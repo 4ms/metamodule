@@ -14,8 +14,11 @@ class Audio {
 public:
 	Audio();
 
-	void process(Frame *in, Frame *out);
-	void register_callback(void callbackfunc(Frame *in, Frame *out));
+	// void process(Frame *in, Frame *out);
+	void process(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]);
+
+	void register_callback(void callbackfunc(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]));
+	//void register_callback(void callbackfunc(Frame *in, Frame *out));
 
 private: 
 	Block tx_buf;

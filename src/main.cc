@@ -5,8 +5,8 @@
 System system;
 Ui ui;
 
-// void dual_filter_loop(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]) {
-void audio_loop(Frame *in, Frame *out) {
+void audio_loop(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]) {
+// void audio_loop(Frame *in, Frame *out) {
 	ui.params.update();
 	ui.audio.process(in, out);
 }
