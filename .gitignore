@@ -1,0 +1,6 @@
+LOCAL/
+LOCAL
+*.hex
+*.bin
+*.wav
+.DS_Store
