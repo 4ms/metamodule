@@ -82,9 +82,12 @@ LFLAGS += $(MCU) -specs=nano.specs  -T $(LDSCRIPT)
 #-----------------------------------
 # Uncomment to compile unoptimized:
 
-# build/src/main.o: OPTFLAG = -O0
+build/src/main.o: OPTFLAG = -O0
+build/src/drivers/codec_i2sx2.o: OPTFLAG = -O0
+build/src/drivers/codec_i2c.o: OPTFLAG = -O0
+build/src/audio.o: OPTFLAG = -O0
 
-$(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -Os
+$(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O0
 
 all: Makefile $(BIN) $(HEX)
 
