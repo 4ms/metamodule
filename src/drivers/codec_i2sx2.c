@@ -64,12 +64,6 @@ enum Codec_Errors init_audio_DMA(uint32_t sample_rate, int32_t *tx_buf, int32_t 
 
 	setup_I2S(sample_rate);
 
-	tx_buffer_start = (uint32_t)tx_buf;
-	rx_buffer_start = (uint32_t)rx_buf;
-
-	tx_buffer_half = (uint32_t)(&(tx_buf[buffer_size/2]));
-	rx_buffer_half = (uint32_t)(&(rx_buf[buffer_size/2]));
-
 	tx_buffer_halves[0] = &(tx_buf[0]);
 	tx_buffer_halves[1] = &(tx_buf[buffer_size/2]);
 
@@ -120,6 +114,17 @@ enum Codec_Errors init_audio_DMA(uint32_t sample_rate, int32_t *tx_buf, int32_t 
 void start_audio(void)
 {
 	HAL_NVIC_EnableIRQ(CODEC_I2S_RX_DMA_IRQn); 
+	HAL_NVIC_EnableIRQ(CODEC_I2S_TX_DMA_IRQn); 
+
+	uint16_t total_frames = buffer_size;
+	uint16_t samples_per_frame = 2;
+	uint16_t int16s_to_xfer = total_frames * samples_per_frame * 2;
+
+	if (HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t *)tx_buffer, int16s_to_xfer) != HAL_OK)
+		codec_dma_it_err = CODEC_I2S_TX_XMIT_DMA_ERR;
+
+	if (HAL_I2S_Receive_DMA(&hi2s3, (uint16_t *)rx_buffer, int16s_to_xfer) != HAL_OK)
+		codec_dma_it_err = CODEC_I2S_RX_XMIT_DMA_ERR;
 }
 
 void stop_audio(void)
@@ -219,9 +224,6 @@ void setup_I2S(uint32_t sample_rate)
 
 enum Codec_Errors init_I2S_DMA(void)
 {
-	//
-	// Prepare the DMA for RX (but don't enable yet)
-	//
 	CODEC_I2S_DMA_CLOCK_ENABLE();
 
 	hdma_spi2_tx.Instance = CODEC_I2S_TX_DMA_STREAM;
@@ -259,33 +261,22 @@ enum Codec_Errors init_I2S_DMA(void)
     HAL_DMA_Init(&hdma_spi3_rx);
     __HAL_LINKDMA(&hi2s3, hdmarx, hdma_spi3_rx);
 
-    //
-    // DMA IRQ and start DMAs
-    //
-
 	HAL_NVIC_DisableIRQ(CODEC_I2S_TX_DMA_IRQn); 
-
+	HAL_NVIC_DisableIRQ(CODEC_I2S_RX_DMA_IRQn); 
+	HAL_NVIC_SetPriority(CODEC_I2S_TX_DMA_IRQn, 1, 0);
 	HAL_NVIC_SetPriority(CODEC_I2S_RX_DMA_IRQn, 1, 0);
-	HAL_NVIC_EnableIRQ(CODEC_I2S_RX_DMA_IRQn); 
-
-	HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t *)tx_buffer, buffer_size);
-	HAL_I2S_Receive_DMA(&hi2s3, (uint16_t *)rx_buffer, buffer_size);
-
-	// if (HAL_SAI_Transmit_DMA(&hsai2b_tx, (uint8_t *)tx_buffer, buffer_size) != HAL_OK)
-	// 		return CODEC_SAIA_XMIT_DMA_ERR;
-	// if (HAL_SAI_Receive_DMA(&hsai2a_rx, (uint8_t *)rx_buffer, buffer_size) != HAL_OK)
-	// 		return CODEC_SAIB_XMIT_DMA_ERR;
-	// __HAL_SAI_ENABLE(&hsai2a_rx);
-	// __HAL_SAI_ENABLE(&hsai2b_tx);
 	
     return CODEC_NO_ERR;
 }
 
 void CODEC_I2S_RX_DMA_IRQHandler(void)
 {
-	// HAL_DMA_IRQHandler(&hdma_spi3_rx);
-
+	HAL_DMA_IRQHandler(&hdma_spi3_rx);
+}
+/*
 	int32_t *src, *dst;
+	uint8_t half;
+	uint32_t flag;
 
 	//Read the interrupt status register (ISR)
 	uint32_t tmpisr = CODEC_I2S_RX_DMA->CODEC_I2S_RX_DMA_ISR;
@@ -300,34 +291,45 @@ void CODEC_I2S_RX_DMA_IRQHandler(void)
 	// 	codec_dma_it_err=CODEC_DMA_IT_DME; 
 
 	// Transfer Complete (TC)
-	if ((tmpisr & CODEC_I2S_RX_DMA_FLAG_TC) && __HAL_DMA_GET_IT_SOURCE(&hdma_spi3_rx, DMA_IT_TC))
-	{
-		// Point to 2nd half of buffers
-		src = (int32_t *)(rx_buffer_half);
-		dst = (int32_t *)(tx_buffer_half);
-
-		//process_audio_block_codec(src, dst);
-		audio_callback(src, dst);
-
-		CODEC_I2S_RX_DMA->CODEC_I2S_RX_DMA_IFCR = CODEC_I2S_RX_DMA_FLAG_TC;
+	if ((tmpisr & CODEC_I2S_RX_DMA_FLAG_TC) && __HAL_DMA_GET_IT_SOURCE(&hdma_spi3_rx, DMA_IT_TC)) {
+		half = 1;
+		flag = CODEC_I2S_RX_DMA_FLAG_TC;
 	}
 
-	// // Half Transfer complete (HT)
-	if ((tmpisr & CODEC_I2S_RX_DMA_FLAG_HT) && __HAL_DMA_GET_IT_SOURCE(&hdma_spi3_rx, DMA_IT_HT))
-	{
-		// Point to 1st half of buffers
-		src = (int32_t *)(rx_buffer_start);
-		dst = (int32_t *)(tx_buffer_start);
-
-		//process_audio_block_codec(src, dst);
-		audio_callback(src, dst);
-
-		CODEC_I2S_RX_DMA->CODEC_I2S_RX_DMA_IFCR = CODEC_I2S_RX_DMA_FLAG_HT;
+	// Half Transfer complete (HT)
+	else if ((tmpisr & CODEC_I2S_RX_DMA_FLAG_HT) && __HAL_DMA_GET_IT_SOURCE(&hdma_spi3_rx, DMA_IT_HT)) {
+		half = 0;
+		flag = CODEC_I2S_RX_DMA_FLAG_HT;
 	}
+
+	else
+		return; //error?
+
+	src = (int32_t *)(rx_buffer_halves[half]);
+	dst = (int32_t *)(tx_buffer_halves[half]);
+
+	audio_callback(src, dst);
+
+	CODEC_I2S_RX_DMA->CODEC_I2S_RX_DMA_IFCR = flag;
+*/
+
+/*
+void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s);
+void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s);
+void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s);
+void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s);
+void HAL_I2S_ErrorCallback(I2S_HandleTypeDef *hi2s);
+*/
+
+void HAL_I2S_RxCpltCallback(void) {
+	audio_callback((int32_t *)(rx_buffer_halves[1]), (int32_t *)(tx_buffer_halves[1]));
+}
+
+void HAL_I2S_RxHalfCpltCallback(void) {
+	audio_callback((int32_t *)(rx_buffer_halves[0]), (int32_t *)(tx_buffer_halves[0]));
 }
 
 void CODEC_I2S_TX_DMA_IRQHandler(void)
 {
 	HAL_DMA_IRQHandler(&hdma_spi2_tx);
 }
-

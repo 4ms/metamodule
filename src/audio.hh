@@ -1,7 +1,8 @@
 #pragma once
 #include <stm32f7xx.h>
 
-const int kBlockSize = 32;
+const int kBlockSize = 32; //number of frames (L/R pairs) we process at a time
+const int kDMABlockSize = kBlockSize * 2; //number of frames total (two DMA half-transfers)
 const int kSampleRate = 48000;
 
 struct Frame {
@@ -9,11 +10,12 @@ struct Frame {
 	int32_t r;
 };
 
-using Block = Frame[kBlockSize];
+using Block = Frame[kDMABlockSize];
 
 class Audio {
 public:
 	Audio();
+	void start();
 
 	// void process(Frame *in, Frame *out);
 	void process(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]);

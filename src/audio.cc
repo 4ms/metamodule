@@ -15,7 +15,7 @@ void Audio::process(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]) {
 
 Audio::Audio() {
 	codec_init(kSampleRate);
-	init_audio_DMA(kSampleRate, (int32_t*)tx_buf, (int32_t*)rx_buf, kBlockSize*2);
+	init_audio_DMA(kSampleRate, (int32_t*)tx_buf, (int32_t*)rx_buf, kDMABlockSize);
 }
 
 void Audio::start() {

@@ -14,6 +14,8 @@ void audio_loop(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]) {
 void main() {
 	ui.audio.register_callback(audio_loop);
 
+	ui.audio.start();
+	
 	while (1) {
 		ui.params.read();
 		__WFI();
