@@ -2,6 +2,7 @@
 #include <stm32f7xx.h>
 
 const int kBlockSize = 32;
+const int kSampleRate = 48000;
 
 struct Frame {
 	int32_t l;

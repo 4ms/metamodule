@@ -74,9 +74,10 @@ AFLAGS = $(MCU)
 
 
 LDSCRIPT = $(DEVICE)/$(LOADFILE)
-LFLAGS =  -Wl,-Map,build/main.map
-LFLAGS += -Wl,--gc-sections
-LFLAGS += $(MCU) -specs=nano.specs  -T $(LDSCRIPT)
+
+LFLAGS =  -Wl,-Map,build/main.map,--cref \
+	-Wl,--gc-sections \
+	$(MCU) -specs=nano.specs  -T $(LDSCRIPT)
 
 
 #-----------------------------------

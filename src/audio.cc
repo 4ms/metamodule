@@ -1,10 +1,12 @@
 #include "audio.hh"
 extern "C" {
 #include "codec_i2sx2.h"
+#include "codec_i2c.h"
 }
 
 
 void Audio::process(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]) {
+//Todo: compare with Buffer<int32_t, kBlockSize>
 	int i=0;
 	for (Frame in_ : in) {
 		out[i++] = in_;
@@ -12,8 +14,12 @@ void Audio::process(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]) {
 }
 
 Audio::Audio() {
-	codec_init(48000);
-	init_audio_DMA(48000, (int32_t*)tx_buf, (int32_t*)rx_buf, kBlockSize);
+	codec_init(kSampleRate);
+	init_audio_DMA(kSampleRate, (int32_t*)tx_buf, (int32_t*)rx_buf, kBlockSize*2);
+}
+
+void Audio::start() {
+	start_audio();
 }
 
 //void Audio::register_callback(void callbackfunc(Frame *in, Frame *out)) {
