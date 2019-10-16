@@ -64,7 +64,6 @@ enum Codec_Errors {
 	CODEC_INVALID_PARAM
 };
 
-
 void codec_deinit(void);
 uint32_t codec_power_down(void);
 uint32_t codec_init(uint32_t sample_rate);

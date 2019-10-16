@@ -32,16 +32,12 @@
 
 I2C_HandleTypeDef codec_i2c2;
 
-
 #define CODEC_IS_SLAVE 0
 #define CODEC_IS_MASTER 1
-
-#define MCLK_SRC_STM 0
 
 #define W8731_ADDR_0 0x1A
 #define W8731_ADDR_1 0x1B
 #define W8731_NUM_REGS 10
-
 
 //Registers:
 #define WM8731_REG_INBOTH       8
@@ -136,13 +132,13 @@ uint16_t codec_init_data[] =
     | SIDEATT_neg6dB),
 
     (DEEMPH_disable         // Reg 05: Digital Audio Path Control: HPF, De-emp at 48kHz on DAC, do not soft mute dac
-    | ADCHPFEnable),
+    | ADCHPFDisable),
 
     (PD_MIC
     | PD_OSC
     | PD_CLKOUT),       // Reg 06: Power Down Control (Clkout, Osc, Mic Off) 0x062
 
-    (format_24b         // Reg 07: Digital Audio Interface Format (24-bit, slave)
+    (format_16b         // Reg 07: Digital Audio Interface Format (24-bit, slave)
     | format_I2S),
 
     0x000,              // Reg 08: Sampling Control (USB_NORM=Normal, BOSR=256x, default = 48k)
