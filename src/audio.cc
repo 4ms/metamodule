@@ -4,8 +4,9 @@ extern "C" {
 #include "codec_i2c.h"
 }
 
-TriangleOscillator triosc{0X10000};
+//Todo: 24-bit audio
 
+TriangleOscillator triosc{0X100000};
 //Todo: compare with Buffer<Frame, kBlockSize>
 void Audio::process(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]) {
 	int i=0;
