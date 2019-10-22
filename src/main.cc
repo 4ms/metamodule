@@ -6,8 +6,7 @@ System system;
 Ui ui;
 Debug debug;
 
-void audio_loop(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]) {
-// void audio_loop(Frame *in, Frame *out) {
+void audio_loop(Block& in, Block& out) {
 	ui.params.update();
 	ui.audio.process(in, out);
 }
