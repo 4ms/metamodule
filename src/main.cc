@@ -1,9 +1,10 @@
 #include <stm32f7xx.h>
 #include "system.hh"
 #include "ui.hh"
-
+#include "debug.hh"
 System system;
 Ui ui;
+Debug debug;
 
 void audio_loop(Frame (&in)[kBlockSize], Frame (&out)[kBlockSize]) {
 // void audio_loop(Frame *in, Frame *out) {

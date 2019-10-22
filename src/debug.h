@@ -1,0 +1,3 @@
+//For C:
+#define DEBUG0_ON GPIOD->BSRR = GPIO_PIN_2
+#define DEBUG0_OFF GPIOD->BSRR = (GPIO_PIN_2 << 16)
