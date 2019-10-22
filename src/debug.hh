@@ -8,5 +8,7 @@ struct Debug {
   void set(int pin, bool value);
 
 private:
-	Pin<NORMAL> pins_[kNumDebugPins] = {{GPIO_PIN_2, GPIOD}};
+	Pin<NORMAL> pins_[kNumDebugPins] = {
+		{GPIO_PIN_2, GPIOD},
+	};
 };
