@@ -127,7 +127,7 @@ uint16_t codec_init_data[] =
     0b0101111,          // Reg 03: Right Headphone out (Mute)
 
     (MUTEMIC            // Reg 04: Analog Audio Path Control (maximum attenuation on sidetone, sidetone disabled, DAC selected, Mute Mic, no bypass)
-    | INSEL_line
+    | /*BYPASS*/INSEL_line
     | DACSEL
     | SIDEATT_neg6dB),
 

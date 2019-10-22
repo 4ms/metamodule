@@ -28,6 +28,7 @@
 
 #include "codec_i2sx2.h"
 #include "codec_i2c.h"
+#include "debug.h"
 
 I2S_HandleTypeDef hi2s2;
 I2S_HandleTypeDef hi2s3;
@@ -81,12 +82,12 @@ void start_audio(void)
 	HAL_NVIC_EnableIRQ(CODEC_I2S_RX_DMA_IRQn); 
 	// HAL_NVIC_EnableIRQ(CODEC_I2S_TX_DMA_IRQn); 
 
-	uint16_t int16s_to_xfer = buffer_size_bytes / 4;
+	uint16_t int16s_to_xfer = buffer_size_bytes / 2;
 
-	if (HAL_I2S_Receive_DMA(&hi2s3, (uint16_t *)(rx_buffer_halves[0]), buffer_size_bytes / 2) != HAL_OK)
+	if (HAL_I2S_Receive_DMA(&hi2s3, (uint16_t *)(rx_buffer_halves[0]), int16s_to_xfer) != HAL_OK)
 		codec_dma_it_err = CODEC_I2S_RX_XMIT_DMA_ERR;
 
-	if (HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t *)(tx_buffer_halves[0]), buffer_size_bytes / 4) != HAL_OK)
+	if (HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t *)(tx_buffer_halves[0]), int16s_to_xfer) != HAL_OK)
 		codec_dma_it_err = CODEC_I2S_TX_XMIT_DMA_ERR;
 
 }
@@ -226,7 +227,9 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s) {
 
 void CODEC_I2S_RX_DMA_IRQHandler(void)
 {
+	DEBUG0_ON;
 	HAL_DMA_IRQHandler(&hdma_spi3_rx);
+	DEBUG0_OFF;
 }
 /*
 	int32_t *src, *dst;
