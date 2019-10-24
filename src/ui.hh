@@ -1,5 +1,6 @@
 #pragma once
 #include "audio.hh"
+#include "leds.hh"
 
 class Controls {
 
@@ -19,7 +20,8 @@ class Ui {
 public:
 	Params params;
 	Audio audio;
-
+	LedCtl leds;
+	
 public:
 	Ui() {}
 };

@@ -74,6 +74,59 @@ public:
 	    HAL_NVIC_SetPriority(DebugMonitor_IRQn, 0, 0);
 	    HAL_NVIC_SetPriority(PendSV_IRQn, 0, 0);
 	    HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+	}
 
+	static void enable_tim_rcc(TIM_TypeDef *TIM) {
+		#ifdef TIM1
+		if (TIM==TIM1) __HAL_RCC_TIM1_CLK_ENABLE();
+		#endif
+		#ifdef TIM2
+		if (TIM==TIM2) __HAL_RCC_TIM2_CLK_ENABLE();
+		#endif
+		#ifdef TIM3
+		if (TIM==TIM3) __HAL_RCC_TIM3_CLK_ENABLE();
+		#endif
+		#ifdef TIM4
+		if (TIM==TIM4) __HAL_RCC_TIM4_CLK_ENABLE();
+		#endif
+		#ifdef TIM5
+		if (TIM==TIM5) __HAL_RCC_TIM5_CLK_ENABLE();
+		#endif
+		#ifdef TIM6
+		if (TIM==TIM6) __HAL_RCC_TIM6_CLK_ENABLE();
+		#endif
+		#ifdef TIM7
+		if (TIM==TIM7) __HAL_RCC_TIM7_CLK_ENABLE();
+		#endif
+		#ifdef TIM8
+		if (TIM==TIM8) __HAL_RCC_TIM8_CLK_ENABLE();
+		#endif
+		#ifdef TIM9
+		if (TIM==TIM9) __HAL_RCC_TIM9_CLK_ENABLE();
+		#endif
+		#ifdef TIM10
+		if (TIM==TIM10) __HAL_RCC_TIM10_CLK_ENABLE();
+		#endif
+		#ifdef TIM11
+		if (TIM==TIM11) __HAL_RCC_TIM11_CLK_ENABLE();
+		#endif
+		#ifdef TIM12
+		if (TIM==TIM12) __HAL_RCC_TIM12_CLK_ENABLE();
+		#endif
+		#ifdef TIM13
+		if (TIM==TIM13) __HAL_RCC_TIM13_CLK_ENABLE();
+		#endif
+		#ifdef TIM14
+		if (TIM==TIM14) __HAL_RCC_TIM14_CLK_ENABLE();
+		#endif
+		#ifdef TIM15
+		if (TIM==TIM15) __HAL_RCC_TIM15_CLK_ENABLE();
+		#endif
+		#ifdef TIM16
+		if (TIM==TIM16) __HAL_RCC_TIM16_CLK_ENABLE();
+		#endif
+		#ifdef TIM17
+		if (TIM==TIM17) __HAL_RCC_TIM17_CLK_ENABLE();
+		#endif
 	}
 };
