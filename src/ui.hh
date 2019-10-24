@@ -21,7 +21,13 @@ public:
 	Params params;
 	Audio audio;
 	LedCtl leds;
-	
+
 public:
-	Ui() {}
+	Ui() {
+		leds.freq1.set_color(Colors::white);
+	}
+
+	void update() {
+		leds.update();
+	}
 };
