@@ -2,7 +2,8 @@
 #include <stm32f7xx.h>
 #include "pin.hh"
 #include "system.hh"
-#define _debugconst_ const
+// #define _debugconst_ const
+#define _debugconst_
 
 struct Color {
     //Todo: measure how much slower it is to use floats for Adjustment.r/b/g
@@ -62,9 +63,9 @@ struct Colors {
 };
 
 class TimPwmLed {
-public:
+protected:
     TimPwmLed() {}
-    
+public:
     TimPwmLed(TIM_TypeDef *TIM, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af) 
     : channel_(channel), pin_(pin, port, af) {
         System::enable_tim_rcc(TIM);
@@ -99,7 +100,6 @@ private:
     TIM_HandleTypeDef htim_;
     uint32_t channel_;
 };
-
 class NoLed : public TimPwmLed {
 public:
     NoLed() {}
@@ -131,7 +131,7 @@ struct RgbLed {
         if (solid_color_ != Colors::off) c = solid_color_;
         c = c.blend(glow_color_, osc_.Process() >> 24);
         c = c.blend(flash_color_, flash_phase_ >> 24);
-        c = c.adjust(color_cal_);
+        // c = c.adjust(color_cal_);
         set_color(c);
         if (flash_phase_ > flash_freq_) flash_phase_ -= flash_freq_;
         else flash_phase_ = 0;
@@ -139,7 +139,6 @@ struct RgbLed {
 
 private:
     TimPwmLed r_, g_, b_;
-    Color background_color_;
     TriangleOscillator osc_;
     Color background_color_ = Colors::off;
     Color solid_color_ = Colors::off;
@@ -147,7 +146,7 @@ private:
     Color glow_color_ = Colors::red;
     uint16_t flash_freq_ = 100;
     uint16_t flash_phase_ = 0;
-    Color::Adjustment& color_cal_;
+//    Color::Adjustment& color_cal_;
 };
 
 struct LedCtl {
