@@ -5,3 +5,5 @@ LOCAL
 *.bin
 *.wav
 .DS_Store
+
+.vscode/
