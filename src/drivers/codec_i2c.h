@@ -30,27 +30,8 @@
 
 #include <stm32f7xx.h>
 
-
-// I2C Config
-//
-#define CODEC_I2C						I2C2
-#define CODEC_I2C_CLK_ENABLE			__HAL_RCC_I2C2_CLK_ENABLE
-#define CODEC_I2C_GPIO_CLOCK_ENABLE		__HAL_RCC_GPIOB_CLK_ENABLE
-#define CODEC_I2C_GPIO_AF				GPIO_AF4_I2C2
-#define CODEC_I2C_GPIO					GPIOB
-#define CODEC_I2C_SCL_PIN				GPIO_PIN_10
-#define CODEC_I2C_SDA_PIN				GPIO_PIN_11
-
-
-#define CODEC_FLAG_TIMEOUT             ((uint32_t)1)
-#define CODEC_LONG_TIMEOUT             ((uint32_t)(300))
-#define CODEC_VLONG_TIMEOUT            ((uint32_t)(1000))
-
-
-
 enum Codec_Errors {
 	CODEC_NO_ERR = 0,
-	CODEC_I2C_INIT_ERR,
 	CODEC_I2S_CLK_INIT_ERR,
 	CODEC_I2STX_INIT_ERR,
 	CODEC_I2SRX_INIT_ERR,
@@ -64,6 +45,5 @@ enum Codec_Errors {
 	CODEC_INVALID_PARAM
 };
 
-void codec_deinit(void);
 uint32_t codec_power_down(void);
 uint32_t codec_init(uint32_t sample_rate);

@@ -27,10 +27,10 @@
  */
 
 // #include "globals.h"
+#include "i2c.h"
 #include "codec_i2c.h"
 #include "codec_i2sx2.h"
 
-I2C_HandleTypeDef codec_i2c2;
 
 #define CODEC_IS_SLAVE 0
 #define CODEC_IS_MASTER 1
@@ -152,16 +152,7 @@ uint16_t codec_init_data[] =
 
 
 //Private
-uint32_t codec_reset(uint32_t sample_rate);
 uint32_t codec_write_register(uint8_t RegisterAddr, uint16_t RegisterValue);
-uint32_t codec_register_setup(uint32_t sample_rate);
-void codec_I2C_GPIO_init(void);
-enum Codec_Errors codec_I2C_init(void);
-
-void codec_deinit(void)
-{
-    __HAL_RCC_I2C2_CLK_DISABLE();
-}
 
 uint32_t codec_power_down(void)
 {
@@ -169,27 +160,9 @@ uint32_t codec_power_down(void)
 
     err=codec_write_register(WM8731_REG_POWERDOWN, 0xFF); //Power Down enable all
     return err;
-
 }
 
 uint32_t codec_init(uint32_t sample_rate)
-{
-    codec_deinit();
-
-	codec_I2C_GPIO_init();
-	codec_I2C_init();
-	uint32_t err = codec_register_setup(sample_rate);
-	return err;
-}
-
-uint32_t codec_register_setup(uint32_t sample_rate)
-{
-	uint32_t err = codec_reset(sample_rate);
-	return err;
-}
-
-
-uint32_t codec_reset(uint32_t sample_rate)
 {
 	uint8_t i;
 	uint32_t err=0;
@@ -215,7 +188,6 @@ uint32_t codec_reset(uint32_t sample_rate)
 	return err;
 }
 
-
 uint32_t codec_write_register(uint8_t RegisterAddr, uint16_t RegisterValue)
 {   
     //Assemble 2-byte data 
@@ -226,59 +198,5 @@ uint32_t codec_write_register(uint8_t RegisterAddr, uint16_t RegisterValue)
     data[0] = Byte1;
     data[1] = Byte2;
 
-    HAL_StatusTypeDef   err;
-
-    while((err = HAL_I2C_Master_Transmit(&codec_i2c2, CODEC_ADDRESS, data, 2, CODEC_VLONG_TIMEOUT)) != HAL_OK)
-    {
-        if (HAL_I2C_GetError(&codec_i2c2) != HAL_I2C_ERROR_AF)
-            return 2;
-    }
-
-	if (err==HAL_OK) 	
-		return 0;
-	else				
-		return 1;
-}
-
-
-
-void codec_I2C_GPIO_init(void)
-{
-    GPIO_InitTypeDef gpio;
-
-	CODEC_I2C_GPIO_CLOCK_ENABLE();
-	CODEC_I2C_CLK_ENABLE();
-
-	//I2C pins SDA SCL
-	gpio.Mode 		= GPIO_MODE_AF_OD;
-	gpio.Pull 		= GPIO_PULLUP;//NOPULL;
-	gpio.Speed 		= GPIO_SPEED_FREQ_HIGH;
-	gpio.Alternate 	= CODEC_I2C_GPIO_AF;
-	gpio.Pin 		= CODEC_I2C_SCL_PIN | CODEC_I2C_SDA_PIN;
-	HAL_GPIO_Init(CODEC_I2C_GPIO, &gpio);
-}
-
-enum Codec_Errors codec_I2C_init(void)
-{
-    codec_i2c2.Instance = I2C2;
-
-	codec_i2c2.Init.Timing 				= 0x20404768;//0x20445757; //set_i2c_timing()
-	codec_i2c2.Init.OwnAddress1		 	= 0x33;
-	codec_i2c2.Init.AddressingMode 		= I2C_ADDRESSINGMODE_7BIT;
-	codec_i2c2.Init.DualAddressMode 	= I2C_DUALADDRESS_DISABLE;
-	codec_i2c2.Init.OwnAddress2 		= 0;
-	codec_i2c2.Init.OwnAddress2Masks	= I2C_OA2_NOMASK;
-	codec_i2c2.Init.GeneralCallMode 	= I2C_GENERALCALL_DISABLE;
-	codec_i2c2.Init.NoStretchMode 		= I2C_NOSTRETCH_DISABLE;
-
-	if (HAL_I2C_Init(&codec_i2c2) != HAL_OK)
-		return CODEC_I2C_INIT_ERR;
-
-  	if (HAL_I2CEx_ConfigAnalogFilter(&codec_i2c2, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-		return CODEC_I2C_INIT_ERR;
-
-  	if (HAL_I2CEx_ConfigDigitalFilter(&codec_i2c2, 0) != HAL_OK)
-		return CODEC_I2C_INIT_ERR;
-	else
-		return CODEC_NO_ERR;
+    return i2c_write(CODEC_ADDRESS, data, 2);
 }

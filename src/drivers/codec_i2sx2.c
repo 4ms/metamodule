@@ -227,9 +227,9 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s) {
 
 void CODEC_I2S_RX_DMA_IRQHandler(void)
 {
-	DEBUG0_ON;
+	// DEBUG0_ON;
 	HAL_DMA_IRQHandler(&hdma_spi3_rx);
-	DEBUG0_OFF;
+	// DEBUG0_OFF;
 }
 /*
 	int32_t *src, *dst;

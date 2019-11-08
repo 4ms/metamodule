@@ -1,5 +1,6 @@
 #include "audio.hh"
 extern "C" {
+#include "i2c.h"
 #include "codec_i2sx2.h"
 #include "codec_i2c.h"
 }
@@ -32,6 +33,7 @@ void Audio::process(Block& in, Block& out) {
 }
 
 Audio::Audio() {
+	i2c_init();
 	codec_init(kSampleRate);
 	init_audio_DMA(kSampleRate, (int16_t*)tx_buf_, (int16_t*)rx_buf_, kDMABlockSize * sizeof(Frame));
 }
