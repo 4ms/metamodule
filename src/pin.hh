@@ -2,47 +2,48 @@
 #include <stm32f7xx.h>
 
 enum PinPolarity {NORMAL, INVERTED};
+enum PinMode {INPUT, OUTPUT, ANALOG, ALT};
 
+//todo: don't use HAL and templatize with Pin and Port. template for INPUT/OUTPUT/ALT ?
 template<PinPolarity polarity>
 class Pin {
 public:
     uint16_t pin;
     GPIO_TypeDef *port;
-    uint8_t af;
-
+    //Todo: use default values in argument list, and make pin_, pull, speed to be enums
     Pin() {}
-    Pin(uint16_t pin_, GPIO_TypeDef *port_) : pin(pin_), port(port_) {}
-    Pin(uint16_t pin_, GPIO_TypeDef *port_, uint8_t af_) : pin(pin_), port(port_), af(af_) {}
+    Pin(enum PinMode mode, uint16_t pin_, GPIO_TypeDef *port_) : pin(pin_), port(port_) {
+        init(mode, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH, 0);
+    }
+    Pin(enum PinMode mode, uint16_t pin_, GPIO_TypeDef *port_, uint8_t af) : pin(pin_), port(port_) {
+        init(mode, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH, af);
+    }
+    Pin(enum PinMode mode, uint32_t pull, uint16_t pin_, GPIO_TypeDef *port_, uint8_t af) : pin(pin_), port(port_) {
+        init(mode, pull, GPIO_SPEED_FREQ_HIGH, af);
+    }
+    Pin(enum PinMode mode, uint32_t pull, uint16_t pin_, GPIO_TypeDef *port_, uint8_t af, uint32_t speed) : pin(pin_), port(port_) {
+        init(mode, pull, speed, af);
+    }
 
-    void init(uint32_t mode, uint32_t pull, uint32_t speed) {
+    void init(enum PinMode mode, uint32_t pull, uint32_t speed, uint8_t af) {
         init_rcc();
         GPIO_InitTypeDef g;
-        g.Mode = mode;
+        g.Mode = mode == INPUT ? GPIO_MODE_INPUT :
+                 mode == OUTPUT ? GPIO_MODE_OUTPUT_PP :
+                 mode == ANALOG ? GPIO_MODE_ANALOG :
+                 mode == ALT ? GPIO_MODE_AF_PP 
+                         : GPIO_MODE_OUTPUT_PP;
         g.Alternate = af;
         g.Pull = pull;
         g.Speed = speed;
         g.Pin = pin;
         HAL_GPIO_Init(port, &g);
     }
-    void init(uint32_t mode, uint32_t pull) {
-        init_rcc();
-        GPIO_InitTypeDef g;
-        g.Mode = mode;
-        g.Alternate = af;
-        g.Pull = pull;
-        g.Speed = GPIO_SPEED_FREQ_HIGH;
-        g.Pin = pin;
-        HAL_GPIO_Init(port, &g);
+    void reinit(enum PinMode mode, uint32_t pull) {
+        init(mode, pull, GPIO_SPEED_FREQ_HIGH);
     }
-    void init(uint32_t mode) {
-        init_rcc();
-        GPIO_InitTypeDef g;
-        g.Mode = mode;
-        g.Alternate = af;
-        g.Pull = GPIO_NOPULL;
-        g.Speed = GPIO_SPEED_FREQ_HIGH;
-        g.Pin = pin;
-        HAL_GPIO_Init(port, &g);
+    void reinit(enum PinMode mode) {
+        init(mode, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH);
     }
 
     void high() {port->BSRR = pin;}

@@ -1,7 +1,6 @@
 #include "debug.hh"
 
 Debug::Debug() {
-  pins_[0].init(GPIO_MODE_OUTPUT_PP);
 }
 
 void Debug::set(int pin, bool value) {
