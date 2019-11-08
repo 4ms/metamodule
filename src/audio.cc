@@ -8,7 +8,7 @@ extern "C" {
 //Todo: 24-bit audio
 //Todo: 96kHz
 
-TriangleOscillator<89478 /*2^32/48000*/> triosc{2};
+TriangleOscillator<48000 /*2^32/48000*/> triosc{1};
 
 void Audio::process(Block& in, Block& out) {
 	int i=0;
@@ -26,7 +26,7 @@ void Audio::process(Block& in, Block& out) {
 
 	for (Frame& out_ : out) {
 		out_.l = (int16_t)(triosc.Process() >> 16) - 0x8000;
-		uint32_t vca = (in[i].r * out_.l);
+		uint32_t vca = (in[i].r * (out_.l > 0 ? out_.l : -out_.l));
 		out_.r = vca >> 16;
 		i++;
 	} 

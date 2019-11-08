@@ -48,7 +48,7 @@ public:
 				leds.res1.set_background(Colors::green);
 			else
 				leds.res1.set_background(Colors::blue);
-
+			last_update_tick_ = HAL_GetTick();
 		}
 
 		leds.update();

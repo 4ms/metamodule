@@ -6,12 +6,24 @@ System system;
 Ui ui;
 Debug debug;
 
-//Todo: create LED update timer to run ui.update();
+//Todo: create LED update timer to run ui.update() (which just updates LEDs if there's a glow or flash)
+//Todo: create timer to run controls.read(), another for controls.cv.read() ?(faster reads so we can oversample?)
+//
+//
+//controls.read():
+//read CV jack --> update controls.cv[].rawval   				?====>params with raw values (is there HW oversampling?)
+//read rotary pins ---> update controls.rotary[].turned = +/-1     ?====> params.freq/res with +1, -1
+//read rotary buttons ---> update controls.rotary[].pushed
+//check ALERT pin --> initiate I2C read over DMA/IT
+//check new value from DMA/IT TC IRQ -->> update controls.pad[].touching
+
 
 void audio_loop(Block& in, Block& out) {
+	debug.set(0,1);
 	ui.params.update();
 	ui.audio.process(in, out);
 	ui.update();
+	debug.set(0,0);
 }
 
 void main() {
@@ -29,7 +41,7 @@ extern "C" {
 	void SysTick_Handler(void)
 	{
 		HAL_IncTick();
-		HAL_SYSTICK_IRQHandler();
+		// HAL_SYSTICK_IRQHandler();
 	}
 
 	void HardFault_Handler() {
