@@ -6,9 +6,12 @@ System system;
 Ui ui;
 Debug debug;
 
+//Todo: create LED update timer to run ui.update();
+
 void audio_loop(Block& in, Block& out) {
 	ui.params.update();
 	ui.audio.process(in, out);
+	ui.update();
 }
 
 void main() {

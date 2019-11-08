@@ -85,6 +85,7 @@ LFLAGS =  -Wl,-Map,build/main.map,--cref \
 
 # build/src/main.o: OPTFLAG = -O0
 # build/src/debug.o: OPTFLAG = -O0
+# build/src/drivers/cap1203.o: OPTFLAG = -O0
 # build/src/drivers/codec_i2sx2.o: OPTFLAG = -O0
 # build/src/drivers/codec_i2c.o: OPTFLAG = -O0
 # build/src/audio.o: OPTFLAG = -O0

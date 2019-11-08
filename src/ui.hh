@@ -1,6 +1,8 @@
 #pragma once
 #include "audio.hh"
 #include "leds.hh"
+#include "touch.hh"
+#include "debug.h"
 
 class Controls {
 
@@ -21,13 +23,36 @@ public:
 	Params params;
 	Audio audio;
 	LedCtl leds;
+	TouchCtl pads;
 
 public:
 	Ui() {
-		leds.freq1.set_color(Colors::white);
+		last_update_tick_= HAL_GetTick();
+
+		leds.freq1.set_background(Colors::pink);
+		leds.res1.set_background(Colors::cyan);
+
+		leds.res1.set_glow(Colors::red, 2);
+
 	}
 
 	void update() {
+		if ((last_update_tick_ - HAL_GetTick()) > 500) {
+
+			if (pads.touched(0))
+				leds.freq1.set_background(Colors::green);
+			else
+				leds.freq1.set_background(Colors::blue);
+
+			if (pads.touched(1))
+				leds.res1.set_background(Colors::green);
+			else
+				leds.res1.set_background(Colors::blue);
+
+		}
+
 		leds.update();
 	}
+
+	uint32_t last_update_tick_;
 };
