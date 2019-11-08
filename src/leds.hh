@@ -139,13 +139,13 @@ struct RgbLed {
 
 private:
     TimPwmLed r_, g_, b_;
-    TriangleOscillator osc_;
+    TriangleOscillator<89478> osc_;
     Color background_color_ = Colors::off;
     Color solid_color_ = Colors::off;
     Color flash_color_ = Colors::white;
     Color glow_color_ = Colors::red;
-    uint16_t flash_freq_ = 100;
-    uint16_t flash_phase_ = 0;
+    uint32_t flash_freq_ = 100;
+    uint32_t flash_phase_ = 0;
 //    Color::Adjustment& color_cal_;
 };
 

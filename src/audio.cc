@@ -7,8 +7,7 @@ extern "C" {
 //Todo: 24-bit audio
 //Todo: 96kHz
 
-
-TriangleOscillator triosc{0X100000};
+TriangleOscillator<89478 /*2^32/48000*/> triosc{2};
 
 void Audio::process(Block& in, Block& out) {
 	int i=0;

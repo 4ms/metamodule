@@ -10,12 +10,17 @@ struct Frame {
 	int16_t r;
 };
 
+
+
+//Todo: Triosc belongs elsewhere
+
 //todo: consider using std::array<Frame, kDMABlockSize> 
 using DMABlock = Frame[kDMABlockSize];
 using Block = Frame[kBlockSize];
 
+template<int update_rate>
 struct TriangleOscillator {
-  TriangleOscillator(uint32_t freq) : freq_(freq) {}
+  TriangleOscillator(uint32_t freq) : freq_(freq*update_rate) {}
   TriangleOscillator() : freq_(0) {}
   uint32_t Process() {
     phase_ += freq_;
