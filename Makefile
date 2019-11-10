@@ -22,6 +22,7 @@ SOURCES  += $(wildcard src/drivers/*.c)
 SOURCES  += $(wildcard src/drivers/*.cc)
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
+DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 
 INCLUDES += -I$(DEVICE)/include \
 			-I$(CORE)/include \
@@ -79,17 +80,14 @@ LFLAGS =  -Wl,-Map,build/main.map,--cref \
 	-Wl,--gc-sections \
 	$(MCU) -specs=nano.specs  -T $(LDSCRIPT)
 
-
-#-----------------------------------
+#----------------------------------
 # Uncomment to compile unoptimized:
-
 # build/src/main.o: OPTFLAG = -O0
 # build/src/debug.o: OPTFLAG = -O0
 # build/src/drivers/cap1203.o: OPTFLAG = -O0
 # build/src/drivers/codec_i2sx2.o: OPTFLAG = -O0
 # build/src/drivers/codec_i2c.o: OPTFLAG = -O0
 # build/src/audio.o: OPTFLAG = -O0
-
 $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 
 all: Makefile $(BIN) $(HEX)
@@ -99,7 +97,6 @@ $(BIN): $(ELF)
 	$(OBJDMP) -x --syms $< > $(addsuffix .dmp, $(basename $<))
 	ls -l $@ $<
 
-
 $(HEX): $(ELF)
 	$(OBJCPY) --output-target=ihex $< $@
 	$(SZ) $(SZOPTS) $(ELF)
@@ -107,19 +104,21 @@ $(HEX): $(ELF)
 $(ELF): $(OBJECTS) 
 	$(LD) $(LFLAGS) -o $@ $(OBJECTS)
 
+DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 
-$(BUILDDIR)/%.o: %.c $(wildcard src/*.h) $(wildcard src/drivers/*.h)
+$(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
 	mkdir -p $(dir $@)
-	$(CC) -c $(OPTFLAG) $(CFLAGS) $< -o $@
+	$(CC) -c $(DEPFLAGS) $(OPTFLAG) $(CFLAGS) $< -o $@
 
-$(BUILDDIR)/%.o: %.cc $(wildcard src/*.h) $(wildcard src/drivers/*.h)
+$(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
 	mkdir -p $(dir $@)
-	$(CC) -c $(OPTFLAG) $(CXXFLAGS) $< -o $@
-
+	$(CC) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.s
 	mkdir -p $(dir $@)
 	$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))
+
+%.d: ;
 
 
 flash: $(BIN)
@@ -127,3 +126,10 @@ flash: $(BIN)
 
 clean:
 	rm -rf build
+
+ifneq "$(MAKECMDGOALS)" "clean"
+-include $(DEPS)
+endif
+
+.PRECIOUS: $(DEPS) $(OBJECTS) $(ELF)
+.PHONY: all clean flash 
