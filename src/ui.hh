@@ -3,14 +3,11 @@
 #include "leds.hh"
 #include "touch.hh"
 #include "debug.h"
-
-class Controls {
-
-};
+#include "controls.hh"
 
 class Params {
-private:
-	Controls controls_;
+public:
+	Controls controls;
 
 public:
 	void read();
@@ -23,7 +20,6 @@ public:
 	Params params;
 	Audio audio;
 	LedCtl leds;
-	TouchCtl pads;
 
 public:
 	Ui() {
@@ -39,7 +35,7 @@ public:
 	void update() {
 		if ((last_update_tick_ - HAL_GetTick()) > 500) {
 
-			if (pads.touched(0))
+			if (params.controls.pads.touched(0))
 				leds.freq1.set_background(Colors::green);
 			else
 				leds.freq1.set_background(Colors::blue);
