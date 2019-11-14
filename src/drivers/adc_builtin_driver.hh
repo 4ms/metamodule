@@ -29,13 +29,31 @@
 #pragma once
 
 #include <stm32f7xx.h>
+#include <stm32f7xx_ll_adc.h>
+#include "pin.hh"
 
-typedef struct builtinAdcSetup{
-	GPIO_TypeDef	*gpio;
-	uint16_t		pin;
-	uint8_t			channel;
-	uint8_t			sample_time; //must be a valid ADC_SAMPLETIME_XXXCYCLES
-} builtinAdcSetup;
+enum AdcChannelNumbers{ ADCChan0, ADCChan1, ADCChan2, ADCChan3, ADCChan4, ADCChan5, ADCChan6, ADCChan7,
+						ADCChan8, ADCChan9, ADCChan10, ADCChan11, ADCChan12, ADCChan13, ADCChan14, ADCChan15
+						};
 
-void ADC1_Init(uint16_t *adc_buffer, uint32_t num_channels, builtinAdcSetup *adc_setup);
-void ADC3_Init(uint16_t *adc_buffer, uint32_t num_channels, builtinAdcSetup *adc_setup);
+struct AdcChan {
+	AdcChan(enum AdcChannelNumbers channel, Pin<NORMAL> pin, uint32_t sampletime) 
+	: channel_(channel), pin_(pin), sampletime_(sampletime){}
+
+	enum AdcChannelNumbers channel_;
+	Pin<NORMAL> pin_;
+	uint32_t sampletime_;
+};
+
+class AdcPeriph
+{
+public:
+	AdcPeriph(ADC_TypeDef *ADCx);
+	void add_channel(const AdcChan adcc);
+	void start(uint16_t *raw_buffer);
+
+private:
+	ADC_TypeDef *ADCx_;
+	uint8_t num_channels_;	
+};
+

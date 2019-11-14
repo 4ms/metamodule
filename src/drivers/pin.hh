@@ -37,6 +37,8 @@ public:
         g.Pull = pull;
         g.Speed = speed;
         g.Pin = pin;
+        // LL_GPIO_SetPinMode(port, pin, mode);
+        // LL_GPIO_SetPinAF
         HAL_GPIO_Init(port, &g);
     }
     void reinit(enum PinMode mode, uint32_t pull) {

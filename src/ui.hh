@@ -9,6 +9,7 @@ class Params {
 public:
 	Controls controls;
 
+
 public:
 	void read();
 	void update();
@@ -40,7 +41,7 @@ public:
 			else
 				leds.freq1.set_background(Colors::blue);
 
-			if (pads.touched(1))
+			if (params.controls.pads.touched(1))
 				leds.res1.set_background(Colors::green);
 			else
 				leds.res1.set_background(Colors::blue);
