@@ -28,10 +28,15 @@ public:
 
 private:
     AdcPeriph ADC_{CV_ADC};
+
     //todo: ADcChan constructor calls add_channel():
     //how to connect to AdcPeriph?
     //AdcPeriph<ADC1, 4/*#channels*/> {freq1cv_adc, res1cv_adc, freq2cv_adc, res2cv_adc};
-    //AdcChan
+    //AdcChan freq1adc {ADC1, freq1cv_adc_init};
+    //or
+    //AdcPeriph ADC_{Adc1 /*enum for 1*/};
+    //AdcChan<Adc1, AdcChan0> freq1cv {freq1cv_pin}; //or
+    //AdcChan freq1cv {Adc1, AdcChan0, freq1cv_pin};
     const AdcChan adcc[kNumAdcChans]{freq1cv_adc, res1cv_adc, freq2cv_adc, res2cv_adc};
 public:
     static uint16_t adc_raw[kNumAdcChans];
