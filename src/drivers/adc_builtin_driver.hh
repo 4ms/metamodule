@@ -50,9 +50,9 @@ class AdcPeriph
 public:
 	AdcPeriph(ADC_TypeDef *ADCx);
 	void add_channel(const AdcChan adcc);
-	void start(uint16_t *raw_buffer);
+	void start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel);
 
-private:
+private: 
 	ADC_TypeDef *ADCx_;
 	uint8_t num_channels_;	
 };

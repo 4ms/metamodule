@@ -4,6 +4,8 @@
 #include "system.hh"
 #include "colors.hh"
 
+//Todo Re-do this with LL
+
 // #define _debugconst_ const
 #define _debugconst_
 

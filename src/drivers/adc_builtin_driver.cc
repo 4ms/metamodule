@@ -30,7 +30,7 @@
 #include "adc_builtin_driver.hh"
 #include "stm32f7xx_ll_adc.h"
 #include "stm32f7xx_ll_dma.h"
-#include <stm32f7xx_ll_bus.h>
+#include "stm32f7xx_ll_bus.h"
 
 AdcPeriph::AdcPeriph(ADC_TypeDef *ADCx)
 {
@@ -73,10 +73,8 @@ void AdcPeriph::add_channel(AdcChan adcc) {
 	num_channels_++;
 
 }
-const uint32_t ADC_DMA_Stream = LL_DMA_STREAM_4;
-const uint32_t ADC_DMA_Channel = LL_DMA_CHANNEL_0;
 
-void AdcPeriph::start(uint16_t *raw_buffer)
+void AdcPeriph::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel)
 {
 	if (!num_channels_) return;
 

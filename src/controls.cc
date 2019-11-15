@@ -14,11 +14,12 @@ TouchCtl Controls::pads;
 
 Controls::Controls()
 {
+    //Todo: maek add_channel the constructor for an adc_channel,
     ADC_.add_channel(adcc[0]);
     ADC_.add_channel(adcc[1]);
     ADC_.add_channel(adcc[2]);
     ADC_.add_channel(adcc[3]);
-    ADC_.start(adc_raw);
+    ADC_.start_dma(adc_raw, LL_DMA_STREAM_4, LL_DMA_CHANNEL_0);
 }
 
 extern "C" void DMA2_Stream4_IRQHandler(void) {
