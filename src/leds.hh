@@ -6,6 +6,8 @@
 
 //Todo Re-do this with LL
 
+//Todo? put all pin/periph defs in a separate file
+
 // #define _debugconst_ const
 #define _debugconst_
 
@@ -35,8 +37,21 @@ class TimPwmLed {
 protected:
     TimPwmLed() : htim_(nohtim_) {}
 public:
+    TimPwmLed(TimPwm& timpwm, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af) 
+    : htim_(timpwm.get_htim()), channel_(channel), pin_(pin, port, ALT, NONE, MEDIUM, af) { 
+        init_();
+    }
+
     TimPwmLed(TIM_HandleTypeDef& htim, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af) 
-    : channel_(channel), pin_(pin, port, ALT, NONE, MEDIUM, af), htim_(htim) {
+    : htim_(htim), channel_(channel), pin_(pin, port, ALT, NONE, MEDIUM, af) {
+        init_();
+    }
+    
+    void set_brightness(uint32_t val) _debugconst_ {
+        __HAL_TIM_SET_COMPARE(&htim_, channel_, val);
+    }
+
+    private: void init_() {
         TIM_OC_InitTypeDef tim_oc;
         tim_oc.OCMode = TIM_OCMODE_PWM1;
         tim_oc.OCPolarity = TIM_OCPOLARITY_LOW;
@@ -47,10 +62,6 @@ public:
         tim_oc.Pulse = 0;
         HAL_TIM_PWM_ConfigChannel(&htim_, &tim_oc, channel_);
         HAL_TIM_PWM_Start(&htim_, channel_);
-    }
-
-    void set_brightness(uint32_t val) _debugconst_ {
-        __HAL_TIM_SET_COMPARE(&htim_, channel_, val);
     }
 
 private:
@@ -145,9 +156,6 @@ public:
         // Pin<NORMAL> r(OUTPUT, GPIO_PIN_11, GPIOA);
         // Pin<NORMAL> g(OUTPUT, GPIO_PIN_10, GPIOA);
         // Pin<NORMAL> b(OUTPUT, GPIO_PIN_5, GPIOB);
-        // r.high(); r.low();
-        // g.high(); g.low();
-        // b.high(); b.low();
 
         // Pin<NORMAL> m5r(OUTPUT, GPIO_PIN_6, GPIOB);
         // Pin<NORMAL> m5b(OUTPUT, GPIO_PIN_7, GPIOB);
@@ -164,21 +172,6 @@ public:
         // Pin<NORMAL> freq2b(OUTPUT, GPIO_PIN_7, GPIOA);
         // Pin<NORMAL> res2g(OUTPUT, GPIO_PIN_0, GPIOB);
         // Pin<NORMAL> res2b(OUTPUT, GPIO_PIN_1, GPIOB);
-        // m1r.high(); m1r.low();
-        // m1b.high(); m1b.low();
-        // m2r.high(); m2r.low();
-        // m2b.high(); m2b.low();
-        // m3r.high(); m3r.low();
-        // m3b.high(); m3b.low();
-        // m4r.high(); m4r.low();
-        // m4b.high(); m4b.low();
-        // m5r.high(); m5r.low();
-        // m5b.high(); m5b.low();
-
-        // freq2g.high(); freq2g.low();
-        // freq2b.high(); freq2b.low();
-        // res2g.high(); res2g.low();
-        // res2b.high(); res2b.low();
     }
 
     //Todo: only update if glowing or fading
@@ -198,7 +191,7 @@ private:
 
 public:
     _debugconst_ RgbLed freq1 { 
-        {htim[tim8].get_htim(), TIM_CHANNEL_4, GPIO_PIN_9, GPIOC, GPIO_AF3_TIM8},
+        {htim[tim8], TIM_CHANNEL_4, GPIO_PIN_9, GPIOC, GPIO_AF3_TIM8},
         {htim[tim8].get_htim(), TIM_CHANNEL_3, GPIO_PIN_8, GPIOC, GPIO_AF3_TIM8},
         {htim[tim2].get_htim(), TIM_CHANNEL_2, GPIO_PIN_3, GPIOB, GPIO_AF1_TIM2}};
 

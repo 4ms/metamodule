@@ -2,7 +2,7 @@
 #include "system.hh"
 #include "ui.hh"
 #include "debug.hh"
-System system;
+System sys;
 Ui ui;
 Debug debug;
 

@@ -1,6 +1,5 @@
 #include "stm32f7xx_ll_dma.h"
 #include "controls.hh"
-#include "adc_builtin_driver.hh"
 
 const uint32_t kNumAdcChannels = 4;
 
