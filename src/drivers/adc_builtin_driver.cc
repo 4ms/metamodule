@@ -32,18 +32,27 @@
 #include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_bus.h"
 
-AdcPeriph::AdcPeriph(ADC_TypeDef *ADCx)
+template <uint32_t adc_n>
+AdcPeriph<adc_n>::AdcPeriph()
 {
-	ADCx_ = ADCx;
+	if (adc_n==1)
+	{
+		ADCx_ = ADC1;
+		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
+	}
+	else if (adc_n == 2)
+	{
+		ADCx_ = ADC2;
+		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC2);
+	}
+	else if (adc_n == 3)
+	{
+		ADCx_ = ADC3;
+		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC3);
+	}
+
 	num_channels_ = 0;
 	LL_ADC_Disable(ADCx_);
-
-	if (ADCx_ == ADC1)
-		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
-	else if (ADCx_ == ADC2)
-		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC2);
-	else if (ADCx_ == ADC3)
-		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC3);
 
 	NVIC_SetPriority(ADC_IRQn, (0 << 2) | 3);
 	NVIC_EnableIRQ(ADC_IRQn);
@@ -65,16 +74,17 @@ AdcPeriph::AdcPeriph(ADC_TypeDef *ADCx)
 	LL_ADC_REG_SetFlagEndOfConversion(ADCx_, LL_ADC_REG_FLAG_EOC_SEQUENCE_CONV);
 }
 
-void AdcPeriph::add_channel(AdcChan adcc) {
-	//adcc.pin.init(); //Todo: make sure pin constructor is called
+template <uint32_t adc_n>
+void AdcPeriph<adc_n>::add_channel(AdcChan adcc)
+{
 	LL_ADC_REG_SetSequencerRanks(ADCx_, num_channels_, adcc.channel_);
 	LL_ADC_REG_SetSequencerLength(ADCx_, LL_ADC_REG_SEQ_SCAN_ENABLE_2RANKS + num_channels_);
 	LL_ADC_SetChannelSamplingTime(ADCx_, adcc.channel_, adcc.sampletime_);
 	num_channels_++;
-
 }
 
-void AdcPeriph::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel)
+template <uint32_t adc_n>
+void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel)
 {
 	if (!num_channels_) return;
 
