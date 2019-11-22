@@ -3,48 +3,28 @@
 #include "stm32f7xx_ll_adc.h"
 #include "adc_builtin_driver.hh"
 #include "touch.hh"
+#include "filter.hh"
+// #include "easiglib/util.hh"
+
 #include <array>
 
 // ADC_TypeDef * const CV_ADC = ADC1;
 const uint32_t kNumAdcChans = 4;
-const AdcChan freq1cv_adc = {ADCChan10, {ANALOG, LL_GPIO_PIN_0, GPIOC}, LL_ADC_SAMPLINGTIME_144CYCLES};
-const AdcChan res1cv_adc = {ADCChan11, {ANALOG, LL_GPIO_PIN_1, GPIOC}, LL_ADC_SAMPLINGTIME_144CYCLES};
-const AdcChan freq2cv_adc = {ADCChan12, {ANALOG, LL_GPIO_PIN_2, GPIOC}, LL_ADC_SAMPLINGTIME_144CYCLES};
-const AdcChan res2cv_adc = {ADCChan13, {ANALOG, LL_GPIO_PIN_3, GPIOC}, LL_ADC_SAMPLINGTIME_144CYCLES};
+const int kOverSampleAmt = 4;
 
-struct CVJack {
-    uint16_t rawval;
-    uint32_t os_buffer;
-    uint16_t os_val;
-};
+const AdcChan freq1cv_adc = {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+const AdcChan res1cv_adc = {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+const AdcChan freq2cv_adc = {ADCChan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+const AdcChan res2cv_adc = {ADCChan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+
 struct Button {
     uint32_t just_pressed;
     uint32_t just_released;
     uint32_t state;
 };
 
-template<class T, int size>
-struct OverSampleBuffer {
-public:
-    OverSampleBuffer() : bitshift_(Log2<size>::val) {}
 
-    void add_val(T val_)
-    {
-        buff_ += val_;
-        if (++idx_>size)
-        {
-            idx_ = 0;
-            val_ = buff_ >> bitshift_;
-        }
-    }
-    T val() {return val_;}
-
-private:
-    int bitshift_;
-    T buff_ = 0;
-    T val_ = 0;
-    int idx_ = 0;
-};
+using CVJack = Oversampler<uint16_t, kOverSampleAmt>;
 
 class Controls {
 public:
@@ -53,6 +33,7 @@ public:
 
 private:
     AdcPeriph<1> ADC_;
+
     //todo: ADcChan constructor calls add_channel():
     //how to connect to AdcPeriph?
     //AdcPeriph<ADC1, 4/*#channels*/> {freq1cv_adc, res1cv_adc, freq2cv_adc, res2cv_adc};
@@ -61,13 +42,10 @@ private:
     //AdcPeriph ADC_{Adc1 /*enum for 1*/};
     //AdcChan<Adc1, AdcChan0> freq1cv {freq1cv_pin}; //or
     //AdcChan freq1cv {Adc1, AdcChan0, freq1cv_pin};
-public:
-    static uint16_t adc_raw[kNumAdcChans];
-    static std::array<uint16_t, kNumAdcChans> adcraw;
-
 
 public:
-    static std::array<OverSampleBuffer<uint16_t, 4>, kNumAdcChans> CV;
+    static std::array<uint16_t, kNumAdcChans> adc_raw;
+    static std::array<CVJack, kNumAdcChans> CV;
 
     static int32_t rotary_turn[2];  //-1, 0, 1
     static Button rotary_button[2]; //0, 1

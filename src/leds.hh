@@ -36,7 +36,7 @@ protected:
     TimPwmLed() : htim_(nohtim_) {}
 public:
     TimPwmLed(TIM_HandleTypeDef& htim, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af) 
-    : channel_(channel), pin_(ALT, pin, port, af), htim_(htim) {
+    : channel_(channel), pin_(pin, port, ALT, NONE, MEDIUM, af), htim_(htim) {
         TIM_OC_InitTypeDef tim_oc;
         tim_oc.OCMode = TIM_OCMODE_PWM1;
         tim_oc.OCPolarity = TIM_OCPOLARITY_LOW;

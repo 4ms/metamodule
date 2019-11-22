@@ -1,14 +1,11 @@
 #include "stm32f7xx_ll_dma.h"
 #include "controls.hh"
 #include "adc_builtin_driver.hh"
-#include "easiglib/util.hh"
 
-const uint32_t kOverSampleBits = 3;
-const uint32_t kOverSampleAmt = 8;
 const uint32_t kNumAdcChannels = 4;
 
-uint16_t Controls::adc_raw[kNumAdcChans];
-CVJack Controls::CV[4];
+std::array<uint16_t, kNumAdcChannels> Controls::adc_raw;
+std::array<CVJack, kNumAdcChannels> Controls::CV;
 int32_t Controls::rotary_turn[2]; //-1, 0, 1
 Button Controls::rotary_button[2]; //0, 1
 TouchCtl Controls::pads;
@@ -19,26 +16,15 @@ Controls::Controls()
     ADC_.add_channel(res1cv_adc);
     ADC_.add_channel(freq2cv_adc);
     ADC_.add_channel(res2cv_adc);
-    ADC_.start_dma(adc_raw, LL_DMA_STREAM_4, LL_DMA_CHANNEL_0);
+    ADC_.start_dma(adc_raw.data(), LL_DMA_STREAM_4, LL_DMA_CHANNEL_0);
 }
 
 void Controls::read()
 {
-    // for (int i = 0; i < kNumAdcChannels; i++)
-    // {
-    //     Controls::CV[i].rawval = Controls::adc_raw[i];
-    //     Controls::CV[i].os_buffer += Controls::adc_raw[i];
-    // }
-    // if (++Controls::lpf_i >= kOverSampleAmt)
-    // {
-    //     Controls::lpf_i = 0;
-    //     for (int i = 0; i < kNumAdcChannels; i++)
-    //         Controls::CV[i].os_val = Controls::CV[i].os_buffer >> kOverSampleBits;
-    // }
-
-    for (auto [raw_val, cv] : zip(Controls::adc_raw, Controls::CV))
-    {
-        cv.add_value(raw_val);
+    //Todo: find an STL way to do this:
+    auto raw_val = Controls::adc_raw.begin();
+    for (auto cv : Controls::CV) {
+        cv.add_val(*raw_val++);
     }
 
         //read_rotary

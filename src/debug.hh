@@ -9,6 +9,6 @@ struct Debug {
 
 private:
 	Pin<NORMAL> pins_[kNumDebugPins] = {
-		{OUTPUT, GPIO_PIN_2, GPIOD},
+		{GPIO_PIN_2, GPIOD, OUTPUT},
 	};
 };
