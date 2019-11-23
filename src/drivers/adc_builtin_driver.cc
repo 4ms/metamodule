@@ -26,7 +26,7 @@
  *
  * -----------------------------------------------------------------------------
  */
-
+#include <stm32f7xx.h>
 #include "adc_builtin_driver.hh"
 #include "stm32f7xx_ll_adc.h"
 #include "stm32f7xx_ll_dma.h"
@@ -34,7 +34,7 @@
 
 
 
-template <uint32_t adc_n>
+template <int adc_n>
 AdcPeriph<adc_n>::AdcPeriph()
 {
 	static_assert(adc_n==1 || adc_n==2 || adc_n==3, "Only ADC1, ADC2, or ADC3 are supported by AdcPeriph");

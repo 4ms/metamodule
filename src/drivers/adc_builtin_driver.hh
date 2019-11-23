@@ -35,27 +35,47 @@
 enum AdcChannelNumbers{ ADCChan0, ADCChan1, ADCChan2, ADCChan3, ADCChan4, ADCChan5, ADCChan6, ADCChan7,
 						ADCChan8, ADCChan9, ADCChan10, ADCChan11, ADCChan12, ADCChan13, ADCChan14, ADCChan15
 						};
-/*
+
 //template function with local static object
-template<uint32_t adc_num>
-AdcPerip& AdcInstance()
-{
+//Todo: make sAdcPeriph private? somehow not publically callable. Place in .cc file?
+//Todo: allow sAdcChan to call add_channel, but not publically callable. friend class?
+template <int adc_n>
+class sAdcPeriph {
+public:
+	sAdcPeriph();
+	void start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel);
+	void add_channel(const AdcChan adcc);
+
+private: 
+	ADC_TypeDef *ADCx_;
+	uint8_t num_channels_;
+};
+
+template<int adc_num> sAdcPeriph<adc_num>& AdcInstance() {
 	static Adc<adc_num> Adc_;
 	return Adc_;
-}
+};
 
-class AdcChan {
-	AdcChan(uint32_t adc_num, enum AdcChannelNumbers channel, Pin<NORMAL> pin, uint32_t sampletime)
-	: adc_periph_(AdcInstance<adc_num>()), channel_(channel), pin_(pin), sampletime_(sampletime){}
-	
+class sAdcChan {
+public:
+	AdcChan(int adc_num, enum AdcChannelNumbers channel, Pin<NORMAL> pin, uint32_t sampletime)
+	: adc_periph_(AdcInstance<adc_num>()), 
+	  channel_(channel), 
+	  pin_(pin), 
+	  sampletime_(sampletime)
+	{
+		adc_periph_.add_channel(this);
+	}
+
+private:
 	AdcPerip& adc_periph_;
 	enum AdcChannelNumbers channel_;
 	Pin<NORMAL> pin_;
 	uint32_t sampletime_;
+};
 
-}
 
-*/
+//non-singleton:
 
 struct AdcChan {
 	AdcChan(enum AdcChannelNumbers channel, Pin<NORMAL> pin, uint32_t sampletime) 
@@ -66,7 +86,7 @@ struct AdcChan {
 	uint32_t sampletime_;
 };
 
-template <uint32_t adc_n>
+template <int adc_n>
 class AdcPeriph
 {
 public:
