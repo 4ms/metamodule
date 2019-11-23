@@ -32,9 +32,12 @@
 #include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_bus.h"
 
+
+
 template <uint32_t adc_n>
 AdcPeriph<adc_n>::AdcPeriph()
 {
+	static_assert(adc_n==1 || adc_n==2 || adc_n==3, "Only ADC1, ADC2, or ADC3 are supported by AdcPeriph");
 	if (adc_n==1)
 	{
 		ADCx_ = ADC1;
@@ -114,3 +117,7 @@ void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, 
 
 	LL_ADC_REG_StartConversionSWStart(ADCx_);
 }
+
+template class AdcPeriph<1>;
+template class AdcPeriph<2>;
+template class AdcPeriph<3>;

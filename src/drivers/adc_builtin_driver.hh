@@ -35,6 +35,27 @@
 enum AdcChannelNumbers{ ADCChan0, ADCChan1, ADCChan2, ADCChan3, ADCChan4, ADCChan5, ADCChan6, ADCChan7,
 						ADCChan8, ADCChan9, ADCChan10, ADCChan11, ADCChan12, ADCChan13, ADCChan14, ADCChan15
 						};
+/*
+//template function with local static object
+template<uint32_t adc_num>
+AdcPerip& AdcInstance()
+{
+	static Adc<adc_num> Adc_;
+	return Adc_;
+}
+
+class AdcChan {
+	AdcChan(uint32_t adc_num, enum AdcChannelNumbers channel, Pin<NORMAL> pin, uint32_t sampletime)
+	: adc_periph_(AdcInstance<adc_num>()), channel_(channel), pin_(pin), sampletime_(sampletime){}
+	
+	AdcPerip& adc_periph_;
+	enum AdcChannelNumbers channel_;
+	Pin<NORMAL> pin_;
+	uint32_t sampletime_;
+
+}
+
+*/
 
 struct AdcChan {
 	AdcChan(enum AdcChannelNumbers channel, Pin<NORMAL> pin, uint32_t sampletime) 

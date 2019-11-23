@@ -32,7 +32,7 @@ public:
     static void read();
 
 private:
-    static AdcPeriph<1> ADC_;
+    AdcPeriph<1> ADC_;
 
     //todo: ADcChan constructor calls add_channel():
     //how to connect to AdcPeriph?
