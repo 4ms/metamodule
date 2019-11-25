@@ -12,11 +12,6 @@
 const uint32_t kNumAdcChans = 4;
 const int kOverSampleAmt = 4;
 
-const AdcChan freq1cv_adc = {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-const AdcChan res1cv_adc = {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-const AdcChan freq2cv_adc = {ADCChan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-const AdcChan res2cv_adc = {ADCChan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-
 struct Button {
     uint32_t just_pressed;
     uint32_t just_released;
@@ -32,7 +27,7 @@ public:
     static void read();
 
 private:
-    AdcPeriph<1> ADC_;
+    // sAdcPeriph<ADC_1> ADC_;
 
     //todo: ADcChan constructor calls add_channel():
     //how to connect to AdcPeriph?

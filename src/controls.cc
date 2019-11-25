@@ -11,11 +11,18 @@ TouchCtl Controls::pads;
 
 Controls::Controls()
 {
-    ADC_.add_channel(freq1cv_adc);
-    ADC_.add_channel(res1cv_adc);
-    ADC_.add_channel(freq2cv_adc);
-    ADC_.add_channel(res2cv_adc);
-    ADC_.start_dma(adc_raw.data(), LL_DMA_STREAM_4, LL_DMA_CHANNEL_0);
+    //Note: constructor adds channel to sAdcPeriph
+    const sAdcChan<ADC_1> freq1cv_adc = {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    const sAdcChan<ADC_1> res1cv_adc = {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    const sAdcChan<ADC_1> freq2cv_adc = {ADCChan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    const sAdcChan<ADC_1> res2cv_adc = {ADCChan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+
+
+    // ADC_.add_channel(freq1cv_adc);
+    // ADC_.add_channel(res1cv_adc);
+    // ADC_.add_channel(freq2cv_adc);
+    // ADC_.add_channel(res2cv_adc);
+    sAdcPeriph<ADC_1>::start_dma(adc_raw.data(), LL_DMA_STREAM_4, LL_DMA_CHANNEL_0);
 }
 
 void Controls::read()

@@ -32,23 +32,25 @@
 #include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_bus.h"
 
+template class sAdcPeriph<ADC_1>;
+template class sAdcPeriph<ADC_2>;
+template class sAdcPeriph<ADC_3>;
 
-
-template <int adc_n>
-AdcPeriph<adc_n>::AdcPeriph()
+template <enum AdcPeriphNums adc_n>
+sAdcPeriph<adc_n>::sAdcPeriph()
 {
-	static_assert(adc_n==1 || adc_n==2 || adc_n==3, "Only ADC1, ADC2, or ADC3 are supported by AdcPeriph");
-	if (adc_n==1)
+	static_assert(adc_n==ADC_1 || adc_n==ADC_2 || adc_n==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
+	if (adc_n==ADC_1)
 	{
 		ADCx_ = ADC1;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
 	}
-	else if (adc_n == 2)
+	else if (adc_n==ADC_2)
 	{
 		ADCx_ = ADC2;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC2);
 	}
-	else if (adc_n == 3)
+	else if (adc_n==ADC_3)
 	{
 		ADCx_ = ADC3;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC3);
@@ -77,8 +79,8 @@ AdcPeriph<adc_n>::AdcPeriph()
 	LL_ADC_REG_SetFlagEndOfConversion(ADCx_, LL_ADC_REG_FLAG_EOC_SEQUENCE_CONV);
 }
 
-template <uint32_t adc_n>
-void AdcPeriph<adc_n>::add_channel(AdcChan adcc)
+template <enum AdcPeriphNums adc_n>
+void sAdcPeriph<adc_n>::add_channel(const sAdcChan<adc_n>& adcc)
 {
 	LL_ADC_REG_SetSequencerRanks(ADCx_, num_channels_, adcc.channel_);
 	LL_ADC_REG_SetSequencerLength(ADCx_, LL_ADC_REG_SEQ_SCAN_ENABLE_2RANKS + num_channels_);
@@ -86,10 +88,10 @@ void AdcPeriph<adc_n>::add_channel(AdcChan adcc)
 	num_channels_++;
 }
 
-template <uint32_t adc_n>
-void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel)
+template <enum AdcPeriphNums adc_n>
+void sAdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel)
 {
-	if (!num_channels_) return;
+	if (!sAdcPeriph<adc_n>::num_channels_) return;
 
 	//Enable DMA2_Stream4 Channel 0
 	NVIC_SetPriority(DMA2_Stream4_IRQn, (1<<2) | 0);
@@ -106,18 +108,14 @@ void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, 
 						LL_DMA_MDATAALIGN_HALFWORD |
 						LL_DMA_PRIORITY_HIGH);
 
-	LL_DMA_ConfigAddresses(DMA2, ADC_DMA_Stream, ADCx_->DR, (uint32_t)raw_buffer, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-	LL_DMA_SetDataLength(DMA2, ADC_DMA_Stream, num_channels_);
+	LL_DMA_ConfigAddresses(DMA2, ADC_DMA_Stream, sAdcPeriph<adc_n>::ADCx_->DR, (uint32_t)raw_buffer, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+	LL_DMA_SetDataLength(DMA2, ADC_DMA_Stream, sAdcPeriph<adc_n>::num_channels_);
 	LL_DMA_EnableIT_TC(DMA2, ADC_DMA_Stream);
 	LL_DMA_DisableIT_HT(DMA2, ADC_DMA_Stream);
 	LL_DMA_EnableIT_TE(DMA2, ADC_DMA_Stream);
 	LL_DMA_EnableStream(DMA2, ADC_DMA_Stream);
 
-	LL_ADC_Enable(ADCx_);
+	LL_ADC_Enable(sAdcPeriph<adc_n>::ADCx_);
 
-	LL_ADC_REG_StartConversionSWStart(ADCx_);
+	LL_ADC_REG_StartConversionSWStart(sAdcPeriph<adc_n>::ADCx_);
 }
-
-template class AdcPeriph<1>;
-template class AdcPeriph<2>;
-template class AdcPeriph<3>;

@@ -68,6 +68,7 @@ CXXFLAGS=$(CFLAGS) \
 	-Werror=return-type \
 	-Wdouble-promotion \
 	-Wno-register \
+	-fno-threadsafe-statics \
 
 
 AFLAGS = $(MCU)
