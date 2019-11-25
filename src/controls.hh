@@ -24,6 +24,21 @@ struct CVJack {
     Oversampler<uint16_t, kOverSampleAmt> oversampler;
 };
 
+//Ideal:
+/*
+const CVJack freq1CV {...};
+const CVJack res1CV ...
+...
+
+class Controls{
+    CVJack CV[4] = {freq1CV, res1CV, freq2CV, res2CV};
+    JackSense CVsense[4] = {in1sense, in2sense, out1freq2sense, res2sense};
+    Rotary rotary[2] = {rotary1, rotary2};
+    Button rotary_press[2] = {}...;
+
+}
+*/
+
 //Controls class reads raw hardware, does fast conditioning (debouncing), and stores values into objects representing each hardware object
 class Controls {
 public:
