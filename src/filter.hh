@@ -35,7 +35,7 @@ public:
     }
     T val() {return val_;}
 private:
-    int oversample_shift_;
+    constexpr int oversample_shift_;
     T buff_ = 0;
     T val_ = 0;
     int idx_ = 0;

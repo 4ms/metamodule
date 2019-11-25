@@ -40,17 +40,14 @@ enum AdcPeriphNums {ADC_1, ADC_2, ADC_3};
 //template function with local static object
 //Todo: make sAdcPeriph private? somehow not publically callable. Place in .cc file?
 //Todo: allow sAdcChan to call add_channel, but not publically callable. friend class?
-template <enum AdcPeriphNums adc_n> class sAdcChan;
 
 template <enum AdcPeriphNums adc_n>
 class sAdcPeriph {
 public: //todo: how to allow constructor just for AdcInstance function, using protected? friend? member method?
 	sAdcPeriph();
-	//: num_channels_(0), ADCx_(adc_n==ADC_1 ? ADC1 : adc_n==ADC_2 ? ADC2 : ADC3)
-	// {}
 public:
 	static void start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel);
-	void add_channel(const sAdcChan<adc_n>& adcc);
+	static void add_channel(enum AdcChannelNumbers channel, uint32_t sampletime);
 
 private: 
 	static ADC_TypeDef *ADCx_;
@@ -60,6 +57,7 @@ private:
 template<enum AdcPeriphNums adc_n>
 sAdcPeriph<adc_n>& AdcInstance() {
 	static_assert(adc_n==ADC_1 || adc_n==ADC_2 || adc_n==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
+
 	static sAdcPeriph<adc_n> Adc_;
 	return Adc_;
 }
@@ -73,7 +71,7 @@ public:
 	  pin_(pin), 
 	  sampletime_(sampletime)
 	{
-		adc_periph_.add_channel(*this);
+		sAdcPeriph<adc_n>::add_channel(channel, sampletime);
 	}
 
 private:

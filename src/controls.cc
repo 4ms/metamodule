@@ -11,11 +11,11 @@ TouchCtl Controls::pads;
 
 Controls::Controls()
 {
-    //Note: constructor adds channel to sAdcPeriph
-    const sAdcChan<ADC_1> freq1cv_adc = {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    const sAdcChan<ADC_1> res1cv_adc = {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    const sAdcChan<ADC_1> freq2cv_adc = {ADCChan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    const sAdcChan<ADC_1> res2cv_adc = {ADCChan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    //Note: constructor adds channel to sAdcPeriph, destructor does nothing (channels can't be removed)
+    sAdcChan<ADC_1> freq1cv_adc = {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    sAdcChan<ADC_1> res1cv_adc = {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    sAdcChan<ADC_1> freq2cv_adc = {ADCChan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    sAdcChan<ADC_1> res2cv_adc = {ADCChan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
 
 
     // ADC_.add_channel(freq1cv_adc);
@@ -27,10 +27,10 @@ Controls::Controls()
 
 void Controls::read()
 {
-    //Todo: find an STL way to do this:
+    //Todo: find an STL way to do this, apply add_val function to each element of adc_raw and store result in cv.val:
     auto raw_val = Controls::adc_raw.begin();
     for (auto cv : Controls::CV) {
-        cv.add_val(*raw_val++);
+        cv.val = cv.oversampler.add_val(*raw_val++);
     }
 
         //read_rotary

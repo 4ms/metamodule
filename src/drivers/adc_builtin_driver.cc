@@ -35,23 +35,23 @@
 template class sAdcPeriph<ADC_1>;
 template class sAdcPeriph<ADC_2>;
 template class sAdcPeriph<ADC_3>;
+template <enum AdcPeriphNums adc_n> ADC_TypeDef* sAdcPeriph<adc_n>::ADCx_;
+template <enum AdcPeriphNums adc_n> uint8_t sAdcPeriph<adc_n>::num_channels_;
+
 
 template <enum AdcPeriphNums adc_n>
 sAdcPeriph<adc_n>::sAdcPeriph()
 {
 	static_assert(adc_n==ADC_1 || adc_n==ADC_2 || adc_n==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
-	if (adc_n==ADC_1)
-	{
+	if (adc_n==ADC_1) {
 		ADCx_ = ADC1;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
 	}
-	else if (adc_n==ADC_2)
-	{
+	else if (adc_n==ADC_2) {
 		ADCx_ = ADC2;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC2);
 	}
-	else if (adc_n==ADC_3)
-	{
+	else if (adc_n==ADC_3) {
 		ADCx_ = ADC3;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC3);
 	}
@@ -80,11 +80,11 @@ sAdcPeriph<adc_n>::sAdcPeriph()
 }
 
 template <enum AdcPeriphNums adc_n>
-void sAdcPeriph<adc_n>::add_channel(const sAdcChan<adc_n>& adcc)
+void sAdcPeriph<adc_n>::add_channel(enum AdcChannelNumbers channel, uint32_t sampletime)
 {
-	LL_ADC_REG_SetSequencerRanks(ADCx_, num_channels_, adcc.channel_);
+	LL_ADC_REG_SetSequencerRanks(ADCx_, num_channels_, channel);
 	LL_ADC_REG_SetSequencerLength(ADCx_, LL_ADC_REG_SEQ_SCAN_ENABLE_2RANKS + num_channels_);
-	LL_ADC_SetChannelSamplingTime(ADCx_, adcc.channel_, adcc.sampletime_);
+	LL_ADC_SetChannelSamplingTime(ADCx_, channel, sampletime);
 	num_channels_++;
 }
 
