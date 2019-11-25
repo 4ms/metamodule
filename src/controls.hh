@@ -21,7 +21,6 @@ struct Button {
 
 struct CVJack {
     bool plugged;
-    uint32_t val;
     Oversampler<uint16_t, kOverSampleAmt> oversampler;
 };
 

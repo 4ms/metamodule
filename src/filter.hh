@@ -25,7 +25,7 @@ template<class T, int size>
 struct Oversampler {
 //Todo: static_assert size is power of 2
 public:
-    Oversampler() : oversample_shift_(Log2Int(size)) {}
+    Oversampler() {}
     void add_val(T newval) {
         buff_ += newval;
         if (++idx_>size) {
@@ -35,7 +35,7 @@ public:
     }
     T val() {return val_;}
 private:
-    constexpr int oversample_shift_;
+    constexpr static int oversample_shift_ = Log2Int(size);
     T buff_ = 0;
     T val_ = 0;
     int idx_ = 0;

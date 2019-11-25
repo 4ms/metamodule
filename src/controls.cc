@@ -30,8 +30,9 @@ void Controls::read()
     //Todo: find an STL way to do this, apply add_val function to each element of adc_raw and store result in cv.val:
     auto raw_val = Controls::adc_raw.begin();
     for (auto cv : Controls::CV) {
-        cv.val = cv.oversampler.add_val(*raw_val++);
+        cv.oversampler.add_val(*raw_val++);
     }
+
 
         //read_rotary
         // Controls::rotary_turn[0] = read_rotary(0);
