@@ -19,11 +19,23 @@ struct Button {
     uint32_t state;
 };
 
+
 struct CVJack {
+    // CVJack(AdcChan<adc_n> &adcchan) : adc(adcchan) {}
+
     bool plugged;
+    template <enum AdcPeriphNums adc_n> static AdcChan<adc_n> &adc;
     Oversampler<uint16_t, kOverSampleAmt> oversampler;
 };
 
+// template<> AdcChan<ADC_1>& CVJack::adc = {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+
+
+// template <int adc_enum>
+// struct CVJack_n {
+//     bool plugged;
+
+// };
 //Ideal:
 /*
 const CVJack freq1CV {...};
@@ -36,6 +48,24 @@ class Controls{
     Rotary rotary[2] = {rotary1, rotary2};
     Button rotary_press[2] = {}...;
 
+//or
+    AdcChan<ADC_1> freq1Adc {...};
+    CVJack freq1CV = {freq1Adc, };
+
+    AdcChan<ADC_1> res1Adc {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    CVJack freq2CV = {res1Adc, };
+    ...
+    //then in Controls::read(), do:
+    freq1CV.oversampler.add_value(freq1CV.adc.get());
+    freq2CV.oversampler.add_value(freq2CV.adc.get());
+
+    or 
+
+    CVJack::CVJack(enum CVJackNames cvjackname) : cvjackname_(cvjackname) {};
+
+    AdcChan<ADC_1>
+    freq2CV.oversampler.add_value(adc.get(freq2CV.get_cvjackname()));
+
 }
 */
 
@@ -46,6 +76,14 @@ public:
     static void read();
 
 public:
+    //Note: constructor adds channel to AdcPeriph, destructor does nothing (channels can't be removed)
+    //Todo: seems like these are created and copied. Use R-value reference to move
+    AdcChan<ADC_1> freq1cv_adc = {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<ADC_1> res1cv_adc = {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<ADC_1> freq2cv_adc = {ADCChan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<ADC_1> res2cv_adc = {ADCChan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+
+
     static std::array<uint16_t, kNumAdcChans> adc_raw;
     static std::array<CVJack, kNumAdcChans> CV;
 
