@@ -32,15 +32,15 @@
 #include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_bus.h"
 
-template class sAdcPeriph<ADC_1>;
-template class sAdcPeriph<ADC_2>;
-template class sAdcPeriph<ADC_3>;
-template <enum AdcPeriphNums adc_n> ADC_TypeDef* sAdcPeriph<adc_n>::ADCx_;
-template <enum AdcPeriphNums adc_n> uint8_t sAdcPeriph<adc_n>::num_channels_;
+template class AdcPeriph<ADC_1>;
+template class AdcPeriph<ADC_2>;
+template class AdcPeriph<ADC_3>;
+template <enum AdcPeriphNums adc_n> ADC_TypeDef* AdcPeriph<adc_n>::ADCx_;
+template <enum AdcPeriphNums adc_n> uint8_t AdcPeriph<adc_n>::num_channels_;
 
 
 template <enum AdcPeriphNums adc_n>
-sAdcPeriph<adc_n>::sAdcPeriph()
+AdcPeriph<adc_n>::AdcPeriph()
 {
 	static_assert(adc_n==ADC_1 || adc_n==ADC_2 || adc_n==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
 	if (adc_n==ADC_1) {
@@ -71,7 +71,7 @@ sAdcPeriph<adc_n>::sAdcPeriph()
 	LL_ADC_REG_InitTypeDef adcreginit;
 
 	adcreginit.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
-	adcreginit.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE; //modify each time we add a channel 
+	adcreginit.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE; //modify each time we add a channel
 	adcreginit.SequencerDiscont = LL_ADC_REG_SEQ_DISCONT_DISABLE;
 	adcreginit.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
 	adcreginit.DMATransfer = LL_ADC_REG_DMA_TRANSFER_UNLIMITED;
@@ -79,23 +79,41 @@ sAdcPeriph<adc_n>::sAdcPeriph()
 	LL_ADC_REG_SetFlagEndOfConversion(ADCx_, LL_ADC_REG_FLAG_EOC_SEQUENCE_CONV);
 }
 
+constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_RANK(const uint8_t x) {
+	return ((x <= 5)  ? (ADC_SQR3_REGOFFSET | (x*5))
+		  : (x <= 11) ? (ADC_SQR2_REGOFFSET | ((x-6)*5))
+		  : (x <= 15) ? (ADC_SQR1_REGOFFSET | ((x-12)*5))
+		  : 0);
+
+	// const uint32_t regoffset = ((x <= 5) ? ADC_SQR3_REGOFFSET
+	// 							  : (x <= 11) ? ADC_SQR2_REGOFFSET
+	// 						 	  : (x <= 15) ? ADC_SQR1_REGOFFSET : 0);
+	// const uint32_t bitoffset = ((x <= 5) ? (x * 5)
+	// 							  : (x <= 11) ? (x - 6) * 5
+	// 							  : (x <= 15) ? (x - 12) * 5 : 0);
+	// return regoffset | bitoffset;
+}
+
+constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(const uint8_t x) {
+	return (x << ADC_SQR1_L_Pos);
+}
+
 template <enum AdcPeriphNums adc_n>
-void sAdcPeriph<adc_n>::add_channel(enum AdcChannelNumbers channel, uint32_t sampletime)
+void AdcPeriph<adc_n>::add_channel(enum AdcChannelNumbers channel, uint32_t sampletime)
 {
-	LL_ADC_REG_SetSequencerRanks(ADCx_, num_channels_, channel);
-	LL_ADC_REG_SetSequencerLength(ADCx_, LL_ADC_REG_SEQ_SCAN_ENABLE_2RANKS + num_channels_);
-	LL_ADC_SetChannelSamplingTime(ADCx_, channel, sampletime);
+
+	LL_ADC_REG_SetSequencerRanks(ADCx_, _LL_ADC_DECIMAL_NB_TO_RANK(num_channels_), __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel));
+	LL_ADC_REG_SetSequencerLength(ADCx_, _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(num_channels_));
+	LL_ADC_SetChannelSamplingTime(ADCx_, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel), sampletime);
 	num_channels_++;
 }
 
 template <enum AdcPeriphNums adc_n>
-void sAdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel)
+void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel, IRQn_Type ADC_DMA_Streamx_IRQn)
 {
-	if (!sAdcPeriph<adc_n>::num_channels_) return;
+	if (!num_channels_) return;
 
 	//Enable DMA2_Stream4 Channel 0
-	NVIC_SetPriority(DMA2_Stream4_IRQn, (1<<2) | 0);
-	NVIC_EnableIRQ(DMA2_Stream4_IRQn);
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2);
 	LL_DMA_SetChannelSelection(DMA2, ADC_DMA_Stream, ADC_DMA_Channel);
 	LL_DMA_ConfigTransfer(DMA2,
@@ -108,14 +126,17 @@ void sAdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream,
 						LL_DMA_MDATAALIGN_HALFWORD |
 						LL_DMA_PRIORITY_HIGH);
 
-	LL_DMA_ConfigAddresses(DMA2, ADC_DMA_Stream, sAdcPeriph<adc_n>::ADCx_->DR, (uint32_t)raw_buffer, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-	LL_DMA_SetDataLength(DMA2, ADC_DMA_Stream, sAdcPeriph<adc_n>::num_channels_);
+	LL_DMA_ConfigAddresses(DMA2, ADC_DMA_Stream, LL_ADC_DMA_GetRegAddr(ADCx_, LL_ADC_DMA_REG_REGULAR_DATA), (uint32_t)raw_buffer, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+	LL_DMA_SetDataLength(DMA2, ADC_DMA_Stream, num_channels_);
 	LL_DMA_EnableIT_TC(DMA2, ADC_DMA_Stream);
 	LL_DMA_DisableIT_HT(DMA2, ADC_DMA_Stream);
 	LL_DMA_EnableIT_TE(DMA2, ADC_DMA_Stream);
 	LL_DMA_EnableStream(DMA2, ADC_DMA_Stream);
 
-	LL_ADC_Enable(sAdcPeriph<adc_n>::ADCx_);
+	NVIC_SetPriority(ADC_DMA_Streamx_IRQn, (1 << 2) | 0);
+	NVIC_EnableIRQ(ADC_DMA_Streamx_IRQn);
 
-	LL_ADC_REG_StartConversionSWStart(sAdcPeriph<adc_n>::ADCx_);
+	LL_ADC_Enable(ADCx_);
+
+	LL_ADC_REG_StartConversionSWStart(ADCx_);
 }
