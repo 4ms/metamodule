@@ -32,7 +32,7 @@ void Controls::read()
 
 Controls::Controls()
 {
-    AdcPeriph<AdcPeriphNum::ADC_1>::start_dma(adc_raw.data(), LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
+    AdcPeriph<AdcPeriphNum::ADC_1>::start_dma(LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
 }
 
 extern "C" void DMA2_Stream4_IRQHandler(void)

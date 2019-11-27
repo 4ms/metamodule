@@ -9,7 +9,6 @@
 
 #include <array>
 
-const uint32_t kNumAdcChans = 4;
 const int kOverSampleAmt = 4;
 
 //Todo: put Button and CVJack in their own files
@@ -21,16 +20,18 @@ struct Button {
 
 
 struct CVJack {
-    CVJack(uint16_t &raw_input) : raw_input_(raw_input) {}
+    // CVJack(uint16_t &raw_input) : raw_input_(raw_input) {}
+    CVJack(IAdcChanBase& adc_channel) : adc_channel_(adc_channel) {}
 
-    CVJack();
-    void set_input_source(uint16_t &raw_input) {raw_input_ = raw_input;}
+    // CVJack();
+    // void set_input_source(uint16_t &raw_input) {raw_input_ = raw_input;}
 
-    void read() {oversampler_.add_val(raw_input_);}
+    void read() {oversampler_.add_val(adc_channel_.get_val());}
     uint16_t get() {return oversampler_.val();}
 
 private:
-    uint16_t &raw_input_;
+    // uint16_t &raw_input_;
+    IAdcChanBase& adc_channel_;
     Oversampler<uint16_t, kOverSampleAmt> oversampler_;
 };
 
@@ -50,10 +51,10 @@ struct Hardware {
     //      It's not clear, but there might be several copies happening (all are destroyed, but it makes initialization slower than necessary.
     //Todo: Compare to using rvalue references to move, and compare timing when optimized
 
-    AdcChan<AdcPeriphNum::ADC_1> freq1cv_adc {AdcChanNum::Chan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    AdcChan<AdcPeriphNum::ADC_1> res1cv_adc {AdcChanNum::Chan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    AdcChan<AdcPeriphNum::ADC_1> freq2cv_adc {AdcChanNum::Chan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    AdcChan<AdcPeriphNum::ADC_1> res2cv_adc {AdcChanNum::Chan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    static inline AdcChan<AdcPeriphNum::ADC_1> freq1cv_adc {AdcChanNum::Chan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}};
+    static inline AdcChan<AdcPeriphNum::ADC_1> res1cv_adc {AdcChanNum::Chan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}};
+    static inline AdcChan<AdcPeriphNum::ADC_1> freq2cv_adc {AdcChanNum::Chan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}};
+    static inline AdcChan<AdcPeriphNum::ADC_1> res2cv_adc {AdcChanNum::Chan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}};
 
     Pin freq2_sense_pin {LL_GPIO_PIN_14, GPIOC, INPUT, UP};
     Pin res2_sense_pin {LL_GPIO_PIN_4, GPIOC, INPUT, UP};
@@ -66,15 +67,15 @@ struct Hardware {
 //and stores values into objects representing each hardware object (e.g. CVJack, JackSense, Rotary, Button...)
 struct Controls : public Hardware
 {
-    static inline std::array<uint16_t, kNumAdcChans> adc_raw;
+    // static inline std::array<uint16_t, kNumAdcChans> adc_raw;
 
-    static inline CVJack freq1CV { adc_raw[0] };
-    static inline CVJack res1CV { adc_raw[1] };
-    static inline CVJack freq2CV { adc_raw[2] };
-    static inline CVJack res2CV { adc_raw[3] };
+    static inline CVJack freq1CV { freq1cv_adc };
+    static inline CVJack res1CV { res1cv_adc };
+    static inline CVJack freq2CV { freq2cv_adc };
+    static inline CVJack res2CV { res2cv_adc };
 
-    //Todo: either allocate 16 uint16_t's per AdcPeriph<>, or dynamically allocate using std::vector<>... but somehow keep the DMA destination as part of AdcPeriph<>
-    //And make an accessor in AdcChan to grab the appropriate value: AdcPeriph<>.get(uint8_t adc_rank_num)  {return dma_buffer(adc_rank_num);}
+    //X Todo: either allocate 16 uint16_t's per AdcPeriph<>, or dynamically allocate using std::vector<>... but somehow keep the DMA destination as part of AdcPeriph<>
+    //X And make an accessor in AdcChan to grab the appropriate value: AdcPeriph<>.get(uint8_t adc_rank_num)  {return dma_buffer(adc_rank_num);}
     //static inline CVJack freq1CV { Hardware::freq1cv_adc };
     //ctor sets CVJack.adc_num_ to Hardware::freq1cv_adc.rank_num, and CVJack.adc_periph_num_ to ::.adc_num_
     //get() calls AdcPeriph<adc_periph_num_>::get(adc_rank_num)

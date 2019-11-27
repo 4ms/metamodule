@@ -98,17 +98,19 @@ constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(const uint8_t x) {
 
 //Todo: add overload that allows for Rank to be set manually (then start_dma must verify and fix any gaps in seqeuence ranks)
 template <AdcPeriphNum adc_n>
-void AdcPeriph<adc_n>::add_channel(AdcChanNum const channel, uint32_t const sampletime)
+uint8_t AdcPeriph<adc_n>::add_channel(const AdcChanNum channel, const uint32_t sampletime)
 {
 	uint8_t channel_u8 = static_cast<uint8_t>(channel);
-	LL_ADC_REG_SetSequencerRanks(ADCx_, _LL_ADC_DECIMAL_NB_TO_RANK(num_channels_), __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_u8));
+	uint8_t rank = _LL_ADC_DECIMAL_NB_TO_RANK(num_channels_);
+	LL_ADC_REG_SetSequencerRanks(ADCx_, rank, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_u8));
 	LL_ADC_REG_SetSequencerLength(ADCx_, _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(num_channels_));
 	LL_ADC_SetChannelSamplingTime(ADCx_, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_u8), sampletime);
 	num_channels_++;
+	return rank;
 }
 
 template <AdcPeriphNum adc_n>
-void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel, IRQn_Type ADC_DMA_Streamx_IRQn)
+void AdcPeriph<adc_n>::start_dma(const uint32_t ADC_DMA_Stream, const uint32_t ADC_DMA_Channel, const IRQn_Type ADC_DMA_Streamx_IRQn)
 {
 	if (!num_channels_) return;
 
@@ -127,7 +129,7 @@ void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, 
 	LL_DMA_ConfigAddresses(DMA2,
 						ADC_DMA_Stream,
 						LL_ADC_DMA_GetRegAddr(ADCx_, LL_ADC_DMA_REG_REGULAR_DATA),
-						(uint32_t)raw_buffer,
+						(uint32_t)(dma_buffer_),
 						LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
 	LL_DMA_SetDataLength(DMA2, ADC_DMA_Stream, num_channels_);
 	LL_DMA_EnableIT_TC(DMA2, ADC_DMA_Stream);
@@ -142,3 +144,8 @@ void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, 
 
 	LL_ADC_REG_StartConversionSWStart(ADCx_);
 }
+
+// template <AdcPeriphNum periph>
+// uint16_t AdcChan<periph>::get_val() {
+// 	return adc_periph_.dma_buffer_[rank_];
+// }

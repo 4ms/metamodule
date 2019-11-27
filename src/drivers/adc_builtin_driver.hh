@@ -37,47 +37,62 @@ enum class AdcChanNum { Chan0, Chan1, Chan2, Chan3, Chan4, Chan5, Chan6, Chan7,
 						Chan8, Chan9, Chan10, Chan11, Chan12, Chan13, Chan14, Chan15 };
 enum class AdcPeriphNum {ADC_1, ADC_2, ADC_3};
 
-template <AdcPeriphNum adc_n> class AdcPeriph;
+template <AdcPeriphNum periph> class AdcPeriph;
 
-template <AdcPeriphNum adc_n>
-class AdcChan {
+class IAdcChanBase {
 public:
-	AdcChan(AdcChanNum channel, Pin pin, uint32_t sampletime)
-	: adc_periph_(AdcPeriph<adc_n>::AdcInstance()),
+	virtual uint16_t get_val();
+	virtual ~IAdcChanBase()=default;
+};
+
+template <AdcPeriphNum periph>
+class AdcChan : public IAdcChanBase {
+public:
+	AdcChan(const AdcChanNum channel, const Pin pin, const uint32_t sampletime=LL_ADC_SAMPLINGTIME_144CYCLES)
+	: adc_periph_(AdcPeriph<periph>::AdcInstance()),
 	  channel_(channel),
 	  pin_(pin),
 	  sampletime_(sampletime)
 	{
-		AdcPeriph<adc_n>::add_channel(channel, sampletime);
+		rank_ = AdcPeriph<periph>::add_channel(channel, sampletime);
 	}
-
+	// ~AdcChan()=default;
+	uint16_t get_val() override {
+		return adc_periph_.dma_buffer_[rank_];
+	}
 private:
-	AdcPeriph<adc_n> &adc_periph_;
+	AdcPeriph<periph> &adc_periph_;
 	Pin pin_;
 	AdcChanNum channel_;
 	uint32_t sampletime_;
+	uint8_t rank_;
 };
 
-template <AdcPeriphNum adc_n>
+template <AdcPeriphNum periph>
 class AdcPeriph
 {
-	template <AdcPeriphNum adc_chan_n>
+	template <AdcPeriphNum adc_chan_periph>
 	friend class AdcChan;
 
 public:
-	static void start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel, IRQn_Type ADC_DMA_Streamx_IRQn);
+	static void start_dma(const uint32_t ADC_DMA_Stream, const uint32_t ADC_DMA_Channel, const IRQn_Type ADC_DMA_Streamx_IRQn);
 
 private:
-	static void add_channel(AdcChanNum const channel, uint32_t const sampletime);
+	//Returns rank channel was added
+	static uint8_t add_channel(const AdcChanNum channel, const uint32_t sampletime);
+
 	//Todo:
+	//add_channel(rank, channel, sampletime)
 	//set_dma_destination(uint16_t *)
 	//set_dma_parameters(DMA1/2, stream, channel, IRQn);
 	//start_dma() //overload with no parameters
 
 	AdcPeriph();
-	static AdcPeriph<adc_n> &AdcInstance();
+	static AdcPeriph<periph> &AdcInstance();
 
 	static inline ADC_TypeDef *ADCx_;
 	static inline uint8_t num_channels_;
-	// static inline uint16_t raw_values[16]; //todo: use vector for dynamic
+	// static inline std::vector<uint16_t> dma_buffer_;
+	// static inline std::array<uint16_t, 16> dma_buffer_;
+	static inline uint16_t dma_buffer_[16]; //todo: use vector for dynamic
 };
