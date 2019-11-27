@@ -52,8 +52,8 @@ public:
 	}
 
 private:
-	AdcPeriph<adc_n>& adc_periph_;
-	Pin<NORMAL> pin_;
+	AdcPeriph<adc_n> &adc_periph_;
+	Pin pin_;
 	enum AdcChannelNumbers channel_;
 	uint32_t sampletime_;
 };

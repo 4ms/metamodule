@@ -1,18 +1,20 @@
 #pragma once
 #include <stm32f7xx.h>
 
-enum PinPolarity {NORMAL, INVERTED};
+// namespace Pins {
+enum PinPolarities {NORMAL, INVERTED};
 enum PinMode {INPUT, OUTPUT, ANALOG, ALT};
 enum PinPull {UP, DOWN, NONE};
 enum PinSpeed {LOW, MEDIUM, HIGH, VERY_HIGH};
-
-//todo: don't use HAL 
+// }
+//todo: don't use HAL
 //todo? templatize with Pin and Port. template for INPUT/OUTPUT/ALT ?
 //todo: Can the enums be in the class or namespace, so we use Pin::Pull::Up or Pin::PULLUP ?
-template<PinPolarity polarity=NORMAL>
-class Pin {
-    
-private: 
+//Pin definition
+template<PinPolarities polarity=NORMAL>
+class PinWithPolarity {
+
+private:
     uint16_t pin_;
     GPIO_TypeDef *port_;
     enum PinMode mode_;
@@ -21,8 +23,8 @@ private:
     uint8_t af_;
 
 public :
-    Pin() {}
-    Pin(uint16_t pin, GPIO_TypeDef *port, enum PinMode mode, enum PinPull pull = NONE, enum PinSpeed speed = MEDIUM, uint8_t af = 0) 
+    PinWithPolarity() {}
+    PinWithPolarity(uint16_t pin, GPIO_TypeDef *port, enum PinMode mode, enum PinPull pull = NONE, enum PinSpeed speed = MEDIUM, uint8_t af = 0)
     : pin_(pin), port_(port), mode_(mode), pull_(pull), speed_(speed), af_(af)
     {
         init_rcc();
@@ -30,7 +32,7 @@ public :
         g.Mode = mode_ == INPUT ? GPIO_MODE_INPUT :
                  mode_ == OUTPUT ? GPIO_MODE_OUTPUT_PP :
                  mode_ == ANALOG ? GPIO_MODE_ANALOG :
-                 mode_ == ALT ? GPIO_MODE_AF_PP 
+                 mode_ == ALT ? GPIO_MODE_AF_PP
                             : GPIO_MODE_OUTPUT_PP;
         g.Alternate = af;
         g.Pull = pull_ == UP ? GPIO_PULLUP :
@@ -39,10 +41,10 @@ public :
         g.Speed = speed_ == LOW ? GPIO_SPEED_FREQ_LOW :
                   speed_ == MEDIUM ? GPIO_SPEED_FREQ_MEDIUM :
                   speed_ == HIGH ? GPIO_SPEED_FREQ_HIGH :
-                  speed_ == VERY_HIGH ? GPIO_SPEED_FREQ_VERY_HIGH 
+                  speed_ == VERY_HIGH ? GPIO_SPEED_FREQ_VERY_HIGH
                                     : GPIO_SPEED_FREQ_MEDIUM;
         g.Pin = pin_;
-        HAL_GPIO_Init(port_, &g);    
+        HAL_GPIO_Init(port_, &g);
         // LL_GPIO_SetPinPinMode(port, pin, mode);
         // LL_GPIO_SetPinAF
     }
@@ -95,3 +97,6 @@ private:
     }
 
 };
+
+using Pin = PinWithPolarity<NORMAL>;
+using PinInverted = PinWithPolarity<INVERTED>;
