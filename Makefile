@@ -45,10 +45,10 @@ SZ 		= $(ARCH)-size
 
 SZOPTS 	= -d
 
-CPU = -mcpu=cortex-m7 
+CPU = -mcpu=cortex-m7
 FPU = -mfpu=fpv5-d16
-FLOAT-ABI = -mfloat-abi=hard 
-MCU = $(CPU) -mthumb -mlittle-endian $(FPU) $(FLOAT-ABI) 
+FLOAT-ABI = -mfloat-abi=hard
+MCU = $(CPU) -mthumb -mlittle-endian $(FPU) $(FLOAT-ABI)
 
 ARCH_CFLAGS = -DARM_MATH_CM7 -D'__FPU_PRESENT=1' -DUSE_HAL_DRIVER -DUSE_FULL_LL_DRIVER -DSTM32F730xx
 
@@ -77,7 +77,7 @@ AFLAGS = $(MCU)
 
 LDSCRIPT = $(DEVICE)/$(LOADFILE)
 
-LFLAGS =  -Wl,-Map,build/main.map,--cref \
+LFLAGS =  -Wl,-Map,main.map,--cref \
 	-Wl,--gc-sections \
 	$(MCU) -specs=nano.specs  -T $(LDSCRIPT)
 
@@ -89,7 +89,7 @@ LFLAGS =  -Wl,-Map,build/main.map,--cref \
 # build/src/drivers/codec_i2sx2.o: OPTFLAG = -O0
 # build/src/drivers/codec_i2c.o: OPTFLAG = -O0
 # build/src/audio.o: OPTFLAG = -O0
-$(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
+# $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 
 all: Makefile $(BIN) $(HEX)
 
@@ -102,7 +102,7 @@ $(HEX): $(ELF)
 	$(OBJCPY) --output-target=ihex $< $@
 	$(SZ) $(SZOPTS) $(ELF)
 
-$(ELF): $(OBJECTS) 
+$(ELF): $(OBJECTS)
 	$(LD) $(LFLAGS) -o $@ $(OBJECTS)
 
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
@@ -133,4 +133,4 @@ ifneq "$(MAKECMDGOALS)" "clean"
 endif
 
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF)
-.PHONY: all clean flash 
+.PHONY: all clean flash
