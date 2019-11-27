@@ -4,11 +4,11 @@
 const uint8_t kNumDebugPins = 1;
 
 struct Debug {
-  Debug();
-  void set(int pin, bool value);
+//   Debug();
+  static void set(int pin, bool value);
 
 private:
-	Pin<NORMAL> pins_[kNumDebugPins] = {
+	static inline Pin pins_[kNumDebugPins] = {
 		{GPIO_PIN_2, GPIOD, OUTPUT},
 	};
 };
