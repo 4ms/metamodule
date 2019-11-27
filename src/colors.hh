@@ -30,7 +30,16 @@ struct Color {
                     (g_*(256-phase) + that.g_*phase) >> 8,
                     (b_*(256-phase) + that.b_*phase) >> 8);
     }
-
+    constexpr const Color blend(Color const that, uint32_t const phase) const {
+        return Color((r_*(256-(phase>>24)) + that.r_*(phase>>24)) >> 8,
+                    (g_*(256-(phase>>24)) + that.g_*(phase>>24)) >> 8,
+                    (b_*(256-(phase>>24)) + that.b_*(phase>>24)) >> 8);
+    }
+    constexpr const Color blend(Color const that, float const phase) const {
+        return Color((r_*(1.0f-phase) + that.r_*phase),
+                    (g_*(1.0f-phase) + that.g_*phase),
+                    (b_*(1.0f-phase) + that.b_*phase));
+    }
     constexpr const bool operator!=(Color const that) {
         return this->r_ != that.r_ || this->g_ != that.g_ || this->b_ != that.b_;
     }
@@ -43,7 +52,7 @@ struct Color {
         return Color((r_ * adj.r) >> 7,
                      (g_ * adj.g) >> 7,
                      (b_ * adj.b) >> 7);
-    } 
+    }
 
 private:
     uint8_t r_, g_, b_;
