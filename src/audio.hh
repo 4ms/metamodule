@@ -1,5 +1,6 @@
 #pragma once
 #include <stm32f7xx.h>
+#include <array>
 
 const int kBlockSize = 32; //number of frames (L/R pairs) we process at a time
 const int kDMABlockSize = kBlockSize * 2; //number of frames for DMA to read/write (two DMA half-transfers)
@@ -10,13 +11,12 @@ struct Frame {
 	int16_t r;
 };
 
-
+using DMABlock = std::array<Frame, kDMABlockSize>;
+using Block = std::array<Frame, kBlockSize>;
+// using DMABlock = Frame[kDMABlockSize];
+// using Block = Frame[kBlockSize];
 
 //Todo: Triosc belongs elsewhere
-
-//todo: consider using std::array<Frame, kDMABlockSize> 
-using DMABlock = Frame[kDMABlockSize];
-using Block = Frame[kBlockSize];
 
 //actual freq = update_rate(Hz) * increment(#) / 2^32
 // increment = 2^32 * freq / update_rate

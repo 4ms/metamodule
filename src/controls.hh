@@ -1,3 +1,4 @@
+#pragma once
 #include <stm32f7xx.h>
 #include "stm32f7xx_ll_gpio.h"
 #include "stm32f7xx_ll_adc.h"

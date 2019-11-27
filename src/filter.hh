@@ -1,3 +1,4 @@
+#pragma once
 #include <stm32f7xx.h>
 
 constexpr uint32_t Log2Int(const uint32_t x) {
