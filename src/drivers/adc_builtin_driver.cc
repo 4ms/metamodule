@@ -33,31 +33,31 @@
 #include "stm32f7xx_ll_bus.h"
 
 //Todo: research if there's a way to not have to declare these class templates
-template class AdcPeriph<ADC_1>;
-template class AdcPeriph<ADC_2>;
-template class AdcPeriph<ADC_3>;
+template class AdcPeriph<AdcPeriphNum::ADC_1>;
+template class AdcPeriph<AdcPeriphNum::ADC_2>;
+template class AdcPeriph<AdcPeriphNum::ADC_3>;
 
-template <enum AdcPeriphNums adc_n>
+template <AdcPeriphNum adc_n>
 AdcPeriph<adc_n>& AdcPeriph<adc_n>::AdcInstance()
 {
-	static_assert(adc_n == ADC_1 || adc_n == ADC_2 || adc_n == ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
+	// static_assert(adc_n == ADC_1 || adc_n == ADC_2 || adc_n == ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
 	static AdcPeriph<adc_n> Adc_;
 	return Adc_;
 }
 
-template <enum AdcPeriphNums adc_n>
+template <AdcPeriphNum adc_n>
 AdcPeriph<adc_n>::AdcPeriph()
 {
-	static_assert(adc_n==ADC_1 || adc_n==ADC_2 || adc_n==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
-	if (adc_n==ADC_1) {
+	// static_assert(adc_n==ADC_1 || adc_n==ADC_2 || adc_n==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
+	if (adc_n==AdcPeriphNum::ADC_1) {
 		ADCx_ = ADC1;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
 	}
-	else if (adc_n==ADC_2) {
+	else if (adc_n==AdcPeriphNum::ADC_2) {
 		ADCx_ = ADC2;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC2);
 	}
-	else if (adc_n==ADC_3) {
+	else if (adc_n==AdcPeriphNum::ADC_3) {
 		ADCx_ = ADC3;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC3);
 	}
@@ -77,7 +77,7 @@ AdcPeriph<adc_n>::AdcPeriph()
 	LL_ADC_REG_InitTypeDef adcreginit;
 
 	adcreginit.TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
-	adcreginit.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE; //modify each time we add a channel
+	adcreginit.SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE;
 	adcreginit.SequencerDiscont = LL_ADC_REG_SEQ_DISCONT_DISABLE;
 	adcreginit.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
 	adcreginit.DMATransfer = LL_ADC_REG_DMA_TRANSFER_UNLIMITED;
@@ -96,22 +96,23 @@ constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(const uint8_t x) {
 	return (x << ADC_SQR1_L_Pos);
 }
 
-//Todo: add overload that allows for Rank to be set manually (and also start_dma must verify and fix any gaps in seqeuence ranks
-template <enum AdcPeriphNums adc_n>
-void AdcPeriph<adc_n>::add_channel(enum AdcChannelNumbers channel, uint32_t sampletime)
+//Todo: add overload that allows for Rank to be set manually (then start_dma must verify and fix any gaps in seqeuence ranks)
+template <AdcPeriphNum adc_n>
+void AdcPeriph<adc_n>::add_channel(AdcChanNum const channel, uint32_t const sampletime)
 {
-	LL_ADC_REG_SetSequencerRanks(ADCx_, _LL_ADC_DECIMAL_NB_TO_RANK(num_channels_), __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel));
+	uint8_t channel_u8 = static_cast<uint8_t>(channel);
+	LL_ADC_REG_SetSequencerRanks(ADCx_, _LL_ADC_DECIMAL_NB_TO_RANK(num_channels_), __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_u8));
 	LL_ADC_REG_SetSequencerLength(ADCx_, _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(num_channels_));
-	LL_ADC_SetChannelSamplingTime(ADCx_, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel), sampletime);
+	LL_ADC_SetChannelSamplingTime(ADCx_, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_u8), sampletime);
 	num_channels_++;
 }
 
-template <enum AdcPeriphNums adc_n>
+template <AdcPeriphNum adc_n>
 void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel, IRQn_Type ADC_DMA_Streamx_IRQn)
 {
 	if (!num_channels_) return;
 
-	//Enable DMA2_Stream4 Channel 0
+	//Todo: add DMA# to parameter list
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2);
 	LL_DMA_SetChannelSelection(DMA2, ADC_DMA_Stream, ADC_DMA_Channel);
 	LL_DMA_ConfigTransfer(DMA2,

@@ -28,21 +28,21 @@
 
 #pragma once
 
+#include <array>
 #include <stm32f7xx.h>
-#include <stm32f7xx_ll_adc.h>
+#include "stm32f7xx_ll_adc.h"
 #include "pin.hh"
 
-enum AdcChannelNumbers{ ADCChan0, ADCChan1, ADCChan2, ADCChan3, ADCChan4, ADCChan5, ADCChan6, ADCChan7,
-						ADCChan8, ADCChan9, ADCChan10, ADCChan11, ADCChan12, ADCChan13, ADCChan14, ADCChan15
-						};
-enum AdcPeriphNums {ADC_1=1, ADC_2=2, ADC_3=3};
+enum class AdcChanNum { Chan0, Chan1, Chan2, Chan3, Chan4, Chan5, Chan6, Chan7,
+						Chan8, Chan9, Chan10, Chan11, Chan12, Chan13, Chan14, Chan15 };
+enum class AdcPeriphNum {ADC_1, ADC_2, ADC_3};
 
-template <enum AdcPeriphNums adc_n> class AdcPeriph;
+template <AdcPeriphNum adc_n> class AdcPeriph;
 
-template <enum AdcPeriphNums adc_n>
+template <AdcPeriphNum adc_n>
 class AdcChan {
 public:
-	AdcChan(enum AdcChannelNumbers channel, Pin pin, uint32_t sampletime)
+	AdcChan(AdcChanNum channel, Pin pin, uint32_t sampletime)
 	: adc_periph_(AdcPeriph<adc_n>::AdcInstance()),
 	  channel_(channel),
 	  pin_(pin),
@@ -54,26 +54,28 @@ public:
 private:
 	AdcPeriph<adc_n> &adc_periph_;
 	Pin pin_;
-	enum AdcChannelNumbers channel_;
+	AdcChanNum channel_;
 	uint32_t sampletime_;
 };
 
-template <enum AdcPeriphNums adc_n>
+template <AdcPeriphNum adc_n>
 class AdcPeriph
 {
+	template <AdcPeriphNum adc_chan_n>
+	friend class AdcChan;
+
 public:
 	static void start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel, IRQn_Type ADC_DMA_Streamx_IRQn);
-	static void add_channel(enum AdcChannelNumbers channel, uint32_t sampletime);
+
+private:
+	static void add_channel(AdcChanNum const channel, uint32_t const sampletime);
 	//Todo:
 	//set_dma_destination(uint16_t *)
 	//set_dma_parameters(DMA1/2, stream, channel, IRQn);
 	//start_dma() //overload with no parameters
 
-private:
 	AdcPeriph();
 	static AdcPeriph<adc_n> &AdcInstance();
-	template <enum AdcPeriphNums adc_chan_n>
-	friend class AdcChan;
 
 	static inline ADC_TypeDef *ADCx_;
 	static inline uint8_t num_channels_;

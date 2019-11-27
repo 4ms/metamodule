@@ -43,15 +43,17 @@ private:
     bool plugged_ = false;
 };
 
+//Hardware class
+//Represents peripherals and I/O that connects to control hardware (e.g. ADCs, GPIO pins, etc..)
 struct Hardware {
     //Note: These are created on the stack, then Pin() ctor and add_channel are called, copying the values to/from stack.
     //      It's not clear, but there might be several copies happening (all are destroyed, but it makes initialization slower than necessary.
     //Todo: Compare to using rvalue references to move, and compare timing when optimized
 
-    AdcChan<ADC_1> freq1cv_adc {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    AdcChan<ADC_1> res1cv_adc {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    AdcChan<ADC_1> freq2cv_adc {ADCChan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    AdcChan<ADC_1> res2cv_adc {ADCChan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<AdcPeriphNum::ADC_1> freq1cv_adc {AdcChanNum::Chan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<AdcPeriphNum::ADC_1> res1cv_adc {AdcChanNum::Chan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<AdcPeriphNum::ADC_1> freq2cv_adc {AdcChanNum::Chan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<AdcPeriphNum::ADC_1> res2cv_adc {AdcChanNum::Chan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
 
     Pin freq2_sense_pin {LL_GPIO_PIN_14, GPIOC, INPUT, UP};
     Pin res2_sense_pin {LL_GPIO_PIN_4, GPIOC, INPUT, UP};
@@ -61,7 +63,7 @@ struct Hardware {
 
 
 //Controls class reads raw hardware, does fast conditioning (oversampling/debouncing)
-//and stores values into objects representing each hardware object
+//and stores values into objects representing each hardware object (e.g. CVJack, JackSense, Rotary, Button...)
 struct Controls : public Hardware
 {
     static inline std::array<uint16_t, kNumAdcChans> adc_raw;

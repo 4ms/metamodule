@@ -6,3 +6,5 @@ LOCAL
 *.wav
 .DS_Store
 .vscode/
+
+main.map
