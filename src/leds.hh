@@ -37,16 +37,16 @@ class TimPwmLed {
 protected:
     TimPwmLed() : htim_(nohtim_) {}
 public:
-    TimPwmLed(TimPwm& timpwm, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af) 
-    : htim_(timpwm.get_htim()), channel_(channel), pin_(pin, port, ALT, NONE, MEDIUM, af) { 
+    TimPwmLed(TimPwm& timpwm, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af)
+    : htim_(timpwm.get_htim()), channel_(channel), pin_(pin, port, ALT, NONE, MEDIUM, af) {
         init_();
     }
 
-    TimPwmLed(TIM_HandleTypeDef& htim, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af) 
+    TimPwmLed(TIM_HandleTypeDef& htim, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af)
     : htim_(htim), channel_(channel), pin_(pin, port, ALT, NONE, MEDIUM, af) {
         init_();
     }
-    
+
     void set_brightness(uint32_t val) _debugconst_ {
         __HAL_TIM_SET_COMPARE(&htim_, channel_, val);
     }
@@ -65,7 +65,7 @@ public:
     }
 
 private:
-    Pin<NORMAL> pin_;
+    Pin pin_;
     TIM_HandleTypeDef& htim_;
     TIM_HandleTypeDef nohtim_;
     uint32_t channel_;
@@ -78,7 +78,7 @@ public:
 };
 
 struct RgbLed {
-    RgbLed(TimPwmLed r_LED, TimPwmLed g_LED, TimPwmLed b_LED) 
+    RgbLed(TimPwmLed r_LED, TimPwmLed g_LED, TimPwmLed b_LED)
     : r_(r_LED), g_(g_LED), b_(b_LED) {}
 
     void set_background(Color col) {background_color_ = col;}
@@ -116,9 +116,9 @@ struct RgbLed {
     //Todo: don't waste cycles updating if nothing's changed
     void refresh() {
         Color c = background_color_;
-        if (solid_color_ != Colors::off) c = solid_color_;
-        c = c.blend(glow_color_, osc_.Process() >> 24);
-        c = c.blend(flash_color_, flash_phase_ >> 24);
+        // if (solid_color_ != Colors::off) c = solid_color_;
+        // c = c.blend(glow_color_, osc_.Process());
+        // c = c.blend(flash_color_, flash_phase_);
         // c = c.adjust(color_cal_);
         set_color(c);
         if (flash_phase_ > flash_freq_) flash_phase_ -= flash_freq_;
@@ -190,22 +190,22 @@ public:
 private:
 
 public:
-    _debugconst_ RgbLed freq1 { 
+    _debugconst_ RgbLed freq1 {
         {htim[tim8], TIM_CHANNEL_4, GPIO_PIN_9, GPIOC, GPIO_AF3_TIM8},
-        {htim[tim8].get_htim(), TIM_CHANNEL_3, GPIO_PIN_8, GPIOC, GPIO_AF3_TIM8},
-        {htim[tim2].get_htim(), TIM_CHANNEL_2, GPIO_PIN_3, GPIOB, GPIO_AF1_TIM2}};
+        {htim[tim8], TIM_CHANNEL_3, GPIO_PIN_8, GPIOC, GPIO_AF3_TIM8},
+        {htim[tim2], TIM_CHANNEL_2, GPIO_PIN_3, GPIOB, GPIO_AF1_TIM2}};
 
-    _debugconst_ RgbLed res1 { 
-        {htim[tim1].get_htim(), TIM_CHANNEL_4, GPIO_PIN_11, GPIOA, GPIO_AF1_TIM1},
-        {htim[tim1].get_htim(), TIM_CHANNEL_3, GPIO_PIN_10, GPIOA, GPIO_AF1_TIM1},
-        {htim[tim3].get_htim(), TIM_CHANNEL_2, GPIO_PIN_5, GPIOB, GPIO_AF2_TIM3}};
+    _debugconst_ RgbLed res1 {
+        {htim[tim1], TIM_CHANNEL_4, GPIO_PIN_11, GPIOA, GPIO_AF1_TIM1},
+        {htim[tim1], TIM_CHANNEL_3, GPIO_PIN_10, GPIOA, GPIO_AF1_TIM1},
+        {htim[tim3], TIM_CHANNEL_2, GPIO_PIN_5, GPIOB, GPIO_AF2_TIM3}};
 
-    // _debugconst_ RgbLed freq2 { 
+    // _debugconst_ RgbLed freq2 {
     //     NoLedElement,
     //     {TIM1, TIM_CHANNEL_1, GPIO_PIN_6, GPIOA, GPIO_AF1_TIM1},
     //     {TIM1, TIM_CHANNEL_3, GPIO_PIN_7, GPIOA, GPIO_AF1_TIM1}};
 
-    // _debugconst_ RgbLed res2 { 
+    // _debugconst_ RgbLed res2 {
     //     NoLedElement,
     //     {TIM1, TIM_CHANNEL_1, GPIO_PIN_0, GPIOB, GPIO_AF1_TIM1},
     //     {TIM1, TIM_CHANNEL_3, GPIO_PIN_1, GPIOB, GPIO_AF1_TIM1}};
