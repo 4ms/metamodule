@@ -37,36 +37,13 @@ enum AdcChannelNumbers{ ADCChan0, ADCChan1, ADCChan2, ADCChan3, ADCChan4, ADCCha
 						};
 enum AdcPeriphNums {ADC_1=1, ADC_2=2, ADC_3=3};
 
-//template function with local static object
-//Todo: make AdcPeriph private? somehow not publically callable. Place in .cc file?
-//Todo: allow AdcChan to call add_channel, but not publically callable. friend class?
-
-template <enum AdcPeriphNums adc_n>
-class AdcPeriph {
-public: //todo: how to allow constructor just for AdcInstance function, using protected? friend? member method?
-	AdcPeriph();
-public:
-	static void start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel, IRQn_Type ADC_DMA_Streamx_IRQn);
-	static void add_channel(enum AdcChannelNumbers channel, uint32_t sampletime);
-
-private:
-	static ADC_TypeDef *ADCx_;
-	static uint8_t num_channels_;
-};
-
-template<enum AdcPeriphNums adc_n>
-AdcPeriph<adc_n>& AdcInstance() {
-	static_assert(adc_n==ADC_1 || adc_n==ADC_2 || adc_n==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
-
-	static AdcPeriph<adc_n> Adc_;
-	return Adc_;
-}
+template <enum AdcPeriphNums adc_n> class AdcPeriph;
 
 template <enum AdcPeriphNums adc_n>
 class AdcChan {
 public:
-	AdcChan(enum AdcChannelNumbers channel, Pin<NORMAL> pin, uint32_t sampletime)
-	: adc_periph_(AdcInstance<adc_n>()),
+	AdcChan(enum AdcChannelNumbers channel, Pin pin, uint32_t sampletime)
+	: adc_periph_(AdcPeriph<adc_n>::AdcInstance()),
 	  channel_(channel),
 	  pin_(pin),
 	  sampletime_(sampletime)
@@ -77,36 +54,28 @@ public:
 private:
 	AdcPeriph<adc_n>& adc_periph_;
 	Pin<NORMAL> pin_;
-public:
 	enum AdcChannelNumbers channel_;
 	uint32_t sampletime_;
 };
 
-
-
-////////////////////////
-//non-singleton:
-/*
-struct AdcChan {
-	AdcChan(enum AdcChannelNumbers channel, Pin<NORMAL> pin, uint32_t sampletime)
-	: channel_(channel), pin_(pin), sampletime_(sampletime){}
-
-	enum AdcChannelNumbers channel_;
-	Pin<NORMAL> pin_;
-	uint32_t sampletime_;
-};
-
-template <int adc_n>
+template <enum AdcPeriphNums adc_n>
 class AdcPeriph
 {
 public:
-	AdcPeriph();
-	void add_channel(const AdcChan adcc);
-	void start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel);
+	static void start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, uint32_t ADC_DMA_Channel, IRQn_Type ADC_DMA_Streamx_IRQn);
+	static void add_channel(enum AdcChannelNumbers channel, uint32_t sampletime);
+	//Todo:
+	//set_dma_destination(uint16_t *)
+	//set_dma_parameters(DMA1/2, stream, channel, IRQn);
+	//start_dma() //overload with no parameters
 
 private:
-	ADC_TypeDef *ADCx_;
-	uint8_t num_channels_;
-};
+	AdcPeriph();
+	static AdcPeriph<adc_n> &AdcInstance();
+	template <enum AdcPeriphNums adc_chan_n>
+	friend class AdcChan;
 
-*/
+	static inline ADC_TypeDef *ADCx_;
+	static inline uint8_t num_channels_;
+	// static inline uint16_t raw_values[16]; //todo: use vector for dynamic
+};

@@ -32,12 +32,18 @@
 #include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_bus.h"
 
+//Todo: research if there's a way to not have to declare these class templates
 template class AdcPeriph<ADC_1>;
 template class AdcPeriph<ADC_2>;
 template class AdcPeriph<ADC_3>;
-template <enum AdcPeriphNums adc_n> ADC_TypeDef* AdcPeriph<adc_n>::ADCx_;
-template <enum AdcPeriphNums adc_n> uint8_t AdcPeriph<adc_n>::num_channels_;
 
+template <enum AdcPeriphNums adc_n>
+AdcPeriph<adc_n>& AdcPeriph<adc_n>::AdcInstance()
+{
+	static_assert(adc_n == ADC_1 || adc_n == ADC_2 || adc_n == ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
+	static AdcPeriph<adc_n> Adc_;
+	return Adc_;
+}
 
 template <enum AdcPeriphNums adc_n>
 AdcPeriph<adc_n>::AdcPeriph()
@@ -84,24 +90,16 @@ constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_RANK(const uint8_t x) {
 		  : (x <= 11) ? (ADC_SQR2_REGOFFSET | ((x-6)*5))
 		  : (x <= 15) ? (ADC_SQR1_REGOFFSET | ((x-12)*5))
 		  : 0);
-
-	// const uint32_t regoffset = ((x <= 5) ? ADC_SQR3_REGOFFSET
-	// 							  : (x <= 11) ? ADC_SQR2_REGOFFSET
-	// 						 	  : (x <= 15) ? ADC_SQR1_REGOFFSET : 0);
-	// const uint32_t bitoffset = ((x <= 5) ? (x * 5)
-	// 							  : (x <= 11) ? (x - 6) * 5
-	// 							  : (x <= 15) ? (x - 12) * 5 : 0);
-	// return regoffset | bitoffset;
 }
 
 constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(const uint8_t x) {
 	return (x << ADC_SQR1_L_Pos);
 }
 
+//Todo: add overload that allows for Rank to be set manually (and also start_dma must verify and fix any gaps in seqeuence ranks
 template <enum AdcPeriphNums adc_n>
 void AdcPeriph<adc_n>::add_channel(enum AdcChannelNumbers channel, uint32_t sampletime)
 {
-
 	LL_ADC_REG_SetSequencerRanks(ADCx_, _LL_ADC_DECIMAL_NB_TO_RANK(num_channels_), __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel));
 	LL_ADC_REG_SetSequencerLength(ADCx_, _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(num_channels_));
 	LL_ADC_SetChannelSamplingTime(ADCx_, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel), sampletime);
@@ -125,8 +123,11 @@ void AdcPeriph<adc_n>::start_dma(uint16_t *raw_buffer, uint32_t ADC_DMA_Stream, 
 						LL_DMA_PDATAALIGN_HALFWORD |
 						LL_DMA_MDATAALIGN_HALFWORD |
 						LL_DMA_PRIORITY_HIGH);
-
-	LL_DMA_ConfigAddresses(DMA2, ADC_DMA_Stream, LL_ADC_DMA_GetRegAddr(ADCx_, LL_ADC_DMA_REG_REGULAR_DATA), (uint32_t)raw_buffer, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+	LL_DMA_ConfigAddresses(DMA2,
+						ADC_DMA_Stream,
+						LL_ADC_DMA_GetRegAddr(ADCx_, LL_ADC_DMA_REG_REGULAR_DATA),
+						(uint32_t)raw_buffer,
+						LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
 	LL_DMA_SetDataLength(DMA2, ADC_DMA_Stream, num_channels_);
 	LL_DMA_EnableIT_TC(DMA2, ADC_DMA_Stream);
 	LL_DMA_DisableIT_HT(DMA2, ADC_DMA_Stream);
