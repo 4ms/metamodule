@@ -4,11 +4,10 @@
 #include "adc_builtin_driver.hh"
 #include "touch.hh"
 #include "filter.hh"
-// #include "easiglib/util.hh"
+#include "pin.hh"
 
 #include <array>
 
-// ADC_TypeDef * const CV_ADC = ADC1;
 const uint32_t kNumAdcChans = 4;
 const int kOverSampleAmt = 4;
 
@@ -21,73 +20,71 @@ struct Button {
 
 
 struct CVJack {
-    // CVJack(AdcChan<adc_n> &adcchan) : adc(adcchan) {}
+    CVJack(uint16_t &raw_input) : raw_input_(raw_input) {}
 
-    bool plugged;
-    template <enum AdcPeriphNums adc_n> static AdcChan<adc_n> &adc;
-    Oversampler<uint16_t, kOverSampleAmt> oversampler;
+    CVJack();
+    void set_input_source(uint16_t &raw_input) {raw_input_ = raw_input;}
+
+    void read() {oversampler_.add_val(raw_input_);}
+    uint16_t get() {return oversampler_.val();}
+
+private:
+    uint16_t &raw_input_;
+    Oversampler<uint16_t, kOverSampleAmt> oversampler_;
 };
 
-// template<> AdcChan<ADC_1>& CVJack::adc = {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+struct JackSense {
+    JackSense(Pin pin) : pin_(pin) {}
+    bool is_plugged() {return plugged_;}
+
+private:
+    Pin pin_;
+    bool plugged_ = false;
+};
+
+struct Hardware {
+    //Note: These are created on the stack, then Pin() ctor and add_channel are called, copying the values to/from stack.
+    //      It's not clear, but there might be several copies happening (all are destroyed, but it makes initialization slower than necessary.
+    //Todo: Compare to using rvalue references to move, and compare timing when optimized
+
+    AdcChan<ADC_1> freq1cv_adc {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<ADC_1> res1cv_adc {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<ADC_1> freq2cv_adc {ADCChan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+    AdcChan<ADC_1> res2cv_adc {ADCChan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
+
+    Pin freq2_sense_pin {LL_GPIO_PIN_14, GPIOC, INPUT, UP};
+    Pin res2_sense_pin {LL_GPIO_PIN_4, GPIOC, INPUT, UP};
+    Pin in1_sense_pin {LL_GPIO_PIN_13, GPIOC, INPUT, UP};
+    Pin in2_sense_pin {LL_GPIO_PIN_15, GPIOC, INPUT, UP};
+};
 
 
-// template <int adc_enum>
-// struct CVJack_n {
-//     bool plugged;
+//Controls class reads raw hardware, does fast conditioning (oversampling/debouncing)
+//and stores values into objects representing each hardware object
+struct Controls : public Hardware
+{
+    static inline std::array<uint16_t, kNumAdcChans> adc_raw;
 
-// };
-//Ideal:
-/*
-const CVJack freq1CV {...};
-const CVJack res1CV ...
-...
+    static inline CVJack freq1CV { adc_raw[0] };
+    static inline CVJack res1CV { adc_raw[1] };
+    static inline CVJack freq2CV { adc_raw[2] };
+    static inline CVJack res2CV { adc_raw[3] };
 
-class Controls{
-    CVJack CV[4] = {freq1CV, res1CV, freq2CV, res2CV};
-    JackSense CVsense[4] = {in1sense, in2sense, out1freq2sense, res2sense};
-    Rotary rotary[2] = {rotary1, rotary2};
-    Button rotary_press[2] = {}...;
+    //Todo: either allocate 16 uint16_t's per AdcPeriph<>, or dynamically allocate using std::vector<>... but somehow keep the DMA destination as part of AdcPeriph<>
+    //And make an accessor in AdcChan to grab the appropriate value: AdcPeriph<>.get(uint8_t adc_rank_num)  {return dma_buffer(adc_rank_num);}
+    //static inline CVJack freq1CV { Hardware::freq1cv_adc };
+    //ctor sets CVJack.adc_num_ to Hardware::freq1cv_adc.rank_num, and CVJack.adc_periph_num_ to ::.adc_num_
+    //get() calls AdcPeriph<adc_periph_num_>::get(adc_rank_num)
 
-//or
-    AdcChan<ADC_1> freq1Adc {...};
-    CVJack freq1CV = {freq1Adc, };
-
-    AdcChan<ADC_1> res1Adc {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    CVJack freq2CV = {res1Adc, };
-    ...
-    //then in Controls::read(), do:
-    freq1CV.oversampler.add_value(freq1CV.adc.get());
-    freq2CV.oversampler.add_value(freq2CV.adc.get());
-
-    or 
-
-    CVJack::CVJack(enum CVJackNames cvjackname) : cvjackname_(cvjackname) {};
-
-    AdcChan<ADC_1>
-    freq2CV.oversampler.add_value(adc.get(freq2CV.get_cvjackname()));
-
-}
-*/
-
-//Controls class reads raw hardware, does fast conditioning (debouncing), and stores values into objects representing each hardware object
-class Controls {
-public:
-    Controls();
-    static void read();
-
-public:
-    //Note: constructor adds channel to AdcPeriph, destructor does nothing (channels can't be removed)
-    //Todo: seems like these are created and copied. Use R-value reference to move
-    AdcChan<ADC_1> freq1cv_adc = {ADCChan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    AdcChan<ADC_1> res1cv_adc = {ADCChan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    AdcChan<ADC_1> freq2cv_adc = {ADCChan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-    AdcChan<ADC_1> res2cv_adc = {ADCChan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}, LL_ADC_SAMPLINGTIME_144CYCLES};
-
-
-    static std::array<uint16_t, kNumAdcChans> adc_raw;
-    static std::array<CVJack, kNumAdcChans> CV;
+    JackSense freq2_sense {freq2_sense_pin};
+    JackSense res2_sense {res2_sense_pin};
+    JackSense in1_sense {in1_sense_pin};
+    JackSense in2_sense {in2_sense_pin};
 
     static int32_t rotary_turn[2];  //-1, 0, 1
     static Button rotary_button[2]; //0, 1
     static TouchCtl pads;
+
+    Controls();
+    static void read(); //Note: must be static so it can be called from IRQHandler
 };

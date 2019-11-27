@@ -7,17 +7,18 @@
 
 class Params {
 public:
-	Controls controls;
-
+	float freq[2];
+	float res[2];
 
 public:
-	void read();
-	void update();
+	void read(Controls& controls);
+	void update(Controls& controls);
 };
 
 
 class Ui {
 public:
+	Controls controls;
 	Params params;
 	Audio audio;
 	LedCtl leds;
@@ -29,24 +30,26 @@ public:
 		leds.freq1.set_background(Colors::pink);
 		leds.res1.set_background(Colors::cyan);
 
-		leds.res1.set_glow(Colors::red, 2);
+		// leds.res1.set_glow(Colors::red, 2);
 
 	}
 
 	void update() {
-		if ((last_update_tick_ - HAL_GetTick()) > 500) {
+		leds.freq1.set_background(Colors::red.blend(Colors::off, params.freq[0]));
 
-			if (params.controls.pads.touched(0))
-				leds.freq1.set_background(Colors::green);
-			else
-				leds.freq1.set_background(Colors::blue);
+		// if ((last_update_tick_ - HAL_GetTick()) > 500) {
 
-			if (params.controls.pads.touched(1))
-				leds.res1.set_background(Colors::green);
-			else
-				leds.res1.set_background(Colors::blue);
-			last_update_tick_ = HAL_GetTick();
-		}
+		// 	if (params.controls.pads.touched(0))
+		// 		leds.freq1.set_background(Colors::green);
+		// 	else
+		// 		leds.freq1.set_background(Colors::blue);
+
+		// 	if (params.controls.pads.touched(1))
+		// 		leds.res1.set_background(Colors::green);
+		// 	else
+		// 		leds.res1.set_background(Colors::blue);
+		// 	last_update_tick_ = HAL_GetTick();
+		// }
 
 		leds.update();
 	}

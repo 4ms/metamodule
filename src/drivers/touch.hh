@@ -17,6 +17,6 @@ public:
 				padnum==1 ? sensor_.isRightTouched() :
 				padnum==2 ? sensor_.isTouched() : false;
 	}
-private: 
-	CAP1203 sensor_; 
+private:
+	CAP1203 sensor_;
 };
