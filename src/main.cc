@@ -13,7 +13,7 @@ Debug debug;
 void audio_loop(Block& in, Block& out) {
 	// debug.set(0,1);
 	ui.params.update(ui.controls);
-	ui.audio.process(in, out);
+	ui.audio.process(ui.params, in, out);
 	// debug.set(0,0);
 }
 

@@ -4,17 +4,7 @@
 #include "touch.hh"
 #include "debug.h"
 #include "controls.hh"
-
-class Params {
-public:
-	float freq[2];
-	float res[2];
-
-public:
-	void read(Controls& controls);
-	void update(Controls& controls);
-};
-
+#include "params.hh"
 
 class Ui {
 public:
@@ -35,7 +25,8 @@ public:
 	}
 
 	void update() {
-		leds.freq1.set_background(Colors::red.blend(Colors::off, params.freq[0]));
+		leds.freq1.set_background(Colors::blue.blend(Colors::red, params.freq[0]));
+		leds.res1.set_background(Colors::cyan.blend(Colors::pink, params.res[0]));
 
 		// if ((last_update_tick_ - HAL_GetTick()) > 500) {
 

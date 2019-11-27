@@ -10,7 +10,7 @@ extern "C" {
 
 // TriangleOscillator<48000 /*2^32/48000*/> triosc{1};
 
-void Audio::process(Block& in, Block& out) {
+void Audio::process(Params &params, Block& in, Block& out) {
 	int i=0;
 	// for (Frame in_ : in) {
 	// 	out[i++] = in_;
