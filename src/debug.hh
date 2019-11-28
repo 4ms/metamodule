@@ -9,6 +9,6 @@ struct Debug {
 
 private:
 	static inline Pin pins_[kNumDebugPins] = {
-		{GPIO_PIN_2, GPIOD, OUTPUT},
+		{GPIO_PIN_2, GPIOD, PinMode::OUTPUT},
 	};
 };

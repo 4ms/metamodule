@@ -38,12 +38,12 @@ protected:
     TimPwmLed() : htim_(nohtim_) {}
 public:
     TimPwmLed(TimPwm& timpwm, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af)
-    : htim_(timpwm.get_htim()), channel_(channel), pin_(pin, port, ALT, NONE, MEDIUM, af) {
+    : htim_(timpwm.get_htim()), channel_(channel), pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) {
         init_();
     }
 
     TimPwmLed(TIM_HandleTypeDef& htim, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af)
-    : htim_(htim), channel_(channel), pin_(pin, port, ALT, NONE, MEDIUM, af) {
+    : htim_(htim), channel_(channel), pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) {
         init_();
     }
 

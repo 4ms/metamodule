@@ -1,17 +1,16 @@
 #pragma once
 #include <stm32f7xx.h>
 
-// namespace Pins {
-enum PinPolarities {NORMAL, INVERTED};
-enum PinMode {INPUT, OUTPUT, ANALOG, ALT};
-enum PinPull {UP, DOWN, NONE};
-enum PinSpeed {LOW, MEDIUM, HIGH, VERY_HIGH};
-// }
+enum class PinPolarity { NORMAL, INVERTED };
+enum class PinMode {INPUT, OUTPUT, ANALOG, ALT};
+enum class PinPull {UP, DOWN, NONE};
+enum class PinSpeed {LOW, MEDIUM, HIGH, VERY_HIGH};
+
 //todo: don't use HAL
 //todo? templatize with Pin and Port. template for INPUT/OUTPUT/ALT ?
 //todo: Can the enums be in the class or namespace, so we use Pin::Pull::Up or Pin::PULLUP ?
 //Pin definition
-template<PinPolarities polarity=NORMAL>
+template<PinPolarity polarity=PinPolarity::NORMAL>
 class PinWithPolarity {
 
 private:
@@ -24,24 +23,24 @@ private:
 
 public :
     PinWithPolarity() {}
-    PinWithPolarity(uint16_t pin, GPIO_TypeDef *port, enum PinMode mode, enum PinPull pull = NONE, enum PinSpeed speed = MEDIUM, uint8_t af = 0)
+    PinWithPolarity(uint16_t pin, GPIO_TypeDef *port, enum PinMode mode, enum PinPull pull = PinPull::NONE, enum PinSpeed speed = PinSpeed::MEDIUM, uint8_t af = 0)
     : pin_(pin), port_(port), mode_(mode), pull_(pull), speed_(speed), af_(af)
     {
         init_rcc();
         GPIO_InitTypeDef g;
-        g.Mode = mode_ == INPUT ? GPIO_MODE_INPUT :
-                 mode_ == OUTPUT ? GPIO_MODE_OUTPUT_PP :
-                 mode_ == ANALOG ? GPIO_MODE_ANALOG :
-                 mode_ == ALT ? GPIO_MODE_AF_PP
+        g.Mode = mode_ == PinMode::INPUT ? GPIO_MODE_INPUT :
+                 mode_ == PinMode::OUTPUT ? GPIO_MODE_OUTPUT_PP :
+                 mode_ == PinMode::ANALOG ? GPIO_MODE_ANALOG :
+                 mode_ == PinMode::ALT ? GPIO_MODE_AF_PP
                             : GPIO_MODE_OUTPUT_PP;
         g.Alternate = af;
-        g.Pull = pull_ == UP ? GPIO_PULLUP :
-                 pull_ == DOWN ? GPIO_PULLDOWN
+        g.Pull = pull_ == PinPull::UP ? GPIO_PULLUP :
+                 pull_ == PinPull::DOWN ? GPIO_PULLDOWN
                               : GPIO_NOPULL;
-        g.Speed = speed_ == LOW ? GPIO_SPEED_FREQ_LOW :
-                  speed_ == MEDIUM ? GPIO_SPEED_FREQ_MEDIUM :
-                  speed_ == HIGH ? GPIO_SPEED_FREQ_HIGH :
-                  speed_ == VERY_HIGH ? GPIO_SPEED_FREQ_VERY_HIGH
+        g.Speed = speed_ == PinSpeed::LOW ? GPIO_SPEED_FREQ_LOW :
+                  speed_ == PinSpeed::MEDIUM ? GPIO_SPEED_FREQ_MEDIUM :
+                  speed_ == PinSpeed::HIGH ? GPIO_SPEED_FREQ_HIGH :
+                  speed_ == PinSpeed::VERY_HIGH ? GPIO_SPEED_FREQ_VERY_HIGH
                                     : GPIO_SPEED_FREQ_MEDIUM;
         g.Pin = pin_;
         HAL_GPIO_Init(port_, &g);
@@ -52,12 +51,12 @@ public :
 public:
     void high() {port_->BSRR = pin_;}
     void low() {port_->BSRR = (uint32_t)pin_ << 16;}
-    void on() {if (polarity==INVERTED) low(); else high();}
-    void off() {if (polarity==INVERTED) high(); else low();}
+    void on() {if (polarity==PinPolarity::INVERTED) low(); else high();}
+    void off() {if (polarity==PinPolarity::INVERTED) high(); else low();}
     void set(uint32_t v) {if (v) on(); else off();}
 
     bool read_raw() {return ((port_->IDR) & pin_) ? true : false;}
-    uint8_t is_on() {return (polarity==INVERTED) ? !read_raw() : read_raw();}
+    uint8_t is_on() {return (polarity==PinPolarity::INVERTED) ? !read_raw() : read_raw();}
 
 private:
     void init_rcc() {
@@ -98,5 +97,5 @@ private:
 
 };
 
-using Pin = PinWithPolarity<NORMAL>;
-using PinInverted = PinWithPolarity<INVERTED>;
+using Pin = PinWithPolarity<PinPolarity::NORMAL>;
+using PinInverted = PinWithPolarity<PinPolarity::INVERTED>;

@@ -57,15 +57,15 @@ struct Hardware {
     //      It's not clear, but there might be several copies happening (all are destroyed, but it makes initialization slower than necessary.
     //Todo: Compare to using rvalue references to move, and compare timing when optimized
 
-    static inline AdcChan<AdcPeriphNum::ADC_1> freq1cv_adc {AdcChanNum::Chan10, {LL_GPIO_PIN_0, GPIOC, ANALOG}};
-    static inline AdcChan<AdcPeriphNum::ADC_1> res1cv_adc {AdcChanNum::Chan11, {LL_GPIO_PIN_1, GPIOC, ANALOG}};
-    static inline AdcChan<AdcPeriphNum::ADC_1> freq2cv_adc {AdcChanNum::Chan12, {LL_GPIO_PIN_2, GPIOC, ANALOG}};
-    static inline AdcChan<AdcPeriphNum::ADC_1> res2cv_adc {AdcChanNum::Chan13, {LL_GPIO_PIN_3, GPIOC, ANALOG}};
+    static inline AdcChan<AdcPeriphNum::ADC_1> freq1cv_adc {AdcChanNum::Chan10, {LL_GPIO_PIN_0, GPIOC, PinMode::ANALOG}};
+    static inline AdcChan<AdcPeriphNum::ADC_1> res1cv_adc {AdcChanNum::Chan11, {LL_GPIO_PIN_1, GPIOC, PinMode::ANALOG}};
+    static inline AdcChan<AdcPeriphNum::ADC_1> freq2cv_adc {AdcChanNum::Chan12, {LL_GPIO_PIN_2, GPIOC, PinMode::ANALOG}};
+    static inline AdcChan<AdcPeriphNum::ADC_1> res2cv_adc {AdcChanNum::Chan13, {LL_GPIO_PIN_3, GPIOC, PinMode::ANALOG}};
 
-    Pin freq2_sense_pin {LL_GPIO_PIN_14, GPIOC, INPUT, UP};
-    Pin res2_sense_pin {LL_GPIO_PIN_4, GPIOC, INPUT, UP};
-    Pin in1_sense_pin {LL_GPIO_PIN_13, GPIOC, INPUT, UP};
-    Pin in2_sense_pin {LL_GPIO_PIN_15, GPIOC, INPUT, UP};
+    Pin freq2_sense_pin {LL_GPIO_PIN_14, GPIOC, PinMode::INPUT, PinPull::UP};
+    Pin res2_sense_pin {LL_GPIO_PIN_4, GPIOC, PinMode::INPUT, PinPull::UP};
+    Pin in1_sense_pin {LL_GPIO_PIN_13, GPIOC, PinMode::INPUT, PinPull::UP};
+    Pin in2_sense_pin {LL_GPIO_PIN_15, GPIOC, PinMode::INPUT, PinPull::UP};
 };
 
 
