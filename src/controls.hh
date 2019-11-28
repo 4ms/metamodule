@@ -66,6 +66,10 @@ struct Hardware {
     Pin res2_sense_pin {LL_GPIO_PIN_4, GPIOC, PinMode::INPUT, PinPull::UP};
     Pin in1_sense_pin {LL_GPIO_PIN_13, GPIOC, PinMode::INPUT, PinPull::UP};
     Pin in2_sense_pin {LL_GPIO_PIN_15, GPIOC, PinMode::INPUT, PinPull::UP};
+
+    //Add TIM pins here:
+    //TimPwm<TIMx::TIM_8>
+    //freq1_led {TimChanNum::Chan4, LL_GPIO_PIN_9, LL_GPIO_C, GPIO_AF3_TIM8};
 };
 
 
