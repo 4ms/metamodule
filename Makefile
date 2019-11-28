@@ -36,7 +36,8 @@ BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
 
 ARCH 	= arm-none-eabi
 CC 		= $(ARCH)-gcc
-LD 		= $(ARCH)-gcc
+CXX 	= $(ARCH)-g++
+LD 		= $(ARCH)-g++
 AS 		= $(ARCH)-as
 OBJCPY 	= $(ARCH)-objcopy
 OBJDMP 	= $(ARCH)-objdump
@@ -59,6 +60,7 @@ CFLAGS = -g2 -fno-common \
 	-I. $(INCLUDES) \
 	-fdata-sections -ffunction-sections \
 	-specs=nano.specs \
+	-lstdc++ \
 
 CXXFLAGS=$(CFLAGS) \
 	-std=c++17 \
@@ -79,7 +81,9 @@ LDSCRIPT = $(DEVICE)/$(LOADFILE)
 
 LFLAGS =  -Wl,-Map,main.map,--cref \
 	-Wl,--gc-sections \
-	$(MCU) -specs=nano.specs  -T $(LDSCRIPT)
+	-lstdc++ \
+	$(MCU) -specs=nano.specs  -T $(LDSCRIPT) \
+
 
 #----------------------------------
 # Uncomment to compile unoptimized:
@@ -113,7 +117,7 @@ $(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
 
 $(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
 	mkdir -p $(dir $@)
-	$(CC) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.s
 	mkdir -p $(dir $@)

@@ -144,8 +144,3 @@ void AdcPeriph<adc_n>::start_dma(const uint32_t ADC_DMA_Stream, const uint32_t A
 
 	LL_ADC_REG_StartConversionSWStart(ADCx_);
 }
-
-// template <AdcPeriphNum periph>
-// uint16_t AdcChan<periph>::get_val() {
-// 	return adc_periph_.dma_buffer_[rank_];
-// }

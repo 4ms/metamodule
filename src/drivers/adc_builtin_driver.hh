@@ -29,6 +29,7 @@
 #pragma once
 
 #include <array>
+#include <vector>
 #include <stm32f7xx.h>
 #include "stm32f7xx_ll_adc.h"
 #include "pin.hh"
@@ -39,10 +40,15 @@ enum class AdcPeriphNum {ADC_1, ADC_2, ADC_3};
 
 template <AdcPeriphNum periph> class AdcPeriph;
 
+    //Todo? avoid virtual base class IAdcChanBase
+	//Instead of AdcChan<>::get_val() {...}, do AdcPeriph<>.get_val(uint8_t channel_rank) {return dma_buffer_[channel_rank];}
+	//Instead of CVJack having a IAdcChanBase& member, it has two uint8_t members: adc_channel_num_, adc_periph_num_
+    //CVJack ctor sets adc_channel_num_(Hardware::freq1cv_adc.get_rank(), and CVJack.adc_periph_num_ to ::.adc_num_
+    //get() calls AdcPeriph<adc_periph_num_>::get(adc_rank_num)
+	//This method makes AdcPeriph a visible class, otherwise it seems OK(?)
+
 class IAdcChanBase {
-public:
-	virtual uint16_t get_val();
-	virtual ~IAdcChanBase()=default;
+	public: virtual uint16_t get_val() {return 0;}
 };
 
 template <AdcPeriphNum periph>
@@ -52,20 +58,20 @@ public:
 	: adc_periph_(AdcPeriph<periph>::AdcInstance()),
 	  channel_(channel),
 	  pin_(pin),
-	  sampletime_(sampletime)
-	{
-		rank_ = AdcPeriph<periph>::add_channel(channel, sampletime);
-	}
-	// ~AdcChan()=default;
-	uint16_t get_val() override {
-		return adc_periph_.dma_buffer_[rank_];
-	}
+	  sampletime_(sampletime),
+	  rank_(AdcPeriph<periph>::add_channel(channel, sampletime))
+	{}
+
+	uint16_t get_val() override { return adc_periph_.dma_buffer_[rank_]; }
+	constexpr uint8_t get_rank() { return rank_; }
+	constexpr AdcPeriphNum get_periph_num() { return periph; }
+
 private:
-	AdcPeriph<periph> &adc_periph_;
-	Pin pin_;
-	AdcChanNum channel_;
-	uint32_t sampletime_;
-	uint8_t rank_;
+	const AdcPeriph<periph> &adc_periph_;
+	const Pin pin_;
+	const AdcChanNum channel_;
+	const uint32_t sampletime_;
+	const uint8_t rank_;
 };
 
 template <AdcPeriphNum periph>
@@ -83,7 +89,6 @@ private:
 
 	//Todo:
 	//add_channel(rank, channel, sampletime)
-	//set_dma_destination(uint16_t *)
 	//set_dma_parameters(DMA1/2, stream, channel, IRQn);
 	//start_dma() //overload with no parameters
 

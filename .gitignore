@@ -8,3 +8,7 @@ LOCAL
 .vscode/
 
 main.map
+
+.clangd/
+
+compile_commands.json

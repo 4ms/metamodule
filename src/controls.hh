@@ -20,18 +20,24 @@ struct Button {
 
 
 struct CVJack {
-    // CVJack(uint16_t &raw_input) : raw_input_(raw_input) {}
     CVJack(IAdcChanBase& adc_channel) : adc_channel_(adc_channel) {}
+    // CVJack(IAdcChanBase& adc_channel) 
+    // : adc_periph_num_(adc_channel.get_periph_num()),
+    //   adc_channel_rank_(adc_channel.get_rank()) {}
 
-    // CVJack();
-    // void set_input_source(uint16_t &raw_input) {raw_input_ = raw_input;}
+    void read() {
+        oversampler_.add_val(adc_channel_.get_val());
+    }
+    // void read() {
+    //     oversampler_.add_val(AdcPeriph<adc_periph_num_>::get_channel_val(adc_channel_num_));
+    // }
 
-    void read() {oversampler_.add_val(adc_channel_.get_val());}
     uint16_t get() {return oversampler_.val();}
 
 private:
-    // uint16_t &raw_input_;
     IAdcChanBase& adc_channel_;
+    // const uint8_t adc_periph_num_;
+    // uint8_t adc_channel_rank_;
     Oversampler<uint16_t, kOverSampleAmt> oversampler_;
 };
 
@@ -65,20 +71,12 @@ struct Hardware {
 
 //Controls class reads raw hardware, does fast conditioning (oversampling/debouncing)
 //and stores values into objects representing each hardware object (e.g. CVJack, JackSense, Rotary, Button...)
-struct Controls : public Hardware
+struct Controls : private Hardware
 {
-    // static inline std::array<uint16_t, kNumAdcChans> adc_raw;
-
     static inline CVJack freq1CV { freq1cv_adc };
     static inline CVJack res1CV { res1cv_adc };
     static inline CVJack freq2CV { freq2cv_adc };
     static inline CVJack res2CV { res2cv_adc };
-
-    //X Todo: either allocate 16 uint16_t's per AdcPeriph<>, or dynamically allocate using std::vector<>... but somehow keep the DMA destination as part of AdcPeriph<>
-    //X And make an accessor in AdcChan to grab the appropriate value: AdcPeriph<>.get(uint8_t adc_rank_num)  {return dma_buffer(adc_rank_num);}
-    //static inline CVJack freq1CV { Hardware::freq1cv_adc };
-    //ctor sets CVJack.adc_num_ to Hardware::freq1cv_adc.rank_num, and CVJack.adc_periph_num_ to ::.adc_num_
-    //get() calls AdcPeriph<adc_periph_num_>::get(adc_rank_num)
 
     JackSense freq2_sense {freq2_sense_pin};
     JackSense res2_sense {res2_sense_pin};
