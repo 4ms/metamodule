@@ -100,13 +100,13 @@ constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(const uint8_t x) {
 template <AdcPeriphNum adc_n>
 uint8_t AdcPeriph<adc_n>::add_channel(const AdcChanNum channel, const uint32_t sampletime)
 {
-	uint8_t channel_u8 = static_cast<uint8_t>(channel);
-	uint8_t rank = _LL_ADC_DECIMAL_NB_TO_RANK(num_channels_);
-	LL_ADC_REG_SetSequencerRanks(ADCx_, rank, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_u8));
+	uint32_t channel_int = static_cast<uint32_t>(channel);
+	LL_ADC_REG_SetSequencerRanks(ADCx_, _LL_ADC_DECIMAL_NB_TO_RANK(num_channels_), __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_int));
 	LL_ADC_REG_SetSequencerLength(ADCx_, _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(num_channels_));
-	LL_ADC_SetChannelSamplingTime(ADCx_, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_u8), sampletime);
+	LL_ADC_SetChannelSamplingTime(ADCx_, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_int), sampletime);
+	uint8_t rank_decimal = num_channels_;
 	num_channels_++;
-	return rank;
+	return rank_decimal;
 }
 
 template <AdcPeriphNum adc_n>
