@@ -29,7 +29,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-I$(PERIPH)/include \
 			-I src \
 			-I src/drivers \
-
+			
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
 BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
@@ -95,7 +95,17 @@ LFLAGS =  -Wl,-Map,main.map,--cref \
 # build/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 
+# rm compile_commands.json 
+# rm build/compile_commands.json 
+# compiledb -n make
+# mv compile_commands.json build/
+
 all: Makefile $(BIN) $(HEX)
+# 	rm compile_commands.json
+# 	rm build/compile_commands.json
+	compiledb -n make
+	mv compile_commands.json build/
+	compdb -p build/ list > compile_commands.json 2>/dev/null
 
 $(BIN): $(ELF)
 	$(OBJCPY) -O binary $< $@

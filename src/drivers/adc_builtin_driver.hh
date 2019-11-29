@@ -29,7 +29,6 @@
 #pragma once
 
 #include <array>
-#include <vector>
 #include <stm32f7xx.h>
 #include "stm32f7xx_ll_adc.h"
 #include "pin.hh"
@@ -45,8 +44,12 @@ template <AdcPeriphNum periph> class AdcPeriph;
 	//Instead of CVJack having a IAdcChanBase& member, it has two uint8_t members: adc_channel_num_, adc_periph_num_
     //CVJack ctor sets adc_channel_num_(Hardware::freq1cv_adc.get_rank(), and CVJack.adc_periph_num_ to ::.adc_num_
     //get() calls AdcPeriph<adc_periph_num_>::get(adc_rank_num)
-	//This method makes AdcPeriph a visible class, otherwise it seems OK(?)
+	//Cons: this technique makes AdcPeriph a visible class
+	//Pros: no virtual base class needed, more simple. Possible speed increase due to no vtable... Todo: measure
 
+	//Or:
+	//template <class periphT> AdcChan {}
+	//...?
 class IAdcChanBase {
 	public: virtual uint16_t get_val() {return 0;}
 };
