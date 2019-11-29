@@ -3,9 +3,9 @@
 
 BINARYNAME 		= main
 
-STARTUP 		= startup_stm32f730xx.s
+STARTUP 		= startup_stm32f732xx.s
 SYSTEM 			= system_stm32f7xx.c
-LOADFILE 		= STM32F730V8x_FLASH.ld
+LOADFILE 		= STM32F732REx_FLASH.ld
 
 DEVICE 			= stm32/device
 CORE 			= stm32/core
@@ -51,7 +51,7 @@ FPU = -mfpu=fpv5-d16
 FLOAT-ABI = -mfloat-abi=hard
 MCU = $(CPU) -mthumb -mlittle-endian $(FPU) $(FLOAT-ABI)
 
-ARCH_CFLAGS = -DARM_MATH_CM7 -D'__FPU_PRESENT=1' -DUSE_HAL_DRIVER -DUSE_FULL_LL_DRIVER -DSTM32F730xx
+ARCH_CFLAGS = -DARM_MATH_CM7 -D'__FPU_PRESENT=1' -DUSE_HAL_DRIVER -DUSE_FULL_LL_DRIVER -DSTM32F732xx
 
 OPTFLAG = -O0
 
