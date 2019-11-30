@@ -9,7 +9,17 @@
 #define _debugconst_
 
 //Todo: use local static like ADC, to prevent user from constructding TimPwm's with same TIMx multiple times
+//
+//It'll be much easier without HAL, since we just pass a TIM_TypeDef * around
+//
+//Problem with current implementation:
+//class xyz { TIM_HandleTypeDef th; 
+//              myfunc() { TimPwm timer1{TIM1}; th = timer1.get_htim(); }
+// };  
+// th will be a ref to a deleted object when myfunc() exits!
+//
 class TimPwm {
+friend class TimPwmLed;
 public:
     TimPwm(TIM_TypeDef *TIM) {
         System::enable_tim_rcc(TIM);
@@ -24,9 +34,10 @@ public:
         HAL_TIM_PWM_Init(&htim_);
     }
 
-    TIM_HandleTypeDef& get_htim() {return htim_;}
+    // static TIM_HandleTypeDef PeriphInstance(TIM_TypeDef *TIM) {return ;}
 
 private:
+    TIM_HandleTypeDef& get_htim() {return htim_;}
     TIM_HandleTypeDef htim_;
 };
 
@@ -43,6 +54,12 @@ public:
     : htim_(htim), channel_(channel), pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) {
         init_();
     }
+
+    //Todo: finish this type of initialization (passing TIMx and getting a local static Instance)
+    // TimPwmLed(TIM_TypeDef *TIM, const uint32_t channel, const uint16_t pin, GPIO_TypeDef * const port, const uint8_t af)
+    // : htim_(TimPwm::PeriphInstance(TIM)), channel_(channel), pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) {
+    //     init_();
+    // }
 
     void set_brightness(uint32_t val) _debugconst_ {
         __HAL_TIM_SET_COMPARE(&htim_, channel_, val);

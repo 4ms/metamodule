@@ -5,10 +5,7 @@
 #include "colors.hh"
 
 
-struct LedCtl {
-private:
-    enum TimPwmPeriphs {tim1 = 0, tim2 = 1, tim3 = 2, tim4 = 3, tim8 = 4};
-    TimPwm htim[5] {TIM1, TIM2, TIM3, TIM4, TIM8};
+class LedCtl {
 
 public:
     LedCtl() {
@@ -56,49 +53,54 @@ public:
     }
 
 private:
+    TimPwm tim1 {TIM1};
+    TimPwm tim2 {TIM2};
+    TimPwm tim3 {TIM3};
+    TimPwm tim4 {TIM4};
+    TimPwm tim8 {TIM8};
 
 public:
     _debugconst_ RgbLed freq1 {
-        {htim[tim8], TIM_CHANNEL_4, GPIO_PIN_9, GPIOC, GPIO_AF3_TIM8},
-        {htim[tim8], TIM_CHANNEL_3, GPIO_PIN_8, GPIOC, GPIO_AF3_TIM8},
-        {htim[tim2], TIM_CHANNEL_2, GPIO_PIN_3, GPIOB, GPIO_AF1_TIM2}};
+        {tim8, TIM_CHANNEL_4, GPIO_PIN_9, GPIOC, GPIO_AF3_TIM8},
+        {tim8, TIM_CHANNEL_3, GPIO_PIN_8, GPIOC, GPIO_AF3_TIM8},
+        {tim2, TIM_CHANNEL_2, GPIO_PIN_3, GPIOB, GPIO_AF1_TIM2}};
 
     _debugconst_ RgbLed res1 {
-        {htim[tim1], TIM_CHANNEL_4, GPIO_PIN_11, GPIOA, GPIO_AF1_TIM1},
-        {htim[tim1], TIM_CHANNEL_3, GPIO_PIN_10, GPIOA, GPIO_AF1_TIM1},
-        {htim[tim3], TIM_CHANNEL_2, GPIO_PIN_5, GPIOB, GPIO_AF2_TIM3}};
+        {tim1, TIM_CHANNEL_4, GPIO_PIN_11, GPIOA, GPIO_AF1_TIM1},
+        {tim1, TIM_CHANNEL_3, GPIO_PIN_10, GPIOA, GPIO_AF1_TIM1},
+        {tim3, TIM_CHANNEL_2, GPIO_PIN_5, GPIOB, GPIO_AF2_TIM3}};
 
-    // _debugconst_ RgbLed freq2 {
-    //     NoLedElement,
-    //     {TIM1, TIM_CHANNEL_1, GPIO_PIN_6, GPIOA, GPIO_AF1_TIM1},
-    //     {TIM1, TIM_CHANNEL_3, GPIO_PIN_7, GPIOA, GPIO_AF1_TIM1}};
+    _debugconst_ RgbLed freq2 {
+        NoLedElement,
+        {TIM3, TIM_CHANNEL_1, GPIO_PIN_6, GPIOA, GPIO_AF2_TIM3},
+        {TIM3, TIM_CHANNEL_2, GPIO_PIN_7, GPIOA, GPIO_AF2_TIM3}};
 
-    // _debugconst_ RgbLed res2 {
-    //     NoLedElement,
-    //     {TIM1, TIM_CHANNEL_1, GPIO_PIN_0, GPIOB, GPIO_AF1_TIM1},
-    //     {TIM1, TIM_CHANNEL_3, GPIO_PIN_1, GPIOB, GPIO_AF1_TIM1}};
+    _debugconst_ RgbLed res2 {
+        NoLedElement,
+        {TIM3, TIM_CHANNEL_3, GPIO_PIN_0, GPIOB, GPIO_AF2_TIM3},
+        {TIM3, TIM_CHANNEL_4, GPIO_PIN_1, GPIOB, GPIO_AF2_TIM3}};
 
-    // _debugconst_ RgbLed mode[5] {
-    //     {{TIM1, TIM_CHANNEL_1, GPIO_PIN_6, GPIOB, GPIO_AF1_TIM1},
-    //      NoLedElement,
-    //      {TIM1, TIM_CHANNEL_3, GPIO_PIN_7, GPIOB, GPIO_AF1_TIM1}},
+    _debugconst_ RgbLed mode[5] {
+        {{TIM4, TIM_CHANNEL_1, GPIO_PIN_6, GPIOB, GPIO_AF2_TIM4},
+         NoLedElement,
+         {TIM4, TIM_CHANNEL_2, GPIO_PIN_7, GPIOB, GPIO_AF2_TIM4}},
 
-    //     {{TIM1, TIM_CHANNEL_1, GPIO_PIN_8, GPIOB, GPIO_AF1_TIM1},
-    //      NoLedElement,
-    //      {TIM1, TIM_CHANNEL_3, GPIO_PIN_9, GPIOB, GPIO_AF1_TIM1}},
+        {{TIM4, TIM_CHANNEL_3, GPIO_PIN_8, GPIOB, GPIO_AF2_TIM4},
+         NoLedElement,
+         {TIM4, TIM_CHANNEL_4, GPIO_PIN_9, GPIOB, GPIO_AF2_TIM4}},
 
-    //     {{TIM1, TIM_CHANNEL_1, GPIO_PIN_0, GPIOA, GPIO_AF1_TIM1},
-    //      NoLedElement,
-    //      {TIM1, TIM_CHANNEL_3, GPIO_PIN_1, GPIOA, GPIO_AF1_TIM1}},
+        {{TIM2, TIM_CHANNEL_1, GPIO_PIN_0, GPIOA, GPIO_AF2_TIM2},
+         NoLedElement,
+         {TIM2, TIM_CHANNEL_2, GPIO_PIN_1, GPIOA, GPIO_AF2_TIM2}},
 
-    //     {{TIM1, TIM_CHANNEL_1, GPIO_PIN_2, GPIOA, GPIO_AF1_TIM1},
-    //      NoLedElement,
-    //      {TIM1, TIM_CHANNEL_3, GPIO_PIN_3, GPIOA, GPIO_AF1_TIM1}},
+        {{TIM2, TIM_CHANNEL_3, GPIO_PIN_2, GPIOA, GPIO_AF2_TIM2},
+         NoLedElement,
+         {TIM2, TIM_CHANNEL_4, GPIO_PIN_3, GPIOA, GPIO_AF2_TIM2}},
 
-    //     {{TIM1, TIM_CHANNEL_1, GPIO_PIN_4, GPIOA, GPIO_AF1_TIM1},
-    //      NoLedElement,
-    //      {TIM1, TIM_CHANNEL_3, GPIO_PIN_5, GPIOA, GPIO_AF1_TIM1}},
-    // };
+        {{TIM1, TIM_CHANNEL_1, GPIO_PIN_4, GPIOA, GPIO_AF2_TIM1},
+         NoLedElement,
+         {TIM1, TIM_CHANNEL_3, GPIO_PIN_5, GPIOA, GPIO_AF2_TIM1}},
+    };
 
 private:
     NoLed NoLedElement;
