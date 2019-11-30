@@ -53,7 +53,6 @@ template <AdcPeriphNum periph> class AdcPeriph;
 
 	//Or: attempt again to make AdcChan non-template
 
-AdcPeriph<AdcPeriphNum periph>
 class IAdcChanBase {
 	public: virtual uint16_t get_val() = 0;
 };
