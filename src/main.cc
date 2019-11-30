@@ -62,7 +62,7 @@ void HardFault_Handler() {
   void SVC_Handler() { while(1); }
   void DebugMon_Handler() { while(1); }
   void PendSV_Handler() { while(1); }
-  // void __cxa_pure_virtual() { while(1); }
+  void __cxa_pure_virtual() { while(1); }
   // __weak void _init() {}
   // __weak void main() {}
 }

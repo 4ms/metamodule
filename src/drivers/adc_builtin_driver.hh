@@ -50,8 +50,12 @@ template <AdcPeriphNum periph> class AdcPeriph;
 	//Or:
 	//template <class periphT> AdcChan {}
 	//...?
+
+	//Or: attempt again to make AdcChan non-template
+
+AdcPeriph<AdcPeriphNum periph>
 class IAdcChanBase {
-	public: virtual uint16_t get_val() {return 0;}
+	public: virtual uint16_t get_val() = 0;
 };
 
 template <AdcPeriphNum periph>
@@ -65,7 +69,7 @@ public:
 	  rank_(AdcPeriph<periph>::add_channel(channel, sampletime))
 	{}
 
-	uint16_t get_val() override { return adc_periph_.dma_buffer_[rank_]; }
+	virtual uint16_t get_val() { return adc_periph_.dma_buffer_[rank_]; }
 	constexpr uint8_t get_rank() { return rank_; }
 	constexpr AdcPeriphNum get_periph_num() { return periph; }
 
