@@ -19,42 +19,23 @@ struct Button {
 };
 
 
+//Todo: create a Read-only class that returns a reference when read (rvalue), 
+//and disallows assignment
+//and is initialized to an rvalue
+
 struct CVJack {
-    CVJack(IAdcChanBase& adc_channel) 
-    : adc_channel_(adc_channel),
-      val_ref_(adc_channel.get_val_ref())
+    CVJack(IAdcChanBase& adc_channel)
+    : val_ref_(adc_channel.get_val_ref())
     {}
-    
-    // CVJack(IAdcChanBase& adc_channel) 
-    // : adc_periph_num_(adc_channel.get_periph_num()),
-    //   adc_channel_rank_(adc_channel.get_rank()),
-    //  {}
-
-    // void read() {
-    //     oversampler_.add_val(
-    //         adc_channel_.get_val();
-    //     );
-    // }
-
-    // void read() {
-    //     oversampler_.add_val(
-    //         AdcPeriph<adc_periph_num_>::get_channel_val(adc_channel_rank_)
-    //     );
-    // }
 
     void read() {
-        oversampler_.add_val(
-            val_ref_
-        );
+        oversampler_.add_val(val_ref_);
     }
 
     uint16_t get() {return oversampler_.val();}
 
 private:
-    IAdcChanBase& adc_channel_;
     volatile uint16_t &val_ref_;
-    // AdcPeriphNum adc_periph_num_;
-    // uint8_t adc_channel_rank_;
     Oversampler<uint16_t, kOverSampleAmt> oversampler_;
 };
 

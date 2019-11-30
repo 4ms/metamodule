@@ -32,6 +32,7 @@ void Controls::read()
 
 Controls::Controls()
 {
+    //wrap this in a member function of Controls
     AdcPeriph<AdcPeriphNum::ADC_1>::start_dma(LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
 }
 
