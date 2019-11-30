@@ -1,12 +1,9 @@
 #pragma once
 #include <stm32f7xx.h>
-// #include "pin.hh"
 #include "system.hh"
 #include "colors.hh"
 
 //Todo Re-do this with LL
-
-//Todo? put all pin/periph defs in a separate file
 
 // #define _debugconst_ const
 #define _debugconst_
@@ -33,17 +30,16 @@ private:
     TIM_HandleTypeDef htim_;
 };
 
-
 class TimPwmLed {
 protected:
     TimPwmLed() : htim_(nohtim_) {}
 public:
-    TimPwmLed(TimPwm& timpwm, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af)
+    TimPwmLed(TimPwm& timpwm, const uint32_t channel, const uint16_t pin, GPIO_TypeDef * const port, const uint8_t af)
     : htim_(timpwm.get_htim()), channel_(channel), pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) {
         init_();
     }
 
-    TimPwmLed(TIM_HandleTypeDef& htim, uint32_t channel, uint16_t pin, GPIO_TypeDef *port, uint8_t af)
+    TimPwmLed(TIM_HandleTypeDef& htim, const uint32_t channel, const uint16_t pin, GPIO_TypeDef * const port, const uint8_t af)
     : htim_(htim), channel_(channel), pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) {
         init_();
     }
@@ -85,7 +81,6 @@ struct RgbLed {
     void set_background(Color col) {background_color_ = col;}
     void set_solid(Color col) {solid_color_ = col;}
 
-    // flash_freq in Hz; max = update_rate
     void flash(Color c, uint32_t flash_freq = 100) {
         flash_color_ = c;
         flash_phase_ = 0xFFFFFFFF;
