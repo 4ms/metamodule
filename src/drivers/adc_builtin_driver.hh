@@ -54,7 +54,7 @@ template <AdcPeriphNum periph> class AdcPeriph;
 	//Or: attempt again to make AdcChan non-template
 
 class IAdcChanBase {
-	public: virtual uint16_t get_val() = 0;
+	public: virtual uint16_t& get_val_ref() = 0;
 };
 
 template <AdcPeriphNum periph>
@@ -68,7 +68,7 @@ public:
 	  rank_(AdcPeriph<periph>::add_channel(channel, sampletime))
 	{}
 
-	virtual uint16_t get_val() { return adc_periph_.dma_buffer_[rank_]; }
+	virtual uint16_t& get_val_ref() { return adc_periph_.dma_buffer_[rank_]; }
 	constexpr uint8_t get_rank() { return rank_; }
 	constexpr AdcPeriphNum get_periph_num() { return periph; }
 
@@ -88,6 +88,7 @@ class AdcPeriph
 
 public:
 	static void start_dma(const uint32_t ADC_DMA_Stream, const uint32_t ADC_DMA_Channel, const IRQn_Type ADC_DMA_Streamx_IRQn);
+	static void get_channel_val(const uint8_t adc_channel_rank_);
 
 private:
 	//Returns rank channel was added
