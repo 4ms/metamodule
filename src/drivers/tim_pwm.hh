@@ -41,17 +41,35 @@ private:
     TIM_HandleTypeDef htim_;
 };
 
+enum class TimPwmOutType {Norm, N};
+
 class TimPwmLed {
 protected:
     TimPwmLed() : htim_(nohtim_) {}
 public:
-    TimPwmLed(TimPwm& timpwm, const uint32_t channel, const uint16_t pin, GPIO_TypeDef * const port, const uint8_t af)
-    : htim_(timpwm.get_htim()), channel_(channel), pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) {
+    TimPwmLed(  TimPwm& timpwm, 
+                const uint32_t channel, 
+                const uint16_t pin, 
+                GPIO_TypeDef * const port, 
+                const uint8_t af, 
+                TimPwmOutType out_n = TimPwmOutType::Norm)
+    : htim_(timpwm.get_htim()), 
+      channel_(channel), 
+      pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) 
+    {
         init_();
     }
 
-    TimPwmLed(TIM_HandleTypeDef& htim, const uint32_t channel, const uint16_t pin, GPIO_TypeDef * const port, const uint8_t af)
-    : htim_(htim), channel_(channel), pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) {
+    TimPwmLed(  TIM_HandleTypeDef& htim, 
+                const uint32_t channel, 
+                const uint16_t pin, 
+                GPIO_TypeDef * const port, 
+                const uint8_t af, 
+                TimPwmOutType out_n = TimPwmOutType::Norm)
+    : htim_(htim), 
+      channel_(channel), 
+      pin_(pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af) 
+    {
         init_();
     }
 
