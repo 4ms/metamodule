@@ -1,4 +1,5 @@
 #pragma once
+#include "system.hh"
 #include "stm32f7xx.h"
 #include "stm32f7xx_ll_gpio.h"
 #include "stm32f7xx_ll_bus.h"
@@ -7,13 +8,22 @@ enum class PinPolarity { NORMAL, INVERTED };
 enum class PinMode {INPUT, OUTPUT, ANALOG, ALT};
 enum class PinPull {UP, DOWN, NONE};
 enum class PinSpeed {LOW, MEDIUM, HIGH, VERY_HIGH};
+//Todo: finish these enums and implement them instead of uin16_t pin/GPIO_TypeDef *port...
+// enum class PinNumber {_0=LL_GPIO_PIN_0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15};
+// enum class PinPort {A=GPIOA_BASE, B=GPIOB_BASE, C=GPIOC_BASE, D, E, F, G, H, I, J, K};
 
 //GPIO Pin driver
 template<PinPolarity polarity=PinPolarity::NORMAL>
-class PinWithPolarity {
+class PinPolarized {
 public :
-    PinWithPolarity() {}
-    PinWithPolarity(const uint16_t pin, GPIO_TypeDef * const port, const enum PinMode mode, const enum PinPull pull = PinPull::NONE, const enum PinSpeed speed = PinSpeed::MEDIUM, const uint8_t af = 0)
+    PinPolarized() {}
+    PinPolarized( uint16_t const pin, 
+                    GPIO_TypeDef * const port, 
+                    PinMode const mode, 
+                    PinPull const pull = PinPull::NONE,
+                    PinSpeed const speed = PinSpeed::MEDIUM,
+                    uint8_t const af = 0
+    )
     : pin_(pin), port_(port)
     {
         System::enable_gpio_rcc(port_);
@@ -43,11 +53,6 @@ public :
         }
     }
 
-private:
-    uint16_t pin_;
-    GPIO_TypeDef* port_;
-
-public:
     void high() {port_->BSRR = pin_;}
     void low() {port_->BSRR = (uint32_t)pin_ << 16;}
     void on() {if (polarity==PinPolarity::INVERTED) low(); else high();}
@@ -56,7 +61,12 @@ public:
 
     bool read_raw() {return ((port_->IDR) & pin_) ? true : false;}
     uint8_t is_on() {return (polarity==PinPolarity::INVERTED) ? !read_raw() : read_raw();}
+
+private:
+    uint16_t pin_;
+    GPIO_TypeDef* port_;
+
 };
 
-using Pin = PinWithPolarity<PinPolarity::NORMAL>;
-using PinInverted = PinWithPolarity<PinPolarity::INVERTED>;
+using Pin = PinPolarized<PinPolarity::NORMAL>;
+using PinInverted = PinPolarized<PinPolarity::INVERTED>;
