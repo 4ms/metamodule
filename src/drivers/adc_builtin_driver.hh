@@ -54,7 +54,9 @@ template <AdcPeriphNum periph> class AdcPeriph;
 	//Or: attempt again to make AdcChan non-template
 
 class IAdcChanBase {
-	public: virtual uint16_t& get_val_ref() = 0;
+public: 
+	virtual uint16_t& get_val_ref() = 0;
+	virtual uint16_t get_val() = 0;
 };
 
 template <AdcPeriphNum periph>
@@ -69,6 +71,7 @@ public:
 	{}
 
 	virtual uint16_t& get_val_ref() { return adc_periph_.dma_buffer_[rank_]; }
+	virtual uint16_t get_val() { return adc_periph_.dma_buffer_[rank_]; }
 	constexpr uint8_t get_rank() { return rank_; }
 	constexpr AdcPeriphNum get_periph_num() { return periph; }
 
