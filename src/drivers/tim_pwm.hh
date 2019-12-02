@@ -28,16 +28,10 @@ class NoLed;
 class TimPwmPeriph {
 friend class TimPwmChannel;
 private:
-    static void init_periph_once(TIM_TypeDef *TIM, 
-                                uint32_t period=256,
-                                uint16_t prescaler=0, 
-                                uint32_t clock_division=0)
-    {
+    static void init_periph_once(TIM_TypeDef *TIM, uint32_t period=256, uint16_t prescaler=0, uint32_t clock_division=0) {
         static bool did_init[16]={false};
-
         uint8_t tim_i = System::tim_periph_to_num(TIM);
         if (!tim_i) return; //Todo: check exception implications of using assert
-
         tim_i--;
         if (!did_init[tim_i]) {
             System::enable_tim_rcc(TIM);
@@ -50,18 +44,32 @@ private:
             };
             LL_TIM_Init(TIM, &timinit); 
             LL_TIM_DisableARRPreload(TIM);
-
             did_init[tim_i] = true;
         }
     }
 };
 
-enum class TimPwmOutType {Norm, N};
-
 // TimPwmChannel: output PWM on a pin
 // automatically initializes the given TIM peripheral if it hasn't been initialized yet
-// Usage:
-// TimPwmChannel myPWMOutput {TIM1, TimChannelNum::_2, GPIO_PIN_3, GPIOA, 
+// Usage: (default period of timer is 256)
+//      TimPwmChannel myPWM {TIM2, TimChannelNum::_2, GPIO_PIN_3, GPIOB, LL_GPIO_AF_1};
+//      // output starts immediately
+//      myPWM.set_output_level(128);
+//
+// or:
+// TimPwmChannel myPWMOutput;
+// Pin myPin = {GPIO_PIN_3, GPIOB, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, LL_GPIO_AF_1};
+// myPWMOutput.set_pin(Pin);
+// myPWMOutput.set_TIM(TIM2);
+// myPWMOutput.set_channel(TimChannelNum::_2);
+// myPWMOutput.set_periph_period(256);
+// myPWMOutput.set_periph_prescaler(0);
+// myPWMOutput.set_periph_clock_division(0);
+// myPWMOutput.init_periph();
+// myPWMOutput.start_output();
+// myPWMOutput.stop_output();
+
+//Todo: add separate methods for setting pin, TIM, channel, period, prescaler, clock_div
 class TimPwmChannel {
 public:
     TimPwmChannel(  TIM_TypeDef* const TIM,
@@ -69,7 +77,6 @@ public:
                 uint16_t const pin, 
                 GPIO_TypeDef * const port, 
                 uint8_t const af, 
-                TimPwmOutType out_n = TimPwmOutType::Norm,
                 uint32_t period=256,
                 uint16_t prescaler=0, 
                 uint32_t clock_division=0)
@@ -80,20 +87,28 @@ public:
 
         TimPwmPeriph::init_periph_once(TIM, period, prescaler, clock_division);
 
-        if (channel_==TimChannelNum::_1N)
+        bool inverted_channel;
+        if (channel_==TimChannelNum::_1N) {
             channel_base_ = TimChannelNum::_1;
-        else if (channel_== TimChannelNum::_2N)
+            inverted_channel = true;
+        }
+        else if (channel_== TimChannelNum::_2N) {
             channel_base_ = TimChannelNum::_2;
-        else if (channel_== TimChannelNum::_3N)
+            inverted_channel = true;
+        }
+        else if (channel_== TimChannelNum::_3N) {
             channel_base_ = TimChannelNum::_3;
-        else 
+            inverted_channel = true;
+        }
+        else {
             channel_base_ = channel_;
+            inverted_channel = false;
+        }
 
-        LL_TIM_OC_InitTypeDef tim_oc
-         = {
+        LL_TIM_OC_InitTypeDef tim_oc = {
             .OCMode = LL_TIM_OCMODE_PWM1,
-            .OCState = out_n==TimPwmOutType::Norm ? LL_TIM_OCSTATE_ENABLE : LL_TIM_OCSTATE_DISABLE,
-            .OCNState = out_n==TimPwmOutType::Norm ? LL_TIM_OCSTATE_DISABLE : LL_TIM_OCSTATE_ENABLE,
+            .OCState = inverted_channel ? LL_TIM_OCSTATE_DISABLE : LL_TIM_OCSTATE_ENABLE,
+            .OCNState = inverted_channel ? LL_TIM_OCSTATE_ENABLE : LL_TIM_OCSTATE_DISABLE,
             .CompareValue = 0,
             .OCPolarity = LL_TIM_OCPOLARITY_LOW,
             .OCNPolarity = LL_TIM_OCPOLARITY_HIGH,
@@ -106,8 +121,14 @@ public:
         LL_TIM_EnableCounter(TIM_);
     }
 
-    constexpr void set_brightness(uint32_t val) const {
+    constexpr void set_output_level(uint32_t val) const {
         _set_timer_ccr(TIM_, channel_base_, val);
+    }
+    void start_output() const {
+        LL_TIM_CC_EnableChannel(TIM_, static_cast<uint32_t>(channel_));
+    }
+    void stop_output() const {
+        LL_TIM_CC_DisableChannel(TIM_, static_cast<uint32_t>(channel_));
     }
 
 protected:
@@ -133,7 +154,7 @@ private:
 class NoLed : public TimPwmChannel {
 public:
     NoLed() {}
-    void set_brightness(uint32_t val) const {}
+    void set_output_level(uint32_t val) const {}
 };
 
 struct RgbLed {
@@ -156,19 +177,19 @@ struct RgbLed {
     }
 
     constexpr void set_color(Color const &col) const {
-        r_.set_brightness(col.red());
-        g_.set_brightness(col.green());
-        b_.set_brightness(col.blue());
+        r_.set_output_level(col.red());
+        g_.set_output_level(col.green());
+        b_.set_output_level(col.blue());
     }
     void set_color(Color const &col, uint8_t const brightness) const {
-        r_.set_brightness((col.red() * brightness)>>8);
-        g_.set_brightness((col.green() * brightness)>>8);
-        b_.set_brightness((col.blue() * brightness)>>8);
+        r_.set_output_level((col.red() * brightness)>>8);
+        g_.set_output_level((col.green() * brightness)>>8);
+        b_.set_output_level((col.blue() * brightness)>>8);
     }
     void set_color(Color const &col, float const brightness) const {
-        r_.set_brightness(col.red() * brightness);
-        g_.set_brightness(col.green() * brightness);
-        b_.set_brightness(col.blue() * brightness);
+        r_.set_output_level(col.red() * brightness);
+        g_.set_output_level(col.green() * brightness);
+        b_.set_output_level(col.blue() * brightness);
     }
 
     //Todo: don't waste cycles updating if nothing's changed

@@ -24,7 +24,7 @@ public:
     }
 
 public:
-    _debugconst_ RgbLed freq1 {
+    RgbLed freq1 {
         {TIM8, TimChannelNum::_4, GPIO_PIN_9, GPIOC, LL_GPIO_AF_3},
         {TIM8, TimChannelNum::_3, GPIO_PIN_8, GPIOC, LL_GPIO_AF_3},
         {TIM2, TimChannelNum::_2, GPIO_PIN_3, GPIOB, LL_GPIO_AF_1}};
@@ -37,7 +37,7 @@ public:
     _debugconst_ RgbLed freq2 {
         NoLedElement,
         {TIM3, TimChannelNum::_1, GPIO_PIN_6, GPIOA, LL_GPIO_AF_2},
-        {TIM8, TimChannelNum::_1, GPIO_PIN_7, GPIOA, LL_GPIO_AF_3, TimPwmOutType::N}};
+        {TIM8, TimChannelNum::_1N, GPIO_PIN_7, GPIOA, LL_GPIO_AF_3}};
 
     _debugconst_ RgbLed res2 {
         NoLedElement,

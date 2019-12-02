@@ -2,6 +2,7 @@
 #include <stm32f7xx.h>
 #include "stm32f7xx_ll_bus.h"
 
+//Todo: refactor for LL intead of HAL
 class System {
 
 	void SetVectorTable(uint32_t reset_address)
@@ -222,5 +223,4 @@ public:
 	    #endif
 	    else return 0;
 	}
-
 };
