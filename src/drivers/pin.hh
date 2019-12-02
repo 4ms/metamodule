@@ -16,7 +16,7 @@ public :
     PinWithPolarity(const uint16_t pin, GPIO_TypeDef * const port, const enum PinMode mode, const enum PinPull pull = PinPull::NONE, const enum PinSpeed speed = PinSpeed::MEDIUM, const uint8_t af = 0)
     : pin_(pin), port_(port)
     {
-        init_rcc();
+        System::enable_gpio_rcc(port_);
         auto mode_ = mode == PinMode::INPUT  ? LL_GPIO_MODE_INPUT :
                      mode == PinMode::OUTPUT ? LL_GPIO_MODE_OUTPUT :
                      mode == PinMode::ANALOG ? LL_GPIO_MODE_ANALOG :
@@ -56,44 +56,6 @@ public:
 
     bool read_raw() {return ((port_->IDR) & pin_) ? true : false;}
     uint8_t is_on() {return (polarity==PinPolarity::INVERTED) ? !read_raw() : read_raw();}
-
-private:
-    void init_rcc() {
-        #ifdef GPIOA
-        if (port_==GPIOA && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
-        #endif
-        #ifdef GPIOB
-        if (port_==GPIOB && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOBEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
-        #endif
-        #ifdef GPIOC
-        if (port_==GPIOC && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOCEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
-        #endif
-        #ifdef GPIOD
-        if (port_==GPIOD && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIODEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOD);
-        #endif
-        #ifdef GPIOE
-        if (port_==GPIOE && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOEEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
-        #endif
-        #ifdef GPIOF
-        if (port_==GPIOF && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOFEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOF);
-        #endif
-        #ifdef GPIOG
-        if (port_==GPIOG && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOGEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOG);
-        #endif
-        #ifdef GPIOH
-        if (port_==GPIOH && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOHEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOH);
-        #endif
-        #ifdef GPIOI
-        if (port_==GPIOI && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOIEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOI);
-        #endif
-        #ifdef GPIOJ
-        if (port_==GPIOJ && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOJEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOJ);
-        #endif
-        #ifdef GPIOK
-        if (port_==GPIOK && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOKEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOK);
-        #endif
-    }
-
 };
 
 using Pin = PinWithPolarity<PinPolarity::NORMAL>;

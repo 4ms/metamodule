@@ -1,5 +1,6 @@
 #pragma once
 #include <stm32f7xx.h>
+#include "stm32f7xx_ll_bus.h"
 
 class System {
 
@@ -76,57 +77,150 @@ public:
 	    HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 	}
 
+    static void enable_gpio_rcc(GPIO_TypeDef* port) {
+    	if (port==nullptr) return;
+        #ifdef GPIOA
+        if (port==GPIOA && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+        #endif
+        #ifdef GPIOB
+        if (port==GPIOB && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOBEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
+        #endif
+        #ifdef GPIOC
+        if (port==GPIOC && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOCEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
+        #endif
+        #ifdef GPIOD
+        if (port==GPIOD && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIODEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOD);
+        #endif
+        #ifdef GPIOE
+        if (port==GPIOE && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOEEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOE);
+        #endif
+        #ifdef GPIOF
+        if (port==GPIOF && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOFEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOF);
+        #endif
+        #ifdef GPIOG
+        if (port==GPIOG && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOGEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOG);
+        #endif
+        #ifdef GPIOH
+        if (port==GPIOH && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOHEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOH);
+        #endif
+        #ifdef GPIOI
+        if (port==GPIOI && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOIEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOI);
+        #endif
+        #ifdef GPIOJ
+        if (port==GPIOJ && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOJEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOJ);
+        #endif
+        #ifdef GPIOK
+        if (port==GPIOK && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOKEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOK);
+        #endif
+    }
 	static void enable_tim_rcc(TIM_TypeDef *TIM) {
 		#ifdef TIM1
-		if (TIM==TIM1) __HAL_RCC_TIM1_CLK_ENABLE();
+		if (TIM==TIM1) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
 		#endif
 		#ifdef TIM2
-		if (TIM==TIM2) __HAL_RCC_TIM2_CLK_ENABLE();
+		if (TIM==TIM2) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
 		#endif
 		#ifdef TIM3
-		if (TIM==TIM3) __HAL_RCC_TIM3_CLK_ENABLE();
+		if (TIM==TIM3) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
 		#endif
 		#ifdef TIM4
-		if (TIM==TIM4) __HAL_RCC_TIM4_CLK_ENABLE();
+		if (TIM==TIM4) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM4);
 		#endif
 		#ifdef TIM5
-		if (TIM==TIM5) __HAL_RCC_TIM5_CLK_ENABLE();
+		if (TIM==TIM5) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM5);
 		#endif
 		#ifdef TIM6
-		if (TIM==TIM6) __HAL_RCC_TIM6_CLK_ENABLE();
+		if (TIM==TIM6) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM6);
 		#endif
 		#ifdef TIM7
-		if (TIM==TIM7) __HAL_RCC_TIM7_CLK_ENABLE();
+		if (TIM==TIM7) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM7);
 		#endif
 		#ifdef TIM8
-		if (TIM==TIM8) __HAL_RCC_TIM8_CLK_ENABLE();
+		if (TIM==TIM8) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM8);
 		#endif
 		#ifdef TIM9
-		if (TIM==TIM9) __HAL_RCC_TIM9_CLK_ENABLE();
+		if (TIM==TIM9) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM9);
 		#endif
 		#ifdef TIM10
-		if (TIM==TIM10) __HAL_RCC_TIM10_CLK_ENABLE();
+		if (TIM==TIM10) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM10);
 		#endif
 		#ifdef TIM11
-		if (TIM==TIM11) __HAL_RCC_TIM11_CLK_ENABLE();
+		if (TIM==TIM11) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM11);
 		#endif
 		#ifdef TIM12
-		if (TIM==TIM12) __HAL_RCC_TIM12_CLK_ENABLE();
+		if (TIM==TIM12) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM12);
 		#endif
 		#ifdef TIM13
-		if (TIM==TIM13) __HAL_RCC_TIM13_CLK_ENABLE();
+		if (TIM==TIM13) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM13);
 		#endif
 		#ifdef TIM14
-		if (TIM==TIM14) __HAL_RCC_TIM14_CLK_ENABLE();
+		if (TIM==TIM14) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM14);
 		#endif
 		#ifdef TIM15
-		if (TIM==TIM15) __HAL_RCC_TIM15_CLK_ENABLE();
+		if (TIM==TIM15) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM15);
 		#endif
 		#ifdef TIM16
-		if (TIM==TIM16) __HAL_RCC_TIM16_CLK_ENABLE();
+		if (TIM==TIM16) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM16);
 		#endif
 		#ifdef TIM17
-		if (TIM==TIM17) __HAL_RCC_TIM17_CLK_ENABLE();
+		if (TIM==TIM17) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM17);
 		#endif
 	}
+
+	static uint8_t tim_periph_to_num(TIM_TypeDef *TIM) {
+		if (TIM==nullptr) return 0;
+	    #ifdef TIM1
+	    else if (TIM==TIM1) return 1;
+	    #endif
+	    #ifdef TIM2
+	    else if (TIM==TIM2) return 2;
+	    #endif
+	    #ifdef TIM3
+	    else if (TIM==TIM3) return 3;
+	    #endif
+	    #ifdef TIM4
+	    else if (TIM==TIM4) return 4;
+	    #endif
+	    #ifdef TIM5
+	    else if (TIM==TIM5) return 5;
+	    #endif
+	    #ifdef TIM6
+	    else if (TIM==TIM6) return 6;
+	    #endif
+	    #ifdef TIM7
+	    else if (TIM==TIM7) return 7;
+	    #endif
+	    #ifdef TIM8
+	    else if (TIM==TIM8) return 8;
+	    #endif
+	    #ifdef TIM9
+	    else if (TIM==TIM9) return 9;
+	    #endif
+	    #ifdef TIM10
+	    else if (TIM==TIM10) return 10;
+	    #endif
+	    #ifdef TIM11
+	    else if (TIM==TIM11) return 11;
+	    #endif
+	    #ifdef TIM12
+	    else if (TIM==TIM12) return 12;
+	    #endif
+	    #ifdef TIM13
+	    else if (TIM==TIM13) return 13;
+	    #endif
+	    #ifdef TIM14
+	    else if (TIM==TIM14) return 14;
+	    #endif
+	    #ifdef TIM15
+	    else if (TIM==TIM15) return 15;
+	    #endif
+	    #ifdef TIM16
+	    else if (TIM==TIM16) return 16;
+	    #endif
+	    #ifdef TIM17
+	    else if (TIM==TIM17) return 17;
+	    #endif
+	    else return 0;
+	}
+
 };
