@@ -22,7 +22,7 @@ public:
     }
     T val() {return val_;}
 private:
-    constexpr static int oversample_shift_ = Log2Int(size);
+    constexpr static auto oversample_shift_ = Log2Int(size);
     T buff_ = 0;
     T val_ = 0;
     int idx_ = 0;

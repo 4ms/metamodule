@@ -29,22 +29,22 @@ public:
         {TIM8, TimChannelNum::_3, GPIO_PIN_8, GPIOC, LL_GPIO_AF_3},
         {TIM2, TimChannelNum::_2, GPIO_PIN_3, GPIOB, LL_GPIO_AF_1}};
 
-    _debugconst_ RgbLed res1 {
+    RgbLed res1 {
         {TIM1, TimChannelNum::_4, GPIO_PIN_11, GPIOA, LL_GPIO_AF_1},
         {TIM1, TimChannelNum::_3, GPIO_PIN_10, GPIOA, LL_GPIO_AF_1},
         {TIM3, TimChannelNum::_2, GPIO_PIN_5, GPIOB, LL_GPIO_AF_2}};
 
-    _debugconst_ RgbLed freq2 {
+    RgbLed freq2 {
         NoLedElement,
         {TIM3, TimChannelNum::_1, GPIO_PIN_6, GPIOA, LL_GPIO_AF_2},
         {TIM8, TimChannelNum::_1N, GPIO_PIN_7, GPIOA, LL_GPIO_AF_3}};
 
-    _debugconst_ RgbLed res2 {
+    RgbLed res2 {
         NoLedElement,
         {TIM3, TimChannelNum::_3, GPIO_PIN_0, GPIOB, LL_GPIO_AF_2},
         {TIM3, TimChannelNum::_4, GPIO_PIN_1, GPIOB, LL_GPIO_AF_2}};
 
-    _debugconst_ RgbLed mode[5] {
+    RgbLed mode[5] {
         {{TIM4, TimChannelNum::_1, GPIO_PIN_6, GPIOB, LL_GPIO_AF_2},
          NoLedElement,
          {TIM4, TimChannelNum::_2, GPIO_PIN_7, GPIOB, LL_GPIO_AF_2}},
