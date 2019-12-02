@@ -44,6 +44,8 @@ private:
             };
             LL_TIM_Init(TIM, &timinit); 
             LL_TIM_DisableARRPreload(TIM);
+            if (IS_TIM_BREAK_INSTANCE(TIM))
+                LL_TIM_EnableAllOutputs(TIM);
             did_init[tim_i] = true;
         }
     }
