@@ -9,9 +9,9 @@ struct Color {
 
     explicit constexpr Color(uint8_t r, uint8_t g, uint8_t b) : r_(r), g_(g), b_(b) {}
 
-    uint8_t red() const { return r_; }
-    uint8_t green() const { return g_; }
-    uint8_t blue() const { return b_; }
+    constexpr uint8_t red() const { return r_; }
+    constexpr uint8_t green() const { return g_; }
+    constexpr uint8_t blue() const { return b_; }
 
     const Color operator+(Color const that) const {
         return Color(__UQADD8(r_, that.r_),
