@@ -17,16 +17,24 @@ public:
 	Ui() {
 		last_update_tick_= HAL_GetTick();
 
-		leds.freq1.set_background(Colors::pink);
-		leds.res1.set_background(Colors::cyan);
-
 		// leds.res1.set_glow(Colors::red, 2);
 
 	}
 
 	void update() {
-		leds.freq1.set_background(Colors::blue.blend(Colors::red, params.freq[0]));
-		leds.res1.set_background(Colors::cyan.blend(Colors::pink, params.res[0]));
+		// leds.freq1.set_background(Colors::white.blend(Colors::off, params.freq[0]));
+		// leds.res1.set_background(Colors::white.blend(Colors::off, params.res[0]));
+		leds.freq1.set_background(Colors::grey);
+		leds.res1.set_background(Colors::grey);
+
+		leds.freq2.set_background(Colors::grey);
+		leds.res2.set_background(Colors::grey);
+
+		leds.mode[0].set_background(Colors::grey);
+		leds.mode[1].set_background(Colors::grey);
+		leds.mode[2].set_background(Colors::grey);
+		leds.mode[3].set_background(Colors::grey);
+		leds.mode[4].set_background(Colors::grey);
 
 		// if ((last_update_tick_ - HAL_GetTick()) > 500) {
 
