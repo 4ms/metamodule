@@ -11,6 +11,14 @@ public:
     void set_output_level(uint32_t val) const {}
 };
 
+class DACLed : public TimPwmChannel {
+public:
+    DACLed(uint8_t dac_chan) : dac_chan_(dac_chan) {}
+    void set_output_level(uint32_t val) const {}
+private:
+    uint8_t dac_chan_;
+};
+
 struct RgbLed {
     RgbLed(TimPwmChannel r_LED, TimPwmChannel g_LED, TimPwmChannel b_LED)
     : r_(r_LED), g_(g_LED), b_(b_LED) {}
@@ -112,25 +120,25 @@ public:
         {TIM3, TimChannelNum::_4, GPIO_PIN_1, GPIOB, LL_GPIO_AF_2}};
 
     RgbLed mode[5] {
-        {{TIM4, TimChannelNum::_1, GPIO_PIN_6, GPIOB, LL_GPIO_AF_2},
+        {NoLedElement,  //DAC0 PA4
          NoLedElement,
-         {TIM4, TimChannelNum::_2, GPIO_PIN_7, GPIOB, LL_GPIO_AF_2}},
-
-        {{TIM4, TimChannelNum::_3, GPIO_PIN_8, GPIOB, LL_GPIO_AF_2},
-         NoLedElement,
-         {TIM4, TimChannelNum::_4, GPIO_PIN_9, GPIOB, LL_GPIO_AF_2}},
-
-        {{TIM2, TimChannelNum::_1, GPIO_PIN_0, GPIOA, LL_GPIO_AF_1},
-         NoLedElement,
-         {TIM5, TimChannelNum::_2, GPIO_PIN_1, GPIOA, LL_GPIO_AF_2}},
+         NoLedElement}, //DAC1 PA5
 
         {{TIM2, TimChannelNum::_3, GPIO_PIN_2, GPIOA, LL_GPIO_AF_1},
          NoLedElement,
          {TIM2, TimChannelNum::_4, GPIO_PIN_3, GPIOA, LL_GPIO_AF_1}},
 
-        {NoLedElement,  //DAC0 PA4
+        {{TIM2, TimChannelNum::_1, GPIO_PIN_0, GPIOA, LL_GPIO_AF_1},
          NoLedElement,
-         NoLedElement}, //DAC1 PA5
+         {TIM5, TimChannelNum::_2, GPIO_PIN_1, GPIOA, LL_GPIO_AF_2}},
+
+        {{TIM4, TimChannelNum::_3, GPIO_PIN_8, GPIOB, LL_GPIO_AF_2},
+         NoLedElement,
+         {TIM4, TimChannelNum::_4, GPIO_PIN_9, GPIOB, LL_GPIO_AF_2}},
+
+        {{TIM4, TimChannelNum::_1, GPIO_PIN_6, GPIOB, LL_GPIO_AF_2},
+         NoLedElement,
+         {TIM4, TimChannelNum::_2, GPIO_PIN_7, GPIOB, LL_GPIO_AF_2}},
     };
 
 private:
