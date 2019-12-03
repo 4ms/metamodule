@@ -22,13 +22,11 @@ public:
 	}
 
 	void update() {
-		// leds.freq1.set_background(Colors::white.blend(Colors::off, params.freq[0]));
-		// leds.res1.set_background(Colors::white.blend(Colors::off, params.res[0]));
-		leds.freq1.set_background(Colors::grey);
-		leds.res1.set_background(Colors::grey);
+		leds.freq1.set_background(Colors::off.blend(Colors::white, params.freq[0]));
+		leds.res1.set_background(Colors::off.blend(Colors::white, params.res[0]));
 
-		leds.freq2.set_background(Colors::grey);
-		leds.res2.set_background(Colors::grey);
+		leds.freq2.set_background(Colors::off.blend(Colors::white, params.freq[1]));
+		leds.res2.set_background(Colors::off.blend(Colors::white, params.res[1]));
 
 		leds.mode[0].set_background(Colors::grey);
 		leds.mode[1].set_background(Colors::grey);
