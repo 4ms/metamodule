@@ -2,6 +2,7 @@
 #include <stm32f7xx.h>
 #include "system.hh"
 #include "colors.hh"
+#include "pin.hh"
 #include "stm32f7xx_ll_tim.h"
 
 enum class TimChannelNum {
@@ -16,39 +17,10 @@ enum class TimChannelNum {
     _6=LL_TIM_CHANNEL_CH6
 };
 
-
-// #define _debugconst_ const
-#define _debugconst_
-
-class TimPwmPeriph;
-class TimPwmChannel;
-class NoLed;
-
-
 class TimPwmPeriph {
 friend class TimPwmChannel;
 private:
-    static void init_periph_once(TIM_TypeDef *TIM, uint32_t period=256, uint16_t prescaler=0, uint32_t clock_division=0) {
-        static bool did_init[16]={false};
-        uint8_t tim_i = System::tim_periph_to_num(TIM);
-        if (!tim_i) return; //Todo: check exception implications of using assert
-        tim_i--;
-        if (!did_init[tim_i]) {
-            System::enable_tim_rcc(TIM);
-            LL_TIM_InitTypeDef timinit = {
-                .Prescaler = prescaler,
-                .CounterMode = LL_TIM_COUNTERMODE_UP,
-                .Autoreload = period,
-                .ClockDivision = clock_division,
-                .RepetitionCounter = 0
-            };
-            LL_TIM_Init(TIM, &timinit); 
-            LL_TIM_DisableARRPreload(TIM);
-            if (IS_TIM_BREAK_INSTANCE(TIM))
-                LL_TIM_EnableAllOutputs(TIM);
-            did_init[tim_i] = true;
-        }
-    }
+    static void init_periph_once(TIM_TypeDef *TIM, uint32_t period=256, uint16_t prescaler=0, uint32_t clock_division=0);
 };
 
 // TimPwmChannel: output PWM on a pin
@@ -69,19 +41,18 @@ private:
 // myPWMOutput.set_periph_clock_division(0);
 // myPWMOutput.init_periph();
 // myPWMOutput.start_output();
-// myPWMOutput.stop_output();
-
+// myPWMOutput.stop_output();t
 //Todo: add separate methods for setting pin, TIM, channel, period, prescaler, clock_div
 class TimPwmChannel {
 public:
     TimPwmChannel(  TIM_TypeDef* const TIM,
-                TimChannelNum const channel,
-                uint16_t const pin, 
-                GPIO_TypeDef * const port, 
-                uint8_t const af, 
-                uint32_t period=256,
-                uint16_t prescaler=0, 
-                uint32_t clock_division=0)
+                    TimChannelNum const channel,
+                    uint16_t const pin, 
+                    GPIO_TypeDef * const port, 
+                    uint8_t const af, 
+                    uint32_t period=256,
+                    uint16_t prescaler=1, 
+                    uint32_t clock_division=0)
     : TIM_(TIM),
       channel_(channel)
     {
@@ -113,7 +84,7 @@ public:
             .OCNState = inverted_channel ? LL_TIM_OCSTATE_ENABLE : LL_TIM_OCSTATE_DISABLE,
             .CompareValue = 0,
             .OCPolarity = LL_TIM_OCPOLARITY_LOW,
-            .OCNPolarity = LL_TIM_OCPOLARITY_HIGH,
+            .OCNPolarity = LL_TIM_OCPOLARITY_LOW,
             .OCIdleState = LL_TIM_OCIDLESTATE_LOW,
             .OCNIdleState = LL_TIM_OCIDLESTATE_LOW,
         };
@@ -152,5 +123,3 @@ private:
     TimChannelNum channel_;
     TimChannelNum channel_base_;
 };
-
-
