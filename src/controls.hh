@@ -87,7 +87,7 @@ struct Controls : private Hardware
 
     static int32_t rotary_turn[2];  //-1, 0, 1
     static Button rotary_button[2]; //0, 1
-    static TouchCtl pads;
+    TouchCtl pads;
 
     Controls();
     static void read(); //Note: must be static so it can be called from IRQHandler

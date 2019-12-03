@@ -112,23 +112,30 @@ public:
 		uint8_t average = 0x30;
 		uint8_t sampletime = 0x08;
 		uint8_t cycletime = 0x01;
-
     	write(CAP1203_Register::AVERAGING_AND_SAMPLE_CONFIG, average|sampletime|cycletime); 
+    	
+    	return true;
     }
 
 	void set_sensitivity(TouchSensitivity sensitivity) {
 		// CAP1203_SetSensitivity(static_cast<uint8_t>(sensitivity));
 	}
 	bool is_pad_touched(uint8_t padnum) {
+		if (!((1<<padnum) & enabled_chan_)) return false;
 
+		uint8_t status = read(CAP1203_Register::SENSOR_INPUT_STATUS);
+		if (status & (1<<padnum)) {
+			clear_interrupt();
+			return true;
+		} else 
 		return false;
 	}
 
-	bool is_right_touched() {
-		return false;
-	}
-	bool is_touched() {
-		return false;
+	void clear_interrupt()
+	{
+	    uint8_t reg = read(CAP1203_Register::MAIN_CONTROL);
+	    reg &= ~bit(CAP1203_MainCtl::Interrupt);
+	    write(CAP1203_Register::MAIN_CONTROL, reg);
 	}
 
 private:
@@ -155,10 +162,9 @@ public:
 	}
 
 	bool touched(uint8_t padnum) {
-		if (padnum!=1 && padnum!=3) return false;
-
 		return sensor_.is_pad_touched(padnum);
 	}
+
 private:
 	CAP1203 sensor_ {kCAP1203Chan1 | kCAP1203Chan3};
 };

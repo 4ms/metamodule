@@ -28,25 +28,29 @@ public:
 		leds.freq2.set_background(Colors::off.blend(Colors::white, params.freq[1]));
 		leds.res2.set_background(Colors::off.blend(Colors::white, params.res[1]));
 
-		leds.mode[0].set_background(Colors::grey);
-		leds.mode[1].set_background(Colors::grey);
-		leds.mode[2].set_background(Colors::grey);
-		leds.mode[3].set_background(Colors::grey);
-		leds.mode[4].set_background(Colors::grey);
+		static uint8_t mode[2] = {0};
 
-		// if ((last_update_tick_ - HAL_GetTick()) > 500) {
+		leds.mode[0].set_background(Colors::off);
+		leds.mode[1].set_background(Colors::off);
+		leds.mode[2].set_background(Colors::off);
+		leds.mode[3].set_background(Colors::off);
+		leds.mode[4].set_background(Colors::off);
 
-		// 	if (params.controls.pads.touched(0))
-		// 		leds.freq1.set_background(Colors::green);
-		// 	else
-		// 		leds.freq1.set_background(Colors::blue);
+		//Todo: add color
+		leds.mode[mode[0]].set_background(Colors::red);
+		leds.mode[mode[1]].set_background(Colors::blue);
 
-		// 	if (params.controls.pads.touched(1))
-		// 		leds.res1.set_background(Colors::green);
-		// 	else
-		// 		leds.res1.set_background(Colors::blue);
-		// 	last_update_tick_ = HAL_GetTick();
-		// }
+		//Todo: timing on this is poor, respond only to interrupt pin
+		if ((last_update_tick_ - HAL_GetTick()) > 2000) {
+
+			if (controls.pads.touched(2))
+				if (++mode[0]>=4) mode[0]=0;
+
+			if (controls.pads.touched(0))
+				if (++mode[1]>=4) mode[1]=0;
+
+			last_update_tick_ = HAL_GetTick();
+		}
 
 		leds.update();
 	}
