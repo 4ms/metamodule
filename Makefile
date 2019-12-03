@@ -103,9 +103,9 @@ LFLAGS =  -Wl,-Map,main.map,--cref \
 all: Makefile $(BIN) $(HEX)
 # 	rm compile_commands.json
 # 	rm build/compile_commands.json
-	compiledb -n make
-	mv compile_commands.json build/
-	compdb -p build/ list > compile_commands.json 2>/dev/null
+# 	compiledb -n make
+# 	mv compile_commands.json build/
+# 	compdb -p build/ list > compile_commands.json 2>/dev/null
 
 $(BIN): $(ELF)
 	$(OBJCPY) -O binary $< $@

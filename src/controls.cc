@@ -16,6 +16,7 @@ void Controls::read()
     res1CV.read();
     res2CV.read();
 	Debug::set(0,false);
+    
     //read_rotary
     // Controls::rotary_turn[0] = read_rotary(0);
     //todo: use queue, from SWN
@@ -32,7 +33,7 @@ void Controls::read()
 
 Controls::Controls()
 {
-    //wrap this in a member function of Controls
+    //Todo: wrap this in a member function of Controls
     AdcPeriph<AdcPeriphNum::ADC_1>::start_dma(LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
 }
 
@@ -42,10 +43,8 @@ extern "C" void DMA2_Stream4_IRQHandler(void)
         LL_DMA_ClearFlag_TC4(DMA2);
         Controls::read();
     }
-    // if (LL_DMA_IsActiveFlag_HT4(DMA2)) {
-    //     LL_DMA_ClearFlag_HT4(DMA2);
-    // }
     if (LL_DMA_IsActiveFlag_TE4(DMA2)) {
         LL_DMA_ClearFlag_TE4(DMA2);
+        //Todo: Handle ADC DMA error
     }
 }
