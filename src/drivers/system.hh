@@ -168,6 +168,8 @@ public:
 		#endif
 	}
 
+	static inline constexpr uint8_t kTimPeriphMax = 17;
+
 	static uint8_t tim_periph_to_num(TIM_TypeDef *TIM) {
 		if (TIM==nullptr) return 0;
 	    #ifdef TIM1
