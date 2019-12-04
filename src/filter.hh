@@ -9,6 +9,7 @@ constexpr uint32_t Log2Int(const uint32_t x) {
 
 template<class T, int size>
 struct Oversampler {
+    static_assert(Log2Int(size)>0, "Oversampler<T, size> requires size to be a power of 2");
 //Todo: static_assert size is power of 2
 public:
     Oversampler() {}
@@ -27,3 +28,4 @@ private:
     T val_ = 0;
     int idx_ = 0;
 };
+
