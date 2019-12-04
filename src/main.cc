@@ -4,22 +4,23 @@
 #include "debug.hh"
 System sys;
 Ui ui;
+Audio audio;
 Debug debug;
 
 //Todo: create LED update timer to run ui.update() (which just updates LEDs if there's a glow or flash)
 //
 
-//every 682us
+//every 682us (1.4kHz)
 void audio_loop(Block& in, Block& out) {
 	// debug.set(0,1);
-	ui.params.update(ui.controls);
-	ui.audio.process(ui.params, in, out);
+	ui.params.update(ui.controls); //This should be ui.read()
+	audio.process(ui.params, in, out);
 	// debug.set(0,0);
 }
 
 void main() {
-	ui.audio.register_callback(audio_loop);
-	ui.audio.start();
+	audio.register_callback(audio_loop);
+	audio.start();
 
 	while (1) {
 		ui.update();

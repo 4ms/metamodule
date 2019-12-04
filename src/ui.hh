@@ -10,7 +10,6 @@ class Ui {
 public:
 	Controls controls;
 	Params params;
-	Audio audio;
 	LedCtl leds;
 
 public:

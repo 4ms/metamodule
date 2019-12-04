@@ -8,6 +8,7 @@
 //read rotary buttons ---> update controls.rotary[].pushed
 //check ALERT pin --> initiate I2C read over DMA/IT
 //check new value from DMA/IT TC IRQ -->> update controls.pad[].touching
+
 void Controls::read()
 {
     Debug::set(0,true);
@@ -16,7 +17,7 @@ void Controls::read()
     res1CV.read();
     res2CV.read();
 	Debug::set(0,false);
-    
+
     //read_rotary
     // Controls::rotary_turn[0] = read_rotary(0);
     //todo: use queue, from SWN
@@ -37,6 +38,7 @@ Controls::Controls()
     AdcPeriph<AdcPeriphNum::ADC_1>::start_dma(LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
 }
 
+//every 11.6us (86.2kHz), ~400ns
 extern "C" void DMA2_Stream4_IRQHandler(void)
 {
     if (LL_DMA_IsActiveFlag_TC4(DMA2)) {
