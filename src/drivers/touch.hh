@@ -1,28 +1,28 @@
 #pragma once
 #include <stm32f7xx.h>
+#include "pin.hh"
 #include "debug.h"
 extern "C" {
 #include "i2c.h"
 }
-// enum class TouchChan { 
-// 	_1 = CS1, 
-// 	_2 = CS2, 
-// 	_3 = CS3, 
-// 	_1_2 = (CS1|CS2), 
-// 	_1_3 = (CS1|CS3), 
-// 	_2_3 = (CS2|CS3), 
-// 	_1_2_3 = (CS1|CS2|CS3), 
-// 	_0 = 0,
-// };
 
-using BitField = uint8_t;
-const BitField kCAP1203Chan1 = 0b001;
-const BitField kCAP1203Chan2 = 0b010;
-const BitField kCAP1203Chan3 = 0b100;
+
+
 const uint8_t kCAP1203DefaultAddr = 0x28<<1;
 const uint8_t kCAP1203ProductID = 0x6D;
 
-enum class CAP1203_Register
+
+namespace CAP1203 {
+using BitField = uint8_t;
+
+enum class Channel : BitField { 
+	_1 = 1, 
+	_2 = 2, 
+	_3 = 4, 
+};
+
+//Todo: convert to CamelCase
+enum class Register : BitField 
 {
     MAIN_CONTROL = 0x00,
     GENERAL_STATUS = 0x02,
@@ -68,103 +68,187 @@ enum class CAP1203_Register
     REVISION = 0xFF,
 };
 
-enum class CAP1203_MainCtl {
+enum class MainCtl : BitField {
 	Standby = 0x20,
 	Sleep = 0x08,
 	Interrupt = 0x01,
 };
 
-enum class TouchSensitivity {
-	_128x = 0,
-	_64x = 1,
-	_32x = 2,
-	_16x = 3,
-	_8x = 4,
-	_4x = 5,
-	_2x = 6,
-	_1x = 7
+enum class Sensitivity : BitField  {
+	_128x = 0<<4,
+	_64x = 1<<4,
+	_32x = 2<<4,
+	_16x = 3<<4,
+	_8x = 4<<4,
+	_4x = 5<<4,
+	_2x = 6<<4,
+	_1x = 7<<4,
 };
 
-template <class T> 
-uint8_t bit(T val) { return(static_cast<uint8_t>(val)); }
+enum class Config  : BitField {
+	InterruptOnRelease = (1<<0),
+};
 
-class CAP1203 {
+//casts an enum class as a bitfield
+template <typename Rt=BitField, typename T> 
+Rt constexpr const bitfield(T const val) { 
+	//assert(sizeof(Rt)>=sizeof(T) || val>>sizeof(Rt) == 0);
+	return(static_cast<Rt>(val)); 
+}
+template<typename... Args>
+BitField constexpr const bitfield(const Args... args) { 
+	return ( ... | bitfield(args));
+}
+
+//returns a BitField with one bit set
+template <typename Rt=BitField> 
+Rt constexpr const setbit(uint8_t const bitnum) { 
+	//assert(val<sizeof(BitField));
+	return(static_cast<Rt>(1<<bitnum));
+}
+
+};
+
+//   void testbf(){
+//   	auto sense16 = bitfield(CAP1203Sensitivity::_16x);
+//   	auto sense1 = bitfield(CAP1203Sensitivity::_1x);
+//   	auto senseauto_16_1 = bitfield<uint16_t>(CAP1203Sensitivity::_1x);
+//   	auto bit5 = setbit(4);
+//   	auto bit15 = setbit(15);
+//   	auto bitauto_15 = setbit<uint16_t>(15);
+//   	uint16_t bit16_15 = setbit<uint16_t>(15);
+//		auto chan123_16 = channels(kCAP1203Chan3, kCAP1203Chan1, kCAP1203Chan1);
+//   }
+
+//----------------------------
+
+using namespace CAP1203;
+
+class CAP1203Controller {
 public:
-	CAP1203(	BitField enabled_channels = (kCAP1203Chan1 | kCAP1203Chan2 | kCAP1203Chan3),
-	 			uint16_t addr = kCAP1203DefaultAddr) 
+	//Todo: varidiac parameters for brace initializer? BitField... Chans) : enabled_chan_(Chans...)
+	 CAP1203Controller(BitField enabled_channels = bitfield(Channel::_1, Channel::_2, Channel::_3),
+	 		 uint16_t addr = kCAP1203DefaultAddr)
 		: addr_(addr),
-		  enabled_chan_(enabled_channels)
-	{}
+		  enabled_chan_(enabled_channels) {}
 
 	bool begin() 
 	{
-		uint8_t product_id = read(CAP1203_Register::PROD_ID);
-		if (product_id != kCAP1203ProductID) 
-			return false; //wrong product ID, cannot begin
+		auto product_id = read(Register::PROD_ID);
+		// if (product_id != kCAP1203ProductID) 
+		// 	return false; //wrong product ID, cannot begin
+		auto manuf_id = read(Register::MANUFACTURE_ID);
 
-	    uint8_t status = read(CAP1203_Register::MAIN_CONTROL);
-	    status &= ~bit(CAP1203_MainCtl::Standby);
+		clear(Register::MAIN_CONTROL, bitfield(MainCtl::Standby));
+		
+	    uint8_t status = read(Register::MAIN_CONTROL);
+	    status &= ~bitfield(MainCtl::Standby);
+	    write(Register::MAIN_CONTROL, status);
 
-	    write(CAP1203_Register::MAIN_CONTROL, status);
-		write(CAP1203_Register::SENSITIVITY_CONTROL, enabled_chan_);
+		write(Register::SENSOR_INPUT_ENABLE, enabled_chan_);
 
 		//Todo: allow control over averaging and sampling time 
 		uint8_t average = 0x30;
 		uint8_t sampletime = 0x08;
 		uint8_t cycletime = 0x01;
-    	write(CAP1203_Register::AVERAGING_AND_SAMPLE_CONFIG, average|sampletime|cycletime); 
-    	
+    	write(Register::AVERAGING_AND_SAMPLE_CONFIG, average|sampletime|cycletime); 
+
     	return true;
     }
 
-	void set_sensitivity(TouchSensitivity sensitivity) {
-		// CAP1203_SetSensitivity(static_cast<uint8_t>(sensitivity));
+	void set_sensitivity(Sensitivity sensitivity) {
+		auto sensereg = read(Register::SENSITIVITY_CONTROL);
+		sensereg |= bitfield(sensitivity);
+	    write(Register::SENSITIVITY_CONTROL, sensereg);
 	}
+
+	void allow_multiple_simulataneous_pads() {
+
+	} 
+
+	void enable_alert_on_release() {
+		set(Register::CONFIG_2, bitfield(Config::InterruptOnRelease));
+	}
+	void clear_alert_on_release() {
+		clear(Register::CONFIG_2, bitfield(Config::InterruptOnRelease));
+	}
+
 	bool is_pad_touched(uint8_t padnum) {
 		if (!((1<<padnum) & enabled_chan_)) return false;
 
-		uint8_t status = read(CAP1203_Register::SENSOR_INPUT_STATUS);
+		auto status = read(Register::SENSOR_INPUT_STATUS);
 		if (status & (1<<padnum)) {
-			clear_interrupt();
+			clear_alert();
 			return true;
 		} else 
 		return false;
 	}
 
-	void clear_interrupt()
-	{
-	    uint8_t reg = read(CAP1203_Register::MAIN_CONTROL);
-	    reg &= ~bit(CAP1203_MainCtl::Interrupt);
-	    write(CAP1203_Register::MAIN_CONTROL, reg);
+	void enable_alerts() {
+		write(Register::INTERRUPT_ENABLE, enabled_chan_);
+	}
+	void enable_alerts(BitField channels) {
+		set(Register::INTERRUPT_ENABLE, channels);
+	}
+	void disable_alerts() {
+		write(Register::INTERRUPT_ENABLE, 0);
+	}
+	void disable_alerts(BitField channels) {
+		clear(Register::INTERRUPT_ENABLE, channels);
+	}
+	void clear_alert() {
+		clear(Register::MAIN_CONTROL, bitfield(MainCtl::Interrupt));
 	}
 
 private:
 	uint16_t const addr_;
 	BitField enabled_chan_;
 
-
-	uint8_t read(CAP1203_Register reg) {
+	uint8_t read(Register reg) {
 	    uint8_t value;
 	    i2c_mem_read(addr_, static_cast<uint16_t>(reg), &value, 1);
 	    return value;
 	}
 
-	void write(CAP1203_Register reg, uint8_t data) {
+	void write(Register reg, uint8_t data) {
 		i2c_mem_write(addr_, static_cast<uint16_t>(reg), &data, 1);
 	}
+	void set(Register reg, BitField bits) {
+		auto regstate = read(reg);
+		regstate |= bits;
+		write(reg, regstate);
+	}
+	void clear(Register reg, BitField bits) {
+		auto regstate = read(reg);
+		regstate &= ~bits;
+		write(reg, regstate);
+	}
 };
-
 
 class TouchCtl {
 public:
 	TouchCtl() {
 		sensor_.begin();
+		sensor_.set_sensitivity(Sensitivity::_1x);
+   		sensor_.enable_alerts();
 	}
-
 	bool touched(uint8_t padnum) {
 		return sensor_.is_pad_touched(padnum);
 	}
-
+	bool alert_received() {
+		if (alert_pin_.is_on()) {
+			sensor_.clear_alert();
+			// if (!alert_state_) {
+			// 	alert_state_=true;
+				return true;
+		// 	}
+		// } else {
+		// 	alert_state_=false;
+		}
+		return false;
+	}
 private:
-	CAP1203 sensor_ {kCAP1203Chan1 | kCAP1203Chan3};
+	PinInverted alert_pin_ {LL_GPIO_PIN_7, GPIOC, PinMode::INPUT};
+	bool alert_state_ = false;
+	CAP1203Controller sensor_ {bitfield(Channel::_1, Channel::_3)};
 };
