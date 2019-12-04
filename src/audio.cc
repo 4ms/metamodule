@@ -33,8 +33,9 @@ void Audio::process(Params &params, Block& in, Block& out) {
 
 	auto in_ = in.begin();
 	for (auto & out_ : out) {
-		out_.l = in_->l;
-		out_.r = in_->r;
+		out_.l = params.freq[0] * in_->l;
+		out_.r = params.freq[1] * in_->r;
+		in_++;
 	}
 }
 
