@@ -38,10 +38,12 @@ public:
 
 		return val;
 	}
-	T& top() {
 
+	//Return a reference to the first element
+	T& first() {
+		return buf_[tail_];
 	}
-	
+
 	void reset() {
 		// std::lock_guard<std::mutex> lock(mutex_);
 		head_ = tail_;

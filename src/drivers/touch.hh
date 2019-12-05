@@ -226,8 +226,11 @@ private:
 
 
 struct Message {
+    enum class Type {Read, Write};
+
     uint8_t address;
     uint8_t data;
+    Type dir;
 };
 
 //--------------
@@ -247,7 +250,7 @@ public:
 		if (alert_pin_.is_on()) {
 			if (!alert_state_) {
 				alert_state_=true;
-                messages_.push(Register::MAIN_CONTROL, bitfield(MainCtl::Interrupt));
+                messages_.put({Register::MAIN_CONTROL, bitfield(MainCtl::Interrupt), Message::Type::Write}); //Todo: get the reg/bitfield from CAP1203 class
 				return true;
 			}
 		} else {
@@ -261,8 +264,8 @@ public:
 
     //IRQ calls this
     void process_IRQ() {
-        auto& message = messages.top();
-        if (message.type == MessageType::Read) {
+        auto& message = messages_.first();
+        if (message.dir == Message::Type::Read) {
             message.data = i2c_last_read_data(); //???how to read data with I2C IT?
         }
         is_xmitting_ = false;
@@ -271,20 +274,16 @@ public:
     void handle_message_queue() {
         if (!is_xmitting_) {
 
-            if (messages.top()) {
-
-            }
-
             if (!messages.empty()) {
-                auto& message = messages.top();
+                auto& message = messages_.first();
 
-                if (message.type == MessageType::PendingWrite) {
+                if (message.type == Message::Type::Write) {
                     is_xmitting_ = true;
-                    sensor.write(message.address, message.data);
+                    sensor.start_write(message.address, message.data);
                 }
-                else if (message.type ==MessageType::PendingRead) {
+                else if (message.type ==Message::Type::Read) {
                     is_xmitting_ = true;
-                    sensor.read(message.address);
+                    sensor.start_read(message.address);
                 }
             }
         }
