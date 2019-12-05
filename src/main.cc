@@ -23,7 +23,8 @@ void main() {
 	audio.start();
 
 	while (1) {
-		ui.update();
+        ui.handle_sensor_queue();
+		ui.update(); //leds
 		__WFI();
 	}
 }

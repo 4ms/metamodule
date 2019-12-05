@@ -5,7 +5,7 @@
 extern "C" {
 #include "i2c.h"
 }
-
+#include "circular_buffer.hh"
 
 
 const uint8_t kCAP1203DefaultAddr = 0x28<<1;
@@ -209,7 +209,6 @@ private:
 	    i2c_mem_read(addr_, static_cast<uint16_t>(reg), &value, 1);
 	    return value;
 	}
-
 	void write(Register reg, uint8_t data) {
 		i2c_mem_write(addr_, static_cast<uint16_t>(reg), &data, 1);
 	}
@@ -225,6 +224,15 @@ private:
 	}
 };
 
+
+struct Message {
+    uint8_t address;
+    uint8_t data;
+};
+
+//--------------
+
+
 class TouchCtl {
 public:
 	TouchCtl() {
@@ -237,17 +245,54 @@ public:
 	}
 	bool alert_received() {
 		if (alert_pin_.is_on()) {
-			sensor_.clear_alert();
-			// if (!alert_state_) {
-			// 	alert_state_=true;
+			if (!alert_state_) {
+				alert_state_=true;
+                messages_.push(Register::MAIN_CONTROL, bitfield(MainCtl::Interrupt));
 				return true;
-		// 	}
-		// } else {
-		// 	alert_state_=false;
+			}
+		} else {
+			alert_state_=false;
 		}
 		return false;
 	}
+    void clear_alert() {
+        sensor_.clear_alert();
+    }
+
+    //IRQ calls this
+    void process_IRQ() {
+        auto& message = messages.top();
+        if (message.type == MessageType::Read) {
+            message.data = i2c_last_read_data(); //???how to read data with I2C IT?
+        }
+        is_xmitting_ = false;
+    }
+
+    void handle_message_queue() {
+        if (!is_xmitting_) {
+
+            if (messages.top()) {
+
+            }
+
+            if (!messages.empty()) {
+                auto& message = messages.top();
+
+                if (message.type == MessageType::PendingWrite) {
+                    is_xmitting_ = true;
+                    sensor.write(message.address, message.data);
+                }
+                else if (message.type ==MessageType::PendingRead) {
+                    is_xmitting_ = true;
+                    sensor.read(message.address);
+                }
+            }
+        }
+    }
+
 private:
+    bool is_xmitting_;
+    CircularBuffer<Message, 16> messages_;
 	PinInverted alert_pin_ {LL_GPIO_PIN_7, GPIOC, PinMode::INPUT};
 	bool alert_state_ = false;
 	CAP1203Controller sensor_ {bitfield(Channel::_1, Channel::_3)};

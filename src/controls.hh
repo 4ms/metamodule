@@ -9,7 +9,7 @@
 
 #include <array>
 
-const int kOverSampleAmt = 4;
+const int kOverSampleAmt = 8;
 
 //Todo: put Button and CVJack in their own files
 struct Button {

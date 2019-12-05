@@ -57,11 +57,9 @@ uint32_t i2c_read(uint16_t dev_address, uint8_t *data, uint16_t size)
 		return 1;
 }
 
-//HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
 uint32_t i2c_mem_read(uint16_t dev_address, uint16_t mem_address, uint8_t *data, uint16_t size)
 {
     HAL_StatusTypeDef   err;
-    //I2C_MEMADD_SIZE_8BIT
 
     while((err = HAL_I2C_Mem_Read(&i2c_, dev_address, mem_address, I2C_MEMADD_SIZE_8BIT, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK)
     {
@@ -73,6 +71,25 @@ uint32_t i2c_mem_read(uint16_t dev_address, uint16_t mem_address, uint8_t *data,
 		return 0;
 	else				
 		return 1;
+}
+
+uint32_t i2c_mem_read_intrpt(uint16_t dev_address, uint16_t mem_address, uint8_t *data, uint16_t size)
+{
+    HAL_StatusTypeDef   err;
+
+    while((err = HAL_I2C_Mem_Read_IT(&i2c_, dev_address, mem_address, I2C_MEMADD_SIZE_8BIT, data, size)) != HAL_OK)
+    {
+        if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
+            return 2;
+    }
+}
+
+void I2Cx_EV_IRQHandler(void) {
+
+}
+
+uint8_t i2c_is_ready(void) {
+    return (HAL_I2C_GetState(&i2c_) == HAL_I2C_STATE_READY);
 }
 
 void i2c_deinit(void)

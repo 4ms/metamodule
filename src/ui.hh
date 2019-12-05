@@ -40,18 +40,22 @@ public:
 		leds.mode[mode[1]].set_background(Colors::blue);
 
 		//Todo: timing on this is poor, respond only to interrupt pin
-		if ((last_update_tick_ - HAL_GetTick()) > 2000) {
+		// if ((last_update_tick_ - HAL_GetTick()) > 2000) {
 
-			if (controls.pads.touched(2))
-				if (++mode[0]>=4) mode[0]=0;
+		// 	if (controls.pads.touched(2))
+		// 		if (++mode[0]>=4) mode[0]=0;
 
-			if (controls.pads.touched(0))
-				if (++mode[1]>=4) mode[1]=0;
+		// 	if (controls.pads.touched(0))
+		// 		if (++mode[1]>=4) mode[1]=0;
 
-			last_update_tick_ = HAL_GetTick();
-		}
+		// 	last_update_tick_ = HAL_GetTick();
+		// }
 
 		leds.update();
+	}
+
+	void handle_sensor_queue() {
+		controls.pads.handle_message_queue();
 	}
 
 	uint32_t last_update_tick_;

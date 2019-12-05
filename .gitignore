@@ -6,15 +6,9 @@ LOCAL
 *.wav
 .DS_Store
 .vscode/
-
 main.map
-
 .clangd/
-
 compile_commands.json
-
 .tags
-
 tags
-
-src/.tags_sorted_by_file
+.tags_*
