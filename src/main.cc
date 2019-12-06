@@ -3,8 +3,8 @@
 #include "ui.hh"
 #include "debug.hh"
 System sys;
-Ui ui;
 Audio audio;
+Ui ui;
 Debug debug;
 
 //Todo: create LED update timer to run ui.update() (which just updates LEDs if there's a glow or flash)
@@ -21,6 +21,7 @@ void audio_loop(Block& in, Block& out) {
 void main() {
 	audio.register_callback(audio_loop);
 	audio.start();
+	ui.controls.begin();
 
 	while (1) {
         ui.handle_sensor_queue();

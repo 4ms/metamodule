@@ -9,40 +9,18 @@ enum Codec_Errors codec_I2C_init(void);
 I2C_HandleTypeDef i2c_;
 uint8_t already_init = 0;
 
-uint32_t i2c_write(uint16_t dev_address, uint8_t *data, uint16_t size)
+#define MAX_I2C_DATA_SIZE 16
+
+static i2c_irq_callback_func_type irq_callback;
+static uint8_t data_in_transit[MAX_I2C_DATA_SIZE];
+
+void set_i2c_irq_callback(i2c_irq_callback_func_type callback)
 {
-    HAL_StatusTypeDef   err;
-
-    while((err = HAL_I2C_Master_Transmit(&i2c_, dev_address, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK)
-    {
-        if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
-            return 2;
-    }
-
-	if (err==HAL_OK)
-		return 0;
-	else
-		return 1;
+	irq_callback = callback;
 }
 
-uint32_t i2c_mem_write(uint16_t dev_address, uint16_t mem_address, uint8_t *data, uint16_t size)
-{
-    HAL_StatusTypeDef   err;
 
-    while((err = HAL_I2C_Mem_Write(&i2c_, dev_address, mem_address, I2C_MEMADD_SIZE_8BIT, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK)
-    {
-        if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
-            return 2;
-    }
-
-	if (err==HAL_OK) 	
-		return 0;
-	else				
-		return 1;
-}
-
-uint32_t i2c_read(uint16_t dev_address, uint8_t *data, uint16_t size)
-{
+uint32_t i2c_read(uint16_t dev_address, uint8_t *data, uint16_t size) {
     HAL_StatusTypeDef   err;
 
     while((err = HAL_I2C_Master_Receive(&i2c_, dev_address, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK)
@@ -51,14 +29,22 @@ uint32_t i2c_read(uint16_t dev_address, uint8_t *data, uint16_t size)
             return 2;
     }
 
-	if (err==HAL_OK) 	
-		return 0;
-	else				
-		return 1;
+    return err==HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
 }
 
-uint32_t i2c_mem_read(uint16_t dev_address, uint16_t mem_address, uint8_t *data, uint16_t size)
-{
+uint32_t i2c_write(uint16_t dev_address, uint8_t *data, uint16_t size) {
+    HAL_StatusTypeDef   err;
+
+    while((err = HAL_I2C_Master_Transmit(&i2c_, dev_address, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK)
+    {
+        if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
+            return 2;
+    }
+
+    return err==HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
+}
+
+uint32_t i2c_mem_read(uint16_t dev_address, uint16_t mem_address, uint8_t *data, uint16_t size) {
     HAL_StatusTypeDef   err;
 
     while((err = HAL_I2C_Mem_Read(&i2c_, dev_address, mem_address, I2C_MEMADD_SIZE_8BIT, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK)
@@ -67,25 +53,63 @@ uint32_t i2c_mem_read(uint16_t dev_address, uint16_t mem_address, uint8_t *data,
             return 2;
     }
 
-	if (err==HAL_OK) 	
-		return 0;
-	else				
-		return 1;
+    return err==HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
 }
 
-uint32_t i2c_mem_read_intrpt(uint16_t dev_address, uint16_t mem_address, uint8_t *data, uint16_t size)
-{
+uint32_t i2c_mem_write(uint16_t dev_address, uint16_t mem_address, uint8_t *data, uint16_t size) {
     HAL_StatusTypeDef   err;
 
-    while((err = HAL_I2C_Mem_Read_IT(&i2c_, dev_address, mem_address, I2C_MEMADD_SIZE_8BIT, data, size)) != HAL_OK)
+    while((err = HAL_I2C_Mem_Write(&i2c_, dev_address, mem_address, I2C_MEMADD_SIZE_8BIT, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK)
     {
         if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
             return 2;
     }
+
+    return err==HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
 }
 
-void I2Cx_EV_IRQHandler(void) {
+//Reads one byte and stores data in a local static variable
+uint32_t i2c_mem_read_register_IT(uint16_t dev_address, uint16_t mem_address)
+{
+    HAL_StatusTypeDef   err;
 
+    while((err = HAL_I2C_Mem_Read_IT(&i2c_, dev_address, mem_address, I2C_MEMADD_SIZE_8BIT, data_in_transit, 1)) != HAL_OK)
+    {
+        if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
+            return 2;
+    }
+    return err==HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
+}
+
+uint32_t i2c_mem_write_register_IT(uint16_t dev_address, uint16_t mem_address, uint8_t data)
+{
+    HAL_StatusTypeDef   err;
+    data_in_transit[0] = data;
+
+    while((err = HAL_I2C_Mem_Write_IT(&i2c_, dev_address, mem_address, I2C_MEMADD_SIZE_8BIT, data_in_transit, 1)) != HAL_OK)
+    {
+        if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
+            return 2;
+    }
+
+    return err==HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
+}
+
+
+
+void I2Cx_EV_IRQHandler(void) {
+	HAL_I2C_EV_IRQHandler(&i2c_);
+}
+void I2Cx_ER_IRQHandler(void) {
+	HAL_I2C_ER_IRQHandler(&i2c_);
+}
+
+void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c) {
+	irq_callback(0);
+}
+
+void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
+	irq_callback(data_in_transit[0]);
 }
 
 uint8_t i2c_is_ready(void) {
@@ -95,6 +119,11 @@ uint8_t i2c_is_ready(void) {
 void i2c_deinit(void)
 {
     I2C_CLK_DISABLE();
+}
+
+void i2c_enable_IT(void) 
+{
+	__HAL_I2C_ENABLE_IT(&i2c_, I2C_IT_ERRI | I2C_IT_TCI | I2C_IT_RXI | I2C_IT_TXI);
 }
 
 void i2c_GPIO_init(void)

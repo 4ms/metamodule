@@ -5,12 +5,10 @@
 extern "C" {
 #include "i2c.h"
 }
-#include "circular_buffer.hh"
-
+#include "util/circular_buffer.hh"
 
 const uint8_t kCAP1203DefaultAddr = 0x28<<1;
 const uint8_t kCAP1203ProductID = 0x6D;
-
 
 namespace CAP1203 {
 using BitField = uint8_t;
@@ -200,18 +198,28 @@ public:
 		clear(Register::MAIN_CONTROL, bitfield(MainCtl::Interrupt));
 	}
 
+
 private:
 	uint16_t const addr_;
 	BitField enabled_chan_;
 
+public:
 	uint8_t read(Register reg) {
 	    uint8_t value;
 	    i2c_mem_read(addr_, static_cast<uint16_t>(reg), &value, 1);
 	    return value;
 	}
+	void read_in_bg(Register reg) {
+	    i2c_mem_read_register_IT(addr_, static_cast<uint16_t>(reg));
+	}
+
 	void write(Register reg, uint8_t data) {
 		i2c_mem_write(addr_, static_cast<uint16_t>(reg), &data, 1);
 	}
+	void write_in_bg(Register reg, BitField data) {
+	    i2c_mem_write_register_IT(addr_, static_cast<uint16_t>(reg), static_cast<uint8_t>(data));
+	}
+
 	void set(Register reg, BitField bits) {
 		auto regstate = read(reg);
 		regstate |= bits;
@@ -224,33 +232,83 @@ private:
 	}
 };
 
-
-struct Message {
-    enum class Type {Read, Write};
-
-    uint8_t address;
-    uint8_t data;
-    Type dir;
-};
-
 //--------------
 
+template <typename MemAddrT, typename DataT>
+struct Message {
+    enum class Type {Read, Write, ReadAlterWrite};
+    Message (Type type=Type::Write, MemAddrT reg=Register::MAIN_CONTROL, DataT bits=bitfield(0)) 
+	: dir(type), 
+	  address(static_cast<MemAddrT>(reg)), 
+	  data(static_cast<DataT>(bits))
+	{}
+
+	// Message() 
+	// : dir(Type::ReadAlterWrite), 
+	//   address(Register::MAIN_CONTROL), 
+	//   data(bitfield(0))
+	// {}
+
+    Type dir;
+    MemAddrT address;
+    DataT data;
+    DataT bits_to_set;
+    DataT bits_to_clear;
+};
+
+// struct RisingEdgeDetector {
+// 	typedef bool check_func_type();
+
+// 	RisingEdgeDetector(check_func_type& check_func) : check_func_(check_func) {}
+// 	bool check() {
+// 		if (check_func_()) {
+// 			if (!last_measured_state_) {
+// 				last_measured_state_=true;
+// 				return true;
+// 			}
+// 		} else {
+// 			last_measured_state_=false;
+// 		}
+// 		return false;
+// 	}
+
+// 	check_func_type check_func_;
+// 	bool last_measured_state_=false;
+// };
+// using JustActivated = RisingEdgeDetector;
+
+using TouchMessage = Message<Register, BitField>;
 
 class TouchCtl {
 public:
 	TouchCtl() {
+	}
+
+	void begin() {
+		i2c_init();
+		i2c_enable_IT();
+		set_i2c_irq_callback((void (*)(uint8_t))(process_message_completed));
 		sensor_.begin();
 		sensor_.set_sensitivity(Sensitivity::_1x);
    		sensor_.enable_alerts();
-	}
+   	}
+
 	bool touched(uint8_t padnum) {
 		return sensor_.is_pad_touched(padnum);
 	}
-	bool alert_received() {
+
+	bool check_alert_received() {
 		if (alert_pin_.is_on()) {
 			if (!alert_state_) {
 				alert_state_=true;
-                messages_.put({Register::MAIN_CONTROL, bitfield(MainCtl::Interrupt), Message::Type::Write}); //Todo: get the reg/bitfield from CAP1203 class
+                messages_.put( TouchMessage{TouchMessage::Type::Write, Register::MAIN_CONTROL, bitfield(0)} ); 
+                messages_.put( TouchMessage{TouchMessage::Type::Read, Register::SENSOR_INPUT_STATUS} ); 
+
+                // auto bits_to_set = bitfield(0);
+                // auto bits_to_clear = bitfield(MainCtl::Interrupt);
+                // messages_.put(TouchMessage{TouchMessage::Type::ReadAlterWrite, Register::MAIN_CONTROL, bits_to_set, bits_to_clear}); 
+
+                //Todo: get the reg/bitfield from CAP1203 class
 				return true;
 			}
 		} else {
@@ -258,40 +316,59 @@ public:
 		}
 		return false;
 	}
-    void clear_alert() {
-        sensor_.clear_alert();
-    }
 
-    //IRQ calls this
-    void process_IRQ() {
+	//IRQ handler callback
+    static void process_message_completed(uint8_t received_data) {
         auto& message = messages_.first();
-        if (message.dir == Message::Type::Read) {
-            message.data = i2c_last_read_data(); //???how to read data with I2C IT?
+        if (message.dir == TouchMessage::Type::ReadAlterWrite) {
+        	//Convert to a Write message, and keep in queue
+        	message.data = received_data;
+        	message.data |= message.bits_to_set;
+        	message.data &= ~(message.bits_to_clear);
+        	message.dir = TouchMessage::Type::Write;
         }
+        else if (message.dir == TouchMessage::Type::Read) {
+        	message.data = received_data;
+        	data_received_ = true;
+        }
+        else
+        	messages_.remove_first();
+
         is_xmitting_ = false;
     }
 
     void handle_message_queue() {
-        if (!is_xmitting_) {
 
-            if (!messages.empty()) {
-                auto& message = messages_.first();
+    	if (data_received_) {
+    		auto& message = messages_.first();
+    		if (message.address==Register::SENSOR_INPUT_STATUS) {
+    			if (bitfield(message.data) & bitfield(Channel::_1)) {
+    				//Save state of pad 1 = touched
+    			}
+    		}
+        	messages_.remove_first();
+    	}
 
-                if (message.type == Message::Type::Write) {
-                    is_xmitting_ = true;
-                    sensor.start_write(message.address, message.data);
-                }
-                else if (message.type ==Message::Type::Read) {
-                    is_xmitting_ = true;
-                    sensor.start_read(message.address);
-                }
-            }
-        }
+    	if (!is_xmitting_) {
+	        if (!messages_.empty()) {
+	            auto& message = messages_.first();
+
+	            if (message.dir == TouchMessage::Type::Write) {
+	                is_xmitting_ = true;
+	                sensor_.write_in_bg(message.address, message.data);
+	            }
+	            else if (message.dir ==TouchMessage::Type::Read) {
+	                is_xmitting_ = true;
+	                sensor_.read_in_bg(message.address);
+	            }
+	        }
+	    }
     }
 
 private:
-    bool is_xmitting_;
-    CircularBuffer<Message, 16> messages_;
+    static inline bool is_xmitting_;
+    static inline bool data_received_;
+    static inline CircularBuffer<TouchMessage, 16> messages_;
 	PinInverted alert_pin_ {LL_GPIO_PIN_7, GPIOC, PinMode::INPUT};
 	bool alert_state_ = false;
 	CAP1203Controller sensor_ {bitfield(Channel::_1, Channel::_3)};

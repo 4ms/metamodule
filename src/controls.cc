@@ -16,6 +16,7 @@ void Controls::read()
     freq2CV.read();
     res1CV.read();
     res2CV.read();
+    pads.check_alert_received();
 	Debug::set(0,false);
 
     //read_rotary

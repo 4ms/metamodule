@@ -85,10 +85,14 @@ struct Controls : private Hardware
     JackSense in1_sense {in1_sense_pin};
     JackSense in2_sense {in2_sense_pin};
 
-    static int32_t rotary_turn[2];  //-1, 0, 1
-    static Button rotary_button[2]; //0, 1
-    TouchCtl pads;
+    static inline TouchCtl pads;
+    static inline int32_t rotary_turn[2];  //-1, 0, 1
+    static inline Button rotary_button[2]; //0, 1
 
     Controls();
     static void read(); //Note: must be static so it can be called from IRQHandler
+    
+    void begin() {
+        pads.begin();
+    }
 };

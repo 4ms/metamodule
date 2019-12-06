@@ -1,15 +1,15 @@
 #pragma once
 #include <cstdio>
 #include <memory>
+#include <array>
 // #include <mutex>
 
 template <class T, size_t max_size_>
 class CircularBuffer {
 public:
-	explicit CircularBuffer(size_t size) :
+	CircularBuffer() {};
 		// buf_(std::unique_ptr<T[]>(new T[size])),
 		// max_size_(size)
-	{}
 
 	void put(T item) {
 		// std::lock_guard<std::mutex> lock(mutex_);
@@ -39,6 +39,13 @@ public:
 		return val;
 	}
 
+	void remove_first() {
+		if (!empty()) {
+			full_ = false;
+			tail_ = (tail_ + 1) % max_size_;
+		}
+	}
+
 	//Return a reference to the first element
 	T& first() {
 		return buf_[tail_];
@@ -56,7 +63,6 @@ public:
 	}
 
 	bool full() const {
-		//If tail is ahead the head by 1, we are full
 		return full_;
 	}
 
@@ -80,7 +86,7 @@ public:
 private:
 	// std::mutex mutex_;
 	// std::unique_ptr<T[]> buf_;
-	std::array<T, max_size_> buf_;
+	std::array<T, max_size_> buf_{};
 	size_t head_ = 0;
 	size_t tail_ = 0;
 	bool full_ = 0;
