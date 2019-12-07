@@ -11,13 +11,13 @@
 
 void Controls::read()
 {
-    Debug::set(0,true);
+    Debug::set_0(true);
     freq1CV.read();
     freq2CV.read();
     res1CV.read();
     res2CV.read();
     pads.check_alert_received();
-	Debug::set(0,false);
+	Debug::set_0(false);
 
     //read_rotary
     // Controls::rotary_turn[0] = read_rotary(0);

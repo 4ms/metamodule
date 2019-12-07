@@ -1,11 +1,9 @@
 /* 
  * pin.hh
  *
- * Based on: GPIO.hpp by Peter Züger (12.08.2017)
- * (https://gitlab.com/peterzuger/let)
- * Adapted to use ST's LL drivers by Dan Green.
- * Portions are copyright (c) 2019 Peter Züger
- * Portions are copyright (c) 2019 Dan Green <danngreen1@gmail.com>
+ * Inspried by GPIO.hpp by Peter Züger (12.08.2017) https://gitlab.com/peterzuger/let
+ * Portions may be copyright (c) 2019 Peter Züger
+ * Remaining code is copyright (c) 2019 Dan Green <danngreen1@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 #pragma once
 #include "system.hh"
 #include "stm32f7xx.h"
@@ -26,11 +25,35 @@
 #include "stm32f7xx_ll_bus.h"
 
 //Todo: CamelCase, not ALL CAPS
-enum class PinPolarity { NORMAL, INVERTED };
-enum class PinMode { INPUT, OUTPUT, ANALOG, ALT };
-enum class PinPull { UP, DOWN, NONE };
-enum class PinSpeed { LOW, MEDIUM, HIGH, VERY_HIGH };
-enum class PinOType { PUSHPULL, OPENDRAIN };
+enum class PinPolarity { 
+    NORMAL, 
+    INVERTED 
+};
+
+enum class PinMode : uint32_t { 
+    INPUT = LL_GPIO_MODE_INPUT, 
+    OUTPUT = LL_GPIO_MODE_OUTPUT,
+    ANALOG = LL_GPIO_MODE_ANALOG, 
+    ALT = LL_GPIO_MODE_ALTERNATE 
+};
+
+enum class PinPull : uint32_t { 
+    UP = LL_GPIO_PULL_UP,
+    DOWN = LL_GPIO_PULL_DOWN,
+    NONE = LL_GPIO_PULL_NO
+};
+
+enum class PinSpeed : uint32_t { 
+    LOW = LL_GPIO_SPEED_FREQ_LOW, 
+    MEDIUM = LL_GPIO_SPEED_FREQ_MEDIUM, 
+    HIGH = LL_GPIO_SPEED_FREQ_HIGH, 
+    VERY_HIGH = LL_GPIO_SPEED_FREQ_VERY_HIGH 
+};
+
+enum class PinOType : uint32_t { 
+    PUSHPULL = LL_GPIO_OUTPUT_PUSHPULL, 
+    OPENDRAIN = LL_GPIO_OUTPUT_OPENDRAIN
+};
 
 enum class GPIO : uint32_t {
     A = GPIOA_BASE, 
@@ -52,11 +75,10 @@ enum class GPIO : uint32_t {
     #endif
 };
 
-// template <auto port>
-
-template<GPIO port, uint8_t pin> //Todo: does auto pin work? Might save an asm extend to use uint32_t
-class PinL {
-    static_assert((pin <= 15) && (pin >= 0), "GPIO Pin pin out of range [0 ... 15]");
+//Todo: does auto pin work? Might save an asm extend to use uint32_t
+template<GPIO port, uint8_t pin, PinPolarity polarity=PinPolarity::NORMAL> 
+struct PinL {
+    static_assert((pin <= 15) && (pin >= 0), "GPIO pin number must be in the range 0 - 15");
 
     auto GPIOPort(GPIO port_) {
         return reinterpret_cast<GPIO_TypeDef *>(port_);
@@ -72,20 +94,20 @@ class PinL {
     PinL(PinMode m, PinOType o){
         System::enable_gpio_rcc(GPIOPort(port));
         mode(m);
-        OutputType(o);
+        out_type(o);
     }
 
     PinL(PinMode m, PinPull pp){
         System::enable_gpio_rcc(GPIOPort(port));
         mode(m);
-        PullUpDown(pp);
+        pull(pp);
     }
 
     PinL(PinMode m, uint8_t af, PinPull pp=PinPull::NONE){
         System::enable_gpio_rcc(GPIOPort(port));
         mode(m);
-        AlternateFunction(af);
-        PullUpDown(pp);
+        alt_func(af);
+        pull(pp);
     }
 
     operator bool(){
@@ -99,116 +121,64 @@ class PinL {
 
     void write(bool val){
         if(val)
-            set();
+            high();
         else
-            clear();
+            low();
     }
     bool read(){
-        return (GPIOPort(port)->IDR & pin ? true : false);
-        // return memory<std::uint32_t>(P+R::IDR) & BIT(p);
+        return (GPIOPort(port)->IDR & (1<<pin) ? true : false);
+        // Todo: compare to:
+        // return LL_GPIO_IsInputPinSet(GPIOPort(port), 1<<pin);
     }
 
-    void set(){
+    void high(){
         GPIOPort(port)->BSRR = 1 << pin;
-        // memory<std::uint32_t>(P+R::BSRR) = BIT(p);
+        // Todo: compare to:
+        // LL_GPIO_SetOutputPin(GPIOPort(port), 1<<pin);
     }
 
-    void clear(){
+    void low(){
         GPIOPort(port)->BSRR = 1<<(pin+16);
-        // memory<std::uint16_t>(P+R::BSRR+2) = BIT(p);
+        // Todo: compare to:
+        // LL_GPIO_ResetOutputPin(GPIOPort(port), 1<<pin);
     }
 
     void toggle(){
         GPIOPort(port)->ODR ^= 1<<pin;
-        // memory<std::uint32_t>(P+R::ODR) ^= BIT(p);
+        // Todo: compare to:
+        // LL_GPIO_TogglePin(GPIOPort(port), 1<<pin);
     }
+
+    //on and off 
+    void on() {if (polarity==PinPolarity::INVERTED) low(); else high();}
+    void off() {if (polarity==PinPolarity::INVERTED) high(); else low();}
+    void set_to(uint32_t v) {if (v) on(); else off();}
+
+    uint8_t is_on() {return (polarity==PinPolarity::INVERTED) ? !read() : read();}
+
 
     void mode(PinMode m){
-        // memory<std::uint32_t>(P+R::MODER) &= ~(0b11 << (p*2));
-
-        // switch(m){
-        // case PinMode::Input:
-        //     memory<std::uint32_t>(P+R::MODER) |= (B::Input << (p*2));
-        //     break;
-
-        // case PinMode::Output:
-        //     memory<std::uint32_t>(P+R::MODER) |= (B::Output << (p*2));
-        //     break;
-
-        // case PinMode::Alternate:
-        //     memory<std::uint32_t>(P+R::MODER) |= (B::Alternate << (p*2));
-        //     break;
-
-        // case PinMode::Analog:
-        //     memory<std::uint32_t>(P+R::MODER) |= (B::Analog << (p*2));
-        //     break;
-
-        // default:
-        //     break;
-        // }
+        LL_GPIO_SetPinMode(GPIOPort(port), 1<<pin, static_cast<uint32_t>(m));
     }
 
-    void OutputType(PinOType o){
-        // if(o == PinOType::OpenDrain)
-        //     memory<std::uint32_t>(P+R::OTYPER) |= BIT(p);
-        // else
-        //     memory<std::uint32_t>(P+R::OTYPER) &= ~BIT(p);
+    void out_type(PinOType o){
+        LL_GPIO_SetPinOutputType(GPIOPort(port), 1<<pin, static_cast<uint32_t>(o));
     }
 
-    void OutputSpeed(PinSpeed o){
-        // memory<std::uint32_t>(P+R::OSPEEDR) &= ~(0b11 << (p*2));
-
-        // switch(o){
-        // case PinSpeed::Slow:
-        //     memory<std::uint32_t>(P+R::OSPEEDR) |= (B::Slow << (p*2));
-        //     break;
-
-        // case PinSpeed::Medium:
-        //     memory<std::uint32_t>(P+R::OSPEEDR) |= (B::Medium << (p*2));
-        //     break;
-
-        // case PinSpeed::Fast:
-        //     memory<std::uint32_t>(P+R::OSPEEDR) |= (B::Fast << (p*2));
-        //     break;
-
-        // case PinSpeed::High:
-        //     memory<std::uint32_t>(P+R::OSPEEDR) |= (B::High << (p*2));
-        //     break;
-
-        // default:
-        //     break;
-        // }
+    void out_speed(PinSpeed s){
+        LL_GPIO_SetPinSpeed(GPIOPort(port), 1<<pin, static_cast<uint32_t>(s));
     }
 
-    void PullUpDown(PinPull m){
-        // memory<std::uint32_t>(P+R::PUPDR) &= ~(0b11 << (p*2));
-
-        // switch(m){
-        // case PinPull::NOPULL:
-        //     memory<std::uint32_t>(P+R::PUPDR) |= (B::NoPull << (p*2));
-        //     break;
-
-        // case PinPull::PULLUP:
-        //     memory<std::uint32_t>(P+R::PUPDR) |= (B::Pullup << (p*2));
-        //     break;
-
-        // case PinPull::PULLDOWN:
-        //     memory<std::uint32_t>(P+R::PUPDR) |= (B::Pulldown << (p*2));
-        //     break;
-
-        // default:
-        //     break;
-        // }
+    void pull(PinPull p){
+        LL_GPIO_SetPinPull(GPIOPort(port), 1<<pin, static_cast<uint32_t>(p));
     }
 
-    void AlternateFunction(const uint8_t f){
-        // if(p < 8){
-        //     memory<std::uint32_t>(P+R::AFRL) &= ~(0xF << (p*4));
-        //     memory<std::uint32_t>(P+R::AFRL) |= (f << (p*4));
-        // }else{
-        //     memory<std::uint32_t>(P+R::AFRH) &= ~(0xF << ((p-8)*4));
-        //     memory<std::uint32_t>(P+R::AFRH) |= (f << ((p-8)*4));
-        // }
+    void alt_func(const uint8_t af){
+//        if (pin >= LL_GPIO_PIN_8)
+        if (pin >= 8)
+            LL_GPIO_SetAFPin_8_15(GPIOPort(port), 1<<pin, af);
+        else
+            LL_GPIO_SetAFPin_0_7(GPIOPort(port), 1<<pin, af);
     }
 };   
 

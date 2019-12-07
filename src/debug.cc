@@ -1,8 +1,5 @@
 #include "debug.hh"
 
-void Debug::set(int pin, bool value) {
-  if (value)
-    pins_[pin].high();
-  else
-    pins_[pin].low();
+void Debug::set_0(bool value) {
+    pin0.set_to(value);
 }
