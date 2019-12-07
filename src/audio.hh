@@ -45,7 +45,7 @@ private:
 
 class Audio {
 public:
-	Audio();
+	//Audio();
 	void start();
   void process(Params &params, Block& in, Block& out);
   void register_callback(void callbackfunc(Block& in, Block& out));

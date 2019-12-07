@@ -53,7 +53,7 @@ MCU = $(CPU) -mthumb -mlittle-endian $(FPU) $(FLOAT-ABI)
 
 ARCH_CFLAGS = -DARM_MATH_CM7 -D'__FPU_PRESENT=1' -DUSE_HAL_DRIVER -DUSE_FULL_LL_DRIVER -DSTM32F732xx
 
-OPTFLAG = -O3
+OPTFLAG = -O0
 
 CFLAGS = -g2 -fno-common \
 	$(ARCH_CFLAGS) $(MCU) \

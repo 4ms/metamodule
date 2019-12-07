@@ -11,8 +11,10 @@
  */ 
 void CAP1203_Initialize(void)
 {
-    CAP1203_ActiveMode();                       //All three sensors are monitored in Active mode
-    CAP1203_Write(SENSINPUTEN,CS1|CS2|CS3);     //Set active inputs
+    unsigned char ctrl_reg = CAP1203_ActiveMode();
+    //Todo: check ctrl_reg for...something? 
+
+    CAP1203_Write(SENSINPUTEN, CS1|CS2|CS3);
     CAP1203_Write(AVERAGE_SAMP_CONF, AVG|SAMP_TIME|CYCLE_TIME); //Setup averaging and sampling time 
     //CAP1203_Write(CONFIG1,~TOUCH);                    //The SMBus timeout and idle functionality are disabled
 }
@@ -147,9 +149,9 @@ void CAP1203_EnableInterrupt(button_type pin)
  *@param sensitivity Change button sensitivity settings.
  *@return none
  */
-void CAP1203_SetSensitivity(sensitivity_type sensitivity)
+void CAP1203_SetSensitivity(uint8_t sensitivity)
 {
-    CAP1203_Write(0x00,sensitivity);
+    CAP1203_Write(SENSITIVITY, sensitivity);
 }
 
 /**
@@ -194,7 +196,7 @@ unsigned int CAP1203_ReadID(void)
  */
 void CAP1203_Write(unsigned char reg, unsigned char data)
 {
-    i2c_mem_read(CAP1203ADDR, reg, &data, 1);
+    i2c_mem_write(CAP1203ADDR, reg, &data, 1);
 }
 
 /**

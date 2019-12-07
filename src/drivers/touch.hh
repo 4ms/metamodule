@@ -137,11 +137,8 @@ public:
 		// 	return false; //wrong product ID, cannot begin
 		auto manuf_id = read(Register::MANUFACTURE_ID);
 
-		clear(Register::MAIN_CONTROL, bitfield(MainCtl::Standby));
-		
-	    uint8_t status = read(Register::MAIN_CONTROL);
-	    status &= ~bitfield(MainCtl::Standby);
-	    write(Register::MAIN_CONTROL, status);
+		// clear(Register::MAIN_CONTROL, bitfield(MainCtl::Standby));
+		write(Register::MAIN_CONTROL, 0);
 
 		write(Register::SENSOR_INPUT_ENABLE, enabled_chan_);
 
@@ -286,29 +283,45 @@ public:
 
 	void begin() {
 		i2c_init();
-		i2c_enable_IT();
 		set_i2c_irq_callback((void (*)(uint8_t))(process_message_completed));
 		sensor_.begin();
-		sensor_.set_sensitivity(Sensitivity::_1x);
+		sensor_.set_sensitivity(Sensitivity::_128x);
    		sensor_.enable_alerts();
+		i2c_enable_IT();
    	}
 
 	bool touched(uint8_t padnum) {
-		return sensor_.is_pad_touched(padnum);
+		return pressed_[padnum & 1];
+	}
+
+	bool just_touched(uint8_t padnum) {
+		if (just_pressed_[padnum & 1]) {
+			just_pressed_[padnum & 1] = false;
+			return true;
+		} else
+			return false;
+	}
+
+	bool just_released(uint8_t padnum) {
+		if (just_released_[padnum & 1]) {
+			just_released_[padnum & 1] = false;
+			return true;
+		} else
+			return false;
 	}
 
 	bool check_alert_received() {
 		if (alert_pin_.is_on()) {
 			if (!alert_state_) {
 				alert_state_=true;
-                messages_.put( TouchMessage{TouchMessage::Type::Write, Register::MAIN_CONTROL, bitfield(0)} ); 
+                //Todo: get the reg/bitfield from CAP1203 class
+                // messages_.put( TouchMessage{TouchMessage::Type::Write, Register::MAIN_CONTROL, bitfield(0)} ); 
                 messages_.put( TouchMessage{TouchMessage::Type::Read, Register::SENSOR_INPUT_STATUS} ); 
 
                 // auto bits_to_set = bitfield(0);
                 // auto bits_to_clear = bitfield(MainCtl::Interrupt);
                 // messages_.put(TouchMessage{TouchMessage::Type::ReadAlterWrite, Register::MAIN_CONTROL, bits_to_set, bits_to_clear}); 
 
-                //Todo: get the reg/bitfield from CAP1203 class
 				return true;
 			}
 		} else {
@@ -343,7 +356,12 @@ public:
     		auto& message = messages_.first();
     		if (message.address==Register::SENSOR_INPUT_STATUS) {
     			if (bitfield(message.data) & bitfield(Channel::_1)) {
-    				//Save state of pad 1 = touched
+    				pressed_[0] = true;
+    				just_pressed_[0] = true;
+    			}
+    			if (bitfield(message.data) & bitfield(Channel::_3)) {
+    				pressed_[1] = true;
+    				just_pressed_[1] = true;
     			}
     		}
         	messages_.remove_first();
@@ -366,6 +384,9 @@ public:
     }
 
 private:
+	bool pressed_[2];
+	bool just_pressed_[2];
+	bool just_released_[2];
     static inline bool is_xmitting_;
     static inline bool data_received_;
     static inline CircularBuffer<TouchMessage, 16> messages_;

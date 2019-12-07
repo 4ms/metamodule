@@ -19,9 +19,9 @@ void audio_loop(Block& in, Block& out) {
 }
 
 void main() {
-	audio.register_callback(audio_loop);
-	audio.start();
 	ui.controls.begin();
+	audio.register_callback(audio_loop);
+	// audio.start();
 
 	while (1) {
         ui.handle_sensor_queue();

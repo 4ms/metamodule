@@ -96,11 +96,10 @@ uint32_t i2c_mem_write_register_IT(uint16_t dev_address, uint16_t mem_address, u
 }
 
 
-
-void I2Cx_EV_IRQHandler(void) {
+void I2C2_EV_IRQHandler(void) {
 	HAL_I2C_EV_IRQHandler(&i2c_);
 }
-void I2Cx_ER_IRQHandler(void) {
+void I2C2_ER_IRQHandler(void) {
 	HAL_I2C_ER_IRQHandler(&i2c_);
 }
 
@@ -123,7 +122,7 @@ void i2c_deinit(void)
 
 void i2c_enable_IT(void) 
 {
-	__HAL_I2C_ENABLE_IT(&i2c_, I2C_IT_ERRI | I2C_IT_TCI | I2C_IT_RXI | I2C_IT_TXI);
+	__HAL_I2C_ENABLE_IT(&i2c_, I2C_IT_ERRI | I2C_IT_TCI | I2C_IT_RXI | I2C_IT_TXI | I2C_IT_STOPI | I2C_IT_NACKI | I2C_IT_ADDRI);
 }
 
 void i2c_GPIO_init(void)
