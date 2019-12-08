@@ -128,6 +128,7 @@ $(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
 $(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
 	mkdir -p $(dir $@)
 	$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
+# 	$(CXX) -c $(OPTFLAG) $(CXXFLAGS) -fverbose-asm -Wa,-adhln $< > $(BUILDDIR)/$(basename $<).lst
 
 $(BUILDDIR)/%.o: %.s
 	mkdir -p $(dir $@)
