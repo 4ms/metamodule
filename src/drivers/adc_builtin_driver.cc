@@ -106,6 +106,7 @@ uint8_t AdcPeriph<adc_n>::add_channel(const AdcChanNum channel, const uint32_t s
 	LL_ADC_SetChannelSamplingTime(ADCx_, __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_int), sampletime);
 	uint8_t rank_decimal = num_channels_;
 	num_channels_++;
+	ranks_[channel_int] = rank_decimal;
 	return rank_decimal;
 }
 

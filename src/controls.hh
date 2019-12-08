@@ -23,20 +23,16 @@ struct Button {
 //and disallows assignment
 //and is initialized to an rvalue
 
-struct CVJack {
-    CVJack(IAdcChanBase& adc_channel)
-    : val_ref_(adc_channel.get_val_ref())
-    {}
+template <AdcPeriphNum p, AdcChanNum c> 
+struct CVJack : AdcChanL<p,c> {
 
-    void read() {
-        oversampler_.add_val(val_ref_);
-    }
+    void read_TESTME() { oversampler_.add_val(AdcPeriph<p>::get_val(c)); }
+    void read() { oversampler_.add_val(this->get_val()); }
 
-    uint16_t get() {return oversampler_.val();}
-
+    uint16_t get() { return oversampler_.val(); }
 private:
-    volatile uint16_t &val_ref_;
     Oversampler<uint16_t, kOverSampleAmt> oversampler_;
+
 };
 
 struct JackSense {
@@ -51,19 +47,16 @@ private:
 //Hardware class
 //Represents peripherals and I/O that connects to control hardware (e.g. ADCs, GPIO pins, etc..)
 struct Hardware {
-    //Note: These are created on the stack, then Pin() ctor and add_channel are called, copying the values to/from stack.
-    //      It's not clear, but there might be several copies happening (all are destroyed, but it makes initialization slower than necessary.
-    //Todo: Compare to using rvalue references to move, and compare timing when optimized
 
-    static inline AdcChan<AdcPeriphNum::ADC_1> freq1cv_adc {AdcChanNum::Chan10, {LL_GPIO_PIN_0, GPIOC, PinMode::ANALOG}};
-    static inline AdcChan<AdcPeriphNum::ADC_1> res1cv_adc {AdcChanNum::Chan11, {LL_GPIO_PIN_1, GPIOC, PinMode::ANALOG}};
-    static inline AdcChan<AdcPeriphNum::ADC_1> freq2cv_adc {AdcChanNum::Chan12, {LL_GPIO_PIN_2, GPIOC, PinMode::ANALOG}};
-    static inline AdcChan<AdcPeriphNum::ADC_1> res2cv_adc {AdcChanNum::Chan13, {LL_GPIO_PIN_3, GPIOC, PinMode::ANALOG}};
+    PinL<GPIO::C, 0> freq1cv_pin {PinMode::ANALOG};
+    PinL<GPIO::C, 1> res1cv_pin {PinMode::ANALOG};
+    PinL<GPIO::C, 2> freq2cv_pin {PinMode::ANALOG};
+    PinL<GPIO::C, 3> res2cv_pin {PinMode::ANALOG};
 
-    Pin freq2_sense_pin {LL_GPIO_PIN_14, GPIOC, PinMode::INPUT, PinPull::UP};
-    Pin res2_sense_pin {LL_GPIO_PIN_4, GPIOC, PinMode::INPUT, PinPull::UP};
-    Pin in1_sense_pin {LL_GPIO_PIN_13, GPIOC, PinMode::INPUT, PinPull::UP};
-    Pin in2_sense_pin {LL_GPIO_PIN_15, GPIOC, PinMode::INPUT, PinPull::UP};
+    PinL<GPIO::C, 14> freq2_sense_pin {PinMode::INPUT, PinPull::UP};
+    PinL<GPIO::C, 4>  res2_sense_pin {PinMode::INPUT, PinPull::UP};
+    PinL<GPIO::C, 13> in1_sense_pin {PinMode::INPUT, PinPull::UP};
+    PinL<GPIO::C, 15> in2_sense_pin {PinMode::INPUT, PinPull::UP};
 
     //Add TIM pins here:
     //TimPwm<TIMx::TIM_8>
@@ -75,15 +68,15 @@ struct Hardware {
 //and stores values into objects representing each hardware object (e.g. CVJack, JackSense, Rotary, Button...)
 struct Controls : private Hardware
 {
-    static inline CVJack freq1CV { freq1cv_adc };
-    static inline CVJack res1CV { res1cv_adc };
-    static inline CVJack freq2CV { freq2cv_adc };
-    static inline CVJack res2CV { res2cv_adc };
+    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::Chan10> freq1CV;
+    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::Chan11> res1CV;
+    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::Chan12> freq2CV;
+    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::Chan13> res2CV;
 
-    JackSense freq2_sense {freq2_sense_pin};
-    JackSense res2_sense {res2_sense_pin};
-    JackSense in1_sense {in1_sense_pin};
-    JackSense in2_sense {in2_sense_pin};
+    // static inline JackSense freq2_sense {freq2_sense_pin};
+    // static inline JackSense res2_sense {res2_sense_pin};
+    // static inline JackSense in1_sense {in1_sense_pin};
+    // static inline JackSense in2_sense {in2_sense_pin};
 
     static inline TouchCtl pads;
     static inline int32_t rotary_turn[2];  //-1, 0, 1
