@@ -80,30 +80,30 @@ template<GPIO port, uint8_t pin, PinPolarity polarity=PinPolarity::NORMAL>
 struct PinL {
     static_assert((pin <= 15) && (pin >= 0), "GPIO pin number must be in the range 0 - 15");
 
-    auto GPIOPort(GPIO port_) {
+    volatile auto GPIOPort(GPIO port_) {
         return reinterpret_cast<GPIO_TypeDef *>(port_);
     }
 
     PinL() = default;
 
-    PinL(PinMode m){
+    constexpr PinL(PinMode m){
         System::enable_gpio_rcc(GPIOPort(port));
         mode(m);
     }
 
-    PinL(PinMode m, PinOType o){
+    constexpr PinL(PinMode m, PinOType o){
         System::enable_gpio_rcc(GPIOPort(port));
         mode(m);
         out_type(o);
     }
 
-    PinL(PinMode m, PinPull pp){
+    constexpr PinL(PinMode m, PinPull pp){
         System::enable_gpio_rcc(GPIOPort(port));
         mode(m);
         pull(pp);
     }
 
-    PinL(PinMode m, uint8_t af, PinPull pp=PinPull::NONE){
+    constexpr PinL(PinMode m, uint8_t af, PinPull pp=PinPull::NONE){
         System::enable_gpio_rcc(GPIOPort(port));
         mode(m);
         alt_func(af);

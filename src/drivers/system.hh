@@ -78,7 +78,7 @@ public:
 	    HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 	}
 
-    static void enable_gpio_rcc(GPIO_TypeDef* port) {
+    static constexpr void enable_gpio_rcc(GPIO_TypeDef* port) {
     	if (port==nullptr) return;
         #ifdef GPIOA
         if (port==GPIOA && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN)) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
