@@ -7,10 +7,31 @@ extern "C" {
 }
 #include "util/circular_buffer.hh"
 
-const uint8_t kCAP1203DefaultAddr = 0x28<<1;
-const uint8_t kCAP1203ProductID = 0x6D;
+//casts an enum class as a bitfield
+template <typename Rt=uint8_t, typename T> 
+Rt constexpr const bitfield(T const val) { 
+	//assert(sizeof(Rt)>=sizeof(T) || val>>sizeof(Rt) == 0);
+	return(static_cast<Rt>(val)); 
+}
+template<typename... Args>
+uint8_t constexpr const bitfield(const Args... args) { 
+	return ( ... | bitfield(args));
+}
+
+//returns a BitField with one bit set
+template <typename Rt=uint8_t> 
+Rt constexpr const setbit(uint8_t const bitnum) { 
+	//assert(val<sizeof(uint8_t));
+	return(static_cast<Rt>(1<<bitnum));
+}
+
+
 
 namespace CAP1203 {
+
+const uint8_t kDefaultAddr = 0x28<<1;
+const uint8_t kProductID = 0x6D;
+
 using BitField = uint8_t;
 
 enum class Channel : BitField { 
@@ -87,54 +108,19 @@ enum class Config  : BitField {
 	InterruptOnRelease = (1<<0),
 };
 
-//casts an enum class as a bitfield
-template <typename Rt=BitField, typename T> 
-Rt constexpr const bitfield(T const val) { 
-	//assert(sizeof(Rt)>=sizeof(T) || val>>sizeof(Rt) == 0);
-	return(static_cast<Rt>(val)); 
-}
-template<typename... Args>
-BitField constexpr const bitfield(const Args... args) { 
-	return ( ... | bitfield(args));
-}
-
-//returns a BitField with one bit set
-template <typename Rt=BitField> 
-Rt constexpr const setbit(uint8_t const bitnum) { 
-	//assert(val<sizeof(BitField));
-	return(static_cast<Rt>(1<<bitnum));
-}
-
-};
-
-//   void testbf(){
-//   	auto sense16 = bitfield(CAP1203Sensitivity::_16x);
-//   	auto sense1 = bitfield(CAP1203Sensitivity::_1x);
-//   	auto senseauto_16_1 = bitfield<uint16_t>(CAP1203Sensitivity::_1x);
-//   	auto bit5 = setbit(4);
-//   	auto bit15 = setbit(15);
-//   	auto bitauto_15 = setbit<uint16_t>(15);
-//   	uint16_t bit16_15 = setbit<uint16_t>(15);
-//		auto chan123_16 = channels(kCAP1203Chan3, kCAP1203Chan1, kCAP1203Chan1);
-//   }
-
-//----------------------------
-
-using namespace CAP1203;
-
-class CAP1203Controller {
+class Controller {
 public:
-	//Todo: varidiac parameters for brace initializer? BitField... Chans) : enabled_chan_(Chans...)
-	 CAP1203Controller(BitField enabled_channels = bitfield(Channel::_1, Channel::_2, Channel::_3),
-	 		 uint16_t addr = kCAP1203DefaultAddr)
+	 Controller(BitField enabled_channels = bitfield(Channel::_1, Channel::_2, Channel::_3),
+	 		 uint16_t addr = kDefaultAddr)
 		: addr_(addr),
 		  enabled_chan_(enabled_channels) {}
 
 	bool begin() 
 	{
 		auto product_id = read(Register::PROD_ID);
-		// if (product_id != kCAP1203ProductID) 
-		// 	return false; //wrong product ID, cannot begin
+		if (product_id != kProductID) 
+			return false; //Todo: handle error wrong product ID, cannot begin
+
 		auto manuf_id = read(Register::MANUFACTURE_ID);
 
 		// clear(Register::MAIN_CONTROL, bitfield(MainCtl::Standby));
@@ -164,12 +150,13 @@ public:
 	void enable_alert_on_release() {
 		set(Register::CONFIG_2, bitfield(Config::InterruptOnRelease));
 	}
-	void clear_alert_on_release() {
+	void disable_alert_on_release() {
 		clear(Register::CONFIG_2, bitfield(Config::InterruptOnRelease));
 	}
 
 	bool is_pad_touched(uint8_t padnum) {
-		if (!((1<<padnum) & enabled_chan_)) return false;
+		if (!((1<<padnum) & enabled_chan_))
+			return false;
 
 		auto status = read(Register::SENSOR_INPUT_STATUS);
 		if (status & (1<<padnum)) {
@@ -194,7 +181,6 @@ public:
 	void clear_alert() {
 		clear(Register::MAIN_CONTROL, bitfield(MainCtl::Interrupt));
 	}
-
 
 private:
 	uint16_t const addr_;
@@ -229,28 +215,28 @@ public:
 	}
 };
 
+};
+
+
 //--------------
 
 template <typename MemAddrT, typename DataT>
 struct Message {
     enum class Type {Read, Write, ReadAlterWrite};
-    Message (Type type=Type::Write, MemAddrT reg=Register::MAIN_CONTROL, DataT bits=bitfield(0)) 
+
+	Message() = default; 
+
+    Message (Type type, MemAddrT reg, DataT bits=0) 
 	: dir(type), 
 	  address(static_cast<MemAddrT>(reg)), 
 	  data(static_cast<DataT>(bits))
 	{}
 
-	// Message() 
-	// : dir(Type::ReadAlterWrite), 
-	//   address(Register::MAIN_CONTROL), 
-	//   data(bitfield(0))
-	// {}
-
     Type dir;
     MemAddrT address;
     DataT data;
-    DataT bits_to_set;
-    DataT bits_to_clear;
+    DataT alter_setbits;
+    DataT alter_clearbits;
 };
 
 // struct RisingEdgeDetector {
@@ -274,7 +260,7 @@ struct Message {
 // };
 // using JustActivated = RisingEdgeDetector;
 
-using TouchMessage = Message<Register, BitField>;
+using TouchMessage = Message<CAP1203::Register, CAP1203::BitField>;
 
 class TouchCtl {
 public:
@@ -284,8 +270,12 @@ public:
 	void begin() {
 		i2c_init();
 		set_i2c_irq_callback((void (*)(uint8_t))(process_message_completed));
-		sensor_.begin();
-		sensor_.set_sensitivity(Sensitivity::_128x);
+		if (!sensor_.begin()) {
+			//panic? reset I2C and retry?
+			//...
+			return;
+		}
+		sensor_.set_sensitivity(CAP1203::Sensitivity::_128x);
    		sensor_.enable_alerts();
 		i2c_enable_IT();
    	}
@@ -315,13 +305,8 @@ public:
 			if (!alert_state_) {
 				alert_state_=true;
                 //Todo: get the reg/bitfield from CAP1203 class
-                messages_.put( TouchMessage{TouchMessage::Type::Write, Register::MAIN_CONTROL, bitfield(0)} ); 
-                messages_.put( TouchMessage{TouchMessage::Type::Read, Register::SENSOR_INPUT_STATUS} ); 
-
-                // auto bits_to_set = bitfield(0);
-                // auto bits_to_clear = bitfield(MainCtl::Interrupt);
-                // messages_.put(TouchMessage{TouchMessage::Type::ReadAlterWrite, Register::MAIN_CONTROL, bits_to_set, bits_to_clear}); 
-
+                messages_.put( TouchMessage{TouchMessage::Type::Read, CAP1203::Register::SENSOR_INPUT_STATUS} ); 
+                messages_.put( TouchMessage{TouchMessage::Type::Write, CAP1203::Register::MAIN_CONTROL, bitfield(0)} ); 
 				return true;
 			}
 		} else {
@@ -336,8 +321,8 @@ public:
         if (message.dir == TouchMessage::Type::ReadAlterWrite) {
         	//Convert to a Write message, and keep in queue
         	message.data = received_data;
-        	message.data |= message.bits_to_set;
-        	message.data &= ~(message.bits_to_clear);
+        	message.data |= message.alter_setbits;
+        	message.data &= ~(message.alter_clearbits);
         	message.dir = TouchMessage::Type::Write;
         }
         else if (message.dir == TouchMessage::Type::Read) {
@@ -351,19 +336,19 @@ public:
     }
 
     void handle_message_queue() {
-
     	if (data_received_) {
     		auto& message = messages_.first();
-    		if (message.address==Register::SENSOR_INPUT_STATUS) {
-    			if (bitfield(message.data) & bitfield(Channel::_1)) {
+    		if (message.address==CAP1203::Register::SENSOR_INPUT_STATUS) {
+    			if (bitfield(message.data) & bitfield(CAP1203::Channel::_1)) {
     				pressed_[0] = true;
     				just_pressed_[0] = true;
     			}
-    			if (bitfield(message.data) & bitfield(Channel::_3)) {
+    			if (bitfield(message.data) & bitfield(CAP1203::Channel::_3)) {
     				pressed_[1] = true;
     				just_pressed_[1] = true;
     			}
     		}
+    		data_received_ = false;
         	messages_.remove_first();
     	}
 
@@ -390,7 +375,7 @@ private:
     static inline bool is_xmitting_;
     static inline bool data_received_;
     static inline CircularBuffer<TouchMessage, 16> messages_;
-	PinInverted alert_pin_ {LL_GPIO_PIN_7, GPIOC, PinMode::INPUT};
+	PinL<GPIO::C, 7, PinPolarity::INVERTED> alert_pin_ {PinMode::INPUT};
 	bool alert_state_ = false;
-	CAP1203Controller sensor_ {bitfield(Channel::_1, Channel::_3)};
+	CAP1203::Controller sensor_ {bitfield(CAP1203::Channel::_1, CAP1203::Channel::_3)};
 };
