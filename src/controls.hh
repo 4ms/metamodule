@@ -24,8 +24,8 @@ struct Button {
 //and disallows assignment
 //and is initialized to an rvalue (move assignment?)
 
-template <AdcPeriphNum p, AdcChanNum c> 
-struct CVJack : AdcChan<p,c, uint32_t> {
+template <AdcPeripheral p(), AdcChanNum c> 
+struct CVJack : AdcChan<p, c, uint32_t> {
 
     void read_TESTME() { oversampler_.add_val(AdcPeriph<p>::get_val(c)); }
     void read() { oversampler_.add_val(this->get_val()); }
@@ -35,10 +35,6 @@ private:
     Oversampler<uint16_t, kOverSampleAmt> oversampler_;
 };
 
-template <ADC_TypeDef* p(), AdcChanNum c> 
-struct CVJackP : AdcChanP<p,c, uint32_t> {
-
-};
 
 // using JackSense<port, pin> = PinL<port, pin, PinPolarity::INVERTED>;
 
@@ -75,12 +71,10 @@ struct Hardware {
 //and stores values into objects representing each hardware object (e.g. CVJack, JackSense, Rotary, Button...)
 struct Controls : private Hardware
 {
-    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::_10> freq1CV;
-    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::_11> res1CV;
-    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::_12> freq2CV;
-    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::_13> res2CV;
-
-    static inline CVJackP <ADC_1P, AdcChanNum::_9> testCV;
+    static inline CVJack <ADC_1, AdcChanNum::_10> freq1CV;
+    static inline CVJack <ADC_1, AdcChanNum::_11> res1CV;
+    static inline CVJack <ADC_1, AdcChanNum::_12> freq2CV;
+    static inline CVJack <ADC_1, AdcChanNum::_13> res2CV;
 
     // static inline JackSense freq2_sense {freq2_sense_pin};
     // static inline JackSense res2_sense {res2_sense_pin};

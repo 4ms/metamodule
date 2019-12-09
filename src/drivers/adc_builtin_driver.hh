@@ -33,62 +33,60 @@
 #include "stm32f7xx_ll_adc.h"
 #include "pin.hh"
 
-// enum Peripherals { Periph1 = ADC1_BASE, Periph2 = ADC2_BASE, Periph3 = ADC3_BASE }; //usage: Adc::Periph1
-enum class AdcChanNum { _0, _1, _2, _3, _4, _5, _6, _7,
-						_8, _9, _10, _11, _12, _13, _14, _15 };
-enum class AdcPeriphNum {ADC_1, ADC_2, ADC_3};
+enum class AdcChanNum { _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15 };
 
-template <ADC_TypeDef* ADC_()> class AdcPeriphP;
-template <AdcPeriphNum periph> class AdcPeriph;
+using AdcPeripheral = ADC_TypeDef*;
 
-template <AdcPeriphNum p, AdcChanNum c, typename T> 
+constexpr AdcPeripheral ADC_1() { return ADC1; }
+constexpr AdcPeripheral ADC_2() { return ADC2; }
+constexpr AdcPeripheral ADC_3() { return ADC3; }
+
+
+template <AdcPeripheral ADC_X()> class AdcPeriph;
+
+template <AdcPeripheral ADC_X(), AdcChanNum c, typename T> 
 class AdcChan {
 public:
 	AdcChan(const uint32_t sampletime=LL_ADC_SAMPLINGTIME_144CYCLES) {
-		auto init_adc_once = AdcPeriph<p>::AdcInstance();
-		AdcPeriph<p>::add_channel(c, sampletime);
+		auto init_adc_once = AdcPeriph<ADC_X>::AdcInstance();
+		AdcPeriph<ADC_X>::add_channel(c, sampletime);
 	}
+
 	T& get_val_ref() {  //experimental, perhaps dangerous? Todo: create a read-only struct to return
-		return AdcPeriph<p>::get_val_ref(c); 
+		return AdcPeriph<ADC_X>::get_val_ref(c); 
 	}
+
 	T get_val() { 
-		return AdcPeriph<p>::get_val(c); 
+		return AdcPeriph<ADC_X>::get_val(c); 
 	}
-	void start_dma(const uint32_t ADC_DMA_Stream, const uint32_t ADC_DMA_Channel, const IRQn_Type ADC_DMA_Streamx_IRQn) { 
-		AdcPeriph<p>::start_dma(ADC_DMA_Stream, ADC_DMA_Channel, ADC_DMA_Streamx_IRQn);
+
+	void start_dma( DMA_TypeDef * const DMAx, 
+					const uint32_t ADC_DMA_Stream, 
+					const uint32_t ADC_DMA_Channel, 
+					const IRQn_Type ADC_DMA_Streamx_IRQn) 
+	{ 
+		AdcPeriph<ADC_X>::start_dma(DMAx, ADC_DMA_Stream, ADC_DMA_Channel, ADC_DMA_Streamx_IRQn);
 	}
 };
 
-
-//Todo: use an int for the template parameter, set to ADC1_BASE, ADC2_BASE, ...
-//We could just redefine the enum AdcPEriphNum elements to = ADC1_BASE, etc
-//Then do (reinterpret_cast<ADC_TypeDef *>(periph)) to get the peripheral 
-constexpr ADC_TypeDef* ADC_1P() { return ADC1; }
-
-template <ADC_TypeDef *ADC_(), AdcChanNum c, typename T> 
-class AdcChanP {
-};
-
-template <ADC_TypeDef* ADC_()> 
-class AdcPeriphP {
-	template <ADC_TypeDef* p(), AdcChanNum c, typename TT>
-	friend class AdcChanP;
-
-};
-
-template <AdcPeriphNum p>
+template <AdcPeripheral ADC_X()> 
 class AdcPeriph
 {
-	template <AdcPeriphNum, AdcChanNum, typename>
+	template <AdcPeripheral p(), AdcChanNum c, typename T>
 	friend class AdcChan;
 
 public:
-	static void start_dma(const uint32_t ADC_DMA_Stream, const uint32_t ADC_DMA_Channel, const IRQn_Type ADC_DMA_Streamx_IRQn);
+	static void start_dma(DMA_TypeDef * const DMAx, 
+						  const uint32_t ADC_DMA_Stream, 
+						  const uint32_t ADC_DMA_Channel, 
+						  const IRQn_Type ADC_DMA_Streamx_IRQn);
+
 	static uint16_t get_val(const AdcChanNum channel) { 
 		return dma_buffer_[ 
 			ranks_[static_cast<uint8_t>(channel)] 
 		];
 	}
+
 	static uint16_t& get_val_ref(const AdcChanNum channel) { 
 		return dma_buffer_[ 
 			ranks_[static_cast<uint8_t>(channel)] 
@@ -103,9 +101,8 @@ private:
 	//start_dma() //overload with no parameters
 
 	AdcPeriph();
-	static AdcPeriph<p> &AdcInstance();
+	static AdcPeriph<ADC_X> &AdcInstance();
 
-	static inline ADC_TypeDef *ADCx_;
 	static inline uint8_t num_channels_;
 	static inline uint8_t ranks_[16];
 	static inline uint16_t dma_buffer_[16]; //todo: use vector for dynamic
