@@ -123,6 +123,10 @@ void i2c_deinit(void)
 void i2c_enable_IT(void) 
 {
 	__HAL_I2C_ENABLE_IT(&i2c_, I2C_IT_ERRI | I2C_IT_TCI | I2C_IT_RXI | I2C_IT_TXI | I2C_IT_STOPI | I2C_IT_NACKI | I2C_IT_ADDRI);
+    NVIC_SetPriority(I2C2_EV_IRQn, (1<<2) | 1);
+    NVIC_EnableIRQ(I2C2_EV_IRQn);
+    NVIC_SetPriority(I2C2_ER_IRQn, (1<<2) | 2);
+    NVIC_EnableIRQ(I2C2_ER_IRQn);
 }
 
 void i2c_GPIO_init(void)
@@ -154,10 +158,10 @@ enum I2CErrors i2c_init(void)
 	i2c_.Init.Timing 				= 0x20404768;//0x20445757; //Todo: use set_i2c_timing()
 	i2c_.Init.OwnAddress1		 	= 0x33;
 	i2c_.Init.AddressingMode 		= I2C_ADDRESSINGMODE_7BIT;
-	i2c_.Init.DualAddressMode 	= I2C_DUALADDRESS_DISABLE;
-	i2c_.Init.OwnAddress2 		= 0;
-	i2c_.Init.OwnAddress2Masks	= I2C_OA2_NOMASK;
-	i2c_.Init.GeneralCallMode 	= I2C_GENERALCALL_DISABLE;
+	i2c_.Init.DualAddressMode 	    = I2C_DUALADDRESS_DISABLE;
+	i2c_.Init.OwnAddress2 		    = 0;
+	i2c_.Init.OwnAddress2Masks	    = I2C_OA2_NOMASK;
+	i2c_.Init.GeneralCallMode 	    = I2C_GENERALCALL_DISABLE;
 	i2c_.Init.NoStretchMode 		= I2C_NOSTRETCH_DISABLE;
 
 	if (HAL_I2C_Init(&i2c_) != HAL_OK)

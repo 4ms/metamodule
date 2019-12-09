@@ -13,8 +13,10 @@
 #define I2C_SCL_PIN				     GPIO_PIN_10
 #define I2C_SDA_PIN				     GPIO_PIN_11
 
-#define I2Cx_EV_IRQHandler      	I2C2_EV_IRQHandler
-#define I2Cx_ER_IRQHandler      	I2C2_ER_IRQHandler
+#define I2Cx_EV_IRQHandler          I2C2_EV_IRQHandler
+#define I2Cx_ER_IRQHandler          I2C2_ER_IRQHandler
+#define I2Cx_EV_IRQn                I2C2_EV_IRQn
+#define I2Cx_ER_IRQn                I2C2_ER_IRQn
 
 
 enum I2CErrors {
