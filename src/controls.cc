@@ -12,11 +12,13 @@
 void Controls::read()
 {
     Debug::set_0(true);
+    
     freq1_cv.read();
     freq2_cv.read();
     res1_cv.read();
     res2_cv.read();
     pads.check_alert_received();
+
 	Debug::set_0(false);
 
     //read_rotary
@@ -39,7 +41,6 @@ Controls::Controls()
     //   1) call the start_dma() method of just one ADC channel per ADC periph,
     //or 2) call every ADC channels' start_dma() method but make AdcPeriph::start_dma() static so it can check if it's already been started
     //or 3) start the dma with the AdcPeriph<ADC_1>::start_dma(...) format
-//
 
     freq1_cv.start_dma(DMA2, LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
     // AdcPeriph<ADC_1>::start_dma(DMA2, LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);

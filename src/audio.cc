@@ -39,14 +39,11 @@ void Audio::process(Params &params, Block& in, Block& out) {
 	}
 }
 
-// Audio::Audio() {
-// }
-
 void Audio::start() {
-	// i2c_init();
-	// codec_init(kSampleRate);
-	// init_audio_DMA(kSampleRate, reinterpret_cast<int16_t *>(tx_buf_.data()), reinterpret_cast<int16_t *>(rx_buf_.data()), kDMABlockSize * sizeof(Frame));
-	// start_audio();
+	i2c_init();
+	codec_init(kSampleRate);
+	init_audio_DMA(kSampleRate, reinterpret_cast<int16_t *>(tx_buf_.data()), reinterpret_cast<int16_t *>(rx_buf_.data()), kDMABlockSize * sizeof(Frame));
+	start_audio();
 }
 
 void Audio::register_callback(void callbackfunc(Block& in, Block& out)) {

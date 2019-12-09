@@ -20,11 +20,14 @@ struct Button {
 
 template <AdcPeripheral p(), AdcChanNum c> 
 struct CVJack : AdcChan<p, c, uint32_t> {
-
     // void read_TESTME() { oversampler_.add_val(AdcPeriph<p>::get_val(c)); }
-    void read() { oversampler_.add_val(this->get_val()); }
+    void read() { 
+        oversampler_.add_val(this->get_val()); 
+    }
 
-    uint16_t get() { return oversampler_.val(); }
+    uint16_t get() { 
+        return oversampler_.val(); 
+    }
 private:
     Oversampler<uint16_t, kOverSampleAmt> oversampler_;
 };
@@ -45,7 +48,6 @@ struct SpecialPinAssignments {
     PinL<GPIO::C, 1> res1cv_pin {PinMode::ANALOG};
     PinL<GPIO::C, 2> freq2cv_pin {PinMode::ANALOG};
     PinL<GPIO::C, 3> res2cv_pin {PinMode::ANALOG};
-
 
     //Add TIM pins here:
     //TimPwm<TIMx::TIM_8>

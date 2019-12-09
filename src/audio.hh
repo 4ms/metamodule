@@ -14,8 +14,6 @@ struct Frame {
 
 using DMABlock = std::array<Frame, kDMABlockSize>;
 using Block = std::array<Frame, kBlockSize>;
-// using DMABlock = Frame[kDMABlockSize];
-// using Block = Frame[kBlockSize];
 
 //Todo: Triosc belongs elsewhere
 
@@ -45,7 +43,7 @@ private:
 
 class Audio {
 public:
-	//Audio();
+	Audio() = default;
 	void start();
   void process(Params &params, Block& in, Block& out);
   void register_callback(void callbackfunc(Block& in, Block& out));
