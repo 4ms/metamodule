@@ -154,7 +154,7 @@ struct PinL {
     void off() {if (polarity==PinPolarity::INVERTED) high(); else low();}
     void set_to(uint32_t v) {if (v) on(); else off();}
 
-    uint8_t is_on() {return (polarity==PinPolarity::INVERTED) ? !read() : read();}
+    bool is_on() {return (polarity==PinPolarity::INVERTED) ? !read() : read();}
 
 
     void mode(PinMode m){
