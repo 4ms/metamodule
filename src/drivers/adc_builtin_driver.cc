@@ -37,27 +37,27 @@ template class AdcPeriph<AdcPeriphNum::ADC_1>;
 template class AdcPeriph<AdcPeriphNum::ADC_2>;
 template class AdcPeriph<AdcPeriphNum::ADC_3>;
 
-template <AdcPeriphNum adc_n>
-AdcPeriph<adc_n>& AdcPeriph<adc_n>::AdcInstance()
+template <AdcPeriphNum p>
+AdcPeriph<p>& AdcPeriph<p>::AdcInstance()
 {
-	// static_assert(adc_n == ADC_1 || adc_n == ADC_2 || adc_n == ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
-	static AdcPeriph<adc_n> Adc_;
+	// static_assert(p == ADC_1 || p == ADC_2 || p == ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
+	static AdcPeriph<p> Adc_;
 	return Adc_;
 }
 
-template <AdcPeriphNum adc_n>
-AdcPeriph<adc_n>::AdcPeriph()
+template <AdcPeriphNum p>
+AdcPeriph<p>::AdcPeriph()
 {
-	// static_assert(adc_n==ADC_1 || adc_n==ADC_2 || adc_n==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
-	if (adc_n==AdcPeriphNum::ADC_1) {
+	// static_assert(p==ADC_1 || p==ADC_2 || p==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
+	if (p==AdcPeriphNum::ADC_1) {
 		ADCx_ = ADC1;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
 	}
-	else if (adc_n==AdcPeriphNum::ADC_2) {
+	else if (p==AdcPeriphNum::ADC_2) {
 		ADCx_ = ADC2;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC2);
 	}
-	else if (adc_n==AdcPeriphNum::ADC_3) {
+	else if (p==AdcPeriphNum::ADC_3) {
 		ADCx_ = ADC3;
 		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC3);
 	}
@@ -96,9 +96,8 @@ constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(const uint8_t x) {
 	return (x << ADC_SQR1_L_Pos);
 }
 
-//Todo: add overload that allows for Rank to be set manually (then start_dma must verify and fix any gaps in seqeuence ranks)
-template <AdcPeriphNum adc_n>
-uint8_t AdcPeriph<adc_n>::add_channel(const AdcChanNum channel, const uint32_t sampletime)
+template <AdcPeriphNum p>
+void AdcPeriph<p>::add_channel(const AdcChanNum channel, const uint32_t sampletime)
 {
 	uint32_t channel_int = static_cast<uint32_t>(channel);
 	LL_ADC_REG_SetSequencerRanks(ADCx_, _LL_ADC_DECIMAL_NB_TO_RANK(num_channels_), __LL_ADC_DECIMAL_NB_TO_CHANNEL(channel_int));
@@ -107,15 +106,14 @@ uint8_t AdcPeriph<adc_n>::add_channel(const AdcChanNum channel, const uint32_t s
 	uint8_t rank_decimal = num_channels_;
 	num_channels_++;
 	ranks_[channel_int] = rank_decimal;
-	return rank_decimal;
 }
 
-template <AdcPeriphNum adc_n>
-void AdcPeriph<adc_n>::start_dma(const uint32_t ADC_DMA_Stream, const uint32_t ADC_DMA_Channel, const IRQn_Type ADC_DMA_Streamx_IRQn)
+//Todo: add DMA# to parameter list
+template <AdcPeriphNum p>
+void AdcPeriph<p>::start_dma(const uint32_t ADC_DMA_Stream, const uint32_t ADC_DMA_Channel, const IRQn_Type ADC_DMA_Streamx_IRQn)
 {
 	if (!num_channels_) return;
 
-	//Todo: add DMA# to parameter list
 	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2);
 	LL_DMA_SetChannelSelection(DMA2, ADC_DMA_Stream, ADC_DMA_Channel);
 	LL_DMA_ConfigTransfer(DMA2,

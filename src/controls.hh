@@ -9,6 +9,7 @@
 
 #include <array>
 
+
 const int kOverSampleAmt = 8;
 
 //Todo: put Button and CVJack in their own files
@@ -19,12 +20,12 @@ struct Button {
 };
 
 
-//Todo: create a Read-only class that returns a reference when read (rvalue), 
+//Todo: create a Read-only class that returns its value when read, 
 //and disallows assignment
-//and is initialized to an rvalue
+//and is initialized to an rvalue (move assignment?)
 
 template <AdcPeriphNum p, AdcChanNum c> 
-struct CVJack : AdcChanL<p,c> {
+struct CVJack : AdcChan<p,c, uint32_t> {
 
     void read_TESTME() { oversampler_.add_val(AdcPeriph<p>::get_val(c)); }
     void read() { oversampler_.add_val(this->get_val()); }
@@ -32,17 +33,23 @@ struct CVJack : AdcChanL<p,c> {
     uint16_t get() { return oversampler_.val(); }
 private:
     Oversampler<uint16_t, kOverSampleAmt> oversampler_;
+};
+
+template <ADC_TypeDef* p(), AdcChanNum c> 
+struct CVJackP : AdcChanP<p,c, uint32_t> {
 
 };
 
-struct JackSense {
-    JackSense(Pin pin) : pin_(pin) {}
-    bool is_plugged() {return plugged_;}
+// using JackSense<port, pin> = PinL<port, pin, PinPolarity::INVERTED>;
 
-private:
-    Pin pin_;
-    bool plugged_ = false;
-};
+// template<GPIO port, uint8_t pin> 
+// struct JackSense : PinL {
+//     JackSense(PinL sensepin) : pin_(sensepin) {}
+//     bool is_plugged() {return pin_.is_on();}
+
+// private:
+//     PinL<port, pin, PinPolarity::INVERTED> pin_;
+// };
 
 //Hardware class
 //Represents peripherals and I/O that connects to control hardware (e.g. ADCs, GPIO pins, etc..)
@@ -68,10 +75,12 @@ struct Hardware {
 //and stores values into objects representing each hardware object (e.g. CVJack, JackSense, Rotary, Button...)
 struct Controls : private Hardware
 {
-    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::Chan10> freq1CV;
-    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::Chan11> res1CV;
-    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::Chan12> freq2CV;
-    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::Chan13> res2CV;
+    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::_10> freq1CV;
+    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::_11> res1CV;
+    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::_12> freq2CV;
+    static inline CVJack <AdcPeriphNum::ADC_1, AdcChanNum::_13> res2CV;
+
+    static inline CVJackP <ADC_1P, AdcChanNum::_9> testCV;
 
     // static inline JackSense freq2_sense {freq2_sense_pin};
     // static inline JackSense res2_sense {res2_sense_pin};
