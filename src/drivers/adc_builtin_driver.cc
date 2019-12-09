@@ -34,13 +34,12 @@
 
 //Todo: research if there's a way to not have to declare these class templates
 template class AdcPeriph<ADC_1>;
-// template class AdcPeriph<AdcPeriphNum::ADC_2>;
-// template class AdcPeriph<AdcPeriphNum::ADC_3>;
+template class AdcPeriph<ADC_2>;
+template class AdcPeriph<ADC_3>;
 
 template <AdcPeripheral p()>
 AdcPeriph<p>& AdcPeriph<p>::AdcInstance()
 {
-	// static_assert(p == ADC_1 || p == ADC_2 || p == ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
 	static AdcPeriph<p> Adc_;
 	return Adc_;
 }
@@ -48,16 +47,7 @@ AdcPeriph<p>& AdcPeriph<p>::AdcInstance()
 template <AdcPeripheral p()>
 AdcPeriph<p>::AdcPeriph()
 {
-	// static_assert(p==ADC_1 || p==ADC_2 || p==ADC_3, "Only ADC1, ADC2, and ADC3 peripherals supported");
-	if (p()==ADC1) {
-		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
-	}
-	else if (p()==ADC2) {
-		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC2);
-	}
-	else if (p()==ADC3) {
-		LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC3);
-	}
+	System::enable_adc_rcc(p());
 
 	num_channels_ = 0;
 	LL_ADC_Disable(p());
@@ -105,14 +95,12 @@ void AdcPeriph<p>::add_channel(const AdcChanNum channel, const uint32_t sampleti
 	ranks_[channel_int] = rank_decimal;
 }
 
-//Todo: add DMA# to parameter list
 template <AdcPeripheral p()>
 void AdcPeriph<p>::start_dma(DMA_TypeDef * const DMAx, const uint32_t ADC_DMA_Stream, const uint32_t ADC_DMA_Channel, const IRQn_Type ADC_DMA_Streamx_IRQn)
 {
 	if (!num_channels_) return;
 
-	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2);
-	//System::enable_dma_rcc(DMAx);
+	System::enable_dma_rcc(DMAx);
 	
 	LL_DMA_SetChannelSelection(DMAx, ADC_DMA_Stream, ADC_DMA_Channel);
 	LL_DMA_ConfigTransfer(DMAx,

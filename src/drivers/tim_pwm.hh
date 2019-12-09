@@ -6,15 +6,15 @@
 #include "stm32f7xx_ll_tim.h"
 
 enum class TimChannelNum {
-    _1=LL_TIM_CHANNEL_CH1,
-    _1N=LL_TIM_CHANNEL_CH1N,
-    _2=LL_TIM_CHANNEL_CH2,
-    _2N=LL_TIM_CHANNEL_CH2N,
-    _3=LL_TIM_CHANNEL_CH3,
-    _3N=LL_TIM_CHANNEL_CH3N,
-    _4=LL_TIM_CHANNEL_CH4,
-    _5=LL_TIM_CHANNEL_CH5,
-    _6=LL_TIM_CHANNEL_CH6
+    _1  = LL_TIM_CHANNEL_CH1,
+    _1N = LL_TIM_CHANNEL_CH1N,
+    _2  = LL_TIM_CHANNEL_CH2,
+    _2N = LL_TIM_CHANNEL_CH2N,
+    _3  = LL_TIM_CHANNEL_CH3,
+    _3N = LL_TIM_CHANNEL_CH3N,
+    _4  = LL_TIM_CHANNEL_CH4,
+    _5  = LL_TIM_CHANNEL_CH5,
+    _6  = LL_TIM_CHANNEL_CH6
 };
 
 class TimPwmPeriph {

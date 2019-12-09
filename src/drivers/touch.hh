@@ -315,7 +315,7 @@ public:
 			if (!alert_state_) {
 				alert_state_=true;
                 //Todo: get the reg/bitfield from CAP1203 class
-                // messages_.put( TouchMessage{TouchMessage::Type::Write, Register::MAIN_CONTROL, bitfield(0)} ); 
+                messages_.put( TouchMessage{TouchMessage::Type::Write, Register::MAIN_CONTROL, bitfield(0)} ); 
                 messages_.put( TouchMessage{TouchMessage::Type::Read, Register::SENSOR_INPUT_STATUS} ); 
 
                 // auto bits_to_set = bitfield(0);

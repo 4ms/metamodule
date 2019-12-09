@@ -2,20 +2,20 @@
 #include "controls.hh"
 #include "debug.hh"
 
-//Controls::read()
-//read CV jack --> update controls.CV*   				?====>params with raw values
-//read rotary pins ---> update controls.rotary[].turned = +/-1     ?====> params.freq/res with +1, -1
-//read rotary buttons ---> update controls.rotary[].pushed
-//check ALERT pin --> initiate I2C read over DMA/IT
-//check new value from DMA/IT TC IRQ -->> update controls.pad[].touching
+//"Thread" Controls::read()
+//Read CV jacks ---> update oversampler
+//Check ALERT pin --> queue an I2C message
+//Read rotary pins ---> update controls.rotary[].turned = +/-1
+//Read rotary buttons ---> update Debouncer
+//??Check new value from DMA/IT TC IRQ -->> update controls.pad[].touching
 
 void Controls::read()
 {
     Debug::set_0(true);
-    freq1CV.read();
-    freq2CV.read();
-    res1CV.read();
-    res2CV.read();
+    freq1_cv.read();
+    freq2_cv.read();
+    res1_cv.read();
+    res2_cv.read();
     pads.check_alert_received();
 	Debug::set_0(false);
 
@@ -35,8 +35,14 @@ void Controls::read()
 
 Controls::Controls()
 {
-    //Todo: wrap this in a member function of Controls
-    AdcPeriph<AdcPeriphNum::ADC_1>::start_dma(LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
+    //Todo: Think of a more elegant solution than to either 
+    //   1) call the start_dma() method of just one ADC channel per ADC periph,
+    //or 2) call every ADC channels' start_dma() method but make AdcPeriph::start_dma() static so it can check if it's already been started
+    //or 3) start the dma with the AdcPeriph<ADC_1>::start_dma(...) format
+//
+
+    freq1_cv.start_dma(DMA2, LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
+    // AdcPeriph<ADC_1>::start_dma(DMA2, LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
 }
 
 //every 11.6us (86.2kHz), ~400ns
