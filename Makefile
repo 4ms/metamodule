@@ -29,6 +29,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-I$(PERIPH)/include \
 			-I src \
 			-I src/drivers \
+			-I src/util \
 			
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex

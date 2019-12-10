@@ -118,15 +118,19 @@ uint8_t i2c_is_ready(void) {
 void i2c_deinit(void)
 {
     I2C_CLK_DISABLE();
+    NVIC_DisableIRQ(I2Cx_EV_IRQn);
 }
 
 void i2c_enable_IT(void) 
 {
-	__HAL_I2C_ENABLE_IT(&i2c_, I2C_IT_ERRI | I2C_IT_TCI | I2C_IT_RXI | I2C_IT_TXI | I2C_IT_STOPI | I2C_IT_NACKI | I2C_IT_ADDRI);
-    NVIC_SetPriority(I2C2_EV_IRQn, (1<<2) | 1);
-    NVIC_EnableIRQ(I2C2_EV_IRQn);
-    NVIC_SetPriority(I2C2_ER_IRQn, (1<<2) | 2);
-    NVIC_EnableIRQ(I2C2_ER_IRQn);
+    // __HAL_I2C_ENABLE_IT(&i2c_, I2C_IT_ERRI | I2C_IT_TCI | I2C_IT_RXI | I2C_IT_TXI | I2C_IT_STOPI | I2C_IT_NACKI | I2C_IT_ADDRI);
+
+    __HAL_I2C_ENABLE_IT(&i2c_, I2C_IT_ERRI | I2C_IT_RXI);
+    NVIC_SetPriority(I2Cx_EV_IRQn, (1<<2) | 1);
+    NVIC_EnableIRQ(I2Cx_EV_IRQn);
+
+    NVIC_SetPriority(I2Cx_ER_IRQn, (1<<2) | 2);
+    NVIC_EnableIRQ(I2Cx_ER_IRQn);
 }
 
 void i2c_GPIO_init(void)
