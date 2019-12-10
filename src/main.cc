@@ -13,20 +13,21 @@ Debug debug;
 //every 682us (1.4kHz)
 void audio_loop(Block& in, Block& out) {
 	// debug.set(0,1);
-	ui.params.update(ui.controls); //This should be ui.read()
+	ui.params.update(); //This should be ui.read()
 	audio.process(ui.params, in, out);
 	// debug.set(0,0);
 }
 
 void main() {
-	ui.controls.begin();
 	audio.register_callback(audio_loop);
 	audio.start();
+
+	ui.controls.begin();
 
 	while (1) {
         ui.handle_sensor_queue();
 		ui.update(); //leds
-		__WFI();
+		__NOP();
 	}
 }
 
