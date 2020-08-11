@@ -12,3 +12,6 @@ compile_commands.json
 .tags
 tags
 .tags_*
+objs/
+lib/
+localtests_tests
