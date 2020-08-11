@@ -3,6 +3,7 @@
 extern "C" {
 #include "i2c.h"
 }
+#include "bitfield.hh"
 
 namespace CAP1203 {
 
@@ -10,7 +11,6 @@ const uint8_t kDefaultAddr = 0x28<<1;
 const uint8_t kProductID = 0x6D;
 
 using RegisterContents = uint8_t;
-using BitField = RegisterContents;
 
 enum Channel : RegisterContents { 
 	Chan1 = 1, 
@@ -86,23 +86,10 @@ enum class Config  : RegisterContents {
 	InterruptOnRelease = (1<<0),
 };
 
-template <typename FieldT>
-struct BitFieldBase {
-	//casts an enum class as a bitfield
-	template <typename T> 
-	FieldT constexpr const bitfield(T const val) { 
-		//assert(sizeof(Rt)>=sizeof(T) || val>>sizeof(Rt) == 0);
-		return(static_cast<FieldT>(val)); 
-	}
-	template<typename... Args>
-	uint8_t constexpr const bitfield(const Args... args) { 
-		return ( ... | bitfield(args));
-	}
-};
-
-class Controller : BitFieldBase<uint8_t> {
+using RegisterBitField = RegisterContents;
+class Controller : BitFieldBase<RegisterBitField> {
 public:
-	 Controller(BitField enabled_channels = (Chan1 | Chan2 | Chan3),
+	Controller(RegisterBitField enabled_channels = (Chan1 | Chan2 | Chan3),
 	 		 	uint16_t addr = kDefaultAddr)
 		: addr_(addr),
 		  enabled_chan_(enabled_channels) {}
@@ -163,26 +150,30 @@ public:
 	void enable_repeated_alerts() {
 		write(Register::REPEAT_RATE_ENABLE, enabled_chan_);
 	}
-	void enable_repeated_alerts(BitField channels) {
+	void enable_repeated_alerts(RegisterBitField channels)
+	{
 		set(Register::REPEAT_RATE_ENABLE, channels);
 	}
 	void disable_repeated_alerts() {
 		write(Register::REPEAT_RATE_ENABLE, 0);
 	}
-	void disable_repeated_alerts(BitField channels) {
+	void disable_repeated_alerts(RegisterBitField channels)
+	{
 		clear(Register::REPEAT_RATE_ENABLE, channels);
 	}
 
 	void enable_alerts() {
 		write(Register::INTERRUPT_ENABLE, enabled_chan_);
 	}
-	void enable_alerts(BitField channels) {
+	void enable_alerts(RegisterBitField channels)
+	{
 		set(Register::INTERRUPT_ENABLE, channels);
 	}
 	void disable_alerts() {
 		write(Register::INTERRUPT_ENABLE, 0);
 	}
-	void disable_alerts(BitField channels) {
+	void disable_alerts(RegisterBitField channels)
+	{
 		clear(Register::INTERRUPT_ENABLE, channels);
 	}
 	void clear_alert() {
@@ -191,7 +182,7 @@ public:
 
 private:
 	uint16_t const addr_;
-	BitField enabled_chan_;
+	RegisterBitField enabled_chan_;
 
 public:
 	uint8_t read(Register reg) {
@@ -210,17 +201,17 @@ public:
 	    i2c_mem_write_register_IT(addr_, static_cast<uint16_t>(reg), static_cast<uint8_t>(data));
 	}
 
-	void set(Register reg, BitField bits) {
+	void set(Register reg, RegisterBitField bits)
 		auto regstate = read(reg);
 		regstate |= bits;
 		write(reg, regstate);
 	}
-	void clear(Register reg, BitField bits) {
+	void clear(Register reg, RegisterBitField bits)
 		auto regstate = read(reg);
 		regstate &= ~bits;
 		write(reg, regstate);
 	}
 };
 
-};
+}; // namespace CAP1203
 
