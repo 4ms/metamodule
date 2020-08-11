@@ -173,7 +173,7 @@ private:
     static inline bool is_xmitting_;
     static inline bool data_received_;
     static inline CircularBuffer<TouchMessage, 16> messages_;
-	PinL<GPIO::C, 7, PinPolarity::INVERTED> alert_pin_ {PinMode::INPUT};
+	PinL<GPIO::C, 7, PinPolarity::Inverted> alert_pin_ {PinMode::Input};
 	bool alert_state_ = false;
 	CAP1203::Controller sensor_ {CAP1203::Chan1 | CAP1203::Chan3};
 };

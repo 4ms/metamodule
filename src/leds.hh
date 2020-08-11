@@ -100,45 +100,45 @@ public:
 
 public:
     RgbLed freq1 {
-        {TIM8, TimChannelNum::_4, GPIO_PIN_9, GPIOC, LL_GPIO_AF_3},
-        {TIM8, TimChannelNum::_3, GPIO_PIN_8, GPIOC, LL_GPIO_AF_3},
-        {TIM2, TimChannelNum::_2, GPIO_PIN_3, GPIOB, LL_GPIO_AF_1}};
+        {TIM8, TimChannelNum::_4},
+        {TIM8, TimChannelNum::_3},
+        {TIM2, TimChannelNum::_2}};
 
     RgbLed res1 {
-        {TIM1, TimChannelNum::_4, GPIO_PIN_11, GPIOA, LL_GPIO_AF_1},
-        {TIM1, TimChannelNum::_3, GPIO_PIN_10, GPIOA, LL_GPIO_AF_1},
-        {TIM3, TimChannelNum::_2, GPIO_PIN_5, GPIOB, LL_GPIO_AF_2}};
+        {TIM1, TimChannelNum::_4},
+        {TIM1, TimChannelNum::_3},
+        {TIM3, TimChannelNum::_2}};
 
     RgbLed freq2 {
         NoLedElement,
-        {TIM3, TimChannelNum::_1, GPIO_PIN_6, GPIOA, LL_GPIO_AF_2},
-        {TIM8, TimChannelNum::_1N, GPIO_PIN_7, GPIOA, LL_GPIO_AF_3}};
+        {TIM3, TimChannelNum::_1},
+        {TIM8, TimChannelNum::_1N}};
 
     RgbLed res2 {
         NoLedElement,
-        {TIM3, TimChannelNum::_3, GPIO_PIN_0, GPIOB, LL_GPIO_AF_2},
-        {TIM3, TimChannelNum::_4, GPIO_PIN_1, GPIOB, LL_GPIO_AF_2}};
+        {TIM3, TimChannelNum::_3},
+        {TIM3, TimChannelNum::_4}};
 
     RgbLed mode[5] {
         {NoLedElement,  //DAC0 PA4
          NoLedElement,
          NoLedElement}, //DAC1 PA5
 
-        {{TIM2, TimChannelNum::_3, GPIO_PIN_2, GPIOA, LL_GPIO_AF_1},
+        {{TIM2, TimChannelNum::_3},
          NoLedElement,
-         {TIM2, TimChannelNum::_4, GPIO_PIN_3, GPIOA, LL_GPIO_AF_1}},
+         {TIM2, TimChannelNum::_4}},
 
-        {{TIM2, TimChannelNum::_1, GPIO_PIN_0, GPIOA, LL_GPIO_AF_1},
+        {{TIM2, TimChannelNum::_1},
          NoLedElement,
-         {TIM5, TimChannelNum::_2, GPIO_PIN_1, GPIOA, LL_GPIO_AF_2}},
+         {TIM5, TimChannelNum::_2}},
 
-        {{TIM4, TimChannelNum::_3, GPIO_PIN_8, GPIOB, LL_GPIO_AF_2},
+        {{TIM4, TimChannelNum::_3},
          NoLedElement,
-         {TIM4, TimChannelNum::_4, GPIO_PIN_9, GPIOB, LL_GPIO_AF_2}},
+         {TIM4, TimChannelNum::_4}},
 
-        {{TIM4, TimChannelNum::_1, GPIO_PIN_6, GPIOB, LL_GPIO_AF_2},
+        {{TIM4, TimChannelNum::_1},
          NoLedElement,
-         {TIM4, TimChannelNum::_2, GPIO_PIN_7, GPIOB, LL_GPIO_AF_2}},
+         {TIM4, TimChannelNum::_2}},
     };
 
 private:

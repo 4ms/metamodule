@@ -43,21 +43,17 @@ private:
 // myPWMOutput.start_output();
 // myPWMOutput.stop_output();t
 //Todo: add separate methods for setting pin, TIM, channel, period, prescaler, clock_div
+
 class TimPwmChannel {
 public:
     TimPwmChannel(  TIM_TypeDef* const TIM,
                     TimChannelNum const channel,
-                    uint16_t const pin, 
-                    GPIO_TypeDef * const port, 
-                    uint8_t const af, 
                     uint32_t period=256,
                     uint16_t prescaler=1, 
                     uint32_t clock_division=0)
     : TIM_(TIM),
       channel_(channel)
     {
-        Pin output_pin{pin, port, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, af};
-
         TimPwmPeriph::init_periph_once(TIM, period, prescaler, clock_division);
 
         bool inverted_channel;
