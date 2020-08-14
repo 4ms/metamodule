@@ -91,5 +91,5 @@ ifeq ("$(wildcard tests/cpputest/build/MakefileWorker.mk)","")
 endif
 
 
-# cpputest/lib/libCppUTest.a:
-# 	cd ./tests/cpputest; autoreconf . -i && ./configure --enable-std-cpp14 && make tdd
+tests/cpputest/lib/libCppUTest.a:
+	cd ./tests/cpputest; autoreconf . -i && ./configure --enable-std-cpp14 && make tdd
