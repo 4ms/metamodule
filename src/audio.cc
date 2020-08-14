@@ -7,7 +7,7 @@ extern "C" {
 //Todo: 24-bit audio
 //Todo: 96kHz
 
-void Audio::process(Params &params, Block& in, Block& out) {
+void Audio::process(Params &params, AudioStreamBlock& in, AudioStreamBlock& out) {
 	//VCA:
 	auto in_ = in.begin();
 	for (auto & out_ : out) {
@@ -20,11 +20,15 @@ void Audio::process(Params &params, Block& in, Block& out) {
 void Audio::start() {
 	i2c_init();
 	codec_init(kSampleRate);
-	init_audio_DMA(kSampleRate, reinterpret_cast<int16_t *>(tx_buf_.data()), reinterpret_cast<int16_t *>(rx_buf_.data()), kDMABlockSize * sizeof(Frame));
+	init_audio_DMA(kSampleRate,
+			reinterpret_cast<int16_t *>(tx_buf_.data()),
+			reinterpret_cast<int16_t *>(rx_buf_.data()),
+			kAudioStreamDMABlockSize * sizeof(AudioFrame)
+	);
 	start_audio();
 }
 
-void Audio::register_callback(void callbackfunc(Block& in, Block& out)) {
+void Audio::register_callback(void callbackfunc(AudioStreamBlock& in, AudioStreamBlock& out)) {
 	//	set_audio_callback(reinterpret_cast<void (*)(int32_t*, int32_t*)>(callbackfunc));
 	set_audio_callback((void (*)(int32_t*, int32_t*))(callbackfunc));
 }

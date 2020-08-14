@@ -11,7 +11,7 @@ Debug debug;
 //
 
 //every 682us (1.4kHz)
-void audio_loop(Block& in, Block& out) {
+void audio_loop(AudioStreamBlock& in, AudioStreamBlock& out) {
 	// debug.set(0,1);
 	ui.params.update(); //This should be ui.read()
 	audio.process(ui.params, in, out);
