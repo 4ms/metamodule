@@ -8,9 +8,9 @@ public:
 
         input=input*preGain;
         if(input>5)
-        input=1;
+        input=5;
         if(input<-5)
-        input=-1;
+        input=-5;
 		float output = input*postGain;
 		return output;
 	}
