@@ -5,7 +5,7 @@
 #include "oscs.hh"
 #include "processors/vca.hh"
 #include "processors/bit_crush.h"
-#include "processors/lpf.h"
+//#include "processors/lpf.h"
 
 //Todo put this in a _config.h file
 static const int kAudioStreamBlockSize = 32; //number of frames (L/R pairs) we process at a time
@@ -45,7 +45,7 @@ struct AudioProcessorList {
 	static inline AudioProcessor* FX[] = {
 		new VCA,
 		new BitCrusher,
-		new LowPassFilter,
+		//new LowPassFilter,
 	};
 };
 
