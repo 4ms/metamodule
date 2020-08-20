@@ -4,20 +4,33 @@ extern "C" {
 #include "codec_i2sx2.h"
 #include "codec_i2c.h"
 }
-//Todo: 24-bit audio
-//Todo: 96kHz
 
-void Audio::process(Params &params, AudioStreamBlock& in, AudioStreamBlock& out) {
-	//VCA:
+Audio::Audio(Params &p)
+	: params(p)
+{
+	instance = this;
+	current_fx[LEFT] = AudioProcessorList::FX[0];
+	current_fx[RIGHT] = AudioProcessorList::FX[0];
+	register_callback(Audio::process);
+}
+
+void Audio::process(AudioStreamBlock& in, AudioStreamBlock& out) {
+	instance->params.update();
+	current_fx[LEFT]->set_param(0, instance->params.freq[0]);
+	current_fx[LEFT]->set_param(1, instance->params.res[0]);
+	current_fx[RIGHT]->set_param(0, instance->params.freq[1]);
+	current_fx[RIGHT]->set_param(1, instance->params.res[1]);
+
 	auto in_ = in.begin();
 	for (auto & out_ : out) {
-		out_.l = params.freq[0] * in_->l;
-		out_.r = params.freq[1] * in_->r;
+		out_.l = current_fx[LEFT]->update(in_->l); // * cf + next_fx[LEFT]->update(in_->l) * (1.0F-cf);
+		out_.r = current_fx[RIGHT]->update(in_->r);
 		in_++;
 	}
 }
 
 void Audio::start() {
+	//Todo: Use c++ library for audio I2S/SAI from touch-sense project
 	i2c_init();
 	codec_init(kSampleRate);
 	init_audio_DMA(kSampleRate,
@@ -29,6 +42,6 @@ void Audio::start() {
 }
 
 void Audio::register_callback(void callbackfunc(AudioStreamBlock& in, AudioStreamBlock& out)) {
-	//	set_audio_callback(reinterpret_cast<void (*)(int32_t*, int32_t*)>(callbackfunc));
+	//Todo: Use c++ library for audio I2S/SAI from touch-sense project
 	set_audio_callback((void (*)(int32_t*, int32_t*))(callbackfunc));
 }

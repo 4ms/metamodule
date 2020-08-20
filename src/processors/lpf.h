@@ -1,5 +1,6 @@
 #include "audio_processor.hh"
 #include "tools.h"
+#include <cmath>
 
 class LowPassFilter : public AudioProcessor {
 public:
@@ -8,7 +9,7 @@ public:
 	{
 		float output = 0;
 		float fSlow0 = (1.0f / q);
-		float fSlow1 = std::tan((fConst0 * cutoff)); //todo: will this compile on stm32?
+		float fSlow1 = tan((fConst0 * cutoff)); //todo: will this compile on stm32?
 		float fSlow2 = (1.0f / fSlow1);
 		float fSlow3 = (1.0f / (((fSlow0 + fSlow2) / fSlow1) + 1.0f));
 		float fSlow4 = (((fSlow2 - fSlow0) / fSlow1) + 1.0f);

@@ -30,7 +30,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-I src \
 			-I src/drivers \
 			-I src/util \
-			
+
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
 BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
@@ -60,7 +60,6 @@ CFLAGS = -g2 -fno-common \
 	$(ARCH_CFLAGS) $(MCU) \
 	-I. $(INCLUDES) \
 	-fdata-sections -ffunction-sections \
-	-specs=nano.specs \
 	-lstdc++ \
 
 CXXFLAGS=$(CFLAGS) \
@@ -72,6 +71,7 @@ CXXFLAGS=$(CFLAGS) \
 	-Wdouble-promotion \
 	-Wno-register \
 	-fno-threadsafe-statics \
+	-specs=nosys.specs \
 
 
 AFLAGS = $(MCU)
@@ -83,7 +83,7 @@ LDSCRIPT = $(DEVICE)/$(LOADFILE)
 LFLAGS =  -Wl,-Map,main.map,--cref \
 	-Wl,--gc-sections \
 	-lstdc++ \
-	$(MCU) -specs=nano.specs  -T $(LDSCRIPT) \
+	$(MCU) -specs=nosys.specs  -T $(LDSCRIPT) \
 
 
 #----------------------------------
@@ -96,8 +96,8 @@ LFLAGS =  -Wl,-Map,main.map,--cref \
 # build/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 
-# rm compile_commands.json 
-# rm build/compile_commands.json 
+# rm compile_commands.json
+# rm build/compile_commands.json
 # compiledb -n make
 # mv compile_commands.json build/
 
