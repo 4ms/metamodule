@@ -1,4 +1,5 @@
 #include "audio_processor.hh"
+#include "tools.h"
 
 class LowPassFilter : public AudioProcessor {
 public:
@@ -30,8 +31,10 @@ public:
 
 	virtual void set_param(int param_id, float val)
 	{
+		const int minCutoff=10;
+		const int maxCutoff=20000;
 		if (param_id == 0)
-			cutoff = val;
+			cutoff = map(val,0,1,minCutoff,maxCutoff);
 		if (param_id == 1)
 			q = val;
 	}
