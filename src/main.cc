@@ -2,24 +2,16 @@
 #include "system.hh"
 #include "ui.hh"
 #include "debug.hh"
+
 System sys;
-Audio audio;
 Ui ui;
+Audio audio{ui.params};
 Debug debug;
 
 //Todo: create LED update timer to run ui.update() (which just updates LEDs if there's a glow or flash)
-//
 
-//every 682us (1.4kHz)
-void audio_loop(AudioStreamBlock& in, AudioStreamBlock& out) {
-	// debug.set(0,1);
-	ui.params.update(); //This should be ui.read()
-	audio.process(ui.params, in, out);
-	// debug.set(0,0);
-}
 
 void main() {
-	audio.register_callback(audio_loop);
 	audio.start();
 
 	ui.controls.begin();

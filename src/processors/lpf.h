@@ -31,7 +31,7 @@ public:
 	virtual void set_param(int param_id, float val)
 	{
 		if (param_id == 0)
-			cutoff = val;
+			cutoff = (val * 15000) + 10;
 		if (param_id == 1)
 			q = val;
 	}
