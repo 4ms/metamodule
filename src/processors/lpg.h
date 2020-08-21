@@ -1,37 +1,35 @@
 #pragma once
 
 #include "audio_processor.hh"
-#include "vca.h"
 #include "lpf.h"
+#include "vca.h"
 
 class LPG : public AudioProcessor {
 public:
-
 	virtual float update(float input)
 	{
-		float slewedControl=expDecay.update(levelControl);
-		lpf.set_param(0,slewedControl);
-		vca.set_param(0,slewedControl);
+		float slewedControl = expDecay.update(levelControl);
+		lpf.set_param(0, slewedControl);
+		vca.set_param(0, slewedControl);
 		return (lpf.update(input));
 	}
 
 	LPG()
 	{
-		expDecay.decayTime=50;
-		lpf.set_param(0,1);
-		lpf.set_param(1,0);
-		vca.set_param(0,1);
-		vca.set_param(1,0);
+		expDecay.decayTime = 50;
+		lpf.set_param(0, 1);
+		lpf.set_param(1, 0);
+		vca.set_param(0, 1);
+		vca.set_param(1, 0);
 	}
 
 	virtual void set_param(int param_id, float val)
 	{
-		if (param_id == 0)
-		{
+		if (param_id == 0) {
 			levelControl = val;
 		}
 		if (param_id == 1)
-			expDecay.decayTime = map(val,0,1,10,300);
+			expDecay.decayTime = map(val, 0, 1, 10, 300);
 	}
 	virtual void set_samplerate(float sr)
 	{
@@ -40,8 +38,7 @@ public:
 	}
 
 private:
-
-    VCA vca;
+	VCA vca;
 	LowPassFilter lpf;
 	ExpDecay expDecay;
 	float levelControl;

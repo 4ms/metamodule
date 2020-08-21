@@ -6,7 +6,6 @@
 
 class LowPassFilter : public AudioProcessor {
 public:
-
 	virtual float update(float input)
 	{
 		float output = 0;
@@ -15,7 +14,7 @@ public:
 		float fSlow2 = (1.0f / fSlow1);
 		float fSlow3 = (1.0f / (((fSlow0 + fSlow2) / fSlow1) + 1.0f));
 		float fSlow4 = (((fSlow2 - fSlow0) / fSlow1) + 1.0f);
-		float fSlow5 = (2.0f * (1.0f - (1.0f / (fSlow1*fSlow1))));
+		float fSlow5 = (2.0f * (1.0f - (1.0f / (fSlow1 * fSlow1))));
 		fRec0[0] = (input - (fSlow3 * ((fSlow4 * fRec0[2]) + (fSlow5 * fRec0[1]))));
 		output = (fSlow3 * (fRec0[2] + (fRec0[0] + (2.0f * fRec0[1]))));
 		fRec0[2] = fRec0[1];
@@ -34,12 +33,12 @@ public:
 
 	virtual void set_param(int param_id, float val)
 	{
-		const int minCutoff=20;
-		const int maxCutoff=20000;
+		const int minCutoff = 20;
+		const int maxCutoff = 20000;
 		if (param_id == 0)
-			cutoff = map(val,0,1,minCutoff,maxCutoff);
+			cutoff = map(val, 0, 1, minCutoff, maxCutoff);
 		if (param_id == 1)
-			q = map(val,0,1,0.2,40);
+			q = map(val, 0, 1, 0.2, 40);
 	}
 	virtual void set_samplerate(float sr)
 	{
