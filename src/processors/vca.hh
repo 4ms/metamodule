@@ -9,7 +9,7 @@ T clip(T val, T min, T max)
 	return val < min ? min : val > max ? max : val;
 }
 
-struct VCA : public AudioProcessor {
+struct SimpleVCA : public AudioProcessor {
 	virtual float update(float in)
 	{
 		return in * cv;
@@ -22,7 +22,7 @@ struct VCA : public AudioProcessor {
 			cv = clip(val, 0.F, 1.F);
 	}
 
-	VCA()
+	SimpleVCA()
 	{
 		cv = 0.0F;
 	}
