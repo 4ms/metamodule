@@ -6,7 +6,7 @@ IndentWidth : 4
 ColumnLimit : 0
 AccessModifierOffset : -4
 AllowShortIfStatementsOnASingleLine : "true"
-AllowShortBlocksOnASingleLine : true
+AllowShortBlocksOnASingleLine : "true"
 AlwaysBreakTemplateDeclarations : "true"
 BreakBeforeBraces: "Stroustrup"
 IndentCaseLabels : "true"
