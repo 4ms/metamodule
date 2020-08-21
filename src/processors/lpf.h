@@ -4,6 +4,8 @@
 #include "tools.h"
 #include <cmath>
 
+using namespace MathTools;
+
 class LowPassFilter : public AudioProcessor {
 public:
 	virtual float update(float input)
@@ -33,16 +35,16 @@ public:
 
 	virtual void set_param(int param_id, float val)
 	{
-		const int minCutoff = 20;
-		const int maxCutoff = 20000;
+		const float minCutoff = 20.F;
+		const float maxCutoff = 20000.F;
 		if (param_id == 0)
-			cutoff = map(val, 0, 1, minCutoff, maxCutoff);
+			cutoff = map_value(val, 0.F, 1.F, minCutoff, maxCutoff);
 		if (param_id == 1)
-			q = map(val, 0, 1, 0.2, 40);
+			q = map_value(val, 0.F, 1.F, 0.2F, 40.F);
 	}
 	virtual void set_samplerate(float sr)
 	{
-		fConst0 = (3.14159274f / std::min<float>(192000.0f, std::max<float>(1.0f, float(sr))));
+		fConst0 = (3.14159274F / std::min<float>(192000.0F, std::max<float>(1.0F, float(sr))));
 	}
 
 private:

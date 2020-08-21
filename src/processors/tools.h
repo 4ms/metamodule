@@ -1,19 +1,21 @@
 #pragma once
 #include <cmath>
 
-inline float map(float x, float in_min, float in_max, float out_min, float out_max)
+namespace MathTools {
+
+template<typename Tval, typename Tin, typename Tout>
+static Tval map_value(Tval x, Tin in_min, Tin in_max, Tout out_min, Tout out_max)
 {
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-inline float constrain(float in, float min, float max)
+template<typename T>
+static T constrain(T val, T min, T max)
 {
-	if (in < min)
-		in = min;
-	if (in > max)
-		in = max;
-	return in;
+	return val < min ? min : val > max ? max : val;
 }
+
+}; // namespace MathTools
 
 class ExpDecay {
 public:

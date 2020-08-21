@@ -3,6 +3,8 @@
 #include "audio_processor.hh"
 #include "tools.h"
 
+using namespace MathTools;
+
 class VCA : public AudioProcessor {
 public:
 	virtual float update(float input)
@@ -28,7 +30,7 @@ public:
 		if (param_id == 0)
 			postGain = val;
 		if (param_id == 1)
-			preGain = map(val, 0, 1, 1, 5);
+			preGain = map_value(val, 0, 1, 1, 5);
 	}
 	virtual void set_samplerate(float sr)
 	{

@@ -1,5 +1,4 @@
 #pragma once
-
 #include "audio_processor.hh"
 #include "lpf.h"
 #include "vca.h"
@@ -29,7 +28,7 @@ public:
 			levelControl = val;
 		}
 		if (param_id == 1)
-			expDecay.decayTime = map(val, 0, 1, 10, 300);
+			expDecay.decayTime = map_value(val, 0.F, 1.F, 10.F, 300.F);
 	}
 	virtual void set_samplerate(float sr)
 	{
