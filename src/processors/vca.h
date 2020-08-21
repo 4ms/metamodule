@@ -1,4 +1,7 @@
+#pragma once
+
 #include "audio_processor.hh"
+#include "tools.h"
 
 class VCA : public AudioProcessor {
 public:

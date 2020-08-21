@@ -1,3 +1,5 @@
+#pragma once
+
 #include "audio_processor.hh"
 #include "tools.h"
 #include <cmath>
