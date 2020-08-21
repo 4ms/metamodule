@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 
 inline float map(float x, float in_min, float in_max, float out_min, float out_max)
 {
@@ -37,10 +38,10 @@ class ExpDecay
     {
         float output=0;
 		float fSlow0 = (0.00100000005f * float(decayTime));
-		int iSlow1 = (std::fabs(fSlow0) < 1.1920929e-07f);
-		float fSlow2 = (iSlow1 ? 0.0f : std::exp((0.0f - (fConst0 / (iSlow1 ? 1.0f : fSlow0)))));
+		int iSlow1 = (fabsf(fSlow0) < 0.00000001f);//1.1920929e-07f);
+		float fSlow2 = (iSlow1 ? 0.0f : expf((0.0f - (fConst0 / (iSlow1 ? 1.0f : fSlow0)))));
 		float fSlow3 = (1.0f - fSlow2);
-        float fTemp0 = std::fabs(input);
+        float fTemp0 = fabsf(input);
         fRec0[0] = std::max<float>(fTemp0, ((fRec0[1] * fSlow2) + (fTemp0 * fSlow3)));
         output = float(fRec0[0]);
         fRec0[1] = fRec0[0];
