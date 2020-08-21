@@ -1,12 +1,12 @@
 #pragma once
-#include <stm32f7xx.h>
-#include <array>
-#include "params.hh"
 #include "oscs.hh"
-#include "processors/vca.h"
+#include "params.hh"
 #include "processors/bit_crush.h"
 #include "processors/lpf.h"
 #include "processors/lpg.h"
+#include "processors/vca.h"
+#include <array>
+#include <stm32f7xx.h>
 
 //Todo put this in a _config.h file
 static const int kAudioStreamBlockSize = 32; //number of frames (L/R pairs) we process at a time
@@ -29,21 +29,21 @@ public:
 
 	Audio(Params &p);
 	void start();
-	static void process(AudioStreamBlock& in, AudioStreamBlock& out);
+	static void process(AudioStreamBlock &in, AudioStreamBlock &out);
 
 private:
-	void register_callback(void callbackfunc(AudioStreamBlock& in, AudioStreamBlock& out));
+	void register_callback(void callbackfunc(AudioStreamBlock &in, AudioStreamBlock &out));
 
 	AudioDMABlock tx_buf_;
 	AudioDMABlock rx_buf_;
-	Params& params;
+	Params &params;
 
 	static inline AudioProcessor *current_fx[2];
 	static inline Audio *instance;
 };
 
 struct AudioProcessorList {
-	static inline AudioProcessor* FX[] = {
+	static inline AudioProcessor *FX[] = {
 		new VCA,
 		new BitCrusher,
 		new LowPassFilter,
