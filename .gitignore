@@ -15,3 +15,5 @@ tags
 objs/
 lib/
 localtests_tests
+
+.nvimrc
