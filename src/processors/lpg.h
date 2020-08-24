@@ -42,4 +42,3 @@ private:
 	ExpDecay expDecay;
 	float levelControl;
 };
-
