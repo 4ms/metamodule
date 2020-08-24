@@ -15,10 +15,9 @@ static T constrain(T val, T min, T max)
 	return val < min ? min : val > max ? max : val;
 }
 
-template<typename T>
-static inline float interpolate(float in1, float in2, float x)
+inline float interpolate(float in1, float in2, float x)
 {
-	return (in2 * x + in1 * (1.0f - x));
+	return (in2 * x) + in1 * (1.0f - x);
 }
 
 }; // namespace MathTools
