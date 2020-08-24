@@ -16,7 +16,7 @@ static T constrain(T val, T min, T max)
 }
 
 template<typename T>
-static T interpolate(T in1, T in2, T x)
+static inline float interpolate(float in1, float in2, float x)
 {
 	return (in2 * x + in1 * (1.0f - x));
 }
