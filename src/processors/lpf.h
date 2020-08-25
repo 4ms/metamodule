@@ -53,6 +53,5 @@ private:
 	float cutoff;
 	float q;
 	float fRec0[3];
-	float fConst0 = 0;
+	float fConst0;
 };
-

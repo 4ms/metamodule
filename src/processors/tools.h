@@ -26,7 +26,7 @@ using namespace MathTools;
 
 class ExpDecay {
 public:
-	float decayTime;
+	float decayTime=10;
 
 	ExpDecay()
 	{
@@ -55,6 +55,6 @@ public:
 	}
 
 private:
-	float fConst0 = 0;
+	float fConst0;
 	float fRec0[2];
 };
