@@ -11,10 +11,10 @@ public:
 	{
 
 		input = input * preGain;
-		if (input > 5)
-			input = 5;
-		if (input < -5)
-			input = -5;
+		if (input > 1.0f)
+			input = 1.0f;
+		if (input < -1.0f)
+			input = -1.0f;
 		float output = input * postGain;
 		return output;
 	}
@@ -40,4 +40,3 @@ private:
 	float preGain;
 	float postGain;
 };
-
