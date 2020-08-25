@@ -44,10 +44,10 @@ public:
 	{
 		//Generate fold tables
 		for (int i = 0; i < 512; i++) {
-			fold1[i] = map_value((float)i, 0.0f, 511.0f, -1.0f, 1.0f);
-			fold2[i] = map_value((float)fmod(i, 256), 0.0f, 255.0f, -1.0f, 1.0f);
-			fold3[i] = map_value((float)fmod(i, 170.6666666667), 0.0f, (512 / 3.0f - 1), -1.0f, 1.0f);
-			fold4[i] = map_value((float)fmod(i, 128), 0.0f, 127.0f, -1.0f, 1.0f);
+			fold1[i] = map_value(i, 0.0f, 511.0f, -1.0f, 1.0f);
+			fold2[i] = map_value(fmod(i, 256), 0.0f, 255.0f, -1.0f, 1.0f);
+			fold3[i] = map_value(fmod(i, 170.6666666667), 0.0f, (512 / 3.0f - 1), -1.0f, 1.0f);
+			fold4[i] = map_value(fmod(i, 128), 0.0f, 127.0f, -1.0f, 1.0f);
 		}
 	}
 

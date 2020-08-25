@@ -22,6 +22,8 @@ inline float interpolate(float in1, float in2, float x)
 
 }; // namespace MathTools
 
+using namespace MathTools;
+
 class ExpDecay {
 public:
 	float decayTime;
@@ -35,7 +37,7 @@ public:
 
 	virtual void set_samplerate(float sr)
 	{
-		fConst0 = (1.0f / std::min<float>(192000.0f, std::max<float>(1.0f, float(sr))));
+		fConst0 = 1.0f / constrain(sr, 1.0f, 192000.0f);
 	}
 
 	float update(float input)
@@ -46,8 +48,8 @@ public:
 		float fSlow2 = (iSlow1 ? 0.0f : expf((0.0f - (fConst0 / (iSlow1 ? 1.0f : fSlow0)))));
 		float fSlow3 = (1.0f - fSlow2);
 		float fTemp0 = fabsf(input);
-		fRec0[0] = std::max<float>(fTemp0, ((fRec0[1] * fSlow2) + (fTemp0 * fSlow3)));
-		output = float(fRec0[0]);
+		fRec0[0] = fmax(fTemp0, ((fRec0[1] * fSlow2) + (fTemp0 * fSlow3)));
+		output = fRec0[0];
 		fRec0[1] = fRec0[0];
 		return output;
 	}
