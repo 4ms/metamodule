@@ -21,7 +21,7 @@ public:
 		output = (fSlow3 * (fRec0[2] + (fRec0[0] + (2.0f * fRec0[1]))));
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
-		return output;
+		return dist.update(output);
 	}
 
 	LowPassFilter()
@@ -50,6 +50,7 @@ public:
 	//~LowPassFilter() {}
 
 private:
+	CubicNonlinearDist dist;
 	float cutoff;
 	float q;
 	float fRec0[3];
