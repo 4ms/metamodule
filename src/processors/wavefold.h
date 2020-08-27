@@ -6,7 +6,7 @@ class WaveFolder : public AudioProcessor {
 public:
 	virtual float update(float input)
 	{
-		float lookupIndex = map_value(input / 5.0f, -1.0f, 1.0f, 0.0f, 511.0f);
+		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 511.0f);
 		float interpVal = lookupIndex - (long)lookupIndex;
 		int firstLookup = lookupIndex;
 		int secondLookup = (firstLookup + 1) % 512;
@@ -37,7 +37,7 @@ public:
 				break;
 		}
 
-		return (output * 5.0f);
+		return (output);
 	}
 
 	WaveFolder()
