@@ -26,8 +26,8 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
-		out_.l = scaling * current_fx[LEFT]->update(in_->l); // * cf + next_fx[LEFT]->update(in_->l) * (1.0F-cf);
-		out_.r = scaling * current_fx[RIGHT]->update(in_->r);
+		out_.l = scaling * current_fx[LEFT]->update(in_->l / scaling); // * cf + next_fx[LEFT]->update(in_->l) * (1.0F-cf);
+		out_.r = scaling * current_fx[RIGHT]->update(in_->r / scaling);
 		in_++;
 	}
 }
