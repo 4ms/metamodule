@@ -46,7 +46,13 @@ private:
 };
 
 struct AudioProcessorList {
-	static inline AudioProcessor *FX[] = {
+	static inline AudioProcessor *FX_LEFT[] = {
+		new VCA,
+		new BitCrusher,
+		new LowPassFilter,
+		new LPG,
+	};
+	static inline AudioProcessor *FX_RIGHT[] = {
 		new VCA,
 		new BitCrusher,
 		new LowPassFilter,

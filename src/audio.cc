@@ -10,8 +10,8 @@ Audio::Audio(Params &p)
 	: params(p)
 {
 	instance = this;
-	current_fx[LEFT] = AudioProcessorList::FX[0];
-	current_fx[RIGHT] = AudioProcessorList::FX[0];
+	current_fx[LEFT] = AudioProcessorList::FX_LEFT[0];
+	current_fx[RIGHT] = AudioProcessorList::FX_RIGHT[0];
 	register_callback(Audio::process);
 }
 
