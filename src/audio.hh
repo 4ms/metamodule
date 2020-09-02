@@ -1,4 +1,5 @@
 #pragma once
+#include "math.hh"
 #include "oscs.hh"
 #include "params.hh"
 #include "processors/bit_crush.h"
@@ -19,6 +20,8 @@ public:
 	struct AudioFrame {
 		int16_t l;
 		int16_t r;
+		static const inline size_t SampleSize = 16;
+		static const inline size_t MaxValue = ipow(2, SampleSize - 1) - 1;
 	};
 	enum AudioChannels {
 		LEFT,

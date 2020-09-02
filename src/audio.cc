@@ -1,4 +1,5 @@
 #include "audio.hh"
+#include "math.hh"
 extern "C" {
 #include "codec_i2c.h"
 #include "codec_i2sx2.h"
@@ -16,6 +17,7 @@ Audio::Audio(Params &p)
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
+	const float scaling = static_cast<float>(in.begin()->MaxValue);
 	instance->params.update();
 	current_fx[LEFT]->set_param(0, instance->params.freq[0]);
 	current_fx[LEFT]->set_param(1, instance->params.res[0]);
@@ -24,8 +26,8 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
-		out_.l = current_fx[LEFT]->update(in_->l); // * cf + next_fx[LEFT]->update(in_->l) * (1.0F-cf);
-		out_.r = current_fx[RIGHT]->update(in_->r);
+		out_.l = scaling * current_fx[LEFT]->update(in_->l); // * cf + next_fx[LEFT]->update(in_->l) * (1.0F-cf);
+		out_.r = scaling * current_fx[RIGHT]->update(in_->r);
 		in_++;
 	}
 }
