@@ -51,12 +51,14 @@ struct AudioProcessorList {
 		new BitCrusher,
 		new LowPassFilter,
 		new LPG,
+		new VCA, //duplicated as a placeholder until we get a 5th FX
 	};
 	static inline AudioProcessor *FX_RIGHT[] = {
 		new VCA,
 		new BitCrusher,
 		new LowPassFilter,
 		new LPG,
+		new VCA, //duplicated as a placeholder until we get a 5th FX
 	};
 };
 
