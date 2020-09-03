@@ -10,15 +10,15 @@ Audio::Audio(Params &p)
 	: params(p)
 {
 	instance = this;
-	current_fx[LEFT] = AudioProcessorList::FX_LEFT[0];
-	current_fx[RIGHT] = AudioProcessorList::FX_RIGHT[0];
+	current_fx[LEFT] = AudioProcessorList::FX_left[0];
+	current_fx[RIGHT] = AudioProcessorList::FX_right[0];
 	register_callback(Audio::process);
 }
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	const float scaling = static_cast<float>(in.begin()->MaxValue);
 	instance->params.update();
+	instance->check_fx_change();
 	current_fx[LEFT]->set_param(0, instance->params.freq[0]);
 	current_fx[LEFT]->set_param(1, instance->params.res[0]);
 	current_fx[RIGHT]->set_param(0, instance->params.freq[1]);
@@ -26,8 +26,14 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
-		out_.l = scaling * current_fx[LEFT]->update(in_->l / scaling); // * cf + next_fx[LEFT]->update(in_->l) * (1.0F-cf);
-		out_.r = scaling * current_fx[RIGHT]->update(in_->r / scaling);
+		auto scaled_in = AudioFrame::scaleInput(in_->l);
+		auto unscaled_out = current_fx[LEFT]->update(scaled_in);
+		out_.l = AudioFrame::scaleOutput(unscaled_out);
+
+		scaled_in = AudioFrame::scaleInput(in_->r);
+		unscaled_out = current_fx[RIGHT]->update(scaled_in);
+		out_.r = AudioFrame::scaleOutput(unscaled_out);
+
 		in_++;
 	}
 }

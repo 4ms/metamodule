@@ -20,9 +20,13 @@ public:
 	struct AudioFrame {
 		int16_t l;
 		int16_t r;
-		static const inline size_t SampleSize = 16;
-		static const inline size_t MaxValue = ipow(2, SampleSize - 1) - 1;
+		static const inline size_t kSampleSize = 16;
+		static const inline size_t kMaxValue = ipow(2, kSampleSize - 1) - 1;
+		static const inline float kScaling = static_cast<float>(kMaxValue);
+		static float scaleInput(int16_t val) { return val / kScaling; }
+		static int16_t scaleOutput(float val) { return val * kScaling; }
 	};
+
 	enum AudioChannels {
 		LEFT,
 		RIGHT
@@ -46,14 +50,14 @@ private:
 };
 
 struct AudioProcessorList {
-	static inline AudioProcessor *FX_LEFT[] = {
+	static inline AudioProcessor *FX_left[] = {
 		new VCA,
 		new BitCrusher,
 		new LowPassFilter,
 		new LPG,
 		new VCA, //duplicated as a placeholder until we get a 5th FX
 	};
-	static inline AudioProcessor *FX_RIGHT[] = {
+	static inline AudioProcessor *FX_right[] = {
 		new VCA,
 		new BitCrusher,
 		new LowPassFilter,
