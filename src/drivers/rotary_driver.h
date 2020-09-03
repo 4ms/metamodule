@@ -22,11 +22,10 @@
 * -----------------------------------------------------------------------------
 */
 
-
 #pragma once
 
 #include <stm32f7xx.h>
-
+/*
 
 enum PinTypes {
 	PULLUP, 				// 0
@@ -92,3 +91,5 @@ int8_t 	read_rotary_turn(o_rotary *rotary_object);
 void 	update_rotary_queue(o_turn *turn_object);
 int8_t 	pop_rotary_queue(o_turn *turn_object);
 uint8_t read_rotary_press(o_rotary *rotary_object);
+
+*/
