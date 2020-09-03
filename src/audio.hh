@@ -1,11 +1,8 @@
 #pragma once
+#include "fxList.hh"
 #include "math.hh"
 #include "oscs.hh"
 #include "params.hh"
-#include "processors/bit_crush.h"
-#include "processors/lpf.h"
-#include "processors/lpg.h"
-#include "processors/vca.h"
 #include <array>
 #include <stm32f7xx.h>
 
@@ -46,24 +43,10 @@ private:
 	AudioDMABlock rx_buf_;
 	Params &params;
 
+	FXList FX_left;
+	FXList FX_right;
+
 	static inline AudioProcessor *current_fx[2];
 	static inline Audio *instance;
-};
-
-struct AudioProcessorList {
-	static inline AudioProcessor *FX_left[] = {
-		new VCA,
-		new BitCrusher,
-		new LowPassFilter,
-		new LPG,
-		new VCA, //duplicated as a placeholder until we get a 5th FX
-	};
-	static inline AudioProcessor *FX_right[] = {
-		new VCA,
-		new BitCrusher,
-		new LowPassFilter,
-		new LPG,
-		new VCA, //duplicated as a placeholder until we get a 5th FX
-	};
 };
 
