@@ -38,6 +38,18 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	}
 }
 
+void Audio::check_fx_change()
+{
+	if (current_fx[LEFT] != AudioProcessorList::FX_left[params.mode[0]]) {
+		//Todo: start crossfading
+		current_fx[LEFT] = AudioProcessorList::FX_left[params.mode[0]];
+	}
+	if (current_fx[RIGHT] != AudioProcessorList::FX_right[params.mode[1]]) {
+		//Todo: start crossfading
+		current_fx[RIGHT] = AudioProcessorList::FX_right[params.mode[1]];
+	}
+}
+
 void Audio::start()
 {
 	//Todo: Use c++ library for audio I2S/SAI from touch-sense project

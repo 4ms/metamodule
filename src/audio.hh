@@ -39,6 +39,7 @@ public:
 	static void process(AudioStreamBlock &in, AudioStreamBlock &out);
 
 private:
+	void check_fx_change();
 	void register_callback(void callbackfunc(AudioStreamBlock &in, AudioStreamBlock &out));
 
 	AudioDMABlock tx_buf_;
