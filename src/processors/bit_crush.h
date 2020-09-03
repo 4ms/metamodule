@@ -8,9 +8,8 @@ public:
 	{
 		phaccu += reducedSampleRate / currentSampleRate;
 		if (phaccu > 1.0f) {
-
-			int quantizedVal = input * powf(2, bitDepth);
-			float bitReduced = (float)quantizedVal / (powf(2, bitDepth));
+			int quantizedVal = input * ipow(2.0f, bitDepth);
+			float bitReduced = (float)quantizedVal / (float)(ipow(2.0f, bitDepth));
 
 			sampledOutput = bitReduced;
 
@@ -42,5 +41,5 @@ private:
 	int bitDepth = 16;
 	float phaccu = 0;
 	float currentSampleRate;
-	float sampledOutput;
+	float sampledOutput = 0;
 };
