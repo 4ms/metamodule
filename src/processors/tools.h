@@ -1,26 +1,6 @@
 #pragma once
+#include "math.hh"
 #include <cmath>
-
-namespace MathTools {
-
-template<typename Tval, typename Tin, typename Tout>
-static Tout map_value(Tval x, Tin in_min, Tin in_max, Tout out_min, Tout out_max)
-{
-	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-template<typename T>
-static T constrain(T val, T min, T max)
-{
-	return val < min ? min : val > max ? max : val;
-}
-
-inline float interpolate(float in1, float in2, float x)
-{
-	return (in2 * x) + in1 * (1.0f - x);
-}
-
-}; // namespace MathTools
 
 using namespace MathTools;
 

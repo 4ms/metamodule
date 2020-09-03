@@ -5,7 +5,7 @@
 #include "params.hh"
 #include <array>
 #include <stm32f7xx.h>
-
+using namespace MathTools;
 //Todo put this in a _config.h file
 static const int kAudioStreamBlockSize = 32; //number of frames (L/R pairs) we process at a time
 static const int kNumAudioDMAHalfTransfers = 2;

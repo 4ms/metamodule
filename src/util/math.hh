@@ -1,6 +1,25 @@
 #pragma once
 #include <stdint.h>
 
+namespace MathTools {
+
+template<typename Tval, typename Tin, typename Tout>
+static Tout map_value(Tval x, Tin in_min, Tin in_max, Tout out_min, Tout out_max)
+{
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+template<typename T>
+static T constrain(T val, T min, T max)
+{
+	return val < min ? min : val > max ? max : val;
+}
+
+inline float interpolate(float in1, float in2, float x)
+{
+	return (in2 * x) + in1 * (1.0f - x);
+}
+
 template<int N>
 struct Log2 {
 	static constexpr int val = Log2<N / 2>::val + 1;
@@ -34,3 +53,5 @@ T wrap(T val)
 		val -= Max;
 	return val;
 }
+
+} // namespace MathTools
