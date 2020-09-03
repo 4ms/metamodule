@@ -29,7 +29,7 @@ public:
 			reducedSampleRate = map_value(val, 0.0f, 1.0f, 1.0f, currentSampleRate / 2.0f);
 		}
 		if (param_id == 1) {
-			bitDepth = map_value(val, 0.0f, 1.0f, 1, 16);
+			bitDepth = map_value(val, 0.0f, 1.0f, 1U, 16U);
 		}
 	}
 	virtual void set_samplerate(float sr)
