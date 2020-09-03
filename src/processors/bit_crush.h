@@ -1,5 +1,6 @@
 #pragma once
 #include "audio_processor.hh"
+#include "math.hh"
 #include "tools.h"
 
 class BitCrusher : public AudioProcessor {
