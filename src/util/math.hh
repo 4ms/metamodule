@@ -16,7 +16,7 @@ constexpr bool is_power_of_2(int v)
 	return v && ((v & (v - 1)) == 0);
 }
 
-constexpr int ipow(int a, int b)
+constexpr unsigned int ipow(unsigned int a, unsigned int b)
 {
 	return b == 0 ? 1 : a * ipow(a, b - 1);
 }

@@ -11,6 +11,20 @@ TEST_GROUP(math_tests){
 
 };
 
+TEST(math_tests, wrapping)
+{
+	uint32_t a = 0;
+	LONGS_EQUAL(1, wrap<5>(a + 1));
+	a++;
+	LONGS_EQUAL(2, wrap<5>(a + 1));
+	a++;
+	LONGS_EQUAL(3, wrap<5>(a + 1));
+	a++;
+	LONGS_EQUAL(4, wrap<5>(a + 1));
+	a++;
+	LONGS_EQUAL(0, wrap<5>(a + 1));
+}
+
 TEST(math_tests, log2test)
 {
 	LONGS_EQUAL(Log2<1>::val, 0);
@@ -27,7 +41,17 @@ TEST(math_tests, log2test)
 
 TEST(math_tests, ipow_test)
 {
-	LONGS_EQUAL(1, ipow(1, 1));
+	UNSIGNED_LONGS_EQUAL(1, ipow(1, 11111));
+	UNSIGNED_LONGS_EQUAL(1, ipow(2, 0));
+	UNSIGNED_LONGS_EQUAL(2, ipow(2, 1));
+	UNSIGNED_LONGS_EQUAL(4, ipow(2, 2));
+	UNSIGNED_LONGS_EQUAL(32768, ipow(2, 15));
+	UNSIGNED_LONGS_EQUAL(65536, ipow(2, 16));
+	UNSIGNED_LONGS_EQUAL(0x80000000U, ipow(2, 31));
+}
+TEST(math_tests, ipow_overflow)
+{
+	UNSIGNED_LONGS_EQUAL(0x00000000, ipow(2, 32));
 }
 
 TEST(math_tests, sizeof_type_test)
