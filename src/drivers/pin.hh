@@ -20,7 +20,7 @@
 #include "stm32f7xx.h"
 #include "stm32f7xx_ll_bus.h"
 #include "stm32f7xx_ll_gpio.h"
-#include "system.hh"
+#include <system.hh>
 
 enum class PinPolarity {
 	Normal,
@@ -104,10 +104,9 @@ public:
 	void set_otype(PinOType otype);
 
 private:
-	GPIO_TypeDef *port_;
+	GPIO port_;
 	uint16_t pin_;
 	PinPolarity polarity_;
-	uint8_t af_;
 
 	template<typename X>
 	uint32_t HALParam(X x)
@@ -115,7 +114,7 @@ private:
 		return static_cast<uint32_t>(x);
 	}
 
-	auto GPIOPort(GPIO port_) { return reinterpret_cast<GPIO_TypeDef *>(port_); }
+	auto GPIOPort(GPIO port_) const { return reinterpret_cast<GPIO_TypeDef *>(port_); }
 };
 
 //// Remove below here once project is converted
