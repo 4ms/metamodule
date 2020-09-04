@@ -1,8 +1,8 @@
 #pragma once
 #include "analog_in.hh"
 #include "debounced_switch.hh"
-#include "filter.hh"
 #include "pin.hh"
+#include "rotary.hh"
 #include "stm32f7xx_ll_adc.h"
 #include "stm32f7xx_ll_gpio.h"
 #include "touch.hh"
@@ -11,11 +11,8 @@
 
 using JackSense = DebouncedSwitch;
 
-//Controls class
-//Reads raw user input hardware,
-//Performs fast conditioning (oversampling/debouncing),
-//and stores conditioned values
 struct Controls {
+	static inline TouchCtl pads;
 	static inline AnalogIn<ADC_1, AdcChanNum::_10> freq1_cv{GPIO::C, 0};
 	static inline AnalogIn<ADC_1, AdcChanNum::_11> res1_cv{GPIO::C, 1};
 	static inline AnalogIn<ADC_1, AdcChanNum::_12> freq2_cv{GPIO::C, 2};
@@ -25,11 +22,8 @@ struct Controls {
 	static inline JackSense res_sense[2] = {{GPIO::C, 4}, {GPIO::C, 4}};
 	static inline JackSense in_sense[2] = {{GPIO::C, 13}, {GPIO::C, 15}};
 
-    static inline TouchCtl pads;
-	static inline int32_t rotary_turn[2];
-	static inline DebouncedSwitch rotary_button[2] = {
-		{GPIO::D, 2},
-		{GPIO::B, 14}};
+	static inline RotaryEncoder<RotaryFullStep> rotary[2] = {{GPIO::C, 11, GPIO::C, 12}, {GPIO::B, 4, GPIO::A, 12}};
+	static inline DebouncedSwitch rotary_button[2] = {{GPIO::D, 2}, {GPIO::B, 14}};
 
 	Controls();
 	static void read();
