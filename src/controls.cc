@@ -22,10 +22,10 @@ void Controls::read()
 	rotary_button[0].update();
 	rotary_button[1].update();
 
-	Debug::set_0(false);
+	rotary[0].update();
+	rotary[1].update();
 
-	//read_rotary
-	// rotary[0].read();
+	Debug::set_0(false);
 }
 
 void Controls::begin()
