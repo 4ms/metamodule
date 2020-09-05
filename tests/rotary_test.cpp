@@ -4,24 +4,23 @@
 #include "fake_gpio.h"
 #include <fff.h>
 
-TEST_GROUP(rotary_tests){
+TEST_GROUP(rotary_tests)
+{
+	RotaryEncoder<RotaryHalfStep> r{GPIO::A, 0, GPIO::B, 1};
 
-	//RotaryEncoder<RotaryHalfStep> r{GPIO::A, 0, GPIO::B, 1};
+	void setup() {}
 
-	void setup(){}
-
-	void teardown(){}};
+	void teardown() {}
+};
 
 TEST(rotary_tests, starts_at_zero)
 {
-	bool initval = read_fake_pin(FakeGPIO::B, 1);
-	CHECK_FALSE(initval);
+	auto init_state = r.read();
+	LONGS_EQUAL(0, init_state);
+}
 
-	set_fake_pin(FakeGPIO::B, 1, true);
-	bool postval = read_fake_pin(FakeGPIO::B, 1);
-	CHECK_TRUE(postval);
-
-	set_fake_pin(FakeGPIO::B, 1, false);
-	postval = read_fake_pin(FakeGPIO::B, 1);
-	CHECK_FALSE(postval);
+TEST(rotary_tests, starts_at_zero)
+{
+	auto init_state = r.read();
+	LONGS_EQUAL(0, init_state);
 }

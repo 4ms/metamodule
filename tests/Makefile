@@ -10,9 +10,8 @@ CPP_PLATFORM = Gcc
 CC = gcc
 PROJECT_HOME_DIR = .
 
-SRC_FILES = 
-# src/debug.cc \
-			# src/drivers/rotary.cc \
+SRC_FILES = src/drivers/rotary.cc \
+			# src/debug.cc \
 			#src/drivers/pin.cc
 
 # SRC_DIRS = \
