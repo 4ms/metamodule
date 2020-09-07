@@ -1,4 +1,6 @@
 #pragma once
+#include <stdint.h>
+
 enum class FakeGPIO : uint8_t {
 	A,
 	B,

@@ -31,18 +31,24 @@ RotaryBase::RotaryBase(GPIO portA, uint8_t pin_numA, GPIO portB, uint8_t pin_num
 	, state_{0x00}
 	, position_{0}
 {
+	//printf("Constructed a Rotary\n");
 }
 
 void RotaryBase::update(const uint32_t table_select)
 {
-	uint8_t pinstate = pinA.is_on() ? 0b10 : 0b00;
-	pinstate += pinB.is_on() ? 0b01 : 0b00;
-	state_ = StateTable[state_ + table_select][pinstate];
+	uint8_t pinstate = pinA.is_on() ? 0b00 : 0b10;
+	pinstate += pinB.is_on() ? 0b00 : 0b01;
+	state_ = StateTable[(state_ & 0xf) + table_select][pinstate];
+	//printf("state_ = %x, pinstate = %d\n", state_, pinstate);
 	uint8_t motion = state_ & (DIR_CW | DIR_CCW);
-	if (motion == DIR_CW)
+	if (motion == DIR_CW) {
 		position_++;
-	if (motion == DIR_CCW)
+		//printf("pos++ = %d\n", position_);
+	}
+	if (motion == DIR_CCW) {
 		position_--;
+		//printf("pos-- = %d\n", position_);
+	}
 }
 
 int32_t RotaryBase::read_position()

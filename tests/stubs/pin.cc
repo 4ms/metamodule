@@ -53,14 +53,22 @@ void Pin::set_to(uint32_t v)
 
 bool Pin::read_raw()
 {
-	return false;
+	bool state = read_fake_pin(fake_port(port_), pin_);
+	//printf("Reading raw pin %d = %d\n", pin_, state);
+	return state;
 }
 uint8_t Pin::is_on()
 {
-	if (polarity_ == PinPolarity::Normal)
-		return read_fake_pin(fake_port(port_), pin_);
-	else
-		return !read_fake_pin(fake_port(port_), pin_);
+	if (polarity_ == PinPolarity::Normal) {
+		bool state = read_fake_pin(fake_port(port_), pin_);
+		// printf("Reading pin %d = %d\n", pin_, state);
+		return state;
+	}
+	else {
+		bool state = !read_fake_pin(fake_port(port_), pin_);
+		// printf("Reading inverted pin %d = %d\n", pin_, state);
+		return state;
+	}
 }
 
 void Pin::set_mode(PinMode mode)

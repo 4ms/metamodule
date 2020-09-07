@@ -18,7 +18,7 @@ private:
 
 enum RotaryStepSize {
 	RotaryHalfStep = 0,
-	RotaryFullStep = 7
+	RotaryFullStep = 6
 };
 
 template<RotaryStepSize StepSize>
