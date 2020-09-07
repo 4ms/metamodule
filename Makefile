@@ -27,9 +27,11 @@ DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 INCLUDES += -I$(DEVICE)/include \
 			-I$(CORE)/include \
 			-I$(PERIPH)/include \
-			-I src \
-			-I src/drivers \
-			-I src/util \
+			-Isrc \
+			-Idrivers \
+			-Iutil \
+			-Isrc/drivers \
+			-Isrc/util \
 
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
@@ -93,7 +95,7 @@ LFLAGS =  -Wl,-Map,main.map,--cref \
 # build/src/drivers/cap1203.o: OPTFLAG = -O0
 # build/src/drivers/codec_i2sx2.o: OPTFLAG = -O0
 # build/src/drivers/codec_i2c.o: OPTFLAG = -O0
-build/src/audio.o: OPTFLAG = -O0
+# build/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 
 # rm compile_commands.json
