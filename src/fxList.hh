@@ -4,11 +4,15 @@
 class FXList {
 public:
 	FXList();
-
 	AudioProcessor *operator[](unsigned int fxnum);
+	static constexpr int NumFX = 5;
 
 private:
-	AudioProcessor *fxList[5];
-	static constexpr int NumFX = sizeof(fxList) / sizeof(fxList[0]);
+	AudioProcessor *fxList[NumFX];
+
+public:
+	using const_fxlist_iterator = AudioProcessor *;
+	const const_fxlist_iterator begin() const { return fxList[0]; }
+	const const_fxlist_iterator end() const { return fxList[NumFX - 1]; }
 };
 
