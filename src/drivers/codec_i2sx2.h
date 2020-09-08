@@ -28,83 +28,81 @@
 
 #pragma once
 
-#include <stm32f7xx.h>
 #include "codec_i2c.h"
+#include "stm32f7xx.h"
 
 //
 // Codec SAI pins
 //
 
-#define CODEC_I2S_TX                    SPI2
-#define CODEC_I2S_RX                    SPI3
+#define CODEC_I2S_TX SPI2
+#define CODEC_I2S_RX SPI3
 
-#define CODEC_I2S_RCC_TX_ENABLE         __HAL_RCC_SPI2_CLK_ENABLE
-#define CODEC_I2S_RCC_RX_ENABLE         __HAL_RCC_SPI3_CLK_ENABLE
+#define CODEC_I2S_RCC_TX_ENABLE __HAL_RCC_SPI2_CLK_ENABLE
+#define CODEC_I2S_RCC_RX_ENABLE __HAL_RCC_SPI3_CLK_ENABLE
 
+#define CODEC_I2S_GPIO_CLOCK_ENABLE \
+	__HAL_RCC_GPIOB_CLK_ENABLE();   \
+	__HAL_RCC_GPIOA_CLK_ENABLE();   \
+	__HAL_RCC_GPIOC_CLK_ENABLE
 
-#define CODEC_I2S_GPIO_CLOCK_ENABLE     __HAL_RCC_GPIOB_CLK_ENABLE();__HAL_RCC_GPIOA_CLK_ENABLE();__HAL_RCC_GPIOC_CLK_ENABLE
+#define CODEC_I2S_MCK_GPIO GPIOC
+#define CODEC_I2S_MCK_PIN GPIO_PIN_6
+#define CODEC_I2S_MCK_GPIO_AF GPIO_AF5_SPI2
 
-#define CODEC_I2S_MCK_GPIO              GPIOC
-#define CODEC_I2S_MCK_PIN               GPIO_PIN_6
-#define CODEC_I2S_MCK_GPIO_AF           GPIO_AF5_SPI2
+#define CODEC_I2S_WS_TX_GPIO GPIOB
+#define CODEC_I2S_WS_TX_PIN GPIO_PIN_12
+#define CODEC_I2S_WS_TX_GPIO_AF GPIO_AF5_SPI2
 
-#define CODEC_I2S_WS_TX_GPIO            GPIOB
-#define CODEC_I2S_WS_TX_PIN             GPIO_PIN_12
-#define CODEC_I2S_WS_TX_GPIO_AF         GPIO_AF5_SPI2
+#define CODEC_I2S_SCK_TX_GPIO GPIOB
+#define CODEC_I2S_SCK_TX_PIN GPIO_PIN_13
+#define CODEC_I2S_SCK_TX_GPIO_AF GPIO_AF5_SPI2
 
-#define CODEC_I2S_SCK_TX_GPIO           GPIOB
-#define CODEC_I2S_SCK_TX_PIN            GPIO_PIN_13
-#define CODEC_I2S_SCK_TX_GPIO_AF        GPIO_AF5_SPI2
+#define CODEC_I2S_SDO_GPIO GPIOB
+#define CODEC_I2S_SDO_PIN GPIO_PIN_15
+#define CODEC_I2S_SDO_GPIO_AF GPIO_AF5_SPI2
 
-#define CODEC_I2S_SDO_GPIO              GPIOB
-#define CODEC_I2S_SDO_PIN               GPIO_PIN_15
-#define CODEC_I2S_SDO_GPIO_AF           GPIO_AF5_SPI2
+#define CODEC_I2S_WS_RX_GPIO GPIOA
+#define CODEC_I2S_WS_RX_PIN GPIO_PIN_15
+#define CODEC_I2S_WS_RX_GPIO_AF GPIO_AF6_SPI3
 
-#define CODEC_I2S_WS_RX_GPIO            GPIOA
-#define CODEC_I2S_WS_RX_PIN             GPIO_PIN_15
-#define CODEC_I2S_WS_RX_GPIO_AF         GPIO_AF6_SPI3
+#define CODEC_I2S_SCK_RX_GPIO GPIOC
+#define CODEC_I2S_SCK_RX_PIN GPIO_PIN_10
+#define CODEC_I2S_SCK_RX_GPIO_AF GPIO_AF6_SPI3
 
-#define CODEC_I2S_SCK_RX_GPIO           GPIOC
-#define CODEC_I2S_SCK_RX_PIN            GPIO_PIN_10
-#define CODEC_I2S_SCK_RX_GPIO_AF        GPIO_AF6_SPI3
+#define CODEC_I2S_SDI_GPIO GPIOB
+#define CODEC_I2S_SDI_PIN GPIO_PIN_2
+#define CODEC_I2S_SDI_GPIO_AF GPIO_AF7_SPI3
 
-#define CODEC_I2S_SDI_GPIO              GPIOB
-#define CODEC_I2S_SDI_PIN               GPIO_PIN_2
-#define CODEC_I2S_SDI_GPIO_AF           GPIO_AF7_SPI3
+#define CODEC_I2S_DMA_CLOCK_ENABLE __HAL_RCC_DMA1_CLK_ENABLE
 
+#define CODEC_I2S_TX_DMA DMA1
+#define CODEC_I2S_TX_DMA_ISR LISR
+#define CODEC_I2S_TX_DMA_IFCR LIFCR
+#define CODEC_I2S_TX_DMA_STREAM DMA1_Stream4
+#define CODEC_I2S_TX_DMA_IRQn DMA1_Stream4_IRQn
+#define CODEC_I2S_TX_DMA_IRQHandler DMA1_Stream4_IRQHandler
+#define CODEC_I2S_TX_DMA_CHANNEL DMA_CHANNEL_0
 
+#define CODEC_I2S_TX_DMA_FLAG_TC DMA_FLAG_TCIF0_4
+#define CODEC_I2S_TX_DMA_FLAG_HT DMA_FLAG_HTIF0_4
+#define CODEC_I2S_TX_DMA_FLAG_FE DMA_FLAG_FEIF0_4
+#define CODEC_I2S_TX_DMA_FLAG_TE DMA_FLAG_TEIF0_4
+#define CODEC_I2S_TX_DMA_FLAG_DME DMA_FLAG_DMEIF0_4
 
-#define CODEC_I2S_DMA_CLOCK_ENABLE      __HAL_RCC_DMA1_CLK_ENABLE
+#define CODEC_I2S_RX_DMA DMA1
+#define CODEC_I2S_RX_DMA_ISR LISR
+#define CODEC_I2S_RX_DMA_IFCR LIFCR
+#define CODEC_I2S_RX_DMA_STREAM DMA1_Stream0
+#define CODEC_I2S_RX_DMA_IRQn DMA1_Stream0_IRQn
+#define CODEC_I2S_RX_DMA_IRQHandler DMA1_Stream0_IRQHandler
+#define CODEC_I2S_RX_DMA_CHANNEL DMA_CHANNEL_0
 
-#define CODEC_I2S_TX_DMA                DMA1
-#define CODEC_I2S_TX_DMA_ISR            LISR
-#define CODEC_I2S_TX_DMA_IFCR           LIFCR
-#define CODEC_I2S_TX_DMA_STREAM         DMA1_Stream4
-#define CODEC_I2S_TX_DMA_IRQn           DMA1_Stream4_IRQn
-#define CODEC_I2S_TX_DMA_IRQHandler     DMA1_Stream4_IRQHandler
-#define CODEC_I2S_TX_DMA_CHANNEL        DMA_CHANNEL_0
-
-#define CODEC_I2S_TX_DMA_FLAG_TC        DMA_FLAG_TCIF0_4
-#define CODEC_I2S_TX_DMA_FLAG_HT        DMA_FLAG_HTIF0_4
-#define CODEC_I2S_TX_DMA_FLAG_FE        DMA_FLAG_FEIF0_4
-#define CODEC_I2S_TX_DMA_FLAG_TE        DMA_FLAG_TEIF0_4
-#define CODEC_I2S_TX_DMA_FLAG_DME       DMA_FLAG_DMEIF0_4
-
-#define CODEC_I2S_RX_DMA                DMA1
-#define CODEC_I2S_RX_DMA_ISR            LISR
-#define CODEC_I2S_RX_DMA_IFCR           LIFCR
-#define CODEC_I2S_RX_DMA_STREAM         DMA1_Stream0
-#define CODEC_I2S_RX_DMA_IRQn           DMA1_Stream0_IRQn
-#define CODEC_I2S_RX_DMA_IRQHandler     DMA1_Stream0_IRQHandler
-#define CODEC_I2S_RX_DMA_CHANNEL        DMA_CHANNEL_0
-
-#define CODEC_I2S_RX_DMA_FLAG_TC        DMA_FLAG_TCIF0_4
-#define CODEC_I2S_RX_DMA_FLAG_HT        DMA_FLAG_HTIF0_4
-#define CODEC_I2S_RX_DMA_FLAG_FE        DMA_FLAG_FEIF0_4
-#define CODEC_I2S_RX_DMA_FLAG_TE        DMA_FLAG_TEIF0_4
-#define CODEC_I2S_RX_DMA_FLAG_DME       DMA_FLAG_DMEIF0_4
-
-
+#define CODEC_I2S_RX_DMA_FLAG_TC DMA_FLAG_TCIF0_4
+#define CODEC_I2S_RX_DMA_FLAG_HT DMA_FLAG_HTIF0_4
+#define CODEC_I2S_RX_DMA_FLAG_FE DMA_FLAG_FEIF0_4
+#define CODEC_I2S_RX_DMA_FLAG_TE DMA_FLAG_TEIF0_4
+#define CODEC_I2S_RX_DMA_FLAG_DME DMA_FLAG_DMEIF0_4
 
 // #define codec_BUFF_LEN       64                          /* DMA rx/tx buffer size, in number of DMA Periph/MemAlign-sized elements (words) */
 // #define codec_HT_LEN         (codec_BUFF_LEN>>1)         /* Half Transfer buffer size (both channels interleved) */
@@ -113,7 +111,6 @@
 // #define MONO_BUFSZ           codec_HT_CHAN_LEN
 
 typedef void (*audio_callback_func_type)(int32_t *src, int32_t *dst);
-
 
 enum Codec_Errors init_i2s_clock(uint32_t sample_rate);
 

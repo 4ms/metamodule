@@ -13,10 +13,9 @@ using JackSense = DebouncedSwitch;
 
 struct Controls {
 	static inline TouchCtl pads;
-	static inline AnalogIn<ADC_1, AdcChanNum::_10> freq1_cv{GPIO::C, 0};
-	static inline AnalogIn<ADC_1, AdcChanNum::_11> res1_cv{GPIO::C, 1};
-	static inline AnalogIn<ADC_1, AdcChanNum::_12> freq2_cv{GPIO::C, 2};
-	static inline AnalogIn<ADC_1, AdcChanNum::_13> res2_cv{GPIO::C, 3};
+
+	static inline AnalogIn<ADC_1, AdcChanNum::_10> freq_cv[2] = {{GPIO::C, 0}, {GPIO::C, 2}};
+	static inline AnalogIn<ADC_1, AdcChanNum::_11> res_cv[2] = {{GPIO::C, 1}, {GPIO::C, 3}};
 
 	static inline JackSense freq_sense[2] = {{GPIO::C, 14}, {GPIO::C, 14}}; //FixMe: only channel 2 is on p1
 	static inline JackSense res_sense[2] = {{GPIO::C, 4}, {GPIO::C, 4}};
