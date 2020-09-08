@@ -1,5 +1,6 @@
 #pragma once
 #include "colors.hh"
+#include "oscs.hh"
 #include "pin.hh"
 #include "tim_pwm.hh"
 #include <stm32f7xx.h>
@@ -22,8 +23,8 @@ private:
 	uint8_t dac_chan_;
 };
 
-struct RgbLed {
-	RgbLed(TimPwmChannel r_LED, TimPwmChannel g_LED, TimPwmChannel b_LED)
+struct PwmRgbLed {
+	PwmRgbLed(TimPwmChannel r_LED, TimPwmChannel g_LED, TimPwmChannel b_LED)
 		: r_(r_LED)
 		, g_(g_LED)
 		, b_(b_LED)
@@ -31,7 +32,15 @@ struct RgbLed {
 	}
 
 	void set_background(Color const &col) { background_color_ = col; }
-	void set_solid(Color const &col) { solid_color_ = col; }
+	void blend_background(Color const col)
+	{
+		background_color_ = background_color_.blend(col);
+	}
+	void add_background(Color const col)
+	{
+		background_color_ = background_color_ + col;
+	}
+	//void set_solid(Color const &col) { solid_color_ = col; }
 
 	void flash(Color const &c, uint32_t const flash_freq = 100)
 	{
@@ -133,27 +142,27 @@ public:
 	}
 
 public:
-	RgbLed freq1{
+	PwmRgbLed freq1{
 		{TIM8, TimChannelNum::_4},
 		{TIM8, TimChannelNum::_3},
 		{TIM2, TimChannelNum::_2}};
 
-	RgbLed res1{
+	PwmRgbLed res1{
 		{TIM1, TimChannelNum::_4},
 		{TIM1, TimChannelNum::_3},
 		{TIM3, TimChannelNum::_2}};
 
-	RgbLed freq2{
+	PwmRgbLed freq2{
 		NoLedElement,
 		{TIM3, TimChannelNum::_1},
 		{TIM8, TimChannelNum::_1N}};
 
-	RgbLed res2{
+	PwmRgbLed res2{
 		NoLedElement,
 		{TIM3, TimChannelNum::_3},
 		{TIM3, TimChannelNum::_4}};
 
-	RgbLed mode[5]{
+	PwmRgbLed mode[5]{
 		{NoLedElement, //DAC0 PA4
 		 NoLedElement,
 		 NoLedElement}, //DAC1 PA5
