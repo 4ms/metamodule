@@ -130,10 +130,10 @@ public:
 	//Todo: only update if glowing or fading
 	void update()
 	{
-		freq1.refresh();
-		res1.refresh();
-		freq2.refresh();
-		res2.refresh();
+		freq[0].refresh();
+		res[0].refresh();
+		freq[1].refresh();
+		res[1].refresh();
 		mode[0].refresh();
 		mode[1].refresh();
 		mode[2].refresh();
@@ -142,46 +142,45 @@ public:
 	}
 
 public:
-	PwmRgbLed freq1{
-		{TIM8, TimChannelNum::_4},
+	PwmRgbLed freq[2] = {
+		{{TIM8, TimChannelNum::_4},
 		{TIM8, TimChannelNum::_3},
-		{TIM2, TimChannelNum::_2}};
-
-	PwmRgbLed res1{
-		{TIM1, TimChannelNum::_4},
-		{TIM1, TimChannelNum::_3},
-		{TIM3, TimChannelNum::_2}};
-
-	PwmRgbLed freq2{
-		NoLedElement,
+		{TIM2, TimChannelNum::_2}},
+		{NoLedElement,
 		{TIM3, TimChannelNum::_1},
-		{TIM8, TimChannelNum::_1N}};
+		{TIM8, TimChannelNum::_1N}}
+	};
 
-	PwmRgbLed res2{
-		NoLedElement,
+	PwmRgbLed res[2] = {
+		{{TIM1, TimChannelNum::_4},
+		{TIM1, TimChannelNum::_3},
+		{TIM3, TimChannelNum::_2}},
+
+		{NoLedElement,
 		{TIM3, TimChannelNum::_3},
-		{TIM3, TimChannelNum::_4}};
+		{TIM3, TimChannelNum::_4}}
+	};
 
 	PwmRgbLed mode[5]{
 		{NoLedElement, //DAC0 PA4
-		 NoLedElement,
-		 NoLedElement}, //DAC1 PA5
+		NoLedElement,
+		NoLedElement}, //DAC1 PA5
 
 		{{TIM2, TimChannelNum::_3},
-		 NoLedElement,
-		 {TIM2, TimChannelNum::_4}},
+		NoLedElement,
+		{TIM2, TimChannelNum::_4}},
 
 		{{TIM2, TimChannelNum::_1},
-		 NoLedElement,
-		 {TIM5, TimChannelNum::_2}},
+		NoLedElement,
+		{TIM5, TimChannelNum::_2}},
 
 		{{TIM4, TimChannelNum::_3},
-		 NoLedElement,
-		 {TIM4, TimChannelNum::_4}},
+		NoLedElement,
+		{TIM4, TimChannelNum::_4}},
 
 		{{TIM4, TimChannelNum::_1},
-		 NoLedElement,
-		 {TIM4, TimChannelNum::_2}},
+		NoLedElement,
+		{TIM4, TimChannelNum::_2}},
 	};
 
 private:

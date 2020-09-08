@@ -2,13 +2,6 @@
 #include "debug.hh"
 #include "stm32f7xx_ll_dma.h"
 
-//"Thread" Controls::read()
-//Read CV jacks ---> update oversampler
-//Check ALERT pin --> queue an I2C message
-//Read rotary pins ---> update controls.rotary[].turned = +/-1
-//Read rotary buttons ---> update Debouncer
-//??Check new value from DMA/IT TC IRQ -->> update controls.pad[].touching
-
 void Controls::read()
 {
 	Debug::set_0(true);
