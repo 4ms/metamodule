@@ -36,8 +36,10 @@ arm-none-eabi
 -Istm32/device/include
 -Istm32/core/include
 -Istm32/periph/include
+-Isrc
 -Isrc/drivers
 -Isrc/util
+-Isrc/processors
 -fdata-sections
 -ffunction-sections
 -std=c++17

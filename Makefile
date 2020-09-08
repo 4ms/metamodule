@@ -28,9 +28,8 @@ INCLUDES += -I$(DEVICE)/include \
 			-I$(CORE)/include \
 			-I$(PERIPH)/include \
 			-Isrc \
-			-Idrivers \
-			-Iutil \
 			-Isrc/drivers \
+			-Isrc/processors \
 			-Isrc/util \
 
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
