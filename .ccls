@@ -3,16 +3,22 @@
 %h c++-header
 -isystem
 /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1
+-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1
 -isystem
 /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/arm-none-eabi
+-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/arm-none-eabi
 -isystem
 /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/backward
+-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/backward
 -isystem
 /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/lib/gcc/arm-none-eabi/8.2.1/include
+-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/lib/gcc/arm-none-eabi/8.2.1/include
 -isystem
 /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/lib/gcc/arm-none-eabi/8.2.1/include-fixed
+-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/lib/gcc/arm-none-eabi/8.2.1/include-fixed
 -isystem
 /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include
+-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include
 -target
 arm-none-eabi
 -fno-common
@@ -30,9 +36,6 @@ arm-none-eabi
 -Istm32/device/include
 -Istm32/core/include
 -Istm32/periph/include
--Isrc
--Idrivers
--Iutil
 -Isrc/drivers
 -Isrc/util
 -fdata-sections
@@ -45,5 +48,3 @@ arm-none-eabi
 -Wdouble-promotion
 -Wno-register
 -fno-threadsafe-statics
--U__GNUC__
--U__clang__
