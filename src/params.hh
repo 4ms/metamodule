@@ -12,8 +12,8 @@ public:
 	float freq[2];
 	float res[2];
 	uint8_t mode[2] = {0};
-	int32_t freq_knob_pos[2] = {50};
-	int32_t res_knob_pos[2] = {0};
+	float freq_knob_pos[2] = {50, 50};
+	float res_knob_pos[2] = {0, 0};
 
 public:
 	void update();
