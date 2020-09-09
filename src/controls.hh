@@ -21,7 +21,7 @@ struct Controls {
 	static inline JackSense res_sense[2] = {{GPIO::C, 4}, {GPIO::C, 4}};
 	static inline JackSense in_sense[2] = {{GPIO::C, 13}, {GPIO::C, 15}};
 
-	static inline RotaryEncoder<RotaryFullStep> rotary[2] = {{GPIO::C, 11, GPIO::C, 12}, {GPIO::B, 4, GPIO::A, 12}};
+	static inline RotaryEncoder<RotaryFullStep> rotary[2] = {{GPIO::C, 12, GPIO::C, 11}, {GPIO::A, 12, GPIO::B, 4}};
 	static inline DebouncedSwitch rotary_button[2] = {{GPIO::D, 2}, {GPIO::B, 14}};
 
 	Controls();
