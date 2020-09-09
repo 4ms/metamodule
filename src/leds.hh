@@ -25,28 +25,45 @@ private:
 
 using PwmRgbLed = RgbLed<TimPwmChannel>;
 
+struct LedDriverDefs {
+	const static inline I2C_TypeDef *LEDDRIVER_I2C = I2C1;
+	//use System::
+	//const static inline LEDDRIVER_I2C_CLK_ENABLE __HAL_RCC_I2C1_CLK_ENABLE
+
+	//use Pin
+	//const static inline LEDDRIVER_I2C_GPIO_CLOCK_ENABLE __HAL_RCC_GPIOB_CLK_ENABLE
+	// const static inline uint8_t LEDDRIVER_I2C_GPIO_AF = GPIO_AF4_I2C1;
+	// const static inline auto LEDDRIVER_I2C_GPIO = GPIOB;
+	// const static inline auto LEDDRIVER_I2C_SCL_PIN = GPIO_PIN_8;
+	// const static inline auto LEDDRIVER_I2C_SDA_PIN = GPIO_PIN_9;
+
+	//use System::
+	//		const static inline LEDDRIVER_I2C_DMA_CLK_ENABLE __HAL_RCC_DMA1_CLK_ENABLE;
+	const static inline auto LEDDRIVER_I2C_DMA = DMA1;
+	const static inline auto LEDDRIVER_I2C_DMA_INSTANCE_TX = DMA1_Stream6;
+	const static inline auto I2C_DMA_CHANNEL_TX = DMA_CHANNEL_1;
+	const static inline auto I2C_DMA_TX_IRQn = DMA1_Stream6_IRQn;
+
+	//?? Use a callback
+	//const static inline auto I2C_DMA_TX_IRQHandler = DMA1_Stream6_IRQHandler;
+	// const static inline auto I2C_EV_IRQHandler = I2C1_EV_IRQHandler;
+	// const static inline auto I2C_ER_IRQHandler = I2C1_ER_IRQHandler;
+	const static inline auto I2C_EV_IRQn = I2C1_EV_IRQn;
+	const static inline auto I2C_ER_IRQn = I2C1_ER_IRQn;
+
+	const static inline uint32_t I2C1_SPEED = 800000;
+
+	const static inline uint32_t PCA9685_MODE1 = 0x00;
+	const static inline uint32_t PCA9685_MODE2 = 0x01;
+	const static inline uint32_t PCA9685_LED0 = 0x06;
+	const static inline uint32_t PRE_SCALE_MODE = 0xFE;
+	const static inline uint32_t PCA9685_I2C_BASE_ADDRESS = 0b10000000;
+};
+
 class LedCtl {
 public:
 	LedCtl()
 	{
-		PinL<GPIO::C, 9> freq1_red_pin{PinMode::Alt, LL_GPIO_AF_3};
-		PinL<GPIO::C, 8> freq1_green_pin{PinMode::Alt, LL_GPIO_AF_3};
-		PinL<GPIO::B, 3> freq1_blue_pin{PinMode::Alt, LL_GPIO_AF_1};
-		PinL<GPIO::A, 11> res1_red_pin{PinMode::Alt, LL_GPIO_AF_1};
-		PinL<GPIO::A, 10> res1_green_pin{PinMode::Alt, LL_GPIO_AF_1};
-		PinL<GPIO::B, 5> res1_blue_pin{PinMode::Alt, LL_GPIO_AF_2};
-		PinL<GPIO::A, 6> freq2_blue_pin{PinMode::Alt, LL_GPIO_AF_2};
-		PinL<GPIO::A, 7> freq2_green_pin{PinMode::Alt, LL_GPIO_AF_3};
-		PinL<GPIO::B, 0> res2_green_pin{PinMode::Alt, LL_GPIO_AF_2};
-		PinL<GPIO::B, 1> res2_blue_pin{PinMode::Alt, LL_GPIO_AF_2};
-		PinL<GPIO::A, 2> mode1_red_pin{PinMode::Alt, LL_GPIO_AF_1};
-		PinL<GPIO::A, 3> mode1_blue_pin{PinMode::Alt, LL_GPIO_AF_1};
-		PinL<GPIO::A, 0> mode2_red_pin{PinMode::Alt, LL_GPIO_AF_1};
-		PinL<GPIO::A, 1> mode2_blue_pin{PinMode::Alt, LL_GPIO_AF_2};
-		PinL<GPIO::B, 8> mode3_red_pin{PinMode::Alt, LL_GPIO_AF_2};
-		PinL<GPIO::B, 9> mode3_blue_pin{PinMode::Alt, LL_GPIO_AF_2};
-		PinL<GPIO::B, 6> mode4_red_pin{PinMode::Alt, LL_GPIO_AF_2};
-		PinL<GPIO::B, 7> mode4_blue_pin{PinMode::Alt, LL_GPIO_AF_2};
 	}
 
 	//Todo: only update if glowing or fading
