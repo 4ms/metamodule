@@ -1,5 +1,5 @@
 BasedOnStyle : "LLVM"
-Standard : "c++14"
+Standard : "c++17"
 UseTab : "Always"
 TabWidth : 4
 IndentWidth : 4
@@ -8,6 +8,8 @@ AccessModifierOffset : -4
 AllowShortIfStatementsOnASingleLine : "true"
 AllowShortBlocksOnASingleLine : "true"
 AlwaysBreakTemplateDeclarations : "true"
+AllowAllArgumentsOnNextLine : "true"
+AlignAfterOpenBracket : "Align"
 BreakBeforeBraces: "Stroustrup"
 IndentCaseLabels : "true"
 IndentPPDirectives : "BeforeHash"

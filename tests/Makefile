@@ -10,7 +10,9 @@ CPP_PLATFORM = Gcc
 CC = gcc
 PROJECT_HOME_DIR = .
 
-SRC_FILES = src/debug.cc \
+SRC_FILES = src/drivers/rotary.cc \
+			# src/debug.cc \
+			#src/drivers/pin.cc
 
 # SRC_DIRS = \
 # 	src \
@@ -52,6 +54,7 @@ CPPUTEST_WARNINGFLAGS += -Wno-missing-field-initializers
 CPPUTEST_WARNINGFLAGS += -Wno-unused-parameter
 CPPUTEST_WARNINGFLAGS += -Wno-register
 CPPUTEST_WARNINGFLAGS += -Wno-missing-noreturn
+CPPUTEST_WARNINGFLAGS += -Wno-unused-template
 
 CPPUTEST_CFLAGS += -Wall
 CPPUTEST_CFLAGS += -Wstrict-prototypes

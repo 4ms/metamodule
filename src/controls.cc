@@ -2,30 +2,19 @@
 #include "debug.hh"
 #include "stm32f7xx_ll_dma.h"
 
-//"Thread" Controls::read()
-//Read CV jacks ---> update oversampler
-//Check ALERT pin --> queue an I2C message
-//Read rotary pins ---> update controls.rotary[].turned = +/-1
-//Read rotary buttons ---> update Debouncer
-//??Check new value from DMA/IT TC IRQ -->> update controls.pad[].touching
-
 void Controls::read()
 {
 	Debug::set_0(true);
 
-	freq1_cv.read();
-	freq2_cv.read();
-	res1_cv.read();
-	res2_cv.read();
 	pads.check_alert_received();
 
-	rotary_button[0].update();
-	rotary_button[1].update();
-
+	for (uint32_t i = 0; i < 2; i++) {
+		freq_cv[i].read();
+		res_cv[i].read();
+		rotary[i].update();
+		rotary_button[i].update();
+	}
 	Debug::set_0(false);
-
-	//read_rotary
-	// rotary[0].read();
 }
 
 void Controls::begin()
@@ -40,7 +29,7 @@ Controls::Controls()
 	//or 2) call every ADC channels' start_dma() method but make AdcPeriph::start_dma() static so it can check if it's already been started
 	//or 3) start the dma with the AdcPeriph<ADC_1>::start_dma(...) format
 
-	freq1_cv.start_dma(DMA2, LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
+	freq_cv[0].start_dma(DMA2, LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
 	// AdcPeriph<ADC_1>::start_dma(DMA2, LL_DMA_STREAM_4, LL_DMA_CHANNEL_0, DMA2_Stream4_IRQn);
 }
 

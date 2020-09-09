@@ -2,7 +2,7 @@
 #include "util/math.hh"
 #include <array>
 #include <fff.h>
-
+using namespace MathTools;
 TEST_GROUP(math_tests){
 
 	void setup(){}

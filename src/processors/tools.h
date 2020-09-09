@@ -1,5 +1,5 @@
 #pragma once
-#include "math.hh"
+#include "util/math.hh"
 #include <cmath>
 
 using namespace MathTools;

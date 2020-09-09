@@ -10,6 +10,10 @@ Audio::Audio(Params &p)
 	: params(p)
 {
 	instance = this;
+	// for (auto &fx : FX_left)
+	// 	fx.set_samplerate(kSampleRate);
+	// for (auto &fx : FX_right)
+	// 	fx.set_samplerate(kSampleRate);
 	current_fx[LEFT] = FX_left[0];
 	current_fx[LEFT]->set_samplerate(kSampleRate);
 	current_fx[RIGHT] = FX_right[0];

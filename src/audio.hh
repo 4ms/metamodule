@@ -17,9 +17,13 @@ public:
 	struct AudioFrame {
 		int16_t l;
 		int16_t r;
-		static const inline size_t kSampleSize = 16;
-		static const inline size_t kMaxValue = ipow(2, kSampleSize - 1) - 1;
+
+	private:
+		static const inline size_t kSampleSizeBits = 16;
+		static const inline size_t kMaxValue = ipow(2, kSampleSizeBits - 1) - 1;
 		static const inline float kScaling = static_cast<float>(kMaxValue);
+
+	public:
 		static float scaleInput(int16_t val) { return val / kScaling; }
 		static int16_t scaleOutput(float val) { return val * kScaling; }
 	};
