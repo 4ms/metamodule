@@ -10,12 +10,14 @@ Audio::Audio(Params &p)
 	: params(p)
 {
 	instance = this;
-	for (auto &fx : FX_left)
-		fx.set_samplerate(kSampleRate);
-	for (auto &fx : FX_right)
-		fx.set_samplerate(kSampleRate);
+	// for (auto &fx : FX_left)
+	// 	fx.set_samplerate(kSampleRate);
+	// for (auto &fx : FX_right)
+	// 	fx.set_samplerate(kSampleRate);
 	current_fx[LEFT] = FX_left[0];
+	current_fx[LEFT]->set_samplerate(kSampleRate);
 	current_fx[RIGHT] = FX_right[0];
+	current_fx[RIGHT]->set_samplerate(kSampleRate);
 	register_callback(Audio::process);
 }
 
@@ -47,10 +49,12 @@ void Audio::check_fx_change()
 	if (current_fx[LEFT] != FX_left[params.mode[0]]) {
 		//Todo: start crossfading
 		current_fx[LEFT] = FX_left[params.mode[0]];
+		current_fx[LEFT]->set_samplerate(kSampleRate);
 	}
 	if (current_fx[RIGHT] != FX_right[params.mode[1]]) {
 		//Todo: start crossfading
 		current_fx[RIGHT] = FX_right[params.mode[1]];
+		current_fx[RIGHT]->set_samplerate(kSampleRate);
 	}
 }
 
