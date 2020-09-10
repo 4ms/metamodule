@@ -25,7 +25,9 @@ public:
 				output = triFold(input);
 				break;
 		}
-		return (output);
+		//return (output);
+
+		return (chebyFold(input));
 	}
 
 	WaveFolder()
@@ -102,18 +104,20 @@ private:
 
 	float chebyFold(float input)
 	{
-		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 256.0f);
+		int cheby_tables = 16;
+		int cheby_size = 513;
+		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, (float)(cheby_size - 1));
 		float interpVal = lookupIndex - (long)lookupIndex;
 		int firstLookup = lookupIndex;
-		int secondLookup = (firstLookup + 1) % 257;
+		int secondLookup = (firstLookup + 1) % cheby_size;
 
-		float foldSamp[13];
+		float foldSamp[cheby_tables + 1];
 		foldSamp[0] = input;
-		for (int i = 0; i < 12; i++) {
+		for (int i = 0; i < cheby_tables; i++) {
 			foldSamp[i + 1] = interpolate(cheby[i][firstLookup], cheby[i][secondLookup], interpVal);
 		}
 
-		float foldLevel = mainFold * 12.0f;
+		float foldLevel = mainFold * float(cheby_tables);
 		float foldPartial = foldLevel - (long)foldLevel;
 
 		float output = 0;

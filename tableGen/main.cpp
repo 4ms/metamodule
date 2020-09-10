@@ -36,7 +36,7 @@ int main()
 		for (int i = 0; i < cheby_size; i++)
 			cheby[n][i] = 2.0f * cheby[0][i] * cheby[n - 1][i] - cheby[n - 2][i];
 
-	myfile << "const float newcheby[16][513] = " << endl
+	myfile << "const float cheby[16][513] = " << endl
 		   << "{";
 
 	for (int i = 0; i < 16; i++) {
@@ -78,7 +78,7 @@ int main()
 		}
 	}
 
-	myfile << "const float newfold[1025] = " << endl;
+	myfile << "const float fold[1025] = " << endl;
 	myfile << "{ ";
 
 	for (int i = 0; i < 1025; i++) {
