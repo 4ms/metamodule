@@ -87,12 +87,9 @@ private:
 
 	float cleanFold(float input)
 	{
-		// s1_31 sample = x * s1_15(amount);
-		// u0_32 phase = sample.to_unsigned_scale();
-		// f res = DynamicData::fold.interpolateDiff<f>(phase);
-		// res *= DynamicData::fold_max.interpolate(amount);
-
-		//float scaledMainFold = constrain(mainFold + 0.000f, 0.f, 1.f);
+		//float scaledMainFold = constrain(mainFold + 0.004f, 0.f, 1.f);
+		//Todo: scale mainFold so it goes to 0, but slowly goes up to 0.004f
+		// Or constrain to 0.004...1.0f and add a VCA that goes to 0->1.0 as mainFold goes 0->0.1 (or so)
 		float scaledMainFold = mainFold;
 		float gainedInput = input * scaledMainFold;
 
