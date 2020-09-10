@@ -84,18 +84,21 @@ private:
 
 	float cleanFold(float input)
 	{
-		float output = 0;
+		// s1_31 sample = x * s1_15(amount);
+		// u0_32 phase = sample.to_unsigned_scale();
+		// f res = DynamicData::fold.interpolateDiff<f>(phase);
+		// res *= DynamicData::fold_max.interpolate(amount);
 
-		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 1024.0f);
+		float scaledMainFold = constrain(mainFold + 0.004f, 0.f, 1.f);
+		float gainedInput = input * scaledMainFold;
+		float lookupIndex = map_value(gainedInput, -1.0f, 1.0f, 0.0f, 1024.0f);
 		float interpVal = lookupIndex - (long)lookupIndex;
 		int firstLookup = lookupIndex;
 		int secondLookup = (firstLookup + 1) % 1025;
 
-		float foldSamp[2];
-		foldSamp[0] = input;
-		foldSamp[1] = interpolate(fold[firstLookup], fold[secondLookup], interpVal);
-
-		output = interpolate(foldSamp[0], foldSamp[1], mainFold);
+		float foldSamp = interpolate(fold[firstLookup], fold[secondLookup], interpVal);
+		float foldMax = interpolate(fold_max[firstLookup / 2], fold_max[secondLookup / 2], interpVal);
+		float output = foldSamp * foldMax;
 
 		return (output);
 	}
