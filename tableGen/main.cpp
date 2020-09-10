@@ -1052,10 +1052,14 @@ int main()
 		}
 	}
 
-	for (int i = 0; i < 513; i++) {
-		myfile << fold_max[i] << "," << endl;
-	}
+	myfile << "const float fold_max[513] = {";
 
+	for (int i = 0; i < 513; i++) {
+		if (i < 512)
+			myfile << fold_max[i] << ",";
+		else
+			myfile << fold_max[i] << "};";
+	}
 	myfile.close();
 	return 0;
 }
