@@ -6,7 +6,7 @@
 class System {
 
 	void SetVectorTable(uint32_t reset_address)
-	{ 
+	{
 		SCB->VTOR = reset_address & (uint32_t)0x1FFFFF80;
 	}
 
@@ -59,14 +59,14 @@ public:
     	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
 		//Code execution from flash over ITCM bus (using ART and Prefetch)
-		// SCB_DisableICache(); 
+		// SCB_DisableICache();
 		// SCB_InvalidateDCache();
-		// SCB_EnableDCache();	
+		// SCB_EnableDCache();
 
 		//Code execution from flash over AXIM bus using I-Cache:
 		SCB_EnableICache();
 		SCB_InvalidateDCache();
-		SCB_EnableDCache();	
+		SCB_EnableDCache();
 
 	    HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
 	    HAL_NVIC_SetPriority(MemoryManagement_IRQn, 0, 0);
@@ -140,6 +140,64 @@ public:
 		else if (DMAx==DMA3) LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA3);
 		#endif
     }
+
+	static constexpr void enable_i2c_rcc(I2C_TypeDef *I2Cx) {
+		if (I2Cx==nullptr) return;
+		#ifdef I2C1
+		else if (I2Cx==I2C1) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+		#endif
+		#ifdef I2C2
+		else if (I2Cx==I2C2) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C2);
+		#endif
+		#ifdef I2C3
+		else if (I2Cx==I2C3) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C3);
+		#endif
+	}
+
+	static constexpr void disable_i2c_rcc(I2C_TypeDef *I2Cx) {
+		if (I2Cx==nullptr) return;
+		#ifdef I2C1
+		else if (I2Cx==I2C1) LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_I2C1);
+		#endif
+		#ifdef I2C2
+		else if (I2Cx==I2C2) LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_I2C2);
+		#endif
+		#ifdef I2C3
+		else if (I2Cx==I2C3) LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_I2C3);
+		#endif
+	}
+
+	static constexpr void enable_sai_rcc(SAI_TypeDef *SAIx) {
+		if (SAIx==nullptr) return;
+		#ifdef SAI1
+		else if (SAIx==SAI1) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SAI1);
+		#endif
+		#ifdef SAI2
+		else if (SAIx==SAI2) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SAI2);
+		#endif
+		#ifdef SAI3
+		else if (SAIx==SAI3) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SAI3);
+		#endif
+		#ifdef SAI4
+		else if (SAIx==SAI4) LL_APB4_GRP1_EnableClock(LL_APB4_GRP1_PERIPH_SAI4);
+		#endif
+	}
+
+	static constexpr void disable_sai_rcc(SAI_TypeDef *SAIx) {
+		if (SAIx==nullptr) return;
+		#ifdef SAI1
+		else if (SAIx==SAI1) LL_APB2_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_SAI1);
+		#endif
+		#ifdef SAI2
+		else if (SAIx==SAI2) LL_APB2_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_SAI2);
+		#endif
+		#ifdef SAI3
+		else if (SAIx==SAI3) LL_APB2_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_SAI3);
+		#endif
+		#ifdef SAI4
+		else if (SAIx==SAI4) LL_APB4_GRP1_DisableClock(LL_APB4_GRP1_PERIPH_SAI4);
+		#endif
+	}
 
 	static void enable_tim_rcc(TIM_TypeDef *TIM) {
 		#ifdef TIM1
@@ -253,3 +311,4 @@ public:
 	    else return 0;
 	}
 };
+
