@@ -144,4 +144,4 @@ private:
 
 		return (output);
 	}
-
+};
