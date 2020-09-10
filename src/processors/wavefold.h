@@ -27,7 +27,8 @@ public:
 		}
 		//return (output);
 
-		return (chebyFold(input));
+		//return (chebyFold(input));
+		return (cleanFold(input));
 	}
 
 	WaveFolder()
@@ -91,15 +92,22 @@ private:
 		// f res = DynamicData::fold.interpolateDiff<f>(phase);
 		// res *= DynamicData::fold_max.interpolate(amount);
 
-		float scaledMainFold = constrain(mainFold + 0.004f, 0.f, 1.f);
+		//float scaledMainFold = constrain(mainFold + 0.000f, 0.f, 1.f);
+		float scaledMainFold = mainFold;
 		float gainedInput = input * scaledMainFold;
+
 		float lookupIndex = map_value(gainedInput, -1.0f, 1.0f, 0.0f, 1024.0f);
 		float interpVal = lookupIndex - (long)lookupIndex;
 		int firstLookup = lookupIndex;
 		int secondLookup = (firstLookup + 1) % 1025;
-
 		float foldSamp = interpolate(fold[firstLookup], fold[secondLookup], interpVal);
-		float foldMax = interpolate(fold_max[firstLookup / 2], fold_max[secondLookup / 2], interpVal);
+
+		lookupIndex = map_value(mainFold, 0.f, 1.0f, 0.0f, 512.0f);
+		interpVal = lookupIndex - (long)lookupIndex;
+		firstLookup = lookupIndex;
+		secondLookup = (firstLookup + 1) % 512;
+		float foldMax = interpolate(fold_max[firstLookup], fold_max[secondLookup], interpVal);
+
 		float output = foldSamp * foldMax;
 
 		return (output);

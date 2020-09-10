@@ -12,6 +12,21 @@ float cheby[16][513];
 float fold[1025];
 float fold_max[513];
 
+// [0..1] --> [-1..1]
+static float faster_sine(float x)
+{
+	x = (x * 2.f) - 1.f;
+	return 4.f * (x - x * fabsf(x));
+}
+
+// [0..1] --> [-1..1]
+static float fast_sine(float x)
+{
+	float y = faster_sine(x);
+	y = 0.225f * (y * fabsf(y) - y) + y;
+	return y;
+}
+
 int main()
 {
 	ofstream myfile;
@@ -65,15 +80,15 @@ int main()
 		fold[0] = 0.0f;
 		for (int i = 1; i < fold_size; ++i) {
 			// TODO: this -3 make the wavefolding curve symmetrical; why?
-			float x = float(i) / float(fold_size - 3); // 0..1
-			x = folds * (2.0f * x - 1.0f);			   // -folds..folds
-			float g = 1.0f / (1.0f + fabsf(x));		   // 0..0.5
+			float x = float(i - 1) / float(fold_size - 3); // 0..1
+			x = folds * (2.0f * x - 1.0f);				   // -folds..folds
+			float g = 1.0f / (1.0f + fabsf(x));			   // 0..0.5
 			float p = 16.0f / (2.0f * M_PI) * x * g;
 			while (p > 1.0f)
 				p--;
 			while (p < 0.0f)
 				p++;
-			x = -g * (x + sin(p));
+			x = -g * (x + fast_sine(p));
 			fold[i] = x;
 		}
 	}
@@ -95,7 +110,10 @@ int main()
 			max = std::max(std::fabsf(fold[i + start]), max);
 			// the attenuation factor accounts for interpolation error, so
 			// we don't overestimate the 1/x curve and amplify to clipping
-			fold_max[i] = 0.95f / (max);
+			if (max == 0.0f)
+				fold_max[i] = 0.0f;
+			else
+				fold_max[i] = 0.95f / (max);
 		}
 	}
 
