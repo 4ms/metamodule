@@ -17,3 +17,5 @@ lib/
 localtests_tests
 
 .nvimrc
+
+.ccls-cache/
