@@ -138,11 +138,10 @@ $(BUILDDIR)/%.o: %.s
 
 %.d: ;
 
-
-tables:
+tables src/processors/wavefold_tables.h: tableGen/main.cpp
 	g++ tableGen/main.cpp -o tableGen/table
 	tableGen/table
-
+	
 flash: $(BIN)
 	st-flash write $(BIN) 0x8000000
 
