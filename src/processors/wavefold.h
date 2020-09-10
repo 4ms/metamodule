@@ -1,8 +1,7 @@
 #pragma once
 #include "audio_processor.hh"
 #include "tools.h"
-#include "wavefold-tables-old.h" //Tables from original python scripts (don't work right)
-#include "wavefold_tables.h"	 //Tables from new g++ project (not all converted yet)
+#include "wavefold_tables.h" //Tables from new g++ project
 
 class WaveFolder : public AudioProcessor {
 public:
