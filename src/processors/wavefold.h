@@ -24,10 +24,7 @@ public:
 				output = triFold(input);
 				break;
 		}
-		//return (output);
-
-		//return (chebyFold(input));
-		return (cleanFold(input));
+		return (output);
 	}
 
 	WaveFolder()
