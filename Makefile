@@ -139,6 +139,10 @@ $(BUILDDIR)/%.o: %.s
 %.d: ;
 
 
+tables:
+	g++ tableGen/main.cpp -o tableGen/table
+	tableGen/table
+
 flash: $(BIN)
 	st-flash write $(BIN) 0x8000000
 

@@ -19,3 +19,5 @@ localtests_tests
 .nvimrc
 
 .ccls-cache/
+
+tableGen/table
