@@ -12,7 +12,6 @@ struct SharedI2C {
 		.PRESC = 8 * 2, //tPREC = 216MHz / 8 = 27MHz
 		.SCLDEL_SDADEL = 0b00010001,
 		.SCLH = 17, //27MHz / (17+17) = 794kHz
-		.SCLL = 17 
-	};
+		.SCLL = 17};
 };
 
