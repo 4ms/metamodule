@@ -2,7 +2,7 @@
 #include "drivers/dma.hh"
 #include "stm32f7xx.h"
 
-const DMAPeriph::DMAConfig LedDriverDmaDef = {
+const DMAConfig LedDriverDmaDef = {
 	.DMAx = DMA1,
 	.stream = DMA1_Stream6,
 	.channel = DMA_CHANNEL_1,
