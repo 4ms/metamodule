@@ -27,10 +27,9 @@
  */
 
 // #include "globals.h"
-#include "i2c.h"
 #include "codec_i2c.h"
 #include "codec_i2sx2.h"
-
+//#include "drivers/i2c.hh"
 
 #define CODEC_IS_SLAVE 0
 #define CODEC_IS_MASTER 1
@@ -40,76 +39,73 @@
 #define W8731_NUM_REGS 10
 
 //Registers:
-#define WM8731_REG_INBOTH       8
-#define WM8731_REG_INMUTE       7
-#define WM8731_REG_POWERDOWN    6
-#define WM8731_REG_INVOL        0
+#define WM8731_REG_INBOTH 8
+#define WM8731_REG_INMUTE 7
+#define WM8731_REG_POWERDOWN 6
+#define WM8731_REG_INVOL 0
 
-#define WM8731_REG_SAMPLE_CTRL  0x08
-#define WM8731_REG_RESET        0x0F
+#define WM8731_REG_SAMPLE_CTRL 0x08
+#define WM8731_REG_RESET 0x0F
 
-#define VOL_p12dB   0b11111 /*+12dB*/
-#define VOL_0dB     0b10111 /*0dB*/
-#define VOL_n1dB    0b10110 /*-1.5dB*/
-#define VOL_n3dB    0b10101 /*-3dB*/
-#define VOL_n6dB    0b10011 /*-6dB*/
-#define VOL_n12dB   15      /*-12dB*/
-#define VOL_n15dB   13      /*-15dB*/
+#define VOL_p12dB 0b11111 /*+12dB*/
+#define VOL_0dB 0b10111	  /*0dB*/
+#define VOL_n1dB 0b10110  /*-1.5dB*/
+#define VOL_n3dB 0b10101  /*-3dB*/
+#define VOL_n6dB 0b10011  /*-6dB*/
+#define VOL_n12dB 15	  /*-12dB*/
+#define VOL_n15dB 13	  /*-15dB*/
 /*1.5dB steps down to..*/
-#define VOL_n34dB   0b00000 /*-34.5dB*/
+#define VOL_n34dB 0b00000 /*-34.5dB*/
 
 //Register 4: Analogue Audio Path Control
-#define MICBOOST        (1 << 0)    /* Boost Mic level */
-#define MUTEMIC         (1 << 1)    /* Mute Mic to ADC */
-#define INSEL_mic       (1 << 2)    /* Mic Select*/
-#define INSEL_line      (0 << 2)    /* LineIn Select*/
-#define BYPASS          (1 << 3)    /* Bypass Enable */
-#define DACSEL          (1 << 4)    /* Select DAC */
-#define SIDETONE        (1 << 5)    /* Enable Sidetone */
+#define MICBOOST (1 << 0)	/* Boost Mic level */
+#define MUTEMIC (1 << 1)	/* Mute Mic to ADC */
+#define INSEL_mic (1 << 2)	/* Mic Select*/
+#define INSEL_line (0 << 2) /* LineIn Select*/
+#define BYPASS (1 << 3)		/* Bypass Enable */
+#define DACSEL (1 << 4)		/* Select DAC */
+#define SIDETONE (1 << 5)	/* Enable Sidetone */
 #define SIDEATT_neg15dB (0b11 << 6)
 #define SIDEATT_neg12dB (0b10 << 6)
-#define SIDEATT_neg9dB  (0b01 << 6)
-#define SIDEATT_neg6dB  (0b00 << 6)
-
+#define SIDEATT_neg9dB (0b01 << 6)
+#define SIDEATT_neg6dB (0b00 << 6)
 
 //Register 5: Digital Audio Path Control
-#define ADCHPFDisable 1                 /* ADC High Pass Filter */
+#define ADCHPFDisable 1 /* ADC High Pass Filter */
 #define ADCHPFEnable 0
-#define DEEMPH_48k      (0b11 << 1)     /* De-emphasis Control */
-#define DEEMPH_44k      (0b10 << 1)
-#define DEEMPH_32k      (0b01 << 1)
-#define DEEMPH_disable  (0b00 << 1)
-#define DACMU_enable    (1 << 3)        /* DAC Soft Mute Control */
-#define DACMU_disable   (0 << 3)
-#define HPOR_store      (1 << 4)        /* Store DC offset when HPF disabled */
-#define HPOR_clear      (0 << 4)
+#define DEEMPH_48k (0b11 << 1) /* De-emphasis Control */
+#define DEEMPH_44k (0b10 << 1)
+#define DEEMPH_32k (0b01 << 1)
+#define DEEMPH_disable (0b00 << 1)
+#define DACMU_enable (1 << 3) /* DAC Soft Mute Control */
+#define DACMU_disable (0 << 3)
+#define HPOR_store (1 << 4) /* Store DC offset when HPF disabled */
+#define HPOR_clear (0 << 4)
 
 //Register 6: Power Down Control: 1= enable power down, 0=disable power down
-#define PD_LINEIN       (1<<0)
-#define PD_MIC          (1<<1)
-#define PD_ADC          (1<<2)
-#define PD_DAC          (1<<3)
-#define PD_OUT          (1<<4)
-#define PD_OSC          (1<<5)
-#define PD_CLKOUT       (1<<6)
-#define PD_POWEROFF     (1<<7)
-
+#define PD_LINEIN (1 << 0)
+#define PD_MIC (1 << 1)
+#define PD_ADC (1 << 2)
+#define PD_DAC (1 << 3)
+#define PD_OUT (1 << 4)
+#define PD_OSC (1 << 5)
+#define PD_CLKOUT (1 << 6)
+#define PD_POWEROFF (1 << 7)
 
 //Register 7: Digital Audio Interface Format
 #define format_MSB_Right 0
 #define format_MSB_Left 1
 #define format_I2S 2
 #define format_DSP 3
-#define format_16b (0<<2)
-#define format_20b (1<<2)
-#define format_24b (2<<2)
-#define format_32b (3<<2)
-
+#define format_16b (0 << 2)
+#define format_20b (1 << 2)
+#define format_24b (2 << 2)
+#define format_32b (3 << 2)
 
 //Register: Sample Rate Controls
-#define SR_USB_NORM (1<<0)      //1=USB (250/272fs), 0=Normal Mode (256/384fs)
-#define SR_BOSR     (1<<1)      //Base Over-Sampling Rate: 0=250/256fs, 1=272/384fs (also 128/192)
-#define SR_NORM_8K  (0b1011 << 2)
+#define SR_USB_NORM (1 << 0) //1=USB (250/272fs), 0=Normal Mode (256/384fs)
+#define SR_BOSR (1 << 1)	 //Base Over-Sampling Rate: 0=250/256fs, 1=272/384fs (also 128/192)
+#define SR_NORM_8K (0b1011 << 2)
 #define SR_NORM_32K (0b0110 << 2)
 #define SR_NORM_44K (0b1000 << 2)
 #define SR_NORM_48K (0b0000 << 2)
@@ -117,86 +113,80 @@
 #define SR_NORM_96K (0b0111 << 2)
 
 uint16_t codec_init_data[] =
-{
-    VOL_0dB,            // Reg 00: Left Line In
+	{
+		VOL_0dB, // Reg 00: Left Line In
 
-    VOL_0dB,            // Reg 01: Right Line In
+		VOL_0dB, // Reg 01: Right Line In
 
-    0b0101111,          // Reg 02: Left Headphone out (Mute)
+		0b0101111, // Reg 02: Left Headphone out (Mute)
 
-    0b0101111,          // Reg 03: Right Headphone out (Mute)
+		0b0101111, // Reg 03: Right Headphone out (Mute)
 
-    (MUTEMIC            // Reg 04: Analog Audio Path Control (maximum attenuation on sidetone, sidetone disabled, DAC selected, Mute Mic, no bypass)
-    | /*BYPASS*/INSEL_line
-    | DACSEL
-    | SIDEATT_neg6dB),
+		(MUTEMIC // Reg 04: Analog Audio Path Control (maximum attenuation on sidetone, sidetone disabled, DAC selected, Mute Mic, no bypass)
+		 | /*BYPASS*/ INSEL_line | DACSEL | SIDEATT_neg6dB),
 
-    (DEEMPH_disable         // Reg 05: Digital Audio Path Control: HPF, De-emp at 48kHz on DAC, do not soft mute dac
-    | ADCHPFDisable),
+		(DEEMPH_disable // Reg 05: Digital Audio Path Control: HPF, De-emp at 48kHz on DAC, do not soft mute dac
+		 | ADCHPFDisable),
 
-    (PD_MIC
-    | PD_OSC
-    | PD_CLKOUT),       // Reg 06: Power Down Control (Clkout, Osc, Mic Off) 0x062
+		(PD_MIC | PD_OSC | PD_CLKOUT), // Reg 06: Power Down Control (Clkout, Osc, Mic Off) 0x062
 
-    (format_16b         // Reg 07: Digital Audio Interface Format (24-bit, slave)
-    | format_I2S),
+		(format_16b // Reg 07: Digital Audio Interface Format (24-bit, slave)
+		 | format_I2S),
 
-    0x000,              // Reg 08: Sampling Control (USB_NORM=Normal, BOSR=256x, default = 48k)
+		0x000, // Reg 08: Sampling Control (USB_NORM=Normal, BOSR=256x, default = 48k)
 
-    0x001               // Reg 09: Active Control
+		0x001 // Reg 09: Active Control
 };
 
-
 //Set configuration here:
-#define CODEC_ADDRESS           (W8731_ADDR_0<<1)
-
+#define CODEC_ADDRESS (W8731_ADDR_0 << 1)
 
 //Private
 uint32_t codec_write_register(uint8_t RegisterAddr, uint16_t RegisterValue);
 
 uint32_t codec_power_down(void)
 {
-    uint32_t err=0;
+	uint32_t err = 0;
 
-    err=codec_write_register(WM8731_REG_POWERDOWN, 0xFF); //Power Down enable all
-    return err;
+	err = codec_write_register(WM8731_REG_POWERDOWN, 0xFF); //Power Down enable all
+	return err;
 }
 
 uint32_t codec_init(uint32_t sample_rate)
 {
 	uint8_t i;
-	uint32_t err=0;
-	
+	uint32_t err = 0;
+
 	err = codec_write_register(WM8731_REG_RESET, 0);
-	
-	if (sample_rate==48000)					
+
+	if (sample_rate == 48000)
 		codec_init_data[WM8731_REG_SAMPLE_CTRL] |= SR_NORM_48K;
-	if (sample_rate==44100)					
+	if (sample_rate == 44100)
 		codec_init_data[WM8731_REG_SAMPLE_CTRL] |= SR_NORM_44K;
-	if (sample_rate==32000)					
+	if (sample_rate == 32000)
 		codec_init_data[WM8731_REG_SAMPLE_CTRL] |= SR_NORM_32K;
-	if (sample_rate==88200)					
+	if (sample_rate == 88200)
 		codec_init_data[WM8731_REG_SAMPLE_CTRL] |= SR_NORM_88K;
-	if (sample_rate==96000)					
+	if (sample_rate == 96000)
 		codec_init_data[WM8731_REG_SAMPLE_CTRL] |= SR_NORM_96K;
-	if (sample_rate==8000)					
+	if (sample_rate == 8000)
 		codec_init_data[WM8731_REG_SAMPLE_CTRL] |= SR_NORM_8K;
 
-	for(i=0;i<W8731_NUM_REGS;i++)
-		err+=codec_write_register(i, codec_init_data[i]);
+	for (i = 0; i < W8731_NUM_REGS; i++)
+		err += codec_write_register(i, codec_init_data[i]);
 
 	return err;
 }
 
 uint32_t codec_write_register(uint8_t RegisterAddr, uint16_t RegisterValue)
-{   
-    //Assemble 2-byte data 
-    uint8_t Byte1 = ((RegisterAddr<<1)&0xFE) | ((RegisterValue>>8)&0x01);
-    uint8_t Byte2 = RegisterValue&0xFF;
-    uint8_t data[2];
-    
-    data[0] = Byte1;
-    data[1] = Byte2;
+{
+	//Assemble 2-byte data
+	uint8_t Byte1 = ((RegisterAddr << 1) & 0xFE) | ((RegisterValue >> 8) & 0x01);
+	uint8_t Byte2 = RegisterValue & 0xFF;
+	uint8_t data[2];
 
-    return i2c_write(CODEC_ADDRESS, data, 2);
+	data[0] = Byte1;
+	data[1] = Byte2;
+
+	//return i2c_write(CODEC_ADDRESS, data, 2);
 }

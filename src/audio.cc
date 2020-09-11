@@ -1,10 +1,8 @@
 #include "audio.hh"
 #include "math.hh"
-extern "C" {
-#include "codec_i2c.h"
-#include "codec_i2sx2.h"
-#include "i2c.h"
-}
+// #include "codec_i2c.h"
+// #include "codec_i2sx2.h"
+// #include "i2c.hh"
 
 Audio::Audio(Params &p)
 	: params(p)
@@ -61,17 +59,17 @@ void Audio::check_fx_change()
 void Audio::start()
 {
 	//Todo: Use c++ library for audio I2S/SAI from touch-sense project
-	i2c_init();
-	codec_init(kSampleRate);
-	init_audio_DMA(kSampleRate,
-				   reinterpret_cast<int16_t *>(tx_buf_.data()),
-				   reinterpret_cast<int16_t *>(rx_buf_.data()),
-				   kAudioStreamDMABlockSize * sizeof(AudioFrame));
-	start_audio();
+	//i2c_init();
+	//codec_init(kSampleRate);
+	// init_audio_DMA(kSampleRate,
+	// 			   reinterpret_cast<int16_t *>(tx_buf_.data()),
+	// 			   reinterpret_cast<int16_t *>(rx_buf_.data()),
+	// 			   kAudioStreamDMABlockSize * sizeof(AudioFrame));
+	// start_audio();
 }
 
 void Audio::register_callback(void callbackfunc(AudioStreamBlock &in, AudioStreamBlock &out))
 {
 	//Todo: Use c++ library for audio I2S/SAI from touch-sense project
-	set_audio_callback((void (*)(int32_t *, int32_t *))(callbackfunc));
+	// set_audio_callback((void (*)(int32_t *, int32_t *))(callbackfunc));
 }
