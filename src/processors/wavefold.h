@@ -1,42 +1,29 @@
 #pragma once
 #include "audio_processor.hh"
 #include "tools.h"
+#include "wavefold_tables.h" //Tables from new g++ project
 
 class WaveFolder : public AudioProcessor {
 public:
 	virtual float update(float input)
 	{
-		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 511.0f);
-		float interpVal = lookupIndex - (long)lookupIndex;
-		int firstLookup = lookupIndex;
-		int secondLookup = (firstLookup + 1) % 512;
-
-		float foldSamp[4];
-		foldSamp[0] = interpolate(fold1[firstLookup], fold1[secondLookup], interpVal);
-		foldSamp[1] = interpolate(fold2[firstLookup], fold2[secondLookup], interpVal);
-		foldSamp[2] = interpolate(fold3[firstLookup], fold3[secondLookup], interpVal);
-		foldSamp[3] = interpolate(fold4[firstLookup], fold4[secondLookup], interpVal);
-
-		float foldLevel = mainFold * 3.0f;
-		float foldPartial = foldLevel - (long)foldLevel;
-
 		float output = 0;
 
-		switch ((int)foldLevel) {
+		float foldInterp = foldType - (long)foldType;
+		switch ((int)foldType) {
 			case 0:
-				output = interpolate(foldSamp[0], foldSamp[1], foldPartial);
+				output = interpolate(cleanFold(input), sharpFold(input), foldInterp);
 				break;
 			case 1:
-				output = interpolate(foldSamp[1], foldSamp[2], foldPartial);
+				output = interpolate(sharpFold(input), chebyFold(input), foldInterp);
 				break;
 			case 2:
-				output = interpolate(foldSamp[2], foldSamp[3], foldPartial);
+				output = interpolate(chebyFold(input), triFold(input), foldInterp);
 				break;
 			case 3:
-				output = foldSamp[3];
+				output = triFold(input);
 				break;
 		}
-
 		return (output);
 	}
 
@@ -44,10 +31,9 @@ public:
 	{
 		//Generate fold tables
 		for (int i = 0; i < 512; i++) {
-			fold1[i] = map_value(i, 0.0f, 511.0f, -1.0f, 1.0f);
-			fold2[i] = map_value(fmodf(i, 256.f), 0.0f, 255.0f, -1.0f, 1.0f);
-			fold3[i] = map_value(fmodf(i, 170.6666666667), 0.0f, (512.f / 3.0f - 1.f), -1.0f, 1.0f);
-			fold4[i] = map_value(fmodf(i, 128.f), 0.0f, 127.0f, -1.0f, 1.0f);
+			fold1[i] = map_value(fmodf(i, 256.f), 0.0f, 255.0f, -1.0f, 1.0f);
+			fold2[i] = map_value(fmodf(i, 170.6666666667), 0.0f, (512.f / 3.0f - 1.f), -1.0f, 1.0f);
+			fold3[i] = map_value(fmodf(i, 128.f), 0.0f, 127.0f, -1.0f, 1.0f);
 		}
 	}
 
@@ -57,6 +43,7 @@ public:
 			mainFold = val;
 		}
 		if (param_id == 1) {
+			foldType = val * 3.0f;
 		}
 	}
 	virtual void set_samplerate(float sr)
@@ -65,8 +52,105 @@ public:
 
 private:
 	float mainFold;
+
+	float foldType = 0;
 	float fold1[512] = {0};
 	float fold2[512] = {0};
 	float fold3[512] = {0};
-	float fold4[512] = {0};
+
+	float sharpFold(float input)
+	{
+		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 511.0f);
+		float interpVal = lookupIndex - (long)lookupIndex;
+		int firstLookup = lookupIndex;
+		int secondLookup = (firstLookup + 1) % 512;
+
+		float foldSamp[4];
+		foldSamp[0] = input;
+		foldSamp[1] = interpolate(fold1[firstLookup], fold1[secondLookup], interpVal);
+		foldSamp[2] = interpolate(fold2[firstLookup], fold2[secondLookup], interpVal);
+		foldSamp[3] = interpolate(fold3[firstLookup], fold3[secondLookup], interpVal);
+
+		float foldLevel = mainFold * 3.0f;
+		float foldPartial = foldLevel - (long)foldLevel;
+
+		float output = 0;
+
+		output = interpolate(foldSamp[(int)foldLevel], foldSamp[(int)(foldLevel + 1)], foldPartial);
+
+		return (output);
+	}
+
+	float cleanFold(float input)
+	{
+		//float scaledMainFold = constrain(mainFold + 0.004f, 0.f, 1.f);
+		//Todo: scale mainFold so it goes to 0, but slowly goes up to 0.004f
+		// Or constrain to 0.004...1.0f and add a VCA that goes to 0->1.0 as mainFold goes 0->0.1 (or so)
+		float scaledMainFold = mainFold;
+		float gainedInput = input * scaledMainFold;
+
+		float lookupIndex = map_value(gainedInput, -1.0f, 1.0f, 0.0f, 1024.0f);
+		float interpVal = lookupIndex - (long)lookupIndex;
+		int firstLookup = lookupIndex;
+		int secondLookup = (firstLookup + 1) % 1025;
+		float foldSamp = interpolate(fold[firstLookup], fold[secondLookup], interpVal);
+
+		lookupIndex = map_value(mainFold, 0.f, 1.0f, 0.0f, 512.0f);
+		interpVal = lookupIndex - (long)lookupIndex;
+		firstLookup = lookupIndex;
+		secondLookup = (firstLookup + 1) % 512;
+		float foldMax = interpolate(fold_max[firstLookup], fold_max[secondLookup], interpVal);
+
+		float output = foldSamp * foldMax;
+
+		return (output);
+	}
+
+	float chebyFold(float input)
+	{
+		int cheby_tables = 16;
+		int cheby_size = 513;
+		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, (float)(cheby_size - 1));
+		float interpVal = lookupIndex - (long)lookupIndex;
+		int firstLookup = lookupIndex;
+		int secondLookup = (firstLookup + 1) % cheby_size;
+
+		float foldSamp[cheby_tables + 1];
+		foldSamp[0] = input;
+		for (int i = 0; i < cheby_tables; i++) {
+			foldSamp[i + 1] = interpolate(cheby[i][firstLookup], cheby[i][secondLookup], interpVal);
+		}
+
+		float foldLevel = mainFold * float(cheby_tables);
+		float foldPartial = foldLevel - (long)foldLevel;
+
+		float output = 0;
+
+		output = interpolate(foldSamp[(int)foldLevel], foldSamp[(int)(foldLevel + 1)], foldPartial);
+
+		return (output);
+	}
+
+	float triFold(float input)
+	{
+		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 8.0f);
+		float interpVal = lookupIndex - (long)lookupIndex;
+		int firstLookup = lookupIndex;
+		int secondLookup = (firstLookup + 1) % 9;
+
+		float foldSamp[9];
+		foldSamp[0] = input;
+		for (int i = 0; i < 8; i++) {
+			foldSamp[i + 1] = interpolate(triangles[i][firstLookup], triangles[i][secondLookup], interpVal);
+		}
+
+		float foldLevel = mainFold * 8.0f;
+		float foldPartial = foldLevel - (long)foldLevel;
+
+		float output = 0;
+
+		output = interpolate(foldSamp[(int)foldLevel], foldSamp[(int)(foldLevel + 1)], foldPartial);
+
+		return (output);
+	}
 };
