@@ -5,15 +5,12 @@
 #include "rotary.hh"
 #include "stm32f7xx_ll_adc.h"
 #include "stm32f7xx_ll_gpio.h"
-#include "touch.hh"
 #include <array>
 #include <stm32f7xx.h>
 
 using JackSense = DebouncedSwitch;
 
 struct Controls {
-	static inline TouchCtl pads;
-
 	static inline AnalogIn<ADC_1, AdcChanNum::_10> freq_cv[2] = {{GPIO::C, 0}, {GPIO::C, 2}};
 	static inline AnalogIn<ADC_1, AdcChanNum::_11> res_cv[2] = {{GPIO::C, 1}, {GPIO::C, 3}};
 

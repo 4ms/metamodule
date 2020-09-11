@@ -4,7 +4,6 @@
 #include "debug.h"
 #include "leds.hh"
 #include "params.hh"
-#include "touch.hh"
 
 class Ui {
 public:
@@ -32,10 +31,5 @@ public:
 				leds.mode[i].add_background(Colors::blue);
 		}
 		leds.update();
-	}
-
-	void handle_sensor_queue()
-	{
-		controls.pads.handle_message_queue();
 	}
 };

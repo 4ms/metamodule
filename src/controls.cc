@@ -6,8 +6,6 @@ void Controls::read()
 {
 	Debug::set_0(true);
 
-	pads.check_alert_received();
-
 	for (uint32_t i = 0; i < 2; i++) {
 		freq_cv[i].read();
 		res_cv[i].read();
@@ -19,7 +17,6 @@ void Controls::read()
 
 void Controls::begin()
 {
-	pads.begin();
 }
 
 Controls::Controls()

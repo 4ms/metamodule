@@ -17,7 +17,6 @@ void main()
 	ui.controls.begin();
 
 	while (1) {
-		ui.handle_sensor_queue();
 		ui.update(); //leds
 		__NOP();
 	}
