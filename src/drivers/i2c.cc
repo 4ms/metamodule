@@ -50,7 +50,7 @@ i2cPeriph::Error i2cPeriph::mem_write(uint16_t dev_address, uint16_t mem_address
 i2cPeriph::Error i2cPeriph::mem_write_dma(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
 {
 	HAL_StatusTypeDef err;
-	while ((err = HAL_I2C_Mem_Write_DMA(&i2c_, dev_address, mem_address, memadd_size, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK) {
+	while ((err = HAL_I2C_Mem_Write_DMA(&i2c_, dev_address, mem_address, memadd_size, data, size)) != HAL_OK) {
 		if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
 			return I2C_XMIT_ERR;
 	}

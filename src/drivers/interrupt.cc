@@ -38,7 +38,14 @@ extern "C" void I2C3_ER_IRQHandler(void)
 		HAL_I2C_ER_IRQHandler(I2C::I2C3_handle);
 }
 
-extern "C" void DMA1_Stream6_IRQn(void)
+extern "C" void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+	//if i2c==I2C::I2C_MemTxCplt_handle[0]
+	// 	if (I2C::I2C_MemTxCplt_cb[0] != nullptr)
+	// 	    I2C::I2C_MemTxCplt_cb[0]();
+}
+
+extern "C" void DMA1_Stream6_IRQHandler(void)
 {
 	if (DMA::DMA1_S6_handle != nullptr)
 		HAL_DMA_IRQHandler(DMA::DMA1_S6_handle);

@@ -14,7 +14,7 @@ PCA9685Driver::PCA9685Driver(i2cPeriph &i2c, uint32_t num_chips)
 	instance_ = this;
 }
 
-LEDDriverError PCA9685Driver::init_as_dma(uint8_t *led_image)
+LEDDriverError PCA9685Driver::init_as_dma(uint8_t *led_image, DMAConfig dma_defs)
 {
 	LEDDriverError err;
 	err = init_as_direct();
@@ -26,7 +26,7 @@ LEDDriverError PCA9685Driver::init_as_dma(uint8_t *led_image)
 	err = I2C_Init();
 	if (err != LEDDriverError::None) return err;
 
-	err = I2C_DMA_Init();
+	err = I2C_DMA_Init(dma_defs);
 	return err;
 }
 
@@ -79,29 +79,26 @@ LEDDriverError PCA9685Driver::set_single_led(uint8_t led_element_number, uint16_
 {
 	uint8_t driver_addr;
 	uint8_t data[5]; //2 bytes for on time + 2 bytes for off time + 1 byte for LED address
-	HAL_StatusTypeDef err;
 
-	if (led_element_number < (num_chips_ * 16)) {
-		driver_addr = (led_element_number / 16);
-		led_element_number = led_element_number - (driver_addr * 16);
-
-		driver_addr = I2C_BASE_ADDRESS | (driver_addr << 1);
-
-		data[0] = REG_LED0 + (led_element_number * 4); //4 registers per LED element
-		data[1] = 0;								   //on-time = 0
-		data[2] = 0;
-		data[3] = brightness & 0xFF; //off-time = brightness
-		data[4] = brightness >> 8;
-
-		while ((err = HAL_I2C_Master_Transmit(&pwmleddriver_i2c, driver_addr, data, 5, LEDDRIVER_LONG_TIMEOUT)) != HAL_OK) {
-			if (HAL_I2C_GetError(&pwmleddriver_i2c) != HAL_I2C_ERROR_AF)
-				return LEDDriverError::SET_LED_ERR;
-		}
-	}
-	else
+	if (led_element_number >= (num_chips_ * 16))
 		return LEDDriverError::BAD_LED_PARAM;
 
-	return LEDDriverError::None;
+	driver_addr = (led_element_number / 16);
+	led_element_number = led_element_number - (driver_addr * 16);
+
+	driver_addr = I2C_BASE_ADDRESS | (driver_addr << 1);
+
+	data[0] = REG_LED0 + (led_element_number * 4); //4 registers per LED element
+	data[1] = 0;								   //on-time = 0
+	data[2] = 0;
+	data[3] = brightness & 0xFF; //off-time = brightness
+	data[4] = brightness >> 8;
+
+	auto err = i2cp_.write(driver_addr, data, 5);
+
+	return (err == i2cPeriph::Error::I2C_NO_ERR)
+			   ? LEDDriverError::None
+			   : LEDDriverError::SET_LED_ERR;
 }
 
 // Sets color of an RGB LED
@@ -188,9 +185,9 @@ LEDDriverError PCA9685Driver::I2C_Init()
 	return LEDDriverError::None;
 }
 
-LEDDriverError PCA9685Driver::I2C_DMA_Init()
+LEDDriverError PCA9685Driver::I2C_DMA_Init(DMAConfig dma_defs)
 {
-	dma_.init_with_conf(LedDriverDmaDef, i2cp_);
+	dma_.init_with_conf(dma_defs, i2cp_);
 
 	auto err = i2cp_.mem_write(
 		I2C_BASE_ADDRESS,
@@ -201,6 +198,8 @@ LEDDriverError PCA9685Driver::I2C_DMA_Init()
 
 	if (err != i2cPeriph::Error::I2C_NO_ERR)
 		return LEDDriverError::DMA_XMIT_ERR;
+
+	return LEDDriverError::None;
 }
 
 LEDDriverError PCA9685Driver::I2C_DMA::init_with_conf(const DMAConfig dmaconf, i2cPeriph &i2c)
@@ -232,29 +231,23 @@ LEDDriverError PCA9685Driver::I2C_DMA::init_with_conf(const DMAConfig dmaconf, i
 	return LEDDriverError::None;
 }
 
-LEDDriverError PCA9685Driver::write_current_frame_to_chip()
+void PCA9685Driver::advance_frame_buffer()
 {
-	return i2cp_.mem_write_dma(
+	if (++cur_chip_num_ >= num_chips_)
+		cur_chip_num_ = 0;
+	frame_buffer_cur_pos = frame_buffer_start + cur_chip_num_ * (kNumRGBLEDsPerChip * 4);
+}
+
+void PCA9685Driver::write_current_frame_to_chip()
+{
+	auto err = i2cp_.mem_write_dma(
 		I2C_BASE_ADDRESS,
 		REG_LED0,
 		REGISTER_ADDR_SIZE,
 		frame_buffer_cur_pos,
 		kNumRGBLEDsPerChip * 4);
-}
 
-extern "C" void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c)
-{
-	auto d = PCA9685Driver::instance_;
-
-	if (++d->cur_chip_num_ >= d->num_chips_) {
-		d->cur_chip_num_ = 0;
-	}
-
-	d->frame_buffer_cur_pos = d->frame_buffer_start + d->cur_chip_num_ * (d->kNumRGBLEDsPerChip * 4);
-
-	d->write_current_frame_to_chip();
-
-	HAL_StatusTypeDef err = HAL_I2C_Mem_Write_DMA(&i2cp_, driver_addr, REG_LED0, REGISTER_ADDR_SIZE, frame_buffer_cur_pos, kNumRGBLEDsPerChip * 4);
-	if (err != HAL_OK)
+	if (err != i2cPeriph::Error::I2C_NO_ERR)
 		g_led_error = LEDDriverError::DMA_XMIT_ERR;
 }
+
