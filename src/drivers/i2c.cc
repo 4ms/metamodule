@@ -1,7 +1,7 @@
 #include "i2c.hh"
+#include "interrupt.hh"
 #include "stm32f7xx.h"
 #include "system.hh"
-#include "interrupt.hh"
 
 const uint32_t _I2C_FLAG_TIMEOUT = 1;
 const uint32_t _I2C_LONG_TIMEOUT = 30;
@@ -41,6 +41,16 @@ i2cPeriph::Error i2cPeriph::mem_write(uint16_t dev_address, uint16_t mem_address
 {
 	HAL_StatusTypeDef err;
 	while ((err = HAL_I2C_Mem_Write(&i2c_, dev_address, mem_address, memadd_size, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK) {
+		if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
+			return I2C_XMIT_ERR;
+	}
+	return err == HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
+}
+
+i2cPeriph::Error i2cPeriph::mem_write_dma(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
+{
+	HAL_StatusTypeDef err;
+	while ((err = HAL_I2C_Mem_Write_DMA(&i2c_, dev_address, mem_address, memadd_size, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK) {
 		if (HAL_I2C_GetError(&i2c_) != HAL_I2C_ERROR_AF)
 			return I2C_XMIT_ERR;
 	}
@@ -97,24 +107,24 @@ i2cPeriph::Error i2cPeriph::init(I2C_TypeDef *periph, const i2cTimingReg &timing
 	return I2C_NO_ERR;
 }
 
-void i2cPeriph::enable_IT(uint8_t pri1, uint8_t pri2) 
+void i2cPeriph::enable_IT(uint8_t pri1, uint8_t pri2)
 {
 	if (i2c_.Instance == I2C1) {
-		I2C_IRQ_instances::I2C1_handle = &i2c_;
+		Interrupts::I2C::I2C1_handle = &i2c_;
 		HAL_NVIC_SetPriority(I2C1_ER_IRQn, pri1, pri2);
 		HAL_NVIC_EnableIRQ(I2C1_ER_IRQn);
 		HAL_NVIC_SetPriority(I2C1_EV_IRQn, pri1, pri2);
 		HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
 	}
 	if (i2c_.Instance == I2C2) {
-		I2C_IRQ_instances::I2C2_handle = &i2c_;
+		Interrupts::I2C::I2C2_handle = &i2c_;
 		HAL_NVIC_SetPriority(I2C2_ER_IRQn, pri1, pri2);
 		HAL_NVIC_EnableIRQ(I2C2_ER_IRQn);
 		HAL_NVIC_SetPriority(I2C2_EV_IRQn, pri1, pri2);
 		HAL_NVIC_EnableIRQ(I2C2_EV_IRQn);
 	}
 	if (i2c_.Instance == I2C3) {
-		I2C_IRQ_instances::I2C3_handle = &i2c_;
+		Interrupts::I2C::I2C3_handle = &i2c_;
 		HAL_NVIC_SetPriority(I2C3_ER_IRQn, pri1, pri2);
 		HAL_NVIC_EnableIRQ(I2C3_ER_IRQn);
 		HAL_NVIC_SetPriority(I2C3_EV_IRQn, pri1, pri2);
@@ -122,20 +132,20 @@ void i2cPeriph::enable_IT(uint8_t pri1, uint8_t pri2)
 	}
 }
 
-void i2cPeriph::disable_IT() 
+void i2cPeriph::disable_IT()
 {
 	if (i2c_.Instance == I2C1) {
-		I2C_IRQ_instances::I2C1_handle = nullptr;
+		Interrupts::I2C::I2C1_handle = nullptr;
 		HAL_NVIC_DisableIRQ(I2C1_ER_IRQn);
 		HAL_NVIC_DisableIRQ(I2C1_EV_IRQn);
 	}
 	if (i2c_.Instance == I2C2) {
-		I2C_IRQ_instances::I2C2_handle = nullptr;
+		Interrupts::I2C::I2C2_handle = nullptr;
 		HAL_NVIC_DisableIRQ(I2C2_ER_IRQn);
 		HAL_NVIC_DisableIRQ(I2C2_EV_IRQn);
 	}
 	if (i2c_.Instance == I2C3) {
-		I2C_IRQ_instances::I2C3_handle = nullptr;
+		Interrupts::I2C::I2C3_handle = nullptr;
 		HAL_NVIC_DisableIRQ(I2C3_ER_IRQn);
 		HAL_NVIC_DisableIRQ(I2C3_EV_IRQn);
 	}

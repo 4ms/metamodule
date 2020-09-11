@@ -1,6 +1,7 @@
 #pragma once
-#include "stm32f7xx.h"
+#include "dma.hh"
 #include "i2c.hh"
+#include "stm32f7xx.h"
 
 enum class LEDDriverError {
 	None = 0,
@@ -17,7 +18,7 @@ class PCA9685Driver {
 public:
 	PCA9685Driver(i2cPeriph &i2c, uint32_t num_chips);
 
-	LEDDriverError init_as_dma(uint8_t *led_image);
+	LEDDriverError init_as_dma(uint8_t *led_image, DMAConfig dma_defs);
 	LEDDriverError init_as_direct();
 
 	LEDDriverError set_rgb_led(uint8_t led_number, uint16_t c_red, uint16_t c_green, uint16_t c_blue);
@@ -25,10 +26,9 @@ public:
 
 	uint8_t get_cur_chip(void);
 
-private:
 	static PCA9685Driver *instance_;
+
 	i2cPeriph &i2cp_;
-	DMA_HandleTypeDef pwmleddriver_dmatx;
 
 	uint32_t num_chips_;
 	uint8_t cur_chip_num_ = 0;
@@ -37,6 +37,7 @@ private:
 	uint8_t *frame_buffer_cur_pos;
 	LEDDriverError g_led_error;
 
+private:
 	uint8_t get_red_led_element_id(uint8_t rgb_led_id);
 	uint8_t get_chip_num(uint8_t rgb_led_id);
 
@@ -46,12 +47,17 @@ private:
 	LEDDriverError I2C_DMA_Init();
 	void tx_complete(DMA_HandleTypeDef *_hdma);
 
+	struct I2C_DMA : public DMAMem2Periph {
+		I2C_DMA();
+		LEDDriverError init_with_conf(const DMAConfig dmaconf, i2cPeriph &i2c);
+	};
+	I2C_DMA dma_;
+
 	const int kNumRGBLEDsPerChip = 5;
 	const static inline uint32_t REG_MODE1 = 0x00;
 	const static inline uint32_t REG_MODE2 = 0x01;
 	const static inline uint32_t REG_LED0 = 0x06;
 	const static inline uint32_t I2C_BASE_ADDRESS = 0b10000000;
 	const static inline auto REGISTER_ADDR_SIZE = I2C_MEMADD_SIZE_8BIT;
-
 };
 
