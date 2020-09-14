@@ -28,7 +28,7 @@
 
 #include "codec_i2sx2.h"
 #include "codec_i2c.h"
-#include "debug.h"
+//#include "debug.h"
 
 I2S_HandleTypeDef hi2s2;
 I2S_HandleTypeDef hi2s3;
@@ -52,7 +52,6 @@ void deinit_I2S_DMA(void);
 void deinit_I2S_clock(void);
 void setup_I2S(uint32_t sample_rate);
 
-
 void set_audio_callback(audio_callback_func_type callback)
 {
 	audio_callback = callback;
@@ -66,10 +65,10 @@ enum Codec_Errors init_audio_DMA(uint32_t sample_rate, int16_t *tx_buf, int16_t 
 	setup_I2S(sample_rate);
 
 	tx_buffer_halves[0] = &(tx_buf[0]);
-	tx_buffer_halves[1] = &(tx_buf[buffer_size_samples/2]);
+	tx_buffer_halves[1] = &(tx_buf[buffer_size_samples / 2]);
 
 	rx_buffer_halves[0] = &(rx_buf[0]);
-	rx_buffer_halves[1] = &(rx_buf[buffer_size_samples/2]);
+	rx_buffer_halves[1] = &(rx_buf[buffer_size_samples / 2]);
 
 	return init_I2S_DMA();
 }
@@ -79,8 +78,8 @@ void start_audio(void)
 	HAL_NVIC_SetPriority(CODEC_I2S_TX_DMA_IRQn, 1, 1);
 	HAL_NVIC_SetPriority(CODEC_I2S_RX_DMA_IRQn, 1, 0);
 
-	HAL_NVIC_EnableIRQ(CODEC_I2S_RX_DMA_IRQn); 
-	// HAL_NVIC_EnableIRQ(CODEC_I2S_TX_DMA_IRQn); 
+	HAL_NVIC_EnableIRQ(CODEC_I2S_RX_DMA_IRQn);
+	// HAL_NVIC_EnableIRQ(CODEC_I2S_TX_DMA_IRQn);
 
 	uint16_t int16s_to_xfer = buffer_size_bytes / 2;
 
@@ -89,14 +88,12 @@ void start_audio(void)
 
 	if (HAL_I2S_Transmit_DMA(&hi2s2, (uint16_t *)(tx_buffer_halves[0]), int16s_to_xfer) != HAL_OK)
 		codec_dma_it_err = CODEC_I2S_TX_XMIT_DMA_ERR;
-
 }
 
 void stop_audio(void)
 {
-	HAL_NVIC_DisableIRQ(CODEC_I2S_RX_DMA_IRQn); 
+	HAL_NVIC_DisableIRQ(CODEC_I2S_RX_DMA_IRQn);
 }
-
 
 void deinit_I2S_clock(void)
 {
@@ -105,99 +102,99 @@ void deinit_I2S_clock(void)
 
 void setup_I2S(uint32_t sample_rate)
 {
-    GPIO_InitTypeDef gpio;
+	GPIO_InitTypeDef gpio;
 
-    CODEC_I2S_GPIO_CLOCK_ENABLE();
+	CODEC_I2S_GPIO_CLOCK_ENABLE();
 
-    // RX I2S
+	// RX I2S
 
-    CODEC_I2S_RCC_RX_ENABLE();
+	CODEC_I2S_RCC_RX_ENABLE();
 
-    gpio.Mode = GPIO_MODE_AF_PP;
-    gpio.Pull = GPIO_NOPULL;
-    gpio.Speed = GPIO_SPEED_FREQ_LOW;
+	gpio.Mode = GPIO_MODE_AF_PP;
+	gpio.Pull = GPIO_NOPULL;
+	gpio.Speed = GPIO_SPEED_FREQ_LOW;
 
-    gpio.Alternate  = CODEC_I2S_WS_RX_GPIO_AF;
-    gpio.Pin = CODEC_I2S_WS_RX_PIN;     
-    HAL_GPIO_Init(CODEC_I2S_WS_RX_GPIO, &gpio);
+	gpio.Alternate = CODEC_I2S_WS_RX_GPIO_AF;
+	gpio.Pin = CODEC_I2S_WS_RX_PIN;
+	HAL_GPIO_Init(CODEC_I2S_WS_RX_GPIO, &gpio);
 
-    gpio.Alternate  = CODEC_I2S_SDI_GPIO_AF;
-    gpio.Pin = CODEC_I2S_SDI_PIN;       
-    HAL_GPIO_Init(CODEC_I2S_SDI_GPIO, &gpio);
+	gpio.Alternate = CODEC_I2S_SDI_GPIO_AF;
+	gpio.Pin = CODEC_I2S_SDI_PIN;
+	HAL_GPIO_Init(CODEC_I2S_SDI_GPIO, &gpio);
 
-    gpio.Alternate  = CODEC_I2S_SCK_RX_GPIO_AF;
-    gpio.Pin = CODEC_I2S_SCK_RX_PIN;
-    HAL_GPIO_Init(CODEC_I2S_SCK_RX_GPIO, &gpio);
+	gpio.Alternate = CODEC_I2S_SCK_RX_GPIO_AF;
+	gpio.Pin = CODEC_I2S_SCK_RX_PIN;
+	HAL_GPIO_Init(CODEC_I2S_SCK_RX_GPIO, &gpio);
 
-    hi2s3.Instance = SPI3;
-    hi2s3.Init.Mode = I2S_MODE_SLAVE_RX;
-    hi2s3.Init.Standard = I2S_STANDARD_PHILIPS;
-    hi2s3.Init.DataFormat = I2S_DATAFORMAT_16B;
-    hi2s3.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
-    hi2s3.Init.AudioFreq = sample_rate;
-    hi2s3.Init.CPOL = I2S_CPOL_LOW;
-    hi2s3.Init.ClockSource = I2S_CLOCK_PLL;
-  	HAL_I2S_DeInit(&hi2s2);
+	hi2s3.Instance = SPI3;
+	hi2s3.Init.Mode = I2S_MODE_SLAVE_RX;
+	hi2s3.Init.Standard = I2S_STANDARD_PHILIPS;
+	hi2s3.Init.DataFormat = I2S_DATAFORMAT_16B;
+	hi2s3.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
+	hi2s3.Init.AudioFreq = sample_rate;
+	hi2s3.Init.CPOL = I2S_CPOL_LOW;
+	hi2s3.Init.ClockSource = I2S_CLOCK_PLL;
+	HAL_I2S_DeInit(&hi2s2);
 	// HAL_I2S_Init(&hi2s3);
 
-    // TX I2S
+	// TX I2S
 
-    CODEC_I2S_RCC_TX_ENABLE();
+	CODEC_I2S_RCC_TX_ENABLE();
 
-    gpio.Mode = GPIO_MODE_AF_PP;
-    gpio.Pull = GPIO_NOPULL;
-    gpio.Speed = GPIO_SPEED_FREQ_LOW;
+	gpio.Mode = GPIO_MODE_AF_PP;
+	gpio.Pull = GPIO_NOPULL;
+	gpio.Speed = GPIO_SPEED_FREQ_LOW;
 
-    gpio.Alternate  = CODEC_I2S_WS_TX_GPIO_AF;
-    gpio.Pin = CODEC_I2S_WS_TX_PIN;     
-    HAL_GPIO_Init(CODEC_I2S_WS_TX_GPIO, &gpio);
+	gpio.Alternate = CODEC_I2S_WS_TX_GPIO_AF;
+	gpio.Pin = CODEC_I2S_WS_TX_PIN;
+	HAL_GPIO_Init(CODEC_I2S_WS_TX_GPIO, &gpio);
 
-    gpio.Alternate  = CODEC_I2S_SCK_TX_GPIO_AF;
-    gpio.Pin = CODEC_I2S_SCK_TX_PIN;    
-    HAL_GPIO_Init(CODEC_I2S_SCK_TX_GPIO, &gpio);
+	gpio.Alternate = CODEC_I2S_SCK_TX_GPIO_AF;
+	gpio.Pin = CODEC_I2S_SCK_TX_PIN;
+	HAL_GPIO_Init(CODEC_I2S_SCK_TX_GPIO, &gpio);
 
-    gpio.Alternate  = CODEC_I2S_SDO_GPIO_AF;
-    gpio.Pin = CODEC_I2S_SDO_PIN;       
-    HAL_GPIO_Init(CODEC_I2S_SDO_GPIO, &gpio);
+	gpio.Alternate = CODEC_I2S_SDO_GPIO_AF;
+	gpio.Pin = CODEC_I2S_SDO_PIN;
+	HAL_GPIO_Init(CODEC_I2S_SDO_GPIO, &gpio);
 
-    gpio.Alternate  = CODEC_I2S_MCK_GPIO_AF;
-    gpio.Pin = CODEC_I2S_MCK_PIN;       
-    HAL_GPIO_Init(CODEC_I2S_MCK_GPIO, &gpio);
+	gpio.Alternate = CODEC_I2S_MCK_GPIO_AF;
+	gpio.Pin = CODEC_I2S_MCK_PIN;
+	HAL_GPIO_Init(CODEC_I2S_MCK_GPIO, &gpio);
 
-    hi2s2.Instance = SPI2;
-    hi2s2.Init.Mode = I2S_MODE_MASTER_TX;
-    hi2s2.Init.Standard = I2S_STANDARD_PHILIPS;
-    hi2s2.Init.DataFormat = I2S_DATAFORMAT_16B;
-    hi2s2.Init.MCLKOutput = I2S_MCLKOUTPUT_ENABLE;
-    hi2s2.Init.AudioFreq = sample_rate;
-    hi2s2.Init.CPOL = I2S_CPOL_LOW;
-    hi2s2.Init.ClockSource = I2S_CLOCK_PLL;
-  	HAL_I2S_DeInit(&hi2s2);
+	hi2s2.Instance = SPI2;
+	hi2s2.Init.Mode = I2S_MODE_MASTER_TX;
+	hi2s2.Init.Standard = I2S_STANDARD_PHILIPS;
+	hi2s2.Init.DataFormat = I2S_DATAFORMAT_16B;
+	hi2s2.Init.MCLKOutput = I2S_MCLKOUTPUT_ENABLE;
+	hi2s2.Init.AudioFreq = sample_rate;
+	hi2s2.Init.CPOL = I2S_CPOL_LOW;
+	hi2s2.Init.ClockSource = I2S_CLOCK_PLL;
+	HAL_I2S_DeInit(&hi2s2);
 	// HAL_I2S_Init(&hi2s2);
 }
 
 enum Codec_Errors init_I2S_DMA(void)
 {
-	HAL_NVIC_DisableIRQ(CODEC_I2S_TX_DMA_IRQn); 
-	HAL_NVIC_DisableIRQ(CODEC_I2S_RX_DMA_IRQn); 
+	HAL_NVIC_DisableIRQ(CODEC_I2S_TX_DMA_IRQn);
+	HAL_NVIC_DisableIRQ(CODEC_I2S_RX_DMA_IRQn);
 
 	CODEC_I2S_DMA_CLOCK_ENABLE();
 
-    hdma_spi3_rx.Instance = CODEC_I2S_RX_DMA_STREAM;
-    hdma_spi3_rx.Init.Channel = CODEC_I2S_RX_DMA_CHANNEL;
-    hdma_spi3_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_spi3_rx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_spi3_rx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_spi3_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+	hdma_spi3_rx.Instance = CODEC_I2S_RX_DMA_STREAM;
+	hdma_spi3_rx.Init.Channel = CODEC_I2S_RX_DMA_CHANNEL;
+	hdma_spi3_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+	hdma_spi3_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+	hdma_spi3_rx.Init.MemInc = DMA_MINC_ENABLE;
+	hdma_spi3_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
 	hdma_spi3_rx.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-    hdma_spi3_rx.Init.Mode = DMA_CIRCULAR;//DMA_NORMAL;
-    hdma_spi3_rx.Init.Priority = DMA_PRIORITY_HIGH;
-    hdma_spi3_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    HAL_DMA_DeInit(&hdma_spi3_rx);
+	hdma_spi3_rx.Init.Mode = DMA_CIRCULAR; //DMA_NORMAL;
+	hdma_spi3_rx.Init.Priority = DMA_PRIORITY_HIGH;
+	hdma_spi3_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+	HAL_DMA_DeInit(&hdma_spi3_rx);
 
 	HAL_I2S_Init(&hi2s3);
-    HAL_DMA_Init(&hdma_spi3_rx);
-    __HAL_LINKDMA(&hi2s3, hdmarx, hdma_spi3_rx);
+	HAL_DMA_Init(&hdma_spi3_rx);
+	__HAL_LINKDMA(&hi2s3, hdmarx, hdma_spi3_rx);
 
 	hdma_spi2_tx.Instance = CODEC_I2S_TX_DMA_STREAM;
 	hdma_spi2_tx.Init.Channel = CODEC_I2S_TX_DMA_CHANNEL;
@@ -213,15 +210,17 @@ enum Codec_Errors init_I2S_DMA(void)
 
 	HAL_I2S_Init(&hi2s2);
 	HAL_DMA_Init(&hdma_spi2_tx);
-    __HAL_LINKDMA(&hi2s2, hdmatx, hdma_spi2_tx);
-	
-    return CODEC_NO_ERR;
+	__HAL_LINKDMA(&hi2s2, hdmatx, hdma_spi2_tx);
+
+	return CODEC_NO_ERR;
 }
 
-void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
+void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s)
+{
 	audio_callback((int32_t *)(rx_buffer_halves[0]), (int32_t *)(tx_buffer_halves[0]));
 }
-void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s) {
+void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
+{
 	audio_callback((int32_t *)(rx_buffer_halves[1]), (int32_t *)(tx_buffer_halves[1]));
 }
 
@@ -279,15 +278,18 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s);
 void HAL_I2S_ErrorCallback(I2S_HandleTypeDef *hi2s);
 */
 
-void HAL_I2S_ErrorCallback(I2S_HandleTypeDef *hi2s) {
+void HAL_I2S_ErrorCallback(I2S_HandleTypeDef *hi2s)
+{
 	__BKPT();
 }
 
-void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s) {
+void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s)
+{
 	// audio_callback((int32_t *)(rx_buffer_halves[1]), (int32_t *)(tx_buffer_halves[1]));
 }
 
-void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s) {
+void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s)
+{
 	// audio_callback((int32_t *)(rx_buffer_halves[0]), (int32_t *)(tx_buffer_halves[0]));
 }
 

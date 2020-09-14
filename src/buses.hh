@@ -1,12 +1,13 @@
 #pragma once
-#include "bus_defs.hh"
+#include "defs/bus_defs.hh"
 
 class Buses {
 public:
 	static inline i2cPeriph i2c;
 
-	Buses() {
-		Pin sda {
+	Buses()
+	{
+		Pin sda{
 			SharedI2C::GPIO,
 			SharedI2C::SDA_PIN,
 			PinMode::Alt,
@@ -14,9 +15,8 @@ public:
 			PinPull::Up,
 			PinPolarity::Normal,
 			PinSpeed::High,
-			PinOType::OpenDrain
-		};
-		Pin scl {
+			PinOType::OpenDrain};
+		Pin scl{
 			SharedI2C::GPIO,
 			SharedI2C::SCL_PIN,
 			PinMode::Alt,
@@ -24,10 +24,9 @@ public:
 			PinPull::Up,
 			PinPolarity::Normal,
 			PinSpeed::High,
-			PinOType::OpenDrain
-		};
+			PinOType::OpenDrain};
 
-		i2c.init( SharedI2C::I2Cx, SharedI2C::I2C_TIMING );
+		i2c.init(SharedI2C::I2Cx, SharedI2C::I2C_TIMING);
 	}
 };
 

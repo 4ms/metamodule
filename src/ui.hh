@@ -1,7 +1,7 @@
 #pragma once
 #include "audio.hh"
 #include "controls.hh"
-#include "debug.h"
+//#include "debug.h"
 #include "leds.hh"
 #include "params.hh"
 
