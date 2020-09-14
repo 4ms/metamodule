@@ -1,8 +1,9 @@
 #pragma once
+#include "drivers/interrupt.hh"
 #include "pin.hh"
 #include <stdint.h>
 
-class i2cPeriph {
+class i2cPeriph : private InterruptManager::ISRBase {
 public:
 	enum Error {
 		I2C_NO_ERR,
@@ -22,6 +23,11 @@ public:
 			return ((PRESC) << 24) | ((SCLDEL_SDADEL) << 16) | ((SCLH) << 8) | ((SCLL) << 0);
 		}
 	};
+
+	class I2CErrHandler : public InterruptManager::ISRBase {
+		virtual void isr();
+	};
+	I2CErrHandler i2c_error_handler;
 
 	i2cPeriph() = default;
 	~i2cPeriph() = default;
@@ -47,4 +53,7 @@ public:
 private:
 	bool already_init = false;
 	I2C_HandleTypeDef i2c_;
+	IRQn_Type i2c_irq_num_;
+	IRQn_Type i2c_err_irq_num_;
+	virtual void isr();
 };

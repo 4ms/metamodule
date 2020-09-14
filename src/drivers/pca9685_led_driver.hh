@@ -3,10 +3,6 @@
 #include "i2c.hh"
 #include "stm32f7xx.h"
 
-namespace PCA9685DriverISR {
-extern "C" void I2C_mem_tx_complete_handler();
-};
-
 enum class LEDDriverError {
 	None = 0,
 	HAL_INIT_ERR = 1,
@@ -18,6 +14,7 @@ enum class LEDDriverError {
 	IT_XMIT_ERR = 7
 };
 
+//Todo: make PCA9685DriverDMA class, inherits/extends PCA9685Driver by adding DMA functions
 class PCA9685Driver {
 
 public:
@@ -31,16 +28,15 @@ public:
 
 	uint8_t get_cur_chip(void);
 
+private:
 	i2cPeriph &i2cp_;
-
 	uint32_t num_chips_;
 	uint8_t cur_chip_num_ = 0;
+	LEDDriverError g_led_error;
 
 	uint8_t *frame_buffer_start;
 	uint8_t *frame_buffer_cur_pos;
-	LEDDriverError g_led_error;
 
-private:
 	uint8_t get_red_led_element_id(uint8_t rgb_led_id);
 	uint8_t get_chip_num(uint8_t rgb_led_id);
 
@@ -54,12 +50,15 @@ private:
 	void tx_complete(DMA_HandleTypeDef *_hdma);
 
 	struct I2C_DMA : public DMAMem2Periph {
-		I2C_DMA();
+		I2C_DMA(PCA9685Driver &parent)
+			: parent_(parent)
+		{
+		}
 		LEDDriverError init_with_conf(const DMAConfig dmaconf, i2cPeriph &i2c);
+		virtual void isr();
+		PCA9685Driver &parent_;
 	};
 	friend class PCA9685Driver::I2C_DMA;
-	static PCA9685Driver *instance_;
-	friend void PCA9685DriverISR::I2C_mem_tx_complete_handler();
 	I2C_DMA dma_;
 
 	const int kNumRGBLEDsPerChip = 5;
@@ -70,11 +69,3 @@ private:
 	const static inline auto REGISTER_ADDR_SIZE = I2C_MEMADD_SIZE_8BIT;
 };
 
-namespace PCA9685DriverISR {
-extern "C" void I2C_mem_tx_complete_handler()
-{
-	PCA9685Driver *d = PCA9685Driver::instance_;
-	d->advance_frame_buffer();
-	d->write_current_frame_to_chip();
-}
-} // namespace PCA9685DriverISR

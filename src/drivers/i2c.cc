@@ -93,6 +93,19 @@ i2cPeriph::Error i2cPeriph::init(I2C_TypeDef *periph, const i2cTimingReg &timing
 	i2c_.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
 	i2c_.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 
+	if (i2c_.Instance == I2C1) {
+		i2c_irq_num_ = I2C1_EV_IRQn;
+		i2c_err_irq_num_ = I2C1_ER_IRQn;
+	}
+	else if (i2c_.Instance == I2C2) {
+		i2c_irq_num_ = I2C2_EV_IRQn;
+		i2c_err_irq_num_ = I2C2_ER_IRQn;
+	}
+	else if (i2c_.Instance == I2C3) {
+		i2c_irq_num_ = I2C3_EV_IRQn;
+		i2c_err_irq_num_ = I2C3_ER_IRQn;
+	}
+
 	HAL_I2C_DeInit(&i2c_);
 	if (HAL_I2C_Init(&i2c_) != HAL_OK)
 		return I2C_INIT_ERR;
@@ -109,46 +122,26 @@ i2cPeriph::Error i2cPeriph::init(I2C_TypeDef *periph, const i2cTimingReg &timing
 
 void i2cPeriph::enable_IT(uint8_t pri1, uint8_t pri2)
 {
-	if (i2c_.Instance == I2C1) {
-		Interrupts::I2C::I2C1_handle = &i2c_;
-		HAL_NVIC_SetPriority(I2C1_ER_IRQn, pri1, pri2);
-		HAL_NVIC_EnableIRQ(I2C1_ER_IRQn);
-		HAL_NVIC_SetPriority(I2C1_EV_IRQn, pri1, pri2);
-		HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
-	}
-	if (i2c_.Instance == I2C2) {
-		Interrupts::I2C::I2C2_handle = &i2c_;
-		HAL_NVIC_SetPriority(I2C2_ER_IRQn, pri1, pri2);
-		HAL_NVIC_EnableIRQ(I2C2_ER_IRQn);
-		HAL_NVIC_SetPriority(I2C2_EV_IRQn, pri1, pri2);
-		HAL_NVIC_EnableIRQ(I2C2_EV_IRQn);
-	}
-	if (i2c_.Instance == I2C3) {
-		Interrupts::I2C::I2C3_handle = &i2c_;
-		HAL_NVIC_SetPriority(I2C3_ER_IRQn, pri1, pri2);
-		HAL_NVIC_EnableIRQ(I2C3_ER_IRQn);
-		HAL_NVIC_SetPriority(I2C3_EV_IRQn, pri1, pri2);
-		HAL_NVIC_EnableIRQ(I2C3_EV_IRQn);
-	}
+	InterruptManager::registerISR(i2c_irq_num_, this);
+	HAL_NVIC_SetPriority(i2c_irq_num_, pri1, pri2);
+	HAL_NVIC_EnableIRQ(i2c_irq_num_);
+	InterruptManager::registerISR(i2c_irq_num_, &i2c_error_handler);
+	HAL_NVIC_SetPriority(i2c_err_irq_num_, pri1, pri2);
+	HAL_NVIC_EnableIRQ(i2c_err_irq_num_);
 }
 
 void i2cPeriph::disable_IT()
 {
-	if (i2c_.Instance == I2C1) {
-		Interrupts::I2C::I2C1_handle = nullptr;
-		HAL_NVIC_DisableIRQ(I2C1_ER_IRQn);
-		HAL_NVIC_DisableIRQ(I2C1_EV_IRQn);
-	}
-	if (i2c_.Instance == I2C2) {
-		Interrupts::I2C::I2C2_handle = nullptr;
-		HAL_NVIC_DisableIRQ(I2C2_ER_IRQn);
-		HAL_NVIC_DisableIRQ(I2C2_EV_IRQn);
-	}
-	if (i2c_.Instance == I2C3) {
-		Interrupts::I2C::I2C3_handle = nullptr;
-		HAL_NVIC_DisableIRQ(I2C3_ER_IRQn);
-		HAL_NVIC_DisableIRQ(I2C3_EV_IRQn);
-	}
+	HAL_NVIC_DisableIRQ(i2c_irq_num_);
+	HAL_NVIC_DisableIRQ(i2c_err_irq_num_);
+}
+
+void i2cPeriph::isr()
+{
+}
+
+void i2cPeriph::I2CErrHandler::isr()
+{
 }
 
 void i2cPeriph::link_DMA_TX(DMA_HandleTypeDef *dmatx)

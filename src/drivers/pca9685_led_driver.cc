@@ -9,9 +9,8 @@ PCA9685Driver::PCA9685Driver(i2cPeriph &i2c, uint32_t num_chips)
 	: i2cp_(i2c)
 	, num_chips_(num_chips)
 	, cur_chip_num_(0)
-
+	, dma_(*this)
 {
-	instance_ = this;
 }
 
 LEDDriverError PCA9685Driver::init_as_dma(uint8_t *led_image, DMAConfig dma_defs)
@@ -251,3 +250,8 @@ void PCA9685Driver::write_current_frame_to_chip()
 		g_led_error = LEDDriverError::DMA_XMIT_ERR;
 }
 
+void PCA9685Driver::I2C_DMA::isr()
+{
+	parent_.advance_frame_buffer();
+	parent_.write_current_frame_to_chip();
+}
