@@ -53,7 +53,12 @@ FPU = -mfpu=fpv5-d16
 FLOAT-ABI = -mfloat-abi=hard
 MCU = $(CPU) -mthumb -mlittle-endian $(FPU) $(FLOAT-ABI)
 
-ARCH_CFLAGS = -DARM_MATH_CM7 -D'__FPU_PRESENT=1' -DUSE_HAL_DRIVER -DUSE_FULL_LL_DRIVER -DSTM32F732xx
+ARCH_CFLAGS = -DARM_MATH_CM7 \
+			  -D'__FPU_PRESENT=1' \
+			  -DUSE_HAL_DRIVER \
+			  -DUSE_FULL_LL_DRIVER \
+			  -DSTM32F732xx \
+			  -DSTM32F7
 
 OPTFLAG = -O3
 
