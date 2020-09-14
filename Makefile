@@ -21,8 +21,12 @@ SOURCES  += $(wildcard src/*.cc)
 SOURCES  += $(wildcard src/drivers/*.c)
 SOURCES  += $(wildcard src/drivers/*.cc)
 
+HEADERS  += $(wildcard src/*.hh)
+HEADERS  += $(wildcard src/drivers/*.hh)
+
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
+PRECHDRS  = $(addprefix $(BUILDDIR)/, $(addsuffix .gch, $(HEADERS)))
 
 INCLUDES += -I$(DEVICE)/include \
 			-I$(CORE)/include \
@@ -102,12 +106,7 @@ LFLAGS =  -Wl,-Map,main.map,--cref \
 # build/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 
-# rm compile_commands.json
-# rm build/compile_commands.json
-# compiledb -n make
-# mv compile_commands.json build/
-
-all: Makefile $(BIN) $(HEX)
+all: Makefile $(BIN) $(HEX) #	$(PRECHDRS)
 # 	rm compile_commands.json
 # 	rm build/compile_commands.json
 # 	compiledb -n make
@@ -141,12 +140,20 @@ $(BUILDDIR)/%.o: %.s
 	mkdir -p $(dir $@)
 	$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))
 
+$(BUILDDIR)/%.hh.gch: %.hh
+	mkdir -p $(dir $@)
+	$(CXX) -c -x c++-header $(CXXFLAGS) $< -o $@
+
+$(BUILDDIR)/%.h.gch: %.h
+	mkdir -p $(dir $@)
+	$(CXX) -c -x c++-header $(CXXFLAGS) $< -o $@
+
 %.d: ;
 
 tables src/processors/wavefold_tables.h: tableGen/main.cpp
 	g++ tableGen/main.cpp -o tableGen/table
 	tableGen/table
-	
+
 flash: $(BIN)
 	st-flash write $(BIN) 0x8000000
 
@@ -157,5 +164,5 @@ ifneq "$(MAKECMDGOALS)" "clean"
 -include $(DEPS)
 endif
 
-.PRECIOUS: $(DEPS) $(OBJECTS) $(ELF)
+.PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
 .PHONY: all clean flash
