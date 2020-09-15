@@ -3,13 +3,13 @@
 
 class Buses {
 public:
-	static inline i2cPeriph i2c;
+	static inline I2CPeriph shared_i2c;
 
 	Buses()
 	{
 		Pin sda{
-			SharedI2C::GPIO,
-			SharedI2C::SDA_PIN,
+			SharedI2C::SDA_port,
+			SharedI2C::SDA_pin,
 			PinMode::Alt,
 			SharedI2C::GPIO_AF,
 			PinPull::Up,
@@ -17,8 +17,8 @@ public:
 			PinSpeed::High,
 			PinOType::OpenDrain};
 		Pin scl{
-			SharedI2C::GPIO,
-			SharedI2C::SCL_PIN,
+			SharedI2C::SCL_port,
+			SharedI2C::SCL_pin,
 			PinMode::Alt,
 			SharedI2C::GPIO_AF,
 			PinPull::Up,
@@ -26,7 +26,7 @@ public:
 			PinSpeed::High,
 			PinOType::OpenDrain};
 
-		i2c.init(SharedI2C::I2Cx, SharedI2C::I2C_TIMING);
+		shared_i2c.init(SharedI2C::I2Cx, SharedI2C::I2C_TIMING);
 	}
 };
 
