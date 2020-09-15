@@ -1,5 +1,7 @@
-#pragma once
+#ifndef _SRC_DRIVERS_PCA9685_LED_DRIVER
+#define _SRC_DRIVERS_PCA9685_LED_DRIVER
 #include "dma.hh"
+#include "hal_callback.hh"
 #include "i2c.hh"
 #include "stm32f7xx.h"
 
@@ -18,48 +20,43 @@ enum class LEDDriverError {
 class PCA9685Driver {
 
 public:
-	PCA9685Driver(i2cPeriph &i2c, uint32_t num_chips);
+	PCA9685Driver(I2CPeriph &i2c, uint32_t num_chips);
 
-	LEDDriverError init_as_dma(uint8_t *led_image, DMAConfig dma_defs);
-	LEDDriverError init_as_direct();
-
+	LEDDriverError start();
+	void start_it_mode();
+	LEDDriverError start_dma_mode(uint16_t *led_frame_buf, const DMAConfig dma_defs);
 	LEDDriverError set_rgb_led(uint8_t led_number, uint16_t c_red, uint16_t c_green, uint16_t c_blue);
 	LEDDriverError set_single_led(uint8_t led_element_number, uint16_t brightness);
 
-	uint8_t get_cur_chip(void);
-
 private:
-	i2cPeriph &i2cp_;
+	I2CPeriph &i2cp_;
 	uint32_t num_chips_;
-	uint8_t cur_chip_num_ = 0;
 	LEDDriverError g_led_error;
 
-	uint8_t *frame_buffer_start;
-	uint8_t *frame_buffer_cur_pos;
+	static uint8_t get_red_led_element_id(uint8_t rgb_led_id);
+	static uint8_t get_chip_num(uint8_t rgb_led_id);
 
-	uint8_t get_red_led_element_id(uint8_t rgb_led_id);
-	uint8_t get_chip_num(uint8_t rgb_led_id);
-
-	void advance_frame_buffer();
-	void write_current_frame_to_chip();
-
-	LEDDriverError writeregister(uint8_t driverAddr, uint8_t registerAddr, uint8_t registerValue);
+	LEDDriverError write_register(uint8_t driverAddr, uint8_t registerAddr, uint8_t registerValue);
 	LEDDriverError reset_chip(uint8_t driverAddr);
-	LEDDriverError I2C_Init();
-	LEDDriverError I2C_DMA_Init(DMAConfig dma_defs);
-	void tx_complete(DMA_HandleTypeDef *_hdma);
 
-	struct I2C_DMA : public DMAMem2Periph {
-		I2C_DMA(PCA9685Driver &parent)
+	struct DMADriver : public DMAMem2Periph, HALCallbackManager::HALCBBase {
+		DMADriver(PCA9685Driver &parent)
 			: parent_(parent)
-		{
-		}
-		LEDDriverError init_with_conf(const DMAConfig dmaconf, i2cPeriph &i2c);
+		{}
+		LEDDriverError start_dma(uint16_t *led_frame_buf, const DMAConfig dma_defs);
+		LEDDriverError init_dma(const DMAConfig dmaconf);
+		void advance_frame_buffer();
+		void write_current_frame_to_chip();
 		virtual void isr();
+		virtual void halcb();
+
 		PCA9685Driver &parent_;
+		uint8_t cur_chip_num_ = 0;
+		uint8_t *frame_buffer_start;
+		uint8_t *frame_buffer_cur_pos;
 	};
-	friend class PCA9685Driver::I2C_DMA;
-	I2C_DMA dma_;
+	friend class PCA9685Driver::DMADriver;
+	DMADriver dma_;
 
 	const int kNumRGBLEDsPerChip = 5;
 	const static inline uint32_t REG_MODE1 = 0x00;
@@ -68,4 +65,4 @@ private:
 	const static inline uint32_t I2C_BASE_ADDRESS = 0b10000000;
 	const static inline auto REGISTER_ADDR_SIZE = I2C_MEMADD_SIZE_8BIT;
 };
-
+#endif
