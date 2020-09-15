@@ -106,12 +106,10 @@ LFLAGS =  -Wl,-Map,main.map,--cref \
 # build/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 
-all: Makefile $(BIN) $(HEX) #	$(PRECHDRS)
-# 	rm compile_commands.json
-# 	rm build/compile_commands.json
-# 	compiledb -n make
-# 	mv compile_commands.json build/
-# 	compdb -p build/ list > compile_commands.json 2>/dev/null
+all: Makefile $(BIN) $(HEX)	#$(PRECHDRS)
+# 	compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
+# 	rm compile_commands.json 
+# 	mv compile_commands_with_headers.json compile_commands.json
 
 $(BIN): $(ELF)
 	$(OBJCPY) -O binary $< $@

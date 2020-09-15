@@ -1,6 +1,6 @@
+%compile_commands.json
 %h -x
 %h c++-header
-%clang++
 -isystem
 /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1
 -I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1
