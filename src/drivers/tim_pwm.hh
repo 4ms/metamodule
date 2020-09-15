@@ -58,16 +58,13 @@ public:
 		if (channel_ == TimChannelNum::_1N) {
 			channel_base_ = TimChannelNum::_1;
 			inverted_channel = true;
-		}
-		else if (channel_ == TimChannelNum::_2N) {
+		} else if (channel_ == TimChannelNum::_2N) {
 			channel_base_ = TimChannelNum::_2;
 			inverted_channel = true;
-		}
-		else if (channel_ == TimChannelNum::_3N) {
+		} else if (channel_ == TimChannelNum::_3N) {
 			channel_base_ = TimChannelNum::_3;
 			inverted_channel = true;
-		}
-		else {
+		} else {
 			channel_base_ = channel_;
 			inverted_channel = false;
 		}
@@ -111,12 +108,24 @@ private:
 	constexpr void _set_timer_ccr(TIM_TypeDef *TIMx, TimChannelNum channel, uint32_t val) const
 	{
 		switch (channel) {
-			case TimChannelNum::_1: TIMx->CCR1 = val; break;
-			case TimChannelNum::_2: TIMx->CCR2 = val; break;
-			case TimChannelNum::_3: TIMx->CCR3 = val; break;
-			case TimChannelNum::_4: TIMx->CCR4 = val; break;
-			case TimChannelNum::_5: TIMx->CCR5 = val; break;
-			default: TIMx->CCR6 = val; break;
+			case TimChannelNum::_1:
+				TIMx->CCR1 = val;
+				break;
+			case TimChannelNum::_2:
+				TIMx->CCR2 = val;
+				break;
+			case TimChannelNum::_3:
+				TIMx->CCR3 = val;
+				break;
+			case TimChannelNum::_4:
+				TIMx->CCR4 = val;
+				break;
+			case TimChannelNum::_5:
+				TIMx->CCR5 = val;
+				break;
+			default:
+				TIMx->CCR6 = val;
+				break;
 		}
 	}
 
@@ -124,3 +133,10 @@ private:
 	TimChannelNum channel_;
 	TimChannelNum channel_base_;
 };
+
+class NoPwmChannel : public TimPwmChannel {
+public:
+	NoPwmChannel() {}
+	void set_output_level(uint32_t val) const {}
+};
+

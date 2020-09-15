@@ -1,35 +1,23 @@
 #pragma once
 #include "colors.hh"
+#include "defs/led_defs.hh"
+#include "i2c.hh"
+#include "pca9685_led_driver.hh"
 #include "pin.hh"
 #include "rgbled.hh"
 #include "stm32f7xx.h"
 #include "tim_pwm.hh"
-#include "defs/led_defs.hh"
-
-class NoPwmLed : public TimPwmChannel {
-public:
-	NoPwmLed() {}
-	void set_output_level(uint32_t val) const {}
-};
-
-class DACLed : public TimPwmChannel {
-public:
-	DACLed(uint8_t dac_chan)
-		: dac_chan_(dac_chan)
-	{
-	}
-	void set_output_level(uint32_t val) const {}
-
-private:
-	uint8_t dac_chan_;
-};
 
 using PwmRgbLed = RgbLed<TimPwmChannel>;
+using NoPwmLed = NoPwmChannel;
 
 class LedCtl {
 public:
-	LedCtl()
+	LedCtl(I2CPeriph &i2c)
+		: led_driver_{i2c, kNumLedDriverChips}
 	{
+		led_driver_.start();
+		led_driver_.start_dma_mode(led_frame_buf, LedDriverDmaDef);
 	}
 
 	//Todo: only update if glowing or fading
@@ -45,6 +33,10 @@ public:
 		mode[3].refresh();
 		mode[4].refresh();
 	}
+
+private:
+	PCA9685Driver led_driver_;
+	uint16_t led_frame_buf[kNumLedDriverChips * 16];
 
 public:
 	PwmRgbLed freq[2] = {

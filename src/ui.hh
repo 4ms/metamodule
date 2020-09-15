@@ -2,6 +2,7 @@
 #include "audio.hh"
 #include "controls.hh"
 //#include "debug.h"
+#include "i2c.hh"
 #include "leds.hh"
 #include "params.hh"
 
@@ -12,10 +13,9 @@ public:
 	LedCtl leds;
 
 public:
-	Ui()
-	{
-		// leds.res1.set_glow(Colors::red, 2);
-	}
+	Ui(I2CPeriph &i2c)
+		: leds{i2c}
+	{}
 
 	void update()
 	{

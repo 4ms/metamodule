@@ -1,14 +1,14 @@
+#include "buses.hh"
 #include "debug.hh"
 #include "stm32f7xx.h"
 #include "system.hh"
 #include "ui.hh"
 
 System sys;
-Ui ui;
+Buses buses;
+Ui ui{buses.shared_i2c};
 Audio audio{ui.params};
 Debug debug;
-
-//Todo: create LED update timer to run ui.update() (which just updates LEDs if there's a glow or flash)
 
 void main()
 {
