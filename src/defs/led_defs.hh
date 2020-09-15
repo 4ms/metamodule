@@ -10,3 +10,5 @@ const DMAConfig LedDriverDmaDef = {
 	.pri = 3,
 	.subpri = 1};
 
+const uint32_t kNumLedDriverChips = 2;
+

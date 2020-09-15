@@ -26,25 +26,25 @@
  *
  * -----------------------------------------------------------------------------
  */
-#include <stm32f7xx.h>
 #include "adc_builtin_driver.hh"
+#include "stm32f7xx.h"
 #include "stm32f7xx_ll_adc.h"
-#include "stm32f7xx_ll_dma.h"
 #include "stm32f7xx_ll_bus.h"
+#include "stm32f7xx_ll_dma.h"
 
 //Todo: research if there's a way to not have to declare these class templates
 template class AdcPeriph<ADC_1>;
 template class AdcPeriph<ADC_2>;
 template class AdcPeriph<ADC_3>;
 
-template <AdcPeripheral p()>
-AdcPeriph<p>& AdcPeriph<p>::AdcInstance()
+template<AdcPeripheral p()>
+AdcPeriph<p> &AdcPeriph<p>::AdcInstance()
 {
 	static AdcPeriph<p> Adc_;
 	return Adc_;
 }
 
-template <AdcPeripheral p()>
+template<AdcPeripheral p()>
 AdcPeriph<p>::AdcPeriph()
 {
 	System::enable_adc_rcc(p());
@@ -72,18 +72,20 @@ AdcPeriph<p>::AdcPeriph()
 	LL_ADC_REG_SetFlagEndOfConversion(p(), LL_ADC_REG_FLAG_EOC_SEQUENCE_CONV);
 }
 
-constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_RANK(const uint8_t x) {
-	return ((x <= 5)  ? (ADC_SQR3_REGOFFSET | (x*5))
-		  : (x <= 11) ? (ADC_SQR2_REGOFFSET | ((x-6)*5))
-		  : (x <= 15) ? (ADC_SQR1_REGOFFSET | ((x-12)*5))
-		  : 0);
+constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_RANK(const uint8_t x)
+{
+	return ((x <= 5) ? (ADC_SQR3_REGOFFSET | (x * 5))
+					 : (x <= 11) ? (ADC_SQR2_REGOFFSET | ((x - 6) * 5))
+								 : (x <= 15) ? (ADC_SQR1_REGOFFSET | ((x - 12) * 5))
+											 : 0);
 }
 
-constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(const uint8_t x) {
+constexpr uint32_t _LL_ADC_DECIMAL_NB_TO_REG_SEQ_LENGTH(const uint8_t x)
+{
 	return (x << ADC_SQR1_L_Pos);
 }
 
-template <AdcPeripheral p()>
+template<AdcPeripheral p()>
 void AdcPeriph<p>::add_channel(const AdcChanNum channel, const uint32_t sampletime)
 {
 	uint32_t channel_int = static_cast<uint32_t>(channel);
@@ -95,38 +97,46 @@ void AdcPeriph<p>::add_channel(const AdcChanNum channel, const uint32_t sampleti
 	ranks_[channel_int] = rank_decimal;
 }
 
-template <AdcPeripheral p()>
-void AdcPeriph<p>::start_dma(DMA_TypeDef * const DMAx, const uint32_t ADC_DMA_Stream, const uint32_t ADC_DMA_Channel, const IRQn_Type ADC_DMA_Streamx_IRQn)
+template<AdcPeripheral p()>
+void AdcPeriph<p>::init_dma(const DMA_LL_Config dma_defs)
 {
 	if (!num_channels_) return;
 
-	System::enable_dma_rcc(DMAx);
-	
-	LL_DMA_SetChannelSelection(DMAx, ADC_DMA_Stream, ADC_DMA_Channel);
-	LL_DMA_ConfigTransfer(DMAx,
-						ADC_DMA_Stream,
-						LL_DMA_DIRECTION_PERIPH_TO_MEMORY |
-						LL_DMA_MODE_CIRCULAR |
-						LL_DMA_PERIPH_NOINCREMENT |
-						LL_DMA_MEMORY_INCREMENT |
-						LL_DMA_PDATAALIGN_HALFWORD |
-						LL_DMA_MDATAALIGN_HALFWORD |
-						LL_DMA_PRIORITY_HIGH);
-	LL_DMA_ConfigAddresses(DMAx,
-						ADC_DMA_Stream,
-						LL_ADC_DMA_GetRegAddr(p(), LL_ADC_DMA_REG_REGULAR_DATA),
-						(uint32_t)(dma_buffer_),
-						LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-	LL_DMA_SetDataLength(DMAx, ADC_DMA_Stream, num_channels_);
-	LL_DMA_EnableIT_TC(DMAx, ADC_DMA_Stream);
-	LL_DMA_DisableIT_HT(DMAx, ADC_DMA_Stream);
-	LL_DMA_EnableIT_TE(DMAx, ADC_DMA_Stream);
-	LL_DMA_EnableStream(DMAx, ADC_DMA_Stream);
+	System::enable_dma_rcc(dma_defs.DMAx);
 
-	NVIC_SetPriority(ADC_DMA_Streamx_IRQn, (1 << 2) | 0);
-	NVIC_EnableIRQ(ADC_DMA_Streamx_IRQn);
+	LL_DMA_SetChannelSelection(dma_defs.DMAx, dma_defs.stream, dma_defs.channel);
+	LL_DMA_ConfigTransfer(dma_defs.DMAx,
+						  dma_defs.stream,
+						  LL_DMA_DIRECTION_PERIPH_TO_MEMORY |
+							  LL_DMA_MODE_CIRCULAR |
+							  LL_DMA_PERIPH_NOINCREMENT |
+							  LL_DMA_MEMORY_INCREMENT |
+							  LL_DMA_PDATAALIGN_HALFWORD |
+							  LL_DMA_MDATAALIGN_HALFWORD |
+							  LL_DMA_PRIORITY_HIGH);
+	LL_DMA_ConfigAddresses(dma_defs.DMAx,
+						   dma_defs.stream,
+						   LL_ADC_DMA_GetRegAddr(p(), LL_ADC_DMA_REG_REGULAR_DATA),
+						   (uint32_t)(dma_buffer_),
+						   LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+	LL_DMA_SetDataLength(dma_defs.DMAx, dma_defs.stream, num_channels_);
+	LL_DMA_EnableIT_TC(dma_defs.DMAx, dma_defs.stream);
+	LL_DMA_DisableIT_HT(dma_defs.DMAx, dma_defs.stream);
+	LL_DMA_EnableIT_TE(dma_defs.DMAx, dma_defs.stream);
+	LL_DMA_EnableStream(dma_defs.DMAx, dma_defs.stream);
+}
 
+//Todo: use InterruptManager
+// template<AdcPeripheral p()>
+// void AdcPeriph<p>::enable_IT(const IRQn_Type ADC_DMA_Streamx_IRQn)
+// {
+// 	NVIC_SetPriority(ADC_DMA_Streamx_IRQn, (1 << 2) | 0);
+// 	NVIC_EnableIRQ(ADC_DMA_Streamx_IRQn);
+// }
+
+template<AdcPeripheral p()>
+void AdcPeriph<p>::start_adc()
+{
 	LL_ADC_Enable(p());
-
 	LL_ADC_REG_StartConversionSWStart(p());
 }

@@ -1,12 +1,13 @@
 #pragma once
 #include "analog_in.hh"
 #include "debounced_switch.hh"
+#include "interrupt.hh"
 #include "pin.hh"
 #include "rotary.hh"
+#include "stm32f7xx.h"
 #include "stm32f7xx_ll_adc.h"
 #include "stm32f7xx_ll_gpio.h"
 #include <array>
-#include <stm32f7xx.h>
 
 using JackSense = DebouncedSwitch;
 
@@ -25,4 +26,9 @@ struct Controls {
 	static void read();
 
 	void begin();
+
+	struct UpdateISR : InterruptManager::ISRBase {
+		virtual void isr();
+	};
+	UpdateISR updater;
 };

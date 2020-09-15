@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _SRC_DRIVERS_INTERRUPT
+#define _SRC_DRIVERS_INTERRUPT
+
 #ifdef STM32F7
 	#include "stm32f7xx.h"
 using IRQType = IRQn_Type;
@@ -28,3 +30,4 @@ private:
 	static inline ISRType ISRs[128];
 };
 
+#endif

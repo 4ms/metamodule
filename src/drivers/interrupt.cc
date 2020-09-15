@@ -1,6 +1,6 @@
 #include "interrupt.hh"
 
-static void ISRHandler(IRQType irqnum) { InterruptManager::callISR(irqnum); } //C wrapper
+static void ISRHandler(IRQType irqnum) { InterruptManager::callISR(irqnum); }
 
 extern "C" void WWDG_IRQHandler(void) { ISRHandler(WWDG_IRQn); }
 extern "C" void PVD_IRQHandler(void) { ISRHandler(PVD_IRQn); }
@@ -86,3 +86,4 @@ extern "C" void SAI2_IRQHandler(void) { ISRHandler(SAI2_IRQn); }
 extern "C" void QUADSPI_IRQHandler(void) { ISRHandler(QUADSPI_IRQn); }
 extern "C" void LPTIM1_IRQHandler(void) { ISRHandler(LPTIM1_IRQn); }
 extern "C" void SDMMC2_IRQHandler(void) { ISRHandler(SDMMC2_IRQn); }
+
