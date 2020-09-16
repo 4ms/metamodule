@@ -1,6 +1,6 @@
 #include "controls.hh"
 #include "debug.hh"
-#include "dma_config.hh"
+#include "dma_config_struct.hh"
 #include "stm32f7xx_ll_dma.h"
 
 void Controls::read()
@@ -32,7 +32,7 @@ Controls::Controls()
 	};
 	AdcPeriph<ADC_1>::init_dma(kADCDMAConfig);
 	AdcPeriph<ADC_1>::start_adc();
-	
+
 	//Todo: register a timer ISR instead: use timekeeper
 	InterruptManager::registerISR(DMA2_Stream4_IRQn, this);
 }

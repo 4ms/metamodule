@@ -1,7 +1,8 @@
 #ifndef _SRC_DRIVERS_PCA9685_LED_DRIVER
 #define _SRC_DRIVERS_PCA9685_LED_DRIVER
+
 #include "defs/led_driver_defs.hh"
-#include "dma_config.hh"
+#include "dma_config_struct.hh"
 #include "hal_callback.hh"
 #include "i2c.hh"
 #include "stm32f7xx.h"

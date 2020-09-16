@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "dma_config.hh"
+#include "dma_config_struct.hh"
 #include "pin.hh"
 #include "stm32f7xx_ll_adc.h"
 #include <array>
