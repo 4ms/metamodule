@@ -1,8 +1,8 @@
 #pragma once
 #include "defs/codec_sai_defs.hh"
-#include "globals.h"
+#include "interrupt.hh"
 #include "pin.hh"
-#include <stdint.h>
+#include <cstdint>
 
 //Todo: pass const SaiDef &def to ctor, and have private reference to it
 //instead of passing it to all the init/config functions
@@ -15,15 +15,18 @@ public:
 		SAI_XMIT_ERR
 	};
 
-	SaiPeriph() = default;
+	SaiPeriph(const SaiDef &def = kCodecSAIDef)
+		: saidef_(def)
+	{}
+
 	~SaiPeriph() = default;
 
-	Error init(const SaiDef &def);
+	Error init();
 	void set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint32_t block_size);
-	Error init(const SaiDef &def, uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint32_t block_size)
+	Error init(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint32_t block_size)
 	{
 		set_txrx_buffers(tx_buf_ptr, rx_buf_ptr, block_size);
-		return init(def);
+		return init();
 	}
 
 	void start();
@@ -32,6 +35,7 @@ public:
 	DMA_HandleTypeDef *get_rx_dmahandle();
 
 private:
+	const SaiDef &saidef_;
 	DMA_HandleTypeDef hdma_tx;
 	DMA_HandleTypeDef hdma_rx;
 	SAI_HandleTypeDef hsai_tx;
@@ -41,12 +45,13 @@ private:
 	uint8_t *tx_buf_ptr_;
 	uint8_t *rx_buf_ptr_;
 	uint32_t block_size_;
-	void _init_pins(const SaiDef &def);
 
-	void _config_rx_sai(const SaiDef &def);
-	void _config_tx_sai(const SaiDef &def);
-	void _config_rx_dma(const SaiDef &def);
-	void _config_tx_dma(const SaiDef &def);
+	virtual void isr();
+	void _init_pins();
+	void _config_rx_sai();
+	void _config_tx_sai();
+	void _config_rx_dma();
+	void _config_tx_dma();
 	Error _init_sai_protocol();
 	Error _init_sai_dma();
 };

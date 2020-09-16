@@ -12,24 +12,24 @@ DMA_HandleTypeDef *SaiPeriph::get_tx_dmahandle()
 	return &hdma_tx;
 }
 
-SaiPeriph::Error SaiPeriph::init(const SaiDef &def)
+SaiPeriph::Error SaiPeriph::init()
 {
-	_init_pins(def);
+	_init_pins();
 
-	System::enable_sai_rcc(def.sai);
-	System::enable_dma_rcc(def.dma_init_rx.DMAx);
-	System::enable_dma_rcc(def.dma_init_tx.DMAx);
+	System::enable_sai_rcc(saidef_.sai);
+	System::enable_dma_rcc(saidef_.dma_init_rx.DMAx);
+	System::enable_dma_rcc(saidef_.dma_init_tx.DMAx);
 
 	{
-		_config_rx_sai(def);
-		_config_tx_sai(def);
+		_config_rx_sai();
+		_config_tx_sai();
 		auto err = _init_sai_protocol();
 		if (err != SAI_NO_ERR)
 			return err;
 	}
 	{
-		_config_rx_dma(def);
-		_config_tx_dma(def);
+		_config_rx_dma();
+		_config_tx_dma();
 		auto err = _init_sai_dma();
 		if (err != SAI_NO_ERR)
 			return err;
@@ -38,21 +38,21 @@ SaiPeriph::Error SaiPeriph::init(const SaiDef &def)
 	__HAL_SAI_ENABLE(&hsai_rx);
 	__HAL_SAI_ENABLE(&hsai_tx);
 
-	tx_irqn = def.dma_init_tx.IRQn;
+	tx_irqn = saidef_.dma_init_tx.IRQn;
 	HAL_NVIC_SetPriority(tx_irqn, 1, 0);
 	HAL_NVIC_DisableIRQ(tx_irqn);
 
-	rx_irqn = def.dma_init_rx.IRQn;
+	rx_irqn = saidef_.dma_init_rx.IRQn;
 	HAL_NVIC_SetPriority(rx_irqn, 1, 1);
 	HAL_NVIC_DisableIRQ(rx_irqn);
 
 	return SAI_NO_ERR;
 }
 
-void SaiPeriph::_config_rx_sai(const SaiDef &def)
+void SaiPeriph::_config_rx_sai()
 {
 	__HAL_SAI_RESET_HANDLE_STATE(&hsai_rx);
-	hsai_rx.Instance = def.rx_block;
+	hsai_rx.Instance = saidef_.rx_block;
 	__HAL_SAI_DISABLE(&hsai_rx);
 
 	hsai_rx.Init.AudioMode = SAI_MODESLAVE_RX;
@@ -61,7 +61,7 @@ void SaiPeriph::_config_rx_sai(const SaiDef &def)
 	hsai_rx.Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
 	hsai_rx.Init.NoDivider = SAI_MASTERDIVIDER_DISABLE;
 	hsai_rx.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
-	hsai_rx.Init.AudioFrequency = def.samplerate;
+	hsai_rx.Init.AudioFrequency = saidef_.samplerate;
 #ifdef STM32H7
 	hsai_rx.Init.MckOutput = SAI_MCK_OUTPUT_DISABLE;
 	hsai_rx.Init.MckOverSampling = SAI_MCK_OVERSAMPLING_DISABLE;
@@ -73,10 +73,10 @@ void SaiPeriph::_config_rx_sai(const SaiDef &def)
 	HAL_SAI_DeInit(&hsai_rx);
 }
 
-void SaiPeriph::_config_tx_sai(const SaiDef &def)
+void SaiPeriph::_config_tx_sai()
 {
 	__HAL_SAI_RESET_HANDLE_STATE(&hsai_tx);
-	hsai_tx.Instance = def.tx_block;
+	hsai_tx.Instance = saidef_.tx_block;
 	__HAL_SAI_DISABLE(&hsai_tx);
 
 	hsai_tx.Init.AudioMode = SAI_MODEMASTER_TX;
@@ -85,7 +85,7 @@ void SaiPeriph::_config_tx_sai(const SaiDef &def)
 	hsai_tx.Init.OutputDrive = SAI_OUTPUTDRIVE_DISABLE;
 	hsai_tx.Init.NoDivider = SAI_MASTERDIVIDER_ENABLE;
 	hsai_tx.Init.FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY;
-	hsai_tx.Init.AudioFrequency = def.samplerate;
+	hsai_tx.Init.AudioFrequency = saidef_.samplerate;
 #ifdef STM32H7
 	hsai_tx.Init.MckOutput = SAI_MCK_OUTPUT_ENABLE;
 	hsai_tx.Init.MckOverSampling = SAI_MCK_OVERSAMPLING_DISABLE;
@@ -108,14 +108,14 @@ SaiPeriph::Error SaiPeriph::_init_sai_protocol()
 	return SAI_NO_ERR;
 }
 
-void SaiPeriph::_config_rx_dma(const SaiDef &def)
+void SaiPeriph::_config_rx_dma()
 {
-	hdma_rx.Instance = def.dma_init_rx.stream;
+	hdma_rx.Instance = saidef_.dma_init_rx.stream;
 #ifdef STM32H7
-	hdma_rx.Init.Request = def.dma_init_rx.channel;
+	hdma_rx.Init.Request = saidef_.dma_init_rx.channel;
 #endif
 #ifdef STM32F7
-	hdma_rx.Init.Channel = def.dma_init_rx.channel;
+	hdma_rx.Init.Channel = saidef_.dma_init_rx.channel;
 #endif
 	hdma_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
 	hdma_rx.Init.PeriphInc = DMA_PINC_DISABLE;
@@ -130,14 +130,14 @@ void SaiPeriph::_config_rx_dma(const SaiDef &def)
 	HAL_DMA_DeInit(&hdma_rx);
 }
 
-void SaiPeriph::_config_tx_dma(const SaiDef &def)
+void SaiPeriph::_config_tx_dma()
 {
-	hdma_tx.Instance = def.dma_init_tx.stream;
+	hdma_tx.Instance = saidef_.dma_init_tx.stream;
 #ifdef STM32H7
-	hdma_tx.Init.Request = def.dma_init_tx.channel;
+	hdma_tx.Init.Request = saidef_.dma_init_tx.channel;
 #endif
 #ifdef STM32F7
-	hdma_tx.Init.Channel = def.dma_init_tx.channel;
+	hdma_tx.Init.Channel = saidef_.dma_init_tx.channel;
 #endif
 	hdma_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
 	hdma_tx.Init.PeriphInc = DMA_PINC_DISABLE;
@@ -163,27 +163,27 @@ SaiPeriph::Error SaiPeriph::_init_sai_dma()
 	return SAI_NO_ERR;
 }
 
-void SaiPeriph::_init_pins(const SaiDef &def)
+void SaiPeriph::_init_pins()
 {
 	Pin sai_mclk{
-		def.MCLK_GPIO, def.MCLK_PIN,
-		PinMode::Alt, def.MCLK_AF,
+		saidef_.MCLK_GPIO, saidef_.MCLK_PIN,
+		PinMode::Alt, saidef_.MCLK_AF,
 		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
 	Pin sai_sclk{
-		def.SCLK_GPIO, def.SCLK_PIN,
-		PinMode::Alt, def.SCLK_AF,
+		saidef_.SCLK_GPIO, saidef_.SCLK_PIN,
+		PinMode::Alt, saidef_.SCLK_AF,
 		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
 	Pin sai_lrclk{
-		def.LRCLK_GPIO, def.LRCLK_PIN,
-		PinMode::Alt, def.LRCLK_AF,
+		saidef_.LRCLK_GPIO, saidef_.LRCLK_PIN,
+		PinMode::Alt, saidef_.LRCLK_AF,
 		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
 	Pin sai_sdo{
-		def.MRX_SDO_GPIO, def.MRX_SDO_PIN,
-		PinMode::Alt, def.MRX_SDO_AF,
+		saidef_.MRX_SDO_GPIO, saidef_.MRX_SDO_PIN,
+		PinMode::Alt, saidef_.MRX_SDO_AF,
 		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
 	Pin sai_sdi{
-		def.MTX_SDI_GPIO, def.MTX_SDI_PIN,
-		PinMode::Alt, def.MTX_SDI_AF,
+		saidef_.MTX_SDI_GPIO, saidef_.MTX_SDI_PIN,
+		PinMode::Alt, saidef_.MTX_SDI_AF,
 		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
 }
 
