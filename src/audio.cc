@@ -19,8 +19,8 @@ Audio::Audio(Params &p, I2CPeriph &i2c, uint32_t sample_rate)
 	current_fx[RIGHT]->set_samplerate(sample_rate_);
 
 	codec.set_txrx_buffers(
-		&(tx_buf_raw_[0][0]),
-		&(rx_buf_raw_[0][0]),
+		reinterpret_cast<uint8_t *>(tx_buf_[0].data()),
+		reinterpret_cast<uint8_t *>(rx_buf_[0].data()),
 		kAudioStreamDMABlockSize * sizeof(AudioFrame) / 4); //Todo: why / 4?
 }
 

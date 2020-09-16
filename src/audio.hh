@@ -17,7 +17,7 @@ static const int kAudioStreamDMABlockSize = kAudioStreamBlockSize * kNumAudioDMA
 
 //Todo: create generic ICodec class, and use it here. Then derive from it to get CodecWM8731, CodecCS4721, etc..
 //Then the SharedBus::i2c can given to a codec object, and a ref to the codec object can be passed to the ctor of Audio
-//
+//And in unit tests we can give a testable codec object (plays from .wav file, and writes to .wav file)
 //
 class Audio {
 public:
@@ -55,15 +55,8 @@ private:
 	void check_fx_change();
 	void register_callback(void callbackfunc(AudioStreamBlock &in, AudioStreamBlock &out));
 
-	//todo: is the union necessary? Check SRAM usage with and without
-	union {
-		AudioStreamBlock tx_buf_[2];
-		uint8_t tx_buf_raw_[kAudioStreamBlockSize * sizeof(AudioFrame)][2];
-	};
-	union {
-		AudioStreamBlock rx_buf_[2];
-		uint8_t rx_buf_raw_[kAudioStreamBlockSize * sizeof(AudioFrame)][2];
-	};
+	AudioStreamBlock tx_buf_[2];
+	AudioStreamBlock rx_buf_[2];
 	Params &params;
 
 	FXList FX_left;
