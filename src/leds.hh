@@ -64,14 +64,6 @@ public:
 		},
 	};
 
-	// PwmRgbLed freq[2] = {
-	// 	{{TIM8, TimChannelNum::_4},
-	// 	 {TIM8, TimChannelNum::_3},
-	// 	 {TIM2, TimChannelNum::_2}},
-	// 	{NoLedElement,
-	// 	 {TIM3, TimChannelNum::_1},
-	// 	 {TIM8, TimChannelNum::_1N}}};
-
 	PwmRgbLed res[2] = {
 		{{TIM1, TimChannelNum::_4},
 		 {TIM1, TimChannelNum::_3},
@@ -82,9 +74,9 @@ public:
 		 {TIM3, TimChannelNum::_4}}};
 
 	PwmRgbLed mode[5]{
-		{NoLedElement, //DAC0 PA4
+		{NoLedElement,
 		 NoLedElement,
-		 NoLedElement}, //DAC1 PA5
+		 NoLedElement},
 
 		{{TIM2, TimChannelNum::_3},
 		 NoLedElement,

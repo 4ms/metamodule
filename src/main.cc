@@ -5,8 +5,8 @@
 #include "ui.hh"
 
 System sys;
-Buses buses;
-Ui ui{buses.shared_i2c};
+SharedBus buses;
+Ui ui{SharedBus::i2c};
 Audio audio{ui.params};
 Debug debug;
 

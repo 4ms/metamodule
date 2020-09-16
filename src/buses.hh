@@ -1,11 +1,11 @@
 #pragma once
 #include "defs/bus_defs.hh"
 
-class Buses {
+class SharedBus {
 public:
-	static inline I2CPeriph shared_i2c;
+	static inline I2CPeriph i2c;
 
-	Buses()
+	SharedBus()
 	{
 		Pin sda{
 			SharedI2C::SDA_port,
@@ -26,7 +26,7 @@ public:
 			PinSpeed::High,
 			PinOType::OpenDrain};
 
-		shared_i2c.init(SharedI2C::I2Cx, SharedI2C::I2C_TIMING);
+		i2c.init(SharedI2C::I2Cx, SharedI2C::I2C_TIMING);
 	}
 };
 
