@@ -60,10 +60,9 @@ void CodecWM8731::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uin
 	sai_.set_txrx_buffers(tx_buf_ptr, rx_buf_ptr, block_size);
 }
 
-CodecWM8731::Error CodecWM8731::start()
+void CodecWM8731::start()
 {
 	sai_.start();
-	return CODEC_NO_ERR;
 }
 
 CodecWM8731::Error CodecWM8731::init_at_samplerate(uint32_t new_sample_rate)

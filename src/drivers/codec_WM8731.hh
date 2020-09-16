@@ -28,11 +28,12 @@
 
 #pragma once
 
+#include "codec.hh"
 #include "i2c.hh"
 #include "sai.hh"
 #include <stdint.h>
 
-class CodecWM8731 {
+class CodecWM8731 : public ICodec {
 public:
 	enum Error {
 		CODEC_NO_ERR = 0,
@@ -53,11 +54,11 @@ public:
 
 	CodecWM8731(I2CPeriph &i2c, uint32_t sample_rate = 48000);
 
-	void set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint32_t block_size);
+	virtual void set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint32_t block_size);
+	virtual void start();
 
 	Error init_at_samplerate(uint32_t sample_rate);
 	Error power_down();
-	Error start();
 
 	DMA_HandleTypeDef *get_rx_dmahandle();
 	DMA_HandleTypeDef *get_tx_dmahandle();

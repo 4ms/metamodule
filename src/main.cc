@@ -1,5 +1,6 @@
 #include "buses.hh"
 #include "debug.hh"
+#include "drivers/codec_WM8731.hh"
 #include "stm32f7xx.h"
 #include "system.hh"
 #include "ui.hh"
@@ -9,10 +10,13 @@ const uint32_t kSampleRate = 48000;
 System sys;
 Debug debug;
 SharedBus shared_i2c;
+//ExternalChips exthw;
+//exthw.codec
+CodecWM8731 codec{SharedBus::i2c};
 
 Controls controls;
 Params params{controls};
-Audio audio{params, SharedBus::i2c, kSampleRate};
+Audio audio{params, codec, kSampleRate};
 LedCtl leds{SharedBus::i2c};
 Ui ui{params, leds};
 

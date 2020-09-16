@@ -1,5 +1,5 @@
 #pragma once
-#include "codec_WM8731.hh"
+#include "codec.hh"
 #include "fxList.hh"
 #include "hal_callback.hh"
 #include "math.hh"
@@ -21,6 +21,10 @@ static const int kAudioStreamDMABlockSize = kAudioStreamBlockSize * kNumAudioDMA
 //
 class Audio {
 public:
+	// Public methods:
+	Audio(Params &p, ICodec &codec, uint32_t sample_rate = 48000);
+	void start();
+
 	// Data types:
 	struct AudioFrame {
 		int16_t l;
@@ -46,9 +50,6 @@ public:
 						 RIGHT };
 	using AudioStreamBlock = std::array<AudioFrame, kAudioStreamBlockSize>;
 
-	// Public methods:
-	Audio(Params &p, I2CPeriph &i2c, uint32_t sample_rate = 48000);
-	void start();
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);
 
 private:
@@ -62,7 +63,7 @@ private:
 	FXList FX_left;
 	FXList FX_right;
 
-	CodecWM8731 codec;
+	ICodec &codec_;
 	uint32_t sample_rate_;
 
 	static inline AudioProcessor *current_fx[2];

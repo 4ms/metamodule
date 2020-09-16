@@ -1,9 +1,8 @@
 #include "audio.hh"
-#include "math.hh"
 
-Audio::Audio(Params &p, I2CPeriph &i2c, uint32_t sample_rate)
+Audio::Audio(Params &p, ICodec &codec, uint32_t sample_rate)
 	: params{p}
-	, codec{i2c, sample_rate}
+	, codec_{codec}
 	, sample_rate_{sample_rate}
 	, callback_tx_halfcomplete{*this}
 	, callback_tx_complete{*this}
@@ -18,7 +17,7 @@ Audio::Audio(Params &p, I2CPeriph &i2c, uint32_t sample_rate)
 	current_fx[RIGHT] = FX_right[0];
 	current_fx[RIGHT]->set_samplerate(sample_rate_);
 
-	codec.set_txrx_buffers(
+	codec_.set_txrx_buffers(
 		reinterpret_cast<uint8_t *>(tx_buf_[0].data()),
 		reinterpret_cast<uint8_t *>(rx_buf_[0].data()),
 		kAudioStreamDMABlockSize * sizeof(AudioFrame) / 4); //Todo: why / 4?
@@ -49,7 +48,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 void Audio::start()
 {
-	codec.start();
+	codec_.start();
 }
 
 void Audio::check_fx_change()
