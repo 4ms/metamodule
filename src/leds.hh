@@ -6,10 +6,7 @@
 #include "pin.hh"
 #include "rgbled.hh"
 #include "stm32f7xx.h"
-#include "tim_pwm.hh"
 
-using PwmRgbLed = RgbLed<TimPwmChannel>;
-using NoPwmLed = NoPwmChannel;
 using DriverRgbLed = RgbLed<FrameBufferLED>;
 
 class LedCtl {
@@ -17,12 +14,11 @@ public:
 	LedCtl(I2CPeriph &i2c)
 		: led_driver_{i2c}
 		, led_frame_buf{led_driver_.get_frame_buffer()}
-	{
-		led_driver_.start();
-	}
+	{}
 
 	void start_dma_mode()
 	{
+		led_driver_.start();
 		led_driver_.start_dma_mode();
 	}
 
@@ -42,6 +38,7 @@ public:
 
 private:
 	PCA9685Driver led_driver_;
+
 	uint32_t *const led_frame_buf;
 	constexpr int led(int chipnum, int lednum)
 	{
@@ -64,38 +61,61 @@ public:
 		},
 	};
 
-	PwmRgbLed res[2] = {
-		{{TIM1, TimChannelNum::_4},
-		 {TIM1, TimChannelNum::_3},
-		 {TIM3, TimChannelNum::_2}},
+	DriverRgbLed res[2] = {
+		{
+			{&led_frame_buf[led(Chip1, 5)]},
+			{&led_frame_buf[led(Chip1, 6)]},
+			{&led_frame_buf[led(Chip1, 7)]},
+		},
+		{
+			{&led_frame_buf[led(Chip1, 8)]},
+			{&led_frame_buf[led(Chip1, 9)]},
+			{&led_frame_buf[led(Chip1, 10)]},
+		},
+	};
 
-		{NoLedElement,
-		 {TIM3, TimChannelNum::_3},
-		 {TIM3, TimChannelNum::_4}}};
+	DriverRgbLed but[2] = {
+		{
+			{&led_frame_buf[led(Chip1, 0)]},
+			NoLED,
+			{&led_frame_buf[led(Chip0, 15)]},
+		},
+		{
+			{&led_frame_buf[led(Chip1, 1)]},
+			{&led_frame_buf[led(Chip1, 14)]},
+			{&led_frame_buf[led(Chip1, 15)]},
+		},
+	};
 
-	PwmRgbLed mode[5]{
-		{NoLedElement,
-		 NoLedElement,
-		 NoLedElement},
-
-		{{TIM2, TimChannelNum::_3},
-		 NoLedElement,
-		 {TIM2, TimChannelNum::_4}},
-
-		{{TIM2, TimChannelNum::_1},
-		 NoLedElement,
-		 {TIM5, TimChannelNum::_2}},
-
-		{{TIM4, TimChannelNum::_3},
-		 NoLedElement,
-		 {TIM4, TimChannelNum::_4}},
-
-		{{TIM4, TimChannelNum::_1},
-		 NoLedElement,
-		 {TIM4, TimChannelNum::_2}},
+	DriverRgbLed mode[5]{
+		{
+			{&led_frame_buf[led(Chip0, 2)]},
+			{&led_frame_buf[led(Chip0, 1)]},
+			{&led_frame_buf[led(Chip0, 0)]},
+		},
+		{
+			{&led_frame_buf[led(Chip0, 5)]},
+			{&led_frame_buf[led(Chip0, 4)]},
+			{&led_frame_buf[led(Chip0, 3)]},
+		},
+		{
+			{&led_frame_buf[led(Chip0, 14)]},
+			{&led_frame_buf[led(Chip0, 7)]},
+			{&led_frame_buf[led(Chip0, 6)]},
+		},
+		{
+			{&led_frame_buf[led(Chip0, 11)]},
+			{&led_frame_buf[led(Chip0, 12)]},
+			{&led_frame_buf[led(Chip0, 13)]},
+		},
+		{
+			{&led_frame_buf[led(Chip0, 8)]},
+			{&led_frame_buf[led(Chip0, 9)]},
+			{&led_frame_buf[led(Chip0, 10)]},
+		},
 	};
 
 private:
-	NoPwmLed NoLedElement;
+	NoFrameBufferLED NoLED;
 };
 

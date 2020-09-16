@@ -13,4 +13,17 @@ public:
 
 private:
 	uint32_t *buffer;
+
+protected:
+	FrameBufferLED()
+		: buffer(nullptr)
+	{}
 };
+
+class NoFrameBufferLED : public FrameBufferLED {
+public:
+	NoFrameBufferLED()
+	{}
+	void set(uint32_t val) const {}
+};
+
