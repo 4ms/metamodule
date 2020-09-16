@@ -5,18 +5,22 @@
 #include "ui.hh"
 
 const uint32_t kSampleRate = 48000;
+
 System sys;
 Debug debug;
 SharedBus shared_i2c;
+
 Controls controls;
 Params params{controls};
+Audio audio{params, SharedBus::i2c, kSampleRate};
 LedCtl leds{SharedBus::i2c};
 Ui ui{params, leds};
-Audio audio{params, SharedBus::i2c, kSampleRate};
 
 void main()
 {
 	audio.start();
+
+	leds.start_dma_mode();
 
 	controls.begin();
 
