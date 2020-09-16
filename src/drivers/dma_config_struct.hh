@@ -1,6 +1,5 @@
 #pragma once
-#include "interrupt.hh"
-#include "stm32f7xx.h"
+#include "stm32xx.h"
 #include "system.hh"
 
 struct DMAConfig {

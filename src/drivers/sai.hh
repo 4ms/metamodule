@@ -4,9 +4,7 @@
 #include "pin.hh"
 #include <cstdint>
 
-//Todo: pass const SaiDef &def to ctor, and have private reference to it
-//instead of passing it to all the init/config functions
-class SaiPeriph /*: NonCopyable*/ {
+class SaiPeriph : InterruptManager::ISRBase {
 public:
 	enum Error {
 		SAI_NO_ERR,

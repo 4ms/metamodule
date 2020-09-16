@@ -196,6 +196,7 @@ void SaiPeriph::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint3
 
 void SaiPeriph::start()
 {
+	InterruptManager::registerISR(tx_irqn, this);
 	HAL_NVIC_EnableIRQ(tx_irqn);
 	HAL_SAI_Receive_DMA(&hsai_rx, rx_buf_ptr_, block_size_);
 	HAL_SAI_Transmit_DMA(&hsai_tx, tx_buf_ptr_, block_size_);
@@ -205,5 +206,12 @@ void SaiPeriph::stop()
 {
 	HAL_NVIC_DisableIRQ(tx_irqn);
 	HAL_NVIC_DisableIRQ(rx_irqn);
+}
+
+void SaiPeriph::isr()
+{
+	//Todo: optimize by calling a callback set by Audio class
+	//passing tx_buf_ptr_ or &tx_buf_ptr_[block_size_] depending on ISR register indicating HT or TC
+	HAL_DMA_IRQHandler(&hdma_tx);
 }
 
