@@ -7,8 +7,10 @@
 #endif
 
 enum class HALCallbackID {
-	MemTxCplt,
+	I2C_MemTxCplt,
 };
+
+const int kMaxHALCallbackIDs = 1;
 
 class HALCallbackManager {
 public:
@@ -18,15 +20,19 @@ public:
 	using HALCBType = HALCBBase *;
 	static inline void registerHALCB(HALCallbackID cbnum, HALCBType cb_obj)
 	{
-		HALCBs[static_cast<uint8_t>(cbnum)] = cb_obj;
+		HALCBs[get_cb_int(cbnum)] = cb_obj;
 	}
 	static inline void callHALCB(HALCallbackID cbnum)
 	{
-		HALCBs[static_cast<uint8_t>(cbnum)]->halcb();
+		HALCBs[get_cb_int(cbnum)]->halcb();
+	}
+	static uint8_t constexpr get_cb_int(HALCallbackID cbnum)
+	{
+		return static_cast<uint8_t>(cbnum);
 	}
 
 private:
-	static inline HALCBType HALCBs[128];
+	static inline HALCBType HALCBs[kMaxHALCallbackIDs];
 };
 
 #endif
