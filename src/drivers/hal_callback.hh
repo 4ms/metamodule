@@ -8,9 +8,11 @@
 
 enum class HALCallbackID {
 	I2C_MemTxCplt,
+	SAI_TxCplt,
+	SAI_TxHalfCplt,
 };
 
-const int kMaxHALCallbackIDs = 1;
+const int kMaxHALCallbackIDs = 3;
 
 class HALCallbackManager {
 public:

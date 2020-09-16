@@ -1,20 +1,27 @@
 #pragma once
+#include "codec_WM8731.hh"
 #include "fxList.hh"
+#include "hal_callback.hh"
 #include "math.hh"
 #include "oscs.hh"
 #include "params.hh"
+#include "stm32f7xx.h"
 #include <array>
-#include <stm32f7xx.h>
+
 using namespace MathTools;
 
 //Todo put this in a _config.h file
 static const int kAudioStreamBlockSize = 32; //number of frames (L/R pairs) we process at a time
 static const int kNumAudioDMAHalfTransfers = 2;
 static const int kAudioStreamDMABlockSize = kAudioStreamBlockSize * kNumAudioDMAHalfTransfers;
-static const int kSampleRate = 48000;
 
+//Todo: create generic ICodec class, and use it here. Then derive from it to get CodecWM8731, CodecCS4721, etc..
+//Then the SharedBus::i2c can given to a codec object, and a ref to the codec object can be passed to the ctor of Audio
+//
+//
 class Audio {
 public:
+	// Data types:
 	struct AudioFrame {
 		int16_t l;
 		int16_t r;
@@ -25,33 +32,58 @@ public:
 		static const inline float kScaling = static_cast<float>(kMaxValue);
 
 	public:
-		static float scaleInput(int16_t val) { return val / kScaling; }
-		static int16_t scaleOutput(float val) { return val * kScaling; }
+		static float scaleInput(int16_t val)
+		{
+			return val / kScaling;
+		}
+		static int16_t scaleOutput(float val)
+		{
+			return val * kScaling;
+		}
 	};
 
-	enum AudioChannels {
-		LEFT,
-		RIGHT
-	};
-	using AudioDMABlock = std::array<AudioFrame, kAudioStreamDMABlockSize>;
+	enum AudioChannels { LEFT,
+						 RIGHT };
 	using AudioStreamBlock = std::array<AudioFrame, kAudioStreamBlockSize>;
 
-	Audio(Params &p);
+	// Public methods:
+	Audio(Params &p, I2CPeriph &i2c, uint32_t sample_rate = 48000);
 	void start();
-	static void process(AudioStreamBlock &in, AudioStreamBlock &out);
+	void process(AudioStreamBlock &in, AudioStreamBlock &out);
 
 private:
 	void check_fx_change();
 	void register_callback(void callbackfunc(AudioStreamBlock &in, AudioStreamBlock &out));
 
-	AudioDMABlock tx_buf_;
-	AudioDMABlock rx_buf_;
+	//todo: is the union necessary? Check SRAM usage with and without
+	union {
+		AudioStreamBlock tx_buf_[2];
+		uint8_t tx_buf_raw_[kAudioStreamBlockSize * sizeof(AudioFrame)][2];
+	};
+	union {
+		AudioStreamBlock rx_buf_[2];
+		uint8_t rx_buf_raw_[kAudioStreamBlockSize * sizeof(AudioFrame)][2];
+	};
 	Params &params;
 
 	FXList FX_left;
 	FXList FX_right;
 
+	CodecWM8731 codec;
+	uint32_t sample_rate_;
+
 	static inline AudioProcessor *current_fx[2];
-	static inline Audio *instance;
+
+	struct TXCompleteCallback : HALCallbackManager::HALCBBase {
+		TXCompleteCallback(Audio &a);
+		virtual void halcb();
+		Audio &audiostream;
+	} callback_tx_complete;
+
+	struct TXHalfCompleteCallback : HALCallbackManager::HALCBBase {
+		TXHalfCompleteCallback(Audio &a);
+		virtual void halcb();
+		Audio &audiostream;
+	} callback_tx_halfcomplete;
 };
 

@@ -30,3 +30,13 @@ extern "C" void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c)
 	//
 	HALCallbackHandler(HALCallbackID::I2C_MemTxCplt);
 }
+
+extern "C" void HAL_SAI_TxCpltCallback(SAI_HandleTypeDef *hsai)
+{
+	HALCallbackHandler(HALCallbackID::SAI_TxCplt);
+}
+extern "C" void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
+{
+	HALCallbackHandler(HALCallbackID::SAI_TxHalfCplt);
+}
+

@@ -1,32 +1,37 @@
 #include "audio.hh"
 #include "math.hh"
-// #include "codec_i2c.h"
-// #include "codec_i2sx2.h"
-// #include "i2c.hh"
 
-Audio::Audio(Params &p)
-	: params(p)
+Audio::Audio(Params &p, I2CPeriph &i2c, uint32_t sample_rate)
+	: params{p}
+	, codec{i2c, sample_rate}
+	, sample_rate_{sample_rate}
+	, callback_tx_halfcomplete{*this}
+	, callback_tx_complete{*this}
 {
-	instance = this;
+	// Todo: get this working:
 	// for (auto &fx : FX_left)
-	// 	fx.set_samplerate(kSampleRate);
+	// 	fx.set_samplerate(sample_rate_);
 	// for (auto &fx : FX_right)
-	// 	fx.set_samplerate(kSampleRate);
+	// 	fx.set_samplerate(sample_rate_);
 	current_fx[LEFT] = FX_left[0];
-	current_fx[LEFT]->set_samplerate(kSampleRate);
+	current_fx[LEFT]->set_samplerate(sample_rate_);
 	current_fx[RIGHT] = FX_right[0];
-	current_fx[RIGHT]->set_samplerate(kSampleRate);
-	register_callback(Audio::process);
+	current_fx[RIGHT]->set_samplerate(sample_rate_);
+
+	codec.set_txrx_buffers(
+		&(tx_buf_raw_[0][0]),
+		&(rx_buf_raw_[0][0]),
+		kAudioStreamDMABlockSize * sizeof(AudioFrame) / 4); //Todo: why / 4?
 }
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	instance->params.update();
-	instance->check_fx_change();
-	current_fx[LEFT]->set_param(0, instance->params.freq[0]);
-	current_fx[LEFT]->set_param(1, instance->params.res[0]);
-	current_fx[RIGHT]->set_param(0, instance->params.freq[1]);
-	current_fx[RIGHT]->set_param(1, instance->params.res[1]);
+	params.update();
+	check_fx_change();
+	current_fx[LEFT]->set_param(0, params.freq[0]);
+	current_fx[LEFT]->set_param(1, params.res[0]);
+	current_fx[RIGHT]->set_param(0, params.freq[1]);
+	current_fx[RIGHT]->set_param(1, params.res[1]);
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
@@ -42,34 +47,43 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	}
 }
 
+void Audio::start()
+{
+	codec.start();
+}
+
 void Audio::check_fx_change()
 {
 	if (current_fx[LEFT] != FX_left[params.mode[0]]) {
 		//Todo: start crossfading
 		current_fx[LEFT] = FX_left[params.mode[0]];
-		current_fx[LEFT]->set_samplerate(kSampleRate);
+		current_fx[LEFT]->set_samplerate(sample_rate_);
 	}
 	if (current_fx[RIGHT] != FX_right[params.mode[1]]) {
 		//Todo: start crossfading
 		current_fx[RIGHT] = FX_right[params.mode[1]];
-		current_fx[RIGHT]->set_samplerate(kSampleRate);
+		current_fx[RIGHT]->set_samplerate(sample_rate_);
 	}
 }
 
-void Audio::start()
+Audio::TXCompleteCallback::TXCompleteCallback(Audio &a)
+	: audiostream(a)
 {
-	//Todo: Use c++ library for audio I2S/SAI from touch-sense project
-	//i2c_init();
-	//codec_init(kSampleRate);
-	// init_audio_DMA(kSampleRate,
-	// 			   reinterpret_cast<int16_t *>(tx_buf_.data()),
-	// 			   reinterpret_cast<int16_t *>(rx_buf_.data()),
-	// 			   kAudioStreamDMABlockSize * sizeof(AudioFrame));
-	// start_audio();
+	HALCallbackManager::registerHALCB(HALCallbackID::SAI_TxCplt, this);
 }
 
-void Audio::register_callback(void callbackfunc(AudioStreamBlock &in, AudioStreamBlock &out))
+void Audio::TXCompleteCallback::halcb()
 {
-	//Todo: Use c++ library for audio I2S/SAI from touch-sense project
-	// set_audio_callback((void (*)(int32_t *, int32_t *))(callbackfunc));
+	audiostream.process(audiostream.rx_buf_[1], audiostream.tx_buf_[1]);
 }
+
+Audio::TXHalfCompleteCallback::TXHalfCompleteCallback(Audio &a)
+	: audiostream(a)
+{
+	HALCallbackManager::registerHALCB(HALCallbackID::SAI_TxHalfCplt, this);
+}
+void Audio::TXHalfCompleteCallback::halcb()
+{
+	audiostream.process(audiostream.rx_buf_[0], audiostream.tx_buf_[0]);
+}
+
