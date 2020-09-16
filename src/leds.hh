@@ -1,6 +1,5 @@
 #pragma once
 #include "colors.hh"
-#include "defs/led_defs.hh"
 #include "i2c.hh"
 #include "pca9685_led_driver.hh"
 #include "pin.hh"
@@ -14,10 +13,10 @@ using NoPwmLed = NoPwmChannel;
 class LedCtl {
 public:
 	LedCtl(I2CPeriph &i2c)
-		: led_driver_{i2c, kNumLedDriverChips}
+		: led_driver_{i2c}
 	{
 		led_driver_.start();
-		led_driver_.start_dma_mode(led_frame_buf, LedDriverDmaDef);
+		led_driver_.start_dma_mode(led_frame_buf);
 	}
 
 	//Todo: only update if glowing or fading
@@ -36,7 +35,7 @@ public:
 
 private:
 	PCA9685Driver led_driver_;
-	uint16_t led_frame_buf[kNumLedDriverChips * 16];
+	uint32_t *led_frame_buf; //[kNumLedDriverChips * PCA9685Driver::kNumLedsPerChip];
 
 public:
 	PwmRgbLed freq[2] = {

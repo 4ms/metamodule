@@ -11,7 +11,7 @@
 
 using JackSense = DebouncedSwitch;
 
-struct Controls {
+struct Controls : InterruptManager::ISRBase {
 	static inline AnalogIn<ADC_1, AdcChanNum::_10> freq_cv[2] = {{GPIO::C, 0}, {GPIO::C, 2}};
 	static inline AnalogIn<ADC_1, AdcChanNum::_11> res_cv[2] = {{GPIO::C, 1}, {GPIO::C, 3}};
 
@@ -24,11 +24,8 @@ struct Controls {
 
 	Controls();
 	static void read();
-
 	void begin();
 
-	struct UpdateISR : InterruptManager::ISRBase {
-		virtual void isr();
-	};
-	UpdateISR updater;
+private:
+	virtual void isr();
 };

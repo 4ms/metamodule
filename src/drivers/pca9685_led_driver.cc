@@ -1,13 +1,11 @@
 #include "pca9685_led_driver.hh"
-#include "defs/led_defs.hh"
-#include "drivers/dma.hh"
 #include "interrupt.hh"
 
 static const uint32_t LEDDRIVER_LONG_TIMEOUT = 4000;
 
-PCA9685Driver::PCA9685Driver(I2CPeriph &i2c, uint32_t num_chips)
+PCA9685Driver::PCA9685Driver(I2CPeriph &i2c)
 	: i2cp_(i2c)
-	, num_chips_(num_chips)
+	, num_chips_(kNumLedDriverChips)
 	, dma_(*this)
 {
 }
@@ -36,11 +34,11 @@ void PCA9685Driver::start_it_mode()
 }
 
 // Start transferring via DMA, given a frame buffer and the hardware configuration
-LEDDriverError PCA9685Driver::start_dma_mode(uint16_t *led_frame_buf, const DMAConfig dma_defs)
+LEDDriverError PCA9685Driver::start_dma_mode(uint32_t *led_frame_buf)
 {
 	//Todo: check if start() has been called, and call it if not
 	start_it_mode();
-	return dma_.start_dma(led_frame_buf, dma_defs);
+	return dma_.start_dma(led_frame_buf, LedDriverDmaDef);
 }
 
 // Sets the brightness value of a single LED
@@ -163,27 +161,38 @@ LEDDriverError PCA9685Driver::write_register(uint8_t driverAddr, uint8_t registe
 //returns led element number of the red element of the given RGB LED id (green is red + 1, blue = red + 2)
 uint8_t PCA9685Driver::get_red_led_element_id(uint8_t rgb_led_id)
 {
-	return (rgb_led_id * 3) + (rgb_led_id / 5);
+	return (rgb_led_id * 3) + (rgb_led_id / kNumRGBLEDsPerChip);
 }
 
 uint8_t PCA9685Driver::get_chip_num(uint8_t rgb_led_id)
 {
-	return (rgb_led_id / 5);
+	return (rgb_led_id / kNumRGBLEDsPerChip);
 }
 
 ///// DMA Driver (todo: separate file?)
 
-LEDDriverError PCA9685Driver::DMADriver::start_dma(uint16_t *led_frame_buf, const DMAConfig dma_defs)
-{
-	LEDDriverError err;
+PCA9685Driver::DMADriver::DMADriver(PCA9685Driver &parent)
+	: parent_(parent)
+{}
 
+LEDDriverError PCA9685Driver::DMADriver::start_dma(uint32_t *led_frame_buf, const DMAConfig dma_defs)
+{
 	frame_buffer_start = reinterpret_cast<uint8_t *>(led_frame_buf);
 	frame_buffer_cur_pos = frame_buffer_start;
 
-	init_dma(dma_defs);
-	parent_.i2cp_.link_DMA_RX(&dmah_);
+	auto err = init_dma(dma_defs);
+	if (err != LEDDriverError::None)
+		return err;
 
-	start_ISR(dma_defs.pri, dma_defs.subpri);
+	//Link I2C and DMA
+	parent_.i2cp_.link_DMA_TX(&dmah_);
+
+	InterruptManager::registerISR(dma_defs.IRQn, this);
+	HAL_NVIC_SetPriority(dma_defs.IRQn, dma_defs.pri, dma_defs.subpri);
+	HAL_NVIC_EnableIRQ(dma_defs.IRQn);
+
+	HALCallbackManager::registerHALCB(HALCallbackID::I2C_MemTxCplt, this);
+
 	write_current_frame_to_chip();
 
 	if (parent_.g_led_error == LEDDriverError::DMA_XMIT_ERR)
@@ -193,7 +202,6 @@ LEDDriverError PCA9685Driver::DMADriver::start_dma(uint16_t *led_frame_buf, cons
 
 LEDDriverError PCA9685Driver::DMADriver::init_dma(const DMAConfig dmaconf)
 {
-	set_conf(dmaconf);
 	dmah_.Instance = dmaconf.stream;
 	dmah_.Init.Channel = dmaconf.channel;
 	dmah_.Init.Direction = DMA_MEMORY_TO_PERIPH;

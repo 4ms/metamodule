@@ -1,5 +1,5 @@
 #pragma once
-#include "drivers/dma.hh"
+#include "drivers/dma_config.hh"
 #include "stm32f7xx.h"
 
 const DMAConfig LedDriverDmaDef = {

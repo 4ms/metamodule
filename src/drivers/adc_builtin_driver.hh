@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "dma.hh"
+#include "dma_config.hh"
 #include "pin.hh"
 #include "stm32f7xx_ll_adc.h"
 #include <array>
@@ -121,16 +121,10 @@ public:
 private:
 	static void add_channel(const AdcChanNum channel, const uint32_t sampletime);
 
-	//Todo:
-	//set_dma_parameters(DMA1/2, stream, channel, IRQn);
-	//start_dma() //overload with no parameters
-
 	AdcPeriph();
 	static AdcPeriph<ADC_X> &AdcInstance();
 
 	static inline uint8_t num_channels_;
 	static inline uint8_t ranks_[16];
-	static inline uint16_t dma_buffer_[16]; //todo: use vector for dynamic
-											// static inline std::vector<uint16_t> dma_buffer_;
-											// static inline std::array<uint16_t, 16> dma_buffer_;
+	static inline uint16_t dma_buffer_[16];
 };
