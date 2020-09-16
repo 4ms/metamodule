@@ -24,7 +24,7 @@ public:
 	const static int kNumRGBLEDsPerChip = 5;
 
 public:
-	PCA9685Driver(I2CPeriph &i2c);
+	PCA9685Driver(I2CPeriph &i2c, const DMAConfig &dma_defs = LedDriverDmaDef);
 
 	LEDDriverError start();
 	void start_it_mode();
@@ -37,7 +37,8 @@ public:
 private:
 	I2CPeriph &i2cp_;
 	uint32_t num_chips_;
-	LEDDriverError g_led_error;
+	LEDDriverError led_error_;
+	const DMAConfig &dma_defs_;
 
 	LEDDriverError write_register(uint8_t driverAddr, uint8_t registerAddr, uint8_t registerValue);
 	LEDDriverError reset_chip(uint8_t driverAddr);
@@ -45,21 +46,20 @@ private:
 	class DMADriver : public InterruptManager::ISRBase, HALCallbackManager::HALCBBase {
 	public:
 		DMADriver(PCA9685Driver &parent);
-		LEDDriverError start_dma(uint32_t *led_frame_buf, const DMAConfig dma_defs);
+		LEDDriverError start_dma(const DMAConfig &dma_defs);
 
 	private:
-		LEDDriverError init_dma(const DMAConfig dmaconf);
+		LEDDriverError init_dma(const DMAConfig &dma_defs);
 		void advance_frame_buffer();
 		void write_current_frame_to_chip();
 		virtual void isr();
 		virtual void halcb();
 
-		PCA9685Driver &parent_;
+		PCA9685Driver &driver_;
 		DMA_HandleTypeDef dmah_;
 		uint8_t cur_chip_num_ = 0;
-		uint8_t *frame_buffer_start;
-		uint8_t *frame_buffer_cur_pos;
-		uint32_t led_frame_buf[kNumLedDriverChips * PCA9685Driver::kNumLedsPerChip];
+		uint32_t *frame_buffer_cur_pos;
+		uint32_t frame_buffer[kNumLedDriverChips * PCA9685Driver::kNumLedsPerChip];
 	};
 	friend class PCA9685Driver::DMADriver;
 	DMADriver dma_;

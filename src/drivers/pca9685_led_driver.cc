@@ -1,11 +1,9 @@
 #include "pca9685_led_driver.hh"
-#include "interrupt.hh"
 
-static const uint32_t LEDDRIVER_LONG_TIMEOUT = 4000;
-
-PCA9685Driver::PCA9685Driver(I2CPeriph &i2c)
+PCA9685Driver::PCA9685Driver(I2CPeriph &i2c, const DMAConfig &dma_defs)
 	: i2cp_(i2c)
 	, num_chips_(kNumLedDriverChips)
+	, dma_defs_(dma_defs)
 	, dma_(*this)
 {
 }
@@ -19,7 +17,8 @@ LEDDriverError PCA9685Driver::start()
 	for (driverAddr = 0; driverAddr < num_chips_; driverAddr++) {
 		err = reset_chip(driverAddr);
 		if (err != LEDDriverError::None)
-			return (err); //Todo return failed driver#: | ((driverAddr+1)<<4));
+			return (err);
+		//Todo return failed driver#: | ((driverAddr+1)<<4));
 	}
 
 	return LEDDriverError::None;
@@ -38,7 +37,7 @@ LEDDriverError PCA9685Driver::start_dma_mode(uint32_t *led_frame_buf)
 {
 	//Todo: check if start() has been called, and call it if not
 	start_it_mode();
-	return dma_.start_dma(led_frame_buf, LedDriverDmaDef);
+	return dma_.start_dma(dma_defs_);
 }
 
 // Sets the brightness value of a single LED
@@ -88,7 +87,6 @@ LEDDriverError PCA9685Driver::set_single_led(uint8_t led_element_number, uint16_
 // Note: This function cannot access pin 15
 LEDDriverError PCA9685Driver::set_rgb_led(uint8_t led_number, uint16_t c_red, uint16_t c_green, uint16_t c_blue)
 {
-
 	uint8_t driverAddr;
 	uint8_t data[13];
 
@@ -167,91 +165,5 @@ uint8_t PCA9685Driver::get_red_led_element_id(uint8_t rgb_led_id)
 uint8_t PCA9685Driver::get_chip_num(uint8_t rgb_led_id)
 {
 	return (rgb_led_id / kNumRGBLEDsPerChip);
-}
-
-///// DMA Driver (todo: separate file?)
-
-PCA9685Driver::DMADriver::DMADriver(PCA9685Driver &parent)
-	: parent_(parent)
-{}
-
-LEDDriverError PCA9685Driver::DMADriver::start_dma(uint32_t *led_frame_buf, const DMAConfig dma_defs)
-{
-	frame_buffer_start = reinterpret_cast<uint8_t *>(led_frame_buf);
-	frame_buffer_cur_pos = frame_buffer_start;
-
-	auto err = init_dma(dma_defs);
-	if (err != LEDDriverError::None)
-		return err;
-
-	//Link I2C and DMA
-	parent_.i2cp_.link_DMA_TX(&dmah_);
-
-	InterruptManager::registerISR(dma_defs.IRQn, this);
-	HAL_NVIC_SetPriority(dma_defs.IRQn, dma_defs.pri, dma_defs.subpri);
-	HAL_NVIC_EnableIRQ(dma_defs.IRQn);
-
-	HALCallbackManager::registerHALCB(HALCallbackID::I2C_MemTxCplt, this);
-
-	write_current_frame_to_chip();
-
-	if (parent_.g_led_error == LEDDriverError::DMA_XMIT_ERR)
-		return LEDDriverError::DMA_XMIT_ERR;
-	return LEDDriverError::None;
-}
-
-LEDDriverError PCA9685Driver::DMADriver::init_dma(const DMAConfig dmaconf)
-{
-	dmah_.Instance = dmaconf.stream;
-	dmah_.Init.Channel = dmaconf.channel;
-	dmah_.Init.Direction = DMA_MEMORY_TO_PERIPH;
-	dmah_.Init.PeriphInc = DMA_PINC_DISABLE;
-	dmah_.Init.MemInc = DMA_MINC_ENABLE;
-	dmah_.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-	dmah_.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-	dmah_.Init.Mode = DMA_NORMAL; //DMA_CIRCULAR
-	dmah_.Init.Priority = DMA_PRIORITY_LOW;
-	dmah_.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-	dmah_.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-	dmah_.Init.MemBurst = DMA_MBURST_SINGLE;
-	dmah_.Init.PeriphBurst = DMA_PBURST_SINGLE;
-
-	HAL_DMA_DeInit(&dmah_);
-	HAL_StatusTypeDef hal_err = HAL_DMA_Init(&dmah_);
-	if (hal_err != HAL_OK)
-		return LEDDriverError::DMA_XMIT_ERR;
-
-	return LEDDriverError::None;
-}
-
-void PCA9685Driver::DMADriver::advance_frame_buffer()
-{
-	if (++cur_chip_num_ >= parent_.num_chips_)
-		cur_chip_num_ = 0;
-	frame_buffer_cur_pos = frame_buffer_start + cur_chip_num_ * (parent_.kNumRGBLEDsPerChip * 4);
-}
-
-void PCA9685Driver::DMADriver::write_current_frame_to_chip()
-{
-	auto err = parent_.i2cp_.mem_write_dma(
-		I2C_BASE_ADDRESS,
-		REG_LED0,
-		REGISTER_ADDR_SIZE,
-		frame_buffer_cur_pos,
-		parent_.kNumRGBLEDsPerChip * 4);
-
-	if (err != I2CPeriph::Error::I2C_NO_ERR)
-		parent_.g_led_error = LEDDriverError::DMA_XMIT_ERR;
-}
-
-void PCA9685Driver::DMADriver::isr()
-{
-	HAL_DMA_IRQHandler(&dmah_);
-}
-
-void PCA9685Driver::DMADriver::halcb()
-{
-	advance_frame_buffer();
-	write_current_frame_to_chip();
 }
 
