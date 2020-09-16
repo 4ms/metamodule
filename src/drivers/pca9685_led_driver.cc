@@ -33,7 +33,7 @@ void PCA9685Driver::start_it_mode()
 }
 
 // Start transferring via DMA, given a frame buffer and the hardware configuration
-LEDDriverError PCA9685Driver::start_dma_mode(uint32_t *led_frame_buf)
+LEDDriverError PCA9685Driver::start_dma_mode()
 {
 	//Todo: check if start() has been called, and call it if not
 	start_it_mode();
@@ -167,3 +167,7 @@ uint8_t PCA9685Driver::get_chip_num(uint8_t rgb_led_id)
 	return (rgb_led_id / kNumRGBLEDsPerChip);
 }
 
+uint32_t *const PCA9685Driver::get_frame_buffer()
+{
+	return dma_.frame_buffer;
+}

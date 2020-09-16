@@ -23,23 +23,12 @@ private:
 
 // TimPwmChannel: output PWM on a pin.
 // Automatically initializes the given TIM peripheral if it hasn't been initialized yet
-// Usage: (default period of timer is 256)
-//      TimPwmChannel myPWM {TIM2, TimChannelNum::_2, GPIO_PIN_3, GPIOB, LL_GPIO_AF_1};
-//      // output starts immediately
-//      myPWM.set_output_level(128);
+// Usage:
+// 		Pin {GPIO::C, 2, LL_GPIO_AF_1};
+//      TimPwmChannel myPWM {TIM1, TimChannelNum::_3}; //default period is 256
+//      myPWM.set(128); // output starts immediately
+//      myPWM.stop_output();
 //
-// or:
-// TimPwmChannel myPWMOutput;
-// Pin myPin = {GPIO_PIN_3, GPIOB, PinMode::ALT, PinPull::NONE, PinSpeed::MEDIUM, LL_GPIO_AF_1};
-// myPWMOutput.set_pin(Pin);
-// myPWMOutput.set_TIM(TIM2);
-// myPWMOutput.set_channel(TimChannelNum::_2);
-// myPWMOutput.set_periph_period(256);
-// myPWMOutput.set_periph_prescaler(0);
-// myPWMOutput.set_periph_clock_division(0);
-// myPWMOutput.init_periph();
-// myPWMOutput.start_output();
-// myPWMOutput.stop_output();
 //Todo: add separate methods for setting pin, TIM, channel, period, prescaler, clock_div
 
 class TimPwmChannel {
@@ -85,7 +74,7 @@ public:
 		LL_TIM_EnableCounter(TIM_);
 	}
 
-	constexpr void set_output_level(uint32_t val) const
+	constexpr void set(uint32_t val) const
 	{
 		_set_timer_ccr(TIM_, channel_base_, val);
 	}
@@ -134,9 +123,10 @@ private:
 	TimChannelNum channel_base_;
 };
 
+//Dummy class for use when an LED element of an RGB LED is not connected
 class NoPwmChannel : public TimPwmChannel {
 public:
 	NoPwmChannel() {}
-	void set_output_level(uint32_t val) const {}
+	void set(uint32_t val) const {}
 };
 

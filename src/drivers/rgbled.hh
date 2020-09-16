@@ -4,7 +4,7 @@
 
 //MixedRgbLed: each color element can have a different
 //LED driver (e.g. PWM, DAC, external chip)
-//Todo: use concepts to ensure LedT all have .set_output_level();
+//Todo: use concepts to ensure LedT all have .set();
 template<typename RLedT, typename GLedT, typename BLedT>
 struct MixedRgbLed {
 
@@ -15,7 +15,10 @@ struct MixedRgbLed {
 	{
 	}
 
-	void set_background(Color const &col) { background_color_ = col; }
+	void set_background(Color const &col)
+	{
+		background_color_ = col;
+	}
 	void blend_background(Color const col)
 	{
 		background_color_ = background_color_.blend(col);
@@ -42,21 +45,21 @@ struct MixedRgbLed {
 
 	constexpr void set_color(Color const &col) const
 	{
-		r_.set_output_level(col.red());
-		g_.set_output_level(col.green());
-		b_.set_output_level(col.blue());
+		r_.set(col.red());
+		g_.set(col.green());
+		b_.set(col.blue());
 	}
 	void set_color(Color const &col, uint8_t const brightness) const
 	{
-		r_.set_output_level((col.red() * brightness) >> 8);
-		g_.set_output_level((col.green() * brightness) >> 8);
-		b_.set_output_level((col.blue() * brightness) >> 8);
+		r_.set((col.red() * brightness) >> 8);
+		g_.set((col.green() * brightness) >> 8);
+		b_.set((col.blue() * brightness) >> 8);
 	}
 	void set_color(Color const &col, float const brightness) const
 	{
-		r_.set_output_level(col.red() * brightness);
-		g_.set_output_level(col.green() * brightness);
-		b_.set_output_level(col.blue() * brightness);
+		r_.set(col.red() * brightness);
+		g_.set(col.green() * brightness);
+		b_.set(col.blue() * brightness);
 	}
 
 	//Todo: don't waste cycles updating if nothing's changed

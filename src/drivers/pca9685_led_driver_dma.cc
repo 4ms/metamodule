@@ -46,7 +46,7 @@ LEDDriverError PCA9685Driver::DMADriver::init_dma(const DMAConfig &dma_defs)
 	dmah_.Init.PeriphBurst = DMA_PBURST_SINGLE;
 
 	HAL_DMA_DeInit(&dmah_);
-	HAL_StatusTypeDef hal_err = HAL_DMA_Init(&dmah_);
+	auto hal_err = HAL_DMA_Init(&dmah_);
 	if (hal_err != HAL_OK)
 		return LEDDriverError::DMA_XMIT_ERR;
 
@@ -69,8 +69,7 @@ void PCA9685Driver::DMADriver::write_current_frame_to_chip()
 		REG_LED0,
 		REGISTER_ADDR_SIZE,
 		reinterpret_cast<uint8_t *>(frame_buffer_cur_pos),
-		PCA9685Driver::kNumLedsPerChip * sizeof(frame_buffer[0])
-	);
+		PCA9685Driver::kNumLedsPerChip * sizeof(frame_buffer[0]));
 
 	if (err != I2CPeriph::Error::I2C_NO_ERR)
 		driver_.led_error_ = LEDDriverError::DMA_XMIT_ERR;

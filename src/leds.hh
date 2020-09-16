@@ -1,5 +1,6 @@
 #pragma once
 #include "colors.hh"
+#include "frame_buffer_led.hh"
 #include "i2c.hh"
 #include "pca9685_led_driver.hh"
 #include "pin.hh"
@@ -9,14 +10,20 @@
 
 using PwmRgbLed = RgbLed<TimPwmChannel>;
 using NoPwmLed = NoPwmChannel;
+using DriverRgbLed = RgbLed<FrameBufferLED>;
 
 class LedCtl {
 public:
 	LedCtl(I2CPeriph &i2c)
 		: led_driver_{i2c}
+		, led_frame_buf{led_driver_.get_frame_buffer()}
 	{
 		led_driver_.start();
-		led_driver_.start_dma_mode(led_frame_buf);
+	}
+
+	void start_dma_mode()
+	{
+		led_driver_.start_dma_mode();
 	}
 
 	//Todo: only update if glowing or fading
@@ -35,16 +42,35 @@ public:
 
 private:
 	PCA9685Driver led_driver_;
-	uint32_t *led_frame_buf; //[kNumLedDriverChips * PCA9685Driver::kNumLedsPerChip];
+	uint32_t *const led_frame_buf;
+	constexpr int led(int chipnum, int lednum)
+	{
+		return (chipnum * PCA9685Driver::kNumLedsPerChip) + lednum;
+	}
+	enum { Chip0 = 0,
+		   Chip1 = 1 };
 
 public:
-	PwmRgbLed freq[2] = {
-		{{TIM8, TimChannelNum::_4},
-		 {TIM8, TimChannelNum::_3},
-		 {TIM2, TimChannelNum::_2}},
-		{NoLedElement,
-		 {TIM3, TimChannelNum::_1},
-		 {TIM8, TimChannelNum::_1N}}};
+	DriverRgbLed freq[2] = {
+		{
+			{&led_frame_buf[led(Chip1, 3)]},
+			{&led_frame_buf[led(Chip1, 2)]},
+			{&led_frame_buf[led(Chip1, 4)]},
+		},
+		{
+			{&led_frame_buf[led(Chip1, 11)]},
+			{&led_frame_buf[led(Chip1, 12)]},
+			{&led_frame_buf[led(Chip1, 13)]},
+		},
+	};
+
+	// PwmRgbLed freq[2] = {
+	// 	{{TIM8, TimChannelNum::_4},
+	// 	 {TIM8, TimChannelNum::_3},
+	// 	 {TIM2, TimChannelNum::_2}},
+	// 	{NoLedElement,
+	// 	 {TIM3, TimChannelNum::_1},
+	// 	 {TIM8, TimChannelNum::_1N}}};
 
 	PwmRgbLed res[2] = {
 		{{TIM1, TimChannelNum::_4},
