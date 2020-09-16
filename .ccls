@@ -42,6 +42,7 @@ arm-none-eabi
 -Isrc/util
 -Isrc/processors
 -Itests
+-Itests/fff
 -Itests/cpputest/include
 -Itests/stubs
 -Itests/stubs/stm32
