@@ -4,20 +4,25 @@
 #include "system.hh"
 #include "ui.hh"
 
+const uint32_t kSampleRate = 48000;
 System sys;
-SharedBus buses;
-Ui ui{SharedBus::i2c};
-Audio audio{ui.params};
 Debug debug;
+SharedBus shared_i2c;
+Controls controls;
+Params params{controls};
+LedCtl leds{SharedBus::i2c};
+Ui ui{params, leds};
+Audio audio{params, SharedBus::i2c, kSampleRate};
 
 void main()
 {
 	audio.start();
 
-	ui.controls.begin();
+	controls.begin();
 
 	while (1) {
-		ui.update(); //leds
+		ui.update();
+		leds.update();
 		__NOP();
 	}
 }

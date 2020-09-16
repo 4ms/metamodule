@@ -1,6 +1,5 @@
 #pragma once
 #include "audio.hh"
-#include "controls.hh"
 //#include "debug.h"
 #include "i2c.hh"
 #include "leds.hh"
@@ -8,13 +7,13 @@
 
 class Ui {
 public:
-	Controls controls;
-	Params params{controls};
-	LedCtl leds;
+	Params &params;
+	LedCtl &leds;
 
 public:
-	Ui(I2CPeriph &i2c)
-		: leds{i2c}
+	Ui(Params &p, LedCtl &l)
+		: params{p}
+		, leds{l}
 	{}
 
 	void update()
@@ -30,6 +29,5 @@ public:
 			if (i == params.mode[1])
 				leds.mode[i].add_background(Colors::blue);
 		}
-		leds.update();
 	}
 };
