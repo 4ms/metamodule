@@ -4,8 +4,6 @@ Audio::Audio(Params &p, ICodec &codec, uint32_t sample_rate)
 	: params{p}
 	, codec_{codec}
 	, sample_rate_{sample_rate}
-	, callback_tx_halfcomplete{*this}
-	, callback_tx_complete{*this}
 {
 	// Todo: get this working:
 	// for (auto &fx : FX_left)
@@ -63,26 +61,5 @@ void Audio::check_fx_change()
 		current_fx[RIGHT] = FX_right[params.mode[1]];
 		current_fx[RIGHT]->set_samplerate(sample_rate_);
 	}
-}
-
-Audio::TXCompleteCallback::TXCompleteCallback(Audio &a)
-	: audiostream(a)
-{
-	HALCallbackManager::registerHALCB(HALCallbackID::SAI_TxCplt, this);
-}
-
-void Audio::TXCompleteCallback::halcb()
-{
-	audiostream.process(audiostream.rx_buf_[1], audiostream.tx_buf_[1]);
-}
-
-Audio::TXHalfCompleteCallback::TXHalfCompleteCallback(Audio &a)
-	: audiostream(a)
-{
-	HALCallbackManager::registerHALCB(HALCallbackID::SAI_TxHalfCplt, this);
-}
-void Audio::TXHalfCompleteCallback::halcb()
-{
-	audiostream.process(audiostream.rx_buf_[0], audiostream.tx_buf_[0]);
 }
 

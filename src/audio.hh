@@ -68,16 +68,14 @@ private:
 
 	static inline AudioProcessor *current_fx[2];
 
-	struct TXCompleteCallback : HALCallbackManager::HALCBBase {
-		TXCompleteCallback(Audio &a);
-		virtual void halcb();
-		Audio &audiostream;
-	} callback_tx_complete;
+	HALCallback stream_complete{
+		HALCallbackID::SAI_TxCplt,
+		[this]() { process(tx_buf_[1], rx_buf_[1]); },
+	};
 
-	struct TXHalfCompleteCallback : HALCallbackManager::HALCBBase {
-		TXHalfCompleteCallback(Audio &a);
-		virtual void halcb();
-		Audio &audiostream;
-	} callback_tx_halfcomplete;
+	HALCallback stream_half_complete{
+		HALCallbackID::SAI_TxHalfCplt,
+		[this]() { process(tx_buf_[0], rx_buf_[1]); },
+	};
 };
 
