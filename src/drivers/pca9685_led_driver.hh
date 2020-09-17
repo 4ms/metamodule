@@ -44,7 +44,7 @@ private:
 	LEDDriverError write_register(uint8_t driverAddr, uint8_t registerAddr, uint8_t registerValue);
 	LEDDriverError reset_chip(uint8_t driverAddr);
 
-	class DMADriver : public InterruptManager::ISRBase, HALCallbackManager::HALCBBase {
+	class DMADriver : public HALCallbackManager::HALCBBase {
 	public:
 		DMADriver(PCA9685Driver &parent);
 		LEDDriverError start_dma(const DMAConfig &dma_defs);
@@ -53,7 +53,6 @@ private:
 		LEDDriverError init_dma(const DMAConfig &dma_defs);
 		void advance_frame_buffer();
 		void write_current_frame_to_chip();
-		virtual void isr();
 		virtual void halcb();
 
 		PCA9685Driver &driver_;

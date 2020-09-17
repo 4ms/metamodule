@@ -130,11 +130,11 @@ I2CPeriph::Error I2CPeriph::init(I2C_TypeDef *periph, const i2cTimingReg &timing
 
 void I2CPeriph::enable_IT(uint8_t pri1, uint8_t pri2)
 {
-	InterruptManager::registerISR(i2c_irq_num_, this);
+	InterruptManager::registerISR(i2c_irq_num_, [this]() { isr(); });
 	HAL_NVIC_SetPriority(i2c_irq_num_, pri1, pri2);
 	HAL_NVIC_EnableIRQ(i2c_irq_num_);
 
-	InterruptManager::registerISR(i2c_irq_num_, &i2c_error_handler);
+	InterruptManager::registerISR(i2c_irq_num_, [this]() { i2c_error_handler(); });
 	HAL_NVIC_SetPriority(i2c_err_irq_num_, pri1, pri2);
 	HAL_NVIC_EnableIRQ(i2c_err_irq_num_);
 }
@@ -150,7 +150,7 @@ void I2CPeriph::isr()
 	HAL_I2C_EV_IRQHandler(&hal_i2c_);
 }
 
-void I2CPeriph::I2CErrHandler::isr()
+void I2CPeriph::i2c_error_handler()
 {
 	HAL_I2C_ER_IRQHandler(&hal_i2c_);
 }

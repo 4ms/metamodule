@@ -34,7 +34,7 @@ Controls::Controls()
 	AdcPeriph<ADC_1>::start_adc();
 
 	//Todo: register a timer ISR instead: use timekeeper
-	InterruptManager::registerISR(DMA2_Stream4_IRQn, this);
+	InterruptManager::registerISR(DMA2_Stream4_IRQn, [this]() { isr(); });
 }
 
 //every 11.6us (86.2kHz), ~400ns

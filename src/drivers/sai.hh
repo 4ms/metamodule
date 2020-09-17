@@ -4,7 +4,7 @@
 #include "pin.hh"
 #include <cstdint>
 
-class SaiPeriph : InterruptManager::ISRBase {
+class SaiPeriph {
 public:
 	enum Error {
 		SAI_NO_ERR,
@@ -44,7 +44,7 @@ private:
 	uint8_t *rx_buf_ptr_;
 	uint32_t block_size_;
 
-	virtual void isr();
+	void isr();
 	void _init_pins();
 	void _config_rx_sai();
 	void _config_tx_sai();

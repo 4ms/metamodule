@@ -196,7 +196,7 @@ void SaiPeriph::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint3
 
 void SaiPeriph::start()
 {
-	InterruptManager::registerISR(tx_irqn, this);
+	InterruptManager::registerISR(tx_irqn, [this]() { isr(); });
 	HAL_NVIC_EnableIRQ(tx_irqn);
 	HAL_SAI_Receive_DMA(&hsai_rx, rx_buf_ptr_, block_size_);
 	HAL_SAI_Transmit_DMA(&hsai_tx, tx_buf_ptr_, block_size_);

@@ -4,7 +4,7 @@
 #include "pin.hh"
 #include <stdint.h>
 
-class I2CPeriph : private InterruptManager::ISRBase {
+class I2CPeriph {
 public:
 	enum Error {
 		I2C_NO_ERR,
@@ -23,15 +23,6 @@ public:
 		{
 			return ((PRESC) << 24) | ((SCLDEL_SDADEL) << 16) | ((SCLH) << 8) | ((SCLL) << 0);
 		}
-	};
-
-	struct I2CErrHandler : public InterruptManager::ISRBase {
-		I2CErrHandler(I2C_HandleTypeDef &i2c)
-			: hal_i2c_(i2c)
-		{
-		}
-		virtual void isr();
-		I2C_HandleTypeDef &hal_i2c_;
 	};
 
 	I2CPeriph() = default;
@@ -65,9 +56,9 @@ public:
 private:
 	bool already_init = false;
 	I2C_HandleTypeDef hal_i2c_;
-	I2CErrHandler i2c_error_handler{hal_i2c_};
 	IRQn_Type i2c_irq_num_;
 	IRQn_Type i2c_err_irq_num_;
-	virtual void isr();
+	void i2c_error_handler();
+	void isr();
 };
 #endif
