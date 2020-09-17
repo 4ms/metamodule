@@ -15,15 +15,12 @@ public:
 	virtual float update(float input)
 	{
 		float output = 0;
-
-		for (int i = 0; (i < count); i = (i + 1)) {
-			float fTemp0 = float(input);
-			fVec0[0] = fTemp0;
-			fRec0[0] = ((fTemp0 + (0.995000005f * fRec0[1])) - fVec0[1]);
-			output = float(fRec0[0]);
-			fVec0[1] = fVec0[0];
-			fRec0[1] = fRec0[0];
-		}
+		float fTemp0 = float(input);
+		fVec0[0] = fTemp0;
+		fRec0[0] = ((fTemp0 + (0.995000005f * fRec0[1])) - fVec0[1]);
+		output = float(fRec0[0]);
+		fVec0[1] = fVec0[0];
+		fRec0[1] = fRec0[0];
 
 		return (output);
 	}
