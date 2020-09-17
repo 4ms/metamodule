@@ -44,7 +44,9 @@ private:
 	LEDDriverError write_register(uint8_t driverAddr, uint8_t registerAddr, uint8_t registerValue);
 	LEDDriverError reset_chip(uint8_t driverAddr);
 
-	class DMADriver : public HALCallbackManager::HALCBBase {
+	class DMADriver {
+		friend class PCA9685Driver;
+
 	public:
 		DMADriver(PCA9685Driver &parent);
 		LEDDriverError start_dma(const DMAConfig &dma_defs);
@@ -53,7 +55,6 @@ private:
 		LEDDriverError init_dma(const DMAConfig &dma_defs);
 		void advance_frame_buffer();
 		void write_current_frame_to_chip();
-		virtual void halcb();
 
 		PCA9685Driver &driver_;
 		DMA_HandleTypeDef dmah_;
@@ -61,7 +62,6 @@ private:
 		uint8_t cur_chip_num_ = 0;
 		uint32_t *frame_buffer_cur_pos;
 		uint32_t frame_buffer[kNumLedDriverChips * PCA9685Driver::kNumLedsPerChip];
-		friend class PCA9685Driver;
 	};
 	friend class PCA9685Driver::DMADriver;
 	DMADriver dma_;
