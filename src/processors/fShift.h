@@ -1,5 +1,6 @@
 #pragma once
 
+#include "math.hh"
 #include "tools.h"
 
 class FreqShift : public AudioProcessor {
@@ -58,7 +59,7 @@ public:
 	virtual void set_param(int param_id, float val)
 	{
 		if (param_id == 0) {
-			shiftAmount = val;
+			shiftAmount = map_value(val, 0.0f, 1.0f, -1000.0f, 1000.0f);
 		}
 		if (param_id == 1) {
 			mix = val;
