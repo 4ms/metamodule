@@ -54,7 +54,6 @@ public:
 
 private:
 	void check_fx_change();
-	void register_callback(void callbackfunc(AudioStreamBlock &in, AudioStreamBlock &out));
 
 	AudioStreamBlock tx_buf_[2];
 	AudioStreamBlock rx_buf_[2];
@@ -70,12 +69,16 @@ private:
 
 	HALCallback stream_complete{
 		HALCallbackID::SAI_TxCplt,
-		[this]() { process(tx_buf_[1], rx_buf_[1]); },
+		[this]() {
+			process(tx_buf_[1], rx_buf_[1]);
+		},
 	};
 
 	HALCallback stream_half_complete{
 		HALCallbackID::SAI_TxHalfCplt,
-		[this]() { process(tx_buf_[0], rx_buf_[1]); },
+		[this]() {
+			process(tx_buf_[0], rx_buf_[1]);
+		},
 	};
 };
 

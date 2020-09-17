@@ -1,4 +1,5 @@
 #include "sai.hh"
+#include "hal_callback.hh"
 #include "stm32xx.h"
 #include "system.hh"
 
@@ -196,7 +197,11 @@ void SaiPeriph::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint3
 
 void SaiPeriph::start()
 {
-	tx_isr.registerISR(tx_irqn, [this]() { isr(); });
+	//InterruptManager::registerISR(tx_irqn, [this]() { isr(); });
+	InterruptManager::registerISR(tx_irqn, [hdmaptr = &hdma_tx]() {
+		HAL_DMA_IRQHandler(hdmaptr);
+		//Todo: optimize HAL DMA extra stuff by using SaiPeriph::handle_dma_isr() instead
+	});
 	HAL_NVIC_EnableIRQ(tx_irqn);
 	HAL_SAI_Receive_DMA(&hsai_rx, rx_buf_ptr_, block_size_);
 	HAL_SAI_Transmit_DMA(&hsai_tx, tx_buf_ptr_, block_size_);
@@ -208,12 +213,22 @@ void SaiPeriph::stop()
 	HAL_NVIC_DisableIRQ(rx_irqn);
 }
 
-void SaiPeriph::isr()
+void SaiPeriph::handle_dma_isr()
 {
-	//Todo: optimize out the unnecessary check HAL_DMA_IRQHandler() makes
-	//by here checking the DMA->ISR() reg if we're HT or TC, and then calling one of two callbacks set by Audio class.
-	//One callback if it's HalfTransfer, the other if it's TransferComplete.
-	//Audio class will need to call something like set_callbacks(ht_cb(), tc_cb())
-	HAL_DMA_IRQHandler(&hdma_tx);
+	// DMA_Base_Registers *regs = (DMA_Base_Registers *)hdma_tx->StreamBaseAddress;
+	// uint32_t tmpisr = regs->ISR;
+
+	// // Transfer Complete (TC) -> Point to 2nd half of buffers
+	// if ((tmpisr & __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_tx)) && __HAL_DMA_GET_IT_SOURCE(&hdma_tx, DMA_IT_TC))
+	// {
+	// 	__HAL_DMA_CLEAR_FLAG(&hdma_tx, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_tx));
+	// 	HALCallbackManager::callHALCB(HALCallbackID::SAI_TxCplt);
+	// }
+	// // Half Transfer complete (HT) -> Point to 1st half of buffers
+	// else if ((tmpisr & __HAL_DMA_GET_HT_FLAG_INDEX(&hdma_tx)) && __HAL_DMA_GET_IT_SOURCE(&hdma_tx, DMA_IT_HT))
+	// {
+	// 	__HAL_DMA_CLEAR_FLAG(&hdma_tx, __HAL_DMA_GET_HT_FLAG_INDEX(&hdma_tx));
+	// 	HALCallbackManager::callHALCB(HALCallbackID::SAI_TxHalfCplt);
+	// }
 }
 

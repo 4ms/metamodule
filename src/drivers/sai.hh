@@ -44,8 +44,7 @@ private:
 	uint8_t *rx_buf_ptr_;
 	uint32_t block_size_;
 
-	Interrupt tx_isr; //{saidef_.dma_init_tx.IRQn, [this]() { isr(); }};
-	void isr();
+	void handle_dma_isr();
 	void _init_pins();
 	void _config_rx_sai();
 	void _config_tx_sai();
