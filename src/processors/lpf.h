@@ -1,7 +1,7 @@
 #pragma once
 
 #include "audio_processor.hh"
-#include "tools.h"
+#include "tools/cubicDist.h"
 #include <cmath>
 
 using namespace MathTools;
