@@ -1,5 +1,4 @@
-#ifndef _SRC_DRIVERS_INTERRUPT
-#define _SRC_DRIVERS_INTERRUPT
+#pragma once
 
 #ifdef STM32F7
 	#include "stm32f7xx.h"
@@ -15,7 +14,7 @@ public:
 	using ISRType = std::function<void(void)>;
 
 	Interrupt() {}
-	void registerISR(IRQType irqnum, ISRType func)
+	static void registerISR(IRQType irqnum, ISRType func)
 	{
 		ISRs[irqnum] = func;
 	}
@@ -33,4 +32,3 @@ private:
 };
 
 using InterruptManager = Interrupt;
-#endif

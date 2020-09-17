@@ -14,7 +14,7 @@ enum class HALCallbackID {
 
 	MAX,
 };
-const int kMaxHALCallbackIDs = static_cast<uint8_t>(HALCallbackID::MAX);
+const int kMaxHALCallbackIDs = static_cast<uint32_t>(HALCallbackID::MAX);
 
 class HALCallbackManager {
 public:
