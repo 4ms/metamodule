@@ -196,7 +196,7 @@ void SaiPeriph::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint3
 
 void SaiPeriph::start()
 {
-	InterruptManager::registerISR(tx_irqn, [this]() { isr(); });
+	tx_isr.registerISR(tx_irqn, [this]() { isr(); });
 	HAL_NVIC_EnableIRQ(tx_irqn);
 	HAL_SAI_Receive_DMA(&hsai_rx, rx_buf_ptr_, block_size_);
 	HAL_SAI_Transmit_DMA(&hsai_tx, tx_buf_ptr_, block_size_);
@@ -210,8 +210,10 @@ void SaiPeriph::stop()
 
 void SaiPeriph::isr()
 {
-	//Todo: optimize by calling a callback set by Audio class
-	//passing tx_buf_ptr_ or &tx_buf_ptr_[block_size_] depending on ISR register indicating HT or TC
+	//Todo: optimize out the unnecessary check HAL_DMA_IRQHandler() makes
+	//by here checking the DMA->ISR() reg if we're HT or TC, and then calling one of two callbacks set by Audio class.
+	//One callback if it's HalfTransfer, the other if it's TransferComplete.
+	//Audio class will need to call something like set_callbacks(ht_cb(), tc_cb())
 	HAL_DMA_IRQHandler(&hdma_tx);
 }
 

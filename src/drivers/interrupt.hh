@@ -10,27 +10,27 @@ using IRQType = uint32_t;
 #endif
 #include <functional>
 
-class InterruptManager {
+class Interrupt {
 public:
-	// struct ISRBase {
-	// 	virtual void isr() = 0;
-	// };
-	//using ISRType = void (*)(void); //static funcs
-	//using ISRType = ISRBase *; //virtual funcs
-	using ISRType = std::function<void(void)>; //function object
-	static inline void registerISR(IRQType irqnum, ISRType isr)
+	using ISRType = std::function<void(void)>;
+
+	Interrupt() {}
+	void registerISR(IRQType irqnum, ISRType func)
 	{
-		ISRs[irqnum] = isr;
+		ISRs[irqnum] = func;
+	}
+	Interrupt(IRQType irqnum, ISRType func)
+	{
+		registerISR(irqnum, func);
 	}
 	static inline void callISR(IRQType irqnum)
 	{
-		//ISRs[irqnum]();  //static funcs
-		//ISRs[irqnum]->isr(); //virt funcs
-		ISRs[irqnum](); //function object
+		ISRs[irqnum]();
 	}
 
 private:
 	static inline ISRType ISRs[128];
 };
 
+using InterruptManager = Interrupt;
 #endif

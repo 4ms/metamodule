@@ -9,9 +9,12 @@ const uint32_t kSampleRate = 48000;
 
 System sys;
 Debug debug;
-SharedBus shared_i2c;
+
+//Todo: some class for grouping codec, bus, led driver chips, etc
 //ExternalChips exthw;
 //exthw.codec
+//exthw.shared_i2c
+SharedBus shared_i2c;
 CodecWM8731 codec{SharedBus::i2c};
 
 Controls controls;

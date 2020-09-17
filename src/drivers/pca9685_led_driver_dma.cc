@@ -16,7 +16,7 @@ LEDDriverError PCA9685Driver::DMADriver::start_dma(const DMAConfig &dma_defs)
 	//Link I2C and DMA
 	driver_.i2cp_.link_DMA_TX(&dmah_);
 
-	InterruptManager::registerISR(dma_defs.IRQn, [dmah_ptr = &dmah_]() { HAL_DMA_IRQHandler(dmah_ptr); });
+	dma_task.registerISR(dma_defs.IRQn, [dmah_ptr = &dmah_]() { HAL_DMA_IRQHandler(dmah_ptr); });
 	HAL_NVIC_SetPriority(dma_defs.IRQn, dma_defs.pri, dma_defs.subpri);
 	HAL_NVIC_EnableIRQ(dma_defs.IRQn);
 

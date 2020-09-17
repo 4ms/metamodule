@@ -73,7 +73,7 @@ CFLAGS = -g2 -fno-common \
 	-lstdc++ \
 
 CXXFLAGS=$(CFLAGS) \
-	-std=c++17 \
+	-std=c++2a \
 	-fno-rtti \
 	-fno-exceptions \
 	-ffreestanding \

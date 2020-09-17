@@ -58,7 +58,9 @@ private:
 	I2C_HandleTypeDef hal_i2c_;
 	IRQn_Type i2c_irq_num_;
 	IRQn_Type i2c_err_irq_num_;
+	Interrupt event_isr;
+	Interrupt error_isr;
 	void i2c_error_handler();
-	void isr();
+	void i2c_event_handler();
 };
 #endif

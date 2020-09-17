@@ -57,6 +57,7 @@ private:
 
 		PCA9685Driver &driver_;
 		DMA_HandleTypeDef dmah_;
+		Interrupt dma_task;
 		uint8_t cur_chip_num_ = 0;
 		uint32_t *frame_buffer_cur_pos;
 		uint32_t frame_buffer[kNumLedDriverChips * PCA9685Driver::kNumLedsPerChip];

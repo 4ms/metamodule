@@ -25,9 +25,10 @@ struct Controls {
 	static inline DebouncedSwitch mode_button[2] = {{GPIO::C, 14}, {GPIO::C, 15}};
 
 	Controls();
-	static void read();
+	void read();
 	void begin();
 
 private:
+	Interrupt read_task;
 	void isr();
 };
