@@ -1,12 +1,10 @@
 #pragma once
 #include "analog_in.hh"
 #include "debounced_switch.hh"
-#include "interrupt.hh"
 #include "pin.hh"
 #include "rotary.hh"
-#include "stm32f7xx.h"
-#include "stm32f7xx_ll_adc.h"
-#include "stm32f7xx_ll_gpio.h"
+#include "stm32xx.h"
+#include "timekeeper.hh"
 #include <array>
 
 using JackSense = DebouncedSwitch;
@@ -29,6 +27,5 @@ struct Controls {
 	void begin();
 
 private:
-	Interrupt read_task;
-	void isr();
+	Timekeeper read_controls_task;
 };

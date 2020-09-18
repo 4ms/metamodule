@@ -18,6 +18,7 @@ void Controls::read()
 
 void Controls::begin()
 {
+	//?? Todo: is this needed?
 }
 
 Controls::Controls()
@@ -33,21 +34,15 @@ Controls::Controls()
 	AdcPeriph<ADC_1>::init_dma(kADCDMAConfig);
 	AdcPeriph<ADC_1>::start_adc();
 
-	//Todo: register a timer ISR instead: use timekeeper
-	//Timerkeeper read_task {TIM4, 2000};
-	//read_task.start(); --> init timer and call registerISR()
-	read_task.registerISR(DMA2_Stream4_IRQn, [this]() { isr(); });
+	const TimekeeperConfig kControlReadTaskConfig = {
+		.TIMx = TIM6,
+		.period_ns = 11000,
+		.priority1 = 2,
+		.priority2 = 3,
+	};
+
+	read_controls_task.init(
+		kControlReadTaskConfig,
+		[this]() { read(); });
 }
 
-//every 11.6us (86.2kHz), ~400ns
-void Controls::isr()
-{
-	if (LL_DMA_IsActiveFlag_TC4(DMA2)) {
-		LL_DMA_ClearFlag_TC4(DMA2);
-		read();
-	}
-	if (LL_DMA_IsActiveFlag_TE4(DMA2)) {
-		LL_DMA_ClearFlag_TE4(DMA2);
-		//Todo: Handle ADC DMA error
-	}
-}
