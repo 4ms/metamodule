@@ -2,7 +2,7 @@
 #include "stm32f7xx_ll_bus.h"
 #include <stm32f7xx.h>
 
-//Todo: refactor for LL intead of HAL
+// Todo: refactor for LL intead of HAL
 class System {
 
 	void SetVectorTable(uint32_t reset_address)
@@ -36,7 +36,9 @@ public:
 		HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
 		HAL_PWREx_EnableOverDrive();
-		RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+		RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK |
+									  RCC_CLOCKTYPE_SYSCLK |
+									  RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 		RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 		RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 		RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
@@ -44,9 +46,10 @@ public:
 
 		HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7);
 
-		PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2C2 | RCC_PERIPHCLK_I2S;
+		PeriphClkInitStruct.PeriphClockSelection =
+			RCC_PERIPHCLK_I2C2 | RCC_PERIPHCLK_I2S;
 		PeriphClkInitStruct.PLLI2S.PLLI2SN = 96;
-		PeriphClkInitStruct.PLLI2S.PLLI2SR = 4; //2 for 96k
+		PeriphClkInitStruct.PLLI2S.PLLI2SR = 4; // 2 for 96k
 		PeriphClkInitStruct.PLLI2S.PLLI2SQ = 2;
 		PeriphClkInitStruct.PLLI2SDivQ = 1;
 
@@ -59,12 +62,12 @@ public:
 		HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 		HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
-		//Code execution from flash over ITCM bus (using ART and Prefetch)
+		// Code execution from flash over ITCM bus (using ART and Prefetch)
 		// SCB_DisableICache();
 		// SCB_InvalidateDCache();
 		// SCB_EnableDCache();
 
-		//Code execution from flash over AXIM bus using I-Cache:
+		// Code execution from flash over AXIM bus using I-Cache:
 		SCB_EnableICache();
 		SCB_InvalidateDCache();
 		SCB_EnableDCache();
@@ -77,6 +80,11 @@ public:
 		HAL_NVIC_SetPriority(DebugMonitor_IRQn, 0, 0);
 		HAL_NVIC_SetPriority(PendSV_IRQn, 0, 0);
 		HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+	}
+
+	static uint32_t encode_nvic_priority(uint32_t pri1, uint32_t pri2)
+	{
+		return NVIC_EncodePriority(NVIC_GetPriorityGrouping(), pri1, pri2);
 	}
 
 	static constexpr void enable_gpio_rcc(GPIO_TypeDef *port)
@@ -445,16 +453,17 @@ public:
 
 	static uint32_t tim_periph_max_freq(TIM_TypeDef *TIM)
 	{
-		//APB2 --> divider = 1;
-		//APB1 --> divider = 2;
+		// APB2 --> divider = 1;
+		// APB1 --> divider = 2;
 		uint32_t divider;
 		uint32_t TIMx_BASE_ADDR = reinterpret_cast<uint32_t>(TIM);
-		if (TIMx_BASE_ADDR >= APB1PERIPH_BASE && TIMx_BASE_ADDR < APB2PERIPH_BASE)
+		if (TIMx_BASE_ADDR >= APB1PERIPH_BASE &&
+			TIMx_BASE_ADDR < APB2PERIPH_BASE)
 			divider = 2;
 		else if (TIMx_BASE_ADDR >= APB2PERIPH_BASE)
 			divider = 1;
 		else
-			divider = 1; //unknown, error?
+			divider = 1; // unknown, error?
 		return HAL_RCC_GetHCLKFreq() / divider;
 	}
 };

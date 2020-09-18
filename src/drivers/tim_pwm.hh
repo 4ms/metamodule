@@ -1,6 +1,7 @@
 #pragma once
 #include "pin.hh"
 #include "stm32f7xx_ll_tim.h"
+#include "tim.hh"
 
 enum class TimChannelNum {
 	_1 = LL_TIM_CHANNEL_CH1,
@@ -14,22 +15,15 @@ enum class TimChannelNum {
 	_6 = LL_TIM_CHANNEL_CH6
 };
 
-class TimPwmPeriph {
-	friend class TimPwmChannel;
-
-private:
-	static void init_periph_once(TIM_TypeDef *TIM, uint32_t period = 256, uint16_t prescaler = 0, uint32_t clock_division = 0);
-};
-
 // TimPwmChannel: output PWM on a pin.
-// Automatically initializes the given TIM peripheral if it hasn't been initialized yet
-// Usage:
-// 		Pin {GPIO::C, 2, LL_GPIO_AF_1};
+// Automatically initializes the given TIM peripheral if it hasn't been
+// initialized yet
+// Usage: 		Pin {GPIO::C, 2, LL_GPIO_AF_1};
 //      TimPwmChannel myPWM {TIM1, TimChannelNum::_3}; //default period is 256
 //      myPWM.set(128); // output starts immediately
 //      myPWM.stop_output();
 //
-//Todo: add separate methods for setting pin, TIM, channel, period, prescaler, clock_div
+// Todo: add separate methods for setting pin, TIM, channel, period, prescaler, clock_div
 
 class TimPwmChannel {
 public:
@@ -41,7 +35,10 @@ public:
 		: TIM_(TIM)
 		, channel_(channel)
 	{
-		TimPwmPeriph::init_periph_once(TIM, period, prescaler, clock_division);
+		TIMPeriph::init_periph(TIM, period, prescaler, clock_division);
+
+		if (IS_TIM_BREAK_INSTANCE(TIM))
+			LL_TIM_EnableAllOutputs(TIM);
 
 		bool inverted_channel;
 		if (channel_ == TimChannelNum::_1N) {
@@ -90,8 +87,7 @@ public:
 protected:
 	TimPwmChannel()
 		: TIM_(nullptr)
-	{
-	}
+	{}
 
 private:
 	constexpr void _set_timer_ccr(TIM_TypeDef *TIMx, TimChannelNum channel, uint32_t val) const
@@ -123,7 +119,7 @@ private:
 	TimChannelNum channel_base_;
 };
 
-//Dummy class for use when an LED element of an RGB LED is not connected
+// Dummy class for use when an LED element of an RGB LED is not connected
 class NoPwmChannel : public TimPwmChannel {
 public:
 	NoPwmChannel() {}
