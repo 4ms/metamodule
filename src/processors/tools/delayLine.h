@@ -6,10 +6,15 @@ class DelayLine {
 public:
 	float delayTimeMS = 500;
 
+	float output = 0;
+
 	DelayLine(float maxTimeMS)
 	{
 		maxSamples = ((maxTimeMS / 1000.0f) * sampleRate) + 1;
 		delayBuffer = new float[maxSamples];
+		for (int i = 0; i < maxSamples; i++) {
+			delayBuffer[i] = 0;
+		}
 	}
 
 	virtual void set_samplerate(float sr)
@@ -17,7 +22,7 @@ public:
 		sampleRate = sr;
 	}
 
-	float update(float input)
+	void update(float input)
 	{
 		delayBuffer[writeIndex] = input;
 		readIndex = writeIndex - ((delayTimeMS / 1000.0f) * sampleRate);
@@ -26,10 +31,9 @@ public:
 		read1 = readIndex;
 		read2 = (read1 + 1) % maxSamples;
 		float readFraction = readIndex - read1;
-		output = interpolate(read1, read2, readFraction);
+		output = interpolate(delayBuffer[read1], delayBuffer[read2], readFraction);
 		writeIndex++;
 		writeIndex %= maxSamples;
-		return (output);
 	}
 
 private:
@@ -37,9 +41,7 @@ private:
 	float *delayBuffer;
 	float sampleRate = 44100;
 
-	float output = 0;
-
-	unsigned long writeIndex;
+	unsigned long writeIndex = 0;
 	float readIndex;
 	unsigned long read1;
 	unsigned long read2;
