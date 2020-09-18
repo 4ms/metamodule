@@ -12,11 +12,11 @@ using namespace MathTools;
 
 class Phaser : public AudioProcessor {
 public:
-	float feedback = 0.98f;
+	float feedback = 0.72f;
 
 	virtual float update(float input)
 	{
-		phaccu += 0.2f / sampleRate;
+		phaccu += 0.4f / sampleRate;
 		if (phaccu > 1)
 			phaccu -= 1.0f;
 		sinLFO = sin(2 * M_PI * phaccu);
@@ -35,7 +35,7 @@ public:
 	Phaser()
 	{
 		for (int i = 0; i < 6; i++)
-			delay[i] = new DelayLine(100);
+			delay[i] = new DelayLine(10);
 	}
 
 	virtual void set_param(int param_id, float val)
