@@ -230,5 +230,14 @@ void SaiPeriph::handle_dma_isr()
 	// 	__HAL_DMA_CLEAR_FLAG(&hdma_tx, __HAL_DMA_GET_HT_FLAG_INDEX(&hdma_tx));
 	// 	HALCallbackManager::callHALCB(HALCallbackID::SAI_TxHalfCplt);
 	// }
+
+	//if (LL_DMA_IsActiveFlag_TC4(DMA2)) {
+	//	LL_DMA_ClearFlag_TC4(DMA2);
+	//	//do_stuff();
+	//}
+	//if (LL_DMA_IsActiveFlag_TE4(DMA2)) {
+	//	LL_DMA_ClearFlag_TE4(DMA2);
+	//	//Handle DMA error
+	//}
 }
 
