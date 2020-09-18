@@ -368,5 +368,94 @@ public:
 		else
 			return 0;
 	}
+	static IRQn_Type tim_periph_to_IRQn(TIM_TypeDef *TIM)
+	{
+		if (TIM == nullptr) return (IRQn_Type)(0);
+#ifdef TIM1
+		else if (TIM == TIM1)
+			return TIM1_UP_TIM10_IRQn;
+#endif
+#ifdef TIM2
+		else if (TIM == TIM2)
+			return TIM2_IRQn;
+#endif
+#ifdef TIM3
+		else if (TIM == TIM3)
+			return TIM3_IRQn;
+#endif
+#ifdef TIM4
+		else if (TIM == TIM4)
+			return TIM4_IRQn;
+#endif
+#ifdef TIM5
+		else if (TIM == TIM5)
+			return TIM5_IRQn;
+#endif
+#ifdef TIM6
+		else if (TIM == TIM6)
+			return TIM6_DAC_IRQn;
+#endif
+#ifdef TIM7
+		else if (TIM == TIM7)
+			return TIM7_IRQn;
+#endif
+#ifdef TIM8
+		else if (TIM == TIM8)
+			return TIM8_UP_TIM13_IRQn;
+#endif
+#ifdef TIM9
+		else if (TIM == TIM9)
+			return TIM1_BRK_TIM9_IRQn;
+#endif
+#ifdef TIM10
+		else if (TIM == TIM10)
+			return TIM1_UP_TIM10_IRQn;
+#endif
+#ifdef TIM11
+		else if (TIM == TIM11)
+			return TIM1_TRG_COM_TIM11_IRQn;
+#endif
+#ifdef TIM12
+		else if (TIM == TIM12)
+			return TIM8_BRK_TIM12_IRQn;
+#endif
+#ifdef TIM13
+		else if (TIM == TIM13)
+			return TIM8_UP_TIM13_IRQn;
+#endif
+#ifdef TIM14
+		else if (TIM == TIM14)
+			return TIM8_TRG_COM_TIM14_IRQn;
+#endif
+#ifdef TIM15
+		else if (TIM == TIM15)
+			return TIM15_IRQn;
+#endif
+#ifdef TIM16
+		else if (TIM == TIM16)
+			return TIM16_IRQn;
+#endif
+#ifdef TIM17
+		else if (TIM == TIM17)
+			return TIM17_IRQn;
+#endif
+		else
+			return (IRQn_Type)(0);
+	}
+
+	static uint32_t tim_periph_max_freq(TIM_TypeDef *TIM)
+	{
+		//APB2 --> divider = 1;
+		//APB1 --> divider = 2;
+		uint32_t divider;
+		uint32_t TIMx_BASE_ADDR = reinterpret_cast<uint32_t>(TIM);
+		if (TIMx_BASE_ADDR >= APB1PERIPH_BASE && TIMx_BASE_ADDR < APB2PERIPH_BASE)
+			divider = 2;
+		else if (TIMx_BASE_ADDR >= APB2PERIPH_BASE)
+			divider = 1;
+		else
+			divider = 1; //unknown, error?
+		return HAL_RCC_GetHCLKFreq() / divider;
+	}
 };
 
