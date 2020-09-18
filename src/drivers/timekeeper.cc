@@ -1,6 +1,7 @@
 #include "timekeeper.hh"
 #include "interrupt.hh"
 #include "stm32xx.h"
+#include "tim.hh"
 
 Timekeeper::Timekeeper()
 	: is_running(false)
@@ -66,54 +67,48 @@ void Timekeeper::set_timing(uint32_t period_ns, uint32_t priority1, uint32_t pri
 		clock_division = 255;
 	}
 
-	HAL_NVIC_SetPriority(irqn, priority1, priority2);
-	HAL_NVIC_EnableIRQ(irqn);
+	auto pri = System::encode_nvic_priority(priority1, priority2);
+	NVIC_SetPriority(irqn, pri);
+	NVIC_EnableIRQ(irqn);
 
-	TIM_HandleTypeDef tim;
-	tim.Instance = timx;
-	tim.Init.Period = period_clocks;
-	tim.Init.Prescaler = prescaler;
-	tim.Init.ClockDivision = clock_division;
-	tim.Init.CounterMode = TIM_COUNTERMODE_UP;
-	tim.Init.RepetitionCounter = 0;
-	tim.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	TIMPeriph::init_periph(timx, period_clocks, prescaler, clock_division);
 
-	HAL_TIM_Base_Init(&tim);
-	HAL_TIM_Base_Start_IT(&tim);
+	LL_TIM_EnableIT_UPDATE(timx);
+	LL_TIM_EnableCounter(timx);
 }
 
 void Timekeeper::register_task(std::function<void(void)> func)
 {
 	task_func = func;
-	InterruptManager::registerISR(
-		irqn,
-		[this]() {
-			if (tim_update_IT_is_set()) {
-				if (tim_update_IT_is_source()) {
-					if (is_running && task_func) //Todo: what is the cost of std::function operator bool
-						task_func();
-				}
-				tim_update_IT_clear();
+	InterruptManager::registerISR(irqn, [this]() {
+		if (tim_update_IT_is_set()) {
+			if (tim_update_IT_is_source()) {
+				// Todo: what is the cost of std::function operator bool
+				if (is_running && task_func)
+					task_func();
 			}
-		});
+			tim_update_IT_clear();
+		}
+	});
 }
 
 bool Timekeeper::tim_update_IT_is_set() const
 {
-	return (timx->SR & TIM_IT_UPDATE) == TIM_IT_UPDATE;
+	return LL_TIM_IsActiveFlag_UPDATE(timx);
 }
 bool Timekeeper::tim_update_IT_is_source() const
 {
-	return (timx->DIER & TIM_IT_UPDATE) == TIM_IT_UPDATE;
+	return LL_TIM_IsEnabledIT_UPDATE(timx);
 }
 void Timekeeper::tim_update_IT_clear() const
 {
-	timx->SR &= ~(TIM_IT_UPDATE);
+	LL_TIM_ClearFlag_UPDATE(timx);
 }
 
-//Todo: allows us to double-up on the IRQs that have two TIM UP (TIM1/TIM10, and TIM8/TIM13 share an ISR)
-//Maybe just need a special-case in register_task:
-//if (IRQn == TIM1_UP_TIM10_IRQn) {
+// Todo: allows doubling-up on the IRQs that have two TIM UP on a single IRQ.
+// e.g.: TIM1/TIM10, and TIM8/TIM13 share an ISR
+// Maybe just need a special-case in register_task:
+// if (IRQn == TIM1_UP_TIM10_IRQn) {
 // ...inside lamba:
 // if (tim_update_IT_is_set(TIM1)) {...
 // else if (tim_update_IT_is_set(TIM10)) {...
