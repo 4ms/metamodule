@@ -3,15 +3,16 @@ Standard : "c++17"
 UseTab : "Always"
 TabWidth : 4
 IndentWidth : 4
-ColumnLimit : 0
+ColumnLimit : 100
 AccessModifierOffset : -4
 AlignAfterOpenBracket: "Align"
-AllowShortFunctionsOnASingleLine: "Inline"
-AllowShortIfStatementsOnASingleLine : "true"
+AllowShortFunctionsOnASingleLine: "All"
+AllowShortIfStatementsOnASingleLine : "Never"
 AllowShortBlocksOnASingleLine : "true"
 AlwaysBreakTemplateDeclarations : "true"
 AllowAllArgumentsOnNextLine : "true"
 AlignAfterOpenBracket : "Align"
+BinPackParameters: false
 BreakConstructorInitializers : "BeforeComma"
 BreakInheritanceList : "AfterColon"
 BreakBeforeBraces: "Custom"
@@ -31,6 +32,7 @@ BraceWrapping:
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
+ConstructorInitializerIndentWidth: 4
 IndentCaseLabels : "true"
 IndentPPDirectives : "BeforeHash"
 SpaceBeforeInheritanceColon : "true"
