@@ -4,7 +4,7 @@
 
 class DelayLine {
 public:
-	float delayTimeMS = 500;
+	float delayTimeMS = 0;
 
 	float output = 0;
 
