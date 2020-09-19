@@ -26,7 +26,7 @@ arm-none-eabi
 -D__FPU_PRESENT=1
 -DUSE_HAL_DRIVER
 -DUSE_FULL_LL_DRIVER
--DSTM32F765xx
+-DSTM32F746xx
 -DSTM32F7
 -mcpu=cortex-m7
 -mthumb
