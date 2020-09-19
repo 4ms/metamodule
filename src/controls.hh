@@ -10,8 +10,10 @@
 using JackSense = DebouncedSwitch;
 
 struct Controls {
-	static inline AnalogIn<ADC_1, AdcChanNum::_10> freq_cv[2] = {{GPIO::A, 2}, {GPIO::A, 0}};
-	static inline AnalogIn<ADC_1, AdcChanNum::_11> res_cv[2] = {{GPIO::A, 3}, {GPIO::A, 1}};
+	static inline AnalogIn<ADC_1, AdcChanNum::_11> freq_cv0 = {GPIO::C, 1}; // LFO CV
+	static inline AnalogIn<ADC_1, AdcChanNum::_13> res_cv0 = {GPIO::C, 3};	// Depth CV ok
+	static inline AnalogIn<ADC_1, AdcChanNum::_10> freq_cv1 = {GPIO::C, 0}; // Lat CV ok
+	static inline AnalogIn<ADC_1, AdcChanNum::_15> res_cv1 = {GPIO::C, 5};	// WTSpread CV ok
 
 	static inline JackSense freq_sense[2] = {{GPIO::C, 4}, {GPIO::B, 1}};
 	static inline JackSense res_sense[2] = {{GPIO::C, 5}, {GPIO::B, 0}};
