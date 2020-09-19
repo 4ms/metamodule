@@ -22,7 +22,7 @@ public:
 		led_driver_.start_dma_mode();
 	}
 
-	//Todo: only update if glowing or fading
+	// Todo: only update if glowing or fading
 	void update()
 	{
 		freq[0].refresh();
@@ -44,74 +44,73 @@ private:
 	{
 		return (chipnum * PCA9685Driver::kNumLedsPerChip) + lednum;
 	}
-	enum { Chip0 = 0,
-		   Chip1 = 1 };
+	enum { Chip0 = 0, Chip1 = 1 };
 
 public:
 	DriverRgbLed freq[2] = {
 		{
-			{&led_frame_buf[led(Chip1, 3)]},
-			{&led_frame_buf[led(Chip1, 2)]},
-			{&led_frame_buf[led(Chip1, 4)]},
+			{&led_frame_buf[led(Chip1, 12)]}, // Lock1
+			{&led_frame_buf[led(Chip1, 13)]},
+			{&led_frame_buf[led(Chip1, 14)]},
 		},
 		{
-			{&led_frame_buf[led(Chip1, 11)]},
-			{&led_frame_buf[led(Chip1, 12)]},
-			{&led_frame_buf[led(Chip1, 13)]},
+			{&led_frame_buf[led(Chip1, 0)]}, // Lock2
+			{&led_frame_buf[led(Chip1, 1)]},
+			{&led_frame_buf[led(Chip1, 2)]},
 		},
 	};
 
 	DriverRgbLed res[2] = {
 		{
+			{&led_frame_buf[led(Chip1, 3)]}, // Lock3
+			{&led_frame_buf[led(Chip1, 4)]},
 			{&led_frame_buf[led(Chip1, 5)]},
-			{&led_frame_buf[led(Chip1, 6)]},
-			{&led_frame_buf[led(Chip1, 7)]},
 		},
 		{
+			{&led_frame_buf[led(Chip1, 6)]}, // LFO Gate(CV?)
+			{&led_frame_buf[led(Chip1, 7)]},
 			{&led_frame_buf[led(Chip1, 8)]},
-			{&led_frame_buf[led(Chip1, 9)]},
-			{&led_frame_buf[led(Chip1, 10)]},
 		},
 	};
 
 	DriverRgbLed but[2] = {
 		{
-			{&led_frame_buf[led(Chip1, 0)]},
 			NoLED,
-			{&led_frame_buf[led(Chip0, 15)]},
+			NoLED,
+			NoLED,
 		},
 		{
-			{&led_frame_buf[led(Chip1, 1)]},
-			{&led_frame_buf[led(Chip1, 14)]},
-			{&led_frame_buf[led(Chip1, 15)]},
+			NoLED,
+			NoLED,
+			NoLED,
 		},
 	};
 
 	DriverRgbLed mode[5]{
 		{
-			{&led_frame_buf[led(Chip0, 2)]},
-			{&led_frame_buf[led(Chip0, 1)]},
 			{&led_frame_buf[led(Chip0, 0)]},
+			{&led_frame_buf[led(Chip0, 1)]},
+			{&led_frame_buf[led(Chip0, 2)]},
 		},
 		{
-			{&led_frame_buf[led(Chip0, 5)]},
-			{&led_frame_buf[led(Chip0, 4)]},
-			{&led_frame_buf[led(Chip0, 3)]},
-		},
-		{
-			{&led_frame_buf[led(Chip0, 14)]},
-			{&led_frame_buf[led(Chip0, 7)]},
-			{&led_frame_buf[led(Chip0, 6)]},
+			{&led_frame_buf[led(Chip0, 9)]},
+			{&led_frame_buf[led(Chip0, 10)]},
+			{&led_frame_buf[led(Chip0, 11)]},
 		},
 		{
 			{&led_frame_buf[led(Chip0, 11)]},
-			{&led_frame_buf[led(Chip0, 12)]},
 			{&led_frame_buf[led(Chip0, 13)]},
+			{&led_frame_buf[led(Chip0, 14)]},
 		},
 		{
-			{&led_frame_buf[led(Chip0, 8)]},
-			{&led_frame_buf[led(Chip0, 9)]},
-			{&led_frame_buf[led(Chip0, 10)]},
+			NoLED,
+			NoLED,
+			NoLED,
+		},
+		{
+			NoLED,
+			NoLED,
+			NoLED,
 		},
 	};
 

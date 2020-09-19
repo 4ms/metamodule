@@ -4,49 +4,51 @@
 #include "stm32xx.h"
 
 const SaiDef kCodecSAIDef = {
-	.sai = SAI1,
-	.tx_block = SAI1_Block_A,
-	.rx_block = SAI1_Block_B,
+	.sai = SAI2,
+	.tx_block = SAI2_Block_B,
+	.rx_block = SAI2_Block_A,
 
-	.dma_init_tx = {
-		.DMAx = DMA2,
-		.stream = DMA2_Stream1,
-		.channel = DMA_CHANNEL_0,
-		.IRQn = DMA2_Stream1_IRQn,
-		.pri = 0,
-		.subpri = 1,
-	},
-	.dma_init_rx = {
-		.DMAx = DMA2,
-		.stream = DMA2_Stream4,
-		.channel = DMA_CHANNEL_1,
-		.IRQn = DMA2_Stream4_IRQn,
-		.pri = 0,
-		.subpri = 1,
-	},
+	.dma_init_tx =
+		{
+			.DMAx = DMA2,
+			.stream = DMA2_Stream1,
+			.channel = DMA_CHANNEL_10,
+			.IRQn = DMA2_Stream1_IRQn,
+			.pri = 0,
+			.subpri = 1,
+		},
+	.dma_init_rx =
+		{
+			.DMAx = DMA2,
+			.stream = DMA2_Stream2,
+			.channel = DMA_CHANNEL_10,
+			.IRQn = DMA2_Stream2_IRQn,
+			.pri = 0,
+			.subpri = 1,
+		},
 
 	.datasize = SAI_DATASIZE_24,
 	.framesize = 32,
 	.samplerate = 48000,
 
 	.MCLK_GPIO = GPIO::E,
-	.MCLK_PIN = 2,
-	.MCLK_AF = GPIO_AF6_SAI1,
+	.MCLK_PIN = 14,
+	.MCLK_AF = GPIO_AF10_SAI2,
 
 	.SCLK_GPIO = GPIO::E,
-	.SCLK_PIN = 5,
-	.SCLK_AF = GPIO_AF6_SAI1,
+	.SCLK_PIN = 12,
+	.SCLK_AF = GPIO_AF10_SAI2,
 
 	.LRCLK_GPIO = GPIO::E,
-	.LRCLK_PIN = 4,
-	.LRCLK_AF = GPIO_AF6_SAI1,
+	.LRCLK_PIN = 13,
+	.LRCLK_AF = GPIO_AF10_SAI2,
 
 	.MTX_SDI_GPIO = GPIO::E,
-	.MTX_SDI_PIN = 6,
-	.MTX_SDI_AF = GPIO_AF6_SAI1,
+	.MTX_SDI_PIN = 11,
+	.MTX_SDI_AF = GPIO_AF10_SAI2,
 
-	.MRX_SDO_GPIO = GPIO::E,
-	.MRX_SDO_PIN = 3,
-	.MRX_SDO_AF = GPIO_AF6_SAI1,
+	.MRX_SDO_GPIO = GPIO::D,
+	.MRX_SDO_PIN = 11,
+	.MRX_SDO_AF = GPIO_AF10_SAI2,
 };
 

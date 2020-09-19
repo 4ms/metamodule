@@ -1,5 +1,5 @@
-#include "buses.hh"
 #include "debug.hh"
+#include "defs/buses.hh"
 #include "drivers/codec_WM8731.hh"
 #include "stm32f7xx.h"
 #include "system.hh"
@@ -10,24 +10,26 @@ const uint32_t kSampleRate = 48000;
 System sys;
 Debug debug;
 
-//Todo: some class for grouping codec, bus, led driver chips, etc
-//ExternalChips exthw;
-//exthw.codec
-//exthw.shared_i2c
-SharedBus shared_i2c;
-CodecWM8731 codec{SharedBus::i2c};
+// Todo: some class for grouping codec, bus, led driver chips, etc
+// ExternalChips exthw;
+// exthw.codec
+// exthw.shared_i2c
+CodecBus _codec_bus;
+LEDDriverBus _leddriver_bus;
+
+CodecWM8731 codec{CodecBus::i2c};
 
 Controls controls;
 Params params{controls};
 Audio audio{params, codec, kSampleRate};
-LedCtl leds{SharedBus::i2c};
+LedCtl leds{LEDDriverBus::i2c};
 Ui ui{params, leds};
 
 void main()
 {
 	audio.start();
 
-	leds.start_dma_mode();
+	// leds.start_dma_mode();
 
 	controls.begin();
 
