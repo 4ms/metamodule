@@ -43,6 +43,7 @@ void Timekeeper::set_periph(TIM_TypeDef *TIMx)
 	irqn = System::tim_periph_to_IRQn(timx);
 }
 
+// Todo: Support 32-bit timers. Right now it runs 32-bit timers in 16-bit mode
 void Timekeeper::set_timing(uint32_t period_ns, uint32_t priority1, uint32_t priority2)
 {
 	uint32_t sysfreq_Hz = System::tim_periph_max_freq(timx);
