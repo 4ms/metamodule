@@ -29,16 +29,15 @@ public:
 		RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 		RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
 		RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-		RCC_OscInitStruct.PLL.PLLM = 8;
-		RCC_OscInitStruct.PLL.PLLN = 216;
+		RCC_OscInitStruct.PLL.PLLM = 16;
+		RCC_OscInitStruct.PLL.PLLN = 432;
 		RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-		RCC_OscInitStruct.PLL.PLLQ = 2;
+		RCC_OscInitStruct.PLL.PLLQ = 9;
 		HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
 		HAL_PWREx_EnableOverDrive();
-		RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK |
-									  RCC_CLOCKTYPE_SYSCLK |
-									  RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+		RCC_ClkInitStruct.ClockType =
+			RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 		RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 		RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 		RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
@@ -47,13 +46,19 @@ public:
 		HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7);
 
 		PeriphClkInitStruct.PeriphClockSelection =
-			RCC_PERIPHCLK_I2C2 | RCC_PERIPHCLK_I2S;
-		PeriphClkInitStruct.PLLI2S.PLLI2SN = 96;
-		PeriphClkInitStruct.PLLI2S.PLLI2SR = 4; // 2 for 96k
-		PeriphClkInitStruct.PLLI2S.PLLI2SQ = 2;
-		PeriphClkInitStruct.PLLI2SDivQ = 1;
+			RCC_PERIPHCLK_UART5 | RCC_PERIPHCLK_I2C1 | RCC_PERIPHCLK_I2C2 | RCC_PERIPHCLK_SAI2;
 
+		PeriphClkInitStruct.PLLI2S.PLLI2SP = RCC_PLLP_DIV2; // not in F732
+		PeriphClkInitStruct.PLLI2S.PLLI2SR = 2;
+		PeriphClkInitStruct.PLLI2S.PLLI2SN = 344; // mult by 344 = 344MHz
+		PeriphClkInitStruct.PLLI2S.PLLI2SQ = 4;	  // div by 4 = 86MHz
+		PeriphClkInitStruct.PLLI2SDivQ = 7;		  // div by 7 = 12.285714MHz
+												  // div by 256 for bit rate = 47.991kHz
+		PeriphClkInitStruct.Sai2ClockSelection = RCC_SAI2CLKSOURCE_PLLI2S;
+
+		PeriphClkInitStruct.Uart5ClockSelection = RCC_UART5CLKSOURCE_PCLK1;
 		PeriphClkInitStruct.I2sClockSelection = RCC_I2SCLKSOURCE_PLLI2S;
+		PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
 		PeriphClkInitStruct.I2c2ClockSelection = RCC_I2C2CLKSOURCE_PCLK1;
 		HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
 
@@ -89,7 +94,8 @@ public:
 
 	static constexpr void enable_gpio_rcc(GPIO_TypeDef *port)
 	{
-		if (port == nullptr) return;
+		if (port == nullptr)
+			return;
 #ifdef GPIOA
 		else if (port == GPIOA && !READ_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN))
 			LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
@@ -138,9 +144,11 @@ public:
 
 	static constexpr void enable_adc_rcc(ADC_TypeDef *ADCx)
 	{
-		if (ADCx == nullptr) return;
+		if (ADCx == nullptr)
+			return;
 #ifdef ADC1
-		if (ADCx == ADC1) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
+		if (ADCx == ADC1)
+			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
 #endif
 #ifdef ADC2
 		else if (ADCx == ADC2)
@@ -154,7 +162,8 @@ public:
 
 	static constexpr void enable_dma_rcc(const DMA_TypeDef *DMAx)
 	{
-		if (DMAx == nullptr) return;
+		if (DMAx == nullptr)
+			return;
 #ifdef DMA1
 		else if (DMAx == DMA1)
 			LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
@@ -171,7 +180,8 @@ public:
 
 	static constexpr void enable_i2c_rcc(I2C_TypeDef *I2Cx)
 	{
-		if (I2Cx == nullptr) return;
+		if (I2Cx == nullptr)
+			return;
 #ifdef I2C1
 		else if (I2Cx == I2C1)
 			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
@@ -188,7 +198,8 @@ public:
 
 	static constexpr void disable_i2c_rcc(I2C_TypeDef *I2Cx)
 	{
-		if (I2Cx == nullptr) return;
+		if (I2Cx == nullptr)
+			return;
 #ifdef I2C1
 		else if (I2Cx == I2C1)
 			LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_I2C1);
@@ -205,7 +216,8 @@ public:
 
 	static constexpr void enable_sai_rcc(SAI_TypeDef *SAIx)
 	{
-		if (SAIx == nullptr) return;
+		if (SAIx == nullptr)
+			return;
 #ifdef SAI1
 		else if (SAIx == SAI1)
 			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SAI1);
@@ -226,7 +238,8 @@ public:
 
 	static constexpr void disable_sai_rcc(SAI_TypeDef *SAIx)
 	{
-		if (SAIx == nullptr) return;
+		if (SAIx == nullptr)
+			return;
 #ifdef SAI1
 		else if (SAIx == SAI1)
 			LL_APB2_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_SAI1);
@@ -248,55 +261,72 @@ public:
 	static void enable_tim_rcc(TIM_TypeDef *TIM)
 	{
 #ifdef TIM1
-		if (TIM == TIM1) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
+		if (TIM == TIM1)
+			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
 #endif
 #ifdef TIM2
-		if (TIM == TIM2) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+		if (TIM == TIM2)
+			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
 #endif
 #ifdef TIM3
-		if (TIM == TIM3) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
+		if (TIM == TIM3)
+			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
 #endif
 #ifdef TIM4
-		if (TIM == TIM4) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM4);
+		if (TIM == TIM4)
+			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM4);
 #endif
 #ifdef TIM5
-		if (TIM == TIM5) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM5);
+		if (TIM == TIM5)
+			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM5);
 #endif
 #ifdef TIM6
-		if (TIM == TIM6) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM6);
+		if (TIM == TIM6)
+			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM6);
 #endif
 #ifdef TIM7
-		if (TIM == TIM7) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM7);
+		if (TIM == TIM7)
+			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM7);
 #endif
 #ifdef TIM8
-		if (TIM == TIM8) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM8);
+		if (TIM == TIM8)
+			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM8);
 #endif
 #ifdef TIM9
-		if (TIM == TIM9) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM9);
+		if (TIM == TIM9)
+			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM9);
 #endif
 #ifdef TIM10
-		if (TIM == TIM10) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM10);
+		if (TIM == TIM10)
+			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM10);
 #endif
 #ifdef TIM11
-		if (TIM == TIM11) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM11);
+		if (TIM == TIM11)
+			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM11);
 #endif
 #ifdef TIM12
-		if (TIM == TIM12) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM12);
+		if (TIM == TIM12)
+			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM12);
 #endif
 #ifdef TIM13
-		if (TIM == TIM13) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM13);
+		if (TIM == TIM13)
+			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM13);
 #endif
 #ifdef TIM14
-		if (TIM == TIM14) LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM14);
+		if (TIM == TIM14)
+			LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM14);
 #endif
 #ifdef TIM15
-		if (TIM == TIM15) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM15);
+		if (TIM == TIM15)
+			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM15);
 #endif
 #ifdef TIM16
-		if (TIM == TIM16) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM16);
+		if (TIM == TIM16)
+			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM16);
 #endif
 #ifdef TIM17
-		if (TIM == TIM17) LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM17);
+		if (TIM == TIM17)
+			LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM17);
 #endif
 	}
 
@@ -304,7 +334,8 @@ public:
 
 	static uint8_t tim_periph_to_num(TIM_TypeDef *TIM)
 	{
-		if (TIM == nullptr) return 0;
+		if (TIM == nullptr)
+			return 0;
 #ifdef TIM1
 		else if (TIM == TIM1)
 			return 1;
@@ -378,7 +409,8 @@ public:
 	}
 	static IRQn_Type tim_periph_to_IRQn(TIM_TypeDef *TIM)
 	{
-		if (TIM == nullptr) return (IRQn_Type)(0);
+		if (TIM == nullptr)
+			return (IRQn_Type)(0);
 #ifdef TIM1
 		else if (TIM == TIM1)
 			return TIM1_UP_TIM10_IRQn;
@@ -457,8 +489,7 @@ public:
 		// APB1 --> divider = 2;
 		uint32_t divider;
 		uint32_t TIMx_BASE_ADDR = reinterpret_cast<uint32_t>(TIM);
-		if (TIMx_BASE_ADDR >= APB1PERIPH_BASE &&
-			TIMx_BASE_ADDR < APB2PERIPH_BASE)
+		if (TIMx_BASE_ADDR >= APB1PERIPH_BASE && TIMx_BASE_ADDR < APB2PERIPH_BASE)
 			divider = 2;
 		else if (TIMx_BASE_ADDR >= APB2PERIPH_BASE)
 			divider = 1;
