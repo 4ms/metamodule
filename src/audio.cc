@@ -15,10 +15,9 @@ Audio::Audio(Params &p, ICodec &codec, uint32_t sample_rate)
 	current_fx[RIGHT] = FX_right[0];
 	current_fx[RIGHT]->set_samplerate(sample_rate_);
 
-	codec_.set_txrx_buffers(
-		reinterpret_cast<uint8_t *>(tx_buf_[0].data()),
-		reinterpret_cast<uint8_t *>(rx_buf_[0].data()),
-		kAudioStreamDMABlockSize * sizeof(AudioFrame) / 4); //Todo: why / 4?
+	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_[0].data()),
+							reinterpret_cast<uint8_t *>(rx_buf_[0].data()),
+							kAudioStreamDMABlockSize * 2);
 }
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
@@ -52,12 +51,12 @@ void Audio::start()
 void Audio::check_fx_change()
 {
 	if (current_fx[LEFT] != FX_left[params.mode[0]]) {
-		//Todo: start crossfading
+		// Todo: start crossfading
 		current_fx[LEFT] = FX_left[params.mode[0]];
 		current_fx[LEFT]->set_samplerate(sample_rate_);
 	}
 	if (current_fx[RIGHT] != FX_right[params.mode[1]]) {
-		//Todo: start crossfading
+		// Todo: start crossfading
 		current_fx[RIGHT] = FX_right[params.mode[1]];
 		current_fx[RIGHT]->set_samplerate(sample_rate_);
 	}
