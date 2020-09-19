@@ -69,16 +69,12 @@ private:
 
 	HALCallback stream_complete{
 		HALCallbackID::SAI_TxCplt,
-		[this]() {
-			process(tx_buf_[1], rx_buf_[1]);
-		},
+		[this]() { process(rx_buf_[0], tx_buf_[1]); },
 	};
 
 	HALCallback stream_half_complete{
 		HALCallbackID::SAI_TxHalfCplt,
-		[this]() {
-			process(tx_buf_[0], rx_buf_[1]);
-		},
+		[this]() { process(rx_buf_[1], tx_buf_[0]); },
 	};
 };
 
