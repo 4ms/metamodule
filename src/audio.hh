@@ -1,4 +1,5 @@
 #pragma once
+#include "audio_frame.hh"
 #include "codec.hh"
 #include "fxList.hh"
 #include "hal_callback.hh"
@@ -8,46 +9,13 @@
 #include "stm32f7xx.h"
 #include <array>
 
-using namespace MathTools;
-
-//Todo put this in a _config.h file
-static const int kAudioStreamBlockSize = 32; //number of frames (L/R pairs) we process at a time
-static const int kNumAudioDMAHalfTransfers = 2;
-static const int kAudioStreamDMABlockSize = kAudioStreamBlockSize * kNumAudioDMAHalfTransfers;
-
-//Todo: create generic ICodec class, and use it here. Then derive from it to get CodecWM8731, CodecCS4721, etc..
-//Then the SharedBus::i2c can given to a codec object, and a ref to the codec object can be passed to the ctor of Audio
-//And in unit tests we can give a testable codec object (plays from .wav file, and writes to .wav file)
-//
 class Audio {
 public:
 	// Public methods:
 	Audio(Params &p, ICodec &codec, uint32_t sample_rate = 48000);
 	void start();
 
-	// Data types:
-	struct AudioFrame {
-		int16_t l;
-		int16_t r;
-
-	private:
-		static const inline size_t kSampleSizeBits = 16;
-		static const inline size_t kMaxValue = ipow(2, kSampleSizeBits - 1) - 1;
-		static const inline float kScaling = static_cast<float>(kMaxValue);
-
-	public:
-		static float scaleInput(int16_t val)
-		{
-			return val / kScaling;
-		}
-		static int16_t scaleOutput(float val)
-		{
-			return val * kScaling;
-		}
-	};
-
-	enum AudioChannels { LEFT,
-						 RIGHT };
+	enum AudioChannels { LEFT, RIGHT };
 	using AudioStreamBlock = std::array<AudioFrame, kAudioStreamBlockSize>;
 
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);
