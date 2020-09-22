@@ -15,16 +15,14 @@ struct Controls {
 	static inline AnalogIn<ADC_1, AdcChanNum::_10> freq_cv1 = {GPIO::C, 0}; // Lat CV ok
 	static inline AnalogIn<ADC_1, AdcChanNum::_15> res_cv1 = {GPIO::C, 5};	// WTSpread CV ok
 
-	static inline JackSense freq_sense[2] = {{GPIO::G, 4}, {GPIO::G, 3}}; // chan A_VOCT, B_VOCT
-	static inline JackSense res_sense[2] = {{GPIO::G, 2}, {GPIO::E, 9}};  // chan C_VOCT, D_VOCT
-	static inline JackSense in_sense[2] = {{GPIO::F, 12}, {GPIO::F, 11}}; // chan E_VOCT, F_VOCT
-	static inline JackSense out_sense[2] = {{GPIO::F, 1}, {GPIO::F, 1}};  // Transpose CV for both
+	static inline JackSense freq_sense[2] = {{GPIO::C, 4}, {GPIO::B, 1}};
+	static inline JackSense res_sense[2] = {{GPIO::C, 5}, {GPIO::B, 0}};
+	static inline JackSense in_sense[2] = {{GPIO::G, 12}, {GPIO::G, 11}};
+	static inline JackSense out_sense[2] = {{GPIO::D, 7}, {GPIO::G, 10}};
 
-	static inline RotaryEncoder<RotaryHalfStep> rotary[2] = {
-		{GPIO::D, 10, GPIO::C, 6}, // Browse, LFO Shape
-		{GPIO::B, 5, GPIO::B, 6}};
-	static inline DebouncedSwitch rotary_button[2] = {{GPIO::D, 9}, {GPIO::B, 4}};
-	static inline DebouncedSwitch mode_button[2] = {{GPIO::C, 9}, {GPIO::D, 0}}; // Chan A, Chan B
+	static inline RotaryEncoder<RotaryFullStep> rotary[2] = {{GPIO::A, 7, GPIO::A, 6}, {GPIO::C, 7, GPIO::C, 6}};
+	static inline DebouncedSwitch rotary_button[2] = {{GPIO::A, 5}, {GPIO::B, 9}};
+	static inline DebouncedSwitch mode_button[2] = {{GPIO::C, 14}, {GPIO::C, 15}};
 
 	Controls();
 	void read();

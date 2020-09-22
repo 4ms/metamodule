@@ -7,8 +7,14 @@
 #include "processors/wavefold.h"
 
 FXList::FXList()
-	: fxList{new VCA, new LowPassFilter, new LPG, new WaveFolder, new BitCrusher}
-{}
+	: fxList{
+		  new LowPassFilter,
+		  new LPG,
+		  new VCA,
+		  new WaveFolder,
+		  new BitCrusher}
+{
+}
 
 AudioProcessor *FXList::operator[](unsigned int fxnum)
 {

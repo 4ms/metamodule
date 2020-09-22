@@ -166,16 +166,26 @@ SaiPeriph::Error SaiPeriph::_init_sai_dma()
 
 void SaiPeriph::_init_pins()
 {
-	Pin sai_mclk{saidef_.MCLK_GPIO, saidef_.MCLK_PIN,	 PinMode::Alt,	 saidef_.MCLK_AF,
-				 PinPull::Up,		PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_sclk{saidef_.SCLK_GPIO, saidef_.SCLK_PIN,	 PinMode::Alt,	 saidef_.SCLK_AF,
-				 PinPull::Up,		PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_lrclk{saidef_.LRCLK_GPIO, saidef_.LRCLK_PIN,   PinMode::Alt,   saidef_.LRCLK_AF,
-				  PinPull::Up,		  PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_sdo{saidef_.MRX_SDO_GPIO, saidef_.MRX_SDO_PIN, PinMode::Alt,   saidef_.MRX_SDO_AF,
-				PinPull::Up,		  PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_sdi{saidef_.MTX_SDI_GPIO, saidef_.MTX_SDI_PIN, PinMode::Alt,   saidef_.MTX_SDI_AF,
-				PinPull::Up,		  PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+	Pin sai_mclk{
+		saidef_.MCLK_GPIO, saidef_.MCLK_PIN,
+		PinMode::Alt, saidef_.MCLK_AF,
+		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+	Pin sai_sclk{
+		saidef_.SCLK_GPIO, saidef_.SCLK_PIN,
+		PinMode::Alt, saidef_.SCLK_AF,
+		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+	Pin sai_lrclk{
+		saidef_.LRCLK_GPIO, saidef_.LRCLK_PIN,
+		PinMode::Alt, saidef_.LRCLK_AF,
+		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+	Pin sai_sdo{
+		saidef_.MRX_SDO_GPIO, saidef_.MRX_SDO_PIN,
+		PinMode::Alt, saidef_.MRX_SDO_AF,
+		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+	Pin sai_sdi{
+		saidef_.MTX_SDI_GPIO, saidef_.MTX_SDI_PIN,
+		PinMode::Alt, saidef_.MTX_SDI_AF,
+		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
 }
 
 void SaiPeriph::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint32_t block_size)
@@ -187,10 +197,10 @@ void SaiPeriph::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint3
 
 void SaiPeriph::start()
 {
-	// InterruptManager::registerISR(tx_irqn, [this]() { isr(); });
+	//InterruptManager::registerISR(tx_irqn, [this]() { isr(); });
 	InterruptManager::registerISR(tx_irqn, [hdmaptr = &hdma_tx]() {
 		HAL_DMA_IRQHandler(hdmaptr);
-		// Todo: optimize HAL DMA extra stuff by using SaiPeriph::handle_dma_isr() instead
+		//Todo: optimize HAL DMA extra stuff by using SaiPeriph::handle_dma_isr() instead
 	});
 	HAL_NVIC_EnableIRQ(tx_irqn);
 	HAL_SAI_Receive_DMA(&hsai_rx, rx_buf_ptr_, block_size_);
@@ -209,25 +219,23 @@ void SaiPeriph::handle_dma_isr()
 	// uint32_t tmpisr = regs->ISR;
 
 	// // Transfer Complete (TC) -> Point to 2nd half of buffers
-	// if ((tmpisr & __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_tx)) && __HAL_DMA_GET_IT_SOURCE(&hdma_tx,
-	// DMA_IT_TC))
+	// if ((tmpisr & __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_tx)) && __HAL_DMA_GET_IT_SOURCE(&hdma_tx, DMA_IT_TC))
 	// {
 	// 	__HAL_DMA_CLEAR_FLAG(&hdma_tx, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_tx));
 	// 	HALCallbackManager::callHALCB(HALCallbackID::SAI_TxCplt);
 	// }
 	// // Half Transfer complete (HT) -> Point to 1st half of buffers
-	// else if ((tmpisr & __HAL_DMA_GET_HT_FLAG_INDEX(&hdma_tx)) &&
-	// __HAL_DMA_GET_IT_SOURCE(&hdma_tx, DMA_IT_HT))
+	// else if ((tmpisr & __HAL_DMA_GET_HT_FLAG_INDEX(&hdma_tx)) && __HAL_DMA_GET_IT_SOURCE(&hdma_tx, DMA_IT_HT))
 	// {
 	// 	__HAL_DMA_CLEAR_FLAG(&hdma_tx, __HAL_DMA_GET_HT_FLAG_INDEX(&hdma_tx));
 	// 	HALCallbackManager::callHALCB(HALCallbackID::SAI_TxHalfCplt);
 	// }
 
-	// if (LL_DMA_IsActiveFlag_TC4(DMA2)) {
+	//if (LL_DMA_IsActiveFlag_TC4(DMA2)) {
 	//	LL_DMA_ClearFlag_TC4(DMA2);
 	//	//do_stuff();
 	//}
-	// if (LL_DMA_IsActiveFlag_TE4(DMA2)) {
+	//if (LL_DMA_IsActiveFlag_TE4(DMA2)) {
 	//	LL_DMA_ClearFlag_TE4(DMA2);
 	//	//Handle DMA error
 	//}
