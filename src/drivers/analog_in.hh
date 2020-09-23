@@ -1,3 +1,4 @@
+#pragma once
 #include "adc_builtin_driver.hh"
 #include "filter.hh"
 
