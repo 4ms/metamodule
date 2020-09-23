@@ -27,8 +27,12 @@ public:
 	{
 		freq[0].refresh();
 		res[0].refresh();
+		but[0].refresh();
+
 		freq[1].refresh();
 		res[1].refresh();
+		but[1].refresh();
+
 		mode[0].refresh();
 		mode[1].refresh();
 		mode[2].refresh();
@@ -69,7 +73,7 @@ public:
 		},
 		{
 			{&led_frame_buf[led(Chip1, 8)]},
-			{&led_frame_buf[led(Chip1, 9)]},
+			NoLED, // was this: {&led_frame_buf[led(Chip1, 9)]},
 			{&led_frame_buf[led(Chip1, 10)]},
 		},
 	};
@@ -77,7 +81,7 @@ public:
 	DriverRgbLed but[2] = {
 		{
 			{&led_frame_buf[led(Chip1, 0)]},
-			NoLED,
+			{&led_frame_buf[led(Chip1, 9)]},
 			{&led_frame_buf[led(Chip0, 15)]},
 		},
 		{
@@ -89,19 +93,9 @@ public:
 
 	DriverRgbLed mode[5]{
 		{
-			{&led_frame_buf[led(Chip0, 2)]},
-			{&led_frame_buf[led(Chip0, 1)]},
-			{&led_frame_buf[led(Chip0, 0)]},
-		},
-		{
-			{&led_frame_buf[led(Chip0, 5)]},
-			{&led_frame_buf[led(Chip0, 4)]},
-			{&led_frame_buf[led(Chip0, 3)]},
-		},
-		{
-			{&led_frame_buf[led(Chip0, 14)]},
-			{&led_frame_buf[led(Chip0, 7)]},
-			{&led_frame_buf[led(Chip0, 6)]},
+			{&led_frame_buf[led(Chip0, 8)]},
+			{&led_frame_buf[led(Chip0, 9)]},
+			{&led_frame_buf[led(Chip0, 10)]},
 		},
 		{
 			{&led_frame_buf[led(Chip0, 11)]},
@@ -109,9 +103,19 @@ public:
 			{&led_frame_buf[led(Chip0, 13)]},
 		},
 		{
-			{&led_frame_buf[led(Chip0, 8)]},
-			{&led_frame_buf[led(Chip0, 9)]},
-			{&led_frame_buf[led(Chip0, 10)]},
+			{&led_frame_buf[led(Chip0, 14)]},
+			{&led_frame_buf[led(Chip0, 7)]},
+			{&led_frame_buf[led(Chip0, 6)]},
+		},
+		{
+			{&led_frame_buf[led(Chip0, 5)]},
+			{&led_frame_buf[led(Chip0, 4)]},
+			{&led_frame_buf[led(Chip0, 3)]},
+		},
+		{
+			{&led_frame_buf[led(Chip0, 2)]},
+			{&led_frame_buf[led(Chip0, 1)]},
+			{&led_frame_buf[led(Chip0, 0)]},
 		},
 	};
 
