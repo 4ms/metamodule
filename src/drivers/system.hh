@@ -29,8 +29,8 @@ public:
 		RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 		RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
 		RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-		RCC_OscInitStruct.PLL.PLLM = 16;
-		RCC_OscInitStruct.PLL.PLLN = 432;
+		RCC_OscInitStruct.PLL.PLLM = 8;
+		RCC_OscInitStruct.PLL.PLLN = 216;
 		RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
 		RCC_OscInitStruct.PLL.PLLQ = 9;
 		HAL_RCC_OscConfig(&RCC_OscInitStruct);
@@ -45,21 +45,18 @@ public:
 
 		HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7);
 
-		PeriphClkInitStruct.PeriphClockSelection =
-			RCC_PERIPHCLK_UART5 | RCC_PERIPHCLK_I2C1 | RCC_PERIPHCLK_I2C2 | RCC_PERIPHCLK_SAI2;
-
-		PeriphClkInitStruct.PLLI2S.PLLI2SP = RCC_PLLP_DIV2; // not in F732
-		PeriphClkInitStruct.PLLI2S.PLLI2SR = 2;
-		PeriphClkInitStruct.PLLI2S.PLLI2SN = 344; // mult by 344 = 344MHz
-		PeriphClkInitStruct.PLLI2S.PLLI2SQ = 4;	  // div by 4 = 86MHz
-		PeriphClkInitStruct.PLLI2SDivQ = 7;		  // div by 7 = 12.285714MHz
-												  // div by 256 for bit rate = 47.991kHz
-		PeriphClkInitStruct.Sai2ClockSelection = RCC_SAI2CLKSOURCE_PLLI2S;
-
-		PeriphClkInitStruct.Uart5ClockSelection = RCC_UART5CLKSOURCE_PCLK1;
-		PeriphClkInitStruct.I2sClockSelection = RCC_I2SCLKSOURCE_PLLI2S;
+		PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3|RCC_PERIPHCLK_USART6 |RCC_PERIPHCLK_SAI1|RCC_PERIPHCLK_I2C1;
+		PeriphClkInitStruct.PLLSAI.PLLSAIN = 172;// mult by 344 = 344MHz
+		PeriphClkInitStruct.PLLSAI.PLLSAIR = 2;  // div by 4 = 86MHz
+		PeriphClkInitStruct.PLLSAI.PLLSAIQ = 2;  // div by 7 = 12.285714MHz
+                                                 // div by 256 for bit rate = 47.991kHz
+		PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV2;
+		PeriphClkInitStruct.PLLSAIDivQ = 7;
+		PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
+		PeriphClkInitStruct.Sai1ClockSelection = RCC_SAI1CLKSOURCE_PLLSAI;
+		PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
+		PeriphClkInitStruct.Usart6ClockSelection = RCC_USART6CLKSOURCE_PCLK2;
 		PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
-		PeriphClkInitStruct.I2c2ClockSelection = RCC_I2C2CLKSOURCE_PCLK1;
 		HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
 
 		HAL_RCC_EnableCSS();
