@@ -116,9 +116,6 @@ LFLAGS =  -Wl,-Map,main.map,--cref \
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 
 all: Makefile $(BIN) $(HEX)	#$(PRECHDRS)
-# 	compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
-# 	rm compile_commands.json 
-# 	mv compile_commands_with_headers.json compile_commands.json
 
 $(BIN): $(ELF)
 	$(OBJCPY) -O binary $< $@
@@ -173,3 +170,12 @@ endif
 
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
 .PHONY: all clean flash
+
+# generate_build_flags:
+# 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \
+#     awk '/End of search list./ { show=0 } { if (show) printf "-I%s\n",$1 }; /#include <...> search starts here:/ { show=1; }' > compile_flags.txt
+#   rm -rf build
+#   make -j16 all
+# 	compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
+# 	rm compile_commands.json 
+# 	mv compile_commands_with_headers.json compile_commands.json
