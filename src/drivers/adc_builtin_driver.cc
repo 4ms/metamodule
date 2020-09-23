@@ -52,8 +52,7 @@ AdcPeriph<p>::AdcPeriph()
 	num_channels_ = 0;
 	LL_ADC_Disable(p());
 
-	NVIC_SetPriority(ADC_IRQn, (0 << 2) | 3);
-	NVIC_EnableIRQ(ADC_IRQn);
+	NVIC_DisableIRQ(ADC_IRQn);
 
 	LL_ADC_SetCommonClock(ADC123_COMMON, LL_ADC_CLOCK_SYNC_PCLK_DIV2);
 
@@ -124,15 +123,20 @@ void AdcPeriph<p>::init_dma(const DMA_LL_Config dma_defs)
 	LL_DMA_DisableIT_HT(dma_defs.DMAx, dma_defs.stream);
 	LL_DMA_EnableIT_TE(dma_defs.DMAx, dma_defs.stream);
 	LL_DMA_EnableStream(dma_defs.DMAx, dma_defs.stream);
+
+
+	DMA_IRQn = dma_defs.IRQn;
+	DMA_IRQ_pri = dma_defs.pri;
+	DMA_IRQ_subpri = dma_defs.subpri;
 }
 
-//Todo: use InterruptManager
-// template<AdcPeripheral p()>
-// void AdcPeriph<p>::enable_IT(const IRQn_Type ADC_DMA_Streamx_IRQn)
-// {
-// 	NVIC_SetPriority(ADC_DMA_Streamx_IRQn, (1 << 2) | 0);
-// 	NVIC_EnableIRQ(ADC_DMA_Streamx_IRQn);
-// }
+template<AdcPeripheral p()>
+void AdcPeriph<p>::enable_DMA_IT()
+{
+	auto pri = System::encode_nvic_priority(DMA_IRQ_pri, DMA_IRQ_subpri);
+	NVIC_SetPriority(DMA_IRQn, pri);
+	NVIC_EnableIRQ(DMA_IRQn);
+}
 
 template<AdcPeripheral p()>
 void AdcPeriph<p>::start_adc()

@@ -105,7 +105,7 @@ class AdcPeriph {
 
 public:
 	static void init_dma(const DMA_LL_Config dma_defs);
-	//static void enable_IT(const IRQn_Type ADC_DMA_Streamx_IRQn);
+	static void enable_DMA_IT();
 	static void start_adc();
 
 	static uint16_t get_val(const AdcChanNum channel)
@@ -127,4 +127,8 @@ private:
 	static inline uint8_t num_channels_;
 	static inline uint8_t ranks_[16];
 	static inline uint16_t dma_buffer_[16];
+
+	static inline IRQn_Type DMA_IRQn;
+	static inline uint8_t DMA_IRQ_pri;
+	static inline uint8_t DMA_IRQ_subpri;
 };
