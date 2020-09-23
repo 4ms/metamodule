@@ -5,7 +5,7 @@ BINARYNAME 		= main
 
 STARTUP 		= startup_stm32f746xx.s
 SYSTEM 			= system_stm32f7xx.c
-LOADFILE 		= STM32F746ZEx_FLASH.ld
+LOADFILE 		= STM32F746ZGTx_FLASH.ld
 
 DEVICE 			= stm32/device
 CORE 			= stm32/core
@@ -18,8 +18,16 @@ SOURCES  += $(DEVICE)/src/$(STARTUP)
 SOURCES  += $(DEVICE)/src/$(SYSTEM)
 SOURCES  += $(wildcard src/*.c)
 SOURCES  += $(wildcard src/*.cc)
+SOURCES  += $(wildcard src/*.cpp)
 SOURCES  += $(wildcard src/drivers/*.c)
 SOURCES  += $(wildcard src/drivers/*.cc)
+SOURCES  += $(wildcard src/drivers/*.cpp)
+SOURCES  += $(wildcard src/util/*.c)
+SOURCES  += $(wildcard src/util/*.cc)
+SOURCES  += $(wildcard src/util/*.cpp)
+SOURCES  += $(wildcard src/processors/*.c)
+SOURCES  += $(wildcard src/processors/*.cc)
+SOURCES  += $(wildcard src/processors/*.cpp)
 
 HEADERS  += $(wildcard src/*.hh)
 HEADERS  += $(wildcard src/drivers/*.hh)
@@ -35,6 +43,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-Isrc/drivers \
 			-Isrc/processors \
 			-Isrc/util \
+			-Isrc/defs \
 
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
