@@ -29,14 +29,15 @@ public:
 	LEDDriverError start();
 	void start_it_mode();
 	LEDDriverError start_dma_mode();
-	LEDDriverError set_rgb_led(uint8_t led_number, uint16_t c_red, uint16_t c_green, uint16_t c_blue);
+	LEDDriverError
+	set_rgb_led(uint8_t led_number, uint16_t c_red, uint16_t c_green, uint16_t c_blue);
 	LEDDriverError set_single_led(uint8_t led_element_number, uint16_t brightness);
 	uint8_t get_red_led_element_id(uint8_t rgb_led_id);
 	uint8_t get_chip_num(uint8_t rgb_led_id);
 	uint32_t *const get_frame_buffer();
 
 private:
-	I2CPeriph &i2cp_;
+	I2CPeriph &i2c_periph_;
 	uint32_t num_chips_;
 	LEDDriverError led_error_;
 	const DMAConfig &dma_defs_;

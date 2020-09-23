@@ -13,24 +13,19 @@ LEDDriverError PCA9685Driver::DMADriver::start_dma(const DMAConfig &dma_defs)
 	if (err != LEDDriverError::None)
 		return err;
 
-	//Link I2C and DMA
-	driver_.i2cp_.link_DMA_TX(&dmah_);
+	// Link I2C and DMA
+	driver_.i2c_periph_.link_DMA_TX(&dmah_);
 
-	InterruptManager::registerISR(
-		dma_defs.IRQn,
-		[dmah_ptr = &dmah_]() {
-			HAL_DMA_IRQHandler(dmah_ptr);
-		});
+	InterruptManager::registerISR(dma_defs.IRQn,
+								  [dmah_ptr = &dmah_]() { HAL_DMA_IRQHandler(dmah_ptr); });
 
 	HAL_NVIC_SetPriority(dma_defs.IRQn, dma_defs.pri, dma_defs.subpri);
 	HAL_NVIC_EnableIRQ(dma_defs.IRQn);
 
-	HALCallback transfer_complete{
-		HALCallbackID::I2C_MemTxCplt,
-		[this]() {
-			advance_frame_buffer();
-			write_current_frame_to_chip();
-		}};
+	HALCallback transfer_complete{HALCallbackID::I2C_MemTxCplt, [this]() {
+									  advance_frame_buffer();
+									  write_current_frame_to_chip();
+								  }};
 
 	write_current_frame_to_chip();
 
@@ -48,7 +43,7 @@ LEDDriverError PCA9685Driver::DMADriver::init_dma(const DMAConfig &dma_defs)
 	dmah_.Init.MemInc = DMA_MINC_ENABLE;
 	dmah_.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
 	dmah_.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-	dmah_.Init.Mode = DMA_NORMAL; //DMA_CIRCULAR
+	dmah_.Init.Mode = DMA_NORMAL; // DMA_CIRCULAR
 	dmah_.Init.Priority = DMA_PRIORITY_LOW;
 	dmah_.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 	dmah_.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
@@ -74,12 +69,10 @@ void PCA9685Driver::DMADriver::advance_frame_buffer()
 
 void PCA9685Driver::DMADriver::write_current_frame_to_chip()
 {
-	auto err = driver_.i2cp_.mem_write_dma(
-		I2C_BASE_ADDRESS,
-		REG_LED0,
-		REGISTER_ADDR_SIZE,
-		reinterpret_cast<uint8_t *>(frame_buffer_cur_pos),
-		PCA9685Driver::kNumLedsPerChip * sizeof(frame_buffer[0]));
+	auto err =
+		driver_.i2c_periph_.mem_write_dma(I2C_BASE_ADDRESS, REG_LED0, REGISTER_ADDR_SIZE,
+										  reinterpret_cast<uint8_t *>(frame_buffer_cur_pos),
+										  PCA9685Driver::kNumLedsPerChip * sizeof(frame_buffer[0]));
 
 	if (err != I2CPeriph::Error::I2C_NO_ERR)
 		driver_.led_error_ = LEDDriverError::DMA_XMIT_ERR;

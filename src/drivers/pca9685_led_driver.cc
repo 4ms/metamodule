@@ -1,7 +1,7 @@
 #include "pca9685_led_driver.hh"
 
 PCA9685Driver::PCA9685Driver(I2CPeriph &i2c, const DMAConfig &dma_defs)
-	: i2cp_(i2c)
+	: i2c_periph_(i2c)
 	, num_chips_(kNumLedDriverChips)
 	, dma_defs_(dma_defs)
 	, dma_(*this)
@@ -28,7 +28,7 @@ LEDDriverError PCA9685Driver::start()
 void PCA9685Driver::start_it_mode()
 {
 	// Todo: check if start() has been called, and call it if not
-	i2cp_.enable_IT(2, 2);
+	i2c_periph_.enable_IT(2, 2);
 }
 
 // Start transferring via DMA, given a frame buffer and the hardware
@@ -68,7 +68,7 @@ LEDDriverError PCA9685Driver::set_single_led(uint8_t led_element_number, uint16_
 	data[4] = brightness >> 8;
 
 	// Todo: write_IT()
-	auto err = i2cp_.write(driver_addr, data, 5);
+	auto err = i2c_periph_.write(driver_addr, data, 5);
 
 	return (err == I2CPeriph::Error::I2C_NO_ERR) ? LEDDriverError::None
 												 : LEDDriverError::SET_LED_ERR;
@@ -118,7 +118,7 @@ PCA9685Driver::set_rgb_led(uint8_t led_number, uint16_t c_red, uint16_t c_green,
 	driverAddr = I2C_BASE_ADDRESS | (driverAddr << 1);
 
 	// Todo: write_IT()
-	auto err = i2cp_.write(driverAddr, data, 13);
+	auto err = i2c_periph_.write(driverAddr, data, 13);
 
 	return (err == I2CPeriph::Error::I2C_NO_ERR) ? LEDDriverError::None
 												 : LEDDriverError::I2C_XMIT_TIMEOUT;
@@ -156,7 +156,7 @@ PCA9685Driver::write_register(uint8_t driverAddr, uint8_t registerAddr, uint8_t 
 
 	driverAddr = I2C_BASE_ADDRESS | (driverAddr << 1);
 
-	auto err = i2cp_.write(driverAddr, data, 2);
+	auto err = i2c_periph_.write(driverAddr, data, 2);
 
 	return (err == I2CPeriph::Error::I2C_NO_ERR) ? LEDDriverError::None
 												 : LEDDriverError::I2C_XMIT_TIMEOUT;
