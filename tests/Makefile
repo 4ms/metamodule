@@ -63,7 +63,8 @@ CPPUTEST_CFLAGS += -Wno-missing-prototypes
 CPPUTEST_CFLAGS += -Wno-documentation\
 					-Wno-documentation-unknown-command \
 					-DTESTPROJECT \
-					-DSTM32F732xx \
+					-DSTM32F746xx \
+					-DSTM32F7 \
 					-DUSE_HAL_DRIVER \
 					-DUSE_FULL_LL_DRIVER \
 					-D'F_CPU=216000000' \
@@ -77,7 +78,8 @@ CPPUTEST_CXXFLAGS += -Wno-documentation \
 					-Wno-documentation-unknown-command\
 					-Wno-missing-noreturn \
 					-DTESTPROJECT \
-					-DSTM32F732xx \
+					-DSTM32F746xx \
+					-DSTM32F7 \
 					-DUSE_HAL_DRIVER \
 					-DUSE_FULL_LL_DRIVER \
 					-D'F_CPU=216000000' \
