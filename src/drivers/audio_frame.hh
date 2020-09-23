@@ -1,5 +1,5 @@
 #include "math.hh"
-#include <cstdint>
+#include <stdint.h>
 
 // Todo put this in a _config.h file
 static const int kAudioStreamBlockSize = 32;
@@ -21,14 +21,30 @@ public:
 	static const inline float kOutScaling = static_cast<float>(kMaxSampleTypeValue);
 
 public:
-	// Todo: use operators for these. operator float() and ...?
-	// clang-format off
-	static float scaleInput(SampleType val) { return convert_s24_to_s32(val) / kOutScaling; }
-	static SampleType scaleOutput(float val) { return static_cast<SampleType>(val * kOutScaling); }
-	// clang-format on
+	static float scaleInput(SampleType val)
+	{
+		return convert_s24_to_s32(val) / kOutScaling;
+	}
+	static SampleType scaleOutput(float val)
+	{
+		return static_cast<SampleType>(val * kOutScaling);
+	}
 
-	// Todo: use ASM sign-extension
-	// Todo: deduce if we need this based on shift amount
+	// Todo: test this, and check generated ASM
+	static inline constexpr SampleType sign_extend(const SampleType &v) noexcept
+	{
+		// static_assert(std::is_integral<SampleType>::value, "SampleType is not integral");
+		static_assert((sizeof(SampleType) * 8u) >= UsedBits,
+					  "SampleType is smaller than the specified width");
+		if constexpr ((sizeof(SampleType) * 8u) == UsedBits)
+			return v;
+		else {
+			using S = struct {
+				signed Val : UsedBits;
+			};
+			return reinterpret_cast<const S *>(&v)->Val;
+		}
+	}
 	static int32_t convert_s24_to_s32(int32_t src)
 	{
 		uint32_t in_24bit = src << 8;
