@@ -38,8 +38,8 @@ Controls::Controls()
 		.pri = 2,
 		.subpri = 0,
 	};
-	AdcPeriph<ADC_1>::init_dma(kADCDMAConfig);
-	AdcPeriph<ADC_1>::start_adc();
+	AdcPeriph<AdcPeriphNum::_1>::init_dma(kADCDMAConfig);
+	AdcPeriph<AdcPeriphNum::_1>::start_adc();
 
 	const TimekeeperConfig kControlReadTaskConfig = {
 		.TIMx = TIM6,

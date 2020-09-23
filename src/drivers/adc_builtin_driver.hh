@@ -33,74 +33,45 @@
 #include "stm32f7xx_ll_adc.h"
 #include <array>
 #include <stm32f7xx.h>
-//FixMe:
-//constexpr function as a template parameter is awkward.
-//Replace with ... int? 1 ==> ADC1, 2 ==> ADC2, 3 ==> ADC3, else static_assert a failure
-//then have a constexpr function: ADC_TypeDef *get_adc_periph(int periph_num);
-enum class AdcChanNum { _0,
-						_1,
-						_2,
-						_3,
-						_4,
-						_5,
-						_6,
-						_7,
-						_8,
-						_9,
-						_10,
-						_11,
-						_12,
-						_13,
-						_14,
-						_15 };
+// FixMe:
+// constexpr function as a template parameter is awkward.
+// Replace with ... int? 1 ==> ADC1, 2 ==> ADC2, 3 ==> ADC3, else static_assert a failure
+// then have a constexpr function: ADC_TypeDef *get_adc_periph(int periph_num);
+enum class AdcChanNum { _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15 };
+enum class AdcPeriphNum { _1, _2, _3 };
 
-using AdcPeripheral = ADC_TypeDef *;
-
-constexpr AdcPeripheral ADC_1()
-{
-	return ADC1;
-}
-constexpr AdcPeripheral ADC_2()
-{
-	return ADC2;
-}
-constexpr AdcPeripheral ADC_3()
-{
-	return ADC3;
-}
-
-template<AdcPeripheral ADC_X()>
+template<AdcPeriphNum ADCN>
 class AdcPeriph;
 
-template<AdcPeripheral ADC_X(), AdcChanNum c, typename T>
+template<AdcPeriphNum ADCN, AdcChanNum c, typename T>
 class AdcChan {
 public:
 	AdcChan(const uint32_t sampletime = LL_ADC_SAMPLINGTIME_144CYCLES)
 	{
-		auto init_adc_once = AdcPeriph<ADC_X>::AdcInstance();
-		AdcPeriph<ADC_X>::add_channel(c, sampletime);
+		auto init_adc_once = AdcPeriph<ADCN>::AdcInstance();
+		AdcPeriph<ADCN>::add_channel(c, sampletime);
 	}
 
 	T &get_val_ref()
-	{ //experimental, perhaps dangerous? Todo: create a read-only struct to return
-		return AdcPeriph<ADC_X>::get_val_ref(c);
+	{ // experimental, perhaps dangerous? Todo: create a read-only struct to return
+		return AdcPeriph<ADCN>::get_val_ref(c);
 	}
 
 	T get_val()
 	{
-		return AdcPeriph<ADC_X>::get_val(c);
+		return AdcPeriph<ADCN>::get_val(c);
 	}
 
 	void start_dma(const DMA_LL_Config dma_defs)
 	{
-		AdcPeriph<ADC_X>::init_dma(dma_defs);
-		AdcPeriph<ADC_X>::start_adc();
+		AdcPeriph<ADCN>::init_dma(dma_defs);
+		AdcPeriph<ADCN>::start_adc();
 	}
 };
 
-template<AdcPeripheral ADC_X()>
+template<AdcPeriphNum ADCN>
 class AdcPeriph {
-	template<AdcPeripheral p(), AdcChanNum c, typename T>
+	template<AdcPeriphNum p, AdcChanNum c, typename T>
 	friend class AdcChan;
 
 public:
@@ -122,7 +93,7 @@ private:
 	static void add_channel(const AdcChanNum channel, const uint32_t sampletime);
 
 	AdcPeriph();
-	static AdcPeriph<ADC_X> &AdcInstance();
+	static AdcPeriph<ADCN> &AdcInstance();
 
 	static inline uint8_t num_channels_;
 	static inline uint8_t ranks_[16];
@@ -131,4 +102,11 @@ private:
 	static inline IRQn_Type DMA_IRQn;
 	static inline uint8_t DMA_IRQ_pri;
 	static inline uint8_t DMA_IRQ_subpri;
+
+	static ADC_TypeDef *get_ADC_base(AdcPeriphNum p = ADCN)
+	{
+		return (p == AdcPeriphNum::_1)
+				   ? ADC1
+				   : (p == AdcPeriphNum::_2) ? ADC2 : (p == AdcPeriphNum::_3) ? ADC3 : nullptr;
+	}
 };
