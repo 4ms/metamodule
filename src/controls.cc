@@ -1,7 +1,7 @@
 #include "controls.hh"
 #include "debug.hh"
 #include "dma_config_struct.hh"
-#include "stm32f7xx_ll_dma.h"
+#include "defs/control_defs.hh"
 
 void Controls::read()
 {
@@ -30,23 +30,8 @@ void Controls::begin()
 
 Controls::Controls()
 {
-	const DMA_LL_Config kADCDMAConfig = {
-		.DMAx = DMA2,
-		.stream = LL_DMA_STREAM_0,
-		.channel = LL_DMA_CHANNEL_0,
-		.IRQn = DMA2_Stream0_IRQn,
-		.pri = 2,
-		.subpri = 0,
-	};
-	AdcPeriph<AdcPeriphNum::_1>::init_dma(kADCDMAConfig);
-	AdcPeriph<AdcPeriphNum::_1>::start_adc();
-
-	const TimekeeperConfig kControlReadTaskConfig = {
-		.TIMx = TIM6,
-		.period_ns = 11000,
-		.priority1 = 2,
-		.priority2 = 3,
-	};
+	CVADCPeriph::init_dma(kADCDMAConfig);
+	CVADCPeriph::start_adc();
 
 	read_controls_task.init(kControlReadTaskConfig, [this]() { read(); });
 }
