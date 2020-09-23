@@ -169,23 +169,23 @@ void SaiPeriph::_init_pins()
 	Pin sai_mclk{
 		saidef_.MCLK_GPIO, saidef_.MCLK_PIN,
 		PinMode::Alt, saidef_.MCLK_AF,
-		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
 	Pin sai_sclk{
 		saidef_.SCLK_GPIO, saidef_.SCLK_PIN,
 		PinMode::Alt, saidef_.SCLK_AF,
-		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
 	Pin sai_lrclk{
 		saidef_.LRCLK_GPIO, saidef_.LRCLK_PIN,
 		PinMode::Alt, saidef_.LRCLK_AF,
-		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_sdo{
-		saidef_.MRX_SDO_GPIO, saidef_.MRX_SDO_PIN,
-		PinMode::Alt, saidef_.MRX_SDO_AF,
-		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_sdi{
-		saidef_.MTX_SDI_GPIO, saidef_.MTX_SDI_PIN,
-		PinMode::Alt, saidef_.MTX_SDI_AF,
-		PinPull::Up, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+	Pin sai_mrx_adc{
+		saidef_.MRX_ADC_GPIO, saidef_.MRX_ADC_PIN,
+		PinMode::Alt, saidef_.MRX_ADC_AF,
+		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+	Pin sai_mtx_dac{
+		saidef_.MTX_DAC_GPIO, saidef_.MTX_DAC_PIN,
+		PinMode::Alt, saidef_.MTX_DAC_AF,
+		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
 }
 
 void SaiPeriph::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint32_t block_size)

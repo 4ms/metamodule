@@ -26,12 +26,12 @@ struct SaiDef {
 	uint8_t LRCLK_PIN;
 	uint8_t LRCLK_AF;
 
-	GPIO MTX_SDI_GPIO;
-	uint8_t MTX_SDI_PIN;
-	uint8_t MTX_SDI_AF;
+	GPIO MTX_DAC_GPIO;
+	uint8_t MTX_DAC_PIN;
+	uint8_t MTX_DAC_AF;
 
-	GPIO MRX_SDO_GPIO;
-	uint8_t MRX_SDO_PIN;
-	uint8_t MRX_SDO_AF;
+	GPIO MRX_ADC_GPIO;
+	uint8_t MRX_ADC_PIN;
+	uint8_t MRX_ADC_AF;
 };
 
