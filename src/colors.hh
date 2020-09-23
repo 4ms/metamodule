@@ -6,8 +6,8 @@ struct Color {
 	struct Adjustment {
 		uint8_t r, g, b;
 	};
-
-	explicit constexpr Color(uint8_t r, uint8_t g, uint8_t b)
+	
+	explicit constexpr Color(uint8_t r=0, uint8_t g=0, uint8_t b=0)
 		: r_(r)
 		, g_(g)
 		, b_(b)
