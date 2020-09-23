@@ -21,11 +21,7 @@ LEDDriverError PCA9685Driver::DMADriver::start_dma(const DMAConfig &dma_defs)
 
 	HAL_NVIC_SetPriority(dma_defs.IRQn, dma_defs.pri, dma_defs.subpri);
 	HAL_NVIC_EnableIRQ(dma_defs.IRQn);
-
-	HALCallback transfer_complete{HALCallbackID::I2C_MemTxCplt, [this]() {
-									  advance_frame_buffer();
-									  write_current_frame_to_chip();
-								  }};
+	
 
 	write_current_frame_to_chip();
 

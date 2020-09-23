@@ -63,6 +63,12 @@ private:
 		uint8_t cur_chip_num_ = 0;
 		uint32_t *frame_buffer_cur_pos;
 		uint32_t frame_buffer[kNumLedDriverChips * PCA9685Driver::kNumLedsPerChip];
+
+		HALCallback transfer_complete{
+			HALCallbackID::I2C_MemTxCplt, [this]() {
+				advance_frame_buffer();
+				write_current_frame_to_chip();
+			}};
 	};
 	friend class PCA9685Driver::DMADriver;
 	DMADriver dma_;

@@ -9,6 +9,9 @@
 #include "stm32f7xx.h"
 #include <array>
 
+//Todo: multiple Audio objects would overwrite the HALCallback: add another
+//param to HALLCallback ctor to give a process ID or SAI Periph# or HAL SAI
+//handle
 class Audio {
 public:
 	// Public methods:
