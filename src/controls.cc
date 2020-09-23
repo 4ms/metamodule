@@ -32,10 +32,10 @@ Controls::Controls()
 {
 	const DMA_LL_Config kADCDMAConfig = {
 		.DMAx = DMA2,
-		.stream = LL_DMA_STREAM_4,
+		.stream = LL_DMA_STREAM_0,
 		.channel = LL_DMA_CHANNEL_0,
-		.IRQn = DMA2_Stream4_IRQn,
-		.pri = 1,
+		.IRQn = DMA2_Stream0_IRQn,
+		.pri = 2,
 		.subpri = 0,
 	};
 	AdcPeriph<ADC_1>::init_dma(kADCDMAConfig);
