@@ -17,7 +17,7 @@ public:
 	virtual float update(float input)
 	{
 		phaccu += lfoSpeed / sampleRate;
-		if (phaccu > 1)
+		if (phaccu >= 1)
 			phaccu -= 1.0f;
 		sinLFO = sin(2.0f * M_PI * phaccu);
 		for (int i = 0; i < stages; i++) {
@@ -35,7 +35,7 @@ public:
 	Phaser()
 	{
 		for (int i = 0; i < stages; i++)
-			delay[i] = new DelayLine(10);
+			delay[i] = new DelayLine(4);
 	}
 
 	virtual void set_param(int param_id, float val)
