@@ -1,25 +1,24 @@
 #pragma once
+#include "sdram_config_struct.hh"
 #include "stm32xx.h"
 
-//Todo: template param for ram size, and bank#(?)
+// Todo: param for ram size, and bank#
 class SDRAMPeriph {
 public:
-	SDRAMPeriph() noexcept;
-	HAL_StatusTypeDef status;
-	bool test();
+	SDRAMPeriph(const SDRAMTimingConfig &timing,
+				const uint32_t base_addr,
+				const uint32_t sdram_size) noexcept;
+	uint32_t test();
 	bool is_busy();
+	void wait_until_ready();
 
-	//SDRAM Bank 2 is 4 x 64MB, from 0xD000 0000 to 0xDFFF FFFF
-	//Thus, we can access 0x10000000 addresses, or 256M addresses
-	//256Mbit = 32MByte = 0x02000000
-	const uint32_t SDRAM_BASE = 0xC0000000;
-	const uint32_t SDRAM_SIZE = 0x02000000;
-	
-	
+	const uint32_t ram_start;
+	const uint32_t ram_size;
+	HAL_StatusTypeDef status;
+
 private:
-	HAL_StatusTypeDef init();
+	HAL_StatusTypeDef init(const SDRAMTimingConfig &timing);
 	void init_gpio();
-
-	static inline SDRAM_HandleTypeDef hsdram1;
-
+	uint32_t do_sdram_test(uint32_t (*mapfunc)(uint32_t));
 };
+
