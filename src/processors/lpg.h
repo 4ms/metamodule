@@ -1,7 +1,7 @@
 #pragma once
 #include "audio_processor.hh"
 #include "lpf.h"
-#include "tools.h"
+#include "tools/expDecay.h"
 #include "vca.h"
 
 class LPG : public AudioProcessor {

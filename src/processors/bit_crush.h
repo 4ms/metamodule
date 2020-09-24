@@ -26,7 +26,13 @@ public:
 	virtual void set_param(int param_id, float val)
 	{
 		if (param_id == 0) {
-			reducedSampleRate = map_value(val, 0.0f, 1.0f, 1.0f, currentSampleRate / 2.0f);
+			float expoControl = val * val;
+			if ((expoControl) <= 0.9f) {
+				reducedSampleRate = map_value(expoControl, 0.0f, 0.9f, 0.1f, currentSampleRate / 16.0f);
+			}
+			else {
+				reducedSampleRate = map_value(expoControl, 0.9f, 1.0f, currentSampleRate / 16.0f, currentSampleRate / 2.0f);
+			}
 		}
 		if (param_id == 1) {
 			bitDepth = map_value(val, 0.0f, 1.0f, 1U, 16U);
