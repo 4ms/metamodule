@@ -13,7 +13,7 @@ System sys;
 Debug debug;
 
 // Note:
-// SDRAM Bank 2 is 4 x 64MB, from 0xC000 0000 to 0xC200 0000
+// SDRAM is 4 x 64MB, from 0xC000 0000 to 0xC200 0000
 // PCB p2 has only 12 address pins connected, so we can only
 // access up to 0xC080 0000, or 64MBit = 8MByte
 SDRAMPeriph sdram{SDRAMTiming_AS4C16M16SA_7CN, 0xC0000000, 0x00800000};
