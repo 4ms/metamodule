@@ -24,10 +24,12 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
 	params.update();
 	check_fx_change();
+
 	current_fx[LEFT]->set_param(0, params.freq[0]);
 	current_fx[LEFT]->set_param(1, params.res[0]);
 	current_fx[RIGHT]->set_param(0, params.freq[1]);
 	current_fx[RIGHT]->set_param(1, params.res[1]);
+	//freq0.set_new_value(params.freq[0]);
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
@@ -39,6 +41,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		unscaled_out = current_fx[RIGHT]->update(scaled_in);
 		out_.r = AudioFrame::scaleOutput(unscaled_out);
 
+		//current_fx[LEFT]->set_param(0, freq0.next());
 		in_++;
 	}
 }

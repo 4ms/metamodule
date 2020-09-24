@@ -71,6 +71,11 @@ private:
 		foldSamp[2] = interpolate(fold2[firstLookup], fold2[secondLookup], interpVal);
 		foldSamp[3] = interpolate(fold3[firstLookup], fold3[secondLookup], interpVal);
 
+		// InterpArray<float, 512> fold1, fold2, fold3;
+		// foldSamp[1] = fold1.interp(lookupIndex);
+		// foldSamp[2] = fold2.interp(lookupIndex);
+		// foldSamp[3] = fold3.interp(lookupIndex);
+
 		float foldLevel = mainFold * 3.0f;
 		float foldPartial = foldLevel - (long)foldLevel;
 
