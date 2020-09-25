@@ -87,16 +87,10 @@ private:
 		float gainedInput = input * scaledMainFold;
 
 		float lookupIndex = map_value(gainedInput, -1.0f, 1.0f, 0.0f, 1024.0f);
-		float interpVal = lookupIndex - (long)lookupIndex;
-		int firstLookup = lookupIndex;
-		int secondLookup = (firstLookup + 1) % 1025;
-		float foldSamp = interpolate(fold[firstLookup], fold[secondLookup], interpVal);
+		float foldSamp = fold.interp(lookupIndex);
 
 		lookupIndex = map_value(mainFold, 0.f, 1.0f, 0.0f, 512.0f);
-		interpVal = lookupIndex - (long)lookupIndex;
-		firstLookup = lookupIndex;
-		secondLookup = (firstLookup + 1) % 512;
-		float foldMax = interpolate(fold_max[firstLookup], fold_max[secondLookup], interpVal);
+		float foldMax = fold_max.interp(lookupIndex);
 
 		float output = foldSamp * foldMax;
 
