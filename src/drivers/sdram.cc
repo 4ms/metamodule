@@ -4,6 +4,10 @@
 #include "stm32f7xx_ll_gpio.h"
 #include "stm32xx.h"
 
+//Todo: {GPIO, pin, AF} inside an config defs array to init the pins
+
+//#define SDRAM_DO_TESTS
+
 SDRAMPeriph::SDRAMPeriph(const SDRAMTimingConfig &timing,
 						 const uint32_t base_addr,
 						 const uint32_t sdram_size) noexcept
@@ -13,6 +17,14 @@ SDRAMPeriph::SDRAMPeriph(const SDRAMTimingConfig &timing,
 {
 	init_gpio();
 	status = init(timing);
+
+#ifdef SDRAM_DO_TESTS
+	uint32_t sdram_fails = test();
+	if (sdram_fails) {
+		// dummy code to allow us to set a breakpoint with a debugger
+		asm("nop");
+	}
+#endif	
 }
 
 HAL_StatusTypeDef SDRAMPeriph::init(const SDRAMTimingConfig &timing)
