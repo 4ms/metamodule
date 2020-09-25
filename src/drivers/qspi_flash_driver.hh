@@ -2,7 +2,7 @@
 #include "math.hh"
 #include "qspi_flash_registers.h"
 #include "stm32xx.h"
-#include "qspi_flash_defs.hh"
+#include "defs/qspi_flash_defs.hh"
 #include "qspi_flash_struct.hh"
 
 class QSpiFlash {

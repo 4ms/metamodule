@@ -53,11 +53,11 @@ QSpiFlash::QSpiFlash(const QSPIFlashConfig &defs)
 
 	/* QSPI initialization */
 	/* QSPI freq = SYSCLK /(1 + ClockPrescaler) = 216 MHz/(1+1) = 108 Mhz */
-	handle.Init.ClockPrescaler = 255;
+	handle.Init.ClockPrescaler = 1;
 	handle.Init.FifoThreshold = 1;
 	handle.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
 	handle.Init.FlashSize = QSPI_FLASH_SIZE_ADDRESSBITS - 1;
-	handle.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_8_CYCLE; // was 1
+	handle.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_1_CYCLE; // was 1
 	handle.Init.ClockMode = QSPI_CLOCK_MODE_0;
 	handle.Init.FlashID = QSPI_FLASH_ID_1;
 	handle.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
@@ -89,71 +89,17 @@ void QSpiFlash::GPIO_Init_IO0_IO1(const QSPIFlashConfig &defs)
 	Pin clk {defs.clk.gpio, defs.clk.pin, PinMode::Alt, defs.clk.af, PinPull::None};
 	Pin io0 {defs.io0.gpio, defs.io0.pin, PinMode::Alt, defs.io0.af, PinPull::None};
 	Pin io1 {defs.io1.gpio, defs.io1.pin, PinMode::Alt, defs.io1.af, PinPull::None};
-	Pin hold {defs.io2.gpio, defs.io2.pin, PinMode::Output, PinAF::AFNone, PinPull::None};
-	Pin wp {defs.io3.gpio, defs.io3.pin, PinMode::Output, PinAF::AFNone, PinPull::None};
+	Pin wp {defs.io2.gpio, defs.io2.pin, PinMode::Output, PinAF::AFNone, PinPull::None};
+	Pin hold {defs.io3.gpio, defs.io3.pin, PinMode::Output, PinAF::AFNone, PinPull::None};
+	//Set /HOLD and /WP pins high to disable holding and write protection, until we enter QPI mode
 	hold.high();
 	wp.high();
-
-	GPIO_InitTypeDef gpio;
-
-// 	QSPI_CS_GPIO_CLK_ENABLE();
-// 	QSPI_CLK_GPIO_CLK_ENABLE();
-// 	QSPI_D0_GPIO_CLK_ENABLE();
-// 	QSPI_D1_GPIO_CLK_ENABLE();
-// 	QSPI_D2_GPIO_CLK_ENABLE();
-// 	QSPI_D3_GPIO_CLK_ENABLE();
-
-// 	gpio.Mode = GPIO_MODE_AF_PP;
-// 	gpio.Speed = GPIO_SPEED_FREQ_HIGH;
-// 	gpio.Pull = GPIO_PULLUP;
-
-// 	gpio.Pin = QSPI_CS_PIN;
-// 	gpio.Alternate = QSPI_CS_PIN_AF;
-// 	HAL_GPIO_Init(QSPI_CS_GPIO_PORT, &gpio);
-
-// 	gpio.Pin = QSPI_CLK_PIN;
-// 	gpio.Alternate = QSPI_CLK_PIN_AF;
-// 	gpio.Pull = GPIO_NOPULL;
-// 	HAL_GPIO_Init(QSPI_CLK_GPIO_PORT, &gpio);
-
-// 	gpio.Pin = QSPI_D0_PIN;
-// 	gpio.Alternate = QSPI_D0_PIN_AF;
-// 	HAL_GPIO_Init(QSPI_D0_GPIO_PORT, &gpio);
-
-// 	gpio.Pin = QSPI_D1_PIN;
-// 	gpio.Alternate = QSPI_D1_PIN_AF;
-// 	HAL_GPIO_Init(QSPI_D1_GPIO_PORT, &gpio);
-
-// 	// IO2 and IO3 are pulled high to disable HOLD and WP
-// 	gpio.Mode = GPIO_MODE_OUTPUT_PP;
-// 	gpio.Pin = QSPI_D2_PIN;
-// 	HAL_GPIO_Init(QSPI_D2_GPIO_PORT, &gpio);
-// 	QSPI_D2_GPIO_PORT->BSRR = QSPI_D2_PIN;
-
-// 	gpio.Mode = GPIO_MODE_OUTPUT_PP;
-// 	gpio.Pin = QSPI_D3_PIN;
-// 	HAL_GPIO_Init(QSPI_D3_GPIO_PORT, &gpio);
-// 	QSPI_D3_GPIO_PORT->BSRR = QSPI_D3_PIN;
 }
 
 void QSpiFlash::GPIO_Init_IO2_IO3_AF(const QSPIFlashConfig &defs)
 {
-	Pin io2 {defs.io2.gpio, defs.io2.pin, PinMode::Output, defs.io2.af, PinPull::None};
-	Pin io3 {defs.io3.gpio, defs.io3.pin, PinMode::Output, defs.io3.af, PinPull::None};
-
-	// GPIO_InitTypeDef gpio;
-
-	// gpio.Mode = GPIO_MODE_AF_PP;
-	// gpio.Speed = GPIO_SPEED_FREQ_HIGH;
-	// gpio.Pull = GPIO_NOPULL;
-
-	// gpio.Pin = QSPI_D2_PIN;
-	// gpio.Alternate = QSPI_D2_PIN_AF;
-	// HAL_GPIO_Init(QSPI_D2_GPIO_PORT, &gpio);
-
-	// gpio.Pin = QSPI_D3_PIN;
-	// gpio.Alternate = QSPI_D3_PIN_AF;
-	// HAL_GPIO_Init(QSPI_D3_GPIO_PORT, &gpio);
+	Pin io2 {defs.io2.gpio, defs.io2.pin, PinMode::Alt, defs.io2.af, PinPull::None};
+	Pin io3 {defs.io3.gpio, defs.io3.pin, PinMode::Alt, defs.io3.af, PinPull::None};
 }
 
 void QSpiFlash::init_command(QSPI_CommandTypeDef *s_command)

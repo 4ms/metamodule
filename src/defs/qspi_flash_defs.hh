@@ -9,3 +9,4 @@ const QSPIFlashConfig kQSPIDefs = {
 	.clk = {GPIO::B, 2, LL_GPIO_AF_9},
 	.cs = {GPIO::B, 6, LL_GPIO_AF_10},
 };
+

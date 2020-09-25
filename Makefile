@@ -73,7 +73,7 @@ ARCH_CFLAGS = -DARM_MATH_CM7 \
 			  -DSTM32F746xx \
 			  -DSTM32F7
 
-OPTFLAG = -O0
+OPTFLAG = -O3
 
 CFLAGS = -g2 -fno-common \
 	$(ARCH_CFLAGS) $(MCU) \
