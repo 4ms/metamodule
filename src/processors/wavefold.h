@@ -1,4 +1,5 @@
 #pragma once
+#include "../util/interp_array.hh"
 #include "audio_processor.hh"
 #include "tools.h"
 #include "wavefold_tables.h" //Tables from new g++ project
@@ -29,7 +30,7 @@ public:
 
 	WaveFolder()
 	{
-		//Generate fold tables
+		// Generate fold tables
 		for (int i = 0; i < 512; i++) {
 			fold1[i] = map_value(fmodf(i, 256.f), 0.0f, 255.0f, -1.0f, 1.0f);
 			fold2[i] = map_value(fmodf(i, 170.6666666667), 0.0f, (512.f / 3.0f - 1.f), -1.0f, 1.0f);
@@ -46,35 +47,25 @@ public:
 			foldType = val * 3.0f;
 		}
 	}
-	virtual void set_samplerate(float sr)
-	{
-	}
+	virtual void set_samplerate(float sr) {}
 
 private:
 	float mainFold;
 
 	float foldType = 0;
-	float fold1[512] = {0};
-	float fold2[512] = {0};
-	float fold3[512] = {0};
+
+	InterpArray<float, 512> fold1, fold2, fold3;
 
 	float sharpFold(float input)
 	{
 		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 511.0f);
-		float interpVal = lookupIndex - (long)lookupIndex;
-		int firstLookup = lookupIndex;
-		int secondLookup = (firstLookup + 1) % 512;
 
 		float foldSamp[4];
 		foldSamp[0] = input;
-		foldSamp[1] = interpolate(fold1[firstLookup], fold1[secondLookup], interpVal);
-		foldSamp[2] = interpolate(fold2[firstLookup], fold2[secondLookup], interpVal);
-		foldSamp[3] = interpolate(fold3[firstLookup], fold3[secondLookup], interpVal);
 
-		// InterpArray<float, 512> fold1, fold2, fold3;
-		// foldSamp[1] = fold1.interp(lookupIndex);
-		// foldSamp[2] = fold2.interp(lookupIndex);
-		// foldSamp[3] = fold3.interp(lookupIndex);
+		foldSamp[1] = fold1.interp(lookupIndex);
+		foldSamp[2] = fold2.interp(lookupIndex);
+		foldSamp[3] = fold3.interp(lookupIndex);
 
 		float foldLevel = mainFold * 3.0f;
 		float foldPartial = foldLevel - (long)foldLevel;
@@ -88,9 +79,10 @@ private:
 
 	float cleanFold(float input)
 	{
-		//float scaledMainFold = constrain(mainFold + 0.004f, 0.f, 1.f);
-		//Todo: scale mainFold so it goes to 0, but slowly goes up to 0.004f
-		// Or constrain to 0.004...1.0f and add a VCA that goes to 0->1.0 as mainFold goes 0->0.1 (or so)
+		// float scaledMainFold = constrain(mainFold + 0.004f, 0.f, 1.f);
+		// Todo: scale mainFold so it goes to 0, but slowly goes up to 0.004f
+		// Or constrain to 0.004...1.0f and add a VCA that goes to 0->1.0 as mainFold goes 0->0.1
+		// (or so)
 		float scaledMainFold = mainFold;
 		float gainedInput = input * scaledMainFold;
 
@@ -146,7 +138,8 @@ private:
 		float foldSamp[9];
 		foldSamp[0] = input;
 		for (int i = 0; i < 8; i++) {
-			foldSamp[i + 1] = interpolate(triangles[i][firstLookup], triangles[i][secondLookup], interpVal);
+			foldSamp[i + 1] =
+				interpolate(triangles[i][firstLookup], triangles[i][secondLookup], interpVal);
 		}
 
 		float foldLevel = mainFold * 8.0f;
