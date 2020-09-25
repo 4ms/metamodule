@@ -4,11 +4,21 @@
 #include "stm32f7xx_ll_gpio.h"
 #include "stm32xx.h"
 
-//Todo: {GPIO, pin, AF} inside an config defs array to init the pins
+// Todo: put {GPIO, pin, AF} inside an config defs array to init the pins
+// Todo: put the rest of these into the sdram config struct:
+// Bank 1/2
+// Column bits (can we calc this?)
+// Row bits (= address bits?)
+// Bus Width (8/16)
+// Num Banks
+// RBurst ?
+// RPipe Delay?
+// Refresh Rate (64ms)
+// Number of rows (8192)
 
 //#define SDRAM_DO_TESTS
 
-SDRAMPeriph::SDRAMPeriph(const SDRAMTimingConfig &timing,
+SDRAMPeriph::SDRAMPeriph(const SDRAMTimingConfig &defs,
 						 const uint32_t base_addr,
 						 const uint32_t sdram_size) noexcept
 	: ram_start(base_addr)
@@ -16,7 +26,7 @@ SDRAMPeriph::SDRAMPeriph(const SDRAMTimingConfig &timing,
 	, status(HAL_ERROR)
 {
 	init_gpio();
-	status = init(timing);
+	status = init(defs);
 
 #ifdef SDRAM_DO_TESTS
 	uint32_t sdram_fails = test();
@@ -24,13 +34,20 @@ SDRAMPeriph::SDRAMPeriph(const SDRAMTimingConfig &timing,
 		// dummy code to allow us to set a breakpoint with a debugger
 		asm("nop");
 	}
-#endif	
+#endif
 }
 
-HAL_StatusTypeDef SDRAMPeriph::init(const SDRAMTimingConfig &timing)
+HAL_StatusTypeDef SDRAMPeriph::init(const SDRAMTimingConfig &defs)
 {
 	__HAL_RCC_FMC_CLK_ENABLE();
 
+	config_timing(defs);
+	start_refresh(defs);
+	return HAL_OK;
+}
+
+void SDRAMPeriph::config_timing(const SDRAMTimingConfig &defs)
+{
 	auto num_to_CAS = [](uint8_t cas_latency) {
 		return cas_latency == 2
 				   ? FMC_SDRAM_CAS_LATENCY_2
@@ -42,43 +59,46 @@ HAL_StatusTypeDef SDRAMPeriph::init(const SDRAMTimingConfig &timing)
 		clockdiv = (uint32_t)(rounded / 1000000U);
 		return clockdiv;
 	};
-	uint32_t sdram_clock = SystemCoreClock / freq_to_clockdiv(timing.max_freq_MHz);
-	auto ns_to_hclks = [sdram_clock = sdram_clock](uint8_t ns) {
+	sdram_clock_ = SystemCoreClock / freq_to_clockdiv(defs.max_freq_MHz);
+	auto ns_to_hclks = [sdram_clock = sdram_clock_](uint8_t ns) {
 		return (sdram_clock / 1000000) * ns;
 	};
 
 	FMC_SDRAM_TimingTypeDef SdramTiming = {
-		.LoadToActiveDelay = ns_to_hclks(timing.tMRD_ns),
-		.ExitSelfRefreshDelay = ns_to_hclks(timing.tXSR_ns),
-		.SelfRefreshTime = ns_to_hclks(timing.tRAS_ns),
-		.RowCycleDelay = ns_to_hclks(timing.tRC_ns),
-		.WriteRecoveryTime = ns_to_hclks(timing.tWR_ns),
-		.RPDelay = ns_to_hclks(timing.tRP_ns),
-		.RCDDelay = ns_to_hclks(timing.tRCD_ns),
+		.LoadToActiveDelay = ns_to_hclks(defs.tMRD_ns),
+		.ExitSelfRefreshDelay = ns_to_hclks(defs.tXSR_ns),
+		.SelfRefreshTime = ns_to_hclks(defs.tRAS_ns),
+		.RowCycleDelay = ns_to_hclks(defs.tRC_ns),
+		.WriteRecoveryTime = ns_to_hclks(defs.tWR_ns),
+		.RPDelay = ns_to_hclks(defs.tRP_ns),
+		.RCDDelay = ns_to_hclks(defs.tRCD_ns),
 	};
 
-	// Todo: put the rest of these into the sdram config struct
 	FMC_SDRAM_InitTypeDef init = {
 		.SDBank = FMC_SDRAM_BANK1,
 		.ColumnBitsNumber = FMC_SDRAM_COLUMN_BITS_NUM_8,
 		.RowBitsNumber = FMC_SDRAM_ROW_BITS_NUM_12,
 		.MemoryDataWidth = FMC_SDRAM_MEM_BUS_WIDTH_16,
 		.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4,
-		.CASLatency = num_to_CAS(timing.CAS_latency),
+		.CASLatency = num_to_CAS(defs.CAS_latency),
 		.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE,
-		.SDClockPeriod = freq_to_clockdiv(timing.max_freq_MHz) == 2 ? FMC_SDRAM_CLOCK_PERIOD_2
-																	: FMC_SDRAM_CLOCK_PERIOD_3,
+		.SDClockPeriod = freq_to_clockdiv(defs.max_freq_MHz) == 2 ? FMC_SDRAM_CLOCK_PERIOD_2
+																  : FMC_SDRAM_CLOCK_PERIOD_3,
 		.ReadBurst = FMC_SDRAM_RBURST_ENABLE,
 		.ReadPipeDelay = FMC_SDRAM_RPIPE_DELAY_2,
 	};
 
 	FMC_SDRAM_Init(FMC_SDRAM_DEVICE, &init);
 	FMC_SDRAM_Timing_Init(FMC_SDRAM_DEVICE, &SdramTiming, init.SDBank);
+}
+
+void SDRAMPeriph::start_refresh(const SDRAMTimingConfig &defs)
+{
+	FMC_SDRAM_CommandTypeDef cmd;
+
 	wait_until_ready();
 
-	FMC_SDRAM_CommandTypeDef cmd;
 	// CLK ENABLE command
-	// FMC_Bank5_6->SDCMR = 1 | FMC_SDCMR_CTB1 | (1 << 5);
 	cmd = {.CommandMode = FMC_SDRAM_CMD_CLK_ENABLE,
 		   .CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1,
 		   .AutoRefreshNumber = 2,
@@ -89,7 +109,6 @@ HAL_StatusTypeDef SDRAMPeriph::init(const SDRAMTimingConfig &timing)
 	wait_until_ready();
 
 	// All Bank Precharge command
-	// FMC_Bank5_6->SDCMR = 2 | FMC_SDCMR_CTB1 | (1 << 5);
 	cmd = {.CommandMode = FMC_SDRAM_CMD_PALL,
 		   .CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1,
 		   .AutoRefreshNumber = 2,
@@ -98,7 +117,6 @@ HAL_StatusTypeDef SDRAMPeriph::init(const SDRAMTimingConfig &timing)
 	wait_until_ready();
 
 	// Auto-refresh command
-	// FMC_Bank5_6->SDCMR = 3 | FMC_SDCMR_CTB1 | (4 << 5);
 	cmd = {.CommandMode = FMC_SDRAM_CMD_AUTOREFRESH_MODE,
 		   .CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1,
 		   .AutoRefreshNumber = 5,
@@ -107,11 +125,11 @@ HAL_StatusTypeDef SDRAMPeriph::init(const SDRAMTimingConfig &timing)
 	wait_until_ready();
 
 	// Load Mode Register
+	// Todo: Calculate this constant based on defs (add new config fields if needed)
 	// Mode Register = 0x231: burst length 2, burst type sequential, CAS latency 3 clocks, Write
 	// burst mode single bit, normal operation mode.
 	// Mode Register = 0x030: burst length 1, burst type sequential, CAS latency 3 clocks, Write
 	// burst mode = single location access, normal operation mode
-	// FMC_Bank5_6->SDCMR = 4 | FMC_SDCMR_CTB1 | (1 << 5) | (0x231 << 9);
 	cmd = {.CommandMode = FMC_SDRAM_CMD_LOAD_MODE,
 		   .CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1,
 		   .AutoRefreshNumber = 2,
@@ -119,17 +137,12 @@ HAL_StatusTypeDef SDRAMPeriph::init(const SDRAMTimingConfig &timing)
 	FMC_SDRAM_SendCommand(FMC_SDRAM_DEVICE, &cmd, 0);
 	wait_until_ready();
 
-	auto refresh_ms_to_rate = [HCLK = SystemCoreClock](uint32_t refresh_ms) {
-
+	// Refresh rate in number of SDCLK clock cycles between the refresh cycles
+	auto refresh_ms_to_rate = [sdram_clock = sdram_clock_](uint32_t refresh_ms, uint32_t num_rows) {
+		return sdram_clock * refresh_ms / (num_rows * 1000);
 	};
-	// refresh rate in number of SDCLK clock cycles between the refresh cycles
-	// 683 = 7.6uS x 90Mhz
-	// 7.6uS x 8196 rows = 62ms refresh rate
-	// FMC_Bank5_6->SDRTR |= (663 << 1);
-	FMC_SDRAM_ProgramRefreshRate(FMC_SDRAM_DEVICE, 633);
+	FMC_SDRAM_ProgramRefreshRate(FMC_SDRAM_DEVICE, refresh_ms_to_rate(64, 8192));
 	wait_until_ready();
-
-	return HAL_OK;
 }
 
 void SDRAMPeriph::init_gpio()

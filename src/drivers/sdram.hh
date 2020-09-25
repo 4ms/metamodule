@@ -5,7 +5,7 @@
 // Todo: param for ram size, and bank#
 class SDRAMPeriph {
 public:
-	SDRAMPeriph(const SDRAMTimingConfig &timing,
+	SDRAMPeriph(const SDRAMTimingConfig &defs,
 				const uint32_t base_addr,
 				const uint32_t sdram_size) noexcept;
 	uint32_t test();
@@ -17,8 +17,12 @@ public:
 	HAL_StatusTypeDef status;
 
 private:
-	HAL_StatusTypeDef init(const SDRAMTimingConfig &timing);
+	HAL_StatusTypeDef init(const SDRAMTimingConfig &defs);
+	void config_timing(const SDRAMTimingConfig &defs);
+	void start_refresh(const SDRAMTimingConfig &defs);
 	void init_gpio();
 	uint32_t do_sdram_test(uint32_t (*mapfunc)(uint32_t));
+
+	uint32_t sdram_clock_;
 };
 
