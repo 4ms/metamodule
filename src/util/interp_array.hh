@@ -1,8 +1,17 @@
 #pragma once
+#include <cstddef>
 
 template<typename T, unsigned int Size>
 struct InterpArray {
 	T data[Size];
+
+	InterpArray() = default;
+
+	InterpArray(T initval)
+	{
+		for (size_t i = 0; i < Size; i++)
+			data[i] = initval;
+	}
 
 	T &operator[](const unsigned int index)
 	{
