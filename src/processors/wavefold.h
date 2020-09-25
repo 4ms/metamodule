@@ -58,7 +58,7 @@ private:
 
 	float sharpFold(float input)
 	{
-		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 511.0f);
+		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 1.0f);
 
 		float foldSamp[4];
 		foldSamp[0] = input;
@@ -86,10 +86,10 @@ private:
 		float scaledMainFold = mainFold;
 		float gainedInput = input * scaledMainFold;
 
-		float lookupIndex = map_value(gainedInput, -1.0f, 1.0f, 0.0f, 1024.0f);
+		float lookupIndex = map_value(gainedInput, -1.0f, 1.0f, 0.0f, 1.0f);
 		float foldSamp = fold.interp(lookupIndex);
 
-		lookupIndex = map_value(mainFold, 0.f, 1.0f, 0.0f, 512.0f);
+		lookupIndex = map_value(mainFold, 0.f, 1.0f, 0.0f, 1.0f);
 		float foldMax = fold_max.interp(lookupIndex);
 
 		float output = foldSamp * foldMax;
@@ -101,15 +101,12 @@ private:
 	{
 		int cheby_tables = 16;
 		int cheby_size = 513;
-		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, (float)(cheby_size - 1));
-		float interpVal = lookupIndex - (long)lookupIndex;
-		int firstLookup = lookupIndex;
-		int secondLookup = (firstLookup + 1) % cheby_size;
+		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 1.0f);
 
 		float foldSamp[cheby_tables + 1];
 		foldSamp[0] = input;
 		for (int i = 0; i < cheby_tables; i++) {
-			foldSamp[i + 1] = interpolate(cheby[i][firstLookup], cheby[i][secondLookup], interpVal);
+			foldSamp[i + 1] = cheby[i].interp(lookupIndex);
 		}
 
 		float foldLevel = mainFold * float(cheby_tables);
@@ -124,16 +121,12 @@ private:
 
 	float triFold(float input)
 	{
-		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 8.0f);
-		float interpVal = lookupIndex - (long)lookupIndex;
-		int firstLookup = lookupIndex;
-		int secondLookup = (firstLookup + 1) % 9;
+		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 1.0f);
 
 		float foldSamp[9];
 		foldSamp[0] = input;
 		for (int i = 0; i < 8; i++) {
-			foldSamp[i + 1] =
-				interpolate(triangles[i][firstLookup], triangles[i][secondLookup], interpVal);
+			foldSamp[i + 1] = triangles[i].interp(lookupIndex);
 		}
 
 		float foldLevel = mainFold * 8.0f;
