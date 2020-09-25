@@ -1,10 +1,17 @@
 #pragma once
-#include <cstddef>
-#include <array>
 
 template<typename T, unsigned int Size>
-struct InterpArray : public std::array<T, Size> {
-	
+struct InterpArray {
+	T data[Size];
+
+	T &operator[](const unsigned int index)
+	{
+		return data[index];
+	}
+	const T operator[](const unsigned int index) const
+	{
+		return data[index];
+	}
 	constexpr float interp_by_index(const float index) const
 	{
 		unsigned int idx0 = static_cast<unsigned int>(index);
@@ -13,13 +20,12 @@ struct InterpArray : public std::array<T, Size> {
 		if (idx1 >= Size)
 			idx1 = 0;
 
-		return (*this)[idx0] + ((*this)[idx1] - (*this)[idx0]) * phase;
+		return data[idx0] + (data[idx1] - data[idx0]) * phase;
 	}
 
 	constexpr float interp(const float phase) const
 	{
-		float const index = phase * (Size-1);
+		float const index = phase * (Size - 1);
 		return interp_by_index(index);
 	}
 };
-

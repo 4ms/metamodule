@@ -15,7 +15,7 @@ TEST_GROUP(interp_array_tests){
 
 TEST(interp_array_tests, inits_with_single_value_sets_just_first_element)
 {
-	InterpArray<long, 4> x = {{42}};
+	InterpArray<long, 4> x = {42};
 	LONGS_EQUAL(42, x[0]);
 	LONGS_EQUAL(0, x[1]);
 	LONGS_EQUAL(0, x[2]);
@@ -25,7 +25,7 @@ TEST(interp_array_tests, inits_with_single_value_sets_just_first_element)
 
 TEST(interp_array_tests, inits_to_multiple_values)
 {
-	InterpArray<long, 3> x = {{42, 43, 44}};
+	InterpArray<long, 3> x = {42, 43, 44};
 	LONGS_EQUAL(42, x[0]);
 	LONGS_EQUAL(43, x[1]);
 	LONGS_EQUAL(44, x[2]);
