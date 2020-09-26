@@ -3,8 +3,8 @@
 #include "qspi_flash_registers.h"
 
 //Todo: use an init struct
-#define QSPI_DO_TESTS
 
+//#define QSPI_DO_TESTS
 
 constexpr uint32_t QSpiFlash::get_64kblock_addr(uint8_t block64k_num)
 {
