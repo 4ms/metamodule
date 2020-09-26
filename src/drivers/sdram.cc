@@ -18,15 +18,16 @@
 
 //#define SDRAM_DO_TESTS
 
-SDRAMPeriph::SDRAMPeriph(const SDRAMTimingConfig &defs,
+SDRAMPeriph::SDRAMPeriph(const SDRAMConfig &sdram_defs,
 						 const uint32_t base_addr,
 						 const uint32_t sdram_size) noexcept
 	: ram_start(base_addr)
 	, ram_size(sdram_size)
 	, status(HAL_ERROR)
+	, defs(sdram_defs)
 {
 	init_gpio();
-	status = init(defs);
+	status = init();
 
 #ifdef SDRAM_DO_TESTS
 	uint32_t sdram_fails = test();
@@ -37,16 +38,16 @@ SDRAMPeriph::SDRAMPeriph(const SDRAMTimingConfig &defs,
 #endif
 }
 
-HAL_StatusTypeDef SDRAMPeriph::init(const SDRAMTimingConfig &defs)
+HAL_StatusTypeDef SDRAMPeriph::init()
 {
 	__HAL_RCC_FMC_CLK_ENABLE();
 
-	config_timing(defs);
-	start_refresh(defs);
+	config_timing();
+	start_refresh();
 	return HAL_OK;
 }
 
-void SDRAMPeriph::config_timing(const SDRAMTimingConfig &defs)
+void SDRAMPeriph::config_timing()
 {
 	auto num_to_CAS = [](uint8_t cas_latency) {
 		return cas_latency == 2
@@ -59,19 +60,19 @@ void SDRAMPeriph::config_timing(const SDRAMTimingConfig &defs)
 		clockdiv = (uint32_t)(rounded / 1000000U);
 		return clockdiv;
 	};
-	sdram_clock_ = SystemCoreClock / freq_to_clockdiv(defs.max_freq_MHz);
+	sdram_clock_ = SystemCoreClock / freq_to_clockdiv(defs.timing.max_freq_MHz);
 	auto ns_to_hclks = [sdram_clock = sdram_clock_](uint8_t ns) {
 		return (sdram_clock / 1000000) * ns;
 	};
 
 	FMC_SDRAM_TimingTypeDef SdramTiming = {
-		.LoadToActiveDelay = ns_to_hclks(defs.tMRD_ns),
-		.ExitSelfRefreshDelay = ns_to_hclks(defs.tXSR_ns),
-		.SelfRefreshTime = ns_to_hclks(defs.tRAS_ns),
-		.RowCycleDelay = ns_to_hclks(defs.tRC_ns),
-		.WriteRecoveryTime = ns_to_hclks(defs.tWR_ns),
-		.RPDelay = ns_to_hclks(defs.tRP_ns),
-		.RCDDelay = ns_to_hclks(defs.tRCD_ns),
+		.LoadToActiveDelay = ns_to_hclks(defs.timing.tMRD_ns),
+		.ExitSelfRefreshDelay = ns_to_hclks(defs.timing.tXSR_ns),
+		.SelfRefreshTime = ns_to_hclks(defs.timing.tRAS_ns),
+		.RowCycleDelay = ns_to_hclks(defs.timing.tRC_ns),
+		.WriteRecoveryTime = ns_to_hclks(defs.timing.tWR_ns),
+		.RPDelay = ns_to_hclks(defs.timing.tRP_ns),
+		.RCDDelay = ns_to_hclks(defs.timing.tRCD_ns),
 	};
 
 	FMC_SDRAM_InitTypeDef init = {
@@ -80,10 +81,10 @@ void SDRAMPeriph::config_timing(const SDRAMTimingConfig &defs)
 		.RowBitsNumber = FMC_SDRAM_ROW_BITS_NUM_12,
 		.MemoryDataWidth = FMC_SDRAM_MEM_BUS_WIDTH_16,
 		.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4,
-		.CASLatency = num_to_CAS(defs.CAS_latency),
+		.CASLatency = num_to_CAS(defs.timing.CAS_latency),
 		.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE,
-		.SDClockPeriod = freq_to_clockdiv(defs.max_freq_MHz) == 2 ? FMC_SDRAM_CLOCK_PERIOD_2
-																  : FMC_SDRAM_CLOCK_PERIOD_3,
+		.SDClockPeriod = freq_to_clockdiv(defs.timing.max_freq_MHz) == 2 ? FMC_SDRAM_CLOCK_PERIOD_2
+																		 : FMC_SDRAM_CLOCK_PERIOD_3,
 		.ReadBurst = FMC_SDRAM_RBURST_ENABLE,
 		.ReadPipeDelay = FMC_SDRAM_RPIPE_DELAY_2,
 	};
@@ -92,7 +93,7 @@ void SDRAMPeriph::config_timing(const SDRAMTimingConfig &defs)
 	FMC_SDRAM_Timing_Init(FMC_SDRAM_DEVICE, &SdramTiming, init.SDBank);
 }
 
-void SDRAMPeriph::start_refresh(const SDRAMTimingConfig &defs)
+void SDRAMPeriph::start_refresh()
 {
 	FMC_SDRAM_CommandTypeDef cmd;
 
@@ -147,45 +148,55 @@ void SDRAMPeriph::start_refresh(const SDRAMTimingConfig &defs)
 
 void SDRAMPeriph::init_gpio()
 {
+	for (auto &pind : defs.pin_list.pin_array) {
+		Pin{pind.gpio,
+			pind.pin,
+			PinMode::Alt,
+			pind.af,
+			PinPull::None,
+			PinPolarity::Normal,
+			PinSpeed::VeryHigh};
+	}
+	// Todo: remove below once above is tested on hardware
 	// clang-format off
-	Pin _A0    {GPIO::F, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A1    {GPIO::F, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A2    {GPIO::F, 2, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A3    {GPIO::F, 3, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A4    {GPIO::F, 4, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A5    {GPIO::F, 5, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _SDNWE {GPIO::C, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _SDNE0 {GPIO::C, 2, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _SDCKE0{GPIO::C, 3, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _SDNRAS{GPIO::F, 11, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A6    {GPIO::F, 12, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A7    {GPIO::F, 13, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A8    {GPIO::F, 14, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A9    {GPIO::F, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A10   {GPIO::G, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _A11   {GPIO::G, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D4    {GPIO::E, 7, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D5    {GPIO::E, 8, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D6    {GPIO::E, 9, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D7    {GPIO::E, 10, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D8    {GPIO::E, 11, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D9    {GPIO::E, 12, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D10   {GPIO::E, 13, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D11   {GPIO::E, 14, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D12   {GPIO::E, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D13   {GPIO::D, 8, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D14   {GPIO::D, 9, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D15   {GPIO::D, 10, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D0    {GPIO::D, 14, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D1    {GPIO::D, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _BA0   {GPIO::G, 4, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _BA1   {GPIO::G, 5, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _SDCLK {GPIO::G, 8, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D2    {GPIO::D, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _D3    {GPIO::D, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _SDNCAS{GPIO::G, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _NBL0  {GPIO::E, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	Pin _NBL1  {GPIO::E, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A0    {GPIO::F, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A1    {GPIO::F, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A2    {GPIO::F, 2, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A3    {GPIO::F, 3, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A4    {GPIO::F, 4, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A5    {GPIO::F, 5, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _SDNWE {GPIO::C, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _SDNE0 {GPIO::C, 2, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _SDCKE0{GPIO::C, 3, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _SDNRAS{GPIO::F, 11, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A6    {GPIO::F, 12, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A7    {GPIO::F, 13, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A8    {GPIO::F, 14, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A9    {GPIO::F, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A10   {GPIO::G, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _A11   {GPIO::G, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D4    {GPIO::E, 7, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D5    {GPIO::E, 8, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D6    {GPIO::E, 9, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D7    {GPIO::E, 10, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D8    {GPIO::E, 11, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D9    {GPIO::E, 12, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D10   {GPIO::E, 13, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D11   {GPIO::E, 14, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D12   {GPIO::E, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D13   {GPIO::D, 8, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D14   {GPIO::D, 9, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D15   {GPIO::D, 10, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D0    {GPIO::D, 14, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D1    {GPIO::D, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _BA0   {GPIO::G, 4, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _BA1   {GPIO::G, 5, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _SDCLK {GPIO::G, 8, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D2    {GPIO::D, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _D3    {GPIO::D, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _SDNCAS{GPIO::G, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _NBL0  {GPIO::E, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
+	// Pin _NBL1  {GPIO::E, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
 	// not connected on p2 PCB:
 	//Pin _A12   {GPIO::G, 2, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
 	// clang-format on
@@ -202,7 +213,7 @@ void SDRAMPeriph::wait_until_ready()
 		;
 }
 
-__attribute__((optimize("O0"))) uint32_t SDRAMPeriph::test()
+uint32_t SDRAMPeriph::test()
 {
 	uint32_t num_fails = 0;
 
@@ -215,7 +226,7 @@ __attribute__((optimize("O0"))) uint32_t SDRAMPeriph::test()
 	return num_fails;
 }
 
-__attribute__((optimize("O0"))) uint32_t SDRAMPeriph::do_sdram_test(uint32_t (*mapfunc)(uint32_t))
+uint32_t SDRAMPeriph::do_sdram_test(uint32_t (*mapfunc)(uint32_t))
 {
 	uint32_t num_fails = 0;
 	using TestT = uint32_t;
@@ -240,6 +251,6 @@ __attribute__((optimize("O0"))) uint32_t SDRAMPeriph::do_sdram_test(uint32_t (*m
 
 		addr += test_val_size;
 	}
-
 	return num_fails;
 }
+

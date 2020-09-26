@@ -12,6 +12,7 @@ AllowShortBlocksOnASingleLine : "true"
 AlwaysBreakTemplateDeclarations : "true"
 AllowAllArgumentsOnNextLine : "true"
 AlignAfterOpenBracket : "Align"
+BinPackArguments: false
 BinPackParameters: false
 BreakConstructorInitializers : "BeforeComma"
 BreakInheritanceList : "AfterColon"
