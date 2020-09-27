@@ -14,7 +14,7 @@ struct DualOpenerADCs {
 
 using CVADCPeriph = AdcPeriph<AdcPeriphNum::_1>;
 
-const DMA_LL_Config kADCDMAConfig = {
+const DMA_LL_Config ADC_DMA_conf = {
 	.DMAx = DMA2,
 	.stream = LL_DMA_STREAM_0,
 	.channel = LL_DMA_CHANNEL_0,
@@ -23,10 +23,9 @@ const DMA_LL_Config kADCDMAConfig = {
 	.subpri = 0,
 };
 
-const TimekeeperConfig kControlReadTaskConfig = {
+const TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
 	.period_ns = 11000,
 	.priority1 = 2,
 	.priority2 = 3,
 };
-
