@@ -24,13 +24,12 @@ public:
 	const static int kNumRGBLEDsPerChip = 5;
 
 public:
-	PCA9685Driver(I2CPeriph &i2c, const DMAConfig &dma_defs = LedDriverDmaDef);
+	PCA9685Driver(I2CPeriph &i2c, const DMAConfig &dma_defs = led_driver_dma_conf);
 
 	LEDDriverError start();
 	void start_it_mode();
 	LEDDriverError start_dma_mode();
-	LEDDriverError
-	set_rgb_led(uint8_t led_number, uint16_t c_red, uint16_t c_green, uint16_t c_blue);
+	LEDDriverError set_rgb_led(uint8_t led_number, uint16_t c_red, uint16_t c_green, uint16_t c_blue);
 	LEDDriverError set_single_led(uint8_t led_element_number, uint16_t brightness);
 	uint8_t get_red_led_element_id(uint8_t rgb_led_id);
 	uint8_t get_chip_num(uint8_t rgb_led_id);
@@ -64,11 +63,10 @@ private:
 		uint32_t *frame_buffer_cur_pos;
 		uint32_t frame_buffer[kNumLedDriverChips * PCA9685Driver::kNumLedsPerChip];
 
-		HALCallback transfer_complete{
-			HALCallbackID::I2C_MemTxCplt, [this]() {
-				advance_frame_buffer();
-				write_current_frame_to_chip();
-			}};
+		HALCallback transfer_complete{HALCallbackID::I2C_MemTxCplt, [this]() {
+										  advance_frame_buffer();
+										  write_current_frame_to_chip();
+									  }};
 	};
 	friend class PCA9685Driver::DMADriver;
 	DMADriver dma_;

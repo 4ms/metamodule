@@ -36,7 +36,8 @@ uint16_t default_codec_init_data[] = {
 	VOL_0dB,   // Reg 01: Right Line In
 	HPVOL_0dB, // Reg 02: Left Headphone out
 	HPVOL_0dB, // Reg 03: Right Headphone out
-	(MUTEMIC   // Reg 04: Analog Audio Path Control (maximum attenuation on sidetone, sidetone disabled, DAC selected, Mute Mic, no bypass)
+	(MUTEMIC   // Reg 04: Analog Audio Path Control (maximum attenuation on sidetone, sidetone disabled, DAC selected,
+			 // Mute Mic, no bypass)
 	 | INSEL_line | DACSEL | SIDEATT_neg6dB),
 	(DEEMPH_disable // Reg 05: Digital Audio Path Control: HPF, De-emp at 48kHz on DAC, do not soft mute dac
 	 | ADCHPFEnable),
@@ -47,11 +48,11 @@ uint16_t default_codec_init_data[] = {
 	0x001  // Reg 09: Active Control
 };
 
-CodecWM8731::CodecWM8731(I2CPeriph &i2c, uint32_t sample_rate)
+CodecWM8731::CodecWM8731(I2CPeriph &i2c, const SaiConfig &saidef)
 	: i2c_(i2c)
+	, sai_{saidef}
 {
-	sample_rate_ = sample_rate;
-	init_at_samplerate(sample_rate_);
+	init_at_samplerate(saidef.samplerate);
 	sai_.init();
 }
 
@@ -68,7 +69,8 @@ void CodecWM8731::start()
 CodecWM8731::Error CodecWM8731::init_at_samplerate(uint32_t new_sample_rate)
 {
 	auto err = _reset();
-	if (err != CODEC_NO_ERR) return err;
+	if (err != CODEC_NO_ERR)
+		return err;
 	return _write_all_registers(new_sample_rate);
 }
 
@@ -87,7 +89,8 @@ CodecWM8731::Error CodecWM8731::_write_all_registers(uint32_t sample_rate)
 		else
 			err = _write_register(i, default_codec_init_data[i] | _calc_samplerate(sample_rate));
 
-		if (err != CODEC_NO_ERR) return err;
+		if (err != CODEC_NO_ERR)
+			return err;
 	}
 	return err;
 }
@@ -112,7 +115,7 @@ uint16_t CodecWM8731::_calc_samplerate(uint32_t sample_rate)
 
 CodecWM8731::Error CodecWM8731::_write_register(uint8_t RegisterAddr, uint16_t RegisterValue)
 {
-	//Assemble 2-byte data
+	// Assemble 2-byte data
 	uint8_t Byte1 = ((RegisterAddr << 1) & 0xFE) | ((RegisterValue >> 8) & 0x01);
 	uint8_t Byte2 = RegisterValue & 0xFF;
 	uint8_t data[2];
@@ -126,7 +129,7 @@ CodecWM8731::Error CodecWM8731::_write_register(uint8_t RegisterAddr, uint16_t R
 
 CodecWM8731::Error CodecWM8731::power_down(void)
 {
-	return _write_register(WM8731_REG_POWERDOWN, 0xFF); //Power Down enable all
+	return _write_register(WM8731_REG_POWERDOWN, 0xFF); // Power Down enable all
 }
 
 DMA_HandleTypeDef *CodecWM8731::get_rx_dmahandle()

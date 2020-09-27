@@ -166,26 +166,46 @@ SaiPeriph::Error SaiPeriph::_init_sai_dma()
 
 void SaiPeriph::_init_pins()
 {
-	Pin sai_mclk{
-		saidef_.MCLK_GPIO, saidef_.MCLK_PIN,
-		PinMode::Alt, saidef_.MCLK_AF,
-		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_sclk{
-		saidef_.SCLK_GPIO, saidef_.SCLK_PIN,
-		PinMode::Alt, saidef_.SCLK_AF,
-		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_lrclk{
-		saidef_.LRCLK_GPIO, saidef_.LRCLK_PIN,
-		PinMode::Alt, saidef_.LRCLK_AF,
-		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_mrx_adc{
-		saidef_.MRX_ADC_GPIO, saidef_.MRX_ADC_PIN,
-		PinMode::Alt, saidef_.MRX_ADC_AF,
-		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
-	Pin sai_mtx_dac{
-		saidef_.MTX_DAC_GPIO, saidef_.MTX_DAC_PIN,
-		PinMode::Alt, saidef_.MTX_DAC_AF,
-		PinPull::None, PinPolarity::Normal, PinSpeed::High, PinOType::PushPull};
+	Pin sai_mclk{saidef_.MCLK.gpio,
+				 saidef_.MCLK.pin,
+				 PinMode::Alt,
+				 saidef_.MCLK.af,
+				 PinPull::None,
+				 PinPolarity::Normal,
+				 PinSpeed::High,
+				 PinOType::PushPull};
+	Pin sai_sclk{saidef_.SCLK.gpio,
+				 saidef_.SCLK.pin,
+				 PinMode::Alt,
+				 saidef_.SCLK.af,
+				 PinPull::None,
+				 PinPolarity::Normal,
+				 PinSpeed::High,
+				 PinOType::PushPull};
+	Pin sai_lrclk{saidef_.LRCLK.gpio,
+				  saidef_.LRCLK.pin,
+				  PinMode::Alt,
+				  saidef_.LRCLK.af,
+				  PinPull::None,
+				  PinPolarity::Normal,
+				  PinSpeed::High,
+				  PinOType::PushPull};
+	Pin sai_mrx_adc{saidef_.SD_ADC.gpio,
+					saidef_.SD_ADC.pin,
+					PinMode::Alt,
+					saidef_.SD_ADC.af,
+					PinPull::None,
+					PinPolarity::Normal,
+					PinSpeed::High,
+					PinOType::PushPull};
+	Pin sai_mtx_dac{saidef_.SD_DAC.gpio,
+					saidef_.SD_DAC.pin,
+					PinMode::Alt,
+					saidef_.SD_DAC.af,
+					PinPull::None,
+					PinPolarity::Normal,
+					PinSpeed::High,
+					PinOType::PushPull};
 }
 
 void SaiPeriph::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint32_t block_size)
@@ -197,10 +217,10 @@ void SaiPeriph::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint3
 
 void SaiPeriph::start()
 {
-	//InterruptManager::registerISR(tx_irqn, [this]() { isr(); });
+	// InterruptManager::registerISR(tx_irqn, [this]() { isr(); });
 	InterruptManager::registerISR(tx_irqn, [hdmaptr = &hdma_tx]() {
 		HAL_DMA_IRQHandler(hdmaptr);
-		//Todo: optimize HAL DMA extra stuff by using SaiPeriph::handle_dma_isr() instead
+		// Todo: optimize HAL DMA extra stuff by using SaiPeriph::handle_dma_isr() instead
 	});
 	HAL_NVIC_EnableIRQ(tx_irqn);
 	HAL_SAI_Receive_DMA(&hsai_rx, rx_buf_ptr_, block_size_);
@@ -231,11 +251,11 @@ void SaiPeriph::handle_dma_isr()
 	// 	HALCallbackManager::callHALCB(HALCallbackID::SAI_TxHalfCplt);
 	// }
 
-	//if (LL_DMA_IsActiveFlag_TC4(DMA2)) {
+	// if (LL_DMA_IsActiveFlag_TC4(DMA2)) {
 	//	LL_DMA_ClearFlag_TC4(DMA2);
 	//	//do_stuff();
 	//}
-	//if (LL_DMA_IsActiveFlag_TE4(DMA2)) {
+	// if (LL_DMA_IsActiveFlag_TE4(DMA2)) {
 	//	LL_DMA_ClearFlag_TE4(DMA2);
 	//	//Handle DMA error
 	//}
