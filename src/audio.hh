@@ -8,11 +8,12 @@
 #include "params.hh"
 #include "stm32f7xx.h"
 #include <array>
-//#include "interp_param.hh"
 
-//Todo: multiple Audio objects would overwrite the HALCallback: add another
-//param to HALLCallback ctor to give a process ID or SAI Periph# or HAL SAI
-//handle
+using AudioFrame = GenericAudioFrame<int32_t, 24>;
+
+// Todo: multiple Audio objects would overwrite the HALCallback: add another
+// param to HALLCallback ctor to give a process ID or SAI Periph# or HAL SAI
+// handle
 class Audio {
 public:
 	// Public methods:
@@ -39,7 +40,7 @@ private:
 
 	static inline AudioProcessor *current_fx[2];
 
-	//Interp<float, kAudioStreamBlockSize> freq0;
+	// Interp<float, kAudioStreamBlockSize> freq0;
 
 	HALCallback stream_complete{
 		HALCallbackID::SAI_TxCplt,
