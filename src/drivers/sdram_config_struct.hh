@@ -25,7 +25,6 @@ struct SDRAMArchConfig {
 	uint8_t column_bits;
 	uint8_t row_bits;
 	uint32_t num_rows;
-	uint8_t connected_bank;
 };
 
 struct SDRAMPinNames {
@@ -78,5 +77,6 @@ struct SDRAMConfig {
 	SDRAMPinList pin_list;
 	SDRAMTimingConfig timing;
 	SDRAMArchConfig arch;
+	uint8_t connected_bank;
 };
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "defs/sdram_defs_AS4C16M16SA_7CN.hh"
+#include "defs/sdram_defs_W9825G6KH_75.hh"
 #include "sdram_config_struct.hh"
 
 const SDRAMPinNames SDRAM_pin_names = {
@@ -44,8 +45,16 @@ const SDRAMPinNames SDRAM_pin_names = {
 	.SDNWE{GPIO::C, 0, LL_GPIO_AF_12},
 };
 
-const SDRAMConfig SDRAM_AS4C_Defs = {
+const SDRAMConfig SDRAM_AS4C_conf = {
 	.pin_list = {SDRAM_pin_names},
-	.timing = SDRAMTiming_AS4C16M16SA_7CN,
-	.arch = SDRAMArch_AS4C16M16SA_7CN,
+	.timing = SDRAM_timing_AS4C16M16SA_7CN,
+	.arch = SDRAM_arch_AS4C16M16SA_7CN,
+	.connected_bank = 1,
+};
+
+const SDRAMConfig SDRAM_W9825_conf = {
+	.pin_list = {SDRAM_pin_names},
+	.timing = SDRAM_timing_W9825G6KH_75,
+	.arch = SDRAM_arch_W9825G6KH_75,
+	.connected_bank = 1,
 };
