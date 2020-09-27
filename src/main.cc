@@ -1,10 +1,12 @@
 #include "buses.hh"
 #include "debug.hh"
+#include "defs/i2c_defs.hh"
 #include "defs/qspi_flash_defs.hh"
 #include "defs/sdram_defs.hh"
 #include "drivers/codec_WM8731.hh"
 #include "qspi_flash_driver.hh"
 #include "sdram.hh"
+#include "shared_bus.hh"
 #include "stm32xx.h"
 #include "system.hh"
 #include "ui.hh"
@@ -20,13 +22,13 @@ Debug debug;
 // access up to 0xC080 0000, or 64MBit = 8MByte
 SDRAMPeriph sdram{SDRAM_AS4C_Defs, 0xC0000000, 0x00800000};
 
-QSpiFlash qspi{kQSPIDefs};
+QSpiFlash qspi{qspi_flash_defs};
 
 // Todo: some class for grouping codec, bus, led driver chips, etc
 // ExternalChips exthw;
 // exthw.codec
 // exthw.shared_i2c
-SharedBus shared_i2c;
+SharedBus shared_i2c{shared_i2c_defs};
 CodecWM8731 codec{SharedBus::i2c};
 
 Controls controls;

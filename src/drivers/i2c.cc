@@ -27,27 +27,34 @@ I2CPeriph::Error I2CPeriph::write(uint16_t dev_address, uint8_t *data, uint16_t 
 	return err == HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
 }
 
-I2CPeriph::Error I2CPeriph::mem_read(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
+I2CPeriph::Error
+I2CPeriph::mem_read(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
 {
 	HAL_StatusTypeDef err;
-	while ((err = HAL_I2C_Mem_Read(&hal_i2c_, dev_address, mem_address, memadd_size, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK) {
+	while ((err = HAL_I2C_Mem_Read(&hal_i2c_, dev_address, mem_address, memadd_size, data, size, _I2C_VLONG_TIMEOUT)) !=
+		   HAL_OK)
+	{
 		if (HAL_I2C_GetError(&hal_i2c_) != HAL_I2C_ERROR_AF)
 			return I2C_XMIT_ERR;
 	}
 	return err == HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
 }
 
-I2CPeriph::Error I2CPeriph::mem_write(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
+I2CPeriph::Error
+I2CPeriph::mem_write(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
 {
 	HAL_StatusTypeDef err;
-	while ((err = HAL_I2C_Mem_Write(&hal_i2c_, dev_address, mem_address, memadd_size, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK) {
+	while ((err = HAL_I2C_Mem_Write(
+				&hal_i2c_, dev_address, mem_address, memadd_size, data, size, _I2C_VLONG_TIMEOUT)) != HAL_OK)
+	{
 		if (HAL_I2C_GetError(&hal_i2c_) != HAL_I2C_ERROR_AF)
 			return I2C_XMIT_ERR;
 	}
 	return err == HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
 }
 
-I2CPeriph::Error I2CPeriph::mem_write_IT(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
+I2CPeriph::Error
+I2CPeriph::mem_write_IT(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
 {
 	HAL_StatusTypeDef err;
 	while ((err = HAL_I2C_Mem_Write_IT(&hal_i2c_, dev_address, mem_address, memadd_size, data, size)) != HAL_OK) {
@@ -57,7 +64,8 @@ I2CPeriph::Error I2CPeriph::mem_write_IT(uint16_t dev_address, uint16_t mem_addr
 	return err == HAL_OK ? I2C_NO_ERR : I2C_XMIT_ERR;
 }
 
-I2CPeriph::Error I2CPeriph::mem_write_dma(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
+I2CPeriph::Error
+I2CPeriph::mem_write_dma(uint16_t dev_address, uint16_t mem_address, uint32_t memadd_size, uint8_t *data, uint16_t size)
 {
 	HAL_StatusTypeDef err;
 	while ((err = HAL_I2C_Mem_Write_DMA(&hal_i2c_, dev_address, mem_address, memadd_size, data, size)) != HAL_OK) {
@@ -79,15 +87,14 @@ void I2CPeriph::deinit(I2C_TypeDef *periph)
 
 I2CPeriph::Error I2CPeriph::init(I2C_TypeDef *periph)
 {
-	//0x307075B1
-	//0x20448787
-	i2cTimingReg t = {.PRESC = 0x50, .SCLDEL_SDADEL = 0x70, .SCLH = 0x75, .SCLL = 0xB1};
+	const I2CTimingConfig t = {.PRESC = 0x50, .SCLDEL_SDADEL = 0x70, .SCLH = 0x75, .SCLL = 0xB1};
 	return init(periph, t);
 }
 
-I2CPeriph::Error I2CPeriph::init(I2C_TypeDef *periph, const i2cTimingReg &timing)
+I2CPeriph::Error I2CPeriph::init(I2C_TypeDef *periph, const I2CTimingConfig &timing)
 {
-	if (already_init) return I2C_ALREADY_INIT;
+	if (already_init)
+		return I2C_ALREADY_INIT;
 
 	deinit(periph);
 

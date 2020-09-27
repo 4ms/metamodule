@@ -1,7 +1,7 @@
 #pragma once
 #include "qspi_flash_struct.hh"
 
-const QSPIFlashConfig kQSPIDefs = {
+const QSPIFlashConfig qspi_flash_defs = {
 	.io0 = {GPIO::F, 8, LL_GPIO_AF_10},
 	.io1 = {GPIO::F, 9, LL_GPIO_AF_10},
 	.io2 = {GPIO::F, 7, LL_GPIO_AF_9},
