@@ -42,7 +42,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-Isrc/drivers \
 			-Isrc/processors \
 			-Isrc/util \
-			-Isrc/defs \
+			-Isrc/conf \
 			-Ieasiglib
 
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf

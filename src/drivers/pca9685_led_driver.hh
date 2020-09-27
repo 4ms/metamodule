@@ -1,10 +1,9 @@
-#ifndef _SRC_DRIVERS_PCA9685_LED_DRIVER
-#define _SRC_DRIVERS_PCA9685_LED_DRIVER
+#pragma once
 
-#include "defs/led_driver_defs.hh"
 #include "dma_config_struct.hh"
 #include "hal_callback.hh"
 #include "i2c.hh"
+#include "led_driver_conf.hh"
 #include "stm32f7xx.h"
 
 enum class LEDDriverError {
@@ -78,4 +77,3 @@ private:
 	const static inline uint32_t I2C_BASE_ADDRESS = 0b10000000;
 	const static inline auto REGISTER_ADDR_SIZE = I2C_MEMADD_SIZE_8BIT;
 };
-#endif

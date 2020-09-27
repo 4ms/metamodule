@@ -1,14 +1,14 @@
 #pragma once
-#include "pin.hh"
 #include "analog_in.hh"
-#include "timekeeper.hh"
-#include "drivers/dma_config_struct.hh"
+#include "dma_config_struct.hh"
+#include "pin.hh"
 #include "stm32f7xx_ll_dma.h"
+#include "timekeeper.hh"
 
-//Todo: put control pin defs here
+// Todo: put control pin defs here
 struct DualOpenerADCs {
-	//using AnalogInFreq0 = AnalogIn<AdcPeriphNum::_1, AdcChanNum::_2>;
-	//static inline const Pin Freq0 = {GPIO::A, 2};
+	// using AnalogInFreq0 = AnalogIn<AdcPeriphNum::_1, AdcChanNum::_2>;
+	// static inline const Pin Freq0 = {GPIO::A, 2};
 	//...
 };
 

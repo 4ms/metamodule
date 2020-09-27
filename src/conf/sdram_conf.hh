@@ -1,6 +1,6 @@
 #pragma once
-#include "defs/sdram_defs_AS4C16M16SA_7CN.hh"
-#include "defs/sdram_defs_W9825G6KH_75.hh"
+#include "sdram_AS4C16M16SA_7CN_conf.hh"
+#include "sdram_W9825G6KH_75_conf.hh"
 #include "sdram_config_struct.hh"
 
 const SDRAMPinNames SDRAM_pin_names = {

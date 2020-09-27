@@ -1,9 +1,9 @@
 #pragma once
 #include "math.hh"
+#include "qspi_flash_conf.hh"
 #include "qspi_flash_registers.h"
-#include "stm32xx.h"
-#include "defs/qspi_flash_defs.hh"
 #include "qspi_flash_struct.hh"
+#include "stm32xx.h"
 
 class QSpiFlash {
 
@@ -15,14 +15,7 @@ public:
 		ENTIRE_CHIP = QSPI_FLASH_SIZE_BYTES
 	};
 
-	enum FlashStatus {
-		STATUS_READY,
-		STATUS_WIP,
-		STATUS_RXING,
-		STATUS_RX_COMPLETE,
-		STATUS_TXING,
-		STATUS_TX_COMPLETE
-	};
+	enum FlashStatus { STATUS_READY, STATUS_WIP, STATUS_RXING, STATUS_RX_COMPLETE, STATUS_TXING, STATUS_TX_COMPLETE };
 
 	enum UseInterruptFlags { EXECUTE_FOREGROUND, EXECUTE_BACKGROUND };
 
@@ -65,21 +58,18 @@ public:
 
 	HAL_StatusTypeDef Reset(void);
 
-	bool
-	Read(uint8_t *pData, uint32_t read_addr, uint32_t num_bytes, UseInterruptFlags use_interrupt);
+	bool Read(uint8_t *pData, uint32_t read_addr, uint32_t num_bytes, UseInterruptFlags use_interrupt);
 	bool Read_Background(uint8_t *pData, uint32_t read_addr, uint32_t num_bytes)
 	{
 		return Read(pData, read_addr, num_bytes, EXECUTE_BACKGROUND);
 	}
 
 	bool Write(uint8_t *pData, uint32_t write_addr, uint32_t num_bytes);
-	bool Write_Page(uint8_t *pData,
-					uint32_t write_addr,
-					uint32_t num_bytes,
-					UseInterruptFlags use_interrupt);
+	bool Write_Page(uint8_t *pData, uint32_t write_addr, uint32_t num_bytes, UseInterruptFlags use_interrupt);
 
 	bool Erase(uint32_t size, uint32_t BaseAddress, UseInterruptFlags use_interrupt);
-	bool Erase_Background(ErasableSizes size, uint32_t BaseAddress) {
+	bool Erase_Background(ErasableSizes size, uint32_t BaseAddress)
+	{
 		return Erase(size, BaseAddress, EXECUTE_FOREGROUND);
 	}
 	bool Erase_Block_Background(uint32_t BaseAddress)

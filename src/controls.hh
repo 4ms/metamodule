@@ -5,7 +5,6 @@
 #include "rotary.hh"
 #include "stm32xx.h"
 #include "timekeeper.hh"
-// #include "defs/control_defs.hh"
 #include <array>
 
 using JackSense = DebouncedSwitch;
@@ -21,8 +20,7 @@ struct Controls {
 	static inline JackSense in_sense[2] = {{GPIO::G, 12}, {GPIO::G, 11}};
 	static inline JackSense out_sense[2] = {{GPIO::D, 7}, {GPIO::G, 10}};
 
-	static inline RotaryEncoder<RotaryFullStep> rotary[2] = {{GPIO::A, 7, GPIO::A, 6},
-															 {GPIO::C, 7, GPIO::C, 6}};
+	static inline RotaryEncoder<RotaryFullStep> rotary[2] = {{GPIO::A, 7, GPIO::A, 6}, {GPIO::C, 7, GPIO::C, 6}};
 	static inline DebouncedSwitch rotary_button[2] = {{GPIO::A, 5}, {GPIO::B, 9}};
 	static inline DebouncedSwitch mode_button[2] = {{GPIO::C, 14}, {GPIO::C, 15}};
 

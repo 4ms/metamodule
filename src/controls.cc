@@ -1,7 +1,7 @@
 #include "controls.hh"
+#include "conf/control_conf.hh"
 #include "debug.hh"
 #include "dma_config_struct.hh"
-#include "defs/control_defs.hh"
 
 void Controls::read()
 {
