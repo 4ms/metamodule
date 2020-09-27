@@ -1,7 +1,7 @@
 #pragma once
 #include "i2c_config_struct.hh"
 
-const I2CConfig shared_i2c_defs = {
+const I2CConfig shared_i2c_conf = {
 	.I2Cx = I2C1,
 	.SCL = {GPIO::B, 8, GPIO_AF4_I2C1},
 	.SDA = {GPIO::B, 7, GPIO_AF4_I2C1},
