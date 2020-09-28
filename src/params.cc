@@ -1,5 +1,5 @@
+#include "params.hh"
 #include "math.hh"
-#include "ui.hh"
 
 using namespace MathTools;
 
