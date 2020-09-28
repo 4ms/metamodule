@@ -1,11 +1,11 @@
 #pragma once
 #include "analog_in.hh"
+#include "conf/control_conf.hh"
 #include "debounced_switch.hh"
 #include "pin.hh"
 #include "rotary.hh"
 #include "stm32xx.h"
 #include "timekeeper.hh"
-#include <array>
 
 using JackSense = DebouncedSwitch;
 
