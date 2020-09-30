@@ -24,12 +24,16 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
 	params.update();
 	check_fx_change();
-
-	current_fx[LEFT]->set_param(0, params.freq[0]);
-	current_fx[LEFT]->set_param(1, params.res[0]);
-	current_fx[RIGHT]->set_param(0, params.freq[1]);
-	current_fx[RIGHT]->set_param(1, params.res[1]);
-	//freq0.set_new_value(params.freq[0]);
+	/*
+		current_fx[LEFT]->set_param(0, params.freq[0]);
+		current_fx[LEFT]->set_param(1, params.res[0]);
+		current_fx[RIGHT]->set_param(0, params.freq[1]);
+		current_fx[RIGHT]->set_param(1, params.res[1]);
+		*/
+	freq0.set_new_value(params.freq[0]);
+	freq1.set_new_value(params.freq[1]);
+	res0.set_new_value(params.res[0]);
+	res1.set_new_value(params.res[1]);
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
@@ -41,7 +45,11 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		unscaled_out = current_fx[RIGHT]->update(scaled_in);
 		out_.r = AudioFrame::scaleOutput(unscaled_out);
 
-		//current_fx[LEFT]->set_param(0, freq0.next());
+		current_fx[LEFT]->set_param(0, freq0.next());
+		current_fx[LEFT]->set_param(1, res0.next());
+		current_fx[RIGHT]->set_param(0, freq1.next());
+		current_fx[RIGHT]->set_param(1, res1.next());
+
 		in_++;
 	}
 }
@@ -64,4 +72,3 @@ void Audio::check_fx_change()
 		current_fx[RIGHT]->set_samplerate(sample_rate_);
 	}
 }
-
