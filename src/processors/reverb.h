@@ -183,7 +183,7 @@ public:
 	{
 		if (param_id == 0) {
 			fb1 = val;
-			fb1 = val;
+			fb2 = val;
 		}
 		if (param_id == 1) {
 			damp = val;
