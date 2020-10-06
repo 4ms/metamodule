@@ -79,19 +79,21 @@ CFLAGS = -g2 -fno-common \
 	$(ARCH_CFLAGS) $(MCU) \
 	-I. $(INCLUDES) \
 	-fdata-sections -ffunction-sections \
-	-lstdc++ \
+	-nostdlib \
+	-nostartfiles \
 
 CXXFLAGS=$(CFLAGS) \
 	-std=c++2a \
 	-fno-rtti \
 	-fno-exceptions \
+	-fno-unwind-tables \
 	-ffreestanding \
+	-fno-threadsafe-statics \
 	-Werror=return-type \
 	-Wdouble-promotion \
 	-Wno-register \
-	-fno-threadsafe-statics \
-	-specs=nosys.specs \
-
+	-nostdlib \
+	-nostartfiles \
 
 AFLAGS = $(MCU)
 #	-x assembler-with-cpp
@@ -101,8 +103,10 @@ LDSCRIPT = $(DEVICE)/$(LOADFILE)
 
 LFLAGS =  -Wl,-Map,main.map,--cref \
 	-Wl,--gc-sections \
-	-lstdc++ \
-	$(MCU) -specs=nosys.specs  -T $(LDSCRIPT) \
+	-nostdlib \
+	-nostartfiles \
+	$(MCU) \
+	-T $(LDSCRIPT) \
 
 
 #----------------------------------
