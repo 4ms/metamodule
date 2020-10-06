@@ -4,6 +4,8 @@
 #include "stm32f7xx_ll_gpio.h"
 #include "stm32xx.h"
 
+#define SDRAM_DO_TEST
+
 SDRAMPeriph::SDRAMPeriph(const SDRAMConfig &sdram_defs) noexcept
 
 	: status(HAL_ERROR)
@@ -11,6 +13,23 @@ SDRAMPeriph::SDRAMPeriph(const SDRAMConfig &sdram_defs) noexcept
 {
 	init_gpio();
 	status = init();
+
+#ifdef SDRAM_DO_TEST
+	{
+		// 434ms
+		// vs SRAM1/2: 128ms
+		// vs DTCM: 111ms
+		uint32_t start = HAL_GetTick();
+		uint32_t sdram_fails = SDRAMPeriph::test(0xC0000000, 0x00800000);
+		volatile uint32_t elapsed = HAL_GetTick() - start;
+		if (elapsed > 540) {
+			while (1)
+				;
+		}
+		while (sdram_fails)
+			;
+	}
+#endif
 }
 
 HAL_StatusTypeDef SDRAMPeriph::init()
@@ -35,7 +54,7 @@ void SDRAMPeriph::config_timing()
 		return clockdiv;
 	};
 	sdram_clock_ = SystemCoreClock / freq_to_clockdiv(defs.timing.max_freq_MHz);
-	auto ns_to_hclks = [sdram_clock = sdram_clock_](uint8_t ns) { return (sdram_clock / 1000000) * ns; };
+	auto ns_to_hclks = [sdram_clock = sdram_clock_](uint32_t ns) { return 1 + ((ns * 10000000U) / sdram_clock); };
 
 	FMC_SDRAM_TimingTypeDef SdramTiming = {
 		.LoadToActiveDelay = ns_to_hclks(defs.timing.tMRD_ns),
@@ -70,10 +89,11 @@ void SDRAMPeriph::start_refresh()
 	FMC_SDRAM_CommandTypeDef cmd;
 
 	wait_until_ready();
+	auto bank = defs.connected_bank == 1 ? FMC_SDRAM_CMD_TARGET_BANK1 : FMC_SDRAM_CMD_TARGET_BANK2;
 
 	// CLK ENABLE command
 	cmd = {.CommandMode = FMC_SDRAM_CMD_CLK_ENABLE,
-		   .CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1,
+		   .CommandTarget = bank,
 		   .AutoRefreshNumber = 2,
 		   .ModeRegisterDefinition = 0};
 	FMC_SDRAM_SendCommand(FMC_SDRAM_DEVICE, &cmd, 0);
@@ -82,16 +102,14 @@ void SDRAMPeriph::start_refresh()
 	wait_until_ready();
 
 	// All Bank Precharge command
-	cmd = {.CommandMode = FMC_SDRAM_CMD_PALL,
-		   .CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1,
-		   .AutoRefreshNumber = 2,
-		   .ModeRegisterDefinition = 0};
+	cmd = {
+		.CommandMode = FMC_SDRAM_CMD_PALL, .CommandTarget = bank, .AutoRefreshNumber = 2, .ModeRegisterDefinition = 0};
 	FMC_SDRAM_SendCommand(FMC_SDRAM_DEVICE, &cmd, 0);
 	wait_until_ready();
 
 	// Auto-refresh command
 	cmd = {.CommandMode = FMC_SDRAM_CMD_AUTOREFRESH_MODE,
-		   .CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1,
+		   .CommandTarget = bank,
 		   .AutoRefreshNumber = 5,
 		   .ModeRegisterDefinition = 0};
 	FMC_SDRAM_SendCommand(FMC_SDRAM_DEVICE, &cmd, 0);
@@ -104,17 +122,19 @@ void SDRAMPeriph::start_refresh()
 	// Mode Register = 0x030: burst length 1, burst type sequential, CAS latency 3 clocks, Write
 	// burst mode = single location access, normal operation mode
 	cmd = {.CommandMode = FMC_SDRAM_CMD_LOAD_MODE,
-		   .CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1,
+		   .CommandTarget = bank,
 		   .AutoRefreshNumber = 2,
 		   .ModeRegisterDefinition = 0x231};
 	FMC_SDRAM_SendCommand(FMC_SDRAM_DEVICE, &cmd, 0);
 	wait_until_ready();
 
 	// Refresh rate in number of SDCLK clock cycles between the refresh cycles
-	auto refresh_ms_to_rate = [sdram_clock = sdram_clock_](uint32_t refresh_ms, uint32_t num_rows) {
-		return sdram_clock * refresh_ms / (num_rows * 1000);
+	auto refresh_ms_to_refcount = [sdram_clock = sdram_clock_](uint32_t refresh_ms, uint32_t num_rows) -> uint32_t {
+		uint32_t rate_us = (refresh_ms * 10000) / num_rows;
+		uint32_t count = (sdram_clock / 1000000U) * rate_us;
+		return (count / 10) - 20; // Safe margin, as per STM32F74x datasheet
 	};
-	FMC_SDRAM_ProgramRefreshRate(FMC_SDRAM_DEVICE, refresh_ms_to_rate(64, 8192));
+	FMC_SDRAM_ProgramRefreshRate(FMC_SDRAM_DEVICE, refresh_ms_to_refcount(defs.timing.refresh_ms, defs.arch.num_rows));
 	wait_until_ready();
 }
 
@@ -123,49 +143,6 @@ void SDRAMPeriph::init_gpio()
 	for (auto &pind : defs.pin_list.pin_array) {
 		Pin{pind.gpio, pind.pin, PinMode::Alt, pind.af, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
 	}
-	// Todo: remove below once above is tested on hardware
-	// clang-format off
-	// Pin _A0    {GPIO::F, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A1    {GPIO::F, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A2    {GPIO::F, 2, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A3    {GPIO::F, 3, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A4    {GPIO::F, 4, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A5    {GPIO::F, 5, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _SDNWE {GPIO::C, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _SDNE0 {GPIO::C, 2, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _SDCKE0{GPIO::C, 3, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _SDNRAS{GPIO::F, 11, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A6    {GPIO::F, 12, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A7    {GPIO::F, 13, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A8    {GPIO::F, 14, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A9    {GPIO::F, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A10   {GPIO::G, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _A11   {GPIO::G, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D4    {GPIO::E, 7, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D5    {GPIO::E, 8, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D6    {GPIO::E, 9, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D7    {GPIO::E, 10, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D8    {GPIO::E, 11, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D9    {GPIO::E, 12, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D10   {GPIO::E, 13, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D11   {GPIO::E, 14, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D12   {GPIO::E, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D13   {GPIO::D, 8, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D14   {GPIO::D, 9, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D15   {GPIO::D, 10, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D0    {GPIO::D, 14, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D1    {GPIO::D, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _BA0   {GPIO::G, 4, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _BA1   {GPIO::G, 5, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _SDCLK {GPIO::G, 8, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D2    {GPIO::D, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _D3    {GPIO::D, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _SDNCAS{GPIO::G, 15, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _NBL0  {GPIO::E, 0, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// Pin _NBL1  {GPIO::E, 1, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// not connected on p2 PCB:
-	//Pin _A12   {GPIO::G, 2, PinMode::Alt, LL_GPIO_AF_12, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
-	// clang-format on
 }
 
 bool SDRAMPeriph::is_busy()
@@ -199,7 +176,7 @@ uint32_t SDRAMPeriph::do_sdram_test(uint32_t (*mapfunc)(uint32_t), const uint32_
 
 	uint32_t addr = ram_start;
 	for (uint32_t i = 0; i < (ram_size / test_val_size); i++) {
-		wait_until_ready();
+		// wait_until_ready();
 		uint32_t testval = mapfunc(i);
 		*((uint32_t *)addr) = testval;
 
@@ -208,7 +185,7 @@ uint32_t SDRAMPeriph::do_sdram_test(uint32_t (*mapfunc)(uint32_t), const uint32_
 
 	addr = ram_start;
 	for (uint32_t i = 0; i < (ram_size / test_val_size); i++) {
-		wait_until_ready();
+		// wait_until_ready();
 		uint32_t readval = *((uint32_t *)addr);
 		uint32_t expectedval = mapfunc(i);
 		if (readval != expectedval)
