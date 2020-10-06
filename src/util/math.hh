@@ -1,7 +1,12 @@
 #pragma once
 #include <stdint.h>
 
-namespace MathTools {
+namespace MathTools
+{
+
+#ifndef M_PI
+	#define M_PI 3.14159265358979323846264338327950288f
+#endif
 
 template<typename Tval, typename Tin, typename Tout>
 static Tout map_value(Tval x, Tin in_min, Tin in_max, Tout out_min, Tout out_max)
