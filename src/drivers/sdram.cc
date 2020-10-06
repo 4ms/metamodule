@@ -4,38 +4,13 @@
 #include "stm32f7xx_ll_gpio.h"
 #include "stm32xx.h"
 
-// Todo: put {GPIO, pin, AF} inside an config defs array to init the pins
-// Todo: put the rest of these into the sdram config struct:
-// Bank 1/2
-// Column bits (can we calc this?)
-// Row bits (= address bits?)
-// Bus Width (8/16)
-// Num Banks
-// RBurst ?
-// RPipe Delay?
-// Refresh Rate (64ms)
-// Number of rows (8192)
+SDRAMPeriph::SDRAMPeriph(const SDRAMConfig &sdram_defs) noexcept
 
-//#define SDRAM_DO_TESTS
-
-SDRAMPeriph::SDRAMPeriph(const SDRAMConfig &sdram_defs,
-						 const uint32_t base_addr,
-						 const uint32_t sdram_size) noexcept
-	: ram_start(base_addr)
-	, ram_size(sdram_size)
-	, status(HAL_ERROR)
+	: status(HAL_ERROR)
 	, defs(sdram_defs)
 {
 	init_gpio();
 	status = init();
-
-#ifdef SDRAM_DO_TESTS
-	uint32_t sdram_fails = test();
-	if (sdram_fails) {
-		// dummy code to allow us to set a breakpoint with a debugger
-		asm("nop");
-	}
-#endif
 }
 
 HAL_StatusTypeDef SDRAMPeriph::init()
@@ -50,9 +25,8 @@ HAL_StatusTypeDef SDRAMPeriph::init()
 void SDRAMPeriph::config_timing()
 {
 	auto num_to_CAS = [](uint8_t cas_latency) {
-		return cas_latency == 2
-				   ? FMC_SDRAM_CAS_LATENCY_2
-				   : cas_latency == 1 ? FMC_SDRAM_CAS_LATENCY_1 : FMC_SDRAM_CAS_LATENCY_3;
+		return cas_latency == 2 ? FMC_SDRAM_CAS_LATENCY_2
+								: cas_latency == 1 ? FMC_SDRAM_CAS_LATENCY_1 : FMC_SDRAM_CAS_LATENCY_3;
 	};
 	auto freq_to_clockdiv = [HCLK = SystemCoreClock](uint8_t freq) {
 		uint32_t clockdiv = HCLK / freq;
@@ -61,9 +35,7 @@ void SDRAMPeriph::config_timing()
 		return clockdiv;
 	};
 	sdram_clock_ = SystemCoreClock / freq_to_clockdiv(defs.timing.max_freq_MHz);
-	auto ns_to_hclks = [sdram_clock = sdram_clock_](uint8_t ns) {
-		return (sdram_clock / 1000000) * ns;
-	};
+	auto ns_to_hclks = [sdram_clock = sdram_clock_](uint8_t ns) { return (sdram_clock / 1000000) * ns; };
 
 	FMC_SDRAM_TimingTypeDef SdramTiming = {
 		.LoadToActiveDelay = ns_to_hclks(defs.timing.tMRD_ns),
@@ -83,8 +55,8 @@ void SDRAMPeriph::config_timing()
 		.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4,
 		.CASLatency = num_to_CAS(defs.timing.CAS_latency),
 		.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE,
-		.SDClockPeriod = freq_to_clockdiv(defs.timing.max_freq_MHz) == 2 ? FMC_SDRAM_CLOCK_PERIOD_2
-																		 : FMC_SDRAM_CLOCK_PERIOD_3,
+		.SDClockPeriod =
+			freq_to_clockdiv(defs.timing.max_freq_MHz) == 2 ? FMC_SDRAM_CLOCK_PERIOD_2 : FMC_SDRAM_CLOCK_PERIOD_3,
 		.ReadBurst = FMC_SDRAM_RBURST_ENABLE,
 		.ReadPipeDelay = FMC_SDRAM_RPIPE_DELAY_2,
 	};
@@ -149,13 +121,7 @@ void SDRAMPeriph::start_refresh()
 void SDRAMPeriph::init_gpio()
 {
 	for (auto &pind : defs.pin_list.pin_array) {
-		Pin{pind.gpio,
-			pind.pin,
-			PinMode::Alt,
-			pind.af,
-			PinPull::None,
-			PinPolarity::Normal,
-			PinSpeed::VeryHigh};
+		Pin{pind.gpio, pind.pin, PinMode::Alt, pind.af, PinPull::None, PinPolarity::Normal, PinSpeed::VeryHigh};
 	}
 	// Todo: remove below once above is tested on hardware
 	// clang-format off
@@ -213,24 +179,23 @@ void SDRAMPeriph::wait_until_ready()
 		;
 }
 
-uint32_t SDRAMPeriph::test()
+uint32_t SDRAMPeriph::test(const uint32_t ram_start, const uint32_t ram_size)
 {
 	uint32_t num_fails = 0;
 
 	auto countup_func = [](uint32_t x) { return x; };
-	num_fails += do_sdram_test(countup_func);
+	num_fails += do_sdram_test(countup_func, ram_start, ram_size);
 
 	auto bitinvert_countdown_func = [](uint32_t x) { return 0xFFFFFFFFU - x; };
-	num_fails += do_sdram_test(bitinvert_countdown_func);
+	num_fails += do_sdram_test(bitinvert_countdown_func, ram_start, ram_size);
 
 	return num_fails;
 }
 
-uint32_t SDRAMPeriph::do_sdram_test(uint32_t (*mapfunc)(uint32_t))
+uint32_t SDRAMPeriph::do_sdram_test(uint32_t (*mapfunc)(uint32_t), const uint32_t ram_start, const uint32_t ram_size)
 {
 	uint32_t num_fails = 0;
-	using TestT = uint32_t;
-	const size_t test_val_size = sizeof(TestT);
+	const size_t test_val_size = sizeof(uint32_t);
 
 	uint32_t addr = ram_start;
 	for (uint32_t i = 0; i < (ram_size / test_val_size); i++) {
