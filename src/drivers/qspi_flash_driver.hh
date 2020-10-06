@@ -1,6 +1,6 @@
 #pragma once
+#include "conf/qspi_flash_conf.hh"
 #include "math.hh"
-#include "qspi_flash_conf.hh"
 #include "qspi_flash_registers.h"
 #include "qspi_flash_struct.hh"
 #include "stm32xx.h"

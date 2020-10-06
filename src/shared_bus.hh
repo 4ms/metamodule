@@ -1,6 +1,6 @@
 #pragma once
+#include "conf/i2c_conf.hh"
 #include "i2c.hh"
-#include "i2c_conf.hh"
 #include "pin.hh"
 
 class SharedBus {

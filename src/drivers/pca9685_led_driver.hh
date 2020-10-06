@@ -1,10 +1,10 @@
 #pragma once
 
+#include "conf/led_driver_conf.hh"
 #include "dma_config_struct.hh"
 #include "hal_callback.hh"
 #include "i2c.hh"
 #include "led_driver.hh"
-#include "led_driver_conf.hh"
 #include "stm32f7xx.h"
 
 class PCA9685Driver : public ILedDmaDriver {
