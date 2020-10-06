@@ -46,6 +46,7 @@ arm-none-eabi
 -Itests/cpputest/include
 -Itests/stubs
 -Itests/stubs/stm32
+-Ieasiglib
 -fdata-sections
 -ffunction-sections
 -std=c++17

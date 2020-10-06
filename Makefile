@@ -34,7 +34,6 @@ HEADERS  += $(wildcard src/drivers/*.hh)
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
-PRECHDRS  = $(addprefix $(BUILDDIR)/, $(addsuffix .gch, $(HEADERS)))
 
 INCLUDES += -I$(DEVICE)/include \
 			-I$(CORE)/include \
@@ -44,6 +43,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-Isrc/processors \
 			-Isrc/util \
 			-Isrc/defs \
+			-Ieasiglib
 
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
@@ -115,7 +115,7 @@ LFLAGS =  -Wl,-Map,main.map,--cref \
 # build/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 
-all: Makefile $(BIN) $(HEX)	#$(PRECHDRS)
+all: Makefile $(BIN) $(HEX)
 
 $(BIN): $(ELF)
 	$(OBJCPY) -O binary $< $@
