@@ -53,3 +53,6 @@ void main()
 	}
 }
 
+void recover_from_task_fault(void) {
+	main();
+}
