@@ -41,8 +41,11 @@ _Min_Stack_Size = 0x540; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 1024K
-RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 320K
+	FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
+	/* RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 320K */
+	DTCM(xrw) : ORIGIN = 0x20000000, LENGTH = 64K
+	SRAM1(xrw) : ORIGIN = 0x20010000, LENGTH = 240K
+	SRAM2(xrw) : ORIGIN = 0x2004C000, LENGTH = 16K
 }
 
 /* Define output sections */
@@ -110,8 +113,16 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 
+
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
+
+  .dtcm (NOLOAD) :
+  {
+    . = ALIGN(16);
+    *(.dtcm)
+    . = ALIGN(16);
+  } >DTCM
 
   /* Initialized data sections goes into RAM, load LMA copy after code */
   .data : 
@@ -123,7 +134,7 @@ SECTIONS
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
-  } >RAM AT> FLASH
+  } >SRAM1 AT> FLASH
 
   
   /* Uninitialized data section */
@@ -140,7 +151,7 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
-  } >RAM
+  } >SRAM1
 
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
@@ -151,7 +162,7 @@ SECTIONS
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-  } >RAM
+  } >SRAM1
 
   
 
