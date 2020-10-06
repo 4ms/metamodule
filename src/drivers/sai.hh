@@ -1,7 +1,7 @@
 #pragma once
-#include "defs/codec_sai_defs.hh"
 #include "interrupt.hh"
 #include "pin.hh"
+#include "sai_config_struct.hh"
 #include <cstdint>
 
 class SaiPeriph {
@@ -10,10 +10,10 @@ public:
 		SAI_NO_ERR,
 		SAI_INIT_ERR,
 		SAI_I2C_ERR,
-		SAI_XMIT_ERR
+		SAI_XMIT_ERR,
 	};
 
-	SaiPeriph(const SaiDef &def = kCodecSAIDef)
+	SaiPeriph(const SaiConfig &def)
 		: saidef_(def)
 	{}
 
@@ -33,7 +33,7 @@ public:
 	DMA_HandleTypeDef *get_rx_dmahandle();
 
 private:
-	const SaiDef &saidef_;
+	const SaiConfig &saidef_;
 	DMA_HandleTypeDef hdma_tx;
 	DMA_HandleTypeDef hdma_rx;
 	SAI_HandleTypeDef hsai_tx;

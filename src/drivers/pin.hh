@@ -1,4 +1,4 @@
-/* 
+/*
  * pin.hh
  *
  * copyright (c) 2020 Dan Green <danngreen1@gmail.com>
@@ -24,7 +24,7 @@
 
 enum class PinPolarity {
 	Normal,
-	Inverted
+	Inverted,
 };
 
 enum class PinMode : uint32_t {
@@ -37,7 +37,7 @@ enum class PinMode : uint32_t {
 enum class PinPull : uint32_t {
 	Up = LL_GPIO_PULL_UP,
 	Down = LL_GPIO_PULL_DOWN,
-	None = LL_GPIO_PULL_NO
+	None = LL_GPIO_PULL_NO,
 };
 
 enum class PinSpeed : uint32_t {
@@ -49,7 +49,7 @@ enum class PinSpeed : uint32_t {
 
 enum class PinOType : uint32_t {
 	PushPull = LL_GPIO_OUTPUT_PUSHPULL,
-	OpenDrain = LL_GPIO_OUTPUT_OPENDRAIN
+	OpenDrain = LL_GPIO_OUTPUT_OPENDRAIN,
 };
 
 enum class GPIO : uint32_t {
@@ -73,14 +73,14 @@ enum class GPIO : uint32_t {
 };
 
 enum PinAF {
-	AFNone = 0
+	AFNone = 0,
 };
 
 class Pin {
 public:
 	Pin() = default;
 
-	//Pin{GPIO::A, 10, PinMode::Input, ...};
+	// Pin{GPIO::A, 10, PinMode::Input, ...};
 	Pin(GPIO port,
 		uint8_t pin,
 		PinMode mode,
@@ -114,10 +114,13 @@ private:
 		return static_cast<uint32_t>(x);
 	}
 
-	auto GPIOPort(GPIO port_) const { return reinterpret_cast<GPIO_TypeDef *>(port_); }
+	auto GPIOPort(GPIO port_) const
+	{
+		return reinterpret_cast<GPIO_TypeDef *>(port_);
+	}
 };
 
-//Convenient wrapper for holding pin defintions to be passed to a peripheral initializater
+// Convenient container for passing pin defintions to a peripheral which performs the initialization
 struct PinNoInit {
 	GPIO gpio;
 	uint8_t pin;

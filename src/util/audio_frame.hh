@@ -34,8 +34,7 @@ public:
 	static inline constexpr SampleType sign_extend(const SampleType &v) noexcept
 	{
 		// static_assert(std::is_integral<SampleType>::value, "SampleType is not integral");
-		static_assert((sizeof(SampleType) * 8u) >= UsedBits,
-					  "SampleType is smaller than the specified width");
+		static_assert((sizeof(SampleType) * 8u) >= UsedBits, "SampleType is smaller than the specified width");
 		if constexpr ((sizeof(SampleType) * 8u) == UsedBits)
 			return v;
 		else {
@@ -53,6 +52,4 @@ public:
 		return (in_s24bit);
 	}
 };
-
-using AudioFrame = GenericAudioFrame<int32_t, 24>;
 

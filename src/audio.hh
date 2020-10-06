@@ -9,7 +9,8 @@
 #include "stm32f7xx.h"
 #include "util/interp_param.hh"
 #include <array>
-//#include "interp_param.hh"
+
+using AudioFrame = GenericAudioFrame<int32_t, 24>;
 
 // Todo: multiple Audio objects would overwrite the HALCallback: add another
 // param to HALLCallback ctor to give a process ID or SAI Periph# or HAL SAI

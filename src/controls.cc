@@ -1,7 +1,5 @@
 #include "controls.hh"
 #include "debug.hh"
-#include "dma_config_struct.hh"
-#include "defs/control_defs.hh"
 
 void Controls::read()
 {
@@ -30,9 +28,9 @@ void Controls::begin()
 
 Controls::Controls()
 {
-	CVADCPeriph::init_dma(kADCDMAConfig);
+	CVADCPeriph::init_dma(ADC_DMA_conf);
 	CVADCPeriph::start_adc();
 
-	read_controls_task.init(kControlReadTaskConfig, [this]() { read(); });
+	read_controls_task.init(control_read_tim_conf, [this]() { read(); });
 }
 

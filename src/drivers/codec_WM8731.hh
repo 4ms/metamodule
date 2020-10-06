@@ -52,7 +52,7 @@ public:
 		INVALID_PARAM
 	};
 
-	CodecWM8731(I2CPeriph &i2c, uint32_t sample_rate = 48000);
+	CodecWM8731(I2CPeriph &i2c, const SaiConfig &saidef);
 
 	virtual void set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uint32_t block_size);
 	virtual void start();
@@ -66,7 +66,7 @@ public:
 private:
 	I2CPeriph &i2c_;
 	SaiPeriph sai_;
-	uint32_t sample_rate_;
+
 	Error _write_register(uint8_t RegisterAddr, uint16_t RegisterValue);
 	Error _write_all_registers(uint32_t sample_rate);
 	Error _reset();

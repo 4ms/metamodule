@@ -23,6 +23,7 @@ arm-none-eabi
 -Istm32/core/include
 -Istm32/periph/include
 -Isrc
+-Isrc/conf
 -Isrc/drivers
 -Isrc/util
 -Isrc/processors
