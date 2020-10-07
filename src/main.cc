@@ -11,23 +11,26 @@
 #include "system.hh"
 #include "ui.hh"
 
-System sys;
-Debug debug;
-
-SDRAMPeriph sdram{SDRAM_AS4C_conf};
-QSpiFlash qspi{qspi_flash_conf};
-SharedBus shared_bus{shared_i2c_conf};
-CodecWM8731 codec{shared_bus.i2c, codec_sai_conf};
-__attribute__((section(".dtcm"))) PCA9685Driver led_driver{shared_bus.i2c, kNumLedDriverChips, led_driver_dma_conf};
-
-Controls controls;
-Params params{controls};
-__attribute__((section(".dtcm"))) Audio audio{params, codec};
-LedCtl leds{led_driver};
-Ui ui{params, leds};
+struct DualOpenerSystem : System, Debug, SDRAMPeriph, SharedBus {
+	DualOpenerSystem()
+		: SDRAMPeriph{SDRAM_AS4C_conf}
+		, SharedBus{i2c_conf}
+	{}
+} _;
 
 void main()
 {
+	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
+	QSpiFlash qspi{qspi_flash_conf};
+	Controls controls;
+	Params params{controls};
+	static __attribute__((section(".dtcm"))) Audio audio{params, codec};
+	static __attribute__((section(".dtcm")))
+	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_driver_dma_conf};
+	LedCtl leds{led_driver};
+
+	Ui ui{params, leds};
+
 	audio.start();
 	ui.start();
 
