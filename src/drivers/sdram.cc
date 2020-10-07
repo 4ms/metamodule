@@ -4,7 +4,7 @@
 #include "stm32f7xx_ll_gpio.h"
 #include "stm32xx.h"
 
-#define SDRAM_DO_TEST
+//#define SDRAM_DO_TEST
 
 SDRAMPeriph::SDRAMPeriph(const SDRAMConfig &sdram_defs) noexcept
 
