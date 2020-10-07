@@ -29,14 +29,10 @@ Ui ui{params, leds};
 void main()
 {
 	audio.start();
-
-	leds.start_dma_mode();
-
-	controls.begin();
+	ui.start();
 
 	while (1) {
 		ui.update();
-		leds.update();
 		__NOP();
 	}
 }

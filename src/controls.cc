@@ -21,7 +21,7 @@ void Controls::read()
 	Debug::set_0(false);
 }
 
-void Controls::begin()
+void Controls::start()
 {
 	read_controls_task.start();
 }

@@ -16,6 +16,12 @@ public:
 		, leds{l}
 	{}
 
+	void start()
+	{
+		leds.start_dma_mode();
+		params.controls.start();
+	}
+
 	void update()
 	{
 		for (int i = 0; i < 2; i++) {
@@ -34,7 +40,6 @@ public:
 				leds.but[i].set_background(Colors::white);
 			else
 				leds.but[i].set_background(Colors::off);
-
 		}
 		for (int i = 0; i < 5; i++) {
 			leds.mode[i].set_background(Colors::off);
@@ -44,6 +49,6 @@ public:
 				leds.mode[i].add_background(Colors::blue);
 		}
 
-			
+		leds.update();
 	}
 };

@@ -26,7 +26,7 @@ struct Controls {
 
 	Controls();
 	void read();
-	void begin();
+	void start();
 
 private:
 	Timekeeper read_controls_task;
