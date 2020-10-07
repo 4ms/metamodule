@@ -46,6 +46,8 @@ MEMORY
 	DTCM(xrw) : ORIGIN = 0x20000000, LENGTH = 64K
 	SRAM1(xrw) : ORIGIN = 0x20010000, LENGTH = 240K
 	SRAM2(xrw) : ORIGIN = 0x2004C000, LENGTH = 16K
+
+	SDRAM(rw) : ORIGIN = 0xC0000000, LENGTH = 8M
 }
 
 /* Define output sections */
@@ -164,7 +166,16 @@ SECTIONS
     . = ALIGN(8);
   } >SRAM1
 
-  
+  .fmc :
+  {
+    . = ALIGN(8);
+    PROVIDE( fmc_start = . );
+    PROVIDE( _fmc_start = . );
+    *(.fmc)
+    *(.fmc*)
+    . = ALIGN(8);
+  } >SDRAM
+ 
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
