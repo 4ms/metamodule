@@ -5,15 +5,17 @@ Audio::Audio(Params &p, ICodec &codec, uint32_t sample_rate)
 	, codec_{codec}
 	, sample_rate_{sample_rate}
 {
-	// Todo: get this working:
+	for (uint32_t i = 0; i < 5; i++) {
+		FX_left[i]->set_samplerate(48000.f);
+		FX_right[i]->set_samplerate(48000.f);
+	}
+
 	// for (auto &fx : FX_left)
 	// 	fx.set_samplerate(sample_rate_);
 	// for (auto &fx : FX_right)
 	// 	fx.set_samplerate(sample_rate_);
 	current_fx[LEFT] = FX_left[0];
-	current_fx[LEFT]->set_samplerate(sample_rate_);
 	current_fx[RIGHT] = FX_right[0];
-	current_fx[RIGHT]->set_samplerate(sample_rate_);
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_[0].data()),
 							reinterpret_cast<uint8_t *>(rx_buf_[0].data()),
@@ -24,12 +26,6 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
 	params.update();
 	check_fx_change();
-	/*
-		current_fx[LEFT]->set_param(0, params.freq[0]);
-		current_fx[LEFT]->set_param(1, params.res[0]);
-		current_fx[RIGHT]->set_param(0, params.freq[1]);
-		current_fx[RIGHT]->set_param(1, params.res[1]);
-		*/
 	freq0.set_new_value(params.freq[0]);
 	freq1.set_new_value(params.freq[1]);
 	res0.set_new_value(params.res[0]);
@@ -64,11 +60,9 @@ void Audio::check_fx_change()
 	if (current_fx[LEFT] != FX_left[params.mode[0]]) {
 		// Todo: start crossfading
 		current_fx[LEFT] = FX_left[params.mode[0]];
-		current_fx[LEFT]->set_samplerate(sample_rate_);
 	}
 	if (current_fx[RIGHT] != FX_right[params.mode[1]]) {
 		// Todo: start crossfading
 		current_fx[RIGHT] = FX_right[params.mode[1]];
-		current_fx[RIGHT]->set_samplerate(sample_rate_);
 	}
 }
