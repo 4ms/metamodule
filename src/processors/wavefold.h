@@ -8,6 +8,7 @@
 using namespace MathTools;
 
 class WaveFolder : public AudioProcessor {
+
 public:
 	virtual float update(float input)
 	{
@@ -33,11 +34,11 @@ public:
 
 	WaveFolder()
 	{
-		// Generate fold tables
+		// Todo: generate these in tableGen
 		for (int i = 0; i < 512; i++) {
-			fold1[i] = map_value(fmodf(i, 256.f), 0.0f, 255.0f, -1.0f, 1.0f);
-			fold2[i] = map_value(fmodf(i, 170.6666666667), 0.0f, (512.f / 3.0f - 1.f), -1.0f, 1.0f);
-			fold3[i] = map_value(fmodf(i, 128.f), 0.0f, 127.0f, -1.0f, 1.0f);
+			fold1[i] = map_value(i % 256, 0.0f, 255.0f, -1.0f, 1.0f);
+			fold2[i] = map_value(fmodf(i, 170.6666666667f), 0.0f, (512.f / 3.0f - 1.f), -1.0f, 1.0f);
+			fold3[i] = map_value(i % 128, 0.0f, 127.0f, -1.0f, 1.0f);
 		}
 	}
 
@@ -53,11 +54,9 @@ public:
 	virtual void set_samplerate(float sr) {}
 
 private:
-	float mainFold;
-
+	float mainFold = 0;
 	float foldType = 0;
-
-	InterpArray<float, 512> fold1, fold2, fold3;
+	static inline InterpArray<float, 512> fold1, fold2, fold3;
 
 	float sharpFold(float input)
 	{
@@ -103,7 +102,6 @@ private:
 	float chebyFold(float input)
 	{
 		int cheby_tables = 16;
-		int cheby_size = 513;
 		float lookupIndex = map_value(input, -1.0f, 1.0f, 0.0f, 1.0f);
 
 		float foldSamp[cheby_tables + 1];
