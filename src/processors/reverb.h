@@ -1,7 +1,7 @@
 #pragma once
 
 #include "math.hh"
-#include "tools.h"
+using namespace MathTools;
 
 class Reverb : public AudioProcessor {
 public:
@@ -138,7 +138,9 @@ public:
 		fRec23[0] = ((fSlow1 * fRec23[1]) + (fSlow2 * fRec22[1]));
 		fVec7[(IOTA & 8191)] = (fTemp0 + (fSlow0 * fRec23[0]));
 		fRec22[0] = fVec7[((IOTA - iConst8) & 8191)];
-		float fTemp1 = ((((((((fRec8[0] + fRec10[0]) + fRec12[0]) + fRec14[0]) + fRec16[0]) + fRec18[0]) + fRec20[0]) + fRec22[0]) + (fSlow3 * fRec6[1]));
+		float fTemp1 = ((((((((fRec8[0] + fRec10[0]) + fRec12[0]) + fRec14[0]) + fRec16[0]) + fRec18[0]) + fRec20[0]) +
+						 fRec22[0]) +
+						(fSlow3 * fRec6[1]));
 		fVec8[(IOTA & 2047)] = fTemp1;
 		fRec6[0] = fVec8[((IOTA - iConst9) & 2047)];
 		float fRec7 = (0.0f - (fSlow3 * fTemp1));

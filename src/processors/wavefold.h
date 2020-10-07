@@ -1,8 +1,11 @@
 #pragma once
 #include "../util/interp_array.hh"
 #include "audio_processor.hh"
-#include "tools.h"
+#include "math.hh"
 #include "wavefold_tables.h" //Tables from new g++ project
+#include <cmath>
+
+using namespace MathTools;
 
 class WaveFolder : public AudioProcessor {
 public:

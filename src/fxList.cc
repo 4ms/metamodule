@@ -3,7 +3,6 @@
 #include "processors/lpf.h"
 #include "processors/lpg.h"
 #include "processors/reverb.h"
-#include "processors/tools.h"
 #include "processors/vca.h"
 #include "processors/wavefold.h"
 

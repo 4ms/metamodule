@@ -1,7 +1,7 @@
 #pragma once
 
 #include "audio_processor.hh"
-#include "tools.h"
+#include "math.hh"
 
 using namespace MathTools;
 
@@ -32,9 +32,7 @@ public:
 		if (param_id == 1)
 			preGain = map_value(val, 0, 1, 1, 5);
 	}
-	virtual void set_samplerate(float sr)
-	{
-	}
+	virtual void set_samplerate(float sr) {}
 
 private:
 	float preGain;

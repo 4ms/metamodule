@@ -1,7 +1,8 @@
 #pragma once
-
 #include "math.hh"
-#include "tools.h"
+#include <cmath>
+
+using namespace MathTools;
 
 class FreqShift : public AudioProcessor {
 public:
@@ -43,7 +44,8 @@ public:
 		fRec4[0] = ((fTemp0 + fTemp4) - (0.946569979f * fRec4[2]));
 		float fTemp5 = (0.837740004f * fRec3[1]);
 		fRec3[0] = ((fRec4[2] + ((0.946569979f * fRec4[0]) + fTemp5)) - ((0.063380003f * fRec3[2]) + fTemp4));
-		output = float((((((0.870685995f * fRec0[0]) + fRec0[2]) - fTemp2) * std::cos(fTemp3)) - ((((0.063380003f * fRec3[0]) + fRec3[2]) - fTemp5) * std::sin(fTemp3))));
+		output = float((((((0.870685995f * fRec0[0]) + fRec0[2]) - fTemp2) * std::cos(fTemp3)) -
+						((((0.063380003f * fRec3[0]) + fRec3[2]) - fTemp5) * std::sin(fTemp3))));
 		fRec1[2] = fRec1[1];
 		fRec1[1] = fRec1[0];
 		fRec0[2] = fRec0[1];

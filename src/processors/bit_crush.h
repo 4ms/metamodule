@@ -1,7 +1,8 @@
 #pragma once
 #include "audio_processor.hh"
 #include "math.hh"
-#include "tools.h"
+
+using namespace MathTools;
 
 class BitCrusher : public AudioProcessor {
 public:
@@ -19,9 +20,7 @@ public:
 		return (sampledOutput);
 	}
 
-	BitCrusher()
-	{
-	}
+	BitCrusher() {}
 
 	virtual void set_param(int param_id, float val)
 	{
@@ -29,9 +28,9 @@ public:
 			float expoControl = val * val;
 			if ((expoControl) <= 0.9f) {
 				reducedSampleRate = map_value(expoControl, 0.0f, 0.9f, 0.1f, currentSampleRate / 16.0f);
-			}
-			else {
-				reducedSampleRate = map_value(expoControl, 0.9f, 1.0f, currentSampleRate / 16.0f, currentSampleRate / 2.0f);
+			} else {
+				reducedSampleRate =
+					map_value(expoControl, 0.9f, 1.0f, currentSampleRate / 16.0f, currentSampleRate / 2.0f);
 			}
 		}
 		if (param_id == 1) {
