@@ -14,17 +14,15 @@
 System sys;
 Debug debug;
 
-// struct DualOpenerHardware {
-SDRAMPeriph sdram{SDRAM_AS4C_conf, 0xC0000000, 0x00800000};
+SDRAMPeriph sdram{SDRAM_AS4C_conf};
 QSpiFlash qspi{qspi_flash_conf};
 SharedBus shared_bus{shared_i2c_conf};
 CodecWM8731 codec{shared_bus.i2c, codec_sai_conf};
-PCA9685Driver led_driver{shared_bus.i2c, kNumLedDriverChips, led_driver_dma_conf};
-// } hardware;
+__attribute__((section(".dtcm"))) PCA9685Driver led_driver{shared_bus.i2c, kNumLedDriverChips, led_driver_dma_conf};
 
 Controls controls;
 Params params{controls};
-Audio audio{params, codec};
+__attribute__((section(".dtcm"))) Audio audio{params, codec};
 LedCtl leds{led_driver};
 Ui ui{params, leds};
 
@@ -43,6 +41,7 @@ void main()
 	}
 }
 
-void recover_from_task_fault(void) {
+void recover_from_task_fault(void)
+{
 	main();
 }
