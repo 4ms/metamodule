@@ -6,11 +6,11 @@
 #include "tools/delayLine.h"
 #include <cmath>
 
-CubicNonlinearDist limit;
-
 using namespace MathTools;
 
 class Phaser : public AudioProcessor {
+	CubicNonlinearDist limit;
+
 public:
 	float feedback = 0.89f;
 
