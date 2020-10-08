@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../util/math_tables.hh"
 #include "audio_processor.hh"
 #include "math.hh"
 #include "tools/cubicDist.h"
