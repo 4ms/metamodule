@@ -2,14 +2,14 @@
 #include "debug.hh"
 #include <cmath>
 
-Audio::Audio(Params &p, ICodec &codec, uint32_t sample_rate)
+Audio::Audio(Params &p, ICodec &codec)
 	: params{p}
 	, codec_{codec}
-	, sample_rate_{sample_rate}
+	, sample_rate_{codec.get_samplerate()}
 {
 	for (uint32_t i = 0; i < 5; i++) {
-		FX_left[i]->set_samplerate(48000.f);
-		FX_right[i]->set_samplerate(48000.f);
+		FX_left[i]->set_samplerate(sample_rate_);
+		FX_right[i]->set_samplerate(sample_rate_);
 	}
 
 	current_fx[LEFT] = FX_left[0];

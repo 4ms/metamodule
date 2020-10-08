@@ -37,7 +37,7 @@ uint16_t default_codec_init_data[] = {
 	HPVOL_0dB, // Reg 02: Left Headphone out
 	HPVOL_0dB, // Reg 03: Right Headphone out
 	(MUTEMIC   // Reg 04: Analog Audio Path Control (maximum attenuation on sidetone, sidetone disabled, DAC selected,
-			 // Mute Mic, no bypass)
+			   // Mute Mic, no bypass)
 	 | INSEL_line | DACSEL | SIDEATT_neg6dB),
 	(DEEMPH_disable // Reg 05: Digital Audio Path Control: HPF, De-emp at 48kHz on DAC, do not soft mute dac
 	 | ADCHPFEnable),
@@ -51,8 +51,9 @@ uint16_t default_codec_init_data[] = {
 CodecWM8731::CodecWM8731(I2CPeriph &i2c, const SaiConfig &saidef)
 	: i2c_(i2c)
 	, sai_{saidef}
+	, samplerate_{saidef.samplerate}
 {
-	init_at_samplerate(saidef.samplerate);
+	init_at_samplerate(samplerate_);
 	sai_.init();
 }
 
@@ -61,6 +62,10 @@ void CodecWM8731::set_txrx_buffers(uint8_t *tx_buf_ptr, uint8_t *rx_buf_ptr, uin
 	sai_.set_txrx_buffers(tx_buf_ptr, rx_buf_ptr, block_size);
 }
 
+uint32_t CodecWM8731::get_samplerate()
+{
+	return samplerate_;
+}
 void CodecWM8731::start()
 {
 	sai_.start();

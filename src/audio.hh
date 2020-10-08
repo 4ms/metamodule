@@ -18,7 +18,7 @@ using AudioFrame = GenericAudioFrame<int32_t, 24>;
 class Audio {
 public:
 	// Public methods:
-	Audio(Params &p, ICodec &codec, uint32_t sample_rate = 48000);
+	Audio(Params &p, ICodec &codec);
 	void start();
 
 	enum AudioChannels { LEFT, RIGHT };
