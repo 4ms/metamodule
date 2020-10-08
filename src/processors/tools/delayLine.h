@@ -2,16 +2,15 @@
 
 #include "math.hh"
 
+template<int maxSamples>
 class DelayLine {
 public:
 	float delayTimeMS = 0;
 
 	float output = 0;
 
-	DelayLine(float maxTimeMS)
+	DelayLine()
 	{
-		maxSamples = ((maxTimeMS / 1000.0f) * sampleRate) + 1;
-		delayBuffer = new float[maxSamples];
 		for (int i = 0; i < maxSamples; i++) {
 			delayBuffer[i] = 0;
 		}
@@ -37,8 +36,8 @@ public:
 	}
 
 private:
-	int maxSamples;
-	float *delayBuffer;
+	// int maxSamples;
+	float delayBuffer[maxSamples];
 	float sampleRate = 44100;
 
 	unsigned long writeIndex = 0;
