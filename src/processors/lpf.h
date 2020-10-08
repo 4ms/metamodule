@@ -13,10 +13,10 @@ public:
 	{
 		float output = 0;
 		fRec0[0] = (input - (fSlow3 * ((fSlow4 * fRec0[2]) + (fSlow5 * fRec0[1]))));
-		output = (fSlow3 * (fRec0[2] + (fRec0[0] + (2.0f * fRec0[1]))));
+		output = dist.update(fSlow3 * (fRec0[2] + (fRec0[0] + (2.0f * fRec0[1]))));
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
-		return dist.update(output);
+		return output;
 	}
 
 	LowPassFilter()
@@ -37,7 +37,7 @@ public:
 		if (param_id == 0) {
 			if (fabsf(last_param[0] - val) > 0.001f) {
 				last_param[0] = val;
-				cutoff = map_value(val, 0.f, 1.f, minCutoff, maxCutoff);
+				cutoff = map_value(val * val, 0.f, 1.f, minCutoff, maxCutoff);
 				// fSlow1 = cutoff / fConst0;
 				fSlow1 = tanf((fConst0 * cutoff));
 				fSlow2 = (1.0f / fSlow1);
