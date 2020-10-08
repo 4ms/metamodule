@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 // Todo put this in a _config.h file
-static const int kAudioStreamBlockSize = 32;
+static const int kAudioStreamBlockSize = 64;
 static const int kNumAudioDMAHalfTransfers = 2;
 static const int kAudioStreamDMABlockSize = kAudioStreamBlockSize * kNumAudioDMAHalfTransfers;
 
