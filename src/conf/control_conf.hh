@@ -25,7 +25,7 @@ const DMA_LL_Config ADC_DMA_conf = {
 
 const TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
-	.period_ns = 11000,
-	.priority1 = 2,
-	.priority2 = 3,
+	.period_ns = 100000, // 10kHz
+	.priority1 = 0,
+	.priority2 = 0,
 };

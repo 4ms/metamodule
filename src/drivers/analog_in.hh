@@ -2,7 +2,7 @@
 #include "adc_builtin_driver.hh"
 #include "filter.hh"
 
-template<AdcPeriphNum p, AdcChanNum c, int kOverSampleAmt = 8>
+template<AdcPeriphNum p, AdcChanNum c, int kOverSampleAmt = 128>
 struct AnalogIn : AdcChan<p, c, uint32_t> {
 	AnalogIn(GPIO port, uint8_t pin_num)
 	{

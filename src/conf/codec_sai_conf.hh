@@ -15,8 +15,8 @@ const SaiConfig codec_sai_conf = {
 			.stream = DMA2_Stream1,
 			.channel = DMA_CHANNEL_0,
 			.IRQn = DMA2_Stream1_IRQn,
-			.pri = 0,
-			.subpri = 1,
+			.pri = 1,
+			.subpri = 0,
 		},
 	.dma_init_rx =
 		{
@@ -24,8 +24,8 @@ const SaiConfig codec_sai_conf = {
 			.stream = DMA2_Stream4,
 			.channel = DMA_CHANNEL_1,
 			.IRQn = DMA2_Stream4_IRQn,
-			.pri = 0,
-			.subpri = 1,
+			.pri = 1,
+			.subpri = 0,
 		},
 
 	.datasize = SAI_DATASIZE_24,
