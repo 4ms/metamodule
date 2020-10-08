@@ -1,6 +1,7 @@
 #pragma once
 
 #include "audio_processor.hh"
+#include "math.hh"
 #include "tools/cubicDist.h"
 #include <cmath>
 
@@ -11,12 +12,6 @@ public:
 	virtual float update(float input)
 	{
 		float output = 0;
-		float fSlow0 = (1.0f / q);
-		float fSlow1 = tanf((fConst0 * cutoff));
-		float fSlow2 = (1.0f / fSlow1);
-		float fSlow3 = (1.0f / (((fSlow0 + fSlow2) / fSlow1) + 1.0f));
-		float fSlow4 = (((fSlow2 - fSlow0) / fSlow1) + 1.0f);
-		float fSlow5 = (2.0f * (1.0f - (1.0f / (fSlow1 * fSlow1))));
 		fRec0[0] = (input - (fSlow3 * ((fSlow4 * fRec0[2]) + (fSlow5 * fRec0[1]))));
 		output = (fSlow3 * (fRec0[2] + (fRec0[0] + (2.0f * fRec0[1]))));
 		fRec0[2] = fRec0[1];
@@ -26,8 +21,9 @@ public:
 
 	LowPassFilter()
 	{
-		cutoff = 200;
-		q = 1;
+		set_samplerate(48000);
+		set_param(0, 0.1f);
+		set_param(1, 0.5f);
 		for (int l0 = 0; l0 < 3; l0++) {
 			fRec0[l0] = 0.0f;
 		}
@@ -37,13 +33,30 @@ public:
 	{
 		const float minCutoff = 20.f;
 		const float maxCutoff = 20000.f;
-		if (param_id == 0)
-			cutoff = map_value(val, 0.f, 1.f, minCutoff, maxCutoff);
-		if (param_id == 1)
-			q = map_value(val, 0.f, 1.f, 0.2F, 40.f);
+
+		if (param_id == 0) {
+			if (fabsf(last_param[0] - val) > 0.001f) {
+				last_param[0] = val;
+				cutoff = map_value(val, 0.f, 1.f, minCutoff, maxCutoff);
+				// fSlow1 = cutoff / fConst0;
+				fSlow1 = tanf((fConst0 * cutoff));
+				fSlow2 = (1.0f / fSlow1);
+				fSlow3 = (1.0f / (((fSlow0 + fSlow2) / fSlow1) + 1.0f));
+				fSlow4 = (((fSlow2 - fSlow0) / fSlow1) + 1.0f);
+				fSlow5 = (2.0f * (1.0f - (1.0f / (fSlow1 * fSlow1))));
+			}
+		}
+		if (param_id == 1) {
+			if (fabsf(last_param[1] - val) > 0.001f) {
+				last_param[1] = val;
+				q = map_value(val, 0.f, 1.f, 0.2f, 40.f);
+				fSlow0 = (1.0f / q);
+			}
+		}
 	}
 	virtual void set_samplerate(float sr)
 	{
+		// fConst0 = constrain(sr, 1.0f, 192000.0f);
 		fConst0 = 3.14159274f / constrain(sr, 1.0f, 192000.0f);
 	}
 
@@ -51,8 +64,10 @@ public:
 
 private:
 	CubicNonlinearDist dist;
+	float last_param[2] = {0.f, 0.f};
 	float cutoff;
 	float q;
 	float fRec0[3];
 	float fConst0;
+	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5;
 };
