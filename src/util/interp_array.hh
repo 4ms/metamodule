@@ -15,10 +15,10 @@ struct InterpArray {
 	constexpr float interp_by_index(const float index) const
 	{
 		unsigned int idx0 = static_cast<unsigned int>(index);
-		float phase = index - static_cast<float>(idx0);
-		unsigned int idx1 = idx0 + 1;
-		if (idx1 >= Size)
-			idx1 = 0;
+		while (idx0 >= Size)
+			idx0 -= Size;
+		const float phase = index - static_cast<float>(idx0);
+		const unsigned int idx1 = (idx0 == (Size - 1)) ? 0 : idx0 + 1;
 
 		return data[idx0] + (data[idx1] - data[idx0]) * phase;
 	}
