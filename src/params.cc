@@ -1,12 +1,13 @@
 #include "params.hh"
+#include "debug.hh"
 #include "math.hh"
-
 using namespace MathTools;
 
 void Params::update()
 {
-	uint16_t freqcv[2] = {controls.freq_cv0.get(), controls.freq_cv1.get()};
-	uint16_t rescv[2] = {controls.res_cv0.get(), controls.res_cv1.get()};
+	// Debug::set_1(true);
+	uint32_t freqcv[2] = {controls.freq_cv0.get(), controls.freq_cv1.get()};
+	uint32_t rescv[2] = {controls.res_cv0.get(), controls.res_cv1.get()};
 
 	for (int i = 0; i < 2; i++) {
 		float rotary_motion = static_cast<float>(controls.rotary[i].read());
@@ -24,5 +25,6 @@ void Params::update()
 			mode[i] = wrap<kNumFX>(mode[i] + 1);
 		}
 	}
+	// Debug::set_1(false);
 }
 

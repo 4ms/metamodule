@@ -20,5 +20,5 @@ struct AnalogIn : AdcChan<p, c, uint32_t> {
 	}
 
 private:
-	Oversampler<uint16_t, kOverSampleAmt> oversampler_;
+	Oversampler<uint32_t, kOverSampleAmt> oversampler_;
 };
