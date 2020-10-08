@@ -3,7 +3,7 @@
 
 void Controls::read()
 {
-	Debug::set_0(true);
+	// Debug::set_1(true);
 
 	freq_cv0.read();
 	res_cv0.read();
@@ -18,7 +18,7 @@ void Controls::read()
 		in_sense[i].update();
 		out_sense[i].update();
 	}
-	Debug::set_0(false);
+	// Debug::set_1(false);
 }
 
 void Controls::start()
