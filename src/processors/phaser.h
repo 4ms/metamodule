@@ -19,7 +19,8 @@ public:
 		phaccu += lfoSpeed / sampleRate;
 		if (phaccu >= 1)
 			phaccu -= 1.0f;
-		sinLFO = sin(2.0f * M_PI * phaccu);
+		sinLFO = phaccu;
+		// sinLFO = fsinf(2.0f * M_PI * phaccu);
 		for (int i = 0; i < stages; i++) {
 			delay[i]->delayTimeMS = map_value(sinLFO, -1.0f, 1.0f, 0.0f, 1.0f * lfoDepth);
 		}
