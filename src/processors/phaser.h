@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../util/math_tables.hh"
 #include "audio_processor.hh"
 #include "math.hh"
 #include "tools/cubicDist.h"
@@ -17,10 +18,9 @@ public:
 	virtual float update(float input)
 	{
 		phaccu += lfoSpeed / sampleRate;
-		if (phaccu >= 1)
+		if (phaccu >= 1.0f)
 			phaccu -= 1.0f;
-		sinLFO = phaccu;
-		// sinLFO = fsinf(2.0f * M_PI * phaccu);
+		sinLFO = sinTable.interp(phaccu);
 		for (int i = 0; i < stages; i++) {
 			delay[i].delayTimeMS = map_value(sinLFO, -1.0f, 1.0f, 0.0f, 1.0f * lfoDepth);
 		}
