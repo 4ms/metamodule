@@ -23,17 +23,15 @@ public:
 public:
 	static float scaleInput(SampleType val)
 	{
-		return convert_s24_to_s32(val) / kOutScaling;
+		return sign_extend(val) / kOutScaling;
 	}
 	static SampleType scaleOutput(float val)
 	{
 		return static_cast<SampleType>(val * kOutScaling);
 	}
 
-	// Todo: test this, and check generated ASM
 	static inline constexpr SampleType sign_extend(const SampleType &v) noexcept
 	{
-		// static_assert(std::is_integral<SampleType>::value, "SampleType is not integral");
 		static_assert((sizeof(SampleType) * 8u) >= UsedBits, "SampleType is smaller than the specified width");
 		if constexpr ((sizeof(SampleType) * 8u) == UsedBits)
 			return v;
@@ -43,13 +41,6 @@ public:
 			};
 			return reinterpret_cast<const S *>(&v)->Val;
 		}
-	}
-	static int32_t convert_s24_to_s32(int32_t src)
-	{
-		uint32_t in_24bit = src << 8;
-		int32_t in_s24bit = (int32_t)in_24bit;
-		in_s24bit >>= 8;
-		return (in_s24bit);
 	}
 };
 
