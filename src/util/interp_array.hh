@@ -45,7 +45,7 @@ struct InterpArray {
 		return interp_by_index(index);
 	}
 
-	constexpr float closest_warp(const float phase) const
+	constexpr float closest_wrap(const float phase) const
 	{
 		unsigned int idx = static_cast<unsigned int>(phase * (Size - 1));
 		while (idx >= Size)

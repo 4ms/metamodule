@@ -97,12 +97,12 @@ TEST(interp_array_tests, wrapping_with_closest)
 	x[0] = 100.f;
 	x[1] = 200.f;
 	x[2] = 150.f;
-	FLOATS_NEARLY_EQUAL(150.f, x.closest(1.f));
-	FLOATS_NEARLY_EQUAL(150.f, x.closest(1.499f));
+	FLOATS_NEARLY_EQUAL(150.f, x.closest_wrap(1.f));
+	FLOATS_NEARLY_EQUAL(150.f, x.closest_wrap(1.499f));
 
-	FLOATS_NEARLY_EQUAL(100.f, x.closest(1.5f));
-	FLOATS_NEARLY_EQUAL(100.f, x.closest(1.999f));
+	FLOATS_NEARLY_EQUAL(100.f, x.closest_wrap(1.5f));
+	FLOATS_NEARLY_EQUAL(100.f, x.closest_wrap(1.999f));
 
-	FLOATS_NEARLY_EQUAL(200.f, x.closest(2.0f));
-	FLOATS_NEARLY_EQUAL(200.f, x.closest(2.4999f));
+	FLOATS_NEARLY_EQUAL(200.f, x.closest_wrap(2.0f));
+	FLOATS_NEARLY_EQUAL(200.f, x.closest_wrap(2.4999f));
 }
