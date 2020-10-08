@@ -2,8 +2,7 @@
 #include "util/interp_array.hh"
 #include <fff.h>
 
-#define FLOATS_NEARLY_EQUAL(e, a)                                                                  \
-	DOUBLES_EQUAL(static_cast<double>(e), static_cast<double>(a), 0.000001);
+#define FLOATS_NEARLY_EQUAL(e, a) DOUBLES_EQUAL(static_cast<double>(e), static_cast<double>(a), 0.000001);
 
 TEST_GROUP(interp_array_tests){
 
@@ -22,7 +21,6 @@ TEST(interp_array_tests, inits_with_single_value_sets_just_first_element)
 	LONGS_EQUAL(0, x[2]);
 }
 
-
 TEST(interp_array_tests, inits_to_multiple_values)
 {
 	InterpArray<long, 3> x = {42, 43, 44};
@@ -34,10 +32,10 @@ TEST(interp_array_tests, inits_to_multiple_values)
 TEST(interp_array_tests, basic_usage_by_phase)
 {
 	InterpArray<long, 4> x;
-	x[0] = 200; //0
-	x[1] = 300; //0.333
-	x[2] = 400; //0.666
-	x[3] = 4000; //1
+	x[0] = 200;	 // 0
+	x[1] = 300;	 // 0.333
+	x[2] = 400;	 // 0.666
+	x[3] = 4000; // 1
 	FLOATS_NEARLY_EQUAL(4000.f, x.interp(1.f));
 	FLOATS_NEARLY_EQUAL(400.f, x.interp(0.666666666f));
 	FLOATS_NEARLY_EQUAL(350.f, x.interp(0.5f));
@@ -48,9 +46,9 @@ TEST(interp_array_tests, basic_usage_by_phase)
 TEST(interp_array_tests, floats_by_phase)
 {
 	InterpArray<float, 3> x;
-	x[0] = 100.f; //0
-	x[1] = 200.f; //0.5
-	x[2] = 2000.f; //1
+	x[0] = 100.f;  // 0
+	x[1] = 200.f;  // 0.5
+	x[2] = 2000.f; // 1
 
 	float expected_0_75 = (x[1] + x[2]) / 2.f;
 	FLOATS_NEARLY_EQUAL(expected_0_75, x.interp(0.75f));
@@ -79,3 +77,32 @@ TEST(interp_array_tests, floats_by_index)
 	FLOATS_NEARLY_EQUAL(115.6f, x.interp_by_index(0.156f));
 }
 
+TEST(interp_array_tests, basic_usage_of_closest)
+{
+	InterpArray<float, 3> x;
+	x[0] = 100.f;
+	x[1] = 200.f;
+	x[2] = 150.f;
+	FLOATS_NEARLY_EQUAL(100.f, x.closest(0.0f));
+	FLOATS_NEARLY_EQUAL(100.f, x.closest(0.49999f));
+	FLOATS_NEARLY_EQUAL(200.f, x.closest(0.5f));
+	FLOATS_NEARLY_EQUAL(200.f, x.closest(0.6f));
+	FLOATS_NEARLY_EQUAL(200.f, x.closest(0.9999f));
+	FLOATS_NEARLY_EQUAL(150.f, x.closest(1.f));
+}
+
+TEST(interp_array_tests, wrapping_with_closest)
+{
+	InterpArray<float, 3> x;
+	x[0] = 100.f;
+	x[1] = 200.f;
+	x[2] = 150.f;
+	FLOATS_NEARLY_EQUAL(150.f, x.closest(1.f));
+	FLOATS_NEARLY_EQUAL(150.f, x.closest(1.499f));
+
+	FLOATS_NEARLY_EQUAL(100.f, x.closest(1.5f));
+	FLOATS_NEARLY_EQUAL(100.f, x.closest(1.999f));
+
+	FLOATS_NEARLY_EQUAL(200.f, x.closest(2.0f));
+	FLOATS_NEARLY_EQUAL(200.f, x.closest(2.4999f));
+}

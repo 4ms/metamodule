@@ -5,9 +5,9 @@
 TEST_GROUP(audio_frame_tests){void setup(){}
 
 							  void teardown(){}};
-#define FLOATS_NEARLY_EQUAL(e, a)                                                                  \
-	DOUBLES_EQUAL(static_cast<double>(e), static_cast<double>(a), 0.000001);
+#define FLOATS_NEARLY_EQUAL(e, a) DOUBLES_EQUAL(static_cast<double>(e), static_cast<double>(a), 0.000001);
 
+using AudioFrame = GenericAudioFrame<int32_t, 24>;
 TEST(audio_frame_tests, input_scales)
 {
 	AudioFrame a;
