@@ -25,7 +25,16 @@ struct InterpArray {
 
 	constexpr float interp(const float phase) const
 	{
-		float const index = phase * (Size - 1);
+		const float index = phase * (Size - 1);
 		return interp_by_index(index);
+	}
+
+	constexpr float closest(const float phase) const
+	{
+		const float index = phase * (Size - 1);
+		unsigned int idx = static_cast<unsigned int>(index);
+		while (idx >= Size)
+			idx -= Size;
+		return data[idx];
 	}
 };
