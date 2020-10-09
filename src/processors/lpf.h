@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../util/math_tables.hh"
 #include "audio_processor.hh"
 #include "math.hh"
 #include "tools/cubicDist.h"
@@ -39,7 +40,7 @@ public:
 				last_param[0] = val;
 				cutoff = map_value(val * val, 0.f, 1.f, minCutoff, maxCutoff);
 				// fSlow1 = cutoff / fConst0;
-				fSlow1 = tanf((fConst0 * cutoff));
+				fSlow1 = tanTable.interp(cutoff / fConst0);
 				fSlow2 = (1.0f / fSlow1);
 				fSlow3 = (1.0f / (((fSlow0 + fSlow2) / fSlow1) + 1.0f));
 				fSlow4 = (((fSlow2 - fSlow0) / fSlow1) + 1.0f);
@@ -57,7 +58,7 @@ public:
 	virtual void set_samplerate(float sr)
 	{
 		// fConst0 = constrain(sr, 1.0f, 192000.0f);
-		fConst0 = 3.14159274f / constrain(sr, 1.0f, 192000.0f);
+		fConst0 = constrain(sr, 1.0f, 192000.0f);
 	}
 
 	//~LowPassFilter() {}
