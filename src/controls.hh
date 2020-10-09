@@ -15,10 +15,10 @@ struct Controls {
 	static inline AnalogIn<AdcPeriphNum::_1, AdcChanNum::_0> freq_cv1 = {GPIO::A, 0};
 	static inline AnalogIn<AdcPeriphNum::_1, AdcChanNum::_1> res_cv1 = {GPIO::A, 1};
 
-	static inline JackSense freq_sense[2] = {{GPIO::C, 4}, {GPIO::B, 1}};
-	static inline JackSense res_sense[2] = {{GPIO::C, 5}, {GPIO::B, 0}};
-	static inline JackSense in_sense[2] = {{GPIO::G, 12}, {GPIO::G, 11}};
-	static inline JackSense out_sense[2] = {{GPIO::D, 7}, {GPIO::G, 10}};
+	static inline JackSense freq_sense[2] = {{GPIO::C, 4, PinPolarity::Normal}, {GPIO::B, 1, PinPolarity::Normal}};
+	static inline JackSense res_sense[2] = {{GPIO::C, 5, PinPolarity::Normal}, {GPIO::B, 0, PinPolarity::Normal}};
+	static inline JackSense in_sense[2] = {{GPIO::G, 12, PinPolarity::Normal}, {GPIO::G, 11, PinPolarity::Normal}};
+	static inline JackSense out_sense[2] = {{GPIO::D, 7, PinPolarity::Normal}, {GPIO::G, 10, PinPolarity::Normal}};
 
 	static inline RotaryEncoder<RotaryFullStep> rotary[2] = {{GPIO::A, 7, GPIO::A, 6}, {GPIO::C, 7, GPIO::C, 6}};
 	static inline DebouncedSwitch rotary_button[2] = {{GPIO::A, 5}, {GPIO::B, 9}};
