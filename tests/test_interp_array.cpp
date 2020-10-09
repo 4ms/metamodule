@@ -77,6 +77,10 @@ TEST(interp_array_tests, floats_by_index)
 	FLOATS_NEARLY_EQUAL(115.6f, x.interp_by_index(0.156f));
 }
 
+TEST(interp_array_tests, wrapping_by_phase) {}
+
+TEST(interp_array_tests, wrapping_by_index) {}
+
 TEST(interp_array_tests, basic_usage_of_closest)
 {
 	InterpArray<float, 3> x;
