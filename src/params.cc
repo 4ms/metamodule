@@ -6,8 +6,12 @@ using namespace MathTools;
 void Params::update()
 {
 	// Debug::set_1(true);
-	uint32_t freqcv[2] = {controls.freq_cv0.get(), controls.freq_cv1.get()};
-	uint32_t rescv[2] = {controls.res_cv0.get(), controls.res_cv1.get()};
+	uint32_t freqcv[2];
+	uint32_t rescv[2];
+	freqcv[0] = controls.freq_sense[0].is_pressed() ? controls.freq_cv0.get() : 0U;
+	freqcv[1] = controls.freq_sense[1].is_pressed() ? controls.freq_cv1.get() : 0U;
+	rescv[0] = controls.res_sense[0].is_pressed() ? controls.res_cv0.get() : 0U;
+	rescv[1] = controls.res_sense[1].is_pressed() ? controls.res_cv1.get() : 0U;
 
 	for (int i = 0; i < 2; i++) {
 		float rotary_motion = static_cast<float>(controls.rotary[i].read());
