@@ -5,6 +5,8 @@
 #include <cmath>
 using namespace std;
 
+ofstream myfile;
+
 const int fold_size = 1025;
 
 float cheby[16][513];
@@ -118,13 +120,18 @@ static float fast_sine(float x)
 	return y;
 }
 
-int main()
+void buildFoldTables()
 {
-	ofstream myfile;
-
 	myfile.open("src/processors/wavefold_tables.h");
 
-	//cheby table generation
+	myfile << "#pragma once" << endl;
+
+	myfile << "#include"
+		   << "\""
+		   << "interp_array.hh"
+		   << "\"" << endl;
+
+	// cheby table generation
 
 	const int cheby_size = 513;
 	const int cheby_tables = 16;
@@ -142,8 +149,7 @@ int main()
 		for (int i = 0; i < cheby_size; i++)
 			cheby[n][i] = 2.0f * cheby[0][i] * cheby[n - 1][i] - cheby[n - 2][i];
 
-	myfile << "const float cheby[16][513] = " << endl
-		   << "{";
+	myfile << "const InterpArray<float, 513> cheby[16] = " << endl << "{";
 
 	for (int i = 0; i < 16; i++) {
 		if (i == 0)
@@ -184,7 +190,7 @@ int main()
 		}
 	}
 
-	myfile << "const float fold[1025] = " << endl;
+	myfile << "const InterpArray<float, 1025> fold = " << endl;
 	myfile << "{ ";
 
 	for (int i = 0; i < 1025; i++) {
@@ -193,7 +199,7 @@ int main()
 
 	myfile << "};" << endl;
 
-	//fold max table generation
+	// fold max table generation
 	{
 		float max = 0.f;
 		int start = (fold_size - 1) / 2;
@@ -208,8 +214,7 @@ int main()
 		}
 	}
 
-	myfile << "const float fold_max[513] = " << endl
-		   << "{";
+	myfile << "const InterpArray<float, 513> fold_max = " << endl << "{";
 
 	for (int i = 0; i < 513; i++) {
 		if (i < 512)
@@ -218,7 +223,7 @@ int main()
 			myfile << fold_max[i] << "};" << endl;
 	}
 
-	myfile << "const float triangles[8][9] = " << endl;
+	myfile << "const InterpArray<float, 9> triangles[8] = " << endl;
 	myfile << "{";
 
 	for (int i = 0; i < 8; i++) {
@@ -232,10 +237,55 @@ int main()
 			myfile << "}," << endl;
 		else {
 			myfile << "}" << endl;
-			myfile << "};";
+			myfile << "};" << endl;
 		}
 	}
 
 	myfile.close();
+}
+
+void buildTrigTables()
+{
+	myfile.open("src/util/math_tables.hh");
+
+	myfile << "#pragma once" << endl;
+
+	myfile << "#include"
+		   << "\""
+		   << "interp_array.hh"
+		   << "\"" << endl;
+
+	const int trigTableLength = 2048;
+
+	myfile << "const InterpArray<float," << trigTableLength << "> sinTable = " << endl;
+	myfile << "{";
+	for (int i = 0; i < trigTableLength; i++) {
+		float index = (float)i / (float)trigTableLength;
+		if (i < trigTableLength - 1)
+			myfile << sinf(index * 2.0f * M_PI) << ",";
+		else
+			myfile << sinf(index * 2.0f * M_PI);
+	}
+	myfile << "};" << endl;
+
+	myfile << "const InterpArray<float," << trigTableLength << "> tanTable = " << endl;
+	myfile << "{";
+	for (int i = 0; i < trigTableLength; i++) {
+		float index = (float)i / (float)trigTableLength * M_PI;
+		if (i < trigTableLength - 1)
+			myfile << tan(index) << ",";
+		else
+			myfile << tan(index);
+	}
+	myfile << "};" << endl;
+
+	myfile.close();
+}
+
+int main()
+{
+	buildFoldTables();
+	buildTrigTables();
+
 	return 0;
 }
