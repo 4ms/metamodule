@@ -23,8 +23,13 @@ Audio::Audio(Params &p, ICodec &codec)
 // param smoothing: +3.9% of processing (23.4% -> 19.5%)
 // SDRAM: +5.7% (SRAM1: 15.5% vs. SDRAM: 21.2% (SDRAM adds 5.7%)
 // block size: 0.2% (@32: 21.2%, @128: 21.0%)
+// Compression<float>: 18.4%, +comp float stereo = 20.4% (+2%)
+// Compression<int32_t>: -> 19.6% (+1%)
+// Hard Clip (constrain): 21.2% -> 21.2% (+2.3%)
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
+	Debug::set_0(true);
+
 	params.update();
 	check_fx_change();
 
@@ -33,24 +38,21 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	res0.set_new_value(params.res[0]);
 	res1.set_new_value(params.res[1]);
 
-	// current_fx[LEFT]->set_param(0, params.freq[0]);
-	// current_fx[LEFT]->set_param(1, params.res[0]);
-	// current_fx[RIGHT]->set_param(0, params.freq[1]);
-	// current_fx[RIGHT]->set_param(1, params.res[1]);
-
-	Debug::set_0(true);
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
 		{
 			auto scaled_in = AudioFrame::scaleInput(in_->l);
-			auto unscaled_out = current_fx[LEFT]->update(scaled_in);
-			out_.l = AudioFrame::scaleOutput(unscaled_out);
+			auto raw_out = current_fx[LEFT]->update(scaled_in);
+			auto scaled_out = AudioFrame::scaleOutput(raw_out);
+			out_.l = compressor.compress(scaled_out);
 		}
 		{
 			auto scaled_in = AudioFrame::scaleInput(in_->r);
-			auto unscaled_out = current_fx[RIGHT]->update(scaled_in);
-			out_.r = AudioFrame::scaleOutput(unscaled_out);
+			auto raw_out = current_fx[RIGHT]->update(scaled_in);
+			auto scaled_out = AudioFrame::scaleOutput(raw_out);
+			out_.r = compressor.compress(scaled_out);
 		}
+
 		current_fx[LEFT]->set_param(0, freq0.next());
 		current_fx[LEFT]->set_param(1, res0.next());
 		current_fx[RIGHT]->set_param(0, freq1.next());

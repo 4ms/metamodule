@@ -13,21 +13,17 @@ struct GenericAudioFrame {
 
 public:
 	static const inline unsigned kSampleTypeBits = sizeof(SampleType) * 8;
+	static const inline unsigned kMaxValue = MathTools::ipow(2, UsedBits - 1) - 1;
+	static const inline float kOutScaling = static_cast<float>(kMaxValue);
 
-	static const inline unsigned kMaxValue = MathTools::ipow(2, kSampleTypeBits - 1) - 1;
-	static const inline unsigned kMaxSampleTypeValue = MathTools::ipow(2, UsedBits - 1);
-
-	static const inline float kInScaling = static_cast<float>(kMaxValue);
-	static const inline float kOutScaling = static_cast<float>(kMaxSampleTypeValue);
-
-public:
-	static float scaleInput(SampleType val)
+	static inline constexpr float scaleInput(SampleType val)
 	{
 		return sign_extend(val) / kOutScaling;
 	}
-	static SampleType scaleOutput(float val)
+	static inline constexpr SampleType scaleOutput(const float val)
 	{
-		return static_cast<SampleType>(val * kOutScaling);
+		const float v = MathTools::constrain(val, -1.f, 1.f);
+		return static_cast<SampleType>(v * kOutScaling);
 	}
 
 	static inline constexpr SampleType sign_extend(const SampleType &v) noexcept

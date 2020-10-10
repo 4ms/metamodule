@@ -1,4 +1,5 @@
 #pragma once
+#include "processors/tools/kneeCompress.h"
 #include "audio_frame.hh"
 #include "codec.hh"
 #include "fxList.hh"
@@ -35,6 +36,8 @@ private:
 
 	FXList FX_left;
 	FXList FX_right;
+
+	KneeCompressor<int32_t> compressor{24, 0.75};
 
 	ICodec &codec_;
 	uint32_t sample_rate_;

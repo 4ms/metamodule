@@ -135,3 +135,28 @@ TEST(kneecomp_tests, check_negative_int32_ts_over_threshold_do_a_knee_bend)
 	CHECK(c100 > -VAL100);
 }
 
+TEST(kneecomp_tests, check_int32_past_bounds)
+{
+	KneeCompressor<int32_t> c{24, 0.75f};
+
+	int32_t c100 = c.compress(VAL100);
+	int32_t c110 = c.compress(INTVAL(24, 1.1f));
+	int32_t c150 = c.compress(INTVAL(24, 1.5f));
+
+	int32_t cn100 = c.compress(VALn100);
+	int32_t cn110 = c.compress(-INTVAL(24, 1.1f));
+	int32_t cn150 = c.compress(-INTVAL(24, 1.5f));
+
+	CHECK(c150 < INTVAL(24, 1.5f));
+	CHECK(c110 < INTVAL(24, 1.1f));
+
+	CHECK(c150 > c110);
+	CHECK(c110 > c100);
+
+	CHECK(cn150 > -INTVAL(24, 1.5f));
+	CHECK(cn110 > -INTVAL(24, 1.1f));
+
+	CHECK(cn150 < cn110);
+	CHECK(cn110 < cn100);
+}
+

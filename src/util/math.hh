@@ -15,7 +15,7 @@ static Tout map_value(Tval x, Tin in_min, Tin in_max, Tout out_min, Tout out_max
 }
 
 template<typename T>
-static T constrain(T val, T min, T max)
+static constexpr T constrain(const T val, const T min, const T max)
 {
 	return val < min ? min : val > max ? max : val;
 }
