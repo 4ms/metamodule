@@ -19,8 +19,9 @@ public:
 		if (phaccu > 1.0f)
 			phaccu -= 1.0f;
 		sinLFO = sinTable.interp(phaccu);
+		const float modDelayTime = map_value(sinLFO, -1.0f, 1.0f, 0.1f, 1.0f * lfoDepth);
 		for (int i = 0; i < stages; i++) {
-			delay[i].delayTimeMS = map_value(sinLFO, -1.0f, 1.0f, 0.1f, 1.0f * lfoDepth);
+			delay[i].delayTimeMS = modDelayTime;
 		}
 		delay[0].update(inLimit.update(input + delay[stages - 1].output * feedback));
 		for (int i = 1; i < stages; i++) {
