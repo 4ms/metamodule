@@ -54,7 +54,7 @@ public:
 	}
 
 private:
-	static const int stages = 12;
+	static const int stages = 6;
 	static const int delayLineSamples = (int)((4.f / 1000.f) * 48000.f + 1.f);
 	float phaccu = 0;
 	float lfoDepth = 0;
