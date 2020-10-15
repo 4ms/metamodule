@@ -7,7 +7,7 @@ Audio::Audio(Params &p, ICodec &codec)
 	, codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
 {
-	for (uint32_t i = 0; i < 5; i++) {
+	for (uint32_t i = 0; i < FXList::NumFX; i++) {
 		FX_left[i]->set_samplerate(sample_rate_);
 		FX_right[i]->set_samplerate(sample_rate_);
 	}

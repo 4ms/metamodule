@@ -1,6 +1,5 @@
 #pragma once
 #include "audio.hh"
-//#include "debug.h"
 #include "i2c.hh"
 #include "leds.hh"
 #include "params.hh"

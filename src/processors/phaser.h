@@ -2,6 +2,7 @@
 
 #include "../util/math_tables.hh"
 #include "audio_processor.hh"
+#include "debug.hh"
 #include "math.hh"
 #include "tools/cubicDist.h"
 #include "tools/delayLine.h"
@@ -15,27 +16,33 @@ public:
 
 	virtual float update(float input)
 	{
+		// 0.75us
 		phaccu += lfoSpeed / sampleRate;
 		if (phaccu > 1.0f)
 			phaccu -= 1.0f;
 		sinLFO = sinTable.interp(phaccu);
 		float modDelayTime = map_value(sinLFO, -1.0f, 1.0f, 0.1f, 1.0f * lfoDepth);
 		for (int i = 0; i < stages; i++) {
-			delay[i].delayTimeMS = modDelayTime;
+			delay[i].delaySamples = map_value(sinLFO, -1.0f, 1.0f, minDelay, delayFactor * lfoDepth);
 		}
-		delay[0].update(inLimit.update(input + delay[stages - 1].output * feedback));
+
+		float in = inLimit.update(input + delay[stages - 1].output * feedback);
+		// 6.7us
+		delay[0].update(in);
 		for (int i = 1; i < stages; i++) {
 			delay[i].update(delay[i - 1].output);
 		}
 
+		// <0.5us
 		output = outLimit.update(delay[stages - 1].output);
-		return interpolate(input, output, 0.5f);
+		float mix = interpolate(input, output, 0.5f);
+
+		return mix;
 	}
 
 	Phaser()
 	{
-		// for (int i = 0; i < stages; i++)
-		// 	delay[i] = new DelayLine(4);
+		set_samplerate(48000.0f);
 	}
 
 	virtual void set_param(int param_id, float val)
@@ -52,6 +59,8 @@ public:
 		for (int i = 0; i < stages; i++)
 			delay[i].set_samplerate(sr);
 		sampleRate = sr;
+		delayFactor = sampleRate * 0.001f;
+		minDelay = delayFactor * 0.1f;
 	}
 
 private:
@@ -64,6 +73,8 @@ private:
 	float output = 0;
 	DelayLine<delayLineSamples> delay[stages];
 	float sampleRate;
+	float delayFactor;
+	float minDelay;
 	CubicNonlinearDist inLimit;
 	CubicNonlinearDist outLimit;
 };
