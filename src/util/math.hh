@@ -9,7 +9,8 @@ namespace MathTools
 #endif
 
 template<typename Tval, typename Tin, typename Tout>
-static Tout map_value(Tval x, Tin in_min, Tin in_max, Tout out_min, Tout out_max)
+static constexpr Tout
+map_value(const Tval x, const Tin in_min, const Tin in_max, const Tout out_min, const Tout out_max)
 {
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
