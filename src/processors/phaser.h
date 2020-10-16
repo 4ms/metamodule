@@ -7,7 +7,6 @@
 #include "tools/cubicDist.h"
 #include "tools/delayLine.h"
 #include <cmath>
-#include <algorithm>
 
 using namespace MathTools;
 
@@ -108,7 +107,7 @@ public:
 		fVslider5 = lfoSpeed;
 		fSlow0 = (0.5f * float(fVslider0));
 		fSlow1 = (1.0f - fSlow0);
-		fSlow2 = std::exp((fConst1 * (0.0f - (3.14159274f * float(fVslider1)))));
+		fSlow2 = expf((fConst1 * (0.0f - (3.14159274f * float(fVslider1)))));
 		fSlow3 = fSlow2*fSlow2;
 		fSlow4 = float(fVslider2);
 		fSlow5 = (0.0f - (2.0f * fSlow2));
@@ -122,7 +121,7 @@ public:
 	virtual void set_samplerate(float sr)
 	{
 		fSampleRate = sr;
-		fConst0 = std::min<float>(192000.0f, std::max<float>(1.0f, float(fSampleRate)));
+		fConst0 = min<float>(192000.0f, max<float>(1.0f, float(fSampleRate)));
 		fConst1 = (1.0f / fConst0);
 		fConst2 = (6.28318548f / fConst0);
 	}
