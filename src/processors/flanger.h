@@ -2,7 +2,7 @@
 
 #include "../util/math_tables.hh"
 #include "audio_processor.hh"
-#include "debug.hh"
+//#include "debug.hh"
 #include "math.hh"
 #include "tools/cubicDist.h"
 #include "tools/delayLine.h"
@@ -21,7 +21,6 @@ public:
 		if (phaccu > 1.0f)
 			phaccu -= 1.0f;
 		sinLFO = sinTable.interp(phaccu);
-		float modDelayTime = map_value(sinLFO, -1.0f, 1.0f, 0.1f, 1.0f * lfoDepth);
 		for (int i = 0; i < stages; i++) {
 			delay[i].delaySamples = map_value(sinLFO, -1.0f, 1.0f, minDelay, delayFactor * lfoDepth);
 		}
