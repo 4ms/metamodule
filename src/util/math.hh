@@ -1,8 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-namespace MathTools
-{
+namespace MathTools {
 
 #ifndef M_PI
 	#define M_PI 3.14159265358979323846264338327950288f
@@ -19,6 +18,28 @@ template<typename T>
 static constexpr T constrain(const T val, const T min, const T max)
 {
 	return val < min ? min : val > max ? max : val;
+}
+
+template<typename T>
+static constexpr T max(const T val1, const T val2)
+{
+	if (val1 > val2) {
+		return val1;
+	}
+	else {
+		return val2;
+	}
+}
+
+template<typename T>
+static constexpr T min(const T val1, const T val2)
+{
+	if (val1 < val2) {
+		return val1;
+	}
+	else {
+		return val2;
+	}
 }
 
 inline float interpolate(float in1, float in2, float x)
