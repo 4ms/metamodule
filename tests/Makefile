@@ -3,12 +3,17 @@
 
 #---- Outputs ----#
 COMPONENT_NAME = localtests
+CPPUTEST_OBJS_DIR = tests/build/objs
+CPPUTEST_LIB_DIR = tests/build/lib
 
 #--- Inputs ----#
 CPPUTEST_HOME = tests/cpputest
 CPP_PLATFORM = Gcc
 CC = gcc
 PROJECT_HOME_DIR = .
+
+# CPPUTEST_USE_STD_C_LIB = N
+# CPPUTEST_USE_STD_CPP_LIB = N
 
 SRC_FILES = src/drivers/rotary.cc \
 			# src/debug.cc \
@@ -44,7 +49,7 @@ MOCKS_SRC_DIRS = \
 	mocks/drivers \
 
 CPPUTEST_WARNINGFLAGS += -Wall 
-##CPPUTEST_WARNINGFLAGS += -Werror
+CPPUTEST_WARNINGFLAGS += -Werror
 CPPUTEST_WARNINGFLAGS += -Wswitch-default
 CPPUTEST_WARNINGFLAGS += -Wno-format-nonliteral
 CPPUTEST_WARNINGFLAGS += -Wno-sign-conversion 
@@ -54,7 +59,8 @@ CPPUTEST_WARNINGFLAGS += -Wno-missing-field-initializers
 CPPUTEST_WARNINGFLAGS += -Wno-unused-parameter
 CPPUTEST_WARNINGFLAGS += -Wno-register
 CPPUTEST_WARNINGFLAGS += -Wno-missing-noreturn
-CPPUTEST_WARNINGFLAGS += -Wno-unused-template
+CPPUTEST_WARNINGFLAGS += -Wno-unused-template \
+						-Wno-poison-system-directories \
 
 CPPUTEST_CFLAGS += -Wall
 CPPUTEST_CFLAGS += -Wstrict-prototypes
@@ -68,6 +74,7 @@ CPPUTEST_CFLAGS += -Wno-documentation\
 					-DUSE_HAL_DRIVER \
 					-DUSE_FULL_LL_DRIVER \
 					-D'F_CPU=216000000' \
+					-Wno-poison-system-directories \
 
 
 CPPUTEST_CXXFLAGS += --std=c++17
