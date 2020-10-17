@@ -1,6 +1,6 @@
 #pragma once
 
-#include "debug.hh"
+//#include "debug.hh"
 #include "math.hh"
 
 template<int maxSamples>

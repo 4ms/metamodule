@@ -1,7 +1,6 @@
 #pragma once
 
 #include "math.hh"
-#include <algorithm>
 
 static float mydsp_faustpower2_f(float value)
 {
@@ -221,105 +220,6 @@ public:
 		fVslider1 = map_value(dryWet, 0.0f, 1.0f, -1.0f, 1.0f);
 		fVslider0 = map_value(level, 0.0f, 1.0f, -70, 40);
 		float output = 0;
-		float fSlow0 = (0.00100000005f * std::pow(10.0f, (0.0500000007f * float(fVslider0))));
-		float fSlow1 = (0.00100000005f * float(fVslider1));
-		float fSlow2 = float(fVslider2);
-		float fSlow3 = std::pow(10.0f, (0.0500000007f * float(fVslider3)));
-		float fSlow4 = (fConst1 * (fSlow2 / std::sqrt(std::max<float>(0.0f, fSlow3))));
-		float fSlow5 = ((1.0f - fSlow4) / (fSlow4 + 1.0f));
-		float fSlow6 = float(fVslider4);
-		float fSlow7 = std::pow(10.0f, (0.0500000007f * float(fVslider5)));
-		float fSlow8 = (fConst1 * (fSlow6 / std::sqrt(std::max<float>(0.0f, fSlow7))));
-		float fSlow9 = ((1.0f - fSlow8) / (fSlow8 + 1.0f));
-		float fSlow10 = float(fVslider6);
-		float fSlow11 = std::exp((fConst3 / fSlow10));
-		float fSlow12 = mydsp_faustpower2_f(fSlow11);
-		float fSlow13 = std::cos((fConst1 * float(fVslider7)));
-		float fSlow14 = (1.0f - (fSlow12 * fSlow13));
-		float fSlow15 = (1.0f - fSlow12);
-		float fSlow16 = (fSlow14 / fSlow15);
-		float fSlow17 =
-			std::sqrt(std::max<float>(0.0f, ((mydsp_faustpower2_f(fSlow14) / mydsp_faustpower2_f(fSlow15)) + -1.0f)));
-		float fSlow18 = (fSlow16 - fSlow17);
-		float fSlow19 = (fSlow11 * (fSlow17 + (1.0f - fSlow16)));
-		float fSlow20 = float(fVslider8);
-		float fSlow21 = ((std::exp((fConst3 / fSlow20)) / fSlow11) + -1.0f);
-		float fSlow22 = (1.0f / std::tan((fConst4 * float(fVslider9))));
-		float fSlow23 = (1.0f / (fSlow22 + 1.0f));
-		float fSlow24 = (1.0f - fSlow22);
-		int iSlow25 = int(std::min<float>(8192.0f, std::max<float>(0.0f, (fConst7 * float(fVslider10)))));
-		float fSlow26 = std::exp((fConst10 / fSlow10));
-		float fSlow27 = mydsp_faustpower2_f(fSlow26);
-		float fSlow28 = (1.0f - (fSlow27 * fSlow13));
-		float fSlow29 = (1.0f - fSlow27);
-		float fSlow30 = (fSlow28 / fSlow29);
-		float fSlow31 =
-			std::sqrt(std::max<float>(0.0f, ((mydsp_faustpower2_f(fSlow28) / mydsp_faustpower2_f(fSlow29)) + -1.0f)));
-		float fSlow32 = (fSlow30 - fSlow31);
-		float fSlow33 = (fSlow26 * (fSlow31 + (1.0f - fSlow30)));
-		float fSlow34 = ((std::exp((fConst10 / fSlow20)) / fSlow26) + -1.0f);
-		float fSlow35 = std::exp((fConst15 / fSlow10));
-		float fSlow36 = mydsp_faustpower2_f(fSlow35);
-		float fSlow37 = (1.0f - (fSlow36 * fSlow13));
-		float fSlow38 = (1.0f - fSlow36);
-		float fSlow39 = (fSlow37 / fSlow38);
-		float fSlow40 =
-			std::sqrt(std::max<float>(0.0f, ((mydsp_faustpower2_f(fSlow37) / mydsp_faustpower2_f(fSlow38)) + -1.0f)));
-		float fSlow41 = (fSlow39 - fSlow40);
-		float fSlow42 = (fSlow35 * (fSlow40 + (1.0f - fSlow39)));
-		float fSlow43 = ((std::exp((fConst15 / fSlow20)) / fSlow35) + -1.0f);
-		float fSlow44 = std::exp((fConst20 / fSlow10));
-		float fSlow45 = mydsp_faustpower2_f(fSlow44);
-		float fSlow46 = (1.0f - (fSlow45 * fSlow13));
-		float fSlow47 = (1.0f - fSlow45);
-		float fSlow48 = (fSlow46 / fSlow47);
-		float fSlow49 =
-			std::sqrt(std::max<float>(0.0f, ((mydsp_faustpower2_f(fSlow46) / mydsp_faustpower2_f(fSlow47)) + -1.0f)));
-		float fSlow50 = (fSlow48 - fSlow49);
-		float fSlow51 = (fSlow44 * (fSlow49 + (1.0f - fSlow48)));
-		float fSlow52 = ((std::exp((fConst20 / fSlow20)) / fSlow44) + -1.0f);
-		float fSlow53 = std::exp((fConst25 / fSlow10));
-		float fSlow54 = mydsp_faustpower2_f(fSlow53);
-		float fSlow55 = (1.0f - (fSlow54 * fSlow13));
-		float fSlow56 = (1.0f - fSlow54);
-		float fSlow57 = (fSlow55 / fSlow56);
-		float fSlow58 =
-			std::sqrt(std::max<float>(0.0f, ((mydsp_faustpower2_f(fSlow55) / mydsp_faustpower2_f(fSlow56)) + -1.0f)));
-		float fSlow59 = (fSlow57 - fSlow58);
-		float fSlow60 = (fSlow53 * (fSlow58 + (1.0f - fSlow57)));
-		float fSlow61 = ((std::exp((fConst25 / fSlow20)) / fSlow53) + -1.0f);
-		float fSlow62 = std::exp((fConst30 / fSlow10));
-		float fSlow63 = mydsp_faustpower2_f(fSlow62);
-		float fSlow64 = (1.0f - (fSlow63 * fSlow13));
-		float fSlow65 = (1.0f - fSlow63);
-		float fSlow66 = (fSlow64 / fSlow65);
-		float fSlow67 =
-			std::sqrt(std::max<float>(0.0f, ((mydsp_faustpower2_f(fSlow64) / mydsp_faustpower2_f(fSlow65)) + -1.0f)));
-		float fSlow68 = (fSlow66 - fSlow67);
-		float fSlow69 = (fSlow62 * (fSlow67 + (1.0f - fSlow66)));
-		float fSlow70 = ((std::exp((fConst30 / fSlow20)) / fSlow62) + -1.0f);
-		float fSlow71 = std::exp((fConst35 / fSlow10));
-		float fSlow72 = mydsp_faustpower2_f(fSlow71);
-		float fSlow73 = (1.0f - (fSlow72 * fSlow13));
-		float fSlow74 = (1.0f - fSlow72);
-		float fSlow75 = (fSlow73 / fSlow74);
-		float fSlow76 =
-			std::sqrt(std::max<float>(0.0f, ((mydsp_faustpower2_f(fSlow73) / mydsp_faustpower2_f(fSlow74)) + -1.0f)));
-		float fSlow77 = (fSlow75 - fSlow76);
-		float fSlow78 = (fSlow71 * (fSlow76 + (1.0f - fSlow75)));
-		float fSlow79 = ((std::exp((fConst35 / fSlow20)) / fSlow71) + -1.0f);
-		float fSlow80 = std::exp((fConst40 / fSlow10));
-		float fSlow81 = mydsp_faustpower2_f(fSlow80);
-		float fSlow82 = (1.0f - (fSlow81 * fSlow13));
-		float fSlow83 = (1.0f - fSlow81);
-		float fSlow84 = (fSlow82 / fSlow83);
-		float fSlow85 =
-			std::sqrt(std::max<float>(0.0f, ((mydsp_faustpower2_f(fSlow82) / mydsp_faustpower2_f(fSlow83)) + -1.0f)));
-		float fSlow86 = (fSlow84 - fSlow85);
-		float fSlow87 = (fSlow80 * (fSlow85 + (1.0f - fSlow84)));
-		float fSlow88 = ((std::exp((fConst40 / fSlow20)) / fSlow80) + -1.0f);
-		float fSlow89 = (0.0f - (std::cos((fConst1 * fSlow6)) * (fSlow9 + 1.0f)));
-		float fSlow90 = (0.0f - (std::cos((fConst1 * fSlow2)) * (fSlow5 + 1.0f)));
 		fRec0[0] = (fSlow0 + (0.999000013f * fRec0[1]));
 		float fTemp0 = input;
 		fVec0[(IOTA & 16383)] = fTemp0;
@@ -498,6 +398,105 @@ public:
 
 	virtual void set_param(int param_id, float val)
 	{
+		fSlow0 = (0.00100000005f * powf(10.0f, (0.0500000007f * float(fVslider0))));
+		fSlow1 = (0.00100000005f * float(fVslider1));
+		fSlow2 = float(fVslider2);
+		fSlow3 = powf(10.0f, (0.0500000007f * float(fVslider3)));
+		fSlow4 = (fConst1 * (fSlow2 / sqrtf(max<float>(0.0f, fSlow3))));
+		fSlow5 = ((1.0f - fSlow4) / (fSlow4 + 1.0f));
+		fSlow6 = float(fVslider4);
+		fSlow7 = powf(10.0f, (0.0500000007f * float(fVslider5)));
+		fSlow8 = (fConst1 * (fSlow6 / sqrt(max<float>(fSlow7, 0))));
+		fSlow9 = ((1.0f - fSlow8) / (fSlow8 + 1.0f));
+		fSlow10 = float(fVslider6);
+		fSlow11 = expf((fConst3 / fSlow10));
+		fSlow12 = mydsp_faustpower2_f(fSlow11);
+		fSlow13 = cos((fConst1 * float(fVslider7)));
+		fSlow14 = (1.0f - (fSlow12 * fSlow13));
+		fSlow15 = (1.0f - fSlow12);
+		fSlow16 = (fSlow14 / fSlow15);
+		fSlow17 =
+			sqrt(max<float>(0.0f, ((mydsp_faustpower2_f(fSlow14) / mydsp_faustpower2_f(fSlow15)) + -1.0f)));
+		fSlow18 = (fSlow16 - fSlow17);
+		fSlow19 = (fSlow11 * (fSlow17 + (1.0f - fSlow16)));
+		fSlow20 = float(fVslider8);
+		fSlow21 = ((expf((fConst3 / fSlow20)) / fSlow11) + -1.0f);
+		fSlow22 = (1.0f / tan((fConst4 * float(fVslider9))));
+		fSlow23 = (1.0f / (fSlow22 + 1.0f));
+		fSlow24 = (1.0f - fSlow22);
+		iSlow25 = int(min<float>(8192.0f, max<float>(0.0f, (fConst7 * float(fVslider10)))));
+		fSlow26 = expf((fConst10 / fSlow10));
+		fSlow27 = mydsp_faustpower2_f(fSlow26);
+		fSlow28 = (1.0f - (fSlow27 * fSlow13));
+		fSlow29 = (1.0f - fSlow27);
+		fSlow30 = (fSlow28 / fSlow29);
+		fSlow31 =
+			sqrt(max<float>(0.0f, ((mydsp_faustpower2_f(fSlow28) / mydsp_faustpower2_f(fSlow29)) + -1.0f)));
+		fSlow32 = (fSlow30 - fSlow31);
+		fSlow33 = (fSlow26 * (fSlow31 + (1.0f - fSlow30)));
+		fSlow34 = ((expf((fConst10 / fSlow20)) / fSlow26) + -1.0f);
+		fSlow35 = expf((fConst15 / fSlow10));
+		fSlow36 = mydsp_faustpower2_f(fSlow35);
+		fSlow37 = (1.0f - (fSlow36 * fSlow13));
+		fSlow38 = (1.0f - fSlow36);
+		fSlow39 = (fSlow37 / fSlow38);
+		fSlow40 =
+			sqrt(max<float>(0.0f, ((mydsp_faustpower2_f(fSlow37) / mydsp_faustpower2_f(fSlow38)) + -1.0f)));
+		fSlow41 = (fSlow39 - fSlow40);
+		fSlow42 = (fSlow35 * (fSlow40 + (1.0f - fSlow39)));
+		fSlow43 = ((expf((fConst15 / fSlow20)) / fSlow35) + -1.0f);
+		fSlow44 = expf((fConst20 / fSlow10));
+		fSlow45 = mydsp_faustpower2_f(fSlow44);
+		fSlow46 = (1.0f - (fSlow45 * fSlow13));
+		fSlow47 = (1.0f - fSlow45);
+		fSlow48 = (fSlow46 / fSlow47);
+		fSlow49 =
+			sqrtf(max<float>(0.0f, ((mydsp_faustpower2_f(fSlow46) / mydsp_faustpower2_f(fSlow47)) + -1.0f)));
+		fSlow50 = (fSlow48 - fSlow49);
+		fSlow51 = (fSlow44 * (fSlow49 + (1.0f - fSlow48)));
+		fSlow52 = ((expf((fConst20 / fSlow20)) / fSlow44) + -1.0f);
+		fSlow53 = expf((fConst25 / fSlow10));
+		fSlow54 = mydsp_faustpower2_f(fSlow53);
+		fSlow55 = (1.0f - (fSlow54 * fSlow13));
+		fSlow56 = (1.0f - fSlow54);
+		fSlow57 = (fSlow55 / fSlow56);
+		fSlow58 =
+			sqrt(max<float>(0.0f, ((mydsp_faustpower2_f(fSlow55) / mydsp_faustpower2_f(fSlow56)) + -1.0f)));
+		fSlow59 = (fSlow57 - fSlow58);
+		fSlow60 = (fSlow53 * (fSlow58 + (1.0f - fSlow57)));
+		fSlow61 = ((expf((fConst25 / fSlow20)) / fSlow53) + -1.0f);
+		fSlow62 = expf((fConst30 / fSlow10));
+		fSlow63 = mydsp_faustpower2_f(fSlow62);
+		fSlow64 = (1.0f - (fSlow63 * fSlow13));
+		fSlow65 = (1.0f - fSlow63);
+		fSlow66 = (fSlow64 / fSlow65);
+		fSlow67 =
+			sqrt(max<float>(0.0f, ((mydsp_faustpower2_f(fSlow64) / mydsp_faustpower2_f(fSlow65)) + -1.0f)));
+		fSlow68 = (fSlow66 - fSlow67);
+		fSlow69 = (fSlow62 * (fSlow67 + (1.0f - fSlow66)));
+		fSlow70 = ((expf((fConst30 / fSlow20)) / fSlow62) + -1.0f);
+		fSlow71 = expf((fConst35 / fSlow10));
+		fSlow72 = mydsp_faustpower2_f(fSlow71);
+		fSlow73 = (1.0f - (fSlow72 * fSlow13));
+		fSlow74 = (1.0f - fSlow72);
+		fSlow75 = (fSlow73 / fSlow74);
+		fSlow76 =
+			sqrt(max<float>(0.0f, ((mydsp_faustpower2_f(fSlow73) / mydsp_faustpower2_f(fSlow74)) + -1.0f)));
+		fSlow77 = (fSlow75 - fSlow76);
+		fSlow78 = (fSlow71 * (fSlow76 + (1.0f - fSlow75)));
+		fSlow79 = ((expf((fConst35 / fSlow20)) / fSlow71) + -1.0f);
+		fSlow80 = expf((fConst40 / fSlow10));
+		fSlow81 = mydsp_faustpower2_f(fSlow80);
+		fSlow82 = (1.0f - (fSlow81 * fSlow13));
+		fSlow83 = (1.0f - fSlow81);
+		fSlow84 = (fSlow82 / fSlow83);
+		fSlow85 =
+			sqrt(max<float>(0.0f, ((mydsp_faustpower2_f(fSlow82) / mydsp_faustpower2_f(fSlow83)) + -1.0f)));
+		fSlow86 = (fSlow84 - fSlow85);
+		fSlow87 = (fSlow80 * (fSlow85 + (1.0f - fSlow84)));
+		fSlow88 = ((expf((fConst40 / fSlow20)) / fSlow80) + -1.0f);
+		fSlow89 = (0.0f - (cos((fConst1 * fSlow6)) * (fSlow9 + 1.0f)));
+		fSlow90 = (0.0f - (cos((fConst1 * fSlow2)) * (fSlow5 + 1.0f)));
 		if (param_id == 0) {
 		}
 		if (param_id == 1) {
@@ -506,53 +505,59 @@ public:
 	virtual void set_samplerate(float sr)
 	{
 		fSampleRate = sr;
-		fConst0 = std::min<float>(192000.0f, std::max<float>(1.0f, float(fSampleRate)));
+		fConst0 = constrain(fSampleRate, 1.0f, 192000.0f);
 		fConst1 = (6.28318548f / fConst0);
-		fConst2 = std::floor(((0.219990999f * fConst0) + 0.5f));
+		fConst2 = floorf(((0.219990999f * fConst0) + 0.5f));
 		fConst3 = ((0.0f - (6.90775537f * fConst2)) / fConst0);
 		fConst4 = (3.14159274f / fConst0);
-		fConst5 = std::floor(((0.0191229992f * fConst0) + 0.5f));
-		iConst6 = int(std::min<float>(16384.0f, std::max<float>(0.0f, (fConst2 - fConst5))));
+		fConst5 = floorf(((0.0191229992f * fConst0) + 0.5f));
+		iConst6 = int(min<float>(16384.0f, max<float>(0.0f, (fConst2 - fConst5))));
+		iConst6 = constrain<float>(fConst2 - fConst5, 0.0f, 16384.0f);
 		fConst7 = (0.00100000005f * fConst0);
-		iConst8 = int(std::min<float>(1024.0f, std::max<float>(0.0f, (fConst5 + -1.0f))));
-		fConst9 = std::floor(((0.256891012f * fConst0) + 0.5f));
+		iConst8 = int(min<float>(1024.0f, max<float>(0.0f, (fConst5 + -1.0f))));
+		fConst9 = floorf(((0.256891012f * fConst0) + 0.5f));
 		fConst10 = ((0.0f - (6.90775537f * fConst9)) / fConst0);
-		fConst11 = std::floor(((0.0273330007f * fConst0) + 0.5f));
-		iConst12 = int(std::min<float>(16384.0f, std::max<float>(0.0f, (fConst9 - fConst11))));
-		iConst13 = int(std::min<float>(2048.0f, std::max<float>(0.0f, (fConst11 + -1.0f))));
-		fConst14 = std::floor(((0.192303002f * fConst0) + 0.5f));
+		fConst11 = floorf(((0.0273330007f * fConst0) + 0.5f));
+		iConst12 = int(min<float>(16384.0f, max<float>(0.0f, (fConst9 - fConst11))));
+		iConst13 = int(min<float>(2048.0f, max<float>(0.0f, (fConst11 + -1.0f))));
+		fConst14 = floorf(((0.192303002f * fConst0) + 0.5f));
 		fConst15 = ((0.0f - (6.90775537f * fConst14)) / fConst0);
-		fConst16 = std::floor(((0.0292910002f * fConst0) + 0.5f));
-		iConst17 = int(std::min<float>(8192.0f, std::max<float>(0.0f, (fConst14 - fConst16))));
-		iConst18 = int(std::min<float>(2048.0f, std::max<float>(0.0f, (fConst16 + -1.0f))));
-		fConst19 = std::floor(((0.210389003f * fConst0) + 0.5f));
+		fConst16 = floorf(((0.0292910002f * fConst0) + 0.5f));
+		iConst17 = int(min<float>(8192.0f, max<float>(0.0f, (fConst14 - fConst16))));
+		iConst18 = int(min<float>(2048.0f, max<float>(0.0f, (fConst16 + -1.0f))));
+		fConst19 = floorf(((0.210389003f * fConst0) + 0.5f));
 		fConst20 = ((0.0f - (6.90775537f * fConst19)) / fConst0);
-		fConst21 = std::floor(((0.0244210009f * fConst0) + 0.5f));
-		iConst22 = int(std::min<float>(16384.0f, std::max<float>(0.0f, (fConst19 - fConst21))));
-		iConst23 = int(std::min<float>(2048.0f, std::max<float>(0.0f, (fConst21 + -1.0f))));
-		fConst24 = std::floor(((0.125f * fConst0) + 0.5f));
+		fConst21 = floorf(((0.0244210009f * fConst0) + 0.5f));
+		iConst22 = int(min<float>(16384.0f, max<float>(0.0f, (fConst19 - fConst21))));
+		iConst23 = int(min<float>(2048.0f, max<float>(0.0f, (fConst21 + -1.0f))));
+		fConst24 = floorf(((0.125f * fConst0) + 0.5f));
 		fConst25 = ((0.0f - (6.90775537f * fConst24)) / fConst0);
-		fConst26 = std::floor(((0.0134579996f * fConst0) + 0.5f));
-		iConst27 = int(std::min<float>(8192.0f, std::max<float>(0.0f, (fConst24 - fConst26))));
-		iConst28 = int(std::min<float>(1024.0f, std::max<float>(0.0f, (fConst26 + -1.0f))));
-		fConst29 = std::floor(((0.127837002f * fConst0) + 0.5f));
+		fConst26 = floorf(((0.0134579996f * fConst0) + 0.5f));
+		iConst27 = int(min<float>(8192.0f, max<float>(0.0f, (fConst24 - fConst26))));
+		iConst28 = int(min<float>(1024.0f, max<float>(0.0f, (fConst26 + -1.0f))));
+		fConst29 = floorf(((0.127837002f * fConst0) + 0.5f));
 		fConst30 = ((0.0f - (6.90775537f * fConst29)) / fConst0);
-		fConst31 = std::floor(((0.0316039994f * fConst0) + 0.5f));
-		iConst32 = int(std::min<float>(8192.0f, std::max<float>(0.0f, (fConst29 - fConst31))));
-		iConst33 = int(std::min<float>(2048.0f, std::max<float>(0.0f, (fConst31 + -1.0f))));
-		fConst34 = std::floor(((0.174713001f * fConst0) + 0.5f));
+		fConst31 = floorf(((0.0316039994f * fConst0) + 0.5f));
+		iConst32 = int(min<float>(8192.0f, max<float>(0.0f, (fConst29 - fConst31))));
+		iConst33 = int(min<float>(2048.0f, max<float>(0.0f, (fConst31 + -1.0f))));
+		fConst34 = floorf(((0.174713001f * fConst0) + 0.5f));
 		fConst35 = ((0.0f - (6.90775537f * fConst34)) / fConst0);
-		fConst36 = std::floor(((0.0229039993f * fConst0) + 0.5f));
-		iConst37 = int(std::min<float>(8192.0f, std::max<float>(0.0f, (fConst34 - fConst36))));
-		iConst38 = int(std::min<float>(2048.0f, std::max<float>(0.0f, (fConst36 + -1.0f))));
-		fConst39 = std::floor(((0.153128996f * fConst0) + 0.5f));
+		fConst36 = floorf(((0.0229039993f * fConst0) + 0.5f));
+		iConst37 = int(min<float>(8192.0f, max<float>(0.0f, (fConst34 - fConst36))));
+		iConst38 = int(min<float>(2048.0f, max<float>(0.0f, (fConst36 + -1.0f))));
+		fConst39 = floorf(((0.153128996f * fConst0) + 0.5f));
 		fConst40 = ((0.0f - (6.90775537f * fConst39)) / fConst0);
-		fConst41 = std::floor(((0.0203460008f * fConst0) + 0.5f));
-		iConst42 = int(std::min<float>(8192.0f, std::max<float>(0.0f, (fConst39 - fConst41))));
-		iConst43 = int(std::min<float>(1024.0f, std::max<float>(0.0f, (fConst41 + -1.0f))));
+		fConst41 = floorf(((0.0203460008f * fConst0) + 0.5f));
+		iConst42 = int(min<float>(8192.0f, max<float>(0.0f, (fConst39 - fConst41))));
+		iConst43 = int(min<float>(1024.0f, max<float>(0.0f, (fConst41 + -1.0f))));
 	}
 
 private:
+	float mydsp_faustpower2_f(float value)
+	{
+		return (value * value);
+	}
+
 	float fSampleRate = 44100;
 	float fVslider0;
 	float fRec0[2];
@@ -666,4 +671,95 @@ private:
 	float fRec2[3];
 	float fRec45[3];
 	float fRec44[3];
+	float fSlow0;
+	float fSlow1;
+	float fSlow2;
+	float fSlow3;
+	float fSlow4;
+	float fSlow5;
+	float fSlow6;
+	float fSlow7;
+	float fSlow8;
+	float fSlow9;
+	float fSlow10;
+	float fSlow11;
+	float fSlow12;
+	float fSlow13;
+	float fSlow14;
+	float fSlow15;
+	float fSlow16;
+	float fSlow17;
+	float fSlow18;
+	float fSlow19;
+	float fSlow20;
+	float fSlow21;
+	float fSlow22;
+	float fSlow23;
+	float fSlow24;
+	int iSlow25;
+	float fSlow26;
+	float fSlow27;
+	float fSlow28;
+	float fSlow29;
+	float fSlow30;
+	float fSlow31;
+	float fSlow32;
+	float fSlow33;
+	float fSlow34;
+	float fSlow35;
+	float fSlow36;
+	float fSlow37;
+	float fSlow38;
+	float fSlow39;
+	float fSlow40;
+	float fSlow41;
+	float fSlow42;
+	float fSlow43;
+	float fSlow44;
+	float fSlow45;
+	float fSlow46;
+	float fSlow47;
+	float fSlow48;
+	float fSlow49;
+	float fSlow50;
+	float fSlow51;
+	float fSlow52;
+	float fSlow53;
+	float fSlow54;
+	float fSlow55;
+	float fSlow56;
+	float fSlow57;
+	float fSlow58;
+	float fSlow59;
+	float fSlow60;
+	float fSlow61;
+	float fSlow62;
+	float fSlow63;
+	float fSlow64;
+	float fSlow65;
+	float fSlow66;
+	float fSlow67;
+	float fSlow68;
+	float fSlow69;
+	float fSlow70;
+	float fSlow71;
+	float fSlow72;
+	float fSlow73;
+	float fSlow74;
+	float fSlow75;
+	float fSlow76;
+	float fSlow77;
+	float fSlow78;
+	float fSlow79;
+	float fSlow80;
+	float fSlow81;
+	float fSlow82;
+	float fSlow83;
+	float fSlow84;
+	float fSlow85;
+	float fSlow86;
+	float fSlow87;
+	float fSlow88;
+	float fSlow89;
+	float fSlow90;
 };
