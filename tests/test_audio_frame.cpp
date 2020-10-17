@@ -33,11 +33,24 @@ TEST(audio_frame_tests, input_scales)
 
 TEST(audio_frame_tests, output_scales)
 {
-	float maxv = 8388607.f / 8388608.f;
+	const float smallest_val = 1.f / 8388608.f;
+	LONGS_EQUAL(-8388608, AudioFrame::scaleOutput(-1.f));
+	LONGS_EQUAL(-8388607, AudioFrame::scaleOutput(-1.f + smallest_val));
+	LONGS_EQUAL(-8388606, AudioFrame::scaleOutput(-1.f + 2 * smallest_val));
 
-	LONGS_EQUAL(0x800000, 0x00FFFFFF & AudioFrame::scaleOutput(-1.f));
-	LONGS_EQUAL(0xC00000, 0x00FFFFFF & AudioFrame::scaleOutput(-0.5f));
+	LONGS_EQUAL(-4194304, AudioFrame::scaleOutput(-0.5f));
+
+	LONGS_EQUAL(-2, AudioFrame::scaleOutput(-2 * smallest_val));
+	LONGS_EQUAL(-1, AudioFrame::scaleOutput(-smallest_val));
 	LONGS_EQUAL(0, AudioFrame::scaleOutput(0.f));
+	LONGS_EQUAL(1, AudioFrame::scaleOutput(smallest_val));
+	LONGS_EQUAL(2, AudioFrame::scaleOutput(2 * smallest_val));
+
+	LONGS_EQUAL(0x100000, AudioFrame::scaleOutput(0.125f));
+	LONGS_EQUAL(0x200000, AudioFrame::scaleOutput(0.25f));
 	LONGS_EQUAL(0x400000, AudioFrame::scaleOutput(0.5f));
-	LONGS_EQUAL(0x7FFFFF, AudioFrame::scaleOutput(maxv));
+
+	LONGS_EQUAL(0x7FFFFE, AudioFrame::scaleOutput(1.0f - 2 * smallest_val));
+	LONGS_EQUAL(0x7FFFFF, AudioFrame::scaleOutput(1.0f - smallest_val));
+	LONGS_EQUAL(0x7FFFFF, AudioFrame::scaleOutput(1.0f));
 }
