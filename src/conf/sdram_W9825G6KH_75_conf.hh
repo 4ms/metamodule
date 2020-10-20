@@ -1,5 +1,5 @@
 #pragma once
-#include "sdram_config_struct.hh"
+#include "drivers/sdram_config_struct.hh"
 
 const SDRAMTimingConfig SDRAM_timing_W9825G6KH_75 = {
 	.tRC_ns = 65,

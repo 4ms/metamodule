@@ -6,3 +6,7 @@
 	path = tests/fff
 	url = https://github.com/meekrosoft/fff.git
 	branch = master
+[submodule "lib/mdrivlib"]
+	path = lib/mdrivlib
+	url = git@github.com:4ms/mdrivlib.git
+	branch = main

@@ -1,14 +1,14 @@
 #pragma once
-#include "processors/tools/kneeCompress.h"
-#include "audio_frame.hh"
-#include "codec.hh"
+#include "drivers/codec.hh"
+#include "drivers/hal_callback.hh"
 #include "fxList.hh"
-#include "hal_callback.hh"
+#include "interp_param.hh"
 #include "math.hh"
 #include "oscs.hh"
 #include "params.hh"
+#include "processors/tools/kneeCompress.h"
 #include "stm32f7xx.h"
-#include "util/interp_param.hh"
+#include "util/audio_frame.hh"
 #include <array>
 
 using AudioFrame = GenericAudioFrame<int32_t, 24>;

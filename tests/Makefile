@@ -15,9 +15,7 @@ PROJECT_HOME_DIR = .
 # CPPUTEST_USE_STD_C_LIB = N
 # CPPUTEST_USE_STD_CPP_LIB = N
 
-SRC_FILES = src/drivers/rotary.cc \
-			# src/debug.cc \
-			#src/drivers/pin.cc
+SRC_FILES = lib/mdrivlib/drivers/rotary.cc \
 
 # SRC_DIRS = \
 # 	src \
@@ -41,7 +39,7 @@ INCLUDE_DIRS =\
 	stm32/core/include \
 	src \
 	src/util \
-	src/drivers \
+	lib/drivers \
 
 
 MOCKS_SRC_DIRS = \
