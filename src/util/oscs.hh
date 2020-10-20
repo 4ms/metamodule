@@ -7,22 +7,27 @@ template<int update_rate>
 struct TriangleOscillator {
 	TriangleOscillator(uint32_t freq)
 		: increment_(freq * (max_ / update_rate))
-	{
-	}
+	{}
 	TriangleOscillator()
 		: increment_(0)
-	{
-	}
+	{}
 	uint32_t Process()
 	{
 		phase_ += increment_;
 		uint32_t sample = phase_ * 2;
-		if (phase_ > max_ / 2) sample = max_ - sample;
+		if (phase_ > max_ / 2)
+			sample = max_ - sample;
 		return sample;
 	}
 
-	void set_frequency(uint32_t freq) { increment_ = freq * (max_ / update_rate); }
-	void set_phase(uint32_t phase) { phase_ = phase; }
+	void set_frequency(uint32_t freq)
+	{
+		increment_ = freq * (max_ / update_rate);
+	}
+	void set_phase(uint32_t phase)
+	{
+		phase_ = phase;
+	}
 
 private:
 	static constexpr uint32_t max_ = 0xFFFFFFFF;
