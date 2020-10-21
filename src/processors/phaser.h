@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../util/math_tables.hh"
+#include "util/math_tables.hh"
 #include "audio_processor.hh"
 //#include "debug.hh"
 #include "math.hh"
@@ -12,40 +12,39 @@ using namespace MathTools;
 
 class Phaser : public AudioProcessor {
 public:
-	
-
 	virtual float update(float input)
 	{
 		float fTemp0 = input;
-			iVec0[0] = 1;
-			fRec7[0] = ((fSlow10 * fRec8[1]) + (fSlow11 * fRec7[1]));
-			fRec8[0] = ((float((1 - iVec0[1])) + (fSlow11 * fRec8[1])) - (fSlow10 * fRec7[1]));
-			float fTemp1 = std::cos((fSlow7 + (fSlow8 * (1.0f - fRec7[0]))));
-			fRec6[0] = ((fTemp0 + (fSlow4 * fRec0[1])) - ((fSlow5 * (fRec6[1] * fTemp1)) + (fSlow3 * fRec6[2])));
-			fRec5[0] = ((fSlow3 * (fRec6[0] - fRec5[2])) + (fRec6[2] + (fSlow5 * (fTemp1 * (fRec6[1] - fRec5[1])))));
-			fRec4[0] = ((fSlow3 * (fRec5[0] - fRec4[2])) + (fRec5[2] + (fSlow5 * (fTemp1 * (fRec5[1] - fRec4[1])))));
-			fRec3[0] = ((fSlow3 * (fRec4[0] - fRec3[2])) + (fRec4[2] + (fSlow5 * (fTemp1 * (fRec4[1] - fRec3[1])))));
-			fRec2[0] = ((fSlow3 * (fRec3[0] - fRec2[2])) + (fRec3[2] + (fSlow5 * (fTemp1 * (fRec3[1] - fRec2[1])))));
-			fRec1[0] = ((fSlow3 * (fRec2[0] - fRec1[2])) + (fRec2[2] + (fSlow5 * (fTemp1 * (fRec2[1] - fRec1[1])))));
-			fRec0[0] = ((fSlow3 * fRec1[0]) + ((fSlow5 * (fTemp1 * fRec1[1])) + fRec1[2]));
-			float output = float(((fSlow1 * fTemp0) + (fSlow0 * fRec0[0])));
-			iVec0[1] = iVec0[0];
-			fRec7[1] = fRec7[0];
-			fRec8[1] = fRec8[0];
-			fRec6[2] = fRec6[1];
-			fRec6[1] = fRec6[0];
-			fRec5[2] = fRec5[1];
-			fRec5[1] = fRec5[0];
-			fRec4[2] = fRec4[1];
-			fRec4[1] = fRec4[0];
-			fRec3[2] = fRec3[1];
-			fRec3[1] = fRec3[0];
-			fRec2[2] = fRec2[1];
-			fRec2[1] = fRec2[0];
-			fRec1[2] = fRec1[1];
-			fRec1[1] = fRec1[0];
-			fRec0[1] = fRec0[0];
-			return output;
+		iVec0[0] = 1;
+		fRec7[0] = ((fSlow10 * fRec8[1]) + (fSlow11 * fRec7[1]));
+		fRec8[0] = ((float((1 - iVec0[1])) + (fSlow11 * fRec8[1])) - (fSlow10 * fRec7[1]));
+		float fTemp1 = 0;
+		//float fTemp1 = std::cos((fSlow7 + (fSlow8 * (1.0f - fRec7[0]))));
+		fRec6[0] = ((fTemp0 + (fSlow4 * fRec0[1])) - ((fSlow5 * (fRec6[1] * fTemp1)) + (fSlow3 * fRec6[2])));
+		fRec5[0] = ((fSlow3 * (fRec6[0] - fRec5[2])) + (fRec6[2] + (fSlow5 * (fTemp1 * (fRec6[1] - fRec5[1])))));
+		fRec4[0] = ((fSlow3 * (fRec5[0] - fRec4[2])) + (fRec5[2] + (fSlow5 * (fTemp1 * (fRec5[1] - fRec4[1])))));
+		fRec3[0] = ((fSlow3 * (fRec4[0] - fRec3[2])) + (fRec4[2] + (fSlow5 * (fTemp1 * (fRec4[1] - fRec3[1])))));
+		fRec2[0] = ((fSlow3 * (fRec3[0] - fRec2[2])) + (fRec3[2] + (fSlow5 * (fTemp1 * (fRec3[1] - fRec2[1])))));
+		fRec1[0] = ((fSlow3 * (fRec2[0] - fRec1[2])) + (fRec2[2] + (fSlow5 * (fTemp1 * (fRec2[1] - fRec1[1])))));
+		fRec0[0] = ((fSlow3 * fRec1[0]) + ((fSlow5 * (fTemp1 * fRec1[1])) + fRec1[2]));
+		float output = float(((fSlow1 * fTemp0) + (fSlow0 * fRec0[0])));
+		iVec0[1] = iVec0[0];
+		fRec7[1] = fRec7[0];
+		fRec8[1] = fRec8[0];
+		fRec6[2] = fRec6[1];
+		fRec6[1] = fRec6[0];
+		fRec5[2] = fRec5[1];
+		fRec5[1] = fRec5[0];
+		fRec4[2] = fRec4[1];
+		fRec4[1] = fRec4[0];
+		fRec3[2] = fRec3[1];
+		fRec3[1] = fRec3[0];
+		fRec2[2] = fRec2[1];
+		fRec2[1] = fRec2[0];
+		fRec1[2] = fRec1[1];
+		fRec1[1] = fRec1[0];
+		fRec0[1] = fRec0[0];
+		return output;
 	}
 
 	Phaser()
@@ -86,24 +85,22 @@ public:
 	virtual void set_param(int param_id, float val)
 	{
 		if (param_id == 0) {
-			
 		}
 		if (param_id == 1) {
-			
 		}
 
-		lfoDepth=0.5;
-		lfoSpeed=0.1;
-		freqMax=0.9;
-		freqMin=0.1;
-		width=0.9;
-		feedback=0.9;
+		lfoDepth = 0.5;
+		lfoSpeed = 0.1;
+		freqMax = 0.9;
+		freqMin = 0.1;
+		width = 0.9;
+		feedback = 0.9;
 
 		fVslider0 = lfoDepth;
-		fVslider1 = map_value(width,0,1,50,5000);
+		fVslider1 = map_value(width, 0, 1, 50, 5000);
 		fVslider2 = feedback;
-		fVslider3 = map_value(freqMin,0,1,1,10000);
-		fVslider4 = map_value(freqMax,0,1,1,10000);
+		fVslider3 = map_value(freqMin, 0, 1, 1, 10000);
+		fVslider4 = map_value(freqMax, 0, 1, 1, 10000);
 		fVslider5 = lfoSpeed;
 		fSlow0 = (0.5f * float(fVslider0));
 		fSlow1 = (1.0f - fSlow0);
@@ -115,8 +112,8 @@ public:
 		fSlow7 = (fConst2 * fSlow6);
 		fSlow8 = (0.5f * (0.0f - (fConst2 * (fSlow6 - float(fVslider4)))));
 		fSlow9 = (fConst2 * float(fVslider5));
-		fSlow10 = std::sin(fSlow9);
-		fSlow11 = std::cos(fSlow9);
+		// fSlow10 = std::sin(fSlow9);
+		// fSlow11 = std::cos(fSlow9);
 	}
 	virtual void set_samplerate(float sr)
 	{
@@ -127,8 +124,7 @@ public:
 	}
 
 private:
-
-float fVslider0;
+	float fVslider0;
 	int fSampleRate;
 	float fConst0;
 	float fConst1;
@@ -159,12 +155,12 @@ float fVslider0;
 	float fSlow8;
 	float fSlow9;
 	float fSlow10;
-		float fSlow11;
+	float fSlow11;
 
-		float lfoDepth;
-		float feedback;
-		float lfoSpeed;
-		float freqMax;
-		float freqMin;
-		float width;
+	float lfoDepth;
+	float feedback;
+	float lfoSpeed;
+	float freqMax;
+	float freqMin;
+	float width;
 };
