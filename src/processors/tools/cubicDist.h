@@ -1,4 +1,6 @@
 #pragma once
+#include "math.hh"
+using namespace MathTools;
 
 class CubicNonlinearDist {
 public:
