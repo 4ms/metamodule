@@ -1,5 +1,5 @@
 #pragma once
-#include "sdram_config_struct.hh"
+#include "drivers/sdram_config_struct.hh"
 
 const SDRAMTimingConfig SDRAM_timing_AS4C16M16SA_7CN = {
 	.tRC_ns = 63,

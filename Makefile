@@ -2,26 +2,30 @@
 #
 
 BINARYNAME 		= main
-
+LIBDIR 			= lib
 STARTUP 		= startup_stm32f746xx.s
 SYSTEM 			= system_stm32f7xx.c
 LOADFILE 		= STM32F746ZGTx_FLASH.ld
 
-DEVICE 			= stm32/device
-CORE 			= stm32/core
-PERIPH 			= stm32/periph
+DEVICE 			= $(LIBDIR)/stm32/device
+CORE 			= $(LIBDIR)/stm32/core
+PERIPH 			= $(LIBDIR)/stm32/periph
+DRIVERLIB       = $(LIBDIR)/mdrivlib
 
 BUILDDIR 		= build
 
-SOURCES  += $(wildcard $(PERIPH)/src/*.c)
 SOURCES  += $(DEVICE)/src/$(STARTUP)
 SOURCES  += $(DEVICE)/src/$(SYSTEM)
+SOURCES  += $(wildcard $(PERIPH)/src/*.c)
+SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.c)
+SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cc)
+SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cpp)
 SOURCES  += $(wildcard src/*.c)
 SOURCES  += $(wildcard src/*.cc)
 SOURCES  += $(wildcard src/*.cpp)
-SOURCES  += $(wildcard src/drivers/*.c)
-SOURCES  += $(wildcard src/drivers/*.cc)
-SOURCES  += $(wildcard src/drivers/*.cpp)
+SOURCES  += $(wildcard src/sys/*.c)
+SOURCES  += $(wildcard src/sys/*.cc)
+SOURCES  += $(wildcard src/sys/*.cpp)
 SOURCES  += $(wildcard src/util/*.c)
 SOURCES  += $(wildcard src/util/*.cc)
 SOURCES  += $(wildcard src/util/*.cpp)
@@ -29,21 +33,18 @@ SOURCES  += $(wildcard src/processors/*.c)
 SOURCES  += $(wildcard src/processors/*.cc)
 SOURCES  += $(wildcard src/processors/*.cpp)
 
-HEADERS  += $(wildcard src/*.hh)
-HEADERS  += $(wildcard src/drivers/*.hh)
-
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 
 INCLUDES += -I$(DEVICE)/include \
 			-I$(CORE)/include \
 			-I$(PERIPH)/include \
+			-I$(DRIVERLIB) \
+			-I$(LIBDIR)/easiglib \
 			-Isrc \
-			-Isrc/drivers \
 			-Isrc/processors \
 			-Isrc/util \
 			-Isrc/conf \
-			-Ieasiglib
 
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
@@ -101,7 +102,7 @@ AFLAGS = $(MCU)
 
 LDSCRIPT = $(DEVICE)/$(LOADFILE)
 
-LFLAGS =  -Wl,-Map,main.map,--cref \
+LFLAGS =  -Wl,-Map,$(BUILDDIR)/main.map,--cref \
 	-Wl,--gc-sections \
 	-nostdlib \
 	-nostartfiles \
@@ -159,8 +160,8 @@ $(BUILDDIR)/%.h.gch: %.h
 %.d: ;
 
 tables src/processors/wavefold_tables.h: tableGen/main.cpp
-	g++ tableGen/main.cpp -o tableGen/table
-	tableGen/table
+	g++ tableGen/main.cpp -o tableGen/make_tables
+	tableGen/make_tables
 
 flash: $(BIN)
 	st-flash write $(BIN) 0x8000000
@@ -175,11 +176,15 @@ endif
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
 .PHONY: all clean flash
 
-# generate_build_flags:
-# 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \
-#     awk '/End of search list./ { show=0 } { if (show) printf "-I%s\n",$1 }; /#include <...> search starts here:/ { show=1; }' > compile_flags.txt
-#   rm -rf build
-#   make -j16 all
-# 	compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
-# 	rm compile_commands.json 
-# 	mv compile_commands_with_headers.json compile_commands.json
+generate_compile_txt:
+	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \
+    awk '/End of search list./ { show=0 } { if (show) printf "-I%s\n",$1 }; /#include <...> search starts here:/ { show=1; }' > compile_flags.txt
+
+# bear: brew install bear
+# compdb: pip install compdb (https://github.com/Sarcasm/compdb)
+generate_build_flags:
+	rm -rf build
+	bear make -j16 all
+	compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
+	rm compile_commands.json 
+	mv compile_commands_with_headers.json compile_commands.json

@@ -1,7 +1,7 @@
 #pragma once
-#include "sdram_AS4C16M16SA_7CN_conf.hh"
-#include "sdram_W9825G6KH_75_conf.hh"
-#include "sdram_config_struct.hh"
+#include "conf/sdram_AS4C16M16SA_7CN_conf.hh"
+#include "conf/sdram_W9825G6KH_75_conf.hh"
+#include "drivers/sdram_config_struct.hh"
 
 const SDRAMPinNames SDRAM_pin_names = {
 	.A0{GPIO::F, 0, LL_GPIO_AF_12},

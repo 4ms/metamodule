@@ -1,5 +1,5 @@
 #pragma once
-#include "qspi_flash_struct.hh"
+#include "drivers/qspi_flash_struct.hh"
 
 const QSPIFlashConfig qspi_flash_conf = {
 	.io0 = {GPIO::F, 8, LL_GPIO_AF_10},

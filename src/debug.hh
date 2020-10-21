@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pin.hh"
+#include "drivers/pin.hh"
 
 struct Debug {
 	static void set_0(bool value)

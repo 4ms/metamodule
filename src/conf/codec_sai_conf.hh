@@ -1,8 +1,8 @@
 #pragma once
-#include "dma_config_struct.hh"
-#include "pin.hh"
-#include "sai_config_struct.hh"
-#include "stm32xx.h"
+#include "drivers/dma_config_struct.hh"
+#include "drivers/pin.hh"
+#include "drivers/sai_config_struct.hh"
+#include "drivers/stm32xx.h"
 
 const SaiConfig codec_sai_conf = {
 	.sai = SAI1,

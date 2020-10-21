@@ -1,6 +1,6 @@
 #pragma once
 #include "audio.hh"
-#include "i2c.hh"
+#include "drivers/i2c.hh"
 #include "leds.hh"
 #include "params.hh"
 

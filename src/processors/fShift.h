@@ -1,5 +1,6 @@
 #pragma once
 #include "math.hh"
+#include "processors/audio_processor.hh"
 #include <cmath>
 
 using namespace MathTools;

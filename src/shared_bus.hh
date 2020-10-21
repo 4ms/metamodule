@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/i2c_conf.hh"
-#include "i2c.hh"
-#include "pin.hh"
+#include "drivers/i2c.hh"
+#include "drivers/pin.hh"
 
 class SharedBus {
 public:

@@ -1,6 +1,6 @@
 #pragma once
 #include "drivers/dma_config_struct.hh"
-#include "stm32f7xx.h"
+#include "drivers/stm32xx.h"
 
 const DMAConfig led_driver_dma_conf = {
 	.DMAx = DMA1,

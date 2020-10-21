@@ -1,12 +1,10 @@
 #pragma once
 
-#include "../util/math_tables.hh"
 #include "audio_processor.hh"
-//#include "debug.hh"
 #include "math.hh"
 #include "tools/cubicDist.h"
 #include "tools/delayLine.h"
-#include <cmath>
+#include "util/math_tables.hh"
 
 using namespace MathTools;
 
