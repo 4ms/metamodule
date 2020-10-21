@@ -19,6 +19,11 @@ struct Debug {
 	{
 		pin3.set_to(value);
 	}
+	
+	static void toggle_0() { pin0.toggle(); }
+	static void toggle_1() { pin1.toggle(); }
+	static void toggle_2() { pin2.toggle(); }
+	static void toggle_3() { pin3.toggle(); }
 
 private:
 	static inline Pin pin0{GPIO::G, 14, PinMode::Output};
