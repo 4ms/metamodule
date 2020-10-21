@@ -1,5 +1,6 @@
 #include "controls.hh"
 #include "debug.hh"
+#include "drivers/interrupt.hh"
 
 void Controls::read()
 {
@@ -29,6 +30,19 @@ void Controls::start()
 Controls::Controls()
 {
 	CVADCPeriph::init_dma(ADC_DMA_conf);
+
+	// Debug: use this to read the DMA timing with an external pin:
+	// InterruptManager::registerISR(ADC_DMA_conf.IRQn, []() {
+	// 	uint32_t tmpisr = DMA2->LISR;
+	// 	if (LL_DMA_IsActiveFlag_TC0(DMA2)) {
+	// 		if (LL_DMA_IsEnabledIT_TC(DMA2, LL_DMA_STREAM_0)) {
+	// 			Debug::toggle_2();
+	// 		}
+	// 		LL_DMA_ClearFlag_TC0(DMA2);
+	// 	}
+	// });
+	// CVADCPeriph::enable_DMA_IT();
+
 	CVADCPeriph::start_adc();
 
 	read_controls_task.init(control_read_tim_conf, [this]() { read(); });
