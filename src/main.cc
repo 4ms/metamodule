@@ -22,14 +22,12 @@ void main()
 {
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
-	Controls controls;
-	Params params{controls};
-	// Todo: pass a buffer that's already created in section dctm to Audio/PCA9685
-	// Or use a custom allocator to ensure the DMA member variables are created in dctm section
-	static __attribute__((section(".dtcm"))) Audio audio{params, codec};
-	static __attribute__((section(".dtcm")))
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_driver_dma_conf};
 	LedCtl leds{led_driver};
+
+	Controls controls;
+	Params params{controls};
+	Audio audio{params, codec};
 
 	Ui ui{params, leds};
 
