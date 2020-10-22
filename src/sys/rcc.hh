@@ -3,7 +3,8 @@
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 
-//#define DEBUG_MODE_DISABLE_CACHE
+//#define DEBUG_MODE_DISABLE_I_CACHE
+#define DEBUG_MODE_DISABLE_D_CACHE
 
 struct SystemClocks {
 	SystemClocks()
@@ -19,13 +20,17 @@ struct SystemClocks {
 
 		SCB_InvalidateDCache();
 
-#ifdef DEBUG_MODE_DISABLE_CACHE
 		// Debug Mode (all caches disabled):
+#ifdef DEBUG_MODE_DISABLE_I_CACHE
 		SCB_DisableICache();
-		SCB_DisableDCache();
 #else
 		// Code execution from flash over AXIM bus (0x08000000) using I-Cache:
 		SCB_EnableICache();
+#endif
+
+#ifdef DEBUG_MODE_DISABLE_D_CACHE
+		SCB_DisableDCache();
+#else
 		SCB_EnableDCache();
 #endif
 
