@@ -18,9 +18,9 @@ void Params::update()
 		float rotary_motion = static_cast<float>(controls.rotary[i].read());
 		if (rotary_motion != 0.f) {
 			if (controls.rotary_button[i].is_pressed())
-				res_knob_pos[i] = constrain(res_knob_pos[i] + (rotary_motion / kFreqScaling), 0.f, 1.f);
+				res_knob_pos[i] = constrain(res_knob_pos[i] + (rotary_motion / kFreqScaling), -1.f, 1.f);
 			else
-				freq_knob_pos[i] = constrain(freq_knob_pos[i] + (rotary_motion / kResScaling), 0.f, 1.f);
+				freq_knob_pos[i] = constrain(freq_knob_pos[i] + (rotary_motion / kResScaling), -1.f, 1.f);
 		}
 
 		freq[i] = constrain(freq_knob_pos[i] + (freqcv[i] / 4095.0f), 0.f, 1.f);
