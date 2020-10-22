@@ -261,10 +261,7 @@ void buildTrigTables()
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / (float)trigTableLength;
-		if (i < trigTableLength - 1)
-			myfile << sinf(index * 2.0f * M_PI) << ",";
-		else
-			myfile << sinf(index * 2.0f * M_PI);
+		myfile << sinf(index * 2.0f * M_PI) << ",";
 	}
 	myfile << "};" << endl;
 
@@ -272,10 +269,18 @@ void buildTrigTables()
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / (float)trigTableLength * M_PI;
-		if (i < trigTableLength - 1)
-			myfile << tan(index) << ",";
-		else
-			myfile << tan(index);
+		myfile << tan(index) << ",";
+	}
+	myfile << "};" << endl;
+
+
+	const float voltageRange = 5.f;
+	const float powRange = (float)(trigTableLength- 1) / voltageRange;
+	myfile << "const InterpArray<float," << trigTableLength << "> expTable = " << endl;
+	myfile << "{";
+	for (int i = 0; i < trigTableLength; i++) {
+		float index = (float)i / powRange;
+		myfile << powf(2.0f, index) << ",";
 	}
 	myfile << "};" << endl;
 
