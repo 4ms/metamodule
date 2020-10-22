@@ -25,8 +25,8 @@ public:
 		set_samplerate(48000);
 		set_param(0, 0.1f);
 		set_param(1, 0.5f);
-		for (int l0 = 0; l0 < 3; l0++) {
-			fRec0[l0] = 0.0f;
+		for (int i = 0; i < 3; i++) {
+			fRec0[i] = 0.0f;
 		}
 	}
 
@@ -38,9 +38,10 @@ public:
 		if (param_id == 0) {
 			if (fabsf(last_param[0] - val) > 0.001f) {
 				last_param[0] = val;
-				cutoff = map_value(val * val, 0.f, 1.f, minCutoff, maxCutoff);
-				// fSlow1 = cutoff / fConst0;
-				fSlow1 = tanTable.interp(cutoff / fConst0);
+				//cutoff = map_value(val * val, 0.f, 1.f, minCutoff, maxCutoff);
+				cutoff = expTable.interp(val);
+				cutoff = map_value(val, 0.f, 32.f, minCutoff, maxCutoff);
+				fSlow1 = tanTable.interp(cutoff / samplerate);
 				fSlow2 = (1.0f / fSlow1);
 				fSlow3 = (1.0f / (((fSlow0 + fSlow2) / fSlow1) + 1.0f));
 				fSlow4 = (((fSlow2 - fSlow0) / fSlow1) + 1.0f);
@@ -57,8 +58,7 @@ public:
 	}
 	virtual void set_samplerate(float sr)
 	{
-		// fConst0 = constrain(sr, 1.0f, 192000.0f);
-		fConst0 = constrain(sr, 1.0f, 192000.0f);
+		samplerate = constrain(sr, 1.0f, 192000.0f);
 	}
 
 	//~LowPassFilter() {}
@@ -69,6 +69,6 @@ private:
 	float cutoff;
 	float q;
 	float fRec0[3];
-	float fConst0;
+	float samplerate;
 	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5;
 };
