@@ -9,14 +9,15 @@
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 #include "shared_bus.hh"
+#include "sys/rcc.hh"
 #include "ui.hh"
 
-struct DualOpenerSystem : System, Debug, SDRAMPeriph, SharedBus {
+struct DualOpenerSystem : SystemClocks, Debug, SDRAMPeriph, SharedBus {
 	DualOpenerSystem()
 		: SDRAMPeriph{SDRAM_AS4C_conf}
 		, SharedBus{i2c_conf}
 	{}
-} _;
+} _hardware;
 
 void main()
 {
