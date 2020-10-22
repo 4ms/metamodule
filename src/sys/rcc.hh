@@ -4,7 +4,7 @@
 #include "drivers/system.hh"
 
 //#define DEBUG_MODE_DISABLE_I_CACHE
-#define DEBUG_MODE_DISABLE_D_CACHE
+//#define DEBUG_MODE_DISABLE_D_CACHE
 
 struct SystemClocks {
 	SystemClocks()
