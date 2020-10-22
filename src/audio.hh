@@ -1,6 +1,5 @@
 #pragma once
 #include "drivers/codec.hh"
-#include "drivers/hal_callback.hh"
 #include "fxList.hh"
 #include "interp_param.hh"
 #include "math.hh"
@@ -48,14 +47,4 @@ private:
 	Interp<float, kAudioStreamBlockSize> freq1;
 	Interp<float, kAudioStreamBlockSize> res0;
 	Interp<float, kAudioStreamBlockSize> res1;
-
-	HALCallback stream_complete{
-		HALCallbackID::SAI_TxCplt,
-		[this]() { process(rx_buf_[0], tx_buf_[1]); },
-	};
-
-	HALCallback stream_half_complete{
-		HALCallbackID::SAI_TxHalfCplt,
-		[this]() { process(rx_buf_[1], tx_buf_[0]); },
-	};
 };

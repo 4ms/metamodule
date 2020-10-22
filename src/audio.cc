@@ -18,6 +18,8 @@ Audio::Audio(Params &p, ICodec &codec)
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_[0].data()),
 							reinterpret_cast<uint8_t *>(rx_buf_[0].data()),
 							kAudioStreamDMABlockSize * 2);
+
+	codec_.set_callbacks([this]() { process(rx_buf_[0], tx_buf_[1]); }, [this]() { process(rx_buf_[1], tx_buf_[0]); });
 }
 
 // param smoothing: +3.9% of processing (23.4% -> 19.5%)
