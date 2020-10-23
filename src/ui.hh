@@ -25,7 +25,7 @@ public:
 	{
 		for (int i = 0; i < 2; i++) {
 			Color freq_col, res_col;
-			if (params.controls.rotary_button[i].is_pressed()) {
+			if (params.knob_sel[i] == Params::FREQ) {
 				freq_col = i ? Colors::blue : Colors::red;
 				res_col = Colors::grey;
 			} else {
@@ -40,6 +40,7 @@ public:
 			else
 				leds.but[i].set_background(Colors::off);
 		}
+
 		for (int i = 0; i < 5; i++) {
 			leds.mode[i].set_background(Colors::off);
 			if (i == params.mode[0])
