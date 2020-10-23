@@ -18,7 +18,6 @@ void Params::update()
 		int32_t rotary_motion = controls.rotary[i].read();
 		int32_t freq_motion = 0;
 		int32_t res_motion = 0;
-	
 
 		if (controls.rotary_button[i].is_just_pressed()) {
 			knob_moved_while_pressed[i] = false;
@@ -30,6 +29,10 @@ void Params::update()
 			if (rotary_motion!=0) {
 				knob_moved_while_pressed[i] = true;
 				//handle changing CV atten
+				if (knob_sel[i] == FREQ)
+					freq_cv_atten[i] = constrain(freq_cv_atten[i] + rotary_motion/100.f, 0.f, 1.f);
+				else
+					res_cv_atten[i] = constrain(res_cv_atten[i] + rotary_motion/100.f, 0.f, 1.f);
 			}
 		} else {
 			if (knob_sel[i] == FREQ) {
@@ -39,11 +42,14 @@ void Params::update()
 			}
 		}
 
-		float res_knob_pos = smoothed_res[i].update(res_motion);
 		float freq_knob_pos = smoothed_freq[i].update(freq_motion);
+		float res_knob_pos = smoothed_res[i].update(res_motion);
 
-		res[i] = constrain(res_knob_pos + (rescv[i] / 4095.0f), 0.f, 1.f);
-		freq[i] = constrain(freq_knob_pos + (freqcv[i] / 4095.0f), 0.f, 1.f);
+		float freq_cv = freq_cv_atten[i] * freqcv[i] / 4095.f;
+		float res_cv = res_cv_atten[i] * rescv[i] / 4095.f;
+
+		freq[i] = constrain(freq_knob_pos + freq_cv, 0.f, 1.f);
+		res[i] = constrain(res_knob_pos + res_cv, 0.f, 1.f);
 
 
 		if (controls.mode_button[i].is_just_released()) {
