@@ -5,7 +5,8 @@ using namespace MathTools;
 
 void Params::update()
 {
-	SCB_CleanInvalidateDCache(); // required until/unless we get ADC buffers into DTCM RAM
+	//SCB_CleanInvalidateDCache(); // required until/unless we get ADC buffers into DTCM RAM
+	
 	// Debug::set_1(true);
 	uint32_t freqcv[2];
 	uint32_t rescv[2];
