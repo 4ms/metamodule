@@ -72,12 +72,12 @@ void Audio::start()
 
 void Audio::check_fx_change()
 {
-	if (current_fx[LEFT] != FX_left[params.mode[0]]) {
+	if (current_fx[LEFT] != FX_left[params.fx_mode[0]]) {
 		// Todo: start crossfading
-		current_fx[LEFT] = FX_left[params.mode[0]];
+		current_fx[LEFT] = FX_left[params.fx_mode[0]];
 	}
-	if (current_fx[RIGHT] != FX_right[params.mode[1]]) {
+	if (current_fx[RIGHT] != FX_right[params.fx_mode[1]]) {
 		// Todo: start crossfading
-		current_fx[RIGHT] = FX_right[params.mode[1]];
+		current_fx[RIGHT] = FX_right[params.fx_mode[1]];
 	}
 }
