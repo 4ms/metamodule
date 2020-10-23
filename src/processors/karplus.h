@@ -5,6 +5,7 @@
 //#include "debug.hh"
 #include "math.hh"
 #include "tools/delayLine.h"
+#include "tools/kneeCompress.h"
 #include <cmath>
 
 using namespace MathTools;
@@ -28,7 +29,7 @@ public:
 			addTaps += delayLine[i].output;
 		}
 
-		output = input + addTaps;
+		output = interpolate(input, addTaps / (float)taps, 0.5f);
 		return (output);
 	}
 
