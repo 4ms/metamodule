@@ -6,14 +6,15 @@
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
+#include "util/filter.hh"
 
 using JackSense = DebouncedSwitch;
 
 struct Controls {
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_2, 16> freq_cv0 = {GPIO::A, 2};
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_3, 16> res_cv0 = {GPIO::A, 3};
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_0, 16> freq_cv1 = {GPIO::A, 0};
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_1, 16> res_cv1 = {GPIO::A, 1};
+	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_2, Oversampler<16>> freq_cv0 = {GPIO::A, 2};
+	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_3, Oversampler<16>> res_cv0 = {GPIO::A, 3};
+	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_0, Oversampler<16>> freq_cv1 = {GPIO::A, 0};
+	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_1, Oversampler<16>> res_cv1 = {GPIO::A, 1};
 
 	JackSense freq_sense[2] = {{GPIO::C, 4, PinPolarity::Normal}, {GPIO::B, 1, PinPolarity::Normal}};
 	JackSense res_sense[2] = {{GPIO::C, 5, PinPolarity::Normal}, {GPIO::B, 0, PinPolarity::Normal}};
@@ -30,4 +31,5 @@ struct Controls {
 
 private:
 	Timekeeper read_controls_task;
+	__attribute__((section(".dtcm"))) static inline uint16_t adc_buffer[4];
 };

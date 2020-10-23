@@ -1,7 +1,6 @@
 #pragma once
-#include <stm32f7xx.h>
 
-constexpr uint32_t Log2Int(const uint32_t x)
+constexpr unsigned int Log2Int(const unsigned int x)
 {
 	for (int i = 0; i < 32; i++)
 		if (x == (1UL << i))
@@ -9,9 +8,9 @@ constexpr uint32_t Log2Int(const uint32_t x)
 	return 0;
 }
 
-template<class T, int size>
+template<int size, class T = unsigned int>
 struct Oversampler {
-	static_assert(Log2Int(size) > 0, "Oversampler<T, size> requires size to be a power of 2");
+	static_assert(Log2Int(size) > 0, "Oversampler<size, T> requires size to be a power of 2");
 
 public:
 	Oversampler() {}
@@ -33,6 +32,6 @@ private:
 	constexpr static auto oversample_shift_ = Log2Int(size);
 	T buff_ = 0;
 	T val_ = 0;
-	int idx_ = 0;
+	unsigned int idx_ = 0;
 };
 
