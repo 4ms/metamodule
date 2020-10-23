@@ -47,7 +47,7 @@ void Params::update()
 
 
 		if (controls.mode_button[i].is_just_released()) {
-			mode[i] = wrap<kNumFX>(mode[i] + 1);
+			fx_mode[i] = wrap<kNumFX>(fx_mode[i] + 1);
 		}
 	}
 	// Debug::set_1(false);

@@ -43,9 +43,9 @@ public:
 
 		for (int i = 0; i < 5; i++) {
 			leds.mode[i].set_background(Colors::off);
-			if (i == params.mode[0])
+			if (i == params.fx_mode[0])
 				leds.mode[i].add_background(Colors::red);
-			if (i == params.mode[1])
+			if (i == params.fx_mode[1])
 				leds.mode[i].add_background(Colors::blue);
 		}
 

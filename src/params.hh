@@ -12,6 +12,7 @@ public:
 	float freq[2];
 	float res[2];
 	uint8_t mode[2] = {0};
+	uint8_t fx_mode[2] = {0};
 
 	enum SelectedKnob { FREQ, RES };
 	SelectedKnob knob_sel[2] = {FREQ, FREQ};
