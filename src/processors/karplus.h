@@ -4,6 +4,7 @@
 #include "audio_processor.hh"
 //#include "debug.hh"
 #include "math.hh"
+#include "tools/dcBlock.h"
 #include "tools/delayLine.h"
 #include "tools/kneeCompress.h"
 #include <cmath>
@@ -29,7 +30,7 @@ public:
 			addTaps += delayLine[i].output;
 		}
 
-		output = interpolate(input, addTaps / (float)taps, 0.5f);
+		output = interpolate(input, dcBlock.update(addTaps) / (float)taps, 0.5f);
 		return (output);
 	}
 
@@ -77,4 +78,6 @@ private:
 		float seconds = 1.0f / inputFrequency;
 		return (seconds * sampleRate);
 	}
+
+	DCBlock dcBlock;
 };
