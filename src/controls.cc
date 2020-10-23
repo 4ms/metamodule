@@ -29,7 +29,7 @@ void Controls::start()
 
 Controls::Controls()
 {
-	CVADCPeriph::init_dma(ADC_DMA_conf);
+	CVADCPeriph::init_dma(ADC_DMA_conf, adc_buffer);
 
 	// Debug: use this to read the DMA timing with an external pin:
 	// InterruptManager::registerISR(ADC_DMA_conf.IRQn, []() {
