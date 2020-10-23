@@ -15,16 +15,22 @@ void Params::update()
 	rescv[1] = controls.res_sense[1].is_pressed() ? 0U : controls.res_cv1.get();
 
 	for (int i = 0; i < 2; i++) {
-		float rotary_motion = static_cast<float>(controls.rotary[i].read());
-		if (rotary_motion != 0.f) {
-			if (controls.rotary_button[i].is_pressed())
-				res_knob_pos[i] = constrain(res_knob_pos[i] + (rotary_motion / kFreqScaling), -1.f, 1.f);
-			else
-				freq_knob_pos[i] = constrain(freq_knob_pos[i] + (rotary_motion / kResScaling), -1.f, 1.f);
+		int32_t rotary_motion = controls.rotary[i].read();
+		int32_t freq_motion = 0;
+		int32_t res_motion = 0;
+
+		if (controls.rotary_button[i].is_pressed()) {
+			res_motion = rotary_motion;
+		} else {
+			freq_motion = rotary_motion;
 		}
 
-		freq[i] = constrain(freq_knob_pos[i] + (freqcv[i] / 4095.0f), 0.f, 1.f);
-		res[i] = constrain(res_knob_pos[i] + (rescv[i] / 4095.0f), 0.f, 1.f);
+		float res_knob_pos = smoothed_res[i].update(res_motion);
+		res[i] = constrain(res_knob_pos + (rescv[i] / 4095.0f), 0.f, 1.f);
+
+		float freq_knob_pos = smoothed_freq[i].update(freq_motion);
+		freq[i] = constrain(freq_knob_pos + (freqcv[i] / 4095.0f), 0.f, 1.f);
+
 
 		if (controls.mode_button[i].is_just_released()) {
 			mode[i] = wrap<kNumFX>(mode[i] + 1);
@@ -32,3 +38,26 @@ void Params::update()
 	}
 	// Debug::set_1(false);
 }
+
+/*
+for (int i = 0; i < 2; i++) {
+	int32_t rotary_motion = controls.rotary[i].read();
+
+	int32_t freq_motion = 0;
+	int32_t res_motion = 0;
+	if (controls.rotary_button[i].is_pressed()) {
+		res_motion = rotary_motion;
+	} else {
+		freq_motion = rotary_motion;
+	}
+	float res_knob_pos = smoothed_res[i].update(res_motion);
+	res[i] = constrain(res_knob_pos + (rescv[i] / 4095.0f), 0.f, 1.f);
+
+	float freq_knob_pos = smoothed_freq[i].update(freq_motion);
+	freq[i] = constrain(freq_knob_pos + (freqcv[i] / 4095.0f), 0.f, 1.f);
+
+	if (controls.mode_button[i].is_just_released()) {
+		mode[i] = wrap<kNumFX>(mode[i] + 1);
+	}
+}
+*/
