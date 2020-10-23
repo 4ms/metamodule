@@ -1,6 +1,7 @@
 #include "fxList.hh"
 #include "processors/bit_crush.h"
 #include "processors/flanger.h"
+#include "processors/karplus.h"
 #include "processors/lpf.h"
 #include "processors/lpg.h"
 #include "processors/reverb.h"
@@ -17,4 +18,3 @@ AudioProcessor *FXList::operator[](unsigned int fxnum)
 		fxnum -= NumFX;
 	return fxList[fxnum];
 }
-
