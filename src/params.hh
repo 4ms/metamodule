@@ -11,7 +11,8 @@ public:
 
 	float freq[2];
 	float res[2];
-	uint8_t mode[2] = {0};
+	float freq_cv_atten[2] = {1.f, 1.f};
+	float res_cv_atten[2] = {1.f, 1.f};
 	uint8_t fx_mode[2] = {0};
 
 	enum SelectedKnob { FREQ, RES };
@@ -22,15 +23,24 @@ public:
 	Controls &controls;
 
 private:
+	//Adjust these as needed:
 	static const int kFreqKnob_Accel = 150;
 	static const int kFreqKnob_Weight = 200;
 	static const int kFreqKnonb_CatchupWeight = 333;
-	AccelParam<kFreqKnob_Accel, kFreqKnob_Weight, kFreqKnonb_CatchupWeight> smoothed_freq[2] = {0.5f, 0.5f};
 
 	static const int kResKnob_Accel = 350;
 	static const int kResKnob_Weight = 200;
 	static const int kResKnonb_CatchupWeight = 333;
-	AccelParam<kResKnob_Accel, kResKnob_Weight, kResKnonb_CatchupWeight> smoothed_res[2] = {0.5f, 0.5f};
+
+	AccelParam smoothed_freq[2] {
+		{kFreqKnob_Accel, kFreqKnob_Weight, kFreqKnonb_CatchupWeight, 0.5f},
+		{kFreqKnob_Accel, kFreqKnob_Weight, kFreqKnonb_CatchupWeight, 0.5f},
+	};
+
+	AccelParam smoothed_res[2] {
+		{kResKnob_Accel, kResKnob_Weight, kResKnonb_CatchupWeight, 0.5f},
+		{kResKnob_Accel, kResKnob_Weight, kResKnonb_CatchupWeight, 0.5f},
+	};
 
 	bool knob_moved_while_pressed[2] = {false, false};
 

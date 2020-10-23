@@ -1,22 +1,17 @@
-#pragma once
+#pragma once 
 #include "math.hh"
 #include <cmath>
 #include "drivers/stm32xx.h"
 
-template <int ACCEL = 150, int LAG = 200, int MORPH_LAG = 333>
 class AccelParam {
-
-	const float fACCEL;
-	const float SPEED;
-	const float MORPH_SPEED;
-
 public:
-	AccelParam(float initval = 0.f)
+	AccelParam(int acceleration = 150, int lag = 200, int catchup_lag = 333, float initval = 0.f)
 		: cur_val_(initval)
 		, dest_(initval)
+		, ACCEL(acceleration)
 		, fACCEL(static_cast<float>(ACCEL))
-		, SPEED(1.f/LAG)
-		, MORPH_SPEED(1.f/MORPH_LAG)
+		, SPEED(1.f/lag)
+		, MORPH_SPEED(1.f/catchup_lag)
 	{}
 
 	float update(int32_t motion)
@@ -32,6 +27,16 @@ public:
 	}
 
 private:
+	float cur_val_;
+	float dest_;
+	int32_t last_inc = 0;
+	uint32_t last_inc_time = 0;
+
+	const int ACCEL;
+	const float fACCEL;
+	const float SPEED;
+	const float MORPH_SPEED;
+
 	void update_dest(int32_t inc)
 	{
 		if (inc == 0)
@@ -48,7 +53,7 @@ private:
 				time_since = ACCEL * abs(inc);
 			else if (time_since == 0)
 				time_since = 1;
-			dest_ += (inc * SPEED * ACCEL / (float)time_since);
+			dest_ += (inc * SPEED * fACCEL / (float)time_since);
 		}
 		last_inc_time = now;
 		dest_ = MathTools::constrain(dest_, -1.0f, 1.0f);
@@ -69,9 +74,5 @@ private:
 		}
 	}
 
-	float cur_val_;
-	float dest_;
-	int32_t last_inc = 0;
-	uint32_t last_inc_time = 0;
 };
 
