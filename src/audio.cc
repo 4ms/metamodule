@@ -28,6 +28,15 @@ Audio::Audio(Params &p, ICodec &codec)
 // Compression<float>: 18.4%, +comp float stereo = 20.4% (+2%)
 // Compression<int32_t>: -> 19.6% (+1%)
 // Hard Clip (constrain): 21.2% -> 21.2% (+2.3%)
+
+Audio::AudioSampleType Audio::process_chan(AudioSampleType in, enum AudioChannels c)
+{
+	auto scaled_in = AudioFrame::scaleInput(in);
+	auto raw_out = current_fx[c]->update(scaled_in);
+	auto scaled_out = AudioFrame::scaleOutput(raw_out);
+	return compressor.compress(scaled_out);
+}
+
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
 	Debug::set_0(true);
@@ -35,6 +44,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	params.update();
 	check_fx_change();
 
+	//
 	freq0.set_new_value(params.freq[0]);
 	freq1.set_new_value(params.freq[1]);
 	res0.set_new_value(params.res[0]);
@@ -42,19 +52,10 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
-		{
-			auto scaled_in = AudioFrame::scaleInput(in_->l);
-			auto raw_out = current_fx[LEFT]->update(scaled_in);
-			auto scaled_out = AudioFrame::scaleOutput(raw_out);
-			out_.l = compressor.compress(scaled_out);
-		}
-		{
-			auto scaled_in = AudioFrame::scaleInput(in_->r);
-			auto raw_out = current_fx[RIGHT]->update(scaled_in);
-			auto scaled_out = AudioFrame::scaleOutput(raw_out);
-			out_.r = compressor.compress(scaled_out);
-		}
+		out_.l = process_chan(in_->l, LEFT);
+		out_.r = process_chan(in_->r, RIGHT);
 
+		// Todo: don't set params if value didn't change
 		current_fx[LEFT]->set_param(0, freq0.next());
 		current_fx[LEFT]->set_param(1, res0.next());
 		current_fx[RIGHT]->set_param(0, freq1.next());
@@ -73,11 +74,9 @@ void Audio::start()
 void Audio::check_fx_change()
 {
 	if (current_fx[LEFT] != FX_left[params.fx_mode[0]]) {
-		// Todo: start crossfading
 		current_fx[LEFT] = FX_left[params.fx_mode[0]];
 	}
 	if (current_fx[RIGHT] != FX_right[params.fx_mode[1]]) {
-		// Todo: start crossfading
 		current_fx[RIGHT] = FX_right[params.fx_mode[1]];
 	}
 }
