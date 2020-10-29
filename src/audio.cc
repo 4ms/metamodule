@@ -44,24 +44,29 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	params.update();
 	check_fx_change();
 
-	//
+	static auto is_small = [](float x) { return x < 1e-8f && x > -1e-8f; };
 	freq0.set_new_value(params.freq[0]);
 	freq1.set_new_value(params.freq[1]);
 	res0.set_new_value(params.res[0]);
 	res1.set_new_value(params.res[1]);
+
+	bool update_freq0 = !is_small(freq0.get_step_size());
+	bool update_freq1 = !is_small(freq1.get_step_size());
+	bool update_res0 = !is_small(res0.get_step_size());
+	bool update_res1 = !is_small(res1.get_step_size());
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
 		out_.l = process_chan(in_->l, LEFT);
 		out_.r = process_chan(in_->r, RIGHT);
 
-		if (freq0.did_change())
+		if (update_freq0)
 			current_fx[LEFT]->set_param(0, freq0.next());
-		if (res0.did_change())
+		if (update_res0)
 			current_fx[LEFT]->set_param(1, res0.next());
-		if (freq1.did_change())
+		if (update_freq1)
 			current_fx[RIGHT]->set_param(0, freq1.next());
-		if (res1.did_change())
+		if (update_res1)
 			current_fx[RIGHT]->set_param(1, res1.next());
 
 		in_++;

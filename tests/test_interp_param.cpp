@@ -84,17 +84,11 @@ TEST(interp_param_tests, zero_breaks)
 	// Interp<float, 0> x;
 }
 
-TEST(interp_param_tests, did_change_returns_true_if_next_has_new_value)
-{
-	Interp<float, 6> x;
-	x.set_new_value(12.f);
-	CHECK(x.did_change());
-}
-TEST(interp_param_tests, did_change_returns_false_if_next_has_same_value)
+TEST(interp_param_tests, step_size_is_nearly_zero_if_value_doesnt_change)
 {
 	Interp<float, 1> x;
 	x.set_new_value(12.f);
 	CHECK(x.next() == 12.f);
 	x.set_new_value(12.f);
-	CHECK_FALSE(x.did_change());
+	FLOATS_NEARLY_EQUAL(x.get_step_size(), (float)0.f);
 }

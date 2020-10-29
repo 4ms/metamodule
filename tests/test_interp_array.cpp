@@ -2,7 +2,7 @@
 #include "util/interp_array.hh"
 #include <fff.h>
 
-#define FLOATS_NEARLY_EQUAL(e, a) DOUBLES_EQUAL(static_cast<double>(e), static_cast<double>(a), 0.000001);
+#define FLOATS_NEARLY_EQUAL(e, a) DOUBLES_EQUAL(static_cast<double>(e), static_cast<double>(a), 0.00001);
 
 TEST_GROUP(interp_array_tests){
 
