@@ -55,11 +55,14 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		out_.l = process_chan(in_->l, LEFT);
 		out_.r = process_chan(in_->r, RIGHT);
 
-		// Todo: don't set params if value didn't change
-		current_fx[LEFT]->set_param(0, freq0.next());
-		current_fx[LEFT]->set_param(1, res0.next());
-		current_fx[RIGHT]->set_param(0, freq1.next());
-		current_fx[RIGHT]->set_param(1, res1.next());
+		if (freq0.did_change())
+			current_fx[LEFT]->set_param(0, freq0.next());
+		if (res0.did_change())
+			current_fx[LEFT]->set_param(1, res0.next());
+		if (freq1.did_change())
+			current_fx[RIGHT]->set_param(0, freq1.next());
+		if (res1.did_change())
+			current_fx[RIGHT]->set_param(1, res1.next());
 
 		in_++;
 	}
