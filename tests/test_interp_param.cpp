@@ -3,8 +3,7 @@
 #include <array>
 #include <fff.h>
 
-#define FLOATS_NEARLY_EQUAL(e, a)                                                                  \
-	DOUBLES_EQUAL(static_cast<double>(e), static_cast<double>(a), 0.000001);
+#define FLOATS_NEARLY_EQUAL(e, a) DOUBLES_EQUAL(static_cast<double>(e), static_cast<double>(a), 0.000001);
 
 TEST_GROUP(interp_param_tests){
 
@@ -39,7 +38,7 @@ TEST(interp_param_tests, many_many_updates)
 	Interp<double, updates> x;
 
 	x.set_new_value(123456789.0);
-	for (unsigned int i = 0; i< (updates-1); i++)
+	for (unsigned int i = 0; i < (updates - 1); i++)
 		x.next();
 
 	DOUBLES_EQUAL(123456789.0, x.next(), 0.000001);
@@ -82,5 +81,20 @@ TEST(interp_param_tests, overflow_keeps_incrementing)
 
 TEST(interp_param_tests, zero_breaks)
 {
-	//Interp<float, 0> x;
+	// Interp<float, 0> x;
+}
+
+TEST(interp_param_tests, did_change_returns_true_if_next_has_new_value)
+{
+	Interp<float, 6> x;
+	x.set_new_value(12.f);
+	CHECK(x.did_change());
+}
+TEST(interp_param_tests, did_change_returns_false_if_next_has_same_value)
+{
+	Interp<float, 1> x;
+	x.set_new_value(12.f);
+	CHECK(x.next() == 12.f);
+	x.set_new_value(12.f);
+	CHECK_FALSE(x.did_change());
 }
