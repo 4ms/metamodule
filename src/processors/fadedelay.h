@@ -29,7 +29,7 @@ public:
 		smoothDelayTime += (timeinMs - smoothDelayTime) * 0.0001f;
 
 		if ((smoothDelayTime != currentDelayTime) && fade >= 1) {
-			delayLine[!activeChannel].delaySamples = sampleDelay;
+			delayLine[!activeChannel].set_delay_samples(sampleDelay);
 			sinceChange = 0;
 		}
 
@@ -79,7 +79,7 @@ private:
 	DelayLine<96000> delayLine[2];
 
 	float sinceChange = 0;
-	float changeTime = 4800;
+	float changeTime = 48000;
 
 	float currentDelayTime = 0;
 
