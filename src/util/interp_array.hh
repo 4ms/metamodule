@@ -21,7 +21,9 @@ struct InterpArray {
 		const float phase = index - static_cast<float>(idx0);
 		const unsigned int idx1 = (idx0 == (Size - 1)) ? 0 : idx0 + 1;
 
-		return data[idx0] + (data[idx1] - data[idx0]) * phase;
+		//return data[idx0] + (data[idx1] - data[idx0]) * phase;
+		return (data[idx1] * phase) + (data[idx0] * (1.0f - phase));
+		// return data[idx1] * index - data[idx1] * idx0 + data[idx0] - data[idx0] * index + data[idx0]*idx0;
 	}
 
 	constexpr float interp_by_index(const float index) const
@@ -30,7 +32,8 @@ struct InterpArray {
 		const float phase = index - static_cast<float>(idx0);
 		const unsigned int idx1 = (idx0 == (Size - 1)) ? 0 : idx0 + 1;
 
-		return data[idx0] + (data[idx1] - data[idx0]) * phase;
+		//return data[idx0] + (data[idx1] - data[idx0]) * phase;
+		return (data[idx1] * phase) + (data[idx0] * (1.0f - phase));
 	}
 
 	constexpr float interp_wrap(const float phase) const

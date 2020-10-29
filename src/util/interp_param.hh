@@ -9,16 +9,23 @@ struct Interp {
 		static_assert(num_updates > 0);
 	}
 
-	T cur_val;
-	T step_size;
-
 	void set_new_value(T new_val)
 	{
-		step_size = (new_val - cur_val) / num_updates;
+		T d = new_val - cur_val;
+		step_size = d / num_updates;
 	}
 	T next()
 	{
 		cur_val += step_size;
 		return cur_val;
 	}
+	T get_step_size()
+	{
+		return step_size;
+	}
+
+	T cur_val;
+
+private:
+	T step_size;
 };
