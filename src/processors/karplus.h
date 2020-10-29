@@ -37,17 +37,11 @@ public:
 			float baseFreq = map_value(val, 0.0f, 1.0f, 20.0f, 1000.0f);
 			apPeriods[0] = 1.0f / baseFreq;
 			delayLine[0].set_delay_samples(periodToSamples(apPeriods[0]));
-			for (int i = 1; i < taps; i++) {
-				apPeriods[i] = apPeriods[i - 1] / spread;
-				delayLine[i].set_delay_samples(periodToSamples(apPeriods[i]));
-			}
+			update_delay_samples();
 		}
 		if (param_id == 1) {
 			spread = map_value(val, 0.0f, 1.0f, 1.0001f, 1.1f);
-			for (int i = 1; i < taps; i++) {
-				apPeriods[i] = apPeriods[i - 1] / spread;
-				delayLine[i].set_delay_samples(periodToSamples(apPeriods[i]));
-			}
+			update_delay_samples();
 		}
 	}
 	virtual void set_samplerate(float sr)
@@ -68,6 +62,13 @@ private:
 	float periodToSamples(float period)
 	{
 		return (period * sampleRate);
+	}
+	void update_delay_samples()
+	{
+		for (int i = 1; i < taps; i++) {
+			apPeriods[i] = apPeriods[i - 1] / spread;
+			delayLine[i].set_delay_samples(periodToSamples(apPeriods[i]));
+		}
 	}
 
 	DCBlock dcBlock;
