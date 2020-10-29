@@ -83,8 +83,12 @@ void Audio::check_fx_change()
 {
 	if (current_fx[LEFT] != FX_left[params.fx_mode[0]]) {
 		current_fx[LEFT] = FX_left[params.fx_mode[0]];
+		current_fx[LEFT]->set_param(0, params.freq[0]);
+		current_fx[LEFT]->set_param(1, params.res[0]);
 	}
 	if (current_fx[RIGHT] != FX_right[params.fx_mode[1]]) {
 		current_fx[RIGHT] = FX_right[params.fx_mode[1]];
+		current_fx[RIGHT]->set_param(0, params.freq[1]);
+		current_fx[RIGHT]->set_param(1, params.res[1]);
 	}
 }
