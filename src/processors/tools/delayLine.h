@@ -1,12 +1,12 @@
 #pragma once
 
-//#include "debug.hh"
+#include "debug.hh"
 #include "math.hh"
+#include "util/interp_array.hh"
 
 template<int maxSamples>
 class DelayLine {
 public:
-	float delaySamples = 0;
 	float output = 0;
 
 	DelayLine()
@@ -16,33 +16,40 @@ public:
 		}
 	}
 
-	virtual void set_samplerate(float sr)
-	{
-		// sampleRate = sr;
+	void set_delay_samples(float delay) {
+		delaySamples = delay;
 	}
 
-	void update(float input)
+	virtual void set_samplerate(float sr)
 	{
+	}
+
+	//calling 6 updates in a loop is 6.7us using float readIndex and interpolating
+	//with int readIndex (just checking it's not negative), it's 5.6us
+	float update(float input)
+	{
+		// ~13%
 		delayBuffer[writeIndex] = input;
+		
+		// ~2%
 		readIndex = writeIndex - delaySamples;
 		if (readIndex < 0)
-			readIndex += maxSamples;
-		read1 = readIndex;
-		read2 = (read1 + 1) % maxSamples;
-		float readFraction = readIndex - read1;
-		output = interpolate(delayBuffer[read1], delayBuffer[read2], readFraction);
-		// output = delayBuffer[readIndex];
+			readIndex +=  maxSamples;
+
+		// ~2.7%
+		output = delayBuffer.interp_by_index(readIndex);
+
+		// ~2%
 		writeIndex++;
-		writeIndex %= maxSamples;
+		if (writeIndex==maxSamples)
+			writeIndex = 0;
+
+		return output;
 	}
 
 private:
-	float delayBuffer[maxSamples];
-	// float sampleRate = 44100;
-
+	InterpArray<float, maxSamples> delayBuffer;
 	unsigned int writeIndex = 0;
-	// int readIndex;
-	float readIndex;
-	unsigned int read1;
-	unsigned int read2;
+	float readIndex = 0;
+	float delaySamples = 1.0f;
 };

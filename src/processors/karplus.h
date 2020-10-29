@@ -15,23 +15,15 @@ class Karplus : public AudioProcessor {
 public:
 	virtual float update(float input)
 	{
-		float output = 0;
+		float output = input * fTaps;
 
-		float addTaps = 0;
-
-		for (int i = 0; i < taps; i++) {
-			float lastSample = delayLine[i].output;
-			if (i == 0)
-				lastSample = delayLine[taps - 1].output;
-			delayLine[i].update(input + lastSample * feedback);
+		output += delayLine[0].update(input + delayLine[taps - 1].output * feedback);
+		for (int i = 1; i < taps; i++) {
+			output += delayLine[i].update(input + delayLine[i].output * feedback);
 		}
 
-		for (int i = 0; i < taps; i++) {
-			addTaps += delayLine[i].output;
-		}
-
-		output = interpolate(input, dcBlock.update(addTaps) / (float)taps, 0.5f);
-		return (output);
+		output = dcBlock.update(output/(fTaps*2.f));
+		return output;
 	}
 
 	Karplus()
@@ -41,20 +33,20 @@ public:
 
 	virtual void set_param(int param_id, float val)
 	{
+		//Todo: fix this so either param can be set independantly
 		if (param_id == 0) {
-			baseFreq = map_value(val, 0.0f, 1.0f, 20.0f, 1000.0f);
-			apFreqs[0] = baseFreq;
+			float baseFreq = map_value(val, 0.0f, 1.0f, 20.0f, 1000.0f);
+			apPeriods[0] = 1.0f/baseFreq;
+			delayLine[0].set_delay_samples(periodToSamples(apPeriods[0]));
 		}
 		if (param_id == 1) {
 			spread = map_value(val, 0.0f, 1.0f, 1.0001f, 1.1f);
 			for (int i = 1; i < taps; i++) {
-				apFreqs[i] = apFreqs[i - 1] * spread;
+				apPeriods[i] = apPeriods[i - 1] / spread;
+				delayLine[i].set_delay_samples(periodToSamples(apPeriods[i]));
 			}
 		}
 
-		for (int i = 0; i < taps; i++) {
-			delayLine[i].delaySamples = freqToSamples(apFreqs[i]);
-		}
 	}
 	virtual void set_samplerate(float sr)
 	{
@@ -63,20 +55,18 @@ public:
 
 private:
 	static const int taps = 6;
-
-	float apFreqs[taps];
+	static constexpr float fTaps = (float)taps;
+	float apPeriods[taps];
 	float sampleRate = 48000;
 	float spread = 1.0f;
 
-	float baseFreq = 20.0f;
 	float feedback = 0.995f;
 
 	DelayLine<2400> delayLine[taps];
 
-	float freqToSamples(float inputFrequency)
+	float periodToSamples(float period)
 	{
-		float seconds = 1.0f / inputFrequency;
-		return (seconds * sampleRate);
+		return (period * sampleRate);
 	}
 
 	DCBlock dcBlock;
