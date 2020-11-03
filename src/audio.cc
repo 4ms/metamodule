@@ -2,10 +2,12 @@
 #include "debug.hh"
 #include <cmath>
 
-Audio::Audio(Params &p, ICodec &codec)
+Audio::Audio(Params &p, ICodec &codec, FXList &fxl, FXList &fxr)
 	: params{p}
 	, codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
+	, FX_left{fxl}
+	, FX_right{fxr} 
 {
 	for (uint32_t i = 0; i < FXList::NumFX; i++) {
 		FX_left[i]->set_samplerate(sample_rate_);

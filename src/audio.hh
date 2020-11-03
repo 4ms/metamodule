@@ -22,7 +22,7 @@ class Audio {
 
 public:
 	// Public methods:
-	Audio(Params &p, ICodec &codec);
+	Audio(Params &p, ICodec &codec, FXList &fxl, FXList &fxr);
 	void start();
 
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);
@@ -35,8 +35,8 @@ private:
 	AudioStreamBlock rx_buf_[2];
 	Params &params;
 
-	FXList FX_left;
-	FXList FX_right;
+	FXList &FX_left;
+	FXList &FX_right;
 
 	KneeCompressor<int32_t> compressor{AudioSampleBits, 0.75};
 

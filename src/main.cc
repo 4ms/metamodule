@@ -29,7 +29,9 @@ void main()
 
 	Controls controls;
 	Params params{controls};
-	static __attribute__((section(".dtcm"))) Audio audio{params, codec};
+	FXList fxl;
+	FXList fxr;
+	static __attribute__((section(".dtcm"))) Audio audio{params, codec, fxl, fxr};
 
 	Ui ui{params, leds};
 

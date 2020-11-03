@@ -49,7 +49,9 @@ extern "C" size_t _sbrk(int incr)
 	char *prev_heap_end;
 
 	if (heap_end == 0) {
-		heap_end = &_fmc_start;
+		//force HARD FAULT
+		//heap_end = (char *)(0x20014000);
+		//heap_end = &_fmc_start;
 		// heap_end = &_end;
 	}
 	prev_heap_end = heap_end;
