@@ -17,6 +17,8 @@ struct DualOpenerSystem : SystemClocks, Debug, SDRAMPeriph, SharedBus {
 		: SDRAMPeriph{SDRAM_AS4C_conf}
 		, SharedBus{i2c_conf}
 	{}
+
+
 } _hardware;
 
 void main()
@@ -29,9 +31,9 @@ void main()
 
 	Controls controls;
 	Params params{controls};
-	FXList fxl;
-	FXList fxr;
-	static __attribute__((section(".dtcm"))) Audio audio{params, codec, fxl, fxr};
+
+	static __attribute__((section(".dtcm"))) Audio::AudioStreamBlock audio_dma_block[4];
+	Audio audio{params, codec, audio_dma_block};
 
 	Ui ui{params, leds};
 

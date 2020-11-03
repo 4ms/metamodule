@@ -2,12 +2,14 @@
 #include "debug.hh"
 #include <cmath>
 
-Audio::Audio(Params &p, ICodec &codec, FXList &fxl, FXList &fxr)
+Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	: params{p}
 	, codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
-	, FX_left{fxl}
-	, FX_right{fxr} 
+	, tx_buf_1{buffers[0]}
+	, tx_buf_2{buffers[1]}
+	, rx_buf_1{buffers[2]}
+	, rx_buf_2{buffers[3]}
 {
 	for (uint32_t i = 0; i < FXList::NumFX; i++) {
 		FX_left[i]->set_samplerate(sample_rate_);
@@ -17,11 +19,11 @@ Audio::Audio(Params &p, ICodec &codec, FXList &fxl, FXList &fxr)
 	current_fx[LEFT] = FX_left[0];
 	current_fx[RIGHT] = FX_right[0];
 
-	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_[0].data()),
-							reinterpret_cast<uint8_t *>(rx_buf_[0].data()),
+	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
+							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
 							kAudioStreamDMABlockSize * 2);
 
-	codec_.set_callbacks([this]() { process(rx_buf_[0], tx_buf_[1]); }, [this]() { process(rx_buf_[1], tx_buf_[0]); });
+	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_2); }, [this]() { process(rx_buf_2, tx_buf_1); });
 }
 
 // param smoothing: +3.9% of processing (23.4% -> 19.5%)
