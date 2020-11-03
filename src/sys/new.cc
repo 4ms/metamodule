@@ -47,15 +47,15 @@ extern "C" size_t _sbrk(int incr)
 	//	;
 	//	//force infinite loop
 	//}
-	extern char _fmc_start; // Defined by the linker
-	// extern char _end; // Defined by the linker
+	// extern char _fmc_start; // Defined by the linker
+	extern char _end; // Defined by the linker
 	static char *heap_end;
 	char *prev_heap_end;
 
 	if (heap_end == 0) {
-		heap_end = &_fmc_start;
+		//heap_end = &_fmc_start;
 		//heap_end = (char *)(0x20014000);
-		// heap_end = &_end;
+		heap_end = &_end;
 	}
 	prev_heap_end = heap_end;
 	// if (heap_end + incr > stack_ptr) {

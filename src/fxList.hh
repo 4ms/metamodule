@@ -17,11 +17,11 @@ public:
 private:
 	AudioProcessor *fxList[NumFX];
 
-	LowPassFilter fx1;
-	VCA fx2;
-	Karplus fx3;
-	WaveFolder fx4;
-	BitCrusher fx5;
+	// LowPassFilter fx1;
+	// VCA fx2;
+	// Karplus fx3;
+	// WaveFolder fx4;
+	// BitCrusher fx5;
 	 
 
 public:
