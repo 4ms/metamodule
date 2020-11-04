@@ -1,8 +1,15 @@
 #include "fxList.hh"
+#include "processors/bit_crush.h"
+#include "processors/flanger.h"
+#include "processors/karplus.h"
+#include "processors/lpf.h"
+#include "processors/lpg.h"
+#include "processors/reverb.h"
+#include "processors/vca.h"
+#include "processors/wavefold.h"
 
-FXList::FXList()
-	: fxList{new LowPassFilter, new VCA, new Karplus, new WaveFolder, new BitCrusher}
-	//: fxList{&fx1, &fx2, &fx3, &fx4, &fx5}
+FXList::FXList(/*char *large_ram_buffer*/)
+	: fxList{new LowPassFilter, new VCA, new Karplus, new Flanger, new BitCrusher}
 {}
 
 AudioProcessor *FXList::operator[](unsigned int fxnum)

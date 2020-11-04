@@ -3,6 +3,7 @@
 #include "debug.hh"
 #include "math.hh"
 #include "util/interp_array.hh"
+#include "sys/alloc_buffer.hh"
 
 template<int maxSamples>
 class DelayLine {
@@ -11,8 +12,9 @@ public:
 
 	DelayLine()
 	{
+		delayBuffer = new AllocInterpArray<float, maxSamples>;
 		for (int i = 0; i < maxSamples; i++) {
-			delayBuffer[i] = 0;
+			delayBuffer->operator[](i) = 0;
 		}
 	}
 
@@ -29,7 +31,8 @@ public:
 	float update(float input)
 	{
 		// ~13%
-		delayBuffer[writeIndex] = input;
+		delayBuffer->operator[](writeIndex) = input;
+		//delayBuffer[writeIndex] = input;
 		
 		// ~2%
 		readIndex = writeIndex - delaySamples;
@@ -37,7 +40,7 @@ public:
 			readIndex +=  maxSamples;
 
 		// ~2.7%
-		output = delayBuffer.interp_by_index(readIndex);
+		output = delayBuffer->interp_by_index(readIndex);
 
 		// ~2%
 		writeIndex++;
@@ -48,7 +51,7 @@ public:
 	}
 
 private:
-	InterpArray<float, maxSamples> delayBuffer;
+	AllocInterpArray<float, maxSamples> *delayBuffer;
 	unsigned int writeIndex = 0;
 	float readIndex = 0;
 	float delaySamples = 1.0f;

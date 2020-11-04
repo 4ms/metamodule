@@ -1,12 +1,5 @@
 #pragma once
 #include "processors/audio_processor.hh"
-#include "processors/bit_crush.h"
-#include "processors/karplus.h"
-#include "processors/lpf.h"
-#include "processors/lpg.h"
-#include "processors/reverb.h"
-#include "processors/vca.h"
-#include "processors/wavefold.h"
 
 class FXList {
 public:
@@ -16,13 +9,6 @@ public:
 
 private:
 	AudioProcessor *fxList[NumFX];
-
-	// LowPassFilter fx1;
-	// VCA fx2;
-	// Karplus fx3;
-	// WaveFolder fx4;
-	// BitCrusher fx5;
-	 
 
 public:
 	using const_fxlist_iterator = AudioProcessor *;
