@@ -8,7 +8,7 @@
 #include "processors/vca.h"
 #include "processors/wavefold.h"
 
-FXList::FXList(/*char *large_ram_buffer*/)
+FXList::FXList()
 	: fxList{new LowPassFilter, new VCA, new Karplus, new Flanger, new BitCrusher}
 {}
 

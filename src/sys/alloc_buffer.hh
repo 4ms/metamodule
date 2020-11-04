@@ -18,3 +18,7 @@ struct AllocInterpArray : AllocOnly<0xC0000000>, public InterpArray<T, Size> {
 };
 
 
+template<typename T, unsigned int ADDR>
+struct AllocAt : T, AllocOnly<ADDR> {
+};
+
