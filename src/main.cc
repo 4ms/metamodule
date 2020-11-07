@@ -17,19 +17,23 @@ struct DualOpenerSystem : SystemClocks, Debug, SDRAMPeriph, SharedBus {
 		: SDRAMPeriph{SDRAM_AS4C_conf}
 		, SharedBus{i2c_conf}
 	{}
+
+	static inline __attribute__((section(".dtcm"))) PCA9685Driver::FrameBuffer led_frame_buffer;
+	static inline __attribute__((section(".dtcm"))) Audio::AudioStreamBlock audio_dma_block[4];
+
 } _hardware;
 
 void main()
 {
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
-	static __attribute__((section(".dtcm")))
-	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_driver_dma_conf};
+	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_driver_dma_conf, _hardware.led_frame_buffer};
 	LedCtl leds{led_driver};
 
 	Controls controls;
 	Params params{controls};
-	static __attribute__((section(".dtcm"))) Audio audio{params, codec};
+
+	Audio audio{params, codec, _hardware.audio_dma_block};
 
 	Ui ui{params, leds};
 

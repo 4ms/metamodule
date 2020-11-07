@@ -5,7 +5,6 @@
 void Controls::read()
 {
 	// Debug::set_1(true);
-
 	freq_cv0.read();
 	res_cv0.read();
 	freq_cv1.read();
@@ -42,7 +41,6 @@ static void debug_control_read_timing()
 	InterruptManager::registerISR(ADC_DMA_conf.IRQn, []() {
 		if (LL_DMA_IsActiveFlag_TC0(DMA2)) {
 			if (LL_DMA_IsEnabledIT_TC(DMA2, LL_DMA_STREAM_0)) {
-				// set this to whatever pin your scope is connected to:
 				Debug::toggle_2();
 			}
 			LL_DMA_ClearFlag_TC0(DMA2);

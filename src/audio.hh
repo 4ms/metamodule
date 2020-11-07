@@ -10,19 +10,17 @@
 #include "util/audio_frame.hh"
 #include <array>
 
-
 class Audio {
-	using AudioSampleType = int32_t; //todo: put this in a config header?
-	static inline const int AudioSampleBits = 24; //todo: put this in a config header?
+	using AudioSampleType = int32_t;			  // todo: put this in a config header?
+	static inline const int AudioSampleBits = 24; // todo: put this in a config header?
 
-
+public:
 	using AudioFrame = GenericAudioFrame<AudioSampleType, AudioSampleBits>;
 	using AudioStreamBlock = std::array<AudioFrame, kAudioStreamBlockSize>;
 	enum AudioChannels { LEFT, RIGHT };
 
-public:
 	// Public methods:
-	Audio(Params &p, ICodec &codec);
+	Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4]);
 	void start();
 
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);
@@ -31,8 +29,10 @@ private:
 	AudioSampleType process_chan(AudioSampleType in, enum AudioChannels c);
 	void check_fx_change();
 
-	AudioStreamBlock tx_buf_[2];
-	AudioStreamBlock rx_buf_[2];
+	AudioStreamBlock &tx_buf_1;
+	AudioStreamBlock &tx_buf_2;
+	AudioStreamBlock &rx_buf_1;
+	AudioStreamBlock &rx_buf_2;
 	Params &params;
 
 	FXList FX_left;
