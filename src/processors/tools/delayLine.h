@@ -13,8 +13,8 @@ public:
 	{
 		delayBuffer = new BigAlloc<InterpArray<float, maxSamples>>;
 		for (int i = 0; i < maxSamples; i++) {
-			// delayBuffer->operator[](i) = 0;
-			*delayBuffer[i] = 0;
+			delayBuffer->operator[](i) = 0;
+			//*delayBuffer[i] = 0;
 		}
 	}
 
@@ -30,8 +30,8 @@ public:
 	float update(float input)
 	{
 		// ~13%
-		// delayBuffer->operator[](writeIndex) = input;
-		*delayBuffer[writeIndex] = input;
+		delayBuffer->operator[](writeIndex) = input;
+		//*delayBuffer[writeIndex] = input;
 
 		// ~2%
 		readIndex = writeIndex - delaySamples;
