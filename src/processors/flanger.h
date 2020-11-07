@@ -1,5 +1,4 @@
 #pragma once
-#include "debug.hh"
 #include "audio_processor.hh"
 #include "math.hh"
 #include "tools/cubicDist.h"
@@ -14,8 +13,6 @@ public:
 
 	virtual float update(float input)
 	{
-		Debug::set_1(true);
-		// 0.75us
 		phaccu += lfoSpeed / sampleRate;
 		if (phaccu > 1.0f)
 			phaccu -= 1.0f;
@@ -25,19 +22,14 @@ public:
 		}
 
 		float in = inLimit.update(input + delay[stages - 1].output * feedback);
-		// 6.7us
-		Debug::set_2(true);
 		delay[0].update(in);
 		for (int i = 1; i < stages; i++) {
 			delay[i].update(delay[i - 1].output);
 		}
-		Debug::set_2(false);
 
-		// <0.5us
 		output = outLimit.update(delay[stages - 1].output);
 		float mix = interpolate(input, output, 0.5f);
 
-		Debug::set_1(false);
 		return mix;
 	}
 

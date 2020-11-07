@@ -8,7 +8,19 @@ struct InterpArray {
 	{
 		return data[index];
 	}
+	T &set(const unsigned int index)
+	{
+		return data[index];
+	}
+	void set(const unsigned int index, T val)
+	{
+		data[index] = val;
+	}
 	const T operator[](const unsigned int index) const
+	{
+		return data[index];
+	}
+	const T get(const unsigned int index) const
 	{
 		return data[index];
 	}
