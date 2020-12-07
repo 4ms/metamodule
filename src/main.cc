@@ -18,6 +18,8 @@ struct DualOpenerSystem : SystemClocks, Debug, SDRAMPeriph, SharedBus {
 		, SharedBus{i2c_conf}
 	{}
 
+	//Todo: this is not ideal to have DMA buffers in D1 domain. See:
+	//https://community.st.com/s/article/FAQ-DMA-is-not-working-on-STM32H7-devices
 	static inline __attribute__((section(".dtcm"))) PCA9685Driver::FrameBuffer led_frame_buffer;
 	static inline __attribute__((section(".dtcm"))) Audio::AudioStreamBlock audio_dma_block[4];
 
