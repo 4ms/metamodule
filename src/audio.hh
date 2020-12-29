@@ -1,6 +1,6 @@
 #pragma once
 #include "drivers/codec.hh"
-#include "fxList.hh"
+// #include "fxList.hh"
 #include "interp_param.hh"
 #include "math.hh"
 #include "oscs.hh"
@@ -26,7 +26,7 @@ public:
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);
 
 private:
-	AudioSampleType process_chan(AudioSampleType in, enum AudioChannels c);
+	AudioSampleType process_chan(AudioSampleType in, int output_id);
 	void check_fx_change();
 
 	AudioStreamBlock &tx_buf_1;
@@ -35,8 +35,9 @@ private:
 	AudioStreamBlock &rx_buf_2;
 	Params &params;
 
-	FXList FX_left;
-	FXList FX_right;
+	PatchPlayer player;
+	// FXList FX_left;
+	// FXList FX_right;
 
 	KneeCompressor<int32_t> compressor{AudioSampleBits, 0.75};
 

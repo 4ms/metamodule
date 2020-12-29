@@ -15,7 +15,7 @@
 // 	}
 // };
 
-static Patch example_patch = {
+static const Patch example_patch = {
 	.modules_used = {PANEL, LFO, MIXER4, LFO},
 	// .num_modules = 3,
 
