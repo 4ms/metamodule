@@ -43,6 +43,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-I$(LIBDIR)/easiglib \
 			-Isrc \
 			-Isrc/processors \
+			-Isrc/CoreModules \
 			-Isrc/util \
 			-Isrc/conf \
 
