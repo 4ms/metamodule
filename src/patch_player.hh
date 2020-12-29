@@ -10,7 +10,6 @@ private:
 	std::array<float, MAX_NODES_IN_PATCH> net_val;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 	const int _Panel = 0;
-	int _num_modules;
 
 public:
 	void set_panel_input(int input_id, float val)
@@ -28,17 +27,14 @@ public:
 
 	void load_patch(const Patch &p)
 	{
-		int i = 0;
-		for (auto type_id : p.modules_used) {
-			if (type_id == LAST_MODULE || type_id >= NUM_MODULE_TYPES)
-				break;
-			modules[i++] = (ModuleFactory::create(type_id));
+		// Todo: safety checks: num_modules = 0 or num_nets = 0, return with error
+
+		for (int i = 0; i < p.num_modules; i++) {
+			modules[i] = (ModuleFactory::create(p.modules_used[i]));
 			// Todo: other safety checks, ie only one PANEL
+			modules[i]->mark_all_inputs_unpatched();
+			modules[i]->mark_all_outputs_unpatched();
 		}
-		if (i)
-			_num_modules = i - 1;
-		else
-			return; // empty patch
 
 		// nodes:
 		// for (int net_i = 0; net_i < p.num_nets; net_i++) {
@@ -55,26 +51,23 @@ public:
 		// }
 
 		// get/set functions:
-		// Mark jacks as patched/unpatched
-		for (auto &m : modules) {
-			m->mark_all_inputs_unpatched();
-			m->mark_all_outputs_unpatched();
-		}
-		for (auto &net : p.nets) {
-			auto endpt = net.begin();
-			if (endpt->module_id == LAST_)
-				break;
-			modules[endpt->module_id]->mark_output_patched(endpt->jack_id);
+		for (int net_i = 0; net_i < p.num_nets; net_i++) {
+			auto &net = p.nets[net_i];
 
-			while (++endpt < net.end() && endpt->module_id != LAST_) {
-				modules[endpt->module_id]->mark_input_patched(endpt->jack_id);
+			for (int node_i = 0; node_i < net.num_nodes; node_i++) {
+				auto &node = net.nodes[node_i];
+				if (node.module_id > p.num_modules)
+					continue;
+				if (node_i == 0)
+					modules[node.module_id]->mark_output_patched(node.jack_id);
+				else
+					modules[node.module_id]->mark_input_patched(node.jack_id);
 			}
 		}
 
 		// Set static params
-		for (auto &k : p.knobs) {
-			if (k.module_id == LAST_)
-				break;
+		for (int i = 0; i < p.num_knobs; i++) {
+			auto &k = p.knobs[i];
 			modules[k.module_id]->set_param(k.param_id, k.value);
 		}
 	}
@@ -82,21 +75,23 @@ public:
 	void update_patch(const Patch &p)
 	{
 		// Copy outs to ins
-		for (auto &net : p.nets) {
-			auto endpt = net.begin();
-			if (endpt->module_id == LAST_)
-				break;
-			float out_val = modules[endpt->module_id]->get_output(endpt->jack_id);
+		for (int net_i = 0; net_i < p.num_nets; net_i++) {
+			auto &net = p.nets[net_i];
+			auto &output = net.nodes[0];
+			if (output.module_id >= p.num_modules)
+				continue;
+			float out_val = modules[output.module_id]->get_output(output.jack_id);
 
-			while (++endpt < net.end() && endpt->module_id != LAST_) {
-				auto in_modid = endpt->module_id;
-				auto in_jackid = endpt->jack_id;
-				modules[in_modid]->set_input(in_jackid, out_val);
+			for (int node_i = 1; node_i < net.num_nodes; node_i++) {
+				auto &node = net.nodes[node_i];
+				if (node.module_id >= p.num_modules)
+					continue;
+				modules[node.module_id]->set_input(node.jack_id, out_val);
 			}
 		}
 
 		// update each module
-		for (int i = 0; i < _num_modules; i++) {
+		for (int i = 0; i < p.num_modules; i++) {
 			modules[i]->update();
 		}
 	}

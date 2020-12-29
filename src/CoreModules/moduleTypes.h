@@ -13,7 +13,6 @@ enum ModuleType {
 	LOGIC,
 
 	NUM_MODULE_TYPES,
-	LAST_MODULE,
 };
 
 class ModuleFactory {
