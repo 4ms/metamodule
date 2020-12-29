@@ -40,11 +40,6 @@ public:
 		else
 			return; // empty patch
 
-		// vectors:
-		// for (auto type_id : p.modules_used) {
-		// 	modules.emplace_back(ModuleFactory::create(type_id));
-		// }
-
 		// nodes:
 		// for (int net_i = 0; net_i < p.num_nets; net_i++) {
 		// int net_i = 0;
@@ -101,8 +96,8 @@ public:
 		}
 
 		// update each module
-		for (auto &m : modules) {
-			m->update();
+		for (int i = 0; i < _num_modules; i++) {
+			modules[i]->update();
 		}
 	}
 };

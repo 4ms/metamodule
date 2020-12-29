@@ -26,11 +26,6 @@ using NetList = std::array<Node, MAX_NODES_IN_PATCH>;
 using ModuleList = std::array<ModuleType, MAX_MODULES_IN_PATCH>;
 using StaticParamList = std::array<StaticParam, MAX_PARAMS_IN_PATCH>;
 
-// using Node = std::vector<EndPoint>;
-// using NetList = std::vector<Node>;
-// using ModuleList = std::vector<ModuleType>;
-// using StaticParamList = std::vector<StaticParam>;
-
 struct Patch {
 	ModuleList modules_used;
 	NetList nets;
