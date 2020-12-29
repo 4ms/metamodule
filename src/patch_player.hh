@@ -5,15 +5,45 @@
 #include "patch.hh"
 #include <cstdint>
 
-struct PatchPlayer {
-	std::vector<std::unique_ptr<CoreProcessor>> modules;
-	std::vector<float> net_val;
+class PatchPlayer {
+private:
+	std::array<float, MAX_NODES_IN_PATCH> net_val;
+	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
+	const int _Panel = 0;
+	int _num_modules;
 
-	void load_patch(Patch &p)
+public:
+	void set_panel_input(int input_id, float val)
 	{
+		modules[_Panel]->set_input(input_id, val);
+	}
+	void set_panel_param(int param_id, float val)
+	{
+		modules[_Panel]->set_param(param_id, val);
+	}
+	float get_panel_output(int output_id)
+	{
+		return modules[_Panel]->get_output(output_id);
+	}
+
+	void load_patch(const Patch &p)
+	{
+		int i = 0;
 		for (auto type_id : p.modules_used) {
-			modules.emplace_back(ModuleFactory::create(type_id));
+			if (type_id == LAST_MODULE || type_id >= NUM_MODULE_TYPES)
+				break;
+			modules[i++] = (ModuleFactory::create(type_id));
+			// Todo: other safety checks, ie only one PANEL
 		}
+		if (i)
+			_num_modules = i - 1;
+		else
+			return; // empty patch
+
+		// vectors:
+		// for (auto type_id : p.modules_used) {
+		// 	modules.emplace_back(ModuleFactory::create(type_id));
+		// }
 
 		// nodes:
 		// for (int net_i = 0; net_i < p.num_nets; net_i++) {
@@ -37,26 +67,33 @@ struct PatchPlayer {
 		}
 		for (auto &net : p.nets) {
 			auto endpt = net.begin();
+			if (endpt->module_id == LAST_)
+				break;
 			modules[endpt->module_id]->mark_output_patched(endpt->jack_id);
-			while (++endpt < net.end()) {
+
+			while (++endpt < net.end() && endpt->module_id != LAST_) {
 				modules[endpt->module_id]->mark_input_patched(endpt->jack_id);
 			}
 		}
 
 		// Set static params
 		for (auto &k : p.knobs) {
+			if (k.module_id == LAST_)
+				break;
 			modules[k.module_id]->set_param(k.param_id, k.value);
 		}
 	}
 
-	void update_patch(Patch &p)
+	void update_patch(const Patch &p)
 	{
 		// Copy outs to ins
 		for (auto &net : p.nets) {
 			auto endpt = net.begin();
+			if (endpt->module_id == LAST_)
+				break;
 			float out_val = modules[endpt->module_id]->get_output(endpt->jack_id);
 
-			while (++endpt < net.end()) {
+			while (++endpt < net.end() && endpt->module_id != LAST_) {
 				auto in_modid = endpt->module_id;
 				auto in_jackid = endpt->jack_id;
 				modules[in_modid]->set_input(in_jackid, out_val);

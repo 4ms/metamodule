@@ -22,9 +22,9 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_2); }, [this]() { process(rx_buf_2, tx_buf_1); });
 }
 
-Audio::AudioSampleType Audio::process_chan(AudioSampleType in, int output_id)
+Audio::AudioSampleType Audio::get_output(int output_id)
 {
-	auto raw_out = player.modules[0].get_output(output_id);
+	auto raw_out = player.get_panel_output(output_id);
 	auto scaled_out = AudioFrame::scaleOutput(raw_out);
 	return compressor.compress(scaled_out);
 }
@@ -49,22 +49,22 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
 		auto scaled_in = AudioFrame::scaleInput(in_->l);
-		player.modules[0].set_input(0, scaled_in);
+		player.set_panel_input(0, scaled_in);
 
 		scaled_in = AudioFrame::scaleInput(in_->r);
-		player.modules[0].set_input(1, scaled_in);
+		player.set_panel_input(1, scaled_in);
 
 		if (update_freq0)
-			current_fx[LEFT]->set_param(0, freq0.next());
+			player.set_panel_param(0, freq0.next());
 		if (update_res0)
-			current_fx[LEFT]->set_param(1, res0.next());
+			player.set_panel_param(1, res0.next());
 		if (update_freq1)
-			current_fx[RIGHT]->set_param(0, freq1.next());
+			player.set_panel_param(2, freq1.next());
 		if (update_res1)
-			current_fx[RIGHT]->set_param(1, res1.next());
+			player.set_panel_param(3, res1.next());
 
-		out_.l = process_chan(in_->l, 0);
-		out_.r = process_chan(in_->r, 1);
+		out_.l = get_output(0);
+		out_.r = get_output(1);
 
 		in_++;
 	}
@@ -80,4 +80,5 @@ void Audio::check_patch_change()
 {
 	// Check if it changed
 	// call patch.load_patch(new_patch);
+	// set cur_patch = new_patch; (copy? pointer?)
 }

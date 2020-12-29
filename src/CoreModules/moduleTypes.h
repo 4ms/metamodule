@@ -4,7 +4,17 @@
 #include "mixer4Core.h"
 #include <memory>
 
-enum ModuleType { PANEL, LFO, AD_ENVELOPE, CROSSFADE, MIXER4, LOGIC, NUM_MODULE_TYPES };
+enum ModuleType {
+	PANEL,
+	LFO,
+	AD_ENVELOPE,
+	CROSSFADE,
+	MIXER4,
+	LOGIC,
+
+	NUM_MODULE_TYPES,
+	LAST_MODULE,
+};
 
 class ModuleFactory {
 public:
