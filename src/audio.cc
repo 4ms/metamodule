@@ -63,6 +63,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		if (update_res1)
 			player.set_panel_param(3, res1.next());
 
+		player.update_patch(example_patch);
 		out_.l = get_output(0);
 		out_.r = get_output(1);
 
