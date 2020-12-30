@@ -120,6 +120,15 @@ static float fast_sine(float x)
 	return y;
 }
 
+std::string format_float(float x)
+{
+	std::string s = std::to_string(x);
+	if (s.find('.') == std::string::npos)
+		return s + ".f";
+	else
+		return s + "f";
+}
+
 void buildFoldTables()
 {
 	myfile.open("src/processors/wavefold_tables.h");
@@ -156,7 +165,7 @@ void buildFoldTables()
 			myfile << endl;
 		myfile << "{";
 		for (int x = 0; x < 513; x++) {
-			myfile << cheby[i][x] << ",";
+			myfile << format_float(cheby[i][x]) << ",";
 		}
 		if (i < 15)
 			myfile << "}," << endl;
@@ -194,9 +203,8 @@ void buildFoldTables()
 	myfile << "{ ";
 
 	for (int i = 0; i < 1025; i++) {
-		myfile << fold[i] << ",";
+		myfile << format_float(fold[i]) << ",";
 	}
-
 	myfile << "};" << endl;
 
 	// fold max table generation
@@ -217,29 +225,21 @@ void buildFoldTables()
 	myfile << "const InterpArray<float, 513> fold_max = " << endl << "{";
 
 	for (int i = 0; i < 513; i++) {
-		if (i < 512)
-			myfile << fold_max[i] << ",";
-		else
-			myfile << fold_max[i] << "};" << endl;
+		myfile << format_float(fold_max[i]) << ",";
 	}
+	myfile << "};" << endl;
 
 	myfile << "const InterpArray<float, 9> triangles[8] = " << endl;
-	myfile << "{";
+	myfile << "{" << endl;
 
 	for (int i = 0; i < 8; i++) {
-		if (i == 0)
-			myfile << endl;
 		myfile << "{";
 		for (int x = 0; x < 9; x++) {
-			myfile << triangles[i][x] << ",";
+			myfile << format_float(triangles[i][x]) << ",";
 		}
-		if (i < 7)
-			myfile << "}," << endl;
-		else {
-			myfile << "}" << endl;
-			myfile << "};" << endl;
-		}
+		myfile << "}," << endl;
 	}
+	myfile << "};" << endl;
 
 	myfile.close();
 }
@@ -261,7 +261,7 @@ void buildTrigTables()
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / (float)trigTableLength;
-		myfile << sinf(index * 2.0f * M_PI) << ",";
+		myfile << format_float(sinf(index * 2.0f * M_PI)) << ",";
 	}
 	myfile << "};" << endl;
 
@@ -269,18 +269,17 @@ void buildTrigTables()
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / (float)trigTableLength * M_PI;
-		myfile << tan(index) << ",";
+		myfile << format_float(tan(index)) << ",";
 	}
 	myfile << "};" << endl;
 
-
 	const float voltageRange = 5.f;
-	const float powRange = (float)(trigTableLength- 1) / voltageRange;
+	const float powRange = (float)(trigTableLength - 1) / voltageRange;
 	myfile << "const InterpArray<float," << trigTableLength << "> expTable = " << endl;
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / powRange;
-		myfile << powf(2.0f, index) << ",";
+		myfile << format_float(powf(2.0f, index)) << ",";
 	}
 	myfile << "};" << endl;
 
