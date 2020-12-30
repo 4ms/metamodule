@@ -18,8 +18,8 @@ struct DualOpenerSystem : SystemClocks, Debug, SDRAMPeriph, SharedBus {
 		, SharedBus{i2c_conf}
 	{}
 
-	//Todo: this is not ideal to have DMA buffers in D1 domain. See:
-	//https://community.st.com/s/article/FAQ-DMA-is-not-working-on-STM32H7-devices
+	// Todo: this is not ideal to have DMA buffers in D1 domain. See:
+	// https://community.st.com/s/article/FAQ-DMA-is-not-working-on-STM32H7-devices
 	static inline __attribute__((section(".dtcm"))) PCA9685Driver::FrameBuffer led_frame_buffer;
 	static inline __attribute__((section(".dtcm"))) Audio::AudioStreamBlock audio_dma_block[4];
 
@@ -27,10 +27,13 @@ struct DualOpenerSystem : SystemClocks, Debug, SDRAMPeriph, SharedBus {
 
 void main()
 {
+
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_driver_dma_conf, _hardware.led_frame_buffer};
 	LedCtl leds{led_driver};
+
+	__HAL_DBGMCU_FREEZE_TIM6();
 
 	Controls controls;
 	Params params{controls};
