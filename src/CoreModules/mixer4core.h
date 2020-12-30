@@ -7,6 +7,8 @@ using namespace MathTools;
 
 class Mixer4Core : public CoreProcessor {
 public:
+	Mixer4Core() {}
+
 	virtual void update() override
 	{
 		mixOut = 0;
@@ -14,8 +16,6 @@ public:
 			mixOut += inputs[i] * levels[i];
 		}
 	}
-
-	Mixer4Core() {}
 
 	virtual void set_param(const int param_id, const float val) override
 	{
@@ -55,8 +55,8 @@ public:
 	virtual void mark_output_patched(const int output_id) {}
 
 private:
-	float inputs[4];
-	float levels[4];
-	float mixOut;
+	float inputs[4] = {0, 0, 0, 0};
+	float levels[4] = {0, 0, 0, 0};
+	float mixOut = 0;
 };
 
