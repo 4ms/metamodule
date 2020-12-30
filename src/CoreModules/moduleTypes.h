@@ -2,6 +2,7 @@
 #include "coreProcessor.h"
 #include "lfoCore.h"
 #include "mixer4Core.h"
+#include "panel.hh"
 #include <memory>
 
 enum ModuleType {
@@ -22,6 +23,8 @@ public:
 	static std::unique_ptr<CoreProcessor> create(const ModuleType id)
 	{
 		switch (id) {
+			case (ModuleType::PANEL):
+				return std::make_unique<Panel>();
 			case (ModuleType::LFO):
 				return std::make_unique<LFOCore>();
 			case (ModuleType::MIXER4):

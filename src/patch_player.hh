@@ -9,55 +9,55 @@ class PatchPlayer {
 private:
 	std::array<float, MAX_NODES_IN_PATCH> net_val;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
-	const int _Panel = 0;
+
+	// Todo: we will hard fault if modules[0] is not of type Panel*.
+	// Maybe the Panel is not the module list, and when we encounter it
+	// in the netlist, we manually set/get from panel
 
 public:
 	void set_panel_input(int input_id, float val)
 	{
-		modules[_Panel]->set_input(input_id, val);
+		//"inputs" as seen by the outside world == "outputs" as seen by other modules
+		static_cast<Panel *>(modules[0].get())->outputs[input_id] = val;
 	}
+
 	void set_panel_param(int param_id, float val)
 	{
-		modules[_Panel]->set_param(param_id, val);
+		static_cast<Panel *>(modules[0].get())->set_param(param_id, val);
 	}
+
 	float get_panel_output(int output_id)
 	{
-		return modules[_Panel]->get_output(output_id);
+		//"outputs" as seen by the outside world == "inputs" as seen by other modules
+		return static_cast<Panel *>(modules[0].get())->inputs[output_id];
 	}
 
 	void load_patch(const Patch &p)
 	{
 		// Todo: safety checks: num_modules = 0 or num_nets = 0, return with error
+		// check if any node has a module_id >= p.num_modules, or otherwise invalid module_id
+		// check all modules_used are valid (could just check for nullptrs after creating modules)
+
+		// Requirement of the patch format: first module must be PANEL (Todo: extend this to different PANELs)
+		if (p.modules_used[0] != PANEL)
+			return;
 
 		for (int i = 0; i < p.num_modules; i++) {
-			modules[i] = (ModuleFactory::create(p.modules_used[i]));
-			// Todo: other safety checks, ie only one PANEL
+			modules[i] = ModuleFactory::create(p.modules_used[i]);
+
+			if (modules[i] == nullptr)
+				return; // Todo: return an error so that we don't try to run the patch
+
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
 		}
 
-		// nodes:
-		// for (int net_i = 0; net_i < p.num_nets; net_i++) {
-		// int net_i = 0;
-		// for (auto &net : p.nets) {
-		// 	net_val[net_i] = 0.f;
-		// 	for (auto &endpt : net) {
-		// 		auto mod_id = endpt.module_id;
-		// 		auto jack_id = endpt.jack_id;
-		// 		if (mod_id < modules.size() && jack_id < modules[mod_id].jacks.size())
-		// 			modules[mod_id]->jack[jack_id].node_value = &(net_val[net_i]);
-		// 	}
-		// 	net_i++;
-		// }
-
-		// get/set functions:
+		// Mark patched jacks:
 		for (int net_i = 0; net_i < p.num_nets; net_i++) {
 			auto &net = p.nets[net_i];
 
 			for (int node_i = 0; node_i < net.num_nodes; node_i++) {
 				auto &node = net.nodes[node_i];
-				if (node.module_id > p.num_modules)
-					continue;
 				if (node_i == 0)
 					modules[node.module_id]->mark_output_patched(node.jack_id);
 				else
@@ -74,26 +74,37 @@ public:
 
 	void update_patch(const Patch &p)
 	{
-		// Copy outs to ins
-		for (int net_i = 0; net_i < p.num_nets; net_i++) {
-			auto &net = p.nets[net_i];
-			auto &output = net.nodes[0];
-			if (output.module_id >= p.num_modules)
-				continue;
-			float out_val = modules[output.module_id]->get_output(output.jack_id);
-
-			for (int node_i = 1; node_i < net.num_nodes; node_i++) {
-				auto &node = net.nodes[node_i];
-				if (node.module_id >= p.num_modules)
-					continue;
-				modules[node.module_id]->set_input(node.jack_id, out_val);
-			}
-		}
+		// todo: copy panel->params to whatever module is assigned to them
 
 		// update each module
 		for (int i = 0; i < p.num_modules; i++) {
 			modules[i]->update();
 		}
+
+		// Copy outs to ins
+		for (int net_i = 0; net_i < p.num_nets; net_i++) {
+			auto &net = p.nets[net_i];
+			auto &output = net.nodes[0];
+			float out_val = modules[output.module_id]->get_output(output.jack_id);
+
+			for (int node_i = 1; node_i < net.num_nodes; node_i++) {
+				auto &node = net.nodes[node_i];
+				modules[node.module_id]->set_input(node.jack_id, out_val);
+			}
+		}
 	}
 };
 
+// nodes:
+// for (int net_i = 0; net_i < p.num_nets; net_i++) {
+// int net_i = 0;
+// for (auto &net : p.nets) {
+// 	net_val[net_i] = 0.f;
+// 	for (auto &endpt : net) {
+// 		auto mod_id = endpt.module_id;
+// 		auto jack_id = endpt.jack_id;
+// 		if (mod_id < modules.size() && jack_id < modules[mod_id].jacks.size())
+// 			modules[mod_id]->jack[jack_id].node_value = &(net_val[net_i]);
+// 	}
+// 	net_i++;
+// }

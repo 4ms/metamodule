@@ -2,6 +2,7 @@
 #include "coreProcessor.h"
 
 class Panel : public CoreProcessor {
+public:
 	float inputs[4];
 	float outputs[4];
 	float params[8];
@@ -25,30 +26,28 @@ public:
 
 	virtual void set_input(const int jack_id, const float val) override
 	{
-		// Unlike normal modules, this function sets the value of the output jacks
-		// because Panel outputs[] are the hardware outputs jacks, which are inputs to
-		// the rest of the patch.
 		if (jack_id >= 4)
 			return;
-		outputs[jack_id] = val;
+		inputs[jack_id] = val;
 	}
 
 	virtual float get_output(const int jack_id) const override
 	{
-		// Unlike normal modules, this method returns the value of the input jacks
-		// because Panel inputs[] are the hardware input jacks, which are outputs to
-		// the rest of the patch.
 		if (jack_id >= 4)
 			return 0.f;
 
-		return inputs[jack_id];
+		return outputs[jack_id];
 	}
 
-	virtual void mark_all_inputs_unpatched() {}
-	virtual void mark_input_unpatched(const int input_id) {}
-	virtual void mark_input_patched(const int input_id) {}
+	// Unlike normal modules, this method returns the value of the input jacks
+	// because Panel inputs[] are the hardware input jacks, which are outputs to
+	// the rest of the patch.
 
-	virtual void mark_all_outputs_unpatched() {}
-	virtual void mark_output_unpatched(const int output_id) {}
-	virtual void mark_output_patched(const int output_id) {}
+	virtual void mark_all_inputs_unpatched() override {}
+	virtual void mark_input_unpatched(const int input_id) override {}
+	virtual void mark_input_patched(const int input_id) override {}
+
+	virtual void mark_all_outputs_unpatched() override {}
+	virtual void mark_output_unpatched(const int output_id) override {}
+	virtual void mark_output_patched(const int output_id) override {}
 };
