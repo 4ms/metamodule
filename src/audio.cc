@@ -31,7 +31,7 @@ Audio::AudioSampleType Audio::get_output(int output_id)
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	Debug::set_0(true);
+	Debug::set_2(true);
 
 	params.update();
 
@@ -69,7 +69,8 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 		in_++;
 	}
-	Debug::set_0(false);
+
+	Debug::set_2(false);
 }
 
 void Audio::start()

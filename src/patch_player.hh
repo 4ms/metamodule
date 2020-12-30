@@ -26,6 +26,11 @@ public:
 		static_cast<Panel *>(modules[0].get())->set_param(param_id, val);
 	}
 
+	float get_panel_param(int param_id)
+	{
+		return static_cast<Panel *>(modules[0].get())->params[param_id];
+	}
+
 	float get_panel_output(int output_id)
 	{
 		//"outputs" as seen by the outside world == "inputs" as seen by other modules
@@ -35,7 +40,7 @@ public:
 	void load_patch(const Patch &p)
 	{
 		// Todo: safety checks: num_modules = 0 or num_nets = 0, return with error
-		// check if any node has a module_id >= p.num_modules, or otherwise invalid module_id
+		// check if any node, static_knob or mapped_knob has an invalid module_id
 		// check all modules_used are valid (could just check for nullptrs after creating modules)
 
 		// Requirement of the patch format: first module must be PANEL (Todo: extend this to different PANELs)
@@ -66,15 +71,20 @@ public:
 		}
 
 		// Set static params
-		for (int i = 0; i < p.num_knobs; i++) {
-			auto &k = p.knobs[i];
+		for (int i = 0; i < p.num_static_knobs; i++) {
+			auto &k = p.static_knobs[i];
 			modules[k.module_id]->set_param(k.param_id, k.value);
 		}
 	}
 
 	void update_patch(const Patch &p)
 	{
-		// todo: copy panel->params to whatever module is assigned to them
+		// Set mapped knobs
+		for (int i = 0; i < p.num_mapped_knobs; i++) {
+			auto &k = p.mapped_knobs[i];
+			auto val = get_panel_param(k.panel_knob_id);
+			modules[k.module_id]->set_param(k.param_id, val);
+		}
 
 		// update each module
 		for (int i = 0; i < p.num_modules; i++) {

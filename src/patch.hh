@@ -24,9 +24,16 @@ struct Net {
 	std::array<EndPoint, MAX_CONNECTIONS_PER_NODE> nodes;
 };
 
+struct MappedParam {
+	uint16_t module_id;
+	uint16_t param_id;
+	uint16_t panel_knob_id;
+};
+
 using NetList = std::array<Net, MAX_NODES_IN_PATCH>;
 using ModuleList = std::array<ModuleType, MAX_MODULES_IN_PATCH>;
 using StaticParamList = std::array<StaticParam, MAX_PARAMS_IN_PATCH>;
+using MappedParamList = std::array<MappedParam, Panel::NumKnobs>;
 
 struct Patch {
 	ModuleList modules_used;
@@ -35,7 +42,10 @@ struct Patch {
 	NetList nets;
 	int num_nets;
 
-	StaticParamList knobs;
-	int num_knobs;
+	StaticParamList static_knobs;
+	int num_static_knobs;
+
+	MappedParamList mapped_knobs;
+	int num_mapped_knobs;
 };
 
