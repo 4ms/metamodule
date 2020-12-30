@@ -2,6 +2,7 @@
 
 #include "coreProcessor.h"
 #include "math.hh"
+#include "math_tables.hh"
 
 using namespace MathTools;
 
@@ -18,8 +19,7 @@ public:
 		if (resetInput > lastReset) {
 			phaccu = 0;
 		}
-		// sinOut = sinf(2.0f * M_PI * (phaccu + phaseOffset)) * level;
-		sinOut = faster_sine(phaccu + phaseOffset) * level;
+		sinOut = sinTable.interp_wrap(phaccu + phaseOffset) * level;
 	}
 
 	virtual void set_param(int const param_id, const float val) override
