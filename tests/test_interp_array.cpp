@@ -77,9 +77,67 @@ TEST(interp_array_tests, floats_by_index)
 	FLOATS_NEARLY_EQUAL(115.6f, x.interp_by_index(0.156f));
 }
 
-TEST(interp_array_tests, wrapping_by_phase) {}
+TEST(interp_array_tests, interp_wrap_period_is_1)
+{
+	InterpArray<float, 3> x;
+	x[0] = 100.f;
+	x[1] = 200.f;
+	x[2] = 2000.f;
+	FLOATS_NEARLY_EQUAL(x.interp_wrap(0.0f), x.interp_wrap(1.0f));
+}
 
-TEST(interp_array_tests, wrapping_by_index) {}
+TEST(interp_array_tests, wrapping_by_phase)
+{
+	InterpArray<float, 3> x;
+	x[0] = 100.f;  // 0.00, 1.00, 2.00...
+	x[1] = 200.f;  // 0.33, 1.33, 2.33...
+	x[2] = 2000.f; // 0.66, 1.66, 2.66...
+
+	for (int i = 0; i < 10; i++) {
+		float y = (float)i / 3.f;
+		FLOATS_NEARLY_EQUAL(x[i % 3], x.interp_wrap(y));
+	}
+}
+
+TEST(interp_array_tests, wrapping_by_phase_loop_transition_is_smooth)
+{
+	InterpArray<float, 3> x;
+	x[0] = 100.f;  // 0.00, 1.00, 2.00...
+	x[1] = 200.f;  // 0.33, 1.33, 2.33...
+	x[2] = 2000.f; // 0.66, 1.66, 2.66...
+
+	// Start point
+	FLOATS_NEARLY_EQUAL(x[2], x.interp_wrap(2.0f / 3.0f));
+
+	// End point
+	FLOATS_NEARLY_EQUAL(x[0], x.interp_wrap(3.0f / 3.0f));
+
+	// Half-way point
+	float loop_transition_middle = (x[2] + x[0]) / 2.0f;
+	FLOATS_NEARLY_EQUAL(loop_transition_middle, x.interp_wrap(2.5f / 3.0f));
+}
+
+TEST(interp_array_tests, index_wrap_period_is_Size)
+{
+	const int Size = 3;
+	InterpArray<float, Size> x;
+	x[0] = 100.f;
+	x[1] = 200.f;
+	x[2] = 2000.f;
+	FLOATS_NEARLY_EQUAL(x.interp_by_index_wrap(0), x.interp_by_index_wrap((float)Size));
+}
+
+TEST(interp_array_tests, wrapping_by_index)
+{
+	InterpArray<float, 3> x;
+	x[0] = 100.f;  // 0.00, 1.00, 2.00...
+	x[1] = 200.f;  // 0.33, 1.33, 2.33...
+	x[2] = 2000.f; // 0.66, 1.66, 2.66...
+
+	for (int i = 0; i < 10; i++) {
+		FLOATS_NEARLY_EQUAL(x[i % 3], x.interp_by_index_wrap((float)i));
+	}
+}
 
 TEST(interp_array_tests, basic_usage_of_closest)
 {
@@ -98,15 +156,22 @@ TEST(interp_array_tests, basic_usage_of_closest)
 TEST(interp_array_tests, wrapping_with_closest)
 {
 	InterpArray<float, 3> x;
-	x[0] = 100.f;
-	x[1] = 200.f;
-	x[2] = 150.f;
-	FLOATS_NEARLY_EQUAL(150.f, x.closest_wrap(1.f));
-	FLOATS_NEARLY_EQUAL(150.f, x.closest_wrap(1.499f));
+	x[0] = 100.f; // 0.00, 1.00, 2.00, ...
+	x[1] = 200.f; // 0.33, 1.33, 2.33, ...
+	x[2] = 150.f; // 0.66, 1.66, 2.66, ...
 
-	FLOATS_NEARLY_EQUAL(100.f, x.closest_wrap(1.5f));
-	FLOATS_NEARLY_EQUAL(100.f, x.closest_wrap(1.999f));
+	FLOATS_NEARLY_EQUAL(x[0], x.closest_wrap(0.f / 3.f));
+	FLOATS_NEARLY_EQUAL(x[0], x.closest_wrap(1.f + 0.f / 3.f));
 
-	FLOATS_NEARLY_EQUAL(200.f, x.closest_wrap(2.0f));
-	FLOATS_NEARLY_EQUAL(200.f, x.closest_wrap(2.4999f));
+	FLOATS_NEARLY_EQUAL(x[1], x.closest_wrap(1.f / 3.f));
+	FLOATS_NEARLY_EQUAL(x[1], x.closest_wrap(1.f + 1.f / 3.f));
+
+	FLOATS_NEARLY_EQUAL(x[2], x.closest_wrap(2.f / 3.f));
+	FLOATS_NEARLY_EQUAL(x[2], x.closest_wrap(1.f + 2.f / 3.f));
+
+	FLOATS_NEARLY_EQUAL(x[0], x.closest_wrap(0.499f / 3.f));
+	FLOATS_NEARLY_EQUAL(x[0], x.closest_wrap(0.999f / 3.f));
+
+	FLOATS_NEARLY_EQUAL(x[1], x.closest_wrap(1.499f / 3.f));
+	FLOATS_NEARLY_EQUAL(x[1], x.closest_wrap(1.999f / 3.f));
 }
