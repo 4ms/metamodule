@@ -45,3 +45,4 @@ public:
 	virtual void mark_output_unpatched(const int output_id) override {}
 	virtual void mark_output_patched(const int output_id) override {}
 };
+
