@@ -46,14 +46,6 @@ public:
 		return output;
 	}
 
-	virtual void mark_all_inputs_unpatched() {}
-	virtual void mark_input_unpatched(const int input_id) {}
-	virtual void mark_input_patched(const int input_id) {}
-
-	virtual void mark_all_outputs_unpatched() {}
-	virtual void mark_output_unpatched(const int output_id) {}
-	virtual void mark_output_patched(const int output_id) {}
-
 private:
 	float inputs[4] = {0, 0, 0, 0};
 	float levels[4] = {0, 0, 0, 0};
