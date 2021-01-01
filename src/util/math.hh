@@ -1,7 +1,9 @@
 #pragma once
-#include <stdint.h>
+#include <cmath>
+#include <cstdint>
 
-namespace MathTools {
+namespace MathTools
+{
 
 #ifndef M_PI
 	#define M_PI 3.14159265358979323846264338327950288f
@@ -25,8 +27,7 @@ static constexpr T max(const T val1, const T val2)
 {
 	if (val1 > val2) {
 		return val1;
-	}
-	else {
+	} else {
 		return val2;
 	}
 }
@@ -36,8 +37,7 @@ static constexpr T min(const T val1, const T val2)
 {
 	if (val1 < val2) {
 		return val1;
-	}
-	else {
+	} else {
 		return val2;
 	}
 }
@@ -79,6 +79,29 @@ T wrap(T val)
 	while (val >= Max)
 		val -= Max;
 	return val;
+}
+
+inline float randomNumber(float minNum, float maxNum)
+{
+	float tempRand = (rand() % 10000) / 9999.0f;
+	return (map_value(tempRand, 0.0f, 1.0f, minNum, maxNum));
+}
+
+constexpr float f_abs(float x)
+{
+	return (x >= 0.f) ? x : -x;
+}
+
+// [0..1] --> [-1..1]
+// 0.00 => 0
+// 0.25 => -1
+// 0.50 => 0
+// 0.75 => 1
+// 1.00 => 0
+constexpr float faster_sine(float x)
+{
+	x = (x * 2.f) - 1.f;
+	return 4.f * (x - x * f_abs(x));
 }
 
 } // namespace MathTools

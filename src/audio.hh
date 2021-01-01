@@ -1,10 +1,10 @@
 #pragma once
 #include "drivers/codec.hh"
-#include "fxList.hh"
 #include "interp_param.hh"
 #include "math.hh"
 #include "oscs.hh"
 #include "params.hh"
+#include "patch_player.hh"
 #include "processors/tools/kneeCompress.h"
 #include "stm32f7xx.h"
 #include "util/audio_frame.hh"
@@ -26,8 +26,8 @@ public:
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);
 
 private:
-	AudioSampleType process_chan(AudioSampleType in, enum AudioChannels c);
-	void check_fx_change();
+	AudioSampleType get_output(int output_id);
+	void check_patch_change();
 
 	AudioStreamBlock &tx_buf_1;
 	AudioStreamBlock &tx_buf_2;
@@ -35,15 +35,12 @@ private:
 	AudioStreamBlock &rx_buf_2;
 	Params &params;
 
-	FXList FX_left;
-	FXList FX_right;
+	PatchPlayer player;
 
 	KneeCompressor<int32_t> compressor{AudioSampleBits, 0.75};
 
 	ICodec &codec_;
 	uint32_t sample_rate_;
-
-	static inline AudioProcessor *current_fx[2];
 
 	Interp<float, kAudioStreamBlockSize> freq0;
 	Interp<float, kAudioStreamBlockSize> freq1;

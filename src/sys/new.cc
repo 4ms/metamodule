@@ -31,6 +31,11 @@ void operator delete(void *p, std::nothrow_t) noexcept
 	operator delete(p);
 }
 
+void operator delete(void *p, std::size_t) noexcept
+{
+	operator delete(p);
+}
+
 void *operator new[](size_t size, std::nothrow_t) noexcept
 {
 	return operator new(size);
@@ -68,10 +73,14 @@ extern "C" size_t _sbrk(int incr)
 	return (size_t)prev_heap_end;
 }
 
-
 namespace std
 {
 void __throw_bad_function_call()
+{
+	while (1)
+		;
+}
+void __throw_bad_alloc()
 {
 	while (1)
 		;

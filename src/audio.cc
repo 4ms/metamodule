@@ -1,5 +1,7 @@
 #include "audio.hh"
 #include "debug.hh"
+#include "example_patch.hh"
+#include "patch_player.hh"
 #include <cmath>
 
 Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
@@ -11,13 +13,7 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	, rx_buf_1{buffers[2]}
 	, rx_buf_2{buffers[3]}
 {
-	for (uint32_t i = 0; i < FXList::NumFX; i++) {
-		FX_left[i]->set_samplerate(sample_rate_);
-		FX_right[i]->set_samplerate(sample_rate_);
-	}
-
-	current_fx[LEFT] = FX_left[0];
-	current_fx[RIGHT] = FX_right[0];
+	player.load_patch(example_patch);
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
@@ -26,27 +22,18 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_2); }, [this]() { process(rx_buf_2, tx_buf_1); });
 }
 
-// param smoothing: +3.9% of processing (23.4% -> 19.5%)
-// SDRAM: +5.7% (SRAM1: 15.5% vs. SDRAM: 21.2% (SDRAM adds 5.7%)
-// block size: 0.2% (@32: 21.2%, @128: 21.0%)
-// Compression<float>: 18.4%, +comp float stereo = 20.4% (+2%)
-// Compression<int32_t>: -> 19.6% (+1%)
-// Hard Clip (constrain): 21.2% -> 21.2% (+2.3%)
-
-Audio::AudioSampleType Audio::process_chan(AudioSampleType in, enum AudioChannels c)
+Audio::AudioSampleType Audio::get_output(int output_id)
 {
-	auto scaled_in = AudioFrame::scaleInput(in);
-	auto raw_out = current_fx[c]->update(scaled_in);
+	auto raw_out = player.get_panel_output(output_id);
 	auto scaled_out = AudioFrame::scaleOutput(raw_out);
 	return compressor.compress(scaled_out);
 }
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	Debug::set_0(true);
+	Debug::set_2(true);
 
 	params.update();
-	check_fx_change();
 
 	freq0.set_new_value(params.freq[0]);
 	freq1.set_new_value(params.freq[1]);
@@ -61,21 +48,29 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
-		out_.l = process_chan(in_->l, LEFT);
-		out_.r = process_chan(in_->r, RIGHT);
+		auto scaled_in = AudioFrame::scaleInput(in_->l);
+		player.set_panel_input(0, scaled_in);
+
+		scaled_in = AudioFrame::scaleInput(in_->r);
+		player.set_panel_input(1, scaled_in);
 
 		if (update_freq0)
-			current_fx[LEFT]->set_param(0, freq0.next());
+			player.set_panel_param(0, freq0.next());
 		if (update_res0)
-			current_fx[LEFT]->set_param(1, res0.next());
+			player.set_panel_param(1, res0.next());
 		if (update_freq1)
-			current_fx[RIGHT]->set_param(0, freq1.next());
+			player.set_panel_param(2, freq1.next());
 		if (update_res1)
-			current_fx[RIGHT]->set_param(1, res1.next());
+			player.set_panel_param(3, res1.next());
+
+		player.update_patch(example_patch);
+		out_.l = get_output(0);
+		out_.r = get_output(1);
 
 		in_++;
 	}
-	Debug::set_0(false);
+
+	Debug::set_2(false);
 }
 
 void Audio::start()
@@ -83,16 +78,9 @@ void Audio::start()
 	codec_.start();
 }
 
-void Audio::check_fx_change()
+void Audio::check_patch_change()
 {
-	if (current_fx[LEFT] != FX_left[params.fx_mode[0]]) {
-		current_fx[LEFT] = FX_left[params.fx_mode[0]];
-		current_fx[LEFT]->set_param(0, params.freq[0]);
-		current_fx[LEFT]->set_param(1, params.res[0]);
-	}
-	if (current_fx[RIGHT] != FX_right[params.fx_mode[1]]) {
-		current_fx[RIGHT] = FX_right[params.fx_mode[1]];
-		current_fx[RIGHT]->set_param(0, params.freq[1]);
-		current_fx[RIGHT]->set_param(1, params.res[1]);
-	}
+	// Check if it changed
+	// call patch.load_patch(new_patch);
+	// set cur_patch = new_patch; (copy? pointer?)
 }

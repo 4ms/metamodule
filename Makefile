@@ -43,6 +43,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-I$(LIBDIR)/easiglib \
 			-Isrc \
 			-Isrc/processors \
+			-Isrc/CoreModules \
 			-Isrc/util \
 			-Isrc/conf \
 
@@ -180,9 +181,7 @@ generate_compile_txt:
 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \
     awk '/End of search list./ { show=0 } { if (show) printf "-I%s\n",$1 }; /#include <...> search starts here:/ { show=1; }' > compile_flags.txt
 
-# bear: brew install bear
-# compdb: pip install compdb (https://github.com/Sarcasm/compdb)
-generate_build_flags:
+compile_commands:
 	rm -rf build
 	bear make -j16 all
 	compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
