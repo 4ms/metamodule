@@ -26,24 +26,23 @@ public:
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);
 
 private:
-	AudioSampleType get_output(int output_id);
-	void check_patch_change();
-
 	AudioStreamBlock &tx_buf_1;
 	AudioStreamBlock &tx_buf_2;
 	AudioStreamBlock &rx_buf_1;
 	AudioStreamBlock &rx_buf_2;
-	Params &params;
-
-	PatchPlayer player;
-
-	KneeCompressor<int32_t> compressor{AudioSampleBits, 0.75};
 
 	ICodec &codec_;
 	uint32_t sample_rate_;
 
-	Interp<float, kAudioStreamBlockSize> freq0;
-	Interp<float, kAudioStreamBlockSize> freq1;
-	Interp<float, kAudioStreamBlockSize> res0;
-	Interp<float, kAudioStreamBlockSize> res1;
+	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
+	// Should we class this out? It's only connected to Audio at init and process()
+	AudioSampleType get_output(int output_id);
+	void check_patch_change();
+
+	Params &params;
+	PatchPlayer player;
+	KneeCompressor<int32_t> compressor{AudioSampleBits, 0.75};
+
+	std::array<Interp<float, kAudioStreamBlockSize>, 4> cvjacks;
+	std::array<Interp<float, kAudioStreamBlockSize>, 4> knobs;
 };

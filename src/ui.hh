@@ -25,15 +25,15 @@ public:
 	{
 		for (int i = 0; i < 2; i++) {
 			Color freq_col, res_col;
-			if (params.knob_sel[i] == Params::FREQ) {
+			if (params.knob_sel[i] == 0) {
 				freq_col = i ? Colors::blue : Colors::red;
 				res_col = Colors::grey;
 			} else {
 				freq_col = Colors::grey;
 				res_col = i ? Colors::blue : Colors::red;
 			}
-			leds.freq[i].set_background(Colors::off.blend(freq_col, params.freq[i] * 0.5f));
-			leds.res[i].set_background(Colors::off.blend(res_col, params.res[i] * 0.5f));
+			leds.freq[i].set_background(Colors::off.blend(freq_col, params.knobs[i * 2 + 0] * 0.5f));
+			leds.res[i].set_background(Colors::off.blend(res_col, params.knobs[i * 2 + 1] * 0.5f));
 
 			if (params.controls.mode_button[i].is_pressed())
 				leds.but[i].set_background(Colors::white);
