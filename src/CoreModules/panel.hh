@@ -11,7 +11,6 @@ public:
 	float outputs[NumOutJacks];
 	float params[NumKnobs];
 
-public:
 	Panel() {}
 
 	virtual void update() override {}

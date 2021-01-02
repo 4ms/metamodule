@@ -1,40 +1,60 @@
 #pragma once
 #include "coreProcessor.h"
-#include "lfoCore.h"
-#include "mixer4Core.h"
-#include "panel.hh"
+#include <map>
 #include <memory>
+#include <string>
 
 enum ModuleType {
 	PANEL,
 	LFO,
+	MIXER4,
 	AD_ENVELOPE,
 	CROSSFADE,
-	MIXER4,
 	LOGIC,
 	SAMPLEHOLD,
 	ATTENUVERT,
 	FADEDELAY,
 	VCA,
-	NUM_MODULE_TYPES,
+
+	NUM_MODULE_TYPES
 };
 
+using ModuleIDType = ModuleType;
+
 class ModuleFactory {
+	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
+
 public:
 	ModuleFactory() = delete;
 
-	static std::unique_ptr<CoreProcessor> create(const ModuleType id)
+	static bool registerModuleType(ModuleIDType id, const std::string name, CreateModuleFunc funcCreate)
 	{
-		switch (id) {
-			case (ModuleType::PANEL):
-				return std::make_unique<Panel>();
-			case (ModuleType::LFO):
-				return std::make_unique<LFOCore>();
-			case (ModuleType::MIXER4):
-				return std::make_unique<Mixer4Core>();
-			default:
-				return nullptr;
+		if (auto it = creation_funcs.find(id); it == creation_funcs.end()) {
+			creation_funcs[id] = funcCreate;
+			module_names[id] = name;
+			return true;
 		}
+		return false;
 	}
+
+	static std::unique_ptr<CoreProcessor> create(const ModuleIDType id)
+	{
+		if (auto it = creation_funcs.find(id); it != creation_funcs.end())
+			return it->second();
+
+		return nullptr;
+	}
+
+	static std::string getModuleTypeName(ModuleIDType id)
+	{
+		if (auto it = module_names.find(id); it != module_names.end())
+			return module_names[id];
+
+		return "Not found. ID=" + std::to_string(static_cast<size_t>(id));
+	}
+
+private:
+	static inline std::map<ModuleIDType, CreateModuleFunc> creation_funcs;
+	static inline std::map<ModuleIDType, std::string> module_names;
 };
 
