@@ -11,13 +11,17 @@
 using JackSense = DebouncedSwitch;
 
 struct Controls {
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_2, Oversampler<16>> freq_cv0 = {GPIO::A, 2};
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_3, Oversampler<16>> res_cv0 = {GPIO::A, 3};
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_0, Oversampler<16>> freq_cv1 = {GPIO::A, 0};
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_1, Oversampler<16>> res_cv1 = {GPIO::A, 1};
+	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_2, Oversampler<16>> cv0 = {GPIO::A, 2};
+	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_3, Oversampler<16>> cv1 = {GPIO::A, 3};
+	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_0, Oversampler<16>> cv2 = {GPIO::A, 0};
+	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_1, Oversampler<16>> cv3 = {GPIO::A, 1};
 
-	JackSense freq_sense[2] = {{GPIO::C, 4, PinPolarity::Normal}, {GPIO::B, 1, PinPolarity::Normal}};
-	JackSense res_sense[2] = {{GPIO::C, 5, PinPolarity::Normal}, {GPIO::B, 0, PinPolarity::Normal}};
+	std::array<JackSense, 4> cv_sense = {{
+		{GPIO::C, 4, PinPolarity::Normal},
+		{GPIO::B, 1, PinPolarity::Normal},
+		{GPIO::C, 5, PinPolarity::Normal},
+		{GPIO::B, 0, PinPolarity::Normal},
+	}};
 	JackSense in_sense[2] = {{GPIO::G, 12, PinPolarity::Normal}, {GPIO::G, 11, PinPolarity::Normal}};
 	JackSense out_sense[2] = {{GPIO::D, 7, PinPolarity::Normal}, {GPIO::G, 10, PinPolarity::Normal}};
 

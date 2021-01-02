@@ -1,7 +1,7 @@
-#pragma once 
+#pragma once
+#include "drivers/stm32xx.h"
 #include "math.hh"
 #include <cmath>
-#include "drivers/stm32xx.h"
 
 class AccelParam {
 public:
@@ -10,8 +10,8 @@ public:
 		, dest_(initval)
 		, ACCEL(acceleration)
 		, fACCEL(static_cast<float>(ACCEL))
-		, SPEED(1.f/lag)
-		, MORPH_SPEED(1.f/catchup_lag)
+		, SPEED(1.f / lag)
+		, MORPH_SPEED(1.f / catchup_lag)
 	{}
 
 	float update(int32_t motion)
@@ -56,7 +56,7 @@ private:
 			dest_ += (inc * SPEED * fACCEL / (float)time_since);
 		}
 		last_inc_time = now;
-		dest_ = MathTools::constrain(dest_, -1.0f, 1.0f);
+		dest_ = MathTools::constrain(dest_, 0.0f, 1.0f);
 	}
 
 	void update_val()
@@ -73,6 +73,5 @@ private:
 				cur_val_ = dest_;
 		}
 	}
-
 };
 

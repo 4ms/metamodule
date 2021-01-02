@@ -10,14 +10,11 @@ public:
 		: controls(c)
 	{}
 
-	float freq[2];
-	float res[2];
-	float freq_cv_atten[2] = {1.f, 1.f};
-	float res_cv_atten[2] = {1.f, 1.f};
+	float cvjacks[4];
+	float knobs[4];
 	uint8_t fx_mode[2] = {0};
 
-	enum SelectedKnob { FREQ, RES };
-	SelectedKnob knob_sel[2] = {FREQ, FREQ};
+	int knob_sel[2] = {0, 0};
 
 public:
 	void update();
@@ -33,12 +30,9 @@ private:
 	static const int kResKnob_Weight = 200;
 	static const int kResKnonb_CatchupWeight = 333;
 
-	AccelParam smoothed_freq[2]{
+	AccelParam smoothed_knob[4]{
 		{kFreqKnob_Accel, kFreqKnob_Weight, kFreqKnob_CatchupWeight, 0.5f},
 		{kFreqKnob_Accel, kFreqKnob_Weight, kFreqKnob_CatchupWeight, 0.5f},
-	};
-
-	AccelParam smoothed_res[2]{
 		{kResKnob_Accel, kResKnob_Weight, kResKnonb_CatchupWeight, 0.5f},
 		{kResKnob_Accel, kResKnob_Weight, kResKnonb_CatchupWeight, 0.5f},
 	};
