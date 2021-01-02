@@ -1,23 +1,5 @@
 #pragma once
-// #include "jack.h"
-
-// class CoreModule {
-// public:
-// 	const int MAX_JACKS_PER_MODULE = 32;
-// 	const int MAX_KNOBS_PER_MODULE = 32;
-
-// 	using Jack = Jack_node;
-// 	using Jacks = std::array<Jack, MAX_JACKS_PER_MODULE>;
-// 	using Knob = float;
-// 	using Knobs = std::array<Knob, MAX_KNOBS_PER_MODULE>;
-
-// 	Jacks jacks;
-// 	Knobs knobs;
-// 	// Buttons?
-
-// 	virtual void update() = 0;
-// };
-
+#include <memory>
 class CoreProcessor {
 public:
 	virtual void update() = 0;

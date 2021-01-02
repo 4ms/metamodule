@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 
 namespace MathTools
 {
@@ -47,6 +48,12 @@ inline float interpolate(float in1, float in2, float x)
 	return (in2 * x) + in1 * (1.0f - x);
 }
 
+inline float randomNumber(float minNum, float maxNum)
+{
+	float tempRand = (rand() % 10000) / 9999.0f;
+	return (map_value(tempRand, 0.0f, 1.0f, minNum, maxNum));
+}
+
 template<int N>
 struct Log2 {
 	static constexpr int val = Log2<N / 2>::val + 1;
@@ -79,12 +86,6 @@ T wrap(T val)
 	while (val >= Max)
 		val -= Max;
 	return val;
-}
-
-inline float randomNumber(float minNum, float maxNum)
-{
-	float tempRand = (rand() % 10000) / 9999.0f;
-	return (map_value(tempRand, 0.0f, 1.0f, minNum, maxNum));
 }
 
 constexpr float f_abs(float x)

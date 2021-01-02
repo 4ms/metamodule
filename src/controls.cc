@@ -5,16 +5,17 @@
 void Controls::read()
 {
 	// Debug::set_1(true);
-	freq_cv0.read();
-	res_cv0.read();
-	freq_cv1.read();
-	res_cv1.read();
+	cv0.read();
+	cv1.read();
+	cv2.read();
+	cv3.read();
+
 	for (uint32_t i = 0; i < 2; i++) {
 		rotary[i].update();
 		rotary_button[i].update();
 		mode_button[i].update();
-		freq_sense[i].update();
-		res_sense[i].update();
+		cv_sense[i].update();
+		cv_sense[i + 2].update();
 		in_sense[i].update();
 		out_sense[i].update();
 	}

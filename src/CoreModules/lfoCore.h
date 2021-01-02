@@ -2,7 +2,8 @@
 
 #include "coreProcessor.h"
 #include "math.hh"
-#include "math_tables.hh"
+#include "moduleTypes.h"
+#include <cmath>
 
 using namespace MathTools;
 
@@ -19,7 +20,9 @@ public:
 		if (resetInput > lastReset) {
 			phaccu = 0;
 		}
-		sinOut = sinTable.interp_wrap(phaccu + phaseOffset) * level;
+		// sinOut = sinf(2.0f * M_PI * (phaccu + phaseOffset)) * level;
+		// sinOut = sinTable.interp_wrap(phaccu + phaseOffset) * level;
+		sinOut = (phaccu + phaseOffset) * level;
 	}
 
 	virtual void set_param(int const param_id, const float val) override
@@ -61,18 +64,17 @@ public:
 		return value;
 	}
 
-	void combineKnobCVFreq()
+	static std::unique_ptr<CoreProcessor> create()
 	{
-		frequency = knob_frequency + cv_frequency;
+		return std::make_unique<LFOCore>();
+	}
+	static constexpr ModuleIDType get_module_type()
+	{
+		return ModuleType::LFO;
 	}
 
-	virtual void mark_all_inputs_unpatched() {}
-	virtual void mark_input_unpatched(const int input_id) {}
-	virtual void mark_input_patched(const int input_id) {}
-
-	virtual void mark_all_outputs_unpatched() {}
-	virtual void mark_output_unpatched(const int output_id) {}
-	virtual void mark_output_patched(const int output_id) {}
+private:
+	static inline bool s_registered = ModuleFactory::registerModuleType(get_module_type(), "LFO", create);
 
 private:
 	float phaccu = 0;
@@ -85,5 +87,10 @@ private:
 	int resetInput = 0;
 	int lastReset = 0;
 	float sinOut;
+
+	void combineKnobCVFreq()
+	{
+		frequency = knob_frequency + cv_frequency;
+	}
 };
 
