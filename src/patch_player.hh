@@ -1,5 +1,7 @@
 #pragma once
 #include "coreProcessor.h"
+#include "lfoCore.h"
+#include "mixer4core.h"
 #include "moduleTypes.h"
 #include "panel.hh"
 #include "patch.hh"

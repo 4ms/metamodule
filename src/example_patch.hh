@@ -63,7 +63,7 @@ static const Patch example_patch = {
 };
 
 static const Patch example_patch2 = {
-	.modules_used = {PANEL, LFO, LFO, MIXER4},
+	.modules_used = {ModuleType::PANEL, LFO, LFO, MIXER4},
 	.num_modules = 4,
 
 	.nets = {{
