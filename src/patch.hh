@@ -1,5 +1,6 @@
 #pragma once
 #include "moduleTypes.h"
+#include "panel.hh"
 #include <vector>
 
 // Todo: will this pack into 4 bytes on all systems?
@@ -14,7 +15,7 @@ struct StaticParam {
 	float value;
 };
 
-const int MAX_MODULES_IN_PATCH = 64;
+const int MAX_MODULES_IN_PATCH = 16;
 const int MAX_NODES_IN_PATCH = 256;
 const int MAX_PARAMS_IN_PATCH = 256;
 const int MAX_CONNECTIONS_PER_NODE = 16;
@@ -31,7 +32,7 @@ struct MappedParam {
 };
 
 using NetList = std::array<Net, MAX_NODES_IN_PATCH>;
-using ModuleList = std::array<ModuleType, MAX_MODULES_IN_PATCH>;
+using ModuleList = std::array<ModuleIDType, MAX_MODULES_IN_PATCH>;
 using StaticParamList = std::array<StaticParam, MAX_PARAMS_IN_PATCH>;
 using MappedParamList = std::array<MappedParam, Panel::NumKnobs>;
 

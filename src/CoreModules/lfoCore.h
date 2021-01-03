@@ -68,13 +68,9 @@ public:
 	{
 		return std::make_unique<LFOCore>();
 	}
-	static constexpr ModuleIDType get_module_type()
-	{
-		return ModuleType::LFO;
-	}
 
 private:
-	static inline bool s_registered = ModuleFactory::registerModuleType(get_module_type(), "LFO", create);
+	static inline bool s_registered = ModuleFactory::registerModuleType("LFOSINE", "Basic Sine LFO", create);
 
 private:
 	float phaccu = 0;

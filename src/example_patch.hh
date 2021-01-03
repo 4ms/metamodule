@@ -1,4 +1,4 @@
-#include "patch_player.hh"
+#include "patch.hh"
 
 // Example of a node-style module:
 // class VCAModule : public Module {
@@ -16,7 +16,8 @@
 // };
 
 static const Patch example_patch = {
-	.modules_used = {PANEL, LFO, MIXER4, LFO},
+	//.modules_used = {PANEL, LFO, MIXER4, LFO},
+	.modules_used = {"PANEL", "LFO", "MIXER4", "LFO"},
 	.num_modules = 4,
 
 	// OUT, IN (, IN (, IN ...)): each OUT/IN is {Module_id, jack_id}
@@ -63,7 +64,8 @@ static const Patch example_patch = {
 };
 
 static const Patch example_patch2 = {
-	.modules_used = {ModuleType::PANEL, LFO, LFO, MIXER4},
+	.modules_used = {"Panel", "LFO", "LFO", "Mixer4"},
+	//.modules_used = {PANEL, LFO, LFO, MIXER4},
 	.num_modules = 4,
 
 	.nets = {{

@@ -53,8 +53,8 @@ public:
 		// check all modules_used are valid (could just check for nullptrs after creating modules)
 
 		// Requirement of the patch format: first module must be PANEL (Todo: extend this to different PANELs)
-		if (p.modules_used[0] != PANEL)
-			return;
+		// if (p.modules_used[0] != "PANEL")
+		// 	return;
 
 		for (int i = 0; i < p.num_modules; i++) {
 			modules[i] = ModuleFactory::create(p.modules_used[i]);
