@@ -44,8 +44,9 @@ public:
 		return std::make_unique<Panel>();
 	}
 
-private:
-	static inline bool s_registered =
-		ModuleFactory::registerModuleType("PANEL_8", "Panel: 8 Pots, 2/2 AudioIO, 4/2 AnalogIO, 1/3 GateIO", create);
+	static constexpr char typeID[20] = "PANEL_8";
+	static constexpr char description[] = "Panel: 8 Pots, 2/2 AudioIO, 4/2 AnalogIO, 1/3 GateIO";
+
+	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 };
 

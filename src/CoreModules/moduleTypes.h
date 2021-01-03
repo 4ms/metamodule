@@ -1,6 +1,7 @@
 #pragma once
 #include "coreProcessor.h"
 #include "string.h"
+#include <array>
 #include <memory>
 #include <string>
 
@@ -47,15 +48,12 @@ public:
 	static bool registerModuleType(ModuleIDType typeslug, const char *name, CreateModuleFunc funcCreate)
 	{
 		int id = getTypeID(typeslug);
-		if (!is_registered[id]) {
+		if (id == -1) {
+			id = next_id;
+			next_id++;
 			creation_funcs[id] = funcCreate;
-			is_registered[id] = true;
-			// #ifdef STM32F7
-			// 			strcpy(module_names[id], name);
-			// 			// strcpy(module_names[id], name.c_str());
-			// #else
+			strcpy(module_slugs[id], typeslug.name);
 			module_names[id] = name;
-			// #endif
 			return true;
 		}
 		return false;
@@ -64,7 +62,7 @@ public:
 	static std::unique_ptr<CoreProcessor> create(const ModuleIDType typeslug)
 	{
 		int id = getTypeID(typeslug);
-		if (is_registered[id])
+		if (id >= 0)
 			return creation_funcs[id]();
 
 		return nullptr;
@@ -73,15 +71,29 @@ public:
 	static std::string getModuleTypeName(ModuleIDType typeslug)
 	{
 		int id = getTypeID(typeslug);
-		if (is_registered[id])
+		if (id >= 0)
 			return module_names[id];
 
 		return "Not found.";
 	}
 
+	static std::string getModuleSlug(ModuleIDType typeslug)
+	{
+		int id = getTypeID(typeslug);
+		if (id >= 0)
+			return module_slugs[id];
+
+		return "????";
+	}
+
 	static int getTypeID(ModuleIDType typeslug)
 	{
-		return 0;
+		for (int i = 0; i < MAX_MODULE_TYPES; i++) {
+			auto &slug = module_slugs[i];
+			if (strcmp(slug, typeslug.name) == 0)
+				return i;
+		}
+		return -1;
 	}
 
 private:
@@ -89,5 +101,5 @@ private:
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline std::array<char[20], MAX_MODULE_TYPES> module_slugs;
 	static inline std::array<std::string, MAX_MODULE_TYPES> module_names;
-	static inline std::array<bool, MAX_MODULE_TYPES> is_registered = {};
+	static inline int next_id = 0;
 };

@@ -1,7 +1,5 @@
 #pragma once
 #include "coreProcessor.h"
-#include "lfoCore.h"
-#include "mixer4core.h"
 #include "moduleTypes.h"
 #include "panel.hh"
 #include "patch.hh"
@@ -12,10 +10,6 @@ private:
 	bool is_loaded = false;
 	std::array<float, MAX_NODES_IN_PATCH> net_val;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
-
-	// Todo: we will hard fault if modules[0] is not of type Panel*.
-	// Maybe the Panel is not the module list, and when we encounter it
-	// in the netlist, we manually set/get from panel
 
 public:
 	void set_panel_input(int input_id, float val)
@@ -53,6 +47,7 @@ public:
 		// check all modules_used are valid (could just check for nullptrs after creating modules)
 
 		// Requirement of the patch format: first module must be PANEL (Todo: extend this to different PANELs)
+		// Todo: equality operator for ModuleTypeWrapper
 		// if (p.modules_used[0] != "PANEL")
 		// 	return;
 

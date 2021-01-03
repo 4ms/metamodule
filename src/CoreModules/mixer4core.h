@@ -51,9 +51,9 @@ public:
 	{
 		return std::make_unique<Mixer4Core>();
 	}
-
-private:
-	static inline bool s_registered = ModuleFactory::registerModuleType("MIXER4", "Mixer - 4 channel", create);
+	static constexpr char typeID[20] = "MIXER4";
+	static constexpr char description[] = "Mixer - 4 channel";
+	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
 	float inputs[4] = {0, 0, 0, 0};
