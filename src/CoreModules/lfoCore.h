@@ -2,8 +2,8 @@
 
 #include "coreProcessor.h"
 #include "math.hh"
+#include "math_tables.hh"
 #include "moduleTypes.h"
-#include <cmath>
 
 using namespace MathTools;
 
@@ -21,8 +21,8 @@ public:
 			phaccu = 0;
 		}
 		// sinOut = sinf(2.0f * M_PI * (phaccu + phaseOffset)) * level;
-		// sinOut = sinTable.interp_wrap(phaccu + phaseOffset) * level;
-		sinOut = (phaccu + phaseOffset) * level;
+		sinOut = sinTable.interp_wrap(phaccu + phaseOffset) * level;
+		// sinOut = (phaccu + phaseOffset) * level;
 	}
 
 	virtual void set_param(int const param_id, const float val) override

@@ -24,7 +24,7 @@ struct ModuleTypeWrapper {
 		}
 		name[kStringLen - 1] = '\0';
 	}
-
+#ifndef STM32F7
 	ModuleTypeWrapper(const std::string s)
 	{
 		for (size_t i = 0; i < kStringLen; i++) {
@@ -35,6 +35,7 @@ struct ModuleTypeWrapper {
 		}
 		name[kStringLen - 1] = '\0';
 	}
+#endif
 };
 
 using ModuleIDType = ModuleTypeWrapper;
@@ -53,7 +54,9 @@ public:
 			next_id++;
 			creation_funcs[id] = funcCreate;
 			strcpy(module_slugs[id], typeslug.name);
+#ifndef STM32F7
 			module_names[id] = name;
+#endif
 			return true;
 		}
 		return false;
@@ -68,6 +71,7 @@ public:
 		return nullptr;
 	}
 
+#ifndef STM32F7
 	static std::string getModuleTypeName(ModuleIDType typeslug)
 	{
 		int id = getTypeID(typeslug);
@@ -76,6 +80,7 @@ public:
 
 		return "Not found.";
 	}
+#endif
 
 	static std::string getModuleSlug(ModuleIDType typeslug)
 	{
@@ -100,6 +105,8 @@ private:
 	static inline const int MAX_MODULE_TYPES = 64;
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline std::array<char[20], MAX_MODULE_TYPES> module_slugs;
+#ifndef STM32F7
 	static inline std::array<std::string, MAX_MODULE_TYPES> module_names;
+#endif
 	static inline int next_id = 0;
 };

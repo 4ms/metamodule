@@ -29,9 +29,10 @@ SOURCES  += $(wildcard src/sys/*.cpp)
 SOURCES  += $(wildcard src/util/*.c)
 SOURCES  += $(wildcard src/util/*.cc)
 SOURCES  += $(wildcard src/util/*.cpp)
-SOURCES  += $(wildcard src/processors/*.c)
-SOURCES  += $(wildcard src/processors/*.cc)
-SOURCES  += $(wildcard src/processors/*.cpp)
+SOURCES  += $(wildcard src/CoreModules/*.cpp)
+# SOURCES  += $(wildcard src/processors/*.c)
+# SOURCES  += $(wildcard src/processors/*.cc)
+# SOURCES  += $(wildcard src/processors/*.cpp)
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
@@ -145,6 +146,10 @@ $(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
 	mkdir -p $(dir $@)
 	$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 # 	$(CXX) -c $(OPTFLAG) $(CXXFLAGS) -fverbose-asm -Wa,-adhln $< > $(BUILDDIR)/$(basename $<).lst
+
+$(BUILDDIR)/%.o: %.cpp $(BUILDDIR)/%.d
+	mkdir -p $(dir $@)
+	$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.s
 	mkdir -p $(dir $@)

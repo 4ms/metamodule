@@ -8,8 +8,8 @@ public:
 	static inline const int NumInJacks = 6;
 	static inline const int NumOutJacks = 2;
 
-	float inputs[NumInJacks];
-	float outputs[NumOutJacks];
+	float inputs[NumInJacks];	// OutsideToPatch
+	float outputs[NumOutJacks]; // PatchToOutside
 	float params[NumKnobs];
 
 	Panel() {}
@@ -24,11 +24,27 @@ public:
 		params[param_id] = val;
 	}
 
+	float get_param(const int param_id) const
+	{
+		if (param_id >= NumKnobs)
+			return 0.f;
+
+		return params[param_id];
+	}
+
 	virtual void set_input(const int jack_id, const float val) override
 	{
 		if (jack_id >= NumInJacks)
 			return;
 		inputs[jack_id] = val;
+	}
+
+	float get_input(const int jack_id) const
+	{
+		if (jack_id >= NumInJacks)
+			return 0.f;
+
+		return inputs[jack_id];
 	}
 
 	virtual float get_output(const int jack_id) const override
@@ -37,6 +53,14 @@ public:
 			return 0.f;
 
 		return outputs[jack_id];
+	}
+
+	void set_output(const int jack_id, const float val)
+	{
+		if (jack_id >= NumOutJacks)
+			return;
+
+		outputs[jack_id] = val;
 	}
 
 	static std::unique_ptr<CoreProcessor> create()

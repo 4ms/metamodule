@@ -4,6 +4,9 @@
 #include "panel.hh"
 #include "patch.hh"
 #include <cstdint>
+#ifdef STM32F7
+	#include "debug.hh"
+#endif
 
 class PatchPlayer {
 private:
@@ -12,12 +15,12 @@ private:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
 public:
-	void set_panel_input(int input_id, float val)
+	void set_panel_input(int jack_id, float val)
 	{
 		if (!is_loaded)
 			return;
 		//"inputs" as seen by the outside world == "outputs" as seen by other modules
-		static_cast<Panel *>(modules[0].get())->outputs[input_id] = val;
+		static_cast<Panel *>(modules[0].get())->set_output(jack_id, val);
 	}
 
 	void set_panel_param(int param_id, float val)
@@ -31,13 +34,13 @@ public:
 	{
 		if (!is_loaded)
 			return 0.f;
-		return static_cast<Panel *>(modules[0].get())->params[param_id];
+		return static_cast<Panel *>(modules[0].get())->get_param(param_id);
 	}
 
-	float get_panel_output(int output_id)
+	float get_panel_output(int jack_id)
 	{
 		//"outputs" as seen by the outside world == "inputs" as seen by other modules
-		return static_cast<Panel *>(modules[0].get())->inputs[output_id];
+		return static_cast<Panel *>(modules[0].get())->get_input(jack_id);
 	}
 
 	void load_patch(const Patch &p)
@@ -48,6 +51,7 @@ public:
 
 		// Requirement of the patch format: first module must be PANEL (Todo: extend this to different PANELs)
 		// Todo: equality operator for ModuleTypeWrapper
+
 		// if (p.modules_used[0] != "PANEL")
 		// 	return;
 
@@ -55,13 +59,15 @@ public:
 			modules[i] = ModuleFactory::create(p.modules_used[i]);
 
 			if (modules[i] == nullptr) {
-				is_loaded = true;
-				return; // Todo: return an error so that we don't try to run the patch
+				is_loaded = false;
+				return;
 			}
 
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
 		}
+
+		is_loaded = true;
 
 		// Mark patched jacks:
 		for (int net_i = 0; net_i < p.num_nets; net_i++) {
@@ -85,19 +91,19 @@ public:
 
 	void update_patch(const Patch &p)
 	{
-		// Set mapped knobs
+		// Set mapped knobs: ~1us for 4 mapped knobs
 		for (int i = 0; i < p.num_mapped_knobs; i++) {
 			auto &k = p.mapped_knobs[i];
 			auto val = get_panel_param(k.panel_knob_id);
 			modules[k.module_id]->set_param(k.param_id, val);
 		}
 
-		// update each module
-		for (int i = 0; i < p.num_modules; i++) {
+		// update each module: ~1.3us for 2xLFO and 1x MIXER4
+		for (int i = 1; i < p.num_modules; i++) {
 			modules[i]->update();
 		}
 
-		// Copy outs to ins
+		// Copy outs to ins: ~1.3us for 4 nets
 		for (int net_i = 0; net_i < p.num_nets; net_i++) {
 			auto &net = p.nets[net_i];
 			auto &output = net.nodes[0];

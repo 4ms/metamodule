@@ -33,6 +33,7 @@ Audio::AudioSampleType Audio::get_output(int output_id)
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
 	Debug::set_2(true);
+	// pre-amble: ~5us
 
 	params.update();
 
@@ -42,11 +43,13 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	for (auto &knob : knobs) {
 		knob.set_new_value(params.knobs[i]);
 		should_update_knob[i] = !is_small(knob.get_step_size());
+		// player.set_panel_param(i, params.knobs[i]);
 		i++;
 	}
 	i = 0;
 	for (auto &cv : cvjacks) {
 		cv.set_new_value(params.cvjacks[i]);
+		// player.set_panel_input(i + 2, params.cvjacks[i]); // i+2 : skip audio jacks
 		i++;
 	}
 
@@ -58,7 +61,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		scaled_in = AudioFrame::scaleInput(in_->r);
 		player.set_panel_input(1, scaled_in);
 
-		i = 0;
+		int i = 0;
 		for (auto &knob : knobs) {
 			if (should_update_knob[i])
 				player.set_panel_param(i, knob.next());
@@ -71,7 +74,8 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			i++;
 		}
 
-		player.update_patch(example_patch2);
+		player.update_patch(example_patch2); // 3.15us
+
 		out_.l = get_output(0);
 		out_.r = get_output(1);
 
