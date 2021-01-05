@@ -13,6 +13,24 @@
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [ 
+{
+      "slug": "LOWPASSGATE",
+      "name": "Lowpassgate",
+      "description": "Low Pass Gate",
+      "tags": []
+}, 
+{
+      "slug": "CLKMULTIPLIER",
+      "name": "Clkmultiplier",
+      "description": "clock multiplier",
+      "tags": []
+}, 
+{
+      "slug": "CLKDIVIDER",
+      "name": "Clkdivider",
+      "description": "clock divider",
+      "tags": []
+}, 
 	{
 	  "slug": "comparator",
 	  "name": "Comparator",

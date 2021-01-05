@@ -2,6 +2,7 @@
 
 #include "coreProcessor.h"
 #include "math.hh"
+#include "CoreModules/moduleTypes.h"
 
 using namespace MathTools;
 
@@ -46,7 +47,7 @@ public:
 	{
 		return std::make_unique<TemplateCore>();
 	}
-	static constexpr char typeID[20] = SLUG;
+	static constexpr char typeID[20] = "SLUG";
 	static constexpr char description[] = "DESCRIPTION";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 

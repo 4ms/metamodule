@@ -84,7 +84,7 @@ with open(pluginjson, 'r') as file:
 with open('jsonTemplate.txt', 'r') as jsonTemp:
   jsondata = jsonTemp.read()
 
-jsondata = jsondata.replace('slugTemplate',effectName.lower())
+jsondata = jsondata.replace('slugTemplate',effectName.upper())
 jsondata = jsondata.replace('nameTemplate',effectName.capitalize())
 jsondata = jsondata.replace('MODULEDESCRIPTION',description)
 
