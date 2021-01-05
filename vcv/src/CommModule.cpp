@@ -1,0 +1,183 @@
+#include "CommModule.h"
+
+CommModule::CommModule()
+{
+	leftExpander.producerMessage = &leftMessages[0];
+	leftExpander.consumerMessage = &leftMessages[1];
+	rightExpander.producerMessage = &rightMessages[0];
+	rightExpander.consumerMessage = &rightMessages[1];
+
+	recdFromRightData.messageType = NoMessage;
+	recdFromLeftData.messageType = NoMessage;
+}
+
+void CommModule::handleCommunication()
+{
+	if (rightExpander.module) {
+		sendToRight();
+		readFromRight();
+	}
+
+	if (leftExpander.module) {
+		sendToLeft();
+		readFromLeft();
+	}
+	else {
+		if (recdFromRightData.messageType == GetAllIDs) {
+			initiateStatusDumpToRight();
+		}
+	}
+}
+
+void CommModule::updateCommIDs(int id)
+{
+	if (!alreadyUpdatedIDs) {
+		for (auto &el : inputJacks) {
+			el->setModuleID(id);
+		}
+		for (auto &el : outputJacks) {
+			el->setModuleID(id);
+		}
+		for (auto &el : commParams) {
+			el->setModuleID(id);
+		}
+		alreadyUpdatedIDs = true;
+	}
+}
+
+void CommModule::process(const ProcessArgs &args)
+{
+	selfID.id = this->id;
+	updateCommIDs(selfID.id);
+
+	for (auto &element : commParams) {
+		element->updateValue();
+		core->set_param(element->getID(), element->getValue());
+	}
+
+	for (auto &element : inputJacks) {
+		element->updateInput();
+		auto scaledIn = element->scale(element->getValue());
+		core->set_input(element->getID(), scaledIn);
+		if(element->inputJackStatus.connected)
+		{
+			core->mark_input_patched(element->getID());
+		}
+		else
+		{
+			core->mark_input_unpatched(element->getID());
+		}
+	}
+
+	core->set_samplerate(args.sampleRate);
+	core->update();
+
+	for (auto &out : outputJacks) {
+		out->setValue(out->scale(core->get_output(out->getID())));
+	}
+
+	for (auto &element : outputJacks) {
+		element->updateOutput();
+	}
+
+	handleCommunication();
+}
+
+void CommModule::configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int NUM_LIGHTS)
+{
+	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+	for (int i = 0; i < NUM_INPUTS; i++) {
+		inputJacks.push_back(std::make_unique<CommInputJack>(inputs[i], i));
+	}
+	for (int i = 0; i < NUM_OUTPUTS; i++) {
+		outputJacks.push_back(std::make_unique<CommOutputJack>(outputs[i], i));
+	}
+	for (int i = 0; i < NUM_PARAMS; i++) {
+		commParams.push_back(std::make_unique<CommParam>(params[i], i));
+	}
+}
+
+void CommModule::sendToRight()
+{
+	auto message = messageToSendRight();
+
+	if (pushIDsPending) {
+		pushIDsPending = false;
+
+		message->moduleData.clear();
+		message->jackData.clear();
+		message->paramData.clear();
+		appendModuleID(message);
+		appendJackData(message);
+		appendParamData(message);
+		message->messageType = SendingIDs;
+
+		rightExpander.module->leftExpander.messageFlipRequested = true;
+	}
+	else if (recdFromLeftData.messageType == SendingIDs) {
+		*message = std::move(recdFromLeftData);
+		appendModuleID(message);
+		appendJackData(message);
+		appendParamData(message);
+		message->messageType = SendingIDs;
+
+		recdFromLeftData.messageType = NoMessage;
+
+		rightExpander.module->leftExpander.messageFlipRequested = true;
+	}
+}
+
+void CommModule::readFromRight()
+{
+	auto recMessage = messageReceivedFromRight();
+	if (recMessage->messageType == GetAllIDs) {
+		recdFromRightData.messageType = GetAllIDs;
+		recMessage->messageType = NoMessage;
+	}
+}
+
+void CommModule::initiateStatusDumpToRight()
+{
+	pushIDsPending = true;
+	recdFromRightData.messageType = NoMessage;
+}
+
+void CommModule::sendToLeft()
+{
+	auto message = messageToSendLeft();
+
+	if (recdFromRightData.messageType == GetAllIDs) {
+		recdFromRightData.messageType = NoMessage;
+		message->messageType = GetAllIDs;
+		leftExpander.module->rightExpander.messageFlipRequested = true;
+	}
+}
+
+void CommModule::readFromLeft()
+{
+	auto recMessage = messageReceivedFromLeft();
+
+	if (recMessage->messageType == SendingIDs) {
+		recdFromLeftData = std::move(*recMessage);
+		recMessage->messageType = NoMessage;
+	}
+}
+
+void CommModule::appendModuleID(CommData *message)
+{
+	message->moduleData.push_back(selfID);
+}
+
+void CommModule::appendJackData(CommData *message)
+{
+	for (auto &jack : inputJacks) {
+		message->jackData.push_back(jack->inputJackStatus);
+	}
+}
+void CommModule::appendParamData(CommData *message)
+{
+	for (auto &param : commParams) {
+		message->paramData.push_back(param->paramStatus);
+	}
+}
+

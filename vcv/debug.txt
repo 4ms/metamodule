@@ -1,0 +1,63 @@
+Module of type LFOSINE (Basic Sine LFO) connected with ID 2
+Module of type ADENV (Attack Decay Envelope) connected with ID 3
+Module of type XFADE (Crossfader) connected with ID 4
+Module of type MIXER4 (Mixer - 4 channel) connected with ID 5
+Module of type LOGIC (Logic - AND, OR, XOR) connected with ID 6
+Module of type SAMPHOLD (Sample and Hold) connected with ID 7
+Module of type ATTENVERT2 (Attenuverter - 2 channel) connected with ID 8
+Module of type FADEDELAY (Fade Delay) connected with ID 9
+Module of type VCA (Basic VCA) connected with ID 10
+Module of type COMPARATOR (Basic Comparator) connected with ID 11
+Module of type MIXER4 (Mixer - 4 channel) connected with ID 1
+Input jack 0 on module 2 not connected
+Input jack 0 on module 3 not connected
+Input jack 0 on module 4 not connected
+Input jack 1 on module 4 not connected
+Input jack 2 on module 4 not connected
+Input jack 0 on module 5 not connected
+Input jack 1 on module 5 not connected
+Input jack 2 on module 5 not connected
+Input jack 3 on module 5 not connected
+Input jack 0 on module 6 not connected
+Input jack 1 on module 6 not connected
+Input jack 0 on module 7 not connected
+Input jack 1 on module 7 not connected
+Input jack 2 on module 7 not connected
+Input jack 3 on module 7 not connected
+Input jack 0 on module 8 not connected
+Input jack 1 on module 8 not connected
+Input jack 0 on module 9 not connected
+Input jack 0 on module 10 not connected
+Input jack 1 on module 10 not connected
+Input jack 0 on module 11 not connected
+Input jack 1 on module 11 not connected
+Input jack 0 on module 1 not connected
+Input jack 1 on module 1 not connected
+Input jack 2 on module 1 not connected
+Input jack 3 on module 1 not connected
+Parameter # 0 on module # 2 value is 0.000000
+Parameter # 1 on module # 2 value is 0.000000
+Parameter # 2 on module # 2 value is 0.000000
+Parameter # 0 on module # 3 value is 0.000000
+Parameter # 1 on module # 3 value is 0.000000
+Parameter # 0 on module # 4 value is 0.000000
+Parameter # 0 on module # 5 value is 0.000000
+Parameter # 1 on module # 5 value is 0.000000
+Parameter # 2 on module # 5 value is 0.000000
+Parameter # 3 on module # 5 value is 0.000000
+Parameter # 0 on module # 8 value is 0.000000
+Parameter # 1 on module # 8 value is 0.000000
+Parameter # 0 on module # 9 value is 0.000000
+Parameter # 1 on module # 9 value is 0.000000
+Parameter # 2 on module # 9 value is 0.000000
+Parameter # 3 on module # 9 value is 0.000000
+Parameter # 0 on module # 10 value is 0.000000
+Parameter # 1 on module # 10 value is 0.000000
+Parameter # 2 on module # 10 value is 0.000000
+Parameter # 3 on module # 10 value is 0.000000
+Parameter # 0 on module # 11 value is 0.000000
+Parameter # 1 on module # 11 value is 0.000000
+Parameter # 0 on module # 1 value is 0.000000
+Parameter # 1 on module # 1 value is 0.000000
+Parameter # 2 on module # 1 value is 0.000000
+Parameter # 3 on module # 1 value is 0.000000

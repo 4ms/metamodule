@@ -1,0 +1,6 @@
+{
+      "slug": "slugTemplate",
+      "name": "nameTemplate",
+      "description": "MODULEDESCRIPTION",
+      "tags": []
+},

@@ -1,0 +1,119 @@
+{
+  "slug": "4msCompany",
+  "name": "4msCompany",
+  "version": "1.0.0",
+  "license": "proprietary",
+  "brand": "4msCompany",
+  "author": "",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [ 
+	{
+	  "slug": "comparator",
+	  "name": "Comparator",
+	  "description": "",
+	  "tags": []
+	}, 
+	{
+	  "slug": "send",
+	  "name": "Send",
+	  "description": "",
+	  "tags": []
+	},
+    {
+      "slug": "expanderModule",
+      "name": "Hub",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "lfo",
+      "name": "lfo",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "ad_envelope",
+      "name": "AD envelope",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "4hptemplate",
+      "name": "4hp template",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "8hptemplate",
+      "name": "8hp template",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "12hptemplate",
+      "name": "12hp template",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "16hptemplate",
+      "name": "16hp template",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "crossfade",
+      "name": "crossfade",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "mixer4",
+      "name": "mixer4",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "logic",
+      "name": "logic",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "samplehold",
+      "name": "samplehold",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "attenuvert",
+      "name": "attenuvert",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "fadedelay",
+      "name": "fadedelay",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "vca",
+      "name": "vca",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "PatchPlayer",
+      "name": "Patch Player",
+      "description": "",
+      "tags": []
+    }
+  ]
+}
