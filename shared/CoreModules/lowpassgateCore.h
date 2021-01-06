@@ -12,14 +12,16 @@ class LowpassgateCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-	    float slewedControl = expDecay.update(levelControl);
+		float levelCV = levelControl+cvAmount*cvInput;
+		levelCV = constrain(levelCV,0.0f,1.0f);
+	    float slewedControl = expDecay.update(levelCV);
 		lpf.set_param(0, slewedControl);
+		lpf.set_param(1,0.0f);
 		signalOutput = (lpf.update(signalInput) * slewedControl);
 	}
 
 	LowpassgateCore()
 	{
-				lpf.set_param(1,0.0f);
 	}
 
 	virtual void set_param(int const param_id, const float val) override
@@ -27,7 +29,11 @@ public:
 		if (param_id == 0) {
 			levelControl = val;
 		}
-		if (param_id == 1) {
+		if(param_id ==1)
+		{
+			cvAmount=val;
+		}
+		if (param_id == 2) {
 			expDecay.decayTime = map_value(val, 0.F, 1.F, 10.F, 1000.0F);
 		}
 	}
@@ -41,7 +47,11 @@ public:
 	{
 		switch (input_id) {
 			case 0:
+			cvInput=val;
+			break;
+			case 1:
 			signalInput=val;
+			break;
 		}
 		
 	}
@@ -68,6 +78,8 @@ public:
 private:
     float signalInput=0;
 	float signalOutput=0;
+	float cvInput=0;
+	float cvAmount=0;
     LowPassFilter lpf;
 	ExpDecay expDecay;
 	float levelControl=1;

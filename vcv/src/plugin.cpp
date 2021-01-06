@@ -7,6 +7,7 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelLowpassfilter);
 p->addModel(modelLowpassgate); 
 p->addModel(modelClkmultiplier); 
 p->addModel(modelClkdivider);

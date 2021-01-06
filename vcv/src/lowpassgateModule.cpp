@@ -6,10 +6,12 @@ struct LowpassgateModule : CommModule {
 
 	enum ParamIds {
 		LEVEL_PARAM,
+		CV_PARAM,
 		DECAY_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
+		CV_INPUT,
 		SIGNAL_INPUT,
 		NUM_INPUTS
 	};
@@ -27,6 +29,7 @@ struct LowpassgateModule : CommModule {
         core = ModuleFactory::create("LOWPASSGATE");
 		selfID.typeID = "LOWPASSGATE";
 		inputJacks[LowpassgateModule::SIGNAL_INPUT]->scale = [](float f) { return f / 5.0f; };
+		inputJacks[LowpassgateModule::CV_INPUT]->scale = [](float f) { return f / 5.0f; };
 		outputJacks[LowpassgateModule::SIGNAL_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 	}
 };
@@ -46,9 +49,11 @@ struct LowpassgateWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hp.svg")));
 
 		addLabeledKnob("LVL",LowpassgateModule::LEVEL_PARAM,{0,0});
-		addLabeledKnob("DECAY",LowpassgateModule::DECAY_PARAM,{0,1});
+		addLabeledKnob("CV",LowpassgateModule::CV_PARAM,{0,1});
+		addLabeledKnob("DECAY",LowpassgateModule::DECAY_PARAM,{0,2});
 
 		addLabeledOutput("OUT",LowpassgateModule::SIGNAL_OUTPUT,{0,0});
+		addLabeledInput("CV",LowpassgateModule::CV_INPUT,{0,2});
 		addLabeledInput("IN",LowpassgateModule::SIGNAL_INPUT,{0,1});
 	}
 };
