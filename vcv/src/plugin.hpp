@@ -6,10 +6,10 @@ using namespace rack;
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin *pluginInstance;
 
-// Declare each Model, defined in each module source file 
+// Declare each Model, defined in each module source file
 extern Model *modelLowpassfilter;
-extern Model *modelLowpassgate; 
-extern Model *modelClkmultiplier; 
+extern Model *modelLowpassgate;
+extern Model *modelClkmultiplier;
 extern Model *modelClkdivider;
 // extern Model *modelDual_opener;
 // extern Model *modelDspTemplate;
@@ -36,4 +36,3 @@ extern Model *modelFadeDelay;
 extern Model *modelVCA;
 extern Model *modelComparator;
 extern Model *modelSend;
-

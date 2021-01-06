@@ -20,6 +20,12 @@
       "tags": []
     },
 {
+      "slug": "LOWPASSFILTER",
+      "name": "Lowpassfilter",
+      "description": "Low Pass Filter",
+      "tags": []
+}, 
+{
       "slug": "LOWPASSGATE",
       "name": "Lowpassgate",
       "description": "Low Pass Gate",

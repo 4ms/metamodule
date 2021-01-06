@@ -6,10 +6,10 @@ void init(Plugin *p)
 {
 	pluginInstance = p;
 
-	// Add modules here 
+	// Add modules here
 p->addModel(modelLowpassfilter);
-p->addModel(modelLowpassgate); 
-p->addModel(modelClkmultiplier); 
+p->addModel(modelLowpassgate);
+p->addModel(modelClkmultiplier);
 p->addModel(modelClkdivider);
 	// p->addModel(modelDual_opener);
 	// p->addModel(modelDspTemplate);
