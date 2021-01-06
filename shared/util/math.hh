@@ -1,4 +1,5 @@
 #pragma once
+#include "tests/doctest.h"
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -48,11 +49,10 @@ inline float interpolate(float in1, float in2, float x)
 	return (in2 * x) + in1 * (1.0f - x);
 }
 
-// Todo: make more efficient, combining operations
-inline float randomNumber(float minNum, float maxNum)
+template<class T>
+T randomNumber(T minNum, T maxNum)
 {
-	float tempRand = (rand() % 10000) / 9999.0f;
-	return (map_value(tempRand, 0.0f, 1.0f, minNum, maxNum));
+	return map_value(std::rand(), 0, RAND_MAX, minNum, maxNum);
 }
 
 template<int N>
