@@ -42,7 +42,7 @@ struct ClkdividerWidget : CommModuleWidget {
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hp.svg")));
 
-addLabeledKnob("DIV",ClkdividerModule::DIVISION_PARAM,{0,0});
+		addLabeledKnob("DIV",ClkdividerModule::DIVISION_PARAM,{0,0});
 		addLabeledInput("CLK IN",ClkdividerModule::CLOCK_INPUT,{0,1});
 		addLabeledOutput("CLK OUT",ClkdividerModule::CLOCK_OUTPUT,{0,0});
 	}
