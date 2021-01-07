@@ -1,0 +1,4 @@
+[submodule "F7/lib/mdrivlib"]
+	path = F7/lib/mdrivlib
+	url = git@github.com:4ms/mdrivlib.git
+	branch = main
