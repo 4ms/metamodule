@@ -12,7 +12,7 @@ class LowPassFilter : public AudioProcessor {
 public:
 	virtual float update(float input)
 	{
-		float output=0;
+		float output = 0;
 		float fSlow0 = (1.0f / float(q));
 		float fSlow1 = std::tan((fConst0 * float(cutoff)));
 		float fSlow2 = (1.0f / fSlow1);
@@ -42,16 +42,16 @@ public:
 		const float maxCutoff = 20000.f;
 
 		if (param_id == 0) {
-				cutoff = map_value(val * val, 0.f, 1.f, minCutoff, maxCutoff);
+			cutoff = map_value(val * val, 0.f, 1.f, minCutoff, maxCutoff);
 		}
 		if (param_id == 1) {
-				q=map_value(val,0.0f,1.0f,0.1f,20.0f);
+			q = map_value(val, 0.0f, 1.0f, 0.1f, 20.0f);
 		}
 	}
 	virtual void set_samplerate(float sr)
 	{
 		samplerate = constrain(sr, 1.0f, 192000.0f);
-		fConst0 = (3.14159274f / std::min<float>(192000.0f, std::max<float>(1.0f, float(samplerate))));
+		fConst0 = (3.14159274f / min<float>(192000.0f, max<float>(1.0f, float(samplerate))));
 	}
 
 	//~LowPassFilter() {}
@@ -59,13 +59,14 @@ public:
 private:
 	CubicNonlinearDist dist;
 	float cutoff;
-	float q=1;
+	float q = 1;
 	float fRec0[3];
-	float samplerate=48000;
+	float samplerate = 48000;
 	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5;
-	float fConst0=1;
+	float fConst0 = 1;
 
-	static float mydsp_faustpower2_f(float value) {
-	return (value * value);
-}
+	static float mydsp_faustpower2_f(float value)
+	{
+		return (value * value);
+	}
 };
