@@ -11,7 +11,7 @@ DEVICE 			= $(LIBDIR)/stm32/device
 CORE 			= $(LIBDIR)/stm32/core
 PERIPH 			= $(LIBDIR)/stm32/periph
 DRIVERLIB       = $(LIBDIR)/mdrivlib
-SHARED  		= ../shared
+SHARED  		= $(PWD)/../shared
 TABLEGEN 		= $(SHARED)/tableGen
 
 BUILDDIR 		= build
@@ -181,7 +181,10 @@ ifneq "$(MAKECMDGOALS)" "clean"
 endif
 
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
-.PHONY: all clean flash tables
+.PHONY: all clean flash tables tests
+
+tests:
+	cd $(SHARED)/util/tests && make tests
 
 generate_compile_txt:
 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \
