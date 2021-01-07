@@ -121,8 +121,6 @@ TEST_CASE("Log2 template")
 	}
 }
 
-TEST_CASE("bipolar_type_range()") {}
-
 TEST_CASE("Testing randomNumber()")
 {
 	SUBCASE("results are in range")
@@ -170,3 +168,55 @@ TEST_CASE("Testing randomNumber()")
 		}
 	}
 }
+TEST_CASE("math_tests: wrapping")
+{
+	uint32_t a = 0;
+	CHECK(1 == MathTools::wrap<5>(a + 1));
+	a++;
+	CHECK(2 == MathTools::wrap<5>(a + 1));
+	a++;
+	CHECK(3 == MathTools::wrap<5>(a + 1));
+	a++;
+	CHECK(4 == MathTools::wrap<5>(a + 1));
+	a++;
+	CHECK(0 == MathTools::wrap<5>(a + 1));
+}
+
+TEST_CASE("math_tests: ipow_tests")
+{
+	SUBCASE("1 to any power is 1")
+	{
+		CHECK(1 == MathTools::ipow(1, 0));
+		// CHECK(1 == MathTools::ipow(1, -10)); //FixMe: CRASH!
+		CHECK(1 == MathTools::ipow(1, 1));
+		CHECK(1 == MathTools::ipow(1, 11111));
+	}
+	SUBCASE("Powers of 2")
+	{
+		CHECK(1 == MathTools::ipow(2, 0));
+		CHECK(2 == MathTools::ipow(2, 1));
+		CHECK(4 == MathTools::ipow(2, 2));
+		CHECK(32768 == MathTools::ipow(2, 15));
+		CHECK(65536 == MathTools::ipow(2, 16));
+		CHECK(0x80000000U == MathTools::ipow(2, 31));
+		SUBCASE("2^32 overflows to 0")
+		{
+			CHECK(0x00000000 == MathTools::ipow(2, 32));
+		}
+	}
+}
+
+TEST_CASE("math_tests: sizeof_type_test")
+{
+	uint8_t u8 = 0;
+	int8_t i8 = 0;
+	uint16_t u16 = 0;
+	int16_t i16 = 0;
+
+	CHECK(32767 == MathTools::bipolar_type_range(u16));
+	CHECK(32767 == MathTools::bipolar_type_range(i16));
+
+	CHECK(127 == MathTools::bipolar_type_range(u8));
+	CHECK(127 == MathTools::bipolar_type_range(i8));
+}
+

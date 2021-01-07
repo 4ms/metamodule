@@ -1,6 +1,6 @@
-
-
-#include "bitfield.hh"
+#include "../bitfield.hh"
+#include "doctest.h"
+#include <cstdint>
 
 BitFieldBase<uint8_t> bf8;
 BitFieldBase<uint16_t> bf16;

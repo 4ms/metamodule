@@ -1,5 +1,5 @@
-
-#include "interp_param.hh"
+#include "../interp_param.hh"
+#include "doctest.h"
 #include <array>
 
 TEST_CASE("interp_param_tests: inits_to_zero")
@@ -30,29 +30,29 @@ TEST_CASE("interp_param_tests: many_many_updates")
 	for (unsigned int i = 0; i < (updates - 1); i++)
 		x.next();
 
-	DOUBLES_EQUAL(123456789.0, x.next(), 0.000001);
+	CHECK_EQ(x.next(), doctest::Approx(123456789.0).epsilon(0.000001));
 }
 
 TEST_CASE("interp_param_tests: goes_negative")
 {
 	Interp<long, 3> x;
 	x.set_new_value(-12L);
-	LONGS_EQUAL(-4L, x.next());
-	LONGS_EQUAL(-8L, x.next());
-	LONGS_EQUAL(-12L, x.next());
+	CHECK_EQ(-4L, x.next());
+	CHECK_EQ(-8L, x.next());
+	CHECK_EQ(-12L, x.next());
 }
 
 TEST_CASE("interp_param_tests: two_updates_opposite_directions")
 {
 	Interp<long, 3> x;
 	x.set_new_value(-12L);
-	LONGS_EQUAL(-4L, x.next());
-	LONGS_EQUAL(-8L, x.next());
-	LONGS_EQUAL(-12L, x.next());
+	CHECK_EQ(-4L, x.next());
+	CHECK_EQ(-8L, x.next());
+	CHECK_EQ(-12L, x.next());
 	x.set_new_value(9L);
-	LONGS_EQUAL(-5L, x.next());
-	LONGS_EQUAL(2L, x.next());
-	LONGS_EQUAL(9L, x.next());
+	CHECK_EQ(-5L, x.next());
+	CHECK_EQ(2L, x.next());
+	CHECK_EQ(9L, x.next());
 }
 
 TEST_CASE("interp_param_tests: overflow_keeps_incrementing")
@@ -65,7 +65,7 @@ TEST_CASE("interp_param_tests: overflow_keeps_incrementing")
 	CHECK(x.next() == 8.0f);
 	CHECK(x.next() == 10.0f);
 	CHECK(x.next() == 12.0f);
-	FLOATS_NEARLY_EQUAL(14.0f, x.next());
+	CHECK_EQ(x.next(), doctest::Approx(14.));
 }
 
 TEST_CASE("interp_param_tests: zero_breaks")
@@ -79,5 +79,6 @@ TEST_CASE("interp_param_tests: step_size_is_nearly_zero_if_value_doesnt_change")
 	x.set_new_value(12.f);
 	CHECK(x.next() == 12.f);
 	x.set_new_value(12.f);
-	FLOATS_NEARLY_EQUAL(x.get_step_size(), (float)0.f);
+	CHECK_EQ(x.get_step_size(), doctest::Approx(0.));
 }
+

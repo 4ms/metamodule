@@ -1,6 +1,5 @@
-
-#include "audio_frame.hh"
-#include "fff.h"
+#include "../audio_frame.hh"
+#include "doctest.h"
 
 using AudioFrame = GenericAudioFrame<int32_t, 24>;
 TEST_CASE("audio_frame_tests: input_scales")
@@ -8,22 +7,22 @@ TEST_CASE("audio_frame_tests: input_scales")
 	AudioFrame a;
 
 	a.l = 0x00000000;
-	FLOATS_NEARLY_EQUAL(0.0f, AudioFrame::scaleInput(a.l));
+	CHECK(((float)AudioFrame::scaleInput(a.l)) == doctest::Approx(0.0));
 
 	a.l = 0x00400000;
-	FLOATS_NEARLY_EQUAL(0.5f, AudioFrame::scaleInput(a.l));
+	CHECK(((float)AudioFrame::scaleInput(a.l)) == doctest::Approx(0.5));
 
 	a.l = 0x007FFFFF;
-	FLOATS_NEARLY_EQUAL(1.0f, AudioFrame::scaleInput(a.l));
+	CHECK(((float)AudioFrame::scaleInput(a.l)) == doctest::Approx(1.0));
 
 	a.r = 0x800000;
-	FLOATS_NEARLY_EQUAL(-1.0f, AudioFrame::scaleInput(a.r));
+	CHECK(((float)AudioFrame::scaleInput(a.r)) == doctest::Approx(-1.0));
 
 	a.r = 0xC00000;
-	FLOATS_NEARLY_EQUAL(-0.5f, AudioFrame::scaleInput(a.r));
+	CHECK(((float)AudioFrame::scaleInput(a.r)) == doctest::Approx(-0.5));
 
 	a.r = 0xFFFFFF;
-	FLOATS_NEARLY_EQUAL(0.0f, AudioFrame::scaleInput(a.r));
+	CHECK(((float)AudioFrame::scaleInput(a.r)) == doctest::Approx(0.0));
 }
 
 TEST_CASE("audio_frame_tests: output_scales")
