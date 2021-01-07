@@ -1,4 +1,127 @@
 #include "../math.hh"
+#include "doctest.h"
+
+TEST_CASE("Testing map_value()")
+{
+	SUBCASE("basic float mapping usage")
+	{
+		auto mapped = MathTools::map_value(0.25f, 0.f, 1.f, 600.f, 700.f);
+		CHECK(mapped == 625.f);
+	}
+	SUBCASE("map a float from a float range to an integer range")
+	{
+		auto mapped = MathTools::map_value(1.25f, 1.f, 2.f, 600, 700);
+		CHECK(mapped == 625);
+	}
+	SUBCASE("map a float from an integer range to a float range")
+	{
+		auto mapped = MathTools::map_value(1.25f, 1, 2, -100.f, -200.f);
+		CHECK(mapped == -125.f);
+	}
+	SUBCASE("map an integer from an integer range to a float range")
+	{
+		auto mapped = MathTools::map_value(25, 10, 70, -100.f, -200.f);
+		CHECK(mapped == -125.f);
+	}
+	SUBCASE("map an integer from an float range to a integer range")
+	{
+		auto mapped = MathTools::map_value(25, 10.0, 70.0, -100, -200);
+		CHECK(mapped == -125);
+	}
+	SUBCASE("map to a zero-width range is always the same number")
+	{
+		int low = 10;
+		int high = 70;
+		for (int i = low; i <= high; i++) {
+			auto mapped = MathTools::map_value(i, 10, 70, 666, 666);
+			CHECK(mapped == 666);
+		}
+	}
+	SUBCASE("map an out-of-range number to a zero-width range is also the same number")
+	{
+		auto mapped = MathTools::map_value(-1000000, 10, 70, 666, 666);
+		CHECK(mapped == 666);
+
+		mapped = MathTools::map_value(7000000, 10, 70, 666, 666);
+		CHECK(mapped == 666);
+	}
+	SUBCASE("map an out-of-range number produces an out-of-range result")
+	{
+		auto mapped = MathTools::map_value(-1000000, 10L, 70L, 0, 10000);
+		CHECK(mapped < 0);
+
+		mapped = MathTools::map_value(7000000, 10L, 70L, 0, 10000);
+		CHECK(mapped > 10000);
+	}
+}
+
+TEST_CASE("Testing in_power_of_2()")
+{
+	CHECK(MathTools::is_power_of_2(1));
+	CHECK(MathTools::is_power_of_2(2));
+	CHECK(MathTools::is_power_of_2(4));
+	CHECK(MathTools::is_power_of_2(8));
+	CHECK(MathTools::is_power_of_2(16));
+	CHECK(MathTools::is_power_of_2(32));
+	//...
+	CHECK(MathTools::is_power_of_2(0x10000000));
+	CHECK(MathTools::is_power_of_2(0x20000000));
+	CHECK(MathTools::is_power_of_2(0x40000000));
+	CHECK(MathTools::is_power_of_2(0x80000000));
+
+	CHECK_FALSE(MathTools::is_power_of_2(0));
+	CHECK_FALSE(MathTools::is_power_of_2(3));
+	CHECK_FALSE(MathTools::is_power_of_2(5));
+	CHECK_FALSE(MathTools::is_power_of_2(6));
+	CHECK_FALSE(MathTools::is_power_of_2(7));
+	//...
+	CHECK_FALSE(MathTools::is_power_of_2(0xFFFFFFFF));
+	CHECK_FALSE(MathTools::is_power_of_2(0xFFFFFFFE));
+	CHECK_FALSE(MathTools::is_power_of_2(0xFFFFFFFD));
+	CHECK_FALSE(MathTools::is_power_of_2(0xFFFFFFFC));
+	CHECK_FALSE(MathTools::is_power_of_2(0xFFFFFFFB));
+	CHECK_FALSE(MathTools::is_power_of_2(0xFFFFFFFA));
+	CHECK_FALSE(MathTools::is_power_of_2(0xBFFFFFFF));
+	CHECK_FALSE(MathTools::is_power_of_2(0xC0000000));
+	CHECK_FALSE(MathTools::is_power_of_2(0xC0000001));
+	CHECK_FALSE(MathTools::is_power_of_2(0x7FFFFFFF));
+	CHECK_FALSE(MathTools::is_power_of_2(0x80000001));
+}
+
+TEST_CASE("Log2 template")
+{
+	SUBCASE("Check weird Log2(0) = 1 thing")
+	{
+		CHECK(MathTools::Log2<0>::val == 1); // Is this important?
+	}
+
+	SUBCASE("Check normal powers of 2")
+	{
+		CHECK(MathTools::Log2<1>::val == 0);
+		CHECK(MathTools::Log2<2>::val == 1);
+		CHECK(MathTools::Log2<4>::val == 2);
+		CHECK(MathTools::Log2<8>::val == 3);
+		CHECK(MathTools::Log2<16>::val == 4);
+		//...
+		CHECK(MathTools::Log2<0x20000000>::val == 29);
+		CHECK(MathTools::Log2<0x40000000>::val == 30);
+		CHECK(MathTools::Log2<0x80000000>::val == 31);
+	}
+
+	SUBCASE("Lowest closest integer (floor) of log2(val) is returned")
+	{
+		CHECK(MathTools::Log2<3>::val == MathTools::Log2<2>::val);
+
+		CHECK(MathTools::Log2<5>::val == MathTools::Log2<4>::val);
+		CHECK(MathTools::Log2<6>::val == MathTools::Log2<4>::val);
+		CHECK(MathTools::Log2<7>::val == MathTools::Log2<4>::val);
+
+		CHECK(MathTools::Log2<9>::val == MathTools::Log2<8>::val);
+		CHECK(MathTools::Log2<15>::val == MathTools::Log2<8>::val);
+	}
+}
+
+TEST_CASE("bipolar_type_range()") {}
 
 TEST_CASE("Testing randomNumber()")
 {

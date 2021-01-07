@@ -1,5 +1,4 @@
 #pragma once
-#include "tests/doctest.h"
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -44,9 +43,9 @@ static constexpr T min(const T val1, const T val2)
 	}
 }
 
-inline float interpolate(float in1, float in2, float x)
+inline float interpolate(float in1, float in2, float phase)
 {
-	return (in2 * x) + in1 * (1.0f - x);
+	return (in2 * phase) + in1 * (1.0f - phase);
 }
 
 template<class T>
@@ -55,7 +54,7 @@ T randomNumber(T minNum, T maxNum)
 	return map_value(std::rand(), 0, RAND_MAX, minNum, maxNum);
 }
 
-template<int N>
+template<unsigned int N>
 struct Log2 {
 	static constexpr int val = Log2<N / 2>::val + 1;
 };
@@ -73,7 +72,7 @@ constexpr unsigned int Log2Int(const unsigned int x)
 	return 0;
 }
 
-constexpr bool is_power_of_2(int v)
+constexpr bool is_power_of_2(unsigned int v)
 {
 	return v && ((v & (v - 1)) == 0);
 }
