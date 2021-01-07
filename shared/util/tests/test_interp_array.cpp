@@ -1,18 +1,7 @@
-#include "CppUTest/TestHarness.h"
+
 #include "interp_array.hh"
-#include <fff.h>
 
-#define FLOATS_NEARLY_EQUAL(e, a) DOUBLES_EQUAL(static_cast<double>(e), static_cast<double>(a), 0.00001);
-
-TEST_GROUP(interp_array_tests){
-
-	void setup(){}
-
-	void teardown(){}
-
-};
-
-TEST(interp_array_tests, inits_with_single_value_sets_just_first_element)
+TEST_CASE("interp_array_tests: inits_with_single_value_sets_just_first_element")
 {
 	InterpArray<long, 4> x = {42};
 	LONGS_EQUAL(42, x[0]);
@@ -21,7 +10,7 @@ TEST(interp_array_tests, inits_with_single_value_sets_just_first_element)
 	LONGS_EQUAL(0, x[2]);
 }
 
-TEST(interp_array_tests, inits_to_multiple_values)
+TEST_CASE("interp_array_tests: inits_to_multiple_values")
 {
 	InterpArray<long, 3> x = {42, 43, 44};
 	LONGS_EQUAL(42, x[0]);
@@ -29,7 +18,7 @@ TEST(interp_array_tests, inits_to_multiple_values)
 	LONGS_EQUAL(44, x[2]);
 }
 
-TEST(interp_array_tests, basic_usage_by_phase)
+TEST_CASE("interp_array_tests: basic_usage_by_phase")
 {
 	InterpArray<long, 4> x;
 	x[0] = 200;	 // 0
@@ -43,7 +32,7 @@ TEST(interp_array_tests, basic_usage_by_phase)
 	FLOATS_NEARLY_EQUAL(200.f, x.interp(0.f));
 }
 
-TEST(interp_array_tests, floats_by_phase)
+TEST_CASE("interp_array_tests: floats_by_phase")
 {
 	InterpArray<float, 3> x;
 	x[0] = 100.f;  // 0
@@ -57,7 +46,7 @@ TEST(interp_array_tests, floats_by_phase)
 	FLOATS_NEARLY_EQUAL(expected_0_875, x.interp(0.875f));
 }
 
-TEST(interp_array_tests, basic_usage_by_index)
+TEST_CASE("interp_array_tests: basic_usage_by_index")
 {
 	InterpArray<long, 300> x;
 	x[201] = 4200;
@@ -69,7 +58,7 @@ TEST(interp_array_tests, basic_usage_by_index)
 	FLOATS_NEARLY_EQUAL(4200.f, x.interp_by_index(201.f));
 }
 
-TEST(interp_array_tests, floats_by_index)
+TEST_CASE("interp_array_tests: floats_by_index")
 {
 	InterpArray<float, 3> x;
 	x[0] = 100.f;
@@ -77,7 +66,7 @@ TEST(interp_array_tests, floats_by_index)
 	FLOATS_NEARLY_EQUAL(115.6f, x.interp_by_index(0.156f));
 }
 
-TEST(interp_array_tests, interp_wrap_period_is_1)
+TEST_CASE("interp_array_tests: interp_wrap_period_is_1")
 {
 	InterpArray<float, 3> x;
 	x[0] = 100.f;
@@ -86,7 +75,7 @@ TEST(interp_array_tests, interp_wrap_period_is_1)
 	FLOATS_NEARLY_EQUAL(x.interp_wrap(0.0f), x.interp_wrap(1.0f));
 }
 
-TEST(interp_array_tests, wrapping_by_phase)
+TEST_CASE("interp_array_tests: wrapping_by_phase")
 {
 	InterpArray<float, 3> x;
 	x[0] = 100.f;  // 0.00, 1.00, 2.00...
@@ -99,7 +88,7 @@ TEST(interp_array_tests, wrapping_by_phase)
 	}
 }
 
-TEST(interp_array_tests, wrapping_by_phase_loop_transition_is_smooth)
+TEST_CASE("interp_array_tests: wrapping_by_phase_loop_transition_is_smooth")
 {
 	InterpArray<float, 3> x;
 	x[0] = 100.f;  // 0.00, 1.00, 2.00...
@@ -117,7 +106,7 @@ TEST(interp_array_tests, wrapping_by_phase_loop_transition_is_smooth)
 	FLOATS_NEARLY_EQUAL(loop_transition_middle, x.interp_wrap(2.5f / 3.0f));
 }
 
-TEST(interp_array_tests, index_wrap_period_is_Size)
+TEST_CASE("interp_array_tests: index_wrap_period_is_Size")
 {
 	const int Size = 3;
 	InterpArray<float, Size> x;
@@ -127,7 +116,7 @@ TEST(interp_array_tests, index_wrap_period_is_Size)
 	FLOATS_NEARLY_EQUAL(x.interp_by_index_wrap(0), x.interp_by_index_wrap((float)Size));
 }
 
-TEST(interp_array_tests, wrapping_by_index)
+TEST_CASE("interp_array_tests: wrapping_by_index")
 {
 	InterpArray<float, 3> x;
 	x[0] = 100.f;  // 0.00, 1.00, 2.00...
@@ -139,7 +128,7 @@ TEST(interp_array_tests, wrapping_by_index)
 	}
 }
 
-TEST(interp_array_tests, basic_usage_of_closest)
+TEST_CASE("interp_array_tests: basic_usage_of_closest")
 {
 	InterpArray<float, 3> x;
 	x[0] = 100.f;
@@ -153,7 +142,7 @@ TEST(interp_array_tests, basic_usage_of_closest)
 	FLOATS_NEARLY_EQUAL(150.f, x.closest(1.f));
 }
 
-TEST(interp_array_tests, wrapping_with_closest)
+TEST_CASE("interp_array_tests: wrapping_with_closest")
 {
 	InterpArray<float, 3> x;
 	x[0] = 100.f; // 0.00, 1.00, 2.00, ...
