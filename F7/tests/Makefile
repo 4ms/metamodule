@@ -40,8 +40,9 @@ INCLUDE_DIRS =\
 	$(DUT_LIBDIR)/stm32/device/include \
 	$(DUT_LIBDIR)/stm32/core/include \
 	$(DUT_LIBDIR)/mdrivlib \
+	../shared/util \
+	../shared \
 	src \
-	src/util \
 
 
 MOCKS_SRC_DIRS = \

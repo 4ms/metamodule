@@ -23,3 +23,10 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
+
+compile_commands:
+	rm -rf build
+	bear make -j16 all
+	compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
+	rm compile_commands.json 
+	mv compile_commands_with_headers.json compile_commands.json

@@ -1,5 +1,5 @@
 #include "CppUTest/TestHarness.h"
-#include "util/interp_param.hh"
+#include "interp_param.hh"
 #include <array>
 #include <fff.h>
 

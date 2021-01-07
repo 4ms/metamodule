@@ -1,9 +1,10 @@
 #pragma once
 
 #include "audio_processor.hh"
-#include "math.hh"
 #include "tools/cubicDist.h"
+#include "util/math.hh"
 #include "util/math_tables.hh"
+#include <algorithm>
 #include <cmath>
 
 using namespace MathTools;
