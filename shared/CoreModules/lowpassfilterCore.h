@@ -1,9 +1,9 @@
 #pragma once
 
+#include "../processors/lpf.h"
+#include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
-#include "CoreModules/moduleTypes.h"
-#include "../processors/lpf.h"
 
 using namespace MathTools;
 
@@ -11,28 +11,30 @@ class LowpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-	signalOut=lpf.update(signalIn);
+		signalOut = lpf.update(signalIn);
 	}
 
-	LowpassfilterCore()
-	{
-	}
+	LowpassfilterCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
-			lpf.set_param(param_id,val);
+		if (param_id == 0) {
+			lpf.cutoff.setValue(map_value(val * val, 0.0f, 1.0f, 20.0f, 20000.0f));
+		} else if (param_id == 1) {
+			lpf.q.setValue(map_value(val, 0.0f, 1.0f, 1.0f, 20.0f));
+		}
 	}
 	virtual void set_samplerate(const float sr) override
 	{
-		lpf.set_samplerate(sr);
+		lpf.sampleRate.setValue(sr);
 	}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
 			case 0:
-			signalIn=val;
-			break;
+				signalIn = val;
+				break;
 		}
 	}
 
@@ -41,8 +43,8 @@ public:
 		float output = 0;
 		switch (output_id) {
 			case 0:
-			output = signalOut;
-			break;
+				output = signalOut;
+				break;
 		}
 		return output;
 	}
@@ -56,9 +58,7 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-
-LowPassFilter lpf;
-float signalIn=0;
-float signalOut=0;
-	
+	LowPassFilter lpf;
+	float signalIn = 0;
+	float signalOut = 0;
 };

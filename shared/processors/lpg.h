@@ -2,39 +2,43 @@
 #include "audio_processor.hh"
 #include "lpf.h"
 #include "tools/expDecay.h"
-#include "vca.h"
+#include "tools/parameter.h"
 
-class LPG : public AudioProcessor {
+class LowPassGate {
 public:
-	virtual float update(float input)
+	Parameter<float> level;
+	Parameter<float> decayTime;
+
+	Parameter<float> sampleRate;
+	float update(float input)
 	{
-		float slewedControl = expDecay.update(levelControl);
-		lpf.set_param(0, slewedControl);
+		if (sampleRate.isChanged()) {
+			lpf.sampleRate.setValue(sampleRate.getValue());
+			expDecay.set_samplerate(sampleRate.getValue());
+		}
+
+		slewedControl = expDecay.update(level.getValue());
+
+		if (decayTime.isChanged() || level.isChanged()) {
+			expDecay.decayTime = decayTime.getValue();
+			lpf.cutoff.setValue(map_value(slewedControl, 0.0f, 1.0f, 20.0f, 20000.0f));
+		}
+
 		return (lpf.update(input) * slewedControl);
+		;
 	}
 
-	LPG()
+	LowPassGate()
 	{
-		levelControl = 1;
-	}
-
-	virtual void set_param(int param_id, float val)
-	{
-		if (param_id == 0) {
-			levelControl = val;
-		}
-		if (param_id == 1) {
-			expDecay.decayTime = map_value(val, 0.F, 1.F, 10.F, 1000.0F);
-		}
-	}
-	virtual void set_samplerate(float sr)
-	{
-		lpf.set_samplerate(sr);
-		expDecay.set_samplerate(sr);
+		level.setValue(1.0f);
+		lpf.q.setValue(1);
+		lpf.cutoff.setValue(20000);
+		expDecay.decayTime = 100.0f;
 	}
 
 private:
 	LowPassFilter lpf;
 	ExpDecay expDecay;
-	float levelControl;
+
+	float slewedControl = 0;
 };

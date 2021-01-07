@@ -13,7 +13,6 @@
 FXList::FXList()
 	: fxList{
 		  new FadeDelay,
-		  new LPG,
 		  new VCA,
 		  new WaveFolder,
 		  new BitCrusher}
