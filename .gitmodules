@@ -1,12 +1,4 @@
-[submodule "tests/cpputest"]
-	path = F7/tests/cpputest
-	url = https://github.com/cpputest/cpputest.git
-	branch = master
-[submodule "tests/fff"]
-	path = F7/tests/fff
-	url = https://github.com/meekrosoft/fff.git
-	branch = master
-[submodule "lib/mdrivlib"]
+[submodule "F7/lib/mdrivlib"]
 	path = F7/lib/mdrivlib
 	url = git@github.com:4ms/mdrivlib.git
 	branch = main
