@@ -1,8 +1,8 @@
 import sys
 
-effectName = input()
-description = input()
-moduleTypesFile = '../src/CoreModules/moduleTypes.h'
+effectName = raw_input()
+description = raw_input()
+moduleTypesFile = '../../shared/CoreModules/moduleTypes.h'
 coreTemplate = 'coreTemplate.txt'
 plugincpp = '../src/plugin.cpp'
 pluginhpp = '../src/plugin.hpp'
@@ -35,13 +35,13 @@ filedata = filedata.replace('TemplateCore', newText)
 filedata = filedata.replace('SLUG',effectName.upper())
 filedata = filedata.replace('DESCRIPTION',description)
 
-newCoreFileName='../src/CoreModules/' + effectName.lower()+'Core.h'
+newCoreFileName='../../shared/CoreModules/' + effectName.lower()+'Core.h'
 
 # Write the file out again
 with open(newCoreFileName, 'w') as file:
   file.write(filedata)
 
-newCoreCPP = '../src/CoreModules/' + effectName.lower()+'Core.cpp'
+newCoreCPP = '../../shared/CoreModules/' + effectName.lower()+'Core.cpp'
 
 with open(newCoreCPP,'w') as file:
   file.write("#include " + '\"' + effectName.lower()+'Core.h' + '\"')

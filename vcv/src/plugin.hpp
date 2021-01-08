@@ -6,7 +6,8 @@ using namespace rack;
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin *pluginInstance;
 
-// Declare each Model, defined in each module source file
+// Declare each Model, defined in each module source file 
+extern Model *modelFreqshift;
 extern Model *modelLowpassfilter;
 extern Model *modelLowpassgate;
 extern Model *modelClkmultiplier;

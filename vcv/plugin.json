@@ -13,6 +13,12 @@
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [ 
+{
+      "slug": "FREQSHIFT",
+      "name": "Freqshift",
+      "description": "Frequency Shifter",
+      "tags": []
+}, 
     {
       "slug": "LOWPASSFILTER",
       "name": "Lowpassfilter",

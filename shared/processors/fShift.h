@@ -1,14 +1,15 @@
 #pragma once
 #include "math.hh"
-#include "processors/audio_processor.hh"
+#include "tools/parameter.h"
 #include <cmath>
 
 using namespace MathTools;
 
-class FreqShift : public AudioProcessor {
+class FreqShift {
 public:
-	float shiftAmount = 0;
-	float mix = 1.0f;
+	Parameter<float> shift;
+	Parameter<float> mix;
+	Parameter<float> sampleRate;
 
 	FreqShift()
 	{
@@ -30,10 +31,14 @@ public:
 		}
 	}
 
-	virtual float update(float input)
+	float update(float input)
 	{
+		if (sampleRate.isChanged()) {
+			fConst0 = (1.0f / constrain(sr, 1.0f, 192000.0f));
+		}
+
 		float output = 0;
-		float fSlow0 = (fConst0 * shiftAmount);
+		float fSlow0 = (fConst0 * shift.getValue());
 		float fTemp0 = float(input);
 		float fTemp1 = (0.0256900005f * fRec1[1]);
 		fRec1[0] = ((fTemp0 + (0.260502011f * fRec1[2])) - fTemp1);
@@ -56,21 +61,8 @@ public:
 		fRec4[1] = fRec4[0];
 		fRec3[2] = fRec3[1];
 		fRec3[1] = fRec3[0];
-		return (output * mix + input * (1.0f - mix));
-	}
-
-	virtual void set_param(int param_id, float val)
-	{
-		if (param_id == 0) {
-			shiftAmount = map_value(val, 0.0f, 1.0f, -1000.0f, 1000.0f);
-		}
-		if (param_id == 1) {
-			mix = val;
-		}
-	}
-	virtual void set_samplerate(float sr)
-	{
-		fConst0 = (1.0f / constrain(sr, 1.0f, 192000.0f));
+		auto mixAmount = mix.getValue();
+		return (output * mixAmount + input * (1.0f - mixAmount));
 	}
 
 private:
