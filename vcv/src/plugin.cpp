@@ -6,7 +6,8 @@ void init(Plugin *p)
 {
 	pluginInstance = p;
 
-	// Add modules here
+	// Add modules here 
+p->addModel(modelBitcrush);
 	p->addModel(modelPhaser);
 	p->addModel(modelFreqshift);
 	p->addModel(modelLowpassfilter);
