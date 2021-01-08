@@ -1,25 +1,64 @@
 #pragma once
 
 #include "util/math_tables.hh"
-#include "audio_processor.hh"
 //#include "debug.hh"
 #include "math.hh"
 #include "tools/cubicDist.h"
 #include "tools/delayLine.h"
+#include "tools/parameter.h"
 #include <cmath>
 
 using namespace MathTools;
 
-class Phaser : public AudioProcessor {
+class Phaser {
 public:
-	virtual float update(float input)
+	Parameter<float> lfoDepth;
+	Parameter<float> feedback;
+	Parameter<float> lfoSpeed;
+	Parameter<float> freqMax;
+	Parameter<float> freqMin;
+	Parameter<float> width;
+	Parameter<float> sampleRate;
+	float update(float input)
 	{
+		if (sampleRate.isChanged()) {
+			fConst0 = constrain(sampleRate.getValue(), 1.0f, 192000.0f);
+			fConst1 = (1.0f / fConst0);
+			fConst2 = (6.28318548f / fConst0);
+		}
+
+		int changeDetected = 0;
+		changeDetected += lfoDepth.isChanged();
+		changeDetected += feedback.isChanged();
+		changeDetected += lfoSpeed.isChanged();
+		changeDetected += freqMax.isChanged();
+		changeDetected += freqMin.isChanged();
+		changeDetected += width.isChanged();
+		if (changeDetected > 0) {
+			fVslider0 = lfoDepth.getValue();
+			fVslider1 = map_value(width.getValue(), 0.0f, 1.0f, 50.0f, 5000.0f);
+			fVslider2 = feedback.getValue();
+			fVslider3 = map_value(freqMin.getValue(), 0.0f, 1.0f, 1.0f, 10000.0f);
+			fVslider4 = map_value(freqMax.getValue(), 0.0f, 1.0f, 1.0f, 10000.0f);
+			fVslider5 = map_value(lfoSpeed.getValue(), 0.0f, 1.0f, 0.1f, 10.0f);
+			fSlow0 = (0.5f * float(fVslider0));
+			fSlow1 = (1.0f - fSlow0);
+			fSlow2 = expf((fConst1 * (0.0f - (3.14159274f * float(fVslider1)))));
+			fSlow3 = fSlow2 * fSlow2;
+			fSlow4 = float(fVslider2);
+			fSlow5 = (0.0f - (2.0f * fSlow2));
+			fSlow6 = float(fVslider3);
+			fSlow7 = (fConst2 * fSlow6);
+			fSlow8 = (0.5f * (0.0f - (fConst2 * (fSlow6 - float(fVslider4)))));
+			fSlow9 = (fConst2 * float(fVslider5));
+			fSlow10 = std::sin(fSlow9);
+			fSlow11 = std::cos(fSlow9);
+		}
 		float fTemp0 = input;
 		iVec0[0] = 1;
 		fRec7[0] = ((fSlow10 * fRec8[1]) + (fSlow11 * fRec7[1]));
 		fRec8[0] = ((float((1 - iVec0[1])) + (fSlow11 * fRec8[1])) - (fSlow10 * fRec7[1]));
-		float fTemp1 = 0;
-		//float fTemp1 = std::cos((fSlow7 + (fSlow8 * (1.0f - fRec7[0]))));
+		float fTemp1 = std::cos((fSlow7 + (fSlow8 * (1.0f - fRec7[0]))));
 		fRec6[0] = ((fTemp0 + (fSlow4 * fRec0[1])) - ((fSlow5 * (fRec6[1] * fTemp1)) + (fSlow3 * fRec6[2])));
 		fRec5[0] = ((fSlow3 * (fRec6[0] - fRec5[2])) + (fRec6[2] + (fSlow5 * (fTemp1 * (fRec6[1] - fRec5[1])))));
 		fRec4[0] = ((fSlow3 * (fRec5[0] - fRec4[2])) + (fRec5[2] + (fSlow5 * (fTemp1 * (fRec5[1] - fRec4[1])))));
@@ -49,7 +88,6 @@ public:
 
 	Phaser()
 	{
-		set_samplerate(48000.0f);
 		for (int l0 = 0; (l0 < 2); l0 = (l0 + 1)) {
 			iVec0[l0] = 0;
 		}
@@ -82,50 +120,8 @@ public:
 		}
 	}
 
-	virtual void set_param(int param_id, float val)
-	{
-		if (param_id == 0) {
-		}
-		if (param_id == 1) {
-		}
-
-		lfoDepth = 0.5;
-		lfoSpeed = 0.1;
-		freqMax = 0.9;
-		freqMin = 0.1;
-		width = 0.9;
-		feedback = 0.9;
-
-		fVslider0 = lfoDepth;
-		fVslider1 = map_value(width, 0, 1, 50, 5000);
-		fVslider2 = feedback;
-		fVslider3 = map_value(freqMin, 0, 1, 1, 10000);
-		fVslider4 = map_value(freqMax, 0, 1, 1, 10000);
-		fVslider5 = lfoSpeed;
-		fSlow0 = (0.5f * float(fVslider0));
-		fSlow1 = (1.0f - fSlow0);
-		fSlow2 = expf((fConst1 * (0.0f - (3.14159274f * float(fVslider1)))));
-		fSlow3 = fSlow2*fSlow2;
-		fSlow4 = float(fVslider2);
-		fSlow5 = (0.0f - (2.0f * fSlow2));
-		fSlow6 = float(fVslider3);
-		fSlow7 = (fConst2 * fSlow6);
-		fSlow8 = (0.5f * (0.0f - (fConst2 * (fSlow6 - float(fVslider4)))));
-		fSlow9 = (fConst2 * float(fVslider5));
-		// fSlow10 = std::sin(fSlow9);
-		// fSlow11 = std::cos(fSlow9);
-	}
-	virtual void set_samplerate(float sr)
-	{
-		fSampleRate = sr;
-		fConst0 = min<float>(192000.0f, max<float>(1.0f, float(fSampleRate)));
-		fConst1 = (1.0f / fConst0);
-		fConst2 = (6.28318548f / fConst0);
-	}
-
 private:
 	float fVslider0;
-	int fSampleRate;
 	float fConst0;
 	float fConst1;
 	float fVslider1;
@@ -156,11 +152,4 @@ private:
 	float fSlow9;
 	float fSlow10;
 	float fSlow11;
-
-	float lfoDepth;
-	float feedback;
-	float lfoSpeed;
-	float freqMax;
-	float freqMin;
-	float width;
 };

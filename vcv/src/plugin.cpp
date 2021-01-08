@@ -6,12 +6,13 @@ void init(Plugin *p)
 {
 	pluginInstance = p;
 
-	// Add modules here 
-p->addModel(modelFreqshift);
-p->addModel(modelLowpassfilter);
-p->addModel(modelLowpassgate);
-p->addModel(modelClkmultiplier);
-p->addModel(modelClkdivider);
+	// Add modules here
+	p->addModel(modelPhaser);
+	p->addModel(modelFreqshift);
+	p->addModel(modelLowpassfilter);
+	p->addModel(modelLowpassgate);
+	p->addModel(modelClkmultiplier);
+	p->addModel(modelClkdivider);
 	// p->addModel(modelDual_opener);
 	// p->addModel(modelDspTemplate);
 	// p->addModel(modelAdjTest);
