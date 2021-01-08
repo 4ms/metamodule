@@ -1,5 +1,4 @@
 #pragma once
-#include "audio_processor.hh"
 #include "lpf.h"
 #include "tools/expDecay.h"
 #include "tools/parameter.h"

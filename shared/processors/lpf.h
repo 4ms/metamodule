@@ -1,6 +1,5 @@
 #pragma once
 
-#include "audio_processor.hh"
 #include "tools/cubicDist.h"
 #include "tools/parameter.h"
 #include "util/math.hh"
