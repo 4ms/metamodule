@@ -34,7 +34,7 @@ public:
 	float update(float input)
 	{
 		if (sampleRate.isChanged()) {
-			fConst0 = (1.0f / constrain(sr, 1.0f, 192000.0f));
+			fConst0 = (1.0f / constrain(sampleRate.getValue(), 1.0f, 192000.0f));
 		}
 
 		float output = 0;
