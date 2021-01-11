@@ -59,12 +59,10 @@ void CommModule::process(const ProcessArgs &args)
 		element->updateInput();
 		auto scaledIn = element->scale(element->getValue());
 		core->set_input(element->getID(), scaledIn);
-		if(element->inputJackStatus.connected)
-		{
+		if (element->inputJackStatus.connected) {
 			core->mark_input_patched(element->getID());
 		}
-		else
-		{
+		else {
 			core->mark_input_unpatched(element->getID());
 		}
 	}
@@ -78,6 +76,10 @@ void CommModule::process(const ProcessArgs &args)
 
 	for (auto &element : outputJacks) {
 		element->updateOutput();
+	}
+
+	for (int i = 0; i < _numLights; i++) {
+		lights[i].setBrightness(core->get_led_brightness(i));
 	}
 
 	handleCommunication();
@@ -95,6 +97,7 @@ void CommModule::configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int
 	for (int i = 0; i < NUM_PARAMS; i++) {
 		commParams.push_back(std::make_unique<CommParam>(params[i], i));
 	}
+	_numLights = NUM_LIGHTS;
 }
 
 void CommModule::sendToRight()
@@ -180,4 +183,3 @@ void CommModule::appendParamData(CommData *message)
 		message->paramData.push_back(param->paramStatus);
 	}
 }
-

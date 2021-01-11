@@ -27,6 +27,8 @@ private:
 	CommData rightMessages[2];
 	bool alreadyUpdatedIDs = false;
 
+	int _numLights = 0;
+
 protected:
 	CommModule();
 	~CommModule() = default;
@@ -63,4 +65,3 @@ private:
 	void appendJackData(CommData *message);
 	void appendParamData(CommData *message);
 };
-
