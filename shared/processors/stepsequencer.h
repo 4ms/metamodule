@@ -1,0 +1,65 @@
+#pragma once
+
+class StepSequencer {
+public:
+	StepSequencer(int steps)
+	{
+		numSteps = steps;
+	}
+
+	void update()
+	{
+		if (currentClock > lastClock) {
+			currentStep++;
+			if (currentStep > numSteps)
+				currentStep = 0;
+		}
+
+		if (currentReset > lastReset) {
+			currentStep = 0;
+		}
+
+		output = values[currentStep];
+		if (currentStep == 0) {
+			endOutput = 1;
+		} else
+			endOutput = 0;
+	}
+
+	void setStep(int stepToSet, float value)
+	{
+		values[stepToSet] = value;
+	}
+
+	void updateClock(float input)
+	{
+		lastClock = currentClock;
+		if (input > 0.0f) {
+			currentClock = 1;
+		} else
+			currentClock = 0;
+	}
+
+	void updateReset(float input)
+	{
+		lastReset = currentReset;
+		if (input > 0.0f) {
+			currentReset = 1;
+		} else
+			currentReset = 0;
+	}
+
+	float output;
+	float endOutput;
+
+private:
+	int numSteps = 8;
+	int currentStep;
+
+	int currentClock;
+	int lastClock;
+	int currentReset;
+	int lastReset;
+
+	float values[16];
+};
