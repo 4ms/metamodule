@@ -36,13 +36,13 @@ public:
 				if (in1Connected)
 					in1 = val;
 				else
-					in1 = 5.0f;
+					in1 = 1.0f;
 				break;
 			case 1:
 				if (in2Connected)
 					in2 = val;
 				else
-					in2 = 5.0f;
+					in2 = 1.0f;
 				break;
 		}
 	}

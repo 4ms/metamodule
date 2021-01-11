@@ -29,6 +29,12 @@ struct AttModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("ATTENVERT2");
 		selfID.typeID = "ATTENVERT2";
+
+		inputJacks[AttModule::INPUT1_INPUT]->scale = [](float f) { return f / 5.0f; };
+		inputJacks[AttModule::INPUT2_INPUT]->scale = [](float f) { return f / 5.0f; };
+
+		outputJacks[AttModule::OUT1_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+		outputJacks[AttModule::OUT2_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 	}
 };
 
