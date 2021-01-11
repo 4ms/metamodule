@@ -10,10 +10,10 @@ public:
 	{
 		phaccu += reducedSampleRate / currentSampleRate;
 		if (phaccu > 1.0f) {
-			int quantizedVal = constrain(input, -1.0f, 1.0f) * ipow(2.0f, bitDepth >> 1);
+			int quantizedVal = floorf(input * ipow(2.0f, bitDepth >> 1));
 			float bitReduced = (float)quantizedVal / powf(2.0f, bitDepth >> 1);
 
-			sampledOutput = constrain(bitReduced, -1.0f, 1.0f);
+			sampledOutput = bitReduced;
 
 			phaccu -= 1.0f;
 		}
