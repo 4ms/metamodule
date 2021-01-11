@@ -13,9 +13,7 @@ public:
 		out2 = in2 * level2;
 	}
 
-	AttCore()
-	{
-	}
+	AttCore() {}
 
 	virtual void set_param(const int param_id, const float val) override
 	{
@@ -29,18 +27,22 @@ public:
 				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override
-	{
-	}
+	virtual void set_samplerate(const float sr) override {}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
 			case 0:
-				in1 = val;
+				if (in1Connected)
+					in1 = val;
+				else
+					in1 = 5.0f;
 				break;
 			case 1:
-				in2 = val;
+				if (in2Connected)
+					in2 = val;
+				else
+					in2 = 5.0f;
 				break;
 		}
 	}
@@ -59,6 +61,21 @@ public:
 		return output;
 	}
 
+	virtual void mark_input_unpatched(const int input_id) override
+	{
+		if (input_id == 0)
+			in1Connected = 0;
+		else if (input_id == 2)
+			in2Connected = 0;
+	}
+	virtual void mark_input_patched(const int input_id) override
+	{
+		if (input_id == 0)
+			in1Connected = 1;
+		else if (input_id == 2)
+			in2Connected = 1;
+	}
+
 	static std::unique_ptr<CoreProcessor> create()
 	{
 		return std::make_unique<AttCore>();
@@ -74,4 +91,7 @@ private:
 	float out2 = 0;
 	float level1 = 0;
 	float level2 = 0;
+
+	int in1Connected = 0;
+	int in2Connected = 0;
 };
