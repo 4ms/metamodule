@@ -16,6 +16,8 @@ protected:
 	void addLabeledInput(const std::string labelText, const int inputID, const Vec position);
 	void addLabeledOutput(const std::string labelText, const int outputID, const Vec position);
 
+	void addLabeledToggle(const std::string labelText, const int lightID, const int paramID, const Vec position);
+
 private:
 	constexpr float gridToYFromTop(const float y);
 	constexpr float gridToYFromBottom(const float y);
@@ -23,11 +25,11 @@ private:
 	void addLabel(const std::string labelText, const Vec pos);
 };
 
-class LabeledButton : public Button 
-{
-	public:
-void 	draw (const DrawArgs &args) override;
-void onDragStart(const event::DragStart& e) override;
+class LabeledButton : public Button {
+public:
+	void draw(const DrawArgs &args) override;
+	void onDragStart(const event::DragStart &e) override;
+
 private:
-int toggleState=0;
+	int toggleState = 0;
 };

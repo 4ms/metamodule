@@ -38,6 +38,17 @@ void CommModuleWidget::addLabel(const std::string labelText, const Vec pos)
 	addChild(button);
 }
 
+void CommModuleWidget::addLabeledToggle(const std::string labelText, const int lightID, const int paramID, const Vec position)
+{
+	const Vec pos = {
+		gridToXCentered(position.x),
+		gridToYFromBottom(position.y),
+	};
+	addParam(createParamCentered<LEDBezel>(mm2px(pos), module, paramID));
+	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({pos.x - 3.0f, pos.y - 3.0f}), module, lightID));
+	addLabel(labelText, {pos.x + 17, pos.y - 8.5f});
+}
+
 constexpr float CommModuleWidget::gridToYFromTop(const float y)
 {
 	return y * kKnobSpacingY + kTopMargin;
@@ -52,35 +63,34 @@ constexpr float CommModuleWidget::gridToXCentered(const float x)
 	return kKnobSpacingX * (x + 0.5f);
 }
 
-void 	LabeledButton::draw (const DrawArgs &args)
+void LabeledButton::draw(const DrawArgs &args)
 {
 	nvgBeginPath(args.vg);
 	nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
-    nvgStrokeWidth(args.vg, 1.0);
+	nvgStrokeWidth(args.vg, 1.0);
 	if (APP->event->hoveredWidget == this)
 		nvgStrokeColor(args.vg, rack::color::RED);
 	else
-	nvgStrokeColor(args.vg, rack::color::BLACK);
+		nvgStrokeColor(args.vg, rack::color::BLACK);
 	nvgStroke(args.vg);
-	if(toggleState)
-	{
-	nvgFillColor(args.vg,rack::color::GREEN);
-	nvgFill(args.vg);
+	if (toggleState) {
+		nvgFillColor(args.vg, rack::color::GREEN);
+		nvgFill(args.vg);
 	}
 
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
-	nvgFillColor(args.vg, nvgRGBA(0,0,0,255));
-	nvgText(args.vg, box.size.x/2.0f,box.size.y/2.0f, text.c_str(), NULL);
+	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
+	nvgText(args.vg, box.size.x / 2.0f, box.size.y / 2.0f, text.c_str(), NULL);
 }
 
-void LabeledButton::onDragStart(const event::DragStart& e) {
-	if (e.button != GLFW_MOUSE_BUTTON_LEFT)
-	{
+void LabeledButton::onDragStart(const event::DragStart &e)
+{
+	if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
 		return;
 	}
 
-	toggleState=!toggleState;
+	toggleState = !toggleState;
 
 	if (quantity)
 		quantity->setMax();
