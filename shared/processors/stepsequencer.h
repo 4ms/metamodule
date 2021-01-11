@@ -11,7 +11,7 @@ public:
 	{
 		if (currentClock > lastClock) {
 			currentStep++;
-			if (currentStep > numSteps)
+			if (currentStep >= numSteps)
 				currentStep = 0;
 		}
 
