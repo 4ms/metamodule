@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "FOURSTEP",
+      "name": "Fourstep",
+      "description": "4 Step Sequencer",
+      "tags": []
+}, 
+{
       "slug": "EIGHTSTEP",
       "name": "Eightstep",
       "description": "8 Step Sequencer",
