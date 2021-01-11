@@ -7,6 +7,7 @@ using namespace rack;
 extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file 
+extern Model *modelQuantizer; 
 extern Model *modelFourstep; 
 extern Model *modelEightstep; 
 extern Model *modelBitcrush;
