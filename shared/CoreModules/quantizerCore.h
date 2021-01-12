@@ -11,45 +11,62 @@ public:
 	void scaleChanged()
 	{
 		if (notesActive > 0) {
+			int tempNote = 13;
 			for (int i = 0; i < 12; i++) {
-				notesActive += keyStatus[i];
-			}
-
-			if (notesActive > 0) {
-				int tempNote = 13;
-				for (int i = 0; i < 12; i++) {
-					if (keyStatus[i] == 1) {
-						tempNote = min(tempNote, i);
-					}
+				if (keyStatus[i] == true) {
+					tempNote = min(tempNote, i);
 				}
-				firstActive = tempNote;
+			}
+			firstActive = tempNote;
 
-				int fillNote = firstActive;
+			int fillNote = firstActive;
 
-				for (int i = 0; i < 12; i++) {
-					if (i < firstActive)
-						mapTable[i] = fillNote;
-					else {
-						if (keyStatus[i] == 1)
-							fillNote = i;
-						mapTable[i] = fillNote;
-					}
+			for (int i = 0; i < 12; i++) {
+				if (i < firstActive)
+					mapTable[i] = fillNote;
+				else {
+					if (keyStatus[i] == 1)
+						fillNote = i;
+					mapTable[i] = fillNote;
 				}
 			}
 		}
 	}
+
 	virtual void update(void) override
 	{
 		notesActive = 0;
+		int changeStatus = 0;
 		for (int i = 0; i < 12; i++) {
 			if (currentButton[i] > lastButton[i]) {
 				keyStatus[i] = !keyStatus[i];
-				scaleChanged();
+				changeStatus = 1;
 			}
 			notesActive += keyStatus[i];
 		}
 
+		if (changeStatus) {
+			scaleChanged();
+		}
+
 		if (notesActive > 0) {
+			int sign;
+			if (signalInput >= 0)
+				sign = 1;
+			else
+				sign = -1;
+			noteValue = fabsf(signalInput) * 60.0f;
+			octave = noteValue / 12.0f;
+
+			currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
+			if (currentNote > 60) {
+				while (currentNote > 60) {
+					octave = noteValue / 12.0f;
+					currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
+					noteValue -= 1.0f;
+				}
+			}
+			signalOutput = currentNote / 60.0f * sign;
 
 		} else {
 			signalOutput = signalInput;
@@ -113,6 +130,12 @@ private:
 	int notesActive = 0;
 
 	int firstActive = 0;
+
+	int currentNote = 0;
+
+	int octave = 0;
+
+	float noteValue = 0;
 
 	float signalInput;
 	float signalOutput;
