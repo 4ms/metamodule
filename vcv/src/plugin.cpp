@@ -7,6 +7,7 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelEightstepprob); 
 p->addModel(modelQuantizer); 
 p->addModel(modelFourstep); 
 p->addModel(modelEightstep); 
