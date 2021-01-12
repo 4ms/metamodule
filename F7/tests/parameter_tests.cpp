@@ -61,3 +61,92 @@ TEST_CASE("Short-hand usage")
 	}
 }
 
+TEST_CASE("Reference Parameter usage")
+{
+
+	float data = 0.75f;
+	RefParameter<float> x{data};
+
+	CHECK(x == data);
+
+	SUBCASE("Changing the underlying data changes the ref param when we read it")
+	{
+		data = 10.0f;
+		CHECK(x == 10.0f);
+	}
+	SUBCASE("Writing to the ref param changes the underlying data")
+	{
+		x = 4.2f;
+		CHECK(data == 4.2f);
+	}
+	SUBCASE("Setting a different value causes isChanged() to be true")
+	{
+		SUBCASE("Writing to underlying data")
+		{
+			data = 1.5f;
+			CHECK(x.isChanged());
+			SUBCASE("And the next time isChanged() is called, it's false")
+			{
+				CHECK(x.isChanged() == false);
+			}
+		}
+
+		SUBCASE("Writing to ref directly")
+		{
+			x = 2.554f;
+			CHECK(x.isChanged());
+			SUBCASE("And the next time isChanged() is called, it's false")
+			{
+				CHECK(x.isChanged() == false);
+			}
+		}
+
+		SUBCASE("Using setValue()")
+		{
+			x.setValue(14.21f);
+			CHECK(x.isChanged());
+			SUBCASE("And the next time isChanged() is called, it's false")
+			{
+				CHECK(x.isChanged() == false);
+			}
+		}
+	}
+
+	SUBCASE("Writing to the underlying data with the same value causes isChanged() to be false")
+	{
+		SUBCASE("Writing to underlying data")
+		{
+			data = 1.5f;
+			CHECK(x.isChanged());
+			data = 1.5f;
+			CHECK(x.isChanged() == false);
+		}
+
+		SUBCASE("Writing to ref directly")
+		{
+			x = 2.554f;
+			CHECK(x.isChanged());
+			x = 2.554f;
+			CHECK(x.isChanged() == false);
+		}
+
+		SUBCASE("Using setValue()")
+		{
+			x.setValue(14.21f);
+			CHECK(x.isChanged());
+			x.setValue(14.21f);
+			CHECK(x.isChanged() == false);
+		}
+
+		SUBCASE("isChanged() is false if we write a different value, but then write the original value before calling "
+				"isChanged()")
+		{
+			x = 5.4f;
+			CHECK(x.isChanged());
+			x.setValue(99.5f);
+			x.setValue(5.4f);
+			CHECK(x.isChanged() == false);
+		}
+	}
+}
+
