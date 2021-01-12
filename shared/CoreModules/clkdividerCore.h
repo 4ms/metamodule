@@ -14,7 +14,8 @@ public:
 		cp.update();
 		if (cp.getWrappedPhase() < pulseWidth) {
 			clockOutput = 1;
-		} else {
+		}
+		else {
 			clockOutput = 0;
 		}
 	}
@@ -60,8 +61,6 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	int clkDivide = 4;
-	float cvIn = 0;
 	float pulseWidth = 0.5f;
 	int clockOutput = 0;
 
