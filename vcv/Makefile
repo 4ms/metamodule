@@ -30,3 +30,11 @@ compile_commands:
 	compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
 	rm compile_commands.json 
 	mv compile_commands_with_headers.json compile_commands.json
+
+tests: core_tests
+
+core_tests:
+	$(MAKE) -f $(SHARED_DIR)/CoreModules/tests/Makefile
+
+.PHONY: tests core_tests
+
