@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "math.hh"
+#include "moduleTypes.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 
@@ -55,10 +55,10 @@ public:
 				sign = 1;
 			else
 				sign = -1;
-			noteValue = fabsf(signalInput) * 60.0f;
-			octave = noteValue / 12.0f;
+			float noteValue = MathTools::f_abs(signalInput) * 60.0f;
+			int octave = noteValue / 12.0f;
 
-			currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
+			int currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
 			if (currentNote > 60) {
 				while (currentNote > 60) {
 					octave = noteValue / 12.0f;
@@ -77,6 +77,8 @@ public:
 	{
 		for (int i = 0; i < 12; i++) {
 			keyStatus[i] = false;
+			currentButton[i] = false;
+			lastButton[i] = false;
 			mapTable[i] = i;
 		}
 	}
@@ -123,19 +125,13 @@ public:
 
 private:
 	bool keyStatus[12];
-	int currentButton[12];
-	int lastButton[12];
+	bool currentButton[12];
+	bool lastButton[12];
 
 	int mapTable[12];
 	int notesActive = 0;
 
 	int firstActive = 0;
-
-	int currentNote = 0;
-
-	int octave = 0;
-
-	float noteValue = 0;
 
 	float signalInput;
 	float signalOutput;
