@@ -39,6 +39,11 @@ public:
 		return (phase - (long)phase);
 	}
 
+	long getCount()
+	{
+		return wholeCount;
+	}
+
 	void setMultiply(float val)
 	{
 		multiply = val;
@@ -53,7 +58,7 @@ private:
 	int currentClock = 0;
 	int lastClock = 0;
 
-	int wholeCount = 0;
+	long wholeCount = 0;
 
 	long sinceClock = 0;
 
