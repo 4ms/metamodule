@@ -1,6 +1,5 @@
 #pragma once
 
-#include "tools/cubicDist.h"
 #include "tools/parameter.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
@@ -43,7 +42,6 @@ public:
 	//~LowPassFilter() {}
 
 private:
-	CubicNonlinearDist dist;
 	float fRec0[3];
 	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5;
 	float fConst0 = 1;
