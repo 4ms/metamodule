@@ -7,7 +7,7 @@
 using namespace MathTools;
 
 class QuantizerCore : public CoreProcessor {
-public:
+private:
 	void scaleChanged()
 	{
 		if (notesActive > 0) {
@@ -33,6 +33,7 @@ public:
 		}
 	}
 
+public:
 	virtual void update(void) override
 	{
 		notesActive = 0;
@@ -91,6 +92,8 @@ public:
 
 	virtual void set_param(int const param_id, const float val) override
 	{
+		if (param_id >= 12 || param_id < 0)
+			return;
 		lastButton[param_id] = currentButton[param_id];
 		currentButton[param_id] = val > 0;
 	}
