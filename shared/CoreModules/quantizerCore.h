@@ -49,27 +49,32 @@ public:
 			scaleChanged();
 		}
 
-		if (notesActive > 0) {
-			int sign;
-			if (signalInput >= 0)
-				sign = 1;
-			else
-				sign = -1;
-			noteValue = fabsf(signalInput) * 60.0f;
-			octave = noteValue / 12.0f;
+		lastInput = currentInput;
+		currentInput = signalInput;
 
-			currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-			if (currentNote > 60) {
-				while (currentNote > 60) {
-					octave = noteValue / 12.0f;
-					currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-					noteValue -= 1.0f;
+		if (currentInput != lastInput) {
+			if (notesActive > 0) {
+				int sign;
+				if (signalInput >= 0)
+					sign = 1;
+				else
+					sign = -1;
+				noteValue = fabsf(signalInput) * 60.0f;
+				octave = noteValue / 12.0f;
+
+				currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
+				if (currentNote > 60) {
+					while (currentNote > 60) {
+						octave = noteValue / 12.0f;
+						currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
+						noteValue -= 1.0f;
+					}
 				}
-			}
-			signalOutput = currentNote / 60.0f * sign;
+				signalOutput = currentNote / 60.0f * sign;
 
-		} else {
-			signalOutput = signalInput;
+			} else {
+				signalOutput = signalInput;
+			}
 		}
 	}
 
@@ -132,6 +137,9 @@ private:
 	int firstActive = 0;
 
 	int currentNote = 0;
+
+	float lastInput = 0;
+	float currentInput = 0;
 
 	int octave = 0;
 

@@ -1,9 +1,9 @@
 #pragma once
 
+#include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
-#include "CoreModules/moduleTypes.h"
-
+#include "processors/tools/clockPhase.h"
 
 using namespace MathTools;
 
@@ -11,55 +11,32 @@ class ClkdividerCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		if(clockIn>lastClockIn)
-		{
-			durationSamples=sinceClock;
-			sinceClock=0;
-			wholeCount+=1;
+		cp.update();
+		if (cp.getWrappedPhase() < pulseWidth) {
+			clockOutput = 1;
+		} else {
+			clockOutput = 0;
 		}
-		tempPhase=sinceClock/(float)durationSamples;
-		if(tempPhase<1)
-		{
-		phase = (float)(wholeCount+tempPhase)/(float)clkDivide;
-		}
-		auto wrapPhase = phase - (unsigned long)phase;
-		if(wrapPhase<pulseWidth)
-		{
-			clockOutput=1;
-		}
-		else
-		{
-			clockOutput=0;
-		}
-		sinceClock++;
 	}
 
-	ClkdividerCore()
-	{
-	}
+	ClkdividerCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
 			case 0:
-			clkDivide=map_value(val,0.0f,1.0f,1.0f,8.99f);
-			break;
+				cp.setDivide(map_value(val, 0.0f, 1.0f, 1.0f, 8.99f));
+				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override
-	{
-	}
+	virtual void set_samplerate(const float sr) override {}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
 			case 0:
-			{
-			lastClockIn=clockIn;
-			clockIn=(val>0.0f);
-			}
-			break;
-			
+				cp.updateClock(val);
+				break;
 		}
 	}
 
@@ -68,8 +45,8 @@ public:
 		float output = 0;
 		switch (output_id) {
 			case 0:
-		output = clockOutput;
-		break;
+				output = clockOutput;
+				break;
 		}
 		return output;
 	}
@@ -83,18 +60,10 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
+	int clkDivide = 4;
+	float cvIn = 0;
+	float pulseWidth = 0.5f;
+	int clockOutput = 0;
 
-int clkDivide = 4;
-float cvIn=0;
-float phase=0;
-int wholeCount=0;
-float tempPhase=0;
-int clockIn=0;
-int lastClockIn=0;
-int resetIn=0;
-int lastResetIn=0;
-float sinceClock=0;
-float pulseWidth=0.5f;
-unsigned long durationSamples=0;
-int clockOutput=0;
+	ClockPhase cp;
 };
