@@ -2,3 +2,6 @@
 	path = F7/lib/mdrivlib
 	url = git@github.com:4ms/mdrivlib.git
 	branch = main
+[submodule "shared/doctest"]
+	path = shared/doctest
+	url = git@github.com:onqtam/doctest.git
