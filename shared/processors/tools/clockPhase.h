@@ -44,12 +44,12 @@ public:
 		return wholeCount;
 	}
 
-	void setMultiply(float val)
+	void setMultiply(int val)
 	{
 		multiply = val;
 	}
 
-	void setDivide(float val)
+	void setDivide(int val)
 	{
 		divide = val;
 	}
