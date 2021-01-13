@@ -4,6 +4,11 @@
 #include "util/math.hh"
 #include <string>
 
+struct LabelButtonID {
+	enum class Types { Knob, InputJack, OutputJack, Toggle } type;
+	int ID;
+};
+
 struct ModuleID {
 	int id;
 	ModuleIDType typeID;
@@ -27,9 +32,9 @@ struct ParamStatus {
 enum GlobalMessage {
 	NoMessage,
 	GetAllIDs,
-	GetAllPatches,
-	GetAllKnobs,
 	SendingIDs,
+	InitMapping,
+
 };
 
 struct CommData {
@@ -37,4 +42,5 @@ struct CommData {
 	std::vector<ModuleID> moduleData;
 	std::vector<JackStatus> jackData;
 	std::vector<ParamStatus> paramData;
+	std::vector<LabelButtonID> mappings;
 };
