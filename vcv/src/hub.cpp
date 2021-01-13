@@ -9,13 +9,13 @@
 #include <functional>
 #include <iostream>
 
-//Todo: rename this to Hub (or something?)
+// Todo: rename this to Hub (or something?)
 struct Expander : public CommModule {
 
 	enum ParamIds {
 		ENUMS(KNOBS, 8),
 		GET_INFO,
-		NUM_PARAMS
+		NUM_PARAMS,
 	};
 	enum InputIds {
 		AUDIO_IN_L,
@@ -24,15 +24,15 @@ struct Expander : public CommModule {
 		CV_2,
 		CV_3,
 		CV_4,
-		NUM_INPUTS
+		NUM_INPUTS,
 	};
 	enum OutputIds {
 		AUDIO_OUT_L,
 		AUDIO_OUT_R,
-		NUM_OUTPUTS
+		NUM_OUTPUTS,
 	};
 	enum LightIds {
-		NUM_LIGHTS
+		NUM_LIGHTS,
 	};
 
 	CommData leftMessages[2];
@@ -60,7 +60,8 @@ struct Expander : public CommModule {
 		if (leftExpander.module) {
 
 			if (buttonJustPressed()) {
-				sendMessageLeft(GetAllIDs);
+				if (startMessageLeft(GetAllIDs) != nullptr)
+					finishMessageLeft();
 			}
 
 			auto message = messageReceivedFromLeft();
@@ -83,14 +84,15 @@ struct Expander : public CommModule {
 						debugContents += " on module " + std::to_string(jData.sendingModuleId);
 						debugContents += " is connected to output jack " + std::to_string(jData.receivedJackId);
 						debugContents += " on module " + std::to_string(jData.receivedModuleId) + "\n";
-					}
-					else {
-						debugContents += "Input jack " + std::to_string(jData.sendingJackId) + " on module " + std::to_string(jData.sendingModuleId) + " not connected" + "\n";
+					} else {
+						debugContents += "Input jack " + std::to_string(jData.sendingJackId) + " on module " +
+										 std::to_string(jData.sendingModuleId) + " not connected" + "\n";
 					}
 				}
 
 				for (auto pData : message->paramData) {
-					debugContents += "Parameter # " + std::to_string(pData.paramID) + " on module # " + std::to_string(pData.moduleID) + " value is " + std::to_string(pData.value) + "\n";
+					debugContents += "Parameter # " + std::to_string(pData.paramID) + " on module # " +
+									 std::to_string(pData.moduleID) + " value is " + std::to_string(pData.value) + "\n";
 				}
 
 				writeToDebugFile(debugFile, debugContents);
@@ -120,18 +122,36 @@ struct Expander : public CommModule {
 				updateDisplay();
 				return true;
 			}
-		}
-		else {
+		} else {
 			buttonAlreadyHandled = false;
 		}
 		return false;
 	}
 
-	void sendMessageLeft(GlobalMessage message_type)
+	CommData *startMessageLeft(GlobalMessage message_type)
 	{
+		if (leftExpander.moduleId != CommModule::CommModuleExpanderID)
+			return nullptr;
 		auto message = messageToSendLeft();
 		message->messageType = message_type;
+		return message;
+	}
+
+	void finishMessageLeft()
+	{
 		leftExpander.module->rightExpander.messageFlipRequested = true;
+	}
+
+	void notifyLabelButtonClicked(LabelButtonID id) override
+	{
+		labelText = "label button clicked" + std::to_string(static_cast<int>(id.type)) + ", " + std::to_string(id.ID);
+		updateDisplay();
+
+		auto message = startMessageLeft(InitMapping);
+		if (message != nullptr) {
+			message->mappings.push_back(id);
+			finishMessageLeft();
+		}
 	}
 };
 
@@ -139,17 +159,16 @@ struct ExpanderWidget : CommModuleWidget {
 
 	Label *valueLabel;
 	Label *valueLabel2;
-	Expander *expModule;
+	Expander *expModule; // for debugging text only
 
 	ExpanderWidget(Expander *module)
 	{
 		setModule(module);
+		mainModule = static_cast<CommModule *>(module);
 		expModule = module;
 
 		if (expModule != nullptr) {
-			expModule->updateDisplay = [&]() {
-				this->valueLabel->text = this->expModule->labelText;
-			};
+			expModule->updateDisplay = [&]() { this->valueLabel->text = this->expModule->labelText; };
 		}
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
