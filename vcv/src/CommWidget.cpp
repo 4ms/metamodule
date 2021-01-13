@@ -44,7 +44,7 @@ void CommModuleWidget::addLabeledToggle(const std::string labelText, const int l
 		gridToXCentered(position.x),
 		gridToYFromBottom(position.y),
 	};
-	addParam(createParamCentered<LEDBezel>(mm2px(pos), module, paramID));
+	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(pos), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({pos.x - 3.0f, pos.y - 3.0f}), module, lightID));
 	addLabel(labelText, {pos.x + 17, pos.y - 8.5f});
 }

@@ -61,5 +61,24 @@ TEST_CASE("Basic Quantizer functionality")
 			CHECK(checks[i] == doctest::Approx(0.2f));
 		}
 	}
+	SUBCASE("Scale change is effective before running update")
+	{
+		QuantizerCore q;
+
+		q.set_input(0, 0);
+
+		q.set_param(0, 1.0f);
+
+		q.update();
+
+		CHECK(q.get_output(0) == 0);
+
+		q.set_param(0, 0.0f);
+		q.set_param(1, 1.0f);
+
+		q.update();
+
+		CHECK(q.get_output(0) == 1 / 60.0f);
+	}
 	// Todo more tests
 }

@@ -10,19 +10,6 @@ class QuantizerCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		bool changeStatus = false;
-		for (int i = 0; i < 12; i++) {
-			if (currentButton[i] > lastButton[i]) {
-				keyStatus[i] = !keyStatus[i];
-				changeStatus = true;
-				lastButton[i] = currentButton[i];
-			}
-		}
-
-		if (changeStatus) {
-			scaleChanged();
-		}
-
 		if (notesActive > 0) {
 			int sign;
 			if (signalInput >= 0)
@@ -61,7 +48,8 @@ public:
 	{
 		if (param_id >= 12 || param_id < 0)
 			return;
-		currentButton[param_id] = val > 0;
+		keyStatus[param_id] = (val > 0.1f);
+		scaleChanged();
 	}
 	virtual void set_samplerate(const float sr) override {}
 
