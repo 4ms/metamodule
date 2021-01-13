@@ -10,6 +10,7 @@ public:
 	std::function<void(void)> updateDisplay;
 	std::string DEBUGSTR = "";
 
+	static const int CommModuleExpanderID = 0x435C; // some unique value
 protected:
 	ModuleID selfID;
 	std::vector<std::unique_ptr<CommParam>> commParams;
