@@ -1,5 +1,6 @@
 #include "CommData.h"
 #include "CommModule.h"
+#include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
 #include "localPath.h"
 #include "plugin.hpp"
@@ -12,15 +13,22 @@
 struct Expander : public CommModule {
 
 	enum ParamIds {
+		ENUMS(KNOBS, 8),
 		GET_INFO,
-		MAIN_KNOB,
 		NUM_PARAMS
 	};
 	enum InputIds {
+		AUDIO_IN_L,
+		AUDIO_IN_R,
+		CV_1,
+		CV_2,
+		CV_3,
+		CV_4,
 		NUM_INPUTS
 	};
 	enum OutputIds {
-		MAIN_OUTPUT,
+		AUDIO_OUT_L,
+		AUDIO_OUT_R,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
@@ -127,7 +135,7 @@ struct Expander : public CommModule {
 	}
 };
 
-struct ExpanderWidget : ModuleWidget {
+struct ExpanderWidget : CommModuleWidget {
 
 	Label *valueLabel;
 	Label *valueLabel2;
@@ -144,24 +152,34 @@ struct ExpanderWidget : ModuleWidget {
 			};
 		}
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/hub.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
 
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addParam(createParamCentered<BefacoPush>(mm2px(Vec(23.292, 70.977)), module, Expander::GET_INFO));
 
-		addParam(createParamCentered<BefacoPush>(mm2px(Vec(23.292, 90.977)), module, Expander::GET_INFO));
-
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.627, 17.01)), module, Expander::MAIN_KNOB));
-
-		valueLabel = createWidget<Label>(mm2px(Vec(0, 40)));
+		valueLabel = createWidget<Label>(mm2px(Vec(0, 50)));
 		valueLabel->color = rack::color::BLACK;
-		valueLabel->text = "exp_default";
+		valueLabel->text = "";
 		valueLabel->fontSize = 13;
 		addChild(valueLabel);
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.859, 110.779)), module, Expander::MAIN_OUTPUT));
+		addLabeledKnob("A", 0, {0, 0});
+		addLabeledKnob("B", 1, {1, 0});
+		addLabeledKnob("C", 2, {2, 0});
+		addLabeledKnob("D", 3, {3, 0});
+		addLabeledKnob("a", 4, {0, 1});
+		addLabeledKnob("b", 5, {1, 1});
+		addLabeledKnob("c", 6, {2, 1});
+		addLabeledKnob("d", 7, {3, 1});
+
+		for (int i = 0; i < 2; i++) {
+			addLabeledInput("A IN", i, {(float)i, 1});
+		}
+		for (int i = 0; i < 2; i++) {
+			addLabeledOutput("A OUT", i, {(float)(i + 2), 1});
+		}
+		for (int i = 2; i < 6; i++) {
+			addLabeledInput("CV IN", i, {(float)(i - 2), 0});
+		}
 	}
 };
 
