@@ -6,7 +6,7 @@ void CommModuleWidget::addLabeledKnob(const std::string labelText, const int kno
 		gridToXCentered(position.x),
 		gridToYFromTop(position.y),
 	};
-	addLabel(labelText, pos);
+	addLabel(labelText, pos, {LabelButtonID::Types::Knob, knobID});
 	addParam(createParamCentered<RoundBlackKnob>(mm2px(pos), module, knobID));
 }
 
@@ -16,7 +16,7 @@ void CommModuleWidget::addLabeledInput(const std::string labelText, const int in
 		gridToXCentered(position.x),
 		gridToYFromBottom(position.y),
 	};
-	addLabel(labelText, pos);
+	addLabel(labelText, pos, {LabelButtonID::Types::InputJack, inputID});
 	addInput(createInputCentered<PJ301MPort>(mm2px(pos), module, inputID));
 }
 
@@ -26,19 +26,24 @@ void CommModuleWidget::addLabeledOutput(const std::string labelText, const int o
 		gridToXCentered(position.x),
 		gridToYFromBottom(position.y),
 	};
-	addLabel(labelText, pos);
+	addLabel(labelText, pos, {LabelButtonID::Types::OutputJack, outputID});
 	addOutput(createOutputCentered<PJ301MPort>(mm2px(pos), module, outputID));
 }
 
-void CommModuleWidget::addLabel(const std::string labelText, const Vec pos)
+void CommModuleWidget::addLabel(const std::string labelText, const Vec pos, const LabelButtonID id)
 {
 	LabeledButton *button = createWidget<LabeledButton>(mm2px(Vec(pos.x - kKnobSpacingX / 2.0f, pos.y + kTextOffset)));
 	button->box.size.x = kGridSpacingX;
 	button->text = labelText;
+	button->id = id;
+	button->mainModule = mainModule;
 	addChild(button);
 }
 
-void CommModuleWidget::addLabeledToggle(const std::string labelText, const int lightID, const int paramID, const Vec position)
+void CommModuleWidget::addLabeledToggle(const std::string labelText,
+										const int lightID,
+										const int paramID,
+										const Vec position)
 {
 	const Vec pos = {
 		gridToXCentered(position.x),
@@ -46,7 +51,7 @@ void CommModuleWidget::addLabeledToggle(const std::string labelText, const int l
 	};
 	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(pos), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({pos.x - 3.0f, pos.y - 3.0f}), module, lightID));
-	addLabel(labelText, {pos.x + 17, pos.y - 8.5f});
+	addLabel(labelText, {pos.x + 17, pos.y - 8.5f}, {LabelButtonID::Types::Toggle, paramID});
 }
 
 constexpr float CommModuleWidget::gridToYFromTop(const float y)
@@ -89,6 +94,8 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 	if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
 		return;
 	}
+
+	mainModule->notifyLabelButtonClicked(id);
 
 	toggleState = !toggleState;
 
