@@ -11,6 +11,8 @@ public:
 	std::string DEBUGSTR = "";
 
 	static const int CommModuleExpanderID = 0x435C; // some unique value
+	virtual void notifyLabelButtonClicked(LabelButtonID id);
+
 protected:
 	ModuleID selfID;
 	std::vector<std::unique_ptr<CommParam>> commParams;

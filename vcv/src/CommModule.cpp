@@ -21,8 +21,7 @@ void CommModule::handleCommunication()
 	if (leftExpander.module) {
 		sendToLeft();
 		readFromLeft();
-	}
-	else {
+	} else {
 		if (recdFromRightData.messageType == GetAllIDs) {
 			initiateStatusDumpToRight();
 		}
@@ -61,8 +60,7 @@ void CommModule::process(const ProcessArgs &args)
 		core->set_input(element->getID(), scaledIn);
 		if (element->inputJackStatus.connected) {
 			core->mark_input_patched(element->getID());
-		}
-		else {
+		} else {
 			core->mark_input_unpatched(element->getID());
 		}
 	}
@@ -116,8 +114,7 @@ void CommModule::sendToRight()
 		message->messageType = SendingIDs;
 
 		rightExpander.module->leftExpander.messageFlipRequested = true;
-	}
-	else if (recdFromLeftData.messageType == SendingIDs) {
+	} else if (recdFromLeftData.messageType == SendingIDs) {
 		*message = std::move(recdFromLeftData);
 		appendModuleID(message);
 		appendJackData(message);
@@ -182,4 +179,10 @@ void CommModule::appendParamData(CommData *message)
 	for (auto &param : commParams) {
 		message->paramData.push_back(param->paramStatus);
 	}
+}
+
+void CommModule::notifyLabelButtonClicked(LabelButtonID id)
+{
+	// todo
+	// Send message to the hub that a label was clicked
 }
