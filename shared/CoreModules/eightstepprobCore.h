@@ -2,8 +2,8 @@
 
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "math.hh"
 #include "processors/tools/clockPhase.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 
@@ -17,9 +17,10 @@ public:
 		if (currentStep != lastStep) {
 			randNum = randomNumber(0.0f, 0.99f);
 		}
-		if ((prob[currentStep] >= randNum) && (cp.getWrappedPhase() < 0.5f)) {
+		if ((prob[currentStep] > randNum) && (cp.getWrappedPhase() < 0.5f)) {
 			gateOutput = 1;
-		} else {
+		}
+		else {
 			gateOutput = 0;
 		}
 	}
