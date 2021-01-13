@@ -7,76 +7,43 @@
 using namespace MathTools;
 
 class QuantizerCore : public CoreProcessor {
-private:
-	void scaleChanged()
-	{
-		if (notesActive > 0) {
-			int tempNote = 13;
-			for (int i = 0; i < 12; i++) {
-				if (keyStatus[i] == true) {
-					tempNote = min(tempNote, i);
-				}
-			}
-			firstActive = tempNote;
-
-			int fillNote = firstActive;
-
-			for (int i = 0; i < 12; i++) {
-				if (i < firstActive)
-					mapTable[i] = fillNote;
-				else {
-					if (keyStatus[i] == 1)
-						fillNote = i;
-					mapTable[i] = fillNote;
-				}
-			}
-		}
-	}
-
 public:
 	virtual void update(void) override
 	{
-		notesActive = 0;
-		int changeStatus = 0;
+		bool changeStatus = false;
 		for (int i = 0; i < 12; i++) {
 			if (currentButton[i] > lastButton[i]) {
 				keyStatus[i] = !keyStatus[i];
-				changeStatus = 1;
+				changeStatus = true;
+				lastButton[i] = currentButton[i];
 			}
-			notesActive += keyStatus[i];
 		}
 
 		if (changeStatus) {
 			scaleChanged();
 		}
 
-		lastInput = currentInput;
-		currentInput = signalInput;
+		if (notesActive > 0) {
+			int sign;
+			if (signalInput >= 0)
+				sign = 1;
+			else
+				sign = -1;
+			float noteValue = MathTools::f_abs(signalInput) * 60.0f;
+			int octave = noteValue / 12.0f;
 
-		if (currentInput != lastInput) {
-
-			if (notesActive > 0) {
-				int sign;
-				if (signalInput >= 0)
-					sign = 1;
-				else
-					sign = -1;
-				float noteValue = MathTools::f_abs(signalInput) * 60.0f;
-				int octave = noteValue / 12.0f;
-
-				int currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-				if (currentNote > 60) {
-					while (currentNote > 60) {
-						octave = noteValue / 12.0f;
-						currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-						noteValue -= 1.0f;
-					}
+			int currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
+			if (currentNote > 60) {
+				while (currentNote > 60) {
+					octave = noteValue / 12.0f;
+					currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
+					noteValue -= 1.0f;
 				}
-				signalOutput = currentNote / 60.0f * sign;
-
-			} else {
-				signalOutput = signalInput;
 			}
+			signalOutput = currentNote / 60.0f * sign;
+		}
+		else {
+			signalOutput = signalInput;
 		}
 	}
 
@@ -94,7 +61,6 @@ public:
 	{
 		if (param_id >= 12 || param_id < 0)
 			return;
-		lastButton[param_id] = currentButton[param_id];
 		currentButton[param_id] = val > 0;
 	}
 	virtual void set_samplerate(const float sr) override {}
@@ -141,9 +107,36 @@ private:
 	int notesActive = 0;
 
 	int firstActive = 0;
-	float lastInput = 0;
-	float currentInput = 0;
+	float signalInput = 0;
+	float signalOutput = 0;
 
-	float signalInput;
-	float signalOutput;
+	void scaleChanged()
+	{
+		int tempNote = 13;
+		for (int i = 0; i < 12; i++) {
+			if (keyStatus[i] == true) {
+				tempNote = min(tempNote, i);
+			}
+		}
+		firstActive = tempNote;
+
+		int fillNote = firstActive;
+
+		notesActive = 0;
+
+		for (int i = 0; i < 12; i++) {
+			notesActive += keyStatus[i] ? 1 : 0;
+		}
+
+		for (int i = 0; i < 12; i++) {
+			if (i < firstActive)
+				mapTable[i] = fillNote;
+			else {
+				if (keyStatus[i] == true) {
+					fillNote = i;
+				}
+				mapTable[i] = fillNote;
+			}
+		}
+	}
 };
