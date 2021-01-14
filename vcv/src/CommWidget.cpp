@@ -32,7 +32,8 @@ void CommModuleWidget::addLabeledOutput(const std::string labelText, const int o
 
 void CommModuleWidget::addLabel(const std::string labelText, const Vec pos, const LabelButtonID id)
 {
-	LabeledButton *button = createWidget<LabeledButton>(mm2px(Vec(pos.x - kKnobSpacingX / 2.0f, pos.y + kTextOffset)));
+	LabeledButton *button = new LabeledButton{*this};
+	button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 2.0f, pos.y + kTextOffset));
 	button->box.size.x = kGridSpacingX;
 	button->text = labelText;
 	button->id = id;
@@ -67,6 +68,15 @@ constexpr float CommModuleWidget::gridToXCentered(const float x)
 	return kKnobSpacingX * (x + 0.5f);
 }
 
+void CommModuleWidget::notifyLabelButtonClicked(LabeledButton &button)
+{
+
+	if (button.state == LabelState::Normal)
+		button.state = LabelState::IsMapped;
+	else
+		button.state = LabelState::Normal;
+}
+
 void LabeledButton::draw(const DrawArgs &args)
 {
 	nvgBeginPath(args.vg);
@@ -76,9 +86,19 @@ void LabeledButton::draw(const DrawArgs &args)
 		nvgStrokeColor(args.vg, rack::color::RED);
 	else
 		nvgStrokeColor(args.vg, rack::color::BLACK);
+
 	nvgStroke(args.vg);
-	if (toggleState) {
+
+	if (state == LabelState::IsMapped) {
 		nvgFillColor(args.vg, rack::color::GREEN);
+		nvgFill(args.vg);
+	}
+	if (state == LabelState::Normal) {
+		nvgFillColor(args.vg, rack::color::WHITE);
+		nvgFill(args.vg);
+	}
+	if (state == LabelState::MappingPending) {
+		nvgFillColor(args.vg, rack::color::YELLOW);
 		nvgFill(args.vg);
 	}
 
@@ -94,9 +114,7 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 		return;
 	}
 
-	// mainModule->notifyLabelButtonClicked(id);
-
-	toggleState = !toggleState;
+	_parent.notifyLabelButtonClicked(*this);
 
 	if (quantity)
 		quantity->setMax();

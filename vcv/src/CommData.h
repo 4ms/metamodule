@@ -9,6 +9,12 @@ struct LabelButtonID {
 	int ID;
 };
 
+enum class LabelState {
+	Normal,
+	MappingPending,
+	IsMapped,
+};
+
 struct ModuleID {
 	int id;
 	ModuleTypeSlug typeID;

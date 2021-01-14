@@ -3,6 +3,8 @@
 #include <rack.hpp>
 using namespace rack;
 
+class LabeledButton;
+
 class CommModuleWidget : public app::ModuleWidget {
 	const float kKnobSpacingY = 20;
 	const float kKnobSpacingX = 20.32f;
@@ -11,6 +13,9 @@ class CommModuleWidget : public app::ModuleWidget {
 	const float kBottomMargin = 15;
 	const float kGridSpacingX = 60;
 	const float kModuleHeight = 128.5f;
+
+public:
+	void notifyLabelButtonClicked(LabeledButton &button);
 
 protected:
 	void addLabeledKnob(const std::string labelText, const int knobID, const Vec position);
@@ -27,6 +32,9 @@ private:
 
 class LabeledButton : public Button {
 public:
+	LabeledButton(CommModuleWidget &parent)
+		: _parent{parent}
+	{}
 	void draw(const DrawArgs &args) override;
 	void onDragStart(const event::DragStart &e) override;
 
@@ -34,5 +42,5 @@ public:
 	LabelState state = LabelState::Normal;
 
 private:
-	int toggleState = 0;
+	CommModuleWidget &_parent;
 };
