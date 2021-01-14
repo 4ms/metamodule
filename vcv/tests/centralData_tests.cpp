@@ -54,3 +54,58 @@ TEST_CASE("getNumModules() and register/unregistering modules")
 		}
 	}
 }
+
+TEST_CASE("ParamStatus adding and remove param data")
+{
+	CentralData cd;
+	SUBCASE("Before any init, paramData is size 0")
+	{
+		CHECK(cd.paramData.size() == 0);
+	}
+	SUBCASE("updateParamStatus() with new module/param IDs adds it to paramData")
+	{
+		ParamStatus p;
+		p.value = 0.5;
+		p.moduleID = 1;
+		p.paramID = 3;
+		cd.updateParamStatus(p);
+		CHECK(cd.paramData.size() == 1);
+
+		bool found = false;
+		for (auto &x : cd.paramData) {
+			if (x.value == p.value && x.moduleID == p.moduleID && x.paramID == p.paramID)
+				found = true;
+		}
+		CHECK(found);
+
+		SUBCASE("updateParamStatus() with an existing module/param ID updates the value and doesn't make a new entry")
+		{
+			ParamStatus p2;
+			p2.value = 0.7;
+			p2.moduleID = 1;
+			p2.paramID = 3;
+			cd.updateParamStatus(p2);
+
+			CHECK(cd.paramData.size() == 1);
+			found = false;
+			for (auto &x : cd.paramData) {
+				if (x.value == p2.value && x.moduleID == p2.moduleID && x.paramID == p2.paramID)
+					found = true;
+			}
+			CHECK(found);
+		}
+	}
+
+	SUBCASE("Removing a module also removes its params")
+	{
+		cd.registerModule({1, "MODULE"});
+		ParamStatus p;
+		p.value = 0.5;
+		p.moduleID = 1;
+		p.paramID = 3;
+		cd.updateParamStatus(p);
+		cd.unregisterModule({1, "MODULE"});
+		CHECK(cd.paramData.size() == 0);
+	}
+}
+
