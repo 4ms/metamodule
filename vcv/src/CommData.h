@@ -11,8 +11,7 @@ struct LabelButtonID {
 
 struct ModuleID {
 	int id;
-	ModuleIDType typeID;
-	// bool operator==(const ModuleID &rhs) const = default;
+	ModuleTypeSlug typeID;
 	bool operator==(const ModuleID &rhs) const
 	{
 		return (this->id == rhs.id) && (this->typeID == rhs.typeID);
