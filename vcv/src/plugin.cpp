@@ -1,9 +1,12 @@
 #include "plugin.hpp"
 
 Plugin *pluginInstance;
+CentralData *centralData;
 
 void init(Plugin *p)
 {
+	centralData = new CentralData;
+
 	pluginInstance = p;
 
 	// Add modules here

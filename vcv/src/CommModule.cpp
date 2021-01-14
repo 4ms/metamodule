@@ -1,4 +1,5 @@
 #include "CommModule.h"
+#include "CommData.h"
 
 CommModule::CommModule()
 {
@@ -40,6 +41,7 @@ void CommModule::updateCommIDs(int id)
 		for (auto &el : commParams) {
 			el->setModuleID(id);
 		}
+		centralData->registerModule(selfID);
 		alreadyUpdatedIDs = true;
 	}
 }
@@ -186,3 +188,8 @@ void CommModule::notifyLabelButtonClicked(LabelButtonID id)
 	// todo
 	// Send message to the hub that a label was clicked
 }
+
+// LabelState CommModule::getLabelButtonState(LabelButtonID id)
+// {
+// 	return LabelState::Normal;
+// }

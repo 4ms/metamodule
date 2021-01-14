@@ -60,8 +60,20 @@ struct Expander : public CommModule {
 		if (leftExpander.module) {
 
 			if (buttonJustPressed()) {
-				if (startMessageLeft(GetAllIDs) != nullptr)
-					finishMessageLeft();
+				// auto module_list = centralData->getModuleList();
+				debugContents = "";
+				for (auto &mod : centralData->moduleData) {
+					debugContents += "Module type ";
+					debugContents += ModuleFactory::getModuleSlug(mod.typeID);
+					debugContents += " (" + ModuleFactory::getModuleTypeName(mod.typeID) + ") ";
+					debugContents += "connected with ID " + std::to_string(mod.id) + "\n";
+				}
+				labelText = "Writing module list to file";
+				updateDisplay();
+
+				writeToDebugFile(debugFile, debugContents);
+				// if (startMessageLeft(GetAllIDs) != nullptr)
+				// 	finishMessageLeft();
 			}
 
 			auto message = messageReceivedFromLeft();

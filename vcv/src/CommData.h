@@ -1,8 +1,8 @@
 #pragma once
 #include "CoreModules/moduleTypes.h"
-#include "plugin.hpp"
 #include "util/math.hh"
 #include <string>
+#include <vector>
 
 struct LabelButtonID {
 	enum class Types { Knob, InputJack, OutputJack, Toggle } type;

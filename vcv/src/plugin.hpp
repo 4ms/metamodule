@@ -1,7 +1,10 @@
 #pragma once
+#include "centralData.h"
 #include <rack.hpp>
 
 using namespace rack;
+
+extern CentralData *centralData;
 
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin *pluginInstance;
