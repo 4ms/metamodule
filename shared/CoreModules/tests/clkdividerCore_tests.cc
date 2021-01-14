@@ -40,3 +40,48 @@ TEST_CASE("50% pulsewidth check")
 	waitCycle(&c);
 	CHECK(c.get_output(0) == 0.0f);
 }
+
+TEST_CASE("test divide by 16")
+{
+	ClkdividerCore c;
+	c.set_samplerate(48000);
+	c.set_param(0, 1.0f);
+
+	clockPulse(&c);
+	waitCycle(&c);
+	waitCycle(&c);
+	waitCycle(&c);
+	clockPulse(&c); // establish clock duration
+	CHECK(c.get_output(0) == 1.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 1.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 1.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 1.0f);
+	clockPulse(&c);
+	CHECK(c.get_output(0) == 1.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 1.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 1.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 1.0f);
+	clockPulse(&c);
+	CHECK(c.get_output(0) == 0.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 0.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 0.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 0.0f);
+	clockPulse(&c);
+	CHECK(c.get_output(0) == 0.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 0.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 0.0f);
+	waitCycle(&c);
+	CHECK(c.get_output(0) == 0.0f);
+	clockPulse(&c);
+}
