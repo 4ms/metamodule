@@ -36,9 +36,18 @@ struct ModuleTypeWrapper {
 		name[kStringLen - 1] = '\0';
 	}
 #endif
+
+	bool operator==(const ModuleTypeWrapper &rhs) const
+	{
+		for (size_t i = 0; i < kStringLen; i++) {
+			if (this->name[i] != rhs.name[i])
+				return false;
+		}
+		return true;
+	}
 };
 
-using ModuleIDType = ModuleTypeWrapper;
+using ModuleTypeSlug = ModuleTypeWrapper;
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
@@ -46,7 +55,7 @@ class ModuleFactory {
 public:
 	ModuleFactory() = delete;
 
-	static bool registerModuleType(ModuleIDType typeslug, const char *name, CreateModuleFunc funcCreate)
+	static bool registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate)
 	{
 		int id = getTypeID(typeslug);
 		if (id == -1) {
@@ -62,7 +71,7 @@ public:
 		return false;
 	}
 
-	static std::unique_ptr<CoreProcessor> create(const ModuleIDType typeslug)
+	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug)
 	{
 		int id = getTypeID(typeslug);
 		if (id >= 0)
@@ -72,7 +81,7 @@ public:
 	}
 
 #ifndef STM32F7
-	static std::string getModuleTypeName(ModuleIDType typeslug)
+	static std::string getModuleTypeName(ModuleTypeSlug typeslug)
 	{
 		int id = getTypeID(typeslug);
 		if (id >= 0)
@@ -82,7 +91,7 @@ public:
 	}
 #endif
 
-	static std::string getModuleSlug(ModuleIDType typeslug)
+	static std::string getModuleSlug(ModuleTypeSlug typeslug)
 	{
 		int id = getTypeID(typeslug);
 		if (id >= 0)
@@ -91,7 +100,7 @@ public:
 		return "????";
 	}
 
-	static int getTypeID(ModuleIDType typeslug)
+	static int getTypeID(ModuleTypeSlug typeslug)
 	{
 		for (int i = 0; i < MAX_MODULE_TYPES; i++) {
 			auto &slug = module_slugs[i];

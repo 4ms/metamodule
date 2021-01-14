@@ -40,6 +40,8 @@ protected:
 	void updateCommIDs(int id);
 	void handleCommunication();
 	virtual void process(const ProcessArgs &args) override;
+	virtual void onAdd() override;
+	virtual void onRemove() override;
 
 	CommData *messageToSendRight()
 	{
