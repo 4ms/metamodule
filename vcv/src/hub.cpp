@@ -37,9 +37,7 @@ struct Expander : public CommModule {
 
 	std::string labelText = "";
 
-	float currentValue = 0;
-	float lastValue = 0;
-
+	long responseTimer = 0;
 	bool buttonAlreadyHandled = false;
 
 	Expander()
@@ -86,13 +84,21 @@ struct Expander : public CommModule {
 	void process(const ProcessArgs &args) override
 	{
 		if (buttonJustPressed()) {
-			std::string str = "";
-			appendModuleList(str);
-			appendParamList(str);
-			writeToDebugFile(debugFile, str);
-
-			labelText = "Writing module list to file";
+			responseTimer = 48000 / 4; // todo: set this to the sampleRate
+			centralData->requestAllParamDataAllModules();
+			labelText = "Requesting all modules send their data";
 			updateDisplay();
+		}
+		if (responseTimer) {
+			if (--responseTimer == 0) {
+				std::string str = "";
+				appendModuleList(str);
+				appendParamList(str);
+				writeToDebugFile(debugFile, str);
+
+				labelText = "Writing module list to file";
+				updateDisplay();
+			}
 		}
 	}
 
