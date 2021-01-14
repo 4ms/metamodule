@@ -13,8 +13,14 @@ public:
 
 	void unregisterModule(ModuleID mod)
 	{
-		// search moduleData for matching mod
-		// remove it
+		auto position = std::find(moduleData.begin(), moduleData.end(), mod);
+		if (position != moduleData.end())
+			moduleData.erase(position);
+	}
+
+	unsigned int getNumModules()
+	{
+		return moduleData.size();
 	}
 
 	//		 private :

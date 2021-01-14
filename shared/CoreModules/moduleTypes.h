@@ -36,6 +36,15 @@ struct ModuleTypeWrapper {
 		name[kStringLen - 1] = '\0';
 	}
 #endif
+
+	bool operator==(const ModuleTypeWrapper &rhs) const
+	{
+		for (size_t i = 0; i < kStringLen; i++) {
+			if (this->name[i] != rhs.name[i])
+				return false;
+		}
+		return true;
+	}
 };
 
 using ModuleIDType = ModuleTypeWrapper;
