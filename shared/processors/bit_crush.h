@@ -50,7 +50,7 @@ private:
 	float reducedSampleRate = 48000.0f;
 	float maxSampleRate;
 	unsigned int maxBitDepth = 16U;
-	int bitDepth = 16;
+	unsigned int bitDepth = 16;
 	float phaccu = 0;
 	float currentSampleRate;
 	float sampledOutput = 0;
