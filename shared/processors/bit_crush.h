@@ -1,6 +1,6 @@
 #pragma once
 #include "audio_processor.hh"
-#include "math.hh"
+#include "util/math.hh"
 
 using namespace MathTools;
 
@@ -8,16 +8,20 @@ class BitCrusher : public AudioProcessor {
 public:
 	virtual float update(float input)
 	{
-		phaccu += reducedSampleRate / currentSampleRate;
-		if (phaccu > 1.0f) {
-			int quantizedVal = floorf(input * ipow(2.0f, bitDepth >> 1));
-			float bitReduced = (float)quantizedVal / powf(2.0f, bitDepth >> 1);
+		if ((reducedSampleRate == maxSampleRate) && (bitDepth == maxBitDepth)) {
+			return input;
+		} else {
+			phaccu += reducedSampleRate / currentSampleRate;
+			if (phaccu >= 1.0f) {
+				int quantizedVal = floorf(input * ipow(2.0f, bitDepth >> 1));
+				float bitReduced = (float)quantizedVal / powf(2.0f, bitDepth >> 1);
 
-			sampledOutput = bitReduced;
+				sampledOutput = bitReduced;
 
-			phaccu -= 1.0f;
+				phaccu -= 1.0f;
+			}
+			return (sampledOutput);
 		}
-		return (sampledOutput);
 	}
 
 	BitCrusher() {}
@@ -29,21 +33,23 @@ public:
 			if ((expoControl) <= 0.9f) {
 				reducedSampleRate = map_value(expoControl, 0.0f, 0.9f, 0.1f, currentSampleRate / 16.0f);
 			} else {
-				reducedSampleRate =
-					map_value(expoControl, 0.9f, 1.0f, currentSampleRate / 16.0f, currentSampleRate / 2.0f);
+				reducedSampleRate = map_value(expoControl, 0.9f, 1.0f, currentSampleRate / 16.0f, maxSampleRate);
 			}
 		}
 		if (param_id == 1) {
-			bitDepth = map_value(val, 0.0f, 1.0f, 1U, 16U);
+			bitDepth = map_value(val, 0.0f, 1.0f, 1U, maxBitDepth);
 		}
 	}
 	virtual void set_samplerate(float sr)
 	{
 		currentSampleRate = sr;
+		maxSampleRate = currentSampleRate / 2.0f;
 	}
 
 private:
 	float reducedSampleRate = 48000.0f;
+	float maxSampleRate;
+	unsigned int maxBitDepth = 16U;
 	int bitDepth = 16;
 	float phaccu = 0;
 	float currentSampleRate;
