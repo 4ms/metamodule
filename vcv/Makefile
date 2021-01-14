@@ -31,10 +31,21 @@ compile_commands:
 	rm compile_commands.json 
 	mv compile_commands_with_headers.json compile_commands.json
 
-tests: core_tests
+tests: core_tests vcv_tests
 
 core_tests:
+	@echo
+	@echo "----------------------------"
+	@echo "Running CoreModule tests...."
+	@echo "----------------------------"
 	$(MAKE) -f $(SHARED_DIR)/CoreModules/tests/Makefile
+
+vcv_tests:
+	@echo
+	@echo "----------------------------"
+	@echo "Running vcv plugin tests...."
+	@echo "----------------------------"
+	$(MAKE) -f tests/Makefile
 
 .PHONY: tests core_tests
 
