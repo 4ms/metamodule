@@ -6,32 +6,18 @@ void init(Plugin *p)
 {
 	pluginInstance = p;
 
-	// Add modules here 
-p->addModel(modelEightstepprob); 
-p->addModel(modelQuantizer); 
-p->addModel(modelFourstep); 
-p->addModel(modelEightstep); 
-p->addModel(modelBitcrush);
+	// Add modules here
+	p->addModel(modelEightstepprob);
+	p->addModel(modelQuantizer);
+	p->addModel(modelFourstep);
+	p->addModel(modelEightstep);
+	p->addModel(modelBitcrush);
 	p->addModel(modelPhaser);
 	p->addModel(modelFreqshift);
 	p->addModel(modelLowpassfilter);
 	p->addModel(modelLowpassgate);
 	p->addModel(modelClkmultiplier);
 	p->addModel(modelClkdivider);
-	// p->addModel(modelDual_opener);
-	// p->addModel(modelDspTemplate);
-	// p->addModel(modelAdjTest);
-
-	p->addModel(modelExpander);
-	p->addModel(modelPatchPlayer);
-
-	//Layout Templates:
-	p->addModel(modelTemplate4);
-	p->addModel(modelTemplate8);
-	p->addModel(modelTemplate12);
-	p->addModel(modelTemplate16);
-
-	//CoreModules:
 	p->addModel(modelLFO);
 	p->addModel(modelAD);
 	p->addModel(modelCrossfade);
@@ -44,6 +30,9 @@ p->addModel(modelBitcrush);
 	p->addModel(modelComparator);
 	p->addModel(modelSend);
 
+	p->addModel(modelExpander);
+
 	// Any other plugin initialization may go here.
-	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup times of Rack.
+	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup
+	// times of Rack.
 }

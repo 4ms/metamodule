@@ -12,91 +12,85 @@
   "sourceUrl": "",
   "donateUrl": "",
   "changelogUrl": "",
-  "modules": [ 
-{
+  "modules": [
+    {
       "slug": "EIGHTSTEPPROB",
       "name": "Eightstepprob",
       "description": "8 Step Probability Sequencer",
       "tags": []
-}, 
-{
+    },
+    {
       "slug": "QUANTIZER",
       "name": "Quantizer",
       "description": "Quantizer",
       "tags": []
-}, 
-{
+    },
+    {
       "slug": "FOURSTEP",
       "name": "Fourstep",
       "description": "4 Step Sequencer",
       "tags": []
-}, 
-{
+    },
+    {
       "slug": "EIGHTSTEP",
       "name": "Eightstep",
       "description": "8 Step Sequencer",
       "tags": []
-}, 
-{
+    },
+    {
       "slug": "BITCRUSH",
       "name": "Bitcrush",
       "description": "Bit Crusher",
       "tags": []
-}, 
-{
+    },
+    {
       "slug": "PHASER",
       "name": "Phaser",
       "description": "Phaser",
       "tags": []
-}, 
-{
+    },
+    {
       "slug": "FREQSHIFT",
       "name": "Freqshift",
       "description": "Frequency Shifter",
       "tags": []
-}, 
+    },
     {
       "slug": "LOWPASSFILTER",
       "name": "Lowpassfilter",
       "description": "Low Pass Filter",
       "tags": []
     },
-{
-      "slug": "LOWPASSFILTER",
-      "name": "Lowpassfilter",
-      "description": "Low Pass Filter",
-      "tags": []
-}, 
-{
+    {
       "slug": "LOWPASSGATE",
       "name": "Lowpassgate",
       "description": "Low Pass Gate",
       "tags": []
-}, 
-{
+    },
+    {
       "slug": "CLKMULTIPLIER",
       "name": "Clkmultiplier",
       "description": "clock multiplier",
       "tags": []
-}, 
-{
+    },
+    {
       "slug": "CLKDIVIDER",
       "name": "Clkdivider",
       "description": "clock divider",
       "tags": []
-}, 
-	{
-	  "slug": "comparator",
-	  "name": "Comparator",
-	  "description": "",
-	  "tags": []
-	}, 
-	{
-	  "slug": "send",
-	  "name": "Send",
-	  "description": "",
-	  "tags": []
-	},
+    },
+    {
+      "slug": "comparator",
+      "name": "Comparator",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "send",
+      "name": "Send",
+      "description": "",
+      "tags": []
+    },
     {
       "slug": "expanderModule",
       "name": "Hub",
@@ -112,30 +106,6 @@
     {
       "slug": "ad_envelope",
       "name": "AD envelope",
-      "description": "",
-      "tags": []
-    },
-    {
-      "slug": "4hptemplate",
-      "name": "4hp template",
-      "description": "",
-      "tags": []
-    },
-    {
-      "slug": "8hptemplate",
-      "name": "8hp template",
-      "description": "",
-      "tags": []
-    },
-    {
-      "slug": "12hptemplate",
-      "name": "12hp template",
-      "description": "",
-      "tags": []
-    },
-    {
-      "slug": "16hptemplate",
-      "name": "16hp template",
       "description": "",
       "tags": []
     },
@@ -178,12 +148,6 @@
     {
       "slug": "vca",
       "name": "vca",
-      "description": "",
-      "tags": []
-    },
-    {
-      "slug": "PatchPlayer",
-      "name": "Patch Player",
       "description": "",
       "tags": []
     }
