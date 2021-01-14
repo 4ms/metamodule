@@ -46,11 +46,19 @@ void CommModule::updateCommIDs(int id)
 	}
 }
 
-void CommModule::process(const ProcessArgs &args)
+void CommModule::onAdd()
 {
 	selfID.id = this->id;
 	updateCommIDs(selfID.id);
+}
 
+void CommModule::onRemove()
+{
+	centralData->unregisterModule(selfID);
+}
+
+void CommModule::process(const ProcessArgs &args)
+{
 	for (auto &element : commParams) {
 		element->updateValue();
 		core->set_param(element->getID(), element->getValue());
