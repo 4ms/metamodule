@@ -14,19 +14,22 @@ CommModule::CommModule()
 
 void CommModule::handleCommunication()
 {
-	if (rightExpander.module) {
-		sendToRight();
-		readFromRight();
-	}
+	for (auto &p : commParams)
+		centralData->updateParamStatus(p->paramStatus);
 
-	if (leftExpander.module) {
-		sendToLeft();
-		readFromLeft();
-	} else {
-		if (recdFromRightData.messageType == GetAllIDs) {
-			initiateStatusDumpToRight();
-		}
-	}
+	// if (rightExpander.module) {
+	// 	sendToRight();
+	// 	readFromRight();
+	// }
+
+	// if (leftExpander.module) {
+	// 	sendToLeft();
+	// 	readFromLeft();
+	// } else {
+	// 	if (recdFromRightData.messageType == GetAllIDs) {
+	// 		initiateStatusDumpToRight();
+	// 	}
+	// }
 }
 
 void CommModule::updateCommIDs(int id)

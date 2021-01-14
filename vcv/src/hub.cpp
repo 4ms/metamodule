@@ -75,7 +75,7 @@ struct Expander : public CommModule {
 		}
 	}
 
-	void appendKnobParamList(std::string &str)
+	void appendParamList(std::string &str)
 	{
 		for (auto pData : centralData->paramData) {
 			str += "Parameter # " + std::to_string(pData.paramID) + " on module # " + std::to_string(pData.moduleID) +
@@ -88,6 +88,7 @@ struct Expander : public CommModule {
 		if (buttonJustPressed()) {
 			std::string str = "";
 			appendModuleList(str);
+			appendParamList(str);
 			writeToDebugFile(debugFile, str);
 
 			labelText = "Writing module list to file";
