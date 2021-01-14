@@ -2,8 +2,8 @@
 
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "math.hh"
 #include "processors/tools/clockPhase.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 
@@ -12,10 +12,9 @@ public:
 	virtual void update(void) override
 	{
 		cp.update();
-		if (cp.getWrappedPhase() < pulseWidth) {
+		if ((cp.getWrappedPhase() < pulseWidth) && clockInit) {
 			clockOutput = 1;
-		}
-		else {
+		} else {
 			clockOutput = 0;
 		}
 	}
@@ -37,6 +36,7 @@ public:
 		switch (input_id) {
 			case 0:
 				cp.updateClock(val);
+				clockInit = true;
 				break;
 		}
 	}
@@ -63,6 +63,7 @@ public:
 private:
 	float pulseWidth = 0.5f;
 	int clockOutput = 0;
+	bool clockInit = false;
 
 	ClockPhase cp;
 };
