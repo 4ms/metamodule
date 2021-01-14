@@ -2,8 +2,8 @@
 
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "math.hh"
 #include "processors/bit_crush.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 
