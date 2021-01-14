@@ -1,5 +1,7 @@
 #pragma once
 #include "CommData.h"
+#include <iostream>
+#include <map>
 #include <mutex>
 #include <vector>
 
@@ -7,6 +9,11 @@ class CentralData {
 	static inline std::mutex mtx;
 
 public:
+	enum MessageType {
+		None,
+		RequestAllParamData,
+	};
+
 	void registerModule(ModuleID mod)
 	{
 		mtx.lock();
@@ -51,10 +58,29 @@ public:
 		mtx.unlock();
 	}
 
+	MessageType getMyMessage(int module_id)
+	{
+		auto m = messages.find(module_id);
+		if (m == messages.end())
+			return MessageType::None;
+		auto msg = messages[module_id];
+		messages[module_id] = MessageType::None;
+		return msg;
+	}
+
+	void requestAllParamDataAllModules()
+	{
+		for (auto &m : moduleData) {
+			messages[m.id] = MessageType::RequestAllParamData;
+		}
+	}
+
 	//		 private :
 	std::vector<ModuleID> moduleData;
 	std::vector<JackStatus> jackData;
 	std::vector<ParamStatus> paramData;
 	std::vector<LabelButtonID> mappings;
+
+	std::map<int, MessageType> messages;
 };
 

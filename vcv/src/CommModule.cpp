@@ -14,8 +14,10 @@ CommModule::CommModule()
 
 void CommModule::handleCommunication()
 {
-	for (auto &p : commParams)
-		centralData->updateParamStatus(p->paramStatus);
+	if (centralData->getMyMessage(selfID.id) == CentralData::RequestAllParamData) {
+		for (auto &p : commParams)
+			centralData->updateParamStatus(p->paramStatus);
+	}
 
 	// if (rightExpander.module) {
 	// 	sendToRight();

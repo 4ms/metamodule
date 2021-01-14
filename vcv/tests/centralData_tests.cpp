@@ -64,6 +64,7 @@ TEST_CASE("ParamStatus adding and remove param data")
 	}
 	SUBCASE("updateParamStatus() with new module/param IDs adds it to paramData")
 	{
+		cd.registerModule({1, "MODULE"});
 		ParamStatus p;
 		p.value = 0.5;
 		p.moduleID = 1;
@@ -106,6 +107,38 @@ TEST_CASE("ParamStatus adding and remove param data")
 		cd.updateParamStatus(p);
 		cd.unregisterModule({1, "MODULE"});
 		CHECK(cd.paramData.size() == 0);
+	}
+	// Todo: Adding a param with a moduleID that's not registered, will not add the param (? or will it?)
+}
+
+TEST_CASE("messages system")
+{
+	CentralData cd;
+	cd.registerModule({1, "MODULE1"});
+	cd.registerModule({2, "MODULE2"});
+
+	SUBCASE("No messages initially")
+	{
+		CHECK(cd.getMyMessage(1) == CentralData::MessageType::None);
+		CHECK(cd.getMyMessage(2) == CentralData::MessageType::None);
+	}
+
+	SUBCASE("requestAllParamDataAllModules() sends everyone a message")
+	{
+		cd.requestAllParamDataAllModules();
+		CHECK(cd.getMyMessage(1) == CentralData::MessageType::RequestAllParamData);
+		CHECK(cd.getMyMessage(2) == CentralData::MessageType::RequestAllParamData);
+	}
+	SUBCASE("Messages are cleared after getMyMessages()")
+	{
+		cd.requestAllParamDataAllModules();
+		cd.getMyMessage(1);
+		CHECK(cd.getMyMessage(1) == CentralData::MessageType::None);
+
+		// module 2's message shouldn't be cleared until it's checked
+		CHECK(cd.getMyMessage(2) == CentralData::MessageType::RequestAllParamData);
+		cd.getMyMessage(2);
+		CHECK(cd.getMyMessage(2) == CentralData::MessageType::None);
 	}
 }
 
