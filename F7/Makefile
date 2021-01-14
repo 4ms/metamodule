@@ -11,7 +11,7 @@ DEVICE 			= $(LIBDIR)/stm32/device
 CORE 			= $(LIBDIR)/stm32/core
 PERIPH 			= $(LIBDIR)/stm32/periph
 DRIVERLIB       = $(LIBDIR)/mdrivlib
-SHARED  		= $(PWD)/../shared
+SHARED  		= src/shared
 TABLEGEN 		= $(SHARED)/tableGen
 
 BUILDDIR 		= build
