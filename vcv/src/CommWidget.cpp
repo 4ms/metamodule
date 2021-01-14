@@ -36,7 +36,6 @@ void CommModuleWidget::addLabel(const std::string labelText, const Vec pos, cons
 	button->box.size.x = kGridSpacingX;
 	button->text = labelText;
 	button->id = id;
-	button->mainModule = mainModule;
 	addChild(button);
 }
 

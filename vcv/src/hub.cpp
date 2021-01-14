@@ -145,7 +145,6 @@ struct ExpanderWidget : CommModuleWidget {
 	ExpanderWidget(Expander *module)
 	{
 		setModule(module);
-		mainModule = static_cast<CommModule *>(module);
 		expModule = module;
 
 		if (expModule != nullptr) {

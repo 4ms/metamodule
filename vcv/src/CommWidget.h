@@ -18,8 +18,6 @@ protected:
 	void addLabeledOutput(const std::string labelText, const int outputID, const Vec position);
 	void addLabeledToggle(const std::string labelText, const int lightID, const int paramID, const Vec position);
 
-	CommModule *mainModule;
-
 private:
 	constexpr float gridToYFromTop(const float y);
 	constexpr float gridToYFromBottom(const float y);
@@ -33,7 +31,7 @@ public:
 	void onDragStart(const event::DragStart &e) override;
 
 	LabelButtonID id;
-	CommModule *mainModule;
+	LabelState state = LabelState::Normal;
 
 private:
 	int toggleState = 0;

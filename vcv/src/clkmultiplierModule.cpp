@@ -36,7 +36,6 @@ struct ClkmultiplierWidget : CommModuleWidget {
 	ClkmultiplierWidget(ClkmultiplierModule *module)
 	{
 		setModule(module);
-		mainModule = static_cast<CommModule *>(module);
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hp.svg")));
 		addLabeledKnob("MULT", ClkmultiplierModule::MULT_PARAM, {0, 0});
