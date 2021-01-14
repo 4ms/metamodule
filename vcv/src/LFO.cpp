@@ -5,28 +5,14 @@
 
 struct LfoModule : CommModule {
 
-	enum ParamIds {
-		FREQ_KNOB,
-		SHAPE_KNOB,
-		LEVEL_KNOB,
-		NUM_PARAMS
-	};
-	enum InputIds {
-		RESET_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		LFO_OUTPUT,
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		REC_LIGHT,
-		NUM_LIGHTS
-	};
+	enum ParamIds { FREQ_KNOB, SHAPE_KNOB, LEVEL_KNOB, NUM_PARAMS };
+	enum InputIds { RESET_INPUT, NUM_INPUTS };
+	enum OutputIds { LFO_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { REC_LIGHT, NUM_LIGHTS };
 
 	LfoModule()
 	{
-		CommModule::configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("LFOSINE");
 		selfID.typeID = "LFOSINE";
 
