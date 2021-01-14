@@ -35,10 +35,6 @@ struct Expander : public CommModule {
 		NUM_LIGHTS,
 	};
 
-	CommData leftMessages[2];
-	CommData rightMessages[2];
-
-	std::string debugContents;
 	std::string labelText = "";
 
 	float currentValue = 0;
@@ -49,78 +45,61 @@ struct Expander : public CommModule {
 	Expander()
 	{
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		leftExpander.producerMessage = &leftMessages[0];
-		leftExpander.consumerMessage = &leftMessages[1];
-		rightExpander.producerMessage = &rightMessages[0];
-		rightExpander.consumerMessage = &rightMessages[1];
+		selfID.typeID = "HUB";
 	}
 
-	void process(const ProcessArgs &args) override
+	void appendModuleList(std::string &str)
 	{
-		if (leftExpander.module) {
+		for (auto &mod : centralData->moduleData) {
+			str += "Module slug in centralData = ";
+			str += mod.typeID.name;
+			str += ". CoreModule slug = ";
+			str += ModuleFactory::getModuleSlug(mod.typeID);
+			str += " (" + ModuleFactory::getModuleTypeName(mod.typeID) + ") ";
+			str += ". VCV Rack unique ID = " + std::to_string(mod.id) + "\n";
+		}
+	}
 
-			if (buttonJustPressed()) {
-				// auto module_list = centralData->getModuleList();
-				debugContents = "";
-				for (auto &mod : centralData->moduleData) {
-					debugContents += "Module type ";
-					debugContents += ModuleFactory::getModuleSlug(mod.typeID);
-					debugContents += " (" + ModuleFactory::getModuleTypeName(mod.typeID) + ") ";
-					debugContents += "connected with ID " + std::to_string(mod.id) + "\n";
-				}
-				labelText = "Writing module list to file";
-				updateDisplay();
-
-				writeToDebugFile(debugFile, debugContents);
-				// if (startMessageLeft(GetAllIDs) != nullptr)
-				// 	finishMessageLeft();
-			}
-
-			auto message = messageReceivedFromLeft();
-
-			if (message->messageType == SendingIDs) {
-				labelText = "Received from left";
-				updateDisplay();
-
-				debugContents = "";
-				for (auto recID : message->moduleData) {
-					debugContents += "Module of type ";
-					debugContents += ModuleFactory::getModuleSlug(recID.typeID);
-					debugContents += " (" + ModuleFactory::getModuleTypeName(recID.typeID) + ") ";
-					debugContents += "connected with ID " + std::to_string(recID.id) + "\n";
-				}
-
-				for (auto jData : message->jackData) {
-					if (jData.connected == true) {
-						debugContents += "Input jack " + std::to_string(jData.sendingJackId);
-						debugContents += " on module " + std::to_string(jData.sendingModuleId);
-						debugContents += " is connected to output jack " + std::to_string(jData.receivedJackId);
-						debugContents += " on module " + std::to_string(jData.receivedModuleId) + "\n";
-					} else {
-						debugContents += "Input jack " + std::to_string(jData.sendingJackId) + " on module " +
-										 std::to_string(jData.sendingModuleId) + " not connected" + "\n";
-					}
-				}
-
-				for (auto pData : message->paramData) {
-					debugContents += "Parameter # " + std::to_string(pData.paramID) + " on module # " +
-									 std::to_string(pData.moduleID) + " value is " + std::to_string(pData.value) + "\n";
-				}
-
-				writeToDebugFile(debugFile, debugContents);
-
-				message->messageType = NoMessage;
-				message->moduleData.clear();
-				message->jackData.clear();
-				message->paramData.clear();
+	void appendCableList(std::string &str)
+	{
+		for (auto jData : centralData->jackData) {
+			if (jData.connected == true) {
+				str += "Input jack " + std::to_string(jData.sendingJackId);
+				str += " on module " + std::to_string(jData.sendingModuleId);
+				str += " is connected to output jack " + std::to_string(jData.receivedJackId);
+				str += " on module " + std::to_string(jData.receivedModuleId) + "\n";
+			} else {
+				str += "Input jack " + std::to_string(jData.sendingJackId) + " on module " +
+					   std::to_string(jData.sendingModuleId) + " not connected" + "\n";
 			}
 		}
 	}
 
-	void writeToDebugFile(std::string inFile, std::string textToWrite)
+	void appendParamList(std::string &str)
+	{
+		for (auto pData : centralData->paramData) {
+			str += "Parameter # " + std::to_string(pData.paramID) + " on module # " + std::to_string(pData.moduleID) +
+				   " value is " + std::to_string(pData.value) + "\n";
+		}
+	}
+
+	void process(const ProcessArgs &args) override
+	{
+		if (buttonJustPressed()) {
+			std::string str = "";
+			appendModuleList(str);
+			appendParamList(str);
+			writeToDebugFile(debugFile, str);
+
+			labelText = "Writing module list to file";
+			updateDisplay();
+		}
+	}
+
+	void writeToDebugFile(std::string fileName, std::string &textToWrite)
 	{
 		std::ofstream myfile;
-		myfile.open(inFile);
+		myfile.open(fileName);
 		myfile << textToWrite;
 		myfile.close();
 	}
@@ -130,8 +109,6 @@ struct Expander : public CommModule {
 		if (params[GET_INFO].getValue() > 0.f) {
 			if (!buttonAlreadyHandled) {
 				buttonAlreadyHandled = true;
-				labelText = "Sending to left";
-				updateDisplay();
 				return true;
 			}
 		} else {
@@ -140,30 +117,16 @@ struct Expander : public CommModule {
 		return false;
 	}
 
-	CommData *startMessageLeft(GlobalMessage message_type)
-	{
-		if (leftExpander.moduleId != CommModule::CommModuleExpanderID)
-			return nullptr;
-		auto message = messageToSendLeft();
-		message->messageType = message_type;
-		return message;
-	}
-
-	void finishMessageLeft()
-	{
-		leftExpander.module->rightExpander.messageFlipRequested = true;
-	}
-
 	void notifyLabelButtonClicked(LabelButtonID id) override
 	{
 		labelText = "label button clicked" + std::to_string(static_cast<int>(id.type)) + ", " + std::to_string(id.ID);
 		updateDisplay();
 
-		auto message = startMessageLeft(InitMapping);
-		if (message != nullptr) {
-			message->mappings.push_back(id);
-			finishMessageLeft();
-		}
+		// auto message = startMessageLeft(InitMapping);
+		// if (message != nullptr) {
+		// 	message->mappings.push_back(id);
+		// 	finishMessageLeft();
+		// }
 	}
 };
 

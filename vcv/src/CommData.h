@@ -31,6 +31,11 @@ struct ParamStatus {
 	float value = 0;
 	int paramID = 0;
 	int moduleID = 0;
+
+	bool isSameParam(ParamStatus &other)
+	{
+		return (paramID == other.paramID) && (moduleID == other.moduleID);
+	}
 };
 
 enum GlobalMessage {

@@ -5,16 +5,16 @@
 #include <memory>
 #include <string>
 
-struct ModuleTypeWrapper {
+struct ModuleTypeSlug {
 	static const int kStringLen = 20;
 	char name[kStringLen];
 
-	ModuleTypeWrapper()
+	ModuleTypeSlug()
 	{
 		name[0] = '\0';
 	}
 
-	ModuleTypeWrapper(const char *s)
+	ModuleTypeSlug(const char *s)
 	{
 		for (size_t i = 0; i < kStringLen; i++) {
 			if (i < strlen(s))
@@ -25,7 +25,7 @@ struct ModuleTypeWrapper {
 		name[kStringLen - 1] = '\0';
 	}
 #ifndef STM32F7
-	ModuleTypeWrapper(const std::string s)
+	ModuleTypeSlug(const std::string s)
 	{
 		for (size_t i = 0; i < kStringLen; i++) {
 			if (i < s.length())
@@ -37,7 +37,7 @@ struct ModuleTypeWrapper {
 	}
 #endif
 
-	bool operator==(const ModuleTypeWrapper &rhs) const
+	bool operator==(const ModuleTypeSlug &rhs) const
 	{
 		for (size_t i = 0; i < kStringLen; i++) {
 			if (this->name[i] != rhs.name[i])
@@ -46,8 +46,6 @@ struct ModuleTypeWrapper {
 		return true;
 	}
 };
-
-using ModuleTypeSlug = ModuleTypeWrapper;
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();

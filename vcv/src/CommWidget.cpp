@@ -95,7 +95,7 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 		return;
 	}
 
-	mainModule->notifyLabelButtonClicked(id);
+	// mainModule->notifyLabelButtonClicked(id);
 
 	toggleState = !toggleState;
 
