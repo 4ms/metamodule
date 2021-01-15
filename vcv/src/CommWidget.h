@@ -15,7 +15,7 @@ class CommModuleWidget : public app::ModuleWidget {
 	const float kModuleHeight = 128.5f;
 
 public:
-	void notifyLabelButtonClicked(LabeledButton &button);
+	virtual void notifyLabelButtonClicked(LabeledButton &button);
 
 protected:
 	void addLabeledKnob(const std::string labelText, const int knobID, const Vec position);
@@ -39,7 +39,7 @@ public:
 	void onDragStart(const event::DragStart &e) override;
 
 	LabelButtonID id;
-	LabelState state = LabelState::Normal;
+	MappingState state = MappingState::Normal;
 
 private:
 	CommModuleWidget &_parent;

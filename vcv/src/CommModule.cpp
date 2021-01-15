@@ -17,6 +17,9 @@ void CommModule::handleCommunication()
 	if (centralData->getMyMessage(selfID.id) == CentralData::RequestAllParamData) {
 		for (auto &p : commParams)
 			centralData->updateParamStatus(p->paramStatus);
+
+		for (auto &ins : inputJacks)
+			centralData->updateJackStatus(ins->inputJackStatus);
 	}
 
 	// if (rightExpander.module) {
@@ -62,6 +65,10 @@ void CommModule::onRemove()
 	centralData->unregisterModule(selfID);
 }
 
+void CommModule::onSampleRateChange()
+{
+	// core->set_samplerate(args.sampleRate);
+}
 void CommModule::process(const ProcessArgs &args)
 {
 	for (auto &element : commParams) {
@@ -80,8 +87,8 @@ void CommModule::process(const ProcessArgs &args)
 		}
 	}
 
-	core->set_samplerate(args.sampleRate);
 	core->update();
+	core->set_samplerate(args.sampleRate);
 
 	for (auto &out : outputJacks) {
 		out->setValue(out->scale(core->get_output(out->getID())));

@@ -6,7 +6,7 @@ void CommModuleWidget::addLabeledKnob(const std::string labelText, const int kno
 		gridToXCentered(position.x),
 		gridToYFromTop(position.y),
 	};
-	addLabel(labelText, pos, {LabelButtonID::Types::Knob, knobID});
+	addLabel(labelText, pos, {LabelButtonID::Types::Knob, knobID, -1});
 	addParam(createParamCentered<RoundBlackKnob>(mm2px(pos), module, knobID));
 }
 
@@ -16,7 +16,7 @@ void CommModuleWidget::addLabeledInput(const std::string labelText, const int in
 		gridToXCentered(position.x),
 		gridToYFromBottom(position.y),
 	};
-	addLabel(labelText, pos, {LabelButtonID::Types::InputJack, inputID});
+	addLabel(labelText, pos, {LabelButtonID::Types::InputJack, inputID, -1});
 	addInput(createInputCentered<PJ301MPort>(mm2px(pos), module, inputID));
 }
 
@@ -26,7 +26,7 @@ void CommModuleWidget::addLabeledOutput(const std::string labelText, const int o
 		gridToXCentered(position.x),
 		gridToYFromBottom(position.y),
 	};
-	addLabel(labelText, pos, {LabelButtonID::Types::OutputJack, outputID});
+	addLabel(labelText, pos, {LabelButtonID::Types::OutputJack, outputID, -1});
 	addOutput(createOutputCentered<PJ301MPort>(mm2px(pos), module, outputID));
 }
 
@@ -51,7 +51,7 @@ void CommModuleWidget::addLabeledToggle(const std::string labelText,
 	};
 	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(pos), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({pos.x - 3.0f, pos.y - 3.0f}), module, lightID));
-	addLabel(labelText, {pos.x + 17, pos.y - 8.5f}, {LabelButtonID::Types::Toggle, paramID});
+	addLabel(labelText, {pos.x + 17, pos.y - 8.5f}, {LabelButtonID::Types::Toggle, paramID, -1});
 }
 
 constexpr float CommModuleWidget::gridToYFromTop(const float y)
@@ -70,11 +70,19 @@ constexpr float CommModuleWidget::gridToXCentered(const float x)
 
 void CommModuleWidget::notifyLabelButtonClicked(LabeledButton &button)
 {
+	button.id.moduleID = module->id;
+	auto mapstate = centralData->getMappingState();
 
-	if (button.state == LabelState::Normal)
-		button.state = LabelState::IsMapped;
-	else
-		button.state = LabelState::Normal;
+	if (mapstate == MappingState::MappingPending) {
+
+		if (button.state == MappingState::IsMapped) {
+			button.state = MappingState::MappingPending;
+			centralData->unregisterMapDest(button.id);
+		} else if (button.state == MappingState::MappingPending) {
+			button.state = MappingState::IsMapped;
+			centralData->registerMapDest(button.id);
+		}
+	}
 }
 
 void LabeledButton::draw(const DrawArgs &args)
@@ -89,17 +97,21 @@ void LabeledButton::draw(const DrawArgs &args)
 
 	nvgStroke(args.vg);
 
-	if (state == LabelState::IsMapped) {
-		nvgFillColor(args.vg, rack::color::GREEN);
+	if (state == MappingState::IsMapped) {
+		nvgFillColor(args.vg, rack::color::BLUE);
 		nvgFill(args.vg);
-	}
-	if (state == LabelState::Normal) {
-		nvgFillColor(args.vg, rack::color::WHITE);
-		nvgFill(args.vg);
-	}
-	if (state == LabelState::MappingPending) {
-		nvgFillColor(args.vg, rack::color::YELLOW);
-		nvgFill(args.vg);
+	} else {
+		auto mapstate = centralData->getMappingState();
+		state = mapstate;
+
+		if (state == MappingState::Normal) {
+			nvgFillColor(args.vg, rack::color::WHITE);
+			nvgFill(args.vg);
+		}
+		if (state == MappingState::MappingPending) {
+			nvgFillColor(args.vg, rack::color::YELLOW);
+			nvgFill(args.vg);
+		}
 	}
 
 	nvgBeginPath(args.vg);

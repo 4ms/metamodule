@@ -7,9 +7,15 @@
 struct LabelButtonID {
 	enum class Types { Knob, InputJack, OutputJack, Toggle } type;
 	int ID;
+	int moduleID;
+
+	bool operator==(const LabelButtonID &rhs) const
+	{
+		return (type == rhs.type) && (ID == rhs.ID) && (moduleID == rhs.moduleID);
+	}
 };
 
-enum class LabelState {
+enum class MappingState {
 	Normal,
 	MappingPending,
 	IsMapped,
@@ -30,7 +36,12 @@ struct JackStatus {
 	int sendingModuleId = 0;
 	int receivedModuleId = 0;
 	bool connected = false;
-	int receivedModuleType = 2;
+
+	bool isSameJack(JackStatus &other)
+	{
+		return (sendingJackId == other.sendingJackId) && (sendingModuleId == other.sendingModuleId);
+	}
+	// int receivedModuleType = 2;
 };
 
 struct ParamStatus {

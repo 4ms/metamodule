@@ -42,6 +42,7 @@ protected:
 	virtual void process(const ProcessArgs &args) override;
 	virtual void onAdd() override;
 	virtual void onRemove() override;
+	virtual void onSampleRateChange() override;
 
 	CommData *messageToSendRight()
 	{

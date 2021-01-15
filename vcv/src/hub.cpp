@@ -81,6 +81,19 @@ struct Expander : public CommModule {
 		}
 	}
 
+	void appendMappingList(std::string &str)
+	{
+		for (auto &m : centralData->maps) {
+			str += "Mapping: src param ID = " + std::to_string(m.src.ID);
+			str += " type = " + std::to_string((int)m.src.type);
+			str += " moduleID = " + std::to_string(m.src.moduleID);
+			str += " ==> dst param ID = " + std::to_string(m.dst.ID);
+			str += " type = " + std::to_string((int)m.dst.type);
+			str += " moduleID = " + std::to_string(m.dst.moduleID);
+			str += "\n";
+		}
+	}
+
 	void process(const ProcessArgs &args) override
 	{
 		if (buttonJustPressed()) {
@@ -94,6 +107,8 @@ struct Expander : public CommModule {
 				std::string str = "";
 				appendModuleList(str);
 				appendParamList(str);
+				appendCableList(str);
+				appendMappingList(str);
 				writeToDebugFile(debugFile, str);
 
 				labelText = "Writing module list to file";
@@ -121,18 +136,6 @@ struct Expander : public CommModule {
 			buttonAlreadyHandled = false;
 		}
 		return false;
-	}
-
-	void notifyLabelButtonClicked(LabelButtonID id) override
-	{
-		labelText = "label button clicked" + std::to_string(static_cast<int>(id.type)) + ", " + std::to_string(id.ID);
-		updateDisplay();
-
-		// auto message = startMessageLeft(InitMapping);
-		// if (message != nullptr) {
-		// 	message->mappings.push_back(id);
-		// 	finishMessageLeft();
-		// }
 	}
 };
 
@@ -178,6 +181,22 @@ struct ExpanderWidget : CommModuleWidget {
 		}
 		for (int i = 2; i < 6; i++) {
 			addLabeledInput("CV IN", i, {(float)(i - 2), 0});
+		}
+	}
+
+	virtual void notifyLabelButtonClicked(LabeledButton &button) override
+	{
+		button.id.moduleID = module->id;
+
+		auto mapstate = centralData->getMappingState();
+
+		if (mapstate == MappingState::MappingPending && centralData->currentMap.src == button.id) {
+			centralData->abortMappingProcedure();
+			valueLabel->text = "Aborted mapping";
+		} else {
+			centralData->startMappingProcedure(button.id);
+			valueLabel->text = "label button clicked" + std::to_string(static_cast<int>(button.id.type)) + ", " +
+							   std::to_string(button.id.ID);
 		}
 	}
 };
