@@ -7,7 +7,8 @@ public:
 		for (int i = 0; i < 16; i++) {
 			values[i] = 0.0f;
 		}
-		numSteps = steps;
+		if (numSteps <= 16)
+			numSteps = steps;
 	}
 
 	void update()
