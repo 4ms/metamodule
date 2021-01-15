@@ -91,21 +91,31 @@ private:
 
 	void scaleChanged()
 	{
-		int tempNote = 13;
-		for (int i = 0; i < 12; i++) {
-			if (keyStatus[i] == true) {
-				tempNote = min(tempNote, i);
-			}
-		}
-		firstActive = tempNote;
-
-		int fillNote = firstActive;
+		firstActive = lowestValidNote();
 
 		notesActive = 0;
 
 		for (int i = 0; i < 12; i++) {
 			notesActive += keyStatus[i] ? 1 : 0;
 		}
+
+		genTable();
+	}
+
+	int lowestValidNote()
+	{
+		int tempNote = 13;
+		for (int i = 0; i < 12; i++) {
+			if (keyStatus[i] == true) {
+				tempNote = min(tempNote, i);
+			}
+		}
+		return (tempNote);
+	}
+
+	void genTable()
+	{
+		int fillNote = firstActive;
 
 		for (int i = 0; i < 12; i++) {
 			if (i < firstActive)
