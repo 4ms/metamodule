@@ -38,7 +38,7 @@ public:
 		if (param_id >= 12 || param_id < 0)
 			return;
 		keyStatus[param_id] = (val > 0.1f);
-		scaleChanged();
+		scaleUpdate();
 	}
 	virtual void set_samplerate(const float sr) override {}
 
@@ -89,17 +89,30 @@ private:
 	float signalInput = 0;
 	float signalOutput = 0;
 
-	void scaleChanged()
-	{
-		firstActive = lowestValidNote();
+	uint16_t currentScale = 0;
+	uint16_t lastScale = 0;
 
+	void scaleUpdate()
+	{
 		notesActive = 0;
 
 		for (int i = 0; i < 12; i++) {
 			notesActive += keyStatus[i] ? 1 : 0;
 		}
 
-		genTable();
+		if (notesActive > 0) {
+			lastScale = currentScale;
+			currentScale = 0;
+			for (int i = 0; i < 12; i++) {
+				currentScale += keyStatus[i] << i;
+			}
+
+			if (currentScale != lastScale) {
+				firstActive = lowestValidNote();
+
+				genTable();
+			}
+		}
 	}
 
 	int lowestValidNote()
