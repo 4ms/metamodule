@@ -10,27 +10,29 @@ public:
 	virtual void update(void) override
 	{
 		for (int i = 0; i < 4; i++) {
-			signalOuts[i] = input * levels[i];
+			signalOuts[i] = signalInput * levels[i];
 		}
 	}
 
 	SendCore()
 	{
+		for (int i = 0; i < 4; i++) {
+			levels[i] = 0;
+			signalOuts[i] = 0;
+		}
 	}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		levels[param_id] = val;
 	}
-	virtual void set_samplerate(const float sr) override
-	{
-	}
+	virtual void set_samplerate(const float sr) override {}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
 			case 0:
-				input = val;
+				signalInput = val;
 				break;
 		}
 	}
@@ -51,6 +53,6 @@ public:
 
 private:
 	float levels[4];
-	float input;
+	float signalInput = 0;
 	float signalOuts[4];
 };
