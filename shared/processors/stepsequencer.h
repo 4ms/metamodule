@@ -4,6 +4,9 @@ class StepSequencer {
 public:
 	StepSequencer(int steps)
 	{
+		for (int i = 0; i < 16; i++) {
+			values[i] = 0.0f;
+		}
 		numSteps = steps;
 	}
 
@@ -54,12 +57,12 @@ public:
 
 private:
 	int numSteps = 8;
-	int currentStep;
+	int currentStep = 0;
 
-	int currentClock;
-	int lastClock;
-	int currentReset;
-	int lastReset;
+	int currentClock = 0;
+	int lastClock = 0;
+	int currentReset = 0;
+	int lastReset = 0;
 
 	float values[16];
 };
