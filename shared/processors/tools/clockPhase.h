@@ -14,9 +14,12 @@ public:
 		}
 	}
 
-	void reset()
+	void updateReset(float val)
 	{
-		wholeCount = 0;
+		lastReset = currentReset;
+		currentReset = val > 0.0f;
+		if (currentReset > lastReset)
+			wholeCount = 0;
 	}
 
 	void update()
@@ -57,6 +60,9 @@ public:
 private:
 	int currentClock = 0;
 	int lastClock = 0;
+
+	int currentReset = 0;
+	int lastReset = 0;
 
 	long wholeCount = 0;
 

@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "SWITCH4TO1",
+      "name": "Switch4to1",
+      "description": "4 to 1 Switch",
+      "tags": []
+}, 
+{
       "slug": "SWITCH1TO4",
       "name": "Switch1to4",
       "description": "1 to 4 Switch",
