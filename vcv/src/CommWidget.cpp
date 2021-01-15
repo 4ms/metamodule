@@ -90,29 +90,28 @@ void LabeledButton::draw(const DrawArgs &args)
 	nvgBeginPath(args.vg);
 	nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
 	nvgStrokeWidth(args.vg, 1.0);
-	if (APP->event->hoveredWidget == this)
-		nvgStrokeColor(args.vg, rack::color::RED);
-	else
-		nvgStrokeColor(args.vg, rack::color::BLACK);
 
-	nvgStroke(args.vg);
+	if (APP->event->hoveredWidget == this)
+		nvgFillColor(args.vg, nvgRGBA(0x80, 0x80, 0x00, 0x80));
+	else
+		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
 
 	if (state == MappingState::IsMapped) {
-		nvgFillColor(args.vg, rack::color::BLUE);
-		nvgFill(args.vg);
-	} else {
-		auto mapstate = centralData->getMappingState();
-		state = mapstate;
-
-		if (state == MappingState::Normal) {
-			nvgFillColor(args.vg, rack::color::WHITE);
-			nvgFill(args.vg);
-		}
-		if (state == MappingState::MappingPending) {
-			nvgFillColor(args.vg, rack::color::YELLOW);
-			nvgFill(args.vg);
-		}
+		nvgStrokeColor(args.vg, rack::color::BLACK);
 	}
+	if (state == MappingState::Normal) {
+		nvgStrokeColor(args.vg, rack::color::WHITE);
+		state = centralData->getMappingState();
+	}
+	if (state == MappingState::MappingPending) {
+		nvgStrokeColor(args.vg, rack::color::YELLOW);
+		state = centralData->getMappingState();
+	}
+	if (state == MappingState::CurrentMapSource) {
+		nvgStrokeColor(args.vg, rack::color::BLUE);
+	}
+	nvgStroke(args.vg);
+	nvgFill(args.vg);
 
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
