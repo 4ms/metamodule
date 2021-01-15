@@ -177,6 +177,20 @@ public:
 				   maps.end());
 	}
 
+	bool isLabelButtonMapped(LabelButtonID &b)
+	{
+		return maps.end() !=
+			   std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == b || m.dst == b); });
+	}
+	bool isLabelButtonSrcMapped(LabelButtonID &b)
+	{
+		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
+	}
+	bool isLabelButtonDstMapped(LabelButtonID &b)
+	{
+		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
+	}
+
 	//		 private :
 	std::map<int, MessageType> messages;
 	std::vector<ModuleID> moduleData;
@@ -196,8 +210,7 @@ private:
 // Todo for mappings:
 /*
 
-
-   Can start a mapping by clicking on a dest (non-hub module)
+   Should be able to start a mapping by clicking on a dest (non-hub module)
 
    If you add a new mapping that ends in a dest which is already part of a mapping, the mapping gets removed and no new
    one is added. Fix this to replace the old mapping if the source is different than the existing mapping

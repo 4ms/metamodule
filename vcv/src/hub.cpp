@@ -199,6 +199,7 @@ struct ExpanderWidget : CommModuleWidget {
 			currentSourceIsThisButton = centralData->getMappingSource() == button.id;
 			centralData->abortMappingProcedure();
 			valueLabel->text = "Aborted mapping";
+			button.isCurrentMapSrc = false;
 		}
 		if (!currentSourceIsThisButton) {
 			centralData->startMappingProcedure(button.id);

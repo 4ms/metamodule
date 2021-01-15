@@ -124,6 +124,7 @@ void LabeledButton::updateState()
 	} else {
 		isPossibleMapDest = false;
 	}
+	isMapped = centralData->isLabelButtonDstMapped(this->id);
 }
 
 void HubLabeledButton::updateState()
@@ -144,6 +145,7 @@ void HubLabeledButton::updateState()
 		}
 		isCurrentMapSrc = false;
 	}
+	isMapped = centralData->isLabelButtonSrcMapped(this->id);
 }
 
 const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
