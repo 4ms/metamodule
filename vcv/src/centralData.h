@@ -14,6 +14,12 @@ public:
 		RequestAllParamData,
 	};
 
+	struct Mapping {
+		LabelButtonID src;
+		LabelButtonID dst; // Todo: vector of destinations
+						   // Todo: vector of amounts
+	};
+
 	void registerModule(ModuleID mod)
 	{
 		mtx.lock();
@@ -100,23 +106,50 @@ public:
 
 	void startMappingProcedure(LabelButtonID src)
 	{
-		currentMapState = MappingState::MappingPending;
+		_isMappingInProgress = true;
 		currentMap.src = src;
 	}
 
 	void abortMappingProcedure()
 	{
-		currentMapState = MappingState::Normal;
+		_isMappingInProgress = false;
 	}
 
-	MappingState getMappingState()
+	bool isMappingInProgress()
 	{
-		return currentMapState;
+		return _isMappingInProgress;
+	}
+
+	const LabelButtonID &getMappingSource()
+	{
+		return currentMap.src;
+	}
+
+	const Mapping &getLastMapping()
+	{
+		return lastMapping;
+	}
+
+private:
+	void clearMapping(Mapping &m)
+	{
+		m.dst.moduleID = -1;
+		m.src.moduleID = -1;
+		m.dst.objID = -1;
+		m.src.objID = -1;
+		m.dst.objType = LabelButtonID::Types::None;
+		m.src.objType = LabelButtonID::Types::None;
+	}
+
+public:
+	void clearLastMapping()
+	{
+		clearMapping(lastMapping);
 	}
 
 	void registerMapDest(LabelButtonID dest)
 	{
-		if (currentMapState != MappingState::MappingPending)
+		if (!_isMappingInProgress)
 			return;
 
 		currentMap.dst = dest;
@@ -132,49 +165,55 @@ public:
 		if (!found)
 			maps.push_back(currentMap);
 
-		currentMap.dst.moduleID = -1;
-		currentMap.src.moduleID = -1;
+		lastMapping = currentMap;
+		clearMapping(currentMap);
 
-		currentMapState = MappingState::Normal;
+		_isMappingInProgress = false;
 	}
 
 	void unregisterMapDest(LabelButtonID dest)
 	{
-		// Todo: find this dest in the data
-
 		maps.erase(std::remove_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dest); }),
 				   maps.end());
 	}
 
+	bool isLabelButtonMapped(LabelButtonID &b)
+	{
+		return maps.end() !=
+			   std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == b || m.dst == b); });
+	}
+	bool isLabelButtonSrcMapped(LabelButtonID &b)
+	{
+		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
+	}
+	bool isLabelButtonDstMapped(LabelButtonID &b)
+	{
+		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
+	}
+
 	//		 private :
+	std::map<int, MessageType> messages;
 	std::vector<ModuleID> moduleData;
 	std::vector<JackStatus> jackData;
 	std::vector<ParamStatus> paramData;
 
-	std::map<int, MessageType> messages;
-
-	struct Mapping {
-		LabelButtonID src;
-		LabelButtonID dst; // Todo: vector of destinations
-						   // Todo: vector of amounts
-	};
-
-	MappingState currentMapState = MappingState::Normal;
-	Mapping currentMap;
+	// Todo: move the mapping stuff to its own class
 
 	std::vector<Mapping> maps;
+
+private:
+	bool _isMappingInProgress = false;
+	Mapping currentMap;
+	Mapping lastMapping;
 };
 
 // Todo for mappings:
 /*
 
-   Mapped labels show some display depending on the map source
-   --- ButtonLabel needs to store more than just MappingState, also something about the display type
-
-   Can start a mapping by clicking on a dest (non-hub module)
+   Should be able to start a mapping by clicking on a dest (non-hub module)
 
    If you add a new mapping that ends in a dest which is already part of a mapping, the mapping gets removed and no new
-   one is added. Fix this to replace the old mapping
+   one is added. Fix this to replace the old mapping if the source is different than the existing mapping
 
-	Source label button should change display during MappingPending state
+   Bug: src labels still show up as mapped even if you remove a map and then abort
  */

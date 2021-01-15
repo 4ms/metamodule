@@ -84,11 +84,11 @@ struct Expander : public CommModule {
 	void appendMappingList(std::string &str)
 	{
 		for (auto &m : centralData->maps) {
-			str += "Mapping: src param ID = " + std::to_string(m.src.ID);
-			str += " type = " + std::to_string((int)m.src.type);
+			str += "Mapping: src param ID = " + std::to_string(m.src.objID);
+			str += " type = " + std::to_string((int)m.src.objType);
 			str += " moduleID = " + std::to_string(m.src.moduleID);
-			str += " ==> dst param ID = " + std::to_string(m.dst.ID);
-			str += " type = " + std::to_string((int)m.dst.type);
+			str += " ==> dst param ID = " + std::to_string(m.dst.objID);
+			str += " type = " + std::to_string((int)m.dst.objType);
 			str += " moduleID = " + std::to_string(m.dst.moduleID);
 			str += "\n";
 		}
@@ -184,21 +184,28 @@ struct ExpanderWidget : CommModuleWidget {
 		}
 	}
 
+	virtual LabeledButton *createLabel() override
+	{
+		return new HubLabeledButton{*this};
+	}
+
 	virtual void notifyLabelButtonClicked(LabeledButton &button) override
 	{
-		button.id.moduleID = module->id;
+		button.id.moduleID = module->id; // workaround for VCV passing bad ptr to module
 
-		auto mapstate = centralData->getMappingState();
+		bool currentSourceIsThisButton = false;
 
-		if (mapstate == MappingState::MappingPending && centralData->currentMap.src == button.id) {
+		if (centralData->isMappingInProgress()) {
+			currentSourceIsThisButton = centralData->getMappingSource() == button.id;
 			centralData->abortMappingProcedure();
 			valueLabel->text = "Aborted mapping";
-			button.state = MappingState::Normal;
-		} else {
+			button.isCurrentMapSrc = false;
+		}
+		if (!currentSourceIsThisButton) {
 			centralData->startMappingProcedure(button.id);
-			valueLabel->text = "label button clicked" + std::to_string(static_cast<int>(button.id.type)) + ", " +
-							   std::to_string(button.id.ID);
-			button.state = MappingState::CurrentMapSource;
+			valueLabel->text = "Start Mapping from: " + std::to_string(static_cast<int>(button.id.objType)) + ", " +
+							   std::to_string(button.id.objID);
+			button.isCurrentMapSrc = true;
 		}
 	}
 };

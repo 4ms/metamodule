@@ -142,3 +142,54 @@ TEST_CASE("messages system")
 	}
 }
 
+TEST_CASE("mappings")
+{
+	CentralData cd;
+
+	SUBCASE("Creating a mapping, then checking if the src and dst are mapped")
+	{
+		LabelButtonID src;
+		src.moduleID = 1;
+		src.objID = 2;
+		src.objType = LabelButtonID::Types::Knob;
+
+		LabelButtonID dst;
+		dst.moduleID = 100;
+		dst.objID = 200;
+		dst.objType = LabelButtonID::Types::Knob;
+
+		cd.startMappingProcedure(src);
+		cd.registerMapDest(dst);
+
+		CHECK(cd.isLabelButtonMapped(src));
+		CHECK(cd.isLabelButtonMapped(dst));
+
+		CHECK(cd.isLabelButtonDstMapped(dst));
+		CHECK(cd.isLabelButtonSrcMapped(dst) == false);
+
+		CHECK(cd.isLabelButtonSrcMapped(src));
+		CHECK(cd.isLabelButtonDstMapped(src) == false);
+
+		SUBCASE("Other objects are not mapped")
+		{
+			LabelButtonID unmappedknob;
+			unmappedknob.moduleID = 999;
+			unmappedknob.objID = 222;
+			unmappedknob.objType = LabelButtonID::Types::Knob;
+			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
+			unmappedknob.moduleID = 1;
+			unmappedknob.objID = 222;
+			unmappedknob.objType = LabelButtonID::Types::Knob;
+			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
+			unmappedknob.moduleID = 111;
+			unmappedknob.objID = 2;
+			unmappedknob.objType = LabelButtonID::Types::Knob;
+			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
+			unmappedknob.moduleID = 1;
+			unmappedknob.objID = 2;
+			unmappedknob.objType = LabelButtonID::Types::InputJack;
+			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
+		}
+	}
+}
+

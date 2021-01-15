@@ -6,6 +6,7 @@ using namespace rack;
 class LabeledButton;
 
 class CommModuleWidget : public app::ModuleWidget {
+protected:
 	const float kKnobSpacingY = 20;
 	const float kKnobSpacingX = 20.32f;
 	const float kTextOffset = 5;
@@ -28,6 +29,7 @@ private:
 	constexpr float gridToYFromBottom(const float y);
 	constexpr float gridToXCentered(const float x);
 	void addLabel(const std::string labelText, const Vec pos, const LabelButtonID id);
+	virtual LabeledButton *createLabel();
 };
 
 class LabeledButton : public Button {
@@ -35,12 +37,27 @@ public:
 	LabeledButton(CommModuleWidget &parent)
 		: _parent{parent}
 	{}
-	void draw(const DrawArgs &args) override;
-	void onDragStart(const event::DragStart &e) override;
+	virtual void draw(const DrawArgs &args) override;
+	virtual void updateState();
+	virtual void onDragStart(const event::DragStart &e) override;
+	void createMapping(LabelButtonID srcId);
 
 	LabelButtonID id;
+	bool isMapped = false;
+	bool isPossibleMapDest = false;
+	bool isCurrentMapSrc = false;
+	LabelButtonID mappedToId{LabelButtonID::Types::None, 0, 0};
 	MappingState state = MappingState::Normal;
 
 private:
 	CommModuleWidget &_parent;
 };
+
+class HubLabeledButton : public LabeledButton {
+public:
+	HubLabeledButton(CommModuleWidget &parent)
+		: LabeledButton{parent}
+	{}
+	virtual void updateState() override;
+};
+

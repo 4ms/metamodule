@@ -30,9 +30,14 @@ void CommModuleWidget::addLabeledOutput(const std::string labelText, const int o
 	addOutput(createOutputCentered<PJ301MPort>(mm2px(pos), module, outputID));
 }
 
+LabeledButton *CommModuleWidget::createLabel()
+{
+	return new LabeledButton{*this};
+}
+
 void CommModuleWidget::addLabel(const std::string labelText, const Vec pos, const LabelButtonID id)
 {
-	LabeledButton *button = new LabeledButton{*this};
+	LabeledButton *button = createLabel();
 	button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 2.0f, pos.y + kTextOffset));
 	button->box.size.x = kGridSpacingX;
 	button->text = labelText;
@@ -71,45 +76,119 @@ constexpr float CommModuleWidget::gridToXCentered(const float x)
 void CommModuleWidget::notifyLabelButtonClicked(LabeledButton &button)
 {
 	button.id.moduleID = module->id;
-	auto mapstate = centralData->getMappingState();
 
-	if (mapstate == MappingState::MappingPending) {
+	if (centralData->isMappingInProgress()) {
+		if (centralData->getMappingSource().objType == button.id.objType) {
+			button.isPossibleMapDest = true;
 
-		if (button.state == MappingState::IsMapped) {
-			button.state = MappingState::MappingPending;
-			centralData->unregisterMapDest(button.id);
-		} else if (button.state == MappingState::MappingPending) {
-			button.state = MappingState::IsMapped;
-			centralData->registerMapDest(button.id);
+			// check if we're mapped to any source, and remove that mapping
+			// if we were mapped to a source different than the current source
+			// then create a new mapping
+			if (button.isMapped) {
+				centralData->unregisterMapDest(button.id);
+
+				if (button.mappedToId == centralData->getMappingSource()) {
+					button.isMapped = false;
+					button.mappedToId.moduleID = -1;
+					button.mappedToId.objID = -1;
+				} else {
+					button.createMapping(centralData->getMappingSource());
+				}
+
+			} else {
+				button.createMapping(centralData->getMappingSource());
+			}
 		}
+	} else {
+		// Todo: Initiate a mapping (virtual module clicked first)
 	}
 }
 
+void LabeledButton::createMapping(LabelButtonID srcId)
+{
+	isMapped = true;
+	mappedToId = srcId;
+	centralData->registerMapDest(id);
+}
+
+void LabeledButton::updateState()
+{
+	isCurrentMapSrc = false;
+	if (centralData->isMappingInProgress()) {
+		if (centralData->getMappingSource().objType == id.objType) {
+			isPossibleMapDest = true;
+		} else {
+			isPossibleMapDest = false;
+		}
+
+	} else {
+		isPossibleMapDest = false;
+	}
+	isMapped = centralData->isLabelButtonDstMapped(this->id);
+}
+
+void HubLabeledButton::updateState()
+{
+	isPossibleMapDest = false;
+	if (centralData->isMappingInProgress()) {
+		if (centralData->getMappingSource() == id) {
+			isCurrentMapSrc = true;
+		} else {
+			isCurrentMapSrc = false;
+		}
+	} else {
+		// if (centralData->getLastMapping().dst == id) {
+		if (isCurrentMapSrc) {
+			isMapped = true;
+			mappedToId = centralData->getLastMapping().src;
+			centralData->clearLastMapping();
+		}
+		isCurrentMapSrc = false;
+	}
+	isMapped = centralData->isLabelButtonSrcMapped(this->id);
+}
+
+const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
+const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
+
+const NVGcolor labelPalette[8] = {
+	rack::color::BLACK,
+	BROWN,
+	rack::color::RED,
+	ORANGE,
+	rack::color::YELLOW,
+	rack::color::GREEN,
+	rack::color::BLUE,
+	rack::color::MAGENTA,
+};
+
 void LabeledButton::draw(const DrawArgs &args)
 {
+	updateState();
+
 	nvgBeginPath(args.vg);
 	nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
-	nvgStrokeWidth(args.vg, 1.0);
+
+	if (isMapped) {
+		unsigned palid = mappedToId.objID & 0x7; // Todo: handle more than 8 colors
+		nvgStrokeColor(args.vg, labelPalette[palid]);
+		nvgStrokeWidth(args.vg, 2.0f);
+	}
+	if (!isMapped) {
+		nvgStrokeColor(args.vg, rack::color::WHITE);
+		nvgStrokeWidth(args.vg, 0.0);
+	}
+	if (isPossibleMapDest) {
+		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.8f));
+	} else if (isCurrentMapSrc) {
+		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
+	} else {
+		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+	}
 
 	if (APP->event->hoveredWidget == this)
-		nvgFillColor(args.vg, nvgRGBA(0x80, 0x80, 0x00, 0x80));
-	else
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.4f));
 
-	if (state == MappingState::IsMapped) {
-		nvgStrokeColor(args.vg, rack::color::BLACK);
-	}
-	if (state == MappingState::Normal) {
-		nvgStrokeColor(args.vg, rack::color::WHITE);
-		state = centralData->getMappingState();
-	}
-	if (state == MappingState::MappingPending) {
-		nvgStrokeColor(args.vg, rack::color::YELLOW);
-		state = centralData->getMappingState();
-	}
-	if (state == MappingState::CurrentMapSource) {
-		nvgStrokeColor(args.vg, rack::color::BLUE);
-	}
 	nvgStroke(args.vg);
 	nvgFill(args.vg);
 
