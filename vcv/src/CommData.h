@@ -5,13 +5,13 @@
 #include <vector>
 
 struct LabelButtonID {
-	enum class Types { Knob, InputJack, OutputJack, Toggle } type;
-	int ID;
+	enum class Types { Knob, InputJack, OutputJack, Toggle } objType;
+	int objID;
 	int moduleID;
 
 	bool operator==(const LabelButtonID &rhs) const
 	{
-		return (type == rhs.type) && (ID == rhs.ID) && (moduleID == rhs.moduleID);
+		return (objType == rhs.objType) && (objID == rhs.objID) && (moduleID == rhs.moduleID);
 	}
 };
 
@@ -71,3 +71,4 @@ struct CommData {
 	std::vector<ParamStatus> paramData;
 	std::vector<LabelButtonID> mappings;
 };
+

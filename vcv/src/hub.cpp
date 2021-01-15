@@ -84,11 +84,11 @@ struct Expander : public CommModule {
 	void appendMappingList(std::string &str)
 	{
 		for (auto &m : centralData->maps) {
-			str += "Mapping: src param ID = " + std::to_string(m.src.ID);
-			str += " type = " + std::to_string((int)m.src.type);
+			str += "Mapping: src param ID = " + std::to_string(m.src.objID);
+			str += " type = " + std::to_string((int)m.src.objType);
 			str += " moduleID = " + std::to_string(m.src.moduleID);
-			str += " ==> dst param ID = " + std::to_string(m.dst.ID);
-			str += " type = " + std::to_string((int)m.dst.type);
+			str += " ==> dst param ID = " + std::to_string(m.dst.objID);
+			str += " type = " + std::to_string((int)m.dst.objType);
 			str += " moduleID = " + std::to_string(m.dst.moduleID);
 			str += "\n";
 		}
@@ -196,8 +196,8 @@ struct ExpanderWidget : CommModuleWidget {
 			button.state = MappingState::Normal;
 		} else {
 			centralData->startMappingProcedure(button.id);
-			valueLabel->text = "label button clicked" + std::to_string(static_cast<int>(button.id.type)) + ", " +
-							   std::to_string(button.id.ID);
+			valueLabel->text = "label button clicked" + std::to_string(static_cast<int>(button.id.objType)) + ", " +
+							   std::to_string(button.id.objID);
 			button.state = MappingState::CurrentMapSource;
 		}
 	}
