@@ -193,10 +193,12 @@ struct ExpanderWidget : CommModuleWidget {
 		if (mapstate == MappingState::MappingPending && centralData->currentMap.src == button.id) {
 			centralData->abortMappingProcedure();
 			valueLabel->text = "Aborted mapping";
+			button.state = MappingState::Normal;
 		} else {
 			centralData->startMappingProcedure(button.id);
 			valueLabel->text = "label button clicked" + std::to_string(static_cast<int>(button.id.type)) + ", " +
 							   std::to_string(button.id.ID);
+			button.state = MappingState::CurrentMapSource;
 		}
 	}
 };

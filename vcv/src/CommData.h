@@ -19,6 +19,7 @@ enum class MappingState {
 	Normal,
 	MappingPending,
 	IsMapped,
+	CurrentMapSource,
 };
 
 struct ModuleID {
