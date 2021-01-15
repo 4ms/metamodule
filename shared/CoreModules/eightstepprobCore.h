@@ -19,8 +19,7 @@ public:
 		}
 		if ((prob[currentStep] > randNum) && (cp.getWrappedPhase() < 0.5f)) {
 			gateOutput = 1;
-		}
-		else {
+		} else {
 			gateOutput = 0;
 		}
 	}
@@ -40,9 +39,7 @@ public:
 				cp.updateClock(val);
 				break;
 			case 1:
-				if (val > 0.0f) {
-					cp.reset();
-				}
+				cp.updateReset(val);
 				break;
 		}
 	}
