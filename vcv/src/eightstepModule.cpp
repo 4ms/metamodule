@@ -15,19 +15,9 @@ struct EightstepModule : CommModule {
 		STEP8_PARAM,
 		NUM_PARAMS
 	};
-	enum InputIds {
-		CLOCK_INPUT,
-		RESET_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		END_OUTPUT,
-		VOLTAGE_OUTPUT,
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		NUM_LIGHTS
-	};
+	enum InputIds { CLOCK_INPUT, RESET_INPUT, NUM_INPUTS };
+	enum OutputIds { END_OUTPUT, VOLTAGE_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { NUM_LIGHTS };
 
 	EightstepModule()
 	{
@@ -52,21 +42,22 @@ struct EightstepWidget : CommModuleWidget {
 		mainModule = module;
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		
+				addLabeledKnob("1", EightstepModule::STEP1_PARAM, {0, 0});
+				addLabeledKnob("2", EightstepModule::STEP2_PARAM, {1, 0});
+				addLabeledKnob("3", EightstepModule::STEP3_PARAM, {0, 1});
+				addLabeledKnob("4", EightstepModule::STEP4_PARAM, {1, 1});
+				addLabeledKnob("5", EightstepModule::STEP5_PARAM, {0, 2});
+				addLabeledKnob("6", EightstepModule::STEP6_PARAM, {1, 2});
+				addLabeledKnob("7", EightstepModule::STEP7_PARAM, {0, 3});
+				addLabeledKnob("8", EightstepModule::STEP8_PARAM, {1, 3});
 
-		addLabeledKnob("1", EightstepModule::STEP1_PARAM, {0, 0});
-		addLabeledKnob("2", EightstepModule::STEP2_PARAM, {1, 0});
-		addLabeledKnob("3", EightstepModule::STEP3_PARAM, {0, 1});
-		addLabeledKnob("4", EightstepModule::STEP4_PARAM, {1, 1});
-		addLabeledKnob("5", EightstepModule::STEP5_PARAM, {0, 2});
-		addLabeledKnob("6", EightstepModule::STEP6_PARAM, {1, 2});
-		addLabeledKnob("7", EightstepModule::STEP7_PARAM, {0, 3});
-		addLabeledKnob("8", EightstepModule::STEP8_PARAM, {1, 3});
+				addLabeledInput("CLK", EightstepModule::CLOCK_INPUT, {0, 1});
+				addLabeledInput("RST", EightstepModule::RESET_INPUT, {1, 1});
 
-		addLabeledInput("CLK", EightstepModule::CLOCK_INPUT, {0, 1});
-		addLabeledInput("RST", EightstepModule::RESET_INPUT, {1, 1});
-
-		addLabeledOutput("OUT", EightstepModule::VOLTAGE_OUTPUT, {0, 0});
-		addLabeledOutput("END", EightstepModule::END_OUTPUT, {1, 0});
+				addLabeledOutput("OUT", EightstepModule::VOLTAGE_OUTPUT, {0, 0});
+				addLabeledOutput("END", EightstepModule::END_OUTPUT, {1, 0});
+				
 	}
 };
 
