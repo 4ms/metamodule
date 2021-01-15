@@ -9,7 +9,8 @@ extern CentralData *centralData;
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin *pluginInstance;
 
-// Declare each Model, defined in each module source file
+// Declare each Model, defined in each module source file 
+extern Model *modelSwitch1to4;
 extern Model *modelEightstepprob;
 extern Model *modelQuantizer;
 extern Model *modelFourstep;
