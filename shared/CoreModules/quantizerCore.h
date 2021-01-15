@@ -11,25 +11,14 @@ public:
 	virtual void update(void) override
 	{
 		if (notesActive > 0) {
-			int sign;
-			if (signalInput >= 0)
-				sign = 1;
-			else
-				sign = -1;
-			float noteValue = MathTools::f_abs(signalInput) * 60.0f;
+			float noteValue = (signalInput + 1.0f) * 60.0f;
 			int octave = noteValue / 12.0f;
 
-			int currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-			if (currentNote > 60) {
-				while (currentNote > 60) {
-					octave = noteValue / 12.0f;
-					currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-					noteValue -= 1.0f;
-				}
-			}
-			signalOutput = currentNote / 60.0f * sign;
-		}
-		else {
+			int tempNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
+			if (tempNote <= 120)
+				currentNote = tempNote;
+			signalOutput = (currentNote / 120.0f) * 2.0f - 1.0f;
+		} else {
 			signalOutput = signalInput;
 		}
 	}
@@ -49,7 +38,7 @@ public:
 		if (param_id >= 12 || param_id < 0)
 			return;
 		keyStatus[param_id] = (val > 0.1f);
-		scaleChanged();
+		scaleUpdate();
 	}
 	virtual void set_samplerate(const float sr) override {}
 
@@ -91,6 +80,8 @@ private:
 	bool currentButton[12];
 	bool lastButton[12];
 
+	int currentNote = 0;
+
 	int mapTable[12];
 	int notesActive = 0;
 
@@ -98,7 +89,33 @@ private:
 	float signalInput = 0;
 	float signalOutput = 0;
 
-	void scaleChanged()
+	uint16_t currentScale = 0;
+	uint16_t lastScale = 0;
+
+	void scaleUpdate()
+	{
+		notesActive = 0;
+
+		for (int i = 0; i < 12; i++) {
+			notesActive += keyStatus[i] ? 1 : 0;
+		}
+
+		if (notesActive > 0) {
+			lastScale = currentScale;
+			currentScale = 0;
+			for (int i = 0; i < 12; i++) {
+				currentScale += keyStatus[i] << i;
+			}
+
+			if (currentScale != lastScale) {
+				firstActive = lowestValidNote();
+
+				genTable();
+			}
+		}
+	}
+
+	int lowestValidNote()
 	{
 		int tempNote = 13;
 		for (int i = 0; i < 12; i++) {
@@ -106,15 +123,12 @@ private:
 				tempNote = min(tempNote, i);
 			}
 		}
-		firstActive = tempNote;
+		return (tempNote);
+	}
 
+	void genTable()
+	{
 		int fillNote = firstActive;
-
-		notesActive = 0;
-
-		for (int i = 0; i < 12; i++) {
-			notesActive += keyStatus[i] ? 1 : 0;
-		}
 
 		for (int i = 0; i < 12; i++) {
 			if (i < firstActive)
