@@ -11,18 +11,13 @@ public:
 	virtual void update(void) override
 	{
 		if (notesActive > 0) {
-			int sign;
-			if (signalInput >= 0)
-				sign = 1;
-			else
-				sign = -1;
-			float noteValue = MathTools::f_abs(signalInput) * 60.0f;
+			float noteValue = (signalInput + 1.0f) * 60.0f;
 			int octave = noteValue / 12.0f;
 
 			int tempNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-			if (tempNote <= 60)
+			if (tempNote <= 120)
 				currentNote = tempNote;
-			signalOutput = currentNote / 60.0f * sign;
+			signalOutput = (currentNote / 120.0f) * 2.0f - 1.0f;
 		} else {
 			signalOutput = signalInput;
 		}
