@@ -19,17 +19,11 @@ public:
 			float noteValue = MathTools::f_abs(signalInput) * 60.0f;
 			int octave = noteValue / 12.0f;
 
-			int currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-			if (currentNote > 60) {
-				while (currentNote > 60) {
-					octave = noteValue / 12.0f;
-					currentNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-					noteValue -= 1.0f;
-				}
-			}
+			int tempNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
+			if (tempNote <= 60)
+				currentNote = tempNote;
 			signalOutput = currentNote / 60.0f * sign;
-		}
-		else {
+		} else {
 			signalOutput = signalInput;
 		}
 	}
@@ -90,6 +84,8 @@ private:
 	bool keyStatus[12];
 	bool currentButton[12];
 	bool lastButton[12];
+
+	int currentNote = 0;
 
 	int mapTable[12];
 	int notesActive = 0;
