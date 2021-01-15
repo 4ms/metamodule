@@ -5,7 +5,7 @@
 #include <vector>
 
 struct LabelButtonID {
-	enum class Types { Knob, InputJack, OutputJack, Toggle } objType;
+	enum class Types { None, Knob, InputJack, OutputJack, Toggle } objType;
 	int objID;
 	int moduleID;
 

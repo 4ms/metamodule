@@ -184,21 +184,27 @@ struct ExpanderWidget : CommModuleWidget {
 		}
 	}
 
+	virtual LabeledButton *createLabel() override
+	{
+		return new HubLabeledButton{*this};
+	}
+
 	virtual void notifyLabelButtonClicked(LabeledButton &button) override
 	{
-		button.id.moduleID = module->id;
+		button.id.moduleID = module->id; // workaround for VCV passing bad ptr to module
 
-		auto mapstate = centralData->getMappingState();
+		bool currentSourceIsThisButton = false;
 
-		if (mapstate == MappingState::MappingPending && centralData->currentMap.src == button.id) {
+		if (centralData->isMappingInProgress()) {
+			currentSourceIsThisButton = centralData->getMappingSource() == button.id;
 			centralData->abortMappingProcedure();
 			valueLabel->text = "Aborted mapping";
-			button.state = MappingState::Normal;
-		} else {
+		}
+		if (!currentSourceIsThisButton) {
 			centralData->startMappingProcedure(button.id);
-			valueLabel->text = "label button clicked" + std::to_string(static_cast<int>(button.id.objType)) + ", " +
+			valueLabel->text = "Start Mapping from: " + std::to_string(static_cast<int>(button.id.objType)) + ", " +
 							   std::to_string(button.id.objID);
-			button.state = MappingState::CurrentMapSource;
+			button.isCurrentMapSrc = true;
 		}
 	}
 };
