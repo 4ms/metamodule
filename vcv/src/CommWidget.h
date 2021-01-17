@@ -33,17 +33,33 @@ private:
 };
 
 class LabeledButton : public Button {
+	// protected:
+	// static inline const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
+	// static inline const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
+
+	// static inline const NVGcolor labelPalette[8] = {
+	// 	rack::color::BLACK,
+	// 	BROWN,
+	// 	rack::color::RED,
+	// 	ORANGE,
+	// 	rack::color::YELLOW,
+	// 	rack::color::GREEN,
+	// 	rack::color::BLUE,
+	// 	rack::color::MAGENTA,
+	// };
+
 public:
 	LabeledButton(CommModuleWidget &parent)
 		: _parent{parent}
 	{}
 	virtual void draw(const DrawArgs &args) override;
-	virtual void updateState();
 	virtual void onDragStart(const event::DragStart &e) override;
+	void updateState();
 	void createMapping(LabelButtonID srcId);
 
 	LabelButtonID id;
 	bool isMapped = false;
+	bool isOnHub = false;
 	bool isPossibleMapDest = false;
 	bool isCurrentMapSrc = false;
 	LabelButtonID mappedToId{LabelButtonID::Types::None, 0, 0};
@@ -51,13 +67,5 @@ public:
 
 private:
 	CommModuleWidget &_parent;
-};
-
-class HubLabeledButton : public LabeledButton {
-public:
-	HubLabeledButton(CommModuleWidget &parent)
-		: LabeledButton{parent}
-	{}
-	virtual void updateState() override;
 };
 

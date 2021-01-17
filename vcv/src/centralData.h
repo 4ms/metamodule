@@ -18,6 +18,15 @@ public:
 		LabelButtonID src;
 		LabelButtonID dst; // Todo: vector of destinations
 						   // Todo: vector of amounts
+		void clear()
+		{
+			dst.moduleID = -1;
+			src.moduleID = -1;
+			dst.objID = -1;
+			src.objID = -1;
+			dst.objType = LabelButtonID::Types::None;
+			src.objType = LabelButtonID::Types::None;
+		}
 	};
 
 	void registerModule(ModuleID mod)
@@ -30,6 +39,7 @@ public:
 	void unregisterModule(ModuleID mod)
 	{
 		mtx.lock();
+
 		auto module_it = std::find(moduleData.begin(), moduleData.end(), mod);
 		if (module_it != moduleData.end())
 			moduleData.erase(module_it);
@@ -37,6 +47,18 @@ public:
 		paramData.erase(
 			std::remove_if(paramData.begin(), paramData.end(), [&](const auto &p) { return (p.moduleID == mod.id); }),
 			paramData.end());
+
+		jackData.erase(std::remove_if(jackData.begin(),
+									  jackData.end(),
+									  [&](const auto &j) {
+										  return (j.receivedModuleId == mod.id || j.sendingModuleId == mod.id);
+									  }),
+					   jackData.end());
+
+		maps.erase(std::remove_if(maps.begin(),
+								  maps.end(),
+								  [&](const auto m) { return m.dst.moduleID == mod.id || m.src.moduleID == mod.id; }),
+				   maps.end());
 		mtx.unlock();
 	}
 
@@ -107,7 +129,7 @@ public:
 	void startMappingProcedure(LabelButtonID src)
 	{
 		_isMappingInProgress = true;
-		currentMap.src = src;
+		_currentMap.src = src;
 	}
 
 	void abortMappingProcedure()
@@ -122,29 +144,7 @@ public:
 
 	const LabelButtonID &getMappingSource()
 	{
-		return currentMap.src;
-	}
-
-	const Mapping &getLastMapping()
-	{
-		return lastMapping;
-	}
-
-private:
-	void clearMapping(Mapping &m)
-	{
-		m.dst.moduleID = -1;
-		m.src.moduleID = -1;
-		m.dst.objID = -1;
-		m.src.objID = -1;
-		m.dst.objType = LabelButtonID::Types::None;
-		m.src.objType = LabelButtonID::Types::None;
-	}
-
-public:
-	void clearLastMapping()
-	{
-		clearMapping(lastMapping);
+		return _currentMap.src;
 	}
 
 	void registerMapDest(LabelButtonID dest)
@@ -152,21 +152,20 @@ public:
 		if (!_isMappingInProgress)
 			return;
 
-		currentMap.dst = dest;
+		_currentMap.dst = dest;
 
 		bool found = false;
 		for (auto &m : maps) {
-			if (m.src == currentMap.src) {
+			if (m.src == _currentMap.src) {
 				found = true;
-				m.dst = currentMap.dst;
+				m.dst = _currentMap.dst;
 				break;
 			}
 		}
 		if (!found)
-			maps.push_back(currentMap);
+			maps.push_back(_currentMap);
 
-		lastMapping = currentMap;
-		clearMapping(currentMap);
+		_currentMap.clear();
 
 		_isMappingInProgress = false;
 	}
@@ -190,6 +189,20 @@ public:
 	{
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
 	}
+	LabelButtonID getMappedSrcFromDst(LabelButtonID &b)
+	{
+		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
+		if (obj != maps.end())
+			return obj->src;
+		return {LabelButtonID::Types::None, -1, -1};
+	}
+	LabelButtonID getMappedDstFromSrc(LabelButtonID &b)
+	{
+		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
+		if (obj != maps.end())
+			return obj->dst;
+		return {LabelButtonID::Types::None, -1, -1};
+	}
 
 	//		 private :
 	std::map<int, MessageType> messages;
@@ -197,23 +210,16 @@ public:
 	std::vector<JackStatus> jackData;
 	std::vector<ParamStatus> paramData;
 
-	// Todo: move the mapping stuff to its own class
-
 	std::vector<Mapping> maps;
 
 private:
 	bool _isMappingInProgress = false;
-	Mapping currentMap;
-	Mapping lastMapping;
+	Mapping _currentMap;
 };
 
 // Todo for mappings:
 /*
+   Allow user to start a mapping by clicking on a dest (non-hub module)
 
-   Should be able to start a mapping by clicking on a dest (non-hub module)
 
-   If you add a new mapping that ends in a dest which is already part of a mapping, the mapping gets removed and no new
-   one is added. Fix this to replace the old mapping if the source is different than the existing mapping
-
-   Bug: src labels still show up as mapped even if you remove a map and then abort
  */
