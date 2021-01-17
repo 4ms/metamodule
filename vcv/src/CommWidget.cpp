@@ -124,34 +124,28 @@ void LabeledButton::updateState()
 	} else {
 		isPossibleMapDest = false;
 	}
-	isMapped = centralData->isLabelButtonDstMapped(this->id);
+	// isMapped = centralData->isLabelButtonDstMapped(this->id);
+	mappedToId = centralData->getMappedSrcFromDst(this->id);
+	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
 
 void HubLabeledButton::updateState()
 {
 	isPossibleMapDest = false;
+	isCurrentMapSrc = false;
 	if (centralData->isMappingInProgress()) {
 		if (centralData->getMappingSource() == id) {
 			isCurrentMapSrc = true;
-		} else {
-			isCurrentMapSrc = false;
 		}
-	} else {
-		// if (centralData->getLastMapping().dst == id) {
-		if (isCurrentMapSrc) {
-			isMapped = true;
-			mappedToId = centralData->getLastMapping().src;
-			centralData->clearLastMapping();
-		}
-		isCurrentMapSrc = false;
 	}
-	isMapped = centralData->isLabelButtonSrcMapped(this->id);
+	mappedToId = centralData->getMappedDstFromSrc(this->id);
+	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
 
-const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
-const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
+static inline const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
+static inline const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
 
-const NVGcolor labelPalette[8] = {
+static inline const NVGcolor labelPalette[8] = {
 	rack::color::BLACK,
 	BROWN,
 	rack::color::RED,
@@ -170,7 +164,8 @@ void LabeledButton::draw(const DrawArgs &args)
 	nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
 
 	if (isMapped) {
-		unsigned palid = mappedToId.objID & 0x7; // Todo: handle more than 8 colors
+		unsigned palid =
+			mappedToId.objID & 0x7; // Todo: handle more than 8 colors, and use this->id if we are a hub button
 		nvgStrokeColor(args.vg, labelPalette[palid]);
 		nvgStrokeWidth(args.vg, 2.0f);
 	}
