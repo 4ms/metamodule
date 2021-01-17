@@ -186,7 +186,9 @@ struct ExpanderWidget : CommModuleWidget {
 
 	virtual LabeledButton *createLabel() override
 	{
-		return new HubLabeledButton{*this};
+		auto tmp = new HubLabeledButton{*this};
+		tmp->isOnHub = true;
+		return tmp;
 	}
 
 	virtual void notifyLabelButtonClicked(LabeledButton &button) override

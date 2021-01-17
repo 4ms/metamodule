@@ -134,16 +134,6 @@ public:
 		return _currentMap.src;
 	}
 
-	const Mapping &getLastMapping()
-	{
-		return _lastMapping;
-	}
-
-	void clearLastMapping()
-	{
-		_lastMapping.clear();
-	}
-
 	void registerMapDest(LabelButtonID dest)
 	{
 		if (!_isMappingInProgress)
@@ -162,7 +152,6 @@ public:
 		if (!found)
 			maps.push_back(_currentMap);
 
-		_lastMapping = _currentMap;
 		_currentMap.clear();
 
 		_isMappingInProgress = false;
@@ -214,7 +203,6 @@ public:
 private:
 	bool _isMappingInProgress = false;
 	Mapping _currentMap;
-	Mapping _lastMapping;
 };
 
 // Todo for mappings:
