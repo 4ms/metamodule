@@ -1,7 +1,7 @@
 #pragma once
 #include "coreProcessor.h"
-#include "math.hh"
 #include "moduleTypes.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 
@@ -16,12 +16,8 @@ public:
 		xorOutput = (int)in1 ^ (int)in2;
 	}
 
-	virtual void set_param(const int param_id, const float val) override
-	{
-	}
-	virtual void set_samplerate(const float sr) override
-	{
-	}
+	virtual void set_param(const int param_id, const float val) override {}
+	virtual void set_samplerate(const float sr) override {}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
@@ -61,9 +57,9 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	float in1;
-	float in2;
-	float andOutput;
-	float orOutput;
-	float xorOutput;
+	float in1 = 0;
+	float in2 = 0;
+	float andOutput = 0;
+	float orOutput = 0;
+	float xorOutput = 0;
 };

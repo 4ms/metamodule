@@ -78,7 +78,7 @@ TEST_CASE("Basic Quantizer functionality")
 
 		q.update();
 
-		CHECK(q.get_output(0) == 1 / 60.0f);
+		CHECK(q.get_output(0) == doctest::Approx(1 / 60.0f));
 	}
 	// Todo more tests
 }
