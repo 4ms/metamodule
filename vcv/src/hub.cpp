@@ -186,7 +186,7 @@ struct ExpanderWidget : CommModuleWidget {
 
 	virtual LabeledButton *createLabel() override
 	{
-		auto tmp = new HubLabeledButton{*this};
+		auto tmp = new LabeledButton{*this};
 		tmp->isOnHub = true;
 		return tmp;
 	}
@@ -201,13 +201,11 @@ struct ExpanderWidget : CommModuleWidget {
 			currentSourceIsThisButton = centralData->getMappingSource() == button.id;
 			centralData->abortMappingProcedure();
 			valueLabel->text = "Aborted mapping";
-			button.isCurrentMapSrc = false;
 		}
 		if (!currentSourceIsThisButton) {
 			centralData->startMappingProcedure(button.id);
 			valueLabel->text = "Start Mapping from: " + std::to_string(static_cast<int>(button.id.objType)) + ", " +
 							   std::to_string(button.id.objID);
-			button.isCurrentMapSrc = true;
 		}
 	}
 };

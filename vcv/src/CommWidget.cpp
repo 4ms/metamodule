@@ -81,11 +81,7 @@ void CommModuleWidget::notifyLabelButtonClicked(LabeledButton &button)
 
 	if (centralData->isMappingInProgress()) {
 		if (centralData->getMappingSource().objType == button.id.objType) {
-			button.isPossibleMapDest = true;
 
-			// check if we're mapped to any source, and remove that mapping
-			// if we were mapped to a source different than the current source
-			// then create a new mapping
 			if (button.isMapped) {
 				centralData->unregisterMapDest(button.id);
 
@@ -116,31 +112,18 @@ void LabeledButton::createMapping(LabelButtonID srcId)
 void LabeledButton::updateState()
 {
 	isCurrentMapSrc = false;
-	if (centralData->isMappingInProgress()) {
-		if (centralData->getMappingSource().objType == id.objType) {
-			isPossibleMapDest = true;
-		} else {
-			isPossibleMapDest = false;
-		}
-
-	} else {
-		isPossibleMapDest = false;
-	}
-	// isMapped = centralData->isLabelButtonDstMapped(this->id);
-	mappedToId = centralData->getMappedSrcFromDst(this->id);
-	isMapped = mappedToId.objType != LabelButtonID::Types::None;
-}
-
-void HubLabeledButton::updateState()
-{
 	isPossibleMapDest = false;
-	isCurrentMapSrc = false;
-	if (centralData->isMappingInProgress()) {
-		if (centralData->getMappingSource() == id) {
+	if (!isOnHub) {
+		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == id.objType)) {
+			isPossibleMapDest = true;
+		}
+		mappedToId = centralData->getMappedSrcFromDst(this->id);
+	} else {
+		if (centralData->isMappingInProgress() && (centralData->getMappingSource() == id)) {
 			isCurrentMapSrc = true;
 		}
+		mappedToId = centralData->getMappedDstFromSrc(this->id);
 	}
-	mappedToId = centralData->getMappedDstFromSrc(this->id);
 	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
 

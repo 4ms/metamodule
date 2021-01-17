@@ -53,8 +53,8 @@ public:
 		: _parent{parent}
 	{}
 	virtual void draw(const DrawArgs &args) override;
-	virtual void updateState();
 	virtual void onDragStart(const event::DragStart &e) override;
+	void updateState();
 	void createMapping(LabelButtonID srcId);
 
 	LabelButtonID id;
@@ -67,13 +67,5 @@ public:
 
 private:
 	CommModuleWidget &_parent;
-};
-
-class HubLabeledButton : public LabeledButton {
-public:
-	HubLabeledButton(CommModuleWidget &parent)
-		: LabeledButton{parent}
-	{}
-	virtual void updateState() override;
 };
 
