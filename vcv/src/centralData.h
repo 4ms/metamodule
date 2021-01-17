@@ -192,19 +192,18 @@ public:
 	LabelButtonID getMappedSrcFromDst(LabelButtonID &b)
 	{
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
-		if (obj == maps.end())
-			return {LabelButtonID::Types::None, -1, -1};
-
-		return obj->src;
+		if (obj != maps.end())
+			return obj->src;
+		return {LabelButtonID::Types::None, -1, -1};
 	}
 	LabelButtonID getMappedDstFromSrc(LabelButtonID &b)
 	{
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
-		if (obj == maps.end())
-			return {LabelButtonID::Types::None, -1, -1};
-
-		return obj->dst;
+		if (obj != maps.end())
+			return obj->dst;
+		return {LabelButtonID::Types::None, -1, -1};
 	}
+
 	//		 private :
 	std::map<int, MessageType> messages;
 	std::vector<ModuleID> moduleData;
@@ -222,6 +221,5 @@ private:
 /*
    Allow user to start a mapping by clicking on a dest (non-hub module)
 
-   When a module is removed, delete all its mappings
 
  */
