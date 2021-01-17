@@ -39,6 +39,7 @@ public:
 	void unregisterModule(ModuleID mod)
 	{
 		mtx.lock();
+
 		auto module_it = std::find(moduleData.begin(), moduleData.end(), mod);
 		if (module_it != moduleData.end())
 			moduleData.erase(module_it);
@@ -46,6 +47,18 @@ public:
 		paramData.erase(
 			std::remove_if(paramData.begin(), paramData.end(), [&](const auto &p) { return (p.moduleID == mod.id); }),
 			paramData.end());
+
+		jackData.erase(std::remove_if(jackData.begin(),
+									  jackData.end(),
+									  [&](const auto &j) {
+										  return (j.receivedModuleId == mod.id || j.sendingModuleId == mod.id);
+									  }),
+					   jackData.end());
+
+		maps.erase(std::remove_if(maps.begin(),
+								  maps.end(),
+								  [&](const auto m) { return m.dst.moduleID == mod.id || m.src.moduleID == mod.id; }),
+				   maps.end());
 		mtx.unlock();
 	}
 
