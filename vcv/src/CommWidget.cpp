@@ -32,7 +32,9 @@ void CommModuleWidget::addLabeledOutput(const std::string labelText, const int o
 
 LabeledButton *CommModuleWidget::createLabel()
 {
-	return new LabeledButton{*this};
+	auto tmp = new LabeledButton{*this};
+	tmp->isOnHub = false;
+	return tmp;
 }
 
 void CommModuleWidget::addLabel(const std::string labelText, const Vec pos, const LabelButtonID id)
@@ -79,11 +81,7 @@ void CommModuleWidget::notifyLabelButtonClicked(LabeledButton &button)
 
 	if (centralData->isMappingInProgress()) {
 		if (centralData->getMappingSource().objType == button.id.objType) {
-			button.isPossibleMapDest = true;
 
-			// check if we're mapped to any source, and remove that mapping
-			// if we were mapped to a source different than the current source
-			// then create a new mapping
 			if (button.isMapped) {
 				centralData->unregisterMapDest(button.id);
 
@@ -114,44 +112,25 @@ void LabeledButton::createMapping(LabelButtonID srcId)
 void LabeledButton::updateState()
 {
 	isCurrentMapSrc = false;
-	if (centralData->isMappingInProgress()) {
-		if (centralData->getMappingSource().objType == id.objType) {
-			isPossibleMapDest = true;
-		} else {
-			isPossibleMapDest = false;
-		}
-
-	} else {
-		isPossibleMapDest = false;
-	}
-	isMapped = centralData->isLabelButtonDstMapped(this->id);
-}
-
-void HubLabeledButton::updateState()
-{
 	isPossibleMapDest = false;
-	if (centralData->isMappingInProgress()) {
-		if (centralData->getMappingSource() == id) {
-			isCurrentMapSrc = true;
-		} else {
-			isCurrentMapSrc = false;
+	if (!isOnHub) {
+		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == id.objType)) {
+			isPossibleMapDest = true;
 		}
+		mappedToId = centralData->getMappedSrcFromDst(this->id);
 	} else {
-		// if (centralData->getLastMapping().dst == id) {
-		if (isCurrentMapSrc) {
-			isMapped = true;
-			mappedToId = centralData->getLastMapping().src;
-			centralData->clearLastMapping();
+		if (centralData->isMappingInProgress() && (centralData->getMappingSource() == id)) {
+			isCurrentMapSrc = true;
 		}
-		isCurrentMapSrc = false;
+		mappedToId = centralData->getMappedDstFromSrc(this->id);
 	}
-	isMapped = centralData->isLabelButtonSrcMapped(this->id);
+	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
 
-const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
-const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
+static inline const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
+static inline const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
 
-const NVGcolor labelPalette[8] = {
+static inline const NVGcolor labelPalette[8] = {
 	rack::color::BLACK,
 	BROWN,
 	rack::color::RED,
@@ -170,7 +149,7 @@ void LabeledButton::draw(const DrawArgs &args)
 	nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
 
 	if (isMapped) {
-		unsigned palid = mappedToId.objID & 0x7; // Todo: handle more than 8 colors
+		unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
 		nvgStrokeColor(args.vg, labelPalette[palid]);
 		nvgStrokeWidth(args.vg, 2.0f);
 	}
