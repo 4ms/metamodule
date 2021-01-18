@@ -10,6 +10,8 @@ extern CentralData *centralData;
 extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file 
+extern Model *modelDetune; 
+extern Model *modelPitchshift; 
 extern Model *modelSwitch4to1; 
 extern Model *modelSwitch1to4;
 extern Model *modelEightstepprob;
