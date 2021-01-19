@@ -67,7 +67,7 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	PitchShift p;
+	PitchShift p{1000.0f};
 	float signalInput = 0;
 	float signalOutput = 0;
 	float coarseShift = 0;
