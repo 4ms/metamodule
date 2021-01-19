@@ -31,10 +31,8 @@ public:
 
 	void registerModule(ModuleID mod)
 	{
-		// std::lock_guard<std::mutex> mguard;
-		mtx.lock();
+		std::lock_guard mguard{mtx};
 		moduleData.push_back(mod);
-		mtx.unlock();
 	}
 
 	template<typename T, typename RT>
@@ -45,7 +43,7 @@ public:
 
 	void unregisterModule(ModuleID mod)
 	{
-		mtx.lock();
+		std::lock_guard mguard{mtx};
 
 		auto module_it = std::find(moduleData.begin(), moduleData.end(), mod);
 		if (module_it != moduleData.end())
@@ -55,21 +53,20 @@ public:
 		remove_and_erase(jackData,
 						 [&](const auto &j) { return j.receivedModuleId == mod.id || j.sendingModuleId == mod.id; });
 		remove_and_erase(maps, [&](const auto &m) { return m.dst.moduleID == mod.id || m.src.moduleID == mod.id; });
-
-		mtx.unlock();
 	}
 
 	unsigned int getNumModules()
 	{
-		mtx.lock();
+		std::lock_guard mguard{mtx};
+
 		auto sz = moduleData.size();
-		mtx.unlock();
 		return sz;
 	}
 
 	void updateParamStatus(ParamStatus updatedParam)
 	{
-		mtx.lock();
+		std::lock_guard mguard{mtx};
+
 		bool found = false;
 		for (auto &p : paramData) {
 			if (p.isSameParam(updatedParam)) {
@@ -80,12 +77,12 @@ public:
 		if (!found) {
 			paramData.push_back(updatedParam);
 		}
-		mtx.unlock();
 	}
 
 	void updateJackStatus(JackStatus updatedJack)
 	{
-		mtx.lock();
+		std::lock_guard mguard{mtx};
+
 		bool found = false;
 		for (auto &j : jackData) {
 			if (j.isSameJack(updatedJack)) {
@@ -103,11 +100,12 @@ public:
 		if (!found) {
 			jackData.push_back(updatedJack);
 		}
-		mtx.unlock();
 	}
 
 	MessageType getMyMessage(int module_id)
 	{
+		std::lock_guard mguard{mtx};
+
 		auto m = messages.find(module_id);
 		if (m == messages.end())
 			return MessageType::None;
@@ -118,6 +116,8 @@ public:
 
 	void requestAllParamDataAllModules()
 	{
+		std::lock_guard mguard{mtx};
+
 		for (auto &m : moduleData) {
 			messages[m.id] = MessageType::RequestAllParamData;
 		}
@@ -146,6 +146,8 @@ public:
 
 	void registerMapDest(LabelButtonID dest)
 	{
+		std::lock_guard mguard{mtx};
+
 		if (!_isMappingInProgress)
 			return;
 
@@ -169,6 +171,8 @@ public:
 
 	void unregisterMapByDest(LabelButtonID dest)
 	{
+		std::lock_guard mguard{mtx};
+
 		remove_and_erase(maps, [&](const auto &m) { return (m.dst == dest); });
 	}
 
