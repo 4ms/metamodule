@@ -1,6 +1,7 @@
 #pragma once
 
 #include "util/math.hh"
+#include "util/math_tables.hh"
 
 using namespace MathTools;
 
@@ -88,8 +89,8 @@ public:
 		float window1 = 0;
 		float window2 = 0;
 
-		window1 = sin(M_PI * phaccu);
-		window2 = sin(M_PI * (adjustedPhase));
+		window1 = sinTable.interp(phaccu);
+		window2 = sinTable.interp(adjustedPhase);
 		float pitchToFreq = 0;
 		pitchToFreq = ((expf(shiftAmount * 0.05776f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
 		phaccu += pitchToFreq / sampleRate;
