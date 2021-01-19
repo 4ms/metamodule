@@ -15,16 +15,10 @@ struct LabelButtonID {
 	}
 };
 
-enum class MappingState {
-	Normal,
-	MappingPending,
-	IsMapped,
-	CurrentMapSource,
-};
-
 struct ModuleID {
 	int id;
 	ModuleTypeSlug typeID;
+
 	bool operator==(const ModuleID &rhs) const
 	{
 		return (this->id == rhs.id) && (this->typeID == rhs.typeID);
@@ -42,7 +36,6 @@ struct JackStatus {
 	{
 		return (sendingJackId == other.sendingJackId) && (sendingModuleId == other.sendingModuleId);
 	}
-	// int receivedModuleType = 2;
 };
 
 struct ParamStatus {
@@ -54,21 +47,5 @@ struct ParamStatus {
 	{
 		return (paramID == other.paramID) && (moduleID == other.moduleID);
 	}
-};
-
-enum GlobalMessage {
-	NoMessage,
-	GetAllIDs,
-	SendingIDs,
-	InitMapping,
-
-};
-
-struct CommData {
-	enum GlobalMessage messageType;
-	std::vector<ModuleID> moduleData;
-	std::vector<JackStatus> jackData;
-	std::vector<ParamStatus> paramData;
-	std::vector<LabelButtonID> mappings;
 };
 

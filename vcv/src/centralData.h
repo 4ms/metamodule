@@ -31,9 +31,16 @@ public:
 
 	void registerModule(ModuleID mod)
 	{
+		// std::lock_guard<std::mutex> mguard;
 		mtx.lock();
 		moduleData.push_back(mod);
 		mtx.unlock();
+	}
+
+	template<typename T, typename RT>
+	void remove_and_erase(T &vec, RT p)
+	{
+		vec.erase(std::remove_if(vec.begin(), vec.end(), p), vec.end());
 	}
 
 	void unregisterModule(ModuleID mod)
@@ -44,21 +51,11 @@ public:
 		if (module_it != moduleData.end())
 			moduleData.erase(module_it);
 
-		paramData.erase(
-			std::remove_if(paramData.begin(), paramData.end(), [&](const auto &p) { return (p.moduleID == mod.id); }),
-			paramData.end());
+		remove_and_erase(paramData, [=](const auto &p) { return (p.moduleID == mod.id); });
+		remove_and_erase(jackData,
+						 [&](const auto &j) { return j.receivedModuleId == mod.id || j.sendingModuleId == mod.id; });
+		remove_and_erase(maps, [&](const auto &m) { return m.dst.moduleID == mod.id || m.src.moduleID == mod.id; });
 
-		jackData.erase(std::remove_if(jackData.begin(),
-									  jackData.end(),
-									  [&](const auto &j) {
-										  return (j.receivedModuleId == mod.id || j.sendingModuleId == mod.id);
-									  }),
-					   jackData.end());
-
-		maps.erase(std::remove_if(maps.begin(),
-								  maps.end(),
-								  [&](const auto m) { return m.dst.moduleID == mod.id || m.src.moduleID == mod.id; }),
-				   maps.end());
 		mtx.unlock();
 	}
 
@@ -170,10 +167,9 @@ public:
 		_isMappingInProgress = false;
 	}
 
-	void unregisterMapDest(LabelButtonID dest)
+	void unregisterMapByDest(LabelButtonID dest)
 	{
-		maps.erase(std::remove_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dest); }),
-				   maps.end());
+		remove_and_erase(maps, [&](const auto &m) { return (m.dst == dest); });
 	}
 
 	bool isLabelButtonMapped(LabelButtonID &b)

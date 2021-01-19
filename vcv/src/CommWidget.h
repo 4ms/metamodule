@@ -62,8 +62,7 @@ public:
 	bool isOnHub = false;
 	bool isPossibleMapDest = false;
 	bool isCurrentMapSrc = false;
-	LabelButtonID mappedToId{LabelButtonID::Types::None, 0, 0};
-	MappingState state = MappingState::Normal;
+	LabelButtonID mappedToId{LabelButtonID::Types::None, -1, -1};
 
 private:
 	CommModuleWidget &_parent;

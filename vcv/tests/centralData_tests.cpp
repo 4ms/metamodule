@@ -111,6 +111,81 @@ TEST_CASE("ParamStatus adding and remove param data")
 	// Todo: Adding a param with a moduleID that's not registered, will not add the param (? or will it?)
 }
 
+TEST_CASE("JackStatus adding and remove patched cable data")
+{
+	CentralData cd;
+	SUBCASE("Before any init, jackData is size 0")
+	{
+		CHECK(cd.jackData.size() == 0);
+	}
+	SUBCASE("updateJackStatus() with new module/jack IDs adds it to jackData")
+	{
+		cd.registerModule({1, "MODULE"});
+		cd.registerModule({2, "MODULE2"});
+		JackStatus j;
+		j.connected = true;
+		j.receivedJackId = 101;
+		j.receivedModuleId = 1;
+		j.sendingJackId = 202;
+		j.sendingModuleId = 2;
+		cd.updateJackStatus(j);
+		CHECK(cd.jackData.size() == 1);
+
+		bool found = false;
+		for (auto &x : cd.jackData) {
+			if (x.receivedJackId == j.receivedJackId && x.receivedModuleId == j.receivedModuleId &&
+				x.sendingJackId == j.sendingJackId && x.sendingModuleId == j.sendingModuleId)
+				found = true;
+		}
+		CHECK(found);
+
+		SUBCASE("updateJackStatus() with an existing sendingjackID/moduleID and different receivedJackId/ModuleId: "
+				"updates the connection info and doesn't make a new entry")
+		{
+			auto originalSize = cd.jackData.size();
+			JackStatus j2;
+			j2.connected = true;
+			j2.receivedJackId = 999;
+			j2.receivedModuleId = 999;
+			j2.sendingJackId = 202;
+			j2.sendingModuleId = 2;
+			cd.updateJackStatus(j2);
+
+			CHECK(cd.jackData.size() == originalSize);
+			found = false;
+			for (auto &x : cd.jackData) {
+				if (x.receivedJackId == j2.receivedJackId && x.receivedModuleId == j2.receivedModuleId &&
+					x.sendingJackId == j2.sendingJackId && x.sendingModuleId == j2.sendingModuleId)
+					found = true;
+			}
+			CHECK(found);
+		}
+	}
+
+	SUBCASE("Removing a module also removes its jack info")
+	{
+		cd.registerModule({1, "MODULE"});
+		cd.registerModule({999, "MODULE999"});
+		JackStatus j2;
+		j2.connected = true;
+		j2.receivedJackId = 999;
+		j2.receivedModuleId = 999;
+		j2.sendingJackId = 202;
+		j2.sendingModuleId = 1;
+		cd.updateJackStatus(j2);
+		SUBCASE("Removing the sendingModule")
+		{
+			cd.unregisterModule({1, "MODULE"});
+			CHECK(cd.jackData.size() == 0);
+		}
+		SUBCASE("Removing the receivingModule")
+		{
+			cd.unregisterModule({999, "MODULE999"});
+			CHECK(cd.jackData.size() == 0);
+		}
+	}
+}
+
 TEST_CASE("messages system")
 {
 	CentralData cd;
@@ -148,11 +223,13 @@ TEST_CASE("mappings")
 
 	SUBCASE("Creating a mapping, then checking if the src and dst are mapped")
 	{
+		cd.registerModule({1, "MODULE1"});
 		LabelButtonID src;
 		src.moduleID = 1;
 		src.objID = 2;
 		src.objType = LabelButtonID::Types::Knob;
 
+		cd.registerModule({100, "MODULE100"});
 		LabelButtonID dst;
 		dst.moduleID = 100;
 		dst.objID = 200;
@@ -190,6 +267,55 @@ TEST_CASE("mappings")
 			unmappedknob.objType = LabelButtonID::Types::InputJack;
 			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
 		}
+
+		SUBCASE("Add other mappings, but still can access the original src or dest by providing one of the pair")
+		{
+			LabelButtonID dst2;
+			dst2.moduleID = 888;
+			dst2.objID = 999;
+			dst2.objType = LabelButtonID::Types::Knob;
+			LabelButtonID src2;
+			src2.moduleID = 777;
+			src2.objID = 666;
+			src2.objType = LabelButtonID::Types::Knob;
+			cd.startMappingProcedure(src2);
+			cd.registerMapDest(dst2);
+
+			auto should_be_src = cd.getMappedSrcFromDst(dst);
+			CHECK(should_be_src == src);
+
+			auto should_be_dst = cd.getMappedDstFromSrc(src);
+			CHECK(should_be_dst == dst);
+		}
+
+		SUBCASE("Removing a mapping")
+		{
+			SUBCASE("By calling unregisterMapByDest")
+			{
+				CHECK(cd.isLabelButtonMapped(src));
+				CHECK(cd.isLabelButtonMapped(dst));
+				cd.unregisterMapByDest(dst);
+				CHECK_FALSE(cd.isLabelButtonMapped(src));
+				CHECK_FALSE(cd.isLabelButtonMapped(dst));
+			}
+			SUBCASE("By removing the src module")
+			{
+				CHECK(cd.isLabelButtonMapped(src));
+				CHECK(cd.isLabelButtonMapped(dst));
+				cd.unregisterModule({1, "MODULE"});
+				CHECK_FALSE(cd.isLabelButtonMapped(src));
+				CHECK_FALSE(cd.isLabelButtonMapped(dst));
+			}
+			SUBCASE("By removing the dst module")
+			{
+				CHECK(cd.isLabelButtonMapped(src));
+				CHECK(cd.isLabelButtonMapped(dst));
+				cd.unregisterModule({100, "MODULE100"});
+				CHECK_FALSE(cd.isLabelButtonMapped(src));
+				CHECK_FALSE(cd.isLabelButtonMapped(dst));
+			}
+		}
 	}
 }
 
+TEST_CASE("clear_if") {}
