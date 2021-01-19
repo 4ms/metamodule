@@ -65,14 +65,13 @@ class PitchShift {
 private:
 	std::unique_ptr<PitchDelay> pitchDelay;
 	float phaccu = 0;
-	const float maxWindow = 1000;
 	const int incrementalPitch = 1;
 	float sampleRate = 96000;
 
 public:
-	PitchShift()
+	PitchShift(float maxWindowTime)
 	{
-		pitchDelay = std::make_unique<PitchDelay>(maxWindow);
+		pitchDelay = std::make_unique<PitchDelay>(maxWindowTime);
 	}
 	float shiftAmount = 1;
 	float windowSize = 500;
