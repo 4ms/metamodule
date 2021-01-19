@@ -11,7 +11,10 @@ class PitchshiftCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		p.shiftAmount = coarseShift + fineShift;
+		auto finalWindow = constrain(windowOffset + windowCV, 0.0f, 1.0f);
+		p.windowSize = map_value(finalWindow, 0.0f, 1.0f, 20.0f, 1000.0f);
+		p.shiftAmount = coarseShift + fineShift + (shiftCV * 12.0f);
+		p.mix = constrain(mixOffset + mixCV, 0.0f, 1.0f);
 		signalOutput = p.update(signalInput);
 	}
 
@@ -26,10 +29,10 @@ public:
 				fineShift = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
 			case 2:
-				p.windowSize = map_value(val, 0.0f, 1.0f, 20.0f, 1000.0f);
+				windowOffset = val;
 				break;
 			case 3:
-				p.mix = val;
+				mixOffset = val;
 				break;
 		}
 	}
@@ -43,6 +46,15 @@ public:
 		switch (input_id) {
 			case 0:
 				signalInput = val;
+				break;
+			case 1:
+				shiftCV = val;
+				break;
+			case 2:
+				windowCV = val;
+				break;
+			case 3:
+				mixCV = val;
 				break;
 		}
 	}
@@ -72,4 +84,10 @@ private:
 	float signalOutput = 0;
 	float coarseShift = 0;
 	float fineShift = 0;
+
+	float shiftCV = 0;
+	float windowCV = 0;
+	float mixCV = 0;
+	float mixOffset = 0;
+	float windowOffset = 100;
 };
