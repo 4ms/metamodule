@@ -32,7 +32,7 @@ struct MappedParam {
 };
 
 using NetList = std::array<Net, MAX_NODES_IN_PATCH>;
-using ModuleList = std::array<ModuleIDType, MAX_MODULES_IN_PATCH>;
+using ModuleList = std::array<ModuleTypeSlug, MAX_MODULES_IN_PATCH>;
 using StaticParamList = std::array<StaticParam, MAX_PARAMS_IN_PATCH>;
 using MappedParamList = std::array<MappedParam, Panel::NumKnobs>;
 
