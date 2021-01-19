@@ -160,6 +160,19 @@ TEST_CASE("JackStatus adding and remove patched cable data")
 			}
 			CHECK(found);
 		}
+		SUBCASE("Updating the jack info to connected=false, will set receivedJack/ModuleIds to -1")
+		{
+			j.connected = false;
+			cd.updateJackStatus(j);
+			CHECK(cd.jackData.size() == 1);
+			found = false;
+			for (auto &x : cd.jackData) {
+				if (x.receivedJackId == -1 && x.receivedModuleId == -1 && x.sendingJackId == j.sendingJackId &&
+					x.sendingModuleId == j.sendingModuleId)
+					found = true;
+			}
+			CHECK(found);
+		}
 	}
 
 	SUBCASE("Removing a module also removes its jack info")
