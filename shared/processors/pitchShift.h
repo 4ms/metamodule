@@ -91,7 +91,14 @@ public:
 		window1 = sinTable.interp(phaccu * 0.5f);		 // return sin(pi*x)
 		window2 = sinTable.interp(adjustedPhase * 0.5f); // return sin(pi*x)
 		float pitchToFreq = 0;
-		pitchToFreq = ((expf(shiftAmount * 0.05776f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
+		//pitchToFreq = ((expf(shiftAmount * 0.05776f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
+
+		if (shiftAmount >= 0)
+			pitchToFreq = ((expTable.interp(shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
+		else {
+			pitchToFreq = ((1.0f / expTable.interp(-shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
+		}
+
 		phaccu += pitchToFreq / sampleRate;
 		if (phaccu >= 1)
 			phaccu -= 1.0f;
