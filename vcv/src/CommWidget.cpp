@@ -83,7 +83,7 @@ void CommModuleWidget::notifyLabelButtonClicked(LabeledButton &button)
 		if (centralData->getMappingSource().objType == button.id.objType) {
 
 			if (button.isMapped) {
-				centralData->unregisterMapDest(button.id);
+				centralData->unregisterMapByDest(button.id);
 
 				if (button.mappedToId == centralData->getMappingSource()) {
 					button.isMapped = false;

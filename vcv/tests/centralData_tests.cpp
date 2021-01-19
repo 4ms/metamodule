@@ -110,7 +110,11 @@ TEST_CASE("ParamStatus adding and remove param data")
 	}
 	// Todo: Adding a param with a moduleID that's not registered, will not add the param (? or will it?)
 }
+//
+// Todo: jackStatus
 
+//
+// Todo:
 TEST_CASE("messages system")
 {
 	CentralData cd;
@@ -148,11 +152,13 @@ TEST_CASE("mappings")
 
 	SUBCASE("Creating a mapping, then checking if the src and dst are mapped")
 	{
+		cd.registerModule({1, "MODULE1"});
 		LabelButtonID src;
 		src.moduleID = 1;
 		src.objID = 2;
 		src.objType = LabelButtonID::Types::Knob;
 
+		cd.registerModule({100, "MODULE100"});
 		LabelButtonID dst;
 		dst.moduleID = 100;
 		dst.objID = 200;
@@ -190,6 +196,43 @@ TEST_CASE("mappings")
 			unmappedknob.objType = LabelButtonID::Types::InputJack;
 			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
 		}
+
+		SUBCASE("Add other mappings, but still can access the original src or dest by providing one of the pair")
+		{
+			LabelButtonID dst2;
+			dst2.moduleID = 888;
+			dst2.objID = 999;
+			dst2.objType = LabelButtonID::Types::Knob;
+			LabelButtonID src2;
+			src2.moduleID = 777;
+			src2.objID = 666;
+			src2.objType = LabelButtonID::Types::Knob;
+			cd.startMappingProcedure(src2);
+			cd.registerMapDest(dst2);
+
+			auto should_be_src = cd.getMappedSrcFromDst(dst);
+			CHECK(should_be_src == src);
+
+			auto should_be_dst = cd.getMappedDstFromSrc(src);
+			CHECK(should_be_dst == dst);
+		}
+
+		SUBCASE("Removing a module also removes its mappings")
+		{
+			SUBCASE("By removing the src module")
+			{
+				cd.unregisterModule({1, "MODULE"});
+				CHECK_FALSE(cd.isLabelButtonMapped(src));
+				CHECK_FALSE(cd.isLabelButtonMapped(dst));
+			}
+			SUBCASE("By removing the dst module")
+			{
+				cd.unregisterModule({100, "MODULE100"});
+				CHECK_FALSE(cd.isLabelButtonMapped(src));
+				CHECK_FALSE(cd.isLabelButtonMapped(dst));
+			}
+		}
 	}
 }
 
+TEST_CASE("clear_if") {}
