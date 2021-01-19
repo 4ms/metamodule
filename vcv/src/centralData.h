@@ -169,9 +169,7 @@ public:
 
 	void unregisterMapByDest(LabelButtonID dest)
 	{
-		// remove_and_erase(maps, [&](const auto &m) { return (m.dst == dest); });
-		maps.erase(std::remove_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dest); }),
-				   maps.end());
+		remove_and_erase(maps, [&](const auto &m) { return (m.dst == dest); });
 	}
 
 	bool isLabelButtonMapped(LabelButtonID &b)
