@@ -4,6 +4,7 @@
 #include "coreProcessor.h"
 #include "math.hh"
 #include "processors/tools/delayLine.h"
+#include "processors/tools/windowComparator.h"
 
 using namespace MathTools;
 
@@ -12,7 +13,7 @@ public:
 	virtual void update(void) override
 	{
 		lastGate = currentGate;
-		currentGate = del.update(gateInput)>0.0f;
+		currentGate = wc.update(del.update(signalInput));
 		if (currentGate && (lastGate == false)) {
 			sinceGate = 0;
 		}
@@ -29,14 +30,12 @@ public:
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
-			case 0:
-			{
+			case 0: {
 				float gateTime = map_value(val, 0.0f, 1.0f, 1.0f, 1000.0f);
 				lengthInSamples = gateTime / 1000.0f * sampleRate;
 				break;
 			}
-			case 1:
-			{
+			case 1: {
 				float delayTimeMs = map_value(val, 0.0f, 1.0f, 0.0f, 1000.0f);
 				delayTimeSamples = delayTimeMs / 1000.0f * sampleRate;
 				del.set_delay_samples(delayTimeSamples);
@@ -53,7 +52,7 @@ public:
 	{
 		switch (input_id) {
 			case 0:
-				gateInput = (val > 0.0f);
+				signalInput= val;
 				break;
 		}
 	}
@@ -82,7 +81,6 @@ public:
 
 private:
 	float sampleRate = 48000;
-	bool gateInput = false;
 	bool lastGate = false;
 	bool currentGate = false;
 	bool gateOutput = false;
@@ -93,5 +91,8 @@ private:
 
 	float delayTimeSamples = 0;
 
+	float signalInput = 0;
+
 	DelayLine<96000> del;
+	WindowComparator wc;
 };
