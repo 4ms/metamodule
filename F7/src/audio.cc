@@ -13,7 +13,7 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	, rx_buf_2{buffers[3]}
 	, params{p}
 {
-	player.load_patch(example_patch2);
+	player.load_patch(example_patch3);
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
@@ -74,7 +74,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			i++;
 		}
 
-		player.update_patch(example_patch2); // 3.15us
+		player.update_patch(example_patch3);
 
 		out_.l = get_output(0);
 		out_.r = get_output(1);
