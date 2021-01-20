@@ -4,6 +4,7 @@
 #include "math.hh"
 #include "math_tables.hh"
 #include "moduleTypes.h"
+#include "processors/tools/windowComparator.h"
 
 using namespace MathTools;
 
@@ -17,7 +18,10 @@ public:
 		if (phaccu >= 1.0f) {
 			phaccu -= 1.0f;
 		}
-		if (resetInput > lastReset) {
+
+		lastReset = currentReset;
+		currentReset = resetInput.get_output();
+		if (currentReset > lastReset) {
 			phaccu = 0;
 		}
 		// sinOut = sinf(2.0f * M_PI * (phaccu + phaseOffset)) * level;
@@ -50,8 +54,7 @@ public:
 			combineKnobCVFreq();
 		}
 		if (input_id == 1) {
-			lastReset = resetInput;
-			resetInput = (val > 0.0f);
+			resetInput.update(val);
 		}
 	}
 
@@ -80,8 +83,9 @@ private:
 	float cv_frequency = 1;
 	float sampleRate = 48000;
 	float level = 1;
-	int resetInput = 0;
+	WindowComparator resetInput;
 	int lastReset = 0;
+	int currentReset = 0;
 	float sinOut;
 
 	void combineKnobCVFreq()
@@ -89,4 +93,3 @@ private:
 		frequency = knob_frequency + cv_frequency;
 	}
 };
-

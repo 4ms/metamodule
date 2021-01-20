@@ -2,6 +2,7 @@
 #include "coreProcessor.h"
 #include "math.hh"
 #include "moduleTypes.h"
+#include "processors/tools/windowComparator.h"
 
 using namespace MathTools;
 
@@ -10,10 +11,10 @@ public:
 	virtual void update(void) override
 	{
 		lastSample1 = currentSample1;
-		currentSample1 = sample1;
+		currentSample1 = sample1.get_output();
 
 		lastSample2 = currentSample2;
-		currentSample2 = sample2;
+		currentSample2 = sample2.get_output();
 
 		if (currentSample1 > lastSample1) {
 			out1 = in1;
@@ -24,16 +25,10 @@ public:
 		}
 	}
 
-	SampleHoldCore()
-	{
-	}
+	SampleHoldCore() {}
 
-	virtual void set_param(const int param_id, const float val) override
-	{
-	}
-	virtual void set_samplerate(const float sr) override
-	{
-	}
+	virtual void set_param(const int param_id, const float val) override {}
+	virtual void set_samplerate(const float sr) override {}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
@@ -41,24 +36,22 @@ public:
 			case 0: {
 				if (in1Connected == 1) {
 					in1 = val;
-				}
-				else {
+				} else {
 					in1 = randomNumber(-1.0f, 1.0f);
 				}
 			} break;
 			case 1:
-				sample1 = val > 0.0f;
+				sample1.update(val);
 				break;
 			case 2: {
 				if (in2Connected == 1) {
 					in2 = val;
-				}
-				else {
+				} else {
 					in2 = randomNumber(-1.0f, 1.0f);
 				}
 			} break;
 			case 3:
-				sample2 = val > 0.0f;
+				sample2.update(val);
 				break;
 		}
 	}
@@ -103,8 +96,8 @@ public:
 private:
 	float in1 = 0;
 	float in2 = 0;
-	float sample1 = 0;
-	float sample2 = 0;
+	WindowComparator sample1;
+	WindowComparator sample2;
 	float out1 = 0;
 	float out2 = 0;
 
