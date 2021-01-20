@@ -13,7 +13,8 @@ public:
 	virtual void update(void) override
 	{
 		lastGate = currentGate;
-		currentGate = wc.update(del.update(signalInput));
+		wc.update(del.update(signalInput));
+		currentGate = wc.get_output();
 		if (currentGate && (lastGate == false)) {
 			sinceGate = 0;
 		}

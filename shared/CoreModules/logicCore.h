@@ -1,6 +1,7 @@
 #pragma once
 #include "coreProcessor.h"
 #include "moduleTypes.h"
+#include "processors/tools/windowComparator.h"
 #include "util/math.hh"
 
 using namespace MathTools;
@@ -11,9 +12,9 @@ public:
 
 	virtual void update(void) override
 	{
-		andOutput = (int)in1 & (int)in2;
-		orOutput = (int)in1 | (int)in2;
-		xorOutput = (int)in1 ^ (int)in2;
+		andOutput = in1.get_output() & in2.get_output();
+		orOutput = in1.get_output() | in2.get_output();
+		xorOutput = in1.get_output() ^ in2.get_output();
 	}
 
 	virtual void set_param(const int param_id, const float val) override {}
@@ -23,10 +24,10 @@ public:
 	{
 		switch (input_id) {
 			case 0:
-				in1 = val > 0.0f;
+				in1.update(val);
 				break;
 			case 1:
-				in2 = val > 0.0f;
+				in2.update(val);
 				break;
 		}
 	}
@@ -57,9 +58,9 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	float in1 = 0;
-	float in2 = 0;
-	float andOutput = 0;
-	float orOutput = 0;
-	float xorOutput = 0;
+	WindowComparator in1;
+	WindowComparator in2;
+	bool andOutput = 0;
+	bool orOutput = 0;
+	bool xorOutput = 0;
 };

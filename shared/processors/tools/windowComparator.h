@@ -2,13 +2,16 @@
 
 class WindowComparator {
 public:
-	bool update(float input)
+	void update(float input)
 	{
 		if (input > highThresh)
 			output = true;
 		if (input < lowThresh)
 			output = false;
+	}
 
+	bool get_output()
+	{
 		return output;
 	}
 
