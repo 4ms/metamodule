@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "GATECONVERTER",
+      "name": "Gateconverter",
+      "description": "Gate Converter",
+      "tags": []
+}, 
+{
       "slug": "DETUNE",
       "name": "Detune",
       "description": "Detune",

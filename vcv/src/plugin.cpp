@@ -10,6 +10,7 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelGateconverter); 
 p->addModel(modelDetune); 
 p->addModel(modelPitchshift); 
 p->addModel(modelSwitch4to1); 
