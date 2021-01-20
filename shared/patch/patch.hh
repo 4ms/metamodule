@@ -1,6 +1,6 @@
 #pragma once
-#include "moduleTypes.h"
-#include "panel.hh"
+#include "CoreModules/moduleTypes.h"
+#include "CoreModules/panel.hh"
 #include <vector>
 
 // Todo: will this pack into 4 bytes on all systems?
