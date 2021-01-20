@@ -63,35 +63,35 @@ public:
 
 class PitchShift {
 private:
-	std::unique_ptr<PitchDelay> pitchDelay;
+	PitchDelay pitchDelay;
 	float phaccu = 0;
 	const int incrementalPitch = 1;
 	float sampleRate = 96000;
 
 public:
 	PitchShift(float maxWindowTime)
-	{
-		pitchDelay = std::make_unique<PitchDelay>(maxWindowTime);
-	}
+		: pitchDelay{maxWindowTime}
+	{}
 	float shiftAmount = 1;
 	float windowSize = 500;
 	float mix = 0;
+
 	float update(float input)
 	{
 		if (incrementalPitch == 0)
 			shiftAmount = (long)shiftAmount;
-		pitchDelay->timeinMs = phaccu * windowSize;
+		pitchDelay.timeinMs = phaccu * windowSize;
 		float adjustedPhase = phaccu + 0.5f;
 		if (adjustedPhase >= 1)
 			adjustedPhase -= 1.0f;
-		pitchDelay->timeinMs2 = adjustedPhase * windowSize;
+		pitchDelay.timeinMs2 = adjustedPhase * windowSize;
 		float window1 = 0;
 		float window2 = 0;
 
 		window1 = sinTable.interp(phaccu * 0.5f);		 // return sin(pi*x)
 		window2 = sinTable.interp(adjustedPhase * 0.5f); // return sin(pi*x)
 		float pitchToFreq = 0;
-		//pitchToFreq = ((expf(shiftAmount * 0.05776f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
+		// pitchToFreq = ((expf(shiftAmount * 0.05776f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
 
 		if (shiftAmount >= 0)
 			pitchToFreq = ((expTable.interp(shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
@@ -104,14 +104,14 @@ public:
 			phaccu -= 1.0f;
 		if (phaccu < 0)
 			phaccu += 1.0f;
-		pitchDelay->update(input);
-		float wet = (pitchDelay->output1 * window1 + pitchDelay->output2 * window2);
+		pitchDelay.update(input);
+		float wet = (pitchDelay.output1 * window1 + pitchDelay.output2 * window2);
 		return (interpolate(input, wet, mix));
 	}
 
 	void setSampleRate(float sr)
 	{
 		sampleRate = sr;
-		pitchDelay->setSampleRate(sr);
+		pitchDelay.setSampleRate(sr);
 	}
 };
