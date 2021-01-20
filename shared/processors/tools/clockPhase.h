@@ -1,13 +1,15 @@
 #pragma once
 
+#include "windowComparator.h"
+
 class ClockPhase {
 public:
 	void updateClock(float val)
 	{
-		lastClock = currentClock;
-		currentClock = val > 0.0f;
+		lastClock = currentClock.get_output();
+		currentClock.update(val);
 
-		if (currentClock > lastClock) {
+		if (currentClock.get_output() > lastClock) {
 			duration = sinceClock;
 			sinceClock = 0;
 			wholeCount++;
@@ -16,9 +18,9 @@ public:
 
 	void updateReset(float val)
 	{
-		lastReset = currentReset;
-		currentReset = val > 0.0f;
-		if (currentReset > lastReset)
+		lastReset = currentReset.get_output();
+		currentReset.update(val);
+		if (currentReset.get_output() > lastReset)
 			wholeCount = 0;
 	}
 
@@ -58,10 +60,10 @@ public:
 	}
 
 private:
-	int currentClock = 0;
+	WindowComparator currentClock;
 	int lastClock = 0;
 
-	int currentReset = 0;
+	WindowComparator currentReset;
 	int lastReset = 0;
 
 	long wholeCount = 0;
