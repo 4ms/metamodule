@@ -2,6 +2,7 @@
 #include "coreProcessor.h"
 #include "math.hh"
 #include "moduleTypes.h"
+#include "processors/tools/windowComparator.h"
 
 using namespace MathTools;
 
@@ -9,15 +10,14 @@ class ComparatorCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		if (signalIn > (cvIn * cvAmount + threshold))
-			compOut = 1;
-		else
-			compOut = 0;
+		auto centerThreshold = cvIn * cvAmount + threshold;
+		comp.set_lowThreshhold(centerThreshold - compError);
+		comp.set_highThreshold(centerThreshold + compError);
+		comp.update(signalIn);
+		compOut = comp.get_output();
 	}
 
-	ComparatorCore()
-	{
-	}
+	ComparatorCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
@@ -30,9 +30,7 @@ public:
 				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override
-	{
-	}
+	virtual void set_samplerate(const float sr) override {}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
@@ -70,4 +68,8 @@ private:
 	float cvIn = 0;
 	float signalIn = 0;
 	float threshold = 0;
+
+	const float compError = 0.1f;
+
+	WindowComparator comp;
 };
