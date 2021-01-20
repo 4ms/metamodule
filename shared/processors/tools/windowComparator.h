@@ -15,8 +15,18 @@ public:
 		return output;
 	}
 
+	void set_lowThreshhold(float lowVal)
+	{
+		lowThresh = lowVal;
+	}
+
+	void set_highThreshold(float highVal)
+	{
+		highThresh = highVal;
+	}
+
 private:
-	const float lowThresh = 0.1f;
-	const float highThresh = 0.5f;
+	float lowThresh = 0.1f;
+	float highThresh = 0.5f;
 	bool output = false;
 };
