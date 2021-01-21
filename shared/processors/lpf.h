@@ -1,8 +1,8 @@
 #pragma once
 
-#include "tools/parameter.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
+#include "util/parameter.h"
 #include <algorithm>
 #include <cmath>
 

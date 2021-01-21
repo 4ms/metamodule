@@ -1,7 +1,7 @@
 #pragma once
 #include "coreProcessor.h"
 #include "moduleTypes.h"
-#include "processors/tools/parameter.h"
+#include "util/parameter.h"
 
 class NodePanel : public CoreProcessor {
 public:

@@ -2,9 +2,9 @@
 
 #include "coreProcessor.h"
 #include "moduleTypes.h"
-#include "processors/tools/parameter.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
+#include "util/parameter.h"
 
 using namespace MathTools;
 

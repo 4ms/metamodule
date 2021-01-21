@@ -1,6 +1,6 @@
 #pragma once
-#include "math.hh"
-#include "tools/parameter.h"
+#include "util/math.hh"
+#include "util/parameter.h"
 #include <cmath>
 
 using namespace MathTools;
