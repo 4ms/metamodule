@@ -79,6 +79,8 @@ void CommModule::process(const ProcessArgs &args)
 void CommModule::configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int NUM_LIGHTS)
 {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+	_numLights = NUM_LIGHTS;
+
 	for (int i = 0; i < NUM_INPUTS; i++) {
 		inputJacks.push_back(std::make_unique<CommInputJack>(inputs[i], i));
 	}
@@ -88,6 +90,5 @@ void CommModule::configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int
 	for (int i = 0; i < NUM_PARAMS; i++) {
 		commParams.push_back(std::make_unique<CommParam>(params[i], i));
 	}
-	_numLights = NUM_LIGHTS;
 }
 

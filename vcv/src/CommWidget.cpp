@@ -75,6 +75,14 @@ constexpr float CommModuleWidget::gridToXCentered(const float x)
 	return kKnobSpacingX * (x + 0.5f);
 }
 
+// Todo: disallow creating an InputJack mapping to a patched jack
+// Can probably not highlight input jacks that are patched (if we can get that info from the module or centralData)
+// Consider how to handle:
+// User makes the InJack mapping on an unpatched jack, then patches the jack
+//
+// Or allow everything but then give an error when creating the patch?
+//
+// Related todo: how to handle patching the Panel jacks to its own modules...!
 void CommModuleWidget::notifyLabelButtonClicked(LabeledButton &button)
 {
 	button.id.moduleID = module->id;
