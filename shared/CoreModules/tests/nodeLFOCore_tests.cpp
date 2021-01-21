@@ -64,35 +64,64 @@ TEST_CASE("Basic LFO usage")
 
 	SUBCASE("Using Nodes")
 	{
-		float out = 0.f, freq = 0.f, reset = 0.f;
-		NodeLFOCore lfo{out, freq, reset};
 
-		SUBCASE("Can read output directly from node, and its the same as using get_output()")
+		SUBCASE("Can read output directly from node, and it's the same as using get_output()")
 		{
 			NodeLFOCore lfo2;
-			lfo2.set_input(0, 0.5);
+			lfo2.set_input(0, 0.5); // freq
+			lfo2.set_input(1, 0.0); // reset
+
+			float freq = 0.0f, reset = 0.f, out = 0.f;
+			NodeLFOCore lfo{freq, reset, out};
+			lfo.set_input(0, 0.5);
+
+			lfo.update();
 			lfo2.update();
+			lfo.update();
 			lfo2.update();
 
-			lfo.set_input(0, 0.5);
-			lfo.update();
-			lfo.update();
+			CHECK(out == lfo.get_output(0));
 			CHECK(out == lfo2.get_output(0));
 		}
 
 		SUBCASE("Directly setting input node is same as using set_input()")
 		{
-			NodeLFOCore lfo2;
-			lfo2.set_input(0, 0.5);
+			float freq = 0.0f, reset = 0.f, out = 0.f;
+			NodeLFOCore lfo{freq, reset, out};
 
 			freq = 0.5;
+
+			NodeLFOCore lfo2;
+			lfo2.set_input(0, 0.5);
 
 			for (int i = 0; i < 30; i++) {
 				lfo2.update();
 				lfo.update();
 			}
 
+			CHECK(out == lfo.get_output(0));
 			CHECK(out == lfo2.get_output(0));
+		}
+
+		SUBCASE("Initializing a node to a non-zero value acts the same as initializing to 0 and then setting it to "
+				"non-zero")
+		{
+			float non_zero_value = 0.3f;
+
+			float freq = non_zero_value, reset = non_zero_value, out = non_zero_value;
+			NodeLFOCore lfo{freq, reset, out};
+			freq = non_zero_value;
+
+			float freq2 = 0.f, reset2 = 0.f, out2 = 0.f;
+			NodeLFOCore lfo2{freq2, reset2, out2};
+			freq2 = non_zero_value;
+
+			for (int i = 0; i < 30; i++) {
+				lfo2.update();
+				lfo.update();
+			}
+
+			CHECK(out == out2);
 		}
 	}
 }

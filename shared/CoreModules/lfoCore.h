@@ -26,13 +26,22 @@ public:
 		return NumKnobs;
 	}
 
-	NodeLFOCore() {}
+	NodeLFOCore()
+	{
+		freqJack = 0.f;
+		resetJack = 0.f;
+		sinOut = 0.f;
+	}
 
 	NodeLFOCore(float &nFreq, float &nReset, float &nOut)
 		: freqJack{nFreq}
 		, resetJack{nReset}
 		, sinOut{nOut}
-	{}
+	{
+		freqJack = 0.f;
+		resetJack = 0.f;
+		sinOut = 0.f;
+	}
 
 	virtual void update() override
 	{
@@ -53,7 +62,9 @@ public:
 	void check_changes()
 	{
 		if (freqJack.isChanged()) {
-			cv_frequency = map_value(freqJack, 0.0f, 1.0f, 0.1f, 200.f);
+			auto f = expTable.closest(constrain(freqJack.getValue(), 0.f, 1.f));
+			cv_frequency = f * f / 0.1f;
+			// cv_frequency = map_value(freqJack, 0.0f, 1.0f, 0.1f, 200.f);
 			combineKnobCVFreq();
 		}
 
@@ -72,7 +83,9 @@ public:
 	virtual void set_param(int const param_id, const float val) override
 	{
 		if (param_id == 0) {
-			knob_frequency = map_value(val, 0.0f, 1.0f, 0.1f, 200.0f);
+			auto f = expTable.closest(constrain(val, 0.f, 1.f));
+			knob_frequency = f * f / 0.1f;
+			// knob_frequency = map_value(val, 0.0f, 1.0f, 0.1f, 200.0f);
 			combineKnobCVFreq();
 		}
 		if (param_id == 1) {
