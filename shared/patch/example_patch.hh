@@ -83,6 +83,10 @@ static const Patch example_patch2 = {
 		// MIXER
 		{LFO1_TO_MIXERCH0, LFO2_TO_MIXERCH1, FREE2, FREE3, OUTL, OUTR},
 	}},
+	.nets = {{
+
+	}},
+	.num_nets = 0,
 
 	.static_knobs = {{
 		{.module_id = 1, .param_id = 0, .value = 0.5f}, // LFO#1 Rate
@@ -106,7 +110,7 @@ static const Patch example_patch2 = {
 };
 
 static const Patch example_patch3 = {
-	.modules_used = {"nPANEL_8", "PITCHSHIFT", "nLFOSINE"},
+	.modules_used = {"PANEL_8", "PITCHSHIFT", "LFOSINE"},
 	.num_modules = 3,
 
 	.module_nodes = {{
@@ -119,6 +123,11 @@ static const Patch example_patch3 = {
 		// LFO
 		{CV0, FREE0, FREE1},
 	}},
+
+	.nets = {{
+
+	}},
+	.num_nets = 0,
 
 	.static_knobs = {{}},
 	.num_static_knobs = 0,
