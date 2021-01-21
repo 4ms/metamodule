@@ -50,7 +50,8 @@ public:
 			phaccu -= 1.0f;
 		if (phaccu < 0)
 			phaccu += 1.0f;
-		pitchDelay.update(input);
+		pitchDelay.updateSample(input);
+		pitchDelay.incrementWriteHead();
 		float wet = (output1 * window1 + output2 * window2);
 		return (interpolate(input, wet, mix));
 	}

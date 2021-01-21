@@ -19,12 +19,15 @@ public:
 
 	// calling 6 updates in a loop is 6.7us using float readIndex and interpolating
 	// with int readIndex (just checking it's not negative), it's 5.6us
-	void update(float input)
+	void updateSample(float input)
 	{
 		(*delayBuffer)[writeIndex] = input;
+	}
 
+	void incrementWriteHead()
+	{
 		writeIndex++;
-		if (writeIndex == maxSamples)
+		if (writeIndex >= maxSamples)
 			writeIndex = 0;
 	}
 

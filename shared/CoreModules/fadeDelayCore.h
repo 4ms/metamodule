@@ -2,7 +2,7 @@
 #include "coreProcessor.h"
 #include "math.hh"
 #include "moduleTypes.h"
-#include "processors/tools/delayLine.h"
+#include "processors/tools/multireadDelayLine.h"
 
 using namespace MathTools;
 
@@ -17,35 +17,24 @@ public:
 			fade = 1;
 		}
 
-		for (int i = 0; i < 2; i++) {
-			delayLine[i].update(input + feedbackSample * feedback);
-			taps[i] = delayLine[i].output;
-		}
-
-		smoothDelayTime += (timeinMs - smoothDelayTime) * 0.0001f;
-
-		if ((smoothDelayTime != currentDelayTime) && fade >= 1) {
-			delayLine[!activeChannel].set_delay_samples(sampleDelay);
-			sinceChange = 0;
-		}
-
-		lastReachedNew = reachedNew;
-		reachedNew = fade >= 1;
-		if (reachedNew > lastReachedNew) {
-			activeChannel = !activeChannel;
+		if (fade >= 1) {
+			delayTimes[0] = delayTimes[1];
+			fading = false;
 		}
 
 		sinceChange++;
+		delayLine.updateSample(input + feedbackSample * feedback);
 
-		output = interpolate(taps[activeChannel], taps[!activeChannel], fade);
+		output = interpolate(delayLine.readSample(delayTimes[0]), delayLine.readSample(delayTimes[1]), fade);
+
+		delayLine.incrementWriteHead();
+
 		feedbackSample = output;
 
 		delayOutput = (interpolate(input, output, mix));
 	}
 
-	FadeDelayCore()
-	{
-	}
+	FadeDelayCore() {}
 
 	virtual void set_param(const int param_id, const float val) override
 	{
@@ -53,6 +42,14 @@ public:
 			case 0:
 				timeinMs = map_value(val, 0.0f, 1.0f, 0.0f, 1000.0f);
 				sampleDelay = timeinMs / 1000.0f * sampleRate;
+				lastDelay = currentDelay;
+				currentDelay = sampleDelay;
+				if (currentDelay != lastDelay) {
+					delayTimes[1] = sampleDelay;
+					fading = true;
+					sinceChange = 0;
+				}
+
 				break;
 			case 1:
 				feedback = val;
@@ -111,22 +108,21 @@ private:
 
 	float timeinMs = 0;
 
+	float currentDelay = 0;
+	float lastDelay = 0;
+
 	float sampleRate = 48000;
 
-	DelayLine<96000> delayLine[2];
+	const static inline long maxSamples = 48000;
+
+	MultireadDelayLine<maxSamples> delayLine;
 
 	float sinceChange = 0;
 	float changeTime = 48000;
 
-	float currentDelayTime = 0;
-
-	float smoothDelayTime = 0;
-
-	int activeChannel = 0;
-	float taps[2];
-
-	int lastReachedNew = 0;
-	int reachedNew = 0;
+	float delayTimes[2] = {0, 0};
 
 	float feedbackSample = 0;
+
+	bool fading = false;
 };
