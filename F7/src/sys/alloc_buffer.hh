@@ -1,5 +1,4 @@
 #pragma once
-#include "interp_array.hh"
 
 template<unsigned int BASEADDR>
 struct AllocForever {
