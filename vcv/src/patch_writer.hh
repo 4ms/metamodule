@@ -95,6 +95,7 @@ public:
 		}
 
 		int node_i = 1;
+		p.num_nets = 0;
 		auto jackInRange = [](int jackid) { return (jackid >= 0) && (jackid < MAX_JACKS_PER_MODULE); };
 		for (auto &cable : jackData) {
 			if (cable.connected && jackInRange(cable.receivedJackId) && jackInRange(cable.sendingJackId) &&
@@ -118,6 +119,29 @@ public:
 					out_node = node_i;
 					in_node = node_i;
 					node_i++;
+				}
+
+				// FixMe: non-node code:
+				out_jack = cable.receivedJackId;
+				// scan existing nets for same output jack
+				bool found = false;
+				for (int j = 0; j < p.num_nets; j++) {
+					if (p.nets[j].jacks[0].jack_id == out_jack && p.nets[j].jacks[0].module_id == out_mod) {
+						auto num_jacks = p.nets[j].num_jacks;
+						p.nets[j].jacks[num_jacks].jack_id = in_jack;
+						p.nets[j].jacks[num_jacks].module_id = in_mod;
+						p.nets[j].num_jacks++;
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					p.nets[p.num_nets].jacks[0].jack_id = out_jack;
+					p.nets[p.num_nets].jacks[0].module_id = out_mod;
+					p.nets[p.num_nets].jacks[1].jack_id = in_jack;
+					p.nets[p.num_nets].jacks[1].module_id = in_mod;
+					p.nets[p.num_nets].num_jacks = 2;
+					p.num_nets++;
 				}
 			}
 		}
@@ -153,9 +177,10 @@ public:
 	{
 		std::string s;
 		s = "#include \"patch.hh\"\n";
-		s += "static const Patch " + patchName +
-			 " = { \n"
-			 "    .modules_used = {\n";
+		s += "static const Patch " + patchName + " = { \n";
+
+		// Module List
+		s += "    .modules_used = {\n";
 		for (int i = 0; i < patch.num_modules; i++) {
 			s += "        \"";
 			s += patch.modules_used[i].name;
@@ -165,6 +190,7 @@ public:
 		s += "    .num_modules = " + std::to_string(patch.num_modules) + ",\n";
 		s += "\n";
 
+		// Nodes
 		s += "    .module_nodes = {{\n";
 		for (int i = 0; i < patch.num_modules; i++) {
 			s += "        // ";
@@ -180,6 +206,29 @@ public:
 		s += "    }},\n";
 		s += "\n";
 
+		// FixMe: non-node code:
+		// Net List
+		s += "    .nets = {{\n";
+		for (int i = 0; i < patch.num_nets; i++) {
+			s += "        {\n";
+			s += "            .num_jacks = " + std::to_string(patch.nets[i].num_jacks) + ",\n";
+			s += "            .jacks = {{\n";
+
+			for (int j = 0; j < patch.nets[i].num_jacks; j++) {
+				s += "                {";
+				s += ".module_id = " + std::to_string(patch.nets[i].jacks[j].module_id) + ", ";
+				s += ".jack_id = " + std::to_string(patch.nets[i].jacks[j].jack_id) + "},\n";
+			}
+
+			s += "            }},\n";
+
+			s += "        },\n";
+		}
+		s += "    }},\n";
+		s += "    .num_nets = " + std::to_string(patch.num_nets) + ",\n";
+		s += "\n";
+
+		// Static knobs
 		s += "    .static_knobs = {{\n";
 		for (int i = 0; i < patch.num_static_knobs; i++) {
 			const auto &knob = patch.static_knobs[i];

@@ -88,12 +88,12 @@ public:
 		for (int net_i = 0; net_i < p.num_nets; net_i++) {
 			auto &net = p.nets[net_i];
 
-			for (int node_i = 0; node_i < net.num_nodes; node_i++) {
-				auto &node = net.nodes[node_i];
-				if (node_i == 0)
-					modules[node.module_id]->mark_output_patched(node.jack_id);
+			for (int jack_i = 0; jack_i < net.num_jacks; jack_i++) {
+				auto &jack = net.jacks[jack_i];
+				if (jack_i == 0)
+					modules[jack.module_id]->mark_output_patched(jack.jack_id);
 				else
-					modules[node.module_id]->mark_input_patched(node.jack_id);
+					modules[jack.module_id]->mark_input_patched(jack.jack_id);
 			}
 		}
 #endif
@@ -124,12 +124,12 @@ public:
 		// Copy outs to ins: ~1.3us for 4 nets
 		for (int net_i = 0; net_i < p.num_nets; net_i++) {
 			auto &net = p.nets[net_i];
-			auto &output = net.nodes[0];
+			auto &output = net.jacks[0];
 			float out_val = modules[output.module_id]->get_output(output.jack_id);
 
-			for (int node_i = 1; node_i < net.num_nodes; node_i++) {
-				auto &node = net.nodes[node_i];
-				modules[node.module_id]->set_input(node.jack_id, out_val);
+			for (int jack_i = 1; jack_i < net.num_jacks; jack_i++) {
+				auto &jack = net.jacks[jack_i];
+				modules[jack.module_id]->set_input(jack.jack_id, out_val);
 			}
 		}
 #endif
