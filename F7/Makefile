@@ -181,10 +181,33 @@ ifneq "$(MAKECMDGOALS)" "clean"
 endif
 
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
-.PHONY: all clean flash tables tests
+.PHONY: all clean flash tables tests F7_tests core_tests util_tests proc_tests
 
-tests:
+tests: F7_tests core_tests util_tests #proc_tests
+
+F7_tests:
+	@echo
+	@echo "----------------------------"
+	@echo "Running F7 tests...."
+	@echo "----------------------------"
+	make -f tests/Makefile
+
+util_tests:
+	@echo
+	@echo "----------------------------"
+	@echo "Running shared/util tests...."
+	@echo "----------------------------"
 	cd $(SHARED)/util/tests && make tests
+
+core_tests:
+	@echo
+	@echo "----------------------------"
+	@echo "Running CoreModule tests...."
+	@echo "----------------------------"
+	$(MAKE) -f $(SHARED)/CoreModules/tests/Makefile
+
+# proc_tests:
+# 	cd $(SHARED)/processors/tests && make tests
 
 generate_compile_txt:
 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \

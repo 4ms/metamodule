@@ -44,23 +44,23 @@ void Params::update()
 		}
 	}
 
-	update_screen();
+	// update_screen();
 
 	// Debug::set_1(false);
 }
 
-void Params::update_screen()
-{
-	if (HAL_GetTick() - last_update_time > 50) {
-		last_update_time = HAL_GetTick();
+// void Params::update_screen()
+// {
+// 	if (HAL_GetTick() - last_update_time > 50) {
+// 		last_update_time = HAL_GetTick();
 
-		uint8_t d[6];
-		d[0] = 0xAA;
-		d[1] = static_cast<uint8_t>(knobs[0] * 100.f);
-		d[2] = static_cast<uint8_t>(knobs[1] * 100.f);
-		d[3] = static_cast<uint8_t>(knobs[2] * 100.f);
-		d[4] = static_cast<uint8_t>(knobs[3] * 100.f);
-		d[5] = 0xA5;
-		screen.send(d, 6);
-	}
-}
+// 		uint8_t d[6];
+// 		d[0] = 0xAA;
+// 		d[1] = static_cast<uint8_t>(knobs[0] * 100.f);
+// 		d[2] = static_cast<uint8_t>(knobs[1] * 100.f);
+// 		d[3] = static_cast<uint8_t>(knobs[2] * 100.f);
+// 		d[4] = static_cast<uint8_t>(knobs[3] * 100.f);
+// 		d[5] = 0xA5;
+// 		screen.send(d, 6);
+// 	}
+// }

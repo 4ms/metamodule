@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "processors/tools/parameter.h"
+#include "util/parameter.h"
 #include <stdint.h>
 
 TEST_CASE("Basic usage")

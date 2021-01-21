@@ -47,5 +47,5 @@ vcv_tests:
 	@echo "----------------------------"
 	$(MAKE) -f tests/Makefile
 
-.PHONY: tests core_tests
+.PHONY: tests core_tests vcv_tests
 

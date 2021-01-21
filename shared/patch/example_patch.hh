@@ -1,22 +1,6 @@
 #include "patch.hh"
-
-// Example of a node-style module:
-// class VCAModule : public Module {
-// 	const ModuleTypeID type_id = VCA;
-// 	enum { OUT, CVIN, AUDIOIN };
-
-// 	void process()
-// 	{
-// 		if (jack[OUT].is_patched()) {
-// 			float cv = jack[CVIN].is_patched() ? jack[CVIN].get() : 1.0f;
-// 			float audioin = jack[AUDIOIN].is_patched() ? jack[AUDIOIN].get() : 0.0f;
-// 			jack[OUT].set(cv * audioin);
-// 		}
-// 	}
-// };
-
+/*
 static const Patch example_patch = {
-	//.modules_used = {PANEL, LFO, MIXER4, LFO},
 	.modules_used = {"PANEL_8", "LFOSINE", "MIXER4", "LFOSINE"},
 	.num_modules = 4,
 
@@ -63,35 +47,42 @@ static const Patch example_patch = {
 	.num_mapped_knobs = 4,
 };
 
+
+*/
+
+enum NodeNames2 {
+	INL,
+	INR,
+	CV0,
+	CV1,
+	CV2,
+	CV3,
+	OUTL,
+	OUTR,
+	LFO1_TO_MIXERCH0,
+	LFO2_TO_MIXERCH1,
+	FREE0,
+	FREE1,
+	FREE2,
+	FREE3,
+};
 static const Patch example_patch2 = {
-	.modules_used = {"PANEL_8", "LFOSINE", "LFOSINE", "MIXER4"},
-	//.modules_used = {PANEL_8, LFO, LFO, MIXER4},
+	.modules_used = {"nPANEL_8", "nLFOSINE", "nLFOSINE", "nMIXER4"},
 	.num_modules = 4,
 
-	.nets = {{
-		// LFO#1 sin out -> mixer ch0
-		{
-			.num_nodes = 2,
-			.nodes = {{{.module_id = 1, .jack_id = 0}, {.module_id = 3, .jack_id = 0}}},
-		},
-		// LFO#2 sin out -> Mixer ch1
-		{
-			.num_nodes = 2,
-			.nodes = {{{.module_id = 2, .jack_id = 0}, {.module_id = 3, .jack_id = 1}}},
-		},
-		// Mixer inv out -> Left out
-		{
-			.num_nodes = 2,
-			.nodes = {{{.module_id = 3, .jack_id = 0}, {.module_id = 0, .jack_id = 0}}},
-		},
-		// Mixer out -> Right out
-		{
-			.num_nodes = 2,
-			.nodes = {{{.module_id = 3, .jack_id = 1}, {.module_id = 0, .jack_id = 1}}},
-		},
+	.module_nodes = {{
+		// PANEL_8
+		{INL, INR, CV0, CV1, CV2, CV3, OUTL, OUTR},
 
+		// LFO#1
+		{FREE0, FREE1, LFO1_TO_MIXERCH0},
+
+		// LFO#2
+		{FREE0, FREE1, LFO2_TO_MIXERCH1},
+
+		// MIXER
+		{LFO1_TO_MIXERCH0, LFO2_TO_MIXERCH1, FREE2, FREE3, OUTL, OUTR},
 	}},
-	.num_nets = 4,
 
 	.static_knobs = {{
 		{.module_id = 1, .param_id = 0, .value = 0.5f}, // LFO#1 Rate
@@ -110,6 +101,33 @@ static const Patch example_patch2 = {
 		{.module_id = 3, .param_id = 0, .panel_knob_id = 1},
 		{.module_id = 2, .param_id = 0, .panel_knob_id = 2},
 		{.module_id = 3, .param_id = 1, .panel_knob_id = 3},
+	}},
+	.num_mapped_knobs = 4,
+};
+
+static const Patch example_patch3 = {
+	.modules_used = {"nPANEL_8", "PITCHSHIFT", "nLFOSINE"},
+	.num_modules = 3,
+
+	.module_nodes = {{
+		// PANEL_8
+		{INL, INR, CV0, CV1, CV2, CV3, OUTL, OUTR},
+
+		// PITCHSHIFT
+		{INL, FREE1, CV1, CV2, OUTL},
+
+		// LFO
+		{CV0, FREE0, FREE1},
+	}},
+
+	.static_knobs = {{}},
+	.num_static_knobs = 0,
+
+	.mapped_knobs = {{
+		{.module_id = 1, .param_id = 0, .panel_knob_id = 0},
+		{.module_id = 1, .param_id = 1, .panel_knob_id = 1},
+		{.module_id = 1, .param_id = 2, .panel_knob_id = 2},
+		{.module_id = 1, .param_id = 3, .panel_knob_id = 3},
 	}},
 	.num_mapped_knobs = 4,
 };

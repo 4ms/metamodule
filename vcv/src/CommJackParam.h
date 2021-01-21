@@ -17,8 +17,7 @@ public:
 	CommInputJack(Port &inputPort, int jackID)
 		: _inputPort{inputPort}
 		, _jackID{jackID}
-	{
-	}
+	{}
 
 	void setModuleID(int moduleID)
 	{
@@ -61,8 +60,7 @@ public:
 	CommOutputJack(Port &outputPort, int jackID)
 		: _outputPort{outputPort}
 		, _jackID{jackID}
-	{
-	}
+	{}
 
 	void setModuleID(int moduleID)
 	{

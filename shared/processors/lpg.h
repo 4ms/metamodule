@@ -1,7 +1,7 @@
 #pragma once
 #include "lpf.h"
-#include "tools/expDecay.h"
-#include "tools/parameter.h"
+#include "processors/tools/expDecay.h"
+#include "util/parameter.h"
 
 class LowPassGate {
 public:

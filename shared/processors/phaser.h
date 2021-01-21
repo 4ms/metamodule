@@ -1,11 +1,10 @@
 #pragma once
 
+#include "processors/tools/cubicDist.h"
+#include "processors/tools/delayLine.h"
+#include "util/math.hh"
 #include "util/math_tables.hh"
-//#include "debug.hh"
-#include "math.hh"
-#include "tools/cubicDist.h"
-#include "tools/delayLine.h"
-#include "tools/parameter.h"
+#include "util/parameter.h"
 #include <cmath>
 
 using namespace MathTools;

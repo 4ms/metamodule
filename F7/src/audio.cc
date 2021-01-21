@@ -13,7 +13,7 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	, rx_buf_2{buffers[3]}
 	, params{p}
 {
-	player.load_patch(example_patch2);
+	player.load_patch(example_patch3);
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
@@ -29,10 +29,15 @@ Audio::AudioSampleType Audio::get_output(int output_id)
 	return scaled_out;
 	// return compressor.compress(scaled_out);
 }
+void Audio::set_input(int input_id, Audio::AudioSampleType in)
+{
+	auto scaled_in = AudioFrame::scaleInput(in);
+	player.set_panel_input(input_id, scaled_in);
+}
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	Debug::set_2(true);
+	Debug::set_0(true);
 	// pre-amble: ~5us
 
 	params.update();
@@ -49,7 +54,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	i = 0;
 	for (auto &cv : cvjacks) {
 		cv.set_new_value(params.cvjacks[i]);
-		// player.set_panel_input(i + 2, params.cvjacks[i]); // i+2 : skip audio jacks
+		// player.set_panel_input(i + 2, params.cvjacks[i]);
 		i++;
 	}
 
@@ -73,8 +78,9 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			player.set_panel_input(i + 2, cv.next()); // i+2 : skip audio jacks
 			i++;
 		}
-
-		player.update_patch(example_patch2); // 3.15us
+		Debug::set_1(true);
+		player.update_patch(example_patch3); // 2.5us... ex 3 is 0.9us
+		Debug::set_1(false);
 
 		out_.l = get_output(0);
 		out_.r = get_output(1);
@@ -82,7 +88,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		in_++;
 	}
 
-	Debug::set_2(false);
+	Debug::set_0(false);
 }
 
 void Audio::start()

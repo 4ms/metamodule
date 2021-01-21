@@ -3,6 +3,7 @@
 #include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
 #include "localPath.h"
+#include "patch_writer.hh"
 #include "plugin.hpp"
 #include "string.h"
 #include <fstream>
@@ -12,28 +13,10 @@
 // Todo: rename this to Hub (or something?)
 struct Expander : public CommModule {
 
-	enum ParamIds {
-		ENUMS(KNOBS, 8),
-		GET_INFO,
-		NUM_PARAMS,
-	};
-	enum InputIds {
-		AUDIO_IN_L,
-		AUDIO_IN_R,
-		CV_1,
-		CV_2,
-		CV_3,
-		CV_4,
-		NUM_INPUTS,
-	};
-	enum OutputIds {
-		AUDIO_OUT_L,
-		AUDIO_OUT_R,
-		NUM_OUTPUTS,
-	};
-	enum LightIds {
-		NUM_LIGHTS,
-	};
+	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
+	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, NUM_INPUTS };
+	enum OutputIds { AUDIO_OUT_L, AUDIO_OUT_R, NUM_OUTPUTS };
+	enum LightIds { NUM_LIGHTS };
 
 	std::string labelText = "";
 
@@ -43,7 +26,71 @@ struct Expander : public CommModule {
 	Expander()
 	{
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		selfID.typeID = "HUB";
+		selfID.typeID = "PANEL_8";
+	}
+
+	void process(const ProcessArgs &args) override
+	{
+		if (buttonJustPressed()) {
+			responseTimer = 48000 / 4; // todo: set this to the sampleRate
+			centralData->requestAllParamDataAllModules();
+			labelText = "Requesting all modules send their data";
+			updateDisplay();
+		}
+		if (responseTimer) {
+			if (--responseTimer == 0) {
+				printDebugFile();
+
+				Patch patch;
+				createPatchStruct(patch);
+				writeToFile("/Users/dann/4ms/stm32/meta-module/shared/patch/example1.hh",
+							PatchWriter::printPatchStructText("Example1", patch));
+
+				labelText = "Wrote debug file and patch header file";
+				updateDisplay();
+			}
+		}
+	}
+
+private:
+	bool buttonJustPressed()
+	{
+		if (params[GET_INFO].getValue() > 0.f) {
+			if (!buttonAlreadyHandled) {
+				buttonAlreadyHandled = true;
+				return true;
+			}
+		} else {
+			buttonAlreadyHandled = false;
+		}
+		return false;
+	}
+
+	void createPatchStruct(Patch &p)
+	{
+		PatchWriter pw{p};
+		labelText = "Creating patch..";
+		updateDisplay();
+
+		pw.copyModuleList(centralData->moduleData);
+		pw.copyJackList(centralData->jackData);
+		pw.copyParamList(centralData->paramData);
+		pw.addMaps(centralData->maps);
+		pw.createPatch();
+	}
+
+	void printDebugFile()
+	{
+		std::string str = "";
+		appendModuleList(str);
+		appendParamList(str);
+		appendCableList(str);
+		appendMappingList(str);
+
+		labelText = "Printing debug file...";
+		updateDisplay();
+
+		writeToFile(debugFile, str);
 	}
 
 	void appendModuleList(std::string &str)
@@ -94,48 +141,12 @@ struct Expander : public CommModule {
 		}
 	}
 
-	void process(const ProcessArgs &args) override
-	{
-		if (buttonJustPressed()) {
-			responseTimer = 48000 / 4; // todo: set this to the sampleRate
-			centralData->requestAllParamDataAllModules();
-			labelText = "Requesting all modules send their data";
-			updateDisplay();
-		}
-		if (responseTimer) {
-			if (--responseTimer == 0) {
-				std::string str = "";
-				appendModuleList(str);
-				appendParamList(str);
-				appendCableList(str);
-				appendMappingList(str);
-				writeToDebugFile(debugFile, str);
-
-				labelText = "Writing module list to file";
-				updateDisplay();
-			}
-		}
-	}
-
-	void writeToDebugFile(std::string fileName, std::string &textToWrite)
+	void writeToFile(std::string fileName, std::string textToWrite)
 	{
 		std::ofstream myfile;
 		myfile.open(fileName);
 		myfile << textToWrite;
 		myfile.close();
-	}
-
-	bool buttonJustPressed()
-	{
-		if (params[GET_INFO].getValue() > 0.f) {
-			if (!buttonAlreadyHandled) {
-				buttonAlreadyHandled = true;
-				return true;
-			}
-		} else {
-			buttonAlreadyHandled = false;
-		}
-		return false;
 	}
 };
 
@@ -161,7 +172,7 @@ struct ExpanderWidget : CommModuleWidget {
 		valueLabel = createWidget<Label>(mm2px(Vec(0, 50)));
 		valueLabel->color = rack::color::BLACK;
 		valueLabel->text = "";
-		valueLabel->fontSize = 13;
+		valueLabel->fontSize = 10;
 		addChild(valueLabel);
 
 		addLabeledKnob("A", 0, {0, 0});
@@ -173,15 +184,15 @@ struct ExpanderWidget : CommModuleWidget {
 		addLabeledKnob("c", 6, {2, 1});
 		addLabeledKnob("d", 7, {3, 1});
 
-		for (int i = 0; i < 2; i++) {
-			addLabeledInput("A IN", i, {(float)i, 1});
-		}
-		for (int i = 0; i < 2; i++) {
-			addLabeledOutput("A OUT", i, {(float)(i + 2), 1});
-		}
-		for (int i = 2; i < 6; i++) {
-			addLabeledInput("CV IN", i, {(float)(i - 2), 0});
-		}
+		addLabeledInput("IN L", 0, {0, 1});
+		addLabeledInput("IN R", 1, {1, 1});
+		addLabeledInput("CV IN 1", 2, {0, 0});
+		addLabeledInput("CV IN 2", 3, {1, 0});
+		addLabeledInput("CV IN 3", 4, {2, 0});
+		addLabeledInput("CV IN 4", 5, {3, 0});
+
+		addLabeledOutput("OUT L", 0, {2, 1});
+		addLabeledOutput("OUT R", 1, {3, 1});
 	}
 
 	virtual LabeledButton *createLabel() override
