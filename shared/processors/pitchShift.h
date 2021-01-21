@@ -1,90 +1,36 @@
 #pragma once
 
+#include "processors/tools/multireadDelayLine.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
 using namespace MathTools;
 
-class PitchDelay {
-private:
-	float samplesMax;
-	float *delayBuffer;
-	unsigned long writeIndex = 0;
-	float sampR;
-	int samplesNeeded;
-
-public:
-	PitchDelay(float maxTime)
-	{
-		float sampRate = 96000;
-		samplesMax = maxTime / 1000.0f * sampRate;
-		samplesNeeded = samplesMax + 1;
-		delayBuffer = new float[samplesNeeded];
-		sampR = sampRate;
-	}
-	float timeinMs = 0;
-	float timeinMs2 = 0;
-	float output1;
-	float output2;
-
-	void update(float input)
-	{
-		float timeToSamples = (timeinMs / 1000.0f) * sampR;
-		delayBuffer[writeIndex] = input;
-
-		float sampleToRead = writeIndex - timeToSamples;
-		if (sampleToRead < 0)
-			sampleToRead += samplesNeeded;
-		float fractional = sampleToRead - (long)sampleToRead;
-
-		int firstSample = sampleToRead;
-		int secondSample = (firstSample + 1) % samplesNeeded;
-
-		float timeToSamples2 = timeinMs2 / 1000.0f * sampR;
-		float offsetSampleToRead = writeIndex - timeToSamples2;
-		if (offsetSampleToRead < 0)
-			offsetSampleToRead += samplesNeeded;
-		float offsetFractional = offsetSampleToRead - (long)offsetSampleToRead;
-
-		int firstOffsetSample = offsetSampleToRead;
-		int secondOffsetSample = (firstOffsetSample + 1) % samplesNeeded;
-
-		writeIndex++;
-		writeIndex %= samplesNeeded;
-		output1 = interpolate(delayBuffer[firstSample], delayBuffer[secondSample], fractional);
-		output2 = interpolate(delayBuffer[firstOffsetSample], delayBuffer[secondOffsetSample], offsetFractional);
-	}
-
-	void setSampleRate(float sr)
-	{
-		sampR = sr;
-	}
-};
-
+template<int maxWindowSize>
 class PitchShift {
 private:
-	PitchDelay pitchDelay;
+	MultireadDelayLine<maxWindowSize> pitchDelay;
 	float phaccu = 0;
 	const int incrementalPitch = 1;
 	float sampleRate = 96000;
 
 public:
-	PitchShift(float maxWindowTime)
-		: pitchDelay{maxWindowTime}
-	{}
+	PitchShift() {}
 	float shiftAmount = 1;
 	float windowSize = 500;
 	float mix = 0;
 
 	float update(float input)
 	{
+		float output1 = 0;
+		float output2 = 0;
 		if (incrementalPitch == 0)
 			shiftAmount = (long)shiftAmount;
-		pitchDelay.timeinMs = phaccu * windowSize;
+		output1 = pitchDelay.readSample(phaccu * windowSize);
 		float adjustedPhase = phaccu + 0.5f;
 		if (adjustedPhase >= 1)
 			adjustedPhase -= 1.0f;
-		pitchDelay.timeinMs2 = adjustedPhase * windowSize;
+		output2 = pitchDelay.readSample(adjustedPhase * windowSize);
 		float window1 = 0;
 		float window2 = 0;
 
@@ -94,24 +40,23 @@ public:
 		// pitchToFreq = ((expf(shiftAmount * 0.05776f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
 
 		if (shiftAmount >= 0)
-			pitchToFreq = ((expTable.interp(shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
+			pitchToFreq = ((expTable.interp(shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize);
 		else {
-			pitchToFreq = ((1.0f / expTable.interp(-shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
+			pitchToFreq = ((1.0f / expTable.interp(-shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize);
 		}
 
-		phaccu += pitchToFreq / sampleRate;
+		phaccu += pitchToFreq;
 		if (phaccu >= 1)
 			phaccu -= 1.0f;
 		if (phaccu < 0)
 			phaccu += 1.0f;
 		pitchDelay.update(input);
-		float wet = (pitchDelay.output1 * window1 + pitchDelay.output2 * window2);
+		float wet = (output1 * window1 + output2 * window2);
 		return (interpolate(input, wet, mix));
 	}
 
 	void setSampleRate(float sr)
 	{
 		sampleRate = sr;
-		pitchDelay.setSampleRate(sr);
 	}
 };

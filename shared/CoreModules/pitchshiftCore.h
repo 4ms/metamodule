@@ -12,7 +12,7 @@ public:
 	virtual void update(void) override
 	{
 		auto finalWindow = constrain(windowOffset + windowCV, 0.0f, 1.0f);
-		p.windowSize = map_value(finalWindow, 0.0f, 1.0f, 20.0f, 1000.0f);
+		p.windowSize = map_value(finalWindow, 0.0f, 1.0f, 20.0f, static_cast<float>(maxWindowSize));
 		p.shiftAmount = coarseShift + fineShift + (shiftCV * 12.0f);
 		p.mix = constrain(mixOffset + mixCV, 0.0f, 1.0f);
 		signalOutput = p.update(signalInput);
@@ -79,7 +79,8 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	PitchShift p{1000.0f};
+	const static inline long maxWindowSize = 9600;
+	PitchShift<maxWindowSize> p;
 	float signalInput = 0;
 	float signalOutput = 0;
 	float coarseShift = 0;

@@ -43,8 +43,8 @@ public:
 	{
 		float addWow = 0;
 		float addFlutter = 0;
-		addWow = wowGen.update() * (wowDepth*wowDepth);
-		addFlutter = flutterGen.update() * (flutterDepth*flutterDepth);
+		addWow = wowGen.update() * (wowDepth * wowDepth);
+		addFlutter = flutterGen.update() * (flutterDepth * flutterDepth);
 		p.shiftAmount = addWow + addFlutter;
 		signalOutput = p.update(signalInput);
 	}
@@ -108,7 +108,7 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	PitchShift p{5.0f};
+	PitchShift<240000> p;
 	float flutterDepth = 0;
 	float wowDepth = 0;
 
