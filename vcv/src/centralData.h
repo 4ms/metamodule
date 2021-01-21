@@ -14,21 +14,6 @@ public:
 		RequestAllParamData,
 	};
 
-	struct Mapping {
-		LabelButtonID src;
-		LabelButtonID dst; // Todo: vector of destinations
-						   // Todo: vector of amounts
-		void clear()
-		{
-			dst.moduleID = -1;
-			src.moduleID = -1;
-			dst.objID = -1;
-			src.objID = -1;
-			dst.objType = LabelButtonID::Types::None;
-			src.objType = LabelButtonID::Types::None;
-		}
-	};
-
 	void registerModule(ModuleID mod)
 	{
 		std::lock_guard mguard{mtx};
