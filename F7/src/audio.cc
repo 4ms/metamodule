@@ -1,6 +1,7 @@
 #include "audio.hh"
 #include "debug.hh"
-#include "example_patch.hh"
+//#include "example_patch.hh"
+#include "example-ps1.hh"
 #include "patch_player.hh"
 #include <cmath>
 
@@ -13,7 +14,7 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	, rx_buf_2{buffers[3]}
 	, params{p}
 {
-	player.load_patch(example_patch3);
+	player.load_patch(example_ps1);
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
@@ -79,7 +80,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			i++;
 		}
 		Debug::set_1(true);
-		player.update_patch(example_patch3); // 2.5us... ex 3 is 0.9us
+		player.update_patch(example_ps1); // 2.5us... ex 3 is 0.9us
 		Debug::set_1(false);
 
 		out_.l = get_output(0);
