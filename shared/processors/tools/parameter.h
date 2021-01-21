@@ -56,7 +56,7 @@ class RefParameter {
 public:
 	RefParameter(T &initVal)
 		: currentVal{initVal}
-		, lastVal{initVal}
+		, lastVal{0}
 	{}
 
 	void setValue(const T input)
