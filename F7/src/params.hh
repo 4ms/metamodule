@@ -41,8 +41,8 @@ private:
 
 	static const inline uint8_t kNumFX = 5; // Todo: how to enforce this matches size of AudioFXList?
 
-	Uart screen;
-	uint32_t last_update_time = 0;
-	void update_screen();
+	// Uart screen;
+	// uint32_t last_update_time = 0;
+	// void update_screen();
 };
 

@@ -1,22 +1,6 @@
 #include "patch.hh"
 
-// Example of a node-style module:
-// class VCAModule : public Module {
-// 	const ModuleTypeID type_id = VCA;
-// 	enum { OUT, CVIN, AUDIOIN };
-
-// 	void process()
-// 	{
-// 		if (jack[OUT].is_patched()) {
-// 			float cv = jack[CVIN].is_patched() ? jack[CVIN].get() : 1.0f;
-// 			float audioin = jack[AUDIOIN].is_patched() ? jack[AUDIOIN].get() : 0.0f;
-// 			jack[OUT].set(cv * audioin);
-// 		}
-// 	}
-// };
-
 static const Patch example_patch = {
-	//.modules_used = {PANEL, LFO, MIXER4, LFO},
 	.modules_used = {"PANEL_8", "LFOSINE", "MIXER4", "LFOSINE"},
 	.num_modules = 4,
 
@@ -65,7 +49,6 @@ static const Patch example_patch = {
 
 static const Patch example_patch2 = {
 	.modules_used = {"PANEL_8", "LFOSINE", "LFOSINE", "MIXER4"},
-	//.modules_used = {PANEL_8, LFO, LFO, MIXER4},
 	.num_modules = 4,
 
 	.nets = {{
@@ -110,6 +93,37 @@ static const Patch example_patch2 = {
 		{.module_id = 3, .param_id = 0, .panel_knob_id = 1},
 		{.module_id = 2, .param_id = 0, .panel_knob_id = 2},
 		{.module_id = 3, .param_id = 1, .panel_knob_id = 3},
+	}},
+	.num_mapped_knobs = 4,
+};
+
+static const Patch example_patch3 = {
+	.modules_used = {"PANEL_8", "PITCHSHIFT"},
+	.num_modules = 2,
+
+	.nets = {{
+		// Panel(0) left in(0) -> PitchShift(1) Audio In(0)
+		{
+			.num_nodes = 2,
+			.nodes = {{{.module_id = 0, .jack_id = 0}, {.module_id = 1, .jack_id = 0}}},
+		},
+		// PitchShift(1) out(0) -> Panel(0) Left out(0)
+		{
+			.num_nodes = 2,
+			.nodes = {{{.module_id = 1, .jack_id = 0}, {.module_id = 0, .jack_id = 0}}},
+		},
+
+	}},
+	.num_nets = 2,
+
+	.static_knobs = {{}},
+	.num_static_knobs = 0,
+
+	.mapped_knobs = {{
+		{.module_id = 1, .param_id = 0, .panel_knob_id = 0}, // Coarse shift
+		{.module_id = 1, .param_id = 1, .panel_knob_id = 1}, // Fine shift
+		{.module_id = 1, .param_id = 2, .panel_knob_id = 2}, // Window offset
+		{.module_id = 1, .param_id = 3, .panel_knob_id = 3}, // Mix offset
 	}},
 	.num_mapped_knobs = 4,
 };

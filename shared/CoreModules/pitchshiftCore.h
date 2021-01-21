@@ -1,9 +1,9 @@
 #pragma once
 
+#include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleTypes.h"
-#include "coreProcessor.h"
-#include "math.hh"
 #include "processors/pitchShift.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 
