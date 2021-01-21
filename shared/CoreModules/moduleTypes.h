@@ -6,7 +6,7 @@
 #include <string>
 
 struct ModuleTypeSlug {
-	static const int kStringLen = 20;
+	static const size_t kStringLen = 20;
 	char name[kStringLen];
 
 	ModuleTypeSlug()
@@ -49,6 +49,7 @@ struct ModuleTypeSlug {
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
+	using CreateModuleFuncWithParams = std::unique_ptr<CoreProcessor> (*)(float *, const uint8_t *);
 
 public:
 	ModuleFactory() = delete;
@@ -67,6 +68,41 @@ public:
 			return true;
 		}
 		return false;
+	}
+
+	static bool registerModuleType(ModuleTypeSlug typeslug,
+								   const char *name,
+								   int firstOutputJackNumber,
+								   CreateModuleFuncWithParams funcCreate)
+	{
+		int id = getTypeID(typeslug);
+		if (id == -1) {
+			id = next_id;
+			next_id++;
+			creation_funcs_wp[id] = funcCreate;
+			strcpy(module_slugs[id], typeslug.name);
+			output_jack_offsets[id] = firstOutputJackNumber;
+#ifndef STM32F7
+			module_names[id] = name;
+#endif
+			return true;
+		}
+		return false;
+	}
+
+	static std::unique_ptr<CoreProcessor>
+	createWithParams(const ModuleTypeSlug typeslug, float *nodes, const uint8_t *indices)
+	{
+		int id = getTypeID(typeslug);
+		if (id >= 0)
+			return creation_funcs_wp[id](nodes, indices);
+
+		return nullptr;
+	}
+
+	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug, float *nodes, const uint8_t *indices)
+	{
+		return createWithParams(typeslug, nodes, indices);
 	}
 
 	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug)
@@ -98,6 +134,15 @@ public:
 		return "????";
 	}
 
+	static int getOutJackOffset(ModuleTypeSlug typeslug)
+	{
+		int id = getTypeID(typeslug);
+		if (id >= 0)
+			return output_jack_offsets[id];
+
+		return 0;
+	}
+
 	static int getTypeID(ModuleTypeSlug typeslug)
 	{
 		for (int i = 0; i < MAX_MODULE_TYPES; i++) {
@@ -111,9 +156,11 @@ public:
 private:
 	static inline const int MAX_MODULE_TYPES = 64;
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
+	static inline std::array<CreateModuleFuncWithParams, MAX_MODULE_TYPES> creation_funcs_wp;
 	static inline std::array<char[20], MAX_MODULE_TYPES> module_slugs;
 #ifndef STM32F7
 	static inline std::array<std::string, MAX_MODULE_TYPES> module_names;
 #endif
+	static inline std::array<int, MAX_MODULE_TYPES> output_jack_offsets;
 	static inline int next_id = 0;
 };

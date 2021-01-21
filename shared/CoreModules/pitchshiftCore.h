@@ -9,6 +9,32 @@ using namespace MathTools;
 
 class PitchshiftCore : public CoreProcessor {
 public:
+	static inline const int NumInJacks = 4;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 4;
+	virtual int get_num_inputs() const override
+	{
+		return NumInJacks;
+	}
+	virtual int get_num_outputs() const override
+	{
+		return NumOutJacks;
+	}
+	virtual int get_num_params() const override
+	{
+		return NumKnobs;
+	}
+
+	PitchshiftCore() {}
+
+	PitchshiftCore(float &in, float &shift, float &window, float &mix, float &out)
+		: signalInput{in}
+		, shiftCV{shift}
+		, windowCV{window}
+		, mixCV{mix}
+		, signalOutput{out}
+	{}
+
 	virtual void update(void) override
 	{
 		auto finalWindow = constrain(windowOffset + windowCV, 0.0f, 1.0f);
@@ -17,8 +43,6 @@ public:
 		p.mix = constrain(mixOffset + mixCV, 0.0f, 1.0f);
 		signalOutput = p.update(signalInput);
 	}
-
-	PitchshiftCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
@@ -74,21 +98,28 @@ public:
 	{
 		return std::make_unique<PitchshiftCore>();
 	}
+	static std::unique_ptr<CoreProcessor> create(float *nodelist, const uint8_t *idx)
+	{
+		return std::make_unique<PitchshiftCore>(
+			nodelist[idx[0]], nodelist[idx[1]], nodelist[idx[2]], nodelist[idx[3]], nodelist[idx[4]]);
+	}
 	static constexpr char typeID[20] = "PITCHSHIFT";
 	static constexpr char description[] = "Pitch Shifter";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
+	static inline bool s_registered_wp = ModuleFactory::registerModuleType(typeID, description, NumInJacks, create);
 
 private:
 	const static inline long maxWindowSize = 9600;
 	PitchShift<maxWindowSize> p;
-	float signalInput = 0;
-	float signalOutput = 0;
+
+	float &signalInput = nodes[0];
+	float &shiftCV = nodes[1];
+	float &windowCV = nodes[2];
+	float &mixCV = nodes[3];
+	float &signalOutput = nodes[4];
+
 	float coarseShift = 0;
 	float fineShift = 0;
-
-	float shiftCV = 0;
-	float windowCV = 0;
-	float mixCV = 0;
 	float mixOffset = 0;
 	float windowOffset = 100;
 };

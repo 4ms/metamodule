@@ -6,7 +6,7 @@
 struct LfoModule : CommModule {
 
 	enum ParamIds { FREQ_KNOB, SHAPE_KNOB, LEVEL_KNOB, NUM_PARAMS };
-	enum InputIds { RESET_INPUT, NUM_INPUTS };
+	enum InputIds { FM_INPUT, RESET_INPUT, NUM_INPUTS };
 	enum OutputIds { LFO_OUTPUT, NUM_OUTPUTS };
 	enum LightIds { REC_LIGHT, NUM_LIGHTS };
 
@@ -38,6 +38,7 @@ struct LfoWidget : CommModuleWidget {
 		addLabeledKnob("PHASE", LfoModule::SHAPE_KNOB, {0, 1});
 		addLabeledKnob("LEVEL", LfoModule::LEVEL_KNOB, {0, 2});
 
+		addLabeledInput("FM", LfoModule::FM_INPUT, {0, 2});
 		addLabeledInput("RESET", LfoModule::RESET_INPUT, {0, 1});
 
 		addLabeledOutput("OUT", LfoModule::LFO_OUTPUT, {0, 0});

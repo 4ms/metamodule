@@ -5,34 +5,16 @@
 
 struct Mixer4Module : public CommModule {
 
-	enum ParamIds {
-		LEVEL1_PARAM,
-		LEVEL2_PARAM,
-		LEVEL3_PARAM,
-		LEVEL4_PARAM,
-		NUM_PARAMS
-	};
-	enum InputIds {
-		INPUT1_INPUT,
-		INPUT2_INPUT,
-		INPUT3_INPUT,
-		INPUT4_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		INV_OUTPUT,
-		MIX_OUTPUT,
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		NUM_LIGHTS
-	};
+	enum ParamIds { LEVEL1_PARAM, LEVEL2_PARAM, LEVEL3_PARAM, LEVEL4_PARAM, NUM_PARAMS };
+	enum InputIds { INPUT1_INPUT, INPUT2_INPUT, INPUT3_INPUT, INPUT4_INPUT, NUM_INPUTS };
+	enum OutputIds { INV_OUTPUT, MIX_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { NUM_LIGHTS };
 
 	Mixer4Module()
 	{
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		core = ModuleFactory::create("MIXER4");
 		selfID.typeID = "MIXER4";
+		core = ModuleFactory::create(selfID.typeID);
 	}
 };
 

@@ -1,21 +1,44 @@
 #pragma once
-
 #include "coreProcessor.h"
-#include "math.hh"
 #include "moduleTypes.h"
+#include "processors/tools/parameter.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 
-class Mixer4Core : public CoreProcessor {
+class NodeMixer4Core : public CoreProcessor {
 public:
-	Mixer4Core() {}
+	static inline const int NumInJacks = 4;
+	static inline const int NumOutJacks = 2;
+	static inline const int NumKnobs = 4;
+	virtual int get_num_inputs() const override
+	{
+		return NumInJacks;
+	}
+	virtual int get_num_outputs() const override
+	{
+		return NumOutJacks;
+	}
+	virtual int get_num_params() const override
+	{
+		return NumKnobs;
+	}
+
+	NodeMixer4Core() {}
+
+	NodeMixer4Core(float &nIn0, float &nIn1, float &nIn2, float &nIn3, float &nOut0, float &nOut1)
+		: inputs{nIn0, nIn1, nIn2, nIn3}
+		, mixOut{nOut0, nOut1}
+	{}
 
 	virtual void update() override
 	{
-		mixOut = 0;
+		float sum = 0;
 		for (int i = 0; i < 4; i++) {
-			mixOut += inputs[i] * levels[i];
+			sum += inputs[i] * levels[i];
 		}
+		mixOut[0] = sum;
+		mixOut[1] = -sum;
 	}
 
 	virtual void set_param(const int param_id, const float val) override
@@ -35,29 +58,34 @@ public:
 
 	virtual float get_output(const int output_id) const override
 	{
-		float output = 0;
 		switch (output_id) {
 			case 0:
-				output = mixOut * -1;
-				break;
+				return mixOut[0];
 			case 1:
-				output = mixOut;
-				break;
+				return mixOut[1];
+			default:
+				return 0.f;
 		}
-		return output;
 	}
 
 	static std::unique_ptr<CoreProcessor> create()
 	{
-		return std::make_unique<Mixer4Core>();
+		return std::make_unique<NodeMixer4Core>();
+	}
+	static std::unique_ptr<CoreProcessor> create(float *nodes, const uint8_t *idx)
+	{
+		return std::make_unique<NodeMixer4Core>(
+			nodes[idx[0]], nodes[idx[1]], nodes[idx[2]], nodes[idx[3]], nodes[idx[4]], nodes[idx[5]]);
 	}
 	static constexpr char typeID[20] = "MIXER4";
-	static constexpr char description[] = "Mixer - 4 channel";
+	static constexpr char description[] = "(node) Mixer - 4 channel";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
+	static inline bool s_registered_wp = ModuleFactory::registerModuleType(typeID, description, NumInJacks, create);
 
 private:
-	float inputs[4] = {0, 0, 0, 0};
+	RefParameter<float> inputs[4] = {nodes[0], nodes[1], nodes[2], nodes[3]};
+	RefParameter<float> mixOut[2] = {nodes[4], nodes[5]};
+
 	float levels[4] = {0, 0, 0, 0};
-	float mixOut = 0;
 };
 
