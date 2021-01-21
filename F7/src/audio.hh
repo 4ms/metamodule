@@ -37,6 +37,7 @@ private:
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()
 	AudioSampleType get_output(int output_id);
+	void set_input(int input_id, AudioSampleType in);
 	void check_patch_change();
 
 	Params &params;

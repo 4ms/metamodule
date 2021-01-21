@@ -7,7 +7,7 @@ void Params::update()
 {
 	// SCB_CleanInvalidateDCache(); // required until/unless we get ADC buffers into DTCM RAM
 
-	Debug::set_1(true);
+	// Debug::set_1(true);
 	cvjacks[0] = controls.cv_sense[0].is_pressed() ? controls.cv0.get() / 4095.f : 0U;
 	cvjacks[1] = controls.cv_sense[1].is_pressed() ? controls.cv1.get() / 4095.f : 0U;
 	cvjacks[2] = controls.cv_sense[2].is_pressed() ? controls.cv2.get() / 4095.f : 0U;
@@ -46,7 +46,7 @@ void Params::update()
 
 	// update_screen();
 
-	Debug::set_1(false);
+	// Debug::set_1(false);
 }
 
 // void Params::update_screen()
