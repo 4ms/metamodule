@@ -56,18 +56,19 @@ public:
 
 	static bool registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate)
 	{
+		bool already_exists = true;
 		int id = getTypeID(typeslug);
 		if (id == -1) {
+			already_exists = false;
 			id = next_id;
 			next_id++;
-			creation_funcs[id] = funcCreate;
 			strcpy(module_slugs[id], typeslug.name);
-#ifndef STM32F7
-			module_names[id] = name;
-#endif
-			return true;
 		}
-		return false;
+#ifndef STM32F7
+		module_names[id] = name;
+#endif
+		creation_funcs[id] = funcCreate;
+		return already_exists;
 	}
 
 	static bool registerModuleType(ModuleTypeSlug typeslug,
@@ -75,19 +76,20 @@ public:
 								   int firstOutputJackNumber,
 								   CreateModuleFuncWithParams funcCreate)
 	{
-		int id = getTypeID(typeslug);
-		if (id == -1) {
-			id = next_id;
+		bool already_exists = true;
+		int new_id = getTypeID(typeslug);
+		if (new_id == -1) {
+			already_exists = false;
+			new_id = next_id;
 			next_id++;
-			creation_funcs_wp[id] = funcCreate;
-			strcpy(module_slugs[id], typeslug.name);
-			output_jack_offsets[id] = firstOutputJackNumber;
-#ifndef STM32F7
-			module_names[id] = name;
-#endif
-			return true;
+			strcpy(module_slugs[new_id], typeslug.name);
 		}
-		return false;
+#ifndef STM32F7
+		module_names[new_id] = name;
+#endif
+		output_jack_offsets[new_id] = firstOutputJackNumber;
+		creation_funcs_wp[new_id] = funcCreate;
+		return already_exists;
 	}
 
 	static std::unique_ptr<CoreProcessor>

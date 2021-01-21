@@ -111,7 +111,7 @@ public:
 	static constexpr char typeID[20] = "PANEL_8";
 	static constexpr char description[] = "(node) Panel: 8 Pots, 2/2 AudioIO, 4/2 AnalogIO, 1/3 GateIO";
 
-	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 	static inline bool s_registered_wp = ModuleFactory::registerModuleType(typeID, description, NumInJacks, create);
+	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 };
 
