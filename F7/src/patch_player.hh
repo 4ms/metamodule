@@ -1,8 +1,8 @@
 #pragma once
-#include "coreProcessor.h"
-#include "moduleTypes.h"
-#include "panel.hh"
-#include "patch.hh"
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/moduleTypes.h"
+#include "CoreModules/panel.hh"
+#include "patch/patch.hh"
 #include <cstdint>
 #ifdef STM32F7
 	#include "debug.hh"
