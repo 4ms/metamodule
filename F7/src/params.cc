@@ -7,7 +7,7 @@ void Params::update()
 {
 	// SCB_CleanInvalidateDCache(); // required until/unless we get ADC buffers into DTCM RAM
 
-	// Debug::set_1(true);
+	Debug::set_1(true);
 	cvjacks[0] = controls.cv_sense[0].is_pressed() ? controls.cv0.get() / 4095.f : 0U;
 	cvjacks[1] = controls.cv_sense[1].is_pressed() ? controls.cv1.get() / 4095.f : 0U;
 	cvjacks[2] = controls.cv_sense[2].is_pressed() ? controls.cv2.get() / 4095.f : 0U;
@@ -44,23 +44,23 @@ void Params::update()
 		}
 	}
 
-	update_screen();
+	// update_screen();
 
-	// Debug::set_1(false);
+	Debug::set_1(false);
 }
 
-void Params::update_screen()
-{
-	if (HAL_GetTick() - last_update_time > 50) {
-		last_update_time = HAL_GetTick();
+// void Params::update_screen()
+// {
+// 	if (HAL_GetTick() - last_update_time > 50) {
+// 		last_update_time = HAL_GetTick();
 
-		uint8_t d[6];
-		d[0] = 0xAA;
-		d[1] = static_cast<uint8_t>(knobs[0] * 100.f);
-		d[2] = static_cast<uint8_t>(knobs[1] * 100.f);
-		d[3] = static_cast<uint8_t>(knobs[2] * 100.f);
-		d[4] = static_cast<uint8_t>(knobs[3] * 100.f);
-		d[5] = 0xA5;
-		screen.send(d, 6);
-	}
-}
+// 		uint8_t d[6];
+// 		d[0] = 0xAA;
+// 		d[1] = static_cast<uint8_t>(knobs[0] * 100.f);
+// 		d[2] = static_cast<uint8_t>(knobs[1] * 100.f);
+// 		d[3] = static_cast<uint8_t>(knobs[2] * 100.f);
+// 		d[4] = static_cast<uint8_t>(knobs[3] * 100.f);
+// 		d[5] = 0xA5;
+// 		screen.send(d, 6);
+// 	}
+// }

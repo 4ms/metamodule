@@ -32,7 +32,7 @@ Audio::AudioSampleType Audio::get_output(int output_id)
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	Debug::set_2(true);
+	Debug::set_0(true);
 	// pre-amble: ~5us
 
 	params.update();
@@ -82,7 +82,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		in_++;
 	}
 
-	Debug::set_2(false);
+	Debug::set_0(false);
 }
 
 void Audio::start()

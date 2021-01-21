@@ -4,7 +4,7 @@
 
 void Controls::read()
 {
-	// Debug::set_1(true);
+	Debug::set_3(true);
 	cv0.read();
 	cv1.read();
 	cv2.read();
@@ -19,7 +19,7 @@ void Controls::read()
 		in_sense[i].update();
 		out_sense[i].update();
 	}
-	// Debug::set_1(false);
+	Debug::set_3(false);
 }
 
 void Controls::start()
