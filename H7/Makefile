@@ -1,11 +1,34 @@
 # Makefile by Dan Green <danngreen1@gmail.com>
 #
+CORE ?= M7
+
+ifeq ($(CORE), M7)
+$(info Building for M7 core)
+LOADFILE	= STM32H745IGTX_FLASH_CM7.ld
+BUILDDIR = build/corem7
+MCU =  -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
+ARCH_CFLAGS = -DARM_MATH_CM7 -DCORE_CM7
+HAL_CONF_INC = src/m7
+else
+
+ifeq ($(CORE), M4)
+$(info Building for M4 core)
+LOADFILE	= STM32H745IGTX_FLASH_CM4.ld
+BUILDDIR = build/corem4
+MCU =  -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
+ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
+HAL_CONF_INC = src/m4
+
+else
+$(error You must specify a CORE. Valid values are M4 or M7)
+endif
+endif
+
+
 
 BINARYNAME 		= main
 STARTUP 		= startup_stm32h745igtx.s
 SYSTEM 			= system_stm32h7xx_dualcore_boot_cm4_cm7.c
-corem7: LOADFILE	= STM32H745IGTX_FLASH_CM7.ld
-corem4: LOADFILE	= STM32H745IGTX_FLASH_CM4.ld
 
 LIBDIR 			= lib
 DEVICE 			= $(LIBDIR)/stm32/device
@@ -14,9 +37,6 @@ PERIPH 			= $(LIBDIR)/stm32/periph
 DRIVERLIB       = $(LIBDIR)/mdrivlib
 SHARED  		= src/shared
 TABLEGEN 		= $(SHARED)/tableGen
-
-corem7: BUILDDIR = build/corem7
-corem4: BUILDDIR = build/corem4
 
 SOURCES  += $(DEVICE)/src/$(STARTUP)
 SOURCES  += $(DEVICE)/src/$(SYSTEM)
@@ -46,6 +66,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-I. \
 			-Isrc \
 			-Isrc/conf \
+			-I$(HAL_CONF_INC) \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \
 			-I$(SHARED)/CoreModules \
@@ -74,10 +95,8 @@ SZOPTS 	= -d
 #gcc(m4): -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DCORE_CM4 -DDEBUG -DSTM32H745xx -c -I../../../CM4/Core/Inc -I../../../Drivers/STM32H7xx_HAL_Driver/Inc -I../../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../../../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I../../../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb 
 #Todo: separate cm4 and cm7 builds
 
-corem7: MCU =  -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
-corem4: MCU =  -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
-corem7: ARCH_CFLAGS = -DARM_MATH_CM7 -DCORE_CM7
-corem4: ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
+
+
 
 ARCH_CFLAGS += -D'__FPU_PRESENT=1' \
 			  -DUSE_HAL_DRIVER \
@@ -123,7 +142,7 @@ AFLAGS = $(MCU)
 LFLAGS = -Wl,--gc-sections \
 	-Wl,-Map,$(BUILDDIR)/main.map,--cref \
 	$(MCU)  \
-	-T $(DEVICE)/$(LOADFILE)
+	-T $(DEVICE)/$(LOADFILE) \
 	-nostdlib \
 	-nostartfiles \
 
@@ -179,11 +198,11 @@ ifneq "$(MAKECMDGOALS)" "clean"
 endif
 
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
-.PHONY: all clean flash tables tests F7_tests core_tests util_tests proc_tests corem4 morem7
+.PHONY: all clean flash tables tests H7_tests core_tests util_tests proc_tests 
 
-tests: F7_tests core_tests util_tests #proc_tests
+tests: H7_tests core_tests util_tests #proc_tests
 
-F7_tests:
+H7_tests:
 	@echo
 	@echo "----------------------------"
 	@echo "Running F7 tests...."
