@@ -125,10 +125,12 @@ public:
 		for (int net_i = 0; net_i < p.num_nets; net_i++) {
 			auto &net = p.nets[net_i];
 			auto &output = net.jacks[0];
+			// FixMe: need to use non-node PANEL which has get_output defined to return input[]
 			float out_val = modules[output.module_id]->get_output(output.jack_id);
 
 			for (int jack_i = 1; jack_i < net.num_jacks; jack_i++) {
 				auto &jack = net.jacks[jack_i];
+				// FixMe: need to use non-node PANEL which has set_input defined to set output[]
 				modules[jack.module_id]->set_input(jack.jack_id, out_val);
 			}
 		}

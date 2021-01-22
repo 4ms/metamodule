@@ -128,7 +128,8 @@ public:
 	static constexpr char typeID[20] = "LFOSINE";
 	static constexpr char description[] = "(node format) Basic Sine LFO";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
-	static inline bool s_registered_wp = ModuleFactory::registerModuleType(typeID, description, NumInJacks, create);
+	static inline bool s_registered_wp =
+		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);
 
 private:
 	const float GateThreshold = 0.1f;

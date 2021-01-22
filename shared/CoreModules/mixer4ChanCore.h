@@ -80,7 +80,8 @@ public:
 	static constexpr char typeID[20] = "MIXER4";
 	static constexpr char description[] = "(node) Mixer - 4 channel";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
-	static inline bool s_registered_wp = ModuleFactory::registerModuleType(typeID, description, NumInJacks, create);
+	static inline bool s_registered_wp =
+		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);
 
 private:
 	RefParameter<float> inputs[4] = {nodes[0], nodes[1], nodes[2], nodes[3]};
