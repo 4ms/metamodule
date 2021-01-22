@@ -73,8 +73,10 @@ public:
 
 	static bool registerModuleType(ModuleTypeSlug typeslug,
 								   const char *name,
-								   int firstOutputJackNumber,
-								   CreateModuleFuncWithParams funcCreate)
+								   CreateModuleFuncWithParams funcCreate,
+								   uint8_t numInputJacks,
+								   uint8_t numOutputJacks,
+								   uint8_t numParams)
 	{
 		bool already_exists = true;
 		int new_id = getTypeID(typeslug);
@@ -87,7 +89,9 @@ public:
 #ifndef STM32F7
 		module_names[new_id] = name;
 #endif
-		output_jack_offsets[new_id] = firstOutputJackNumber;
+		output_jack_offsets[new_id] = numInputJacks;
+		total_jacks[new_id] = numInputJacks + numOutputJacks;
+		total_params[new_id] = numParams;
 		creation_funcs_wp[new_id] = funcCreate;
 		return already_exists;
 	}
@@ -156,13 +160,15 @@ public:
 	}
 
 private:
-	static inline const int MAX_MODULE_TYPES = 64;
+	static inline const int MAX_MODULE_TYPES = 256;
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline std::array<CreateModuleFuncWithParams, MAX_MODULE_TYPES> creation_funcs_wp;
 	static inline std::array<char[20], MAX_MODULE_TYPES> module_slugs;
 #ifndef STM32F7
 	static inline std::array<std::string, MAX_MODULE_TYPES> module_names;
 #endif
-	static inline std::array<int, MAX_MODULE_TYPES> output_jack_offsets;
+	static inline std::array<uint8_t, MAX_MODULE_TYPES> output_jack_offsets;
+	static inline std::array<uint8_t, MAX_MODULE_TYPES> total_jacks;
+	static inline std::array<uint8_t, MAX_MODULE_TYPES> total_params;
 	static inline int next_id = 0;
 };

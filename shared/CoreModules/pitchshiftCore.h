@@ -106,7 +106,8 @@ public:
 	static constexpr char typeID[20] = "PITCHSHIFT";
 	static constexpr char description[] = "Pitch Shifter";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
-	static inline bool s_registered_wp = ModuleFactory::registerModuleType(typeID, description, NumInJacks, create);
+	static inline bool s_registered_wp =
+		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);
 
 private:
 	const static inline long maxWindowSize = 9600;

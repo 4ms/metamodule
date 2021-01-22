@@ -21,13 +21,13 @@ public:
 		return NumKnobs;
 	}
 
-	RefParameter<float> inputs[NumInJacks];
 	RefParameter<float> outputs[NumOutJacks];
+	RefParameter<float> inputs[NumInJacks];
 	float params[NumKnobs];
 
 	NodePanel()
-		: inputs{nodes[0], nodes[1], nodes[2], nodes[3], nodes[4], nodes[5]}
-		, outputs{nodes[6], nodes[7]}
+		: outputs{nodes[0], nodes[7]}
+		, inputs{nodes[2], nodes[3], nodes[4], nodes[5], nodes[6], nodes[7]}
 	{}
 
 	NodePanel(float &cable0,
@@ -38,8 +38,8 @@ public:
 			  float &cable5,
 			  float &cable6,
 			  float &cable7)
-		: inputs{cable0, cable1, cable2, cable3, cable4, cable5}
-		, outputs{cable6, cable7}
+		: outputs{cable0, cable1}
+		, inputs{cable2, cable3, cable4, cable5, cable6, cable7}
 	{}
 
 	virtual void update() override {}
@@ -111,7 +111,10 @@ public:
 	static constexpr char typeID[20] = "PANEL_8";
 	static constexpr char description[] = "(node) Panel: 8 Pots, 2/2 AudioIO, 4/2 AnalogIO, 1/3 GateIO";
 
-	static inline bool s_registered_wp = ModuleFactory::registerModuleType(typeID, description, NumInJacks, create);
+	// Swapped In/Out! Beacuse panel is different than other modules
+	static inline bool s_registered_wp =
+		ModuleFactory::registerModuleType(typeID, description, create, NumOutJacks, NumInJacks, NumKnobs);
+
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 };
 
