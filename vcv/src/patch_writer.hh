@@ -1,6 +1,7 @@
 #pragma once
 #include "CommData.h"
 #include "patch/patch.hh"
+#include <map>
 
 class PatchWriter {
 
@@ -8,15 +9,6 @@ public:
 	PatchWriter(Patch &patch)
 		: p{patch}
 	{}
-
-	void addCable(JackStatus cable)
-	{
-		jackData.push_back(cable);
-	}
-	void addMappedParam(Mapping map)
-	{
-		mapData.push_back(map);
-	}
 
 	void copyModuleList(std::vector<ModuleID> &modules)
 	{
@@ -35,10 +27,10 @@ public:
 	{
 		for (auto &m : maps) {
 			if (m.dst.objType == LabelButtonID::Types::Knob) {
-				addMappedParam(m);
+				mapData.push_back(m);
 			}
 			if (m.dst.objType == LabelButtonID::Types::InputJack) {
-				addCable({
+				jackData.push_back({
 					.sendingJackId = m.dst.objID,
 					.receivedJackId = m.src.objID,
 					.sendingModuleId = m.dst.moduleID,
@@ -47,7 +39,7 @@ public:
 				});
 			}
 			if (m.dst.objType == LabelButtonID::Types::OutputJack) {
-				addCable({
+				jackData.push_back({
 					.sendingJackId = m.src.objID,
 					.receivedJackId = m.dst.objID,
 					.sendingModuleId = m.src.moduleID,
@@ -58,37 +50,76 @@ public:
 		}
 	}
 
-	void createPatch()
+	void generateModuleList()
 	{
-		// Todo: map module IDs from VCV's unique ID to sequential IDs where panel = 0
+		std::vector<int> vcv_mod_ids;
 
-		int i = 0;
+		int i = 1;
+		vcv_mod_ids.push_back(-1);
 		for (auto &mod : moduleData) {
-			p.modules_used[i] = mod.typeID;
-			i++;
+			if (strcmp(mod.typeID.name, "PANEL_8") == 0) {
+				p.modules_used[0] = mod.typeID;
+				vcv_mod_ids[0] = mod.id;
+			} else {
+				p.modules_used[i] = mod.typeID;
+				vcv_mod_ids.push_back(mod.id);
+				i++;
+			}
 		}
 		p.num_modules = i;
 
-		i = 0;
+		if (vcv_mod_ids[0] < 0)
+			return;
+		// error: no panel!
+
+		idMap = squash_ids(vcv_mod_ids);
+		// printf("p.modules_used: [");
+		// for (auto &m : p.modules_used) {
+		// 	printf("%s, ", m.name);
+		// }
+		// printf("]\n");
+
+		// printf("vcv_mod_ids (before): [");
+		// for (auto v : vcv_mod_ids) {
+		// 	printf("%d, ", v);
+		// }
+		// printf("]\n");
+
+		// printf("idMap (after): [");
+		// for (auto v : idMap) {
+		// 	printf("%d: %d, ", v.first, v.second);
+		// }
+		// printf("]\n");
+	}
+
+	void generateStaticKnobList()
+	{
+		int i = 0;
 		for (auto &param : paramData) {
-			p.static_knobs[i].module_id = param.moduleID;
+			p.static_knobs[i].module_id = idMap[param.moduleID];
 			p.static_knobs[i].param_id = param.paramID;
 			p.static_knobs[i].value = param.value;
 			i++;
 		}
 		p.num_static_knobs = i;
+	}
 
-		i = 0;
+	void generateMappedKnobList()
+	{
+		int i = 0;
 		for (auto &map : mapData) {
 			if ((map.src.objType == LabelButtonID::Types::Knob) && (map.dst.objType == map.src.objType)) {
-				p.mapped_knobs[i].module_id = map.dst.moduleID;
+				p.mapped_knobs[i].module_id = idMap[map.dst.moduleID];
 				p.mapped_knobs[i].param_id = map.dst.objID;
 				p.mapped_knobs[i].panel_knob_id = map.src.objID;
 				i++;
 			}
 		}
 		p.num_mapped_knobs = i;
+	}
 
+	void generateNodeList()
+	{
 		for (auto &mn : p.module_nodes) {
 			for (int i = 0; i < MAX_JACKS_PER_MODULE; i++)
 				mn[i] = 0;
@@ -101,9 +132,9 @@ public:
 			if (cable.connected && jackInRange(cable.receivedJackId) && jackInRange(cable.sendingJackId) &&
 				cable.receivedModuleId >= 0 && cable.sendingModuleId >= 0)
 			{
-				auto out_mod = cable.receivedModuleId;
+				auto out_mod = idMap[cable.receivedModuleId];
 				auto out_jack = cable.receivedJackId + ModuleFactory::getOutJackOffset(p.modules_used[out_mod]);
-				auto in_mod = cable.sendingModuleId;
+				auto in_mod = idMap[cable.sendingModuleId];
 				auto in_jack = cable.sendingJackId;
 
 				auto &out_node = p.module_nodes[out_mod][out_jack];
@@ -145,32 +176,17 @@ public:
 				}
 			}
 		}
-
 		// Todo: fix this function to only assign unique nums for jacks that exist on the module
 		// Or, do it in the patch reader?
 		// assignUniqueNumToEmptyNodes(node_i);
 	}
 
-	void mergeNodes(uint8_t old_num, uint8_t new_num)
+	void createPatch()
 	{
-		for (int mod_i = 0; mod_i < MAX_MODULES_IN_PATCH; mod_i++) {
-			for (int jack_i = 0; jack_i < MAX_JACKS_PER_MODULE; jack_i++) {
-				if (p.module_nodes[mod_i][jack_i] == old_num)
-					p.module_nodes[mod_i][jack_i] = new_num;
-			}
-		}
-	}
-
-	void assignUniqueNumToEmptyNodes(unsigned long starting_node_i)
-	{
-		for (int mod_i = 0; mod_i < MAX_MODULES_IN_PATCH; mod_i++) {
-			// int num_jacks = ModuleFactory::getNumJacks();
-			for (int jack_i = 0; jack_i < MAX_JACKS_PER_MODULE; jack_i++) {
-				if (p.module_nodes[mod_i][jack_i] == 0) {
-					p.module_nodes[mod_i][jack_i] = starting_node_i++;
-				}
-			}
-		}
+		generateModuleList();
+		generateStaticKnobList();
+		generateMappedKnobList();
+		generateNodeList();
 	}
 
 	static std::string printPatchStructText(std::string patchName, const Patch &patch)
@@ -258,19 +274,49 @@ public:
 		return s;
 	}
 
+	static std::map<int, int> squash_ids(std::vector<int> ids)
+	{
+		std::map<int, int> s;
+
+		int i = 0;
+		for (auto id : ids) {
+			s[id] = i++;
+		}
+		return s;
+	}
+
 private:
 	Patch &p;
+
 	std::vector<ModuleID> moduleData;
 	std::vector<JackStatus> jackData;
 	std::vector<ParamStatus> paramData;
 	std::vector<Mapping> mapData;
+	std::map<int, int> idMap;
 
 	// squashes module ids so that 0 = panel and increments upwards
 	void _cleanup_module_ids();
 
-	// void _addModule(int id, ModuleTypeSlug slug);
-	// void _addCable(Jack out, Jack in);
-	// void _addStaticParam(StaticParam pr);
-	// void _addMappedParam(MappedParam pr);
+	void mergeNodes(uint8_t old_num, uint8_t new_num)
+	{
+		for (int mod_i = 0; mod_i < MAX_MODULES_IN_PATCH; mod_i++) {
+			for (int jack_i = 0; jack_i < MAX_JACKS_PER_MODULE; jack_i++) {
+				if (p.module_nodes[mod_i][jack_i] == old_num)
+					p.module_nodes[mod_i][jack_i] = new_num;
+			}
+		}
+	}
+
+	void assignUniqueNumToEmptyNodes(unsigned long starting_node_i)
+	{
+		for (int mod_i = 0; mod_i < MAX_MODULES_IN_PATCH; mod_i++) {
+			// int num_jacks = ModuleFactory::getNumJacks();
+			for (int jack_i = 0; jack_i < MAX_JACKS_PER_MODULE; jack_i++) {
+				if (p.module_nodes[mod_i][jack_i] == 0) {
+					p.module_nodes[mod_i][jack_i] = starting_node_i++;
+				}
+			}
+		}
+	}
 };
 
