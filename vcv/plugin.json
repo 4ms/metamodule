@@ -14,6 +14,18 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "STEREOMIXER",
+      "name": "Stereomixer",
+      "description": "Stereo Mixer",
+      "tags": []
+}, 
+{
+      "slug": "PANNER",
+      "name": "Panner",
+      "description": "Panner",
+      "tags": []
+}, 
+{
       "slug": "GATECONVERTER",
       "name": "Gateconverter",
       "description": "Gate Converter",
