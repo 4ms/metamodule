@@ -176,9 +176,14 @@ public:
 				}
 			}
 		}
-		// Todo: fix this function to only assign unique nums for jacks that exist on the module
-		// Or, do it in the patch reader?
-		// assignUniqueNumToEmptyNodes(node_i);
+
+		unsigned unique_node_idx = MAX_NODES_IN_PATCH - 1;
+		for (int mod_i = 0; mod_i < p.num_modules; mod_i++) {
+			for (int node_i = 0; node_i < ModuleFactory::getNumJacks(p.modules_used[mod_i]); node_i++) {
+				if (p.module_nodes[mod_i][node_i] == 0)
+					p.module_nodes[mod_i][node_i] = unique_node_idx--;
+			}
+		}
 	}
 
 	void createPatch()

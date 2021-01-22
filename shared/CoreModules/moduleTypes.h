@@ -140,11 +140,29 @@ public:
 		return "????";
 	}
 
-	static int getOutJackOffset(ModuleTypeSlug typeslug)
+	static uint8_t getOutJackOffset(ModuleTypeSlug typeslug)
 	{
 		int id = getTypeID(typeslug);
 		if (id >= 0)
 			return output_jack_offsets[id];
+
+		return 0;
+	}
+
+	static uint8_t getNumJacks(ModuleTypeSlug typeslug)
+	{
+		int id = getTypeID(typeslug);
+		if (id >= 0)
+			return total_jacks[id];
+
+		return 0;
+	}
+
+	static uint8_t getNumParams(ModuleTypeSlug typeslug)
+	{
+		int id = getTypeID(typeslug);
+		if (id >= 0)
+			return total_params[id];
 
 		return 0;
 	}
