@@ -1,13 +1,13 @@
 #pragma once
 #include "drivers/codec.hh"
-#include "interp_param.hh"
-#include "math.hh"
-#include "oscs.hh"
+#include "drivers/stm32xx.h"
 #include "params.hh"
 #include "patch_player.hh"
 #include "processors/tools/kneeCompress.h"
-#include "stm32f7xx.h"
 #include "util/audio_frame.hh"
+#include "util/interp_param.hh"
+#include "util/math.hh"
+#include "util/oscs.hh"
 #include <array>
 
 class Audio {

@@ -2,8 +2,8 @@
 #include "drivers/analog_in.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
+#include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
-#include "stm32f7xx_ll_dma.h"
 
 // Todo: put control pin defs here
 struct DualOpenerADCs {
