@@ -58,6 +58,8 @@ struct SampleHoldWidget : CommModuleWidget {
 		addLabeledInput("SAMP", SampleHoldModule::SAMPLE2_INPUT, {0, 2});
 		addLabeledOutput("OUT 1", SampleHoldModule::OUT1_OUTPUT, {0, 1});
 		addLabeledOutput("OUT 2", SampleHoldModule::OUT2_OUTPUT, {0, 0});
+
+		addModuleTitle("S&H");
 	}
 };
 

@@ -47,6 +47,7 @@ struct StereomixerWidget : CommModuleWidget {
 
 		addLabeledOutput("L OUT", StereomixerModule::LEFT_OUTPUT, {3, 1});
 		addLabeledOutput("R OUT", StereomixerModule::RIGHT_OUTPUT, {3, 0});
+		addModuleTitle("STEREO MIXER");
 	}
 };
 

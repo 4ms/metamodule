@@ -35,6 +35,8 @@ struct PannerWidget : CommModuleWidget {
 		addLabeledInput("IN", PannerModule::SIGNAL_INPUT, {0, 2});
 		addLabeledOutput("LEFT", PannerModule::LEFT_OUTPUT, {0, 1});
 		addLabeledOutput("RIGHT", PannerModule::RIGHT_OUTPUT, {0, 0});
+
+		addModuleTitle("PAN");
 	}
 };
 

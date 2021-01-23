@@ -68,6 +68,7 @@ public:
 		else if (input_id == 1)
 			in2Connected = 0;
 	}
+	
 	virtual void mark_input_patched(const int input_id) override
 	{
 		if (input_id == 0)

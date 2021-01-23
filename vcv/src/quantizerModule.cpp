@@ -53,6 +53,8 @@ struct QuantizerWidget : CommModuleWidget {
 
 		addLabeledInput("IN", QuantizerModule::SIGNAL_INPUT, {0, 0});
 		addLabeledOutput("OUT", QuantizerModule::SIGNAL_OUTPUT, {1, 0});
+
+		addModuleTitle("QUANTIZER");
 	}
 };
 

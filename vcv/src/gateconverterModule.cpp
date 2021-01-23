@@ -37,6 +37,8 @@ struct GateconverterWidget : CommModuleWidget {
 		addLabeledKnob("DELAY", GateconverterModule::DELAY_PARAM, {0, 1});
 		addLabeledInput("IN", GateconverterModule::GATE_INPUT, {0, 1});
 		addLabeledOutput("OUT", GateconverterModule::GATE_OUTPUT, {0, 0});
+
+		addModuleTitle("GATE");
 	}
 };
 

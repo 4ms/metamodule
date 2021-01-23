@@ -53,6 +53,8 @@ struct EightstepprobWidget : CommModuleWidget {
 		addLabeledInput("CLOCK", EightstepprobModule::CLOCK_INPUT, {0, 1});
 		addLabeledInput("RESET", EightstepprobModule::RESET_INPUT, {0, 0});
 		addLabeledOutput("OUT", EightstepprobModule::GATE_OUTPUT, {1, 0});
+
+		addModuleTitle("PROB 8");
 	}
 };
 

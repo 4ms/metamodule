@@ -57,6 +57,8 @@ struct EightstepWidget : CommModuleWidget {
 
 				addLabeledOutput("OUT", EightstepModule::VOLTAGE_OUTPUT, {0, 0});
 				addLabeledOutput("END", EightstepModule::END_OUTPUT, {1, 0});
+
+				addModuleTitle("SEQ 8");
 				
 	}
 };

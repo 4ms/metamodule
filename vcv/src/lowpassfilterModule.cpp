@@ -51,6 +51,8 @@ struct LowpassfilterWidget : CommModuleWidget {
 
 		addLabeledOutput("OUT",LowpassfilterModule::SIGNAL_OUTPUT,{0,0});
 		addLabeledInput("IN",LowpassfilterModule::SIGNAL_INPUT,{0,1});
+
+		addModuleTitle("LPF");
 	}
 };
 

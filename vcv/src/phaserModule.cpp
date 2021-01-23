@@ -56,6 +56,8 @@ struct PhaserWidget : CommModuleWidget {
 
 		addLabeledInput("IN", PhaserModule::SIGNAL_INPUT, {0, 0});
 		addLabeledOutput("OUT", PhaserModule::SIGNAL_OUTPUT, {1, 0});
+
+		addModuleTitle("PHASER");
 	}
 };
 

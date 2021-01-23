@@ -54,6 +54,8 @@ struct FourstepWidget : CommModuleWidget {
 
 		addLabeledInput("CLK", FourstepModule::CLOCK_INPUT, {0, 1});
 		addLabeledOutput("OUT", FourstepModule::VOLTAGE_OUTPUT, {0, 0});
+
+		addModuleTitle("SEQ 4");
 	}
 };
 

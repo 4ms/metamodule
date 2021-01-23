@@ -53,6 +53,8 @@ struct FadeDelayWidget : CommModuleWidget {
 
 		addLabeledInput("IN", FadeDelayModule::DELAY_INPUT, {0, 0});
 		addLabeledOutput("OUT", FadeDelayModule::DELAY_OUTPUT, {1, 0});
+
+		addModuleTitle("FADE DELAY");
 	}
 };
 

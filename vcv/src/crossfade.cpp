@@ -53,6 +53,7 @@ struct CrossfadeWidget : CommModuleWidget {
 		addLabeledInput("IN2", CrossfadeModule::INPUT2_INPUT, {0, 1});
 
 		addLabeledOutput("OUT", CrossfadeModule::CROSSFADE_OUTPUT, {0, 0});
+		addModuleTitle("FADE");
 	}
 };
 

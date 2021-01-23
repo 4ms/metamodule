@@ -44,6 +44,8 @@ struct Mixer4Widget : CommModuleWidget {
 
 		addLabeledOutput("INV", Mixer4Module::INV_OUTPUT, {0, 0});
 		addLabeledOutput("MIX", Mixer4Module::MIX_OUTPUT, {1, 0});
+
+		addModuleTitle("MIXER");
 	}
 };
 

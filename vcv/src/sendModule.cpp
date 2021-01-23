@@ -60,6 +60,8 @@ struct SendWidget : CommModuleWidget {
 		addLabeledOutput("OUT2", SendModule::OUTPUT2_OUTPUT, {1, 1});
 		addLabeledOutput("OUT3", SendModule::OUTPUT3_OUTPUT, {0, 0});
 		addLabeledOutput("OUT4", SendModule::OUTPUT4_OUTPUT, {1, 0});
+
+		addModuleTitle("SEND");
 	}
 };
 

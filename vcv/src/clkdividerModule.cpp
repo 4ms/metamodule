@@ -45,6 +45,7 @@ struct ClkdividerWidget : CommModuleWidget {
 		addLabeledKnob("DIV",ClkdividerModule::DIVISION_PARAM,{0,0});
 		addLabeledInput("CLK IN",ClkdividerModule::CLOCK_INPUT,{0,1});
 		addLabeledOutput("CLK OUT",ClkdividerModule::CLOCK_OUTPUT,{0,0});
+		addModuleTitle("CLK /");
 	}
 };
 

@@ -55,6 +55,8 @@ struct LowpassgateWidget : CommModuleWidget {
 		addLabeledOutput("OUT",LowpassgateModule::SIGNAL_OUTPUT,{0,0});
 		addLabeledInput("CV",LowpassgateModule::CV_INPUT,{0,2});
 		addLabeledInput("IN",LowpassgateModule::SIGNAL_INPUT,{0,1});
+
+		addModuleTitle("LPG");
 	}
 };
 
