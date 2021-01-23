@@ -1,5 +1,17 @@
 #include "CommWidget.h"
 
+void CommModuleWidget::addModuleTitle(const std::string moduleTitle)
+{
+Label* moduleLabel = new Label();
+moduleLabel->text = moduleTitle;
+moduleLabel->box.pos={0,0};
+moduleLabel->box.size.x = box.size.x;
+moduleLabel->color = rack::color::BLACK;
+moduleLabel->alignment = Label::CENTER_ALIGNMENT;
+moduleLabel->fontSize = 13;
+addChild(moduleLabel);
+}
+
 void CommModuleWidget::addLabeledKnob(const std::string labelText, const int knobID, const Vec position)
 {
 	const Vec pos = {
@@ -42,6 +54,7 @@ void CommModuleWidget::addLabel(const std::string labelText, const Vec pos, cons
 	LabeledButton *button = createLabel();
 	button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 2.0f, pos.y + kTextOffset));
 	button->box.size.x = kGridSpacingX;
+	button->box.size.y = 10;
 	button->text = labelText;
 	button->id = id;
 	addChild(button);
@@ -182,6 +195,7 @@ void LabeledButton::draw(const DrawArgs &args)
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
+	nvgFontSize(args.vg, 10.0f);
 	nvgText(args.vg, box.size.x / 2.0f, box.size.y / 2.0f, text.c_str(), NULL);
 }
 
