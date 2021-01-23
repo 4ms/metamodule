@@ -26,7 +26,7 @@ public:
 	float params[NumKnobs];
 
 	NodePanel()
-		: outputs{nodes[0], nodes[7]}
+		: outputs{nodes[0], nodes[1]}
 		, inputs{nodes[2], nodes[3], nodes[4], nodes[5], nodes[6], nodes[7]}
 	{}
 
