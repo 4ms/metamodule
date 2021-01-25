@@ -16,6 +16,12 @@ public:
 		: led_driver_{led_driver}
 	{}
 
+	void start_it_mode()
+	{
+		led_driver_.start();
+		led_driver_.start_it_mode();
+	}
+
 	void start_dma_mode()
 	{
 		led_driver_.start();
@@ -67,7 +73,7 @@ public:
 		},
 		{
 			{led_driver_.get_buf_addr(Chip1, 8)},
-			NoLED, // was this: {led_driver_.get_buf_addr(Chip1, 9)},
+			NoLED,
 			{led_driver_.get_buf_addr(Chip1, 10)},
 		},
 	};

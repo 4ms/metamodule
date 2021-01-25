@@ -30,7 +30,7 @@ void main()
 
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
-	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_driver_dma_conf, _hardware.led_frame_buffer};
+	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, _hardware.led_frame_buffer};
 	LedCtl leds{led_driver};
 
 	__HAL_DBGMCU_FREEZE_TIM6();
