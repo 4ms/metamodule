@@ -1,5 +1,5 @@
 #pragma once
-#include <sys/_types/_size_t.h>
+#include <cstddef>
 
 template<unsigned int BASEADDR>
 struct AllocForever {

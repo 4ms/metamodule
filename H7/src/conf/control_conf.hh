@@ -1,26 +1,31 @@
 #pragma once
-#include "drivers/analog_in.hh"
+#include "drivers/adc_spi_max11666.hh"
+#include "drivers/analog_in_ext.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 
-// Todo: put control pin defs here
-struct DualOpenerADCs {
-	// using AnalogInFreq0 = AnalogIn<AdcPeriphNum::_1, AdcChanNum::_2>;
-	// static inline const Pin Freq0 = {GPIO::A, 2};
-	//...
-};
+struct MetaModuleControls {};
 
-using CVADCPeriph = AdcPeriph<AdcPeriphNum::_1>;
-
-const DMA_LL_Config ADC_DMA_conf = {
-	.DMAx = DMA2,
-	.stream = LL_DMA_STREAM_0,
-	.channel = LL_DMA_CHANNEL_0,
-	.IRQn = DMA2_Stream0_IRQn,
-	.pri = 2,
-	.subpri = 0,
+const SpiConfig<2> spi_adc_conf = {
+	.spi = SPI1,
+	.IRQn = SPI1_IRQn,
+	// .pins =
+	// 	{
+	.SCLK = {GPIO::G, 11}, // Todo: add alt func
+	.COPI = {GPIO::D, 7},
+	.CIPO = {GPIO::G, 9},
+	.CS =
+		{
+			{GPIO::G, 10},
+			{GPIO::G, 12},
+		},
+	// },
+	// .num_chips = 2,
+	// .chans_per_chip = 2,
+	// .change_channel_commands = {0x00FF, 0xFF00},
+	// .continue_channel_commands = {0xFFFF, 0x0000},
 };
 
 const TimekeeperConfig control_read_tim_conf = {

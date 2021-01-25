@@ -1,6 +1,6 @@
 #pragma once
 #include "conf/control_conf.hh"
-#include "drivers/analog_in.hh"
+#include "drivers/analog_in_ext.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/pin.hh"
 #include "drivers/rotary.hh"
@@ -11,10 +11,7 @@
 using JackSense = DebouncedSwitch;
 
 struct Controls {
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_2, Oversampler<16>> cv0 = {GPIO::A, 2};
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_3, Oversampler<16>> cv1 = {GPIO::A, 3};
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_0, Oversampler<16>> cv2 = {GPIO::A, 0};
-	AnalogIn<AdcPeriphNum::_1, AdcChanNum::_1, Oversampler<16>> cv3 = {GPIO::A, 1};
+	AnalogIn<AdcSpi_MAX11666<2>, 4, Oversampler<16>> cvadc{spi_adc_conf};
 
 	std::array<JackSense, 4> cv_sense = {{
 		{GPIO::C, 4, PinPolarity::Normal},

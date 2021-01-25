@@ -5,10 +5,7 @@
 void Controls::read()
 {
 	// Debug::set_3(true);
-	cv0.read();
-	cv1.read();
-	cv2.read();
-	cv3.read();
+	cvadc.read();
 
 	for (uint32_t i = 0; i < 2; i++) {
 		rotary[i].update();
@@ -29,9 +26,8 @@ void Controls::start()
 
 Controls::Controls()
 {
-	CVADCPeriph::init_dma(ADC_DMA_conf, adc_buffer);
+	cvadc.start();
 	// debug_control_read_timing();
-	CVADCPeriph::start_adc();
 
 	read_controls_task.init(control_read_tim_conf, [this]() { read(); });
 }
@@ -39,13 +35,13 @@ Controls::Controls()
 static void debug_control_read_timing()
 {
 	// Debug: use this to read the DMA timing with an external pin:
-	InterruptManager::registerISR(ADC_DMA_conf.IRQn, []() {
-		if (LL_DMA_IsActiveFlag_TC0(DMA2)) {
-			if (LL_DMA_IsEnabledIT_TC(DMA2, LL_DMA_STREAM_0)) {
-				Debug::toggle_2();
-			}
-			LL_DMA_ClearFlag_TC0(DMA2);
-		}
-	});
-	CVADCPeriph::enable_DMA_IT();
+	// InterruptManager::registerISR(ADC_DMA_conf.IRQn, []() {
+	// 	if (LL_DMA_IsActiveFlag_TC0(DMA2)) {
+	// 		if (LL_DMA_IsEnabledIT_TC(DMA2, LL_DMA_STREAM_0)) {
+	// 			Debug::toggle_2();
+	// 		}
+	// 		LL_DMA_ClearFlag_TC0(DMA2);
+	// 	}
+	// });
+	// CVADCPeriph::enable_DMA_IT();
 }
