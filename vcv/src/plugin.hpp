@@ -10,6 +10,7 @@ extern CentralData *centralData;
 extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file 
+extern Model *modelFmosc; 
 extern Model *modelStereomixer; 
 extern Model *modelPanner; 
 extern Model *modelGateconverter; 
