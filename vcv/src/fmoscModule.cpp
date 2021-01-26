@@ -5,7 +5,7 @@
 struct FmoscModule : CommModule {
 
 	enum ParamIds { COARSE_TUNE_PARAM, INDEX_PARAM, RATIO_COARSE_PARAM, RATIO_FINE_PARAM, NUM_PARAMS };
-	enum InputIds { INDEX_INPUT, NUM_INPUTS };
+	enum InputIds { INDEX_INPUT, VOCT_INPUT, NUM_INPUTS };
 	enum OutputIds { MAIN_OUTPUT, NUM_OUTPUTS };
 	enum LightIds { NUM_LIGHTS };
 
@@ -31,18 +31,19 @@ struct FmoscWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/12hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hpTemplate.svg")));
 
 		addLabeledKnob("PITCH", FmoscModule::COARSE_TUNE_PARAM, {0, 0});
-		addLabeledKnob("INDEX", FmoscModule::INDEX_PARAM, {1, 0});
+		addLabeledKnob("INDEX", FmoscModule::INDEX_PARAM, {0, 3});
 		addLabeledKnob("RATIO C", FmoscModule::RATIO_COARSE_PARAM, {0, 1});
-		addLabeledKnob("RATIO F", FmoscModule::RATIO_FINE_PARAM, {1, 1});
+		addLabeledKnob("RATIO F", FmoscModule::RATIO_FINE_PARAM, {0, 2});
 
-		addLabeledInput("INDEX", FmoscModule::INDEX_INPUT, {0, 0});
+		addLabeledInput("V/OCT", FmoscModule::VOCT_INPUT, {0, 2});
+		addLabeledInput("INDEX", FmoscModule::INDEX_INPUT, {0, 1});
 
-		addLabeledOutput("OUT", FmoscModule::MAIN_OUTPUT, {2, 0});
+		addLabeledOutput("OUT", FmoscModule::MAIN_OUTPUT, {0, 0});
 
-		addModuleTitle("FM OSCILLATOR");
+		addModuleTitle("FM");
 	}
 };
 

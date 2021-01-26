@@ -10,7 +10,7 @@ protected:
 	const float kKnobSpacingY = 17;
 	const float kKnobSpacingX = 20.32f;
 	const float kTextOffset = 5;
-	const float kTopMargin = 20;
+	const float kTopMargin = 13;
 	const float kBottomMargin = 15;
 	const float kGridSpacingX = 60;
 	const float kModuleHeight = 128.5f;
