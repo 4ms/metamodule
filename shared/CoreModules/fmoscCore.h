@@ -1,0 +1,81 @@
+#pragma once
+
+#include "CoreModules/moduleTypes.h"
+#include "coreProcessor.h"
+#include "math.hh"
+#include "processors/twoOpFMOscillator.h"
+
+using namespace MathTools;
+
+class FmoscCore : public CoreProcessor {
+public:
+	virtual void update(void) override
+	{
+		totalIndex = constrain(indexCV + indexKnob, 0.0f, 1.0f);
+		fm.modAmount = totalIndex * 4.0f;
+		mainOutput = fm.update();
+	}
+
+	FmoscCore() {}
+
+	virtual void set_param(int const param_id, const float val) override
+	{
+		switch (param_id) {
+			case 0:
+				fm.freq = map_value(val, 0.0f, 1.0f, 20.0f, 800.0f);
+				break;
+			case 1:
+				indexKnob = val;
+				break;
+			case 2:
+				fm.ratioCoarse = map_value(val, 0.0f, 1.0f, 0, 7);
+				break;
+			case 3: {
+				if (val < 0.5f)
+					fm.ratioFine = map_value(val, 0.0f, 0.5f, 0.5f, 1.0f);
+				else
+					fm.ratioFine = map_value(val, 0.5f, 1.0f, 1.0f, 2.0f);
+				break;
+			}
+		}
+	}
+	virtual void set_samplerate(const float sr) override
+	{
+		fm.set_samplerate(sr);
+	}
+
+	virtual void set_input(const int input_id, const float val) override
+	{
+		switch (input_id) {
+			case 0:
+				indexCV = val;
+				break;
+		}
+	}
+
+	virtual float get_output(const int output_id) const override
+	{
+		float output = 0;
+		switch (output_id) {
+			case 0:
+				output = mainOutput;
+				break;
+		}
+		return output;
+	}
+
+	static std::unique_ptr<CoreProcessor> create()
+	{
+		return std::make_unique<FmoscCore>();
+	}
+	static constexpr char typeID[20] = "FMOSC";
+	static constexpr char description[] = "FM Oscillator";
+	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
+
+private:
+	TwoOpFM fm;
+	float mainOutput;
+	float indexKnob = 0;
+	float indexCV = 0;
+	float totalIndex = 0;
+};

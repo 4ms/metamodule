@@ -40,6 +40,8 @@ struct Switch4to1Widget : CommModuleWidget {
 		}
 
 		addLabeledOutput("OUT", Switch4to1Module::SIGNAL_OUTPUT, {1, 0});
+
+		addModuleTitle("SWITCH 4:1");
 	}
 };
 

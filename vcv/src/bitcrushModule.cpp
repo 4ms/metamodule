@@ -51,6 +51,7 @@ struct BitcrushWidget : CommModuleWidget {
 
 		addLabeledInput("IN", BitcrushModule::SIGNAL_INPUT, {0, 1});
 		addLabeledOutput("OUT", BitcrushModule::SIGNAL_OUTPUT, {0, 0});
+		addModuleTitle("CRUSH");
 	}
 };
 

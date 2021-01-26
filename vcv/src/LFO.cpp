@@ -42,6 +42,8 @@ struct LfoWidget : CommModuleWidget {
 		addLabeledInput("RESET", LfoModule::RESET_INPUT, {0, 1});
 
 		addLabeledOutput("OUT", LfoModule::LFO_OUTPUT, {0, 0});
+
+		addModuleTitle("LFO");
 	}
 };
 

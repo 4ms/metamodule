@@ -41,6 +41,7 @@ struct ClkmultiplierWidget : CommModuleWidget {
 		addLabeledKnob("MULT", ClkmultiplierModule::MULT_PARAM, {0, 0});
 		addLabeledInput("CLK IN", ClkmultiplierModule::CLOCK_INPUT, {0, 1});
 		addLabeledOutput("CLK OUT", ClkmultiplierModule::CLOCK_OUTPUT, {0, 0});
+		addModuleTitle("CLK X");
 	}
 };
 

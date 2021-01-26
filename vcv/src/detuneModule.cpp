@@ -38,6 +38,8 @@ struct DetuneWidget : CommModuleWidget {
 
 		addLabeledInput("IN", DetuneModule::SIGNAL_INPUT, {0, 1});
 		addLabeledOutput("OUT", DetuneModule::SIGNAL_OUTPUT, {0, 0});
+
+		addModuleTitle("DTUNE");
 	}
 };
 

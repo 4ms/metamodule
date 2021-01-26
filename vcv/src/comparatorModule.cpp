@@ -56,6 +56,7 @@ struct ComparatorWidget : CommModuleWidget {
 
 		addLabeledInput("IN", ComparatorModule::SIGNAL_INPUT, {0, 2});
 		addLabeledInput("CV", ComparatorModule::CV_INPUT, {0, 1});
+		addModuleTitle("COMP");
 	}
 };
 

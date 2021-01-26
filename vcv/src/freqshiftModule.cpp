@@ -50,6 +50,8 @@ struct FreqshiftWidget : CommModuleWidget {
 
 		addLabeledInput("IN", FreqshiftModule::SIGNAL_INPUT, {0, 1});
 		addLabeledOutput("OUT", FreqshiftModule::SIGNAL_OUTPUT, {0, 0});
+
+		addModuleTitle("FSHIFT");
 	}
 };
 

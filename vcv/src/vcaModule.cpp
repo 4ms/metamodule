@@ -59,6 +59,8 @@ struct VCAWidget : CommModuleWidget {
 		addLabeledInput("IN", VCAModule::SIGNAL_INPUT, {0, 0});
 		addLabeledInput("CV", VCAModule::CV_INPUT, {1, 0});
 		addLabeledOutput("OUT", VCAModule::VCA_OUTPUT, {0, 1});
+
+		addModuleTitle("VCA");
 	}
 };
 

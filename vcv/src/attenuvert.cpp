@@ -5,24 +5,10 @@
 
 struct AttModule : CommModule {
 
-	enum ParamIds {
-		LEVEL1_PARAM,
-		LEVEL2_PARAM,
-		NUM_PARAMS
-	};
-	enum InputIds {
-		INPUT1_INPUT,
-		INPUT2_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		OUT1_OUTPUT,
-		OUT2_OUTPUT,
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		NUM_LIGHTS
-	};
+	enum ParamIds { LEVEL1_PARAM, LEVEL2_PARAM, NUM_PARAMS };
+	enum InputIds { INPUT1_INPUT, INPUT2_INPUT, NUM_INPUTS };
+	enum OutputIds { OUT1_OUTPUT, OUT2_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { NUM_LIGHTS };
 
 	AttModule()
 	{
@@ -60,6 +46,7 @@ struct AttWidget : CommModuleWidget {
 
 		addLabeledOutput("OUT 1", AttModule::OUT1_OUTPUT, {0, 1});
 		addLabeledOutput("OUT 2", AttModule::OUT2_OUTPUT, {0, 0});
+		addModuleTitle("ATT");
 	}
 };
 

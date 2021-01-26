@@ -44,6 +44,8 @@ struct PitchshiftWidget : CommModuleWidget {
 
 		addLabeledInput("IN", PitchshiftModule::SIGNAL_INPUT, {0, 0});
 		addLabeledOutput("OUT", PitchshiftModule::SIGNAL_OUTPUT, {1, 0});
+
+		addModuleTitle("PITCH SHIFT");
 	}
 };
 

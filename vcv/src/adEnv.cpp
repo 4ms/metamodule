@@ -59,6 +59,7 @@ struct adWidget : CommModuleWidget {
 
 		addLabeledKnob("A", adModule::ATTACK_KNOB, {0, 0});
 		addLabeledKnob("D", adModule::DECAY_KNOB, {0, 1});
+		addModuleTitle("A/D");
 	}
 };
 

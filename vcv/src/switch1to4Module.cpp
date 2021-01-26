@@ -40,6 +40,8 @@ struct Switch1to4Widget : CommModuleWidget {
 		}
 
 		addLabeledInput("IN", Switch1to4Module::SIGNAL_INPUT, {1, 4});
+
+		addModuleTitle("SWITCH 1:4");
 	}
 };
 

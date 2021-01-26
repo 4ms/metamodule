@@ -10,6 +10,9 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelFmosc); 
+p->addModel(modelStereomixer); 
+p->addModel(modelPanner); 
 p->addModel(modelGateconverter); 
 p->addModel(modelDetune); 
 p->addModel(modelPitchshift); 

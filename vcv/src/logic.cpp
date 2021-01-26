@@ -45,7 +45,9 @@ struct LogicWidget : CommModuleWidget {
 		addLabeledInput("IN2", LogicModule::INPUT2_INPUT, {0, 3});
 		addLabeledOutput("AND", LogicModule::AND_OUTPUT, {0, 2});
 		addLabeledOutput("OR", LogicModule::OR_OUTPUT, {0, 1});
-		addLabeledOutput("XOR", LogicModule::XOR_OUTPUT, {0, 0});
+		addLabeledOutput("XOR", LogicModule::XOR_OUTPUT, {0, 0});	
+
+		addModuleTitle("LOGIC");
 	}
 };
 
