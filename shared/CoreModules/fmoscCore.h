@@ -11,6 +11,8 @@ class FmoscCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		totalIndex = constrain(indexCV + indexKnob, 0.0f, 1.0f);
+		fm.modAmount = totalIndex * 4.0f;
 		mainOutput = fm.update();
 	}
 
@@ -23,11 +25,18 @@ public:
 				fm.freq = map_value(val, 0.0f, 1.0f, 20.0f, 800.0f);
 				break;
 			case 1:
-				fm.modAmount = map_value(val, 0.0f, 1.0f, 0.0f, 10.0f);
+				indexKnob = val;
 				break;
 			case 2:
-				fm.ratioCoarse = map_value(val, 0.0f, 1.0f, 1, 16);
+				fm.ratioCoarse = map_value(val, 0.0f, 1.0f, 0, 7);
 				break;
+			case 3: {
+				if (val < 0.5f)
+					fm.ratioFine = map_value(val, 0.0f, 0.5f, 0.5f, 1.0f);
+				else
+					fm.ratioFine = map_value(val, 0.5f, 1.0f, 1.0f, 2.0f);
+				break;
+			}
 		}
 	}
 	virtual void set_samplerate(const float sr) override
@@ -38,6 +47,9 @@ public:
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
+			case 0:
+				indexCV = val;
+				break;
 		}
 	}
 
@@ -63,4 +75,7 @@ public:
 private:
 	TwoOpFM fm;
 	float mainOutput;
+	float indexKnob = 0;
+	float indexCV = 0;
+	float totalIndex = 0;
 };
