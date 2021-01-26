@@ -32,5 +32,4 @@ struct Controls {
 
 private:
 	Timekeeper read_controls_task;
-	__attribute__((section(".dtcm"))) static inline uint16_t adc_buffer[4];
 };

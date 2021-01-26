@@ -3,7 +3,8 @@ CompileFlags:
 	Add: [
 			"-std=c++17",
 			"-DSTM32H7",
-			"-DSTM32H755xx",
+			"-DSTM32H745xx",
+			"-DSTM32H7x5xx",
 			"-DCORE_CM7",
 			"-I/Users/dann/4ms/stm32/meta-module/shared",
 			"-I/Users/dann/4ms/stm32/meta-module/H7/lib/stm32/device/include",
@@ -11,6 +12,7 @@ CompileFlags:
 			"-I/Users/dann/4ms/stm32/meta-module/H7/lib/stm32/periph/include",
 			"-I/Users/dann/4ms/stm32/meta-module/H7/src",
 			"-I/Users/dann/4ms/stm32/meta-module/H7/src/sys",
+			"-I/Users/dann/4ms/stm32/meta-module/H7/lib/mdrivlib",
 			"-isystem /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1",
 			"-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1",
 			"-isystem /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/arm-none-eabi",

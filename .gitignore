@@ -17,5 +17,7 @@ localtests_tests
 .nvimrc
 .ccls-cache/
 tableGen/table
-
+compile_flags.txt
 tableGen/make_tables
+
+H7/cubemx/

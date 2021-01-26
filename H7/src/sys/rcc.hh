@@ -11,12 +11,9 @@ struct SystemClocks {
 	{
 		System::SetVectorTable(0x08000000);
 
-		__HAL_FLASH_ART_ENABLE();
-		__HAL_FLASH_PREFETCH_BUFFER_ENABLE();
+		System::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
 
 		HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
-
-		System::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
 
 		SCB_InvalidateDCache();
 

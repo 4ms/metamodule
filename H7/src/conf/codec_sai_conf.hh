@@ -6,23 +6,21 @@
 
 const SaiConfig codec_sai_conf = {
 	.sai = SAI1,
-	.tx_block = SAI1_Block_A,
-	.rx_block = SAI1_Block_B,
+	.tx_block = SAI4_Block_A,
+	.rx_block = SAI4_Block_B,
 
 	.dma_init_tx =
 		{
-			.DMAx = DMA2,
-			.stream = DMA2_Stream1,
-			.channel = DMA_CHANNEL_0,
+			.stream = BDMA_Channel0,
+			.request = BDMA_REQUEST_SAI4_A,
 			.IRQn = DMA2_Stream1_IRQn,
 			.pri = 1,
 			.subpri = 0,
 		},
 	.dma_init_rx =
 		{
-			.DMAx = DMA2,
-			.stream = DMA2_Stream4,
-			.channel = DMA_CHANNEL_1,
+			.stream = BDMA_Channel1,
+			.request = BDMA_REQUEST_SAI4_A,
 			.IRQn = DMA2_Stream4_IRQn,
 			.pri = 1,
 			.subpri = 0,
@@ -32,9 +30,9 @@ const SaiConfig codec_sai_conf = {
 	.framesize = 32,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::E, 2, GPIO_AF6_SAI1},
-	.SCLK = {GPIO::E, 5, GPIO_AF6_SAI1},
-	.LRCLK = {GPIO::E, 4, GPIO_AF6_SAI1},
-	.SD_DAC = {GPIO::E, 6, GPIO_AF6_SAI1},
-	.SD_ADC = {GPIO::E, 3, GPIO_AF6_SAI1},
+	.MCLK = {GPIO::E, 2, GPIO_AF8_SAI4},
+	.SCLK = {GPIO::E, 5, GPIO_AF8_SAI4},
+	.LRCLK = {GPIO::E, 4, GPIO_AF8_SAI4},
+	.SD_DAC = {GPIO::E, 6, GPIO_AF8_SAI4},
+	.SD_ADC = {GPIO::E, 3, GPIO_AF8_SAI4},
 };

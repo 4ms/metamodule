@@ -100,6 +100,7 @@ extern "C" {
 
 	/* User-created defines: (4ms/Dan Green) */
 	#define LL_DMA_MODULE_ENABLED
+	#define LL_BDMA_MODULE_ENABLED
 	#define LL_TIM_MODULE_ENABLED
 	#define LL_BUS_MODULE_ENABLED
 	#define LL_FMC_MODULE_ENABLED
@@ -498,6 +499,10 @@ extern "C" {
 	/*User added (4ms/Dan Green) */
 	#ifdef LL_DMA_MODULE_ENABLED
 		#include "stm32h7xx_ll_dma.h"
+	#endif
+
+	#ifdef LL_BDMA_MODULE_ENABLED
+		#include "stm32h7xx_ll_bdma.h"
 	#endif
 
 	#ifdef LL_TIM_MODULE_ENABLED
