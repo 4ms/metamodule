@@ -62,7 +62,7 @@ public:
 		osc[0].frequency = freq;
 		osc[0].update();
 
-		return osc[0].waveOut;
+		return osc[0].sinOut;
 	}
 
 	void set_samplerate(float sr)
