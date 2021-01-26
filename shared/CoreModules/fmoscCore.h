@@ -11,6 +11,7 @@ class FmoscCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		fm.freq = basePitch * expTable.interp(constrain(pitchInput,0.0f,1.0f));
 		totalIndex = constrain(indexCV + indexKnob, 0.0f, 1.0f);
 		fm.modAmount = totalIndex * 4.0f;
 		mainOutput = fm.update();
@@ -22,7 +23,7 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				fm.freq = map_value(val, 0.0f, 1.0f, 20.0f, 800.0f);
+				basePitch = 20.0f * expTable.interp(val);
 				break;
 			case 1:
 				indexKnob = val;
@@ -50,6 +51,9 @@ public:
 			case 0:
 				indexCV = val;
 				break;
+			case 1:
+				pitchInput = val;
+				break;
 		}
 	}
 
@@ -74,8 +78,10 @@ public:
 
 private:
 	TwoOpFM fm;
+	float basePitch = 0;
 	float mainOutput;
 	float indexKnob = 0;
 	float indexCV = 0;
 	float totalIndex = 0;
+	float pitchInput = 0;
 };

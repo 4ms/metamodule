@@ -50,10 +50,12 @@ public:
 	int ratioCoarse = 1;
 	float ratioFine = 1;
 	float modAmount = 0;
+
 	TwoOpFM() {}
 
 	float update(void)
 	{
+		
 		osc[1].frequency = freq * (ratioTable[ratioCoarse] * ratioFine);
 		osc[1].update();
 
