@@ -2,8 +2,8 @@
 
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "math.hh"
 #include "processors/twoOpFMOscillator.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 
@@ -11,9 +11,9 @@ class FmoscCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		fm.freq = basePitch * expTable.interp(constrain(pitchInput,0.0f,1.0f));
+		fm.set_frequency(basePitch * expTable.interp(constrain(pitchInput, 0.0f, 1.0f)));
 		totalIndex = constrain(indexCV + indexKnob, 0.0f, 1.0f);
-		fm.modAmount = totalIndex * 4.0f;
+		fm.modAmount = totalIndex;
 		mainOutput = fm.update();
 	}
 
