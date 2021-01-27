@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "COMPLEXENVELOPE",
+      "name": "Complexenvelope",
+      "description": "Complex Envelope",
+      "tags": []
+}, 
+{
       "slug": "FMOSC",
       "name": "Fmosc",
       "description": "FM Oscillator",
