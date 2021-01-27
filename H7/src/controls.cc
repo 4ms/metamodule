@@ -7,14 +7,16 @@ void Controls::read()
 	// Debug::set_3(true);
 	cvadc.read();
 
+	rotary.update();
+	rotary_button.update();
 	for (uint32_t i = 0; i < 2; i++) {
-		rotary[i].update();
-		rotary_button[i].update();
-		mode_button[i].update();
+		button[i].update();
 		cv_sense[i].update();
 		cv_sense[i + 2].update();
 		in_sense[i].update();
 		out_sense[i].update();
+		// dac_sense[i].update();
+		// trig_in_sense[i].update();
 	}
 	// Debug::set_3(false);
 }

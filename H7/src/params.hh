@@ -10,39 +10,21 @@ public:
 		: controls(c)
 	{}
 
-	float cvjacks[4];
-	float knobs[4];
-	uint8_t fx_mode[2] = {0};
-
-	int knob_sel[2] = {0, 0};
-
-public:
 	void update();
 	Controls &controls;
 
+	float cvjacks[4];
+	float knobs[8];
+	bool gate_ins[3];
+	bool jack_senses[15];
+	bool buttons[2];
+
+	// SelbusQueue selbus_commands;
+
+	float dac_out[2];
+	bool clock_out;
+
 private:
-	// Adjust these as needed:
-	static const int kFreqKnob_Accel = 150;
-	static const int kFreqKnob_Weight = 200;
-	static const int kFreqKnob_CatchupWeight = 333;
-
-	static const int kResKnob_Accel = 350;
-	static const int kResKnob_Weight = 200;
-	static const int kResKnonb_CatchupWeight = 333;
-
-	AccelParam smoothed_knob[4]{
-		{kFreqKnob_Accel, kFreqKnob_Weight, kFreqKnob_CatchupWeight, 0.5f},
-		{kFreqKnob_Accel, kFreqKnob_Weight, kFreqKnob_CatchupWeight, 0.5f},
-		{kResKnob_Accel, kResKnob_Weight, kResKnonb_CatchupWeight, 0.5f},
-		{kResKnob_Accel, kResKnob_Weight, kResKnonb_CatchupWeight, 0.5f},
-	};
-
-	bool knob_moved_while_pressed[2] = {false, false};
-
-	static const inline uint8_t kNumFX = 5; // Todo: how to enforce this matches size of AudioFXList?
-
-	// Uart screen;
-	// uint32_t last_update_time = 0;
-	// void update_screen();
+	bool knob_moved_while_pressed = false;
 };
 

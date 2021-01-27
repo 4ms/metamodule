@@ -2,29 +2,30 @@
 #include "conf/control_conf.hh"
 #include "drivers/analog_in_ext.hh"
 #include "drivers/debounced_switch.hh"
+#include "drivers/i2c.hh"
 #include "drivers/pin.hh"
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 #include "util/filter.hh"
 
-using JackSense = DebouncedSwitch;
+struct GPIO_expander_conf {
+	uint32_t addr;
+	Pin int_pin;
+};
+
+template<I2C_TypeDef *const I2C>
+struct GPIOExpander {
+	GPIOExpander(GPIO_expander_conf &conf);
+};
 
 struct Controls {
 	AnalogIn<AdcSpi_MAX11666<2>, 4, Oversampler<16>> cvadc{spi_adc_conf};
 
-	std::array<JackSense, 4> cv_sense = {{
-		{GPIO::C, 4, PinPolarity::Normal},
-		{GPIO::B, 1, PinPolarity::Normal},
-		{GPIO::C, 5, PinPolarity::Normal},
-		{GPIO::B, 0, PinPolarity::Normal},
-	}};
-	JackSense in_sense[2] = {{GPIO::G, 12, PinPolarity::Normal}, {GPIO::G, 11, PinPolarity::Normal}};
-	JackSense out_sense[2] = {{GPIO::D, 7, PinPolarity::Normal}, {GPIO::G, 10, PinPolarity::Normal}};
-
-	RotaryEncoder<RotaryFullStep> rotary[2] = {{GPIO::A, 7, GPIO::A, 6}, {GPIO::C, 7, GPIO::C, 6}};
-	DebouncedSwitch rotary_button[2] = {{GPIO::A, 5}, {GPIO::B, 9}};
-	DebouncedSwitch mode_button[2] = {{GPIO::C, 14}, {GPIO::C, 15}};
+	GPIOExpander<I2C1> sense{.addr = 0x00, .int_pin = {GPIO : D, 11}};
+	DebouncedSwitch button[2] = {{GPIO::C, 10}, {GPIO::C, 11}};
+	RotaryEncoder<RotaryFullStep> rotary = {GPIO::C, 7, GPIO::C, 8};
+	DebouncedSwitch rotary_button = {GPIO::C, 6};
 
 	Controls();
 	void read();
