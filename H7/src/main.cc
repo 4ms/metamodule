@@ -14,7 +14,7 @@
 
 struct DualOpenerSystem : SystemClocks, Debug, SDRAMPeriph, SharedBus {
 	DualOpenerSystem()
-		: SDRAMPeriph{SDRAM_AS4C_conf}
+		: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
 		, SharedBus{i2c_conf}
 	{}
 

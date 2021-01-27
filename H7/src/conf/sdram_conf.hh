@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/sdram_48LC16M16_6A_conf.hh"
 #include "conf/sdram_AS4C16M16SA_7CN_conf.hh"
 #include "conf/sdram_W9825G6KH_75_conf.hh"
 #include "drivers/sdram_config_struct.hh"
@@ -16,7 +17,7 @@ const SDRAMPinNames SDRAM_pin_names = {
 	.A9{GPIO::F, 15, LL_GPIO_AF_12},
 	.A10{GPIO::G, 0, LL_GPIO_AF_12},
 	.A11{GPIO::G, 1, LL_GPIO_AF_12},
-	.A12{GPIO::G, 2, LL_GPIO_AF_12}, // not connected on PCB p2
+	.A12{GPIO::G, 2, LL_GPIO_AF_12},
 	.BA0{GPIO::G, 4, LL_GPIO_AF_12},
 	.BA1{GPIO::G, 5, LL_GPIO_AF_12},
 	.D0{GPIO::D, 14, LL_GPIO_AF_12},
@@ -49,6 +50,13 @@ const SDRAMConfig SDRAM_AS4C_conf = {
 	.pin_list = {SDRAM_pin_names},
 	.timing = SDRAM_timing_AS4C16M16SA_7CN,
 	.arch = SDRAM_arch_AS4C16M16SA_7CN,
+	.connected_bank = 1,
+};
+
+const SDRAMConfig SDRAM_48LC16M16_6A_conf = {
+	.pin_list = {SDRAM_pin_names},
+	.timing = SDRAM_timing_48LC16M16_6A,
+	.arch = SDRAM_arch_48LC16M16_6A,
 	.connected_bank = 1,
 };
 
