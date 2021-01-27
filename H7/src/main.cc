@@ -9,13 +9,13 @@
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 #include "shared_bus.hh"
-#include "sys/rcc.hh"
+#include "sys/system_clocks.hh"
 #include "ui.hh"
 
-struct DualOpenerSystem : SystemClocks, Debug, SDRAMPeriph, SharedBus {
+struct DualOpenerSystem : SystemClocks, Debug /*, SDRAMPeriph*/, SharedBus {
 	DualOpenerSystem()
-		: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
-		, SharedBus{i2c_conf}
+		// : SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
+		: SharedBus{i2c_conf}
 	{}
 
 	// Todo: this is not ideal to have DMA buffers in D1 domain. See:
