@@ -27,7 +27,8 @@ endif
 
 
 BINARYNAME 		= main
-STARTUP 		= startup_stm32h745igtx.s
+# STARTUP 		= startup_stm32h745igtx.s
+STARTUP 		= startup_cm7.s
 SYSTEM 			= system_stm32h7xx_dualcore_boot_cm4_cm7.c
 
 LIBDIR 			= lib
@@ -38,7 +39,8 @@ DRIVERLIB       = $(LIBDIR)/mdrivlib
 SHARED  		= src/shared
 TABLEGEN 		= $(SHARED)/tableGen
 
-SOURCES  += $(DEVICE)/src/$(STARTUP)
+# SOURCES  += $(DEVICE)/src/$(STARTUP)
+SOURCES  += $(DRIVERLIB)/drivers/$(STARTUP)
 SOURCES  += $(DEVICE)/src/$(SYSTEM)
 SOURCES  += $(wildcard $(PERIPH)/src/*.c)
 SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.c)
@@ -109,13 +111,12 @@ OPTFLAG = -O3
 
 #----------------------------------
 # Uncomment to compile unoptimized:
-# build/src/main.o: OPTFLAG = -O0
-# build/src/debug.o: OPTFLAG = -O0
-# build/src/drivers/cap1203.o: OPTFLAG = -O0
-# build/src/drivers/codec_i2sx2.o: OPTFLAG = -O0
-# build/src/drivers/codec_i2c.o: OPTFLAG = -O0
-# build/src/audio.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/main.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
+# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/sdram.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
 
 CFLAGS = -g2 -fno-common \
 	$(ARCH_CFLAGS) $(MCU) \
@@ -161,26 +162,30 @@ $(HEX): $(ELF)
 	$(SZ) $(SZOPTS) $(ELF)
 
 $(ELF): $(OBJECTS)
-	$(LD) $(LFLAGS) -o $@ $(OBJECTS)
+	$(info Linking...)
+	@$(LD) $(LFLAGS) -o $@ $(OBJECTS)
 
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 
 $(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
-	mkdir -p $(dir $@)
-	$(CC) -c $(DEPFLAGS) $(OPTFLAG) $(CFLAGS) $< -o $@
+	@mkdir -p $(dir $@)
+	$(info Building $< at $(OPTFLAG))
+	@$(CC) -c $(DEPFLAGS) $(OPTFLAG) $(CFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
-	mkdir -p $(dir $@)
-	$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
-# 	$(CXX) -c $(OPTFLAG) $(CXXFLAGS) -fverbose-asm -Wa,-adhln $< > $(BUILDDIR)/$(basename $<).lst
+	@mkdir -p $(dir $@)
+	$(info Building $< at $(OPTFLAG))
+	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cpp $(BUILDDIR)/%.d
-	mkdir -p $(dir $@)
-	$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
+	@mkdir -p $(dir $@)
+	$(info Building $< at $(OPTFLAG))
+	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.s
-	mkdir -p $(dir $@)
-	$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))
+	@mkdir -p $(dir $@)
+	$(info Building $< at $(OPTFLAG))
+	@$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))
 
 %.d: ;
 
@@ -199,16 +204,23 @@ ifneq "$(MAKECMDGOALS)" "clean"
 endif
 
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
-.PHONY: all clean flash tables tests H7_tests core_tests util_tests proc_tests 
+.PHONY: all clean flash tables tests H7_tests core_tests util_tests proc_tests mdrivlib_tests
 
-tests: H7_tests core_tests util_tests #proc_tests
+tests: H7_tests core_tests util_tests mdrivlib_tests #proc_tests 
 
 H7_tests:
 	@echo
 	@echo "----------------------------"
-	@echo "Running F7 tests...."
+	@echo "Running H7 tests...."
 	@echo "----------------------------"
 	make -f tests/Makefile
+
+mdrivlib_tests:
+	@echo
+	@echo "----------------------------"
+	@echo "Running mdrivlib tests...."
+	@echo "----------------------------"
+	cd $(DRIVERLIB) && make -f tests/Makefile
 
 util_tests:
 	@echo
