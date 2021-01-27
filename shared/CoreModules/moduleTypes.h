@@ -5,6 +5,10 @@
 #include <memory>
 #include <string>
 
+#if !defined(STM32F7) && !defined(STM32H7)
+	#define HAS_STD_STRING
+#endif
+
 struct ModuleTypeSlug {
 	static const size_t kStringLen = 20;
 	char name[kStringLen];
@@ -24,7 +28,7 @@ struct ModuleTypeSlug {
 		}
 		name[kStringLen - 1] = '\0';
 	}
-#ifndef STM32F7
+#if defined(HAS_STD_STRING)
 	ModuleTypeSlug(const std::string s)
 	{
 		for (size_t i = 0; i < kStringLen; i++) {
@@ -64,7 +68,7 @@ public:
 			next_id++;
 			strcpy(module_slugs[id], typeslug.name);
 		}
-#ifndef STM32F7
+#if defined(HAS_STD_STRING)
 		module_names[id] = name;
 #endif
 		creation_funcs[id] = funcCreate;
@@ -86,7 +90,7 @@ public:
 			next_id++;
 			strcpy(module_slugs[new_id], typeslug.name);
 		}
-#ifndef STM32F7
+#if defined(HAS_STD_STRING)
 		module_names[new_id] = name;
 #endif
 		output_jack_offsets[new_id] = numInputJacks;
@@ -120,7 +124,7 @@ public:
 		return nullptr;
 	}
 
-#ifndef STM32F7
+#if defined(HAS_STD_STRING)
 	static std::string getModuleTypeName(ModuleTypeSlug typeslug)
 	{
 		int id = getTypeID(typeslug);
@@ -182,7 +186,7 @@ private:
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline std::array<CreateModuleFuncWithParams, MAX_MODULE_TYPES> creation_funcs_wp;
 	static inline std::array<char[20], MAX_MODULE_TYPES> module_slugs;
-#ifndef STM32F7
+#if defined(HAS_STD_STRING)
 	static inline std::array<std::string, MAX_MODULE_TYPES> module_names;
 #endif
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> output_jack_offsets;
