@@ -14,6 +14,8 @@ struct ComplexenvelopeModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("COMPLEXENVELOPE");
 		selfID.typeID = "COMPLEXENVELOPE";
+
+		outputJacks[ComplexenvelopeModule::SIGNAL_OUTPUT]->scale = [](float f) { return f * 10.0f; };
 	}
 };
 
@@ -31,11 +33,11 @@ struct ComplexenvelopeWidget : CommModuleWidget {
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
 
-		addLabeledKnob("ATTACK", ComplexenvelopeModule::ATTACK_PARAM,{0,0});
-		addLabeledKnob("HOLD",ComplexenvelopeModule::HOLD_PARAM,{1,0});
-		addLabeledKnob("DECAY",ComplexenvelopeModule::DECAY_PARAM,{0,1});
-		addLabeledKnob("SUSTAIN",ComplexenvelopeModule::SUSTAIN_PARAM,{1,1});
-		addLabeledKnob("RELEASE",ComplexenvelopeModule::RELEASE_PARAM,{0,2});
+		addLabeledKnob("ATTACK", ComplexenvelopeModule::ATTACK_PARAM, {0, 0});
+		addLabeledKnob("HOLD", ComplexenvelopeModule::HOLD_PARAM, {1, 0});
+		addLabeledKnob("DECAY", ComplexenvelopeModule::DECAY_PARAM, {0, 1});
+		addLabeledKnob("SUSTAIN", ComplexenvelopeModule::SUSTAIN_PARAM, {1, 1});
+		addLabeledKnob("RELEASE", ComplexenvelopeModule::RELEASE_PARAM, {0, 2});
 
 		addLabeledOutput("OUT", ComplexenvelopeModule::SIGNAL_OUTPUT, {0, 0});
 		addLabeledInput("IN", ComplexenvelopeModule::GATE_INPUT, {0, 1});

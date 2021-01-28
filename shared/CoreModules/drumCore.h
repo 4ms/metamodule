@@ -10,6 +10,9 @@ using namespace MathTools;
 
 class DrumCore : public CoreProcessor {
 public:
+	float pitchAmount = 0;
+	float fmAmount = 0;
+
 	virtual void update(void) override
 	{
 		float pitchEnvelopeOut = 0;
@@ -22,16 +25,29 @@ public:
 		noiseEnvelopeOut = noiseEnvelope.update(gateIn);
 		fmEnvelopeOut = fmEnvelope.update(gateIn);
 
+		osc.set_frequency(baseFrequency + (pitchEnvelopeOut * 2000.0f * pitchAmount));
+
 		drumOutput = osc.update() * toneEnvelopeOut;
 	}
 
 	DrumCore() {
-		osc.set_frequency(200);
 	}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
+			case 1:
+			pitchEnvelope.set_time(val);
+			break;
+			case 2:
+				pitchAmount = val;
+				break;
+			case 5:
+				fmAmount = val;
+				break;
+				case 6:
+				toneEnvelope.set_time(val);
+				break;
 		}
 	}
 	virtual void set_samplerate(const float sr) override
@@ -72,12 +88,13 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	MacroEnvelope pitchEnvelope;
-	MacroEnvelope fmEnvelope;
-	MacroEnvelope toneEnvelope;
-	MacroEnvelope noiseEnvelope;
+	MacroEnvelope pitchEnvelope{false,false};
+	MacroEnvelope fmEnvelope{false,false};
+	MacroEnvelope toneEnvelope{false,true};
+	MacroEnvelope noiseEnvelope{false,false};
 	TwoOpFM osc;
 
 	float gateIn = 0;
 	float drumOutput = 0;
+	float baseFrequency = 50;
 };

@@ -25,6 +25,8 @@ struct DrumModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("DRUM");
 		selfID.typeID = "DRUM";
+
+		outputJacks[DrumModule::DRUM_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 	}
 };
 
