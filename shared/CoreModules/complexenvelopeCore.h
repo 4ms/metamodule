@@ -18,7 +18,23 @@ public:
 
 	virtual void set_param(int const param_id, const float val) override
 	{
+		auto mappedTime = map_value(val,0.0f,1.0f,0.1f,1000.0f);
 		switch (param_id) {
+			case 0: // attack
+			e.set_envelope_time(0,mappedTime);
+				break;
+			case 1: // hold
+			e.set_envelope_time(1,mappedTime);
+				break;
+			case 2: // decay
+			e.set_envelope_time(2,mappedTime);
+				break;
+			case 3: // sustain
+			e.set_sustain(val);
+				break;
+			case 4: // release
+			e.set_envelope_time(3,mappedTime);
+				break;
 		}
 	}
 	virtual void set_samplerate(const float sr) override {}
