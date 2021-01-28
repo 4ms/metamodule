@@ -10,7 +10,7 @@ const SDRAMTimingConfig SDRAM_timing_48LC16M16_6A = {
 	.tWR_ns = 14,  // 3
 	.tRCD_ns = 18, // 3
 
-	.max_freq_MHz = 167,
+	.max_freq_MHz = 80, // 167,
 	.CAS_latency = 3,
 	.refresh_ms = 64,
 	.read_burst_enabled = true,
