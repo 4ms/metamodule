@@ -8,6 +8,9 @@ struct DrumModule : CommModule {
 		PITCH_PARAM,
 		PITCH_ENV_PARAM,
 		PITCH_AMT_PARAM,
+		FM_RATIO_PARAM,
+		FM_ENV_PARAM,
+		FM_AMT_PARAM,
 		TONE_ENV_PARAM,
 		NOISE_ENV_PARAM,
 		NOISE_BLEND_PARAM,
@@ -45,9 +48,16 @@ struct DrumWidget : CommModuleWidget {
 		addLabeledKnob("PITCH ENV", DrumModule::PITCH_ENV_PARAM, {1, 0});
 		addLabeledKnob("PITCH AMT", DrumModule::PITCH_AMT_PARAM, {2, 0});
 
-		addLabeledKnob("TONE ENV", DrumModule::TONE_ENV_PARAM, {0, 1});
-		addLabeledKnob("NOISE ENV", DrumModule::NOISE_ENV_PARAM, {1, 1});
-		addLabeledKnob("NOISE BLEND", DrumModule::NOISE_BLEND_PARAM, {2, 1});
+		addLabeledKnob("RATIO", DrumModule::FM_RATIO_PARAM, {0, 1});
+		addLabeledKnob("FM ENV", DrumModule::FM_ENV_PARAM, {1, 1});
+		addLabeledKnob("FM AMT", DrumModule::FM_AMT_PARAM, {2, 1});
+
+		addLabeledKnob("TONE ENV", DrumModule::TONE_ENV_PARAM, {0, 2});
+		addLabeledKnob("NOISE ENV", DrumModule::NOISE_ENV_PARAM, {1, 2});
+		addLabeledKnob("NOISE BLEND", DrumModule::NOISE_BLEND_PARAM, {2, 2});
+
+		addLabeledInput("TRIGGER", DrumModule::TRIGGER_INPUT, {0, 0});
+		addLabeledOutput("OUTPUT", DrumModule::DRUM_OUTPUT, {2, 0});
 	}
 };
 

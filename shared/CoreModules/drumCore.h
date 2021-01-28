@@ -1,10 +1,10 @@
 #pragma once
 
+#include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
-#include "CoreModules/moduleTypes.h"
+#include "processors/macroEnvelope.h"
 #include "processors/twoOpFMOscillator.h"
-#include "processors/envelope.h"
 
 using namespace MathTools;
 
@@ -12,27 +12,43 @@ class DrumCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-	
+		float pitchEnvelopeOut = 0;
+		float toneEnvelopeOut = 0;
+		float noiseEnvelopeOut = 0;
+		float fmEnvelopeOut = 0;
+
+		pitchEnvelopeOut = pitchEnvelope.update(gateIn);
+		toneEnvelopeOut = toneEnvelope.update(gateIn);
+		noiseEnvelopeOut = noiseEnvelope.update(gateIn);
+		fmEnvelopeOut = fmEnvelope.update(gateIn);
+
+		drumOutput = osc.update() * toneEnvelopeOut;
 	}
 
-	DrumCore()
-	{
+	DrumCore() {
+		osc.set_frequency(200);
 	}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
-			
 		}
 	}
 	virtual void set_samplerate(const float sr) override
 	{
+		pitchEnvelope.set_samplerate(sr);
+		toneEnvelope.set_samplerate(sr);
+		noiseEnvelope.set_samplerate(sr);
+		fmEnvelope.set_samplerate(sr);
+		osc.set_samplerate(sr);
 	}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
-			
+			case 0:
+				gateIn = val;
+				break;
 		}
 	}
 
@@ -40,7 +56,9 @@ public:
 	{
 		float output = 0;
 		switch (output_id) {
-		
+			case 0:
+				output = drumOutput;
+				break;
 		}
 		return output;
 	}
@@ -54,7 +72,12 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
+	MacroEnvelope pitchEnvelope;
+	MacroEnvelope fmEnvelope;
+	MacroEnvelope toneEnvelope;
+	MacroEnvelope noiseEnvelope;
+	TwoOpFM osc;
 
-
-	
+	float gateIn = 0;
+	float drumOutput = 0;
 };

@@ -19,6 +19,11 @@ private:
 	float currentRatio = 1;
 	float lastRatio = 1;
 
+	void updateIncrement()
+	{
+		increment[0] = currentFreq * (currentRatio) * (max_ / sampleRate);
+	}
+
 public:
 	int ratioCoarse = 1;
 	float ratioFine = 1;
@@ -33,11 +38,6 @@ public:
 		if (currentFreq != lastFreq) {
 			updateIncrement();
 		}
-	}
-
-	void updateIncrement()
-	{
-		increment[0] = currentFreq * (currentRatio) * (max_ / sampleRate);
 	}
 
 	void updateRatio()
