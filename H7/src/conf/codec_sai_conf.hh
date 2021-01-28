@@ -5,7 +5,7 @@
 #include "drivers/stm32xx.h"
 
 const SaiConfig codec_sai_conf = {
-	.sai = SAI1,
+	.sai = SAI4,
 	.tx_block = SAI4_Block_A,
 	.rx_block = SAI4_Block_B,
 
@@ -13,7 +13,7 @@ const SaiConfig codec_sai_conf = {
 		{
 			.stream = BDMA_Channel0,
 			.request = BDMA_REQUEST_SAI4_A,
-			.IRQn = DMA2_Stream1_IRQn,
+			.IRQn = BDMA_Channel0_IRQn,
 			.pri = 1,
 			.subpri = 0,
 		},
@@ -21,7 +21,7 @@ const SaiConfig codec_sai_conf = {
 		{
 			.stream = BDMA_Channel1,
 			.request = BDMA_REQUEST_SAI4_A,
-			.IRQn = DMA2_Stream4_IRQn,
+			.IRQn = BDMA_Channel1_IRQn,
 			.pri = 1,
 			.subpri = 0,
 		},
