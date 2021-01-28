@@ -68,8 +68,18 @@ public:
 		return envOut;
 	}
 
+	void set_envelope_time(int _envStage, float milliseconds)
+	{
+		envTimes[_envStage] = milliseconds;
+	}
+
 	void set_samplerate(float sr)
 	{
 		sampleRate = sr;
 	}
+
+    void set_sustain(float _sustainLevel)
+    {
+        sustainLevel = _sustainLevel;
+    }
 };
