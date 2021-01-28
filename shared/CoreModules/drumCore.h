@@ -10,9 +10,6 @@ using namespace MathTools;
 
 class DrumCore : public CoreProcessor {
 public:
-	float pitchAmount = 0;
-	float fmAmount = 0;
-
 	virtual void update(void) override
 	{
 		float pitchEnvelopeOut = 0;
@@ -26,27 +23,45 @@ public:
 		fmEnvelopeOut = fmEnvelope.update(gateIn);
 
 		osc.set_frequency(baseFrequency + (pitchEnvelopeOut * 2000.0f * pitchAmount));
+		osc.modAmount = fmEnvelopeOut * fmAmount;
+		auto noiseOut = randomNumber(-1.0f, 1.0f) * noiseEnvelopeOut;
 
-		drumOutput = osc.update() * toneEnvelopeOut;
+		auto toneOutput = osc.update() * toneEnvelopeOut;
+
+		drumOutput = interpolate(toneOutput, noiseOut, noiseBlend);
 	}
 
-	DrumCore() {
-	}
+	DrumCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
+			case 0:
+				baseFrequency = map_value(val, 0.0f, 1.0f, 20.0f, 1000.0f);
+				break;
 			case 1:
-			pitchEnvelope.set_time(val);
-			break;
+				pitchEnvelope.set_time(val);
+				break;
 			case 2:
 				pitchAmount = val;
+				break;
+			case 3:
+				osc.ratioFine = map_value(val, 0.0f, 1.0f, 1.0f, 16.0f);
+				break;
+			case 4:
+				fmEnvelope.set_time(val);
 				break;
 			case 5:
 				fmAmount = val;
 				break;
-				case 6:
+			case 6:
 				toneEnvelope.set_time(val);
+				break;
+			case 7:
+				noiseEnvelope.set_time(val);
+				break;
+			case 8:
+				noiseBlend = val;
 				break;
 		}
 	}
@@ -88,13 +103,16 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	MacroEnvelope pitchEnvelope{false,false};
-	MacroEnvelope fmEnvelope{false,false};
-	MacroEnvelope toneEnvelope{false,true};
-	MacroEnvelope noiseEnvelope{false,false};
+	MacroEnvelope pitchEnvelope{false, false};
+	MacroEnvelope fmEnvelope{false, false};
+	MacroEnvelope toneEnvelope{false, true};
+	MacroEnvelope noiseEnvelope{false, false};
 	TwoOpFM osc;
 
 	float gateIn = 0;
 	float drumOutput = 0;
 	float baseFrequency = 50;
+	float noiseBlend = 0.5f;
+	float pitchAmount = 0;
+	float fmAmount = 0;
 };
