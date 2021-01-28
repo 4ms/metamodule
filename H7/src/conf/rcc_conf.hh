@@ -58,7 +58,7 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 			.PLL3VCOSEL = RCC_PLL3VCOWIDE,
 			.PLL3FRACN = 1245,
 		},
-	.FmcClockSelection = RCC_FMCCLKSOURCE_PLL,
+	.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2,
 	.QspiClockSelection = RCC_QSPICLKSOURCE_D1HCLK,
 	.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL,
 	.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_D2PCLK1,

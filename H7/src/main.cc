@@ -12,9 +12,9 @@
 #include "sys/system_clocks.hh"
 #include "ui.hh"
 
-struct DualOpenerSystem : SystemClocks, Debug /*, SDRAMPeriph*/, SharedBus {
+struct DualOpenerSystem : SystemClocks, Debug, /*SDRAMPeriph,*/ SharedBus {
 	DualOpenerSystem()
-		// : SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
+		//: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
 		: SharedBus{i2c_conf}
 	{}
 
@@ -27,7 +27,6 @@ struct DualOpenerSystem : SystemClocks, Debug /*, SDRAMPeriph*/, SharedBus {
 
 void main()
 {
-
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, _hardware.led_frame_buffer};
