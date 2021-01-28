@@ -10,6 +10,7 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelDrum); 
 p->addModel(modelComplexenvelope); 
 p->addModel(modelFmosc); 
 p->addModel(modelStereomixer); 

@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "DRUM",
+      "name": "Drum",
+      "description": "Drum",
+      "tags": []
+}, 
+{
       "slug": "COMPLEXENVELOPE",
       "name": "Complexenvelope",
       "description": "Complex Envelope",
