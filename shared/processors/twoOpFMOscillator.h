@@ -25,7 +25,7 @@ private:
 	}
 
 public:
-	int ratioCoarse = 1;
+	int ratioCoarse = 4;
 	float ratioFine = 1;
 	float modAmount = 0;
 
