@@ -286,9 +286,15 @@ private:
 	{
 		float rise = 0;
 		auto linearCurve = (float)phaccu / (float)max_;
+		float interpVal = 0.0f;
 		if (curve <= 0.5f) {
 			auto expoRise = expoCurve[phaccu >> 21];
-			rise = interpolate(expoRise, linearCurve, curve * 2.0f);
+			interpVal = map_value(curve, 0.0f, 0.5f, 0.0f, 1.0f);
+			rise = interpolate(expoRise, linearCurve, interpVal);
+		} else {
+			interpVal = map_value(curve, 0.5f, 1.0f, 0.0f, 1.0f);
+			auto logRise = 1.0f - expoCurve[(max_ - phaccu) >> 21];
+			rise = interpolate(linearCurve, logRise, interpVal);
 		}
 
 		return (rise);
@@ -296,7 +302,20 @@ private:
 
 	float calcFall(float fallFrom, float fallTo, float curve)
 	{
-		return (map_value((float)phaccu / (float)max_, 0.0f, 1.0f, fallFrom, fallTo));
+		float fall = 0;
+		auto linearCurve = map_value((float)phaccu / (float)max_, 0.0f, 1.0f, fallFrom, fallTo);
+
+		float interpVal = 0.0f;
+		if (curve <= 0.5f) {
+			auto expoFall = map_value(expoCurve[(max_-phaccu) >> 21],1.0f,0.0f,fallFrom,fallTo);
+			interpVal = map_value(curve, 0.0f, 0.5f, 0.0f, 1.0f);
+			fall = interpolate(expoFall, linearCurve, interpVal);
+		} else {
+			interpVal = map_value(curve, 0.5f, 1.0f, 0.0f, 1.0f);
+			auto logFall = map_value(expoCurve[phaccu >> 21],0.0f,1.0f,fallFrom,fallTo);
+			fall = interpolate(linearCurve, logFall, interpVal);
+		}
+		return fall;
 	}
 
 public:
