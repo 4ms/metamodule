@@ -377,6 +377,14 @@ public:
 	void set_envelope_time(int _envStage, float milliseconds)
 	{
 		envTimes[_envStage] = milliseconds;
+		if (_envStage == 1) // hold stage
+		{
+			if (milliseconds < 0.1f) {
+				holdEnable = false;
+			} else {
+				holdEnable = true;
+			}
+		}
 	}
 
 	void set_samplerate(float sr)

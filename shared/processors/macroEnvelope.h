@@ -16,7 +16,6 @@ public:
 		e.set_envelope_time(2, 500);
 		e.set_envelope_time(3, 1000);
 		e.sustainEnable = _enableSustain;
-		e.holdEnable = _enableHold;
 		envelopeTime.addPreset({0.1f, 1.0f, 12.0f, 100.0f, 0.1f});
 		envelopeTime.addPreset({0.1f, 1.0f, 60.0f, 600.0f, 0.1f});
 		envelopeTime.addPreset({0.1f, 300.0f, 200.0f, 1200.0f, 0.3f});

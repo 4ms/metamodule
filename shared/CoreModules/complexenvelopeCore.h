@@ -24,7 +24,7 @@ public:
 				e.set_envelope_time(0, mappedTime);
 				break;
 			case 1: // hold
-				e.set_envelope_time(1, mappedTime);
+				e.set_envelope_time(1, map_value(val,0.0f,1.0f,0.0f,1000.0f));
 				break;
 			case 2: // decay
 				e.set_envelope_time(2, mappedTime);
