@@ -19,15 +19,27 @@ struct Debug {
 	{
 		pin3.set_to(value);
 	}
-	
-	static void toggle_0() { pin0.toggle(); }
-	static void toggle_1() { pin1.toggle(); }
-	static void toggle_2() { pin2.toggle(); }
-	static void toggle_3() { pin3.toggle(); }
+
+	static void toggle_0()
+	{
+		pin0.toggle();
+	}
+	static void toggle_1()
+	{
+		pin1.toggle();
+	}
+	static void toggle_2()
+	{
+		pin2.toggle();
+	}
+	static void toggle_3()
+	{
+		pin3.toggle();
+	}
 
 private:
-	static inline Pin pin0{GPIO::G, 14, PinMode::Output};
-	static inline Pin pin1{GPIO::G, 9, PinMode::Output};
-	static inline Pin pin2{GPIO::D, 3, PinMode::Output};
-	static inline Pin pin3{GPIO::D, 4, PinMode::Output};
+	static inline Pin pin0{GPIO::A, 9, PinMode::Output};
+	static inline Pin pin1{GPIO::A, 10, PinMode::Output};
+	static inline Pin pin2{GPIO::A, 11, PinMode::Output};
+	static inline Pin pin3{GPIO::A, 12, PinMode::Output};
 };
