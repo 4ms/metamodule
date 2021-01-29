@@ -9,6 +9,7 @@
 // 	.IRQn = DMA1_Stream6_IRQn,
 // 	.pri = 3,
 // 	.subpri = 1,
+// .continuous = false,
 // };
 
 const uint32_t kNumLedDriverChips = 1;

@@ -1,5 +1,6 @@
 #pragma once
 #include "audio.hh"
+#include "debug.hh"
 #include "drivers/i2c.hh"
 #include "leds.hh"
 #include "params.hh"
@@ -25,7 +26,21 @@ public:
 	void update()
 	{
 		// Set LED colors
+
+		leds.but[0].set_background(Colors::yellow);
+		leds.but[1].set_background(Colors::white);
+		leds.clockLED.set_background(Colors::yellow);
+		leds.rotaryLED.set_background(Colors::purple);
 		leds.update();
+
+		// Todo: set a timer to manage refresh
+		static uint32_t last_update = 0;
+		if (HAL_GetTick() - last_update > 15) {
+			last_update = HAL_GetTick();
+			Debug::set_0(true);
+			leds.refresh();
+			Debug::set_0(false);
+		}
 
 		// Update screen
 
