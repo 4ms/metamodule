@@ -103,10 +103,10 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	MacroEnvelope pitchEnvelope{false, false};
-	MacroEnvelope fmEnvelope{false, false};
-	MacroEnvelope toneEnvelope{false, true};
-	MacroEnvelope noiseEnvelope{false, false};
+	MacroEnvelope pitchEnvelope{false};
+	MacroEnvelope fmEnvelope{false};
+	MacroEnvelope toneEnvelope{false};
+	MacroEnvelope noiseEnvelope{false};
 	TwoOpFM osc;
 
 	float gateIn = 0;
