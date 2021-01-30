@@ -20,6 +20,8 @@ private:
 	float decayCurve = 0;
 	float releaseCurve = 0;
 	bool holdEnable = true;
+	float attackSample = 0;
+	float releaseSample = 0;
 
 	bool lastGate;
 	WindowComparator gateInput;
@@ -38,7 +40,7 @@ private:
 			rise = interpolate(phaccu, logRise, interpVal);
 		}
 
-		return (rise);
+		return (map_value(rise, 0.0f, 1.0f, attackSample, 1.0f));
 	}
 
 	float calcFall(float fallFrom, float fallTo, float curve)
@@ -69,6 +71,7 @@ public:
 		if (gateInput.get_output() > lastGate) {
 			phaccu = 0;
 			stage = 0;
+			attackSample = lastSample;
 		}
 		if (gateInput.get_output() < lastGate) {
 			if (sustainEnable) {
@@ -77,61 +80,61 @@ public:
 			}
 		}
 
-		if (stage < 4) {
-			int stageSelect = 0;
-			if (sustainEnable) {
-				if (stage < 3)
-					stageSelect = stage;
-				else {
-					stageSelect = 3;
-				}
-			} else {
+		int stageSelect = 0;
+		if (sustainEnable) {
+			if (stage < 3)
 				stageSelect = stage;
+			else {
+				stageSelect = 3;
 			}
-
-			increment = 1000.0f / envTimes[stageSelect] / sampleRate;
-
-			phaccu += increment;
-			if (phaccu >= 1.0f) // overflow
-			{
-				if (stage == 0) {
-					if (holdEnable) {
-						stage = 1;
-					} else {
-						stage = 2;
-					}
-
-				} else {
-					if (sustainEnable) {
-						if (stage < 3 || stage == 4)
-							stage++;
-					} else {
-						stage++;
-					}
-				}
-				phaccu = 0;
-			}
-			if (stage == 0) { // attack stage
-				envOut = calcRise(attackCurve);
-			} else if (stage == 1) { // hold stage
-				envOut = 1.0f;
-			} else if (stage == 2) { // decay stage
-				envOut = calcFall(1.0f, sustainLevel, decayCurve);
-			}
-
-			if (sustainEnable) {
-				if (stage == 3) { // sustain stage
-					envOut = sustainLevel;
-				} else if (stage == 4) { // release stage
-					envOut = calcFall(lastSample, 0.0f, releaseCurve);
-				}
-			} else { // release
-				if (stage == 3) {
-					envOut = calcFall(sustainLevel, 0.0f, releaseCurve);
-				}
-			}
-			lastSample = envOut;
+		} else {
+			stageSelect = stage;
 		}
+
+		increment = 1000.0f / envTimes[stageSelect] / sampleRate;
+
+		phaccu += increment;
+		if (phaccu >= 1.0f) // overflow
+		{
+			if (stage == 0) {
+				if (holdEnable) {
+					stage = 1;
+				} else {
+					stage = 2;
+				}
+
+			} else {
+				if (sustainEnable) {
+					if (stage < 3 || stage == 4)
+						stage++;
+				} else {
+					stage++;
+				}
+			}
+			phaccu = 0;
+		}
+		if (stage == 0) { // attack stage
+			envOut = calcRise(attackCurve);
+		} else if (stage == 1) { // hold stage
+			envOut = 1.0f;
+		} else if (stage == 2) { // decay stage
+			envOut = calcFall(1.0f, sustainLevel, decayCurve);
+		}
+
+		if (sustainEnable) {
+			if (stage == 3) { // sustain stage
+				envOut = sustainLevel;
+			} else if (stage == 4) { // release stage
+				envOut = calcFall(releaseSample, 0.0f, releaseCurve);
+			}
+		} else { // release
+			if (stage == 3) {
+				envOut = calcFall(sustainLevel, 0.0f, releaseCurve);
+			}
+		}
+		if(stage<4)
+		releaseSample=envOut;
+		lastSample = envOut;
 		return envOut;
 	}
 
