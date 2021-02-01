@@ -1,7 +1,5 @@
 #include "audio.hh"
 #include "debug.hh"
-//#include "example_patch.hh"
-//#include "example-ps1.hh"
 #include "example-lfosimple.hh"
 #include "patch_player.hh"
 #include <cmath>
@@ -39,7 +37,7 @@ void Audio::set_input(int input_id, Audio::AudioSampleType in)
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	Debug::set_0(true);
+	// Debug::set_0(true);
 	// pre-amble: ~5us
 
 	params.update();
@@ -80,9 +78,9 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			player.set_panel_input(i + 2, cv.next()); // i+2 : skip audio jacks
 			i++;
 		}
-		Debug::set_1(true);
+		// Debug::set_1(true);
 		player.update_patch(example_lfosimple);
-		Debug::set_1(false);
+		// Debug::set_1(false);
 
 		out_.l = get_output(0);
 		out_.r = get_output(1);
@@ -90,7 +88,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		in_++;
 	}
 
-	Debug::set_0(false);
+	// Debug::set_0(false);
 }
 
 void Audio::start()

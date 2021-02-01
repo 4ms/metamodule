@@ -1,5 +1,6 @@
 #pragma once
 #include "audio.hh"
+#include "debug.hh"
 #include "drivers/i2c.hh"
 #include "leds.hh"
 #include "params.hh"
@@ -10,6 +11,8 @@ public:
 	LedCtl &leds;
 
 public:
+	static constexpr uint32_t kUpdateRate_Hz = 125;
+	static constexpr uint32_t kUpdateRate_ms = 1000U / (kUpdateRate_Hz);
 	Ui(Params &p, LedCtl &l /*, Screen &s*/)
 		: params{p}
 		, leds{l}
@@ -20,12 +23,31 @@ public:
 	{
 		leds.start_it_mode();
 		params.controls.start();
+
+		leds.but[0].set_background(Colors::yellow);
+		leds.but[1].set_background(Colors::white);
+		leds.clockLED.set_background(Colors::yellow);
+		leds.rotaryLED.set_background(Colors::purple);
+
+		leds.but[0].breathe(Colors::purple, 4 * kUpdateRate_Hz);
+		// leds.but[1].breathe(Colors::red, 2 * kUpdateRate_Hz);
+		leds.clockLED.breathe(Colors::pink, 3 * kUpdateRate_Hz);
+		leds.rotaryLED.breathe(Colors::green, 2 * kUpdateRate_Hz);
 	}
 
 	void update()
 	{
-		// Set LED colors
-		leds.update();
+
+		// Todo: set a timer to manage refresh
+		static uint32_t last_update = 0;
+		if (HAL_GetTick() - last_update > kUpdateRate_ms) { // why is this 8ms instead of 16ms?
+			last_update = HAL_GetTick();
+			Debug::set_0(true);
+			// Set LED colors
+			leds.update();
+			leds.refresh();
+			Debug::set_0(false);
+		}
 
 		// Update screen
 

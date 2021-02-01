@@ -5,26 +5,23 @@
 #include "drivers/stm32xx.h"
 
 const SaiConfig codec_sai_conf = {
-	.sai = SAI1,
-	// rx/tx swapped in order to correct p3 PCB:
-	.tx_block = SAI1_Block_B,
-	.rx_block = SAI1_Block_A,
-
-	.mode = SaiConfig::RXMaster,
+	.sai = SAI4,
+	.tx_block = SAI4_Block_A,
+	.rx_block = SAI4_Block_B,
 
 	.dma_init_tx =
 		{
-			.stream = DMA1_Stream1,		   // BDMA_Channel0,
-			.channel = DMA_REQUEST_SAI1_B, // BDMA_REQUEST_SAI4_B,
-			.IRQn = DMA1_Stream1_IRQn,	   // BDMA_Channel0_IRQn,
+			.stream = BDMA_Channel0,
+			.request = BDMA_REQUEST_SAI4_A,
+			.IRQn = BDMA_Channel0_IRQn,
 			.pri = 1,
 			.subpri = 0,
 		},
 	.dma_init_rx =
 		{
-			.stream = DMA1_Stream0,		   // BDMA_Channel1,
-			.channel = DMA_REQUEST_SAI1_A, // BDMA_REQUEST_SAI4_A, // SAI4_B in uncorrected PCB
-			.IRQn = DMA1_Stream0_IRQn,	   // BDMA_Channel1_IRQn,
+			.stream = BDMA_Channel1,
+			.request = BDMA_REQUEST_SAI4_A,
+			.IRQn = BDMA_Channel1_IRQn,
 			.pri = 1,
 			.subpri = 0,
 		},
@@ -33,20 +30,9 @@ const SaiConfig codec_sai_conf = {
 	.framesize = 32,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::E, 2, GPIO_AF6_SAI1},
-	.SCLK = {GPIO::E, 5, GPIO_AF6_SAI1},
-	.LRCLK = {GPIO::E, 4, GPIO_AF6_SAI1},
-
-	// swapped ADC/DAC pins in order to correct p3 PCB: (actually doesn't change anything)
-	.SD_DAC = {GPIO::E, 3, GPIO_AF6_SAI1},
-	.SD_ADC = {GPIO::E, 6, GPIO_AF6_SAI1},
-	/*
-		.MCLK = {GPIO::E, 2, GPIO_AF8_SAI4},
-		.SCLK = {GPIO::E, 5, GPIO_AF8_SAI4},
-		.LRCLK = {GPIO::E, 4, GPIO_AF8_SAI4},
-
-		// swapped ADC/DAC pins in order to correct p3 PCB: (actually doesn't change anything)
-		.SD_DAC = {GPIO::E, 3, GPIO_AF8_SAI4},
-		.SD_ADC = {GPIO::E, 6, GPIO_AF8_SAI4},
-		*/
+	.MCLK = {GPIO::E, 2, GPIO_AF8_SAI4},
+	.SCLK = {GPIO::E, 5, GPIO_AF8_SAI4},
+	.LRCLK = {GPIO::E, 4, GPIO_AF8_SAI4},
+	.SD_DAC = {GPIO::E, 6, GPIO_AF8_SAI4},
+	.SD_ADC = {GPIO::E, 3, GPIO_AF8_SAI4},
 };

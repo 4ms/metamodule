@@ -2,13 +2,14 @@
 // #include "drivers/dma_config_struct.hh"
 #include "drivers/stm32xx.h"
 
-// const DMA_Config led_driver_dma_conf = {
+// const DMAConfig led_driver_dma_conf = {
 // 	.DMAx = DMA1,
 // 	.stream = DMA1_Stream6,
 // 	.channel = DMA_CHANNEL_1,
 // 	.IRQn = DMA1_Stream6_IRQn,
 // 	.pri = 3,
 // 	.subpri = 1,
+// .continuous = false,
 // };
 
 const uint32_t kNumLedDriverChips = 1;
