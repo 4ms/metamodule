@@ -60,6 +60,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
+		/*
 		auto scaled_in = AudioFrame::scaleInput(in_->l);
 		player.set_panel_input(0, scaled_in);
 
@@ -84,7 +85,9 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 		out_.l = get_output(0);
 		out_.r = get_output(1);
-
+		*/
+		out_.l = in_->l;
+		out_.r = in_->r;
 		in_++;
 	}
 
