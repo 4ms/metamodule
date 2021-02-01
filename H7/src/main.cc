@@ -27,7 +27,7 @@ struct DualOpenerSystem : SystemClocks, Debug, /*SDRAMPeriph,*/ SharedBus {
 
 void main()
 {
-	// CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
+	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, _hardware.led_frame_buffer};
 	LedCtl leds{led_driver};
@@ -37,11 +37,11 @@ void main()
 	Controls controls;
 	Params params{controls};
 
-	// Audio audio{params, codec, _hardware.audio_dma_block};
+	Audio audio{params, codec, _hardware.audio_dma_block};
 
 	Ui ui{params, leds};
 
-	// audio.start();
+	audio.start();
 	ui.start();
 
 	while (1) {
