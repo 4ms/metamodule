@@ -16,7 +16,7 @@ struct DrumModule : CommModule {
 		NOISE_BLEND_PARAM,
 		NUM_PARAMS
 	};
-	enum InputIds { TRIGGER_INPUT, NUM_INPUTS };
+	enum InputIds { TRIGGER_INPUT, PITCH_INPUT, NUM_INPUTS };
 	enum OutputIds { DRUM_OUTPUT, NUM_OUTPUTS };
 	enum LightIds { NUM_LIGHTS };
 
@@ -27,6 +27,7 @@ struct DrumModule : CommModule {
 		selfID.typeID = "DRUM";
 
 		outputJacks[DrumModule::DRUM_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+		inputJacks[DrumModule::PITCH_INPUT]->scale = [](float f) { return f / 5.0f; };
 	}
 };
 
@@ -58,6 +59,7 @@ struct DrumWidget : CommModuleWidget {
 		addLabeledKnob("NOISE ENV", DrumModule::NOISE_ENV_PARAM, {1, 2});
 		addLabeledKnob("NOISE BLEND", DrumModule::NOISE_BLEND_PARAM, {2, 2});
 
+		addLabeledInput("V/OCT", DrumModule::PITCH_INPUT, {0, 1});
 		addLabeledInput("TRIGGER", DrumModule::TRIGGER_INPUT, {0, 0});
 		addLabeledOutput("OUTPUT", DrumModule::DRUM_OUTPUT, {2, 0});
 	}

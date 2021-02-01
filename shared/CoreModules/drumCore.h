@@ -13,7 +13,10 @@ class DrumCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		osc.set_frequency(baseFrequency + (envelopes[pitchEnvelope].update(gateIn) * 4000.0f * (pitchAmount*pitchAmount)));
+		auto freqCalc =
+			baseFrequency + (envelopes[pitchEnvelope].update(gateIn) * 4000.0f * (pitchAmount * pitchAmount));
+
+		osc.set_frequency(freqCalc * expTable.interp(constrain(pitchCV, 0.0f, 1.0f)));
 		osc.modAmount = envelopes[fmEnvelope].update(gateIn) * fmAmount;
 		auto noiseOut = randomNumber(-1.0f, 1.0f) * envelopes[noiseEnvelope].update(gateIn);
 
@@ -113,6 +116,9 @@ public:
 			case 0:
 				gateIn = val;
 				break;
+			case 1:
+				pitchCV = val;
+				break;
 		}
 	}
 
@@ -147,6 +153,7 @@ private:
 	float noiseBlend = 0.5f;
 	float pitchAmount = 0;
 	float fmAmount = 0;
+	float pitchCV = 20;
 
 	InterpArray<float, 4> pitchDecayTimes = {10, 10, 200, 500};
 	InterpArray<float, 4> pitchBreakPoint = {0, 0.1, 0.2, 1};
