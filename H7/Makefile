@@ -123,7 +123,7 @@ OPTFLAG = -O3
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver_dma.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/i2c.o: OPTFLAG = -O0
-$(BUILDDIR)/$(DRIVERLIB)/drivers/sai.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/sai.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
 
 CFLAGS = -g2 -fno-common \
