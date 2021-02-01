@@ -42,11 +42,11 @@ public:
 		static uint32_t last_update = 0;
 		if (HAL_GetTick() - last_update > kUpdateRate_ms) { // why is this 8ms instead of 16ms?
 			last_update = HAL_GetTick();
-			Debug::set_0(true);
+			Debug::set_3(true);
 			// Set LED colors
 			leds.update();
 			leds.refresh();
-			Debug::set_0(false);
+			Debug::set_3(false);
 		}
 
 		// Update screen

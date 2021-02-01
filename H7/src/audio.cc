@@ -2,7 +2,6 @@
 #include "debug.hh"
 #include "example-lfosimple.hh"
 #include "patch_player.hh"
-#include <cmath>
 
 Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	: codec_{codec}
@@ -18,8 +17,7 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
 							kAudioStreamDMABlockSize * 2);
-
-	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_2); }, [this]() { process(rx_buf_2, tx_buf_1); });
+	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_1); }, [this]() { process(rx_buf_2, tx_buf_2); });
 }
 
 Audio::AudioSampleType Audio::get_output(int output_id)
@@ -37,7 +35,7 @@ void Audio::set_input(int input_id, Audio::AudioSampleType in)
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	// Debug::set_0(true);
+	Debug::set_0(true);
 	// pre-amble: ~5us
 
 	params.update();
@@ -60,7 +58,6 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
-		/*
 		auto scaled_in = AudioFrame::scaleInput(in_->l);
 		player.set_panel_input(0, scaled_in);
 
@@ -79,19 +76,18 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			player.set_panel_input(i + 2, cv.next()); // i+2 : skip audio jacks
 			i++;
 		}
-		// Debug::set_1(true);
+		Debug::set_1(true);
 		player.update_patch(example_lfosimple);
-		// Debug::set_1(false);
+		Debug::set_1(false);
 
 		out_.l = get_output(0);
 		out_.r = get_output(1);
-		*/
-		out_.l = in_->l;
-		out_.r = in_->r;
+		// out_.l = in_->l;
+		// out_.r = in_->r;
 		in_++;
 	}
 
-	// Debug::set_0(false);
+	Debug::set_0(false);
 }
 
 void Audio::start()

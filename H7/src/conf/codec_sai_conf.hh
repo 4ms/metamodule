@@ -4,9 +4,9 @@
 #include "drivers/sai_config_struct.hh"
 #include "drivers/stm32xx.h"
 
+// Note: rx/tx swapped in order to correct p3 PCB
 const SaiConfig codec_sai_conf = {
 	.sai = SAI1,
-	// rx/tx swapped in order to correct p3 PCB:
 	.tx_block = SAI1_Block_B,
 	.rx_block = SAI1_Block_A,
 
@@ -25,7 +25,7 @@ const SaiConfig codec_sai_conf = {
 		{
 			.DMAx = DMA1,
 			.stream = DMA1_Stream0,		   // BDMA_Channel1,
-			.channel = DMA_REQUEST_SAI1_A, // BDMA_REQUEST_SAI4_A, // SAI4_B in uncorrected PCB
+			.channel = DMA_REQUEST_SAI1_A, // BDMA_REQUEST_SAI4_A,
 			.IRQn = DMA1_Stream0_IRQn,	   // BDMA_Channel1_IRQn,
 			.pri = 1,
 			.subpri = 0,
@@ -38,17 +38,6 @@ const SaiConfig codec_sai_conf = {
 	.MCLK = {GPIO::E, 2, GPIO_AF6_SAI1},
 	.SCLK = {GPIO::E, 5, GPIO_AF6_SAI1},
 	.LRCLK = {GPIO::E, 4, GPIO_AF6_SAI1},
-
-	// swapped ADC/DAC pins in order to correct p3 PCB: (actually doesn't change anything)
 	.SD_DAC = {GPIO::E, 3, GPIO_AF6_SAI1},
 	.SD_ADC = {GPIO::E, 6, GPIO_AF6_SAI1},
-	/*
-		.MCLK = {GPIO::E, 2, GPIO_AF8_SAI4},
-		.SCLK = {GPIO::E, 5, GPIO_AF8_SAI4},
-		.LRCLK = {GPIO::E, 4, GPIO_AF8_SAI4},
-
-		// swapped ADC/DAC pins in order to correct p3 PCB: (actually doesn't change anything)
-		.SD_DAC = {GPIO::E, 3, GPIO_AF8_SAI4},
-		.SD_ADC = {GPIO::E, 6, GPIO_AF8_SAI4},
-		*/
 };

@@ -3,7 +3,9 @@
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdram_conf.hh"
 #include "debug.hh"
+#include "drivers/arch.hh"
 #include "drivers/codec_WM8731.hh"
+#include "drivers/mpu.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "drivers/sdram.hh"
 #include "drivers/stm32xx.h"
@@ -16,10 +18,11 @@ struct DualOpenerSystem : SystemClocks, Debug, /*SDRAMPeriph,*/ SharedBus {
 	DualOpenerSystem()
 		//: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
 		: SharedBus{i2c_conf}
-	{}
+	{
+		MPU_::disable_cache_for_dma_buffer(audio_dma_block, sizeof(audio_dma_block));
+		MPU_::disable_cache_for_dma_buffer(led_frame_buffer, sizeof(led_frame_buffer));
+	}
 
-	// Todo: ensure D-Cache does not clobber our dma buffers:
-	// see: https://community.st.com/s/article/FAQ-DMA-is-not-working-on-STM32H7-devices
 	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
 	static inline __attribute__((section(".dma_buffer"))) Audio::AudioStreamBlock audio_dma_block[4];
 
