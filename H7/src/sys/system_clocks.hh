@@ -9,6 +9,7 @@
 struct SystemClocks {
 	SystemClocks()
 	{
+		// target::init_powerup();
 		int32_t timeout = 0xFFFF;
 		while ((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) != RESET) && (timeout-- > 0))
 			;
@@ -16,18 +17,15 @@ struct SystemClocks {
 			__BKPT();
 
 		System::SetVectorTable(0x08000000);
-
 		System::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
-
 		HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
 
+		// target::init_caches();
 		SCB_InvalidateDCache();
 
-		// Debug Mode (all caches disabled):
 #ifdef DEBUG_MODE_DISABLE_I_CACHE
 		SCB_DisableICache();
 #else
-		// Code execution from flash over AXIM bus (0x08000000) using I-Cache:
 		SCB_EnableICache();
 #endif
 

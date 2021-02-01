@@ -18,16 +18,16 @@ struct DualOpenerSystem : SystemClocks, Debug, /*SDRAMPeriph,*/ SharedBus {
 		: SharedBus{i2c_conf}
 	{}
 
-	// Todo: this is not ideal to have DMA buffers in D1 domain. See:
-	// https://community.st.com/s/article/FAQ-DMA-is-not-working-on-STM32H7-devices
-	static inline __attribute__((section(".dtcm"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
-	static inline __attribute__((section(".dtcm"))) Audio::AudioStreamBlock audio_dma_block[4];
+	// Todo: ensure D-Cache does not clobber our dma buffers:
+	// see: https://community.st.com/s/article/FAQ-DMA-is-not-working-on-STM32H7-devices
+	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
+	static inline __attribute__((section(".dma_buffer"))) Audio::AudioStreamBlock audio_dma_block[4];
 
 } _hardware;
 
 void main()
 {
-	// CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
+	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, _hardware.led_frame_buffer};
 	LedCtl leds{led_driver};
@@ -37,11 +37,11 @@ void main()
 	Controls controls;
 	Params params{controls};
 
-	// Audio audio{params, codec, _hardware.audio_dma_block};
+	Audio audio{params, codec, _hardware.audio_dma_block};
 
 	Ui ui{params, leds};
 
-	// audio.start();
+	audio.start();
 	ui.start();
 
 	while (1) {

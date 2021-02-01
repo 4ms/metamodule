@@ -4,7 +4,8 @@ CORE ?= M7
 
 ifeq ($(CORE), M7)
 $(info Building for M7 core)
-LOADFILE	= STM32H745IGTX_FLASH_CM7.ld
+#LOADFILE	= STM32H745IGTX_FLASH_CM7.ld
+LOADFILE	= stm32h755xx_flash_CM7.ld
 BUILDDIR = build/corem7
 MCU =  -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM7 -DCORE_CM7
@@ -13,7 +14,8 @@ else
 
 ifeq ($(CORE), M4)
 $(info Building for M4 core)
-LOADFILE	= STM32H745IGTX_FLASH_CM4.ld
+# LOADFILE	= STM32H745IGTX_FLASH_CM4.ld
+LOADFILE	= stm32h755xx_flash_CM4.ld
 BUILDDIR = build/corem4
 MCU =  -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
@@ -121,6 +123,7 @@ OPTFLAG = -O3
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver_dma.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/i2c.o: OPTFLAG = -O0
+$(BUILDDIR)/$(DRIVERLIB)/drivers/sai.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
 
 CFLAGS = -g2 -fno-common \

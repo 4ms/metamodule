@@ -14,6 +14,7 @@ const SaiConfig codec_sai_conf = {
 
 	.dma_init_tx =
 		{
+			.DMAx = DMA1,
 			.stream = DMA1_Stream1,		   // BDMA_Channel0,
 			.channel = DMA_REQUEST_SAI1_B, // BDMA_REQUEST_SAI4_B,
 			.IRQn = DMA1_Stream1_IRQn,	   // BDMA_Channel0_IRQn,
@@ -22,6 +23,7 @@ const SaiConfig codec_sai_conf = {
 		},
 	.dma_init_rx =
 		{
+			.DMAx = DMA1,
 			.stream = DMA1_Stream0,		   // BDMA_Channel1,
 			.channel = DMA_REQUEST_SAI1_A, // BDMA_REQUEST_SAI4_A, // SAI4_B in uncorrected PCB
 			.IRQn = DMA1_Stream0_IRQn,	   // BDMA_Channel1_IRQn,
