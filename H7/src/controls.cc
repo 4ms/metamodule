@@ -26,7 +26,8 @@ void Controls::start()
 	read_controls_task.start();
 }
 
-Controls::Controls()
+Controls::Controls(I2CPeriph &i2c)
+	: _i2c{i2c}
 {
 	cvadc.start();
 	// debug_control_read_timing();

@@ -5,25 +5,24 @@
 #include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/codec_WM8731.hh"
-#include "drivers/i2c.hh"
 #include "drivers/mpu.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "drivers/sdram.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
+#include "shared_bus.hh"
 #include "sys/system_clocks.hh"
 #include "ui.hh"
 
-struct DualOpenerSystem : SystemClocks, /*SDRAMPeriph,*/ Debug {
+struct DualOpenerSystem : SystemClocks, /*SDRAMPeriph,*/ Debug, SharedBus {
 	DualOpenerSystem()
 		//: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
-		: shared_i2c{i2c_conf}
+		: SharedBus{i2c_conf}
 	{
 		target::MPU_::disable_cache_for_dma_buffer(audio_dma_block, sizeof(audio_dma_block));
 		target::MPU_::disable_cache_for_dma_buffer(led_frame_buffer, sizeof(led_frame_buffer));
 	}
 
-	I2CPeriph shared_i2c;
 	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
 	static inline __attribute__((section(".dma_buffer"))) Audio::AudioStreamBlock audio_dma_block[4];
 
@@ -31,15 +30,14 @@ struct DualOpenerSystem : SystemClocks, /*SDRAMPeriph,*/ Debug {
 
 void main()
 {
-
-	CodecWM8731 codec{_hardware.shared_i2c, codec_sai_conf};
+	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
-	PCA9685DmaDriver led_driver{_hardware.shared_i2c, kNumLedDriverChips, {}, _hardware.led_frame_buffer};
+	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, _hardware.led_frame_buffer};
 	LedCtl leds{led_driver};
 
 	__HAL_DBGMCU_FREEZE_TIM6();
 
-	Controls controls; //{_hardware.shared_i2c, _hardware.cvadc_spi};
+	Controls controls{SharedBus::i2c}; //, _hardware.cvadc_spi};
 	Params params{controls};
 
 	Audio audio{params, codec, _hardware.audio_dma_block};
