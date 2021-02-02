@@ -4,7 +4,6 @@
 #include "drivers/sai_config_struct.hh"
 #include "drivers/stm32xx.h"
 
-// Note: rx/tx swapped in order to correct p3 PCB
 const SaiConfig codec_sai_conf = {
 	.sai = SAI1,
 	.tx_block = SAI1_Block_B,

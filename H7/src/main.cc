@@ -14,13 +14,13 @@
 #include "sys/system_clocks.hh"
 #include "ui.hh"
 
-struct DualOpenerSystem : SystemClocks, Debug, /*SDRAMPeriph,*/ SharedBus {
+struct DualOpenerSystem : SystemClocks, /*SDRAMPeriph,*/ Debug, SharedBus {
 	DualOpenerSystem()
 		//: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
 		: SharedBus{i2c_conf}
 	{
-		MPU_::disable_cache_for_dma_buffer(audio_dma_block, sizeof(audio_dma_block));
-		MPU_::disable_cache_for_dma_buffer(led_frame_buffer, sizeof(led_frame_buffer));
+		target::MPU_::disable_cache_for_dma_buffer(audio_dma_block, sizeof(audio_dma_block));
+		target::MPU_::disable_cache_for_dma_buffer(led_frame_buffer, sizeof(led_frame_buffer));
 	}
 
 	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
@@ -37,7 +37,7 @@ void main()
 
 	__HAL_DBGMCU_FREEZE_TIM6();
 
-	Controls controls;
+	Controls controls{SharedBus::i2c}; //, _hardware.cvadc_spi};
 	Params params{controls};
 
 	Audio audio{params, codec, _hardware.audio_dma_block};
