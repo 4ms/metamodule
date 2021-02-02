@@ -282,6 +282,14 @@ void buildTrigTables()
 	}
 	myfile << "};" << endl;
 
+	myfile << "const InterpArray<float," << trigTableLength << "> pow9Table = " << endl;
+	myfile << "{";
+	for (int i = 0; i < trigTableLength; i++) {
+		float index = (float)i / (float)(trigTableLength - 1);
+		myfile << format_float(powf(index, 8.8f)) << ",";
+	}
+	myfile << "};" << endl;
+
 	myfile.close();
 }
 
