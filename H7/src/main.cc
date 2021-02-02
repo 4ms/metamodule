@@ -31,6 +31,7 @@ struct DualOpenerSystem : SystemClocks, /*SDRAMPeriph,*/ Debug {
 
 void main()
 {
+
 	CodecWM8731 codec{_hardware.shared_i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	PCA9685DmaDriver led_driver{_hardware.shared_i2c, kNumLedDriverChips, {}, _hardware.led_frame_buffer};
