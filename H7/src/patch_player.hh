@@ -1,23 +1,18 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleTypes.h"
+
 #define USE_NODES
-#ifdef USE_NODES
-	#include "CoreModules/panel_node.hh"
-#else
-	#include "CoreModules/panel.hh"
-#endif
+
+#include "CoreModules/panel_node.hh"
+
 #include "patch/patch.hh"
 #include <cstdint>
 #ifdef STM32F7
 	#include "debug.hh"
 #endif
 
-#ifdef USE_NODES
 using PanelT = NodePanel;
-#else
-using PanelT = Panel;
-#endif
 
 class PatchPlayer {
 private:
@@ -30,11 +25,28 @@ public:
 	{
 		if (!is_loaded)
 			return;
-#ifdef USE_NODES
 		static_cast<PanelT *>(modules[0].get())->set_input(jack_id, val);
-#else
+	}
+
+	float get_panel_input(int jack_id)
+	{
+		if (!is_loaded)
+			return 0.f;
+		return static_cast<PanelT *>(modules[0].get())->get_input(jack_id);
+	}
+
+	void set_panel_output(int jack_id, float val)
+	{
+		if (!is_loaded)
+			return;
 		static_cast<PanelT *>(modules[0].get())->set_output(jack_id, val);
-#endif
+	}
+
+	float get_panel_output(int jack_id)
+	{
+		if (!is_loaded)
+			return 0.f;
+		return static_cast<PanelT *>(modules[0].get())->get_output(jack_id);
 	}
 
 	void set_panel_param(int param_id, float val)
@@ -46,21 +58,14 @@ public:
 
 	float get_panel_param(int param_id)
 	{
-		if (!is_loaded)
-			return 0.f;
-		return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
+		// until we get ADC running:
+		return 0.5f;
+		// if (!is_loaded)
+		// 	return 0.f;
+		// return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
 	}
 
-	float get_panel_output(int jack_id)
-	{
-#ifdef USE_NODES
-		return static_cast<PanelT *>(modules[0].get())->get_output(jack_id);
-#else
-		return static_cast<PanelT *>(modules[0].get())->get_input(jack_id);
-#endif
-	}
-
-	void load_patch(const Patch &p)
+	bool load_patch(const Patch &p)
 	{
 		for (auto &n : nodes)
 			n = 0.f;
@@ -74,7 +79,7 @@ public:
 
 			if (modules[i] == nullptr) {
 				is_loaded = false;
-				return;
+				return false;
 			}
 
 			modules[i]->mark_all_inputs_unpatched();
@@ -104,6 +109,7 @@ public:
 		}
 
 		is_loaded = true;
+		return true;
 	}
 
 	void update_patch(const Patch &p)
@@ -125,13 +131,21 @@ public:
 		for (int net_i = 0; net_i < p.num_nets; net_i++) {
 			auto &net = p.nets[net_i];
 			auto &output = net.jacks[0];
-			// FixMe: need to use non-node PANEL which has get_output defined to return input[]
-			float out_val = modules[output.module_id]->get_output(output.jack_id);
+
+			// Todo: instead of this if block, just define Panel::get_output() as get_input()
+			// and set_input() as set_output()
+			float out_val;
+			if (output.module_id == 0)
+				out_val = get_panel_input(output.jack_id);
+			else
+				out_val = modules[output.module_id]->get_output(output.jack_id);
 
 			for (int jack_i = 1; jack_i < net.num_jacks; jack_i++) {
 				auto &jack = net.jacks[jack_i];
-				// FixMe: need to use non-node PANEL which has set_input defined to set output[]
-				modules[jack.module_id]->set_input(jack.jack_id, out_val);
+				if (jack.module_id == 0)
+					set_panel_output(jack.jack_id, out_val);
+				else
+					modules[jack.module_id]->set_input(jack.jack_id, out_val);
 			}
 		}
 #endif

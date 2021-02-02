@@ -1,6 +1,8 @@
 #include "audio.hh"
 #include "debug.hh"
-#include "example-lfosimple.hh"
+// #include "example-lfosimple.hh"
+// #include "example-ps2.hh"
+#include "example1.hh"
 #include "patch_player.hh"
 
 Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
@@ -12,7 +14,12 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	, rx_buf_2{buffers[3]}
 	, params{p}
 {
-	player.load_patch(example_lfosimple);
+	bool ok = player.load_patch(Example1);
+	if (!ok) {
+		while (1) {
+			;
+		}
+	}
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
@@ -77,7 +84,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			i++;
 		}
 		Debug::set_1(true);
-		player.update_patch(example_lfosimple);
+		player.update_patch(Example1);
 		Debug::set_1(false);
 
 		out_.l = get_output(0);
