@@ -37,16 +37,30 @@ public:
 
 	void update()
 	{
-
 		// Todo: set a timer to manage refresh
-		static uint32_t last_update = 0;
-		if (HAL_GetTick() - last_update > kUpdateRate_ms) { // why is this 8ms instead of 16ms?
-			last_update = HAL_GetTick();
-			Debug::set_3(true);
-			// Set LED colors
-			leds.update();
-			leds.refresh();
-			Debug::set_3(false);
+		// static uint32_t last_update = 0;
+		static uint32_t next_client = 0;
+
+		// Todo: add queue to i2c
+		if (!params.controls.i2c.is_ready()) {
+			// if (HAL_GetTick() - last_update > kUpdateRate_ms) { // why is this 8ms instead of 16ms?
+			// last_update = HAL_GetTick();
+			switch (next_client) {
+				case 0:
+					Debug::set_3(true);
+					leds.update();
+					leds.refresh();
+					Debug::set_3(false);
+					next_client = 1;
+					break;
+				case 1:
+					Debug::set_2(true);
+					// params.controls.potadc.select_channel0_source
+					// initiate read
+					Debug::set_2(false);
+					next_client = 0;
+					break;
+			}
 		}
 
 		// Update screen

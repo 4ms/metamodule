@@ -37,7 +37,7 @@ public:
 
 	void refresh()
 	{
-		led_driver_.write_once();
+		led_driver_.write_once(0);
 	}
 
 private:
