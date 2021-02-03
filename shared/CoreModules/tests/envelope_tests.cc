@@ -3,10 +3,6 @@
 #include <iostream>
 #include <stdint.h>
 
-#include <chrono>
-
-using namespace std::chrono;
-
 TEST_CASE("sustain test")
 {
 	Envelope e;
