@@ -10,6 +10,7 @@
 #include "drivers/sdram.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
+#include "muxed_adc.hh"
 #include "shared_bus.hh"
 #include "sys/system_clocks.hh"
 #include "ui.hh"
@@ -30,6 +31,10 @@ struct DualOpenerSystem : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 
 void main()
 {
+	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
+	// GPIO Expander here
+	// CV ADC here
+
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, _hardware.led_frame_buffer};
@@ -37,7 +42,7 @@ void main()
 
 	__HAL_DBGMCU_FREEZE_TIM6();
 
-	Controls controls{SharedBus::i2c}; //, _hardware.cvadc_spi};
+	Controls controls{SharedBus::i2c}; //{potadc, cvadc, gpio_expander};
 	Params params{controls};
 
 	Audio audio{params, codec, _hardware.audio_dma_block};
