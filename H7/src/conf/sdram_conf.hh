@@ -1,10 +1,11 @@
 #pragma once
 #include "conf/sdram_48LC16M16_6A_conf.hh"
+#include "conf/sdram_AS4C16M16SA_6CN_conf.hh"
 #include "conf/sdram_AS4C16M16SA_7CN_conf.hh"
 #include "conf/sdram_W9825G6KH_75_conf.hh"
 #include "drivers/sdram_config_struct.hh"
 
-const SDRAMPinNames SDRAM_pin_names = {
+constexpr SDRAMPinNames SDRAM_pin_names = {
 	.A0{GPIO::F, 0, LL_GPIO_AF_12},
 	.A1{GPIO::F, 1, LL_GPIO_AF_12},
 	.A2{GPIO::F, 2, LL_GPIO_AF_12},
@@ -46,23 +47,34 @@ const SDRAMPinNames SDRAM_pin_names = {
 	.SDNWE{GPIO::C, 0, LL_GPIO_AF_12},
 };
 
-const SDRAMConfig SDRAM_AS4C_conf = {
+constexpr SDRAMConfig SDRAM_AS4C_T7_conf = {
 	.pin_list = {SDRAM_pin_names},
 	.timing = SDRAM_timing_AS4C16M16SA_7CN,
 	.arch = SDRAM_arch_AS4C16M16SA_7CN,
 	.connected_bank = 1,
+	.fmc_kernel_clock_MHz = 480,
 };
 
-const SDRAMConfig SDRAM_48LC16M16_6A_conf = {
+constexpr SDRAMConfig SDRAM_AS4C_T6_conf = {
+	.pin_list = {SDRAM_pin_names},
+	.timing = SDRAM_timing_AS4C16M16SA_6CN,
+	.arch = SDRAM_arch_AS4C16M16SA_6CN,
+	.connected_bank = 1,
+	.fmc_kernel_clock_MHz = 216,
+};
+
+constexpr SDRAMConfig SDRAM_48LC16M16_6A_conf = {
 	.pin_list = {SDRAM_pin_names},
 	.timing = SDRAM_timing_48LC16M16_6A,
 	.arch = SDRAM_arch_48LC16M16_6A,
 	.connected_bank = 1,
+	.fmc_kernel_clock_MHz = 480,
 };
 
-const SDRAMConfig SDRAM_W9825_conf = {
+constexpr SDRAMConfig SDRAM_W9825_conf = {
 	.pin_list = {SDRAM_pin_names},
 	.timing = SDRAM_timing_W9825G6KH_75,
 	.arch = SDRAM_arch_W9825G6KH_75,
 	.connected_bank = 1,
+	.fmc_kernel_clock_MHz = 480,
 };

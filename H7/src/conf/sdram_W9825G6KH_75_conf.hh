@@ -1,7 +1,7 @@
 #pragma once
 #include "drivers/sdram_config_struct.hh"
 
-const SDRAMTimingConfig SDRAM_timing_W9825G6KH_75 = {
+constexpr SDRAMTimingConfig SDRAM_timing_W9825G6KH_75 = {
 	.tRC_ns = 65,
 	.tRP_ns = 21,
 	.tMRD_ns = 2,
@@ -17,7 +17,7 @@ const SDRAMTimingConfig SDRAM_timing_W9825G6KH_75 = {
 	.read_pipe_delay = 2,
 };
 
-const SDRAMArchConfig SDRAM_arch_W9825G6KH_75 = {
+constexpr SDRAMArchConfig SDRAM_arch_W9825G6KH_75 = {
 	.num_internal_banks = 4,
 	.bus_width_bits = 16,
 	.column_bits = 12,
