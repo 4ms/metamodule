@@ -1,4 +1,5 @@
 #pragma once
+#include "debug.hh"
 #include "drivers/i2c.hh"
 
 class SharedBus {
@@ -8,6 +9,11 @@ public:
 	SharedBus(const I2CConfig &defs)
 	{
 		i2c.init(defs);
+	}
+
+	static void process_queue()
+	{
+		//
 	}
 };
 

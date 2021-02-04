@@ -83,9 +83,9 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			player.set_panel_input(i + 2, cv.next()); // i+2 : skip audio jacks
 			i++;
 		}
-		Debug::set_1(true);
+		// Debug::set_1(true);
 		player.update_patch(Example1);
-		Debug::set_1(false);
+		// Debug::set_1(false);
 
 		out_.l = get_output(0);
 		out_.r = get_output(1);

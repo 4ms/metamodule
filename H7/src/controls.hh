@@ -10,10 +10,12 @@
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
+#include "muxed_adc.hh"
 #include "util/filter.hh"
 
 struct Controls {
 
+	MuxedADC &potadc;
 	AnalogIn<AdcSpi_MAX11666<2>, 4, Oversampler<16>> cvadc{spi_adc_conf};
 
 	GPIOExpander<16> sense{gpio_expander_conf};
@@ -22,11 +24,9 @@ struct Controls {
 	RotaryEncoder<RotaryFullStep> rotary = {GPIO::C, 7, GPIO::C, 8};
 	DebouncedSwitch rotary_button = {GPIO::C, 6};
 
-	Controls(I2CPeriph &i2c);
+	Controls(MuxedADC &potadc);
 	void read();
 	void start();
-
-	I2CPeriph &i2c;
 
 private:
 	Timekeeper read_controls_task;

@@ -9,33 +9,71 @@
 // Channel 1 is connected to Patch CV
 class MuxedADC {
 public:
+	enum class Channel : uint8_t {
+		Pots = 0,
+		PatchCV = 1,
+	};
+
 	MuxedADC(I2CPeriph &i2c, const MuxedADC_Config &conf)
-		: chan_sel{{conf.SEL0.gpio, conf.SEL0.pin, PinMode::Output},
+		: _pot_sel{{conf.SEL0.gpio, conf.SEL0.pin, PinMode::Output},
 				   {conf.SEL1.gpio, conf.SEL1.pin, PinMode::Output},
 				   {conf.SEL2.gpio, conf.SEL2.pin, PinMode::Output}}
-		, _i2c{i2c}
-		, _adc{_i2c, conf.adc_conf}
+		, _adc{i2c, conf.adc_conf}
 	{}
 
-	void select_channel0_source(unsigned chan)
+	void start()
 	{
-		chan_sel[0].set_to(chan & 0b001);
-		chan_sel[1].set_to(chan & 0b010);
-		chan_sel[2].set_to(chan & 0b100);
+		auto err = _adc.send_config();
+		handle_error(err);
 	}
 
-	void initiate_read() {}
-	uint32_t get_val(unsigned chan)
+	void select_pot_source(unsigned pot)
 	{
-		return chan < 8 ? last_pot_reading[chan] : last_chan1_reading;
+		_cur_pot = pot & 0b111;
+		_pot_sel[0].set_to(pot & 0b001);
+		_pot_sel[1].set_to(pot & 0b010);
+		_pot_sel[2].set_to(pot & 0b100);
+	}
+
+	void initiate_read(Channel chan)
+	{
+		auto err = _adc.select_channel(static_cast<uint8_t>(chan));
+		handle_error(err);
+		err = _adc.read_blocking();
+		handle_error(err);
+	}
+
+	void finalize_read(Channel chan)
+	{
+		if (chan == Channel::Pots)
+			_last_pot_reading[_cur_pot] = _adc.get_last_val();
+		else
+			_last_chan1_reading = _adc.get_last_val();
+	}
+
+	uint32_t get_last_pot_reading(unsigned pot)
+	{
+		return pot < 8 ? _last_pot_reading[pot] : 0;
+	}
+
+	uint32_t get_last_cvjack_reading()
+	{
+		return _last_chan1_reading;
 	}
 
 private:
-	Pin chan_sel[3];
-	I2CPeriph &_i2c;
+	Pin _pot_sel[3];
 	ADC_I2C_MAX11645 _adc;
 
-	uint32_t last_pot_reading[8];
-	uint32_t last_chan1_reading;
+	uint32_t _last_pot_reading[8];
+	uint32_t _last_chan1_reading;
+	unsigned _cur_pot;
+
+	void handle_error(ADC_I2C_MAX11645::Error err)
+	{
+		if (err != ADC_I2C_MAX11645::Error::None) {
+			__BKPT();
+		}
+	}
 };
 

@@ -18,6 +18,7 @@ void Controls::read()
 		// dac_sense[i].update();
 		// trig_in_sense[i].update();
 	}
+
 	// Debug::set_3(false);
 }
 
@@ -26,10 +27,11 @@ void Controls::start()
 	read_controls_task.start();
 }
 
-Controls::Controls(I2CPeriph &i2c)
-	: _i2c{i2c}
+Controls::Controls(MuxedADC &potadc)
+	: potadc(potadc)
 {
 	cvadc.start();
+	potadc.start();
 	// debug_control_read_timing();
 
 	read_controls_task.init(control_read_tim_conf, [this]() { read(); });

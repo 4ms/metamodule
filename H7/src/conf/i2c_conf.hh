@@ -7,9 +7,9 @@ const I2CConfig i2c_conf = {
 	.SDA = {GPIO::B, 7, GPIO_AF4_I2C1},
 	.timing =
 		{
-			.PRESC = 18 * 2, // tPREC = 480MHz / 18 = 26.7MHz
+			.PRESC = 0x60, // = 120MHz / (6+2) = 15MHz [only top 4 bits matter]
 			.SCLDEL_SDADEL = 0b00010001,
-			.SCLH = 17, // 26.7MHz / (17+17) = 784kHz
+			.SCLH = 17, // 15MHz / (17+1 + 17+1) = 416kHz - delays = 397.3kHz measured
 			.SCLL = 17,
 		},
 };

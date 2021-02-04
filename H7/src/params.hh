@@ -14,6 +14,7 @@ public:
 	Controls &controls;
 
 	float cvjacks[4];
+	float patchcv;
 	float knobs[8];
 	bool gate_ins[3];
 	bool jack_senses[15];
