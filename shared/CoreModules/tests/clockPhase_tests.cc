@@ -40,3 +40,51 @@ TEST_CASE("multiply count test")
 	}
 	CHECK(cp.getPhase() == 8);
 }
+
+TEST_CASE("advance on unipolar and bipolar signals")
+{
+	SUBCASE("unipolar clock")
+	{
+		ClockPhase cp;
+		cp.updateClock(0.0f);
+		cp.update();
+		cp.updateClock(1.0f);
+		cp.update();
+		cp.updateClock(0.0f);
+		cp.update();
+		cp.updateClock(1.0f);
+		cp.update();
+		CHECK(cp.getCount() == 2);
+	}
+
+	SUBCASE("bipolar clock")
+	{
+		ClockPhase cp;
+		cp.updateClock(-1.0f);
+		cp.update();
+		cp.updateClock(1.0f);
+		cp.update();
+		cp.updateClock(-1.0f);
+		cp.update();
+		cp.updateClock(1.0f);
+		cp.update();
+		CHECK(cp.getCount() == 2);
+	}
+}
+
+TEST_CASE("reset test")
+{
+	ClockPhase cp;
+	cp.updateReset(0);
+	cp.updateClock(-1.0f);
+	cp.update();
+	cp.updateClock(1.0f);
+	cp.update();
+	cp.updateClock(-1.0f);
+	cp.update();
+	cp.updateClock(1.0f);
+	cp.update();
+	cp.updateReset(1.0f);
+	cp.update();
+	CHECK(cp.getCount() == 0);
+}
