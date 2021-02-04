@@ -35,11 +35,15 @@ public:
 		_pot_sel[2].set_to(pot & 0b100);
 	}
 
-	void initiate_read(Channel chan)
+	void select_channel(Channel chan)
 	{
 		auto err = _adc.select_channel(static_cast<uint8_t>(chan));
 		handle_error(err);
-		err = _adc.read_blocking();
+	}
+
+	void initiate_read(Channel chan)
+	{
+		auto err = _adc.read_blocking();
 		handle_error(err);
 	}
 

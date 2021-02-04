@@ -63,8 +63,10 @@ void main()
 	uint8_t cur_pot;
 	enum I2CClients {
 		Leds = 0,
-		Pots = 1,
-		PatchCV = 2,
+		SelectPots = 1,
+		ReadPots = 2,
+		SelectPatchCV = 3,
+		ReadPatchCV = 4,
 		NUMCLIENTS,
 	};
 	I2CClients cur_client;
@@ -78,23 +80,39 @@ void main()
 					leds.update();
 					leds.refresh();
 					Debug::set_3(false);
-					cur_client = Pots;
+					cur_client = SelectPots;
 					break;
 
-				case Pots:
+				case SelectPots:
+					Debug::set_2(true);
+					params.controls.potadc.select_channel(MuxedADC::Channel::Pots);
+					cur_client = ReadPots;
+					cur_pot = 0;
+					params.controls.potadc.select_pot_source(cur_pot);
+					Debug::set_2(false);
+					break;
+
+				case ReadPots:
 					Debug::set_2(true);
 					params.controls.potadc.initiate_read(MuxedADC::Channel::Pots);
 					params.controls.potadc.finalize_read(MuxedADC::Channel::Pots);
 					params.knobs[cur_pot] = params.controls.potadc.get_last_pot_reading(cur_pot);
 					if (++cur_pot >= 8) {
-						cur_client = PatchCV;
+						cur_client = SelectPatchCV;
 						cur_pot = 0;
 					}
 					params.controls.potadc.select_pot_source(cur_pot);
 					Debug::set_2(false);
 					break;
 
-				case PatchCV:
+				case SelectPatchCV:
+					Debug::set_2(true);
+					params.controls.potadc.select_channel(MuxedADC::Channel::PatchCV);
+					cur_client = ReadPatchCV;
+					Debug::set_2(false);
+					break;
+
+				case ReadPatchCV:
 					Debug::set_2(true);
 					params.controls.potadc.initiate_read(MuxedADC::Channel::PatchCV);
 					params.controls.potadc.finalize_read(MuxedADC::Channel::PatchCV);
@@ -102,6 +120,7 @@ void main()
 					cur_client = Leds;
 					Debug::set_2(false);
 					break;
+
 				default:
 					cur_client = Leds;
 					break;
