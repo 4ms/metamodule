@@ -120,7 +120,10 @@ void main()
 					params.knobs[cur_pot] = controls.potadc.collect_reading() / 4095.0f;
 					if (++cur_pot >= 8) {
 						cur_client = SelectPatchCV;
-					}
+						cur_pot = 0;
+					} else
+						cur_client = RequestReadPots;
+					controls.potadc.select_pot_source(cur_pot);
 					break;
 
 					// GPIO Sense here (between ADC channels)
