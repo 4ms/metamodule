@@ -32,21 +32,10 @@ Controls::Controls(MuxedADC &potadc)
 {
 	cvadc.start();
 	potadc.start();
-	// debug_control_read_timing();
+
+	// Todo: use RCC_Control or create DBGMCU_Control:
+	__HAL_DBGMCU_FREEZE_TIM6();
 
 	read_controls_task.init(control_read_tim_conf, [this]() { read(); });
 }
 
-static void debug_control_read_timing()
-{
-	// Debug: use this to read the DMA timing with an external pin:
-	// InterruptManager::registerISR(ADC_DMA_conf.IRQn, []() {
-	// 	if (LL_DMA_IsActiveFlag_TC0(DMA2)) {
-	// 		if (LL_DMA_IsEnabledIT_TC(DMA2, LL_DMA_STREAM_0)) {
-	// 			Debug::toggle_2();
-	// 		}
-	// 		LL_DMA_ClearFlag_TC0(DMA2);
-	// 	}
-	// });
-	// CVADCPeriph::enable_DMA_IT();
-}

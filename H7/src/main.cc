@@ -48,8 +48,6 @@ void main()
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
 	LedCtl leds{led_driver};
 
-	__HAL_DBGMCU_FREEZE_TIM6();
-
 	Controls controls{_hw.potadc}; //{potadc, cvadc, gpio_expander};
 	Params params{controls};
 
@@ -60,7 +58,24 @@ void main()
 	audio.start();
 	ui.start();
 
-	uint8_t cur_pot;
+	// Todo: create class RoundRobinHandler {
+	//    void add_to_sequence(T &&func); or add_to_sequence(std::function<void(void)> &&func);
+	//    void advance_sequence_loop();
+	//};
+	// auto select_pots = [&](){ cur_pot = 0;
+	//			 controls.potadc.select_pot_source(cur_pot);
+	//			 controls.potadc.select_adc_channel(MuxedADC::Channel::Pots); };
+	// handler.add_to_sequence([&](){ leds.refresh(); });
+	// handler.add_to_sequence([&](){ select_pots; });
+	// ..
+	// while (1) {
+	//    ui.update();
+	//    leds.update();
+	//    if (SharedBus::i2c.is_ready()) {
+	//    	handler.advance_sequence_loop();
+	//    }
+	//    __NOP();
+	// }
 	enum I2CClients {
 		Leds,
 		SelectPots,
@@ -71,10 +86,14 @@ void main()
 		CollectReadPatchCV,
 	};
 	I2CClients cur_client;
+	uint8_t cur_pot;
 
 	while (1) {
 		ui.update();
+
+		// Todo: adjust timing, pulled this out of the loop!
 		leds.update();
+
 		if (SharedBus::i2c.is_ready()) {
 			Debug::set_2(true);
 			switch (cur_client) {
