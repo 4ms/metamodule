@@ -15,8 +15,12 @@ public:
 	{
 		auto freqCalc =
 			baseFrequency + (envelopes[pitchEnvelope].update(gateIn) * 4000.0f * (pitchAmount * pitchAmount));
+		if (pitchConnected) {
+			osc.set_frequency(freqCalc * expTable.interp(constrain(pitchCV, 0.0f, 1.0f)));
+		} else {
+			osc.set_frequency(freqCalc);
+		}
 
-		osc.set_frequency(freqCalc * expTable.interp(constrain(pitchCV, 0.0f, 1.0f)));
 		osc.modAmount = envelopes[fmEnvelope].update(gateIn) * fmAmount;
 		auto noiseOut = randomNumber(-1.0f, 1.0f) * envelopes[noiseEnvelope].update(gateIn);
 
@@ -133,6 +137,19 @@ public:
 		return output;
 	}
 
+	virtual void mark_input_unpatched(const int input_id) override
+	{
+		if (input_id == 1) {
+			pitchConnected = false;
+		}
+	}
+	virtual void mark_input_patched(const int input_id) override
+	{
+		if (input_id == 1) {
+			pitchConnected = true;
+		}
+	}
+
 	static std::unique_ptr<CoreProcessor> create()
 	{
 		return std::make_unique<DrumCore>();
@@ -154,6 +171,7 @@ private:
 	float pitchAmount = 0;
 	float fmAmount = 0;
 	float pitchCV = 20;
+	bool pitchConnected = false;
 
 	InterpArray<float, 4> pitchDecayTimes = {10, 10, 200, 500};
 	InterpArray<float, 4> pitchBreakPoint = {0, 0.1, 0.2, 1};
