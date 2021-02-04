@@ -62,69 +62,70 @@ void main()
 
 	uint8_t cur_pot;
 	enum I2CClients {
-		Leds = 0,
-		SelectPots = 1,
-		ReadPots = 2,
-		SelectPatchCV = 3,
-		ReadPatchCV = 4,
-		NUMCLIENTS,
+		Leds,
+		SelectPots,
+		RequestReadPots,
+		CollectReadPots,
+		SelectPatchCV,
+		RequestReadPatchCV,
+		CollectReadPatchCV,
 	};
 	I2CClients cur_client;
 
 	while (1) {
 		ui.update();
+		leds.update();
 		if (SharedBus::i2c.is_ready()) {
+			Debug::set_2(true);
 			switch (cur_client) {
 				case Leds:
 					Debug::set_3(true);
-					leds.update();
 					leds.refresh();
 					Debug::set_3(false);
 					cur_client = SelectPots;
 					break;
 
 				case SelectPots:
-					Debug::set_2(true);
-					params.controls.potadc.select_channel(MuxedADC::Channel::Pots);
-					cur_client = ReadPots;
 					cur_pot = 0;
-					params.controls.potadc.select_pot_source(cur_pot);
-					Debug::set_2(false);
+					controls.potadc.select_pot_source(cur_pot);
+					controls.potadc.select_adc_channel(MuxedADC::Channel::Pots);
+					cur_client = RequestReadPots;
 					break;
 
-				case ReadPots:
-					Debug::set_2(true);
-					params.controls.potadc.initiate_read(MuxedADC::Channel::Pots);
-					params.controls.potadc.finalize_read(MuxedADC::Channel::Pots);
-					params.knobs[cur_pot] = params.controls.potadc.get_last_pot_reading(cur_pot);
+				case RequestReadPots:
+					controls.potadc.request_reading();
+					cur_client = CollectReadPots;
+					break;
+
+				case CollectReadPots:
+					params.knobs[cur_pot] = controls.potadc.collect_reading() / 4095.0f;
 					if (++cur_pot >= 8) {
 						cur_client = SelectPatchCV;
-						cur_pot = 0;
 					}
-					params.controls.potadc.select_pot_source(cur_pot);
-					Debug::set_2(false);
 					break;
+
+					// GPIO Sense here (between ADC channels)
 
 				case SelectPatchCV:
-					Debug::set_2(true);
-					params.controls.potadc.select_channel(MuxedADC::Channel::PatchCV);
-					cur_client = ReadPatchCV;
-					Debug::set_2(false);
+					controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);
+					cur_client = RequestReadPatchCV;
 					break;
 
-				case ReadPatchCV:
-					Debug::set_2(true);
-					params.controls.potadc.initiate_read(MuxedADC::Channel::PatchCV);
-					params.controls.potadc.finalize_read(MuxedADC::Channel::PatchCV);
-					params.patchcv = params.controls.potadc.get_last_cvjack_reading();
+				case RequestReadPatchCV:
+					controls.potadc.request_reading();
+					cur_client = CollectReadPatchCV;
+					break;
+
+				case CollectReadPatchCV:
+					params.patchcv = controls.potadc.collect_reading() / 4095.0f;
 					cur_client = Leds;
-					Debug::set_2(false);
 					break;
 
 				default:
 					cur_client = Leds;
 					break;
 			}
+			Debug::set_2(false);
 		}
 		__NOP();
 	}
