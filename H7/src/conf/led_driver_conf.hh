@@ -1,16 +1,17 @@
 #pragma once
-// #include "drivers/dma_config_struct.hh"
 #include "drivers/stm32xx.h"
+#include "drivers/timekeeper.hh"
 
-// const DMAConfig led_driver_dma_conf = {
-// 	.DMAx = DMA1,
-// 	.stream = DMA1_Stream6,
-// 	.channel = DMA_CHANNEL_1,
-// 	.IRQn = DMA1_Stream6_IRQn,
-// 	.pri = 3,
-// 	.subpri = 1,
-// .continuous = false,
-// };
+// 10_000_000ns = 100Hz
+constexpr uint32_t led_update_freq_Hz = 100;
+constexpr uint32_t led_update_period_ns = 1000000000UL / led_update_freq_Hz;
+
+const TimekeeperConfig led_update_task_conf = {
+	.TIMx = TIM7,
+	.period_ns = led_update_period_ns,
+	.priority1 = 3,
+	.priority2 = 3,
+};
 
 const uint32_t kNumLedDriverChips = 1;
 

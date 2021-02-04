@@ -21,3 +21,5 @@ compile_flags.txt
 tableGen/make_tables
 
 H7/cubemx/
+
+H7/compile_commands.json.compdb

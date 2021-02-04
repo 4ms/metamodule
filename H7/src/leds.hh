@@ -8,9 +8,10 @@
 #include "drivers/rgbled.hh"
 #include "drivers/stm32xx.h"
 
-using DriverRgbLed = RgbLed<FrameBufferLED>;
-
+template<unsigned UpdateRateHz = 100>
 class LedCtl {
+	using DriverRgbLed = RgbLed<FrameBufferLED, UpdateRateHz>;
+
 public:
 	LedCtl(ILedDmaDriver &led_driver)
 		: led_driver_{led_driver}

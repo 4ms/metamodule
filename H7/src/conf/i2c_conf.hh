@@ -12,7 +12,7 @@ const I2CConfig i2c_conf = {
 			// I2C clock = I2CPeriphClock / (SCLDEL + SDADEL + SCLH+1 + SCLL+1)
 			// 30MHz / (1 + 1 + 17+1 + 17+1) = 789kHz
 			.PRESC = 0x20,
-			.SCLDEL_SDADEL = 0b00010001,
+			.SCLDEL_SDADEL = 0b00110011,
 			.SCLH = 17,
 			.SCLL = 17,
 		},

@@ -91,9 +91,6 @@ void main()
 	while (1) {
 		ui.update();
 
-		// Todo: adjust timing, pulled this out of the loop!
-		leds.update();
-
 		if (SharedBus::i2c.is_ready()) {
 			Debug::set_2(true);
 			switch (cur_client) {
