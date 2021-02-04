@@ -252,9 +252,11 @@ generate_compile_txt:
 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \
     awk '/End of search list./ { show=0 } { if (show) printf "-I%s\n",$1 }; /#include <...> search starts here:/ { show=1; }' > compile_flags.txt
 
+#https://github.com/nickdiego/compiledb
 compile_commands:
-	rm -rf build
-	bear make -j16 all
-	compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
-	rm compile_commands.json 
-	mv compile_commands_with_headers.json compile_commands.json
+	compiledb make
+	# rm -rf build
+	# bear make -j16 all
+	# compdb -p ./ list > compile_commands_with_headers.json 2>/dev/null
+	# rm compile_commands.json 
+	# mv compile_commands_with_headers.json compile_commands.json
