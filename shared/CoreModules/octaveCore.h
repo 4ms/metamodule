@@ -10,6 +10,8 @@ class OctaveCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		auto cvSum = constrain<float>(octaveOffset+cvInput,0.0f,1.0f);
+		int octave = map_value(cvSum,0.0f,1.0f,0,5);
 		voltOutput = voltInput + octave;
 	}
 
@@ -19,7 +21,7 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				octave = map_value(val, 0.0f, 1.0f, 0, 5);
+				octaveOffset = val;
 				break;
 		}
 	}
@@ -30,6 +32,9 @@ public:
 		switch (input_id) {
 			case 0:
 				voltInput = val;
+				break;
+			case 1:
+				cvInput = val;
 				break;
 		}
 	}
@@ -54,7 +59,8 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	int octave = 0;
+	float octaveOffset = 0;
+	float cvInput=0;
 	float voltInput = 0;
 	float voltOutput = 0;
 };
