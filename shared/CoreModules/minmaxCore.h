@@ -2,7 +2,7 @@
 
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "math.hh"
+#include "util/math.hh"
 
 using namespace MathTools;
 
