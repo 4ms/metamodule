@@ -10,6 +10,7 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelOctave); 
 p->addModel(modelMinmax); 
 p->addModel(modelDrum); 
 p->addModel(modelComplexenvelope); 
