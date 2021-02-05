@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "MINMAX",
+      "name": "Minmax",
+      "description": "Minimum/Maximum",
+      "tags": []
+}, 
+{
       "slug": "DRUM",
       "name": "Drum",
       "description": "Drum",
