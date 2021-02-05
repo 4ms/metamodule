@@ -1,9 +1,15 @@
 #pragma once
 #include "drivers/adc_i2c_config_struct.hh"
-#include "drivers/adc_i2c_max11645.hh"
 
 const ADC_I2C_Config adc_i2c_conf{
 	//
+};
+
+struct MuxedADC_Config {
+	PinNoInit SEL0;
+	PinNoInit SEL1;
+	PinNoInit SEL2;
+	ADC_I2C_Config adc_conf;
 };
 
 const MuxedADC_Config muxed_adc_conf{

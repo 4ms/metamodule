@@ -6,6 +6,7 @@ void Controls::read()
 {
 	// Debug::set_3(true);
 	cvadc.read();
+	cvadc.advance_channel();
 
 	rotary.update();
 	rotary_button.update();
@@ -24,13 +25,13 @@ void Controls::read()
 
 void Controls::start()
 {
+	cvadc.start();
 	read_controls_task.start();
 }
 
 Controls::Controls(MuxedADC &potadc)
 	: potadc(potadc)
 {
-	cvadc.start();
 	potadc.start();
 
 	// Todo: use RCC_Control or create DBGMCU_Control:

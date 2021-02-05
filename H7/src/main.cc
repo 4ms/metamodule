@@ -5,6 +5,7 @@
 #include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/codec_WM8731.hh"
+#include "drivers/gpio_expander.hh"
 #include "drivers/mpu.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "drivers/sdram.hh"
@@ -26,6 +27,7 @@ struct Hardware : SystemClocks, /*SDRAMPeriph,*/ Debug, SharedBus {
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
+	// GPIOExpander<16> sense{gpio_expander_conf};
 } _hw;
 
 struct StaticBuffers {

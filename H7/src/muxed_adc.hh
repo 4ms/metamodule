@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/adc_i2c_conf.hh"
 #include "drivers/adc_i2c_config_struct.hh"
 #include "drivers/adc_i2c_max11645.hh"
 #include "drivers/i2c.hh"

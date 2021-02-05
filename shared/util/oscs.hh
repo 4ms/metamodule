@@ -35,6 +35,11 @@ struct TriangleOscillator {
 		increment_ = freq * freq_units;
 	}
 
+	void set_frequency(int freq)
+	{
+		increment_ = freq * freq_units;
+	}
+
 	void set_frequency(float freq)
 	{
 		increment_ = static_cast<uint32_t>(freq * static_cast<float>(freq_units));
