@@ -5,13 +5,11 @@ using namespace MathTools;
 
 void Params::update()
 {
-	// SCB_CleanInvalidateDCache(); // required until/unless we get ADC buffers into DTCM RAM
+	Debug::set_1(true);
 
-	// Debug::set_1(true);
-	// cvjacks[0] = controls.cv_sense[0].is_pressed() ? controls.cvadc.get(0) / 4095.f : 0U;
-	// cvjacks[1] = controls.cv_sense[1].is_pressed() ? controls.cvadc.get(1) / 4095.f : 0U;
-	// cvjacks[2] = controls.cv_sense[2].is_pressed() ? controls.cvadc.get(2) / 4095.f : 0U;
-	// cvjacks[3] = controls.cv_sense[3].is_pressed() ? controls.cvadc.get(3) / 4095.f : 0U;
+	for (int i = 0; i < 4; i++) {
+		cvjacks[i] = (2047.5f - static_cast<float>(controls.cvadc.get_val(i))) / 2047.5f;
+	}
 
 	int32_t rotary_motion = controls.rotary.read();
 
@@ -34,7 +32,7 @@ void Params::update()
 		buttons[i] = controls.button[i].is_pressed();
 	}
 
-	// Debug::set_1(false);
+	Debug::set_1(false);
 }
 
 // void Params::update_screen()

@@ -114,6 +114,7 @@ OPTFLAG = -O3
 #----------------------------------
 # Uncomment to compile unoptimized:
 # $(BUILDDIR)/src/main.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/controls.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 # $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0

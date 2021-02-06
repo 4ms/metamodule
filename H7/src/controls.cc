@@ -5,8 +5,10 @@
 void Controls::read()
 {
 	// Debug::set_3(true);
+	// todo: oversampling collection needs to happen when ADC ISR is hit
+	// then here we do nothing
+	// and in params.update we copy oversampler result to params.cvjacks
 	cvadc.read();
-	cvadc.advance_channel();
 
 	rotary.update();
 	rotary_button.update();

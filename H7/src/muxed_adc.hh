@@ -59,7 +59,7 @@ private:
 	void handle_error(ADC_I2C_MAX11645::Error err)
 	{
 		if (err != ADC_I2C_MAX11645::Error::None) {
-			__BKPT();
+			//__BKPT();
 		}
 	}
 };

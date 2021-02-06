@@ -18,10 +18,10 @@
 
 namespace MetaModule
 {
-struct Hardware : SystemClocks, /*SDRAMPeriph,*/ Debug, SharedBus {
+struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	Hardware()
-		//: SDRAMPeriph{SDRAM_AS4C_T6_conf}
-		: SharedBus{i2c_conf}
+		: SDRAMPeriph{SDRAM_AS4C_T6_conf}
+		, SharedBus{i2c_conf}
 	{}
 
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
