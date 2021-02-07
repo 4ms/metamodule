@@ -30,3 +30,19 @@ private:
 	unsigned int idx_ = 0;
 };
 
+struct NoFilter {
+public:
+	NoFilter() {}
+	void add_val(unsigned newval)
+	{
+		val_ = newval;
+	}
+	unsigned val()
+	{
+		return val_;
+	}
+
+private:
+	unsigned val_ = 0;
+};
+
