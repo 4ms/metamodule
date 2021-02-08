@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "GATESEQ8",
+      "name": "Gateseq8",
+      "description": "8 Step Gate Sequencer",
+      "tags": []
+}, 
+{
       "slug": "OCTAVE",
       "name": "Octave",
       "description": "Octave",
