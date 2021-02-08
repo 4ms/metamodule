@@ -36,6 +36,8 @@ struct OctaveWidget : CommModuleWidget {
 		addLabeledInput("CV", OctaveModule::CV_INPUT, {0, 2});
 		addLabeledInput("IN", OctaveModule::PITCH_INPUT, {0, 1});
 		addLabeledOutput("OUT", OctaveModule::PITCH_OUTPUT, {0, 0});
+
+		addModuleTitle("OCT");
 	}
 };
 

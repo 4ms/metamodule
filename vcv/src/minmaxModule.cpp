@@ -35,6 +35,8 @@ struct MinmaxWidget : CommModuleWidget {
 		addLabeledInput("IN B", MinmaxModule::B_INPUT, {0, 2});
 		addLabeledOutput("MIN", MinmaxModule::MIN_OUTPUT, {0, 1});
 		addLabeledOutput("MAX", MinmaxModule::MAX_OUTPUT, {0, 0});
+
+		addModuleTitle("MNMX");
 	}
 };
 
