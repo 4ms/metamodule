@@ -18,10 +18,7 @@ struct Controls {
 	MuxedADC &potadc;
 
 	// Todo: Would be nice to use deduction to get rid of the SpiConfig<> template params
-	using AdcSpiChip = AdcSpi_MAX11666<SpiConfig<kSpiAdcConfPeriphNum, kSpiAdcConfNumChips>>;
-	static const inline unsigned NumAdcChannels = 4;
-
-	AnalogIn<AdcSpiChip, NumAdcChannels, Oversampler<16>> cvadc{spi_adc_conf};
+	AdcSpi_MAX11666<SpiConfig<spi_adc_conf.PeriphNum, spi_adc_conf.NumChips>, Oversampler<16>> cvadc{spi_adc_conf};
 
 	DebouncedSwitch button[2] = {{GPIO::C, 10}, {GPIO::C, 11}};
 	RotaryEncoder<RotaryFullStep> rotary = {GPIO::C, 7, GPIO::C, 8};
