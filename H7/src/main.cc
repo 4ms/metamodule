@@ -1,4 +1,5 @@
 #include "conf/codec_sai_conf.hh"
+#include "conf/control_conf.hh"
 #include "conf/i2c_conf.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdram_conf.hh"
@@ -16,6 +17,10 @@
 #include "sys/system_clocks.hh"
 #include "ui.hh"
 
+// Todo: some hardware chips are in Hardware, others are in e.g. Controls.
+// How to solve this?
+// ---Controls takes an exact type of AdcSpi_MAX11666<1,2,Oversampler<16>> in its ctor. We get those params from
+// spi_adc_conf::
 namespace MetaModule
 {
 struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
@@ -27,6 +32,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
+	CVAdcChipT cvadc{spi_adc_conf};
 	// GPIOExpander<16> sense{gpio_expander_conf};
 } _hw;
 
@@ -50,7 +56,7 @@ void main()
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
 	LedCtl leds{led_driver};
 
-	Controls controls{_hw.potadc}; //{potadc, cvadc, gpio_expander};
+	Controls controls{_hw.potadc, _hw.cvadc}; //{potadc, cvadc, gpio_expander};
 	Params params{controls};
 
 	Audio audio{params, _hw.codec, StaticBuffers::audio_dma_block};

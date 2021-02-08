@@ -1,8 +1,10 @@
 #pragma once
+#include "drivers/adc_spi_max11666.hh"
 #include "drivers/pin.hh"
 #include "drivers/spi_config_struct.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
+#include "util/filter.hh"
 
 constexpr unsigned kSpiAdcConfPeriphNum = 1;
 constexpr unsigned kSpiAdcConfNumChips = 2;
@@ -33,3 +35,4 @@ const TimekeeperConfig control_read_tim_conf = {
 	.priority2 = 0,
 };
 
+using CVAdcChipT = AdcSpi_MAX11666<SpiConfig<spi_adc_conf.PeriphNum, spi_adc_conf.NumChips>, Oversampler<16>>;

@@ -27,8 +27,9 @@ void Controls::start()
 	read_controls_task.start();
 }
 
-Controls::Controls(MuxedADC &potadc)
+Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc)
 	: potadc(potadc)
+	, cvadc(cvadc)
 {
 	potadc.start();
 
