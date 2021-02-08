@@ -1,5 +1,25 @@
 # Makefile by Dan Green <danngreen1@gmail.com>
-#
+
+OPTFLAG = -O3
+
+#----------------------------------
+# Uncomment to compile unoptimized:
+# $(BUILDDIR)/src/main.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/controls.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
+# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/sdram.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/system.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_i2c.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver_dma.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/i2c.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/sai.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(SHARED)/CoreModules/pitchshiftCore.o: OPTFLAG = -O0
+#-----------------------------------
+
 CORE ?= M7
 
 ifeq ($(CORE), M7)
@@ -27,7 +47,6 @@ endif
 endif
 
 
-
 BINARYNAME 		= main
 # STARTUP 		= startup_stm32h745igtx.s
 STARTUP 		= startup_cm7.s
@@ -41,7 +60,6 @@ DRIVERLIB       = $(LIBDIR)/mdrivlib
 SHARED  		= src/shared
 TABLEGEN 		= $(SHARED)/tableGen
 
-# SOURCES  += $(DEVICE)/src/$(STARTUP)
 SOURCES  += $(DRIVERLIB)/drivers/$(STARTUP)
 SOURCES  += $(DEVICE)/src/$(SYSTEM)
 SOURCES  += $(wildcard $(PERIPH)/src/*.c)
@@ -92,15 +110,6 @@ GDB 	= $(ARCH)-gdb
 SZ 		= $(ARCH)-size
 
 SZOPTS 	= -d
-#From CubeIDE: 
-#linker: -mcpu=cortex-m7 -T"/Users/dann/4ms_local/stm32/meta-module/H7/cubemx/H745/STM32CubeIDE/CM7/STM32H745IGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="${ProjName}.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-#gcc: -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DCORE_CM7 -DDEBUG -DSTM32H745xx -c -I../../../CM7/Core/Inc -I../../../Drivers/STM32H7xx_HAL_Driver/Inc -I../../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../../../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I../../../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb
-
-#gcc(m4): -mcpu=cortex-m4 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DCORE_CM4 -DDEBUG -DSTM32H745xx -c -I../../../CM4/Core/Inc -I../../../Drivers/STM32H7xx_HAL_Driver/Inc -I../../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../../../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I../../../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb 
-#Todo: separate cm4 and cm7 builds
-
-
-
 
 ARCH_CFLAGS += -D'__FPU_PRESENT=1' \
 			  -DUSE_HAL_DRIVER \
@@ -109,24 +118,6 @@ ARCH_CFLAGS += -D'__FPU_PRESENT=1' \
 			  -DSTM32H7x5xx \
 			  -DSTM32H7
 
-OPTFLAG = -O3
-
-#----------------------------------
-# Uncomment to compile unoptimized:
-# $(BUILDDIR)/src/main.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/controls.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
-# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/sdram.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/system.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_i2c.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver_dma.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/i2c.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/sai.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(SHARED)/CoreModules/pitchshiftCore.o: OPTFLAG = -O0
 
 CFLAGS = -g2 -fno-common \
 	$(ARCH_CFLAGS) $(MCU) \
