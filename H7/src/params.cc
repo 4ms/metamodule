@@ -5,7 +5,7 @@ using namespace MathTools;
 
 void Params::update()
 {
-	Debug::set_1(true);
+	Debug::Pin1::high();
 
 	for (int i = 0; i < 4; i++) {
 		cvjacks[i] = (2047.5f - static_cast<float>(controls.cvadc.get_val(i))) / 2047.5f;
@@ -32,7 +32,7 @@ void Params::update()
 		buttons[i] = controls.button[i].is_pressed();
 	}
 
-	Debug::set_1(false);
+	Debug::Pin1::low();
 }
 
 // void Params::update_screen()

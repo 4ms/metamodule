@@ -17,10 +17,6 @@
 #include "sys/system_clocks.hh"
 #include "ui.hh"
 
-// Todo: some hardware chips are in Hardware, others are in e.g. Controls.
-// How to solve this?
-// ---Controls takes an exact type of AdcSpi_MAX11666<1,2,Oversampler<16>> in its ctor. We get those params from
-// spi_adc_conf::
 namespace MetaModule
 {
 struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
@@ -100,12 +96,12 @@ void main()
 		ui.update();
 
 		if (SharedBus::i2c.is_ready()) {
-			Debug::set_2(true);
+			Debug::Pin2::high();
 			switch (cur_client) {
 				case Leds:
-					Debug::set_3(true);
+					// Debug::set_3(true);
 					leds.refresh();
-					Debug::set_3(false);
+					// Debug::set_3(false);
 					cur_client = SelectPots;
 					break;
 
@@ -152,7 +148,7 @@ void main()
 					cur_client = Leds;
 					break;
 			}
-			Debug::set_2(false);
+			Debug::Pin2::low();
 		}
 		__NOP();
 	}

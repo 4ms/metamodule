@@ -16,10 +16,6 @@
 struct Controls {
 
 	MuxedADC &potadc;
-
-	// Todo: Would be nice to use deduction to get rid of the SpiConfig<> template params
-	// AdcSpi_MAX11666<SpiConfig<spi_adc_conf.PeriphNum, spi_adc_conf.NumChips>, Oversampler<16>> cvadc{spi_adc_conf};
-
 	CVAdcChipT &cvadc;
 
 	DebouncedSwitch button[2] = {{GPIO::C, 10}, {GPIO::C, 11}};

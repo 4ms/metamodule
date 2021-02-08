@@ -42,7 +42,7 @@ void Audio::set_input(int input_id, Audio::AudioSampleType in)
 
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	Debug::set_0(true);
+	Debug::Pin0::high();
 	// pre-amble: ~5us
 
 	params.update();
@@ -94,7 +94,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		in_++;
 	}
 
-	Debug::set_0(false);
+	Debug::Pin0::low();
 }
 
 void Audio::start()
