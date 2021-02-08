@@ -94,6 +94,13 @@ INCLUDES += -I$(DEVICE)/include \
 			-I$(SHARED)/CoreModules \
 			-I$(SHARED)/util \
 			-I$(SHARED)/patch \
+			-I$(LIBDIR)/adafruit_gfx/Adafruit\ ST7735\ and\ ST7789\ Library \
+			-I$(LIBDIR)/adafruit_gfx/Adafruit\ GFX\ Library \
+			-I$(LIBDIR)/adafruit_gfx/arduino \
+			-I$(LIBDIR)/adafruit_gfx/DAISY_SEED \
+			-I$(LIBDIR)/adafruit_gfx/SPI \
+
+
 
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
