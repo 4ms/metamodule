@@ -41,6 +41,9 @@ struct Gateseq16Widget : CommModuleWidget {
 								 {static_cast<float>(x*2), 1 + static_cast<float>((7 - y) * 0.7f)});
 			}
 		}
+
+		addLabeledInput("CLOCK",Gateseq16Module::CLOCK_INPUT,{0,0});
+		addLabeledOutput("OUTPUT",Gateseq16Module::GATE_OUTPUT,{3,0});
 	}
 };
 
