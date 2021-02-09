@@ -71,7 +71,7 @@ void CommModuleWidget::addLabeledToggle(const std::string labelText,
 	};
 	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(pos), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({pos.x - 3.0f, pos.y - 3.0f}), module, lightID));
-	addLabel(labelText, {pos.x + 17, pos.y - 8.5f}, {LabelButtonID::Types::Toggle, paramID, -1});
+	addLabel(labelText, {pos.x + 17, pos.y - 6.7f}, {LabelButtonID::Types::Toggle, paramID, -1});
 }
 
 constexpr float CommModuleWidget::gridToYFromTop(const float y)
