@@ -13,8 +13,9 @@ public:
 	{
 
 		cp.update();
+		stepPhase = cp.getWrappedPhase();
 		currentStep = (int)(cp.getPhase())%8;
-		if (stepActive[currentStep] && (cp.getWrappedPhase() < 0.5f)) {
+		if (stepActive[currentStep] && (stepPhase < 0.5f)) {
 			gateOutput = 1;
 		} else {
 			gateOutput = 0;
@@ -63,7 +64,9 @@ public:
 
 	virtual float get_led_brightness(const int led_id) const override
 	{
-		return stepActive[led_id];
+		bool stepStatus = stepActive[led_id];
+		bool countStatus = (currentStep==led_id) && (stepPhase<0.5f);
+		return stepStatus^countStatus;
 	}
 
 	static std::unique_ptr<CoreProcessor> create()
@@ -79,4 +82,5 @@ private:
 	int currentStep = 0;
 	float gateOutput = 0;
 	bool stepActive[8];
+	float stepPhase=0;
 };
