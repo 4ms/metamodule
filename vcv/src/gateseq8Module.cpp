@@ -42,7 +42,7 @@ struct Gateseq8Widget : CommModuleWidget {
 							 Gateseq8Module::STEP_PARAMS + i,
 							 {0, 1 + static_cast<float>((7 - i) * 0.7f)});
 
-			addLabeledOutput("", Gateseq8Module::STEP_OUTS + i, {2, static_cast<float>(7 - i) * 0.88f});
+			addLabeledOutput("STEP " + std::to_string(i+1), Gateseq8Module::STEP_OUTS + i, {2, static_cast<float>(7 - i) * 0.74f + 0.74f});
 		}
 
 		addModuleTitle("GATE 8");

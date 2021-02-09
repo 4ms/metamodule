@@ -48,7 +48,7 @@ struct QuantizerWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
 
 		for (int i = 0; i < 12; i++) {
-			addLabeledToggle(noteNames[i], QuantizerModule::LIGHTPARAMS + i, QuantizerModule::KEYPARAMS + i, {0, i * 0.42f + 0.5f});
+			addLabeledToggle(noteNames[i], QuantizerModule::LIGHTPARAMS + i, QuantizerModule::KEYPARAMS + i, {0, i * 0.49f + 0.57f});
 		}
 
 		addLabeledInput("IN", QuantizerModule::SIGNAL_INPUT, {0, 0});
