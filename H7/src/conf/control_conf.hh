@@ -28,7 +28,8 @@ constexpr SpiConfig<kSpiAdcConfPeriphNum, kSpiAdcConfNumChips> spi_adc_conf = {
 	.data_dir = SpiDataDir::Duplex,
 };
 
-struct SpiAdcConf : DefaultSpiAdcConf {
+// Todo: try using this instead of the above
+struct SpiAdcConf : DefaultSpiConf {
 	static constexpr uint16_t PeriphNum = 1; // SPI1
 	static constexpr uint16_t NumChips = 2;
 	static constexpr uint16_t IRQn = SPI1_IRQn;
