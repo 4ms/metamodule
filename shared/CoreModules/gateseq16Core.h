@@ -9,10 +9,11 @@ using namespace MathTools;
 
 class Gateseq16Core : public CoreProcessor {
 public:
-	virtual void update(void) override {
+	virtual void update(void) override
+	{
 		cp.update();
 		stepPhase = cp.getWrappedPhase();
-		currentStep = (int)(cp.getPhase())%16;
+		currentStep = (int)(cp.getPhase()) % 16;
 		if (stepActive[currentStep] && (stepPhase < 0.5f)) {
 			gateOutput = 1;
 		} else {
@@ -20,8 +21,9 @@ public:
 		}
 	}
 
-	Gateseq16Core() {
-			for (int i = 0; i < 16; i++) {
+	Gateseq16Core()
+	{
+		for (int i = 0; i < 16; i++) {
 			stepActive[i] = false;
 		}
 	}
@@ -41,6 +43,9 @@ public:
 		switch (input_id) {
 			case 0:
 				cp.updateClock(val);
+				break;
+			case 1:
+				cp.updateReset(val);
 				break;
 		}
 	}
