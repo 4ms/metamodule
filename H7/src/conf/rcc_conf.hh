@@ -65,5 +65,5 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_D2PCLK1,
 	.Usart16ClockSelection = RCC_USART16CLKSOURCE_D2PCLK2,
 	.I2c123ClockSelection = RCC_I2C123CLKSOURCE_D2PCLK1,
-	.Spi6ClockSelection = RCC_SPI6CLKSOURCE_D3PCLK1,
+	.Spi6ClockSelection = RCC_SPI6CLKSOURCE_PLL2,
 };

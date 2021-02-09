@@ -24,8 +24,27 @@ constexpr SpiConfig<kSpiAdcConfPeriphNum, kSpiAdcConfNumChips> spi_adc_conf = {
 
 	.use_hardware_ss = false,
 	.clock_division = 64,
-	//.data_size
+	.data_size = 16,
+	.data_dir = SpiDataDir::Duplex,
+};
 
+struct SpiAdcConf : DefaultSpiAdcConf {
+	static constexpr uint16_t PeriphNum = 1; // SPI1
+	static constexpr uint16_t NumChips = 2;
+	static constexpr uint16_t IRQn = SPI1_IRQn;
+	static constexpr uint16_t priority1 = 0;
+	static constexpr uint16_t priority2 = 1;
+	static constexpr PinNoInit SCLK = {GPIO::G, 11, LL_GPIO_AF_5};
+	static constexpr PinNoInit COPI = {GPIO::D, 7, LL_GPIO_AF_5};
+	static constexpr PinNoInit CIPO = {GPIO::G, 9, LL_GPIO_AF_5};
+	static constexpr PinNoInit CS[2] = {
+		{GPIO::G, 10},
+		{GPIO::G, 12},
+	};
+	static constexpr bool use_hardware_ss = false;
+	static constexpr uint16_t clock_division = 64;
+	static constexpr uint16_t data_size = 16;
+	static constexpr SpiDataDir data_dir = SpiDataDir::Duplex;
 };
 
 const TimekeeperConfig control_read_tim_conf = {

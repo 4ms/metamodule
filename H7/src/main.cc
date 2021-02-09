@@ -13,6 +13,7 @@
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 #include "muxed_adc.hh"
+#include "screen.hh"
 #include "shared_bus.hh"
 #include "sys/system_clocks.hh"
 #include "ui.hh"
@@ -29,6 +30,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	CVAdcChipT cvadc{spi_adc_conf};
+	Screen screen{screen_conf};
 	// GPIOExpander<16> sense{gpio_expander_conf};
 } _hw;
 
@@ -48,6 +50,9 @@ struct StaticBuffers {
 void main()
 {
 	using namespace MetaModule;
+
+	_hw.screen.init();
+	_hw.screen.demo();
 
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
 	LedCtl leds{led_driver};
