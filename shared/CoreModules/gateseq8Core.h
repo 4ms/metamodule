@@ -54,11 +54,15 @@ public:
 	virtual float get_output(const int output_id) const override
 	{
 		float output = 0;
-		switch (output_id) {
-			case 0:
-				output = gateOutput;
-				break;
+		if(output_id==0)
+		{
+			output=gateOutput;
 		}
+		else
+		{
+			currentStep == (output_id-1) ? output =1 : output =0;
+		}
+		
 		return output;
 	}
 
