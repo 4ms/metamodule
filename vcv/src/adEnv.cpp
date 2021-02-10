@@ -3,26 +3,13 @@
 #include "CoreModules/moduleTypes.h"
 #include "math.hh"
 
-//Todo: separate out the "core" from this and put it in CoreModules/
+// Todo: separate out the "core" from this and put it in CoreModules/
 struct adModule : public CommModule {
 
-	enum ParamIds {
-		ATTACK_KNOB,
-		DECAY_KNOB,
-		NUM_PARAMS
-	};
-	enum InputIds {
-		GATE_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		ENV_OUTPUT,
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		REC_LIGHT,
-		NUM_LIGHTS
-	};
+	enum ParamIds { ATTACK_KNOB, DECAY_KNOB, A_SHAPE, D_SHAPE, NUM_PARAMS };
+	enum InputIds { GATE_INPUT, NUM_INPUTS };
+	enum OutputIds { ENV_OUTPUT, EOA_OUTPUT, EOD_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { REC_LIGHT, NUM_LIGHTS };
 
 	adModule()
 	{
@@ -31,6 +18,8 @@ struct adModule : public CommModule {
 		selfID.typeID = "ADENV";
 
 		outputJacks[adModule::ENV_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+		outputJacks[adModule::EOA_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+		outputJacks[adModule::EOD_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 	}
 };
 
@@ -47,18 +36,20 @@ struct adWidget : CommModuleWidget {
 		mainModule = module;
 
 		if (mainModule != nullptr) {
-			mainModule->updateDisplay = [&]() {
-				this->recLabel->text = this->mainModule->DEBUGSTR;
-			};
+			mainModule->updateDisplay = [&]() { this->recLabel->text = this->mainModule->DEBUGSTR; };
 		}
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
 
 		addLabeledInput("GATE", adModule::GATE_INPUT, {0, 1});
-		addLabeledOutput("OUT", adModule::ENV_OUTPUT, {0, 0});
+		addLabeledOutput("OUT", adModule::ENV_OUTPUT, {1, 1});
+		addLabeledOutput("EOA", adModule::EOA_OUTPUT, {0, 0});
+		addLabeledOutput("EOD", adModule::EOD_OUTPUT, {1, 0});
 
 		addLabeledKnob("A", adModule::ATTACK_KNOB, {0, 0});
 		addLabeledKnob("D", adModule::DECAY_KNOB, {0, 1});
+		addLabeledKnob("A SHAPE", adModule::A_SHAPE, {1, 0});
+		addLabeledKnob("D SHAPE", adModule::D_SHAPE, {1, 1});
 		addModuleTitle("A/D");
 	}
 };

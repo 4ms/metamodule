@@ -1,6 +1,7 @@
 #pragma once
 #include "coreProcessor.h"
 #include "math.hh"
+#include "math_tables.hh"
 #include "moduleTypes.h"
 
 using namespace MathTools;
@@ -9,37 +10,53 @@ class AdCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		stage = (int)phaccu;
+		int stage = (int)phaccu;
 		float envFrequency;
 		if (stage == 0) {
 			envFrequency = 1000.0f / attackTime;
-		}
-		else {
+		} else {
 			envFrequency = 1000.0f / decayTime;
 		}
 
-		phaccu += envFrequency / sampleRate;
+		float wrappedPhase = phaccu - (long)phaccu;
 
 		if (stage == 0) {
-			envOut = phaccu;
-		}
-		else {
-			if (phaccu >= 2)
-				envOut = 0;
-			else {
-				envOut = 2.0f - phaccu;
+			float rise = 0;
+			float linearRise = map_value(phaccu, 0.0f, 1.0f, attackSample, 1.0f);
+			if (aShape <= 0.5f) {
+				auto expoRise = map_value(pow9Table.closest(wrappedPhase), 0.0f, 1.0f, attackSample, 1.0f);
+				float interpVal = aShape * 2.0f;
+				rise = interpolate(expoRise, linearRise, interpVal);
+			} else {
+				float interpVal = aShape * 2.0f - 1.0f;
+				auto logRise = map_value(1.0f - pow9Table.closest(1.0f - phaccu), 0.0f, 1.0f, attackSample, 1.0f);
+				rise = interpolate(wrappedPhase, logRise, interpVal);
 			}
+			envOut = rise;
+
+		} else if (stage == 1) {
+			float fall = 0;
+			auto linearCurve = map_value(wrappedPhase, 0.0f, 1.0f, 1.0f, 0.0f);
+
+			float interpVal = 0.0f;
+			if (dShape <= 0.5f) {
+				auto expoFall = map_value(pow9Table.closest(1.0f - wrappedPhase), 1.0f, 0.0f, 1.0f, 0.0f);
+				interpVal = dShape * 2.0f;
+				fall = interpolate(expoFall, linearCurve, interpVal);
+			} else {
+				interpVal = dShape * 2.0f - 1.0f;
+				auto logFall = map_value(pow9Table.closest(wrappedPhase), 0.0f, 1.0f, 1.0f, 0.0f);
+				fall = interpolate(linearCurve, logFall, interpVal);
+			}
+			envOut = fall;
+		} else {
+			envOut = 0;
 		}
 
-		if (currentGate > lastGate) {
-			phaccu = 0;
-			stage = 0;
-		}
+		phaccu += envFrequency / sampleRate;
 	}
 
-	AdCore()
-	{
-	}
+	AdCore() {}
 
 	virtual void set_param(const int param_id, const float val) override
 	{
@@ -49,6 +66,12 @@ public:
 				break;
 			case 1:
 				decayTime = map_value(val, 0.0f, 1.0f, 1.0f, 1200.0f);
+				break;
+			case 2:
+				aShape = val;
+				break;
+			case 3:
+				dShape = val;
 				break;
 		}
 	}
@@ -64,6 +87,10 @@ public:
 			case 0:
 				lastGate = currentGate;
 				currentGate = val > 0;
+				if (currentGate > lastGate) {
+					attackSample = envOut;
+					phaccu = 0;
+				}
 				break;
 		}
 	}
@@ -74,6 +101,12 @@ public:
 		switch (output_id) {
 			case 0:
 				output = envOut;
+				break;
+			case 1:
+			output = phaccu>1&&phaccu<1.5f;
+				break;
+			case 2:
+			output = (int)phaccu>1;
 				break;
 		}
 		return output;
@@ -90,12 +123,14 @@ public:
 private:
 	int currentGate = 0;
 	int lastGate = 0;
-	float attackTime = 0;
-	float decayTime = 0;
+	float attackTime = 0.1f;
+	float decayTime = 0.1f;
 	float envOut = 0;
+	float aShape = 0;
+	float dShape = 0;
+	float attackSample = 0;
 
-	float phaccu;
-	int stage = 0;
+	float phaccu = 0;
 
 	float sampleRate = 48000;
 };
