@@ -1,12 +1,12 @@
 #ifndef _ADAFRUIT_GFX_H
 #define _ADAFRUIT_GFX_H
 
-#if ARDUINO >= 100
-#include "Arduino.h"
-#include "Print.h"
-#else
+// #if ARDUINO >= 100
+// 	#include "Arduino.h"
+// 	#include "Print.h"
+// #else
 #include "WProgram.h"
-#endif
+// #endif
 #include "gfxfont.h"
 
 /// A generic graphics superclass that can handle all sorts of drawing. At a
@@ -89,9 +89,9 @@ public:
   void drawXBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w,
                    int16_t h, uint16_t color);
   void drawGrayscaleBitmap(int16_t x, int16_t y, const uint8_t bitmap[],
-                           int16_t w, int16_t h);
-  void drawGrayscaleBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w,
-                           int16_t h);
+	// void getTextBounds(
+	// 	const __FlashStringHelper *s, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
+	// void getTextBounds(const String &str, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
   void drawGrayscaleBitmap(int16_t x, int16_t y, const uint8_t bitmap[],
                            const uint8_t mask[], int16_t w, int16_t h);
   void drawGrayscaleBitmap(int16_t x, int16_t y, uint8_t *bitmap, uint8_t *mask,
