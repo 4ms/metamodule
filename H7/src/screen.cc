@@ -2,28 +2,6 @@
 #include "screen_demo_pic.h"
 // const unsigned int pic[19200];
 
-void Screen::set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
-{
-	write<Data>(0x2a);
-	write<Cmd>(Xstart >> 8);
-	write<Cmd>(Xstart);
-	write<Cmd>(Xend >> 8);
-	write<Cmd>(Xend);
-
-	write<Data>(0x2b);
-	write<Cmd>(Ystart >> 8);
-	write<Cmd>(Ystart);
-	write<Cmd>(Yend >> 8);
-	write<Cmd>(Yend);
-
-	write<Data>(0x2c); // LCD_WriteCMD(GRAMWR);
-}
-
-#define ST7735_TFTWIDTH_128 128 // for 1.44 and mini
-#define ST7735_TFTWIDTH_80 80 // for mini
-#define ST7735_TFTHEIGHT_128 128 // for 1.44" display
-#define ST7735_TFTHEIGHT_160 160 // for 1.8" and mini display
-
 #define ST_CMD_DELAY 0x80 // special signifier for command lists
 
 #define ST77XX_NOP 0x00
@@ -75,12 +53,13 @@ void Screen::set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Y
 
 // clang-format off
 
-static const uint8_t generic_st7789[] =  {                // Init commands for 7789 screens
+static const uint8_t generic_st7789[] =  {                
+									// Init commands for 7789 screens
     9,                              //  9 commands in list:
     ST77XX_SWRESET,   ST_CMD_DELAY, //  1: Software reset, no args, w/delay
       150,                          //     ~150 ms delay
     ST77XX_SLPOUT ,   ST_CMD_DELAY, //  2: Out of sleep mode, no args, w/delay
-      10,                          //      10 ms delay
+      10,                           //      10 ms delay
     ST77XX_COLMOD , 1+ST_CMD_DELAY, //  3: Set color mode, 1 arg + delay:
       0x55,                         //     16-bit color
       10,                           //     10 ms delay
@@ -88,32 +67,46 @@ static const uint8_t generic_st7789[] =  {                // Init commands for 7
       0x08,                         //     Row/col addr, bottom-top refresh
     ST77XX_CASET  , 4,              //  5: Column addr set, 4 args, no delay:
       0x00,
-      0,        //     XSTART = 0
+      0,        					//     XSTART = 0
       0,
-      240,  //     XEND = 240
+      240,  						//     XEND = 240
     ST77XX_RASET  , 4,              //  6: Row addr set, 4 args, no delay:
       0x00,
-      0,             //     YSTART = 0
+      0,             				//     YSTART = 0
       320>>8,
-      320&0xFF,  //     YEND = 320
-    ST77XX_INVON  ,   ST_CMD_DELAY,  //  7: hack
+      320&0xFF, 			 		//     YEND = 320
+    ST77XX_INVON  ,   ST_CMD_DELAY, //  7: hack
       10,
     ST77XX_NORON  ,   ST_CMD_DELAY, //  8: Normal display on, no args, w/delay
       10,                           //     10 ms delay
     ST77XX_DISPON ,   ST_CMD_DELAY, //  9: Main screen turn on, no args, delay
-      10 };                          //    10 ms delay
+      10 
+};
 
 // clang-format on
 
 void Screen::init()
 {
+
+	if ((window_width == 240) && (window_height == 240)) { // 1.3" and 1.54" displays
+		_colstart = 0;
+		_rowstart = 80;
+	} else if ((window_width == 135) && (window_height == 240)) { // 1.13" display
+		_colstart = 53;
+		_rowstart = 40;
+	} else {
+		_colstart = 0;
+		_rowstart = 0;
+	}
+
+	init_display(generic_st7789);
+	set_rotation(0);
+	return;
+
 	// RES = 0;
 	// delayms(10);
 	// RES = 1;
 	// delayms(120);
-
-	init_display(generic_st7789);
-	return;
 
 	write<Cmd>(0x36); // MADCTL
 	// if (DERECTION == 0)
@@ -202,10 +195,18 @@ void Screen::demo()
 	set_pos(60, 40, 179, 199);
 	for (int j = 0; j < 160; j++) {
 		for (int i = 0; i < 120; i++) {
-			write<Cmd>(pic[n++]);
+			write<Data>(pic[n++]);
 		}
 	}
 }
+
+// static void Screen::sendCommand(uint8_t cmd, const uint8_t *addr, uint8_t numDataBytes)
+// {
+// 	write<Cmd>(cmd);
+// 	while (numDataBytes--) {
+// 		write<Data>(*addr++);
+// 	}
+// }
 
 void Screen::init_display(const uint8_t *addr)
 {
@@ -222,8 +223,6 @@ void Screen::init_display(const uint8_t *addr)
 		while (numArgs--) {
 			write<Data>(*addr++);
 		}
-		// sendCommand(cmd, addr, numArgs);
-		// addr += numArgs;
 
 		if (ms) {
 			ms = *addr++; // Read post-command delay time (ms)
@@ -242,44 +241,60 @@ void Screen::set_rotation(uint8_t m)
 	switch (rotation) {
 		case 0:
 			madctl = ST77XX_MADCTL_MX | ST77XX_MADCTL_MY | ST77XX_MADCTL_RGB;
-			// _xstart = _colstart;
-			// _ystart = _rowstart;
-			// _width = window_width;
-			// _height = window_height;
+			_xstart = _colstart;
+			_ystart = _rowstart;
+			_width = window_width;
+			_height = window_height;
 			break;
 		case 1:
 			madctl = ST77XX_MADCTL_MY | ST77XX_MADCTL_MV | ST77XX_MADCTL_RGB;
-			// _xstart = _rowstart;
-			// _ystart = _colstart;
-			// _height = window_width;
-			// _width = window_height;
+			_xstart = _rowstart;
+			_ystart = _colstart;
+			_height = window_width;
+			_width = window_height;
 			break;
 		case 2:
 			madctl = ST77XX_MADCTL_RGB;
 			if ((window_width == 135) && (window_height == 240)) {
-				// _xstart = _colstart - 1;
-				// _ystart = _rowstart;
+				_xstart = _colstart - 1;
+				_ystart = _rowstart;
 			} else {
-				// _xstart = 0;
-				// _ystart = 0;
+				_xstart = 0;
+				_ystart = 0;
 			}
-			// _width = window_width;
-			// _height = window_height;
+			_width = window_width;
+			_height = window_height;
 			break;
 		case 3:
 			madctl = ST77XX_MADCTL_MX | ST77XX_MADCTL_MV | ST77XX_MADCTL_RGB;
 			if ((window_width == 135) && (window_height == 240)) {
-				// _xstart = _rowstart;
-				// _ystart = _colstart;
+				_xstart = _rowstart;
+				_ystart = _colstart;
 			} else {
-				// _xstart = 0;
-				// _ystart = 0;
+				_xstart = 0;
+				_ystart = 0;
 			}
-			// _height = window_width;
-			// _width = window_height;
+			_height = window_width;
+			_width = window_height;
 			break;
 	}
 	write<Cmd>(ST77XX_MADCTL);
 	write<Data>(madctl);
 }
 
+void Screen::set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
+{
+	write<Cmd>(ST77XX_CASET);
+	write<Data>(Xstart >> 8);
+	write<Data>(Xstart);
+	write<Data>(Xend >> 8);
+	write<Data>(Xend);
+
+	write<Cmd>(ST77XX_RASET);
+	write<Data>(Ystart >> 8);
+	write<Data>(Ystart);
+	write<Data>(Yend >> 8);
+	write<Data>(Yend);
+
+	write<Cmd>(ST77XX_RAMWR);
+}

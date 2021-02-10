@@ -1,24 +1,5 @@
 # Makefile by Dan Green <danngreen1@gmail.com>
 
-OPTFLAG = -O3
-
-#----------------------------------
-# Uncomment to compile unoptimized:
-# $(BUILDDIR)/src/main.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/controls.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
-# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/sdram.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/system.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_i2c.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver_dma.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/i2c.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/sai.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(SHARED)/CoreModules/pitchshiftCore.o: OPTFLAG = -O0
-#-----------------------------------
 
 CORE ?= M7
 
@@ -45,7 +26,6 @@ else
 $(error You must specify a CORE. Valid values are M4 or M7)
 endif
 endif
-
 
 BINARYNAME 		= main
 # STARTUP 		= startup_stm32h745igtx.s
@@ -77,6 +57,29 @@ SOURCES  += $(wildcard $(SHARED)/util/*.cc)
 SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
 SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
 
+OPTFLAG = -O3
+#----------------------------------
+# Uncomment to compile unoptimized:
+# $(BUILDDIR)/src/main.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/screen.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/controls.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
+# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/sdram.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/system.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_i2c.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver_dma.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/i2c.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/sai.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(SHARED)/CoreModules/pitchshiftCore.o: OPTFLAG = -O0
+#-----------------------------------
+
+
+
+
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 
@@ -99,6 +102,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-I$(LIBDIR)/adafruit_gfx/arduino \
 			-I$(LIBDIR)/adafruit_gfx/DAISY_SEED \
 			-I$(LIBDIR)/adafruit_gfx/SPI \
+			-I$(LIBDIR)/adafruit_gfx \
 
 
 
