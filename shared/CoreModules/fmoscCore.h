@@ -12,9 +12,9 @@ public:
 	virtual void update(void) override
 	{
 		fm.set_frequency(basePitch * expTable.interp(constrain(pitchInput, 0.0f, 1.0f)));
-		totalIndex = constrain(indexCV + indexKnob, 0.0f, 1.0f);
-		float totalShape = constrain(shapeCV + shapeKnob, 0.0f, 1.0f);
-		fm.shape = totalShape*shapeAmount;
+		totalIndex = constrain(indexCV*indexAmount + indexKnob, 0.0f, 1.0f);
+		float totalShape = constrain(shapeCV*shapeAmount + shapeKnob, 0.0f, 1.0f);
+		fm.shape = totalShape;
 		fm.modAmount = totalIndex;
 		mainOutput = fm.update();
 	}
@@ -45,6 +45,9 @@ public:
 				break;
 			case 5:
 				shapeAmount = val;
+				break;
+			case 6:
+				indexAmount = val;
 				break;
 		}
 	}
@@ -98,4 +101,5 @@ private:
 	float totalIndex = 0;
 	float pitchInput = 0;
 	float shapeAmount = 0;
+	float indexAmount = 0;
 };
