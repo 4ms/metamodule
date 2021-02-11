@@ -3,6 +3,7 @@
 #include "controls.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/uart.hh"
+#include "util/debouncer.hh"
 
 class Params {
 public:
@@ -13,12 +14,17 @@ public:
 	void update();
 	Controls &controls;
 
-	float cvjacks[4];
-	float patchcv;
-	float knobs[8];
+	float cvjacks[4] = {0.f};
+	float patchcv = 0.f;
+	float knobs[8] = {0.f};
 	bool gate_ins[3];
 	bool jack_senses[15];
-	bool buttons[2];
+
+	Button buttons[2];
+	Button rotary_button;
+
+	int32_t rotary_motion = 0;
+	int32_t rotary_pushed_motion = 0;
 
 	// SelbusQueue selbus_commands;
 
@@ -26,6 +32,6 @@ public:
 	bool clock_out;
 
 private:
-	bool knob_moved_while_pressed = false;
+	bool _rotary_moved_while_pressed = false;
 };
 

@@ -27,16 +27,16 @@ public:
 		params.controls.start();
 
 		leds.but[0].set_background(Colors::yellow);
-		leds.but[0].breathe(Colors::purple, 4 * Hz);
+		// leds.but[0].breathe(Colors::purple, 4 * Hz);
 
 		leds.but[1].set_background(Colors::white);
-		leds.but[1].breathe(Colors::red, 2 * Hz);
+		// leds.but[1].breathe(Colors::red, 2 * Hz);
 
 		leds.clockLED.set_background(Colors::blue);
-		leds.clockLED.breathe(Colors::pink, 3 * Hz);
+		// leds.clockLED.breathe(Colors::pink, 3 * Hz);
 
 		leds.rotaryLED.set_background(Colors::blue);
-		leds.rotaryLED.breathe(Colors::green, 0.5f * Hz);
+		// leds.rotaryLED.breathe(Colors::green, 0.5f * Hz);
 
 		// Todo: set led_update_task_conf.update_rate_Hz to be a factor of AnimationUpdateRate and Hz
 		//
@@ -46,8 +46,38 @@ public:
 
 	void update()
 	{
-		// Todo: set led colors/flash/breathe/background etc based on Params
-		// leds.update();
+		if (params.buttons[0].is_pressed())
+			leds.but[0].set_background(Colors::red);
+		else
+			leds.but[0].set_background(Colors::white);
+
+		if (params.buttons[1].is_pressed())
+			leds.but[1].set_background(Colors::blue);
+		else
+			leds.but[1].set_background(Colors::white);
+
+		if (params.rotary_button.is_pressed())
+			leds.rotaryLED.set_background(Colors::blue);
+		else
+			leds.rotaryLED.set_background(Colors::white);
+
+		// if (params.buttons[1].is_just_pressed())
+		// 	leds.but[1].set_background(Colors::red);
+
+		// if (params.buttons[1].is_just_released())
+		// 	leds.but[1].set_background(Colors::blue);
+
+		// if (params.buttons[0].is_just_pressed())
+		// 	leds.but[0].set_background(Colors::red);
+
+		// if (params.buttons[0].is_just_released())
+		// 	leds.but[0].set_background(Colors::blue);
+
+		// if (params.rotary_button.is_just_pressed())
+		// 	leds.rotaryLED.set_background(Colors::white);
+
+		// if (params.rotary_button.is_just_released())
+		// 	leds.rotaryLED.set_background(Colors::blue);
 	}
 
 private:

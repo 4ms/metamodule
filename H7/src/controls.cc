@@ -8,15 +8,8 @@ void Controls::read()
 
 	rotary.update();
 	rotary_button.update();
-	for (uint32_t i = 0; i < 2; i++) {
-		button[i].update();
-		// cv_sense[i].update();
-		// cv_sense[i + 2].update();
-		// in_sense[i].update();
-		// out_sense[i].update();
-		// dac_sense[i].update();
-		// trig_in_sense[i].update();
-	}
+	button[0].update();
+	button[1].update();
 
 	// Debug::set_3(false);
 }

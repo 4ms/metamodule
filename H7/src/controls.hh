@@ -19,7 +19,7 @@ struct Controls {
 	CVAdcChipT &cvadc;
 
 	DebouncedSwitch button[2] = {{GPIO::C, 10}, {GPIO::C, 11}};
-	RotaryEncoder<RotaryFullStep> rotary = {GPIO::C, 7, GPIO::C, 8};
+	RotaryEncoder<RotaryFullStep> rotary = {GPIO::C, 8, GPIO::C, 7};
 	DebouncedSwitch rotary_button = {GPIO::C, 6};
 
 	// Controls(MuxedADC &potadc);

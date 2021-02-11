@@ -11,26 +11,36 @@ void Params::update()
 		cvjacks[i] = (2047.5f - static_cast<float>(controls.cvadc.get_val(i))) / 2047.5f;
 	}
 
-	int32_t rotary_motion = controls.rotary.read();
+	int tmp_rotary_motion = controls.rotary.read();
 
 	if (controls.rotary_button.is_just_pressed()) {
-		knob_moved_while_pressed = false;
+		_rotary_moved_while_pressed = false;
+		rotary_button.register_rising_edge();
 	}
-	if (controls.rotary_button.is_just_released() && !knob_moved_while_pressed) {
-		// Handle button tap
+	if (controls.rotary_button.is_just_released() && !_rotary_moved_while_pressed) {
+		rotary_button.register_falling_edge();
 	}
 	if (controls.rotary_button.is_pressed()) {
 		if (rotary_motion != 0) {
-			knob_moved_while_pressed = true;
-			// Handle push+turn
+			_rotary_moved_while_pressed = true;
+			rotary_pushed_motion += tmp_rotary_motion;
 		}
 	} else {
-		// Handle turning (not pushed)
+		rotary_motion += tmp_rotary_motion;
 	}
 
 	for (int i = 0; i < 2; i++) {
-		buttons[i] = controls.button[i].is_pressed();
+		if (controls.button[i].just_went_high())
+			buttons[i].register_rising_edge();
+
+		if (controls.button[i].just_went_low())
+			buttons[i].register_falling_edge();
 	}
+
+	// Todo: Pot ADC and Patch CV copying from controls to params happens in main loop.
+	// This might be a problem if we separate Controls and Params between cores.
+	// Can we store the last reading in Controls:: and then copy it over to Params:: here?
+	// Wait until we separate cores to make sure we'll need this
 
 	Debug::Pin1::low();
 }
