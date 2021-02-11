@@ -61,8 +61,9 @@ protected:
 	bool got_rising_edge_;
 	bool got_falling_edge_;
 };
-
-template<unsigned RisingEdgePattern = 0x0000000F, unsigned FallingEdgePattern = 0xFFFFFFF0>
+template<unsigned RisingEdgePattern = 0x00000001,
+		 unsigned FallingEdgePattern = 0xFFFFFFFE,
+		 unsigned StateMask = 0x00000FFF>
 struct Debouncer : Button {
 	Debouncer()
 		: debounce_state_{0}
@@ -70,10 +71,10 @@ struct Debouncer : Button {
 
 	void register_state(unsigned new_state)
 	{
-		debounce_state_ = (debounce_state_ << 1) | new_state;
-		if (debounce_state_ == RisingEdgePattern) {
+		debounce_state_ = ((debounce_state_ << 1) | new_state) & StateMask;
+		if (debounce_state_ == (RisingEdgePattern & StateMask)) {
 			register_rising_edge();
-		} else if (debounce_state_ == FallingEdgePattern) {
+		} else if (debounce_state_ == (FallingEdgePattern & StateMask)) {
 			register_falling_edge();
 		}
 	}
