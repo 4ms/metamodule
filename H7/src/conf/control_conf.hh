@@ -23,7 +23,7 @@ constexpr SpiConfig<kSpiAdcConfPeriphNum, kSpiAdcConfNumChips> spi_adc_conf = {
 		},
 
 	.use_hardware_ss = false,
-	.clock_division = 64,
+	.clock_division = 256,
 	.data_size = 16,
 	.data_dir = SpiDataDir::Duplex,
 };
