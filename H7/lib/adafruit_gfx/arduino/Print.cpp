@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <math.h>
+//#include "Arduino.h"
 #include "Arduino.h"
 
 #include "Print.h"
@@ -48,15 +48,15 @@ size_t Print::write(const uint8_t *buffer, size_t size)
   return n;
 }
 
-size_t Print::print(const __FlashStringHelper *ifsh)
-{
-  return print(reinterpret_cast<const char *>(ifsh));
-}
+// size_t Print::print(const __FlashStringHelper *ifsh)
+// {
+// 	return print(reinterpret_cast<const char *>(ifsh));
+// }
 
-size_t Print::print(const String &s)
-{
-  return write(s.c_str(), s.length());
-}
+// size_t Print::print(const String &s)
+// {
+// 	return write(s.c_str(), s.length());
+// }
 
 size_t Print::print(const char str[])
 {
@@ -113,12 +113,12 @@ size_t Print::print(double n, int digits)
   return printFloat(n, digits);
 }
 
-size_t Print::println(const __FlashStringHelper *ifsh)
-{
-  size_t n = print(ifsh);
-  n += println();
+// size_t Print::println(const __FlashStringHelper *ifsh)
+// {
+// 	size_t n = print(ifsh);
+// 	n += println();
   return n;
-}
+// }
 
 size_t Print::print(const Printable &x)
 {
@@ -130,12 +130,12 @@ size_t Print::println(void)
   return write("\r\n");
 }
 
-size_t Print::println(const String &s)
-{
-  size_t n = print(s);
-  n += println();
-  return n;
-}
+// size_t Print::println(const String &s)
+// {
+// 	size_t n = print(s);
+// 	n += println();
+// 	return n;
+// }
 
 size_t Print::println(const char c[])
 {
@@ -224,19 +224,19 @@ extern "C" {
   }
 }
 
-int Print::printf(const char *format, ...)
-{
-  va_list ap;
-  va_start(ap, format);
-  return vdprintf((int)this, format, ap);
-}
+// int Print::printf(const char *format, ...)
+// {
+// 	va_list ap;
+// 	va_start(ap, format);
+// 	return vdprintf((int)this, format, ap);
+// }
 
-int Print::printf(const __FlashStringHelper *format, ...)
-{
-  va_list ap;
-  va_start(ap, format);
-  return vdprintf((int)this, (const char *)format, ap);
-}
+// int Print::printf(const __FlashStringHelper *format, ...)
+// {
+// 	va_list ap;
+// 	va_start(ap, format);
+// 	return vdprintf((int)this, (const char *)format, ap);
+// }
 
 // Private Methods /////////////////////////////////////////////////////////////
 

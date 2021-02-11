@@ -3,11 +3,12 @@
 
 // #if ARDUINO >= 100
 // 	#include "Arduino.h"
-// 	#include "Print.h"
+#include "Print.h"
 // #else
 #include "WProgram.h"
 // #endif
 #include "gfxfont.h"
+#include <cstddef>
 
 /// A generic graphics superclass that can handle all sorts of drawing. At a
 /// minimum you can subclass and provide drawPixel(). At a maximum you can do a
@@ -160,12 +161,12 @@ public:
 		_cp437 = x;
 	}
 
-	using Print::write;
-#if ARDUINO >= 100
-	virtual std::size_t write(uint8_t);
-#else
-	virtual void write(uint8_t);
-#endif
+	// using Print::write;
+	// #if ARDUINO >= 100
+	virtual size_t write(uint8_t);
+	// #else
+	// virtual void write(uint8_t);
+	// #endif
 
 	/************************************************************************/
 	/*!
