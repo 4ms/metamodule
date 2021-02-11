@@ -56,6 +56,8 @@ SOURCES  += $(wildcard $(SHARED)/util/*.c)
 SOURCES  += $(wildcard $(SHARED)/util/*.cc)
 SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
 SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
+SOURCES  += $(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library/Adafruit_GFX.cpp 
+SOURCES  += $(LIBDIR)/adafruit_gfx/arduino/Print.cpp
 
 OPTFLAG = -O3
 #----------------------------------
@@ -97,8 +99,8 @@ INCLUDES += -I$(DEVICE)/include \
 			-I$(SHARED)/CoreModules \
 			-I$(SHARED)/util \
 			-I$(SHARED)/patch \
-			-I$(LIBDIR)/adafruit_gfx/Adafruit\ ST7735\ and\ ST7789\ Library \
-			-I$(LIBDIR)/adafruit_gfx/Adafruit\ GFX\ Library \
+			-I$(LIBDIR)/adafruit_gfx/Adafruit_ST7735_and_ST7789_Library \
+			-I$(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library \
 			-I$(LIBDIR)/adafruit_gfx/arduino \
 			-I$(LIBDIR)/adafruit_gfx/DAISY_SEED \
 			-I$(LIBDIR)/adafruit_gfx/SPI \

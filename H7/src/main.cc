@@ -52,7 +52,7 @@ void main()
 	using namespace MetaModule;
 
 	_hw.screen.init();
-	// _hw.screen.demo();
+	_hw.screen.demo();
 
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
 	LedCtl leds{led_driver};
