@@ -2,16 +2,20 @@
 #include "debug.hh"
 #include "drivers/interrupt.hh"
 
+// CM7: 10kHz, 3.3%
 void Controls::read()
 {
-	// Debug::set_3(true);
-
+	Debug::Pin2::high();
 	rotary.update();
-	rotary_button.update();
-	button[0].update();
-	button[1].update();
+	// rotary_button.update();
+	button1.update();
+	button2.update();
 
-	// Debug::set_3(false);
+	// gate_ins[0].update();
+	// gate_ins[1].update();
+	// gate_ins[2].update();
+
+	Debug::Pin2::low();
 }
 
 void Controls::start()

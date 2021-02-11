@@ -101,7 +101,7 @@ void main()
 		ui.update();
 
 		if (SharedBus::i2c.is_ready()) {
-			Debug::Pin2::high();
+			// Debug::Pin2::high();
 			switch (cur_client) {
 				case Leds:
 					// Debug::set_3(true);
@@ -153,7 +153,7 @@ void main()
 					cur_client = Leds;
 					break;
 			}
-			Debug::Pin2::low();
+			// Debug::Pin2::low();
 		}
 		__NOP();
 	}

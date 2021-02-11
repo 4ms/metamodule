@@ -22,7 +22,7 @@ constexpr struct MMScreenConf : DefaultSpiScreenConf {
 		.data_size = 8,
 		.data_dir = SpiDataDir::TXOnly,
 	};
-	using DCPin = FPin<GPIO::A, 6>;
+	using DCPin = FPin<GPIO::A, 6, PinMode::Output>;
 
 	static constexpr uint32_t width = 240;
 	static constexpr uint32_t height = 240;

@@ -3,10 +3,10 @@
 #include "drivers/register_access.hh"
 
 struct Debug {
-	using Pin0 = FPin<GPIO::A, 9>;
-	using Pin1 = FPin<GPIO::A, 10>;
-	using Pin2 = FPin<GPIO::A, 11>;
-	using Pin3 = FPin<GPIO::A, 12>;
+	using Pin0 = FPin<GPIO::A, 9, PinMode::Output>;
+	using Pin1 = FPin<GPIO::A, 10, PinMode::Output>;
+	using Pin2 = FPin<GPIO::A, 11, PinMode::Output>;
+	using Pin3 = FPin<GPIO::A, 12, PinMode::Output>;
 
 	static inline Pin0 pin_0_init;
 	static inline Pin1 pin_1_init;

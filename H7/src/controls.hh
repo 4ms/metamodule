@@ -13,17 +13,23 @@
 #include "muxed_adc.hh"
 #include "util/filter.hh"
 
+using GateInJack = DebouncedSwitch;
+
 struct Controls {
 
 	MuxedADC &potadc;
 	CVAdcChipT &cvadc;
 
-	DebouncedSwitch button[2] = {{GPIO::C, 10}, {GPIO::C, 11}};
+	DebouncedPin<GPIO::C, 10, PinPolarity::Inverted> button1;
+	DebouncedPin<GPIO::C, 11, PinPolarity::Inverted> button2;
+
+	// DebouncedSwitch button[2] = {{GPIO::C, 10}, {GPIO::C, 11}};
 	RotaryEncoder<RotaryFullStep> rotary = {GPIO::C, 8, GPIO::C, 7};
 	DebouncedSwitch rotary_button = {GPIO::C, 6};
+	GateInJack gate_ins[3] = {{GPIO::G, 6}, {GPIO::G, 7}, {GPIO::D, 12}};
 
-	// Controls(MuxedADC &potadc);
 	Controls(MuxedADC &potadc, CVAdcChipT &cvadc);
+
 	void read();
 	void start();
 
