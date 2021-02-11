@@ -26,7 +26,7 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				cp.setMultiply(map_value(val, 0.0f, 1.0f, 1.0f, 8.99f));
+				cp.setMultiply(map_value(val, 0.0f, 1.0f, 1.0f, 16.99f));
 				break;
 		}
 	}
