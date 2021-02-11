@@ -1,8 +1,8 @@
 #pragma once
 #include "coreProcessor.h"
-#include "math.hh"
-#include "math_tables.hh"
 #include "moduleTypes.h"
+#include "util/math.hh"
+#include "util/math_tables.hh"
 
 using namespace MathTools;
 
@@ -103,10 +103,10 @@ public:
 				output = envOut;
 				break;
 			case 1:
-			output = phaccu>1&&phaccu<1.5f;
+				output = phaccu >= 1;
 				break;
 			case 2:
-			output = (int)phaccu>1;
+				output = phaccu >= 2;
 				break;
 		}
 		return output;
