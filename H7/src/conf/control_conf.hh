@@ -23,7 +23,7 @@ constexpr SpiConfig<kSpiAdcConfPeriphNum, kSpiAdcConfNumChips> spi_adc_conf = {
 		},
 
 	.use_hardware_ss = false,
-	.clock_division = 256,
+	.clock_division = 128,
 	.data_size = 16,
 	.data_dir = SpiDataDir::Duplex,
 };
@@ -55,4 +55,4 @@ const TimekeeperConfig control_read_tim_conf = {
 	.priority2 = 0,
 };
 
-using CVAdcChipT = AdcSpi_MAX11666<SpiConfig<spi_adc_conf.PeriphNum, spi_adc_conf.NumChips>, Oversampler<16>>;
+using CVAdcChipT = AdcSpi_MAX11666<SpiConfig<spi_adc_conf.PeriphNum, spi_adc_conf.NumChips>, Oversampler<8>>;
