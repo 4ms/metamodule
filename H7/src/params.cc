@@ -29,23 +29,27 @@ void Params::update()
 		rotary_motion += tmp_rotary_motion;
 	}
 
-	if (controls.button1.is_pressed() && !buttons[0].is_pressed())
-		buttons[0].register_rising_edge();
-	else if (!controls.button1.is_pressed() && buttons[0].is_pressed())
-		buttons[0].register_falling_edge();
+	buttons[0].copy_state(controls.button0);
+	buttons[1].copy_state(controls.button1);
+	rotary_button.copy_state(controls.rotary_button);
+	gate_ins[0].copy_state(controls.gate_in0);
+	gate_ins[1].copy_state(controls.gate_in1);
+	clock_in.copy_state(controls.clock_in);
 
-	if (controls.button2.is_pressed() && !buttons[1].is_pressed())
-		buttons[1].register_rising_edge();
-	else if (!controls.button2.is_pressed() && buttons[1].is_pressed())
-		buttons[1].register_falling_edge();
-	// if (controls.button1.just_went_low())
+	// if (controls.button0.is_pressed() && !buttons[0].is_pressed())
+	// 	buttons[0].register_rising_edge();
+	// else if (!controls.button0.is_pressed() && buttons[0].is_pressed())
 	// 	buttons[0].register_falling_edge();
 
-	// if (controls.button2.just_went_high())
+	// if (controls.button1.is_pressed() && !buttons[1].is_pressed())
 	// 	buttons[1].register_rising_edge();
-
-	// if (controls.button2.just_went_low())
+	// else if (!controls.button1.is_pressed() && buttons[1].is_pressed())
 	// 	buttons[1].register_falling_edge();
+
+	// if (controls.rotary_button.is_pressed() && !rotary_button.is_pressed())
+	// 	rotary_button.register_rising_edge();
+	// else if (!controls.rotary_button.is_pressed() && buttons[1].is_pressed())
+	// 	rotary_button.register_falling_edge();
 
 	// Todo: Pot ADC and Patch CV copying from controls to params happens in main loop.
 	// This might be a problem if we separate Controls and Params between cores.

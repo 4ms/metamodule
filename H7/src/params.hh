@@ -17,11 +17,13 @@ public:
 	float cvjacks[4] = {0.f};
 	float patchcv = 0.f;
 	float knobs[8] = {0.f};
-	bool gate_ins[3];
-	bool jack_senses[15];
 
-	Button buttons[2];
-	Button rotary_button;
+	Toggler gate_ins[2];
+	Toggler clock_in;
+	Toggler jack_senses[15];
+
+	Toggler buttons[2];
+	Toggler rotary_button;
 
 	int32_t rotary_motion = 0;
 	int32_t rotary_pushed_motion = 0;

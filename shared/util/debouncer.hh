@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
 
-struct Button {
-	Button()
+struct Toggler {
+	Toggler()
 		: is_high_{false}
 		, got_rising_edge_{false}
 		, got_falling_edge_{false}
@@ -56,15 +56,32 @@ struct Button {
 		got_rising_edge_ = false;
 	}
 
+	void set_state(unsigned x)
+	{
+		is_high_ = x ? true : false;
+	}
+
+	void copy_state(const Toggler &other)
+	{
+		is_high_ = other.is_high_;
+		got_rising_edge_ = other.got_rising_edge_;
+		got_falling_edge_ = other.got_falling_edge_;
+		// if (is_pressed() && !other.is_pressed())
+		// 	register_rising_edge();
+		// else if (!is_pressed() && other.is_pressed())
+		// 	register_falling_edge();
+	}
+
 protected:
 	bool is_high_;
 	bool got_rising_edge_;
 	bool got_falling_edge_;
 };
+
 template<unsigned RisingEdgePattern = 0x00000001,
 		 unsigned FallingEdgePattern = 0xFFFFFFFE,
 		 unsigned StateMask = 0x00000FFF>
-struct Debouncer : Button {
+struct Debouncer : Toggler {
 	Debouncer()
 		: debounce_state_{0}
 	{}
@@ -76,6 +93,8 @@ struct Debouncer : Button {
 			register_rising_edge();
 		} else if (debounce_state_ == (FallingEdgePattern & StateMask)) {
 			register_falling_edge();
+		} else {
+			set_state(new_state);
 		}
 	}
 

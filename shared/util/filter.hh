@@ -23,7 +23,6 @@ public:
 	}
 
 private:
-	// constexpr static auto oversample_shift_ = MathTools::Log2Int(Size);
 	constexpr static auto oversample_shift_ = MathTools::Log2<Size>::val;
 	T buff_ = 0;
 	T val_ = 0;
