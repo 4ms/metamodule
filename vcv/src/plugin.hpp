@@ -10,6 +10,10 @@ extern CentralData *centralData;
 extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file 
+extern Model *modelGateseq16; 
+extern Model *modelGateseq8; 
+extern Model *modelOctave; 
+extern Model *modelMinmax; 
 extern Model *modelDrum; 
 extern Model *modelComplexenvelope; 
 extern Model *modelFmosc; 

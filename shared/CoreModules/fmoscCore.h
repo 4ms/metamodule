@@ -12,7 +12,9 @@ public:
 	virtual void update(void) override
 	{
 		fm.set_frequency(basePitch * expTable.interp(constrain(pitchInput, 0.0f, 1.0f)));
-		totalIndex = constrain(indexCV + indexKnob, 0.0f, 1.0f);
+		totalIndex = constrain(indexCV*indexAmount + indexKnob, 0.0f, 1.0f);
+		float totalShape = constrain(shapeCV*shapeAmount + shapeKnob, 0.0f, 1.0f);
+		fm.shape = totalShape;
 		fm.modAmount = totalIndex;
 		mainOutput = fm.update();
 	}
@@ -38,6 +40,15 @@ public:
 					fm.ratioFine = map_value(val, 0.5f, 1.0f, 1.0f, 2.0f);
 				break;
 			}
+			case 4:
+				shapeKnob = val;
+				break;
+			case 5:
+				shapeAmount = val;
+				break;
+			case 6:
+				indexAmount = val;
+				break;
 		}
 	}
 	virtual void set_samplerate(const float sr) override
@@ -53,6 +64,9 @@ public:
 				break;
 			case 1:
 				pitchInput = val;
+				break;
+			case 2:
+				shapeCV = val;
 				break;
 		}
 	}
@@ -82,6 +96,10 @@ private:
 	float mainOutput;
 	float indexKnob = 0;
 	float indexCV = 0;
+	float shapeKnob = 0;
+	float shapeCV = 0;
 	float totalIndex = 0;
 	float pitchInput = 0;
+	float shapeAmount = 0;
+	float indexAmount = 0;
 };

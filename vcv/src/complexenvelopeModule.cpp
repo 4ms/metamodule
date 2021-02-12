@@ -56,6 +56,8 @@ struct ComplexenvelopeWidget : CommModuleWidget {
 
 		addLabeledOutput("OUT", ComplexenvelopeModule::SIGNAL_OUTPUT, {0, 0});
 		addLabeledInput("IN", ComplexenvelopeModule::GATE_INPUT, {0, 1});
+
+		addModuleTitle("COMPLEX EG");
 	}
 };
 

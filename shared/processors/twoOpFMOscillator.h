@@ -28,6 +28,7 @@ public:
 	int ratioCoarse = 4;
 	float ratioFine = 1;
 	float modAmount = 0;
+	float shape = 0;
 
 	TwoOpFM() {}
 
@@ -58,9 +59,10 @@ public:
 		increment[1] = freqCalc * (max_ / sampleRate);
 		phaccu[1] += increment[1];
 
-		sinOut[1] = sinTable[phaccu[1] >> 21];
-
-		return sinOut[1];
+        
+		sinOut[1] = sinTable[((phaccu[1]+max_/2)&max_) >> 21];
+        auto sqrOut = (phaccu[1]>(max_/2))*2.0f-1.0f;
+		return (MathTools::interpolate(sinOut[1],sqrOut,shape));
 	}
 
 	void set_samplerate(float sr)

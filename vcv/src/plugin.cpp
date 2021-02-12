@@ -10,6 +10,10 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelGateseq16); 
+p->addModel(modelGateseq8); 
+p->addModel(modelOctave); 
+p->addModel(modelMinmax); 
 p->addModel(modelDrum); 
 p->addModel(modelComplexenvelope); 
 p->addModel(modelFmosc); 

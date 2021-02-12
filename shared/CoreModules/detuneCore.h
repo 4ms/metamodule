@@ -52,7 +52,7 @@ public:
 	DetuneCore()
 	{
 		p.mix = 1.0f;
-		p.windowSize = 5.0f;
+		p.windowSize = 240;
 	}
 
 	virtual void set_param(int const param_id, const float val) override
@@ -108,7 +108,7 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	PitchShift<240000> p;
+	PitchShift<9600> p;
 	float flutterDepth = 0;
 	float wowDepth = 0;
 

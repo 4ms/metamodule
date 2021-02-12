@@ -2,30 +2,26 @@
 
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "processors/tools/clockPhase.h"
-#include "util/math.hh"
+#include "math.hh"
 
 using namespace MathTools;
 
-class ClkdividerCore : public CoreProcessor {
+class OctaveCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		cp.update();
-		if ((cp.getWrappedPhase() < pulseWidth) && clockInit) {
-			clockOutput = 1;
-		} else {
-			clockOutput = 0;
-		}
+		auto cvSum = constrain<float>(octaveOffset+cvInput,0.0f,1.0f);
+		int octave = map_value(cvSum,0.0f,1.0f,0,5);
+		voltOutput = voltInput + octave;
 	}
 
-	ClkdividerCore() {}
+	OctaveCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
 			case 0:
-				cp.setDivide(map_value(val, 0.0f, 1.0f, 1.0f, 16.99f));
+				octaveOffset = val;
 				break;
 		}
 	}
@@ -35,8 +31,10 @@ public:
 	{
 		switch (input_id) {
 			case 0:
-				cp.updateClock(val);
-				clockInit = true;
+				voltInput = val;
+				break;
+			case 1:
+				cvInput = val;
 				break;
 		}
 	}
@@ -46,7 +44,7 @@ public:
 		float output = 0;
 		switch (output_id) {
 			case 0:
-				output = clockOutput;
+				output = voltOutput;
 				break;
 		}
 		return output;
@@ -54,16 +52,15 @@ public:
 
 	static std::unique_ptr<CoreProcessor> create()
 	{
-		return std::make_unique<ClkdividerCore>();
+		return std::make_unique<OctaveCore>();
 	}
-	static constexpr char typeID[20] = "CLKDIVIDER";
-	static constexpr char description[] = "clock divider";
+	static constexpr char typeID[20] = "OCTAVE";
+	static constexpr char description[] = "Octave";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	float pulseWidth = 0.5f;
-	int clockOutput = 0;
-	bool clockInit = false;
-
-	ClockPhase cp;
+	float octaveOffset = 0;
+	float cvInput=0;
+	float voltInput = 0;
+	float voltOutput = 0;
 };

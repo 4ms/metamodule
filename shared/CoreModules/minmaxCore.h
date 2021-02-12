@@ -2,31 +2,23 @@
 
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "processors/tools/clockPhase.h"
 #include "util/math.hh"
 
 using namespace MathTools;
 
-class ClkdividerCore : public CoreProcessor {
+class MinmaxCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		cp.update();
-		if ((cp.getWrappedPhase() < pulseWidth) && clockInit) {
-			clockOutput = 1;
-		} else {
-			clockOutput = 0;
-		}
+		maxOut = max<float>(inA, inB);
+		minOut = min<float>(inA, inB);
 	}
 
-	ClkdividerCore() {}
+	MinmaxCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
-			case 0:
-				cp.setDivide(map_value(val, 0.0f, 1.0f, 1.0f, 16.99f));
-				break;
 		}
 	}
 	virtual void set_samplerate(const float sr) override {}
@@ -35,8 +27,10 @@ public:
 	{
 		switch (input_id) {
 			case 0:
-				cp.updateClock(val);
-				clockInit = true;
+				inA = val;
+				break;
+			case 1:
+				inB = val;
 				break;
 		}
 	}
@@ -46,7 +40,10 @@ public:
 		float output = 0;
 		switch (output_id) {
 			case 0:
-				output = clockOutput;
+				output = minOut;
+				break;
+			case 1:
+				output = maxOut;
 				break;
 		}
 		return output;
@@ -54,16 +51,16 @@ public:
 
 	static std::unique_ptr<CoreProcessor> create()
 	{
-		return std::make_unique<ClkdividerCore>();
+		return std::make_unique<MinmaxCore>();
 	}
-	static constexpr char typeID[20] = "CLKDIVIDER";
-	static constexpr char description[] = "clock divider";
+	static constexpr char typeID[20] = "MINMAX";
+	static constexpr char description[] = "Minimum/Maximum";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	float pulseWidth = 0.5f;
-	int clockOutput = 0;
-	bool clockInit = false;
+	float inA = 0;
+	float inB = 0;
 
-	ClockPhase cp;
+	float maxOut = 0;
+	float minOut = 0;
 };
