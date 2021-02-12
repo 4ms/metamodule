@@ -4,7 +4,7 @@
 // CM7: 10kHz, 1.6% = 1.6us
 void Controls::read()
 {
-	Debug::Pin2::high();
+	// Debug::Pin2::high();
 	rotary.update();
 	rotary_button.update();
 	button0.update();
@@ -14,13 +14,14 @@ void Controls::read()
 	gate_in1.update();
 	clock_in.update();
 
-	Debug::Pin2::low();
+	// Debug::Pin2::low();
 }
 
 void Controls::start()
 {
 	cvadc.start();
 	read_controls_task.start();
+	read_cvadc_task.start();
 }
 
 Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc)
@@ -33,5 +34,6 @@ Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc)
 	__HAL_DBGMCU_FREEZE_TIM6();
 
 	read_controls_task.init(control_read_tim_conf, [this]() { read(); });
+	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.start(); });
 }
 

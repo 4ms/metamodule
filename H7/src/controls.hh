@@ -28,4 +28,5 @@ struct Controls {
 
 private:
 	Timekeeper read_controls_task;
+	Timekeeper read_cvadc_task;
 };

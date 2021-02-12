@@ -19,14 +19,21 @@ struct SpiAdcConf : DefaultSpiConf {
 	static constexpr PinNoInit CS0 = {GPIO::G, 10};
 	static constexpr PinNoInit CS1 = {GPIO::G, 12};
 	static constexpr bool use_hardware_ss = false;
-	static constexpr uint16_t clock_division = 128;
+	static constexpr uint16_t clock_division = 16;
 	static constexpr uint16_t data_size = 16;
 	static constexpr SpiDataDir data_dir = SpiDataDir::Duplex;
 };
 
 using CVAdcChipT = AdcSpi_MAX11666<SpiAdcConf, Oversampler<8>>;
 
-const TimekeeperConfig control_read_tim_conf = {
+constexpr TimekeeperConfig cvadc_tim_conf = {
+	.TIMx = TIM17,
+	.period_ns = 71000, // 14khz
+	.priority1 = 0,
+	.priority2 = 1,
+};
+
+constexpr TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
 	.period_ns = 100000, // 10kHz
 	.priority1 = 0,
