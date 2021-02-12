@@ -29,8 +29,8 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
-	CVAdcChipT cvadc{spi_adc_conf};
-	Screen screen{screen_conf};
+	CVAdcChipT cvadc;
+	Screen screen;
 	// GPIOExpander<16> sense{gpio_expander_conf};
 } _hw;
 

@@ -8,11 +8,10 @@
 
 class mmooo {};
 
-class Screen : public MMScreenDriverT, Adafruit_GFX {
+class Screen : public SpiScreenDriver<MMScreenConf>, Adafruit_GFX {
 public:
-	Screen(const MMScreenConf &conf)
+	Screen()
 		: Adafruit_GFX{240, 240}
-		, MMScreenDriverT{conf.screen_SPI_conf}
 		, window_height{MMScreenConf::width}
 		, window_width{MMScreenConf::height}
 	{}
