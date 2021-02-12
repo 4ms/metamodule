@@ -2,7 +2,7 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleTypes.h"
 
-#define USE_NODES
+// #define USE_NODES
 
 #include "CoreModules/panel_node.hh"
 
@@ -58,11 +58,9 @@ public:
 
 	float get_panel_param(int param_id)
 	{
-		// until we get ADC running:
-		return 0.5f;
-		// if (!is_loaded)
-		// 	return 0.f;
-		// return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
+		if (!is_loaded)
+			return 0.f;
+		return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
 	}
 
 	bool load_patch(const Patch &p)

@@ -102,12 +102,10 @@ void main()
 
 		constexpr bool ENABLE_I2C = true;
 		if (ENABLE_I2C && SharedBus::i2c.is_ready()) {
-			// Debug::Pin2::high();
+			Debug::Pin2::high();
 			switch (cur_client) {
 				case Leds:
-					// Debug::Pin3::high();
 					leds.refresh();
-					// Debug::Pin3::low();
 					cur_client = SelectPots;
 					break;
 
@@ -124,6 +122,7 @@ void main()
 					break;
 
 				case CollectReadPots:
+					Debug::Pin3::high();
 					params.knobs[cur_pot] = controls.potadc.collect_reading() / 4095.0f;
 					if (++cur_pot >= 8) {
 						cur_client = SelectPatchCV;
@@ -131,6 +130,7 @@ void main()
 					} else
 						cur_client = RequestReadPots;
 					controls.potadc.select_pot_source(cur_pot);
+					Debug::Pin3::low();
 					break;
 
 					// GPIO Sense here (between ADC channels)
@@ -154,7 +154,7 @@ void main()
 					cur_client = Leds;
 					break;
 			}
-			// Debug::Pin2::low();
+			Debug::Pin2::low();
 		}
 		__NOP();
 	}
