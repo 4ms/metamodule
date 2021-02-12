@@ -129,6 +129,8 @@ CFLAGS = -g2 -fno-common \
 	-fdata-sections -ffunction-sections \
 	-nostdlib \
 	-nostartfiles \
+	--param l1-cache-size=16 \
+	--param l1-cache-line-size=32 \
 
 CXXFLAGS = $(CFLAGS) \
 	-std=c++2a \
