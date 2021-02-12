@@ -1,8 +1,5 @@
 # Makefile by Dan Green <danngreen1@gmail.com>
-
-
 CORE ?= M7
-
 ifeq ($(CORE), M7)
 $(info Building for M7 core)
 #LOADFILE	= STM32H745IGTX_FLASH_CM7.ld
@@ -12,7 +9,6 @@ MCU =  -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM7 -DCORE_CM7
 HAL_CONF_INC = src/m7
 else
-
 ifeq ($(CORE), M4)
 $(info Building for M4 core)
 # LOADFILE	= STM32H745IGTX_FLASH_CM4.ld
@@ -21,14 +17,12 @@ BUILDDIR = build/corem4
 MCU =  -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
 HAL_CONF_INC = src/m4
-
 else
 $(error You must specify a CORE. Valid values are M4 or M7)
 endif
 endif
 
 BINARYNAME 		= main
-# STARTUP 		= startup_stm32h745igtx.s
 STARTUP 		= startup_cm7.s
 SYSTEM 			= system_stm32h7xx_dualcore_boot_cm4_cm7.c
 
@@ -39,25 +33,6 @@ PERIPH 			= $(LIBDIR)/stm32/periph
 DRIVERLIB       = $(LIBDIR)/mdrivlib
 SHARED  		= src/shared
 TABLEGEN 		= $(SHARED)/tableGen
-
-SOURCES  += $(DRIVERLIB)/drivers/$(STARTUP)
-SOURCES  += $(DEVICE)/src/$(SYSTEM)
-SOURCES  += $(wildcard $(PERIPH)/src/*.c)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.c)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cc)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cpp)
-SOURCES  += $(wildcard src/*.c)
-SOURCES  += $(wildcard src/*.cc)
-SOURCES  += $(wildcard src/*.cpp)
-SOURCES  += $(wildcard src/sys/*.c)
-SOURCES  += $(wildcard src/sys/*.cc)
-SOURCES  += $(wildcard src/sys/*.cpp)
-SOURCES  += $(wildcard $(SHARED)/util/*.c)
-SOURCES  += $(wildcard $(SHARED)/util/*.cc)
-SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
-SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
-SOURCES  += $(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library/Adafruit_GFX.cpp 
-SOURCES  += $(LIBDIR)/adafruit_gfx/arduino/Print.cpp
 
 OPTFLAG = -O3
 #----------------------------------
@@ -79,8 +54,24 @@ OPTFLAG = -O3
 # $(BUILDDIR)/$(SHARED)/CoreModules/pitchshiftCore.o: OPTFLAG = -O0
 #-----------------------------------
 
-
-
+SOURCES  += $(DRIVERLIB)/drivers/$(STARTUP)
+SOURCES  += $(DEVICE)/src/$(SYSTEM)
+SOURCES  += $(wildcard $(PERIPH)/src/*.c)
+SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.c)
+SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cc)
+SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cpp)
+SOURCES  += $(wildcard src/*.c)
+SOURCES  += $(wildcard src/*.cc)
+SOURCES  += $(wildcard src/*.cpp)
+SOURCES  += $(wildcard src/sys/*.c)
+SOURCES  += $(wildcard src/sys/*.cc)
+SOURCES  += $(wildcard src/sys/*.cpp)
+SOURCES  += $(wildcard $(SHARED)/util/*.c)
+SOURCES  += $(wildcard $(SHARED)/util/*.cc)
+SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
+SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
+SOURCES  += $(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library/Adafruit_GFX.cpp 
+SOURCES  += $(LIBDIR)/adafruit_gfx/arduino/Print.cpp
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))

@@ -57,12 +57,12 @@ void main()
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
 	LedCtl leds{led_driver};
 
-	Controls controls{_hw.potadc, _hw.cvadc}; //{potadc, cvadc, gpio_expander};
+	Controls controls{_hw.potadc, _hw.cvadc}; //, gpio_expander};
 	Params params{controls};
 
 	Audio audio{params, _hw.codec, StaticBuffers::audio_dma_block};
 
-	Ui ui{params, leds};
+	Ui ui{params, leds}; //, _hw.screen
 
 	audio.start();
 	ui.start();
@@ -100,7 +100,8 @@ void main()
 	while (1) {
 		ui.update();
 
-		if (SharedBus::i2c.is_ready()) {
+		constexpr bool ENABLE_I2C = false;
+		if (ENABLE_I2C && SharedBus::i2c.is_ready()) {
 			// Debug::Pin2::high();
 			switch (cur_client) {
 				case Leds:
