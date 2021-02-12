@@ -52,7 +52,7 @@ void main()
 	using namespace MetaModule;
 
 	_hw.screen.init();
-	_hw.screen.demo();
+	// _hw.screen.demo();
 
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
 	LedCtl leds{led_driver};
@@ -100,14 +100,14 @@ void main()
 	while (1) {
 		ui.update();
 
-		constexpr bool ENABLE_I2C = false;
+		constexpr bool ENABLE_I2C = true;
 		if (ENABLE_I2C && SharedBus::i2c.is_ready()) {
 			// Debug::Pin2::high();
 			switch (cur_client) {
 				case Leds:
-					// Debug::set_3(true);
+					// Debug::Pin3::high();
 					leds.refresh();
-					// Debug::set_3(false);
+					// Debug::Pin3::low();
 					cur_client = SelectPots;
 					break;
 
