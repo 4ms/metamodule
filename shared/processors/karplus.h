@@ -43,13 +43,13 @@ public:
 
 	void set_spread(float _spread)
 	{
-		spread = map_value(_spread, 0.0f, 1.0f, 1.0001f, 1.1f);
+		spread = map_value(_spread, 0.0f, 1.0f, 1.001f, 1.01f);
 		update_delay_samples();
 	}
 
 	void set_decay(float val)
 	{
-		feedback = map_value(val, 0.0f, 1.0f, 0.8f, 0.999f);
+		feedback = map_value(val, 0.0f, 1.0f, 0.75f, 0.99999f);
 	}
 
 private:

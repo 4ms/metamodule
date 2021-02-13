@@ -22,9 +22,10 @@ public:
 	KarplusCore()
 	{
 		e.set_sustain(0.0f);
-		e.set_envelope_time(0, 1);
+		e.set_envelope_time(0, 0.1);
 		e.set_envelope_time(1, 0);
-		e.set_envelope_time(2, 2);
+		e.set_envelope_time(2, 10);
+		e.set_decay_curve(0);
 		e.set_envelope_time(3, 1);
 		e.sustainEnable = 0;
 	}
@@ -37,6 +38,9 @@ public:
 				break;
 			case 1:
 				k.set_decay(val);
+				break;
+			case 2:
+				k.set_spread(val);
 				break;
 		}
 	}
@@ -78,7 +82,6 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	float decay = 0;
 	float karpOut = 0;
 	float gateInput = 0;
 	float pitchInput = 0;
