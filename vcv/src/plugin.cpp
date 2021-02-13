@@ -10,6 +10,7 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelKarplus); 
 p->addModel(modelGateseq16); 
 p->addModel(modelGateseq8); 
 p->addModel(modelOctave); 
