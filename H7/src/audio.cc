@@ -40,10 +40,21 @@ void Audio::set_input(int input_id, Audio::AudioSampleType in)
 	player.set_panel_input(input_id, scaled_in);
 }
 
+// namespace
+// {
+static volatile uint32_t last_start_tm = 0;
+// }
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
+	if (check_patch_change())
+		return;
+
+	// Todo: use target::DWT
+	uint32_t start_tm = DWT->CYCCNT;
+	uint32_t period = start_tm - last_start_tm;
+	last_start_tm = start_tm;
+
 	Debug::Pin0::high();
-	// pre-amble: ~5us
 
 	params.update();
 
@@ -84,17 +95,17 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			i++;
 		}
 		// Debug::set_1(true);
-		player.update_patch(Example1);
+		player.update_patch(params.cur_patch());
 		// Debug::set_1(false);
 
 		out_.l = get_output(0);
 		out_.r = get_output(1);
-		// out_.l = in_->l;
-		// out_.r = in_->r;
 		in_++;
 	}
 
 	Debug::Pin0::low();
+	uint32_t elapsed_tm = DWT->CYCCNT - start_tm;
+	params.audio_load = (elapsed_tm * 100) / period;
 }
 
 void Audio::start()

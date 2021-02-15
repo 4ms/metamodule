@@ -33,6 +33,7 @@ public:
 	float dac_out[2];
 	bool clock_out;
 
+	uint8_t audio_load = 0;
 private:
 	bool _rotary_moved_while_pressed = false;
 };
