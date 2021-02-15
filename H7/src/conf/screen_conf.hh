@@ -3,7 +3,7 @@
 #include "drivers/spi_screen_config_struct.hh"
 #include "drivers/spi_screen_driver.hh"
 
-constexpr struct MMScreenConf : DefaultSpiScreenConf {
+struct MMScreenConf : DefaultSpiScreenConf {
 	struct ScreenSpiConf : DefaultSpiConf {
 		static constexpr uint16_t PeriphNum = 6; // SPI6
 		static constexpr uint16_t NumChips = 1;
@@ -23,7 +23,7 @@ constexpr struct MMScreenConf : DefaultSpiScreenConf {
 
 	static constexpr uint32_t width = 240;
 	static constexpr uint32_t height = 240;
-} screen_conf;
+	static constexpr uint32_t rowstart = 80;
+	static constexpr uint32_t colstart = 0;
+};
 
-using MMScreenDriverT = SpiScreenDriver<MMScreenConf>;
-// using MMScreenDriverT = SpiScreenDriver<SpiConfig<MMScreenConf::ScreenSPIx>, MMScreenConf::DCPin>;
