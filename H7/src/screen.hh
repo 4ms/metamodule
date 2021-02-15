@@ -10,12 +10,14 @@
 #include "drivers/system.hh"
 
 using ScreenConfT = MMScreenConf;
-// Todo: why does making Screen a template class over <ScreenConT>, remove ability to access SpiScreenDriver base class?
+
+// Todo: generalize this adaptor so we can include it in mdrivlib
+// Why does making Screen a template class over <ScreenConT>, remove ability to access SpiScreenDriver base class?
 // template<typename ScreenConfT>
 
-class Screen : public SpiScreenDriver<ScreenConfT>, public Adafruit_GFX {
+class ScreenGFXAdaptor : public SpiScreenDriver<ScreenConfT>, public Adafruit_GFX {
 public:
-	Screen()
+	ScreenGFXAdaptor()
 		: Adafruit_GFX{ScreenConfT::width, ScreenConfT::height}
 		, window_height{ScreenConfT::width}
 		, window_width{ScreenConfT::height}
@@ -79,11 +81,36 @@ public:
 		transmit<Data>(madctl);
 	}
 
+	virtual void startWrite() override
+	{
+		//
+	}
+
 	virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override
 	{
 		set_pos(x, y, 1, 1);
-		transmit<Data>(color >> 8);
-		transmit<Data>(color & 0xFF);
+		transmit_data_16(color);
+		// transmit<Data>(color >> 8);
+		// transmit<Data>(color & 0xFF);
+	}
+	// virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
+	// virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
+	// virtual void fillScreen(uint16_t color);
+	void fillRect_test(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+	{
+		set_pos(x, y, w, h);
+		begin_open_data_transmission(4);
+		uint32_t color32 = color << 16 | color;
+		// if w*h is odd, we'll wrap around to 1st pixel again, which is ok, right? Todo!
+		for (int i = 0; i < (w * h); i += 2) {
+			transmit_open_data32(color32);
+		}
+		end_open_data_transmission();
+	}
+
+	virtual void endWrite() override
+	{
+		//
 	}
 
 private:
@@ -105,16 +132,18 @@ private:
 		Xend += _xstart;
 		Yend += _ystart;
 		transmit<Cmd>(ST77XX::CASET);
-		transmit<Data>(Xstart >> 8);
-		transmit<Data>(Xstart);
-		transmit<Data>(Xend >> 8);
-		transmit<Data>(Xend);
+		transmit_data_32(Xstart << 16 | Xend);
+		// transmit<Data>(Xstart >> 8);
+		// transmit<Data>(Xstart);
+		// transmit<Data>(Xend >> 8);
+		// transmit<Data>(Xend);
 
 		transmit<Cmd>(ST77XX::RASET);
-		transmit<Data>(Ystart >> 8);
-		transmit<Data>(Ystart);
-		transmit<Data>(Yend >> 8);
-		transmit<Data>(Yend);
+		transmit_data_32(Ystart << 16 | Yend);
+		// transmit<Data>(Ystart >> 8);
+		// transmit<Data>(Ystart);
+		// transmit<Data>(Yend >> 8);
+		// transmit<Data>(Yend);
 
 		transmit<Cmd>(ST77XX::RAMWR);
 	}
@@ -146,22 +175,12 @@ private:
 	}
 };
 
-struct ScreenDemo : public Screen {
-	ScreenDemo() {}
+struct Screen : public ScreenGFXAdaptor {
 
-	uint16_t bar_x[4], bar_y[4];
-	static constexpr uint16_t bar_colors[4] = {
-		Colors::orange.Rgb565(),
-		Colors::pink.Rgb565(),
-		Colors::purple.Rgb565(),
-		Colors::green.Rgb565(),
-	};
-	// Color{160, 224, 96}.Rgb565(),
-	// Color{96, 160, 224}.Rgb565(),
-	// Color{240, 48, 96}.Rgb565(),
-	// Color{96, 48, 255}.Rgb565(),
+	Screen() {}
 
-	void demo();
-	void drawMockupBase();
-	void draw_bar(uint16_t level, uint16_t x, uint16_t y, uint16_t col);
+	void fill(Color c)
+	{
+		fillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+	}
 };
