@@ -1,6 +1,4 @@
-// PROGMEM is required to be defined by the fonts
-#define PROGMEM
-#include "screen.hh"
+#include "screen_demo.hh"
 #include "Fonts/FreeSans12pt7b.h"
 #include "Fonts/FreeSansBold12pt7b.h"
 #include "Fonts/FreeSansBold18pt7b.h"
