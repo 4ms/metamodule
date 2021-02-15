@@ -58,3 +58,12 @@ struct Patch {
 	MappedParamList mapped_knobs;
 	int num_mapped_knobs;
 };
+
+struct PatchRef {
+	PatchRef(const Patch &p)
+		: patch(p)
+	{}
+
+	const Patch &patch;
+};
+

@@ -1,7 +1,15 @@
 #include "params.hh"
 #include "debug.hh"
+#include "example-lfosimple.hh"
+#include "example-ps2.hh"
+#include "example1.hh"
 #include "math.hh"
 using namespace MathTools;
+
+Params::Params(Controls &c)
+	: controls(c)
+	, _patches{{Example1}, {example_ps2}, {example_lfosimple}}
+{}
 
 void Params::update()
 {

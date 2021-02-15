@@ -15,6 +15,8 @@ CompileFlags:
 			"-I/Users/dann/4ms/stm32/meta-module/H7/lib/mdrivlib",
 			"-I/Users/dann/4ms/stm32/meta-module/H7/lib",
 			"-I/Users/dann/4ms/stm32/meta-module/H7/lib/adafruit_gfx",
+			"-I/Users/dann/4ms/stm32/meta-module/H7/lib/adafruit_gfx/Adafruit_GFX_Library",
+			"-I/Users/dann/4ms/stm32/meta-module/H7/lib/adafruit_gfx/arduino",
 			"-isystem /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1",
 			"-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1",
 			"-isystem /usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/arm-none-eabi",

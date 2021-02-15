@@ -1,5 +1,5 @@
 #include "patch.hh"
-static const Patch example_ps2 = {
+const Patch example_ps2 = {
 	.modules_used =
 		{
 			"PANEL_8",

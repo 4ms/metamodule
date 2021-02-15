@@ -1,5 +1,5 @@
 #include "patch.hh"
-static const Patch example_lfosimple = {
+const Patch example_lfosimple = {
 	.modules_used =
 		{
 			"PANEL_8",

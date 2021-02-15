@@ -1,8 +1,5 @@
 #include "audio.hh"
 #include "debug.hh"
-// #include "example-lfosimple.hh"
-// #include "example-ps2.hh"
-#include "example1.hh"
 #include "patch_player.hh"
 
 Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
@@ -14,7 +11,7 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	, rx_buf_2{buffers[3]}
 	, params{p}
 {
-	bool ok = player.load_patch(Example1);
+	bool ok = player.load_patch(params.cur_patch());
 	if (!ok) {
 		while (1) {
 			;
@@ -113,9 +110,26 @@ void Audio::start()
 	codec_.start();
 }
 
-void Audio::check_patch_change()
+bool Audio::check_patch_change()
 {
-	// Check if it changed
-	// call patch.load_patch(new_patch);
-	// set cur_patch = new_patch; (copy? pointer?)
+	bool new_patch = false;
+	if (params.rotary_pushed_motion > 0) {
+		params.next_patch();
+		new_patch = true;
+	} else if (params.rotary_pushed_motion < 0) {
+		params.prev_patch();
+		new_patch = true;
+	}
+
+	if (new_patch) {
+		params.rotary_pushed_motion = 0;
+		params.should_redraw_patch = true;
+		__BKPT();
+		bool ok = player.load_patch(params.cur_patch());
+		if (!ok) {
+			while (1)
+				; // Todo: handle error?
+		}
+	}
+	return new_patch;
 }
