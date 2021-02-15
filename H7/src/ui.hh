@@ -1,28 +1,39 @@
 #pragma once
+#include "Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
 #include "debug.hh"
 #include "drivers/i2c.hh"
 #include "leds.hh"
 #include "params.hh"
+#include "screen.hh"
 
 template<unsigned AnimationUpdateRate = 100>
 class Ui {
 public:
 	Params &params;
 	LedCtl<AnimationUpdateRate> &leds;
+	Screen &screen;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, LedCtl<AnimationUpdateRate> &l /*, Screen &s*/)
+	Ui(Params &p, LedCtl<AnimationUpdateRate> &l, Screen &s)
 		: params{p}
 		, leds{l}
-	//, screen{s}
+		, screen{s}
 	{}
 
 	void start()
 	{
+		screen.init();
+		screen.fill(Colors::grey);
+		screen.setFont(&FreeSansBold18pt7b);
+		screen.setTextColor(ST77XX::WHITE);
+		screen.setTextSize(1);
+		screen.setCursor(2, 200);
+		screen.print("MetaModule");
+
 		leds.start_it_mode();
 		params.controls.start();
 

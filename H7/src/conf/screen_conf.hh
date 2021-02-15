@@ -18,6 +18,7 @@ struct MMScreenConf : DefaultSpiScreenConf {
 		static constexpr uint16_t clock_division = 8;
 		static constexpr uint16_t data_size = 8;
 		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
+		static constexpr uint8_t FifoThreshold = 2;
 	};
 	using DCPin = FPin<GPIO::A, 6, PinMode::Output>;
 
