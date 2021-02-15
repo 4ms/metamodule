@@ -23,6 +23,7 @@ struct SpiAdcConf : DefaultSpiConf {
 	static constexpr uint16_t data_size = 16;
 	static constexpr SpiDataDir data_dir = SpiDataDir::Duplex;
 	static constexpr uint8_t FifoThreshold = 1;
+	static constexpr bool LSBfirst = false;
 };
 
 using CVAdcChipT = AdcSpi_MAX11666<SpiAdcConf, Oversampler<8>>;
