@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "KARPLUS",
+      "name": "Karplus",
+      "description": "Karplus",
+      "tags": []
+}, 
+{
       "slug": "GATESEQ16",
       "name": "Gateseq16",
       "description": "16 Step Gate Sequencer",

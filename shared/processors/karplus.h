@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../util/math_tables.hh"
-#include "audio_processor.hh"
 //#include "debug.hh"
 #include "math.hh"
 #include "tools/dcBlock.h"
@@ -11,9 +10,9 @@
 
 using namespace MathTools;
 
-class Karplus : public AudioProcessor {
+class Karplus {
 public:
-	virtual float update(float input)
+	float update(float input)
 	{
 		float output = input * taps;
 
@@ -30,23 +29,27 @@ public:
 	{
 		set_samplerate(48000.0f);
 	}
-
-	virtual void set_param(int param_id, float val)
-	{
-		if (param_id == 0) {
-			float baseFreq = map_value(val, 0.0f, 1.0f, 20.0f, 1000.0f);
-			apPeriods[0] = 1.0f / baseFreq;
-			delayLine[0].set_delay_samples(periodToSamples(apPeriods[0]));
-			update_delay_samples();
-		}
-		if (param_id == 1) {
-			spread = map_value(val, 0.0f, 1.0f, 1.0001f, 1.1f);
-			update_delay_samples();
-		}
-	}
-	virtual void set_samplerate(float sr)
+	void set_samplerate(float sr)
 	{
 		sampleRate = sr;
+	}
+
+	void set_frequency(float inFreq)
+	{
+		apPeriods[0] = 1.0f / inFreq;
+		delayLine[0].set_delay_samples(periodToSamples(apPeriods[0]));
+		update_delay_samples();
+	}
+
+	void set_spread(float _spread)
+	{
+		spread = map_value(_spread, 0.0f, 1.0f, 1.001f, 1.01f);
+		update_delay_samples();
+	}
+
+	void set_decay(float val)
+	{
+		feedback = map_value(val, 0.0f, 1.0f, 0.75f, 0.99999f);
 	}
 
 private:
