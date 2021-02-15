@@ -17,7 +17,7 @@ struct SystemClocks {
 			__BKPT();
 
 		System::SetVectorTable(0x08000000);
-		System::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
+		System::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf, 500);
 		HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
 
 		// target::init_caches();
