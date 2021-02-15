@@ -1,4 +1,5 @@
 #pragma once
+#include "Fonts/FreeMono12pt7b.h"
 #include "Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
 #include "debug.hh"
@@ -27,12 +28,22 @@ public:
 	void start()
 	{
 		screen.init();
-		screen.fill(Colors::grey);
+		// screen.fillRect_test(0, 0, 240, 240, Colors::blue.Rgb565());
+		screen.fill(Colors::blue);
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(ST77XX::WHITE);
 		screen.setTextSize(1);
-		screen.setCursor(2, 200);
+		screen.setCursor(20, 200);
 		screen.print("MetaModule");
+
+		screen.setFont(&FreeMono12pt7b);
+		screen.setTextColor(ST77XX::WHITE);
+		screen.setTextSize(1);
+		screen.setCursor(2, 20);
+		screen.print("Load:");
+
+		screen.setCursor(80, 20);
+		screen.print(params.audio_load, 10);
 
 		leds.start_it_mode();
 		params.controls.start();
@@ -55,6 +66,7 @@ public:
 		led_update_task.start();
 	}
 
+	uint32_t last_screen_update = 0;
 	void update()
 	{
 		if (params.buttons[0].is_pressed())
@@ -72,6 +84,19 @@ public:
 		else
 			leds.rotaryLED.set_background(Colors::white);
 
+		uint32_t now = HAL_GetTick();
+		if (now - last_screen_update > 1000) {
+			last_screen_update = now;
+			screen.fillRect(80, 0, 60, 25, Colors::blue.Rgb565());
+			screen.setCursor(80, 20);
+			screen.print(params.audio_load, 10);
+		}
+		if (params.rotary_pushed_motion > 0) {
+			params.next_patch();
+		}
+		if (params.rotary_pushed_motion < 0) {
+			params.prev_patch();
+		}
 		// if (params.buttons[1].is_just_pressed())
 		// 	leds.but[1].set_background(Colors::red);
 

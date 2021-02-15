@@ -90,28 +90,47 @@ public:
 	{
 		set_pos(x, y, 1, 1);
 		transmit_data_16(color);
-		// transmit<Data>(color >> 8);
-		// transmit<Data>(color & 0xFF);
 	}
-	// virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
-	// virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
-	// virtual void fillScreen(uint16_t color);
+
 	void fillRect_test(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
 		set_pos(x, y, w, h);
 		begin_open_data_transmission(4);
 		uint32_t color32 = color << 16 | color;
-		// if w*h is odd, we'll wrap around to 1st pixel again, which is ok, right? Todo!
-		for (int i = 0; i < (w * h); i += 2) {
+		for (int i = 0; i < ((w + 1) * (h + 1)); i += 2) {
 			transmit_open_data32(color32);
 		}
 		end_open_data_transmission();
+	}
+
+	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
+	{
+		set_pos(x, y, x + w, y + h);
+		for (int i = 0; i <= ((w) * (h)); i += 1) {
+			transmit_data_16(color, color);
+		}
+	}
+	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
+	{
+		set_pos(x, y, x + w, y);
+		for (int i = 0; i <= w; i++) {
+			transmit_data_16(color, color);
+		}
+	}
+	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) override
+	{
+		set_pos(x, y, x, y + h);
+		for (int i = 0; i <= h; i++) {
+			transmit_data_16(color, color);
+		}
 	}
 
 	virtual void endWrite() override
 	{
 		//
 	}
+
+	void printnum(uint32_t) {}
 
 private:
 	const int window_width;
@@ -125,6 +144,7 @@ private:
 	int _width;
 	int _height;
 
+	// Todo: Xend == width, right?
 	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
 	{
 		Xstart += _xstart;
@@ -132,18 +152,10 @@ private:
 		Xend += _xstart;
 		Yend += _ystart;
 		transmit<Cmd>(ST77XX::CASET);
-		transmit_data_32(Xstart << 16 | Xend);
-		// transmit<Data>(Xstart >> 8);
-		// transmit<Data>(Xstart);
-		// transmit<Data>(Xend >> 8);
-		// transmit<Data>(Xend);
+		transmit_data_16(Xstart, Xend);
 
 		transmit<Cmd>(ST77XX::RASET);
-		transmit_data_32(Ystart << 16 | Yend);
-		// transmit<Data>(Ystart >> 8);
-		// transmit<Data>(Ystart);
-		// transmit<Data>(Yend >> 8);
-		// transmit<Data>(Yend);
+		transmit_data_16(Ystart, Yend);
 
 		transmit<Cmd>(ST77XX::RAMWR);
 	}
