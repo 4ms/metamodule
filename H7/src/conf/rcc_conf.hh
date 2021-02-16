@@ -39,10 +39,10 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.PLL2 =
 		{
 			.PLL2M = 1,
-			.PLL2N = 27,
+			.PLL2N = 14,
 			.PLL2P = 25,
 			.PLL2Q = 3,
-			.PLL2R = 2,
+			.PLL2R = 1,
 			.PLL2RGE = RCC_PLL2VCIRANGE_3,
 			.PLL2VCOSEL = RCC_PLL2VCOMEDIUM,
 			.PLL2FRACN = 0,

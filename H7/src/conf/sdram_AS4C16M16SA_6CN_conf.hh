@@ -10,7 +10,7 @@ constexpr SDRAMTimingConfig SDRAM_timing_AS4C16M16SA_6CN = {
 	.tWR_ns = 12,
 	.tRCD_ns = 18,
 
-	.max_freq_MHz = 166, // tried: 37,
+	.max_freq_MHz = 166,
 	.CAS_latency = 3,
 	.refresh_ms = 64,
 	.read_burst_enabled = false,
@@ -20,7 +20,7 @@ constexpr SDRAMTimingConfig SDRAM_timing_AS4C16M16SA_6CN = {
 constexpr SDRAMArchConfig SDRAM_arch_AS4C16M16SA_6CN = {
 	.num_internal_banks = 4,
 	.bus_width_bits = 16,
-	.column_bits = 9, // think it should be 9
-	.row_bits = 13,	  // think it should be 13
+	.column_bits = 9,
+	.row_bits = 13,
 	.num_rows = 8192,
 };

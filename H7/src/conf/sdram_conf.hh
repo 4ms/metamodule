@@ -47,12 +47,14 @@ constexpr SDRAMPinNames SDRAM_pin_names = {
 	.SDNWE{GPIO::C, 0, LL_GPIO_AF_12},
 };
 
+constexpr uint32_t FMC_Clock = 224; // Todo: read/calc this from RCC... query System?
+
 constexpr SDRAMConfig SDRAM_AS4C_T7_conf = {
 	.pin_list = {SDRAM_pin_names},
 	.timing = SDRAM_timing_AS4C16M16SA_7CN,
 	.arch = SDRAM_arch_AS4C16M16SA_7CN,
 	.connected_bank = 1,
-	.fmc_kernel_clock_MHz = 480,
+	.fmc_kernel_clock_MHz = FMC_Clock,
 };
 
 constexpr SDRAMConfig SDRAM_AS4C_T6_conf = {
@@ -60,7 +62,7 @@ constexpr SDRAMConfig SDRAM_AS4C_T6_conf = {
 	.timing = SDRAM_timing_AS4C16M16SA_6CN,
 	.arch = SDRAM_arch_AS4C16M16SA_6CN,
 	.connected_bank = 1,
-	.fmc_kernel_clock_MHz = 216,
+	.fmc_kernel_clock_MHz = FMC_Clock,
 };
 
 constexpr SDRAMConfig SDRAM_48LC16M16_6A_conf = {
@@ -68,7 +70,7 @@ constexpr SDRAMConfig SDRAM_48LC16M16_6A_conf = {
 	.timing = SDRAM_timing_48LC16M16_6A,
 	.arch = SDRAM_arch_48LC16M16_6A,
 	.connected_bank = 1,
-	.fmc_kernel_clock_MHz = 480,
+	.fmc_kernel_clock_MHz = FMC_Clock,
 };
 
 constexpr SDRAMConfig SDRAM_W9825_conf = {
@@ -76,5 +78,5 @@ constexpr SDRAMConfig SDRAM_W9825_conf = {
 	.timing = SDRAM_timing_W9825G6KH_75,
 	.arch = SDRAM_arch_W9825G6KH_75,
 	.connected_bank = 1,
-	.fmc_kernel_clock_MHz = 480,
+	.fmc_kernel_clock_MHz = FMC_Clock,
 };
