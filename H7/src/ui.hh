@@ -28,8 +28,7 @@ public:
 	void start()
 	{
 		screen.init();
-		// screen.fillRect_test(0, 0, 240, 240, Colors::blue.Rgb565());
-		screen.fill(Colors::blue);
+		screen.fill(Colors::pink);
 
 		draw_patch_name();
 
@@ -46,16 +45,12 @@ public:
 		params.controls.start();
 
 		leds.but[0].set_background(Colors::yellow);
-		// leds.but[0].breathe(Colors::purple, 4 * Hz);
 
 		leds.but[1].set_background(Colors::white);
-		// leds.but[1].breathe(Colors::red, 2 * Hz);
 
 		leds.clockLED.set_background(Colors::blue);
-		// leds.clockLED.breathe(Colors::pink, 3 * Hz);
 
 		leds.rotaryLED.set_background(Colors::blue);
-		// leds.rotaryLED.breathe(Colors::green, 0.5f * Hz);
 
 		// Todo: set led_update_task_conf.update_rate_Hz to be a factor of AnimationUpdateRate and Hz
 		//
@@ -116,24 +111,41 @@ private:
 
 	void draw_patch_name()
 	{
-		screen.fillRect(0, 30, 240, 140, Colors::blue.Rgb565());
+		screen.fillRect(0, 30, 240, 210, Colors::pink.Rgb565());
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(ST77XX::WHITE);
 		screen.setTextSize(1);
-		uint32_t y = 100;
+		uint32_t y = 60;
 		for (int i = 1; i < params.cur_patch().num_modules; i++) {
-			screen.setCursor(20, y);
+			screen.setCursor(10, y);
 			screen.print(params.cur_patch().modules_used[i].name);
 			y += 40;
 		}
 	}
+
 	void draw_audio_load()
 	{
-		screen.fillRect(80, 0, 60, 25, Colors::blue.Rgb565());
+		screen.fillRect(80, 0, 60, 25, Colors::pink.Rgb565());
 		screen.setFont(&FreeMono12pt7b);
 		screen.setTextColor(ST77XX::WHITE);
 		screen.setTextSize(1);
 		screen.setCursor(80, 20);
 		screen.print(params.audio_load, 10);
+	}
+
+	void draw_test_squares()
+	{
+		// Should see a 1-pixel border around the 4-square, and a 1-pixel gap between squares
+		screen.fillRect(0, 0, 44, 44, Colors::purple.Rgb565());
+		screen.fillRect(1, 1, 20, 20, Colors::red.Rgb565());
+		screen.fillRect(1, 23, 20, 20, Colors::green.Rgb565());
+		screen.fillRect(23, 1, 20, 20, Colors::orange.Rgb565());
+		screen.fillRect(23, 23, 20, 20, Colors::grey.Rgb565());
+
+		screen.fillRect(196, 196, 44, 44, Colors::white.Rgb565());
+		screen.fillRect(219, 219, 20, 20, Colors::yellow.Rgb565());
+		screen.fillRect(197, 219, 20, 20, Colors::purple.Rgb565());
+		screen.fillRect(197, 197, 20, 20, Colors::pink.Rgb565());
+		screen.fillRect(219, 197, 20, 20, Colors::cyan.Rgb565());
 	}
 };
