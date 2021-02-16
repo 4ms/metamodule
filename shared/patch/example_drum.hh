@@ -1,5 +1,5 @@
 #include "patch.hh"
-const Patch ExampleDrum = {
+const Patch exampleDrum = {
 	.modules_used =
 		{
 			"PANEL_8",
