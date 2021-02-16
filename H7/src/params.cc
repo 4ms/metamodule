@@ -1,19 +1,20 @@
 #include "params.hh"
 #include "debug.hh"
-#include "example-lfosimple.hh"
-#include "example-ps2.hh"
-#include "example1.hh"
+#include "example_drum.hh"
+#include "example_duallfo.hh"
+#include "example_karplus.hh"
+#include "example_pitchShift_simple.hh"
 #include "math.hh"
 using namespace MathTools;
 
 Params::Params(Controls &c)
 	: controls(c)
-	, _patches{{Example1}, {example_ps2}, {example_lfosimple}}
+	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum}}
 {}
 
 void Params::update()
 {
-	Debug::Pin1::high();
+	// Debug::Pin1::high();
 
 	for (int i = 0; i < 4; i++) {
 		cvjacks[i] = (2047.5f - static_cast<float>(controls.cvadc.get_val(i))) / 2047.5f;
@@ -64,7 +65,7 @@ void Params::update()
 	// Can we store the last reading in Controls:: and then copy it over to Params:: here?
 	// Wait until we separate cores to make sure we'll need this
 
-	Debug::Pin1::low();
+	// Debug::Pin1::low();
 }
 
 // void Params::update_screen()
