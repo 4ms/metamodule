@@ -80,12 +80,26 @@ public:
 		if (now - last_screen_update > 1000) {
 			last_screen_update = now;
 			draw_audio_load();
+			screen.setTextColor(Colors::white.Rgb565(), Colors::pink.Rgb565());
+			screen.setTextSize(2);
+			screen.setFont(NULL);
+			int y = 200;
+			for (int i = 0; i < 8; i++) {
+				screen.setCursor((i & 0b11) * 60, y);
+				screen.print((uint16_t)(params.knobs[i] * 100));
+				screen.print("  ");
+				if (i == 3)
+					y += 20;
+			}
 		}
 
 		if (params.should_redraw_patch) {
 			params.should_redraw_patch = false;
 			draw_patch_name();
 		}
+
+		// screen.setTextColor(Colors::white.Rgb565());
+		// screen.setTextSize(1);
 
 		// if (params.buttons[1].is_just_pressed())
 		// 	leds.but[1].set_background(Colors::red);
@@ -113,13 +127,13 @@ private:
 	{
 		screen.fillRect(0, 30, 240, 210, Colors::pink.Rgb565());
 		screen.setFont(&FreeSansBold18pt7b);
-		screen.setTextColor(ST77XX::WHITE);
+		screen.setTextColor(Colors::white.Rgb565());
 		screen.setTextSize(1);
 		uint32_t y = 60;
 		for (int i = 1; i < params.cur_patch().num_modules; i++) {
 			screen.setCursor(10, y);
 			screen.print(params.cur_patch().modules_used[i].name);
-			y += 40;
+			y += 35;
 		}
 	}
 
