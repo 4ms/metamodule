@@ -13,6 +13,10 @@ struct AllocForever {
 	{
 		// nothing is ever deleted
 	}
+	static void reset()
+	{
+		alloc_ptr = (char *)BASEADDR;
+	}
 
 private:
 	static inline char *alloc_ptr = (char *)BASEADDR;

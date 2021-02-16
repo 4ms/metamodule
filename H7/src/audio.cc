@@ -117,17 +117,17 @@ bool Audio::check_patch_change()
 {
 	bool new_patch = false;
 	if (params.rotary_motion > 0) {
-		params.rotary_motion = 0;
+		player.unload_patch(params.cur_patch());
 		params.next_patch();
 		new_patch = true;
 	} else if (params.rotary_motion < 0) {
-		params.rotary_motion = 0;
+		player.unload_patch(params.cur_patch());
 		params.prev_patch();
 		new_patch = true;
 	}
 
 	if (new_patch) {
-		params.rotary_pushed_motion = 0;
+		params.rotary_motion = 0;
 		params.should_redraw_patch = true;
 		// __BKPT();
 		bool ok = player.load_patch(params.cur_patch());

@@ -98,9 +98,9 @@ void main()
 		ui.update();
 
 		constexpr bool ENABLE_I2C = true;
-		constexpr bool ENABLE_LED_REFRESH = false;
+		constexpr bool ENABLE_LED_REFRESH = true;
 		if (ENABLE_I2C && SharedBus::i2c.is_ready()) {
-			Debug::Pin2::high();
+			// Debug::Pin2::high();
 			switch (cur_client) {
 				case Leds:
 					if (ENABLE_LED_REFRESH)
@@ -153,7 +153,7 @@ void main()
 					cur_client = Leds;
 					break;
 			}
-			Debug::Pin2::low();
+			// Debug::Pin2::low();
 		}
 		__NOP();
 	}

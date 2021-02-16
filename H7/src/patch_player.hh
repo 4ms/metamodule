@@ -5,8 +5,8 @@
 // #define USE_NODES
 
 #include "CoreModules/panel_node.hh"
-
 #include "patch/patch.hh"
+#include "sys/alloc_buffer.hh"
 #include <cstdint>
 #ifdef STM32F7
 	#include "debug.hh"
@@ -61,6 +61,15 @@ public:
 		if (!is_loaded)
 			return 0.f;
 		return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
+	}
+
+	void unload_patch(const Patch &p)
+	{
+		is_loaded = false;
+		for (int i = 0; i < p.num_modules; i++) {
+			modules[i].reset(nullptr);
+		}
+		BigAlloc<Patch>::reset();
 	}
 
 	bool load_patch(const Patch &p)
