@@ -53,10 +53,17 @@ public:
 			_cur_patch--;
 	}
 
+	void set_knob_val(uint32_t knob_id, float val)
+	{
+		knobs[_pot_map[knob_id]] = val;
+	}
+
 private:
 	static constexpr uint32_t num_patches = 3;
 	bool _rotary_moved_while_pressed = false;
 	uint32_t _cur_patch = 0;
 	PatchRef _patches[num_patches];
+
+	const uint8_t _pot_map[8] = {1, 4, 0, 5, 3, 6, 7, 2};
 };
 

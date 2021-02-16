@@ -122,7 +122,7 @@ void main()
 
 				case CollectReadPots:
 					Debug::Pin3::high();
-					params.knobs[cur_pot] = controls.potadc.collect_reading() / 4095.0f;
+					params.set_knob_val(cur_pot, controls.potadc.collect_reading() / 4095.0f);
 					if (++cur_pot >= 8) {
 						cur_client = SelectPots; // SelectPatchCV;
 						cur_pot = 0;
