@@ -21,6 +21,8 @@ struct Controls {
 	DebouncedPin<GPIO::G, 7, PinPolarity::Normal> gate_in1;
 	DebouncedPin<GPIO::D, 12, PinPolarity::Normal> clock_in;
 
+	FPin<GPIO::D, 13, PinMode::Output> clock_out;
+
 	Controls(MuxedADC &potadc, CVAdcChipT &cvadc);
 
 	void read();

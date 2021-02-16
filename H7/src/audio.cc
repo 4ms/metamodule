@@ -43,8 +43,10 @@ static volatile uint32_t last_start_tm = 0;
 // }
 void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	if (check_patch_change())
-		return;
+	if (check_patch_change()) {
+		params.controls.clock_out.high();
+	}
+	// 	return;
 
 	// Todo: use target::DWT
 	uint32_t start_tm = DWT->CYCCNT;
@@ -101,6 +103,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	}
 
 	Debug::Pin0::low();
+	params.controls.clock_out.low();
 	uint32_t elapsed_tm = DWT->CYCCNT - start_tm;
 	params.audio_load = (elapsed_tm * 100) / period;
 }
@@ -113,10 +116,12 @@ void Audio::start()
 bool Audio::check_patch_change()
 {
 	bool new_patch = false;
-	if (params.rotary_pushed_motion > 0) {
+	if (params.rotary_motion > 0) {
+		params.rotary_motion = 0;
 		params.next_patch();
 		new_patch = true;
-	} else if (params.rotary_pushed_motion < 0) {
+	} else if (params.rotary_motion < 0) {
+		params.rotary_motion = 0;
 		params.prev_patch();
 		new_patch = true;
 	}
@@ -124,7 +129,7 @@ bool Audio::check_patch_change()
 	if (new_patch) {
 		params.rotary_pushed_motion = 0;
 		params.should_redraw_patch = true;
-		__BKPT();
+		// __BKPT();
 		bool ok = player.load_patch(params.cur_patch());
 		if (!ok) {
 			while (1)
