@@ -88,13 +88,13 @@ public:
 
 	virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override
 	{
-		set_pos(x, y, 1, 1);
+		set_pos(x, y, x, y);
 		transmit_data_16(color);
 	}
 
 	void fillRect_test(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
-		set_pos(x, y, w, h);
+		set_pos(x, y, x + w - 1, y + h - 1);
 		begin_open_data_transmission(4);
 		uint32_t color32 = color << 16 | color;
 		for (int i = 0; i < ((w + 1) * (h + 1)); i += 2) {
@@ -105,21 +105,21 @@ public:
 
 	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
 	{
-		set_pos(x, y, x + w, y + h);
+		set_pos(x, y, x + w - 1, y + h - 1);
 		for (int i = 0; i <= ((w) * (h)); i += 1) {
 			transmit_data_16(color, color);
 		}
 	}
 	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
 	{
-		set_pos(x, y, x + w, y);
+		set_pos(x, y, x + w - 1, y);
 		for (int i = 0; i <= w; i++) {
 			transmit_data_16(color, color);
 		}
 	}
 	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) override
 	{
-		set_pos(x, y, x, y + h);
+		set_pos(x, y, x, y + h - 1);
 		for (int i = 0; i <= h; i++) {
 			transmit_data_16(color, color);
 		}
@@ -129,8 +129,6 @@ public:
 	{
 		//
 	}
-
-	void printnum(uint32_t) {}
 
 private:
 	const int window_width;
@@ -144,7 +142,6 @@ private:
 	int _width;
 	int _height;
 
-	// Todo: Xend == width, right?
 	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
 	{
 		Xstart += _xstart;
