@@ -2,20 +2,20 @@
 CORE ?= M7
 ifeq ($(CORE), M7)
 $(info Building for M7 core)
-#LOADFILE	= STM32H745IGTX_FLASH_CM7.ld
 LOADFILE	= stm32h755xx_flash_CM7.ld
 BUILDDIR = build/corem7
 MCU =  -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM7 -DCORE_CM7
+CORE_SRC = src/m7
 HAL_CONF_INC = src/m7
 else
 ifeq ($(CORE), M4)
 $(info Building for M4 core)
-# LOADFILE	= STM32H745IGTX_FLASH_CM4.ld
 LOADFILE	= stm32h755xx_flash_CM4.ld
 BUILDDIR = build/corem4
 MCU =  -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
+CORE_SRC = src/m4
 HAL_CONF_INC = src/m4
 else
 $(error You must specify a CORE. Valid values are M4 or M7)
@@ -60,6 +60,9 @@ SOURCES  += $(wildcard $(PERIPH)/src/*.c)
 SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.c)
 SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cc)
 SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cpp)
+SOURCES  += $(wildcard $(CORE_SRC)/*.c)
+SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
+SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
 SOURCES  += $(wildcard src/*.c)
 SOURCES  += $(wildcard src/*.cc)
 SOURCES  += $(wildcard src/*.cpp)
@@ -84,6 +87,7 @@ INCLUDES += -I$(DEVICE)/include \
 			-I. \
 			-Isrc \
 			-Isrc/conf \
+			-I$(CORE_SRC) \
 			-I$(HAL_CONF_INC) \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \
@@ -196,7 +200,7 @@ $(BUILDDIR)/%.o: %.s
 
 %.d: ;
 
-tables $(SHARED)/processors/math_tables.h: $(TABLEGEN)/main.cpp
+tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
 
