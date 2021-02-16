@@ -98,11 +98,13 @@ void main()
 		ui.update();
 
 		constexpr bool ENABLE_I2C = true;
+		constexpr bool ENABLE_LED_REFRESH = false;
 		if (ENABLE_I2C && SharedBus::i2c.is_ready()) {
 			Debug::Pin2::high();
 			switch (cur_client) {
 				case Leds:
-					leds.refresh();
+					if (ENABLE_LED_REFRESH)
+						leds.refresh();
 					cur_client = SelectPots;
 					break;
 
@@ -122,7 +124,7 @@ void main()
 					Debug::Pin3::high();
 					params.knobs[cur_pot] = controls.potadc.collect_reading() / 4095.0f;
 					if (++cur_pot >= 8) {
-						cur_client = SelectPatchCV;
+						cur_client = SelectPots; // SelectPatchCV;
 						cur_pot = 0;
 					} else
 						cur_client = RequestReadPots;
