@@ -4,6 +4,7 @@
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
+#include "util/math_tables.hh"
 
 using namespace MathTools;
 
@@ -11,6 +12,8 @@ class LowpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		float finalCutoff = constrain(cvInput*cvAmount+baseFrequency,0.0f,1.0f);
+		lpf.cutoff.setValue(map_value(finalCutoff, 0.0f, 1.0f, 20.0f, 20000.0f));
 		signalOut = lpf.update(signalIn);
 	}
 
@@ -19,9 +22,11 @@ public:
 	virtual void set_param(int const param_id, const float val) override
 	{
 		if (param_id == 0) {
-			lpf.cutoff.setValue(map_value(val * val, 0.0f, 1.0f, 20.0f, 20000.0f));
+			baseFrequency=val*val;
 		} else if (param_id == 1) {
 			lpf.q.setValue(map_value(val, 0.0f, 1.0f, 1.0f, 20.0f));
+		} else if (param_id == 2) {
+			cvAmount = val;
 		}
 	}
 	virtual void set_samplerate(const float sr) override
@@ -34,6 +39,9 @@ public:
 		switch (input_id) {
 			case 0:
 				signalIn = val;
+				break;
+			case 1:
+				cvInput = val;
 				break;
 		}
 	}
@@ -61,4 +69,7 @@ private:
 	LowPassFilter lpf;
 	float signalIn = 0;
 	float signalOut = 0;
+	float baseFrequency=1.0;
+	float cvInput=0;
+	float cvAmount=0;
 };
