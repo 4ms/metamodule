@@ -25,7 +25,7 @@ private:
 template<typename T, unsigned int ADDR>
 struct AllocAt : T, AllocForever<ADDR> {};
 
-static const unsigned int SDRAM_BASE_ADDR = 0x24000000;
+static const unsigned int SDRAM_BASE_ADDR = 0xC0000000;
 
 template<typename T>
 using BigAlloc = AllocAt<T, SDRAM_BASE_ADDR>;
