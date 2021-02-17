@@ -13,7 +13,7 @@ struct Controls {
 	MuxedADC &potadc;
 	CVAdcChipT &cvadc;
 
-	RotaryEncoder<RotaryFullStep> rotary = {GPIO::C, 8, GPIO::C, 7};
+	RotaryEncoder<RotaryHalfStep> rotary = {GPIO::C, 8, GPIO::C, 7};
 	DebouncedPin<GPIO::C, 10, PinPolarity::Inverted> button0;
 	DebouncedPin<GPIO::C, 11, PinPolarity::Inverted> button1;
 	DebouncedPin<GPIO::C, 6, PinPolarity::Inverted> rotary_button;
