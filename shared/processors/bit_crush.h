@@ -52,6 +52,6 @@ private:
 	unsigned int maxBitDepth = 16U;
 	unsigned int bitDepth = 16;
 	float phaccu = 0;
-	float currentSampleRate;
+	float currentSampleRate=48000;
 	float sampledOutput = 0;
 };

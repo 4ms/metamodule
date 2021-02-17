@@ -49,7 +49,7 @@ public:
 
 	void set_decay(float val)
 	{
-		feedback = map_value(val, 0.0f, 1.0f, 0.75f, 0.99999f);
+		feedback = map_value(val, 0.0f, 1.0f, 0.98f, 1.0f);
 	}
 
 private:

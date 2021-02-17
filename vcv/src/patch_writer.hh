@@ -127,9 +127,9 @@ public:
 
 		int node_i = 1;
 		p.num_nets = 0;
-		auto jackInRange = [](int jackid) { return (jackid >= 0) && (jackid < MAX_JACKS_PER_MODULE); };
+		auto validJackId = [](int jackid) { return (jackid >= 0) && (jackid < MAX_JACKS_PER_MODULE); };
 		for (auto &cable : jackData) {
-			if (cable.connected && jackInRange(cable.receivedJackId) && jackInRange(cable.sendingJackId) &&
+			if (cable.connected && validJackId(cable.receivedJackId) && validJackId(cable.sendingJackId) &&
 				cable.receivedModuleId >= 0 && cable.sendingModuleId >= 0)
 			{
 				auto out_mod = idMap[cable.receivedModuleId];

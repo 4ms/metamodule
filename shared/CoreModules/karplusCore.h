@@ -24,9 +24,11 @@ public:
 		e.set_sustain(0.0f);
 		e.set_envelope_time(0, 0.1);
 		e.set_envelope_time(1, 0);
-		e.set_envelope_time(2, 10);
-		e.set_decay_curve(0);
-		e.set_envelope_time(3, 1);
+		e.set_envelope_time(2, 30);
+		e.set_decay_curve(0); 
+		e.set_release_curve(0.5f);
+		e.set_sustain(0.1f);
+		e.set_envelope_time(3, 200);
 		e.sustainEnable = 0;
 	}
 
@@ -38,6 +40,8 @@ public:
 				break;
 			case 1:
 				k.set_decay(val);
+				e.set_sustain(map_value(val,0.0f,1.0f,0.0f,0.2f));
+				e.set_envelope_time(3, map_value(val,0.0f,1.0f,200.0f,1000.0f));
 				break;
 			case 2:
 				k.set_spread(val);
