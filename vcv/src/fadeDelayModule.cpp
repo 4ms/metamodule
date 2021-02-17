@@ -5,8 +5,8 @@
 
 struct FadeDelayModule : CommModule {
 
-	enum ParamIds { DELAY_PARAM, FEED_PARAM, FADE_PARAM, MIX_PARAM, NUM_PARAMS };
-	enum InputIds { DELAY_INPUT, CLOCK_INPUT, NUM_INPUTS };
+	enum ParamIds { DELAY_PARAM, FEED_PARAM, FADE_PARAM, MIX_PARAM, DELAY_CV_PARAM, NUM_PARAMS };
+	enum InputIds { DELAY_INPUT, CLOCK_INPUT, CV_INPUT, NUM_INPUTS };
 	enum OutputIds { DELAY_OUTPUT, NUM_OUTPUTS };
 	enum LightIds { NUM_LIGHTS };
 
@@ -15,6 +15,8 @@ struct FadeDelayModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("FADEDELAY");
 		selfID.typeID = "FADEDELAY";
+
+				inputJacks[FadeDelayModule::CV_INPUT]->scale = [](float f) { return f / 5.0f; };
 	}
 };
 
@@ -36,7 +38,9 @@ struct FadeDelayWidget : CommModuleWidget {
 		addLabeledKnob("FEED", FadeDelayModule::FEED_PARAM, {1, 0});
 		addLabeledKnob("FADE", FadeDelayModule::FADE_PARAM, {0, 1});
 		addLabeledKnob("MIX", FadeDelayModule::MIX_PARAM, {1, 1});
+		addLabeledKnob("DELAY CV", FadeDelayModule::DELAY_CV_PARAM, {0,2});
 
+        addLabeledInput("CV",FadeDelayModule::CV_INPUT,{0,2});
 		addLabeledInput("IN", FadeDelayModule::DELAY_INPUT, {0, 0});
 		addLabeledInput("CLOCK", FadeDelayModule::CLOCK_INPUT, {0, 1});
 		addLabeledOutput("OUT", FadeDelayModule::DELAY_OUTPUT, {1, 0});
