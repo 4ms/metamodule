@@ -122,6 +122,11 @@ public:
 		//
 	}
 
+	// Todo: print_in_box(x,y,w,h, char* txt, uint32_t len)
+	// does what print() does (using draw_char()) but will erase the background with custom fonts
+	// After drawing text, if cursor position is inside the box,
+	// it will fill in all pixels on remaining background.
+	// ... OR: would it be faster to use a gfx off-screen context?
 private:
 	const int window_width;
 	const int window_height;
