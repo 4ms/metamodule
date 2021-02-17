@@ -2,6 +2,7 @@
 #include "coreProcessor.h"
 #include "math.hh"
 #include "moduleTypes.h"
+#include "processors/tools/clockToSamples.h"
 #include "processors/tools/multireadDelayLine.h"
 
 using namespace MathTools;
@@ -12,6 +13,8 @@ public:
 	{
 		float output = 0;
 		float fade = sinceChange / changeTime;
+
+		clockSamples.update(clockInput);
 
 		if (fade > 1) {
 			fade = 1;
@@ -24,8 +27,12 @@ public:
 
 		sinceChange++;
 		delayLine.updateSample(input + feedbackSample * feedback);
-
+		if(fading)
 		output = interpolate(delayLine.readSample(delayTimes[0]), delayLine.readSample(delayTimes[1]), fade);
+		else
+		{
+			output = delayLine.readSample(delayTimes[1]);
+		}
 
 		delayLine.incrementWriteHead();
 
@@ -40,8 +47,18 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				timeinMs = map_value(val, 0.0f, 1.0f, 0.0f, 1000.0f);
-				sampleDelay = timeinMs / 1000.0f * sampleRate;
+			if(fading==false)
+			{
+				if (clockAttached == false) {
+					timeinMs = map_value(val, 0.0f, 1.0f, 0.0f, 1000.0f);
+					sampleDelay = timeinMs / 1000.0f * sampleRate;
+				} else {
+					int divSelect = val*4.0f;
+					auto delayCalc = clockSamples.getSamples()*divTable[divSelect];
+					if(delayCalc<maxSamples)
+					sampleDelay = delayCalc;
+				}
+			}
 				lastDelay = currentDelay;
 				currentDelay = sampleDelay;
 				if (currentDelay != lastDelay) {
@@ -55,9 +72,9 @@ public:
 				feedback = val;
 				break;
 			case 2: {
-				auto changeMs = 0;
+				float changeMs = 0;
 				changeMs = map_value(val, 0.0f, 1.0f, 10.0f, 1000.0f);
-				changeTime = changeMs / 1000.0f * sampleRate;
+				changeTime = changeMs * sampleRate/1000.0f;
 			} break;
 			case 3:
 				mix = val;
@@ -75,6 +92,9 @@ public:
 			case 0:
 				input = val;
 				break;
+			case 1:
+				clockInput = val;
+				break;
 		}
 	}
 
@@ -89,6 +109,17 @@ public:
 		return output;
 	}
 
+	virtual void mark_input_unpatched(const int input_id) override
+	{
+		if (input_id == 1)
+			clockAttached = false;
+	}
+	virtual void mark_input_patched(const int input_id) override
+	{
+		if (input_id == 1)
+			clockAttached = true;
+	}
+
 	static std::unique_ptr<CoreProcessor> create()
 	{
 		return std::make_unique<FadeDelayCore>();
@@ -98,6 +129,7 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
+    const float divTable[5] = {0.125,0.25,0.5,1,2};
 	float sampleDelay = 0;
 	float feedback = 0;
 	float mix;
@@ -125,4 +157,10 @@ private:
 	float feedbackSample = 0;
 
 	bool fading = false;
+
+	float clockInput = 0;
+
+	bool clockAttached = false;
+
+	ClockToSamples clockSamples;
 };
