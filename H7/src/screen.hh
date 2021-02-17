@@ -54,25 +54,15 @@ public:
 				break;
 			case 2:
 				madctl = ST77XX::MADCTL_RGB;
-				if ((window_width == 135) && (window_height == 240)) {
-					_xstart = _colstart - 1;
-					_ystart = _rowstart;
-				} else {
-					_xstart = 0;
-					_ystart = 0;
-				}
+				_xstart = 0;
+				_ystart = 0;
 				_width = window_width;
 				_height = window_height;
 				break;
 			case 3:
 				madctl = ST77XX::MADCTL_MX | ST77XX::MADCTL_MV | ST77XX::MADCTL_RGB;
-				if ((window_width == 135) && (window_height == 240)) {
-					_xstart = _rowstart;
-					_ystart = _colstart;
-				} else {
-					_xstart = 0;
-					_ystart = 0;
-				}
+				_xstart = 0;
+				_ystart = 0;
 				_height = window_width;
 				_width = window_height;
 				break;
@@ -92,7 +82,8 @@ public:
 		transmit_data_16(color);
 	}
 
-	void fillRect_test(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+	// This tasks ~18ms
+	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
 	{
 		set_pos(x, y, x + w - 1, y + h - 1);
 		begin_open_data_transmission(4);
@@ -103,25 +94,26 @@ public:
 		end_open_data_transmission();
 	}
 
-	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
+	// Note: this takes ~350ms!
+	void fillRect_slow(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
 		set_pos(x, y, x + w - 1, y + h - 1);
 		for (int i = 0; i <= ((w) * (h)); i += 1) {
-			transmit_data_16(color, color);
+			transmit_data_32(color, color);
 		}
 	}
 	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
 	{
 		set_pos(x, y, x + w - 1, y);
 		for (int i = 0; i <= w; i++) {
-			transmit_data_16(color, color);
+			transmit_data_32(color, color);
 		}
 	}
 	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) override
 	{
 		set_pos(x, y, x, y + h - 1);
 		for (int i = 0; i <= h; i++) {
-			transmit_data_16(color, color);
+			transmit_data_32(color, color);
 		}
 	}
 
@@ -149,10 +141,10 @@ private:
 		Xend += _xstart;
 		Yend += _ystart;
 		transmit<Cmd>(ST77XX::CASET);
-		transmit_data_16(Xstart, Xend);
+		transmit_data_32(Xstart, Xend);
 
 		transmit<Cmd>(ST77XX::RASET);
-		transmit_data_16(Ystart, Yend);
+		transmit_data_32(Ystart, Yend);
 
 		transmit<Cmd>(ST77XX::RAMWR);
 	}

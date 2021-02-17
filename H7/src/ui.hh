@@ -28,7 +28,9 @@ public:
 	void start()
 	{
 		screen.init();
+		Debug::Pin2::high();
 		screen.fill(Colors::pink);
+		Debug::Pin2::low();
 
 		draw_patch_name();
 
@@ -77,8 +79,9 @@ public:
 			leds.rotaryLED.set_background(Colors::white);
 
 		uint32_t now = HAL_GetTick();
-		if (now - last_screen_update > 1000) {
+		if (now - last_screen_update > 100) {
 			last_screen_update = now;
+			Debug::Pin2::high();
 			draw_audio_load();
 			screen.setTextColor(Colors::white.Rgb565(), Colors::pink.Rgb565());
 			screen.setTextSize(2);
@@ -91,6 +94,7 @@ public:
 				if (i == 3)
 					y += 20;
 			}
+			Debug::Pin2::low();
 		}
 
 		if (params.should_redraw_patch) {
@@ -125,14 +129,18 @@ private:
 
 	void draw_patch_name()
 	{
-		screen.fillRect(0, 30, 240, 210, Colors::pink.Rgb565());
+		Debug::Pin2::high();
+		screen.fillRect(0, 30, 240, 150, Colors::pink.Rgb565()); // 120ms
+		Debug::Pin2::low();
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(Colors::white.Rgb565());
 		screen.setTextSize(1);
 		uint32_t y = 60;
 		for (int i = 1; i < params.cur_patch().num_modules; i++) {
 			screen.setCursor(10, y);
-			screen.print(params.cur_patch().modules_used[i].name);
+			Debug::Pin2::high();
+			screen.print(params.cur_patch().modules_used[i].name); // 41ms for "LFOSINE"
+			Debug::Pin2::low();
 			y += 35;
 		}
 	}

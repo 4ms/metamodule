@@ -124,7 +124,7 @@ void main()
 					Debug::Pin3::high();
 					params.set_knob_val(cur_pot, controls.potadc.collect_reading() / 4095.0f);
 					if (++cur_pot >= 8) {
-						cur_client = SelectPots; // SelectPatchCV;
+						cur_client = SelectPatchCV;
 						cur_pot = 0;
 					} else
 						cur_client = RequestReadPots;

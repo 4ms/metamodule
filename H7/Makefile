@@ -1,5 +1,5 @@
 # Makefile by Dan Green <danngreen1@gmail.com>
-CORE ?= M4
+CORE ?= M7
 ifeq ($(CORE), M7)
 $(info Building for M7 core)
 LOADFILE	= stm32h755xx_flash_CM7.ld
