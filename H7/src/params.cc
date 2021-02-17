@@ -1,15 +1,14 @@
 #include "params.hh"
 #include "debug.hh"
+#include "example1.hh"
 #include "example_drum.hh"
 #include "example_duallfo.hh"
 #include "example_karplus.hh"
 #include "example_pitchShift_simple.hh"
 #include "math.hh"
-using namespace MathTools;
-
 Params::Params(Controls &c)
 	: controls(c)
-	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum}}
+	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum}, {Example1}}
 {}
 
 void Params::update()
@@ -45,21 +44,6 @@ void Params::update()
 	gate_ins[1].copy_state(controls.gate_in1);
 	clock_in.copy_state(controls.clock_in);
 
-	// if (controls.button0.is_pressed() && !buttons[0].is_pressed())
-	// 	buttons[0].register_rising_edge();
-	// else if (!controls.button0.is_pressed() && buttons[0].is_pressed())
-	// 	buttons[0].register_falling_edge();
-
-	// if (controls.button1.is_pressed() && !buttons[1].is_pressed())
-	// 	buttons[1].register_rising_edge();
-	// else if (!controls.button1.is_pressed() && buttons[1].is_pressed())
-	// 	buttons[1].register_falling_edge();
-
-	// if (controls.rotary_button.is_pressed() && !rotary_button.is_pressed())
-	// 	rotary_button.register_rising_edge();
-	// else if (!controls.rotary_button.is_pressed() && buttons[1].is_pressed())
-	// 	rotary_button.register_falling_edge();
-
 	// Todo: Pot ADC and Patch CV copying from controls to params happens in main loop.
 	// This might be a problem if we separate Controls and Params between cores.
 	// Can we store the last reading in Controls:: and then copy it over to Params:: here?
@@ -67,19 +51,3 @@ void Params::update()
 
 	// Debug::Pin1::low();
 }
-
-// void Params::update_screen()
-// {
-// 	if (HAL_GetTick() - last_update_time > 50) {
-// 		last_update_time = HAL_GetTick();
-
-// 		uint8_t d[6];
-// 		d[0] = 0xAA;
-// 		d[1] = static_cast<uint8_t>(knobs[0] * 100.f);
-// 		d[2] = static_cast<uint8_t>(knobs[1] * 100.f);
-// 		d[3] = static_cast<uint8_t>(knobs[2] * 100.f);
-// 		d[4] = static_cast<uint8_t>(knobs[3] * 100.f);
-// 		d[5] = 0xA5;
-// 		screen.send(d, 6);
-// 	}
-// }

@@ -28,14 +28,14 @@ const Patch exampleDrum = {
 		{
 			.num_jacks = 2,
 			.jacks = {{
-				{.module_id = 1, .jack_id = 0},
+				{.module_id = 1, .jack_id = 0}, // LFOSINE output-> DRUM input0
 				{.module_id = 2, .jack_id = 0},
 			}},
 		},
 		{
 			.num_jacks = 2,
 			.jacks = {{
-				{.module_id = 2, .jack_id = 0},
+				{.module_id = 2, .jack_id = 0}, // DRUM output->Panel OUT-L
 				{.module_id = 0, .jack_id = 0},
 			}},
 		},

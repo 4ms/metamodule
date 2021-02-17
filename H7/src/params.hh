@@ -8,6 +8,8 @@
 
 class Params {
 public:
+	static constexpr uint32_t num_patches = 4;
+
 	Params(Controls &c);
 
 	void update();
@@ -59,7 +61,6 @@ public:
 	}
 
 private:
-	static constexpr uint32_t num_patches = 3;
 	bool _rotary_moved_while_pressed = false;
 	uint32_t _cur_patch = 0;
 	PatchRef _patches[num_patches];
