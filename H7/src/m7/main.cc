@@ -1,11 +1,13 @@
 #include "conf/codec_sai_conf.hh"
 #include "conf/control_conf.hh"
+#include "conf/dac_conf.hh"
 #include "conf/i2c_conf.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdram_conf.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/codec_WM8731.hh"
+#include "drivers/dac_MCP48FVB22.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/mpu.hh"
 #include "drivers/qspi_flash_driver.hh"
@@ -30,6 +32,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	CVAdcChipT cvadc;
+	AnalogOutT dac;
 	Screen screen;
 	// GPIOExpander<16> sense{gpio_expander_conf};
 } _hw;
@@ -61,7 +64,10 @@ void main()
 
 	Ui ui{params, leds, _hw.screen};
 
+	_hw.dac.start();
+
 	audio.start();
+	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 	ui.start();
 
 	// Todo: create class RoundRobinHandler {
@@ -82,6 +88,11 @@ void main()
 	//    }
 	//    __NOP();
 	// }
+	// Takes:
+	// leds
+	// controls.potadc
+	// params.set_knob_val (or store in controls?)
+	// params.patchcv (same as ^^^^)
 	enum I2CClients {
 		Leds,
 		SelectPots,

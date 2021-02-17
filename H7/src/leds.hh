@@ -17,6 +17,11 @@ public:
 		: led_driver_{led_driver}
 	{}
 
+	void start()
+	{
+		led_driver_.start();
+	}
+
 	void start_it_mode()
 	{
 		led_driver_.start_it_mode();

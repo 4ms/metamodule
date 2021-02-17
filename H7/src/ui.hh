@@ -43,7 +43,7 @@ public:
 		screen.setCursor(80, 20);
 		screen.print(params.audio_load, 10);
 
-		leds.start_it_mode();
+		leds.start();
 		params.controls.start();
 
 		leds.but[0].set_background(Colors::yellow);

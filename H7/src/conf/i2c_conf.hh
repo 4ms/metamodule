@@ -16,5 +16,7 @@ const I2CConfig i2c_conf = {
 			.SCLH = 17,
 			.SCLL = 17,
 		},
+	.priority1 = 0,
+	.priority2 = 1,
 };
 
