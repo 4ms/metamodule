@@ -4,16 +4,20 @@
 
 TEST_CASE("squash_ids() works")
 {
-	std::vector<int> ids = {1, 6, 25, 30, 9, 0, 2};
-	auto sq = PatchWriter::squash_ids(ids);
-	CHECK(sq[1] == 0);
-	CHECK(sq[6] == 1);
-	CHECK(sq[25] == 2);
-	CHECK(sq[30] == 3);
-	CHECK(sq[9] == 4);
-	CHECK(sq[0] == 5);
-	CHECK(sq[2] == 6);
+	SUBCASE("y = id[x]  transfomrs to squashed[y] = x")
+	{
+		std::vector<int> ids = {1, 6, 25, 30, 9, 0, 2};
+		auto sq = PatchWriter::squash_ids(ids);
+		CHECK(sq[1] == 0);
+		CHECK(sq[6] == 1);
+		CHECK(sq[25] == 2);
+		CHECK(sq[30] == 3);
+		CHECK(sq[9] == 4);
+		CHECK(sq[0] == 5);
+		CHECK(sq[2] == 6);
+	}
 
+	SUBCASE("y = id[x]  transforms to squashed[y] = x (just another test of the same thing)")
 	{
 		std::vector<int> ids = {30, 11, 6, 0, 1};
 		auto sq = PatchWriter::squash_ids(ids);
@@ -52,11 +56,11 @@ TEST_CASE("ids are re-arranged properly")
 	SUBCASE("Static Knob List is in order")
 	{
 		std::vector<ParamStatus> params;
-		params.push_back({.moduleID = 11, .paramID = 1, .value = 0.1f});  // module A
-		params.push_back({.moduleID = 11, .paramID = 2, .value = 0.2f});  // module A
-		params.push_back({.moduleID = 1, .paramID = 3, .value = 0.3f});	  // module E
-		params.push_back({.moduleID = 0, .paramID = 0, .value = 0.001f}); // module D
-		params.push_back({.moduleID = 30, .paramID = 6, .value = 6.f});	  // module PANEL
+		params.push_back({.value = 0.1f, .paramID = 1, .moduleID = 11});  // module A
+		params.push_back({.value = 0.2f, .paramID = 2, .moduleID = 11});  // module A
+		params.push_back({.value = 0.3f, .paramID = 3, .moduleID = 1});	  // module E
+		params.push_back({.value = 0.001f, .paramID = 0, .moduleID = 0}); // module D
+		params.push_back({.value = 6.f, .paramID = 6, .moduleID = 30});	  // module PANEL
 		pw.copyParamList(params);
 
 		pw.createPatch();
