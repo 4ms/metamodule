@@ -97,8 +97,8 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		player.update_patch(params.cur_patch());
 		// Debug::set_1(false);
 
-		out_.l = get_output(0);
-		out_.r = get_output(1);
+		out_.l = get_output(1); // yep, the OUT jacks are swapped on p3 hardware
+		out_.r = get_output(0);
 		in_++;
 	}
 
