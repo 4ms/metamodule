@@ -1,5 +1,5 @@
 # Makefile by Dan Green <danngreen1@gmail.com>
-CORE ?= M7
+CORE ?= M4
 ifeq ($(CORE), M7)
 $(info Building for M7 core)
 LOADFILE	= stm32h755xx_flash_CM7.ld
@@ -54,6 +54,20 @@ OPTFLAG = -O3
 # $(BUILDDIR)/$(SHARED)/CoreModules/pitchshiftCore.o: OPTFLAG = -O0
 #-----------------------------------
 
+ifeq ($(CORE), M4)
+SOURCES  += $(DRIVERLIB)/drivers/$(STARTUP)
+SOURCES  += $(DEVICE)/src/$(SYSTEM)
+SOURCES  += $(wildcard $(PERIPH)/src/*.c)
+SOURCES  += $(wildcard $(CORE_SRC)/*.c)
+SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
+SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
+SOURCES  += $(wildcard src/sys/*.c)
+SOURCES  += $(wildcard src/sys/*.cc)
+SOURCES  += $(DRIVERLIB)/drivers/interrupt.cc
+SOURCES  += $(DRIVERLIB)/drivers/hal_handlers.cc
+endif
+
+ifeq ($(CORE), M7)
 SOURCES  += $(DRIVERLIB)/drivers/$(STARTUP)
 SOURCES  += $(DEVICE)/src/$(SYSTEM)
 SOURCES  += $(wildcard $(PERIPH)/src/*.c)
@@ -75,6 +89,7 @@ SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
 SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
 SOURCES  += $(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library/Adafruit_GFX.cpp 
 SOURCES  += $(LIBDIR)/adafruit_gfx/arduino/Print.cpp
+endif
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
