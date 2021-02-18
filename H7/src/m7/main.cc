@@ -7,7 +7,7 @@
 #include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/codec_WM8731.hh"
-#include "drivers/dac_MCP48FVB22.hh"
+#include "drivers/dac_MCP48FVBxx.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/mpu.hh"
 #include "drivers/qspi_flash_driver.hh"
@@ -65,6 +65,11 @@ void main()
 	Ui ui{params, leds, _hw.screen};
 
 	_hw.dac.init();
+
+	for (int i = 0; i < 4096 * 4096; i += 256) {
+		_hw.dac.set_output_blocking(0, i);
+		_hw.dac.set_output_blocking(1, i);
+	}
 
 	audio.start();
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
