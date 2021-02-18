@@ -18,7 +18,7 @@ struct MM_DACConf : DefaultSpiTransferConf {
 		static constexpr PinNoInit CS1 = {GPIO::B, 11, 0};
 		static constexpr bool use_hardware_ss = true; // FixMe: set to false when we use two chips
 		static constexpr uint16_t clock_division = 128;
-		static constexpr uint16_t data_size = 8;
+		static constexpr uint16_t data_size = 24;
 		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
 		static constexpr uint8_t FifoThreshold = 1;
 		static constexpr bool LSBfirst = false;

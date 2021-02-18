@@ -64,7 +64,7 @@ void main()
 
 	Ui ui{params, leds, _hw.screen};
 
-	_hw.dac.start();
+	_hw.dac.init();
 
 	audio.start();
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
