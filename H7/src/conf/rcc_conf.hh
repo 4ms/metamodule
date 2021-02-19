@@ -53,7 +53,7 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 			.PLL3N = 49,
 			.PLL3P = 64,
 			.PLL3Q = 2,
-			.PLL3R = 2,
+			.PLL3R = 17,
 			.PLL3RGE = RCC_PLL3VCIRANGE_3,
 			.PLL3VCOSEL = RCC_PLL3VCOWIDE,
 			.PLL3FRACN = 1245,
@@ -64,6 +64,6 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL,
 	.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_D2PCLK1,
 	.Usart16ClockSelection = RCC_USART16CLKSOURCE_D2PCLK2,
-	.I2c123ClockSelection = RCC_I2C123CLKSOURCE_D2PCLK1,
+	.I2c123ClockSelection = RCC_I2C123CLKSOURCE_PLL3,
 	.Spi6ClockSelection = RCC_SPI6CLKSOURCE_PLL2,
 };

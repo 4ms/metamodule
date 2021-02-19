@@ -46,4 +46,6 @@ private:
 
 	std::array<Interp<float, kAudioStreamBlockSize>, 4> cvjacks;
 	std::array<Interp<float, kAudioStreamBlockSize>, 4> knobs;
+
+	uint32_t last_start_tm = 0;
 };
