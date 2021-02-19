@@ -8,6 +8,8 @@
 // ADC Channel 0 is connected to the 8=>1 mux, with a pot wiper on each input.
 // The 3 GPIO pins selecting which pot is active.
 // ADC Channel 1 is connected to Patch CV
+namespace mdrivlib
+{
 class MuxedADC {
 public:
 	enum class Channel : uint8_t {
@@ -63,4 +65,4 @@ private:
 		}
 	}
 };
-
+} // namespace mdrivlib

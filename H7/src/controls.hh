@@ -7,7 +7,7 @@
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 #include "muxed_adc.hh"
-
+using namespace mdrivlib;
 struct Controls {
 
 	MuxedADC &potadc;

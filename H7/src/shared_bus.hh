@@ -1,6 +1,7 @@
 #pragma once
 #include "debug.hh"
 #include "drivers/i2c.hh"
+using namespace mdrivlib;
 
 class SharedBus {
 public:
