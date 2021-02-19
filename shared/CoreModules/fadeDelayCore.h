@@ -11,49 +11,16 @@ class FadeDelayCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		float output = 0;
-		float fade = sinceChange / changeTime;
-
 		clockSamples.update(clockInput);
 
-		if (fade > 1) {
-			fade = 1;
-		}
-
-		if (fade >= 1) {
-			delayTimes[0] = delayTimes[1];
-			fading = false;
-		}
-
-		sinceChange++;
-		delayLine.updateSample(input + feedbackSample * feedback);
-		if(fading)
-		output = interpolate(delayLine.readSample(delayTimes[0]), delayLine.readSample(delayTimes[1]), fade);
-		else
-		{
-			output = delayLine.readSample(delayTimes[1]);
-		}
-
-		delayLine.incrementWriteHead();
-
-		feedbackSample = output;
-
-		delayOutput = (interpolate(input, output, mix));
-	}
-
-	FadeDelayCore() {}
-
-	virtual void set_param(const int param_id, const float val) override
-	{
-		switch (param_id) {
-			case 0:
-			if(fading==false)
+				if(fading==false)
 			{
+				float finalDelay = constrain(baseDelay + cvInput*cvAmount,0.0f,1.0f);
 				if (clockAttached == false) {
-					timeinMs = map_value(val, 0.0f, 1.0f, 0.0f, 1000.0f);
+					timeinMs = map_value(finalDelay, 0.0f, 1.0f, 0.0f, 1000.0f);
 					sampleDelay = timeinMs / 1000.0f * sampleRate;
 				} else {
-					int divSelect = val*4.0f;
+					int divSelect = finalDelay*4.0f;
 					auto delayCalc = clockSamples.getSamples()*divTable[divSelect];
 					if(delayCalc<maxSamples)
 					sampleDelay = delayCalc;
@@ -67,7 +34,43 @@ public:
 					sinceChange = 0;
 				}
 
-				break;
+						float output = 0;
+		float fade = sinceChange / changeTime;
+
+				if (fade > 1) {
+			fade = 1;
+		}
+
+		if (fade >= 1) {
+			delayTimes[0] = delayTimes[1];
+			fading = false;
+		}
+
+		delayLine.updateSample(input + feedbackSample * feedback);
+		if(fading)
+		output = interpolate(delayLine.readSample(delayTimes[0]), delayLine.readSample(delayTimes[1]), fade);
+		else
+		{
+			output = delayLine.readSample(delayTimes[1]);
+		}
+
+		delayLine.incrementWriteHead();
+
+		feedbackSample = output;
+
+		delayOutput = (interpolate(input, output, mix));
+
+				sinceChange++;
+	}
+
+	FadeDelayCore() {}
+
+	virtual void set_param(const int param_id, const float val) override
+	{
+		switch (param_id) {
+			case 0:
+			baseDelay = val;
+							break;
 			case 1:
 				feedback = val;
 				break;
@@ -78,6 +81,9 @@ public:
 			} break;
 			case 3:
 				mix = val;
+				break;
+				case 4:
+				cvAmount=val;
 				break;
 		}
 	}
@@ -94,6 +100,9 @@ public:
 				break;
 			case 1:
 				clockInput = val;
+				break;
+				case 2:
+				cvInput=val;
 				break;
 		}
 	}
@@ -139,11 +148,15 @@ private:
 	float input = 0;
 
 	float timeinMs = 0;
+	float baseDelay=0;
 
 	float currentDelay = 0;
 	float lastDelay = 0;
 
 	float sampleRate = 48000;
+
+		float cvInput=0;
+	float cvAmount=0;
 
 	const static inline long maxSamples = 48000;
 
