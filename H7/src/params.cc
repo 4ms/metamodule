@@ -6,9 +6,10 @@
 #include "example_karplus.hh"
 #include "example_pitchShift_simple.hh"
 #include "math.hh"
+
 Params::Params(Controls &c)
 	: controls(c)
-	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum}, {Example1}}
+	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum} /*, {Example1}*/}
 {}
 
 void Params::update()

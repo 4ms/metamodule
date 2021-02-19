@@ -8,7 +8,7 @@
 
 class Params {
 public:
-	static constexpr uint32_t num_patches = 4;
+	static constexpr uint32_t num_patches = 3;
 
 	Params(Controls &c);
 
