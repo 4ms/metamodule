@@ -5,9 +5,9 @@
 
 class NodePanel : public CoreProcessor {
 public:
-	static inline const int NumInJacks = 6;
-	static inline const int NumOutJacks = 2;
-	static inline const int NumKnobs = 8;
+	static inline constexpr int NumInJacks = 6;
+	static inline constexpr int NumOutJacks = 2;
+	static inline constexpr int NumKnobs = 8;
 	virtual int get_num_inputs() const override
 	{
 		return NumInJacks;
