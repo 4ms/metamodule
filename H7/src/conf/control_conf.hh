@@ -19,7 +19,8 @@ struct SpiAdcConf : DefaultSpiConf {
 	static constexpr PinNoInit CS0 = {GPIO::G, 10};
 	static constexpr PinNoInit CS1 = {GPIO::G, 12};
 	static constexpr bool use_hardware_ss = false;
-	static constexpr uint16_t clock_division = 16;
+	static constexpr uint16_t clock_division =
+		16; // Todo: was 480Mhz/16 = 30MHz. Changed to 320MHz/16 = 20MHz. Can we go to 320/8 = 40MHZ?
 	static constexpr uint16_t data_size = 16;
 	static constexpr SpiDataDir data_dir = SpiDataDir::Duplex;
 	static constexpr uint8_t FifoThreshold = 1;
