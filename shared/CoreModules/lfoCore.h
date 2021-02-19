@@ -83,7 +83,7 @@ public:
 	{
 		if (param_id == 0) {
 			auto f = expTable.closest(constrain(val, 0.f, 1.f));
-			knob_frequency = f * f * 0.1f;
+			knob_frequency = f * f;
 			combineKnobCVFreq();
 		}
 		if (param_id == 1) {
