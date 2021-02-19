@@ -1,5 +1,5 @@
 #include "patch.hh"
-static const Patch Example1 = {
+static const Patch fadedelay_example = {
 	.modules_used =
 		{
 			"PANEL_8",

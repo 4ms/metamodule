@@ -5,11 +5,12 @@
 #include "example_duallfo.hh"
 #include "example_karplus.hh"
 #include "example_pitchShift_simple.hh"
+#include "fadedelay_two.hh"
 #include "math.hh"
 
 Params::Params(Controls &c)
 	: controls(c)
-	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum} /*, {Example1}*/}
+	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum}, {fadedelay_example}}
 {}
 
 void Params::update()
