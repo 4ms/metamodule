@@ -220,3 +220,12 @@ TEST_CASE("math_tests: sizeof_type_test")
 	CHECK(127 == MathTools::bipolar_type_range(i8));
 }
 
+TEST_CASE("swap_bytes tests")
+{
+	uint16_t hw1 = 0x1234;
+	uint16_t hw2 = 0x0140;
+	CHECK(MathTools::swap_bytes_and_combine(hw1, hw2) == 0x34124001);
+
+	uint32_t w = 0x12345678;
+	CHECK(MathTools::swap_bytes32(w) == 0x78563412);
+}

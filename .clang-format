@@ -11,7 +11,7 @@ AllowShortIfStatementsOnASingleLine : "Never"
 AllowShortBlocksOnASingleLine : "true"
 AlwaysBreakTemplateDeclarations : "true"
 AllowAllArgumentsOnNextLine : "true"
-AlignAfterOpenBracket : "Align"
+AlignOperands : "AlignAfterOperator"
 BinPackArguments: false
 BinPackParameters: false
 BreakConstructorInitializers : "BeforeComma"

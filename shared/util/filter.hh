@@ -23,10 +23,25 @@ public:
 	}
 
 private:
-	// constexpr static auto oversample_shift_ = MathTools::Log2Int(Size);
 	constexpr static auto oversample_shift_ = MathTools::Log2<Size>::val;
 	T buff_ = 0;
 	T val_ = 0;
 	unsigned int idx_ = 0;
+};
+
+struct NoFilter {
+public:
+	NoFilter() {}
+	void add_val(unsigned newval)
+	{
+		val_ = newval;
+	}
+	unsigned val()
+	{
+		return val_;
+	}
+
+private:
+	unsigned val_ = 0;
 };
 

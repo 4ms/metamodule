@@ -1,4 +1,5 @@
 TEST_SOURCES = doctest.cc
+TEST_SOURCES += ../math_tables.cc
 TEST_SOURCES += $(wildcard *_test.cc)
 TEST_SOURCES += $(wildcard *_test.cpp)
 TEST_SOURCES += $(wildcard *_tests.cc)

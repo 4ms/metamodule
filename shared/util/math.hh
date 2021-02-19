@@ -114,4 +114,18 @@ constexpr float faster_sine(float x)
 	return 4.f * (x - x * f_abs(x));
 }
 
+constexpr uint16_t swap_bytes16(uint16_t halfword)
+{
+	return ((halfword & 0xFF) << 8) | (halfword >> 8);
+}
+
+constexpr uint32_t swap_bytes32(uint32_t word)
+{
+	return ((word & 0x000000FF) << 24) | ((word & 0x0000FF00) << 8) | ((word & 0x00FF0000) >> 8) | (word >> 24);
+}
+constexpr uint32_t swap_bytes_and_combine(uint16_t halfword1, uint16_t halfword2)
+{
+	return ((halfword1 & 0xFF) << 24) | ((halfword1 & 0xFF00) << 8) | ((halfword2 & 0x00FF) << 8) | (halfword2 >> 8);
+}
+
 } // namespace MathTools

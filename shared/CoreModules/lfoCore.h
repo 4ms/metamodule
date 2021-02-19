@@ -63,8 +63,7 @@ public:
 	{
 		if (freqJack.isChanged()) {
 			auto f = expTable.closest(constrain(freqJack.getValue(), 0.f, 1.f));
-			cv_frequency = f * f / 0.1f;
-			// cv_frequency = map_value(freqJack, 0.0f, 1.0f, 0.1f, 200.f);
+			cv_frequency = f * f * 0.1f;
 			combineKnobCVFreq();
 		}
 
@@ -84,8 +83,7 @@ public:
 	{
 		if (param_id == 0) {
 			auto f = expTable.closest(constrain(val, 0.f, 1.f));
-			knob_frequency = f * f / 0.1f;
-			// knob_frequency = map_value(val, 0.0f, 1.0f, 0.1f, 200.0f);
+			knob_frequency = f * f;
 			combineKnobCVFreq();
 		}
 		if (param_id == 1) {
