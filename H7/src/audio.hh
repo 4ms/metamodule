@@ -11,6 +11,7 @@
 #include <array>
 
 class Audio {
+
 	using AudioSampleType = int32_t;			  // todo: put this in a config header?
 	static inline const int AudioSampleBits = 24; // todo: put this in a config header?
 
@@ -44,8 +45,14 @@ private:
 	PatchPlayer player;
 	KneeCompressor<int32_t> compressor{AudioSampleBits, 0.75};
 
-	std::array<Interp<float, kAudioStreamBlockSize>, 4> cvjacks;
-	std::array<Interp<float, kAudioStreamBlockSize>, 4> knobs;
+	static constexpr unsigned NumKnobs = PatchPlayer::get_num_panel_knobs();
+	static constexpr unsigned NumAudioInputs = 2;
+	static constexpr unsigned NumCVInputs = PatchPlayer::get_num_panel_inputs() - NumAudioInputs;
+	static constexpr unsigned NumAudioOutputs = 2;
+	static constexpr unsigned NumCVOutputs = PatchPlayer::get_num_panel_outputs() - NumAudioOutputs;
+
+	std::array<Interp<float, kAudioStreamBlockSize>, NumCVInputs> cvjacks;
+	std::array<Interp<float, kAudioStreamBlockSize>, NumKnobs> knobs;
 
 	uint32_t last_start_tm = 0;
 };

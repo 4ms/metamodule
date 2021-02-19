@@ -21,6 +21,19 @@ private:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
 public:
+	static constexpr unsigned get_num_panel_knobs()
+	{
+		return Panel::NumKnobs;
+	}
+	static constexpr unsigned get_num_panel_inputs()
+	{
+		return Panel::NumInJacks;
+	}
+	static constexpr unsigned get_num_panel_outputs()
+	{
+		return Panel::NumOutJacks;
+	}
+
 	void set_panel_input(int jack_id, float val)
 	{
 		if (!is_loaded)

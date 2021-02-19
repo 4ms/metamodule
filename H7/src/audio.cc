@@ -58,7 +58,8 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 	params.update();
 
-	bool should_update_knob[4];
+	// Todo: # of knobs needs to live in one place only
+	bool should_update_knob[NumKnobs];
 	static auto is_small = [](float x) { return x < 3e-4f && x > -3e-4f; };
 	int i = 0;
 	for (auto &knob : knobs) {
@@ -82,7 +83,7 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 		i = 0;
 		for (auto &cv : cvjacks) {
-			player.set_panel_input(i + 2, cv.next()); // i+2 : skip audio jacks
+			player.set_panel_input(i + NumAudioInputs, cv.next());
 			i++;
 		}
 
