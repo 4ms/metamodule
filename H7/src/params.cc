@@ -10,7 +10,7 @@
 
 Params::Params(Controls &c)
 	: controls(c)
-	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum}, {fadedelay_example}}
+	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum}, {fadedelay_example}, {Example1}}
 {}
 
 void Params::update()
