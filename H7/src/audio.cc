@@ -45,8 +45,8 @@ void AudioStream::set_input(int input_id, AudioConf::SampleT in)
 	player.set_panel_input(input_id, scaled_in);
 }
 
-TriangleOscillator<48000> debugosc0{500};
-TriangleOscillator<48000> debugosc1{100};
+TriangleOscillator<48000> debugosc0{1000}; // 500Hz: 20V in 1ms, so 416mV in 20.833uS
+TriangleOscillator<48000> debugosc1{50};
 
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
@@ -113,8 +113,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 		in_++;
 
-		dac.queue_sample(debugosc0.Process());
-		dac.queue_sample(debugosc1.Process());
+		dac.queue_sample(0, debugosc0.Process() >> 8);
+		dac.queue_sample(1, debugosc1.Process() >> 8);
 	}
 
 	Debug::Pin0::low();
@@ -135,13 +135,14 @@ void AudioStream::start()
 	dac_updater.init(
 		{
 			.TIMx = TIM15,
-			.period_ns = 20833,
-			.priority1 = 3,
-			.priority2 = 3,
+			.period_ns = 10416,
+			.priority1 = 0,
+			.priority2 = 0,
 		},
 		[&]() {
-			dac.output_next(0);
-			dac.output_next(1);
+			Debug::Pin3::high();
+			dac.output_next();
+			Debug::Pin3::low();
 		});
 	dac_updater.start();
 }

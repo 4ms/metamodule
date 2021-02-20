@@ -67,13 +67,6 @@ void main()
 
 	Ui ui{params, leds, _hw.screen};
 
-	// _hw.dac.init();
-
-	// for (int i = 0; i < 4096 * 4096; i += 256) {
-	// 	_hw.dac.set_output_blocking(0, i);
-	// 	_hw.dac.set_output_blocking(1, i);
-	// }
-
 	audio.start();
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 	ui.start();
@@ -140,7 +133,7 @@ void main()
 					break;
 
 				case CollectReadPots:
-					Debug::Pin3::high();
+					// Debug::Pin3::high();
 					params.set_knob_val(cur_pot, controls.potadc.collect_reading() / 4095.0f);
 					if (++cur_pot >= 8) {
 						cur_client = SelectPatchCV;
@@ -148,7 +141,7 @@ void main()
 					} else
 						cur_client = RequestReadPots;
 					controls.potadc.select_pot_source(cur_pot);
-					Debug::Pin3::low();
+					// Debug::Pin3::low();
 					break;
 
 					// GPIO Sense here (between ADC channels)
