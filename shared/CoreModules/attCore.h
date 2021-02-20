@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "math.hh"
+#include "util/math.hh"
 
 using namespace MathTools;
 
@@ -68,7 +68,7 @@ public:
 		else if (input_id == 1)
 			in2Connected = 0;
 	}
-	
+
 	virtual void mark_input_patched(const int input_id) override
 	{
 		if (input_id == 0)

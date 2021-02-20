@@ -3,13 +3,13 @@
 #include "CoreModules/panel.hh"
 #include <vector>
 
-const int MAX_MODULES_IN_PATCH = 16;
-const int MAX_PARAMS_IN_PATCH = 256;
+const int MAX_MODULES_IN_PATCH = 8;
+const int MAX_PARAMS_IN_PATCH = 32;
 const int MAX_JACKS_PER_MODULE = 32;
 const int MAX_NODES_IN_PATCH = MAX_JACKS_PER_MODULE * MAX_MODULES_IN_PATCH;
 
 // FixMe: non-node only code:
-const int MAX_CONNECTIONS_PER_NODE = 16;
+const int MAX_CONNECTIONS_PER_NODE = 8;
 
 // Todo: will this pack into 4 bytes on all systems?
 struct Jack {
@@ -58,3 +58,12 @@ struct Patch {
 	MappedParamList mapped_knobs;
 	int num_mapped_knobs;
 };
+
+struct PatchRef {
+	PatchRef(const Patch &p)
+		: patch(p)
+	{}
+
+	const Patch &patch;
+};
+

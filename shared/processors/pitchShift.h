@@ -12,7 +12,7 @@ private:
 	MultireadDelayLine<maxWindowSize> pitchDelay;
 	float phaccu = 0;
 	const int incrementalPitch = 1;
-	float sampleRate = 96000;
+	float sampleRate = 48000;
 
 public:
 	PitchShift() {}

@@ -1,5 +1,4 @@
 #pragma once
-
 #include "sys/alloc_buffer.hh"
 #include "util/interp_array.hh"
 #include "util/math.hh"
