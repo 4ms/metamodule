@@ -5,6 +5,7 @@
 #include "drivers/interrupt.hh"
 #include "drivers/spi_transfer.hh"
 #include "drivers/spi_transfer_config_struct.hh"
+#include "drivers/timekeeper.hh"
 #include "util/circular_buffer.hh"
 
 struct MM_DACConf : DefaultSpiTransferConf {
@@ -29,6 +30,13 @@ struct MM_DACConf : DefaultSpiTransferConf {
 	};
 	static constexpr uint32_t NumChannelsPerChip = 2;
 	using AuxPin = FPin<GPIO::B, 14, PinMode::Output>;
+};
+
+const TimekeeperConfig dac_updater_conf{
+	.TIMx = TIM15,
+	.period_ns = 10416,
+	.priority1 = 0,
+	.priority2 = 0,
 };
 
 using AnalogOutT =

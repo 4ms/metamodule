@@ -113,6 +113,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 		in_++;
 
+		// Todo: use player.get_output(2) and (3)
 		dac.queue_sample(0, debugosc0.Process() >> 8);
 		dac.queue_sample(1, debugosc1.Process() >> 8);
 	}
@@ -132,18 +133,7 @@ void AudioStream::start()
 {
 	codec_.start();
 	const TimekeeperConfig led_update_task_conf = {};
-	dac_updater.init(
-		{
-			.TIMx = TIM15,
-			.period_ns = 10416,
-			.priority1 = 0,
-			.priority2 = 0,
-		},
-		[&]() {
-			Debug::Pin3::high();
-			dac.output_next();
-			Debug::Pin3::low();
-		});
+	dac_updater.init(dac_updater_conf, [&]() { dac.output_next(); });
 	dac_updater.start();
 }
 
