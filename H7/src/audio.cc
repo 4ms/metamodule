@@ -4,7 +4,7 @@
 
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 
-Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
+AudioStream::AudioStream(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	: codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
 	, tx_buf_1{buffers[0]}
@@ -22,27 +22,27 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
-							kAudioStreamDMABlockSize * 2);
+							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_1); }, [this]() { process(rx_buf_2, tx_buf_2); });
 
 	// Todo: LoadMeasurer class
 	// DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 }
 
-Audio::AudioSampleType Audio::get_output(int output_id)
+AudioConf::SampleT AudioStream::get_output(int output_id)
 {
 	auto raw_out = player.get_panel_output(output_id);
 	auto scaled_out = AudioFrame::scaleOutput(raw_out);
 	return scaled_out;
 	// return compressor.compress(scaled_out);
 }
-void Audio::set_input(int input_id, Audio::AudioSampleType in)
+void AudioStream::set_input(int input_id, AudioConf::SampleT in)
 {
 	auto scaled_in = AudioFrame::scaleInput(in);
 	player.set_panel_input(input_id, scaled_in);
 }
 
-void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
+void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
 	if (check_patch_change()) {
 		params.controls.clock_out.high();
@@ -119,12 +119,12 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	////
 }
 
-void Audio::start()
+void AudioStream::start()
 {
 	codec_.start();
 }
 
-bool Audio::check_patch_change()
+bool AudioStream::check_patch_change()
 {
 	bool new_patch = false;
 	if (params.rotary_motion > 0) {

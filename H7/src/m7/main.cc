@@ -39,7 +39,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
-	static inline __attribute__((section(".dma_buffer"))) Audio::AudioStreamBlock audio_dma_block[4];
+	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 
 	StaticBuffers()
 	{
@@ -54,13 +54,14 @@ void main()
 {
 	using namespace MetaModule;
 
+	// Todo: finish non-DMA PCA9685 driver and use it
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
 	LedCtl leds{led_driver};
 
 	Controls controls{_hw.potadc, _hw.cvadc}; //, gpio_expander};
 	Params params{controls};
 
-	Audio audio{params, _hw.codec, StaticBuffers::audio_dma_block};
+	AudioStream audio{params, _hw.codec, StaticBuffers::audio_dma_block};
 
 	Ui ui{params, leds, _hw.screen};
 
