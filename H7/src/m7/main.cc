@@ -19,6 +19,7 @@
 #include "shared_bus.hh"
 #include "sys/system_clocks.hh"
 #include "ui.hh"
+#include "util/circular_buffer.hh"
 
 namespace MetaModule
 {
@@ -40,6 +41,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
+	static inline CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize> dac_buffer;
 
 	StaticBuffers()
 	{
