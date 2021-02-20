@@ -28,7 +28,30 @@ struct Controls {
 	void read();
 	void start();
 
+	void store_pot_reading(uint32_t pot_id, uint32_t val)
+	{
+		latest_pot_reading[_pot_map[pot_id]] = val;
+	}
+
+	uint32_t get_pot_reading(uint32_t pot_id)
+	{
+		return latest_pot_reading[pot_id];
+	}
+
+	void store_patchcv_reading(uint32_t patchcv)
+	{
+		latest_patchcv_reading = patchcv;
+	}
+	uint32_t get_patchcv_reading()
+	{
+		return latest_patchcv_reading;
+	}
+
 private:
 	Timekeeper read_controls_task;
 	Timekeeper read_cvadc_task;
+
+	uint32_t latest_patchcv_reading;
+	uint32_t latest_pot_reading[8];
+	const uint8_t _pot_map[8] = {1, 4, 0, 5, 3, 6, 7, 2};
 };

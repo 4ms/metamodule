@@ -68,7 +68,9 @@ void main()
 	Ui ui{params, leds, _hw.screen};
 
 	audio.start();
+
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
+
 	ui.start();
 
 	// Todo: create class RoundRobinHandler {
@@ -92,8 +94,6 @@ void main()
 	// Takes:
 	// leds
 	// controls.potadc
-	// params.set_knob_val (or store in controls?)
-	// params.patchcv (same as ^^^^)
 	enum I2CClients {
 		Leds,
 		SelectPots,
@@ -109,14 +109,11 @@ void main()
 	while (1) {
 		ui.update();
 
-		constexpr bool ENABLE_I2C = true;
-		constexpr bool ENABLE_LED_REFRESH = true;
-		if (ENABLE_I2C && SharedBus::i2c.is_ready()) {
+		if (SharedBus::i2c.is_ready()) {
 			// Debug::Pin2::high();
 			switch (cur_client) {
 				case Leds:
-					if (ENABLE_LED_REFRESH)
-						leds.refresh();
+					leds.refresh();
 					cur_client = SelectPots;
 					break;
 
@@ -133,15 +130,13 @@ void main()
 					break;
 
 				case CollectReadPots:
-					// Debug::Pin3::high();
-					params.set_knob_val(cur_pot, controls.potadc.collect_reading() / 4095.0f);
+					controls.store_pot_reading(cur_pot, controls.potadc.collect_reading());
 					if (++cur_pot >= 8) {
 						cur_client = SelectPatchCV;
 						cur_pot = 0;
 					} else
 						cur_client = RequestReadPots;
 					controls.potadc.select_pot_source(cur_pot);
-					// Debug::Pin3::low();
 					break;
 
 					// GPIO Sense here (between ADC channels)
@@ -157,7 +152,7 @@ void main()
 					break;
 
 				case CollectReadPatchCV:
-					params.patchcv = controls.potadc.collect_reading() / 4095.0f;
+					controls.store_patchcv_reading(controls.potadc.collect_reading());
 					cur_client = Leds;
 					break;
 
