@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/dac_conf.hh"
 #include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
 #include "drivers/stm32xx.h"
@@ -13,6 +14,7 @@
 
 using AudioConf = StreamConf::Audio;
 
+// Todo: we don't need a codec virtual class, just use a type alias
 class AudioStream {
 
 public:
@@ -20,8 +22,7 @@ public:
 	using AudioStreamBlock = std::array<AudioFrame, AudioConf::BlockSize>;
 	enum AudioChannels { LEFT, RIGHT };
 
-	// Public methods:
-	AudioStream(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4]);
+	AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4]);
 	void start();
 
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);
@@ -42,6 +43,7 @@ private:
 	bool check_patch_change();
 
 	Params &params;
+	AnalogOutT &dac;
 	PatchPlayer player;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 

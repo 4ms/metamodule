@@ -19,7 +19,6 @@
 #include "shared_bus.hh"
 #include "sys/system_clocks.hh"
 #include "ui.hh"
-#include "util/circular_buffer.hh"
 
 namespace MetaModule
 {
@@ -29,6 +28,8 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 		, SharedBus{i2c_conf}
 	{}
 
+	// Todo: understand why setting the members to static inline causes SystemClocks ctor to hang on waiting for
+	// D2CLKREADY
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
@@ -41,7 +42,6 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
-	static inline CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize> dac_buffer;
 
 	StaticBuffers()
 	{
@@ -63,16 +63,16 @@ void main()
 	Controls controls{_hw.potadc, _hw.cvadc}; //, gpio_expander};
 	Params params{controls};
 
-	AudioStream audio{params, _hw.codec, StaticBuffers::audio_dma_block};
+	AudioStream audio{params, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
 
 	Ui ui{params, leds, _hw.screen};
 
-	_hw.dac.init();
+	// _hw.dac.init();
 
-	for (int i = 0; i < 4096 * 4096; i += 256) {
-		_hw.dac.set_output_blocking(0, i);
-		_hw.dac.set_output_blocking(1, i);
-	}
+	// for (int i = 0; i < 4096 * 4096; i += 256) {
+	// 	_hw.dac.set_output_blocking(0, i);
+	// 	_hw.dac.set_output_blocking(1, i);
+	// }
 
 	audio.start();
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);

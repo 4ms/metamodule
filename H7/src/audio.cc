@@ -4,7 +4,7 @@
 
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 
-AudioStream::AudioStream(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
+AudioStream::AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4])
 	: codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
 	, tx_buf_1{buffers[0]}
@@ -12,6 +12,7 @@ AudioStream::AudioStream(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4
 	, rx_buf_1{buffers[2]}
 	, rx_buf_2{buffers[3]}
 	, params{p}
+	, dac{dac}
 {
 	bool ok = player.load_patch(params.cur_patch());
 	if (!ok) {
@@ -24,6 +25,8 @@ AudioStream::AudioStream(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
 							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_1); }, [this]() { process(rx_buf_2, tx_buf_2); });
+
+	dac.init();
 
 	// Todo: LoadMeasurer class
 	// DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
@@ -42,6 +45,9 @@ void AudioStream::set_input(int input_id, AudioConf::SampleT in)
 	player.set_panel_input(input_id, scaled_in);
 }
 
+TriangleOscillator<48000> debugosc0{500};
+TriangleOscillator<48000> debugosc1{100};
+
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
 	if (check_patch_change()) {
@@ -58,7 +64,6 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 	params.update();
 
-	// Todo: # of knobs needs to live in one place only
 	bool should_update_knob[NumKnobs];
 	static auto is_small = [](float x) { return x < 3e-4f && x > -3e-4f; };
 	int i = 0;
@@ -94,7 +99,6 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			i++;
 		}
 
-		// SCB_InvalidateDCache();
 		player.update_patch(params.cur_patch());
 
 		// FixMe: Why are the L/R samples swapped in the DMA buffer? The L/R jacks are not swapped on hardware
@@ -108,6 +112,9 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		}
 
 		in_++;
+
+		dac.queue_sample(debugosc0.Process());
+		dac.queue_sample(debugosc1.Process());
 	}
 
 	Debug::Pin0::low();
@@ -119,9 +126,24 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	////
 }
 
+Timekeeper dac_updater;
+
 void AudioStream::start()
 {
 	codec_.start();
+	const TimekeeperConfig led_update_task_conf = {};
+	dac_updater.init(
+		{
+			.TIMx = TIM15,
+			.period_ns = 20833,
+			.priority1 = 3,
+			.priority2 = 3,
+		},
+		[&]() {
+			dac.output_next(0);
+			dac.output_next(1);
+		});
+	dac_updater.start();
 }
 
 bool AudioStream::check_patch_change()
@@ -140,7 +162,6 @@ bool AudioStream::check_patch_change()
 	if (new_patch) {
 		params.rotary_motion = 0;
 		params.should_redraw_patch = true;
-		// __BKPT();
 		bool ok = player.load_patch(params.cur_patch());
 		if (!ok) {
 			while (1)

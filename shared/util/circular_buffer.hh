@@ -26,12 +26,17 @@ public:
 			return T();
 		}
 
-		//Read data and advance the tail (we now have a free space)
+		// Read data and advance the tail (we now have a free space)
 		auto val = buf_[tail_];
 		full_ = false;
 		tail_ = (tail_ + 1) % max_size_;
 
 		return val;
+	}
+
+	void set_head(size_t head)
+	{
+		head_ = head;
 	}
 
 	void remove_first()
@@ -42,7 +47,7 @@ public:
 		}
 	}
 
-	//Return a reference to the first element
+	// Return a reference to the first element
 	T &first()
 	{
 		return buf_[tail_];
@@ -56,7 +61,7 @@ public:
 
 	bool empty() const
 	{
-		//if head and tail are equal, we are empty
+		// if head and tail are equal, we are empty
 		return (!full_ && (head_ == tail_));
 	}
 
