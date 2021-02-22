@@ -1,8 +1,10 @@
 #pragma once
 
+#include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
-#include "CoreModules/moduleTypes.h"
+#include "processors/freeverb/allpass.h"
+#include "processors/freeverb/comb.h"
 
 using namespace MathTools;
 
@@ -10,27 +12,67 @@ class ReverbCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-	
+		float wetSignal = 0;
+
+		for (int i = 0; i < numComb; i++) {
+			wetSignal += combFilter[i].process(signalIn);
+		}
+
+		for (int i = 0; i < numAll; i++) {
+			wetSignal = apFilter[i].process(wetSignal);
+		}
+
+		signalOut = interpolate(signalIn, wetSignal, mix);
 	}
 
 	ReverbCore()
 	{
+		combFilter[0].setbuffer(combBuffer1, combTuning[0]);
+		combFilter[1].setbuffer(combBuffer2, combTuning[1]);
+		combFilter[2].setbuffer(combBuffer3, combTuning[2]);
+		combFilter[3].setbuffer(combBuffer4, combTuning[3]);
+
+		apFilter[0].setbuffer(allBuffer1, allTuning[0]);
+		apFilter[1].setbuffer(allBuffer2, allTuning[1]);
+		apFilter[2].setbuffer(allBuffer3, allTuning[2]);
+		apFilter[3].setbuffer(allBuffer4, allTuning[3]);
+
+		for (int i = 0; i < numAll; i++) {
+			apFilter[i].setfeedback(0.5f);
+		}
+
+		for(int i=0;i<numComb;i++)
+		{
+			combFilter[i].setfeedback(0);
+		}
 	}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
-			
+			case 0: // size
+				for (int i = 0; i < numComb; i++) {
+					combFilter[i].setfeedback(val);
+				}
+				break;
+			case 1: // damp
+				for (int i = 0; i < numComb; i++) {
+					combFilter[i].setdamp(val);
+				}
+				break;
+			case 2:
+				mix = val;
+				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override
-	{
-	}
+	virtual void set_samplerate(const float sr) override {}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
-			
+			case 0:
+				signalIn = val;
+				break;
 		}
 	}
 
@@ -38,7 +80,9 @@ public:
 	{
 		float output = 0;
 		switch (output_id) {
-		
+			case 0:
+				output = signalOut;
+				break;
 		}
 		return output;
 	}
@@ -52,5 +96,27 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	
+	float signalIn = 0;
+	float signalOut = 0;
+
+	static const int numComb = 4;
+	static const int numAll = 4;
+
+	static constexpr int combTuning[numComb] = {3000, 4003, 4528, 5217};
+	static constexpr int allTuning[numAll] = {1248, 812, 358, 125};
+
+	float combBuffer1[combTuning[0]];
+	float combBuffer2[combTuning[1]];
+	float combBuffer3[combTuning[2]];
+	float combBuffer4[combTuning[3]];
+
+	float allBuffer1[allTuning[0]];
+	float allBuffer2[allTuning[1]];
+	float allBuffer3[allTuning[2]];
+	float allBuffer4[allTuning[3]];
+
+	comb combFilter[numComb];
+	allpass apFilter[numAll];
+
+	float mix = 0;
 };
