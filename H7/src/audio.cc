@@ -1,5 +1,6 @@
 #include "audio.hh"
 #include "debug.hh"
+#include "drivers/syscfg.hh"
 #include "patch_player.hh"
 
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
@@ -132,9 +133,20 @@ Timekeeper dac_updater;
 void AudioStream::start()
 {
 	codec_.start();
-	const TimekeeperConfig led_update_task_conf = {};
-	dac_updater.init(dac_updater_conf, [&]() { dac.output_next(); });
-	dac_updater.start();
+
+	// Todo: syscfg exti interface: PinISR::init({GPIO::E, 4}, [](){});
+	target::RCC_Control::SYSCFG_::set();
+	target::SYSCFG_EXTI::Pin4::write(target::SYSCFG_EXTI::PortE);
+	target::EXTI_IMR1::write(1 << 4);
+	target::EXTI_RTSR1::write(1 << 4);
+	target::EXTI_FTSR1::write(1 << 4);
+	InterruptManager::registerISR(EXTI4_IRQn, 0, 0, [&]() {
+		if (target::EXTI_PR1::read() == (1 << 4)) {
+			target::EXTI_PR1::write(1 << 4);
+			dac.output_next();
+		}
+	});
+	/////////////////
 }
 
 bool AudioStream::check_patch_change()

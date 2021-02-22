@@ -3,6 +3,7 @@
 #include "drivers/dac_MCP48FVBxx.hh"
 #include "drivers/dac_stream.hh"
 #include "drivers/interrupt.hh"
+#include "drivers/pinchange.hh"
 #include "drivers/spi_transfer.hh"
 #include "drivers/spi_transfer_config_struct.hh"
 #include "drivers/timekeeper.hh"
@@ -32,9 +33,11 @@ struct MM_DACConf : DefaultSpiTransferConf {
 	using AuxPin = FPin<GPIO::B, 14, PinMode::Output>;
 };
 
-const TimekeeperConfig dac_updater_conf{
-	.TIMx = TIM15,
-	.period_ns = 10416,
+const PinChangeConfig DAC_update_conf = {
+	.pin = 4,
+	.port = GPIO::E,
+	.on_rising_edge = true,
+	.on_falling_edge = true,
 	.priority1 = 0,
 	.priority2 = 0,
 };
