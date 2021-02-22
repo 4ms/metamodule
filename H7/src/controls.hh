@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/adc_spi_conf.hh"
 #include "conf/control_conf.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/i2c.hh"

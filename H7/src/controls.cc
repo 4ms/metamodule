@@ -35,6 +35,6 @@ Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc)
 	__HAL_DBGMCU_FREEZE_TIM6();
 
 	read_controls_task.init(control_read_tim_conf, [this]() { read(); });
-	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.start(); });
+	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 }
 
