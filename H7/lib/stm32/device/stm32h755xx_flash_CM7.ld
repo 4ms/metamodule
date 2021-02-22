@@ -48,7 +48,10 @@ MEMORY
 	ITCMRAM (xrw)	: ORIGIN = 0x00000000, LENGTH = 64K
 }
 
-_estack = 0x20020000;		/* end of RAM */
+_sheap = 0x24000000; 		/* start of heap */
+_eheap = 0x24080000; 		/* end of heap */
+
+_estack = 0x20020000;		/* end of stack */
 /* Highest address of the user mode stack */
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x200;			/* required amount of heap	*/
@@ -150,16 +153,17 @@ SECTIONS
 		__bss_end__ = _ebss;
 	} >RAM
 
-	/* User_heap_stack section, used to check that there is enough RAM left */
-	._user_heap_stack :
-	{
-		. = ALIGN(8);
-		PROVIDE ( end = . );
-		PROVIDE ( _end = . );
-		. = . + _Min_Heap_Size;
-		. = . + _Min_Stack_Size;
-		. = ALIGN(8);
-	} >RAM
+
+	/* ._user_heap_stack : */
+	/* { */
+	/* 	. = ALIGN(8); */
+	/* 	PROVIDE ( end = . ); */
+	/* 	PROVIDE ( _end = . ); */
+	/* 	. = . + _Min_Heap_Size; */
+	/* 	. = . + _Min_Stack_Size; */
+	/* used to check that there is enough RAM left */
+	/* 	. = ALIGN(8); */
+	/* } >RAM */
 
 	.dma_buffer :
 	{
