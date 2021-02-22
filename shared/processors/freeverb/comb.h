@@ -14,6 +14,10 @@ public:
 	{
 		buffer = buf;
 		bufsize = size;
+		for(int i=0;i<size;i++)
+		{
+			buffer[i]=0;
+		}
 	}
 
 	void mute()
