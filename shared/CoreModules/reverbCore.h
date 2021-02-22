@@ -14,53 +14,51 @@ public:
 	{
 		float wetSignal = 0;
 
-		for (int i = 0; i < numComb; i++) {
-			wetSignal += combFilter[i].process(signalIn);
-		}
+		wetSignal += combFilter1.process(signalIn);
+		wetSignal += combFilter2.process(signalIn);
+		wetSignal += combFilter3.process(signalIn);
+		wetSignal += combFilter4.process(signalIn);
 
-		wetSignal/=static_cast<float>(numComb);
+		wetSignal /= static_cast<float>(numComb);
 
-		for (int i = 0; i < numAll; i++) {
-			wetSignal = apFilter[i].process(wetSignal);
-		}
+		wetSignal = apFilter1.process(wetSignal);
+		wetSignal = apFilter2.process(wetSignal);
+		wetSignal = apFilter3.process(wetSignal);
+		wetSignal = apFilter4.process(wetSignal);
 
 		signalOut = interpolate(signalIn, wetSignal, mix);
 	}
 
 	ReverbCore()
 	{
-		combFilter[0].setbuffer(combBuffer1, combTuning[0]);
-		combFilter[1].setbuffer(combBuffer2, combTuning[1]);
-		combFilter[2].setbuffer(combBuffer3, combTuning[2]);
-		combFilter[3].setbuffer(combBuffer4, combTuning[3]);
+		apFilter1.setfeedback(0.5f);
+		apFilter2.setfeedback(0.5f);
+		apFilter3.setfeedback(0.5f);
+		apFilter4.setfeedback(0.5f);
 
-		apFilter[0].setbuffer(allBuffer1, allTuning[0]);
-		apFilter[1].setbuffer(allBuffer2, allTuning[1]);
-		apFilter[2].setbuffer(allBuffer3, allTuning[2]);
-		apFilter[3].setbuffer(allBuffer4, allTuning[3]);
+		combFilter1.setfeedback(0);
+		combFilter2.setfeedback(0);
+		combFilter3.setfeedback(0);
+		combFilter4.setfeedback(0);
 
-		for (int i = 0; i < numAll; i++) {
-			apFilter[i].setfeedback(0.5f);
-		}
 
-		for(int i=0;i<numComb;i++)
-		{
-			combFilter[i].setfeedback(0);
-		}
 	}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
 			case 0: // size
-				for (int i = 0; i < numComb; i++) {
-					combFilter[i].setfeedback(val);
-				}
+					combFilter1.setfeedback(val);
+					combFilter2.setfeedback(val);
+					combFilter3.setfeedback(val);
+					combFilter4.setfeedback(val);
+
 				break;
 			case 1: // damp
-				for (int i = 0; i < numComb; i++) {
-					combFilter[i].setdamp(val);
-				}
+					combFilter1.setdamp(val);
+					combFilter2.setdamp(val);
+					combFilter3.setdamp(val);
+					combFilter4.setdamp(val);
 				break;
 			case 2:
 				mix = val;
@@ -104,21 +102,15 @@ private:
 	static const int numComb = 4;
 	static const int numAll = 4;
 
-	static constexpr int combTuning[numComb] = {3000, 4003, 4528, 5217};
-	static constexpr int allTuning[numAll] = {1248, 812, 358, 125};
+	comb<3000> combFilter1;
+    comb<4003> combFilter2;
+	comb<4528> combFilter3;
+	comb<5217> combFilter4;
 
-	float combBuffer1[combTuning[0]];
-	float combBuffer2[combTuning[1]];
-	float combBuffer3[combTuning[2]];
-	float combBuffer4[combTuning[3]];
-
-	float allBuffer1[allTuning[0]];
-	float allBuffer2[allTuning[1]];
-	float allBuffer3[allTuning[2]];
-	float allBuffer4[allTuning[3]];
-
-	comb combFilter[numComb];
-	allpass apFilter[numAll];
+	allpass<1248> apFilter1;
+	allpass<812> apFilter2;
+	allpass<358> apFilter3;
+	allpass<125> apFilter4;
 
 	float mix = 0;
 };
