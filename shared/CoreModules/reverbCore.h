@@ -18,6 +18,8 @@ public:
 			wetSignal += combFilter[i].process(signalIn);
 		}
 
+		wetSignal/=static_cast<float>(numComb);
+
 		for (int i = 0; i < numAll; i++) {
 			wetSignal = apFilter[i].process(wetSignal);
 		}
