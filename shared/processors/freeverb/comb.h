@@ -2,28 +2,17 @@
 
 #include "denormals.h"
 
+template<long bufferLength>
 class comb {
 public:
 	comb()
 	{
 		filterstore = 0;
 		bufidx = 0;
-	}
-
-	void setbuffer(float *buf, int size)
-	{
-		buffer = buf;
-		bufsize = size;
-		for(int i=0;i<size;i++)
+		for(int i=0;i<bufferLength;i++)
 		{
 			buffer[i]=0;
 		}
-	}
-
-	void mute()
-	{
-		for (int i = 0; i < bufsize; i++)
-			buffer[i] = 0;
 	}
 
 	void setdamp(float val)
@@ -49,7 +38,7 @@ public:
 
 		buffer[bufidx] = input + (filterstore * feedback);
 
-		if (++bufidx >= bufsize)
+		if (++bufidx >= bufferLength)
 			bufidx = 0;
 
 		return output;
@@ -60,7 +49,6 @@ private:
 	float filterstore = 0;
 	float damp1 = 0;
 	float damp2 = 0;
-	float *buffer = nullptr;
-	int bufsize = 1;
+	BigAlloc<std::array<float,bufferLength>> buffer;
 	int bufidx = 0;
 };
