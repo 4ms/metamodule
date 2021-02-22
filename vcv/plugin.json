@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "REVERB",
+      "name": "Reverb",
+      "description": "Reverb",
+      "tags": []
+}, 
+{
       "slug": "KARPLUS",
       "name": "Karplus",
       "description": "Karplus",
