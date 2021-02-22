@@ -1,7 +1,5 @@
 #pragma once
 
-#include "denormals.h"
-
 template<long bufferLength>
 class comb {
 public:
@@ -31,10 +29,8 @@ public:
 		float output;
 
 		output = buffer[bufidx];
-		undenormalise(output);
 
 		filterstore = (output * damp2) + (filterstore * damp1);
-		undenormalise(filterstore);
 
 		buffer[bufidx] = input + (filterstore * feedback);
 

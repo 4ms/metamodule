@@ -1,6 +1,5 @@
 #pragma once
 
-#include "denormals.h"
 #include "sys/alloc_buffer.hh"
 #include "util/interp_array.hh"
 
@@ -22,7 +21,6 @@ public:
 		float bufout = 0;
 
 		bufout = buffer[bufidx];
-		undenormalise(bufout);
 
 		output = -input + bufout;
 		buffer[bufidx] = input + (bufout * feedback);
