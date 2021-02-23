@@ -2,6 +2,7 @@
 #include "conf/dac_conf.hh"
 #include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
+#include "drivers/cycle_counter.hh"
 #include "drivers/stm32xx.h"
 #include "params.hh"
 #include "patch_player.hh"
@@ -46,7 +47,9 @@ private:
 	Params &params;
 	AnalogOutT &dac;
 	PatchPlayer player;
+	PinChangeInterrupt dac_updater;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
+	CycleCounter load_measure;
 
 	static constexpr unsigned NumKnobs = PatchPlayer::get_num_panel_knobs();
 	static constexpr unsigned NumAudioInputs = 2;
@@ -56,6 +59,4 @@ private:
 
 	std::array<Interp<float, AudioConf::BlockSize>, NumCVInputs> cvjacks;
 	std::array<Interp<float, AudioConf::BlockSize>, NumKnobs> knobs;
-
-	uint32_t last_start_tm = 0;
 };

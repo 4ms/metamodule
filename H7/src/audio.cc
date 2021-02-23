@@ -23,9 +23,9 @@ AudioStream::AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamB
 	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_1); }, [this]() { process(rx_buf_2, tx_buf_2); });
 
 	dac.init();
+	dac_updater.init(DAC_update_conf, [&]() { dac.output_next(); });
 
-	// Todo: LoadMeasurer class
-	// DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+	load_measure.init();
 }
 
 AudioConf::SampleT AudioStream::get_output(int output_id)
@@ -41,19 +41,11 @@ void AudioStream::set_input(int input_id, AudioConf::SampleT in)
 	player.set_panel_input(input_id, scaled_in);
 }
 
-TriangleOscillator<48000> debugosc0{1000}; // 500Hz: 20V in 1ms, so 416mV in 20.833uS
-TriangleOscillator<48000> debugosc1{50};
-
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
 	check_patch_change();
 
-	// Todo: Make LoadMeasurer class, and use target::DWT
-	uint32_t start_tm = DWT->CYCCNT /*SysTick->VAL*/;
-	uint32_t period = start_tm - last_start_tm;
-	last_start_tm = start_tm;
-	/////
-
+	load_measure.start_measurement();
 	Debug::Pin0::high();
 
 	params.update();
@@ -110,32 +102,15 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	}
 
 	Debug::Pin0::low();
-
-	// Todo: move to LoadMeasurer class
-	uint32_t elapsed_tm = /*SysTick->VAL */ DWT->CYCCNT - start_tm;
-	params.audio_load = ((elapsed_tm * 100) + 1) / (period + 1);
-	////
+	load_measure.end_measurement();
+	params.audio_load = load_measure.get_last_measurement_load_percent();
 }
-
-Timekeeper dac_updater;
 
 void AudioStream::start()
 {
 	codec_.start();
 
-	// Todo: syscfg exti interface: PinISR::init({GPIO::E, 4}, [](){});
-	target::RCC_Control::SYSCFG_::set();
-	target::SYSCFG_EXTI::Pin4::write(target::SYSCFG_EXTI::PortE);
-	target::EXTI_IMR1::write(1 << 4);
-	target::EXTI_RTSR1::write(1 << 4);
-	target::EXTI_FTSR1::write(1 << 4);
-	InterruptManager::registerISR(EXTI4_IRQn, 0, 0, [&]() {
-		if (target::EXTI_PR1::read() == (1 << 4)) {
-			target::EXTI_PR1::write(1 << 4);
-			dac.output_next();
-		}
-	});
-	/////////////////
+	dac_updater.start();
 }
 
 bool AudioStream::check_patch_change()
