@@ -41,6 +41,7 @@ private:
 	AudioConf::SampleT get_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change();
+	void load_patch();
 
 	Params &params;
 	AnalogOutT &dac;

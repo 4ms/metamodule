@@ -15,12 +15,7 @@ AudioStream::AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamB
 	, params{p}
 	, dac{dac}
 {
-	bool ok = player.load_patch(params.cur_patch());
-	if (!ok) {
-		while (1) {
-			;
-		}
-	}
+	load_patch();
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
@@ -51,9 +46,7 @@ TriangleOscillator<48000> debugosc1{50};
 
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	if (check_patch_change()) {
-		params.controls.clock_out.high();
-	}
+	check_patch_change();
 
 	// Todo: Make LoadMeasurer class, and use target::DWT
 	uint32_t start_tm = DWT->CYCCNT /*SysTick->VAL*/;
@@ -66,18 +59,16 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	params.update();
 
 	bool should_update_knob[NumKnobs];
-	static auto is_small = [](float x) { return x < 3e-4f && x > -3e-4f; };
+	static auto is_small = [](float x) { return x < 9e-4f && x > -9e-4f; };
 	int i = 0;
 	for (auto &knob : knobs) {
 		knob.set_new_value(params.knobs[i]);
 		should_update_knob[i] = !is_small(knob.get_step_size());
-		// player.set_panel_param(i, params.knobs[i]);
 		i++;
 	}
 	i = 0;
 	for (auto &cv : cvjacks) {
 		cv.set_new_value(params.cvjacks[i]);
-		// player.set_panel_input(i + 2, params.cvjacks[i]);
 		i++;
 	}
 
@@ -92,7 +83,6 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			player.set_panel_input(i + NumAudioInputs, cv.next());
 			i++;
 		}
-
 		i = 0;
 		for (auto &knob : knobs) {
 			if (should_update_knob[i])
@@ -112,15 +102,14 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			out_.r = get_output(0);
 		}
 
-		in_++;
-
 		// Todo: use player.get_output(2) and (3)
-		dac.queue_sample(0, debugosc0.Process() >> 8);
-		dac.queue_sample(1, debugosc1.Process() >> 8);
+		dac.queue_sample(0, out_.r + 0x00800000);
+		dac.queue_sample(1, out_.l + 0x00800000);
+
+		in_++;
 	}
 
 	Debug::Pin0::low();
-	params.controls.clock_out.low();
 
 	// Todo: move to LoadMeasurer class
 	uint32_t elapsed_tm = /*SysTick->VAL */ DWT->CYCCNT - start_tm;
@@ -165,11 +154,27 @@ bool AudioStream::check_patch_change()
 	if (new_patch) {
 		params.rotary_motion = 0;
 		params.should_redraw_patch = true;
-		bool ok = player.load_patch(params.cur_patch());
-		if (!ok) {
-			while (1)
-				; // Todo: handle error?
-		}
+		load_patch();
 	}
 	return new_patch;
+}
+
+void AudioStream::load_patch()
+{
+	bool ok = player.load_patch(params.cur_patch());
+
+	for (int i = 0; i < NumCVInputs; i++)
+		player.set_panel_input(i + NumAudioInputs, params.cvjacks[i]);
+
+	for (int i = 0; i < NumAudioInputs + NumCVInputs; i++)
+		player.set_panel_input(i, 0);
+
+	for (int i = 0; i < NumKnobs; i++)
+		player.set_panel_param(i, params.knobs[i]);
+
+	if (!ok) {
+		while (1) {
+			; // Todo: Display error on screen: Cannot load patch
+		}
+	}
 }
