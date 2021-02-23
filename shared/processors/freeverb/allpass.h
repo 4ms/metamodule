@@ -3,16 +3,20 @@
 #include "sys/alloc_buffer.hh"
 #include "util/interp_array.hh"
 
-template<long bufferLength>
 class allpass {
 public:
 	allpass()
 	{
 		bufidx = 0;
-		for(int i=0;i<bufferLength;i++)
+		for(int i=0;i<maxLength;i++)
 		{
 			buffer[i]=0;
 		}
+	}
+
+	void setLength(long length)
+	{
+		bufferLength=length;
 	}
 
 	float process(float input)
@@ -31,13 +35,15 @@ public:
 		return output;
 	}
 
-	void setfeedback(float val)
+	void setFeedback(float val)
 	{
 		feedback = val;
 	}
 
 private:
-	BigAlloc<std::array<float,bufferLength>> buffer;
+    static constexpr int maxLength = 6000;
+    long bufferLength = maxLength;
+	BigAlloc<std::array<float,maxLength>> buffer;
 	float feedback = 0;
 	int bufidx = 0;
 };
