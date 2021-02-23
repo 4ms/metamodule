@@ -15,6 +15,7 @@ public:
 	void update();
 	Controls &controls;
 
+	// Todo: 4 and 8 should come from Panel
 	float cvjacks[4] = {0.f};
 	float patchcv = 0.f;
 	float knobs[8] = {0.f};
@@ -31,11 +32,11 @@ public:
 
 	// SelbusQueue selbus_commands;
 
-	float dac_out[2];
-	bool clock_out;
+	// bool clock_out
 
 	uint8_t audio_load = 0;
 
+	// Todo: move this into PatchManager or PatchList
 	bool should_redraw_patch = false;
 	const Patch &cur_patch()
 	{
@@ -55,16 +56,9 @@ public:
 			_cur_patch--;
 	}
 
-	void set_knob_val(uint32_t knob_id, float val)
-	{
-		knobs[_pot_map[knob_id]] = val;
-	}
-
 private:
 	bool _rotary_moved_while_pressed = false;
 	uint32_t _cur_patch = 0;
 	PatchRef _patches[num_patches];
-
-	const uint8_t _pot_map[8] = {1, 4, 0, 5, 3, 6, 7, 2};
 };
 

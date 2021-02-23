@@ -1,8 +1,13 @@
 #pragma once
+#include "conf/stream_conf.hh"
 #include "drivers/dac_MCP48FVBxx.hh"
+#include "drivers/dac_stream.hh"
 #include "drivers/interrupt.hh"
+#include "drivers/pinchange.hh"
 #include "drivers/spi_transfer.hh"
 #include "drivers/spi_transfer_config_struct.hh"
+#include "drivers/timekeeper.hh"
+#include "util/circular_buffer.hh"
 
 struct MM_DACConf : DefaultSpiTransferConf {
 	struct SpiConf : DefaultSpiConf {
@@ -27,5 +32,16 @@ struct MM_DACConf : DefaultSpiTransferConf {
 	static constexpr uint32_t NumChannelsPerChip = 2;
 	using AuxPin = FPin<GPIO::B, 14, PinMode::Output>;
 };
-using AnalogOutT = DacSpi_MCP48FVBxx<MM_DACConf>;
+
+const PinChangeConfig DAC_update_conf = {
+	.pin = 4,
+	.port = GPIO::E,
+	.on_rising_edge = true,
+	.on_falling_edge = true,
+	.priority1 = 0,
+	.priority2 = 0,
+};
+
+using AnalogOutT =
+	DacStream<DacSpi_MCP48FVBxx<MM_DACConf>, CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize>>;
 

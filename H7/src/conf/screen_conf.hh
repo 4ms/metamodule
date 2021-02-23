@@ -20,6 +20,8 @@ struct MMScreenConf : DefaultSpiScreenConf {
 		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
 		static constexpr uint8_t FifoThreshold = 1;
 		static constexpr bool LSBfirst = false;
+
+		static constexpr bool pulse_hardware_ss = true;
 	};
 	using DCPin = FPin<GPIO::A, 6, PinMode::Output>;
 

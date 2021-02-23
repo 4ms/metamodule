@@ -16,7 +16,6 @@ Params::Params(Controls &c)
 void Params::update()
 {
 	// Debug::Pin1::high();
-
 	for (int i = 0; i < 4; i++) {
 		cvjacks[i] = (2047.5f - static_cast<float>(controls.cvadc.get_val(i))) / 2047.5f;
 	}
@@ -46,10 +45,9 @@ void Params::update()
 	gate_ins[1].copy_state(controls.gate_in1);
 	clock_in.copy_state(controls.clock_in);
 
-	// Todo: Pot ADC and Patch CV copying from controls to params happens in main loop.
-	// This might be a problem if we separate Controls and Params between cores.
-	// Can we store the last reading in Controls:: and then copy it over to Params:: here?
-	// Wait until we separate cores to make sure we'll need this
+	for (int i = 0; i < 8; i++)
+		knobs[i] = controls.get_pot_reading(i) / 4095.0f;
 
+	patchcv = controls.get_patchcv_reading() / 4095.0f;
 	// Debug::Pin1::low();
 }

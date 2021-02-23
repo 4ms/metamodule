@@ -28,6 +28,8 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 		, SharedBus{i2c_conf}
 	{}
 
+	// Todo: understand why setting the members to static inline causes SystemClocks ctor to hang on waiting for
+	// D2CLKREADY
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
@@ -39,7 +41,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
-	static inline __attribute__((section(".dma_buffer"))) Audio::AudioStreamBlock audio_dma_block[4];
+	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 
 	StaticBuffers()
 	{
@@ -54,25 +56,21 @@ void main()
 {
 	using namespace MetaModule;
 
+	// Todo: finish non-DMA PCA9685 driver and use it
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
 	LedCtl leds{led_driver};
 
 	Controls controls{_hw.potadc, _hw.cvadc}; //, gpio_expander};
 	Params params{controls};
 
-	Audio audio{params, _hw.codec, StaticBuffers::audio_dma_block};
+	AudioStream audio{params, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
 
 	Ui ui{params, leds, _hw.screen};
 
-	_hw.dac.init();
-
-	for (int i = 0; i < 4096 * 4096; i += 256) {
-		_hw.dac.set_output_blocking(0, i);
-		_hw.dac.set_output_blocking(1, i);
-	}
-
 	audio.start();
+
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
+
 	ui.start();
 
 	// Todo: create class RoundRobinHandler {
@@ -96,8 +94,6 @@ void main()
 	// Takes:
 	// leds
 	// controls.potadc
-	// params.set_knob_val (or store in controls?)
-	// params.patchcv (same as ^^^^)
 	enum I2CClients {
 		Leds,
 		SelectPots,
@@ -113,14 +109,11 @@ void main()
 	while (1) {
 		ui.update();
 
-		constexpr bool ENABLE_I2C = true;
-		constexpr bool ENABLE_LED_REFRESH = true;
-		if (ENABLE_I2C && SharedBus::i2c.is_ready()) {
+		if (SharedBus::i2c.is_ready()) {
 			// Debug::Pin2::high();
 			switch (cur_client) {
 				case Leds:
-					if (ENABLE_LED_REFRESH)
-						leds.refresh();
+					leds.refresh();
 					cur_client = SelectPots;
 					break;
 
@@ -137,15 +130,13 @@ void main()
 					break;
 
 				case CollectReadPots:
-					Debug::Pin3::high();
-					params.set_knob_val(cur_pot, controls.potadc.collect_reading() / 4095.0f);
+					controls.store_pot_reading(cur_pot, controls.potadc.collect_reading());
 					if (++cur_pot >= 8) {
 						cur_client = SelectPatchCV;
 						cur_pot = 0;
 					} else
 						cur_client = RequestReadPots;
 					controls.potadc.select_pot_source(cur_pot);
-					Debug::Pin3::low();
 					break;
 
 					// GPIO Sense here (between ADC channels)
@@ -161,7 +152,7 @@ void main()
 					break;
 
 				case CollectReadPatchCV:
-					params.patchcv = controls.potadc.collect_reading() / 4095.0f;
+					controls.store_patchcv_reading(controls.potadc.collect_reading());
 					cur_client = Leds;
 					break;
 

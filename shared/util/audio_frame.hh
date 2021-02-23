@@ -1,11 +1,6 @@
 #include "math.hh"
 #include <stdint.h>
 
-// Todo put this in a _config.h file
-static const int kAudioStreamBlockSize = 64;
-static const int kNumAudioDMAHalfTransfers = 2;
-static const int kAudioStreamDMABlockSize = kAudioStreamBlockSize * kNumAudioDMAHalfTransfers;
-
 template<typename SampleType, int UsedBits = sizeof(SampleType) * 8>
 struct GenericAudioFrame {
 	SampleType l;

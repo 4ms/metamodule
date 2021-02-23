@@ -1,10 +1,11 @@
 #include "audio.hh"
 #include "debug.hh"
+#include "drivers/syscfg.hh"
 #include "patch_player.hh"
 
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 
-Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
+AudioStream::AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4])
 	: codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
 	, tx_buf_1{buffers[0]}
@@ -12,66 +13,54 @@ Audio::Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4])
 	, rx_buf_1{buffers[2]}
 	, rx_buf_2{buffers[3]}
 	, params{p}
+	, dac{dac}
 {
-	bool ok = player.load_patch(params.cur_patch());
-	if (!ok) {
-		while (1) {
-			;
-		}
-	}
+	load_patch();
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
-							kAudioStreamDMABlockSize * 2);
+							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_1); }, [this]() { process(rx_buf_2, tx_buf_2); });
 
-	// Todo: LoadMeasurer class
-	// DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+	dac.init();
+	dac_updater.init(DAC_update_conf, [&]() { dac.output_next(); });
+
+	load_measure.init();
 }
 
-Audio::AudioSampleType Audio::get_output(int output_id)
+AudioConf::SampleT AudioStream::get_output(int output_id)
 {
 	auto raw_out = player.get_panel_output(output_id);
 	auto scaled_out = AudioFrame::scaleOutput(raw_out);
 	return scaled_out;
 	// return compressor.compress(scaled_out);
 }
-void Audio::set_input(int input_id, Audio::AudioSampleType in)
+void AudioStream::set_input(int input_id, AudioConf::SampleT in)
 {
 	auto scaled_in = AudioFrame::scaleInput(in);
 	player.set_panel_input(input_id, scaled_in);
 }
 
-void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
+void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 {
-	if (check_patch_change()) {
-		params.controls.clock_out.high();
-	}
+	check_patch_change();
 
-	// Todo: Make LoadMeasurer class, and use target::DWT
-	uint32_t start_tm = DWT->CYCCNT /*SysTick->VAL*/;
-	uint32_t period = start_tm - last_start_tm;
-	last_start_tm = start_tm;
-	/////
-
+	load_measure.start_measurement();
 	Debug::Pin0::high();
 
 	params.update();
 
-	// Todo: # of knobs needs to live in one place only
 	bool should_update_knob[NumKnobs];
-	static auto is_small = [](float x) { return x < 3e-4f && x > -3e-4f; };
+	static auto is_small = [](float x) { return x < 9e-4f && x > -9e-4f; };
 	int i = 0;
 	for (auto &knob : knobs) {
 		knob.set_new_value(params.knobs[i]);
 		should_update_knob[i] = !is_small(knob.get_step_size());
-		// player.set_panel_param(i, params.knobs[i]);
 		i++;
 	}
 	i = 0;
 	for (auto &cv : cvjacks) {
 		cv.set_new_value(params.cvjacks[i]);
-		// player.set_panel_input(i + 2, params.cvjacks[i]);
 		i++;
 	}
 
@@ -86,7 +75,6 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			player.set_panel_input(i + NumAudioInputs, cv.next());
 			i++;
 		}
-
 		i = 0;
 		for (auto &knob : knobs) {
 			if (should_update_knob[i])
@@ -94,7 +82,6 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			i++;
 		}
 
-		// SCB_InvalidateDCache();
 		player.update_patch(params.cur_patch());
 
 		// FixMe: Why are the L/R samples swapped in the DMA buffer? The L/R jacks are not swapped on hardware
@@ -107,24 +94,26 @@ void Audio::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			out_.r = get_output(0);
 		}
 
+		// Todo: use player.get_output(2) and (3)
+		dac.queue_sample(0, out_.r + 0x00800000);
+		dac.queue_sample(1, out_.l + 0x00800000);
+
 		in_++;
 	}
 
 	Debug::Pin0::low();
-	params.controls.clock_out.low();
-
-	// Todo: move to LoadMeasurer class
-	uint32_t elapsed_tm = /*SysTick->VAL */ DWT->CYCCNT - start_tm;
-	params.audio_load = ((elapsed_tm * 100) + 1) / (period + 1);
-	////
+	load_measure.end_measurement();
+	params.audio_load = load_measure.get_last_measurement_load_percent();
 }
 
-void Audio::start()
+void AudioStream::start()
 {
 	codec_.start();
+
+	dac_updater.start();
 }
 
-bool Audio::check_patch_change()
+bool AudioStream::check_patch_change()
 {
 	bool new_patch = false;
 	if (params.rotary_motion > 0) {
@@ -140,12 +129,27 @@ bool Audio::check_patch_change()
 	if (new_patch) {
 		params.rotary_motion = 0;
 		params.should_redraw_patch = true;
-		// __BKPT();
-		bool ok = player.load_patch(params.cur_patch());
-		if (!ok) {
-			while (1)
-				; // Todo: handle error?
-		}
+		load_patch();
 	}
 	return new_patch;
+}
+
+void AudioStream::load_patch()
+{
+	bool ok = player.load_patch(params.cur_patch());
+
+	for (int i = 0; i < NumCVInputs; i++)
+		player.set_panel_input(i + NumAudioInputs, params.cvjacks[i]);
+
+	for (int i = 0; i < NumAudioInputs + NumCVInputs; i++)
+		player.set_panel_input(i, 0);
+
+	for (int i = 0; i < NumKnobs; i++)
+		player.set_panel_param(i, params.knobs[i]);
+
+	if (!ok) {
+		while (1) {
+			; // Todo: Display error on screen: Cannot load patch
+		}
+	}
 }

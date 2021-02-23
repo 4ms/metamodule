@@ -1,5 +1,8 @@
 #pragma once
+#include "conf/dac_conf.hh"
+#include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
+#include "drivers/cycle_counter.hh"
 #include "drivers/stm32xx.h"
 #include "params.hh"
 #include "patch_player.hh"
@@ -10,18 +13,17 @@
 #include "util/oscs.hh"
 #include <array>
 
-class Audio {
+using AudioConf = StreamConf::Audio;
 
-	using AudioSampleType = int32_t;			  // todo: put this in a config header?
-	static inline const int AudioSampleBits = 24; // todo: put this in a config header?
+// Todo: we don't need a codec virtual class, just use a type alias
+class AudioStream {
 
 public:
-	using AudioFrame = GenericAudioFrame<AudioSampleType, AudioSampleBits>;
-	using AudioStreamBlock = std::array<AudioFrame, kAudioStreamBlockSize>;
+	using AudioFrame = GenericAudioFrame<AudioConf::SampleT, AudioConf::SampleBits>;
+	using AudioStreamBlock = std::array<AudioFrame, AudioConf::BlockSize>;
 	enum AudioChannels { LEFT, RIGHT };
 
-	// Public methods:
-	Audio(Params &p, ICodec &codec, AudioStreamBlock (&buffers)[4]);
+	AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4]);
 	void start();
 
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);
@@ -37,13 +39,17 @@ private:
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()
-	AudioSampleType get_output(int output_id);
-	void set_input(int input_id, AudioSampleType in);
+	AudioConf::SampleT get_output(int output_id);
+	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change();
+	void load_patch();
 
 	Params &params;
+	AnalogOutT &dac;
 	PatchPlayer player;
-	KneeCompressor<int32_t> compressor{AudioSampleBits, 0.75};
+	PinChangeInterrupt dac_updater;
+	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
+	CycleCounter load_measure;
 
 	static constexpr unsigned NumKnobs = PatchPlayer::get_num_panel_knobs();
 	static constexpr unsigned NumAudioInputs = 2;
@@ -51,8 +57,6 @@ private:
 	static constexpr unsigned NumAudioOutputs = 2;
 	static constexpr unsigned NumCVOutputs = PatchPlayer::get_num_panel_outputs() - NumAudioOutputs;
 
-	std::array<Interp<float, kAudioStreamBlockSize>, NumCVInputs> cvjacks;
-	std::array<Interp<float, kAudioStreamBlockSize>, NumKnobs> knobs;
-
-	uint32_t last_start_tm = 0;
+	std::array<Interp<float, AudioConf::BlockSize>, NumCVInputs> cvjacks;
+	std::array<Interp<float, AudioConf::BlockSize>, NumKnobs> knobs;
 };
