@@ -14,15 +14,13 @@ public:
 	{
 		float wetSignal = 0;
 
-		for(int i=0;i<numComb;i++)
-		{
+		for (int i = 0; i < numComb; i++) {
 			wetSignal += combFilter[i].process(signalIn);
 		}
 
 		wetSignal /= static_cast<float>(numComb);
 
-		for(int i=0;i<numAll;i++)
-		{
+		for (int i = 0; i < numAll; i++) {
 			wetSignal = apFilter[i].process(wetSignal);
 		}
 
@@ -31,39 +29,48 @@ public:
 
 	ReverbCore()
 	{
-		for(int i=0;i<numAll;i++)
-		{
-apFilter[i].setLength(allTuning[i]);
-apFilter[i].setFeedback(0.5f);
+		for (int i = 0; i < numAll; i++) {
+			apFilter[i].setLength(allTuning[i]);
+			apFilter[i].setFeedback(0.6f);
+			currentAllTunning[i] = allTuning[i];
 		}
 
-		for(int i=0;i<numComb;i++)
-		{
-combFilter[i].setFeedback(0);
-combFilter[i].setLength(combTuning[i]);
+		for (int i = 0; i < numComb; i++) {
+			combFilter[i].setFeedback(0);
+			combFilter[i].setLength(combTuning[i]);
+			currentCombTuning[i] = combTuning[i];
 		}
-
-
 	}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
 			case 0: // size
-					for(int i=0;i<numComb;i++)
-					{
-						combFilter[i].setFeedback(val);
-					}
-
+				for (int i = 0; i < numComb; i++) {
+					currentCombTuning[i] = combTuning[i] * val;
+					if (currentCombTuning[i] < 1)
+						currentCombTuning[i] = 1;
+						combFilter[i].setLength(currentCombTuning[i]);
+				}
+				for (int i = 0; i < numAll; i++) {
+					currentAllTunning[i] = allTuning[i] * val;
+					if (currentAllTunning[i] < 1)
+						currentAllTunning[i] = 1;
+						apFilter[i].setLength(currentAllTunning[i]);
+				}
 				break;
 			case 1: // damp
-					for(int i=0;i<numComb;i++)
-					{
-						combFilter[i].setDamp(val);
-					}
+				for (int i = 0; i < numComb; i++) {
+					combFilter[i].setDamp(val);
+				}
 				break;
 			case 2:
 				mix = val;
+				break;
+			case 3: // time
+				for (int i = 0; i < numComb; i++) {
+					combFilter[i].setFeedback(map_value(val,0.0f,1.0f,0.8f,0.99f));
+				}
 				break;
 		}
 	}
@@ -101,11 +108,14 @@ private:
 	float signalIn = 0;
 	float signalOut = 0;
 
-	static const int numComb = 4;
+	static const int numComb = 8;
 	static const int numAll = 4;
 
-	static constexpr int allTuning[numAll]={1248,812,358,125};
-	static constexpr int combTuning[numComb]={3000,4003,4528,5217};
+	static constexpr int allTuning[numAll] = {1248, 812, 358, 125};
+	static constexpr int combTuning[numComb] = {3000, 4003, 4528, 5217, 1206, 2108, 3337, 5003};
+
+	int currentAllTunning[numAll];
+	int currentCombTuning[numComb];
 
 	comb combFilter[numComb];
 	allpass apFilter[numAll];
