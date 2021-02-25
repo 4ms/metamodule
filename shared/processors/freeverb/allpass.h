@@ -1,22 +1,21 @@
 #pragma once
-
 #include "sys/alloc_buffer.hh"
 #include "util/interp_array.hh"
+#include <array>
 
 class allpass {
 public:
 	allpass()
 	{
 		bufidx = 0;
-		for(int i=0;i<maxLength;i++)
-		{
-			buffer[i]=0;
+		for (int i = 0; i < maxLength; i++) {
+			(*buffer)[i] = 0;
 		}
 	}
 
 	void setLength(long length)
 	{
-		bufferLength=length;
+		bufferLength = length;
 	}
 
 	float process(float input)
@@ -24,10 +23,10 @@ public:
 		float output = 0;
 		float bufout = 0;
 
-		bufout = buffer[bufidx];
+		bufout = (*buffer)[bufidx];
 
 		output = -input + bufout;
-		buffer[bufidx] = input + (bufout * feedback);
+		(*buffer)[bufidx] = input + (bufout * feedback);
 
 		if (++bufidx >= bufferLength)
 			bufidx = 0;
@@ -41,9 +40,10 @@ public:
 	}
 
 private:
-    static constexpr int maxLength = 6000;
-    long bufferLength = maxLength;
-	BigAlloc<std::array<float,maxLength>> buffer;
+	static constexpr int maxLength = 6000;
+	long bufferLength = maxLength;
+	using BufferType = BigAlloc<std::array<float, maxLength>>;
+	BufferType *buffer = new BufferType;
 	float feedback = 0;
 	int bufidx = 0;
 };

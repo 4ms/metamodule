@@ -11,9 +11,8 @@ public:
 
 	DelayLine()
 	{
-		delayBuffer = new BigAlloc<InterpArray<float, maxSamples>>;
 		for (int i = 0; i < maxSamples; i++) {
-			(*delayBuffer)[i] = 0;
+			delayBuffer->set(i, 0);
 		}
 	}
 
@@ -24,22 +23,16 @@ public:
 
 	virtual void set_samplerate(float sr) {}
 
-	// calling 6 updates in a loop is 6.7us using float readIndex and interpolating
-	// with int readIndex (just checking it's not negative), it's 5.6us
 	float update(float input)
 	{
-		// ~13%
-		(*delayBuffer)[writeIndex] = input;
+		delayBuffer->set(writeIndex, input);
 
-		// ~2%
 		readIndex = writeIndex - delaySamples;
 		if (readIndex < 0)
 			readIndex += maxSamples;
 
-		// ~2.7%
 		output = delayBuffer->interp_by_index(readIndex);
 
-		// ~2%
 		writeIndex++;
 		if (writeIndex == maxSamples)
 			writeIndex = 0;
@@ -48,7 +41,8 @@ public:
 	}
 
 private:
-	BigAlloc<InterpArray<float, maxSamples>> *delayBuffer;
+	using BufferType = BigAlloc<InterpArray<float, maxSamples>>;
+	BufferType *delayBuffer = new BufferType;
 	unsigned int writeIndex = 0;
 	float readIndex = 0;
 	float delaySamples = 1.0f;

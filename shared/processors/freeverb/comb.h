@@ -1,4 +1,6 @@
 #pragma once
+#include "sys/alloc_buffer.hh"
+#include <array>
 
 class comb {
 public:
@@ -6,9 +8,8 @@ public:
 	{
 		filterstore = 0;
 		bufidx = 0;
-		for(int i=0;i<maxLength;i++)
-		{
-			buffer[i]=0;
+		for (int i = 0; i < maxLength; i++) {
+			(*buffer)[i] = 0;
 		}
 	}
 
@@ -25,18 +26,18 @@ public:
 
 	void setLength(long length)
 	{
-		bufferLength=length;
+		bufferLength = length;
 	}
 
 	float process(float input)
 	{
 		float output;
 
-		output = buffer[bufidx];
+		output = (*buffer)[bufidx];
 
 		filterstore = (output * damp2) + (filterstore * damp1);
 
-		buffer[bufidx] = input + (filterstore * feedback);
+		(*buffer)[bufidx] = input + (filterstore * feedback);
 
 		if (++bufidx >= bufferLength)
 			bufidx = 0;
@@ -45,12 +46,13 @@ public:
 	}
 
 private:
-    long bufferLength=maxLength;
+	long bufferLength = maxLength;
 	float feedback = 0;
 	float filterstore = 0;
 	float damp1 = 0;
 	float damp2 = 0;
 	static constexpr int maxLength = 6000;
-	BigAlloc<std::array<float,maxLength>> buffer;
+	using BufferType = BigAlloc<std::array<float, maxLength>>;
+	BufferType *buffer = new BufferType;
 	int bufidx = 0;
 };
