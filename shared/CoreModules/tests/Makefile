@@ -11,6 +11,7 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
+# TEST_SOURCES += $(wildcard $(TEST_DIR)/allPass_tests.cc)
 
 BUILDDIR = build
 
@@ -22,6 +23,9 @@ CXXFLAGS = 	-Wall \
 			-I$(DOCTEST_DIR) \
 			-I../shared \
 			-I../shared/CoreModules \
+			-I$(TEST_DIR) \
+			-Wno-unused-const-variable \
+			-DTESTPROJECT \
 
 tests: $(BUILDDIR)/runtests
 	$(BUILDDIR)/runtests

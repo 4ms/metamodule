@@ -50,13 +50,13 @@ public:
 					currentCombTuning[i] = combTuning[i] * val;
 					if (currentCombTuning[i] < 1)
 						currentCombTuning[i] = 1;
-						combFilter[i].setLength(currentCombTuning[i]);
+					combFilter[i].setLength(currentCombTuning[i]);
 				}
 				for (int i = 0; i < numAll; i++) {
 					currentAllTunning[i] = allTuning[i] * val;
 					if (currentAllTunning[i] < 1)
 						currentAllTunning[i] = 1;
-						apFilter[i].setLength(currentAllTunning[i]);
+					apFilter[i].setLength(currentAllTunning[i]);
 				}
 				break;
 			case 1: // damp
@@ -69,7 +69,7 @@ public:
 				break;
 			case 3: // time
 				for (int i = 0; i < numComb; i++) {
-					combFilter[i].setFeedback(map_value(val,0.0f,1.0f,0.8f,0.99f));
+					combFilter[i].setFeedback(map_value(val, 0.0f, 1.0f, 0.8f, 0.99f));
 				}
 				break;
 		}
@@ -118,7 +118,7 @@ private:
 	int currentCombTuning[numComb];
 
 	Comb combFilter[numComb];
-	allpass apFilter[numAll];
+	AllPass<6000> apFilter[numAll];
 
 	float mix = 0;
 };
