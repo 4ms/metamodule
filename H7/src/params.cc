@@ -1,16 +1,22 @@
 #include "params.hh"
 #include "debug.hh"
-#include "example1.hh"
 #include "example_drum.hh"
+#include "example_drum_verb_mono.h"
 #include "example_duallfo.hh"
 #include "example_karplus.hh"
 #include "example_pitchShift_simple.hh"
+#include "example_stereo_verb.h"
 #include "fadedelay_two.hh"
 #include "math.hh"
 
 Params::Params(Controls &c)
 	: controls(c)
-	, _patches{{exampleDualLFO}, {examplePitchShiftSimple}, {exampleDrum}, {fadedelay_example}, {Example1}}
+	, _patches{{exampleDualLFO},
+			   {examplePitchShiftSimple},
+			   {exampleDrum},
+			   {fadedelay_example},
+			   {example_drum_verb_mono},
+			   {example_stereo_verb}}
 {}
 
 void Params::update()
