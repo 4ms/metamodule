@@ -2,16 +2,29 @@
 #include "sys/alloc_buffer.hh"
 #include <array>
 
+#include "processors/fadeloop.hh"
 template<unsigned long MAX_LENGTH>
-class Comb {
+class Comb : public FadeLoop<float, MAX_LENGTH> {
 public:
-	Comb()
+	Comb() {}
+
+	float process(float input)
 	{
-		filterstore = 0;
-		bufidx = 0;
-		for (int i = 0; i < maxLength; i++) {
-			(*buffer)[i] = 0;
-		}
+		float output = this->read();
+		filterstore = (output * damp2) + (filterstore * damp1);
+		this->write(input + (filterstore * feedback));
+		this->step();
+		return output;
+	}
+
+	void setLength(unsigned long length)
+	{
+		this->change_delay(length);
+	}
+
+	void setFeedback(float val)
+	{
+		feedback = val;
 	}
 
 	void setDamp(float val)
@@ -20,40 +33,15 @@ public:
 		damp2 = 1 - val;
 	}
 
-	void setFeedback(float val)
+	void setFadeSpeed(float val)
 	{
-		feedback = val;
-	}
-
-	void setLength(long length)
-	{
-		bufferLength = length;
-	}
-
-	float process(float input)
-	{
-		float output;
-
-		output = (*buffer)[bufidx];
-
-		filterstore = (output * damp2) + (filterstore * damp1);
-
-		(*buffer)[bufidx] = input + (filterstore * feedback);
-
-		if (++bufidx >= bufferLength)
-			bufidx = 0;
-
-		return output;
+		this->set_fade_speed(val);
 	}
 
 private:
-	long bufferLength = maxLength;
 	float feedback = 0;
 	float filterstore = 0;
 	float damp1 = 0;
 	float damp2 = 0;
-	static constexpr int maxLength = 6000;
-	using BufferType = BigAlloc<std::array<float, MAX_LENGTH>>;
-	BufferType *buffer = new BufferType;
-	int bufidx = 0;
 };
+
