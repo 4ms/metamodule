@@ -9,12 +9,7 @@ class AllPass {
 public:
 	AllPass()
 	{
-		read_idx = 0;
-		write_idx = 0;
-		fade_idx = 0;
-		is_fading = false;
-		fade_is_queued = false;
-		for (int i = 0; i < MAX_LENGTH; i++) {
+		for (unsigned long i = 0; i < MAX_LENGTH; i++) {
 			(*buffer)[i] = 0;
 		}
 	}
@@ -66,9 +61,6 @@ private:
 			} else {
 				is_fading = false;
 			}
-		} else {
-			if (++fade_idx >= MAX_LENGTH)
-				fade_idx = 0;
 		}
 	}
 
@@ -92,6 +84,9 @@ public:
 		if (++read_idx >= MAX_LENGTH)
 			read_idx = 0;
 
+		if (++fade_idx >= MAX_LENGTH)
+			fade_idx = 0;
+
 		float output = -input + bufout;
 		return output;
 	}
@@ -107,8 +102,6 @@ public:
 	}
 
 private:
-	unsigned long last_requested_length = 0;
-
 	using BufferType = BigAlloc<std::array<float, MAX_LENGTH>>;
 	BufferType *buffer = new BufferType;
 	float feedback = 0;
@@ -116,6 +109,7 @@ private:
 	unsigned long read_idx = 0;
 	unsigned long write_idx = 0;
 	unsigned long fade_idx = 0;
+	unsigned long last_requested_length = 0;
 	unsigned long queued_fade_length = 0;
 	bool fade_is_queued = false;
 	bool is_fading = false;
