@@ -1,9 +1,21 @@
-# Makefile by Dan Green <danngreen1@gmail.com>
+# Makefile by Dan Green <danngreen1@gmail.com>, public domain
+
+# Choose the core to build:
+# CORE=M4 make -j16
+# CORE=M7 make -j16
+# Todo: build both cores with one make command
+
+# Set this to the path to your JFlash executable
+JFLASHEXE = /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
+
+BUILDDIR_M7 = build/corem7
+BUILDDIR_M4 = build/corem4
+
 CORE ?= M7
 ifeq ($(CORE), M7)
 $(info Building for M7 core)
 LOADFILE	= stm32h755xx_flash_CM7.ld
-BUILDDIR = build/corem7
+BUILDDIR = $(BUILDDIR_M7)
 MCU =  -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM7 -DCORE_CM7
 CORE_SRC = src/m7
@@ -12,7 +24,7 @@ else
 ifeq ($(CORE), M4)
 $(info Building for M4 core)
 LOADFILE	= stm32h755xx_flash_CM4.ld
-BUILDDIR = build/corem4
+BUILDDIR = $(BUILDDIR_M4)
 MCU =  -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
 CORE_SRC = src/m4
@@ -70,7 +82,7 @@ SOURCES  += $(wildcard $(SHARED)/util/*.c)
 SOURCES  += $(wildcard $(SHARED)/util/*.cc)
 SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
 SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
-SOURCES  += $(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library/Adafruit_GFX.cpp 
+SOURCES  += $(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library/Adafruit_GFX.cpp
 SOURCES  += $(LIBDIR)/adafruit_gfx/arduino/Print.cpp
 endif
 
@@ -170,7 +182,7 @@ $(HEX): $(ELF)
 	$(OBJCPY) --output-target=ihex $< $@
 	$(SZ) $(SZOPTS) $(ELF)
 
-$(ELF): $(OBJECTS)
+$(ELF): $(OBJECTS) $(DEVICE)/$(LOADFILE)
 	$(info Linking...)
 	@$(LD) $(LFLAGS) -o $@ $(OBJECTS)
 
@@ -202,8 +214,19 @@ tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
 
-flash: $(BIN)
-	st-flash write $(BIN) 0x8000000
+flash: $(HEX)
+	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR)/$(BINARYNAME).hex -auto -exit
+
+flash_m7: $(BUILDDIR_M7)/$(BINARYNAME).hex
+	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
+
+flash_m4: $(BUILDDIR_M4)/$(BINARYNAME).hex
+	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
+
+flash_all: $(BUILDDIR_M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
+	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
+
+#/Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe -openprjmetamodule-h7-cm7.jflash -openbuild/corem7/main.hex -auto -openbuild/corem4/main.hex -auto -exit
 
 clean:
 	rm -rf build
@@ -215,7 +238,7 @@ endif
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
 .PHONY: all clean flash tables tests H7_tests core_tests util_tests proc_tests mdrivlib_tests
 
-tests: H7_tests core_tests util_tests mdrivlib_tests #proc_tests 
+tests: H7_tests core_tests util_tests mdrivlib_tests #proc_tests
 
 H7_tests:
 	@echo
@@ -256,5 +279,5 @@ generate_compile_txt:
 compile_commands:
 	compiledb make
 	compdb -p ./ list > compile_commands.tmp 2>/dev/null
-	rm compile_commands.json 
+	rm compile_commands.json
 	mv compile_commands.tmp compile_commands.json
