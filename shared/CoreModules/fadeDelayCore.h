@@ -13,31 +13,30 @@ public:
 	{
 		clockSamples.update(clockInput);
 
-				if(fading==false)
-			{
-				float finalDelay = constrain(baseDelay + cvInput*cvAmount,0.0f,1.0f);
-				if (clockAttached == false) {
-					timeinMs = map_value(finalDelay, 0.0f, 1.0f, 0.0f, 1000.0f);
-					sampleDelay = timeinMs / 1000.0f * sampleRate;
-				} else {
-					int divSelect = finalDelay*4.0f;
-					auto delayCalc = clockSamples.getSamples()*divTable[divSelect];
-					if(delayCalc<maxSamples)
+		if (fading == false) {
+			float finalDelay = constrain(baseDelay + cvInput * cvAmount, 0.0f, 1.0f);
+			if (clockAttached == false) {
+				timeinMs = map_value(finalDelay, 0.0f, 1.0f, 0.0f, 1000.0f);
+				sampleDelay = timeinMs / 1000.0f * sampleRate;
+			} else {
+				int divSelect = finalDelay * 4.0f;
+				auto delayCalc = clockSamples.getSamples() * divTable[divSelect];
+				if (delayCalc < maxSamples)
 					sampleDelay = delayCalc;
-				}
 			}
-				lastDelay = currentDelay;
-				currentDelay = sampleDelay;
-				if (currentDelay != lastDelay) {
-					delayTimes[1] = sampleDelay;
-					fading = true;
-					sinceChange = 0;
-				}
+		}
+		lastDelay = currentDelay;
+		currentDelay = sampleDelay;
+		if (currentDelay != lastDelay) {
+			delayTimes[1] = sampleDelay;
+			fading = true;
+			sinceChange = 0;
+		}
 
-						float output = 0;
+		float output = 0;
 		float fade = sinceChange / changeTime;
 
-				if (fade > 1) {
+		if (fade > 1) {
 			fade = 1;
 		}
 
@@ -47,10 +46,9 @@ public:
 		}
 
 		delayLine.updateSample(input + feedbackSample * feedback);
-		if(fading)
-		output = interpolate(delayLine.readSample(delayTimes[0]), delayLine.readSample(delayTimes[1]), fade);
-		else
-		{
+		if (fading)
+			output = interpolate(delayLine.readSample(delayTimes[0]), delayLine.readSample(delayTimes[1]), fade);
+		else {
 			output = delayLine.readSample(delayTimes[1]);
 		}
 
@@ -60,7 +58,7 @@ public:
 
 		delayOutput = (interpolate(input, output, mix));
 
-				sinceChange++;
+		sinceChange++;
 	}
 
 	FadeDelayCore() {}
@@ -69,21 +67,21 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-			baseDelay = val;
-							break;
+				baseDelay = val;
+				break;
 			case 1:
 				feedback = val;
 				break;
 			case 2: {
 				float changeMs = 0;
 				changeMs = map_value(val, 0.0f, 1.0f, 10.0f, 1000.0f);
-				changeTime = changeMs * sampleRate/1000.0f;
+				changeTime = changeMs * sampleRate / 1000.0f;
 			} break;
 			case 3:
 				mix = val;
 				break;
-				case 4:
-				cvAmount=val;
+			case 4:
+				cvAmount = val;
 				break;
 		}
 	}
@@ -101,8 +99,8 @@ public:
 			case 1:
 				clockInput = val;
 				break;
-				case 2:
-				cvInput=val;
+			case 2:
+				cvInput = val;
 				break;
 		}
 	}
@@ -138,7 +136,7 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-    const float divTable[5] = {0.125,0.25,0.5,1,2};
+	const float divTable[5] = {0.125, 0.25, 0.5, 1, 2};
 	float sampleDelay = 0;
 	float feedback = 0;
 	float mix;
@@ -148,15 +146,15 @@ private:
 	float input = 0;
 
 	float timeinMs = 0;
-	float baseDelay=0;
+	float baseDelay = 0;
 
 	float currentDelay = 0;
 	float lastDelay = 0;
 
 	float sampleRate = 48000;
 
-		float cvInput=0;
-	float cvAmount=0;
+	float cvInput = 0;
+	float cvAmount = 0;
 
 	const static inline long maxSamples = 48000;
 
