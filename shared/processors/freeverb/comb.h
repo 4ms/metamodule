@@ -2,9 +2,9 @@
 #include "sys/alloc_buffer.hh"
 #include <array>
 
-class comb {
+class Comb {
 public:
-	comb()
+	Comb()
 	{
 		filterstore = 0;
 		bufidx = 0;
