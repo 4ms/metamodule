@@ -124,7 +124,7 @@ public:
 		return std::make_unique<NodeLFOCore>(nodelist[idx[0]], nodelist[idx[1]], nodelist[idx[2]]);
 	}
 	static constexpr char typeID[20] = "LFOSINE";
-	static constexpr char description[] = "(node format) Basic Sine LFO";
+	static constexpr char description[] = "Sine LFO";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 	static inline bool s_registered_wp =
 		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);
@@ -139,7 +139,7 @@ private:
 	// knobs
 	float phaseOffset = 0;
 	float level = 1;
-	Parameter<float> knob_frequency{1.f};
+	float knob_frequency = 1.f;
 
 	// internals
 	float cv_frequency = 0.f;
