@@ -4,6 +4,7 @@
 #include "util/math.hh"
 #include <array>
 
+// Todo: How to allow usage of different types of buffers? Pass reference? CRTP for read/write functions?
 template<typename DataType, unsigned long MAX_LENGTH>
 class FadeLoop {
 public:
