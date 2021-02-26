@@ -165,7 +165,7 @@ SECTIONS
 	/* 	. = ALIGN(8); */
 	/* } >RAM */
 
-	.dma_buffer :
+	.dma_buffer (NOLOAD) :
 	{
 		. = ALIGN(8);
 		*(.dma_buffer)
