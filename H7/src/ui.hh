@@ -25,11 +25,16 @@ public:
 		, screen{s}
 	{}
 
+	Color bgcolor = Colors::pink;
+	Color patch_fgcolor = Colors::blue;
+	Color load_fgcolor = Colors::cyan;
+	Color pots_fgcolor = Colors::red;
+
 	void start()
 	{
 		screen.init();
 		Debug::Pin2::high();
-		screen.fill(Colors::pink);
+		screen.fill(bgcolor);
 		Debug::Pin2::low();
 
 		draw_patch_name();
@@ -46,13 +51,10 @@ public:
 		leds.start();
 		params.controls.start();
 
-		leds.but[0].set_background(Colors::yellow);
-
-		leds.but[1].set_background(Colors::white);
-
-		leds.clockLED.set_background(Colors::blue);
-
-		leds.rotaryLED.set_background(Colors::blue);
+		leds.but[0].set_background(Colors::grey);
+		leds.but[1].set_background(Colors::grey);
+		leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
+		leds.rotaryLED.set_background(Colors::grey);
 
 		// Todo: set led_update_task_conf.update_rate_Hz to be a factor of AnimationUpdateRate and Hz
 		//
@@ -66,24 +68,24 @@ public:
 		if (params.buttons[0].is_pressed())
 			leds.but[0].set_background(Colors::red);
 		else
-			leds.but[0].set_background(Colors::white);
+			leds.but[0].set_background(Colors::grey);
 
 		if (params.buttons[1].is_pressed())
 			leds.but[1].set_background(Colors::blue);
 		else
-			leds.but[1].set_background(Colors::white);
+			leds.but[1].set_background(Colors::grey);
 
 		if (params.rotary_button.is_pressed())
 			leds.rotaryLED.set_background(Colors::blue);
 		else
-			leds.rotaryLED.set_background(Colors::white);
+			leds.rotaryLED.set_background(Colors::grey);
 
 		uint32_t now = HAL_GetTick();
 		if (now - last_screen_update > 100) {
 			last_screen_update = now;
 			Debug::Pin2::high();
 			draw_audio_load();
-			screen.setTextColor(Colors::white.Rgb565(), Colors::pink.Rgb565());
+			screen.setTextColor(pots_fgcolor.Rgb565(), bgcolor.Rgb565());
 			screen.setTextSize(2);
 			screen.setFont(NULL);
 			int y = 200;
@@ -130,16 +132,16 @@ private:
 	void draw_patch_name()
 	{
 		Debug::Pin2::high();
-		screen.fillRect(0, 30, 240, 150, Colors::pink.Rgb565()); // 120ms
+		screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
 		Debug::Pin2::low();
 		screen.setFont(&FreeSansBold18pt7b);
-		screen.setTextColor(Colors::white.Rgb565());
+		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
 		uint32_t y = 60;
 		for (int i = 1; i < params.cur_patch().num_modules; i++) {
 			screen.setCursor(10, y);
 			Debug::Pin2::high();
-			screen.print(params.cur_patch().modules_used[i].name); // 41ms for "LFOSINE"
+			screen.print(params.cur_patch().modules_used[i].name);
 			Debug::Pin2::low();
 			y += 35;
 		}
@@ -147,9 +149,9 @@ private:
 
 	void draw_audio_load()
 	{
-		screen.fillRect(80, 0, 60, 25, Colors::pink.Rgb565());
+		screen.fillRect(80, 0, 60, 25, bgcolor.Rgb565());
 		screen.setFont(&FreeMono12pt7b);
-		screen.setTextColor(ST77XX::WHITE);
+		screen.setTextColor(load_fgcolor.Rgb565());
 		screen.setTextSize(1);
 		screen.setCursor(80, 20);
 		screen.print(params.audio_load, 10);
