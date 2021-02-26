@@ -2,6 +2,7 @@
 #include "sys/alloc_buffer.hh"
 #include <array>
 
+template<unsigned long MAX_LENGTH>
 class Comb {
 public:
 	Comb()
@@ -52,7 +53,7 @@ private:
 	float damp1 = 0;
 	float damp2 = 0;
 	static constexpr int maxLength = 6000;
-	using BufferType = BigAlloc<std::array<float, maxLength>>;
+	using BufferType = BigAlloc<std::array<float, MAX_LENGTH>>;
 	BufferType *buffer = new BufferType;
 	int bufidx = 0;
 };

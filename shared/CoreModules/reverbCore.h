@@ -117,7 +117,7 @@ private:
 	int currentAllTunning[numAll];
 	int currentCombTuning[numComb];
 
-	Comb combFilter[numComb];
+	Comb<6000> combFilter[numComb];
 	AllPass<6000> apFilter[numAll];
 
 	float mix = 0;
