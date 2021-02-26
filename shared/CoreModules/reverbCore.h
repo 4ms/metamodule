@@ -32,6 +32,7 @@ public:
 		for (int i = 0; i < numAll; i++) {
 			apFilter[i].setLength(allTuning[i]);
 			apFilter[i].setFeedback(0.6f);
+			apFilter[i].setFadeSpeed(0.001f);
 			currentAllTunning[i] = allTuning[i];
 		}
 
@@ -74,7 +75,10 @@ public:
 				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override {}
+	virtual void set_samplerate(const float sr) override
+	{
+		// Todo: adjust fade speed for Comb and AllPass, when samplerate changes
+	}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
