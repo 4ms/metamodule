@@ -2,24 +2,30 @@
 
 void CommModuleWidget::addModuleTitle(const std::string moduleTitle)
 {
-Label* moduleLabel = new Label();
-moduleLabel->text = moduleTitle;
-moduleLabel->box.pos={0,0};
-moduleLabel->box.size.x = box.size.x;
-moduleLabel->color = rack::color::BLACK;
-moduleLabel->alignment = Label::CENTER_ALIGNMENT;
-moduleLabel->fontSize = 13;
-addChild(moduleLabel);
+	Label *moduleLabel = new Label();
+	moduleLabel->text = moduleTitle;
+	moduleLabel->box.pos = {0, 0};
+	moduleLabel->box.size.x = box.size.x;
+	moduleLabel->color = rack::color::BLACK;
+	moduleLabel->alignment = Label::CENTER_ALIGNMENT;
+	moduleLabel->fontSize = 13;
+	addChild(moduleLabel);
 }
 
-void CommModuleWidget::addLabeledKnob(const std::string labelText, const int knobID, const Vec position)
+void CommModuleWidget::addLabeledKnob(const std::string labelText,
+									  const int knobID,
+									  const Vec position,
+									  const float defaultValue)
 {
 	const Vec pos = {
 		gridToXCentered(position.x),
 		gridToYFromTop(position.y),
 	};
 	addLabel(labelText, pos, {LabelButtonID::Types::Knob, knobID, -1});
-	addParam(createParamCentered<RoundBlackKnob>(mm2px(pos), module, knobID));
+	auto p = createParamCentered<RoundBlackKnob>(mm2px(pos), module, knobID);
+	if (p->paramQuantity)
+		p->paramQuantity->defaultValue = defaultValue;
+	addParam(p);
 }
 
 void CommModuleWidget::addLabeledInput(const std::string labelText, const int inputID, const Vec position)

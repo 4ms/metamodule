@@ -19,7 +19,8 @@ public:
 	virtual void notifyLabelButtonClicked(LabeledButton &button);
 
 protected:
-	void addLabeledKnob(const std::string labelText, const int knobID, const Vec position);
+	void
+	addLabeledKnob(const std::string labelText, const int knobID, const Vec position, const float defaultValue = 0.f);
 	void addLabeledInput(const std::string labelText, const int inputID, const Vec position);
 	void addLabeledOutput(const std::string labelText, const int outputID, const Vec position);
 	void addLabeledToggle(const std::string labelText, const int lightID, const int paramID, const Vec position);
