@@ -6,16 +6,14 @@ IndentWidth : 4
 ColumnLimit : 120
 AccessModifierOffset : -4
 AlignAfterOpenBracket: "Align"
+AlignOperands : "AlignAfterOperator"
+AllowAllArgumentsOnNextLine : "true"
+AllowShortBlocksOnASingleLine : "true"
 AllowShortFunctionsOnASingleLine: "All"
 AllowShortIfStatementsOnASingleLine : "Never"
-AllowShortBlocksOnASingleLine : "true"
 AlwaysBreakTemplateDeclarations : "true"
-AllowAllArgumentsOnNextLine : "true"
-AlignOperands : "AlignAfterOperator"
 BinPackArguments: false
 BinPackParameters: false
-BreakConstructorInitializers : "BeforeComma"
-BreakInheritanceList : "AfterColon"
 BreakBeforeBraces: "Custom"
 BraceWrapping:
   AfterCaseLabel: false
@@ -33,14 +31,18 @@ BraceWrapping:
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
+BreakBeforeTernaryOperators : false
+BreakConstructorInitializers : "BeforeComma"
+BreakInheritanceList : "AfterColon"
 ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth : 4
 IndentCaseLabels : "true"
 IndentPPDirectives : "BeforeHash"
-SpaceBeforeInheritanceColon : "true"
-SpaceBeforeCtorInitializerColon : "true"
-SpaceBeforeAssignmentOperators : "true"
-SpaceAfterTemplateKeyword : "false"
 SpaceAfterCStyleCast : "false"
+SpaceAfterTemplateKeyword : "false"
+SpaceBeforeAssignmentOperators : "true"
+SpaceBeforeCtorInitializerColon : "true"
+SpaceBeforeInheritanceColon : "true"
 SpaceBeforeParens : "ControlStatements"
 SpaceBeforeRangeBasedForLoopColon : "true"
 SpaceInEmptyParentheses : "false"
