@@ -51,7 +51,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	params.update();
 
 	bool should_update_knob[NumKnobs];
-	static auto is_small = [](float x) { return x < 9e-4f && x > -9e-4f; };
+	static auto is_small = [](float x) { return (x < 3e-6f) && (x > -3e-6f); };
 	int i = 0;
 	for (auto &knob : knobs) {
 		knob.set_new_value(params.knobs[i]);
