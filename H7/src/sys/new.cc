@@ -46,13 +46,19 @@ void operator delete[](void *p, std::nothrow_t) noexcept
 	operator delete(p);
 }
 
+static char *heap_end;
+extern char _sheap;
+
+size_t get_heap_size()
+{
+	return reinterpret_cast<size_t>(heap_end) - reinterpret_cast<size_t>(&_sheap);
+}
+
 extern "C" size_t _sbrk(int incr)
 {
 	// Defined by the linker
-	extern char _sheap;
 	extern char _eheap;
 
-	static char *heap_end;
 	char *prev_heap_end;
 
 	if (heap_end == 0) {

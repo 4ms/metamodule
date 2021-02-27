@@ -1,9 +1,9 @@
 #pragma once
 #include <cstddef>
 
-constexpr unsigned int SDRAM_BASE_ADDR = 0xC0000000;
+constexpr size_t SDRAM_BASE_ADDR = 0xC0000000;
 
-template<unsigned int BASEADDR>
+template<size_t BASEADDR>
 struct AllocForever {
 	void *operator new(size_t size)
 	{
@@ -20,11 +20,16 @@ struct AllocForever {
 		alloc_ptr = (char *)BASEADDR;
 	}
 
+	static size_t get_memory_usage()
+	{
+		return reinterpret_cast<size_t>(alloc_ptr) - SDRAM_BASE_ADDR;
+	}
+
 private:
 	static inline char *alloc_ptr = (char *)BASEADDR;
 };
 
-template<typename T, unsigned int ADDR>
+template<typename T, size_t ADDR>
 struct AllocAt : T, AllocForever<ADDR> {};
 
 template<typename T>
