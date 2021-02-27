@@ -77,20 +77,8 @@ public:
 		uint32_t now = HAL_GetTick();
 		if (now - last_screen_update > 100) {
 			last_screen_update = now;
-			Debug::Pin2::high();
 			draw_audio_load();
-			screen.setTextColor(pots_fgcolor.Rgb565(), bgcolor.Rgb565());
-			screen.setTextSize(2);
-			screen.setFont(NULL);
-			int y = 200;
-			for (int i = 0; i < 8; i++) {
-				screen.setCursor((i & 0b11) * 60, y);
-				screen.print((uint16_t)(params.knobs[i] * 100));
-				screen.print("  ");
-				if (i == 3)
-					y += 20;
-			}
-			Debug::Pin2::low();
+			draw_pot_values();
 		}
 
 		if (params.should_redraw_patch) {
@@ -155,6 +143,28 @@ private:
 		screen.print("kb   ");
 	}
 
+	void draw_pot_values()
+	{
+		// Debug::Pin2::high();
+		screen.setTextColor(pots_fgcolor.Rgb565(), bgcolor.Rgb565());
+		screen.setTextSize(2);
+		screen.setFont(NULL);
+		int y = 180;
+		for (int i = 0; i < 12; i++) {
+			screen.setCursor((i & 0b11) * 60, y);
+			// screen.print((uint16_t)(i < 4 ? params.cvjacks[i] * 100 : params.knobs[i - 4] * 100));
+			if (i < 4)
+				screen.print((uint16_t)(params.cvjacks[i] * 100));
+			else
+				screen.print((uint16_t)(params.knobs[i - 4] * 100));
+
+			screen.print("  ");
+			if (i == 3 || i == 7)
+				y += 20;
+		}
+
+		// Debug::Pin2::low();
+	}
 	void draw_test_squares()
 	{
 		// Should see a 1-pixel border around the 4-square, and a 1-pixel gap between squares
