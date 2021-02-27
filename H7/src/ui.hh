@@ -30,7 +30,7 @@ public:
 	Color bgcolor = Colors::pink;
 	Color patch_fgcolor = Colors::blue;
 	Color load_fgcolor = Colors::cyan;
-	Color pots_fgcolor = Colors::red;
+	Color pots_fgcolor = Colors::green;
 
 	void start()
 	{
