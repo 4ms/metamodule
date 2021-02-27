@@ -15,8 +15,8 @@
   IRLen = 0
   MultipleTargets = 0
   NumDevices = 0
-  Speed0 = 4000
-  Speed1 = 4000
+  Speed0 = 12000
+  Speed1 = 12000
   TAP_Number = 0
   UseAdaptive0 = 0
   UseAdaptive1 = 0
