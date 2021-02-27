@@ -63,7 +63,7 @@ public:
 	{
 		if (freqJack.isChanged()) {
 			auto f = expTable.closest(constrain(freqJack.getValue(), 0.f, 1.f));
-			cv_frequency = f * f * 0.1f;
+			cv_frequency = f * f;
 			combineKnobCVFreq();
 		}
 
