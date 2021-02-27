@@ -7,6 +7,8 @@
 #include "leds.hh"
 #include "params.hh"
 #include "screen.hh"
+#include "sys/alloc_buffer.hh"
+#include "sys/mem_usage.hh"
 
 template<unsigned AnimationUpdateRate = 100>
 class Ui {
@@ -38,15 +40,7 @@ public:
 		Debug::Pin2::low();
 
 		draw_patch_name();
-
-		screen.setFont(&FreeMono12pt7b);
-		screen.setTextColor(ST77XX::WHITE);
-		screen.setTextSize(1);
-		screen.setCursor(2, 20);
-		screen.print("Load:");
-
-		screen.setCursor(80, 20);
-		screen.print(params.audio_load, 10);
+		draw_audio_load();
 
 		leds.start();
 		params.controls.start();
@@ -149,12 +143,16 @@ private:
 
 	void draw_audio_load()
 	{
-		screen.fillRect(80, 0, 60, 25, bgcolor.Rgb565());
-		screen.setFont(&FreeMono12pt7b);
-		screen.setTextColor(load_fgcolor.Rgb565());
-		screen.setTextSize(1);
-		screen.setCursor(80, 20);
+		screen.setTextColor(load_fgcolor.Rgb565(), bgcolor.Rgb565());
+		screen.setTextSize(2);
+		screen.setFont(NULL);
+		screen.setCursor(0, 10);
 		screen.print(params.audio_load, 10);
+		screen.print("% ");
+		screen.print(get_heap_size() / 1024, 10);
+		screen.print("kb ");
+		screen.print(BigAlloc<Ui>::get_memory_usage() / 1024, 10);
+		screen.print("kb   ");
 	}
 
 	void draw_test_squares()
