@@ -1,8 +1,8 @@
 #pragma once
+#include "processors/fadeloop.hh"
 #include "sys/alloc_buffer.hh"
 #include <array>
 
-#include "processors/fadeloop.hh"
 template<unsigned long MAX_LENGTH>
 class Comb : public FadeLoop<float, MAX_LENGTH> {
 public:
