@@ -15,6 +15,15 @@ public:
 		}
 	}
 
+	// Shortcut to do a read() and a write()
+	// Only useful if the value to write doesn't depend on what's read
+	DataType process(DataType val_to_write)
+	{
+		auto read_val = read();
+		write(val_to_write);
+		return read_val;
+	}
+
 	DataType read()
 	{
 		DataType bufout;
