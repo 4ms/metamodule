@@ -10,7 +10,6 @@ public:
 	{
 		float bufout = this->read();
 		this->write(input + bufout * feedback);
-		this->step();
 		return -input + bufout;
 	}
 

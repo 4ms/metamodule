@@ -15,6 +15,35 @@ public:
 		}
 	}
 
+	DataType read()
+	{
+		DataType bufout;
+
+		if (is_fading) {
+			bufout = MathTools::interpolate((*buffer)[read_idx], (*buffer)[fade_idx], fade_phase);
+			_update_fade();
+			if (++fade_idx >= MAX_LENGTH)
+				fade_idx = 0;
+		} else {
+			bufout = (*buffer)[read_idx];
+		}
+		if (++read_idx >= MAX_LENGTH)
+			read_idx = 0;
+		return bufout;
+	}
+
+	void write(DataType val)
+	{
+		(*buffer)[write_idx] = val;
+		if (++write_idx >= MAX_LENGTH)
+			write_idx = 0;
+	}
+
+	void set_fade_speed(float val)
+	{
+		fade_speed = MathTools::constrain(val, 0.0000001f, 1.0f);
+	}
+
 	void change_delay(unsigned long length)
 	{
 		while (length >= MAX_LENGTH)
@@ -63,42 +92,6 @@ private:
 				is_fading = false;
 			}
 		}
-	}
-
-public:
-	DataType read()
-	{
-		DataType bufout;
-
-		if (is_fading) {
-			bufout = MathTools::interpolate((*buffer)[read_idx], (*buffer)[fade_idx], fade_phase);
-			_update_fade();
-		} else {
-			bufout = (*buffer)[read_idx];
-		}
-		return bufout;
-	}
-
-	void write(DataType val)
-	{
-		(*buffer)[write_idx] = val;
-	}
-
-	void step()
-	{
-		if (++write_idx >= MAX_LENGTH)
-			write_idx = 0;
-
-		if (++read_idx >= MAX_LENGTH)
-			read_idx = 0;
-
-		if (++fade_idx >= MAX_LENGTH)
-			fade_idx = 0;
-	}
-
-	void set_fade_speed(float val)
-	{
-		fade_speed = MathTools::constrain(val, 0.0000001f, 1.0f);
 	}
 
 private:

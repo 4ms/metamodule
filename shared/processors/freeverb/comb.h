@@ -13,7 +13,6 @@ public:
 		float output = this->read();
 		filterstore = (output * damp2) + (filterstore * damp1);
 		this->write(input + (filterstore * feedback));
-		this->step();
 		return output;
 	}
 
