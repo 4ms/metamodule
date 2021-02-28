@@ -1,7 +1,85 @@
 #include "doctest.h"
 #include "processors/fadeloop.hh"
+#include "util/interp_array.hh"
 #include <iostream>
 #include <stdint.h>
+
+TEST_CASE("FadeloopExt basic usage")
+{
+	int loops;
+
+	SUBCASE("Can use C_style array")
+	{
+		float _buf[100];
+		FadeLoopExt2 fl2{_buf};
+		loops = 0;
+		while (fl2.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == 100);
+	}
+
+	SUBCASE("Can use std::array")
+	{
+		FadeLoopExt2 fl3{*(new std::array<float, 20>)};
+		loops = 0;
+		while (fl3.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == 20);
+	}
+
+	SUBCASE("Can use dynamic memory")
+	{
+		using BigDynArray = BigAlloc<std::array<float, 100>>;
+		BigDynArray *dynbuf = new BigDynArray;
+		FadeLoopExt2 bigfl{*dynbuf};
+		loops = 0;
+		while (bigfl.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == 100);
+
+		FadeLoopExt2 bigfl2{*(new BigAlloc<InterpArray<float, 100>>)};
+		loops = 0;
+		while (bigfl2.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == 100);
+	}
+
+	SUBCASE("ext3: Can use C_style array")
+	{
+		float _buf[100];
+		FadeLoopExt3 fl2{&_buf};
+		loops = 0;
+		while (fl2.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == 100);
+	}
+
+	SUBCASE("Can use std::array")
+	{
+		FadeLoopExt3 fl3{new std::array<float, 20>};
+		loops = 0;
+		while (fl3.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == 20);
+	}
+
+	SUBCASE("ext3: Can use dynamic memory")
+	{
+		using BigDynArray = BigAlloc<std::array<float, 100>>;
+		BigDynArray *dynbuf = new BigDynArray;
+		FadeLoopExt3 bigfl{dynbuf};
+		loops = 0;
+		while (bigfl.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == 100);
+
+		FadeLoopExt3 bigfl2{new BigAlloc<InterpArray<float, 100>>};
+		loops = 0;
+		while (bigfl2.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == 100);
+	}
+}
 
 TEST_CASE("Fadeloop basic usage")
 {
