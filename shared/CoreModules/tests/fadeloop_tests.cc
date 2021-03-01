@@ -10,83 +10,57 @@ TEST_CASE("FadeloopExt basic usage")
 
 	SUBCASE("Can use C_style array")
 	{
-		float _buf[100];
-		FadeLoopExt2 fl2{_buf};
+		constexpr unsigned size = 18;
+		float _buf[size];
+		FadeLoopExt fl2{_buf};
 		loops = 0;
 		while (fl2.process(1.f) != 1.f)
 			loops++;
-		CHECK(loops == 100);
+		CHECK(loops == size);
 	}
 
 	SUBCASE("Can use std::array")
 	{
-		FadeLoopExt2 fl3{*(new std::array<float, 20>)};
+		constexpr unsigned size = 188;
+		FadeLoopExt fl3{*(new std::array<float, size>)};
 		loops = 0;
 		while (fl3.process(1.f) != 1.f)
 			loops++;
-		CHECK(loops == 20);
+		CHECK(loops == size);
 	}
 
 	SUBCASE("Can use dynamic memory")
 	{
-		using BigDynArray = BigAlloc<std::array<float, 100>>;
+		constexpr unsigned size = 18;
+		using BigDynArray = BigAlloc<std::array<float, size>>;
 		BigDynArray *dynbuf = new BigDynArray;
-		FadeLoopExt2 bigfl{*dynbuf};
+		FadeLoopExt bigfl{*dynbuf};
 		loops = 0;
-		while (bigfl.process(1.f) != 1.f)
+		while (bigfl.process(111.f) != 111.f)
 			loops++;
-		CHECK(loops == 100);
+		CHECK(loops == size);
+		SUBCASE("The buffer we give the FadeLoopExt is being modified (not a copy)")
+		{
+			CHECK((*dynbuf)[0] == 111.f);
+		}
 
-		FadeLoopExt2 bigfl2{*(new BigAlloc<InterpArray<float, 100>>)};
+		FadeLoopExt bigfl2{*(new BigAlloc<InterpArray<float, size>>)};
 		loops = 0;
 		while (bigfl2.process(1.f) != 1.f)
 			loops++;
-		CHECK(loops == 100);
+		CHECK(loops == size);
 	}
 
-	SUBCASE("ext3: Can use C_style array")
+	SUBCASE("Can use BigBuffer (use BigBuffer<>::get() in FadeLoopExt ctor)")
 	{
-		float _buf[100];
-		FadeLoopExt3 fl2{&_buf};
+		constexpr unsigned size = 14;
+		BigBuffer<std::array<float, size>> buf;
+		FadeLoopExt flbuf{buf.get()};
 		loops = 0;
-		while (fl2.process(1.f) != 1.f)
+		while (flbuf.process(123.f) != 123.f)
 			loops++;
-		CHECK(loops == 100);
-	}
-
-	SUBCASE("Can use std::array")
-	{
-		FadeLoopExt3 fl3{new std::array<float, 20>};
-		loops = 0;
-		while (fl3.process(1.f) != 1.f)
-			loops++;
-		CHECK(loops == 20);
-	}
-
-	SUBCASE("ext3: Can use dynamic memory")
-	{
-		using BigDynArray = BigAlloc<std::array<float, 100>>;
-		BigDynArray *dynbuf = new BigDynArray;
-		FadeLoopExt3 bigfl{dynbuf};
-		loops = 0;
-		while (bigfl.process(1.f) != 1.f)
-			loops++;
-		CHECK(loops == 100);
-
-		FadeLoopExt3 bigfl2{new BigAlloc<InterpArray<float, 100>>};
-		loops = 0;
-		while (bigfl2.process(1.f) != 1.f)
-			loops++;
-		CHECK(loops == 100);
-	}
-
-	SUBCASE("FadeLoop2")
-	{
-		FadeLoop2<float, 100> fl22;
-		loops = 0;
-		while (fl22.process(1.f) != 1.f)
-			loops++;
-		CHECK(loops == 100);
+		CHECK(loops == size);
+		CHECK(buf[0] == 123.f);
 	}
 }
 
@@ -107,6 +81,12 @@ TEST_CASE("Fadeloop basic usage")
 				all_outputs_zero = false;
 		}
 		CHECK(all_outputs_zero);
+
+		SUBCASE("And then the first output after looping through the whole array will be the first thing written")
+		{
+			out = fl.process(1234);
+			CHECK(out == 99999);
+		}
 	}
 
 	SUBCASE("Simple delay: comes out as it went in after one delay period set by change_delay()")
