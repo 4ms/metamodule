@@ -1,5 +1,9 @@
 CompileFlags: 
 	Add: [ 
+			"-std=c++17",
 			"-I../shared/doctest/doctest",
+			"-I../../doctest/doctest",
+			"-I../..",
+			"-I../../../H7/src"
 		]
 
