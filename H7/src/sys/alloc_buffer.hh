@@ -35,3 +35,5 @@ struct AllocAt : T, AllocForever<ADDR> {};
 template<typename T>
 using BigAlloc = AllocAt<T, SDRAM_BASE_ADDR>;
 
+using BigHeapAllocation = AllocForever<SDRAM_BASE_ADDR>;
+
