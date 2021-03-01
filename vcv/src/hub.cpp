@@ -43,9 +43,7 @@ struct Expander : public CommModule {
 
 				Patch patch;
 				createPatchStruct(patch);
-				writeToFile(examplePatchDir +
-								"example1.hh", //"/Users/dann/4ms/stm32/meta-module/shared/patch/example1.hh",
-							PatchWriter::printPatchStructText("Example1", patch));
+				writeToFile(examplePatchDir + "example1.hh", PatchWriter::printPatchStructText("Example1", patch));
 
 				labelText = "Wrote debug file and patch header file";
 				updateDisplay();

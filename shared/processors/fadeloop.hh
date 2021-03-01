@@ -121,14 +121,8 @@ private:
 
 // FadeLoop is a simple wrapper for FadeLoopExt,
 // where the buffer is std::array, allocated in the "big" heap
-// template<typename DataType, unsigned long MAX_LENGTH>
-// struct FadeLoop : BigBuffer<std::array<DataType, MAX_LENGTH>>, FadeLoopExt<std::array<DataType, MAX_LENGTH>> {
-// 	FadeLoop()
-// 		: FadeLoopExt<std::array<DataType, MAX_LENGTH>>{this->get()}
-// 	{}
-// };
 template<typename DataType, unsigned long MAX_LENGTH>
-struct FadeLoop : /*BigAlloc<std::array<DataType, MAX_LENGTH>>,*/ FadeLoopExt<std::array<DataType, MAX_LENGTH>> {
+struct FadeLoop : FadeLoopExt<std::array<DataType, MAX_LENGTH>> {
 	FadeLoop()
 		: FadeLoopExt<std::array<DataType, MAX_LENGTH>>{*(new BigAlloc<std::array<DataType, MAX_LENGTH>>)}
 	{}
