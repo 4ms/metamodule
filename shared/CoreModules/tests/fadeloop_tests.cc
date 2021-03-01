@@ -51,17 +51,17 @@ TEST_CASE("FadeloopExt basic usage")
 		CHECK(loops == size);
 	}
 
-	SUBCASE("Can use BigBuffer (use BigBuffer<>::get() in FadeLoopExt ctor)")
-	{
-		constexpr unsigned size = 14;
-		BigBuffer<std::array<float, size>> buf;
-		FadeLoopExt flbuf{buf.get()};
-		loops = 0;
-		while (flbuf.process(123.f) != 123.f)
-			loops++;
-		CHECK(loops == size);
-		CHECK(buf[0] == 123.f);
-	}
+	// SUBCASE("Can use BigBuffer (use BigBuffer<>::get() in FadeLoopExt ctor)")
+	// {
+	// 	constexpr unsigned size = 14;
+	// 	BigBuffer<std::array<float, size>> buf;
+	// 	FadeLoopExt flbuf{buf.get()};
+	// 	loops = 0;
+	// 	while (flbuf.process(123.f) != 123.f)
+	// 		loops++;
+	// 	CHECK(loops == size);
+	// 	CHECK(buf[0] == 123.f);
+	// }
 }
 
 TEST_CASE("Fadeloop basic usage")
