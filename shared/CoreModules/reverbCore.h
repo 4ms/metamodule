@@ -3,8 +3,8 @@
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
-#include "processors/freeverb/allpass.h"
-#include "processors/freeverb/comb.h"
+#include "processors/allpass.h"
+#include "processors/comb.h"
 
 using namespace MathTools;
 
