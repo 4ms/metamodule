@@ -79,6 +79,15 @@ TEST_CASE("FadeloopExt basic usage")
 			loops++;
 		CHECK(loops == 100);
 	}
+
+	SUBCASE("FadeLoop2")
+	{
+		FadeLoop2<float, 100> fl22;
+		loops = 0;
+		while (fl22.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == 100);
+	}
 }
 
 TEST_CASE("Fadeloop basic usage")

@@ -1,5 +1,6 @@
 #pragma once
 #include "sys/alloc_buffer.hh"
+#include "util/big_buffer.hh"
 #include "util/math.hh"
 #include <array>
 
@@ -117,6 +118,7 @@ private:
 	float fade_speed = 0.001f;
 };
 
+/////////////Ext
 template<typename DataType, typename BufferType, unsigned long MAX_LENGTH>
 class FadeLoopExt {
 	BufferType &buffer;
@@ -230,6 +232,7 @@ private:
 	float fade_speed = 0.001f;
 };
 
+/// Ext2
 template<typename BufferType>
 class FadeLoopExt2 {
 	BufferType &buffer;
@@ -460,3 +463,14 @@ private:
 	float fade_phase = 0;
 	float fade_speed = 0.001f;
 };
+
+// FadeLoop is a simple wrapper for FadeLoopExt,
+// where the buffer is std::array, allocated in the "big" heap
+template<typename DataType, unsigned long MAX_LENGTH>
+struct FadeLoop2 : BigBuffer<std::array<DataType, MAX_LENGTH>>, FadeLoopExt2<std::array<DataType, MAX_LENGTH>> {
+	// BigBuffer<std::array<DataType, MAX_LENGTH>> _buffer;
+	FadeLoop2()
+		: FadeLoopExt2<std::array<DataType, MAX_LENGTH>>{this->get()}
+	{}
+};
+
