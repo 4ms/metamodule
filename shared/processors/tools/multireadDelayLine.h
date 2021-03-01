@@ -1,5 +1,6 @@
 #pragma once
-#include "sys/alloc_buffer.hh"
+// #include "sys/alloc_buffer.hh"
+#include "util/big_buffer.hh"
 #include "util/interp_array.hh"
 #include "util/math.hh"
 
@@ -8,9 +9,8 @@ class MultireadDelayLine {
 public:
 	MultireadDelayLine()
 	{
-		delayBuffer = new BigAlloc<InterpArray<float, maxSamples>>;
 		for (int i = 0; i < maxSamples; i++) {
-			(*delayBuffer)[i] = 0;
+			delayBuffer[i] = 0;
 		}
 	}
 
@@ -20,7 +20,7 @@ public:
 	// with int readIndex (just checking it's not negative), it's 5.6us
 	void updateSample(float input)
 	{
-		(*delayBuffer)[writeIndex] = input;
+		delayBuffer[writeIndex] = input;
 	}
 
 	void incrementWriteHead()
@@ -36,10 +36,10 @@ public:
 		if (readIndex < 0)
 			readIndex += maxSamples;
 
-		return (delayBuffer->interp_by_index(readIndex));
+		return (delayBuffer.get().interp_by_index(readIndex));
 	}
 
 private:
-	BigAlloc<InterpArray<float, maxSamples>> *delayBuffer;
+	BigBuffer<InterpArray<float, maxSamples>> delayBuffer;
 	unsigned long writeIndex = 0;
 };
