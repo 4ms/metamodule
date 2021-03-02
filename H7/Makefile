@@ -276,7 +276,7 @@ core_tests:
 	@echo "----------------------------"
 	@echo "Running CoreModule tests...."
 	@echo "----------------------------"
-	$(MAKE) -f $(SHARED)/CoreModules/tests/Makefile
+	cd $(SHARED) && $(MAKE) -j16 -f CoreModules/tests/Makefile
 
 # proc_tests:
 # 	cd $(SHARED)/processors/tests && make tests
