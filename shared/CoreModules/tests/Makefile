@@ -4,7 +4,7 @@
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR = $(TEST_DIR)
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
-TEST_SOURCES += $(wildcard util/*.cc)
+TEST_SOURCES += $(wildcard ../util/*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
@@ -19,7 +19,7 @@ CXXFLAGS = 	-Wall \
 			-stdlib=libc++ \
 			-I$(DOCTEST_DIR) \
 			-I. \
-			-ICoreModules \
+			-I.. \
 			-I$(TEST_DIR) \
 			-Wno-unused-const-variable \
 			-DTESTPROJECT \
@@ -28,9 +28,9 @@ CXXFLAGS = 	-Wall \
 
 CXX = clang++
 LDFLAGS = -lstdc++
-OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
+OBJECTS = $(addprefix $(BUILDDIR)/, $(subst ../,,$(addsuffix .o, $(basename $(TEST_SOURCES)))))
 DEPDIR := $(BUILDDIR)
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(subst ../,,$(basename $<).d)
 
 .PHONY: all tests clean
 
@@ -42,6 +42,12 @@ $(BUILDDIR)/%.o: %.c
 	@$(CC) -c $(DEPFLAGS) $(CFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cc
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+
+#FixMe: This kludge lets us build util/%.o, but it's not pretty or general
+$(BUILDDIR)/%.o: ../%.cc
 	@mkdir -p $(dir $@)
 	$(info Building $<)
 	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@

@@ -49,7 +49,7 @@ $(BUILDDIR)/%.o: %.cpp
 
 
 tests: $(BUILDDIR)/runtests 
-	$(BUILDDIR)/runtests
+	@$(BUILDDIR)/runtests
 
 $(BUILDDIR)/runtests: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
