@@ -41,8 +41,8 @@ TEST_CASE("Allpass basic usage")
 		}
 	}
 
-	SUBCASE(
-		"With some feedback, output is at full volume after the first loop, then half volume on each subsequent loop")
+	SUBCASE("With some feedback, output is at full volume after the first loop, then decreases by the feedback amount "
+			"on each subsequent loop")
 	{
 		const int length = 10;
 		const float feedback = 0.4f;
