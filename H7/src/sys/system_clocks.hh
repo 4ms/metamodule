@@ -11,6 +11,8 @@ struct SystemClocks {
 	{
 		// target::init_powerup();
 		int32_t timeout = 0xFFFF;
+
+		// wait_for_cm4_sleep();
 		while ((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) != RESET) && (timeout-- > 0))
 			;
 		if (timeout < 0)

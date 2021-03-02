@@ -255,28 +255,28 @@ H7_tests:
 	@echo "----------------------------"
 	@echo "Running H7 tests...."
 	@echo "----------------------------"
-	make -f tests/Makefile
+	@$(MAKE) -f tests/Makefile
 
 mdrivlib_tests:
 	@echo
 	@echo "----------------------------"
 	@echo "Running mdrivlib tests...."
 	@echo "----------------------------"
-	cd $(DRIVERLIB) && make -f tests/Makefile
+	@cd $(DRIVERLIB) && $(MAKE) -f tests/Makefile
 
 util_tests:
 	@echo
 	@echo "----------------------------"
 	@echo "Running shared/util tests...."
 	@echo "----------------------------"
-	cd $(SHARED)/util/tests && make tests
+	@cd $(SHARED)/util && $(MAKE) -f tests/Makefile
 
 core_tests:
 	@echo
 	@echo "----------------------------"
 	@echo "Running CoreModule tests...."
 	@echo "----------------------------"
-	cd $(SHARED) && $(MAKE) -j16 -f CoreModules/tests/Makefile
+	@cd $(SHARED)/CoreModules && $(MAKE) -f tests/Makefile
 
 # proc_tests:
 # 	cd $(SHARED)/processors/tests && make tests

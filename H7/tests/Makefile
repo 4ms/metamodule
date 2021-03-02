@@ -1,7 +1,9 @@
-#this is meant to be run from PROJECT_ROOT/SUBPROJECT/
+# This is meant to be run from the parent dir of this Makefile:
+# make -f tests/Makefile
 
-DOCTEST_DIR ?= src/shared/doctest/doctest
 TEST_DIR ?= tests
+DOCTESTHEADER_DIR = $(TEST_DIR)
+BUILDDIR = $(TEST_DIR)/build
 
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
@@ -11,10 +13,6 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 
-BUILDDIR = build
-
-.PHONY: tests clean FORCE
-
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
 			-stdlib=libc++ \
@@ -22,14 +20,50 @@ CXXFLAGS = 	-Wall \
 			-Isrc \
 			-Isrc/shared \
 
-tests: $(BUILDDIR)/runtests
+### Boilerplate below here:
+
+CXX = clang++
+LDFLAGS = -lstdc++
+OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
+DEPDIR := $(BUILDDIR)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
+
+.PHONY: all tests clean
+
+all: $(DOCTESTHEADER_DIR)/doctest.h tests
+
+$(BUILDDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	@$(CC) -c $(DEPFLAGS) $(CFLAGS) $< -o $@
+
+$(BUILDDIR)/%.o: %.cc
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+
+$(BUILDDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+
+
+tests: $(BUILDDIR)/runtests 
 	$(BUILDDIR)/runtests
 
-#Todo: build test sources individually into .o files, and use -MM -MF -MMD to check dependencies
-$(BUILDDIR)/runtests: $(TEST_SOURCES) FORCE
-	@mkdir -p $(@D)
-	clang++ $(CXXFLAGS) $(TEST_SOURCES) -o $(BUILDDIR)/runtests
+$(BUILDDIR)/runtests: $(OBJECTS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
+
+$(DOCTESTHEADER_DIR)/doctest.h:
+	wget https://raw.githubusercontent.com/onqtam/doctest/master/doctest/doctest.h -P $(DOCTESTHEADER_DIR)/
 
 clean:
 	rm -rf $(BUILDDIR)
+
+$(DEPDIR): ; @mkdir -p $@
+
+DEPFILES := $(addprefix $(DEPDIR)/, $(addsuffix .d, $(basename $(TEST_SOURCES))))
+$(DEPFILES):
+
+include $(wildcard $(DEPFILES))
 
