@@ -13,6 +13,8 @@ class LedCtl {
 	using DriverRgbLed = RgbLed<FrameBufferLED, UpdateRateHz>;
 
 public:
+	static constexpr unsigned LEDUpdateRateHz = UpdateRateHz;
+
 	LedCtl(ILedDmaDriver &led_driver)
 		: led_driver_{led_driver}
 	{}

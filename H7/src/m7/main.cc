@@ -73,94 +73,12 @@ void main()
 
 	ui.start();
 
-	// Todo: create class RoundRobinHandler {
-	//    void add_to_sequence(T &&func); or add_to_sequence(std::function<void(void)> &&func);
-	//    void advance_sequence_loop();
-	//};
-	// auto select_pots = [&](){ cur_pot = 0;
-	//			 controls.potadc.select_pot_source(cur_pot);
-	//			 controls.potadc.select_adc_channel(MuxedADC::Channel::Pots); };
-	// handler.add_to_sequence([&](){ leds.refresh(); });
-	// handler.add_to_sequence([&](){ select_pots; });
-	// ..
-	// while (1) {
-	//    ui.update();
-	//    leds.update();
-	//    if (SharedBus::i2c.is_ready()) {
-	//    	handler.advance_sequence_loop();
-	//    }
-	//    __NOP();
-	// }
-	// Takes:
-	// leds
-	// controls.potadc
-	enum I2CClients {
-		Leds,
-		SelectPots,
-		RequestReadPots,
-		CollectReadPots,
-		SelectPatchCV,
-		RequestReadPatchCV,
-		CollectReadPatchCV,
-	};
-	I2CClients cur_client;
-	uint8_t cur_pot;
+	SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
 
 	while (1) {
 		ui.update();
-
 		if (SharedBus::i2c.is_ready()) {
-			// Debug::Pin2::high();
-			switch (cur_client) {
-				case Leds:
-					leds.refresh();
-					cur_client = SelectPots;
-					break;
-
-				case SelectPots:
-					cur_pot = 0;
-					controls.potadc.select_pot_source(cur_pot);
-					controls.potadc.select_adc_channel(MuxedADC::Channel::Pots);
-					cur_client = RequestReadPots;
-					break;
-
-				case RequestReadPots:
-					controls.potadc.request_reading();
-					cur_client = CollectReadPots;
-					break;
-
-				case CollectReadPots:
-					controls.store_pot_reading(cur_pot, controls.potadc.collect_reading());
-					if (++cur_pot >= 8) {
-						cur_client = SelectPatchCV;
-						cur_pot = 0;
-					} else
-						cur_client = RequestReadPots;
-					controls.potadc.select_pot_source(cur_pot);
-					break;
-
-					// GPIO Sense here (between ADC channels)
-
-				case SelectPatchCV:
-					controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);
-					cur_client = RequestReadPatchCV;
-					break;
-
-				case RequestReadPatchCV:
-					controls.potadc.request_reading();
-					cur_client = CollectReadPatchCV;
-					break;
-
-				case CollectReadPatchCV:
-					controls.store_patchcv_reading(controls.potadc.collect_reading());
-					cur_client = Leds;
-					break;
-
-				default:
-					cur_client = Leds;
-					break;
-			}
-			// Debug::Pin2::low();
+			i2cqueue.update();
 		}
 		__NOP();
 	}

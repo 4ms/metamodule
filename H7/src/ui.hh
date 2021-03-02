@@ -1,6 +1,6 @@
 #pragma once
-#include "Fonts/FreeMono12pt7b.h"
-#include "Fonts/FreeSansBold18pt7b.h"
+#include "Adafruit_GFX_Library/Fonts/FreeMono12pt7b.h"
+#include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
 #include "debug.hh"
 #include "drivers/i2c.hh"
@@ -35,9 +35,9 @@ public:
 	void start()
 	{
 		screen.init();
-		Debug::Pin2::high();
+		// Debug::Pin2::high();
 		screen.fill(bgcolor);
-		Debug::Pin2::low();
+		// Debug::Pin2::low();
 
 		draw_patch_name();
 		draw_audio_load();
@@ -113,18 +113,18 @@ private:
 
 	void draw_patch_name()
 	{
-		Debug::Pin2::high();
+		// Debug::Pin2::high();
 		screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
-		Debug::Pin2::low();
+		// Debug::Pin2::low();
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
 		uint32_t y = 60;
 		for (int i = 1; i < params.cur_patch().num_modules; i++) {
 			screen.setCursor(10, y);
-			Debug::Pin2::high();
+			// Debug::Pin2::high();
 			screen.print(params.cur_patch().modules_used[i].name);
-			Debug::Pin2::low();
+			// Debug::Pin2::low();
 			y += 35;
 		}
 	}
