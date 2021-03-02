@@ -3,5 +3,5 @@ CompileFlags:
 	Add: [
 		-std=c++17,
 		-I..,
-		-I../H7/src	
+		-I../H7/src,
 	]
