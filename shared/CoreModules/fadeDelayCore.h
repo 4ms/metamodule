@@ -1,64 +1,43 @@
 #pragma once
 #include "coreProcessor.h"
-#include "math.hh"
 #include "moduleTypes.h"
+#include "processors/fadeloop.hh"
 #include "processors/tools/clockToSamples.h"
-#include "processors/tools/multireadDelayLine.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 
 class FadeDelayCore : public CoreProcessor {
 public:
+	const static inline long maxSamples = 48000;
+	enum Inputs { AudioIn, Clock, CV };
+	enum Outputs { AudioOut };
+	enum Params { DelayTime, Feedback, FadeTime, Mix, CVAmount };
+
 	virtual void update(void) override
 	{
+		float sampleDelay;
+
 		clockSamples.update(clockInput);
 
-		if (fading == false) {
-			float finalDelay = constrain(baseDelay + cvInput * cvAmount, 0.0f, 1.0f);
-			if (clockAttached == false) {
-				timeinMs = map_value(finalDelay, 0.0f, 1.0f, 0.0f, 1000.0f);
-				sampleDelay = timeinMs / 1000.0f * sampleRate;
-			} else {
-				int divSelect = finalDelay * 4.0f;
-				auto delayCalc = clockSamples.getSamples() * divTable[divSelect];
-				if (delayCalc < maxSamples)
-					sampleDelay = delayCalc;
-			}
-		}
-		lastDelay = currentDelay;
-		currentDelay = sampleDelay;
-		if (currentDelay != lastDelay) {
-			delayTimes[1] = sampleDelay;
-			fading = true;
-			sinceChange = 0;
+		float finalDelay = constrain(baseDelay + cvInput * cvAmount, 0.0f, 1.0f);
+		if (clockAttached == false) {
+			const float oneSample = 1.0f / sampleRate;
+			const float oneSecond = sampleRate * 1.0f;
+			sampleDelay = map_value(finalDelay, 0.0f, 1.0f, oneSample, oneSecond);
+		} else {
+			int divSelect = finalDelay * 4.0f;
+			auto delayCalc = clockSamples.getSamples() * divTable[divSelect];
+			if (delayCalc < maxSamples)
+				sampleDelay = delayCalc;
 		}
 
-		float output = 0;
-		float fade = sinceChange / changeTime;
+		delayLine.change_delay(sampleDelay);
 
-		if (fade > 1) {
-			fade = 1;
-		}
+		delayLine.write(input + lastOutput * feedback);
+		lastOutput = delayLine.read();
 
-		if (fade >= 1) {
-			delayTimes[0] = delayTimes[1];
-			fading = false;
-		}
-
-		delayLine.updateSample(input + feedbackSample * feedback);
-		if (fading)
-			output = interpolate(delayLine.readSample(delayTimes[0]), delayLine.readSample(delayTimes[1]), fade);
-		else {
-			output = delayLine.readSample(delayTimes[1]);
-		}
-
-		delayLine.incrementWriteHead();
-
-		feedbackSample = output;
-
-		delayOutput = (interpolate(input, output, mix));
-
-		sinceChange++;
+		delayOutput = (interpolate(input, lastOutput, mix));
 	}
 
 	FadeDelayCore() {}
@@ -73,9 +52,8 @@ public:
 				feedback = val;
 				break;
 			case 2: {
-				float changeMs = 0;
-				changeMs = map_value(val, 0.0f, 1.0f, 10.0f, 1000.0f);
-				changeTime = changeMs * sampleRate / 1000.0f;
+				changeSec = map_value(val, 0.0f, 1.0f, 0.001f, 1.0f);
+				update_fade_time();
 			} break;
 			case 3:
 				mix = val;
@@ -85,9 +63,11 @@ public:
 				break;
 		}
 	}
+
 	virtual void set_samplerate(const float sr) override
 	{
 		sampleRate = sr;
+		update_fade_time();
 	}
 
 	virtual void set_input(const int input_id, const float val) override
@@ -136,42 +116,31 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	const float divTable[5] = {0.125, 0.25, 0.5, 1, 2};
-	float sampleDelay = 0;
+	void update_fade_time()
+	{
+		delayLine.set_fade_speed(1.f / (changeSec * sampleRate));
+	}
 	float feedback = 0;
-	float mix;
+	float mix = 0.5f;
 
 	float delayOutput = 0;
+	float lastOutput = 0;
+	float feedbackSample = 0;
 
 	float input = 0;
 
-	float timeinMs = 0;
 	float baseDelay = 0;
 
-	float currentDelay = 0;
-	float lastDelay = 0;
-
 	float sampleRate = 48000;
+	float changeSec = 0.01f;
 
 	float cvInput = 0;
 	float cvAmount = 0;
 
-	const static inline long maxSamples = 48000;
+	FadeLoop<float, maxSamples> delayLine;
 
-	MultireadDelayLine<maxSamples> delayLine;
-
-	float sinceChange = 0;
-	float changeTime = 48000;
-
-	float delayTimes[2] = {0, 0};
-
-	float feedbackSample = 0;
-
-	bool fading = false;
-
+	const float divTable[5] = {0.125, 0.25, 0.5, 1, 2};
 	float clockInput = 0;
-
 	bool clockAttached = false;
-
 	ClockToSamples clockSamples;
 };

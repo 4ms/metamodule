@@ -4,66 +4,6 @@
 #include <iostream>
 #include <stdint.h>
 
-TEST_CASE("FadeloopExt basic usage")
-{
-	int loops;
-
-	SUBCASE("Can use C_style array")
-	{
-		constexpr unsigned size = 18;
-		float _buf[size];
-		FadeLoopExt fl2{_buf};
-		loops = 0;
-		while (fl2.process(1.f) != 1.f)
-			loops++;
-		CHECK(loops == size);
-	}
-
-	SUBCASE("Can use std::array")
-	{
-		constexpr unsigned size = 188;
-		FadeLoopExt fl3{*(new std::array<float, size>)};
-		loops = 0;
-		while (fl3.process(1.f) != 1.f)
-			loops++;
-		CHECK(loops == size);
-	}
-
-	SUBCASE("Can use dynamic memory")
-	{
-		constexpr unsigned size = 18;
-		using BigDynArray = BigAlloc<std::array<float, size>>;
-		BigDynArray *dynbuf = new BigDynArray;
-		FadeLoopExt bigfl{*dynbuf};
-		loops = 0;
-		while (bigfl.process(111.f) != 111.f)
-			loops++;
-		CHECK(loops == size);
-		SUBCASE("The buffer we give the FadeLoopExt is being modified (not a copy)")
-		{
-			CHECK((*dynbuf)[0] == 111.f);
-		}
-
-		FadeLoopExt bigfl2{*(new BigAlloc<InterpArray<float, size>>)};
-		loops = 0;
-		while (bigfl2.process(1.f) != 1.f)
-			loops++;
-		CHECK(loops == size);
-	}
-
-	// SUBCASE("Can use BigBuffer (use BigBuffer<>::get() in FadeLoopExt ctor)")
-	// {
-	// 	constexpr unsigned size = 14;
-	// 	BigBuffer<std::array<float, size>> buf;
-	// 	FadeLoopExt flbuf{buf.get()};
-	// 	loops = 0;
-	// 	while (flbuf.process(123.f) != 123.f)
-	// 		loops++;
-	// 	CHECK(loops == size);
-	// 	CHECK(buf[0] == 123.f);
-	// }
-}
-
 TEST_CASE("Fadeloop basic usage")
 {
 	constexpr unsigned long max_buffer_size = 100;
@@ -197,4 +137,64 @@ TEST_CASE("Fadeloop basic usage")
 			}
 		}
 	}
+}
+
+TEST_CASE("FadeloopExt basic usage")
+{
+	int loops;
+
+	SUBCASE("Can use C_style array")
+	{
+		constexpr unsigned size = 18;
+		float _buf[size];
+		FadeLoopExt fl2{_buf};
+		loops = 0;
+		while (fl2.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == size);
+	}
+
+	SUBCASE("Can use std::array")
+	{
+		constexpr unsigned size = 188;
+		FadeLoopExt fl3{*(new std::array<float, size>)};
+		loops = 0;
+		while (fl3.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == size);
+	}
+
+	SUBCASE("Can use dynamic memory")
+	{
+		constexpr unsigned size = 18;
+		using BigDynArray = BigAlloc<std::array<float, size>>;
+		BigDynArray *dynbuf = new BigDynArray;
+		FadeLoopExt bigfl{*dynbuf};
+		loops = 0;
+		while (bigfl.process(111.f) != 111.f)
+			loops++;
+		CHECK(loops == size);
+		SUBCASE("The buffer we give the FadeLoopExt is being modified (not a copy)")
+		{
+			CHECK((*dynbuf)[0] == 111.f);
+		}
+
+		FadeLoopExt bigfl2{*(new BigAlloc<InterpArray<float, size>>)};
+		loops = 0;
+		while (bigfl2.process(1.f) != 1.f)
+			loops++;
+		CHECK(loops == size);
+	}
+
+	// SUBCASE("Can use BigBuffer (use BigBuffer<>::get() in FadeLoopExt ctor)")
+	// {
+	// 	constexpr unsigned size = 14;
+	// 	BigBuffer<std::array<float, size>> buf;
+	// 	FadeLoopExt flbuf{buf.get()};
+	// 	loops = 0;
+	// 	while (flbuf.process(123.f) != 123.f)
+	// 		loops++;
+	// 	CHECK(loops == size);
+	// 	CHECK(buf[0] == 123.f);
+	// }
 }
