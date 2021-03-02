@@ -10,34 +10,39 @@ using namespace MathTools;
 class FadeDelayCore : public CoreProcessor {
 public:
 	const static inline long maxSamples = 48000;
+	constexpr static inline unsigned minDelayTimeInSamples = 1;
+	constexpr static inline float maxDelayTimeInSeconds = 1.0f;
+
+	constexpr static inline float minFadeTimeInSeconds = 0.001f;
+	constexpr static inline float maxFadeTimeInSeconds = 1.0f;
+
 	enum Inputs { AudioIn, Clock, CV };
 	enum Outputs { AudioOut };
 	enum Params { DelayTime, Feedback, FadeTime, Mix, CVAmount };
 
 	virtual void update(void) override
 	{
-		float sampleDelay;
 
 		clockSamples.update(clockInput);
 
-		float finalDelay = constrain(baseDelay + cvInput * cvAmount, 0.0f, 1.0f);
+		float finalDelay = constrain(delayKnob + cvInput * cvAmount, 0.0f, 1.0f);
 		if (clockAttached == false) {
-			const float oneSample = 1.0f / sampleRate;
-			const float oneSecond = sampleRate * 1.0f;
-			sampleDelay = map_value(finalDelay, 0.0f, 1.0f, oneSample, oneSecond);
+			const unsigned long maxDelay = sampleRate * maxDelayTimeInSeconds;
+			const unsigned long minDelay = 1;
+			unsigned long sampleDelay = map_value(finalDelay, 0.0f, 1.0f, minDelay, maxDelay);
+			delayLine.change_delay(sampleDelay);
 		} else {
 			int divSelect = finalDelay * 4.0f;
 			auto delayCalc = clockSamples.getSamples() * divTable[divSelect];
-			if (delayCalc < maxSamples)
-				sampleDelay = delayCalc;
+			if (delayCalc < maxSamples) {
+				delayLine.change_delay(delayCalc);
+			}
 		}
 
-		delayLine.change_delay(sampleDelay);
+		float output = delayLine.read();
+		delayLine.write(input + output * feedbackKnob);
 
-		delayLine.write(input + lastOutput * feedback);
-		lastOutput = delayLine.read();
-
-		delayOutput = (interpolate(input, lastOutput, mix));
+		delayOutput = (interpolate(input, output, mixKnob));
 	}
 
 	FadeDelayCore() {}
@@ -46,17 +51,17 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				baseDelay = val;
+				delayKnob = val;
 				break;
 			case 1:
-				feedback = val;
+				feedbackKnob = val;
 				break;
 			case 2: {
-				changeSec = map_value(val, 0.0f, 1.0f, 0.001f, 1.0f);
+				fadeTimeSec = map_value(val, 0.0f, 1.0f, minFadeTimeInSeconds, maxFadeTimeInSeconds);
 				update_fade_time();
 			} break;
 			case 3:
-				mix = val;
+				mixKnob = val;
 				break;
 			case 4:
 				cvAmount = val;
@@ -118,21 +123,18 @@ public:
 private:
 	void update_fade_time()
 	{
-		delayLine.set_fade_speed(1.f / (changeSec * sampleRate));
+		delayLine.set_fade_speed(1.f / (fadeTimeSec * sampleRate));
 	}
-	float feedback = 0;
-	float mix = 0.5f;
 
-	float delayOutput = 0;
-	float lastOutput = 0;
-	float feedbackSample = 0;
+	float feedbackKnob = 0;
+	float mixKnob = 0.5f;
+	float delayKnob = 0;
+	float fadeTimeSec = 0.01f;
 
 	float input = 0;
-
-	float baseDelay = 0;
+	float delayOutput = 0;
 
 	float sampleRate = 48000;
-	float changeSec = 0.01f;
 
 	float cvInput = 0;
 	float cvAmount = 0;
