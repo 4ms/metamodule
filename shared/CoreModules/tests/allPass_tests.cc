@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "processors/freeverb/allpass.h"
+#include "processors/allpass.h"
 #include <iostream>
 #include <stdint.h>
 
