@@ -39,7 +39,7 @@ core_tests:
 	@echo "----------------------------"
 	@echo "Running CoreModule tests...."
 	@echo "----------------------------"
-	$(MAKE) -f $(SHARED_DIR)/CoreModules/tests/Makefile
+	cd $(SHARED_DIR) && $(MAKE) -j16 -f CoreModules/tests/Makefile
 
 vcv_tests:
 	@echo

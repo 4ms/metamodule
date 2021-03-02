@@ -1,6 +1,5 @@
-#this is meant to be run from the shared/ dir
-#and there should be shared/doctest/doctest/doctest.h
-
+# This is meant to be run from the shared/ dir
+# make -f CoreModules/tests/Makefile
 
 DOCTEST_DIR ?= doctest/doctest
 ifeq (,$(wildcard $(DOCTEST_DIR)/doctest.h))
@@ -36,25 +35,29 @@ CXXFLAGS = 	-Wall \
 LDFLAGS = -lstdc++
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
-DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(TEST_SOURCES))))
-DEPFLAGS = -MMD -MF$(BUILDDIR)/$(basename $<).d
 
-$(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
+DEPDIR := $(BUILDDIR)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
+#DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
+
+#DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(TEST_SOURCES))))
+# DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
+
+$(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(info Building $<)
 	$(CC) -c $(DEPFLAGS) $(CFLAGS) $< -o $@
 
-$(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
+$(BUILDDIR)/%.o: %.cc
 	@mkdir -p $(dir $@)
 	$(info Building $<)
 	$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
-$(BUILDDIR)/%.o: %.cpp $(BUILDDIR)/%.d
+$(BUILDDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(info Building $<)
 	$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
-%.d: ;
 
 tests: $(BUILDDIR)/runtests
 	$(BUILDDIR)/runtests
@@ -65,8 +68,10 @@ $(BUILDDIR)/runtests: $(OBJECTS)
 clean:
 	rm -rf $(BUILDDIR)
 
-ifneq "$(MAKECMDGOALS)" "clean"
--include $(DEPS)
-endif
+$(DEPDIR): ; @mkdir -p $@
 
-.PRECIOUS: $(DEPS) $(OBJECTS)
+DEPFILES := $(addprefix $(DEPDIR)/, $(addsuffix .d, $(basename $(TEST_SOURCES))))
+$(DEPFILES):
+
+include $(wildcard $(DEPFILES))
+
