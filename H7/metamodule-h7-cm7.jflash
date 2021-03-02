@@ -3,7 +3,7 @@
 [GENERAL]
   aATEModuleSel[10] = 0,0,0,0,0,0,0,0,0,0
   ConnectMode = 0
-  CurrentFile = "/Users/dann/4ms_local/stm32/meta-module/H7/build/corem7/main.hex"
+  CurrentFile = ""
   DataFileSAddr = 0x08000000
   GUIMode = 0
   HostName = ""
