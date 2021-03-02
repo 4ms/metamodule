@@ -43,7 +43,7 @@ DEVICE 			= $(LIBDIR)/stm32/device
 CMSIS 			= $(LIBDIR)/stm32/cmsis
 PERIPH 			= $(LIBDIR)/stm32/periph
 DRIVERLIB       = $(LIBDIR)/mdrivlib
-SHARED  		= src/shared
+SHARED  		= ../shared
 TABLEGEN 		= $(SHARED)/tableGen
 
 OPTFLAG = -O3
@@ -170,6 +170,7 @@ LFLAGS = -Wl,--gc-sections \
 	-nostartfiles \
 
 
+DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 
 all: Makefile $(BIN) $(HEX)
 
@@ -185,8 +186,6 @@ $(HEX): $(ELF)
 $(ELF): $(OBJECTS) $(DEVICE)/$(LOADFILE)
 	$(info Linking...)
 	@$(LD) $(LFLAGS) -o $@ $(OBJECTS)
-
-DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 
 $(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)
@@ -215,21 +214,32 @@ tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 	cd $(TABLEGEN) && ./make_tables
 
 flash: $(HEX)
+ifeq (,$(wildcard $(JFLASHEXE)))
+    $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
+endif
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR)/$(BINARYNAME).hex -auto -exit
 
 flash_m7: $(BUILDDIR_M7)/$(BINARYNAME).hex
+ifeq (,$(wildcard $(JFLASHEXE)))
+    $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
+endif
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
 
 flash_m4: $(BUILDDIR_M4)/$(BINARYNAME).hex
+ifeq (,$(wildcard $(JFLASHEXE)))
+    $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
+endif
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
 flash_all: $(BUILDDIR_M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
+ifeq (,$(wildcard $(JFLASHEXE)))
+    $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
+endif
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
-#/Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe -openprjmetamodule-h7-cm7.jflash -openbuild/corem7/main.hex -auto -openbuild/corem4/main.hex -auto -exit
-
 clean:
-	rm -rf build
+	rm -rf $(BUILDDIR_M7)
+	rm -rf $(BUILDDIR_M4)
 
 ifneq "$(MAKECMDGOALS)" "clean"
 -include $(DEPS)
