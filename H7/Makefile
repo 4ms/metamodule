@@ -58,6 +58,7 @@ SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
 SOURCES  += $(wildcard src/sys/*.c)
 SOURCES  += $(wildcard src/sys/*.cc)
+SOURCES  += $(DRIVERLIB)/drivers/pin.cc
 SOURCES  += $(DRIVERLIB)/drivers/interrupt.cc
 SOURCES  += $(DRIVERLIB)/drivers/hal_handlers.cc
 endif
@@ -107,7 +108,6 @@ INCLUDES += -I$(DEVICE)/include \
 			-I$(LIBDIR)/adafruit_gfx/Adafruit_ST7735_and_ST7789_Library \
 			-I$(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library \
 			-I$(LIBDIR)/adafruit_gfx/arduino \
-			-I$(LIBDIR)/adafruit_gfx/DAISY_SEED \
 			-I$(LIBDIR)/adafruit_gfx/SPI \
 			-I$(LIBDIR)/adafruit_gfx \
 
