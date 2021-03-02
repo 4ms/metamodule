@@ -13,6 +13,36 @@ public:
 	{
 		cp.update();
 		stepNum = cp.getCount() % 4;
+
+		float position = cvInput * 3.0f;
+		float fade = position - (int)position;
+
+		switch ((int)position) {
+			case 0:
+				scanLevels[0] = 1.0f - fade;
+				scanLevels[1] = fade;
+				scanLevels[2] = 0;
+				scanLevels[3] = 0;
+				break;
+			case 1:
+				scanLevels[1] = 1.0f - fade;
+				scanLevels[2] = fade;
+				scanLevels[0] = 0;
+				scanLevels[3] = 0;
+				break;
+			case 2:
+				scanLevels[2] = 1.0f - fade;
+				scanLevels[3] = fade;
+				scanLevels[0] = 0;
+				scanLevels[1] = 0;
+				break;
+			case 3:
+				scanLevels[0] = 0;
+				scanLevels[1] = 0;
+				scanLevels[2] = 0;
+				scanLevels[3] = 1.0f;
+				break;
+		}
 	}
 
 	Switch4to1Core() {}
@@ -30,6 +60,8 @@ public:
 			cp.updateClock(val);
 		} else if (input_id == 1) {
 			cp.updateReset(val);
+		} else if (input_id == 6) {
+			cvInput = constrain(val, 0.0f, 1.0f);
 		} else {
 			auto inputNum = input_id - 2;
 			signalInputs[inputNum] = val;
@@ -40,11 +72,31 @@ public:
 	{
 		float output = 0;
 		switch (output_id) {
-			case 0:
-				output = signalInputs[stepNum];
-				break;
+			case 0: {
+				if (cvMode) {
+					for (int i = 0; i < 4; i++) {
+						output += signalInputs[i] * scanLevels[i];
+					}
+
+				} else {
+					output = signalInputs[stepNum];
+				}
+			} break;
 		}
 		return output;
+	}
+
+	virtual void mark_input_unpatched(const int input_id) override
+	{
+		if (input_id == 6) {
+			cvMode = false;
+		}
+	}
+	virtual void mark_input_patched(const int input_id) override
+	{
+		if (input_id == 6) {
+			cvMode = true;
+		}
 	}
 
 	static std::unique_ptr<CoreProcessor> create()
@@ -58,5 +110,8 @@ public:
 private:
 	int stepNum = 0;
 	float signalInputs[4] = {0, 0, 0, 0};
+	float cvInput;
+	float scanLevels[4];
+	bool cvMode = false;
 	ClockPhase cp;
 };

@@ -13,9 +13,45 @@ public:
 	{
 		cp.update();
 		stepNum = cp.getCount() % 4;
+
+		float position = cvSignal * 3.0f;
+		float fade = position-(int)position;
+
+		switch((int)position)
+		{
+			case 0:
+			panSignals[0]=1.0f-fade;
+			panSignals[1]=fade;
+			panSignals[2]=0;
+			panSignals[3]=0;
+			break;
+			case 1:
+			panSignals[0]=0;
+			panSignals[1]=1.0f-fade;
+			panSignals[2]=fade;
+			panSignals[3]=0;
+			break;
+			case 2:
+			panSignals[0]=0;
+			panSignals[1]=0;
+			panSignals[2]=1.0f-fade;
+			panSignals[3]=fade;
+			break;
+			case 3:
+			panSignals[0]=0;
+			panSignals[1]=0;
+			panSignals[2]=0;
+			panSignals[3]=1.0f;
+			break;
+		}
 	}
 
-	Switch1to4Core() {}
+	Switch1to4Core()
+	{
+		for (int i = 0; i < 4; i++) {
+			panSignals[i] = 0;
+		}
+	}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
@@ -36,19 +72,37 @@ public:
 			case 2: // signal
 				inputSignal = val;
 				break;
+			case 3:
+				cvSignal = constrain(val, 0.0f, 1.0f);
+				break;
 		}
 	}
 
 	virtual float get_output(const int output_id) const override
 	{
 		float output = 0;
-		if (output_id == stepNum) {
-			output = inputSignal;
+		if (cvMode) {
+			output = panSignals[output_id]*inputSignal;
 		} else {
-			output = 0;
+			if (output_id == stepNum) {
+				output = inputSignal;
+			} else {
+				output = 0;
+			}
 		}
 
 		return output;
+	}
+
+	virtual void mark_input_unpatched(const int input_id) override
+	{
+		if (input_id == 3)
+			cvMode = false;
+	}
+	virtual void mark_input_patched(const int input_id) override
+	{
+		if (input_id == 3)
+			cvMode = true;
 	}
 
 	static std::unique_ptr<CoreProcessor> create()
@@ -61,6 +115,9 @@ public:
 
 private:
 	ClockPhase cp;
+	float panSignals[4];
+	float cvSignal = 0;
+	bool cvMode = false;
 	int stepNum = 0;
 	float inputSignal = 0;
 };

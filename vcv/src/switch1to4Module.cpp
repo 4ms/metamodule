@@ -5,7 +5,7 @@
 struct Switch1to4Module : CommModule {
 
 	enum ParamIds { NUM_PARAMS };
-	enum InputIds { CLOCK_INPUT, RESET_INPUT, SIGNAL_INPUT, NUM_INPUTS };
+	enum InputIds { CLOCK_INPUT, RESET_INPUT, SIGNAL_INPUT, CV_INPUT, NUM_INPUTS };
 	enum OutputIds { ENUMS(SIGNAL_OUTPUTS, 4), NUM_OUTPUTS };
 	enum LightIds { NUM_LIGHTS };
 
@@ -14,6 +14,8 @@ struct Switch1to4Module : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("SWITCH1TO4");
 		selfID.typeID = "SWITCH1TO4";
+
+		inputJacks[Switch1to4Module::CV_INPUT]->scale = [](float f) { return f / 5.0f; };
 	}
 };
 
@@ -33,6 +35,7 @@ struct Switch1to4Widget : CommModuleWidget {
 
 		addLabeledInput("CLOCK", Switch1to4Module::CLOCK_INPUT, {0, 1});
 		addLabeledInput("RESET", Switch1to4Module::RESET_INPUT, {0, 0});
+		addLabeledInput("CV", Switch1to4Module::CV_INPUT, {0, 2});
 
 		for (int i = 0; i < 4; i++) {
 			addLabeledOutput(
