@@ -69,8 +69,12 @@ TEST_CASE("FadeDelayCore basic usage")
 		while (loops--)
 			fd.update();
 
+		// input the test signal
 		fd.set_input(FadeDelayCore::Inputs::AudioIn, initial_input);
 		fd.update();
+
+		// Run the delay until we get our original input back out
+		// in order to measure the delay loop time
 		long measured_delay_samples = 0;
 		const long TIMEOUT = 0xFFFF;
 		out = 0.f;
@@ -100,6 +104,14 @@ TEST_CASE("FadeDelayCore basic usage")
 			out = fd.get_output(FadeDelayCore::Outputs::AudioOut);
 		}
 		CHECK(out == doctest::Approx(initial_input * feedback * feedback));
+
+		out = 0.f;
+		for (long i = 0; i < measured_delay_samples; i++) {
+			fd.set_input(FadeDelayCore::Inputs::AudioIn, 0);
+			fd.update();
+			out = fd.get_output(FadeDelayCore::Outputs::AudioOut);
+		}
+		CHECK(out == doctest::Approx(initial_input * feedback * feedback * feedback));
 	}
 
 	SUBCASE("Fading")
