@@ -48,7 +48,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	load_measure.start_measurement();
 	Debug::Pin0::high();
 
-	params.update();
+	params.lock_for_read();
+	// params.update();
 
 	bool should_update_knob[NumKnobs];
 	static auto is_small = [](float x) { return (x < 3e-6f) && (x > -3e-6f); };
@@ -63,6 +64,13 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		cv.set_new_value(params.cvjacks[i]);
 		i++;
 	}
+
+	// Todo: use these:
+	// params.control_data.gate_ins[]
+	// params.control_data.clock_in
+	// params.control_data.patch_cv
+	// params.control_data.buttons[]
+	// params.control_data.jack_senses[]
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
@@ -100,6 +108,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 
 		in_++;
 	}
+
+	params.control_data.unlock_for_read();
 
 	Debug::Pin0::low();
 	load_measure.end_measurement();

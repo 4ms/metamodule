@@ -11,7 +11,14 @@ JFLASHEXE = /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
 BUILDDIR_M7 = build/corem7
 BUILDDIR_M4 = build/corem4
 
+.PHONY: CM4 CM7
+
+CM4: CORE = M4
+
+CM7: CORE = M7
+
 CORE ?= M7
+
 ifeq ($(CORE), M7)
 $(info Building for M7 core)
 LOADFILE	= stm32h755xx_flash_CM7.ld

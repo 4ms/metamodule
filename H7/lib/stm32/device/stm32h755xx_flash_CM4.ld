@@ -43,11 +43,14 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
 	FLASH (rx)			: ORIGIN = 0x08100000, LENGTH = 1024K
-	RAM (xrw)			: ORIGIN = 0x10000000, LENGTH = 256K /*SRAM1/2 Alias */
+	SRAM1 (xrw)			: ORIGIN = 0x10000000, LENGTH = 128K /*SRAM1 Alias */
+	SRAM2 (xrw)			: ORIGIN = 0x10020000, LENGTH = 128K /*SRAM2 Alias */
 	SRAM3 (xrw)			: ORIGIN = 0x10040000, LENGTH = 32K /*SRAM3 Alias */
 }
 
-_estack = 0x10040000;		/* end of RAM */
+_estack = 0x10020000;		/* end of RAM */
+
+_control_data_start = 0x10020000;
 
 /* Define output sections */
 SECTIONS

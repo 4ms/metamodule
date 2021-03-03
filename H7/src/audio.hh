@@ -23,7 +23,7 @@ public:
 	using AudioStreamBlock = std::array<AudioFrame, AudioConf::BlockSize>;
 	enum AudioChannels { LEFT, RIGHT };
 
-	AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4]);
+	AudioStream(Params &p, PatchList &patches, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4]);
 	void start();
 
 	void process(AudioStreamBlock &in, AudioStreamBlock &out);

@@ -48,6 +48,8 @@ MEMORY
 	ITCMRAM (xrw)	: ORIGIN = 0x00000000, LENGTH = 64K
 }
 
+_control_data_start = 0x30020000;
+
 _sheap = 0x24000000; 		/* start of heap */
 _eheap = 0x24080000; 		/* end of heap */
 

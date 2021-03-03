@@ -43,7 +43,6 @@ public:
 		draw_audio_load();
 
 		leds.start();
-		params.controls.start();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);

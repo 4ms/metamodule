@@ -8,32 +8,17 @@
 
 class Params {
 public:
-	static constexpr uint32_t num_patches = 6;
+	Params(ControlData &c);
 
-	Params(Controls &c);
-
-	void update();
-	Controls &controls;
-
-	// Todo: 4 and 8 should come from Panel
-	float cvjacks[4] = {0.f};
-	float patchcv = 0.f;
-	float knobs[8] = {0.f};
-
-	Toggler gate_ins[2];
-	Toggler clock_in;
-	Toggler jack_senses[15];
-
-	Toggler buttons[2];
-	Toggler rotary_button;
-
-	int32_t rotary_motion = 0;
-	int32_t rotary_pushed_motion = 0;
+	ControlData &control_data;
 
 	// SelbusQueue selbus_commands;
 
 	// bool clock_out
+};
 
+class PatchList {
+	static constexpr uint32_t num_patches = 6;
 	uint8_t audio_load = 0;
 
 	// Todo: move this into PatchManager or PatchList
@@ -42,12 +27,14 @@ public:
 	{
 		return _patches[_cur_patch].patch;
 	}
+
 	void next_patch()
 	{
 		_cur_patch++;
 		if (_cur_patch == num_patches)
 			_cur_patch = 0;
 	}
+
 	void prev_patch()
 	{
 		if (_cur_patch == 0)
@@ -57,7 +44,7 @@ public:
 	}
 
 private:
-	bool _rotary_moved_while_pressed = false;
+	// bool _rotary_moved_while_pressed = false;
 	uint32_t _cur_patch = 0;
 	PatchRef _patches[num_patches];
 };

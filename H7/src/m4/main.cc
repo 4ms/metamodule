@@ -1,4 +1,6 @@
+#include "conf/control_conf.hh"
 #include "conf/hsem_conf.hh"
+#include "controls.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/hsem.hh"
@@ -19,6 +21,15 @@ void main(void)
 	}
 	Debug::Pin3::low();
 
+	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
+	CVAdcChipT cvadc;
+
+	extern char *_control_data_start; // defined by linker
+	ControlData *control_data = reinterpret_cast<ControlData *>(&_control_data_start);
+
+	Controls controls{potadc, cvadc, *control_data}; //, gpio_expander};
+
+	controls.start();
 	// SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
 
 	while (1) {
@@ -34,3 +45,4 @@ void recover_from_task_fault()
 {
 	main();
 }
+

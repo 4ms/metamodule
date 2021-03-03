@@ -32,10 +32,10 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 
 	// Todo: understand why setting the members to static inline causes SystemClocks ctor to hang on waiting for
 	// D2CLKREADY
-	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
+	// MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
-	CVAdcChipT cvadc;
+	// CVAdcChipT cvadc;
 	AnalogOutT dac;
 	Screen screen;
 	// GPIOExpander<16> sense{gpio_expander_conf};
@@ -44,6 +44,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
+	// static inline __attribute__((section(".shared_mem"))) ControlData control_data;
 
 	StaticBuffers()
 	{
@@ -62,14 +63,15 @@ void main()
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
 	LedCtl leds{led_driver};
 
-	Controls controls{_hw.potadc, _hw.cvadc}; //, gpio_expander};
-	Params params{controls};
+	// Controls controls{_hw.potadc, _hw.cvadc}; //, gpio_expander};
+
+	extern char *_control_data_start; // defined by linker
+	ControlData *control_data = reinterpret_cast<ControlData *>(&_control_data_start);
+	Params params{*control_data};
 
 	AudioStream audio{params, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
 
 	Ui ui{params, leds, _hw.screen};
-
-	audio.start();
 
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 
@@ -77,13 +79,15 @@ void main()
 
 	HWSemaphore::clear<SharedBusLock>();
 	Debug::Pin1::high();
-	SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
+	// SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
+
+	audio.start();
 
 	while (1) {
 		ui.update();
-		if (SharedBus::i2c.is_ready()) {
-			i2cqueue.update();
-		}
+		// if (SharedBus::i2c.is_ready()) {
+		// 	i2cqueue.update();
+		// }
 		__NOP();
 	}
 }
