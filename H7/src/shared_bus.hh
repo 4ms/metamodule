@@ -38,7 +38,7 @@ public:
 
 	void update()
 	{
-		Debug::Pin2::high();
+		// Debug::Pin2::high();
 		switch (cur_client) {
 			case Leds:
 				leds.refresh();
@@ -88,7 +88,7 @@ public:
 				cur_client = Leds;
 				break;
 		}
-		Debug::Pin2::low();
+		// Debug::Pin2::low();
 	}
 
 private:

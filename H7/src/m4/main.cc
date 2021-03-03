@@ -1,32 +1,32 @@
+#include "conf/hsem_conf.hh"
+#include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
+#include "m4/system_clocks.hh"
+#include "shared_bus.hh"
 
-#include "debug.hh"
-
+using namespace MetaModule;
 void main(void)
 {
-	target::RCC_Control::HSEM_::set();
+	target::corem4::SystemClocks start_clocks;
 
-	constexpr uint32_t HSEM_id_mask = 1 << 0;
+	Debug::Pin3::high();
+	Debug::Pin2::high();
+	while (HWSemaphore::is_locked<SharedBusLock>()) {
+		Debug::Pin2::low();
+	}
+	Debug::Pin3::low();
 
-	target::HSEM_::template IER<HSEM_id_mask>::set();
-
-	// Domain D2 goes to STOP mode (Cortex-M4 in deep-sleep) waiting for Cortex-M7 to
-	// perform system initialization (system clock config, external memory configuration.. )
-	HAL_PWREx_ClearPendingEvent();
-	HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
-
-	// __HAL_HSEM_CLEAR_FLAG(HSEM_id_mask);
-	target::HSEM_::template ICR<HSEM_id_mask>::set();
-
-	HAL_Init();
-	target::RCC_Control::SYSCFG_::set();
+	// SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
 
 	while (1) {
-		Debug::Pin3::high();
-		Debug::Pin3::low();
+		// if (SharedBus::i2c.is_ready()) {
+		Debug::Pin2::high();
+		// i2cqueue.update();
+		Debug::Pin2::low();
+		// }
 	}
 }
 

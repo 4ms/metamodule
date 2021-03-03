@@ -1,6 +1,7 @@
 #include "conf/codec_sai_conf.hh"
 #include "conf/control_conf.hh"
 #include "conf/dac_conf.hh"
+#include "conf/hsem_conf.hh"
 #include "conf/i2c_conf.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdram_conf.hh"
@@ -9,15 +10,16 @@
 #include "drivers/codec_WM8731.hh"
 #include "drivers/dac_MCP48FVBxx.hh"
 #include "drivers/gpio_expander.hh"
+#include "drivers/hsem.hh"
 #include "drivers/mpu.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "drivers/sdram.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
+#include "m7/system_clocks.hh"
 #include "muxed_adc.hh"
 #include "screen.hh"
 #include "shared_bus.hh"
-#include "sys/system_clocks.hh"
 #include "ui.hh"
 
 namespace MetaModule
@@ -73,6 +75,8 @@ void main()
 
 	ui.start();
 
+	HWSemaphore::clear<SharedBusLock>();
+	Debug::Pin1::high();
 	SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
 
 	while (1) {
