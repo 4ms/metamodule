@@ -6,6 +6,7 @@
 #include "drivers/stm32xx.h"
 #include "params.hh"
 #include "patch_player.hh"
+#include "patchlist.hh"
 #include "processors/tools/kneeCompress.h"
 #include "util/audio_frame.hh"
 #include "util/interp_param.hh"
@@ -13,6 +14,7 @@
 #include "util/oscs.hh"
 #include <array>
 
+using namespace mdrivlib;
 using AudioConf = StreamConf::Audio;
 
 // Todo: we don't need a codec virtual class, just use a type alias
@@ -46,6 +48,7 @@ private:
 
 	Params &params;
 	AnalogOutT &dac;
+	PatchList &patch_list;
 	PatchPlayer player;
 	PinChangeInterrupt dac_updater;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};

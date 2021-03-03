@@ -66,12 +66,12 @@ void main()
 	// Controls controls{_hw.potadc, _hw.cvadc}; //, gpio_expander};
 
 	extern char *_control_data_start; // defined by linker
-	ControlData *control_data = reinterpret_cast<ControlData *>(&_control_data_start);
-	Params params{*control_data};
+	Params *params_ptr = reinterpret_cast<Params *>(&_control_data_start);
+	Params &params = *params_ptr;
+	PatchList patch_list;
 
-	AudioStream audio{params, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
-
-	Ui ui{params, leds, _hw.screen};
+	AudioStream audio{params, patch_list, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
+	Ui ui{params, patch_list, leds, _hw.screen};
 
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 

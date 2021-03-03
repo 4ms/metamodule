@@ -1,51 +1,88 @@
 #pragma once
-#include "accel_param.hh"
-#include "controls.hh"
 #include "drivers/stm32xx.h"
-#include "drivers/uart.hh"
-#include "patch/patch.hh"
 #include "util/debouncer.hh"
 
-class Params {
-public:
-	Params(ControlData &c);
+struct Params {
+	float cvjacks[4] = {0.f, 0.f, 0.f, 0.f};
+	float patchcv = 0.f;
+	float knobs[8] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
 
-	ControlData &control_data;
+	Toggler gate_ins[2];
+	Toggler clock_in;
+	Toggler jack_senses[15];
+
+	Toggler buttons[2];
+
+	Toggler rotary_button;
+	int32_t rotary_motion = 0;
+	int32_t rotary_pushed_motion = 0;
 
 	// SelbusQueue selbus_commands;
-
 	// bool clock_out
-};
 
-class PatchList {
-	static constexpr uint32_t num_patches = 6;
-	uint8_t audio_load = 0;
-
-	// Todo: move this into PatchManager or PatchList
-	bool should_redraw_patch = false;
-	const Patch &cur_patch()
+	void init()
 	{
-		return _patches[_cur_patch].patch;
+		cvjacks[0] = 0.f;
+		cvjacks[1] = 0.f;
+		cvjacks[2] = 0.f;
+		cvjacks[3] = 0.f;
+		knobs[0] = 0.f;
+		knobs[1] = 0.f;
+		knobs[2] = 0.f;
+		knobs[3] = 0.f;
+		knobs[4] = 0.f;
+		knobs[5] = 0.f;
+		knobs[6] = 0.f;
+		knobs[7] = 0.f;
+		patchcv = 0.f;
+		rotary_motion = 0;
+		rotary_pushed_motion = 0;
+		clock_in.register_rising_edge();
+		clock_in.is_just_pressed();
+		clock_in.set_state(0);
+		gate_ins[0].register_rising_edge();
+		gate_ins[0].is_just_pressed();
+		gate_ins[0].set_state(0);
+		gate_ins[1].register_rising_edge();
+		gate_ins[1].is_just_pressed();
+		gate_ins[1].set_state(0);
+		for (int i = 0; i < 15; i++) {
+			jack_senses[i].register_rising_edge();
+			jack_senses[i].is_just_pressed();
+			jack_senses[i].set_state(0);
+		}
 	}
 
-	void next_patch()
+	// has an HSEM id?
+	void lock_for_read()
 	{
-		_cur_patch++;
-		if (_cur_patch == num_patches)
-			_cur_patch = 0;
+		while (write_lock)
+			;
+		read_lock = false;
+	}
+	void unlock_for_read()
+	{
+		read_lock = true;
 	}
 
-	void prev_patch()
+	void lock_for_write()
 	{
-		if (_cur_patch == 0)
-			_cur_patch = num_patches - 1;
-		else
-			_cur_patch--;
+		while (read_lock)
+			;
+		write_lock = true;
+	}
+
+	void unlock_for_write()
+	{
+		write_lock = false;
+	}
+
+	bool _is_locked()
+	{
+		return write_lock || read_lock;
 	}
 
 private:
-	// bool _rotary_moved_while_pressed = false;
-	uint32_t _cur_patch = 0;
-	PatchRef _patches[num_patches];
+	volatile bool write_lock = false;
+	volatile bool read_lock = false;
 };
-

@@ -3,6 +3,7 @@
 #include "debug.hh"
 #include "drivers/i2c.hh"
 #include "leds.hh"
+#include "params.hh"
 
 using namespace mdrivlib;
 

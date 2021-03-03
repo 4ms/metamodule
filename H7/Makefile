@@ -65,9 +65,14 @@ SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
 SOURCES  += $(wildcard src/sys/*.c)
 SOURCES  += $(wildcard src/sys/*.cc)
-SOURCES  += $(DRIVERLIB)/drivers/pin.cc
-SOURCES  += $(DRIVERLIB)/drivers/interrupt.cc
 SOURCES  += $(DRIVERLIB)/drivers/hal_handlers.cc
+SOURCES  += $(DRIVERLIB)/drivers/i2c.cc
+SOURCES  += $(DRIVERLIB)/drivers/interrupt.cc
+SOURCES  += $(DRIVERLIB)/drivers/pin.cc
+SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
+SOURCES  += $(DRIVERLIB)/drivers/system.cc
+SOURCES  += $(DRIVERLIB)/drivers/tim.cc
+SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
 endif
 
 ifeq ($(CORE), M7)

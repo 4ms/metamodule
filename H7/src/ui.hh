@@ -6,6 +6,7 @@
 #include "drivers/i2c.hh"
 #include "leds.hh"
 #include "params.hh"
+#include "patchlist.hh"
 #include "screen.hh"
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
@@ -14,6 +15,7 @@ template<unsigned AnimationUpdateRate = 100>
 class Ui {
 public:
 	Params &params;
+	PatchList &patch_list;
 	LedCtl<AnimationUpdateRate> &leds;
 	Screen &screen;
 
@@ -21,8 +23,9 @@ public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, LedCtl<AnimationUpdateRate> &l, Screen &s)
+	Ui(Params &p, PatchList &patchlist, LedCtl<AnimationUpdateRate> &l, Screen &s)
 		: params{p}
+		, patch_list{patch_list}
 		, leds{l}
 		, screen{s}
 	{}
@@ -80,8 +83,8 @@ public:
 			draw_pot_values();
 		}
 
-		if (params.should_redraw_patch) {
-			params.should_redraw_patch = false;
+		if (patch_list.should_redraw_patch) {
+			patch_list.should_redraw_patch = false;
 			draw_patch_name();
 		}
 
@@ -119,10 +122,10 @@ private:
 		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
 		uint32_t y = 60;
-		for (int i = 1; i < params.cur_patch().num_modules; i++) {
+		for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
 			screen.setCursor(10, y);
 			// Debug::Pin2::high();
-			screen.print(params.cur_patch().modules_used[i].name);
+			screen.print(patch_list.cur_patch().modules_used[i].name);
 			// Debug::Pin2::low();
 			y += 35;
 		}
@@ -134,7 +137,7 @@ private:
 		screen.setTextSize(2);
 		screen.setFont(NULL);
 		screen.setCursor(0, 10);
-		screen.print(params.audio_load, 10);
+		screen.print(patch_list.audio_load, 10);
 		screen.print("% ");
 		screen.print(get_heap_size() / 1024, 10);
 		screen.print("kb ");
@@ -151,7 +154,6 @@ private:
 		int y = 180;
 		for (int i = 0; i < 12; i++) {
 			screen.setCursor((i & 0b11) * 60, y);
-			// screen.print((uint16_t)(i < 4 ? params.cvjacks[i] * 100 : params.knobs[i - 4] * 100));
 			if (i < 4)
 				screen.print((uint16_t)(params.cvjacks[i] * 100));
 			else

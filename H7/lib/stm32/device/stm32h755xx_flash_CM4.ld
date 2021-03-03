@@ -130,7 +130,7 @@ SECTIONS
 
 		. = ALIGN(4);
 		_edata = .;				/* define a global symbol at data end */
-	} >RAM AT> FLASH
+	} >SRAM1 AT> FLASH
 
 	
 	/* Uninitialized data section */
@@ -147,7 +147,7 @@ SECTIONS
 		. = ALIGN(4);
 		_ebss = .;				 /* define a global symbol at bss end */
 		__bss_end__ = _ebss;
-	} >RAM
+	} >SRAM1
 
 	/* User_heap_stack section, used to check that there is enough RAM left */
 	._user_heap_stack :
@@ -158,7 +158,7 @@ SECTIONS
 		. = . + _Min_Heap_Size;
 		. = . + _Min_Stack_Size;
 		. = ALIGN(8);
-	} >RAM
+	} >SRAM1
 
 	
 	.dma_buffer :

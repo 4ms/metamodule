@@ -7,6 +7,7 @@
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
 #include "m4/system_clocks.hh"
+#include "params.hh"
 #include "shared_bus.hh"
 
 using namespace MetaModule;
@@ -25,9 +26,9 @@ void main(void)
 	CVAdcChipT cvadc;
 
 	extern char *_control_data_start; // defined by linker
-	ControlData *control_data = reinterpret_cast<ControlData *>(&_control_data_start);
+	Params *params = reinterpret_cast<Params *>(&_control_data_start);
 
-	Controls controls{potadc, cvadc, *control_data}; //, gpio_expander};
+	Controls controls{potadc, cvadc, *params}; //, gpio_expander};
 
 	controls.start();
 	// SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};

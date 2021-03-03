@@ -5,7 +5,8 @@
 
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 
-AudioStream::AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4])
+AudioStream::AudioStream(
+	Params &p, PatchList &patchlist, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4])
 	: codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
 	, tx_buf_1{buffers[0]}
@@ -14,6 +15,7 @@ AudioStream::AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamB
 	, rx_buf_2{buffers[3]}
 	, params{p}
 	, dac{dac}
+	, patch_list{patchlist}
 {
 	load_patch();
 
@@ -49,7 +51,6 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	Debug::Pin0::high();
 
 	params.lock_for_read();
-	// params.update();
 
 	bool should_update_knob[NumKnobs];
 	static auto is_small = [](float x) { return (x < 3e-6f) && (x > -3e-6f); };
@@ -65,12 +66,12 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		i++;
 	}
 
-	// Todo: use these:
-	// params.control_data.gate_ins[]
-	// params.control_data.clock_in
-	// params.control_data.patch_cv
-	// params.control_data.buttons[]
-	// params.control_data.jack_senses[]
+	// Todo: integrate these:
+	// params.gate_ins[]
+	// params.clock_in
+	// params.patch_cv
+	// params.buttons[]
+	// params.jack_senses[]
 
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
@@ -90,7 +91,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 			i++;
 		}
 
-		player.update_patch(params.cur_patch());
+		player.update_patch(patch_list.cur_patch());
 
 		// FixMe: Why are the L/R samples swapped in the DMA buffer? The L/R jacks are not swapped on hardware
 		// Todo: scope the data stream vs. LR clk
@@ -109,11 +110,11 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		in_++;
 	}
 
-	params.control_data.unlock_for_read();
+	params.unlock_for_read();
 
 	Debug::Pin0::low();
 	load_measure.end_measurement();
-	params.audio_load = load_measure.get_last_measurement_load_percent();
+	patch_list.audio_load = load_measure.get_last_measurement_load_percent();
 }
 
 void AudioStream::start()
@@ -127,18 +128,18 @@ bool AudioStream::check_patch_change()
 {
 	bool new_patch = false;
 	if (params.rotary_motion > 0) {
-		player.unload_patch(params.cur_patch());
-		params.next_patch();
+		player.unload_patch(patch_list.cur_patch());
+		patch_list.next_patch();
 		new_patch = true;
 	} else if (params.rotary_motion < 0) {
-		player.unload_patch(params.cur_patch());
-		params.prev_patch();
+		player.unload_patch(patch_list.cur_patch());
+		patch_list.prev_patch();
 		new_patch = true;
 	}
 
 	if (new_patch) {
 		params.rotary_motion = 0;
-		params.should_redraw_patch = true;
+		patch_list.should_redraw_patch = true;
 		load_patch();
 	}
 	return new_patch;
@@ -146,7 +147,7 @@ bool AudioStream::check_patch_change()
 
 void AudioStream::load_patch()
 {
-	bool ok = player.load_patch(params.cur_patch());
+	bool ok = player.load_patch(patch_list.cur_patch());
 
 	for (int i = 0; i < NumCVInputs; i++)
 		player.set_panel_input(i + NumAudioInputs, params.cvjacks[i]);

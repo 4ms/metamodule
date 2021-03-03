@@ -65,7 +65,7 @@ void Controls::start()
 	clock_out.low();
 }
 
-Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ControlData &dest)
+Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, Params &dest)
 	: potadc(potadc)
 	, cvadc(cvadc)
 	, dest(dest)

@@ -1,16 +1,10 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleTypes.h"
-
-// #define USE_NODES
-
 #include "CoreModules/panel_node.hh"
 #include "patch/patch.hh"
 #include "sys/alloc_buffer.hh"
 #include <cstdint>
-#ifdef STM32F7
-	#include "debug.hh"
-#endif
 
 using PanelT = NodePanel;
 
