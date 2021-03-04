@@ -1,265 +1,45 @@
-# Makefile by Dan Green <danngreen1@gmail.com>, public domain
-
-# Choose the core to build:
-# CORE=M4 make -j16
-# CORE=M7 make -j16
-# Todo: build both cores with one make command
-
 # Set this to the path to your JFlash executable
 JFLASHEXE = /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
 
-BUILDDIR_M7 = build/corem7
-BUILDDIR_M4 = build/corem4
+export BUILDDIR_M4 = build/corem4
+export BUILDDIR_M7 = build/corem7
+export BINARYNAME 		= main
+export STARTUP 		= startup_cm7.s
+export SYSTEM 			= system_stm32h7xx_dualcore_boot_cm4_cm7.c
+export LIBDIR 			= lib
+export DEVICE 			= $(LIBDIR)/stm32/device
+export CMSIS 			= $(LIBDIR)/stm32/cmsis
+export PERIPH 			= $(LIBDIR)/stm32/periph
+export DRIVERLIB       = $(LIBDIR)/mdrivlib
+export SHARED  		= ../shared
+export TABLEGEN 		= $(SHARED)/tableGen
 
-.PHONY: CM4 CM7
+all:
+	$(MAKE) -f makefile_m7.mk
+	$(MAKE) -f makefile_m4.mk
 
-CM4: CORE = M4
-
-CM7: CORE = M7
-
-CORE ?= M7
-
-ifeq ($(CORE), M7)
-$(info Building for M7 core)
-LOADFILE	= stm32h755xx_flash_CM7.ld
-BUILDDIR = $(BUILDDIR_M7)
-MCU =  -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
-ARCH_CFLAGS = -DARM_MATH_CM7 -DCORE_CM7
-CORE_SRC = src/m7
-HAL_CONF_INC = src/m7
-else
-ifeq ($(CORE), M4)
-$(info Building for M4 core)
-LOADFILE	= stm32h755xx_flash_CM4.ld
-BUILDDIR = $(BUILDDIR_M4)
-MCU =  -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
-ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
-CORE_SRC = src/m4
-HAL_CONF_INC = src/m4
-else
-$(error You must specify a CORE. Valid values are M4 or M7)
-endif
-endif
-
-BINARYNAME 		= main
-STARTUP 		= startup_cm7.s
-SYSTEM 			= system_stm32h7xx_dualcore_boot_cm4_cm7.c
-
-LIBDIR 			= lib
-DEVICE 			= $(LIBDIR)/stm32/device
-CMSIS 			= $(LIBDIR)/stm32/cmsis
-PERIPH 			= $(LIBDIR)/stm32/periph
-DRIVERLIB       = $(LIBDIR)/mdrivlib
-SHARED  		= ../shared
-TABLEGEN 		= $(SHARED)/tableGen
-
-OPTFLAG = -O3
-include makefile_opts.mk
-
-ifeq ($(CORE), M4)
-SOURCES  += $(DRIVERLIB)/drivers/$(STARTUP)
-SOURCES  += $(DEVICE)/src/$(SYSTEM)
-SOURCES  += $(wildcard $(PERIPH)/src/*.c)
-SOURCES  += $(wildcard $(CORE_SRC)/*.c)
-SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
-SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
-SOURCES  += $(wildcard src/sys/*.c)
-SOURCES  += $(wildcard src/sys/*.cc)
-SOURCES  += $(DRIVERLIB)/drivers/hal_handlers.cc
-SOURCES  += $(DRIVERLIB)/drivers/i2c.cc
-SOURCES  += $(DRIVERLIB)/drivers/interrupt.cc
-SOURCES  += $(DRIVERLIB)/drivers/pin.cc
-SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
-SOURCES  += $(DRIVERLIB)/drivers/system.cc
-SOURCES  += $(DRIVERLIB)/drivers/tim.cc
-SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
-SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
-SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver_dma.cc
-endif
-
-ifeq ($(CORE), M7)
-SOURCES  += $(DRIVERLIB)/drivers/$(STARTUP)
-SOURCES  += $(DEVICE)/src/$(SYSTEM)
-SOURCES  += $(wildcard $(PERIPH)/src/*.c)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.c)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cc)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cpp)
-SOURCES  += $(wildcard $(CORE_SRC)/*.c)
-SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
-SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
-SOURCES  += $(wildcard src/*.c)
-SOURCES  += $(wildcard src/*.cc)
-SOURCES  += $(wildcard src/*.cpp)
-SOURCES  += $(wildcard src/sys/*.c)
-SOURCES  += $(wildcard src/sys/*.cc)
-SOURCES  += $(wildcard src/sys/*.cpp)
-SOURCES  += $(wildcard $(SHARED)/util/*.c)
-SOURCES  += $(wildcard $(SHARED)/util/*.cc)
-SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
-SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
-SOURCES  += $(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library/Adafruit_GFX.cpp
-SOURCES  += $(LIBDIR)/adafruit_gfx/arduino/Print.cpp
-endif
-
-OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
-DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
-
-INCLUDES += -I$(DEVICE)/include \
-			-I$(CMSIS)/include \
-			-I$(PERIPH)/include \
-			-I$(DRIVERLIB) \
-			-I$(LIBDIR)/easiglib \
-			-I. \
-			-Isrc \
-			-Isrc/conf \
-			-I$(CORE_SRC) \
-			-I$(HAL_CONF_INC) \
-			-I$(SHARED) \
-			-I$(SHARED)/processors \
-			-I$(SHARED)/CoreModules \
-			-I$(SHARED)/util \
-			-I$(SHARED)/patch \
-			-I$(LIBDIR)/adafruit_gfx/Adafruit_ST7735_and_ST7789_Library \
-			-I$(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library \
-			-I$(LIBDIR)/adafruit_gfx/arduino \
-			-I$(LIBDIR)/adafruit_gfx/SPI \
-			-I$(LIBDIR)/adafruit_gfx \
+clean:
+	rm -rf $(BUILDDIR_M4)
+	rm -rf $(BUILDDIR_M7)
 
 
+# ifeq (,$(wildcard $(JFLASHEXE)))
+#     $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
+# endif
+flash_m7: $(BUILDDIR_M7)/$(BINARYNAME).hex
+	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
 
-ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
-HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
-BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
+flash_m4: $(BUILDDIR_M4)/$(BINARYNAME).hex
+	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
-ARCH 	= arm-none-eabi
-CC 		= $(ARCH)-gcc
-CXX 	= $(ARCH)-g++
-LD 		= $(ARCH)-g++
-AS 		= $(ARCH)-as
-OBJCPY 	= $(ARCH)-objcopy
-OBJDMP 	= $(ARCH)-objdump
-GDB 	= $(ARCH)-gdb
-SZ 		= $(ARCH)-size
+flash: $(BUILDDIR_M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
+	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
-SZOPTS 	= -d
-
-ARCH_CFLAGS += -D'__FPU_PRESENT=1' \
-			  -DUSE_HAL_DRIVER \
-			  -DUSE_FULL_LL_DRIVER \
-			  -DSTM32H745xx \
-			  -DSTM32H7x5xx \
-			  -DSTM32H7
-
-
-CFLAGS = -g2 -fno-common \
-	$(ARCH_CFLAGS) $(MCU) \
-	$(INCLUDES) \
-	-fdata-sections -ffunction-sections \
-	-nostdlib \
-	-nostartfiles \
-	--param l1-cache-size=16 \
-	--param l1-cache-line-size=32 \
-
-CXXFLAGS = $(CFLAGS) \
-	-std=c++2a \
-	-fno-rtti \
-	-fno-exceptions \
-	-fno-unwind-tables \
-	-ffreestanding \
-	-fno-threadsafe-statics \
-	-Werror=return-type \
-	-Wdouble-promotion \
-	-Wno-register \
-	-nostdlib \
-	-nostartfiles \
-
-AFLAGS = $(MCU)
-#	-x assembler-with-cpp
-
-LFLAGS = -Wl,--gc-sections \
-	-Wl,-Map,$(BUILDDIR)/main.map,--cref \
-	$(MCU)  \
-	-T $(DEVICE)/$(LOADFILE) \
-	-nostdlib \
-	-nostartfiles \
-
-
-DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
-
-all: Makefile $(BIN) $(HEX)
-
-$(BIN): $(ELF)
-	$(OBJCPY) -O binary $< $@
-	$(OBJDMP) -x --syms $< > $(addsuffix .dmp, $(basename $<))
-	ls -l $@ $<
-
-$(HEX): $(ELF)
-	$(OBJCPY) --output-target=ihex $< $@
-	$(SZ) $(SZOPTS) $(ELF)
-
-$(ELF): $(OBJECTS) $(DEVICE)/$(LOADFILE)
-	$(info Linking...)
-	@$(LD) $(LFLAGS) -o $@ $(OBJECTS)
-
-$(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
-	@mkdir -p $(dir $@)
-	$(info Building $< at $(OPTFLAG))
-	@$(CC) -c $(DEPFLAGS) $(OPTFLAG) $(CFLAGS) $< -o $@
-
-$(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
-	@mkdir -p $(dir $@)
-	$(info Building $< at $(OPTFLAG))
-	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
-
-$(BUILDDIR)/%.o: %.cpp $(BUILDDIR)/%.d
-	@mkdir -p $(dir $@)
-	$(info Building $< at $(OPTFLAG))
-	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
-
-$(BUILDDIR)/%.o: %.s
-	@mkdir -p $(dir $@)
-	$(info Building $< at $(OPTFLAG))
-	@$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))
-
-%.d: ;
 
 tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
 
-flash: $(HEX)
-ifeq (,$(wildcard $(JFLASHEXE)))
-    $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
-endif
-	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR)/$(BINARYNAME).hex -auto -exit
-
-flash_m7: $(BUILDDIR_M7)/$(BINARYNAME).hex
-ifeq (,$(wildcard $(JFLASHEXE)))
-    $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
-endif
-	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
-
-flash_m4: $(BUILDDIR_M4)/$(BINARYNAME).hex
-ifeq (,$(wildcard $(JFLASHEXE)))
-    $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
-endif
-	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
-
-flash_all: $(BUILDDIR_M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
-ifeq (,$(wildcard $(JFLASHEXE)))
-    $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
-endif
-	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
-
-clean:
-	rm -rf $(BUILDDIR_M7)
-	rm -rf $(BUILDDIR_M4)
-
-ifneq "$(MAKECMDGOALS)" "clean"
--include $(DEPS)
-endif
-
-.PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
 .PHONY: all clean flash tables tests H7_tests core_tests util_tests proc_tests mdrivlib_tests
 
 tests: H7_tests core_tests util_tests mdrivlib_tests #proc_tests
