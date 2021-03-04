@@ -11,6 +11,18 @@ class ComplexenvelopeCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		float finalAttack = constrain(attackCv + attackOffset, 0.0f, 1.0f);
+		float finalHold = constrain(holdCv + holdOffset, 0.0f, 1.0f);
+		float finalDecay = constrain(decayCv + decayOffset, 0.0f, 1.0f);
+		float finalSustain = constrain(sustainCv + sustainOffset, 0.0f, 1.0f);
+		float finalRelease = constrain(releaseCv + releaseOffset, 0.0f, 1.0f);
+
+		e.set_envelope_time(0, map_value(finalAttack, 0.0f, 1.0f, 0.1f, 1000.0f));
+		e.set_envelope_time(1, map_value(finalHold, 0.0f, 1.0f, 0.0f, 1000.0f));
+		e.set_envelope_time(2, map_value(finalDecay, 0.0f, 1.0f, 0.1f, 1000.0f));
+		e.set_envelope_time(3, map_value(finalRelease, 0.0f, 1.0f, 0.1f, 1000.0f));
+
+		e.set_sustain(finalSustain);
 		envelopeOutput = e.update(gateInput);
 	}
 
@@ -18,22 +30,21 @@ public:
 
 	virtual void set_param(int const param_id, const float val) override
 	{
-		auto mappedTime = map_value(val, 0.0f, 1.0f, 0.1f, 1000.0f);
 		switch (param_id) {
 			case 0: // attack
-				e.set_envelope_time(0, mappedTime);
+				attackOffset = val;
 				break;
 			case 1: // hold
-				e.set_envelope_time(1, map_value(val,0.0f,1.0f,0.0f,1000.0f));
+				holdOffset = val;
 				break;
 			case 2: // decay
-				e.set_envelope_time(2, mappedTime);
+				decayOffset = val;
 				break;
 			case 3: // sustain
-				e.set_sustain(val);
+				sustainOffset = val;
 				break;
 			case 4: // release
-				e.set_envelope_time(3, mappedTime);
+				releaseOffset = val;
 				break;
 			case 5:
 				e.set_attack_curve(val);
@@ -56,6 +67,21 @@ public:
 		switch (input_id) {
 			case 0:
 				gateInput = val;
+				break;
+			case 1:
+				attackCv = val;
+				break;
+			case 2:
+				holdCv = val;
+				break;
+			case 3:
+				decayCv = val;
+				break;
+			case 4:
+				sustainCv = val;
+				break;
+			case 5:
+				releaseCv = val;
 				break;
 		}
 	}
@@ -82,5 +108,17 @@ public:
 private:
 	float gateInput = 0;
 	float envelopeOutput = 0;
+
+	float attackOffset = 0;
+	float holdOffset = 0;
+	float decayOffset = 0;
+	float sustainOffset = 0;
+	float releaseOffset = 0;
+
+	float attackCv = 0;
+	float holdCv = 0;
+	float decayCv = 0;
+	float sustainCv = 0;
+	float releaseCv = 0;
 	Envelope e;
 };
