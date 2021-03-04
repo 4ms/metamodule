@@ -1,22 +1,23 @@
-# Set this to the path to your JFlash executable
+# If you want to use `make flash`, set this to the path to your JFlash executable:
 JFLASHEXE = /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
 
-export BUILDDIR_M4 = build/corem4
-export BUILDDIR_M7 = build/corem7
+export BUILDDIR_M4 		= build/corem4
+export BUILDDIR_M7 		= build/corem7
 export BINARYNAME 		= main
-export STARTUP 		= startup_cm7.s
+export STARTUP 			= startup_cm7.s
 export SYSTEM 			= system_stm32h7xx_dualcore_boot_cm4_cm7.c
 export LIBDIR 			= lib
 export DEVICE 			= $(LIBDIR)/stm32/device
 export CMSIS 			= $(LIBDIR)/stm32/cmsis
 export PERIPH 			= $(LIBDIR)/stm32/periph
-export DRIVERLIB       = $(LIBDIR)/mdrivlib
-export SHARED  		= ../shared
+export DRIVERLIB       	= $(LIBDIR)/mdrivlib
+export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
-all:
-	$(MAKE) -f makefile_m7.mk
-	$(MAKE) -f makefile_m4.mk
+all: tests
+	@$(MAKE) --no-print-directory -f makefile_m7.mk
+	@$(MAKE) --no-print-directory -f makefile_m4.mk
+
 
 clean:
 	rm -rf $(BUILDDIR_M4)
@@ -35,7 +36,6 @@ flash_m4: $(BUILDDIR_M4)/$(BINARYNAME).hex
 flash: $(BUILDDIR_M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
-
 tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
@@ -45,32 +45,20 @@ tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 tests: H7_tests core_tests util_tests mdrivlib_tests #proc_tests
 
 H7_tests:
-	@echo
-	@echo "----------------------------"
-	@echo "Running H7 tests...."
-	@echo "----------------------------"
-	@$(MAKE) -f tests/Makefile
+	@echo ">>>>> Running H7 tests...."
+	@$(MAKE) --no-print-directory -f tests/Makefile
 
 mdrivlib_tests:
-	@echo
-	@echo "----------------------------"
 	@echo "Running mdrivlib tests...."
-	@echo "----------------------------"
-	@cd $(DRIVERLIB) && $(MAKE) -f tests/Makefile
+	@cd $(DRIVERLIB) && $(MAKE) --no-print-directory -f tests/Makefile
 
 util_tests:
-	@echo
-	@echo "----------------------------"
-	@echo "Running shared/util tests...."
-	@echo "----------------------------"
-	@cd $(SHARED)/util && $(MAKE) -f tests/Makefile
+	@echo ">>>>>> Running shared/util tests...."
+	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile
 
 core_tests:
-	@echo
-	@echo "----------------------------"
-	@echo "Running CoreModule tests...."
-	@echo "----------------------------"
-	@cd $(SHARED)/CoreModules && $(MAKE) -f tests/Makefile
+	@echo ">>>>>> Running CoreModule tests...."
+	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile
 
 # proc_tests:
 # 	cd $(SHARED)/processors/tests && make tests
