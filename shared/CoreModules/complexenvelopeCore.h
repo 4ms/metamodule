@@ -24,6 +24,8 @@ public:
 
 		e.set_sustain(finalSustain);
 		envelopeOutput = e.update(gateInput);
+
+		currentStage=e.getStage();
 	}
 
 	ComplexenvelopeCore() {}
@@ -89,11 +91,16 @@ public:
 	virtual float get_output(const int output_id) const override
 	{
 		float output = 0;
-		switch (output_id) {
-			case 0:
-				output = envelopeOutput;
-				break;
+		if (output_id < 1) {
+			output = envelopeOutput;
+		} else {
+			if (currentStage == (output_id - 1)) {
+				output = 1;
+			} else {
+				output = 0;
+			}
 		}
+
 		return output;
 	}
 
@@ -120,5 +127,6 @@ private:
 	float decayCv = 0;
 	float sustainCv = 0;
 	float releaseCv = 0;
+	int currentStage=0;
 	Envelope e;
 };
