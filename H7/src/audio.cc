@@ -5,8 +5,7 @@
 
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 
-AudioStream::AudioStream(
-	Params &p, PatchList &patchlist, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4])
+AudioStream::AudioStream(Params &p, PatchList &patches, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4])
 	: codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
 	, tx_buf_1{buffers[0]}
@@ -15,7 +14,7 @@ AudioStream::AudioStream(
 	, rx_buf_2{buffers[3]}
 	, params{p}
 	, dac{dac}
-	, patch_list{patchlist}
+	, patch_list{patches}
 {
 	load_patch();
 
@@ -48,9 +47,9 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 	check_patch_change();
 
 	load_measure.start_measurement();
-	Debug::Pin0::high();
 
 	params.lock_for_read();
+	Debug::Pin0::high();
 
 	bool should_update_knob[NumKnobs];
 	static auto is_small = [](float x) { return (x < 3e-6f) && (x > -3e-6f); };
@@ -110,9 +109,9 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out)
 		in_++;
 	}
 
+	Debug::Pin0::low();
 	params.unlock_for_read();
 
-	Debug::Pin0::low();
 	load_measure.end_measurement();
 	patch_list.audio_load = load_measure.get_last_measurement_load_percent();
 }

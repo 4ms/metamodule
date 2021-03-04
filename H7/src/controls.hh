@@ -12,10 +12,11 @@
 using namespace mdrivlib;
 
 struct Controls {
-	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, Params &dest);
+	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, Params &params, Params &dest);
 
 	MuxedADC &potadc;
 	CVAdcChipT &cvadc;
+	Params &params;
 	Params &dest;
 
 	RotaryEncoder<RotaryHalfStep> rotary = {GPIO::C, 8, GPIO::C, 7};

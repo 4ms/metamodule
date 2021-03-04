@@ -14,10 +14,16 @@ const I2CConfig i2c_conf = {
 			// tSYNC1 = (SDADEL * (PRESC>>4 + 1) + 1) * tClockSource
 			// tSYNC2 = (SCLDEL * (PRESC>>4 + 1) + 1) * tClockSource
 
+			// stable with M7:
 			// SCL Freq = 1/tSCL = fClockSource / (PRESC>>4 + 1) / (SCLL + SCLH + 2) .... - some more for tSNC1
 			// 0x60 -> 400kHz: 120MHz / (6+2) = 15MHz I2CperiphClock
 			// 15MHz / (1 + 1 + 17+1 + 17+1) = 394kHz
-			.PRESC = 0xF0,
+			// .PRESC = 0xF0,
+			// .SCLDEL_SDADEL = 0b00110011,
+			// .SCLH = 28, // 17,
+			// .SCLL = 28, // 17,
+
+			.PRESC = 0x10,
 			.SCLDEL_SDADEL = 0b00110011,
 			.SCLH = 28, // 17,
 			.SCLL = 28, // 17,

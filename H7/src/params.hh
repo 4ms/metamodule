@@ -1,6 +1,10 @@
 #pragma once
+#include "conf/hsem_conf.hh"
+#include "drivers/hsem.hh"
 #include "drivers/stm32xx.h"
 #include "util/debouncer.hh"
+
+using namespace MetaModule;
 
 struct Params {
 	float cvjacks[4] = {0.f, 0.f, 0.f, 0.f};
@@ -46,6 +50,7 @@ struct Params {
 		gate_ins[1].register_rising_edge();
 		gate_ins[1].is_just_pressed();
 		gate_ins[1].set_state(0);
+
 		for (int i = 0; i < 15; i++) {
 			jack_senses[i].register_rising_edge();
 			jack_senses[i].is_just_pressed();
@@ -53,36 +58,29 @@ struct Params {
 		}
 	}
 
-	// has an HSEM id?
 	void lock_for_read()
 	{
-		while (write_lock)
+		while (HWSemaphore::set<ParamsLock>() != HWSemaphore::SetOk)
 			;
-		read_lock = false;
 	}
 	void unlock_for_read()
 	{
-		read_lock = true;
+		HWSemaphore::clear<ParamsLock>();
 	}
 
 	void lock_for_write()
 	{
-		while (read_lock)
+		while (HWSemaphore::set<ParamsLock>() != HWSemaphore::SetOk)
 			;
-		write_lock = true;
 	}
 
 	void unlock_for_write()
 	{
-		write_lock = false;
+		HWSemaphore::clear<ParamsLock>();
 	}
 
 	bool _is_locked()
 	{
-		return write_lock || read_lock;
+		return HWSemaphore::is_locked<ParamsLock>();
 	}
-
-private:
-	volatile bool write_lock = false;
-	volatile bool read_lock = false;
 };

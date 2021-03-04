@@ -1,5 +1,6 @@
 #include "conf/control_conf.hh"
 #include "conf/hsem_conf.hh"
+#include "conf/i2c_conf.hh"
 #include "controls.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
@@ -22,23 +23,35 @@ void main(void)
 	}
 	Debug::Pin3::low();
 
+	SharedBus::i2c.init(i2c_conf);
+
+	// Todo: finish non-DMA PCA9685 driver and use it
+	PCA9685DmaDriver::FrameBuffer led_frame_buffer;
+	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, led_frame_buffer};
+	LedCtl leds{led_driver};
+
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CVAdcChipT cvadc;
 
-	extern char *_control_data_start; // defined by linker
-	Params *params = reinterpret_cast<Params *>(&_control_data_start);
+	Params params;
+	extern char *_params_ptr; // defined by linker
+	Params *params_cm7 = reinterpret_cast<Params *>(&_params_ptr);
 
-	Controls controls{potadc, cvadc, *params}; //, gpio_expander};
+	Controls controls{potadc, cvadc, params, *params_cm7}; //, gpio_expander};
+
+	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 
 	controls.start();
-	// SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
+
+	SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
 
 	while (1) {
-		// if (SharedBus::i2c.is_ready()) {
-		Debug::Pin2::high();
-		// i2cqueue.update();
-		Debug::Pin2::low();
-		// }
+		if (SharedBus::i2c.is_ready()) {
+			Debug::Pin2::high();
+			i2cqueue.update();
+			Debug::Pin2::low();
+		}
+		controls.read();
 	}
 }
 

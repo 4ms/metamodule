@@ -24,32 +24,28 @@
 
 namespace MetaModule
 {
-struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
+struct Hardware : SystemClocks, SDRAMPeriph, Debug /*, SharedBus*/ {
 	Hardware()
 		: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
-		, SharedBus{i2c_conf}
+	// , SharedBus{i2c_conf}
 	{}
 
 	// Todo: understand why setting the members to static inline causes SystemClocks ctor to hang on waiting for
 	// D2CLKREADY
-	// MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
+
+	// Todo: figure out how to use i2c on both cores -- OR -- separate Codec::I2C from Codec::SAI
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
-	// CVAdcChipT cvadc;
 	AnalogOutT dac;
 	Screen screen;
-	// GPIOExpander<16> sense{gpio_expander_conf};
 } _hw;
 
 struct StaticBuffers {
-	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
-	// static inline __attribute__((section(".shared_mem"))) ControlData control_data;
 
 	StaticBuffers()
 	{
 		target::MPU_::disable_cache_for_dma_buffer(audio_dma_block, sizeof(audio_dma_block));
-		target::MPU_::disable_cache_for_dma_buffer(led_frame_buffer, sizeof(led_frame_buffer));
 	}
 } _sb;
 
@@ -58,22 +54,22 @@ struct StaticBuffers {
 void main()
 {
 	using namespace MetaModule;
-
-	// Todo: finish non-DMA PCA9685 driver and use it
-	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
-	LedCtl leds{led_driver};
-
-	// Controls controls{_hw.potadc, _hw.cvadc}; //, gpio_expander};
-
-	extern char *_control_data_start; // defined by linker
-	Params *params_ptr = reinterpret_cast<Params *>(&_control_data_start);
-	Params &params = *params_ptr;
+	// Todo: use memory better: right now all patches get copied with CopyInitData with mostly zeros (some values?)
+	// Then libc_init calls PatchList ctor. So make it static? Have a load() function? Keep in mind we'll want to
+	// dynamically load patches at some point
 	PatchList patch_list;
 
-	AudioStream audio{params, patch_list, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
-	Ui ui{params, patch_list, leds, _hw.screen};
+	Params params;
+	extern char *_params_ptr; // defined by linker
+	uint32_t *params_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
+	*params_ptr = reinterpret_cast<uint32_t>(&params);
 
-	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
+	params.init();
+
+	AudioStream audio{params, patch_list, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
+	Ui ui{params, patch_list, _hw.screen};
+
+	// SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 
 	ui.start();
 

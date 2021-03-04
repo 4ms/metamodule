@@ -11,10 +11,10 @@ class SharedBus {
 public:
 	static inline I2CPeriph i2c;
 
-	SharedBus(const I2CConfig &defs)
-	{
-		i2c.init(defs);
-	}
+	// SharedBus(const I2CConfig &defs)
+	// {
+	// 	i2c.init(defs);
+	// }
 };
 
 template<size_t LEDUpdateRate>
@@ -36,13 +36,15 @@ public:
 		: leds{leds}
 		, controls{controls}
 	{}
+	// SharedBusQueue(Controls &controls)
+	// 	: controls{controls}
+	// {}
 
 	void update()
 	{
-		// Debug::Pin2::high();
 		switch (cur_client) {
 			case Leds:
-				leds.refresh();
+				// leds.refresh();
 				cur_client = SelectPots;
 				break;
 
@@ -89,7 +91,6 @@ public:
 				cur_client = Leds;
 				break;
 		}
-		// Debug::Pin2::low();
 	}
 
 private:

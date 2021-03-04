@@ -50,7 +50,7 @@ MEMORY
 
 _estack = 0x10020000;		/* end of RAM */
 
-_control_data_start = 0x10020000;
+_params_ptr = 0x38000000;
 
 /* Define output sections */
 SECTIONS

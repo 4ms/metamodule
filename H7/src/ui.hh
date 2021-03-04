@@ -16,17 +16,16 @@ class Ui {
 public:
 	Params &params;
 	PatchList &patch_list;
-	LedCtl<AnimationUpdateRate> &leds;
+	// LedCtl<AnimationUpdateRate> &leds;
 	Screen &screen;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, PatchList &patchlist, LedCtl<AnimationUpdateRate> &l, Screen &s)
+	Ui(Params &p, PatchList &patchlist, /* LedCtl<AnimationUpdateRate> &l, */ Screen &s)
 		: params{p}
-		, patch_list{patch_list}
-		, leds{l}
+		, patch_list{patchlist} // , leds{l}
 		, screen{s}
 	{}
 
@@ -45,36 +44,36 @@ public:
 		draw_patch_name();
 		draw_audio_load();
 
-		leds.start();
+		// leds.start();
 
-		leds.but[0].set_background(Colors::grey);
-		leds.but[1].set_background(Colors::grey);
-		leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
-		leds.rotaryLED.set_background(Colors::grey);
+		// leds.but[0].set_background(Colors::grey);
+		// leds.but[1].set_background(Colors::grey);
+		// leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
+		// leds.rotaryLED.set_background(Colors::grey);
 
 		// Todo: set led_update_task_conf.update_rate_Hz to be a factor of AnimationUpdateRate and Hz
 		//
-		led_update_task.init(led_update_task_conf, [this]() { leds.update(); });
-		led_update_task.start();
+		// led_update_task.init(led_update_task_conf, [this]() { leds.update(); });
+		// led_update_task.start();
 	}
 
 	uint32_t last_screen_update = 0;
 	void update()
 	{
-		if (params.buttons[0].is_pressed())
-			leds.but[0].set_background(Colors::red);
-		else
-			leds.but[0].set_background(Colors::grey);
+		// if (params.buttons[0].is_pressed())
+		// 	leds.but[0].set_background(Colors::red);
+		// else
+		// 	leds.but[0].set_background(Colors::grey);
 
-		if (params.buttons[1].is_pressed())
-			leds.but[1].set_background(Colors::blue);
-		else
-			leds.but[1].set_background(Colors::grey);
+		// if (params.buttons[1].is_pressed())
+		// 	leds.but[1].set_background(Colors::blue);
+		// else
+		// 	leds.but[1].set_background(Colors::grey);
 
-		if (params.rotary_button.is_pressed())
-			leds.rotaryLED.set_background(Colors::blue);
-		else
-			leds.rotaryLED.set_background(Colors::grey);
+		// if (params.rotary_button.is_pressed())
+		// 	leds.rotaryLED.set_background(Colors::blue);
+		// else
+		// 	leds.rotaryLED.set_background(Colors::grey);
 
 		uint32_t now = HAL_GetTick();
 		if (now - last_screen_update > 100) {
