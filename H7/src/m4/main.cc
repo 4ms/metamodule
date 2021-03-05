@@ -35,7 +35,7 @@ void main(void)
 
 	Params params;
 	extern char *_params_ptr; // defined by linker
-	Params *params_cm7 = reinterpret_cast<Params *>(&_params_ptr);
+	Params *params_cm7 = reinterpret_cast<Params *>(_params_ptr);
 
 	Controls controls{potadc, cvadc, params, *params_cm7}; //, gpio_expander};
 

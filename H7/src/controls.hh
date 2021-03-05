@@ -3,12 +3,14 @@
 #include "conf/control_conf.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/i2c.hh"
+#include "drivers/memory_transfer.hh"
 #include "drivers/pin.hh"
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 #include "muxed_adc.hh"
 #include "params.hh"
+
 using namespace mdrivlib;
 
 struct Controls {
@@ -28,6 +30,8 @@ struct Controls {
 	DebouncedPin<GPIO::D, 12, PinPolarity::Normal> clock_in;
 
 	FPin<GPIO::D, 13, PinMode::Output> clock_out;
+
+	MemoryTransfer mem_xfer;
 
 	void read();
 	void start();

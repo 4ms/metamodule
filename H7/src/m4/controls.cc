@@ -53,9 +53,7 @@ void Controls::read()
 	Debug::Pin1::low();
 	Debug::Pin1::high();
 	params.lock_for_write();
-	// initiate M2M DMA, with its complete IRQ unlocking the semaphor
-	memcpy(&dest, &params, sizeof(Params));
-	params.unlock_for_write();
+	mem_xfer.start(&dest, &params, sizeof(Params), [&]() { params.unlock_for_write(); });
 	Debug::Pin1::low();
 }
 
@@ -80,6 +78,5 @@ Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, Params &params, Params &
 
 	// read_controls_task.init(control_read_tim_conf, [this]() { read(); });
 	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
-	dest.init();
 }
 
