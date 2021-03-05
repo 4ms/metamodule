@@ -14,7 +14,7 @@ void Controls::read()
 	gate_in1.update();
 	clock_in.update();
 
-	Debug::Pin1::high();
+	Debug::Pin3::high();
 
 	for (int i = 0; i < 4; i++) {
 		params.cvjacks[i] = (2047.5f - static_cast<float>(cvadc.get_val(i))) / 2047.5f;
@@ -50,11 +50,10 @@ void Controls::read()
 
 	params.patchcv = get_patchcv_reading() / 4095.0f;
 
-	Debug::Pin1::low();
+	Debug::Pin3::low();
 	Debug::Pin1::high();
 	params.lock_for_write();
-	mem_xfer.start(&dest, &params, sizeof(Params), [&]() { params.unlock_for_write(); });
-	Debug::Pin1::low();
+	mem_xfer.start(&dest, &params, sizeof(Params));
 }
 
 void Controls::start()
@@ -62,7 +61,12 @@ void Controls::start()
 	params.unlock_for_write();
 	potadc.start();
 	cvadc.start();
-	// read_controls_task.start();
+	mem_xfer.registerCallback([&]() {
+		params.unlock_for_write();
+		Debug::Pin1::low();
+	});
+
+	read_controls_task.start();
 	read_cvadc_task.start();
 	clock_out.low();
 }
@@ -76,7 +80,7 @@ Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, Params &params, Params &
 	// Todo: use RCC_Control or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
 
-	// read_controls_task.init(control_read_tim_conf, [this]() { read(); });
+	read_controls_task.init(control_read_tim_conf, [this]() { read(); });
 	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 }
 

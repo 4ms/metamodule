@@ -51,7 +51,7 @@ void main(void)
 			i2cqueue.update();
 			Debug::Pin2::low();
 		}
-		controls.read();
+		// controls.read();
 	}
 }
 
