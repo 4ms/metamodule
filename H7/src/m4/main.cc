@@ -49,7 +49,7 @@ void main(void)
 	while (1) {
 		if (SharedBus::i2c.is_ready()) {
 			Debug::Pin2::high();
-			// i2cqueue.update();
+			i2cqueue.update();
 			Debug::Pin2::low();
 		}
 		// controls.read();

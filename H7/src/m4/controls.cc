@@ -53,7 +53,7 @@ void Controls::read()
 
 	Debug::Pin1::high();
 	params.lock_for_write();
-	mem_xfer.repeat_start();
+	mem_xfer.start_transfer();
 }
 
 void Controls::start()
@@ -93,7 +93,8 @@ void Controls::start()
 	params.lock_for_write();
 	Debug::Pin1::high();
 	Debug::Pin2::low();
-	mem_xfer.first_start(&dest, &params, sizeof(Params));
+	mem_xfer.config_transfer(&dest, &params, sizeof(Params));
+	mem_xfer.start_transfer();
 	while (params._is_locked()) {
 		Debug::Pin3::high();
 		Debug::Pin3::low();
