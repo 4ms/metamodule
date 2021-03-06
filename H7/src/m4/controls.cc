@@ -49,11 +49,11 @@ void Controls::read()
 		params.knobs[i] = get_pot_reading(i) / 4095.0f;
 
 	params.patchcv = get_patchcv_reading() / 4095.0f;
-
 	Debug::Pin3::low();
+
 	Debug::Pin1::high();
 	params.lock_for_write();
-	mem_xfer.start(&dest, &params, sizeof(Params));
+	mem_xfer.repeat_start();
 }
 
 void Controls::start()
@@ -61,10 +61,43 @@ void Controls::start()
 	params.unlock_for_write();
 	potadc.start();
 	cvadc.start();
-	mem_xfer.registerCallback([&]() {
-		params.unlock_for_write();
-		Debug::Pin1::low();
+
+	// mem_xfer.registerCallback([&]() {
+	// 	params.unlock_for_write();
+	// 	Debug::Pin1::low();
+	// });
+	InterruptManager::registerISR(MDMA_IRQn, 1, 1, [&]() {
+		if ((MDMA_Channel0->CISR & MDMA_CISR_BRTIF) && (MDMA_Channel0->CCR & MDMA_CCR_BRTIE)) {
+			MDMA_Channel0->CIFCR = MDMA_CIFCR_CBRTIF;
+		}
+
+		if ((MDMA_Channel0->CISR & MDMA_CISR_BTIF) && (MDMA_Channel0->CCR & MDMA_CCR_BTIE)) {
+			MDMA_Channel0->CIFCR = MDMA_CIFCR_CBTIF;
+		}
+
+		if ((MDMA_Channel0->CISR & MDMA_CISR_CTCIF) && (MDMA_Channel0->CCR & MDMA_CCR_CTCIE)) {
+			MDMA_Channel0->CIFCR = MDMA_CIFCR_CCTCIF;
+			// params.unlock_for_write();
+			// Debug::Pin1::low();
+		}
+
+		if ((MDMA_Channel0->CISR & MDMA_CISR_TCIF) && (MDMA_Channel0->CCR & MDMA_CCR_TCIE)) {
+			MDMA_Channel0->CIFCR = MDMA_CIFCR_CLTCIF;
+			params.unlock_for_write();
+			Debug::Pin1::low();
+			// callback();
+		}
 	});
+
+	Debug::Pin2::high();
+	params.lock_for_write();
+	Debug::Pin1::high();
+	Debug::Pin2::low();
+	mem_xfer.first_start(&dest, &params, sizeof(Params));
+	while (params._is_locked()) {
+		Debug::Pin3::high();
+		Debug::Pin3::low();
+	}
 
 	read_controls_task.start();
 	read_cvadc_task.start();
