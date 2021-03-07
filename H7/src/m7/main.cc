@@ -53,7 +53,9 @@ struct StaticBuffers {
 
 void main()
 {
+	constexpr uint32_t LEDUpdateHz = 100;
 	using namespace MetaModule;
+
 	// Todo: use memory better: right now all patches get copied with CopyInitData with mostly zeros (some values?)
 	// Then libc_init calls PatchList ctor. So make it static? Have a load() function? Keep in mind we'll want to
 	// dynamically load patches at some point
@@ -67,7 +69,10 @@ void main()
 	params.init();
 
 	AudioStream audio{params, patch_list, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
-	Ui ui{params, patch_list, _hw.screen};
+
+	uint32_t led_frame_buf[PCA9685Driver::kNumLedsPerChip];
+	LedFrame<LEDUpdateHz> leds{led_frame_buf};
+	Ui<LEDUpdateHz> ui{params, patch_list, leds, _hw.screen};
 
 	// SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 
@@ -75,15 +80,11 @@ void main()
 
 	HWSemaphore::clear<SharedBusLock>();
 	Debug::Pin1::high();
-	// SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
 
 	// audio.start();
 
 	while (1) {
 		ui.update();
-		// if (SharedBus::i2c.is_ready()) {
-		// 	i2cqueue.update();
-		// }
 		__NOP();
 	}
 }

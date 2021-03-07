@@ -16,16 +16,17 @@ class Ui {
 public:
 	Params &params;
 	PatchList &patch_list;
-	// LedCtl<AnimationUpdateRate> &leds;
+	LedFrame<AnimationUpdateRate> &leds;
 	Screen &screen;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, PatchList &patchlist, /* LedCtl<AnimationUpdateRate> &l, */ Screen &s)
+	Ui(Params &p, PatchList &patchlist, LedFrame<AnimationUpdateRate> l, Screen &s)
 		: params{p}
-		, patch_list{patchlist} // , leds{l}
+		, patch_list{patchlist}
+		, leds{l}
 		, screen{s}
 	{}
 

@@ -32,7 +32,7 @@ class SharedBusQueue {
 	uint8_t cur_pot;
 
 public:
-	SharedBusQueue(LedCtl<LEDUpdateRate> &leds, Controls &controls)
+	SharedBusQueue(PCA9685Driver &leds, Controls &controls)
 		: leds{leds}
 		, controls{controls}
 	{}
@@ -44,7 +44,7 @@ public:
 	{
 		switch (cur_client) {
 			case Leds:
-				// leds.refresh();
+				leds.write_chip(0);
 				cur_client = SelectPots;
 				break;
 
@@ -94,7 +94,7 @@ public:
 	}
 
 private:
-	LedCtl<LEDUpdateRate> &leds;
+	PCA9685Driver &leds;
 	Controls &controls;
 };
 

@@ -14,6 +14,8 @@
 using namespace MetaModule;
 void main(void)
 {
+	constexpr uint32_t LEDUpdateHz = 100;
+
 	target::corem4::SystemClocks start_clocks;
 
 	Debug::Pin3::high();
@@ -29,9 +31,8 @@ void main(void)
 	// Todo: finish non-DMA PCA9685 driver and use it:
 	// PCA9685Driver<MetaModulePCA9685Conf>::FrameBuffer led_frame_buffer;
 	// PCA9685Driver<MetaModulePCA9685Conf> led_driver{SharedBus::i2c, led_frame_buffer};
-	PCA9685DmaDriver::FrameBuffer led_frame_buffer;
-	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, led_frame_buffer};
-	LedCtl leds{led_driver};
+	uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CVAdcChipT cvadc;
@@ -46,7 +47,7 @@ void main(void)
 
 	controls.start();
 
-	SharedBusQueue<leds.LEDUpdateRateHz> i2cqueue{leds, controls};
+	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
 
 	while (1) {
 		if (SharedBus::i2c.is_ready()) {
