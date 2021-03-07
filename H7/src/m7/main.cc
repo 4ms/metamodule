@@ -20,6 +20,7 @@
 #include "muxed_adc.hh"
 #include "screen.hh"
 #include "shared_bus.hh"
+#include "shared_memory.hh"
 #include "ui.hh"
 
 namespace MetaModule
@@ -62,6 +63,7 @@ void main()
 	PatchList patch_list;
 
 	Params params;
+	// SharedMemory::write_address_of(params, SharedMemory::ParamsPtrLocation);
 	extern char *_params_ptr; // defined by linker
 	uint32_t *params_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
 	*params_ptr = reinterpret_cast<uint32_t>(&params);
