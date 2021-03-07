@@ -60,11 +60,9 @@ void main()
 	PatchList patch_list;
 
 	Params params;
-
-	Params params2;
 	extern char *_params_ptr; // defined by linker
 	uint32_t *params_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
-	*params_ptr = reinterpret_cast<uint32_t>(&params2);
+	*params_ptr = reinterpret_cast<uint32_t>(&params);
 
 	params.init();
 
@@ -82,7 +80,7 @@ void main()
 	// audio.start();
 
 	while (1) {
-		// ui.update();
+		ui.update();
 		// if (SharedBus::i2c.is_ready()) {
 		// 	i2cqueue.update();
 		// }

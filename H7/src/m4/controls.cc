@@ -2,7 +2,16 @@
 #include "debug.hh"
 #include <cstring>
 
-// CM7: 10kHz, 1.6% = 1.6us
+// CM4: 10kHz, 2.9% = 2.9us
+//
+// We have: knobs, buttons, rotary, gate ins, cv jacks
+// CV jacks may eventually be SAI and synced with audio, so let's not worry too much about them, treat them like knobs
+// for now
+//
+// Gate ins + knobs: store values in a buffer. If we can do Controls::read() at 48kHz, then it's BLOCK_SIZE long
+// Then after audio block relinquishes lock on params, we can transfer the buffer.
+// --- would be better if we transferred it right before audio block needs it, but that might be hard to anticipate
+// --- ... maybe after audio block lifts lock, we do a few more reads into the buffers, then transfer
 void Controls::read()
 {
 	rotary.update();
@@ -49,11 +58,14 @@ void Controls::read()
 		params.knobs[i] = get_pot_reading(i) / 4095.0f;
 
 	params.patchcv = get_patchcv_reading() / 4095.0f;
-	Debug::Pin3::low();
 
+	// Todo: don't transfer this each time, instead only xfer after audio block is done
+	// Pin1 high->low takes 2.2us, sometimes up to 4us (bus delays?)
 	Debug::Pin1::high();
 	params.lock_for_write();
 	mem_xfer.start_transfer();
+
+	Debug::Pin3::low();
 }
 
 void Controls::start()
@@ -62,31 +74,9 @@ void Controls::start()
 	potadc.start();
 	cvadc.start();
 
-	// mem_xfer.registerCallback([&]() {
-	// 	params.unlock_for_write();
-	// 	Debug::Pin1::low();
-	// });
-	InterruptManager::registerISR(MDMA_IRQn, 1, 1, [&]() {
-		if ((MDMA_Channel0->CISR & MDMA_CISR_BRTIF) && (MDMA_Channel0->CCR & MDMA_CCR_BRTIE)) {
-			MDMA_Channel0->CIFCR = MDMA_CIFCR_CBRTIF;
-		}
-
-		if ((MDMA_Channel0->CISR & MDMA_CISR_BTIF) && (MDMA_Channel0->CCR & MDMA_CCR_BTIE)) {
-			MDMA_Channel0->CIFCR = MDMA_CIFCR_CBTIF;
-		}
-
-		if ((MDMA_Channel0->CISR & MDMA_CISR_CTCIF) && (MDMA_Channel0->CCR & MDMA_CCR_CTCIE)) {
-			MDMA_Channel0->CIFCR = MDMA_CIFCR_CCTCIF;
-			// params.unlock_for_write();
-			// Debug::Pin1::low();
-		}
-
-		if ((MDMA_Channel0->CISR & MDMA_CISR_TCIF) && (MDMA_Channel0->CCR & MDMA_CCR_TCIE)) {
-			MDMA_Channel0->CIFCR = MDMA_CIFCR_CLTCIF;
-			params.unlock_for_write();
-			Debug::Pin1::low();
-			// callback();
-		}
+	mem_xfer.registerCallback([&]() {
+		params.unlock_for_write();
+		Debug::Pin1::low();
 	});
 
 	Debug::Pin2::high();

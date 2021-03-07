@@ -26,7 +26,9 @@ void main(void)
 
 	SharedBus::i2c.init(i2c_conf);
 
-	// Todo: finish non-DMA PCA9685 driver and use it
+	// Todo: finish non-DMA PCA9685 driver and use it:
+	// PCA9685Driver<MetaModulePCA9685Conf>::FrameBuffer led_frame_buffer;
+	// PCA9685Driver<MetaModulePCA9685Conf> led_driver{SharedBus::i2c, led_frame_buffer};
 	PCA9685DmaDriver::FrameBuffer led_frame_buffer;
 	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, led_frame_buffer};
 	LedCtl leds{led_driver};
