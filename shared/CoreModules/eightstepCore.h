@@ -18,7 +18,13 @@ public:
 
 	virtual void set_param(int const param_id, const float val) override
 	{
+		if(param_id<8)
 		seq->setStep(param_id, val);
+		else
+		{
+			seq->setLength(map_value(val,0.0f,1.0f,0,8));
+		}
+		
 	}
 	virtual void set_samplerate(const float sr) override {}
 
