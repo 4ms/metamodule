@@ -1,45 +1,14 @@
 #pragma once
-#include "drivers/colors.hh"
 #include "drivers/frame_buffer_led.hh"
-#include "drivers/i2c.hh"
-#include "drivers/led_driver.hh"
 #include "drivers/pca9685_led_driver.hh"
-#include "drivers/pin.hh"
 #include "drivers/rgbled.hh"
 #include "drivers/stm32xx.h"
 using namespace mdrivlib;
 
-// template<typename LedDriverT>
-// class LedController {
-// 	LedDriverT &led_driver_;
-
-// public:
-// 	LedController(LedDriverT &led_driver)
-// 		: led_driver_{led_driver}
-// 	{}
-
-// 	void start()
-// 	{
-// 		led_driver_.start();
-// 	}
-
-// 	void start_it_mode()
-// 	{
-// 		led_driver_.start_it_mode();
-// 	}
-
-// 	void start_dma_mode()
-// 	{
-// 		led_driver_.start_dma_mode();
-// 	}
-
-// 	void refresh()
-// 	{
-// 		led_driver_.write_once(0);
-// 	}
-// };
-
 // CM7
+// Todo: consider making the driver type a template parameter:
+// (in conf:) using MMLedDriver = PCA9685Driver;
+// (in main:) LedFrame<MMLedDriver, UpdateRateHz>
 template<unsigned UpdateRateHz>
 class LedFrame {
 	enum { Chip0 = 0 };
@@ -67,7 +36,7 @@ public:
 			}}
 	{}
 
-	void update()
+	void update_animation()
 	{
 		but[0].update_animation();
 		but[1].update_animation();

@@ -1,20 +1,20 @@
 #pragma once
+#include "conf/hsem_conf.hh"
 #include "controls.hh"
 #include "debug.hh"
+#include "drivers/hsem.hh"
 #include "drivers/i2c.hh"
 #include "leds.hh"
 #include "params.hh"
 
 using namespace mdrivlib;
+namespace MetaModule
+{
 
+// Singleton class
 class SharedBus {
 public:
 	static inline I2CPeriph i2c;
-
-	// SharedBus(const I2CConfig &defs)
-	// {
-	// 	i2c.init(defs);
-	// }
 };
 
 template<size_t LEDUpdateRate>
@@ -36,19 +36,21 @@ public:
 		: leds{leds}
 		, controls{controls}
 	{}
-	// SharedBusQueue(Controls &controls)
-	// 	: controls{controls}
-	// {}
 
 	void update()
 	{
 		switch (cur_client) {
 			case Leds:
-				leds.write_chip(0);
+				Debug::Pin2::high();
+				if (HWSemaphore::lock<LEDFrameBufLock>() == HWSemaphore::SetOk) {
+					leds.write_chip(0);
+				}
+				Debug::Pin2::low();
 				cur_client = SelectPots;
 				break;
 
 			case SelectPots:
+				HWSemaphore::unlock<LEDFrameBufLock>();
 				cur_pot = 0;
 				controls.potadc.select_pot_source(cur_pot);
 				controls.potadc.select_adc_channel(MuxedADC::Channel::Pots);
@@ -116,3 +118,4 @@ private:
 //    }
 //    __NOP();
 // }
+} // namespace MetaModule

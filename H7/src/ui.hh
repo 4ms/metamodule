@@ -3,7 +3,9 @@
 #include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
 #include "debug.hh"
+#include "drivers/hsem.hh"
 #include "drivers/i2c.hh"
+#include "drivers/interrupt.hh"
 #include "leds.hh"
 #include "params.hh"
 #include "patchlist.hh"
@@ -45,37 +47,35 @@ public:
 		draw_patch_name();
 		draw_audio_load();
 
-		// leds.start();
+		leds.but[0].set_background(Colors::grey);
+		leds.but[1].set_background(Colors::grey);
+		leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
+		leds.rotaryLED.set_background(Colors::grey);
 
-		// leds.but[0].set_background(Colors::grey);
-		// leds.but[1].set_background(Colors::grey);
-		// leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
-		// leds.rotaryLED.set_background(Colors::grey);
-
-		// Todo: set led_update_task_conf.update_rate_Hz to be a factor of AnimationUpdateRate and Hz
-		//
-		// led_update_task.init(led_update_task_conf, [this]() { leds.update(); });
+		// Todo: led animation rate depends on I2C rate... not easy to set  maybe we can have it self-calibrate against
+		// the SysTick?
+		// Otherwise we can use this: but we'd have to make it thread-safe we could just have
+		// update_animation() just update the TriOsc and fade (but not write actual color to the framebuffer)
+		// led_update_task.init(led_update_animation_task_conf, [this]() { leds.update_animation(); });
 		// led_update_task.start();
+
+		InterruptManager::registerISR(HSEM1_IRQn, 2, 1, [=]() {
+			if (HWSemaphore::lock<LEDFrameBufLock>() == HWSemaphore::SetOk) {
+				// Todo: ref manual says we need to disable the ISR first, is that true? Sec 11.3.7
+				HWSemaphore::clear_ISR<LEDFrameBufLock>();
+				update_led_states();
+				HWSemaphore::unlock<LEDFrameBufLock>();
+			} else {
+				HWSemaphore::clear_ISR<LEDFrameBufLock>();
+			}
+		});
+
+		HWSemaphore::enable_ISR<LEDFrameBufLock>();
 	}
 
 	uint32_t last_screen_update = 0;
 	void update()
 	{
-		// if (params.buttons[0].is_pressed())
-		// 	leds.but[0].set_background(Colors::red);
-		// else
-		// 	leds.but[0].set_background(Colors::grey);
-
-		// if (params.buttons[1].is_pressed())
-		// 	leds.but[1].set_background(Colors::blue);
-		// else
-		// 	leds.but[1].set_background(Colors::grey);
-
-		// if (params.rotary_button.is_pressed())
-		// 	leds.rotaryLED.set_background(Colors::blue);
-		// else
-		// 	leds.rotaryLED.set_background(Colors::grey);
-
 		uint32_t now = HAL_GetTick();
 		if (now - last_screen_update > 100) {
 			last_screen_update = now;
@@ -87,31 +87,30 @@ public:
 			patch_list.should_redraw_patch = false;
 			draw_patch_name();
 		}
-
-		// screen.setTextColor(Colors::white.Rgb565());
-		// screen.setTextSize(1);
-
-		// if (params.buttons[1].is_just_pressed())
-		// 	leds.but[1].set_background(Colors::red);
-
-		// if (params.buttons[1].is_just_released())
-		// 	leds.but[1].set_background(Colors::blue);
-
-		// if (params.buttons[0].is_just_pressed())
-		// 	leds.but[0].set_background(Colors::red);
-
-		// if (params.buttons[0].is_just_released())
-		// 	leds.but[0].set_background(Colors::blue);
-
-		// if (params.rotary_button.is_just_pressed())
-		// 	leds.rotaryLED.set_background(Colors::white);
-
-		// if (params.rotary_button.is_just_released())
-		// 	leds.rotaryLED.set_background(Colors::blue);
 	}
 
 private:
 	Timekeeper led_update_task;
+
+	void update_led_states()
+	{
+		if (params.buttons[0].is_pressed())
+			leds.but[0].set_background(Colors::red);
+		else
+			leds.but[0].set_background(Colors::grey);
+
+		if (params.buttons[1].is_pressed())
+			leds.but[1].set_background(Colors::blue);
+		else
+			leds.but[1].set_background(Colors::grey);
+
+		if (params.rotary_button.is_pressed())
+			leds.rotaryLED.set_background(Colors::blue);
+		else
+			leds.rotaryLED.set_background(Colors::grey);
+
+		leds.update_animation();
+	}
 
 	void draw_patch_name()
 	{
