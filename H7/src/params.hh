@@ -60,23 +60,23 @@ struct Params {
 
 	void lock_for_read()
 	{
-		while (HWSemaphore::set<ParamsLock>() != HWSemaphore::SetOk)
+		while (HWSemaphore::lock<ParamsLock>() != HWSemaphore::SetOk)
 			;
 	}
 	void unlock_for_read()
 	{
-		HWSemaphore::clear<ParamsLock>();
+		HWSemaphore::unlock<ParamsLock>();
 	}
 
 	void lock_for_write()
 	{
-		while (HWSemaphore::set<ParamsLock>() != HWSemaphore::SetOk)
+		while (HWSemaphore::lock<ParamsLock>() != HWSemaphore::SetOk)
 			;
 	}
 
 	void unlock_for_write()
 	{
-		HWSemaphore::clear<ParamsLock>();
+		HWSemaphore::unlock<ParamsLock>();
 	}
 
 	bool _is_locked()
