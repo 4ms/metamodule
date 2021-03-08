@@ -63,10 +63,6 @@ void main()
 	PatchList patch_list;
 
 	Params params;
-	// SharedMemory::write_address_of(params, SharedMemory::ParamsPtrLocation);
-	extern char *_params_ptr; // defined by linker
-	uint32_t *params_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
-	*params_ptr = reinterpret_cast<uint32_t>(&params);
 
 	params.init();
 
@@ -80,7 +76,10 @@ void main()
 
 	ui.start();
 
-	HWSemaphore::clear<SharedBusLock>();
+	SharedMemory::write_address_of(&params, SharedMemory::ParamsPtrLocation);
+	SCB_CleanDCache();
+
+	HWSemaphore::unlock<SharedBusLock>();
 	Debug::Pin1::high();
 
 	// audio.start();

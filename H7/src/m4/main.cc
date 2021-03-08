@@ -10,6 +10,7 @@
 #include "m4/system_clocks.hh"
 #include "params.hh"
 #include "shared_bus.hh"
+#include "shared_memory.hh"
 
 using namespace MetaModule;
 void main(void)
@@ -28,9 +29,6 @@ void main(void)
 
 	SharedBus::i2c.init(i2c_conf);
 
-	// Todo: finish non-DMA PCA9685 driver and use it:
-	// PCA9685Driver<MetaModulePCA9685Conf>::FrameBuffer led_frame_buffer;
-	// PCA9685Driver<MetaModulePCA9685Conf> led_driver{SharedBus::i2c, led_frame_buffer};
 	uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
@@ -38,24 +36,40 @@ void main(void)
 	CVAdcChipT cvadc;
 
 	Params params;
-	extern char *_params_ptr; // defined by linker
-	Params *params_cm7 = reinterpret_cast<Params *>(_params_ptr);
+	Params *params_cm7 = SharedMemory::read_address_of<Params *>(SharedMemory::ParamsPtrLocation);
 
 	Controls controls{potadc, cvadc, params, *params_cm7}; //, gpio_expander};
 
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 
+	led_driver.start_it_mode();
 	controls.start();
 
 	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
 
+	for (int i = 0; i < 16; i++) {
+		led_frame_buffer[i] = 0x00000000;
+	}
+	led_frame_buffer[0] = 0x30 << 20;
+	led_frame_buffer[1] = 0xF0 << 20;
+	led_frame_buffer[2] = 0x30 << 20;
+
+	led_frame_buffer[3] = 0x1F << 20;
+	led_frame_buffer[4] = 0xF0 << 20;
+	led_frame_buffer[5] = 0xF0 << 20;
+
+	led_frame_buffer[6] = 0x1f << 20;
+	led_frame_buffer[7] = 0xf0 << 20;
+	led_frame_buffer[8] = 0xf0 << 20;
+
+	led_frame_buffer[10] = 0x3f << 20;
+	led_frame_buffer[10] = 0x30 << 20;
+	led_frame_buffer[11] = 0x30 << 20;
+
 	while (1) {
 		if (SharedBus::i2c.is_ready()) {
-			Debug::Pin2::high();
 			i2cqueue.update();
-			Debug::Pin2::low();
 		}
-		// controls.read();
 	}
 }
 
