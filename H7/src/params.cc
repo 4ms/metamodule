@@ -7,12 +7,13 @@
 #include "example_pitchShift_simple.hh"
 #include "example_stereo_verb.h"
 #include "fadedelay_two.hh"
+#include "example1.hh"
 #include "math.hh"
 
 Params::Params(Controls &c)
 	: controls(c)
 	, _patches{{exampleDualLFO},
-			   {examplePitchShiftSimple},
+			   {Example1},
 			   {exampleDrum},
 			   {fadedelay_example},
 			   {example_drum_verb_mono},

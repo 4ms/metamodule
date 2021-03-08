@@ -43,8 +43,17 @@ public:
 	{
 		float addWow = 0;
 		float addFlutter = 0;
-		addWow = wowGen.update() * (wowDepth * wowDepth);
-		addFlutter = flutterGen.update() * (flutterDepth * flutterDepth);
+		float finalWow = 0;
+		float finalFlutter = 0;
+		if (detuneCvConnected == false) {
+			finalWow = wowDepth;
+			finalFlutter = flutterDepth;
+		} else {
+			finalWow = constrain(wowDepth + cvAmount, 0.0f, 1.0f);
+			finalFlutter = constrain(flutterDepth + cvAmount, 0.0f, 1.0f);
+		}
+		addWow = wowGen.update() * (finalWow * finalWow);
+		addFlutter = flutterGen.update() * (finalFlutter * finalFlutter);
 		p.shiftAmount = addWow + addFlutter;
 		signalOutput = p.update(signalInput);
 	}
@@ -85,6 +94,9 @@ public:
 			case 0:
 				signalInput = val;
 				break;
+			case 1:
+				cvAmount = val;
+				break;
 		}
 	}
 
@@ -97,6 +109,17 @@ public:
 				break;
 		}
 		return output;
+	}
+
+	virtual void mark_input_unpatched(const int input_id) override
+	{
+		if (input_id == 1)
+			detuneCvConnected = false;
+	}
+	virtual void mark_input_patched(const int input_id) override
+	{
+		if (input_id == 1)
+			detuneCvConnected = true;
 	}
 
 	static std::unique_ptr<CoreProcessor> create()
@@ -114,6 +137,9 @@ private:
 
 	float signalInput = 0;
 	float signalOutput = 0;
+
+	bool detuneCvConnected = false;
+	float cvAmount = 0;
 
 	InterpRandomGenerator flutterGen;
 	InterpRandomGenerator wowGen;
