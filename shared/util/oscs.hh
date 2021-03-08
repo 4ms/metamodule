@@ -11,13 +11,19 @@ struct TriangleOscillator {
 	TriangleOscillator()
 		: increment_(0)
 	{}
-	uint32_t Process()
+
+	void update()
 	{
 		phase_ += increment_;
-		uint32_t sample = phase_ * 2;
-		if (phase_ > max_ / 2)
-			sample = max_ - sample;
-		return sample;
+	}
+	uint32_t val()
+	{
+		return (phase_ > max_ / 2) ? (max_ - phase_ * 2) : (phase_ * 2);
+	}
+	uint32_t Process()
+	{
+		update();
+		return val();
 	}
 
 	void set_period_ms(uint32_t period_ms)
