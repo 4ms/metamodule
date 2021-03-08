@@ -16,7 +16,7 @@ struct DrumModule : CommModule {
 		NOISE_BLEND_PARAM,
 		NUM_PARAMS
 	};
-	enum InputIds { TRIGGER_INPUT, PITCH_INPUT, NUM_INPUTS };
+	enum InputIds { TRIGGER_INPUT, PITCH_INPUT, N_ENV_CV, FM_ENV_CV, PITCH_ENV_CV, TONE_ENV_CV, NUM_INPUTS };
 	enum OutputIds { DRUM_OUTPUT, NUM_OUTPUTS };
 	enum LightIds { NUM_LIGHTS };
 
@@ -28,6 +28,11 @@ struct DrumModule : CommModule {
 
 		outputJacks[DrumModule::DRUM_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 		inputJacks[DrumModule::PITCH_INPUT]->scale = [](float f) { return f / 5.0f; };
+
+		inputJacks[DrumModule::N_ENV_CV]->scale = [](float f) { return f / 5.0f; };
+		inputJacks[DrumModule::TONE_ENV_CV]->scale = [](float f) { return f / 5.0f; };
+		inputJacks[DrumModule::PITCH_ENV_CV]->scale = [](float f) { return f / 5.0f; };
+		inputJacks[DrumModule::FM_ENV_CV]->scale = [](float f) { return f / 5.0f; };
 	}
 };
 
@@ -58,6 +63,11 @@ struct DrumWidget : CommModuleWidget {
 		addLabeledKnob("TONE ENV", DrumModule::TONE_ENV_PARAM, {0, 2});
 		addLabeledKnob("NOISE ENV", DrumModule::NOISE_ENV_PARAM, {1, 2});
 		addLabeledKnob("NOISE BLEND", DrumModule::NOISE_BLEND_PARAM, {2, 2});
+
+		addLabeledInput("N ENV", DrumModule::N_ENV_CV, {1, 0});
+		addLabeledInput("FM ENV", DrumModule::FM_ENV_CV, {1, 1});
+		addLabeledInput("P ENV", DrumModule::PITCH_ENV_CV, {1, 2});
+		addLabeledInput("T ENV", DrumModule::TONE_ENV_CV, {1, 3});
 
 		addLabeledInput("V/OCT", DrumModule::PITCH_INPUT, {0, 1});
 		addLabeledInput("TRIGGER", DrumModule::TRIGGER_INPUT, {0, 0});
