@@ -95,6 +95,11 @@ public:
 		envelopes[pitchEnvelope].set_envelope_time(1, 0);
 		envelopes[pitchEnvelope].set_envelope_time(2, 50);
 		envelopes[pitchEnvelope].set_envelope_time(3, 2000);
+
+		setToneEnvelope();
+		setFMEnvelope();
+		setNoiseEnvelope();
+		setPitchEnvelope();
 	}
 
 	virtual void set_param(int const param_id, const float val) override
@@ -189,15 +194,19 @@ public:
 				break;
 			case 2:
 				noiseEnvCV = val;
+				setNoiseEnvelope();
 				break;
 			case 3:
 				FMEnvCV = val;
+				setFMEnvelope();
 				break;
 			case 4:
 				pitchEnvCV = val;
+				setPitchEnvelope();
 				break;
 			case 5:
 				toneEnvCV = val;
+				setToneEnvelope();
 				break;
 		}
 	}
