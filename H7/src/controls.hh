@@ -14,12 +14,11 @@
 using namespace mdrivlib;
 
 struct Controls {
-	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, Params &params, Params &dest);
+	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock (&param_blocks)[2]);
 
 	MuxedADC &potadc;
 	CVAdcChipT &cvadc;
-	Params &params;
-	Params &dest;
+	ParamBlock (&param_blocks)[2];
 
 	RotaryEncoder<RotaryHalfStep> rotary = {GPIO::C, 8, GPIO::C, 7};
 	DebouncedPin<GPIO::C, 10, PinPolarity::Inverted> button0;
@@ -33,8 +32,9 @@ struct Controls {
 
 	MemoryTransfer mem_xfer;
 
-	void read();
+	void update_debouncers();
 	void start();
+	void update_params();
 
 	void store_pot_reading(uint32_t pot_id, uint32_t val)
 	{

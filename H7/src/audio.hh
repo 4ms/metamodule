@@ -25,16 +25,24 @@ public:
 	using AudioStreamBlock = std::array<AudioFrame, AudioConf::BlockSize>;
 	enum AudioChannels { LEFT, RIGHT };
 
-	AudioStream(Params &p, PatchList &patches, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4]);
+	AudioStream(PatchList &patches,
+				ICodec &codec,
+				AnalogOutT &dac,
+				ParamBlock (&p)[2],
+				Params &last_params,
+				AudioStreamBlock (&buffers)[4]);
 	void start();
 
-	void process(AudioStreamBlock &in, AudioStreamBlock &out);
+	void process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &params);
 
 private:
 	AudioStreamBlock &tx_buf_1;
 	AudioStreamBlock &tx_buf_2;
 	AudioStreamBlock &rx_buf_1;
 	AudioStreamBlock &rx_buf_2;
+	ParamBlock &param_block_1;
+	ParamBlock &param_block_2;
+	Params &last_params;
 
 	ICodec &codec_;
 	uint32_t sample_rate_;
@@ -46,7 +54,6 @@ private:
 	bool check_patch_change();
 	void load_patch();
 
-	Params &params;
 	AnalogOutT &dac;
 	PatchList &patch_list;
 	PatchPlayer player;
@@ -59,7 +66,4 @@ private:
 	static constexpr unsigned NumCVInputs = PatchPlayer::get_num_panel_inputs() - NumAudioInputs;
 	static constexpr unsigned NumAudioOutputs = 2;
 	static constexpr unsigned NumCVOutputs = PatchPlayer::get_num_panel_outputs() - NumAudioOutputs;
-
-	std::array<Interp<float, AudioConf::BlockSize>, NumCVInputs> cvjacks;
-	std::array<Interp<float, AudioConf::BlockSize>, NumKnobs> knobs;
 };

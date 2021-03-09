@@ -1,8 +1,10 @@
 #pragma once
 #include "conf/hsem_conf.hh"
+#include "conf/stream_conf.hh"
 #include "drivers/hsem.hh"
 #include "drivers/stm32xx.h"
 #include "util/debouncer.hh"
+#include <array>
 
 using namespace MetaModule;
 
@@ -20,6 +22,7 @@ struct Params {
 	Toggler rotary_button;
 	int32_t rotary_motion = 0;
 	int32_t rotary_pushed_motion = 0;
+	// int32_t rotary_position = 0;
 
 	// SelbusQueue selbus_commands;
 	// bool clock_out
@@ -84,4 +87,19 @@ struct Params {
 	{
 		return HWSemaphore::is_locked<ParamsLock>();
 	}
+
+	void enable_unlock_ISR()
+	{
+		HWSemaphore::enable_ISR<ParamsLock>();
+	}
+	void disable_unlock_ISR()
+	{
+		HWSemaphore::disable_ISR<ParamsLock>();
+	}
+	void clear_unlock_ISR()
+	{
+		HWSemaphore::clear_ISR<ParamsLock>();
+	}
 };
+
+using ParamBlock = std::array<Params, StreamConf::Audio::BlockSize>;

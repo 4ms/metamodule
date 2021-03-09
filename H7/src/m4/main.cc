@@ -18,26 +18,26 @@ void main(void)
 {
 	target::corem4::SystemClocks start_clocks;
 
-	Debug::Pin3::high();
-	Debug::Pin2::high();
+	// Debug::Pin3::high();
+	// Debug::Pin2::high();
 	while (HWSemaphore::is_locked<SharedBusLock>()) {
-		Debug::Pin2::low();
+		// Debug::Pin2::low();
 	}
-	Debug::Pin3::low();
-	Debug::Pin1::low();
+	// Debug::Pin3::low();
+	// Debug::Pin1::low();
 
 	SharedBus::i2c.init(i2c_conf);
 
-	uint32_t *led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufferLocation);
+	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufferLocation);
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CVAdcChipT cvadc;
 
-	Params params;
-	Params *params_cm7 = SharedMemory::read_address_of<Params *>(SharedMemory::ParamsPtrLocation);
+	ParamBlock param_block;
+	auto params_cm7 = SharedMemory::read_address_of<ParamBlock *>(SharedMemory::ParamsPtrLocation);
 
-	Controls controls{potadc, cvadc, params, *params_cm7}; //, gpio_expander};
+	Controls controls{potadc, cvadc, param_block, *params_cm7}; //, gpio_expander};
 
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 

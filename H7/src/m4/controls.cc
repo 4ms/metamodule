@@ -12,7 +12,9 @@
 // Then after audio block relinquishes lock on params, we can transfer the buffer.
 // --- would be better if we transferred it right before audio block needs it, but that might be hard to anticipate
 // --- ... maybe after audio block lifts lock, we do a few more reads into the buffers, then transfer
-void Controls::read()
+
+// MDMA for one Param struct (pin high->low) takes 2.2us, sometimes up to 4us (bus delays?)
+void Controls::update_debouncers()
 {
 	rotary.update();
 	rotary_button.update();
@@ -22,6 +24,11 @@ void Controls::read()
 	gate_in0.update();
 	gate_in1.update();
 	clock_in.update();
+}
+
+void Controls::update_params()
+{
+	auto &params = param_blocks[0][0];
 
 	for (int i = 0; i < 4; i++) {
 		params.cvjacks[i] = (2047.5f - static_cast<float>(cvadc.get_val(i))) / 2047.5f;
@@ -57,37 +64,45 @@ void Controls::read()
 
 	params.patchcv = get_patchcv_reading() / 4095.0f;
 
-	// Todo: don't transfer this each time, instead only xfer after audio block is done
-	// Just make sure Controls::read() is not running
-	// Pin1 high->low takes 2.2us, sometimes up to 4us (bus delays?)
-	Debug::Pin1::high();
-	params.lock_for_write();
-	mem_xfer.start_transfer();
-
 	// Debug::Pin3::low();
 }
 
 void Controls::start()
 {
 	params.unlock_for_write();
+	params.clear_unlock_ISR();
+	params.disable_unlock_ISR();
 	potadc.start();
 	cvadc.start();
+
+	InterruptManager::registerISR(HSEM2_IRQn, 2, 1, [&]() {
+		Debug::Pin3::high();
+
+		params.clear_unlock_ISR();
+
+		update_params();
+		params.lock_for_write();
+		Debug::Pin1::high();
+		mem_xfer.start_transfer();
+
+		Debug::Pin3::low();
+	});
 
 	mem_xfer.registerCallback([&]() {
 		params.unlock_for_write();
 		Debug::Pin1::low();
+		params.enable_unlock_ISR();
 	});
 
-	Debug::Pin2::high();
-	params.lock_for_write();
-	Debug::Pin1::high();
-	Debug::Pin2::low();
 	mem_xfer.config_transfer(&dest, &params, sizeof(Params));
-	mem_xfer.start_transfer();
-	while (params._is_locked()) {
-		Debug::Pin3::high();
-		Debug::Pin3::low();
-	}
+
+	params.enable_unlock_ISR();
+
+	// mem_xfer.start_transfer();
+	// while (params._is_locked()) {
+	// 	// Debug::Pin3::high();
+	// 	// Debug::Pin3::low();
+	// }
 
 	read_controls_task.start();
 	read_cvadc_task.start();
@@ -103,7 +118,6 @@ Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, Params &params, Params &
 	// Todo: use RCC_Control or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
 
-	read_controls_task.init(control_read_tim_conf, [this]() { read(); });
+	read_controls_task.init(control_read_tim_conf, [this]() { update_debouncers(); });
 	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 }
-

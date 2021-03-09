@@ -44,6 +44,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 	static inline __attribute__((section(".dma_buffer"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+	static inline __attribute__((section(".dma_buffer"))) ParamBlock param_blocks[2];
 
 	StaticBuffers()
 	{
@@ -61,25 +62,30 @@ void main()
 {
 	using namespace MetaModule;
 
-	Params params;
-	params.init();
+	Params last_params;
+	for (auto &p : StaticBuffers::param_blocks[0])
+		p.init();
+	for (auto &p : StaticBuffers::param_blocks[1])
+		p.init();
+	last_params.init();
 
 	PatchList patch_list;
-	AudioStream audio{params, patch_list, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
+	AudioStream audio{
+		patch_list, _hw.codec, _hw.dac, StaticBuffers::param_blocks, last_params, StaticBuffers::audio_dma_block};
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{params, patch_list, leds, _hw.screen};
+	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, _hw.screen};
 
 	ui.start();
 
 	SharedBus::i2c.deinit();
 
-	SharedMemory::write_address_of(&params, SharedMemory::ParamsPtrLocation);
+	SharedMemory::write_address_of(StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufferLocation);
 	SCB_CleanDCache();
 
 	HWSemaphore::disable_ISR<SharedBusLock>();
 	HWSemaphore::unlock<SharedBusLock>();
-	Debug::Pin1::high();
+	// Debug::Pin1::high();
 
 	audio.start();
 

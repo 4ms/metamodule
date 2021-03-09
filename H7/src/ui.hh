@@ -60,10 +60,8 @@ public:
 		// led_update_task.start();
 
 		InterruptManager::registerISR(HSEM1_IRQn, 2, 1, [&]() {
-			// Debug::Pin0::high();
 			HWSemaphore::clear_ISR<LEDFrameBufLock>();
 			update_led_states();
-			// Debug::Pin0::low();
 		});
 
 		HWSemaphore::enable_ISR<LEDFrameBufLock>();
@@ -104,6 +102,11 @@ private:
 			leds.rotaryLED.set_background(Colors::blue);
 		else
 			leds.rotaryLED.set_background(Colors::magenta);
+
+		leds.rotaryLED.breathe(Colors::magenta, 1);
+		leds.clockLED.breathe(Colors::green, 9);
+		leds.but[0].breathe(Colors::blue, 0.1f);
+		leds.but[1].breathe(Colors::white, 0.01f);
 
 		leds.update_animation();
 	}
