@@ -15,6 +15,10 @@ namespace MetaModule
 class SharedBus {
 public:
 	static inline I2CPeriph i2c;
+	SharedBus(const I2CConfig &i2c_conf_)
+	{
+		i2c.init(i2c_conf_);
+	}
 };
 
 template<size_t LEDUpdateRate>
@@ -42,15 +46,15 @@ public:
 		switch (cur_client) {
 			case Leds:
 				Debug::Pin2::high();
-				if (HWSemaphore::lock<LEDFrameBufLock>() == HWSemaphore::SetOk) {
+				if (HWSemaphore::lock<LEDFrameBufLock>(2) == HWSemaphore::LockedOk) {
 					leds.write_chip(0);
 				}
-				Debug::Pin2::low();
 				cur_client = SelectPots;
 				break;
 
 			case SelectPots:
-				HWSemaphore::unlock<LEDFrameBufLock>();
+				Debug::Pin2::low();
+				HWSemaphore::unlock<LEDFrameBufLock>(2);
 				cur_pot = 0;
 				controls.potadc.select_pot_source(cur_pot);
 				controls.potadc.select_adc_channel(MuxedADC::Channel::Pots);

@@ -13,10 +13,9 @@
 #include "shared_memory.hh"
 
 using namespace MetaModule;
+
 void main(void)
 {
-	constexpr uint32_t LEDUpdateHz = 100;
-
 	target::corem4::SystemClocks start_clocks;
 
 	Debug::Pin3::high();
@@ -29,7 +28,7 @@ void main(void)
 
 	SharedBus::i2c.init(i2c_conf);
 
-	uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+	uint32_t *led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufferLocation);
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
@@ -46,25 +45,6 @@ void main(void)
 	controls.start();
 
 	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
-
-	for (int i = 0; i < 16; i++) {
-		led_frame_buffer[i] = 0x00000000;
-	}
-	led_frame_buffer[0] = 0x30 << 20;
-	led_frame_buffer[1] = 0xF0 << 20;
-	led_frame_buffer[2] = 0x30 << 20;
-
-	led_frame_buffer[3] = 0x1F << 20;
-	led_frame_buffer[4] = 0xF0 << 20;
-	led_frame_buffer[5] = 0xF0 << 20;
-
-	led_frame_buffer[6] = 0x1f << 20;
-	led_frame_buffer[7] = 0xf0 << 20;
-	led_frame_buffer[8] = 0xf0 << 20;
-
-	led_frame_buffer[10] = 0x3f << 20;
-	led_frame_buffer[10] = 0x30 << 20;
-	led_frame_buffer[11] = 0x30 << 20;
 
 	while (1) {
 		if (SharedBus::i2c.is_ready()) {

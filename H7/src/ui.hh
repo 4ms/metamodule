@@ -59,15 +59,11 @@ public:
 		// led_update_task.init(led_update_animation_task_conf, [this]() { leds.update_animation(); });
 		// led_update_task.start();
 
-		InterruptManager::registerISR(HSEM1_IRQn, 2, 1, [=]() {
-			if (HWSemaphore::lock<LEDFrameBufLock>() == HWSemaphore::SetOk) {
-				// Todo: ref manual says we need to disable the ISR first, is that true? Sec 11.3.7
-				HWSemaphore::clear_ISR<LEDFrameBufLock>();
-				update_led_states();
-				HWSemaphore::unlock<LEDFrameBufLock>();
-			} else {
-				HWSemaphore::clear_ISR<LEDFrameBufLock>();
-			}
+		InterruptManager::registerISR(HSEM1_IRQn, 2, 1, [&]() {
+			// Debug::Pin0::high();
+			HWSemaphore::clear_ISR<LEDFrameBufLock>();
+			update_led_states();
+			// Debug::Pin0::low();
 		});
 
 		HWSemaphore::enable_ISR<LEDFrameBufLock>();
@@ -97,17 +93,17 @@ private:
 		if (params.buttons[0].is_pressed())
 			leds.but[0].set_background(Colors::red);
 		else
-			leds.but[0].set_background(Colors::grey);
+			leds.but[0].set_background(Colors::green);
 
 		if (params.buttons[1].is_pressed())
 			leds.but[1].set_background(Colors::blue);
 		else
-			leds.but[1].set_background(Colors::grey);
+			leds.but[1].set_background(Colors::orange);
 
 		if (params.rotary_button.is_pressed())
 			leds.rotaryLED.set_background(Colors::blue);
 		else
-			leds.rotaryLED.set_background(Colors::grey);
+			leds.rotaryLED.set_background(Colors::magenta);
 
 		leds.update_animation();
 	}

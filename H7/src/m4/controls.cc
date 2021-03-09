@@ -23,8 +23,6 @@ void Controls::read()
 	gate_in1.update();
 	clock_in.update();
 
-	Debug::Pin3::high();
-
 	for (int i = 0; i < 4; i++) {
 		params.cvjacks[i] = (2047.5f - static_cast<float>(cvadc.get_val(i))) / 2047.5f;
 	}
@@ -60,12 +58,13 @@ void Controls::read()
 	params.patchcv = get_patchcv_reading() / 4095.0f;
 
 	// Todo: don't transfer this each time, instead only xfer after audio block is done
+	// Just make sure Controls::read() is not running
 	// Pin1 high->low takes 2.2us, sometimes up to 4us (bus delays?)
 	Debug::Pin1::high();
 	params.lock_for_write();
 	mem_xfer.start_transfer();
 
-	Debug::Pin3::low();
+	// Debug::Pin3::low();
 }
 
 void Controls::start()

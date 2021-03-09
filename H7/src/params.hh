@@ -56,11 +56,12 @@ struct Params {
 			jack_senses[i].is_just_pressed();
 			jack_senses[i].set_state(0);
 		}
+		HWSemaphore::disable_ISR<ParamsLock>();
 	}
 
 	void lock_for_read()
 	{
-		while (HWSemaphore::lock<ParamsLock>() != HWSemaphore::SetOk)
+		while (HWSemaphore::lock<ParamsLock>() != HWSemaphore::LockedOk)
 			;
 	}
 	void unlock_for_read()
@@ -70,7 +71,7 @@ struct Params {
 
 	void lock_for_write()
 	{
-		while (HWSemaphore::lock<ParamsLock>() != HWSemaphore::SetOk)
+		while (HWSemaphore::lock<ParamsLock>() != HWSemaphore::LockedOk)
 			;
 	}
 

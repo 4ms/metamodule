@@ -1,6 +1,8 @@
 #pragma once
 #include "drivers/i2c_config_struct.hh"
 
+constexpr uint32_t LEDUpdateHz = 100;
+
 const I2CConfig i2c_conf = {
 	.I2Cx = I2C1,
 	.SCL = {GPIO::B, 6, GPIO_AF4_I2C1},

@@ -25,10 +25,10 @@
 
 namespace MetaModule
 {
-struct Hardware : SystemClocks, SDRAMPeriph, Debug /*, SharedBus*/ {
+struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	Hardware()
 		: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
-	// , SharedBus{i2c_conf}
+		, SharedBus{i2c_conf}
 	{}
 
 	// Todo: understand why setting the members to static inline causes SystemClocks ctor to hang on waiting for
@@ -43,6 +43,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug /*, SharedBus*/ {
 
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
+	static inline __attribute__((section(".dma_buffer"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 
 	StaticBuffers()
 	{
@@ -52,37 +53,35 @@ struct StaticBuffers {
 
 } // namespace MetaModule
 
+// Todo: use PatchList memory better: right now all patches get copied with CopyInitData with mostly zeros (some
+// values?) Then libc_init calls PatchList ctor. So make it static? Have a load() function? Keep in mind we'll want to
+// dynamically load patches at some point
+
 void main()
 {
-	constexpr uint32_t LEDUpdateHz = 100;
 	using namespace MetaModule;
 
-	// Todo: use memory better: right now all patches get copied with CopyInitData with mostly zeros (some values?)
-	// Then libc_init calls PatchList ctor. So make it static? Have a load() function? Keep in mind we'll want to
-	// dynamically load patches at some point
-	PatchList patch_list;
-
 	Params params;
-
 	params.init();
 
+	PatchList patch_list;
 	AudioStream audio{params, patch_list, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
-
-	uint32_t led_frame_buf[PCA9685Driver::kNumLedsPerChip];
-	LedFrame<LEDUpdateHz> leds{led_frame_buf};
+	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 	Ui<LEDUpdateHz> ui{params, patch_list, leds, _hw.screen};
-
-	// SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 
 	ui.start();
 
+	SharedBus::i2c.deinit();
+
 	SharedMemory::write_address_of(&params, SharedMemory::ParamsPtrLocation);
+	SharedMemory::write_address_of(StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufferLocation);
 	SCB_CleanDCache();
 
+	HWSemaphore::disable_ISR<SharedBusLock>();
 	HWSemaphore::unlock<SharedBusLock>();
 	Debug::Pin1::high();
 
-	// audio.start();
+	audio.start();
 
 	while (1) {
 		ui.update();
