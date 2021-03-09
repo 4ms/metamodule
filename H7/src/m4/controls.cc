@@ -1,7 +1,9 @@
 #include "controls.hh"
+#include "conf/hsem_conf.hh"
 #include "debug.hh"
+#include "drivers/hsem.hh"
 #include <cstring>
-
+using namespace MetaModule;
 // CM4: 10kHz, 2.9% = 2.9us
 //
 // We have: knobs, buttons, rotary, gate ins, cv jacks
@@ -28,73 +30,63 @@ void Controls::update_debouncers()
 
 void Controls::update_params()
 {
-	auto &params = param_blocks[0][0];
+	Params *params = &(*cur_param_block)[0];
 
 	for (int i = 0; i < 4; i++) {
-		params.cvjacks[i] = (2047.5f - static_cast<float>(cvadc.get_val(i))) / 2047.5f;
+		params->cvjacks[i] = (2047.5f - static_cast<float>(cvadc.get_val(i))) / 2047.5f;
 	}
 
 	int tmp_rotary_motion = rotary.read();
 
 	if (rotary_button.is_just_pressed()) {
 		_rotary_moved_while_pressed = false;
-		params.rotary_button.register_rising_edge();
+		params->rotary_button.register_rising_edge();
 	}
 	if (rotary_button.is_just_released() && !_rotary_moved_while_pressed) {
-		params.rotary_button.register_falling_edge();
+		params->rotary_button.register_falling_edge();
 	}
 	if (rotary_button.is_pressed()) {
-		if (params.rotary_motion != 0) {
+		if (params->rotary_motion != 0) {
 			_rotary_moved_while_pressed = true;
-			params.rotary_pushed_motion += tmp_rotary_motion;
+			params->rotary_pushed_motion += tmp_rotary_motion;
 		}
 	} else {
-		params.rotary_motion += tmp_rotary_motion;
+		params->rotary_position += tmp_rotary_motion;
+		if (tmp_rotary_motion > 0)
+			params->rotary_motion = 1;
+		else if (tmp_rotary_motion < 0)
+			params->rotary_motion = -1;
+		else
+			params->rotary_motion = 0;
 	}
 
-	params.buttons[0].copy_state(button0);
-	params.buttons[1].copy_state(button1);
-	params.rotary_button.copy_state(rotary_button);
-	params.gate_ins[0].copy_state(gate_in0);
-	params.gate_ins[1].copy_state(gate_in1);
-	params.clock_in.copy_state(clock_in);
+	params->buttons[0].copy_state(button0);
+	params->buttons[1].copy_state(button1);
+	params->rotary_button.copy_state(rotary_button);
+	params->gate_ins[0].copy_state(gate_in0);
+	params->gate_ins[1].copy_state(gate_in1);
+	params->clock_in.copy_state(clock_in);
 
 	for (int i = 0; i < 8; i++)
-		params.knobs[i] = get_pot_reading(i) / 4095.0f;
+		params->knobs[i] = get_pot_reading(i) / 4095.0f;
 
-	params.patchcv = get_patchcv_reading() / 4095.0f;
+	params->patchcv = get_patchcv_reading() / 4095.0f;
 
 	// Debug::Pin3::low();
 }
 
 void Controls::start()
 {
-	params.unlock_for_write();
-	params.clear_unlock_ISR();
-	params.disable_unlock_ISR();
+	HWSemaphore<ParamsLock>::clear_ISR();
+
 	potadc.start();
 	cvadc.start();
 
 	InterruptManager::registerISR(HSEM2_IRQn, 2, 1, [&]() {
 		Debug::Pin3::high();
-
-		params.clear_unlock_ISR();
-
 		update_params();
-		params.lock_for_write();
-		Debug::Pin1::high();
-		mem_xfer.start_transfer();
-
 		Debug::Pin3::low();
 	});
-
-	mem_xfer.registerCallback([&]() {
-		params.unlock_for_write();
-		Debug::Pin1::low();
-		params.enable_unlock_ISR();
-	});
-
-	mem_xfer.config_transfer(&dest, &params, sizeof(Params));
 
 	params.enable_unlock_ISR();
 
@@ -109,11 +101,12 @@ void Controls::start()
 	clock_out.low();
 }
 
-Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, Params &params, Params &dest)
+Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock (&param_blocks_)[2])
 	: potadc(potadc)
 	, cvadc(cvadc)
-	, params(params)
-	, dest(dest)
+	, param_block_1{param_blocks_[0]}
+	, param_block_2{param_blocks_[1]}
+	, cur_param_block{&param_block_1}
 {
 	// Todo: use RCC_Control or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();

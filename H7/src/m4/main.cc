@@ -20,7 +20,7 @@ void main(void)
 
 	// Debug::Pin3::high();
 	// Debug::Pin2::high();
-	while (HWSemaphore::is_locked<SharedBusLock>()) {
+	while (HWSemaphore<SharedBusLock>::is_locked()) {
 		// Debug::Pin2::low();
 	}
 	// Debug::Pin3::low();
@@ -57,4 +57,3 @@ void recover_from_task_fault()
 {
 	main();
 }
-

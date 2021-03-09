@@ -54,7 +54,7 @@ struct SystemClocks {
 	SystemClocks()
 	{
 		target::RCC_Control::HSEM_::set();
-		HWSemaphore::lock<SharedBusLock>();
+		HWSemaphore<SharedBusLock>::lock();
 
 		target::corem7::SystemStartup::wait_for_cm4_sleep();
 

@@ -1,12 +1,12 @@
 #pragma once
-#include "conf/hsem_conf.hh"
+// #include "conf/hsem_conf.hh"
 #include "conf/stream_conf.hh"
-#include "drivers/hsem.hh"
+// #include "drivers/hsem.hh"
 #include "drivers/stm32xx.h"
 #include "util/debouncer.hh"
 #include <array>
 
-using namespace MetaModule;
+// using namespace MetaModule;
 
 struct Params {
 	float cvjacks[4] = {0.f, 0.f, 0.f, 0.f};
@@ -22,7 +22,7 @@ struct Params {
 	Toggler rotary_button;
 	int32_t rotary_motion = 0;
 	int32_t rotary_pushed_motion = 0;
-	// int32_t rotary_position = 0;
+	int32_t rotary_position = 0;
 
 	// SelbusQueue selbus_commands;
 	// bool clock_out
@@ -59,9 +59,12 @@ struct Params {
 			jack_senses[i].is_just_pressed();
 			jack_senses[i].set_state(0);
 		}
-		HWSemaphore::disable_ISR<ParamsLock>();
 	}
+};
+/*
+struct ParamController {
 
+	// HWSemaphore::disable_ISR<ParamsLock>();
 	void lock_for_read()
 	{
 		while (HWSemaphore::lock<ParamsLock>() != HWSemaphore::LockedOk)
@@ -101,5 +104,5 @@ struct Params {
 		HWSemaphore::clear_ISR<ParamsLock>();
 	}
 };
-
+*/
 using ParamBlock = std::array<Params, StreamConf::Audio::BlockSize>;
