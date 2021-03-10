@@ -61,48 +61,5 @@ struct Params {
 		}
 	}
 };
-/*
-struct ParamController {
 
-	// HWSemaphore::disable_ISR<ParamsLock>();
-	void lock_for_read()
-	{
-		while (HWSemaphore::lock<ParamsLock>() != HWSemaphore::LockedOk)
-			;
-	}
-	void unlock_for_read()
-	{
-		HWSemaphore::unlock<ParamsLock>();
-	}
-
-	void lock_for_write()
-	{
-		while (HWSemaphore::lock<ParamsLock>() != HWSemaphore::LockedOk)
-			;
-	}
-
-	void unlock_for_write()
-	{
-		HWSemaphore::unlock<ParamsLock>();
-	}
-
-	bool _is_locked()
-	{
-		return HWSemaphore::is_locked<ParamsLock>();
-	}
-
-	void enable_unlock_ISR()
-	{
-		HWSemaphore::enable_ISR<ParamsLock>();
-	}
-	void disable_unlock_ISR()
-	{
-		HWSemaphore::disable_ISR<ParamsLock>();
-	}
-	void clear_unlock_ISR()
-	{
-		HWSemaphore::clear_ISR<ParamsLock>();
-	}
-};
-*/
 using ParamBlock = std::array<Params, StreamConf::Audio::BlockSize>;

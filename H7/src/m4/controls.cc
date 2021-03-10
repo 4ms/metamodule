@@ -89,13 +89,12 @@ void Controls::update_params()
 
 void Controls::start()
 {
-
 	potadc.start();
 	cvadc.start();
 
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
-	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_ISR();
+	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_ISR();
 	InterruptManager::registerISR(HSEM2_IRQn, 0, 0, [&]() {
 		if (HWSemaphore<ParamsBuf1Lock>::is_ISR_triggered_and_enabled()) {

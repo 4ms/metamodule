@@ -84,7 +84,6 @@ void main()
 
 	HWSemaphore<SharedBusLock>::disable_ISR();
 	HWSemaphore<SharedBusLock>::unlock();
-	// Debug::Pin1::high();
 
 	audio.start();
 
