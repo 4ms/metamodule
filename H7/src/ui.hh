@@ -2,6 +2,7 @@
 #include "Adafruit_GFX_Library/Fonts/FreeMono12pt7b.h"
 #include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
+#include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/i2c.hh"
@@ -13,6 +14,8 @@
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
 
+namespace MetaModule
+{
 template<unsigned AnimationUpdateRate = 100>
 class Ui {
 public:
@@ -50,7 +53,7 @@ public:
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
 		leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
-		leds.rotaryLED.set_background(Colors::grey);
+		leds.rotaryLED.set_background(Colors::green);
 
 		// Todo: led animation rate depends on I2C rate... not easy to set  maybe we can have it self-calibrate against
 		// the SysTick?
@@ -60,11 +63,11 @@ public:
 		// led_update_task.start();
 
 		InterruptManager::registerISR(HSEM1_IRQn, 2, 1, [&]() {
-			HWSemaphore::clear_ISR<LEDFrameBufLock>();
+			HWSemaphore<LEDFrameBufLock>::clear_ISR();
 			update_led_states();
 		});
 
-		HWSemaphore::enable_ISR<LEDFrameBufLock>();
+		HWSemaphore<LEDFrameBufLock>::enable_ISR();
 	}
 
 	uint32_t last_screen_update = 0;
@@ -101,11 +104,11 @@ private:
 		if (params.rotary_button.is_pressed())
 			leds.rotaryLED.set_background(Colors::blue);
 		else
-			leds.rotaryLED.set_background(Colors::magenta);
+			leds.rotaryLED.set_background(Colors::green);
 
 		leds.rotaryLED.breathe(Colors::magenta, 1);
-		leds.clockLED.breathe(Colors::green, 9);
-		leds.but[0].breathe(Colors::blue, 0.1f);
+		leds.clockLED.breathe(Colors::green, 0.75f);
+		leds.but[0].breathe(Colors::blue, 0.5f);
 		leds.but[1].breathe(Colors::white, 0.01f);
 
 		leds.update_animation();
@@ -180,3 +183,4 @@ private:
 		screen.fillRect(219, 197, 20, 20, Colors::cyan.Rgb565());
 	}
 };
+} // namespace MetaModule

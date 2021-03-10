@@ -1,8 +1,12 @@
 #include "audio.hh"
+#include "conf/hsem_conf.hh"
 #include "debug.hh"
+#include "drivers/hsem.hh"
 #include "drivers/syscfg.hh"
 #include "patch_player.hh"
 
+namespace MetaModule
+{
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 
 AudioStream::AudioStream(PatchList &patches,
@@ -28,8 +32,17 @@ AudioStream::AudioStream(PatchList &patches,
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
 							AudioConf::DMABlockSize * 2);
-	codec_.set_callbacks([this]() { process(rx_buf_1, tx_buf_1, param_block_1); },
-						 [this]() { process(rx_buf_2, tx_buf_2, param_block_2); });
+	codec_.set_callbacks(
+		[this]() {
+			HWSemaphore<ParamsBuf1Lock>::lock();
+			HWSemaphore<ParamsBuf2Lock>::unlock();
+			process(rx_buf_1, tx_buf_1, param_block_1);
+		},
+		[this]() {
+			HWSemaphore<ParamsBuf2Lock>::lock();
+			HWSemaphore<ParamsBuf1Lock>::unlock();
+			process(rx_buf_2, tx_buf_2, param_block_2);
+		});
 
 	dac.init();
 	dac_updater.init(DAC_update_conf, [&]() { dac.output_next(); });
@@ -52,12 +65,13 @@ void AudioStream::set_input(int input_id, AudioConf::SampleT in)
 
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
 {
+	// Todo: make this point, not copy
 	last_params = *param_block.begin();
 	check_patch_change();
 
 	load_measure.start_measurement();
-
-	Debug::Pin0::high();
+	if (param_block.begin() < &param_block_1[1])
+		Debug::Pin0::high();
 
 	// Todo: integrate these:
 	// params.gate_ins[]
@@ -155,3 +169,5 @@ void AudioStream::load_patch()
 		}
 	}
 }
+
+} // namespace MetaModule

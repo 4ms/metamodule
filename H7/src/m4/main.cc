@@ -29,15 +29,15 @@ void main(void)
 	SharedBus::i2c.init(i2c_conf);
 
 	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufferLocation);
+	ParamBlock *param_block_base = SharedMemory::read_address_of<ParamBlock *>(SharedMemory::ParamsPtrLocation);
+
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CVAdcChipT cvadc;
 
-	ParamBlock param_block;
-	auto params_cm7 = SharedMemory::read_address_of<ParamBlock *>(SharedMemory::ParamsPtrLocation);
 
-	Controls controls{potadc, cvadc, param_block, *params_cm7}; //, gpio_expander};
+	Controls controls{potadc, cvadc, param_block_base}; //, gpio_expander};
 
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 

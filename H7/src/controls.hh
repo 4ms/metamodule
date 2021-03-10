@@ -14,13 +14,13 @@
 using namespace mdrivlib;
 
 struct Controls {
-	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock (&param_blocks)[2]);
+	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block);
 
 	MuxedADC &potadc;
 	CVAdcChipT &cvadc;
-	ParamBlock &param_block_1;
-	ParamBlock &param_block_2;
+	ParamBlock *param_blocks;
 	ParamBlock *cur_param_block;
+	Params *cur_params;
 
 	RotaryEncoder<RotaryHalfStep> rotary = {GPIO::C, 8, GPIO::C, 7};
 	DebouncedPin<GPIO::C, 10, PinPolarity::Inverted> button0;

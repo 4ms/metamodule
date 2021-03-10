@@ -45,7 +45,7 @@ public:
 	{
 		switch (cur_client) {
 			case Leds:
-				Debug::Pin2::high();
+				// Debug::Pin2::high();
 				if (HWSemaphore<LEDFrameBufLock>::lock(2) == HWSemaphoreFlag::LockedOk) {
 					leds.write_chip(0);
 				}
@@ -53,7 +53,7 @@ public:
 				break;
 
 			case SelectPots:
-				Debug::Pin2::low();
+				// Debug::Pin2::low();
 				HWSemaphore<LEDFrameBufLock>::unlock(2);
 				cur_pot = 0;
 				controls.potadc.select_pot_source(cur_pot);

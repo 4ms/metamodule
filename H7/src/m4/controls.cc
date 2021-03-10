@@ -30,7 +30,12 @@ void Controls::update_debouncers()
 
 void Controls::update_params()
 {
-	Params *params = &(*cur_param_block)[0];
+	Params *params = cur_params;
+
+	if (params <= &param_blocks[1][0])
+		Debug::Pin1::high();
+	else
+		Debug::Pin2::high();
 
 	for (int i = 0; i < 4; i++) {
 		params->cvjacks[i] = (2047.5f - static_cast<float>(cvadc.get_val(i))) / 2047.5f;
@@ -72,45 +77,64 @@ void Controls::update_params()
 
 	params->patchcv = get_patchcv_reading() / 4095.0f;
 
-	// Debug::Pin3::low();
+	if (params <= &param_blocks[1][0])
+		Debug::Pin1::low();
+	else
+		Debug::Pin2::low();
+
+	cur_params++;
+	if (cur_params >= &param_blocks[2][0])
+		cur_params = &param_blocks[0][0];
 }
 
 void Controls::start()
 {
-	HWSemaphore<ParamsLock>::clear_ISR();
 
 	potadc.start();
 	cvadc.start();
 
-	InterruptManager::registerISR(HSEM2_IRQn, 2, 1, [&]() {
-		Debug::Pin3::high();
-		update_params();
-		Debug::Pin3::low();
+	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
+	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
+	HWSemaphore<ParamsBuf1Lock>::disable_ISR();
+	HWSemaphore<ParamsBuf2Lock>::disable_ISR();
+	InterruptManager::registerISR(HSEM2_IRQn, 0, 0, [&]() {
+		if (HWSemaphore<ParamsBuf1Lock>::is_ISR_triggered_and_enabled()) {
+			Debug::Pin3::high();
+			Debug::Pin3::low();
+			cur_params = &param_blocks[0][0];
+			HWSemaphore<ParamsBuf1Lock>::clear_ISR();
+		} else if (HWSemaphore<ParamsBuf2Lock>::is_ISR_triggered_and_enabled()) {
+			Debug::Pin2::high();
+			Debug::Pin2::low();
+			cur_params = &param_blocks[1][0];
+			HWSemaphore<ParamsBuf2Lock>::clear_ISR();
+		} else {
+			Debug::Pin1::high();
+			Debug::Pin1::low();
+			return;
+		}
 	});
-
-	params.enable_unlock_ISR();
-
-	// mem_xfer.start_transfer();
-	// while (params._is_locked()) {
-	// 	// Debug::Pin3::high();
-	// 	// Debug::Pin3::low();
-	// }
+	HWSemaphore<ParamsBuf1Lock>::enable_ISR();
+	HWSemaphore<ParamsBuf2Lock>::enable_ISR();
 
 	read_controls_task.start();
 	read_cvadc_task.start();
 	clock_out.low();
 }
 
-Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock (&param_blocks_)[2])
+Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block_base)
 	: potadc(potadc)
 	, cvadc(cvadc)
-	, param_block_1{param_blocks_[0]}
-	, param_block_2{param_blocks_[1]}
-	, cur_param_block{&param_block_1}
+	, param_blocks(param_block_base)
+	, cur_param_block(param_block_base)
+	, cur_params(&param_block_base[0][0])
 {
 	// Todo: use RCC_Control or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
 
-	read_controls_task.init(control_read_tim_conf, [this]() { update_debouncers(); });
+	read_controls_task.init(control_read_tim_conf, [this]() {
+		update_debouncers();
+		update_params();
+	});
 	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 }

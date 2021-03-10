@@ -34,7 +34,6 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	// Todo: understand why setting the members to static inline causes SystemClocks ctor to hang on waiting for
 	// D2CLKREADY
 
-	// Todo: figure out how to use i2c on both cores -- OR -- separate Codec::I2C from Codec::SAI
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	AnalogOutT dac;
@@ -75,11 +74,11 @@ void main()
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, _hw.screen};
 
-	ui.start();
-
 	SharedBus::i2c.deinit();
 
-	SharedMemory::write_address_of(StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
+	ui.start();
+
+	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufferLocation);
 	SCB_CleanDCache();
 
