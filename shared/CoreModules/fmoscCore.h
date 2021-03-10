@@ -12,10 +12,12 @@ public:
 	virtual void update(void) override
 	{
 		fm.set_frequency(basePitch * expTable.interp(constrain(pitchInput, 0.0f, 1.0f)));
-		totalIndex = constrain(indexCV*indexAmount + indexKnob, 0.0f, 1.0f);
-		float totalShape = constrain(shapeCV*shapeAmount + shapeKnob, 0.0f, 1.0f);
+		totalIndex = constrain(indexCV * indexAmount + indexKnob, 0.0f, 1.0f);
+		float totalShape = constrain(shapeCV * shapeAmount + shapeKnob, 0.0f, 1.0f);
 		fm.shape = totalShape;
 		fm.modAmount = totalIndex;
+		float finalMix = constrain(mixCV+mix,0.0f,1.0f);
+		fm.mix = finalMix;
 		mainOutput = fm.update();
 	}
 
@@ -49,6 +51,9 @@ public:
 			case 6:
 				indexAmount = val;
 				break;
+			case 7:
+				mix = val;
+				break;
 		}
 	}
 	virtual void set_samplerate(const float sr) override
@@ -67,6 +72,9 @@ public:
 				break;
 			case 2:
 				shapeCV = val;
+				break;
+			case 3:
+				mixCV = val;
 				break;
 		}
 	}
@@ -92,6 +100,8 @@ public:
 
 private:
 	TwoOpFM fm;
+	float mix = 0;
+	float mixCV = 0;
 	float basePitch = 0;
 	float mainOutput;
 	float indexKnob = 0;
