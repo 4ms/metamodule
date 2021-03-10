@@ -62,12 +62,7 @@ void main()
 	using namespace MetaModule;
 
 	Params last_params;
-	for (auto &p : StaticBuffers::param_blocks[0])
-		p.init();
-	for (auto &p : StaticBuffers::param_blocks[1])
-		p.init();
-	last_params.init();
-
+	
 	PatchList patch_list;
 	AudioStream audio{
 		patch_list, _hw.codec, _hw.dac, StaticBuffers::param_blocks, last_params, StaticBuffers::audio_dma_block};
