@@ -10,8 +10,9 @@ class PannerCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		leftOut = signalInput * (1.0f - panPosition);
-		rightOut = signalInput * panPosition;
+		float finalPan = constrain(panPosition+panCV,0.0f,1.0f);
+		leftOut = signalInput * (1.0f - finalPan);
+		rightOut = signalInput * finalPan;
 	}
 
 	PannerCore() {}
@@ -31,6 +32,9 @@ public:
 		switch (input_id) {
 			case 0:
 				signalInput = val;
+				break;
+			case 1:
+				panCV = val;
 				break;
 		}
 	}
@@ -62,4 +66,6 @@ private:
 	float signalInput = 0;
 	float leftOut = 0;
 	float rightOut = 0;
+
+	float panCV = 0;
 };
