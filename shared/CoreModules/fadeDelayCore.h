@@ -40,7 +40,8 @@ public:
 		}
 
 		float output = delayLine.read();
-		delayLine.write(input + output * feedbackKnob);
+		float finalFeedback = constrain(feedbackKnob + feedCV, 0.0f, 1.0f);
+		delayLine.write(input + output * finalFeedback);
 
 		delayOutput = (interpolate(input, output, mixKnob));
 	}
@@ -57,7 +58,7 @@ public:
 				feedbackKnob = val;
 				break;
 			case 2: {
-				fadeTimeSec = map_value(val, 0.0f, 1.0f, minFadeTimeInSeconds, maxFadeTimeInSeconds);
+				fadeOffset = val;
 				update_fade_time();
 			} break;
 			case 3:
@@ -86,6 +87,13 @@ public:
 				break;
 			case 2:
 				cvInput = val;
+				break;
+			case 3:
+				fadeCV = val;
+				break;
+			case 4:
+				feedCV = val;
+				update_fade_time();
 				break;
 		}
 	}
@@ -123,6 +131,8 @@ public:
 private:
 	void update_fade_time()
 	{
+		float finalFade = constrain(fadeOffset + fadeCV, 0.0f, 1.0f);
+		fadeTimeSec = map_value(finalFade, 0.0f, 1.0f, minFadeTimeInSeconds, maxFadeTimeInSeconds);
 		delayLine.set_fade_speed(1.f / (fadeTimeSec * sampleRate));
 	}
 
@@ -130,6 +140,7 @@ private:
 	float mixKnob = 0.5f;
 	float delayKnob = 0;
 	float fadeTimeSec = 0.01f;
+	float fadeOffset = 0;
 
 	float input = 0;
 	float delayOutput = 0;
@@ -138,6 +149,9 @@ private:
 
 	float cvInput = 0;
 	float cvAmount = 0;
+
+	float fadeCV = 0;
+	float feedCV = 0;
 
 	FadeLoop<float, maxSamples> delayLine;
 
