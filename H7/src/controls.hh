@@ -13,6 +13,8 @@
 
 using namespace mdrivlib;
 
+namespace MetaModule
+{
 struct Controls {
 	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block);
 
@@ -26,9 +28,11 @@ struct Controls {
 	DebouncedPin<GPIO::C, 10, PinPolarity::Inverted> button0;
 	DebouncedPin<GPIO::C, 11, PinPolarity::Inverted> button1;
 	DebouncedPin<GPIO::C, 6, PinPolarity::Inverted> rotary_button;
-	DebouncedPin<GPIO::G, 6, PinPolarity::Normal> gate_in0;
-	DebouncedPin<GPIO::G, 7, PinPolarity::Normal> gate_in1;
+	// Todo: std::tuple<GateIn1Type, GateIn2Type, ClockInType> gate_ins;
+	// gate_in<0>.update();
 	DebouncedPin<GPIO::D, 12, PinPolarity::Normal> clock_in;
+	DebouncedPin<GPIO::G, 6, PinPolarity::Normal> gate_in1;
+	DebouncedPin<GPIO::G, 7, PinPolarity::Normal> gate_in2;
 
 	FPin<GPIO::D, 13, PinMode::Output> clock_out;
 
@@ -60,8 +64,9 @@ private:
 	Timekeeper read_cvadc_task;
 
 	uint32_t latest_patchcv_reading;
-	uint32_t latest_pot_reading[8];
-	const uint8_t _pot_map[8] = {1, 4, 0, 5, 3, 6, 7, 2};
+	uint32_t latest_pot_reading[NumPot];
+	const uint8_t _pot_map[NumPot] = {1, 4, 0, 5, 3, 6, 7, 2};
 
 	bool _rotary_moved_while_pressed = false;
 };
+} // namespace MetaModule

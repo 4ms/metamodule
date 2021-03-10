@@ -15,7 +15,8 @@
 #include <array>
 
 using namespace mdrivlib;
-namespace MetaModule {
+namespace MetaModule
+{
 using AudioConf = StreamConf::Audio;
 
 // Todo: we don't need a codec virtual class, just use a type alias
@@ -68,4 +69,4 @@ private:
 	static constexpr unsigned NumAudioOutputs = 2;
 	static constexpr unsigned NumCVOutputs = PatchPlayer::get_num_panel_outputs() - NumAudioOutputs;
 };
-}
+} // namespace MetaModule

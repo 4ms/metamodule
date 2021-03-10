@@ -65,13 +65,13 @@ void AudioStream::set_input(int input_id, AudioConf::SampleT in)
 
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
 {
-	// Todo: make this point, not copy
+	// copy this so UI can write it to the screen asynchronuously without CM4 over-writing
 	last_params = *param_block.begin();
 	check_patch_change();
 
 	load_measure.start_measurement();
-	if (param_block.begin() < &param_block_1[1])
-		Debug::Pin0::high();
+	// if (param_block.begin() < &param_block_1[1])
+	Debug::Pin0::high();
 
 	// Todo: integrate these:
 	// params.gate_ins[]

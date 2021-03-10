@@ -41,11 +41,11 @@ public:
 		, controls{controls}
 	{}
 
+	// Loop is at ~366Hz (2.73us)
 	void update()
 	{
 		switch (cur_client) {
 			case Leds:
-				// Debug::Pin2::high();
 				if (HWSemaphore<LEDFrameBufLock>::lock(2) == HWSemaphoreFlag::LockedOk) {
 					leds.write_chip(0);
 				}
@@ -53,7 +53,7 @@ public:
 				break;
 
 			case SelectPots:
-				// Debug::Pin2::low();
+				Debug::Pin3::high();
 				HWSemaphore<LEDFrameBufLock>::unlock(2);
 				cur_pot = 0;
 				controls.potadc.select_pot_source(cur_pot);
@@ -79,6 +79,7 @@ public:
 				// GPIO Sense here (between ADC channels)
 
 			case SelectPatchCV:
+				Debug::Pin3::low();
 				controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);
 				cur_client = RequestReadPatchCV;
 				break;
