@@ -124,7 +124,7 @@ private:
 		screen.setTextSize(1);
 		uint32_t y = 60;
 		for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
-			screen.setCursor(10, y);
+				screen.setCursor(10, y);
 			// Debug::Pin2::high();
 			screen.print(patch_list.cur_patch().modules_used[i].name);
 			// Debug::Pin2::low();

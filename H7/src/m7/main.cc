@@ -84,6 +84,7 @@ void main()
 	audio.start();
 
 	while (1) {
+		//Todo: call this on a timer set to screen frame rate
 		ui.update();
 		__NOP();
 	}

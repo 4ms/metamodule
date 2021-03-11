@@ -12,7 +12,10 @@ struct PatchList {
 			_cur_patch = 0;
 		return _patches[_cur_patch].patch;
 	}
-
+	uint32_t cur_patch_index()
+	{
+		return _cur_patch;
+	}
 	void next_patch()
 	{
 		_cur_patch++;
@@ -35,4 +38,3 @@ private:
 	uint32_t _cur_patch = 0;
 	PatchRef _patches[NumPatches];
 };
-
