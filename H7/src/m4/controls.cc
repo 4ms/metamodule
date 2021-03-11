@@ -12,8 +12,6 @@ static bool stop = true;
 
 void Controls::update_debouncers()
 {
-	if (stop)
-		return;
 	rotary.update();
 	rotary_button.update();
 	button0.update();
@@ -25,20 +23,22 @@ void Controls::update_debouncers()
 }
 
 // first param in block: 2.0-2.4us, @ 48kHz
-// second param in block: 1.0-1.1us @ 48kHz
-// 64 params in a block: weighted average is 1.07us = 5.1% load
+// second param in block: 1.3-1.5us @ 48kHz
+// load 6.8%
 void Controls::update_params()
 {
 	Debug::Pin1::high();
-	if (stop)
-		return;
 
 	Params *params = cur_params;
 	Params *first_param = (params < &param_blocks[1][0]) ? &param_blocks[0][0] : &param_blocks[1][0];
 
-	for (int i = 0; i < NumCVIn; i++) {
-		params->cvjacks[i] = (2047.5f - static_cast<float>(cvadc.get_val(i))) / 2047.5f;
-	}
+	params->cvjacks[0] = (2047.5f - static_cast<float>(cvadc.get_val(0))) / 2047.5f;
+	params->cvjacks[1] = (2047.5f - static_cast<float>(cvadc.get_val(1))) / 2047.5f;
+	params->cvjacks[2] = (2047.5f - static_cast<float>(cvadc.get_val(3))) / 2047.5f;
+	params->cvjacks[3] = (2047.5f - static_cast<float>(cvadc.get_val(2))) / 2047.5f;
+	// for (int i = 0; i < NumCVIn; i++)
+	// 	params->cvjacks[i] = (2047.5f - static_cast<float>(cvadc.get_val(i))) / 2047.5f;
+
 	params->buttons[0].copy_state(button0);
 	params->buttons[1].copy_state(button1);
 	params->gate_ins[0].copy_state(clock_in);
@@ -59,34 +59,35 @@ void Controls::update_params()
 		}
 
 		if (rotary_button.is_pressed()) {
-			if (tmp_rotary_motion != 0) {
-				_rotary_moved_while_pressed = true;
-				params->rotary_pushed_motion = tmp_rotary_motion;
-			}
 			params->rotary_motion = 0;
+			params->rotary_pushed_motion = tmp_rotary_motion;
+			if (tmp_rotary_motion != 0)
+				_rotary_moved_while_pressed = true;
 		} else {
-			// params->rotary_position += tmp_rotary_motion;
 			params->rotary_motion = tmp_rotary_motion;
+			params->rotary_pushed_motion = 0;
 		}
 
 		params->rotary_button.copy_state(rotary_button);
 
-		for (int i = 0; i < NumPot; i++)
-			params->knobs[i] = get_pot_reading(i) / 4095.0f;
+		for (int i = 0; i < NumPot; i++) {
+			_knobs[i].set_new_value(get_pot_reading(i) / 4095.0f);
+			params->knobs[i] = _knobs[i].next();
+			// params->knobs[i] = get_pot_reading(i) / 4095.0f;
+		}
 
 		params->patchcv = get_patchcv_reading() / 4095.0f;
 
 	} else {
-		Debug::Pin2::high();
 		params->patchcv = first_param->patchcv;
+
 		for (int i = 0; i < NumPot; i++)
-			params->knobs[i] = first_param->knobs[i];
+			params->knobs[i] = _knobs[i].next();
+
 		// jacksenses
 		params->rotary_button.copy_state(first_param->rotary_button);
 		params->rotary_motion = first_param->rotary_motion;
 		params->rotary_pushed_motion = first_param->rotary_pushed_motion;
-		// params->rotary_position = first_param->rotary_position;
-		Debug::Pin2::low();
 	}
 
 	cur_params++;
@@ -140,6 +141,8 @@ Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block_
 	__HAL_DBGMCU_FREEZE_TIM6();
 
 	read_controls_task.init(control_read_tim_conf, [this]() {
+		if (stop)
+			return;
 		update_debouncers();
 		update_params();
 	});
