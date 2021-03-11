@@ -4,14 +4,14 @@
 
 TEST_CASE("interp_param_tests: inits_to_zero")
 {
-	Interp<float, 6> x;
+	InterpParam<float, 6> x;
 	CHECK(x.cur_val == 0.f);
 	CHECK(x.next() == 0.f);
 }
 
 TEST_CASE("interp_param_tests: basic_usage")
 {
-	Interp<float, 6> x;
+	InterpParam<float, 6> x;
 	x.set_new_value(12.f);
 	CHECK(x.next() == 2.0f);
 	CHECK(x.next() == 4.0f);
@@ -24,7 +24,7 @@ TEST_CASE("interp_param_tests: basic_usage")
 TEST_CASE("interp_param_tests: many_many_updates")
 {
 	const unsigned int updates = 0x1000000;
-	Interp<double, updates> x;
+	InterpParam<double, updates> x;
 
 	x.set_new_value(123456789.0);
 	for (unsigned int i = 0; i < (updates - 1); i++)
@@ -35,7 +35,7 @@ TEST_CASE("interp_param_tests: many_many_updates")
 
 TEST_CASE("interp_param_tests: goes_negative")
 {
-	Interp<long, 3> x;
+	InterpParam<long, 3> x;
 	x.set_new_value(-12L);
 	CHECK_EQ(-4L, x.next());
 	CHECK_EQ(-8L, x.next());
@@ -44,7 +44,7 @@ TEST_CASE("interp_param_tests: goes_negative")
 
 TEST_CASE("interp_param_tests: two_updates_opposite_directions")
 {
-	Interp<long, 3> x;
+	InterpParam<long, 3> x;
 	x.set_new_value(-12L);
 	CHECK_EQ(-4L, x.next());
 	CHECK_EQ(-8L, x.next());
@@ -57,7 +57,7 @@ TEST_CASE("interp_param_tests: two_updates_opposite_directions")
 
 TEST_CASE("interp_param_tests: overflow_keeps_incrementing")
 {
-	Interp<float, 6> x;
+	InterpParam<float, 6> x;
 	x.set_new_value(12.f);
 	CHECK(x.next() == 2.0f);
 	CHECK(x.next() == 4.0f);
@@ -70,12 +70,12 @@ TEST_CASE("interp_param_tests: overflow_keeps_incrementing")
 
 TEST_CASE("interp_param_tests: zero_breaks")
 {
-	// Interp<float, 0> x;
+	// InterpParam<float, 0> x;
 }
 
 TEST_CASE("interp_param_tests: step_size_is_nearly_zero_if_value_doesnt_change")
 {
-	Interp<float, 1> x;
+	InterpParam<float, 1> x;
 	x.set_new_value(12.f);
 	CHECK(x.next() == 12.f);
 	x.set_new_value(12.f);
