@@ -70,6 +70,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	Debug::Pin0::high();
 	load_measure.start_measurement();
 
+	SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block, sizeof(ParamBlock));
+
 	last_params = param_block[0];
 	check_patch_change(last_params.rotary_motion);
 

@@ -48,7 +48,6 @@ struct StaticBuffers {
 	StaticBuffers()
 	{
 		target::MPU_::disable_cache_for_dma_buffer(audio_dma_block, sizeof(audio_dma_block));
-		target::MPU_::disable_cache_for_dma_buffer<ParamBlock[2]>(&param_blocks, sizeof(param_blocks));
 	}
 } _sb;
 
