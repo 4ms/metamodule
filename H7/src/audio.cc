@@ -34,13 +34,13 @@ AudioStream::AudioStream(PatchList &patches,
 							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks(
 		[this]() {
-			HWSemaphore<ParamsBuf2Lock>::lock();
-			HWSemaphore<ParamsBuf1Lock>::unlock();
+			HWSemaphore<ParamsBuf1Lock>::lock();
+			HWSemaphore<ParamsBuf2Lock>::unlock();
 			process(rx_buf_1, tx_buf_1, param_block_1);
 		},
 		[this]() {
-			HWSemaphore<ParamsBuf1Lock>::lock();
-			HWSemaphore<ParamsBuf2Lock>::unlock();
+			HWSemaphore<ParamsBuf2Lock>::lock();
+			HWSemaphore<ParamsBuf1Lock>::unlock();
 			process(rx_buf_2, tx_buf_2, param_block_2);
 		});
 

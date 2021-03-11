@@ -51,8 +51,6 @@ void Controls::update_params()
 	if (tmp_rotary_motion != 0)
 		Debug::Pin2::high();
 
-	// params->rotary_pushed_motion = 12; // tmp_rotary_motion;
-
 	if (rotary_button.is_just_pressed()) {
 		_rotary_moved_while_pressed = false;
 		params->rotary_button.register_rising_edge();
@@ -98,8 +96,7 @@ void Controls::update_params()
 	cur_params++;
 	if (cur_params == &param_blocks[1][0] || cur_params == &param_blocks[2][0])
 		stop = true;
-	// if (cur_params >= &param_blocks[2][0])
-	// 	cur_params = &param_blocks[0][0];
+
 	Debug::Pin1::low();
 }
 
@@ -114,18 +111,17 @@ void Controls::start()
 	HWSemaphore<ParamsBuf2Lock>::disable_ISR();
 	InterruptManager::registerISR(HSEM2_IRQn, 0, 0, [&]() {
 		if (HWSemaphore<ParamsBuf1Lock>::is_ISR_triggered_and_enabled()) {
-			Debug::Pin3::low();
+			Debug::Pin3::high();
 			stop = false;
-			cur_params = &param_blocks[1][0];
+			cur_params = &param_blocks[0][0];
 			debug_i = 100;
 			HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 			return;
 		}
 		if (HWSemaphore<ParamsBuf2Lock>::is_ISR_triggered_and_enabled()) {
-			Debug::Pin3::high();
+			Debug::Pin3::low();
 			stop = false;
-			cur_params = &param_blocks[0][0];
-			debug_i = 400;
+			cur_params = &param_blocks[1][0];
 			HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 			return;
 		}
