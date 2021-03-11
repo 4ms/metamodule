@@ -24,7 +24,7 @@ struct Controls {
 	ParamBlock *cur_param_block;
 	Params *cur_params;
 
-	RotaryEncoder<RotaryHalfStep> rotary = {GPIO::C, 8, GPIO::C, 7};
+	RotaryEncoder<RotaryHalfStep> rotary = {GPIO::C, 7, GPIO::C, 8};
 	DebouncedPin<GPIO::C, 10, PinPolarity::Inverted> button0;
 	DebouncedPin<GPIO::C, 11, PinPolarity::Inverted> button1;
 	DebouncedPin<GPIO::C, 6, PinPolarity::Inverted> rotary_button;
