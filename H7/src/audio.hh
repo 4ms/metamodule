@@ -53,7 +53,7 @@ private:
 	// Should we class this out? It's only connected to Audio at init and process()
 	AudioConf::SampleT get_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
-	bool check_patch_change();
+	bool check_patch_change(int motion);
 	void load_patch();
 
 	AnalogOutT &dac;

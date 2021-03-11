@@ -53,7 +53,6 @@ public:
 				break;
 
 			case SelectPots:
-				Debug::Pin3::high();
 				HWSemaphore<LEDFrameBufLock>::unlock(2);
 				cur_pot = 0;
 				controls.potadc.select_pot_source(cur_pot);
@@ -79,7 +78,6 @@ public:
 				// GPIO Sense here (between ADC channels)
 
 			case SelectPatchCV:
-				Debug::Pin3::low();
 				controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);
 				cur_client = RequestReadPatchCV;
 				break;

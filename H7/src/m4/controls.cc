@@ -8,9 +8,12 @@ namespace MetaModule
 {
 
 // Note: not using MDMA because for one Param struct (debug pin high->low) took 2.2us, sometimes up to 4us (bus delays?)
+static bool stop = true;
 
 void Controls::update_debouncers()
 {
+	if (stop)
+		return;
 	rotary.update();
 	rotary_button.update();
 	button0.update();
@@ -24,12 +27,15 @@ void Controls::update_debouncers()
 // first param in block: 2.0-2.4us, @ 48kHz
 // second param in block: 1.0-1.1us @ 48kHz
 // 64 params in a block: weighted average is 1.07us = 5.1% load
+static int debug_i = 1;
 void Controls::update_params()
 {
 	Debug::Pin1::high();
+	if (stop)
+		return;
 
 	Params *params = cur_params;
-	Params *first_param = (params < &param_blocks[1][0]) ? &param_blocks[0][0] : &param_blocks[1][0];
+	// Params *first_param = (params < &param_blocks[1][0]) ? &param_blocks[0][0] : &param_blocks[1][0];
 
 	for (int i = 0; i < NumCVIn; i++) {
 		params->cvjacks[i] = (2047.5f - static_cast<float>(cvadc.get_val(i))) / 2047.5f;
@@ -40,54 +46,60 @@ void Controls::update_params()
 	params->gate_ins[1].copy_state(gate_in1);
 	params->gate_ins[2].copy_state(gate_in2);
 
-	if (params == first_param) {
-		int tmp_rotary_motion = rotary.read();
+	// if (params == first_param) {
+	int tmp_rotary_motion = rotary.read();
+	if (tmp_rotary_motion != 0)
+		Debug::Pin2::high();
 
-		if (rotary_button.is_just_pressed()) {
-			_rotary_moved_while_pressed = false;
-			params->rotary_button.register_rising_edge();
-		}
-		if (rotary_button.is_just_released() && !_rotary_moved_while_pressed) {
-			params->rotary_button.register_falling_edge();
-		}
-		if (rotary_button.is_pressed()) {
-			if (params->rotary_motion != 0) {
-				_rotary_moved_while_pressed = true;
-				params->rotary_pushed_motion += tmp_rotary_motion;
-			}
-		} else {
-			params->rotary_position += tmp_rotary_motion;
+	// params->rotary_pushed_motion = 12; // tmp_rotary_motion;
 
-			if (tmp_rotary_motion > 0)
-				params->rotary_motion = 1;
-			else if (tmp_rotary_motion < 0)
-				params->rotary_motion = -1;
-			else
-				params->rotary_motion = 0;
-		}
-
-		params->rotary_button.copy_state(rotary_button);
-
-		for (int i = 0; i < NumPot; i++)
-			params->knobs[i] = get_pot_reading(i) / 4095.0f;
-
-		params->patchcv = get_patchcv_reading() / 4095.0f;
-
-	} else {
-		params->patchcv = first_param->patchcv;
-		for (int i = 0; i < NumPot; i++)
-			params->knobs[i] = first_param->knobs[i];
-		// jacksenses
-		params->rotary_button.copy_state(first_param->rotary_button);
-		params->rotary_motion = first_param->rotary_motion;
-		params->rotary_pushed_motion = first_param->rotary_pushed_motion;
-		params->rotary_position = first_param->rotary_position;
+	if (rotary_button.is_just_pressed()) {
+		_rotary_moved_while_pressed = false;
+		params->rotary_button.register_rising_edge();
+	}
+	if (rotary_button.is_just_released() && !_rotary_moved_while_pressed) {
+		params->rotary_button.register_falling_edge();
+		// Todo: if button is released and _rotary_moved_while_pressed == true, then do we need to tell
+		// params->rotary_button that the button is released?
 	}
 
-	cur_params++;
-	if (cur_params >= &param_blocks[2][0])
-		cur_params = &param_blocks[0][0];
+	if (rotary_button.is_pressed()) {
+		if (tmp_rotary_motion != 0) {
+			_rotary_moved_while_pressed = true;
+			params->rotary_pushed_motion = tmp_rotary_motion;
+		}
+		params->rotary_motion = 0;
+	} else {
+		params->rotary_position += tmp_rotary_motion;
+		params->rotary_motion = tmp_rotary_motion;
+		Debug::Pin2::low();
+	}
 
+	params->rotary_button.copy_state(rotary_button);
+
+	for (int i = 0; i < NumPot; i++)
+		params->knobs[i] = get_pot_reading(i) / 4095.0f;
+
+	params->patchcv = get_patchcv_reading() / 4095.0f;
+
+	// } else {
+	// 	Debug::Pin2::high();
+	// 	params->patchcv = first_param->patchcv;
+	// 	for (int i = 0; i < NumPot; i++)
+	// 		params->knobs[i] = first_param->knobs[i];
+	// 	// jacksenses
+	// 	params->rotary_button.copy_state(first_param->rotary_button);
+	// 	params->rotary_motion = first_param->rotary_motion;
+	// 	params->rotary_pushed_motion = first_param->rotary_pushed_motion;
+	// 	params->rotary_position = first_param->rotary_position;
+	// 	Debug::Pin2::low();
+	// }
+
+	cur_params++;
+	if (cur_params == &param_blocks[1][0] || cur_params == &param_blocks[2][0])
+		stop = true;
+	// if (cur_params >= &param_blocks[2][0])
+	// 	cur_params = &param_blocks[0][0];
 	Debug::Pin1::low();
 }
 
@@ -102,12 +114,18 @@ void Controls::start()
 	HWSemaphore<ParamsBuf2Lock>::disable_ISR();
 	InterruptManager::registerISR(HSEM2_IRQn, 0, 0, [&]() {
 		if (HWSemaphore<ParamsBuf1Lock>::is_ISR_triggered_and_enabled()) {
-			cur_params = &param_blocks[0][0];
+			Debug::Pin3::low();
+			stop = false;
+			cur_params = &param_blocks[1][0];
+			debug_i = 100;
 			HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 			return;
 		}
 		if (HWSemaphore<ParamsBuf2Lock>::is_ISR_triggered_and_enabled()) {
-			cur_params = &param_blocks[1][0];
+			Debug::Pin3::high();
+			stop = false;
+			cur_params = &param_blocks[0][0];
+			debug_i = 400;
 			HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 			return;
 		}

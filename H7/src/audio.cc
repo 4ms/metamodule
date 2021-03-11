@@ -34,13 +34,13 @@ AudioStream::AudioStream(PatchList &patches,
 							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks(
 		[this]() {
-			HWSemaphore<ParamsBuf1Lock>::lock();
-			HWSemaphore<ParamsBuf2Lock>::unlock();
+			HWSemaphore<ParamsBuf2Lock>::lock();
+			HWSemaphore<ParamsBuf1Lock>::unlock();
 			process(rx_buf_1, tx_buf_1, param_block_1);
 		},
 		[this]() {
-			HWSemaphore<ParamsBuf2Lock>::lock();
-			HWSemaphore<ParamsBuf1Lock>::unlock();
+			HWSemaphore<ParamsBuf1Lock>::lock();
+			HWSemaphore<ParamsBuf2Lock>::unlock();
 			process(rx_buf_2, tx_buf_2, param_block_2);
 		});
 
@@ -63,15 +63,15 @@ void AudioStream::set_input(int input_id, AudioConf::SampleT in)
 	player.set_panel_input(input_id, scaled_in);
 }
 
+static volatile int framectr = 0;
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
 {
-	// copy this so UI can write it to the screen asynchronuously without CM4 over-writing
-	last_params = *param_block.begin();
-	check_patch_change();
+	if (param_block.begin() == &param_block_1[0])
+		Debug::Pin0::high();
+
+	last_params = param_block[0];
 
 	load_measure.start_measurement();
-	// if (param_block.begin() < &param_block_1[1])
-	Debug::Pin0::high();
 
 	// Todo: integrate these:
 	// params.gate_ins[]
@@ -80,9 +80,22 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	// params.buttons[]
 	// params.jack_senses[]
 
+	framectr = 0;
 	auto in_ = in.begin();
 	auto params_ = param_block.begin();
 	for (auto &out_ : out) {
+		// if (param_block[0].rotary_motion != params_->rotary_motion) {
+		// 	Debug::Pin0::low();
+		// 	// if (framectr != 0)
+		// }
+		// if (param_block[0].rotary_pushed_motion != params_->rotary_pushed_motion) {
+		// 	Debug::Pin0::high();
+		// 	Debug::Pin0::low();
+		// 	// if (framectr != 0)
+		// }
+		check_patch_change(params_->rotary_motion);
+		framectr++;
+
 		int i;
 		set_input(0, in_->l);
 		set_input(1, in_->r);
@@ -130,14 +143,14 @@ void AudioStream::start()
 	dac_updater.start();
 }
 
-bool AudioStream::check_patch_change()
+bool AudioStream::check_patch_change(int motion)
 {
 	bool new_patch = false;
-	if (last_params.rotary_motion > 0) {
+	if (motion > 0) {
 		player.unload_patch(patch_list.cur_patch());
 		patch_list.next_patch();
 		new_patch = true;
-	} else if (last_params.rotary_motion < 0) {
+	} else if (motion < 0) {
 		player.unload_patch(patch_list.cur_patch());
 		patch_list.prev_patch();
 		new_patch = true;
