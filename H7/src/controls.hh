@@ -21,9 +21,6 @@ struct Controls {
 
 	MuxedADC &potadc;
 	CVAdcChipT &cvadc;
-	ParamBlock *param_blocks;
-	ParamBlock *cur_param_block;
-	Params *cur_params;
 
 	RotaryEncoder<RotaryHalfStep> rotary = {GPIO::C, 7, GPIO::C, 8};
 	DebouncedPin<GPIO::C, 10, PinPolarity::Inverted> button0;
@@ -63,6 +60,10 @@ struct Controls {
 private:
 	Timekeeper read_controls_task;
 	Timekeeper read_cvadc_task;
+
+	ParamBlock *param_blocks;
+	ParamBlock *cur_param_block;
+	Params *cur_params;
 
 	uint32_t latest_patchcv_reading;
 	uint32_t latest_pot_reading[NumPot];
