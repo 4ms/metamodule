@@ -23,6 +23,12 @@ clean:
 	rm -rf $(BUILDDIR_M4)
 	rm -rf $(BUILDDIR_M7)
 
+$(BUILDDIR_M4)/$(BINARYNAME).hex:
+	@$(MAKE) --no-print-directory -f makefile_m4.mk
+
+$(BUILDDIR_M7)/$(BINARYNAME).hex:
+	@$(MAKE) --no-print-directory -f makefile_m7.mk
+
 
 # ifeq (,$(wildcard $(JFLASHEXE)))
 #     $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
