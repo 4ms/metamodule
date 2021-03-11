@@ -64,17 +64,19 @@ struct Log2<1> {
 	static constexpr int val = 0;
 };
 
-constexpr unsigned int Log2Int(const unsigned int x)
-{
-	for (int i = 0; i < 32; i++)
-		if (x == (1UL << i))
-			return i;
-	return 0;
-}
-
 constexpr bool is_power_of_2(unsigned int v)
 {
 	return v && ((v & (v - 1)) == 0);
+}
+
+constexpr unsigned int Log2Int(const unsigned int x)
+{
+	int i = 32;
+	while (i--) {
+		if (x & (1UL << i))
+			return i;
+	}
+	return 0;
 }
 
 constexpr unsigned int ipow(unsigned int a, unsigned int b)
