@@ -13,12 +13,20 @@ public:
 	virtual void update(void) override
 	{
 		lastGate = currentGate;
-		wc.update(del.update(signalInput));
 		currentGate = wc.get_output();
 		if (currentGate && (lastGate == false)) {
+			finalDelay = map_value(constrain(delayCV + delayTime, 0.0f, 1.0f), 0.0f, 1.0f, 0.0f, 1000.0f) / 1000.0f * sampleRate;
+			finalLength = map_value(constrain(lengthCV + gateLength, 0.0f, 1.0f), 0.0f, 1.0f, 1.0f, 1000.0f) / 1000.0f *
+						  sampleRate;
+
+			del.set_delay_samples(finalDelay);
+
 			sinceGate = 0;
 		}
-		if (sinceGate < lengthInSamples) {
+
+		wc.update(del.update(signalInput));
+
+		if (sinceGate < finalLength) {
 			gateOutput = true;
 		} else {
 			gateOutput = false;
@@ -32,14 +40,11 @@ public:
 	{
 		switch (param_id) {
 			case 0: {
-				float gateTime = map_value(val, 0.0f, 1.0f, 1.0f, 1000.0f);
-				lengthInSamples = gateTime / 1000.0f * sampleRate;
+				gateLength = val;
 				break;
 			}
 			case 1: {
-				float delayTimeMs = map_value(val, 0.0f, 1.0f, 0.0f, 1000.0f);
-				delayTimeSamples = delayTimeMs / 1000.0f * sampleRate;
-				del.set_delay_samples(delayTimeSamples);
+				delayTime = val;
 				break;
 			}
 		}
@@ -53,7 +58,13 @@ public:
 	{
 		switch (input_id) {
 			case 0:
-				signalInput= val;
+				signalInput = val;
+				break;
+			case 1:
+				lengthCV = val;
+				break;
+			case 2:
+				delayCV = val;
 				break;
 		}
 	}
@@ -88,11 +99,17 @@ private:
 
 	unsigned long sinceGate = 0;
 
-	float lengthInSamples = 10;
+	float gateLength = 10;
 
-	float delayTimeSamples = 0;
+	float delayTime = 0;
 
 	float signalInput = 0;
+
+	float lengthCV = 0;
+	float delayCV = 0;
+
+	float finalLength = 10;
+	float finalDelay = 0;
 
 	DelayLine<96000> del;
 	WindowComparator wc;

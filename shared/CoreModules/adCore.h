@@ -12,6 +12,8 @@ public:
 	{
 		int stage = (int)phaccu;
 		float envFrequency;
+		attackTime = map_value(constrain(attackTimeParam + attackCV, 0.0f, 1.0f), 0.0f, 1.0f, 1.0f, 1200.0f);
+		decayTime = map_value(constrain(decayTimeParam + decayCV, 0.0f, 1.0f), 0.0f, 1.0f, 1.0f, 1200.0f);
 		if (stage == 0) {
 			envFrequency = 1000.0f / attackTime;
 		} else {
@@ -21,30 +23,34 @@ public:
 		float wrappedPhase = phaccu - (long)phaccu;
 
 		if (stage == 0) {
+			float finalAShape = constrain(aShape + aShapeCV, 0.0f, 1.0f);
+
 			float rise = 0;
 			float linearRise = map_value(phaccu, 0.0f, 1.0f, attackSample, 1.0f);
-			if (aShape <= 0.5f) {
+			if (finalAShape <= 0.5f) {
 				auto expoRise = map_value(pow9Table.closest(wrappedPhase), 0.0f, 1.0f, attackSample, 1.0f);
-				float interpVal = aShape * 2.0f;
+				float interpVal = finalAShape * 2.0f;
 				rise = interpolate(expoRise, linearRise, interpVal);
 			} else {
-				float interpVal = aShape * 2.0f - 1.0f;
+				float interpVal = finalAShape * 2.0f - 1.0f;
 				auto logRise = map_value(1.0f - pow9Table.closest(1.0f - phaccu), 0.0f, 1.0f, attackSample, 1.0f);
 				rise = interpolate(wrappedPhase, logRise, interpVal);
 			}
 			envOut = rise;
 
 		} else if (stage == 1) {
+			float finalDShape = constrain(dShape + dShapeCV, 0.0f, 1.0f);
+
 			float fall = 0;
 			auto linearCurve = map_value(wrappedPhase, 0.0f, 1.0f, 1.0f, 0.0f);
 
 			float interpVal = 0.0f;
-			if (dShape <= 0.5f) {
+			if (finalDShape <= 0.5f) {
 				auto expoFall = map_value(pow9Table.closest(1.0f - wrappedPhase), 1.0f, 0.0f, 1.0f, 0.0f);
-				interpVal = dShape * 2.0f;
+				interpVal = finalDShape * 2.0f;
 				fall = interpolate(expoFall, linearCurve, interpVal);
 			} else {
-				interpVal = dShape * 2.0f - 1.0f;
+				interpVal = finalDShape * 2.0f - 1.0f;
 				auto logFall = map_value(pow9Table.closest(wrappedPhase), 0.0f, 1.0f, 1.0f, 0.0f);
 				fall = interpolate(linearCurve, logFall, interpVal);
 			}
@@ -62,10 +68,10 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				attackTime = map_value(val, 0.0f, 1.0f, 1.0f, 1200.0f);
+				attackTimeParam = val;
 				break;
 			case 1:
-				decayTime = map_value(val, 0.0f, 1.0f, 1.0f, 1200.0f);
+				decayTimeParam = val;
 				break;
 			case 2:
 				aShape = val;
@@ -91,6 +97,18 @@ public:
 					attackSample = envOut;
 					phaccu = 0;
 				}
+				break;
+			case 1: // attack cv
+				attackCV = val;
+				break;
+			case 2: // decay cv
+				decayCV = val;
+				break;
+			case 3: // attack shape cv
+				aShapeCV = val;
+				break;
+			case 4: // decay shape cv
+				dShapeCV = val;
 				break;
 		}
 	}
@@ -129,6 +147,13 @@ private:
 	float aShape = 0;
 	float dShape = 0;
 	float attackSample = 0;
+	float attackCV = 0;
+	float decayCV = 0;
+	float aShapeCV = 0;
+	float dShapeCV = 0;
+
+	float decayTimeParam;
+	float attackTimeParam;
 
 	float phaccu = 0;
 

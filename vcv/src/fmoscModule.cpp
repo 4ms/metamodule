@@ -12,9 +12,10 @@ struct FmoscModule : CommModule {
 		SHAPE_PARAM,
 		SHAPE_CV_PARAM,
 		INDEX_CV_PARAM,
+		MIX_PARAM,
 		NUM_PARAMS
 	};
-	enum InputIds { INDEX_INPUT, VOCT_INPUT, SHAPE_CV_INPUT, NUM_INPUTS };
+	enum InputIds { INDEX_INPUT, VOCT_INPUT, SHAPE_CV_INPUT, MIX_CV_INPUT, SEC_VOCT_INPUT, NUM_INPUTS };
 	enum OutputIds { MAIN_OUTPUT, NUM_OUTPUTS };
 	enum LightIds { NUM_LIGHTS };
 
@@ -46,6 +47,7 @@ struct FmoscWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
 
 		addLabeledKnob("PITCH", FmoscModule::COARSE_TUNE_PARAM, {0, 0});
+		addLabeledKnob("MIX", FmoscModule::MIX_PARAM, {1, 0});
 		addLabeledKnob("INDEX", FmoscModule::INDEX_PARAM, {0, 1});
 		addLabeledKnob("INDEX CV", FmoscModule::INDEX_CV_PARAM, {1, 1});
 		addLabeledKnob("RATIO C", FmoscModule::RATIO_COARSE_PARAM, {0, 2});
@@ -53,7 +55,10 @@ struct FmoscWidget : CommModuleWidget {
 		addLabeledKnob("SHAPE", FmoscModule::SHAPE_PARAM, {0, 3});
 		addLabeledKnob("SHAPE CV", FmoscModule::SHAPE_CV_PARAM, {1, 3});
 
-		addLabeledInput("V/OCT", FmoscModule::VOCT_INPUT, {0, 1});
+		addLabeledInput("V/OCT SEC", FmoscModule::SEC_VOCT_INPUT, {1, 2});
+		addLabeledInput("MIX", FmoscModule::MIX_CV_INPUT, {0, 1});
+
+		addLabeledInput("V/OCT PRI", FmoscModule::VOCT_INPUT, {0, 2});
 		addLabeledInput("INDEX", FmoscModule::INDEX_INPUT, {1, 1});
 		addLabeledInput("SHAPE CV", FmoscModule::SHAPE_CV_INPUT, {0, 0});
 

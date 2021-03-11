@@ -15,8 +15,16 @@ struct ComplexenvelopeModule : CommModule {
 		RELEASE_CURVE_PARAM,
 		NUM_PARAMS
 	};
-	enum InputIds { GATE_INPUT, NUM_INPUTS };
-	enum OutputIds { SIGNAL_OUTPUT, NUM_OUTPUTS };
+	enum InputIds { GATE_INPUT, ATTACK_CV, HOLD_CV, DECAY_CV, SUSTAIN_CV, RELEASE_CV, NUM_INPUTS };
+	enum OutputIds {
+		SIGNAL_OUTPUT,
+		ATTACK_OUTPUT,
+		HOLD_OUTPUT,
+		DECAY_OUTPUT,
+		SUSTAIN_OUTPUT,
+		RELEASE_OUTPUT,
+		NUM_OUTPUTS
+	};
 	enum LightIds { NUM_LIGHTS };
 
 	ComplexenvelopeModule()
@@ -41,7 +49,7 @@ struct ComplexenvelopeWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
 
 		addLabeledKnob("ATTACK", ComplexenvelopeModule::ATTACK_PARAM, {0, 0});
 		addLabeledKnob("DECAY", ComplexenvelopeModule::DECAY_PARAM, {0, 1});
@@ -52,10 +60,22 @@ struct ComplexenvelopeWidget : CommModuleWidget {
 		addLabeledKnob("CURVE", ComplexenvelopeModule::RELEASE_CURVE_PARAM, {1, 2});
 
 		addLabeledKnob("HOLD", ComplexenvelopeModule::HOLD_PARAM, {0, 3});
-		addLabeledKnob("SUSTAIN", ComplexenvelopeModule::SUSTAIN_PARAM, {1, 3});
+		addLabeledKnob("SUSTAIN", ComplexenvelopeModule::SUSTAIN_PARAM, {0, 4});
 
 		addLabeledOutput("OUT", ComplexenvelopeModule::SIGNAL_OUTPUT, {0, 0});
 		addLabeledInput("IN", ComplexenvelopeModule::GATE_INPUT, {0, 1});
+
+		addLabeledInput("ATTACK CV", ComplexenvelopeModule::ATTACK_CV, {2, 6});
+		addLabeledInput("DECAY CV", ComplexenvelopeModule::DECAY_CV, {2, 5});
+		addLabeledInput("HOLD CV", ComplexenvelopeModule::HOLD_CV, {2, 3});
+		addLabeledInput("SUSTAIN CV", ComplexenvelopeModule::SUSTAIN_CV, {2, 2});
+		addLabeledInput("RELEASE CV", ComplexenvelopeModule::RELEASE_CV, {2, 4});
+
+		addLabeledOutput("ATTACK OUT", ComplexenvelopeModule::ATTACK_OUTPUT, {3, 6});
+		addLabeledOutput("DECAY OUT", ComplexenvelopeModule::DECAY_OUTPUT, {3, 5});
+		addLabeledOutput("HOLD OUT", ComplexenvelopeModule::HOLD_OUTPUT, {3, 3});
+		addLabeledOutput("SUSTAIN OUT", ComplexenvelopeModule::SUSTAIN_OUTPUT, {3, 2});
+		addLabeledOutput("RELEASE OUT", ComplexenvelopeModule::RELEASE_OUTPUT, {3, 4});
 
 		addModuleTitle("COMPLEX EG");
 	}

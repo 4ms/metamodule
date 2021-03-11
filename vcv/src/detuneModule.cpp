@@ -5,7 +5,7 @@
 struct DetuneModule : CommModule {
 
 	enum ParamIds { WOW_SPEED_PARAM, WOW_DEPTH_PARAM, FLUTTER_SPEED_PARAM, FLUTTER_DEPTH_PARAM, NUM_PARAMS };
-	enum InputIds { SIGNAL_INPUT, NUM_INPUTS };
+	enum InputIds { SIGNAL_INPUT, DETUNE_CV, NUM_INPUTS };
 	enum OutputIds { SIGNAL_OUTPUT, NUM_OUTPUTS };
 	enum LightIds { NUM_LIGHTS };
 
@@ -14,6 +14,8 @@ struct DetuneModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("DETUNE");
 		selfID.typeID = "DETUNE";
+
+		inputJacks[DetuneModule::DETUNE_CV]->scale = [](float f) { return f / 5.0f; };
 	}
 };
 
@@ -36,6 +38,7 @@ struct DetuneWidget : CommModuleWidget {
 		addLabeledKnob("F S", DetuneModule::FLUTTER_SPEED_PARAM, {0, 2});
 		addLabeledKnob("F D", DetuneModule::FLUTTER_DEPTH_PARAM, {0, 3});
 
+		addLabeledInput("DETUNE", DetuneModule::DETUNE_CV, {0, 2});
 		addLabeledInput("IN", DetuneModule::SIGNAL_INPUT, {0, 1});
 		addLabeledOutput("OUT", DetuneModule::SIGNAL_OUTPUT, {0, 0});
 

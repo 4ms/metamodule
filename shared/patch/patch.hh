@@ -6,7 +6,7 @@
 // #define USE_NODES
 
 const int MAX_MODULES_IN_PATCH = 8;
-const int MAX_PARAMS_IN_PATCH = 36;
+const int MAX_PARAMS_IN_PATCH = 64;
 const int MAX_JACKS_PER_MODULE = 32;
 const int MAX_NODES_IN_PATCH = MAX_JACKS_PER_MODULE * MAX_MODULES_IN_PATCH;
 

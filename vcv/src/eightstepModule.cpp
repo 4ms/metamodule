@@ -13,6 +13,7 @@ struct EightstepModule : CommModule {
 		STEP6_PARAM,
 		STEP7_PARAM,
 		STEP8_PARAM,
+		LENGTH_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds { CLOCK_INPUT, RESET_INPUT, NUM_INPUTS };
@@ -51,6 +52,8 @@ struct EightstepWidget : CommModuleWidget {
 				addLabeledKnob("6", EightstepModule::STEP6_PARAM, {1, 2});
 				addLabeledKnob("7", EightstepModule::STEP7_PARAM, {0, 3});
 				addLabeledKnob("8", EightstepModule::STEP8_PARAM, {1, 3});
+
+				addLabeledKnob("LENGTH",EightstepModule::LENGTH_PARAM,{0,4});
 
 				addLabeledInput("CLK", EightstepModule::CLOCK_INPUT, {0, 1});
 				addLabeledInput("RST", EightstepModule::RESET_INPUT, {1, 1});

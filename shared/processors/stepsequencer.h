@@ -35,6 +35,11 @@ public:
 		values[stepToSet] = value;
 	}
 
+	void setLength(int _numSteps)
+	{
+		numSteps=_numSteps;
+	}
+
 	void updateClock(float input)
 	{
 		lastClock = currentClock;

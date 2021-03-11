@@ -10,6 +10,41 @@
 using namespace MathTools;
 
 class DrumCore : public CoreProcessor {
+private:
+	enum { pitchEnvelope, fmEnvelope, toneEnvelope, noiseEnvelope };
+
+	Envelope envelopes[4];
+	TwoOpFM osc;
+
+	float gateIn = 0;
+	float drumOutput = 0;
+	float baseFrequency = 50;
+	float noiseBlend = 0.5f;
+	float pitchAmount = 0;
+	float fmAmount = 0;
+	float pitchCV = 20;
+	bool pitchConnected = false;
+
+	float baseNoiseEnvTime = 0;
+	float baseToneEnvTime = 0;
+	float basePitchEnvTime = 0;
+	float baseFMEnvTime = 0;
+
+	float noiseEnvCV = 0;
+	float toneEnvCV = 0;
+	float pitchEnvCV = 0;
+	float FMEnvCV = 0;
+
+	InterpArray<float, 4> pitchDecayTimes = {10, 10, 200, 500};
+	InterpArray<float, 4> pitchBreakPoint = {0, 0.1, 0.2, 1};
+	InterpArray<float, 4> pitchReleaseTimes = {50, 300, 500, 3000};
+
+	InterpArray<float, 7> toneAttackTimes = {1, 1, 3, 5, 7, 9, 20};
+	InterpArray<float, 6> toneHoldTimes = {0, 20, 50, 70, 100, 600};
+	InterpArray<float, 3> toneDecayTimes = {10, 200, 600};
+	InterpArray<float, 4> toneBreakPoint = {0.1, 0.2, 0.8};
+	InterpArray<float, 3> toneReleaseTimes = {10, 500, 4000};
+
 public:
 	virtual void update(void) override
 	{
@@ -60,6 +95,11 @@ public:
 		envelopes[pitchEnvelope].set_envelope_time(1, 0);
 		envelopes[pitchEnvelope].set_envelope_time(2, 50);
 		envelopes[pitchEnvelope].set_envelope_time(3, 2000);
+
+		setToneEnvelope();
+		setFMEnvelope();
+		setNoiseEnvelope();
+		setPitchEnvelope();
 	}
 
 	virtual void set_param(int const param_id, const float val) override
@@ -69,9 +109,8 @@ public:
 				baseFrequency = map_value(val, 0.0f, 1.0f, 10.0f, 1000.0f);
 				break;
 			case 1: // pitch envelope
-				envelopes[pitchEnvelope].set_envelope_time(2, pitchDecayTimes.interp(val));
-				envelopes[pitchEnvelope].set_envelope_time(3, pitchReleaseTimes.interp(val));
-				envelopes[pitchEnvelope].set_sustain(pitchBreakPoint.interp(val));
+				basePitchEnvTime = val;
+				setPitchEnvelope();
 				break;
 			case 2:
 				pitchAmount = val;
@@ -80,32 +119,62 @@ public:
 				osc.ratioFine = map_value(val, 0.0f, 1.0f, 1.0f, 16.0f);
 				break;
 			case 4: // fm envelope
-				envelopes[fmEnvelope].set_envelope_time(0, map_value(val, 0.0f, 1.0f, 1.0f, 100.0f));
-				envelopes[fmEnvelope].set_envelope_time(2, map_value(val, 0.0f, 1.0f, 10.0f, 8000.0f));
-				envelopes[fmEnvelope].set_envelope_time(3, map_value(val, 0.0f, 1.0f, 10.0f, 3000.0f));
-				envelopes[fmEnvelope].set_sustain(map_value(val, 0.0f, 1.0f, 0.0f, 0.3f));
+				baseFMEnvTime = val;
+				setFMEnvelope();
 				break;
 			case 5:
 				fmAmount = val;
 				break;
 			case 6: // tone envelope
-				envelopes[toneEnvelope].set_envelope_time(0, toneAttackTimes.interp(val));
-				envelopes[toneEnvelope].set_envelope_time(1, toneHoldTimes.interp(val));
-				envelopes[toneEnvelope].set_envelope_time(2, toneDecayTimes.interp(val));
-				envelopes[toneEnvelope].set_envelope_time(3, toneReleaseTimes.interp(val));
-				envelopes[toneEnvelope].set_sustain(toneBreakPoint.interp(val));
+				baseToneEnvTime = val;
+				setToneEnvelope();
 				break;
 			case 7: // noise envelope
-				envelopes[noiseEnvelope].set_envelope_time(0, map_value(val, 0.0f, 1.0f, 1.0f, 50.0f));
-				envelopes[noiseEnvelope].set_envelope_time(2, map_value(val, 0.0f, 1.0f, 30.0f, 100.0f));
-				envelopes[noiseEnvelope].set_envelope_time(3, map_value(val, 0.0f, 1.0f, 100.0f, 3000.0f));
-				envelopes[noiseEnvelope].set_sustain(map_value(val, 0.0f, 1.0f, 0.0f, 0.25f));
+				baseNoiseEnvTime = val;
+				setNoiseEnvelope();
 				break;
 			case 8:
 				noiseBlend = val;
 				break;
 		}
 	}
+
+	void setFMEnvelope()
+	{
+		float val = constrain(baseFMEnvTime + FMEnvCV, 0.0f, 1.0f);
+		envelopes[fmEnvelope].set_envelope_time(0, map_value(val, 0.0f, 1.0f, 1.0f, 100.0f));
+		envelopes[fmEnvelope].set_envelope_time(2, map_value(val, 0.0f, 1.0f, 10.0f, 8000.0f));
+		envelopes[fmEnvelope].set_envelope_time(3, map_value(val, 0.0f, 1.0f, 10.0f, 3000.0f));
+		envelopes[fmEnvelope].set_sustain(map_value(val, 0.0f, 1.0f, 0.0f, 0.3f));
+	}
+
+	void setToneEnvelope()
+	{
+		float val = constrain(baseToneEnvTime + toneEnvCV, 0.0f, 1.0f);
+		envelopes[toneEnvelope].set_envelope_time(0, toneAttackTimes.interp(val));
+		envelopes[toneEnvelope].set_envelope_time(1, toneHoldTimes.interp(val));
+		envelopes[toneEnvelope].set_envelope_time(2, toneDecayTimes.interp(val));
+		envelopes[toneEnvelope].set_envelope_time(3, toneReleaseTimes.interp(val));
+		envelopes[toneEnvelope].set_sustain(toneBreakPoint.interp(val));
+	}
+
+	void setNoiseEnvelope()
+	{
+		float val = constrain(baseNoiseEnvTime + noiseEnvCV, 0.0f, 1.0f);
+		envelopes[noiseEnvelope].set_envelope_time(0, map_value(val, 0.0f, 1.0f, 1.0f, 50.0f));
+		envelopes[noiseEnvelope].set_envelope_time(2, map_value(val, 0.0f, 1.0f, 30.0f, 100.0f));
+		envelopes[noiseEnvelope].set_envelope_time(3, map_value(val, 0.0f, 1.0f, 100.0f, 3000.0f));
+		envelopes[noiseEnvelope].set_sustain(map_value(val, 0.0f, 1.0f, 0.0f, 0.25f));
+	}
+
+	void setPitchEnvelope()
+	{
+		float val = constrain(pitchEnvCV + basePitchEnvTime, 0.0f, 1.0f);
+		envelopes[pitchEnvelope].set_envelope_time(2, pitchDecayTimes.interp(val));
+		envelopes[pitchEnvelope].set_envelope_time(3, pitchReleaseTimes.interp(val));
+		envelopes[pitchEnvelope].set_sustain(pitchBreakPoint.interp(val));
+	}
+
 	virtual void set_samplerate(const float sr) override
 	{
 		for (int i = 0; i < 4; i++) {
@@ -122,6 +191,22 @@ public:
 				break;
 			case 1:
 				pitchCV = val;
+				break;
+			case 2:
+				noiseEnvCV = val;
+				setNoiseEnvelope();
+				break;
+			case 3:
+				FMEnvCV = val;
+				setFMEnvelope();
+				break;
+			case 4:
+				pitchEnvCV = val;
+				setPitchEnvelope();
+				break;
+			case 5:
+				toneEnvCV = val;
+				setToneEnvelope();
 				break;
 		}
 	}
@@ -157,29 +242,4 @@ public:
 	static constexpr char typeID[20] = "DRUM";
 	static constexpr char description[] = "Drum";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
-
-private:
-	enum { pitchEnvelope, fmEnvelope, toneEnvelope, noiseEnvelope };
-
-	Envelope envelopes[4];
-	TwoOpFM osc;
-
-	float gateIn = 0;
-	float drumOutput = 0;
-	float baseFrequency = 50;
-	float noiseBlend = 0.5f;
-	float pitchAmount = 0;
-	float fmAmount = 0;
-	float pitchCV = 20;
-	bool pitchConnected = false;
-
-	InterpArray<float, 4> pitchDecayTimes = {10, 10, 200, 500};
-	InterpArray<float, 4> pitchBreakPoint = {0, 0.1, 0.2, 1};
-	InterpArray<float, 4> pitchReleaseTimes = {50, 300, 500, 3000};
-
-	InterpArray<float, 7> toneAttackTimes = {1, 1, 3, 5, 7, 9, 20};
-	InterpArray<float, 6> toneHoldTimes = {0, 20, 50, 70, 100, 600};
-	InterpArray<float, 3> toneDecayTimes = {10, 200, 600};
-	InterpArray<float, 4> toneBreakPoint = {0.1, 0.2, 0.8};
-	InterpArray<float, 3> toneReleaseTimes = {10, 500, 4000};
 };

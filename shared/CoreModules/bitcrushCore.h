@@ -11,6 +11,14 @@ class BitcrushCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		if(bCvConnected==false)
+		bCV=0;
+		if(srCvConnected==false)
+		srCV=0;
+		auto finalSR = constrain(srOffset + srCV, 0.0f, 1.0f);
+		auto finalBit = constrain(bOffset + bCV, 0.0f, 1.0f);
+		bc.set_param(0, finalSR);
+		bc.set_param(1, finalBit);
 		signalOutput = bc.update(signalInput);
 	}
 
@@ -18,7 +26,11 @@ public:
 
 	virtual void set_param(int const param_id, const float val) override
 	{
-		bc.set_param(param_id, val);
+		if (param_id == 0) {
+			srOffset = val;
+		} else if (param_id == 1) {
+			bOffset = val;
+		}
 	}
 	virtual void set_samplerate(const float sr) override
 	{
@@ -30,6 +42,12 @@ public:
 		switch (input_id) {
 			case 0:
 				signalInput = val;
+				break;
+			case 1:
+				srCV = val;
+				break;
+			case 2:
+				bCV = val;
 				break;
 		}
 	}
@@ -45,6 +63,23 @@ public:
 		return output;
 	}
 
+	virtual void mark_input_unpatched(const int input_id) override
+	{
+		if (input_id == 1) {
+			srCvConnected = false;
+		} else if (input_id == 2) {
+			bCvConnected = false;
+		}
+	}
+	virtual void mark_input_patched(const int input_id) override
+	{
+		if (input_id == 1) {
+			srCvConnected = true;
+		} else if (input_id == 2) {
+			bCvConnected = true;
+		}
+	}
+
 	static std::unique_ptr<CoreProcessor> create()
 	{
 		return std::make_unique<BitcrushCore>();
@@ -58,4 +93,12 @@ private:
 
 	float signalInput = 0;
 	float signalOutput = 0;
+
+	float srOffset = 0;
+	float bOffset = 0;
+	float srCV = 0;
+	float bCV = 0;
+
+	bool srCvConnected = false;
+	bool bCvConnected = false;
 };

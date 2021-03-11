@@ -64,6 +64,12 @@ private:
 public:
 	bool sustainEnable = true;
 	Envelope() {}
+
+    int getStage()
+	{
+		return stage;
+	}
+
 	float update(float input)
 	{
 		lastGate = gateInput.get_output();

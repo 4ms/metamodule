@@ -29,6 +29,7 @@ public:
 	float ratioFine = 1;
 	float modAmount = 0;
 	float shape = 0;
+	float mix = 0;
 
 	TwoOpFM() {}
 
@@ -59,10 +60,13 @@ public:
 		increment[1] = freqCalc * (max_ / sampleRate);
 		phaccu[1] += increment[1];
 
-        
-		sinOut[1] = sinTable[((phaccu[1]+max_/2)&max_) >> 21];
-        auto sqrOut = (phaccu[1]>(max_/2))*2.0f-1.0f;
-		return (MathTools::interpolate(sinOut[1],sqrOut,shape));
+		sinOut[1] = sinTable[((phaccu[1] + max_ / 2) & max_) >> 21];
+		auto sqrOut1 = (phaccu[1] > (max_ / 2)) * 2.0f - 1.0f;
+		auto sqrOut2 = (phaccu[0] > (max_ / 2)) * 2.0f - 1.0f;
+
+		auto finalWav1 = MathTools::interpolate(sinOut[1], sqrOut1, shape);
+		auto finalWav2 = MathTools::interpolate(sinOut[0], sqrOut2, shape);
+		return (MathTools::interpolate(finalWav1,finalWav2,mix));
 	}
 
 	void set_samplerate(float sr)
