@@ -69,6 +69,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	if (param_block.begin() == &param_block_1[0])
 		Debug::Pin0::high();
 
+	check_patch_change(param_block[0].rotary_motion);
+
 	last_params = param_block[0];
 
 	load_measure.start_measurement();
@@ -93,7 +95,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		// 	Debug::Pin0::low();
 		// 	// if (framectr != 0)
 		// }
-		check_patch_change(params_->rotary_motion);
+		// check_patch_change(params_->rotary_motion);
 		framectr++;
 
 		int i;
