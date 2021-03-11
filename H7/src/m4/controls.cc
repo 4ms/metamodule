@@ -70,8 +70,11 @@ void Controls::update_params()
 
 		params->rotary_button.copy_state(rotary_button);
 
-		for (int i = 0; i < NumPot; i++)
-			params->knobs[i] = get_pot_reading(i) / 4095.0f;
+		for (int i = 0; i < NumPot; i++) {
+			_knobs[i].set_new_value(get_pot_reading(i) / 4095.0f);
+			params->knobs[i] = _knobs[i].next();
+			// params->knobs[i] = get_pot_reading(i) / 4095.0f;
+		}
 
 		params->patchcv = get_patchcv_reading() / 4095.0f;
 
@@ -79,7 +82,8 @@ void Controls::update_params()
 		params->patchcv = first_param->patchcv;
 
 		for (int i = 0; i < NumPot; i++)
-			params->knobs[i] = first_param->knobs[i];
+			params->knobs[i] = _knobs[i].next();
+
 		// jacksenses
 		params->rotary_button.copy_state(first_param->rotary_button);
 		params->rotary_motion = first_param->rotary_motion;
