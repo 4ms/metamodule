@@ -43,11 +43,14 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
 	FLASH (rx)			: ORIGIN = 0x08100000, LENGTH = 1024K
-	RAM (xrw)			: ORIGIN = 0x10000000, LENGTH = 256K /*SRAM1/2 Alias */
+	SRAM1 (xrw)			: ORIGIN = 0x10000000, LENGTH = 128K /*SRAM1 Alias */
+	SRAM2 (xrw)			: ORIGIN = 0x10020000, LENGTH = 128K /*SRAM2 Alias */
 	SRAM3 (xrw)			: ORIGIN = 0x10040000, LENGTH = 32K /*SRAM3 Alias */
 }
 
-_estack = 0x10040000;		/* end of RAM */
+_estack = 0x10020000;		/* end of RAM */
+
+_params_ptr = 0x38000000;
 
 /* Define output sections */
 SECTIONS
@@ -127,7 +130,7 @@ SECTIONS
 
 		. = ALIGN(4);
 		_edata = .;				/* define a global symbol at data end */
-	} >RAM AT> FLASH
+	} >SRAM1 AT> FLASH
 
 	
 	/* Uninitialized data section */
@@ -144,7 +147,7 @@ SECTIONS
 		. = ALIGN(4);
 		_ebss = .;				 /* define a global symbol at bss end */
 		__bss_end__ = _ebss;
-	} >RAM
+	} >SRAM1
 
 	/* User_heap_stack section, used to check that there is enough RAM left */
 	._user_heap_stack :
@@ -155,7 +158,7 @@ SECTIONS
 		. = . + _Min_Heap_Size;
 		. = . + _Min_Stack_Size;
 		. = ALIGN(8);
-	} >RAM
+	} >SRAM1
 
 	
 	.dma_buffer :

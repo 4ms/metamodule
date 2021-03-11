@@ -1,28 +1,47 @@
+#include "conf/control_conf.hh"
+#include "conf/hsem_conf.hh"
+#include "conf/i2c_conf.hh"
+#include "controls.hh"
+#include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
+#include "m4/system_clocks.hh"
+#include "params.hh"
+#include "shared_bus.hh"
+#include "shared_memory.hh"
+
+using namespace MetaModule;
+
 void main(void)
 {
-	target::RCC_Control::HSEM_::set();
+	target::corem4::SystemClocks start_clocks;
 
-	constexpr uint32_t HSEM_id_mask = 1 << 0;
+	while (HWSemaphore<SharedBusLock>::is_locked()) {
+	}
 
-	target::HSEM_::template IER<HSEM_id_mask>::set();
+	SharedBus::i2c.init(i2c_conf);
 
-	// HAL_HSEM_ActivateNotification(HSEM_id_mask);
+	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufferLocation);
+	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
-	// Domain D2 goes to STOP mode (Cortex-M4 in deep-sleep) waiting for Cortex-M7 to
-	// perform system initialization (system clock config, external memory configuration.. )
-	HAL_PWREx_ClearPendingEvent();
-	HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
+	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
+	CVAdcChipT cvadc;
+	auto param_block_base = SharedMemory::read_address_of<ParamBlock *>(SharedMemory::ParamsPtrLocation);
+	Controls controls{potadc, cvadc, param_block_base}; //, gpio_expander};
 
-	__HAL_HSEM_CLEAR_FLAG(HSEM_id_mask);
+	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
 
-	HAL_Init();
-	target::RCC_Control::SYSCFG_::set();
+	led_driver.start_it_mode();
+	controls.start();
+
+	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
 
 	while (1) {
+		if (SharedBus::i2c.is_ready()) {
+			i2cqueue.update();
+		}
 	}
 }
 

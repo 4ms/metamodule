@@ -1,28 +1,36 @@
 #pragma once
-#include "Fonts/FreeMono12pt7b.h"
-#include "Fonts/FreeSansBold18pt7b.h"
+#include "Adafruit_GFX_Library/Fonts/FreeMono12pt7b.h"
+#include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
+#include "conf/hsem_conf.hh"
 #include "debug.hh"
+#include "drivers/hsem.hh"
 #include "drivers/i2c.hh"
+#include "drivers/interrupt.hh"
 #include "leds.hh"
 #include "params.hh"
+#include "patchlist.hh"
 #include "screen.hh"
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
 
+namespace MetaModule
+{
 template<unsigned AnimationUpdateRate = 100>
 class Ui {
 public:
 	Params &params;
-	LedCtl<AnimationUpdateRate> &leds;
+	PatchList &patch_list;
+	LedFrame<AnimationUpdateRate> &leds;
 	Screen &screen;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, LedCtl<AnimationUpdateRate> &l, Screen &s)
+	Ui(Params &p, PatchList &patchlist, LedFrame<AnimationUpdateRate> l, Screen &s)
 		: params{p}
+		, patch_list{patchlist}
 		, leds{l}
 		, screen{s}
 	{}
@@ -35,45 +43,36 @@ public:
 	void start()
 	{
 		screen.init();
-		Debug::Pin2::high();
+		// Debug::Pin2::high();
 		screen.fill(bgcolor);
-		Debug::Pin2::low();
+		// Debug::Pin2::low();
 
 		draw_patch_name();
 		draw_audio_load();
 
-		leds.start();
-		params.controls.start();
-
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
 		leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
-		leds.rotaryLED.set_background(Colors::grey);
+		leds.rotaryLED.set_background(Colors::green);
 
-		// Todo: set led_update_task_conf.update_rate_Hz to be a factor of AnimationUpdateRate and Hz
-		//
-		led_update_task.init(led_update_task_conf, [this]() { leds.update(); });
-		led_update_task.start();
+		// Todo: led animation rate depends on I2C rate... not easy to set  maybe we can have it self-calibrate against
+		// the SysTick?
+		// Otherwise we can use this: but we'd have to make it thread-safe we could just have
+		// update_animation() just update the TriOsc and fade (but not write actual color to the framebuffer)
+		// led_update_task.init(led_update_animation_task_conf, [this]() { leds.update_animation(); });
+		// led_update_task.start();
+
+		InterruptManager::registerISR(HSEM1_IRQn, 2, 1, [&]() {
+			HWSemaphore<LEDFrameBufLock>::clear_ISR();
+			update_led_states();
+		});
+
+		HWSemaphore<LEDFrameBufLock>::enable_ISR();
 	}
 
 	uint32_t last_screen_update = 0;
 	void update()
 	{
-		if (params.buttons[0].is_pressed())
-			leds.but[0].set_background(Colors::red);
-		else
-			leds.but[0].set_background(Colors::grey);
-
-		if (params.buttons[1].is_pressed())
-			leds.but[1].set_background(Colors::blue);
-		else
-			leds.but[1].set_background(Colors::grey);
-
-		if (params.rotary_button.is_pressed())
-			leds.rotaryLED.set_background(Colors::blue);
-		else
-			leds.rotaryLED.set_background(Colors::grey);
-
 		uint32_t now = HAL_GetTick();
 		if (now - last_screen_update > 100) {
 			last_screen_update = now;
@@ -81,50 +80,54 @@ public:
 			draw_pot_values();
 		}
 
-		if (params.should_redraw_patch) {
-			params.should_redraw_patch = false;
+		if (patch_list.should_redraw_patch) {
+			patch_list.should_redraw_patch = false;
 			draw_patch_name();
 		}
-
-		// screen.setTextColor(Colors::white.Rgb565());
-		// screen.setTextSize(1);
-
-		// if (params.buttons[1].is_just_pressed())
-		// 	leds.but[1].set_background(Colors::red);
-
-		// if (params.buttons[1].is_just_released())
-		// 	leds.but[1].set_background(Colors::blue);
-
-		// if (params.buttons[0].is_just_pressed())
-		// 	leds.but[0].set_background(Colors::red);
-
-		// if (params.buttons[0].is_just_released())
-		// 	leds.but[0].set_background(Colors::blue);
-
-		// if (params.rotary_button.is_just_pressed())
-		// 	leds.rotaryLED.set_background(Colors::white);
-
-		// if (params.rotary_button.is_just_released())
-		// 	leds.rotaryLED.set_background(Colors::blue);
 	}
 
 private:
 	Timekeeper led_update_task;
 
+	void update_led_states()
+	{
+		if (params.buttons[0].is_pressed())
+			leds.but[0].set_background(Colors::red);
+		else
+			leds.but[0].set_background(Colors::green);
+
+		if (params.buttons[1].is_pressed())
+			leds.but[1].set_background(Colors::blue);
+		else
+			leds.but[1].set_background(Colors::orange);
+
+		if (params.rotary_button.is_pressed())
+			leds.rotaryLED.set_background(Colors::blue);
+		else
+			leds.rotaryLED.set_background(Colors::green);
+
+		leds.rotaryLED.breathe(Colors::magenta, 1);
+		leds.clockLED.breathe(Colors::green, 0.75f);
+		leds.but[0].breathe(Colors::blue, 0.5f);
+		leds.but[1].breathe(Colors::white, 0.01f);
+
+		leds.update_animation();
+	}
+
 	void draw_patch_name()
 	{
-		Debug::Pin2::high();
+		// Debug::Pin2::high();
 		screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
-		Debug::Pin2::low();
+		// Debug::Pin2::low();
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
 		uint32_t y = 60;
-		for (int i = 1; i < params.cur_patch().num_modules; i++) {
-			screen.setCursor(10, y);
-			Debug::Pin2::high();
-			screen.print(params.cur_patch().modules_used[i].name);
-			Debug::Pin2::low();
+		for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
+				screen.setCursor(10, y);
+			// Debug::Pin2::high();
+			screen.print(patch_list.cur_patch().modules_used[i].name);
+			// Debug::Pin2::low();
 			y += 35;
 		}
 	}
@@ -135,7 +138,7 @@ private:
 		screen.setTextSize(2);
 		screen.setFont(NULL);
 		screen.setCursor(0, 10);
-		screen.print(params.audio_load, 10);
+		screen.print(patch_list.audio_load, 10);
 		screen.print("% ");
 		screen.print(get_heap_size() / 1024, 10);
 		screen.print("kb ");
@@ -152,7 +155,6 @@ private:
 		int y = 180;
 		for (int i = 0; i < 12; i++) {
 			screen.setCursor((i & 0b11) * 60, y);
-			// screen.print((uint16_t)(i < 4 ? params.cvjacks[i] * 100 : params.knobs[i - 4] * 100));
 			if (i < 4)
 				screen.print((uint16_t)(params.cvjacks[i] * 100));
 			else
@@ -181,3 +183,4 @@ private:
 		screen.fillRect(219, 197, 20, 20, Colors::cyan.Rgb565());
 	}
 };
+} // namespace MetaModule

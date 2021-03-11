@@ -38,7 +38,7 @@ ENTRY(Reset_Handler)
 /* Specify the memory areas */
 MEMORY
 {
-	FLASH (rx)		: ORIGIN = 0x08000000, LENGTH = 1024K
+	FLASH (rx)		: ORIGIN = 0x08000000, LENGTH = 1024K /* up to 0x08100000 */
 	RAM (xrw)		: ORIGIN = 0x20000000, LENGTH = 128K /* DTCM (dual?) M7 */
 	AXISRAM (rw) 	: ORIGIN = 0x24000000, LENGTH = 512K /* D1 Domain */
 	SRAM1 (rw) 		: ORIGIN = 0x30000000, LENGTH = 128K /* D2 Domain */
@@ -47,6 +47,8 @@ MEMORY
 	SRAM4 (rw) 		: ORIGIN = 0x38000000, LENGTH = 64K /* D3 Domain */
 	ITCMRAM (xrw)	: ORIGIN = 0x00000000, LENGTH = 64K
 }
+
+_params_ptr = 0x38000000;
 
 _sheap = 0x24000000; 		/* start of heap */
 _eheap = 0x24080000; 		/* end of heap */

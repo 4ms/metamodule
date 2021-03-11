@@ -1,64 +1,52 @@
 #pragma once
-#include "accel_param.hh"
-#include "controls.hh"
+#include "conf/control_conf.hh"
+#include "conf/stream_conf.hh"
 #include "drivers/stm32xx.h"
-#include "drivers/uart.hh"
-#include "patch/patch.hh"
 #include "util/debouncer.hh"
+#include <array>
 
-class Params {
-public:
-	static constexpr uint32_t num_patches = 6;
-
-	Params(Controls &c);
-
-	void update();
-	Controls &controls;
-
-	// Todo: 4 and 8 should come from Panel
-	float cvjacks[4] = {0.f};
-	float patchcv = 0.f;
-	float knobs[8] = {0.f};
-
-	Toggler gate_ins[2];
-	Toggler clock_in;
-	Toggler jack_senses[15];
-
+namespace MetaModule
+{
+struct Params {
+	// Sampled at audio sample rate:
+	float cvjacks[NumCVIn] = {0.f};
+	Toggler gate_ins[NumGateIn];
 	Toggler buttons[2];
-	Toggler rotary_button;
 
+	// Same value for an entire block:
+	float knobs[NumPot] = {0.f};
+	Toggler jack_senses[15];
+	float patchcv = 0.f;
+
+	Toggler rotary_button;
 	int32_t rotary_motion = 0;
 	int32_t rotary_pushed_motion = 0;
+	int32_t rotary_position = 0;
 
-	// SelbusQueue selbus_commands;
-
-	// bool clock_out
-
-	uint8_t audio_load = 0;
-
-	// Todo: move this into PatchManager or PatchList
-	bool should_redraw_patch = false;
-	const Patch &cur_patch()
+	Params &operator=(const Params &that)
 	{
-		return _patches[_cur_patch].patch;
-	}
-	void next_patch()
-	{
-		_cur_patch++;
-		if (_cur_patch == num_patches)
-			_cur_patch = 0;
-	}
-	void prev_patch()
-	{
-		if (_cur_patch == 0)
-			_cur_patch = num_patches - 1;
-		else
-			_cur_patch--;
-	}
+		if (this == &that)
+			return *this;
 
-private:
-	bool _rotary_moved_while_pressed = false;
-	uint32_t _cur_patch = 0;
-	PatchRef _patches[num_patches];
+		for (int i = 0; i < NumCVIn; i++)
+			cvjacks[i] = that.cvjacks[i];
+		for (int i = 0; i < NumGateIn; i++)
+			gate_ins[i].copy_state(that.gate_ins[i]);
+		for (int i = 0; i < NumRgbButton; i++)
+			buttons[i].copy_state(that.buttons[i]);
+		for (int i = 0; i < NumPot; i++)
+			knobs[i] = that.knobs[i];
+		for (int i = 0; i < 15; i++)
+			jack_senses[i].copy_state(that.jack_senses[i]);
+		patchcv = that.patchcv;
+		rotary_button.copy_state(that.rotary_button);
+		rotary_motion = that.rotary_motion;
+		rotary_pushed_motion = that.rotary_pushed_motion;
+		rotary_position = that.rotary_position;
+
+		return *this;
+	}
 };
 
+using ParamBlock = std::array<Params, StreamConf::Audio::BlockSize>;
+} // namespace MetaModule

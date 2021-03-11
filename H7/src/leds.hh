@@ -1,39 +1,42 @@
 #pragma once
-#include "drivers/colors.hh"
 #include "drivers/frame_buffer_led.hh"
-#include "drivers/i2c.hh"
-#include "drivers/led_driver.hh"
 #include "drivers/pca9685_led_driver.hh"
-#include "drivers/pin.hh"
 #include "drivers/rgbled.hh"
 #include "drivers/stm32xx.h"
+using namespace mdrivlib;
 
-template<unsigned UpdateRateHz = 100>
-class LedCtl {
-	using DriverRgbLed = RgbLed<FrameBufferLED, UpdateRateHz>;
+// CM7
+// Todo: consider making the driver type a template parameter:
+// (in conf:) using MMLedDriver = PCA9685Driver;
+// (in main:) LedFrame<MMLedDriver, UpdateRateHz>
+template<unsigned UpdateRateHz>
+class LedFrame {
+	enum { Chip0 = 0 };
 
 public:
-	LedCtl(ILedDmaDriver &led_driver)
-		: led_driver_{led_driver}
+	LedFrame(uint32_t *frame_buf)
+		: rotaryLED  {
+			{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 3)},
+			{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 4)},
+			{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 5)},
+		}
+		, clockLED  {
+			{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 9)},
+			{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 10)},
+			{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 11)},
+		}
+		, but {{
+				{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 0)},
+				{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 1)},
+				{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 2)},
+			},{
+				{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 6)},
+				{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 7)},
+				{PCA9685Driver::get_buf_addr(frame_buf, Chip0, 8)},
+			}}
 	{}
 
-	void start()
-	{
-		led_driver_.start();
-	}
-
-	void start_it_mode()
-	{
-		led_driver_.start_it_mode();
-	}
-
-	void start_dma_mode()
-	{
-		led_driver_.start_dma_mode();
-	}
-
-	// Todo: only update if glowing or fading
-	void update()
+	void update_animation()
 	{
 		but[0].update_animation();
 		but[1].update_animation();
@@ -41,43 +44,8 @@ public:
 		rotaryLED.update_animation();
 	}
 
-	void refresh()
-	{
-		led_driver_.write_once(0);
-	}
-
-private:
-	ILedDmaDriver &led_driver_;
-
-	enum { Chip0 = 0 };
-
-public:
-	DriverRgbLed rotaryLED = {
-		{led_driver_.get_buf_addr(Chip0, 3)},
-		{led_driver_.get_buf_addr(Chip0, 4)},
-		{led_driver_.get_buf_addr(Chip0, 5)},
-	};
-
-	DriverRgbLed clockLED = {
-		{led_driver_.get_buf_addr(Chip0, 9)},
-		{led_driver_.get_buf_addr(Chip0, 10)},
-		{led_driver_.get_buf_addr(Chip0, 11)},
-	};
-
-	DriverRgbLed but[2] = {
-		{
-			{led_driver_.get_buf_addr(Chip0, 0)},
-			{led_driver_.get_buf_addr(Chip0, 1)},
-			{led_driver_.get_buf_addr(Chip0, 2)},
-		},
-		{
-			{led_driver_.get_buf_addr(Chip0, 6)},
-			{led_driver_.get_buf_addr(Chip0, 7)},
-			{led_driver_.get_buf_addr(Chip0, 8)},
-		},
-	};
-
-private:
-	NoFrameBufferLED NoLED;
+	RgbLed<FrameBufferLED, UpdateRateHz> clockLED;
+	RgbLed<FrameBufferLED, UpdateRateHz> rotaryLED;
+	RgbLed<FrameBufferLED, UpdateRateHz> but[2];
 };
 

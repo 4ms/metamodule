@@ -1,12 +1,14 @@
 #pragma once
 #include "coreProcessor.h"
 #include "moduleTypes.h"
+#include "panel_defs.hh"
 
 class Panel : public CoreProcessor {
 public:
-	static inline const int NumKnobs = 8;
-	static inline const int NumInJacks = 6;
-	static inline const int NumOutJacks = 2;
+	static constexpr int NumKnobs = PanelDef::NumPot;
+	static constexpr int NumInJacks = PanelDef::NumAudioIn + PanelDef::NumCVIn;
+	static constexpr int NumOutJacks = PanelDef::NumAudioOut;
+	// Todo: DAC out, gate out, gate in
 
 	float inputs[NumInJacks];	// OutsideToPatch
 	float outputs[NumOutJacks]; // PatchToOutside
@@ -73,4 +75,3 @@ public:
 
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 };
-

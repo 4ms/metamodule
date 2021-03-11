@@ -55,7 +55,7 @@ TEST_CASE("Testing map_value()")
 	}
 }
 
-TEST_CASE("Testing in_power_of_2()")
+TEST_CASE("Testing is_power_of_2()")
 {
 	CHECK(MathTools::is_power_of_2(1));
 	CHECK(MathTools::is_power_of_2(2));
@@ -228,4 +228,37 @@ TEST_CASE("swap_bytes tests")
 
 	uint32_t w = 0x12345678;
 	CHECK(MathTools::swap_bytes32(w) == 0x78563412);
+}
+
+TEST_CASE("log2int")
+{
+	SUBCASE("Log(0) is undefined, but in MathTools Log2Int(0) = 0")
+	{
+		CHECK(MathTools::Log2Int(0) == 0); // Is this important?
+	}
+
+	SUBCASE("Check powers of 2")
+	{
+		CHECK(MathTools::Log2Int(1) == 0);
+		CHECK(MathTools::Log2Int(2) == 1);
+		CHECK(MathTools::Log2Int(4) == 2);
+		CHECK(MathTools::Log2Int(8) == 3);
+		CHECK(MathTools::Log2Int(16) == 4);
+		//...
+		CHECK(MathTools::Log2Int(0x20000000) == 29);
+		CHECK(MathTools::Log2Int(0x40000000) == 30);
+		CHECK(MathTools::Log2Int(0x80000000) == 31);
+	}
+
+	SUBCASE("Lowest closest integer (floor) of log2(val) is returned")
+	{
+		CHECK(MathTools::Log2Int(3) == MathTools::Log2Int(2));
+
+		CHECK(MathTools::Log2Int(5) == MathTools::Log2Int(4));
+		CHECK(MathTools::Log2Int(6) == MathTools::Log2Int(4));
+		CHECK(MathTools::Log2Int(7) == MathTools::Log2Int(4));
+
+		CHECK(MathTools::Log2Int(9) == MathTools::Log2Int(8));
+		CHECK(MathTools::Log2Int(15) == MathTools::Log2Int(8));
+	}
 }

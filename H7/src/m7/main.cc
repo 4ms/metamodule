@@ -1,6 +1,7 @@
 #include "conf/codec_sai_conf.hh"
 #include "conf/control_conf.hh"
 #include "conf/dac_conf.hh"
+#include "conf/hsem_conf.hh"
 #include "conf/i2c_conf.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdram_conf.hh"
@@ -9,15 +10,17 @@
 #include "drivers/codec_WM8731.hh"
 #include "drivers/dac_MCP48FVBxx.hh"
 #include "drivers/gpio_expander.hh"
+#include "drivers/hsem.hh"
 #include "drivers/mpu.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "drivers/sdram.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
+#include "m7/system_clocks.hh"
 #include "muxed_adc.hh"
 #include "screen.hh"
 #include "shared_bus.hh"
-#include "sys/system_clocks.hh"
+#include "shared_memory.hh"
 #include "ui.hh"
 
 namespace MetaModule
@@ -30,138 +33,59 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 
 	// Todo: understand why setting the members to static inline causes SystemClocks ctor to hang on waiting for
 	// D2CLKREADY
-	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
+
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
-	CVAdcChipT cvadc;
 	AnalogOutT dac;
 	Screen screen;
-	// GPIOExpander<16> sense{gpio_expander_conf};
 } _hw;
 
 struct StaticBuffers {
-	static inline __attribute__((section(".dma_buffer"))) PCA9685DmaDriver::FrameBuffer led_frame_buffer;
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
+	static inline __attribute__((section(".dma_buffer"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+	static inline __attribute__((section(".dma_buffer"))) ParamBlock param_blocks[2];
 
 	StaticBuffers()
 	{
 		target::MPU_::disable_cache_for_dma_buffer(audio_dma_block, sizeof(audio_dma_block));
-		target::MPU_::disable_cache_for_dma_buffer(led_frame_buffer, sizeof(led_frame_buffer));
+		target::MPU_::disable_cache_for_dma_buffer<ParamBlock[2]>(&param_blocks, sizeof(param_blocks));
 	}
 } _sb;
 
 } // namespace MetaModule
 
+// Todo: use PatchList memory better: right now all patches get copied with CopyInitData with mostly zeros (some
+// values?) Then libc_init calls PatchList ctor. So make it static? Have a load() function? Keep in mind we'll want to
+// dynamically load patches at some point
+
 void main()
 {
 	using namespace MetaModule;
 
-	// Todo: finish non-DMA PCA9685 driver and use it
-	PCA9685DmaDriver led_driver{SharedBus::i2c, kNumLedDriverChips, {}, StaticBuffers::led_frame_buffer};
-	LedCtl leds{led_driver};
+	Params last_params;
+	PatchList patch_list;
 
-	Controls controls{_hw.potadc, _hw.cvadc}; //, gpio_expander};
-	Params params{controls};
+	AudioStream audio{
+		patch_list, _hw.codec, _hw.dac, StaticBuffers::param_blocks, last_params, StaticBuffers::audio_dma_block};
+	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
+	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, _hw.screen};
 
-	AudioStream audio{params, _hw.codec, _hw.dac, StaticBuffers::audio_dma_block};
-
-	Ui ui{params, leds, _hw.screen};
-
-	audio.start();
-
-	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
+	SharedBus::i2c.deinit();
 
 	ui.start();
 
-	// Todo: create class RoundRobinHandler {
-	//    void add_to_sequence(T &&func); or add_to_sequence(std::function<void(void)> &&func);
-	//    void advance_sequence_loop();
-	//};
-	// auto select_pots = [&](){ cur_pot = 0;
-	//			 controls.potadc.select_pot_source(cur_pot);
-	//			 controls.potadc.select_adc_channel(MuxedADC::Channel::Pots); };
-	// handler.add_to_sequence([&](){ leds.refresh(); });
-	// handler.add_to_sequence([&](){ select_pots; });
-	// ..
-	// while (1) {
-	//    ui.update();
-	//    leds.update();
-	//    if (SharedBus::i2c.is_ready()) {
-	//    	handler.advance_sequence_loop();
-	//    }
-	//    __NOP();
-	// }
-	// Takes:
-	// leds
-	// controls.potadc
-	enum I2CClients {
-		Leds,
-		SelectPots,
-		RequestReadPots,
-		CollectReadPots,
-		SelectPatchCV,
-		RequestReadPatchCV,
-		CollectReadPatchCV,
-	};
-	I2CClients cur_client;
-	uint8_t cur_pot;
+	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
+	SharedMemory::write_address_of(StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufferLocation);
+	SCB_CleanDCache();
+
+	HWSemaphore<SharedBusLock>::disable_ISR();
+	HWSemaphore<SharedBusLock>::unlock();
+
+	audio.start();
 
 	while (1) {
+		//Todo: call this on a timer set to screen frame rate
 		ui.update();
-
-		if (SharedBus::i2c.is_ready()) {
-			// Debug::Pin2::high();
-			switch (cur_client) {
-				case Leds:
-					leds.refresh();
-					cur_client = SelectPots;
-					break;
-
-				case SelectPots:
-					cur_pot = 0;
-					controls.potadc.select_pot_source(cur_pot);
-					controls.potadc.select_adc_channel(MuxedADC::Channel::Pots);
-					cur_client = RequestReadPots;
-					break;
-
-				case RequestReadPots:
-					controls.potadc.request_reading();
-					cur_client = CollectReadPots;
-					break;
-
-				case CollectReadPots:
-					controls.store_pot_reading(cur_pot, controls.potadc.collect_reading());
-					if (++cur_pot >= 8) {
-						cur_client = SelectPatchCV;
-						cur_pot = 0;
-					} else
-						cur_client = RequestReadPots;
-					controls.potadc.select_pot_source(cur_pot);
-					break;
-
-					// GPIO Sense here (between ADC channels)
-
-				case SelectPatchCV:
-					controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);
-					cur_client = RequestReadPatchCV;
-					break;
-
-				case RequestReadPatchCV:
-					controls.potadc.request_reading();
-					cur_client = CollectReadPatchCV;
-					break;
-
-				case CollectReadPatchCV:
-					controls.store_patchcv_reading(controls.potadc.collect_reading());
-					cur_client = Leds;
-					break;
-
-				default:
-					cur_client = Leds;
-					break;
-			}
-			// Debug::Pin2::low();
-		}
 		__NOP();
 	}
 }

@@ -6,6 +6,7 @@
 #include "drivers/stm32xx.h"
 #include "params.hh"
 #include "patch_player.hh"
+#include "patchlist.hh"
 #include "processors/tools/kneeCompress.h"
 #include "util/audio_frame.hh"
 #include "util/interp_param.hh"
@@ -13,6 +14,9 @@
 #include "util/oscs.hh"
 #include <array>
 
+using namespace mdrivlib;
+namespace MetaModule
+{
 using AudioConf = StreamConf::Audio;
 
 // Todo: we don't need a codec virtual class, just use a type alias
@@ -23,16 +27,24 @@ public:
 	using AudioStreamBlock = std::array<AudioFrame, AudioConf::BlockSize>;
 	enum AudioChannels { LEFT, RIGHT };
 
-	AudioStream(Params &p, ICodec &codec, AnalogOutT &dac, AudioStreamBlock (&buffers)[4]);
+	AudioStream(PatchList &patches,
+				ICodec &codec,
+				AnalogOutT &dac,
+				ParamBlock (&p)[2],
+				Params &last_params,
+				AudioStreamBlock (&buffers)[4]);
 	void start();
 
-	void process(AudioStreamBlock &in, AudioStreamBlock &out);
+	void process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &params);
 
 private:
 	AudioStreamBlock &tx_buf_1;
 	AudioStreamBlock &tx_buf_2;
 	AudioStreamBlock &rx_buf_1;
 	AudioStreamBlock &rx_buf_2;
+	ParamBlock &param_block_1;
+	ParamBlock &param_block_2;
+	Params &last_params;
 
 	ICodec &codec_;
 	uint32_t sample_rate_;
@@ -41,11 +53,11 @@ private:
 	// Should we class this out? It's only connected to Audio at init and process()
 	AudioConf::SampleT get_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
-	bool check_patch_change();
+	bool check_patch_change(int motion);
 	void load_patch();
 
-	Params &params;
 	AnalogOutT &dac;
+	PatchList &patch_list;
 	PatchPlayer player;
 	PinChangeInterrupt dac_updater;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
@@ -56,7 +68,5 @@ private:
 	static constexpr unsigned NumCVInputs = PatchPlayer::get_num_panel_inputs() - NumAudioInputs;
 	static constexpr unsigned NumAudioOutputs = 2;
 	static constexpr unsigned NumCVOutputs = PatchPlayer::get_num_panel_outputs() - NumAudioOutputs;
-
-	std::array<Interp<float, AudioConf::BlockSize>, NumCVInputs> cvjacks;
-	std::array<Interp<float, AudioConf::BlockSize>, NumKnobs> knobs;
 };
+} // namespace MetaModule
