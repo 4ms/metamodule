@@ -57,50 +57,29 @@ AudioConf::SampleT AudioStream::get_output(int output_id)
 	return scaled_out;
 	// return compressor.compress(scaled_out);
 }
-void AudioStream::set_input(int input_id, AudioConf::SampleT in)
-{
-	auto scaled_in = AudioFrame::scaleInput(in);
-	player.set_panel_input(input_id, scaled_in);
-}
 
-static volatile int framectr = 0;
+// Todo: integrate these:
+// params.gate_ins[]
+// params.clock_in
+// params.patch_cv
+// params.buttons[]
+// params.jack_senses[]
+
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
 {
-	if (param_block.begin() == &param_block_1[0])
-		Debug::Pin0::high();
-
-	check_patch_change(param_block[0].rotary_motion);
-
-	last_params = param_block[0];
-
+	Debug::Pin0::high();
 	load_measure.start_measurement();
 
-	// Todo: integrate these:
-	// params.gate_ins[]
-	// params.clock_in
-	// params.patch_cv
-	// params.buttons[]
-	// params.jack_senses[]
+	last_params = param_block[0];
+	check_patch_change(last_params.rotary_motion);
 
-	framectr = 0;
 	auto in_ = in.begin();
 	auto params_ = param_block.begin();
 	for (auto &out_ : out) {
-		// if (param_block[0].rotary_motion != params_->rotary_motion) {
-		// 	Debug::Pin0::low();
-		// 	// if (framectr != 0)
-		// }
-		// if (param_block[0].rotary_pushed_motion != params_->rotary_pushed_motion) {
-		// 	Debug::Pin0::high();
-		// 	Debug::Pin0::low();
-		// 	// if (framectr != 0)
-		// }
-		// check_patch_change(params_->rotary_motion);
-		framectr++;
-
 		int i;
-		set_input(0, in_->l);
-		set_input(1, in_->r);
+
+		player.set_panel_input(0, AudioFrame::scaleInput(in_->l));
+		player.set_panel_input(1, AudioFrame::scaleInput(in_->r));
 
 		i = 0;
 		for (auto &cv : params_->cvjacks) {
@@ -169,11 +148,11 @@ void AudioStream::load_patch()
 {
 	bool ok = player.load_patch(patch_list.cur_patch());
 
+	for (int i = 0; i < NumAudioInputs; i++)
+		player.set_panel_input(i, 0);
+
 	for (int i = 0; i < NumCVInputs; i++)
 		player.set_panel_input(i + NumAudioInputs, last_params.cvjacks[i]);
-
-	for (int i = 0; i < NumAudioInputs + NumCVInputs; i++)
-		player.set_panel_input(i, 0);
 
 	for (int i = 0; i < NumKnobs; i++)
 		player.set_panel_param(i, last_params.knobs[i]);
