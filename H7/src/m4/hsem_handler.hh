@@ -10,8 +10,8 @@ struct HWSemaphoreGlobalHandler : public HWSemaphoreGlobalBase {
 		InterruptManager::registerISR(HSEM2_IRQn, pri1, pri2, [&]() {
 			handle_isr<ParamsBuf1Lock>();
 			handle_isr<ParamsBuf2Lock>();
-			handle_isr<ScreenFrameBuf1Lock>();
-			handle_isr<ScreenFrameBuf2Lock>();
+			// handle_isr<ScreenFrameBuf1Lock>();
+			// handle_isr<ScreenFrameBuf2Lock>();
 		});
 	}
 };
