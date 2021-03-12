@@ -69,7 +69,9 @@ constexpr bool is_power_of_2(unsigned int v)
 	return v && ((v & (v - 1)) == 0);
 }
 
-constexpr unsigned int Log2Int(const unsigned int x)
+//Todo: log2_ceiling()
+
+constexpr unsigned int log2_floor(const unsigned int x)
 {
 	int i = 32;
 	while (i--) {

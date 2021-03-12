@@ -95,13 +95,13 @@ public:
 	}
 
 	// Note: this takes ~350ms!
-	void fillRect_slow(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
-	{
-		set_pos(x, y, x + w - 1, y + h - 1);
-		for (int i = 0; i <= ((w) * (h)); i += 1) {
-			transmit_data_32(color, color);
-		}
-	}
+	// void fillRect_slow(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+	// {
+	// 	set_pos(x, y, x + w - 1, y + h - 1);
+	// 	for (int i = 0; i <= ((w) * (h)); i += 1) {
+	// 		transmit_data_32(color, color);
+	// 	}
+	// }
 	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
 	{
 		set_pos(x, y, x + w - 1, y);
@@ -123,11 +123,10 @@ public:
 	}
 
 	// Todo: print_in_box(x,y,w,h, char* txt, uint32_t len)
-	// does what print() does (using draw_char()) but will erase the background with custom fonts
-	// After drawing text, if cursor position is inside the box,
-	// it will fill in all pixels on remaining background.
-	// ... OR: would it be faster to use a gfx off-screen context?
-private:
+	// does what print() does (using draw_char()) but also draws the background with custom fonts
+	// After drawing text, it will fillRect() all remaining pixels within the box
+
+protected:
 	const int window_width;
 	const int window_height;
 	const int _colstart;
@@ -181,6 +180,7 @@ private:
 	}
 };
 
+// template <typename ScreenConfT>
 struct Screen : public ScreenGFXAdaptor {
 
 	Screen() {}
@@ -188,5 +188,79 @@ struct Screen : public ScreenGFXAdaptor {
 	void fill(Color c)
 	{
 		fillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+	}
+};
+
+// template <typename ScreenConfT>
+struct ScreenWithFrameBuffer : public ScreenGFXAdaptor {
+
+	ScreenConfT::FrameBufferT &framebuf;
+
+	ScreenWithFrameBuffer(ScreenConfT::FrameBufferT &framebuf_)
+		: framebuf{framebuf_}
+	{}
+
+	virtual void startWrite() override {}
+
+	virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override
+	{
+		framebuf[x + y * ScreenConfT::width] = color;
+	}
+
+	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
+	{
+		if ((x + w) > ScreenConfT::width)
+			w = ScreenConfT::width - x;
+
+		if ((h + y) > ScreenConfT::height)
+			h = ScreenConfT::height - y;
+
+		// Use DMA2D ?
+		for (int xi = x; xi < (x + w); xi++) {
+		for (int yi = y; yi < (y + h); yi++) {
+			framebuf[xi + yi * ScreenConfT::width] = color;
+		}
+		}
+	}
+
+	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
+	{
+		if ((x + w) > ScreenConfT::width)
+			w = ScreenConfT::width - x;
+
+		const int16_t row_offset = x + y * ScreenConfT::width;
+		for (int i = 0; i < w; i++) {
+			framebuf[i + row_offset] = color;
+		}
+	}
+	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) override
+	{
+		if ((h + y) > ScreenConfT::height)
+			h = ScreenConfT::height - y;
+
+		for (int i = y; i < (h + y); i++)
+			framebuf[i * ScreenConfT::width + x] = color;
+	}
+
+	virtual void endWrite() override {}
+
+	void fill(Color c)
+	{
+		fillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+	}
+
+	void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, Color c)
+	{
+		fillRect(x, y, w, h, c.Rgb565());
+	}
+
+	void transfer_buffer_to_screen()
+	{
+		set_pos(0, 0, _width, _height);
+		begin_open_data_transmission(4);
+		for (int i = 0; i < (_width * _height); i += 2) {
+			transmit_open_data32(framebuf[i], framebuf[i + 1]);
+		}
+		end_open_data_transmission();
 	}
 };

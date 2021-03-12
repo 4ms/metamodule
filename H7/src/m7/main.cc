@@ -37,13 +37,13 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	AnalogOutT dac;
-	Screen screen;
 } _hw;
 
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 	static inline __attribute__((section(".dma_buffer"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	static inline __attribute__((section(".dma_buffer"))) ParamBlock param_blocks[2];
+	static inline __attribute__((section(".axisram"))) MMScreenConf::FrameBufferT screen_framebuf;
 
 	StaticBuffers()
 	{
@@ -67,7 +67,7 @@ void main()
 	AudioStream audio{
 		patch_list, _hw.codec, _hw.dac, StaticBuffers::param_blocks, last_params, StaticBuffers::audio_dma_block};
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, _hw.screen};
+	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, StaticBuffers::screen_framebuf};
 
 	SharedBus::i2c.deinit();
 
@@ -83,7 +83,7 @@ void main()
 	audio.start();
 
 	while (1) {
-		//Todo: call this on a timer set to screen frame rate
+		// Todo: call this on a timer set to screen frame rate
 		ui.update();
 		__NOP();
 	}

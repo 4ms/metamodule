@@ -22,33 +22,36 @@ public:
 	Params &params;
 	PatchList &patch_list;
 	LedFrame<AnimationUpdateRate> &leds;
-	Screen &screen;
+	ScreenWithFrameBuffer screen;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, PatchList &patchlist, LedFrame<AnimationUpdateRate> l, Screen &s)
+	Ui(Params &p, PatchList &pl, LedFrame<AnimationUpdateRate> l, MMScreenConf::FrameBufferT &screenbuf)
 		: params{p}
-		, patch_list{patchlist}
+		, patch_list{pl}
 		, leds{l}
-		, screen{s}
+		, screen{screenbuf}
 	{}
 
 	Color bgcolor = Colors::pink;
-	Color patch_fgcolor = Colors::blue;
+	Color patch_fgcolor = Colors::green;
 	Color load_fgcolor = Colors::cyan;
 	Color pots_fgcolor = Colors::green;
 
 	void start()
 	{
 		screen.init();
-		// Debug::Pin2::high();
-		screen.fill(bgcolor);
-		// Debug::Pin2::low();
 
+		screen.fill(bgcolor);
 		draw_patch_name();
 		draw_audio_load();
+
+		Debug::Pin2::high();
+		SCB_CleanDCache_by_Addr((uint32_t *)&screen.framebuf, sizeof(ScreenConfT::FrameBufferT));
+		screen.transfer_buffer_to_screen();
+		Debug::Pin2::low();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -84,6 +87,7 @@ public:
 			patch_list.should_redraw_patch = false;
 			draw_patch_name();
 		}
+		// send frame buffer
 	}
 
 private:
@@ -124,7 +128,7 @@ private:
 		screen.setTextSize(1);
 		uint32_t y = 60;
 		for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
-				screen.setCursor(10, y);
+			screen.setCursor(10, y);
 			// Debug::Pin2::high();
 			screen.print(patch_list.cur_patch().modules_used[i].name);
 			// Debug::Pin2::low();
