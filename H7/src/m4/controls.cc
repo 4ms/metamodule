@@ -113,15 +113,14 @@ void Controls::start()
 	// 		return;
 	// 	}
 	// });
-	HWSemaphoreGlobalHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
+	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
 		_buffer_full = false;
 		cur_params = &param_blocks[0][0];
 	});
-	HWSemaphoreGlobalHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
+	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
 		_buffer_full = false;
 		cur_params = &param_blocks[1][0];
 	});
-	HWSemaphoreGlobalHandler::enable_global_ISR(0, 0);
 	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 

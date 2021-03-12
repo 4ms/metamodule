@@ -72,6 +72,7 @@ void main()
 	SharedBus::i2c.deinit();
 
 	ui.start();
+	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufferLocation);

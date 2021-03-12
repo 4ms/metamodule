@@ -8,6 +8,7 @@
 #include "drivers/i2c.hh"
 #include "drivers/interrupt.hh"
 #include "leds.hh"
+#include "m7/hsem_handler.hh"
 #include "params.hh"
 #include "patchlist.hh"
 #include "screen.hh"
@@ -65,10 +66,7 @@ public:
 		// led_update_task.init(led_update_animation_task_conf, [this]() { leds.update_animation(); });
 		// led_update_task.start();
 
-		InterruptManager::registerISR(HSEM1_IRQn, 2, 1, [&]() {
-			HWSemaphore<LEDFrameBufLock>::clear_ISR();
-			update_led_states();
-		});
+		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() { update_led_states(); });
 
 		HWSemaphore<LEDFrameBufLock>::enable_channel_ISR();
 	}

@@ -8,6 +8,7 @@
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
 #include "m4/system_clocks.hh"
+#include "m4/hsem_handler.hh"
 #include "params.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
@@ -35,6 +36,7 @@ void main(void)
 
 	led_driver.start_it_mode();
 	controls.start();
+	HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
 
 	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
 
