@@ -77,7 +77,7 @@ void main()
 	SharedMemory::write_address_of(StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufferLocation);
 	SCB_CleanDCache();
 
-	HWSemaphore<SharedBusLock>::disable_ISR();
+	HWSemaphore<SharedBusLock>::disable_channel_ISR();
 	HWSemaphore<SharedBusLock>::unlock();
 
 	audio.start();

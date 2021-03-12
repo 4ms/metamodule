@@ -95,9 +95,9 @@ void Controls::start()
 	cvadc.start();
 
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
-	HWSemaphore<ParamsBuf1Lock>::disable_ISR();
+	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
-	HWSemaphore<ParamsBuf2Lock>::disable_ISR();
+	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	InterruptManager::registerISR(HSEM2_IRQn, 0, 0, [&]() {
 		if (HWSemaphore<ParamsBuf1Lock>::is_ISR_triggered_and_enabled()) {
 			_buffer_full = false;
@@ -112,8 +112,8 @@ void Controls::start()
 			return;
 		}
 	});
-	HWSemaphore<ParamsBuf1Lock>::enable_ISR();
-	HWSemaphore<ParamsBuf2Lock>::enable_ISR();
+	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
+	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();
 	read_cvadc_task.start();

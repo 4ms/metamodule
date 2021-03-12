@@ -70,7 +70,7 @@ public:
 			update_led_states();
 		});
 
-		HWSemaphore<LEDFrameBufLock>::enable_ISR();
+		HWSemaphore<LEDFrameBufLock>::enable_channel_ISR();
 	}
 
 	uint32_t last_screen_update = 0;
