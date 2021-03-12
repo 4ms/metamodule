@@ -7,6 +7,7 @@
 #include "drivers/hsem.hh"
 #include "drivers/i2c.hh"
 #include "drivers/interrupt.hh"
+#include "drivers/memory_transfer.hh"
 #include "leds.hh"
 #include "m7/hsem_handler.hh"
 #include "params.hh"
@@ -24,6 +25,8 @@ public:
 	PatchList &patch_list;
 	LedFrame<AnimationUpdateRate> &leds;
 	ScreenWithFrameBuffer screen;
+	DmaSpiScreenDriver<MMScreenConf> screen_dma;
+	// MemoryTransfer memxfer;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
@@ -37,7 +40,7 @@ public:
 	{}
 
 	Color bgcolor = Colors::pink;
-	Color patch_fgcolor = Colors::green;
+	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::cyan;
 	Color pots_fgcolor = Colors::green;
 
@@ -49,10 +52,20 @@ public:
 		draw_patch_name();
 		draw_audio_load();
 
-		Debug::Pin2::high();
 		SCB_CleanDCache_by_Addr((uint32_t *)&screen.framebuf, sizeof(ScreenConfT::FrameBufferT));
-		screen.transfer_buffer_to_screen();
+		// screen.transfer_buffer_to_screen();
+		screen.set_pos(0, 0, 240, 240);
+		screen_dma.init_dma();
+		Debug::Pin2::high();
+		screen_dma.start_dma_transfer(0x38000100, sizeof(ScreenConfT::FrameBufferT) / 2);
 		Debug::Pin2::low();
+
+		// memxfer.registerCallback([&]() {
+		// 	Debug::Pin2::low();
+		// 	screen_dma.start_dma_transfer(0x38000100, sizeof(ScreenConfT::FrameBufferT) / 2);
+		// });
+		// memxfer.config_transfer((void *)0x38000100, (void *)&screen.framebuf, sizeof(ScreenConfT::FrameBufferT) / 2);
+		// memxfer.start_transfer();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -85,7 +98,6 @@ public:
 			patch_list.should_redraw_patch = false;
 			draw_patch_name();
 		}
-		// send frame buffer
 	}
 
 private:

@@ -23,6 +23,14 @@ struct MMScreenConf : DefaultSpiScreenConf {
 
 		static constexpr bool pulse_hardware_ss = true;
 	};
+		struct BDMAConf : BDMA_Conf {
+			static constexpr unsigned StreamNum = 2;
+			static constexpr unsigned RequestNum = BDMA_REQUEST_SPI6_TX;
+			static constexpr IRQn_Type IRQn = BDMA_Channel2_IRQn;
+			static constexpr uint32_t pri = 2;
+			static constexpr uint32_t subpri = 2;
+		};
+
 	using DCPin = FPin<GPIO::A, 6, PinMode::Output>;
 
 	static constexpr uint32_t width = 240;

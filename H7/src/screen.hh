@@ -138,6 +138,7 @@ protected:
 	int _width;
 	int _height;
 
+public:
 	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
 	{
 		Xstart += _xstart;
