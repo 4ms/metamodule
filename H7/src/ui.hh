@@ -54,11 +54,19 @@ public:
 
 		SCB_CleanDCache_by_Addr((uint32_t *)&screen.framebuf, sizeof(ScreenConfT::FrameBufferT));
 		// screen.transfer_buffer_to_screen();
-		screen.set_pos(0, 0, 240, 240);
-		screen_dma.init_dma();
+		screen.set_pos(0, 0, 120, 120);
+
 		Debug::Pin2::high();
-		screen_dma.start_dma_transfer(0x38000100, sizeof(ScreenConfT::FrameBufferT) / 2);
-		Debug::Pin2::low();
+		screen_dma.init_mdma([&]() {
+			Debug::Pin2::low();
+			// Debug::Pin3::high();
+			// screen_dma.init_mdma([&]() { Debug::Pin3::low(); });
+			// screen_dma.start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
+			// 							  sizeof(ScreenConfT::FrameBufferT) / 2);
+		});
+
+		screen_dma.start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
+		// Debug::Pin2::low();
 
 		// memxfer.registerCallback([&]() {
 		// 	Debug::Pin2::low();
@@ -92,12 +100,14 @@ public:
 			last_screen_update = now;
 			draw_audio_load();
 			draw_pot_values();
-		}
-
 		if (patch_list.should_redraw_patch) {
 			patch_list.should_redraw_patch = false;
 			draw_patch_name();
 		}
+		Debug::Pin2::high();
+		screen_dma.start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
+		}
+
 	}
 
 private:
