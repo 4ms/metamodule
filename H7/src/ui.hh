@@ -61,16 +61,6 @@ public:
 
 		screen_writer.init();
 		screen_writer.transfer_buffer_to_screen();
-		// Debug::Pin2::high();
-		// screen_dma.init_mdma([&]() {
-		// 	Debug::Pin2::low();
-		// 	// Debug::Pin3::high();
-		// 	// screen_dma.init_mdma([&]() { Debug::Pin3::low(); });
-		// 	// screen_dma.start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
-		// 	// 							  sizeof(ScreenConfT::FrameBufferT) / 2);
-		// });
-
-		// screen_dma.start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);

@@ -208,8 +208,9 @@ public:
 
 	void init()
 	{
-		set_rotation(1); // ScreenConfT::rotation
+		DmaSpiScreenDriver<ScreenConfT>::init();
 		init_display(generic_st7789);
+		set_rotation(1); // ScreenConfT::rotation
 	}
 
 	void set_rotation(uint8_t m)
@@ -265,15 +266,17 @@ public:
 
 	void transfer_buffer_to_screen()
 	{
-		SCB_CleanDCache_by_Addr((uint32_t *)framebuf, sizeof(ScreenConfT::FrameBufferT));
-		Debug::Pin2::high();
+		set_pos(0, 0, 240, 119);
+		SCB_CleanDCache_by_Addr((uint32_t *)0x24000000 /*(uint32_t *)framebuf*/, sizeof(ScreenConfT::FrameBufferT));
+		Debug::Pin1::high();
 
 		init_mdma([&]() {
-			Debug::Pin2::low();
-			// Debug::Pin3::high();
-			// screen_dma.init_mdma([&]() { Debug::Pin3::low(); });
-			// screen_dma.start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
-			// 							  sizeof(ScreenConfT::FrameBufferT) / 2);
+			Debug::Pin1::low();
+			// set_pos(0, 120, 240, 240);
+			// Debug::Pin2::high();
+			// init_mdma([&]() { Debug::Pin2::low(); });
+			// start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
+			// 				   sizeof(ScreenConfT::FrameBufferT) / 2);
 		});
 
 		start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
