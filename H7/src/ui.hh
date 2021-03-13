@@ -24,19 +24,19 @@ public:
 	Params &params;
 	PatchList &patch_list;
 	LedFrame<AnimationUpdateRate> &leds;
-	ScreenWithFrameBuffer screen;
-	DmaSpiScreenDriver<MMScreenConf> screen_dma;
-	// MemoryTransfer memxfer;
+	ScreenFrameBuffer screen;
+	ScreenFrameWriter screen_writer;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, PatchList &pl, LedFrame<AnimationUpdateRate> l, MMScreenConf::FrameBufferT &screenbuf)
+	Ui(Params &p, PatchList &pl, LedFrame<AnimationUpdateRate> l, MMScreenConf::FrameBufferT &screenbuf, MMScreenConf::FrameBufferT *screen_writer_buf)
 		: params{p}
 		, patch_list{pl}
 		, leds{l}
 		, screen{screenbuf}
+		, screen_writer{screen_writer_buf}
 	{}
 
 	Color bgcolor = Colors::pink;
@@ -46,6 +46,7 @@ public:
 
 	void start()
 	{
+		HWSemaphore<ScreenFrameBuf1Lock>::lock();
 		screen.init();
 
 		screen.fill(bgcolor);
@@ -53,27 +54,18 @@ public:
 		draw_audio_load();
 
 		SCB_CleanDCache_by_Addr((uint32_t *)&screen.framebuf, sizeof(ScreenConfT::FrameBufferT));
-		// screen.transfer_buffer_to_screen();
-		screen.set_pos(0, 0, 120, 120);
+		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
 
-		Debug::Pin2::high();
-		screen_dma.init_mdma([&]() {
-			Debug::Pin2::low();
-			// Debug::Pin3::high();
-			// screen_dma.init_mdma([&]() { Debug::Pin3::low(); });
-			// screen_dma.start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
-			// 							  sizeof(ScreenConfT::FrameBufferT) / 2);
-		});
-
-		screen_dma.start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
-		// Debug::Pin2::low();
-
-		// memxfer.registerCallback([&]() {
+		// Debug::Pin2::high();
+		// screen_dma.init_mdma([&]() {
 		// 	Debug::Pin2::low();
-		// 	screen_dma.start_dma_transfer(0x38000100, sizeof(ScreenConfT::FrameBufferT) / 2);
+		// 	// Debug::Pin3::high();
+		// 	// screen_dma.init_mdma([&]() { Debug::Pin3::low(); });
+		// 	// screen_dma.start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
+		// 	// 							  sizeof(ScreenConfT::FrameBufferT) / 2);
 		// });
-		// memxfer.config_transfer((void *)0x38000100, (void *)&screen.framebuf, sizeof(ScreenConfT::FrameBufferT) / 2);
-		// memxfer.start_transfer();
+
+		// screen_dma.start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -100,14 +92,13 @@ public:
 			last_screen_update = now;
 			draw_audio_load();
 			draw_pot_values();
-		if (patch_list.should_redraw_patch) {
-			patch_list.should_redraw_patch = false;
-			draw_patch_name();
+			if (patch_list.should_redraw_patch) {
+				patch_list.should_redraw_patch = false;
+				draw_patch_name();
+			}
+			// Debug::Pin2::high();
+			// screen_dma.start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
 		}
-		Debug::Pin2::high();
-		screen_dma.start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
-		}
-
 	}
 
 private:

@@ -67,7 +67,7 @@ void main()
 	AudioStream audio{
 		patch_list, _hw.codec, _hw.dac, StaticBuffers::param_blocks, last_params, StaticBuffers::audio_dma_block};
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, StaticBuffers::screen_framebuf};
+	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, StaticBuffers::screen_framebuf, &StaticBuffers::screen_framebuf};
 
 	SharedBus::i2c.deinit();
 
