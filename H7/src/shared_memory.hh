@@ -22,4 +22,5 @@ struct SharedMemory {
 
 	static constexpr uint32_t ParamsPtrLocation = 0;
 	static constexpr uint32_t LEDFrameBufferLocation = 1;
+	static constexpr uint32_t ScreenFrameBufferLocation = 2;
 };
