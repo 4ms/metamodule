@@ -31,7 +31,11 @@ public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, PatchList &pl, LedFrame<AnimationUpdateRate> l, MMScreenConf::FrameBufferT &screenbuf, MMScreenConf::FrameBufferT *screen_writer_buf)
+	Ui(Params &p,
+	   PatchList &pl,
+	   LedFrame<AnimationUpdateRate> l,
+	   MMScreenConf::FrameBufferT &screenbuf,
+	   MMScreenConf::FrameBufferT *screen_writer_buf)
 		: params{p}
 		, patch_list{pl}
 		, leds{l}
@@ -46,16 +50,17 @@ public:
 
 	void start()
 	{
-		HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		// HWSemaphore<ScreenFrameBuf1Lock>::lock();
 		screen.init();
 
 		screen.fill(bgcolor);
 		draw_patch_name();
 		draw_audio_load();
 
-		SCB_CleanDCache_by_Addr((uint32_t *)&screen.framebuf, sizeof(ScreenConfT::FrameBufferT));
-		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
+		// HWSemaphore<ScreenFrameBuf1Lock>::unlock();
 
+		screen_writer.init();
+		screen_writer.transfer_buffer_to_screen();
 		// Debug::Pin2::high();
 		// screen_dma.init_mdma([&]() {
 		// 	Debug::Pin2::low();

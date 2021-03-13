@@ -196,7 +196,7 @@ struct Screen : public ScreenGFXAdaptor {
 //////////////////////////////////////////
 
 // template <typename ScreenConfT>
-class ScreenFrameWriter : public SpiScreenDriver<ScreenConfT> {
+class ScreenFrameWriter : public DmaSpiScreenDriver<ScreenConfT> {
 	ScreenConfT::FrameBufferT *framebuf;
 
 public:
@@ -248,18 +248,35 @@ public:
 				_width = ScreenConfT::height;
 				break;
 		}
-		transmit<Cmd>(ST77XX::MADCTL);
-		transmit<Data>(madctl);
+		transmit_blocking<Cmd>(ST77XX::MADCTL);
+		transmit_blocking<Data>(madctl);
 	}
+
+	// void transfer_buffer_to_screen_blocking()
+	// {
+	// 	SCB_CleanDCache_by_Addr((uint32_t *)framebuf, sizeof(ScreenConfT::FrameBufferT));
+	// 	set_pos(0, 0, _width, _height);
+	// 	begin_open_data_transmission(4);
+	// 	for (int i = 0; i < (_width * _height); i += 2) {
+	// 		transmit_open_data32((*framebuf)[i], (*framebuf)[i + 1]);
+	// 	}
+	// 	end_open_data_transmission();
+	// }
 
 	void transfer_buffer_to_screen()
 	{
-		set_pos(0, 0, _width, _height);
-		begin_open_data_transmission(4);
-		for (int i = 0; i < (_width * _height); i += 2) {
-			transmit_open_data32((*framebuf)[i], (*framebuf)[i + 1]);
-		}
-		end_open_data_transmission();
+		SCB_CleanDCache_by_Addr((uint32_t *)framebuf, sizeof(ScreenConfT::FrameBufferT));
+		Debug::Pin2::high();
+
+		init_mdma([&]() {
+			Debug::Pin2::low();
+			// Debug::Pin3::high();
+			// screen_dma.init_mdma([&]() { Debug::Pin3::low(); });
+			// screen_dma.start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
+			// 							  sizeof(ScreenConfT::FrameBufferT) / 2);
+		});
+
+		start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
 	}
 
 protected:
@@ -277,16 +294,17 @@ protected:
 		Ystart += _ystart;
 		Xend += _xstart;
 		Yend += _ystart;
-		transmit<Cmd>(ST77XX::CASET);
-		transmit_data_32(Xstart, Xend);
+		transmit_blocking<Cmd>(ST77XX::CASET);
+		transmit_blocking<Data>(Xstart, Xend);
 
-		transmit<Cmd>(ST77XX::RASET);
-		transmit_data_32(Ystart, Yend);
+		transmit_blocking<Cmd>(ST77XX::RASET);
+		transmit_blocking<Data>(Ystart, Yend);
 
-		transmit<Cmd>(ST77XX::RAMWR);
+		transmit_blocking<Cmd>(ST77XX::RAMWR);
 	}
 
 	// Todo re-write as just a sequence of commands with delays
+	// Make a fake transmit_blocking<>(uint8_t) and fake HAL_Delay() to record results
 	void init_display(const uint8_t *addr)
 	{
 		uint8_t numCommands, cmd, numArgs;
@@ -298,9 +316,9 @@ protected:
 			numArgs = *addr++;					 // Number of args to follow
 			ms = numArgs & ST77XX::ST_CMD_DELAY; // If hibit set, delay follows args
 			numArgs &= ~ST77XX::ST_CMD_DELAY;	 // Mask out delay bit
-			transmit<Cmd>(cmd);
+			transmit_blocking<Cmd>(cmd);
 			while (numArgs--) {
-				transmit<Data>(*addr++);
+				transmit_blocking<Data>(*addr++);
 			}
 
 			if (ms) {
