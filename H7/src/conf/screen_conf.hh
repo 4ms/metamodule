@@ -15,7 +15,7 @@ struct MMScreenConf : DefaultSpiScreenConf {
 		static constexpr PinNoInit CIPO = {GPIO::A, 0};
 		static constexpr PinNoInit CS0 = {GPIO::A, 4, LL_GPIO_AF_8};
 		static constexpr bool use_hardware_ss = true;
-		static constexpr uint16_t clock_division = 1;
+		static constexpr uint16_t clock_division = 4;
 		static constexpr uint16_t data_size = 8;
 		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
 		static constexpr uint8_t FifoThreshold = 1;
@@ -23,13 +23,13 @@ struct MMScreenConf : DefaultSpiScreenConf {
 
 		static constexpr bool pulse_hardware_ss = true;
 	};
-		struct BDMAConf : BDMA_Conf {
-			static constexpr unsigned StreamNum = 2;
-			static constexpr unsigned RequestNum = BDMA_REQUEST_SPI6_TX;
-			static constexpr IRQn_Type IRQn = BDMA_Channel2_IRQn;
-			static constexpr uint32_t pri = 2;
-			static constexpr uint32_t subpri = 2;
-		};
+	struct BDMAConf : BDMA_Conf {
+		static constexpr unsigned StreamNum = 2;
+		static constexpr unsigned RequestNum = BDMA_REQUEST_SPI6_TX;
+		static constexpr IRQn_Type IRQn = BDMA_Channel2_IRQn;
+		static constexpr uint32_t pri = 2;
+		static constexpr uint32_t subpri = 2;
+	};
 
 	using DCPin = FPin<GPIO::A, 6, PinMode::Output>;
 
