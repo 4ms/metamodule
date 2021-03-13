@@ -192,14 +192,154 @@ struct Screen : public ScreenGFXAdaptor {
 	}
 };
 
+/////////////////////////////////////////
+//////////////////////////////////////////
+
 // template <typename ScreenConfT>
-struct ScreenWithFrameBuffer : public ScreenGFXAdaptor {
+class ScreenFrameWriter : public SpiScreenDriver<ScreenConfT> {
+	ScreenConfT::FrameBufferT *framebuf;
+
+public:
+	ScreenFrameWriter(ScreenConfT::FrameBufferT *framebuf_)
+		: framebuf{framebuf_}
+		, _rowstart{ScreenConfT::rowstart}
+		, _colstart{ScreenConfT::colstart}
+	{}
+
+	void init()
+	{
+		set_rotation(1); // ScreenConfT::rotation
+		init_display(generic_st7789);
+	}
+
+	void set_rotation(uint8_t m)
+	{
+		uint8_t madctl = 0;
+
+		_rotation = m & 3;
+
+		switch (_rotation) {
+			case 0:
+				madctl = ST77XX::MADCTL_MX | ST77XX::MADCTL_MY | ST77XX::MADCTL_RGB;
+				_xstart = _colstart;
+				_ystart = _rowstart;
+				_width = ScreenConfT::width;
+				_height = ScreenConfT::height;
+				break;
+			case 1:
+				madctl = ST77XX::MADCTL_MY | ST77XX::MADCTL_MV | ST77XX::MADCTL_RGB;
+				_xstart = _rowstart;
+				_ystart = _colstart;
+				_height = ScreenConfT::width;
+				_width = ScreenConfT::height;
+				break;
+			case 2:
+				madctl = ST77XX::MADCTL_RGB;
+				_xstart = 0;
+				_ystart = 0;
+				_width = ScreenConfT::width;
+				_height = ScreenConfT::height;
+				break;
+			case 3:
+				madctl = ST77XX::MADCTL_MX | ST77XX::MADCTL_MV | ST77XX::MADCTL_RGB;
+				_xstart = 0;
+				_ystart = 0;
+				_height = ScreenConfT::width;
+				_width = ScreenConfT::height;
+				break;
+		}
+		transmit<Cmd>(ST77XX::MADCTL);
+		transmit<Data>(madctl);
+	}
+
+	void transfer_buffer_to_screen()
+	{
+		set_pos(0, 0, _width, _height);
+		begin_open_data_transmission(4);
+		for (int i = 0; i < (_width * _height); i += 2) {
+			transmit_open_data32((*framebuf)[i], (*framebuf)[i + 1]);
+		}
+		end_open_data_transmission();
+	}
+
+protected:
+	const int _colstart;
+	const int _rowstart;
+	int _rotation;
+	int _xstart;
+	int _ystart;
+	int _width;
+	int _height;
+
+	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
+	{
+		Xstart += _xstart;
+		Ystart += _ystart;
+		Xend += _xstart;
+		Yend += _ystart;
+		transmit<Cmd>(ST77XX::CASET);
+		transmit_data_32(Xstart, Xend);
+
+		transmit<Cmd>(ST77XX::RASET);
+		transmit_data_32(Ystart, Yend);
+
+		transmit<Cmd>(ST77XX::RAMWR);
+	}
+
+	// Todo re-write as just a sequence of commands with delays
+	void init_display(const uint8_t *addr)
+	{
+		uint8_t numCommands, cmd, numArgs;
+		uint16_t ms;
+
+		numCommands = *addr++;					 // Number of commands to follow
+		while (numCommands--) {					 // For each command...
+			cmd = *addr++;						 // Read command
+			numArgs = *addr++;					 // Number of args to follow
+			ms = numArgs & ST77XX::ST_CMD_DELAY; // If hibit set, delay follows args
+			numArgs &= ~ST77XX::ST_CMD_DELAY;	 // Mask out delay bit
+			transmit<Cmd>(cmd);
+			while (numArgs--) {
+				transmit<Data>(*addr++);
+			}
+
+			if (ms) {
+				ms = *addr++; // Read post-command delay time (ms)
+				if (ms == 255)
+					ms = 500; // If 255, delay for 500 ms
+				HAL_Delay(ms);
+			}
+		}
+	}
+};
+
+// template <typename ScreenConfT>
+class ScreenFrameBuffer : public Adafruit_GFX {
 
 	ScreenConfT::FrameBufferT &framebuf;
 
-	ScreenWithFrameBuffer(ScreenConfT::FrameBufferT &framebuf_)
-		: framebuf{framebuf_}
+public:
+	ScreenFrameBuffer(ScreenConfT::FrameBufferT &framebuf_)
+		: Adafruit_GFX{ScreenConfT::width, ScreenConfT::height}
+		, framebuf{framebuf_}
 	{}
+
+	void init()
+	{
+		set_rotation(1); // ScreenConfT::rotation
+	}
+
+	void set_rotation(uint8_t m)
+	{
+		_rotation = m & 0b11;
+		if (_rotation & 0b01) {
+			_width = ScreenConfT::width;
+			_height = ScreenConfT::height;
+		} else {
+			_width = ScreenConfT::height;
+			_height = ScreenConfT::width;
+		}
+	}
 
 	virtual void startWrite() override {}
 
@@ -218,9 +358,9 @@ struct ScreenWithFrameBuffer : public ScreenGFXAdaptor {
 
 		// Use DMA2D ?
 		for (int xi = x; xi < (x + w); xi++) {
-		for (int yi = y; yi < (y + h); yi++) {
-			framebuf[xi + yi * ScreenConfT::width] = color;
-		}
+			for (int yi = y; yi < (y + h); yi++) {
+				framebuf[xi + yi * ScreenConfT::width] = color;
+			}
 		}
 	}
 
@@ -255,13 +395,8 @@ struct ScreenWithFrameBuffer : public ScreenGFXAdaptor {
 		fillRect(x, y, w, h, c.Rgb565());
 	}
 
-	void transfer_buffer_to_screen()
-	{
-		set_pos(0, 0, _width, _height);
-		begin_open_data_transmission(4);
-		for (int i = 0; i < (_width * _height); i += 2) {
-			transmit_open_data32(framebuf[i], framebuf[i + 1]);
-		}
-		end_open_data_transmission();
-	}
+protected:
+	int _rotation;
+	int _width;
+	int _height;
 };
