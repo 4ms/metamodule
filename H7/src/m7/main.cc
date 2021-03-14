@@ -18,7 +18,7 @@
 #include "drivers/system.hh"
 #include "m7/system_clocks.hh"
 #include "muxed_adc.hh"
-#include "screen.hh"
+// #include "screen.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "ui.hh"
