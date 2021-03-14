@@ -279,6 +279,13 @@ public:
 			// 				   sizeof(ScreenConfT::FrameBufferT) / 2);
 		});
 
+		uint16_t *addr = (uint16_t *)(0x24000000);
+		for (int i = 0; i < (_width * _height / 2); i += 2) {
+			// uint16_t val1 = *addr++;
+			// uint16_t val2 = *addr++;
+			// transmit_blocking<Data>(val1, val2);
+			transmit_blocking<Data>(0xF800, 0xF800);
+		}
 		start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
 	}
 
