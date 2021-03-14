@@ -61,8 +61,8 @@ public:
 				_width = ScreenConfT::width;
 				break;
 		}
-		transmit<Cmd>(ST77XX::MADCTL);
-		transmit<Data>(madctl);
+		transmit_blocking<Cmd>(ST77XX::MADCTL);
+		transmit_blocking<Data>(madctl);
 	}
 
 	virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override
@@ -77,7 +77,7 @@ public:
 
 		set_pos(x, y, x + w - 1, y + h - 1);
 		for (int i = 0; i <= ((w) * (h)); i += 1) {
-			transmit_data_32(color, color);
+			transmit_blocking<Data>(color, color);
 		}
 		// set_pos(x, y, x + w - 1, y + h - 1);
 		// begin_open_data_transmission(4);
@@ -105,13 +105,13 @@ public:
 		Ystart += _ystart;
 		Xend += _xstart;
 		Yend += _ystart;
-		transmit<Cmd>(ST77XX::CASET);
-		transmit_data_32(Xstart, Xend);
+		transmit_blocking<Cmd>(ST77XX::CASET);
+		transmit_blocking<Data>(Xstart, Xend);
 
-		transmit<Cmd>(ST77XX::RASET);
-		transmit_data_32(Ystart, Yend);
+		transmit_blocking<Cmd>(ST77XX::RASET);
+		transmit_blocking<Data>(Ystart, Yend);
 
-		transmit<Cmd>(ST77XX::RAMWR);
+		transmit_blocking<Cmd>(ST77XX::RAMWR);
 	}
 
 	// Todo re-write as just a sequence of commands with delays
@@ -126,9 +126,9 @@ public:
 			numArgs = *addr++;					 // Number of args to follow
 			ms = numArgs & ST77XX::ST_CMD_DELAY; // If hibit set, delay follows args
 			numArgs &= ~ST77XX::ST_CMD_DELAY;	 // Mask out delay bit
-			transmit<Cmd>(cmd);
+			transmit_blocking<Cmd>(cmd);
 			while (numArgs--) {
-				transmit<Data>(*addr++);
+				transmit_blocking<Data>(*addr++);
 			}
 
 			if (ms) {

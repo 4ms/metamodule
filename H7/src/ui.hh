@@ -44,7 +44,7 @@ public:
 				  // , screen_writer{screen_writer_buf}
 	{}
 
-	Color bgcolor = Colors::blue;
+	Color bgcolor = Colors::green;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::cyan;
 	Color pots_fgcolor = Colors::green;
