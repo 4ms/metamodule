@@ -266,7 +266,7 @@ public:
 
 	void transfer_buffer_to_screen()
 	{
-		set_pos(0, 0, 240, 119);
+		set_pos(0, 0, 239, 119);
 		SCB_CleanDCache_by_Addr((uint32_t *)0x24000000 /*(uint32_t *)framebuf*/, sizeof(ScreenConfT::FrameBufferT));
 		Debug::Pin1::high();
 
@@ -279,7 +279,7 @@ public:
 			// 				   sizeof(ScreenConfT::FrameBufferT) / 2);
 		});
 
-		uint16_t *addr = (uint16_t *)(0x24000000);
+		// uint16_t *addr = (uint16_t *)(0x24000000);
 		for (int i = 0; i < (_width * _height / 2); i += 2) {
 			// uint16_t val1 = *addr++;
 			// uint16_t val2 = *addr++;
