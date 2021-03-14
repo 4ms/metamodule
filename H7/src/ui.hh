@@ -12,8 +12,8 @@
 #include "m7/hsem_handler.hh"
 #include "params.hh"
 #include "patchlist.hh"
-// #include "screen.hh"
-#include "screen2.hh"
+#include "screen.hh"
+// #include "screen2.hh"
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
 
@@ -25,9 +25,9 @@ public:
 	Params &params;
 	PatchList &patch_list;
 	LedFrame<AnimationUpdateRate> &leds;
-	Screen screen;
+	// Screen screen;
 	// ScreenFrameBuffer screen;
-	// ScreenFrameWriter screen_writer;
+	ScreenFrameWriter screen_writer;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
@@ -41,27 +41,26 @@ public:
 		: params{p}
 		, patch_list{pl}
 		, leds{l} // , screen{screenbuf}
-				  // , screen_writer{screen_writer_buf}
+				  , screen_writer{screen_writer_buf}
 	{}
 
-	Color bgcolor = Colors::green;
+	Color bgcolor = Colors::pink;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::cyan;
 	Color pots_fgcolor = Colors::green;
 
 	void start()
 	{
-		// HWSemaphore<ScreenFrameBuf1Lock>::lock();
-		screen.init();
-
-		screen.fill(bgcolor);
+		// // HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		// screen.init();
+		// screen.fill(bgcolor);
 		// draw_patch_name();
 		// draw_audio_load();
 
 		// // HWSemaphore<ScreenFrameBuf1Lock>::unlock();
 
-		// screen_writer.init();
-		// screen_writer.transfer_buffer_to_screen();
+		screen_writer.init();
+		screen_writer.transfer_buffer_to_screen();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
