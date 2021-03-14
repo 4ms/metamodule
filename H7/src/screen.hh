@@ -204,12 +204,11 @@ public:
 		: framebuf{framebuf_}
 		, _rowstart{ScreenConfT::rowstart}
 		, _colstart{ScreenConfT::colstart}
-	{
-		// DmaSpiScreenDriver<ScreenConfT>::init();
-	}
+	{}
 
 	void init()
 	{
+		DmaSpiScreenDriver<ScreenConfT>::init();
 		init_display(generic_st7789);
 		set_rotation(1); // ScreenConfT::rotation
 	}
@@ -267,7 +266,7 @@ public:
 
 	void transfer_buffer_to_screen()
 	{
-		set_pos(0, 0, _width - 1, (_height/2) - 1);
+		set_pos(0, 0, _width - 1, (_height / 2) - 1);
 		// SCB_CleanDCache_by_Addr((uint32_t *)0x24000000 /*(uint32_t *)framebuf*/, sizeof(ScreenConfT::FrameBufferT));
 		// Debug::Pin1::high();
 
@@ -285,7 +284,7 @@ public:
 			// uint16_t val1 = *addr++;
 			// uint16_t val2 = *addr++;
 			// transmit_blocking<Data>(val1, val2);
-			transmit_blocking<Data>(0x09DF, 0x09DF);
+			transmit_blocking<Data>(0xF9DF, 0xF9DF);
 		}
 		// start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
 	}
