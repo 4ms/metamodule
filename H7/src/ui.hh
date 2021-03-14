@@ -26,7 +26,7 @@ public:
 	PatchList &patch_list;
 	LedFrame<AnimationUpdateRate> &leds;
 	// Screen screen;
-	// ScreenFrameBuffer screen;
+	ScreenFrameBuffer screen;
 	ScreenFrameWriter screen_writer;
 
 public:
@@ -40,8 +40,9 @@ public:
 	   MMScreenConf::FrameBufferT *screen_writer_buf)
 		: params{p}
 		, patch_list{pl}
-		, leds{l} // , screen{screenbuf}
-				  , screen_writer{screen_writer_buf}
+		, leds{l}
+		, screen{screenbuf}
+		, screen_writer{screen_writer_buf}
 	{}
 
 	Color bgcolor = Colors::pink;
@@ -52,10 +53,10 @@ public:
 	void start()
 	{
 		// // HWSemaphore<ScreenFrameBuf1Lock>::lock();
-		// screen.init();
-		// screen.fill(bgcolor);
-		// draw_patch_name();
-		// draw_audio_load();
+		screen.init();
+		screen.fill(bgcolor);
+		draw_patch_name();
+		draw_audio_load();
 
 		// // HWSemaphore<ScreenFrameBuf1Lock>::unlock();
 
@@ -126,71 +127,71 @@ private:
 
 	void draw_patch_name()
 	{
-		// // Debug::Pin2::high();
-		// screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
-		// // Debug::Pin2::low();
-		// screen.setFont(&FreeSansBold18pt7b);
-		// screen.setTextColor(patch_fgcolor.Rgb565());
-		// screen.setTextSize(1);
-		// uint32_t y = 60;
-		// for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
-		// 	screen.setCursor(10, y);
-		// 	// Debug::Pin2::high();
-		// 	screen.print(patch_list.cur_patch().modules_used[i].name);
-		// 	// Debug::Pin2::low();
-		// 	y += 35;
-		// }
+		// Debug::Pin2::high();
+		screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
+		// Debug::Pin2::low();
+		screen.setFont(&FreeSansBold18pt7b);
+		screen.setTextColor(patch_fgcolor.Rgb565());
+		screen.setTextSize(1);
+		uint32_t y = 60;
+		for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
+			screen.setCursor(10, y);
+			// Debug::Pin2::high();
+			screen.print(patch_list.cur_patch().modules_used[i].name);
+			// Debug::Pin2::low();
+			y += 35;
+		}
 	}
 
 	void draw_audio_load()
 	{
-		// screen.setTextColor(load_fgcolor.Rgb565(), bgcolor.Rgb565());
-		// screen.setTextSize(2);
-		// screen.setFont(NULL);
-		// screen.setCursor(0, 10);
-		// screen.print(patch_list.audio_load, 10);
-		// screen.print("% ");
-		// screen.print(get_heap_size() / 1024, 10);
-		// screen.print("kb ");
-		// screen.print(BigAlloc<Ui>::get_memory_usage() / 1024, 10);
-		// screen.print("kb   ");
+		screen.setTextColor(load_fgcolor.Rgb565(), bgcolor.Rgb565());
+		screen.setTextSize(2);
+		screen.setFont(NULL);
+		screen.setCursor(0, 10);
+		screen.print(patch_list.audio_load, 10);
+		screen.print("% ");
+		screen.print(get_heap_size() / 1024, 10);
+		screen.print("kb ");
+		screen.print(BigAlloc<Ui>::get_memory_usage() / 1024, 10);
+		screen.print("kb   ");
 	}
 
 	void draw_pot_values()
 	{
 		// Debug::Pin2::high();
-		// screen.setTextColor(pots_fgcolor.Rgb565(), bgcolor.Rgb565());
-		// screen.setTextSize(2);
-		// screen.setFont(NULL);
-		// int y = 180;
-		// for (int i = 0; i < 12; i++) {
-		// 	screen.setCursor((i & 0b11) * 60, y);
-		// 	if (i < 4)
-		// 		screen.print((uint16_t)(params.cvjacks[i] * 100));
-		// 	else
-		// 		screen.print((uint16_t)(params.knobs[i - 4] * 100));
+		screen.setTextColor(pots_fgcolor.Rgb565(), bgcolor.Rgb565());
+		screen.setTextSize(2);
+		screen.setFont(NULL);
+		int y = 180;
+		for (int i = 0; i < 12; i++) {
+			screen.setCursor((i & 0b11) * 60, y);
+			if (i < 4)
+				screen.print((uint16_t)(params.cvjacks[i] * 100));
+			else
+				screen.print((uint16_t)(params.knobs[i - 4] * 100));
 
-		// 	screen.print("  ");
-		// 	if (i == 3 || i == 7)
-		// 		y += 20;
-		// }
+			screen.print("  ");
+			if (i == 3 || i == 7)
+				y += 20;
+		}
 
 		// Debug::Pin2::low();
 	}
 	void draw_test_squares()
 	{
 		// Should see a 1-pixel border around the 4-square, and a 1-pixel gap between squares
-		// screen.fillRect(0, 0, 44, 44, Colors::purple.Rgb565());
-		// screen.fillRect(1, 1, 20, 20, Colors::red.Rgb565());
-		// screen.fillRect(1, 23, 20, 20, Colors::green.Rgb565());
-		// screen.fillRect(23, 1, 20, 20, Colors::orange.Rgb565());
-		// screen.fillRect(23, 23, 20, 20, Colors::grey.Rgb565());
+		screen.fillRect(0, 0, 44, 44, Colors::purple.Rgb565());
+		screen.fillRect(1, 1, 20, 20, Colors::red.Rgb565());
+		screen.fillRect(1, 23, 20, 20, Colors::green.Rgb565());
+		screen.fillRect(23, 1, 20, 20, Colors::orange.Rgb565());
+		screen.fillRect(23, 23, 20, 20, Colors::grey.Rgb565());
 
-		// screen.fillRect(196, 196, 44, 44, Colors::white.Rgb565());
-		// screen.fillRect(219, 219, 20, 20, Colors::yellow.Rgb565());
-		// screen.fillRect(197, 219, 20, 20, Colors::purple.Rgb565());
-		// screen.fillRect(197, 197, 20, 20, Colors::pink.Rgb565());
-		// screen.fillRect(219, 197, 20, 20, Colors::cyan.Rgb565());
+		screen.fillRect(196, 196, 44, 44, Colors::white.Rgb565());
+		screen.fillRect(219, 219, 20, 20, Colors::yellow.Rgb565());
+		screen.fillRect(197, 219, 20, 20, Colors::purple.Rgb565());
+		screen.fillRect(197, 197, 20, 20, Colors::pink.Rgb565());
+		screen.fillRect(219, 197, 20, 20, Colors::cyan.Rgb565());
 	}
 };
 } // namespace MetaModule
