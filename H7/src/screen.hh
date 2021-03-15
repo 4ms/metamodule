@@ -259,19 +259,17 @@ public:
 	{
 		Debug::Pin1::high();
 		set_pos(0, 0, _width - 1, _height - 1);
-		SCB_CleanDCache_by_Addr((uint32_t *)0x24000000 /*(uint32_t *)framebuf*/, sizeof(ScreenConfT::FrameBufferT));
+		SCB_CleanDCache_by_Addr((uint32_t *)framebuf, sizeof(ScreenConfT::FrameBufferT));
 
-		memcpy((void *)(0x38000000), (void *)(0x24000000), HalfFrameSize);
+		memcpy((void *)(0x38000000), (void *)(&framebuf[0]), HalfFrameSize);
 
 		config_bdma_transfer(0x38000000, HalfFrameSize);
 		start_bdma_transfer([&]() {
 			Debug::Pin1::low();
-			memcpy((void *)(0x38000000), (void *)(0x24000000 + HalfFrameSize), HalfFrameSize);
+			memcpy((void *)(0x38000000), (void *)((uint32_t)(&framebuf[0]) + HalfFrameSize), HalfFrameSize);
 			Debug::Pin2::high();
 			config_bdma_transfer(0x38000000, HalfFrameSize);
-			start_bdma_transfer([&]() { 
-					Debug::Pin2::low();
-			});
+			start_bdma_transfer([&]() { Debug::Pin2::low(); });
 		});
 
 		// init_mdma([&]() {

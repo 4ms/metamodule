@@ -29,6 +29,14 @@ struct MMScreenConf : DefaultSpiScreenConf {
 		static constexpr IRQn_Type IRQn = BDMA_Channel2_IRQn;
 		static constexpr uint32_t pri = 2;
 		static constexpr uint32_t subpri = 2;
+		static constexpr Direction dir = Mem2Periph;
+		static constexpr bool circular = false;
+		static constexpr TransferSize transfer_size_mem = Byte;
+		static constexpr TransferSize transfer_size_periph = Byte;
+		static constexpr uint8_t dma_priority = Low;
+		static constexpr bool mem_inc = true;
+		static constexpr bool periph_inc = false;
+		static constexpr bool half_transfer_interrupt_enable = false;
 	};
 
 	using DCPin = FPin<GPIO::A, 6, PinMode::Output>;
