@@ -16,6 +16,8 @@ private:
 	Envelope envelopes[4];
 	TwoOpFM osc;
 
+	float pitchMultiple = 1;
+
 	float gateIn = 0;
 	float drumOutput = 0;
 	float baseFrequency = 50;
@@ -45,13 +47,23 @@ private:
 	InterpArray<float, 4> toneBreakPoint = {0.1, 0.2, 0.8};
 	InterpArray<float, 3> toneReleaseTimes = {10, 500, 4000};
 
+	void setPitchMultiple()
+	{
+		if (pitchCV >= 0)
+			pitchMultiple = expTable.interp(constrain(pitchCV, 0.0f, 1.0f));
+		else {
+			float invertPitch = pitchCV * -1.0f;
+			pitchMultiple = 1.0f/expTable.interp(constrain(invertPitch, 0.0f, 1.0f));
+		}
+	}
+
 public:
 	virtual void update(void) override
 	{
 		auto freqCalc =
 			baseFrequency + (envelopes[pitchEnvelope].update(gateIn) * 4000.0f * (pitchAmount * pitchAmount));
 		if (pitchConnected) {
-			osc.set_frequency(freqCalc * expTable.interp(constrain(pitchCV, 0.0f, 1.0f)));
+			osc.set_frequency(freqCalc * pitchMultiple);
 		} else {
 			osc.set_frequency(freqCalc);
 		}
@@ -191,6 +203,7 @@ public:
 				break;
 			case 1:
 				pitchCV = val;
+				setPitchMultiple();
 				break;
 			case 2:
 				noiseEnvCV = val;
