@@ -266,18 +266,27 @@ public:
 
 	void transfer_buffer_to_screen()
 	{
-		set_pos(0, 0, _width - 1, (_height / 2) - 1);
+		set_pos(0, 0, _width - 1, _height  - 1);
 		SCB_CleanDCache_by_Addr((uint32_t *)0x24000000 /*(uint32_t *)framebuf*/, sizeof(ScreenConfT::FrameBufferT));
 
-		Debug::Pin1::high();
-		init_mdma([&]() {
-			Debug::Pin1::low();
-			// set_pos(0, 120, 240, 240);
-			// Debug::Pin2::high();
-			// init_mdma([&]() { Debug::Pin2::low(); });
-			// start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
-			// 				   sizeof(ScreenConfT::FrameBufferT) / 2);
-		});
+		memcpy((void *)(0x38000000), (void *)(0x24000000), sizeof(ScreenConfT::FrameBufferT) / 2);
+		// uint32_t *src_addr = (uint32_t *)(0x24000000);
+		// uint32_t *dst_addr = (uint32_t *)(0x38000000);
+		// for (int i = 0; i < (_width * _height); i += 4) {
+		// 	*dst_addr++ = *src_addr++;
+		// }
+		init_bdma([]() { Debug::Pin1::low(); });
+		start_bdma_transfer(0x38000000, sizeof(ScreenConfT::FrameBufferT) / 2);
+
+		// init_mdma([&]() {
+		// 	wait_until_ready();
+		// 	// Debug::Pin1::low();
+		// 	// set_pos(0, 120, 240, 240);
+		// 	// Debug::Pin2::high();
+		// 	// init_mdma([&]() { Debug::Pin2::low(); });
+		// 	// start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
+		// 	// 				   sizeof(ScreenConfT::FrameBufferT) / 2);
+		// });
 
 		// uint16_t *addr = (uint16_t *)(0x24000000);
 		// for (int i = 0; i < (_width * _height / 2); i += 2) {
@@ -285,7 +294,7 @@ public:
 		// 	uint16_t val2 = *addr++;
 		// 	transmit_blocking<Data>(val1, val2);
 		// }
-		start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
+		// start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
 	}
 
 protected:
