@@ -1,4 +1,5 @@
 #pragma once
+#include "math_tables.hh"
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -128,6 +129,19 @@ constexpr uint32_t swap_bytes32(uint32_t word)
 constexpr uint32_t swap_bytes_and_combine(uint16_t halfword1, uint16_t halfword2)
 {
 	return ((halfword1 & 0xFF) << 24) | ((halfword1 & 0xFF00) << 8) | ((halfword2 & 0x00FF) << 8) | (halfword2 >> 8);
+}
+
+constexpr float setPitchMultiple(float val)
+{
+	float pitchMultiple = 1;
+	if (val >= 0)
+		pitchMultiple = expTable.interp(constrain(val, 0.0f, 1.0f));
+	else {
+		float invertPitch = val * -1.0f;
+		pitchMultiple = 1.0f / expTable.interp(constrain(invertPitch, 0.0f, 1.0f));
+	}
+
+	return pitchMultiple;
 }
 
 } // namespace MathTools
