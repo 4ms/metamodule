@@ -198,6 +198,8 @@ struct Screen : public ScreenGFXAdaptor {
 // template <typename ScreenConfT>
 class ScreenFrameWriter : public DmaSpiScreenDriver<ScreenConfT> {
 	ScreenConfT::FrameBufferT *framebuf;
+	static constexpr uint32_t FrameSize = sizeof(ScreenConfT::FrameBufferT);
+	static constexpr uint32_t HalfFrameSize = sizeof(ScreenConfT::FrameBufferT) / 2;
 
 public:
 	ScreenFrameWriter(ScreenConfT::FrameBufferT *framebuf_)
@@ -253,30 +255,24 @@ public:
 		transmit_blocking<Data>(madctl);
 	}
 
-	// void transfer_buffer_to_screen_blocking()
-	// {
-	// 	SCB_CleanDCache_by_Addr((uint32_t *)framebuf, sizeof(ScreenConfT::FrameBufferT));
-	// 	set_pos(0, 0, _width, _height);
-	// 	begin_open_data_transmission(4);
-	// 	for (int i = 0; i < (_width * _height); i += 2) {
-	// 		transmit_open_data32((*framebuf)[i], (*framebuf)[i + 1]);
-	// 	}
-	// 	end_open_data_transmission();
-	// }
-
 	void transfer_buffer_to_screen()
 	{
-		set_pos(0, 0, _width - 1, _height  - 1);
+		Debug::Pin1::high();
+		set_pos(0, 0, _width - 1, _height - 1);
 		SCB_CleanDCache_by_Addr((uint32_t *)0x24000000 /*(uint32_t *)framebuf*/, sizeof(ScreenConfT::FrameBufferT));
 
-		memcpy((void *)(0x38000000), (void *)(0x24000000), sizeof(ScreenConfT::FrameBufferT) / 2);
-		// uint32_t *src_addr = (uint32_t *)(0x24000000);
-		// uint32_t *dst_addr = (uint32_t *)(0x38000000);
-		// for (int i = 0; i < (_width * _height); i += 4) {
-		// 	*dst_addr++ = *src_addr++;
-		// }
-		init_bdma([]() { Debug::Pin1::low(); });
-		start_bdma_transfer(0x38000000, sizeof(ScreenConfT::FrameBufferT) / 2);
+		memcpy((void *)(0x38000000), (void *)(0x24000000), HalfFrameSize);
+
+		config_bdma_transfer(0x38000000, HalfFrameSize);
+		start_bdma_transfer([&]() {
+			Debug::Pin1::low();
+			memcpy((void *)(0x38000000), (void *)(0x24000000 + HalfFrameSize), HalfFrameSize);
+			Debug::Pin2::high();
+			config_bdma_transfer(0x38000000, HalfFrameSize);
+			start_bdma_transfer([&]() { 
+					Debug::Pin2::low();
+			});
+		});
 
 		// init_mdma([&]() {
 		// 	wait_until_ready();
@@ -287,13 +283,6 @@ public:
 		// 	// start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
 		// 	// 				   sizeof(ScreenConfT::FrameBufferT) / 2);
 		// });
-
-		// uint16_t *addr = (uint16_t *)(0x24000000);
-		// for (int i = 0; i < (_width * _height / 2); i += 2) {
-		// 	uint16_t val1 = *addr++;
-		// 	uint16_t val2 = *addr++;
-		// 	transmit_blocking<Data>(val1, val2);
-		// }
 		// start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
 	}
 

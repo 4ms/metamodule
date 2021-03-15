@@ -45,7 +45,7 @@ public:
 		, screen_writer{screen_writer_buf}
 	{}
 
-	Color bgcolor = Colors::yellow;
+	Color bgcolor = Colors::pink;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::cyan;
 	Color pots_fgcolor = Colors::green;
@@ -62,6 +62,10 @@ public:
 
 		screen_writer.init();
 		screen_writer.transfer_buffer_to_screen();
+
+		// HAL_Delay(10);
+		// screen.fill(pots_fgcolor);
+		// screen_writer.transfer_buffer_to_screen();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -90,8 +94,7 @@ public:
 				patch_list.should_redraw_patch = false;
 				draw_patch_name();
 			}
-			// Debug::Pin2::high();
-			// screen_dma.start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
+			// screen_writer.transfer_buffer_to_screen();
 		}
 	}
 
