@@ -48,7 +48,7 @@ public:
 	Color bgcolor = Colors::pink;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::cyan;
-	Color pots_fgcolor = Colors::green;
+	Color pots_fgcolor = Colors::red;
 
 	void start()
 	{
@@ -63,9 +63,9 @@ public:
 		screen_writer.init();
 		screen_writer.transfer_buffer_to_screen();
 
-		// HAL_Delay(10);
-		// screen.fill(pots_fgcolor);
-		// screen_writer.transfer_buffer_to_screen();
+		HAL_Delay(40);
+		screen.fill(pots_fgcolor);
+		screen_writer.transfer_buffer_to_screen();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
