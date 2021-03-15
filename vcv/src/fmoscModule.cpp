@@ -26,7 +26,8 @@ struct FmoscModule : CommModule {
 		selfID.typeID = "FMOSC";
 
 		inputJacks[FmoscModule::INDEX_INPUT]->scale = [](float f) { return f / 5.0f; };
-		inputJacks[FmoscModule::VOCT_INPUT]->scale = [](float f) { return f / 10.0f; };
+		inputJacks[FmoscModule::VOCT_INPUT]->scale = [](float f) { return f / 5.0f; };
+		inputJacks[FmoscModule::SEC_VOCT_INPUT]->scale = [](float f) { return f / 5.0f; };
 		inputJacks[FmoscModule::SHAPE_CV_INPUT]->scale = [](float f) { return f / 5.0f; };
 		outputJacks[FmoscModule::MAIN_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 	}
