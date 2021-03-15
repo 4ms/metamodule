@@ -45,7 +45,7 @@ public:
 		, screen_writer{screen_writer_buf}
 	{}
 
-	Color bgcolor = Colors::pink;
+	Color bgcolor = Colors::yellow;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::cyan;
 	Color pots_fgcolor = Colors::green;
@@ -74,9 +74,7 @@ public:
 		// update_animation() just update the TriOsc and fade (but not write actual color to the framebuffer)
 		// led_update_task.init(led_update_animation_task_conf, [this]() { leds.update_animation(); });
 		// led_update_task.start();
-
 		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() { update_led_states(); });
-
 		HWSemaphore<LEDFrameBufLock>::enable_channel_ISR();
 	}
 
