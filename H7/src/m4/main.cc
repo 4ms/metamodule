@@ -26,27 +26,27 @@ void main(void)
 	target::corem4::SystemClocks start_clocks;
 
 	while (HWSemaphore<SharedBusLock>::is_locked()) {
-		// Debug::Pin2::high();
-		// Debug::Pin2::low();
 	}
 
-	// Debug::Pin1::high();
 	SharedBus::i2c.init(i2c_conf);
-	// Debug::Pin1::low();
 
+	// Led Driver
 	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufferLocation);
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
+	// Controls
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CVAdcChipT cvadc;
 	auto param_block_base = SharedMemory::read_address_of<ParamBlock *>(SharedMemory::ParamsPtrLocation);
 	Controls controls{potadc, cvadc, param_block_base}; //, gpio_expander};
 
+	// SharedBus
+	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
 	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
-
 	led_driver.start_it_mode();
 	controls.start();
 
+	// Screen
 	uint32_t *screen_writebuf = &StaticBuffers::screen_writebuf_base;
 	auto screen_readbuf =
 		SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenFrameBufferLocation);
@@ -54,17 +54,11 @@ void main(void)
 	screen_writer.init();
 	HWSemaphore<ScreenFrameBuf1Lock>::clear_ISR();
 	HWSemaphore<ScreenFrameBuf1Lock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>([&]() {
-		Debug::Pin3::low();
-		screen_writer.transfer_buffer_to_screen();
-		Debug::Pin3::high();
-	});
-	Debug::Pin3::high();
+	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>(
+		[&]() { screen_writer.transfer_buffer_to_screen(); });
 	HWSemaphore<ScreenFrameBuf1Lock>::enable_channel_ISR();
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
-	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
-
 	while (1) {
 		if (SharedBus::i2c.is_ready()) {
 			i2cqueue.update();
