@@ -14,6 +14,10 @@ struct HighpassfilterModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("HIGHPASSFILTER");
 		selfID.typeID = "HIGHPASSFILTER";
+
+		inputJacks[HighpassfilterModule::SIGNAL_INPUT]->scale = [](float f) { return f / 5.0f; };
+		inputJacks[HighpassfilterModule::CV_INPUT]->scale = [](float f) { return f / 5.0f; };
+		outputJacks[HighpassfilterModule::SIGNAL_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 	}
 };
 
