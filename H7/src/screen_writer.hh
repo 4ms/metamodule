@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/screen_conf.hh"
+#include "drivers/memory_transfer.hh"
 #include "drivers/pin.hh"
 #include "drivers/spi.hh"
 #include "drivers/spi_screen_ST77XX.hh"
@@ -78,27 +79,29 @@ public:
 	void transfer_buffer_to_screen()
 	{
 		if (!using_mdma && writebuffer_size == HalfFrameSize) {
-			Debug::Pin1::high();
 			set_pos(0, 0, _width - 1, _height - 1);
 
-			// uint32_t *src = reinterpret_cast<uint32_t *>(&(framebuf[0]));
-			// uint32_t *dst = reinterpret_cast<uint32_t *>(&writebuffer);
-			// for (int i = 0; i < HalfFrameSize / 4; i += 4)
-			// 	*dst++ = *src++;
-			// memcpy(writebuffer, (void *)(&framebuf[0]), HalfFrameSize);
-
+			// mdma takes 0.6 - 3ms
+			// bdma takes 4.7ms 
+			// mdma takes 0.5us
+			// bdma takes 4.7ms
 			config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
-			start_bdma_transfer([&]() {
+			mem_xfer.config_transfer(dst, src, HalfFrameSize);
+			mem_xfer.register_callback([&]() {
 				Debug::Pin1::low();
-				// memcpy(writebuffer, (void *)((uint32_t)(&framebuf[0]) + HalfFrameSize), HalfFrameSize);
-				// uint32_t *src = reinterpret_cast<uint32_t *>(&(framebuf[0]) + HalfFrameSize);
-				// uint32_t *dst = reinterpret_cast<uint32_t *>(&writebuffer);
-				// for (int i = 0; i < HalfFrameSize; i += 4)
-				// 	*dst++ = *src++;
-				Debug::Pin2::high();
-				config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
-				start_bdma_transfer([&]() { Debug::Pin2::low(); });
+				start_bdma_transfer([&]() {
+					Debug::Pin2::high();
+					mem_xfer.config_transfer(dst, src2, HalfFrameSize);
+					mem_xfer.register_callback([&]() {
+						Debug::Pin2::low();
+						Debug::Pin1::high();
+						start_bdma_transfer([&]() { Debug::Pin1::low(); });
+					});
+					mem_xfer.start_transfer();
+				});
 			});
+			Debug::Pin1::high();
+			mem_xfer.start_transfer();
 			return;
 		}
 		// if (using_mdma && writebuffer_size == HalfFrameSize) {
@@ -147,6 +150,12 @@ protected:
 	int _ystart;
 	int _width;
 	int _height;
+
+	void *dst = reinterpret_cast<void *>(writebuffer);
+	void *src = reinterpret_cast<void *>(&framebuf[0]);
+	void *src2 = reinterpret_cast<void *>((uint32_t)(&framebuf[0]) + HalfFrameSize);
+	MemoryTransfer mem_xfer;
+	MemoryTransfer mem_xfer2;
 
 	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
 	{

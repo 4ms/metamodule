@@ -38,18 +38,18 @@ public:
 		, screen{screenbuf}
 	{}
 
-	Color bgcolor = Colors::green;
+	Color bgcolor = Colors::pink;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
-	Color load_fgcolor = Colors::cyan;
-	Color pots_fgcolor = Colors::red;
+	Color load_fgcolor = Colors::blue;
+	Color pots_fgcolor = Colors::green;
 
 	void start()
 	{
 		// HWSemaphore<ScreenFrameBuf1Lock>::lock();
 		screen.init();
-		// screen.fill(bgcolor);
-		// draw_patch_name();
-		// draw_audio_load();
+		screen.fill(bgcolor);
+		draw_patch_name();
+		draw_audio_load();
 
 		// HWSemaphore<ScreenFrameBuf1Lock>::unlock();
 
