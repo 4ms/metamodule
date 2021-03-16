@@ -1,5 +1,6 @@
 #pragma once
-#include "conf/rcc_conf.hh"
+#include "drivers/hsem.hh"
+#include "drivers/interrupt.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 
@@ -14,12 +15,16 @@ struct SystemClocks {
 	{
 		target::RCC_Control::HSEM_::set();
 
+		// Enable notification in order to wakeup
+		HAL_NVIC_EnableIRQ(HSEM2_IRQn);
+		InterruptManager::registerISR(HSEM2_IRQn, 0, 0, []() { HAL_NVIC_DisableIRQ(HSEM2_IRQn); });
+
 		// Domain D2 goes to STOP mode (Cortex-M4 in deep-sleep) waiting for Cortex-M7 to
 		// perform system initialization
 		HAL_PWREx_ClearPendingEvent();
 		HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
 
-		// Wakeup here ??
+		// Wakeup here
 
 		__HAL_RCC_ART_CLK_ENABLE();
 		__HAL_ART_CONFIG_BASE_ADDRESS(0x08100000UL);
