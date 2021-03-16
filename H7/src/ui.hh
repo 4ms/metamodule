@@ -45,13 +45,13 @@ public:
 
 	void start()
 	{
-		HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		// HWSemaphore<ScreenFrameBuf1Lock>::lock();
 		screen.init();
-		screen.fill(bgcolor);
-		draw_patch_name();
-		draw_audio_load();
+		// screen.fill(bgcolor);
+		// draw_patch_name();
+		// draw_audio_load();
 
-		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
+		// HWSemaphore<ScreenFrameBuf1Lock>::unlock();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);

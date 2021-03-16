@@ -71,7 +71,6 @@ void main()
 
 	SharedBus::i2c.deinit();
 
-	ui.start();
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
@@ -79,9 +78,11 @@ void main()
 	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenFrameBufferLocation);
 	SCB_CleanDCache();
 
+
 	HWSemaphore<SharedBusLock>::disable_channel_ISR();
 	HWSemaphore<SharedBusLock>::unlock();
 
+	ui.start();
 	audio.start();
 
 	while (1) {

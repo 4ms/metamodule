@@ -21,28 +21,18 @@ struct StaticBuffers {
 	static inline __attribute__((section(".d3buffer"))) uint32_t screen_writebuf_base;
 } _sb;
 
-struct ScreenUpdater {
-	ScreenUpdater()
-	{
-		uint32_t *screen_writebuf = &StaticBuffers::screen_writebuf_base;
-		auto screen_readbuf =
-			SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenFrameBufferLocation);
-		ScreenFrameWriter screen_writer{screen_readbuf, screen_writebuf, sizeof(MMScreenConf::FrameBufferT) / 2};
-		screen_writer.init();
-		HWSemaphore<ScreenFrameBuf1Lock>::enable_channel_ISR();
-		HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>(
-			[&]() { screen_writer.transfer_buffer_to_screen(); });
-	}
-};
-
 void main(void)
 {
 	target::corem4::SystemClocks start_clocks;
 
 	while (HWSemaphore<SharedBusLock>::is_locked()) {
+		Debug::Pin2::high();
+		Debug::Pin2::low();
 	}
 
+	Debug::Pin1::high();
 	SharedBus::i2c.init(i2c_conf);
+	Debug::Pin1::low();
 
 	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufferLocation);
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
@@ -58,8 +48,17 @@ void main(void)
 	controls.start();
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
 
-	// Screen:
-	ScreenUpdater screen;
+	uint32_t *screen_writebuf = &StaticBuffers::screen_writebuf_base;
+	auto screen_readbuf =
+		SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenFrameBufferLocation);
+	ScreenFrameWriter screen_writer{screen_readbuf, screen_writebuf, sizeof(MMScreenConf::FrameBufferT) / 2};
+	screen_writer.init();
+	HWSemaphore<ScreenFrameBuf1Lock>::enable_channel_ISR();
+	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>([]() {
+		Debug::Pin3::high();
+		Debug::Pin3::low();
+		// screen_writer.transfer_buffer_to_screen();
+	});
 
 	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
 
