@@ -51,7 +51,7 @@ MEMORY
 _params_ptr = 0x3800FF00;
 
 /* Screen Frame Buffer = 240 x 240 x 2(bytes/pixel) x 2 buffers = 230400bytes = 0x38400 */
-_sheap = 0x24000000 + 0x00038400; 		/* start of heap */
+_sheap = 0x24040000;  		/* start of heap */
 _eheap = 0x24080000; 		/* end of heap */
 
 _estack = 0x20020000;		/* end of stack */

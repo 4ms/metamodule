@@ -54,9 +54,10 @@ void main(void)
 	screen_writer.init();
 	HWSemaphore<ScreenFrameBuf1Lock>::clear_ISR();
 	HWSemaphore<ScreenFrameBuf1Lock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>([]() {
+	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>([&]() {
 		Debug::Pin3::low();
-		// screen_writer.transfer_buffer_to_screen();
+		screen_writer.transfer_buffer_to_screen();
+		Debug::Pin3::high();
 	});
 	Debug::Pin3::high();
 	HWSemaphore<ScreenFrameBuf1Lock>::enable_channel_ISR();

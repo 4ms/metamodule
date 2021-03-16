@@ -81,20 +81,20 @@ public:
 			Debug::Pin1::high();
 			set_pos(0, 0, _width - 1, _height - 1);
 
-			uint32_t *src = reinterpret_cast<uint32_t *>(&(framebuf[0]));
-			uint32_t *dst = reinterpret_cast<uint32_t *>(&writebuffer);
-			for (int i = 0; i < HalfFrameSize; i += 4)
-				*dst++ = *src++;
+			// uint32_t *src = reinterpret_cast<uint32_t *>(&(framebuf[0]));
+			// uint32_t *dst = reinterpret_cast<uint32_t *>(&writebuffer);
+			// for (int i = 0; i < HalfFrameSize / 4; i += 4)
+			// 	*dst++ = *src++;
 			// memcpy(writebuffer, (void *)(&framebuf[0]), HalfFrameSize);
 
 			config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
 			start_bdma_transfer([&]() {
 				Debug::Pin1::low();
 				// memcpy(writebuffer, (void *)((uint32_t)(&framebuf[0]) + HalfFrameSize), HalfFrameSize);
-				uint32_t *src = reinterpret_cast<uint32_t *>(&(framebuf[0]) + HalfFrameSize);
-				uint32_t *dst = reinterpret_cast<uint32_t *>(&writebuffer);
-				for (int i = 0; i < HalfFrameSize; i += 4)
-					*dst++ = *src++;
+				// uint32_t *src = reinterpret_cast<uint32_t *>(&(framebuf[0]) + HalfFrameSize);
+				// uint32_t *dst = reinterpret_cast<uint32_t *>(&writebuffer);
+				// for (int i = 0; i < HalfFrameSize; i += 4)
+				// 	*dst++ = *src++;
 				Debug::Pin2::high();
 				config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
 				start_bdma_transfer([&]() { Debug::Pin2::low(); });
