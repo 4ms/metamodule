@@ -40,7 +40,7 @@ public:
 				indexKnob = val;
 				break;
 			case 2:
-				ratioCoarse = map_value(val, 0.0f, 1.0f, 0, 7);
+				ratioCoarse = ratioTable[map_value(val, 0.0f, 1.0f, 0, 7)];
 				break;
 			case 3: {
 				if (val < 0.5f)
@@ -139,4 +139,6 @@ private:
 	float pitchInput = 0;
 	float shapeAmount = 0;
 	float indexAmount = 0;
+
+	const float ratioTable[8]={0.125f,0.25f,0.5f,1,2,4,8,16};
 };
