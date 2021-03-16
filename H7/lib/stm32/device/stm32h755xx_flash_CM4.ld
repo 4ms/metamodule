@@ -50,8 +50,8 @@ MEMORY
 }
 
 _estack = 0x10020000;		/* end of RAM */
-/* _sheap = 0x10047000; */
-/* _eheap = 0x10048000; */
+_sheap = 0x10047000;
+_eheap = 0x10048000;
 
 _params_ptr = 0x3800FF00;
 

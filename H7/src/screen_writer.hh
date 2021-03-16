@@ -101,32 +101,32 @@ public:
 			});
 			return;
 		}
-		if (using_mdma && writebuffer_size == HalfFrameSize) {
-			Debug::Pin1::high();
-			set_pos(0, 0, _width - 1, _height - 1);
+		// if (using_mdma && writebuffer_size == HalfFrameSize) {
+		// 	Debug::Pin1::high();
+		// 	set_pos(0, 0, _width - 1, _height - 1);
 
-			// memcpy(writebuffer, (void *)(&framebuf[0]), HalfFrameSize);
+		// 	// memcpy(writebuffer, (void *)(&framebuf[0]), HalfFrameSize);
 
-			config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
-			start_bdma_transfer([&]() {
-				Debug::Pin1::low();
-				// memcpy(writebuffer, (void *)((uint32_t)(&framebuf[0]) + HalfFrameSize), HalfFrameSize);
-				Debug::Pin2::high();
-				config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
-				start_bdma_transfer([&]() { Debug::Pin2::low(); });
-			});
-			return;
-		}
-		if (writebuffer_size == FrameSize) {
-			// Todo: test full buffer xfer
-			set_pos(0, 0, _width - 1, _height - 1);
+		// 	config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
+		// 	start_bdma_transfer([&]() {
+		// 		Debug::Pin1::low();
+		// 		// memcpy(writebuffer, (void *)((uint32_t)(&framebuf[0]) + HalfFrameSize), HalfFrameSize);
+		// 		Debug::Pin2::high();
+		// 		config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
+		// 		start_bdma_transfer([&]() { Debug::Pin2::low(); });
+		// 	});
+		// 	return;
+		// }
+		// if (writebuffer_size == FrameSize) {
+		// 	// Todo: test full buffer xfer
+		// 	set_pos(0, 0, _width - 1, _height - 1);
 
-			// memcpy(writebuffer, (void *)(&framebuf[0]), FrameSize);
+		// 	// memcpy(writebuffer, (void *)(&framebuf[0]), FrameSize);
 
-			config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), FrameSize);
-			start_bdma_transfer([]() {});
-			return;
-		}
+		// 	config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), FrameSize);
+		// 	start_bdma_transfer([]() {});
+		// 	return;
+		// }
 	}
 	// init_mdma([&]() {
 	// 	wait_until_ready();
