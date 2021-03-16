@@ -12,7 +12,7 @@
 #include "m7/hsem_handler.hh"
 #include "params.hh"
 #include "patchlist.hh"
-#include "screen.hh"
+#include "screen_buffer.hh"
 // #include "screen2.hh"
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
@@ -25,47 +25,33 @@ public:
 	Params &params;
 	PatchList &patch_list;
 	LedFrame<AnimationUpdateRate> &leds;
-	// Screen screen;
 	ScreenFrameBuffer screen;
-	ScreenFrameWriter screen_writer;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p,
-	   PatchList &pl,
-	   LedFrame<AnimationUpdateRate> l,
-	   MMScreenConf::FrameBufferT &screenbuf,
-	   MMScreenConf::FrameBufferT *screen_writer_buf)
+	Ui(Params &p, PatchList &pl, LedFrame<AnimationUpdateRate> l, MMScreenConf::FrameBufferT &screenbuf)
 		: params{p}
 		, patch_list{pl}
 		, leds{l}
 		, screen{screenbuf}
-		, screen_writer{screen_writer_buf}
 	{}
 
-	Color bgcolor = Colors::pink;
+	Color bgcolor = Colors::green;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::cyan;
 	Color pots_fgcolor = Colors::red;
 
 	void start()
 	{
-		// // HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		HWSemaphore<ScreenFrameBuf1Lock>::lock();
 		screen.init();
 		screen.fill(bgcolor);
 		draw_patch_name();
 		draw_audio_load();
 
-		// // HWSemaphore<ScreenFrameBuf1Lock>::unlock();
-
-		screen_writer.init();
-		screen_writer.transfer_buffer_to_screen();
-
-		HAL_Delay(40);
-		screen.fill(pots_fgcolor);
-		screen_writer.transfer_buffer_to_screen();
+		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -87,6 +73,7 @@ public:
 	{
 		uint32_t now = HAL_GetTick();
 		if (now - last_screen_update > 100) {
+			HWSemaphore<ScreenFrameBuf1Lock>::lock();
 			last_screen_update = now;
 			draw_audio_load();
 			draw_pot_values();
@@ -94,7 +81,8 @@ public:
 				patch_list.should_redraw_patch = false;
 				draw_patch_name();
 			}
-			// screen_writer.transfer_buffer_to_screen();
+			screen.flush_cache();
+			HWSemaphore<ScreenFrameBuf1Lock>::unlock();
 		}
 	}
 

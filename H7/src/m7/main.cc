@@ -18,7 +18,6 @@
 #include "drivers/system.hh"
 #include "m7/system_clocks.hh"
 #include "muxed_adc.hh"
-// #include "screen.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "ui.hh"
@@ -44,6 +43,7 @@ struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	static inline __attribute__((section(".dma_buffer"))) ParamBlock param_blocks[2];
 	static inline __attribute__((section(".axisram"))) MMScreenConf::FrameBufferT screen_framebuf;
+	static inline __attribute__((section(".d3buffer"))) uint32_t screen_writebuf_base;
 
 	StaticBuffers()
 	{
@@ -67,7 +67,7 @@ void main()
 	AudioStream audio{
 		patch_list, _hw.codec, _hw.dac, StaticBuffers::param_blocks, last_params, StaticBuffers::audio_dma_block};
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, StaticBuffers::screen_framebuf, &StaticBuffers::screen_framebuf};
+	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, StaticBuffers::screen_framebuf};
 
 	SharedBus::i2c.deinit();
 
@@ -76,6 +76,7 @@ void main()
 
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufferLocation);
+	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenFrameBufferLocation);
 	SCB_CleanDCache();
 
 	HWSemaphore<SharedBusLock>::disable_channel_ISR();

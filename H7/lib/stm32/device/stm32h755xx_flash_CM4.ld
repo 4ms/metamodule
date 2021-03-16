@@ -46,11 +46,12 @@ MEMORY
 	SRAM1 (xrw)			: ORIGIN = 0x10000000, LENGTH = 128K /*SRAM1 Alias */
 	SRAM2 (xrw)			: ORIGIN = 0x10020000, LENGTH = 128K /*SRAM2 Alias */
 	SRAM3 (xrw)			: ORIGIN = 0x10040000, LENGTH = 32K /*SRAM3 Alias */
+	SRAM4 (rw) 			: ORIGIN = 0x38000000, LENGTH = 64K /* D3 Domain */
 }
 
 _estack = 0x10020000;		/* end of RAM */
 
-_params_ptr = 0x38000000;
+_params_ptr = 0x3800FF00;
 
 /* Define output sections */
 SECTIONS
@@ -169,6 +170,13 @@ SECTIONS
 		. = ALIGN(8);
 	} > SRAM3
 	
+	.d3buffer (NOLOAD) :
+	{
+		. = ALIGN(8);
+		*(.d3buffer)
+		*(.d3buffer*)
+		. = ALIGN(8);
+	} > SRAM4
 
 	/* Remove information from the standard libraries */
 	/DISCARD/ :

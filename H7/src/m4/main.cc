@@ -1,19 +1,39 @@
 #include "conf/control_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/i2c_conf.hh"
+#include "conf/screen_conf.hh"
 #include "controls.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
 #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
-#include "m4/system_clocks.hh"
 #include "m4/hsem_handler.hh"
+#include "m4/system_clocks.hh"
 #include "params.hh"
+#include "screen_writer.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 
 using namespace MetaModule;
+
+struct StaticBuffers {
+	static inline __attribute__((section(".d3buffer"))) uint32_t screen_writebuf_base;
+} _sb;
+
+struct ScreenUpdater {
+	ScreenUpdater()
+	{
+		uint32_t *screen_writebuf = &StaticBuffers::screen_writebuf_base;
+		auto screen_readbuf =
+			SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenFrameBufferLocation);
+		ScreenFrameWriter screen_writer{screen_readbuf, screen_writebuf, sizeof(MMScreenConf::FrameBufferT) / 2};
+		screen_writer.init();
+		HWSemaphore<ScreenFrameBuf1Lock>::enable_channel_ISR();
+		HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>(
+			[&]() { screen_writer.transfer_buffer_to_screen(); });
+	}
+};
 
 void main(void)
 {
@@ -37,6 +57,9 @@ void main(void)
 	led_driver.start_it_mode();
 	controls.start();
 	HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
+
+	// Screen:
+	ScreenUpdater screen;
 
 	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
 

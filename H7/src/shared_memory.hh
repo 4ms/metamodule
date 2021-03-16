@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 
+//Defined in linker script
 extern char *_params_ptr;
 
 struct SharedMemory {
