@@ -11,7 +11,8 @@ class HighpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		hpf.cutoff = map_value(cutoffOffset, 0.0f, 1.0f, 20.0f, 20000.0f);
+		auto finalCutoff = constrain(cutoffCV+cutoffOffset,0.0f,1.0f);
+		hpf.cutoff = map_value(finalCutoff, 0.0f, 1.0f, 20.0f, 20000.0f);
 		signalOutput = hpf.update(signalInput);
 	}
 
@@ -38,6 +39,9 @@ public:
 		switch (input_id) {
 			case 0:
 				signalInput = val;
+				break;
+			case 1:
+				cutoffCV = val;
 				break;
 		}
 	}
