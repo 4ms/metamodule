@@ -89,7 +89,7 @@ public:
 	void flush_cache()
 	{
 #if defined(CORE_CM7)
-		SCB_CleanDCache_by_Addr((uint32_t *)(&framebuf), sizeof(ScreenConfT::FrameBufferT));
+		SCB_CleanDCache_by_Addr((uint32_t *)(&framebuf[0]), sizeof(ScreenConfT::FrameBufferT));
 #endif
 	}
 

@@ -38,20 +38,18 @@ public:
 		, screen{screenbuf}
 	{}
 
-	Color bgcolor = Colors::pink;
+	Color bgcolor = Colors::red;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::blue;
 	Color pots_fgcolor = Colors::green;
 
 	void start()
 	{
-		// HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		// Debug::Pin3::high();
 		screen.init();
 		screen.fill(bgcolor);
 		draw_patch_name();
-		draw_audio_load();
-
-		// HWSemaphore<ScreenFrameBuf1Lock>::unlock();
+		// Debug::Pin3::low();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -66,28 +64,41 @@ public:
 		// led_update_task.start();
 		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() { update_led_states(); });
 		HWSemaphore<LEDFrameBufLock>::enable_channel_ISR();
+
+		screen_draw_task.init(
+			{
+				.TIMx = TIM5,
+				.period_ns = 1000000000 / 33, // 33Hz
+				.priority1 = 3,
+				.priority2 = 3,
+
+			},
+			[&]() { refresh_screen(); });
+		screen_draw_task.start();
 	}
 
-	uint32_t last_screen_update = 0;
-	void update()
+	// uint32_t last_screen_update = 0;
+	void refresh_screen()
 	{
-		uint32_t now = HAL_GetTick();
-		if (now - last_screen_update > 100) {
-			HWSemaphore<ScreenFrameBuf1Lock>::lock();
-			last_screen_update = now;
-			draw_audio_load();
-			draw_pot_values();
-			if (patch_list.should_redraw_patch) {
-				patch_list.should_redraw_patch = false;
-				draw_patch_name();
-			}
-			screen.flush_cache();
-			HWSemaphore<ScreenFrameBuf1Lock>::unlock();
+		// uint32_t now = HAL_GetTick();
+		// if (now - last_screen_update > 50) {
+		// last_screen_update = now;
+		HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		Debug::Pin3::high();
+		draw_audio_load();
+		draw_pot_values();
+		if (patch_list.should_redraw_patch) {
+			patch_list.should_redraw_patch = false;
+			draw_patch_name();
 		}
+		screen.flush_cache();
+		Debug::Pin3::low();
+		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
+		// }
 	}
 
 private:
-	Timekeeper led_update_task;
+	Timekeeper screen_draw_task;
 
 	void update_led_states()
 	{
@@ -109,25 +120,21 @@ private:
 		leds.rotaryLED.breathe(Colors::magenta, 1);
 		leds.clockLED.breathe(Colors::green, 0.75f);
 		leds.but[0].breathe(Colors::blue, 0.5f);
-		leds.but[1].breathe(Colors::white, 0.01f);
+		leds.but[1].breathe(Colors::white, 0.1f);
 
 		leds.update_animation();
 	}
 
 	void draw_patch_name()
 	{
-		// Debug::Pin2::high();
 		screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
-		// Debug::Pin2::low();
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
 		uint32_t y = 60;
 		for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
 			screen.setCursor(10, y);
-			// Debug::Pin2::high();
 			screen.print(patch_list.cur_patch().modules_used[i].name);
-			// Debug::Pin2::low();
 			y += 35;
 		}
 	}

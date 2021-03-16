@@ -75,14 +75,13 @@ public:
 		transmit_blocking<Data>(madctl);
 	}
 
-	static constexpr bool using_mdma = false;
 	void transfer_buffer_to_screen()
 	{
-		if (!using_mdma && writebuffer_size == HalfFrameSize) {
+		if (writebuffer_size == HalfFrameSize) {
 			set_pos(0, 0, _width - 1, _height - 1);
 
 			// mdma takes 0.6 - 3ms
-			// bdma takes 4.7ms 
+			// bdma takes 4.7ms
 			// mdma takes 0.5us
 			// bdma takes 4.7ms
 			config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
@@ -100,47 +99,21 @@ public:
 					mem_xfer.start_transfer();
 				});
 			});
+			mem_xfer.start_transfer();
 			Debug::Pin1::high();
+			return;
+		}
+		if (writebuffer_size == FrameSize) {
+			// Todo: test full buffer xfer
+			set_pos(0, 0, _width - 1, _height - 1);
+
+			config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), FrameSize);
+			mem_xfer.config_transfer(dst, src, FrameSize);
+			mem_xfer.register_callback([&]() { start_bdma_transfer([]() {}); });
 			mem_xfer.start_transfer();
 			return;
 		}
-		// if (using_mdma && writebuffer_size == HalfFrameSize) {
-		// 	Debug::Pin1::high();
-		// 	set_pos(0, 0, _width - 1, _height - 1);
-
-		// 	// memcpy(writebuffer, (void *)(&framebuf[0]), HalfFrameSize);
-
-		// 	config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
-		// 	start_bdma_transfer([&]() {
-		// 		Debug::Pin1::low();
-		// 		// memcpy(writebuffer, (void *)((uint32_t)(&framebuf[0]) + HalfFrameSize), HalfFrameSize);
-		// 		Debug::Pin2::high();
-		// 		config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
-		// 		start_bdma_transfer([&]() { Debug::Pin2::low(); });
-		// 	});
-		// 	return;
-		// }
-		// if (writebuffer_size == FrameSize) {
-		// 	// Todo: test full buffer xfer
-		// 	set_pos(0, 0, _width - 1, _height - 1);
-
-		// 	// memcpy(writebuffer, (void *)(&framebuf[0]), FrameSize);
-
-		// 	config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), FrameSize);
-		// 	start_bdma_transfer([]() {});
-		// 	return;
-		// }
 	}
-	// init_mdma([&]() {
-	// 	wait_until_ready();
-	// 	// Debug::Pin1::low();
-	// 	// set_pos(0, 120, 240, 240);
-	// 	// Debug::Pin2::high();
-	// 	// init_mdma([&]() { Debug::Pin2::low(); });
-	// 	// start_dma_transfer(0x24000000 + sizeof(ScreenConfT::FrameBufferT) / 2,
-	// 	// 				   sizeof(ScreenConfT::FrameBufferT) / 2);
-	// });
-	// start_dma_transfer(0x24000000, sizeof(ScreenConfT::FrameBufferT) / 2);
 
 protected:
 	const int _colstart;
