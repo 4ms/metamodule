@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-//Defined in linker script
+// Defined in linker script
 extern char *_params_ptr;
 
 struct SharedMemory {
@@ -22,6 +22,6 @@ struct SharedMemory {
 	}
 
 	static constexpr uint32_t ParamsPtrLocation = 0;
-	static constexpr uint32_t LEDFrameBufferLocation = 1;
-	static constexpr uint32_t ScreenFrameBufferLocation = 2;
+	static constexpr uint32_t LEDFrameBufLocation = 1;
+	static constexpr uint32_t ScreenBufLocation = 2;
 };

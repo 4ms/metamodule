@@ -74,8 +74,8 @@ void main()
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
-	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufferLocation);
-	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenFrameBufferLocation);
+	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
+	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
 	SCB_CleanDCache();
 
 	HWSemaphore<SharedBusLock>::disable_channel_ISR();

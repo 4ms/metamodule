@@ -50,4 +50,7 @@ struct MMScreenConf : DefaultSpiScreenConf {
 	static constexpr Rotation rotation = CW90;
 
 	using FrameBufferT = std::array<uint16_t, width * height>;
+	using HalfFrameBufferT = std::array<uint16_t, width * height / 2>;
+	static constexpr uint32_t FrameBytes = sizeof(FrameBufferT);
+	static constexpr uint32_t HalfFrameBytes = sizeof(HalfFrameBufferT);
 };

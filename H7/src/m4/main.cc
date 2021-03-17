@@ -18,7 +18,7 @@
 using namespace MetaModule;
 
 struct StaticBuffers {
-	static inline __attribute__((section(".d3buffer"))) uint32_t screen_writebuf_base;
+	static inline __attribute__((section(".d3buffer"))) MMScreenConf::HalfFrameBufferT screen_writebuf;
 } _sb;
 
 void main(void)
@@ -32,14 +32,16 @@ void main(void)
 
 	SharedBus::i2c.init(i2c_conf);
 
+	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufLocation);
+	auto param_block_base = SharedMemory::read_address_of<ParamBlock *>(SharedMemory::ParamsPtrLocation);
+	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
+
 	// Led Driver
-	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufferLocation);
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
 	// Controls
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CVAdcChipT cvadc;
-	auto param_block_base = SharedMemory::read_address_of<ParamBlock *>(SharedMemory::ParamsPtrLocation);
 	Controls controls{potadc, cvadc, param_block_base}; //, gpio_expander};
 
 	// SharedBus
@@ -49,11 +51,10 @@ void main(void)
 	controls.start();
 
 	// Screen
-	uint32_t *screen_writebuf = &StaticBuffers::screen_writebuf_base;
-	auto screen_readbuf =
-		SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenFrameBufferLocation);
-	ScreenFrameWriter screen_writer{screen_readbuf, screen_writebuf, sizeof(MMScreenConf::FrameBufferT) / 2};
+	ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::screen_writebuf, MMScreenConf::HalfFrameBytes};
 	screen_writer.init();
+
+	//SemaphoreAction screenupdate {ScreenFrameBuf1Lock, [&](){ screen_writer.transfer_buffer_to_screen(); });
 	HWSemaphore<ScreenFrameBuf1Lock>::clear_ISR();
 	HWSemaphore<ScreenFrameBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>(

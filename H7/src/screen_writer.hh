@@ -12,18 +12,37 @@ using ScreenConfT = MMScreenConf;
 
 // template <typename ScreenConfT>
 class ScreenFrameWriter : public DmaSpiScreenDriver<ScreenConfT> {
-	ScreenConfT::FrameBufferT *framebuf;
-	static constexpr uint32_t FrameSize = sizeof(ScreenConfT::FrameBufferT);
-	static constexpr uint32_t HalfFrameSize = sizeof(ScreenConfT::FrameBufferT) / 2;
+	static constexpr uint32_t FrameSize = ScreenConfT::FrameBytes;
+	static constexpr uint32_t HalfFrameSize = ScreenConfT::HalfFrameBytes;
 
-	void *writebuffer;
-	uint32_t writebuffer_size;
+	bool using_half_buffer_transfers;
+
+	uint32_t dst_addr;
+	void *dst;
+	void *src;
+	void *src_2nd_half;
 
 public:
-	ScreenFrameWriter(ScreenConfT::FrameBufferT *framebuf_, void *writebuffer, size_t writebuffer_size)
-		: framebuf{framebuf_}
-		, writebuffer{writebuffer}
-		, writebuffer_size{writebuffer_size}
+	ScreenFrameWriter(ScreenConfT::FrameBufferT *readbuf_,
+					  ScreenConfT::HalfFrameBufferT *writebuf_,
+					  size_t writebuffer_size)
+		: using_half_buffer_transfers{true}
+		, dst_addr{reinterpret_cast<uint32_t>(writebuf_)}
+		, dst{reinterpret_cast<void *>(writebuf_)}
+		, src{reinterpret_cast<void *>(readbuf_->data())}
+		, src_2nd_half{reinterpret_cast<void *>((uint32_t)(&readbuf_[0]) + HalfFrameSize)}
+		, _rowstart{ScreenConfT::rowstart}
+		, _colstart{ScreenConfT::colstart}
+	{}
+
+	ScreenFrameWriter(ScreenConfT::FrameBufferT *readbuf_,
+					  ScreenConfT::FrameBufferT *writebuf_,
+					  size_t writebuffer_size)
+		: using_half_buffer_transfers{false}
+		, dst_addr{reinterpret_cast<uint32_t>(writebuf_)}
+		, dst{reinterpret_cast<void *>(writebuf_)}
+		, src{reinterpret_cast<void *>(readbuf_->data())}
+		, src_2nd_half{src}
 		, _rowstart{ScreenConfT::rowstart}
 		, _colstart{ScreenConfT::colstart}
 	{}
@@ -32,38 +51,37 @@ public:
 	{
 		DmaSpiScreenDriver<ScreenConfT>::init();
 		init_display(generic_st7789);
-		set_rotation(1); // ScreenConfT::rotation
+		set_rotation(ScreenConfT::rotation);
 	}
 
-	void set_rotation(uint8_t m)
+	void set_rotation(ScreenConfT::Rotation rot)
 	{
+		_rotation = rot;
+
 		uint8_t madctl = 0;
-
-		_rotation = m & 3;
-
 		switch (_rotation) {
-			case 0:
+			case ScreenConfT::None:
 				madctl = ST77XX::MADCTL_MX | ST77XX::MADCTL_MY | ST77XX::MADCTL_RGB;
 				_xstart = _colstart;
 				_ystart = _rowstart;
 				_width = ScreenConfT::width;
 				_height = ScreenConfT::height;
 				break;
-			case 1:
+			case ScreenConfT::CW90:
 				madctl = ST77XX::MADCTL_MY | ST77XX::MADCTL_MV | ST77XX::MADCTL_RGB;
 				_xstart = _rowstart;
 				_ystart = _colstart;
 				_height = ScreenConfT::width;
 				_width = ScreenConfT::height;
 				break;
-			case 2:
+			case ScreenConfT::Flip180:
 				madctl = ST77XX::MADCTL_RGB;
 				_xstart = 0;
 				_ystart = 0;
 				_width = ScreenConfT::width;
 				_height = ScreenConfT::height;
 				break;
-			case 3:
+			case ScreenConfT::CCW90:
 				madctl = ST77XX::MADCTL_MX | ST77XX::MADCTL_MV | ST77XX::MADCTL_RGB;
 				_xstart = 0;
 				_ystart = 0;
@@ -77,20 +95,15 @@ public:
 
 	void transfer_buffer_to_screen()
 	{
-		if (writebuffer_size == HalfFrameSize) {
+		if (using_half_buffer_transfers) {
 			set_pos(0, 0, _width - 1, _height - 1);
-
-			// mdma takes 0.6 - 3ms
-			// bdma takes 4.7ms
-			// mdma takes 0.5us
-			// bdma takes 4.7ms
-			config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), HalfFrameSize);
+			config_bdma_transfer(dst_addr, HalfFrameSize);
 			mem_xfer.config_transfer(dst, src, HalfFrameSize);
 			mem_xfer.register_callback([&]() {
 				Debug::Pin1::low();
 				start_bdma_transfer([&]() {
 					Debug::Pin1::high();
-					mem_xfer.config_transfer(dst, src2, HalfFrameSize);
+					mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
 					mem_xfer.register_callback([&]() {
 						Debug::Pin1::low();
 						Debug::Pin1::high();
@@ -101,34 +114,26 @@ public:
 			});
 			mem_xfer.start_transfer();
 			Debug::Pin1::high();
-			return;
-		}
-		if (writebuffer_size == FrameSize) {
+		} else {
 			// Todo: test full buffer xfer
 			set_pos(0, 0, _width - 1, _height - 1);
-
-			config_bdma_transfer(reinterpret_cast<uint32_t>(writebuffer), FrameSize);
+			config_bdma_transfer(dst_addr, FrameSize);
 			mem_xfer.config_transfer(dst, src, FrameSize);
 			mem_xfer.register_callback([&]() { start_bdma_transfer([]() {}); });
 			mem_xfer.start_transfer();
-			return;
 		}
 	}
 
 protected:
 	const int _colstart;
 	const int _rowstart;
-	int _rotation;
+	ScreenConfT::Rotation _rotation;
 	int _xstart;
 	int _ystart;
 	int _width;
 	int _height;
 
-	void *dst = reinterpret_cast<void *>(writebuffer);
-	void *src = reinterpret_cast<void *>(&framebuf[0]);
-	void *src2 = reinterpret_cast<void *>((uint32_t)(&framebuf[0]) + HalfFrameSize);
 	MemoryTransfer mem_xfer;
-	MemoryTransfer mem_xfer2;
 
 	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
 	{
