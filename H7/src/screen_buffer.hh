@@ -36,42 +36,58 @@ public:
 
 	virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override
 	{
-		framebuf[x + y * ScreenConfT::width] = color;
+		framebuf[x + y * _width] = color;
 	}
 
 	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
 	{
-		if ((x + w) > ScreenConfT::width)
-			w = ScreenConfT::width - x;
+		if ((x + w) > _width)
+			w = _width - x;
 
-		if ((h + y) > ScreenConfT::height)
-			h = ScreenConfT::height - y;
+		if ((h + y) > _height)
+			h = _height - y;
 
 		// Use DMA2D ?
 		for (int xi = x; xi < (x + w); xi++) {
 			for (int yi = y; yi < (y + h); yi++) {
-				framebuf[xi + yi * ScreenConfT::width] = color;
+				framebuf[xi + yi * _width] = color;
 			}
 		}
 	}
 
 	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
 	{
-		if ((x + w) > ScreenConfT::width)
-			w = ScreenConfT::width - x;
+		if (y < 0)
+			return;
+		if (y >= _height)
+			return;
+		if (x < 0) {
+			w += x;
+			x = 0;
+		}
+		if ((x + w) >= _width)
+			w = _width - x;
 
-		const int16_t row_offset = x + y * ScreenConfT::width;
+		const int16_t row_offset = x + y * _width;
 		for (int i = 0; i < w; i++) {
 			framebuf[i + row_offset] = color;
 		}
 	}
 	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) override
 	{
-		if ((h + y) > ScreenConfT::height)
-			h = ScreenConfT::height - y;
+		if (x < 0)
+			return;
+		if (x >= _width)
+			return;
+		if (y < 0) {
+			h += y;
+			y = 0;
+		}
+		if ((h + y) >= _height)
+			h = _height - y;
 
 		for (int i = y; i < (h + y); i++)
-			framebuf[i * ScreenConfT::width + x] = color;
+			framebuf[i * _width + x] = color;
 	}
 
 	virtual void endWrite() override {}
