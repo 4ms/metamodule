@@ -8,7 +8,7 @@
 
 using namespace MathTools;
 
-class LowPassFilter {
+class BandPassFilter {
 public:
 	Parameter<float> cutoff;
 	Parameter<float> q;
@@ -25,14 +25,14 @@ public:
 			calcFilterVariables();
 		}
 
-		fRec0[0] = (float(input) - (fSlow3 * ((fSlow4 * fRec0[2]) + (fSlow5 * fRec0[1]))));
-		output = float((fSlow3 * (fRec0[2] + (fRec0[0] + (2.0f * fRec0[1])))));
+		fRec0[0] = (float(input) - (fSlow5 * ((fSlow6 * fRec0[2]) + (fSlow7 * fRec0[1]))));
+		output = float(((fSlow4 * fRec0[0]) + (fSlow8 * fRec0[2])));
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
 		return output;
 	}
 
-	LowPassFilter()
+	BandPassFilter()
 	{
 		for (int i = 0; i < 3; i++) {
 			fRec0[i] = 0.0f;
@@ -41,7 +41,7 @@ public:
 
 private:
 	float fRec0[3];
-	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5;
+	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5, fSlow6, fSlow7, fSlow8;
 	float fConst0 = 1;
 
 	static float mydsp_faustpower2_f(float value)
@@ -51,11 +51,14 @@ private:
 
 	void calcFilterVariables()
 	{
-		fSlow0 = (1.0f / float(q.getValue()));
-		fSlow1 = std::tan((fConst0 * float(cutoff.getValue())));
-		fSlow2 = (1.0f / fSlow1);
-		fSlow3 = (1.0f / (((fSlow0 + fSlow2) / fSlow1) + 1.0f));
-		fSlow4 = (((fSlow2 - fSlow0) / fSlow1) + 1.0f);
-		fSlow5 = (2.0f * (1.0f - (1.0f / mydsp_faustpower2_f(fSlow1))));
+		fSlow0 = std::tan((fConst0 * float(cutoff.getValue())));
+		fSlow1 = (1.0f / float(q.getValue()));
+		fSlow2 = (1.0f / fSlow0);
+		fSlow3 = (((fSlow1 + fSlow2) / fSlow0) + 1.0f);
+		fSlow4 = (1.0f / (fSlow0 * fSlow3));
+		fSlow5 = (1.0f / fSlow3);
+		fSlow6 = (((fSlow2 - fSlow1) / fSlow0) + 1.0f);
+		fSlow7 = (2.0f * (1.0f - (1.0f / mydsp_faustpower2_f(fSlow0))));
+		fSlow8 = (0.0f - fSlow4);
 	}
 };

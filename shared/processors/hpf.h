@@ -39,8 +39,6 @@ public:
 		}
 	}
 
-	//~LowPassFilter() {}
-
 private:
 	float fRec0[3];
 	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5;
@@ -53,8 +51,8 @@ private:
 
 	void calcFilterVariables()
 	{
-		fSlow0 = (1.0f / float(q));
-		fSlow1 = std::tan((fConst0 * float(cutoff)));
+		fSlow0 = (1.0f / float(q.getValue()));
+		fSlow1 = std::tan((fConst0 * float(cutoff.getValue())));
 		fSlow2 = (1.0f / fSlow1);
 		fSlow3 = (1.0f / (((fSlow0 + fSlow2) / fSlow1) + 1.0f));
 		fSlow4 = (((fSlow2 - fSlow0) / fSlow1) + 1.0f);
