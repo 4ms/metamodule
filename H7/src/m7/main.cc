@@ -27,7 +27,7 @@ namespace MetaModule
 struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	Hardware()
 		: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
-		, SharedBus{i2c_conf}
+		, SharedBus{i2c_conf_m7}
 	{}
 
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
