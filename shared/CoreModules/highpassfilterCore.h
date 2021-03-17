@@ -11,7 +11,7 @@ class HighpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		auto finalCutoff = constrain(cutoffCV+cutoffOffset,0.0f,1.0f);
+		auto finalCutoff = constrain(cutoffCV + cutoffOffset, 0.0f, 1.0f);
 		hpf.cutoff = map_value(finalCutoff, 0.0f, 1.0f, 20.0f, 20000.0f);
 		signalOutput = hpf.update(signalInput);
 	}
@@ -31,7 +31,7 @@ public:
 	}
 	virtual void set_samplerate(const float sr) override
 	{
-		hpf.sampleRate = sr;
+		hpf.sampleRate.setValue(sr);
 	}
 
 	virtual void set_input(const int input_id, const float val) override

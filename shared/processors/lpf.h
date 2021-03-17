@@ -39,8 +39,6 @@ public:
 		}
 	}
 
-	//~LowPassFilter() {}
-
 private:
 	float fRec0[3];
 	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5;
