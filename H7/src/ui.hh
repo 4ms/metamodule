@@ -140,7 +140,6 @@ private:
 
 	void draw_patch_name()
 	{
-		// screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
@@ -154,7 +153,7 @@ private:
 
 	void draw_audio_load()
 	{
-		screen.setTextColor(load_fgcolor.Rgb565()); //, bgcolor.Rgb565());
+		screen.setTextColor(load_fgcolor.Rgb565());
 		screen.setTextSize(2);
 		screen.setFont(NULL);
 		screen.setCursor(0, 10);
@@ -168,16 +167,16 @@ private:
 
 	void draw_pot_values()
 	{
-		screen.setTextColor(pots_fgcolor.Rgb565()); //, bgcolor.Rgb565());
+		screen.setTextColor(pots_fgcolor.Rgb565());
 		screen.setTextSize(2);
 		screen.setFont(NULL);
 		int y = 180;
 		for (int i = 0; i < 12; i++) {
 			screen.setCursor((i & 0b11) * 60, y);
 			if (i < 4)
-				screen.print((uint16_t)(params.cvjacks[i] * 100));
+				screen.print((int16_t)(params.cvjacks[i] * 100));
 			else
-				screen.print((uint16_t)(params.knobs[i - 4] * 100));
+				screen.print((int16_t)(params.knobs[i - 4] * 100));
 
 			screen.print("  ");
 			if (i == 3 || i == 7)
