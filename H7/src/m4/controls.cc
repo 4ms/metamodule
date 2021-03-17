@@ -2,6 +2,7 @@
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
+#include "m4/hsem_handler.hh"
 #include <cstring>
 
 namespace MetaModule
@@ -95,25 +96,33 @@ void Controls::start()
 	cvadc.start();
 
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
-	HWSemaphore<ParamsBuf1Lock>::disable_ISR();
+	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
-	HWSemaphore<ParamsBuf2Lock>::disable_ISR();
-	InterruptManager::registerISR(HSEM2_IRQn, 0, 0, [&]() {
-		if (HWSemaphore<ParamsBuf1Lock>::is_ISR_triggered_and_enabled()) {
-			_buffer_full = false;
-			cur_params = &param_blocks[0][0];
-			HWSemaphore<ParamsBuf1Lock>::clear_ISR();
-			return;
-		}
-		if (HWSemaphore<ParamsBuf2Lock>::is_ISR_triggered_and_enabled()) {
-			_buffer_full = false;
-			cur_params = &param_blocks[1][0];
-			HWSemaphore<ParamsBuf2Lock>::clear_ISR();
-			return;
-		}
+	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
+	// InterruptManager::registerISR(HSEM2_IRQn, 0, 0, [&]() {
+	// 	if (HWSemaphore<ParamsBuf1Lock>::is_ISR_triggered_and_enabled()) {
+	// 		_buffer_full = false;
+	// 		cur_params = &param_blocks[0][0];
+	// 		HWSemaphore<ParamsBuf1Lock>::clear_ISR();
+	// 		return;
+	// 	}
+	// 	if (HWSemaphore<ParamsBuf2Lock>::is_ISR_triggered_and_enabled()) {
+	// 		_buffer_full = false;
+	// 		cur_params = &param_blocks[1][0];
+	// 		HWSemaphore<ParamsBuf2Lock>::clear_ISR();
+	// 		return;
+	// 	}
+	// });
+	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
+		_buffer_full = false;
+		cur_params = &param_blocks[0][0];
 	});
-	HWSemaphore<ParamsBuf1Lock>::enable_ISR();
-	HWSemaphore<ParamsBuf2Lock>::enable_ISR();
+	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
+		_buffer_full = false;
+		cur_params = &param_blocks[1][0];
+	});
+	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
+	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();
 	read_cvadc_task.start();

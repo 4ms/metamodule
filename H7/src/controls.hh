@@ -3,7 +3,6 @@
 #include "conf/control_conf.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/i2c.hh"
-#include "drivers/memory_transfer.hh"
 #include "drivers/pin.hh"
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"

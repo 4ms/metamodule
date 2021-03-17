@@ -2,17 +2,22 @@
 #include "Adafruit_GFX_Library/Fonts/FreeMono12pt7b.h"
 #include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
+#include "bouncing_ball.hh"
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/i2c.hh"
 #include "drivers/interrupt.hh"
+#include "drivers/memory_transfer.hh"
 #include "leds.hh"
+#include "m7/hsem_handler.hh"
 #include "params.hh"
 #include "patchlist.hh"
-#include "screen.hh"
+#include "screen_buffer.hh"
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
+
+constexpr bool ENABLE_BOUNCING_BALL_DEMO = true;
 
 namespace MetaModule
 {
@@ -22,33 +27,47 @@ public:
 	Params &params;
 	PatchList &patch_list;
 	LedFrame<AnimationUpdateRate> &leds;
-	Screen &screen;
+	ScreenFrameBuffer screen;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, PatchList &patchlist, LedFrame<AnimationUpdateRate> l, Screen &s)
+	Ui(Params &p, PatchList &pl, LedFrame<AnimationUpdateRate> l, MMScreenConf::FrameBufferT &screenbuf)
 		: params{p}
-		, patch_list{patchlist}
+		, patch_list{pl}
 		, leds{l}
-		, screen{s}
+		, screen{screenbuf}
 	{}
 
 	Color bgcolor = Colors::pink;
-	Color patch_fgcolor = Colors::blue;
-	Color load_fgcolor = Colors::cyan;
+	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
+	Color load_fgcolor = Colors::blue;
 	Color pots_fgcolor = Colors::green;
+
+	BouncingBall balls[6] = {
+		{8, {120, 120}, {8, 6}, {239, 239}},
+		{16, {120, 120}, {8, 6}, {239, 239}},
+		{4, {20, 10}, {2, -1}, {239, 239}},
+		{8, {12, 120}, {3, -6}, {239, 239}},
+		{20, {220, 30}, {-1, 1}, {239, 239}},
+		{2, {10, 220}, {20, 15}, {239, 239}},
+	};
+
+	Color ball_colors[6] = {
+		Colors::red,
+		Colors::black,
+		Colors::white,
+		Colors::magenta,
+		Colors::orange,
+		Colors::blue,
+	};
 
 	void start()
 	{
 		screen.init();
-		// Debug::Pin2::high();
 		screen.fill(bgcolor);
-		// Debug::Pin2::low();
-
 		draw_patch_name();
-		draw_audio_load();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -61,33 +80,38 @@ public:
 		// update_animation() just update the TriOsc and fade (but not write actual color to the framebuffer)
 		// led_update_task.init(led_update_animation_task_conf, [this]() { leds.update_animation(); });
 		// led_update_task.start();
+		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() { update_led_states(); });
+		HWSemaphore<LEDFrameBufLock>::enable_channel_ISR();
 
-		InterruptManager::registerISR(HSEM1_IRQn, 2, 1, [&]() {
-			HWSemaphore<LEDFrameBufLock>::clear_ISR();
-			update_led_states();
-		});
+		screen_draw_task.init(
+			{
+				.TIMx = TIM5,
+				.period_ns = 1000000000 / 33, // =  33Hz
+				.priority1 = 3,
+				.priority2 = 3,
 
-		HWSemaphore<LEDFrameBufLock>::enable_ISR();
+			},
+			[&]() { refresh_screen(); });
+		screen_draw_task.start();
 	}
 
-	uint32_t last_screen_update = 0;
-	void update()
+	void refresh_screen()
 	{
-		uint32_t now = HAL_GetTick();
-		if (now - last_screen_update > 100) {
-			last_screen_update = now;
-			draw_audio_load();
-			draw_pot_values();
-		}
-
-		if (patch_list.should_redraw_patch) {
-			patch_list.should_redraw_patch = false;
-			draw_patch_name();
-		}
+		Debug::Pin3::high();
+		HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		screen.fill(bgcolor);
+		if constexpr (ENABLE_BOUNCING_BALL_DEMO)
+			draw_bouncing_ball();
+		draw_audio_load();
+		draw_pot_values();
+		draw_patch_name();
+		screen.flush_cache();
+		Debug::Pin3::low();
+		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
 	}
 
 private:
-	Timekeeper led_update_task;
+	Timekeeper screen_draw_task;
 
 	void update_led_states()
 	{
@@ -109,32 +133,28 @@ private:
 		leds.rotaryLED.breathe(Colors::magenta, 1);
 		leds.clockLED.breathe(Colors::green, 0.75f);
 		leds.but[0].breathe(Colors::blue, 0.5f);
-		leds.but[1].breathe(Colors::white, 0.01f);
+		leds.but[1].breathe(Colors::white, 0.1f);
 
 		leds.update_animation();
 	}
 
 	void draw_patch_name()
 	{
-		// Debug::Pin2::high();
-		screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
-		// Debug::Pin2::low();
+		// screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
 		uint32_t y = 60;
 		for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
-				screen.setCursor(10, y);
-			// Debug::Pin2::high();
+			screen.setCursor(10, y);
 			screen.print(patch_list.cur_patch().modules_used[i].name);
-			// Debug::Pin2::low();
 			y += 35;
 		}
 	}
 
 	void draw_audio_load()
 	{
-		screen.setTextColor(load_fgcolor.Rgb565(), bgcolor.Rgb565());
+		screen.setTextColor(load_fgcolor.Rgb565()); //, bgcolor.Rgb565());
 		screen.setTextSize(2);
 		screen.setFont(NULL);
 		screen.setCursor(0, 10);
@@ -148,8 +168,7 @@ private:
 
 	void draw_pot_values()
 	{
-		// Debug::Pin2::high();
-		screen.setTextColor(pots_fgcolor.Rgb565(), bgcolor.Rgb565());
+		screen.setTextColor(pots_fgcolor.Rgb565()); //, bgcolor.Rgb565());
 		screen.setTextSize(2);
 		screen.setFont(NULL);
 		int y = 180;
@@ -164,9 +183,19 @@ private:
 			if (i == 3 || i == 7)
 				y += 20;
 		}
-
-		// Debug::Pin2::low();
 	}
+
+	void draw_bouncing_ball()
+	{
+		int i = 0;
+		for (auto &ball : balls) {
+			ball.update();
+			auto pos = ball.get_pos();
+			screen.fillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565());
+			i++;
+		}
+	}
+
 	void draw_test_squares()
 	{
 		// Should see a 1-pixel border around the 4-square, and a 1-pixel gap between squares

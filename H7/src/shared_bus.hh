@@ -32,7 +32,7 @@ class SharedBusQueue {
 		RequestReadPatchCV,
 		CollectReadPatchCV,
 	};
-	I2CClients cur_client;
+	I2CClients cur_client = SelectPots;
 	uint8_t cur_pot;
 
 public:
@@ -90,6 +90,7 @@ public:
 			case CollectReadPatchCV:
 				controls.store_patchcv_reading(controls.potadc.collect_reading());
 				cur_client = Leds;
+				HWSemaphore<M4_ready>::unlock();
 				break;
 
 			default:

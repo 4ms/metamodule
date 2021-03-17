@@ -18,7 +18,6 @@
 #include "drivers/system.hh"
 #include "m7/system_clocks.hh"
 #include "muxed_adc.hh"
-#include "screen.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "ui.hh"
@@ -31,19 +30,17 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 		, SharedBus{i2c_conf}
 	{}
 
-	// Todo: understand why setting the members to static inline causes SystemClocks ctor to hang on waiting for
-	// D2CLKREADY
-
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	AnalogOutT dac;
-	Screen screen;
 } _hw;
 
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 	static inline __attribute__((section(".dma_buffer"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	static inline __attribute__((section(".dma_buffer"))) ParamBlock param_blocks[2];
+	static inline __attribute__((section(".axisram"))) MMScreenConf::FrameBufferT screen_framebuf;
+	static inline __attribute__((section(".d3buffer"))) uint32_t screen_writebuf_base;
 
 	StaticBuffers()
 	{
@@ -67,24 +64,27 @@ void main()
 	AudioStream audio{
 		patch_list, _hw.codec, _hw.dac, StaticBuffers::param_blocks, last_params, StaticBuffers::audio_dma_block};
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, _hw.screen};
+	Ui<LEDUpdateHz> ui{last_params, patch_list, leds, StaticBuffers::screen_framebuf};
 
 	SharedBus::i2c.deinit();
 
-	ui.start();
-
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
-	SharedMemory::write_address_of(StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufferLocation);
+	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
+	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
 	SCB_CleanDCache();
 
-	HWSemaphore<SharedBusLock>::disable_ISR();
+	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
+	HWSemaphore<SharedBusLock>::disable_channel_ISR();
 	HWSemaphore<SharedBusLock>::unlock();
 
+	// wait for M4 to be ready
+	while (HWSemaphore<M4_ready>::is_locked()) {
+	}
+
+	ui.start();
 	audio.start();
 
 	while (1) {
-		//Todo: call this on a timer set to screen frame rate
-		ui.update();
 		__NOP();
 	}
 }

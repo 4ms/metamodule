@@ -11,16 +11,10 @@
 
 using ScreenConfT = MMScreenConf;
 
-// Todo: generalize this adaptor so we can include it in mdrivlib
-// Why does making Screen a template class over <ScreenConT>, remove ability to access SpiScreenDriver base class?
-// template<typename ScreenConfT>
-
-class ScreenGFXAdaptor : public SpiScreenDriver<ScreenConfT>, public Adafruit_GFX {
+class ScreenGFXAdaptor : public DmaSpiScreenDriver<ScreenConfT>, public Adafruit_GFX {
 public:
 	ScreenGFXAdaptor()
 		: Adafruit_GFX{ScreenConfT::width, ScreenConfT::height}
-		, window_height{ScreenConfT::width}
-		, window_width{ScreenConfT::height}
 		, _rowstart{ScreenConfT::rowstart}
 		, _colstart{ScreenConfT::colstart}
 	{}
@@ -42,94 +36,59 @@ public:
 				madctl = ST77XX::MADCTL_MX | ST77XX::MADCTL_MY | ST77XX::MADCTL_RGB;
 				_xstart = _colstart;
 				_ystart = _rowstart;
-				_width = window_width;
-				_height = window_height;
+				_width = ScreenConfT::height;
+				_height = ScreenConfT::width;
 				break;
 			case 1:
 				madctl = ST77XX::MADCTL_MY | ST77XX::MADCTL_MV | ST77XX::MADCTL_RGB;
 				_xstart = _rowstart;
 				_ystart = _colstart;
-				_height = window_width;
-				_width = window_height;
+				_height = ScreenConfT::height;
+				_width = ScreenConfT::width;
 				break;
 			case 2:
 				madctl = ST77XX::MADCTL_RGB;
 				_xstart = 0;
 				_ystart = 0;
-				_width = window_width;
-				_height = window_height;
+				_width = ScreenConfT::height;
+				_height = ScreenConfT::width;
 				break;
 			case 3:
 				madctl = ST77XX::MADCTL_MX | ST77XX::MADCTL_MV | ST77XX::MADCTL_RGB;
 				_xstart = 0;
 				_ystart = 0;
-				_height = window_width;
-				_width = window_height;
+				_height = ScreenConfT::height;
+				_width = ScreenConfT::width;
 				break;
 		}
-		transmit<Cmd>(ST77XX::MADCTL);
-		transmit<Data>(madctl);
-	}
-
-	virtual void startWrite() override
-	{
-		//
+		transmit_blocking<Cmd>(ST77XX::MADCTL);
+		transmit_blocking<Data>(madctl);
 	}
 
 	virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override
 	{
-		set_pos(x, y, x, y);
-		transmit_data_16(color);
+		// set_pos(x, y, x, y);
+		// transmit_data_16(color);
 	}
 
 	// This tasks ~18ms
 	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
 	{
-		set_pos(x, y, x + w - 1, y + h - 1);
-		begin_open_data_transmission(4);
-		uint32_t color32 = color << 16 | color;
-		for (int i = 0; i < ((w + 1) * (h + 1)); i += 2) {
-			transmit_open_data32(color32);
-		}
-		end_open_data_transmission();
-	}
 
-	// Note: this takes ~350ms!
-	void fillRect_slow(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
-	{
 		set_pos(x, y, x + w - 1, y + h - 1);
 		for (int i = 0; i <= ((w) * (h)); i += 1) {
-			transmit_data_32(color, color);
+			transmit_blocking<Data>(color, color);
 		}
-	}
-	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
-	{
-		set_pos(x, y, x + w - 1, y);
-		for (int i = 0; i <= w; i++) {
-			transmit_data_32(color, color);
-		}
-	}
-	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) override
-	{
-		set_pos(x, y, x, y + h - 1);
-		for (int i = 0; i <= h; i++) {
-			transmit_data_32(color, color);
-		}
+		// set_pos(x, y, x + w - 1, y + h - 1);
+		// begin_open_data_transmission(4);
+		// uint32_t color32 = color << 16 | color;
+		// for (int i = 0; i < ((w + 1) * (h + 1)); i += 2) {
+		// 	transmit_open_data32(color32);
+		// }
+		// end_open_data_transmission();
 	}
 
-	virtual void endWrite() override
-	{
-		//
-	}
-
-	// Todo: print_in_box(x,y,w,h, char* txt, uint32_t len)
-	// does what print() does (using draw_char()) but will erase the background with custom fonts
-	// After drawing text, if cursor position is inside the box,
-	// it will fill in all pixels on remaining background.
-	// ... OR: would it be faster to use a gfx off-screen context?
-private:
-	const int window_width;
-	const int window_height;
+protected:
 	const int _colstart;
 	const int _rowstart;
 
@@ -139,19 +98,20 @@ private:
 	int _width;
 	int _height;
 
+public:
 	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
 	{
 		Xstart += _xstart;
 		Ystart += _ystart;
 		Xend += _xstart;
 		Yend += _ystart;
-		transmit<Cmd>(ST77XX::CASET);
-		transmit_data_32(Xstart, Xend);
+		transmit_blocking<Cmd>(ST77XX::CASET);
+		transmit_blocking<Data>(Xstart, Xend);
 
-		transmit<Cmd>(ST77XX::RASET);
-		transmit_data_32(Ystart, Yend);
+		transmit_blocking<Cmd>(ST77XX::RASET);
+		transmit_blocking<Data>(Ystart, Yend);
 
-		transmit<Cmd>(ST77XX::RAMWR);
+		transmit_blocking<Cmd>(ST77XX::RAMWR);
 	}
 
 	// Todo re-write as just a sequence of commands with delays
@@ -166,9 +126,9 @@ private:
 			numArgs = *addr++;					 // Number of args to follow
 			ms = numArgs & ST77XX::ST_CMD_DELAY; // If hibit set, delay follows args
 			numArgs &= ~ST77XX::ST_CMD_DELAY;	 // Mask out delay bit
-			transmit<Cmd>(cmd);
+			transmit_blocking<Cmd>(cmd);
 			while (numArgs--) {
-				transmit<Data>(*addr++);
+				transmit_blocking<Data>(*addr++);
 			}
 
 			if (ms) {
@@ -181,6 +141,7 @@ private:
 	}
 };
 
+// template <typename ScreenConfT>
 struct Screen : public ScreenGFXAdaptor {
 
 	Screen() {}

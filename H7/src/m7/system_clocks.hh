@@ -71,6 +71,9 @@ struct SystemClocks {
 		HAL_NVIC_SetPriority(DebugMonitor_IRQn, 0, 0);
 		HAL_NVIC_SetPriority(PendSV_IRQn, 0, 0);
 		HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+
+		HWSemaphore<15>::lock();
+		HWSemaphore<15>::unlock();
 	}
 };
 } // namespace MetaModule

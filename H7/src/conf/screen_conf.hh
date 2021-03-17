@@ -23,11 +23,34 @@ struct MMScreenConf : DefaultSpiScreenConf {
 
 		static constexpr bool pulse_hardware_ss = true;
 	};
+
+	struct BDMAConf : BDMA_Conf {
+		static constexpr unsigned StreamNum = 2;
+		static constexpr unsigned RequestNum = BDMA_REQUEST_SPI6_TX;
+		static constexpr IRQn_Type IRQn = BDMA_Channel2_IRQn;
+		static constexpr uint32_t pri = 2;
+		static constexpr uint32_t subpri = 2;
+		static constexpr Direction dir = Mem2Periph;
+		static constexpr bool circular = false;
+		static constexpr TransferSize transfer_size_mem = Byte;
+		static constexpr TransferSize transfer_size_periph = Byte;
+		static constexpr uint8_t dma_priority = Low;
+		static constexpr bool mem_inc = true;
+		static constexpr bool periph_inc = false;
+		static constexpr bool half_transfer_interrupt_enable = false;
+	};
+
 	using DCPin = FPin<GPIO::A, 6, PinMode::Output>;
 
 	static constexpr uint32_t width = 240;
 	static constexpr uint32_t height = 240;
 	static constexpr uint32_t rowstart = 80;
 	static constexpr uint32_t colstart = 0;
-};
+	enum Rotation {None, CW90, Flip180, CCW90};
+	static constexpr Rotation rotation = CW90;
 
+	using FrameBufferT = std::array<uint16_t, width * height>;
+	using HalfFrameBufferT = std::array<uint16_t, width * height / 2>;
+	static constexpr uint32_t FrameBytes = sizeof(FrameBufferT);
+	static constexpr uint32_t HalfFrameBytes = sizeof(HalfFrameBufferT);
+};

@@ -228,37 +228,40 @@ TEST_CASE("swap_bytes tests")
 
 	uint32_t w = 0x12345678;
 	CHECK(MathTools::swap_bytes32(w) == 0x78563412);
+
+	uint16_t hw = 0x9876;
+	CHECK(MathTools::swap_bytes16(hw) == 0x7698);
 }
 
 TEST_CASE("log2int")
 {
 	SUBCASE("Log(0) is undefined, but in MathTools Log2Int(0) = 0")
 	{
-		CHECK(MathTools::Log2Int(0) == 0); // Is this important?
+		CHECK(MathTools::log2_floor(0) == 0); // Is this important?
 	}
 
 	SUBCASE("Check powers of 2")
 	{
-		CHECK(MathTools::Log2Int(1) == 0);
-		CHECK(MathTools::Log2Int(2) == 1);
-		CHECK(MathTools::Log2Int(4) == 2);
-		CHECK(MathTools::Log2Int(8) == 3);
-		CHECK(MathTools::Log2Int(16) == 4);
+		CHECK(MathTools::log2_floor(1) == 0);
+		CHECK(MathTools::log2_floor(2) == 1);
+		CHECK(MathTools::log2_floor(4) == 2);
+		CHECK(MathTools::log2_floor(8) == 3);
+		CHECK(MathTools::log2_floor(16) == 4);
 		//...
-		CHECK(MathTools::Log2Int(0x20000000) == 29);
-		CHECK(MathTools::Log2Int(0x40000000) == 30);
-		CHECK(MathTools::Log2Int(0x80000000) == 31);
+		CHECK(MathTools::log2_floor(0x20000000) == 29);
+		CHECK(MathTools::log2_floor(0x40000000) == 30);
+		CHECK(MathTools::log2_floor(0x80000000) == 31);
 	}
 
 	SUBCASE("Lowest closest integer (floor) of log2(val) is returned")
 	{
-		CHECK(MathTools::Log2Int(3) == MathTools::Log2Int(2));
+		CHECK(MathTools::log2_floor(3) == MathTools::log2_floor(2));
 
-		CHECK(MathTools::Log2Int(5) == MathTools::Log2Int(4));
-		CHECK(MathTools::Log2Int(6) == MathTools::Log2Int(4));
-		CHECK(MathTools::Log2Int(7) == MathTools::Log2Int(4));
+		CHECK(MathTools::log2_floor(5) == MathTools::log2_floor(4));
+		CHECK(MathTools::log2_floor(6) == MathTools::log2_floor(4));
+		CHECK(MathTools::log2_floor(7) == MathTools::log2_floor(4));
 
-		CHECK(MathTools::Log2Int(9) == MathTools::Log2Int(8));
-		CHECK(MathTools::Log2Int(15) == MathTools::Log2Int(8));
+		CHECK(MathTools::log2_floor(9) == MathTools::log2_floor(8));
+		CHECK(MathTools::log2_floor(15) == MathTools::log2_floor(8));
 	}
 }

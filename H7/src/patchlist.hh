@@ -32,7 +32,6 @@ struct PatchList {
 	}
 
 	uint8_t audio_load = 0;
-	bool should_redraw_patch = false;
 
 private:
 	uint32_t _cur_patch = 0;
