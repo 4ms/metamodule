@@ -2,6 +2,7 @@
 #include "Adafruit_GFX_Library/Fonts/FreeMono12pt7b.h"
 #include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
+#include "bouncing_ball.hh"
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
@@ -13,9 +14,10 @@
 #include "params.hh"
 #include "patchlist.hh"
 #include "screen_buffer.hh"
-// #include "screen2.hh"
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
+
+constexpr bool ENABLE_BOUNCING_BALL_DEMO = true;
 
 namespace MetaModule
 {
@@ -38,10 +40,28 @@ public:
 		, screen{screenbuf}
 	{}
 
-	Color bgcolor = Colors::red;
+	Color bgcolor = Colors::pink;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::blue;
 	Color pots_fgcolor = Colors::green;
+
+	BouncingBall balls[6] = {
+		{8, {120, 120}, {8, 6}, {239, 239}},
+		{16, {120, 120}, {8, 6}, {239, 239}},
+		{4, {20, 10}, {2, -1}, {239, 239}},
+		{8, {12, 120}, {3, -6}, {239, 239}},
+		{20, {220, 30}, {-1, 1}, {239, 239}},
+		{2, {10, 220}, {20, 15}, {239, 239}},
+	};
+
+	Color ball_colors[6] = {
+		Colors::red,
+		Colors::black,
+		Colors::white,
+		Colors::magenta,
+		Colors::orange,
+		Colors::blue,
+	};
 
 	void start()
 	{
@@ -79,12 +99,12 @@ public:
 	{
 		Debug::Pin3::high();
 		HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		screen.fill(bgcolor);
+		if constexpr (ENABLE_BOUNCING_BALL_DEMO)
+			draw_bouncing_ball();
 		draw_audio_load();
 		draw_pot_values();
-		if (patch_list.should_redraw_patch) {
-			patch_list.should_redraw_patch = false;
-			draw_patch_name();
-		}
+		draw_patch_name();
 		screen.flush_cache();
 		Debug::Pin3::low();
 		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
@@ -120,7 +140,7 @@ private:
 
 	void draw_patch_name()
 	{
-		screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
+		// screen.fillRect(0, 30, 240, 150, bgcolor.Rgb565());
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
@@ -134,7 +154,7 @@ private:
 
 	void draw_audio_load()
 	{
-		screen.setTextColor(load_fgcolor.Rgb565(), bgcolor.Rgb565());
+		screen.setTextColor(load_fgcolor.Rgb565()); //, bgcolor.Rgb565());
 		screen.setTextSize(2);
 		screen.setFont(NULL);
 		screen.setCursor(0, 10);
@@ -148,8 +168,7 @@ private:
 
 	void draw_pot_values()
 	{
-		// Debug::Pin2::high();
-		screen.setTextColor(pots_fgcolor.Rgb565(), bgcolor.Rgb565());
+		screen.setTextColor(pots_fgcolor.Rgb565()); //, bgcolor.Rgb565());
 		screen.setTextSize(2);
 		screen.setFont(NULL);
 		int y = 180;
@@ -164,9 +183,19 @@ private:
 			if (i == 3 || i == 7)
 				y += 20;
 		}
-
-		// Debug::Pin2::low();
 	}
+
+	void draw_bouncing_ball()
+	{
+		int i = 0;
+		for (auto &ball : balls) {
+			ball.update();
+			auto pos = ball.get_pos();
+			screen.fillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565());
+			i++;
+		}
+	}
+
 	void draw_test_squares()
 	{
 		// Should see a 1-pixel border around the 4-square, and a 1-pixel gap between squares

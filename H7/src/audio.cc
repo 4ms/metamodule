@@ -128,22 +128,18 @@ void AudioStream::start()
 
 bool AudioStream::check_patch_change(int motion)
 {
-	bool new_patch = false;
 	if (motion > 0) {
 		player.unload_patch(patch_list.cur_patch());
 		patch_list.next_patch();
-		new_patch = true;
+		load_patch();
+		return true;
 	} else if (motion < 0) {
 		player.unload_patch(patch_list.cur_patch());
 		patch_list.prev_patch();
-		new_patch = true;
-	}
-
-	if (new_patch) {
-		patch_list.should_redraw_patch = true;
 		load_patch();
+		return true;
 	}
-	return new_patch;
+	return false;
 }
 
 void AudioStream::load_patch()
