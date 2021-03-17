@@ -40,7 +40,6 @@ struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	static inline __attribute__((section(".dma_buffer"))) ParamBlock param_blocks[2];
 	static inline __attribute__((section(".axisram"))) MMScreenConf::FrameBufferT screen_framebuf;
-	static inline __attribute__((section(".d3buffer"))) uint32_t screen_writebuf_base;
 
 	StaticBuffers()
 	{

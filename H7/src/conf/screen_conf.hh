@@ -46,7 +46,7 @@ struct MMScreenConf : DefaultSpiScreenConf {
 	static constexpr uint32_t height = 240;
 	static constexpr uint32_t rowstart = 80;
 	static constexpr uint32_t colstart = 0;
-	enum Rotation {None, CW90, Flip180, CCW90};
+	enum Rotation { None, CW90, Flip180, CCW90 };
 	static constexpr Rotation rotation = CW90;
 
 	using FrameBufferT = std::array<uint16_t, width * height>;
