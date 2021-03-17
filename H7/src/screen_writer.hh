@@ -8,6 +8,7 @@
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 
+using namespace mdrivlib;
 using ScreenConfT = MMScreenConf;
 
 // template <typename ScreenConfT>
@@ -133,7 +134,11 @@ protected:
 	int _width;
 	int _height;
 
-	MemoryTransfer mem_xfer;
+	struct ScreenMemXferConfT : MemoryTransferDefaultConfT {
+		static constexpr unsigned channel = 0;
+		static constexpr bool swap_bytes = true;
+	};
+	MemoryTransfer<ScreenMemXferConfT> mem_xfer;
 
 	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
 	{

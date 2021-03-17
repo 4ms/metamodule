@@ -54,7 +54,7 @@ void main(void)
 	ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::screen_writebuf, MMScreenConf::HalfFrameBytes};
 	screen_writer.init();
 
-	//SemaphoreAction screenupdate {ScreenFrameBuf1Lock, [&](){ screen_writer.transfer_buffer_to_screen(); });
+	// SemaphoreAction screenupdate {ScreenFrameBuf1Lock, [&](){ screen_writer.transfer_buffer_to_screen(); });
 	HWSemaphore<ScreenFrameBuf1Lock>::clear_ISR();
 	HWSemaphore<ScreenFrameBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>(
