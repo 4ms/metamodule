@@ -32,14 +32,15 @@ class SharedBusQueue {
 		RequestReadPatchCV,
 		CollectReadPatchCV,
 	};
-	I2CClients cur_client;
+	I2CClients cur_client = SelectPots;
 	uint8_t cur_pot;
 
 public:
 	SharedBusQueue(PCA9685Driver &leds, Controls &controls)
 		: leds{leds}
 		, controls{controls}
-	{}
+	{
+	}
 
 	// Loop is at ~366Hz (2.73us)
 	void update()
@@ -90,6 +91,8 @@ public:
 			case CollectReadPatchCV:
 				controls.store_patchcv_reading(controls.potadc.collect_reading());
 				cur_client = Leds;
+				HWSemaphore<M4_ready>::unlock();
+				Debug::Pin2::low();
 				break;
 
 			default:

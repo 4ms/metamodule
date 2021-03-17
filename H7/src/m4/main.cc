@@ -27,6 +27,8 @@ void main(void)
 
 	while (HWSemaphore<SharedBusLock>::is_locked()) {
 	}
+	HWSemaphore<M4_ready>::lock();
+	Debug::Pin2::high();
 
 	SharedBus::i2c.init(i2c_conf);
 
@@ -59,6 +61,7 @@ void main(void)
 	HWSemaphore<ScreenFrameBuf1Lock>::enable_channel_ISR();
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
+
 	while (1) {
 		if (SharedBus::i2c.is_ready()) {
 			i2cqueue.update();

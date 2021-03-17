@@ -81,6 +81,13 @@ void main()
 	HWSemaphore<SharedBusLock>::disable_channel_ISR();
 	HWSemaphore<SharedBusLock>::unlock();
 
+	// wait for M4 to be ready
+
+	Debug::Pin1::high();
+	while (HWSemaphore<M4_ready>::is_locked())
+		;
+	Debug::Pin1::low();
+
 	ui.start();
 	audio.start();
 

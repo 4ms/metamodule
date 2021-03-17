@@ -9,7 +9,7 @@ enum SemaphoreLocks {
 	ParamsBuf2Lock,
 	LEDFrameBufLock,
 	ScreenFrameBuf1Lock,
-	ScreenFrameBuf2Lock,
+	M4_ready,
 };
 
 } // namespace MetaModule

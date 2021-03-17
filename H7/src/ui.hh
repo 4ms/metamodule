@@ -45,11 +45,9 @@ public:
 
 	void start()
 	{
-		// Debug::Pin3::high();
 		screen.init();
 		screen.fill(bgcolor);
 		draw_patch_name();
-		// Debug::Pin3::low();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -68,7 +66,7 @@ public:
 		screen_draw_task.init(
 			{
 				.TIMx = TIM5,
-				.period_ns = 1000000000 / 33, // 33Hz
+				.period_ns = 1000000000 / 33, // =  33Hz
 				.priority1 = 3,
 				.priority2 = 3,
 
@@ -77,14 +75,10 @@ public:
 		screen_draw_task.start();
 	}
 
-	// uint32_t last_screen_update = 0;
 	void refresh_screen()
 	{
-		// uint32_t now = HAL_GetTick();
-		// if (now - last_screen_update > 50) {
-		// last_screen_update = now;
-		HWSemaphore<ScreenFrameBuf1Lock>::lock();
 		Debug::Pin3::high();
+		HWSemaphore<ScreenFrameBuf1Lock>::lock();
 		draw_audio_load();
 		draw_pot_values();
 		if (patch_list.should_redraw_patch) {
@@ -94,7 +88,6 @@ public:
 		screen.flush_cache();
 		Debug::Pin3::low();
 		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
-		// }
 	}
 
 private:

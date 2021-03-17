@@ -89,10 +89,10 @@ public:
 			mem_xfer.register_callback([&]() {
 				Debug::Pin1::low();
 				start_bdma_transfer([&]() {
-					Debug::Pin2::high();
+					Debug::Pin1::high();
 					mem_xfer.config_transfer(dst, src2, HalfFrameSize);
 					mem_xfer.register_callback([&]() {
-						Debug::Pin2::low();
+						Debug::Pin1::low();
 						Debug::Pin1::high();
 						start_bdma_transfer([&]() { Debug::Pin1::low(); });
 					});
