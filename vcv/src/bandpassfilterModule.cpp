@@ -14,6 +14,10 @@ struct BandpassfilterModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("BANDPASSFILTER");
 		selfID.typeID = "BANDPASSFILTER";
+
+		inputJacks[BandpassfilterModule::SIGNAL_INPUT]->scale = [](float f) { return f / 5.0f; };
+		inputJacks[BandpassfilterModule::CV_INPUT]->scale = [](float f) { return f / 5.0f; };
+		outputJacks[BandpassfilterModule::SIGNAL_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 	}
 };
 
