@@ -13,6 +13,7 @@
 #include "params.hh"
 #include "screen_writer.hh"
 #include "shared_bus.hh"
+#include "shared_bus_queue.hh"
 #include "shared_memory.hh"
 
 using namespace MetaModule;
