@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "BANDPASSFILTER",
+      "name": "Bandpassfilter",
+      "description": "Bandpass Filter",
+      "tags": []
+}, 
+{
       "slug": "HIGHPASSFILTER",
       "name": "Highpassfilter",
       "description": "Highpass Filter",

@@ -10,6 +10,7 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelBandpassfilter); 
 p->addModel(modelHighpassfilter); 
 p->addModel(modelReverb); 
 p->addModel(modelKarplus); 
