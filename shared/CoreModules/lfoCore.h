@@ -55,15 +55,17 @@ public:
 			if (phaccu >= 1.0f)
 				phaccu -= 1.0f;
 		}
-
 		sinOut = sinTable.interp_wrap(phaccu + phaseOffset) * level;
 	}
 
 	void check_changes()
 	{
 		if (freqJack.isChanged()) {
-			auto f = expTable.closest(constrain(freqJack.getValue(), 0.f, 1.f));
-			cv_frequency = f * f;
+			float val = freqJack.getValue();
+			if (val >= 0.f)
+				cv_frequency = expTable.closest(constrain(val, 0.f, 1.f));
+			else
+				cv_frequency = 1.0f / expTable.closest(constrain(-val, 0.0f, 1.f));
 			combineKnobCVFreq();
 		}
 
@@ -79,11 +81,11 @@ public:
 		}
 	}
 
-	virtual void set_param(int const param_id, const float val) override
+	virtual void set_param(const int param_id, const float val) override
 	{
 		if (param_id == 0) {
-			auto f = expTable.closest(constrain(val, 0.f, 1.f));
-			knob_frequency = f * f;
+			auto expoval = expTable.closest(constrain(val, 0.f, 1.f));
+			knob_frequency = expoval * expoval;
 			combineKnobCVFreq();
 		}
 		if (param_id == 1) {
@@ -151,6 +153,6 @@ private:
 
 	void combineKnobCVFreq()
 	{
-		frequency = knob_frequency + cv_frequency;
+		frequency = knob_frequency * cv_frequency;
 	}
 };
