@@ -30,9 +30,6 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 		, SharedBus{i2c_conf}
 	{}
 
-	// Todo: understand why setting the members to static inline causes SystemClocks ctor to hang on waiting for
-	// D2CLKREADY
-
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	QSpiFlash qspi{qspi_flash_conf};
 	AnalogOutT dac;
@@ -71,22 +68,18 @@ void main()
 
 	SharedBus::i2c.deinit();
 
-	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
-
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
 	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
 	SCB_CleanDCache();
 
+	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 	HWSemaphore<SharedBusLock>::disable_channel_ISR();
 	HWSemaphore<SharedBusLock>::unlock();
 
 	// wait for M4 to be ready
-
-	Debug::Pin1::high();
-	while (HWSemaphore<M4_ready>::is_locked())
-		;
-	Debug::Pin1::low();
+	while (HWSemaphore<M4_ready>::is_locked()) {
+	}
 
 	ui.start();
 	audio.start();

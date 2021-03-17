@@ -28,7 +28,6 @@ void main(void)
 	while (HWSemaphore<SharedBusLock>::is_locked()) {
 	}
 	HWSemaphore<M4_ready>::lock();
-	Debug::Pin2::high();
 
 	SharedBus::i2c.init(i2c_conf);
 

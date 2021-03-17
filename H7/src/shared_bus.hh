@@ -39,8 +39,7 @@ public:
 	SharedBusQueue(PCA9685Driver &leds, Controls &controls)
 		: leds{leds}
 		, controls{controls}
-	{
-	}
+	{}
 
 	// Loop is at ~366Hz (2.73us)
 	void update()
@@ -92,7 +91,6 @@ public:
 				controls.store_patchcv_reading(controls.potadc.collect_reading());
 				cur_client = Leds;
 				HWSemaphore<M4_ready>::unlock();
-				Debug::Pin2::low();
 				break;
 
 			default:
