@@ -12,8 +12,7 @@ class LowpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		float finalCutoff = constrain(cvInput*cvAmount+baseFrequency,0.0f,1.0f);
-		lpf.cutoff.setValue(map_value(finalCutoff, 0.0f, 1.0f, 20.0f, 20000.0f));
+		lpf.cutoff.setValue(setPitchMultiple(constrain(baseFrequency+cvInput*cvAmount,-1.0f,1.0f))*262.0f);
 		signalOut = lpf.update(signalIn);
 	}
 
@@ -22,7 +21,7 @@ public:
 	virtual void set_param(int const param_id, const float val) override
 	{
 		if (param_id == 0) {
-			baseFrequency=val*val;
+			baseFrequency=map_value(val,0.0f,1.0f,-1.0f,1.0f);
 		} else if (param_id == 1) {
 			lpf.q.setValue(map_value(val, 0.0f, 1.0f, 1.0f, 20.0f));
 		} else if (param_id == 2) {
