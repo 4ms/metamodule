@@ -15,6 +15,7 @@
 #include "shared_bus.hh"
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
+#include "drivers/gpio_expander_TCA9535.hh"
 
 using namespace MetaModule;
 

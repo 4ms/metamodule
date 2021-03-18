@@ -1,8 +1,8 @@
 #pragma once
 #include "conf/hsem_conf.hh"
+#include "controls.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
-#include "controls.hh"
 #include "leds.hh"
 #include "params.hh"
 
@@ -16,6 +16,8 @@ class SharedBusQueue {
 		SelectPots,
 		RequestReadPots,
 		CollectReadPots,
+		RequestReadGPIOExpander,
+		CollectReadGPIOExpander,
 		SelectPatchCV,
 		RequestReadPatchCV,
 		CollectReadPatchCV,
@@ -56,14 +58,22 @@ public:
 			case CollectReadPots:
 				controls.store_pot_reading(cur_pot, controls.potadc.collect_reading());
 				if (++cur_pot >= 8) {
-					cur_client = SelectPatchCV;
+					cur_client = RequestReadGPIOExpander;
 					cur_pot = 0;
 				} else
 					cur_client = RequestReadPots;
 				controls.potadc.select_pot_source(cur_pot);
 				break;
 
-				// GPIO Sense here (between ADC channels)
+			case RequestReadGPIOExpander:
+				//read	
+				cur_client = CollectReadGPIOExpander;
+				break;
+
+			case CollectReadGPIOExpander:
+				//collect reading
+				cur_client = SelectPatchCV;
+				break;
 
 			case SelectPatchCV:
 				controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);
