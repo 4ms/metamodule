@@ -153,6 +153,6 @@ private:
 
 	void combineKnobCVFreq()
 	{
-		frequency = knob_frequency * cv_frequency;
+		frequency = knob_frequency + cv_frequency;
 	}
 };
