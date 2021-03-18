@@ -11,8 +11,7 @@ class HighpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		auto finalCutoff = constrain(cutoffCV + cutoffOffset, 0.0f, 1.0f);
-		hpf.cutoff = map_value(finalCutoff, 0.0f, 1.0f, 20.0f, 20000.0f);
+		hpf.cutoff.setValue(setPitchMultiple(constrain(cutoffOffset + cutoffCV, -1.0f, 1.0f)) * 262.0f);
 		signalOutput = hpf.update(signalInput);
 	}
 
@@ -22,7 +21,7 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				cutoffOffset = val * val;
+				cutoffOffset = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
 			case 1:
 				hpf.q = map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
