@@ -2,6 +2,7 @@
 #include "conf/adc_spi_conf.hh"
 #include "conf/control_conf.hh"
 #include "drivers/debounced_switch.hh"
+#include "drivers/gpio_expander.hh"
 #include "drivers/i2c.hh"
 #include "drivers/pin.hh"
 #include "drivers/rotary.hh"
@@ -16,10 +17,11 @@ using namespace mdrivlib;
 namespace MetaModule
 {
 struct Controls {
-	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block);
+	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block, GPIOExpander &gpio_expander);
 
 	MuxedADC &potadc;
 	CVAdcChipT &cvadc;
+	GPIOExpander &jacksense_reader;
 
 	RotaryEncoder<RotaryHalfStep> rotary = {GPIO::C, 7, GPIO::C, 8};
 	DebouncedPin<GPIO::C, 10, PinPolarity::Inverted> button0;
@@ -41,7 +43,6 @@ struct Controls {
 	{
 		latest_pot_reading[_pot_map[pot_id]] = val;
 	}
-
 	uint32_t get_pot_reading(uint32_t pot_id)
 	{
 		return latest_pot_reading[pot_id];
@@ -56,6 +57,15 @@ struct Controls {
 		return latest_patchcv_reading;
 	}
 
+	void store_jacksense_reading(uint16_t reading)
+	{
+		latest_jacksense_reading = reading;
+	}
+	uint32_t get_jacksense_reading()
+	{
+		return latest_jacksense_reading;
+	}
+
 private:
 	Timekeeper read_controls_task;
 	Timekeeper read_cvadc_task;
@@ -65,6 +75,7 @@ private:
 	Params *cur_params;
 
 	uint32_t latest_patchcv_reading;
+	uint16_t latest_jacksense_reading;
 	uint32_t latest_pot_reading[NumPot];
 	const uint8_t _pot_map[NumPot] = {1, 4, 0, 5, 3, 6, 7, 2};
 	InterpParam<float, StreamConf::Audio::BlockSize> _knobs[NumPot];
