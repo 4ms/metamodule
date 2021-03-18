@@ -99,7 +99,14 @@ public:
 	{
 		Debug::Pin3::high();
 		HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		// screen.fillRect(40, 50, 40, 30, Colors::blue.Rgb565());
 		screen.fill(bgcolor);
+		// screen.flush_cache();
+		// int i = 10000;
+		// while (i--)
+		// 	Debug::Pin3::high();
+		// screen.fillRect(40, 70, 40, 30, Colors::yellow.Rgb565());
+
 		if constexpr (ENABLE_BOUNCING_BALL_DEMO)
 			draw_bouncing_ball();
 		draw_audio_load();
