@@ -31,13 +31,14 @@ public:
 		, controls{controls}
 	{}
 
-	// Loop is at ~366Hz (2.73us)
+	// Loop is at ~366Hz (2.73ms)
+	// with GPIO Exp it's at 185Hz (5.4ms) -- vs audio block @64 runs at 750Hz
 	void update()
 	{
 		switch (cur_client) {
 			case Leds:
 				if (HWSemaphore<LEDFrameBufLock>::lock(2) == HWSemaphoreFlag::LockedOk) {
-					leds.write_chip(0);
+					leds.write_partial_chip(0, 12);
 				}
 				cur_client = SelectPots;
 				break;
