@@ -29,7 +29,7 @@ public:
 		output = float((fSlow3 * (fRec0[2] + (fRec0[0] + (2.0f * fRec0[1])))));
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
-		return output;
+		return constrain(output,-1.0f,1.0f);
 	}
 
 	LowPassFilter()
