@@ -11,8 +11,7 @@ class BandpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		auto finalCutoff = constrain(cutoffCV + cutoffOffset, 0.0f, 1.0f);
-		bpf.cutoff = map_value(finalCutoff, 0.0f, 1.0f, 20.0f, 20000.0f);
+		bpf.cutoff = 262.0f * setPitchMultiple(constrain(cutoffCV + cutoffOffset, -1.0f, 1.0f));
 		signalOutput = bpf.update(signalInput);
 	}
 
@@ -22,7 +21,7 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				cutoffOffset = val * val;
+				cutoffOffset = map_value(val,0.0f,1.0f,-1.0f,1.0f);
 				break;
 			case 1:
 				bpf.q = map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
