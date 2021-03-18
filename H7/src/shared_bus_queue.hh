@@ -1,8 +1,8 @@
 #pragma once
 #include "conf/hsem_conf.hh"
+#include "controls.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
-#include "controls.hh"
 #include "leds.hh"
 #include "params.hh"
 
@@ -13,9 +13,15 @@ template<size_t LEDUpdateRate>
 class SharedBusQueue {
 	enum I2CClients {
 		Leds,
+
 		SelectPots,
 		RequestReadPots,
 		CollectReadPots,
+
+		PrepareReadGPIOExpander,
+		RequestReadGPIOExpander,
+		CollectReadGPIOExpander,
+
 		SelectPatchCV,
 		RequestReadPatchCV,
 		CollectReadPatchCV,
@@ -29,13 +35,14 @@ public:
 		, controls{controls}
 	{}
 
-	// Loop is at ~366Hz (2.73us)
+	// Loop is at ~366Hz (2.73ms)
+	// with GPIO Exp it's at 185Hz (5.4ms) -- vs audio block @64 runs at 750Hz
 	void update()
 	{
 		switch (cur_client) {
 			case Leds:
 				if (HWSemaphore<LEDFrameBufLock>::lock(2) == HWSemaphoreFlag::LockedOk) {
-					leds.write_chip(0);
+					leds.write_partial_chip(0, 12);
 				}
 				cur_client = SelectPots;
 				break;
@@ -56,14 +63,34 @@ public:
 			case CollectReadPots:
 				controls.store_pot_reading(cur_pot, controls.potadc.collect_reading());
 				if (++cur_pot >= 8) {
-					cur_client = SelectPatchCV;
+					cur_client = PrepareReadGPIOExpander;
 					cur_pot = 0;
 				} else
 					cur_client = RequestReadPots;
 				controls.potadc.select_pot_source(cur_pot);
 				break;
 
-				// GPIO Sense here (between ADC channels)
+			case PrepareReadGPIOExpander: {
+				auto err = controls.jacksense_reader.prepare_read();
+				if (err != GPIOExpander::Error::None)
+					__BKPT();
+				cur_client = RequestReadGPIOExpander;
+				break;
+			}
+
+			case RequestReadGPIOExpander: {
+				auto err = controls.jacksense_reader.read_pins();
+				if (err != GPIOExpander::Error::None)
+					__BKPT();
+				cur_client = CollectReadGPIOExpander;
+				break;
+			}
+
+			case CollectReadGPIOExpander: {
+				controls.store_jacksense_reading(controls.jacksense_reader.collect_last_reading());
+				cur_client = SelectPatchCV;
+				break;
+			}
 
 			case SelectPatchCV:
 				controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);

@@ -8,7 +8,6 @@
 namespace MetaModule
 {
 
-// Note: not using MDMA because for one Param struct (debug pin high->low) took 2.2us, sometimes up to 4us (bus delays?)
 static bool _buffer_full = true;
 
 void Controls::update_debouncers()
@@ -69,6 +68,8 @@ void Controls::update_params()
 
 		cur_params->patchcv = get_patchcv_reading() / 4095.0f;
 
+		cur_params->jack_senses = get_jacksense_reading();
+
 		for (int i = 0; i < NumPot; i++) {
 			_knobs[i].set_new_value(get_pot_reading(i) / 4095.0f);
 			cur_params->knobs[i] = _knobs[i].next();
@@ -79,10 +80,11 @@ void Controls::update_params()
 		for (int i = 0; i < NumPot; i++)
 			cur_params->knobs[i] = _knobs[i].next();
 
-		// jacksenses
 		cur_params->rotary_button.copy_state(first_param->rotary_button);
 		cur_params->rotary_motion = first_param->rotary_motion;
 		cur_params->rotary_pushed_motion = first_param->rotary_pushed_motion;
+
+		cur_params->jack_senses = first_param->jack_senses;
 	}
 
 	cur_params++;
@@ -94,29 +96,16 @@ void Controls::start()
 {
 	potadc.start();
 	cvadc.start();
+	jacksense_reader.start();
 
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
-	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
-	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
-	// InterruptManager::registerISR(HSEM2_IRQn, 0, 0, [&]() {
-	// 	if (HWSemaphore<ParamsBuf1Lock>::is_ISR_triggered_and_enabled()) {
-	// 		_buffer_full = false;
-	// 		cur_params = &param_blocks[0][0];
-	// 		HWSemaphore<ParamsBuf1Lock>::clear_ISR();
-	// 		return;
-	// 	}
-	// 	if (HWSemaphore<ParamsBuf2Lock>::is_ISR_triggered_and_enabled()) {
-	// 		_buffer_full = false;
-	// 		cur_params = &param_blocks[1][0];
-	// 		HWSemaphore<ParamsBuf2Lock>::clear_ISR();
-	// 		return;
-	// 	}
-	// });
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
 		_buffer_full = false;
 		cur_params = &param_blocks[0][0];
 	});
+	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
+	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
 		_buffer_full = false;
 		cur_params = &param_blocks[1][0];
@@ -129,9 +118,10 @@ void Controls::start()
 	clock_out.low();
 }
 
-Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block_base)
+Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block_base, GPIOExpander &gpio_expander)
 	: potadc(potadc)
 	, cvadc(cvadc)
+	, jacksense_reader{gpio_expander}
 	, param_blocks(param_block_base)
 	, cur_param_block(param_block_base)
 	, cur_params(&param_block_base[0][0])

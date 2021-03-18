@@ -15,8 +15,8 @@ struct Params {
 
 	// Same value for an entire block:
 	float knobs[NumPot] = {0.f};
-	Toggler jack_senses[15];
 	float patchcv = 0.f;
+	uint16_t jack_senses;
 
 	Toggler rotary_button;
 	int32_t rotary_motion = 0;
@@ -36,8 +36,9 @@ struct Params {
 			buttons[i].copy_state(that.buttons[i]);
 		for (int i = 0; i < NumPot; i++)
 			knobs[i] = that.knobs[i];
-		for (int i = 0; i < 15; i++)
-			jack_senses[i].copy_state(that.jack_senses[i]);
+		// for (int i = 0; i < 15; i++)
+		// 	jack_senses[i].copy_state(that.jack_senses[i]);
+		jack_senses = that.jack_senses;
 		patchcv = that.patchcv;
 		rotary_button.copy_state(that.rotary_button);
 		rotary_motion = that.rotary_motion;
