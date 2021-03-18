@@ -105,6 +105,7 @@ public:
 		draw_audio_load();
 		draw_pot_values();
 		draw_patch_name();
+		draw_jack_senses();
 		screen.flush_cache();
 		Debug::Pin3::low();
 		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
@@ -181,6 +182,26 @@ private:
 			screen.print("  ");
 			if (i == 3 || i == 7)
 				y += 20;
+		}
+	}
+	void draw_jack_senses()
+	{
+		screen.setTextColor(Colors::white.Rgb565());
+		screen.setTextSize(1);
+		screen.setFont(NULL);
+		const uint16_t yoffset = 150;
+		const unsigned pin_order[15] = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 4, 5, 14};
+		const char names[15][3] = {"A", "B", "C", "D", "Li", "Ri", "Lo", "Ro", "G1", "G2", "Ci", "Co", "V1", "V2", "P"};
+		for (unsigned i = 0; i < 15; i++) {
+			auto pin = pin_order[i];
+			bool plugged = params.jack_senses & (1 << pin);
+			bool works = (pin != 4 && pin != 5 && pin != 8 && pin != 9 && pin != 13);
+			uint16_t xpos = (i & 0b0111) * 240 / 8;
+			uint16_t ypos = i > 7 ? yoffset + 15 : yoffset;
+			auto color = works ? (plugged ? Colors::yellow : Colors::grey) : Colors::black;
+			screen.fillRect(xpos, ypos, 30, 15, color);
+			screen.setCursor(xpos + 6, ypos + 4);
+			screen.print(names[i]);
 		}
 	}
 

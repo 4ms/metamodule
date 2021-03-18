@@ -1,10 +1,12 @@
 #include "conf/control_conf.hh"
+#include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/i2c_conf.hh"
 #include "conf/screen_conf.hh"
 #include "controls.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
+#include "drivers/gpio_expander_TCA9535.hh"
 #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
@@ -15,7 +17,6 @@
 #include "shared_bus.hh"
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
-#include "drivers/gpio_expander_TCA9535.hh"
 
 using namespace MetaModule;
 
@@ -43,7 +44,8 @@ void main(void)
 	// Controls
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CVAdcChipT cvadc;
-	Controls controls{potadc, cvadc, param_block_base}; //, gpio_expander};
+	GPIOExpander gpio_expander{SharedBus::i2c, gpio_expander_conf};
+	Controls controls{potadc, cvadc, param_block_base, gpio_expander};
 
 	// SharedBus
 	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};

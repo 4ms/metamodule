@@ -13,11 +13,15 @@ template<size_t LEDUpdateRate>
 class SharedBusQueue {
 	enum I2CClients {
 		Leds,
+
 		SelectPots,
 		RequestReadPots,
 		CollectReadPots,
+
+		PrepareReadGPIOExpander,
 		RequestReadGPIOExpander,
 		CollectReadGPIOExpander,
+
 		SelectPatchCV,
 		RequestReadPatchCV,
 		CollectReadPatchCV,
@@ -59,22 +63,34 @@ public:
 			case CollectReadPots:
 				controls.store_pot_reading(cur_pot, controls.potadc.collect_reading());
 				if (++cur_pot >= 8) {
-					cur_client = RequestReadGPIOExpander;
+					cur_client = PrepareReadGPIOExpander;
 					cur_pot = 0;
 				} else
 					cur_client = RequestReadPots;
 				controls.potadc.select_pot_source(cur_pot);
 				break;
 
-			case RequestReadGPIOExpander:
-				//read	
+			case PrepareReadGPIOExpander: {
+				auto err = controls.jacksense_reader.prepare_read();
+				if (err != GPIOExpander::Error::None)
+					__BKPT();
+				cur_client = RequestReadGPIOExpander;
+				break;
+			}
+
+			case RequestReadGPIOExpander: {
+				auto err = controls.jacksense_reader.read_pins();
+				if (err != GPIOExpander::Error::None)
+					__BKPT();
 				cur_client = CollectReadGPIOExpander;
 				break;
+			}
 
-			case CollectReadGPIOExpander:
-				//collect reading
+			case CollectReadGPIOExpander: {
+				controls.store_jacksense_reading(controls.jacksense_reader.collect_last_reading());
 				cur_client = SelectPatchCV;
 				break;
+			}
 
 			case SelectPatchCV:
 				controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);
