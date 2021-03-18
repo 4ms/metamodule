@@ -8,12 +8,25 @@ using ScreenConfT = MMScreenConf;
 class ScreenFrameBuffer : public Adafruit_GFX {
 
 	ScreenConfT::FrameBufferT &framebuf;
+	static volatile inline bool is_dma2d_done;
 
 public:
 	ScreenFrameBuffer(ScreenConfT::FrameBufferT &framebuf_)
 		: Adafruit_GFX{ScreenConfT::width, ScreenConfT::height}
 		, framebuf{framebuf_}
-	{}
+	{
+		target::RCC_Control::DMA2D_::set();
+
+		NVIC_DisableIRQ(DMA2D_IRQn);
+		InterruptManager::registerISR(DMA2D_IRQn, [&]() {
+			DMA2D->IFCR |= DMA2D_IFCR_CTCIF;
+			is_dma2d_done = true;
+			NVIC_DisableIRQ(DMA2D_IRQn);
+		});
+		auto pri = System::encode_nvic_priority(0, 0);
+		NVIC_SetPriority(DMA2D_IRQn, pri);
+		is_dma2d_done = true;
+	}
 
 	void init()
 	{
@@ -41,18 +54,56 @@ public:
 
 	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
 	{
+		if (x >= _width || y >= _height)
+			return;
 		if ((x + w) > _width)
 			w = _width - x;
 
 		if ((h + y) > _height)
 			h = _height - y;
 
-		// Use DMA2D ?
+		// FixMe: it's actually faster to directly draw small areas than use DMA2D. Figure out what the break-point is
+		// and choose the fastest algorithm
+		// if (w*h > MaxSizeForDirectWrite)
+		//     fastFillRect(x, y, w, h, color);
+		// else {
+
 		for (int xi = x; xi < (x + w); xi++) {
 			for (int yi = y; yi < (y + h); yi++) {
 				framebuf[xi + yi * _width] = color;
 			}
 		}
+	}
+	void fastFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+	{
+		DMA2D->NLR = h | (w << DMA2D_NLR_PL_Pos);
+		DMA2D->OOR = _width - w;
+		DMA2D->OMAR = reinterpret_cast<uint32_t>(&framebuf[x + y * _width]);
+		DMA2D->OCOLR = color;
+		DMA2D->OPFCCR = (0 << DMA2D_OPFCCR_RBS_Pos) | (0 << DMA2D_OPFCCR_AI_Pos) | (0 << DMA2D_OPFCCR_SB_Pos) |
+						(0b010 << DMA2D_OPFCCR_CM_Pos);
+
+		// DMA2D->AMTCR = (255 << DMA2D_AMTCR_DT_Pos) | DMA2D_AMTCR_EN;
+		DMA2D->AMTCR = 0;
+		DMA2D->IFCR = DMA2D_IFCR_CTCIF;
+		DMA2D->CR = (0b011 << DMA2D_CR_MODE_Pos) | DMA2D_CR_TCIE; // clear everything else
+
+		is_dma2d_done = false;
+		NVIC_EnableIRQ(DMA2D_IRQn);
+		DMA2D->CR |= DMA2D_CR_START;
+
+		while (!is_dma2d_done) {
+		}
+		NVIC_DisableIRQ(DMA2D_IRQn);
+	}
+
+	void blendRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, float alpha)
+	{
+		// Todo with DMA2D
+	}
+	void blendPixel(int16_t x, int16_t y, uint16_t color, float alpha)
+	{
+		// Todo
 	}
 
 	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
@@ -94,7 +145,7 @@ public:
 
 	void fill(Color c)
 	{
-		fillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+		fastFillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
 	}
 
 	void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, Color c)
