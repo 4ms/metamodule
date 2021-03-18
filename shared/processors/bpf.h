@@ -38,7 +38,7 @@ public:
 			fRec0[i] = 0.0f;
 		}
 		cutoff.setValue(262);
-		q.setValue(0);
+		q.setValue(1);
 		sampleRate.setValue(48000);
 	}
 

@@ -29,7 +29,7 @@ public:
 		output = float((fSlow3 * (fRec0[2] + (fRec0[0] + (2.0f * fRec0[1])))));
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
-		return constrain(output,-1.0f,1.0f);
+		return constrain(output, -1.0f, 1.0f);
 	}
 
 	LowPassFilter()
@@ -37,6 +37,9 @@ public:
 		for (int i = 0; i < 3; i++) {
 			fRec0[i] = 0.0f;
 		}
+		cutoff.setValue(262);
+		q.setValue(1);
+		sampleRate.setValue(48000);
 	}
 
 private:
