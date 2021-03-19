@@ -206,6 +206,7 @@ private:
 			uint16_t xpos = (i & 0b0111) * 240 / 8;
 			uint16_t ypos = i > 7 ? yoffset + 15 : yoffset;
 			auto color = works ? (plugged ? Colors::yellow : Colors::grey) : Colors::black;
+			// screen.blendRect(xpos, ypos, 30, 15, color.Rgb565(), 0.5f);
 			screen.fillRect(xpos, ypos, 30, 15, color);
 			screen.setCursor(xpos + 6, ypos + 4);
 			screen.print(names[i]);

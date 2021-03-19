@@ -65,8 +65,8 @@ public:
 			h = _height - y;
 
 		// Todo: Measure and set this for optimal performance
-		constexpr uint32_t MaxSizeForDirectWrite = 100;
-		if (w * h > MaxSizeForDirectWrite)
+		constexpr uint32_t MaxSizeForDirectWrite = 1000;
+		if ((w * h) > MaxSizeForDirectWrite)
 			fastFillRect(x, y, w, h, color);
 		else {
 			for (int xi = x; xi < (x + w); xi++) {
@@ -85,7 +85,6 @@ public:
 		DMA2D->OPFCCR = (0 << DMA2D_OPFCCR_RBS_Pos) | (0 << DMA2D_OPFCCR_AI_Pos) | (0 << DMA2D_OPFCCR_SB_Pos) |
 						(0b010 << DMA2D_OPFCCR_CM_Pos);
 
-		// DMA2D->AMTCR = (255 << DMA2D_AMTCR_DT_Pos) | DMA2D_AMTCR_EN;
 		DMA2D->AMTCR = 0;
 		DMA2D->IFCR = DMA2D_IFCR_CTCIF;
 		DMA2D->CR = (0b011 << DMA2D_CR_MODE_Pos) | DMA2D_CR_TCIE; // clear everything else
