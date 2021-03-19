@@ -36,7 +36,7 @@ public:
 	}
 
 private:
-	float sampleRate;
+	float sampleRate = 48000;
 	float slewedOut = 0;
 	int direction;
 	float lastSample = 0;
