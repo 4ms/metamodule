@@ -48,11 +48,6 @@ INCLUDES = -I$(DEVICE)/include \
 			-I$(SHARED)/CoreModules \
 			-I$(SHARED)/util \
 			-I$(SHARED)/patch \
-			-I$(LIBDIR)/adafruit_gfx/Adafruit_ST7735_and_ST7789_Library \
-			-I$(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library \
-			-I$(LIBDIR)/adafruit_gfx/arduino \
-			-I$(LIBDIR)/adafruit_gfx/SPI \
-			-I$(LIBDIR)/adafruit_gfx \
 
 include makefile_common.mk
 
