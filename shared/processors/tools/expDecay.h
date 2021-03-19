@@ -27,9 +27,9 @@ public:
 		}
 
 		if (direction == 0)
-			slewedOut += (input - slewedOut) * (1000.0f / decayTime / sampleRate);
+			slewedOut += ((input - slewedOut) * (1000.0f / decayTime / sampleRate));
 		else {
-			slewedOut += (input - slewedOut) * (1000.0f / attackTime / sampleRate);
+			slewedOut += ((input - slewedOut) * (1000.0f / attackTime / sampleRate));
 		}
 
 		return (slewedOut);

@@ -2,6 +2,9 @@
 #include "lpf.h"
 #include "processors/tools/expDecay.h"
 #include "util/parameter.h"
+#include "util/math.hh"
+
+using namespace MathTools;
 
 class LowPassGate {
 public:
@@ -20,7 +23,8 @@ public:
 
 		if (decayTime.isChanged() || level.isChanged()) {
 			expDecay.decayTime = decayTime.getValue();
-			lpf.cutoff.setValue(map_value(slewedControl, 0.0f, 1.0f, 20.0f, 20000.0f));
+			auto controlSignal = map_value(slewedControl, 0.0f, 1.0f, -1.0f,1.0f);
+			lpf.cutoff.setValue(262.0f*setPitchMultiple(controlSignal));
 		}
 
 		return (lpf.update(input) * slewedControl);
@@ -32,6 +36,7 @@ public:
 		level.setValue(1.0f);
 		lpf.q.setValue(1);
 		lpf.cutoff.setValue(20000);
+		sampleRate.setValue(48000);
 		expDecay.decayTime = 100.0f;
 	}
 
