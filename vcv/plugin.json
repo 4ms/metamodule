@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "SLEWLIMITER",
+      "name": "Slewlimiter",
+      "description": "Slew Limiter",
+      "tags": []
+}, 
+{
       "slug": "BANDPASSFILTER",
       "name": "Bandpassfilter",
       "description": "Bandpass Filter",
