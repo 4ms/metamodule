@@ -2,6 +2,8 @@
 #include "Adafruit_GFX_Library/Adafruit_GFX.h"
 #include "conf/screen_conf.hh"
 #include "drivers/colors.hh"
+#include "drivers/rcc.hh"
+#include "drivers/stm32xx.h"
 
 using ScreenConfT = MMScreenConf;
 // template <typename ScreenConfT>
@@ -19,7 +21,7 @@ public:
 
 		NVIC_DisableIRQ(DMA2D_IRQn);
 		InterruptManager::registerISR(DMA2D_IRQn, [&]() {
-			DMA2D->IFCR |= DMA2D_IFCR_CTCIF;
+			DMA2D->IFCR = DMA2D->IFCR | DMA2D_IFCR_CTCIF;
 			is_dma2d_done = true;
 			NVIC_DisableIRQ(DMA2D_IRQn);
 		});
@@ -62,15 +64,15 @@ public:
 		if ((h + y) > _height)
 			h = _height - y;
 
-		// FixMe: it's actually faster to directly draw small areas than use DMA2D. Figure out what the break-point is
-		// and choose the fastest algorithm
-		// if (w*h > MaxSizeForDirectWrite)
-		//     fastFillRect(x, y, w, h, color);
-		// else {
-
-		for (int xi = x; xi < (x + w); xi++) {
-			for (int yi = y; yi < (y + h); yi++) {
-				framebuf[xi + yi * _width] = color;
+		// Todo: Measure and set this for optimal performance
+		constexpr uint32_t MaxSizeForDirectWrite = 100;
+		if (w * h > MaxSizeForDirectWrite)
+			fastFillRect(x, y, w, h, color);
+		else {
+			for (int xi = x; xi < (x + w); xi++) {
+				for (int yi = y; yi < (y + h); yi++) {
+					framebuf[xi + yi * _width] = color;
+				}
 			}
 		}
 	}
@@ -100,10 +102,72 @@ public:
 	void blendRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, float alpha)
 	{
 		// Todo with DMA2D
+		if (x >= _width || y >= _height)
+			return;
+		if (alpha < 1.f / 64.f)
+			return;
+		if (alpha > 63.f / 64.f) {
+			fillRect(x, y, w, h, color);
+			return;
+		}
+		int16_t max_x = (x + w) > _width ? _width : x + w;
+		int16_t max_y = (h + y) > _height ? _height : y + h;
+
+		if (1) {
+			const float inv_alpha = 1.f - alpha;
+			for (int xi = x; xi < max_x; xi++) {
+				for (int yi = y; yi < max_y; yi++) {
+					draw_blended_pix(xi, yi, color, alpha);
+				}
+			}
+		} else {
+			uint16_t r1 = (color >> 11) * alpha;
+			uint16_t g1 = ((color >> 5) & 0b111111) * alpha;
+			uint16_t b1 = (color & 0b11111) * alpha;
+			const float inv_alpha = 1.f - alpha;
+			for (int xi = x; xi < max_x; xi++) {
+				for (int yi = y; yi < max_y; yi++) {
+					auto cur_pixel = framebuf[x + y * _width];
+					uint16_t r2 = (cur_pixel >> 11) * inv_alpha;
+					uint16_t g2 = ((cur_pixel >> 5) & 0b111111) * inv_alpha;
+					uint16_t b2 = (cur_pixel & 0b11111) * inv_alpha;
+					uint16_t r = r1 + r2;
+					uint16_t g = g1 + g2;
+					uint16_t b = b1 + b2;
+					framebuf[x + y * _width] = ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | ((b >> 3));
+				}
+			}
+		}
 	}
 	void blendPixel(int16_t x, int16_t y, uint16_t color, float alpha)
 	{
-		// Todo
+		if (alpha < 1.f / 64.f)
+			return;
+		else if (alpha > 63.f / 64.f)
+			drawPixel(x, y, color);
+		else {
+			draw_blended_pix(x, y, color, alpha);
+		}
+	}
+	constexpr uint16_t _blend_rgb565(const uint16_t color1, const uint16_t color2, const float alpha)
+	{
+		uint16_t r1 = (color1 >> 11) * alpha;
+		uint16_t g1 = ((color1 >> 5) & 0b111111) * alpha;
+		uint16_t b1 = (color1 & 0b11111) * alpha;
+		const float inv_alpha = 1.f - alpha;
+		uint16_t r2 = (color2 >> 11) * inv_alpha;
+		uint16_t g2 = ((color2 >> 5) & 0b111111) * inv_alpha;
+		uint16_t b2 = (color2 & 0b11111) * inv_alpha;
+		uint16_t r = r1 + r2;
+		uint16_t g = g1 + g2;
+		uint16_t b = b1 + b2;
+		return ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | ((b >> 3));
+	}
+
+	void draw_blended_pix(int16_t x, int16_t y, uint16_t color, float alpha)
+	{
+		auto cur_pixel = framebuf[x + y * _width];
+		framebuf[x + y * _width] = _blend_rgb565(color, cur_pixel, alpha);
 	}
 
 	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
