@@ -23,8 +23,8 @@ public:
 
 		if (decayTime.isChanged() || level.isChanged()) {
 			expDecay.decayTime = decayTime.getValue();
-			auto controlSignal = map_value(slewedControl, 0.0f, 1.0f, -1.0f,1.0f);
-			lpf.cutoff.setValue(262.0f*setPitchMultiple(controlSignal));
+			float controlSignal = map_value(slewedControl, 0.0f, 1.0f, -1.0f,1.0f);
+			lpf.cutoff.setValue(523.25f*setPitchMultiple(controlSignal));
 		}
 
 		return (lpf.update(input) * slewedControl);
