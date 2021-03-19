@@ -5,6 +5,7 @@
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
+#include "processors/tools/windowComparator.h"
 
 using namespace MathTools;
 
@@ -12,12 +13,18 @@ class LowpassgateCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		float levelCV = levelControl + cvAmount * cvInput;
+		wc.update(pingIn);
+		pingLast = pingCurrent;
+		pingCurrent = wc.get_output();
+		if (pingCurrent > pingLast) {
+			sincePing = 0;
+		}
+		pulseOut = sincePing < pulseTime;
+		float levelCV = levelControl + cvAmount * cvInput + pulseOut;
 		levelCV = constrain(levelCV, 0.0f, 1.0f);
 		lpg.level.setValue(levelCV);
-		// lpf.set_param(0, slewedControl);
-		// lpf.set_param(1,0.0f);
 		signalOutput = (lpg.update(signalInput));
+		sincePing++;
 	}
 
 	LowpassgateCore() {}
@@ -37,6 +44,7 @@ public:
 	virtual void set_samplerate(const float sr) override
 	{
 		lpg.sampleRate.setValue(sr);
+		pulseTime = 12 / 1000.0f * sr;
 	}
 
 	virtual void set_input(const int input_id, const float val) override
@@ -47,6 +55,9 @@ public:
 				break;
 			case 1:
 				signalInput = val;
+				break;
+			case 2:
+				pingIn = val;
 				break;
 		}
 	}
@@ -77,4 +88,11 @@ private:
 	float cvAmount = 0;
 	LowPassGate lpg;
 	float levelControl = 1;
+	float pingCurrent = 0;
+	float pingLast = 0;
+	float pingIn = 0;
+	float pulseOut = 0;
+	WindowComparator wc;
+	long sincePing = 0;
+	long pulseTime = 300;
 };
