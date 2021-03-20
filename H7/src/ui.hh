@@ -45,13 +45,13 @@ public:
 	Color load_fgcolor = Colors::blue;
 	Color pots_fgcolor = Colors::green;
 
-	BouncingBall balls[6] = {
-		{8, {120, 120}, {8, 6}, {239, 239}},
-		{16, {120, 120}, {8, 6}, {239, 239}},
-		{4, {20, 10}, {2, -1}, {239, 239}},
-		{8, {12, 120}, {3, -6}, {239, 239}},
-		{20, {220, 30}, {-1, 1}, {239, 239}},
-		{2, {10, 220}, {20, 15}, {239, 239}},
+	BouncingBall balls[3] = {
+		{100, {220, 30}, {-1, 1}, {239, 239}},
+		{84, {20, 10}, {2, -1}, {239, 239}},
+		{70, {10, 220}, {2, 1}, {239, 239}},
+		// {46, {120, 120}, {2, 3}, {239, 239}},
+		// {28, {120, 120}, {3, 2}, {239, 239}},
+		// {28, {12, 120}, {3, -3}, {239, 239}},
 	};
 
 	Color ball_colors[6] = {
@@ -99,14 +99,7 @@ public:
 	{
 		Debug::Pin3::high();
 		HWSemaphore<ScreenFrameBuf1Lock>::lock();
-		// screen.fillRect(40, 50, 40, 30, Colors::blue.Rgb565());
 		screen.fill(bgcolor);
-		// screen.flush_cache();
-		// int i = 10000;
-		// while (i--)
-		// 	Debug::Pin3::high();
-		// screen.fillRect(40, 70, 40, 30, Colors::yellow.Rgb565());
-
 		if constexpr (ENABLE_BOUNCING_BALL_DEMO)
 			draw_bouncing_ball();
 		draw_audio_load();
@@ -206,8 +199,8 @@ private:
 			uint16_t xpos = (i & 0b0111) * 240 / 8;
 			uint16_t ypos = i > 7 ? yoffset + 15 : yoffset;
 			auto color = works ? (plugged ? Colors::yellow : Colors::grey) : Colors::black;
-			// screen.blendRect(xpos, ypos, 30, 15, color.Rgb565(), 0.5f);
-			screen.fillRect(xpos, ypos, 30, 15, color);
+			screen.blendRect(xpos, ypos, 30, 15, color.Rgb565(), 0.75f);
+			// screen.fillRect(xpos, ypos, 30, 15, color);
 			screen.setCursor(xpos + 6, ypos + 4);
 			screen.print(names[i]);
 		}
@@ -219,7 +212,8 @@ private:
 		for (auto &ball : balls) {
 			ball.update();
 			auto pos = ball.get_pos();
-			screen.fillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565());
+			screen.blendCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565(), 0.25f);
+			// screen.fillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565());
 			i++;
 		}
 	}

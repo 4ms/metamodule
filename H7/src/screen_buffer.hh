@@ -98,75 +98,78 @@ public:
 		NVIC_DisableIRQ(DMA2D_IRQn);
 	}
 
-	void blendRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, float alpha)
+	void blendRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, float f_alpha)
 	{
 		// Todo with DMA2D
 		if (x >= _width || y >= _height)
 			return;
-		if (alpha < 1.f / 64.f)
+
+		uint8_t alpha = f_alpha * 255.f;
+		if (alpha < 4)
 			return;
-		if (alpha > 63.f / 64.f) {
+		if (alpha > 252) {
 			fillRect(x, y, w, h, color);
 			return;
 		}
+
 		int16_t max_x = (x + w) > _width ? _width : x + w;
 		int16_t max_y = (h + y) > _height ? _height : y + h;
 
 		if (1) {
-			const float inv_alpha = 1.f - alpha;
 			for (int xi = x; xi < max_x; xi++) {
 				for (int yi = y; yi < max_y; yi++) {
-					draw_blended_pix(xi, yi, color, alpha);
+					draw_blended_pix(xi, yi, color, f_alpha);
 				}
 			}
 		} else {
-			uint16_t r1 = (color >> 11) * alpha;
-			uint16_t g1 = ((color >> 5) & 0b111111) * alpha;
-			uint16_t b1 = (color & 0b11111) * alpha;
-			const float inv_alpha = 1.f - alpha;
-			for (int xi = x; xi < max_x; xi++) {
-				for (int yi = y; yi < max_y; yi++) {
-					auto cur_pixel = framebuf[x + y * _width];
-					uint16_t r2 = (cur_pixel >> 11) * inv_alpha;
-					uint16_t g2 = ((cur_pixel >> 5) & 0b111111) * inv_alpha;
-					uint16_t b2 = (cur_pixel & 0b11111) * inv_alpha;
-					uint16_t r = r1 + r2;
-					uint16_t g = g1 + g2;
-					uint16_t b = b1 + b2;
-					framebuf[x + y * _width] = ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | ((b >> 3));
-				}
-			}
+			// uint16_t r1 = (color >> 11) * alpha;
+			// uint16_t g1 = ((color >> 5) & 0b111111) * alpha;
+			// uint16_t b1 = (color & 0b11111) * alpha;
+			// const uint8_t inv_alpha = 255 - alpha;
+			// for (int xi = x; xi < max_x; xi++) {
+			// 	for (int yi = y; yi < max_y; yi++) {
+			// 		auto cur_pixel = framebuf[x + y * _width];
+			// 		uint16_t r2 = (cur_pixel >> 11) * inv_alpha;
+			// 		uint16_t g2 = ((cur_pixel >> 5) & 0b111111) * inv_alpha;
+			// 		uint16_t b2 = (cur_pixel & 0b11111) * inv_alpha;
+			// 		uint16_t r = (r1 + r2) >> 8;
+			// 		uint16_t g = (g1 + g2) >> 8;
+			// 		uint16_t b = (b1 + b2) >> 8;
+			// 		framebuf[x + y * _width] = ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | ((b >> 3));
+			// 	}
+			// }
 		}
 	}
 	void blendPixel(int16_t x, int16_t y, uint16_t color, float alpha)
 	{
-		if (alpha < 1.f / 64.f)
+		if (alpha < (1.f / 64.f))
 			return;
-		else if (alpha > 63.f / 64.f)
+		else if (alpha > (63.f / 64.f))
 			drawPixel(x, y, color);
-		else {
+		else
 			draw_blended_pix(x, y, color, alpha);
-		}
 	}
-	constexpr uint16_t _blend_rgb565(const uint16_t color1, const uint16_t color2, const float alpha)
-	{
-		uint16_t r1 = (color1 >> 11) * alpha;
-		uint16_t g1 = ((color1 >> 5) & 0b111111) * alpha;
-		uint16_t b1 = (color1 & 0b11111) * alpha;
-		const float inv_alpha = 1.f - alpha;
-		uint16_t r2 = (color2 >> 11) * inv_alpha;
-		uint16_t g2 = ((color2 >> 5) & 0b111111) * inv_alpha;
-		uint16_t b2 = (color2 & 0b11111) * inv_alpha;
-		uint16_t r = r1 + r2;
-		uint16_t g = g1 + g2;
-		uint16_t b = b1 + b2;
-		return ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | ((b >> 3));
-	}
+	// constexpr uint16_t _blend_rgb565(const uint16_t color1, const uint16_t color2, const float f_alpha)
+	// {
+	// 	const uint8_t alpha = f_alpha * 255.f;
+	// 	const uint8_t inv_alpha = 255 - alpha;
+
+	// 	uint16_t r1 = (color1 >> 11) * alpha;
+	// 	uint16_t g1 = ((color1 >> 5) & 0b111111) * alpha;
+	// 	uint16_t b1 = (color1 & 0b11111) * alpha;
+	// 	uint16_t r2 = (color2 >> 11) * inv_alpha;
+	// 	uint16_t g2 = ((color2 >> 5) & 0b111111) * inv_alpha;
+	// 	uint16_t b2 = (color2 & 0b11111) * inv_alpha;
+	// 	uint16_t r = (r1 + r2) >> 8;
+	// 	uint16_t g = (g1 + g2) >> 8;
+	// 	uint16_t b = (b1 + b2) >> 8;
+	// 	return ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | ((b >> 3));
+	// }
 
 	void draw_blended_pix(int16_t x, int16_t y, uint16_t color, float alpha)
 	{
 		auto cur_pixel = framebuf[x + y * _width];
-		framebuf[x + y * _width] = _blend_rgb565(color, cur_pixel, alpha);
+		framebuf[x + y * _width] = Color::blend(color, cur_pixel, alpha);
 	}
 
 	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
@@ -202,6 +205,68 @@ public:
 
 		for (int i = y; i < (h + y); i++)
 			framebuf[i * _width + x] = color;
+	}
+
+	void blendFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, float alpha)
+	{
+		if ((x < 0) || (x >= _width))
+			return;
+		if (y < 0) {
+			h += y;
+			y = 0;
+		}
+		if ((h + y) >= _height)
+			h = _height - y;
+
+		for (int yi = y; yi < (h + y); yi++)
+			blendPixel(x, yi, color, alpha);
+	}
+
+	void
+	blendCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t corners, int16_t delta, uint16_t color, float alpha)
+	{
+
+		int16_t f = 1 - r;
+		int16_t ddF_x = 1;
+		int16_t ddF_y = -2 * r;
+		int16_t x = 0;
+		int16_t y = r;
+		int16_t px = x;
+		int16_t py = y;
+
+		delta++; // Avoid some +1's in the loop
+
+		while (x < y) {
+			if (f >= 0) {
+				y--;
+				ddF_y += 2;
+				f += ddF_y;
+			}
+			x++;
+			ddF_x += 2;
+			f += ddF_x;
+			// These checks avoid double-drawing certain lines, important
+			// for the SSD1306 library which has an INVERT drawing mode.
+			if (x < (y + 1)) {
+				if (corners & 1)
+					blendFastVLine(x0 + x, y0 - y, 2 * y + delta, color, alpha);
+				if (corners & 2)
+					blendFastVLine(x0 - x, y0 - y, 2 * y + delta, color, alpha);
+			}
+			if (y != py) {
+				if (corners & 1)
+					blendFastVLine(x0 + py, y0 - px, 2 * px + delta, color, alpha);
+				if (corners & 2)
+					blendFastVLine(x0 - py, y0 - px, 2 * px + delta, color, alpha);
+				py = y;
+			}
+			px = x;
+		}
+	}
+	void blendCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, float alpha)
+	{
+		blendFastVLine(x0, y0 - r, 2 * r + 1, color, alpha);
+		blendCircleHelper(x0, y0, r, 0b11, 0, color, alpha);
 	}
 
 	virtual void endWrite() override {}
