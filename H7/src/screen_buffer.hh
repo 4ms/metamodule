@@ -47,11 +47,14 @@ public:
 		}
 	}
 
-	virtual void startWrite() override {}
-
-	virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override
+	void fill(Color c)
 	{
-		framebuf[x + y * _width] = color;
+		fastFillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+	}
+
+	void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, Color c)
+	{
+		fillRect(x, y, w, h, c.Rgb565());
 	}
 
 	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
@@ -76,6 +79,7 @@ public:
 			}
 		}
 	}
+
 	void fastFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
 		DMA2D->NLR = h | (w << DMA2D_NLR_PL_Pos);
@@ -115,31 +119,13 @@ public:
 		int16_t max_x = (x + w) > _width ? _width : x + w;
 		int16_t max_y = (h + y) > _height ? _height : y + h;
 
-		if (1) {
-			for (int xi = x; xi < max_x; xi++) {
-				for (int yi = y; yi < max_y; yi++) {
-					draw_blended_pix(xi, yi, color, f_alpha);
-				}
+		for (int xi = x; xi < max_x; xi++) {
+			for (int yi = y; yi < max_y; yi++) {
+				draw_blended_pix(xi, yi, color, f_alpha);
 			}
-		} else {
-			// uint16_t r1 = (color >> 11) * alpha;
-			// uint16_t g1 = ((color >> 5) & 0b111111) * alpha;
-			// uint16_t b1 = (color & 0b11111) * alpha;
-			// const uint8_t inv_alpha = 255 - alpha;
-			// for (int xi = x; xi < max_x; xi++) {
-			// 	for (int yi = y; yi < max_y; yi++) {
-			// 		auto cur_pixel = framebuf[x + y * _width];
-			// 		uint16_t r2 = (cur_pixel >> 11) * inv_alpha;
-			// 		uint16_t g2 = ((cur_pixel >> 5) & 0b111111) * inv_alpha;
-			// 		uint16_t b2 = (cur_pixel & 0b11111) * inv_alpha;
-			// 		uint16_t r = (r1 + r2) >> 8;
-			// 		uint16_t g = (g1 + g2) >> 8;
-			// 		uint16_t b = (b1 + b2) >> 8;
-			// 		framebuf[x + y * _width] = ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | ((b >> 3));
-			// 	}
-			// }
 		}
 	}
+
 	void blendPixel(int16_t x, int16_t y, uint16_t color, float alpha)
 	{
 		if (alpha < (1.f / 64.f))
@@ -149,22 +135,11 @@ public:
 		else
 			draw_blended_pix(x, y, color, alpha);
 	}
-	// constexpr uint16_t _blend_rgb565(const uint16_t color1, const uint16_t color2, const float f_alpha)
-	// {
-	// 	const uint8_t alpha = f_alpha * 255.f;
-	// 	const uint8_t inv_alpha = 255 - alpha;
 
-	// 	uint16_t r1 = (color1 >> 11) * alpha;
-	// 	uint16_t g1 = ((color1 >> 5) & 0b111111) * alpha;
-	// 	uint16_t b1 = (color1 & 0b11111) * alpha;
-	// 	uint16_t r2 = (color2 >> 11) * inv_alpha;
-	// 	uint16_t g2 = ((color2 >> 5) & 0b111111) * inv_alpha;
-	// 	uint16_t b2 = (color2 & 0b11111) * inv_alpha;
-	// 	uint16_t r = (r1 + r2) >> 8;
-	// 	uint16_t g = (g1 + g2) >> 8;
-	// 	uint16_t b = (b1 + b2) >> 8;
-	// 	return ((r & 0b11111000) << 8) | ((g & 0b11111100) << 3) | ((b >> 3));
-	// }
+	virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override
+	{
+		framebuf[x + y * _width] = color;
+	}
 
 	void draw_blended_pix(int16_t x, int16_t y, uint16_t color, float alpha)
 	{
@@ -174,9 +149,7 @@ public:
 
 	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
 	{
-		if (y < 0)
-			return;
-		if (y >= _height)
+		if (y < 0 || y >= _height)
 			return;
 		if (x < 0) {
 			w += x;
@@ -192,9 +165,7 @@ public:
 	}
 	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) override
 	{
-		if (x < 0)
-			return;
-		if (x >= _width)
+		if (x < 0 || x >= _width)
 			return;
 		if (y < 0) {
 			h += y;
@@ -209,23 +180,75 @@ public:
 
 	void blendFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, float alpha)
 	{
-		if ((x < 0) || (x >= _width))
+		if (x < 0 || x >= _width)
 			return;
 		if (y < 0) {
 			h += y;
 			y = 0;
 		}
-		if ((h + y) >= _height)
-			h = _height - y;
+		int16_t max_y = (h + y) > _height ? _height : y + h;
+		uint8_t int_alpha = alpha * 255.f;
 
-		for (int yi = y; yi < (h + y); yi++)
-			blendPixel(x, yi, color, alpha);
+		// Todo measure speed on these:
+		// ..vs the fastest of them, but using floats
+
+		// #1: 4.17ms no div
+		for (int yi = y; yi < max_y; yi++)
+			draw_blended_pix(x, yi, color, alpha);
+
+		// #2: 4.7ms and colors are inverted?
+		// uint8_t inv_alpha = 255 - int_alpha;
+		// uint32_t r1 = ((color & 0xf800)) * int_alpha;
+		// uint32_t g1 = ((color & 0x07e0)) * int_alpha;
+		// uint32_t b1 = ((color & 0x001f)) * int_alpha;
+		// for (int32_t pos = x + y * _width; pos < (x + max_y * _width); pos += _width) {
+		// 	auto cur_pixel = framebuf[pos];
+		// 	uint32_t r2 = ((cur_pixel & 0xf800)) * inv_alpha;
+		// 	uint32_t g2 = ((cur_pixel & 0x07e0)) * inv_alpha;
+		// 	uint32_t b2 = ((cur_pixel & 0x001f)) * inv_alpha;
+		// 	uint16_t r = ((r1 + r2) >> 8);
+		// 	uint16_t g = ((g1 + g2) >> 8);
+		// 	uint16_t b = ((b1 + b2) >> 8);
+		// 	framebuf[pos] = (r & 0x7f00) | (g & 0x07e0) | (b & 0x001f);
+		// }
+
+		// #3: 4.1ms
+		// uint8_t b = (int_alpha + 2) >> 2;
+		// uint8_t a = 64 - b;
+		// uint32_t a_rb1 = (color & Color::MASK_RB) * a;
+		// uint32_t a_g1 = (color & Color::MASK_G) * a;
+
+		// for (int32_t pos = x + y * _width; pos < (x + max_y * _width); pos += _width) {
+		// 	auto cur_pixel = framebuf[pos];
+		// 	uint32_t b_rb2 = (uint32_t)(cur_pixel & Color::MASK_RB) * b;
+		// 	uint32_t b_g2 = (uint32_t)(cur_pixel & Color::MASK_G) * b;
+		// 	framebuf[pos] = (((a_rb1 + b_rb2) & Color::MASK_MUL_RB) | ((a_g1 + b_g2) & Color::MASK_MUL_G)) >> 6;
+		// }
+
+		//#4: 4.0ms
+		// uint8_t _alpha = (int_alpha + 4) >> 3;
+		// uint32_t fg = (color | (color << 16)) & 0b00000111111000001111100000011111;
+		// for (int32_t pos = x + y * _width; pos < (x + max_y * _width); pos += _width) {
+		// 	uint32_t bg = framebuf[pos];
+		// 	bg = (bg | (bg << 16)) & 0b00000111111000001111100000011111;
+		// 	uint32_t result = ((((fg - bg) * _alpha) >> 5) + bg) & 0b00000111111000001111100000011111;
+		// 	framebuf[pos] = (uint16_t)((result >> 16) | result);
+		// }
+	}
+
+	void blendCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, float alpha)
+	{
+		// 3.9ms:
+		// blend64FillCircle(x0, y0, r, color, alpha);
+
+		// #4: 4.0ms
+		blendFastVLine(x0, y0 - r, 2 * r + 1, color, alpha);
+		blendCircleHelper(x0, y0, r, 0b11, 0, color, alpha);
 	}
 
 	void
 	blendCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t corners, int16_t delta, uint16_t color, float alpha)
 	{
-
 		int16_t f = 1 - r;
 		int16_t ddF_x = 1;
 		int16_t ddF_y = -2 * r;
@@ -263,22 +286,70 @@ public:
 			px = x;
 		}
 	}
-	void blendCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, float alpha)
+
+	uint16_t _blend64_helper(uint32_t fg32, uint32_t bg_color, uint8_t alpha64)
 	{
-		blendFastVLine(x0, y0 - r, 2 * r + 1, color, alpha);
-		blendCircleHelper(x0, y0, r, 0b11, 0, color, alpha);
+		uint32_t bg32 = (bg_color | (bg_color << 16)) & 0b00000111111000001111100000011111;
+		uint32_t result = ((((fg32 - bg32) * alpha64) >> 5) + bg32) & 0b00000111111000001111100000011111;
+		return (uint16_t)((result >> 16) | result);
 	}
 
-	virtual void endWrite() override {}
-
-	void fill(Color c)
+	void _blend64_vline(int16_t x, int16_t y_top, int16_t y_bot, uint32_t fg32, uint8_t alpha64)
 	{
-		fastFillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+		if (y_top < 0)
+			y_top = 0;
+		if (y_bot >= _height)
+			y_bot = _height - 1;
+		for (int32_t pos = y_top * _width; pos <= y_bot * _width; pos += _width) {
+			framebuf[x + pos] = _blend64_helper(fg32, framebuf[x + pos], alpha64);
+		}
 	}
 
-	void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, Color c)
+	void _blend64_two_vline(int16_t x1, int16_t x2, int16_t y_top, int16_t y_bot, uint32_t fg32, uint8_t alpha64)
 	{
-		fillRect(x, y, w, h, c.Rgb565());
+		if (y_top < 0)
+			y_top = 0;
+		if (y_bot >= _height)
+			y_bot = _height - 1;
+		for (int32_t pos = y_top * _width; pos <= y_bot * _width; pos += _width) {
+			framebuf[x1 + pos] = _blend64_helper(fg32, framebuf[x1 + pos], alpha64);
+			framebuf[x2 + pos] = _blend64_helper(fg32, framebuf[x2 + pos], alpha64);
+		}
+	}
+
+	void blend64FillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, float alpha)
+	{
+		int16_t f = 1 - r;
+		int16_t ddF_x = 1;
+		int16_t ddF_y = -2 * r;
+		int16_t x = 0;
+		int16_t y = r;
+		int16_t px = x;
+		int16_t py = y;
+		uint8_t int_alpha = alpha * 255.f;
+		uint8_t _alpha = (int_alpha + 4) >> 3;
+		uint32_t fg = (color | (color << 16)) & 0b00000111111000001111100000011111;
+
+		_blend64_vline(x0, y0 - r, y0 + r, fg, _alpha);
+
+		while (x < y) {
+			if (f >= 0) {
+				y--;
+				ddF_y += 2;
+				f += ddF_y;
+			}
+			x++;
+			ddF_x += 2;
+			f += ddF_x;
+			if (x < (y + 1)) {
+				_blend64_two_vline(x0 + x, x0 - x, y0 - y, y0 + y, fg, _alpha);
+			}
+			if (y != py) {
+				_blend64_two_vline(x0 + py, x0 - py, y0 - px, y0 + px, fg, _alpha);
+				py = y;
+			}
+			px = x;
+		}
 	}
 
 	void flush_cache()
@@ -287,6 +358,9 @@ public:
 		SCB_CleanDCache_by_Addr((uint32_t *)(&framebuf[0]), sizeof(ScreenConfT::FrameBufferT));
 #endif
 	}
+
+	virtual void startWrite() override {}
+	virtual void endWrite() override {}
 
 protected:
 	int _rotation;
