@@ -46,9 +46,7 @@ public:
 	Color pots_fgcolor = Colors::green;
 
 	BouncingBall balls[3] = {
-		{100, {220, 30}, {-1, 1}, {239, 239}},
-		{84, {20, 10}, {2, -1}, {239, 239}},
-		{70, {10, 220}, {2, 1}, {239, 239}},
+		{100, {220, 30}, {-1, 1}, {239, 239}}, {84, {20, 10}, {2, -1}, {239, 239}}, {70, {10, 220}, {2, 1}, {239, 239}},
 		// {46, {120, 120}, {2, 3}, {239, 239}},
 		// {28, {120, 120}, {3, 2}, {239, 239}},
 		// {28, {12, 120}, {3, -3}, {239, 239}},
@@ -199,8 +197,8 @@ private:
 			uint16_t xpos = (i & 0b0111) * 240 / 8;
 			uint16_t ypos = i > 7 ? yoffset + 15 : yoffset;
 			auto color = works ? (plugged ? Colors::yellow : Colors::grey) : Colors::black;
-			screen.blendRect(xpos, ypos, 30, 15, color.Rgb565(), 0.75f);
-			// screen.fillRect(xpos, ypos, 30, 15, color);
+			// screen.blendRect(xpos, ypos, 30, 15, color.Rgb565(), 0.75f);
+			screen.fillRect(xpos, ypos, 30, 15, color);
 			screen.setCursor(xpos + 6, ypos + 4);
 			screen.print(names[i]);
 		}
@@ -212,8 +210,8 @@ private:
 		for (auto &ball : balls) {
 			ball.update();
 			auto pos = ball.get_pos();
-			screen.blendCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565(), 0.25f);
-			// screen.fillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565());
+			// screen.blendCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565(), 0.25f);
+			screen.fillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565());
 			i++;
 		}
 	}
