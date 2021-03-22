@@ -17,7 +17,7 @@ export TABLEGEN 		= $(SHARED)/tableGen
 all: 
 	@$(MAKE) --no-print-directory -f makefile_m7.mk
 	@$(MAKE) --no-print-directory -f makefile_m4.mk
-	@$(MAKE) tests
+	@$(MAKE) --no-print-directory tests
 
 
 clean:
@@ -52,23 +52,20 @@ tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 tests: H7_tests core_tests util_tests mdrivlib_tests #proc_tests
 
 H7_tests:
-	@echo ">>>>> Running H7 tests...."
+	$(info ... Running H7 tests....)
 	@$(MAKE) --no-print-directory -f tests/Makefile
 
 mdrivlib_tests:
-	@echo "Running mdrivlib tests...."
+	$(info ... Running mdrivlib tests ...)
 	@cd $(DRIVERLIB) && $(MAKE) --no-print-directory -f tests/Makefile
 
 util_tests:
-	@echo ">>>>>> Running shared/util tests...."
+	$(info ... Running shared/util tests ...)
 	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile
 
 core_tests:
-	@echo ">>>>>> Running CoreModule tests...."
+	$(info ... Running CoreModule tests ...)
 	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile
-
-# proc_tests:
-# 	cd $(SHARED)/processors/tests && make tests
 
 generate_compile_txt:
 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \

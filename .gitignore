@@ -27,3 +27,5 @@ H7/compile_commands.json.compdb
 shared/tests/doctest.h
 
 shared/CoreModules/tests/doctest.h
+
+vcv/tests/doctest.h

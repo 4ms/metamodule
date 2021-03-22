@@ -26,6 +26,12 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
 
+all: $(TARGET)
+	@$(MAKE) --no-print-directory tests
+
+run: install
+	$(shell $(RACK_DIR)/Rack &)
+	
 compile_commands:
 	rm -rf build
 	bear make -j16 all
@@ -36,16 +42,16 @@ compile_commands:
 tests: core_tests util_tests vcv_tests
 
 core_tests:
-	$(info >>>>>> Running CoreModule tests....)
+	$(info ... Running CoreModule tests ...)
 	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile
 
 util_tests:
-	$(info >>>>>> Running shared/util tests....)
+	$(info ... Running shared/util tests ...)
 	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile
 
 vcv_tests:
-	$(info >>>>>> Running vcv plugin tests....)
-	$(MAKE) -f tests/Makefile
+	$(info ... Running vcv plugin tests ...)
+	@$(MAKE) --no-print-directory -f tests/Makefile
 
 .PHONY: tests core_tests vcv_tests util_tests
 

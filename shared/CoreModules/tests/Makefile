@@ -32,6 +32,8 @@ OBJECTS = $(addprefix $(BUILDDIR)/, $(subst ../,,$(addsuffix .o, $(basename $(TE
 DEPDIR := $(BUILDDIR)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(subst ../,,$(basename $<).d)
 
+TMPFILE = $(BUILDDIR)/runtests.out
+
 .PHONY: all tests clean
 
 all: $(DOCTESTHEADER_DIR)/doctest.h tests
@@ -58,7 +60,7 @@ $(BUILDDIR)/%.o: %.cpp
 	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
 tests: $(BUILDDIR)/runtests
-	$(BUILDDIR)/runtests
+	@$(BUILDDIR)/runtests --out=$(TMPFILE) && echo "[√] Unit tests passed: $(notdir $(PWD))" || cat $(TMPFILE)
 
 $(BUILDDIR)/runtests: $(OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)

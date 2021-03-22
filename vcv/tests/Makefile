@@ -1,9 +1,8 @@
-#this is meant to be run from PROJECT_ROOT/vcv/ or PROJECT_ROOT/F7/, 
-#and there should be ./src/shared/doctest/doctest/doctest.h
+# This is meant to be run from the vcv/ dir
+# make -f tests/Makefile
 
-DOCTEST_DIR ?= src/shared/doctest/doctest
 TEST_DIR ?= tests
-
+DOCTESTHEADER_DIR ?= $(TEST_DIR)
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cpp)
@@ -12,26 +11,62 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 
-BUILDDIR = build
-
-.PHONY: tests clean FORCE
+BUILDDIR = $(TEST_DIR)/build
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
 			-stdlib=libc++ \
 			-I$(DOCTEST_DIR) \
+			-I../src\
 			-Isrc\
 			-Isrc/shared \
+			-DTESTPROJECT \
+
+### Boilerplate below here:
+
+CXX = clang++
+LDFLAGS = -lstdc++
+OBJECTS = $(addprefix $(BUILDDIR)/, $(subst ../,,$(addsuffix .o, $(basename $(TEST_SOURCES)))))
+DEPDIR := $(BUILDDIR)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(subst ../,,$(basename $<).d)
+
+.PHONY: all tests clean
+
+TMPFILE = $(BUILDDIR)/runtests.out
+
+all: $(DOCTESTHEADER_DIR)/doctest.h tests
+
+$(BUILDDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	@$(CC) -c $(DEPFLAGS) $(CFLAGS) $< -o $@
+
+$(BUILDDIR)/%.o: %.cc
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+
+$(BUILDDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(info Building $<)
+	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
 tests: $(BUILDDIR)/runtests
-	$(BUILDDIR)/runtests
+	@$(BUILDDIR)/runtests --out=$(TMPFILE) && echo "[√] Unit tests passed: $(notdir $(PWD))" || cat $(TMPFILE)
 
-#Todo: build test sources individually into .o files, and use -MM -MF -MMD to check dependencies
-$(BUILDDIR)/runtests: $(TEST_SOURCES) FORCE
-	@mkdir -p $(@D)
-	clang++ $(CXXFLAGS) $(TEST_SOURCES) -o $(BUILDDIR)/runtests
+$(BUILDDIR)/runtests: $(OBJECTS)
+	@$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
+
+$(DOCTESTHEADER_DIR)/doctest.h:
+	wget https://raw.githubusercontent.com/onqtam/doctest/master/doctest/doctest.h -P $(DOCTESTHEADER_DIR)/
 
 clean:
 	rm -rf $(BUILDDIR)
 
+$(DEPDIR): ; @mkdir -p $@
+
+DEPFILES := $(addprefix $(DEPDIR)/, $(addsuffix .d, $(basename $(TEST_SOURCES))))
+$(DEPFILES):
+
+include $(wildcard $(DEPFILES))
 
