@@ -53,10 +53,10 @@ static const Patch exampleDrum = {
 	.num_static_knobs = 12,
 
 	.mapped_knobs = {{
-		{.module_id = 2, .param_id = 1, .panel_knob_id = 1},
-		{.module_id = 1, .param_id = 0, .panel_knob_id = 3},
 		{.module_id = 2, .param_id = 0, .panel_knob_id = 0},
+		{.module_id = 2, .param_id = 1, .panel_knob_id = 1},
 		{.module_id = 2, .param_id = 2, .panel_knob_id = 2},
+		{.module_id = 1, .param_id = 0, .panel_knob_id = 3},
 		{.module_id = 2, .param_id = 3, .panel_knob_id = 4},
 	}},
 	.num_mapped_knobs = 5,

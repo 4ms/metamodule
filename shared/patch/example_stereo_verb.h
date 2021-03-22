@@ -1,6 +1,6 @@
 #include "patch.hh"
 static const Patch example_stereo_verb = {
-	.patch_name = "Stereo Reverb",
+	.patch_name = "Stereo 'Verb",
 	.modules_used =
 		{
 			"PANEL_8",

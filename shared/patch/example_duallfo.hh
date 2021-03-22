@@ -1,6 +1,6 @@
 #include "patch.hh"
 const Patch exampleDualLFO = {
-	.patch_name = "Dual Sine LFO",
+	.patch_name = "Dual SineLFO",
 	.modules_used =
 		{
 			"PANEL_8",
@@ -61,12 +61,12 @@ const Patch exampleDualLFO = {
 	.num_static_knobs = 6,
 
 	.mapped_knobs = {{
-		{.module_id = 2, .param_id = 0, .panel_knob_id = 0},
-		{.module_id = 1, .param_id = 0, .panel_knob_id = 1},
-		{.module_id = 2, .param_id = 2, .panel_knob_id = 2},
-		{.module_id = 1, .param_id = 2, .panel_knob_id = 3},
-		{.module_id = 2, .param_id = 1, .panel_knob_id = 4},
-		{.module_id = 1, .param_id = 1, .panel_knob_id = 5},
+		{.module_id = 1, .param_id = 0, .panel_knob_id = 0},
+		{.module_id = 2, .param_id = 0, .panel_knob_id = 1},
+		{.module_id = 1, .param_id = 2, .panel_knob_id = 2},
+		{.module_id = 2, .param_id = 2, .panel_knob_id = 3},
+		{.module_id = 1, .param_id = 1, .panel_knob_id = 4},
+		{.module_id = 2, .param_id = 1, .panel_knob_id = 5},
 	}},
 	.num_mapped_knobs = 6,
 
