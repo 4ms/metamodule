@@ -1,5 +1,6 @@
 #include "patch.hh"
 static const Patch fadedelay_example = {
+	.patch_name = "Stereo Delay",
 	.modules_used =
 		{
 			"PANEL_8",

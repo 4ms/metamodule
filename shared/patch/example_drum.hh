@@ -1,5 +1,6 @@
 #include "patch.hh"
 static const Patch exampleDrum = {
+	.patch_name = "LFO + Drum",
 	.modules_used =
 		{
 			"PANEL_8",

@@ -1,5 +1,6 @@
 #include "patch.hh"
 const Patch exampleDualLFO = {
+	.patch_name = "Dual Sine LFO",
 	.modules_used =
 		{
 			"PANEL_8",

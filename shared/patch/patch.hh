@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/moduleTypes.h"
 #include "CoreModules/panel.hh"
-#include <vector>
+#include "util/static_string.hh"
 
 // #define USE_NODES
 
@@ -45,6 +45,7 @@ using StaticParamList = std::array<StaticParam, MAX_PARAMS_IN_PATCH>;
 using MappedParamList = std::array<MappedParam, Panel::NumKnobs>;
 
 struct Patch {
+	StaticString<30> patch_name;
 	ModuleList modules_used;
 	int num_modules;
 
@@ -68,4 +69,3 @@ struct PatchRef {
 
 	const Patch &patch;
 };
-

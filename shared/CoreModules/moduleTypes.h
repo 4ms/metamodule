@@ -1,55 +1,10 @@
 #pragma once
 #include "coreProcessor.h"
-#include "string.h"
+#include "util/static_string.hh"
 #include <array>
-#include <memory>
-#include <string>
+#include <string.h>
 
-#if !defined(STM32F7) && !defined(STM32H7)
-	#define HAS_STD_STRING
-#endif
-
-struct ModuleTypeSlug {
-	static const size_t kStringLen = 20;
-	char name[kStringLen];
-
-	ModuleTypeSlug()
-	{
-		name[0] = '\0';
-	}
-
-	ModuleTypeSlug(const char *s)
-	{
-		for (size_t i = 0; i < kStringLen; i++) {
-			if (i < strlen(s))
-				name[i] = s[i];
-			else
-				name[i] = '\0';
-		}
-		name[kStringLen - 1] = '\0';
-	}
-#if defined(HAS_STD_STRING)
-	ModuleTypeSlug(const std::string s)
-	{
-		for (size_t i = 0; i < kStringLen; i++) {
-			if (i < s.length())
-				name[i] = s.c_str()[i];
-			else
-				name[i] = '\0';
-		}
-		name[kStringLen - 1] = '\0';
-	}
-#endif
-
-	bool operator==(const ModuleTypeSlug &rhs) const
-	{
-		for (size_t i = 0; i < kStringLen; i++) {
-			if (this->name[i] != rhs.name[i])
-				return false;
-		}
-		return true;
-	}
-};
+using ModuleTypeSlug = StaticString<20>;
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
@@ -66,7 +21,7 @@ public:
 			already_exists = false;
 			id = next_id;
 			next_id++;
-			strcpy(module_slugs[id], typeslug.name);
+			module_slugs[id] = typeslug;
 		}
 #if defined(HAS_STD_STRING)
 		module_names[id] = name;
@@ -88,7 +43,7 @@ public:
 			already_exists = false;
 			new_id = next_id;
 			next_id++;
-			strcpy(module_slugs[new_id], typeslug.name);
+			module_slugs[new_id] = typeslug;
 		}
 #if defined(HAS_STD_STRING)
 		module_names[new_id] = name;
@@ -124,8 +79,7 @@ public:
 		return nullptr;
 	}
 
-#if defined(HAS_STD_STRING)
-	static std::string getModuleTypeName(ModuleTypeSlug typeslug)
+	static const char *getModuleTypeName(ModuleTypeSlug typeslug)
 	{
 		int id = getTypeID(typeslug);
 		if (id >= 0)
@@ -133,9 +87,8 @@ public:
 
 		return "Not found.";
 	}
-#endif
 
-	static std::string getModuleSlug(ModuleTypeSlug typeslug)
+	static const char *getModuleSlug(ModuleTypeSlug typeslug)
 	{
 		int id = getTypeID(typeslug);
 		if (id >= 0)
@@ -175,7 +128,7 @@ public:
 	{
 		for (int i = 0; i < MAX_MODULE_TYPES; i++) {
 			auto &slug = module_slugs[i];
-			if (strcmp(slug, typeslug.name) == 0)
+			if (slug == typeslug)
 				return i;
 		}
 		return -1;
@@ -185,10 +138,8 @@ private:
 	static inline const int MAX_MODULE_TYPES = 256;
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline std::array<CreateModuleFuncWithParams, MAX_MODULE_TYPES> creation_funcs_wp;
-	static inline std::array<char[20], MAX_MODULE_TYPES> module_slugs;
-#if defined(HAS_STD_STRING)
-	static inline std::array<std::string, MAX_MODULE_TYPES> module_names;
-#endif
+	static inline std::array<StaticString<20>, MAX_MODULE_TYPES> module_slugs;
+	static inline std::array<StaticString<40>, MAX_MODULE_TYPES> module_names;
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> output_jack_offsets;
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> total_jacks;
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> total_params;

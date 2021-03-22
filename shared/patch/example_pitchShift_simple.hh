@@ -1,5 +1,6 @@
 #include "patch.hh"
 const Patch examplePitchShiftSimple = {
+	.patch_name = "PitchShift + LFO",
 	.modules_used =
 		{
 			"PANEL_8",
