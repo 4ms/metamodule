@@ -46,11 +46,11 @@ TEST_CASE("ids are re-arranged properly")
 	SUBCASE("modules_used starts with PANEL, but otherwise is in order")
 	{
 		pw.createPatch();
-		CHECK(p.modules_used[0].name[0] == 'P');
-		CHECK(p.modules_used[1].name[0] == 'A');
-		CHECK(p.modules_used[2].name[0] == 'B');
-		CHECK(p.modules_used[3].name[0] == 'D');
-		CHECK(p.modules_used[4].name[0] == 'E');
+		CHECK(p.modules_used[0].cstr()[0] == 'P');
+		CHECK(p.modules_used[1].cstr()[0] == 'A');
+		CHECK(p.modules_used[2].cstr()[0] == 'B');
+		CHECK(p.modules_used[3].cstr()[0] == 'D');
+		CHECK(p.modules_used[4].cstr()[0] == 'E');
 	}
 
 	SUBCASE("Static Knob List is in order")

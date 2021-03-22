@@ -2,6 +2,7 @@
 RACK_DIR ?= ../..
 
 SHARED_DIR = src/shared
+SHARED = $(SHARED_DIR)
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS += -std=c++17 -Isrc -I$(SHARED_DIR)/util -I$(SHARED_DIR)/processors -I$(SHARED_DIR)/CoreModules -I$(SHARED_DIR)/patch -I$(SHARED_DIR)
@@ -32,21 +33,19 @@ compile_commands:
 	rm compile_commands.json 
 	mv compile_commands_with_headers.json compile_commands.json
 
-tests: core_tests vcv_tests
+tests: core_tests util_tests vcv_tests
 
 core_tests:
-	@echo
-	@echo "----------------------------"
-	@echo "Running CoreModule tests...."
-	@echo "----------------------------"
-	cd $(SHARED_DIR) && $(MAKE) -j16 -f CoreModules/tests/Makefile
+	$(info >>>>>> Running CoreModule tests....)
+	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile
+
+util_tests:
+	$(info >>>>>> Running shared/util tests....)
+	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile
 
 vcv_tests:
-	@echo
-	@echo "----------------------------"
-	@echo "Running vcv plugin tests...."
-	@echo "----------------------------"
+	$(info >>>>>> Running vcv plugin tests....)
 	$(MAKE) -f tests/Makefile
 
-.PHONY: tests core_tests vcv_tests
+.PHONY: tests core_tests vcv_tests util_tests
 
