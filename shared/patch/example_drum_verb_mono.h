@@ -1,5 +1,6 @@
 #include "patch.hh"
 static const Patch example_drum_verb_mono = {
+	.patch_name = "Reverb Drum",
 	.modules_used =
 		{
 			"PANEL_8",

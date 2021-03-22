@@ -1,5 +1,6 @@
 #include "patch.hh"
 static const Patch exampleKarplus = {
+	.patch_name = "Stereo Karplus-Strong",
 	.modules_used =
 		{
 			"PANEL_8",
