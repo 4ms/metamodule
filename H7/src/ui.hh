@@ -1,5 +1,6 @@
 #pragma once
 #include "Adafruit_GFX_Library/Fonts/FreeMono12pt7b.h"
+#include "Adafruit_GFX_Library/Fonts/FreeSans9pt7b.h"
 #include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
 #include "bouncing_ball.hh"
@@ -17,31 +18,37 @@
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
 
-constexpr bool ENABLE_BOUNCING_BALL_DEMO = true;
+constexpr bool ENABLE_BOUNCING_BALL_DEMO = false;
 
 namespace MetaModule
 {
 template<unsigned AnimationUpdateRate = 100>
 class Ui {
 public:
-	Params &params;
 	PatchList &patch_list;
+	PatchPlayer &player;
 	LedFrame<AnimationUpdateRate> &leds;
+	Params &params;
 	ScreenFrameBuffer screen;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
-	Ui(Params &p, PatchList &pl, LedFrame<AnimationUpdateRate> l, MMScreenConf::FrameBufferT &screenbuf)
-		: params{p}
-		, patch_list{pl}
+	Ui(PatchList &pl,
+	   PatchPlayer &pp,
+	   LedFrame<AnimationUpdateRate> &l,
+	   Params &p,
+	   MMScreenConf::FrameBufferT &screenbuf)
+		: patch_list{pl}
+		, player{pp}
 		, leds{l}
+		, params{p}
 		, screen{screenbuf}
 	{}
 
 	Color bgcolor = Colors::pink;
-	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
+	Color patch_fgcolor = Colors::blue.blend(Colors::black, 0.5f);
 	Color load_fgcolor = Colors::blue;
 	Color pots_fgcolor = Colors::black;
 
@@ -61,7 +68,6 @@ public:
 	{
 		screen.init();
 		screen.fill(bgcolor);
-		draw_patch_name();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -100,6 +106,7 @@ public:
 		draw_pot_values();
 		draw_patch_name();
 		draw_jack_senses();
+		draw_knob_map();
 		screen.flush_cache();
 		Debug::Pin3::low();
 		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
@@ -133,12 +140,43 @@ private:
 		leds.update_animation();
 	}
 
+	void draw_knob_map()
+	{
+		screen.setFont(&FreeSans9pt7b);
+		screen.setTextSize(1);
+		screen.setTextWrap(false);
+		const uint16_t line_height = 16;
+		const char knob_name[8][2] = {"A", "B", "C", "D", "a", "b", "c", "d"};
+		auto &cur_patch = patch_list.cur_patch();
+
+		for (int i = 0; i < cur_patch.num_mapped_knobs; i++) {
+			auto &knob = cur_patch.mapped_knobs[i];
+
+			screen.setTextColor(Colors::black.Rgb565());
+			screen.setCursor(2, 50 + line_height * i);
+			screen.print(knob_name[knob.panel_knob_id]);
+			screen.print(" = ");
+
+			screen.setTextColor(Colors::white.blend(Colors::black, 0.25f).Rgb565());
+			screen.print(ModuleFactory::getModuleTypeName(cur_patch.modules_used[knob.module_id]));
+			screen.print(" #");
+			screen.print(knob.module_id);
+
+			screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f).Rgb565());
+			if (player.is_loaded) {
+				screen.print(": ");
+				screen.print(player.modules[knob.module_id]->knob_name(knob.param_id));
+			}
+		}
+	}
+
 	void draw_patch_name()
 	{
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
-		screen.setCursor(4, 60);
+		screen.setCursor(2, 30);
+		screen.setTextWrap(false);
 		screen.print(patch_list.cur_patch().patch_name);
 	}
 
@@ -147,11 +185,14 @@ private:
 		screen.setTextColor(load_fgcolor.Rgb565());
 		screen.setTextSize(2);
 		screen.setFont(NULL);
-		screen.setCursor(0, 10);
+		screen.setCursor(200, 225);
 		screen.print(patch_list.audio_load, 10);
 		screen.print("% ");
+		screen.setTextSize(1);
+		screen.setCursor(175, 224);
 		screen.print(get_heap_size() / 1024, 10);
 		screen.print("kb ");
+		screen.setCursor(175, 232);
 		screen.print(BigAlloc<Ui>::get_memory_usage() / 1024, 10);
 		screen.print("kb   ");
 	}
@@ -161,11 +202,11 @@ private:
 		screen.setTextColor(pots_fgcolor.Rgb565());
 		screen.setTextSize(1);
 		screen.setFont(NULL);
-		int y = 210;
+		int y = 214;
 		const int box_height = 15;
 		const int box_width = 30;
 		for (int i = 0; i < 12; i++) {
-			screen.setCursor((i & 0b111) * box_width, y);
+			screen.setCursor((i & 0b111) * box_width + 3, y);
 			if (i >= 8)
 				screen.print((int16_t)(params.cvjacks[i - 8] * 100));
 			else
@@ -185,7 +226,7 @@ private:
 		const uint16_t yoffset = 180;
 		const uint16_t box_height = 15;
 		const uint16_t box_width = 240 / 8;
-		const float box_alpha = 0.75f;
+		const float box_alpha = 0.85f;
 
 		const unsigned pin_order[15] = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 4, 5, 14};
 		const char names[15][5] = {"CVA",
@@ -222,7 +263,6 @@ private:
 		for (auto &ball : balls) {
 			ball.update();
 			auto pos = ball.get_pos();
-			// screen.blendCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565(), 0.25f);
 			screen.fillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565());
 			i++;
 		}

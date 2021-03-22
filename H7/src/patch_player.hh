@@ -9,7 +9,7 @@
 using PanelT = NodePanel;
 
 class PatchPlayer {
-private:
+public:
 	bool is_loaded = false;
 	std::array<float, MAX_NODES_IN_PATCH> nodes;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
