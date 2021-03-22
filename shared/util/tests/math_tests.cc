@@ -167,6 +167,29 @@ TEST_CASE("Testing randomNumber()")
 			CHECK(num_high_x == 0);
 		}
 	}
+
+	SUBCASE("Roughly equal distribution")
+	{
+		int reps = 100;
+		unsigned cnt[3] = {0, 0, 0};
+		while (reps--) {
+			auto x = MathTools::randomNumber<unsigned int>(1, 11);
+			if (x == 1)
+				cnt[0]++;
+			if (x == 5)
+				cnt[1]++;
+			if (x == 10)
+				cnt[2]++;
+		}
+		// on average, each one should get 10 counts
+		// ..let's say it can be +/-7
+		CHECK(cnt[0] > 3);
+		CHECK(cnt[1] > 3);
+		CHECK(cnt[2] > 3);
+		CHECK(cnt[0] < 17);
+		CHECK(cnt[1] < 17);
+		CHECK(cnt[2] < 17);
+	}
 }
 TEST_CASE("math_tests: wrapping")
 {

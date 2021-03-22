@@ -52,7 +52,7 @@ inline float interpolate(float in1, float in2, float phase)
 template<class T>
 T randomNumber(T minNum, T maxNum)
 {
-	return map_value(std::rand(), 0, RAND_MAX, minNum, maxNum);
+	return map_value<int, long, T>(std::rand(), 0, RAND_MAX, minNum, maxNum);
 }
 
 template<unsigned int N>
@@ -70,7 +70,7 @@ constexpr bool is_power_of_2(unsigned int v)
 	return v && ((v & (v - 1)) == 0);
 }
 
-//Todo: log2_ceiling()
+// Todo: log2_ceiling()
 
 constexpr unsigned int log2_floor(const unsigned int x)
 {
