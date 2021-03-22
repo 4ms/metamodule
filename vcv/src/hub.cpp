@@ -42,6 +42,9 @@ struct Expander : public CommModule {
 				printDebugFile();
 
 				Patch patch;
+				std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
+				patch.patch_name = randomname.c_str();
+				// patch.patch_name = "Unnamed Patch";
 				createPatchStruct(patch);
 				writeToFile(examplePatchDir + "example1.hh", PatchWriter::printPatchStructText("Example1", patch));
 

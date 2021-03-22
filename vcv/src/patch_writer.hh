@@ -194,11 +194,16 @@ public:
 		generateNodeList();
 	}
 
-	static std::string printPatchStructText(std::string patchName, const Patch &patch)
+	static std::string printPatchStructText(std::string patchStructName, const Patch &patch)
 	{
 		std::string s;
 		s = "#include \"patch.hh\"\n";
-		s += "static const Patch " + patchName + " = { \n";
+		s += "static const Patch " + patchStructName + " = { \n";
+
+		// Patch name
+		s += "    .patch_name = \"";
+		s += patch.patch_name;
+		s += "\",\n";
 
 		// Module List
 		s += "    .modules_used = {\n";
