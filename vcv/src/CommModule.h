@@ -8,6 +8,7 @@
 class CommModule : public Module {
 public:
 	std::function<void(void)> updateDisplay;
+	std::function<void(void)> updatePatchName;
 	std::string DEBUGSTR = "";
 
 protected:
