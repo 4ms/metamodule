@@ -57,7 +57,7 @@ public:
 		int i = 1;
 		vcv_mod_ids.push_back(-1);
 		for (auto &mod : moduleData) {
-			if (strcmp(mod.typeID.name, "PANEL_8") == 0) {
+			if (strcmp(mod.typeID.cstr(), "PANEL_8") == 0) {
 				p.modules_used[0] = mod.typeID;
 				vcv_mod_ids[0] = mod.id;
 			} else {
@@ -204,7 +204,7 @@ public:
 		s += "    .modules_used = {\n";
 		for (int i = 0; i < patch.num_modules; i++) {
 			s += "        \"";
-			s += patch.modules_used[i].name;
+			s += patch.modules_used[i].cstr();
 			s += "\",\n";
 		}
 		s += "    },\n";
@@ -215,7 +215,7 @@ public:
 		s += "    .module_nodes = {{\n";
 		for (int i = 0; i < patch.num_modules; i++) {
 			s += "        // ";
-			s += patch.modules_used[i].name;
+			s += patch.modules_used[i].cstr();
 			s += "\n";
 			s += "        {";
 			for (int j = 0; j < MAX_JACKS_PER_MODULE; j++) {
@@ -324,4 +324,3 @@ private:
 		}
 	}
 };
-

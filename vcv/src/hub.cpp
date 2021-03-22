@@ -96,10 +96,12 @@ private:
 	{
 		for (auto &mod : centralData->moduleData) {
 			str += "Module slug in centralData = ";
-			str += mod.typeID.name;
+			str += mod.typeID;
 			str += ". CoreModule slug = ";
 			str += ModuleFactory::getModuleSlug(mod.typeID);
-			str += " (" + ModuleFactory::getModuleTypeName(mod.typeID) + ") ";
+			str += " (";
+			str += ModuleFactory::getModuleTypeName(mod.typeID);
+			str += ") ";
 			str += ". VCV Rack unique ID = " + std::to_string(mod.id) + "\n";
 		}
 	}

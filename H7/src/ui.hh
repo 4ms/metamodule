@@ -145,7 +145,7 @@ private:
 		uint32_t y = 60;
 		for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
 			screen.setCursor(10, y);
-			screen.print(patch_list.cur_patch().modules_used[i].name);
+			screen.print(patch_list.cur_patch().modules_used[i]);
 			y += 35;
 		}
 	}
