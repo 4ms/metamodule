@@ -23,9 +23,7 @@ public:
 			next_id++;
 			module_slugs[id] = typeslug;
 		}
-#if defined(HAS_STD_STRING)
 		module_names[id] = name;
-#endif
 		creation_funcs[id] = funcCreate;
 		return already_exists;
 	}
@@ -45,9 +43,7 @@ public:
 			next_id++;
 			module_slugs[new_id] = typeslug;
 		}
-#if defined(HAS_STD_STRING)
 		module_names[new_id] = name;
-#endif
 		output_jack_offsets[new_id] = numInputJacks;
 		total_jacks[new_id] = numInputJacks + numOutputJacks;
 		total_params[new_id] = numParams;
