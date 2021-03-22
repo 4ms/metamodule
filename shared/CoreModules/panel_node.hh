@@ -8,18 +8,6 @@ public:
 	static inline constexpr int NumInJacks = 6;
 	static inline constexpr int NumOutJacks = 2;
 	static inline constexpr int NumKnobs = 8;
-	virtual int get_num_inputs() const override
-	{
-		return NumInJacks;
-	}
-	virtual int get_num_outputs() const override
-	{
-		return NumOutJacks;
-	}
-	virtual int get_num_params() const override
-	{
-		return NumKnobs;
-	}
 
 	RefParameter<float> outputs[NumOutJacks];
 	RefParameter<float> inputs[NumInJacks];
@@ -117,4 +105,3 @@ public:
 
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 };
-
