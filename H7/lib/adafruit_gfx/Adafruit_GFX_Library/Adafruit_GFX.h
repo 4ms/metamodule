@@ -8,7 +8,7 @@
 #include "WProgram.h"
 // #endif
 #include "gfxfont.h"
-#include <cstddef>
+#include <stdint.h>
 
 /// A generic graphics superclass that can handle all sorts of drawing. At a
 /// minimum you can subclass and provide drawPixel(). At a maximum you can do a
