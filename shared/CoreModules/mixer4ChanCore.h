@@ -66,7 +66,7 @@ public:
 			nodes[idx[0]], nodes[idx[1]], nodes[idx[2]], nodes[idx[3]], nodes[idx[4]], nodes[idx[5]]);
 	}
 	static constexpr char typeID[20] = "MIXER4";
-	static constexpr char description[] = "(node) Mixer - 4 channel";
+	static constexpr char description[] = "Mixer";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 	static inline bool s_registered_wp =
 		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);
@@ -77,4 +77,3 @@ private:
 
 	float levels[4] = {0, 0, 0, 0};
 };
-

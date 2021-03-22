@@ -23,15 +23,21 @@ public:
 	// clang-format off
 	virtual float get_led_brightness(const int led_id) const { return 0; }
 
+	static constexpr size_t NameChars = 15;
+	static constexpr size_t LongNameChars = 40;
+
 	static constexpr unsigned NumKnobs = 0;
 	static constexpr unsigned NumOutJacks = 0;
 	static constexpr unsigned NumInJacks = 0;
-	static inline const std::array<StaticString<15>, NumKnobs> KnobNames{};
-	static inline const std::array<StaticString<15>, NumOutJacks> OutJackNames{};
-	static inline const std::array<StaticString<15>, NumInJacks> InJackNames{};
-	virtual StaticString<15> knob_name(unsigned idx) {  return (idx < NumKnobs) ? KnobNames[idx] : ""; }
-	virtual StaticString<15> injack_name(unsigned idx) {  return (idx < NumInJacks) ? InJackNames[idx] : ""; }
-	virtual StaticString<15> outjack_name(unsigned idx) {  return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{};
+	virtual StaticString<NameChars> knob_name(unsigned idx) { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+
+	static inline const StaticString<LongNameChars> description{};
+	virtual StaticString<LongNameChars> get_description() { return description; }
 	// clang-format on
 
 	virtual void mark_all_inputs_unpatched() {}

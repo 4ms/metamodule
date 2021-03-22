@@ -106,7 +106,8 @@ public:
 		draw_pot_values();
 		draw_patch_name();
 		draw_jack_senses();
-		draw_knob_map();
+		// draw_knob_map();
+		draw_jack_map();
 		screen.flush_cache();
 		Debug::Pin3::low();
 		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
@@ -149,6 +150,7 @@ private:
 		const char knob_name[8][2] = {"A", "B", "C", "D", "a", "b", "c", "d"};
 		auto &cur_patch = patch_list.cur_patch();
 
+			if (player.is_loaded) {
 		for (int i = 0; i < cur_patch.num_mapped_knobs; i++) {
 			auto &knob = cur_patch.mapped_knobs[i];
 
@@ -157,15 +159,59 @@ private:
 			screen.print(knob_name[knob.panel_knob_id]);
 			screen.print(" = ");
 
-			screen.setTextColor(Colors::white.blend(Colors::black, 0.25f).Rgb565());
-			screen.print(ModuleFactory::getModuleTypeName(cur_patch.modules_used[knob.module_id]));
+			screen.setTextColor(Colors::white.blend(Colors::black, 0.75f).Rgb565());
+			screen.print(player.modules[knob.module_id]->get_description());
 			screen.print(" #");
 			screen.print(knob.module_id);
 
 			screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f).Rgb565());
-			if (player.is_loaded) {
 				screen.print(": ");
 				screen.print(player.modules[knob.module_id]->knob_name(knob.param_id));
+			}
+		}
+	}
+
+	void draw_jack_map()
+	{
+		screen.setFont(&FreeSans9pt7b);
+		screen.setTextSize(1);
+		screen.setTextWrap(false);
+		int y = 50;
+		const uint16_t line_height = 16;
+		const int num_jacks = 8;
+		const char jack_name[num_jacks][5] = {"CV A", "CV B", "CV C", "CV D", "InL", "InR", "OutL", "OutR"};
+		auto &cur_patch = patch_list.cur_patch();
+
+		if (player.is_loaded) {
+			int num_ins = player.get_num_panel_inputs();
+			for (int i = 0; i < num_jacks; i++) {
+				Jack jack;
+				if (i < num_ins)
+					jack = player.get_panel_input_connection(i);
+				else
+					jack = player.get_panel_output_connection(i - num_ins);
+
+				if (jack.module_id == 0)
+					continue;
+
+				screen.setTextColor(Colors::black.Rgb565());
+				screen.setCursor(2, y);
+				y += line_height;
+				screen.print(jack_name[i]);
+				screen.print(": ");
+
+				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f).Rgb565());
+				if (i < num_ins)
+					screen.print(player.modules[jack.module_id]->injack_name(jack.jack_id));
+				else
+					screen.print(player.modules[jack.module_id]->outjack_name(jack.jack_id));
+
+				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f).Rgb565());
+				screen.print(" (");
+				screen.print(player.modules[jack.module_id]->get_description());
+				screen.print(" #");
+				screen.print(jack.module_id);
+				screen.print(")");
 			}
 		}
 	}
