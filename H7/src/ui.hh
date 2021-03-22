@@ -43,22 +43,18 @@ public:
 	Color bgcolor = Colors::pink;
 	Color patch_fgcolor = Colors::blue.blend(Colors::white, 0.5f);
 	Color load_fgcolor = Colors::blue;
-	Color pots_fgcolor = Colors::green;
+	Color pots_fgcolor = Colors::black;
 
 	BouncingBall balls[3] = {
-		{100, {220, 30}, {-1, 1}, {239, 239}}, {84, {20, 10}, {2, -1}, {239, 239}}, {70, {10, 220}, {2, 1}, {239, 239}},
-		// {46, {120, 120}, {2, 3}, {239, 239}},
-		// {28, {120, 120}, {3, 2}, {239, 239}},
-		// {28, {12, 120}, {3, -3}, {239, 239}},
+		{60, {220, 30}, {-1, 1}, {239, 239}},
+		{50, {20, 10}, {2, -1}, {239, 239}},
+		{40, {10, 220}, {2, 3}, {239, 239}},
 	};
 
-	Color ball_colors[6] = {
+	Color ball_colors[3] = {
 		Colors::red,
 		Colors::black,
-		Colors::white,
-		Colors::magenta,
 		Colors::orange,
-		Colors::blue,
 	};
 
 	void start()
@@ -142,12 +138,8 @@ private:
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(patch_fgcolor.Rgb565());
 		screen.setTextSize(1);
-		uint32_t y = 60;
-		for (int i = 1; i < patch_list.cur_patch().num_modules; i++) {
-			screen.setCursor(10, y);
-			screen.print(patch_list.cur_patch().modules_used[i]);
-			y += 35;
-		}
+		screen.setCursor(4, 60);
+		screen.print(patch_list.cur_patch().patch_name);
 	}
 
 	void draw_audio_load()
@@ -167,39 +159,59 @@ private:
 	void draw_pot_values()
 	{
 		screen.setTextColor(pots_fgcolor.Rgb565());
-		screen.setTextSize(2);
+		screen.setTextSize(1);
 		screen.setFont(NULL);
-		int y = 180;
+		int y = 210;
+		const int box_height = 15;
+		const int box_width = 30;
 		for (int i = 0; i < 12; i++) {
-			screen.setCursor((i & 0b11) * 60, y);
-			if (i < 4)
-				screen.print((int16_t)(params.cvjacks[i] * 100));
+			screen.setCursor((i & 0b111) * box_width, y);
+			if (i >= 8)
+				screen.print((int16_t)(params.cvjacks[i - 8] * 100));
 			else
-				screen.print((int16_t)(params.knobs[i - 4] * 100));
-
-			screen.print("  ");
-			if (i == 3 || i == 7)
-				y += 20;
+				screen.print((int16_t)(params.knobs[i] * 100));
+			screen.print(" ");
+			if (i == 7)
+				y += box_height;
 		}
 	}
+
 	void draw_jack_senses()
 	{
 		screen.setTextColor(Colors::white.Rgb565());
 		screen.setTextSize(1);
 		screen.setFont(NULL);
-		const uint16_t yoffset = 150;
+
+		const uint16_t yoffset = 180;
+		const uint16_t box_height = 15;
+		const uint16_t box_width = 240 / 8;
+		const float box_alpha = 0.75f;
+
 		const unsigned pin_order[15] = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 4, 5, 14};
-		const char names[15][3] = {"A", "B", "C", "D", "Li", "Ri", "Lo", "Ro", "G1", "G2", "Ci", "Co", "V1", "V2", "P"};
+		const char names[15][5] = {"CVA",
+								   "CVB",
+								   "CVC",
+								   "CVD",
+								   "Lin",
+								   "Rin",
+								   "Lout",
+								   "Rout",
+								   "Gt1",
+								   "Gt2",
+								   "CkIn",
+								   "CkO",
+								   "CVO1",
+								   "CVO2",
+								   "Pat"};
 		for (unsigned i = 0; i < 15; i++) {
 			auto pin = pin_order[i];
 			bool plugged = params.jack_senses & (1 << pin);
 			bool works = (pin != 4 && pin != 5 && pin != 8 && pin != 9 && pin != 13);
-			uint16_t xpos = (i & 0b0111) * 240 / 8;
-			uint16_t ypos = i > 7 ? yoffset + 15 : yoffset;
+			uint16_t xpos = (i & 0b0111) * box_width;
+			uint16_t ypos = i > 7 ? yoffset + box_height : yoffset;
 			auto color = works ? (plugged ? Colors::yellow : Colors::grey) : Colors::black;
-			// screen.blendRect(xpos, ypos, 30, 15, color.Rgb565(), 0.75f);
-			screen.fillRect(xpos, ypos, 30, 15, color);
-			screen.setCursor(xpos + 6, ypos + 4);
+			screen.blendRect(xpos, ypos, box_width, box_height, color.Rgb565(), box_alpha);
+			screen.setCursor(xpos + 3, ypos + 4);
 			screen.print(names[i]);
 		}
 	}
