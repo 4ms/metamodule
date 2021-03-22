@@ -10,21 +10,22 @@ using namespace MathTools;
 
 class NodeLFOCore : public CoreProcessor {
 public:
+	static inline const int NumAnalogInJacks = 1;
+	static inline const int NumAnalogOutJacks = 1;
+	static inline const int NumDigitalInJacks = 1;
+	static inline const int NumDigitalOutJacks = 0;
 	static inline const int NumInJacks = 2;
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 3;
-	virtual int get_num_inputs() const override
-	{
-		return NumInJacks;
-	}
-	virtual int get_num_outputs() const override
-	{
-		return NumOutJacks;
-	}
-	virtual int get_num_params() const override
-	{
-		return NumKnobs;
-	}
+
+	static inline const std::array<StaticString<15>, NumKnobs> KnobNames = {"Freq", "Phase", "Level"};
+	static inline const std::array<StaticString<15>, NumOutJacks> OutJackNames = {"Sine"};
+	static inline const std::array<StaticString<15>, NumInJacks> InJackNames = {"Freq", "Reset"};
+	// clang-format off
+	virtual StaticString<15> knob_name(unsigned idx) override {  return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<15> injack_name(unsigned idx) override {  return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<15> outjack_name(unsigned idx) override {  return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	// clang-format on
 
 	NodeLFOCore()
 	{
@@ -126,7 +127,7 @@ public:
 		return std::make_unique<NodeLFOCore>(nodelist[idx[0]], nodelist[idx[1]], nodelist[idx[2]]);
 	}
 	static constexpr char typeID[20] = "LFOSINE";
-	static constexpr char description[] = "Sine LFO";
+	static constexpr char description[] = "LFO";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 	static inline bool s_registered_wp =
 		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);
