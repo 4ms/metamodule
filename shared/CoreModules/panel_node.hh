@@ -109,7 +109,7 @@ public:
 	}
 
 	static constexpr char typeID[20] = "PANEL_8";
-	static constexpr char description[] = "(node) Panel: 8 Pots, 2/2 AudioIO, 4/2 AnalogIO, 1/3 GateIO";
+	static constexpr char description[] = "Panel";
 
 	// Swapped In/Out! Beacuse panel is different than other modules
 	static inline bool s_registered_wp =
