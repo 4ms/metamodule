@@ -19,6 +19,7 @@ struct Expander : public CommModule {
 	enum LightIds { NUM_LIGHTS };
 
 	std::string labelText = "";
+	std::string patchNameText = "";
 
 	long responseTimer = 0;
 	bool buttonAlreadyHandled = false;
@@ -35,6 +36,7 @@ struct Expander : public CommModule {
 			responseTimer = 48000 / 4; // todo: set this to the sampleRate
 			centralData->requestAllParamDataAllModules();
 			labelText = "Requesting all modules send their data";
+			updatePatchName();
 			updateDisplay();
 		}
 		if (responseTimer) {
@@ -42,8 +44,12 @@ struct Expander : public CommModule {
 				printDebugFile();
 
 				Patch patch;
-				std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
-				patch.patch_name = randomname.c_str();
+				if (patchNameText != "") {
+					patch.patch_name = patchNameText.c_str();
+				} else {
+					std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
+					patch.patch_name = randomname.c_str();
+				}
 				// patch.patch_name = "Unnamed Patch";
 				createPatchStruct(patch);
 				writeToFile(examplePatchDir + "example1.hh", PatchWriter::printPatchStructText("Example1", patch));
@@ -158,6 +164,7 @@ struct ExpanderWidget : CommModuleWidget {
 
 	Label *valueLabel;
 	Label *valueLabel2;
+	LedDisplayTextField *patchName;
 	Expander *expModule; // for debugging text only
 
 	ExpanderWidget(Expander *module)
@@ -167,6 +174,7 @@ struct ExpanderWidget : CommModuleWidget {
 
 		if (expModule != nullptr) {
 			expModule->updateDisplay = [&]() { this->valueLabel->text = this->expModule->labelText; };
+			expModule->updatePatchName = [&]() { this->expModule->patchNameText = this->patchName->text; };
 		}
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
@@ -178,6 +186,11 @@ struct ExpanderWidget : CommModuleWidget {
 		valueLabel->text = "";
 		valueLabel->fontSize = 10;
 		addChild(valueLabel);
+
+		patchName = createWidget<LedDisplayTextField>(mm2px(Vec(28, 65.977)));
+		patchName->text = "Enter Patch Name";
+		patchName->color = rack::color::BLACK;
+		addChild(patchName);
 
 		addLabeledKnob("A", 0, {0, 0});
 		addLabeledKnob("B", 1, {1, 0});
