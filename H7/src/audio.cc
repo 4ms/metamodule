@@ -86,7 +86,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	if (block_patch_change)
 		block_patch_change--;
 	else {
-		if (check_patch_change(last_params.rotary_motion)) {
+		if (check_patch_change(last_params.rotary_pushed_motion)) {
 			block_patch_change = 32;
 			for (auto &out_ : out) {
 				out_.l = 0;
