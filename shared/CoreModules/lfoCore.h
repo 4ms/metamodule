@@ -14,9 +14,9 @@ public:
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 3;
 
-	static inline const std::array<StaticString<15>, NumKnobs> KnobNames{"Freq", "Phase", "Level"};
-	static inline const std::array<StaticString<15>, NumOutJacks> OutJackNames{"Sine"};
-	static inline const std::array<StaticString<15>, NumInJacks> InJackNames{"Freq", "Reset"};
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Freq", "Phase", "Level"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Sine"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Freq", "Reset"};
 	static inline const StaticString<LongNameChars> description{"SineLFO"};
 
 	// clang-format off

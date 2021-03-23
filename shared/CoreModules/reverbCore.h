@@ -9,6 +9,39 @@
 using namespace MathTools;
 
 class ReverbCore : public CoreProcessor {
+	static inline const int NumInJacks = 1;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 18;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Size",
+																				"Damp",
+																				"Mix",
+																				"Time",
+																				"AllpassRatio",
+																				"CRatio",
+																				"Allpass1",
+																				"Allpass2",
+																				"Allpass3",
+																				"Allpass4",
+																				"C1",
+																				"C2",
+																				"C3",
+																				"C4",
+																				"C5",
+																				"C6",
+																				"C7",
+																				"C8"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input"};
+	static inline const StaticString<LongNameChars> description{"Reverb"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
+
 public:
 	virtual void update(void) override
 	{
@@ -195,7 +228,6 @@ public:
 		return std::make_unique<ReverbCore>();
 	}
 	static constexpr char typeID[20] = "REVERB";
-	static constexpr char description[] = "Reverb";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

@@ -12,6 +12,18 @@ public:
 	static inline const int NumOutJacks = 2;
 	static inline const int NumKnobs = 4;
 
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Level 1","Level 2","Level 3","Level 4"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Mix","Inverted Mix"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input 1", "Input 2", "Input 3", "Input 4"};
+	static inline const StaticString<LongNameChars> description{"MIXER"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
+
 	NodeMixer4Core() {}
 
 	NodeMixer4Core(float &nIn0, float &nIn1, float &nIn2, float &nIn3, float &nOut0, float &nOut1)
@@ -66,7 +78,6 @@ public:
 			nodes[idx[0]], nodes[idx[1]], nodes[idx[2]], nodes[idx[3]], nodes[idx[4]], nodes[idx[5]]);
 	}
 	static constexpr char typeID[20] = "MIXER4";
-	static constexpr char description[] = "Mixer";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 	static inline bool s_registered_wp =
 		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);

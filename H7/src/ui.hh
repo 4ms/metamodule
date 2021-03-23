@@ -150,21 +150,21 @@ private:
 		const char knob_name[8][2] = {"A", "B", "C", "D", "a", "b", "c", "d"};
 		auto &cur_patch = patch_list.cur_patch();
 
-			if (player.is_loaded) {
-		for (int i = 0; i < cur_patch.num_mapped_knobs; i++) {
-			auto &knob = cur_patch.mapped_knobs[i];
+		if (player.is_loaded) {
+			for (int i = 0; i < cur_patch.num_mapped_knobs; i++) {
+				auto &knob = cur_patch.mapped_knobs[i];
 
-			screen.setTextColor(Colors::black.Rgb565());
-			screen.setCursor(2, 50 + line_height * i);
-			screen.print(knob_name[knob.panel_knob_id]);
-			screen.print(" = ");
+				screen.setTextColor(Colors::black.Rgb565());
+				screen.setCursor(2, 50 + line_height * i);
+				screen.print(knob_name[knob.panel_knob_id]);
+				screen.print(" = ");
 
-			screen.setTextColor(Colors::white.blend(Colors::black, 0.75f).Rgb565());
-			screen.print(player.modules[knob.module_id]->get_description());
-			screen.print(" #");
-			screen.print(knob.module_id);
+				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f).Rgb565());
+				screen.print(player.modules[knob.module_id]->get_description());
+				screen.print(" #");
+				screen.print(knob.module_id);
 
-			screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f).Rgb565());
+				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f).Rgb565());
 				screen.print(": ");
 				screen.print(player.modules[knob.module_id]->knob_name(knob.param_id));
 			}
