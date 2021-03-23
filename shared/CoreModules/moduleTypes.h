@@ -4,6 +4,10 @@
 #include <array>
 #include <string.h>
 
+#if defined(STM32H7) || defined(STM32F7)
+	#define __MODULE_FACTORY_SAVE_SPACE
+#endif
+
 using ModuleTypeSlug = StaticString<20>;
 
 class ModuleFactory {
@@ -23,7 +27,7 @@ public:
 			next_id++;
 			module_slugs[id] = typeslug;
 		}
-#if defined(HAS_STD_STRING)
+#ifndef __MODULE_FACTORY_SAVE_SPACE
 		module_names[id] = name;
 #endif
 		creation_funcs[id] = funcCreate;
@@ -45,7 +49,7 @@ public:
 			next_id++;
 			module_slugs[new_id] = typeslug;
 		}
-#if defined(HAS_STD_STRING)
+#ifndef __MODULE_FACTORY_SAVE_SPACE
 		module_names[new_id] = name;
 #endif
 		output_jack_offsets[new_id] = numInputJacks;
@@ -83,7 +87,11 @@ public:
 	{
 		int id = getTypeID(typeslug);
 		if (id >= 0)
+#ifndef __MODULE_FACTORY_SAVE_SPACE
 			return module_names[id];
+#else
+			return module_slugs[id];
+#endif
 
 		return "Not found.";
 	}
@@ -138,8 +146,10 @@ private:
 	static inline const int MAX_MODULE_TYPES = 256;
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline std::array<CreateModuleFuncWithParams, MAX_MODULE_TYPES> creation_funcs_wp;
-	static inline std::array<StaticString<20>, MAX_MODULE_TYPES> module_slugs;
-	static inline std::array<StaticString<40>, MAX_MODULE_TYPES> module_names;
+	static inline std::array<ModuleTypeSlug, MAX_MODULE_TYPES> module_slugs;
+#ifndef __MODULE_FACTORY_SAVE_SPACE
+	static inline std::array<StaticString<CoreProcessor::LongNameChars>, MAX_MODULE_TYPES> module_names;
+#endif
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> output_jack_offsets;
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> total_jacks;
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> total_params;

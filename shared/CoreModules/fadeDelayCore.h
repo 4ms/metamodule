@@ -8,6 +8,22 @@
 using namespace MathTools;
 
 class FadeDelayCore : public CoreProcessor {
+	static inline const int NumInJacks = 5;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 5;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Time", "Feedback", "Fade", "Mix", "Time CV"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input", "Clock", "Time", "Fade", "Feedback"};
+	static inline const StaticString<LongNameChars> description{"Fade Delay"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
+
 public:
 	const static inline long maxSamples = 48000;
 	constexpr static inline unsigned minDelayTimeInSamples = 1;
@@ -125,7 +141,6 @@ public:
 		return std::make_unique<FadeDelayCore>();
 	}
 	static constexpr char typeID[20] = "FADEDELAY";
-	static constexpr char description[] = "Fade Delay";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

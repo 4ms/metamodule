@@ -10,6 +10,22 @@
 using namespace MathTools;
 
 class DrumCore : public CoreProcessor {
+	static inline const int NumInJacks = 6;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 9;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Pitch", "Pitch Env", "Pitch Amt", "Ratio", "FM Env", "FM Amt", "Tone Env", "Noise Env", "Noise Mix"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Gate", "V/OCT", "Noise Env", "FM Env", "Pitch Env", "Tone Env"};
+	static inline const StaticString<LongNameChars> description{"Drum"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
+
 private:
 	enum { pitchEnvelope, fmEnvelope, toneEnvelope, noiseEnvelope };
 
@@ -35,7 +51,7 @@ private:
 	float pitchEnvCV = 0;
 	float FMEnvCV = 0;
 
-	float ratio=1;
+	float ratio = 1;
 
 	InterpArray<float, 4> pitchDecayTimes = {10, 10, 200, 500};
 	InterpArray<float, 4> pitchBreakPoint = {0, 0.1, 0.2, 1};
@@ -52,11 +68,11 @@ public:
 	{
 		auto freqCalc =
 			baseFrequency + (envelopes[pitchEnvelope].update(gateIn) * 4000.0f * (pitchAmount * pitchAmount));
-			osc.set_frequency(1,baseFrequency*ratio);
+		osc.set_frequency(1, baseFrequency * ratio);
 		if (pitchConnected) {
-			osc.set_frequency(0,freqCalc * setPitchMultiple(pitchCV));
+			osc.set_frequency(0, freqCalc * setPitchMultiple(pitchCV));
 		} else {
-			osc.set_frequency(0,freqCalc);
+			osc.set_frequency(0, freqCalc);
 		}
 
 		osc.modAmount = envelopes[fmEnvelope].update(gateIn) * fmAmount;
@@ -243,6 +259,5 @@ public:
 		return std::make_unique<DrumCore>();
 	}
 	static constexpr char typeID[20] = "DRUM";
-	static constexpr char description[] = "Drum";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 };

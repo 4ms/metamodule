@@ -12,18 +12,19 @@ public:
 	static inline const int NumInJacks = 4;
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 4;
-	virtual int get_num_inputs() const override
-	{
-		return NumInJacks;
-	}
-	virtual int get_num_outputs() const override
-	{
-		return NumOutJacks;
-	}
-	virtual int get_num_params() const override
-	{
-		return NumKnobs;
-	}
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Coarse", "Fine", "Window", "Mix"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
+		"Input", "Shift", "Window", "Mix"};
+	static inline const StaticString<LongNameChars> description{"Pitch Shifter"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 
 	PitchshiftCore() {}
 
@@ -104,7 +105,6 @@ public:
 			nodelist[idx[0]], nodelist[idx[1]], nodelist[idx[2]], nodelist[idx[3]], nodelist[idx[4]]);
 	}
 	static constexpr char typeID[20] = "PITCHSHIFT";
-	static constexpr char description[] = "Pitch Shifter";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 	static inline bool s_registered_wp =
 		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);

@@ -10,6 +10,7 @@ namespace MetaModule
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 
 AudioStream::AudioStream(PatchList &patches,
+						 PatchPlayer &patchplayer,
 						 ICodec &codec,
 						 AnalogOutT &dac,
 						 ParamBlock (&p)[2],
@@ -26,6 +27,7 @@ AudioStream::AudioStream(PatchList &patches,
 	, last_params{last_params}
 	, dac{dac}
 	, patch_list{patches}
+	, player{patchplayer}
 {
 	load_patch();
 

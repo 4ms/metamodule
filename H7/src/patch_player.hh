@@ -9,7 +9,7 @@
 using PanelT = NodePanel;
 
 class PatchPlayer {
-private:
+public:
 	bool is_loaded = false;
 	std::array<float, MAX_NODES_IN_PATCH> nodes;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
@@ -27,6 +27,9 @@ public:
 	{
 		return Panel::NumOutJacks;
 	}
+
+	Jack out_conns[Panel::NumOutJacks] = {0};
+	Jack in_conns[Panel::NumInJacks] = {0};
 
 	void set_panel_input(int jack_id, float val)
 	{
@@ -73,9 +76,16 @@ public:
 	void unload_patch(const Patch &p)
 	{
 		is_loaded = false;
-		for (int i = 0; i < p.num_modules; i++) {
+
+		for (int i = 0; i < p.num_modules; i++)
 			modules[i].reset(nullptr);
-		}
+
+		for (int i = 0; i < Panel::NumOutJacks; i++)
+			out_conns[i] = {0, 0};
+
+		for (int i = 0; i < Panel::NumInJacks; i++)
+			in_conns[i] = {0, 0};
+
 		BigAlloc<Patch>::reset();
 	}
 
@@ -104,6 +114,7 @@ public:
 #ifdef USE_NODES
 // Todo
 #else
+		const int panelId = 0;
 		for (int net_i = 0; net_i < p.num_nets; net_i++) {
 			auto &net = p.nets[net_i];
 
@@ -113,8 +124,25 @@ public:
 					modules[jack.module_id]->mark_output_patched(jack.jack_id);
 				else
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
+
+				// Todo: use ConnectionList instead of NetList
+				if (jack.module_id == panelId) {
+					bool panel_jack_is_output = (jack_i == 0) ? true : false;
+					auto jack_id = jack.jack_id;
+					for (int other_jack_i = 0; other_jack_i < net.num_jacks; other_jack_i++) {
+						if (other_jack_i == jack_i)
+							continue;
+						auto &other_jack = net.jacks[other_jack_i];
+						// Todo: append to a list instead of replacing
+						if (panel_jack_is_output)
+							out_conns[jack_id] = other_jack;
+						else
+							in_conns[jack_id] = other_jack;
+					}
+				}
 			}
 		}
+
 #endif
 
 		for (int i = 0; i < p.num_static_knobs; i++) {
@@ -124,6 +152,22 @@ public:
 
 		is_loaded = true;
 		return true;
+	}
+
+	Jack get_panel_output_connection(unsigned jack_id, unsigned connection_id = 0)
+	{
+		if (connection_id > 0)
+			return {.module_id = 0, .jack_id = 0};
+
+		return out_conns[jack_id];
+	}
+
+	Jack get_panel_input_connection(unsigned jack_id, unsigned connection_id = 0)
+	{
+		if (connection_id > 0)
+			return {.module_id = 0, .jack_id = 0};
+
+		return in_conns[jack_id];
 	}
 
 	void update_patch(const Patch &p)

@@ -28,6 +28,7 @@ public:
 	enum AudioChannels { LEFT, RIGHT };
 
 	AudioStream(PatchList &patches,
+				PatchPlayer &patchplayer,
 				ICodec &codec,
 				AnalogOutT &dac,
 				ParamBlock (&p)[2],
@@ -58,7 +59,7 @@ private:
 
 	AnalogOutT &dac;
 	PatchList &patch_list;
-	PatchPlayer player;
+	PatchPlayer &player;
 	PinChangeInterrupt dac_updater;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	CycleCounter load_measure;

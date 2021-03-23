@@ -204,7 +204,6 @@ public:
 			framebuf[i * _width + x] = color;
 	}
 
-
 	void blendFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, float alpha)
 	{
 		if (x < 0 || x >= _width)
@@ -351,6 +350,59 @@ public:
 			}
 			px = x;
 		}
+	}
+
+	//
+	// Text
+	//
+
+	size_t write(uint8_t c) override
+	{
+		if (!gfxFont) { // 'Classic' built-in font
+
+			if (c == '\n') {								// Newline?
+				cursor_x = 0;								// Reset x to zero,
+				cursor_y += textsize_y * 8;					// advance y one line
+			} else if (c != '\r') {							// Ignore carriage returns
+				if ((cursor_x + textsize_x * 6) > _width) { // Off right?
+					if (wrap) {
+						cursor_x = 0;				// Reset x to zero,
+						cursor_y += textsize_y * 8; // advance y one line
+					} else {
+						return 0;
+					}
+				}
+				drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
+				cursor_x += textsize_x * 6; // Advance x one char
+			}
+
+		} else { // Custom font
+
+			if (c == '\n') {
+				cursor_x = 0;
+				cursor_y += (int16_t)textsize_y * gfxFont->yAdvance;
+			} else if (c != '\r') {
+				uint8_t first = gfxFont->first;
+				if ((c >= first) && (c <= gfxFont->last)) {
+					GFXglyph *glyph = gfxFont->glyph + (c - first);
+					uint8_t w = glyph->width, h = glyph->height;
+					if ((w > 0) && (h > 0)) {
+						int16_t xo = (int8_t)glyph->xOffset; // sic
+						if ((cursor_x + textsize_x * (xo + w)) > _width) {
+							if (wrap) {
+								cursor_x = 0;
+								cursor_y += (int16_t)textsize_y * gfxFont->yAdvance;
+							} else {
+								return 0;
+							}
+						}
+						drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
+					}
+					cursor_x += glyph->xAdvance * (int16_t)textsize_x;
+				}
+			}
+		}
+		return 1;
 	}
 
 	void flush_cache()

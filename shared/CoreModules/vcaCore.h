@@ -11,18 +11,6 @@ public:
 	static inline const int NumInJacks = 2;
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 4;
-	virtual int get_num_inputs() const override
-	{
-		return NumInJacks;
-	}
-	virtual int get_num_outputs() const override
-	{
-		return NumOutJacks;
-	}
-	virtual int get_num_params() const override
-	{
-		return NumKnobs;
-	}
 
 	VCACore() {}
 
