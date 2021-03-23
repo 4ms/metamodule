@@ -86,7 +86,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	if (block_patch_change)
 		block_patch_change--;
 	else {
-		if (check_patch_change(last_params.rotary_pushed_motion)) {
+		if (check_patch_change(last_params.rotary_pushed.use_motion())) {
 			block_patch_change = 32;
 			for (auto &out_ : out) {
 				out_.l = 0;
@@ -133,8 +133,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		out_.r = get_output(0);
 
 		// Todo: use player.get_output(2) and (3)
-		dac.queue_sample(0, out_.r + 0x00800000);
-		dac.queue_sample(1, out_.l + 0x00800000);
+		dac.queue_sample(0, out_.l + 0x00800000);
+		dac.queue_sample(1, out_.r + 0x00800000);
 
 		in_++;
 		params_++;

@@ -42,8 +42,8 @@ void Controls::update_params()
 	cur_params->gate_ins[2].copy_state(gate_in2);
 
 	if (cur_params == first_param) {
+		// Rotary
 		int tmp_rotary_motion = rotary.read();
-
 		if (rotary_button.is_just_pressed()) {
 			_rotary_moved_while_pressed = false;
 			cur_params->rotary_button.register_rising_edge();
@@ -53,18 +53,17 @@ void Controls::update_params()
 			// Todo: if button is released and _rotary_moved_while_pressed == true, then do we need to tell
 			// params->rotary_button that the button is released?
 		}
-
 		if (rotary_button.is_pressed()) {
-			cur_params->rotary_motion = 0;
-			cur_params->rotary_pushed_motion = tmp_rotary_motion;
+			cur_params->rotary.motion = 0;
+			cur_params->rotary_pushed.motion = tmp_rotary_motion;
 			if (tmp_rotary_motion != 0)
 				_rotary_moved_while_pressed = true;
 		} else {
-			cur_params->rotary_motion = tmp_rotary_motion;
-			cur_params->rotary_pushed_motion = 0;
+			cur_params->rotary.motion = tmp_rotary_motion;
+			cur_params->rotary_pushed.motion = 0;
 		}
-
 		cur_params->rotary_button.copy_state(rotary_button);
+		//
 
 		cur_params->patchcv = get_patchcv_reading() / 4095.0f;
 
@@ -75,14 +74,15 @@ void Controls::update_params()
 			cur_params->knobs[i] = _knobs[i].next();
 		}
 	} else {
-		cur_params->patchcv = first_param->patchcv;
 
 		for (int i = 0; i < NumPot; i++)
 			cur_params->knobs[i] = _knobs[i].next();
 
-		cur_params->rotary_button.copy_state(first_param->rotary_button);
-		cur_params->rotary_motion = first_param->rotary_motion;
-		cur_params->rotary_pushed_motion = first_param->rotary_pushed_motion;
+		// Todo: MetaParams has patchcv, rotary, rotary_pushed, rotary_button
+		// cur_params->patchcv = first_param->patchcv;
+		// cur_params->rotary_button.copy_state(first_param->rotary_button);
+		// cur_params->rotary = first_param->rotary;
+		// cur_params->rotary_pushed = first_param->rotary_pushed;
 
 		cur_params->jack_senses = first_param->jack_senses;
 	}

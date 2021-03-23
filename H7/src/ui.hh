@@ -92,11 +92,12 @@ public:
 	void update()
 	{
 		// Todo: not thread-safe: audio process might interrupt and we'd zero out a good value, missing a rotary turn
-		if (params.rotary.use_motion() < 0) {
+		auto rotary = params.rotary.use_motion();
+		if (rotary < 0) {
 			pages.prev_page();
 		}
 
-		if (params.rotary.use_motion() > 0) {
+		if (rotary > 0) {
 			pages.next_page();
 		}
 	}
