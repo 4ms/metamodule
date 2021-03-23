@@ -1,4 +1,5 @@
 #pragma once
+#include "bouncing_ball.hh"
 #include "page_manager.hh"
 
 namespace MetaModule

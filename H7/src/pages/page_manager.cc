@@ -1,5 +1,7 @@
 #include "pages/page_manager.hh"
 #include "pages/bouncing_balls.hh"
+#include "pages/debuginfo.hh"
+#include "pages/page_widgets.hh"
 #include "pages/patch_overview.hh"
 
 namespace MetaModule
@@ -11,30 +13,35 @@ void PageManager::display_current_page()
 		default:
 		case PatchOverview:
 			PatchOverviewPage::draw(this);
-			screen.fill(bgcolor);
-			// draw_bouncing_ball();
-			// draw_audio_load();
-			// draw_pot_values();
-			// draw_patch_name();
-			// draw_jack_senses();
-			// // draw_knob_map();
-			// draw_jack_map();
 			break;
+
 		case ModulesInPatch:
+			ModulesInPatchPage::draw(this);
 			break;
+
 		case JackMap:
+			JackMapPage::draw(this);
 			break;
+
 		case PotMap:
+			KnobMapPage::draw(this);
 			break;
+
 		case PatchLayout:
+			PatchLayoutPage::draw(this);
 			break;
+
 		case PatchSelector:
 			break;
+
 		case DebugInfo:
+			DebugInfoPage::draw(this);
 			break;
+
 		case BouncingBalls:
 			BouncingBallsPage::draw(this);
 			break;
 	}
 }
+
 } // namespace MetaModule
