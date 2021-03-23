@@ -97,8 +97,13 @@ public:
 
 	void refresh_screen()
 	{
+
 		Debug::Pin3::high();
-		HWSemaphore<ScreenFrameBuf1Lock>::lock();
+		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
+			Debug::Pin3::low();
+			return;
+		}
+		HWSemaphore<ScreenFrameBufLock>::lock();
 		screen.fill(bgcolor);
 		if constexpr (ENABLE_BOUNCING_BALL_DEMO)
 			draw_bouncing_ball();
@@ -110,7 +115,7 @@ public:
 		draw_jack_map();
 		screen.flush_cache();
 		Debug::Pin3::low();
-		HWSemaphore<ScreenFrameBuf1Lock>::unlock();
+		HWSemaphore<ScreenFrameBufLock>::unlock();
 	}
 
 private:

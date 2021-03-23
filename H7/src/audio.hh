@@ -63,6 +63,7 @@ private:
 	PinChangeInterrupt dac_updater;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	CycleCounter load_measure;
+	uint32_t block_patch_change = 0;
 
 	static constexpr unsigned NumKnobs = PatchPlayer::get_num_panel_knobs();
 	static constexpr unsigned NumAudioInputs = 2;

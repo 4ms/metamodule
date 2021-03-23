@@ -8,7 +8,8 @@ enum SemaphoreLocks {
 	ParamsBuf1Lock,
 	ParamsBuf2Lock,
 	LEDFrameBufLock,
-	ScreenFrameBuf1Lock,
+	ScreenFrameBufLock,
+	ScreenFrameWriteLock,
 	M4_ready,
 };
 

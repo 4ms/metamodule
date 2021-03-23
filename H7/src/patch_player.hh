@@ -13,6 +13,8 @@ public:
 	bool is_loaded = false;
 	std::array<float, MAX_NODES_IN_PATCH> nodes;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
+	Jack out_conns[Panel::NumOutJacks] = {0};
+	Jack in_conns[Panel::NumInJacks] = {0};
 
 public:
 	static constexpr unsigned get_num_panel_knobs()
@@ -27,9 +29,6 @@ public:
 	{
 		return Panel::NumOutJacks;
 	}
-
-	Jack out_conns[Panel::NumOutJacks] = {0};
-	Jack in_conns[Panel::NumInJacks] = {0};
 
 	void set_panel_input(int jack_id, float val)
 	{
@@ -127,18 +126,22 @@ public:
 
 				// Todo: use ConnectionList instead of NetList
 				if (jack.module_id == panelId) {
-					bool panel_jack_is_output = (jack_i == 0) ? true : false;
-					auto jack_id = jack.jack_id;
-					for (int other_jack_i = 0; other_jack_i < net.num_jacks; other_jack_i++) {
-						if (other_jack_i == jack_i)
-							continue;
-						auto &other_jack = net.jacks[other_jack_i];
-						// Todo: append to a list instead of replacing
-						if (panel_jack_is_output)
-							out_conns[jack_id] = other_jack;
-						else
-							in_conns[jack_id] = other_jack;
-					}
+					if (jack_i == 0)
+						out_conns[jack.jack_id] = net.jacks[1];
+					else
+						in_conns[jack.jack_id] = net.jacks[0];
+
+					// auto jack_id = jack.jack_id;
+					// for (int other_jack_i = 0; other_jack_i < net.num_jacks; other_jack_i++) {
+					// if (other_jack_i == jack_i)
+					// 	continue;
+					// auto &other_jack = net.jacks[other_jack_i];
+					// Todo: append to a list instead of replacing
+					// if (panel_jack_is_output)
+					// 	out_conns[jack_id] = other_jack;
+					// else
+					// 	in_conns[jack_id] = other_jack;
+					// }
 				}
 			}
 		}
