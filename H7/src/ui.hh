@@ -235,10 +235,10 @@ private:
 		screen.print(patch_list.audio_load, 10);
 		screen.print("% ");
 		screen.setTextSize(1);
-		screen.setCursor(175, 224);
+		screen.setCursor(160, 224);
 		screen.print(get_heap_size() / 1024, 10);
 		screen.print("kb ");
-		screen.setCursor(175, 232);
+		screen.setCursor(160, 232);
 		screen.print(BigAlloc<Ui>::get_memory_usage() / 1024, 10);
 		screen.print("kb   ");
 	}
