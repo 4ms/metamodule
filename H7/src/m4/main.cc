@@ -58,11 +58,18 @@ void main(void)
 	screen_writer.init();
 
 	// SemaphoreAction screenupdate {ScreenFrameBuf1Lock, [&](){ screen_writer.transfer_buffer_to_screen(); });
-	HWSemaphore<ScreenFrameBuf1Lock>::clear_ISR();
-	HWSemaphore<ScreenFrameBuf1Lock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBuf1Lock>(
-		[&]() { screen_writer.transfer_buffer_to_screen(); });
-	HWSemaphore<ScreenFrameBuf1Lock>::enable_channel_ISR();
+	HWSemaphore<ScreenFrameBufLock>::clear_ISR();
+	HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
+	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>(
+		[&]() { 
+		HWSemaphore<ScreenFrameWriteLock>::lock();
+		screen_writer.transfer_buffer_to_screen();
+		HWSemaphore<ScreenFrameWriteLock>::unlock();
+	});
+	HWSemaphore<ScreenFrameBufLock>::enable_channel_ISR();
+
+	HWSemaphore<ScreenFrameWriteLock>::disable_channel_ISR();
+	HWSemaphore<ScreenFrameWriteLock>::unlock();
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
 
