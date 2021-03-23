@@ -47,27 +47,10 @@ public:
 		, pages{pl, pp, p, screen}
 	{}
 
-	Color bgcolor = Colors::pink;
-	Color patch_fgcolor = Colors::blue.blend(Colors::black, 0.5f);
-	Color load_fgcolor = Colors::blue;
-	Color pots_fgcolor = Colors::black;
-
-	BouncingBall balls[3] = {
-		{60, {220, 30}, {-1, 1}, {239, 239}},
-		{50, {20, 10}, {2, -1}, {239, 239}},
-		{40, {10, 220}, {2, 3}, {239, 239}},
-	};
-
-	Color ball_colors[3] = {
-		Colors::red,
-		Colors::black,
-		Colors::orange,
-	};
-
 	void start()
 	{
 		screen.init();
-		screen.fill(bgcolor);
+		pages.init();
 
 		leds.but[0].set_background(Colors::grey);
 		leds.but[1].set_background(Colors::grey);
@@ -97,7 +80,6 @@ public:
 
 	void refresh_screen()
 	{
-
 		Debug::Pin3::high();
 		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
 			Debug::Pin3::low();
@@ -215,12 +197,6 @@ private:
 
 	void draw_patch_name()
 	{
-		screen.setFont(&FreeSansBold18pt7b);
-		screen.setTextColor(patch_fgcolor.Rgb565());
-		screen.setTextSize(1);
-		screen.setCursor(2, 30);
-		screen.setTextWrap(false);
-		screen.print(patch_list.cur_patch().patch_name);
 	}
 
 	void draw_audio_load()
@@ -297,17 +273,6 @@ private:
 			screen.blendRect(xpos, ypos, box_width, box_height, color.Rgb565(), box_alpha);
 			screen.setCursor(xpos + 3, ypos + 4);
 			screen.print(names[i]);
-		}
-	}
-
-	void draw_bouncing_ball()
-	{
-		int i = 0;
-		for (auto &ball : balls) {
-			ball.update();
-			auto pos = ball.get_pos();
-			screen.fillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565());
-			i++;
 		}
 	}
 

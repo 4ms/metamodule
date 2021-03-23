@@ -27,7 +27,6 @@ class DisplayPage {
 	//
 };
 
-
 class PageManager {
 public:
 	PatchList &patch_list;
@@ -42,7 +41,6 @@ public:
 	Color load_fgcolor = Colors::blue;
 	Color pots_fgcolor = Colors::black;
 
-public:
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, ScreenFrameBuffer &s)
 		: patch_list{pl}
 		, patch_player{pp}
