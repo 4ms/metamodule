@@ -1,7 +1,4 @@
 #pragma once
-#include "Adafruit_GFX_Library/Fonts/FreeMono12pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSans9pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
 #include "audio.hh"
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
@@ -11,7 +8,7 @@
 #include "drivers/memory_transfer.hh"
 #include "leds.hh"
 #include "m7/hsem_handler.hh"
-#include "pages/bouncing_ball.hh"
+#include "pages/page_manager.hh"
 #include "params.hh"
 #include "patchlist.hh"
 #include "screen_buffer.hh"
@@ -22,6 +19,7 @@ constexpr bool ENABLE_BOUNCING_BALL_DEMO = false;
 
 namespace MetaModule
 {
+
 template<unsigned AnimationUpdateRate = 100>
 class Ui {
 public:
@@ -30,6 +28,7 @@ public:
 	LedFrame<AnimationUpdateRate> &leds;
 	Params &params;
 	ScreenFrameBuffer screen;
+	PageManager pages;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
@@ -45,6 +44,7 @@ public:
 		, leds{l}
 		, params{p}
 		, screen{screenbuf}
+		, pages{pl, pp, p, screen}
 	{}
 
 	Color bgcolor = Colors::pink;
@@ -104,15 +104,7 @@ public:
 			return;
 		}
 		HWSemaphore<ScreenFrameBufLock>::lock();
-		screen.fill(bgcolor);
-		if constexpr (ENABLE_BOUNCING_BALL_DEMO)
-			draw_bouncing_ball();
-		draw_audio_load();
-		draw_pot_values();
-		draw_patch_name();
-		draw_jack_senses();
-		// draw_knob_map();
-		draw_jack_map();
+		pages.display_current_page();
 		screen.flush_cache();
 		Debug::Pin3::low();
 		HWSemaphore<ScreenFrameBufLock>::unlock();
