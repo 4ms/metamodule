@@ -75,7 +75,21 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block, sizeof(ParamBlock));
 
 	last_params = param_block[0];
-	check_patch_change(last_params.rotary_motion);
+
+	if (block_patch_change)
+		block_patch_change--;
+	else {
+		if (check_patch_change(last_params.rotary_motion)) {
+			block_patch_change = 32;
+			for (auto &out_ : out) {
+				out_.l = 0;
+				out_.r = 0;
+				dac.queue_sample(0, 0x00800000);
+				dac.queue_sample(1, 0x00800000);
+			}
+			return;
+		}
+	}
 
 	auto in_ = in.begin();
 	auto params_ = param_block.begin();
