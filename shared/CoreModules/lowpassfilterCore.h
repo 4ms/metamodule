@@ -9,10 +9,26 @@
 using namespace MathTools;
 
 class LowpassfilterCore : public CoreProcessor {
+	static inline const int NumInJacks = 2;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 2;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Cutoff", "Q"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input", "Cutoff CV"};
+	static inline const StaticString<LongNameChars> description{"Lowpass Filter"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
+
 public:
 	virtual void update(void) override
 	{
-		lpf.cutoff.setValue(setPitchMultiple(constrain(baseFrequency+cvInput*cvAmount,-1.0f,1.0f))*262.0f);
+		lpf.cutoff.setValue(setPitchMultiple(constrain(baseFrequency + cvInput * cvAmount, -1.0f, 1.0f)) * 262.0f);
 		signalOut = lpf.update(signalIn);
 	}
 
@@ -21,7 +37,7 @@ public:
 	virtual void set_param(int const param_id, const float val) override
 	{
 		if (param_id == 0) {
-			baseFrequency=map_value(val,0.0f,1.0f,-1.0f,1.0f);
+			baseFrequency = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 		} else if (param_id == 1) {
 			lpf.q.setValue(map_value(val, 0.0f, 1.0f, 1.0f, 20.0f));
 		} else if (param_id == 2) {
@@ -61,14 +77,13 @@ public:
 		return std::make_unique<LowpassfilterCore>();
 	}
 	static constexpr char typeID[20] = "LOWPASSFILTER";
-	static constexpr char description[] = "Low Pass Filter";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
 	LowPassFilter lpf;
 	float signalIn = 0;
 	float signalOut = 0;
-	float baseFrequency=1.0;
-	float cvInput=0;
-	float cvAmount=0;
+	float baseFrequency = 1.0;
+	float cvInput = 0;
+	float cvAmount = 0;
 };

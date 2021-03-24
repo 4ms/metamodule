@@ -8,6 +8,21 @@
 using namespace MathTools;
 
 class HighpassfilterCore : public CoreProcessor {
+	static inline const int NumInJacks = 2;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 2;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Cutoff", "Q"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input", "Cutoff CV"};
+	static inline const StaticString<LongNameChars> description{"Highpass Filter"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
@@ -61,7 +76,6 @@ public:
 		return std::make_unique<HighpassfilterCore>();
 	}
 	static constexpr char typeID[20] = "HIGHPASSFILTER";
-	static constexpr char description[] = "Highpass Filter";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

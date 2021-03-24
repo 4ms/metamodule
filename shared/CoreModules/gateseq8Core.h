@@ -8,6 +8,21 @@
 using namespace MathTools;
 
 class Gateseq8Core : public CoreProcessor {
+	static inline const int NumInJacks = 1;
+	static inline const int NumOutJacks = 9;
+	static inline const int NumKnobs = 0;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output", "Step 1", "Step 2", "Step 3", "Step 4", "Step 5", "Step 6", "Step 7", "Step 8"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Clock In"};
+	static inline const StaticString<LongNameChars> description{"8 Step Gate Sequencer"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
@@ -78,7 +93,6 @@ public:
 		return std::make_unique<Gateseq8Core>();
 	}
 	static constexpr char typeID[20] = "GATESEQ8";
-	static constexpr char description[] = "8 Step Gate Sequencer";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

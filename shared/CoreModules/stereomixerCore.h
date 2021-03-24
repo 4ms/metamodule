@@ -7,6 +7,21 @@
 using namespace MathTools;
 
 class StereomixerCore : public CoreProcessor {
+	static inline const int NumInJacks = 8;
+	static inline const int NumOutJacks = 2;
+	static inline const int NumKnobs = 8;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Level 1", "Level 2", "Level 3", "Level 4", "Pan 1", "Pan 2", "Pan 3", "Pan 4"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Left Output", "Right Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Left 1", "Left 2", "Left 3", "Left 4", "Right 1", "Right 2", "Right 3", "Right 4"};
+	static inline const StaticString<LongNameChars> description{"Stereo Mixer"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
@@ -64,12 +79,9 @@ public:
 		} else {
 			if (rightConnected[input_id - 4]) {
 				signalInputs[inputChannelNum][1] = val;
+			} else {
+				signalInputs[inputChannelNum][1] = signalInputs[inputChannelNum][0];
 			}
-			else
-			{
-				signalInputs[inputChannelNum][1]=signalInputs[inputChannelNum][0];
-			}
-			
 		}
 	}
 
@@ -105,7 +117,6 @@ public:
 		return std::make_unique<StereomixerCore>();
 	}
 	static constexpr char typeID[20] = "STEREOMIXER";
-	static constexpr char description[] = "Stereo Mixer";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

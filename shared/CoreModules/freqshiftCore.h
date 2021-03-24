@@ -10,12 +10,12 @@ using namespace MathTools;
 class FreqshiftCore : public CoreProcessor {
 	static inline const int NumInJacks = 1;
 	static inline const int NumOutJacks = 1;
-	static inline const int NumKnobs = 1;
+	static inline const int NumKnobs = 3;
 
-	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Divide"};
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Shift Coarse", "Shift Fine", "Mix"};
 	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Clock In"};
-	static inline const StaticString<LongNameChars> description{"Clock Divider"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input"};
+	static inline const StaticString<LongNameChars> description{"Frequency Shifter"};
 
 	// clang-format off
 	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
@@ -77,7 +77,6 @@ public:
 		return std::make_unique<FreqshiftCore>();
 	}
 	static constexpr char typeID[20] = "FREQSHIFT";
-	static constexpr char description[] = "Frequency Shifter";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
