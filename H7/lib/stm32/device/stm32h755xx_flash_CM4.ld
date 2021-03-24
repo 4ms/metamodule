@@ -164,13 +164,13 @@ SECTIONS
 	} >SRAM1
 
 	
-	.dma_buffer :
-	{
-		. = ALIGN(8);
-		*(.dma_buffer)
-		*(.dma_buffer*)
-		. = ALIGN(8);
-	} > SRAM3
+	/* .dma_buffer : */
+	/* { */
+	/* 	. = ALIGN(8); */
+	/* 	*(.dma_buffer) */
+	/* 	*(.dma_buffer*) */
+	/* 	. = ALIGN(8); */
+	/* } > SRAM3 */
 	
 	.d3buffer (NOLOAD) :
 	{
