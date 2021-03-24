@@ -15,8 +15,6 @@
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
 
-constexpr bool ENABLE_BOUNCING_BALL_DEMO = false;
-
 namespace MetaModule
 {
 
