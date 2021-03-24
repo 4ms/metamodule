@@ -8,13 +8,28 @@
 using namespace MathTools;
 
 class BitcrushCore : public CoreProcessor {
+	static inline const int NumInJacks = 3;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 2;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Samplerate", "Bit Depth"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input", "SR CV", "B CV"};
+	static inline const StaticString<LongNameChars> description{"Bitcrusher"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
-		if(bCvConnected==false)
-		bCV=0;
-		if(srCvConnected==false)
-		srCV=0;
+		if (bCvConnected == false)
+			bCV = 0;
+		if (srCvConnected == false)
+			srCV = 0;
 		auto finalSR = constrain(srOffset + srCV, 0.0f, 1.0f);
 		auto finalBit = constrain(bOffset + bCV, 0.0f, 1.0f);
 		bc.set_param(0, finalSR);
@@ -85,7 +100,6 @@ public:
 		return std::make_unique<BitcrushCore>();
 	}
 	static constexpr char typeID[20] = "BITCRUSH";
-	static constexpr char description[] = "Bit Crusher";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

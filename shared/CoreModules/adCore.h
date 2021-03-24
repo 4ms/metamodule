@@ -7,6 +7,21 @@
 using namespace MathTools;
 
 class AdCore : public CoreProcessor {
+	static inline const int NumInJacks = 5;
+	static inline const int NumOutJacks = 3;
+	static inline const int NumKnobs = 4;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"A Time", "D Time", "A Shape", "D Shape"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output","EOA","EOD"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Gate","A CV", "D CV", "A SHP CV", "D SHP CV"};
+	static inline const StaticString<LongNameChars> description{"A/D ENVELOPE"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
@@ -135,7 +150,6 @@ public:
 		return std::make_unique<AdCore>();
 	}
 	static constexpr char typeID[20] = "ADENV";
-	static constexpr char description[] = "Attack Decay Envelope";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

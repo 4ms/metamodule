@@ -6,6 +6,21 @@
 using namespace MathTools;
 
 class CrossfadeCore : public CoreProcessor {
+	static inline const int NumInJacks = 3;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 1;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Fade"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input 1", "Input 2", "Fade CV"};
+	static inline const StaticString<LongNameChars> description{"Crossfader"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	CrossfadeCore() {}
 
@@ -51,7 +66,6 @@ public:
 		return std::make_unique<CrossfadeCore>();
 	}
 	static constexpr char typeID[20] = "XFADE";
-	static constexpr char description[] = "Crossfader";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
