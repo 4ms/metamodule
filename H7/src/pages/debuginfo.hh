@@ -8,6 +8,8 @@ namespace MetaModule
 struct DebugInfoPage : DisplayPage {
 	static void draw(PageManager *pm)
 	{
+		pm->screen.fill(pm->bgcolor);
+		PageWidgets::draw_patch_name(pm, &FreeSansBold12pt7b, pm->patch_fgcolor, 2, 30);
 		PageWidgets::draw_jack_senses(pm->screen, pm->params, 180);
 		PageWidgets::draw_pot_values(pm->screen, pm->params, Colors::black, 214);
 		PageWidgets::draw_processor_stats(pm->screen, Colors::blue, pm->patch_list.audio_load);
