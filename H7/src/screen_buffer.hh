@@ -356,6 +356,16 @@ public:
 	// Text
 	//
 
+	void setTextColor(Color color)
+	{
+		this->setTextColor(color.Rgb565());
+	}
+
+	void setTextColor(Color fgcolor, Color bgcolor)
+	{
+		this->setTextColor(fgcolor.Rgb565(), bgcolor.Rgb565());
+	}
+
 	size_t write(uint8_t c) override
 	{
 		if (!gfxFont) { // 'Classic' built-in font
