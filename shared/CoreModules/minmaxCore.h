@@ -7,6 +7,21 @@
 using namespace MathTools;
 
 class MinmaxCore : public CoreProcessor {
+	static inline const int NumInJacks = 2;
+	static inline const int NumOutJacks = 2;
+	static inline const int NumKnobs = 0;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Min", "Max"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input 1", "Input 2"};
+	static inline const StaticString<LongNameChars> description{"Min/Max"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
@@ -54,7 +69,6 @@ public:
 		return std::make_unique<MinmaxCore>();
 	}
 	static constexpr char typeID[20] = "MINMAX";
-	static constexpr char description[] = "Minimum/Maximum";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

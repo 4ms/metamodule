@@ -8,6 +8,21 @@
 using namespace MathTools;
 
 class ComplexenvelopeCore : public CoreProcessor {
+	static inline const int NumInJacks = 6;
+	static inline const int NumOutJacks = 6;
+	static inline const int NumKnobs = 8;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Attack","Hold","Decay","Sustain","Release","Attack Curve", "Decay Curve", "Release Curve"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output", "Attack Stage", "Decay Stage", "Release Stage", "Hold Stage", "Sustain Stage"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Gate In", "Attack", "Hold", "Decay", "Sustain", "Release"};
+	static inline const StaticString<LongNameChars> description{"Complex Envelope"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
@@ -25,7 +40,7 @@ public:
 		e.set_sustain(finalSustain);
 		envelopeOutput = e.update(gateInput);
 
-		currentStage=e.getStage();
+		currentStage = e.getStage();
 	}
 
 	ComplexenvelopeCore() {}
@@ -109,7 +124,6 @@ public:
 		return std::make_unique<ComplexenvelopeCore>();
 	}
 	static constexpr char typeID[20] = "COMPLEXENVELOPE";
-	static constexpr char description[] = "Complex Envelope";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
@@ -127,6 +141,6 @@ private:
 	float decayCv = 0;
 	float sustainCv = 0;
 	float releaseCv = 0;
-	int currentStage=0;
+	int currentStage = 0;
 	Envelope e;
 };

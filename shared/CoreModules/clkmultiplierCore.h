@@ -8,14 +8,28 @@
 using namespace MathTools;
 
 class ClkmultiplierCore : public CoreProcessor {
+	static inline const int NumInJacks = 1;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 1;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Multiply"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Clock In"};
+	static inline const StaticString<LongNameChars> description{"Clock Multiplier"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
 		cp.update();
 		if (cp.getWrappedPhase() < pulseWidth) {
 			clockOutput = 1;
-		}
-		else {
+		} else {
 			clockOutput = 0;
 		}
 	}
@@ -57,7 +71,6 @@ public:
 		return std::make_unique<ClkmultiplierCore>();
 	}
 	static constexpr char typeID[20] = "CLKMULTIPLIER";
-	static constexpr char description[] = "clock multiplier";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

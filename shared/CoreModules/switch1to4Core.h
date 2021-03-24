@@ -8,6 +8,23 @@
 using namespace MathTools;
 
 class Switch1to4Core : public CoreProcessor {
+	static inline const int NumInJacks = 4;
+	static inline const int NumOutJacks = 4;
+	static inline const int NumKnobs = 0;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{
+		"Output 1", "Output 2", "Output 3", "Output 4"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
+		"Clock In", "Reset In", "Input", "CV"};
+	static inline const StaticString<LongNameChars> description{"1:4 Switch"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
@@ -15,34 +32,33 @@ public:
 		stepNum = cp.getCount() % 4;
 
 		float position = cvSignal * 3.0f;
-		float fade = position-(int)position;
+		float fade = position - (int)position;
 
-		switch((int)position)
-		{
+		switch ((int)position) {
 			case 0:
-			panSignals[0]=1.0f-fade;
-			panSignals[1]=fade;
-			panSignals[2]=0;
-			panSignals[3]=0;
-			break;
+				panSignals[0] = 1.0f - fade;
+				panSignals[1] = fade;
+				panSignals[2] = 0;
+				panSignals[3] = 0;
+				break;
 			case 1:
-			panSignals[0]=0;
-			panSignals[1]=1.0f-fade;
-			panSignals[2]=fade;
-			panSignals[3]=0;
-			break;
+				panSignals[0] = 0;
+				panSignals[1] = 1.0f - fade;
+				panSignals[2] = fade;
+				panSignals[3] = 0;
+				break;
 			case 2:
-			panSignals[0]=0;
-			panSignals[1]=0;
-			panSignals[2]=1.0f-fade;
-			panSignals[3]=fade;
-			break;
+				panSignals[0] = 0;
+				panSignals[1] = 0;
+				panSignals[2] = 1.0f - fade;
+				panSignals[3] = fade;
+				break;
 			case 3:
-			panSignals[0]=0;
-			panSignals[1]=0;
-			panSignals[2]=0;
-			panSignals[3]=1.0f;
-			break;
+				panSignals[0] = 0;
+				panSignals[1] = 0;
+				panSignals[2] = 0;
+				panSignals[3] = 1.0f;
+				break;
 		}
 	}
 
@@ -82,7 +98,7 @@ public:
 	{
 		float output = 0;
 		if (cvMode) {
-			output = panSignals[output_id]*inputSignal;
+			output = panSignals[output_id] * inputSignal;
 		} else {
 			if (output_id == stepNum) {
 				output = inputSignal;
@@ -110,7 +126,6 @@ public:
 		return std::make_unique<Switch1to4Core>();
 	}
 	static constexpr char typeID[20] = "SWITCH1TO4";
-	static constexpr char description[] = "1 to 4 Switch";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

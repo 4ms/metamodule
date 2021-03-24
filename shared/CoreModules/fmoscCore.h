@@ -8,16 +8,29 @@
 using namespace MathTools;
 
 class FmoscCore : public CoreProcessor {
+	static inline const int NumInJacks = 5;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 8;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Pitch", "Index", "Ratio Coarse", "Ratio Fine", "Shape", "Shape Amount", "Index Amount", "Mix"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Index CV", "Pitch 1", "Shape", "Mix", "Pitch 2"};
+	static inline const StaticString<LongNameChars> description{"FM Oscillator"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
 		fm.set_frequency(0, basePitch * setPitchMultiple(pitchInput));
-		if (secondPitchConnected==false) {
-			fm.set_frequency(1, basePitch*ratioFine*ratioCoarse);
-		}
-		else
-		{
-			fm.set_frequency(1,basePitch*setPitchMultiple(secondPitchInput));
+		if (secondPitchConnected == false) {
+			fm.set_frequency(1, basePitch * ratioFine * ratioCoarse);
+		} else {
+			fm.set_frequency(1, basePitch * setPitchMultiple(secondPitchInput));
 		}
 		totalIndex = constrain(indexCV * indexAmount + indexKnob, 0.0f, 1.0f);
 		float totalShape = constrain(shapeCV * shapeAmount + shapeKnob, 0.0f, 1.0f);
@@ -118,7 +131,6 @@ public:
 		return std::make_unique<FmoscCore>();
 	}
 	static constexpr char typeID[20] = "FMOSC";
-	static constexpr char description[] = "FM Oscillator";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
@@ -140,5 +152,5 @@ private:
 	float shapeAmount = 0;
 	float indexAmount = 0;
 
-	const float ratioTable[8]={0.125f,0.25f,0.5f,1,2,4,8,16};
+	const float ratioTable[8] = {0.125f, 0.25f, 0.5f, 1, 2, 4, 8, 16};
 };

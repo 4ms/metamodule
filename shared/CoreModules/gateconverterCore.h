@@ -9,13 +9,29 @@
 using namespace MathTools;
 
 class GateconverterCore : public CoreProcessor {
+	static inline const int NumInJacks = 3;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 2;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Length", "Delay"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input", "Length", "Delay"};
+	static inline const StaticString<LongNameChars> description{"Gate Converter"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
 		lastGate = currentGate;
 		currentGate = wc.get_output();
 		if (currentGate && (lastGate == false)) {
-			finalDelay = map_value(constrain(delayCV + delayTime, 0.0f, 1.0f), 0.0f, 1.0f, 0.0f, 1000.0f) / 1000.0f * sampleRate;
+			finalDelay =
+				map_value(constrain(delayCV + delayTime, 0.0f, 1.0f), 0.0f, 1.0f, 0.0f, 1000.0f) / 1000.0f * sampleRate;
 			finalLength = map_value(constrain(lengthCV + gateLength, 0.0f, 1.0f), 0.0f, 1.0f, 1.0f, 1000.0f) / 1000.0f *
 						  sampleRate;
 
@@ -88,7 +104,6 @@ public:
 		return std::make_unique<GateconverterCore>();
 	}
 	static constexpr char typeID[20] = "GATECONVERTER";
-	static constexpr char description[] = "Gate Converter";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

@@ -10,6 +10,21 @@
 using namespace MathTools;
 
 class KarplusCore : public CoreProcessor {
+	static inline const int NumInJacks = 2;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 3;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Pitch", "Decay", "Spread"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Gate Input", "Pitch Input"};
+	static inline const StaticString<LongNameChars> description{"Karplus"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
@@ -25,7 +40,7 @@ public:
 		e.set_envelope_time(0, 0.1);
 		e.set_envelope_time(1, 0);
 		e.set_envelope_time(2, 30);
-		e.set_decay_curve(0); 
+		e.set_decay_curve(0);
 		e.set_release_curve(0.5f);
 		e.set_sustain(0.1f);
 		e.set_envelope_time(3, 200);
@@ -40,8 +55,8 @@ public:
 				break;
 			case 1:
 				k.set_decay(val);
-				e.set_sustain(map_value(val,0.0f,1.0f,0.0f,0.2f));
-				e.set_envelope_time(3, map_value(val,0.0f,1.0f,200.0f,1000.0f));
+				e.set_sustain(map_value(val, 0.0f, 1.0f, 0.0f, 0.2f));
+				e.set_envelope_time(3, map_value(val, 0.0f, 1.0f, 200.0f, 1000.0f));
 				break;
 			case 2:
 				k.set_spread(val);
@@ -82,7 +97,6 @@ public:
 		return std::make_unique<KarplusCore>();
 	}
 	static constexpr char typeID[20] = "KARPLUS";
-	static constexpr char description[] = "Karplus";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

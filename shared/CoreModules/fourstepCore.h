@@ -8,6 +8,21 @@
 using namespace MathTools;
 
 class FourstepCore : public CoreProcessor {
+	static inline const int NumInJacks = 1;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 4;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Step 1", "Step 2", "Step 3", "Step 4"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Clock In"};
+	static inline const StaticString<LongNameChars> description{"4 Step Sequencer"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 public:
 	virtual void update(void) override
 	{
@@ -47,7 +62,6 @@ public:
 		return std::make_unique<FourstepCore>();
 	}
 	static constexpr char typeID[20] = "FOURSTEP";
-	static constexpr char description[] = "4 Step Sequencer";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:

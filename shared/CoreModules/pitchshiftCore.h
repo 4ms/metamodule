@@ -8,15 +8,13 @@
 using namespace MathTools;
 
 class PitchshiftCore : public CoreProcessor {
-public:
 	static inline const int NumInJacks = 4;
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 4;
 
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Coarse", "Fine", "Window", "Mix"};
 	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
-		"Input", "Shift", "Window", "Mix"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input", "Shift", "Window", "Mix"};
 	static inline const StaticString<LongNameChars> description{"Pitch Shifter"};
 
 	// clang-format off
@@ -25,7 +23,7 @@ public:
 	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
 	virtual StaticString<LongNameChars> get_description() override { return description; }
 	// clang-format on
-
+public:
 	PitchshiftCore() {}
 
 	PitchshiftCore(float &in, float &shift, float &window, float &mix, float &out)
