@@ -179,7 +179,7 @@ private:
 		int y = 50;
 		const uint16_t line_height = 16;
 		const int num_jacks = 8;
-		const char jack_name[num_jacks][5] = {"CV A", "CV B", "CV C", "CV D", "InL", "InR", "OutL", "OutR"};
+		const char jack_name[num_jacks][6] = {"In L", "In R", "CV A", "CV B", "CV C", "CV D", "Out L", "Out R"};
 		auto &cur_patch = patch_list.cur_patch();
 
 		if (player.is_loaded) {
@@ -235,10 +235,10 @@ private:
 		screen.print(patch_list.audio_load, 10);
 		screen.print("% ");
 		screen.setTextSize(1);
-		screen.setCursor(175, 224);
+		screen.setCursor(160, 224);
 		screen.print(get_heap_size() / 1024, 10);
 		screen.print("kb ");
-		screen.setCursor(175, 232);
+		screen.setCursor(160, 232);
 		screen.print(BigAlloc<Ui>::get_memory_usage() / 1024, 10);
 		screen.print("kb   ");
 	}
