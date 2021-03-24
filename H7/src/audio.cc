@@ -36,14 +36,24 @@ AudioStream::AudioStream(PatchList &patches,
 							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks(
 		[this]() {
+			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
+			SCB_InvalidateDCache_by_Addr((uint32_t *)&rx_buf_1, sizeof(rx_buf_1));
+			SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block_1, sizeof(param_block_1));
 			process(rx_buf_1, tx_buf_1, param_block_1);
+			SCB_CleanDCache_by_Addr((uint32_t *)&tx_buf_1, sizeof(tx_buf_1));
+			Debug::Pin0::low();
 		},
 		[this]() {
+			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
+			SCB_InvalidateDCache_by_Addr((uint32_t *)&rx_buf_2, sizeof(rx_buf_2));
+			SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block_2, sizeof(param_block_2));
 			process(rx_buf_2, tx_buf_2, param_block_2);
+			SCB_CleanDCache_by_Addr((uint32_t *)&tx_buf_2, sizeof(tx_buf_2));
+			Debug::Pin0::low();
 		});
 
 	dac.init();
@@ -69,10 +79,7 @@ AudioConf::SampleT AudioStream::get_output(int output_id)
 
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
 {
-	Debug::Pin0::high();
 	load_measure.start_measurement();
-
-	SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block, sizeof(ParamBlock));
 
 	last_params = param_block[0];
 
@@ -94,6 +101,14 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	auto in_ = in.begin();
 	auto params_ = param_block.begin();
 	for (auto &out_ : out) {
+		if constexpr (DEBUG_PASSTHRU_AUDIO) {
+			out_.l = in_->l;
+			out_.r = in_->r;
+			dac.queue_sample(0, out_.r + 0x00800000);
+			dac.queue_sample(1, out_.l + 0x00800000);
+			in_++;
+			continue;
+		}
 		int i;
 
 		player.set_panel_input(0, AudioFrame::scaleInput(in_->l));
@@ -114,13 +129,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 		// FixMe: Why are the L/R samples swapped in the DMA buffer? The L/R jacks are not swapped on hardware
 		// Todo: scope the data stream vs. LR clk
-		if constexpr (DEBUG_PASSTHRU_AUDIO) {
-			out_.l = in_->r;
-			out_.r = in_->l;
-		} else {
-			out_.l = get_output(1);
-			out_.r = get_output(0);
-		}
+		out_.l = get_output(1);
+		out_.r = get_output(0);
 
 		// Todo: use player.get_output(2) and (3)
 		dac.queue_sample(0, out_.r + 0x00800000);
@@ -130,7 +140,6 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		params_++;
 	}
 
-	Debug::Pin0::low();
 	load_measure.end_measurement();
 	patch_list.audio_load = load_measure.get_last_measurement_load_percent();
 }
