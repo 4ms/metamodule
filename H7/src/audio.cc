@@ -81,7 +81,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 {
 	load_measure.start_measurement();
 
-	last_params = param_block[0];
+	last_params.update_with(param_block[0]);
 
 	if (block_patch_change)
 		block_patch_change--;
