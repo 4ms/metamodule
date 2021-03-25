@@ -124,24 +124,11 @@ public:
 				else
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
 
-				// Todo: use ConnectionList instead of NetList
 				if (jack.module_id == panelId) {
 					if (jack_i == 0)
-						out_conns[jack.jack_id] = net.jacks[1];
+						in_conns[jack.jack_id] = net.jacks[1];
 					else
-						in_conns[jack.jack_id] = net.jacks[0];
-
-					// auto jack_id = jack.jack_id;
-					// for (int other_jack_i = 0; other_jack_i < net.num_jacks; other_jack_i++) {
-					// if (other_jack_i == jack_i)
-					// 	continue;
-					// auto &other_jack = net.jacks[other_jack_i];
-					// Todo: append to a list instead of replacing
-					// if (panel_jack_is_output)
-					// 	out_conns[jack_id] = other_jack;
-					// else
-					// 	in_conns[jack_id] = other_jack;
-					// }
+						out_conns[jack.jack_id] = net.jacks[0];
 				}
 			}
 		}
@@ -157,17 +144,19 @@ public:
 		return true;
 	}
 
-	Jack get_panel_output_connection(unsigned jack_id, unsigned connection_id = 0)
+	Jack get_panel_output_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
 	{
-		if (connection_id > 0)
+		// Todo: support multiple jacks connected to one net
+		if (multiple_connection_id > 0)
 			return {.module_id = 0, .jack_id = 0};
 
 		return out_conns[jack_id];
 	}
 
-	Jack get_panel_input_connection(unsigned jack_id, unsigned connection_id = 0)
+	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
 	{
-		if (connection_id > 0)
+		// Todo: support multiple jacks connected to one net
+		if (multiple_connection_id > 0)
 			return {.module_id = 0, .jack_id = 0};
 
 		return in_conns[jack_id];

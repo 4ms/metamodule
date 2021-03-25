@@ -11,6 +11,7 @@ struct PatchOverviewPage : DisplayPage {
 	static constexpr uint16_t subheader_ypos = 56;
 
 	static constexpr uint16_t list_ypos = 76;
+	static constexpr uint16_t list_lineheight = 20;
 
 	static void draw(PageManager *pm)
 	{
@@ -51,11 +52,11 @@ struct JackMapPage : DisplayPage {
 		screen.print("Jack layout:");
 
 		screen.setFont(&FreeSans9pt7b);
-		const uint16_t line_height = 16;
+		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 		int y = PatchOverviewPage::list_ypos;
 
 		const int num_jacks = 8;
-		const char jack_name[num_jacks][6] = {"In L", "In R", "CV A", "CV B", "CV C", "CV D", "Out L", "Out R"};
+		const char jack_name[num_jacks][6] = {"In L", "In R", "CV A", "CV B", "CV C", "CV D", "OutL", "OutR"};
 
 		if (player.is_loaded) {
 			int num_ins = player.get_num_panel_inputs();
@@ -104,7 +105,7 @@ struct KnobMapPage : DisplayPage {
 
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
-		const uint16_t line_height = 16;
+		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 		const char knob_name[8][2] = {"A", "B", "C", "D", "a", "b", "c", "d"};
 
 		if (player.is_loaded) {
@@ -141,7 +142,7 @@ struct PatchLayoutPage : DisplayPage {
 
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
-		const uint16_t line_height = 16;
+		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 	}
 };
 
@@ -157,7 +158,7 @@ struct ModulesInPatchPage : DisplayPage {
 
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
-		const uint16_t line_height = 16;
+		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 	}
 };
 
