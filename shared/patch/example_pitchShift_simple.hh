@@ -11,50 +11,18 @@ const Patch examplePitchShiftSimple = {
 
 	.module_nodes = {{
 		// PANEL_8
-		{
-			2,
-			255,
-			3,
-			254,
-			4,
-			253,
-			5,
-			6,
-			0,
-		},
+		{2, 255, 3, 254, 4, 253, 5, 6, 0},
 		// PITCHSHIFT
-		{
-			3,
-			1,
-			5,
-			6,
-			2,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-		},
+		{3, 1, 5, 6, 2, 0, 0, 0, 0, 0, 0},
 		// LFOSINE
-		{
-			4,
-			252,
-			1,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-		},
+		{4, 252, 1, 0, 0, 0, 0, 0, 0, 0},
 	}},
 
 	.nets = {{
 		{
 			.num_jacks = 2,
 			.jacks = {{
+				// LFOSINE:out0 -> PITCHSHIFT:in1
 				{.module_id = 2, .jack_id = 0},
 				{.module_id = 1, .jack_id = 1},
 			}},
@@ -76,6 +44,7 @@ const Patch examplePitchShiftSimple = {
 		{
 			.num_jacks = 2,
 			.jacks = {{
+				// Panel:out2(CVA in) -> LFOSINE:in0 (Freq)
 				{.module_id = 0, .jack_id = 2},
 				{.module_id = 2, .jack_id = 0},
 			}},
