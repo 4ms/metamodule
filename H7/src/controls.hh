@@ -80,7 +80,6 @@ private:
 	const uint8_t _pot_map[NumPot] = {1, 4, 0, 5, 3, 6, 7, 2};
 	InterpParam<float, StreamConf::Audio::BlockSize> _knobs[NumPot];
 
-	int32_t _rotary_motion = 0;
 	bool _rotary_moved_while_pressed = false;
 };
 } // namespace MetaModule

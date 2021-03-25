@@ -18,8 +18,9 @@ struct SystemClocks {
 		HWSemaphore<15>::enable_channel_ISR();
 		HAL_NVIC_EnableIRQ(HSEM2_IRQn);
 		InterruptManager::registerISR(HSEM2_IRQn, 0, 0, []() {
-				HWSemaphore<15>::clear_ISR();
-				HAL_NVIC_DisableIRQ(HSEM2_IRQn); });
+			HWSemaphore<15>::clear_ISR();
+			HAL_NVIC_DisableIRQ(HSEM2_IRQn);
+		});
 
 		// Domain D2 goes to STOP mode (Cortex-M4 in deep-sleep) waiting for Cortex-M7 to
 		// perform system initialization

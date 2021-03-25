@@ -37,8 +37,8 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
-	static inline __attribute__((section(".dma_buffer"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
-	static inline __attribute__((section(".dma_buffer"))) ParamBlock param_blocks[2];
+	static inline __attribute__((section(".axisram"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+	static inline __attribute__((section(".axisram"))) ParamBlock param_blocks[2];
 	static inline __attribute__((section(".axisram"))) MMScreenConf::FrameBufferT screen_framebuf;
 
 	StaticBuffers()

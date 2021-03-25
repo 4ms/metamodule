@@ -7,6 +7,29 @@
 
 namespace MetaModule
 {
+struct RotaryMotion {
+	int32_t abs_pos = 0;
+	int32_t motion = 0;
+
+	int32_t use_motion()
+	{
+		auto tmp = motion;
+		motion = 0;
+		return tmp;
+	}
+	void add_motion(const RotaryMotion &that)
+	{
+		motion += that.motion;
+		abs_pos += that.motion;
+	}
+	void transfer_motion(RotaryMotion &that)
+	{
+		auto that_motion = that.use_motion();
+		motion += that_motion;
+		abs_pos += that_motion;
+	}
+};
+
 struct Params {
 	// Sampled at audio sample rate:
 	float cvjacks[NumCVIn] = {0.f};
@@ -19,9 +42,8 @@ struct Params {
 	uint16_t jack_senses;
 
 	Toggler rotary_button;
-	int32_t rotary_motion = 0;
-	int32_t rotary_pushed_motion = 0;
-	int32_t rotary_position = 0;
+	RotaryMotion rotary;
+	RotaryMotion rotary_pushed;
 
 	Params &operator=(const Params &that)
 	{
@@ -36,16 +58,31 @@ struct Params {
 			buttons[i].copy_state(that.buttons[i]);
 		for (int i = 0; i < NumPot; i++)
 			knobs[i] = that.knobs[i];
-		// for (int i = 0; i < 15; i++)
-		// 	jack_senses[i].copy_state(that.jack_senses[i]);
 		jack_senses = that.jack_senses;
 		patchcv = that.patchcv;
 		rotary_button.copy_state(that.rotary_button);
-		rotary_motion = that.rotary_motion;
-		rotary_pushed_motion = that.rotary_pushed_motion;
-		rotary_position = that.rotary_position;
+		rotary = that.rotary;
+		rotary_pushed = that.rotary_pushed;
 
 		return *this;
+	}
+
+	// Copies some data, adds other data (rotary motion)
+	void update_with(const Params &that)
+	{
+		for (int i = 0; i < NumCVIn; i++)
+			cvjacks[i] = that.cvjacks[i];
+		for (int i = 0; i < NumGateIn; i++)
+			gate_ins[i].copy_state(that.gate_ins[i]);
+		for (int i = 0; i < NumRgbButton; i++)
+			buttons[i].copy_state(that.buttons[i]);
+		for (int i = 0; i < NumPot; i++)
+			knobs[i] = that.knobs[i];
+		jack_senses = that.jack_senses;
+		patchcv = that.patchcv;
+		rotary_button.copy_state(that.rotary_button);
+		rotary.add_motion(that.rotary);
+		rotary_pushed.add_motion(that.rotary_pushed);
 	}
 };
 
