@@ -43,7 +43,10 @@ struct StaticBuffers {
 
 	StaticBuffers()
 	{
-		target::MPU_::disable_cache_for_dma_buffer(audio_dma_block, sizeof(audio_dma_block));
+		auto region_id = target::MPU_::disable_cache_for_dma_buffer(
+			reinterpret_cast<uint32_t>(audio_dma_block[0].data()), sizeof(audio_dma_block));
+		if (region_id < 0)
+			__BKPT(); // debug breakpoint
 	}
 } _sb;
 
