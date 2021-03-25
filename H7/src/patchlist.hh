@@ -12,6 +12,14 @@ struct PatchList {
 			_cur_patch = 0;
 		return _patches[_cur_patch].patch;
 	}
+
+	const Patch &get_patch(uint32_t patch_id)
+	{
+		if (patch_id >= NumPatches)
+			return _patches[0].patch;
+		return _patches[patch_id].patch;
+	}
+
 	uint32_t cur_patch_index()
 	{
 		return _cur_patch;

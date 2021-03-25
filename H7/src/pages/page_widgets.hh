@@ -15,7 +15,6 @@ struct PageWidgets {
 		screen.setTextColor(color.Rgb565());
 		screen.setTextSize(1);
 		screen.setCursor(x, y);
-		screen.setTextWrap(false);
 		screen.print(cur_patch.patch_name);
 	}
 

@@ -3,6 +3,7 @@
 #include "pages/debuginfo.hh"
 #include "pages/page_widgets.hh"
 #include "pages/patch_overview.hh"
+#include "pages/patch_selector.hh"
 
 namespace MetaModule
 {
@@ -32,6 +33,7 @@ void PageManager::display_current_page()
 			break;
 
 		case PatchSelector:
+			PatchSelectorPage::draw(this);
 			break;
 
 		case DebugInfo:
