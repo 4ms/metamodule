@@ -41,14 +41,16 @@ public:
 	{
 		switch (cur_client) {
 			case Leds:
-				if (HWSemaphore<LEDFrameBufLock>::lock(2) == HWSemaphoreFlag::LockedOk) {
+				if (HWSemaphore<LEDFrameBufLock>::lock() == HWSemaphoreFlag::LockedOk) {
+					Debug::Pin2::high();
 					leds.write_partial_chip(0, 12);
 				}
 				cur_client = SelectPots;
 				break;
 
 			case SelectPots:
-				HWSemaphore<LEDFrameBufLock>::unlock(2);
+				Debug::Pin2::low();
+				HWSemaphore<LEDFrameBufLock>::unlock();
 				cur_pot = 0;
 				controls.potadc.select_pot_source(cur_pot);
 				controls.potadc.select_adc_channel(MuxedADC::Channel::Pots);

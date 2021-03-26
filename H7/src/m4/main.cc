@@ -32,7 +32,7 @@ void main(void)
 	}
 	HWSemaphore<M4_ready>::lock();
 
-	SharedBus::i2c.init(i2c_conf);
+	SharedBus::i2c.init(i2c_conf_m4);
 
 	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufLocation);
 	auto param_block_base = SharedMemory::read_address_of<ParamBlock *>(SharedMemory::ParamsPtrLocation);
@@ -51,7 +51,7 @@ void main(void)
 
 	// SharedBus
 	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
-	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
+	SharedBus::i2c.enable_IT(i2c_conf_m4.priority1, i2c_conf_m4.priority2);
 	led_driver.start_it_mode();
 	controls.start();
 
