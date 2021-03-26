@@ -26,11 +26,16 @@ struct StaticBuffers {
 	struct CacheDisabler {
 		CacheDisabler(char *_start, char *_size)
 		{
-			auto region_id = target::MPU_::disable_cache_for_dma_buffer(reinterpret_cast<uint32_t>(_start),
-																		reinterpret_cast<uint32_t>(_size));
+			target::MPU_::disable_cache_for_dma_buffer(reinterpret_cast<uint32_t>(_start),
+													   reinterpret_cast<uint32_t>(_size));
+		}
+		CacheDisabler(void *_start, size_t _size)
+		{
+			target::MPU_::disable_cache_for_dma_buffer(reinterpret_cast<uint32_t>(_start), _size);
 		}
 	};
 	static inline CacheDisabler dma_region_disable{&_dma_buffer_start, &_dma_buffer_region_size};
+	static inline CacheDisabler screenbuf_region_disable{&screen_framebuf, sizeof(screen_framebuf)};
 };
 
 } // namespace MetaModule
