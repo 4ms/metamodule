@@ -11,11 +11,11 @@
 #include "drivers/dac_MCP48FVBxx.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/hsem.hh"
-#include "drivers/mpu.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "drivers/sdram.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
+#include "m7/static_buffers.hh"
 #include "m7/system_clocks.hh"
 #include "muxed_adc.hh"
 #include "shared_bus.hh"
@@ -24,6 +24,10 @@
 
 namespace MetaModule
 {
+
+// Define the hardware elements used by Core M7
+// This initializes the SystemClocks (RCC) and other system resources
+// and then initializes the external chips that this core uses, before main() runs
 struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	Hardware()
 		: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
@@ -31,27 +35,11 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 	{}
 
 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
-	QSpiFlash qspi{qspi_flash_conf};
+	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
 	AnalogOutT dac;
 } _hw;
 
-struct StaticBuffers {
-	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
-	static inline __attribute__((section(".axisram"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
-	static inline __attribute__((section(".axisram"))) ParamBlock param_blocks[2];
-	static inline __attribute__((section(".axisram"))) MMScreenConf::FrameBufferT screen_framebuf;
-
-	StaticBuffers()
-	{
-		target::MPU_::disable_cache_for_dma_buffer(audio_dma_block, sizeof(audio_dma_block));
-	}
-} _sb;
-
 } // namespace MetaModule
-
-// Todo: use PatchList memory better: right now all patches get copied with CopyInitData with mostly zeros (some
-// values?) Then libc_init calls PatchList ctor. So make it static? Have a load() function? Keep in mind we'll want to
-// dynamically load patches at some point
 
 void main()
 {

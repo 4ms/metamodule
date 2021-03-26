@@ -54,6 +54,10 @@ _params_ptr = 0x3800FF00;
 _sheap = 0x24040000;  		/* start of heap */
 _eheap = 0x24080000; 		/* end of heap */
 
+
+_dma_buffer_start = 0x30040000;
+_dma_buffer_region_size = 0x8000;
+
 _estack = 0x20020000;		/* end of stack */
 /* Highest address of the user mode stack */
 /* Generate a link error if heap and stack don't fit into RAM */

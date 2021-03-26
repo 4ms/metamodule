@@ -32,13 +32,15 @@ void main(void)
 	}
 	HWSemaphore<M4_ready>::lock();
 
-	SharedBus::i2c.init(i2c_conf);
+	SharedBus::i2c.init(i2c_conf_m4);
 
 	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufLocation);
 	auto param_block_base = SharedMemory::read_address_of<ParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
 
 	// Led Driver
+	// uint32_t local_fb[16] = {0};
+	// uint32_t *l_led_frame_buffer = local_fb;
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
 	// Controls
@@ -49,7 +51,7 @@ void main(void)
 
 	// SharedBus
 	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
-	SharedBus::i2c.enable_IT(i2c_conf.priority1, i2c_conf.priority2);
+	SharedBus::i2c.enable_IT(i2c_conf_m4.priority1, i2c_conf_m4.priority2);
 	led_driver.start_it_mode();
 	controls.start();
 
@@ -60,8 +62,7 @@ void main(void)
 	// SemaphoreAction screenupdate {ScreenFrameBuf1Lock, [&](){ screen_writer.transfer_buffer_to_screen(); });
 	HWSemaphore<ScreenFrameBufLock>::clear_ISR();
 	HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>(
-		[&]() { 
+	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>([&]() {
 		HWSemaphore<ScreenFrameWriteLock>::lock();
 		screen_writer.transfer_buffer_to_screen();
 		HWSemaphore<ScreenFrameWriteLock>::unlock();

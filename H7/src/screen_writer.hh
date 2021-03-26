@@ -101,20 +101,21 @@ public:
 			config_bdma_transfer(dst_addr, HalfFrameSize);
 			mem_xfer.config_transfer(dst, src, HalfFrameSize);
 			mem_xfer.register_callback([&]() {
-				Debug::Pin1::low();
+				// Debug::Pin1::low();
 				start_bdma_transfer([&]() {
-					Debug::Pin2::high();
+					// Debug::Pin2::high();
 					mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
 					mem_xfer.register_callback([&]() {
-						Debug::Pin2::low();
+						// Debug::Pin2::low();
 						// Debug::Pin2::high();
-						start_bdma_transfer([&]() { Debug::Pin1::low(); });
+						start_bdma_transfer([&]() { // Debug::Pin1::low();
+						});
 					});
 					mem_xfer.start_transfer();
 				});
 			});
 			mem_xfer.start_transfer();
-			Debug::Pin1::high();
+			// Debug::Pin1::high();
 		} else {
 			// Todo: test full buffer xfer
 			set_pos(0, 0, _width - 1, _height - 1);

@@ -418,7 +418,8 @@ public:
 	void flush_cache()
 	{
 #if defined(CORE_CM7)
-		SCB_CleanDCache_by_Addr((uint32_t *)(&framebuf[0]), sizeof(ScreenConfT::FrameBufferT));
+		// Don't need to do this now, since we disabled cache for the entire screen buffer
+		// SCB_CleanDCache_by_Addr((uint32_t *)(&framebuf[0]), sizeof(ScreenConfT::FrameBufferT));
 #endif
 	}
 
