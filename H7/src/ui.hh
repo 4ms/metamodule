@@ -57,7 +57,12 @@ public:
 		// update_animation() just update the TriOsc and fade (but not write actual color to the framebuffer)
 		// led_update_task.init(led_update_animation_task_conf, [this]() { leds.update_animation(); });
 		// led_update_task.start();
-		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() { update_led_states(); });
+		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() {
+			if (HWSemaphore<LEDFrameBufLock>::lock() == HWSemaphoreFlag::LockedOk) {
+				update_led_states();
+				HWSemaphore<LEDFrameBufLock>::unlock();
+			}
+		});
 		HWSemaphore<LEDFrameBufLock>::enable_channel_ISR();
 
 		screen_draw_task.init(
@@ -105,6 +110,7 @@ private:
 
 	void update_led_states()
 	{
+		Debug::Pin1::high();
 		if (params.buttons[0].is_pressed())
 			leds.but[0].set_background(Colors::red);
 		else
@@ -126,6 +132,7 @@ private:
 		leds.but[1].breathe(Colors::white, 0.1f);
 
 		leds.update_animation();
+		Debug::Pin1::low();
 	}
 };
 } // namespace MetaModule
