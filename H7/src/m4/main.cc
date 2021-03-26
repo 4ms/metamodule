@@ -39,7 +39,9 @@ void main(void)
 	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
 
 	// Led Driver
-	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
+	uint32_t local_fb[16] = {0};
+	uint32_t *l_led_frame_buffer = local_fb;
+	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, l_led_frame_buffer};
 
 	// Controls
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
@@ -60,8 +62,7 @@ void main(void)
 	// SemaphoreAction screenupdate {ScreenFrameBuf1Lock, [&](){ screen_writer.transfer_buffer_to_screen(); });
 	HWSemaphore<ScreenFrameBufLock>::clear_ISR();
 	HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>(
-		[&]() { 
+	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>([&]() {
 		HWSemaphore<ScreenFrameWriteLock>::lock();
 		screen_writer.transfer_buffer_to_screen();
 		HWSemaphore<ScreenFrameWriteLock>::unlock();
