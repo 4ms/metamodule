@@ -1,12 +1,21 @@
 #pragma once
 #include "drivers/i2c_config_struct.hh"
+#include "local_board_rev.hh"
 
 constexpr uint32_t LEDUpdateHz = 100;
 
 const I2CConfig i2c_conf_m4 = {
+
+#ifdef USING_DUAL_I2C_BUS_ON_HACKED_PCB
 	.I2Cx = I2C3,
 	.SCL = {GPIO::A, 8, GPIO_AF4_I2C3},
 	.SDA = {GPIO::C, 9, GPIO_AF4_I2C3},
+#else
+	.I2Cx = I2C1,
+	.SCL = {GPIO::B, 6, GPIO_AF4_I2C1},
+	.SDA = {GPIO::B, 7, GPIO_AF4_I2C1},
+#endif
+
 	.timing =
 		{
 			.PRESC = 0x00,
@@ -17,6 +26,7 @@ const I2CConfig i2c_conf_m4 = {
 	.priority1 = 0,
 	.priority2 = 1,
 };
+
 
 const I2CConfig i2c_conf_m7 = {
 	.I2Cx = I2C1,
