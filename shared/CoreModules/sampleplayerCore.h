@@ -7,9 +7,9 @@
 using namespace MathTools;
 
 class SampleplayerCore : public CoreProcessor {
-	static inline const int NumInJacks = 1;
-	static inline const int NumOutJacks = 1;
-	static inline const int NumKnobs = 1;
+	static inline const int NumInJacks = 0;
+	static inline const int NumOutJacks = 0;
+	static inline const int NumKnobs = 0;
 
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{};
 	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{};
