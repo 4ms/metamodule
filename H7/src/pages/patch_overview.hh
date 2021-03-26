@@ -20,8 +20,9 @@ struct PatchOverviewPage : DisplayPage {
 		auto &cur_patch = pm->patch_list.cur_patch();
 
 		screen.fill(bgcolor);
+		PageWidgets::setup_header(pm);
 		screen.setTextWrap(true);
-		PageWidgets::draw_patch_name(pm, &FreeSansBold18pt7b, pm->patch_fgcolor, 2, 30);
+		screen.print(cur_patch.patch_name);
 
 		screen.setFont(&FreeSans9pt7b);
 		screen.setTextColor(Colors::grey);
@@ -33,11 +34,11 @@ struct PatchOverviewPage : DisplayPage {
 	static void draw_header_and_setup_subheader(PageManager *pm)
 	{
 		pm->screen.fill(PatchOverviewPage::bgcolor);
-		pm->screen.setTextWrap(false);
-		PageWidgets::draw_patch_name(pm, &FreeSansBold18pt7b, pm->patch_fgcolor, 2, 30);
-		pm->screen.setFont(&FreeSansBold12pt7b);
-		pm->screen.setTextColor(subheader_fg);
-		pm->screen.setCursor(2, PatchOverviewPage::subheader_ypos);
+
+		PageWidgets::setup_header(pm);
+		pm->screen.print(pm->patch_list.cur_patch().patch_name);
+
+		PageWidgets::setup_sub_header(pm);
 	}
 };
 

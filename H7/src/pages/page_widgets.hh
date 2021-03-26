@@ -6,16 +6,29 @@ namespace MetaModule
 {
 
 struct PageWidgets {
-	static void draw_patch_name(PageManager *pm, const GFXfont *font, Color color, uint16_t x, uint16_t y)
+	static constexpr Color header_fg = Colors::blue.blend(Colors::black, 0.5f);
+	static constexpr uint16_t header_ypos = 30;
+	static constexpr Color subheader_fg = Colors::black;
+	static constexpr uint16_t subheader_ypos = 56;
+
+	static void setup_header(PageManager *pm)
 	{
 		auto &screen = pm->screen;
-		auto &cur_patch = pm->patch_list.cur_patch();
-
-		screen.setFont(font);
-		screen.setTextColor(color.Rgb565());
+		screen.setFont(&FreeSansBold18pt7b);
+		screen.setTextColor(header_fg);
 		screen.setTextSize(1);
-		screen.setCursor(x, y);
-		screen.print(cur_patch.patch_name);
+		screen.setCursor(2, header_ypos);
+		screen.setTextWrap(false);
+	}
+
+	static void setup_sub_header(PageManager *pm)
+	{
+		auto &screen = pm->screen;
+		screen.setFont(&FreeSansBold12pt7b);
+		screen.setTextColor(subheader_fg);
+		screen.setTextSize(1);
+		screen.setCursor(2, subheader_ypos);
+		screen.setTextWrap(false);
 	}
 
 	static void draw_processor_stats(ScreenFrameBuffer &screen, Color color, uint8_t audio_load)

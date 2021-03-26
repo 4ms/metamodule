@@ -38,11 +38,6 @@ public:
 
 	Page cur_page;
 
-	Color bgcolor = Colors::pink;
-	Color patch_fgcolor = Colors::blue.blend(Colors::black, 0.5f);
-	Color load_fgcolor = Colors::blue;
-	Color pots_fgcolor = Colors::black;
-
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, ScreenFrameBuffer &s)
 		: patch_list{pl}
 		, patch_player{pp}

@@ -39,8 +39,6 @@ void main(void)
 	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
 
 	// Led Driver
-	// uint32_t local_fb[16] = {0};
-	// uint32_t *l_led_frame_buffer = local_fb;
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
 	// Controls

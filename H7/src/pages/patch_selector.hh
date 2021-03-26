@@ -12,10 +12,10 @@ struct PatchSelectorPage : DisplayPage {
 		auto &player = pm->patch_player;
 		auto &cur_patch = pm->patch_list.cur_patch();
 
-		screen.fill(pm->bgcolor);
+		screen.fill(Colors::white);
 		screen.setFont(&FreeSansBold12pt7b);
 		screen.setTextColor(Colors::black);
-		screen.setCursor(2, 20);
+		screen.setCursor(2, 40);
 		screen.print("Select a patch:");
 
 		screen.setFont(&FreeSans12pt7b);
