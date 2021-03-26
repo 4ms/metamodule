@@ -56,7 +56,7 @@ struct JackMapPage : DisplayPage {
 		int y = PatchOverviewPage::list_ypos;
 
 		const int num_jacks = 8;
-		const char jack_name[num_jacks][6] = {"In L", "In R", "CV A", "CV B", "CV C", "CV D", "OutL", "OutR"};
+		const char jack_name[num_jacks][6] = {"In L", "In R", "CV A", "CV B", "CV C", "CV D", "Out L", "Out R"};
 
 		if (player.is_loaded) {
 			int num_ins = player.get_num_panel_inputs();
