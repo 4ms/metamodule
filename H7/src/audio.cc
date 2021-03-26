@@ -39,20 +39,20 @@ AudioStream::AudioStream(PatchList &patches,
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
-			SCB_InvalidateDCache_by_Addr((uint32_t *)&rx_buf_1, sizeof(rx_buf_1));
-			SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block_1, sizeof(param_block_1));
+			// SCB_InvalidateDCache_by_Addr((uint32_t *)&rx_buf_1, sizeof(rx_buf_1));
+			// SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block_1, sizeof(param_block_1));
 			process(rx_buf_1, tx_buf_1, param_block_1);
-			SCB_CleanDCache_by_Addr((uint32_t *)&tx_buf_1, sizeof(tx_buf_1));
+			// SCB_CleanDCache_by_Addr((uint32_t *)&tx_buf_1, sizeof(tx_buf_1));
 			Debug::Pin0::low();
 		},
 		[this]() {
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
-			SCB_InvalidateDCache_by_Addr((uint32_t *)&rx_buf_2, sizeof(rx_buf_2));
-			SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block_2, sizeof(param_block_2));
+			// SCB_InvalidateDCache_by_Addr((uint32_t *)&rx_buf_2, sizeof(rx_buf_2));
+			// SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block_2, sizeof(param_block_2));
 			process(rx_buf_2, tx_buf_2, param_block_2);
-			SCB_CleanDCache_by_Addr((uint32_t *)&tx_buf_2, sizeof(tx_buf_2));
+			// SCB_CleanDCache_by_Addr((uint32_t *)&tx_buf_2, sizeof(tx_buf_2));
 			Debug::Pin0::low();
 		});
 
@@ -81,12 +81,12 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 {
 	load_measure.start_measurement();
 
-	last_params = param_block[0];
+	last_params.update_with(param_block[0]);
 
 	if (block_patch_change)
 		block_patch_change--;
 	else {
-		if (check_patch_change(last_params.rotary_motion)) {
+		if (check_patch_change(last_params.rotary_pushed.use_motion())) {
 			block_patch_change = 32;
 			for (auto &out_ : out) {
 				out_.l = 0;
@@ -133,8 +133,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		out_.r = get_output(0);
 
 		// Todo: use player.get_output(2) and (3)
-		dac.queue_sample(0, out_.r + 0x00800000);
-		dac.queue_sample(1, out_.l + 0x00800000);
+		dac.queue_sample(0, out_.l + 0x00800000);
+		dac.queue_sample(1, out_.r + 0x00800000);
 
 		in_++;
 		params_++;
