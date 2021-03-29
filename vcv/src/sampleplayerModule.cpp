@@ -33,7 +33,7 @@ struct SampleplayerWidget : CommModuleWidget {
 
 		addModuleTitle("SAMPLER");
 		addLabeledInput("TRIGGER", SampleplayerModule::TRIGGER_INPUT, {0, 1});
-		addLabeledInput("OUTPUT", SampleplayerModule::SAMPLE_OUTPUT, {0, 0});
+		addLabeledOutput("OUTPUT", SampleplayerModule::SAMPLE_OUTPUT, {0, 0});
 	}
 };
 
