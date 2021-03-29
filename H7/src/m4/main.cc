@@ -18,14 +18,17 @@
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
 
-using namespace MetaModule;
-
+namespace MetaModule
+{
 struct StaticBuffers {
 	static inline __attribute__((section(".d3buffer"))) MMScreenConf::HalfFrameBufferT screen_writebuf;
 } _sb;
+} // namespace MetaModule
 
 void main(void)
 {
+	using namespace MetaModule;
+
 	target::corem4::SystemClocks start_clocks;
 
 	while (HWSemaphore<SharedBusLock>::is_locked()) {
