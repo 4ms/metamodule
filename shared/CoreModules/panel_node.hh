@@ -1,13 +1,21 @@
 #pragma once
 #include "coreProcessor.h"
 #include "moduleTypes.h"
+#include "panel_defs.hh"
 #include "util/parameter.h"
 
 class NodePanel : public CoreProcessor {
 public:
-	static inline constexpr int NumInJacks = 6;
-	static inline constexpr int NumOutJacks = 2;
-	static inline constexpr int NumKnobs = 8;
+	static constexpr int NumKnobs = PanelDef::NumPot;
+	static constexpr int NumInJacks = PanelDef::NumAudioIn + PanelDef::NumCVIn;
+	static constexpr int NumOutJacks = PanelDef::NumAudioOut;
+	// Todo: DAC out, gate out, gate in
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"A", "B", "C", "D", "a", "b", "c", "d"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"OutL", "OutR"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
+		"In L", "In R", "CV A", "CV B", "CV C", "CV D"};
+	static inline const StaticString<LongNameChars> description{"PANEL"};
 
 	RefParameter<float> outputs[NumOutJacks];
 	RefParameter<float> inputs[NumInJacks];
@@ -97,11 +105,16 @@ public:
 	}
 
 	static constexpr char typeID[20] = "PANEL_8";
-	static constexpr char description[] = "Panel";
 
 	// Swapped In/Out! Beacuse panel is different than other modules
 	static inline bool s_registered_wp =
 		ModuleFactory::registerModuleType(typeID, description, create, NumOutJacks, NumInJacks, NumKnobs);
 
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 };

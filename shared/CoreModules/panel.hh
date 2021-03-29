@@ -10,6 +10,19 @@ public:
 	static constexpr int NumOutJacks = PanelDef::NumAudioOut;
 	// Todo: DAC out, gate out, gate in
 
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"A", "B", "C", "D", "a", "b", "c", "d"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"OutL", "OutR"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
+		"In L", "In R", "CV A", "CV B", "CV C", "CV D"};
+	static inline const StaticString<LongNameChars> description{"PANEL"};
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
+
 	float inputs[NumInJacks];	// OutsideToPatch
 	float outputs[NumOutJacks]; // PatchToOutside
 	float params[NumKnobs];
@@ -71,7 +84,6 @@ public:
 	}
 
 	static constexpr char typeID[20] = "netPANEL_8";
-	static constexpr char description[] = "Panel: 8 Pots, 2/2 AudioIO, 4/2 AnalogIO, 1/3 GateIO";
 
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 };
