@@ -12,16 +12,14 @@ struct PatchSelectorPage : DisplayPage {
 		auto &player = pm->patch_player;
 		auto &cur_patch = pm->patch_list.cur_patch();
 
-		screen.fill(pm->bgcolor);
-		screen.setFont(&FreeSansBold12pt7b);
-		screen.setTextColor(Colors::black);
-		screen.setCursor(2, 20);
+		screen.fill(Colors::white);
+		PageWidgets::setup_header(pm);
 		screen.print("Select a patch:");
 
 		screen.setFont(&FreeSans12pt7b);
 		screen.setTextColor(Colors::black.blend(Colors::green));
 		for (int i = 0; i < PatchList::NumPatches; i++) {
-			screen.setCursor(2, 40 + i * 24);
+			screen.setCursor(2, 60 + i * 24);
 			screen.print(pm->patch_list.get_patch(i).patch_name);
 		}
 	}

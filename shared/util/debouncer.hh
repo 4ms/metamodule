@@ -8,10 +8,18 @@ struct Toggler {
 		, got_falling_edge_{false}
 	{}
 
+	void reset()
+	{
+		is_high_ = false;
+		got_falling_edge_ = false;
+		got_rising_edge_ = false;
+	}
+
 	bool is_high() const
 	{
 		return is_high_;
 	}
+
 	bool is_pressed() const
 	{
 		return is_high_;
@@ -25,6 +33,7 @@ struct Toggler {
 		} else
 			return false;
 	}
+
 	bool just_went_high()
 	{
 		return is_just_pressed();
@@ -101,4 +110,3 @@ struct Debouncer : Toggler {
 private:
 	unsigned debounce_state_;
 };
-

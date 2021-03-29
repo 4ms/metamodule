@@ -60,6 +60,7 @@ public:
 		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() {
 			if (HWSemaphore<LEDFrameBufLock>::lock() == HWSemaphoreFlag::LockedOk) {
 				update_led_states();
+				// Todo: doesn't this cause the ISR to trigger itself?
 				HWSemaphore<LEDFrameBufLock>::unlock();
 			}
 		});
@@ -80,15 +81,15 @@ public:
 	void refresh_screen()
 	{
 		update();
-		Debug::Pin3::high();
+		// Debug::Pin3::high();
 		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
-			Debug::Pin3::low();
+			// Debug::Pin3::low();
 			return;
 		}
 		HWSemaphore<ScreenFrameBufLock>::lock();
 		pages.display_current_page();
 		screen.flush_cache();
-		Debug::Pin3::low();
+		// Debug::Pin3::low();
 		HWSemaphore<ScreenFrameBufLock>::unlock();
 	}
 
@@ -110,7 +111,7 @@ private:
 
 	void update_led_states()
 	{
-		Debug::Pin1::high();
+		// Debug::Pin1::high();
 		if (params.buttons[0].is_pressed())
 			leds.but[0].set_background(Colors::red);
 		else
@@ -132,7 +133,7 @@ private:
 		leds.but[1].breathe(Colors::white, 0.1f);
 
 		leds.update_animation();
-		Debug::Pin1::low();
+		// Debug::Pin1::low();
 	}
 };
 } // namespace MetaModule

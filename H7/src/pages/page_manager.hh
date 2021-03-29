@@ -1,10 +1,5 @@
 #pragma once
-#include "Adafruit_GFX_Library/Fonts/FreeMono12pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSans12pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSans9pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSansBold12pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
-#include "pages/bouncing_ball.hh"
+#include "pages/fonts.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
@@ -38,11 +33,6 @@ public:
 
 	Page cur_page;
 
-	Color bgcolor = Colors::pink;
-	Color patch_fgcolor = Colors::blue.blend(Colors::black, 0.5f);
-	Color load_fgcolor = Colors::blue;
-	Color pots_fgcolor = Colors::black;
-
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, ScreenFrameBuffer &s)
 		: patch_list{pl}
 		, patch_player{pp}
@@ -51,31 +41,10 @@ public:
 		, cur_page{Page::PatchOverview}
 	{}
 
-	void init()
-	{
-		cur_page = Page::PatchOverview;
-		display_current_page();
-	}
-
-	void next_page()
-	{
-		cur_page = static_cast<Page>(static_cast<unsigned>(cur_page) + 1);
-		if (cur_page >= LAST_PAGE)
-			cur_page = PatchOverview;
-	}
-	void prev_page()
-	{
-		if (static_cast<unsigned>(cur_page) == 0)
-			cur_page = static_cast<Page>(static_cast<unsigned>(LAST_PAGE) - 1);
-		else
-			cur_page = static_cast<Page>(static_cast<unsigned>(cur_page) - 1);
-	}
-
-	void jump_to_page(Page p)
-	{
-		cur_page = p;
-	}
-
+	void init();
+	void next_page();
+	void prev_page();
+	void jump_to_page(Page p);
 	void display_current_page();
 };
 } // namespace MetaModule

@@ -44,6 +44,7 @@ struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
 void main()
 {
 	using namespace MetaModule;
+	StaticBuffers::init();
 
 	Params last_params;
 	PatchList patch_list;
@@ -67,8 +68,9 @@ void main()
 	SCB_CleanDCache();
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
-	HWSemaphore<SharedBusLock>::disable_channel_ISR();
-	HWSemaphore<SharedBusLock>::unlock();
+
+	// Tell M4 we're done with init
+	HWSemaphore<M7_ready>::unlock();
 
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked()) {

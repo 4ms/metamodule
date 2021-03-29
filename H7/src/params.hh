@@ -45,26 +45,28 @@ struct Params {
 	RotaryMotion rotary;
 	RotaryMotion rotary_pushed;
 
-	Params &operator=(const Params &that)
+	Params()
 	{
-		if (this == &that)
-			return *this;
+		clear();
+	}
 
+	void clear()
+	{
 		for (int i = 0; i < NumCVIn; i++)
-			cvjacks[i] = that.cvjacks[i];
+			cvjacks[i] = 0.f;
 		for (int i = 0; i < NumGateIn; i++)
-			gate_ins[i].copy_state(that.gate_ins[i]);
+			gate_ins[i].reset();
 		for (int i = 0; i < NumRgbButton; i++)
-			buttons[i].copy_state(that.buttons[i]);
+			buttons[i].reset();
 		for (int i = 0; i < NumPot; i++)
-			knobs[i] = that.knobs[i];
-		jack_senses = that.jack_senses;
-		patchcv = that.patchcv;
-		rotary_button.copy_state(that.rotary_button);
-		rotary = that.rotary;
-		rotary_pushed = that.rotary_pushed;
-
-		return *this;
+			knobs[i] = 0.f;
+		jack_senses = 0;
+		patchcv = 0.f;
+		rotary_button.reset();
+		rotary.motion = 0;
+		rotary.abs_pos = 0;
+		rotary_pushed.motion = 0;
+		rotary_pushed.abs_pos = 0;
 	}
 
 	// Copies some data, adds other data (rotary motion)

@@ -18,4 +18,3 @@ struct StreamConf {
 		using SampleT = uint32_t;
 	};
 };
-

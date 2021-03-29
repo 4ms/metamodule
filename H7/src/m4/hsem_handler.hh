@@ -15,4 +15,5 @@ struct HWSemaphoreCoreHandler : public HWSemaphoreGlobalBase {
 		});
 	}
 };
+
 } // namespace MetaModule

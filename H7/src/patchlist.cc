@@ -15,5 +15,5 @@ PatchList::PatchList()
 			   {example_drum_verb_mono},
 			   {example_stereo_verb}}
 {
-	_cur_patch = 0;
+	_cur_patch_idx = 0;
 }

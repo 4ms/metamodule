@@ -41,9 +41,11 @@ void Controls::update_params()
 	cur_params->gate_ins[1].copy_state(gate_in1);
 	cur_params->gate_ins[2].copy_state(gate_in2);
 
+	// Todo: use MetaParams and Params
 	if (cur_params == first_param) {
 		// Rotary
 		int tmp_rotary_motion = rotary.read();
+
 		if (rotary_button.is_just_pressed()) {
 			_rotary_moved_while_pressed = false;
 			cur_params->rotary_button.register_rising_edge();

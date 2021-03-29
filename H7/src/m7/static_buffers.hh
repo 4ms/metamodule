@@ -36,6 +36,17 @@ struct StaticBuffers {
 	};
 	static inline CacheDisabler dma_region_disable{&_dma_buffer_start, &_dma_buffer_region_size};
 	static inline CacheDisabler screenbuf_region_disable{&screen_framebuf, sizeof(screen_framebuf)};
+
+	static void init()
+	{
+		// Todo: why doesn't Params::Params() get called, or does it have to do with it being a NOLOAD section of
+		// memory?
+		for (auto &block : param_blocks) {
+			for (auto &param : block) {
+				param.clear();
+			}
+		}
+	}
 };
 
 } // namespace MetaModule

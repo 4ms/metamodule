@@ -18,19 +18,23 @@
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
 
-using namespace MetaModule;
-
+namespace MetaModule
+{
 struct StaticBuffers {
 	static inline __attribute__((section(".d3buffer"))) MMScreenConf::HalfFrameBufferT screen_writebuf;
 } _sb;
+} // namespace MetaModule
 
 void main(void)
 {
-	target::corem4::SystemClocks start_clocks;
+	using namespace MetaModule;
 
-	while (HWSemaphore<SharedBusLock>::is_locked()) {
-	}
+	target::RCC_Control::HSEM_::set();
 	HWSemaphore<M4_ready>::lock();
+
+	target::corem4::SystemClocks start_clocks;
+	while (HWSemaphore<M7_ready>::is_locked()) {
+	}
 
 	SharedBus::i2c.init(i2c_conf_m4);
 
@@ -39,8 +43,6 @@ void main(void)
 	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
 
 	// Led Driver
-	// uint32_t local_fb[16] = {0};
-	// uint32_t *l_led_frame_buffer = local_fb;
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
 	// Controls
