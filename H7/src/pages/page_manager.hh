@@ -1,10 +1,5 @@
 #pragma once
-#include "Adafruit_GFX_Library/Fonts/FreeMono12pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSans12pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSans9pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSansBold12pt7b.h"
-#include "Adafruit_GFX_Library/Fonts/FreeSansBold18pt7b.h"
-#include "pages/bouncing_ball.hh"
+#include "pages/fonts.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"

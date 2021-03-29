@@ -174,7 +174,7 @@ const GFXglyph FreeMono12pt7bGlyphs[] PROGMEM = {{0, 0, 0, 14, 0, 1},		 // 0x20 
 												 {1444, 5, 18, 14, 5, -14},	 // 0x7D '}'
 												 {1456, 10, 3, 14, 2, -7}};	 // 0x7E '~'
 
-const GFXfont FreeMono12pt7b PROGMEM = {
+extern const GFXfont FreeMono12pt7b PROGMEM = {
 	(uint8_t *)FreeMono12pt7bBitmaps, (GFXglyph *)FreeMono12pt7bGlyphs, 0x20, 0x7E, 24};
 
 // Approx. 2132 bytes
