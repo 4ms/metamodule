@@ -36,24 +36,18 @@ AudioStream::AudioStream(PatchList &patches,
 							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks(
 		[this]() {
-			Debug::Pin0::high();
+			Debug::Pin1::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
-			// SCB_InvalidateDCache_by_Addr((uint32_t *)&rx_buf_1, sizeof(rx_buf_1));
-			// SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block_1, sizeof(param_block_1));
 			process(rx_buf_1, tx_buf_1, param_block_1);
-			// SCB_CleanDCache_by_Addr((uint32_t *)&tx_buf_1, sizeof(tx_buf_1));
-			Debug::Pin0::low();
+			Debug::Pin1::low();
 		},
 		[this]() {
-			Debug::Pin0::high();
+			Debug::Pin1::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
-			// SCB_InvalidateDCache_by_Addr((uint32_t *)&rx_buf_2, sizeof(rx_buf_2));
-			// SCB_InvalidateDCache_by_Addr((uint32_t *)&param_block_2, sizeof(param_block_2));
 			process(rx_buf_2, tx_buf_2, param_block_2);
-			// SCB_CleanDCache_by_Addr((uint32_t *)&tx_buf_2, sizeof(tx_buf_2));
-			Debug::Pin0::low();
+			Debug::Pin1::low();
 		});
 
 	dac.init();
@@ -83,9 +77,9 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 	last_params.update_with(param_block[0]);
 
-	if (block_patch_change)
+	if (block_patch_change) {
 		block_patch_change--;
-	else {
+	} else {
 		if (check_patch_change(last_params.rotary_pushed.use_motion())) {
 			block_patch_change = 32;
 			for (auto &out_ : out) {

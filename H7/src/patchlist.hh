@@ -8,9 +8,9 @@ struct PatchList {
 
 	const Patch &cur_patch()
 	{
-		if (_cur_patch >= NumPatches)
-			_cur_patch = 0;
-		return _patches[_cur_patch].patch;
+		if (_cur_patch_idx >= NumPatches)
+			_cur_patch_idx = 0;
+		return _patches[_cur_patch_idx].patch;
 	}
 
 	const Patch &get_patch(uint32_t patch_id)
@@ -22,26 +22,26 @@ struct PatchList {
 
 	uint32_t cur_patch_index()
 	{
-		return _cur_patch;
+		return _cur_patch_idx;
 	}
 	void next_patch()
 	{
-		_cur_patch++;
-		if (_cur_patch == NumPatches)
-			_cur_patch = 0;
+		_cur_patch_idx++;
+		if (_cur_patch_idx == NumPatches)
+			_cur_patch_idx = 0;
 	}
 
 	void prev_patch()
 	{
-		if (_cur_patch == 0)
-			_cur_patch = NumPatches - 1;
+		if (_cur_patch_idx == 0)
+			_cur_patch_idx = NumPatches - 1;
 		else
-			_cur_patch--;
+			_cur_patch_idx--;
 	}
 
 	uint8_t audio_load = 0;
 
 private:
-	uint32_t _cur_patch = 0;
+	uint32_t _cur_patch_idx = 0;
 	PatchRef _patches[NumPatches];
 };
