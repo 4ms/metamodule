@@ -13,9 +13,7 @@ struct PatchSelectorPage : DisplayPage {
 		auto &cur_patch = pm->patch_list.cur_patch();
 
 		screen.fill(Colors::white);
-		screen.setFont(&FreeSansBold12pt7b);
-		screen.setTextColor(Colors::black);
-		screen.setCursor(2, 40);
+		PageWidgets::setup_header(pm);
 		screen.print("Select a patch:");
 
 		screen.setFont(&FreeSans12pt7b);

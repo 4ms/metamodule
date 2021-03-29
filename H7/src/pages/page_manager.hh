@@ -41,31 +41,10 @@ public:
 		, cur_page{Page::PatchOverview}
 	{}
 
-	void init()
-	{
-		cur_page = Page::PatchOverview;
-		display_current_page();
-	}
-
-	void next_page()
-	{
-		cur_page = static_cast<Page>(static_cast<unsigned>(cur_page) + 1);
-		if (cur_page >= LAST_PAGE)
-			cur_page = PatchOverview;
-	}
-	void prev_page()
-	{
-		if (static_cast<unsigned>(cur_page) == 0)
-			cur_page = static_cast<Page>(static_cast<unsigned>(LAST_PAGE) - 1);
-		else
-			cur_page = static_cast<Page>(static_cast<unsigned>(cur_page) - 1);
-	}
-
-	void jump_to_page(Page p)
-	{
-		cur_page = p;
-	}
-
+	void init();
+	void next_page();
+	void prev_page();
+	void jump_to_page(Page p);
 	void display_current_page();
 };
 } // namespace MetaModule
