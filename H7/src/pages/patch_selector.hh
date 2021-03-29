@@ -19,7 +19,7 @@ struct PatchSelectorPage : DisplayPage {
 		screen.setFont(&FreeSans12pt7b);
 		screen.setTextColor(Colors::black.blend(Colors::green));
 		for (int i = 0; i < PatchList::NumPatches; i++) {
-			screen.setCursor(2, 40 + i * 24);
+			screen.setCursor(2, 60 + i * 24);
 			screen.print(pm->patch_list.get_patch(i).patch_name);
 		}
 	}
