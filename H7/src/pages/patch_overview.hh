@@ -163,7 +163,7 @@ struct PatchLayoutPage : PageBase {
 					screen.print(patch_player.modules[input_jack.module_id]->get_description());
 					screen.print(": ");
 					screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
-					screen.print(patch_player.modules[input_jack.module_id]->outjack_name(input_jack.jack_id));
+					screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
 				}
 				screen.print("\n");
 			}
