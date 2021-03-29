@@ -29,3 +29,5 @@ shared/tests/doctest.h
 shared/CoreModules/tests/doctest.h
 
 vcv/tests/doctest.h
+
+H7/local_board_rev.hh
