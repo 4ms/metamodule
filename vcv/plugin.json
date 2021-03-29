@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "MOOGLADDER",
+      "name": "Moogladder",
+      "description": "Moog Ladder Filter",
+      "tags": []
+}, 
+{
       "slug": "SAMPLEPLAYER",
       "name": "Sampleplayer",
       "description": "Sample Player",
