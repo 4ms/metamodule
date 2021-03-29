@@ -4,7 +4,7 @@
 namespace MetaModule
 {
 enum SemaphoreLocks {
-	SharedBusLock = 1,
+	M7_ready = 1,
 	ParamsBuf1Lock,
 	ParamsBuf2Lock,
 	LEDFrameBufLock,

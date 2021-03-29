@@ -29,11 +29,12 @@ void main(void)
 {
 	using namespace MetaModule;
 
-	target::corem4::SystemClocks start_clocks;
-
-	while (HWSemaphore<SharedBusLock>::is_locked()) {
-	}
+	target::RCC_Control::HSEM_::set();
 	HWSemaphore<M4_ready>::lock();
+
+	target::corem4::SystemClocks start_clocks;
+	while (HWSemaphore<M7_ready>::is_locked()) {
+	}
 
 	SharedBus::i2c.init(i2c_conf_m4);
 

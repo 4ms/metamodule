@@ -28,6 +28,13 @@ struct SystemStartup {
 			__BKPT(); // Handle error
 	}
 
+	static void tell_cm4_to_wakeup()
+	{
+		// Signal to Core M4 to power up (triggers an ISR on M4)
+		HWSemaphore<15>::lock();
+		HWSemaphore<15>::unlock();
+	}
+
 	static void init_caches()
 	{
 		SCB_InvalidateDCache();
@@ -55,7 +62,8 @@ struct SystemClocks {
 	SystemClocks()
 	{
 		target::RCC_Control::HSEM_::set();
-		HWSemaphore<SharedBusLock>::lock();
+		HWSemaphore<M7_ready>::disable_channel_ISR();
+		HWSemaphore<M7_ready>::lock();
 
 		target::corem7::SystemStartup::wait_for_cm4_sleep();
 
@@ -73,8 +81,7 @@ struct SystemClocks {
 		HAL_NVIC_SetPriority(PendSV_IRQn, 0, 0);
 		HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 
-		HWSemaphore<15>::lock();
-		HWSemaphore<15>::unlock();
+		target::corem7::SystemStartup::tell_cm4_to_wakeup();
 	}
 };
 } // namespace MetaModule

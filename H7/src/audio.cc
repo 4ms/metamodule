@@ -140,8 +140,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 void AudioStream::start()
 {
+	last_params.clear();
 	codec_.start();
-
 	dac_updater.start();
 }
 
