@@ -143,6 +143,31 @@ struct PatchLayoutPage : PageBase {
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
 		const uint16_t line_height = PatchOverviewPage::list_lineheight;
+		if (patch_player.is_loaded) {
+			screen.setCursor(2, y_pos);
+			for (int i = 0; i < patch_list.cur_patch().num_nets; i++) {
+				auto &net = patch_list.cur_patch().nets[i];
+				if (net.num_jacks < 2 || net.jacks[0].module_id == 0 || net.jacks[1].module_id == 0)
+					continue;
+
+				screen.setTextColor(Colors::black);
+				auto output_jack = net.jacks[0];
+				screen.print(patch_player.modules[output_jack.module_id]->get_description());
+				screen.print(": ");
+				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
+				screen.print(patch_player.modules[output_jack.module_id]->outjack_name(output_jack.jack_id));
+
+				for (int j = 1; j < net.num_jacks; j++) {
+					auto input_jack = net.jacks[j];
+					screen.print("\n  => ");
+					screen.print(patch_player.modules[input_jack.module_id]->get_description());
+					screen.print(": ");
+					screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
+					screen.print(patch_player.modules[input_jack.module_id]->outjack_name(input_jack.jack_id));
+				}
+				screen.print("\n");
+			}
+		}
 	}
 };
 
