@@ -1,26 +1,26 @@
 #pragma once
-#include "pages/page_manager.hh"
+#include "pages/base.hh"
 #include "pages/page_widgets.hh"
 
 namespace MetaModule
 {
 
-struct PatchSelectorPage : DisplayPage {
-	static void draw(PageManager *pm)
-	{
-		auto &screen = pm->screen;
-		auto &player = pm->patch_player;
-		auto &cur_patch = pm->patch_list.cur_patch();
+struct PatchSelectorPage : PageBase {
+	PatchSelectorPage(PatchInfo info, ScreenFrameBuffer &screen)
+		: PageBase{info, screen}
+	{}
 
+	void draw()
+	{
 		screen.fill(Colors::white);
-		PageWidgets::setup_header(pm);
+		PageWidgets::setup_header(screen);
 		screen.print("Select a patch:");
 
 		screen.setFont(&FreeSans12pt7b);
 		screen.setTextColor(Colors::black.blend(Colors::green));
 		for (int i = 0; i < PatchList::NumPatches; i++) {
 			screen.setCursor(2, 60 + i * 24);
-			screen.print(pm->patch_list.get_patch(i).patch_name);
+			screen.print(patch_list.get_patch(i).patch_name);
 		}
 	}
 };

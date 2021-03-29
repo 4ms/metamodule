@@ -1,6 +1,6 @@
 // #include "Adafruit_GFX_Library/Adafruit_GFX.h"
 #pragma once
-#include "gfxfont.h"
+#include "Adafruit_GFX_Library/gfxfont.h"
 
 extern const GFXfont FreeMono12pt7b;
 extern const GFXfont FreeSans12pt7b;

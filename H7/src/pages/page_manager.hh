@@ -1,5 +1,9 @@
 #pragma once
-#include "pages/fonts.hh"
+#include "pages/bouncing_balls.hh"
+#include "pages/debuginfo.hh"
+#include "pages/page_widgets.hh"
+#include "pages/patch_overview.hh"
+#include "pages/patch_selector.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
@@ -20,25 +24,29 @@ enum Page : unsigned {
 	LAST_PAGE,
 };
 
-struct DisplayPage {
-	DisplayPage() = delete;
-};
-
 class PageManager {
-public:
-	PatchList &patch_list;
-	PatchPlayer &patch_player;
-	Params &params;
-	ScreenFrameBuffer &screen;
+	BouncingBallsPage balls_page;
+	PatchOverviewPage overview_page;
+	JackMapPage jack_map_page;
+	KnobMapPage knob_map_page;
+	PatchLayoutPage patch_layout_page;
+	ModulesInPatchPage modules_in_patch_page;
+	PatchSelectorPage patch_selector_page;
+	DebugInfoPage debug_info_page;
 
+public:
 	Page cur_page;
 
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, ScreenFrameBuffer &s)
-		: patch_list{pl}
-		, patch_player{pp}
-		, params{p}
-		, screen{s}
-		, cur_page{Page::PatchOverview}
+		: cur_page{Page::PatchOverview}
+		, balls_page{{pl, pp, p}, s}
+		, overview_page{{pl, pp, p}, s}
+		, jack_map_page{{pl, pp, p}, s}
+		, knob_map_page{{pl, pp, p}, s}
+		, patch_layout_page{{pl, pp, p}, s}
+		, modules_in_patch_page{{pl, pp, p}, s}
+		, patch_selector_page{{pl, pp, p}, s}
+		, debug_info_page{{pl, pp, p}, s}
 	{}
 
 	void init();
@@ -47,4 +55,7 @@ public:
 	void jump_to_page(Page p);
 	void display_current_page();
 };
+
+struct DisplayPage {};
+
 } // namespace MetaModule

@@ -1,5 +1,5 @@
 #pragma once
-#include "pages/page_manager.hh"
+#include "pages/base.hh"
 #include "sys/mem_usage.hh"
 
 namespace MetaModule
@@ -11,9 +11,8 @@ struct PageWidgets {
 	static constexpr Color subheader_fg = Colors::black;
 	static constexpr uint16_t subheader_ypos = 56;
 
-	static void setup_header(PageManager *pm)
+	static void setup_header(ScreenFrameBuffer &screen)
 	{
-		auto &screen = pm->screen;
 		screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(header_fg);
 		screen.setTextSize(1);
@@ -21,9 +20,8 @@ struct PageWidgets {
 		screen.setTextWrap(false);
 	}
 
-	static void setup_sub_header(PageManager *pm)
+	static void setup_sub_header(ScreenFrameBuffer &screen)
 	{
-		auto &screen = pm->screen;
 		screen.setFont(&FreeSansBold12pt7b);
 		screen.setTextColor(subheader_fg);
 		screen.setTextSize(1);

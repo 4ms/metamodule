@@ -1,19 +1,23 @@
 #pragma once
-#include "pages/page_manager.hh"
+#include "pages/base.hh"
 #include "pages/page_widgets.hh"
 
 namespace MetaModule
 {
 
-struct DebugInfoPage : DisplayPage {
-	static void draw(PageManager *pm)
+struct DebugInfoPage : PageBase {
+	DebugInfoPage(PatchInfo info, ScreenFrameBuffer &screen)
+		: PageBase{info, screen}
+	{}
+
+	void draw()
 	{
-		pm->screen.fill(Colors::pink);
-		PageWidgets::setup_header(pm);
-		pm->screen.print(pm->patch_list.cur_patch().patch_name);
-		PageWidgets::draw_jack_senses(pm->screen, pm->params, 180);
-		PageWidgets::draw_pot_values(pm->screen, pm->params, Colors::black, 214);
-		PageWidgets::draw_processor_stats(pm->screen, Colors::blue, pm->patch_list.audio_load);
+		screen.fill(Colors::pink);
+		PageWidgets::setup_header(screen);
+		screen.print(patch_list.cur_patch().patch_name);
+		PageWidgets::draw_jack_senses(screen, params, 180);
+		PageWidgets::draw_pot_values(screen, params, Colors::black, 214);
+		PageWidgets::draw_processor_stats(screen, Colors::blue, patch_list.audio_load);
 	}
 
 	static void draw_test_squares(ScreenFrameBuffer &screen)
