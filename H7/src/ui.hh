@@ -60,6 +60,7 @@ public:
 		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() {
 			if (HWSemaphore<LEDFrameBufLock>::lock() == HWSemaphoreFlag::LockedOk) {
 				update_led_states();
+				// Todo: doesn't this cause the ISR to trigger itself?
 				HWSemaphore<LEDFrameBufLock>::unlock();
 			}
 		});
