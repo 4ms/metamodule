@@ -12,9 +12,10 @@ public:
 	static inline const int NumOutJacks = 2;
 	static inline const int NumKnobs = 4;
 
-	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Level 1","Level 2","Level 3","Level 4"};
-	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Mix","Inverted Mix"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Input 1", "Input 2", "Input 3", "Input 4"};
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{
+		"Level 1", "Level 2", "Level 3", "Level 4"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Mix", "Inv. Mix"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"In 1", "In 2", "In 3", "In 4"};
 	static inline const StaticString<LongNameChars> description{"MIXER"};
 
 	// clang-format off
