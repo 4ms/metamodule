@@ -147,7 +147,7 @@ struct PatchLayoutPage : PageBase {
 			screen.setCursor(2, y_pos);
 			for (int i = 0; i < patch_list.cur_patch().num_nets; i++) {
 				auto &net = patch_list.cur_patch().nets[i];
-				if (net.num_jacks < 2 || net.jacks[0].module_id == 0 || net.jacks[1].module_id == 0)
+				if (net.num_jacks < 2) // || net.jacks[0].module_id == 0 || net.jacks[1].module_id == 0)
 					continue;
 
 				screen.setTextColor(Colors::black);
@@ -187,6 +187,18 @@ struct ModulesInPatchPage : PageBase {
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
 		const uint16_t line_height = PatchOverviewPage::list_lineheight;
+		if (patch_player.is_loaded) {
+			screen.setCursor(2, y_pos);
+			for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {
+				if (i == 0)
+					continue; // skip PANEL
+				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
+				screen.print(patch_player.modules[i]->get_description());
+				screen.print(" #");
+				screen.print(i);
+				screen.print("\n");
+			}
+		}
 	}
 };
 

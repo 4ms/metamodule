@@ -13,8 +13,15 @@ public:
 	bool is_loaded = false;
 	std::array<float, MAX_NODES_IN_PATCH> nodes;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
+
+	// cached data:
 	Jack out_conns[Panel::NumOutJacks] = {0};
 	Jack in_conns[Panel::NumInJacks] = {0};
+
+	// Index of each module that appears more than once.
+	// 0 = only appears once in the patch
+	// 1 => reads "LFO #1", 2=> "LFO #2", etc.
+	uint8_t dup_module_index[MAX_MODULES_IN_PATCH];
 
 public:
 	static constexpr unsigned get_num_panel_knobs()
@@ -107,6 +114,27 @@ public:
 
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
+		}
+
+		// Check for multiple instances of same module type
+		// Todo: this is a naive implementation, perhaps can be made more efficient
+		for (unsigned i = 0; i < p.num_modules; i++) {
+			auto &this_slug = p.modules_used[i];
+			if (this_slug == StaticString<1>(""))
+				break;
+
+			unsigned found = 1;
+			unsigned this_index = 0;
+			for (unsigned j = 0; j < p.num_modules; j++) {
+				if (i == j) {
+					this_index = found;
+					continue;
+				}
+				auto &that_slug = p.modules_used[j];
+				if (that_slug == this_slug) {
+					found++;
+				}
+			}
 		}
 
 		// Mark patched jacks:
