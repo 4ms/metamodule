@@ -17,8 +17,12 @@ CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
 			-stdlib=libc++ \
 			-I$(DOCTEST_DIR) \
+			-I. \
+			-I.. \
 			-Isrc \
-			-Isrc/shared \
+			-I../src \
+			-I../shared \
+			-I../../shared \
 
 ### Boilerplate below here:
 
@@ -53,7 +57,8 @@ tests: $(BUILDDIR)/runtests
 	@$(BUILDDIR)/runtests --out=$(TMPFILE) && echo "[√] Unit tests passed: $(notdir $(PWD))" || cat $(TMPFILE)
 
 $(BUILDDIR)/runtests: $(OBJECTS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
+	$(info Building $(BUILDDIR)/runtests) 
+	@$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
 
 $(DOCTESTHEADER_DIR)/doctest.h:
 	wget https://raw.githubusercontent.com/onqtam/doctest/master/doctest/doctest.h -P $(DOCTESTHEADER_DIR)/

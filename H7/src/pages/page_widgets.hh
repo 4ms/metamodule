@@ -46,6 +46,16 @@ struct PageWidgets {
 		screen.print("kb   ");
 	}
 
+	static void print_module_name(ScreenFrameBuffer &screen, PatchPlayer &patch_player, uint32_t module_id)
+	{
+		screen.print(patch_player.modules[module_id]->get_description());
+		auto dup_id = patch_player.get_multiple_module_index(module_id);
+		if (dup_id) {
+			screen.print(" #");
+			screen.print(dup_id);
+		}
+	}
+
 	static void draw_pot_values(ScreenFrameBuffer &screen, Params &params, Color color, int16_t y_pos = 214)
 	{
 		screen.setTextColor(color.Rgb565());

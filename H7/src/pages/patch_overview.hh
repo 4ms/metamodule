@@ -27,11 +27,13 @@ struct PatchOverviewPage : PageBase {
 		screen.setFont(&FreeSans9pt7b);
 		screen.setTextColor(Colors::grey);
 		screen.setCursor(2, 90);
-		screen.print("The verbose patch description, etc etc");
+		screen.print("The verbose patch description, etc etc. Todo, fix word-wrap to only wrap on a space");
 		screen.setTextWrap(false);
 	}
 };
 
+// Todo: this should display User-set names for jacks:
+// Instead of "Drum#3:Out", should be "Kick Out"
 struct JackMapPage : PageBase {
 	JackMapPage(PatchInfo info, ScreenFrameBuffer &screen)
 		: PageBase{info, screen}
@@ -49,12 +51,11 @@ struct JackMapPage : PageBase {
 		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 		int y = PatchOverviewPage::list_ypos;
 
-		const int num_jacks = 8;
-		const char jack_name[num_jacks][6] = {"In L", "In R", "CV A", "CV B", "CV C", "CV D", "OutL", "OutR"};
-
 		if (patch_player.is_loaded) {
-			int num_ins = patch_player.get_num_panel_inputs();
-			for (int i = 0; i < num_jacks; i++) {
+			int num_ins = Panel::NumUserFacingInJacks;
+			int num_outs = Panel::NumUserFacingOutJacks;
+
+			for (int i = 0; i < (num_ins + num_outs); i++) {
 				Jack jack;
 				if (i < num_ins)
 					jack = patch_player.get_panel_input_connection(i);
@@ -67,7 +68,10 @@ struct JackMapPage : PageBase {
 				screen.setTextColor(Colors::black);
 				screen.setCursor(2, y);
 				y += line_height;
-				screen.print(jack_name[i]);
+				if (i < num_ins)
+					screen.print(patch_player.modules[0]->outjack_name(i));
+				else
+					screen.print(patch_player.modules[0]->injack_name(i - num_ins));
 				screen.print(": ");
 
 				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
@@ -78,9 +82,7 @@ struct JackMapPage : PageBase {
 
 				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
 				screen.print(" (");
-				screen.print(patch_player.modules[jack.module_id]->get_description());
-				screen.print(" #");
-				screen.print(jack.module_id);
+				PageWidgets::print_module_name(screen, patch_player, jack.module_id);
 				screen.print(")");
 			}
 		}
@@ -115,9 +117,7 @@ struct KnobMapPage : PageBase {
 				screen.print(" = ");
 
 				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
-				screen.print(patch_player.modules[knob.module_id]->get_description());
-				screen.print(" #");
-				screen.print(knob.module_id);
+				PageWidgets::print_module_name(screen, patch_player, knob.module_id);
 
 				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
 				screen.print(": ");
@@ -138,7 +138,7 @@ struct PatchLayoutPage : PageBase {
 		PageWidgets::setup_header(screen);
 		screen.print(patch_list.cur_patch().patch_name);
 		PageWidgets::setup_sub_header(screen);
-		screen.print("Patch cables:");
+		screen.print("Internal cables:");
 
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
@@ -150,9 +150,9 @@ struct PatchLayoutPage : PageBase {
 				if (net.num_jacks < 2 || net.jacks[0].module_id == 0 || net.jacks[1].module_id == 0)
 					continue;
 
-				screen.setTextColor(Colors::black);
 				auto output_jack = net.jacks[0];
-				screen.print(patch_player.modules[output_jack.module_id]->get_description());
+				screen.setTextColor(Colors::black);
+				PageWidgets::print_module_name(screen, patch_player, output_jack.module_id);
 				screen.print(": ");
 				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
 				screen.print(patch_player.modules[output_jack.module_id]->outjack_name(output_jack.jack_id));
@@ -160,7 +160,8 @@ struct PatchLayoutPage : PageBase {
 				for (int j = 1; j < net.num_jacks; j++) {
 					auto input_jack = net.jacks[j];
 					screen.print("\n  => ");
-					screen.print(patch_player.modules[input_jack.module_id]->get_description());
+					screen.setTextColor(Colors::black);
+					PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
 					screen.print(": ");
 					screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
 					screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
@@ -187,6 +188,18 @@ struct ModulesInPatchPage : PageBase {
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
 		const uint16_t line_height = PatchOverviewPage::list_lineheight;
+		if (patch_player.is_loaded) {
+			screen.setCursor(0, y_pos);
+			for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {
+				if (i == 0)
+					continue; // skip PANEL
+				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
+				screen.print(i);
+				screen.print(": ");
+				PageWidgets::print_module_name(screen, patch_player, i);
+				screen.print("\n");
+			}
+		}
 	}
 };
 

@@ -4,6 +4,7 @@
 #include "util/static_string.hh"
 
 // #define USE_NODES
+static constexpr bool USE_NODES = false;
 
 const int MAX_MODULES_IN_PATCH = 8;
 const int MAX_PARAMS_IN_PATCH = 64;
