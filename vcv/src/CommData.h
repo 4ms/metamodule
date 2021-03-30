@@ -13,6 +13,7 @@ struct LabelButtonID {
 	{
 		return (objType == rhs.objType) && (objID == rhs.objID) && (moduleID == rhs.moduleID);
 	}
+
 	const char *objTypeStr()
 	{
 		if (objType == Types::Knob)
@@ -24,6 +25,20 @@ struct LabelButtonID {
 		if (objType == Types::Toggle)
 			return "Toggle";
 		return "None";
+	}
+
+	void setObjTypeFromString(const char *str)
+	{
+		if (std::strcmp(str, "Knob") == 0)
+			objType = Types::Knob;
+		else if (std::strcmp(str, "InputJack") == 0)
+			objType = Types::InputJack;
+		else if (std::strcmp(str, "OutputJack") == 0)
+			objType = Types::OutputJack;
+		else if (std::strcmp(str, "Toggle") == 0)
+			objType = Types::Toggle;
+		else
+			objType = Types::None;
 	}
 };
 

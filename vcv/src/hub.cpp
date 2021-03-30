@@ -31,6 +31,63 @@ struct MetaModuleHub : public CommModule {
 		selfID.typeID = "PANEL_8";
 	}
 
+	json_t *dataToJson() override
+	{
+		json_t *rootJ = json_object();
+		json_t *mapsJ = json_array();
+		for (auto &m : centralData->maps) {
+			json_t *thisMapJ = json_object();
+			json_object_set_new(thisMapJ, "DstModID", json_integer(m.dst.moduleID));
+			json_object_set_new(thisMapJ, "DstObjID", json_integer(m.dst.objID));
+			json_object_set_new(thisMapJ, "DstObjType", json_string(m.dst.objTypeStr()));
+			json_object_set_new(thisMapJ, "SrcModID", json_integer(m.src.moduleID));
+			json_object_set_new(thisMapJ, "SrcObjID", json_integer(m.src.objID));
+			json_object_set_new(thisMapJ, "SrcObjType", json_string(m.src.objTypeStr()));
+
+			json_array_append(mapsJ, thisMapJ);
+			json_decref(thisMapJ);
+		}
+		json_object_set_new(rootJ, "Mappings", mapsJ);
+		return rootJ;
+	}
+
+	void dataFromJson(json_t *rootJ) override
+	{
+		auto mapsJ = json_object_get(rootJ, "Mappings");
+		if (json_is_array(mapsJ)) {
+			centralData->maps.clear();
+			for (size_t i = 0; i < json_array_size(mapsJ); i++) {
+				auto mappingJ = json_array_get(mapsJ, i);
+				Mapping mapping;
+				if (json_is_object(mappingJ)) {
+					json_t *val;
+
+					val = json_object_get(mappingJ, "DstModID");
+					if (json_is_integer(val))
+						mapping.dst.moduleID = json_integer_value(val);
+					val = json_object_get(mappingJ, "DstObjID");
+					if (json_is_integer(val))
+						mapping.dst.objID = json_integer_value(val);
+					val = json_object_get(mappingJ, "DstObjType");
+					if (json_is_string(val))
+						mapping.dst.setObjTypeFromString(json_string_value(val));
+
+					val = json_object_get(mappingJ, "SrcModID");
+					if (json_is_integer(val))
+						mapping.src.moduleID = json_integer_value(val);
+					val = json_object_get(mappingJ, "SrcObjID");
+					if (json_is_integer(val))
+						mapping.src.objID = json_integer_value(val);
+					val = json_object_get(mappingJ, "SrcObjType");
+					if (json_is_string(val))
+						mapping.src.setObjTypeFromString(json_string_value(val));
+
+					centralData->maps.push_back(mapping);
+				}
+			}
+		}
+	}
+
 	void process(const ProcessArgs &args) override
 	{
 		if (buttonJustPressed()) {
