@@ -20,7 +20,6 @@ struct DebugInfoPage : PageBase {
 		PageWidgets::draw_processor_stats(screen, Colors::blue, patch_list.audio_load);
 
 		screen.setCursor(0, 40);
-		// patch_player.calc_multiple_module_indicies(patch_list.cur_patch());
 		for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {
 			screen.print(i);
 			screen.print(": ");
@@ -29,6 +28,25 @@ struct DebugInfoPage : PageBase {
 			screen.print(patch_list.cur_patch().modules_used[i]);
 			screen.print(": ");
 			screen.print(patch_player.get_multiple_module_index(i));
+			screen.print("\n");
+		}
+		screen.setTextColor(Colors::black);
+		for (int i = 0; i < Panel::NumUserFacingOutJacks; i++) {
+			screen.print(i);
+			screen.print(": {");
+			screen.print(patch_player.get_panel_output_connection(i).module_id);
+			screen.print(",");
+			screen.print(patch_player.get_panel_output_connection(i).jack_id);
+			screen.print("}");
+			screen.print("\n");
+		}
+		for (int i = 0; i < Panel::NumUserFacingInJacks; i++) {
+			screen.print(i);
+			screen.print(": {");
+			screen.print(patch_player.get_panel_input_connection(i).module_id);
+			screen.print(",");
+			screen.print(patch_player.get_panel_input_connection(i).jack_id);
+			screen.print("}");
 			screen.print("\n");
 		}
 	}

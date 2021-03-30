@@ -15,8 +15,8 @@ public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
 	// cached data:
-	Jack out_conns[Panel::NumOutJacks] = {{0}}; // 6
-	Jack in_conns[Panel::NumInJacks] = {{0}};	// 2
+	Jack out_conns[Panel::NumInJacks] = {{0}}; // [2]: OutL OutR
+	Jack in_conns[Panel::NumOutJacks] = {{0}}; // [6]: InL InR CVA, etc..
 
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
@@ -46,28 +46,14 @@ public:
 	{
 		if (!is_loaded)
 			return;
-		static_cast<PanelT *>(modules[0].get())->set_input(jack_id, val);
-	}
-
-	float get_panel_input(int jack_id)
-	{
-		if (!is_loaded)
-			return 0.f;
-		return static_cast<PanelT *>(modules[0].get())->get_input(jack_id);
-	}
-
-	void set_panel_output(int jack_id, float val)
-	{
-		if (!is_loaded)
-			return;
-		static_cast<PanelT *>(modules[0].get())->set_output(jack_id, val);
+		static_cast<PanelT *>(modules[0].get())->set_panel_input(jack_id, val);
 	}
 
 	float get_panel_output(int jack_id)
 	{
 		if (!is_loaded)
 			return 0.f;
-		return static_cast<PanelT *>(modules[0].get())->get_output(jack_id);
+		return static_cast<PanelT *>(modules[0].get())->get_panel_output(jack_id);
 	}
 
 	void set_panel_param(int param_id, float val)
@@ -102,10 +88,10 @@ public:
 		for (int i = 0; i < MAX_MODULES_IN_PATCH; i++)
 			dup_module_index[i] = 0;
 
-		for (int i = 0; i < Panel::NumOutJacks; i++)
+		for (int i = 0; i < Panel::NumInJacks; i++)
 			out_conns[i] = {0, 0};
 
-		for (int i = 0; i < Panel::NumInJacks; i++)
+		for (int i = 0; i < Panel::NumOutJacks; i++)
 			in_conns[i] = {0, 0};
 	}
 
@@ -181,11 +167,11 @@ public:
 				if (jack.module_id == panelId) {
 					if (jack_i == 0) {
 						// panel jack is producer, which means it's a user-facing input (e.g. Audio In L)
-						if (jack.jack_id < Panel::NumInJacks)
+						if (jack.jack_id < Panel::NumUserFacingInJacks)
 							in_conns[jack.jack_id] = net.jacks[1];
 					} else {
 						// panel jack is consumer, which means it's a user-facing output (e.g. CV Out 3)
-						if (jack.jack_id < Panel::NumOutJacks)
+						if (jack.jack_id < Panel::NumUserFacingOutJacks)
 							out_conns[jack.jack_id] = net.jacks[0];
 					}
 				}
@@ -199,7 +185,7 @@ public:
 	Jack get_panel_output_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
 	{
 		// Todo: support multiple jacks connected to one net
-		if (jack_id >= Panel::NumOutJacks || multiple_connection_id > 0)
+		if (jack_id >= Panel::NumUserFacingOutJacks || multiple_connection_id > 0)
 			return {.module_id = 0, .jack_id = 0};
 
 		return out_conns[jack_id];
@@ -211,7 +197,7 @@ public:
 	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
 	{
 		// Todo: support multiple jacks connected to one net
-		if (jack_id >= Panel::NumInJacks || multiple_connection_id > 0)
+		if (jack_id >= Panel::NumUserFacingInJacks || multiple_connection_id > 0)
 			return {.module_id = 0, .jack_id = 0};
 
 		return in_conns[jack_id];
@@ -273,17 +259,17 @@ public:
 				// and set_input() as set_output()
 				// and then we need to change the audio functions
 				float out_val;
-				if (output.module_id == 0)
-					out_val = get_panel_input(output.jack_id);
-				else
-					out_val = modules[output.module_id]->get_output(output.jack_id);
+				// if (output.module_id == 0)
+				// 	out_val = get_panel_input(output.jack_id);
+				// else
+				out_val = modules[output.module_id]->get_output(output.jack_id);
 
 				for (int jack_i = 1; jack_i < net.num_jacks; jack_i++) {
 					auto &jack = net.jacks[jack_i];
-					if (jack.module_id == 0)
-						set_panel_output(jack.jack_id, out_val);
-					else
-						modules[jack.module_id]->set_input(jack.jack_id, out_val);
+					// if (jack.module_id == 0)
+					// 	set_panel_output(jack.jack_id, out_val);
+					// else
+					modules[jack.module_id]->set_input(jack.jack_id, out_val);
 				}
 			}
 		}

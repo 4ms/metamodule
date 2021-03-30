@@ -58,38 +58,43 @@ public:
 	{
 		if (param_id >= NumKnobs)
 			return 0.f;
-
 		return params[param_id];
 	}
 
+	// Sets the value of a user_facing_outs jack (Audio OUT L, for example), which is an "input" as seen by the patch.
+	// Used by the patch to store the outputs of the internal modules, on their way to the real world
 	virtual void set_input(const int jack_id, const float val) override
-	{
-		if (jack_id >= NumUserFacingInJacks)
-			return;
-		user_facing_ins[jack_id] = val;
-	}
-
-	float get_input(const int jack_id) const
-	{
-		if (jack_id >= NumUserFacingInJacks)
-			return 0.f;
-		return user_facing_ins[jack_id];
-	}
-
-	// Sets the value of a user_facing_outs jack (Audio Out L, for example)
-	void set_output(const int jack_id, const float val)
 	{
 		if (jack_id >= NumUserFacingOutJacks)
 			return;
 		user_facing_outs[jack_id] = val;
 	}
 
-	// Returns the value on a user_facing_outs (Audio Out L, for example)
-	virtual float get_output(const int jack_id) const override
+	// Returns the value on a user_facing_outs jack (Audio OUT L, for example)
+	// Used by the audio loop to pass outputs of the internal modules along to the real world
+	float get_panel_output(const int jack_id) const
 	{
 		if (jack_id >= NumUserFacingOutJacks)
 			return 0.f;
 		return user_facing_outs[jack_id];
+	}
+
+	// Sets the value of a user_facing_ins jack (Audio IN L, for example)
+	// Used by the audio loop to store a signal captured from the real world
+	void set_panel_input(const int jack_id, const float val)
+	{
+		if (jack_id >= NumUserFacingInJacks)
+			return;
+		user_facing_ins[jack_id] = val;
+	}
+
+	// Returns the value on a user_facing_ins jack (Audio IN L, for example), which is an output as seen by the patch
+	// Used by the patch, to pass a stored signal (which was capture from the real world) to internal modules
+	virtual float get_output(const int jack_id) const override
+	{
+		if (jack_id >= NumUserFacingInJacks)
+			return 0.f;
+		return user_facing_ins[jack_id];
 	}
 
 	static std::unique_ptr<CoreProcessor> create()

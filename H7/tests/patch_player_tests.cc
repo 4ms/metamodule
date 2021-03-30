@@ -24,7 +24,7 @@ static const Patch p = {
 			.num_jacks = 2,
 			.jacks = {{
 				{.module_id = 0, .jack_id = 1}, // producer: panel jack like "Audio In", or virtual jack like "ADSR Out"
-				{.module_id = 5, .jack_id = 3}, // consumer: panel jack like "CV Out", or virtual jack like "FM In"
+				{.module_id = 5, .jack_id = 2}, // consumer: panel jack like "CV Out", or virtual jack like "FM In"
 			}},
 		},
 		{
@@ -50,7 +50,7 @@ TEST_CASE("Panel jack connections")
 			CHECK(player.get_panel_input_connection(i).jack_id == 0);
 		} else {
 			CHECK(player.get_panel_input_connection(i).module_id == 5);
-			CHECK(player.get_panel_input_connection(i).jack_id == 3);
+			CHECK(player.get_panel_input_connection(i).jack_id == 2);
 		}
 	}
 
