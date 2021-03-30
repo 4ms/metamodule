@@ -19,13 +19,9 @@ localtests_tests
 tableGen/table
 compile_flags.txt
 tableGen/make_tables
-
 H7/cubemx/
-
 H7/compile_commands.json.compdb
-
 shared/tests/doctest.h
-
 shared/CoreModules/tests/doctest.h
-
 vcv/tests/doctest.h
+local_board_rev.hh
