@@ -18,6 +18,19 @@ struct DebugInfoPage : PageBase {
 		PageWidgets::draw_jack_senses(screen, params, 180);
 		PageWidgets::draw_pot_values(screen, params, Colors::black, 214);
 		PageWidgets::draw_processor_stats(screen, Colors::blue, patch_list.audio_load);
+
+		screen.setCursor(0, 40);
+		// patch_player.calc_multiple_module_indicies(patch_list.cur_patch());
+		for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {
+			screen.print(i);
+			screen.print(": ");
+			screen.print(patch_player.modules[i]->get_description());
+			screen.print(": ");
+			screen.print(patch_list.cur_patch().modules_used[i]);
+			screen.print(": ");
+			screen.print(patch_player.get_multiple_module_index(i));
+			screen.print("\n");
+		}
 	}
 
 	static void draw_test_squares(ScreenFrameBuffer &screen)

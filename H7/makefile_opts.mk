@@ -18,5 +18,5 @@
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/sai.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(SHARED)/CoreModules/lfoCore.o: OPTFLAG = -O0
-$(BUILDDIR)/$(SHARED)/CoreModules/fmoscCore.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(SHARED)/CoreModules/fmoscCore.o: OPTFLAG = -O0
 #-----------------------------------

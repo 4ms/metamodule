@@ -84,9 +84,7 @@ struct JackMapPage : PageBase {
 
 				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
 				screen.print(" (");
-				screen.print(patch_player.modules[jack.module_id]->get_description());
-				screen.print(" #");
-				screen.print(jack.module_id);
+				PageWidgets::print_module_name(screen, patch_player, jack.module_id);
 				screen.print(")");
 			}
 		}
@@ -121,9 +119,7 @@ struct KnobMapPage : PageBase {
 				screen.print(" = ");
 
 				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
-				screen.print(patch_player.modules[knob.module_id]->get_description());
-				screen.print(" #");
-				screen.print(knob.module_id);
+				PageWidgets::print_module_name(screen, patch_player, knob.module_id);
 
 				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
 				screen.print(": ");
@@ -144,7 +140,7 @@ struct PatchLayoutPage : PageBase {
 		PageWidgets::setup_header(screen);
 		screen.print(patch_list.cur_patch().patch_name);
 		PageWidgets::setup_sub_header(screen);
-		screen.print("Patch cables:");
+		screen.print("Internal cables:");
 
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
@@ -153,12 +149,12 @@ struct PatchLayoutPage : PageBase {
 			screen.setCursor(2, y_pos);
 			for (int i = 0; i < patch_list.cur_patch().num_nets; i++) {
 				auto &net = patch_list.cur_patch().nets[i];
-				if (net.num_jacks < 2) // || net.jacks[0].module_id == 0 || net.jacks[1].module_id == 0)
+				if (net.num_jacks < 2 || net.jacks[0].module_id == 0 || net.jacks[1].module_id == 0)
 					continue;
 
-				screen.setTextColor(Colors::black);
 				auto output_jack = net.jacks[0];
-				screen.print(patch_player.modules[output_jack.module_id]->get_description());
+				screen.setTextColor(Colors::black);
+				PageWidgets::print_module_name(screen, patch_player, output_jack.module_id);
 				screen.print(": ");
 				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
 				screen.print(patch_player.modules[output_jack.module_id]->outjack_name(output_jack.jack_id));
@@ -166,7 +162,8 @@ struct PatchLayoutPage : PageBase {
 				for (int j = 1; j < net.num_jacks; j++) {
 					auto input_jack = net.jacks[j];
 					screen.print("\n  => ");
-					screen.print(patch_player.modules[input_jack.module_id]->get_description());
+					screen.setTextColor(Colors::black);
+					PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
 					screen.print(": ");
 					screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
 					screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
@@ -194,14 +191,14 @@ struct ModulesInPatchPage : PageBase {
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
 		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 		if (patch_player.is_loaded) {
-			screen.setCursor(2, y_pos);
+			screen.setCursor(0, y_pos);
 			for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {
 				if (i == 0)
 					continue; // skip PANEL
 				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
-				screen.print(patch_player.modules[i]->get_description());
-				screen.print(" #");
 				screen.print(i);
+				screen.print(": ");
+				PageWidgets::print_module_name(screen, patch_player, i);
 				screen.print("\n");
 			}
 		}

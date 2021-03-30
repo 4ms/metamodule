@@ -29,7 +29,6 @@ AudioStream::AudioStream(PatchList &patches,
 	, patch_list{patches}
 	, player{patchplayer}
 {
-	load_patch();
 
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
@@ -77,6 +76,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 	last_params.update_with(param_block[0]);
 
+	// Todo: patch change detection happens in ui or pagemanager
+	// Which sends a message to audio via MetaParams (or just changes it with patch_player)
 	if (block_patch_change) {
 		block_patch_change--;
 	} else {
@@ -140,6 +141,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 void AudioStream::start()
 {
+	load_patch();
 	last_params.clear();
 	codec_.start();
 	dac_updater.start();

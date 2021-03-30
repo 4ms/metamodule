@@ -46,18 +46,15 @@ struct PageWidgets {
 		screen.print("kb   ");
 	}
 
-	// static int32_t get_duplicate_module_suffix(Patch &cur_patch, unsigned module_index) {
-	// 	unsigned found = 0;
-	// 	auto module_slug = cur_patch.modules_used[module_index];
-	// 	for (unsigned i = 0; i<cur_patch.num_modules; i++) {
-	// 		if (module_slug == cur_patch.modules[i])
-	// 			found++;
-	// 	}
-	// 	if (!found)
-	// 		return -1; //Patch data changed from underneath us: data race --> abort
-	// 	if (found == 1)
-	// 		return 0;
-	// }
+	static void print_module_name(ScreenFrameBuffer &screen, PatchPlayer &patch_player, uint32_t module_id)
+	{
+		screen.print(patch_player.modules[module_id]->get_description());
+		auto dup_id = patch_player.get_multiple_module_index(module_id);
+		if (dup_id) {
+			screen.print(" #");
+			screen.print(dup_id);
+		}
+	}
 
 	static void draw_pot_values(ScreenFrameBuffer &screen, Params &params, Color color, int16_t y_pos = 214)
 	{
