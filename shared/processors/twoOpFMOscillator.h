@@ -10,6 +10,9 @@ private:
 	uint32_t phaccu[2];
 	int sampleRate = 48000;
 	float sinOut[2];
+	uint32_t increment0;
+	uint32_t increment1;
+	float inv_samplerate=max_ / sampleRate;
 
 public:
 	float modAmount = 0;
@@ -22,26 +25,22 @@ public:
 
 	void set_frequency(int channel, float inputFreq)
 	{
-		if (channel == 0)
-			priFreq = inputFreq;
-		else if (channel == 1) {
-			secFreq = inputFreq;
+		if (channel == 0) {
+			auto freqCalc = (inputFreq + (sinOut[1] * modAmount * 4000.0f));
+			increment0 = freqCalc * inv_samplerate;
+		} else if (channel == 1) {
+			increment1 = inputFreq * inv_samplerate;
 		}
 	}
 
 	// Todo: store inv_samplerate, not sampleRate
 	float update(void)
 	{
-		auto inv_samplerate = max_ / sampleRate;
-
-		uint32_t increment = secFreq * static_cast<float>(inv_samplerate);
-		phaccu[1] += increment;
+		phaccu[1] += increment1;
 		sinOut[1] = sinTable[((phaccu[1] + max_ / 2) & max_) >> 21];
 
 		sinOut[0] = sinTable[phaccu[0] >> 21];
-		auto freqCalc = (priFreq + (sinOut[1] * modAmount * 4000.0f));
-		uint32_t increment2 = freqCalc * static_cast<float>(inv_samplerate);
-		phaccu[0] += increment2;
+		phaccu[0] += increment0;
 
 		auto sqrOut1 = (phaccu[0] > (max_ / 2)) * 2.0f - 1.0f;
 		auto sqrOut2 = (phaccu[1] > (max_ / 2)) * 2.0f - 1.0f;
@@ -54,5 +53,6 @@ public:
 	void set_samplerate(float sr)
 	{
 		sampleRate = sr;
+		inv_samplerate = max_ / sampleRate;
 	}
 };
