@@ -11,7 +11,7 @@
 #include <iostream>
 
 // Todo: rename this to Hub (or something?)
-struct Expander : public CommModule {
+struct MetaModuleHub : public CommModule {
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, NUM_INPUTS };
@@ -24,7 +24,7 @@ struct Expander : public CommModule {
 	long responseTimer = 0;
 	bool buttonAlreadyHandled = false;
 
-	Expander()
+	MetaModuleHub()
 	{
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		selfID.typeID = "PANEL_8";
@@ -160,14 +160,14 @@ private:
 	}
 };
 
-struct ExpanderWidget : CommModuleWidget {
+struct MetaModuleHubWidget : CommModuleWidget {
 
 	Label *valueLabel;
 	Label *valueLabel2;
 	LedDisplayTextField *patchName;
-	Expander *expModule; // for debugging text only
+	MetaModuleHub *expModule; // for debugging text only
 
-	ExpanderWidget(Expander *module)
+	MetaModuleHubWidget(MetaModuleHub *module)
 	{
 		setModule(module);
 		expModule = module;
@@ -179,7 +179,7 @@ struct ExpanderWidget : CommModuleWidget {
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
 
-		addParam(createParamCentered<BefacoPush>(mm2px(Vec(23.292, 70.977)), module, Expander::GET_INFO));
+		addParam(createParamCentered<BefacoPush>(mm2px(Vec(23.292, 70.977)), module, MetaModuleHub::GET_INFO));
 
 		valueLabel = createWidget<Label>(mm2px(Vec(0, 50)));
 		valueLabel->color = rack::color::BLACK;
@@ -238,4 +238,4 @@ struct ExpanderWidget : CommModuleWidget {
 	}
 };
 
-Model *modelExpander = createModel<Expander, ExpanderWidget>("expanderModule");
+Model *modelMetaModuleHub = createModel<MetaModuleHub, MetaModuleHubWidget>("metaModuleHubModule");

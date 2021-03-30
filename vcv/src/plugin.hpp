@@ -9,26 +9,26 @@ extern CentralData *centralData;
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin *pluginInstance;
 
-// Declare each Model, defined in each module source file 
-extern Model *modelSampleplayer; 
-extern Model *modelSlewlimiter; 
-extern Model *modelBandpassfilter; 
-extern Model *modelHighpassfilter; 
-extern Model *modelReverb; 
-extern Model *modelKarplus; 
-extern Model *modelGateseq16; 
-extern Model *modelGateseq8; 
-extern Model *modelOctave; 
-extern Model *modelMinmax; 
-extern Model *modelDrum; 
-extern Model *modelComplexenvelope; 
-extern Model *modelFmosc; 
-extern Model *modelStereomixer; 
-extern Model *modelPanner; 
-extern Model *modelGateconverter; 
-extern Model *modelDetune; 
-extern Model *modelPitchshift; 
-extern Model *modelSwitch4to1; 
+// Declare each Model, defined in each module source file
+extern Model *modelSampleplayer;
+extern Model *modelSlewlimiter;
+extern Model *modelBandpassfilter;
+extern Model *modelHighpassfilter;
+extern Model *modelReverb;
+extern Model *modelKarplus;
+extern Model *modelGateseq16;
+extern Model *modelGateseq8;
+extern Model *modelOctave;
+extern Model *modelMinmax;
+extern Model *modelDrum;
+extern Model *modelComplexenvelope;
+extern Model *modelFmosc;
+extern Model *modelStereomixer;
+extern Model *modelPanner;
+extern Model *modelGateconverter;
+extern Model *modelDetune;
+extern Model *modelPitchshift;
+extern Model *modelSwitch4to1;
 extern Model *modelSwitch1to4;
 extern Model *modelEightstepprob;
 extern Model *modelQuantizer;
@@ -53,4 +53,4 @@ extern Model *modelVCA;
 extern Model *modelComparator;
 extern Model *modelSend;
 
-extern Model *modelExpander;
+extern Model *modelMetaModuleHub;

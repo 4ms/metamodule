@@ -9,27 +9,27 @@ void init(Plugin *p)
 
 	pluginInstance = p;
 
-	// Add modules here 
-p->addModel(modelSampleplayer); 
-p->addModel(modelSlewlimiter); 
-p->addModel(modelBandpassfilter); 
-p->addModel(modelHighpassfilter); 
-p->addModel(modelReverb); 
-p->addModel(modelKarplus); 
-p->addModel(modelGateseq16); 
-p->addModel(modelGateseq8); 
-p->addModel(modelOctave); 
-p->addModel(modelMinmax); 
-p->addModel(modelDrum); 
-p->addModel(modelComplexenvelope); 
-p->addModel(modelFmosc); 
-p->addModel(modelStereomixer); 
-p->addModel(modelPanner); 
-p->addModel(modelGateconverter); 
-p->addModel(modelDetune); 
-p->addModel(modelPitchshift); 
-p->addModel(modelSwitch4to1); 
-p->addModel(modelSwitch1to4);
+	// Add modules here
+	p->addModel(modelSampleplayer);
+	p->addModel(modelSlewlimiter);
+	p->addModel(modelBandpassfilter);
+	p->addModel(modelHighpassfilter);
+	p->addModel(modelReverb);
+	p->addModel(modelKarplus);
+	p->addModel(modelGateseq16);
+	p->addModel(modelGateseq8);
+	p->addModel(modelOctave);
+	p->addModel(modelMinmax);
+	p->addModel(modelDrum);
+	p->addModel(modelComplexenvelope);
+	p->addModel(modelFmosc);
+	p->addModel(modelStereomixer);
+	p->addModel(modelPanner);
+	p->addModel(modelGateconverter);
+	p->addModel(modelDetune);
+	p->addModel(modelPitchshift);
+	p->addModel(modelSwitch4to1);
+	p->addModel(modelSwitch1to4);
 	p->addModel(modelEightstepprob);
 	p->addModel(modelQuantizer);
 	p->addModel(modelFourstep);
@@ -53,7 +53,7 @@ p->addModel(modelSwitch1to4);
 	p->addModel(modelComparator);
 	p->addModel(modelSend);
 
-	p->addModel(modelExpander);
+	p->addModel(modelMetaModuleHub);
 
 	// Any other plugin initialization may go here.
 	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup
