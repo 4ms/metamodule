@@ -1,4 +1,4 @@
-# This is meant to be run from the CoreModules/ dir
+# This is meant to be run from the util/ dir
 # make -f tests/Makefile
 
 TEST_DIR ?= tests
