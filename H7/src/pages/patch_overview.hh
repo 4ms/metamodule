@@ -51,12 +51,11 @@ struct JackMapPage : PageBase {
 		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 		int y = PatchOverviewPage::list_ypos;
 
-		const int num_jacks = 8;
-		// const char jack_name[num_jacks][6] = {"In L", "In R", "CV A", "CV B", "CV C", "CV D", "OutL", "OutR"};
-
 		if (patch_player.is_loaded) {
-			int num_ins = patch_player.get_num_panel_inputs();
-			for (int i = 0; i < num_jacks; i++) {
+			int num_ins = Panel::NumUserFacingInJacks;
+			int num_outs = Panel::NumUserFacingOutJacks;
+
+			for (int i = 0; i < (num_ins + num_outs); i++) {
 				Jack jack;
 				if (i < num_ins)
 					jack = patch_player.get_panel_input_connection(i);
@@ -70,10 +69,9 @@ struct JackMapPage : PageBase {
 				screen.setCursor(2, y);
 				y += line_height;
 				if (i < num_ins)
-					screen.print(patch_player.modules[0]->injack_name(i));
-				else
 					screen.print(patch_player.modules[0]->outjack_name(i));
-				// screen.print(jack_name[i]);
+				else
+					screen.print(patch_player.modules[0]->injack_name(i - num_ins));
 				screen.print(": ");
 
 				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
