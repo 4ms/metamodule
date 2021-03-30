@@ -29,19 +29,17 @@ class LowpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		if(mode==0) // basic resonant LPF
+		if (mode == 0) // basic resonant LPF
 		{
-		lpf.cutoff.setValue(setPitchMultiple(constrain(baseFrequency + cvInput * cvAmount, -1.0f, 1.0f)) * 262.0f);
-		lpf.q.setValue(filterQ);
-		signalOut = lpf.update(signalIn);
-	}
-	else if(mode ==1) // Moog LPF
-	{
-		moog.cutoff.setValue(constrain(baseFrequency+cvInput*cvAmount,0.0f,1.0f));
-		moog.q.setValue(filterQ);
-		signalOut=moog.update(signalIn);
-	}
-	
+			lpf.cutoff.setValue(setPitchMultiple(constrain(baseFrequency + cvInput * cvAmount, -1.0f, 1.0f)) * 262.0f);
+			lpf.q.setValue(filterQ);
+			signalOut = lpf.update(signalIn);
+		} else if (mode == 1) // Moog LPF
+		{
+			moog.cutoff.setValue(constrain(baseFrequency + cvInput * cvAmount, 0.0f, 1.0f));
+			moog.q.setValue(filterQ);
+			signalOut = moog.update(signalIn);
+		}
 	}
 
 	LowpassfilterCore() {}
@@ -51,9 +49,11 @@ public:
 		if (param_id == 0) {
 			baseFrequency = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 		} else if (param_id == 1) {
-			filterQ=map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
+			filterQ = map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
 		} else if (param_id == 2) {
 			cvAmount = val;
+		} else if (param_id == 3) {
+			mode = val;
 		}
 	}
 	virtual void set_samplerate(const float sr) override
@@ -82,6 +82,11 @@ public:
 				break;
 		}
 		return output;
+	}
+
+	virtual float get_led_brightness(const int led_id) const override
+	{
+		return mode;
 	}
 
 	static std::unique_ptr<CoreProcessor> create()
