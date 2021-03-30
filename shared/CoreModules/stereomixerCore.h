@@ -2,7 +2,7 @@
 
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
-#include "math.hh"
+#include "util/math.hh"
 
 using namespace MathTools;
 
@@ -11,9 +11,11 @@ class StereomixerCore : public CoreProcessor {
 	static inline const int NumOutJacks = 2;
 	static inline const int NumKnobs = 8;
 
-	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Level 1", "Level 2", "Level 3", "Level 4", "Pan 1", "Pan 2", "Pan 3", "Pan 4"};
-	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Left Output", "Right Output"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Left 1", "Left 2", "Left 3", "Left 4", "Right 1", "Right 2", "Right 3", "Right 4"};
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{
+		"Level 1", "Level 2", "Level 3", "Level 4", "Pan 1", "Pan 2", "Pan 3", "Pan 4"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Out L", "Out R"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
+		"Left 1", "Left 2", "Left 3", "Left 4", "Right 1", "Right 2", "Right 3", "Right 4"};
 	static inline const StaticString<LongNameChars> description{"Stereo Mixer"};
 
 	// clang-format off
