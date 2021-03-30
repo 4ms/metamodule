@@ -6,6 +6,7 @@
 #include "patch_writer.hh"
 #include "plugin.hpp"
 #include "string.h"
+#include "util/string_util.hh"
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -44,17 +45,30 @@ struct MetaModuleHub : public CommModule {
 				printDebugFile();
 
 				Patch patch;
-				if (patchNameText != "") {
+				if (patchNameText != "" && patchNameText != "Enter Patch Name") {
 					patch.patch_name = patchNameText.c_str();
 				} else {
 					std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
 					patch.patch_name = randomname.c_str();
 				}
-				// patch.patch_name = "Unnamed Patch";
+				ReplaceString patchStructName{patch.patch_name.cstr()};
+				patchStructName.replace_all(" ", "")
+					.replace_all("-", "")
+					.replace_all(",", "")
+					.replace_all("/", "")
+					.replace_all("\\", "")
+					.replace_all("\"", "")
+					.replace_all("'", "")
+					.replace_all(".", "")
+					.replace_all("?", "")
+					.replace_all("#", "")
+					.replace_all("!", "");
+				std::string patchFileName = examplePatchDir + patchStructName.str + ".hh";
 				createPatchStruct(patch);
-				writeToFile(examplePatchDir + "example1.hh", PatchWriter::printPatchStructText("Example1", patch));
+				writeToFile(patchFileName, PatchWriter::printPatchStructText(patchStructName.str, patch));
 
-				labelText = "Wrote debug file and patch header file";
+				labelText = "Wrote patch file: ";
+				labelText += patchStructName.str + ".hh";
 				updateDisplay();
 			}
 		}
