@@ -1,4 +1,5 @@
 #include "patchlist.hh"
+#include "QuadDrum.hh"
 #include "example_drum.hh"
 #include "example_drum_verb_mono.h"
 #include "example_duallfo.hh"
@@ -8,12 +9,15 @@
 #include "fadedelay_two.hh"
 
 PatchList::PatchList()
-	: _patches{{exampleDualLFO},
-			   {examplePitchShiftSimple},
-			   {exampleDrum},
-			   {fadedelay_example},
-			   {example_drum_verb_mono},
-			   {example_stereo_verb}}
+	: _patches{
+		  {exampleDualLFO},
+		  {examplePitchShiftSimple},
+		  {exampleDrum},
+		  {fadedelay_example},
+		  {example_drum_verb_mono},
+		  {example_stereo_verb},
+		  {QuadDrum},
+	  }
 {
 	_cur_patch_idx = 0;
 }
