@@ -27,11 +27,13 @@ struct PatchOverviewPage : PageBase {
 		screen.setFont(&FreeSans9pt7b);
 		screen.setTextColor(Colors::grey);
 		screen.setCursor(2, 90);
-		screen.print("The verbose patch description, etc etc");
+		screen.print("The verbose patch description, etc etc. Todo, fix word-wrap to only wrap on a space");
 		screen.setTextWrap(false);
 	}
 };
 
+// Todo: this should display User-set names for jacks:
+// Instead of "Drum#3:Out", should be "Kick Out"
 struct JackMapPage : PageBase {
 	JackMapPage(PatchInfo info, ScreenFrameBuffer &screen)
 		: PageBase{info, screen}
@@ -50,7 +52,7 @@ struct JackMapPage : PageBase {
 		int y = PatchOverviewPage::list_ypos;
 
 		const int num_jacks = 8;
-		const char jack_name[num_jacks][6] = {"In L", "In R", "CV A", "CV B", "CV C", "CV D", "OutL", "OutR"};
+		// const char jack_name[num_jacks][6] = {"In L", "In R", "CV A", "CV B", "CV C", "CV D", "OutL", "OutR"};
 
 		if (patch_player.is_loaded) {
 			int num_ins = patch_player.get_num_panel_inputs();
@@ -67,7 +69,11 @@ struct JackMapPage : PageBase {
 				screen.setTextColor(Colors::black);
 				screen.setCursor(2, y);
 				y += line_height;
-				screen.print(jack_name[i]);
+				if (i < num_ins)
+					screen.print(patch_player.modules[0]->injack_name(i));
+				else
+					screen.print(patch_player.modules[0]->outjack_name(i));
+				// screen.print(jack_name[i]);
 				screen.print(": ");
 
 				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));

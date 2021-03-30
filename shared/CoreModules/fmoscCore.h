@@ -12,9 +12,11 @@ class FmoscCore : public CoreProcessor {
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 8;
 
-	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Pitch", "Index", "Ratio Coarse", "Ratio Fine", "Shape", "Shape Amount", "Index Amount", "Mix"};
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{
+		"Pitch", "Index", "Ratio Coarse", "Ratio Fine", "Shape", "Shape Amount", "Index Amount", "Mix"};
 	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Index CV", "Pitch 1", "Shape", "Mix", "Pitch 2"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
+		"Index CV", "Pitch 1", "Shape", "Mix", "Pitch 2"};
 	static inline const StaticString<LongNameChars> description{"FM Oscillator"};
 
 	// clang-format off
@@ -41,7 +43,10 @@ public:
 		mainOutput = fm.update();
 	}
 
-	FmoscCore() {}
+	FmoscCore()
+	{
+		set_samplerate(48000);
+	}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
