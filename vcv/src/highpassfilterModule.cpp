@@ -4,10 +4,10 @@
 
 struct HighpassfilterModule : CommModule {
 
-	enum ParamIds { CUTOFF_PARAM, Q_PARAM, NUM_PARAMS };
+	enum ParamIds { CUTOFF_PARAM, Q_PARAM, MODE_PARAM, NUM_PARAMS };
 	enum InputIds { SIGNAL_INPUT, CV_INPUT, NUM_INPUTS };
 	enum OutputIds { SIGNAL_OUTPUT, NUM_OUTPUTS };
-	enum LightIds { NUM_LIGHTS };
+	enum LightIds { MODE_LIGHT, NUM_LIGHTS };
 
 	HighpassfilterModule()
 	{
@@ -33,11 +33,13 @@ struct HighpassfilterWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hp.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
 
 		addModuleTitle("HPF");
 		addLabeledKnob("CUTOFF", HighpassfilterModule::CUTOFF_PARAM, {0, 0});
 		addLabeledKnob("Q", HighpassfilterModule::Q_PARAM, {0, 1});
+
+		addLabeledToggle("MODE", HighpassfilterModule::MODE_LIGHT, HighpassfilterModule::MODE_PARAM, {0, 3});
 
 		addLabeledInput("CV", HighpassfilterModule::CV_INPUT, {0, 2});
 		addLabeledInput("INPUT", HighpassfilterModule::SIGNAL_INPUT, {0, 1});
