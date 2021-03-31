@@ -138,6 +138,8 @@ void LabeledButton::createMapping(LabelButtonID srcId)
 
 void LabeledButton::updateState()
 {
+	id.moduleID = _parent.module->id;
+
 	isCurrentMapSrc = false;
 	isPossibleMapDest = false;
 	if (!isOnHub) {

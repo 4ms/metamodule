@@ -13,6 +13,33 @@ struct LabelButtonID {
 	{
 		return (objType == rhs.objType) && (objID == rhs.objID) && (moduleID == rhs.moduleID);
 	}
+
+	const char *objTypeStr()
+	{
+		if (objType == Types::Knob)
+			return "Knob";
+		if (objType == Types::InputJack)
+			return "InputJack";
+		if (objType == Types::OutputJack)
+			return "OutputJack";
+		if (objType == Types::Toggle)
+			return "Toggle";
+		return "None";
+	}
+
+	void setObjTypeFromString(const char *str)
+	{
+		if (std::strcmp(str, "Knob") == 0)
+			objType = Types::Knob;
+		else if (std::strcmp(str, "InputJack") == 0)
+			objType = Types::InputJack;
+		else if (std::strcmp(str, "OutputJack") == 0)
+			objType = Types::OutputJack;
+		else if (std::strcmp(str, "Toggle") == 0)
+			objType = Types::Toggle;
+		else
+			objType = Types::None;
+	}
 };
 
 struct Mapping {
@@ -62,4 +89,3 @@ struct ParamStatus {
 		return (paramID == other.paramID) && (moduleID == other.moduleID);
 	}
 };
-
