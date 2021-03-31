@@ -31,39 +31,39 @@ public:
 				PatchPlayer &patchplayer,
 				ICodec &codec,
 				AnalogOutT &dac,
-				ParamBlock (&p)[2],
-				Params &last_params,
+				ParamCache &cache,
+				DoubleBufParamBlock &p,
 				AudioStreamBlock (&buffers)[4]);
 	void start();
 
 	void process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &params);
 
 private:
+	ParamCache &cache;
+	DoubleBufParamBlock &param_blocks;
 	AudioStreamBlock &tx_buf_1;
 	AudioStreamBlock &tx_buf_2;
 	AudioStreamBlock &rx_buf_1;
 	AudioStreamBlock &rx_buf_2;
-	ParamBlock &param_block_1;
-	ParamBlock &param_block_2;
-	Params &last_params;
 
 	ICodec &codec_;
 	uint32_t sample_rate_;
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()
+
+	AnalogOutT &dac;
+	PinChangeInterrupt dac_updater;
+	PatchList &patch_list;
+	PatchPlayer &player;
+	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
+	CycleCounter load_measure;
+	uint32_t block_patch_change;
+
 	AudioConf::SampleT get_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void load_patch();
-
-	AnalogOutT &dac;
-	PatchList &patch_list;
-	PatchPlayer &player;
-	PinChangeInterrupt dac_updater;
-	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
-	CycleCounter load_measure;
-	uint32_t block_patch_change = 0;
 
 	static constexpr unsigned NumKnobs = PatchPlayer::get_num_panel_knobs();
 	static constexpr unsigned NumAudioInputs = 2;

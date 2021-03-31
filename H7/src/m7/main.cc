@@ -46,19 +46,19 @@ void main()
 	using namespace MetaModule;
 	StaticBuffers::init();
 
-	Params last_params;
 	PatchList patch_list;
 	PatchPlayer patch_player;
+	ParamCache param_cache;
 
 	AudioStream audio{patch_list,
 					  patch_player,
 					  _hw.codec,
 					  _hw.dac,
+					  param_cache,
 					  StaticBuffers::param_blocks,
-					  last_params,
 					  StaticBuffers::audio_dma_block};
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{patch_list, patch_player, leds, last_params, StaticBuffers::screen_framebuf};
+	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, leds, StaticBuffers::screen_framebuf};
 
 	SharedBus::i2c.deinit();
 
@@ -76,6 +76,7 @@ void main()
 	while (HWSemaphore<M4_ready>::is_locked()) {
 	}
 
+	param_cache.clear();
 	ui.start();
 	audio.start();
 

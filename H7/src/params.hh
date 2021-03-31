@@ -38,12 +38,7 @@ struct Params {
 
 	// Same value for an entire block:
 	float knobs[NumPot] = {0.f};
-	float patchcv = 0.f;
 	uint16_t jack_senses;
-
-	Toggler rotary_button;
-	RotaryMotion rotary;
-	RotaryMotion rotary_pushed;
 
 	Params()
 	{
@@ -61,6 +56,35 @@ struct Params {
 		for (int i = 0; i < NumPot; i++)
 			knobs[i] = 0.f;
 		jack_senses = 0;
+	}
+
+	// void update_with(const Params &that)
+	// {
+	// 	for (int i = 0; i < NumCVIn; i++)
+	// 		cvjacks[i] = that.cvjacks[i];
+	// 	for (int i = 0; i < NumGateIn; i++)
+	// 		gate_ins[i].copy_state(that.gate_ins[i]);
+	// 	for (int i = 0; i < NumRgbButton; i++)
+	// 		buttons[i].copy_state(that.buttons[i]);
+	// 	for (int i = 0; i < NumPot; i++)
+	// 		knobs[i] = that.knobs[i];
+	// 	jack_senses = that.jack_senses;
+	// }
+};
+
+struct MetaParams {
+	float patchcv = 0.f;
+	Toggler rotary_button;
+	RotaryMotion rotary;
+	RotaryMotion rotary_pushed;
+
+	MetaParams()
+	{
+		clear();
+	}
+
+	void clear()
+	{
 		patchcv = 0.f;
 		rotary_button.reset();
 		rotary.motion = 0;
@@ -70,17 +94,8 @@ struct Params {
 	}
 
 	// Copies some data, adds other data (rotary motion)
-	void update_with(const Params &that)
+	void update_with(const MetaParams &that)
 	{
-		for (int i = 0; i < NumCVIn; i++)
-			cvjacks[i] = that.cvjacks[i];
-		for (int i = 0; i < NumGateIn; i++)
-			gate_ins[i].copy_state(that.gate_ins[i]);
-		for (int i = 0; i < NumRgbButton; i++)
-			buttons[i].copy_state(that.buttons[i]);
-		for (int i = 0; i < NumPot; i++)
-			knobs[i] = that.knobs[i];
-		jack_senses = that.jack_senses;
 		patchcv = that.patchcv;
 		rotary_button.copy_state(that.rotary_button);
 		rotary.add_motion(that.rotary);
@@ -88,5 +103,36 @@ struct Params {
 	}
 };
 
-using ParamBlock = std::array<Params, StreamConf::Audio::BlockSize>;
+struct ParamCache {
+	Params p;
+	MetaParams m;
+
+	void write_sync(Params &p_, MetaParams &m_)
+	{
+		p = p_;
+		m = m_;
+	}
+	Params &read_sync_params()
+	{
+		return p;
+	}
+	MetaParams &read_sync_metaparams()
+	{
+		return m;
+	}
+	void clear()
+	{
+		p.clear();
+		m.clear();
+	}
+};
+
+// using ParamBlock = std::array<Params, StreamConf::Audio::BlockSize>;
+struct ParamBlock {
+	std::array<Params, StreamConf::Audio::BlockSize> params;
+	MetaParams metaparams;
+};
+
+using DoubleBufParamBlock = std::array<ParamBlock, 2>;
+
 } // namespace MetaModule

@@ -22,9 +22,9 @@ template<unsigned AnimationUpdateRate = 100>
 class Ui {
 public:
 	LedFrame<AnimationUpdateRate> &leds;
-	Params &params;
 	ScreenFrameBuffer screen;
 	PageManager pages;
+	ParamCache &param_cache;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
@@ -32,13 +32,13 @@ public:
 
 	Ui(PatchList &pl,
 	   PatchPlayer &pp,
+	   ParamCache &pc,
 	   LedFrame<AnimationUpdateRate> &l,
-	   Params &p,
 	   MMScreenConf::FrameBufferT &screenbuf)
 		: leds{l}
-		, params{p}
 		, screen{screenbuf}
-		, pages{pl, pp, p, screen}
+		, param_cache{pc}
+		, pages{pl, pp, pc.read_sync_params(), screen}
 	{}
 
 	void start()
@@ -96,7 +96,7 @@ public:
 	void update()
 	{
 		// Todo: not thread-safe: audio process might interrupt and we'd zero out a good value, missing a rotary turn
-		auto rotary = params.rotary.use_motion();
+		auto rotary = param_cache.read_sync_metaparams().rotary.use_motion();
 		if (rotary < 0) {
 			pages.prev_page();
 		}
@@ -112,17 +112,17 @@ private:
 	void update_led_states()
 	{
 		// Debug::Pin1::high();
-		if (params.buttons[0].is_pressed())
+		if (param_cache.read_sync_params().buttons[0].is_pressed())
 			leds.but[0].set_background(Colors::red);
 		else
 			leds.but[0].set_background(Colors::green);
 
-		if (params.buttons[1].is_pressed())
+		if (param_cache.read_sync_params().buttons[1].is_pressed())
 			leds.but[1].set_background(Colors::blue);
 		else
 			leds.but[1].set_background(Colors::orange);
 
-		if (params.rotary_button.is_pressed())
+		if (param_cache.read_sync_metaparams().rotary_button.is_pressed())
 			leds.rotaryLED.set_background(Colors::blue);
 		else
 			leds.rotaryLED.set_background(Colors::green);

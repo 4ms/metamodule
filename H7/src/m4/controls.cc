@@ -8,8 +8,6 @@
 namespace MetaModule
 {
 
-static bool _buffer_full = true;
-
 void Controls::update_debouncers()
 {
 	rotary.update();
@@ -27,8 +25,6 @@ void Controls::update_debouncers()
 // load 6.8%
 void Controls::update_params()
 {
-	Params *first_param = (cur_params < &param_blocks[1][0]) ? &param_blocks[0][0] : &param_blocks[1][0];
-
 	cur_params->cvjacks[0] = (2047.5f - static_cast<float>(cvadc.get_val(0))) / 2047.5f;
 	cur_params->cvjacks[1] = (2047.5f - static_cast<float>(cvadc.get_val(1))) / 2047.5f;
 	// Oops! CV C and CV D are swapped:
@@ -40,57 +36,60 @@ void Controls::update_params()
 	cur_params->gate_ins[0].copy_state(clock_in);
 	cur_params->gate_ins[1].copy_state(gate_in1);
 	cur_params->gate_ins[2].copy_state(gate_in2);
+	cur_params->jack_senses = get_jacksense_reading();
 
-	// Todo: use MetaParams and Params
-	if (cur_params == first_param) {
-		// Rotary
-		int tmp_rotary_motion = rotary.read();
+	if (_first_param) {
+		_first_param = false;
 
-		if (rotary_button.is_just_pressed()) {
-			_rotary_moved_while_pressed = false;
-			cur_params->rotary_button.register_rising_edge();
-		}
-		if (rotary_button.is_just_released() && !_rotary_moved_while_pressed) {
-			cur_params->rotary_button.register_falling_edge();
-			// Todo: if button is released and _rotary_moved_while_pressed == true, then do we need to tell
-			// params->rotary_button that the button is released?
-		}
-		if (rotary_button.is_pressed()) {
-			cur_params->rotary.motion = 0;
-			cur_params->rotary_pushed.motion = tmp_rotary_motion;
-			if (tmp_rotary_motion != 0)
-				_rotary_moved_while_pressed = true;
-		} else {
-			cur_params->rotary.motion = tmp_rotary_motion;
-			cur_params->rotary_pushed.motion = 0;
-		}
-		cur_params->rotary_button.copy_state(rotary_button);
-		//
-
-		cur_params->patchcv = get_patchcv_reading() / 4095.0f;
-
-		cur_params->jack_senses = get_jacksense_reading();
-
+		// Interpolate knob readings across the param block, since we capture them at a slower rate than the audio block
+		// runs
 		for (int i = 0; i < NumPot; i++) {
 			_knobs[i].set_new_value(get_pot_reading(i) / 4095.0f);
 			cur_params->knobs[i] = _knobs[i].next();
 		}
-	} else {
 
+		// Metaparams:
+
+		// PatchCV
+		cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
+
+		// Rotary button
+		if (rotary_button.is_just_pressed()) {
+			_rotary_moved_while_pressed = false;
+			cur_metaparams->rotary_button.register_rising_edge();
+		}
+		if (rotary_button.is_just_released()) {
+			if (_rotary_moved_while_pressed)
+				cur_metaparams->rotary_button.reset();
+			else
+				cur_metaparams->rotary_button.register_falling_edge();
+		}
+
+		// Rotary turning
+		int tmp_rotary_motion = rotary.read();
+		if (rotary_button.is_pressed()) {
+			cur_metaparams->rotary.motion = 0;
+			cur_metaparams->rotary_pushed.motion = tmp_rotary_motion;
+			if (tmp_rotary_motion != 0)
+				_rotary_moved_while_pressed = true;
+		} else {
+			cur_metaparams->rotary.motion = tmp_rotary_motion;
+			cur_metaparams->rotary_pushed.motion = 0;
+		}
+
+		// bool pressed = rotary_button.is_pressed();
+		// cur_metaparams->rotary.motion = pressed ? 0 : tmp_rotary_motion;
+		// cur_metaparams->rotary_pushed.motion = pressed ? tmp_rotary_motion : 0;
+		// if (pressed && tmp_rotary_motion)
+		// 	_rotary_moved_while_pressed = true;
+	} else {
+		// Interpolate the knobs
 		for (int i = 0; i < NumPot; i++)
 			cur_params->knobs[i] = _knobs[i].next();
-
-		// Todo: MetaParams has patchcv, rotary, rotary_pushed, rotary_button
-		// cur_params->patchcv = first_param->patchcv;
-		// cur_params->rotary_button.copy_state(first_param->rotary_button);
-		// cur_params->rotary = first_param->rotary;
-		// cur_params->rotary_pushed = first_param->rotary_pushed;
-
-		cur_params->jack_senses = first_param->jack_senses;
 	}
 
 	cur_params++;
-	if (cur_params == &param_blocks[1][0] || cur_params == &param_blocks[2][0])
+	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
 		_buffer_full = true;
 }
 
@@ -104,13 +103,17 @@ void Controls::start()
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
 		_buffer_full = false;
-		cur_params = &param_blocks[0][0];
+		_first_param = true;
+		cur_metaparams = &param_blocks[0].metaparams;
+		cur_params = param_blocks[0].params.begin();
 	});
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
 		_buffer_full = false;
-		cur_params = &param_blocks[1][0];
+		_first_param = true;
+		cur_metaparams = &param_blocks[1].metaparams;
+		cur_params = param_blocks[1].params.begin();
 	});
 	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
@@ -120,13 +123,15 @@ void Controls::start()
 	clock_out.low();
 }
 
-Controls::Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block_base, GPIOExpander &gpio_expander)
+Controls::Controls(MuxedADC &potadc,
+				   CVAdcChipT &cvadc,
+				   DoubleBufParamBlock &param_blocks_ref,
+				   GPIOExpander &gpio_expander)
 	: potadc(potadc)
 	, cvadc(cvadc)
 	, jacksense_reader{gpio_expander}
-	, param_blocks(param_block_base)
-	, cur_param_block(param_block_base)
-	, cur_params(&param_block_base[0][0])
+	, param_blocks(param_blocks_ref)
+	, cur_params(param_blocks[0].params.begin())
 {
 	// Todo: use RCC_Control or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();

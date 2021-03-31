@@ -13,18 +13,17 @@ AudioStream::AudioStream(PatchList &patches,
 						 PatchPlayer &patchplayer,
 						 ICodec &codec,
 						 AnalogOutT &dac,
-						 ParamBlock (&p)[2],
-						 Params &last_params,
+						 ParamCache &param_cache,
+						 DoubleBufParamBlock &p,
 						 AudioStreamBlock (&buffers)[4])
-	: codec_{codec}
-	, sample_rate_{codec.get_samplerate()}
+	: cache{param_cache}
+	, param_blocks{p}
 	, tx_buf_1{buffers[0]}
 	, tx_buf_2{buffers[1]}
 	, rx_buf_1{buffers[2]}
 	, rx_buf_2{buffers[3]}
-	, param_block_1{p[0]}
-	, param_block_2{p[1]}
-	, last_params{last_params}
+	, codec_{codec}
+	, sample_rate_{codec.get_samplerate()}
 	, dac{dac}
 	, patch_list{patches}
 	, player{patchplayer}
@@ -38,14 +37,14 @@ AudioStream::AudioStream(PatchList &patches,
 			Debug::Pin1::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
-			process(rx_buf_1, tx_buf_1, param_block_1);
+			process(rx_buf_1, tx_buf_1, param_blocks[0]);
 			Debug::Pin1::low();
 		},
 		[this]() {
 			Debug::Pin1::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
-			process(rx_buf_2, tx_buf_2, param_block_2);
+			process(rx_buf_2, tx_buf_2, param_blocks[1]);
 			Debug::Pin1::low();
 		});
 
@@ -73,15 +72,14 @@ AudioConf::SampleT AudioStream::get_output(int output_id)
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
 {
 	load_measure.start_measurement();
-
-	last_params.update_with(param_block[0]);
+	cache.write_sync(param_block.params[0], param_block.metaparams);
 
 	// Todo: patch change detection happens in ui or pagemanager
 	// Which sends a message to audio via MetaParams (or just changes it with patch_player)
 	if (block_patch_change) {
 		block_patch_change--;
 	} else {
-		if (check_patch_change(last_params.rotary_pushed.use_motion())) {
+		if (check_patch_change(param_block.metaparams.rotary_pushed.use_motion())) {
 			block_patch_change = 32;
 			for (auto &out_ : out) {
 				out_.l = 0;
@@ -94,7 +92,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	}
 
 	auto in_ = in.begin();
-	auto params_ = param_block.begin();
+	auto params_ = param_block.params.begin();
 	for (auto &out_ : out) {
 		if constexpr (DEBUG_PASSTHRU_AUDIO) {
 			out_.l = in_->l;
@@ -142,7 +140,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 void AudioStream::start()
 {
 	load_patch();
-	last_params.clear();
+	block_patch_change = 0;
 	codec_.start();
 	dac_updater.start();
 }
@@ -171,10 +169,10 @@ void AudioStream::load_patch()
 		player.set_panel_input(i, 0);
 
 	for (int i = 0; i < NumCVInputs; i++)
-		player.set_panel_input(i + NumAudioInputs, last_params.cvjacks[i]);
+		player.set_panel_input(i + NumAudioInputs, 0); // last_params.cvjacks[i]);
 
 	for (int i = 0; i < NumKnobs; i++)
-		player.set_panel_param(i, last_params.knobs[i]);
+		player.set_panel_param(i, 0); // last_params.knobs[i]);
 
 	if (!ok) {
 		while (1) {
