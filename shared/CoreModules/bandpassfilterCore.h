@@ -4,6 +4,7 @@
 #include "coreProcessor.h"
 #include "math.hh"
 #include "processors/bpf.h"
+#include "processors/oberheimBPF.h"
 
 using namespace MathTools;
 
@@ -26,8 +27,15 @@ class BandpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		bpf.cutoff.setValue(262.0f * setPitchMultiple(constrain(cutoffCV + cutoffOffset, -1.0f, 1.0f)));
-		signalOutput = bpf.update(signalInput);
+		if (mode == 0) {
+			bpf.q = map_value(filterQ, 0.0f, 1.0f, 1.0f, 20.0f);
+			bpf.cutoff.setValue(262.0f * setPitchMultiple(constrain(cutoffCV + cutoffOffset, -1.0f, 1.0f)));
+			signalOutput = bpf.update(signalInput);
+		} else if (mode == 1) {
+			ober.q = map_value(filterQ, 0.0f, 1.0f, 1.0f, 20.0f);
+			ober.cutoff.setValue(constrain(cutoffCV + cutoffOffset, 0.0f, 1.0f));
+			signalOutput = ober.update(signalInput);
+		}
 	}
 
 	BandpassfilterCore() {}
@@ -39,7 +47,10 @@ public:
 				cutoffOffset = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
 			case 1:
-				bpf.q = map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
+				filterQ = val;
+				break;
+			case 2:
+				mode = val;
 				break;
 		}
 	}
@@ -71,6 +82,11 @@ public:
 		return output;
 	}
 
+	virtual float get_led_brightness(const int led_id) const override
+	{
+		return mode;
+	}
+
 	static std::unique_ptr<CoreProcessor> create()
 	{
 		return std::make_unique<BandpassfilterCore>();
@@ -79,7 +95,10 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
+	int mode = 0;
+	float filterQ = 1;
 	BandPassFilter bpf;
+	OberBPF ober;
 	float cutoffCV = 0;
 	float cutoffOffset = 0;
 	float signalInput = 0;

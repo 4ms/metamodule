@@ -4,10 +4,10 @@
 
 struct LowpassfilterModule : CommModule {
 
-	enum ParamIds { CUTOFF_PARAM, RES_PARAM, CUTOFF_CV_PARAM, NUM_PARAMS };
+	enum ParamIds { CUTOFF_PARAM, RES_PARAM, CUTOFF_CV_PARAM, MODE_PARAM, NUM_PARAMS };
 	enum InputIds { SIGNAL_INPUT, CV_INPUT, NUM_INPUTS };
 	enum OutputIds { SIGNAL_OUTPUT, NUM_OUTPUTS };
-	enum LightIds { NUM_LIGHTS };
+	enum LightIds { MODE_LIGHT, NUM_LIGHTS };
 
 	LowpassfilterModule()
 	{
@@ -33,15 +33,17 @@ struct LowpassfilterWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hp.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
 
 		addLabeledKnob("CUT", LowpassfilterModule::CUTOFF_PARAM, {0, 0});
-		addLabeledKnob("RES", LowpassfilterModule::RES_PARAM, {0, 1}); 
-		addLabeledKnob("CV",LowpassfilterModule::CUTOFF_CV_PARAM,{0,2});
+		addLabeledKnob("RES", LowpassfilterModule::RES_PARAM, {0, 1});
+		addLabeledKnob("CV", LowpassfilterModule::CUTOFF_CV_PARAM, {0, 2});
+
+		addLabeledToggle("MODE", LowpassfilterModule::MODE_LIGHT, LowpassfilterModule::MODE_PARAM, {0, 3});
 
 		addLabeledOutput("OUT", LowpassfilterModule::SIGNAL_OUTPUT, {0, 0});
 		addLabeledInput("IN", LowpassfilterModule::SIGNAL_INPUT, {0, 1});
-		addLabeledInput("CV",LowpassfilterModule::CV_INPUT,{0,2});
+		addLabeledInput("CV", LowpassfilterModule::CV_INPUT, {0, 2});
 
 		addModuleTitle("LPF");
 	}

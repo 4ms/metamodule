@@ -4,10 +4,10 @@
 
 struct BandpassfilterModule : CommModule {
 
-	enum ParamIds { CUTOFF_PARAM, Q_PARAM, NUM_PARAMS };
+	enum ParamIds { CUTOFF_PARAM, Q_PARAM, MODE_PARAM, NUM_PARAMS };
 	enum InputIds { SIGNAL_INPUT, CV_INPUT, NUM_INPUTS };
 	enum OutputIds { SIGNAL_OUTPUT, NUM_OUTPUTS };
-	enum LightIds { NUM_LIGHTS };
+	enum LightIds { MODE_LIGHT, NUM_LIGHTS };
 
 	BandpassfilterModule()
 	{
@@ -33,15 +33,16 @@ struct BandpassfilterWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hp.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
 
 		addModuleTitle("BPF");
 
-		addLabeledKnob("CUTOFF",BandpassfilterModule::CUTOFF_PARAM,{0,0});
-		addLabeledKnob("Q",BandpassfilterModule::Q_PARAM,{0,1});
-		addLabeledInput("CV",BandpassfilterModule::CV_INPUT,{0,2});
-		addLabeledInput("INPUT",BandpassfilterModule::SIGNAL_INPUT,{0,1});
-		addLabeledOutput("OUTPUT",BandpassfilterModule::SIGNAL_OUTPUT,{0,0});
+		addLabeledKnob("CUTOFF", BandpassfilterModule::CUTOFF_PARAM, {0, 0});
+		addLabeledKnob("Q", BandpassfilterModule::Q_PARAM, {0, 1});
+		addLabeledInput("CV", BandpassfilterModule::CV_INPUT, {0, 2});
+		addLabeledToggle("MODE", BandpassfilterModule::MODE_LIGHT, BandpassfilterModule::MODE_PARAM, {0, 3});
+		addLabeledInput("INPUT", BandpassfilterModule::SIGNAL_INPUT, {0, 1});
+		addLabeledOutput("OUTPUT", BandpassfilterModule::SIGNAL_OUTPUT, {0, 0});
 	}
 };
 

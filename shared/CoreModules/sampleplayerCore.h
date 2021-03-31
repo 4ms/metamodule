@@ -1,19 +1,19 @@
 #pragma once
 
+#include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
-#include "CoreModules/moduleTypes.h"
 
 using namespace MathTools;
 
 class SampleplayerCore : public CoreProcessor {
-	static inline const int NumInJacks = 0;
-	static inline const int NumOutJacks = 0;
+	static inline const int NumInJacks = 1;
+	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 0;
 
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{};
-	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Trigger"};
 	static inline const StaticString<LongNameChars> description{"Sample Player"};
 
 	// clang-format off
@@ -23,29 +23,22 @@ class SampleplayerCore : public CoreProcessor {
 	virtual StaticString<LongNameChars> get_description() override { return description; }
 	// clang-format on
 public:
-	virtual void update(void) override
-	{
-	
-	}
+	virtual void update(void) override {}
 
-	SampleplayerCore()
-	{
-	}
+	SampleplayerCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
-			
+			case 0:
+			break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override
-	{
-	}
+	virtual void set_samplerate(const float sr) override {}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
-			
 		}
 	}
 
@@ -53,7 +46,9 @@ public:
 	{
 		float output = 0;
 		switch (output_id) {
-		
+			case 0:
+				output = 0;
+				break;
 		}
 		return output;
 	}
@@ -66,5 +61,4 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	
 };

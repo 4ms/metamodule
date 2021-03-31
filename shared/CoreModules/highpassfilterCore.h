@@ -4,6 +4,7 @@
 #include "coreProcessor.h"
 #include "math.hh"
 #include "processors/hpf.h"
+#include "processors/korgHPF.h"
 
 using namespace MathTools;
 
@@ -26,8 +27,15 @@ class HighpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		hpf.cutoff.setValue(setPitchMultiple(constrain(cutoffOffset + cutoffCV, -1.0f, 1.0f)) * 262.0f);
-		signalOutput = hpf.update(signalInput);
+		if (mode == 0) {
+			hpf.cutoff.setValue(setPitchMultiple(constrain(cutoffOffset + cutoffCV, -1.0f, 1.0f)) * 262.0f);
+			signalOutput = hpf.update(signalInput);
+		} else if (mode == 1) {
+			{
+				korg.cutoff.setValue(constrain(cutoffOffset + cutoffCV, 0.0f, 1.0f));
+				signalOutput = korg.update(signalInput);
+			}
+		}
 	}
 
 	HighpassfilterCore() {}
@@ -39,7 +47,14 @@ public:
 				cutoffOffset = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
 			case 1:
-				hpf.q = map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
+				if (mode == 0) {
+					hpf.q = map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
+				} else if (mode == 1) {
+					korg.q = map_value(val, 0.0f, 1.0f, 0.0f, 10.0f);
+				}
+				break;
+			case 2:
+				mode = val;
 				break;
 		}
 	}
@@ -71,6 +86,11 @@ public:
 		return output;
 	}
 
+	virtual float get_led_brightness(const int led_id) const override
+	{
+		return mode;
+	}
+
 	static std::unique_ptr<CoreProcessor> create()
 	{
 		return std::make_unique<HighpassfilterCore>();
@@ -79,7 +99,9 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
+	int mode = 0;
 	HighPassFilter hpf;
+	KorgHPF korg;
 	float signalInput = 0;
 	float signalOutput = 0;
 	float cutoffOffset = 0;
