@@ -138,7 +138,9 @@ void LabeledButton::createMapping(LabelButtonID srcId)
 
 void LabeledButton::updateState()
 {
-	id.moduleID = _parent.module->id;
+	if (_parent.module != nullptr)
+		if (_parent.module->id > 0)
+			id.moduleID = _parent.module->id;
 
 	isCurrentMapSrc = false;
 	isPossibleMapDest = false;
