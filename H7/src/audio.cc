@@ -87,11 +87,9 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	cache.write_sync(param_block.params[0], param_block.metaparams);
 	load_measure.start_measurement();
 
-	if (mbox.loading_new_patch) {
-		mbox.audio_is_muted = true;
-	} else {
-		mbox.audio_is_muted = false;
-	}
+	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch
+	// Todo: fade down before setting audio_is_muted to true
+	mbox.audio_is_muted = mbox.loading_new_patch ? true : false;
 
 	if (mbox.audio_is_muted) {
 		output_silence(out);
@@ -145,47 +143,21 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 void AudioStream::start()
 {
-	// todo: move this to ui
-	load_patch();
-
 	codec_.start();
 	dac_updater.start();
 }
 
-// bool AudioStream::check_patch_change(int motion)
-// {
-// 	if (motion > 0) {
-// 		player.unload_patch(patch_list.cur_patch());
-// 		patch_list.next_patch();
-// 		load_patch();
-// 		return true;
-// 	} else if (motion < 0) {
-// 		player.unload_patch(patch_list.cur_patch());
-// 		patch_list.prev_patch();
-// 		load_patch();
-// 		return true;
-// 	}
-// 	return false;
-// }
-
-void AudioStream::load_patch()
+// TODO: not used, remove?
+void AudioStream::send_zeros_to_patch()
 {
-	bool ok = player.load_patch(patch_list.cur_patch());
-
 	for (int i = 0; i < NumAudioInputs; i++)
 		player.set_panel_input(i, 0);
 
 	for (int i = 0; i < NumCVInputs; i++)
-		player.set_panel_input(i + NumAudioInputs, 0); // last_params.cvjacks[i]);
+		player.set_panel_input(i + NumAudioInputs, 0);
 
 	for (int i = 0; i < NumKnobs; i++)
-		player.set_panel_param(i, 0); // last_params.knobs[i]);
-
-	if (!ok) {
-		while (1) {
-			; // Todo: Display error on screen: Cannot load patch
-		}
-	}
+		player.set_panel_param(i, 0);
 }
 
 } // namespace MetaModule

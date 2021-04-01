@@ -76,8 +76,8 @@ void main()
 	HWSemaphore<M7_ready>::unlock();
 
 	// wait for M4 to be ready
-	while (HWSemaphore<M4_ready>::is_locked()) {
-	}
+	while (HWSemaphore<M4_ready>::is_locked())
+		;
 
 	param_cache.clear();
 	ui.start();

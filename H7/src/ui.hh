@@ -61,6 +61,9 @@ public:
 	{
 		params.clear();
 		metaparams.clear();
+
+		player.load_patch(patch_list.cur_patch());
+
 		screen.init();
 		pages.init();
 
@@ -126,7 +129,6 @@ public:
 		if (rotary_pushed) {
 			auto now_tm = HAL_GetTick();
 			if ((now_tm - last_changed_page_tm) > 100) {
-				// Debug::Pin3::high();
 				last_changed_page_tm = now_tm;
 				if (rotary_pushed < 0) {
 					uint32_t cur_patch_index = patch_list.cur_patch_index();
@@ -137,7 +139,6 @@ public:
 					mbox.new_patch_index = cur_patch_index == (patch_list.NumPatches - 1) ? 0 : cur_patch_index + 1;
 				}
 				mbox.loading_new_patch = true;
-				// Debug::Pin3::low();
 			}
 		}
 

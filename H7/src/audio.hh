@@ -66,7 +66,7 @@ private:
 	void output_silence(AudioStreamBlock &out);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
-	void load_patch();
+	void send_zeros_to_patch();
 
 	static constexpr unsigned NumKnobs = PatchPlayer::get_num_panel_knobs();
 	static constexpr unsigned NumAudioInputs = 2;
