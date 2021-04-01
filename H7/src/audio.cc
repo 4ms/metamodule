@@ -52,7 +52,6 @@ AudioStream::AudioStream(PatchList &patches,
 
 	dac.init();
 	dac_updater.init(DAC_update_conf, [&]() { dac.output_next(); });
-
 	load_measure.init();
 }
 
@@ -130,9 +129,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		out_.l = get_output(1);
 		out_.r = get_output(0);
 
-		// Todo: use player.get_output(2) and (3)
-		dac.queue_sample(0, out_.l + 0x00800000);
-		dac.queue_sample(1, out_.r + 0x00800000);
+		dac.queue_sample(0, get_output(2) + 0x00800000);
+		dac.queue_sample(1, get_output(3) + 0x00800000);
 
 		in_++;
 		params_++;

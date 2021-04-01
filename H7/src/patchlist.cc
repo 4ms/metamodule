@@ -1,4 +1,6 @@
 #include "patchlist.hh"
+#include "KP_FM_DRUM_DET.hh"
+#include "KarplusStereo.hh"
 #include "QuadDrum.hh"
 #include "example_drum.hh"
 #include "example_drum_verb_mono.h"
@@ -17,6 +19,8 @@ PatchList::PatchList()
 		  {example_drum_verb_mono},
 		  {example_stereo_verb},
 		  {QuadDrum},
+		  {KP_FM_DRUM_DET},
+		  {KarplusStereo},
 	  }
 {
 	_cur_patch_idx = 0;

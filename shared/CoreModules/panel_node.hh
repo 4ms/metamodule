@@ -9,14 +9,15 @@ class Panel : public CoreProcessor {
 public:
 	static constexpr int NumKnobs = PanelDef::NumPot;
 	static constexpr int NumOutJacks = PanelDef::NumAudioIn + PanelDef::NumCVIn;
-	static constexpr int NumInJacks = PanelDef::NumAudioOut;
+	static constexpr int NumInJacks = PanelDef::NumAudioOut + PanelDef::NumDACOut;
 
 	// In these lines, "OutJack" is a user-facing Input [and vice-versa]
 	static constexpr int NumUserFacingOutJacks = NumInJacks;
 	static constexpr int NumUserFacingInJacks = NumOutJacks;
 
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"A", "B", "C", "D", "a", "b", "c", "d"};
-	static inline const std::array<StaticString<NameChars>, NumUserFacingOutJacks> InJackNames{"OutL", "OutR"};
+	static inline const std::array<StaticString<NameChars>, NumUserFacingOutJacks> InJackNames{
+		"OutL", "OutR", "CVOut1", "CVOut2"};
 	static inline const std::array<StaticString<NameChars>, NumUserFacingInJacks> OutJackNames{
 		"In L", "In R", "CV A", "CV B", "CV C", "CV D"};
 	static inline const StaticString<LongNameChars> description{"PANEL"};
@@ -24,12 +25,13 @@ public:
 	// user_facing_outs are inputs as seen by the patch (the patch outputs to the user_facing_outs), and vice-versa
 	// the patch inputs from the user_facing_ins, so the latter are outputs
 	RefParameter<float> user_facing_outs[NumUserFacingOutJacks];
-	RefParameter<float> user_facing_ins[NumOutJacks];
+	RefParameter<float> user_facing_ins[NumUserFacingInJacks];
 	float params[NumKnobs];
 
-	Panel() // convention is to initialize ins, then outs. We're doing it right here (user_facing_outs = inputs).
-		: user_facing_outs{nodes[0], nodes[1]}
-		, user_facing_ins{nodes[2], nodes[3], nodes[4], nodes[5], nodes[6], nodes[7]}
+	Panel() // convention is to initialize ins, then outs. Look backwards, but we're doing it correct here
+			// (user_facing_outs = inputs).
+		: user_facing_outs{nodes[0], nodes[1], nodes[2], nodes[3]}
+		, user_facing_ins{nodes[4], nodes[5], nodes[6], nodes[7], nodes[8], nodes[9]}
 	{}
 
 	Panel(float &cable0,
@@ -39,9 +41,11 @@ public:
 		  float &cable4,
 		  float &cable5,
 		  float &cable6,
-		  float &cable7)
-		: user_facing_outs{cable0, cable1}
-		, user_facing_ins{cable2, cable3, cable4, cable5, cable6, cable7}
+		  float &cable7,
+		  float &cable8,
+		  float &cable9)
+		: user_facing_outs{cable0, cable1, cable2, cable3}
+		, user_facing_ins{cable4, cable5, cable6, cable7, cable8, cable9}
 	{}
 
 	virtual void update() override {}
@@ -71,7 +75,7 @@ public:
 	}
 
 	// Returns the value on a user_facing_outs jack (Audio OUT L, for example)
-	// Used by the audio loop to pass outputs of the internal modules along to the real world
+	// Used by the audio loop to pass outputs from the internal modules to the real world
 	float get_panel_output(const int jack_id) const
 	{
 		if (jack_id >= NumUserFacingOutJacks)
@@ -111,7 +115,9 @@ public:
 									   nodes[idx[4]],
 									   nodes[idx[5]],
 									   nodes[idx[6]],
-									   nodes[idx[7]]);
+									   nodes[idx[7]],
+									   nodes[idx[8]],
+									   nodes[idx[9]]);
 	}
 
 	static constexpr char typeID[20] = "PANEL_8";
