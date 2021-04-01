@@ -70,3 +70,6 @@ private:
 	CommModuleWidget &_parent;
 };
 
+class MetaModuleTextBox : public LedDisplayTextField {
+	virtual void draw(const DrawArgs &args) override;
+};

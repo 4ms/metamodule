@@ -220,3 +220,9 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 	if (quantity)
 		quantity->setMax();
 }
+
+void MetaModuleTextBox::draw(const DrawArgs &args)
+{
+	// Todo: draw it a custom way
+	LedDisplayTextField::draw(args);
+}

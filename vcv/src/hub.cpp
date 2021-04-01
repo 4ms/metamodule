@@ -250,18 +250,20 @@ struct MetaModuleHubWidget : CommModuleWidget {
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
 
-		addParam(createParamCentered<BefacoPush>(mm2px(Vec(23.292, 70.977)), module, MetaModuleHub::GET_INFO));
+		addParam(createParamCentered<BefacoPush>(mm2px(Vec(10, 50)), module, MetaModuleHub::GET_INFO));
 
-		valueLabel = createWidget<Label>(mm2px(Vec(0, 50)));
+		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
 		valueLabel->color = rack::color::BLACK;
 		valueLabel->text = "";
 		valueLabel->fontSize = 10;
 		addChild(valueLabel);
 
-		patchName = createWidget<LedDisplayTextField>(mm2px(Vec(28, 65.977)));
+		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(20, 45)));
 		patchName->text = "Enter Patch Name";
-		patchName->color = rack::color::BLACK;
+		patchName->color = rack::color::WHITE;
+		patchName->box.size = {mm2px(Vec(40, 10))};
 		addChild(patchName);
+		patchName->selectAll(); // Doesn't work :(
 
 		addLabeledKnob("A", 0, {0, 0});
 		addLabeledKnob("B", 1, {1, 0});
