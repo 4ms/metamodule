@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/control_conf.hh"
 #include "conf/stream_conf.hh"
-#include "drivers/stm32xx.h"
+#include "debug.hh"
 #include "util/debouncer.hh"
 #include <array>
 
@@ -38,12 +38,7 @@ struct Params {
 
 	// Same value for an entire block:
 	float knobs[NumPot] = {0.f};
-	float patchcv = 0.f;
 	uint16_t jack_senses;
-
-	Toggler rotary_button;
-	RotaryMotion rotary;
-	RotaryMotion rotary_pushed;
 
 	Params()
 	{
@@ -61,16 +56,9 @@ struct Params {
 		for (int i = 0; i < NumPot; i++)
 			knobs[i] = 0.f;
 		jack_senses = 0;
-		patchcv = 0.f;
-		rotary_button.reset();
-		rotary.motion = 0;
-		rotary.abs_pos = 0;
-		rotary_pushed.motion = 0;
-		rotary_pushed.abs_pos = 0;
 	}
 
-	// Copies some data, adds other data (rotary motion)
-	void update_with(const Params &that)
+	void copy(const Params &that)
 	{
 		for (int i = 0; i < NumCVIn; i++)
 			cvjacks[i] = that.cvjacks[i];
@@ -81,12 +69,118 @@ struct Params {
 		for (int i = 0; i < NumPot; i++)
 			knobs[i] = that.knobs[i];
 		jack_senses = that.jack_senses;
+	}
+};
+
+struct MetaParams {
+	float patchcv = 0.f;
+	Toggler rotary_button;
+	RotaryMotion rotary;
+	RotaryMotion rotary_pushed;
+	uint8_t audio_load = 0;
+
+	MetaParams()
+	{
+		clear();
+	}
+
+	void clear()
+	{
+		patchcv = 0.f;
+		rotary_button.reset();
+		rotary.motion = 0;
+		rotary.abs_pos = 0;
+		rotary_pushed.motion = 0;
+		rotary_pushed.abs_pos = 0;
+		audio_load = 0;
+	}
+
+	// Copies some data, adds other data (rotary motion)
+	void update_with(const MetaParams &that)
+	{
 		patchcv = that.patchcv;
 		rotary_button.copy_state(that.rotary_button);
 		rotary.add_motion(that.rotary);
 		rotary_pushed.add_motion(that.rotary_pushed);
+		audio_load = that.audio_load;
+	}
+	void copy(const MetaParams &that)
+	{
+		patchcv = that.patchcv;
+		rotary_button.copy_state(that.rotary_button);
+		rotary = that.rotary;
+		rotary_pushed = that.rotary_pushed;
+		audio_load = that.audio_load;
+	}
+	void transfer(MetaParams &that)
+	{
+		patchcv = that.patchcv;
+		rotary_button.copy_state(that.rotary_button);
+		rotary.transfer_motion(that.rotary);
+		rotary_pushed.transfer_motion(that.rotary_pushed);
+		audio_load = that.audio_load;
 	}
 };
 
-using ParamBlock = std::array<Params, StreamConf::Audio::BlockSize>;
+// ParamCache class
+// Stores a copy of Params and MetaParams and allows access from single core
+// where a higher-priority ISR does write_sync(), and a lower-priority ISR does read_sync_*()
+// The users of this class should each have their own copy of Params and MetaParams.
+//
+// Todo: use HSEM to allow for multiple cores and inverted ISR priorities
+// Todo: "cache" isn't the best name for this, think of something better...
+struct ParamCache {
+	Params p;
+	MetaParams m;
+
+	ParamCache()
+	{
+		clear();
+	}
+	void write_sync(Params &p_, MetaParams &m_)
+	{
+		_new_data = false; // protects against multiple write_syncs without a read_sync, and then one write_sync
+						   // interupting a read_sync in progress
+		p.copy(p_);
+		m.update_with(m_);
+		_new_data = true;
+	}
+
+	bool read_sync(Params *params, MetaParams *metaparams)
+	{
+		if (!_new_data)
+			return false;
+		if (!_new_data)
+			return false;
+		params->copy(p);
+		metaparams->transfer(m);
+		_new_data = false;
+		return true;
+	}
+
+	void clear()
+	{
+		_new_data = false;
+		p.clear();
+		m.clear();
+		_new_data = true;
+	}
+
+private:
+	volatile bool _new_data = true;
+};
+
+struct ParamBlock {
+	std::array<Params, StreamConf::Audio::BlockSize> params;
+	MetaParams metaparams;
+};
+
+using DoubleBufParamBlock = std::array<ParamBlock, 2>;
+
+struct UiAudioMailbox {
+	bool loading_new_patch = false;
+	bool audio_is_muted = false;
+	uint32_t new_patch_index;
+};
+
 } // namespace MetaModule

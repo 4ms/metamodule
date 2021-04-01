@@ -17,7 +17,7 @@ struct DebugInfoPage : PageBase {
 		screen.print(patch_list.cur_patch().patch_name);
 		PageWidgets::draw_jack_senses(screen, params, 180);
 		PageWidgets::draw_pot_values(screen, params, Colors::black, 214);
-		PageWidgets::draw_processor_stats(screen, Colors::blue, patch_list.audio_load);
+		PageWidgets::draw_processor_stats(screen, Colors::blue, metaparams.audio_load);
 
 		screen.setCursor(0, 40);
 		for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {

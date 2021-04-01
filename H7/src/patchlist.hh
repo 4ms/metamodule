@@ -39,7 +39,13 @@ struct PatchList {
 			_cur_patch_idx--;
 	}
 
-	uint8_t audio_load = 0;
+	void jump_to_patch(uint32_t patch_index)
+	{
+		if (patch_index >= NumPatches)
+			patch_index = NumPatches - 1;
+
+		_cur_patch_idx = patch_index;
+	}
 
 private:
 	uint32_t _cur_patch_idx = 0;

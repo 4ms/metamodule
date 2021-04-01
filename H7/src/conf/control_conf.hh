@@ -17,7 +17,7 @@ static constexpr uint32_t NumRgbButton = PanelDef::NumRgbButton;
 
 const TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
-	.period_ns = 20833, // 48kHz
+	.period_ns = 20800, // must be just a hair faster than 48kHz
 	.priority1 = 0,
 	.priority2 = 3,
 };

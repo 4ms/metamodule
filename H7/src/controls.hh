@@ -17,7 +17,7 @@ using namespace mdrivlib;
 namespace MetaModule
 {
 struct Controls {
-	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, ParamBlock *param_block, GPIOExpander &gpio_expander);
+	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, DoubleBufParamBlock &param_blocks_ref, GPIOExpander &gpio_expander);
 
 	MuxedADC &potadc;
 	CVAdcChipT &cvadc;
@@ -70,9 +70,11 @@ private:
 	Timekeeper read_controls_task;
 	Timekeeper read_cvadc_task;
 
-	ParamBlock *param_blocks;
-	ParamBlock *cur_param_block;
+	DoubleBufParamBlock &param_blocks;
 	Params *cur_params;
+	MetaParams *cur_metaparams;
+	bool _buffer_full = true;
+	bool _first_param = true;
 
 	uint32_t latest_patchcv_reading;
 	uint16_t latest_jacksense_reading;

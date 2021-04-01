@@ -13,18 +13,19 @@ AudioStream::AudioStream(PatchList &patches,
 						 PatchPlayer &patchplayer,
 						 ICodec &codec,
 						 AnalogOutT &dac,
-						 ParamBlock (&p)[2],
-						 Params &last_params,
+						 ParamCache &param_cache,
+						 UiAudioMailbox &uiaudiomailbox,
+						 DoubleBufParamBlock &p,
 						 AudioStreamBlock (&buffers)[4])
-	: codec_{codec}
-	, sample_rate_{codec.get_samplerate()}
+	: cache{param_cache}
+	, mbox{uiaudiomailbox}
+	, param_blocks{p}
 	, tx_buf_1{buffers[0]}
 	, tx_buf_2{buffers[1]}
 	, rx_buf_1{buffers[2]}
 	, rx_buf_2{buffers[3]}
-	, param_block_1{p[0]}
-	, param_block_2{p[1]}
-	, last_params{last_params}
+	, codec_{codec}
+	, sample_rate_{codec.get_samplerate()}
 	, dac{dac}
 	, patch_list{patches}
 	, player{patchplayer}
@@ -35,18 +36,18 @@ AudioStream::AudioStream(PatchList &patches,
 							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks(
 		[this]() {
-			Debug::Pin1::high();
+			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
-			process(rx_buf_1, tx_buf_1, param_block_1);
-			Debug::Pin1::low();
+			process(rx_buf_1, tx_buf_1, param_blocks[0]);
+			Debug::Pin0::low();
 		},
 		[this]() {
-			Debug::Pin1::high();
+			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
-			process(rx_buf_2, tx_buf_2, param_block_2);
-			Debug::Pin1::low();
+			process(rx_buf_2, tx_buf_2, param_blocks[1]);
+			Debug::Pin0::low();
 		});
 
 	dac.init();
@@ -63,6 +64,16 @@ AudioConf::SampleT AudioStream::get_output(int output_id)
 	// return compressor.compress(scaled_out);
 }
 
+void AudioStream::output_silence(AudioStreamBlock &out)
+{
+	for (auto &out_ : out) {
+		out_.l = 0;
+		out_.r = 0;
+		dac.queue_sample(0, 0x00800000);
+		dac.queue_sample(1, 0x00800000);
+	}
+}
+
 // Todo: integrate these:
 // params.gate_ins[]
 // params.clock_in
@@ -72,29 +83,21 @@ AudioConf::SampleT AudioStream::get_output(int output_id)
 
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
 {
+	param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
+	cache.write_sync(param_block.params[0], param_block.metaparams);
 	load_measure.start_measurement();
 
-	last_params.update_with(param_block[0]);
+	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch
+	// Todo: fade down before setting audio_is_muted to true
+	mbox.audio_is_muted = mbox.loading_new_patch ? true : false;
 
-	// Todo: patch change detection happens in ui or pagemanager
-	// Which sends a message to audio via MetaParams (or just changes it with patch_player)
-	if (block_patch_change) {
-		block_patch_change--;
-	} else {
-		if (check_patch_change(last_params.rotary_pushed.use_motion())) {
-			block_patch_change = 32;
-			for (auto &out_ : out) {
-				out_.l = 0;
-				out_.r = 0;
-				dac.queue_sample(0, 0x00800000);
-				dac.queue_sample(1, 0x00800000);
-			}
-			return;
-		}
+	if (mbox.audio_is_muted) {
+		output_silence(out);
+		return;
 	}
 
 	auto in_ = in.begin();
-	auto params_ = param_block.begin();
+	auto params_ = param_block.params.begin();
 	for (auto &out_ : out) {
 		if constexpr (DEBUG_PASSTHRU_AUDIO) {
 			out_.l = in_->l;
@@ -136,51 +139,25 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	}
 
 	load_measure.end_measurement();
-	patch_list.audio_load = load_measure.get_last_measurement_load_percent();
 }
 
 void AudioStream::start()
 {
-	load_patch();
-	last_params.clear();
 	codec_.start();
 	dac_updater.start();
 }
 
-bool AudioStream::check_patch_change(int motion)
+// TODO: not used, remove?
+void AudioStream::send_zeros_to_patch()
 {
-	if (motion > 0) {
-		player.unload_patch(patch_list.cur_patch());
-		patch_list.next_patch();
-		load_patch();
-		return true;
-	} else if (motion < 0) {
-		player.unload_patch(patch_list.cur_patch());
-		patch_list.prev_patch();
-		load_patch();
-		return true;
-	}
-	return false;
-}
-
-void AudioStream::load_patch()
-{
-	bool ok = player.load_patch(patch_list.cur_patch());
-
 	for (int i = 0; i < NumAudioInputs; i++)
 		player.set_panel_input(i, 0);
 
 	for (int i = 0; i < NumCVInputs; i++)
-		player.set_panel_input(i + NumAudioInputs, last_params.cvjacks[i]);
+		player.set_panel_input(i + NumAudioInputs, 0);
 
 	for (int i = 0; i < NumKnobs; i++)
-		player.set_panel_param(i, last_params.knobs[i]);
-
-	if (!ok) {
-		while (1) {
-			; // Todo: Display error on screen: Cannot load patch
-		}
-	}
+		player.set_panel_param(i, 0);
 }
 
 } // namespace MetaModule

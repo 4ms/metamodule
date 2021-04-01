@@ -3,7 +3,6 @@
 #include "conf/screen_conf.hh"
 #include "drivers/colors.hh"
 #include "drivers/rcc.hh"
-#include "drivers/stm32xx.h"
 
 using ScreenConfT = MMScreenConf;
 // template <typename ScreenConfT>

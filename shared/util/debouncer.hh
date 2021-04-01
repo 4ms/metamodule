@@ -2,6 +2,13 @@
 #include <cstdint>
 
 struct Toggler {
+
+protected:
+	bool is_high_;
+	bool got_rising_edge_;
+	bool got_falling_edge_;
+
+public:
 	Toggler()
 		: is_high_{false}
 		, got_rising_edge_{false}
@@ -58,6 +65,7 @@ struct Toggler {
 		got_rising_edge_ = true;
 		got_falling_edge_ = false;
 	}
+
 	void register_falling_edge()
 	{
 		is_high_ = false;
@@ -75,16 +83,13 @@ struct Toggler {
 		is_high_ = other.is_high_;
 		got_rising_edge_ = other.got_rising_edge_;
 		got_falling_edge_ = other.got_falling_edge_;
-		// if (is_pressed() && !other.is_pressed())
-		// 	register_rising_edge();
-		// else if (!is_pressed() && other.is_pressed())
-		// 	register_falling_edge();
 	}
 
-protected:
-	bool is_high_;
-	bool got_rising_edge_;
-	bool got_falling_edge_;
+	Toggler &operator=(const Toggler &other)
+	{
+		copy_state(other);
+		return *this;
+	}
 };
 
 template<unsigned RisingEdgePattern = 0x00000001,
