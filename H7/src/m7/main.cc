@@ -50,6 +50,9 @@ void main()
 	PatchPlayer patch_player;
 	ParamCache param_cache;
 
+	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
+	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, leds, StaticBuffers::screen_framebuf};
+
 	AudioStream audio{patch_list,
 					  patch_player,
 					  _hw.codec,
@@ -57,8 +60,6 @@ void main()
 					  param_cache,
 					  StaticBuffers::param_blocks,
 					  StaticBuffers::audio_dma_block};
-	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, leds, StaticBuffers::screen_framebuf};
 
 	SharedBus::i2c.deinit();
 

@@ -34,18 +34,18 @@ AudioStream::AudioStream(PatchList &patches,
 							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks(
 		[this]() {
-			Debug::Pin1::high();
+			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
 			process(rx_buf_1, tx_buf_1, param_blocks[0]);
-			Debug::Pin1::low();
+			Debug::Pin0::low();
 		},
 		[this]() {
-			Debug::Pin1::high();
+			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
 			process(rx_buf_2, tx_buf_2, param_blocks[1]);
-			Debug::Pin1::low();
+			Debug::Pin0::low();
 		});
 
 	dac.init();
@@ -79,7 +79,12 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	if (block_patch_change) {
 		block_patch_change--;
 	} else {
-		if (check_patch_change(param_block.metaparams.rotary_pushed.use_motion())) {
+		if (cache.load_new_patch) {
+			cache.load_new_patch = false;
+			player.unload_patch(patch_list.cur_patch());
+			patch_list.jump_to_patch(cache.new_patch_index);
+			load_patch();
+
 			block_patch_change = 32;
 			for (auto &out_ : out) {
 				out_.l = 0;
@@ -145,21 +150,21 @@ void AudioStream::start()
 	dac_updater.start();
 }
 
-bool AudioStream::check_patch_change(int motion)
-{
-	if (motion > 0) {
-		player.unload_patch(patch_list.cur_patch());
-		patch_list.next_patch();
-		load_patch();
-		return true;
-	} else if (motion < 0) {
-		player.unload_patch(patch_list.cur_patch());
-		patch_list.prev_patch();
-		load_patch();
-		return true;
-	}
-	return false;
-}
+// bool AudioStream::check_patch_change(int motion)
+// {
+// 	if (motion > 0) {
+// 		player.unload_patch(patch_list.cur_patch());
+// 		patch_list.next_patch();
+// 		load_patch();
+// 		return true;
+// 	} else if (motion < 0) {
+// 		player.unload_patch(patch_list.cur_patch());
+// 		patch_list.prev_patch();
+// 		load_patch();
+// 		return true;
+// 	}
+// 	return false;
+// }
 
 void AudioStream::load_patch()
 {

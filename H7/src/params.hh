@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/control_conf.hh"
 #include "conf/stream_conf.hh"
+#include "debug.hh"
 #include "drivers/stm32xx.h"
 #include "util/debouncer.hh"
 #include <array>
@@ -58,18 +59,18 @@ struct Params {
 		jack_senses = 0;
 	}
 
-	// void update_with(const Params &that)
-	// {
-	// 	for (int i = 0; i < NumCVIn; i++)
-	// 		cvjacks[i] = that.cvjacks[i];
-	// 	for (int i = 0; i < NumGateIn; i++)
-	// 		gate_ins[i].copy_state(that.gate_ins[i]);
-	// 	for (int i = 0; i < NumRgbButton; i++)
-	// 		buttons[i].copy_state(that.buttons[i]);
-	// 	for (int i = 0; i < NumPot; i++)
-	// 		knobs[i] = that.knobs[i];
-	// 	jack_senses = that.jack_senses;
-	// }
+	void copy(const Params &that)
+	{
+		for (int i = 0; i < NumCVIn; i++)
+			cvjacks[i] = that.cvjacks[i];
+		for (int i = 0; i < NumGateIn; i++)
+			gate_ins[i].copy_state(that.gate_ins[i]);
+		for (int i = 0; i < NumRgbButton; i++)
+			buttons[i].copy_state(that.buttons[i]);
+		for (int i = 0; i < NumPot; i++)
+			knobs[i] = that.knobs[i];
+		jack_senses = that.jack_senses;
+	}
 };
 
 struct MetaParams {
@@ -101,30 +102,73 @@ struct MetaParams {
 		rotary.add_motion(that.rotary);
 		rotary_pushed.add_motion(that.rotary_pushed);
 	}
+	void copy(const MetaParams &that)
+	{
+		patchcv = that.patchcv;
+		rotary_button.copy_state(that.rotary_button);
+		rotary = that.rotary;
+		rotary_pushed = that.rotary_pushed;
+	}
+	void transfer(MetaParams &that)
+	{
+		patchcv = that.patchcv;
+		rotary_button.copy_state(that.rotary_button);
+		rotary.transfer_motion(that.rotary);
+		rotary_pushed.transfer_motion(that.rotary_pushed);
+	}
 };
 
 struct ParamCache {
 	Params p;
 	MetaParams m;
+	bool _new_data = true;
 
 	void write_sync(Params &p_, MetaParams &m_)
 	{
-		p = p_;
-		m = m_;
+		_new_data = false; // protects against multiple write_syncs without a read_sync, and then one write_sync
+						   // interupting a read_sync in progress
+		Debug::Pin1::high();
+		p.copy(p_);
+		m.update_with(m_);
+		_new_data = true;
+		Debug::Pin1::low();
 	}
-	Params &read_sync_params()
+	bool read_sync_params(Params *params)
 	{
-		return p;
+		if (!_new_data)
+			return false;
+
+		Debug::Pin2::high();
+
+		if (!_new_data)
+			return false;
+		params->copy(p);
+		Debug::Pin2::low();
+		_new_data = false;
+		return true;
 	}
-	MetaParams &read_sync_metaparams()
+	bool read_sync_metaparams(MetaParams *metaparams)
 	{
-		return m;
+		if (!_new_data)
+			return false;
+
+		Debug::Pin2::high();
+
+		if (!_new_data)
+			return false;
+		metaparams->transfer(m);
+		Debug::Pin2::low();
+		_new_data = false;
+		return true;
 	}
 	void clear()
 	{
 		p.clear();
 		m.clear();
 	}
+
+	bool load_new_patch = false;
+	uint32_t new_patch_index;
 };
 
 // using ParamBlock = std::array<Params, StreamConf::Audio::BlockSize>;
