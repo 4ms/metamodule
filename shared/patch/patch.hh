@@ -63,6 +63,13 @@ struct Patch {
 	int num_mapped_knobs;
 };
 
+// Todo: move cached patch info here:
+struct PatchAnalysis {
+	// get_panel_input_connection
+	// get_panel_output_connection
+	// get_duplicate_module_type_id
+};
+
 struct PatchRef {
 	PatchRef(const Patch &p)
 		: patch(p)

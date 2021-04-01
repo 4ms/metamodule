@@ -16,10 +16,17 @@ struct PatchSelectorPage : PageBase {
 		PageWidgets::setup_header(screen);
 		screen.print("Select a patch:");
 
-		screen.setFont(&FreeSans12pt7b);
-		screen.setTextColor(Colors::black.blend(Colors::green));
 		for (int i = 0; i < PatchList::NumPatches; i++) {
 			screen.setCursor(2, 60 + i * 24);
+			if (i == patch_list.cur_patch_index()) {
+				screen.setFont(&FreeSansBold12pt7b);
+				screen.fillRect(0, 38 + i * 24, 240, 24, Colors::yellow);
+				screen.setTextColor(Colors::black);
+			} else {
+				screen.setFont(&FreeSans12pt7b);
+				screen.setTextColor(Colors::black.blend(Colors::green));
+			}
+
 			screen.print(patch_list.get_patch(i).patch_name);
 		}
 	}
