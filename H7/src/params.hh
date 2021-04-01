@@ -145,26 +145,19 @@ struct ParamCache {
 		m.update_with(m_);
 		_new_data = true;
 	}
-	bool read_sync_params(Params *params)
+
+	bool read_sync(Params *params, MetaParams *metaparams)
 	{
 		if (!_new_data)
 			return false;
 		if (!_new_data)
 			return false;
 		params->copy(p);
-		_new_data = false;
-		return true;
-	}
-	bool read_sync_metaparams(MetaParams *metaparams)
-	{
-		if (!_new_data)
-			return false;
-		if (!_new_data)
-			return false;
 		metaparams->transfer(m);
 		_new_data = false;
 		return true;
 	}
+
 	void clear()
 	{
 		_new_data = false;

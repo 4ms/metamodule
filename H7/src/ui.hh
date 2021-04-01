@@ -101,8 +101,7 @@ public:
 
 	void update_ui()
 	{
-		param_cache.read_sync_metaparams(&metaparams);
-		param_cache.read_sync_params(&params);
+		param_cache.read_sync(&params, &metaparams);
 		handle_rotary();
 
 		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
