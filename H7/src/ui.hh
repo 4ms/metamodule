@@ -28,6 +28,8 @@ public:
 	Params params;
 	MetaParams metaparams;
 
+	PatchList &patchlist; // Todo remove
+
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
@@ -41,6 +43,7 @@ public:
 		, screen{screenbuf}
 		, param_cache{pc}
 		, pages{pl, pp, params, screen}
+		, patchlist{pl}
 	{}
 
 	void start()
@@ -105,6 +108,16 @@ public:
 
 		if (rotary > 0) {
 			pages.next_page();
+		}
+
+		auto rotary_pushed = metaparams.rotary_pushed.use_motion();
+		if (rotary_pushed < 0) {
+			param_cache.new_patch_index = patchlist.cur_patch_index() - 1;
+			param_cache.load_new_patch = true;
+		}
+		if (rotary_pushed > 0) {
+			param_cache.new_patch_index = patchlist.cur_patch_index() + 1;
+			param_cache.load_new_patch = true;
 		}
 	}
 
