@@ -20,15 +20,22 @@ namespace MetaModule
 
 template<unsigned AnimationUpdateRate = 100>
 class Ui {
-public:
+private:
 	LedFrame<AnimationUpdateRate> &leds;
 	ScreenFrameBuffer screen;
 	PageManager pages;
+
+	// Ui stores its own copy of params and metaparams because while it's accessing these in order to draw the screen,
+	// respond to rotary motion, etc. the audio process loop might interrupt it and update the values in ParamCache
 	ParamCache &param_cache;
 	Params params;
 	MetaParams metaparams;
 
-	PatchList &patchlist; // Todo remove
+	UiAudioMailbox &mbox;
+
+	// Todo remove once we have pages editing the cur_patch
+	PatchList &patchlist;
+	uint32_t last_changed_page_tm = 0;
 
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
@@ -37,12 +44,14 @@ public:
 	Ui(PatchList &pl,
 	   PatchPlayer &pp,
 	   ParamCache &pc,
+	   UiAudioMailbox &uiaudiomailbox,
 	   LedFrame<AnimationUpdateRate> &l,
 	   MMScreenConf::FrameBufferT &screenbuf)
 		: leds{l}
 		, screen{screenbuf}
 		, param_cache{pc}
-		, pages{pl, pp, params, screen}
+		, mbox{uiaudiomailbox}
+		, pages{pl, pp, params, metaparams, screen}
 		, patchlist{pl}
 	{}
 
@@ -111,13 +120,16 @@ public:
 		}
 
 		auto rotary_pushed = metaparams.rotary_pushed.use_motion();
-		if (rotary_pushed < 0) {
-			param_cache.new_patch_index = patchlist.cur_patch_index() - 1;
-			param_cache.load_new_patch = true;
-		}
-		if (rotary_pushed > 0) {
-			param_cache.new_patch_index = patchlist.cur_patch_index() + 1;
-			param_cache.load_new_patch = true;
+		if (rotary_pushed) {
+			auto now_tm = HAL_GetTick();
+			if (now_tm - last_changed_page_tm > 100) {
+				last_changed_page_tm = now_tm;
+				if (rotary_pushed < 0)
+					mbox.new_patch_index = patchlist.cur_patch_index() - 1;
+				if (rotary_pushed > 0)
+					mbox.new_patch_index = patchlist.cur_patch_index() + 1;
+				mbox.load_new_patch = true;
+			}
 		}
 	}
 
@@ -126,29 +138,17 @@ private:
 
 	void update_led_states()
 	{
-		// Debug::Pin1::high();
-		// if (param_cache.read_sync_params().buttons[0].is_pressed())
-		// 	leds.but[0].set_background(Colors::red);
-		// else
-		// 	leds.but[0].set_background(Colors::green);
-
-		// if (param_cache.read_sync_params().buttons[1].is_pressed())
-		// 	leds.but[1].set_background(Colors::blue);
-		// else
-		// 	leds.but[1].set_background(Colors::orange);
-
-		// if (param_cache.read_sync_metaparams().rotary_button.is_pressed())
-		// 	leds.rotaryLED.set_background(Colors::blue);
-		// else
-		// 	leds.rotaryLED.set_background(Colors::green);
-
-		leds.rotaryLED.breathe(Colors::magenta, 1);
-		leds.clockLED.breathe(Colors::green, 0.75f);
-		leds.but[0].breathe(Colors::blue, 0.5f);
-		leds.but[1].breathe(Colors::white, 0.1f);
+		// Todo: audio process reads led brightness from coreModules, for each mapped LED
+		// and stores that in UiAudioMailbox
+		// UI uses that data to set LEDs here
+		// Todo: confirm thread-safety: m4 unlock -> update_led_states(), but will wait until audio.process() is done
+		// [right?]
+		// ... can audio.process() interrupt this?
+		//
+		leds.rotaryLED.set_background(Colors::green);
+		leds.rotaryLED.breathe(Colors::magenta, 0.5f);
 
 		leds.update_animation();
-		// Debug::Pin1::low();
 	}
 };
 } // namespace MetaModule

@@ -14,9 +14,11 @@ AudioStream::AudioStream(PatchList &patches,
 						 ICodec &codec,
 						 AnalogOutT &dac,
 						 ParamCache &param_cache,
+						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
 						 AudioStreamBlock (&buffers)[4])
 	: cache{param_cache}
+	, mbox{uiaudiomailbox}
 	, param_blocks{p}
 	, tx_buf_1{buffers[0]}
 	, tx_buf_2{buffers[1]}
@@ -62,6 +64,16 @@ AudioConf::SampleT AudioStream::get_output(int output_id)
 	// return compressor.compress(scaled_out);
 }
 
+void AudioStream::output_silence(AudioStreamBlock &out)
+{
+	for (auto &out_ : out) {
+		out_.l = 0;
+		out_.r = 0;
+		dac.queue_sample(0, 0x00800000);
+		dac.queue_sample(1, 0x00800000);
+	}
+}
+
 // Todo: integrate these:
 // params.gate_ins[]
 // params.clock_in
@@ -74,26 +86,14 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	load_measure.start_measurement();
 	cache.write_sync(param_block.params[0], param_block.metaparams);
 
-	// Todo: patch change detection happens in ui or pagemanager
-	// Which sends a message to audio via MetaParams (or just changes it with patch_player)
-	if (block_patch_change) {
-		block_patch_change--;
-	} else {
-		if (cache.load_new_patch) {
-			cache.load_new_patch = false;
-			player.unload_patch(patch_list.cur_patch());
-			patch_list.jump_to_patch(cache.new_patch_index);
-			load_patch();
+	if (mbox.load_new_patch) {
+		mbox.load_new_patch = false;
 
-			block_patch_change = 32;
-			for (auto &out_ : out) {
-				out_.l = 0;
-				out_.r = 0;
-				dac.queue_sample(0, 0x00800000);
-				dac.queue_sample(1, 0x00800000);
-			}
-			return;
-		}
+			player.unload_patch(patch_list.cur_patch());
+		patch_list.jump_to_patch(mbox.new_patch_index);
+		load_patch();
+		output_silence(out);
+		return;
 	}
 
 	auto in_ = in.begin();

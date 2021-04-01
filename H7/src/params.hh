@@ -166,17 +166,18 @@ struct ParamCache {
 		p.clear();
 		m.clear();
 	}
-
-	bool load_new_patch = false;
-	uint32_t new_patch_index;
 };
 
-// using ParamBlock = std::array<Params, StreamConf::Audio::BlockSize>;
 struct ParamBlock {
 	std::array<Params, StreamConf::Audio::BlockSize> params;
 	MetaParams metaparams;
 };
 
 using DoubleBufParamBlock = std::array<ParamBlock, 2>;
+
+struct UiAudioMailbox {
+	bool load_new_patch = false;
+	uint32_t new_patch_index;
+};
 
 } // namespace MetaModule

@@ -32,6 +32,7 @@ public:
 				ICodec &codec,
 				AnalogOutT &dac,
 				ParamCache &cache,
+				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
 				AudioStreamBlock (&buffers)[4]);
 	void start();
@@ -40,6 +41,7 @@ public:
 
 private:
 	ParamCache &cache;
+	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
 	AudioStreamBlock &tx_buf_1;
 	AudioStreamBlock &tx_buf_2;
@@ -61,6 +63,7 @@ private:
 	uint32_t block_patch_change;
 
 	AudioConf::SampleT get_output(int output_id);
+	void output_silence(AudioStreamBlock &out);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void load_patch();

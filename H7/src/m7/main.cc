@@ -49,15 +49,17 @@ void main()
 	PatchList patch_list;
 	PatchPlayer patch_player;
 	ParamCache param_cache;
+	UiAudioMailbox mbox;
 
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, leds, StaticBuffers::screen_framebuf};
+	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
 	AudioStream audio{patch_list,
 					  patch_player,
 					  _hw.codec,
 					  _hw.dac,
 					  param_cache,
+					  mbox,
 					  StaticBuffers::param_blocks,
 					  StaticBuffers::audio_dma_block};
 
