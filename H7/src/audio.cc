@@ -83,13 +83,14 @@ void AudioStream::output_silence(AudioStreamBlock &out)
 
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
 {
-	load_measure.start_measurement();
+	param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
 	cache.write_sync(param_block.params[0], param_block.metaparams);
+	load_measure.start_measurement();
 
 	if (mbox.load_new_patch) {
 		mbox.load_new_patch = false;
 
-			player.unload_patch(patch_list.cur_patch());
+		player.unload_patch(patch_list.cur_patch());
 		patch_list.jump_to_patch(mbox.new_patch_index);
 		load_patch();
 		output_silence(out);
@@ -139,7 +140,6 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	}
 
 	load_measure.end_measurement();
-	patch_list.audio_load = load_measure.get_last_measurement_load_percent();
 }
 
 void AudioStream::start()

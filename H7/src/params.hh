@@ -2,7 +2,6 @@
 #include "conf/control_conf.hh"
 #include "conf/stream_conf.hh"
 #include "debug.hh"
-#include "drivers/stm32xx.h"
 #include "util/debouncer.hh"
 #include <array>
 
@@ -78,6 +77,7 @@ struct MetaParams {
 	Toggler rotary_button;
 	RotaryMotion rotary;
 	RotaryMotion rotary_pushed;
+	uint8_t audio_load = 0;
 
 	MetaParams()
 	{
@@ -92,6 +92,7 @@ struct MetaParams {
 		rotary.abs_pos = 0;
 		rotary_pushed.motion = 0;
 		rotary_pushed.abs_pos = 0;
+		audio_load = 0;
 	}
 
 	// Copies some data, adds other data (rotary motion)
@@ -101,6 +102,7 @@ struct MetaParams {
 		rotary_button.copy_state(that.rotary_button);
 		rotary.add_motion(that.rotary);
 		rotary_pushed.add_motion(that.rotary_pushed);
+		audio_load = that.audio_load;
 	}
 	void copy(const MetaParams &that)
 	{
@@ -108,6 +110,7 @@ struct MetaParams {
 		rotary_button.copy_state(that.rotary_button);
 		rotary = that.rotary;
 		rotary_pushed = that.rotary_pushed;
+		audio_load = that.audio_load;
 	}
 	void transfer(MetaParams &that)
 	{
@@ -115,14 +118,19 @@ struct MetaParams {
 		rotary_button.copy_state(that.rotary_button);
 		rotary.transfer_motion(that.rotary);
 		rotary_pushed.transfer_motion(that.rotary_pushed);
+		audio_load = that.audio_load;
 	}
 };
 
 struct ParamCache {
 	Params p;
 	MetaParams m;
-	bool _new_data = true;
+	volatile bool _new_data = true;
 
+	ParamCache()
+	{
+		clear();
+	}
 	void write_sync(Params &p_, MetaParams &m_)
 	{
 		_new_data = false; // protects against multiple write_syncs without a read_sync, and then one write_sync

@@ -41,14 +41,11 @@ struct PatchList {
 
 	void jump_to_patch(uint32_t patch_index)
 	{
-		if (patch_index >= NumPatches)
-			_cur_patch_idx = NumPatches - 1;
-		else
-			_cur_patch_idx = patch_index;
-	}
+		while (patch_index >= NumPatches)
+			patch_index -= NumPatches;
 
-	// Todo: move this to UI, and have an interface for audio to set it in UI
-	uint8_t audio_load = 0;
+		_cur_patch_idx = patch_index;
+	}
 
 private:
 	uint32_t _cur_patch_idx = 0;

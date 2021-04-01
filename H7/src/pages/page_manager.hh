@@ -37,16 +37,16 @@ class PageManager {
 public:
 	Page cur_page;
 
-	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, ScreenFrameBuffer &s)
+	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, ScreenFrameBuffer &s)
 		: cur_page{Page::PatchOverview}
-		, balls_page{{pl, pp, p}, s}
-		, overview_page{{pl, pp, p}, s}
-		, jack_map_page{{pl, pp, p}, s}
-		, knob_map_page{{pl, pp, p}, s}
-		, patch_layout_page{{pl, pp, p}, s}
-		, modules_in_patch_page{{pl, pp, p}, s}
-		, patch_selector_page{{pl, pp, p}, s}
-		, debug_info_page{{pl, pp, p}, s}
+		, balls_page{{pl, pp, p, m}, s}
+		, overview_page{{pl, pp, p, m}, s}
+		, jack_map_page{{pl, pp, p, m}, s}
+		, knob_map_page{{pl, pp, p, m}, s}
+		, patch_layout_page{{pl, pp, p, m}, s}
+		, modules_in_patch_page{{pl, pp, p, m}, s}
+		, patch_selector_page{{pl, pp, p, m}, s}
+		, debug_info_page{{pl, pp, p, m}, s}
 	{}
 
 	void init();
