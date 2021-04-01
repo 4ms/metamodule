@@ -137,10 +137,16 @@ Controls::Controls(MuxedADC &potadc,
 	__HAL_DBGMCU_FREEZE_TIM6();
 
 	read_controls_task.init(control_read_tim_conf, [this]() {
+		Debug::Pin3::high();
 		if (_buffer_full)
 			return;
+		HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
+		HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 		update_debouncers();
 		update_params();
+		HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
+		HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
+		Debug::Pin3::low();
 	});
 	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 }
