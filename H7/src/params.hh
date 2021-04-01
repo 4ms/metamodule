@@ -122,10 +122,16 @@ struct MetaParams {
 	}
 };
 
+// ParamCache class
+// Stores a copy of Params and MetaParams and allows access from single core
+// where a higher-priority ISR does write_sync(), and a lower-priority ISR does read_sync_*()
+// The users of this class should each have their own copy of Params and MetaParams.
+//
+// Todo: use HSEM to allow for multiple cores and inverted ISR priorities
+// Todo: "cache" isn't the best name for this, think of something better...
 struct ParamCache {
 	Params p;
 	MetaParams m;
-	volatile bool _new_data = true;
 
 	ParamCache()
 	{
@@ -135,23 +141,17 @@ struct ParamCache {
 	{
 		_new_data = false; // protects against multiple write_syncs without a read_sync, and then one write_sync
 						   // interupting a read_sync in progress
-		Debug::Pin1::high();
 		p.copy(p_);
 		m.update_with(m_);
 		_new_data = true;
-		Debug::Pin1::low();
 	}
 	bool read_sync_params(Params *params)
 	{
 		if (!_new_data)
 			return false;
-
-		Debug::Pin2::high();
-
 		if (!_new_data)
 			return false;
 		params->copy(p);
-		Debug::Pin2::low();
 		_new_data = false;
 		return true;
 	}
@@ -159,21 +159,22 @@ struct ParamCache {
 	{
 		if (!_new_data)
 			return false;
-
-		Debug::Pin2::high();
-
 		if (!_new_data)
 			return false;
 		metaparams->transfer(m);
-		Debug::Pin2::low();
 		_new_data = false;
 		return true;
 	}
 	void clear()
 	{
+		_new_data = false;
 		p.clear();
 		m.clear();
+		_new_data = true;
 	}
+
+private:
+	volatile bool _new_data = true;
 };
 
 struct ParamBlock {
@@ -184,7 +185,8 @@ struct ParamBlock {
 using DoubleBufParamBlock = std::array<ParamBlock, 2>;
 
 struct UiAudioMailbox {
-	bool load_new_patch = false;
+	bool loading_new_patch = false;
+	bool audio_is_muted = false;
 	uint32_t new_patch_index;
 };
 

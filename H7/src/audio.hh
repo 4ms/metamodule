@@ -60,7 +60,7 @@ private:
 	PatchPlayer &player;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	CycleCounter load_measure;
-	uint32_t block_patch_change;
+	uint32_t _mute_ctr = 0;
 
 	AudioConf::SampleT get_output(int output_id);
 	void output_silence(AudioStreamBlock &out);

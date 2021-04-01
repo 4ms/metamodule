@@ -41,8 +41,8 @@ struct PatchList {
 
 	void jump_to_patch(uint32_t patch_index)
 	{
-		while (patch_index >= NumPatches)
-			patch_index -= NumPatches;
+		if (patch_index >= NumPatches)
+			patch_index = NumPatches - 1;
 
 		_cur_patch_idx = patch_index;
 	}

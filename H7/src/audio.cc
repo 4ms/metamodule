@@ -87,12 +87,13 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	cache.write_sync(param_block.params[0], param_block.metaparams);
 	load_measure.start_measurement();
 
-	if (mbox.load_new_patch) {
-		mbox.load_new_patch = false;
+	if (mbox.loading_new_patch) {
+		mbox.audio_is_muted = true;
+	} else {
+		mbox.audio_is_muted = false;
+	}
 
-		player.unload_patch(patch_list.cur_patch());
-		patch_list.jump_to_patch(mbox.new_patch_index);
-		load_patch();
+	if (mbox.audio_is_muted) {
 		output_silence(out);
 		return;
 	}
@@ -144,8 +145,9 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 void AudioStream::start()
 {
+	// todo: move this to ui
 	load_patch();
-	block_patch_change = 0;
+
 	codec_.start();
 	dac_updater.start();
 }

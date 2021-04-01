@@ -41,8 +41,7 @@ void Controls::update_params()
 	if (_first_param) {
 		_first_param = false;
 
-		// Interpolate knob readings across the param block, since we capture them at a slower rate than the audio block
-		// runs
+		// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
 		for (int i = 0; i < NumPot; i++) {
 			_knobs[i].set_new_value(get_pot_reading(i) / 4095.0f);
 			cur_params->knobs[i] = _knobs[i].next();
@@ -77,11 +76,13 @@ void Controls::update_params()
 			cur_metaparams->rotary_pushed.motion = 0;
 		}
 
+		// int new_rotary_motion = rotary.read();
 		// bool pressed = rotary_button.is_pressed();
-		// cur_metaparams->rotary.motion = pressed ? 0 : tmp_rotary_motion;
-		// cur_metaparams->rotary_pushed.motion = pressed ? tmp_rotary_motion : 0;
+		// cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
+		// cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
 		// if (pressed && tmp_rotary_motion)
 		// 	_rotary_moved_while_pressed = true;
+
 	} else {
 		// Interpolate the knobs
 		for (int i = 0; i < NumPot; i++)
@@ -137,7 +138,6 @@ Controls::Controls(MuxedADC &potadc,
 	__HAL_DBGMCU_FREEZE_TIM6();
 
 	read_controls_task.init(control_read_tim_conf, [this]() {
-		Debug::Pin3::high();
 		if (_buffer_full)
 			return;
 		HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
@@ -146,7 +146,6 @@ Controls::Controls(MuxedADC &potadc,
 		update_params();
 		HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 		HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
-		Debug::Pin3::low();
 	});
 	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 }

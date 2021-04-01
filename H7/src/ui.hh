@@ -34,7 +34,8 @@ private:
 	UiAudioMailbox &mbox;
 
 	// Todo remove once we have pages editing the cur_patch
-	PatchList &patchlist;
+	PatchPlayer &player;
+	PatchList &patch_list;
 	uint32_t last_changed_page_tm = 0;
 
 public:
@@ -52,7 +53,8 @@ public:
 		, param_cache{pc}
 		, mbox{uiaudiomailbox}
 		, pages{pl, pp, params, metaparams, screen}
-		, patchlist{pl}
+		, patch_list{pl}
+		, player{pp}
 	{}
 
 	void start()
@@ -90,15 +92,16 @@ public:
 				.priority2 = 3,
 
 			},
-			[&]() { refresh_screen(); });
+			[&]() { update_ui(); });
 		screen_draw_task.start();
 	}
 
-	void refresh_screen()
+	void update_ui()
 	{
 		param_cache.read_sync_metaparams(&metaparams);
 		param_cache.read_sync_params(&params);
-		update();
+		handle_rotary();
+
 		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
 			return;
 		}
@@ -108,7 +111,7 @@ public:
 		HWSemaphore<ScreenFrameBufLock>::unlock();
 	}
 
-	void update()
+	void handle_rotary()
 	{
 		auto rotary = metaparams.rotary.use_motion();
 		if (rotary < 0) {
@@ -122,14 +125,36 @@ public:
 		auto rotary_pushed = metaparams.rotary_pushed.use_motion();
 		if (rotary_pushed) {
 			auto now_tm = HAL_GetTick();
-			if (now_tm - last_changed_page_tm > 100) {
+			if ((now_tm - last_changed_page_tm) > 100) {
+				// Debug::Pin3::high();
 				last_changed_page_tm = now_tm;
-				if (rotary_pushed < 0)
-					mbox.new_patch_index = patchlist.cur_patch_index() - 1;
-				if (rotary_pushed > 0)
-					mbox.new_patch_index = patchlist.cur_patch_index() + 1;
-				mbox.load_new_patch = true;
+				if (rotary_pushed < 0) {
+					uint32_t cur_patch_index = patch_list.cur_patch_index();
+					mbox.new_patch_index = (cur_patch_index == 0) ? (patch_list.NumPatches - 1) : cur_patch_index - 1;
+				}
+				if (rotary_pushed > 0) {
+					uint32_t cur_patch_index = patch_list.cur_patch_index();
+					mbox.new_patch_index = cur_patch_index == (patch_list.NumPatches - 1) ? 0 : cur_patch_index + 1;
+				}
+				mbox.loading_new_patch = true;
+				// Debug::Pin3::low();
 			}
+		}
+
+		if (mbox.loading_new_patch && mbox.audio_is_muted) {
+			player.unload_patch(patch_list.cur_patch());
+			patch_list.jump_to_patch(mbox.new_patch_index);
+			Debug::Pin1::high();
+			bool ok = player.load_patch(patch_list.cur_patch());
+			if (!ok) {
+				// Todo: handle error: display on screen, and try another patch?
+				// metaparams.error = Errors::CannotLoadPatch;
+				// metaparams.error_data = patch_list.cur_patch();
+				while (1)
+					;
+			}
+			mbox.loading_new_patch = false;
+			Debug::Pin1::low();
 		}
 	}
 
