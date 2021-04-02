@@ -61,7 +61,7 @@ public:
 			h = _height - y;
 
 		// Todo: Measure and set this for optimal performance
-		constexpr uint32_t MaxSizeForDirectWrite = 1000;
+		constexpr int MaxSizeForDirectWrite = 1000;
 		if ((w * h) > MaxSizeForDirectWrite)
 			fastFillRect(x, y, w, h, color);
 		else {
@@ -75,7 +75,7 @@ public:
 
 	void fastFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
-		auto starting_addr = reinterpret_cast<uint32_t>(&framebuf[x + y * _width]);
+		size_t starting_addr = reinterpret_cast<size_t>(&framebuf[x + y * _width]);
 		dma2d.fillrect_rgb565(starting_addr, w, h, _width, color);
 	}
 
@@ -186,7 +186,6 @@ public:
 			y = 0;
 		}
 		int16_t max_y = (h + y) > _height ? _height : y + h;
-		uint8_t int_alpha = alpha * 255.f;
 
 		for (int yi = y; yi < max_y; yi++)
 			draw_blended_pix(x, yi, color, alpha);
