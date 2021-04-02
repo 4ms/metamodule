@@ -149,7 +149,7 @@ constexpr float setPitchMultiple(float val)
 static inline float freqToNorm(float input) // normalized filter frequency conversion
 {
   float output = 0;
-  output = (logf(input)-logf(20))/(3*logf(10));
+  output = (logf(input)-2.99573f)/(6.90776f);
   return output;
 }
 
