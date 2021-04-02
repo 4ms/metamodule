@@ -146,4 +146,11 @@ constexpr float setPitchMultiple(float val)
 	return pitchMultiple;
 }
 
+static inline float freqToNorm(float input) // normalized filter frequency conversion
+{
+  float output = 0;
+  output = (logf(input)-logf(20))/(3*logf(10));
+  return output;
+}
+
 } // namespace MathTools
