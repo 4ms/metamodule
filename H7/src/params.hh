@@ -1,7 +1,6 @@
 #pragma once
-#include "conf/control_conf.hh"
+#include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
-#include "debug.hh"
 #include "util/debouncer.hh"
 #include <array>
 
@@ -47,26 +46,26 @@ struct Params {
 
 	void clear()
 	{
-		for (int i = 0; i < NumCVIn; i++)
+		for (unsigned i = 0; i < NumCVIn; i++)
 			cvjacks[i] = 0.f;
-		for (int i = 0; i < NumGateIn; i++)
+		for (unsigned i = 0; i < NumGateIn; i++)
 			gate_ins[i].reset();
-		for (int i = 0; i < NumRgbButton; i++)
+		for (unsigned i = 0; i < NumRgbButton; i++)
 			buttons[i].reset();
-		for (int i = 0; i < NumPot; i++)
+		for (unsigned i = 0; i < NumPot; i++)
 			knobs[i] = 0.f;
 		jack_senses = 0;
 	}
 
 	void copy(const Params &that)
 	{
-		for (int i = 0; i < NumCVIn; i++)
+		for (unsigned i = 0; i < NumCVIn; i++)
 			cvjacks[i] = that.cvjacks[i];
-		for (int i = 0; i < NumGateIn; i++)
+		for (unsigned i = 0; i < NumGateIn; i++)
 			gate_ins[i].copy_state(that.gate_ins[i]);
-		for (int i = 0; i < NumRgbButton; i++)
+		for (unsigned i = 0; i < NumRgbButton; i++)
 			buttons[i].copy_state(that.buttons[i]);
-		for (int i = 0; i < NumPot; i++)
+		for (unsigned i = 0; i < NumPot; i++)
 			knobs[i] = that.knobs[i];
 		jack_senses = that.jack_senses;
 	}

@@ -1,5 +1,4 @@
 #pragma once
-#include "pages/fonts.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"

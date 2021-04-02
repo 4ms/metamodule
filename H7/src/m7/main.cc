@@ -1,6 +1,4 @@
 #include "conf/codec_sai_conf.hh"
-#include "conf/control_conf.hh"
-#include "conf/dac_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/i2c_conf.hh"
 #include "conf/qspi_flash_conf.hh"

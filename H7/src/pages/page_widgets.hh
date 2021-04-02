@@ -1,5 +1,6 @@
 #pragma once
 #include "pages/base.hh"
+#include "pages/fonts.hh"
 #include "sys/mem_usage.hh"
 
 namespace MetaModule

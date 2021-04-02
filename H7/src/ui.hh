@@ -1,6 +1,7 @@
 #pragma once
 #include "audio.hh"
 #include "conf/hsem_conf.hh"
+#include "conf/screen_buffer_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/i2c.hh"
@@ -47,7 +48,7 @@ public:
 	   ParamCache &pc,
 	   UiAudioMailbox &uiaudiomailbox,
 	   LedFrame<AnimationUpdateRate> &l,
-	   MMScreenConf::FrameBufferT &screenbuf)
+	   MMScreenBufferConf::FrameBufferT &screenbuf)
 		: leds{l}
 		, screen{screenbuf}
 		, param_cache{pc}

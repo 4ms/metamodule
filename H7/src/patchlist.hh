@@ -2,7 +2,7 @@
 #include "patch/patch.hh"
 
 struct PatchList {
-	static const uint32_t NumPatches = 7;
+	static const uint32_t NumPatches = 10;
 
 	PatchList();
 

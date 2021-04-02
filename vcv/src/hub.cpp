@@ -11,12 +11,11 @@
 #include <functional>
 #include <iostream>
 
-// Todo: rename this to Hub (or something?)
 struct MetaModuleHub : public CommModule {
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
-	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, NUM_INPUTS };
-	enum OutputIds { AUDIO_OUT_L, AUDIO_OUT_R, NUM_OUTPUTS };
+	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
+	enum OutputIds { AUDIO_OUT_L, AUDIO_OUT_R, AUDIO_OUT_3, AUDIO_OUT_4, CLOCK_OUT, NUM_OUTPUTS };
 	enum LightIds { NUM_LIGHTS };
 
 	std::string labelText = "";
@@ -250,18 +249,20 @@ struct MetaModuleHubWidget : CommModuleWidget {
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
 
-		addParam(createParamCentered<BefacoPush>(mm2px(Vec(23.292, 70.977)), module, MetaModuleHub::GET_INFO));
+		addParam(createParamCentered<BefacoPush>(mm2px(Vec(10, 50)), module, MetaModuleHub::GET_INFO));
 
-		valueLabel = createWidget<Label>(mm2px(Vec(0, 50)));
+		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
 		valueLabel->color = rack::color::BLACK;
 		valueLabel->text = "";
 		valueLabel->fontSize = 10;
 		addChild(valueLabel);
 
-		patchName = createWidget<LedDisplayTextField>(mm2px(Vec(28, 65.977)));
+		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(20, 45)));
 		patchName->text = "Enter Patch Name";
-		patchName->color = rack::color::BLACK;
+		patchName->color = rack::color::WHITE;
+		patchName->box.size = {mm2px(Vec(40, 10))};
 		addChild(patchName);
+		patchName->selectAll(); // Doesn't work :(
 
 		addLabeledKnob("A", 0, {0, 0});
 		addLabeledKnob("B", 1, {1, 0});
@@ -272,15 +273,28 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		addLabeledKnob("c", 6, {2, 1});
 		addLabeledKnob("d", 7, {3, 1});
 
-		addLabeledInput("IN L", 0, {0, 1});
-		addLabeledInput("IN R", 1, {1, 1});
-		addLabeledInput("CV IN 1", 2, {0, 0});
-		addLabeledInput("CV IN 2", 3, {1, 0});
-		addLabeledInput("CV IN 3", 4, {2, 0});
-		addLabeledInput("CV IN 4", 5, {3, 0});
+		addLabeledInput("CV IN 1", MetaModuleHub::CV_1, {0, 3});
+		addLabeledInput("CV IN 2", MetaModuleHub::CV_2, {1, 3});
+		addLabeledInput("CV IN 3", MetaModuleHub::CV_3, {2, 3});
+		addLabeledInput("CV IN 4", MetaModuleHub::CV_4, {3, 3});
 
-		addLabeledOutput("OUT L", 0, {2, 1});
-		addLabeledOutput("OUT R", 1, {3, 1});
+		addLabeledInput("Gate In 1", MetaModuleHub::GATE_IN_1, {0, 2});
+		addLabeledInput("Gate In 2", MetaModuleHub::GATE_IN_2, {1, 2});
+		addLabeledInput("Clock In", MetaModuleHub::CLOCK_IN, {2, 2});
+
+		addLabeledInput("Audio IN L", MetaModuleHub::AUDIO_IN_L, {0, 0});
+		addLabeledInput("Audio IN R", MetaModuleHub::AUDIO_IN_R, {1, 0});
+
+		addLabeledOutput("Audio OUT L", MetaModuleHub::AUDIO_OUT_L, {2, 0});
+		addLabeledOutput("Audio OUT R", MetaModuleHub::AUDIO_OUT_R, {3, 0});
+
+		addLabeledOutput("CV Out 1", MetaModuleHub::AUDIO_OUT_3, {1, 1});
+		addLabeledOutput("CV Out 2", MetaModuleHub::AUDIO_OUT_4, {2, 1});
+
+		addLabeledOutput("Clock Out", MetaModuleHub::CLOCK_OUT, {3, 2});
+
+		// Todo:
+		// addLabeledToggle() for both RGB Buttons
 	}
 
 	virtual LabeledButton *createLabel() override

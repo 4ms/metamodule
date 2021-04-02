@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 
-// Todo put this in a _config.h file
 struct StreamConf {
 	struct Audio {
 		static constexpr int BlockSize = 64;

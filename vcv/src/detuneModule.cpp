@@ -33,16 +33,16 @@ struct DetuneWidget : CommModuleWidget {
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hpTemplate.svg")));
 
-		addLabeledKnob("WOW S", DetuneModule::WOW_SPEED_PARAM, {0, 0});
-		addLabeledKnob("WOW D", DetuneModule::WOW_DEPTH_PARAM, {0, 1});
-		addLabeledKnob("F S", DetuneModule::FLUTTER_SPEED_PARAM, {0, 2});
-		addLabeledKnob("F D", DetuneModule::FLUTTER_DEPTH_PARAM, {0, 3});
+		addLabeledKnob("Wow Speed", DetuneModule::WOW_SPEED_PARAM, {0, 0});
+		addLabeledKnob("Wow Depth", DetuneModule::WOW_DEPTH_PARAM, {0, 1});
+		addLabeledKnob("Flut Speed", DetuneModule::FLUTTER_SPEED_PARAM, {0, 2});
+		addLabeledKnob("Flut Depth", DetuneModule::FLUTTER_DEPTH_PARAM, {0, 3});
 
-		addLabeledInput("DETUNE", DetuneModule::DETUNE_CV, {0, 2});
-		addLabeledInput("IN", DetuneModule::SIGNAL_INPUT, {0, 1});
-		addLabeledOutput("OUT", DetuneModule::SIGNAL_OUTPUT, {0, 0});
+		addLabeledInput("Detune", DetuneModule::DETUNE_CV, {0, 2});
+		addLabeledInput("In", DetuneModule::SIGNAL_INPUT, {0, 1});
+		addLabeledOutput("Out", DetuneModule::SIGNAL_OUTPUT, {0, 0});
 
-		addModuleTitle("DTUNE");
+		addModuleTitle("DETUNE");
 	}
 };
 

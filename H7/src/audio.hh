@@ -55,23 +55,29 @@ private:
 	// Should we class this out? It's only connected to Audio at init and process()
 
 	AnalogOutT &dac;
+	GPIOStream<FPin<GPIO::D, 13, PinMode::Output>, CircularBuffer<uint8_t, AudioConf::BlockSize>> clock_out;
 	PinChangeInterrupt dac_updater;
+
 	PatchList &patch_list;
 	PatchPlayer &player;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	CycleCounter load_measure;
 	uint32_t _mute_ctr = 0;
 
-	AudioConf::SampleT get_output(int output_id);
+	AudioConf::SampleT get_audio_output(int output_id);
+	uint32_t get_dac_output(int output_id);
 	void output_silence(AudioStreamBlock &out);
+	void passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
 
-	static constexpr unsigned NumKnobs = PatchPlayer::get_num_panel_knobs();
-	static constexpr unsigned NumAudioInputs = 2;
-	static constexpr unsigned NumCVInputs = PatchPlayer::get_num_panel_inputs() - NumAudioInputs;
-	static constexpr unsigned NumAudioOutputs = 2;
-	static constexpr unsigned NumCVOutputs = PatchPlayer::get_num_panel_outputs() - NumAudioOutputs;
+	static constexpr unsigned NumKnobs = PanelDef::NumPot;
+	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;
+	static constexpr unsigned NumCVInputs = PanelDef::NumCVIn;
+	static constexpr unsigned NumGateInputs = PanelDef::NumGateIn;
+	static constexpr unsigned NumGateOutputs = PanelDef::NumGateOut;
+	static constexpr unsigned NumAudioOutputs = PanelDef::NumAudioOut;
+	static constexpr unsigned NumCVOutputs = PanelDef::NumDACOut;
 };
 } // namespace MetaModule

@@ -1,32 +1,22 @@
 #pragma once
 #include "Adafruit_GFX_Library/Adafruit_GFX.h"
-#include "conf/screen_conf.hh"
-#include "drivers/colors.hh"
-#include "drivers/rcc.hh"
+#include "conf/screen_buffer_conf.hh"
+#include "drivers/dma2d_transfer.hh"
+#include "util/colors.hh"
 
-using ScreenConfT = MMScreenConf;
+using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
 class ScreenFrameBuffer : public Adafruit_GFX {
 
+	target::DMA2DTransfer dma2d;
 	ScreenConfT::FrameBufferT &framebuf;
-	static volatile inline bool is_dma2d_done;
 
 public:
 	ScreenFrameBuffer(ScreenConfT::FrameBufferT &framebuf_)
 		: Adafruit_GFX{ScreenConfT::width, ScreenConfT::height}
 		, framebuf{framebuf_}
 	{
-		target::RCC_Control::DMA2D_::set();
-
-		NVIC_DisableIRQ(DMA2D_IRQn);
-		InterruptManager::registerISR(DMA2D_IRQn, [&]() {
-			DMA2D->IFCR = DMA2D->IFCR | DMA2D_IFCR_CTCIF;
-			is_dma2d_done = true;
-			NVIC_DisableIRQ(DMA2D_IRQn);
-		});
-		auto pri = System::encode_nvic_priority(0, 0);
-		NVIC_SetPriority(DMA2D_IRQn, pri);
-		is_dma2d_done = true;
+		dma2d.init();
 	}
 
 	void init()
@@ -85,24 +75,8 @@ public:
 
 	void fastFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
-		DMA2D->NLR = h | (w << DMA2D_NLR_PL_Pos);
-		DMA2D->OOR = _width - w;
-		DMA2D->OMAR = reinterpret_cast<uint32_t>(&framebuf[x + y * _width]);
-		DMA2D->OCOLR = color;
-		DMA2D->OPFCCR = (0 << DMA2D_OPFCCR_RBS_Pos) | (0 << DMA2D_OPFCCR_AI_Pos) | (0 << DMA2D_OPFCCR_SB_Pos) |
-						(0b010 << DMA2D_OPFCCR_CM_Pos);
-
-		DMA2D->AMTCR = 0;
-		DMA2D->IFCR = DMA2D_IFCR_CTCIF;
-		DMA2D->CR = (0b011 << DMA2D_CR_MODE_Pos) | DMA2D_CR_TCIE; // clear everything else
-
-		is_dma2d_done = false;
-		NVIC_EnableIRQ(DMA2D_IRQn);
-		DMA2D->CR |= DMA2D_CR_START;
-
-		while (!is_dma2d_done) {
-		}
-		NVIC_DisableIRQ(DMA2D_IRQn);
+		auto starting_addr = reinterpret_cast<uint32_t>(&framebuf[x + y * _width]);
+		dma2d.fillrect_rgb565(starting_addr, w, h, _width, color);
 	}
 
 	void blendRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, float f_alpha)
@@ -414,13 +388,7 @@ public:
 		return 1;
 	}
 
-	void flush_cache()
-	{
-#if defined(CORE_CM7)
-		// Don't need to do this now, since we disabled cache for the entire screen buffer
-		// SCB_CleanDCache_by_Addr((uint32_t *)(&framebuf[0]), sizeof(ScreenConfT::FrameBufferT));
-#endif
-	}
+	void flush_cache() {}
 
 	virtual void startWrite() override {}
 	virtual void endWrite() override {}

@@ -9,6 +9,8 @@ namespace MetaModule
 {
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 
+// Clock in -> clock out latency: 1.33ms (one audio DMA half-transfer)
+// Gate In -> audio OUt latency: 1.90ms
 AudioStream::AudioStream(PatchList &patches,
 						 PatchPlayer &patchplayer,
 						 ICodec &codec,
@@ -51,12 +53,17 @@ AudioStream::AudioStream(PatchList &patches,
 		});
 
 	dac.init();
-	dac_updater.init(DAC_update_conf, [&]() { dac.output_next(); });
-
+	dac_updater.init(DAC_update_conf, [&]() {
+		static bool rising_edge = false;
+		dac.output_next();
+		rising_edge = !rising_edge;
+		if (rising_edge)
+			clock_out.output_next();
+	});
 	load_measure.init();
 }
 
-AudioConf::SampleT AudioStream::get_output(int output_id)
+AudioConf::SampleT AudioStream::get_audio_output(int output_id)
 {
 	auto raw_out = player.get_panel_output(output_id);
 	auto scaled_out = AudioFrame::scaleOutput(raw_out);
@@ -64,20 +71,15 @@ AudioConf::SampleT AudioStream::get_output(int output_id)
 	// return compressor.compress(scaled_out);
 }
 
-void AudioStream::output_silence(AudioStreamBlock &out)
+uint32_t AudioStream::get_dac_output(int output_id)
 {
-	for (auto &out_ : out) {
-		out_.l = 0;
-		out_.r = 0;
-		dac.queue_sample(0, 0x00800000);
-		dac.queue_sample(1, 0x00800000);
-	}
+	auto raw_out = player.get_panel_output(output_id);
+	raw_out *= -1.f;
+	auto scaled_out = AudioFrame::scaleOutput(raw_out);
+	scaled_out += 0x00800000;
+	return scaled_out;
 }
-
 // Todo: integrate these:
-// params.gate_ins[]
-// params.clock_in
-// params.patch_cv
 // params.buttons[]
 // params.jack_senses[]
 
@@ -96,25 +98,29 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		return;
 	}
 
+	if constexpr (DEBUG_PASSTHRU_AUDIO) {
+		passthrough_audio(in, out);
+		return;
+	}
+
 	auto in_ = in.begin();
 	auto params_ = param_block.params.begin();
 	for (auto &out_ : out) {
-		if constexpr (DEBUG_PASSTHRU_AUDIO) {
-			out_.l = in_->l;
-			out_.r = in_->r;
-			dac.queue_sample(0, out_.r + 0x00800000);
-			dac.queue_sample(1, out_.l + 0x00800000);
-			in_++;
-			continue;
-		}
 		int i;
 
-		player.set_panel_input(0, AudioFrame::scaleInput(in_->l));
-		player.set_panel_input(1, AudioFrame::scaleInput(in_->r));
+		player.set_panel_input(0, AudioFrame::scaleInput(-1.f * in_->l)); // inputs are inverted in hardware PCB p3
+		player.set_panel_input(1, AudioFrame::scaleInput(-1.f * in_->r));
 
 		i = 0;
 		for (auto &cv : params_->cvjacks) {
+			// Todo: player.set_cv_input(i, cv);
 			player.set_panel_input(i + NumAudioInputs, cv);
+			i++;
+		}
+		i = 0;
+		for (auto &gatein : params_->gate_ins) {
+			// Todo: player.set_gate_input(i, cv);
+			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
 			i++;
 		}
 		i = 0;
@@ -127,12 +133,12 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 		// FixMe: Why are the L/R samples swapped in the DMA buffer? The L/R jacks are not swapped on hardware
 		// Todo: scope the data stream vs. LR clk
-		out_.l = get_output(1);
-		out_.r = get_output(0);
+		out_.l = get_audio_output(1);
+		out_.r = get_audio_output(0);
 
-		// Todo: use player.get_output(2) and (3)
-		dac.queue_sample(0, out_.l + 0x00800000);
-		dac.queue_sample(1, out_.r + 0x00800000);
+		dac.queue_sample(0, get_dac_output(2));
+		dac.queue_sample(1, get_dac_output(3));
+		clock_out.queue_sample(player.get_panel_output(4) > 0.5f ? true : false);
 
 		in_++;
 		params_++;
@@ -145,6 +151,28 @@ void AudioStream::start()
 {
 	codec_.start();
 	dac_updater.start();
+}
+
+void AudioStream::output_silence(AudioStreamBlock &out)
+{
+	for (auto &out_ : out) {
+		out_.l = 0;
+		out_.r = 0;
+		dac.queue_sample(0, 0x00800000);
+		dac.queue_sample(1, 0x00800000);
+	}
+}
+
+void AudioStream::passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out)
+{
+	auto in_ = in.begin();
+	for (auto &out_ : out) {
+		out_.l = -(in_->r); // inverted and channels swapped
+		out_.r = -(in_->l);
+		dac.queue_sample(0, in_->l + 0x00800000);
+		dac.queue_sample(1, in_->r + 0x00800000);
+		in_++;
+	}
 }
 
 // TODO: not used, remove?

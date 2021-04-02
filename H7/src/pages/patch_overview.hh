@@ -1,5 +1,6 @@
 #pragma once
 #include "pages/base.hh"
+#include "pages/fonts.hh"
 #include "pages/page_widgets.hh"
 
 namespace MetaModule

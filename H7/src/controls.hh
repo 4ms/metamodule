@@ -33,8 +33,6 @@ struct Controls {
 	DebouncedPin<GPIO::G, 6, PinPolarity::Normal> gate_in1;
 	DebouncedPin<GPIO::G, 7, PinPolarity::Normal> gate_in2;
 
-	FPin<GPIO::D, 13, PinMode::Output> clock_out;
-
 	void update_debouncers();
 	void start();
 	void update_params();
