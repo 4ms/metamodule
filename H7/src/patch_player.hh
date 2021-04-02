@@ -15,8 +15,8 @@ public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
 	// cached data:
-	Jack out_conns[Panel::NumInJacks] = {{0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
-	Jack in_conns[Panel::NumOutJacks] = {{0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
+	Jack out_conns[Panel::NumInJacks] = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
+	Jack in_conns[Panel::NumOutJacks] = {{0, 0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
 
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
@@ -240,12 +240,12 @@ public:
 	void calc_multiple_module_indicies(const Patch &p)
 	{
 		// Todo: this is a naive implementation, perhaps can be made more efficient
-		for (unsigned i = 0; i < p.num_modules; i++) {
+		for (int i = 0; i < p.num_modules; i++) {
 			auto &this_slug = p.modules_used[i];
 
 			unsigned found = 1;
 			unsigned this_index = 0;
-			for (unsigned j = 0; j < p.num_modules; j++) {
+			for (int j = 0; j < p.num_modules; j++) {
 				if (i == j) {
 					this_index = found;
 					continue;
