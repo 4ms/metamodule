@@ -1,5 +1,5 @@
 #pragma once
-#include "conf/control_conf.hh"
+#include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
 #include "debug.hh"
 #include "util/debouncer.hh"

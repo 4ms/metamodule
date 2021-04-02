@@ -1,4 +1,3 @@
-#include "conf/control_conf.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/i2c_conf.hh"
