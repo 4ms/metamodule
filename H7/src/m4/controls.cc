@@ -33,9 +33,9 @@ void Controls::update_params()
 
 	cur_params->buttons[0].copy_state(button0);
 	cur_params->buttons[1].copy_state(button1);
-	cur_params->gate_ins[0].copy_state(clock_in);
-	cur_params->gate_ins[1].copy_state(gate_in1);
-	cur_params->gate_ins[2].copy_state(gate_in2);
+	cur_params->gate_ins[0].copy_state(gate_in1);
+	cur_params->gate_ins[1].copy_state(gate_in2);
+	cur_params->gate_ins[2].copy_state(clock_in);
 	cur_params->jack_senses = get_jacksense_reading();
 
 	if (_first_param) {
