@@ -9,19 +9,19 @@
 #include "example_pitchShift_simple.hh"
 #include "example_stereo_verb.h"
 #include "fadedelay_two.hh"
+#include "gateintest.hh"
 
 PatchList::PatchList()
-	: _patches{
-		  {exampleDualLFO},
-		  {examplePitchShiftSimple},
-		  {exampleDrum},
-		  {fadedelay_example},
-		  {example_drum_verb_mono},
-		  {example_stereo_verb},
-		  {QuadDrum},
-		  {KP_FM_DRUM_DET},
-		  {KarplusStereo},
-	  }
+	: _patches{{exampleDualLFO},
+			   {examplePitchShiftSimple},
+			   {exampleDrum},
+			   {fadedelay_example},
+			   {example_drum_verb_mono},
+			   {example_stereo_verb},
+			   {QuadDrum},
+			   {KP_FM_DRUM_DET},
+			   {KarplusStereo},
+			   {gateintest}}
 {
 	_cur_patch_idx = 0;
 }
