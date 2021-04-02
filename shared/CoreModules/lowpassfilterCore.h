@@ -29,14 +29,15 @@ class LowpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		auto filterFreq = setPitchMultiple(constrain(baseFrequency + cvInput * cvAmount, -1.0f, 1.0f)) * 262.0f ;
 		if (mode == 0) // basic resonant LPF
 		{
-			lpf.cutoff.setValue(setPitchMultiple(constrain(baseFrequency + cvInput * cvAmount, -1.0f, 1.0f)) * 262.0f);
+			lpf.cutoff.setValue(filterFreq);
 			lpf.q.setValue(filterQ);
 			signalOut = lpf.update(signalIn);
 		} else if (mode == 1) // Moog LPF
 		{
-			moog.cutoff.setValue(constrain(baseFrequency + cvInput * cvAmount, 0.0f, 1.0f));
+			moog.cutoff.setValue(freqToNorm(filterFreq));
 			moog.q.setValue(filterQ);
 			signalOut = moog.update(signalIn);
 		}

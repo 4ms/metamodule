@@ -27,12 +27,13 @@ class HighpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		float filterFreq = setPitchMultiple(constrain(cutoffOffset + cutoffCV, -1.0f, 1.0f)) * 523.25f;
 		if (mode == 0) {
-			hpf.cutoff.setValue(setPitchMultiple(constrain(cutoffOffset + cutoffCV, -1.0f, 1.0f)) * 262.0f);
+			hpf.cutoff.setValue(filterFreq);
 			signalOutput = hpf.update(signalInput);
 		} else if (mode == 1) {
 			{
-				korg.cutoff.setValue(constrain(cutoffOffset + cutoffCV, 0.0f, 1.0f));
+				korg.cutoff.setValue(freqToNorm(filterFreq));
 				signalOutput = korg.update(signalInput);
 			}
 		}

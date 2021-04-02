@@ -27,13 +27,14 @@ class BandpassfilterCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		float filterFreq = 523.25f * setPitchMultiple(constrain(cutoffCV + cutoffOffset, -1.0f, 1.0f));
 		if (mode == 0) {
 			bpf.q = map_value(filterQ, 0.0f, 1.0f, 1.0f, 20.0f);
-			bpf.cutoff.setValue(262.0f * setPitchMultiple(constrain(cutoffCV + cutoffOffset, -1.0f, 1.0f)));
+			bpf.cutoff.setValue(filterFreq);
 			signalOutput = bpf.update(signalInput);
 		} else if (mode == 1) {
 			ober.q = map_value(filterQ, 0.0f, 1.0f, 1.0f, 20.0f);
-			ober.cutoff.setValue(constrain(cutoffCV + cutoffOffset, 0.0f, 1.0f));
+			ober.cutoff.setValue(freqToNorm(filterFreq));
 			signalOutput = ober.update(signalInput);
 		}
 	}
