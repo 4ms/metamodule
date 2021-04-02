@@ -1,10 +1,10 @@
 #pragma once
 #include "Adafruit_GFX_Library/Adafruit_GFX.h"
-#include "conf/screen_conf.hh"
+#include "conf/screen_buffer_conf.hh"
 #include "drivers/colors.hh"
 #include "drivers/dma2d_transfer.hh"
 
-using ScreenConfT = MMScreenConf;
+using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
 class ScreenFrameBuffer : public Adafruit_GFX {
 

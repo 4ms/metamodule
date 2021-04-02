@@ -1,9 +1,9 @@
 #pragma once
 #include "audio.hh"
+#include "conf/screen_conf.hh"
 #include "drivers/mpu.hh"
 #include "leds.hh"
 #include "params.hh"
-#include "screen_buffer.hh"
 
 // Defined in linker:
 extern char _dma_buffer_start;

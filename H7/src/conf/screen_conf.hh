@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/screen_buffer_conf.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/spi_screen_config_struct.hh"
 #include "drivers/spi_screen_driver.hh"
@@ -42,14 +43,16 @@ struct MMScreenConf : DefaultSpiScreenConf {
 
 	using DCPin = FPin<GPIO::A, 6, PinMode::Output>;
 
-	static constexpr uint32_t width = 240;
-	static constexpr uint32_t height = 240;
 	static constexpr uint32_t rowstart = 80;
 	static constexpr uint32_t colstart = 0;
-	enum Rotation { None, CW90, Flip180, CCW90 };
-	static constexpr Rotation rotation = CW90;
 
-	using FrameBufferT = std::array<uint16_t, width * height>;
+	static constexpr uint32_t width = MMScreenBufferConf::width;
+	static constexpr uint32_t height = MMScreenBufferConf::height;
+	enum Rotation { None, CW90, Flip180, CCW90 };
+	static constexpr Rotation rotation = CW90; // Todo: set this from ScreenBufferConfT
+
+	using FrameBufferT = MMScreenBufferConf::FrameBufferT;
+
 	using HalfFrameBufferT = std::array<uint16_t, width * height / 2>;
 	static constexpr uint32_t FrameBytes = sizeof(FrameBufferT);
 	static constexpr uint32_t HalfFrameBytes = sizeof(HalfFrameBufferT);
