@@ -121,7 +121,7 @@ void Controls::start()
 
 	read_controls_task.start();
 	read_cvadc_task.start();
-	clock_out.low();
+	// clock_out.low();
 }
 
 Controls::Controls(MuxedADC &potadc,

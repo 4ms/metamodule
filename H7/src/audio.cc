@@ -51,7 +51,10 @@ AudioStream::AudioStream(PatchList &patches,
 		});
 
 	dac.init();
-	dac_updater.init(DAC_update_conf, [&]() { dac.output_next(); });
+	dac_updater.init(DAC_update_conf, [&]() {
+		dac.output_next();
+		clock_out.output_next();
+	});
 	load_measure.init();
 }
 
@@ -74,9 +77,7 @@ void AudioStream::output_silence(AudioStreamBlock &out)
 }
 
 // Todo: integrate these:
-// params.gate_ins[]
-// params.clock_in
-// params.patch_cv
+// √ params.gate_ins[]
 // params.buttons[]
 // params.jack_senses[]
 
@@ -113,7 +114,14 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 		i = 0;
 		for (auto &cv : params_->cvjacks) {
+			// Todo: player.set_cv_input(i, cv);
 			player.set_panel_input(i + NumAudioInputs, cv);
+			i++;
+		}
+		i = 0;
+		for (auto &gatein : params_->gate_ins) {
+			// Todo: player.set_gate_input(i, cv);
+			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
 			i++;
 		}
 		i = 0;
@@ -131,6 +139,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 
 		dac.queue_sample(0, get_output(2) + 0x00800000);
 		dac.queue_sample(1, get_output(3) + 0x00800000);
+		clock_out.queue_sample(player.get_panel_output(4) > 0.5f ? true : false);
 
 		in_++;
 		params_++;

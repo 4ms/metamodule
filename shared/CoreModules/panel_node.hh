@@ -8,8 +8,8 @@
 class Panel : public CoreProcessor {
 public:
 	static constexpr int NumKnobs = PanelDef::NumPot;
-	static constexpr int NumOutJacks = PanelDef::NumAudioIn + PanelDef::NumCVIn;
-	static constexpr int NumInJacks = PanelDef::NumAudioOut + PanelDef::NumDACOut;
+	static constexpr int NumOutJacks = PanelDef::NumAudioIn + PanelDef::NumCVIn + PanelDef::NumGateIn;
+	static constexpr int NumInJacks = PanelDef::NumAudioOut + PanelDef::NumDACOut + PanelDef::NumGateOut;
 
 	// In these lines, "OutJack" is a user-facing Input [and vice-versa]
 	static constexpr int NumUserFacingOutJacks = NumInJacks;
@@ -17,9 +17,9 @@ public:
 
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"A", "B", "C", "D", "a", "b", "c", "d"};
 	static inline const std::array<StaticString<NameChars>, NumUserFacingOutJacks> InJackNames{
-		"OutL", "OutR", "CVOut1", "CVOut2"};
+		"OutL", "OutR", "CVOut1", "CVOut2", "ClockOut"};
 	static inline const std::array<StaticString<NameChars>, NumUserFacingInJacks> OutJackNames{
-		"In L", "In R", "CV A", "CV B", "CV C", "CV D"};
+		"In L", "In R", "CV A", "CV B", "CV C", "CV D", "GateIn1", "GateIn2", "ClockIn"};
 	static inline const StaticString<LongNameChars> description{"PANEL"};
 
 	// user_facing_outs are inputs as seen by the patch (the patch outputs to the user_facing_outs), and vice-versa
@@ -30,8 +30,8 @@ public:
 
 	Panel() // convention is to initialize ins, then outs. Look backwards, but we're doing it correct here
 			// (user_facing_outs = inputs).
-		: user_facing_outs{nodes[0], nodes[1], nodes[2], nodes[3]}
-		, user_facing_ins{nodes[4], nodes[5], nodes[6], nodes[7], nodes[8], nodes[9]}
+		: user_facing_outs{nodes[0], nodes[1], nodes[2], nodes[3], nodes[4]}
+		, user_facing_ins{nodes[5], nodes[6], nodes[7], nodes[8], nodes[9], nodes[10], nodes[11], nodes[12], nodes[13]}
 	{}
 
 	Panel(float &cable0,
@@ -43,9 +43,13 @@ public:
 		  float &cable6,
 		  float &cable7,
 		  float &cable8,
-		  float &cable9)
-		: user_facing_outs{cable0, cable1, cable2, cable3}
-		, user_facing_ins{cable4, cable5, cable6, cable7, cable8, cable9}
+		  float &cable9,
+		  float &cable10,
+		  float &cable11,
+		  float &cable12,
+		  float &cable13)
+		: user_facing_outs{cable0, cable1, cable2, cable3, cable4}
+		, user_facing_ins{cable5, cable6, cable7, cable8, cable9, cable10, cable11, cable12, cable13}
 	{}
 
 	virtual void update() override {}
@@ -117,7 +121,11 @@ public:
 									   nodes[idx[6]],
 									   nodes[idx[7]],
 									   nodes[idx[8]],
-									   nodes[idx[9]]);
+									   nodes[idx[9]],
+									   nodes[idx[10]],
+									   nodes[idx[11]],
+									   nodes[idx[12]],
+									   nodes[idx[13]]);
 	}
 
 	static constexpr char typeID[20] = "PANEL_8";
