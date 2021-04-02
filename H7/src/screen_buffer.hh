@@ -1,8 +1,8 @@
 #pragma once
 #include "Adafruit_GFX_Library/Adafruit_GFX.h"
 #include "conf/screen_buffer_conf.hh"
-#include "drivers/colors.hh"
 #include "drivers/dma2d_transfer.hh"
+#include "util/colors.hh"
 
 using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
