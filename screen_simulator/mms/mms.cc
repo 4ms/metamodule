@@ -1,6 +1,6 @@
 #include <cstdint>
 #define _DMA2D_TRANSFER_HH
-#include "stubs/dma2d_transfer.hh"
+#include "stubs/drivers/dma2d_transfer.hh"
 #include "pages/sim_test_page.hh"
 
 // void init() {

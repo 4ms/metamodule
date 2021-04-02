@@ -11,7 +11,10 @@ fn main() {
         .files(src.iter())
         .include("../H7/src")
         .include("../shared")
+        .include("../H7/lib/adafruit_gfx")
+        .include("../H7/lib/adafruit_gfx/arduino")
         .include("mms")
+        .include("mms/stubs")
         .flag("-std=c++2a")
         .flag("-Wno-unused-parameter");
     build.compile("metamodulescreen");
