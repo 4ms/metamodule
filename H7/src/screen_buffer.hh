@@ -1,20 +1,21 @@
 #pragma once
-#include "Adafruit_GFX_Library/Adafruit_GFX.h"
+#include "Adafruit_GFX_Library/gfxfont.h"
+#include "Adafruit_GFX_Library/glcdfont.c" //yep: .c, that's how arduino does it
+#include "Print.h"
 #include "conf/screen_buffer_conf.hh"
 #include "drivers/dma2d_transfer.hh"
 #include "util/colors.hh"
 
 using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
-class ScreenFrameBuffer : public Adafruit_GFX {
+class ScreenFrameBuffer : public Print {
 
 	target::DMA2DTransfer dma2d;
 	ScreenConfT::FrameBufferT &framebuf;
 
 public:
 	ScreenFrameBuffer(ScreenConfT::FrameBufferT &framebuf_)
-		: Adafruit_GFX{ScreenConfT::width, ScreenConfT::height}
-		, framebuf{framebuf_}
+		: framebuf{framebuf_}
 	{
 		dma2d.init();
 	}
@@ -50,7 +51,7 @@ public:
 		fillRect(x, y, w, h, c.Rgb565());
 	}
 
-	virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override
+	void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
 		if (x >= _width || y >= _height)
 			return;
@@ -60,8 +61,12 @@ public:
 		if ((h + y) > _height)
 			h = _height - y;
 
+#ifdef SIMULATOR
+		constexpr int MaxSizeForDirectWrite = 0x10000000;
+#else
 		// Todo: Measure and set this for optimal performance
 		constexpr int MaxSizeForDirectWrite = 1000;
+#endif
 		if ((w * h) > MaxSizeForDirectWrite)
 			fastFillRect(x, y, w, h, color);
 		else {
@@ -75,8 +80,12 @@ public:
 
 	void fastFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
+#ifdef SIMULATOR
+		fillRect(x, y, w, h, color);
+#else
 		size_t starting_addr = reinterpret_cast<size_t>(&framebuf[x + y * _width]);
 		dma2d.fillrect_rgb565(starting_addr, w, h, _width, color);
+#endif
 	}
 
 	void blendRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, float f_alpha)
@@ -137,7 +146,7 @@ public:
 			draw_blended_pix(x, y, color, alpha);
 	}
 
-	virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override
+	void drawPixel(int16_t x, int16_t y, uint16_t color)
 	{
 		framebuf[x + y * _width] = color;
 	}
@@ -146,7 +155,7 @@ public:
 	// Line
 	//
 
-	virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) override
+	void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
 	{
 		if (y < 0 || y >= _height)
 			return;
@@ -162,7 +171,8 @@ public:
 			framebuf[i + row_offset] = color;
 		}
 	}
-	virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) override
+
+	void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
 	{
 		if (x < 0 || x >= _width)
 			return;
@@ -330,18 +340,55 @@ public:
 
 	void setTextColor(Color color)
 	{
-		Adafruit_GFX::setTextColor(color.Rgb565());
+		textcolor = textbgcolor = color.Rgb565();
 	}
 
 	void setTextColor(Color fgcolor, Color bgcolor)
 	{
-		Adafruit_GFX::setTextColor(fgcolor.Rgb565(), bgcolor.Rgb565());
+		textcolor = fgcolor.Rgb565();
+		textbgcolor = bgcolor.Rgb565();
 	}
 
-	size_t write(uint8_t c) override
+	void setTextSize(uint8_t s)
 	{
-		if (!gfxFont) { // 'Classic' built-in font
+		textsize_x = textsize_y = s;
+	}
+	void setTextSize(uint8_t s_x, uint8_t s_y)
+	{
+		textsize_x = s_x;
+		textsize_y = s_y;
+	}
 
+	void setCursor(int16_t x, int16_t y)
+	{
+		cursor_x = x;
+		cursor_y = y;
+	}
+
+	void setTextWrap(bool w)
+	{
+		wrap = w;
+	}
+
+	void setFont(const GFXfont *newfont)
+	{
+		if (newfont != nullptr) {
+			if (gfxFont == nullptr) {
+				// Switching from classic to new font behavior.
+				// Move cursor pos down 6 pixels so it's on baseline.
+				cursor_y += 6;
+			}
+		} else if (gfxFont != nullptr) {
+			// Switching from new to classic font behavior.
+			// Move cursor pos up 6 pixels so it's at top-left of char.
+			cursor_y -= 6;
+		}
+		gfxFont = newfont;
+	}
+
+	size_t write(uint8_t c)
+	{
+		if (!gfxFont) {										// 'Classic' built-in font
 			if (c == '\n') {								// Newline?
 				cursor_x = 0;								// Reset x to zero,
 				cursor_y += textsize_y * 8;					// advance y one line
@@ -359,7 +406,6 @@ public:
 			}
 
 		} else { // Custom font
-
 			if (c == '\n') {
 				cursor_x = 0;
 				cursor_y += (int16_t)textsize_y * gfxFont->yAdvance;
@@ -387,13 +433,149 @@ public:
 		return 1;
 	}
 
-	void flush_cache() {}
+	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size)
+	{
+		drawChar(x, y, c, color, bg, size, size);
+	}
 
-	virtual void startWrite() override {}
-	virtual void endWrite() override {}
+	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y)
+	{
+		if (!gfxFont) { // 'Classic' built-in font
+
+			if ((x >= _width) ||			  // Clip right
+				(y >= _height) ||			  // Clip bottom
+				((x + 6 * size_x - 1) < 0) || // Clip left
+				((y + 8 * size_y - 1) < 0))	  // Clip top
+				return;
+
+			if (!_cp437 && (c >= 176))
+				c++; // Handle 'classic' charset behavior
+
+			for (int8_t i = 0; i < 5; i++) { // Char bitmap = 5 columns
+				uint8_t line = font[c * 5 + i];
+				for (int8_t j = 0; j < 8; j++, line >>= 1) {
+					if (line & 1) {
+						if (size_x == 1 && size_y == 1)
+							drawPixel(x + i, y + j, color);
+						else
+							fillRect(x + i * size_x, y + j * size_y, size_x, size_y, color);
+					} else if (bg != color) {
+						if (size_x == 1 && size_y == 1)
+							drawPixel(x + i, y + j, bg);
+						else
+							fillRect(x + i * size_x, y + j * size_y, size_x, size_y, bg);
+					}
+				}
+			}
+			if (bg != color) { // If opaque, draw vertical line for last column
+				if (size_x == 1 && size_y == 1)
+					drawFastVLine(x + 5, y, 8, bg);
+				else
+					fillRect(x + 5 * size_x, y, size_x, 8 * size_y, bg);
+			}
+
+		} else { // Custom font
+
+			// Character is assumed previously filtered by write() to eliminate
+			// newlines, returns, non-printable characters, etc.  Calling
+			// drawChar() directly with 'bad' characters of font may cause mayhem!
+
+			c -= (uint8_t)gfxFont->first;
+			GFXglyph *glyph = gfxFont->glyph + c;
+			uint8_t *bitmap = gfxFont->bitmap;
+
+			uint16_t bo = glyph->bitmapOffset;
+			uint8_t w = glyph->width;
+			uint8_t h = glyph->height;
+			int8_t xo = glyph->xOffset;
+			int8_t yo = glyph->yOffset;
+			uint8_t xx, yy, bits = 0, bit = 0;
+			int16_t xo16 = 0, yo16 = 0;
+
+			if (size_x > 1 || size_y > 1) {
+				xo16 = xo;
+				yo16 = yo;
+			}
+
+			// Todo: Add character clipping here
+
+			// NOTE: THERE IS NO 'BACKGROUND' COLOR OPTION ON CUSTOM FONTS.
+			// THIS IS ON PURPOSE AND BY DESIGN.  The background color feature
+			// has typically been used with the 'classic' font to overwrite old
+			// screen contents with new data.  This ONLY works because the
+			// characters are a uniform size; it's not a sensible thing to do with
+			// proportionally-spaced fonts with glyphs of varying sizes (and that
+			// may overlap).  To replace previously-drawn text when using a custom
+			// font, use the getTextBounds() function to determine the smallest
+			// rectangle encompassing a string, erase the area with fillRect(),
+			// then draw new text.  This WILL infortunately 'blink' the text, but
+			// is unavoidable.  Drawing 'background' pixels will NOT fix this,
+			// only creates a new set of problems.  Have an idea to work around
+			// this (a canvas object type for MCUs that can afford the RAM and
+			// displays supporting setAddrWindow() and pushColors()), but haven't
+			// implemented this yet.
+
+			for (yy = 0; yy < h; yy++) {
+				for (xx = 0; xx < w; xx++) {
+					if (!(bit++ & 7)) {
+						bits = bitmap[bo++];
+					}
+					if (bits & 0x80) {
+						if (size_x == 1 && size_y == 1) {
+							drawPixel(x + xo + xx, y + yo + yy, color);
+						} else {
+							fillRect(x + (xo16 + xx) * size_x, y + (yo16 + yy) * size_y, size_x, size_y, color);
+						}
+					}
+					bits <<= 1;
+				}
+			}
+
+		} // End classic vs custom font
+	}
+
+	void flush_cache() {}
 
 protected:
 	int _rotation;
 	int _width;
 	int _height;
+
+	int16_t cursor_x;		///< x location to start print()ing text
+	int16_t cursor_y;		///< y location to start print()ing text
+	uint16_t textcolor;		///< 16-bit background color for print()
+	uint16_t textbgcolor;	///< 16-bit text color for print()
+	uint8_t textsize_x;		///< Desired magnification in X-axis of text to print()
+	uint8_t textsize_y;		///< Desired magnification in Y-axis of text to print()
+	uint8_t rotation;		///< Display rotation (0 thru 3)
+	bool wrap;				///< If set, 'wrap' text at right edge of display
+	bool _cp437;			///< If set, use correct CP437 charset (default is off)
+	const GFXfont *gfxFont; ///< Pointer to special font
+
+	// 	unsigned char pgm_read_byte(uint32_t addr)
+	// 	{
+	// 		return (*(const unsigned char *)(addr));
+	// 	}
+	// 	unsigned short pgm_read_word(uint32_t addr)
+	// 	{
+	// 		return (*(const unsigned short *)(addr));
+	// 	}
+	// 	unsigned long pgm_read_dword(uint32_t addr)
+	// 	{
+	// 		return (*(const unsigned long *)(addr));
+	// 	}
+	// 	auto pgm_read_pointer(uint32_t addr)
+	// 	{
+	// 		return ((void *)pgm_read_dword(addr));
+	// 	}
+
+	// 	GFXglyph *pgm_read_glyph_ptr(const GFXfont *gfxFont, uint8_t c)
+	// 	{
+	// 		return gfxFont->glyph + c;
+	// 	}
+
+	// 	uint8_t *pgm_read_bitmap_ptr(const GFXfont *gfxFont)
+	// 	{
+	// 		return gfxFont->bitmap;
+	// 	}
 };
