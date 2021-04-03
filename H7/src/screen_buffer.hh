@@ -61,12 +61,8 @@ public:
 		if ((h + y) > _height)
 			h = _height - y;
 
-#ifdef SIMULATOR
-		constexpr int MaxSizeForDirectWrite = 0x10000000;
-#else
 		// Todo: Measure and set this for optimal performance
 		constexpr int MaxSizeForDirectWrite = 1000;
-#endif
 		if ((w * h) > MaxSizeForDirectWrite)
 			fastFillRect(x, y, w, h, color);
 		else {
@@ -80,12 +76,8 @@ public:
 
 	void fastFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
-#ifdef SIMULATOR
-		fillRect(x, y, w, h, color);
-#else
-		size_t starting_addr = reinterpret_cast<size_t>(&framebuf[x + y * _width]);
+		uintptr_t starting_addr = reinterpret_cast<uintptr_t>(&framebuf[x + y * _width]);
 		dma2d.fillrect_rgb565(starting_addr, w, h, _width, color);
-#endif
 	}
 
 	void blendRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, float f_alpha)

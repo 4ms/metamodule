@@ -1,10 +1,11 @@
 fn main() {
-    // pkg_config::Config::new()
-    //     .atleast_version("1.2")
-    //     .probe("z")
-    //     .unwrap();
-
-    let src = ["mms/mms.cc", "../H7/lib/adafruit_gfx/Adafruit_GFX_Library/Adafruit_GFX.cpp", "../H7/lib/adafruit_gfx/arduino/Print.cpp", "../H7/src/patchlist.cc" ];
+    println!("cargo:rerun-if-changed=../H7/src/pages/sim_test_page.hh");
+    let src = [
+        "mms/mms.cc",
+        "../H7/lib/adafruit_gfx/arduino/Print.cpp",
+        "../H7/src/patchlist.cc",
+        "../H7/src/pages/fonts.cc",
+    ];
     let mut builder = cc::Build::new();
     let build = builder
         .cpp(true)
