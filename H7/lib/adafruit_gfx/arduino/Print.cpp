@@ -216,7 +216,7 @@ __attribute__((weak)) int _write(int file, char *ptr, int len)
 		case STDIN_FILENO:
 			break;
 		default:
-			// ((class Print *)file)->write((uint8_t *)ptr, len);
+			/// Woah, this is asking for trouble: ((class Print *)file)->write((uint8_t *)ptr, len);
 			break;
 	}
 	return len;

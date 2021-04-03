@@ -18,7 +18,10 @@ struct SimPageManager {
 
 	MetaModule::SimulationTestPage testpage{{patch_list, patch_player, params, metaparams}, screen};
 
-	SimPageManager() {}
+	SimPageManager()
+	{
+		screen.set_rotation(MMScreenBufferConf::Rotation::CW90);
+	}
 };
 
 static SimPageManager pm;
@@ -28,13 +31,13 @@ extern "C" void init_screen()
 	pm.params.clear();
 	pm.metaparams.clear();
 	pm.testpage.draw();
-	for (int y = 0; y < 240; y += 2) {
-		for (int x = 0; x < 240; x++) {
-			pm.screen.drawPixel(x, y, 0xffff);
-			// pm.framebuf[x + y * 240] = 0xffff;
-			// pm.framebuf[x + (y + 1) * 240] = 0xff00;
-		}
-	}
+	// for (int y = 0; y < 240; y += 2) {
+	// 	for (int x = 0; x < 240; x++) {
+	// 		pm.screen.drawPixel(x, y + 1, 0x00ff);
+	// 		// pm.framebuf[x + y * 240] = 0xffff;
+	// 		// pm.framebuf[x + (y + 1) * 240] = 0xff00;
+	// 	}
+	// }
 }
 
 extern "C" uint16_t get_pixel(uint16_t x, uint16_t y)
