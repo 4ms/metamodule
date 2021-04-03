@@ -30,78 +30,79 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
  */
+#if (0) // making sure this doesn't compile
 
-#include "Adafruit_GFX.h"
-#include "glcdfont.c"
-#include "string.h"
-#include <cstdlib>
-#ifdef __AVR__
-	#include <avr/pgmspace.h>
-#elif defined(ESP8266) || defined(ESP32)
-	#include <pgmspace.h>
-#endif
+	#include "Adafruit_GFX.h"
+	#include "glcdfont.c"
+	#include "string.h"
+	#include <cstdlib>
+	#ifdef __AVR__
+		#include <avr/pgmspace.h>
+	#elif defined(ESP8266) || defined(ESP32)
+		#include <pgmspace.h>
+	#endif
 
 // Many (but maybe not all) non-AVR board installs define macros
 // for compatibility with existing PROGMEM-reading AVR code.
 // Do our own checks and defines here for good measure...
 
-#ifndef pgm_read_byte
-	#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-#endif
-#ifndef pgm_read_word
-	#define pgm_read_word(addr) (*(const unsigned short *)(addr))
-#endif
-#ifndef pgm_read_dword
-	#define pgm_read_dword(addr) (*(const unsigned long *)(addr))
-#endif
+	#ifndef pgm_read_byte
+		#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
+	#endif
+	#ifndef pgm_read_word
+		#define pgm_read_word(addr) (*(const unsigned short *)(addr))
+	#endif
+	#ifndef pgm_read_dword
+		#define pgm_read_dword(addr) (*(const unsigned long *)(addr))
+	#endif
 
 // Pointers are a peculiar case...typically 16-bit on AVR boards,
 // 32 bits elsewhere.  Try to accommodate both...
 
-#if !defined(__INT_MAX__) || (__INT_MAX__ > 0xFFFF)
-	#define pgm_read_pointer(addr) ((void *)pgm_read_dword(addr))
-#else
-	#define pgm_read_pointer(addr) ((void *)pgm_read_word(addr))
-#endif
+	#if !defined(__INT_MAX__) || (__INT_MAX__ > 0xFFFF)
+		#define pgm_read_pointer(addr) ((void *)pgm_read_dword(addr))
+	#else
+		#define pgm_read_pointer(addr) ((void *)pgm_read_word(addr))
+	#endif
 
 inline GFXglyph *pgm_read_glyph_ptr(const GFXfont *gfxFont, uint8_t c)
 {
-#ifdef __AVR__
+	#ifdef __AVR__
 	return &(((GFXglyph *)pgm_read_pointer(&gfxFont->glyph))[c]);
-#else
+	#else
 	// expression in __AVR__ section may generate "dereferencing type-punned
 	// pointer will break strict-aliasing rules" warning In fact, on other
 	// platforms (such as STM32) there is no need to do this pointer magic as
 	// program memory may be read in a usual way So expression may be simplified
 	return gfxFont->glyph + c;
-#endif //__AVR__
+	#endif //__AVR__
 }
 
 inline uint8_t *pgm_read_bitmap_ptr(const GFXfont *gfxFont)
 {
-#ifdef __AVR__
+	#ifdef __AVR__
 	return (uint8_t *)pgm_read_pointer(&gfxFont->bitmap);
-#else
+	#else
 	// expression in __AVR__ section generates "dereferencing type-punned pointer
 	// will break strict-aliasing rules" warning In fact, on other platforms (such
 	// as STM32) there is no need to do this pointer magic as program memory may
 	// be read in a usual way So expression may be simplified
 	return gfxFont->bitmap;
-#endif //__AVR__
+	#endif //__AVR__
 }
 
-#ifndef min
-	#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
+	#ifndef min
+		#define min(a, b) (((a) < (b)) ? (a) : (b))
+	#endif
 
-#ifndef _swap_int16_t
-	#define _swap_int16_t(a, b)                                                                                        \
-		{                                                                                                              \
-			int16_t t = a;                                                                                             \
-			a = b;                                                                                                     \
-			b = t;                                                                                                     \
-		}
-#endif
+	#ifndef _swap_int16_t
+		#define _swap_int16_t(a, b)                                                                                    \
+			{                                                                                                          \
+				int16_t t = a;                                                                                         \
+				a = b;                                                                                                 \
+				b = t;                                                                                                 \
+			}
+	#endif
 
 /**************************************************************************/
 /*!
@@ -138,9 +139,9 @@ Adafruit_GFX::Adafruit_GFX(int16_t w, int16_t h)
 /**************************************************************************/
 void Adafruit_GFX::writeLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
 {
-#if defined(ESP8266)
+	#if defined(ESP8266)
 	yield();
-#endif
+	#endif
 	int16_t steep = abs(y1 - y0) > abs(x1 - x0);
 	if (steep) {
 		_swap_int16_t(x0, y0);
@@ -365,9 +366,9 @@ void Adafruit_GFX::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint
 /**************************************************************************/
 void Adafruit_GFX::drawCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
 {
-#if defined(ESP8266)
+	#if defined(ESP8266)
 	yield();
-#endif
+	#endif
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -1776,11 +1777,11 @@ bool Adafruit_GFX_Button::justReleased()
 // scanline pad).
 // NOT EXTENSIVELY TESTED YET.  MAY CONTAIN WORST BUGS KNOWN TO HUMANKIND.
 
-#ifdef __AVR__
+	#ifdef __AVR__
 // Bitmask tables of 0x80>>X and ~(0x80>>X), because X>>Y is slow on AVR
 const uint8_t PROGMEM GFXcanvas1::GFXsetBit[] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
 const uint8_t PROGMEM GFXcanvas1::GFXclrBit[] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0xFE};
-#endif
+	#endif
 
 /**************************************************************************/
 /*!
@@ -1842,17 +1843,17 @@ void GFXcanvas1::drawPixel(int16_t x, int16_t y, uint16_t color)
 		}
 
 		uint8_t *ptr = &buffer[(x / 8) + y * ((WIDTH + 7) / 8)];
-#ifdef __AVR__
+	#ifdef __AVR__
 		if (color)
 			*ptr |= pgm_read_byte(&GFXsetBit[x & 7]);
 		else
 			*ptr &= pgm_read_byte(&GFXclrBit[x & 7]);
-#else
+	#else
 		if (color)
 			*ptr |= 0x80 >> (x & 7);
 		else
 			*ptr &= ~(0x80 >> (x & 7));
-#endif
+	#endif
 	}
 }
 
@@ -1906,11 +1907,11 @@ bool GFXcanvas1::getRawPixel(int16_t x, int16_t y) const
 		uint8_t *buffer = this->getBuffer();
 		uint8_t *ptr = &buffer[(x / 8) + y * ((WIDTH + 7) / 8)];
 
-#ifdef __AVR__
+	#ifdef __AVR__
 		return ((*ptr) & pgm_read_byte(&GFXsetBit[x & 7])) != 0;
-#else
+	#else
 		return ((*ptr) & (0x80 >> (x & 7))) != 0;
-#endif
+	#endif
 	}
 	return 0;
 }
@@ -2057,21 +2058,21 @@ void GFXcanvas1::drawFastRawVLine(int16_t x, int16_t y, int16_t h, uint16_t colo
 	uint8_t *ptr = &buffer[(x / 8) + y * row_bytes];
 
 	if (color > 0) {
-#ifdef __AVR__
+	#ifdef __AVR__
 		uint8_t bit_mask = pgm_read_byte(&GFXsetBit[x & 7]);
-#else
+	#else
 		uint8_t bit_mask = (0x80 >> (x & 7));
-#endif
+	#endif
 		for (int16_t i = 0; i < h; i++) {
 			*ptr |= bit_mask;
 			ptr += row_bytes;
 		}
 	} else {
-#ifdef __AVR__
+	#ifdef __AVR__
 		uint8_t bit_mask = pgm_read_byte(&GFXclrBit[x & 7]);
-#else
+	#else
 		uint8_t bit_mask = ~(0x80 >> (x & 7));
-#endif
+	#endif
 		for (int16_t i = 0; i < h; i++) {
 			*ptr &= bit_mask;
 			ptr += row_bytes;
@@ -2101,11 +2102,11 @@ void GFXcanvas1::drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t colo
 		// create bit mask for first byte
 		uint8_t startByteBitMask = 0x00;
 		for (int8_t i = (x & 7); ((i < 8) && (remainingWidthBits > 0)); i++) {
-#ifdef __AVR__
+	#ifdef __AVR__
 			startByteBitMask |= pgm_read_byte(&GFXsetBit[i]);
-#else
+	#else
 			startByteBitMask |= (0x80 >> i);
-#endif
+	#endif
 			remainingWidthBits--;
 		}
 		if (color > 0) {
@@ -2128,11 +2129,11 @@ void GFXcanvas1::drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t colo
 		if (lastByteBits > 0) {
 			uint8_t lastByteBitMask = 0x00;
 			for (size_t i = 0; i < lastByteBits; i++) {
-#ifdef __AVR__
+	#ifdef __AVR__
 				lastByteBitMask |= pgm_read_byte(&GFXsetBit[i]);
-#else
+	#else
 				lastByteBitMask |= (0x80 >> i);
-#endif
+	#endif
 			}
 			ptr += remainingWholeBytes;
 
@@ -2721,3 +2722,5 @@ void GFXcanvas16::drawFastRawHLine(int16_t x, int16_t y, int16_t w, uint16_t col
 		buffer[i] = color;
 	}
 }
+
+#endif
