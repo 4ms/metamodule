@@ -26,6 +26,8 @@ struct Simulator {
 
 	void init()
 	{
+		auto &patch = patch_list.cur_patch();
+		patch_player.load_patch(patch);
 		pages.init();
 	}
 
@@ -36,14 +38,34 @@ struct Simulator {
 };
 static Simulator sim;
 
-extern "C" void next_page()
+extern "C" void rotary_fwd()
 {
 	sim.pages.next_page();
 }
 
-extern "C" void prev_page()
+extern "C" void rotary_back()
 {
 	sim.pages.prev_page();
+}
+
+extern "C" void rotary_push_fwd()
+{
+	sim.patch_list.next_patch();
+}
+
+extern "C" void rotary_push_back()
+{
+	sim.patch_list.prev_patch();
+}
+
+extern "C" void rotary_press()
+{
+	//
+}
+
+extern "C" void rotary_release()
+{
+	//
 }
 
 extern "C" void jump_to_page(unsigned page_num)

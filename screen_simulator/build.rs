@@ -1,5 +1,6 @@
 fn main() {
     println!("cargo:rerun-if-changed=../H7/src/pages/sim_test_page.hh");
+    println!("cargo:rerun-if-changed=mms/mms.cc");
     let src = [
         "mms/mms.cc",
         "../H7/lib/adafruit_gfx/arduino/Print.cpp",
