@@ -5,6 +5,7 @@ fn main() {
         "../H7/lib/adafruit_gfx/arduino/Print.cpp",
         "../H7/src/patchlist.cc",
         "../H7/src/pages/fonts.cc",
+        "../H7/src/pages/page_manager.cc",
     ];
     let mut builder = cc::Build::new();
     let build = builder
@@ -17,6 +18,7 @@ fn main() {
         .include("../H7/lib/adafruit_gfx/arduino")
         .include("mms")
         .include("mms/stubs")
+        .flag("-DSIMULATOR")
         .flag("-std=c++2a")
         .flag("-Wno-unused-parameter");
     build.compile("metamodulescreen");

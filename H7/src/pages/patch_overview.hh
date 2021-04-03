@@ -143,7 +143,6 @@ struct PatchLayoutPage : PageBase {
 
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
-		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 		if (patch_player.is_loaded) {
 			screen.setCursor(2, y_pos);
 			for (int i = 0; i < patch_list.cur_patch().num_nets; i++) {
@@ -188,7 +187,6 @@ struct ModulesInPatchPage : PageBase {
 
 		screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
-		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 		if (patch_player.is_loaded) {
 			screen.setCursor(0, y_pos);
 			for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {

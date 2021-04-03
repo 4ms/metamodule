@@ -5,65 +5,68 @@
 #include "stubs/drivers/dma2d_transfer.hh"
 namespace target = ScreenSimulator;
 
-// #define SIMULATOR
-#include "pages/bouncing_balls.hh"
-#include "pages/sim_test_page.hh"
+#include "pages/page_manager.hh"
 
-// struct SimData {
-// 	PatchList patch_list;
-// 	PatchPlayer patch_player;
-// 	MetaModule::Params params;
-// 	MetaModule::MetaParams metaparams;
-// 	ScreenConfT::FrameBufferT framebuf;
-// 	ScreenFrameBuffer screen{framebuf};
-
-// 	SimData() {
-// 		params.clear();
-// 		metaparams.clear();
-// 		screen.set_rotation(MMScreenBufferConf::Rotation::CW90);
-// 	}
-// };
-
-struct SimPageManager {
+struct Simulator {
 	PatchList patch_list;
 	PatchPlayer patch_player;
 	MetaModule::Params params;
 	MetaModule::MetaParams metaparams;
-
 	ScreenConfT::FrameBufferT framebuf;
 	ScreenFrameBuffer screen{framebuf};
+	MetaModule::PageManager pages;
 
-	MetaModule::SimulationTestPage testpage{{patch_list, patch_player, params, metaparams}, screen};
-	MetaModule::BouncingBallsPage ball_page{{patch_list, patch_player, params, metaparams}, screen};
-
-	unsigned cur_page = 0;
-
-	SimPageManager()
+	Simulator()
+		: pages{patch_list, patch_player, params, metaparams, screen}
 	{
+		params.clear();
+		metaparams.clear();
 		screen.set_rotation(MMScreenBufferConf::Rotation::CW90);
 	}
 
-	void draw()
+	void init()
 	{
-		testpage.draw();
+		pages.init();
+	}
+
+	void refresh()
+	{
+		pages.display_current_page();
 	}
 };
+static Simulator sim;
 
-static SimPageManager pm;
+extern "C" void next_page()
+{
+	sim.pages.next_page();
+}
+
+extern "C" void prev_page()
+{
+	sim.pages.prev_page();
+}
+
+extern "C" void jump_to_page(unsigned page_num)
+{
+	sim.pages.jump_to_page(static_cast<MetaModule::Page>(page_num));
+}
 
 extern "C" void init_screen()
 {
-	pm.params.clear();
-	pm.metaparams.clear();
-	pm.testpage.draw();
+	sim.init();
 }
 
 extern "C" void refresh()
 {
-	pm.draw();
+	sim.refresh();
 }
 
 extern "C" uint16_t get_pixel(uint16_t x, uint16_t y)
 {
-	return (pm.framebuf[x + y * 240]);
+	return (sim.framebuf[x + y * 240]);
+}
+
+size_t get_heap_size()
+{
+	return 0;
 }

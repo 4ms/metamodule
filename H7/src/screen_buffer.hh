@@ -10,7 +10,11 @@ using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
 class ScreenFrameBuffer : public Print {
 
+#ifdef SIMULATOR
+	ScreenSimulator::DMA2DTransfer dma2d;
+#else
 	target::DMA2DTransfer dma2d;
+#endif
 	ScreenConfT::FrameBufferT &framebuf;
 
 public:
