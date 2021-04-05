@@ -27,4 +27,8 @@ typedef struct {
 	uint8_t yAdvance; ///< Newline distance (y axis)
 } GFXfont;
 
+#ifndef PROGMEM
+	#define PROGMEM
+#endif
+
 #endif // _GFXFONT_H_

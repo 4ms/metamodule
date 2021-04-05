@@ -14,6 +14,10 @@ export DRIVERLIB       	= $(LIBDIR)/mdrivlib
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
+simulate:
+	$(info Simulating screens...)
+	@cd ../screen_simulator && cargo run
+
 all: 
 	@$(MAKE) --no-print-directory -f makefile_m7.mk
 	@$(MAKE) --no-print-directory -f makefile_m4.mk

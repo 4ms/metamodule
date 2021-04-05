@@ -1,0 +1,9 @@
+---
+CompileFlags:
+	Add: [
+	"-I../../H7/src",
+	"-I../../H7/lib/mdrivlib",
+	"-I../../shared",
+	"-I../../H7/lib/adafruit_gfx",
+	"-I../../H7/lib/adafruit_gfx/arduino"
+	]

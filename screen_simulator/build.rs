@@ -1,17 +1,38 @@
 fn main() {
-    // pkg_config::Config::new()
-    //     .atleast_version("1.2")
-    //     .probe("z")
-    //     .unwrap();
+    println!("cargo:rerun-if-changed=../H7/src/pages/sim_test_page.hh");
+    println!("cargo:rerun-if-changed=../H7/src/pages/");
+    println!("cargo:rerun-if-changed=mms/mms.cc");
 
-    let src = ["mms/mms.cc"];
+    let mut src: Vec<String> = Vec::new();
+    src.push(String::from("mms/mms.cc"));
+    src.push(String::from("../H7/lib/adafruit_gfx/arduino/Print.cpp"));
+    src.push(String::from("../H7/src/patchlist.cc"));
+    src.push(String::from("../H7/src/pages/fonts.cc"));
+    src.push(String::from("../H7/src/pages/page_manager.cc"));
+    src.push(String::from("../shared/util/math_tables.cc"));
+
+    use glob::glob;
+    for entry in glob("../shared/CoreModules/*.cpp").expect("Bad glob pattern") {
+        if let Ok(path) = entry {
+            let f_name = String::from(path.to_string_lossy());
+            src.push(format!("{}", f_name));
+        }
+    }
+
     let mut builder = cc::Build::new();
     let build = builder
         .cpp(true)
         .files(src.iter())
-        .include("../H7/src")
-        .include("../shared")
+        .flag("--includestubs/sys/alloc_buffer.hh")
         .include("mms")
+        .include("mms/stubs")
+        .include("../shared")
+        .include("../shared/util")
+        .include("../shared/patch")
+        .include("../H7/src")
+        .include("../H7/lib/adafruit_gfx")
+        .include("../H7/lib/adafruit_gfx/arduino")
+        .flag("-DSIMULATOR")
         .flag("-std=c++2a")
         .flag("-Wno-unused-parameter");
     build.compile("metamodulescreen");

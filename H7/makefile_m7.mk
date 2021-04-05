@@ -32,7 +32,6 @@ SOURCES  += $(wildcard $(SHARED)/util/*.c)
 SOURCES  += $(wildcard $(SHARED)/util/*.cc)
 SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
 SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
-SOURCES  += $(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library/Adafruit_GFX.cpp
 SOURCES  += $(LIBDIR)/adafruit_gfx/arduino/Print.cpp
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
@@ -53,7 +52,6 @@ INCLUDES = -I$(DEVICE)/include \
 			-I$(SHARED)/CoreModules \
 			-I$(SHARED)/util \
 			-I$(SHARED)/patch \
-			-I$(LIBDIR)/adafruit_gfx/Adafruit_GFX_Library \
 			-I$(LIBDIR)/adafruit_gfx/arduino \
 			-I$(LIBDIR)/adafruit_gfx \
 

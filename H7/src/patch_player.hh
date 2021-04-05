@@ -5,7 +5,8 @@
 #include "patch/patch.hh"
 #include "sys/alloc_buffer.hh"
 #include <cstdint>
-
+namespace MetaModule
+{
 using PanelT = Panel;
 
 class PatchPlayer {
@@ -107,7 +108,7 @@ public:
 			modules[i].reset(nullptr);
 		}
 		clear_cache();
-		BigAlloc<Patch>::reset();
+		BigAllocControl::reset();
 	}
 
 	void mark_patched_jacks(const Patch &p)
@@ -269,3 +270,4 @@ public:
 		return dup_module_index[idx];
 	}
 };
+} // namespace MetaModule

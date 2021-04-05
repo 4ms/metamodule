@@ -43,7 +43,7 @@ struct PageWidgets {
 		screen.print(get_heap_size() / 1024, 10);
 		screen.print("kb ");
 		screen.setCursor(160, 232);
-		screen.print(BigAlloc<PageWidgets>::get_memory_usage() / 1024, 10);
+		screen.print(BigAllocControl::get_memory_usage() / 1024, 10);
 		screen.print("kb   ");
 	}
 

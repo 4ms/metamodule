@@ -38,8 +38,7 @@ public:
 	Page cur_page;
 
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, ScreenFrameBuffer &s)
-		: cur_page{Page::PatchOverview}
-		, balls_page{{pl, pp, p, m}, s}
+		: balls_page{{pl, pp, p, m}, s}
 		, overview_page{{pl, pp, p, m}, s}
 		, jack_map_page{{pl, pp, p, m}, s}
 		, knob_map_page{{pl, pp, p, m}, s}
@@ -47,6 +46,7 @@ public:
 		, modules_in_patch_page{{pl, pp, p, m}, s}
 		, patch_selector_page{{pl, pp, p, m}, s}
 		, debug_info_page{{pl, pp, p, m}, s}
+		, cur_page{Page::PatchOverview}
 	{}
 
 	void init();

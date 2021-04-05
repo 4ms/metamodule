@@ -17,7 +17,7 @@ struct PatchSelectorPage : PageBase {
 		PageWidgets::setup_header(screen);
 		screen.print("Select a patch:");
 
-		for (int i = 0; i < PatchList::NumPatches; i++) {
+		for (unsigned i = 0; i < PatchList::NumPatches; i++) {
 			screen.setCursor(2, 60 + i * 24);
 			if (i == patch_list.cur_patch_index()) {
 				screen.setFont(&FreeSansBold12pt7b);

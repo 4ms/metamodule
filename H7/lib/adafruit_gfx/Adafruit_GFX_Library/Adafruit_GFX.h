@@ -1,14 +1,15 @@
-#ifndef _ADAFRUIT_GFX_H
-#define _ADAFRUIT_GFX_H
+#if (0) // just making sure it's not included
+	#ifndef _ADAFRUIT_GFX_H
+		#define _ADAFRUIT_GFX_H
 
-// #if ARDUINO >= 100
-// 	#include "Arduino.h"
-#include "Print.h"
-// #else
-#include "WProgram.h"
-// #endif
-#include "gfxfont.h"
-#include <stdint.h>
+		// #if ARDUINO >= 100
+		// 	#include "Arduino.h"
+		#include "Print.h"
+		// #else
+		#include "WProgram.h"
+		// #endif
+		#include "gfxfont.h"
+		#include <stdint.h>
 
 /// A generic graphics superclass that can handle all sorts of drawing. At a
 /// minimum you can subclass and provide drawPixel(). At a maximum you can do a
@@ -363,10 +364,10 @@ protected:
 private:
 	uint8_t *buffer;
 
-#ifdef __AVR__
+		#ifdef __AVR__
 	// Bitmask tables of 0x80>>X and ~(0x80>>X), because X>>Y is slow on AVR
 	static const uint8_t PROGMEM GFXsetBit[], GFXclrBit[];
-#endif
+		#endif
 };
 
 /// A GFX 8-bit canvas context for graphics
@@ -430,4 +431,5 @@ private:
 	uint16_t *buffer;
 };
 
-#endif // _ADAFRUIT_GFX_H
+	#endif // _ADAFRUIT_GFX_H
+#endif
