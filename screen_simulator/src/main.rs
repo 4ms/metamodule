@@ -6,15 +6,15 @@ const HEIGHT: usize = 240;
 
 #[link(name = "metamodulescreen")]
 extern "C" {
-    fn init_screen() -> ();
+    fn init_screen() -> bool;
     fn get_pixel(x: u16, y: u16) -> u16;
     fn refresh() -> ();
     fn rotary_back() -> ();
     fn rotary_fwd() -> ();
-    // fn rotary_push_back() -> ();
-    // fn rotary_push_fwd() -> ();
-    // fn rotary_press() -> ();
-    // fn rotary_release() -> ();
+    fn rotary_push_back() -> ();
+    fn rotary_push_fwd() -> ();
+    fn rotary_press() -> ();
+    fn rotary_release() -> ();
 }
 
 fn get_ext_color(x: usize, y: usize) -> u32 {
@@ -33,7 +33,13 @@ struct KeyHandler<'a> {
 }
 
 fn main() {
-    unsafe { init_screen() };
+    let loaded_ok;
+    unsafe {
+        loaded_ok = init_screen();
+    };
+    if !loaded_ok {
+        panic!("Cannot load patch");
+    }
 
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
 
@@ -42,7 +48,7 @@ fn main() {
             panic!("{}", e);
         });
 
-    let mut keys: [KeyHandler; 2] = [
+    let mut keys: [KeyHandler; 6] = [
         KeyHandler {
             key: Key::Right,
             is_pressed: false,
@@ -52,6 +58,26 @@ fn main() {
             key: Key::Left,
             is_pressed: false,
             action: &|| unsafe { rotary_back() },
+        },
+        KeyHandler {
+            key: Key::Down,
+            is_pressed: false,
+            action: &|| unsafe { rotary_press() },
+        },
+        KeyHandler {
+            key: Key::Up,
+            is_pressed: false,
+            action: &|| unsafe { rotary_release() },
+        },
+        KeyHandler {
+            key: Key::Comma,
+            is_pressed: false,
+            action: &|| unsafe { rotary_push_back() },
+        },
+        KeyHandler {
+            key: Key::Period,
+            is_pressed: false,
+            action: &|| unsafe { rotary_push_fwd() },
         },
     ];
 
