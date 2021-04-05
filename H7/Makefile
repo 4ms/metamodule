@@ -45,7 +45,7 @@ flash: $(BUILDDIR_M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
 tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
-	g++ $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
+	g++ -I../shared -std=c++17 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
 
 simulate:
