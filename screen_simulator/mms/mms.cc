@@ -1,3 +1,4 @@
+#include "stubs/sys/alloc_buffer.hh"
 #include <cstdint>
 
 // Override dma2d to our stub:
@@ -9,7 +10,7 @@ namespace target = ScreenSimulator;
 
 struct Simulator {
 	PatchList patch_list;
-	PatchPlayer patch_player;
+	MetaModule::PatchPlayer patch_player;
 	MetaModule::Params params;
 	MetaModule::MetaParams metaparams;
 	ScreenConfT::FrameBufferT framebuf;
@@ -54,13 +55,13 @@ extern "C" void rotary_back()
 extern "C" void rotary_push_fwd()
 {
 	sim.patch_list.next_patch();
-	// sim.patch_player.load_patch(sim.patch_list.cur_patch());
+	sim.patch_player.load_patch(sim.patch_list.cur_patch());
 }
 
 extern "C" void rotary_push_back()
 {
 	sim.patch_list.prev_patch();
-	// sim.patch_player.load_patch(sim.patch_list.cur_patch());
+	sim.patch_player.load_patch(sim.patch_list.cur_patch());
 }
 
 extern "C" void rotary_press()

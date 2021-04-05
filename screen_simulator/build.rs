@@ -23,14 +23,15 @@ fn main() {
     let build = builder
         .cpp(true)
         .files(src.iter())
+        .flag("--includestubs/sys/alloc_buffer.hh")
+        .include("mms")
+        .include("mms/stubs")
         .include("../shared")
         .include("../shared/util")
         .include("../shared/patch")
         .include("../H7/src")
         .include("../H7/lib/adafruit_gfx")
         .include("../H7/lib/adafruit_gfx/arduino")
-        .include("mms")
-        .include("mms/stubs")
         .flag("-DSIMULATOR")
         .flag("-std=c++2a")
         .flag("-Wno-unused-parameter");
