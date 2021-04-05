@@ -247,8 +247,6 @@ void buildTrigTables()
 	ofstream myfile;
 	myfile.open("../util/math_tables.cc");
 
-	myfile << "#pragma once" << endl;
-
 	myfile << "#include"
 		   << "\""
 		   << "interp_array.hh"
