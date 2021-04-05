@@ -1,8 +1,12 @@
-#pragma once
+#ifndef __SYS_ALLOC_BUFFER_HH
+#define __SYS_ALLOC_BUFFER_HH
+
 #include <cstddef>
 
-constexpr size_t SDRAM_BASE_ADDR = 0xC0000000;
+// namespace MetaModule
+// {
 
+constexpr size_t SDRAM_BASE_ADDR = 0xC0000000;
 template<size_t BASEADDR>
 struct AllocForever {
 	void *operator new(size_t size)
@@ -32,8 +36,24 @@ private:
 template<typename T, size_t ADDR>
 struct AllocAt : T, AllocForever<ADDR> {};
 
+// These are exported:
+
 template<typename T>
 using BigAlloc = AllocAt<T, SDRAM_BASE_ADDR>;
 
+struct BigAllocControl {
+	static void reset()
+	{
+		AllocForever<SDRAM_BASE_ADDR>::reset();
+	}
+
+	static size_t get_memory_usage()
+	{
+		return AllocForever<SDRAM_BASE_ADDR>::get_memory_usage();
+	}
+};
+
 using BigHeapAllocation = AllocForever<SDRAM_BASE_ADDR>;
 
+// } // namespace MetaModule
+#endif

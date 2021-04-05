@@ -40,7 +40,7 @@ static const Patch p = {
 
 TEST_CASE("Panel jack connections")
 {
-	PatchPlayer player;
+	MetaModule::PatchPlayer player;
 	player.calc_panel_jack_connections(p);
 
 	for (int i = 0; i < Panel::NumInJacks; i++) {
@@ -80,7 +80,7 @@ TEST_CASE("Dup module index")
 				},
 			.num_modules = 3,
 		};
-		PatchPlayer player;
+		MetaModule::PatchPlayer player;
 		player.calc_multiple_module_indicies(exampleDualLFO);
 		CHECK(player.get_multiple_module_index(0) == 0); // PANEL_8
 		CHECK(player.get_multiple_module_index(1) == 1); // LFOSINE 1
@@ -89,7 +89,7 @@ TEST_CASE("Dup module index")
 
 	SUBCASE("If there's more than one of a module type, caches correct 'dup index' for each")
 	{
-		PatchPlayer player;
+		MetaModule::PatchPlayer player;
 		player.calc_multiple_module_indicies(p);
 
 		CHECK(player.get_multiple_module_index(0) == 0); // PANEL_8
