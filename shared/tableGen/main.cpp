@@ -292,7 +292,7 @@ void buildTrigTables()
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / (float)(trigTableLength - 1);
-		myfile << format_float(MathTools::map_value(index, 0.0f, 1.0f, 20.0f, 20000.0f)) << ",";
+		myfile << format_float(logf(MathTools::map_value(index, 0.0f, 1.0f, 20.0f, 20000.0f))) << ",";
 	}
 	myfile << "};" << endl;
 
