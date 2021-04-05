@@ -1,4 +1,4 @@
-#include "math.h"
+#include "util/math.hh"
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -156,7 +156,7 @@ void buildFoldTables()
 		for (int i = 0; i < cheby_size; i++)
 			cheby[n][i] = 2.0f * cheby[0][i] * cheby[n - 1][i] - cheby[n - 2][i];
 
-	myfile << "const InterpArray<float, 513> cheby[16] = " << endl << "{";
+	myfile << "extern const InterpArray<float, 513> cheby[16] = " << endl << "{";
 
 	for (int i = 0; i < 16; i++) {
 		if (i == 0)
@@ -197,7 +197,7 @@ void buildFoldTables()
 		}
 	}
 
-	myfile << "const InterpArray<float, 1025> fold = " << endl;
+	myfile << "extern const InterpArray<float, 1025> fold = " << endl;
 	myfile << "{ ";
 
 	for (int i = 0; i < 1025; i++) {
@@ -220,14 +220,14 @@ void buildFoldTables()
 		}
 	}
 
-	myfile << "const InterpArray<float, 513> fold_max = " << endl << "{";
+	myfile << "extern const InterpArray<float, 513> fold_max = " << endl << "{";
 
 	for (int i = 0; i < 513; i++) {
 		myfile << format_float(fold_max[i]) << ",";
 	}
 	myfile << "};" << endl;
 
-	myfile << "const InterpArray<float, 9> triangles[8] = " << endl;
+	myfile << "extern const InterpArray<float, 9> triangles[8] = " << endl;
 	myfile << "{" << endl;
 
 	for (int i = 0; i < 8; i++) {
@@ -256,7 +256,7 @@ void buildTrigTables()
 
 	const int trigTableLength = 2048;
 
-	myfile << "const InterpArray<float," << trigTableLength << "> sinTable = " << endl;
+	myfile << "extern const InterpArray<float," << trigTableLength << "> sinTable = " << endl;
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / (float)trigTableLength;
@@ -264,7 +264,7 @@ void buildTrigTables()
 	}
 	myfile << "};" << endl;
 
-	myfile << "const InterpArray<float," << trigTableLength << "> tanTable = " << endl;
+	myfile << "extern const InterpArray<float," << trigTableLength << "> tanTable = " << endl;
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / (float)trigTableLength * M_PI;
@@ -274,7 +274,7 @@ void buildTrigTables()
 
 	const float voltageRange = 5.f;
 	const float powRange = (float)(trigTableLength - 1) / voltageRange;
-	myfile << "const InterpArray<float," << trigTableLength << "> expTable = " << endl;
+	myfile << "extern const InterpArray<float," << trigTableLength << "> expTable = " << endl;
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / powRange;
@@ -282,11 +282,19 @@ void buildTrigTables()
 	}
 	myfile << "};" << endl;
 
-	myfile << "const InterpArray<float," << trigTableLength << "> pow9Table = " << endl;
+	myfile << "extern const InterpArray<float," << trigTableLength << "> pow9Table = " << endl;
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / (float)(trigTableLength - 1);
 		myfile << format_float(powf(index, 8.8f)) << ",";
+	}
+	myfile << "};" << endl;
+
+	myfile << "extern const InterpArray<float," << trigTableLength << "> logTable = " << endl;
+	myfile << "{";
+	for (int i = 0; i < trigTableLength; i++) {
+		float index = (float)i / (float)(trigTableLength - 1);
+		myfile << format_float(MathTools::map_value(index, 0.0f, 1.0f, 20.0f, 20000.0f)) << ",";
 	}
 	myfile << "};" << endl;
 
