@@ -13,23 +13,23 @@ float originalFreqToNorm(float input)
 
 TEST_CASE("values are equal to original function")
 {
-	for (int i = 0; i < 10; i++) {
-		float value = (rand() % 100) / 100.0f;
-		CHECK(originalFreqToNorm(value) == doctest::Approx(freqToNorm(value)));
+	for (int i = 0; i < 20; i++) {
+		float value = map_value(static_cast<float>(i), 0.0f, 19.0f, 20.0f, 20000.0f);
+		CHECK(originalFreqToNorm(value) == doctest::Approx(audioFreqToNorm(value)));
 	}
 
-	SUBCASE("Check 0 equals NAN or +/-INF")
+	SUBCASE("Check value below 20 returns same value as 20")
 	{
-		float val = freqToNorm(0.f);
-		bool equals_pos_inf = (val == INFINITY);
-		bool equals_neg_inf = (val == -INFINITY);
-		bool equals_nan = (val == NAN);
-		CHECK((equals_neg_inf || equals_pos_inf || equals_nan));
+		CHECK(audioFreqToNorm(20)==audioFreqToNorm(0));
+	}
+
+	SUBCASE("Check that value above 20000 returns same value as 20000")
+	{
+		CHECK(audioFreqToNorm(30000.0f)==audioFreqToNorm(20000.0f));
 	}
 
 	SUBCASE("Check 20 returns 0")
 	{
-		CHECK(freqToNorm(20.f) == doctest::Approx(0.f));
+		CHECK(audioFreqToNorm(20.f) == doctest::Approx(0.f));
 	}
 }
-

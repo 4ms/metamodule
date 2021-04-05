@@ -34,7 +34,7 @@ public:
 			signalOutput = bpf.update(signalInput);
 		} else if (mode == 1) {
 			ober.q = map_value(filterQ, 0.0f, 1.0f, 1.0f, 20.0f);
-			ober.cutoff.setValue(freqToNorm(filterFreq));
+			ober.cutoff.setValue(audioFreqToNorm(filterFreq));
 			signalOutput = ober.update(signalInput);
 		}
 	}

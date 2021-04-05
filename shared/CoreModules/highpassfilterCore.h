@@ -33,7 +33,7 @@ public:
 			signalOutput = hpf.update(signalInput);
 		} else if (mode == 1) {
 			{
-				korg.cutoff.setValue(freqToNorm(filterFreq));
+				korg.cutoff.setValue(audioFreqToNorm(filterFreq));
 				signalOutput = korg.update(signalInput);
 			}
 		}

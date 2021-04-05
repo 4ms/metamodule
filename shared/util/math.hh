@@ -146,11 +146,13 @@ constexpr float setPitchMultiple(float val)
 	return pitchMultiple;
 }
 
-static inline float freqToNorm(float input) // normalized filter frequency conversion
+static inline float audioFreqToNorm(float input) // normalized filter frequency conversion
 {
-  float output = 0;
-  output = (logf(input)-2.99573f)/(6.90776f);
-  return output;
-}
+	float output = 0;
+	input = constrain(input,20.0f,20000.0f);
+		float temp1 = logTable.interp(map_value(input, 20.0f, 20000.0f, 0.0f, 1.0f));
+		output = (temp1 - 2.99573f) / (6.90776f);
+	return output;
 
-} // namespace MathTools
+}
+}; // namespace MathTools

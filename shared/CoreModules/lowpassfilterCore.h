@@ -37,7 +37,7 @@ public:
 			signalOut = lpf.update(signalIn);
 		} else if (mode == 1) // Moog LPF
 		{
-			moog.cutoff.setValue(freqToNorm(filterFreq));
+			moog.cutoff.setValue(audioFreqToNorm(filterFreq));
 			moog.q.setValue(filterQ);
 			signalOut = moog.update(signalIn);
 		}
