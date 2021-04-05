@@ -511,6 +511,12 @@ public:
 			// displays supporting setAddrWindow() and pushColors()), but haven't
 			// implemented this yet.
 
+			if ((x >= _width) ||			  // Clip right
+				(y >= _height) ||			  // Clip bottom
+				((x + w * size_x - 1) < 0) || // Clip left
+				((y + h * size_y - 1) < 0))	  // Clip top
+				return;
+
 			for (yy = 0; yy < h; yy++) {
 				for (xx = 0; xx < w; xx++) {
 					if (!(bit++ & 7)) {
@@ -518,7 +524,8 @@ public:
 					}
 					if (bits & 0x80) {
 						if (size_x == 1 && size_y == 1) {
-							drawPixel(x + xo + xx, y + yo + yy, color);
+							if ((x + xo + xx < _width) && (y + yo + yy < _height))
+								drawPixel(x + xo + xx, y + yo + yy, color);
 						} else {
 							fillRect(x + (xo16 + xx) * size_x, y + (yo16 + yy) * size_y, size_x, size_y, color);
 						}
