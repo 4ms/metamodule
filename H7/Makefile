@@ -14,9 +14,6 @@ export DRIVERLIB       	= $(LIBDIR)/mdrivlib
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
-simulate:
-	$(info Simulating screens...)
-	@cd ../screen_simulator && cargo run
 
 all: 
 	@$(MAKE) --no-print-directory -f makefile_m7.mk
@@ -51,7 +48,11 @@ tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
 
-.PHONY: all clean flash tables tests H7_tests core_tests util_tests proc_tests mdrivlib_tests
+simulate:
+	$(info Simulating screens...)
+	@cd ../screen_simulator && cargo run
+
+.PHONY: all clean flash tables tests H7_tests core_tests util_tests proc_tests mdrivlib_tests simulate
 
 tests: H7_tests core_tests util_tests mdrivlib_tests #proc_tests
 
