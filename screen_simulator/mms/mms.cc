@@ -24,11 +24,14 @@ struct Simulator {
 		screen.set_rotation(MMScreenBufferConf::Rotation::CW90);
 	}
 
-	void init()
+	bool init()
 	{
 		auto &patch = patch_list.cur_patch();
-		patch_player.load_patch(patch);
+		bool loaded_ok = patch_player.load_patch(patch);
+		if (!loaded_ok)
+			return false;
 		pages.init();
+		return true;
 	}
 
 	void refresh()
@@ -51,11 +54,13 @@ extern "C" void rotary_back()
 extern "C" void rotary_push_fwd()
 {
 	sim.patch_list.next_patch();
+	// sim.patch_player.load_patch(sim.patch_list.cur_patch());
 }
 
 extern "C" void rotary_push_back()
 {
 	sim.patch_list.prev_patch();
+	// sim.patch_player.load_patch(sim.patch_list.cur_patch());
 }
 
 extern "C" void rotary_press()
