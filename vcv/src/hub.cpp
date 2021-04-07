@@ -101,6 +101,11 @@ struct MetaModuleHub : public CommModule {
 				printDebugFile();
 
 				Patch patch;
+				std::string patchDir;
+				if (patchNameText.substr(0, 5) == "test_")
+					patchDir = testPatchDir;
+				else
+					patchDir = examplePatchDir;
 				if (patchNameText != "" && patchNameText != "Enter Patch Name") {
 					patch.patch_name = patchNameText.c_str();
 				} else {
@@ -119,7 +124,7 @@ struct MetaModuleHub : public CommModule {
 					.replace_all("?", "")
 					.replace_all("#", "")
 					.replace_all("!", "");
-				std::string patchFileName = examplePatchDir + patchStructName.str + ".hh";
+				std::string patchFileName = patchDir + patchStructName.str + ".hh";
 				createPatchStruct(patch);
 				writeToFile(patchFileName, PatchWriter::printPatchStructText(patchStructName.str, patch));
 
