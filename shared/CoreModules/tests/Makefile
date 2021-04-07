@@ -63,7 +63,7 @@ tests: $(BUILDDIR)/runtests
 	@$(BUILDDIR)/runtests --out=$(TMPFILE) && echo "[√] Unit tests passed: $(notdir $(PWD))" || cat $(TMPFILE)
 
 $(BUILDDIR)/runtests: $(OBJECTS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
+	@$(CXX) $(LDFLAGS) -o $@ $(OBJECTS)
 
 $(DOCTESTHEADER_DIR)/doctest.h:
 	wget https://raw.githubusercontent.com/onqtam/doctest/master/doctest/doctest.h -P $(DOCTESTHEADER_DIR)/
