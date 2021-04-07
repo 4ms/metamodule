@@ -19,8 +19,10 @@ all:
 	@$(MAKE) --no-print-directory -f makefile_m4.mk
 	@$(MAKE) --no-print-directory tests
 
-inttest:
-	@$(MAKE) --no-print-directory EXTDEF=INTEGRATION_TESTS all
+inttest: 
+	touch src/patchlist.cc 
+	touch src/patchlist.hh
+	@$(MAKE) --no-print-directory EXTDEF=METAMODULE_INTEGRATION_TESTS all
 
 clean:
 	rm -rf $(BUILDDIR_M4)

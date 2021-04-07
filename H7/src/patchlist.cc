@@ -1,6 +1,6 @@
 #include "patchlist.hh"
 
-#ifndef INTEGRATION_TESTS
+#ifndef METAMODULE_INTEGRATION_TESTS
 	#include "KP_FM_DRUM_DET.hh"
 	#include "KarplusStereo.hh"
 	#include "LPFBPF.hh"
@@ -14,16 +14,18 @@
 	#include "fadedelay_two.hh"
 
 PatchList::PatchList()
-	: _patches{{exampleDualLFO},
-			   {examplePitchShiftSimple},
-			   {exampleDrum},
-			   {fadedelay_example},
-			   {example_drum_verb_mono},
-			   {example_stereo_verb},
-			   {QuadDrum},
-			   {KP_FM_DRUM_DET},
-			   {KarplusStereo},
-			   {LPFBPF}}
+	: _patches{
+		  {exampleDualLFO},
+		  {examplePitchShiftSimple},
+		  {exampleDrum},
+		  {fadedelay_example},
+		  {example_drum_verb_mono},
+		  {example_stereo_verb},
+		  {QuadDrum},
+		  {KP_FM_DRUM_DET},
+		  {KarplusStereo},
+		  {LPFBPF},
+	  }
 {
 	_cur_patch_idx = 0;
 }
@@ -32,16 +34,10 @@ PatchList::PatchList()
 	#include "patch/integration_tests/all_tests.hh"
 
 PatchList::PatchList()
-	: _patches{{exampleDualLFO},
-			   {examplePitchShiftSimple},
-			   {exampleDrum},
-			   {fadedelay_example},
-			   {example_drum_verb_mono},
-			   {example_stereo_verb},
-			   {QuadDrum},
-			   {KP_FM_DRUM_DET},
-			   {KarplusStereo},
-			   {LPFBPF}}
+	: _patches{
+		  {test_adCore},
+		  // MARK: Add patches below here:
+	  }
 {
 	_cur_patch_idx = 0;
 }
