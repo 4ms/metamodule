@@ -11,6 +11,9 @@ HAL_CONF_INC = src/m7
 OPTFLAG = -O3
 include makefile_opts.mk
 
+MFDIR = $(LIBDIR)/mcufont/decoder
+include $(LIBDIR)/mcufont/decoder/mcufont.mk
+
 SOURCES  = $(DRIVERLIB)/drivers/$(STARTUP)
 SOURCES  += $(DEVICE)/src/$(SYSTEM)
 SOURCES  += $(wildcard $(PERIPH)/src/*.c)
@@ -32,6 +35,7 @@ SOURCES  += $(wildcard $(SHARED)/util/*.cc)
 SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
 SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
 SOURCES  += $(LIBDIR)/printf/printf.c
+SOURCES  += $(MFSRC)
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
@@ -52,8 +56,7 @@ INCLUDES = -I$(DEVICE)/include \
 			-I$(SHARED)/util \
 			-I$(SHARED)/patch \
 			-I$(LIBDIR)/printf \
-			-I$(LIBDIR)/adafruit_gfx/arduino \
-			-I$(LIBDIR)/adafruit_gfx \
+			-I$(MFINC) \
 
 include makefile_common.mk
 

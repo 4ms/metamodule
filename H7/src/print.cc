@@ -16,3 +16,9 @@ extern "C" void _putchar(char character)
 		return;
 	default_screen->write(character);
 }
+
+extern "C" void draw_pixel(int16_t x, int16_t y, uint8_t count, uint8_t alpha, void *state)
+{
+	while (count--)
+		default_screen->draw_blended_text_pixel_clipped(x, y, alpha);
+}
