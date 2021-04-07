@@ -36,14 +36,14 @@ struct PageWidgets {
 		screen.setTextSize(2);
 		screen.setFont(NULL);
 		screen.setCursor(200, 225);
-		screen.print(audio_load, 10);
+		screen.print(audio_load);
 		screen.print("% ");
 		screen.setTextSize(1);
 		screen.setCursor(160, 224);
-		screen.print(get_heap_size() / 1024, 10);
+		screen.print(get_heap_size() / 1024);
 		screen.print("kb ");
 		screen.setCursor(160, 232);
-		screen.print(BigAllocControl::get_memory_usage() / 1024, 10);
+		screen.print(BigAllocControl::get_memory_usage() / 1024);
 		screen.print("kb   ");
 	}
 

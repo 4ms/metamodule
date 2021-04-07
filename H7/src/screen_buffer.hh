@@ -1,14 +1,14 @@
 #pragma once
 #include "Adafruit_GFX_Library/gfxfont.h"
 #include "Adafruit_GFX_Library/glcdfont.c" //yep: .c, that's how arduino does it
-#include "Print.h"
 #include "conf/screen_buffer_conf.hh"
 #include "drivers/dma2d_transfer.hh"
+#include "printf.h"
 #include "util/colors.hh"
 
 using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
-class ScreenFrameBuffer : public Print {
+class ScreenFrameBuffer {
 
 #ifdef SIMULATOR
 	ScreenSimulator::DMA2DTransfer dma2d;
@@ -382,7 +382,7 @@ public:
 		gfxFont = newfont;
 	}
 
-	size_t write(uint8_t c)
+	size_t write(char c)
 	{
 		if (!gfxFont) {										// 'Classic' built-in font
 			if (c == '\n') {								// Newline?
@@ -409,9 +409,10 @@ public:
 				uint8_t first = gfxFont->first;
 				if ((c >= first) && (c <= gfxFont->last)) {
 					GFXglyph *glyph = gfxFont->glyph + (c - first);
-					uint8_t w = glyph->width, h = glyph->height;
+					uint8_t w = glyph->width;
+					uint8_t h = glyph->height;
 					if ((w > 0) && (h > 0)) {
-						int16_t xo = (int8_t)glyph->xOffset; // sic
+						int16_t xo = (int8_t)glyph->xOffset; // sic... what?
 						if ((cursor_x + textsize_x * (xo + w)) > _width) {
 							if (wrap) {
 								cursor_x = 0;
@@ -436,8 +437,7 @@ public:
 
 	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y)
 	{
-		if (!gfxFont) { // 'Classic' built-in font
-
+		if (!gfxFont) {						  // 'Classic' built-in font
 			if ((x >= _width) ||			  // Clip right
 				(y >= _height) ||			  // Clip bottom
 				((x + 6 * size_x - 1) < 0) || // Clip left
@@ -493,24 +493,6 @@ public:
 				yo16 = yo;
 			}
 
-			// Todo: Add character clipping here
-
-			// NOTE: THERE IS NO 'BACKGROUND' COLOR OPTION ON CUSTOM FONTS.
-			// THIS IS ON PURPOSE AND BY DESIGN.  The background color feature
-			// has typically been used with the 'classic' font to overwrite old
-			// screen contents with new data.  This ONLY works because the
-			// characters are a uniform size; it's not a sensible thing to do with
-			// proportionally-spaced fonts with glyphs of varying sizes (and that
-			// may overlap).  To replace previously-drawn text when using a custom
-			// font, use the getTextBounds() function to determine the smallest
-			// rectangle encompassing a string, erase the area with fillRect(),
-			// then draw new text.  This WILL infortunately 'blink' the text, but
-			// is unavoidable.  Drawing 'background' pixels will NOT fix this,
-			// only creates a new set of problems.  Have an idea to work around
-			// this (a canvas object type for MCUs that can afford the RAM and
-			// displays supporting setAddrWindow() and pushColors()), but haven't
-			// implemented this yet.
-
 			if ((x >= _width) ||			  // Clip right
 				(y >= _height) ||			  // Clip bottom
 				((x + w * size_x - 1) < 0) || // Clip left
@@ -533,9 +515,18 @@ public:
 					bits <<= 1;
 				}
 			}
-
 		} // End classic vs custom font
 	}
+
+	// clang-format off
+	int print(const char s[]) 	{ return printf("%s", s); }
+	int print(const char c) 	{ return printf("%c", c); }
+	int print(int n) 			{ return printf("%d", n); }
+	int print(unsigned n) 		{ return printf("%d", n); }
+	int print(long n) 			{ return printf("%d", n); }
+	int print(unsigned long n) 	{ return printf("%d", n); }
+	// int print(float f) 			{ return printf("%f", f); }
+	// clang-format on
 
 	void flush_cache() {}
 
@@ -554,31 +545,6 @@ protected:
 	bool wrap;				///< If set, 'wrap' text at right edge of display
 	bool _cp437;			///< If set, use correct CP437 charset (default is off)
 	const GFXfont *gfxFont; ///< Pointer to special font
-
-	// 	unsigned char pgm_read_byte(uint32_t addr)
-	// 	{
-	// 		return (*(const unsigned char *)(addr));
-	// 	}
-	// 	unsigned short pgm_read_word(uint32_t addr)
-	// 	{
-	// 		return (*(const unsigned short *)(addr));
-	// 	}
-	// 	unsigned long pgm_read_dword(uint32_t addr)
-	// 	{
-	// 		return (*(const unsigned long *)(addr));
-	// 	}
-	// 	auto pgm_read_pointer(uint32_t addr)
-	// 	{
-	// 		return ((void *)pgm_read_dword(addr));
-	// 	}
-
-	// 	GFXglyph *pgm_read_glyph_ptr(const GFXfont *gfxFont, uint8_t c)
-	// 	{
-	// 		return gfxFont->glyph + c;
-	// 	}
-
-	// 	uint8_t *pgm_read_bitmap_ptr(const GFXfont *gfxFont)
-	// 	{
-	// 		return gfxFont->bitmap;
-	// 	}
 };
+
+void register_printf_destination(ScreenFrameBuffer &screen);

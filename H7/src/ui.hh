@@ -66,6 +66,7 @@ public:
 		player.load_patch(patch_list.cur_patch());
 
 		screen.init();
+		register_printf_destination(screen);
 		pages.init();
 
 		leds.but[0].set_background(Colors::grey);
