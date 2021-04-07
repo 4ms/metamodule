@@ -14,12 +14,13 @@ export DRIVERLIB       	= $(LIBDIR)/mdrivlib
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
-
 all: 
 	@$(MAKE) --no-print-directory -f makefile_m7.mk
 	@$(MAKE) --no-print-directory -f makefile_m4.mk
 	@$(MAKE) --no-print-directory tests
 
+inttest:
+	@$(MAKE) --no-print-directory EXTDEF=INTEGRATION_TESTS all
 
 clean:
 	rm -rf $(BUILDDIR_M4)

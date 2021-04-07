@@ -20,7 +20,8 @@ ARCH_CFLAGS += -D'__FPU_PRESENT=1' \
 			  -DUSE_FULL_LL_DRIVER \
 			  -DSTM32H745xx \
 			  -DSTM32H7x5xx \
-			  -DSTM32H7
+			  -DSTM32H7 \
+			  -D$(EXTDEF)
 
 CFLAGS = -g2 -fno-common \
 	$(ARCH_CFLAGS) $(MCU) \
@@ -80,7 +81,7 @@ $(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
 $(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)
 	$(info Building $< at $(OPTFLAG))
-	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cpp $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)
