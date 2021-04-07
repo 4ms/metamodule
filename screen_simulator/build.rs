@@ -1,11 +1,11 @@
 fn main() {
-    println!("cargo:rerun-if-changed=../H7/src/pages/sim_test_page.hh");
     println!("cargo:rerun-if-changed=../H7/src/pages/");
     println!("cargo:rerun-if-changed=mms/mms.cc");
 
     let mut src: Vec<String> = Vec::new();
     src.push(String::from("mms/mms.cc"));
-    src.push(String::from("../H7/lib/adafruit_gfx/arduino/Print.cpp"));
+    src.push(String::from("../H7/lib/printf/printf.c"));
+    src.push(String::from("../H7/src/print.cc"));
     src.push(String::from("../H7/src/patchlist.cc"));
     src.push(String::from("../H7/src/pages/fonts.cc"));
     src.push(String::from("../H7/src/pages/page_manager.cc"));
@@ -24,6 +24,7 @@ fn main() {
         .cpp(true)
         .files(src.iter())
         .flag("--includestubs/sys/alloc_buffer.hh")
+        .include("../H7/lib/printf")
         .include("mms")
         .include("mms/stubs")
         .include("../shared")
@@ -31,7 +32,6 @@ fn main() {
         .include("../shared/patch")
         .include("../H7/src")
         .include("../H7/lib/adafruit_gfx")
-        .include("../H7/lib/adafruit_gfx/arduino")
         .flag("-DSIMULATOR")
         .flag("-std=c++2a")
         .flag("-Wno-unused-parameter");

@@ -22,7 +22,9 @@ struct Simulator {
 	{
 		params.clear();
 		metaparams.clear();
-		screen.set_rotation(MMScreenBufferConf::Rotation::CW90);
+		screen.init();
+		register_printf_destination(screen);
+		// screen.set_rotation(MMScreenBufferConf::Rotation::CW90);
 	}
 
 	bool init()
