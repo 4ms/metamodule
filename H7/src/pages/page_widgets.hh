@@ -14,7 +14,7 @@ struct PageWidgets {
 
 	static void setup_header(ScreenFrameBuffer &screen)
 	{
-		screen.setFont(&FreeSansBold18pt7b);
+		// screen.setFont(&FreeSansBold18pt7b);
 		screen.setTextColor(header_fg);
 		screen.setTextSize(1);
 		screen.setCursor(2, header_ypos);
@@ -23,7 +23,7 @@ struct PageWidgets {
 
 	static void setup_sub_header(ScreenFrameBuffer &screen)
 	{
-		screen.setFont(&FreeSansBold12pt7b);
+		// screen.setFont(&FreeSansBold12pt7b);
 		screen.setTextColor(subheader_fg);
 		screen.setTextSize(1);
 		screen.setCursor(2, subheader_ypos);

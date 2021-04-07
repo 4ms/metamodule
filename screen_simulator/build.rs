@@ -7,9 +7,18 @@ fn main() {
     src.push(String::from("../H7/lib/printf/printf.c"));
     src.push(String::from("../H7/src/print.cc"));
     src.push(String::from("../H7/src/patchlist.cc"));
-    src.push(String::from("../H7/src/pages/fonts.cc"));
     src.push(String::from("../H7/src/pages/page_manager.cc"));
     src.push(String::from("../shared/util/math_tables.cc"));
+
+    src.push(String::from("../H7/lib/mcufont/fonts/DejaVuSans12.c"));
+    src.push(String::from("../H7/lib/mcufont/decoder/mf_font.c"));
+    src.push(String::from("../H7/lib/mcufont/decoder/mf_kerning.c"));
+    src.push(String::from("../H7/lib/mcufont/decoder/mf_bwfont.c"));
+    src.push(String::from("../H7/lib/mcufont/decoder/mf_rlefont.c"));
+    // src.push(String::from("../H7/lib/mcufont/decoder/mf_scaledfont.c"));
+    // src.push(String::from("../H7/lib/mcufont/decoder/mf_wordwrap.c"));
+    src.push(String::from("../H7/lib/mcufont/decoder/mf_encoding.c"));
+    src.push(String::from("../H7/lib/mcufont/decoder/mf_justify.c"));
 
     use glob::glob;
     for entry in glob("../shared/CoreModules/*.cpp").expect("Bad glob pattern") {
@@ -31,7 +40,8 @@ fn main() {
         .include("../shared/util")
         .include("../shared/patch")
         .include("../H7/src")
-        .include("../H7/lib/adafruit_gfx")
+        .include("../H7/lib/mcufont/decoder")
+        .include("../H7/lib/mcufont/fonts")
         .flag("-DSIMULATOR")
         .flag("-std=c++2a")
         .flag("-Wno-unused-parameter");

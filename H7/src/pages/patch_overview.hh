@@ -25,7 +25,7 @@ struct PatchOverviewPage : PageBase {
 		screen.setTextWrap(true);
 		screen.print(patch_list.cur_patch().patch_name);
 
-		screen.setFont(&FreeSans9pt7b);
+		// screen.setFont(&FreeSans9pt7b);
 		screen.setTextColor(Colors::grey);
 		screen.setCursor(2, 90);
 		screen.print("The verbose patch description, etc etc. Todo, fix word-wrap to only wrap on a space");
@@ -48,7 +48,7 @@ struct JackMapPage : PageBase {
 		PageWidgets::setup_sub_header(screen);
 		screen.print("Jack layout:");
 
-		screen.setFont(&FreeSans9pt7b);
+		// screen.setFont(&FreeSans9pt7b);
 		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 		int y = PatchOverviewPage::list_ypos;
 
@@ -103,7 +103,7 @@ struct KnobMapPage : PageBase {
 		PageWidgets::setup_sub_header(screen);
 		screen.print("Knob layout:");
 
-		screen.setFont(&FreeSans9pt7b);
+		// screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
 		const uint16_t line_height = PatchOverviewPage::list_lineheight;
 		const char knob_name[8][2] = {"A", "B", "C", "D", "a", "b", "c", "d"};
@@ -141,7 +141,7 @@ struct PatchLayoutPage : PageBase {
 		PageWidgets::setup_sub_header(screen);
 		screen.print("Internal cables:");
 
-		screen.setFont(&FreeSans9pt7b);
+		// screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
 		if (patch_player.is_loaded) {
 			screen.setCursor(2, y_pos);
@@ -185,7 +185,7 @@ struct ModulesInPatchPage : PageBase {
 		PageWidgets::setup_sub_header(screen);
 		screen.print("Modules in patch:");
 
-		screen.setFont(&FreeSans9pt7b);
+		// screen.setFont(&FreeSans9pt7b);
 		const uint16_t y_pos = PatchOverviewPage::list_ypos;
 		if (patch_player.is_loaded) {
 			screen.setCursor(0, y_pos);

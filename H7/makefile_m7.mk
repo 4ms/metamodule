@@ -11,6 +11,7 @@ HAL_CONF_INC = src/m7
 OPTFLAG = -O3
 include makefile_opts.mk
 
+MFFONTDIR = $(LIBDIR)/mcufont/fonts
 MFDIR = $(LIBDIR)/mcufont/decoder
 include $(LIBDIR)/mcufont/decoder/mcufont.mk
 
@@ -57,6 +58,7 @@ INCLUDES = -I$(DEVICE)/include \
 			-I$(SHARED)/patch \
 			-I$(LIBDIR)/printf \
 			-I$(MFINC) \
+			-I$(MFFONTDIR) \
 
 include makefile_common.mk
 

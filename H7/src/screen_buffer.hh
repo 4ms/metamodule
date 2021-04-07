@@ -1,9 +1,13 @@
 #pragma once
 #include "conf/screen_buffer_conf.hh"
 #include "drivers/dma2d_transfer.hh"
-#include "mf_font.h"
+#include "mcufont.h"
+#include "pages/fonts.hh"
 #include "printf.h"
 #include "util/colors.hh"
+
+extern "C" void _draw_text_pixel_callback(int16_t x, int16_t y, uint8_t count, uint8_t alpha, void *state);
+extern "C" uint8_t _char_callback(int16_t x0, int16_t y0, mf_char character, void *state);
 
 using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
@@ -21,6 +25,7 @@ public:
 		: framebuf{framebuf_}
 	{
 		dma2d.init();
+		_font = &mf_rlefont_DejaVuSans12.font;
 	}
 
 	void init()
@@ -416,37 +421,47 @@ public:
 
 	void setFont(const mf_font_s *newfont)
 	{
-		font = newfont;
+		_font = newfont;
 	}
 
-	// printf() calls this
-	int write(char c)
+	// printf() calls _putchar() which is C wrapper over this
+	void write(char character)
 	{
-		// in adafruit, this called drawChar() using current cursor, textColor, and textSize
-		return 0;
+		cursor_x += mf_render_character(_font, cursor_x, cursor_y, character, &_draw_text_pixel_callback, nullptr);
 	}
 
-	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size)
+	void drawChar(int16_t x, int16_t y, unsigned char character, uint16_t color) {}
+
+	char _textbuf[255];
+	void printf_at(int16_t x, int16_t y, const char *format, ...)
 	{
-		drawChar(x, y, c, color, bg, size, size);
+		va_list args;
+		va_start(args, format);
+		int res = vsnprintf(_textbuf, 255, format, args);
+		if (res)
+			mf_render_aligned(_font, x, y, MF_ALIGN_LEFT, _textbuf, 0, &_char_callback, nullptr);
+		va_end(args);
 	}
 
-	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y)
+	void _render_textbuf()
 	{
-		//
+		mf_render_aligned(_font, cursor_x, cursor_y, MF_ALIGN_LEFT, _textbuf, 0, &_char_callback, nullptr);
+		cursor_x += mf_get_string_width(_font, _textbuf, 0, true);
 	}
 
 	// clang-format off
-	int print(const char s[]) 	{ return printf("%s", s); }
-	int print(const char c) 	{ return printf("%c", c); }
-	int print(int n) 			{ return printf("%d", n); }
-	int print(unsigned n) 		{ return printf("%d", n); }
-	int print(long n) 			{ return printf("%d", n); }
-	int print(unsigned long n) 	{ return printf("%d", n); }
-	// int print(float f) 			{ return printf("%f", f); }
+	void print(const char s[]) 	{ if (snprintf(_textbuf, 255, "%s", s)) _render_textbuf(); }
+	void print(const char c) 	{ if (snprintf(_textbuf, 255, "%c", c)) _render_textbuf(); }
+	void print(int n) 			{ if (snprintf(_textbuf, 255, "%d", n)) _render_textbuf(); }
+	void print(unsigned n) 		{ if (snprintf(_textbuf, 255, "%d", n)) _render_textbuf(); }
+	void print(long n) 			{ if (snprintf(_textbuf, 255, "%d", n)) _render_textbuf(); }
+	void print(unsigned long n)	{ if (snprintf(_textbuf, 255, "%d", n)) _render_textbuf(); }
+	// void print(float n)			{ if (snprintf(_textbuf, 255, "%f", n)) _render_textbuf(); }
 	// clang-format on
 
 	void flush_cache() {}
+
+	const mf_font_s *_font;
 
 protected:
 	int _rotation;
@@ -461,7 +476,6 @@ protected:
 	uint8_t textsize_y;
 	uint8_t rotation;
 	bool wrap;
-	const mf_font_s *font;
 };
 
 void register_printf_destination(ScreenFrameBuffer &screen);
