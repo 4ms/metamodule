@@ -2,6 +2,23 @@ fn main() {
     println!("cargo:rerun-if-changed=../H7/src/pages/");
     println!("cargo:rerun-if-changed=mms/mms.cc");
 
+    let mut mcufont_src: Vec<String> = Vec::new();
+    mcufont_src.push(String::from("../H7/lib/mcufont/decoder/mf_font.c"));
+    mcufont_src.push(String::from("../H7/lib/mcufont/decoder/mf_kerning.c"));
+    mcufont_src.push(String::from("../H7/lib/mcufont/decoder/mf_bwfont.c"));
+    mcufont_src.push(String::from("../H7/lib/mcufont/decoder/mf_rlefont.c"));
+    mcufont_src.push(String::from("../H7/lib/mcufont/decoder/mf_scaledfont.c"));
+    mcufont_src.push(String::from("../H7/lib/mcufont/decoder/mf_wordwrap.c"));
+    mcufont_src.push(String::from("../H7/lib/mcufont/decoder/mf_encoding.c"));
+    mcufont_src.push(String::from("../H7/lib/mcufont/decoder/mf_justify.c"));
+    let mut builder = cc::Build::new();
+    let build = builder
+        .cpp(false)
+        .files(mcufont_src.iter())
+        .include("../H7/lib/mcufont/decoder")
+        .include("../H7/lib/mcufont/fonts");
+    build.compile("mcufont");
+
     let mut src: Vec<String> = Vec::new();
     src.push(String::from("mms/mms.cc"));
     src.push(String::from("../H7/lib/printf/printf.c"));
@@ -9,16 +26,6 @@ fn main() {
     src.push(String::from("../H7/src/patchlist.cc"));
     src.push(String::from("../H7/src/pages/page_manager.cc"));
     src.push(String::from("../shared/util/math_tables.cc"));
-
-    src.push(String::from("../H7/lib/mcufont/fonts/DejaVuSans12.c"));
-    src.push(String::from("../H7/lib/mcufont/decoder/mf_font.c"));
-    src.push(String::from("../H7/lib/mcufont/decoder/mf_kerning.c"));
-    src.push(String::from("../H7/lib/mcufont/decoder/mf_bwfont.c"));
-    src.push(String::from("../H7/lib/mcufont/decoder/mf_rlefont.c"));
-    // src.push(String::from("../H7/lib/mcufont/decoder/mf_scaledfont.c"));
-    // src.push(String::from("../H7/lib/mcufont/decoder/mf_wordwrap.c"));
-    src.push(String::from("../H7/lib/mcufont/decoder/mf_encoding.c"));
-    src.push(String::from("../H7/lib/mcufont/decoder/mf_justify.c"));
 
     use glob::glob;
     for entry in glob("../shared/CoreModules/*.cpp").expect("Bad glob pattern") {
@@ -30,6 +37,7 @@ fn main() {
 
     let mut builder = cc::Build::new();
     let build = builder
+        .object("libmcufont.a")
         .cpp(true)
         .files(src.iter())
         .flag("--includestubs/sys/alloc_buffer.hh")
