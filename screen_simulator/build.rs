@@ -35,11 +35,13 @@ fn main() {
         }
     }
 
+    println!("cargo:rerun-rustc-link-lib=mcufont");
     let mut builder = cc::Build::new();
     let build = builder
-        .object("libmcufont.a")
         .cpp(true)
         .files(src.iter())
+        // .flag("-Wl,anything=libmcufont")
+        // .object("libmcufont.a")
         .flag("--includestubs/sys/alloc_buffer.hh")
         .include("../H7/lib/printf")
         .include("mms")
