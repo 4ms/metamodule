@@ -21,9 +21,7 @@ extern "C" void _draw_text_pixel_callback(int16_t x, int16_t y, uint8_t count, u
 {
 	if (!screen_is_registered)
 		return;
-	while (count--)
-		default_screen->draw_blended_text_pixel_clipped(x, y, alpha);
-	// default_screen->drawHLine(
+	default_screen->blendHLineText(x, y, count, alpha);
 }
 
 extern "C" uint8_t _char_callback(int16_t x0, int16_t y0, mf_char character, void *state)

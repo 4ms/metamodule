@@ -24,7 +24,6 @@ struct Simulator {
 		metaparams.clear();
 		screen.init();
 		register_printf_destination(screen);
-		// screen.set_rotation(MMScreenBufferConf::Rotation::CW90);
 	}
 
 	bool init()

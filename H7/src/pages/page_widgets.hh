@@ -8,24 +8,22 @@ namespace MetaModule
 
 struct PageWidgets {
 	static constexpr Color header_fg = Colors::blue.blend(Colors::black, 0.5f);
-	static constexpr uint16_t header_ypos = 30;
+	static constexpr uint16_t header_ypos = 0;
 	static constexpr Color subheader_fg = Colors::black;
-	static constexpr uint16_t subheader_ypos = 56;
+	static constexpr uint16_t subheader_ypos = 36;
 
 	static void setup_header(ScreenFrameBuffer &screen)
 	{
-		// screen.setFont(&FreeSansBold18pt7b);
+		screen.setFont(&mf_rlefont_DejaVuSerif32.font);
 		screen.setTextColor(header_fg);
-		screen.setTextSize(1);
 		screen.setCursor(2, header_ypos);
 		screen.setTextWrap(false);
 	}
 
 	static void setup_sub_header(ScreenFrameBuffer &screen)
 	{
-		// screen.setFont(&FreeSansBold12pt7b);
+		screen.setFont(&mf_rlefont_DejaVuSerif16.font);
 		screen.setTextColor(subheader_fg);
-		screen.setTextSize(1);
 		screen.setCursor(2, subheader_ypos);
 		screen.setTextWrap(false);
 	}
@@ -33,12 +31,11 @@ struct PageWidgets {
 	static void draw_processor_stats(ScreenFrameBuffer &screen, Color color, uint8_t audio_load)
 	{
 		screen.setTextColor(color.Rgb565());
-		screen.setTextSize(2);
-		screen.setFont(NULL);
+		screen.setFont(&mf_rlefont_fixed_10x20.font);
 		screen.setCursor(200, 225);
 		screen.print(audio_load);
 		screen.print("% ");
-		screen.setTextSize(1);
+		screen.setFont(&mf_rlefont_fixed_7x14.font);
 		screen.setCursor(160, 224);
 		screen.print(get_heap_size() / 1024);
 		screen.print("kb ");
@@ -60,8 +57,7 @@ struct PageWidgets {
 	static void draw_pot_values(ScreenFrameBuffer &screen, Params &params, Color color, int16_t y_pos = 214)
 	{
 		screen.setTextColor(color.Rgb565());
-		screen.setTextSize(1);
-		screen.setFont(NULL);
+		screen.setFont(&mf_rlefont_fixed_7x14.font);
 		int y = y_pos;
 		const int box_height = 15;
 		const int box_width = 30;
@@ -87,8 +83,7 @@ struct PageWidgets {
 		const float box_alpha = 0.85f;
 
 		screen.setTextColor(text_color.Rgb565());
-		screen.setTextSize(1);
-		screen.setFont(NULL);
+		screen.setFont(&mf_rlefont_fixed_7x14.font);
 
 		const uint16_t yoffset = y_pos;
 		const uint16_t box_height = 15;

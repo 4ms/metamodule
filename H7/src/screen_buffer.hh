@@ -133,36 +133,51 @@ public:
 	void draw_blended_pix(int16_t x, int16_t y, uint16_t color, uint8_t alpha)
 	{
 		auto cur_pixel = framebuf[x + y * _width];
-		framebuf[x + y * _width] = Color::blend(color, cur_pixel, alpha);
+		framebuf[x + y * _width] = Color::blend(cur_pixel, color, alpha);
 	}
 
 	// Blends a Pixel into the framebuffer, using the current text fg color. Not bounds checked!
 	void draw_blended_text_pixel(int16_t x, int16_t y, uint8_t alpha)
 	{
+		draw_blended_pix(x, y, textcolor, alpha);
+	}
+
+	// Blends a pixel into the framebuffer. Clips at screen bounds.
+	void draw_blended_pixel_clipped(int16_t x, int16_t y, uint16_t color, uint8_t alpha)
+	{
+		if (x < 0 || x >= _width || y < 0 || y >= _height)
+			return;
 		auto cur_pixel = framebuf[x + y * _width];
-		framebuf[x + y * _width] = Color::blend(textcolor, cur_pixel, alpha);
+		framebuf[x + y * _width] = Color::blend(cur_pixel, color, alpha);
 	}
 
 	// Blends a pixel into the framebuffer, using current text fg color. Clips at screen bounds.
 	void draw_blended_text_pixel_clipped(int16_t x, int16_t y, uint8_t alpha)
 	{
-		if (x < 0 || x >= _width || y < 0 || y >= _height)
-			return;
-		auto cur_pixel = framebuf[x + y * _width];
-		framebuf[x + y * _width] = Color::blend(textcolor, cur_pixel, alpha);
+		draw_blended_pixel_clipped(x, y, textcolor, alpha);
 	}
 
-	void blendPixel(int16_t x, int16_t y, uint16_t color, float f_alpha)
+	// Blends a pixel into the framebuffer. Optimized if alpha is near min or max.
+	// Not bounds checked!
+	// alpha: 0 => no change to framebuffer, 255 => color replaces pixel in framebuffer
+	void blendPixel(int16_t x, int16_t y, uint16_t color, uint8_t alpha)
 	{
-		uint8_t alpha = f_alpha * 255.f;
-		if (alpha < (1.f / 64.f))
+		if (alpha < 4)
 			return;
-		else if (alpha > (63.f / 64.f))
+		else if (alpha > 252)
 			drawPixel(x, y, color);
 		else
 			draw_blended_pix(x, y, color, alpha);
 	}
 
+	// Blends a pixel into the framebuffer. Optimized if alpha is near min or max
+	// f_alpha: 0 => no change to framebuffer, 1=>color replaces pixel in framebuffer
+	void blendPixel(int16_t x, int16_t y, uint16_t color, float f_alpha)
+	{
+		blendPixel(x, y, color, (uint8_t)(f_alpha * 255.f));
+	}
+
+	// Sets a pixel in the framebuffer. Not bounds checked.
 	void drawPixel(int16_t x, int16_t y, uint16_t color)
 	{
 		framebuf[x + y * _width] = color;
@@ -180,42 +195,36 @@ public:
 			w += x;
 			x = 0;
 		}
-		if ((x + w) >= _width)
-			w = _width - x;
+		int16_t max_x = (w + x) >= _width ? _width : x + w;
 
-		const int16_t row_offset = x + y * _width;
-		for (int i = 0; i < w; i++) {
-			framebuf[i + row_offset] = color;
+		for (int16_t xi = x; xi < max_x; xi++) {
+			drawPixel(xi, y, color);
 		}
 	}
 
-	void blendHLine(int16_t x, int16_t y, int16_t w, uint16_t color, float alpha)
+	void blendHLine(int16_t x, int16_t y, int16_t w, uint16_t color, uint8_t alpha)
 	{
-		if (y < 0 || y >= _height)
+		if (alpha > 252) {
+			drawHLine(x, y, w, color);
+			return;
+		}
+		if (alpha < 4 || y < 0 || y >= _height)
 			return;
 		if (x < 0) {
 			w += x;
 			x = 0;
 		}
-		int16_t max_x = (w + x) > _width ? _width : x + w;
+		int16_t max_x = (w + x) >= _width ? _width : x + w;
 
-		for (int xi = x; xi < max_x; xi++)
+		// Todo: try reading all pixels onto stack, then blend and write all at once
+		// Might give a performance boost, due to caching
+		for (int16_t xi = x; xi < max_x; xi++)
 			draw_blended_pix(xi, y, color, alpha);
 	}
 
-	// Uses current text color
-	void blendHLineText(int16_t x, int16_t y, int16_t w, float alpha)
+	void blendHLineText(int16_t x, int16_t y, int16_t w, uint8_t alpha)
 	{
-		if (y < 0 || y >= _height)
-			return;
-		if (x < 0) {
-			w += x;
-			x = 0;
-		}
-		int16_t max_x = (w + x) > _width ? _width : x + w;
-
-		for (int xi = x; xi < max_x; xi++)
-			draw_blended_pix(xi, y, textcolor, alpha);
+		blendHLine(x, y, w, textcolor, alpha);
 	}
 
 	void drawVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
@@ -389,24 +398,16 @@ public:
 
 	void setTextColor(Color color)
 	{
-		textcolor = textbgcolor = color.Rgb565();
+		textcolor = color.Rgb565();
 	}
 
 	void setTextColor(Color fgcolor, Color bgcolor)
 	{
 		textcolor = fgcolor.Rgb565();
-		textbgcolor = bgcolor.Rgb565();
 	}
 
-	void setTextSize(uint8_t s)
-	{
-		textsize_x = textsize_y = s;
-	}
-	void setTextSize(uint8_t s_x, uint8_t s_y)
-	{
-		textsize_x = s_x;
-		textsize_y = s_y;
-	}
+	void setTextSize(uint8_t s) {}
+	void setTextSize(uint8_t s_x, uint8_t s_y) {}
 
 	void setCursor(int16_t x, int16_t y)
 	{
@@ -462,6 +463,7 @@ public:
 	void flush_cache() {}
 
 	const mf_font_s *_font;
+	uint16_t textcolor;
 
 protected:
 	int _rotation;
@@ -470,10 +472,6 @@ protected:
 
 	int16_t cursor_x;
 	int16_t cursor_y;
-	uint16_t textcolor;
-	uint16_t textbgcolor;
-	uint8_t textsize_x;
-	uint8_t textsize_y;
 	uint8_t rotation;
 	bool wrap;
 };

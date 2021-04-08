@@ -16,7 +16,8 @@ fn main() {
         .cpp(false)
         .files(mcufont_src.iter())
         .include("../H7/lib/mcufont/decoder")
-        .include("../H7/lib/mcufont/fonts");
+        .include("../H7/lib/mcufont/fonts")
+        .flag("-Wno-unused-parameter");
     build.compile("mcufont");
 
     let mut src: Vec<String> = Vec::new();
@@ -40,8 +41,6 @@ fn main() {
     let build = builder
         .cpp(true)
         .files(src.iter())
-        // .flag("-Wl,anything=libmcufont")
-        // .object("libmcufont.a")
         .flag("--includestubs/sys/alloc_buffer.hh")
         .include("../H7/lib/printf")
         .include("mms")
