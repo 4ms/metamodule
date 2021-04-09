@@ -85,7 +85,7 @@ struct PatchSelectorPage : PageBase {
 
 	const int32_t num_animation_steps = 6;
 	const int32_t lineheight = 24;
-	const int32_t y_offset = 40;
+	const int32_t y_offset = 48;
 };
 
 } // namespace MetaModule
