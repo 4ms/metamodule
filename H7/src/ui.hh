@@ -110,7 +110,9 @@ public:
 			return;
 		}
 		HWSemaphore<ScreenFrameBufLock>::lock();
+		// Debug::Pin1::high();
 		pages.display_current_page();
+		// Debug::Pin1::low();
 		screen.flush_cache();
 		HWSemaphore<ScreenFrameBufLock>::unlock();
 	}
