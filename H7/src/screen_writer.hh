@@ -102,7 +102,6 @@ public:
 	{
 		if (using_half_buffer_transfers) {
 			HWSemaphore<ScreenFrameWriteLock>::lock();
-
 			set_pos(0, 0, _width - 1, _height - 1);
 			config_bdma_transfer(dst_addr, HalfFrameSize);
 			mem_xfer.config_transfer(dst, src, HalfFrameSize);
@@ -125,6 +124,7 @@ public:
 					mem_xfer.start_transfer();
 				});
 			});
+
 			mem_xfer.start_transfer();
 		} else {
 			// Todo: test full buffer xfer

@@ -439,7 +439,7 @@ public:
 		va_start(args, format);
 		int res = vsnprintf(_textbuf, 255, format, args);
 		if (res)
-			mf_render_aligned(_font, x, y, MF_ALIGN_LEFT, _textbuf, 0, &_char_callback, nullptr);
+			mf_render_aligned(_font, x, y, MF_ALIGN_LEFT, _textbuf, 0, &_char_cursor_callback, nullptr);
 		va_end(args);
 	}
 	void printf(const char *format, ...)
@@ -448,7 +448,7 @@ public:
 		va_start(args, format);
 		int res = vsnprintf(_textbuf, 255, format, args);
 		if (res)
-			mf_render_aligned(_font, cursor_x, cursor_y, MF_ALIGN_LEFT, _textbuf, 0, &_char_callback, nullptr);
+			mf_render_aligned(_font, cursor_x, cursor_y, MF_ALIGN_LEFT, _textbuf, 0, &_char_cursor_callback, nullptr);
 		va_end(args);
 	}
 
