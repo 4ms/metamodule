@@ -22,3 +22,5 @@ struct DMA2DTransfer {
 };
 
 } // namespace ScreenSimulator
+
+namespace target = ScreenSimulator;

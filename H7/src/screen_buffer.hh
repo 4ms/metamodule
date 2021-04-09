@@ -11,13 +11,9 @@ extern "C" uint8_t _char_cursor_callback(int16_t x0, int16_t y0, mf_char charact
 
 using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
-class ScreenFrameBuffer {
 
-#ifdef SIMULATOR
-	ScreenSimulator::DMA2DTransfer dma2d;
-#else
+class ScreenFrameBuffer {
 	target::DMA2DTransfer dma2d;
-#endif
 	ScreenConfT::FrameBufferT &framebuf;
 
 public:

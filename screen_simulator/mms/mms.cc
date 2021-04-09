@@ -4,7 +4,6 @@
 // Override dma2d to our stub:
 #define _DMA2D_TRANSFER_HH
 #include "stubs/drivers/dma2d_transfer.hh"
-namespace target = ScreenSimulator;
 
 #include "pages/page_manager.hh"
 
