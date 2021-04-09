@@ -23,9 +23,22 @@ struct PatchOverviewPage : PageBase {
 
 		screen.setFont(PageWidgets::list_font);
 		screen.setTextColor(Colors::grey);
-		screen.setCursor(2, 60);
-		screen.print("Here is the verbose patch description, etc etc. Todo, fix word-wrap to only wrap on a space");
-		screen.setTextWrap(false);
+		screen.setCursor(0, 60);
+		screen.setAlignment(ScreenFrameBuffer::Left);
+		screen.print("Left Justified.");
+		screen.print("More");
+
+		screen.setTextColor(Colors::red);
+		screen.setCursor(239, 90);
+		screen.setAlignment(ScreenFrameBuffer::Right);
+		screen.print("Right Justified.");
+		screen.print("More");
+
+		screen.setTextColor(Colors::green.blend(Colors::black, 0.25f));
+		screen.setCursor(120, 120);
+		screen.setAlignment(ScreenFrameBuffer::Center);
+		screen.print("Center Justified.");
+		screen.print("More");
 	}
 };
 
@@ -156,16 +169,23 @@ struct PatchLayoutPage : PageBase {
 				for (int j = 1; j < net.num_jacks; j++) {
 					auto input_jack = net.jacks[j];
 					y_pos += PageWidgets::list_lineheight;
-					screen.setCursor(2, y_pos);
-					screen.setTextColor(Colors::grey);
-					screen.print("  => ");
-					screen.setTextColor(Colors::black);
-					PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
-					screen.print(": ");
+					screen.setCursor(239, y_pos);
+
+					// right-to-left:
+					screen.setAlignment(ScreenFrameBuffer::Right);
+
 					screen.setTextColor(Colors::blue.blend(Colors::black, 0.25f));
 					screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
+
+					screen.setTextColor(Colors::black);
+					screen.print(": ");
+					PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
+
+					screen.setTextColor(Colors::grey);
+					screen.print("  => ");
 				}
 				y_pos += PageWidgets::list_lineheight;
+				screen.setAlignment(ScreenFrameBuffer::Left);
 			}
 		}
 	}

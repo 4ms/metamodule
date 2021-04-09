@@ -33,6 +33,7 @@ struct PageWidgets {
 	{
 		screen.setFont(header_font);
 		screen.setTextColor(header_fg);
+		screen.setAlignment(ScreenFrameBuffer::Left);
 		screen.setCursor(2, header_ypos);
 		screen.setTextWrap(false);
 	}
@@ -41,6 +42,7 @@ struct PageWidgets {
 	{
 		screen.setFont(subheader_font);
 		screen.setTextColor(subheader_fg);
+		screen.setAlignment(ScreenFrameBuffer::Left);
 		screen.setCursor(2, subheader_ypos);
 		screen.setTextWrap(false);
 	}
@@ -60,8 +62,18 @@ struct PageWidgets {
 		screen.print(patch_player.modules[module_id]->get_description());
 		auto dup_id = patch_player.get_multiple_module_index(module_id);
 		if (dup_id) {
-			screen.printf(" (%d)", dup_id);
+			screen.printf(" #%d", dup_id);
 		}
+	}
+
+	static void get_module_name(PatchPlayer &patch_player, uint32_t module_id, char *module_name)
+	{
+		auto dup_id = patch_player.get_multiple_module_index(module_id);
+		if (dup_id)
+			snprintf(module_name, 255, "%s #%d", patch_player.modules[module_id]->get_description().cstr(), dup_id);
+		else
+			snprintf(module_name, 255, "%s", patch_player.modules[module_id]->get_description().cstr());
+		// module_name = patch_player.modules[module_id]->get_description().cstr();
 	}
 
 	static void draw_pot_values(ScreenFrameBuffer &screen, Params &params, Color color, int16_t y_pos = 210)
