@@ -50,6 +50,29 @@ struct DebugInfoPage : PageBase {
 		}
 	}
 
+	static void test_justification(ScreenFrameBuffer &screen)
+	{
+		// Test justifications
+		screen.setFont(PageWidgets::list_font);
+		screen.setTextColor(Colors::grey);
+		screen.setCursor(0, 60);
+		screen.setAlignment(ScreenFrameBuffer::Left);
+		screen.print("Left Justified.");
+		screen.print("More");
+
+		screen.setTextColor(Colors::red);
+		screen.setCursor(239, 90);
+		screen.setAlignment(ScreenFrameBuffer::Right);
+		screen.print("Right Justified.");
+		screen.print("More");
+
+		screen.setTextColor(Colors::green.blend(Colors::black, 0.25f));
+		screen.setCursor(120, 120);
+		screen.setAlignment(ScreenFrameBuffer::Center);
+		screen.print("Center Justified.");
+		screen.print("More");
+	}
+
 	static void draw_test_squares(ScreenFrameBuffer &screen)
 	{
 		// Should see a 1-pixel border around the 4-square, and a 1-pixel gap between squares

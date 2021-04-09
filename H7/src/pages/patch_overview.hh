@@ -20,25 +20,6 @@ struct PatchOverviewPage : PageBase {
 		PageWidgets::setup_header(screen);
 		screen.setTextWrap(true);
 		screen.print(patch_list.cur_patch().patch_name);
-
-		screen.setFont(PageWidgets::list_font);
-		screen.setTextColor(Colors::grey);
-		screen.setCursor(0, 60);
-		screen.setAlignment(ScreenFrameBuffer::Left);
-		screen.print("Left Justified.");
-		screen.print("More");
-
-		screen.setTextColor(Colors::red);
-		screen.setCursor(239, 90);
-		screen.setAlignment(ScreenFrameBuffer::Right);
-		screen.print("Right Justified.");
-		screen.print("More");
-
-		screen.setTextColor(Colors::green.blend(Colors::black, 0.25f));
-		screen.setCursor(120, 120);
-		screen.setAlignment(ScreenFrameBuffer::Center);
-		screen.print("Center Justified.");
-		screen.print("More");
 	}
 };
 
