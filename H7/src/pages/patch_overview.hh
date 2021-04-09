@@ -23,7 +23,7 @@ struct PatchOverviewPage : PageBase {
 
 		screen.setFont(PageWidgets::list_font);
 		screen.setTextColor(Colors::grey);
-		screen.setCursor(2, 90);
+		screen.setCursor(2, 60);
 		screen.print("Here is the verbose patch description, etc etc. Todo, fix word-wrap to only wrap on a space");
 		screen.setTextWrap(false);
 	}
@@ -140,28 +140,29 @@ struct PatchLayoutPage : PageBase {
 		screen.setFont(PageWidgets::list_font);
 		uint16_t y_pos = PageWidgets::list_ypos;
 		if (patch_player.is_loaded) {
-			screen.setCursor(2, y_pos);
 			for (int i = 0; i < patch_list.cur_patch().num_nets; i++) {
 				auto &net = patch_list.cur_patch().nets[i];
 				if (net.num_jacks < 2 || net.jacks[0].module_id == 0 || net.jacks[1].module_id == 0)
 					continue;
 
 				auto output_jack = net.jacks[0];
+				screen.setCursor(2, y_pos);
 				screen.setTextColor(Colors::black);
 				PageWidgets::print_module_name(screen, patch_player, output_jack.module_id);
 				screen.print(": ");
-				screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
+				screen.setTextColor(Colors::blue.blend(Colors::black, 0.25f));
 				screen.print(patch_player.modules[output_jack.module_id]->outjack_name(output_jack.jack_id));
 
 				for (int j = 1; j < net.num_jacks; j++) {
 					auto input_jack = net.jacks[j];
 					y_pos += PageWidgets::list_lineheight;
 					screen.setCursor(2, y_pos);
+					screen.setTextColor(Colors::grey);
 					screen.print("  => ");
 					screen.setTextColor(Colors::black);
 					PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
 					screen.print(": ");
-					screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
+					screen.setTextColor(Colors::blue.blend(Colors::black, 0.25f));
 					screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
 				}
 				y_pos += PageWidgets::list_lineheight;
