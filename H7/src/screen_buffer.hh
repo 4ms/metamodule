@@ -17,11 +17,14 @@ class ScreenFrameBuffer {
 	ScreenConfT::FrameBufferT &framebuf;
 
 public:
+	enum Alignment { Left, Right, Center };
+
 	ScreenFrameBuffer(ScreenConfT::FrameBufferT &framebuf_)
 		: framebuf{framebuf_}
 	{
 		dma2d.init();
 		_font = &mf_rlefont_fixed_10x20.font;
+		setAlignment(Left);
 	}
 
 	void init()
@@ -397,14 +400,6 @@ public:
 		textcolor = color.Rgb565();
 	}
 
-	void setTextColor(Color fgcolor, Color bgcolor)
-	{
-		textcolor = fgcolor.Rgb565();
-	}
-
-	void setTextSize(uint8_t s) {}
-	void setTextSize(uint8_t s_x, uint8_t s_y) {}
-
 	void setCursor(int16_t x, int16_t y)
 	{
 		cursor_x = x;
@@ -421,38 +416,37 @@ public:
 		_font = newfont;
 	}
 
-	// printf() calls _putchar() which is C wrapper over this
-	void write(char character)
+	void setAlignment(Alignment align)
 	{
-		cursor_x += mf_render_character(_font, cursor_x, cursor_y, character, &_draw_text_pixel_callback, nullptr);
+		_alignment = align == Center ? MF_ALIGN_CENTER : align == Right ? MF_ALIGN_RIGHT : MF_ALIGN_LEFT;
 	}
 
-	char _textbuf[255];
 	void printf_at(int16_t x, int16_t y, const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
 		int res = vsnprintf(_textbuf, 255, format, args);
 		if (res)
-			mf_render_aligned(_font, x, y, MF_ALIGN_LEFT, _textbuf, 0, &_char_cursor_callback, nullptr);
+			mf_render_aligned(_font, x, y, _alignment, _textbuf, 0, &_char_cursor_callback, nullptr);
 		va_end(args);
 	}
+
 	void printf(const char *format, ...)
 	{
 		va_list args;
 		va_start(args, format);
 		int res = vsnprintf(_textbuf, 255, format, args);
 		if (res)
-			mf_render_aligned(_font, cursor_x, cursor_y, MF_ALIGN_LEFT, _textbuf, 0, &_char_cursor_callback, nullptr);
+			mf_render_aligned(_font, cursor_x, cursor_y, _alignment, _textbuf, 0, &_char_cursor_callback, nullptr);
 		va_end(args);
 	}
 
 	void _render_textbuf()
 	{
-		mf_render_aligned(_font, cursor_x, cursor_y, MF_ALIGN_LEFT, _textbuf, 0, &_char_cursor_callback, nullptr);
-		// cursor_x += mf_get_string_width(_font, _textbuf, 0, true);
+		mf_render_aligned(_font, cursor_x, cursor_y, _alignment, _textbuf, 0, &_char_cursor_callback, nullptr);
 	}
 
+	// Quick print shortcuts
 	// clang-format off
 	void print(const char s[]) 	{ if (snprintf(_textbuf, 255, "%s", s)) _render_textbuf(); }
 	void print(const char c) 	{ if (snprintf(_textbuf, 255, "%c", c)) _render_textbuf(); }
@@ -466,6 +460,7 @@ public:
 	void flush_cache() {}
 
 	const mf_font_s *_font;
+	mf_align_t _alignment;
 	uint16_t textcolor;
 	int16_t cursor_x;
 	int16_t cursor_y;
@@ -477,6 +472,9 @@ protected:
 
 	uint8_t rotation;
 	bool wrap;
+
+private:
+	char _textbuf[255];
 };
 
 void register_printf_destination(ScreenFrameBuffer &screen);
