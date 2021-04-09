@@ -55,6 +55,9 @@ public:
 	void prev_page();
 	void jump_to_page(Page p);
 	void display_current_page();
+
+private:
+	void start_page();
 };
 
 struct DisplayPage {};

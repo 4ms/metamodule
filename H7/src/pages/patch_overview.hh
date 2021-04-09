@@ -159,7 +159,7 @@ struct PatchLayoutPage : PageBase {
 					continue;
 
 				auto output_jack = net.jacks[0];
-				screen.setCursor(2, y_pos);
+				screen.setCursor(PageWidgets::margin_left, y_pos);
 				screen.setTextColor(Colors::black);
 				PageWidgets::print_module_name(screen, patch_player, output_jack.module_id);
 				screen.print(": ");
@@ -169,23 +169,17 @@ struct PatchLayoutPage : PageBase {
 				for (int j = 1; j < net.num_jacks; j++) {
 					auto input_jack = net.jacks[j];
 					y_pos += PageWidgets::list_lineheight;
-					screen.setCursor(239, y_pos);
-
-					// right-to-left:
-					screen.setAlignment(ScreenFrameBuffer::Right);
-
-					screen.setTextColor(Colors::blue.blend(Colors::black, 0.25f));
-					screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
-
-					screen.setTextColor(Colors::black);
-					screen.print(": ");
-					PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
+					screen.setCursor(PageWidgets::margin_left, y_pos);
 
 					screen.setTextColor(Colors::grey);
 					screen.print("  => ");
+					screen.setTextColor(Colors::black);
+					PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
+					screen.print(": ");
+					screen.setTextColor(Colors::blue.blend(Colors::black, 0.25f));
+					screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
 				}
 				y_pos += PageWidgets::list_lineheight;
-				screen.setAlignment(ScreenFrameBuffer::Left);
 			}
 		}
 	}
@@ -212,8 +206,6 @@ struct ModulesInPatchPage : PageBase {
 					continue; // skip PANEL
 				screen.setCursor(PageWidgets::margin_left, y_pos);
 				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
-				screen.print(i);
-				screen.print(": ");
 				PageWidgets::print_module_name(screen, patch_player, i);
 				y_pos += PageWidgets::list_lineheight;
 			}
