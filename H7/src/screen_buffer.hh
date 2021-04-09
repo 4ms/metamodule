@@ -7,7 +7,6 @@
 #include "util/colors.hh"
 
 extern "C" void _draw_text_pixel_callback(int16_t x, int16_t y, uint8_t count, uint8_t alpha, void *state);
-extern "C" uint8_t _char_callback(int16_t x0, int16_t y0, mf_char character, void *state);
 extern "C" uint8_t _char_cursor_callback(int16_t x0, int16_t y0, mf_char character, void *state);
 
 using ScreenConfT = MMScreenBufferConf;
