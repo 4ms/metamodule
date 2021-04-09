@@ -19,36 +19,58 @@ struct DebugInfoPage : PageBase {
 		PageWidgets::draw_pot_values(screen, params, Colors::black, 214);
 		PageWidgets::draw_processor_stats(screen, Colors::blue, metaparams.audio_load);
 
-		screen.setCursor(0, 40);
+		screen.setFont(mf_find_font("fixed_5x8"));
+		uint16_t y_pos = 40;
 		for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {
-			screen.print(i);
-			screen.print(": ");
-			screen.print(patch_player.modules[i]->get_description());
-			screen.print(": ");
-			screen.print(patch_list.cur_patch().modules_used[i]);
-			screen.print(": ");
-			screen.print(patch_player.get_multiple_module_index(i));
-			screen.print("\n");
+			screen.setCursor(0, y_pos);
+			screen.printf("%d: %s (%s) #%d",
+						  i,
+						  patch_player.modules[i]->get_description().cstr(),
+						  patch_list.cur_patch().modules_used[i].cstr(),
+						  patch_player.get_multiple_module_index(i));
+			y_pos += 10;
 		}
 		screen.setTextColor(Colors::black);
 		for (int i = 0; i < Panel::NumUserFacingOutJacks; i++) {
-			screen.print(i);
-			screen.print(": {");
-			screen.print(patch_player.get_panel_output_connection(i).module_id);
-			screen.print(",");
-			screen.print(patch_player.get_panel_output_connection(i).jack_id);
-			screen.print("}");
-			screen.print("\n");
+			screen.setCursor(0, y_pos);
+			screen.printf("OUT %d: {%d, %d}",
+						  i,
+						  patch_player.get_panel_output_connection(i).module_id,
+						  patch_player.get_panel_output_connection(i).jack_id);
+			y_pos += 8;
 		}
+		y_pos = 40;
 		for (int i = 0; i < Panel::NumUserFacingInJacks; i++) {
-			screen.print(i);
-			screen.print(": {");
-			screen.print(patch_player.get_panel_input_connection(i).module_id);
-			screen.print(",");
-			screen.print(patch_player.get_panel_input_connection(i).jack_id);
-			screen.print("}");
-			screen.print("\n");
+			screen.setCursor(160, y_pos);
+			screen.printf("IN %d: {%d, %d}",
+						  i,
+						  patch_player.get_panel_input_connection(i).module_id,
+						  patch_player.get_panel_input_connection(i).jack_id);
+			y_pos += 10;
 		}
+	}
+
+	static void test_justification(ScreenFrameBuffer &screen)
+	{
+		// Test justifications
+		screen.setFont(PageWidgets::list_font);
+		screen.setTextColor(Colors::grey);
+		screen.setCursor(0, 60);
+		screen.setAlignment(ScreenFrameBuffer::Left);
+		screen.print("Left Justified.");
+		screen.print("More");
+
+		screen.setTextColor(Colors::red);
+		screen.setCursor(239, 90);
+		screen.setAlignment(ScreenFrameBuffer::Right);
+		screen.print("Right Justified.");
+		screen.print("More");
+
+		screen.setTextColor(Colors::green.blend(Colors::black, 0.25f));
+		screen.setCursor(120, 120);
+		screen.setAlignment(ScreenFrameBuffer::Center);
+		screen.print("Center Justified.");
+		screen.print("More");
 	}
 
 	static void draw_test_squares(ScreenFrameBuffer &screen)

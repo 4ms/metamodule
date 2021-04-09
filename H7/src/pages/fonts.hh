@@ -1,9 +1,6 @@
-// #include "Adafruit_GFX_Library/Adafruit_GFX.h"
-#pragma once
-#include "Adafruit_GFX_Library/gfxfont.h"
-
-extern const GFXfont FreeMono12pt7b;
-extern const GFXfont FreeSans12pt7b;
-extern const GFXfont FreeSans9pt7b;
-extern const GFXfont FreeSansBold12pt7b;
-extern const GFXfont FreeSansBold18pt7b;
+extern "C" {
+#include "mf_rlefont.h"
+extern const struct mf_rlefont_s mf_rlefont_fixed_10x20;
+extern const struct mf_rlefont_s mf_rlefont_fixed_7x14;
+extern const struct mf_rlefont_s mf_rlefont_fixed_5x8;
+}

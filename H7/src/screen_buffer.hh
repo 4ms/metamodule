@@ -1,27 +1,30 @@
 #pragma once
-#include "Adafruit_GFX_Library/gfxfont.h"
-#include "Adafruit_GFX_Library/glcdfont.c" //yep: .c, that's how arduino does it
-#include "Print.h"
 #include "conf/screen_buffer_conf.hh"
 #include "drivers/dma2d_transfer.hh"
+#include "mcufont.h"
+#include "pages/fonts.hh"
+#include "printf.h"
 #include "util/colors.hh"
+
+extern "C" void _draw_text_pixel_callback(int16_t x, int16_t y, uint8_t count, uint8_t alpha, void *state);
+extern "C" uint8_t _char_cursor_callback(int16_t x0, int16_t y0, mf_char character, void *state);
 
 using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
-class ScreenFrameBuffer : public Print {
 
-#ifdef SIMULATOR
-	ScreenSimulator::DMA2DTransfer dma2d;
-#else
+class ScreenFrameBuffer {
 	target::DMA2DTransfer dma2d;
-#endif
 	ScreenConfT::FrameBufferT &framebuf;
 
 public:
+	enum Alignment { Left, Right, Center };
+
 	ScreenFrameBuffer(ScreenConfT::FrameBufferT &framebuf_)
 		: framebuf{framebuf_}
 	{
 		dma2d.init();
+		_font = &mf_rlefont_fixed_10x20.font;
+		setAlignment(Left);
 	}
 
 	void init()
@@ -117,7 +120,7 @@ public:
 		// 3.9ms:
 		// blend64FillCircle(x0, y0, r, color, alpha);
 		// 4.0ms
-		blendFastVLine(x0, y0 - r, 2 * r + 1, color, alpha);
+		blendVLine(x0, y0 - r, 2 * r + 1, color, alpha);
 		blendCircleHelper(x0, y0, r, 0b11, 0, color, alpha);
 	}
 
@@ -125,23 +128,55 @@ public:
 	// Pixel
 	//
 
+	// Blends a pixel into the framebuffer. Not bounds-checked!
 	void draw_blended_pix(int16_t x, int16_t y, uint16_t color, uint8_t alpha)
 	{
 		auto cur_pixel = framebuf[x + y * _width];
-		framebuf[x + y * _width] = Color::blend(color, cur_pixel, alpha);
+		framebuf[x + y * _width] = Color::blend(cur_pixel, color, alpha);
 	}
 
-	void blendPixel(int16_t x, int16_t y, uint16_t color, float f_alpha)
+	// Blends a Pixel into the framebuffer, using the current text fg color. Not bounds checked!
+	void draw_blended_text_pixel(int16_t x, int16_t y, uint8_t alpha)
 	{
-		uint8_t alpha = f_alpha * 255.f;
-		if (alpha < (1.f / 64.f))
+		draw_blended_pix(x, y, textcolor, alpha);
+	}
+
+	// Blends a pixel into the framebuffer. Clips at screen bounds.
+	void draw_blended_pixel_clipped(int16_t x, int16_t y, uint16_t color, uint8_t alpha)
+	{
+		if (x < 0 || x >= _width || y < 0 || y >= _height)
 			return;
-		else if (alpha > (63.f / 64.f))
+		auto cur_pixel = framebuf[x + y * _width];
+		framebuf[x + y * _width] = Color::blend(cur_pixel, color, alpha);
+	}
+
+	// Blends a pixel into the framebuffer, using current text fg color. Clips at screen bounds.
+	void draw_blended_text_pixel_clipped(int16_t x, int16_t y, uint8_t alpha)
+	{
+		draw_blended_pixel_clipped(x, y, textcolor, alpha);
+	}
+
+	// Blends a pixel into the framebuffer. Optimized if alpha is near min or max.
+	// Not bounds checked!
+	// alpha: 0 => no change to framebuffer, 255 => color replaces pixel in framebuffer
+	void blendPixel(int16_t x, int16_t y, uint16_t color, uint8_t alpha)
+	{
+		if (alpha < 4)
+			return;
+		else if (alpha > 252)
 			drawPixel(x, y, color);
 		else
 			draw_blended_pix(x, y, color, alpha);
 	}
 
+	// Blends a pixel into the framebuffer. Optimized if alpha is near min or max
+	// f_alpha: 0 => no change to framebuffer, 1=>color replaces pixel in framebuffer
+	void blendPixel(int16_t x, int16_t y, uint16_t color, float f_alpha)
+	{
+		blendPixel(x, y, color, (uint8_t)(f_alpha * 255.f));
+	}
+
+	// Sets a pixel in the framebuffer. Not bounds checked.
 	void drawPixel(int16_t x, int16_t y, uint16_t color)
 	{
 		framebuf[x + y * _width] = color;
@@ -151,7 +186,7 @@ public:
 	// Line
 	//
 
-	void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
+	void drawHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
 	{
 		if (y < 0 || y >= _height)
 			return;
@@ -159,16 +194,39 @@ public:
 			w += x;
 			x = 0;
 		}
-		if ((x + w) >= _width)
-			w = _width - x;
+		int16_t max_x = (w + x) >= _width ? _width : x + w;
 
-		const int16_t row_offset = x + y * _width;
-		for (int i = 0; i < w; i++) {
-			framebuf[i + row_offset] = color;
+		for (int16_t xi = x; xi < max_x; xi++) {
+			drawPixel(xi, y, color);
 		}
 	}
 
-	void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
+	void blendHLine(int16_t x, int16_t y, int16_t w, uint16_t color, uint8_t alpha)
+	{
+		if (alpha > 252) {
+			drawHLine(x, y, w, color);
+			return;
+		}
+		if (alpha < 4 || y < 0 || y >= _height)
+			return;
+		if (x < 0) {
+			w += x;
+			x = 0;
+		}
+		int16_t max_x = (w + x) >= _width ? _width : x + w;
+
+		// Todo: try reading all pixels onto stack, then blend and write all at once
+		// Might give a performance boost, due to caching
+		for (int16_t xi = x; xi < max_x; xi++)
+			draw_blended_pix(xi, y, color, alpha);
+	}
+
+	void blendHLineText(int16_t x, int16_t y, int16_t w, uint8_t alpha)
+	{
+		blendHLine(x, y, w, textcolor, alpha);
+	}
+
+	void drawVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
 	{
 		if (x < 0 || x >= _width)
 			return;
@@ -183,7 +241,7 @@ public:
 			framebuf[i * _width + x] = color;
 	}
 
-	void blendFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, float alpha)
+	void blendVLine(int16_t x, int16_t y, int16_t h, uint16_t color, float alpha)
 	{
 		if (x < 0 || x >= _width)
 			return;
@@ -238,21 +296,58 @@ public:
 			// for the SSD1306 library which has an INVERT drawing mode.
 			if (x < (y + 1)) {
 				if (corners & 1)
-					blendFastVLine(x0 + x, y0 - y, 2 * y + delta, color, alpha);
+					blendVLine(x0 + x, y0 - y, 2 * y + delta, color, alpha);
 				if (corners & 2)
-					blendFastVLine(x0 - x, y0 - y, 2 * y + delta, color, alpha);
+					blendVLine(x0 - x, y0 - y, 2 * y + delta, color, alpha);
 			}
 			if (y != py) {
 				if (corners & 1)
-					blendFastVLine(x0 + py, y0 - px, 2 * px + delta, color, alpha);
+					blendVLine(x0 + py, y0 - px, 2 * px + delta, color, alpha);
 				if (corners & 2)
-					blendFastVLine(x0 - py, y0 - px, 2 * px + delta, color, alpha);
+					blendVLine(x0 - py, y0 - px, 2 * px + delta, color, alpha);
 				py = y;
 			}
 			px = x;
 		}
 	}
 
+	void blend64FillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, float alpha)
+	{
+		int16_t f = 1 - r;
+		int16_t ddF_x = 1;
+		int16_t ddF_y = -2 * r;
+		int16_t x = 0;
+		int16_t y = r;
+		int16_t px = x;
+		int16_t py = y;
+		uint8_t int_alpha = alpha * 255.f;
+		uint8_t _alpha = (int_alpha + 4) >> 3;
+		uint32_t fg = (color | (color << 16)) & 0b00000111111000001111100000011111;
+
+		_blend64_vline(x0, y0 - r, y0 + r, fg, _alpha);
+
+		while (x < y) {
+			if (f >= 0) {
+				y--;
+				ddF_y += 2;
+				f += ddF_y;
+			}
+			x++;
+			ddF_x += 2;
+			f += ddF_x;
+			if (x < (y + 1)) {
+				_blend64_two_vline(x0 + x, x0 - x, y0 - y, y0 + y, fg, _alpha);
+			}
+			if (y != py) {
+				_blend64_two_vline(x0 + py, x0 - py, y0 - px, y0 + px, fg, _alpha);
+				py = y;
+			}
+			px = x;
+		}
+	}
+
+private:
+	// Blend helpers:
 	uint16_t _blend64_helper(uint32_t fg32, uint32_t bg_color, uint8_t alpha64)
 	{
 		uint32_t bg32 = (bg_color | (bg_color << 16)) & 0b00000111111000001111100000011111;
@@ -295,64 +390,14 @@ public:
 		}
 	}
 
-	void blend64FillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, float alpha)
-	{
-		int16_t f = 1 - r;
-		int16_t ddF_x = 1;
-		int16_t ddF_y = -2 * r;
-		int16_t x = 0;
-		int16_t y = r;
-		int16_t px = x;
-		int16_t py = y;
-		uint8_t int_alpha = alpha * 255.f;
-		uint8_t _alpha = (int_alpha + 4) >> 3;
-		uint32_t fg = (color | (color << 16)) & 0b00000111111000001111100000011111;
-
-		_blend64_vline(x0, y0 - r, y0 + r, fg, _alpha);
-
-		while (x < y) {
-			if (f >= 0) {
-				y--;
-				ddF_y += 2;
-				f += ddF_y;
-			}
-			x++;
-			ddF_x += 2;
-			f += ddF_x;
-			if (x < (y + 1)) {
-				_blend64_two_vline(x0 + x, x0 - x, y0 - y, y0 + y, fg, _alpha);
-			}
-			if (y != py) {
-				_blend64_two_vline(x0 + py, x0 - py, y0 - px, y0 + px, fg, _alpha);
-				py = y;
-			}
-			px = x;
-		}
-	}
-
+public:
 	//
 	// Text
 	//
 
 	void setTextColor(Color color)
 	{
-		textcolor = textbgcolor = color.Rgb565();
-	}
-
-	void setTextColor(Color fgcolor, Color bgcolor)
-	{
-		textcolor = fgcolor.Rgb565();
-		textbgcolor = bgcolor.Rgb565();
-	}
-
-	void setTextSize(uint8_t s)
-	{
-		textsize_x = textsize_y = s;
-	}
-	void setTextSize(uint8_t s_x, uint8_t s_y)
-	{
-		textsize_x = s_x;
-		textsize_y = s_y;
+		textcolor = color.Rgb565();
 	}
 
 	void setCursor(int16_t x, int16_t y)
@@ -366,219 +411,70 @@ public:
 		wrap = w;
 	}
 
-	void setFont(const GFXfont *newfont)
+	void setFont(const mf_font_s *newfont)
 	{
-		if (newfont != nullptr) {
-			if (gfxFont == nullptr) {
-				// Switching from classic to new font behavior.
-				// Move cursor pos down 6 pixels so it's on baseline.
-				cursor_y += 6;
-			}
-		} else if (gfxFont != nullptr) {
-			// Switching from new to classic font behavior.
-			// Move cursor pos up 6 pixels so it's at top-left of char.
-			cursor_y -= 6;
-		}
-		gfxFont = newfont;
+		_font = newfont;
 	}
 
-	size_t write(uint8_t c)
+	void setAlignment(Alignment align)
 	{
-		if (!gfxFont) {										// 'Classic' built-in font
-			if (c == '\n') {								// Newline?
-				cursor_x = 0;								// Reset x to zero,
-				cursor_y += textsize_y * 8;					// advance y one line
-			} else if (c != '\r') {							// Ignore carriage returns
-				if ((cursor_x + textsize_x * 6) > _width) { // Off right?
-					if (wrap) {
-						cursor_x = 0;				// Reset x to zero,
-						cursor_y += textsize_y * 8; // advance y one line
-					} else {
-						return 0;
-					}
-				}
-				drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
-				cursor_x += textsize_x * 6; // Advance x one char
-			}
-
-		} else { // Custom font
-			if (c == '\n') {
-				cursor_x = 0;
-				cursor_y += (int16_t)textsize_y * gfxFont->yAdvance;
-			} else if (c != '\r') {
-				uint8_t first = gfxFont->first;
-				if ((c >= first) && (c <= gfxFont->last)) {
-					GFXglyph *glyph = gfxFont->glyph + (c - first);
-					uint8_t w = glyph->width, h = glyph->height;
-					if ((w > 0) && (h > 0)) {
-						int16_t xo = (int8_t)glyph->xOffset; // sic
-						if ((cursor_x + textsize_x * (xo + w)) > _width) {
-							if (wrap) {
-								cursor_x = 0;
-								cursor_y += (int16_t)textsize_y * gfxFont->yAdvance;
-							} else {
-								return 0;
-							}
-						}
-						drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
-					}
-					cursor_x += glyph->xAdvance * (int16_t)textsize_x;
-				}
-			}
-		}
-		return 1;
+		_alignment = align == Center ? MF_ALIGN_CENTER : align == Right ? MF_ALIGN_RIGHT : MF_ALIGN_LEFT;
 	}
 
-	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size)
+	void printf_at(int16_t x, int16_t y, const char *format, ...)
 	{
-		drawChar(x, y, c, color, bg, size, size);
+		va_list args;
+		va_start(args, format);
+		int res = vsnprintf(_textbuf, 255, format, args);
+		if (res)
+			mf_render_aligned(_font, x, y, _alignment, _textbuf, 0, &_char_cursor_callback, nullptr);
+		va_end(args);
 	}
 
-	void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y)
+	void printf(const char *format, ...)
 	{
-		if (!gfxFont) { // 'Classic' built-in font
-
-			if ((x >= _width) ||			  // Clip right
-				(y >= _height) ||			  // Clip bottom
-				((x + 6 * size_x - 1) < 0) || // Clip left
-				((y + 8 * size_y - 1) < 0))	  // Clip top
-				return;
-
-			if (!_cp437 && (c >= 176))
-				c++; // Handle 'classic' charset behavior
-
-			for (int8_t i = 0; i < 5; i++) { // Char bitmap = 5 columns
-				uint8_t line = font[c * 5 + i];
-				for (int8_t j = 0; j < 8; j++, line >>= 1) {
-					if (line & 1) {
-						if (size_x == 1 && size_y == 1)
-							drawPixel(x + i, y + j, color);
-						else
-							fillRect(x + i * size_x, y + j * size_y, size_x, size_y, color);
-					} else if (bg != color) {
-						if (size_x == 1 && size_y == 1)
-							drawPixel(x + i, y + j, bg);
-						else
-							fillRect(x + i * size_x, y + j * size_y, size_x, size_y, bg);
-					}
-				}
-			}
-			if (bg != color) { // If opaque, draw vertical line for last column
-				if (size_x == 1 && size_y == 1)
-					drawFastVLine(x + 5, y, 8, bg);
-				else
-					fillRect(x + 5 * size_x, y, size_x, 8 * size_y, bg);
-			}
-
-		} else { // Custom font
-
-			// Character is assumed previously filtered by write() to eliminate
-			// newlines, returns, non-printable characters, etc.  Calling
-			// drawChar() directly with 'bad' characters of font may cause mayhem!
-
-			c -= (uint8_t)gfxFont->first;
-			GFXglyph *glyph = gfxFont->glyph + c;
-			uint8_t *bitmap = gfxFont->bitmap;
-
-			uint16_t bo = glyph->bitmapOffset;
-			uint8_t w = glyph->width;
-			uint8_t h = glyph->height;
-			int8_t xo = glyph->xOffset;
-			int8_t yo = glyph->yOffset;
-			uint8_t xx, yy, bits = 0, bit = 0;
-			int16_t xo16 = 0, yo16 = 0;
-
-			if (size_x > 1 || size_y > 1) {
-				xo16 = xo;
-				yo16 = yo;
-			}
-
-			// Todo: Add character clipping here
-
-			// NOTE: THERE IS NO 'BACKGROUND' COLOR OPTION ON CUSTOM FONTS.
-			// THIS IS ON PURPOSE AND BY DESIGN.  The background color feature
-			// has typically been used with the 'classic' font to overwrite old
-			// screen contents with new data.  This ONLY works because the
-			// characters are a uniform size; it's not a sensible thing to do with
-			// proportionally-spaced fonts with glyphs of varying sizes (and that
-			// may overlap).  To replace previously-drawn text when using a custom
-			// font, use the getTextBounds() function to determine the smallest
-			// rectangle encompassing a string, erase the area with fillRect(),
-			// then draw new text.  This WILL infortunately 'blink' the text, but
-			// is unavoidable.  Drawing 'background' pixels will NOT fix this,
-			// only creates a new set of problems.  Have an idea to work around
-			// this (a canvas object type for MCUs that can afford the RAM and
-			// displays supporting setAddrWindow() and pushColors()), but haven't
-			// implemented this yet.
-
-			if ((x >= _width) ||			  // Clip right
-				(y >= _height) ||			  // Clip bottom
-				((x + w * size_x - 1) < 0) || // Clip left
-				((y + h * size_y - 1) < 0))	  // Clip top
-				return;
-
-			for (yy = 0; yy < h; yy++) {
-				for (xx = 0; xx < w; xx++) {
-					if (!(bit++ & 7)) {
-						bits = bitmap[bo++];
-					}
-					if (bits & 0x80) {
-						if (size_x == 1 && size_y == 1) {
-							if ((x + xo + xx < _width) && (y + yo + yy < _height))
-								drawPixel(x + xo + xx, y + yo + yy, color);
-						} else {
-							fillRect(x + (xo16 + xx) * size_x, y + (yo16 + yy) * size_y, size_x, size_y, color);
-						}
-					}
-					bits <<= 1;
-				}
-			}
-
-		} // End classic vs custom font
+		va_list args;
+		va_start(args, format);
+		int res = vsnprintf(_textbuf, 255, format, args);
+		if (res)
+			mf_render_aligned(_font, cursor_x, cursor_y, _alignment, _textbuf, 0, &_char_cursor_callback, nullptr);
+		va_end(args);
 	}
+
+	void _render_textbuf()
+	{
+		mf_render_aligned(_font, cursor_x, cursor_y, _alignment, _textbuf, 0, &_char_cursor_callback, nullptr);
+	}
+
+	// Quick print shortcuts
+	// clang-format off
+	void print(const char s[]) 	{ if (snprintf(_textbuf, 255, "%s", s)) _render_textbuf(); }
+	void print(const char c) 	{ if (snprintf(_textbuf, 255, "%c", c)) _render_textbuf(); }
+	void print(int n) 			{ if (snprintf(_textbuf, 255, "%d", n)) _render_textbuf(); }
+	void print(unsigned n) 		{ if (snprintf(_textbuf, 255, "%d", n)) _render_textbuf(); }
+	void print(long n) 			{ if (snprintf(_textbuf, 255, "%d", n)) _render_textbuf(); }
+	void print(unsigned long n)	{ if (snprintf(_textbuf, 255, "%d", n)) _render_textbuf(); }
+	// void print(float n)			{ if (snprintf(_textbuf, 255, "%f", n)) _render_textbuf(); }
+	// clang-format on
 
 	void flush_cache() {}
+
+	const mf_font_s *_font;
+	mf_align_t _alignment;
+	uint16_t textcolor;
+	int16_t cursor_x;
+	int16_t cursor_y;
 
 protected:
 	int _rotation;
 	int _width;
 	int _height;
 
-	int16_t cursor_x;		///< x location to start print()ing text
-	int16_t cursor_y;		///< y location to start print()ing text
-	uint16_t textcolor;		///< 16-bit background color for print()
-	uint16_t textbgcolor;	///< 16-bit text color for print()
-	uint8_t textsize_x;		///< Desired magnification in X-axis of text to print()
-	uint8_t textsize_y;		///< Desired magnification in Y-axis of text to print()
-	uint8_t rotation;		///< Display rotation (0 thru 3)
-	bool wrap;				///< If set, 'wrap' text at right edge of display
-	bool _cp437;			///< If set, use correct CP437 charset (default is off)
-	const GFXfont *gfxFont; ///< Pointer to special font
+	uint8_t rotation;
+	bool wrap;
 
-	// 	unsigned char pgm_read_byte(uint32_t addr)
-	// 	{
-	// 		return (*(const unsigned char *)(addr));
-	// 	}
-	// 	unsigned short pgm_read_word(uint32_t addr)
-	// 	{
-	// 		return (*(const unsigned short *)(addr));
-	// 	}
-	// 	unsigned long pgm_read_dword(uint32_t addr)
-	// 	{
-	// 		return (*(const unsigned long *)(addr));
-	// 	}
-	// 	auto pgm_read_pointer(uint32_t addr)
-	// 	{
-	// 		return ((void *)pgm_read_dword(addr));
-	// 	}
-
-	// 	GFXglyph *pgm_read_glyph_ptr(const GFXfont *gfxFont, uint8_t c)
-	// 	{
-	// 		return gfxFont->glyph + c;
-	// 	}
-
-	// 	uint8_t *pgm_read_bitmap_ptr(const GFXfont *gfxFont)
-	// 	{
-	// 		return gfxFont->bitmap;
-	// 	}
+private:
+	char _textbuf[255];
 };
+
+void register_printf_destination(ScreenFrameBuffer &screen);

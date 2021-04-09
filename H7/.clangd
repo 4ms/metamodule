@@ -12,9 +12,9 @@ CompileFlags:
 			"-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/lib/gcc/arm-none-eabi/8.2.1/include",
 			"-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/lib/gcc/arm-none-eabi/8.2.1/include-fixed",
 			"-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include",
-			"-I../lib/adafruit_gfx",
-			"-Ilib/adafruit_gfx",
-			"-Ilib/adafruit_gfx/arduino",
+			"-Ilib/printf",
+			"-Ilib/mcufont/fonts",
+			"-Ilib/mcufont/decoder",
 			"--target=arm-none-eabi",
 			"-Wno-deprecated-volatile"
 	]

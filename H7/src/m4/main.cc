@@ -64,11 +64,9 @@ void main(void)
 	HWSemaphore<ScreenFrameBufLock>::clear_ISR();
 	HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>([&]() {
-		HWSemaphore<ScreenFrameWriteLock>::lock();
 		// Todo: ideally we would disable this ISR here, then enable it when transfer has completed
 		// HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
 		screen_writer.transfer_buffer_to_screen();
-		HWSemaphore<ScreenFrameWriteLock>::unlock();
 	});
 	HWSemaphore<ScreenFrameBufLock>::enable_channel_ISR();
 
