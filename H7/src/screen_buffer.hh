@@ -8,6 +8,7 @@
 
 extern "C" void _draw_text_pixel_callback(int16_t x, int16_t y, uint8_t count, uint8_t alpha, void *state);
 extern "C" uint8_t _char_callback(int16_t x0, int16_t y0, mf_char character, void *state);
+extern "C" uint8_t _char_cursor_callback(int16_t x0, int16_t y0, mf_char character, void *state);
 
 using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
@@ -25,7 +26,7 @@ public:
 		: framebuf{framebuf_}
 	{
 		dma2d.init();
-		_font = &mf_rlefont_DejaVuSans12.font;
+		_font = &mf_rlefont_fixed_10x20.font;
 	}
 
 	void init()
@@ -431,8 +432,6 @@ public:
 		cursor_x += mf_render_character(_font, cursor_x, cursor_y, character, &_draw_text_pixel_callback, nullptr);
 	}
 
-	void drawChar(int16_t x, int16_t y, unsigned char character, uint16_t color) {}
-
 	char _textbuf[255];
 	void printf_at(int16_t x, int16_t y, const char *format, ...)
 	{
@@ -443,11 +442,20 @@ public:
 			mf_render_aligned(_font, x, y, MF_ALIGN_LEFT, _textbuf, 0, &_char_callback, nullptr);
 		va_end(args);
 	}
+	void printf(const char *format, ...)
+	{
+		va_list args;
+		va_start(args, format);
+		int res = vsnprintf(_textbuf, 255, format, args);
+		if (res)
+			mf_render_aligned(_font, cursor_x, cursor_y, MF_ALIGN_LEFT, _textbuf, 0, &_char_callback, nullptr);
+		va_end(args);
+	}
 
 	void _render_textbuf()
 	{
-		mf_render_aligned(_font, cursor_x, cursor_y, MF_ALIGN_LEFT, _textbuf, 0, &_char_callback, nullptr);
-		cursor_x += mf_get_string_width(_font, _textbuf, 0, true);
+		mf_render_aligned(_font, cursor_x, cursor_y, MF_ALIGN_LEFT, _textbuf, 0, &_char_cursor_callback, nullptr);
+		// cursor_x += mf_get_string_width(_font, _textbuf, 0, true);
 	}
 
 	// clang-format off
@@ -464,14 +472,14 @@ public:
 
 	const mf_font_s *_font;
 	uint16_t textcolor;
+	int16_t cursor_x;
+	int16_t cursor_y;
 
 protected:
 	int _rotation;
 	int _width;
 	int _height;
 
-	int16_t cursor_x;
-	int16_t cursor_y;
 	uint8_t rotation;
 	bool wrap;
 };

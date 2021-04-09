@@ -11,6 +11,8 @@ FONTS = DejaVuSans12 DejaVuSans32 \
 		GillSans12 \
 		GillSans18 \
 		GillSans32 \
+		GillSans-Bold32 \
+		GillSans-SemiBold24 \
 
 		# SFCompactRounded-Regular32 \
 		# SFNSRounded-Regular32
@@ -24,7 +26,6 @@ clean:
 	rm -f $(FONTS:=.c) $(FONTS:=.dat)
 
 fonts.h: $(FONTS:=.c)
-	# /bin/echo -e $(foreach font,$(FONTS),'\n#include "'$(font)'.c"') > $@
 	for i in $(FONTS) ; do \
 		/bin/echo '#include "'$$i.c'"' >> $@ ; \
 	done
@@ -63,6 +64,16 @@ GillSans18.dat: GillSans.ttf
 
 GillSans32.dat: GillSans.ttf
 	$(MCUFONT) import_ttf $< 32
+	$(MCUFONT) filter $@ $(CHARS)
+	$(MCUFONT) rlefont_optimize $@ 30
+
+GillSans-Bold32.dat: GillSans-Bold.ttf
+	$(MCUFONT) import_ttf $< 32
+	$(MCUFONT) filter $@ $(CHARS)
+	$(MCUFONT) rlefont_optimize $@ 30
+
+GillSans-SemiBold24.dat: GillSans-SemiBold.ttf
+	$(MCUFONT) import_ttf $< 24
 	$(MCUFONT) filter $@ $(CHARS)
 	$(MCUFONT) rlefont_optimize $@ 30
 

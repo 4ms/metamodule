@@ -19,35 +19,34 @@ struct DebugInfoPage : PageBase {
 		PageWidgets::draw_pot_values(screen, params, Colors::black, 214);
 		PageWidgets::draw_processor_stats(screen, Colors::blue, metaparams.audio_load);
 
-		screen.setCursor(0, 40);
+		screen.setFont(mf_find_font("fixed_5x8"));
+		uint16_t y_pos = 40;
 		for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {
-			screen.print(i);
-			screen.print(": ");
-			screen.print(patch_player.modules[i]->get_description());
-			screen.print(": ");
-			screen.print(patch_list.cur_patch().modules_used[i]);
-			screen.print(": ");
-			screen.print(patch_player.get_multiple_module_index(i));
-			screen.print("\n");
+			screen.setCursor(0, y_pos);
+			screen.printf("%d: %s (%s) #%d",
+						  i,
+						  patch_player.modules[i]->get_description().cstr(),
+						  patch_list.cur_patch().modules_used[i].cstr(),
+						  patch_player.get_multiple_module_index(i));
+			y_pos += 10;
 		}
 		screen.setTextColor(Colors::black);
 		for (int i = 0; i < Panel::NumUserFacingOutJacks; i++) {
-			screen.print(i);
-			screen.print(": {");
-			screen.print(patch_player.get_panel_output_connection(i).module_id);
-			screen.print(",");
-			screen.print(patch_player.get_panel_output_connection(i).jack_id);
-			screen.print("}");
-			screen.print("\n");
+			screen.setCursor(0, y_pos);
+			screen.printf("OUT %d: {%d, %d}",
+						  i,
+						  patch_player.get_panel_output_connection(i).module_id,
+						  patch_player.get_panel_output_connection(i).jack_id);
+			y_pos += 8;
 		}
+		y_pos = 40;
 		for (int i = 0; i < Panel::NumUserFacingInJacks; i++) {
-			screen.print(i);
-			screen.print(": {");
-			screen.print(patch_player.get_panel_input_connection(i).module_id);
-			screen.print(",");
-			screen.print(patch_player.get_panel_input_connection(i).jack_id);
-			screen.print("}");
-			screen.print("\n");
+			screen.setCursor(160, y_pos);
+			screen.printf("IN %d: {%d, %d}",
+						  i,
+						  patch_player.get_panel_input_connection(i).module_id,
+						  patch_player.get_panel_input_connection(i).jack_id);
+			y_pos += 10;
 		}
 	}
 

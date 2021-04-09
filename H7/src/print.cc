@@ -30,3 +30,12 @@ extern "C" uint8_t _char_callback(int16_t x0, int16_t y0, mf_char character, voi
 		return 0;
 	return mf_render_character(default_screen->_font, x0, y0, character, &_draw_text_pixel_callback, state);
 }
+
+extern "C" uint8_t _char_cursor_callback(int16_t x0, int16_t y0, mf_char character, void *state)
+{
+	if (!screen_is_registered)
+		return 0;
+	auto x_inc = mf_render_character(default_screen->_font, x0, y0, character, &_draw_text_pixel_callback, state);
+	default_screen->cursor_x += x_inc;
+	return x_inc;
+}

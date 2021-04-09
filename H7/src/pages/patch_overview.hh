@@ -13,10 +13,6 @@ struct PatchOverviewPage : PageBase {
 
 	static constexpr Color bgcolor = Colors::white;
 	static constexpr Color subheader_fg = Colors::black;
-	static constexpr uint16_t subheader_ypos = 56;
-
-	static constexpr uint16_t list_ypos = 76;
-	static constexpr uint16_t list_lineheight = 20;
 
 	void draw()
 	{
@@ -25,7 +21,7 @@ struct PatchOverviewPage : PageBase {
 		screen.setTextWrap(true);
 		screen.print(patch_list.cur_patch().patch_name);
 
-		screen.setFont(&mf_rlefont_DejaVuSans12.font);
+		screen.setFont(PageWidgets::list_font);
 		screen.setTextColor(Colors::grey);
 		screen.setCursor(2, 90);
 		screen.print("Here is the verbose patch description, etc etc. Todo, fix word-wrap to only wrap on a space");
@@ -48,9 +44,9 @@ struct JackMapPage : PageBase {
 		PageWidgets::setup_sub_header(screen);
 		screen.print("Jack layout:");
 
-		screen.setFont(&mf_rlefont_DejaVuSans12.font);
-		const uint16_t line_height = PatchOverviewPage::list_lineheight;
-		int y = PatchOverviewPage::list_ypos;
+		screen.setFont(PageWidgets::list_font);
+		const uint16_t line_height = PageWidgets::list_lineheight;
+		int y = PageWidgets::list_ypos;
 
 		if (patch_player.is_loaded) {
 			int num_ins = Panel::NumUserFacingInJacks;
@@ -103,9 +99,9 @@ struct KnobMapPage : PageBase {
 		PageWidgets::setup_sub_header(screen);
 		screen.print("Knob layout:");
 
-		screen.setFont(&mf_rlefont_DejaVuSans12.font);
-		const uint16_t y_pos = PatchOverviewPage::list_ypos;
-		const uint16_t line_height = PatchOverviewPage::list_lineheight;
+		screen.setFont(PageWidgets::list_font);
+		const uint16_t y_pos = PageWidgets::list_ypos;
+		const uint16_t line_height = PageWidgets::list_lineheight;
 		const char knob_name[8][2] = {"A", "B", "C", "D", "a", "b", "c", "d"};
 
 		if (patch_player.is_loaded) {
@@ -141,8 +137,8 @@ struct PatchLayoutPage : PageBase {
 		PageWidgets::setup_sub_header(screen);
 		screen.print("Internal cables:");
 
-		screen.setFont(&mf_rlefont_DejaVuSans12.font);
-		const uint16_t y_pos = PatchOverviewPage::list_ypos;
+		screen.setFont(PageWidgets::list_font);
+		uint16_t y_pos = PageWidgets::list_ypos;
 		if (patch_player.is_loaded) {
 			screen.setCursor(2, y_pos);
 			for (int i = 0; i < patch_list.cur_patch().num_nets; i++) {
@@ -159,14 +155,16 @@ struct PatchLayoutPage : PageBase {
 
 				for (int j = 1; j < net.num_jacks; j++) {
 					auto input_jack = net.jacks[j];
-					screen.print("\n  => ");
+					y_pos += PageWidgets::list_lineheight;
+					screen.setCursor(2, y_pos);
+					screen.print("  => ");
 					screen.setTextColor(Colors::black);
 					PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
 					screen.print(": ");
 					screen.setTextColor(Colors::blue.blend(Colors::black, 0.5f));
 					screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
 				}
-				screen.print("\n");
+				y_pos += PageWidgets::list_lineheight;
 			}
 		}
 	}
@@ -185,18 +183,18 @@ struct ModulesInPatchPage : PageBase {
 		PageWidgets::setup_sub_header(screen);
 		screen.print("Modules in patch:");
 
-		screen.setFont(&mf_rlefont_DejaVuSans12.font);
-		const uint16_t y_pos = PatchOverviewPage::list_ypos;
+		screen.setFont(PageWidgets::list_font);
+		uint16_t y_pos = PageWidgets::list_ypos;
 		if (patch_player.is_loaded) {
-			screen.setCursor(0, y_pos);
 			for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {
 				if (i == 0)
 					continue; // skip PANEL
+				screen.setCursor(PageWidgets::margin_left, y_pos);
 				screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
 				screen.print(i);
 				screen.print(": ");
 				PageWidgets::print_module_name(screen, patch_player, i);
-				screen.print("\n");
+				y_pos += PageWidgets::list_lineheight;
 			}
 		}
 	}

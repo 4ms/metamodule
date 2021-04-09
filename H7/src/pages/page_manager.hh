@@ -33,6 +33,7 @@ class PageManager {
 	ModulesInPatchPage modules_in_patch_page;
 	PatchSelectorPage patch_selector_page;
 	DebugInfoPage debug_info_page;
+	PageWidgets widgets;
 
 public:
 	Page cur_page;
