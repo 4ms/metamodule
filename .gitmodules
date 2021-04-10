@@ -11,3 +11,6 @@
 [submodule "MP1/lib/mdrivlib"]
 	path = MP1/lib/mdrivlib
 	url = git@github.com:4ms/mdrivlib.git
+[submodule "MP1/lib/printf"]
+	path = MP1/lib/printf
+	url = git@github.com:mpaland/printf.git
