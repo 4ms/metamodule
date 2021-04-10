@@ -2,12 +2,12 @@
 	path = F7/lib/mdrivlib
 	url = git@github.com:4ms/mdrivlib.git
 	branch = main
-[submodule "shared/doctest"]
-	path = shared/doctest
-	url = git@github.com:onqtam/doctest.git
 [submodule "H7/lib/mdrivlib"]
 	path = H7/lib/mdrivlib
 	url = git@github.com:4ms/mdrivlib.git
 [submodule "H7/lib/printf"]
 	path = H7/lib/printf
 	url = git@github.com:mpaland/printf.git
+[submodule "MP1/lib/mdrivlib"]
+	path = MP1/lib/mdrivlib
+	url = git@github.com:4ms/mdrivlib.git
