@@ -2,3 +2,4 @@
 #include "patch/integration_tests/test_attCore.hh"
 #include "patch/integration_tests/test_bitcrushCore.hh"
 #include "patch/integration_tests/test_bpfCore.hh"
+#include "patch/integration_tests/test_clkdivideCore.hh"
