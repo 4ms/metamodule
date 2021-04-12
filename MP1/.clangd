@@ -1,0 +1,8 @@
+CompileFlags:
+	Add: [
+		"--target=arm-none-eabi",
+		"-Ilib/stm32/device/include",
+		"-Ilib/stm32/cmsis/include",
+		"-Ilib/stm32/cmsis/Core",
+		"-Ilib/stm32/cmsis/Core_A",
+	]

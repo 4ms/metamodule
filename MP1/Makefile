@@ -3,8 +3,10 @@ JFLASHEXE = /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
 
 export BUILDDIR_M4 		= build/corem4
 export BUILDDIR_M7 		= build/corem7
+export BUILDDIR_A7 		= build/corea7
 export BINARYNAME 		= main
 export STARTUP 			= startup_cm7.s
+export STARTUP_CA7		= startup_ca7.s
 export SYSTEM 			= system_stm32h7xx_dualcore_boot_cm4_cm7.c
 export LIBDIR 			= lib
 export DEVICE 			= $(LIBDIR)/stm32/device
@@ -15,9 +17,11 @@ export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
 all: 
-	@$(MAKE) --no-print-directory -f makefile_m7.mk
-	@$(MAKE) --no-print-directory -f makefile_m4.mk
-	@$(MAKE) --no-print-directory tests
+	@$(MAKE) --no-print-directory -f makefile_a7.mk
+	# @$(MAKE) --no-print-directory -f makefile_m7.mk
+	# @$(MAKE) --no-print-directory -f makefile_m4.mk
+	# @$(MAKE) --no-print-directory tests
+
 
 inttest: 
 	touch src/patchlist.cc 
@@ -26,7 +30,7 @@ inttest:
 
 clean:
 	rm -rf $(BUILDDIR_M4)
-	rm -rf $(BUILDDIR_M7)
+	rm -rf $(BUILDDIR_A7)
 
 $(BUILDDIR_M4)/$(BINARYNAME).hex:
 	@$(MAKE) --no-print-directory -f makefile_m4.mk
@@ -38,13 +42,13 @@ $(BUILDDIR_M7)/$(BINARYNAME).hex:
 # ifeq (,$(wildcard $(JFLASHEXE)))
 #     $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
 # endif
-flash_m7: $(BUILDDIR_M7)/$(BINARYNAME).hex
+flash_m7: $(BUILDDIR_A7)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
 
 flash_m4: $(BUILDDIR_M4)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
-flash: $(BUILDDIR_M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
+flash: $(BUILDDIR_A7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
 tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
