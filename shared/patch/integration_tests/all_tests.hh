@@ -3,3 +3,4 @@
 #include "patch/integration_tests/test_bitcrushCore.hh"
 #include "patch/integration_tests/test_bpfCore.hh"
 #include "patch/integration_tests/test_clkdivideCore.hh"
+#include "patch/integration_tests/test_clkmultiplierCore.hh"
