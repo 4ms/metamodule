@@ -31,7 +31,7 @@ public:
 		if (param_id == 0) {
 			float expoControl = val * val;
 			if ((expoControl) <= 0.9f) {
-				reducedSampleRate = map_value(expoControl, 0.0f, 0.9f, 0.1f, currentSampleRate / 16.0f);
+				reducedSampleRate = map_value(expoControl, 0.0f, 0.9f, 1.0f, currentSampleRate / 16.0f);
 			} else {
 				reducedSampleRate = map_value(expoControl, 0.9f, 1.0f, currentSampleRate / 16.0f, maxSampleRate);
 			}
