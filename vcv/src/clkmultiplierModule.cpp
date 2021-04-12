@@ -10,6 +10,7 @@ struct ClkmultiplierModule : CommModule {
 	};
 	enum InputIds {
 		CLOCK_INPUT,
+		CV_INPUT,
 		NUM_INPUTS,
 	};
 	enum OutputIds {
@@ -25,6 +26,9 @@ struct ClkmultiplierModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("CLKMULTIPLIER");
 		selfID.typeID = "CLKMULTIPLIER";
+
+		outputJacks[ClkmultiplierModule::CLOCK_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+		inputJacks[ClkmultiplierModule::CV_INPUT]->scale = [](float f) { return f / 5.0f; };
 	}
 };
 
@@ -40,6 +44,7 @@ struct ClkmultiplierWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hp.svg")));
 		addLabeledKnob("MULT", ClkmultiplierModule::MULT_PARAM, {0, 0});
 		addLabeledInput("CLK IN", ClkmultiplierModule::CLOCK_INPUT, {0, 1});
+		addLabeledInput("CV", ClkmultiplierModule::CV_INPUT, {0, 2});
 		addLabeledOutput("CLK OUT", ClkmultiplierModule::CLOCK_OUTPUT, {0, 0});
 		addModuleTitle("CLK X");
 	}

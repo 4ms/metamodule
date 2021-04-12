@@ -8,13 +8,13 @@
 using namespace MathTools;
 
 class ClkmultiplierCore : public CoreProcessor {
-	static inline const int NumInJacks = 1;
+	static inline const int NumInJacks = 2;
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 1;
 
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Multiply"};
 	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Clock In"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Clock In", "CV"};
 	static inline const StaticString<LongNameChars> description{"Clock Multiplier"};
 
 	// clang-format off
@@ -26,6 +26,8 @@ class ClkmultiplierCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		float finalMultiply = constrain(multiplyOffset + multiplyCV, 0.0f, 1.0f);
+		cp.setMultiply(map_value(finalMultiply, 0.0f, 1.0f, 1.0f, 16.99f));
 		cp.update();
 		if (cp.getWrappedPhase() < pulseWidth) {
 			clockOutput = 1;
@@ -40,7 +42,7 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				cp.setMultiply(map_value(val, 0.0f, 1.0f, 1.0f, 16.99f));
+				multiplyOffset = val;
 				break;
 		}
 	}
@@ -52,6 +54,8 @@ public:
 			case 0:
 				cp.updateClock(val);
 				break;
+			case 1:
+				multiplyCV = val;
 		}
 	}
 
@@ -76,6 +80,8 @@ public:
 private:
 	float pulseWidth = 0.5f;
 	int clockOutput = 0;
+	float multiplyOffset = 0;
+	float multiplyCV = 0;
 
 	ClockPhase cp;
 };
