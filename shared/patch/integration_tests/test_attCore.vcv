@@ -1,0 +1,277 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 30,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 39,
+      "rightModuleId": 33,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 39,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 39,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 39,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 39,
+            "DstObjID": 1,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "OutputJack"
+          }
+        ]
+      },
+      "pos": [
+        8,
+        0
+      ]
+    },
+    {
+      "id": 33,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 9.64999962
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.809998631
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 30,
+      "rightModuleId": 41,
+      "data": {
+        "lissajous": 0,
+        "external": 1
+      },
+      "pos": [
+        24,
+        0
+      ]
+    },
+    {
+      "id": 38,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 42,
+      "text": "ATTCORE TEST\n\nInput 1 and 2 are connected to LFO output\n\nKnobs A and B control level for 1 and 2\n\nOutputs are on Audio Left and Right\n\nCheck that output is proportional to level set on knobs A and B\n",
+      "pos": [
+        47,
+        0
+      ]
+    },
+    {
+      "id": 39,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "attenuvert",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.472500056
+        },
+        {
+          "id": 1,
+          "value": 0.502500057
+        }
+      ],
+      "leftModuleId": 40,
+      "rightModuleId": 30,
+      "pos": [
+        4,
+        0
+      ]
+    },
+    {
+      "id": 40,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        }
+      ],
+      "rightModuleId": 39,
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 41,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 33,
+      "rightModuleId": 42,
+      "pos": [
+        37,
+        0
+      ]
+    },
+    {
+      "id": 42,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 41,
+      "rightModuleId": 38,
+      "pos": [
+        42,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 43,
+      "outputModuleId": 40,
+      "outputId": 0,
+      "inputModuleId": 39,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 44,
+      "outputModuleId": 40,
+      "outputId": 0,
+      "inputModuleId": 39,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 45,
+      "outputModuleId": 39,
+      "outputId": 0,
+      "inputModuleId": 41,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 46,
+      "outputModuleId": 41,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 47,
+      "outputModuleId": 39,
+      "outputId": 1,
+      "inputModuleId": 42,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 48,
+      "outputModuleId": 42,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 1,
+      "color": "#c91847"
+    }
+  ]
+}
