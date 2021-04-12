@@ -33,6 +33,7 @@ class PageManager {
 	ModulesInPatchPage modules_in_patch_page;
 	PatchSelectorPage patch_selector_page;
 	DebugInfoPage debug_info_page;
+	PageWidgets widgets;
 
 public:
 	Page cur_page;
@@ -54,6 +55,9 @@ public:
 	void prev_page();
 	void jump_to_page(Page p);
 	void display_current_page();
+
+private:
+	void start_page();
 };
 
 struct DisplayPage {};

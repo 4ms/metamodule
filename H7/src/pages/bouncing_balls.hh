@@ -1,7 +1,6 @@
 #pragma once
 #include "pages/base.hh"
 #include "pages/bouncing_ball.hh"
-#include "pages/fonts.hh"
 
 namespace MetaModule
 {
