@@ -35,7 +35,7 @@ PatchList::PatchList()
 
 PatchList::PatchList()
 	: _patches{
-		  {test_adCore},
+		  {test_adCore}, {test_attCore}, {test_bpfCore}, {test_bitcrushCore}
 		  // MARK: Add patches below here:
 	  }
 {
