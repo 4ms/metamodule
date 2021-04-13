@@ -22,7 +22,7 @@ UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 #####
 
 SOURCES = $(DRIVERLIB)/drivers/$(STARTUP_CA7) \
-		  src/a7/app.cc\
+		  src/a7/main.cc\
 		  $(DRIVERLIB)/drivers/pin.cc
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))

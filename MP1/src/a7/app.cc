@@ -3,11 +3,6 @@
 
 #include <stdint.h>
 
-const uint32_t *UART4_ISR = (uint32_t *)0x40010028;
-const uint32_t TXFE = (1 << 23); // FIFO Empty
-const uint32_t TXFNF = (1 << 7); // TX FIFO Not Full
-const uint32_t TC = (1 << 6);	 // Tx Complete
-
 void delay_long()
 {
 	uint32_t i = 0x100000;
@@ -30,14 +25,14 @@ void delay_for_uart(void)
 		;
 }
 
-uint32_t uart_ready()
-{
-	uint32_t isr = (*UART4_ISR);
-	if (isr & TC)
-		return 1;
-	else
-		return 0;
-}
+// uint32_t uart_ready()
+// {
+// 	uint32_t isr = (*UART4_ISR);
+// 	if (isr & TC)
+// 		return 1;
+// 	else
+// 		return 0;
+// }
 
 void write(const char *str)
 {
@@ -82,28 +77,6 @@ int main()
 	red_LED2.high();
 	red_LED2.low();
 
-	// RCC->MC_AHB4ENSETR |= RCC_MC_AHB4ENSETR_GPIOIEN;
-	// RCC->MC_AHB5ENSETR |= RCC_MC_AHB5ENSETR_GPIOZEN;
-
-	// LL_GPIO_SetPinMode(GPIOI, LL_GPIO_PIN_8, LL_GPIO_MODE_OUTPUT);
-	// LL_GPIO_SetPinOutputType(GPIOI, LL_GPIO_PIN_8, LL_GPIO_OUTPUT_PUSHPULL);
-	// LL_GPIO_SetPinSpeed(GPIOI, LL_GPIO_PIN_8, LL_GPIO_SPEED_FREQ_MEDIUM);
-	// LL_GPIO_SetPinMode(GPIOI, LL_GPIO_PIN_9, LL_GPIO_MODE_OUTPUT);
-	// LL_GPIO_SetPinOutputType(GPIOI, LL_GPIO_PIN_9, LL_GPIO_OUTPUT_PUSHPULL);
-	// LL_GPIO_SetPinSpeed(GPIOI, LL_GPIO_PIN_9, LL_GPIO_SPEED_FREQ_MEDIUM);
-
-	// LL_GPIO_SetOutputPin(GPIOI, LL_GPIO_PIN_8);
-	// LL_GPIO_ResetOutputPin(GPIOI, LL_GPIO_PIN_8);
-
-	// LL_GPIO_SetOutputPin(GPIOI, LL_GPIO_PIN_9);
-	// LL_GPIO_ResetOutputPin(GPIOI, LL_GPIO_PIN_9);
-
-	// LL_GPIO_SetOutputPin(GPIOZ, LL_GPIO_PIN_6);
-	// LL_GPIO_ResetOutputPin(GPIOZ, LL_GPIO_PIN_6);
-
-	// LL_GPIO_SetOutputPin(GPIOZ, LL_GPIO_PIN_7);
-	// LL_GPIO_ResetOutputPin(GPIOZ, LL_GPIO_PIN_7);
-
 	// Test function calls (tests the stack)
 	const char *s = "Hello world from bare-metal!\r\n";
 	write(s);
@@ -116,30 +89,22 @@ int main()
 	}
 
 	while (1) {
-		// LL_GPIO_SetOutputPin(GPIOI, LL_GPIO_PIN_8);
 		red_LED1.low();
 		delay_long();
 		red_LED1.high();
-		// LL_GPIO_ResetOutputPin(GPIOI, LL_GPIO_PIN_8);
 
-		// LL_GPIO_SetOutputPin(GPIOI, LL_GPIO_PIN_9);
 		red_LED2.low();
 		delay_long();
 		red_LED2.high();
-		// LL_GPIO_ResetOutputPin(GPIOI, LL_GPIO_PIN_9);
 
-		// LL_GPIO_SetOutputPin(GPIOZ, LL_GPIO_PIN_6);
 		green_LED1.low();
 		delay_long();
 		green_LED1.high();
-		// LL_GPIO_ResetOutputPin(GPIOZ, LL_GPIO_PIN_6);
 
-		// LL_GPIO_SetOutputPin(GPIOZ, LL_GPIO_PIN_7);
 		green_LED2.low();
 		delay_long();
 		green_LED2.high();
-		// LL_GPIO_ResetOutputPin(GPIOZ, LL_GPIO_PIN_7);
-	};
+	}
 
 	return 0;
 }
