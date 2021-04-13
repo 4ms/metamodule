@@ -135,11 +135,19 @@
             "SrcModID": 30,
             "SrcObjID": 7,
             "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 0,
+            "DstObjType": "InputJack",
+            "SrcModID": 30,
+            "SrcObjID": 6,
+            "SrcObjType": "InputJack"
           }
         ]
       },
       "pos": [
-        24,
+        20,
         0
       ]
     },
@@ -151,49 +159,23 @@
       "params": [
         {
           "id": 0,
-          "value": 0.115500011
+          "value": 0.0
         },
         {
           "id": 1,
-          "value": 0.163500026
+          "value": 0.0
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 0.00150000001
         },
         {
           "id": 3,
-          "value": 0.512500107
-        }
-      ],
-      "leftModuleId": 32,
-      "rightModuleId": 30,
-      "pos": [
-        16,
-        0
-      ]
-    },
-    {
-      "id": 32,
-      "plugin": "4msCompany",
-      "version": "1.0.0",
-      "model": "lfo",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.183000073
-        },
-        {
-          "id": 1,
           "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 1.0
         }
       ],
       "leftModuleId": 37,
-      "rightModuleId": 31,
+      "rightModuleId": 30,
       "pos": [
         12,
         0
@@ -223,7 +205,7 @@
         },
         {
           "id": 4,
-          "value": 9.64999962
+          "value": 7.34001017
         },
         {
           "id": 5,
@@ -244,7 +226,7 @@
         "external": 1
       },
       "pos": [
-        40,
+        36,
         0
       ]
     },
@@ -256,7 +238,7 @@
       "params": [],
       "rightModuleId": 35,
       "pos": [
-        55,
+        51,
         0
       ]
     },
@@ -269,7 +251,7 @@
       "leftModuleId": 34,
       "rightModuleId": 38,
       "pos": [
-        60,
+        56,
         0
       ]
     },
@@ -306,7 +288,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0
+          "value": 0.274500012
         },
         {
           "id": 1,
@@ -322,7 +304,7 @@
         }
       ],
       "leftModuleId": 36,
-      "rightModuleId": 32,
+      "rightModuleId": 31,
       "pos": [
         4,
         0
@@ -335,30 +317,28 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 35,
-      "text": "ADCORE TEST\n\nLFO triggers A/D envelope\n\nA-D knobs are :\n-attack time\n-decay time\n-attack shape\n-decay shape\n\na-d knobs control LFO into the 4 module parameters\n\nCV Out 1 and 2 and End of Attack and End of Decay gates\n\nAudio Out Left is envelope output",
+      "rightModuleId": 57,
+      "text": "ADCORE TEST\n\nGate In 1 triggers A/D envelope\n\nA-D knobs are :\n-attack time\n-decay time\n-attack shape\n-decay shape\n\na-d knobs control LFO amount into the 4 module parameters\n\nCV Out 1 and 2 and End of Attack and End of Decay gates\n\nAudio Out Left is envelope output\n",
       "pos": [
-        65,
+        61,
+        0
+      ]
+    },
+    {
+      "id": 57,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 38,
+      "text": "Fire gate into Gate In 1\n\nTurning knobs A and B should make attack and decay times longer (range = 1ms to 1.2 seconds)\n\nTurnings knobs C and D change stage shapes (exponential at minimum, linear at 50% and log at 100%)\n\nAdjust a-d knobs (at 0 there should be no effect). As they are turned up the parameters will vary  in a bipolar fashion\n\nIf the main control and cv amount control are centered the parameter will swing full range\n\nCheck that EOA is high when envelope is in decay stage\n and that EOD is high when envelope has settled \n",
+      "pos": [
+        77,
         0
       ]
     }
   ],
   "cables": [
-    {
-      "id": 30,
-      "outputModuleId": 32,
-      "outputId": 0,
-      "inputModuleId": 31,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 34,
-      "outputModuleId": 32,
-      "outputId": 0,
-      "inputModuleId": 34,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
     {
       "id": 35,
       "outputModuleId": 34,
