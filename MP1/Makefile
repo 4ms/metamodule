@@ -18,9 +18,12 @@ export TABLEGEN 		= $(SHARED)/tableGen
 
 all: 
 	@$(MAKE) --no-print-directory -f makefile_a7.mk
-	# @$(MAKE) --no-print-directory -f makefile_m7.mk
-	# @$(MAKE) --no-print-directory -f makefile_m4.mk
-	# @$(MAKE) --no-print-directory tests
+	@$(MAKE) --no-print-directory tests
+
+H7:
+	@$(MAKE) --no-print-directory -f makefile_m7.mk
+	@$(MAKE) --no-print-directory -f makefile_m4.mk
+	@$(MAKE) --no-print-directory tests
 
 
 inttest: 
@@ -42,13 +45,17 @@ $(BUILDDIR_M7)/$(BINARYNAME).hex:
 # ifeq (,$(wildcard $(JFLASHEXE)))
 #     $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
 # endif
+flash_a7:
+	$(info not implemented yet)
+
+
 flash_m7: $(BUILDDIR_A7)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
 
 flash_m4: $(BUILDDIR_M4)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
-flash: $(BUILDDIR_A7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
+flash_h7: $(BUILDDIR_A7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
 tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
@@ -59,13 +66,16 @@ simulate:
 	$(info Simulating screens...)
 	@cd ../screen_simulator && cargo run
 
-.PHONY: all clean flash tables tests H7_tests core_tests util_tests proc_tests mdrivlib_tests simulate
+.PHONY: all clean flash_a7 flash_m7 flash_m4 flash_h7 tables tests H7_tests core_tests util_tests proc_tests mdrivlib_tests simulate
 
-tests: H7_tests core_tests util_tests mdrivlib_tests #proc_tests
+tests: MP1_tests H7_tests core_tests util_tests mdrivlib_tests #vcv_tests
+
+MP1_tests:
+	$(info ... No MP1 tests yet....)
 
 H7_tests:
 	$(info ... Running H7 tests....)
-	@$(MAKE) --no-print-directory -f tests/Makefile
+	@cd ../H7 && $(MAKE) --no-print-directory -f tests/Makefile
 
 mdrivlib_tests:
 	$(info ... Running mdrivlib tests ...)

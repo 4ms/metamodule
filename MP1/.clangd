@@ -1,8 +1,22 @@
+---
 CompileFlags:
 	Add: [
+		"-std=c++17",
+		"-DCORE_CA7", 
+		"-DSTM32MP1",
+		"-DSTM32MP157Cxx",
+		"-DUSE_HAL_DRIVER",
 		"--target=arm-none-eabi",
 		"-Ilib/stm32/device/include",
 		"-Ilib/stm32/cmsis/include",
-		"-Ilib/stm32/cmsis/Core",
-		"-Ilib/stm32/cmsis/Core_A",
+		"-Ilib/stm32/cmsis/Core/Include",
+		"-Ilib/stm32/cmsis/Core_A/Include",
+		"-Ilib/mdrivlib",
+		"-Ilib/mdrivlib/drivers",
+        "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1",
+        "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/arm-none-eabi",
+        "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/backward",
+        "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/lib/gcc/arm-none-eabi/8.2.1/include",
+        "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/lib/gcc/arm-none-eabi/8.2.1/include-fixed",
+        "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include"
 	]
