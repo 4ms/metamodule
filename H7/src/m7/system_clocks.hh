@@ -67,8 +67,8 @@ struct SystemClocks {
 
 		target::corem7::SystemStartup::wait_for_cm4_sleep();
 
-		System::SetVectorTable(0x08000000);
-		System::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf, 500);
+		target::System::SetVectorTable(0x08000000);
+		target::System::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf, 500);
 		NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
 
 		target::corem7::SystemStartup::init_caches();

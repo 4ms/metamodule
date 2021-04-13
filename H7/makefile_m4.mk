@@ -24,7 +24,6 @@ SOURCES  += $(DRIVERLIB)/drivers/i2c.cc
 SOURCES  += $(DRIVERLIB)/drivers/interrupt.cc
 SOURCES  += $(DRIVERLIB)/drivers/pin.cc
 SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
-SOURCES  += $(DRIVERLIB)/drivers/system.cc
 SOURCES  += $(DRIVERLIB)/drivers/tim.cc
 SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
