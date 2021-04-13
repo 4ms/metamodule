@@ -49,7 +49,6 @@ struct MetaModuleHub : public CommModule {
 		json_object_set_new(rootJ, "Mappings", mapsJ);
 		json_t *patchNameJ = json_string(patchNameText.c_str());
 		json_object_set_new(rootJ, "PatchName", patchNameJ);
-		redrawPatchName();
 		return rootJ;
 	}
 
@@ -58,6 +57,7 @@ struct MetaModuleHub : public CommModule {
 		auto patchNameJ = json_object_get(rootJ, "PatchName");
 		if (json_is_string(patchNameJ)) {
 			patchNameText = json_string_value(patchNameJ);
+			redrawPatchName();
 		}
 
 		auto mapsJ = json_object_get(rootJ, "Mappings");
@@ -66,6 +66,7 @@ struct MetaModuleHub : public CommModule {
 			for (size_t i = 0; i < json_array_size(mapsJ); i++) {
 				auto mappingJ = json_array_get(mapsJ, i);
 				Mapping mapping;
+
 				if (json_is_object(mappingJ)) {
 					json_t *val;
 
