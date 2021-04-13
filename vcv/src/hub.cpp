@@ -47,11 +47,19 @@ struct MetaModuleHub : public CommModule {
 			json_decref(thisMapJ);
 		}
 		json_object_set_new(rootJ, "Mappings", mapsJ);
+		json_t *patchNameJ = json_string(patchNameText.c_str());
+		json_object_set_new(rootJ, "PatchName", patchNameJ);
+		redrawPatchName();
 		return rootJ;
 	}
 
 	void dataFromJson(json_t *rootJ) override
 	{
+		auto patchNameJ = json_object_get(rootJ, "PatchName");
+		if (json_is_string(patchNameJ)) {
+			patchNameText = json_string_value(patchNameJ);
+		}
+
 		auto mapsJ = json_object_get(rootJ, "Mappings");
 		if (json_is_array(mapsJ)) {
 			centralData->maps.clear();
@@ -250,6 +258,7 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		if (expModule != nullptr) {
 			expModule->updateDisplay = [&]() { this->valueLabel->text = this->expModule->labelText; };
 			expModule->updatePatchName = [&]() { this->expModule->patchNameText = this->patchName->text; };
+			expModule->redrawPatchName = [&]() { this->patchName->text = this->expModule->patchNameText; };
 		}
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
@@ -263,7 +272,10 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		addChild(valueLabel);
 
 		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(20, 45)));
-		patchName->text = "Enter Patch Name";
+		if (expModule != nullptr && expModule->patchNameText.length() > 0)
+			patchName->text = this->expModule->patchNameText;
+		else
+			patchName->text = "Enter Patch Name";
 		patchName->color = rack::color::WHITE;
 		patchName->box.size = {mm2px(Vec(40, 10))};
 		addChild(patchName);
