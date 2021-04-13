@@ -144,7 +144,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 42,
-      "text": "ATTCORE TEST\n\nInput 1 and 2 are connected to LFO output\n\nKnobs A and B control level for 1 and 2\n\nOutputs are on Audio Left and Right\n\nCheck that output is proportional to level set on knobs A and B\n",
+      "text": "ATTCORE TEST\n\nInput 1 and 2 are connected to LFO output\n\nKnobs A and B control level for 1 and 2\n\nOutputs are on Audio Left and Right\n\nCheck that output is proportional to level set on knobs A and B (minimum value is fully inverted, 50% is 0 gain, maximum value is unity gain)\n",
       "pos": [
         47,
         0
