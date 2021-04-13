@@ -26,3 +26,5 @@ shared/CoreModules/tests/doctest.h
 vcv/tests/doctest.h
 shared/tableGen/make_tables
 *.dat
+
+H7/local_board_rev.hh
