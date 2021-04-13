@@ -1,6 +1,3 @@
-// #include "stm32mp157cxx_ca7.h"
-// #include "stm32mp1xx_ll_gpio.h"
-// #include "stm32mp1xx_ll_usart.h"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
 
@@ -10,12 +7,6 @@ const uint32_t *UART4_ISR = (uint32_t *)0x40010028;
 const uint32_t TXFE = (1 << 23); // FIFO Empty
 const uint32_t TXFNF = (1 << 7); // TX FIFO Not Full
 const uint32_t TC = (1 << 6);	 // Tx Complete
-
-/* GPIO I, pin 8 = red D2 */
-/* GPIO I, pin 9 = green D2 */
-/* GPIO Z, pin 6 = red D1 */
-/* GPIO Z, pin 7 = green D1 */
-/* all LEDs are active low */
 
 void delay_long()
 {
