@@ -71,11 +71,19 @@
             "SrcModID": 30,
             "SrcObjID": 0,
             "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 57,
+            "DstObjID": 1,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "OutputJack"
           }
         ]
       },
       "pos": [
-        12,
+        16,
         0
       ]
     },
@@ -125,7 +133,7 @@
         "external": 0
       },
       "pos": [
-        28,
+        32,
         0
       ]
     },
@@ -136,9 +144,9 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 42,
-      "text": "CLOCK MULTIPLIER CORE TEST\n\nKnob A - Multiply\nKnob B - CV Amount\n\nCheck output on Audio Out L",
+      "text": "CLOCK MULTIPLIER CORE TEST\n\nKnob A - Multiply\nKnob B - CV Amount\n\nMultiplied output on Audio Out L\nMain clock on Audio Out R\n\nVerify multiplications relative to main clock. Knob at 0% is multiply by 1. Knob at 100% is multiply by 16.",
       "pos": [
-        51,
+        55,
         0
       ]
     },
@@ -151,7 +159,7 @@
       "leftModuleId": 33,
       "rightModuleId": 42,
       "pos": [
-        41,
+        45,
         0
       ]
     },
@@ -164,7 +172,7 @@
       "leftModuleId": 41,
       "rightModuleId": 38,
       "pos": [
-        46,
+        50,
         0
       ]
     },
@@ -176,7 +184,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.226499826
+          "value": 0.134999871
         },
         {
           "id": 1,
@@ -190,7 +198,7 @@
       "leftModuleId": 55,
       "rightModuleId": 56,
       "pos": [
-        4,
+        8,
         0
       ]
     },
@@ -213,9 +221,10 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 57,
       "rightModuleId": 54,
       "pos": [
-        0,
+        4,
         0
       ]
     },
@@ -233,7 +242,19 @@
       "leftModuleId": 54,
       "rightModuleId": 30,
       "pos": [
-        8,
+        12,
+        0
+      ]
+    },
+    {
+      "id": 57,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "logic",
+      "params": [],
+      "rightModuleId": 55,
+      "pos": [
+        0,
         0
       ]
     }
@@ -256,26 +277,34 @@
       "color": "#c91847"
     },
     {
-      "id": 64,
-      "outputModuleId": 54,
-      "outputId": 0,
-      "inputModuleId": 56,
-      "inputId": 0,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 65,
-      "outputModuleId": 55,
-      "outputId": 0,
-      "inputModuleId": 56,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
       "id": 66,
       "outputModuleId": 56,
       "outputId": 0,
       "inputModuleId": 41,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 67,
+      "outputModuleId": 55,
+      "outputId": 0,
+      "inputModuleId": 56,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 69,
+      "outputModuleId": 57,
+      "outputId": 1,
+      "inputModuleId": 56,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 70,
+      "outputModuleId": 54,
+      "outputId": 0,
+      "inputModuleId": 57,
       "inputId": 0,
       "color": "#c9b70e"
     }
