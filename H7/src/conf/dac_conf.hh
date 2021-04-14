@@ -42,5 +42,5 @@ const PinChangeConfig DAC_update_conf = {
 	.priority2 = 0,
 };
 
-using AnalogOutT =
-	DacStream<DacSpi_MCP48FVBxx<MM_DACConf>, CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize>>;
+using AnalogOutT = DacStream<mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>,
+							 CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize>>;

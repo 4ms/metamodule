@@ -26,7 +26,7 @@ struct SpiAdcConf : DefaultSpiConf {
 	static constexpr bool LSBfirst = false;
 };
 
-using CVAdcChipT = AdcSpi_MAX11666<SpiAdcConf, Oversampler<8>>;
+using CVAdcChipT = mdrivlib::AdcSpi_MAX11666<SpiAdcConf, Oversampler<8>>;
 
 const TimekeeperConfig cvadc_tim_conf = {
 	.TIMx = TIM17,
@@ -34,4 +34,3 @@ const TimekeeperConfig cvadc_tim_conf = {
 	.priority1 = 0,
 	.priority2 = 1,
 };
-
