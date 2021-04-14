@@ -13,7 +13,7 @@ namespace corem4
 struct SystemClocks {
 	SystemClocks()
 	{
-		target::RCC_Control::HSEM_::set();
+		target::RCC_Enable::HSEM_::set();
 
 		// Enable notification in order to wakeup
 		HWSemaphore<15>::enable_channel_ISR();
@@ -45,7 +45,7 @@ struct SystemClocks {
 		SystemCoreClock = SystemD2Clock;
 		HAL_InitTick(TICK_INT_PRIORITY);
 
-		target::RCC_Control::SYSCFG_::set();
+		target::RCC_Enable::SYSCFG_::set();
 	}
 };
 } // namespace corem4

@@ -134,7 +134,7 @@ Controls::Controls(MuxedADC &potadc,
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 {
-	// Todo: use RCC_Control or create DBGMCU_Control:
+	// Todo: use RCC_Enable or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
 
 	read_controls_task.init(control_read_tim_conf, [this]() {

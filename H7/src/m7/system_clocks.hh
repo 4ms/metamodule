@@ -61,7 +61,7 @@ namespace MetaModule
 struct SystemClocks {
 	SystemClocks()
 	{
-		target::RCC_Control::HSEM_::set();
+		target::RCC_Enable::HSEM_::set();
 		HWSemaphore<M7_ready>::disable_channel_ISR();
 		HWSemaphore<M7_ready>::lock();
 

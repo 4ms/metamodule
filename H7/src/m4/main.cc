@@ -28,7 +28,7 @@ void main(void)
 {
 	using namespace MetaModule;
 
-	target::RCC_Control::HSEM_::set();
+	target::RCC_Enable::HSEM_::set();
 	HWSemaphore<M4_ready>::lock();
 
 	target::corem4::SystemClocks start_clocks;
