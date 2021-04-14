@@ -3,7 +3,7 @@
 
 constexpr uint32_t LEDUpdateHz = 100;
 
-const I2CConfig i2c_conf_m4 = {
+const I2CConfig i2c_conf_controls = {
 
 	.I2Cx = I2C3,
 	.SCL = {GPIO::A, 8, GPIO_AF4_I2C3},
@@ -19,7 +19,7 @@ const I2CConfig i2c_conf_m4 = {
 	.priority2 = 1,
 };
 
-const I2CConfig i2c_conf_m7 = {
+const I2CConfig i2c_conf_codec = {
 	.I2Cx = I2C1,
 	.SCL = {GPIO::B, 6, GPIO_AF4_I2C1},
 	.SDA = {GPIO::B, 7, GPIO_AF4_I2C1},

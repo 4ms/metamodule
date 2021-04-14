@@ -7,6 +7,8 @@
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 // #include "ui.hh"
+#include "a7/conf/i2c_conf.hh"
+#include "debug.hh"
 
 #include "drivers/pin.hh"
 
@@ -16,16 +18,15 @@ namespace MetaModule
 // Define the hardware elements used by Core A7
 // This initializes the SystemClocks (RCC) and other system resources
 // and then initializes the external chips that this core uses, before main() runs
-// struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
-// 	Hardware()
-// 		: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
-// 		, SharedBus{i2c_conf_m7}
-// 	{}
+struct Hardware : Debug, SharedBus {
+	Hardware()
+		: SharedBus{i2c_conf_codec}
+	{}
 
-// 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
-// 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
-// 	AnalogOutT dac;
-// } _hw;
+	// 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
+	// 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
+	// 	AnalogOutT dac;
+} _hw;
 
 } // namespace MetaModule
 
@@ -43,7 +44,6 @@ void main()
 	Pin green_LED2{GPIO::I, 9, PinMode::Output};
 	Pin red_LED1{GPIO::Z, 6, PinMode::Output};
 	Pin green_LED1{GPIO::Z, 7, PinMode::Output};
-
 
 	// StaticBuffers::init();
 
@@ -85,8 +85,10 @@ void main()
 	// audio.start();
 
 	while (1) {
+		Debug::Pin0::high();
 		red_LED1.low();
 		delay_long();
+		Debug::Pin0::low();
 		red_LED1.high();
 
 		red_LED2.low();
