@@ -45,8 +45,6 @@ CXXFLAGS = $(CFLAGS) \
 	-Wdouble-promotion \
 	-Wno-register \
 	-Wno-volatile \
-	-nostdlib \
-	-nostartfiles \
 
 AFLAGS = $(MCU)
 #	-x assembler-with-cpp

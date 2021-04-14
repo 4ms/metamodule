@@ -15,6 +15,7 @@
 namespace MetaModule
 {
 
+// FixMe: static ctors are not called!
 // Define the hardware elements used by Core A7
 // This initializes the SystemClocks (RCC) and other system resources
 // and then initializes the external chips that this core uses, before main() runs
@@ -44,6 +45,8 @@ void main()
 	Pin green_LED2{GPIO::I, 9, PinMode::Output};
 	Pin red_LED1{GPIO::Z, 6, PinMode::Output};
 	Pin green_LED1{GPIO::Z, 7, PinMode::Output};
+
+	SharedBus _sb{i2c_conf_codec};
 
 	// StaticBuffers::init();
 
@@ -110,3 +113,5 @@ void recover_from_task_fault(void)
 {
 	main();
 }
+
+// extern "C" void _init() {}

@@ -3,8 +3,8 @@
 $(info Building for A7 core)
 BUILDDIR = $(BUILDDIR_A7)
 LOADFILE = $(DEVICE)/src/stm32mp15xx_ca7.ld
-MCU = #-mcpu=cortex-a7 -mfpu=? -mthumb -mlittle-endian -mfloat-abi=?
-ARCH_CFLAGS = -DCORE_CA7 -DSTM32MP157Cxx -DSTM32MP1 #-DARM_MATH_CA7
+MCU =  -mcpu=cortex-a7 -mfpu=fpv5-d16 -mlittle-endian -mfloat-abi=hard
+# MCU = -mcpu=cortex-a7 -mlittle-endian #-mthumb? -mfput=? -mfloat-abi=?
 CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
 
@@ -22,8 +22,12 @@ UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 #####
 
 SOURCES = $(DRIVERLIB)/drivers/$(STARTUP_CA7) \
+		  src/sys/syscpp.c\
 		  src/a7/main.cc\
-		  $(DRIVERLIB)/drivers/pin.cc
+		  $(DRIVERLIB)/drivers/pin.cc \
+		  $(DRIVERLIB)/drivers/i2c.cc \
+		  $(PERIPH)/src/stm32mp1xx_hal_i2c.c \
+		  $(PERIPH)/src/stm32mp1xx_hal_i2c_ex.c \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
@@ -42,15 +46,23 @@ INCLUDES = -I. \
 
 AFLAGS = $(MCU)
 
+ARCH_CFLAGS += -DUSE_HAL_DRIVER \
+			  -DUSE_FULL_LL_DRIVER \
+			  -DSTM32MP157Cxx \
+			  -DSTM32MP1 \
+			  -DCORE_CA7 \
+#DARM_MATH_CA7
+
 CFLAGS = -g2 \
-		 -nostdlib \
-		 -nostartfiles \
-		 -DUSE_HAL_DRIVER \
+		 -fno-common \
 		 $(ARCH_CFLAGS) \
 		 $(MCU) \
 		 $(INCLUDES) \
-		 -fno-common \
 		 -fdata-sections -ffunction-sections \
+		 -nostartfiles \
+		 -nostdlib \
+		-ffreestanding
+		 # -nodefaultlibs \
 
 CXXFLAGS = $(CFLAGS) \
 		-std=c++2a \
@@ -64,15 +76,22 @@ CXXFLAGS = $(CFLAGS) \
 		-Wno-register \
 		-Wno-volatile \
 
-LFLAGS = -T $(LOADFILE) \
-	-Wl,--gc-sections \
+LFLAGS = -Wl,--gc-sections \
 	-Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
+	-Wl,--verbose \
 	$(MCU)  \
-	-nostdlib \
+	-T $(LOADFILE) \
 	-nostartfiles \
+	-nostdlib \
+	-ffreestanding
+	# -nodefaultlibs \
+
+#-nostartfiles removes __init()
+#-nostdlib or -nodefaultlib removes __libc_init_array(), which requires __init()
 
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 
+# ARCH 	= /usr/local/Caskroom/gcc-arm-embedded/10-2020-q4-major/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi
 ARCH 	= arm-none-eabi
 CC 		= $(ARCH)-gcc
 CXX 	= $(ARCH)-g++
