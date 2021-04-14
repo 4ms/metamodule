@@ -30,7 +30,7 @@ public:
 			bCV = 0;
 		if (srCvConnected == false)
 			srCV = 0;
-		auto finalSR = constrain(srOffset + srCV, 0.0f, 1.0f);
+		auto finalSR = constrain(srOffset + srCV, -1.0f, 1.0f);
 		auto finalBit = constrain(bOffset + bCV, 0.0f, 1.0f);
 		bc.set_param(0, finalSR);
 		bc.set_param(1, finalBit);
@@ -42,7 +42,7 @@ public:
 	virtual void set_param(int const param_id, const float val) override
 	{
 		if (param_id == 0) {
-			srOffset = val;
+			srOffset = val*2.0f-1.0f; //convert to -1 to 1 range
 		} else if (param_id == 1) {
 			bOffset = val;
 		}

@@ -33,11 +33,10 @@ public:
 	virtual void set_param(int param_id, float val)
 	{
 		if (param_id == 0) {
-			float expoControl = val * val;
-			if ((expoControl) <= 0.9f) {
-				reducedSampleRate = map_value(expoControl, 0.0f, 0.9f, 1.0f, currentSampleRate / 16.0f);
-			} else {
-				reducedSampleRate = map_value(expoControl, 0.9f, 1.0f, currentSampleRate / 16.0f, maxSampleRate);
+			if (val == 1)
+				reducedSampleRate = maxSampleRate;
+			else {
+				reducedSampleRate = setPitchMultiple(val) * 625.0f;
 			}
 		}
 		if (param_id == 1) {
