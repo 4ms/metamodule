@@ -11,6 +11,8 @@ CompileFlags:
 		"-Ilib/stm32/cmsis/include",
 		"-Ilib/stm32/cmsis/Core/Include",
 		"-Ilib/stm32/cmsis/Core_A/Include",
+		"-I../shared/util",
+		"-I../shared",
 		"-Ilib/mdrivlib",
 		"-Ilib/mdrivlib/drivers",
         "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1",
