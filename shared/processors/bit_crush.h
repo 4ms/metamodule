@@ -1,5 +1,6 @@
 #pragma once
 #include "audio_processor.hh"
+#include "processors/tools/quantizeBits.h"
 #include "util/math.hh"
 
 using namespace MathTools;
@@ -13,8 +14,7 @@ public:
 		} else {
 			phaccu += reducedSampleRate / currentSampleRate;
 			if (phaccu >= 1.0f) {
-				int quantizedVal = floorf(input * ipow(2.0f, bitDepth >> 1));
-				float bitReduced = (float)quantizedVal / powf(2.0f, bitDepth >> 1);
+				float bitReduced = q.update(input);
 
 				sampledOutput = bitReduced;
 
@@ -24,7 +24,11 @@ public:
 		}
 	}
 
-	BitCrusher() {}
+	BitCrusher()
+	{
+		q.setMax(1);
+		q.setMin(-1);
+	}
 
 	virtual void set_param(int param_id, float val)
 	{
@@ -38,6 +42,7 @@ public:
 		}
 		if (param_id == 1) {
 			bitDepth = map_value(val, 0.0f, 1.0f, 1U, maxBitDepth);
+			q.setSteps(powf(2, bitDepth));
 		}
 	}
 	virtual void set_samplerate(float sr)
@@ -52,6 +57,8 @@ private:
 	unsigned int maxBitDepth = 16U;
 	unsigned int bitDepth = 16;
 	float phaccu = 0;
-	float currentSampleRate=48000;
+	float currentSampleRate = 48000;
 	float sampledOutput = 0;
+
+	BitQuantizer q;
 };
