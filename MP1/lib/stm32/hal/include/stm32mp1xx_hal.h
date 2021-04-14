@@ -27,7 +27,7 @@ extern "C" {
 	#endif
 
 	/* Includes ------------------------------------------------------------------*/
-	#include "stm32mp1xx_hal_def.h"
+	// #include "stm32mp1xx_hal_def.h"
 	#include "stm32mp1xx_hal_conf.h"
 
 /** @addtogroup STM32MP1xx_HAL_Driver
