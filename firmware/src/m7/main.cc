@@ -26,7 +26,7 @@ namespace MetaModule
 // Define the hardware elements used by Core M7
 // This initializes the SystemClocks (RCC) and other system resources
 // and then initializes the external chips that this core uses, before main() runs
-struct Hardware : SystemClocks, SDRAMPeriph, Debug, SharedBus {
+struct Hardware : AppStartup, SDRAMPeriph, Debug, SharedBus {
 	Hardware()
 		: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
 		, SharedBus{i2c_conf_m7}

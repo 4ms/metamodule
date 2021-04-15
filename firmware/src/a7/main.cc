@@ -3,7 +3,7 @@
 #include "drivers/stm32xx.h"
 // #include "drivers/system.hh"
 // #include "m7/static_buffers.hh"
-// #include "m7/system_clocks.hh"
+#include "a7/system_clocks.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 // #include "ui.hh"
@@ -19,7 +19,7 @@ namespace MetaModule
 // Define the hardware elements used by Core A7
 // This initializes the SystemClocks (RCC) and other system resources
 // and then initializes the external chips that this core uses, before main() runs
-struct Hardware : Debug, SharedBus {
+struct Hardware : AppStartup, Debug, SharedBus {
 	Hardware()
 		: SharedBus{i2c_conf_codec}
 	{}

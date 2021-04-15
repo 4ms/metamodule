@@ -58,8 +58,8 @@ struct SystemStartup {
 
 namespace MetaModule
 {
-struct SystemClocks {
-	SystemClocks()
+struct AppStartup {
+	AppStartup()
 	{
 		target::RCC_Enable::HSEM_::set();
 		HWSemaphore<M7_ready>::disable_channel_ISR();
