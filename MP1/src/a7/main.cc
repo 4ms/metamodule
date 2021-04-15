@@ -7,6 +7,7 @@
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 // #include "ui.hh"
+#include "a7/conf/dac_conf.hh"
 #include "a7/conf/i2c_conf.hh"
 #include "debug.hh"
 
@@ -15,7 +16,6 @@
 namespace MetaModule
 {
 
-// FixMe: static ctors are not called!
 // Define the hardware elements used by Core A7
 // This initializes the SystemClocks (RCC) and other system resources
 // and then initializes the external chips that this core uses, before main() runs
@@ -26,7 +26,7 @@ struct Hardware : Debug, SharedBus {
 
 	// 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	// 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
-	// AnalogOutT dac;
+	AnalogOutT dac;
 } _hw;
 
 } // namespace MetaModule
