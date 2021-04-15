@@ -50,13 +50,13 @@ flash_a7:
 
 
 flash_m7: $(BUILDDIR_A7)/$(BINARYNAME).hex
-	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
+	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
 
 flash_m4: $(BUILDDIR_M4)/$(BINARYNAME).hex
-	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
+	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
 flash_h7: $(BUILDDIR_A7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
-	$(JFLASHEXE) -openprjmetamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
+	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
 tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ -I../shared -std=c++17 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
