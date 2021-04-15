@@ -2,11 +2,13 @@
 
 $(info Building for M7 core)
 BUILDDIR = $(BUILDDIR_M7)
-LOADFILE	= stm32h755xx_flash_CM7.ld
-MCU =  -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
+LOADFILE = $(LINKSCRIPTDIR)/stm32h755xx_flash_CM7.ld
+MCU = -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM7 -DCORE_CM7
 CORE_SRC = src/m7
 HAL_CONF_INC = src/m7
+HALDIR = $(HALBASE)/stm32h7x5
+DEVICEDIR = $(DEVICEBASE)/stm32h7x5
 
 OPTFLAG = -O3
 include makefile_opts.mk
@@ -15,11 +17,11 @@ MFFONTDIR = $(LIBDIR)/mcufont/fonts
 MFDIR = $(LIBDIR)/mcufont/decoder
 include $(LIBDIR)/mcufont/decoder/mcufont.mk
 
-SOURCES  = $(DRIVERLIB)/drivers/$(STARTUP)
-SOURCES  += $(DEVICE)/src/$(SYSTEM)
-SOURCES  += $(wildcard $(PERIPH)/src/*.c)
+SOURCES  = $(STARTUP_H7)
+SOURCES  += $(SYSTEM_H7)
+SOURCES  += $(wildcard $(HALDIR)/src/*.c)
 SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cc)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/target/stm32h7x5/*.cc)
+SOURCES  += $(wildcard $(DRIVERLIB)/drivers/target/stm32h7x5/drivers/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.c)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
@@ -40,11 +42,12 @@ SOURCES  += $(MFSRC)
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 
-INCLUDES = -I$(DEVICE)/include \
-			-I$(CMSIS)/include \
-			-I$(PERIPH)/include \
+INCLUDES = -I$(DEVICEDIR)/include \
+			-I$(CMSIS)/Include \
+			-I$(HALDIR)/include \
 			-I$(DRIVERLIB) \
 			-I$(DRIVERLIB)/drivers/target/stm32h7x5 \
+			-I$(DRIVERLIB)/drivers/target/stm32h7x5/drivers \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \

@@ -2,11 +2,13 @@
 
 $(info Building for A7 core)
 BUILDDIR = $(BUILDDIR_A7)
-LOADFILE = $(DEVICE)/src/stm32mp15xx_ca7.ld
+LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
 MCU =  -mcpu=cortex-a7 -mfpu=fpv5-d16 -mlittle-endian -mfloat-abi=hard
 # MCU = -mcpu=cortex-a7 -mlittle-endian #-mthumb? -mfput=? -mfloat-abi=?
 CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
+HALDIR = $(HALBASE)/stm32mp1
+DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 
 OPTFLAG = -O0
 include makefile_opts.mk
@@ -21,14 +23,14 @@ UBOOTBUILDDIR = $(UBOOTDIR)/build
 UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 #####
 
-SOURCES = $(DRIVERLIB)/drivers/$(STARTUP_CA7) \
+SOURCES = $(STARTUP_CA7) \
 		  src/sys/syscpp.c\
 		  src/a7/main.cc\
 		  $(DRIVERLIB)/drivers/pin.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
-		  $(PERIPH)/src/stm32mp1xx_hal.c \
-		  $(PERIPH)/src/stm32mp1xx_hal_i2c.c \
-		  $(PERIPH)/src/stm32mp1xx_hal_i2c_ex.c \
+		  $(HALDIR)/src/stm32mp1xx_hal.c \
+		  $(HALDIR)/src/stm32mp1xx_hal_i2c.c \
+		  $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
@@ -37,14 +39,14 @@ INCLUDES = -I. \
 		   -Isrc \
 		   -Isrc/a7 \
 		   -Isrc/a7/conf \
-		   -I$(PERIPH)/include \
+		   -I$(HALDIR)/include \
 		   -I$(CMSIS)/Core_A/Include \
-		   -I$(CMSIS)/Core/Include \
-		   -I$(CMSIS)/include \
-		   -I$(DEVICE)/include \
+		   -I$(CMSIS)/Include \
+		   -I$(DEVICEDIR)/include \
 		   -I$(DRIVERLIB) \
 		   -I$(DRIVERLIB)/drivers \
 		   -I$(DRIVERLIB)/drivers/target/stm32mp1 \
+		   -I$(DRIVERLIB)/drivers/target/stm32mp1/drivers \
 		   -I$(SHARED) \
 
 AFLAGS = $(MCU)

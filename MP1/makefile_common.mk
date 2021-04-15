@@ -52,7 +52,7 @@ AFLAGS = $(MCU)
 LFLAGS = -Wl,--gc-sections \
 	-Wl,-Map,$(BUILDDIR)/main.map,--cref \
 	$(MCU)  \
-	-T $(DEVICE)/$(LOADFILE) \
+	-T $(LOADFILE) \
 	-nostdlib \
 	-nostartfiles \
 
@@ -69,7 +69,7 @@ $(HEX): $(ELF)
 	$(OBJCPY) --output-target=ihex $< $@
 	$(SZ) $(SZOPTS) $(ELF)
 
-$(ELF): $(OBJECTS) $(DEVICE)/$(LOADFILE)
+$(ELF): $(OBJECTS) $(LOADFILE)
 	$(info Linking...)
 	@$(LD) $(LFLAGS) -o $@ $(OBJECTS)
 
