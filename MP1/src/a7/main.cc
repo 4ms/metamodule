@@ -26,7 +26,7 @@ struct Hardware : Debug, SharedBus {
 
 	// 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	// 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
-	// 	AnalogOutT dac;
+	// AnalogOutT dac;
 } _hw;
 
 } // namespace MetaModule
@@ -46,7 +46,10 @@ void main()
 	Pin red_LED1{GPIO::Z, 6, PinMode::Output};
 	Pin green_LED1{GPIO::Z, 7, PinMode::Output};
 
-	SharedBus _sb{i2c_conf_codec};
+	uint8_t data[2] = {0xAA, 0xF0};
+	SharedBus::i2c.write(0x55, data, 2);
+
+	// SharedBus _sb{i2c_conf_codec};
 
 	// StaticBuffers::init();
 

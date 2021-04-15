@@ -26,6 +26,7 @@ SOURCES = $(DRIVERLIB)/drivers/$(STARTUP_CA7) \
 		  src/a7/main.cc\
 		  $(DRIVERLIB)/drivers/pin.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
+		  $(PERIPH)/src/stm32mp1xx_hal.c \
 		  $(PERIPH)/src/stm32mp1xx_hal_i2c.c \
 		  $(PERIPH)/src/stm32mp1xx_hal_i2c_ex.c \
 
@@ -62,7 +63,6 @@ CFLAGS = -g2 \
 		 -nostartfiles \
 		 -nostdlib \
 		-ffreestanding
-		 # -nodefaultlibs \
 
 CXXFLAGS = $(CFLAGS) \
 		-std=c++2a \
@@ -78,16 +78,11 @@ CXXFLAGS = $(CFLAGS) \
 
 LFLAGS = -Wl,--gc-sections \
 	-Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
-	-Wl,--verbose \
 	$(MCU)  \
 	-T $(LOADFILE) \
 	-nostartfiles \
 	-nostdlib \
 	-ffreestanding
-	# -nodefaultlibs \
-
-#-nostartfiles removes __init()
-#-nostdlib or -nodefaultlib removes __libc_init_array(), which requires __init()
 
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 
@@ -116,21 +111,21 @@ $(UIMG): $(BIN) $(UBOOT_MKIMAGE)
 $(BUILDDIR)/%.o: %.s
 	@mkdir -p $(dir $@)
 	$(info Building $< at $(OPTFLAG))
-	$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))
+	@$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))
 
 $(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)
 	$(info Building $< at $(OPTFLAG))
-	$(CC) -c $(DEPFLAGS) $(OPTFLAG) $(CFLAGS) $< -o $@
+	@$(CC) -c $(DEPFLAGS) $(OPTFLAG) $(CFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)
 	$(info Building $< at $(OPTFLAG))
-	$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
+	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 $(ELF): $(OBJECTS) $(LOADFILE)
 	$(info Linking...)
-	$(LD) $(LFLAGS) -o $@ $(OBJECTS)
+	@$(LD) $(LFLAGS) -o $@ $(OBJECTS)
 
 $(BIN): $(ELF)
 	$(OBJCPY) -O binary $< $@

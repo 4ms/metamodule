@@ -12,6 +12,7 @@ SECTIONS
 {
     .text : {
         *(.vector_table)
+        *(.text)
         *(.text*)
 					/* Todo: check if we need the next 5 lines */
 		*(.glue_7)         /* glue arm to thumb code */
@@ -31,6 +32,12 @@ SECTIONS
 		. = ALIGN(8);
 	} > ROM
 
+	.ARM.extab	 : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >ROM
+	.ARM : {
+		__exidx_start = .;
+		*(.ARM.exidx*)
+		__exidx_end = .;
+	} >ROM
 
 	.preinit_array :
 	{
@@ -78,6 +85,7 @@ SECTIONS
     .bss : {
         _bss_start = .;
         *(.bss)
+		*(COMMON)  /* required for libc, such as __lock___atexit_recursive_mutex */
         . = ALIGN(8);
         _bss_end = .;
     } > RAM
