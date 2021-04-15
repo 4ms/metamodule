@@ -47,15 +47,9 @@ $(BUILDDIR_M7)/$(BINARYNAME).hex:
 # endif
 flash_a7:
 	$(info not implemented yet)
+	#$(JFLASHEXE) -openprjflashing/metamodule-mp1-ca7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
 
-
-flash_m7: $(BUILDDIR_A7)/$(BINARYNAME).hex
-	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
-
-flash_m4: $(BUILDDIR_M4)/$(BINARYNAME).hex
-	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
-
-flash_h7: $(BUILDDIR_A7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
+flash_h7: $(BUILDDIR_M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
 tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
