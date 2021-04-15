@@ -15,6 +15,7 @@ CompileFlags:
 		"-I../shared",
 		"-Ilib/mdrivlib",
 		"-Ilib/mdrivlib/drivers",
+		"-Ilib/mdrivlib/drivers/target/stm32mp1",
         "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1",
         "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/arm-none-eabi",
         "-I/usr/local/Cellar/arm-none-eabi-gcc/8-2018-q4-major/gcc/arm-none-eabi/include/c++/8.2.1/backward",

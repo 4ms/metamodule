@@ -18,9 +18,8 @@ include $(LIBDIR)/mcufont/decoder/mcufont.mk
 SOURCES  = $(DRIVERLIB)/drivers/$(STARTUP)
 SOURCES  += $(DEVICE)/src/$(SYSTEM)
 SOURCES  += $(wildcard $(PERIPH)/src/*.c)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.c)
 SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cc)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cpp)
+SOURCES  += $(wildcard $(DRIVERLIB)/drivers/target/stm32h7x5/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.c)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
@@ -45,6 +44,7 @@ INCLUDES = -I$(DEVICE)/include \
 			-I$(CMSIS)/include \
 			-I$(PERIPH)/include \
 			-I$(DRIVERLIB) \
+			-I$(DRIVERLIB)/drivers/target/stm32h7x5 \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \

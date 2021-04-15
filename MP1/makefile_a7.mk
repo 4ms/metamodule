@@ -44,6 +44,8 @@ INCLUDES = -I. \
 		   -I$(DEVICE)/include \
 		   -I$(DRIVERLIB) \
 		   -I$(DRIVERLIB)/drivers \
+		   -I$(DRIVERLIB)/drivers/target/stm32mp1 \
+		   -I$(SHARED) \
 
 AFLAGS = $(MCU)
 
@@ -105,9 +107,6 @@ BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
 
 all: Makefile $(ELF) $(UIMG)
 
-$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
-	$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
-
 $(BUILDDIR)/%.o: %.s
 	@mkdir -p $(dir $@)
 	$(info Building $< at $(OPTFLAG))
@@ -131,8 +130,11 @@ $(BIN): $(ELF)
 	$(OBJCPY) -O binary $< $@
 
 $(UBOOT_MKIMAGE): $(UBOOTSRCDIR)
-	cd $(UBOOTSRCDIR) && make KBUILD_OUTPUT=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
-	cd $(UBOOTSRCDIR) && make -j16 KBUILD_OUTPUT=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- all
+	cd $(UBOOTSRCDIR) && make O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
+	cd $(UBOOTSRCDIR) && make -j16 O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- all
+
+$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
+	$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
 uboot_clean:
 	rm -rf $(UBOOTBUILDDIR)
