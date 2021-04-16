@@ -46,6 +46,34 @@ void main()
 	Pin red_LED1{GPIO::Z, 6, PinMode::Output};
 	Pin green_LED1{GPIO::Z, 7, PinMode::Output};
 
+	// HAL_RCC_GetPLL1ClockFreq(PLL1_ClocksTypeDef *PLL1_Clocks);
+	// HAL_RCC_GetPLL2ClockFreq(PLL2_ClocksTypeDef *PLL2_Clocks);
+	// HAL_RCC_GetPLL3ClockFreq(PLL3_ClocksTypeDef *PLL3_Clocks);
+	// HAL_RCC_GetPLL4ClockFreq(PLL4_ClocksTypeDef *PLL4_Clocks);
+
+	uint32_t m_MPUSS = HAL_RCC_GetMPUSSFreq();
+	uint32_t m_AXISS = HAL_RCC_GetAXISSFreq();
+	uint32_t m_MCUSS = HAL_RCC_GetMCUSSFreq();
+	uint32_t m_ACLK = HAL_RCC_GetACLKFreq();
+	uint32_t m_HCLK1 = HAL_RCC_GetHCLK1Freq();
+	uint32_t m_HCLK2 = HAL_RCC_GetHCLK2Freq();
+	uint32_t m_HCLK3 = HAL_RCC_GetHCLK3Freq();
+	uint32_t m_HCLK4 = HAL_RCC_GetHCLK4Freq();
+	uint32_t m_HCLK5 = HAL_RCC_GetHCLK5Freq();
+	uint32_t m_HCLK6 = HAL_RCC_GetHCLK6Freq();
+	uint32_t m_MCU = HAL_RCC_GetMCUFreq();
+	uint32_t m_FCLK = HAL_RCC_GetFCLKFreq();
+	uint32_t m_MLHCLK = HAL_RCC_GetMLHCLKFreq();
+	uint32_t m_PCLK1 = HAL_RCC_GetPCLK1Freq();
+	uint32_t m_PCLK2 = HAL_RCC_GetPCLK2Freq();
+	uint32_t m_PCLK3 = HAL_RCC_GetPCLK3Freq();
+	uint32_t m_PCLK4 = HAL_RCC_GetPCLK4Freq();
+	uint32_t m_PCLK5 = HAL_RCC_GetPCLK5Freq();
+	uint32_t m_SystemCoreClock = HAL_RCC_GetSystemCoreClockFreq();
+
+	uint32_t RCC_GetCKPERFreq(void);
+	_hw.dac.init();
+
 	uint8_t data[2] = {0xAA, 0xF0};
 	SharedBus::i2c.write(0x55, data, 2);
 

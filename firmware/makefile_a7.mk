@@ -13,15 +13,6 @@ DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 OPTFLAG = -O0
 include makefile_opts.mk
 
-####
-UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
-LOADADDR 	= 0xC2000040
-ENTRYPOINT 	= $(LOADADDR)
-UBOOTDIR 	= $(LIBDIR)/u-boot
-UBOOTSRCDIR = $(UBOOTDIR)/u-boot-stm32mp1-baremetal
-UBOOTBUILDDIR = $(UBOOTDIR)/build
-UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
-#####
 
 SOURCES = $(STARTUP_CA7) \
 		  src/sys/syscpp.c\
@@ -31,6 +22,8 @@ SOURCES = $(STARTUP_CA7) \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c \
+		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
+		  $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
@@ -89,6 +82,16 @@ LFLAGS = -Wl,--gc-sections \
 	-ffreestanding
 
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
+
+#### U-BOOT
+UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
+LOADADDR 	= 0xC2000040
+ENTRYPOINT 	= $(LOADADDR)
+UBOOTDIR 	= $(LIBDIR)/u-boot
+UBOOTSRCDIR = $(UBOOTDIR)/u-boot-stm32mp1-baremetal
+UBOOTBUILDDIR = $(UBOOTDIR)/build
+UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
+#####
 
 # ARCH 	= /usr/local/Caskroom/gcc-arm-embedded/10-2020-q4-major/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi
 ARCH 	= arm-none-eabi
