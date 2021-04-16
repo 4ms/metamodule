@@ -15,12 +15,22 @@ OPTFLAG = -O3
 include makefile_opts.mk
 
 SOURCES = $(STARTUP_CA7) \
-		  src/sys/syscpp.c\
-		  src/a7/main.cc\
+		  system/libc_stub.c\
+		  system/libcpp_stub.cc \
+		  system/new.cc \
 		  system/system_ca7.c \
+		  system/irq_ctrl.c \
+		  $(CORE_SRC)/main.cc\
+		  src/patchlist.cc\
+		  $(SHARED)/util/math_tables.cc \
+		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(DRIVERLIB)/drivers/pin.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
+		  $(DRIVERLIB)/drivers/sai.cc \
+		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \
+		  $(HALDIR)/src/stm32mp1xx_hal_sai.c \
+		  $(HALDIR)/src/stm32mp1xx_hal_dma.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
@@ -42,6 +52,9 @@ INCLUDES = -I. \
 		   -I$(DRIVERLIB)/drivers/target/stm32mp1 \
 		   -I$(DRIVERLIB)/drivers/target/stm32mp1/drivers \
 		   -I$(SHARED) \
+		   -I$(SHARED)/CoreModules \
+		   -I$(SHARED)/util \
+		   -I$(SHARED)/patch \
 
 AFLAGS = $(MCU)
 
@@ -127,6 +140,12 @@ $(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)
 	$(info Building $< at $(OPTFLAG))
 	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
+
+$(BUILDDIR)/%.o: %.cpp $(BUILDDIR)/%.d
+	@mkdir -p $(dir $@)
+	$(info Building $< at $(OPTFLAG))
+	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
+
 
 $(ELF): $(OBJECTS) $(LOADFILE)
 	$(info Linking...)

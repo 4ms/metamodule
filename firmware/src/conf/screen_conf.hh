@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/screen_buffer_conf.hh"
+#include "drivers/bdma_config_struct.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/spi_screen_config_struct.hh"
 #include "drivers/spi_screen_driver.hh"

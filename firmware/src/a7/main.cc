@@ -1,15 +1,21 @@
 // #include "drivers/hsem.hh"
 // #include "drivers/qspi_flash_driver.hh"
-#include "drivers/stm32xx.h"
 // #include "drivers/system.hh"
 // #include "m7/static_buffers.hh"
+// #include "ui.hh"
+#include "a7/conf/codec_sai_conf.hh"
+#include "a7/conf/i2c_conf.hh"
 #include "a7/system_clocks.hh"
+#include "audio.hh"
+#include "codec_WM8731.hh"
+#include "conf/dac_conf.hh"
+#include "debug.hh"
+#include "drivers/stm32xx.h"
+#include "params.hh"
+#include "patch_player.hh"
+#include "patchlist.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
-// #include "ui.hh"
-#include "a7/conf/dac_conf.hh"
-#include "a7/conf/i2c_conf.hh"
-#include "debug.hh"
 
 #include "drivers/pin.hh"
 
@@ -24,7 +30,7 @@ struct Hardware : AppStartup, Debug, SharedBus {
 		: SharedBus{i2c_conf_codec}
 	{}
 
-	// 	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
+	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	// 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
 	AnalogOutT dac;
 } _hw;
@@ -57,45 +63,19 @@ void main()
 	uint32_t pFLatency;
 	HAL_RCC_GetClockConfig(&RCC_ClkInitStruct, &pFLatency);
 
-	// HAL_RCC_GetPLL1ClockFreq(PLL1_ClocksTypeDef *PLL1_Clocks);
-	// HAL_RCC_GetPLL2ClockFreq(PLL2_ClocksTypeDef *PLL2_Clocks);
-	// HAL_RCC_GetPLL3ClockFreq(PLL3_ClocksTypeDef *PLL3_Clocks);
-	// HAL_RCC_GetPLL4ClockFreq(PLL4_ClocksTypeDef *PLL4_Clocks);
+	uint32_t perfreq = RCC_GetCKPERFreq();
 
-	uint32_t m_MPUSS = HAL_RCC_GetMPUSSFreq();
-	uint32_t m_AXISS = HAL_RCC_GetAXISSFreq();
-	uint32_t m_MCUSS = HAL_RCC_GetMCUSSFreq();
-	uint32_t m_ACLK = HAL_RCC_GetACLKFreq();
-	uint32_t m_HCLK1 = HAL_RCC_GetHCLK1Freq();
-	uint32_t m_HCLK2 = HAL_RCC_GetHCLK2Freq();
-	uint32_t m_HCLK3 = HAL_RCC_GetHCLK3Freq();
-	uint32_t m_HCLK4 = HAL_RCC_GetHCLK4Freq();
-	uint32_t m_HCLK5 = HAL_RCC_GetHCLK5Freq();
-	uint32_t m_HCLK6 = HAL_RCC_GetHCLK6Freq();
-	uint32_t m_MCU = HAL_RCC_GetMCUFreq();
-	uint32_t m_FCLK = HAL_RCC_GetFCLKFreq();
-	uint32_t m_MLHCLK = HAL_RCC_GetMLHCLKFreq();
-	uint32_t m_PCLK1 = HAL_RCC_GetPCLK1Freq();
-	uint32_t m_PCLK2 = HAL_RCC_GetPCLK2Freq();
-	uint32_t m_PCLK3 = HAL_RCC_GetPCLK3Freq();
-	uint32_t m_PCLK4 = HAL_RCC_GetPCLK4Freq();
-	uint32_t m_PCLK5 = HAL_RCC_GetPCLK5Freq();
-	uint32_t m_SystemCoreClock = HAL_RCC_GetSystemCoreClockFreq();
-
-	uint32_t RCC_GetCKPERFreq(void);
 	_hw.dac.init();
 
 	uint8_t data[2] = {0xAA, 0xF0};
 	SharedBus::i2c.write(0x55, data, 2);
 
-	// SharedBus _sb{i2c_conf_codec};
-
 	// StaticBuffers::init();
 
-	// PatchList patch_list;
-	// PatchPlayer patch_player;
-	// ParamCache param_cache;
-	// UiAudioMailbox mbox;
+	PatchList patch_list;
+	PatchPlayer patch_player;
+	ParamCache param_cache;
+	UiAudioMailbox mbox;
 
 	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
