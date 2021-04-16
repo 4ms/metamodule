@@ -6,11 +6,16 @@
 #include "drivers/pinchange.hh"
 #include "drivers/spi_transfer.hh"
 #include "drivers/spi_transfer_config_struct.hh"
-#include "drivers/timekeeper.hh"
 #include "util/circular_buffer.hh"
 
+#ifdef STM32H7
+	#include "m7/conf/dac_conf_target.hh"
+#elif defined(STM32MP1)
+	#include "a7/conf/dac_conf_target.hh"
+#endif
+
 struct MM_DACConf : DefaultSpiTransferConf {
-	struct SpiConf : DefaultSpiConf {
+	struct SpiConf : DACConfTarget {
 		static constexpr uint16_t PeriphNum = 2;
 		static constexpr uint16_t NumChips = 2;
 		static constexpr IRQType IRQn = SPI2_IRQn;
@@ -30,12 +35,13 @@ struct MM_DACConf : DefaultSpiTransferConf {
 		static constexpr uint32_t NumClocksToggleSSInterData = 0;
 	};
 	static constexpr uint32_t NumChannelsPerChip = 2;
-	using AuxPin = FPin<GPIO::B, 14, PinMode::Output>;
+
+	using AuxPin = DACConfTarget::AuxPin; // FPin<GPIO::B, 14, PinMode::Output>;
 };
 
 const PinChangeConfig DAC_update_conf = {
-	.pin = 4,
-	.port = GPIO::E,
+	.pin = DACConfTarget::SaiLRClkPin.pin,
+	.port = DACConfTarget::SaiLRClkPin.gpio,
 	.on_rising_edge = true,
 	.on_falling_edge = true,
 	.priority1 = 0,
