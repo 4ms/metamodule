@@ -8,6 +8,8 @@ MEMORY
     RAM (rwx): ORIGIN = 0xC0200000, LENGTH = 1M
 }
 
+__HEAP_SIZE = 0x40000;
+
 SECTIONS
 {
     .text : {
@@ -85,12 +87,21 @@ SECTIONS
     .bss : {
         _bss_start = .;
         *(.bss)
+        *(.bss*)   /* required for some malloc calls */
 		*(COMMON)  /* required for libc, such as __lock___atexit_recursive_mutex */
         . = ALIGN(8);
         _bss_end = .;
     } > RAM
 
-    _fiq_stack_start = ADDR(.bss) + SIZEOF(.bss);
+	.heap (NOLOAD):
+	{
+		. = ALIGN(8);
+		_sheap = .;
+		. += __HEAP_SIZE;
+		_eheap = .;
+	} > RAM
+
+    _fiq_stack_start = ADDR(.heap) + SIZEOF(.heap);
     _fiq_stack_end = _fiq_stack_start + 0x1000; /* 64 KB */
 
     _irq_stack_start = _fiq_stack_end;
@@ -109,4 +120,6 @@ SECTIONS
     libm.a ( * )
     libgcc.a ( * )
   }
+
+	.ARM.attributes 0 : { *(.ARM.attributes) }
 }
