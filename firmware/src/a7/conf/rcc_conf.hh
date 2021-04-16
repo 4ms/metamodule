@@ -15,7 +15,6 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLP = 1,
 			.PLLQ = 1,
 			.PLLR = 1,
-			//.PLLRGE =
 			.PLLFRACV = 2048,
 			.PLLMODE = RCC_PLL_FRACTIONAL, // Todo: what is this?
 										   // .MOD_PER, etc = , //This is only for spread-spectrum, right?
@@ -29,7 +28,6 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLP = 2,
 			.PLLQ = 1,
 			.PLLR = 1,
-			//.PLLRGE =
 			.PLLFRACV = 5120,
 			.PLLMODE = RCC_PLL_FRACTIONAL, // Todo: what is this?
 		},
@@ -62,21 +60,34 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 };
 
 const RCC_ClkInitTypeDef rcc_clk_conf = {
-	// .ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2 |
-	// 			 RCC_CLOCKTYPE_D3PCLK1 | RCC_CLOCKTYPE_D1PCLK1,
-	// .SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK,
-	// .SYSCLKDivider = RCC_SYSCLK_DIV1,
-	// .AHBCLKDivider = RCC_HCLK_DIV2,
-	// .APB3CLKDivider = RCC_APB3_DIV2,
-	// .APB1CLKDivider = RCC_APB1_DIV2,
-	// .APB2CLKDivider = RCC_APB2_DIV2,
-	// .APB4CLKDivider = RCC_APB4_DIV2,
+	.ClockType = RCC_CLOCKTYPE_MPU | RCC_CLOCKTYPE_ACLK | RCC_CLOCKTYPE_HCLK /* <-- MCU Clock */ | RCC_CLOCKTYPE_PCLK1 |
+				 RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_PCLK3 | RCC_CLOCKTYPE_PCLK4 | RCC_CLOCKTYPE_PCLK5,
+	.MPUInit =
+		{
+			.MPU_Clock = RCC_MPUSOURCE_PLL1,
+			.MPU_Div = RCC_MPU_DIV_OFF,
+		},
+	.AXISSInit =
+		{
+			.AXI_Clock = RCC_AXISSOURCE_PLL2,
+			.AXI_Div = RCC_MPU_DIV_OFF,
+		},
+	.MCUInit =
+		{
+			.MCU_Clock = RCC_MCUSSOURCE_PLL3,
+			.MCU_Div = RCC_MCU_DIV1,
+		},
+	.APB4_Div = RCC_APB4_DIV2,
+	.APB5_Div = RCC_APB5_DIV4,
+	.APB1_Div = RCC_APB1_DIV2,
+	.APB2_Div = RCC_APB2_DIV2,
+	.APB3_Div = RCC_APB3_DIV2,
 };
 
 const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SPI23,
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_HSI,
-	.Spi23ClockSelection = RCC_SPI23CLKSOURCE_PER,
+	.Spi23ClockSelection = RCC_SPI23CLKSOURCE_PLL4,
 };
 
 // .PeriphClockSelection = RCC_PERIPHCLK_UART4 | RCC_PERIPHCLK_USART1 | RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI2 |

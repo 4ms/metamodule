@@ -36,22 +36,7 @@ struct SystemStartup {
 		// HWSemaphore<15>::unlock();
 	}
 
-	static void init_caches()
-	{
-		// SCB_InvalidateDCache();
-
-		// #ifdef DEBUG_MODE_DISABLE_I_CACHE
-		// SCB_DisableICache();
-		// #else
-		// SCB_EnableICache();
-		// #endif
-
-		// #ifdef DEBUG_MODE_DISABLE_D_CACHE
-		// SCB_DisableDCache();
-		// #else
-		// SCB_EnableDCache();
-		// #endif
-	}
+	static void init_caches() {}
 };
 } // namespace corem7
 } // namespace stm32h7x5
