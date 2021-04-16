@@ -4,15 +4,15 @@ $(info Building for A7 core)
 BUILDDIR = $(BUILDDIR_A7)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
 MCU =  -mcpu=cortex-a7 -mfpu=fpv5-d16 -mlittle-endian -mfloat-abi=hard
-# MCU = -mcpu=cortex-a7 -mlittle-endian #-mthumb? -mfput=? -mfloat-abi=?
 CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 
-OPTFLAG = -O0
-include makefile_opts.mk
+SHARED = src/a7/shared
 
+OPTFLAG = -O3
+include makefile_opts.mk
 
 SOURCES = $(STARTUP_CA7) \
 		  src/sys/syscpp.c\
