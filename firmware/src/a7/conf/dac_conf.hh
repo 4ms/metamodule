@@ -21,7 +21,7 @@ struct MM_DACConf : DefaultSpiTransferConf {
 		static constexpr PinNoInit CS0 = {GPIO::B, 9, 0};
 		static constexpr PinNoInit CS1 = {GPIO::B, 8, 0};
 		static constexpr bool use_hardware_ss = false;
-		static constexpr uint16_t clock_division = 16;
+		static constexpr uint16_t clock_division = 1;
 		static constexpr uint16_t data_size = 24;
 		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
 		static constexpr uint8_t FifoThreshold = 1;
