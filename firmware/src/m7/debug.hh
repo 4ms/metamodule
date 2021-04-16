@@ -15,4 +15,3 @@ struct Debug {
 };
 
 #define GCC_OPTIMIZE_OFF __attribute__((optimize("-O0")))
-
