@@ -75,22 +75,3 @@ extern "C" size_t _sbrk(int incr)
 	heap_end += incr;
 	return (size_t)prev_heap_end;
 }
-
-namespace std
-{
-void __throw_bad_function_call()
-{
-	while (1)
-		;
-}
-void __throw_bad_alloc()
-{
-	while (1)
-		;
-}
-void __throw_length_error(char const *)
-{
-	while (1)
-		;
-}
-} // namespace std
