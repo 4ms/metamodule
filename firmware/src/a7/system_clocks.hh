@@ -1,6 +1,6 @@
 #pragma once
 #include "a7/conf/rcc_conf.hh"
-#include "arch.hh"
+#include "drivers/arch.hh"
 // #include "conf/hsem_conf.hh"
 // #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
@@ -84,6 +84,7 @@ struct AppStartup {
 
 		// target::corem7::SystemStartup::tell_cm4_to_wakeup();
 	}
+
 	static void init_clocks(const RCC_OscInitTypeDef &osc_def,
 							const RCC_ClkInitTypeDef &clk_def,
 							const RCC_PeriphCLKInitTypeDef &pclk_def,

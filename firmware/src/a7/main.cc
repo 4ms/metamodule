@@ -46,6 +46,17 @@ void main()
 	Pin red_LED1{GPIO::Z, 6, PinMode::Output};
 	Pin green_LED1{GPIO::Z, 7, PinMode::Output};
 
+	uint32_t x = 100000;
+	while (x--) {
+		Debug::Pin0::high();
+		Debug::Pin0::low();
+	}
+	RCC_OscInitTypeDef RCC_OscInitStruct;
+	HAL_RCC_GetOscConfig(&RCC_OscInitStruct);
+	RCC_ClkInitTypeDef RCC_ClkInitStruct;
+	uint32_t pFLatency;
+	HAL_RCC_GetClockConfig(&RCC_ClkInitStruct, &pFLatency);
+
 	// HAL_RCC_GetPLL1ClockFreq(PLL1_ClocksTypeDef *PLL1_Clocks);
 	// HAL_RCC_GetPLL2ClockFreq(PLL2_ClocksTypeDef *PLL2_Clocks);
 	// HAL_RCC_GetPLL3ClockFreq(PLL3_ClocksTypeDef *PLL3_Clocks);
