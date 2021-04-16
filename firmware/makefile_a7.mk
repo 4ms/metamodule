@@ -17,6 +17,7 @@ include makefile_opts.mk
 SOURCES = $(STARTUP_CA7) \
 		  src/sys/syscpp.c\
 		  src/a7/main.cc\
+		  system/system_ca7.c \
 		  $(DRIVERLIB)/drivers/pin.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \

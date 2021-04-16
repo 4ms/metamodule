@@ -3,10 +3,18 @@
 #include "drivers/register_access.hh"
 
 struct Debug {
+
+#if defined(STM32H7)
 	using Pin0 = FPin<GPIO::A, 9, PinMode::Output>;
 	using Pin1 = FPin<GPIO::A, 10, PinMode::Output>;
 	using Pin2 = FPin<GPIO::A, 11, PinMode::Output>;
 	using Pin3 = FPin<GPIO::A, 12, PinMode::Output>;
+#elif defined(STM32MP1)
+	using Pin0 = FPin<GPIO::D, 5, PinMode::Output>;
+	using Pin1 = FPin<GPIO::D, 6, PinMode::Output>;
+	using Pin2 = FPin<GPIO::E, 15, PinMode::Output>;
+	using Pin3 = FPin<GPIO::D, 4, PinMode::Output>;
+#endif
 
 	static inline Pin0 pin_0_init;
 	static inline Pin1 pin_1_init;

@@ -39,6 +39,7 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(CMSIS)/Include \
 			-I$(HALDIR)/include \
 			-I$(DRIVERLIB) \
+			-I$(DRIVERLIB)/drivers \
 			-I$(DRIVERLIB)/drivers/target/stm32h7x5 \
 			-I$(DRIVERLIB)/drivers/target/stm32h7x5/drivers \
 			-I$(LIBDIR)/easiglib \
