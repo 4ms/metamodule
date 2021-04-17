@@ -1,4 +1,5 @@
-// #include "drivers/hsem.hh"
+#include "drivers/hsem.hh"
+#include "irq_ctrl.h"
 // #include "drivers/qspi_flash_driver.hh"
 // #include "drivers/system.hh"
 // #include "m7/static_buffers.hh"
@@ -44,6 +45,21 @@ void delay_long()
 		;
 }
 
+extern "C" void SVC_Handler()
+{
+	IRQn_ID_t irqn = IRQ_GetActiveIRQ();
+	IRQ_EndOfInterrupt(irqn);
+}
+
+extern "C" void IRQ_Handler()
+{
+	__BKPT();
+}
+extern "C" void FIQ_Handler()
+{
+	__BKPT();
+}
+
 void main()
 {
 	using namespace MetaModule;
@@ -67,6 +83,15 @@ void main()
 	uint32_t pFLatency;
 	HAL_RCC_GetClockConfig(&RCC_ClkInitStruct, &pFLatency);
 	uint32_t perfreq = RCC_GetCKPERFreq();
+
+	HWSemaphore<1>::disable_channel_ISR();
+	HWSemaphore<1>::clear_ISR();
+	target::System::enable_irq(HSEM_IT1_IRQn);
+	HWSemaphore<1>::enable_channel_ISR();
+	HWSemaphore<1>::lock();
+	HWSemaphore<1>::unlock();
+
+	// HWSemaphoreGlobalBase::register_channel_ISR<1>([]() { Debug::Pin0::high(); });
 
 	_hw.dac.init();
 
