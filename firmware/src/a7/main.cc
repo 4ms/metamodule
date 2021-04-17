@@ -53,7 +53,8 @@ extern "C" void SVC_Handler()
 
 extern "C" void IRQ_Handler()
 {
-	__BKPT();
+	IRQn_ID_t irqn = IRQ_GetActiveIRQ();
+	IRQ_EndOfInterrupt(irqn);
 }
 extern "C" void FIQ_Handler()
 {
