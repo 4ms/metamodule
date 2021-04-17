@@ -8,7 +8,7 @@
 	#define __MODULE_FACTORY_SAVE_SPACE
 #endif
 
-using ModuleTypeSlug = StaticString<20>;
+using ModuleTypeSlug = StaticString<31>;
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
