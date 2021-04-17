@@ -82,6 +82,7 @@ extern "C" {
 
 	#include <stdint.h>
 
+	#include "stm32mp157cxx_ca7_macros.h"
 	#include "stm32mp157cxx_ca7_periphaddrs.h"
 	#include "stm32mp157cxx_ca7_structs.h"
 
