@@ -11,7 +11,6 @@ export CMSIS 			= $(LIBDIR)/cmsis
 export HALBASE 			= $(LIBDIR)/stm32-hal
 export DRIVERLIB       	= $(LIBDIR)/mdrivlib
 export STARTUP_H7		= $(DRIVERLIB)/drivers/startup_cm7.s
-export STARTUP_CA7		= $(DRIVERLIB)/drivers/startup_ca7.s
 export LINKSCRIPTDIR   	= system/linker
 # export SYSTEM_CA7		= system/system_stm32mp1.c  #Doesnt exist yet
 export SYSTEM_H7		= system/system_stm32h7xx_dualcore_boot_cm4_cm7.c
@@ -33,6 +32,9 @@ inttest:
 clean:
 	rm -rf $(BUILDDIR_M4)
 	rm -rf $(BUILDDIR_M7)
+	rm -rf $(BUILDDIR_A7)
+
+clean_a7:
 	rm -rf $(BUILDDIR_A7)
 
 $(BUILDDIR_M4)/$(BINARYNAME).hex:

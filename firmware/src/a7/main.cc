@@ -3,19 +3,19 @@
 // #include "drivers/system.hh"
 // #include "m7/static_buffers.hh"
 // #include "ui.hh"
-#include "a7/conf/codec_sai_conf.hh"
+// #include "a7/conf/codec_sai_conf.hh"
 #include "a7/conf/i2c_conf.hh"
 #include "a7/system_clocks.hh"
-#include "audio.hh"
-#include "codec_WM8731.hh"
+// #include "audio.hh"
+// #include "codec_WM8731.hh"
 #include "conf/dac_conf.hh"
 #include "debug.hh"
 #include "drivers/stm32xx.h"
-#include "params.hh"
-#include "patch_player.hh"
-#include "patchlist.hh"
+// #include "params.hh"
+// #include "patch_player.hh"
+// #include "patchlist.hh"
 #include "shared_bus.hh"
-#include "shared_memory.hh"
+// #include "shared_memory.hh"
 
 #include "drivers/pin.hh"
 
@@ -30,7 +30,7 @@ struct Hardware : AppStartup, Debug, SharedBus {
 		: SharedBus{i2c_conf_codec}
 	{}
 
-	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
+	// CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	// 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
 	AnalogOutT dac;
 } _hw;
@@ -47,6 +47,8 @@ void delay_long()
 void main()
 {
 	using namespace MetaModule;
+
+	// Tests:
 	Pin red_LED2{GPIO::I, 8, PinMode::Output};
 	Pin green_LED2{GPIO::I, 9, PinMode::Output};
 	Pin red_LED1{GPIO::Z, 6, PinMode::Output};
@@ -57,25 +59,27 @@ void main()
 		Debug::Pin0::high();
 		Debug::Pin0::low();
 	}
+
+	// Get clock info (for debugging):
 	RCC_OscInitTypeDef RCC_OscInitStruct;
 	HAL_RCC_GetOscConfig(&RCC_OscInitStruct);
 	RCC_ClkInitTypeDef RCC_ClkInitStruct;
 	uint32_t pFLatency;
 	HAL_RCC_GetClockConfig(&RCC_ClkInitStruct, &pFLatency);
-
 	uint32_t perfreq = RCC_GetCKPERFreq();
 
 	_hw.dac.init();
 
-	uint8_t data[2] = {0xAA, 0xF0};
-	SharedBus::i2c.write(0x55, data, 2);
+	// Fixme: i2c pins don't seem to respond:
+	// uint8_t data[2] = {0xAA, 0xF0};
+	// SharedBus::i2c.write(0x55, data, 2);
 
 	// StaticBuffers::init();
 
-	PatchList patch_list;
-	PatchPlayer patch_player;
-	ParamCache param_cache;
-	UiAudioMailbox mbox;
+	// PatchList patch_list;
+	// PatchPlayer patch_player;
+	// ParamCache param_cache;
+	// UiAudioMailbox mbox;
 
 	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};

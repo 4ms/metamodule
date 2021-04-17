@@ -2,7 +2,13 @@
 
 $(info Building for A7 core)
 BUILDDIR = $(BUILDDIR_A7)
+
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
+STARTUP_CA7	= $(DRIVERLIB)/drivers/startup_ca7.s
+
+# LOADFILE = $(LINKSCRIPTDIR)/ARMCA7.ld
+# STARTUP_CA7	= system/startup_ARMCA7.c
+
 MCU =  -mcpu=cortex-a7 -mfpu=fpv5-d16 -mlittle-endian -mfloat-abi=hard
 CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
@@ -11,7 +17,7 @@ DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 
 SHARED = src/a7/shared
 
-OPTFLAG = -O3
+OPTFLAG = -O0
 include makefile_opts.mk
 
 SOURCES = $(STARTUP_CA7) \
@@ -21,13 +27,8 @@ SOURCES = $(STARTUP_CA7) \
 		  system/system_ca7.c \
 		  system/irq_ctrl.c \
 		  $(CORE_SRC)/main.cc\
-		  src/patchlist.cc\
-		  $(SHARED)/util/math_tables.cc \
-		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(DRIVERLIB)/drivers/pin.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
-		  $(DRIVERLIB)/drivers/sai.cc \
-		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_sai.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_dma.c \
@@ -35,6 +36,11 @@ SOURCES = $(STARTUP_CA7) \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c \
+		  # $(DRIVERLIB)/drivers/sai.cc \
+		  # $(DRIVERLIB)/drivers/codec_WM8731.cc \
+		  # $(SHARED)/util/math_tables.cc \
+		  #src/patchlist.cc\
+		#$(wildcard $(SHARED)/CoreModules/*.cpp) \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
