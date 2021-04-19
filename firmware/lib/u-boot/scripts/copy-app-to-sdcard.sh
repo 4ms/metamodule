@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 [ "$#" -eq 2 ] || { 
-	echo "Usage: ./copy_to_sdcard.sh path/to/application.uimg /dev/{sdcard device name}" >&2;
+	echo "Usage: scripts/copy_to_sdcard.sh path/to/application.uimg /dev/{sdcard device name}" >&2;
 	exit 1;
 }
 

@@ -12,9 +12,9 @@
 # code on the card using the copy_to_sdcard.sh script
 
 [ "$#" -eq 2 ] || { 
-	echo "Usage: ./partition-sdcard.sh /dev/XXX path/to/files/" >&2; 
+	echo "Usage: scripts/partition-sdcard.sh /dev/XXX build/" >&2; 
 	echo "Where /dev/XXX is the sd card device, e.g. /dev/sdc or /dev/disk3"
-	echo "And the path ends in a '/', like 'build/'"
+	echo "And 'build/' is the path to the u-boot image files, (make sure it ends in a '/')"
 	exit 1; 
 }
 

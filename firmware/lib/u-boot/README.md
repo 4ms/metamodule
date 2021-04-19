@@ -13,6 +13,7 @@ The bootloader must be built once, and loaded once onto an SD Card, which is ins
 
 The application ultimately needs to live on the SD Card as well, but it can be flashed into RAM using a J-Link flasher, making debugging much easier than having to copy files to an SD Card each time the code is changed.
 
+You can easily include this repo as a submodule into your project, or just copy it in.
 
 ## Building:
 
@@ -32,23 +33,17 @@ export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"`
 
 Build u-boot, putting the files in the build/ dir:
 ```
-cd u-boot-stm32mp1-baremetal
-make O=../build CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
-make -j16 O=../build CROSS_COMPILE=arm-none-eabi- all
+scripts/build.sh
 ```
-You can change the -j16 in the second make command to match your actual number of processor cores.
 Ignore warnings about "format string is not a string literal" (TODO: patch u-boot to fix this)
 
 Verify the output files were created:
 ```
-cd ..
 ls -l build/u-boot-spl.stm32
 ls -l build/u-boot.img
 ```
 
-Now you need to format and partition an SD Card. 
-
-To format and create the necessary partitions, insert a card and do:
+Now you need to format and partition an SD Card.  Insert a card and do:
 (TODO: Is this neccessary or does sgdisk -o wipe it?)
 ```
 ## Linux:
@@ -64,7 +59,7 @@ Take note of what it lists. Then remove (or insert) the SD Card, and repeat the 
 
 Then run the script to partition the drive and copy the bootloader images:
 ```
-./partition-sdcard.sh /dev/XXX build/
+scripts/partition-sdcard-and-copy-bootloader.sh /dev/XXX build/
 ```
 ...where /dev/XXX is the SD Card device name such as /dev/sdc or /dev/disk2
 This script will create four partitions and copy the bootloader images onto the first three.
@@ -78,7 +73,7 @@ Format partition 4 as FAT32. In macOS do this by:
 diskutil eraseVolume FAT32 MYAPP /dev/disk#s4
 ```
 
-Where MYAPP is just some name you can give your volume
+Where MYAPP is just some name you can give your volume so that when you insert it, it'll show up at /Volumes/MYAPP
 
 On linux:
 ```
@@ -97,14 +92,14 @@ bare-arm.uimg. Now it's time to build that file.
 
 # 4) Build the application
 ```
-cd ctest    # or the application directory for a custom app
+cd ctest    # or the application directory if you're using this in another app
 make 
-ls -l build/main.elf
-ls -l build/main.uimg
+ls -l build/*.elf
+ls -l build/*.uimg
 ```
-You should see the main.elf and the main.uimg files after building. Each of these is the compiled application, and either one must be loaded
+You should see the elf and the uimg files. Each of these is the compiled application, and either one must be loaded
 in SDRAM at 0xC2000040. You can load the elf file by using a debugger/programmer such as J-link connected to the SWD pins.
-Or, you can copy uimg file to the SD Card in the fourth partition using normal linux cp commands. 
+Or, you can copy uimg file to the SD Card in the fourth partition the same way you would copy any file. 
 The former method is only temporary, requires a debugger to be attached, and will not persist after power down. However, it's much more convenient so it's preferred for Debug builds.
 In the latter method, the application firmware is stored on the SD Card, so this is the method for production or long-term testing. With this method, the bootloader will load the application into 0xC2000040 on boot.
 
@@ -115,32 +110,32 @@ Or, if you want to have the application load even without a debugger attached, u
 
 There are two ways to do this:
 
-## 5a) Normal copy via SD Card reader/adaptor
+The easiest way is just to physically insert the SD card into your computer. If the SD Card is still in the OSD board, power down the OSD board, remove the SD Card, and put it back into the computer.
 
-If the SD Card is still in the OSD board, power down the OSD board, remove the SD Card, and put it back into the computer.
-The fourth partition should mount. If not, do:
-`sudo mount -u
-
-## 5b) USB Gadget
-
-If you have the UART connected and your particular OS happens to be compatible with usb-gadget, then you might be able to mount the SD Card directly over UART without having to physically touch the card. Do this:
+The more convenient way (if it works) is to use the USB gadget function. If you have the UART connected and your particular OS happens to be compatible with usb-gadget, then you might be able to mount the SD Card directly over UART without having to physically touch the card. Do this:
 1) When the board is booting, up look for the message `Hit any key to stop autoboot`, and press a key.
 2) You will see a UBOOT> prompt. Type the command: `ums 0 mmc 0`
 3) In another terminal window, look to see that there's a new device, e.g. /dev/sdX or /dev/disk#
 
-If your OS detects this new device, it might just mount it automatically and you can copy the application uimg file normally:
+Regardless of whether you physically move the card or use USB gadget, the next step is make sure the sd card is mounted and then copy the application uimg file to it, just like you would copy a normal file to a normal USB stick. You have to re-name the file on the sd card to be `bare-arm.uimg`. 
+
 ```
 cp build/main.uimg /Volumes/MYAPP/bare-arm.uimg
 ```
+ Of course, adjust the command above so that you're using the actual uimg file that your application build created (might be app.uimg or something), and the actual path to the mounted sd card.
+Or you can use drag-and-drop within your OS's GUI, and then rename it.
 
-Make sure the file is named `bare-arm.uimg` on the SD Card. The bootloader looks for a file with this exact name, in the root dir of a FAT32 filesystem on partition 4.
+If your OS didn't automatically mount the drive, do:
+`sudo mount -o user /dev/sdX /tmp/sdcard_root`
+or use some other path where you mount things. Then copy the file as above.
 
-If you OS doesn't recognize the new sd card device, you can manually mount it and copy the file, or use the handy script:
-The `copy_to_sdcard.sh` script takes two arguments:
+**Make sure the file is named `bare-arm.uimg` on the SD Card. The bootloader looks for a file with this exact name, in the root dir of a FAT32 filesystem on partition 4.**
+
+There's also a handy script to automatically mount and copy and unmount the drive. 
 ```
-./copy_to_sdcard.sh filname /dev/sdXX
+scripts/partition-sdcard-and-copy-bootloader.sh build/myapp.uimg /dev/sdXX
 ```
-Where `filename` is the path to the app uimg file (perhaps ctest/bare-arm.uimg) and `/dev/sdXX` is the SD Card's fourth partition, e.g. `/dev/sdc4`.
+Where `build/myapp.uimg` is the path to the app uimg file (perhaps ctest/bare-arm.uimg) and `/dev/sdXX` is the SD Card's fourth partition, e.g. `/dev/sdc4`.
 The script will mount the SD Card partition, remove the old bare-arm.uimg file, and copy the one you provided onto the correct place.
 
 # 6) Debug application
