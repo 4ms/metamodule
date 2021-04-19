@@ -11,9 +11,10 @@
 # After running this script, you must load your application
 # code on the card using the copy_to_sdcard.sh script
 
-[ "$#" -eq 1 ] || { 
-	echo "Usage: ./partition-sdcard.sh /dev/sdX" >&2; 
-	echo "Where /dev/sdX is the sd card device, e.g. /dev/sdc"
+[ "$#" -eq 2 ] || { 
+	echo "Usage: ./partition-sdcard.sh /dev/XXX path/to/files/" >&2; 
+	echo "Where /dev/XXX is the sd card device, e.g. /dev/sdc or /dev/disk3"
+	echo "And the path ends in a '/', like 'build/'"
 	exit 1; 
 }
 
@@ -22,25 +23,17 @@ if [ ! -b $1 ]; then
 	exit 1;
 fi
 
-echo "Device $2 found."
-echo "Partitioning..."
-
+echo "Device $1 found, removing partitions"
 sudo sgdisk -o $1 
-sudo sgdisk --resize-table=128 -a 1 \ 
--n 1:34:545 -c 1:fsbl1 \
--n 2:546:1057 -c 2:fsbl2 \
--n 3:1058:5153 -c 3:ssbl \
--n 4:5154:9249 -c 4:prog -p $1
 
-#fsbl1 = First Stage Bootloader 1
-#fsbl1 = First Stage Bootloader 2 (duplicate/backup partition)
-#ssbl = Second Stage Bootloader
-#prog = can be any size and any name, it will be where the application code lives, eventually
+echo "Partitioning..."
+sudo sgdisk --resize-table=128 -a 1 -n 1:34:545 -c 1:fsbl1 -n 2:546:1057 -c 2:fsbl2 -n 3:1058:5153 -c 3:ssbl -N 4 -c 4:prog -p $1
 
-echo "Copying bootloaders..."
-sudo dd if=$KBUILD_OUTPUT/u-boot-spl.stm32 of=$1s1
-sudo dd if=$KBUILD_OUTPUT/u-boot-spl.stm32 of=$1s2 
-sudo dd if=$KBUILD_OUTPUT/u-boot.img of=$1s3
+echo "Copying bootloaders... (this only works on macOS, for linux just remove the 's' in the of= part of the commands"
+
+sudo dd if=$2/u-boot-spl.stm32 of=$1s1
+sudo dd if=$2/u-boot-spl.stm32 of=$1s2 
+sudo dd if=$2/u-boot.img of=$1s3
 
 echo "Done!"
 
