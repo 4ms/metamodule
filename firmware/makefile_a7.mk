@@ -14,6 +14,7 @@ CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
+TARGETDRIVERS = $(DRIVERLIB)/drivers/target/stm32mp1
 
 SHARED = src/a7/shared
 
@@ -28,6 +29,7 @@ SOURCES = $(STARTUP_CA7) \
 		  system/irq_ctrl.c \
 		  $(CORE_SRC)/main.cc\
 		  $(DRIVERLIB)/drivers/pin.cc \
+		  $(TARGETDRIVERS)/drivers/interrupt.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_sai.c \
@@ -167,14 +169,14 @@ $(UBOOT_MKIMAGE): $(UBOOTSRCDIR)
 $(UIMG): $(BIN) $(UBOOT_MKIMAGE)
 	$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
-uboot_clean:
-	rm -rf $(UBOOTBUILDDIR)
-
 %.d: ;
 
 clean:
-	rm -rf build
-	rm $(UIMAGENAME)
+	rm -rf $(BUILDDIR)
+
+clean_uboot:
+	rm -rf $(UBOOTBUILDDIR)
+
 
 ifneq "$(MAKECMDGOALS)" "clean"
 -include $(DEPS)
@@ -183,6 +185,15 @@ endif
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF)
 .PHONY: all
 
-#Todo: add card commands
-#./create-sd.sh sdcard.img bare-arm.uimg
-	
+
+# Todo: get this working:
+# install-uboot:
+	# $(info Please enter the sd card device node:)
+	# ls -l /dev/disk*  #if macOS
+	# ls -l /dev/sd*    #if linux
+	# getinput(devXX)  #How to do this?
+	# scripts/format-sdcard.sh $(devXX)
+	# scripts/partition-sdcard.sh $(devXX)
+	# scripts/copy-bootloader.sh $(devXX) $(UBOOTBUILDDIR)/
+	# scripts/copy-app-to-sdcard.sh $(UIMG) $(devXX)
+

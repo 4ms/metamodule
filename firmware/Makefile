@@ -34,8 +34,6 @@ clean:
 	rm -rf $(BUILDDIR_M7)
 	rm -rf $(BUILDDIR_A7)
 
-clean_a7:
-	rm -rf $(BUILDDIR_A7)
 
 $(BUILDDIR_M4)/$(BINARYNAME).hex:
 	@$(MAKE) --no-print-directory -f makefile_m4.mk
@@ -81,6 +79,12 @@ util_tests:
 core_tests:
 	$(info ... Running CoreModule tests ...)
 	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile
+
+clean_a7:
+	$(MAKE) --no-print-directory clean -f makefile_a7.mk
+
+clean_uboot:
+	$(MAKE) --no-print-directory clean_uboot -f makefile_a7.mk
 
 generate_compile_txt:
 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \

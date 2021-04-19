@@ -1,5 +1,7 @@
+#include "a7/hsem_handler.hh"
 #include "drivers/hsem.hh"
 #include "irq_ctrl.h"
+
 // #include "drivers/qspi_flash_driver.hh"
 // #include "drivers/system.hh"
 // #include "m7/static_buffers.hh"
@@ -45,31 +47,9 @@ void delay_long()
 		;
 }
 
-extern "C" void SVC_Handler()
-{
-	IRQn_ID_t irqn = IRQ_GetActiveIRQ();
-	IRQ_EndOfInterrupt(irqn);
-}
-
-extern "C" void IRQ_Handler()
-{
-	IRQn_ID_t irqn = IRQ_GetActiveIRQ();
-	IRQ_EndOfInterrupt(irqn);
-}
-extern "C" void FIQ_Handler()
-{
-	__BKPT();
-}
-
 void main()
 {
 	using namespace MetaModule;
-
-	// Tests:
-	Pin red_LED2{GPIO::I, 8, PinMode::Output};
-	Pin green_LED2{GPIO::I, 9, PinMode::Output};
-	Pin red_LED1{GPIO::Z, 6, PinMode::Output};
-	Pin green_LED1{GPIO::Z, 7, PinMode::Output};
 
 	uint32_t x = 100000;
 	while (x--) {
@@ -77,23 +57,19 @@ void main()
 		Debug::Pin0::low();
 	}
 
-	// Get clock info (for debugging):
-	RCC_OscInitTypeDef RCC_OscInitStruct;
-	HAL_RCC_GetOscConfig(&RCC_OscInitStruct);
-	RCC_ClkInitTypeDef RCC_ClkInitStruct;
-	uint32_t pFLatency;
-	HAL_RCC_GetClockConfig(&RCC_ClkInitStruct, &pFLatency);
-	uint32_t perfreq = RCC_GetCKPERFreq();
+	HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
+		Debug::red_LED1::high();
+		Debug::Pin0::high();
+	});
+	HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
 
 	HWSemaphore<1>::disable_channel_ISR();
 	HWSemaphore<1>::clear_ISR();
 	target::System::enable_irq(HSEM_IT1_IRQn);
 	HWSemaphore<1>::enable_channel_ISR();
 	HWSemaphore<1>::lock();
+
 	HWSemaphore<1>::unlock();
-
-	// HWSemaphoreGlobalBase::register_channel_ISR<1>([]() { Debug::Pin0::high(); });
-
 	_hw.dac.init();
 
 	// Fixme: i2c pins don't seem to respond:
@@ -141,22 +117,22 @@ void main()
 
 	while (1) {
 		Debug::Pin0::high();
-		red_LED1.low();
+		Debug::red_LED1::low();
 		delay_long();
 		Debug::Pin0::low();
-		red_LED1.high();
+		Debug::red_LED1::high();
 
-		red_LED2.low();
+		Debug::red_LED2::low();
 		delay_long();
-		red_LED2.high();
+		Debug::red_LED2::high();
 
-		green_LED1.low();
+		Debug::green_LED1::low();
 		delay_long();
-		green_LED1.high();
+		Debug::green_LED1::high();
 
-		green_LED2.low();
+		Debug::green_LED2::low();
 		delay_long();
-		green_LED2.high();
+		Debug::green_LED2::high();
 		__NOP();
 	}
 }
@@ -165,5 +141,3 @@ void recover_from_task_fault(void)
 {
 	main();
 }
-
-// extern "C" void _init() {}
