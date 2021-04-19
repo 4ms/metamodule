@@ -26,6 +26,10 @@ struct VoltagesourceModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         core = ModuleFactory::create("VOLTAGESOURCE");
 		selfID.typeID = "VOLTAGESOURCE";
+
+	outputJacks[VoltagesourceModule::OUTPUT1_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+	outputJacks[VoltagesourceModule::OUTPUT2_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+
 	}
 };
 

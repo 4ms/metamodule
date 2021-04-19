@@ -35,6 +35,12 @@ public:
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
+			case 0:
+			output1=val;
+			break;
+			case 1:
+			output2=val;
+			break;
 			
 		}
 	}
@@ -53,7 +59,12 @@ public:
 	{
 		float output = 0;
 		switch (output_id) {
-		
+		case 0:
+		output = output1;
+		break;
+		case 1:
+		output = output2;
+		break;
 		}
 		return output;
 	}
@@ -66,5 +77,7 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
+
+float output1, output2;
 	
 };
