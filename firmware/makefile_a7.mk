@@ -15,7 +15,7 @@ TARGETDRIVERS = $(DRIVERLIB)/drivers/target/stm32mp1
 
 SHARED = src/a7/shared
 
-OPTFLAG = -O3
+OPTFLAG = -O0
 include makefile_opts.mk
 
 SOURCES = $(STARTUP_CA7) \

@@ -57,19 +57,16 @@ void main()
 		HAL_Delay(1);
 	}
 
-	HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
-		Debug::red_LED1::high();
-		Debug::Pin0::high();
-	});
-	HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
+	// HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
 
-	HWSemaphore<1>::disable_channel_ISR();
-	HWSemaphore<1>::clear_ISR();
-	target::System::enable_irq(HSEM_IT1_IRQn);
-	HWSemaphore<1>::enable_channel_ISR();
-	HWSemaphore<1>::lock();
-	HWSemaphore<1>::unlock();
+	// HWSemaphore<1>::disable_channel_ISR();
+	// HWSemaphore<1>::clear_ISR();
+	// target::System::enable_irq(HSEM_IT1_IRQn);
+	// HWSemaphore<1>::enable_channel_ISR();
+	// HWSemaphore<1>::lock();
+	// HWSemaphore<1>::unlock();
 
+	// FixMe: clock output no longer works?
 	_hw.dac.init();
 
 	// Fixme: i2c pins don't seem to respond:
@@ -118,21 +115,28 @@ void main()
 	while (1) {
 		Debug::Pin0::high();
 		Debug::red_LED1::low();
-		delay_long();
+		HAL_Delay(10);
 		Debug::Pin0::low();
 		Debug::red_LED1::high();
 
+		Debug::Pin1::high();
 		Debug::red_LED2::low();
-		delay_long();
+		HAL_Delay(1);
+		Debug::Pin1::low();
 		Debug::red_LED2::high();
 
+		Debug::Pin2::high();
 		Debug::green_LED1::low();
-		delay_long();
+		HAL_Delay(1);
+		Debug::Pin2::low();
 		Debug::green_LED1::high();
 
+		Debug::Pin3::high();
 		Debug::green_LED2::low();
-		delay_long();
+		HAL_Delay(1);
+		Debug::Pin3::low();
 		Debug::green_LED2::high();
+
 		__NOP();
 	}
 }

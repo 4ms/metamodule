@@ -12,6 +12,7 @@ struct DACConfTarget : DefaultSpiConf {
 	static constexpr PinNoInit CS0 = {GPIO::B, 12, 0};
 	static constexpr PinNoInit CS1 = {GPIO::B, 11, 0};
 	static constexpr uint16_t clock_division = 16;
+	static constexpr uint32_t NumClocksToggleSSInterData = 0;
 
 	using AuxPin = FPin<GPIO::B, 14, PinMode::Output>;
 	static constexpr PinNoInit SaiLRClkPin = {GPIO::E, 4};
