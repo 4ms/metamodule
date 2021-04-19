@@ -10,6 +10,7 @@ extern CentralData *centralData;
 extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file 
+extern Model *modelVoltagesource; 
 extern Model *modelNoise;
 extern Model *modelSampleplayer;
 extern Model *modelSlewlimiter;
