@@ -1,7 +1,5 @@
 #include "a7/hsem_handler.hh"
 #include "drivers/hsem.hh"
-#include "irq_ctrl.h"
-
 // #include "drivers/qspi_flash_driver.hh"
 // #include "drivers/system.hh"
 // #include "m7/static_buffers.hh"

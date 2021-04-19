@@ -9,6 +9,7 @@ CORE_SRC = src/m7
 HAL_CONF_INC = src/m7
 HALDIR = $(HALBASE)/stm32h7x5
 DEVICEDIR = $(DEVICEBASE)/stm32h7x5
+TARGETDEVICEDIR = $(DRIVERLIB)/drivers/target/stm32h7x5
 
 OPTFLAG = -O3
 include makefile_opts.mk
@@ -21,7 +22,7 @@ SOURCES  = $(STARTUP_H7)
 SOURCES  += $(SYSTEM_H7)
 SOURCES  += $(wildcard $(HALDIR)/src/*.c)
 SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cc)
-SOURCES  += $(wildcard $(DRIVERLIB)/drivers/target/stm32h7x5/drivers/*.cc)
+SOURCES  += $(wildcard $(TARGETDEVICEDIR)/drivers/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.c)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)

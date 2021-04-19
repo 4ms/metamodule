@@ -9,6 +9,7 @@ CORE_SRC = src/m4
 HAL_CONF_INC = src/m4
 HALDIR = $(HALBASE)/stm32h7x5
 DEVICEDIR = $(DEVICEBASE)/stm32h7x5
+TARGETDEVICEDIR = $(DRIVERLIB)/drivers/target/stm32h7x5
 
 OPTFLAG = -O3
 include makefile_opts.mk
@@ -24,7 +25,7 @@ SOURCES  += $(wildcard system/libcpp_stub.cc)
 SOURCES  += $(wildcard system/new.cc)
 SOURCES  += $(DRIVERLIB)/drivers/hal_handlers.cc
 SOURCES  += $(DRIVERLIB)/drivers/i2c.cc
-SOURCES  += $(DRIVERLIB)/drivers/interrupt.cc
+SOURCES  += $(TARGETDEVICEDIR)/drivers/interrupt.cc
 SOURCES  += $(DRIVERLIB)/drivers/pin.cc
 SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
 # SOURCES  += $(DRIVERLIB)/drivers/system.cc
