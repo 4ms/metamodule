@@ -1,0 +1,300 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 30,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 69,
+      "rightModuleId": 33,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 69,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 69,
+            "DstObjID": 1,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 69,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 67,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          }
+        ],
+        "PatchName": "test_minmaxCore"
+      },
+      "pos": [
+        12,
+        0
+      ]
+    },
+    {
+      "id": 33,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 8.89500046
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.809998631
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 30,
+      "rightModuleId": 41,
+      "data": {
+        "lissajous": 0,
+        "external": 1
+      },
+      "pos": [
+        28,
+        0
+      ]
+    },
+    {
+      "id": 38,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 42,
+      "text": "PANNER CORE MODULE\n\n\nKnob A - Pan offset\nKnob B - CV Amount\n\nAdjust Knob A. Minimum value sends sine wave to left output. Maximum value sends sine wave to right output.\n\nSet Knob B to 50%. Increase Knob B to modulate panning from left to right with a sine wave.\n\nPan Left - Audio Output L\nPan Right - Audio Output R\n",
+      "pos": [
+        51,
+        0
+      ]
+    },
+    {
+      "id": 41,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 33,
+      "rightModuleId": 42,
+      "pos": [
+        41,
+        0
+      ]
+    },
+    {
+      "id": 42,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 41,
+      "rightModuleId": 38,
+      "pos": [
+        46,
+        0
+      ]
+    },
+    {
+      "id": 67,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 68,
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 68,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.636999965
+        },
+        {
+          "id": 1,
+          "value": 0.577000201
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 67,
+      "rightModuleId": 69,
+      "pos": [
+        4,
+        0
+      ]
+    },
+    {
+      "id": 69,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "PANNER",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.504000068
+        }
+      ],
+      "leftModuleId": 68,
+      "rightModuleId": 30,
+      "pos": [
+        8,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 46,
+      "outputModuleId": 41,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 48,
+      "outputModuleId": 42,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 77,
+      "outputModuleId": 68,
+      "outputId": 0,
+      "inputModuleId": 69,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 78,
+      "outputModuleId": 69,
+      "outputId": 0,
+      "inputModuleId": 41,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 79,
+      "outputModuleId": 69,
+      "outputId": 1,
+      "inputModuleId": 42,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 80,
+      "outputModuleId": 67,
+      "outputId": 0,
+      "inputModuleId": 69,
+      "inputId": 1,
+      "color": "#0986ad"
+    }
+  ]
+}
