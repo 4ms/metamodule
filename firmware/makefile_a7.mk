@@ -6,9 +6,6 @@ BUILDDIR = $(BUILDDIR_A7)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
 STARTUP_CA7	= $(DRIVERLIB)/drivers/startup_ca7.s
 
-# LOADFILE = $(LINKSCRIPTDIR)/ARMCA7.ld
-# STARTUP_CA7	= system/startup_ARMCA7.c
-
 MCU =  -mcpu=cortex-a7 -mfpu=fpv5-d16 -mlittle-endian -mfloat-abi=hard
 CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
@@ -18,7 +15,7 @@ TARGETDRIVERS = $(DRIVERLIB)/drivers/target/stm32mp1
 
 SHARED = src/a7/shared
 
-OPTFLAG = -O0
+OPTFLAG = -O3
 include makefile_opts.mk
 
 SOURCES = $(STARTUP_CA7) \
@@ -30,6 +27,7 @@ SOURCES = $(STARTUP_CA7) \
 		  $(CORE_SRC)/main.cc\
 		  $(DRIVERLIB)/drivers/pin.cc \
 		  $(TARGETDRIVERS)/drivers/interrupt.cc \
+		  $(TARGETDRIVERS)/drivers/hal_handlers.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_sai.c \

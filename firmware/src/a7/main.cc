@@ -49,10 +49,12 @@ void main()
 {
 	using namespace MetaModule;
 
-	uint32_t x = 100000;
-	while (x--) {
+	uint32_t xx = 10;
+	while (xx--) {
 		Debug::Pin0::high();
+		HAL_Delay(1);
 		Debug::Pin0::low();
+		HAL_Delay(1);
 	}
 
 	HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
@@ -66,8 +68,8 @@ void main()
 	target::System::enable_irq(HSEM_IT1_IRQn);
 	HWSemaphore<1>::enable_channel_ISR();
 	HWSemaphore<1>::lock();
-
 	HWSemaphore<1>::unlock();
+
 	_hw.dac.init();
 
 	// Fixme: i2c pins don't seem to respond:
