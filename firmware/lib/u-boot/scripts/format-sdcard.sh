@@ -9,9 +9,8 @@ if [ ! -b $1 ]; then
 	exit 1;
 fi
 
-echo "Device $2 found."
+echo "Device $1 found."
 echo "Formatting..."
 
-mkfs.ext2 $1
-
+mkfs.fat32 $1 || diskutil eraseDisk FAT32 BAREMETA $1
 echo "Done"
