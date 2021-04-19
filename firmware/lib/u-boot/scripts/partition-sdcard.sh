@@ -5,7 +5,7 @@
 # This script is meant to be run once when using a new SD Card.
 # 
 # After running this script, you must load your application
-# code on the card using the copy_to_sdcard.sh script
+# code on the card using the copy-app-to-sdcard.sh script or by manually copying the uimg file
 
 [ "$#" -eq 1 ] || { 
 	echo ""
