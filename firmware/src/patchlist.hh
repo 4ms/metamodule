@@ -7,7 +7,7 @@ struct PatchList {
 	// MARK: Change NumPatches here:
 	static const uint32_t NumPatches = 1; // Integration test patches
 #else
-	static const uint32_t NumPatches = 1; // Normal mode
+	static const uint32_t NumPatches = 2; // Normal mode
 #endif
 
 	PatchList();

@@ -45,6 +45,7 @@ SOURCES = $(STARTUP_CA7) \
 		  src/audio.cc\
 		  $(SHARED)/CoreModules/panel.cpp \
 		  $(SHARED)/CoreModules/lfoCore.cpp \
+		  $(SHARED)/CoreModules/karplusCore.cpp \
 			# $(wildcard $(SHARED)/CoreModules/*.cpp) \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))

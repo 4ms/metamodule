@@ -2,7 +2,7 @@
 
 #ifndef METAMODULE_INTEGRATION_TESTS
 	// #include "KP_FM_DRUM_DET.hh"
-	// #include "KarplusStereo.hh"
+	#include "KarplusStereo.hh"
 	// #include "LPFBPF.hh"
 	// #include "QuadDrum.hh"
 	// #include "example_drum.hh"
@@ -23,7 +23,7 @@ PatchList::PatchList()
 		  // {example_stereo_verb},
 		  // {QuadDrum},
 		  // {KP_FM_DRUM_DET},
-		  // {KarplusStereo},
+		  {KarplusStereo},
 		  // {LPFBPF},
 	  }
 {
