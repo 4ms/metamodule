@@ -24,11 +24,6 @@ SOURCES = $(STARTUP_CA7) \
 		  system/new.cc \
 		  system/system_ca7.c \
 		  system/irq_ctrl.c \
-		  $(CORE_SRC)/main.cc\
-		  $(DRIVERLIB)/drivers/pin.cc \
-		  $(TARGETDRIVERS)/drivers/interrupt.cc \
-		  $(TARGETDRIVERS)/drivers/hal_handlers.cc \
-		  $(DRIVERLIB)/drivers/i2c.cc \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_sai.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_dma.c \
@@ -36,10 +31,18 @@ SOURCES = $(STARTUP_CA7) \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c \
+		  $(DRIVERLIB)/drivers/pin.cc \
+		  $(TARGETDRIVERS)/drivers/interrupt.cc \
+		  $(TARGETDRIVERS)/drivers/hal_handlers.cc \
+		  $(TARGETDRIVERS)/drivers/cycle_counter.cc \
+		  $(TARGETDRIVERS)/drivers/pinchange.cc \
+		  $(DRIVERLIB)/drivers/i2c.cc \
 		  $(DRIVERLIB)/drivers/sai.cc \
 		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
 		  $(SHARED)/util/math_tables.cc \
+		  $(CORE_SRC)/main.cc\
 		  src/patchlist.cc\
+		  src/audio.cc\
 		  $(SHARED)/CoreModules/panel.cpp \
 		  $(SHARED)/CoreModules/lfoCore.cpp \
 			# $(wildcard $(SHARED)/CoreModules/*.cpp) \

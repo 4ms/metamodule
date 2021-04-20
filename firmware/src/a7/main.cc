@@ -43,42 +43,42 @@ void main()
 	using namespace MetaModule;
 	StaticBuffers::init();
 
-	_hw.dac.init();
+	// _hw.dac.init();
 
-	_hw.codec.set_txrx_buffers(reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[0].data()),
-							   reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[2].data()),
-							   AudioConf::DMABlockSize * 2);
-	_hw.codec.set_callbacks(
-		[]() {
-			Debug::Pin0::high();
-			Debug::Pin0::low();
-		},
-		[]() {
-			Debug::Pin1::high();
-			Debug::Pin1::low();
-		});
+	// _hw.codec.set_txrx_buffers(reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[0].data()),
+	// 						   reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[2].data()),
+	// 						   AudioConf::DMABlockSize * 2);
+	// _hw.codec.set_callbacks(
+	// 	[]() {
+	// 		Debug::Pin0::high();
+	// 		Debug::Pin0::low();
+	// 	},
+	// 	[]() {
+	// 		Debug::Pin1::high();
+	// 		Debug::Pin1::low();
+	// 	});
 
 	// FixMe: RX FIFO remains empty and HAL times out.
 	// _hw.codec.start();
 
 	PatchList patch_list;
-	// PatchPlayer patch_player;
-	// ParamCache param_cache;
-	// UiAudioMailbox mbox;
+	PatchPlayer patch_player;
+	ParamCache param_cache;
+	UiAudioMailbox mbox;
 
 	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
-	// AudioStream audio{patch_list,
-	// 				  patch_player,
-	// 				  _hw.codec,
-	// 				  _hw.dac,
-	// 				  param_cache,
-	// 				  mbox,
-	// 				  StaticBuffers::param_blocks,
-	// 				  StaticBuffers::audio_dma_block};
+	AudioStream audio{patch_list,
+					  patch_player,
+					  _hw.codec,
+					  _hw.dac,
+					  param_cache,
+					  mbox,
+					  StaticBuffers::param_blocks,
+					  StaticBuffers::audio_dma_block};
 
-	// SharedBus::i2c.deinit();
+	SharedBus::i2c.deinit();
 
 	// SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	// SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
@@ -94,9 +94,9 @@ void main()
 	// while (HWSemaphore<M4_ready>::is_locked())
 	// 	;
 
-	// param_cache.clear();
+	param_cache.clear();
 	// ui.start();
-	// audio.start();
+	audio.start();
 
 	while (1) {
 		Debug::red_LED1::low();

@@ -2,7 +2,6 @@
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
-#include "drivers/syscfg.hh"
 #include "patch_player.hh"
 
 namespace MetaModule

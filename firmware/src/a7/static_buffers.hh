@@ -20,7 +20,7 @@ namespace MetaModule
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 	// static inline __attribute__((section(".axisram"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
-	// static inline __attribute__((section(".dma_buffer"))) DoubleBufParamBlock param_blocks;
+	static inline __attribute__((section(".dma_buffer"))) DoubleBufParamBlock param_blocks;
 	// static inline __attribute__((section(".axisram"))) MMScreenConf::FrameBufferT screen_framebuf;
 
 	// struct CacheDisabler {
@@ -40,12 +40,12 @@ struct StaticBuffers {
 	static void init()
 	{
 		// Todo: why doesn't Params::Params() get called? because it's in a NOLOAD section of memory?
-		// for (auto &block : param_blocks) {
-		// 	for (auto &param : block.params) {
-		// 		param.clear();
-		// 	}
-		// 	block.metaparams.clear();
-		// }
+		for (auto &block : param_blocks) {
+			for (auto &param : block.params) {
+				param.clear();
+			}
+			block.metaparams.clear();
+		}
 	}
 };
 
