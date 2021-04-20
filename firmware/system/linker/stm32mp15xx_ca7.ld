@@ -2,17 +2,19 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(_Reset)
 
+__HEAP_SIZE = 0x10000000;
+
 MEMORY
 {
     ROM (rx) : ORIGIN = 0xC2000040, LENGTH = 1M
     RAM (rwx): ORIGIN = 0xC0200000, LENGTH = 1M
+	HEAP (rwx) : ORIGIN = 0xD0000000, LENGTH = __HEAP_SIZE
 	SRAM1 (rwx) : ORIGIN = 0x10000000, LENGTH = 128K
 	SRAM2 (rwx) : ORIGIN = 0x10020000, LENGTH = 128K
 	SRAM3 (rwx) : ORIGIN = 0x10040000, LENGTH = 64K
 	SRAM4 (rwx) : ORIGIN = 0x10050000, LENGTH = 64K
 }
 
-__HEAP_SIZE = 0x40000;
 
 SECTIONS
 {
@@ -103,7 +105,7 @@ SECTIONS
 		_sheap = .;
 		. += __HEAP_SIZE;
 		_eheap = .;
-	} > RAM
+	} > HEAP
 
     _fiq_stack_start = ADDR(.heap) + SIZEOF(.heap);
     _fiq_stack_end = _fiq_stack_start + 0x1000; /* 64 KB */
