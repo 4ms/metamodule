@@ -41,6 +41,7 @@ struct Hardware : AppStartup, Debug, SharedBus {
 void main()
 {
 	using namespace MetaModule;
+	StaticBuffers::init();
 
 	_hw.dac.init();
 
@@ -57,11 +58,10 @@ void main()
 			Debug::Pin1::low();
 		});
 
-	_hw.codec.start();
+	// FixMe: RX FIFO remains empty and HAL times out.
+	// _hw.codec.start();
 
-	// StaticBuffers::init();
-
-	// PatchList patch_list;
+	PatchList patch_list;
 	// PatchPlayer patch_player;
 	// ParamCache param_cache;
 	// UiAudioMailbox mbox;

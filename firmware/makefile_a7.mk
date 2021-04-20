@@ -39,8 +39,10 @@ SOURCES = $(STARTUP_CA7) \
 		  $(DRIVERLIB)/drivers/sai.cc \
 		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
 		  $(SHARED)/util/math_tables.cc \
-		  #src/patchlist.cc\
-		#$(wildcard $(SHARED)/CoreModules/*.cpp) \
+		  src/patchlist.cc\
+		  $(SHARED)/CoreModules/panel.cpp \
+		  $(SHARED)/CoreModules/lfoCore.cpp \
+			# $(wildcard $(SHARED)/CoreModules/*.cpp) \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
