@@ -34,9 +34,9 @@ const SaiConfig codec_sai_conf = {
 	.framesize = 32,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::B, 3, 4},   // GPIO_AF4_SAI4},
-	.SCLK = {GPIO::B, 4, 4},   // GPIO_AF4_SAI4},
-	.LRCLK = {GPIO::A, 15, 2}, // GPIO_AF2_SAI4},
-	.SD_DAC = {GPIO::B, 5, 3}, // GPIO_AF3_SAI4}, // SAI 4 A = RX
-	.SD_ADC = {GPIO::H, 5, 6}, // GPIO_AF6_SAI4}, //<< fixme: not listed in datasheet! try 2 or 3 or 6 // SAI 4 B = TX
+	.MCLK = {GPIO::B, 3, LL_GPIO_AF_12},
+	.SCLK = {GPIO::B, 4, LL_GPIO_AF_4},
+	.LRCLK = {GPIO::A, 15, LL_GPIO_AF_12},
+	.SD_DAC = {GPIO::B, 5, LL_GPIO_AF_10}, // SAI 4 A = RX
+	.SD_ADC = {GPIO::H, 5, LL_GPIO_AF_12}, // SAI 4 B = TX
 };

@@ -36,9 +36,9 @@ SOURCES = $(STARTUP_CA7) \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c \
-		  # $(DRIVERLIB)/drivers/sai.cc \
-		  # $(DRIVERLIB)/drivers/codec_WM8731.cc \
-		  # $(SHARED)/util/math_tables.cc \
+		  $(DRIVERLIB)/drivers/sai.cc \
+		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
+		  $(SHARED)/util/math_tables.cc \
 		  #src/patchlist.cc\
 		#$(wildcard $(SHARED)/CoreModules/*.cpp) \
 

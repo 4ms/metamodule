@@ -2,13 +2,13 @@
 #include "drivers/hsem.hh"
 // #include "drivers/qspi_flash_driver.hh"
 // #include "drivers/system.hh"
-// #include "m7/static_buffers.hh"
+#include "a7/static_buffers.hh"
 // #include "ui.hh"
-// #include "a7/conf/codec_sai_conf.hh"
+#include "a7/conf/codec_sai_conf.hh"
 #include "a7/conf/i2c_conf.hh"
 #include "a7/system_clocks.hh"
-// #include "audio.hh"
-// #include "codec_WM8731.hh"
+#include "audio.hh"
+#include "codec_WM8731.hh"
 #include "conf/dac_conf.hh"
 #include "debug.hh"
 #include "drivers/stm32xx.h"
@@ -31,47 +31,33 @@ struct Hardware : AppStartup, Debug, SharedBus {
 		: SharedBus{i2c_conf_codec}
 	{}
 
-	// CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
+	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
 	// 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
 	AnalogOutT dac;
 } _hw;
 
 } // namespace MetaModule
 
-void delay_long()
-{
-	uint32_t i = 0x100000;
-	while (i--)
-		;
-}
-
 void main()
 {
 	using namespace MetaModule;
 
-	uint32_t xx = 10;
-	while (xx--) {
-		Debug::Pin0::high();
-		HAL_Delay(1);
-		Debug::Pin0::low();
-		HAL_Delay(1);
-	}
-
-	// HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
-
-	// HWSemaphore<1>::disable_channel_ISR();
-	// HWSemaphore<1>::clear_ISR();
-	// target::System::enable_irq(HSEM_IT1_IRQn);
-	// HWSemaphore<1>::enable_channel_ISR();
-	// HWSemaphore<1>::lock();
-	// HWSemaphore<1>::unlock();
-
-	// FixMe: clock output no longer works?
 	_hw.dac.init();
 
-	// Fixme: i2c pins don't seem to respond:
-	// uint8_t data[2] = {0xAA, 0xF0};
-	// SharedBus::i2c.write(0x55, data, 2);
+	_hw.codec.set_txrx_buffers(reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[0].data()),
+							   reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[2].data()),
+							   AudioConf::DMABlockSize * 2);
+	_hw.codec.set_callbacks(
+		[]() {
+			Debug::Pin0::high();
+			Debug::Pin0::low();
+		},
+		[]() {
+			Debug::Pin1::high();
+			Debug::Pin1::low();
+		});
+
+	_hw.codec.start();
 
 	// StaticBuffers::init();
 
@@ -113,28 +99,20 @@ void main()
 	// audio.start();
 
 	while (1) {
-		Debug::Pin0::high();
 		Debug::red_LED1::low();
-		HAL_Delay(10);
-		Debug::Pin0::low();
+		HAL_Delay(500);
 		Debug::red_LED1::high();
 
-		Debug::Pin1::high();
 		Debug::red_LED2::low();
-		HAL_Delay(1);
-		Debug::Pin1::low();
+		HAL_Delay(500);
 		Debug::red_LED2::high();
 
-		Debug::Pin2::high();
 		Debug::green_LED1::low();
-		HAL_Delay(1);
-		Debug::Pin2::low();
+		HAL_Delay(500);
 		Debug::green_LED1::high();
 
-		Debug::Pin3::high();
 		Debug::green_LED2::low();
-		HAL_Delay(1);
-		Debug::Pin3::low();
+		HAL_Delay(500);
 		Debug::green_LED2::high();
 
 		__NOP();
