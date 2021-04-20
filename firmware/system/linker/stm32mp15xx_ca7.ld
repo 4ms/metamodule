@@ -6,6 +6,10 @@ MEMORY
 {
     ROM (rx) : ORIGIN = 0xC2000040, LENGTH = 1M
     RAM (rwx): ORIGIN = 0xC0200000, LENGTH = 1M
+	SRAM1 (rwx) : ORIGIN = 0x10000000, LENGTH = 128K
+	SRAM2 (rwx) : ORIGIN = 0x10020000, LENGTH = 128K
+	SRAM3 (rwx) : ORIGIN = 0x10040000, LENGTH = 64K
+	SRAM4 (rwx) : ORIGIN = 0x10050000, LENGTH = 64K
 }
 
 __HEAP_SIZE = 0x40000;
@@ -112,6 +116,15 @@ SECTIONS
 
     _irq_stack_size = _irq_stack_end - _irq_stack_start;
     _fiq_stack_size = _fiq_stack_end - _fiq_stack_start;
+
+	.dma_buffer (NOLOAD) :
+	{
+		. = ALIGN(8);
+		*(.dma_buffer)
+		*(.dma_buffer*)
+		. = ALIGN(8);
+	} > SRAM3
+	
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :
