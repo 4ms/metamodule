@@ -66,7 +66,7 @@ void main()
 	ParamCache param_cache;
 	UiAudioMailbox mbox;
 
-	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
+	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
 	AudioStream audio{patch_list,

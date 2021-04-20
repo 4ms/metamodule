@@ -2,8 +2,8 @@
 #include "audio.hh"
 // #include "conf/screen_conf.hh"
 // #include "drivers/mpu.hh"
-// #include "leds.hh"
-// #include "params.hh"
+#include "leds.hh"
+#include "params.hh"
 
 // Defined in linker:
 // extern char _dma_buffer_start;
@@ -19,7 +19,7 @@ namespace MetaModule
 {
 struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
-	// static inline __attribute__((section(".axisram"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+	static inline __attribute__((section(".axisram"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	static inline __attribute__((section(".dma_buffer"))) DoubleBufParamBlock param_blocks;
 	// static inline __attribute__((section(".axisram"))) MMScreenConf::FrameBufferT screen_framebuf;
 
