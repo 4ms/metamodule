@@ -43,10 +43,10 @@ SOURCES = $(STARTUP_CA7) \
 		  $(CORE_SRC)/main.cc\
 		  src/patchlist.cc\
 		  src/audio.cc\
-		  $(SHARED)/CoreModules/panel.cpp \
-		  $(SHARED)/CoreModules/lfoCore.cpp \
-		  $(SHARED)/CoreModules/karplusCore.cpp \
-			# $(wildcard $(SHARED)/CoreModules/*.cpp) \
+			$(wildcard $(SHARED)/CoreModules/*.cpp) \
+		  # $(SHARED)/CoreModules/panel.cpp \
+		  # $(SHARED)/CoreModules/lfoCore.cpp \
+		  # $(SHARED)/CoreModules/karplusCore.cpp \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
