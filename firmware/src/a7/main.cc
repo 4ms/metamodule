@@ -41,7 +41,16 @@ struct Hardware : AppStartup, Debug, SharedBus {
 void main()
 {
 	using namespace MetaModule;
+	__disable_irq();
+
+	auto x = GIC_AcknowledgePending();
+	unsigned num_irq = 32U * ((GIC_DistributorInfo() & 0x1FU) + 1U);
+	for (unsigned i = 32; i < num_irq; i++) {
+		GIC_EndInterrupt((IRQn_Type)i);
+		GIC_ClearPendingIRQ((IRQn_Type)i);
+	}
 	__enable_irq();
+	GIC_Enable();
 
 	HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
 		Debug::red_LED1::high();
@@ -94,6 +103,7 @@ void main()
 
 	param_cache.clear();
 	// ui.start();
+	patch_player.load_patch(patch_list.cur_patch());
 	audio.start();
 
 	while (1) {

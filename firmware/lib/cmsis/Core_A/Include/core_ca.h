@@ -1150,14 +1150,14 @@ __STATIC_INLINE void L2C_CleanInvPa (void *pa)
 */
 __STATIC_INLINE void GIC_EnableDistributor(void)
 {
-  GICDistributor->CTLR |= 1U;
+  GICDistributor->CTLR |= 3U; /*1U;*/
 }
 
 /** \brief Disable the interrupt distributor using the GIC's CTLR register.
 */
 __STATIC_INLINE void GIC_DisableDistributor(void)
 {
-  GICDistributor->CTLR &=~1U;
+  GICDistributor->CTLR &=~3U;/*1U;*/
 }
 
 /** \brief Read the GIC's TYPER register.
@@ -1199,14 +1199,14 @@ __STATIC_INLINE uint32_t GIC_GetTarget(IRQn_Type IRQn)
 */
 __STATIC_INLINE void GIC_EnableInterface(void)
 {
-  GICInterface->CTLR |= 1U; //enable interface
+  GICInterface->CTLR |= 3U;//1U; //enable interface
 }
 
 /** \brief Disable the CPU's interrupt interface.
 */
 __STATIC_INLINE void GIC_DisableInterface(void)
 {
-  GICInterface->CTLR &=~1U; //disable distributor
+  GICInterface->CTLR &=~3U;//1U; //disable distributor
 }
 
 /** \brief Read the CPU's IAR register.

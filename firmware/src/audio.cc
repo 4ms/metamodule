@@ -32,6 +32,7 @@ AudioStream::AudioStream(PatchList &patches,
 	, player{patchplayer}
 {
 
+	codec_.init();
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
 							AudioConf::DMABlockSize * 2);
