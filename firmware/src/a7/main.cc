@@ -41,25 +41,23 @@ struct Hardware : AppStartup, Debug, SharedBus {
 void main()
 {
 	using namespace MetaModule;
+	__enable_irq();
+
+	HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
+		Debug::red_LED1::high();
+		Debug::Pin0::high();
+	});
+	HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
+
+	HWSemaphore<1>::disable_channel_ISR();
+	HWSemaphore<1>::clear_ISR();
+
+	target::System::enable_irq(HSEM_IT1_IRQn);
+	HWSemaphore<1>::enable_channel_ISR();
+	HWSemaphore<1>::lock();
+	HWSemaphore<1>::unlock();
+
 	StaticBuffers::init();
-
-	// _hw.dac.init();
-
-	// _hw.codec.set_txrx_buffers(reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[0].data()),
-	// 						   reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[2].data()),
-	// 						   AudioConf::DMABlockSize * 2);
-	// _hw.codec.set_callbacks(
-	// 	[]() {
-	// 		Debug::Pin0::high();
-	// 		Debug::Pin0::low();
-	// 	},
-	// 	[]() {
-	// 		Debug::Pin1::high();
-	// 		Debug::Pin1::low();
-	// 	});
-
-	// FixMe: RX FIFO remains empty and HAL times out.
-	// _hw.codec.start();
 
 	PatchList patch_list;
 	PatchPlayer patch_player;
