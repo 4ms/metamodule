@@ -11,18 +11,19 @@ using PanelT = Panel;
 
 class PatchPlayer {
 public:
-	bool is_loaded = false;
 	std::array<float, MAX_NODES_IN_PATCH> nodes;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
 	// cached data:
-	Jack out_conns[Panel::NumInJacks] = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
+	Jack out_conns[Panel::NumInJacks] __attribute__((aligned(4))) = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
 	Jack in_conns[Panel::NumOutJacks] = {{0, 0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
 
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
 	// 1 => reads "LFO #1", 2=> "LFO #2", etc.
 	uint8_t dup_module_index[MAX_MODULES_IN_PATCH] = {0};
+
+	bool is_loaded = false;
 
 public:
 	PatchPlayer()
