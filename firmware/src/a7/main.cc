@@ -38,6 +38,8 @@ struct Hardware : AppStartup, Debug, SharedBus {
 
 } // namespace MetaModule
 
+void timing_test(uint32_t addr);
+
 void main()
 {
 	using namespace MetaModule;
@@ -52,19 +54,32 @@ void main()
 	__enable_irq();
 	GIC_Enable();
 
-	HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
-		Debug::red_LED1::high();
-		Debug::Pin0::high();
-	});
-	HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
+	Debug::Pin1::low();
+	timing_test(0xC4000000);
+	Debug::Pin1::high();
+	timing_test(0xD8000000);
+	Debug::Pin1::low();
+	timing_test(0x10000000);
+	Debug::Pin1::high();
+	timing_test(0x10020000);
+	Debug::Pin1::low();
+	timing_test(0x10040000);
+	Debug::Pin1::high();
+	timing_test(0x10050000);
+	Debug::Pin1::low();
 
-	HWSemaphore<1>::disable_channel_ISR();
-	HWSemaphore<1>::clear_ISR();
+	// HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
+	// 	Debug::red_LED1::high();
+	// 	Debug::Pin0::high();
+	// });
+	// HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
 
-	target::System::enable_irq(HSEM_IT1_IRQn);
-	HWSemaphore<1>::enable_channel_ISR();
-	HWSemaphore<1>::lock();
-	HWSemaphore<1>::unlock();
+	// HWSemaphore<1>::disable_channel_ISR();
+	// HWSemaphore<1>::clear_ISR();
+	// target::System::enable_irq(HSEM_IT1_IRQn);
+	// HWSemaphore<1>::enable_channel_ISR();
+	// HWSemaphore<1>::lock();
+	// HWSemaphore<1>::unlock();
 
 	StaticBuffers::init();
 
@@ -125,6 +140,19 @@ void main()
 
 		__NOP();
 	}
+}
+
+void timing_test(uint32_t addr)
+{
+	auto baseaddr = reinterpret_cast<uint32_t *>(addr);
+	for (uint32_t i = 0; i < 1024; i++) {
+		Debug::Pin0::high();
+		*baseaddr++ = i;
+		Debug::Pin0::low();
+	}
+
+	// STR STR ADD STR CMP BNE
+	// ~5.95MHz ---> 6 instructions means 24MHz
 }
 
 void recover_from_task_fault(void)
