@@ -270,10 +270,10 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   PL1_SetControl(0x1);
 #else
   /*Set Counter Frequency */
-  PL1_SetCounterFrequency(HSI_VALUE);
+  // PL1_SetCounterFrequency(HSI_VALUE);
  // __set_CNTFRQ(HSI_VALUE);
   /* Initialize Counter */
-  PL1_SetLoadValue(0x1);
+  // PL1_SetLoadValue(0x1);
  // __set_CNTP_TVAL(0x1);
 #endif
 
