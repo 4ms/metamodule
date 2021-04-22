@@ -76,6 +76,12 @@ struct AppStartup {
 							const uint32_t systick_freq_hz = 1000)
 	{
 
+		// HAL_RCC_DeInit();
+
+		RCC->MPCKSELR = 0;
+		while ((RCC->MPCKSELR & RCC_MPCKSELR_MPUSRCRDY_Msk) == 0)
+			;
+
 		RCC_OscInitTypeDef osc_def_ = osc_def;
 		HAL_RCC_OscConfig(&osc_def_);
 
