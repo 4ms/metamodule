@@ -16,8 +16,7 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLQ = 1,
 			.PLLR = 1,
 			.PLLFRACV = 2048,
-			.PLLMODE = RCC_PLL_FRACTIONAL, // Todo: what is this?
-										   // .MOD_PER, etc = , //This is only for spread-spectrum, right?
+			.PLLMODE = RCC_PLL_FRACTIONAL,
 		},
 	.PLL2 =
 		{
@@ -29,7 +28,7 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLQ = 1,
 			.PLLR = 1,
 			.PLLFRACV = 5120,
-			.PLLMODE = RCC_PLL_FRACTIONAL, // Todo: what is this?
+			.PLLMODE = RCC_PLL_FRACTIONAL,
 		},
 	.PLL3 =
 		{
@@ -42,7 +41,7 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLR = 37,
 			.PLLRGE = RCC_PLL3IFRANGE_1,
 			.PLLFRACV = 6660,
-			.PLLMODE = RCC_PLL_FRACTIONAL, // Todo: what is this?
+			.PLLMODE = RCC_PLL_FRACTIONAL,
 		},
 	.PLL4 =
 		{
@@ -55,19 +54,22 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLR = 8,
 			.PLLRGE = RCC_PLL4IFRANGE_1,
 			.PLLFRACV = 0,
-			.PLLMODE = RCC_PLL_INTEGER, // Todo: what is this?
+			.PLLMODE = RCC_PLL_INTEGER,
 		},
 };
 
 const RCC_ClkInitTypeDef rcc_clk_conf = {
-	.ClockType = /*RCC_CLOCKTYPE_MPU |*/ RCC_CLOCKTYPE_ACLK | RCC_CLOCKTYPE_HCLK /* <-- MCU Clock */ |
-				 RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_PCLK3 | RCC_CLOCKTYPE_PCLK4 |
-				 RCC_CLOCKTYPE_PCLK5,
-	// .MPUInit =
-	// 	{
-	// 		.MPU_Clock = RCC_MPUSOURCE_PLL1,
-	// 		.MPU_Div = RCC_MPU_DIV_OFF,
-	// 	},
+	.ClockType = RCC_CLOCKTYPE_MPU | RCC_CLOCKTYPE_ACLK | RCC_CLOCKTYPE_HCLK /* <-- MCU Clock */ | RCC_CLOCKTYPE_PCLK1 |
+				 RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_PCLK3 | RCC_CLOCKTYPE_PCLK4 | RCC_CLOCKTYPE_PCLK5,
+	.MPUInit =
+		{
+			// HSI (64MHz): 5.2MHz for 6 inst. = 32MHz clock?
+			// HSE (24MHz): 1.5MHz-2MHz for 6 inst. = 12MHz clock?
+			// .MPU_Clock = RCC_MPUSOURCE_MPUDIV, DIV2: 6.14MHz
+			// .MPU_Clock = RCC_MPUSOURCE_PLL1, : 6.14MHz - 6.54MHz = ~40MHz clock?
+			.MPU_Clock = RCC_MPUSOURCE_PLL1,
+			.MPU_Div = RCC_MPU_DIV2,
+		},
 	.AXISSInit =
 		{
 			.AXI_Clock = RCC_AXISSOURCE_PLL2,
