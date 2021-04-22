@@ -26,8 +26,18 @@ void SystemInit(void)
 	// #if ((__FPU_PRESENT == 1) && (__FPU_USED == 1))
 	__FPU_Enable();
 
-	// MMU_CreateTranslationTable();
+	// Todo: See if CP0 to CP13 are implemented.
+	// Read CPACR, save value, write 0x0FFFFFFF,
+	// read back: if each field is 0b00 -> copro is not implemented, 0b11->implemented.
 
+	// NSACR = all copros to non-sec
+	// asm volatile("mrc	p15, 0, r0, c1, c1, 2 \n"
+	// 			 "movw	r1, #0x3fff \n"
+	// 			 "movt	r1, #0x0004 \n"
+	// 			 "orr	r0, r0, r1 \n"
+	// 			 "mcr	p15, 0, r0, c1, c1, 2 \n");
+
+	// MMU_CreateTranslationTable();
 	// MMU_Enable();
 
 	L1C_EnableCaches();
