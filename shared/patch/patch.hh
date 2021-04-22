@@ -34,7 +34,7 @@ struct MappedParam {
 
 // FixMe: non-node only code:
 struct Net {
-	uint16_t num_jacks;
+	uint32_t num_jacks;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE> jacks;
 };
 using NetList = std::array<Net, MAX_NODES_IN_PATCH>;
