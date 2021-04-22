@@ -32,6 +32,7 @@ AudioStream::AudioStream(PatchList &patches,
 	, player{patchplayer}
 {
 
+	codec_.init();
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
 							AudioConf::DMABlockSize * 2);
@@ -40,14 +41,20 @@ AudioStream::AudioStream(PatchList &patches,
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
-			process(rx_buf_1, tx_buf_1, param_blocks[0]);
+			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
+				process(rx_buf_1, tx_buf_1, param_blocks[0]);
+			else
+				process(rx_buf_2, tx_buf_2, param_blocks[0]);
 			Debug::Pin0::low();
 		},
 		[this]() {
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
-			process(rx_buf_2, tx_buf_2, param_blocks[1]);
+			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
+				process(rx_buf_2, tx_buf_2, param_blocks[1]);
+			else
+				process(rx_buf_1, tx_buf_1, param_blocks[1]);
 			Debug::Pin0::low();
 		});
 
@@ -124,7 +131,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		}
 		i = 0;
 		for (auto &knob : params_->knobs) {
-			player.set_panel_param(i, knob);
+			player.set_panel_param(i, 0.5f); // knob);
 			i++;
 		}
 
@@ -166,8 +173,13 @@ void AudioStream::passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out)
 {
 	auto in_ = in.begin();
 	for (auto &out_ : out) {
-		out_.l = -(in_->r); // inverted and channels swapped
-		out_.r = -(in_->l);
+		if constexpr (target::TYPE == SupportedTargets::stm32h7x5) {
+			out_.l = -(in_->r); // inverted and channels swapped (H7 only)
+			out_.r = -(in_->l);
+		} else {
+			out_.l = -(in_->l); // inverted (MP1 only)
+			out_.r = -(in_->r);
+		}
 		dac.queue_sample(0, in_->l + 0x00800000);
 		dac.queue_sample(1, in_->r + 0x00800000);
 		in_++;

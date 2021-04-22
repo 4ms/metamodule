@@ -1,10 +1,10 @@
 #pragma once
 #include "conf/hsem_conf.hh"
-#include "conf/rcc_conf.hh"
 #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
+#include "m7/conf/rcc_conf.hh"
 
 // #define DEBUG_MODE_DISABLE_I_CACHE
 // #define DEBUG_MODE_DISABLE_D_CACHE

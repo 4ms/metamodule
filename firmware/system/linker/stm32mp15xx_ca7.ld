@@ -107,7 +107,7 @@ SECTIONS
 		_eheap = .;
 	} > HEAP
 
-    _fiq_stack_start = ADDR(.heap) + SIZEOF(.heap);
+    _fiq_stack_start = _bss_end; /* ADDR(.heap) + SIZEOF(.heap);*/
     _fiq_stack_end = _fiq_stack_start + 0x1000; /* 64 KB */
 
     _irq_stack_start = _fiq_stack_end;

@@ -6,7 +6,8 @@ BUILDDIR = $(BUILDDIR_A7)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
 STARTUP_CA7	= $(DRIVERLIB)/drivers/startup_ca7.s
 
-MCU =  -mcpu=cortex-a7 -mfpu=fpv5-d16 -mlittle-endian -mfloat-abi=hard
+# -mfpu=fpv4-d16
+MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard
 CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
@@ -15,7 +16,7 @@ TARGETDRIVERS = $(DRIVERLIB)/drivers/target/stm32mp1
 
 SHARED = src/a7/shared
 
-OPTFLAG = -O0
+OPTFLAG = -O3
 include makefile_opts.mk
 
 SOURCES = $(STARTUP_CA7) \

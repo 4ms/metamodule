@@ -38,28 +38,50 @@ struct Hardware : AppStartup, Debug, SharedBus {
 
 } // namespace MetaModule
 
+void timing_test(uint32_t addr);
+
 void main()
 {
 	using namespace MetaModule;
+	__disable_irq();
+
+	auto x = GIC_AcknowledgePending();
+	unsigned num_irq = 32U * ((GIC_DistributorInfo() & 0x1FU) + 1U);
+	for (unsigned i = 32; i < num_irq; i++) {
+		GIC_EndInterrupt((IRQn_Type)i);
+		GIC_ClearPendingIRQ((IRQn_Type)i);
+	}
+	__enable_irq();
+	GIC_Enable();
+
+	Debug::Pin1::low();
+	timing_test(0xC4000000);
+	Debug::Pin1::high();
+	timing_test(0xD8000000);
+	Debug::Pin1::low();
+	timing_test(0x10000000);
+	Debug::Pin1::high();
+	timing_test(0x10020000);
+	Debug::Pin1::low();
+	timing_test(0x10040000);
+	Debug::Pin1::high();
+	timing_test(0x10050000);
+	Debug::Pin1::low();
+
+	// HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
+	// 	Debug::red_LED1::high();
+	// 	Debug::Pin0::high();
+	// });
+	// HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
+
+	// HWSemaphore<1>::disable_channel_ISR();
+	// HWSemaphore<1>::clear_ISR();
+	// target::System::enable_irq(HSEM_IT1_IRQn);
+	// HWSemaphore<1>::enable_channel_ISR();
+	// HWSemaphore<1>::lock();
+	// HWSemaphore<1>::unlock();
+
 	StaticBuffers::init();
-
-	// _hw.dac.init();
-
-	// _hw.codec.set_txrx_buffers(reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[0].data()),
-	// 						   reinterpret_cast<uint8_t *>(StaticBuffers::audio_dma_block[2].data()),
-	// 						   AudioConf::DMABlockSize * 2);
-	// _hw.codec.set_callbacks(
-	// 	[]() {
-	// 		Debug::Pin0::high();
-	// 		Debug::Pin0::low();
-	// 	},
-	// 	[]() {
-	// 		Debug::Pin1::high();
-	// 		Debug::Pin1::low();
-	// 	});
-
-	// FixMe: RX FIFO remains empty and HAL times out.
-	// _hw.codec.start();
 
 	PatchList patch_list;
 	PatchPlayer patch_player;
@@ -96,6 +118,7 @@ void main()
 
 	param_cache.clear();
 	// ui.start();
+	patch_player.load_patch(patch_list.cur_patch());
 	audio.start();
 
 	while (1) {
@@ -117,6 +140,19 @@ void main()
 
 		__NOP();
 	}
+}
+
+void timing_test(uint32_t addr)
+{
+	auto baseaddr = reinterpret_cast<uint32_t *>(addr);
+	for (uint32_t i = 0; i < 1024; i++) {
+		Debug::Pin0::high();
+		*baseaddr++ = i;
+		Debug::Pin0::low();
+	}
+
+	// STR STR ADD STR CMP BNE
+	// ~5.95MHz ---> 6 instructions means 24MHz
 }
 
 void recover_from_task_fault(void)
