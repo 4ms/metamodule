@@ -1,4 +1,5 @@
 #include "irq_ctrl.h"
+#include "mmu_ca7.h"
 #include "stm32mp1xx.h"
 
 uint32_t SystemCoreClock = HSE_VALUE;
@@ -37,8 +38,8 @@ void SystemInit(void)
 	// 			 "orr	r0, r0, r1 \n"
 	// 			 "mcr	p15, 0, r0, c1, c1, 2 \n");
 
-	// MMU_CreateTranslationTable();
-	// MMU_Enable();
+	MMU_CreateTranslationTable();
+	MMU_Enable();
 
 	L1C_EnableCaches();
 	L1C_EnableBTAC();

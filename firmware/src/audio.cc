@@ -135,10 +135,11 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 			i++;
 		}
 
+		Debug::Pin1::high();
+		// dual LFO: 2us on H7, 31us on MP1
 		player.update_patch(patch_list.cur_patch());
+		Debug::Pin1::low();
 
-		// FixMe: Why are the L/R samples swapped in the DMA buffer? The L/R jacks are not swapped on hardware
-		// Todo: scope the data stream vs. LR clk
 		out_.l = get_audio_output(1);
 		out_.r = get_audio_output(0);
 

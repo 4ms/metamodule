@@ -7,7 +7,7 @@ LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
 STARTUP_CA7	= $(DRIVERLIB)/drivers/startup_ca7.s
 
 # -mfpu=fpv4-d16
-MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard
+MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard -mthumb-interwork
 CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
@@ -24,6 +24,7 @@ SOURCES = $(STARTUP_CA7) \
 		  system/libcpp_stub.cc \
 		  system/new.cc \
 		  system/system_ca7.c \
+		  system/mmu_ca7.c \
 		  system/irq_ctrl.c \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_sai.c \
