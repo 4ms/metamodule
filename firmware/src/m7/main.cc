@@ -44,6 +44,14 @@ void main()
 	using namespace MetaModule;
 	StaticBuffers::init();
 
+	// 4.1us for 4006 instructions: 976MIPS
+	// Debug::Pin2::high();
+	// for (uint32_t i = 0; i < 1000; i++) {
+	// 	asm volatile("MOVW R0, #0x5556\n"
+	// 				 "MOVW R0, #0xAAAA\n");
+	// }
+	// Debug::Pin2::low();
+
 	PatchList patch_list;
 	PatchPlayer patch_player;
 	ParamCache param_cache;
