@@ -14,12 +14,12 @@
 
 PatchList::PatchList()
 	: _patches{
+		  {example_stereo_verb},
 		  {exampleDualLFO},
 		  {examplePitchShiftSimple},
 		  {exampleDrum},
 		  {fadedelay_example},
 		  {example_drum_verb_mono},
-		  {example_stereo_verb},
 		  {QuadDrum},
 		  {KP_FM_DRUM_DET},
 		  {KarplusStereo},
