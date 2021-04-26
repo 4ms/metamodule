@@ -141,7 +141,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		}
 		i = 0;
 		for (auto &knob : params_->knobs) {
-			player.set_panel_param(i, 0.5f); // knob);
+			player.set_panel_param(i, knob);
 			i++;
 		}
 
