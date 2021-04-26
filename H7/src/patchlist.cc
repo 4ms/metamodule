@@ -36,6 +36,7 @@ PatchList::PatchList()
 PatchList::PatchList()
 	: _patches{
 		  {test_14switchCore_clock},
+		  {test_14switchCore_cv},
 		  {test_bitcrushCore},
 		  {test_bpfCore},
 		  {test_clkdivideCore},
@@ -43,8 +44,7 @@ PatchList::PatchList()
 		  {test_comparatorCore},
 		  {test_crossfadeCore},
 		  {test_logicCore},
-		  {test_minmaxCore},
-		  {test_pannerCore}
+		  {test_minmaxCore}
 		  // MARK: Add patches below here:
 	  }
 {

@@ -1,4 +1,5 @@
 #include "patch/integration_tests/test_14switchCore_clock.hh"
+#include "patch/integration_tests/test_14switchCore_cv.hh"
 #include "patch/integration_tests/test_adCore.hh"
 #include "patch/integration_tests/test_attCore.hh"
 #include "patch/integration_tests/test_bitcrushCore.hh"
