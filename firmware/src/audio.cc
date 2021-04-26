@@ -1,4 +1,5 @@
 #include "audio.hh"
+#include "arch.hh"
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
@@ -45,9 +46,10 @@ AudioStream::AudioStream(PatchList &patches,
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
 				process(rx_buf_1, tx_buf_1, param_blocks[0]);
 			else {
-				// invalidate cache for rx_buf_2 and param_block[0] addresses
+				target::SystemCache::invalidate_dcache_by_range(&rx_buf_2, sizeof(AudioStreamBlock));
+				target::SystemCache::invalidate_dcache_by_range(&(param_blocks[0]), sizeof(ParamBlock));
 				process(rx_buf_2, tx_buf_2, param_blocks[0]);
-				// clean cache for tx_buf_2 address (unless we make that region write-through)
+				target::SystemCache::clean_dcache_by_range(&tx_buf_2, sizeof(AudioStreamBlock));
 			}
 			Debug::Pin0::low();
 		},
@@ -58,11 +60,10 @@ AudioStream::AudioStream(PatchList &patches,
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
 				process(rx_buf_2, tx_buf_2, param_blocks[1]);
 			else {
-				// invalidate cache for rx_buf_1 and param_block[1] addresses
-				for (auto &addr : rx_buf_1)
-					L1C_InvalidateDCacheMVA(&addr);
+				target::SystemCache::invalidate_dcache_by_range(&rx_buf_1, sizeof(AudioStreamBlock));
+				target::SystemCache::invalidate_dcache_by_range(&(param_blocks[1]), sizeof(ParamBlock));
 				process(rx_buf_1, tx_buf_1, param_blocks[1]);
-				// clean cache for tx_buf_1 address (unless we make that region write-through)
+				target::SystemCache::clean_dcache_by_range(&tx_buf_1, sizeof(AudioStreamBlock));
 			}
 			Debug::Pin0::low();
 		});
@@ -145,7 +146,7 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		}
 
 		Debug::Pin1::high();
-		// dual LFO: 2us on H7, 31us on MP1
+		// dual LFO: 2us on H7, 31us on MP1, with cache it's 9us on MP1, now it's 1.43us on MP1
 		player.update_patch(patch_list.cur_patch());
 		Debug::Pin1::low();
 
