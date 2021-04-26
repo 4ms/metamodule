@@ -88,7 +88,8 @@
             "SrcObjID": 3,
             "SrcObjType": "Knob"
           }
-        ]
+        ],
+        "PatchName": ""
       },
       "pos": [
         16,
@@ -152,7 +153,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 42,
-      "text": "BANDPASS CORE TEST\n\nKnob A - Filter Cutoff\nKnob B - Filter Resonance\nKnob C - LFO Speed\nKnob D - LFO Depth\n\nAudio In L connected to white noise\nAudio Out L - Filter Output\n",
+      "text": "BANDPASS CORE TEST\n\nKnob A - Filter Cutoff\nKnob B - Filter Resonance\nKnob C - LFO Speed\nKnob D - LFO Depth\n\nAudio In L connected to white noise\nAudio Out L - Filter Output\n\nKnobs B/C/D down: sweep knob A from 0 to 100. Should be almost no output at 0, and an FFT should show a peak at about 300Hz at 50%, and 7.5kHz at max.\n\nKnob B (Res) should have a subtle effect from 0 to 20%, and a less subtle effect from 20% to 100%.\n\nKnob A at 50%, Knob C at 0, knob D at 100%:  LFO should sweep freq from 0 to max\n",
       "pos": [
         55,
         0
@@ -233,7 +234,6 @@
       "data": {
         "audio": {
           "driver": 5,
-          "deviceName": "Apple Inc.: Mac mini Speakers",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,

@@ -88,7 +88,8 @@
             "SrcObjID": 0,
             "SrcObjType": "OutputJack"
           }
-        ]
+        ],
+        "PatchName": ""
       },
       "pos": [
         16,
@@ -152,7 +153,8 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 42,
-      "text": "BITCRUSH CORE TEST\n\nKnob A - Sample Rate\nKnob B- Bit Depth\nKnob C - Sample Rate CV\nKnob D - Bit Depth CV\n\nBit crush in patched to Sine LFO\n\nTest output on Audio Out Left\n",
+      "rightModuleId": 82,
+      "text": "BITCRUSH CORE TEST\n\nKnob A - Sample Rate\nKnob B - Bit Depth\nKnob C - Sample Rate CV (bipolar)\nKnob D - Bit Depth CV (bipolar)\n\nSine LFO is patched into Bit crush input.\n \n\nTest output on Audio Out Left\n\nSample Rate knob varies from about 25Hz (40ms steps) to smooth. No noticalble change with knob 50% to 100%\n\nBit Depth knob varies from 1-bit (square wave) to smooth. no noticable change from 50% to 100%\n\n",
       "pos": [
         55,
         0
@@ -276,6 +278,19 @@
       "rightModuleId": 51,
       "pos": [
         0,
+        0
+      ]
+    },
+    {
+      "id": 82,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 38,
+      "text": "Knobs C/D test:\nTurn all knobs center.\nTurn C to 100%: bottom of sine should be step-wave\nTurn C down to 0%: top of sine should be step-wave\n\nTurn D to 100%: bottom of sine should be flat/square\nTurn D to 0%: top of sine should be flat/square",
+      "pos": [
+        71,
         0
       ]
     }
