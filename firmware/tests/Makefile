@@ -17,6 +17,10 @@ CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
 			-stdlib=libc++ \
 			-I$(DOCTEST_DIR) \
+			-I$(TEST_DIR) \
+			-I$(TEST_DIR)/stubs \
+			-I../$(TEST_DIR)/stubs \
+			-I../stubs \
 			-I. \
 			-I.. \
 			-Isrc \
@@ -50,7 +54,7 @@ $(BUILDDIR)/%.o: %.cc
 $(BUILDDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
 
 tests: $(BUILDDIR)/runtests 
