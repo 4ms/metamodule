@@ -2,13 +2,15 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(_Reset)
 
-__HEAP_SIZE = 0x10000000;
+__DDMA_SIZE = 0x10000;
+__HEAP_SIZE = 0x0FFF0000; /*0x10000000 - __DDMA_SIZE*/
 
 MEMORY
 {
     ROM (rx) : ORIGIN = 0xC2000040, LENGTH = 1M
     RAM (rwx): ORIGIN = 0xC0200000, LENGTH = 1M
 	HEAP (rwx) : ORIGIN = 0xD0000000, LENGTH = __HEAP_SIZE
+	DDMA (rwx) : ORIGIN = 0xDFFF0000, LENGTH = __DDMA_SIZE
 	SRAM1 (rwx) : ORIGIN = 0x10000000, LENGTH = 128K
 	SRAM2 (rwx) : ORIGIN = 0x10020000, LENGTH = 128K
 	SRAM3 (rwx) : ORIGIN = 0x10040000, LENGTH = 64K
@@ -107,7 +109,14 @@ SECTIONS
 		_eheap = .;
 	} > HEAP
 
-    _fiq_stack_start = _bss_end; /* ADDR(.heap) + SIZEOF(.heap);*/
+	.ddma (NOLOAD):
+	{
+		. = ALIGN(8);
+        *(.ddma)
+	} > DDMA
+
+
+    _fiq_stack_start = _bss_end;
     _fiq_stack_end = _fiq_stack_start + 0x1000; /* 64 KB */
 
     _irq_stack_start = _fiq_stack_end;
@@ -118,6 +127,7 @@ SECTIONS
 
     _irq_stack_size = _irq_stack_end - _irq_stack_start;
     _fiq_stack_size = _fiq_stack_end - _fiq_stack_start;
+
 
 	.dma_buffer (NOLOAD) :
 	{

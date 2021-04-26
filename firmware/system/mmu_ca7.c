@@ -26,63 +26,6 @@
  * limitations under the License.
  */
 
-/* Memory map description from: DUI0447G_v2m_p1_trm.pdf 4.2.2 Arm Cortex-A Series memory map
-
-													 Memory Type
-0xffffffff |--------------------------|             ------------
-		   |       FLAG SYNC          |             Device Memory
-0xfffff000 |--------------------------|             ------------
-		   |         Fault            |                Fault
-0xfff00000 |--------------------------|             ------------
-		   |                          |                Normal
-		   |                          |
-		   |      Daughterboard       |
-		   |         memory           |
-		   |                          |
-0x80505000 |--------------------------|             ------------
-		   |TTB (L2 Sync Flags   ) 4k |                Normal
-0x80504C00 |--------------------------|             ------------
-		   |TTB (L2 Peripherals-B) 16k|                Normal
-0x80504800 |--------------------------|             ------------
-		   |TTB (L2 Peripherals-A) 16k|                Normal
-0x80504400 |--------------------------|             ------------
-		   |TTB (L2 Priv Periphs)  4k |                Normal
-0x80504000 |--------------------------|             ------------
-		   |    TTB (L1 Descriptors)  |                Normal
-0x80500000 |--------------------------|             ------------
-		   |          Stack           |                Normal
-		   |--------------------------|             ------------
-		   |          Heap            |                Normal
-0x80400000 |--------------------------|             ------------
-		   |         ZI Data          |                Normal
-0x80300000 |--------------------------|             ------------
-		   |         RW Data          |                Normal
-0x80200000 |--------------------------|             ------------
-		   |         RO Data          |                Normal
-		   |--------------------------|             ------------
-		   |         RO Code          |              USH Normal
-0x80000000 |--------------------------|             ------------
-		   |      Daughterboard       |                Fault
-		   |      HSB AXI buses       |
-0x40000000 |--------------------------|             ------------
-		   |      Daughterboard       |                Fault
-		   |  test chips peripherals  |
-0x2c002000 |--------------------------|             ------------
-		   |     Private Address      |            Device Memory
-0x2c000000 |--------------------------|             ------------
-		   |      Daughterboard       |                Fault
-		   |  test chips peripherals  |
-0x20000000 |--------------------------|             ------------
-		   |       Peripherals        |           Device Memory RW/RO
-		   |                          |              & Fault
-0x00000000 |--------------------------|
-*/
-
-// L1 Cache info and restrictions about architecture of the caches (CCSIR register):
-// Write-Through support *not* available
-// Write-Back support available.
-// Read allocation support available.
-// Write allocation support available.
 
 // Note: You should use the Shareable attribute carefully.
 // For cores without coherency logic (such as SCU) marking a region as shareable forces the processor to not cache that
@@ -115,8 +58,8 @@
 #define __HEAP_BASE 0xD0000000
 #define __HEAP_SIZE 0x10000000
 
-#define __TTB_BASE 0xC0500000
-#define __TTB_SIZE 0x00005000
+#define __TTB_BASE 0xC0100000
+#define __TTB_SIZE 0x00004400
 
 // #define VE_A7_MP_FLASH_BASE0 (0x00000000UL)
 // #define VE_A7_MP_FLASH_BASE1 (0x0C000000UL)
@@ -163,18 +106,15 @@
 				 // The L1 translation table therefore contains 4096 32-bit (word-sized) entries.
 
 #define PRIVATE_TABLE_L2_BASE_4k (__TTB_BASE + TTB_L1_SIZE)				  // Map 4k Private Address space
-#define PERIPHERAL_A_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0x400) // Map 64k Peripheral #1 0x1C000000 - 0x1C00FFFFF
-#define PERIPHERAL_B_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0x800) // Map 64k Peripheral #2 0x1C100000 - 0x1C1FFFFFF
-#define SYNC_FLAGS_TABLE_L2_BASE_4k (__TTB_BASE + TTB_L1_SIZE + 0xC00)	  // Map 4k Flag synchronization
-#define GIC_TABLE_L2_BASE_4k (__TTB_BASE + TTB_L1_SIZE + 0x1000)
+#define GIC_TABLE_L2_BASE_4k (__TTB_BASE + TTB_L1_SIZE + 0x400)
+// #define PERIPHERAL_A_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0x800) // Map 64k Peripheral #1 0x1C000000 - 0x1C00FFFFF
+// #define PERIPHERAL_B_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0xC00) // Map 64k Peripheral #2 0x1C100000 - 0x1C1FFFFFF
+// #define SYNC_FLAGS_TABLE_L2_BASE_4k (__TTB_BASE + TTB_L1_SIZE + 0x1000)	  // Map 4k Flag synchronization
 
 //--------------------- PERIPHERALS -------------------
 #define PERIPHERAL_A_FAULT (0x00000000 + 0x40000000) // 0x1C000000-0x1C00FFFF (1M)
 #define PERIPHERAL_B_FAULT (0x00100000 + 0x50000000) // 0x1C100000-0x1C10FFFF (1M)
 
-//--------------------- SYNC FLAGS --------------------
-#define FLAG_SYNC 0xFFFFF000
-#define F_SYNC_BASE 0xFFF00000 // 1M aligned
 
 static uint32_t Sect_Normal;	 // outer & inner wb/wa, non-shareable, executable, rw, domain 0, base addr 0
 static uint32_t Sect_Normal_Cod; // outer & inner wb/wa, non-shareable, executable, ro, domain 0, base addr 0
@@ -196,42 +136,25 @@ void MMU_CreateTranslationTable(void)
 	// Create 4GB of faulting entries
 	MMU_TTSection(TTB_BASE, 0, 4096, DESCRIPTOR_FAULT);
 
-	/*
-	 * Generate descriptors. Refer to core_ca.h to get information about attributes
-	 *
-	 */
-	// Create descriptors for Vectors, RO, RW, ZI sections
 	section_normal(Sect_Normal, region);
 	section_normal_cod(Sect_Normal_Cod, region);
 	section_normal_ro(Sect_Normal_RO, region);
 	section_normal_rw(Sect_Normal_RW, region);
-	// Create descriptors for peripherals
 	section_device_ro(Sect_Device_RO, region);
 	section_device_rw(Sect_Device_RW, region);
-	// Create descriptors for 64k pages
 	page64k_device_rw(Page_L1_64k, Page_64k_Device_RW, region);
-	// Create descriptors for 4k pages
 	page4k_device_rw(Page_L1_4k, Page_4k_Device_RW, region);
 
-	/*
-	 *  Define MMU flat-map regions and attributes
-	 *
-	 */
-
-	// Define Image
 	MMU_TTSection(TTB_BASE, __ROM_BASE, __ROM_SIZE / 0x100000, Sect_Normal_Cod);  // multiple of 1MB sections
 	MMU_TTSection(TTB_BASE, __RAM_BASE, __RAM_SIZE / 0x100000, Sect_Normal_RW);	  // multiple of 1MB sections
 	MMU_TTSection(TTB_BASE, __RAM2_BASE, __RAM2_SIZE / 0x100000, Sect_Normal_RW); // multiple of 1MB sections
 	MMU_TTSection(TTB_BASE, __HEAP_BASE, __HEAP_SIZE / 0x100000, Sect_Normal_RW); // multiple of 1MB sections
 
-	//--------------------- PERIPHERALS -------------------
-	// MMU_TTSection(TTB_BASE, VE_A7_MP_FLASH_BASE0, 64, Sect_Device_RO); // 64MB NOR
-	// MMU_TTSection(TTB_BASE, VE_A7_MP_FLASH_BASE1, 64, Sect_Device_RO); // 64MB NOR
-	MMU_TTSection(TTB_BASE, VE_A7_MP_SRAM1_BASE, 1, Sect_Device_RW); // 1MB RAM (actually is only 384kB)
-	// MMU_TTSection(TTB_BASE, VE_A7_MP_VRAM_BASE, 32, Sect_Device_RW);   // 32MB RAM
-	// MMU_TTSection(TTB_BASE, VE_A7_MP_ETHERNET_BASE, 16, Sect_Device_RW);
-	// MMU_TTSection(TTB_BASE, VE_A7_MP_USB_BASE, 16, Sect_Device_RW);
 
+	MMU_TTSection(TTB_BASE, VE_A7_MP_SRAM1_BASE, 1, Sect_Normal_RW); // 1MB RAM (actually is only 384kB)
+
+	//Peripheral memory
+	//Todo: be more specific: cover only actual peripherals
 	MMU_TTSection(TTB_BASE, 0x40000000, 0x10000000 / 0x100000, Sect_Device_RW);
 	MMU_TTSection(TTB_BASE, 0x50000000, 0x10000000 / 0x100000, Sect_Device_RW);
 
