@@ -1,6 +1,7 @@
 #include "audio.hh"
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
+#include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "patch_player.hh"
 
@@ -43,8 +44,11 @@ AudioStream::AudioStream(PatchList &patches,
 			HWSemaphore<ParamsBuf2Lock>::unlock();
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
 				process(rx_buf_1, tx_buf_1, param_blocks[0]);
-			else
+			else {
+				// invalidate cache for rx_buf_2 and param_block[0] addresses
 				process(rx_buf_2, tx_buf_2, param_blocks[0]);
+				// clean cache for tx_buf_2 address (unless we make that region write-through)
+			}
 			Debug::Pin0::low();
 		},
 		[this]() {
@@ -53,8 +57,13 @@ AudioStream::AudioStream(PatchList &patches,
 			HWSemaphore<ParamsBuf1Lock>::unlock();
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
 				process(rx_buf_2, tx_buf_2, param_blocks[1]);
-			else
+			else {
+				// invalidate cache for rx_buf_1 and param_block[1] addresses
+				for (auto &addr : rx_buf_1)
+					L1C_InvalidateDCacheMVA(&addr);
 				process(rx_buf_1, tx_buf_1, param_blocks[1]);
+				// clean cache for tx_buf_1 address (unless we make that region write-through)
+			}
 			Debug::Pin0::low();
 		});
 
