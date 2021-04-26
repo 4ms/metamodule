@@ -80,7 +80,8 @@
             "SrcObjID": 1,
             "SrcObjType": "OutputJack"
           }
-        ]
+        ],
+        "PatchName": ""
       },
       "pos": [
         16,
@@ -144,7 +145,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 42,
-      "text": "CLOCK MULTIPLIER CORE TEST\n\nKnob A - Multiply\nKnob B - CV Amount\n\nMultiplied output on Audio Out L\nMain clock on Audio Out R\n\nVerify multiplications relative to main clock. Knob at 0% is multiply by 1. Knob at 100% is multiply by 16.",
+      "text": "CLOCK MULTIPLIER CORE TEST\n\nKnob A - Multiply\nKnob B - CV Amount\n\nMultiplied output on Audio Out L\nMain clock on Audio Out R\n\nWith Knob B down:\nVerify multiplications relative to main clock. Knob at 0% is multiply by 1. Knob at 100% is multiply by 16.\n\nOn scope you should see mult amount only changes on rising edge of  main clock (OutR)\n\nTurn Knob B up slowly, should hear clock output go faster and slower (only changing on rising edge of Out R)\n\n",
       "pos": [
         55,
         0
