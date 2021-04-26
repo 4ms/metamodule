@@ -26,6 +26,7 @@
 #define __CMSIS_GCC_H
 
 /* ignore some GCC warnings */
+#include <stdint-gcc.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -171,7 +172,7 @@ __STATIC_FORCEINLINE  uint32_t __REV(uint32_t value)
 #else
   uint32_t result;
 
-  __ASM volatile ("rev %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
+	__ASM volatile("rev %0, %1" : "=r"(result) : "r"(value));
   return result;
 #endif
 }
@@ -204,7 +205,7 @@ __STATIC_FORCEINLINE  int16_t __REVSH(int16_t value)
 #else
   int16_t result;
 
-  __ASM volatile ("revsh %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
+	__ASM volatile("revsh %0, %1" : "=r"(result) : "r"(value));
   return result;
 #endif
 }
