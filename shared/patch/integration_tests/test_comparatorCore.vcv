@@ -153,7 +153,8 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 42,
-      "text": "COMPARATOR CORE TEST\n\nLFO out patched to comparator input\n\nKnob A  - Offset\nKnob B - LFO Speed\nKnob C - CV Amount\n\n\nAdjust offset (Knob A) and monitor output. Values go from -5 to +5 volts\n\nCheck output (Audio Out L) to go from 0v to 5v when offset is above input signal\n\nAdjust Knob C to introduce CV modulation. The pulsewidth of the output will change\n\nAudio Out R patched to LFO output\n",
+      "rightModuleId": 61,
+      "text": "COMPARATOR CORE TEST\n\nLFO out patched to comparator input\n\nKnob A  - Offset\nKnob B - LFO Speed\nKnob C - CV Amount\nAudio Out L - Comparator Output\nAudio Out R - LFO output\n\nAdjust offset (Knob A) and monitor output. Out L should be rect wave with duty cycle going from 100% to 0% as you turn knob A from 0% to 100%. Out L should be 0v with A at 100% and 5V with A at 0%. \n\nTurn knob B the full range, duty cycle should be same no matter what.\n\nValues go from -5 to +5 volts\n \n\n",
       "pos": [
         51,
         0
@@ -255,6 +256,19 @@
       "rightModuleId": 59,
       "pos": [
         0,
+        0
+      ]
+    },
+    {
+      "id": 61,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 38,
+      "text": "Adjust Knob  C to introduce CV modulation. The pulsewidth of the output will change in both directions (+ and -)\nWith Knob A at 50%, and Knob C at 100%, the pulse width should go from 0 to 100% (the sound will cut out for equal time at min and max)",
+      "pos": [
+        67,
         0
       ]
     }
