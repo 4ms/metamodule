@@ -80,7 +80,8 @@
             "SrcObjID": 1,
             "SrcObjType": "OutputJack"
           }
-        ]
+        ],
+        "PatchName": ""
       },
       "pos": [
         16,
@@ -144,7 +145,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 42,
-      "text": "CLOCK DIVIDER CORE TEST\n\nKnob A - Divison\nKnob B - CV Amount\n\nMeasure main clock frequency\n\nAdjust Division amount one division at a time to verify divided frequency\n\nKnob at 0% should be divide by 1, 100% is divide by 16\n\nAudio Out L is divided output\n\nAudio Out R is main clock",
+      "text": "CLOCK DIVIDER CORE TEST\n\nKnob A - Divison\nKnob B - CV Amount\nAudio Out L is divided output\nAudio Out R is main clock\n\nWith Knob B down:\n\nAdjust Division amount one division at a time to verify divided frequency\n\nKnob A at 0% should be divide by 1, 100% is divide by 16\n\nThen turn Knob B up. Should be.. seemingly random? Should reduce and increase division from what Knob A sets.\n",
       "pos": [
         55,
         0
