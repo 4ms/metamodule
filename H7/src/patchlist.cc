@@ -35,12 +35,16 @@ PatchList::PatchList()
 
 PatchList::PatchList()
 	: _patches{
-		  {test_adCore},
-		  {test_attCore},
-		  {test_bpfCore},
+		  {test_14switchCore_clock},
 		  {test_bitcrushCore},
+		  {test_bpfCore},
 		  {test_clkdivideCore},
-		  {test_clkmultiplierCore}
+		  {test_clkmultiplierCore},
+		  {test_comparatorCore},
+		  {test_crossfadeCore},
+		  {test_logicCore},
+		  {test_minmaxCore},
+		  {test_pannerCore}
 		  // MARK: Add patches below here:
 	  }
 {
