@@ -149,8 +149,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		player.update_patch(patch_list.cur_patch());
 		Debug::Pin1::low();
 
-		out_.l = get_audio_output(1);
-		out_.r = get_audio_output(0);
+		out_.l = get_audio_output(LEFT_OUT);
+		out_.r = get_audio_output(RIGHT_OUT);
 
 		dac.queue_sample(0, get_dac_output(2));
 		dac.queue_sample(1, get_dac_output(3));

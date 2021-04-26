@@ -79,5 +79,8 @@ private:
 	static constexpr unsigned NumGateOutputs = PanelDef::NumGateOut;
 	static constexpr unsigned NumAudioOutputs = PanelDef::NumAudioOut;
 	static constexpr unsigned NumCVOutputs = PanelDef::NumDACOut;
+
+	static constexpr uint32_t LEFT_OUT = (target::TYPE == SupportedTargets::stm32h7x5) ? 1 : 0;
+	static constexpr uint32_t RIGHT_OUT = 1 - LEFT_OUT;
 };
 } // namespace MetaModule
