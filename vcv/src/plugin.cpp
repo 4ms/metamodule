@@ -9,7 +9,9 @@ void init(Plugin *p)
 
 	pluginInstance = p;
 
-	// Add modules here
+	// Add modules here 
+p->addModel(modelVoltagesource); 
+p->addModel(modelNoise);
 	p->addModel(modelSampleplayer);
 	p->addModel(modelSlewlimiter);
 	p->addModel(modelBandpassfilter);

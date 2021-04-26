@@ -8,13 +8,13 @@
 using namespace MathTools;
 
 class ClkdividerCore : public CoreProcessor {
-	static inline const int NumInJacks = 1;
+	static inline const int NumInJacks = 2;
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 1;
 
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Divide"};
 	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Clock In"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Clock In", "CV In"};
 	static inline const StaticString<LongNameChars> description{"Clock Divider"};
 
 	// clang-format off
@@ -26,6 +26,8 @@ class ClkdividerCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
+		float finalDivide = constrain(clockDivideOffset + clockDivideCV, 0.0f, 1.0f);
+		cp.setDivide(map_value(finalDivide, 0.0f, 1.0f, 1.0f, 16.99f));
 		cp.update();
 		if ((cp.getWrappedPhase() < pulseWidth) && clockInit) {
 			clockOutput = 1;
@@ -40,7 +42,7 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				cp.setDivide(map_value(val, 0.0f, 1.0f, 1.0f, 16.99f));
+				clockDivideOffset = val;
 				break;
 		}
 	}
@@ -52,6 +54,9 @@ public:
 			case 0:
 				cp.updateClock(val);
 				clockInit = true;
+				break;
+			case 1:
+				clockDivideCV = val;
 				break;
 		}
 	}
@@ -78,6 +83,8 @@ private:
 	float pulseWidth = 0.5f;
 	int clockOutput = 0;
 	bool clockInit = false;
+	float clockDivideOffset = 0;
+	float clockDivideCV = 0;
 
 	ClockPhase cp;
 };

@@ -5,9 +5,9 @@ struct PatchList {
 
 #ifdef METAMODULE_INTEGRATION_TESTS
 	// MARK: Change NumPatches here:
-	static const uint32_t NumPatches = 1; // Integration test patches
+	static const uint32_t NumPatches = 10; // Integration test patches
 #else
-	static const uint32_t NumPatches = 9; // Normal mode
+	static const uint32_t NumPatches = 10; // Normal mode
 #endif
 
 	PatchList();

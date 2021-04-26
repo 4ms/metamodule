@@ -10,6 +10,8 @@ public:
 		currentClock.update(val);
 
 		if (currentClock.get_output() > lastClock) {
+			multiply = queueMultiply;
+			divide = queueDivide;
 			duration = sinceClock;
 			sinceClock = 0;
 			wholeCount++;
@@ -51,12 +53,12 @@ public:
 
 	void setMultiply(int val)
 	{
-		multiply = val;
+		queueMultiply = val;
 	}
 
 	void setDivide(int val)
 	{
-		divide = val;
+		queueDivide = val;
 	}
 
 private:
@@ -79,4 +81,7 @@ private:
 	int multiply = 1;
 
 	int divide = 1;
+
+	int queueDivide = 1;
+	int queueMultiply = 1;
 };

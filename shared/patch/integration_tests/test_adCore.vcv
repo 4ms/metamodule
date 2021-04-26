@@ -1,0 +1,407 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 30,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 31,
+      "rightModuleId": 33,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 31,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 1,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 2,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 2,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 3,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 37,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 4,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 37,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 5,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 37,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 6,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 37,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 7,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 0,
+            "DstObjType": "InputJack",
+            "SrcModID": 30,
+            "SrcObjID": 6,
+            "SrcObjType": "InputJack"
+          }
+        ]
+      },
+      "pos": [
+        20,
+        0
+      ]
+    },
+    {
+      "id": 31,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "ad_envelope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.00150000001
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 37,
+      "rightModuleId": 30,
+      "pos": [
+        12,
+        0
+      ]
+    },
+    {
+      "id": 33,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 7.34001017
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.809998631
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 30,
+      "data": {
+        "lissajous": 0,
+        "external": 1
+      },
+      "pos": [
+        36,
+        0
+      ]
+    },
+    {
+      "id": 34,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "rightModuleId": 35,
+      "pos": [
+        51,
+        0
+      ]
+    },
+    {
+      "id": 35,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 34,
+      "rightModuleId": 38,
+      "pos": [
+        56,
+        0
+      ]
+    },
+    {
+      "id": 36,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        }
+      ],
+      "rightModuleId": 37,
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 37,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "send",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.274500012
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 36,
+      "rightModuleId": 31,
+      "pos": [
+        4,
+        0
+      ]
+    },
+    {
+      "id": 38,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 35,
+      "rightModuleId": 57,
+      "text": "ADCORE TEST\n\nGate In 1 triggers A/D envelope\n\nA-D knobs are :\n-attack time\n-decay time\n-attack shape\n-decay shape\n\na-d knobs control LFO amount into the 4 module parameters\n\nCV Out 1 and 2 and End of Attack and End of Decay gates\n\nAudio Out Left is envelope output\n",
+      "pos": [
+        61,
+        0
+      ]
+    },
+    {
+      "id": 57,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 38,
+      "text": "Fire gate into Gate In 1\n\nTurning knobs A and B should make attack and decay times longer (range = 1ms to 1.2 seconds)\n\nTurnings knobs C and D change stage shapes (exponential at minimum, linear at 50% and log at 100%)\n\nAdjust a-d knobs (at 0 there should be no effect). As they are turned up the parameters will vary  in a bipolar fashion\n\nIf the main control and cv amount control are centered the parameter will swing full range\n\nCheck that EOA is high when envelope is in decay stage\n and that EOD is high when envelope has settled \n",
+      "pos": [
+        77,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 35,
+      "outputModuleId": 34,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 2,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 36,
+      "outputModuleId": 31,
+      "outputId": 0,
+      "inputModuleId": 35,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 37,
+      "outputModuleId": 35,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 38,
+      "outputModuleId": 36,
+      "outputId": 0,
+      "inputModuleId": 37,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 39,
+      "outputModuleId": 37,
+      "outputId": 0,
+      "inputModuleId": 31,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 40,
+      "outputModuleId": 37,
+      "outputId": 1,
+      "inputModuleId": 31,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 41,
+      "outputModuleId": 37,
+      "outputId": 2,
+      "inputModuleId": 31,
+      "inputId": 3,
+      "color": "#0986ad"
+    },
+    {
+      "id": 42,
+      "outputModuleId": 37,
+      "outputId": 3,
+      "inputModuleId": 31,
+      "inputId": 4,
+      "color": "#c9b70e"
+    }
+  ]
+}

@@ -83,7 +83,7 @@ private:
 	float signalIn = 0;
 	float threshold = 0;
 
-	const float compError = 0.1f;
+	const float compError = 0.02f;
 
 	WindowComparator comp;
 };

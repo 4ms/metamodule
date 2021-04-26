@@ -4,27 +4,19 @@
 
 struct ClkdividerModule : CommModule {
 
-	enum ParamIds {
-		DIVISION_PARAM,
-		NUM_PARAMS
-	};
-	enum InputIds {
-		CLOCK_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		CLOCK_OUTPUT,
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		NUM_LIGHTS
-	};
+	enum ParamIds { DIVISION_PARAM, NUM_PARAMS };
+	enum InputIds { CLOCK_INPUT, CV_INPUT, NUM_INPUTS };
+	enum OutputIds { CLOCK_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { NUM_LIGHTS };
 
 	ClkdividerModule()
 	{
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        core = ModuleFactory::create("CLKDIVIDER");
+		core = ModuleFactory::create("CLKDIVIDER");
 		selfID.typeID = "CLKDIVIDER";
+
+		outputJacks[ClkdividerModule::CLOCK_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+		inputJacks[ClkdividerModule::CV_INPUT]->scale = [](float f) { return f / 5.0f; };
 	}
 };
 
@@ -42,9 +34,10 @@ struct ClkdividerWidget : CommModuleWidget {
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hp.svg")));
 
-		addLabeledKnob("DIV",ClkdividerModule::DIVISION_PARAM,{0,0});
-		addLabeledInput("CLK IN",ClkdividerModule::CLOCK_INPUT,{0,1});
-		addLabeledOutput("CLK OUT",ClkdividerModule::CLOCK_OUTPUT,{0,0});
+		addLabeledKnob("DIV", ClkdividerModule::DIVISION_PARAM, {0, 0});
+		addLabeledInput("CLK IN", ClkdividerModule::CLOCK_INPUT, {0, 1});
+		addLabeledInput("CV", ClkdividerModule::CV_INPUT, {0, 2});
+		addLabeledOutput("CLK OUT", ClkdividerModule::CLOCK_OUTPUT, {0, 0});
 		addModuleTitle("CLK /");
 	}
 };

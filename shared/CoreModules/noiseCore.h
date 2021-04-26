@@ -3,19 +3,18 @@
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
-#include "processors/tools/clockPhase.h"
 
 using namespace MathTools;
 
-class ClkmultiplierCore : public CoreProcessor {
-	static inline const int NumInJacks = 2;
+class NoiseCore : public CoreProcessor {
+	static inline const int NumInJacks = 1;
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 1;
 
-	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Multiply"};
-	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Clock In", "CV"};
-	static inline const StaticString<LongNameChars> description{"Clock Multiplier"};
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{};
+	static inline const StaticString<LongNameChars> description{"Noise"};
 
 	// clang-format off
 	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
@@ -26,24 +25,14 @@ class ClkmultiplierCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-		float finalMultiply = constrain(multiplyOffset + multiplyCV, 0.0f, 1.0f);
-		cp.setMultiply(map_value(finalMultiply, 0.0f, 1.0f, 1.0f, 16.99f));
-		cp.update();
-		if (cp.getWrappedPhase() < pulseWidth) {
-			clockOutput = 1;
-		} else {
-			clockOutput = 0;
-		}
+		whiteNoise = randomNumber(-1.0f, 1.0f);
 	}
 
-	ClkmultiplierCore() {}
+	NoiseCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
-			case 0:
-				multiplyOffset = val;
-				break;
 		}
 	}
 	virtual void set_samplerate(const float sr) override {}
@@ -51,11 +40,6 @@ public:
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
-			case 0:
-				cp.updateClock(val);
-				break;
-			case 1:
-				multiplyCV = val;
 		}
 	}
 
@@ -64,7 +48,7 @@ public:
 		float output = 0;
 		switch (output_id) {
 			case 0:
-				output = clockOutput;
+				output = whiteNoise;
 				break;
 		}
 		return output;
@@ -72,16 +56,11 @@ public:
 
 	static std::unique_ptr<CoreProcessor> create()
 	{
-		return std::make_unique<ClkmultiplierCore>();
+		return std::make_unique<NoiseCore>();
 	}
-	static constexpr char typeID[20] = "CLKMULTIPLIER";
+	static constexpr char typeID[20] = "NOISE";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	float pulseWidth = 0.5f;
-	int clockOutput = 0;
-	float multiplyOffset = 0;
-	float multiplyCV = 0;
-
-	ClockPhase cp;
+	float whiteNoise = 0;
 };

@@ -1,0 +1,311 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 30,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 61,
+      "rightModuleId": 33,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 61,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 63,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 61,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack"
+          }
+        ],
+        "PatchName": "test_comparatorCore"
+      },
+      "pos": [
+        17,
+        0
+      ]
+    },
+    {
+      "id": 33,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 9.64999962
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.809998631
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 30,
+      "rightModuleId": 41,
+      "data": {
+        "lissajous": 0,
+        "external": 1
+      },
+      "pos": [
+        33,
+        0
+      ]
+    },
+    {
+      "id": 38,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 42,
+      "text": "CROSSFADE CORE TEST\n\nKnob A - Crossfade Offset\nKnob B- CV Amount\n\nAdjust Knob A. Minimum value produces 0-5v square. Maximum value produces +/- 5v sine wave.\n\nAdjust knob B to produce a varying signal from square to sine wave\n\nMonitor output on Audio Output L\n",
+      "pos": [
+        56,
+        0
+      ]
+    },
+    {
+      "id": 41,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 33,
+      "rightModuleId": 42,
+      "pos": [
+        46,
+        0
+      ]
+    },
+    {
+      "id": 42,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 41,
+      "rightModuleId": 38,
+      "pos": [
+        51,
+        0
+      ]
+    },
+    {
+      "id": 61,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "crossfade",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.529500008
+        }
+      ],
+      "rightModuleId": 30,
+      "pos": [
+        13,
+        0
+      ]
+    },
+    {
+      "id": 62,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.25999999
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 63,
+      "rightModuleId": 64,
+      "pos": [
+        4,
+        0
+      ]
+    },
+    {
+      "id": 63,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 62,
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 64,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "logic",
+      "params": [],
+      "leftModuleId": 62,
+      "pos": [
+        8,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 46,
+      "outputModuleId": 41,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 48,
+      "outputModuleId": 42,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 67,
+      "outputModuleId": 62,
+      "outputId": 0,
+      "inputModuleId": 64,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 69,
+      "outputModuleId": 64,
+      "outputId": 1,
+      "inputModuleId": 61,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 70,
+      "outputModuleId": 62,
+      "outputId": 0,
+      "inputModuleId": 61,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 71,
+      "outputModuleId": 61,
+      "outputId": 0,
+      "inputModuleId": 41,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 72,
+      "outputModuleId": 63,
+      "outputId": 0,
+      "inputModuleId": 61,
+      "inputId": 2,
+      "color": "#0986ad"
+    }
+  ]
+}
