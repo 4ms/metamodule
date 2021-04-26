@@ -12,7 +12,7 @@ const int MAX_JACKS_PER_MODULE = 32;
 const int MAX_NODES_IN_PATCH = MAX_JACKS_PER_MODULE * MAX_MODULES_IN_PATCH;
 
 // FixMe: non-node only code:
-const int MAX_CONNECTIONS_PER_NODE = 8;
+const int MAX_CONNECTIONS_PER_NODE = 4;
 
 // Todo: will this pack into 4 bytes on all systems?
 struct Jack {
