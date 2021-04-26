@@ -8,7 +8,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 80,
-      "text": "1:4 SWITCH CORE TEST (CLOCKED)\n\nKnob A - patched to Switch reset input\n\nCV Out 1 - Switch out 1\nCV Out 2 - Switch out 2\nAudio Out L - Switch out 3\nAudio Out R - Switch out 4\n\nCheck each output to make sure the sine wave on the input is cycling through the outputs\n\nTurn Knob A all the way down to 0%, and then up to 50% to reset the switch back to output 1 and verify.  \n",
+      "text": "1:4 SWITCH CORE TEST (CLOCKED)\n\nKnob A - patched to Switch reset input\n\nCV Out 1 - Switch out 1\nCV Out 2 - Switch out 2\nAudio Out L - Switch out 3\nAudio Out R - Switch out 4\n\nCheck each output to make sure the sine wave on the input is cycling through the outputs\n\nWhile Output 2-4 is active: Turn Knob A all the way down to 0%, and then up to 50%. Verify Output immediately starts to ouput.\n\nWhile Output 1 is active: repeat the above test, and verify nothing happens (Output 1 should continue outputting as normal and timing should not change)   \n",
       "pos": [
         49,
         0
