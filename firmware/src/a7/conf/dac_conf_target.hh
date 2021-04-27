@@ -15,5 +15,5 @@ struct DACConfTarget : DefaultSpiConf {
 	static constexpr uint32_t NumClocksToggleSSInterData = 0;
 
 	using AuxPin = FPin<GPIO::E, 3, PinMode::Output>;
-	static constexpr PinNoInit SaiLRClkPin = {GPIO::A, 15};
+	static constexpr PinNoInit SaiLRClkPin = {GPIO::D, 4};
 };
