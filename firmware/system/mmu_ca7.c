@@ -26,7 +26,6 @@
  * limitations under the License.
  */
 
-
 // Note: You should use the Shareable attribute carefully.
 // For cores without coherency logic (such as SCU) marking a region as shareable forces the processor to not cache that
 // region regardless of the inner cache settings. Cortex-A versions of RTX use LDREX/STREX instructions relying on Local
@@ -59,62 +58,26 @@
 #define __HEAP_SIZE 0x10000000
 
 #define __TTB_BASE 0xC0100000
-#define __TTB_SIZE 0x00004400
 
-// #define VE_A7_MP_FLASH_BASE0 (0x00000000UL)
-// #define VE_A7_MP_FLASH_BASE1 (0x0C000000UL)
-#define VE_A7_MP_SRAM1_BASE (0x10000000UL)
-// #define VE_A7_MP_SRAM2_BASE (0x10020000UL)
-// #define VE_A7_MP_SRAM3_BASE (0x10040000UL)
-// #define VE_A7_MP_SRAM4_BASE (0x10050000UL)
-
-// #define VE_A7_MP_PERIPH_BASE_CS2 (0x18000000UL)
-// #define VE_A7_MP_VRAM_BASE (0x00000000UL + VE_A7_MP_PERIPH_BASE_CS2)
-// #define VE_A7_MP_ETHERNET_BASE (0x02000000UL + VE_A7_MP_PERIPH_BASE_CS2)
-// #define VE_A7_MP_USB_BASE (0x03000000UL + VE_A7_MP_PERIPH_BASE_CS2)
-
-#define VE_A7_MP_PERIPH_BASE_CS3 (0x40000000UL)							   /*!< (Peripheral ) Base Address */
-#define VE_A7_MP_DAP_BASE (0x00000000UL + VE_A7_MP_PERIPH_BASE_CS3)		   /*!< (LOCAL DAP  ) Base Address */
-#define VE_A7_MP_SYSTEM_REG_BASE (0x00010000UL + VE_A7_MP_PERIPH_BASE_CS3) /*!< (SYSTEM REG ) Base Address */
-#define VE_A7_MP_SERIAL_BASE (0x00030000UL + VE_A7_MP_PERIPH_BASE_CS3)	   /*!< (SERIAL     ) Base Address */
-#define VE_A7_MP_AACI_BASE (0x00040000UL + VE_A7_MP_PERIPH_BASE_CS3)	   /*!< (AACI       ) Base Address */
-#define VE_A7_MP_MMCI_BASE (0x00050000UL + VE_A7_MP_PERIPH_BASE_CS3)	   /*!< (MMCI       ) Base Address */
-#define VE_A7_MP_KMI0_BASE (0x00060000UL + VE_A7_MP_PERIPH_BASE_CS3)	   /*!< (KMI0       ) Base Address */
-#define VE_A7_MP_UART_BASE (0x00090000UL + VE_A7_MP_PERIPH_BASE_CS3)	   /*!< (UART       ) Base Address */
-#define VE_A7_MP_WDT_BASE (0x000F0000UL + VE_A7_MP_PERIPH_BASE_CS3)		   /*!< (WDT        ) Base Address */
-#define VE_A7_MP_TIMER_BASE (0x00110000UL + VE_A7_MP_PERIPH_BASE_CS3)	   /*!< (TIMER      ) Base Address */
-#define VE_A7_MP_DVI_BASE (0x00160000UL + VE_A7_MP_PERIPH_BASE_CS3)		   /*!< (DVI        ) Base Address */
-#define VE_A7_MP_RTC_BASE (0x00170000UL + VE_A7_MP_PERIPH_BASE_CS3)		   /*!< (RTC        ) Base Address */
-#define VE_A7_MP_UART4_BASE (0x001B0000UL + VE_A7_MP_PERIPH_BASE_CS3)	   /*!< (UART4      ) Base Address */
-#define VE_A7_MP_CLCD_BASE (0x001F0000UL + VE_A7_MP_PERIPH_BASE_CS3)	   /*!< (CLCD       ) Base Address */
-
-#define VE_A7_MP_PRIVATE_PERIPH_BASE (0x2C000000UL)									/*!< (Peripheral ) Base Address */
-#define VE_A7_MP_GIC_DISTRIBUTOR_BASE (0x00001000UL + VE_A7_MP_PRIVATE_PERIPH_BASE) /*!< (GIC DIST   ) Base Address */
-#define VE_A7_MP_GIC_INTERFACE_BASE (0x00002000UL + VE_A7_MP_PRIVATE_PERIPH_BASE)	/*!< (GIC CPU IF ) Base Address */
-#define VE_A7_MP_PL310_BASE (0x000F0000UL + VE_A7_MP_PRIVATE_PERIPH_BASE)			/*!< (L2C-310    ) Base Address */
-#define VE_A7_MP_SSRAM_BASE (0x2E000000UL)											/*!< (System SRAM) Base Address */
-#define VE_A7_MP_DRAM_BASE (0x80000000UL)											/*!< (DRAM       ) Base Address */
+#define A7_SRAM1_BASE (0x10000000UL)
+#define A7_SRAM2_BASE (0x10020000UL)
+#define A7_SRAM3_BASE (0x10040000UL)
+#define A7_SRAM4_BASE (0x10050000UL)
 
 // TTB base address
 #define TTB_BASE ((uint32_t *)__TTB_BASE)
 
 // L2 table pointers
 //----------------------------------------
-#define TTB_L1_SIZE                                                                                                                        \
-	(0x00004000) // The L1 translation table divides the full 4GB address space of a 32-bit core
-				 // into 4096 equally sized sections, each of which describes 1MB of virtual memory space.
-				 // The L1 translation table therefore contains 4096 32-bit (word-sized) entries.
 
-#define PRIVATE_TABLE_L2_BASE_4k (__TTB_BASE + TTB_L1_SIZE)				  // Map 4k Private Address space
-#define GIC_TABLE_L2_BASE_4k (__TTB_BASE + TTB_L1_SIZE + 0x400)
-// #define PERIPHERAL_A_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0x800) // Map 64k Peripheral #1 0x1C000000 - 0x1C00FFFFF
-// #define PERIPHERAL_B_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0xC00) // Map 64k Peripheral #2 0x1C100000 - 0x1C1FFFFFF
-// #define SYNC_FLAGS_TABLE_L2_BASE_4k (__TTB_BASE + TTB_L1_SIZE + 0x1000)	  // Map 4k Flag synchronization
+// The L1 translation table divides the full 4GB address space of a 32-bit core
+// into 4096 equally sized sections, each of which describes 1MB of virtual memory space.
+// The L1 translation table therefore contains 4096 32-bit (word-sized) entries.
+#define TTB_L1_SIZE (0x00004000)
+#define TTB_L2_SIZE (0x00000400)
 
-//--------------------- PERIPHERALS -------------------
-#define PERIPHERAL_A_FAULT (0x00000000 + 0x40000000) // 0x1C000000-0x1C00FFFF (1M)
-#define PERIPHERAL_B_FAULT (0x00100000 + 0x50000000) // 0x1C100000-0x1C10FFFF (1M)
-
+#define PRIVATE_TABLE_L2_BASE_4k (__TTB_BASE + TTB_L1_SIZE)
+#define GIC_TABLE_L2_BASE_4k (PRIVATE_TABLE_L2_BASE_4k + TTB_L2_SIZE)
 
 static uint32_t Sect_Normal;	 // outer & inner wb/wa, non-shareable, executable, rw, domain 0, base addr 0
 static uint32_t Sect_Normal_Cod; // outer & inner wb/wa, non-shareable, executable, ro, domain 0, base addr 0
@@ -145,16 +108,15 @@ void MMU_CreateTranslationTable(void)
 	page64k_device_rw(Page_L1_64k, Page_64k_Device_RW, region);
 	page4k_device_rw(Page_L1_4k, Page_4k_Device_RW, region);
 
-	MMU_TTSection(TTB_BASE, __ROM_BASE, __ROM_SIZE / 0x100000, Sect_Normal_Cod);  // multiple of 1MB sections
-	MMU_TTSection(TTB_BASE, __RAM_BASE, __RAM_SIZE / 0x100000, Sect_Normal_RW);	  // multiple of 1MB sections
-	MMU_TTSection(TTB_BASE, __RAM2_BASE, __RAM2_SIZE / 0x100000, Sect_Normal_RW); // multiple of 1MB sections
-	MMU_TTSection(TTB_BASE, __HEAP_BASE, __HEAP_SIZE / 0x100000, Sect_Normal_RW); // multiple of 1MB sections
+	MMU_TTSection(TTB_BASE, __ROM_BASE, __ROM_SIZE / 0x100000, Sect_Normal_Cod);
+	MMU_TTSection(TTB_BASE, __RAM_BASE, __RAM_SIZE / 0x100000, Sect_Normal_RW);
+	MMU_TTSection(TTB_BASE, __RAM2_BASE, __RAM2_SIZE / 0x100000, Sect_Normal_RW);
+	MMU_TTSection(TTB_BASE, __HEAP_BASE, __HEAP_SIZE / 0x100000, Sect_Normal_RW);
 
+	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Normal_RW); // 1MB RAM (actually is only 384kB)
 
-	MMU_TTSection(TTB_BASE, VE_A7_MP_SRAM1_BASE, 1, Sect_Normal_RW); // 1MB RAM (actually is only 384kB)
-
-	//Peripheral memory
-	//Todo: be more specific: cover only actual peripherals
+	// Peripheral memory
+	// Todo: be more specific: cover only actual peripherals, as in example below
 	MMU_TTSection(TTB_BASE, 0x40000000, 0x10000000 / 0x100000, Sect_Device_RW);
 	MMU_TTSection(TTB_BASE, 0x50000000, 0x10000000 / 0x100000, Sect_Device_RW);
 
