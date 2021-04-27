@@ -12,10 +12,12 @@
 	#include "example_pitchShift_simple.hh"
 	#include "example_stereo_verb.h"
 	#include "fadedelay_two.hh"
+	#include "simple_lfo_passthrru.hh"
 
 PatchList::PatchList()
 	: _patches{
-		  {exampleDualLFO},
+		  {simple_lfo_passthrru},
+		  // {exampleDualLFO},
 		  {examplePitchShiftSimple},
 		  {exampleDrum},
 		  {fadedelay_example},
