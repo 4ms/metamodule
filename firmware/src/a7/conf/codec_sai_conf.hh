@@ -17,7 +17,7 @@ const SaiConfig codec_sai_conf = {
 			.stream = DMA2_Stream1,		   // BDMA_Channel1,
 			.channel = DMA_REQUEST_SAI3_A, // BDMA_REQUEST_SAI4_A,
 			.IRQn = DMA2_Stream1_IRQn,	   // BDMA_Channel1_IRQn,
-			.pri = 1,
+			.pri = 0,
 			.subpri = 0,
 		},
 	.dma_init_rx =
@@ -26,7 +26,7 @@ const SaiConfig codec_sai_conf = {
 			.stream = DMA2_Stream2,		   // BDMA_Channel0,
 			.channel = DMA_REQUEST_SAI3_B, // BDMA_REQUEST_SAI4_B,
 			.IRQn = DMA2_Stream2_IRQn,	   // BDMA_Channel0_IRQn,
-			.pri = 1,
+			.pri = 0,
 			.subpri = 0,
 		},
 

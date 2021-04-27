@@ -79,7 +79,7 @@ void main()
 	// with MMU: 4.99us --> 802MIPS
 	timing_test(0xD8000000);
 	Debug::Pin1::low();
-	
+
 	// w/o MMU: 48us for 4007 instructions: 83MIPS (each test)
 	// with MMU: 4.9us--> 830MIPS
 	timing_test(0x10000000);
