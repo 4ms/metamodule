@@ -145,7 +145,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 42,
-      "text": "PANNER CORE MODULE\n\n\nKnob A - Pan offset\nKnob B - CV Amount\n\nAdjust Knob A. Minimum value sends sine wave to left output. Maximum value sends sine wave to right output.\n\nSet Knob B to 50%. Increase Knob B to modulate panning from left to right with a sine wave.\n\nPan Left - Audio Output L\nPan Right - Audio Output R\n",
+      "text": "PANNER CORE MODULE\n\n\nKnob A - Pan offset\nKnob B - CV Amount\n\nWith Knob B at 0, adjust Knob A. Minimum value sends sine wave to left output. Maximum value sends sine wave to right output.\n\nSet both Knobs to 50%. Should crossfade from fully L to fully R (amplitude envelopes on scope should be out-of-phase sine waves) \n\nPan Left - Audio Output L\nPan Right - Audio Output R\n",
       "pos": [
         51,
         0
