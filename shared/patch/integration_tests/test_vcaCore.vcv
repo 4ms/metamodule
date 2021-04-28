@@ -79,6 +79,14 @@
             "SrcModID": 30,
             "SrcObjID": 3,
             "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 66,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack"
           }
         ],
         "PatchName": "test_vcaCore"
@@ -95,7 +103,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 30,
-      "text": "VCA CORE TEST\n\nKnob A - Pre Gain\nKnob B - Post Gain\nKnob C - Offset\nKnob D - CV Amount\n\nTurn up Knob A, the sine wave will begin to clip\n\nTurn Knob B down to verify that the signal is attenuated\n\nTurn Knob C up to allow more of the signal through, at max the full sine wave will be present at the output\n\nTurn Knob D down to verify that the\nsignal is attenuated",
+      "text": "VCA CORE TEST\n\nKnob A - Pre Gain\nKnob B - Post Gain\nKnob C - Offset\nKnob D - CV Amount\n\nStart with Knobs A and C at minimum. Knobs B and D at maximum\n\nTurn up Knob A, the sine wave will begin to clip\n\nTurn Knob B down to verify that the signal is attenuated\n\nTurn Knob C up to allow more of the signal through, at max the full sine wave will be present at the output\n\nTurn Knob D down to verify that the\nsignal is attenuated",
       "pos": [
         49,
         0

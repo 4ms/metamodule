@@ -44,7 +44,7 @@ PatchList::PatchList()
 		  {test_comparatorCore},
 		  {test_crossfadeCore},
 		  {test_logicCore},
-		  {test_minmaxCore}
+		  {test_vcaCore}
 		  // MARK: Add patches below here:
 	  }
 {

@@ -11,3 +11,4 @@
 #include "patch/integration_tests/test_logicCore.hh"
 #include "patch/integration_tests/test_minmaxCore.hh"
 #include "patch/integration_tests/test_pannerCore.hh"
+#include "patch/integration_tests/test_vcaCore.hh"
