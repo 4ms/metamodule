@@ -39,12 +39,14 @@ struct Hardware : AppStartup, Debug, SharedBus {
 } // namespace MetaModule
 
 void timing_test(uint32_t addr);
+void run_all_timing_tests();
 
 void main()
 {
 	using namespace MetaModule;
-	Debug::Pin2::low();
 
+	// Todo do we need to do this still?
+	// Put this in InterruptControl::
 	__disable_irq();
 	auto x = GIC_AcknowledgePending();
 	unsigned num_irq = 32U * ((GIC_DistributorInfo() & 0x1FU) + 1U);
@@ -55,56 +57,7 @@ void main()
 	__enable_irq();
 	GIC_Enable();
 
-	// with MMU: 4.8s for 4006 instructions: 834MIPS
-	Debug::Pin2::low();
-	Debug::Pin1::high();
-	for (uint32_t i = 0; i < 1000; i++) {
-		asm volatile("MOVW R0, #0x5556\n"
-					 "MOVW R0, #0xAAAA\n");
-	}
-	Debug::Pin2::high();
-	Debug::Pin1::low();
-
-	// // 14.2us for 4001 instructions: 281MIPS
-	// Debug::Pin2::low();
-	// asm volatile("MOVW R3, #0\n"
-	// 			 "cloop: \n"
-	// 			 "MOVW R0, #0x5556\n"
-	// 			 "ADD R3, R3, #1\n"
-	// 			 "CMP R3, #0x03E8\n"
-	// 			 "BNE cloop\n");
-	Debug::Pin2::high();
-	Debug::Pin1::high();
-	// w/o MMU: 14us for 4006 instructions: 286MIPS
-	// with MMU: 4.99us --> 802MIPS
-	timing_test(0xD8000000);
-	Debug::Pin1::low();
-
-	// w/o MMU: 48us for 4007 instructions: 83MIPS (each test)
-	// with MMU: 4.9us--> 830MIPS
-	timing_test(0x10000000);
-	Debug::Pin1::high();
-	timing_test(0x10020000);
-	Debug::Pin1::low();
-	timing_test(0x10040000);
-	Debug::Pin1::high();
-	timing_test(0x10050000);
-	Debug::Pin1::low();
-
-	Debug::Pin2::low();
-	// HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
-	// 	Debug::red_LED1::high();
-	// 	Debug::Pin0::high();
-	// });
-	// HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
-
-	// HWSemaphore<1>::disable_channel_ISR();
-	// HWSemaphore<1>::clear_ISR();
-	// target::System::enable_irq(HSEM_IT1_IRQn);
-	// HWSemaphore<1>::enable_channel_ISR();
-	// HWSemaphore<1>::lock();
-	// HWSemaphore<1>::unlock();
-
+	run_all_timing_tests();
 	StaticBuffers::init();
 
 	PatchList patch_list;
@@ -166,17 +119,61 @@ void main()
 	}
 }
 
+void run_all_timing_tests()
+{
+	// with MMU: 4.8s for 4006 instructions: 834MIPS
+	Debug::Pin2::low();
+	Debug::Pin1::high();
+	for (uint32_t i = 0; i < 1000; i++) {
+		asm volatile("MOVW R0, #0x5556\n"
+					 "MOVW R0, #0xAAAA\n");
+	}
+	Debug::Pin2::high();
+	Debug::Pin1::low();
+
+	Debug::Pin2::high();
+	Debug::Pin1::high();
+	// w/o MMU: 14us for 4006 instructions: 286MIPS
+	// with MMU: 4.99us --> 802MIPS
+	timing_test(0xD8000000);
+	Debug::Pin1::low();
+
+	// w/o MMU: 48us for 4007 instructions: 83MIPS (each test)
+	// with MMU: 4.9us--> 830MIPS
+	timing_test(0x10000000);
+	Debug::Pin1::high();
+	timing_test(0x10020000);
+	Debug::Pin1::low();
+	timing_test(0x10040000);
+	Debug::Pin1::high();
+	timing_test(0x10050000);
+	Debug::Pin1::low();
+
+	Debug::Pin2::low();
+}
+
 void timing_test(uint32_t addr)
 {
 	auto baseaddr = reinterpret_cast<uint32_t *>(addr);
 	for (uint32_t i = 0; i < 1000; i++) {
-		// Debug::Pin0::high();
 		*baseaddr++ = i;
-		// Debug::Pin0::low();
 	}
+}
 
-	// STR STR ADD STR CMP BNE
-	// ~5.95MHz ---> 6 instructions means 24MHz
+void isr_test()
+{
+	HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
+		Debug::red_LED1::high();
+		Debug::Pin0::high();
+	});
+	// HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
+
+	HWSemaphore<1>::disable_channel_ISR();
+	HWSemaphore<1>::clear_ISR();
+	target::System::enable_irq(HSEM_IT1_IRQn);
+	HWSemaphore<1>::enable_channel_ISR();
+	HWSemaphore<1>::lock();
+	HWSemaphore<1>::unlock();
 }
 
 void recover_from_task_fault(void)
