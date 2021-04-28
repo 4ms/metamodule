@@ -119,7 +119,7 @@ UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 #####
 
 # ARCH 	= /usr/local/Caskroom/gcc-arm-embedded/10-2020-q4-major/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi
-ARCH 	= arm-none-eabi
+ARCH 	?= arm-none-eabi
 CC 		= $(ARCH)-gcc
 CXX 	= $(ARCH)-g++
 LD 		= $(ARCH)-g++
