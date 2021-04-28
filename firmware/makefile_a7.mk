@@ -4,7 +4,6 @@ $(info Building for A7 core)
 BUILDDIR = $(BUILDDIR_A7)
 
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
-STARTUP_CA7	= $(DRIVERLIB)/drivers/startup_ca7.s
 
 # -mfpu=fpv4-d16
 MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard -mthumb-interwork
@@ -12,7 +11,8 @@ CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
-TARGETDRIVERS = $(DRIVERLIB)/drivers/target/stm32mp1
+TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
+STARTUP_CA7	= $(TARGETDEVICEDIR)/boot/startup_ca7.s
 
 SHARED = src/a7/shared
 
@@ -34,10 +34,10 @@ SOURCES = $(STARTUP_CA7) \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c \
 		  $(DRIVERLIB)/drivers/pin.cc \
-		  $(TARGETDRIVERS)/drivers/interrupt.cc \
-		  $(TARGETDRIVERS)/drivers/hal_handlers.cc \
-		  $(TARGETDRIVERS)/drivers/cycle_counter.cc \
-		  $(TARGETDRIVERS)/drivers/pinchange.cc \
+		  $(TARGETDEVICEDIR)/drivers/interrupt.cc \
+		  $(TARGETDEVICEDIR)/drivers/hal_handlers.cc \
+		  $(TARGETDEVICEDIR)/drivers/cycle_counter.cc \
+		  $(TARGETDEVICEDIR)/drivers/pinchange.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
 		  $(DRIVERLIB)/drivers/sai.cc \
 		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
@@ -60,8 +60,8 @@ INCLUDES = -I. \
 		   -I$(DEVICEDIR)/include \
 		   -I$(DRIVERLIB) \
 		   -I$(DRIVERLIB)/drivers \
-		   -I$(DRIVERLIB)/drivers/target/stm32mp1 \
-		   -I$(DRIVERLIB)/drivers/target/stm32mp1/drivers \
+		   -I$(TARGETDEVICEDIR) \
+		   -I$(TARGETDEVICEDIR)/drivers \
 		   -I$(SHARED) \
 		   -I$(SHARED)/CoreModules \
 		   -I$(SHARED)/util \

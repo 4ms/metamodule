@@ -10,10 +10,7 @@ export DEVICEBASE		= $(LIBDIR)/cmsis-device
 export CMSIS 			= $(LIBDIR)/cmsis
 export HALBASE 			= $(LIBDIR)/stm32-hal
 export DRIVERLIB       	= $(LIBDIR)/mdrivlib
-export STARTUP_H7		= $(DRIVERLIB)/drivers/startup_cm7.s
 export LINKSCRIPTDIR   	= system/linker
-# export SYSTEM_CA7		= system/system_stm32mp1.c  #Doesnt exist yet
-export SYSTEM_H7		= system/system_stm32h7xx_dualcore_boot_cm4_cm7.c
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 

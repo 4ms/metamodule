@@ -1,5 +1,6 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
+$(info --------------------)
 $(info Building for M7 core)
 BUILDDIR = $(BUILDDIR_M7)
 LOADFILE = $(LINKSCRIPTDIR)/stm32h755xx_flash_CM7.ld
@@ -9,7 +10,10 @@ CORE_SRC = src/m7
 HAL_CONF_INC = src/m7
 HALDIR = $(HALBASE)/stm32h7x5
 DEVICEDIR = $(DEVICEBASE)/stm32h7x5
-TARGETDEVICEDIR = $(DRIVERLIB)/drivers/target/stm32h7x5
+TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32h7x5
+
+STARTUP_H7 = $(TARGETDEVICEDIR)/boot/startup_cm7.s
+SYSTEM_H7 = system/system_stm32h7xx_dualcore_boot_cm4_cm7.c
 
 OPTFLAG = -O3
 include makefile_opts.mk
@@ -48,8 +52,8 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(HALDIR)/include \
 			-I$(DRIVERLIB) \
 			-I$(DRIVERLIB)/drivers \
-			-I$(DRIVERLIB)/drivers/target/stm32h7x5 \
-			-I$(DRIVERLIB)/drivers/target/stm32h7x5/drivers \
+			-I$(TARGETDEVICEDIR) \
+			-I$(TARGETDEVICEDIR)/drivers \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \
