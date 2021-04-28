@@ -70,12 +70,6 @@ AudioStream::AudioStream(PatchList &patches,
 
 	dac.init();
 
-	// DAC TEST:
-	// for (uint32_t i = 0; i < 0x00FFFFFF; i += 0x100) {
-	// 	dac.set_output_blocking(0, i);
-	// 	dac.set_output_blocking(1, i);
-	// }
-
 	dac_updater.init(DAC_update_conf, [&]() {
 		// static bool rising_edge = false;
 		dac.output_next();
