@@ -128,10 +128,6 @@ SECTIONS
     _user_stack_start = _stack_end;
     _user_stack_end = _user_stack_start + 0x1000; /* 64 KB */
 
-    _irq_stack_size = _irq_stack_end - _irq_stack_start;
-    _fiq_stack_size = _fiq_stack_end - _fiq_stack_start;
-
-
 	.dma_buffer (NOLOAD) :
 	{
 		. = ALIGN(8);
