@@ -122,10 +122,11 @@ SECTIONS
     _irq_stack_start = _fiq_stack_end;
     _irq_stack_end = _irq_stack_start + 0x1000; /* 64 KB */
 
-    _stack_start = _irq_stack_end;
-    _stack_end = _stack_start + 0x1000; /* 64 KB */
+	_svc_nested_isr_count = _irq_stack_end;
+    _svc_stack_start = _irq_stack_end + 0x0008;
+    _svc_stack_end = _svc_stack_start + 0x1000; /* 64 KB */
 
-    _user_stack_start = _stack_end;
+    _user_stack_start = _svc_stack_end;
     _user_stack_end = _user_stack_start + 0x1000; /* 64 KB */
 
 	.dma_buffer (NOLOAD) :
