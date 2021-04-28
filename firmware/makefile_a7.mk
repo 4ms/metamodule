@@ -43,6 +43,7 @@ SOURCES = $(STARTUP_CA7) \
 		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
 		  $(SHARED)/util/math_tables.cc \
 		  $(CORE_SRC)/main.cc\
+		  $(CORE_SRC)/isr_test.cc\
 		  src/patchlist.cc\
 		  src/audio.cc\
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \

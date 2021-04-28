@@ -39,21 +39,22 @@ struct Hardware : AppStartup, Debug, SharedBus {
 } // namespace MetaModule
 
 void timing_test(uint32_t addr);
+void test_nesting_isr();
 
 void main()
 {
 	using namespace MetaModule;
-	Debug::Pin2::low();
+	test_nesting_isr();
 
-	__disable_irq();
-	auto x = GIC_AcknowledgePending();
-	unsigned num_irq = 32U * ((GIC_DistributorInfo() & 0x1FU) + 1U);
-	for (unsigned i = 32; i < num_irq; i++) {
-		GIC_EndInterrupt((IRQn_Type)i);
-		GIC_ClearPendingIRQ((IRQn_Type)i);
-	}
-	__enable_irq();
-	GIC_Enable();
+	// __disable_irq();
+	// auto x = GIC_AcknowledgePending();
+	// unsigned num_irq = 32U * ((GIC_DistributorInfo() & 0x1FU) + 1U);
+	// for (unsigned i = 32; i < num_irq; i++) {
+	// 	GIC_EndInterrupt((IRQn_Type)i);
+	// 	GIC_ClearPendingIRQ((IRQn_Type)i);
+	// }
+	// __enable_irq();
+	// GIC_Enable();
 
 	// with MMU: 4.8s for 4006 instructions: 834MIPS
 	Debug::Pin2::low();
@@ -92,18 +93,6 @@ void main()
 	Debug::Pin1::low();
 
 	Debug::Pin2::low();
-	// HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
-	// 	Debug::red_LED1::high();
-	// 	Debug::Pin0::high();
-	// });
-	// HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
-
-	// HWSemaphore<1>::disable_channel_ISR();
-	// HWSemaphore<1>::clear_ISR();
-	// target::System::enable_irq(HSEM_IT1_IRQn);
-	// HWSemaphore<1>::enable_channel_ISR();
-	// HWSemaphore<1>::lock();
-	// HWSemaphore<1>::unlock();
 
 	StaticBuffers::init();
 
