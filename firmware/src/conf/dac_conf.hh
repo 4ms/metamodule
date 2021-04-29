@@ -35,8 +35,8 @@ const PinChangeConfig DAC_update_conf = {
 	.port = DACConfTarget::SaiLRClkPin.gpio,
 	.on_rising_edge = true,
 	.on_falling_edge = true,
-	.priority1 = 7,
-	.priority2 = 3,
+	.priority1 = 0,
+	.priority2 = 0,
 };
 
 using AnalogOutT = DacStream<mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>,

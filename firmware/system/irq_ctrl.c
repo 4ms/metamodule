@@ -35,52 +35,59 @@
 		#define IRQ_GIC_LINE_COUNT (1020U)
 	#endif
 
-static IRQHandler_t IRQTable[IRQ_GIC_LINE_COUNT] = {0U};
+// static IRQHandler_t IRQTable[IRQ_GIC_LINE_COUNT] = {0U};
 static uint32_t IRQ_ID0;
 
 /// Initialize interrupt controller.
 __WEAK int32_t IRQ_Initialize(void)
 {
-	uint32_t i;
+	// __disable_irq();
 
-	for (i = 0U; i < IRQ_GIC_LINE_COUNT; i++) {
-		IRQTable[i] = (IRQHandler_t)NULL;
+	uint32_t i;
+	int x = GIC_AcknowledgePending();
+	unsigned num_irq = 32U * ((GIC_DistributorInfo() & 0x1FU) + 1U);
+	for (unsigned i = 32; i < num_irq; i++) {
+		GIC_EndInterrupt((IRQn_Type)i);
+		GIC_ClearPendingIRQ((IRQn_Type)i);
 	}
+
 	GIC_Enable();
+	// __enable_irq();
+
 	return (0);
 }
 
 /// Register interrupt handler.
-__WEAK int32_t IRQ_SetHandler(IRQn_ID_t irqn, IRQHandler_t handler)
-{
-	int32_t status;
+// __WEAK int32_t IRQ_SetHandler(IRQn_ID_t irqn, IRQHandler_t handler)
+// {
+// 	int32_t status;
 
-	if ((irqn >= 0) && (irqn < (IRQn_ID_t)IRQ_GIC_LINE_COUNT)) {
-		IRQTable[irqn] = handler;
-		status = 0;
-	} else {
-		status = -1;
-	}
+// 	if ((irqn >= 0) && (irqn < (IRQn_ID_t)IRQ_GIC_LINE_COUNT)) {
+// 		IRQTable[irqn] = handler;
+// 		status = 0;
+// 	} else {
+// 		status = -1;
+// 	}
 
-	return (status);
-}
+// 	return (status);
+// }
 
 /// Get the registered interrupt handler.
-__WEAK IRQHandler_t IRQ_GetHandler(IRQn_ID_t irqn)
-{
-	IRQHandler_t h;
+// __WEAK IRQHandler_t IRQ_GetHandler(IRQn_ID_t irqn)
+// {
+// 	IRQHandler_t h;
 
-	// Ignore CPUID field (software generated interrupts)
-	irqn &= 0x3FFU;
+// 	// Ignore CPUID field (software generated interrupts)
+// 	irqn &= 0x3FFU;
 
-	if ((irqn >= 0) && (irqn < (IRQn_ID_t)IRQ_GIC_LINE_COUNT)) {
-		h = IRQTable[irqn];
-	} else {
-		h = (IRQHandler_t)0;
-	}
+// 	if ((irqn >= 0) && (irqn < (IRQn_ID_t)IRQ_GIC_LINE_COUNT)) {
+// 		h = IRQTable[irqn];
+// 	} else {
+// 		h = (IRQHandler_t)0;
+// 	}
 
-	return (h);
-}
+// 	return (h);
+// }
 
 /// Enable interrupt.
 __WEAK int32_t IRQ_Enable(IRQn_ID_t irqn)

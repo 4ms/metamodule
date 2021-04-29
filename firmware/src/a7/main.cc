@@ -40,22 +40,22 @@ struct Hardware : AppStartup, Debug, SharedBus {
 
 void timing_test(uint32_t addr);
 void run_all_timing_tests();
+void test_nesting_isr();
 
 void main()
 {
 	using namespace MetaModule;
+	test_nesting_isr();
 
-	// Todo do we need to do this still?
-	// Put this in InterruptControl::
-	__disable_irq();
-	auto x = GIC_AcknowledgePending();
-	unsigned num_irq = 32U * ((GIC_DistributorInfo() & 0x1FU) + 1U);
-	for (unsigned i = 32; i < num_irq; i++) {
-		GIC_EndInterrupt((IRQn_Type)i);
-		GIC_ClearPendingIRQ((IRQn_Type)i);
-	}
-	__enable_irq();
-	GIC_Enable();
+	// __disable_irq();
+	// auto x = GIC_AcknowledgePending();
+	// unsigned num_irq = 32U * ((GIC_DistributorInfo() & 0x1FU) + 1U);
+	// for (unsigned i = 32; i < num_irq; i++) {
+	// 	GIC_EndInterrupt((IRQn_Type)i);
+	// 	GIC_ClearPendingIRQ((IRQn_Type)i);
+	// }
+	// __enable_irq();
+	// GIC_Enable();
 
 	run_all_timing_tests();
 	StaticBuffers::init();
