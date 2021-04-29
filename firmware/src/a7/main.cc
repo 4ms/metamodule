@@ -17,8 +17,10 @@
 // #include "patchlist.hh"
 #include "shared_bus.hh"
 // #include "shared_memory.hh"
-
 #include "drivers/pin.hh"
+
+#include "examples/nested_isr.hh"
+#include "examples/timing_tests.hh"
 
 namespace MetaModule
 {
@@ -38,25 +40,10 @@ struct Hardware : AppStartup, Debug, SharedBus {
 
 } // namespace MetaModule
 
-void timing_test(uint32_t addr);
-void run_all_timing_tests();
-void test_nesting_isr();
-
 void main()
 {
 	using namespace MetaModule;
 	test_nesting_isr();
-
-	// __disable_irq();
-	// auto x = GIC_AcknowledgePending();
-	// unsigned num_irq = 32U * ((GIC_DistributorInfo() & 0x1FU) + 1U);
-	// for (unsigned i = 32; i < num_irq; i++) {
-	// 	GIC_EndInterrupt((IRQn_Type)i);
-	// 	GIC_ClearPendingIRQ((IRQn_Type)i);
-	// }
-	// __enable_irq();
-	// GIC_Enable();
-
 	run_all_timing_tests();
 	StaticBuffers::init();
 
@@ -117,63 +104,6 @@ void main()
 
 		__NOP();
 	}
-}
-
-void run_all_timing_tests()
-{
-	// with MMU: 4.8s for 4006 instructions: 834MIPS
-	Debug::Pin2::low();
-	Debug::Pin1::high();
-	for (uint32_t i = 0; i < 1000; i++) {
-		asm volatile("MOVW R0, #0x5556\n"
-					 "MOVW R0, #0xAAAA\n");
-	}
-	Debug::Pin2::high();
-	Debug::Pin1::low();
-
-	Debug::Pin2::high();
-	Debug::Pin1::high();
-	// w/o MMU: 14us for 4006 instructions: 286MIPS
-	// with MMU: 4.99us --> 802MIPS
-	timing_test(0xD8000000);
-	Debug::Pin1::low();
-
-	// w/o MMU: 48us for 4007 instructions: 83MIPS (each test)
-	// with MMU: 4.9us--> 830MIPS
-	timing_test(0x10000000);
-	Debug::Pin1::high();
-	timing_test(0x10020000);
-	Debug::Pin1::low();
-	timing_test(0x10040000);
-	Debug::Pin1::high();
-	timing_test(0x10050000);
-	Debug::Pin1::low();
-
-	Debug::Pin2::low();
-}
-
-void timing_test(uint32_t addr)
-{
-	auto baseaddr = reinterpret_cast<uint32_t *>(addr);
-	for (uint32_t i = 0; i < 1000; i++) {
-		*baseaddr++ = i;
-	}
-}
-
-void isr_test()
-{
-	HWSemaphoreGlobalBase::register_channel_ISR<1>([]() {
-		Debug::red_LED1::high();
-		Debug::Pin0::high();
-	});
-	// HWSemaphoreCoreHandler::enable_global_ISR(0, 0);
-
-	HWSemaphore<1>::disable_channel_ISR();
-	HWSemaphore<1>::clear_ISR();
-	target::System::enable_irq(HSEM_IT1_IRQn);
-	HWSemaphore<1>::enable_channel_ISR();
-	HWSemaphore<1>::lock();
-	HWSemaphore<1>::unlock();
 }
 
 void recover_from_task_fault(void)
