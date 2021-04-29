@@ -72,7 +72,7 @@ AudioStream::AudioStream(PatchList &patches,
 
 	dac_updater.init(DAC_update_conf, [&]() {
 		// static bool rising_edge = false;
-		dac.output_next();
+		// dac.output_next();
 		// rising_edge = !rising_edge;
 		// if (rising_edge)
 		// 	clock_out.output_next();
@@ -146,10 +146,8 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 			i++;
 		}
 
-		Debug::Pin1::high();
 		// dual LFO: 2us on H7, 31us on MP1, with cache it's 9us on MP1, now it's 1.43us on MP1
 		player.update_patch(patch_list.cur_patch());
-		Debug::Pin1::low();
 
 		out_.l = get_audio_output(LEFT_OUT);
 		out_.r = get_audio_output(RIGHT_OUT);
