@@ -19,8 +19,9 @@
 // #include "shared_memory.hh"
 #include "drivers/pin.hh"
 
-#include "examples/nested_isr.hh"
-#include "examples/timing_tests.hh"
+// Test hardware:
+// #include "examples/nested_isr.hh"
+// #include "examples/timing_tests.hh"
 
 namespace MetaModule
 {
@@ -43,8 +44,9 @@ struct Hardware : AppStartup, Debug, SharedBus {
 void main()
 {
 	using namespace MetaModule;
-	test_nesting_isr();
-	run_all_timing_tests();
+	// test_nesting_isr();
+	// run_all_timing_tests();
+
 	StaticBuffers::init();
 
 	PatchList patch_list;
