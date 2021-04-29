@@ -20,6 +20,9 @@ all:
 	@$(MAKE) --no-print-directory -f makefile_m4.mk
 	@$(MAKE) --no-print-directory tests
 
+a7:
+	@$(MAKE) --no-print-directory -f makefile_a7.mk
+
 
 inttest: 
 	touch src/patchlist.cc 
