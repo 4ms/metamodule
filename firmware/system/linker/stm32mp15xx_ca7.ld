@@ -99,6 +99,8 @@ SECTIONS
 		*(COMMON)  /* required for libc, such as __lock___atexit_recursive_mutex */
         . = ALIGN(8);
         _bss_end = .;
+		. = ALIGN(256);
+		_ram_aligned_end = .;
     } > RAM
 
 	.heap (NOLOAD):
@@ -116,18 +118,18 @@ SECTIONS
 	} > DDMA
 
 
-    _fiq_stack_start = _bss_end;
-    _fiq_stack_end = _fiq_stack_start + 0x1000; /* 64 KB */
+    _fiq_stack_start = _ram_aligned_end;
+    _fiq_stack_end = _fiq_stack_start + 0x2000; /* 128 KB */
 
     _irq_stack_start = _fiq_stack_end;
-    _irq_stack_end = _irq_stack_start + 0x1000; /* 64 KB */
+    _irq_stack_end = _irq_stack_start + 0x2000; /* 128 KB */
 
 	_svc_nested_isr_count = _irq_stack_end;
     _svc_stack_start = _irq_stack_end + 0x0008;
-    _svc_stack_end = _svc_stack_start + 0x1000; /* 64 KB */
+    _svc_stack_end = _svc_stack_start + 0x2000 - 0x0008; /* 128 KB */
 
     _user_stack_start = _svc_stack_end;
-    _user_stack_end = _user_stack_start + 0x1000; /* 64 KB */
+    _user_stack_end = _user_stack_start + 0x2000; /* 128 KB */
 
 	.dma_buffer (NOLOAD) :
 	{
