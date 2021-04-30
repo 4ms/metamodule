@@ -8,8 +8,8 @@ CompileFlags:
 		"-DSTM32H7",
 		"-Ilib/cmsis-device/stm32h7x5/include",
 		"-Ilib/stm32-hal/stm32h7x5/include",
-		"-Ilib/mdrivlib/drivers/target/stm32h7x5",
-		"-Ilib/mdrivlib/drivers/target/stm32h7x5/drivers",
+		"-Ilib/mdrivlib/target/stm32h7x5",
+		"-Ilib/mdrivlib/target/stm32h7x5/drivers",
 		"-Isrc/m4",
 		"-Isrc/m7",
 		"-DARM_MATH_CM7",
@@ -35,8 +35,9 @@ CompileFlags:
 		"-Ilib/stm32-hal/stm32mp1/include",
 		"-Ilib/cmsis/Core_A/Include",
 		"-Ilib/cmsis-device/stm32mp157c/include",
-		"-Ilib/mdrivlib/drivers/target/stm32mp1",
-		"-Ilib/mdrivlib/drivers/target/stm32mp1/drivers",
+		"-Ilib/mdrivlib/drivers",
+		"-Ilib/mdrivlib/target/stm32mp1",
+		"-Ilib/mdrivlib/target/stm32mp1/drivers",
 	]
 ---
 If:
@@ -51,8 +52,8 @@ CompileFlags:
 		"-DSTM32H7",
 		"-Ilib/cmsis-device/stm32h7x5/include",
 		"-Ilib/stm32-hal/stm32h7x5/include",
-		"-Ilib/mdrivlib/drivers/target/stm32h7x5",
-		"-Ilib/mdrivlib/drivers/target/stm32h7x5/drivers",
+		"-Ilib/mdrivlib/target/stm32h7x5",
+		"-Ilib/mdrivlib/target/stm32h7x5/drivers",
 		"-Isrc/m4",
 		"-Isrc/m7",
 		"-DARM_MATH_CM7",
@@ -68,6 +69,6 @@ CompileFlags:
 		"-Ilib/stm32-hal/stm32mp1/include",
 		"-Ilib/cmsis/Core_A/Include",
 		"-Ilib/cmsis-device/stm32mp157c/include",
-		"-Ilib/mdrivlib/drivers/target/stm32mp1",
-		"-Ilib/mdrivlib/drivers/target/stm32mp1/drivers",
+		"-Ilib/mdrivlib/target/stm32mp1",
+		"-Ilib/mdrivlib/target/stm32mp1/drivers",
 	]
