@@ -43,11 +43,19 @@ AudioStream::AudioStream(PatchList &patches,
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
+
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
 				process(rx_buf_1, tx_buf_1, param_blocks[0]);
 			else {
 				target::SystemCache::invalidate_dcache_by_range(&rx_buf_2, sizeof(AudioStreamBlock));
 				target::SystemCache::invalidate_dcache_by_range(&(param_blocks[0]), sizeof(ParamBlock));
+				// float fa[64];
+				// for (int i = 0; i < 64; i++) {
+				// 	fa[i] = (rx_buf_2[i].l + rx_buf_2[i].r) / 2.f;
+				// 	fa[i] *= 0.25f + (i * 0.01f);
+				// 	tx_buf_2[i].r = fa[i];
+				// 	tx_buf_2[i].l = (float)i / 64.f;
+				// }
 				process(rx_buf_2, tx_buf_2, param_blocks[0]);
 				target::SystemCache::clean_dcache_by_range(&tx_buf_2, sizeof(AudioStreamBlock));
 			}
@@ -62,6 +70,13 @@ AudioStream::AudioStream(PatchList &patches,
 			else {
 				target::SystemCache::invalidate_dcache_by_range(&rx_buf_1, sizeof(AudioStreamBlock));
 				target::SystemCache::invalidate_dcache_by_range(&(param_blocks[1]), sizeof(ParamBlock));
+				// float fa[64];
+				// for (int i = 0; i < 64; i++) {
+				// 	fa[i] = (rx_buf_1[i].l + rx_buf_1[i].r) / 2.f;
+				// 	fa[i] *= 0.25f + (i * 0.01f);
+				// 	tx_buf_1[i].r = fa[i];
+				// 	tx_buf_1[i].l = (float)i / 64.f;
+				// }
 				process(rx_buf_1, tx_buf_1, param_blocks[1]);
 				target::SystemCache::clean_dcache_by_range(&tx_buf_1, sizeof(AudioStreamBlock));
 			}
@@ -72,7 +87,7 @@ AudioStream::AudioStream(PatchList &patches,
 
 	dac_updater.init(DAC_update_conf, [&]() {
 		// static bool rising_edge = false;
-		// dac.output_next();
+		dac.output_next();
 		// rising_edge = !rising_edge;
 		// if (rising_edge)
 		// 	clock_out.output_next();
