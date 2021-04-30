@@ -22,6 +22,8 @@ SECTIONS
 {
     .text : {
         *(.vector_table)
+		*(.resethandler)
+		*(.irqhandler)
         *(.text)
         *(.text*)
 					/* Todo: check if we need the next 5 lines */
