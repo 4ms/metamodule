@@ -55,7 +55,7 @@ private:
 	// Should we class this out? It's only connected to Audio at init and process()
 
 	AnalogOutT &dac;
-	GPIOStream<FPin<GPIO::D, 13, PinMode::Output>, CircularBuffer<uint8_t, AudioConf::BlockSize>> clock_out;
+	GPIOStream<FPin<GPIO::E, 0, PinMode::Output>, CircularBuffer<uint8_t, AudioConf::BlockSize>> clock_out;
 	PinChangeInterrupt dac_updater;
 
 	PatchList &patch_list;

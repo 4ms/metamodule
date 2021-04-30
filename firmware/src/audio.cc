@@ -72,11 +72,11 @@ AudioStream::AudioStream(PatchList &patches,
 	dac.init();
 
 	dac_updater.init(DAC_update_conf, [&]() {
-		// static bool rising_edge = false;
+		static bool rising_edge = false;
 		dac.output_next();
-		// rising_edge = !rising_edge;
-		// if (rising_edge)
-		// 	clock_out.output_next();
+		rising_edge = !rising_edge;
+		if (rising_edge)
+			clock_out.output_next();
 	});
 	load_measure.init();
 }
