@@ -35,7 +35,7 @@ PatchList::PatchList()
 
 PatchList::PatchList()
 	: _patches{
-		  {test_14switchCore_clock},
+		  {test_sampleholdCore},
 		  {test_14switchCore_cv},
 		  {test_bitcrushCore},
 		  {test_bpfCore},
