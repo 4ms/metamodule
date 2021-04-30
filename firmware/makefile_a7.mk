@@ -1,23 +1,25 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
+$(info --------------------)
 $(info Building for A7 core)
 BUILDDIR = $(BUILDDIR_A7)
-
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
-
-# -mfpu=fpv4-d16
 MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard -mthumb-interwork
 CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
-STARTUP_CA7	= $(TARGETDEVICEDIR)/boot/startup_ca7.s
 
+STARTUP_CA7	= $(TARGETDEVICEDIR)/boot/startup_ca7.s
 SHARED = src/a7/shared
 
 OPTFLAG = -O3
 include makefile_opts.mk
+
+MFFONTDIR = $(LIBDIR)/mcufont/fonts
+MFDIR = $(LIBDIR)/mcufont/decoder
+include $(LIBDIR)/mcufont/decoder/mcufont.mk
 
 SOURCES = $(STARTUP_CA7) \
 		  system/libc_stub.c\
@@ -46,6 +48,8 @@ SOURCES = $(STARTUP_CA7) \
 		  src/patchlist.cc\
 		  src/audio.cc\
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
+		  $(LIBDIR)/printf/printf.c \
+		  $(MFSRC) \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
@@ -66,6 +70,9 @@ INCLUDES = -I. \
 		   -I$(SHARED)/CoreModules \
 		   -I$(SHARED)/util \
 		   -I$(SHARED)/patch \
+			-I$(LIBDIR)/printf \
+			-I$(MFINC) \
+			-I$(MFFONTDIR) \
 
 AFLAGS = $(MCU)
 
@@ -163,14 +170,14 @@ $(ELF): $(OBJECTS) $(LOADFILE)
 	@$(LD) $(LFLAGS) -o $@ $(OBJECTS)
 
 $(BIN): $(ELF)
-	$(OBJCPY) -O binary $< $@
+	@$(OBJCPY) -O binary $< $@
 
 $(UBOOT_MKIMAGE): $(UBOOTSRCDIR)
 	cd $(UBOOTSRCDIR) && make O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
 	cd $(UBOOTSRCDIR) && make -j16 O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- all
 
 $(UIMG): $(BIN) $(UBOOT_MKIMAGE)
-	$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+	@$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
 %.d: ;
 

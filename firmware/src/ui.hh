@@ -1,5 +1,5 @@
 #pragma once
-#include "audio.hh"
+// #include "audio.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "debug.hh"
@@ -7,8 +7,8 @@
 #include "drivers/i2c.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/memory_transfer.hh"
+#include "hsem_handler.hh"
 #include "leds.hh"
-#include "m7/hsem_handler.hh"
 #include "pages/page_manager.hh"
 #include "params.hh"
 #include "patchlist.hh"
