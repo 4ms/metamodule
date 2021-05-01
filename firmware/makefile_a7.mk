@@ -35,7 +35,10 @@ SOURCES = $(STARTUP_CA7) \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c \
+		  $(HALDIR)/src/stm32mp1xx_ll_tim.c \
 		  $(DRIVERLIB)/drivers/pin.cc \
+		  $(DRIVERLIB)/drivers/timekeeper.cc \
+		  $(DRIVERLIB)/drivers/tim.cc \
 		  $(TARGETDEVICEDIR)/drivers/interrupt.cc \
 		  $(TARGETDEVICEDIR)/drivers/hal_handlers.cc \
 		  $(TARGETDEVICEDIR)/drivers/cycle_counter.cc \
@@ -46,7 +49,9 @@ SOURCES = $(STARTUP_CA7) \
 		  $(SHARED)/util/math_tables.cc \
 		  $(CORE_SRC)/main.cc\
 		  src/patchlist.cc\
-		  src/audio.cc\
+		  src/pages/page_manager.cc \
+		  src/print.cc \
+		  src/audio.cc \
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(LIBDIR)/printf/printf.c \
 		  $(MFSRC) \

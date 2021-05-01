@@ -54,7 +54,7 @@ void main()
 	UiAudioMailbox mbox;
 
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
+	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
 	AudioStream audio{patch_list,
 					  patch_player,
@@ -82,8 +82,8 @@ void main()
 	// 	;
 
 	param_cache.clear();
-	// ui.start();
-	patch_player.load_patch(patch_list.cur_patch());
+	ui.start();
+	// patch_player.load_patch(patch_list.cur_patch());
 	audio.start();
 
 	while (1) {
