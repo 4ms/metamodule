@@ -1,6 +1,6 @@
 #pragma once
 #include "audio.hh"
-#include "conf/screen_conf.hh"
+#include "conf/screen_buffer_conf.hh"
 #include "drivers/mpu.hh"
 #include "leds.hh"
 #include "params.hh"
@@ -21,7 +21,7 @@ struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 	static inline __attribute__((section(".axisram"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	static inline __attribute__((section(".dma_buffer"))) DoubleBufParamBlock param_blocks;
-	static inline __attribute__((section(".axisram"))) MMScreenConf::FrameBufferT screen_framebuf;
+	static inline __attribute__((section(".axisram"))) MMScreenBufferConf::FrameBufferT screen_framebuf;
 
 	struct CacheDisabler {
 		CacheDisabler(char *_start, char *_size)

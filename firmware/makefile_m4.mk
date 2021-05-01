@@ -51,6 +51,7 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I. \
 			-Isrc \
 			-Isrc/conf \
+			-Isrc/m4/conf \
 			-I$(CORE_SRC) \
 			-I$(HAL_CONF_INC) \
 			-I$(SHARED) \

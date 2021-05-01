@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/screen_buffer_conf.hh"
+#include "drivers/bdma.hh"
 #include "drivers/bdma_config_struct.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/spi_screen_config_struct.hh"
@@ -58,3 +59,5 @@ struct MMScreenConf : DefaultSpiScreenConf {
 	static constexpr uint32_t FrameBytes = sizeof(FrameBufferT);
 	static constexpr uint32_t HalfFrameBytes = sizeof(HalfFrameBufferT);
 };
+
+using ScreenTransferDriverT = target::BDMATransfer<typename MMScreenConf::BDMAConf>;

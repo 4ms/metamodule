@@ -11,16 +11,17 @@
 #include "drivers/system.hh"
 
 using namespace mdrivlib;
-using ScreenConfT = MMScreenConf;
+using ScreenWriterConfT = MMScreenConf;
 
 namespace MetaModule
 {
-// template <typename ScreenConfT>
-class ScreenFrameWriter : public DmaSpiScreenDriver<ScreenConfT> {
-	static constexpr uint32_t FrameSize = ScreenConfT::FrameBytes;
-	static constexpr uint32_t HalfFrameSize = ScreenConfT::HalfFrameBytes;
+// template <typename ScreenWriterConfT>
+class ScreenFrameWriter : public DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT> {
+	static constexpr uint32_t FrameSize = ScreenWriterConfT::FrameBytes;
+	static constexpr uint32_t HalfFrameSize = ScreenWriterConfT::HalfFrameBytes;
 
 	bool using_half_buffer_transfers;
+	bool direct_mode;
 
 	uint32_t dst_addr;
 	void *dst;
@@ -28,70 +29,81 @@ class ScreenFrameWriter : public DmaSpiScreenDriver<ScreenConfT> {
 	void *src_2nd_half;
 
 public:
-	ScreenFrameWriter(ScreenConfT::FrameBufferT *readbuf_,
-					  ScreenConfT::HalfFrameBufferT *writebuf_,
+	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_,
+					  ScreenWriterConfT::HalfFrameBufferT *writebuf_,
 					  size_t writebuffer_size)
 		: using_half_buffer_transfers{true}
+		, direct_mode{false}
 		, dst_addr{reinterpret_cast<uint32_t>(writebuf_)}
 		, dst{reinterpret_cast<void *>(writebuf_)}
 		, src{reinterpret_cast<void *>(readbuf_->data())}
 		, src_2nd_half{reinterpret_cast<void *>((uint32_t)(&readbuf_[0]) + HalfFrameSize)}
-		, _rowstart{ScreenConfT::rowstart}
-		, _colstart{ScreenConfT::colstart}
+		, _rowstart{ScreenWriterConfT::rowstart}
+		, _colstart{ScreenWriterConfT::colstart}
 	{}
 
-	ScreenFrameWriter(ScreenConfT::FrameBufferT *readbuf_,
-					  ScreenConfT::FrameBufferT *writebuf_,
+	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_,
+					  ScreenWriterConfT::FrameBufferT *writebuf_,
 					  size_t writebuffer_size)
 		: using_half_buffer_transfers{false}
+		, direct_mode{false}
 		, dst_addr{reinterpret_cast<uint32_t>(writebuf_)}
 		, dst{reinterpret_cast<void *>(writebuf_)}
 		, src{reinterpret_cast<void *>(readbuf_->data())}
 		, src_2nd_half{src}
-		, _rowstart{ScreenConfT::rowstart}
-		, _colstart{ScreenConfT::colstart}
+		, _rowstart{ScreenWriterConfT::rowstart}
+		, _colstart{ScreenWriterConfT::colstart}
+	{}
+
+	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_, size_t writebuffer_size)
+		: using_half_buffer_transfers{false}
+		, direct_mode{true}
+		, src{reinterpret_cast<void *>(readbuf_->data())}
+		, src_2nd_half{src}
+		, _rowstart{ScreenWriterConfT::rowstart}
+		, _colstart{ScreenWriterConfT::colstart}
 	{}
 
 	void init()
 	{
-		DmaSpiScreenDriver<ScreenConfT>::init();
+		DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
 		init_display(generic_st7789);
-		set_rotation(ScreenConfT::rotation);
+		set_rotation(ScreenWriterConfT::rotation);
 	}
 
-	void set_rotation(ScreenConfT::Rotation rot)
+	void set_rotation(ScreenWriterConfT::Rotation rot)
 	{
 		_rotation = rot;
 
 		uint8_t madctl = 0;
 		switch (_rotation) {
-			case ScreenConfT::None:
+			case ScreenWriterConfT::None:
 				madctl = ST77XX::MADCTL_MX | ST77XX::MADCTL_MY | ST77XX::MADCTL_RGB;
 				_xstart = _colstart;
 				_ystart = _rowstart;
-				_width = ScreenConfT::width;
-				_height = ScreenConfT::height;
+				_width = ScreenWriterConfT::width;
+				_height = ScreenWriterConfT::height;
 				break;
-			case ScreenConfT::CW90:
+			case ScreenWriterConfT::CW90:
 				madctl = ST77XX::MADCTL_MY | ST77XX::MADCTL_MV | ST77XX::MADCTL_RGB;
 				_xstart = _rowstart;
 				_ystart = _colstart;
-				_height = ScreenConfT::width;
-				_width = ScreenConfT::height;
+				_height = ScreenWriterConfT::width;
+				_width = ScreenWriterConfT::height;
 				break;
-			case ScreenConfT::Flip180:
+			case ScreenWriterConfT::Flip180:
 				madctl = ST77XX::MADCTL_RGB;
 				_xstart = 0;
 				_ystart = 0;
-				_width = ScreenConfT::width;
-				_height = ScreenConfT::height;
+				_width = ScreenWriterConfT::width;
+				_height = ScreenWriterConfT::height;
 				break;
-			case ScreenConfT::CCW90:
+			case ScreenWriterConfT::CCW90:
 				madctl = ST77XX::MADCTL_MX | ST77XX::MADCTL_MV | ST77XX::MADCTL_RGB;
 				_xstart = 0;
 				_ystart = 0;
-				_height = ScreenConfT::width;
-				_width = ScreenConfT::height;
+				_height = ScreenWriterConfT::width;
+				_width = ScreenWriterConfT::height;
 				break;
 		}
 		transmit_blocking<Cmd>(ST77XX::MADCTL);
@@ -139,7 +151,7 @@ public:
 protected:
 	const int _colstart;
 	const int _rowstart;
-	ScreenConfT::Rotation _rotation;
+	ScreenWriterConfT::Rotation _rotation;
 	int _xstart;
 	int _ystart;
 	int _width;

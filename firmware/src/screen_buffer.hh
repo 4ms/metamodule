@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/screen_buffer_conf.hh"
+#include "drivers/cache.hh"
 #include "drivers/dma2d_transfer.hh"
 #include "mcufont.h"
 #include "pages/fonts.hh"
@@ -457,7 +458,11 @@ public:
 	// void print(float n)			{ if (snprintf(_textbuf, 255, "%f", n)) _render_textbuf(); }
 	// clang-format on
 
-	void flush_cache() {}
+	void flush_cache()
+	{
+		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7)
+			target::SystemCache::clean_dcache_by_range(&framebuf, sizeof(ScreenConfT::FrameBufferT));
+	}
 
 	const mf_font_s *_font;
 	mf_align_t _alignment;
