@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/hsem_conf.hh"
 #include "conf/screen_conf.hh"
+#include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/memory_transfer.hh"
 #include "drivers/pin.hh"
@@ -112,40 +113,47 @@ public:
 
 	void transfer_buffer_to_screen()
 	{
-		if (using_half_buffer_transfers) {
-			HWSemaphore<ScreenFrameWriteLock>::lock();
-			set_pos(0, 0, _width - 1, _height - 1);
-			config_bdma_transfer(dst_addr, HalfFrameSize);
-			mem_xfer.config_transfer(dst, src, HalfFrameSize);
-			// Debug::Pin2::high(); // start MDMA xfer #1
-			mem_xfer.register_callback([&]() {
-				// Debug::Pin2::low();	 // completed MDMA xfer#1
-				// Debug::Pin3::high(); // start BDMA transfer #1
-				start_bdma_transfer([&]() {
-					// Debug::Pin3::low(); // completed BDMA xfer #1
-					mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
-					// Debug::Pin2::high(); // start MDMA xfer #2
-					mem_xfer.register_callback([&]() {
-						// Debug::Pin2::low();	 // completed MDMA xfer #2
-						// Debug::Pin3::high(); // start BDMA xfer #2
-						start_bdma_transfer([&]() {
-							// Debug::Pin3::low(); // completed BDMA xfer #3
-							HWSemaphore<ScreenFrameWriteLock>::unlock();
-						});
-					});
-					mem_xfer.start_transfer();
-				});
-			});
+		// if (using_half_buffer_transfers) {
+		// 	HWSemaphore<ScreenFrameWriteLock>::lock();
+		// 	set_pos(0, 0, _width - 1, _height - 1);
+		// 	config_dma_transfer(dst_addr, HalfFrameSize);
+		// 	mem_xfer.config_transfer(dst, src, HalfFrameSize);
+		// 	// Debug::Pin2::high(); // start MDMA xfer #1
+		// 	mem_xfer.register_callback([&]() {
+		// 		// Debug::Pin2::low();	 // completed MDMA xfer#1
+		// 		// Debug::Pin3::high(); // start BDMA transfer #1
+		// 		start_dma_transfer([&]() {
+		// 			// Debug::Pin3::low(); // completed BDMA xfer #1
+		// 			mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
+		// 			// Debug::Pin2::high(); // start MDMA xfer #2
+		// 			mem_xfer.register_callback([&]() {
+		// 				// Debug::Pin2::low();	 // completed MDMA xfer #2
+		// 				// Debug::Pin3::high(); // start BDMA xfer #2
+		// 				start_dma_transfer([&]() {
+		// 					// Debug::Pin3::low(); // completed BDMA xfer #3
+		// 					HWSemaphore<ScreenFrameWriteLock>::unlock();
+		// 				});
+		// 			});
+		// 			mem_xfer.start_transfer();
+		// 		});
+		// 	});
 
-			mem_xfer.start_transfer();
-		} else {
-			// Todo: test full buffer xfer
-			set_pos(0, 0, _width - 1, _height - 1);
-			config_bdma_transfer(dst_addr, FrameSize);
-			mem_xfer.config_transfer(dst, src, FrameSize);
-			mem_xfer.register_callback([&]() { start_bdma_transfer([]() {}); });
-			mem_xfer.start_transfer();
-		}
+		// 	mem_xfer.start_transfer();
+		// } else if (!direct_mode) {
+		// 	// Todo: test full buffer xfer
+		// 	set_pos(0, 0, _width - 1, _height - 1);
+		// 	// Setup transfer from mem-to-mem destination (dst_addr) to the SPI peripheral
+		// 	config_dma_transfer(dst_addr, FrameSize);
+		// 	// Setup the mem-to-mem transfer
+		// 	mem_xfer.config_transfer(dst, src, FrameSize);
+		// 	mem_xfer.register_callback([&]() { start_dma_transfer([]() {}); });
+		// 	mem_xfer.start_transfer();
+		// } else {
+		set_pos(0, 0, _width - 1, _height - 1);
+		config_dma_transfer(reinterpret_cast<uint32_t>(src), FrameSize);
+		Debug::Pin2::high();
+		start_dma_transfer([]() { Debug::Pin2::low(); });
+		// }
 	}
 
 protected:
