@@ -15,8 +15,8 @@ MEMORY
 	SRAM2 (rwx) : ORIGIN = 0x10020000, LENGTH = 128K
 	SRAM3 (rwx) : ORIGIN = 0x10040000, LENGTH = 64K
 	SRAM4 (rwx) : ORIGIN = 0x10050000, LENGTH = 64K
+	SYSRAM (rwx) : ORIGIN = 0x2FFC0000, LENGTH = 256K
 }
-
 
 SECTIONS
 {
@@ -119,19 +119,18 @@ SECTIONS
         *(.ddma)
 	} > DDMA
 
+    _user_stack_start = 0x2FFC0000;
+    _user_stack_end = _user_stack_start + 0x10000; /* 64k */
 
-    _fiq_stack_start = _ram_aligned_end;
-    _fiq_stack_end = _fiq_stack_start + 0x2000; /* 128 KB */
+    _svc_stack_start = _user_stack_end;
+    _svc_stack_end = _svc_stack_start + 0x1000; /* 4k */
 
-    _irq_stack_start = _fiq_stack_end;
-    _irq_stack_end = _irq_stack_start + 0x2000; /* 128 KB */
+    _irq_stack_start = _svc_stack_end;
+    _irq_stack_end = _irq_stack_start + 0x1000; /* 4k */
 
-	_svc_nested_isr_count = _irq_stack_end;
-    _svc_stack_start = _irq_stack_end + 0x0008;
-    _svc_stack_end = _svc_stack_start + 0x2000 - 0x0008; /* 128 KB */
+    _fiq_stack_start = _irq_stack_end;
+    _fiq_stack_end = _fiq_stack_start + 0x100; /* 256B */
 
-    _user_stack_start = _svc_stack_end;
-    _user_stack_end = _user_stack_start + 0x2000; /* 128 KB */
 
 	.dma_buffer (NOLOAD) :
 	{
