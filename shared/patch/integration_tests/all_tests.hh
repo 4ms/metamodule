@@ -12,6 +12,7 @@
 #include "patch/integration_tests/test_fourstepCore.hh"
 #include "patch/integration_tests/test_logicCore.hh"
 #include "patch/integration_tests/test_minmaxCore.hh"
+#include "patch/integration_tests/test_octaveCore.hh"
 #include "patch/integration_tests/test_pannerCore.hh"
 #include "patch/integration_tests/test_sampleholdCore.hh"
 #include "patch/integration_tests/test_vcaCore.hh"
