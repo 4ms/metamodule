@@ -119,7 +119,13 @@ SECTIONS
         *(.ddma)
 	} > DDMA
 
-    _user_stack_start = 0x2FFC0000;
+	.sysram (NOLOAD):
+	{
+		. = ALIGN(8);
+		*(.sysram)
+	} > SYSRAM
+
+    _user_stack_start = _ram_aligned_end; /* ORIGIN(SYSRAM); */
     _user_stack_end = _user_stack_start + 0x10000; /* 64k */
 
     _svc_stack_start = _user_stack_end;

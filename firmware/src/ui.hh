@@ -52,6 +52,26 @@ public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 
+// Just testing!!!
+#if defined(STM32MP1)
+	Ui(PatchList &pl,
+	   PatchPlayer &pp,
+	   ParamCache &pc,
+	   UiAudioMailbox &uiaudiomailbox,
+	   LedFrame<AnimationUpdateRate> &l,
+	   MMScreenBufferConf::FrameBufferT (&screenbuf)[2])
+		: leds{l}
+		, screen{screenbuf[0]}
+		, param_cache{pc}
+		, mbox{uiaudiomailbox}
+		, pages{pl, pp, params, metaparams, screen}
+		, patch_list{pl} // clang-format off
+		, player{pp}
+		, screen_writer(&screenbuf[0], &screenbuf[1], MMScreenConf::FrameBytes)
+	{
+		screen_writer.init();
+	}
+#else
 	Ui(PatchList &pl,
 	   PatchPlayer &pp,
 	   ParamCache &pc,
@@ -65,14 +85,6 @@ public:
 		, pages{pl, pp, params, metaparams, screen}
 		, patch_list{pl} // clang-format off
 		, player{pp}
-
-// Just testing!!!
-#if defined(STM32MP1) 
-	, screen_writer(&screenbuf, MMScreenConf::FrameBytes)
-	{
-		screen_writer.init();
-	}
-#else
 	{}
 #endif
 	// clang-format on
