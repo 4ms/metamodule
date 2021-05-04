@@ -11,6 +11,8 @@
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 
+#include "examples/hardware-tests/memory_transfer_test.hh"
+
 using namespace mdrivlib;
 using ScreenWriterConfT = MMScreenConf;
 
@@ -72,43 +74,14 @@ public:
 		init_display(generic_st7789);
 		set_rotation(ScreenWriterConfT::rotation);
 
-		uint16_t x = 0;
-		auto readbuf_ = reinterpret_cast<ScreenWriterConfT::FrameBufferT *>(src);
-		for (auto &p : *readbuf_)
-			p = x++;
-
-		Debug::Pin2::high();
-
-		// Test mem to mem:
-		// MDMA_HandleTypeDef hmdma;
-		// hmdma.Instance = MDMA_Channel0;
-		// hmdma.Init.Request = MDMA_REQUEST_SW;
-		// hmdma.Init.TransferTriggerMode = MDMA_BLOCK_TRANSFER;
-		// hmdma.Init.Priority = MDMA_PRIORITY_HIGH;
-		// hmdma.Init.SecureMode = MDMA_SECURE_MODE_DISABLE;
-		// hmdma.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
-		// hmdma.Init.SourceInc = MDMA_SRC_INC_WORD;
-		// hmdma.Init.DestinationInc = MDMA_DEST_INC_WORD;
-		// hmdma.Init.SourceDataSize = MDMA_SRC_DATASIZE_WORD;
-		// hmdma.Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
-		// hmdma.Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
-		// hmdma.Init.BufferTransferLength = 120;
-		// hmdma.Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;
-		// hmdma.Init.DestBurst = MDMA_DEST_BURST_SINGLE;
-		// hmdma.Init.SourceBlockAddressOffset = 0;
-		// hmdma.Init.DestBlockAddressOffset = 0;
-		// target::RCC_Enable::MDMA_::set();
-		// HAL_MDMA_Init(&hmdma);
-		// auto err = HAL_MDMA_Start(&hmdma, reinterpret_cast<uint32_t>(src), dst_addr, 240 * 240, 2);
-
-		mem_xfer.config_transfer(dst, src, FrameSize);
-		mem_xfer.register_callback([]() {
-			Debug::Pin2::low();
-			__BKPT();
-		});
-		mem_xfer.start_transfer();
-
-		HAL_Delay(100);
+		////TESTS:
+		// HardwareExample::MemoryTransferByteSwapTest::run(src, dst, FrameSize);
+		// Debug::Pin2::high();
+		// set_pos(0, 0, _width - 1, _height - 1);
+		// for (uint32_t pix = 0; pix < (_width * _height / 2); pix++)
+		// 	transmit_blocking<Data>(0x0700, 0x0700);
+		// Debug::Pin2::low();
+		/////
 	}
 
 	void set_rotation(ScreenWriterConfT::Rotation rot)
@@ -181,8 +154,10 @@ public:
 			Debug::Pin2::high();
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 			set_pos(0, 0, _width - 1, _height - 1);
+
 			// Setup transfer from mem-to-mem destination (dst_addr) to the SPI peripheral
 			config_dma_transfer(dst_addr, FrameSize);
+
 			// Setup the mem-to-mem transfer
 			mem_xfer.config_transfer(dst, src, FrameSize);
 			mem_xfer.register_callback([&] {
@@ -210,7 +185,7 @@ protected:
 
 	struct ScreenMemXferConfT : MemoryTransferDefaultConfT {
 		static constexpr unsigned channel = 0;
-		static constexpr bool swap_bytes = true;
+		static constexpr bool swap_bytes = false;
 		static constexpr bool bufferable_write_mode = true;
 		static constexpr uint32_t PriorityLevel = Medium;
 		static constexpr uint32_t src_burst = 0b100;

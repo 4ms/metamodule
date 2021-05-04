@@ -27,7 +27,7 @@ struct MMScreenConf : DefaultSpiScreenConf {
 		static constexpr bool pulse_hardware_ss = true;
 	};
 
-	struct BDMAConf : BDMA_Conf {
+	struct DMAConf : BDMA_Conf {
 		static constexpr unsigned StreamNum = 2;
 		static constexpr unsigned RequestNum = BDMA_REQUEST_SPI6_TX;
 		static constexpr IRQn_Type IRQn = BDMA_Channel2_IRQn;
@@ -35,8 +35,8 @@ struct MMScreenConf : DefaultSpiScreenConf {
 		static constexpr uint32_t subpri = 2;
 		static constexpr Direction dir = Mem2Periph;
 		static constexpr bool circular = false;
-		static constexpr TransferSize transfer_size_mem = Byte;
-		static constexpr TransferSize transfer_size_periph = Byte;
+		static constexpr TransferSize transfer_size_mem = HalfWord;
+		static constexpr TransferSize transfer_size_periph = HalfWord;
 		static constexpr uint8_t dma_priority = Low;
 		static constexpr bool mem_inc = true;
 		static constexpr bool periph_inc = false;
@@ -60,4 +60,4 @@ struct MMScreenConf : DefaultSpiScreenConf {
 	static constexpr uint32_t HalfFrameBytes = sizeof(HalfFrameBufferT);
 };
 
-using ScreenTransferDriverT = target::BDMATransfer<typename MMScreenConf::BDMAConf>;
+using ScreenTransferDriverT = target::BDMATransfer<typename MMScreenConf::DMAConf>;

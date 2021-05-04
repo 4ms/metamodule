@@ -36,8 +36,8 @@ struct MMScreenConf : DefaultSpiScreenConf {
 		static constexpr uint32_t subpri = 3;
 		static constexpr Direction dir = Mem2Periph;
 		static constexpr bool circular = false;
-		static constexpr TransferSize transfer_size_mem = Byte;
-		static constexpr TransferSize transfer_size_periph = Byte;
+		static constexpr TransferSize transfer_size_mem = HalfWord;
+		static constexpr TransferSize transfer_size_periph = HalfWord;
 		static constexpr uint8_t dma_priority = Low;
 		static constexpr bool mem_inc = true;
 		static constexpr bool periph_inc = false;
