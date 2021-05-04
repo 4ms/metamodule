@@ -49,11 +49,12 @@ public:
 		: using_half_buffer_transfers{false}
 		, direct_mode{false}
 		, dst_addr{reinterpret_cast<uint32_t>(writebuf_)}
-		, dst{reinterpret_cast<void *>(writebuf_)}
+		, dst{reinterpret_cast<void *>(writebuf_->data())}
 		, src{reinterpret_cast<void *>(readbuf_->data())}
 		, src_2nd_half{src}
 		, _rowstart{ScreenWriterConfT::rowstart}
 		, _colstart{ScreenWriterConfT::colstart}
+
 	{}
 
 	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_, size_t writebuffer_size)
@@ -70,6 +71,44 @@ public:
 		DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
 		init_display(generic_st7789);
 		set_rotation(ScreenWriterConfT::rotation);
+
+		uint16_t x = 0;
+		auto readbuf_ = reinterpret_cast<ScreenWriterConfT::FrameBufferT *>(src);
+		for (auto &p : *readbuf_)
+			p = x++;
+
+		Debug::Pin2::high();
+
+		// Test mem to mem:
+		// MDMA_HandleTypeDef hmdma;
+		// hmdma.Instance = MDMA_Channel0;
+		// hmdma.Init.Request = MDMA_REQUEST_SW;
+		// hmdma.Init.TransferTriggerMode = MDMA_BLOCK_TRANSFER;
+		// hmdma.Init.Priority = MDMA_PRIORITY_HIGH;
+		// hmdma.Init.SecureMode = MDMA_SECURE_MODE_DISABLE;
+		// hmdma.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
+		// hmdma.Init.SourceInc = MDMA_SRC_INC_WORD;
+		// hmdma.Init.DestinationInc = MDMA_DEST_INC_WORD;
+		// hmdma.Init.SourceDataSize = MDMA_SRC_DATASIZE_WORD;
+		// hmdma.Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
+		// hmdma.Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
+		// hmdma.Init.BufferTransferLength = 120;
+		// hmdma.Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;
+		// hmdma.Init.DestBurst = MDMA_DEST_BURST_SINGLE;
+		// hmdma.Init.SourceBlockAddressOffset = 0;
+		// hmdma.Init.DestBlockAddressOffset = 0;
+		// target::RCC_Enable::MDMA_::set();
+		// HAL_MDMA_Init(&hmdma);
+		// auto err = HAL_MDMA_Start(&hmdma, reinterpret_cast<uint32_t>(src), dst_addr, 240 * 240, 2);
+
+		mem_xfer.config_transfer(dst, src, FrameSize);
+		mem_xfer.register_callback([]() {
+			Debug::Pin2::low();
+			__BKPT();
+		});
+		mem_xfer.start_transfer();
+
+		HAL_Delay(100);
 	}
 
 	void set_rotation(ScreenWriterConfT::Rotation rot)
@@ -113,47 +152,49 @@ public:
 
 	void transfer_buffer_to_screen()
 	{
-		// if (using_half_buffer_transfers) {
-		// 	HWSemaphore<ScreenFrameWriteLock>::lock();
-		// 	set_pos(0, 0, _width - 1, _height - 1);
-		// 	config_dma_transfer(dst_addr, HalfFrameSize);
-		// 	mem_xfer.config_transfer(dst, src, HalfFrameSize);
-		// 	// Debug::Pin2::high(); // start MDMA xfer #1
-		// 	mem_xfer.register_callback([&]() {
-		// 		// Debug::Pin2::low();	 // completed MDMA xfer#1
-		// 		// Debug::Pin3::high(); // start BDMA transfer #1
-		// 		start_dma_transfer([&]() {
-		// 			// Debug::Pin3::low(); // completed BDMA xfer #1
-		// 			mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
-		// 			// Debug::Pin2::high(); // start MDMA xfer #2
-		// 			mem_xfer.register_callback([&]() {
-		// 				// Debug::Pin2::low();	 // completed MDMA xfer #2
-		// 				// Debug::Pin3::high(); // start BDMA xfer #2
-		// 				start_dma_transfer([&]() {
-		// 					// Debug::Pin3::low(); // completed BDMA xfer #3
-		// 					HWSemaphore<ScreenFrameWriteLock>::unlock();
-		// 				});
-		// 			});
-		// 			mem_xfer.start_transfer();
-		// 		});
-		// 	});
-
-		// 	mem_xfer.start_transfer();
-		// } else if (!direct_mode) {
-		// 	// Todo: test full buffer xfer
-		// 	set_pos(0, 0, _width - 1, _height - 1);
-		// 	// Setup transfer from mem-to-mem destination (dst_addr) to the SPI peripheral
-		// 	config_dma_transfer(dst_addr, FrameSize);
-		// 	// Setup the mem-to-mem transfer
-		// 	mem_xfer.config_transfer(dst, src, FrameSize);
-		// 	mem_xfer.register_callback([&]() { start_dma_transfer([]() {}); });
-		// 	mem_xfer.start_transfer();
-		// } else {
-		set_pos(0, 0, _width - 1, _height - 1);
-		config_dma_transfer(reinterpret_cast<uint32_t>(src), FrameSize);
-		Debug::Pin2::high();
-		start_dma_transfer([]() { Debug::Pin2::low(); });
-		// }
+		if (using_half_buffer_transfers) {
+			HWSemaphore<ScreenFrameWriteLock>::lock();
+			set_pos(0, 0, _width - 1, _height - 1);
+			config_dma_transfer(dst_addr, HalfFrameSize);
+			mem_xfer.config_transfer(dst, src, HalfFrameSize);
+			// Debug::Pin2::high(); // start MDMA xfer #1
+			mem_xfer.register_callback([&]() {
+				// Debug::Pin2::low();	 // completed MDMA xfer#1
+				// Debug::Pin3::high(); // start BDMA transfer #1
+				start_dma_transfer([&]() {
+					// Debug::Pin3::low(); // completed BDMA xfer #1
+					mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
+					// Debug::Pin2::high(); // start MDMA xfer #2
+					mem_xfer.register_callback([&]() {
+						// Debug::Pin2::low();	 // completed MDMA xfer #2
+						// Debug::Pin3::high(); // start BDMA xfer #2
+						start_dma_transfer([&]() {
+							// Debug::Pin3::low(); // completed BDMA xfer #3
+							HWSemaphore<ScreenFrameWriteLock>::unlock();
+						});
+					});
+					mem_xfer.start_transfer();
+				});
+			});
+			mem_xfer.start_transfer();
+		} else if (!direct_mode) {
+			Debug::Pin2::high();
+			set_pos(0, 0, _width - 1, _height - 1);
+			// Setup transfer from mem-to-mem destination (dst_addr) to the SPI peripheral
+			config_dma_transfer(dst_addr, FrameSize);
+			// Setup the mem-to-mem transfer
+			mem_xfer.config_transfer(dst, src, FrameSize);
+			mem_xfer.register_callback([&]() {
+				Debug::Pin2::low();
+				// start_dma_transfer([]() {});
+			});
+			mem_xfer.start_transfer();
+		} else {
+			Debug::Pin2::high();
+			set_pos(0, 0, _width - 1, _height - 1);
+			config_dma_transfer(reinterpret_cast<uint32_t>(src), FrameSize);
+			start_dma_transfer([]() { Debug::Pin2::low(); });
+		}
 	}
 
 protected:
@@ -168,6 +209,7 @@ protected:
 	struct ScreenMemXferConfT : MemoryTransferDefaultConfT {
 		static constexpr unsigned channel = 0;
 		static constexpr bool swap_bytes = true;
+		static constexpr bool bufferable_write_mode = true;
 	};
 	MemoryTransfer<ScreenMemXferConfT> mem_xfer;
 

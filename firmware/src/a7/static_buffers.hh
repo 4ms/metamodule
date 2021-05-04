@@ -21,7 +21,7 @@ struct StaticBuffers {
 	static inline __attribute__((section(".ddma"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 	static inline /*__attribute__((section(".axisram"))) */ uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	static inline /*__attribute__((section(".dma_buffer"))) */ DoubleBufParamBlock param_blocks;
-	static inline __attribute__((section(".ddma"))) MMScreenConf::FrameBufferT screen_framebuf;
+	static inline __attribute__((section(".sysram"))) MMScreenConf::FrameBufferT screen_framebuf[2];
 
 	// struct CacheDisabler {
 	// 	CacheDisabler(char *_start, char *_size)
