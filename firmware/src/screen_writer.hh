@@ -179,21 +179,23 @@ public:
 			mem_xfer.start_transfer();
 		} else if (!direct_mode) {
 			Debug::Pin2::high();
+			HWSemaphore<ScreenFrameWriteLock>::lock();
 			set_pos(0, 0, _width - 1, _height - 1);
 			// Setup transfer from mem-to-mem destination (dst_addr) to the SPI peripheral
 			config_dma_transfer(dst_addr, FrameSize);
 			// Setup the mem-to-mem transfer
 			mem_xfer.config_transfer(dst, src, FrameSize);
-			mem_xfer.register_callback([&]() {
-				Debug::Pin2::low();
-				// start_dma_transfer([]() {});
+			mem_xfer.register_callback([&] {
+				start_dma_transfer([]() {
+					Debug::Pin2::low();
+					HWSemaphore<ScreenFrameWriteLock>::unlock();
+				});
 			});
 			mem_xfer.start_transfer();
 		} else {
-			Debug::Pin2::high();
 			set_pos(0, 0, _width - 1, _height - 1);
 			config_dma_transfer(reinterpret_cast<uint32_t>(src), FrameSize);
-			start_dma_transfer([]() { Debug::Pin2::low(); });
+			start_dma_transfer([] {});
 		}
 	}
 
@@ -210,6 +212,9 @@ protected:
 		static constexpr unsigned channel = 0;
 		static constexpr bool swap_bytes = true;
 		static constexpr bool bufferable_write_mode = true;
+		static constexpr uint32_t PriorityLevel = Medium;
+		static constexpr uint32_t src_burst = 0b100;
+		static constexpr uint32_t dst_burst = 0b100;
 	};
 	MemoryTransfer<ScreenMemXferConfT> mem_xfer;
 
