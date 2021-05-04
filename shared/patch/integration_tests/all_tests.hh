@@ -10,6 +10,7 @@
 #include "patch/integration_tests/test_crossfadeCore.hh"
 #include "patch/integration_tests/test_eightstepCore.hh"
 #include "patch/integration_tests/test_fourstepCore.hh"
+#include "patch/integration_tests/test_gateCore.hh"
 #include "patch/integration_tests/test_logicCore.hh"
 #include "patch/integration_tests/test_minmaxCore.hh"
 #include "patch/integration_tests/test_octaveCore.hh"

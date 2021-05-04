@@ -38,7 +38,7 @@ PatchList::PatchList()
 		  {test_sampleholdCore},
 		  {test_eightstepCore},
 		  {test_octaveCore},
-		  {test_bpfCore},
+		  {test_gateCore},
 		  {test_clkdivideCore},
 		  {test_clkmultiplierCore},
 		  {test_comparatorCore},
