@@ -27,7 +27,7 @@ public:
 	{
 		auto cvSum = constrain<float>(octaveOffset + cvInput, 0.0f, 1.0f);
 		int octave = map_value(cvSum, 0.0f, 1.0f, 0, 5);
-		voltOutput = voltInput + octave;
+		voltOutput = voltInput + octave/5.0f;
 	}
 
 	OctaveCore() {}
