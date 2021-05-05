@@ -50,7 +50,7 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLM = 4,
 			.PLLN = 99,
 			.PLLP = 6,
-			.PLLQ = 8,
+			.PLLQ = 5,
 			.PLLR = 8,
 			.PLLRGE = RCC_PLL4IFRANGE_1,
 			.PLLFRACV = 0,
@@ -63,10 +63,6 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 				 RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_PCLK3 | RCC_CLOCKTYPE_PCLK4 | RCC_CLOCKTYPE_PCLK5,
 	.MPUInit =
 		{
-			// HSI (64MHz): 5.2MHz for 6 inst. = 32MHz clock?
-			// HSE (24MHz): 1.5MHz-2MHz for 6 inst. = 12MHz clock?
-			// .MPU_Clock = RCC_MPUSOURCE_MPUDIV, DIV2: 6.14MHz
-			// .MPU_Clock = RCC_MPUSOURCE_PLL1, : 6.14MHz - 6.54MHz = ~40MHz clock?
 			.MPU_Clock = RCC_MPUSOURCE_PLL1,
 			.MPU_Div = RCC_MPU_DIV2,
 		},
@@ -88,11 +84,9 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 };
 
 const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
-	.PeriphClockSelection =
-		RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI3 | /*RCC_PERIPHCLK_SAI4 |*/ RCC_PERIPHCLK_SPI23 | RCC_PERIPHCLK_SPI45,
+	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI3 | RCC_PERIPHCLK_SPI23 | RCC_PERIPHCLK_SPI45,
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_HSI,
 	.Sai3ClockSelection = RCC_SAI3CLKSOURCE_PLL3_Q,
-	// .Sai4ClockSelection = RCC_SAI4CLKSOURCE_PLL3_Q,
 	.Spi23ClockSelection = RCC_SPI23CLKSOURCE_PLL4,
-	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK2,
+	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PLL4,
 };
