@@ -1,7 +1,7 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
 $(info --------------------)
-$(info Building for M4 core)
+$(info Building for H7 M4 core)
 BUILDDIR = $(BUILDDIR_M4)
 LOADFILE = $(LINKSCRIPTDIR)/stm32h755xx_flash_CM4.ld
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard

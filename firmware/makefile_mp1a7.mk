@@ -1,7 +1,7 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
 $(info --------------------)
-$(info Building for A7 core)
+$(info Building for MP1 A7 core)
 BUILDDIR = $(BUILDDIR_A7)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
 MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard -mthumb-interwork

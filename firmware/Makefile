@@ -15,14 +15,21 @@ export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
 all: 
-	@$(MAKE) --no-print-directory -f makefile_a7.mk
-	@$(MAKE) --no-print-directory -f makefile_m7.mk
-	@$(MAKE) --no-print-directory -f makefile_m4.mk
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk
+	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk
+	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
+	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
 	@$(MAKE) --no-print-directory tests
 
 a7:
-	@$(MAKE) --no-print-directory -f makefile_a7.mk
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk
 
+mp1m4:
+	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk
+
+h7:
+	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
+	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
 
 inttest: 
 	touch src/patchlist.cc 
