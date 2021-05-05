@@ -25,8 +25,8 @@ SOURCES = $(STARTUP_CA7) \
 		  system/libc_stub.c\
 		  system/libcpp_stub.cc \
 		  system/new.cc \
+		  system/mmu_ca7.c \
 		  $(TARGETDEVICEDIR)/boot/system_ca7.c \
-		  $(TARGETDEVICEDIR)/boot/mmu_ca7.c \
 		  $(TARGETDEVICEDIR)/boot/irq_ctrl.c \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_sai.c \
