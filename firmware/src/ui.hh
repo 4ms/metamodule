@@ -123,7 +123,7 @@ public:
 		screen_draw_task.init(
 			{
 				.TIMx = TIM5,
-				.period_ns = 4000000000 / 33, // =  33Hz
+				.period_ns = 3000000000 / 33, // =  33Hz
 				.priority1 = 2,
 				.priority2 = 2,
 
@@ -146,6 +146,8 @@ public:
 		Debug::Pin1::low();
 		screen.flush_cache();
 		HWSemaphore<ScreenFrameBufLock>::unlock();
+
+		/// TESTING:::
 #ifdef STM32MP1
 		screen_writer.transfer_buffer_to_screen();
 #endif
@@ -182,7 +184,6 @@ public:
 		if (mbox.loading_new_patch && mbox.audio_is_muted) {
 			player.unload_patch(patch_list.cur_patch());
 			patch_list.jump_to_patch(mbox.new_patch_index);
-			Debug::Pin1::high();
 			bool ok = player.load_patch(patch_list.cur_patch());
 			if (!ok) {
 				// Todo: handle error: display on screen, and try another patch?
@@ -192,7 +193,6 @@ public:
 					;
 			}
 			mbox.loading_new_patch = false;
-			Debug::Pin1::low();
 		}
 	}
 

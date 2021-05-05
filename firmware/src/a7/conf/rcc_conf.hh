@@ -88,9 +88,11 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 };
 
 const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
-	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI3 | /*RCC_PERIPHCLK_SAI4 |*/ RCC_PERIPHCLK_SPI23,
+	.PeriphClockSelection =
+		RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI3 | /*RCC_PERIPHCLK_SAI4 |*/ RCC_PERIPHCLK_SPI23 | RCC_PERIPHCLK_SPI45,
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_HSI,
 	.Sai3ClockSelection = RCC_SAI3CLKSOURCE_PLL3_Q,
 	// .Sai4ClockSelection = RCC_SAI4CLKSOURCE_PLL3_Q,
 	.Spi23ClockSelection = RCC_SPI23CLKSOURCE_PLL4,
+	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK2,
 };
