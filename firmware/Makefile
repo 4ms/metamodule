@@ -22,7 +22,7 @@ all:
 	@$(MAKE) --no-print-directory tests
 
 a7:
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
 
 mp1m4:
 	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk

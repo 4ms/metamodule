@@ -73,5 +73,16 @@ INCLUDES = -I$(DEVICEDIR)/include \
 EXTRA_CFLAGS = --param l1-cache-size=16 \
 	 		   --param l1-cache-line-size=32 \
 
+EXTDEF ?= METAMODULE_NORMAL_MODE
+
+ARCH_CFLAGS += -D'__FPU_PRESENT=1' \
+			  -DUSE_HAL_DRIVER \
+			  -DUSE_FULL_LL_DRIVER \
+			  -DSTM32H745xx \
+			  -DSTM32H7x5xx \
+			  -DSTM32H7 \
+			  -D$(EXTDEF)
+
+
 include makefile_common.mk
 

@@ -15,15 +15,6 @@ ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
 BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
 
-EXTDEF ?= METAMODULE_NORMAL_MODE
-
-ARCH_CFLAGS += -D'__FPU_PRESENT=1' \
-			  -DUSE_HAL_DRIVER \
-			  -DUSE_FULL_LL_DRIVER \
-			  -DSTM32H745xx \
-			  -DSTM32H7x5xx \
-			  -DSTM32H7 \
-			  -D$(EXTDEF)
 
 CFLAGS = -g2 -fno-common \
 	$(ARCH_CFLAGS) $(MCU) \
@@ -31,8 +22,7 @@ CFLAGS = -g2 -fno-common \
 	-fdata-sections -ffunction-sections \
 	-nostdlib \
 	-nostartfiles \
-	--param l1-cache-size=16 \
-	--param l1-cache-line-size=32 \
+	$(EXTRA_CFLAGS)
 
 CXXFLAGS = $(CFLAGS) \
 	-std=c++2a \
@@ -47,27 +37,27 @@ CXXFLAGS = $(CFLAGS) \
 	-Wno-volatile \
 
 AFLAGS = $(MCU)
-#	-x assembler-with-cpp
 
 LFLAGS = -Wl,--gc-sections \
-	-Wl,-Map,$(BUILDDIR)/main.map,--cref \
+	-Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \
 	$(MCU)  \
 	-T $(LOADFILE) \
 	-nostdlib \
 	-nostartfiles \
+	-ffreestanding \
 
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 
 all: Makefile $(BIN) $(HEX)
 
 $(BIN): $(ELF)
-	$(OBJCPY) -O binary $< $@
-	$(OBJDMP) -x --syms $< > $(addsuffix .dmp, $(basename $<))
+	@$(OBJCPY) -O binary $< $@
+	@$(OBJDMP) -x --syms $< > $(addsuffix .dmp, $(basename $<))
 	ls -l $@ $<
 
 $(HEX): $(ELF)
-	$(OBJCPY) --output-target=ihex $< $@
-	$(SZ) $(SZOPTS) $(ELF)
+	@$(OBJCPY) --output-target=ihex $< $@
+	@$(SZ) $(SZOPTS) $(ELF)
 
 $(ELF): $(OBJECTS) $(LOADFILE)
 	$(info Linking...)
@@ -95,8 +85,14 @@ $(BUILDDIR)/%.o: %.s
 
 %.d: ;
 
+clean:
+	rm -rf $(BUILDDIR)
+
+
 ifneq "$(MAKECMDGOALS)" "clean"
 -include $(DEPS)
 endif
 
 .PRECIOUS: $(DEPS) $(OBJECTS) $(ELF) $(PRECHDRS)
+
+.PHONY: all
