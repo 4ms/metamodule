@@ -51,7 +51,8 @@ public:
 
 	void fill(Color c)
 	{
-		fastFillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+		// fastFillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+		fillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
 	}
 
 	void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, Color c)
@@ -70,16 +71,16 @@ public:
 			h = _height - y;
 
 		// Todo: Measure and set this for optimal performance
-		constexpr int MaxSizeForDirectWrite = 1000;
-		if ((w * h) > MaxSizeForDirectWrite)
-			fastFillRect(x, y, w, h, color);
-		else {
-			for (int xi = x; xi < (x + w); xi++) {
-				for (int yi = y; yi < (y + h); yi++) {
-					framebuf[xi + yi * _width] = color;
-				}
+		// constexpr int MaxSizeForDirectWrite = 1000;
+		// if ((w * h) > MaxSizeForDirectWrite)
+		// 	fastFillRect(x, y, w, h, color);
+		// else {
+		for (int xi = x; xi < (x + w); xi++) {
+			for (int yi = y; yi < (y + h); yi++) {
+				framebuf[xi + yi * _width] = color;
 			}
 		}
+		// }
 	}
 
 	void fastFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
@@ -460,8 +461,10 @@ public:
 
 	void flush_cache()
 	{
-		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7)
+		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
 			target::SystemCache::clean_dcache_by_range(&framebuf, sizeof(ScreenConfT::FrameBufferT));
+			__DSB();
+		}
 	}
 
 	const mf_font_s *_font;
