@@ -2,9 +2,8 @@
 
 $(info --------------------)
 $(info Building for MP1 A7 core)
-BUILDDIR = $(BUILDDIR_A7)
+BUILDDIR = $(BUILDDIR_MP1A7)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
-MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard -mthumb-interwork
 CORE_SRC = src/a7
 HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
@@ -89,6 +88,7 @@ ARCH_CFLAGS += -DUSE_HAL_DRIVER \
 			  -DSTM32MP1 \
 			  -DCORE_CA7 \
 
+MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard -mthumb-interwork
 
 # ARCH 	= /usr/local/Caskroom/gcc-arm-embedded/10-2020-q4-major/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi
 

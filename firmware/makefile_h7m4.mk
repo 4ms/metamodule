@@ -2,7 +2,7 @@
 
 $(info --------------------)
 $(info Building for H7 M4 core)
-BUILDDIR = $(BUILDDIR_M4)
+BUILDDIR = $(BUILDDIR_H7M4)
 LOADFILE = $(LINKSCRIPTDIR)/stm32h755xx_flash_CM4.ld
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4

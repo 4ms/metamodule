@@ -1,9 +1,10 @@
 # If you want to use `make flash`, set this to the path to your JFlash executable:
 JFLASHEXE = /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
 
-export BUILDDIR_M4 		= build/corem4
-export BUILDDIR_M7 		= build/corem7
-export BUILDDIR_A7 		= build/corea7
+export BUILDDIR_H7M7 	= build/h7corem7
+export BUILDDIR_H7M4 	= build/h7corem4
+export BUILDDIR_MP1A7 	= build/mp1corea7
+export BUILDDIR_MP1M4 	= build/mp1corem4
 export BINARYNAME 		= main
 export LIBDIR 			= lib
 export DEVICEBASE		= $(LIBDIR)/cmsis-device
@@ -15,7 +16,7 @@ export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
 all: 
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
 	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk
 	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
 	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
@@ -37,15 +38,16 @@ inttest:
 	@$(MAKE) --no-print-directory EXTDEF=METAMODULE_INTEGRATION_TESTS all
 
 clean:
-	rm -rf $(BUILDDIR_M4)
-	rm -rf $(BUILDDIR_M7)
-	rm -rf $(BUILDDIR_A7)
+	rm -rf $(BUILDDIR_H7M4)
+	rm -rf $(BUILDDIR_H7M7)
+	rm -rf $(BUILDDIR_MP1A7)
+	rm -rf $(BUILDDIR_MP1M4)
 
 
-$(BUILDDIR_M4)/$(BINARYNAME).hex:
+$(BUILDDIR_H7M4)/$(BINARYNAME).hex:
 	@$(MAKE) --no-print-directory -f makefile_m4.mk
 
-$(BUILDDIR_M7)/$(BINARYNAME).hex:
+$(BUILDDIR_H7M7)/$(BINARYNAME).hex:
 	@$(MAKE) --no-print-directory -f makefile_m7.mk
 
 
