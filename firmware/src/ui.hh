@@ -123,7 +123,7 @@ public:
 		screen_draw_task.init(
 			{
 				.TIMx = TIM5,
-				.period_ns = 3000000000 / 33, // =  33Hz
+				.period_ns = 1000000000 / 33, // =  33Hz
 				.priority1 = 2,
 				.priority2 = 2,
 
