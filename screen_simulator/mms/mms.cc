@@ -1,3 +1,4 @@
+#include "stubs/drivers/arch.hh"
 #include "stubs/sys/alloc_buffer.hh"
 #include <cstdint>
 

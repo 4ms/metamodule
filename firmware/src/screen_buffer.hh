@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/screen_buffer_conf.hh"
+#include "drivers/arch.hh"
 #include "drivers/cache.hh"
 #include "drivers/dma2d_transfer.hh"
 #include "mcufont.h"
