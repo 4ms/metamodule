@@ -91,17 +91,17 @@ void main()
 		HAL_Delay(500);
 		Debug::red_LED1::high();
 
-		Debug::red_LED2::low();
-		HAL_Delay(500);
-		Debug::red_LED2::high();
+		// Debug::red_LED2::low();
+		// HAL_Delay(500);
+		// Debug::red_LED2::high();
 
 		Debug::green_LED1::low();
 		HAL_Delay(500);
 		Debug::green_LED1::high();
 
-		Debug::green_LED2::low();
-		HAL_Delay(500);
-		Debug::green_LED2::high();
+		// Debug::green_LED2::low();
+		// HAL_Delay(500);
+		// Debug::green_LED2::high();
 
 		__NOP();
 	}

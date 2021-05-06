@@ -67,6 +67,7 @@ SECTIONS
   .text :
   {
     . = ALIGN(4);
+    /* KEEP(*(.isr_vector)) /1* Startup code *1/ */
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
     *(.glue_7)         /* glue arm to thumb code */
