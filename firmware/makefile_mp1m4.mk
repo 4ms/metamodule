@@ -9,6 +9,7 @@ HAL_CONF_INC = src/mp1m4
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
+TARGETDEVICEDIR_CM4 = $(DRIVERLIB)/target/stm32mp1_cm4
 
 STARTUP = $(DEVICEBASE)/stm32mp157c/templates/startup_stm32mp157cxx_cm4.s
 SYSTEM = $(DEVICEBASE)/stm32mp157c/templates/system_stm32mp1xx.c
@@ -45,6 +46,8 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(DRIVERLIB)/drivers \
 			-I$(TARGETDEVICEDIR) \
 			-I$(TARGETDEVICEDIR)/drivers \
+			-I$(TARGETDEVICEDIR_CM4) \
+			-I$(TARGETDEVICEDIR_CM4)/drivers \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \

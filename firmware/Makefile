@@ -43,6 +43,12 @@ clean:
 	rm -rf $(BUILDDIR_MP1A7)
 	rm -rf $(BUILDDIR_MP1M4)
 
+clean_a7:
+	$(MAKE) --no-print-directory clean -f makefile_mp1a7.mk
+
+clean_uboot:
+	$(MAKE) --no-print-directory clean_uboot -f makefile_mp1a7.mk
+
 
 $(BUILDDIR_H7M4)/$(BINARYNAME).hex:
 	@$(MAKE) --no-print-directory -f makefile_m4.mk
@@ -54,12 +60,16 @@ $(BUILDDIR_H7M7)/$(BINARYNAME).hex:
 # ifeq (,$(wildcard $(JFLASHEXE)))
 #     $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
 # endif
+
 flash_a7:
 	$(info not implemented yet)
-	#$(JFLASHEXE) -openprjflashing/metamodule-mp1-ca7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -exit
+	#$(JFLASHEXE) -openprjflashing/metamodule-mp1-ca7.jflash -open$(BUILDDIR_H7M7)/$(BINARYNAME).hex -auto -exit
 
-flash_h7: $(BUILDDIR_M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
-	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
+flash_mp1m4:
+	$(JFLASHEXE) -openprjflashing/metamodule-mp1-cm4.jflash -open$(BUILDDIR_MP1M4)/$(BINARYNAME).hex -auto -exit
+
+flash_h7: $(BUILDDIR_H7M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
+	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_H7M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
 tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ -I../shared -std=c++17 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
@@ -89,11 +99,6 @@ core_tests:
 	$(info ... Running CoreModule tests ...)
 	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile
 
-clean_a7:
-	$(MAKE) --no-print-directory clean -f makefile_a7.mk
-
-clean_uboot:
-	$(MAKE) --no-print-directory clean_uboot -f makefile_a7.mk
 
 generate_compile_txt:
 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \

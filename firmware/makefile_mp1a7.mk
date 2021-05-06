@@ -9,8 +9,9 @@ HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
+TARGETDEVICEDIR_CA7 = $(DRIVERLIB)/target/stm32mp1_ca7
 
-STARTUP_CA7	= $(TARGETDEVICEDIR)/boot/startup_ca7.s
+STARTUP_CA7	= $(TARGETDEVICEDIR_CA7)/boot/startup_ca7.s
 SHARED = src/a7/shared
 
 OPTFLAG = -O3
@@ -25,8 +26,8 @@ SOURCES = $(STARTUP_CA7) \
 		  system/libcpp_stub.cc \
 		  system/new.cc \
 		  system/mmu_ca7.c \
-		  $(TARGETDEVICEDIR)/boot/system_ca7.c \
-		  $(TARGETDEVICEDIR)/boot/irq_ctrl.c \
+		  $(TARGETDEVICEDIR_CA7)/boot/system_ca7.c \
+		  $(TARGETDEVICEDIR_CA7)/boot/irq_ctrl.c \
 		  $(HALDIR)/src/stm32mp1xx_hal.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_sai.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_dma.c \
@@ -38,9 +39,9 @@ SOURCES = $(STARTUP_CA7) \
 		  $(DRIVERLIB)/drivers/pin.cc \
 		  $(DRIVERLIB)/drivers/timekeeper.cc \
 		  $(DRIVERLIB)/drivers/tim.cc \
-		  $(TARGETDEVICEDIR)/drivers/interrupt.cc \
-		  $(TARGETDEVICEDIR)/drivers/hal_handlers.cc \
-		  $(TARGETDEVICEDIR)/drivers/cycle_counter.cc \
+		  $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc \
+		  $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc \
+		  $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc \
 		  $(TARGETDEVICEDIR)/drivers/pinchange.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
 		  $(DRIVERLIB)/drivers/sai.cc \
@@ -70,6 +71,8 @@ INCLUDES = -I. \
 		   -I$(DRIVERLIB)/drivers \
 		   -I$(TARGETDEVICEDIR) \
 		   -I$(TARGETDEVICEDIR)/drivers \
+		   -I$(TARGETDEVICEDIR_CA7) \
+		   -I$(TARGETDEVICEDIR_CA7)/drivers \
 		   -I$(SHARED) \
 		   -I$(SHARED)/CoreModules \
 		   -I$(SHARED)/util \
