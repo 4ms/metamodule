@@ -12,32 +12,27 @@ using namespace MetaModule;
 
 static void app_startup()
 {
-	Debug::Pin2::low();
-	Debug::green_LED2::low();
-
 	target::RCC_Enable::HSEM_::set();
-	Debug::Pin2::high();
+	// Tell A7 we're not ready yet
 	HWSemaphore<M4_ready>::lock();
 
-	Debug::Pin2::low();
+	// Wait until A7 is ready
 	while (HWSemaphore<M7_ready>::is_locked())
 		;
 
-	Debug::green_LED2::high();
+	target::SystemClocks init_system_clocks{};
 };
 
 void main()
 {
 	app_startup();
 
-	target::SystemClocks init_system_clocks{};
-
 	// Simulate startup time
 	for (int i = 0; i < 3000000; i++) {
 	}
 
+	// Tell A7 we're ready
 	HWSemaphore<M4_ready>::unlock();
-	Debug::green_LED2::low();
 
 	while (1) {
 		Debug::red_LED2::low();

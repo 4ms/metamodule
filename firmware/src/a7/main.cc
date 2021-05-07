@@ -9,14 +9,14 @@
 #include "codec_WM8731.hh"
 #include "conf/dac_conf.hh"
 #include "debug.hh"
+#include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
 #include "shared_bus.hh"
+#include "shared_memory.hh"
 #include "ui.hh"
-// #include "shared_memory.hh"
-#include "drivers/pin.hh"
 
 namespace MetaModule
 {
@@ -62,7 +62,7 @@ void main()
 	SharedBus::i2c.deinit();
 
 	// SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
-	// SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
+	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
 	// SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
 	// SCB_CleanDCache();
 
@@ -70,21 +70,10 @@ void main()
 
 	// // Tell M4 we're done with init
 	HWSemaphore<M7_ready>::unlock();
-	Debug::Pin0::low();
 
 	// wait for M4 to be ready
-	// while (!HWSemaphore<M4_ready>::is_locked())
-	// 	;
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
-	Debug::Pin0::high();
-	Debug::Pin1::high();
-	Debug::Pin0::low();
-	Debug::Pin1::low();
-	Debug::Pin0::high();
-	Debug::Pin1::high();
-	Debug::Pin0::low();
-	Debug::Pin1::low();
 
 	param_cache.clear();
 	ui.start();
