@@ -42,7 +42,7 @@ CompileFlags:
 	]
 ---
 If:
-	PathMatch: [".*mp1.*a7.*"]
+	PathMatch: [".*a7.*"]
 CompileFlags:
 	Add: [
 		"-Ilib/mdrivlib/target/stm32mp1_ca7",

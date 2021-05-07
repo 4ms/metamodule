@@ -62,8 +62,10 @@ $(BUILDDIR_H7M7)/$(BINARYNAME).hex:
 # endif
 
 flash_a7:
-	$(info not implemented yet)
-	#$(JFLASHEXE) -openprjflashing/metamodule-mp1-ca7.jflash -open$(BUILDDIR_H7M7)/$(BINARYNAME).hex -auto -exit
+	$(info SD card must be mounted)
+	cp $(BUILDDIR_MP1M4)/$(BINARYNAME).elf /Volumes/BAREAPP/m4-main.elf
+	cp $(BUILDDIR_MP1A7)/$(BINARYNAME).uimg /Volumes/BAREAPP/a7-main.uimg
+	diskutil unmount /Volumes/BAREAPP
 
 flash_mp1m4:
 	$(JFLASHEXE) -openprjflashing/metamodule-mp1-cm4.jflash -open$(BUILDDIR_MP1M4)/$(BINARYNAME).hex -auto -exit

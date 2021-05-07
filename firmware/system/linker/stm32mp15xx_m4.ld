@@ -41,7 +41,7 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Memories definition */
 MEMORY
 {
-  m_interrupts (RX)  : ORIGIN = 0x00000000, LENGTH = 0x00000298
+  m_interrupts (RX)  : ORIGIN = 0x00000000, LENGTH = 0x00000440
   m_text       (RX)  : ORIGIN = 0x10000000, LENGTH = 0x00020000
   m_data       (RW)  : ORIGIN = 0x10020000, LENGTH = 0x00020000
   m_ipc_shm    (RW)  : ORIGIN = 0x10040000, LENGTH = 0x00008000

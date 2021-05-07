@@ -11,7 +11,7 @@ DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
 TARGETDEVICEDIR_CM4 = $(DRIVERLIB)/target/stm32mp1_cm4
 
-STARTUP = $(DEVICEBASE)/stm32mp157c/templates/startup_stm32mp157cxx_cm4.s
+STARTUP = $(TARGETDEVICEDIR_CM4)/boot/startup_stm32mp157cxx_cm4.s
 SYSTEM = $(DEVICEBASE)/stm32mp157c/templates/system_stm32mp1xx.c
 
 OPTFLAG = -O0
@@ -19,18 +19,18 @@ include makefile_opts.mk
 
 SOURCES  = $(STARTUP)
 SOURCES  += $(SYSTEM)
-# SOURCES  += $(wildcard $(HALDIR)/src/*.c)
-SOURCES  += $(HALDIR)/src/stm32mp1xx_hal_cortex.c)
 SOURCES  += $(HALDIR)/src/stm32mp1xx_hal.c)
+SOURCES  += $(HALDIR)/src/stm32mp1xx_hal_rcc.c)
+SOURCES  += $(HALDIR)/src/stm32mp1xx_hal_cortex.c)
 SOURCES  += $(wildcard $(CORE_SRC)/*.c)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
 SOURCES  += $(wildcard system/libc_stub.c)
 SOURCES  += $(wildcard system/libcpp_stub.cc)
 #SOURCES  += $(wildcard system/new.cc)
-# SOURCES  += $(DRIVERLIB)/drivers/hal_handlers.cc
+SOURCES  += $(DRIVERLIB)/drivers/hal_handlers.cc
 # SOURCES  += $(DRIVERLIB)/drivers/i2c.cc
-# SOURCES  += $(TARGETDEVICEDIR)/drivers/interrupt.cc
+SOURCES  += $(TARGETDEVICEDIR_CM4)/drivers/interrupt_handler.cc
 SOURCES  += $(DRIVERLIB)/drivers/pin.cc
 # SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
 # SOURCES  += $(DRIVERLIB)/drivers/tim.cc
