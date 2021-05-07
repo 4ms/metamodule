@@ -151,7 +151,7 @@ public:
 			});
 			mem_xfer.start_transfer();
 		} else if (!direct_mode) {
-			Debug::Pin2::high();
+			// Debug::Pin2::high();
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 			set_pos(0, 0, _width - 1, _height - 1);
 
@@ -162,7 +162,7 @@ public:
 			mem_xfer.config_transfer(dst, src, FrameSize);
 			mem_xfer.register_callback([&] {
 				start_dma_transfer([]() {
-					Debug::Pin2::low();
+					// Debug::Pin2::low();
 					HWSemaphore<ScreenFrameWriteLock>::unlock();
 				});
 			});

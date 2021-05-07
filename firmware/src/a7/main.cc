@@ -18,10 +18,6 @@
 // #include "shared_memory.hh"
 #include "drivers/pin.hh"
 
-// Test hardware:
-// #include "examples/nested_isr.hh"
-// #include "examples/timing_tests.hh"
-
 namespace MetaModule
 {
 
@@ -43,8 +39,6 @@ struct Hardware : AppStartup, Debug, SharedBus {
 void main()
 {
 	using namespace MetaModule;
-	// test_nesting_isr();
-	// run_all_timing_tests();
 
 	StaticBuffers::init();
 
@@ -76,34 +70,35 @@ void main()
 
 	// // Tell M4 we're done with init
 	HWSemaphore<M7_ready>::unlock();
+	Debug::Pin0::low();
 
-	// // wait for M4 to be ready
-	while (!HWSemaphore<M4_ready>::is_locked())
-		;
+	// wait for M4 to be ready
+	// while (!HWSemaphore<M4_ready>::is_locked())
+	// 	;
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
+	Debug::Pin0::high();
+	Debug::Pin1::high();
+	Debug::Pin0::low();
+	Debug::Pin1::low();
+	Debug::Pin0::high();
+	Debug::Pin1::high();
+	Debug::Pin0::low();
+	Debug::Pin1::low();
 
 	param_cache.clear();
 	ui.start();
-	// patch_player.load_patch(patch_list.cur_patch());
 	audio.start();
 
 	while (1) {
+		// LED1 = A7 core running
 		Debug::red_LED1::low();
 		HAL_Delay(500);
 		Debug::red_LED1::high();
 
-		// Debug::red_LED2::low();
-		// HAL_Delay(500);
-		// Debug::red_LED2::high();
-
 		Debug::green_LED1::low();
 		HAL_Delay(500);
 		Debug::green_LED1::high();
-
-		// Debug::green_LED2::low();
-		// HAL_Delay(500);
-		// Debug::green_LED2::high();
 
 		__NOP();
 	}

@@ -12,21 +12,18 @@ using namespace MetaModule;
 
 static void app_startup()
 {
+	Debug::Pin2::low();
+	Debug::green_LED2::low();
+
 	target::RCC_Enable::HSEM_::set();
+	Debug::Pin2::high();
 	HWSemaphore<M4_ready>::lock();
 
-	HWSemaphore<15>::enable_channel_ISR();
-	target::System::enable_irq(HSEM_IT2_IRQn);
-	InterruptManager::registerISR(HSEM_IT2_IRQn, 0, 0, []() {
-		HWSemaphore<15>::clear_ISR();
-		target::System::disable_irq(HSEM_IT2_IRQn);
-	});
-
-	// go to sleep, wait for wakeup
-	__WFI();
-
+	Debug::Pin2::low();
 	while (HWSemaphore<M7_ready>::is_locked())
 		;
+
+	Debug::green_LED2::high();
 };
 
 void main()
@@ -35,24 +32,23 @@ void main()
 
 	target::SystemClocks init_system_clocks{};
 
+	// Simulate startup time
 	for (int i = 0; i < 3000000; i++) {
 	}
 
-	// Main loop continuously locks/unlocks M4_ready, so CA7 can pick up at any time
+	HWSemaphore<M4_ready>::unlock();
+	Debug::green_LED2::low();
+
 	while (1) {
-		HWSemaphore<M4_ready>::lock();
 		Debug::red_LED2::low();
-		for (int i = 0; i < 1000000; i++) { // 100000 = 75Hz
-		}
+		HAL_Delay(10);
 		Debug::red_LED2::high();
-
-		HWSemaphore<M4_ready>::unlock();
-		Debug::green_LED2::low();
-		for (int i = 0; i < 1000000; i++) {
-		}
-		Debug::green_LED2::high();
-
-		for (int i = 0; i < 3000000; i++) {
-		}
+		HAL_Delay(50);
 	}
+}
+
+void recover_from_task_fault()
+{
+	while (1)
+		;
 }
