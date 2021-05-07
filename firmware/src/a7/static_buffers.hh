@@ -20,22 +20,9 @@ namespace MetaModule
 struct StaticBuffers {
 	static inline __attribute__((section(".ddma"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 	static inline /*__attribute__((section(".axisram"))) */ uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
-	static inline /*__attribute__((section(".dma_buffer"))) */ DoubleBufParamBlock param_blocks;
-	static inline __attribute__((section(".sysram"))) MMScreenConf::FrameBufferT screen_framebuf[2];
-
-	// struct CacheDisabler {
-	// 	CacheDisabler(char *_start, char *_size)
-	// 	{
-	// 		target::MPU_::disable_cache_for_dma_buffer(reinterpret_cast<uint32_t>(_start),
-	// 												   reinterpret_cast<uint32_t>(_size));
-	// 	}
-	// 	CacheDisabler(void *_start, size_t _size)
-	// 	{
-	// 		target::MPU_::disable_cache_for_dma_buffer(reinterpret_cast<uint32_t>(_start), _size);
-	// 	}
-	// };
-	// static inline CacheDisabler dma_region_disable{&_dma_buffer_start, &_dma_buffer_region_size};
-	// static inline CacheDisabler screenbuf_region_disable{&screen_framebuf, sizeof(screen_framebuf)};
+	static inline /*__attribute__((section(".dma_buffer"))) */ DoubleBufParamBlock param_blocks; // 4380 * 2
+	static inline __attribute__((section(".sysram"))) MMScreenConf::FrameBufferT screen_framebuf;
+	static inline __attribute__((section(".shared_memory"))) MMScreenConf::FrameBufferT screen_framebuf_shared;
 
 	static void init()
 	{

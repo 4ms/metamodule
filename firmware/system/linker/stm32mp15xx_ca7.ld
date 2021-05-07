@@ -5,18 +5,20 @@ ENTRY(_Reset)
 __DDMA_SIZE = 0x20000;
 __HEAP_SIZE = 0x0FFE0000; /*0x10000000 - __DDMA_SIZE*/
 
+
 MEMORY
 {
-    ROM (rx) : ORIGIN = 0xC2000040, LENGTH = 1M
-    RAM (rw): ORIGIN = 0xC0200000, LENGTH = 1M
-	HEAP (rw) : ORIGIN = 0xD0000000, LENGTH = __HEAP_SIZE
-	DDMA (rw) : ORIGIN = 0xDFFE0000, LENGTH = __DDMA_SIZE
-	/* SRAM1 (rwx) : ORIGIN = 0x10000000, LENGTH = 128K */
-	/* SRAM2 (rwx) : ORIGIN = 0x10020000, LENGTH = 128K */
-	SRAM3 (rw) : ORIGIN = 0x10040000, LENGTH = 64K /* shared with cm4 */
-	/* SRAM4 (rwx) : ORIGIN = 0x10050000, LENGTH = 64K */
-	SYSRAM (rwx) : ORIGIN = 0x2FFC0000, LENGTH = 256K
+    ROM (rx) 			: ORIGIN = 0xC2000040, LENGTH = 1M
+    RAM (rw) 			: ORIGIN = 0xC0200000, LENGTH = 1M
+	HEAP (rw) 			: ORIGIN = 0xD0000000, LENGTH = __HEAP_SIZE
+	DDMA (rw) 			: ORIGIN = 0xDFFE0000, LENGTH = __DDMA_SIZE
+	SHAREDMEM (rw) 		: ORIGIN = 0x10040000, LENGTH = 128K /* shared with cm4 */
+	SYSRAM (rw) 		: ORIGIN = 0x2FFC0000, LENGTH = 192K
+	SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, LENGTH = 64K
 }
+
+_params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM) - 256;
+/* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
 
 SECTIONS
 {
@@ -83,7 +85,6 @@ SECTIONS
 
     _text_end = .;
 
-    /* .data : AT(ADDR(.text) + SIZEOF(.text)) */
     .data : AT(_text_end)
     {
         . = ALIGN(8);
@@ -123,28 +124,30 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		*(.sysram)
+		. = ALIGN(8);
+		_end_of_sysram = .;
 	} > SYSRAM
 
-    _user_stack_start = _ram_aligned_end; /* ORIGIN(SYSRAM); */
-    _user_stack_end = _user_stack_start + 0x10000; /* 64k */
+    _user_stack_start = _end_of_sysram; /*ORIGIN(SYSRAM);*/ /*_ram_aligned_end; */
+    _user_stack_end = _user_stack_start + 0x10000 - 0x300; /* 64k - 768B */
 
     _svc_stack_start = _user_stack_end;
-    _svc_stack_end = _svc_stack_start + 0x1000; /* 4k */
+    _svc_stack_end = _svc_stack_start + 0x100;
 
     _irq_stack_start = _svc_stack_end;
-    _irq_stack_end = _irq_stack_start + 0x1000; /* 4k */
+    _irq_stack_end = _irq_stack_start + 0x100; 
 
     _fiq_stack_start = _irq_stack_end;
-    _fiq_stack_end = _fiq_stack_start + 0x100; /* 256B */
+    _fiq_stack_end = _fiq_stack_start + 0x100;
 
 
-	.dma_buffer (NOLOAD) :
+	.shared_memory (NOLOAD) :
 	{
 		. = ALIGN(8);
-		*(.dma_buffer)
-		*(.dma_buffer*)
+		*(.shared_memory)
+		*(.shared_memory*)
 		. = ALIGN(8);
-	} > SRAM3
+	} > SHAREDMEM
 	
 
   /* Remove information from the compiler libraries */
