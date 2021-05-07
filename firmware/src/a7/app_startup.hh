@@ -1,12 +1,11 @@
 #pragma once
 #include "a7/conf/rcc_conf.hh"
+#include "conf/hsem_conf.hh"
 #include "drivers/arch.hh"
-// #include "conf/hsem_conf.hh"
-// #include "drivers/hsem.hh"
+#include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
-
 
 namespace MetaModule
 {
@@ -14,14 +13,16 @@ struct AppStartup {
 	AppStartup()
 	{
 		target::RCC_Enable::HSEM_::set();
-		// HWSemaphore<M7_ready>::disable_channel_ISR();
-		// HWSemaphore<M7_ready>::lock();
+		HWSemaphore<M7_ready>::disable_channel_ISR();
+		HWSemaphore<M7_ready>::lock();
 
-		// target::corem7::SystemStartup::wait_for_cm4_sleep();
+		HWSemaphore<15>::lock();
+		// target::SystemStartup::wait_for_cm4_sleep();
 
 		init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf, 500);
 
-		// target::corem7::SystemStartup::tell_cm4_to_wakeup();
+		// target::SystemStartup::tell_cm4_to_wakeup();
+		HWSemaphore<15>::unlock();
 	}
 
 	static void init_clocks(const RCC_OscInitTypeDef &osc_def,

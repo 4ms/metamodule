@@ -19,7 +19,9 @@ include makefile_opts.mk
 
 SOURCES  = $(STARTUP)
 SOURCES  += $(SYSTEM)
-#SOURCES  += $(wildcard $(HALDIR)/src/*.c)
+# SOURCES  += $(wildcard $(HALDIR)/src/*.c)
+SOURCES  += $(HALDIR)/src/stm32mp1xx_hal_cortex.c)
+SOURCES  += $(HALDIR)/src/stm32mp1xx_hal.c)
 SOURCES  += $(wildcard $(CORE_SRC)/*.c)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
