@@ -39,14 +39,14 @@ CompileFlags:
 		"-Ilib/mdrivlib/drivers",
 		"-Ilib/mdrivlib/target/stm32mp1",
 		"-Ilib/mdrivlib/target/stm32mp1/drivers",
+		"-Ilib/mdrivlib/target/stm32mp1_ca7",
+		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
 	]
 ---
 If:
 	PathMatch: [".*a7.*"]
 CompileFlags:
 	Add: [
-		"-Ilib/mdrivlib/target/stm32mp1_ca7",
-		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
 	]
 ---
 If:
@@ -59,6 +59,8 @@ CompileFlags:
 	]
 	Remove: [
 		"-DCORE_CA7"
+		"-Ilib/mdrivlib/target/stm32mp1_ca7",
+		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
 	]
 ---
 If:
@@ -92,4 +94,9 @@ CompileFlags:
 		"-Ilib/cmsis-device/stm32mp157c/include",
 		"-Ilib/mdrivlib/target/stm32mp1",
 		"-Ilib/mdrivlib/target/stm32mp1/drivers",
+		"-Ilib/mdrivlib/target/stm32mp1_ca7",
+		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
+		"-Ilib/mdrivlib/target/stm32mp1_cm4",
+		"-Ilib/mdrivlib/target/stm32mp1_cm4/drivers",
+		"-DCORE_CM4"
 	]

@@ -32,6 +32,7 @@ class ScreenFrameWriter : public DmaSpiScreenDriver<ScreenWriterConfT, ScreenTra
 	void *src_2nd_half;
 
 public:
+	// Half frame buffer transfer mode
 	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_,
 					  ScreenWriterConfT::HalfFrameBufferT *writebuf_,
 					  size_t writebuffer_size)
@@ -45,6 +46,7 @@ public:
 		, _colstart{ScreenWriterConfT::colstart}
 	{}
 
+	// Full frame buffer mode
 	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_,
 					  ScreenWriterConfT::FrameBufferT *writebuf_,
 					  size_t writebuffer_size)
@@ -59,6 +61,7 @@ public:
 
 	{}
 
+	// Direct transfer mode
 	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_, size_t writebuffer_size)
 		: using_half_buffer_transfers{false}
 		, direct_mode{true}
@@ -168,9 +171,13 @@ public:
 			});
 			mem_xfer.start_transfer();
 		} else {
+			HWSemaphore<ScreenFrameWriteLock>::lock();
 			set_pos(0, 0, _width - 1, _height - 1);
 			config_dma_transfer(reinterpret_cast<uint32_t>(src), FrameSize);
-			start_dma_transfer([] {});
+			start_dma_transfer([] {
+				// Debug::Pin2::low();
+				HWSemaphore<ScreenFrameWriteLock>::unlock();
+			});
 		}
 	}
 

@@ -144,7 +144,9 @@ SECTIONS
     . = ALIGN(8);
     PROVIDE ( end = . );
     PROVIDE ( _end = . );
+	_sheap = .;
     . = . + _Min_Heap_Size;
+	_eheap = .;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } > m_data

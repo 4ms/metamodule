@@ -1,6 +1,6 @@
 #pragma once
-#include <cstdint>
 #include <array>
+#include <cstdint>
 
 struct MMScreenBufferConf {
 	static constexpr uint32_t width = 240;
@@ -10,4 +10,3 @@ struct MMScreenBufferConf {
 
 	using FrameBufferT = std::array<uint16_t, width * height>;
 };
-

@@ -47,6 +47,7 @@ void operator delete[](void *p, std::nothrow_t) noexcept
 }
 
 static char *heap_end;
+// Defined by the linker
 extern char _sheap;
 
 size_t get_heap_size()

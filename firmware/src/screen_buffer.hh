@@ -52,6 +52,7 @@ public:
 
 	void fill(Color c)
 	{
+		// Fixme: fix fastFillRect for A7
 		// fastFillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
 		fillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
 	}
@@ -71,6 +72,7 @@ public:
 		if ((h + y) > _height)
 			h = _height - y;
 
+		// Fixme: fix fastFillRect for A7
 		// Todo: Measure and set this for optimal performance
 		// constexpr int MaxSizeForDirectWrite = 1000;
 		// if ((w * h) > MaxSizeForDirectWrite)
@@ -465,6 +467,7 @@ public:
 		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
 			target::SystemCache::clean_dcache_by_range(&framebuf, sizeof(ScreenConfT::FrameBufferT));
 			__DSB();
+			// do mem2mem xfer
 		}
 	}
 
