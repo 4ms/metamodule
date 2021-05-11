@@ -128,7 +128,7 @@ SECTIONS
 		_end_of_sysram = .;
 	} > SYSRAM
 
-    _user_stack_start = _end_of_sysram; /*ORIGIN(SYSRAM);*/ /*_ram_aligned_end; */
+    _user_stack_start = ORIGIN(SYSRAM_STACK); /*_end_of_sysram;*/ /*_ram_aligned_end; */
     _user_stack_end = _user_stack_start + 0x10000 - 0x300; /* 64k - 768B */
 
     _svc_stack_start = _user_stack_end;
