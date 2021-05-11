@@ -28,3 +28,4 @@ shared/tableGen/make_tables
 *.dat
 *.uimg
 local_board_rev.hh
+firmware/.gdb_history
