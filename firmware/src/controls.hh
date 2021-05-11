@@ -23,15 +23,21 @@ struct Controls {
 	CVAdcChipT &cvadc;
 	GPIOExpander &jacksense_reader;
 
-	RotaryEncoder<RotaryHalfStep> rotary = {GPIO::C, 7, GPIO::C, 8};
-	DebouncedPin<GPIO::C, 10, PinPolarity::Inverted> button0;
-	DebouncedPin<GPIO::C, 11, PinPolarity::Inverted> button1;
-	DebouncedPin<GPIO::C, 6, PinPolarity::Inverted> rotary_button;
+	RotaryEncoder<RotaryHalfStep> rotary = {
+		MMControlPins::rotA.gpio,
+		MMControlPins::rotA.pin,
+		MMControlPins::rotB.gpio,
+		MMControlPins::rotB.pin,
+	};
+	DebouncedPin<MMControlPins::but0.gpio, MMControlPins::but0.pin, PinPolarity::Inverted> button0;
+	DebouncedPin<MMControlPins::but1.gpio, MMControlPins::but1.pin, PinPolarity::Inverted> button1;
+	DebouncedPin<MMControlPins::rotS.gpio, MMControlPins::rotS.pin, PinPolarity::Inverted> rotary_button;
+
 	// Todo: std::tuple<GateIn1Type, GateIn2Type, ClockInType> gate_ins;
 	// gate_in<0>.update();
-	DebouncedPin<GPIO::D, 12, PinPolarity::Normal> clock_in;
-	DebouncedPin<GPIO::G, 6, PinPolarity::Normal> gate_in1;
-	DebouncedPin<GPIO::G, 7, PinPolarity::Normal> gate_in2;
+	DebouncedPin<MMControlPins::clkin.gpio, MMControlPins::clkin.pin, PinPolarity::Normal> clock_in;
+	DebouncedPin<MMControlPins::gate1.gpio, MMControlPins::gate1.pin, PinPolarity::Normal> gate_in1;
+	DebouncedPin<MMControlPins::gate2.gpio, MMControlPins::gate2.pin, PinPolarity::Normal> gate_in2;
 
 	void update_debouncers();
 	void start();

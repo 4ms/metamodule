@@ -20,15 +20,9 @@ namespace MetaModule
 struct StaticBuffers {
 	static inline __attribute__((section(".ddma"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 	static inline /*__attribute__((section(".axisram"))) */ uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
-	static inline /*__attribute__((section(".dma_buffer"))) */ DoubleBufParamBlock param_blocks; // 4380 * 2
+	static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
 	static inline __attribute__((section(".sysram"))) MMScreenBufferConf::FrameBufferT screen_framebuf;
-	// static inline __attribute__((section(".shared_memory"))) MMScreenConf::FrameBufferT screen_framebuf_shared;
 
-	// Try using m4 core to initaite MDMA from sysram to shared_memory (SRAM3/4)
-	// if that doesn't work, put screen buf in shared_memory and see if it's much slower
-	// if that's not good, then initiate the mdma transfer here on a7 (sysram to shared memory) before releasing the
-	// screenframbuflock
-	//
 	static void init()
 	{
 		// Todo: why doesn't Params::Params() get called? because it's in a NOLOAD section of memory?

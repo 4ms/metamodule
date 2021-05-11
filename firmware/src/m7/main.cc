@@ -16,7 +16,6 @@
 #include "drivers/system_startup.hh"
 #include "m7/app_startup.hh"
 #include "m7/static_buffers.hh"
-#include "muxed_adc.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "ui.hh"

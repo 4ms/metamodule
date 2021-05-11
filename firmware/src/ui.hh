@@ -16,10 +16,6 @@
 #include "sys/alloc_buffer.hh"
 #include "sys/mem_usage.hh"
 
-// #if defined(STM32MP1) // Just testing!!!
-// 	#include "screen_writer.hh"
-// #endif
-
 namespace MetaModule
 {
 
@@ -43,36 +39,9 @@ private:
 	PatchList &patch_list;
 	uint32_t last_changed_page_tm = 0;
 
-	// #if defined(STM32MP1) // Just testing!!!
-	// 	// Todo: testing, remove:
-	// 	ScreenFrameWriter screen_writer;
-	// #endif
-
 public:
 	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
 	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
-
-	// Just testing!!!
-	// #if defined(STM32MP1)
-	// 	Ui(PatchList &pl,
-	// 	   PatchPlayer &pp,
-	// 	   ParamCache &pc,
-	// 	   UiAudioMailbox &uiaudiomailbox,
-	// 	   LedFrame<AnimationUpdateRate> &l,
-	// 	   MMScreenBufferConf::FrameBufferT (&screenbuf),
-	// 	   MMScreenBufferConf::FrameBufferT (&screenbuf))
-	// 		: leds{l}
-	// 		, screen{screenbuf[0]}
-	// 		, param_cache{pc}
-	// 		, mbox{uiaudiomailbox}
-	// 		, pages{pl, pp, params, metaparams, screen}
-	// 		, patch_list{pl} // clang-format off
-	// 		, player{pp}
-	// 		, screen_writer(&screenbuf[0], &screenbuf[1], MMScreenConf::FrameBytes)
-	// 	{
-	// 		screen_writer.init();
-	// 	}
-	// #else
 	Ui(PatchList &pl,
 	   PatchPlayer &pp,
 	   ParamCache &pc,
@@ -84,11 +53,9 @@ public:
 		, param_cache{pc}
 		, mbox{uiaudiomailbox}
 		, pages{pl, pp, params, metaparams, screen}
-		, patch_list{pl} // clang-format off
+		, patch_list{pl}
 		, player{pp}
 	{}
-// #endif
-	// clang-format on
 
 	void start()
 	{
@@ -142,16 +109,11 @@ public:
 			return;
 		}
 		HWSemaphore<ScreenFrameBufLock>::lock();
-		Debug::Pin1::high();
+		// Debug::Pin1::high();
 		pages.display_current_page();
-		Debug::Pin1::low();
+		// Debug::Pin1::low();
 		screen.flush_cache();
 		HWSemaphore<ScreenFrameBufLock>::unlock();
-
-		/// TESTING:::
-		// #ifdef STM32MP1
-		// 		screen_writer.transfer_buffer_to_screen();
-		// #endif
 	}
 
 	void handle_rotary()
