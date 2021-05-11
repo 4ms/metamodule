@@ -2,7 +2,7 @@
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
-#include "m4/hsem_handler.hh"
+#include "hsem_handler.hh"
 #include <cstring>
 
 namespace MetaModule
@@ -25,6 +25,10 @@ void Controls::update_debouncers()
 // load 6.8%
 void Controls::update_params()
 {
+	volatile bool abcd = true;
+	while (abcd)
+		;
+
 	cur_params->cvjacks[0] = (2047.5f - static_cast<float>(cvadc.get_val(0))) / 2047.5f;
 	cur_params->cvjacks[1] = (2047.5f - static_cast<float>(cvadc.get_val(1))) / 2047.5f;
 	// Oops! CV C and CV D are swapped:
@@ -136,17 +140,24 @@ Controls::Controls(MuxedADC &potadc,
 {
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
+	__HAL_DBGMCU_FREEZE_TIM17();
 
 	read_controls_task.init(control_read_tim_conf, [this]() {
-		if (_buffer_full)
-			return;
+		// if (_buffer_full)
+		// 	return;
+		Debug::Pin1::high();
 		HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 		HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 		update_debouncers();
 		update_params();
 		HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 		HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
+		Debug::Pin1::low();
 	});
-	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
+	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() {
+		Debug::Pin0::high();
+		cvadc.read_and_switch_channels();
+		Debug::Pin0::low();
+	});
 }
 } // namespace MetaModule

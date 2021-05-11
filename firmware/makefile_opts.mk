@@ -1,5 +1,6 @@
 #----------------------------------
 # Uncomment to compile unoptimized:
+# $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/timekeeper.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/main.o: OPTFLAG = -O0
