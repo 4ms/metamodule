@@ -73,6 +73,9 @@ flash_mp1m4:
 flash_h7: $(BUILDDIR_H7M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_H7M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
+start_gdb:
+	JLinkGDBServer -select USB -device STM32MP15xx_M4_Bank1 -endian little -if SWD -speed 8000 -noir -nohalt
+
 tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ -I../shared -std=c++17 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
