@@ -1,5 +1,6 @@
 #----------------------------------
 # Uncomment to compile unoptimized:
+# $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/timekeeper.o: OPTFLAG = -O0
@@ -20,4 +21,7 @@
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(SHARED)/CoreModules/lfoCore.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(SHARED)/CoreModules/fmoscCore.o: OPTFLAG = -O0
+
+#FixMe: for some reason gcc uses invalid alignmet in a VST1.8 instruction (base address is aligned to 4 bytes, but instruction requires 8-byte alignment). Why?? Setting -O0 fixes it...
+$(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
 #-----------------------------------
