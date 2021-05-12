@@ -7,14 +7,14 @@ namespace MetaModule
 {
 const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
-	.period_ns = 20800, // must be just a hair faster than 48kHz
+	.period_ns = 20000, // must be just a hair faster than 48kHz
 	.priority1 = 0,
 	.priority2 = 3,
 };
 
 struct MMControlPins {
-	static constexpr PinNoInit rotA{GPIO::G, 12};
-	static constexpr PinNoInit rotB{GPIO::G, 13};
+	static constexpr PinNoInit rotA{GPIO::G, 13};
+	static constexpr PinNoInit rotB{GPIO::G, 12};
 	static constexpr PinNoInit rotS{GPIO::A, 3};
 
 	static constexpr PinNoInit but0{GPIO::F, 11};
