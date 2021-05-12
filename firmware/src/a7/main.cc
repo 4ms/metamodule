@@ -66,6 +66,7 @@ void main()
 	auto addr = SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
 	target::SystemCache::clean_dcache_by_addr(addr);
 
+	// Enable ISR for LedBufFrameLock:
 	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	// // Tell M4 we're done with init
