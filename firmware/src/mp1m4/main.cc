@@ -9,6 +9,7 @@
 #include "drivers/arch.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/hsem.hh"
+#include "drivers/pca9685_led_driver.hh"
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
 #include "drivers/system.hh"
@@ -17,6 +18,7 @@
 #include "params.hh"
 #include "screen_writer.hh"
 #include "shared_bus.hh"
+#include "shared_bus_queue.hh"
 #include "shared_memory.hh"
 
 namespace MetaModule
@@ -48,12 +50,12 @@ void main()
 
 	SharedBus::i2c.init(i2c_conf_controls);
 
-	// auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufLocation);
+	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufLocation);
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
 
 	// Led Driver
-	// PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
+	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
 
 	// Controls
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
@@ -62,9 +64,9 @@ void main()
 	Controls controls{potadc, cvadc, *param_block_base, gpio_expander};
 
 	// SharedBus
-	// SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
-	// SharedBus::i2c.enable_IT(i2c_conf_m4.priority1, i2c_conf_m4.priority2);
-	// led_driver.start_it_mode();
+	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};
+	SharedBus::i2c.enable_IT(i2c_conf_controls.priority1, i2c_conf_controls.priority2);
+	led_driver.start_it_mode();
 
 	controls.start();
 
@@ -86,22 +88,22 @@ void main()
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
 
-	// while (1) {
-	// 	if (SharedBus::i2c.is_ready()) {
-	// 		i2cqueue.update();
-	// 	}
-	// 	__NOP();
-	// }
+	while (1) {
+		if (SharedBus::i2c.is_ready()) {
+			i2cqueue.update();
+		}
+		__NOP();
+	}
 
 	// Tell A7 we're ready
-	HWSemaphore<M4_ready>::unlock();
+	// HWSemaphore<M4_ready>::unlock();
 
-	while (1) {
-		Debug::red_LED2::low();
-		HAL_Delay(10);
-		Debug::red_LED2::high();
-		HAL_Delay(50);
-	}
+	// while (1) {
+	// 	Debug::red_LED2::low();
+	// 	HAL_Delay(10);
+	// 	Debug::red_LED2::high();
+	// 	HAL_Delay(50);
+	// }
 }
 
 void recover_from_task_fault()

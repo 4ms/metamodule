@@ -40,7 +40,7 @@ SOURCES  += $(DRIVERLIB)/drivers/pin.cc
 SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
 SOURCES  += $(DRIVERLIB)/drivers/tim.cc
 SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
-# SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
+SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
 # SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver_dma.cc
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
