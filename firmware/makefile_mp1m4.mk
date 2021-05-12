@@ -14,7 +14,7 @@ TARGETDEVICEDIR_CM4 = $(DRIVERLIB)/target/stm32mp1_cm4
 STARTUP = $(TARGETDEVICEDIR_CM4)/boot/startup_stm32mp157cxx_cm4.s
 SYSTEM = $(DEVICEBASE)/stm32mp157c/templates/system_stm32mp1xx.c
 
-OPTFLAG = -O0
+OPTFLAG = -O3
 include makefile_opts.mk
 
 SOURCES  = $(STARTUP)
