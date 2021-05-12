@@ -87,8 +87,8 @@ struct PageWidgets {
 			screen.setCursor((i & 0b111) * box_width + 3, y);
 			if (i >= 8)
 				screen.print((int16_t)(params.cvjacks[i - 8] * 100));
-			else
-				screen.print((int16_t)(params.knobs[i] * 100));
+			// else
+			// 	screen.print((int16_t)(params.knobs[i] * 100));
 			if (i == 7)
 				y += box_height;
 		}
