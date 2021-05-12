@@ -41,9 +41,9 @@ public:
 	{
 		switch (cur_client) {
 			case Leds:
-				if (HWSemaphore<LEDFrameBufLock>::lock() == HWSemaphoreFlag::LockedOk) {
-					leds.write_partial_chip(0, 12);
-				}
+				// if (HWSemaphore<LEDFrameBufLock>::lock() == HWSemaphoreFlag::LockedOk) {
+				// 	leds.write_partial_chip(0, 12);
+				// }
 				cur_client = SelectPots;
 				break;
 
@@ -72,16 +72,16 @@ public:
 
 			case PrepareReadGPIOExpander: {
 				auto err = controls.jacksense_reader.prepare_read();
-				if (err != GPIOExpander::Error::None)
-					__BKPT();
+				// if (err != GPIOExpander::Error::None)
+				// 	__BKPT();
 				cur_client = RequestReadGPIOExpander;
 				break;
 			}
 
 			case RequestReadGPIOExpander: {
 				auto err = controls.jacksense_reader.read_pins();
-				if (err != GPIOExpander::Error::None)
-					__BKPT();
+				// if (err != GPIOExpander::Error::None)
+				// 	__BKPT();
 				cur_client = CollectReadGPIOExpander;
 				break;
 			}
