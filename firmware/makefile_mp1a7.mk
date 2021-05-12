@@ -81,7 +81,7 @@ INCLUDES = -I. \
 			-I$(MFINC) \
 			-I$(MFFONTDIR) \
 
-EXTRA_CFLAGS = --param l1-cache-size=32 \
+EXTRA_CFLAGS = --param l1-cache-size=64 \
 	 		   --param l1-cache-line-size=32 \
 			   --param l2-cache-size=256 \
 

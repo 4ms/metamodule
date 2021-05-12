@@ -1,5 +1,5 @@
 
-ARCH 	= arm-none-eabi
+ARCH 	?= arm-none-eabi
 CC 		= $(ARCH)-gcc
 CXX 	= $(ARCH)-g++
 LD 		= $(ARCH)-g++
