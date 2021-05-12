@@ -103,19 +103,19 @@ void Controls::start()
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
-		_buffer_full = false;
-		_first_param = true;
 		cur_metaparams = &param_blocks[0].metaparams;
 		cur_params = param_blocks[0].params.begin();
+		_first_param = true;
+		_buffer_full = false;
 	});
 
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
-		_buffer_full = false;
-		_first_param = true;
 		cur_metaparams = &param_blocks[1].metaparams;
 		cur_params = param_blocks[1].params.begin();
+		_first_param = true;
+		_buffer_full = false;
 	});
 	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
@@ -141,22 +141,19 @@ Controls::Controls(MuxedADC &potadc,
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 
+	// mp1 m4: 20.1us, width= 4.1us
 	read_controls_task.init(control_read_tim_conf, [this]() {
 		if (_buffer_full)
 			return;
-		Debug::Pin1::high();
 		HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 		HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 		update_debouncers();
 		update_params();
 		HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 		HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
-		Debug::Pin1::low();
 	});
-	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() {
-		Debug::Pin0::high();
-		cvadc.read_and_switch_channels();
-		Debug::Pin0::low();
-	});
+
+	// 72us, 0.5us wide
+	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 }
 } // namespace MetaModule
