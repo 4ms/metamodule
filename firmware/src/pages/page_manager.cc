@@ -5,7 +5,7 @@ namespace MetaModule
 
 void PageManager::init()
 {
-	cur_page = Page::PatchOverview;
+	cur_page = Page::DebugInfo;
 	display_current_page();
 }
 
