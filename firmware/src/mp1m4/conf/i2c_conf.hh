@@ -3,15 +3,14 @@
 
 constexpr uint32_t LEDUpdateHz = 100;
 
-// Runs at 417kHz on A7:
-// At 520kHz on MP1-M4
+// Runs at 400kHz on MP1-M4: 0x00601173
+// Runs at 100kHz on MP1-M4: 0x10707DBC
 const I2CConfig i2c_conf_controls = {
-	.I2Cx = I2C1,
-	.SCL = {GPIO::H, 11, 5},
-	.SDA = {GPIO::H, 12, 5},
+	.I2Cx = I2C2,
+	.SCL = {GPIO::Z, 0, 3},
+	.SDA = {GPIO::Z, 1, 3},
 	.timing =
 		{
-			// MP1 M4: 400kHz:
 			.PRESC = 0x00,
 			.SCLDEL_SDADEL = 0x60,
 			.SCLH = 0x11,
