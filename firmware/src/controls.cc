@@ -25,10 +25,6 @@ void Controls::update_debouncers()
 // load 6.8%
 void Controls::update_params()
 {
-	volatile bool abcd = true;
-	while (abcd)
-		;
-
 	cur_params->cvjacks[0] = (2047.5f - static_cast<float>(cvadc.get_val(0))) / 2047.5f;
 	cur_params->cvjacks[1] = (2047.5f - static_cast<float>(cvadc.get_val(1))) / 2047.5f;
 	// Oops! CV C and CV D are swapped:
@@ -53,9 +49,6 @@ void Controls::update_params()
 
 		// Metaparams:
 
-		// PatchCV
-		cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
-
 		// Rotary button
 		if (rotary_button.is_just_pressed()) {
 			_rotary_moved_while_pressed = false;
@@ -79,6 +72,9 @@ void Controls::update_params()
 			cur_metaparams->rotary.motion = tmp_rotary_motion;
 			cur_metaparams->rotary_pushed.motion = 0;
 		}
+
+		// PatchCV
+		cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
 
 		// int new_rotary_motion = rotary.read();
 		// bool pressed = rotary_button.is_pressed();
@@ -112,6 +108,7 @@ void Controls::start()
 		cur_metaparams = &param_blocks[0].metaparams;
 		cur_params = param_blocks[0].params.begin();
 	});
+
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
@@ -137,14 +134,16 @@ Controls::Controls(MuxedADC &potadc,
 	, jacksense_reader{gpio_expander}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
+	, cur_metaparams(&param_blocks[0].metaparams)
+	, _buffer_full{false}
 {
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 
 	read_controls_task.init(control_read_tim_conf, [this]() {
-		// if (_buffer_full)
-		// 	return;
+		if (_buffer_full)
+			return;
 		Debug::Pin1::high();
 		HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 		HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
