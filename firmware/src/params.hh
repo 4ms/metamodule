@@ -123,7 +123,7 @@ struct MetaParams {
 
 // ParamCache class
 // Stores a copy of Params and MetaParams and allows access from single core
-// where a higher-priority ISR does write_sync(), and a lower-priority ISR does read_sync_*()
+// where a higher-priority ISR does write_sync(), and a lower-priority ISR does read_sync()
 // The users of this class should each have their own copy of Params and MetaParams.
 //
 // Todo: use HSEM to allow for multiple cores and inverted ISR priorities

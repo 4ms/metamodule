@@ -90,13 +90,15 @@ static uint32_t Sect_Normal_RO;	 // as Sect_Normal_Cod, but not executable
 static uint32_t Sect_Normal_RW;	 // as Sect_Normal_Cod, but writeable and not executable
 static uint32_t Sect_Device_RO;	 // device, non-shareable, non-executable, ro, domain 0, base addr 0
 static uint32_t Sect_Device_RW;	 // as Sect_Device_RO, but writeable
+static uint32_t Sect_StronglyOrdered;
 
 static uint32_t Page_L1_4k = 0x0;	// generic
 static uint32_t Page_L1_64k = 0x0;	// generic
 static uint32_t Page_4k_Device_RW;	// Shared device, not executable, rw, domain 0
 static uint32_t Page_64k_Device_RW; // Shared device, not executable, rw, domain 0
 
-void MMU_CreateTranslationTable(void) {
+void MMU_CreateTranslationTable(void)
+{
 	mmu_region_attributes_Type region;
 
 	// Create 4GB of faulting entries
@@ -108,6 +110,7 @@ void MMU_CreateTranslationTable(void) {
 	section_normal_rw(Sect_Normal_RW, region);
 	section_device_ro(Sect_Device_RO, region);
 	section_device_rw(Sect_Device_RW, region);
+	section_so(Sect_StronglyOrdered, region);
 	page64k_device_rw(Page_L1_64k, Page_64k_Device_RW, region);
 	page4k_device_rw(Page_L1_4k, Page_4k_Device_RW, region);
 
