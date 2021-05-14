@@ -130,24 +130,24 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		player.set_panel_input(1, AudioFrame::scaleInput(-1.f * in_->r));
 
 		i = 0;
-		for (auto &cv : params_->cvjacks) {
+		for (const auto &cv : params_->cvjacks) {
 			// Todo: player.set_cv_input(i, cv);
 			player.set_panel_input(i + NumAudioInputs, cv);
 			i++;
 		}
 		i = 0;
-		for (auto &gatein : params_->gate_ins) {
+		for (const auto &gatein : params_->gate_ins) {
 			// Todo: player.set_gate_input(i, cv);
 			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
 			i++;
 		}
 		i = 0;
-		for (auto &knob : params_->knobs) {
+		for (const auto &knob : params_->knobs) {
 			player.set_panel_param(i, knob);
 			i++;
 		}
 
-		// dual LFO: 2us on H7, 31us on MP1, with cache it's 9us on MP1, now it's 1.43us on MP1
+		// dual LFO: 2us on H7, with cache it's 9us on MP1, now it's 1.43us on MP1
 		player.update_patch(patch_list.cur_patch());
 
 		out_.l = get_audio_output(LEFT_OUT);
