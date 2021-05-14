@@ -8,7 +8,7 @@
 
 namespace MetaModule
 {
-constexpr bool DEBUG_PASSTHRU_AUDIO = false;
+constexpr bool DEBUG_PASSTHRU_AUDIO = true;
 
 // Clock in -> clock out latency: 1.33ms (one audio DMA half-transfer)
 // Gate In -> audio OUt latency: 1.90ms
@@ -40,7 +40,7 @@ AudioStream::AudioStream(PatchList &patches,
 							AudioConf::DMABlockSize * 2);
 	codec_.set_callbacks(
 		[this]() {
-			// Debug::Pin0::high();
+			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
 
@@ -52,10 +52,10 @@ AudioStream::AudioStream(PatchList &patches,
 				process(rx_buf_2, tx_buf_2, param_blocks[0]);
 				target::SystemCache::clean_dcache_by_range(&tx_buf_2, sizeof(AudioStreamBlock));
 			}
-			// Debug::Pin0::low();
+			Debug::Pin0::low();
 		},
 		[this]() {
-			// Debug::Pin0::high();
+			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
@@ -66,7 +66,7 @@ AudioStream::AudioStream(PatchList &patches,
 				process(rx_buf_1, tx_buf_1, param_blocks[1]);
 				target::SystemCache::clean_dcache_by_range(&tx_buf_1, sizeof(AudioStreamBlock));
 			}
-			// Debug::Pin0::low();
+			Debug::Pin0::low();
 		});
 
 	dac.init();
