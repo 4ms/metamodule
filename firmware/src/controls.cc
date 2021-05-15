@@ -49,6 +49,9 @@ void Controls::update_params()
 
 		// Metaparams:
 
+		// PatchCV
+		cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
+
 		// Rotary button
 		if (rotary_button.is_just_pressed()) {
 			_rotary_moved_while_pressed = false;
@@ -62,26 +65,26 @@ void Controls::update_params()
 		}
 
 		// Rotary turning
-		int tmp_rotary_motion = rotary.read();
-		if (rotary_button.is_pressed()) {
-			cur_metaparams->rotary.motion = 0;
-			cur_metaparams->rotary_pushed.motion = tmp_rotary_motion;
-			if (tmp_rotary_motion != 0)
-				_rotary_moved_while_pressed = true;
-		} else {
-			cur_metaparams->rotary.motion = tmp_rotary_motion;
-			cur_metaparams->rotary_pushed.motion = 0;
-		}
+		// int tmp_rotary_motion = rotary.read();
+		// if (rotary_button.is_pressed()) {
+		// 	cur_metaparams->rotary.motion = 0;
+		// 	cur_metaparams->rotary_pushed.motion = tmp_rotary_motion;
+		// 	if (tmp_rotary_motion != 0)
+		// 		_rotary_moved_while_pressed = true;
+		// } else {
+		// 	cur_metaparams->rotary.motion = tmp_rotary_motion;
+		// 	cur_metaparams->rotary_pushed.motion = 0;
+		// }
 
-		// PatchCV
-		cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
-
-		// int new_rotary_motion = rotary.read();
-		// bool pressed = rotary_button.is_pressed();
-		// cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
-		// cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
-		// if (pressed && tmp_rotary_motion)
-		// 	_rotary_moved_while_pressed = true;
+		int new_rotary_motion = rotary.read();
+		if (new_rotary_motion > 0)
+			Debug::Pin1::high();
+		else
+			Debug::Pin1::low();
+		bool pressed = rotary_button.is_pressed();
+		cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
+		cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
+		_rotary_moved_while_pressed = (pressed && new_rotary_motion);
 
 	} else {
 		// Interpolate the knobs
@@ -103,23 +106,23 @@ void Controls::start()
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
-		Debug::Pin1::high();
+		// Debug::Pin1::high();
 		cur_metaparams = &param_blocks[0].metaparams;
 		cur_params = param_blocks[0].params.begin();
 		_first_param = true;
 		_buffer_full = false;
-		Debug::Pin1::low();
+		// Debug::Pin1::low();
 	});
 
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
-		Debug::Pin1::high();
+		// Debug::Pin1::high();
 		cur_metaparams = &param_blocks[1].metaparams;
 		cur_params = param_blocks[1].params.begin();
 		_first_param = true;
 		_buffer_full = false;
-		Debug::Pin1::low();
+		// Debug::Pin1::low();
 	});
 	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
@@ -152,14 +155,15 @@ Controls::Controls(MuxedADC &potadc,
 			// Debug::Pin0::low();
 			return;
 		}
-		Debug::Pin2::high();
-		HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
-		HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
+		// Debug::Pin2::high();
+		// Todo: these enable/disable blocks aren't necessary, right?
+		// HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
+		// HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 		update_debouncers();
 		update_params();
-		HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
-		HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
-		Debug::Pin2::low();
+		// HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
+		// HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
+		// Debug::Pin2::low();
 	});
 
 	// 72us, 0.5us wide

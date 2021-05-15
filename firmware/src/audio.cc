@@ -8,7 +8,7 @@
 
 namespace MetaModule
 {
-constexpr bool DEBUG_PASSTHRU_AUDIO = true;
+constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 
 // Clock in -> clock out latency: 1.33ms (one audio DMA half-transfer)
 // Gate In -> audio OUt latency: 1.90ms
@@ -104,7 +104,15 @@ uint32_t AudioStream::get_dac_output(int output_id)
 void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
 {
 	param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
+
+	if (param_block.metaparams.rotary.motion > 1) // never?!
+		Debug::Pin2::high();
+	else
+		Debug::Pin2::low();
+
 	cache.write_sync(param_block.params[0], param_block.metaparams);
+	target::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
+
 	load_measure.start_measurement();
 
 	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch

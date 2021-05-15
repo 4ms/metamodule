@@ -57,6 +57,7 @@
 
 #define __HEAP_BASE 0xD0000000
 #define __HEAP_SIZE 0x10000000
+/* #define __HEAP_SIZE (0x10000000 - 1024 * 1024) */
 
 #define __TTB_BASE 0xC0100000
 
