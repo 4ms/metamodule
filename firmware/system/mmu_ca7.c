@@ -49,15 +49,23 @@
 #define __ROM_BASE 0xC2000000
 #define __ROM_SIZE 0x00100000 /* 1M */
 
+/* RAM: 0xC0200000 - 0xC2000000 */
 #define __RAM_BASE 0xC0200000
 #define __RAM_SIZE (0xC2000000 - __RAM_BASE)
 
+/* RAM2: 0xC2100000 - 0xD0000000 */
 #define __RAM2_BASE 0xC2100000
 #define __RAM2_SIZE (0xD0000000 - __RAM2_BASE)
 
+/* DMA BUF: 0xDFF00000 - 0xE0000000 */
+#define __DMABUF_SIZE (1024 * 1024)
+#define __DMABUF_END 0xE0000000
+#define __DMABUF_BASE (__DMABUF_END - __DMABUF_SIZE)
+
+/* HEAP: 0xD0000000 - 0xDFF00000*/
 #define __HEAP_BASE 0xD0000000
-#define __HEAP_SIZE 0x10000000
-/* #define __HEAP_SIZE (0x10000000 - 1024 * 1024) */
+#define __HEAP_END __DMABUF_BASE
+#define __HEAP_SIZE (__HEAP_END - __HEAP_BASE)
 
 #define __TTB_BASE 0xC0100000
 
@@ -65,10 +73,10 @@
 #define A7_SYSRAM_SIZE 0x00040000 /* 256kB */
 #define A7_SYSRAM_1MB_SECTION_BASE 0x2FF00000
 
-#define A7_SRAM1_BASE (0x10000000UL)
-#define A7_SRAM2_BASE (0x10020000UL)
-#define A7_SRAM3_BASE (0x10040000UL)
-#define A7_SRAM4_BASE (0x10050000UL)
+#define A7_SRAM1_BASE (0x30000000UL)
+#define A7_SRAM2_BASE (0x30020000UL)
+#define A7_SRAM3_BASE (0x30040000UL)
+#define A7_SRAM4_BASE (0x30050000UL)
 
 // TTB base address
 #define TTB_BASE ((uint32_t *)__TTB_BASE)
@@ -123,15 +131,20 @@ void MMU_CreateTranslationTable(void)
 	MMU_TTSection(TTB_BASE, __RAM2_BASE, __RAM2_SIZE / 0x100000, Sect_Normal_RW);
 	MMU_TTSection(TTB_BASE, __HEAP_BASE, __HEAP_SIZE / 0x100000, Sect_Normal_RW);
 
+	//.ddma
+	MMU_TTSection(TTB_BASE, __DMABUF_BASE, __DMABUF_SIZE / 0x100000, Sect_Device_RW);
+
+	//.shared_memory
 	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Normal_RW); // 1MB RAM (actually is only 384kB)
+
+	//.sysram
+	MMU_TTSection(TTB_BASE, A7_SYSRAM_1MB_SECTION_BASE, 1, Sect_Normal_RW);
 
 	// Peripheral memory
 	// For better security: be more specific and use 4k tables to cover only actual peripherals, as in example file in
 	// CMSIS
 	MMU_TTSection(TTB_BASE, 0x40000000, 0x10000000 / 0x100000, Sect_Device_RW);
 	MMU_TTSection(TTB_BASE, 0x50000000, 0x10000000 / 0x100000, Sect_Device_RW);
-
-	MMU_TTSection(TTB_BASE, A7_SYSRAM_1MB_SECTION_BASE, 1, Sect_Normal_RW);
 
 	// GIC
 	// Only need: 0xA002 0000 - 0xA002 8000, but set 0xA002 0000 - 0XA0012 0000

@@ -48,7 +48,7 @@ AudioStream::AudioStream(PatchList &patches,
 				process(rx_buf_1, tx_buf_1, param_blocks[0]);
 			else {
 				target::SystemCache::invalidate_dcache_by_range(&rx_buf_2, sizeof(AudioStreamBlock));
-				target::SystemCache::invalidate_dcache_by_range(&(param_blocks[0]), sizeof(ParamBlock));
+				// target::SystemCache::invalidate_dcache_by_range(&(param_blocks[0]), sizeof(ParamBlock));
 				process(rx_buf_2, tx_buf_2, param_blocks[0]);
 				target::SystemCache::clean_dcache_by_range(&tx_buf_2, sizeof(AudioStreamBlock));
 			}
@@ -62,7 +62,7 @@ AudioStream::AudioStream(PatchList &patches,
 				process(rx_buf_2, tx_buf_2, param_blocks[1]);
 			else {
 				target::SystemCache::invalidate_dcache_by_range(&rx_buf_1, sizeof(AudioStreamBlock));
-				target::SystemCache::invalidate_dcache_by_range(&(param_blocks[1]), sizeof(ParamBlock));
+				// target::SystemCache::invalidate_dcache_by_range(&(param_blocks[1]), sizeof(ParamBlock));
 				process(rx_buf_1, tx_buf_1, param_blocks[1]);
 				target::SystemCache::clean_dcache_by_range(&tx_buf_1, sizeof(AudioStreamBlock));
 			}

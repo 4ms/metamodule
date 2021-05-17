@@ -38,7 +38,7 @@ static void app_startup()
 };
 
 struct StaticBuffers {
-	static inline __attribute__((section(".shared_memory"))) MMScreenConf::FrameBufferT screen_writebuf;
+	static inline /*__attribute__((section(".shared_memory")))*/ MMScreenConf::FrameBufferT screen_writebuf;
 } _sb;
 } // namespace MetaModule
 

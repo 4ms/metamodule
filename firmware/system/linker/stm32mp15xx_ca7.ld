@@ -2,22 +2,28 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(_Reset)
 
-__DDMA_SIZE = 0x20000;
-__HEAP_SIZE = 0x0FFE0000; /*0x10000000 - __DDMA_SIZE*/
+_DMABUF_SIZE = 1024 * 1024;
+_DMABUF_END = 0xE0000000;
+_DMABUF_BASE = (_DMABUF_END - _DMABUF_SIZE);
 
+_HEAP_BASE = 0xD0000000;
+_HEAP_END = _DMABUF_BASE;
+_HEAP_SIZE = _HEAP_END - _HEAP_BASE;
+
+_SHARED_PTR_SIZE = 256;
 
 MEMORY
 {
-    ROM (rx) 			: ORIGIN = 0xC2000040, LENGTH = 1M
-    RAM (rw) 			: ORIGIN = 0xC0200000, LENGTH = 1M
-	HEAP (rw) 			: ORIGIN = 0xD0000000, LENGTH = __HEAP_SIZE
-	DDMA (rw) 			: ORIGIN = 0xDFFE0000, LENGTH = __DDMA_SIZE
-	SHAREDMEM (rw) 		: ORIGIN = 0x10040000, LENGTH = 128K /* shared with cm4 */
-	SYSRAM (rw) 		: ORIGIN = 0x2FFC0000, LENGTH = 192K
-	SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, LENGTH = 64K
+    ROM (rx) 			: ORIGIN = 0xC2000040, 		LENGTH = (1M - 0x40)
+    RAM (rw) 			: ORIGIN = 0xC0200000, 		LENGTH = 1M
+	HEAP (rw) 			: ORIGIN = _HEAP_BASE,		LENGTH = _HEAP_SIZE
+	DMABUF (rw) 		: ORIGIN = _DMABUF_BASE, 	LENGTH = _DMABUF_SIZE
+	SHAREDMEM (rw) 		: ORIGIN = 0x30040000, 		LENGTH = (128K - _SHARED_PTR_SIZE) /* shared with cm4 */
+	SYSRAM (rw) 		: ORIGIN = 0x2FFC0000, 		LENGTH = 192K
+	SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, 		LENGTH = 64K
 }
 
-_params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM) - 256;
+_params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM);
 /* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
 
 SECTIONS
@@ -110,7 +116,7 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		_sheap = .;
-		. += __HEAP_SIZE;
+		. += _HEAP_SIZE;
 		_eheap = .;
 	} > HEAP
 
@@ -118,7 +124,7 @@ SECTIONS
 	{
 		. = ALIGN(8);
         *(.ddma)
-	} > DDMA
+	} > DMABUF
 
 	.sysram (NOLOAD):
 	{

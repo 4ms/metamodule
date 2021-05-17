@@ -4,16 +4,17 @@ _estack = 0x10040000;
 
 _Min_Heap_Size  = 0x1000;  /* required amount of heap  */
 _Min_Stack_Size = 0x400; /* required amount of stack */
+__SHARED_PTR_SIZE = 256;
 
 MEMORY
 {
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
 	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = 0x00020000
 	m_data       (RW)  	: ORIGIN = 0x10020000, LENGTH = 0x00020000
-	SHAREDMEM    (RW)	: ORIGIN = 0x10040000, LENGTH = 128K /* shared with cm4 */
+	SHAREDMEM    (RW)	: ORIGIN = 0x10040000, LENGTH = (128K - __SHARED_PTR_SIZE) /* shared with ca7 */
 }
 
-_params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM) - 256;
+_params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM);
 /* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
 
 SECTIONS
