@@ -24,7 +24,7 @@ struct StaticBuffers {
 
 	// FIXME: Why does last few words of param_blocks become 00'd out if its in sysram and appears earlier in this list?
 	// (address 0x2FFDE400 and up is blanked)
-	static inline __attribute__((section(".ddma"))) DoubleBufParamBlock param_blocks; // 4380 * 2
+	static inline __attribute__((section(".shared_memory"))) DoubleBufParamBlock param_blocks; // 4380 * 2
 
 	static void init()
 	{
