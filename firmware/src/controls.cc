@@ -65,22 +65,7 @@ void Controls::update_params()
 		}
 
 		// Rotary turning
-		// int tmp_rotary_motion = rotary.read();
-		// if (rotary_button.is_pressed()) {
-		// 	cur_metaparams->rotary.motion = 0;
-		// 	cur_metaparams->rotary_pushed.motion = tmp_rotary_motion;
-		// 	if (tmp_rotary_motion != 0)
-		// 		_rotary_moved_while_pressed = true;
-		// } else {
-		// 	cur_metaparams->rotary.motion = tmp_rotary_motion;
-		// 	cur_metaparams->rotary_pushed.motion = 0;
-		// }
-
 		int new_rotary_motion = rotary.read();
-		if (new_rotary_motion > 0)
-			Debug::Pin1::high();
-		else
-			Debug::Pin1::low();
 		bool pressed = rotary_button.is_pressed();
 		cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
 		cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
@@ -106,7 +91,8 @@ void Controls::start()
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
-		// Debug::Pin1::high();
+		// if (param_blocks[0].metaparams.rotary.motion > 0)
+		// 	Debug::Pin1::high();
 		cur_metaparams = &param_blocks[0].metaparams;
 		cur_params = param_blocks[0].params.begin();
 		_first_param = true;
@@ -117,7 +103,8 @@ void Controls::start()
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
-		// Debug::Pin1::high();
+		// if (param_blocks[0].metaparams.rotary.motion > 0)
+		// 	Debug::Pin1::high();
 		cur_metaparams = &param_blocks[1].metaparams;
 		cur_params = param_blocks[1].params.begin();
 		_first_param = true;

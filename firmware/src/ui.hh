@@ -102,14 +102,8 @@ public:
 
 	void update_ui()
 	{
-		Debug::Pin3::high();
-		target::SystemCache::invalidate_dcache_by_range(&param_cache.m, sizeof(MetaParams));
 		param_cache.read_sync(&params, &metaparams);
-		// target::SystemCache::clean_dcache_by_range(&p, sizeof(Params));
-		// target::SystemCache::clean_dcache_by_range(&m, sizeof(MetaParams));
-		// target::SystemCache::invalidate_dcache_by_range(&param_cache.p, sizeof(Params));
 		handle_rotary();
-		Debug::Pin3::low();
 
 		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
 			return;
