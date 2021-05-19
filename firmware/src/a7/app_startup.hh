@@ -3,10 +3,13 @@
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
+#include "drivers/copro_control.hh"
 #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
+#include "firmware_m4.h"
+#include "firmware_m4_vectors.h"
 
 namespace MetaModule
 {
@@ -17,10 +20,15 @@ struct AppStartup {
 		HWSemaphore<M7_ready>::disable_channel_ISR();
 		HWSemaphore<M7_ready>::lock();
 
-		init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf, 500);
+		init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
 
-		// Allow MCU to boot
-		RCC->MP_GCR = RCC->MP_GCR | RCC_MP_GCR_BOOT_MCU;
+		Copro::reset();
+		Copro::load_vector_data(build_mp1corem4_vectors_bin, build_mp1corem4_vectors_bin_len);
+		Copro::load_firmware_data(build_mp1corem4_firmware_bin, build_mp1corem4_firmware_bin_len);
+		L1C_CleanDCacheAll();
+		__DSB();
+		__ISB();
+		Copro::start();
 	}
 
 	static void init_clocks(const RCC_OscInitTypeDef &osc_def,

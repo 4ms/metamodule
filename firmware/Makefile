@@ -22,6 +22,29 @@ all:
 	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
 	@$(MAKE) --no-print-directory tests
 
+embm4: firmware_m4.h firmware_m4_vectors.h
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
+
+$(BUILDDIR_MP1M4)/$(BINARYNAME).elf: mp1m4
+
+firmware_m4.h: $(BUILDDIR_MP1M4)/firmware.bin
+	xxd -i -c 8 $< $@
+
+firmware_m4_vectors.h: $(BUILDDIR_MP1M4)/vectors.bin
+	xxd -i -c 8 $< $@
+
+$(BUILDDIR_MP1M4)/vectors.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy --dump-section .isr_vector=$(BUILDDIR_MP1M4)/vectors.bin $<
+
+$(BUILDDIR_MP1M4)/firmware.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy -O binary \
+		-j .text \
+		-j .startup_copro_fw.Reset_Handler \
+		-j .rodata \
+		-j .init_array \
+		-j .data \
+		$< $@
+
 a7:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
 
@@ -42,6 +65,8 @@ clean:
 	rm -rf $(BUILDDIR_H7M7)
 	rm -rf $(BUILDDIR_MP1A7)
 	rm -rf $(BUILDDIR_MP1M4)
+	rm -f firmware_m4*.h
+	rm -f firmware_m4*.h
 
 clean_a7:
 	$(MAKE) --no-print-directory clean -f makefile_mp1a7.mk

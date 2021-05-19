@@ -77,6 +77,8 @@
 #define A7_SRAM2_BASE (0x30020000UL)
 #define A7_SRAM3_BASE (0x30040000UL)
 #define A7_SRAM4_BASE (0x30050000UL)
+#define RETRAM (0x38000000UL)
+#define A7_M4VECTOR_BASE RETRAM
 
 // TTB base address
 #define TTB_BASE ((uint32_t *)__TTB_BASE)
@@ -134,8 +136,11 @@ void MMU_CreateTranslationTable(void)
 	//.ddma: non-cacheable
 	MMU_TTSection(TTB_BASE, __DMABUF_BASE, __DMABUF_SIZE / 0x100000, Sect_Normal_RW);
 
-	//.shared_memory
-	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Device_RW); // 1MB RAM (actually is only 384kB)
+	//.shared_memory and m4 codespace
+	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Device_RW); // 1MB (actually is only 384kB)
+
+	// M4 vector table (RETRAM)
+	MMU_TTSection(TTB_BASE, A7_M4VECTOR_BASE, 1, Sect_Device_RW); // 1MB (actually is only 64kB)
 
 	//.sysram
 	MMU_TTSection(TTB_BASE, A7_SYSRAM_1MB_SECTION_BASE, 1, Sect_Normal_RW);
