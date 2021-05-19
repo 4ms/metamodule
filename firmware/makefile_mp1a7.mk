@@ -81,8 +81,9 @@ INCLUDES = -I. \
 			-I$(MFINC) \
 			-I$(MFFONTDIR) \
 
-EXTRA_CFLAGS = --param l1-cache-size=64 \
-	 		   --param l1-cache-line-size=32 \
+#D-Cache L1: 32 KB, 128 Sets, 64 Bytes/Line, 4-Way
+EXTRA_CFLAGS = --param l1-cache-size=32 \
+	 		   --param l1-cache-line-size=64 \
 			   --param l2-cache-size=256 \
 
 ARCH_CFLAGS += -DUSE_HAL_DRIVER \
