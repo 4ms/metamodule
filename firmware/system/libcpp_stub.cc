@@ -2,8 +2,9 @@ namespace std
 {
 void __throw_bad_function_call()
 {
-	while (1)
-		;
+	return;
+	// while (1)
+	// 	;
 }
 void __throw_bad_alloc()
 {
