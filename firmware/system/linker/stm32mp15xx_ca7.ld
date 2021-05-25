@@ -139,7 +139,7 @@ SECTIONS
     _user_stack_end = _user_stack_start + 0x10000 - 0x300; /* 64k - 768B  */
 
     _svc_stack_start = _user_stack_end;
-    _svc_stack_end = _svc_stack_start + 0x100;
+    _svc_stack_end = _svc_stack_start + 0x10000; /* 64k for ISRs*/
 
     _irq_stack_start = _svc_stack_end;
     _irq_stack_end = _irq_stack_start + 0x100; 
