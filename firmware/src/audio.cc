@@ -71,7 +71,7 @@ AudioStream::AudioStream(PatchList &patches,
 
 	dac.init();
 
-	dac_updater.init(DAC_update_conf, [&]() {
+	dac_updater.init([&]() {
 		static bool rising_edge = false;
 		dac.output_next();
 		rising_edge = !rising_edge;

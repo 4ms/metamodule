@@ -3,7 +3,7 @@
 #include "drivers/dac_MCP48FVBxx.hh"
 #include "drivers/dac_stream.hh"
 #include "drivers/interrupt.hh"
-#include "drivers/pinchange.hh"
+#include "drivers/pin_change.hh"
 #include "drivers/spi_transfer.hh"
 #include "drivers/spi_transfer_config_struct.hh"
 #include "util/circular_buffer.hh"
@@ -30,13 +30,22 @@ struct MM_DACConf : DefaultSpiTransferConf {
 	using AuxPin = DACConfTarget::AuxPin;
 };
 
-const PinChangeConfig DAC_update_conf = {
-	.pin = DACConfTarget::SaiLRClkPin.pin,
-	.port = DACConfTarget::SaiLRClkPin.gpio,
-	.on_rising_edge = true,
-	.on_falling_edge = true,
-	.priority1 = 0,
-	.priority2 = 0,
+// const PinChangeConfig DAC_update_conf = {
+// 	.pin = DACConfTarget::SaiLRClkPin.pin,
+// 	.port = DACConfTarget::SaiLRClkPin.gpio,
+// 	.on_rising_edge = true,
+// 	.on_falling_edge = true,
+// 	.priority1 = 0,
+// 	.priority2 = 0,
+// };
+
+struct DACUpdateConf : public DefaultPinChangeConf {
+	static constexpr uint32_t pin = DACConfTarget::SaiLRClkPin.pin;
+	static constexpr GPIO port = DACConfTarget::SaiLRClkPin.gpio;
+	static constexpr bool on_rising_edge = true;
+	static constexpr bool on_falling_edge = true;
+	static constexpr uint32_t priority1 = 0;
+	static constexpr uint32_t priority2 = 0;
 };
 
 using AnalogOutT = DacStream<mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>,

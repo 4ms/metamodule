@@ -56,7 +56,8 @@ private:
 
 	AnalogOutT &dac;
 	GPIOStream<FPin<GPIO::E, 0, PinMode::Output>, CircularBuffer<uint8_t, AudioConf::BlockSize>> clock_out;
-	PinChangeInterrupt dac_updater;
+	// PinChangeInterrupt dac_updater;
+	PinChangeInt<DACUpdateConf> dac_updater;
 
 	PatchList &patch_list;
 	PatchPlayer &player;
