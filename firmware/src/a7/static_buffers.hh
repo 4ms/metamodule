@@ -17,9 +17,6 @@ namespace StaticBuffers
 static inline __attribute__((section(".sysram"))) AudioStream::AudioStreamBlock audio_dma_block[4];
 static inline /*__attribute__((section(".sysram")))*/ uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 static inline /*__attribute__((section(".sysram")))*/ MMScreenBufferConf::FrameBufferT screen_framebuf;
-
-// FIXME: Why does last few words of param_blocks become 00'd out if its in sysram and appears earlier in this list?
-// (address 0x2FFDE400 and up is blanked)
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
 
 static void init()

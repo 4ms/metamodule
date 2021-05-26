@@ -105,11 +105,6 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 {
 	param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
 
-	if (param_block.metaparams.rotary.motion > 1) // never?!
-		Debug::Pin2::high();
-	else
-		Debug::Pin2::low();
-
 	cache.write_sync(param_block.params[0], param_block.metaparams);
 	target::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
 
