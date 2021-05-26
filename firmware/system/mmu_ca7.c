@@ -158,15 +158,21 @@ void MMU_CreateTranslationTable(void)
 	// Only need: 0xA002 0000 - 0xA002 8000, but set 0xA002 0000 - 0XA0012 0000
 	MMU_TTSection(TTB_BASE, __get_CBAR(), 1, Sect_Device_RW);
 
-	// Define L2CC entry.  Uncomment if PL310 is present
-	//    MMU_TTPage4k (TTB_BASE, VE_A5_MP_PL310_BASE     ,  1,  Page_L1_4k, (uint32_t *)PRIVATE_TABLE_L2_BASE_4k,
-	//    Page_4k_Device_RW);
-
-	// Create (256 * 4k)=1MB faulting entries to synchronization space (Useful if some non-cacheable DMA agent is
-	// present in the SoC)
-	// MMU_TTPage4k(TTB_BASE, F_SYNC_BASE, 256, Page_L1_4k, (uint32_t *)SYNC_FLAGS_TABLE_L2_BASE_4k, DESCRIPTOR_FAULT);
-	// Define synchronization space entry.
-	// MMU_TTPage4k(TTB_BASE, FLAG_SYNC, 1, Page_L1_4k, (uint32_t *)SYNC_FLAGS_TABLE_L2_BASE_4k, Page_4k_Device_RW);
+	// How to setup 4k or 64k pages:
+	//
+	// Each 1Mb section of 64k or 4k pages needs a L2 entry:
+	// #define PRIVATE_TABLE_L2_BASE_4k       (__TTB_BASE + TTB_L1_SIZE)
+	// #define PERIPHERAL_A_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0x400)
+	// #define PERIPHERAL_B_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0x800)
+	// #define SYNC_FLAGS_TABLE_L2_BASE_4k    (__TTB_BASE + TTB_L1_SIZE + 0xC00)
+	//
+	// Then, define all the pages to Fault:
+	// MMU_TTPage4k (TTB_BASE, SomeAddressAlignedTo1MB            ,256,  Page_L1_4k, (uint32_t
+	// *)PRIVATE_TABLE_L2_BASE_4k, DESCRIPTOR_FAULT);
+	//
+	// Then, define just the ones you need to be whatever you need
+	// MMU_TTPage4k (TTB_BASE, SomeAddressAlignedto4K           ,  3,  Page_L1_4k, (uint32_t *)PRIVATE_TABLE_L2_BASE_4k,
+	// Page_4k_Device_RW);
 
 	/* Set location of level 1 page table
 	; 31:14 - Translation table base addr (31:14-TTBCR.N, TTBCR.N is 0 out of reset)
