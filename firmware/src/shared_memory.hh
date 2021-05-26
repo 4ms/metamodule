@@ -13,7 +13,6 @@ struct SharedMemory {
 		uint32_t *loc_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
 		*(loc_ptr + offset) = reinterpret_cast<uint32_t>(object);
 		return &_params_ptr + offset * 4;
-		/* return *_params_ptr + (offset * 4); */
 	}
 
 	template<typename T>

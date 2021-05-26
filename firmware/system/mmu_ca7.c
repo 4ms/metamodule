@@ -102,6 +102,7 @@ static uint32_t Sect_Normal_RW;	 // as Sect_Normal_Cod, but writeable and not ex
 static uint32_t Sect_Device_RO;	 // device, non-shareable, non-executable, ro, domain 0, base addr 0
 static uint32_t Sect_Device_RW;	 // as Sect_Device_RO, but writeable
 static uint32_t Sect_StronglyOrdered;
+static uint32_t Sect_Normal_NonCache;
 
 static uint32_t Page_L1_4k = 0x0;	// generic
 static uint32_t Page_L1_64k = 0x0;	// generic
@@ -122,6 +123,7 @@ void MMU_CreateTranslationTable(void)
 	section_device_ro(Sect_Device_RO, region);
 	section_device_rw(Sect_Device_RW, region);
 	section_so(Sect_StronglyOrdered, region);
+	section_normal_nc(Sect_Normal_NonCache, region);
 	page64k_device_rw(Page_L1_64k, Page_64k_Device_RW, region);
 	page4k_device_rw(Page_L1_4k, Page_4k_Device_RW, region);
 
@@ -134,7 +136,8 @@ void MMU_CreateTranslationTable(void)
 	MMU_TTSection(TTB_BASE, __HEAP_BASE, __HEAP_SIZE / 0x100000, Sect_Normal_RW);
 
 	//.ddma: non-cacheable
-	MMU_TTSection(TTB_BASE, __DMABUF_BASE, __DMABUF_SIZE / 0x100000, Sect_Normal_RW);
+	// Note: section_so is quite a bit faster than section_normal_nc
+	MMU_TTSection(TTB_BASE, __DMABUF_BASE, __DMABUF_SIZE / 0x100000, Sect_StronglyOrdered);
 
 	//.shared_memory and m4 codespace
 	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Device_RW); // 1MB (actually is only 384kB)
