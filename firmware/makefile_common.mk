@@ -15,6 +15,9 @@ ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
 BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
 
+EXTRA_CFLAGS ?= 
+EXTRA_CPPFLAGS ?=
+EXTRA_LFLAGS ?=
 
 CFLAGS = -g2 -fno-common \
 	$(ARCH_CFLAGS) $(MCU) \
@@ -35,6 +38,7 @@ CXXFLAGS = $(CFLAGS) \
 	-Wdouble-promotion \
 	-Wno-register \
 	-Wno-volatile \
+	$(EXTRA_CPPFLAGS)
 
 AFLAGS = $(MCU)
 
@@ -45,6 +49,7 @@ LFLAGS = -Wl,--gc-sections \
 	-nostdlib \
 	-nostartfiles \
 	-ffreestanding \
+	$(EXTRA_LFLAGS)
 
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 

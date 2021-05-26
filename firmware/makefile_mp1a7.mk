@@ -15,6 +15,9 @@ STARTUP_CA7	= $(TARGETDEVICEDIR_CA7)/boot/startup_ca7.s
 SHARED = src/a7/shared
 
 OPTFLAG = -O3
+# LTOFLAG =
+LTOFLAG = -flto=auto
+
 include makefile_opts.mk
 
 MFFONTDIR = $(LIBDIR)/mcufont/fonts
@@ -86,6 +89,10 @@ EXTRA_CFLAGS = --param l1-cache-size=32 \
 	 		   --param l1-cache-line-size=64 \
 			   --param l2-cache-size=256 \
 
+EXTRA_CPPFLAGS = $(LTOFLAG)
+
+EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG)
+
 ARCH_CFLAGS += -DUSE_HAL_DRIVER \
 			  -DUSE_FULL_LL_DRIVER \
 			  -DSTM32MP157Cxx \
@@ -94,7 +101,7 @@ ARCH_CFLAGS += -DUSE_HAL_DRIVER \
 
 MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard -mthumb-interwork
 
-# ARCH 	= /usr/local/Caskroom/gcc-arm-embedded/10-2020-q4-major/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi
+ARCH 	= /usr/local/Caskroom/gcc-arm-embedded/10-2020-q4-major/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi
 
 #### U-BOOT
 UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
