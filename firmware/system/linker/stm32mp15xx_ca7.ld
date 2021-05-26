@@ -136,10 +136,10 @@ SECTIONS
 
 	/* User Stack: 0x2FFF0000 - 0x2FFFFD00 */
     _user_stack_start = ORIGIN(SYSRAM_STACK);
-    _user_stack_end = _user_stack_start + 0x10000 - 0x300; /* 64k - 768B  */
+    _user_stack_end = _user_stack_start + 0x8000 - 0x200; /* 32k - 512B  */
 
     _svc_stack_start = _user_stack_end;
-    _svc_stack_end = _svc_stack_start + 0x10000; /* 64k for ISRs*/
+    _svc_stack_end = _svc_stack_start + 0x8000; /* 32k for ISRs*/
 
     _irq_stack_start = _svc_stack_end;
     _irq_stack_end = _irq_stack_start + 0x100; 
