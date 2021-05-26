@@ -139,10 +139,10 @@ void MMU_CreateTranslationTable(void)
 	// Note: section_so is quite a bit faster than section_normal_nc
 	MMU_TTSection(TTB_BASE, __DMABUF_BASE, __DMABUF_SIZE / 0x100000, Sect_StronglyOrdered);
 
-	//.shared_memory and m4 codespace
+	//.shared_memory and m4 codespace: 0x30000000, or 0x10000000 as seen by M4
 	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Device_RW); // 1MB (actually is only 384kB)
 
-	// M4 vector table (RETRAM)
+	// M4 vector table (RETRAM: 0x38000000, or 0x00000000 as seen by M4)
 	MMU_TTSection(TTB_BASE, A7_M4VECTOR_BASE, 1, Sect_Device_RW); // 1MB (actually is only 64kB)
 
 	//.sysram
