@@ -20,7 +20,8 @@ MEMORY
 	DMABUF (rw) 		: ORIGIN = _DMABUF_BASE, 	LENGTH = _DMABUF_SIZE
 	SHAREDMEM (rw) 		: ORIGIN = 0x30040000, 		LENGTH = (128K - _SHARED_PTR_SIZE) /* shared with cm4 */
 	SYSRAM (rw) 		: ORIGIN = 0x2FFC0000, 		LENGTH = 192K
-	SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, 		LENGTH = 64K
+	/* SYSDMARAM (rw) 		: ORIGIN = 0x2FFEC000, 		LENGTH = 16K */
+	/* SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, 		LENGTH = 64K */
 }
 
 _params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM);
@@ -126,6 +127,12 @@ SECTIONS
         *(.ddma)
 	} > DMABUF
 
+	/* .sys_dma (NOLOAD): */
+	/* { */
+	/* 	. = ALIGN(8); */
+        /* *(.sys_dma) */
+	/* } > SYSDMARAM */
+
 	.sysram (NOLOAD):
 	{
 		. = ALIGN(8);
@@ -135,8 +142,9 @@ SECTIONS
 	} > SYSRAM
 
 	/* User Stack: 0x2FFF0000 - 0x2FFFFD00 */
-    _user_stack_start = ORIGIN(SYSRAM_STACK);
-    _user_stack_end = _user_stack_start + 0x8000 - 0x200; /* 32k - 512B  */
+    /* _user_stack_start = ORIGIN(SYSRAM_STACK); */
+    _user_stack_start = _ram_aligned_end;
+    _user_stack_end = _user_stack_start + 0x8000 - 0x200; /* 32k - 768B  */
 
     _svc_stack_start = _user_stack_end;
     _svc_stack_end = _svc_stack_start + 0x8000; /* 32k for ISRs*/

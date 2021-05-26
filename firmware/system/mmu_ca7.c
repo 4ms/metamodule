@@ -127,7 +127,7 @@ void MMU_CreateTranslationTable(void)
 	page64k_device_rw(Page_L1_64k, Page_64k_Device_RW, region);
 	page4k_device_rw(Page_L1_4k, Page_4k_Device_RW, region);
 
-	// ROM should be Cod (RO), but that seems to interere with debugger loading an elf file, so setting it to Normal:
+	// ROM should be Cod (RO), but that seems to interfere with debugger loading an elf file, so setting it to Normal:
 	// Todo: Investigate this
 	MMU_TTSection(TTB_BASE, __ROM_BASE, __ROM_SIZE / 0x100000, Sect_Normal);
 
@@ -146,7 +146,7 @@ void MMU_CreateTranslationTable(void)
 	MMU_TTSection(TTB_BASE, A7_M4VECTOR_BASE, 1, Sect_Device_RW); // 1MB (actually is only 64kB)
 
 	//.sysram
-	MMU_TTSection(TTB_BASE, A7_SYSRAM_1MB_SECTION_BASE, 1, Sect_Normal_RW);
+	MMU_TTSection(TTB_BASE, A7_SYSRAM_1MB_SECTION_BASE, 1, Sect_StronglyOrdered);
 
 	// Peripheral memory
 	// For better security: be more specific and use 4k tables to cover only actual peripherals, as in example file in
@@ -167,11 +167,11 @@ void MMU_CreateTranslationTable(void)
 	// #define SYNC_FLAGS_TABLE_L2_BASE_4k    (__TTB_BASE + TTB_L1_SIZE + 0xC00)
 	//
 	// Then, define all the pages to Fault:
-	// MMU_TTPage4k (TTB_BASE, SomeAddressAlignedTo1MB            ,256,  Page_L1_4k, (uint32_t
-	// *)PRIVATE_TABLE_L2_BASE_4k, DESCRIPTOR_FAULT);
+	// MMU_TTPage4k (TTB_BASE, SomeAddressAlignedTo1MB, 256, Page_L1_4k, (uint32_t *)PRIVATE_TABLE_L2_BASE_4k,
+	// DESCRIPTOR_FAULT);
 	//
 	// Then, define just the ones you need to be whatever you need
-	// MMU_TTPage4k (TTB_BASE, SomeAddressAlignedto4K           ,  3,  Page_L1_4k, (uint32_t *)PRIVATE_TABLE_L2_BASE_4k,
+	// MMU_TTPage4k (TTB_BASE, SomeAddressAlignedto4K, 3, Page_L1_4k, (uint32_t *)PRIVATE_TABLE_L2_BASE_4k,
 	// Page_4k_Device_RW);
 
 	/* Set location of level 1 page table
