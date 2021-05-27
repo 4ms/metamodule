@@ -11,9 +11,10 @@ struct StreamConf {
 	};
 
 	struct DAC {
-		static constexpr int BlockSize = Audio::DMABlockSize;
+		static constexpr int BlockSize = Audio::BlockSize;
+		static constexpr int DMABlockSize = Audio::DMABlockSize;
 		static constexpr int NumOutputs = 2;
-		static constexpr int BufferSize = BlockSize * NumOutputs;
+		static constexpr int BufferSize = DMABlockSize * NumOutputs;
 		using SampleT = uint32_t;
 	};
 };

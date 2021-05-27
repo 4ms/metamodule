@@ -1,4 +1,5 @@
 #pragma once
+#include "auxsignal.hh"
 #include "conf/dac_conf.hh"
 #include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
@@ -34,10 +35,11 @@ public:
 				ParamCache &cache,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
-				AudioStreamBlock (&buffers)[4]);
+				AudioStreamBlock (&buffers)[4],
+				AuxSignalStreamBlock (&auxsig)[2]);
 	void start();
 
-	void process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &params);
+	void process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &params, AuxSignalStreamBlock &aux);
 
 private:
 	ParamCache &cache;
@@ -47,17 +49,14 @@ private:
 	AudioStreamBlock &tx_buf_2;
 	AudioStreamBlock &rx_buf_1;
 	AudioStreamBlock &rx_buf_2;
+	AuxSignalStreamBlock &auxsig_1;
+	AuxSignalStreamBlock &auxsig_2;
 
 	ICodec &codec_;
 	uint32_t sample_rate_;
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()
-
-	AnalogOutT &dac;
-	GPIOStream<FPin<GPIO::E, 0, PinMode::Output>, CircularBuffer<uint8_t, AudioConf::BlockSize>> clock_out;
-	// PinChangeInterrupt dac_updater;
-	PinChangeInt<DACUpdateConf> dac_updater;
 
 	PatchList &patch_list;
 	PatchPlayer &player;
@@ -67,8 +66,8 @@ private:
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	uint32_t get_dac_output(int output_id);
-	void output_silence(AudioStreamBlock &out);
-	void passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out);
+	void output_silence(AudioStreamBlock &out, AuxSignalStreamBlock &aux);
+	void passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out, AuxSignalStreamBlock &aux);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();

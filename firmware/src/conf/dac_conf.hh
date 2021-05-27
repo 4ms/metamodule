@@ -30,15 +30,6 @@ struct MM_DACConf : DefaultSpiTransferConf {
 	using AuxPin = DACConfTarget::AuxPin;
 };
 
-// const PinChangeConfig DAC_update_conf = {
-// 	.pin = DACConfTarget::SaiLRClkPin.pin,
-// 	.port = DACConfTarget::SaiLRClkPin.gpio,
-// 	.on_rising_edge = true,
-// 	.on_falling_edge = true,
-// 	.priority1 = 0,
-// 	.priority2 = 0,
-// };
-
 struct DACUpdateConf : public DefaultPinChangeConf {
 	static constexpr uint32_t pin = DACConfTarget::SaiLRClkPin.pin;
 	static constexpr GPIO port = DACConfTarget::SaiLRClkPin.gpio;

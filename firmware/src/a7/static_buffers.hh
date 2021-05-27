@@ -1,6 +1,7 @@
 #pragma once
 #include "audio.hh"
 #include "conf/screen_buffer_conf.hh"
+#include "conf/stream_conf.hh"
 #include "leds.hh"
 #include "params.hh"
 
@@ -18,6 +19,7 @@ static inline __attribute__((section(".sysram"))) AudioStream::AudioStreamBlock 
 static inline /*__attribute__((section(".sysram")))*/ uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 static inline /*__attribute__((section(".sysram")))*/ MMScreenBufferConf::FrameBufferT screen_framebuf;
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
+static inline __attribute__((section(".sysram"))) AuxSignalStreamBlock auxsignal_block[2];
 
 static void init()
 {

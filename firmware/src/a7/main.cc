@@ -57,7 +57,8 @@ void main()
 					  param_cache,
 					  mbox,
 					  StaticBuffers::param_blocks,
-					  StaticBuffers::audio_dma_block};
+					  StaticBuffers::audio_dma_block,
+					  StaticBuffers::auxsignal_block};
 
 	SharedBus::i2c.deinit();
 
@@ -68,6 +69,9 @@ void main()
 	target::SystemCache::clean_dcache_by_addr(addr);
 
 	addr = SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
+	target::SystemCache::clean_dcache_by_addr(addr);
+
+	addr = SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	target::SystemCache::clean_dcache_by_addr(addr);
 
 	// Enable ISR for LedBufFrameLock:
