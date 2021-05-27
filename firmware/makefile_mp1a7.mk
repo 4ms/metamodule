@@ -45,7 +45,6 @@ SOURCES = $(STARTUP_CA7) \
 		  $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc \
 		  $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc \
 		  $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc \
-		  $(TARGETDEVICEDIR)/drivers/pinchange.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
 		  $(DRIVERLIB)/drivers/sai.cc \
 		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
