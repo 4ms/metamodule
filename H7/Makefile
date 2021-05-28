@@ -27,6 +27,10 @@ inttest:
 clean:
 	rm -rf $(BUILDDIR_M4)
 	rm -rf $(BUILDDIR_M7)
+	@$(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(DRIVERLIB) && $(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile clean
 
 $(BUILDDIR_M4)/$(BINARYNAME).hex:
 	@$(MAKE) --no-print-directory -f makefile_m4.mk
