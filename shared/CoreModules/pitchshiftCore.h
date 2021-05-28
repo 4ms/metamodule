@@ -48,6 +48,7 @@ public:
 		switch (param_id) {
 			case 0:
 				coarseShift = map_value(val, 0.0f, 1.0f, -12.0f, 12.0f);
+				break;
 			case 1:
 				fineShift = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
