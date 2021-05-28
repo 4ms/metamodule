@@ -90,10 +90,6 @@ TEST_CASE("Testing is_power_of_2()")
 
 TEST_CASE("Log2 template")
 {
-	SUBCASE("Check weird Log2(0) = 1 thing")
-	{
-		CHECK(MathTools::Log2<0>::val == 1); // Is this important?
-	}
 
 	SUBCASE("Check normal powers of 2")
 	{
