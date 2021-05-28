@@ -170,9 +170,10 @@ TEST_CASE("Testing randomNumber()")
 
 	SUBCASE("Roughly equal distribution")
 	{
-		int reps = 100;
+		int reps = 1000;
 		unsigned cnt[3] = {0, 0, 0};
 		while (reps--) {
+
 			auto x = MathTools::randomNumber<unsigned int>(1, 11);
 			if (x == 1)
 				cnt[0]++;
@@ -183,12 +184,12 @@ TEST_CASE("Testing randomNumber()")
 		}
 		// on average, each one should get 10 counts
 		// ..let's say it can be +/-7
-		CHECK(cnt[0] > 3);
-		CHECK(cnt[1] > 3);
-		CHECK(cnt[2] > 3);
-		CHECK(cnt[0] < 17);
-		CHECK(cnt[1] < 17);
-		CHECK(cnt[2] < 17);
+		CHECK(cnt[0] > 30);
+		CHECK(cnt[1] > 30);
+		CHECK(cnt[2] > 30);
+		CHECK(cnt[0] < 170);
+		CHECK(cnt[1] < 170);
+		CHECK(cnt[2] < 170);
 	}
 }
 TEST_CASE("math_tests: wrapping")
