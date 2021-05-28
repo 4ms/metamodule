@@ -69,6 +69,11 @@ clean:
 	rm -rf $(BUILDDIR_MP1M4)
 	rm -f firmware_m4*.h
 	rm -f firmware_m4*.h
+	@$(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(DRIVERLIB) && $(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile clean
+
 
 clean_a7:
 	$(MAKE) --no-print-directory clean -f makefile_mp1a7.mk
