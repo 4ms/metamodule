@@ -28,3 +28,7 @@ shared/tableGen/make_tables
 *.dat
 
 H7/local_board_rev.hh
+
+*.swo
+
+*.swp
