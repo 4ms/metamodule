@@ -15,7 +15,6 @@ BUILDDIR = $(TEST_DIR)/build
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
-			-stdlib=libc++ \
 			-I$(DOCTEST_DIR) \
 			-I../src\
 			-Isrc\
