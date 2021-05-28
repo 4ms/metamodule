@@ -57,12 +57,12 @@ T randomNumber(T minNum, T maxNum)
 
 template<unsigned int N>
 struct Log2 {
-	static constexpr int val = Log2<N / 2>::val + 1;
+	enum { val = Log2<N / 2>::val + 1 };
 };
 
 template<>
 struct Log2<1> {
-	static constexpr int val = 0;
+	enum { val = 0 };
 };
 
 constexpr bool is_power_of_2(unsigned int v)
@@ -149,10 +149,9 @@ constexpr float setPitchMultiple(float val)
 static inline float audioFreqToNorm(float input) // normalized filter frequency conversion
 {
 	float output = 0;
-	input = constrain(input,20.0f,20000.0f);
-		float temp1 = logTable.interp(map_value(input, 20.0f, 20000.0f, 0.0f, 1.0f));
-		output = (temp1 - 2.99573f) / (6.90776f);
+	input = constrain(input, 20.0f, 20000.0f);
+	float temp1 = logTable.interp(map_value(input, 20.0f, 20000.0f, 0.0f, 1.0f));
+	output = (temp1 - 2.99573f) / (6.90776f);
 	return output;
-
 }
 }; // namespace MathTools
