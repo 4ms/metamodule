@@ -47,8 +47,6 @@ void Controls::update_params()
 			cur_params->knobs[i] = _knobs[i].next();
 		}
 
-		// Metaparams:
-
 		// PatchCV
 		cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
 
@@ -91,38 +89,49 @@ void Controls::start()
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
-		// if (param_blocks[0].metaparams.rotary.motion > 0)
-		// 	Debug::Pin1::high();
+		Debug::Pin1::high();
 		cur_metaparams = &param_blocks[0].metaparams;
 		cur_params = param_blocks[0].params.begin();
 		_first_param = true;
 		_buffer_full = false;
-		// Debug::Pin1::low();
+
+		for (auto &aux : auxstream_blocks[0]) {
+			dac.queue_sample(0, aux.dac1);
+			dac.queue_sample(1, aux.dac2);
+			clock_out.queue_sample(aux.clock_out);
+		}
+		Debug::Pin1::low();
 	});
 
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
-		// if (param_blocks[0].metaparams.rotary.motion > 0)
-		// 	Debug::Pin1::high();
+		Debug::Pin1::high();
 		cur_metaparams = &param_blocks[1].metaparams;
 		cur_params = param_blocks[1].params.begin();
 		_first_param = true;
 		_buffer_full = false;
-		// Debug::Pin1::low();
+
+		for (auto &aux : auxstream_blocks[1]) {
+			dac.queue_sample(0, aux.dac1);
+			dac.queue_sample(1, aux.dac2);
+			clock_out.queue_sample(aux.clock_out);
+		}
+		Debug::Pin1::low();
 	});
 	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();
 	read_cvadc_task.start();
-	// clock_out.low();
+	auxstream_updater.start();
 }
 
 Controls::Controls(MuxedADC &potadc,
 				   CVAdcChipT &cvadc,
 				   DoubleBufParamBlock &param_blocks_ref,
-				   GPIOExpander &gpio_expander)
+				   GPIOExpander &gpio_expander,
+				   DoubleAuxSignalStreamBlock &auxsignal_blocks_ref)
 	: potadc(potadc)
 	, cvadc(cvadc)
 	, jacksense_reader{gpio_expander}
@@ -130,6 +139,7 @@ Controls::Controls(MuxedADC &potadc,
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks[0].metaparams)
 	, _buffer_full{false}
+	, auxstream_blocks{auxsignal_blocks_ref}
 {
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
@@ -138,11 +148,8 @@ Controls::Controls(MuxedADC &potadc,
 	// mp1 m4: 20.1us, width= 4.1us
 	read_controls_task.init(control_read_tim_conf, [this]() {
 		if (_buffer_full) {
-			// Debug::Pin0::high();
-			// Debug::Pin0::low();
 			return;
 		}
-		// Debug::Pin2::high();
 		// Todo: these enable/disable blocks aren't necessary, right?
 		// HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 		// HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
@@ -150,14 +157,20 @@ Controls::Controls(MuxedADC &potadc,
 		update_params();
 		// HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 		// HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
-		// Debug::Pin2::low();
 	});
 
 	// 72us, 0.5us wide
-	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() {
-		// Debug::Pin1::high();
-		cvadc.read_and_switch_channels();
-		// Debug::Pin1::low();
+	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
+
+	dac.init();
+	auxstream_updater.init([&]() {
+		Debug::Pin2::high();
+		static bool rising_edge = false;
+		dac.output_next();
+		rising_edge = !rising_edge;
+		if (rising_edge)
+			clock_out.output_next();
+		Debug::Pin2::low();
 	});
 }
 } // namespace MetaModule

@@ -1,6 +1,8 @@
 #pragma once
+#include "auxsignal.hh"
 #include "conf/adc_spi_conf.hh"
 #include "conf/control_conf.hh"
+#include "conf/dac_conf.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/i2c.hh"
@@ -17,7 +19,11 @@ using namespace mdrivlib;
 namespace MetaModule
 {
 struct Controls {
-	Controls(MuxedADC &potadc, CVAdcChipT &cvadc, DoubleBufParamBlock &param_blocks_ref, GPIOExpander &gpio_expander);
+	Controls(MuxedADC &potadc,
+			 CVAdcChipT &cvadc,
+			 DoubleBufParamBlock &param_blocks_ref,
+			 GPIOExpander &gpio_expander,
+			 DoubleAuxSignalStreamBlock &auxsignal_blocks_ref);
 
 	MuxedADC &potadc;
 	CVAdcChipT &cvadc;
@@ -79,6 +85,11 @@ private:
 	MetaParams *cur_metaparams;
 	bool _buffer_full = true;
 	bool _first_param = true;
+
+	DoubleAuxSignalStreamBlock &auxstream_blocks;
+	PinChangeInt<DACUpdateConf> auxstream_updater;
+	GPIOStream<FPin<GPIO::E, 0, PinMode::Output>, CircularBuffer<uint8_t, StreamConf::DAC::BlockSize>> clock_out;
+	AnalogOutT dac;
 
 	uint32_t latest_patchcv_reading;
 	uint16_t latest_jacksense_reading;

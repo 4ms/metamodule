@@ -1,3 +1,4 @@
+#include "auxsignal.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/i2c_conf.hh"
@@ -40,6 +41,8 @@ void main(void)
 	auto led_frame_buffer = SharedMemory::read_address_of<uint32_t *>(SharedMemory::LEDFrameBufLocation);
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
+	auto auxsignal_buffer =
+		SharedMemory::read_address_of<DoubleAuxSignalStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
 
 	// Led Driver
 	PCA9685Driver led_driver{SharedBus::i2c, kNumLedDriverChips, led_frame_buffer};
@@ -48,7 +51,7 @@ void main(void)
 	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
 	CVAdcChipT cvadc;
 	GPIOExpander gpio_expander{SharedBus::i2c, gpio_expander_conf};
-	Controls controls{potadc, cvadc, *param_block_base, gpio_expander};
+	Controls controls{potadc, cvadc, *param_block_base, gpio_expander, *auxsignal_buffer};
 
 	// SharedBus
 	SharedBusQueue<LEDUpdateHz> i2cqueue{led_driver, controls};

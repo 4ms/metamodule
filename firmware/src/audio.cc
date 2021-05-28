@@ -19,7 +19,8 @@ AudioStream::AudioStream(PatchList &patches,
 						 ParamCache &param_cache,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
-						 AudioStreamBlock (&buffers)[4])
+						 AudioStreamBlock (&buffers)[4],
+						 AuxSignalStreamBlock (&auxsig)[2])
 	: cache{param_cache}
 	, mbox{uiaudiomailbox}
 	, param_blocks{p}
@@ -27,9 +28,10 @@ AudioStream::AudioStream(PatchList &patches,
 	, tx_buf_2{buffers[1]}
 	, rx_buf_1{buffers[2]}
 	, rx_buf_2{buffers[3]}
+	, auxsig_1{auxsig[0]}
+	, auxsig_2{auxsig[1]}
 	, codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
-	, dac{dac}
 	, patch_list{patches}
 	, player{patchplayer}
 {
@@ -45,11 +47,11 @@ AudioStream::AudioStream(PatchList &patches,
 			HWSemaphore<ParamsBuf2Lock>::unlock();
 
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
-				process(rx_buf_1, tx_buf_1, param_blocks[0]);
+				process(rx_buf_1, tx_buf_1, param_blocks[0], auxsig_1);
 			else {
 				// target::SystemCache::invalidate_dcache_by_range(&rx_buf_2, sizeof(AudioStreamBlock));
 				// target::SystemCache::invalidate_dcache_by_range(&(param_blocks[0]), sizeof(ParamBlock));
-				process(rx_buf_2, tx_buf_2, param_blocks[0]);
+				process(rx_buf_2, tx_buf_2, param_blocks[0], auxsig_1);
 				// target::SystemCache::clean_dcache_by_range(&tx_buf_2, sizeof(AudioStreamBlock));
 			}
 			Debug::Pin0::low();
@@ -59,25 +61,16 @@ AudioStream::AudioStream(PatchList &patches,
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
-				process(rx_buf_2, tx_buf_2, param_blocks[1]);
+				process(rx_buf_2, tx_buf_2, param_blocks[1], auxsig_2);
 			else {
 				// target::SystemCache::invalidate_dcache_by_range(&rx_buf_1, sizeof(AudioStreamBlock));
 				// target::SystemCache::invalidate_dcache_by_range(&(param_blocks[1]), sizeof(ParamBlock));
-				process(rx_buf_1, tx_buf_1, param_blocks[1]);
+				process(rx_buf_1, tx_buf_1, param_blocks[1], auxsig_2);
 				// target::SystemCache::clean_dcache_by_range(&tx_buf_1, sizeof(AudioStreamBlock));
 			}
 			Debug::Pin0::low();
 		});
 
-	dac.init();
-
-	dac_updater.init(DAC_update_conf, [&]() {
-		static bool rising_edge = false;
-		dac.output_next();
-		rising_edge = !rising_edge;
-		if (rising_edge)
-			clock_out.output_next();
-	});
 	load_measure.init();
 }
 
@@ -101,7 +94,10 @@ uint32_t AudioStream::get_dac_output(int output_id)
 // params.buttons[]
 // params.jack_senses[]
 
-void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &param_block)
+void AudioStream::process(AudioStreamBlock &in,
+						  AudioStreamBlock &out,
+						  ParamBlock &param_block,
+						  AuxSignalStreamBlock &aux)
 {
 	param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
 
@@ -115,17 +111,18 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 	mbox.audio_is_muted = mbox.loading_new_patch ? true : false;
 
 	if (mbox.audio_is_muted) {
-		output_silence(out);
+		output_silence(out, aux);
 		return;
 	}
 
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
-		passthrough_audio(in, out);
+		passthrough_audio(in, out, aux);
 		return;
 	}
 
 	auto in_ = in.begin();
 	auto params_ = param_block.params.begin();
+	auto aux_ = aux.begin();
 	for (auto &out_ : out) {
 		int i;
 
@@ -156,12 +153,13 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 		out_.l = get_audio_output(LEFT_OUT);
 		out_.r = get_audio_output(RIGHT_OUT);
 
-		dac.queue_sample(0, get_dac_output(2));
-		dac.queue_sample(1, get_dac_output(3));
-		clock_out.queue_sample(player.get_panel_output(4) > 0.5f ? true : false);
+		aux_->dac1 = get_dac_output(2);
+		aux_->dac2 = get_dac_output(3);
+		aux_->clock_out = player.get_panel_output(4) > 0.5f ? 1 : 0;
 
 		in_++;
 		params_++;
+		aux_++;
 	}
 
 	load_measure.end_measurement();
@@ -170,22 +168,25 @@ void AudioStream::process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBloc
 void AudioStream::start()
 {
 	codec_.start();
-	dac_updater.start();
 }
 
-void AudioStream::output_silence(AudioStreamBlock &out)
+void AudioStream::output_silence(AudioStreamBlock &out, AuxSignalStreamBlock &aux)
 {
+	auto aux_ = aux.begin();
 	for (auto &out_ : out) {
 		out_.l = 0;
 		out_.r = 0;
-		dac.queue_sample(0, 0x00800000);
-		dac.queue_sample(1, 0x00800000);
+		aux_->dac1 = 0x00800000;
+		aux_->dac2 = 0x00800000;
+		aux_->clock_out = 0;
+		aux_++;
 	}
 }
 
-void AudioStream::passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out)
+void AudioStream::passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out, AuxSignalStreamBlock &aux)
 {
 	auto in_ = in.begin();
+	auto aux_ = aux.begin();
 	for (auto &out_ : out) {
 		if constexpr (target::TYPE == SupportedTargets::stm32h7x5) {
 			out_.l = -(in_->r); // inverted and channels swapped (H7 only)
@@ -194,23 +195,11 @@ void AudioStream::passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out)
 			out_.l = -(in_->l); // inverted (MP1 only)
 			out_.r = -(in_->r);
 		}
-		dac.queue_sample(0, in_->l + 0x00800000);
-		dac.queue_sample(1, in_->r + 0x00800000);
+		aux_->dac1 = 0x00800000;
+		aux_->dac2 = 0x00800000;
+		aux_++;
 		in_++;
 	}
-}
-
-// TODO: not used, remove?
-void AudioStream::send_zeros_to_patch()
-{
-	for (int i = 0; i < NumAudioInputs; i++)
-		player.set_panel_input(i, 0);
-
-	for (int i = 0; i < NumCVInputs; i++)
-		player.set_panel_input(i + NumAudioInputs, 0);
-
-	for (int i = 0; i < NumKnobs; i++)
-		player.set_panel_param(i, 0);
 }
 
 } // namespace MetaModule

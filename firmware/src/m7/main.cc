@@ -59,13 +59,15 @@ void main()
 					  param_cache,
 					  mbox,
 					  StaticBuffers::param_blocks,
-					  StaticBuffers::audio_dma_block};
+					  StaticBuffers::audio_dma_block,
+					  StaticBuffers::auxsignal_block};
 
 	SharedBus::i2c.deinit();
 
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
 	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
+	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SCB_CleanDCache();
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
