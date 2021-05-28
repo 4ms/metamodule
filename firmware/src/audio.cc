@@ -168,7 +168,6 @@ void AudioStream::process(AudioStreamBlock &in,
 void AudioStream::start()
 {
 	codec_.start();
-	// dac_updater.start();
 }
 
 void AudioStream::output_silence(AudioStreamBlock &out, AuxSignalStreamBlock &aux)
@@ -179,6 +178,7 @@ void AudioStream::output_silence(AudioStreamBlock &out, AuxSignalStreamBlock &au
 		out_.r = 0;
 		aux_->dac1 = 0x00800000;
 		aux_->dac2 = 0x00800000;
+		aux_->clock_out = 0;
 		aux_++;
 	}
 }
@@ -200,19 +200,6 @@ void AudioStream::passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out,
 		aux_++;
 		in_++;
 	}
-}
-
-// TODO: not used, remove?
-void AudioStream::send_zeros_to_patch()
-{
-	for (int i = 0; i < NumAudioInputs; i++)
-		player.set_panel_input(i, 0);
-
-	for (int i = 0; i < NumCVInputs; i++)
-		player.set_panel_input(i + NumAudioInputs, 0);
-
-	for (int i = 0; i < NumKnobs; i++)
-		player.set_panel_param(i, 0);
 }
 
 } // namespace MetaModule
