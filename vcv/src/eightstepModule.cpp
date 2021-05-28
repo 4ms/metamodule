@@ -42,7 +42,7 @@ struct EightstepWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 		
 				addLabeledKnob("1", EightstepModule::STEP1_PARAM, {0, 0});
 				addLabeledKnob("2", EightstepModule::STEP2_PARAM, {1, 0});

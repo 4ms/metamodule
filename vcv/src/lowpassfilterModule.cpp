@@ -33,7 +33,7 @@ struct LowpassfilterWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		addLabeledKnob("CUT", LowpassfilterModule::CUTOFF_PARAM, {0, 0});
 		addLabeledKnob("RES", LowpassfilterModule::RES_PARAM, {0, 1});

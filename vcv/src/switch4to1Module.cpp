@@ -31,7 +31,7 @@ struct Switch4to1Widget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		addLabeledInput("CLOCK", Switch4to1Module::CLOCK_INPUT, {0, 1});
 		addLabeledInput("RESET", Switch4to1Module::RESET_INPUT, {0, 0});

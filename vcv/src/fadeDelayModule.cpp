@@ -34,7 +34,7 @@ struct FadeDelayWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		addLabeledKnob("DELAY", FadeDelayModule::DELAY_PARAM, {0, 0});
 		addLabeledKnob("FEED", FadeDelayModule::FEED_PARAM, {1, 0});

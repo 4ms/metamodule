@@ -32,7 +32,7 @@ struct CrossfadeWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hptemplate.svg")));
 
 		addLabeledKnob("FADE", CrossfadeModule::CROSSFADE_PARAM, {0, 0});
 

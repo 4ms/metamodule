@@ -29,7 +29,7 @@ struct StereomixerWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hptemplate.svg")));
 
 		for (int i = 0; i < 4; i++) {
 			int channelNum = i + 1;

@@ -44,7 +44,7 @@ struct adWidget : CommModuleWidget {
 			mainModule->updateDisplay = [&]() { this->recLabel->text = this->mainModule->DEBUGSTR; };
 		}
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		addLabeledInput("GATE", adModule::GATE_INPUT, {0, 1});
 		addLabeledOutput("OUT", adModule::ENV_OUTPUT, {1, 1});

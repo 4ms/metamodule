@@ -50,7 +50,7 @@ struct SampleHoldWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hptemplate.svg")));
 
 		addLabeledInput("IN 1", SampleHoldModule::INPUT1_INPUT, {0, 5});
 		addLabeledInput("SAMP", SampleHoldModule::SAMPLE1_INPUT, {0, 4});

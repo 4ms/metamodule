@@ -48,7 +48,7 @@ struct DrumWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/12hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/12hptemplate.svg")));
 
 		addModuleTitle("DRUM");
 

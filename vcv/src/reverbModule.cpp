@@ -78,7 +78,7 @@ struct ReverbWidget : CommModuleWidget {
 			mainModule->updateDisplay = [&]() { this->valueLabel->text = this->mainModule->DEBUGSTR; };
 		}
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hptemplate.svg")));
 
 		valueLabel = createWidget<Label>(mm2px(Vec(0, 90)));
 		valueLabel->color = rack::color::BLACK;

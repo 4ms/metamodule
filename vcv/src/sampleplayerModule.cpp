@@ -29,7 +29,7 @@ struct SampleplayerWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		addModuleTitle("SAMPLER");
 		addLabeledInput("TRIGGER", SampleplayerModule::TRIGGER_INPUT, {0, 1});

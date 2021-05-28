@@ -39,7 +39,7 @@ struct LogicWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hptemplate.svg")));
 
 		addLabeledInput("IN1", LogicModule::INPUT1_INPUT, {0, 4});
 		addLabeledInput("IN2", LogicModule::INPUT2_INPUT, {0, 3});
