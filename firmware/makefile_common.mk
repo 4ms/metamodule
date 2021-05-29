@@ -40,7 +40,7 @@ CXXFLAGS = $(CFLAGS) \
 	-Wno-volatile \
 	$(EXTRA_CPPFLAGS)
 
-AFLAGS = $(MCU)
+AFLAGS ?= $(MCU)
 
 LFLAGS = -Wl,--gc-sections \
 	-Wl,-Map,$(BUILDDIR)/$(BINARYNAME).map,--cref \

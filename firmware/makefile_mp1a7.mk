@@ -98,7 +98,20 @@ ARCH_CFLAGS += -DUSE_HAL_DRIVER \
 			  -DSTM32MP1 \
 			  -DCORE_CA7 \
 
-MCU =  -mcpu=cortex-a7 -mfpu=neon-vfpv4 -mlittle-endian -mfloat-abi=hard -mthumb-interwork
+MCU = -mcpu=cortex-a7 \
+	  -mlittle-endian \
+	  -mfpu=neon-vfpv4 \
+	  -mfloat-abi=hard \
+	  -munaligned-access \
+	  -mthumb-interwork \
+	  -mtune=cortex-a7 \
+	  -mvectorize-with-neon-double \
+	  # -mvectorize-with-neon-quad \
+
+AFLAGS = -mcpu=cortex-a7 \
+		 -mlittle-endian \
+		 -mfpu=neon-vfpv4 \
+		 -mfloat-abi=hard \
 
 ARCH 	= /usr/local/Caskroom/gcc-arm-embedded/10-2020-q4-major/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi
 
