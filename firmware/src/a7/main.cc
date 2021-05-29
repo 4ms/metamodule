@@ -94,9 +94,9 @@ void main()
 		HAL_Delay(500);
 		Debug::red_LED1::high();
 
-		Debug::green_LED1::low();
-		HAL_Delay(500);
-		Debug::green_LED1::high();
+		// Debug::green_LED1::low();
+		// HAL_Delay(500);
+		// Debug::green_LED1::high();
 
 		__NOP();
 	}
@@ -105,4 +105,15 @@ void main()
 void recover_from_task_fault(void)
 {
 	main();
+}
+
+extern "C" void aux_core_main()
+{
+	// __WFI();
+	while (1) {
+		Debug::green_LED1::low();
+		HAL_Delay(500);
+		Debug::green_LED1::high();
+		HAL_Delay(500);
+	}
 }
