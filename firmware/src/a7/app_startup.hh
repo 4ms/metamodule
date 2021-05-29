@@ -31,7 +31,7 @@ struct AppStartup {
 		__ISB();
 		Copro::start();
 
-		SecondaryCore::start();
+		// SecondaryCore::start();
 	}
 
 	static void init_clocks(const RCC_OscInitTypeDef &osc_def,
