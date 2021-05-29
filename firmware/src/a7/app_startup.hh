@@ -6,6 +6,7 @@
 #include "drivers/copro_control.hh"
 #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
+#include "drivers/secondary_core_control.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 #include "firmware_m4.h"
@@ -22,14 +23,6 @@ struct AppStartup {
 
 		init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
 
-		// Stop request for core 1
-		// RCC->MP_SREQSETR = RCC_MP_SREQSETR_STPREQ_P1;
-
-		// Reset MPU1
-		RCC->MP_GRSTCSETR = RCC_MP_GRSTCSETR_MPUP1RST;
-		__DSB();
-		__ISB();
-
 		Copro::reset();
 		Copro::load_vector_data(build_mp1corem4_vectors_bin, build_mp1corem4_vectors_bin_len);
 		Copro::load_firmware_data(build_mp1corem4_firmware_bin, build_mp1corem4_firmware_bin_len);
@@ -37,6 +30,8 @@ struct AppStartup {
 		__DSB();
 		__ISB();
 		Copro::start();
+
+		SecondaryCore::start();
 	}
 
 	static void init_clocks(const RCC_OscInitTypeDef &osc_def,
