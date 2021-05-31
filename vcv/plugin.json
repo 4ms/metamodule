@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "ENVELOPEFOLLOWER",
+      "name": "Envelopefollower",
+      "description": "Envelope Follower",
+      "tags": []
+}, 
+{
       "slug": "VOLTAGESOURCE",
       "name": "Voltagesource",
       "description": "Voltage Source",
