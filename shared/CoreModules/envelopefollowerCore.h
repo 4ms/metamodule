@@ -3,6 +3,7 @@
 #include "coreProcessor.h"
 #include "math.hh"
 #include "CoreModules/moduleTypes.h"
+#include "processors/tools/windowComparator.h"
 
 using namespace MathTools;
 
@@ -25,7 +26,20 @@ class EnvelopefollowerCore : public CoreProcessor {
 public:
 	virtual void update(void) override
 	{
-	
+	float rectSignal = signalInput;
+	if(rectSignal<0)
+	rectSignal*=-1.0f;
+
+if(envOutput<rectSignal) // rising signal
+{
+	envOutput+=((rectSignal-envOutput)*0.1f);
+}
+else // falling signal
+{
+		envOutput+=((rectSignal-envOutput)*0.001f);
+}
+wc.update(envOutput);
+gateOutput=wc.get_output();
 	}
 
 	EnvelopefollowerCore()
@@ -35,7 +49,19 @@ public:
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
-			
+			case 0:
+			float topThresh;
+			float bottomThresh;
+			const float errorAmount=0.1f;
+			topThresh=val+errorAmount;
+			if(topThresh>1.0f)
+			topThresh=1.0f;
+			bottomThresh=val-errorAmount;
+			if(bottomThresh<0)
+			bottomThresh=0;
+			wc.set_highThreshold(topThresh);
+			wc.set_lowThreshhold(bottomThresh);
+			break;
 		}
 	}
 	virtual void set_samplerate(const float sr) override
@@ -45,7 +71,9 @@ public:
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
-			
+			case 0:
+			signalInput=val;
+			break;
 		}
 	}
 
@@ -53,7 +81,12 @@ public:
 	{
 		float output = 0;
 		switch (output_id) {
-		
+			case 0:
+		output = envOutput;
+		break;
+		case 1:
+		output = gateOutput;
+		break;
 		}
 		return output;
 	}
@@ -66,5 +99,9 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
+float signalInput=0;
+float envOutput=0;
+float gateOutput=0;
+WindowComparator wc;
 	
 };
