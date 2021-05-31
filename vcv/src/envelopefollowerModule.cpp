@@ -26,6 +26,10 @@ struct EnvelopefollowerModule : CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         core = ModuleFactory::create("ENVELOPEFOLLOWER");
 		selfID.typeID = "ENVELOPEFOLLOWER";
+
+		inputJacks[EnvelopefollowerModule::SIGNAL_INPUT]->scale = [](float f) { return f / 5.0f; };
+		outputJacks[EnvelopefollowerModule::ENVELOPE_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+		outputJacks[EnvelopefollowerModule::GATE_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 	}
 };
 
