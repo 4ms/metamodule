@@ -144,16 +144,19 @@ SECTIONS
 	/* User Stack: 0x2FFF0000 - 0x2FFFFD00 */
     /* _user_stack_start = ORIGIN(SYSRAM_STACK); */
     _user_stack_start = _ram_aligned_end;
-    _user_stack_end = _user_stack_start + 0x8000 - 0x200; /* 32k - 768B  */
+    _user_stack_end = _user_stack_start + 0x6000 - 0x200; /* 32k - 768B  */
 
     _svc_stack_start = _user_stack_end;
-    _svc_stack_end = _svc_stack_start + 0x8000; /* 32k for ISRs*/
+    _svc_stack_end = _svc_stack_start + 0x6000; /* 32k for ISRs*/
 
     _irq_stack_start = _svc_stack_end;
     _irq_stack_end = _irq_stack_start + 0x100; 
 
     _fiq_stack_start = _irq_stack_end;
     _fiq_stack_end = _fiq_stack_start + 0x100;
+
+    _core2_user_stack_start = _fiq_stack_end;
+    _core2_user_stack_end = _core2_user_stack_start + 0x1000;
 
 
 	.shared_memory (NOLOAD) :
