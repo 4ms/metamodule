@@ -4,6 +4,7 @@
 #include "math.hh"
 #include "CoreModules/moduleTypes.h"
 #include "processors/tools/windowComparator.h"
+#include "processors/tools/expDecay.h"
 
 using namespace MathTools;
 
@@ -29,17 +30,9 @@ public:
 	float rectSignal = signalInput;
 	if(rectSignal<0)
 	rectSignal*=-1.0f;
-
-if(envOutput<rectSignal) // rising signal
-{
-	envOutput+=((rectSignal-envOutput)*0.1f);
-}
-else // falling signal
-{
-		envOutput+=((rectSignal-envOutput)*0.001f);
-}
-wc.update(envOutput);
-gateOutput=wc.get_output();
+	envOutput=slew.update(rectSignal);
+	wc.update(envOutput);
+	gateOutput=wc.get_output();
 	}
 
 	EnvelopefollowerCore()
@@ -49,7 +42,8 @@ gateOutput=wc.get_output();
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
-			case 0:
+			case 0: //threshold
+			{
 			float topThresh;
 			float bottomThresh;
 			const float errorAmount=0.1f;
@@ -61,6 +55,13 @@ gateOutput=wc.get_output();
 			bottomThresh=0;
 			wc.set_highThreshold(topThresh);
 			wc.set_lowThreshhold(bottomThresh);
+			}
+			break;
+			case 1: //rise
+			slew.attackTime=map_value(val,0.0f,1.0f,1.0f,2000.f);
+			break;
+			case 2: //fall
+			slew.decayTime=map_value(val,0.0f,1.0f,1.0f,2000.0f);
 			break;
 		}
 	}
@@ -103,5 +104,6 @@ float signalInput=0;
 float envOutput=0;
 float gateOutput=0;
 WindowComparator wc;
+ExpDecay slew;
 	
 };
