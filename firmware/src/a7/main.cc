@@ -112,10 +112,10 @@ extern "C" void aux_core_main()
 {
 	// __WFI();
 	while (1) {
-		for (int i = 0; i < 100000; i++)
+		for (uint32_t i = 0; i < 10000000UL; i++)
 			asm("NOP\n");
 		Debug::green_LED1::high();
-		for (int i = 0; i < 100000; i++)
+		for (uint32_t i = 0; i < 10000000UL; i++)
 			asm("NOP\n");
 		Debug::green_LED1::low();
 		// HAL_Delay(500);
