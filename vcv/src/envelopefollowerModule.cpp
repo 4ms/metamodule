@@ -6,6 +6,8 @@ struct EnvelopefollowerModule : CommModule {
 
 	enum ParamIds {
 		THRESHOLD_PARAM,
+		RISE_PARAM,
+		FALL_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -47,7 +49,9 @@ struct EnvelopefollowerWidget : CommModuleWidget {
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hp.svg")));
 
-		addLabeledKnob("THRESHOLD", EnvelopefollowerModule::THRESHOLD_PARAM, {0, 0});
+		addLabeledKnob("RISE", EnvelopefollowerModule::RISE_PARAM, {0, 0});
+		addLabeledKnob("FALL", EnvelopefollowerModule::FALL_PARAM, {0, 1});
+		addLabeledKnob("THRESHOLD", EnvelopefollowerModule::THRESHOLD_PARAM, {0, 2});
 		addLabeledInput("INPUT", EnvelopefollowerModule::SIGNAL_INPUT, {0, 2});
 		addLabeledOutput("GATE", EnvelopefollowerModule::GATE_OUTPUT, {0, 1});
 		addLabeledOutput("ENV", EnvelopefollowerModule::ENVELOPE_OUTPUT, {0, 0});
