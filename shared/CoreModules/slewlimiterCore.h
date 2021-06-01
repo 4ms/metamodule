@@ -35,7 +35,7 @@ public:
 	{
 		switch (param_id) {
 			case 0: // rise time
-
+slew.attackTime=map_value(val,0.0f,1.0f,1.0f,2000.0f);
 				break;
 			case 1: // fall time
 				slew.decayTime = map_value(val, 0.0f, 1.0f, 1.0f, 2000.0f);
