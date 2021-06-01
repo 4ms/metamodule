@@ -31,8 +31,8 @@ struct AppStartup {
 		__ISB();
 		Copro::start();
 
-		SecondaryCore::reset();
-		HAL_Delay(1);
+		// SecondaryCore::reset();
+		// HAL_Delay(50);
 		SecondaryCore::start();
 	}
 
