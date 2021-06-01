@@ -1,0 +1,34 @@
+read CPU id
+if 1 branch -->
+
+--> 
+
+...
+
+0000A244:
+?
+
+0000A2F8:
+Set GICC_PMR = 8
+
+0000A218:
+Set GICD_ISENABLER0 = 1
+
+0000A2B8:
+Set GICD_IPRIORITY0 = 0 (just clearing bits for ISR 0)
+
+0000A290:
+Set GICD_IGROUP0 = 0 (just for ISR 0?)
+
+000004CC: DSB
+000004D0: WFI
+000004D4: Read IAR @ 0000A25C
+000004D8: Write EOIR @ 0000A308
+000004DC: Check if IRQ num is 0
+
+... if it's 0, then [...] and check is TAMP backup reg 4 is CA7FACE0
+If not, then DSB/WFI
+
+On next SGI0, wake up and check if TAMP backup reg4 is CA7FACE1
+If so, read reg5 and jump to that address.
+
