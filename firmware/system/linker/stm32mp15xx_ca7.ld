@@ -155,8 +155,8 @@ SECTIONS
     _fiq_stack_start = _irq_stack_end;
     _fiq_stack_end = _fiq_stack_start + 0x100;
 
-    _core2_user_stack_start = _fiq_stack_end;
-    _core2_user_stack_end = _core2_user_stack_start + 0x1000;
+    _auxcore_user_stack_start = _fiq_stack_end;
+    _auxcore_user_stack_end = _auxcore_user_stack_start + 0x1000;
 
 
 	.shared_memory (NOLOAD) :
