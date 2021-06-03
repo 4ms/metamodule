@@ -17,3 +17,4 @@
 #include "patch/integration_tests/test_pannerCore.hh"
 #include "patch/integration_tests/test_sampleholdCore.hh"
 #include "patch/integration_tests/test_vcaCore.hh"
+#include "patch/integration_tests/test_envelopefollowerCore.hh"

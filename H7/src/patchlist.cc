@@ -35,7 +35,7 @@ PatchList::PatchList()
 
 PatchList::PatchList()
 	: _patches{
-		  {test_sampleholdCore},
+		  {test_envelopefollowerCore},
 		  {test_eightstepCore},
 		  {test_octaveCore},
 		  {test_gateCore},
