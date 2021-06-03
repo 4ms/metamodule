@@ -1,33 +1,47 @@
+reset all regiseters to 0
 read CPU id
-if 1 branch -->
+if 1 branch to 0210
 
---> 
-
-...
-
-0000A244:
-?
-
-0000A2F8:
-Set GICC_PMR = 8
-
-0000A218:
-Set GICD_ISENABLER0 = 1
-
-0000A2B8:
-Set GICD_IPRIORITY0 = 0 (just clearing bits for ISR 0)
-
-0000A290:
-Set GICD_IGROUP0 = 0 (just for ISR 0?)
-
-000004CC: DSB
-000004D0: WFI
-000004D4: Read IAR @ 0000A25C
-000004D8: Write EOIR @ 0000A308
-000004DC: Check if IRQ num is 0
+0210:
+setup stacks: abt, und, irq, svc, mon
+set monitor VBAR to 0x000007E0
+set normal VBAR to 0x00000000
+0264-026C: set SCR->NS to 1: non-secure state when not in monitor mode
+0270-0274: set VBAR to 0xA320 (why so soon, we just set it to 0?)
+0278: read System Control Reg (SCTLR)
+027C: clear V bit (0x2000) (low exception vectors)
+	  set I bit (0x1000): ICACHE enabled
+	  clear Z bit (0x0800): program flow prediction disabled
+	  clear C bit (#4): data cache disabled
+	  clear M bit (#1): MMU disabled
+0290: write SCTLR = 0x00C51078
+0298: disabled BPALL (all branch prediction)
+02A0: set SCR->NS to 0: secure state when not in monitor mode
+[set SCTLR to same as before]
+02C4: disable BPALL (again?)
+02C8-0x2D8: in SCTLR set FIQ to 1 (already was 1) so FIQ go ot Monitor mode
+			clear IRQ so IRQs do not go to Monitor mode
+			clear EA so external aborts are not taken to monitor mode
+02DC: switch to System Mode
+02E0: branch to 94E0 where we set bit 6 (#64 = 0x40) enable SMP bit in ACTLR, only if it's not already set.
+read CPUID, branch to 04A0 if it's 1
+04A0: branch to A244 (and then a series of subroutine branching)
+A244: Enable groups 0 and 1 in GICC_CTRL
+A2F8: Set GICC_PMR = 8
+A218: Set GICD_ISENABLER0 = 1
+A2B8: Set GICD_IPRIORITY0 = 0 (just clearing bits for ISR 0)
+A290: Set GICD_IGROUP0 = 0 (just for ISR 0?)
+return to 04CC
+04CC: DSB
+04D0: WFI
+04D4: Read IAR @ 0000A25C
+04D8: Write EOIR @ 0000A308
+04DC: Check if IRQ num is 0
 
 ... if it's 0, then [...] and check is TAMP backup reg 4 is CA7FACE0
-If not, then DSB/WFI
+If not, then:
+00000608: DSB
+0000060C: WFI
 
 On next SGI0, wake up and check if TAMP backup reg4 is CA7FACE1
 If so, read reg5 and jump to that address.
