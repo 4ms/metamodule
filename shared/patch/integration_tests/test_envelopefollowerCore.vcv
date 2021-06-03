@@ -294,7 +294,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 22,
-      "text": "",
+      "text": "Envelope follower output is patched to CV Out 1. Check that a exponential decay envelope with quick attack is present on this output.\n\nGate output is on CV Out 2. Check that a gate signal corresponding to the envelope output is present here.\n\nThe audio signal going into the envelope follower is output on Audio Out L",
       "pos": [
         61,
         0
