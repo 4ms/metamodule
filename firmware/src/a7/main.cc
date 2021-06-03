@@ -91,15 +91,18 @@ void main()
 	while (1) {
 		// LED1 = A7 core running
 		Debug::red_LED1::low();
-		HAL_Delay(500);
-		Debug::red_LED1::high();
-		HAL_Delay(500);
-
-		// Debug::green_LED1::low();
 		// HAL_Delay(500);
-		// Debug::green_LED1::high();
+		for (uint32_t i = 0; i < 1000000UL; i++)
+			__NOP();
+		Debug::red_LED1::high();
+		// HAL_Delay(500);
+		for (uint32_t i = 0; i < 1000000UL; i++)
 
-		__NOP();
+			// Debug::green_LED1::low();
+			// HAL_Delay(500);
+			// Debug::green_LED1::high();
+
+			__NOP();
 	}
 }
 
@@ -112,10 +115,10 @@ extern "C" void aux_core_main()
 {
 	// __WFI();
 	while (1) {
-		for (uint32_t i = 0; i < 10000000UL; i++)
+		for (uint32_t i = 0; i < 1000000UL; i++)
 			asm("NOP\n");
 		Debug::green_LED1::high();
-		for (uint32_t i = 0; i < 10000000UL; i++)
+		for (uint32_t i = 0; i < 1000000UL; i++)
 			asm("NOP\n");
 		Debug::green_LED1::low();
 		// HAL_Delay(500);
