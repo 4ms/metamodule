@@ -92,11 +92,14 @@ EXTRA_CPPFLAGS = $(LTOFLAG)
 
 EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG)
 
+EXTDEF ?= METAMODULE_NORMAL_MODE
+
 ARCH_CFLAGS += -DUSE_HAL_DRIVER \
 			  -DUSE_FULL_LL_DRIVER \
 			  -DSTM32MP157Cxx \
 			  -DSTM32MP1 \
 			  -DCORE_CA7 \
+			  -D$(EXTDEF)
 
 MCU = -mcpu=cortex-a7 \
 	  -mlittle-endian \
