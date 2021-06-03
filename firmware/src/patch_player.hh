@@ -15,8 +15,12 @@ public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
 	// cached data:
-	Jack out_conns[Panel::NumInJacks] __attribute__((aligned(4))) = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
-	Jack in_conns[Panel::NumOutJacks] = {{0, 0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
+	enum {
+		NumInConns = Panel::NumOutJacks,
+		NumOutConns = Panel::NumInJacks,
+	};
+	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
+	Jack in_conns[NumInConns] = {{0, 0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
 
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
@@ -122,12 +126,37 @@ public:
 
 			for (int jack_i = 0; jack_i < net.num_jacks; jack_i++) {
 				auto &jack = net.jacks[jack_i];
-				// Todo: add get_num_inputs() etc to CoreProcessor, so we can range-check here
 				if (jack_i == 0)
 					modules[jack.module_id]->mark_output_patched(jack.jack_id);
 				else
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
 			}
+		}
+	}
+
+	void set_input_jack_patched_status(int panel_in_jack_id, bool is_patched)
+	{
+		if (panel_in_jack_id >= NumInConns)
+			return;
+		auto &jack = in_conns[panel_in_jack_id];
+		if (jack.module_id > 0) {
+			if (is_patched)
+				modules[jack.module_id]->mark_input_patched(jack.jack_id);
+			else
+				modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+		}
+	}
+
+	void set_output_jack_patched_status(int panel_out_jack_id, bool is_patched)
+	{
+		if (panel_out_jack_id >= NumOutConns)
+			return;
+		auto &jack = out_conns[panel_out_jack_id];
+		if (jack.module_id > 0) {
+			if (is_patched)
+				modules[jack.module_id]->mark_output_patched(jack.jack_id);
+			else
+				modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 		}
 	}
 

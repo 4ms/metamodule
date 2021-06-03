@@ -71,6 +71,7 @@ private:
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
+	void propagate_sense_pins(Params &params);
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;
