@@ -44,9 +44,12 @@ PatchList::PatchList()
 		  {test_clkdivideCore},
 		  {test_clkmultiplierCore},
 		  {test_comparatorCore},
-		  {test_crossfadeCore},
-		  {test_logicCore},
-		  {test_minmaxCore}
+		  // {test_crossfadeCore},
+		  // {test_logicCore},
+		  // {test_minmaxCore}
+		  {test_sense_pins_CV},
+		  {test_sense_pins_gates},
+		  {test_sense_pins_audio},
 		  // MARK: Add patches below here:
 	  }
 {

@@ -12,7 +12,7 @@ TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
 TARGETDEVICEDIR_CA7 = $(DRIVERLIB)/target/stm32mp1_ca7
 
 STARTUP_CA7	= $(TARGETDEVICEDIR_CA7)/boot/startup_ca7.s
-SHARED = src/a7/shared
+SHARED = src/shared
 
 OPTFLAG = -O3
 # LTOFLAG =
