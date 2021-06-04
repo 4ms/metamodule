@@ -1,5 +1,5 @@
 # If you want to use `make flash`, set this to the path to your JFlash executable:
-JFLASHEXE = /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
+JFLASHEXE ?= /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
 
 export BUILDDIR_H7M7 	= build/h7corem7
 export BUILDDIR_H7M4 	= build/h7corem4
