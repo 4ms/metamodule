@@ -116,8 +116,6 @@ AFLAGS = -mcpu=cortex-a7 \
 		 -mfpu=neon-vfpv4 \
 		 -mfloat-abi=hard \
 
-ARCH 	= /usr/local/Caskroom/gcc-arm-embedded/10-2020-q4-major/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi
-
 #### U-BOOT
 UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
 LOADADDR 	= 0xC2000040
