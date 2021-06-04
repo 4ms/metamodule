@@ -39,7 +39,7 @@ static void app_startup()
 };
 
 struct StaticBuffers {
-	static inline /*__attribute__((section(".shared_memory")))*/ MMScreenConf::FrameBufferT screen_writebuf;
+	static inline MMScreenConf::FrameBufferT screen_writebuf;
 } _sb;
 } // namespace MetaModule
 
@@ -93,17 +93,12 @@ void main()
 
 	while (1) {
 		if (SharedBus::i2c.is_ready()) {
+			Debug::red_LED2::low();
 			i2cqueue.update();
+			Debug::red_LED2::high();
 		}
 		__NOP();
 	}
-
-	// while (1) {
-	// 	Debug::red_LED2::low();
-	// 	HAL_Delay(10);
-	// 	Debug::red_LED2::high();
-	// 	HAL_Delay(50);
-	// }
 }
 
 void recover_from_task_fault()
