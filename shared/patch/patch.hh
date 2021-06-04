@@ -34,7 +34,7 @@ struct MappedParam {
 
 // FixMe: non-node only code:
 struct Net {
-	uint16_t num_jacks;
+	uint32_t num_jacks;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE> jacks;
 };
 using NetList = std::array<Net, MAX_NODES_IN_PATCH>;
@@ -46,7 +46,7 @@ using StaticParamList = std::array<StaticParam, MAX_PARAMS_IN_PATCH>;
 using MappedParamList = std::array<MappedParam, Panel::NumKnobs>;
 
 struct Patch {
-	StaticString<30> patch_name;
+	ModuleTypeSlug patch_name;
 	ModuleList modules_used;
 	int num_modules;
 

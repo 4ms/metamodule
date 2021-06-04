@@ -1,0 +1,155 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 85,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "attenuvert",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.484499931
+        },
+        {
+          "id": 1,
+          "value": 0.5024997
+        }
+      ],
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 30,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 88,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 85,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 2,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 85,
+            "DstObjID": 1,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 3,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 85,
+            "DstObjID": 0,
+            "DstObjType": "InputJack",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "InputJack"
+          },
+          {
+            "DstModID": 85,
+            "DstObjID": 1,
+            "DstObjType": "InputJack",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "InputJack"
+          },
+          {
+            "DstModID": 85,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 85,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          }
+        ],
+        "PatchName": "test_sense_pins_audio"
+      },
+      "pos": [
+        9,
+        0
+      ]
+    },
+    {
+      "id": 88,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 30,
+      "rightModuleId": 91,
+      "text": "This tests the hardware/firmware's ability to tell virtual modules when the physical module's jacks are patched/unpatched.\n\nThis tests the jack sense feature of the audio input jacks.\n\n1) Scope CV Out 1 and 2, all other jacks unpatched. Verify the knobs A and B respectively make the outputs go from about -10V (knob fully CCW) to +10V (knob fully CW)\n\n2) Patch an audio signal into audio input jack L and R, one at a time. \nVerify that the corresponding ouput  is now the audio signal, and the corresponding knob acts as an attenuverter (inverted with knob CCW, non-inverted with knob CW).\n\nNote: Audio In jacks are AC-coupled",
+      "pos": [
+        25,
+        0
+      ]
+    },
+    {
+      "id": 91,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 88,
+      "text": "Channel Paths:\n\nAudio In L -> Knob A -> CV Out 1\n\nAudio In R -> Knob B -> CV Out 2",
+      "pos": [
+        41,
+        0
+      ]
+    }
+  ],
+  "cables": []
+}

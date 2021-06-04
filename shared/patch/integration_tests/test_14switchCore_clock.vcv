@@ -8,6 +8,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 80,
+      "rightModuleId": 84,
       "text": "1:4 SWITCH CORE TEST (CLOCKED)\n\nKnob A - patched to Switch reset input\n\nCV Out 1 - Switch out 1\nCV Out 2 - Switch out 2\nAudio Out L - Switch out 3\nAudio Out R - Switch out 4\n\nCheck each output to make sure the sine wave on the input is cycling through the outputs\n\nWhile Output 2-4 is active: Turn Knob A all the way down to 0%, and then up to 50%. Verify Output immediately starts to ouput.\n\nWhile Output 1 is active: repeat the above test, and verify nothing happens (Output 1 should continue outputting as normal and timing should not change)   \n",
       "pos": [
         49,
@@ -113,6 +114,14 @@
             "SrcModID": 75,
             "SrcObjID": 0,
             "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 74,
+            "DstObjID": 3,
+            "DstObjType": "InputJack",
+            "SrcModID": 75,
+            "SrcObjID": 2,
+            "SrcObjType": "InputJack"
           }
         ],
         "PatchName": "test_14switchCore_clock"
@@ -130,7 +139,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.105000004
+          "value": 0.0465000048
         },
         {
           "id": 1,
@@ -244,6 +253,19 @@
         0,
         0
       ]
+    },
+    {
+      "id": 84,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 8,
+      "text": "Next, patch a manual CV signal into the CV A jack. \nThe clock should stop, and you should have complete manual control over which output(s) are active.\n\nA CV from 0 to 8V should crossfade from one output to the next, in order (CV1 -> CV2 -> OutL -> OutR)",
+      "pos": [
+        65,
+        0
+      ]
     }
   ],
   "cables": [
@@ -268,6 +290,22 @@
       "outputModuleId": 81,
       "outputId": 0,
       "inputModuleId": 74,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 79,
+      "outputModuleId": 74,
+      "outputId": 1,
+      "inputModuleId": 80,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 80,
+      "outputModuleId": 74,
+      "outputId": 0,
+      "inputModuleId": 80,
       "inputId": 1,
       "color": "#0c8e15"
     }

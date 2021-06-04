@@ -15,6 +15,10 @@
 #include "patch/integration_tests/test_minmaxCore.hh"
 #include "patch/integration_tests/test_octaveCore.hh"
 #include "patch/integration_tests/test_pannerCore.hh"
+#include "patch/integration_tests/test_sense_pins_CV.hh"
+#include "patch/integration_tests/test_sense_pins_audio.hh"
+#include "patch/integration_tests/test_sense_pins_gates.hh"
+
 #include "patch/integration_tests/test_sampleholdCore.hh"
 #include "patch/integration_tests/test_vcaCore.hh"
 #include "patch/integration_tests/test_envelopefollowerCore.hh"

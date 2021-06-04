@@ -24,7 +24,7 @@ public:
 	virtual float get_led_brightness(const int led_id) const { return 0; }
 
 	static constexpr size_t NameChars = 15;
-	static constexpr size_t LongNameChars = 40;
+	static constexpr size_t LongNameChars = 39;
 
 	static constexpr unsigned NumKnobs = 0;
 	static constexpr unsigned NumOutJacks = 0;
