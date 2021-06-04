@@ -15,7 +15,6 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
-			-stdlib=libc++ \
 			-I$(DOCTEST_DIR) \
 			-I$(TEST_DIR) \
 			-I$(TEST_DIR)/stubs \
