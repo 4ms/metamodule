@@ -3,10 +3,10 @@
 class ExpDecay {
 public:
 	float decayTime = 10;
+		float attackTime=10;
 
 	ExpDecay()
 	{
-		attackTime = 10;
 	}
 
 	virtual void set_samplerate(float sr)
@@ -41,5 +41,4 @@ private:
 	int direction;
 	float lastSample = 0;
 	float currentSample = 0;
-	float attackTime;
 };

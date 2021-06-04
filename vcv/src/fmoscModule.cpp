@@ -45,7 +45,7 @@ struct FmoscWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		addLabeledKnob("PITCH", FmoscModule::COARSE_TUNE_PARAM, {0, 0});
 		addLabeledKnob("MIX", FmoscModule::MIX_PARAM, {1, 0});

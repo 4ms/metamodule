@@ -34,7 +34,7 @@ struct Gateseq8Widget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/12hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/12hptemplate.svg")));
 
 		for (int i = 0; i < 8; i++) {
 			addLabeledToggle(std::to_string(i + 1),

@@ -1,0 +1,210 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 8,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 80,
+      "text": "OCTAVE CORE TEST\n\nKnob A - Signal Input\nKnob B - Octave Controll\nKnob C - CV Input\n\nEnsure when turning Knob A that the voltage comes out of the module unaffected\n\nKnob B and Knob C will add voltage to the input in 1V intervals\n\nCheck the output on CV Out 1\n",
+      "pos": [
+        39,
+        0
+      ]
+    },
+    {
+      "id": 75,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 80,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 89,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 75,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 88,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 75,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 89,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 75,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 88,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 75,
+            "SrcObjID": 2,
+            "SrcObjType": "OutputJack"
+          }
+        ],
+        "PatchName": "test_octaveCore"
+      },
+      "pos": [
+        10,
+        0
+      ]
+    },
+    {
+      "id": 80,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 6.40999699
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 75,
+      "rightModuleId": 8,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        26,
+        0
+      ]
+    },
+    {
+      "id": 88,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "OCTAVE",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.00449999981
+        }
+      ],
+      "leftModuleId": 89,
+      "pos": [
+        4,
+        0
+      ]
+    },
+    {
+      "id": 89,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "VOLTAGESOURCE",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 88,
+      "pos": [
+        0,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 0,
+      "outputModuleId": 89,
+      "outputId": 0,
+      "inputModuleId": 88,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1,
+      "outputModuleId": 89,
+      "outputId": 1,
+      "inputModuleId": 88,
+      "inputId": 1,
+      "color": "#0c8e15"
+    }
+  ]
+}

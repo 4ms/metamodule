@@ -1,0 +1,282 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 30,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 66,
+      "rightModuleId": 38,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 66,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 66,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 66,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 66,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 30,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 66,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 30,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack"
+          }
+        ],
+        "PatchName": "test_vcaCore"
+      },
+      "pos": [
+        33,
+        0
+      ]
+    },
+    {
+      "id": 38,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 30,
+      "text": "VCA CORE TEST\n\nKnob A - Pre Gain\nKnob B - Post Gain\nKnob C - Offset\nKnob D - CV Amount\n\nStart with Knobs A and C at minimum. Knobs B and D at maximum\n\nTurn up Knob A, the sine wave will begin to clip\n\nTurn Knob B down to verify that the signal is attenuated\n\nTurn Knob C up to allow more of the signal through, at max the full sine wave will be present at the output\n\nTurn Knob D down to verify that the\nsignal is attenuated",
+      "pos": [
+        49,
+        0
+      ]
+    },
+    {
+      "id": 66,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "vca",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 67,
+      "rightModuleId": 30,
+      "pos": [
+        25,
+        0
+      ]
+    },
+    {
+      "id": 67,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 68,
+      "rightModuleId": 66,
+      "pos": [
+        21,
+        0
+      ]
+    },
+    {
+      "id": 68,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "ad_envelope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.251999885
+        },
+        {
+          "id": 2,
+          "value": 0.462000012
+        },
+        {
+          "id": 3,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 69,
+      "rightModuleId": 67,
+      "pos": [
+        13,
+        0
+      ]
+    },
+    {
+      "id": 69,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 7.89500189
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 68,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        0,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 73,
+      "outputModuleId": 67,
+      "outputId": 0,
+      "inputModuleId": 66,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 74,
+      "outputModuleId": 67,
+      "outputId": 0,
+      "inputModuleId": 68,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 75,
+      "outputModuleId": 68,
+      "outputId": 0,
+      "inputModuleId": 66,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 76,
+      "outputModuleId": 66,
+      "outputId": 0,
+      "inputModuleId": 69,
+      "inputId": 0,
+      "color": "#c91847"
+    }
+  ]
+}

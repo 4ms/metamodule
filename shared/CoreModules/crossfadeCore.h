@@ -48,7 +48,7 @@ public:
 				in2 = val;
 				break;
 			case 2:
-				xFadeCV = val / 5.0f;
+				xFadeCV = val;
 				break;
 		}
 	}

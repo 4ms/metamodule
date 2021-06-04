@@ -41,7 +41,7 @@ struct EightstepprobWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		for (int x = 0; x < 2; x++) {
 			for (int y = 0; y < 4; y++) {

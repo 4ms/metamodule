@@ -32,7 +32,7 @@ struct PitchshiftWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 		addLabeledKnob("COARSE", PitchshiftModule::COARSE_PARAM, {0, 0});
 		addLabeledKnob("FINE", PitchshiftModule::FINE_PARAM, {1, 0});
 		addLabeledKnob("WINDOW", PitchshiftModule::WINDOW_PARAM, {0, 1});

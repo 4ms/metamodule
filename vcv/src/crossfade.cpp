@@ -5,29 +5,18 @@
 
 struct CrossfadeModule : public CommModule {
 
-	enum ParamIds {
-		CROSSFADE_PARAM,
-		NUM_PARAMS
-	};
-	enum InputIds {
-		INPUT1_INPUT,
-		INPUT2_INPUT,
-		CV_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		CROSSFADE_OUTPUT,
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		NUM_LIGHTS
-	};
+	enum ParamIds { CROSSFADE_PARAM, NUM_PARAMS };
+	enum InputIds { INPUT1_INPUT, INPUT2_INPUT, CV_INPUT, NUM_INPUTS };
+	enum OutputIds { CROSSFADE_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { NUM_LIGHTS };
 
 	CrossfadeModule()
 	{
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("XFADE");
 		selfID.typeID = "XFADE";
+
+		inputJacks[CrossfadeModule::CV_INPUT]->scale = [](float f) { return f / 5.0f; };
 	}
 };
 
@@ -43,7 +32,7 @@ struct CrossfadeWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hptemplate.svg")));
 
 		addLabeledKnob("FADE", CrossfadeModule::CROSSFADE_PARAM, {0, 0});
 

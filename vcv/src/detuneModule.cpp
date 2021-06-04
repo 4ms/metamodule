@@ -31,7 +31,7 @@ struct DetuneWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hptemplate.svg")));
 
 		addLabeledKnob("Wow Speed", DetuneModule::WOW_SPEED_PARAM, {0, 0});
 		addLabeledKnob("Wow Depth", DetuneModule::WOW_DEPTH_PARAM, {0, 1});

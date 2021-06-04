@@ -36,7 +36,7 @@ struct AttWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4hptemplate.svg")));
 
 		addLabeledKnob("LEVEL", AttModule::LEVEL1_PARAM, {0, 0});
 		addLabeledKnob("LEVEL", AttModule::LEVEL2_PARAM, {0, 1});

@@ -4,6 +4,7 @@
 #include <map>
 #include <mutex>
 #include <vector>
+#include <algorithm>
 
 class CentralData {
 	static inline std::mutex mtx;

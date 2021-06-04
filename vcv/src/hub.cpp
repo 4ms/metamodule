@@ -262,7 +262,7 @@ struct MetaModuleHubWidget : CommModuleWidget {
 			expModule->redrawPatchName = [&]() { this->patchName->text = this->expModule->patchNameText; };
 		}
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hptemplate.svg")));
 
 		addParam(createParamCentered<BefacoPush>(mm2px(Vec(10, 50)), module, MetaModuleHub::GET_INFO));
 

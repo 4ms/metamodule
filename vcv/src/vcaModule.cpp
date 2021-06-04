@@ -49,7 +49,7 @@ struct VCAWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		addLabeledKnob("PRE", VCAModule::PREGAIN_PARAM, {0, 0});
 		addLabeledKnob("POST", VCAModule::POSTGAIN_PARAM, {1, 0});

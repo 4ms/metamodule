@@ -30,7 +30,7 @@ struct Mixer4Widget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		addLabeledKnob("LVL1", Mixer4Module::LEVEL1_PARAM, {0, 0});
 		addLabeledKnob("LVL2", Mixer4Module::LEVEL2_PARAM, {1, 0});

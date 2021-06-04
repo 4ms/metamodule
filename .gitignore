@@ -31,3 +31,5 @@ local_board_rev.hh
 firmware/.gdb_history
 firmware_m4.h
 firmware_m4_vectors.h
+*.swo
+*.swp

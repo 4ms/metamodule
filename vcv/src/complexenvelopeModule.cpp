@@ -49,7 +49,7 @@ struct ComplexenvelopeWidget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hpTemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hptemplate.svg")));
 
 		addLabeledKnob("ATTACK", ComplexenvelopeModule::ATTACK_PARAM, {0, 0});
 		addLabeledKnob("DECAY", ComplexenvelopeModule::DECAY_PARAM, {0, 1});

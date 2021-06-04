@@ -15,7 +15,9 @@ struct OctaveModule : CommModule {
 		core = ModuleFactory::create("OCTAVE");
 		selfID.typeID = "OCTAVE";
 
+		inputJacks[OctaveModule::PITCH_INPUT]->scale = [](float f) { return f / 5.0f; };
 		inputJacks[OctaveModule::CV_INPUT]->scale = [](float f) { return f / 5.0f; };
+		outputJacks[OctaveModule::PITCH_OUTPUT]->scale = [](float f) {return f*5.0f;};
 	}
 };
 
