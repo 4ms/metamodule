@@ -103,7 +103,7 @@ flash_a7:
 flash_mp1m4:
 	$(JFLASHEXE) -openprjflashing/metamodule-mp1-cm4.jflash -open$(BUILDDIR_MP1M4)/$(BINARYNAME).hex -auto -exit
 
-flash_h7: $(BUILDDIR_H7M7)/$(BINARYNAME).hex $(BUILDDIR_M4)/$(BINARYNAME).hex
+flash_h7: $(BUILDDIR_H7M7)/$(BINARYNAME).hex $(BUILDDIR_H7M4)/$(BINARYNAME).hex
 	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_H7M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_M4)/$(BINARYNAME).hex -auto -exit
 
 start_gdb:
