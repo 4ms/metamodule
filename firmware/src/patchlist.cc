@@ -40,7 +40,7 @@ PatchList::PatchList()
 		  {test_14switchCore_clock},
 		  {test_14switchCore_cv},
 		  {test_bitcrushCore},
-		  {test_bpfCore},
+		  {test_karplusCore},
 		  {test_clkdivideCore},
 		  {test_clkmultiplierCore},
 		  {test_comparatorCore},

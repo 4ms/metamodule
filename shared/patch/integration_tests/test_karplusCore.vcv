@@ -1,0 +1,304 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 19,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 29,
+      "rightModuleId": 22,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 27,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 19,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 19,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 27,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 19,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 27,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 19,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 28,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 19,
+            "SrcObjID": 4,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 27,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 19,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack"
+          }
+        ],
+        "PatchName": "test_karplusCore"
+      },
+      "pos": [
+        28,
+        0
+      ]
+    },
+    {
+      "id": 22,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 19,
+      "rightModuleId": 26,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        44,
+        0
+      ]
+    },
+    {
+      "id": 26,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 22,
+      "text": "KARPLUS CORE TEST\n\nKnob A and Knob B control the pitch offset (A) and pitch CV amount (B)\n\nKnob C controls the decay envelope time\n\nKnob D controls the spread (applying time offset to each internal delay line)\n\nKnob a controls the speed at  which the module is triggered\n\n Monitor audio on Audio Out L\n",
+      "pos": [
+        57,
+        0
+      ]
+    },
+    {
+      "id": 27,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "KARPLUS",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.126000002
+        },
+        {
+          "id": 1,
+          "value": 0.0764999315
+        },
+        {
+          "id": 2,
+          "value": 0.0194997024
+        }
+      ],
+      "rightModuleId": 30,
+      "pos": [
+        9,
+        0
+      ]
+    },
+    {
+      "id": 28,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0735001042
+        },
+        {
+          "id": 1,
+          "value": 0.493500024
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 31,
+      "pos": [
+        4,
+        0
+      ]
+    },
+    {
+      "id": 29,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "AudioInterface",
+      "params": [],
+      "leftModuleId": 30,
+      "rightModuleId": 19,
+      "data": {
+        "audio": {
+          "driver": 1,
+          "deviceName": "default",
+          "offset": 0,
+          "maxChannels": 8,
+          "sampleRate": 44100,
+          "blockSize": 256
+        }
+      },
+      "pos": [
+        18,
+        0
+      ]
+    },
+    {
+      "id": 30,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 27,
+      "rightModuleId": 29,
+      "pos": [
+        13,
+        0
+      ]
+    },
+    {
+      "id": 31,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "attenuvert",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.607500732
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 28,
+      "pos": [
+        0,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 63,
+      "outputModuleId": 31,
+      "outputId": 0,
+      "inputModuleId": 27,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 65,
+      "outputModuleId": 27,
+      "outputId": 0,
+      "inputModuleId": 30,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 68,
+      "outputModuleId": 28,
+      "outputId": 0,
+      "inputModuleId": 27,
+      "inputId": 0,
+      "color": "#c91847"
+    }
+  ]
+}
