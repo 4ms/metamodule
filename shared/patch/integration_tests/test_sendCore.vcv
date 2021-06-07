@@ -1,0 +1,286 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 19,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 29,
+      "rightModuleId": 22,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 33,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 19,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 33,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 19,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 33,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 19,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 33,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 19,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 33,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 19,
+            "SrcObjID": 2,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 33,
+            "DstObjID": 1,
+            "DstObjType": "OutputJack",
+            "SrcModID": 19,
+            "SrcObjID": 3,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 33,
+            "DstObjID": 2,
+            "DstObjType": "OutputJack",
+            "SrcModID": 19,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 33,
+            "DstObjID": 3,
+            "DstObjType": "OutputJack",
+            "SrcModID": 19,
+            "SrcObjID": 1,
+            "SrcObjType": "OutputJack"
+          }
+        ],
+        "PatchName": "test_sendCore"
+      },
+      "pos": [
+        29,
+        0
+      ]
+    },
+    {
+      "id": 22,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 19,
+      "rightModuleId": 26,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        45,
+        0
+      ]
+    },
+    {
+      "id": 26,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 22,
+      "text": "SEND CORE TEST\n\nKnobs A-D adjust the amount of sine wave on the input sent to Outputs 1-4\n\nCV Out 1 is OUT1 from Send\nCV Out 2 is OUT2 from Send\nAudio Out L is OUT3 from Send\nAudio Out R is OUT4 from Send",
+      "pos": [
+        58,
+        0
+      ]
+    },
+    {
+      "id": 29,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "AudioInterface",
+      "params": [],
+      "leftModuleId": 30,
+      "rightModuleId": 19,
+      "data": {
+        "audio": {
+          "driver": 1,
+          "deviceName": "default",
+          "offset": 0,
+          "maxChannels": 8,
+          "sampleRate": 44100,
+          "blockSize": 256
+        }
+      },
+      "pos": [
+        19,
+        0
+      ]
+    },
+    {
+      "id": 30,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 33,
+      "rightModuleId": 29,
+      "pos": [
+        14,
+        0
+      ]
+    },
+    {
+      "id": 33,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "send",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 30,
+      "pos": [
+        6,
+        0
+      ]
+    },
+    {
+      "id": 34,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.206999987
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        }
+      ],
+      "pos": [
+        0,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 71,
+      "outputModuleId": 34,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 0,
+      "color": "#c91847"
+    }
+  ]
+}
