@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "MULTILFO",
+      "name": "Multilfo",
+      "description": "Multi Output LFO",
+      "tags": []
+}, 
+{
       "slug": "ENVELOPEFOLLOWER",
       "name": "Envelopefollower",
       "description": "Envelope Follower",
