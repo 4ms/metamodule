@@ -164,13 +164,13 @@ Controls::Controls(MuxedADC &potadc,
 
 	dac.init();
 	auxstream_updater.init([&]() {
-		Debug::Pin2::high();
+		// Debug::Pin2::high();
 		static bool rising_edge = false;
 		dac.output_next();
 		rising_edge = !rising_edge;
 		if (rising_edge)
 			clock_out.output_next();
-		Debug::Pin2::low();
+		// Debug::Pin2::low();
 	});
 }
 } // namespace MetaModule

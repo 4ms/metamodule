@@ -26,6 +26,7 @@ CXXFLAGS = 	-Wall \
 			-I../src \
 			-I../shared \
 			-I../../shared \
+			-DTESTPROJECT \
 
 ### Boilerplate below here:
 

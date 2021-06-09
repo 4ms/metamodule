@@ -6,6 +6,7 @@
 #include "drivers/hsem.hh"
 #include "panel.hh"
 #include "patch_player.hh"
+
 namespace MetaModule
 {
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
@@ -103,7 +104,7 @@ void AudioStream::process(AudioStreamBlock &in,
 	load_measure.start_measurement();
 
 	cache.write_sync(param_block.params[0], param_block.metaparams);
-	target::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
+	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
 
 	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch
 	// Todo: fade down before setting audio_is_muted to true

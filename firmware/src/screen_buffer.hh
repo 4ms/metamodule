@@ -465,7 +465,7 @@ public:
 	void flush_cache()
 	{
 		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
-			target::SystemCache::clean_dcache_by_range(&framebuf, sizeof(ScreenConfT::FrameBufferT));
+			mdrivlib::SystemCache::clean_dcache_by_range(&framebuf, sizeof(ScreenConfT::FrameBufferT));
 			__DSB();
 			// do mem2mem xfer
 		}

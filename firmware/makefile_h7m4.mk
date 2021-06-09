@@ -11,6 +11,7 @@ HAL_CONF_INC = src/m4
 HALDIR = $(HALBASE)/stm32h7x5
 DEVICEDIR = $(DEVICEBASE)/stm32h7x5
 TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32h7x5
+TARGETCOREDIR = $(DRIVERLIB)/target/stm32h7x5_m4
 
 STARTUP_H7 = $(TARGETDEVICEDIR)/boot/startup_cm7.s
 SYSTEM_H7 = system/system_stm32h7xx_dualcore_boot_cm4_cm7.c
@@ -46,6 +47,8 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(HALDIR)/include \
 			-I$(DRIVERLIB) \
 			-I$(DRIVERLIB)/drivers \
+			-I$(TARGETCOREDIR) \
+			-I$(TARGETCOREDIR)/drivers \
 			-I$(TARGETDEVICEDIR) \
 			-I$(TARGETDEVICEDIR)/drivers \
 			-I$(LIBDIR)/easiglib \

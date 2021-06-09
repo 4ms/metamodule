@@ -2,6 +2,10 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleTypes.h"
 #include "CoreModules/panel_node.hh"
+#ifndef TESTPROJECT
+	#include "debug.hh"
+#endif
+#include "drivers/secondary_core_control.hh"
 #include "patch/patch.hh"
 #include "sys/alloc_buffer.hh"
 #include <cstdint>
@@ -85,12 +89,14 @@ public:
 			modules[k.module_id]->set_param(k.param_id, val);
 		}
 
+		Debug::Pin2::high();
+		SecondaryCore::send_sgi();
+		Debug::Pin2::low();
 		for (int i = 1; i < p.num_modules; i++) {
 			modules[i]->update();
 		}
 
 		if constexpr (USE_NODES == false) {
-			// Copy outs to ins: ~1.3us for 4 nets
 			for (int net_i = 0; net_i < p.num_nets; net_i++) {
 				auto &net = p.nets[net_i];
 				auto &output = net.jacks[0];
@@ -207,14 +213,14 @@ public:
 
 	void clear_cache()
 	{
-		for (int i = 0; i < MAX_MODULES_IN_PATCH; i++)
-			dup_module_index[i] = 0;
+		for (auto &d : dup_module_index)
+			d = 0;
 
-		for (int i = 0; i < Panel::NumInJacks; i++)
-			out_conns[i] = {0, 0};
+		for (auto &out_conn : out_conns)
+			out_conn = {0, 0};
 
-		for (int i = 0; i < Panel::NumOutJacks; i++)
-			in_conns[i] = {0, 0};
+		for (auto &in_conn : in_conns)
+			in_conn = {0, 0};
 	}
 
 	// Cache all the panel jack connections

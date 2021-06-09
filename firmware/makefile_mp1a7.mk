@@ -50,6 +50,7 @@ SOURCES = $(STARTUP_CA7) \
 		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
 		  $(SHARED)/util/math_tables.cc \
 		  $(CORE_SRC)/main.cc\
+		  $(CORE_SRC)/aux_core_main.cc\
 		  src/patchlist.cc\
 		  src/pages/page_manager.cc \
 		  src/print.cc \

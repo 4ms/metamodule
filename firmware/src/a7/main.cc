@@ -62,23 +62,17 @@ void main()
 
 	SharedBus::i2c.deinit();
 
-	auto addr = SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
-	target::SystemCache::clean_dcache_by_addr(addr);
-
-	addr = SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
-	target::SystemCache::clean_dcache_by_addr(addr);
-
-	addr = SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
-	target::SystemCache::clean_dcache_by_addr(addr);
-
-	addr = SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
-	target::SystemCache::clean_dcache_by_addr(addr);
+	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
+	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
+	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
+	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
+	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 
 	// Enable ISR for LedBufFrameLock:
 	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	// // Tell M4 we're done with init
-	HWSemaphore<M7_ready>::unlock();
+	HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked())
@@ -88,7 +82,7 @@ void main()
 	ui.start();
 	audio.start();
 
-	while (1) {
+	while (true) {
 		// HAL_Delay(500);
 		for (uint32_t i = 0; i < 100000000UL; i++)
 			__NOP();
@@ -101,21 +95,7 @@ void main()
 	}
 }
 
-void recover_from_task_fault(void)
+void recover_from_task_fault()
 {
 	main();
-}
-
-extern "C" void aux_core_main()
-{
-	// __WFI();
-	while (1) {
-		for (uint32_t i = 0; i < 100000000UL; i++)
-			asm("NOP\n");
-		Debug::green_LED1::high();
-		for (uint32_t i = 0; i < 100000000UL; i++)
-			asm("NOP\n");
-		Debug::green_LED1::low();
-		// HAL_Delay(500);
-	}
 }
