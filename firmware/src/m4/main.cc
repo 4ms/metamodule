@@ -33,7 +33,7 @@ void main(void)
 	HWSemaphore<M4_ready>::lock();
 
 	target::corem4::SystemClocks start_clocks;
-	while (HWSemaphore<M7_ready>::is_locked())
+	while (HWSemaphore<MainCoreReady>::is_locked())
 		;
 
 	SharedBus::i2c.init(i2c_conf_m4);

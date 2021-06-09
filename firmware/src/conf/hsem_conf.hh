@@ -3,7 +3,7 @@
 namespace MetaModule
 {
 enum SemaphoreLocks {
-	M7_ready = 1,
+	MainCoreReady = 1,
 	ParamsBuf1Lock,
 	ParamsBuf2Lock,
 	LEDFrameBufLock,

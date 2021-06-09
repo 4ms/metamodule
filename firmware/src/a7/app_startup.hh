@@ -18,8 +18,8 @@ struct AppStartup {
 	AppStartup()
 	{
 		target::RCC_Enable::HSEM_::set();
-		HWSemaphore<M7_ready>::disable_channel_ISR();
-		HWSemaphore<M7_ready>::lock();
+		HWSemaphore<MainCoreReady>::disable_channel_ISR();
+		HWSemaphore<MainCoreReady>::lock();
 
 		init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
 
