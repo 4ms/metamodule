@@ -2,13 +2,19 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleTypes.h"
 #include "CoreModules/panel_node.hh"
+#include "drivers/arch.hh"
+#include "drivers/cache.hh"
 #ifndef TESTPROJECT
 	#include "debug.hh"
+#else
+	#include "../stubs/debug.hh"
 #endif
-#include "drivers/secondary_core_control.hh"
+#include "conf/hsem_conf.hh"
+#include "drivers/smp.hh"
 #include "patch/patch.hh"
 #include "sys/alloc_buffer.hh"
 #include <cstdint>
+
 namespace MetaModule
 {
 using PanelT = Panel;
@@ -89,11 +95,34 @@ public:
 			modules[k.module_id]->set_param(k.param_id, val);
 		}
 
-		Debug::Pin2::high();
-		SecondaryCore::send_sgi();
-		Debug::Pin2::low();
-		for (int i = 1; i < p.num_modules; i++) {
-			modules[i]->update();
+		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
+
+			for (int i = 1; i < p.num_modules; i++) {
+				if (i == 1) {
+					// mdrivlib::SystemCache::clean_dcache();
+					SMPControl::write(i);
+					SMPControl::notify(1);
+				} else {
+					Debug::Pin1::high();
+					modules[i]->update();
+					Debug::Pin1::low();
+				}
+			}
+			Debug::Pin2::high();
+			while (SMPControl::read() != 0)
+				;
+			Debug::Pin2::low();
+
+			// Tell aux core to flush its cache (so we can copy outs->ins)
+			// SMPControl::write(2);
+			// SMPControl::notify(2);
+			// while (SMPControl::read() != 0)
+			// 	;
+
+		} else {
+			for (int i = 1; i < p.num_modules; i++) {
+				modules[i]->update();
+			}
 		}
 
 		if constexpr (USE_NODES == false) {
