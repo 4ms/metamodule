@@ -86,20 +86,31 @@ public:
 	}
 
 	// Runs the patch
+	//
+	// Timing:
+	// Stereo Verb Audio process:
+	// ~3us preamble (before audio process starts looping?)
+	// Repeat 64 times:
+	// 	~2us setup (set_panel_input/param)
+	// 	~4.2us to xfer knobs <<<<<<<<<<<<<<<!!!!!
+	// 	~1.5us parallel process both channels
+	// 	~0.5us to copy outs to ins
+	// 	==== 8.2us  * 64 = roughly 533us = 40% of 64 * 1/48000 = 1333us
 	void update_patch(const Patch &p)
 	{
 		// Todo: possible to use refs for knobs?
+		Debug::Pin2::high();
 		for (int i = 0; i < p.num_mapped_knobs; i++) {
 			auto &k = p.mapped_knobs[i];
 			auto val = get_panel_param(k.panel_knob_id);
 			modules[k.module_id]->set_param(k.param_id, val);
 		}
+		Debug::Pin2::low();
 
 		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
 
 			for (int i = 1; i < p.num_modules; i++) {
 				if (i == 1) {
-					// mdrivlib::SystemCache::clean_dcache();
 					SMPControl::write(i);
 					SMPControl::notify(1);
 				} else {
@@ -108,16 +119,8 @@ public:
 					Debug::Pin1::low();
 				}
 			}
-			Debug::Pin2::high();
 			while (SMPControl::read() != 0)
 				;
-			Debug::Pin2::low();
-
-			// Tell aux core to flush its cache (so we can copy outs->ins)
-			// SMPControl::write(2);
-			// SMPControl::notify(2);
-			// while (SMPControl::read() != 0)
-			// 	;
 
 		} else {
 			for (int i = 1; i < p.num_modules; i++) {
@@ -126,6 +129,7 @@ public:
 		}
 
 		if constexpr (USE_NODES == false) {
+			Debug::Pin1::high();
 			for (int net_i = 0; net_i < p.num_nets; net_i++) {
 				auto &net = p.nets[net_i];
 				auto &output = net.jacks[0];
@@ -138,6 +142,7 @@ public:
 					modules[jack.module_id]->set_input(jack.jack_id, out_val);
 				}
 			}
+			Debug::Pin1::low();
 		}
 	}
 
