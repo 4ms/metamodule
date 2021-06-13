@@ -20,6 +20,12 @@ namespace MetaModule
 using PanelT = Panel;
 
 class PatchPlayer {
+
+struct Knob {
+	uint16_t module_id;
+	uint16_t param_id;
+};
+
 public:
 	std::array<float, MAX_NODES_IN_PATCH> nodes;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
@@ -31,6 +37,8 @@ public:
 	};
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
 	Jack in_conns[NumInConns] = {{0, 0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
+
+    Knob knob_conns[Panel::NumKnobs]{{0,0}};
 
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
@@ -72,7 +80,8 @@ public:
 		// ...but it's harder to unit test.
 		mark_patched_jacks(p);
 		calc_panel_jack_connections(p);
-
+        calc_panel_knob_connections(p);
+        
 		// Set all initial knob values:
 		for (int i = 0; i < p.num_static_knobs; i++) {
 			const auto &k = p.static_knobs[i];
@@ -233,7 +242,10 @@ public:
 	{
 		if (!is_loaded)
 			return;
-		static_cast<PanelT *>(modules[0].get())->set_param(param_id, val);
+			
+		auto &k = knob_conns[param_id];
+		modules[k.module_id]->set_param(k.param_id, val);
+		// static_cast<PanelT *>(modules[0].get())->set_param(param_id, val);
 	}
 
 	float get_panel_param(int param_id)
@@ -255,6 +267,9 @@ public:
 
 		for (auto &in_conn : in_conns)
 			in_conn = {0, 0};
+			
+		for (auto &knob : knob_conns)
+		    knob_conn = {0, 0};
 	}
 
 	// Cache all the panel jack connections
@@ -280,6 +295,15 @@ public:
 					}
 				}
 			}
+		}
+	}
+	
+	void calc_panel_knob_connections(const Patch &p)
+	{
+		for (int i = 0; i < p.num_mapped_knobs; i++) {
+			auto &k = p.mapped_knobs[i];
+			knob_conns[k.panel_knob_id].module_id = k.module_id;
+			knob_conns[k.panel_knob_id].param_id = k.param_id;
 		}
 	}
 
