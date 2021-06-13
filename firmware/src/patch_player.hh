@@ -120,6 +120,7 @@ public:
 
 			for (int i = 1; i < p.num_modules; i++) {
 				if (i == 1) {
+					// thread::create
 					SMPControl::write(i);
 					SMPControl::notify(1);
 				} else {
@@ -128,6 +129,8 @@ public:
 					Debug::Pin1::low();
 				}
 			}
+
+			// thread::join
 			while (SMPControl::read() != 0)
 				;
 
@@ -137,6 +140,10 @@ public:
 			}
 		}
 
+		// Jacks
+		// We could save time by skipping panel jacks
+		// and changing set_panel_input and get_panel_output to
+		// access the in_conns[] and out_conns[] directly
 		if constexpr (USE_NODES == false) {
 			Debug::Pin1::high();
 			for (int net_i = 0; net_i < p.num_nets; net_i++) {
