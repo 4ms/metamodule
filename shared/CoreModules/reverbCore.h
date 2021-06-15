@@ -131,6 +131,7 @@ public:
 	{
 		switch (param_id) {
 			case Size:
+				// if (fabsf(val - globalAllpassAtten) > 0.0001f) {
 				globalAllpassAtten = val;
 				globalCombAtten = val;
 				for (int i = 0; i < numComb; i++) {
@@ -139,6 +140,7 @@ public:
 				for (int i = 0; i < numAllpass; i++) {
 					updateAllpassTuning(i);
 				}
+				// }
 				break;
 
 			case Damp:
@@ -151,11 +153,12 @@ public:
 				mix = val;
 				break;
 
-			case Time:
+			case Time: {
+				auto v = map_value(val, 0.0f, 1.0f, 0.8f, 0.99f);
 				for (int i = 0; i < numComb; i++) {
-					combFilter[i].setFeedback(map_value(val, 0.0f, 1.0f, 0.8f, 0.99f));
+					combFilter[i].setFeedback(v);
 				}
-				break;
+			} break;
 
 			case AllpassRatio: {
 				int ival = (int)(val * 48);		// 0...48
