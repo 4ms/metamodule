@@ -44,5 +44,17 @@ extern "C" void aux_core_main()
 			// signal we're done
 			SMPControl::write(0);
 		}
+
+		// Run a function
+		if (irqnum == SGI3_IRQn) {
+			Debug::Pin3::high();
+			auto thread_addr = SMPControl::read();
+			auto thread_func = reinterpret_cast<std::function<void()> *>(thread_addr);
+			thread_func->operator()();
+
+			// signal we're done
+			SMPControl::write(0);
+			Debug::Pin3::low();
+		}
 	}
 }

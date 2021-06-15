@@ -110,25 +110,22 @@ public:
 	// 	~1.5us parallel process both channels
 	// 	~0.45us to copy outs to ins
 	// 	==== 8.2us  * 64 = roughly 533us = 40% of 64 * 1/48000 = 1333us
+	std::function<void()> module_1_update = [this] { modules[1]->update(); };
+
 	void update_patch(const Patch &p)
 	{
 		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
-
 			for (int i = 1; i < p.num_modules; i++) {
-				if (i == 1) {
-					// thread::create
-					SMPControl::write(i);
-					SMPControl::notify(1); // 1: modules[i]->update();
-				} else {
-					Debug::Pin1::high();
+				if (i == 1)
+					SMPThread::run(module_1_update);
+				else {
+					// Debug::Pin1::high();
 					modules[i]->update();
-					Debug::Pin1::low();
+					// Debug::Pin1::low();
 				}
 			}
 
-			// thread::join
-			while (SMPControl::read() != 0)
-				;
+			SMPThread::join();
 
 		} else {
 			for (int i = 1; i < p.num_modules; i++) {
