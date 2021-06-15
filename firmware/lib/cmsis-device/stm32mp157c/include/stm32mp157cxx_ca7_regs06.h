@@ -1,3 +1,4 @@
+
 /******************************************************************************/
 /*                                                                            */
 /*                         Reset and Clock Control                            */
@@ -5316,4 +5317,3 @@
 #define RCC_SIDR_SID_29                           (0x20000000U << RCC_SIDR_SID_Pos)                  /*!< 0x20000000 */
 #define RCC_SIDR_SID_30                           (0x40000000U << RCC_SIDR_SID_Pos)                  /*!< 0x40000000 */
 #define RCC_SIDR_SID_31                           (0x80000000U << RCC_SIDR_SID_Pos)                  /*!< 0x80000000 */
-

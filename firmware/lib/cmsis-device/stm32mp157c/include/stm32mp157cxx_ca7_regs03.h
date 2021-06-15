@@ -1,3 +1,4 @@
+
 /******************************************************************************/
 /*                                                                            */
 /*                Ethernet MAC Registers bits definitions                     */
@@ -5023,4 +5024,3 @@
 #define ETH_DMAC1MFCR_MFCO_Pos              (15U)
 #define ETH_DMAC1MFCR_MFCO_Msk              (0x1U << ETH_DMAC1MFCR_MFCO_Pos)                    /*!< 0x00008000 */
 #define ETH_DMAC1MFCR_MFCO                  ETH_DMAC1MFCR_MFCO_Msk                              /*!< Overflow status of the MFC Counter */
-
