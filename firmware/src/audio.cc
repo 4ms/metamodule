@@ -145,10 +145,10 @@ void AudioStream::process(AudioStreamBlock &in,
 		}
 		i = 0;
 		for (const auto &knob : params_->knobs) {
-			Debug::Pin2::high();
+			// Debug::Pin2::high();
 			player.set_panel_param(i, knob);
 			i++;
-			Debug::Pin2::low();
+			// Debug::Pin2::low();
 		}
 
 		player.update_patch(patch_list.cur_patch());
