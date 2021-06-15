@@ -101,28 +101,24 @@ public:
 	// ~3us preamble (before audio process starts looping?)
 	// Repeat 64 times:
 	// 	~2us setup (set_panel_input/param)
-	// 	~4.2us to xfer knobs <<<<<<<<<<<<<<<!!!!!
+	// 	~5.94us to xfer knobs:
+	// 		-Size: 0.99 - 1.09us
+	// 		-Time: 0.24 - 0.37us
+	// 		-AllpassRatio: 0.59 - 0.56us
+	// 		-CRatio: 0.86 - 0.85us
+	// 		All done twice plus ~0.4 overhead
 	// 	~1.5us parallel process both channels
-	// 	~0.5us to copy outs to ins
+	// 	~0.45us to copy outs to ins
 	// 	==== 8.2us  * 64 = roughly 533us = 40% of 64 * 1/48000 = 1333us
 	void update_patch(const Patch &p)
 	{
-		// Todo: possible to use refs for knobs?
-		// Debug::Pin2::high();
-		// for (int i = 0; i < p.num_mapped_knobs; i++) {
-		// 	auto &k = p.mapped_knobs[i];
-		// 	auto val = get_panel_param(k.panel_knob_id);
-		// 	modules[k.module_id]->set_param(k.param_id, val);
-		// }
-		// Debug::Pin2::low();
-
 		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
 
 			for (int i = 1; i < p.num_modules; i++) {
 				if (i == 1) {
 					// thread::create
 					SMPControl::write(i);
-					SMPControl::notify(1);
+					SMPControl::notify(1); // 1: modules[i]->update();
 				} else {
 					Debug::Pin1::high();
 					modules[i]->update();
