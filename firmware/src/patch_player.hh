@@ -128,10 +128,14 @@ public:
 				Debug::Pin2::high();
 				if (!SMPThread::is_running()) {
 					SMPThread::run([this, module_i = i] {
-						Debug::Pin3::high();
-						for (int knob_i = 0; knob_i < knob_cache[module_i].num_mapped_knobs; knob_i++)
+						for (int knob_i = 0; knob_i < knob_cache[module_i].num_mapped_knobs; knob_i++) {
+							Debug::Pin3::high();
 							modules[module_i]->set_param(knob_cache[module_i].knobs[knob_i].param_id,
 														 knob_cache[module_i].knobs[knob_i].val);
+							Debug::Pin3::low();
+						}
+						knob_cache[module_i].num_mapped_knobs = 0;
+						Debug::Pin3::high();
 						modules[module_i]->update();
 						Debug::Pin3::low();
 					});

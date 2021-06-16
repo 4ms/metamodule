@@ -51,15 +51,15 @@ extern "C" void aux_core_main()
 
 		// Run a function
 		if (irqnum == SGI3_IRQn) {
-			// Debug::Pin3::high();
 			auto thread_addr = SMPControl::read();
 			auto thread_func = reinterpret_cast<std::function<void()> *>(thread_addr);
 			thread_func->operator()();
 
+			Debug::Pin1::high();
 			// signal we're done
 			SMPControl::write(0);
 			SMPControl::write<SMPThread::StatusReg>(SMPThread::NotRunning);
-			// Debug::Pin3::low();
+			Debug::Pin1::low();
 		}
 	}
 }
