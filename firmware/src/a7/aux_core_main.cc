@@ -22,7 +22,7 @@ extern "C" void aux_core_main()
 
 		// Process a module command
 		if (irqnum == SGI1_IRQn) {
-			Debug::Pin3::high();
+			// Debug::Pin3::high();
 
 			auto module_idx = SMPControl::read();
 			patch_player->modules[module_idx]->update();
@@ -55,11 +55,10 @@ extern "C" void aux_core_main()
 			auto thread_func = reinterpret_cast<std::function<void()> *>(thread_addr);
 			thread_func->operator()();
 
-			Debug::Pin1::high();
 			// signal we're done
 			SMPControl::write(0);
 			SMPControl::write<SMPThread::StatusReg>(SMPThread::NotRunning);
-			Debug::Pin1::low();
+			Debug::Pin3::low();
 		}
 	}
 }

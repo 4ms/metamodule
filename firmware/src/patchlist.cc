@@ -16,8 +16,8 @@
 
 PatchList::PatchList()
 	: _patches{
-		  {example_stereo_verb},
 		  {simple_lfo_passthrru},
+		  {example_stereo_verb},
 		  {examplePitchShiftSimple},
 		  {exampleDrum},
 		  {fadedelay_example},

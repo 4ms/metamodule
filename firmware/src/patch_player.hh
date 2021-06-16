@@ -125,24 +125,16 @@ public:
 	{
 		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
 			for (int i = 1; i < p.num_modules; i++) {
-				Debug::Pin2::high();
-				if (!SMPThread::is_running()) {
-					SMPThread::run([this, module_i = i] {
-						for (int knob_i = 0; knob_i < knob_cache[module_i].num_mapped_knobs; knob_i++) {
-							Debug::Pin3::high();
-							modules[module_i]->set_param(knob_cache[module_i].knobs[knob_i].param_id,
-														 knob_cache[module_i].knobs[knob_i].val);
-							Debug::Pin3::low();
-						}
-						knob_cache[module_i].num_mapped_knobs = 0;
-						Debug::Pin3::high();
-						modules[module_i]->update();
-						Debug::Pin3::low();
-					});
+				// if (!SMPThread::is_running()) {
+				// 	Debug::Pin3::high();
+				// 	SMPThread::run([this, i = i] { modules[i]->update(); });
+				if (SMPControl::read() == 0) {
+					Debug::Pin3::high();
+					SMPControl::write(i);
+					SMPControl::notify<1>();
 				} else {
 					modules[i]->update();
 				}
-				Debug::Pin2::low();
 			}
 
 			SMPThread::join();
@@ -191,13 +183,7 @@ public:
 		if (!is_loaded)
 			return;
 		auto &k = knob_conns[param_id];
-		auto &cache = knob_cache[k.module_id];
-
-		auto i = cache.num_mapped_knobs;
-		cache.knobs[i].param_id = param_id;
-		cache.knobs[i].val = val;
-		i++;
-		cache.num_mapped_knobs = i;
+		modules[k.module_id]->set_param(k.param_id, val);
 	}
 
 	void set_panel_input(int jack_id, float val)

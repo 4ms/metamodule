@@ -143,13 +143,11 @@ void AudioStream::process(AudioStreamBlock &in,
 			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
 			i++;
 		}
-		// Debug::Pin1::high();
 		i = 0;
 		for (const auto &knob : params_->knobs) {
 			player.set_panel_param(i, knob);
 			i++;
 		}
-		// Debug::Pin1::low();
 
 		player.update_patch(patch_list.cur_patch());
 
