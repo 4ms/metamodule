@@ -54,6 +54,7 @@ extern "C" void aux_core_main()
 
 			// signal we're done
 			SMPControl::write(0);
+			SMPControl::write<SMPThread::StatusReg>(SMPThread::NotRunning);
 			Debug::Pin3::low();
 		}
 	}

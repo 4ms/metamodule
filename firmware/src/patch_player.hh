@@ -116,9 +116,9 @@ public:
 	{
 		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
 			for (int i = 1; i < p.num_modules; i++) {
-				if (i == 1)
+				if (i == 1 && !SMPThread::is_running()) {
 					SMPThread::run(module_1_update);
-				else {
+				} else {
 					// Debug::Pin1::high();
 					modules[i]->update();
 					// Debug::Pin1::low();
@@ -244,8 +244,11 @@ public:
 			return;
 
 		auto &k = knob_conns[param_id];
-		modules[k.module_id]->set_param(k.param_id, val);
-		// static_cast<PanelT *>(modules[0].get())->set_param(param_id, val);
+		if (k.module_id == 1 && !SMPThread::is_running()) {
+			std::function<void()> module_1_set_param = [this, p = k.param_id, v = val] { modules[1]->set_param(p, v); };
+			SMPThread::run(module_1_set_param);
+		} else
+			modules[k.module_id]->set_param(k.param_id, val);
 	}
 
 	float get_panel_param(int param_id)
