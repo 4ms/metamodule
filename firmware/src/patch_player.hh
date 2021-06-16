@@ -26,6 +26,16 @@ class PatchPlayer {
 		uint16_t param_id;
 	};
 
+	struct CachedKnob {
+		uint32_t param_id;
+		float val;
+	};
+	struct ModuleKnobCache {
+		uint32_t num_mapped_knobs;
+		CachedKnob knobs[Panel::NumKnobs];
+	};
+	ModuleKnobCache knob_cache[MAX_MODULES_IN_PATCH];
+
 public:
 	std::array<float, MAX_NODES_IN_PATCH> nodes;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
@@ -37,7 +47,6 @@ public:
 	};
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
 	Jack in_conns[NumInConns] = {{0, 0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
-
 	Knob knob_conns[Panel::NumKnobs]{{0, 0}};
 
 	// Index of each module that appears more than once.
@@ -116,13 +125,20 @@ public:
 	{
 		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
 			for (int i = 1; i < p.num_modules; i++) {
-				// Debug::Pin2::high();
+				Debug::Pin2::high();
 				if (!SMPThread::is_running()) {
-					SMPThread::run([this, i = i] { modules[i]->update(); });
+					SMPThread::run([this, module_i = i] {
+						Debug::Pin3::high();
+						for (int knob_i = 0; knob_i < knob_cache[module_i].num_mapped_knobs; knob_i++)
+							modules[module_i]->set_param(knob_cache[module_i].knobs[knob_i].param_id,
+														 knob_cache[module_i].knobs[knob_i].val);
+						modules[module_i]->update();
+						Debug::Pin3::low();
+					});
 				} else {
 					modules[i]->update();
 				}
-				// Debug::Pin2::low();
+				Debug::Pin2::low();
 			}
 
 			SMPThread::join();
@@ -170,17 +186,14 @@ public:
 	{
 		if (!is_loaded)
 			return;
-
-		// Debug::Pin1::high();
 		auto &k = knob_conns[param_id];
-		if (!SMPThread::is_running()) {
-			SMPThread::run([this, p = k.param_id, v = val] { modules[1]->set_param(p, v); });
-		} else {
-			// Debug::Pin2::high();
-			modules[k.module_id]->set_param(k.param_id, val);
-			// Debug::Pin2::low();
-		}
-		// Debug::Pin1::low();
+		auto &cache = knob_cache[k.module_id];
+
+		auto i = cache.num_mapped_knobs;
+		cache.knobs[i].param_id = param_id;
+		cache.knobs[i].val = val;
+		i++;
+		cache.num_mapped_knobs = i;
 	}
 
 	void set_panel_input(int jack_id, float val)
@@ -278,6 +291,14 @@ public:
 
 		for (auto &knob_conn : knob_conns)
 			knob_conn = {0, 0};
+
+		for (auto &kc : knob_cache) {
+			kc.num_mapped_knobs = 0;
+			for (auto &k : kc.knobs) {
+				k.param_id = 0;
+				k.val = 0.f;
+			}
+		}
 	}
 
 	// Cache all the panel jack connections
