@@ -37,17 +37,21 @@ extern "C" void aux_core_main()
 			Debug::Pin3::low();
 		}
 
-		// Flush Cache command
+		// Update a param command
 		if (irqnum == SGI2_IRQn) {
-			// flush cache
-			// mdrivlib::SystemCache::clean_dcache();
+
+			auto module_idx = SMPControl::read();
+			auto param_id = SMPControl::read<29>();
+			auto u32val = SMPControl::read<28>();
+			auto val = *(reinterpret_cast<float *>(&u32val));
+			patch_player->modules[module_idx]->set_param(param_id, val);
 			// signal we're done
 			SMPControl::write(0);
 		}
 
 		// Run a function
 		if (irqnum == SGI3_IRQn) {
-			Debug::Pin3::high();
+			// Debug::Pin3::high();
 			auto thread_addr = SMPControl::read();
 			auto thread_func = reinterpret_cast<std::function<void()> *>(thread_addr);
 			thread_func->operator()();
@@ -55,7 +59,7 @@ extern "C" void aux_core_main()
 			// signal we're done
 			SMPControl::write(0);
 			SMPControl::write<SMPThread::StatusReg>(SMPThread::NotRunning);
-			Debug::Pin3::low();
+			// Debug::Pin3::low();
 		}
 	}
 }
