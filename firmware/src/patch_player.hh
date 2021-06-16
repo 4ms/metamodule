@@ -56,6 +56,7 @@ public:
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	bool load_patch(const Patch &p)
 	{
+		SMPThread::init();
 		clear_cache();
 		for (auto &n : nodes)
 			n = 0.f;
@@ -110,19 +111,18 @@ public:
 	// 	~1.5us parallel process both channels
 	// 	~0.45us to copy outs to ins
 	// 	==== 8.2us  * 64 = roughly 533us = 40% of 64 * 1/48000 = 1333us
-	std::function<void()> module_1_update = [this] { modules[1]->update(); };
 
 	void update_patch(const Patch &p)
 	{
 		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
 			for (int i = 1; i < p.num_modules; i++) {
-				if (i == 1 && !SMPThread::is_running()) {
-					SMPThread::run(module_1_update);
+				// Debug::Pin2::high();
+				if (!SMPThread::is_running()) {
+					SMPThread::run([this, i = i] { modules[i]->update(); });
 				} else {
-					// Debug::Pin1::high();
 					modules[i]->update();
-					// Debug::Pin1::low();
 				}
+				// Debug::Pin2::low();
 			}
 
 			SMPThread::join();
@@ -138,7 +138,6 @@ public:
 		// and changing set_panel_input and get_panel_output to
 		// access the in_conns[] and out_conns[] directly
 		if constexpr (USE_NODES == false) {
-			Debug::Pin1::high();
 			for (int net_i = 0; net_i < p.num_nets; net_i++) {
 				auto &net = p.nets[net_i];
 				auto &output = net.jacks[0];
@@ -151,12 +150,12 @@ public:
 					modules[jack.module_id]->set_input(jack.jack_id, out_val);
 				}
 			}
-			Debug::Pin1::low();
 		}
 	}
 
 	void unload_patch(const Patch &p)
 	{
+		SMPThread::join();
 		is_loaded = false;
 		for (int i = 0; i < p.num_modules; i++) {
 			modules[i].reset(nullptr);
@@ -164,6 +163,61 @@ public:
 		clear_cache();
 		BigAllocControl::reset();
 	}
+
+	// Getters and Setters:
+
+	void set_panel_param(int param_id, float val)
+	{
+		if (!is_loaded)
+			return;
+
+		// Debug::Pin1::high();
+		auto &k = knob_conns[param_id];
+		if (!SMPThread::is_running()) {
+			SMPThread::run([this, p = k.param_id, v = val] { modules[1]->set_param(p, v); });
+		} else {
+			// Debug::Pin2::high();
+			modules[k.module_id]->set_param(k.param_id, val);
+			// Debug::Pin2::low();
+		}
+		// Debug::Pin1::low();
+	}
+
+	void set_panel_input(int jack_id, float val)
+	{
+		if (!is_loaded)
+			return;
+		static_cast<PanelT *>(modules[0].get())->set_panel_input(jack_id, val);
+	}
+
+	float get_panel_output(int jack_id)
+	{
+		if (!is_loaded)
+			return 0.f;
+		return static_cast<PanelT *>(modules[0].get())->get_panel_output(jack_id);
+	}
+
+	// float get_panel_param(int param_id)
+	// {
+	// 	if (!is_loaded)
+	// 		return 0.f;
+	// 	return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
+	// }
+
+	static constexpr unsigned get_num_panel_knobs()
+	{
+		return Panel::NumKnobs;
+	}
+	static constexpr unsigned get_num_panel_inputs()
+	{
+		return Panel::NumInJacks;
+	}
+	static constexpr unsigned get_num_panel_outputs()
+	{
+		return Panel::NumOutJacks;
+	}
+
+	// Jack patched/unpatched status
 
 	void mark_patched_jacks(const Patch &p)
 	{
@@ -207,55 +261,6 @@ public:
 			else
 				modules[jack.module_id]->mark_output_unpatched(jack.jack_id);
 		}
-	}
-
-	// Getters and Setters:
-
-	static constexpr unsigned get_num_panel_knobs()
-	{
-		return Panel::NumKnobs;
-	}
-	static constexpr unsigned get_num_panel_inputs()
-	{
-		return Panel::NumInJacks;
-	}
-	static constexpr unsigned get_num_panel_outputs()
-	{
-		return Panel::NumOutJacks;
-	}
-
-	void set_panel_input(int jack_id, float val)
-	{
-		if (!is_loaded)
-			return;
-		static_cast<PanelT *>(modules[0].get())->set_panel_input(jack_id, val);
-	}
-
-	float get_panel_output(int jack_id)
-	{
-		if (!is_loaded)
-			return 0.f;
-		return static_cast<PanelT *>(modules[0].get())->get_panel_output(jack_id);
-	}
-
-	void set_panel_param(int param_id, float val)
-	{
-		if (!is_loaded)
-			return;
-
-		auto &k = knob_conns[param_id];
-		if (k.module_id == 1 && !SMPThread::is_running()) {
-			std::function<void()> module_1_set_param = [this, p = k.param_id, v = val] { modules[1]->set_param(p, v); };
-			SMPThread::run(module_1_set_param);
-		} else
-			modules[k.module_id]->set_param(k.param_id, val);
-	}
-
-	float get_panel_param(int param_id)
-	{
-		if (!is_loaded)
-			return 0.f;
-		return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
 	}
 
 	// Cache functions:

@@ -14,4 +14,9 @@ struct SMPThread {
 	static void run(std::function<void()> entry) {}
 
 	static void join() {}
+	static bool is_running()
+	{
+		return true;
+	}
+	static void init() {}
 };
