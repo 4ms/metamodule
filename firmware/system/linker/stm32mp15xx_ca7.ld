@@ -137,6 +137,7 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		*(.sysram)
+		*(.noncachable)
 		. = ALIGN(8);
 		_end_of_sysram = .;
 	} > SYSRAM

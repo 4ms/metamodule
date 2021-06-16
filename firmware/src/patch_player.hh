@@ -12,6 +12,7 @@
 #include "conf/hsem_conf.hh"
 #include "drivers/smp.hh"
 #include "patch/patch.hh"
+#include "smp_api.hh"
 #include "sys/alloc_buffer.hh"
 #include <cstdint>
 
@@ -25,16 +26,6 @@ class PatchPlayer {
 		uint16_t module_id;
 		uint16_t param_id;
 	};
-
-	struct CachedKnob {
-		uint32_t param_id;
-		float val;
-	};
-	struct ModuleKnobCache {
-		uint32_t num_mapped_knobs;
-		CachedKnob knobs[Panel::NumKnobs];
-	};
-	ModuleKnobCache knob_cache[MAX_MODULES_IN_PATCH];
 
 public:
 	std::array<float, MAX_NODES_IN_PATCH> nodes;
@@ -105,45 +96,16 @@ public:
 	}
 
 	// Runs the patch
-	//
-	// Timing:
-	// Stereo Verb Audio process:
-	// ~3us preamble (before audio process starts looping?)
-	// Repeat 64 times:
-	// 	~2us setup (set_panel_input/param)
-	// 	~5.94us to xfer knobs:
-	// 		-Size: 0.99 - 1.09us
-	// 		-Time: 0.24 - 0.37us
-	// 		-AllpassRatio: 0.59 - 0.56us
-	// 		-CRatio: 0.86 - 0.85us
-	// 		All done twice plus ~0.4 overhead
-	// 	~1.5us parallel process both channels
-	// 	~0.45us to copy outs to ins
-	// 	==== 8.2us  * 64 = roughly 533us = 40% of 64 * 1/48000 = 1333us
-
 	void update_patch(const Patch &p)
 	{
-		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
-			for (int i = 1; i < p.num_modules; i++) {
-				// if (!SMPThread::is_running()) {
-				// 	Debug::Pin3::high();
-				// 	SMPThread::run([this, i = i] { modules[i]->update(); });
-				if (SMPControl::read() == 0) {
-					Debug::Pin3::high();
-					SMPControl::write(i);
-					SMPControl::notify<1>();
-				} else {
-					modules[i]->update();
-				}
-			}
-
-			SMPThread::join();
-
-		} else {
-			for (int i = 1; i < p.num_modules; i++) {
-				modules[i]->update();
+		for (int module_i = 1; module_i < p.num_modules; module_i++) {
+			if (!SMPThread::is_running()) {
+				SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);
+			} else {
+				modules[module_i]->update();
 			}
 		}
+		SMPThread::join();
 
 		// Jacks
 		// We could save time by skipping panel jacks
@@ -281,14 +243,6 @@ public:
 
 		for (auto &knob_conn : knob_conns)
 			knob_conn = {0, 0};
-
-		for (auto &kc : knob_cache) {
-			kc.num_mapped_knobs = 0;
-			for (auto &k : kc.knobs) {
-				k.param_id = 0;
-				k.val = 0.f;
-			}
-		}
 	}
 
 	// Cache all the panel jack connections
