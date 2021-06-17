@@ -24,7 +24,8 @@ MFFONTDIR = $(LIBDIR)/mcufont/fonts
 MFDIR = $(LIBDIR)/mcufont/decoder
 include $(LIBDIR)/mcufont/decoder/mcufont.mk
 
-SOURCES = $(STARTUP_CA7) \
+NE10DIR = $(LIBDIR)/ne10/ne10
+
 ASM_SOURCES = $(STARTUP_CA7)
 
 SOURCES = \
@@ -61,6 +62,45 @@ SOURCES = \
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(LIBDIR)/printf/printf.c \
 		  $(MFSRC) \
+		  $(NE10DIR)/common/NE10_mask_table.c \
+		  $(NE10DIR)/modules/dsp/NE10_fft.c \
+		  $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
+		  $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
+		  $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
+		  $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
+		  $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
+		  $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
+		  $(NE10DIR)/modules/dsp/NE10_fir.c \
+		  $(NE10DIR)/modules/dsp/NE10_fir_init.c \
+		  $(NE10DIR)/modules/dsp/NE10_iir.c \
+		  $(NE10DIR)/modules/dsp/NE10_iir_init.c \
+		  $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
+		  $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
+		  $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
+
+#NE10_ASM_OPTIMIZATION
+SOURCES += \
+		  $(NE10DIR)/modules/dsp/NE10_fft_float32.neon.c \
+		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.c \
+		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.c \
+
+ASM_SOURCES += \
+		  $(NE10DIR)/modules/dsp/NE10_fft_float32.neon.s \
+		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.s \
+		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.s \
+
+#!NE10_ASM_OPTIMIZATION
+# SOURCES += \
+# 	$(NE10DIR)/modules/dsp/NE10_fft_float32.neonintrinsic.c \
+# 	$(NE10DIR)/modules/dsp/NE10_fft_int32.neonintrinsic.c \
+# 	$(NE10DIR)/modules/dsp/NE10_fft_int16.neonintrinsic.c \
+# 	$(NE10DIR)/modules/dsp/NE10_rfft_float32.neonintrinsic.c \
+
+ASM_SOURCES += \
+		  $(NE10DIR)/modules/dsp/NE10_fir.neon.s \
+		  $(NE10DIR)/modules/dsp/NE10_iir.neon.s \
+		  $(NE10DIR)/common/NE10header.s \
+		  $(NE10DIR)/common/versionheader.s \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
@@ -88,14 +128,19 @@ INCLUDES = -I. \
 		   -I$(SHARED)/CoreModules \
 		   -I$(SHARED)/util \
 		   -I$(SHARED)/patch \
-			-I$(LIBDIR)/printf \
-			-I$(MFINC) \
-			-I$(MFFONTDIR) \
+		   -I$(LIBDIR)/printf \
+		   -I$(MFINC) \
+		   -I$(MFFONTDIR) \
+		   -I$(NE10DIR)/inc \
+		   -I$(NE10DIR)/common \
+		   -I$(NE10DIR)/modules/dsp \
 
 #D-Cache L1: 32 KB, 128 Sets, 64 Bytes/Line, 4-Way
 EXTRA_CFLAGS = --param l1-cache-size=32 \
 	 		   --param l1-cache-line-size=64 \
 			   --param l2-cache-size=256 \
+				-DNE10_ENABLE_DSP \
+				-DNE10_UNROLL_LEVEL=1 \
 
 EXTRA_CPPFLAGS = $(LTOFLAG)
 
@@ -117,6 +162,8 @@ MCU = -mcpu=cortex-a7 \
 	  -munaligned-access \
 	  -mthumb-interwork \
 	  -mtune=cortex-a7 \
+	  -funsafe-math-optimizations \
+	  -ffast-math \
 	  -mvectorize-with-neon-double \
 	  # -mvectorize-with-neon-quad \
 
