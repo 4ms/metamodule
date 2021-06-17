@@ -43,8 +43,10 @@ class ReverbCore : public CoreProcessor {
 	// clang-format on
 
 public:
-	virtual void update(void) override
+	void update() override
 	{
+		update_params();
+
 		float wetSignal = 0;
 
 		for (int i = 0; i < numComb; i++) {
@@ -58,6 +60,7 @@ public:
 		}
 
 		signalOut = interpolate(signalIn, wetSignal, mix);
+		// signalOut = signalIn * inv_mix + wetSignal * mix;
 	}
 
 	ReverbCore()
@@ -110,6 +113,7 @@ public:
 	{
 		return currentCombTuning[id];
 	}
+
 	void updateAllpassTuning(const int id)
 	{
 		currentAllpassTuning[id] =
@@ -127,61 +131,104 @@ public:
 		combFilter[id].setLength(currentCombTuning[id]);
 	}
 
+	void update_params()
+	{
+		if (all_ap_tuning_needs_update) {
+			for (int i = 0; i < numAllpass; i++)
+				updateAllpassTuning(i);
+			all_ap_tuning_needs_update = false;
+		}
+		if (all_comb_tuning_needs_update) {
+			for (int i = 0; i < numComb; i++)
+				updateCombTuning(i);
+			all_comb_tuning_needs_update = false;
+		}
+		if (damp_needs_update) {
+			for (int i = 0; i < numComb; i++) {
+				combFilter[i].setDamp(new_damp);
+			}
+			damp_needs_update = false;
+		}
+		if (fb_needs_update) {
+			auto v = map_value(new_feedback, 0.0f, 1.0f, 0.8f, 0.99f);
+			for (int i = 0; i < numComb; i++) {
+				combFilter[i].setFeedback(v);
+			}
+		}
+		if (all_ap_ratio_needs_update) {
+			int ival = (int)(new_all_ap_ratio * 48); // 0...48
+			float fval = ival / 12.f + 1.f;			 // 1..5, steps of 0.08333
+			for (int i = 0; i < numAllpass; i++) {
+				ratioKnobAllpassAtten[i] = i == 0 ? 1.f : ratioKnobAllpassAtten[i - 1] / fval;
+				updateAllpassTuning(i);
+			}
+		}
+		if (all_comb_ratio_needs_update) {
+			int ival = (int)(new_all_comb_ratio * 48);
+			float fval = ival / 12.f + 1.f;
+			for (int i = 0; i < numComb; i++) {
+				ratioKnobCombAtten[i] = i == 0 ? 1.f : ratioKnobCombAtten[i - 1] / fval;
+				updateCombTuning(i);
+			}
+		}
+		for (int i = 0; i < numAllpass; i++) {
+			if (ap_ratio_needs_update[i]) {
+				manualKnobCombAtten[i] = new_ap_ratio[i];
+				updateAllpassTuning(i);
+				ap_ratio_needs_update[i] = false;
+			}
+		}
+		for (int i = 0; i < numComb; i++) {
+			if (comb_ratio_needs_update[i]) {
+				manualKnobCombAtten[i] = new_comb_ratio[i];
+				updateCombTuning(i);
+				comb_ratio_needs_update[i] = false;
+			}
+		}
+	}
+
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
 			case Size:
 				globalAllpassAtten = val;
 				globalCombAtten = val;
-				for (int i = 0; i < numComb; i++) {
-					updateCombTuning(i);
-				}
-				for (int i = 0; i < numAllpass; i++) {
-					updateAllpassTuning(i);
-				}
+				all_comb_tuning_needs_update = true;
+				all_ap_tuning_needs_update = true;
 				break;
 
 			case Damp:
-				for (int i = 0; i < numComb; i++) {
-					combFilter[i].setDamp(val);
-				}
+				new_damp = val;
+				damp_needs_update = true;
 				break;
 
 			case Mix:
 				mix = val;
+				inv_mix = 1.0f - val;
 				break;
 
 			case Time:
-				for (int i = 0; i < numComb; i++) {
-					combFilter[i].setFeedback(map_value(val, 0.0f, 1.0f, 0.8f, 0.99f));
-				}
+				new_feedback = val;
+				fb_needs_update = true;
 				break;
 
-			case AllpassRatio: {
-				int ival = (int)(val * 48);		// 0...48
-				float fval = ival / 12.f + 1.f; // 1..5, steps of 0.08333
-				for (int i = 0; i < numAllpass; i++) {
-					ratioKnobAllpassAtten[i] = i == 0 ? 1.f : ratioKnobAllpassAtten[i - 1] / fval;
-					updateAllpassTuning(i);
-				}
-			} break;
+			case AllpassRatio:
+				new_all_ap_ratio = val;
+				all_ap_ratio_needs_update = true;
+				break;
 
-			case CRatio: {
-				int ival = (int)(val * 48);
-				float fval = ival / 12.f + 1.f;
-				for (int i = 0; i < numComb; i++) {
-					ratioKnobCombAtten[i] = i == 0 ? 1.f : ratioKnobCombAtten[i - 1] / fval;
-					updateCombTuning(i);
-				}
-			} break;
+			case CRatio:
+				new_all_comb_ratio = val;
+				all_comb_ratio_needs_update = true;
+				break;
 
 			case Allpass1:
 			case Allpass2:
 			case Allpass3:
 			case Allpass4: {
 				int i = param_id - Allpass1;
-				manualKnobAllpassAtten[i] = val;
-				updateAllpassTuning(i);
+				ap_ratio_needs_update[i] = true;
+				new_ap_ratio[i] = val;
 			} break;
 
 			case C1:
@@ -193,8 +240,8 @@ public:
 			case C7:
 			case C8: {
 				int i = param_id - C1;
-				manualKnobCombAtten[i] = val;
-				updateCombTuning(i);
+				comb_ratio_needs_update[i] = true;
+				new_comb_ratio[i] = val;
 			} break;
 		}
 	}
@@ -259,5 +306,22 @@ private:
 	AllPass<6000> apFilter[numAllpass];
 	Comb<6000> combFilter[numComb];
 
-	float mix = 0;
+	float mix = 0.f;
+	float inv_mix = 1.f;
+
+	bool all_ap_tuning_needs_update = true;
+	bool all_comb_tuning_needs_update = true;
+	float new_damp = 0.f;
+	bool damp_needs_update = true;
+	float new_feedback = 0.f;
+	bool fb_needs_update = true;
+	float new_all_ap_ratio = 0.f;
+	bool all_ap_ratio_needs_update = true;
+	float new_all_comb_ratio = 0.f;
+	bool all_comb_ratio_needs_update = true;
+
+	float new_ap_ratio[numAllpass] = {0.f};
+	bool ap_ratio_needs_update[numAllpass] = {false};
+	float new_comb_ratio[numComb] = {0.f};
+	bool comb_ratio_needs_update[numComb] = {false};
 };

@@ -6,6 +6,7 @@
 #include "drivers/hsem.hh"
 #include "panel.hh"
 #include "patch_player.hh"
+
 namespace MetaModule
 {
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
@@ -49,10 +50,10 @@ AudioStream::AudioStream(PatchList &patches,
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
 				process(rx_buf_1, tx_buf_1, param_blocks[0], auxsig_1);
 			else {
-				// target::SystemCache::invalidate_dcache_by_range(&rx_buf_2, sizeof(AudioStreamBlock));
-				// target::SystemCache::invalidate_dcache_by_range(&(param_blocks[0]), sizeof(ParamBlock));
+				// SystemCache::invalidate_dcache_by_range(&rx_buf_2, sizeof(AudioStreamBlock));
+				// SystemCache::invalidate_dcache_by_range(&(param_blocks[0]), sizeof(ParamBlock));
 				process(rx_buf_2, tx_buf_2, param_blocks[0], auxsig_1);
-				// target::SystemCache::clean_dcache_by_range(&tx_buf_2, sizeof(AudioStreamBlock));
+				// SystemCache::clean_dcache_by_range(&tx_buf_2, sizeof(AudioStreamBlock));
 			}
 			Debug::Pin0::low();
 		},
@@ -63,10 +64,10 @@ AudioStream::AudioStream(PatchList &patches,
 			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
 				process(rx_buf_2, tx_buf_2, param_blocks[1], auxsig_2);
 			else {
-				// target::SystemCache::invalidate_dcache_by_range(&rx_buf_1, sizeof(AudioStreamBlock));
-				// target::SystemCache::invalidate_dcache_by_range(&(param_blocks[1]), sizeof(ParamBlock));
+				// SystemCache::invalidate_dcache_by_range(&rx_buf_1, sizeof(AudioStreamBlock));
+				// SystemCache::invalidate_dcache_by_range(&(param_blocks[1]), sizeof(ParamBlock));
 				process(rx_buf_1, tx_buf_1, param_blocks[1], auxsig_2);
-				// target::SystemCache::clean_dcache_by_range(&tx_buf_1, sizeof(AudioStreamBlock));
+				// SystemCache::clean_dcache_by_range(&tx_buf_1, sizeof(AudioStreamBlock));
 			}
 			Debug::Pin0::low();
 		});
@@ -103,7 +104,7 @@ void AudioStream::process(AudioStreamBlock &in,
 	load_measure.start_measurement();
 
 	cache.write_sync(param_block.params[0], param_block.metaparams);
-	target::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
+	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
 
 	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch
 	// Todo: fade down before setting audio_is_muted to true
@@ -166,12 +167,6 @@ void AudioStream::start()
 	codec_.start();
 }
 
-// plugging into ClkIn jack makes bit 12 of params.jack_senses go high
-// jacksense_pin_order[2] = 12 , so i = 2
-// we call player.set_input_jack_patched_status(2, true);
-// so in_conns[2] = {module 1, jack 3}
-// switch14->mark_input_patched(3)
-// ---fix: jack_sense_pin_order[2] = 0, so plugging into CVA will make bit 0 of jack_senses go high when i = 2
 void AudioStream::propagate_sense_pins(Params &params)
 {
 	for (int i = 0; i < Panel::NumUserFacingInJacks; i++) {

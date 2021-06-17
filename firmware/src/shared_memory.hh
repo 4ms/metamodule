@@ -1,4 +1,5 @@
 #pragma once
+#include "drivers/cache.hh"
 #include <cstdint>
 
 // Defined in linker script
@@ -8,22 +9,27 @@ struct SharedMemory {
 	SharedMemory() = delete;
 
 	template<typename T>
-	static uint32_t **write_address_of(T *object, uint32_t offset)
+	static void write_address_of(T *object, uint32_t offset)
 	{
-		uint32_t *loc_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
+		auto *loc_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
 		*(loc_ptr + offset) = reinterpret_cast<uint32_t>(object);
-		return &_params_ptr + offset * 4;
+
+		auto addr = &_params_ptr + offset * 4;
+		mdrivlib::SystemCache::clean_dcache_by_addr(addr);
 	}
 
 	template<typename T>
 	static T read_address_of(uint32_t offset)
 	{
-		uint32_t *loc_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
+		auto *loc_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
 		return reinterpret_cast<T>(*(loc_ptr + offset));
 	}
 
-	static constexpr uint32_t ParamsPtrLocation = 0;
-	static constexpr uint32_t LEDFrameBufLocation = 1;
-	static constexpr uint32_t ScreenBufLocation = 2;
-	static constexpr uint32_t AuxSignalBlockLocation = 3;
+	enum : uint32_t {
+		ParamsPtrLocation = 0,
+		LEDFrameBufLocation,
+		ScreenBufLocation,
+		AuxSignalBlockLocation,
+		PatchPlayerLocation,
+	};
 };

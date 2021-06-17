@@ -1,3 +1,576 @@
+
+/******************************************************************************/
+/*                                                                            */
+/*                      Digital to Analog Converter                           */
+/*                                                                            */
+/******************************************************************************/
+/********************  Bit definition for DAC_CR register  ********************/
+#define DAC_CR_EN1_Pos              (0U)
+#define DAC_CR_EN1_Msk              (0x1U << DAC_CR_EN1_Pos)                   /*!< 0x00000001 */
+#define DAC_CR_EN1                  DAC_CR_EN1_Msk                             /*!<DAC channel1 enable */
+#define DAC_CR_TEN1_Pos             (1U)
+#define DAC_CR_TEN1_Msk             (0x1U << DAC_CR_TEN1_Pos)                  /*!< 0x00000002 */
+#define DAC_CR_TEN1                 DAC_CR_TEN1_Msk                            /*!<DAC channel1 Trigger enable */
+
+#define DAC_CR_TSEL1_Pos            (2U)
+#define DAC_CR_TSEL1_Msk            (0xFU << DAC_CR_TSEL1_Pos)                 /*!< 0x0000003C */
+#define DAC_CR_TSEL1                DAC_CR_TSEL1_Msk                           /*!<TSEL1[2:0] (DAC channel1 Trigger selection) */
+#define DAC_CR_TSEL1_0              (0x1U << DAC_CR_TSEL1_Pos)                 /*!< 0x00000004 */
+#define DAC_CR_TSEL1_1              (0x2U << DAC_CR_TSEL1_Pos)                 /*!< 0x00000008 */
+#define DAC_CR_TSEL1_2              (0x4U << DAC_CR_TSEL1_Pos)                 /*!< 0x00000010 */
+#define DAC_CR_TSEL1_3              (0x8U << DAC_CR_TSEL1_Pos)                 /*!< 0x00000020 */
+
+
+#define DAC_CR_WAVE1_Pos            (6U)
+#define DAC_CR_WAVE1_Msk            (0x3U << DAC_CR_WAVE1_Pos)                 /*!< 0x000000C0 */
+#define DAC_CR_WAVE1                DAC_CR_WAVE1_Msk                           /*!<WAVE1[1:0] (DAC channel1 noise/triangle wave generation enable) */
+#define DAC_CR_WAVE1_0              (0x1U << DAC_CR_WAVE1_Pos)                 /*!< 0x00000040 */
+#define DAC_CR_WAVE1_1              (0x2U << DAC_CR_WAVE1_Pos)                 /*!< 0x00000080 */
+
+#define DAC_CR_MAMP1_Pos            (8U)
+#define DAC_CR_MAMP1_Msk            (0xFU << DAC_CR_MAMP1_Pos)                 /*!< 0x00000F00 */
+#define DAC_CR_MAMP1                DAC_CR_MAMP1_Msk                           /*!<MAMP1[3:0] (DAC channel1 Mask/Amplitude selector) */
+#define DAC_CR_MAMP1_0              (0x1U << DAC_CR_MAMP1_Pos)                 /*!< 0x00000100 */
+#define DAC_CR_MAMP1_1              (0x2U << DAC_CR_MAMP1_Pos)                 /*!< 0x00000200 */
+#define DAC_CR_MAMP1_2              (0x4U << DAC_CR_MAMP1_Pos)                 /*!< 0x00000400 */
+#define DAC_CR_MAMP1_3              (0x8U << DAC_CR_MAMP1_Pos)                 /*!< 0x00000800 */
+
+#define DAC_CR_DMAEN1_Pos           (12U)
+#define DAC_CR_DMAEN1_Msk           (0x1U << DAC_CR_DMAEN1_Pos)                /*!< 0x00001000 */
+#define DAC_CR_DMAEN1               DAC_CR_DMAEN1_Msk                          /*!<DAC channel1 DMA enable */
+#define DAC_CR_DMAUDRIE1_Pos        (13U)
+#define DAC_CR_DMAUDRIE1_Msk        (0x1U << DAC_CR_DMAUDRIE1_Pos)             /*!< 0x00002000 */
+#define DAC_CR_DMAUDRIE1            DAC_CR_DMAUDRIE1_Msk                       /*!<DAC channel 1 DMA underrun interrupt enable  >*/
+#define DAC_CR_CEN1_Pos             (14U)
+#define DAC_CR_CEN1_Msk             (0x1U << DAC_CR_CEN1_Pos)                  /*!< 0x00004000 */
+#define DAC_CR_CEN1                 DAC_CR_CEN1_Msk                            /*!<DAC channel 1 calibration enable >*/
+#define DAC_CR_HFSEL_Pos            (15U)
+#define DAC_CR_HFSEL_Msk            (0x1U << DAC_CR_HFSEL_Pos)                  /*!< 0x00008000 */
+#define DAC_CR_HFSEL                DAC_CR_HFSEL_Msk                            /*!<High frequency interface mode enable >*/
+
+#define DAC_CR_EN2_Pos              (16U)
+#define DAC_CR_EN2_Msk              (0x1U << DAC_CR_EN2_Pos)                   /*!< 0x00010000 */
+#define DAC_CR_EN2                  DAC_CR_EN2_Msk                             /*!<DAC channel2 enable */
+#define DAC_CR_TEN2_Pos             (17U)
+#define DAC_CR_TEN2_Msk             (0x1U << DAC_CR_TEN2_Pos)                  /*!< 0x00020000 */
+#define DAC_CR_TEN2                 DAC_CR_TEN2_Msk                            /*!<DAC channel2 Trigger enable */
+
+#define DAC_CR_TSEL2_Pos            (18U)
+#define DAC_CR_TSEL2_Msk            (0xFU << DAC_CR_TSEL2_Pos)                 /*!< 0x003C0000 */
+#define DAC_CR_TSEL2                DAC_CR_TSEL2_Msk                           /*!<TSEL2[2:0] (DAC channel2 Trigger selection) */
+#define DAC_CR_TSEL2_0              (0x1U << DAC_CR_TSEL2_Pos)                 /*!< 0x00040000 */
+#define DAC_CR_TSEL2_1              (0x2U << DAC_CR_TSEL2_Pos)                 /*!< 0x00080000 */
+#define DAC_CR_TSEL2_2              (0x4U << DAC_CR_TSEL2_Pos)                 /*!< 0x00100000 */
+#define DAC_CR_TSEL2_3              (0x8U << DAC_CR_TSEL2_Pos)                 /*!< 0x00200000 */
+
+
+#define DAC_CR_WAVE2_Pos            (22U)
+#define DAC_CR_WAVE2_Msk            (0x3U << DAC_CR_WAVE2_Pos)                 /*!< 0x00C00000 */
+#define DAC_CR_WAVE2                DAC_CR_WAVE2_Msk                           /*!<WAVE2[1:0] (DAC channel2 noise/triangle wave generation enable) */
+#define DAC_CR_WAVE2_0              (0x1U << DAC_CR_WAVE2_Pos)                 /*!< 0x00400000 */
+#define DAC_CR_WAVE2_1              (0x2U << DAC_CR_WAVE2_Pos)                 /*!< 0x00800000 */
+
+#define DAC_CR_MAMP2_Pos            (24U)
+#define DAC_CR_MAMP2_Msk            (0xFU << DAC_CR_MAMP2_Pos)                 /*!< 0x0F000000 */
+#define DAC_CR_MAMP2                DAC_CR_MAMP2_Msk                           /*!<MAMP2[3:0] (DAC channel2 Mask/Amplitude selector) */
+#define DAC_CR_MAMP2_0              (0x1U << DAC_CR_MAMP2_Pos)                 /*!< 0x01000000 */
+#define DAC_CR_MAMP2_1              (0x2U << DAC_CR_MAMP2_Pos)                 /*!< 0x02000000 */
+#define DAC_CR_MAMP2_2              (0x4U << DAC_CR_MAMP2_Pos)                 /*!< 0x04000000 */
+#define DAC_CR_MAMP2_3              (0x8U << DAC_CR_MAMP2_Pos)                 /*!< 0x08000000 */
+
+#define DAC_CR_DMAEN2_Pos           (28U)
+#define DAC_CR_DMAEN2_Msk           (0x1U << DAC_CR_DMAEN2_Pos)                /*!< 0x10000000 */
+#define DAC_CR_DMAEN2               DAC_CR_DMAEN2_Msk                          /*!<DAC channel2 DMA enabled */
+#define DAC_CR_DMAUDRIE2_Pos        (29U)
+#define DAC_CR_DMAUDRIE2_Msk        (0x1U << DAC_CR_DMAUDRIE2_Pos)             /*!< 0x20000000 */
+#define DAC_CR_DMAUDRIE2            DAC_CR_DMAUDRIE2_Msk                       /*!<DAC channel2 DMA underrun interrupt enable  >*/
+#define DAC_CR_CEN2_Pos             (30U)
+#define DAC_CR_CEN2_Msk             (0x1U << DAC_CR_CEN2_Pos)                  /*!< 0x40000000 */
+#define DAC_CR_CEN2                 DAC_CR_CEN2_Msk                            /*!<DAC channel2 calibration enable >*/
+
+/*****************  Bit definition for DAC_SWTRIGR register  ******************/
+#define DAC_SWTRIGR_SWTRIG1         ((uint8_t)0x01)                            /*!<DAC channel1 software trigger */
+#define DAC_SWTRIGR_SWTRIG2         ((uint8_t)0x02)                            /*!<DAC channel2 software trigger */
+
+/*****************  Bit definition for DAC_DHR12R1 register  ******************/
+#define DAC_DHR12R1_DACC1DHR        ((uint16_t)0x0FFF)                         /*!<DAC channel1 12-bit Right aligned data */
+
+/*****************  Bit definition for DAC_DHR12L1 register  ******************/
+#define DAC_DHR12L1_DACC1DHR        ((uint16_t)0xFFF0)                         /*!<DAC channel1 12-bit Left aligned data */
+
+/******************  Bit definition for DAC_DHR8R1 register  ******************/
+#define DAC_DHR8R1_DACC1DHR         ((uint8_t)0xFF)                            /*!<DAC channel1 8-bit Right aligned data */
+
+/*****************  Bit definition for DAC_DHR12R2 register  ******************/
+#define DAC_DHR12R2_DACC2DHR        ((uint16_t)0x0FFF)                         /*!<DAC channel2 12-bit Right aligned data */
+
+/*****************  Bit definition for DAC_DHR12L2 register  ******************/
+#define DAC_DHR12L2_DACC2DHR        ((uint16_t)0xFFF0)                         /*!<DAC channel2 12-bit Left aligned data */
+
+/******************  Bit definition for DAC_DHR8R2 register  ******************/
+#define DAC_DHR8R2_DACC2DHR         ((uint8_t)0xFF)                            /*!<DAC channel2 8-bit Right aligned data */
+
+/*****************  Bit definition for DAC_DHR12RD register  ******************/
+#define DAC_DHR12RD_DACC1DHR_Pos    (0U)
+#define DAC_DHR12RD_DACC1DHR_Msk    (0xFFFU << DAC_DHR12RD_DACC1DHR_Pos)       /*!< 0x00000FFF */
+#define DAC_DHR12RD_DACC1DHR        DAC_DHR12RD_DACC1DHR_Msk                   /*!<DAC channel1 12-bit Right aligned data */
+#define DAC_DHR12RD_DACC2DHR_Pos    (16U)
+#define DAC_DHR12RD_DACC2DHR_Msk    (0xFFFU << DAC_DHR12RD_DACC2DHR_Pos)       /*!< 0x0FFF0000 */
+#define DAC_DHR12RD_DACC2DHR        DAC_DHR12RD_DACC2DHR_Msk                   /*!<DAC channel2 12-bit Right aligned data */
+
+/*****************  Bit definition for DAC_DHR12LD register  ******************/
+#define DAC_DHR12LD_DACC1DHR_Pos    (4U)
+#define DAC_DHR12LD_DACC1DHR_Msk    (0xFFFU << DAC_DHR12LD_DACC1DHR_Pos)       /*!< 0x0000FFF0 */
+#define DAC_DHR12LD_DACC1DHR        DAC_DHR12LD_DACC1DHR_Msk                   /*!<DAC channel1 12-bit Left aligned data */
+#define DAC_DHR12LD_DACC2DHR_Pos    (20U)
+#define DAC_DHR12LD_DACC2DHR_Msk    (0xFFFU << DAC_DHR12LD_DACC2DHR_Pos)       /*!< 0xFFF00000 */
+#define DAC_DHR12LD_DACC2DHR        DAC_DHR12LD_DACC2DHR_Msk                   /*!<DAC channel2 12-bit Left aligned data */
+
+/******************  Bit definition for DAC_DHR8RD register  ******************/
+#define DAC_DHR8RD_DACC1DHR_Pos     (0U)
+#define DAC_DHR8RD_DACC1DHR_Msk     (0xFFU << DAC_DHR8RD_DACC1DHR_Pos)         /*!< 0x000000FF */
+#define DAC_DHR8RD_DACC1DHR         DAC_DHR8RD_DACC1DHR_Msk                    /*!<DAC channel1 8-bit Right aligned data */
+#define DAC_DHR8RD_DACC2DHR_Pos     (0U)
+#define DAC_DHR8RD_DACC2DHR_Msk     (0xFFU << DAC_DHR8RD_DACC2DHR_Pos)         /*!< 0x000000FF */
+#define DAC_DHR8RD_DACC2DHR         DAC_DHR8RD_DACC2DHR_Msk                    /*!<DAC channel2 8-bit Right aligned data */
+
+/*******************  Bit definition for DAC_DOR1 register  *******************/
+#define DAC_DOR1_DACC1DOR           ((uint16_t)0x0FFF)                         /*!<DAC channel1 data output */
+
+/*******************  Bit definition for DAC_DOR2 register  *******************/
+#define DAC_DOR2_DACC2DOR           ((uint16_t)0x0FFF)                         /*!<DAC channel2 data output */
+
+/********************  Bit definition for DAC_SR register  ********************/
+#define DAC_SR_DMAUDR1_Pos          (13U)
+#define DAC_SR_DMAUDR1_Msk          (0x1U << DAC_SR_DMAUDR1_Pos)               /*!< 0x00002000 */
+#define DAC_SR_DMAUDR1              DAC_SR_DMAUDR1_Msk                         /*!<DAC channel1 DMA underrun flag */
+#define DAC_SR_CAL_FLAG1_Pos        (14U)
+#define DAC_SR_CAL_FLAG1_Msk        (0x1U << DAC_SR_CAL_FLAG1_Pos)             /*!< 0x00004000 */
+#define DAC_SR_CAL_FLAG1            DAC_SR_CAL_FLAG1_Msk                       /*!<DAC channel1 calibration offset status */
+#define DAC_SR_BWST1_Pos            (15U)
+#define DAC_SR_BWST1_Msk            (0x4001U << DAC_SR_BWST1_Pos)              /*!< 0x20008000 */
+#define DAC_SR_BWST1                DAC_SR_BWST1_Msk                           /*!<DAC channel1 busy writing sample time flag */
+
+#define DAC_SR_DMAUDR2_Pos          (29U)
+#define DAC_SR_DMAUDR2_Msk          (0x1U << DAC_SR_DMAUDR2_Pos)               /*!< 0x20000000 */
+#define DAC_SR_DMAUDR2              DAC_SR_DMAUDR2_Msk                         /*!<DAC channel2 DMA underrun flag */
+#define DAC_SR_CAL_FLAG2_Pos        (30U)
+#define DAC_SR_CAL_FLAG2_Msk        (0x1U << DAC_SR_CAL_FLAG2_Pos)             /*!< 0x40000000 */
+#define DAC_SR_CAL_FLAG2            DAC_SR_CAL_FLAG2_Msk                       /*!<DAC channel2 calibration offset status */
+#define DAC_SR_BWST2_Pos            (31U)
+#define DAC_SR_BWST2_Msk            (0x1U << DAC_SR_BWST2_Pos)                 /*!< 0x80000000 */
+#define DAC_SR_BWST2                DAC_SR_BWST2_Msk                           /*!<DAC channel2 busy writing sample time flag */
+
+/*******************  Bit definition for DAC_CCR register  ********************/
+#define DAC_CCR_OTRIM1_Pos          (0U)
+#define DAC_CCR_OTRIM1_Msk          (0x1FU << DAC_CCR_OTRIM1_Pos)              /*!< 0x0000001F */
+#define DAC_CCR_OTRIM1              DAC_CCR_OTRIM1_Msk                         /*!<DAC channel1 offset trimming value */
+#define DAC_CCR_OTRIM2_Pos          (16U)
+#define DAC_CCR_OTRIM2_Msk          (0x1FU << DAC_CCR_OTRIM2_Pos)              /*!< 0x001F0000 */
+#define DAC_CCR_OTRIM2              DAC_CCR_OTRIM2_Msk                         /*!<DAC channel2 offset trimming value */
+
+/*******************  Bit definition for DAC_MCR register  *******************/
+#define DAC_MCR_MODE1_Pos           (0U)
+#define DAC_MCR_MODE1_Msk           (0x7U << DAC_MCR_MODE1_Pos)                /*!< 0x00000007 */
+#define DAC_MCR_MODE1               DAC_MCR_MODE1_Msk                          /*!<MODE1[2:0] (DAC channel1 mode) */
+#define DAC_MCR_MODE1_0             (0x1U << DAC_MCR_MODE1_Pos)                /*!< 0x00000001 */
+#define DAC_MCR_MODE1_1             (0x2U << DAC_MCR_MODE1_Pos)                /*!< 0x00000002 */
+#define DAC_MCR_MODE1_2             (0x4U << DAC_MCR_MODE1_Pos)                /*!< 0x00000004 */
+
+#define DAC_MCR_MODE2_Pos           (16U)
+#define DAC_MCR_MODE2_Msk           (0x7U << DAC_MCR_MODE2_Pos)                /*!< 0x00070000 */
+#define DAC_MCR_MODE2               DAC_MCR_MODE2_Msk                          /*!<MODE2[2:0] (DAC channel2 mode) */
+#define DAC_MCR_MODE2_0             (0x1U << DAC_MCR_MODE2_Pos)                /*!< 0x00010000 */
+#define DAC_MCR_MODE2_1             (0x2U << DAC_MCR_MODE2_Pos)                /*!< 0x00020000 */
+#define DAC_MCR_MODE2_2             (0x4U << DAC_MCR_MODE2_Pos)                /*!< 0x00040000 */
+
+/******************  Bit definition for DAC_SHSR1 register  ******************/
+#define DAC_SHSR1_TSAMPLE1_Pos      (0U)
+#define DAC_SHSR1_TSAMPLE1_Msk      (0x3FFU << DAC_SHSR1_TSAMPLE1_Pos)         /*!< 0x000003FF */
+#define DAC_SHSR1_TSAMPLE1          DAC_SHSR1_TSAMPLE1_Msk                     /*!<DAC channel1 sample time */
+
+/******************  Bit definition for DAC_SHSR2 register  ******************/
+#define DAC_SHSR1_TSAMPLE2_Pos      (0U)
+#define DAC_SHSR1_TSAMPLE2_Msk      (0x3FFU << DAC_SHSR1_TSAMPLE2_Pos)         /*!< 0x000003FF */
+#define DAC_SHSR1_TSAMPLE2          DAC_SHSR1_TSAMPLE2_Msk                     /*!<DAC channel2 sample time */
+
+/******************  Bit definition for DAC_SHHR register  ******************/
+#define DAC_SHHR_THOLD1_Pos         (0U)
+#define DAC_SHHR_THOLD1_Msk         (0x3FFU << DAC_SHHR_THOLD1_Pos)            /*!< 0x000003FF */
+#define DAC_SHHR_THOLD1             DAC_SHHR_THOLD1_Msk                        /*!<DAC channel1 hold time */
+#define DAC_SHHR_THOLD2_Pos         (16U)
+#define DAC_SHHR_THOLD2_Msk         (0x3FFU << DAC_SHHR_THOLD2_Pos)            /*!< 0x03FF0000 */
+#define DAC_SHHR_THOLD2             DAC_SHHR_THOLD2_Msk                        /*!<DAC channel2 hold time */
+
+/******************  Bit definition for DAC_SHRR register  ******************/
+#define DAC_SHRR_TREFRESH1_Pos      (0U)
+#define DAC_SHRR_TREFRESH1_Msk      (0xFFU << DAC_SHRR_TREFRESH1_Pos)          /*!< 0x000000FF */
+#define DAC_SHRR_TREFRESH1          DAC_SHRR_TREFRESH1_Msk                     /*!<DAC channel1 refresh time */
+#define DAC_SHRR_TREFRESH2_Pos      (16U)
+#define DAC_SHRR_TREFRESH2_Msk      (0xFFU << DAC_SHRR_TREFRESH2_Pos)          /*!< 0x00FF0000 */
+#define DAC_SHRR_TREFRESH2          DAC_SHRR_TREFRESH2_Msk                     /*!<DAC channel2 refresh time */
+
+/**********************  Bit definition for DAC_HWCFGR0 register  ***************/
+#define DAC_HWCFGR0_DUAL_Pos      (0U)
+#define DAC_HWCFGR0_DUAL_Msk      (0xFF << DAC_HWCFGR0_DUAL_Pos)               /*!< 0x0000000F */
+#define DAC_HWCFGR0_DUAL          DAC_HWCFGR0_DUAL_Msk                         /*!< Dual DAC capability */
+#define DAC_HWCFGR0_LFSR_Pos      (4U)
+#define DAC_HWCFGR0_LFSR_Msk      (0xFU << DAC_HWCFGR0_LFSR_Pos)               /*!< 0x000000F0 */
+#define DAC_HWCFGR0_LFSR          DAC_HWCFGR0_LFSR_Msk                         /*!< Pseudonoise wave generation capability */
+#define DAC_HWCFGR0_TRIANGLE_Pos  (8U)
+#define DAC_HWCFGR0_TRIANGLE_Msk  (0xFU << DAC_HWCFGR0_TRIANGLE_Pos)           /*!< 0x00000F00 */
+#define DAC_HWCFGR0_TRIANGLE      DAC_HWCFGR0_TRIANGLE_Msk                     /*!< Triangle wave generation capability */
+#define DAC_HWCFGR0_SAMPLE_Pos    (12U)
+#define DAC_HWCFGR0_SAMPLE_Msk    (0xFU << DAC_HWCFGR0_SAMPLE_Pos)             /*!< 0x0000F000 */
+#define DAC_HWCFGR0_SAMPLE        DAC_HWCFGR0_SAMPLE_Msk                       /*!< Sample and Hold mode capability */
+#define DAC_HWCFGR0_OR_CFG_Pos    (16U)
+#define DAC_HWCFGR0_OR_CFG_Msk    (0xFFU << DAC_HWCFGR0_OR_CFG_Pos)            /*!< 0x00FF0000 */
+#define DAC_HWCFGR0_OR_CFG        DAC_HWCFGR0_OR_CFG_Msk                       /*!< option register bit width */
+
+/********************  Bit definition for DAC_VERR register********************/
+#define DAC_VERR_MINREV_Pos        (0U)
+#define DAC_VERR_MINREV_Msk        (0xFU << DAC_VERR_MINREV_Pos)           /*!< 0x0000000F */
+#define DAC_VERR_MINREV            DAC_VERR_MINREV_Msk                     /*!< MAJREV[3:0] bits (Minor revision) */
+#define DAC_VERR_MAJREV_Pos        (4U)
+#define DAC_VERR_MAJREV_Msk        (0xFU << DAC_VERR_MAJREV_Pos)           /*!< 0x000000F0 */
+#define DAC_VERR_MAJREV            DAC_VERR_MAJREV_Msk                     /*!< MINREV[3:0] bits (Major revision) */
+
+/**********************  Bit definition for DAC_IPIDR register  ****************/
+#define DAC_IPIDR_IPID_Pos       (0U)
+#define DAC_IPIDR_IPID_Msk       (0xFFFFFFFFU << DAC_IPIDR_IPID_Pos)         /*!< 0xFFFFFFFF */
+#define DAC_IPIDR_IPID           DAC_IPIDR_IPID_Msk                          /*!< IP Identification */
+
+/**********************  Bit definition for DAC_SIDR register  *****************/
+#define DAC_SIDR_SID_Pos         (0U)
+#define DAC_SIDR_SID_Msk         (0xFFFFFFFFU << DAC_SIDR_SID_Pos)           /*!< 0xFFFFFFFF */
+#define DAC_SIDR_SID             DAC_SIDR_SID_Msk                            /*!< IP size identification */
+
+/******************************************************************************/
+/*                                                                            */
+/*                                DBG                                         */
+/*                                                                            */
+/******************************************************************************/
+
+/********************  Bit definition for DBGMCU_IDCODE register  *************/
+#define DBGMCU_IDCODE_DEV_ID_Pos              (0U)
+#define DBGMCU_IDCODE_DEV_ID_Msk              (0xFFFU << DBGMCU_IDCODE_DEV_ID_Pos) /*!< 0x00000FFF */
+#define DBGMCU_IDCODE_DEV_ID                  DBGMCU_IDCODE_DEV_ID_Msk
+#define DBGMCU_IDCODE_REV_ID_Pos              (16U)
+#define DBGMCU_IDCODE_REV_ID_Msk              (0xFFFFU << DBGMCU_IDCODE_REV_ID_Pos) /*!< 0xFFFF0000 */
+#define DBGMCU_IDCODE_REV_ID                  DBGMCU_IDCODE_REV_ID_Msk
+
+/********************  Bit definition for DBGMCU_CR register  *****************/
+#define DBGMCU_CR_DBG_SLEEP_Pos               (0U)
+#define DBGMCU_CR_DBG_SLEEP_Msk               (0x1U << DBGMCU_CR_DBG_SLEEP_Pos) /*!< 0x00000001 */
+#define DBGMCU_CR_DBG_SLEEP                   DBGMCU_CR_DBG_SLEEP_Msk
+#define DBGMCU_CR_DBG_STOP_Pos                (1U)
+#define DBGMCU_CR_DBG_STOP_Msk                (0x1U << DBGMCU_CR_DBG_STOP_Pos) /*!< 0x00000002 */
+#define DBGMCU_CR_DBG_STOP                    DBGMCU_CR_DBG_STOP_Msk
+#define DBGMCU_CR_DBG_STANDBY_Pos             (2U)
+#define DBGMCU_CR_DBG_STANDBY_Msk             (0x1U << DBGMCU_CR_DBG_STANDBY_Pos) /*!< 0x00000004 */
+#define DBGMCU_CR_DBG_STANDBY                 DBGMCU_CR_DBG_STANDBY_Msk
+#define DBGMCU_CR_DBG_WDFZCTL_Pos             (24U)
+#define DBGMCU_CR_DBG_WDFZCTL_Msk             (0x1U << DBGMCU_CR_DBG_WDFZCTL_Pos) /*!< 0x01000000 */
+#define DBGMCU_CR_DBG_WDFZCTL                 DBGMCU_CR_DBG_WDFZCTL_Msk
+#define DBGMCU_CR_DBG_TRGOEN_Pos              (28U)
+#define DBGMCU_CR_DBG_TRGOEN_Msk              (0x1U << DBGMCU_CR_DBG_TRGOEN_Pos) /*!< 0x10000000 */
+#define DBGMCU_CR_DBG_TRGOEN                  DBGMCU_CR_DBG_TRGOEN_Msk
+
+/********************  Bit definition for APB4FZ register  ************/
+#define DBGMCU_APB4_FZ_DBG_IWDG2_STOP_Pos     (2U)
+#define DBGMCU_APB4_FZ_DBG_IWDG2_STOP_Msk     (0x1U << DBGMCU_APB4_FZ_DBG_IWDG2_STOP_Pos) /*!< 0x00000004 */
+#define DBGMCU_APB4_FZ_DBG_IWDG2_STOP         DBGMCU_APB4_FZ_DBG_IWDG2_STOP_Msk
+
+/********************  Bit definition for APB1FZ register  ************/
+#define DBGMCU_APB1_FZ_DBG_TIM2_STOP_Pos      (0U)
+#define DBGMCU_APB1_FZ_DBG_TIM2_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_TIM2_STOP_Pos) /*!< 0x00000001 */
+#define DBGMCU_APB1_FZ_DBG_TIM2_STOP          DBGMCU_APB1_FZ_DBG_TIM2_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_TIM3_STOP_Pos      (1U)
+#define DBGMCU_APB1_FZ_DBG_TIM3_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_TIM3_STOP_Pos) /*!< 0x00000002 */
+#define DBGMCU_APB1_FZ_DBG_TIM3_STOP          DBGMCU_APB1_FZ_DBG_TIM3_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_TIM4_STOP_Pos      (2U)
+#define DBGMCU_APB1_FZ_DBG_TIM4_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_TIM4_STOP_Pos) /*!< 0x00000004 */
+#define DBGMCU_APB1_FZ_DBG_TIM4_STOP          DBGMCU_APB1_FZ_DBG_TIM4_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_TIM5_STOP_Pos      (3U)
+#define DBGMCU_APB1_FZ_DBG_TIM5_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_TIM5_STOP_Pos) /*!< 0x00000008 */
+#define DBGMCU_APB1_FZ_DBG_TIM5_STOP          DBGMCU_APB1_FZ_DBG_TIM5_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_TIM6_STOP_Pos      (4U)
+#define DBGMCU_APB1_FZ_DBG_TIM6_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_TIM6_STOP_Pos) /*!< 0x00000010 */
+#define DBGMCU_APB1_FZ_DBG_TIM6_STOP          DBGMCU_APB1_FZ_DBG_TIM6_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_TIM7_STOP_Pos      (5U)
+#define DBGMCU_APB1_FZ_DBG_TIM7_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_TIM7_STOP_Pos) /*!< 0x00000020 */
+#define DBGMCU_APB1_FZ_DBG_TIM7_STOP          DBGMCU_APB1_FZ_DBG_TIM7_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_TIM12_STOP_Pos     (6U)
+#define DBGMCU_APB1_FZ_DBG_TIM12_STOP_Msk     (0x1U << DBGMCU_APB1_FZ_DBG_TIM12_STOP_Pos) /*!< 0x00000040 */
+#define DBGMCU_APB1_FZ_DBG_TIM12_STOP         DBGMCU_APB1_FZ_DBG_TIM12_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_TIM13_STOP_Pos     (7U)
+#define DBGMCU_APB1_FZ_DBG_TIM13_STOP_Msk     (0x1U << DBGMCU_APB1_FZ_DBG_TIM13_STOP_Pos) /*!< 0x00000080 */
+#define DBGMCU_APB1_FZ_DBG_TIM13_STOP         DBGMCU_APB1_FZ_DBG_TIM13_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_TIM14_STOP_Pos     (8U)
+#define DBGMCU_APB1_FZ_DBG_TIM14_STOP_Msk     (0x1U << DBGMCU_APB1_FZ_DBG_TIM14_STOP_Pos) /*!< 0x00000100 */
+#define DBGMCU_APB1_FZ_DBG_TIM14_STOP         DBGMCU_APB1_FZ_DBG_TIM14_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_LPTIM1_STOP_Pos    (9U)
+#define DBGMCU_APB1_FZ_DBG_LPTIM1_STOP_Msk    (0x1U << DBGMCU_APB1_FZ_DBG_LPTIM1_STOP_Pos) /*!< 0x00000200 */
+#define DBGMCU_APB1_FZ_DBG_LPTIM1_STOP        DBGMCU_APB1_FZ_DBG_LPTIM1_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_WWDG1_STOP_Pos     (10U)
+#define DBGMCU_APB1_FZ_DBG_WWDG1_STOP_Msk     (0x1U << DBGMCU_APB1_FZ_DBG_WWDG1_STOP_Pos) /*!< 0x00000400 */
+#define DBGMCU_APB1_FZ_DBG_WWDG1_STOP         DBGMCU_APB1_FZ_DBG_WWDG1_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_I2C1_STOP_Pos      (18U)
+#define DBGMCU_APB1_FZ_DBG_I2C1_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_I2C1_STOP_Pos) /*!< 0x00040000 */
+#define DBGMCU_APB1_FZ_DBG_I2C1_STOP          DBGMCU_APB1_FZ_DBG_I2C1_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_I2C2_STOP_Pos      (19U)
+#define DBGMCU_APB1_FZ_DBG_I2C2_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_I2C2_STOP_Pos) /*!< 0x00080000 */
+#define DBGMCU_APB1_FZ_DBG_I2C2_STOP          DBGMCU_APB1_FZ_DBG_I2C2_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_I2C3_STOP_Pos      (20U)
+#define DBGMCU_APB1_FZ_DBG_I2C3_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_I2C3_STOP_Pos) /*!< 0x00100000 */
+#define DBGMCU_APB1_FZ_DBG_I2C3_STOP          DBGMCU_APB1_FZ_DBG_I2C3_STOP_Msk
+#define DBGMCU_APB1_FZ_DBG_I2C5_STOP_Pos      (21U)
+#define DBGMCU_APB1_FZ_DBG_I2C5_STOP_Msk      (0x1U << DBGMCU_APB1_FZ_DBG_I2C5_STOP_Pos) /*!< 0x00200000 */
+#define DBGMCU_APB1_FZ_DBG_I2C5_STOP          DBGMCU_APB1_FZ_DBG_I2C5_STOP_Msk
+
+/********************  Bit definition for APB2FZ register  ************/
+#define DBGMCU_APB2_FZ_DBG_TIM1_STOP_Pos      (0U)
+#define DBGMCU_APB2_FZ_DBG_TIM1_STOP_Msk      (0x1U << DBGMCU_APB2_FZ_DBG_TIM1_STOP_Pos) /*!< 0x00000001 */
+#define DBGMCU_APB2_FZ_DBG_TIM1_STOP          DBGMCU_APB2_FZ_DBG_TIM1_STOP_Msk
+#define DBGMCU_APB2_FZ_DBG_TIM8_STOP_Pos      (1U)
+#define DBGMCU_APB2_FZ_DBG_TIM8_STOP_Msk      (0x1U << DBGMCU_APB2_FZ_DBG_TIM8_STOP_Pos) /*!< 0x00000002 */
+#define DBGMCU_APB2_FZ_DBG_TIM8_STOP          DBGMCU_APB2_FZ_DBG_TIM8_STOP_Msk
+#define DBGMCU_APB2_FZ_DBG_TIM15_STOP_Pos     (6U)
+#define DBGMCU_APB2_FZ_DBG_TIM15_STOP_Msk     (0x1U << DBGMCU_APB2_FZ_DBG_TIM15_STOP_Pos) /*!< 0x00000040 */
+#define DBGMCU_APB2_FZ_DBG_TIM15_STOP         DBGMCU_APB2_FZ_DBG_TIM15_STOP_Msk
+#define DBGMCU_APB2_FZ_DBG_TIM16_STOP_Pos     (7U)
+#define DBGMCU_APB2_FZ_DBG_TIM16_STOP_Msk     (0x1U << DBGMCU_APB2_FZ_DBG_TIM16_STOP_Pos) /*!< 0x00000080 */
+#define DBGMCU_APB2_FZ_DBG_TIM16_STOP         DBGMCU_APB2_FZ_DBG_TIM16_STOP_Msk
+#define DBGMCU_APB2_FZ_DBG_TIM17_STOP_Pos     (8U)
+#define DBGMCU_APB2_FZ_DBG_TIM17_STOP_Msk     (0x1U << DBGMCU_APB2_FZ_DBG_TIM17_STOP_Pos) /*!< 0x00000100 */
+#define DBGMCU_APB2_FZ_DBG_TIM17_STOP         DBGMCU_APB2_FZ_DBG_TIM17_STOP_Msk
+#define DBGMCU_APB2_FZ_DBG_FDCAN_STOP_Pos     (15U)
+#define DBGMCU_APB2_FZ_DBG_FDCAN_STOP_Msk     (0x1U << DBGMCU_APB2_FZ_DBG_FDCAN_STOP_Pos) /*!< 0x00008000 */
+#define DBGMCU_APB2_FZ_DBG_FDCAN_STOP         DBGMCU_APB2_FZ_DBG_FDCAN_STOP_Msk
+
+/********************  Bit definition for APB3FZ register  ************/
+#define DBGMCU_APB3_FZ_DBG_LPTIM2_STOP_Pos    (1U)
+#define DBGMCU_APB3_FZ_DBG_LPTIM2_STOP_Msk    (0x1U << DBGMCU_APB3_FZ_DBG_LPTIM2_STOP_Pos) /*!< 0x00000002 */
+#define DBGMCU_APB3_FZ_DBG_LPTIM2_STOP        DBGMCU_APB3_FZ_DBG_LPTIM2_STOP_Msk
+#define DBGMCU_APB3_FZ_DBG_LPTIM3_STOP_Pos    (2U)
+#define DBGMCU_APB3_FZ_DBG_LPTIM3_STOP_Msk    (0x1U << DBGMCU_APB3_FZ_DBG_LPTIM3_STOP_Pos) /*!< 0x00000004 */
+#define DBGMCU_APB3_FZ_DBG_LPTIM3_STOP        DBGMCU_APB3_FZ_DBG_LPTIM3_STOP_Msk
+#define DBGMCU_APB3_FZ_DBG_LPTIM4_STOP_Pos    (3U)
+#define DBGMCU_APB3_FZ_DBG_LPTIM4_STOP_Msk    (0x1U << DBGMCU_APB3_FZ_DBG_LPTIM4_STOP_Pos) /*!< 0x00000008 */
+#define DBGMCU_APB3_FZ_DBG_LPTIM4_STOP        DBGMCU_APB3_FZ_DBG_LPTIM4_STOP_Msk
+#define DBGMCU_APB3_FZ_DBG_LPTIM5_STOP_Pos    (4U)
+#define DBGMCU_APB3_FZ_DBG_LPTIM5_STOP_Msk    (0x1U << DBGMCU_APB3_FZ_DBG_LPTIM5_STOP_Pos) /*!< 0x00000010 */
+#define DBGMCU_APB3_FZ_DBG_LPTIM5_STOP        DBGMCU_APB3_FZ_DBG_LPTIM5_STOP_Msk
+
+/********************  Bit definition for APB5FZ register  ************/
+#define DBGMCU_APB5_FZ_DBG_I2C4_STOP_Pos      (2U)
+#define DBGMCU_APB5_FZ_DBG_I2C4_STOP_Msk      (0x1U << DBGMCU_APB5_FZ_DBG_I2C4_STOP_Pos) /*!< 0x00000004 */
+#define DBGMCU_APB5_FZ_DBG_I2C4_STOP          DBGMCU_APB5_FZ_DBG_I2C4_STOP_Msk
+#define DBGMCU_APB5_FZ_DBG_IWDG1_STOP_Pos     (3U)
+#define DBGMCU_APB5_FZ_DBG_IWDG1_STOP_Msk     (0x1U << DBGMCU_APB5_FZ_DBG_IWDG1_STOP_Pos) /*!< 0x00000008 */
+#define DBGMCU_APB5_FZ_DBG_IWDG1_STOP         DBGMCU_APB5_FZ_DBG_IWDG1_STOP_Msk
+#define DBGMCU_APB5_FZ_DBG_RTC_STOP_Pos       (4U)
+#define DBGMCU_APB5_FZ_DBG_RTC_STOP_Msk       (0x1U << DBGMCU_APB5_FZ_DBG_RTC_STOP_Pos) /*!< 0x00000010 */
+#define DBGMCU_APB5_FZ_DBG_RTC_STOP           DBGMCU_APB5_FZ_DBG_RTC_STOP_Msk
+#define DBGMCU_APB5_FZ_DBG_I2C6_STOP_Pos      (9U)
+#define DBGMCU_APB5_FZ_DBG_I2C6_STOP_Msk      (0x1U << DBGMCU_APB5_FZ_DBG_I2C6_STOP_Pos) /*!< 0x00000200 */
+#define DBGMCU_APB5_FZ_DBG_I2C6_STOP          DBGMCU_APB5_FZ_DBG_I2C6_STOP_Msk
+
+/******************************************************************************/
+/*                                                                            */
+/*                                    DCMI                                    */
+/*                                                                            */
+/******************************************************************************/
+/********************  Bits definition for DCMI_CR register  ******************/
+#define DCMI_CR_CAPTURE_Pos        (0U)
+#define DCMI_CR_CAPTURE_Msk        (0x1UL << DCMI_CR_CAPTURE_Pos)              /*!< 0x00000001 */
+#define DCMI_CR_CAPTURE            DCMI_CR_CAPTURE_Msk
+#define DCMI_CR_CM_Pos             (1U)
+#define DCMI_CR_CM_Msk             (0x1UL << DCMI_CR_CM_Pos)                   /*!< 0x00000002 */
+#define DCMI_CR_CM                 DCMI_CR_CM_Msk
+#define DCMI_CR_CROP_Pos           (2U)
+#define DCMI_CR_CROP_Msk           (0x1UL << DCMI_CR_CROP_Pos)                 /*!< 0x00000004 */
+#define DCMI_CR_CROP               DCMI_CR_CROP_Msk
+#define DCMI_CR_JPEG_Pos           (3U)
+#define DCMI_CR_JPEG_Msk           (0x1UL << DCMI_CR_JPEG_Pos)                 /*!< 0x00000008 */
+#define DCMI_CR_JPEG               DCMI_CR_JPEG_Msk
+#define DCMI_CR_ESS_Pos            (4U)
+#define DCMI_CR_ESS_Msk            (0x1UL << DCMI_CR_ESS_Pos)                  /*!< 0x00000010 */
+#define DCMI_CR_ESS                DCMI_CR_ESS_Msk
+#define DCMI_CR_PCKPOL_Pos         (5U)
+#define DCMI_CR_PCKPOL_Msk         (0x1UL << DCMI_CR_PCKPOL_Pos)               /*!< 0x00000020 */
+#define DCMI_CR_PCKPOL             DCMI_CR_PCKPOL_Msk
+#define DCMI_CR_HSPOL_Pos          (6U)
+#define DCMI_CR_HSPOL_Msk          (0x1UL << DCMI_CR_HSPOL_Pos)                /*!< 0x00000040 */
+#define DCMI_CR_HSPOL              DCMI_CR_HSPOL_Msk
+#define DCMI_CR_VSPOL_Pos          (7U)
+#define DCMI_CR_VSPOL_Msk          (0x1UL << DCMI_CR_VSPOL_Pos)                /*!< 0x00000080 */
+#define DCMI_CR_VSPOL              DCMI_CR_VSPOL_Msk
+#define DCMI_CR_FCRC_0             ((uint32_t)0x00000100U)
+#define DCMI_CR_FCRC_1             ((uint32_t)0x00000200U)
+#define DCMI_CR_EDM_0              ((uint32_t)0x00000400U)
+#define DCMI_CR_EDM_1              ((uint32_t)0x00000800U)
+#define DCMI_CR_CRE_Pos            (12U)
+#define DCMI_CR_CRE_Msk            (0x1UL << DCMI_CR_CRE_Pos)                  /*!< 0x00001000 */
+#define DCMI_CR_CRE                DCMI_CR_CRE_Msk
+#define DCMI_CR_ENABLE_Pos         (14U)
+#define DCMI_CR_ENABLE_Msk         (0x1UL << DCMI_CR_ENABLE_Pos)               /*!< 0x00004000 */
+#define DCMI_CR_ENABLE             DCMI_CR_ENABLE_Msk
+#define DCMI_CR_BSM_Pos            (16U)
+#define DCMI_CR_BSM_Msk            (0x3UL << DCMI_CR_BSM_Pos)                  /*!< 0x00030000 */
+#define DCMI_CR_BSM                DCMI_CR_BSM_Msk
+#define DCMI_CR_BSM_0              (0x1U << DCMI_CR_BSM_Pos)                   /*!< 0x00010000 */
+#define DCMI_CR_BSM_1              (0x2U << DCMI_CR_BSM_Pos)                   /*!< 0x00020000 */
+#define DCMI_CR_OEBS_Pos           (18U)
+#define DCMI_CR_OEBS_Msk           (0x1UL << DCMI_CR_OEBS_Pos)                 /*!< 0x00040000 */
+#define DCMI_CR_OEBS               DCMI_CR_OEBS_Msk
+#define DCMI_CR_LSM_Pos            (19U)
+#define DCMI_CR_LSM_Msk            (0x1UL << DCMI_CR_LSM_Pos)                  /*!< 0x00080000 */
+#define DCMI_CR_LSM                DCMI_CR_LSM_Msk
+#define DCMI_CR_OELS_Pos           (20U)
+#define DCMI_CR_OELS_Msk           (0x1UL << DCMI_CR_OELS_Pos)                 /*!< 0x00100000 */
+#define DCMI_CR_OELS               DCMI_CR_OELS_Msk
+
+/********************  Bits definition for DCMI_SR register  ******************/
+#define DCMI_SR_HSYNC_Pos          (0U)
+#define DCMI_SR_HSYNC_Msk          (0x1UL << DCMI_SR_HSYNC_Pos)                /*!< 0x00000001 */
+#define DCMI_SR_HSYNC              DCMI_SR_HSYNC_Msk
+#define DCMI_SR_VSYNC_Pos          (1U)
+#define DCMI_SR_VSYNC_Msk          (0x1UL << DCMI_SR_VSYNC_Pos)                /*!< 0x00000002 */
+#define DCMI_SR_VSYNC              DCMI_SR_VSYNC_Msk
+#define DCMI_SR_FNE_Pos            (2U)
+#define DCMI_SR_FNE_Msk            (0x1UL << DCMI_SR_FNE_Pos)                  /*!< 0x00000004 */
+#define DCMI_SR_FNE                DCMI_SR_FNE_Msk
+
+/********************  Bits definition for DCMI_RIS register   ****************/
+#define DCMI_RIS_FRAME_RIS_Pos     (0U)
+#define DCMI_RIS_FRAME_RIS_Msk     (0x1UL << DCMI_RIS_FRAME_RIS_Pos)           /*!< 0x00000001 */
+#define DCMI_RIS_FRAME_RIS         DCMI_RIS_FRAME_RIS_Msk
+#define DCMI_RIS_OVR_RIS_Pos       (1U)
+#define DCMI_RIS_OVR_RIS_Msk       (0x1UL << DCMI_RIS_OVR_RIS_Pos)             /*!< 0x00000002 */
+#define DCMI_RIS_OVR_RIS           DCMI_RIS_OVR_RIS_Msk
+#define DCMI_RIS_ERR_RIS_Pos       (2U)
+#define DCMI_RIS_ERR_RIS_Msk       (0x1UL << DCMI_RIS_ERR_RIS_Pos)             /*!< 0x00000004 */
+#define DCMI_RIS_ERR_RIS           DCMI_RIS_ERR_RIS_Msk
+#define DCMI_RIS_VSYNC_RIS_Pos     (3U)
+#define DCMI_RIS_VSYNC_RIS_Msk     (0x1UL << DCMI_RIS_VSYNC_RIS_Pos)           /*!< 0x00000008 */
+#define DCMI_RIS_VSYNC_RIS         DCMI_RIS_VSYNC_RIS_Msk
+#define DCMI_RIS_LINE_RIS_Pos      (4U)
+#define DCMI_RIS_LINE_RIS_Msk      (0x1UL << DCMI_RIS_LINE_RIS_Pos)            /*!< 0x00000010 */
+#define DCMI_RIS_LINE_RIS          DCMI_RIS_LINE_RIS_Msk
+
+/********************  Bits definition for DCMI_IER register  *****************/
+#define DCMI_IER_FRAME_IE_Pos      (0U)
+#define DCMI_IER_FRAME_IE_Msk      (0x1UL << DCMI_IER_FRAME_IE_Pos)            /*!< 0x00000001 */
+#define DCMI_IER_FRAME_IE          DCMI_IER_FRAME_IE_Msk
+#define DCMI_IER_OVR_IE_Pos        (1U)
+#define DCMI_IER_OVR_IE_Msk        (0x1UL << DCMI_IER_OVR_IE_Pos)              /*!< 0x00000002 */
+#define DCMI_IER_OVR_IE            DCMI_IER_OVR_IE_Msk
+#define DCMI_IER_ERR_IE_Pos        (2U)
+#define DCMI_IER_ERR_IE_Msk        (0x1UL << DCMI_IER_ERR_IE_Pos)              /*!< 0x00000004 */
+#define DCMI_IER_ERR_IE            DCMI_IER_ERR_IE_Msk
+#define DCMI_IER_VSYNC_IE_Pos      (3U)
+#define DCMI_IER_VSYNC_IE_Msk      (0x1UL << DCMI_IER_VSYNC_IE_Pos)            /*!< 0x00000008 */
+#define DCMI_IER_VSYNC_IE          DCMI_IER_VSYNC_IE_Msk
+#define DCMI_IER_LINE_IE_Pos       (4U)
+#define DCMI_IER_LINE_IE_Msk       (0x1UL << DCMI_IER_LINE_IE_Pos)             /*!< 0x00000010 */
+#define DCMI_IER_LINE_IE           DCMI_IER_LINE_IE_Msk
+
+
+/********************  Bits definition for DCMI_MIS register  *****************/
+#define DCMI_MIS_FRAME_MIS_Pos     (0U)
+#define DCMI_MIS_FRAME_MIS_Msk     (0x1UL << DCMI_MIS_FRAME_MIS_Pos)           /*!< 0x00000001 */
+#define DCMI_MIS_FRAME_MIS         DCMI_MIS_FRAME_MIS_Msk
+#define DCMI_MIS_OVR_MIS_Pos       (1U)
+#define DCMI_MIS_OVR_MIS_Msk       (0x1UL << DCMI_MIS_OVR_MIS_Pos)             /*!< 0x00000002 */
+#define DCMI_MIS_OVR_MIS           DCMI_MIS_OVR_MIS_Msk
+#define DCMI_MIS_ERR_MIS_Pos       (2U)
+#define DCMI_MIS_ERR_MIS_Msk       (0x1UL << DCMI_MIS_ERR_MIS_Pos)             /*!< 0x00000004 */
+#define DCMI_MIS_ERR_MIS           DCMI_MIS_ERR_MIS_Msk
+#define DCMI_MIS_VSYNC_MIS_Pos     (3U)
+#define DCMI_MIS_VSYNC_MIS_Msk     (0x1UL << DCMI_MIS_VSYNC_MIS_Pos)           /*!< 0x00000008 */
+#define DCMI_MIS_VSYNC_MIS         DCMI_MIS_VSYNC_MIS_Msk
+#define DCMI_MIS_LINE_MIS_Pos      (4U)
+#define DCMI_MIS_LINE_MIS_Msk      (0x1UL << DCMI_MIS_LINE_MIS_Pos)            /*!< 0x00000010 */
+#define DCMI_MIS_LINE_MIS          DCMI_MIS_LINE_MIS_Msk
+
+
+/********************  Bits definition for DCMI_ICR register  *****************/
+#define DCMI_ICR_FRAME_ISC_Pos     (0U)
+#define DCMI_ICR_FRAME_ISC_Msk     (0x1UL << DCMI_ICR_FRAME_ISC_Pos)           /*!< 0x00000001 */
+#define DCMI_ICR_FRAME_ISC         DCMI_ICR_FRAME_ISC_Msk
+#define DCMI_ICR_OVR_ISC_Pos       (1U)
+#define DCMI_ICR_OVR_ISC_Msk       (0x1UL << DCMI_ICR_OVR_ISC_Pos)             /*!< 0x00000002 */
+#define DCMI_ICR_OVR_ISC           DCMI_ICR_OVR_ISC_Msk
+#define DCMI_ICR_ERR_ISC_Pos       (2U)
+#define DCMI_ICR_ERR_ISC_Msk       (0x1UL << DCMI_ICR_ERR_ISC_Pos)             /*!< 0x00000004 */
+#define DCMI_ICR_ERR_ISC           DCMI_ICR_ERR_ISC_Msk
+#define DCMI_ICR_VSYNC_ISC_Pos     (3U)
+#define DCMI_ICR_VSYNC_ISC_Msk     (0x1UL << DCMI_ICR_VSYNC_ISC_Pos)           /*!< 0x00000008 */
+#define DCMI_ICR_VSYNC_ISC         DCMI_ICR_VSYNC_ISC_Msk
+#define DCMI_ICR_LINE_ISC_Pos      (4U)
+#define DCMI_ICR_LINE_ISC_Msk      (0x1UL << DCMI_ICR_LINE_ISC_Pos)            /*!< 0x00000010 */
+#define DCMI_ICR_LINE_ISC          DCMI_ICR_LINE_ISC_Msk
+
+
+/********************  Bits definition for DCMI_ESCR register  ******************/
+#define DCMI_ESCR_FSC_Pos          (0U)
+#define DCMI_ESCR_FSC_Msk          (0xFFUL << DCMI_ESCR_FSC_Pos)               /*!< 0x000000FF */
+#define DCMI_ESCR_FSC              DCMI_ESCR_FSC_Msk
+#define DCMI_ESCR_LSC_Pos          (8U)
+#define DCMI_ESCR_LSC_Msk          (0xFFUL << DCMI_ESCR_LSC_Pos)               /*!< 0x0000FF00 */
+#define DCMI_ESCR_LSC              DCMI_ESCR_LSC_Msk
+#define DCMI_ESCR_LEC_Pos          (16U)
+#define DCMI_ESCR_LEC_Msk          (0xFFUL << DCMI_ESCR_LEC_Pos)               /*!< 0x00FF0000 */
+#define DCMI_ESCR_LEC              DCMI_ESCR_LEC_Msk
+#define DCMI_ESCR_FEC_Pos          (24U)
+#define DCMI_ESCR_FEC_Msk          (0xFFUL << DCMI_ESCR_FEC_Pos)               /*!< 0xFF000000 */
+#define DCMI_ESCR_FEC              DCMI_ESCR_FEC_Msk
+
+/********************  Bits definition for DCMI_ESUR register  ******************/
+#define DCMI_ESUR_FSU_Pos          (0U)
+#define DCMI_ESUR_FSU_Msk          (0xFFUL << DCMI_ESUR_FSU_Pos)               /*!< 0x000000FF */
+#define DCMI_ESUR_FSU              DCMI_ESUR_FSU_Msk
+#define DCMI_ESUR_LSU_Pos          (8U)
+#define DCMI_ESUR_LSU_Msk          (0xFFUL << DCMI_ESUR_LSU_Pos)               /*!< 0x0000FF00 */
+#define DCMI_ESUR_LSU              DCMI_ESUR_LSU_Msk
+#define DCMI_ESUR_LEU_Pos          (16U)
+#define DCMI_ESUR_LEU_Msk          (0xFFUL << DCMI_ESUR_LEU_Pos)               /*!< 0x00FF0000 */
+#define DCMI_ESUR_LEU              DCMI_ESUR_LEU_Msk
+#define DCMI_ESUR_FEU_Pos          (24U)
+#define DCMI_ESUR_FEU_Msk          (0xFFUL << DCMI_ESUR_FEU_Pos)               /*!< 0xFF000000 */
+#define DCMI_ESUR_FEU              DCMI_ESUR_FEU_Msk
+
+/********************  Bits definition for DCMI_CWSTRT register  ******************/
+#define DCMI_CWSTRT_HOFFCNT_Pos    (0U)
+#define DCMI_CWSTRT_HOFFCNT_Msk    (0x3FFFUL << DCMI_CWSTRT_HOFFCNT_Pos)       /*!< 0x00003FFF */
+#define DCMI_CWSTRT_HOFFCNT        DCMI_CWSTRT_HOFFCNT_Msk
+#define DCMI_CWSTRT_VST_Pos        (16U)
+#define DCMI_CWSTRT_VST_Msk        (0x1FFFUL << DCMI_CWSTRT_VST_Pos)           /*!< 0x1FFF0000 */
+#define DCMI_CWSTRT_VST            DCMI_CWSTRT_VST_Msk
+
+/********************  Bits definition for DCMI_CWSIZE register  ******************/
+#define DCMI_CWSIZE_CAPCNT_Pos     (0U)
+#define DCMI_CWSIZE_CAPCNT_Msk     (0x3FFFUL << DCMI_CWSIZE_CAPCNT_Pos)        /*!< 0x00003FFF */
+#define DCMI_CWSIZE_CAPCNT         DCMI_CWSIZE_CAPCNT_Msk
+#define DCMI_CWSIZE_VLINE_Pos      (16U)
+#define DCMI_CWSIZE_VLINE_Msk      (0x3FFFUL << DCMI_CWSIZE_VLINE_Pos)         /*!< 0x3FFF0000 */
+#define DCMI_CWSIZE_VLINE          DCMI_CWSIZE_VLINE_Msk
+
+/********************  Bits definition for DCMI_DR register  ******************/
+#define DCMI_DR_BYTE0_Pos          (0U)
+#define DCMI_DR_BYTE0_Msk          (0xFFUL << DCMI_DR_BYTE0_Pos)               /*!< 0x000000FF */
+#define DCMI_DR_BYTE0              DCMI_DR_BYTE0_Msk
+#define DCMI_DR_BYTE1_Pos          (8U)
+#define DCMI_DR_BYTE1_Msk          (0xFFUL << DCMI_DR_BYTE1_Pos)               /*!< 0x0000FF00 */
+#define DCMI_DR_BYTE1              DCMI_DR_BYTE1_Msk
+#define DCMI_DR_BYTE2_Pos          (16U)
+#define DCMI_DR_BYTE2_Msk          (0xFFUL << DCMI_DR_BYTE2_Pos)               /*!< 0x00FF0000 */
+#define DCMI_DR_BYTE2              DCMI_DR_BYTE2_Msk
+#define DCMI_DR_BYTE3_Pos          (24U)
+#define DCMI_DR_BYTE3_Msk          (0xFFUL << DCMI_DR_BYTE3_Pos)               /*!< 0xFF000000 */
+#define DCMI_DR_BYTE3              DCMI_DR_BYTE3_Msk
+
 /******************************************************************************/
 /*                                                                            */
 /*                    DDRCTRL block description (DDRCTRL)                     */
@@ -4897,4 +5470,3 @@
 #define DFSDM_SIDR_SID_Pos         (0U)
 #define DFSDM_SIDR_SID_Msk         (0xFFFFFFFFU << DFSDM_SIDR_SID_Pos)           /*!< 0xFFFFFFFF */
 #define DFSDM_SIDR_SID             DFSDM_SIDR_SID_Msk                            /*!< IP size identification */
-

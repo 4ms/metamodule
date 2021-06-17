@@ -17,12 +17,11 @@
 PatchList::PatchList()
 	: _patches{
 		  {simple_lfo_passthrru},
-		  // {exampleDualLFO},
+		  {example_stereo_verb},
 		  {examplePitchShiftSimple},
 		  {exampleDrum},
 		  {fadedelay_example},
 		  {example_drum_verb_mono},
-		  {example_stereo_verb},
 		  {QuadDrum},
 		  {KP_FM_DRUM_DET},
 		  {KarplusStereo},

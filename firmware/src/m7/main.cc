@@ -73,7 +73,7 @@ void main()
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	// Tell M4 we're done with init
-	HWSemaphore<M7_ready>::unlock();
+	HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked())
@@ -83,12 +83,12 @@ void main()
 	ui.start();
 	audio.start();
 
-	while (1) {
+	while (true) {
 		__NOP();
 	}
 }
 
-void recover_from_task_fault(void)
+void recover_from_task_fault()
 {
 	main();
 }

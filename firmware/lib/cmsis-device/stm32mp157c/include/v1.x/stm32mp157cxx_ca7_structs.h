@@ -1,4 +1,11 @@
-
+// File split up 1/:
+#ifndef __IO
+#define __IO
+#endif
+#ifndef __I
+#define __I
+#endif
+#include <stdint.h>
 /** @addtogroup Peripheral_registers_structures
   * @{
   */
@@ -2617,9 +2624,6 @@ typedef struct
   __IO uint32_t HCDMAB;           /*!< Host Channel DMA Address Buffer Register 51Ch */
   uint32_t Reserved[2];           /*!< Reserved                                      */
 } USB_OTG_HostChannelTypeDef;
-/**
-  * @}
-  */
 
 /**
   * @brief USB_EHCI Capability Registers
@@ -2638,9 +2642,6 @@ typedef struct
   __IO uint32_t PERIODICLISTBASE; /*!< Periodic Frame List Base Address register, Address offset: 0x24 */
   __IO uint32_t ASYNCLISTADDR;    /*!< Asynchronous List Address register,        Address offset: 0x28 */
 } USB_EHCI_CapabilityTypeDef;
-/**
-  * @}
-  */
 
 /**
   * @brief GPU host interface registers
@@ -2668,3 +2669,4 @@ typedef struct
 /**
   * @}
   */
+

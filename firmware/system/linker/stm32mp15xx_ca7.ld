@@ -20,7 +20,7 @@ MEMORY
 	DMABUF (rw) 		: ORIGIN = _DMABUF_BASE, 	LENGTH = _DMABUF_SIZE
 	SHAREDMEM (rw) 		: ORIGIN = 0x30040000, 		LENGTH = (128K - _SHARED_PTR_SIZE) /* shared with cm4 */
 	SYSRAM (rw) 		: ORIGIN = 0x2FFC0000, 		LENGTH = 192K
-	/* SYSDMARAM (rw) 		: ORIGIN = 0x2FFEC000, 		LENGTH = 16K */
+	SYSDMARAM (rw) 		: ORIGIN = 0x2FFF0000, 		LENGTH = 64K
 	/* SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, 		LENGTH = 64K */
 }
 
@@ -127,16 +127,17 @@ SECTIONS
         *(.ddma)
 	} > DMABUF
 
-	/* .sys_dma (NOLOAD): */
-	/* { */
-	/* 	. = ALIGN(8); */
-        /* *(.sys_dma) */
-	/* } > SYSDMARAM */
+	.sys_dma (NOLOAD):
+	{
+		. = ALIGN(8);
+        *(.sys_dma)
+	} > SYSDMARAM
 
 	.sysram (NOLOAD):
 	{
 		. = ALIGN(8);
 		*(.sysram)
+		*(.noncachable)
 		. = ALIGN(8);
 		_end_of_sysram = .;
 	} > SYSRAM

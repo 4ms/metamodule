@@ -2,14 +2,31 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleTypes.h"
 #include "CoreModules/panel_node.hh"
+#include "drivers/arch.hh"
+#include "drivers/cache.hh"
+#ifndef TESTPROJECT
+	#include "debug.hh"
+#else
+	#include "../stubs/debug.hh"
+#endif
+#include "conf/hsem_conf.hh"
+#include "drivers/smp.hh"
 #include "patch/patch.hh"
+#include "smp_api.hh"
 #include "sys/alloc_buffer.hh"
 #include <cstdint>
+
 namespace MetaModule
 {
 using PanelT = Panel;
 
 class PatchPlayer {
+
+	struct Knob {
+		uint16_t module_id;
+		uint16_t param_id;
+	};
+
 public:
 	std::array<float, MAX_NODES_IN_PATCH> nodes;
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
@@ -21,6 +38,7 @@ public:
 	};
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
 	Jack in_conns[NumInConns] = {{0, 0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
+	Knob knob_conns[Panel::NumKnobs]{{0, 0}};
 
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
@@ -38,6 +56,7 @@ public:
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	bool load_patch(const Patch &p)
 	{
+		SMPThread::init();
 		clear_cache();
 		for (auto &n : nodes)
 			n = 0.f;
@@ -62,6 +81,7 @@ public:
 		// ...but it's harder to unit test.
 		mark_patched_jacks(p);
 		calc_panel_jack_connections(p);
+		calc_panel_knob_connections(p);
 
 		// Set all initial knob values:
 		for (int i = 0; i < p.num_static_knobs; i++) {
@@ -78,19 +98,20 @@ public:
 	// Runs the patch
 	void update_patch(const Patch &p)
 	{
-		// Todo: possible to use refs for knobs?
-		for (int i = 0; i < p.num_mapped_knobs; i++) {
-			auto &k = p.mapped_knobs[i];
-			auto val = get_panel_param(k.panel_knob_id);
-			modules[k.module_id]->set_param(k.param_id, val);
+		for (int module_i = 1; module_i < p.num_modules; module_i++) {
+			if (!SMPThread::is_running()) {
+				SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);
+			} else {
+				modules[module_i]->update();
+			}
 		}
+		SMPThread::join();
 
-		for (int i = 1; i < p.num_modules; i++) {
-			modules[i]->update();
-		}
-
+		// Jacks
+		// We could save time by skipping panel jacks
+		// and changing set_panel_input and get_panel_output to
+		// access the in_conns[] and out_conns[] directly
 		if constexpr (USE_NODES == false) {
-			// Copy outs to ins: ~1.3us for 4 nets
 			for (int net_i = 0; net_i < p.num_nets; net_i++) {
 				auto &net = p.nets[net_i];
 				auto &output = net.jacks[0];
@@ -108,6 +129,7 @@ public:
 
 	void unload_patch(const Patch &p)
 	{
+		SMPThread::join();
 		is_loaded = false;
 		for (int i = 0; i < p.num_modules; i++) {
 			modules[i].reset(nullptr);
@@ -115,6 +137,52 @@ public:
 		clear_cache();
 		BigAllocControl::reset();
 	}
+
+	// Getters and Setters:
+
+	void set_panel_param(int param_id, float val)
+	{
+		if (!is_loaded)
+			return;
+		auto &k = knob_conns[param_id];
+		modules[k.module_id]->set_param(k.param_id, val);
+	}
+
+	void set_panel_input(int jack_id, float val)
+	{
+		if (!is_loaded)
+			return;
+		static_cast<PanelT *>(modules[0].get())->set_panel_input(jack_id, val);
+	}
+
+	float get_panel_output(int jack_id)
+	{
+		if (!is_loaded)
+			return 0.f;
+		return static_cast<PanelT *>(modules[0].get())->get_panel_output(jack_id);
+	}
+
+	// float get_panel_param(int param_id)
+	// {
+	// 	if (!is_loaded)
+	// 		return 0.f;
+	// 	return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
+	// }
+
+	static constexpr unsigned get_num_panel_knobs()
+	{
+		return Panel::NumKnobs;
+	}
+	static constexpr unsigned get_num_panel_inputs()
+	{
+		return Panel::NumInJacks;
+	}
+	static constexpr unsigned get_num_panel_outputs()
+	{
+		return Panel::NumOutJacks;
+	}
+
+	// Jack patched/unpatched status
 
 	void mark_patched_jacks(const Patch &p)
 	{
@@ -160,61 +228,21 @@ public:
 		}
 	}
 
-	// Getters and Setters:
-
-	static constexpr unsigned get_num_panel_knobs()
-	{
-		return Panel::NumKnobs;
-	}
-	static constexpr unsigned get_num_panel_inputs()
-	{
-		return Panel::NumInJacks;
-	}
-	static constexpr unsigned get_num_panel_outputs()
-	{
-		return Panel::NumOutJacks;
-	}
-
-	void set_panel_input(int jack_id, float val)
-	{
-		if (!is_loaded)
-			return;
-		static_cast<PanelT *>(modules[0].get())->set_panel_input(jack_id, val);
-	}
-
-	float get_panel_output(int jack_id)
-	{
-		if (!is_loaded)
-			return 0.f;
-		return static_cast<PanelT *>(modules[0].get())->get_panel_output(jack_id);
-	}
-
-	void set_panel_param(int param_id, float val)
-	{
-		if (!is_loaded)
-			return;
-		static_cast<PanelT *>(modules[0].get())->set_param(param_id, val);
-	}
-
-	float get_panel_param(int param_id)
-	{
-		if (!is_loaded)
-			return 0.f;
-		return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
-	}
-
 	// Cache functions:
 
 	void clear_cache()
 	{
-		for (int i = 0; i < MAX_MODULES_IN_PATCH; i++)
-			dup_module_index[i] = 0;
+		for (auto &d : dup_module_index)
+			d = 0;
 
-		for (int i = 0; i < Panel::NumInJacks; i++)
-			out_conns[i] = {0, 0};
+		for (auto &out_conn : out_conns)
+			out_conn = {0, 0};
 
-		for (int i = 0; i < Panel::NumOutJacks; i++)
-			in_conns[i] = {0, 0};
+		for (auto &in_conn : in_conns)
+			in_conn = {0, 0};
+
+		for (auto &knob_conn : knob_conns)
+			knob_conn = {0, 0};
 	}
 
 	// Cache all the panel jack connections
@@ -240,6 +268,15 @@ public:
 					}
 				}
 			}
+		}
+	}
+
+	void calc_panel_knob_connections(const Patch &p)
+	{
+		for (int i = 0; i < p.num_mapped_knobs; i++) {
+			auto &k = p.mapped_knobs[i];
+			knob_conns[k.panel_knob_id].module_id = k.module_id;
+			knob_conns[k.panel_knob_id].param_id = k.param_id;
 		}
 	}
 

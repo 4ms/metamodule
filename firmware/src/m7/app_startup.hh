@@ -13,8 +13,8 @@ struct AppStartup {
 	AppStartup()
 	{
 		target::RCC_Enable::HSEM_::set();
-		HWSemaphore<M7_ready>::disable_channel_ISR();
-		HWSemaphore<M7_ready>::lock();
+		HWSemaphore<MainCoreReady>::disable_channel_ISR();
+		HWSemaphore<MainCoreReady>::lock();
 
 		target::corem7::SystemStartup::wait_for_cm4_sleep();
 
