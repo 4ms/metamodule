@@ -89,12 +89,15 @@ ASM_SOURCES += \
 		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.s \
 		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.s \
 
+NE10_CFLAGS = -DNE10_UNROLL_LEVEL=0
+
 #!NE10_ASM_OPTIMIZATION
 # SOURCES += \
 # 	$(NE10DIR)/modules/dsp/NE10_fft_float32.neonintrinsic.c \
 # 	$(NE10DIR)/modules/dsp/NE10_fft_int32.neonintrinsic.c \
 # 	$(NE10DIR)/modules/dsp/NE10_fft_int16.neonintrinsic.c \
 # 	$(NE10DIR)/modules/dsp/NE10_rfft_float32.neonintrinsic.c \
+# NE10_CFLAGS = -DNE10_UNROLL_LEVEL=1
 
 ASM_SOURCES += \
 		  $(NE10DIR)/modules/dsp/NE10_fir.neon.s \
@@ -140,7 +143,7 @@ EXTRA_CFLAGS = --param l1-cache-size=32 \
 	 		   --param l1-cache-line-size=64 \
 			   --param l2-cache-size=256 \
 				-DNE10_ENABLE_DSP \
-				-DNE10_UNROLL_LEVEL=1 \
+				$(NE10_CFLAGS) \
 
 EXTRA_CPPFLAGS = $(LTOFLAG)
 
