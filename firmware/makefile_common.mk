@@ -82,7 +82,7 @@ $(BUILDDIR)/%.o: %.cpp $(BUILDDIR)/%.d
 	$(info Building $< at $(OPTFLAG))
 	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
-$(BUILDDIR)/%.o: %.s
+$(BUILDDIR)/%_s.o: %.s
 	@mkdir -p $(dir $@)
 	$(info Building $< at $(OPTFLAG))
 	@$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))

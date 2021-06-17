@@ -25,6 +25,9 @@ MFDIR = $(LIBDIR)/mcufont/decoder
 include $(LIBDIR)/mcufont/decoder/mcufont.mk
 
 SOURCES = $(STARTUP_CA7) \
+ASM_SOURCES = $(STARTUP_CA7)
+
+SOURCES = \
 		  system/libc_stub.c\
 		  system/libcpp_stub.cc \
 		  system/new.cc \
@@ -61,6 +64,11 @@ SOURCES = $(STARTUP_CA7) \
 
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
 DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
+
+ASM_OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
+ASM_DEPS      = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
+OBJECTS += $(ASM_OBJECTS)
+DEPS += $(ASM_DEPS)
 
 INCLUDES = -I. \
 		   -Isrc \
