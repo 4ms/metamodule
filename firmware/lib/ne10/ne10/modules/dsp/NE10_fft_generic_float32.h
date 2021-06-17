@@ -188,8 +188,8 @@ static inline void FFT3_FCU (ne10_fft_cpx_float32_t Fout[3],
     NE10_CPX_ADD (scratch[3], scratch[1], scratch[2]);
     NE10_CPX_SUB (scratch[0], scratch[1], scratch[2]);
 
-    scratch_in[1].r = scratch_in[0].r - scratch[3].r * 0.5;
-    scratch_in[1].i = scratch_in[0].i - scratch[3].i * 0.5;
+    scratch_in[1].r = scratch_in[0].r - scratch[3].r * 0.5f;
+    scratch_in[1].i = scratch_in[0].i - scratch[3].i * 0.5f;
 
     scratch[0].r *= -TW_3I_F32;
     scratch[0].i *= -TW_3I_F32;
