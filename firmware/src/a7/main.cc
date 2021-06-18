@@ -1,8 +1,6 @@
 #include "a7/hsem_handler.hh"
 #include "drivers/hsem.hh"
 // #include "drivers/qspi_flash_driver.hh"
-#include "NE10_dsp.h"
-#include "NE10_init.h"
 #include "a7/app_startup.hh"
 #include "a7/conf/codec_sai_conf.hh"
 #include "a7/conf/i2c_conf.hh"
@@ -69,25 +67,6 @@ void main()
 	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
-
-	{
-		auto status = ne10_init_dsp(NE10_OK);
-		constexpr uint32_t SAMPLES = 1024;
-		ne10_fft_cpx_float32_t src[SAMPLES]; // A source array of input data
-		ne10_fft_cpx_float32_t dst[SAMPLES]; // A destination array for the transformed data
-		ne10_fft_cfg_float32_t cfg;			 // An FFT "configuration structure"
-		cfg = ne10_fft_alloc_c2c_float32(SAMPLES);
-		// Generate test input values (with both real and imaginary components)
-		for (int i = 0; i < SAMPLES; i++) {
-			src[i].r = (ne10_float32_t)rand() / RAND_MAX * 50.0f;
-			src[i].i = (ne10_float32_t)rand() / RAND_MAX * 50.0f;
-		}
-		// Perform the FFT (for an IFFT, the last parameter should be `1`)
-		ne10_fft_c2c_1d_float32(dst, src, cfg, 0);
-
-		// Free the allocated configuration structure
-		ne10_fft_destroy_c2c_float32(cfg);
-	}
 
 	// Enable ISR for LedBufFrameLock:
 	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
