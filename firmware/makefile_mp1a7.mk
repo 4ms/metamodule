@@ -78,7 +78,9 @@ SOURCES = \
 		  $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
 		  $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
 
-#NE10_ASM_OPTIMIZATION
+NE10_ASM_OPTIMIZATION = 1
+
+ifneq ($(NE10_ASM_OPTIMIZATION),)
 SOURCES += \
 		  $(NE10DIR)/modules/dsp/NE10_fft_float32.neon.c \
 		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.c \
@@ -90,28 +92,21 @@ ASM_SOURCES += \
 		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.s \
 
 NE10_CFLAGS = -DNE10_UNROLL_LEVEL=0
+else
+SOURCES += \
+	$(NE10DIR)/modules/dsp/NE10_fft_float32.neonintrinsic.c \
+	$(NE10DIR)/modules/dsp/NE10_fft_int32.neonintrinsic.c \
+	$(NE10DIR)/modules/dsp/NE10_fft_int16.neonintrinsic.c \
+	$(NE10DIR)/modules/dsp/NE10_rfft_float32.neonintrinsic.c \
 
-#!NE10_ASM_OPTIMIZATION
-# SOURCES += \
-# 	$(NE10DIR)/modules/dsp/NE10_fft_float32.neonintrinsic.c \
-# 	$(NE10DIR)/modules/dsp/NE10_fft_int32.neonintrinsic.c \
-# 	$(NE10DIR)/modules/dsp/NE10_fft_int16.neonintrinsic.c \
-# 	$(NE10DIR)/modules/dsp/NE10_rfft_float32.neonintrinsic.c \
-# NE10_CFLAGS = -DNE10_UNROLL_LEVEL=1
+NE10_CFLAGS = -DNE10_UNROLL_LEVEL=1
+endif
 
 ASM_SOURCES += \
 		  $(NE10DIR)/modules/dsp/NE10_fir.neon.s \
 		  $(NE10DIR)/modules/dsp/NE10_iir.neon.s \
 		  $(NE10DIR)/common/NE10header.s \
 		  $(NE10DIR)/common/versionheader.s \
-
-OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
-DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
-
-ASM_OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
-ASM_DEPS      = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
-OBJECTS += $(ASM_OBJECTS)
-DEPS += $(ASM_DEPS)
 
 INCLUDES = -I. \
 		   -Isrc \

@@ -42,14 +42,6 @@ SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
 SOURCES  += $(DRIVERLIB)/drivers/tim.cc
 SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
-# SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver_dma.cc
-
-OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
-DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
-ASM_OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
-ASM_DEPS      = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
-OBJECTS += $(ASM_OBJECTS)
-DEPS += $(ASM_DEPS)
 
 INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(CMSIS)/Include \

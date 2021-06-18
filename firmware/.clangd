@@ -51,6 +51,9 @@ CompileFlags:
 		"-Ilib/mdrivlib/target/stm32mp1/drivers",
 		"-Ilib/mdrivlib/target/stm32mp1_ca7",
 		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
+		"-Ilib/ne10/ne10/inc",
+		"-Ilib/ne10/ne10/common",
+		"-Ilib/ne10/ne10/modules/dsp",
 	]
 ---
 If:
