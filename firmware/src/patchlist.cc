@@ -36,7 +36,7 @@ PatchList::PatchList()
 
 PatchList::PatchList()
 	: _patches{
-		  {test_14switchCore_clock},
+		  {test_multilfoCore},
 		  {test_14switchCore_cv},
 		  {test_bitcrushCore},
 		  {test_karplusCore},
