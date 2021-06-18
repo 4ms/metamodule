@@ -2,6 +2,7 @@
 #include "NE10_dsp.h"
 #include "NE10_init.h"
 #include "audio.hh"
+#include "debug.hh"
 #include "util/math_tables.hh"
 #include <cstdint>
 
@@ -10,11 +11,11 @@ using namespace MetaModule;
 class FFTfx {
 	using BlockType = AudioStream::AudioStreamBlock;
 	static constexpr uint32_t BufferSize = 16384;
+	static constexpr uint32_t BufferSizeMask = BufferSize - 1;
 
-	static constexpr uint32_t FFTSize = 2048; // AudioConf::BlockSize;
+	static constexpr uint32_t FFTSize = 2048;
 	static constexpr float FFTScaleFactor = 1.0f / (float)FFTSize;
 	static constexpr uint32_t HopSize = 512;
-	static constexpr uint32_t Period = 512;
 
 	uint32_t in_i = 0;
 	uint32_t out_read_i = 0;
@@ -60,53 +61,77 @@ public:
 	{
 		auto _out = out.begin();
 		for (auto &_in : in) {
-			inputBuffer[0][in_i] = _in.l;
-			inputBuffer[1][in_i] = _in.r;
+			// Grab input
+			inputBuffer[0][in_i] = AudioStream::AudioFrame::scaleInput((_in.l + _in.r) / 2);
+			// inputBuffer[1][in_i] = AudioStream::AudioFrame::scaleInput(_in.r);
 			if (++in_i >= BufferSize)
 				in_i = 0;
 
+			// Copy output buffer to output
 			_out->l = outputBuffer[0][out_read_i];
-			_out->r = outputBuffer[1][out_read_i];
+			_out->r = _out->l;
+			// _out->r = outputBuffer[1][out_read_i];
+			_out++;
+
+			// Clear the output sample in the buffer so it is ready for the next overlap-add
 			outputBuffer[0][out_read_i] = 0;
-			outputBuffer[1][out_read_i] = 0;
+			// outputBuffer[1][out_read_i] = 0;
 			if (++out_read_i >= BufferSize)
 				out_read_i = 0;
+
 			if (++out_write_i >= BufferSize)
 				out_write_i = 0;
-		}
 
-		for (auto &_in : in) {
-			timeDomainIn[0][in_i].r = AudioStream::AudioFrame::scaleInput(_in.l);
-			timeDomainIn[0][in_i].i = 0;
-			timeDomainIn[1][in_i].r = AudioStream::AudioFrame::scaleInput(_in.r);
-			timeDomainIn[1][in_i].i = 0;
-			if (++in_i >= FFTSize) {
-				in_i = 0;
-				buffer_full = true;
+			// Process a bit
+			if (++sample_i >= HopSize) {
+				Debug::Pin1::high();
+				// Copy the last FFTSize samples, applying the window
+				int32_t read_i = (in_i - FFTSize + BufferSize) & BufferSizeMask;
+				for (int n = 0; n < FFTSize; n++) {
+					timeDomainIn[0][n].r = (ne10_float32_t)inputBuffer[0][read_i & BufferSizeMask] * windowBuffer[n];
+					timeDomainIn[0][n].i = 0;
+					// timeDomainIn[1][n].r = (ne10_float32_t)inputBuffer[1][read_i & BufferSizeMask] * windowBuffer[n];
+					// timeDomainIn[1][n].i = 0;
+					read_i++;
+				}
+
+				// Run the FFT
+				ne10_fft_c2c_1d_float32(freqDomain[0], timeDomainIn[0], cfg, 0);
+				// ne10_fft_c2c_1d_float32(freqDomain[1], timeDomainIn[1], cfg, 0);
+
+				// Robotize
+				for (int i = 0; i < FFTSize; i++) {
+					float amplitude =
+						sqrtf(freqDomain[0][i].r * freqDomain[0][i].r + freqDomain[0][i].i * freqDomain[0][i].i);
+					freqDomain[0][i].r = amplitude;
+					freqDomain[0][i].i = 0;
+				}
+				// Brick walls:
+				// for (int i = 0; i < FFTSize / 8; i++) {
+				// 	freqDomain[0][i].r = 0;
+				// 	freqDomain[0][i].i = 0;
+				// }
+				// for (int i = FFTSize / 8; i < FFTSize; i++) {
+				// 	freqDomain[1][i].r = 0;
+				// 	freqDomain[1][i].i = 0;
+				// }
+
+				// IFFT
+				ne10_fft_c2c_1d_float32(timeDomainOut[0], freqDomain[0], cfg, 1);
+				// ne10_fft_c2c_1d_float32(timeDomainOut[1], freqDomain[0], cfg, 1);
+
+				uint32_t write_i = out_write_i;
+				for (int i = 0; i < FFTSize; i++) {
+					outputBuffer[0][write_i] +=
+						AudioStream::AudioFrame::scaleOutput(timeDomainOut[0][i].r); //* FFTScaleFactor);
+					// outputBuffer[1][write_i] +=
+					// 	AudioStream::AudioFrame::scaleOutput(timeDomainOut[1][i].r * FFTScaleFactor);
+					if (write_i++ >= BufferSize)
+						write_i = 0;
+				}
+				sample_i = 0;
+				Debug::Pin1::low();
 			}
-		}
-
-		// FFT
-		ne10_fft_c2c_1d_float32(freqDomain[0], timeDomainIn[0], cfg, 0);
-		ne10_fft_c2c_1d_float32(freqDomain[1], timeDomainIn[1], cfg, 0);
-
-		// Brick walls:
-		for (int i = 0; i < FFTSize / 2; i++) {
-			freqDomain[0][i].r = 0;
-			freqDomain[0][i].i = 0;
-		}
-		for (int i = FFTSize / 2; i < FFTSize; i++) {
-			freqDomain[1][i].r = 0;
-			freqDomain[1][i].i = 0;
-		}
-
-		// IFFT
-		ne10_fft_c2c_1d_float32(timeDomainOut[0], freqDomain[0], cfg, 1);
-		ne10_fft_c2c_1d_float32(timeDomainOut[1], freqDomain[0], cfg, 1);
-
-		for (int i = 0; i < AudioConf::BlockSize; i++) {
-			out[i].l = AudioStream::AudioFrame::scaleOutput(timeDomainOut[0][i].r);
-			out[i].r = AudioStream::AudioFrame::scaleOutput(timeDomainOut[1][i].r);
 		}
 	}
 };
