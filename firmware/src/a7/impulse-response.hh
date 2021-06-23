@@ -1,7 +1,5 @@
-namespace WavFile {
-
-/* impulse-response */
-const s16 impulse-response[14419] = {
+#include <cstdint>
+const int16_t impulse_response[14419] = {
   35,
   -93,
   -33,
@@ -14423,4 +14421,3 @@ const s16 impulse-response[14419] = {
   -5,
 };
 
-}; //namespace WavFile

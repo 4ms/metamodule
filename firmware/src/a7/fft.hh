@@ -45,16 +45,11 @@ public:
 			}
 		}
 
-		out_write_i = HopSize;
-
-		// float inputAudio[AudioConf::BlockSize] ///not used: this is out "BlockType in" but made mono, but still
-		// interpolated L/R
+		out_write_i = HopSize * 2;
 
 		// Cosine window
 		for (int n = 0; n < FFTSize; n++)
 			windowBuffer[n] = 0.5f * (1.0f - sinTable.interp_wrap(0.25f + n / (float)(FFTSize - 1)));
-		// windowBuffer[n] = 0.5f * (1.0f - sin(M_PI/2.0f + 2.0f * M_PI * n / (float)(FFTSize - 1)));
-		// windowBuffer[n] = 0.5f * (1.0f - cosf(2.0f * M_PI * n / (float)(FFTSize - 1)));
 	}
 
 	void process(BlockType &in, BlockType &out)
@@ -62,7 +57,7 @@ public:
 		auto _out = out.begin();
 		for (auto &_in : in) {
 			// Grab input
-			inputBuffer[0][in_i] = AudioStream::AudioFrame::scaleInput((_in.l + _in.r) / 2);
+			inputBuffer[0][in_i] = AudioStream::AudioFrame::scaleInput(_in.l);
 			// inputBuffer[1][in_i] = AudioStream::AudioFrame::scaleInput(_in.r);
 			if (++in_i >= BufferSize)
 				in_i = 0;
@@ -82,20 +77,20 @@ public:
 			if (++out_write_i >= BufferSize)
 				out_write_i = 0;
 
-			// Process a bit
+			// Process a block
 			if (++sample_i >= HopSize) {
 				Debug::Pin1::high();
 				// Copy the last FFTSize samples, applying the window
-				int32_t read_i = (in_i - FFTSize + BufferSize) & BufferSizeMask;
+				int32_t read_i = (in_i + BufferSize - FFTSize) % BufferSizeMask;
 				for (int n = 0; n < FFTSize; n++) {
-					timeDomainIn[0][n].r = (ne10_float32_t)inputBuffer[0][read_i & BufferSizeMask] * windowBuffer[n];
+					timeDomainIn[0][n].r = (ne10_float32_t)inputBuffer[0][read_i] * windowBuffer[n];
 					timeDomainIn[0][n].i = 0;
 					// timeDomainIn[1][n].r = (ne10_float32_t)inputBuffer[1][read_i & BufferSizeMask] * windowBuffer[n];
 					// timeDomainIn[1][n].i = 0;
-					read_i++;
+					if (++read_i >= BufferSize)
+						read_i = 0;
 				}
 
-				// Run the FFT
 				ne10_fft_c2c_1d_float32(freqDomain[0], timeDomainIn[0], cfg, 0);
 				// ne10_fft_c2c_1d_float32(freqDomain[1], timeDomainIn[1], cfg, 0);
 
@@ -106,11 +101,13 @@ public:
 					freqDomain[0][i].r = amplitude;
 					freqDomain[0][i].i = 0;
 				}
-				// Brick walls:
-				// for (int i = 0; i < FFTSize / 8; i++) {
-				// 	freqDomain[0][i].r = 0;
-				// 	freqDomain[0][i].i = 0;
+
+				// for (int i = 0; i < FFTSize; i++) {
+				// 	freqDomain[0][i].i = freqDomain[0][i].r;
+				// 	freqDomain[0][i].r = freqDomain[0][i].i;
 				// }
+
+				// Brick walls:
 				// for (int i = FFTSize / 8; i < FFTSize; i++) {
 				// 	freqDomain[1][i].r = 0;
 				// 	freqDomain[1][i].i = 0;
@@ -122,11 +119,12 @@ public:
 
 				uint32_t write_i = out_write_i;
 				for (int i = 0; i < FFTSize; i++) {
-					outputBuffer[0][write_i] +=
-						AudioStream::AudioFrame::scaleOutput(timeDomainOut[0][i].r); //* FFTScaleFactor);
+					float sample = sqrtf(timeDomainOut[0][i].r * timeDomainOut[0][i].r +
+										 timeDomainOut[0][i].i * timeDomainOut[0][i].i);
+					outputBuffer[0][write_i] += AudioStream::AudioFrame::scaleOutput(sample);
 					// outputBuffer[1][write_i] +=
 					// 	AudioStream::AudioFrame::scaleOutput(timeDomainOut[1][i].r * FFTScaleFactor);
-					if (write_i++ >= BufferSize)
+					if (++write_i >= BufferSize)
 						write_i = 0;
 				}
 				sample_i = 0;

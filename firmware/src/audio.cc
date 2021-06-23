@@ -4,7 +4,8 @@
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
-#include "fft.hh"
+// #include "fft.hh"
+#include "convolve.hh"
 #include "panel.hh"
 #include "patch_player.hh"
 
@@ -12,7 +13,8 @@ namespace MetaModule
 {
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 constexpr bool DEBUG_NE10_FFT = true;
-static FFTfx fftfx;
+// static FFTfx fftfx;
+static Convolver fftfx;
 
 // Clock in -> clock out latency: 1.33ms (one audio DMA half-transfer)
 // Gate In -> audio OUt latency: 1.90ms
