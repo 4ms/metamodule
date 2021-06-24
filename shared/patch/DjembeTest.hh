@@ -9,14 +9,12 @@ static const Patch DjembeTest = {
 	.num_modules = 2,
 
 	.module_nodes = {{
-		// PANEL_8
-		{
-			1, 4, 255, 254, 253, 252, 251, 250, 2, 1, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		},
-		// DJMEBE
-		{
-			1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		},
+		// PANEL_8:		"In L", "In R", "CV A", "CV B", "CV C", "CV D", "GateIn1", "GateIn2", "ClockIn"
+		// "OutL", "OutR", "CVOut1", "CVOut2", "ClockOut",
+		{},
+		// DJMEBE: Output
+		// "Freq", "Gain", "Sharpness", "Strike", "Trigger"
+		{},
 	}},
 
 	.nets = {{
@@ -34,8 +32,36 @@ static const Patch DjembeTest = {
 				{.module_id = 1, .jack_id = 4},
 			}},
 		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 0, .jack_id = 2}, // Panel CV A -> Djembe Freq
+				{.module_id = 1, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 0, .jack_id = 3}, // Panel CV B -> Djembe Gain
+				{.module_id = 1, .jack_id = 1},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 0, .jack_id = 4}, // Panel CV C -> Djembe Sharpness
+				{.module_id = 1, .jack_id = 2},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 0, .jack_id = 5}, // Panel CV D -> Djembe Strike
+				{.module_id = 1, .jack_id = 3},
+			}},
+		},
 	}},
-	.num_nets = 2,
+	.num_nets = 6,
 
 	.static_knobs = {{
 		{.module_id = 1, .param_id = 0, .value = 0.165000f},
