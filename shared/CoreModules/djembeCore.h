@@ -1,0 +1,589 @@
+#pragma once
+#include "CoreModules/moduleTypes.h"
+#include "coreProcessor.h"
+#include "util/math.hh"
+#include "util/math_tables.hh"
+
+#define FAUSTFLOAT float
+
+using namespace MathTools;
+
+constexpr uint32_t SAMPLERATE = 48000;
+
+class DjembeCore : public CoreProcessor {
+	static inline const int NumInJacks = 5;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 4;
+
+	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Freq", "Gain", "Sharpness", "Strike"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
+		"Freq", "Gain", "Sharpness", "Strike", "Trigger"};
+	static inline const StaticString<LongNameChars> description{"Djembe"};
+
+	enum Params { Freq = 0, Gain = 1, Sharpness = 2, Strike = 3, Trigger = 4 };
+
+public:
+	float pow_2f(float x)
+	{
+		x = x / 5.0f; // expTable.interp(x) = 2^(x*5), where 0 <= x <= 1
+		float res = 1.f;
+		for (;;) {
+			if (x < 1) {
+				res *= expTable.interp(x);
+				break;
+			} else {
+				res *= 32.f;
+				x -= 1.f;
+			}
+		}
+		return res;
+	}
+
+	float table_cos(float x)
+	{
+		return sinTable.interp_wrap((x / (2.f * M_PI)) + 0.25f);
+	}
+
+	DjembeCore()
+	{
+		fConst1 = (3.14159274f / SAMPLERATE);
+		fConst2 = (0.00200000009f * SAMPLERATE);
+		float fConst3 = std::pow(0.00100000005f, (1.66666663f / SAMPLERATE));
+		fConst4 = (0.0f - (2.0f * fConst3));
+		fConst5 = (6.28318548f / SAMPLERATE);
+		fConst6 = pow_2f(fConst3);
+		float fConst7 = std::pow(0.00100000005f, (1.75438595f / SAMPLERATE));
+		fConst8 = (0.0f - (2.0f * fConst7));
+		fConst9 = pow_2f(fConst7);
+		float fConst10 = std::pow(0.00100000005f, (1.85185182f / SAMPLERATE));
+		fConst11 = (0.0f - (2.0f * fConst10));
+		fConst12 = pow_2f(fConst10);
+		float fConst13 = std::pow(0.00100000005f, (1.96078432f / SAMPLERATE));
+		fConst14 = (0.0f - (2.0f * fConst13));
+		fConst15 = pow_2f(fConst13);
+		float fConst16 = std::pow(0.00100000005f, (2.08333325f / SAMPLERATE));
+		fConst17 = (0.0f - (2.0f * fConst16));
+		fConst18 = pow_2f(fConst16);
+		float fConst19 = std::pow(0.00100000005f, (2.22222233f / SAMPLERATE));
+		fConst20 = (0.0f - (2.0f * fConst19));
+		fConst21 = pow_2f(fConst19);
+		float fConst22 = std::pow(0.00100000005f, (2.38095236f / SAMPLERATE));
+		fConst23 = (0.0f - (2.0f * fConst22));
+		fConst24 = pow_2f(fConst22);
+		float fConst25 = std::pow(0.00100000005f, (2.56410265f / SAMPLERATE));
+		fConst26 = (0.0f - (2.0f * fConst25));
+		fConst27 = pow_2f(fConst25);
+		float fConst28 = std::pow(0.00100000005f, (2.77777767f / SAMPLERATE));
+		fConst29 = (0.0f - (2.0f * fConst28));
+		fConst30 = pow_2f(fConst28);
+		float fConst31 = std::pow(0.00100000005f, (3.030303f / SAMPLERATE));
+		fConst32 = (0.0f - (2.0f * fConst31));
+		fConst33 = pow_2f(fConst31);
+		float fConst34 = std::pow(0.00100000005f, (3.33333325f / SAMPLERATE));
+		fConst35 = (0.0f - (2.0f * fConst34));
+		fConst36 = pow_2f(fConst34);
+		float fConst37 = std::pow(0.00100000005f, (3.70370364f / SAMPLERATE));
+		fConst38 = (0.0f - (2.0f * fConst37));
+		fConst39 = pow_2f(fConst37);
+		float fConst40 = std::pow(0.00100000005f, (4.16666651f / SAMPLERATE));
+		fConst41 = (0.0f - (2.0f * fConst40));
+		fConst42 = pow_2f(fConst40);
+		float fConst43 = std::pow(0.00100000005f, (4.76190472f / SAMPLERATE));
+		fConst44 = (0.0f - (2.0f * fConst43));
+		fConst45 = pow_2f(fConst43);
+		float fConst46 = std::pow(0.00100000005f, (5.55555534f / SAMPLERATE));
+		fConst47 = (0.0f - (2.0f * fConst46));
+		fConst48 = pow_2f(fConst46);
+		float fConst49 = std::pow(0.00100000005f, (6.66666651f / SAMPLERATE));
+		fConst50 = (0.0f - (2.0f * fConst49));
+		fConst51 = pow_2f(fConst49);
+		float fConst52 = std::pow(0.00100000005f, (8.33333302f / SAMPLERATE));
+		fConst53 = (0.0f - (2.0f * fConst52));
+		fConst54 = pow_2f(fConst52);
+		float fConst55 = std::pow(0.00100000005f, (11.1111107f / SAMPLERATE));
+		fConst56 = (0.0f - (2.0f * fConst55));
+		fConst57 = pow_2f(fConst55);
+		float fConst58 = std::pow(0.00100000005f, (16.666666f / SAMPLERATE));
+		fConst59 = (0.0f - (2.0f * fConst58));
+		fConst60 = pow_2f(fConst58);
+		float fConst61 = std::pow(0.00100000005f, (33.3333321f / SAMPLERATE));
+		fConst62 = (0.0f - (2.0f * fConst61));
+		fConst63 = pow_2f(fConst61);
+
+		IOTA = 0;
+
+		// Todo: Combine these loops
+		for (int l0 = 0; (l0 < 2); l0 = (l0 + 1)) {
+			iRec3[l0] = 0;
+		}
+		for (int l1 = 0; (l1 < 3); l1 = (l1 + 1)) {
+			fRec2[l1] = 0.0f;
+		}
+		for (int l2 = 0; (l2 < 3); l2 = (l2 + 1)) {
+			fRec1[l2] = 0.0f;
+		}
+		for (int l3 = 0; (l3 < 2); l3 = (l3 + 1)) {
+			fVec0[l3] = 0.0f;
+		}
+		for (int l4 = 0; (l4 < 2); l4 = (l4 + 1)) {
+			iRec4[l4] = 0;
+		}
+		for (int l5 = 0; (l5 < 3); l5 = (l5 + 1)) {
+			fRec0[l5] = 0.0f;
+		}
+		for (int l6 = 0; (l6 < 3); l6 = (l6 + 1)) {
+			fRec5[l6] = 0.0f;
+		}
+		for (int l7 = 0; (l7 < 3); l7 = (l7 + 1)) {
+			fRec6[l7] = 0.0f;
+		}
+		for (int l8 = 0; (l8 < 3); l8 = (l8 + 1)) {
+			fRec7[l8] = 0.0f;
+		}
+		for (int l9 = 0; (l9 < 3); l9 = (l9 + 1)) {
+			fRec8[l9] = 0.0f;
+		}
+		for (int l10 = 0; (l10 < 3); l10 = (l10 + 1)) {
+			fRec9[l10] = 0.0f;
+		}
+		for (int l11 = 0; (l11 < 3); l11 = (l11 + 1)) {
+			fRec10[l11] = 0.0f;
+		}
+		for (int l12 = 0; (l12 < 3); l12 = (l12 + 1)) {
+			fRec11[l12] = 0.0f;
+		}
+		for (int l13 = 0; (l13 < 3); l13 = (l13 + 1)) {
+			fRec12[l13] = 0.0f;
+		}
+		for (int l14 = 0; (l14 < 3); l14 = (l14 + 1)) {
+			fRec13[l14] = 0.0f;
+		}
+		for (int l15 = 0; (l15 < 3); l15 = (l15 + 1)) {
+			fRec14[l15] = 0.0f;
+		}
+		for (int l16 = 0; (l16 < 3); l16 = (l16 + 1)) {
+			fRec15[l16] = 0.0f;
+		}
+		for (int l17 = 0; (l17 < 3); l17 = (l17 + 1)) {
+			fRec16[l17] = 0.0f;
+		}
+		for (int l18 = 0; (l18 < 3); l18 = (l18 + 1)) {
+			fRec17[l18] = 0.0f;
+		}
+		for (int l19 = 0; (l19 < 3); l19 = (l19 + 1)) {
+			fRec18[l19] = 0.0f;
+		}
+		for (int l20 = 0; (l20 < 3); l20 = (l20 + 1)) {
+			fRec19[l20] = 0.0f;
+		}
+		for (int l21 = 0; (l21 < 3); l21 = (l21 + 1)) {
+			fRec20[l21] = 0.0f;
+		}
+		for (int l22 = 0; (l22 < 3); l22 = (l22 + 1)) {
+			fRec21[l22] = 0.0f;
+		}
+		for (int l23 = 0; (l23 < 3); l23 = (l23 + 1)) {
+			fRec22[l23] = 0.0f;
+		}
+		for (int l24 = 0; (l24 < 3); l24 = (l24 + 1)) {
+			fRec23[l24] = 0.0f;
+		}
+
+		// UI
+		// Todo: convert these to human param names
+		fEntry0 = FAUSTFLOAT(0.0f);
+		fHslider0 = FAUSTFLOAT(1.0f);
+		fEntry1 = FAUSTFLOAT(0.0f);
+		fHslider1 = FAUSTFLOAT(0.29999999999999999f);
+		fEntry2 = FAUSTFLOAT(0.0f);
+		fHslider2 = FAUSTFLOAT(0.5f);
+		fButton0 = FAUSTFLOAT(0.0f);
+		fButton1 = FAUSTFLOAT(0.0f);
+		fEntry3 = FAUSTFLOAT(1.0f);
+		fHslider3 = FAUSTFLOAT(60.0f);
+	}
+
+	void update() override
+	{
+		update_params();
+
+		// for (int i0 = 0; (i0 < count); i0 = (i0 + 1)) {
+		iRec3[0] = ((1103515245 * iRec3[1]) + 12345);
+		fRec2[0] = ((4.65661287e-10f * float(iRec3[0])) - (fSlow7 * ((fSlow10 * fRec2[2]) + (fSlow11 * fRec2[1]))));
+		fRec1[0] = ((fSlow7 * (((fSlow9 * fRec2[0]) + (fSlow12 * fRec2[1])) + (fSlow9 * fRec2[2]))) -
+					(fSlow13 * ((fSlow14 * fRec1[2]) + (fSlow15 * fRec1[1]))));
+		fVec0[0] = fSlow17;
+		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (fSlow17 <= fVec0[1])) + (fSlow17 > fVec0[1]));
+		float fTemp0 = (fSlow16 * float(iRec4[0]));
+		float fTemp1 = (fSlow4 * ((fRec1[2] + (fRec1[0] + (2.0f * fRec1[1]))) *
+								  std::max<float>(0.0f, std::min<float>(fTemp0, (2.0f - fTemp0)))));
+		fRec0[0] = (fTemp1 - ((fSlow19 * fRec0[1]) + (fConst6 * fRec0[2])));
+		fRec5[0] = (fTemp1 - ((fSlow20 * fRec5[1]) + (fConst9 * fRec5[2])));
+		fRec6[0] = (fTemp1 - ((fSlow21 * fRec6[1]) + (fConst12 * fRec6[2])));
+		fRec7[0] = (fTemp1 - ((fSlow22 * fRec7[1]) + (fConst15 * fRec7[2])));
+		fRec8[0] = (fTemp1 - ((fSlow23 * fRec8[1]) + (fConst18 * fRec8[2])));
+		fRec9[0] = (fTemp1 - ((fSlow24 * fRec9[1]) + (fConst21 * fRec9[2])));
+		fRec10[0] = (fTemp1 - ((fSlow25 * fRec10[1]) + (fConst24 * fRec10[2])));
+		fRec11[0] = (fTemp1 - ((fSlow26 * fRec11[1]) + (fConst27 * fRec11[2])));
+		fRec12[0] = (fTemp1 - ((fSlow27 * fRec12[1]) + (fConst30 * fRec12[2])));
+		fRec13[0] = (fTemp1 - ((fSlow28 * fRec13[1]) + (fConst33 * fRec13[2])));
+		fRec14[0] = (fTemp1 - ((fSlow29 * fRec14[1]) + (fConst36 * fRec14[2])));
+		fRec15[0] = (fTemp1 - ((fSlow30 * fRec15[1]) + (fConst39 * fRec15[2])));
+		fRec16[0] = (fTemp1 - ((fSlow31 * fRec16[1]) + (fConst42 * fRec16[2])));
+		fRec17[0] = (fTemp1 - ((fSlow32 * fRec17[1]) + (fConst45 * fRec17[2])));
+		fRec18[0] = (fTemp1 - ((fSlow33 * fRec18[1]) + (fConst48 * fRec18[2])));
+		fRec19[0] = (fTemp1 - ((fSlow34 * fRec19[1]) + (fConst51 * fRec19[2])));
+		fRec20[0] = (fTemp1 - ((fSlow35 * fRec20[1]) + (fConst54 * fRec20[2])));
+		fRec21[0] = (fTemp1 - ((fSlow36 * fRec21[1]) + (fConst57 * fRec21[2])));
+		fRec22[0] = (fTemp1 - ((fSlow37 * fRec22[1]) + (fConst60 * fRec22[2])));
+		fRec23[0] = (fTemp1 - ((fSlow38 * fRec23[1]) + (fConst63 * fRec23[2])));
+		signalOut = FAUSTFLOAT(
+			(0.0500000007f *
+			 ((((((((((((((((((((fRec0[0] + (0.25f * (fRec5[0] - fRec5[2]))) + (0.111111112f * (fRec6[0] - fRec6[2]))) +
+							   (0.0625f * (fRec7[0] - fRec7[2]))) +
+							  (0.0399999991f * (fRec8[0] - fRec8[2]))) +
+							 (0.027777778f * (fRec9[0] - fRec9[2]))) +
+							(0.0204081628f * (fRec10[0] - fRec10[2]))) +
+						   (0.015625f * (fRec11[0] - fRec11[2]))) +
+						  (0.0123456791f * (fRec12[0] - fRec12[2]))) +
+						 (0.00999999978f * (fRec13[0] - fRec13[2]))) +
+						(0.00826446246f * (fRec14[0] - fRec14[2]))) +
+					   (0.0069444445f * (fRec15[0] - fRec15[2]))) +
+					  (0.00591715984f * (fRec16[0] - fRec16[2]))) +
+					 (0.00510204071f * (fRec17[0] - fRec17[2]))) +
+					(0.00444444455f * (fRec18[0] - fRec18[2]))) +
+				   (0.00390625f * (fRec19[0] - fRec19[2]))) +
+				  (0.00346020772f * (fRec20[0] - fRec20[2]))) +
+				 (0.00308641978f * (fRec21[0] - fRec21[2]))) +
+				(0.00277008303f * (fRec22[0] - fRec22[2]))) +
+			   (0.00249999994f * (fRec23[0] - fRec23[2]))) -
+			  fRec0[2])));
+		iRec3[1] = iRec3[0];
+		fRec2[2] = fRec2[1];
+		fRec2[1] = fRec2[0];
+		fRec1[2] = fRec1[1];
+		fRec1[1] = fRec1[0];
+		fVec0[1] = fVec0[0];
+		iRec4[1] = iRec4[0];
+		fRec0[2] = fRec0[1];
+		fRec0[1] = fRec0[0];
+		fRec5[2] = fRec5[1];
+		fRec5[1] = fRec5[0];
+		fRec6[2] = fRec6[1];
+		fRec6[1] = fRec6[0];
+		fRec7[2] = fRec7[1];
+		fRec7[1] = fRec7[0];
+		fRec8[2] = fRec8[1];
+		fRec8[1] = fRec8[0];
+		fRec9[2] = fRec9[1];
+		fRec9[1] = fRec9[0];
+		fRec10[2] = fRec10[1];
+		fRec10[1] = fRec10[0];
+		fRec11[2] = fRec11[1];
+		fRec11[1] = fRec11[0];
+		fRec12[2] = fRec12[1];
+		fRec12[1] = fRec12[0];
+		fRec13[2] = fRec13[1];
+		fRec13[1] = fRec13[0];
+		fRec14[2] = fRec14[1];
+		fRec14[1] = fRec14[0];
+		fRec15[2] = fRec15[1];
+		fRec15[1] = fRec15[0];
+		fRec16[2] = fRec16[1];
+		fRec16[1] = fRec16[0];
+		fRec17[2] = fRec17[1];
+		fRec17[1] = fRec17[0];
+		fRec18[2] = fRec18[1];
+		fRec18[1] = fRec18[0];
+		fRec19[2] = fRec19[1];
+		fRec19[1] = fRec19[0];
+		fRec20[2] = fRec20[1];
+		fRec20[1] = fRec20[0];
+		fRec21[2] = fRec21[1];
+		fRec21[1] = fRec21[0];
+		fRec22[2] = fRec22[1];
+		fRec22[1] = fRec22[0];
+		fRec23[2] = fRec23[1];
+		fRec23[1] = fRec23[0];
+		// }
+	}
+
+	void update_params()
+	{
+		// ui_interface->addHorizontalSlider("freq", &fHslider3, 60.0f, 20.0f, 500.0f, 1.0f);
+		// ui_interface->addHorizontalSlider("gain", &fHslider0, 1.0f, 0.0f, 1.0f, 0.00999999978f);
+		// ui_interface->addHorizontalSlider("sharpness", &fHslider2, 0.5f, 0.0f, 1.0f, 0.00999999978f);
+		// ui_interface->addHorizontalSlider("strike", &fHslider1, 0.300000012f, 0.0f, 1.0f, 0.00999999978f);
+		// ui_interface->closeBox();
+		// ui_interface->openVerticalBox("jacks");
+		// ui_interface->declare(&fEntry0, "CV", "5");
+		// ui_interface->addNumEntry("gaincv", &fEntry0, 0.0f, 0.0f, 1.0f, 0.00999999978f);
+		// ui_interface->declare(&fEntry2, "CV", "4");
+		// ui_interface->addNumEntry("shaprcv", &fEntry2, 0.0f, 0.0f, 1.0f, 0.00999999978f);
+		// ui_interface->declare(&fEntry1, "CV", "3");
+		// ui_interface->addNumEntry("strikecv", &fEntry1, 0.0f, 0.0f, 1.0f, 0.00999999978f);
+		// ui_interface->closeBox();
+		// ui_interface->addButton("Trigger", &fButton1);
+		// ui_interface->declare(&fEntry3, "CV", "2");
+		// ui_interface->addNumEntry("freqcv", &fEntry3, 1.0f, 1.0f, 32.0f, 0.00100000005f);
+		// ui_interface->declare(&fButton0, "CV", "1");
+		// ui_interface->addButton("gate", &fButton0);
+		fSlow0 = std::min<float>((float(fEntry1) + float(fHslider1)), 1.0f);
+		fSlow1 = tanTable.interp((fConst1 * ((15000.0f * fSlow0) + 500.0f)) / 2.f * M_PI);
+		fSlow2 = (1.0f / fSlow1);
+		fSlow3 = (((fSlow2 + 1.41421354f) / fSlow1) + 1.0f);
+		fSlow4 = (std::min<float>((float(fEntry0) + float(fHslider0)), 1.0f) / fSlow3);
+		fSlow5 = tanTable.interp((fConst1 * ((500.0f * fSlow0) + 40.0f)) / 2.f * M_PI);
+		fSlow6 = (1.0f / fSlow5);
+		fSlow7 = (1.0f / (((fSlow6 + 1.41421354f) / fSlow5) + 1.0f));
+		fSlow8 = pow_2f(fSlow5);
+		fSlow9 = (1.0f / fSlow8);
+		fSlow10 = (((fSlow6 + -1.41421354f) / fSlow5) + 1.0f);
+		fSlow11 = (2.0f * (1.0f - fSlow9));
+		fSlow12 = (0.0f - (2.0f / fSlow8));
+		fSlow13 = (1.0f / fSlow3);
+		fSlow14 = (((fSlow2 + -1.41421354f) / fSlow1) + 1.0f);
+		fSlow15 = (2.0f * (1.0f - (1.0f / pow_2f(fSlow1))));
+		fSlow16 =
+			(1.0f / std::max<float>(1.0f, (fConst2 * std::min<float>((float(fEntry2) + float(fHslider2)), 1.0f))));
+		fSlow17 = (float(fButton0) + float(fButton1));
+		fSlow18 = (float(fEntry3) * float(fHslider3));
+		fSlow19 = (fConst4 * table_cos((fConst5 * fSlow18)));
+		fSlow20 = (fConst8 * table_cos((fConst5 * (fSlow18 + 200.0f))));
+		fSlow21 = (fConst11 * table_cos((fConst5 * (fSlow18 + 400.0f))));
+		fSlow22 = (fConst14 * table_cos((fConst5 * (fSlow18 + 600.0f))));
+		fSlow23 = (fConst17 * table_cos((fConst5 * (fSlow18 + 800.0f))));
+		fSlow24 = (fConst20 * table_cos((fConst5 * (fSlow18 + 1000.0f))));
+		fSlow25 = (fConst23 * table_cos((fConst5 * (fSlow18 + 1200.0f))));
+		fSlow26 = (fConst26 * table_cos((fConst5 * (fSlow18 + 1400.0f))));
+		fSlow27 = (fConst29 * table_cos((fConst5 * (fSlow18 + 1600.0f))));
+		fSlow28 = (fConst32 * table_cos((fConst5 * (fSlow18 + 1800.0f))));
+		fSlow29 = (fConst35 * table_cos((fConst5 * (fSlow18 + 2000.0f))));
+		fSlow30 = (fConst38 * table_cos((fConst5 * (fSlow18 + 2200.0f))));
+		fSlow31 = (fConst41 * table_cos((fConst5 * (fSlow18 + 2400.0f))));
+		fSlow32 = (fConst44 * table_cos((fConst5 * (fSlow18 + 2600.0f))));
+		fSlow33 = (fConst47 * table_cos((fConst5 * (fSlow18 + 2800.0f))));
+		fSlow34 = (fConst50 * table_cos((fConst5 * (fSlow18 + 3000.0f))));
+		fSlow35 = (fConst53 * table_cos((fConst5 * (fSlow18 + 3200.0f))));
+		fSlow36 = (fConst56 * table_cos((fConst5 * (fSlow18 + 3400.0f))));
+		fSlow37 = (fConst59 * table_cos((fConst5 * (fSlow18 + 3600.0f))));
+		fSlow38 = (fConst62 * table_cos((fConst5 * (fSlow18 + 3800.0f))));
+	}
+
+	void set_param(int const param_id, const float val) override
+	{
+		switch (param_id) {
+			case Freq:
+				break;
+
+			case Gain:
+				// new_damp = val;
+				// damp_needs_update = true;
+				break;
+
+			case Sharpness:
+				break;
+
+			case Strike:
+				break;
+		}
+	}
+
+	void set_samplerate(const float sr) override
+	{
+		// Todo!
+	}
+
+	void set_input(const int input_id, const float val) override
+	{
+		switch (input_id) {
+			case Freq:
+				break;
+
+			case Gain:
+				// new_damp = val;
+				// damp_needs_update = true;
+				break;
+
+			case Sharpness:
+				break;
+
+			case Strike:
+				break;
+
+			case Trigger:
+				trigIn = val;
+				break;
+		}
+	}
+
+	float get_output(const int output_id) const override
+	{
+		switch (output_id) {
+			case 0:
+				return signalOut;
+				break;
+		}
+		return 0;
+	}
+
+	static std::unique_ptr<CoreProcessor> create()
+	{
+		return std::make_unique<DjembeCore>();
+	}
+
+	static constexpr char typeID[20] = "DJEMBE";
+	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
+
+private:
+	float signalOut = 0;
+	float trigIn = 0;
+
+	float IOTA;
+
+	FAUSTFLOAT fEntry0;
+	FAUSTFLOAT fHslider0;
+	int fSampleRate;
+	float fConst1;
+	FAUSTFLOAT fEntry1;
+	FAUSTFLOAT fHslider1;
+	int iRec3[2];
+	float fRec2[3];
+	float fRec1[3];
+	float fConst2;
+	FAUSTFLOAT fEntry2;
+	FAUSTFLOAT fHslider2;
+	FAUSTFLOAT fButton0;
+	FAUSTFLOAT fButton1;
+	float fVec0[2];
+	int iRec4[2];
+	float fConst4;
+	float fConst5;
+	FAUSTFLOAT fEntry3;
+	FAUSTFLOAT fHslider3;
+	float fConst6;
+	float fRec0[3];
+	float fConst8;
+	float fConst9;
+	float fRec5[3];
+	float fConst11;
+	float fConst12;
+	float fRec6[3];
+	float fConst14;
+	float fConst15;
+	float fRec7[3];
+	float fConst17;
+	float fConst18;
+	float fRec8[3];
+	float fConst20;
+	float fConst21;
+	float fRec9[3];
+	float fConst23;
+	float fConst24;
+	float fRec10[3];
+	float fConst26;
+	float fConst27;
+	float fRec11[3];
+	float fConst29;
+	float fConst30;
+	float fRec12[3];
+	float fConst32;
+	float fConst33;
+	float fRec13[3];
+	float fConst35;
+	float fConst36;
+	float fRec14[3];
+	float fConst38;
+	float fConst39;
+	float fRec15[3];
+	float fConst41;
+	float fConst42;
+	float fRec16[3];
+	float fConst44;
+	float fConst45;
+	float fRec17[3];
+	float fConst47;
+	float fConst48;
+	float fRec18[3];
+	float fConst50;
+	float fConst51;
+	float fRec19[3];
+	float fConst53;
+	float fConst54;
+	float fRec20[3];
+	float fConst56;
+	float fConst57;
+	float fRec21[3];
+	float fConst59;
+	float fConst60;
+	float fRec22[3];
+	float fConst62;
+	float fConst63;
+	float fRec23[3];
+	float fSlow0;
+	float fSlow1;
+	float fSlow2;
+	float fSlow3;
+	float fSlow4;
+	float fSlow5;
+	float fSlow6;
+	float fSlow7;
+	float fSlow8;
+	float fSlow9;
+	float fSlow10;
+	float fSlow11;
+	float fSlow12;
+	float fSlow13;
+	float fSlow14;
+	float fSlow15;
+	float fSlow16;
+	float fSlow17;
+	float fSlow18;
+	float fSlow19;
+	float fSlow20;
+	float fSlow21;
+	float fSlow22;
+	float fSlow23;
+	float fSlow24;
+	float fSlow25;
+	float fSlow26;
+	float fSlow27;
+	float fSlow28;
+	float fSlow29;
+	float fSlow30;
+	float fSlow31;
+	float fSlow32;
+	float fSlow33;
+	float fSlow34;
+	float fSlow35;
+	float fSlow36;
+	float fSlow37;
+	float fSlow38;
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
+};
+
+/*
+import("stdfaust.lib");
+freqknob = hslider("v: djembe/freq", 60, 20, 500, 1);
+freqcv = nentry("freqcv [CV:2]", 1, 1, 32, 0.001);
+freqtotal = freqknob * freqcv;
+
+trigbutton = button("Trigger");
+gate = button("gate [CV:1]");
+
+strikecv = nentry("v: jacks/strikecv [CV:3]", 0, 0, 1, 0.01);
+sharpcv = nentry("v: jacks/shaprcv [CV:4]", 0, 0, 1, 0.01);
+gaincv = nentry("v: jacks/gaincv [CV:5]", 0, 0, 1, 0.01);
+
+strikepos = hslider("v: djembe/strike", 0.3, 0, 1, 0.01) + strikecv, 1 :min;
+strikesharpness = hslider("v: djembe/sharpness", 0.5, 0, 1, 0.01) + sharpcv, 1 :min;
+strikegain = hslider("v: djembe/gain", 1, 0, 1, 0.01) + gaincv, 1 :min;
+process = trigbutton + gate : pm.djembe(freqtotal, strikepos, strikesharpness, strikegain);
+*/

@@ -13,17 +13,19 @@
 	#include "example_stereo_verb.h"
 	#include "fadedelay_two.hh"
 	#include "simple_lfo_passthrru.hh"
+	#include "DjembeTest.hh"
 
 PatchList::PatchList()
 	: _patches{
 		  {simple_lfo_passthrru},
+		  {DjembeTest},
 		  {example_stereo_verb},
 		  {examplePitchShiftSimple},
 		  {exampleDrum},
 		  {fadedelay_example},
 		  {example_drum_verb_mono},
 		  {QuadDrum},
-		  {KP_FM_DRUM_DET},
+		  // {KP_FM_DRUM_DET},
 		  {KarplusStereo},
 		  {LPFBPF},
 	  }

@@ -7,19 +7,19 @@
 
 using namespace MathTools;
 
-template<uint32_t SAMPLERATE>
-class DjembeCore : public CoreProcessor {
-	static inline const int NumInJacks = 5;
-	static inline const int NumOutJacks = 1;
+template<uint32_t SAMPLERATE = 48000>
+class FreeVerb : public CoreProcessor {
+	static inline const int NumInJacks = 6;
+	static inline const int NumOutJacks = 2;
 	static inline const int NumKnobs = 4;
 
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Freq", "Gain", "Sharpness", "Strike"};
-	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output1", "Output2"};
 	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
-		"Freq", "Gain", "Sharpness", "Strike", "Trigger"};
+		"Freq", "Gain", "Sharpness", "Strike", "Trigger1", "Trigger2"};
 	static inline const StaticString<LongNameChars> description{"Djembe"};
 
-	enum Params { Freq = 0, Gain = 1, Sharpness = 2, Strike = 3, Trigger = 4 };
+	enum Params { Freq = 0, Gain = 1, Sharpness = 2, Strike = 3, Trigger = 4, Trigger2 = 5 };
 
 public:
 	DjembeCore()
@@ -34,13 +34,13 @@ public:
 		, iConst9{int((0.0353061222f * SAMPLERATE))}
 		, iConst10{int((0.0366666652f * SAMPLERATE))}
 		, iConst11{int((0.0126077095f * SAMPLERATE))}
-		, iConst12{std::min<int>(1024, std::max<int>(0, (iConst11 + -1)))}
+		, iConst12{min<int>(1024, max<int>(0, (iConst11 + -1)))}
 		, iConst13{int((0.00999999978f * SAMPLERATE))}
-		, iConst14{std::min<int>(1024, std::max<int>(0, (iConst13 + -1)))}
+		, iConst14{min<int>(1024, max<int>(0, (iConst13 + -1)))}
 		, iConst15{int((0.00773242628f * SAMPLERATE))}
-		, iConst16{std::min<int>(1024, std::max<int>(0, (iConst15 + -1)))}
+		, iConst16{min<int>(1024, max<int>(0, (iConst15 + -1)))}
 		, iConst17{int((0.00510204071f * SAMPLERATE))}
-		, iConst18{std::min<int>(1024, std::max<int>(0, (iConst17 + -1)))}
+		, iConst18{min<int>(1024, max<int>(0, (iConst17 + -1)))}
 		, fConst19{(0.00104308384f * SAMPLERATE)}
 	{
 		IOTA = 0;
@@ -136,19 +136,20 @@ public:
 	{
 		update_params();
 
-		FAUSTFLOAT *input0 = inputs[0];
-		FAUSTFLOAT *input1 = inputs[1];
-		FAUSTFLOAT *output0 = outputs[0];
-		FAUSTFLOAT *output1 = outputs[1];
+		// FAUSTFLOAT *input0 = inputs[0];
+		// FAUSTFLOAT *input1 = inputs[1];
+		// FAUSTFLOAT *output0 = outputs[0];
+		// FAUSTFLOAT *output1 = outputs[1];
 
-		float fSlow0 = ((fConst1 * std::min<float>((float(fEntry0) + float(fHslider0)), 1.0f)) + 0.699999988f);
-		float fSlow1 = (fConst2 * std::min<float>((float(fEntry1) + float(fHslider1)), 1.0f));
+		// Todo: only calculate these every N frames:
+		float fSlow0 = ((fConst1 * min<float>((float(fEntry0) + float(fHslider0)), 1.0f)) + 0.699999988f);
+		float fSlow1 = (fConst2 * min<float>((float(fEntry1) + float(fHslider1)), 1.0f));
 		float fSlow2 = (1.0f - fSlow1);
-		float fSlow3 = std::min<float>((float(fEntry2) + float(fHslider2)), 1.0f);
+		float fSlow3 = min<float>((float(fEntry2) + float(fHslider2)), 1.0f);
 		float fSlow4 = (0.100000001f * fSlow3);
-		float fSlow5 = ((fConst1 * std::min<float>((float(fEntry3) + float(fHslider3)), 1.0f)) + 0.699999988f);
+		float fSlow5 = ((fConst1 * min<float>((float(fEntry3) + float(fHslider3)), 1.0f)) + 0.699999988f);
 		float fSlow6 = (1.0f - fSlow3);
-		int iSlow7 = int((fConst19 * std::min<float>((float(fEntry4) + float(fHslider4)), 1.0f)));
+		int iSlow7 = int((fConst19 * min<float>((float(fEntry4) + float(fHslider4)), 1.0f)));
 		int iSlow8 = (iConst3 + iSlow7);
 		int iSlow9 = (iConst4 + iSlow7);
 		int iSlow10 = (iConst5 + iSlow7);
@@ -158,14 +159,19 @@ public:
 		int iSlow14 = (iConst9 + iSlow7);
 		int iSlow15 = (iConst10 + iSlow7);
 		int iSlow16 = (iSlow7 + -1);
-		int iSlow17 = std::min<int>(1024, std::max<int>(0, (iConst11 + iSlow16)));
-		int iSlow18 = std::min<int>(1024, std::max<int>(0, (iConst13 + iSlow16)));
-		int iSlow19 = std::min<int>(1024, std::max<int>(0, (iConst15 + iSlow16)));
-		int iSlow20 = std::min<int>(1024, std::max<int>(0, (iConst17 + iSlow16)));
+		int iSlow17 = min<int>(1024, max<int>(0, (iConst11 + iSlow16)));
+		// int iSlow17 = constrain<int>(iConst11 + iSlow16, 0, 1024);
+		int iSlow18 = min<int>(1024, max<int>(0, (iConst13 + iSlow16)));
+		int iSlow19 = min<int>(1024, max<int>(0, (iConst15 + iSlow16)));
+		int iSlow20 = min<int>(1024, max<int>(0, (iConst17 + iSlow16)));
+
 		// for (int i0 = 0; (i0 < count); i0 = (i0 + 1)) {
 		fRec9[0] = ((fSlow1 * fRec9[1]) + (fSlow2 * fRec8[1]));
-		float fTemp0 = float(input0[i0]);
-		float fTemp1 = float(input1[i0]);
+
+		float fTemp0 = trigIn[0];
+		float fTemp1 = trigIn[1];
+		// float fTemp0 = float(input0[i0]);
+		// float fTemp1 = float(input1[i0]);
 		float fTemp2 = (fSlow4 * (fTemp0 + fTemp1));
 		fVec0[(IOTA & 8191)] = ((fSlow0 * fRec9[0]) + fTemp2);
 		fRec8[0] = fVec0[((IOTA - iConst3) & 8191)];
@@ -208,7 +214,10 @@ public:
 		fVec11[(IOTA & 1023)] = fTemp6;
 		fRec0[0] = fVec11[((IOTA - iConst18) & 1023)];
 		float fRec1 = (0.0f - (fSlow5 * fTemp6));
-		output0[i0] = FAUSTFLOAT(((fRec1 + fRec0[1]) + (fSlow6 * fTemp0)));
+
+		// output0[i0] = FAUSTFLOAT(((fRec1 + fRec0[1]) + (fSlow6 * fTemp0)));
+		signalOut[0] = FAUSTFLOAT(((fRec1 + fRec0[1]) + (fSlow6 * fTemp0)));
+
 		fRec33[0] = ((fSlow1 * fRec33[1]) + (fSlow2 * fRec32[1]));
 		fVec12[(IOTA & 8191)] = (fTemp2 + (fSlow0 * fRec33[0]));
 		fRec32[0] = fVec12[((IOTA - iSlow8) & 8191)];
@@ -251,7 +260,10 @@ public:
 		fVec23[(IOTA & 2047)] = fTemp10;
 		fRec24[0] = fVec23[((IOTA - iSlow20) & 2047)];
 		float fRec25 = (0.0f - (fSlow5 * fTemp10));
-		output1[i0] = FAUSTFLOAT(((fRec25 + fRec24[1]) + (fSlow6 * fTemp1)));
+
+		signalOut[1] = FAUSTFLOAT(((fRec25 + fRec24[1]) + (fSlow6 * fTemp1)));
+		// output1[i0] = FAUSTFLOAT(((fRec25 + fRec24[1]) + (fSlow6 * fTemp1)));
+
 		fRec9[1] = fRec9[0];
 		IOTA = (IOTA + 1);
 		fRec8[1] = fRec8[0];
@@ -303,6 +315,7 @@ public:
 		// ui_interface->addNumEntry("DampCV", &fEntry1, 0.0f, 0.0f, 1.0f, 0.00999999978f);
 		// ui_interface->addNumEntry("DryWetCV", &fEntry2, 0.0f, 0.0f, 1.0f, 0.00999999978f);
 		// ui_interface->addNumEntry("SpreadCV", &fEntry4, 0.0f, 0.0f, 40000.0f, 1.0f);
+
 		// ui_interface->addHorizontalSlider("APFeed", &fHslider3, 0.5f, 0.0f, 1.0f, 0.0250000004f);
 		// ui_interface->addHorizontalSlider("Damp", &fHslider1, 0.5f, 0.0f, 1.0f, 0.0250000004f);
 		// ui_interface->addHorizontalSlider("RoomSize", &fHslider0, 0.5f, 0.0f, 1.0f, 0.0250000004f);
@@ -331,7 +344,7 @@ public:
 
 	void set_samplerate(const float sr) override
 	{
-		fSampleRate = sr;
+		// Todo!
 	}
 
 	void set_input(const int input_id, const float val) override
@@ -352,19 +365,26 @@ public:
 				break;
 
 			case Trigger:
+				trigIn[0] = val;
+				break;
+
+			case Trigger2:
+				trigIn[1] = val;
 				break;
 		}
 	}
 
 	float get_output(const int output_id) const override
 	{
-		float output = 0;
 		switch (output_id) {
 			case 0:
-				output = signalOut;
+				return signalOut[0];
+				break;
+			case 1:
+				return signalOut[1];
 				break;
 		}
-		return output;
+		return 0;
 	}
 
 	static std::unique_ptr<CoreProcessor> create()
@@ -372,13 +392,13 @@ public:
 		return std::make_unique<DjembeCore>();
 	}
 
-	static constexpr char typeID[20] = "DJEMBE";
+	static constexpr char typeID[20] = "FREEVERB";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	float signalOut = 0;
+	float signalOut[2] = {0, 0};
+	float trigIn[2] = {0, 0};
 
-	int fSampleRate = 48000;
 	const float fConst1;
 	FAUSTFLOAT fEntry0;
 	FAUSTFLOAT fHslider0;
