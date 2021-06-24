@@ -154,4 +154,34 @@ static inline float audioFreqToNorm(float input) // normalized filter frequency 
 	output = (temp1 - 2.99573f) / (6.90776f);
 	return output;
 }
+
+// Todo: needs tests
+static inline float pow2(float x)
+{
+	// expTable.interp(x) = 2^(x*5), where 0 <= x <= 1
+	x = x / 5.0f;
+	float res = 1.f;
+	for (;;) {
+		if (x < 1.f) {
+			res *= expTable.interp(x);
+			break;
+		} else {
+			res *= 32.f;
+			x -= 1.f;
+		}
+	}
+	return res;
+}
+
+// Todo: needs tests
+static inline float cos(float x)
+{
+	return sinTable.interp_wrap((x / (2.f * M_PI)) + 0.25f);
+}
+
+static inline float tan(float x)
+{
+	return tanTable.interp_wrap(x / (2.f * M_PI));
+}
+
 }; // namespace MathTools
