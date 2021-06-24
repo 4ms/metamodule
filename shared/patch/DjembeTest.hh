@@ -38,18 +38,18 @@ static const Patch DjembeTest = {
 	.num_nets = 2,
 
 	.static_knobs = {{
-		{.module_id = 0, .param_id = 0, .value = 0.165000f},
-		{.module_id = 0, .param_id = 1, .value = 0.250500f},
-		{.module_id = 0, .param_id = 2, .value = 0.112500f},
-		{.module_id = 0, .param_id = 3, .value = 0.165000f},
+		{.module_id = 1, .param_id = 0, .value = 0.165000f},
+		{.module_id = 1, .param_id = 1, .value = 0.250500f},
+		{.module_id = 1, .param_id = 2, .value = 0.112500f},
+		{.module_id = 1, .param_id = 3, .value = 0.165000f},
 	}},
 	.num_static_knobs = 4,
 
 	.mapped_knobs = {{
-		{.module_id = 0, .param_id = 0, .panel_knob_id = 0},
-		{.module_id = 0, .param_id = 1, .panel_knob_id = 1},
-		{.module_id = 0, .param_id = 2, .panel_knob_id = 2},
-		{.module_id = 0, .param_id = 3, .panel_knob_id = 3},
+		{.module_id = 1, .param_id = 0, .panel_knob_id = 0},
+		{.module_id = 1, .param_id = 1, .panel_knob_id = 1},
+		{.module_id = 1, .param_id = 2, .panel_knob_id = 2},
+		{.module_id = 1, .param_id = 3, .panel_knob_id = 3},
 	}},
 	.num_mapped_knobs = 4,
 
