@@ -1,6 +1,6 @@
 #include "CommModule.h"
 #include "CommWidget.h"
-#include "math.hh"
+#include "util/math.hh"
 
 struct TemplateModule : CommModule {
 
