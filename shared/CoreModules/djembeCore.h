@@ -1,10 +1,9 @@
 #pragma once
+
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
-
-#define FAUSTFLOAT float
 
 using namespace MathTools;
 
@@ -24,27 +23,6 @@ class DjembeCore : public CoreProcessor {
 	enum Params { Freq = 0, Gain = 1, Sharpness = 2, Strike = 3, Trigger = 4 };
 
 public:
-	float pow_2f(float x)
-	{
-		x = x / 5.0f; // expTable.interp(x) = 2^(x*5), where 0 <= x <= 1
-		float res = 1.f;
-		for (;;) {
-			if (x < 1) {
-				res *= expTable.interp(x);
-				break;
-			} else {
-				res *= 32.f;
-				x -= 1.f;
-			}
-		}
-		return res;
-	}
-
-	float table_cos(float x)
-	{
-		return sinTable.interp_wrap((x / (2.f * M_PI)) + 0.25f);
-	}
-
 	DjembeCore()
 	{
 		fConst1 = (3.14159274f / SAMPLERATE);
@@ -52,64 +30,64 @@ public:
 		float fConst3 = std::pow(0.00100000005f, (1.66666663f / SAMPLERATE));
 		fConst4 = (0.0f - (2.0f * fConst3));
 		fConst5 = (6.28318548f / SAMPLERATE);
-		fConst6 = pow_2f(fConst3);
+		fConst6 = MathTools::pow2(fConst3);
 		float fConst7 = std::pow(0.00100000005f, (1.75438595f / SAMPLERATE));
 		fConst8 = (0.0f - (2.0f * fConst7));
-		fConst9 = pow_2f(fConst7);
+		fConst9 = MathTools::pow2(fConst7);
 		float fConst10 = std::pow(0.00100000005f, (1.85185182f / SAMPLERATE));
 		fConst11 = (0.0f - (2.0f * fConst10));
-		fConst12 = pow_2f(fConst10);
+		fConst12 = MathTools::pow2(fConst10);
 		float fConst13 = std::pow(0.00100000005f, (1.96078432f / SAMPLERATE));
 		fConst14 = (0.0f - (2.0f * fConst13));
-		fConst15 = pow_2f(fConst13);
+		fConst15 = MathTools::pow2(fConst13);
 		float fConst16 = std::pow(0.00100000005f, (2.08333325f / SAMPLERATE));
 		fConst17 = (0.0f - (2.0f * fConst16));
-		fConst18 = pow_2f(fConst16);
+		fConst18 = MathTools::pow2(fConst16);
 		float fConst19 = std::pow(0.00100000005f, (2.22222233f / SAMPLERATE));
 		fConst20 = (0.0f - (2.0f * fConst19));
-		fConst21 = pow_2f(fConst19);
+		fConst21 = MathTools::pow2(fConst19);
 		float fConst22 = std::pow(0.00100000005f, (2.38095236f / SAMPLERATE));
 		fConst23 = (0.0f - (2.0f * fConst22));
-		fConst24 = pow_2f(fConst22);
+		fConst24 = MathTools::pow2(fConst22);
 		float fConst25 = std::pow(0.00100000005f, (2.56410265f / SAMPLERATE));
 		fConst26 = (0.0f - (2.0f * fConst25));
-		fConst27 = pow_2f(fConst25);
+		fConst27 = MathTools::pow2(fConst25);
 		float fConst28 = std::pow(0.00100000005f, (2.77777767f / SAMPLERATE));
 		fConst29 = (0.0f - (2.0f * fConst28));
-		fConst30 = pow_2f(fConst28);
+		fConst30 = MathTools::pow2(fConst28);
 		float fConst31 = std::pow(0.00100000005f, (3.030303f / SAMPLERATE));
 		fConst32 = (0.0f - (2.0f * fConst31));
-		fConst33 = pow_2f(fConst31);
+		fConst33 = MathTools::pow2(fConst31);
 		float fConst34 = std::pow(0.00100000005f, (3.33333325f / SAMPLERATE));
 		fConst35 = (0.0f - (2.0f * fConst34));
-		fConst36 = pow_2f(fConst34);
+		fConst36 = MathTools::pow2(fConst34);
 		float fConst37 = std::pow(0.00100000005f, (3.70370364f / SAMPLERATE));
 		fConst38 = (0.0f - (2.0f * fConst37));
-		fConst39 = pow_2f(fConst37);
+		fConst39 = MathTools::pow2(fConst37);
 		float fConst40 = std::pow(0.00100000005f, (4.16666651f / SAMPLERATE));
 		fConst41 = (0.0f - (2.0f * fConst40));
-		fConst42 = pow_2f(fConst40);
+		fConst42 = MathTools::pow2(fConst40);
 		float fConst43 = std::pow(0.00100000005f, (4.76190472f / SAMPLERATE));
 		fConst44 = (0.0f - (2.0f * fConst43));
-		fConst45 = pow_2f(fConst43);
+		fConst45 = MathTools::pow2(fConst43);
 		float fConst46 = std::pow(0.00100000005f, (5.55555534f / SAMPLERATE));
 		fConst47 = (0.0f - (2.0f * fConst46));
-		fConst48 = pow_2f(fConst46);
+		fConst48 = MathTools::pow2(fConst46);
 		float fConst49 = std::pow(0.00100000005f, (6.66666651f / SAMPLERATE));
 		fConst50 = (0.0f - (2.0f * fConst49));
-		fConst51 = pow_2f(fConst49);
+		fConst51 = MathTools::pow2(fConst49);
 		float fConst52 = std::pow(0.00100000005f, (8.33333302f / SAMPLERATE));
 		fConst53 = (0.0f - (2.0f * fConst52));
-		fConst54 = pow_2f(fConst52);
+		fConst54 = MathTools::pow2(fConst52);
 		float fConst55 = std::pow(0.00100000005f, (11.1111107f / SAMPLERATE));
 		fConst56 = (0.0f - (2.0f * fConst55));
-		fConst57 = pow_2f(fConst55);
+		fConst57 = MathTools::pow2(fConst55);
 		float fConst58 = std::pow(0.00100000005f, (16.666666f / SAMPLERATE));
 		fConst59 = (0.0f - (2.0f * fConst58));
-		fConst60 = pow_2f(fConst58);
+		fConst60 = MathTools::pow2(fConst58);
 		float fConst61 = std::pow(0.00100000005f, (33.3333321f / SAMPLERATE));
 		fConst62 = (0.0f - (2.0f * fConst61));
-		fConst63 = pow_2f(fConst61);
+		fConst63 = MathTools::pow2(fConst61);
 
 		IOTA = 0;
 
@@ -192,21 +170,22 @@ public:
 
 		// UI
 		// Todo: convert these to human param names
-		fEntry0 = FAUSTFLOAT(0.0f);
-		fHslider0 = FAUSTFLOAT(1.0f);
-		fEntry1 = FAUSTFLOAT(0.0f);
-		fHslider1 = FAUSTFLOAT(0.29999999999999999f);
-		fEntry2 = FAUSTFLOAT(0.0f);
-		fHslider2 = FAUSTFLOAT(0.5f);
-		fButton0 = FAUSTFLOAT(0.0f);
-		fButton1 = FAUSTFLOAT(0.0f);
-		fEntry3 = FAUSTFLOAT(1.0f);
-		fHslider3 = FAUSTFLOAT(60.0f);
+		gainCV = float(0.0f);
+		gainKnob = float(1.0f);
+		strikeCV = float(0.0f);
+		strikeKnob = float(0.29999999999999999f);
+		sharpCV = float(0.0f);
+		sharpnessKnob = float(0.5f);
+		trigIn = float(0.0f);
+		freqCV = float(1.0f);
+		freqKnob = float(60.0f);
 	}
 
 	void update() override
 	{
-		update_params();
+		if (paramsUpdated)
+			update_params();
+		paramsUpdated = false;
 
 		// for (int i0 = 0; (i0 < count); i0 = (i0 + 1)) {
 		iRec3[0] = ((1103515245 * iRec3[1]) + 12345);
@@ -238,7 +217,7 @@ public:
 		fRec21[0] = (fTemp1 - ((fSlow36 * fRec21[1]) + (fConst57 * fRec21[2])));
 		fRec22[0] = (fTemp1 - ((fSlow37 * fRec22[1]) + (fConst60 * fRec22[2])));
 		fRec23[0] = (fTemp1 - ((fSlow38 * fRec23[1]) + (fConst63 * fRec23[2])));
-		signalOut = FAUSTFLOAT(
+		signalOut = float(
 			(0.0500000007f *
 			 ((((((((((((((((((((fRec0[0] + (0.25f * (fRec5[0] - fRec5[2]))) + (0.111111112f * (fRec6[0] - fRec6[2]))) +
 							   (0.0625f * (fRec7[0] - fRec7[2]))) +
@@ -311,81 +290,69 @@ public:
 
 	void update_params()
 	{
-		// ui_interface->addHorizontalSlider("freq", &fHslider3, 60.0f, 20.0f, 500.0f, 1.0f);
-		// ui_interface->addHorizontalSlider("gain", &fHslider0, 1.0f, 0.0f, 1.0f, 0.00999999978f);
-		// ui_interface->addHorizontalSlider("sharpness", &fHslider2, 0.5f, 0.0f, 1.0f, 0.00999999978f);
-		// ui_interface->addHorizontalSlider("strike", &fHslider1, 0.300000012f, 0.0f, 1.0f, 0.00999999978f);
-		// ui_interface->closeBox();
-		// ui_interface->openVerticalBox("jacks");
-		// ui_interface->declare(&fEntry0, "CV", "5");
-		// ui_interface->addNumEntry("gaincv", &fEntry0, 0.0f, 0.0f, 1.0f, 0.00999999978f);
-		// ui_interface->declare(&fEntry2, "CV", "4");
-		// ui_interface->addNumEntry("shaprcv", &fEntry2, 0.0f, 0.0f, 1.0f, 0.00999999978f);
-		// ui_interface->declare(&fEntry1, "CV", "3");
-		// ui_interface->addNumEntry("strikecv", &fEntry1, 0.0f, 0.0f, 1.0f, 0.00999999978f);
-		// ui_interface->closeBox();
-		// ui_interface->addButton("Trigger", &fButton1);
-		// ui_interface->declare(&fEntry3, "CV", "2");
-		// ui_interface->addNumEntry("freqcv", &fEntry3, 1.0f, 1.0f, 32.0f, 0.00100000005f);
-		// ui_interface->declare(&fButton0, "CV", "1");
-		// ui_interface->addButton("gate", &fButton0);
-		fSlow0 = std::min<float>((float(fEntry1) + float(fHslider1)), 1.0f);
-		fSlow1 = tanTable.interp((fConst1 * ((15000.0f * fSlow0) + 500.0f)) / 2.f * M_PI);
+		fSlow0 = std::min<float>((float(strikeCV) + float(strikeKnob)), 1.0f);
+		fSlow1 = MathTools::tan(fConst1 * ((15000.0f * fSlow0) + 500.0f));
 		fSlow2 = (1.0f / fSlow1);
 		fSlow3 = (((fSlow2 + 1.41421354f) / fSlow1) + 1.0f);
-		fSlow4 = (std::min<float>((float(fEntry0) + float(fHslider0)), 1.0f) / fSlow3);
-		fSlow5 = tanTable.interp((fConst1 * ((500.0f * fSlow0) + 40.0f)) / 2.f * M_PI);
+		fSlow4 = (std::min<float>((float(gainCV) + float(gainKnob)), 1.0f) / fSlow3);
+		fSlow5 = MathTools::tan(fConst1 * ((500.0f * fSlow0) + 40.0f));
 		fSlow6 = (1.0f / fSlow5);
 		fSlow7 = (1.0f / (((fSlow6 + 1.41421354f) / fSlow5) + 1.0f));
-		fSlow8 = pow_2f(fSlow5);
+		fSlow8 = MathTools::pow2(fSlow5);
 		fSlow9 = (1.0f / fSlow8);
 		fSlow10 = (((fSlow6 + -1.41421354f) / fSlow5) + 1.0f);
 		fSlow11 = (2.0f * (1.0f - fSlow9));
 		fSlow12 = (0.0f - (2.0f / fSlow8));
 		fSlow13 = (1.0f / fSlow3);
 		fSlow14 = (((fSlow2 + -1.41421354f) / fSlow1) + 1.0f);
-		fSlow15 = (2.0f * (1.0f - (1.0f / pow_2f(fSlow1))));
+		fSlow15 = (2.0f * (1.0f - (1.0f / MathTools::pow2(fSlow1))));
 		fSlow16 =
-			(1.0f / std::max<float>(1.0f, (fConst2 * std::min<float>((float(fEntry2) + float(fHslider2)), 1.0f))));
-		fSlow17 = (float(fButton0) + float(fButton1));
-		fSlow18 = (float(fEntry3) * float(fHslider3));
-		fSlow19 = (fConst4 * table_cos((fConst5 * fSlow18)));
-		fSlow20 = (fConst8 * table_cos((fConst5 * (fSlow18 + 200.0f))));
-		fSlow21 = (fConst11 * table_cos((fConst5 * (fSlow18 + 400.0f))));
-		fSlow22 = (fConst14 * table_cos((fConst5 * (fSlow18 + 600.0f))));
-		fSlow23 = (fConst17 * table_cos((fConst5 * (fSlow18 + 800.0f))));
-		fSlow24 = (fConst20 * table_cos((fConst5 * (fSlow18 + 1000.0f))));
-		fSlow25 = (fConst23 * table_cos((fConst5 * (fSlow18 + 1200.0f))));
-		fSlow26 = (fConst26 * table_cos((fConst5 * (fSlow18 + 1400.0f))));
-		fSlow27 = (fConst29 * table_cos((fConst5 * (fSlow18 + 1600.0f))));
-		fSlow28 = (fConst32 * table_cos((fConst5 * (fSlow18 + 1800.0f))));
-		fSlow29 = (fConst35 * table_cos((fConst5 * (fSlow18 + 2000.0f))));
-		fSlow30 = (fConst38 * table_cos((fConst5 * (fSlow18 + 2200.0f))));
-		fSlow31 = (fConst41 * table_cos((fConst5 * (fSlow18 + 2400.0f))));
-		fSlow32 = (fConst44 * table_cos((fConst5 * (fSlow18 + 2600.0f))));
-		fSlow33 = (fConst47 * table_cos((fConst5 * (fSlow18 + 2800.0f))));
-		fSlow34 = (fConst50 * table_cos((fConst5 * (fSlow18 + 3000.0f))));
-		fSlow35 = (fConst53 * table_cos((fConst5 * (fSlow18 + 3200.0f))));
-		fSlow36 = (fConst56 * table_cos((fConst5 * (fSlow18 + 3400.0f))));
-		fSlow37 = (fConst59 * table_cos((fConst5 * (fSlow18 + 3600.0f))));
-		fSlow38 = (fConst62 * table_cos((fConst5 * (fSlow18 + 3800.0f))));
+			(1.0f / std::max<float>(1.0f, (fConst2 * std::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
+		fSlow17 = float(trigIn);
+		fSlow18 = (float(freqCV) * float(freqKnob));
+		fSlow19 = (fConst4 * MathTools::cos((fConst5 * fSlow18)));
+		fSlow20 = (fConst8 * MathTools::cos((fConst5 * (fSlow18 + 200.0f))));
+		fSlow21 = (fConst11 * MathTools::cos((fConst5 * (fSlow18 + 400.0f))));
+		fSlow22 = (fConst14 * MathTools::cos((fConst5 * (fSlow18 + 600.0f))));
+		fSlow23 = (fConst17 * MathTools::cos((fConst5 * (fSlow18 + 800.0f))));
+		fSlow24 = (fConst20 * MathTools::cos((fConst5 * (fSlow18 + 1000.0f))));
+		fSlow25 = (fConst23 * MathTools::cos((fConst5 * (fSlow18 + 1200.0f))));
+		fSlow26 = (fConst26 * MathTools::cos((fConst5 * (fSlow18 + 1400.0f))));
+		fSlow27 = (fConst29 * MathTools::cos((fConst5 * (fSlow18 + 1600.0f))));
+		fSlow28 = (fConst32 * MathTools::cos((fConst5 * (fSlow18 + 1800.0f))));
+		fSlow29 = (fConst35 * MathTools::cos((fConst5 * (fSlow18 + 2000.0f))));
+		fSlow30 = (fConst38 * MathTools::cos((fConst5 * (fSlow18 + 2200.0f))));
+		fSlow31 = (fConst41 * MathTools::cos((fConst5 * (fSlow18 + 2400.0f))));
+		fSlow32 = (fConst44 * MathTools::cos((fConst5 * (fSlow18 + 2600.0f))));
+		fSlow33 = (fConst47 * MathTools::cos((fConst5 * (fSlow18 + 2800.0f))));
+		fSlow34 = (fConst50 * MathTools::cos((fConst5 * (fSlow18 + 3000.0f))));
+		fSlow35 = (fConst53 * MathTools::cos((fConst5 * (fSlow18 + 3200.0f))));
+		fSlow36 = (fConst56 * MathTools::cos((fConst5 * (fSlow18 + 3400.0f))));
+		fSlow37 = (fConst59 * MathTools::cos((fConst5 * (fSlow18 + 3600.0f))));
+		fSlow38 = (fConst62 * MathTools::cos((fConst5 * (fSlow18 + 3800.0f))));
 	}
 
 	void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
 			case Freq:
+				freqKnob = MathTools::map_value(val, 0.f, 1.f, 20.f, 500.f);
+				paramsUpdated = true;
 				break;
 
 			case Gain:
-				// new_damp = val;
-				// damp_needs_update = true;
+				gainKnob = val;
+				paramsUpdated = true;
 				break;
 
 			case Sharpness:
+				sharpnessKnob = val;
+				paramsUpdated = true;
 				break;
 
 			case Strike:
+				strikeKnob = val;
+				paramsUpdated = true;
 				break;
 		}
 	}
@@ -399,21 +366,28 @@ public:
 	{
 		switch (input_id) {
 			case Freq:
+				freqCV = expTable.interp(val);
+				paramsUpdated = true;
 				break;
 
 			case Gain:
-				// new_damp = val;
-				// damp_needs_update = true;
+				gainCV = val;
+				paramsUpdated = true;
 				break;
 
 			case Sharpness:
+				sharpCV = val;
+				paramsUpdated = true;
 				break;
 
 			case Strike:
+				strikeCV = val;
+				paramsUpdated = true;
 				break;
 
 			case Trigger:
 				trigIn = val;
+				paramsUpdated = true;
 				break;
 		}
 	}
@@ -428,40 +402,30 @@ public:
 		return 0;
 	}
 
-	static std::unique_ptr<CoreProcessor> create()
-	{
-		return std::make_unique<DjembeCore>();
-	}
-
-	static constexpr char typeID[20] = "DJEMBE";
-	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
-
 private:
+	bool paramsUpdated = false;
 	float signalOut = 0;
-	float trigIn = 0;
 
 	float IOTA;
 
-	FAUSTFLOAT fEntry0;
-	FAUSTFLOAT fHslider0;
-	int fSampleRate;
+	float gainCV;
+	float gainKnob;
 	float fConst1;
-	FAUSTFLOAT fEntry1;
-	FAUSTFLOAT fHslider1;
+	float strikeCV;
+	float strikeKnob;
 	int iRec3[2];
 	float fRec2[3];
 	float fRec1[3];
 	float fConst2;
-	FAUSTFLOAT fEntry2;
-	FAUSTFLOAT fHslider2;
-	FAUSTFLOAT fButton0;
-	FAUSTFLOAT fButton1;
+	float sharpCV;
+	float sharpnessKnob;
+	float trigIn;
 	float fVec0[2];
 	int iRec4[2];
 	float fConst4;
 	float fConst5;
-	FAUSTFLOAT fEntry3;
-	FAUSTFLOAT fHslider3;
+	float freqCV;
+	float freqKnob;
 	float fConst6;
 	float fRec0[3];
 	float fConst8;
@@ -561,11 +525,15 @@ private:
 	float fSlow37;
 	float fSlow38;
 
+public:
 	// clang-format off
-	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
-	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
-	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
-	virtual StaticString<LongNameChars> get_description() override { return description; }
+	static constexpr char typeID[20] = "DJEMBE";
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<DjembeCore>(); }
+	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
+	StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	StaticString<LongNameChars> get_description() override { return description; }
 	// clang-format on
 };
 
