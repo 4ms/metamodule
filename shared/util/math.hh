@@ -181,7 +181,7 @@ static inline float cos(float x)
 
 static inline float tan(float x)
 {
-	return tanTable.interp_wrap(x / (2.f * M_PI));
+	return tanTable.interp_wrap(x / M_PI);
 }
 
 }; // namespace MathTools
