@@ -302,7 +302,7 @@ public:
 	{
 		switch (input_id) {
 			case Freq:
-				freqCV = expTable.interp(val);
+				freqCV = expTable.interp(MathTools::constrain(val, 0.f, 1.0f));
 				paramsUpdated = true;
 				break;
 
