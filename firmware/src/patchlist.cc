@@ -14,11 +14,13 @@
 	#include "fadedelay_two.hh"
 	#include "simple_lfo_passthrru.hh"
 	#include "DjembeTest.hh"
+	#include "dualdjmebe.hh"
 
 PatchList::PatchList()
 	: _patches{
 		  {simple_lfo_passthrru},
 		  {DjembeTest},
+		  {dualdjmebe},
 		  {example_stereo_verb},
 		  {examplePitchShiftSimple},
 		  {exampleDrum},
@@ -27,7 +29,7 @@ PatchList::PatchList()
 		  {QuadDrum},
 		  // {KP_FM_DRUM_DET},
 		  {KarplusStereo},
-		  {LPFBPF},
+		  // {LPFBPF},
 	  }
 {
 	_cur_patch_idx = 0;
