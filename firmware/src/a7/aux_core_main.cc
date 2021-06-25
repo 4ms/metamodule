@@ -26,11 +26,14 @@ extern "C" void aux_core_main()
 
 		// Process a module command
 		if (command == SMPCommand::UpdateModule) {
+			Debug::Pin3::high();
 			auto module_idx = SMPControl::read<ModuleID>();
 			patch_player->modules[module_idx]->update();
 
 			// signal we're done
 			SMPControl::write<DoneZero>(0);
+			// MainCore::send_sgi(SMPCommand::UpdateModule);
+			Debug::Pin3::low();
 		}
 
 		// Update a param command
@@ -47,12 +50,6 @@ extern "C" void aux_core_main()
 		// Run a function
 		if (command == SMPThread::CallFunction) {
 			SMPThread::execute();
-			// auto thread_addr = SMPControl::read<FunctionAddress>();
-			// auto thread_func = reinterpret_cast<std::function<void()> *>(thread_addr);
-			// thread_func->operator()();
-
-			// signal we're done
-			// SMPControl::write<DoneZero>(0);
 		}
 	}
 }
