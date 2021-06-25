@@ -102,9 +102,10 @@ public:
 			if (!SMPThread::is_running()) {
 				SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);
 			} else {
-			Debug::Pin2::high();
+				Debug::Pin2::high();
 				modules[module_i]->update();
-			Debug::Pin2::low();
+				Debug::Pin2::low();
+			}
 		}
 		SMPThread::join();
 
