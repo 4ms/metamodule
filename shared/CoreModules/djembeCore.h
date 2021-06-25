@@ -1,7 +1,7 @@
 #pragma once
-
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
+#include "gcem/include/gcem.hpp"
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
@@ -25,69 +25,6 @@ class DjembeCore : public CoreProcessor {
 public:
 	DjembeCore()
 	{
-		fConst1 = (3.14159274f / SAMPLERATE);
-		fConst2 = (0.00200000009f * SAMPLERATE);
-		float fConst3 = std::pow(0.00100000005f, (1.66666663f / SAMPLERATE));
-		fConst4 = (0.0f - (2.0f * fConst3));
-		fConst5 = (6.28318548f / SAMPLERATE);
-		fConst6 = (fConst3 * fConst3);
-		float fConst7 = std::pow(0.00100000005f, (1.75438595f / SAMPLERATE));
-		fConst8 = (0.0f - (2.0f * fConst7));
-		fConst9 = (fConst7 * fConst7);
-		float fConst10 = std::pow(0.00100000005f, (1.85185182f / SAMPLERATE));
-		fConst11 = (0.0f - (2.0f * fConst10));
-		fConst12 = (fConst10 * fConst10);
-		float fConst13 = std::pow(0.00100000005f, (1.96078432f / SAMPLERATE));
-		fConst14 = (0.0f - (2.0f * fConst13));
-		fConst15 = (fConst13 * fConst13);
-		float fConst16 = std::pow(0.00100000005f, (2.08333325f / SAMPLERATE));
-		fConst17 = (0.0f - (2.0f * fConst16));
-		fConst18 = (fConst16 * fConst16);
-		float fConst19 = std::pow(0.00100000005f, (2.22222233f / SAMPLERATE));
-		fConst20 = (0.0f - (2.0f * fConst19));
-		fConst21 = (fConst19 * fConst19);
-		float fConst22 = std::pow(0.00100000005f, (2.38095236f / SAMPLERATE));
-		fConst23 = (0.0f - (2.0f * fConst22));
-		fConst24 = (fConst22 * fConst22);
-		float fConst25 = std::pow(0.00100000005f, (2.56410265f / SAMPLERATE));
-		fConst26 = (0.0f - (2.0f * fConst25));
-		fConst27 = (fConst25 * fConst25);
-		float fConst28 = std::pow(0.00100000005f, (2.77777767f / SAMPLERATE));
-		fConst29 = (0.0f - (2.0f * fConst28));
-		fConst30 = (fConst28 * fConst28);
-		float fConst31 = std::pow(0.00100000005f, (3.030303f / SAMPLERATE));
-		fConst32 = (0.0f - (2.0f * fConst31));
-		fConst33 = (fConst31 * fConst31);
-		float fConst34 = std::pow(0.00100000005f, (3.33333325f / SAMPLERATE));
-		fConst35 = (0.0f - (2.0f * fConst34));
-		fConst36 = (fConst34 * fConst34);
-		float fConst37 = std::pow(0.00100000005f, (3.70370364f / SAMPLERATE));
-		fConst38 = (0.0f - (2.0f * fConst37));
-		fConst39 = (fConst37 * fConst37);
-		float fConst40 = std::pow(0.00100000005f, (4.16666651f / SAMPLERATE));
-		fConst41 = (0.0f - (2.0f * fConst40));
-		fConst42 = (fConst40 * fConst40);
-		float fConst43 = std::pow(0.00100000005f, (4.76190472f / SAMPLERATE));
-		fConst44 = (0.0f - (2.0f * fConst43));
-		fConst45 = (fConst43 * fConst43);
-		float fConst46 = std::pow(0.00100000005f, (5.55555534f / SAMPLERATE));
-		fConst47 = (0.0f - (2.0f * fConst46));
-		fConst48 = (fConst46 * fConst46);
-		float fConst49 = std::pow(0.00100000005f, (6.66666651f / SAMPLERATE));
-		fConst50 = (0.0f - (2.0f * fConst49));
-		fConst51 = (fConst49 * fConst49);
-		float fConst52 = std::pow(0.00100000005f, (8.33333302f / SAMPLERATE));
-		fConst53 = (0.0f - (2.0f * fConst52));
-		fConst54 = (fConst52 * fConst52);
-		float fConst55 = std::pow(0.00100000005f, (11.1111107f / SAMPLERATE));
-		fConst56 = (0.0f - (2.0f * fConst55));
-		fConst57 = (fConst55 * fConst55);
-		float fConst58 = std::pow(0.00100000005f, (16.666666f / SAMPLERATE));
-		fConst59 = (0.0f - (2.0f * fConst58));
-		fConst60 = (fConst58 * fConst58);
-		float fConst61 = std::pow(0.00100000005f, (33.3333321f / SAMPLERATE));
-		fConst62 = (0.0f - (2.0f * fConst61));
-		fConst63 = (fConst61 * fConst61);
 
 		IOTA = 0;
 
@@ -195,7 +132,7 @@ public:
 		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (fSlow17 <= fVec0[1])) + (fSlow17 > fVec0[1]));
 		float fTemp0 = (fSlow16 * float(iRec4[0]));
 		float fTemp1 = (fSlow4 * ((fRec1[2] + (fRec1[0] + (2.0f * fRec1[1]))) *
-								  std::max<float>(0.0f, std::min<float>(fTemp0, (2.0f - fTemp0)))));
+								  MathTools::max<float>(0.0f, MathTools::min<float>(fTemp0, (2.0f - fTemp0)))));
 		fRec0[0] = (fTemp1 - ((fSlow19 * fRec0[1]) + (fConst6 * fRec0[2])));
 		fRec5[0] = (fTemp1 - ((fSlow20 * fRec5[1]) + (fConst9 * fRec5[2])));
 		fRec6[0] = (fTemp1 - ((fSlow21 * fRec6[1]) + (fConst12 * fRec6[2])));
@@ -289,11 +226,11 @@ public:
 
 	void update_params()
 	{
-		fSlow0 = std::min<float>((float(strikeCV) + float(strikeKnob)), 1.0f);
+		fSlow0 = MathTools::min<float>((float(strikeCV) + float(strikeKnob)), 1.0f);
 		fSlow1 = MathTools::tan(fConst1 * ((15000.0f * fSlow0) + 500.0f));
 		fSlow2 = (1.0f / fSlow1);
 		fSlow3 = (((fSlow2 + 1.41421354f) / fSlow1) + 1.0f);
-		fSlow4 = (std::min<float>((float(gainCV) + float(gainKnob)), 1.0f) / fSlow3);
+		fSlow4 = (MathTools::min<float>((float(gainCV) + float(gainKnob)), 1.0f) / fSlow3);
 		fSlow5 = MathTools::tan(fConst1 * ((500.0f * fSlow0) + 40.0f));
 		fSlow6 = (1.0f / fSlow5);
 		fSlow7 = (1.0f / (((fSlow6 + 1.41421354f) / fSlow5) + 1.0f));
@@ -305,8 +242,8 @@ public:
 		fSlow13 = (1.0f / fSlow3);
 		fSlow14 = (((fSlow2 + -1.41421354f) / fSlow1) + 1.0f);
 		fSlow15 = (2.0f * (1.0f - (1.0f / (fSlow1 * fSlow1))));
-		fSlow16 =
-			(1.0f / std::max<float>(1.0f, (fConst2 * std::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
+		fSlow16 = (1.0f / MathTools::max<float>(
+							  1.0f, (fConst2 * MathTools::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
 		fSlow17 = float(trigIn) * 2.f;
 		fSlow18 = (float(freqCV) * float(freqKnob));
 		fSlow19 = (fConst4 * MathTools::cos((fConst5 * fSlow18)));
@@ -409,80 +346,80 @@ private:
 
 	float gainCV;
 	float gainKnob;
-	float fConst1;
+	// float fConst1;
 	float strikeCV;
 	float strikeKnob;
 	int iRec3[2];
 	float fRec2[3];
 	float fRec1[3];
-	float fConst2;
+	// float fConst2;
 	float sharpCV;
 	float sharpnessKnob;
 	float trigIn;
 	float fVec0[2];
 	int iRec4[2];
-	float fConst4;
-	float fConst5;
+	// float fConst4;
+	// float fConst5;
 	float freqCV;
 	float freqKnob;
-	float fConst6;
+	// float fConst6;
 	float fRec0[3];
-	float fConst8;
-	float fConst9;
+	// float fConst8;
+	// float fConst9;
 	float fRec5[3];
-	float fConst11;
-	float fConst12;
+	// float fConst11;
+	// float fConst12;
 	float fRec6[3];
-	float fConst14;
-	float fConst15;
+	// float fConst14;
+	// float fConst15;
 	float fRec7[3];
-	float fConst17;
-	float fConst18;
+	// float fConst17;
+	// float fConst18;
 	float fRec8[3];
-	float fConst20;
-	float fConst21;
+	// float fConst20;
+	// float fConst21;
 	float fRec9[3];
-	float fConst23;
-	float fConst24;
+	// float fConst23;
+	// float fConst24;
 	float fRec10[3];
-	float fConst26;
-	float fConst27;
+	// float fConst26;
+	// float fConst27;
 	float fRec11[3];
-	float fConst29;
-	float fConst30;
+	// float fConst29;
+	// float fConst30;
 	float fRec12[3];
-	float fConst32;
-	float fConst33;
+	// float fConst32;
+	// float fConst33;
 	float fRec13[3];
-	float fConst35;
-	float fConst36;
+	// float fConst35;
+	// float fConst36;
 	float fRec14[3];
-	float fConst38;
-	float fConst39;
+	// float fConst38;
+	// float fConst39;
 	float fRec15[3];
-	float fConst41;
-	float fConst42;
+	// float fConst41;
+	// float fConst42;
 	float fRec16[3];
-	float fConst44;
-	float fConst45;
+	// float fConst44;
+	// float fConst45;
 	float fRec17[3];
-	float fConst47;
-	float fConst48;
+	// float fConst47;
+	// float fConst48;
 	float fRec18[3];
-	float fConst50;
-	float fConst51;
+	// float fConst50;
+	// float fConst51;
 	float fRec19[3];
-	float fConst53;
-	float fConst54;
+	// float fConst53;
+	// float fConst54;
 	float fRec20[3];
-	float fConst56;
-	float fConst57;
+	// float fConst56;
+	// float fConst57;
 	float fRec21[3];
-	float fConst59;
-	float fConst60;
+	// float fConst59;
+	// float fConst60;
 	float fRec22[3];
-	float fConst62;
-	float fConst63;
+	// float fConst62;
+	// float fConst63;
 	float fRec23[3];
 	float fSlow0;
 	float fSlow1;
@@ -523,6 +460,69 @@ private:
 	float fSlow36;
 	float fSlow37;
 	float fSlow38;
+	static constexpr float fConst1 = (3.14159274f / SAMPLERATE);
+	static constexpr float fConst2 = (0.00200000009f * SAMPLERATE);
+	static constexpr float fConst3 = gcem::pow(0.00100000005f, (1.66666663f / SAMPLERATE));
+	static constexpr float fConst4 = (0.0f - (2.0f * fConst3));
+	static constexpr float fConst5 = (6.28318548f / SAMPLERATE);
+	static constexpr float fConst6 = (fConst3 * fConst3);
+	static constexpr float fConst7 = gcem::pow(0.00100000005f, (1.75438595f / SAMPLERATE));
+	static constexpr float fConst8 = (0.0f - (2.0f * fConst7));
+	static constexpr float fConst9 = (fConst7 * fConst7);
+	static constexpr float fConst10 = gcem::pow(0.00100000005f, (1.85185182f / SAMPLERATE));
+	static constexpr float fConst11 = (0.0f - (2.0f * fConst10));
+	static constexpr float fConst12 = (fConst10 * fConst10);
+	static constexpr float fConst13 = gcem::pow(0.00100000005f, (1.96078432f / SAMPLERATE));
+	static constexpr float fConst14 = (0.0f - (2.0f * fConst13));
+	static constexpr float fConst15 = (fConst13 * fConst13);
+	static constexpr float fConst16 = gcem::pow(0.00100000005f, (2.08333325f / SAMPLERATE));
+	static constexpr float fConst17 = (0.0f - (2.0f * fConst16));
+	static constexpr float fConst18 = (fConst16 * fConst16);
+	static constexpr float fConst19 = gcem::pow(0.00100000005f, (2.22222233f / SAMPLERATE));
+	static constexpr float fConst20 = (0.0f - (2.0f * fConst19));
+	static constexpr float fConst21 = (fConst19 * fConst19);
+	static constexpr float fConst22 = gcem::pow(0.00100000005f, (2.38095236f / SAMPLERATE));
+	static constexpr float fConst23 = (0.0f - (2.0f * fConst22));
+	static constexpr float fConst24 = (fConst22 * fConst22);
+	static constexpr float fConst25 = gcem::pow(0.00100000005f, (2.56410265f / SAMPLERATE));
+	static constexpr float fConst26 = (0.0f - (2.0f * fConst25));
+	static constexpr float fConst27 = (fConst25 * fConst25);
+	static constexpr float fConst28 = gcem::pow(0.00100000005f, (2.77777767f / SAMPLERATE));
+	static constexpr float fConst29 = (0.0f - (2.0f * fConst28));
+	static constexpr float fConst30 = (fConst28 * fConst28);
+	static constexpr float fConst31 = gcem::pow(0.00100000005f, (3.030303f / SAMPLERATE));
+	static constexpr float fConst32 = (0.0f - (2.0f * fConst31));
+	static constexpr float fConst33 = (fConst31 * fConst31);
+	static constexpr float fConst34 = gcem::pow(0.00100000005f, (3.33333325f / SAMPLERATE));
+	static constexpr float fConst35 = (0.0f - (2.0f * fConst34));
+	static constexpr float fConst36 = (fConst34 * fConst34);
+	static constexpr float fConst37 = gcem::pow(0.00100000005f, (3.70370364f / SAMPLERATE));
+	static constexpr float fConst38 = (0.0f - (2.0f * fConst37));
+	static constexpr float fConst39 = (fConst37 * fConst37);
+	static constexpr float fConst40 = gcem::pow(0.00100000005f, (4.16666651f / SAMPLERATE));
+	static constexpr float fConst41 = (0.0f - (2.0f * fConst40));
+	static constexpr float fConst42 = (fConst40 * fConst40);
+	static constexpr float fConst43 = gcem::pow(0.00100000005f, (4.76190472f / SAMPLERATE));
+	static constexpr float fConst44 = (0.0f - (2.0f * fConst43));
+	static constexpr float fConst45 = (fConst43 * fConst43);
+	static constexpr float fConst46 = gcem::pow(0.00100000005f, (5.55555534f / SAMPLERATE));
+	static constexpr float fConst47 = (0.0f - (2.0f * fConst46));
+	static constexpr float fConst48 = (fConst46 * fConst46);
+	static constexpr float fConst49 = gcem::pow(0.00100000005f, (6.66666651f / SAMPLERATE));
+	static constexpr float fConst50 = (0.0f - (2.0f * fConst49));
+	static constexpr float fConst51 = (fConst49 * fConst49);
+	static constexpr float fConst52 = gcem::pow(0.00100000005f, (8.33333302f / SAMPLERATE));
+	static constexpr float fConst53 = (0.0f - (2.0f * fConst52));
+	static constexpr float fConst54 = (fConst52 * fConst52);
+	static constexpr float fConst55 = gcem::pow(0.00100000005f, (11.1111107f / SAMPLERATE));
+	static constexpr float fConst56 = (0.0f - (2.0f * fConst55));
+	static constexpr float fConst57 = (fConst55 * fConst55);
+	static constexpr float fConst58 = gcem::pow(0.00100000005f, (16.666666f / SAMPLERATE));
+	static constexpr float fConst59 = (0.0f - (2.0f * fConst58));
+	static constexpr float fConst60 = (fConst58 * fConst58);
+	static constexpr float fConst61 = gcem::pow(0.00100000005f, (33.3333321f / SAMPLERATE));
+	static constexpr float fConst62 = (0.0f - (2.0f * fConst61));
+	static constexpr float fConst63 = (fConst61 * fConst61);
 
 public:
 	// clang-format off
