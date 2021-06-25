@@ -15,18 +15,20 @@
 	#include "simple_lfo_passthrru.hh"
 	#include "DjembeTest.hh"
 	#include "dualdjmebe.hh"
+	#include "quaddjmebe.hh"
 
 PatchList::PatchList()
 	: _patches{
 		  {simple_lfo_passthrru},
 		  {DjembeTest},
 		  {dualdjmebe},
+		  {quaddjmebe},
 		  {example_stereo_verb},
 		  {examplePitchShiftSimple},
 		  {exampleDrum},
 		  {fadedelay_example},
 		  {example_drum_verb_mono},
-		  {QuadDrum},
+		  // {QuadDrum},
 		  // {KP_FM_DRUM_DET},
 		  {KarplusStereo},
 		  // {LPFBPF},
