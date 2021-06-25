@@ -25,21 +25,20 @@ class DjembeCore : public CoreProcessor {
 public:
 	DjembeCore()
 	{
-
 		IOTA = 0;
 
 		// Todo: Combine these loops
 		for (int l0 = 0; (l0 < 2); l0 = (l0 + 1)) {
-			iRec3[l0] = 0;
+			noise[l0] = 0;
 		}
 		for (int l1 = 0; (l1 < 3); l1 = (l1 + 1)) {
-			fRec2[l1] = 0.0f;
+			noise_hp[l1] = 0.0f;
 		}
 		for (int l2 = 0; (l2 < 3); l2 = (l2 + 1)) {
-			fRec1[l2] = 0.0f;
+			noise_hp_lp[l2] = 0.0f;
 		}
 		for (int l3 = 0; (l3 < 2); l3 = (l3 + 1)) {
-			fVec0[l3] = 0.0f;
+			fVecTrig[l3] = 0.0f;
 		}
 		for (int l4 = 0; (l4 < 2); l4 = (l4 + 1)) {
 			iRec4[l4] = 0;
@@ -123,36 +122,37 @@ public:
 			update_params();
 		paramsUpdated = false;
 
-		// for (int i0 = 0; (i0 < count); i0 = (i0 + 1)) {
-		iRec3[0] = ((1103515245 * iRec3[1]) + 12345);
-		fRec2[0] = ((4.65661287e-10f * float(iRec3[0])) - (fSlow7 * ((fSlow10 * fRec2[2]) + (fSlow11 * fRec2[1]))));
-		fRec1[0] = ((fSlow7 * (((fSlow9 * fRec2[0]) + (fSlow12 * fRec2[1])) + (fSlow9 * fRec2[2]))) -
-					(fSlow13 * ((fSlow14 * fRec1[2]) + (fSlow15 * fRec1[1]))));
-		fVec0[0] = fSlow17;
-		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (fSlow17 <= fVec0[1])) + (fSlow17 > fVec0[1]));
-		float fTemp0 = (fSlow16 * float(iRec4[0]));
-		float fTemp1 = (fSlow4 * ((fRec1[2] + (fRec1[0] + (2.0f * fRec1[1]))) *
-								  MathTools::max<float>(0.0f, MathTools::min<float>(fTemp0, (2.0f - fTemp0)))));
-		fRec0[0] = (fTemp1 - ((fSlow19 * fRec0[1]) + (fConst6 * fRec0[2])));
-		fRec5[0] = (fTemp1 - ((fSlow20 * fRec5[1]) + (fConst9 * fRec5[2])));
-		fRec6[0] = (fTemp1 - ((fSlow21 * fRec6[1]) + (fConst12 * fRec6[2])));
-		fRec7[0] = (fTemp1 - ((fSlow22 * fRec7[1]) + (fConst15 * fRec7[2])));
-		fRec8[0] = (fTemp1 - ((fSlow23 * fRec8[1]) + (fConst18 * fRec8[2])));
-		fRec9[0] = (fTemp1 - ((fSlow24 * fRec9[1]) + (fConst21 * fRec9[2])));
-		fRec10[0] = (fTemp1 - ((fSlow25 * fRec10[1]) + (fConst24 * fRec10[2])));
-		fRec11[0] = (fTemp1 - ((fSlow26 * fRec11[1]) + (fConst27 * fRec11[2])));
-		fRec12[0] = (fTemp1 - ((fSlow27 * fRec12[1]) + (fConst30 * fRec12[2])));
-		fRec13[0] = (fTemp1 - ((fSlow28 * fRec13[1]) + (fConst33 * fRec13[2])));
-		fRec14[0] = (fTemp1 - ((fSlow29 * fRec14[1]) + (fConst36 * fRec14[2])));
-		fRec15[0] = (fTemp1 - ((fSlow30 * fRec15[1]) + (fConst39 * fRec15[2])));
-		fRec16[0] = (fTemp1 - ((fSlow31 * fRec16[1]) + (fConst42 * fRec16[2])));
-		fRec17[0] = (fTemp1 - ((fSlow32 * fRec17[1]) + (fConst45 * fRec17[2])));
-		fRec18[0] = (fTemp1 - ((fSlow33 * fRec18[1]) + (fConst48 * fRec18[2])));
-		fRec19[0] = (fTemp1 - ((fSlow34 * fRec19[1]) + (fConst51 * fRec19[2])));
-		fRec20[0] = (fTemp1 - ((fSlow35 * fRec20[1]) + (fConst54 * fRec20[2])));
-		fRec21[0] = (fTemp1 - ((fSlow36 * fRec21[1]) + (fConst57 * fRec21[2])));
-		fRec22[0] = (fTemp1 - ((fSlow37 * fRec22[1]) + (fConst60 * fRec22[2])));
-		fRec23[0] = (fTemp1 - ((fSlow38 * fRec23[1]) + (fConst63 * fRec23[2])));
+		// StrikeModel:
+		noise[0] = (1103515245 * noise[1]) + 12345;
+		noise_hp[0] =
+			(4.65661287e-10f * float(noise[0])) - (fSlow7 * ((fSlow10 * noise_hp[2]) + (fSlow11 * noise_hp[1])));
+		noise_hp_lp[0] = (fSlow7 * (((fSlow9 * noise_hp[0]) + (fSlow12 * noise_hp[1])) + (fSlow9 * noise_hp[2]))) -
+						 (fSlow13 * ((fSlow14 * noise_hp_lp[2]) + (fSlow15 * noise_hp_lp[1])));
+		fVecTrig[0] = fSlowTrig;
+		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (fSlowTrig <= fVecTrig[1])) + (fSlowTrig > fVecTrig[1]));
+		float fTemp0 = (adEnvRate * float(iRec4[0]));
+		float adEnv = MathTools::max<float>(0.0f, MathTools::min<float>(fTemp0, (2.0f - fTemp0)));
+		float noiseBurst = fSlow4 * (noise_hp_lp[2] + (noise_hp_lp[0] + (2.0f * noise_hp_lp[1]))) * adEnv;
+		fRec0[0] = (noiseBurst - ((fSlow19 * fRec0[1]) + (fConst6 * fRec0[2])));
+		fRec5[0] = (noiseBurst - ((fSlow20 * fRec5[1]) + (fConst9 * fRec5[2])));
+		fRec6[0] = (noiseBurst - ((fSlow21 * fRec6[1]) + (fConst12 * fRec6[2])));
+		fRec7[0] = (noiseBurst - ((fSlow22 * fRec7[1]) + (fConst15 * fRec7[2])));
+		fRec8[0] = (noiseBurst - ((fSlow23 * fRec8[1]) + (fConst18 * fRec8[2])));
+		fRec9[0] = (noiseBurst - ((fSlow24 * fRec9[1]) + (fConst21 * fRec9[2])));
+		fRec10[0] = (noiseBurst - ((fSlow25 * fRec10[1]) + (fConst24 * fRec10[2])));
+		fRec11[0] = (noiseBurst - ((fSlow26 * fRec11[1]) + (fConst27 * fRec11[2])));
+		fRec12[0] = (noiseBurst - ((fSlow27 * fRec12[1]) + (fConst30 * fRec12[2])));
+		fRec13[0] = (noiseBurst - ((fSlow28 * fRec13[1]) + (fConst33 * fRec13[2])));
+		fRec14[0] = (noiseBurst - ((fSlow29 * fRec14[1]) + (fConst36 * fRec14[2])));
+		fRec15[0] = (noiseBurst - ((fSlow30 * fRec15[1]) + (fConst39 * fRec15[2])));
+		fRec16[0] = (noiseBurst - ((fSlow31 * fRec16[1]) + (fConst42 * fRec16[2])));
+		fRec17[0] = (noiseBurst - ((fSlow32 * fRec17[1]) + (fConst45 * fRec17[2])));
+		fRec18[0] = (noiseBurst - ((fSlow33 * fRec18[1]) + (fConst48 * fRec18[2])));
+		fRec19[0] = (noiseBurst - ((fSlow34 * fRec19[1]) + (fConst51 * fRec19[2])));
+		fRec20[0] = (noiseBurst - ((fSlow35 * fRec20[1]) + (fConst54 * fRec20[2])));
+		fRec21[0] = (noiseBurst - ((fSlow36 * fRec21[1]) + (fConst57 * fRec21[2])));
+		fRec22[0] = (noiseBurst - ((fSlow37 * fRec22[1]) + (fConst60 * fRec22[2])));
+		fRec23[0] = (noiseBurst - ((fSlow38 * fRec23[1]) + (fConst63 * fRec23[2])));
 		signalOut = float(
 			(0.0500000007f *
 			 ((((((((((((((((((((fRec0[0] + (0.25f * (fRec5[0] - fRec5[2]))) + (0.111111112f * (fRec6[0] - fRec6[2]))) +
@@ -174,12 +174,12 @@ public:
 				(0.00277008303f * (fRec22[0] - fRec22[2]))) +
 			   (0.00249999994f * (fRec23[0] - fRec23[2]))) -
 			  fRec0[2])));
-		iRec3[1] = iRec3[0];
-		fRec2[2] = fRec2[1];
-		fRec2[1] = fRec2[0];
-		fRec1[2] = fRec1[1];
-		fRec1[1] = fRec1[0];
-		fVec0[1] = fVec0[0];
+		noise[1] = noise[0];
+		noise_hp[2] = noise_hp[1];
+		noise_hp[1] = noise_hp[0];
+		noise_hp_lp[2] = noise_hp_lp[1];
+		noise_hp_lp[1] = noise_hp_lp[0];
+		fVecTrig[1] = fVecTrig[0];
 		iRec4[1] = iRec4[0];
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
@@ -226,12 +226,12 @@ public:
 
 	void update_params()
 	{
-		fSlow0 = MathTools::min<float>((float(strikeCV) + float(strikeKnob)), 1.0f);
-		fSlow1 = MathTools::tan(fConst1 * ((15000.0f * fSlow0) + 500.0f));
-		fSlow2 = (1.0f / fSlow1);
-		fSlow3 = (((fSlow2 + 1.41421354f) / fSlow1) + 1.0f);
-		fSlow4 = (MathTools::min<float>((float(gainCV) + float(gainKnob)), 1.0f) / fSlow3);
-		fSlow5 = MathTools::tan(fConst1 * ((500.0f * fSlow0) + 40.0f));
+		strike0 = MathTools::min<float>((float(strikeCV) + float(strikeKnob)), 1.0f);
+		strike1 = MathTools::tan(fConst1 * ((15000.0f * strike0) + 500.0f));
+		strike2 = (1.0f / strike1);
+		strike3 = (((strike2 + 1.41421354f) / strike1) + 1.0f);
+		fSlow4 = (MathTools::min<float>((float(gainCV) + float(gainKnob)), 1.0f) / strike3);
+		fSlow5 = MathTools::tan(fConst1 * ((500.0f * strike0) + 40.0f));
 		fSlow6 = (1.0f / fSlow5);
 		fSlow7 = (1.0f / (((fSlow6 + 1.41421354f) / fSlow5) + 1.0f));
 		fSlow8 = (fSlow5 * fSlow5);
@@ -239,12 +239,13 @@ public:
 		fSlow10 = (((fSlow6 + -1.41421354f) / fSlow5) + 1.0f);
 		fSlow11 = (2.0f * (1.0f - fSlow9));
 		fSlow12 = (0.0f - (2.0f / fSlow8));
-		fSlow13 = (1.0f / fSlow3);
-		fSlow14 = (((fSlow2 + -1.41421354f) / fSlow1) + 1.0f);
-		fSlow15 = (2.0f * (1.0f - (1.0f / (fSlow1 * fSlow1))));
-		fSlow16 = (1.0f / MathTools::max<float>(
-							  1.0f, (fConst2 * MathTools::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
-		fSlow17 = float(trigIn) * 2.f;
+		fSlow13 = (1.0f / strike3);
+		fSlow14 = (((strike2 + -1.41421354f) / strike1) + 1.0f);
+		fSlow15 = (2.0f * (1.0f - (1.0f / (strike1 * strike1))));
+		adEnvRate =
+			(1.0f / MathTools::max<float>(
+						1.0f, (fConst2 * MathTools::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
+		fSlowTrig = float(trigIn) * 2.f;
 		fSlow18 = (float(freqCV) * float(freqKnob));
 		fSlow19 = (fConst4 * MathTools::cos((fConst5 * fSlow18)));
 		fSlow20 = (fConst8 * MathTools::cos((fConst5 * (fSlow18 + 200.0f))));
@@ -349,14 +350,14 @@ private:
 	// float fConst1;
 	float strikeCV;
 	float strikeKnob;
-	int iRec3[2];
-	float fRec2[3];
-	float fRec1[3];
+	int noise[2];
+	float noise_hp[3];
+	float noise_hp_lp[3];
 	// float fConst2;
 	float sharpCV;
 	float sharpnessKnob;
 	float trigIn;
-	float fVec0[2];
+	float fVecTrig[2];
 	int iRec4[2];
 	// float fConst4;
 	// float fConst5;
@@ -421,10 +422,10 @@ private:
 	// float fConst62;
 	// float fConst63;
 	float fRec23[3];
-	float fSlow0;
-	float fSlow1;
-	float fSlow2;
-	float fSlow3;
+	float strike0;
+	float strike1;
+	float strike2;
+	float strike3;
 	float fSlow4;
 	float fSlow5;
 	float fSlow6;
@@ -437,8 +438,8 @@ private:
 	float fSlow13;
 	float fSlow14;
 	float fSlow15;
-	float fSlow16;
-	float fSlow17;
+	float adEnvRate;
+	float fSlowTrig;
 	float fSlow18;
 	float fSlow19;
 	float fSlow20;
