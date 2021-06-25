@@ -3,7 +3,8 @@ import sys
 effectName = raw_input()
 description = raw_input()
 moduleTypesFile = '../../shared/CoreModules/moduleTypes.h'
-coreTemplate = 'coreTemplate.txt'
+coreTemplate = 'coreTemplate.cpp'
+moduleWidgetTemplate = 'wrapperTemplate.cpp'
 plugincpp = '../src/plugin.cpp'
 pluginhpp = '../src/plugin.hpp'
 pluginjson = '../plugin.json'
@@ -49,7 +50,7 @@ with open(newCoreCPP,'w') as file:
 with open(plugincpp, 'r') as file :
   filedata = file.read()
 
-newText = 'Add modules here \n' + 'p->addModel(' + modelName + ');'
+newText = 'Add modules here \n' + '\tp->addModel(' + modelName + ');'
 filedata=filedata.replace('Add modules here',newText)
 
 with open(plugincpp, 'w') as file:
@@ -64,7 +65,7 @@ filedata = filedata.replace('module source file',newText)
 with open(pluginhpp, 'w') as file:
   file.write(filedata)
 
-with open('wrapperTemplate.txt', 'r') as file:
+with open(moduleWidgetTemplate, 'r') as file:
   filedata = file.read()
 
 filedata = filedata.replace('Template',effectName.capitalize())

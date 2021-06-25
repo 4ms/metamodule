@@ -1,0 +1,526 @@
+#include "patch.hh"
+static const Patch quaddjmebe = {
+	.patch_name = "quad-djmebe",
+	.modules_used =
+		{
+			"PANEL_8",		 // 0
+			"DJEMBE",		 // 1
+			"DJEMBE",		 // 2
+			"DJEMBE",		 // 3
+			"DJEMBE",		 // 4
+			"MULTILFO",		 // 5
+			"CLKMULTIPLIER", // 6
+			"CLKDIVIDER",	 // 7
+			"SEND_1TO4",	 // 8
+			"QUANTIZER",	 // 9
+			"ATTENVERT2",	 // 10
+			"MIXER4",		 // 11
+			"MIXER4",		 // 12
+			"QUANTIZER",	 // 13
+			"ATTENVERT2",
+		},
+	.num_modules = 15,
+
+	.module_nodes = {{
+		// PANEL_8
+		{
+			12,
+			10,
+			255,
+			254,
+			253,
+			252,
+			251,
+			250,
+			249,
+			248,
+			247,
+			11,
+			14,
+			13,
+			0,
+			15,
+		},
+		// DJEMBE
+		{
+			6,
+			14,
+			0,
+			0,
+			2,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// DJEMBE
+		{
+			9,
+			0,
+			0,
+			13,
+			4,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// CLKMULTIPLIER
+		{
+			2,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// QUANTIZER
+		{
+			6,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// MULTILFO
+		{
+			9,
+			0,
+			6,
+			15,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// DJEMBE
+		{
+			7,
+			0,
+			11,
+			0,
+			2,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// CLKDIVIDER
+		{
+			2,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// SEND_1TO4
+		{
+			14,
+			2,
+			4,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// QUANTIZER
+		{
+			9,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// ATTENVERT2
+		{
+			6,
+			6,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// MIXER4
+		{
+			7,
+			6,
+			246,
+			245,
+			244,
+			12,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// MIXER4
+		{
+			9,
+			8,
+			243,
+			242,
+			241,
+			10,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// DJEMBE
+		{
+			8,
+			0,
+			0,
+			0,
+			4,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+		// ATTENVERT2
+		{
+			9,
+			9,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+		},
+	}},
+
+	.nets = {{
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 13, .jack_id = 0},
+				{.module_id = 1, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 3,
+			.jacks = {{
+				{.module_id = 6, .jack_id = 0},
+				{.module_id = 1, .jack_id = 4},
+				{.module_id = 7, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 9, .jack_id = 0},
+				{.module_id = 2, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 3,
+			.jacks = {{
+				{.module_id = 8, .jack_id = 2},
+				{.module_id = 2, .jack_id = 4},
+				{.module_id = 4, .jack_id = 4},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 8, .jack_id = 1},
+				{.module_id = 6, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 10, .jack_id = 1},
+				{.module_id = 13, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 7, .jack_id = 0},
+				{.module_id = 3, .jack_id = 4},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 5, .jack_id = 2},
+				{.module_id = 10, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 10, .jack_id = 0},
+				{.module_id = 10, .jack_id = 1},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 3, .jack_id = 0},
+				{.module_id = 11, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 1, .jack_id = 0},
+				{.module_id = 11, .jack_id = 1},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 2, .jack_id = 0},
+				{.module_id = 12, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 4, .jack_id = 0},
+				{.module_id = 12, .jack_id = 1},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 14, .jack_id = 1},
+				{.module_id = 9, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 5, .jack_id = 0},
+				{.module_id = 14, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 14, .jack_id = 0},
+				{.module_id = 14, .jack_id = 1},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 12, .jack_id = 1},
+				{.module_id = 0, .jack_id = 1},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 0, .jack_id = 2},
+				{.module_id = 3, .jack_id = 2},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 11, .jack_id = 1},
+				{.module_id = 0, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 0, .jack_id = 4},
+				{.module_id = 2, .jack_id = 3},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 0, .jack_id = 3},
+				{.module_id = 1, .jack_id = 1},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 0, .jack_id = 8},
+				{.module_id = 8, .jack_id = 0},
+			}},
+		},
+		{
+			.num_jacks = 2,
+			.jacks = {{
+				{.module_id = 0, .jack_id = 6},
+				{.module_id = 5, .jack_id = 3},
+			}},
+		},
+	}},
+	.num_nets = 23,
+
+	.static_knobs = {{
+		{.module_id = 1, .param_id = 0, .value = 0.151500f},   {.module_id = 1, .param_id = 1, .value = 0.480000f},
+		{.module_id = 1, .param_id = 2, .value = 0.511500f},   {.module_id = 1, .param_id = 3, .value = 0.537000f},
+		{.module_id = 2, .param_id = 0, .value = 0.000000f},   {.module_id = 2, .param_id = 1, .value = 0.466500f},
+		{.module_id = 2, .param_id = 2, .value = 0.499500f},   {.module_id = 2, .param_id = 3, .value = 0.511500f},
+		{.module_id = 6, .param_id = 0, .value = 0.000000f},   {.module_id = 13, .param_id = 0, .value = 1.000000f},
+		{.module_id = 13, .param_id = 1, .value = 0.000000f},  {.module_id = 13, .param_id = 2, .value = 1.000000f},
+		{.module_id = 13, .param_id = 3, .value = 1.000000f},  {.module_id = 13, .param_id = 4, .value = 0.000000f},
+		{.module_id = 13, .param_id = 5, .value = 1.000000f},  {.module_id = 13, .param_id = 6, .value = 0.000000f},
+		{.module_id = 13, .param_id = 7, .value = 1.000000f},  {.module_id = 13, .param_id = 8, .value = 0.000000f},
+		{.module_id = 13, .param_id = 9, .value = 1.000000f},  {.module_id = 13, .param_id = 10, .value = 1.000000f},
+		{.module_id = 13, .param_id = 11, .value = 0.000000f}, {.module_id = 5, .param_id = 0, .value = 0.000000f},
+		{.module_id = 5, .param_id = 1, .value = 0.142500f},   {.module_id = 5, .param_id = 2, .value = 0.000000f},
+		{.module_id = 3, .param_id = 0, .value = 0.276000f},   {.module_id = 3, .param_id = 1, .value = 0.507000f},
+		{.module_id = 3, .param_id = 2, .value = 0.456000f},   {.module_id = 3, .param_id = 3, .value = 0.481500f},
+		{.module_id = 7, .param_id = 0, .value = 0.378000f},   {.module_id = 8, .param_id = 0, .value = 1.000000f},
+		{.module_id = 8, .param_id = 1, .value = 1.000000f},   {.module_id = 8, .param_id = 2, .value = 1.000000f},
+		{.module_id = 8, .param_id = 3, .value = 1.000000f},   {.module_id = 9, .param_id = 0, .value = 1.000000f},
+		{.module_id = 9, .param_id = 1, .value = 0.000000f},   {.module_id = 9, .param_id = 2, .value = 1.000000f},
+		{.module_id = 9, .param_id = 3, .value = 1.000000f},   {.module_id = 9, .param_id = 4, .value = 0.000000f},
+		{.module_id = 9, .param_id = 5, .value = 1.000000f},   {.module_id = 9, .param_id = 6, .value = 0.000000f},
+		{.module_id = 9, .param_id = 7, .value = 1.000000f},   {.module_id = 9, .param_id = 8, .value = 0.000000f},
+		{.module_id = 9, .param_id = 9, .value = 1.000000f},   {.module_id = 9, .param_id = 10, .value = 1.000000f},
+		{.module_id = 9, .param_id = 11, .value = 0.000000f},  {.module_id = 10, .param_id = 0, .value = 0.750000f},
+		{.module_id = 10, .param_id = 1, .value = 0.514500f},  {.module_id = 11, .param_id = 0, .value = 1.000000f},
+		{.module_id = 11, .param_id = 1, .value = 1.000000f},  {.module_id = 11, .param_id = 2, .value = 0.000000f},
+		{.module_id = 11, .param_id = 3, .value = 0.000000f},  {.module_id = 12, .param_id = 0, .value = 1.000000f},
+		{.module_id = 12, .param_id = 1, .value = 1.000000f},  {.module_id = 12, .param_id = 2, .value = 0.000000f},
+		{.module_id = 12, .param_id = 3, .value = 0.000000f},  {.module_id = 4, .param_id = 0, .value = 0.000000f},
+		{.module_id = 4, .param_id = 1, .value = 0.529500f},   {.module_id = 4, .param_id = 2, .value = 0.420000f},
+		{.module_id = 4, .param_id = 3, .value = 0.529500f},   {.module_id = 14, .param_id = 0, .value = 0.576000f},
+		{.module_id = 14, .param_id = 1, .value = 0.219000f},
+	}},
+	.num_static_knobs = 61,
+
+	.mapped_knobs = {{
+		{.module_id = 10, .param_id = 1, .panel_knob_id = 6},
+		{.module_id = 3, .param_id = 0, .panel_knob_id = 0},
+		{.module_id = 1, .param_id = 0, .panel_knob_id = 1},
+		{.module_id = 2, .param_id = 0, .panel_knob_id = 2},
+		{.module_id = 7, .param_id = 0, .panel_knob_id = 4},
+		{.module_id = 6, .param_id = 0, .panel_knob_id = 5},
+		{.module_id = 4, .param_id = 0, .panel_knob_id = 3},
+		{.module_id = 14, .param_id = 1, .panel_knob_id = 7},
+	}},
+	.num_mapped_knobs = 8,
+
+};

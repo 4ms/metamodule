@@ -13,19 +13,25 @@
 	#include "example_stereo_verb.h"
 	#include "fadedelay_two.hh"
 	#include "simple_lfo_passthrru.hh"
+	#include "DjembeTest.hh"
+	#include "dualdjmebe.hh"
+	#include "quaddjmebe.hh"
 
 PatchList::PatchList()
 	: _patches{
 		  {simple_lfo_passthrru},
+		  {DjembeTest},
+		  {dualdjmebe},
+		  {quaddjmebe},
 		  {example_stereo_verb},
 		  {examplePitchShiftSimple},
 		  {exampleDrum},
 		  {fadedelay_example},
 		  {example_drum_verb_mono},
-		  {QuadDrum},
-		  {KP_FM_DRUM_DET},
+		  // {QuadDrum},
+		  // {KP_FM_DRUM_DET},
 		  {KarplusStereo},
-		  {LPFBPF},
+		  // {LPFBPF},
 	  }
 {
 	_cur_patch_idx = 0;
@@ -36,7 +42,7 @@ PatchList::PatchList()
 
 PatchList::PatchList()
 	: _patches{
-		  {test_14switchCore_clock},
+		  {test_multilfoCore},
 		  {test_14switchCore_cv},
 		  {test_bitcrushCore},
 		  {test_karplusCore},
