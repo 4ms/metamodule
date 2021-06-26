@@ -12,9 +12,9 @@
 namespace MetaModule
 {
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
-constexpr bool DEBUG_NE10_FFT = true;
+// constexpr bool DEBUG_NE10_FFT = true;
 // static FFTfx fftfx;
-static Convolver fftfx;
+// static Convolver fftfx;
 
 // Clock in -> clock out latency: 1.33ms (one audio DMA half-transfer)
 // Gate In -> audio OUt latency: 1.90ms
@@ -79,8 +79,8 @@ AudioStream::AudioStream(PatchList &patches,
 
 	load_measure.init();
 
-	if constexpr (DEBUG_NE10_FFT)
-		fftfx.init();
+	// if constexpr (DEBUG_NE10_FFT)
+	// 	fftfx.init();
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id)
@@ -121,10 +121,10 @@ void AudioStream::process(AudioStreamBlock &in,
 		return;
 	}
 
-	if constexpr (DEBUG_NE10_FFT) {
-		fftfx.process(in, out);
-		return;
-	}
+	// if constexpr (DEBUG_NE10_FFT) {
+	// 	fftfx.process(in, out);
+	// 	return;
+	// }
 
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
 		passthrough_audio(in, out, aux);

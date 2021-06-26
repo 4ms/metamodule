@@ -1,5 +1,7 @@
 #pragma once
 #include "CoreModules/moduleTypes.h"
+#include "NE10_dsp.h"
+#include "NE10_init.h"
 #include "coreProcessor.h"
 #include "gcem/include/gcem.hpp"
 #include "util/math.hh"
@@ -25,6 +27,8 @@ class DjembeCore : public CoreProcessor {
 public:
 	DjembeCore()
 	{
+		ne10_init_dsp(NE10_OK);
+
 		IOTA = 0;
 
 		// Todo: Combine these loops
@@ -116,6 +120,18 @@ public:
 		freqKnob = float(60.0f);
 	}
 
+	struct IIR_tf2_Filter {
+		float signal[4];
+		float a1;
+		float a2;
+		float _pad0;
+		float _pad1;
+		float b0;
+		float b1;
+		float b2;
+		float _pad2;
+	};
+
 	void update() override
 	{
 		if (paramsUpdated)
@@ -128,11 +144,16 @@ public:
 			(4.65661287e-10f * float(noise[0])) - (fSlow7 * ((fSlow10 * noise_hp[2]) + (fSlow11 * noise_hp[1])));
 		noise_hp_lp[0] = (fSlow7 * (((fSlow9 * noise_hp[0]) + (fSlow12 * noise_hp[1])) + (fSlow9 * noise_hp[2]))) -
 						 (fSlow13 * ((fSlow14 * noise_hp_lp[2]) + (fSlow15 * noise_hp_lp[1])));
-		fVecTrig[0] = fSlowTrig;
-		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (fSlowTrig <= fVecTrig[1])) + (fSlowTrig > fVecTrig[1]));
+		fVecTrig[0] = slowTrig;
+		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (slowTrig <= fVecTrig[1])) + (slowTrig > fVecTrig[1]));
 		float fTemp0 = (adEnvRate * float(iRec4[0]));
 		float adEnv = MathTools::max<float>(0.0f, MathTools::min<float>(fTemp0, (2.0f - fTemp0)));
 		float noiseBurst = fSlow4 * (noise_hp_lp[2] + (noise_hp_lp[0] + (2.0f * noise_hp_lp[1]))) * adEnv;
+
+		// filter[X].signal[0] = (noiseBurst - ((filter[X].a1 * filter[X].signal[1]) + (filter[X].a2 *
+		// filter[X].signal[2])));
+		// b0 = 1; b1 = 0; b2 = -1;
+
 		fRec0[0] = (noiseBurst - ((fSlow19 * fRec0[1]) + (fConst6 * fRec0[2])));
 		fRec5[0] = (noiseBurst - ((fSlow20 * fRec5[1]) + (fConst9 * fRec5[2])));
 		fRec6[0] = (noiseBurst - ((fSlow21 * fRec6[1]) + (fConst12 * fRec6[2])));
@@ -245,28 +266,30 @@ public:
 		adEnvRate =
 			(1.0f / MathTools::max<float>(
 						1.0f, (fConst2 * MathTools::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
-		fSlowTrig = float(trigIn) * 2.f;
-		fSlow18 = (float(freqCV) * float(freqKnob));
-		fSlow19 = (fConst4 * MathTools::cos((fConst5 * fSlow18)));
-		fSlow20 = (fConst8 * MathTools::cos((fConst5 * (fSlow18 + 200.0f))));
-		fSlow21 = (fConst11 * MathTools::cos((fConst5 * (fSlow18 + 400.0f))));
-		fSlow22 = (fConst14 * MathTools::cos((fConst5 * (fSlow18 + 600.0f))));
-		fSlow23 = (fConst17 * MathTools::cos((fConst5 * (fSlow18 + 800.0f))));
-		fSlow24 = (fConst20 * MathTools::cos((fConst5 * (fSlow18 + 1000.0f))));
-		fSlow25 = (fConst23 * MathTools::cos((fConst5 * (fSlow18 + 1200.0f))));
-		fSlow26 = (fConst26 * MathTools::cos((fConst5 * (fSlow18 + 1400.0f))));
-		fSlow27 = (fConst29 * MathTools::cos((fConst5 * (fSlow18 + 1600.0f))));
-		fSlow28 = (fConst32 * MathTools::cos((fConst5 * (fSlow18 + 1800.0f))));
-		fSlow29 = (fConst35 * MathTools::cos((fConst5 * (fSlow18 + 2000.0f))));
-		fSlow30 = (fConst38 * MathTools::cos((fConst5 * (fSlow18 + 2200.0f))));
-		fSlow31 = (fConst41 * MathTools::cos((fConst5 * (fSlow18 + 2400.0f))));
-		fSlow32 = (fConst44 * MathTools::cos((fConst5 * (fSlow18 + 2600.0f))));
-		fSlow33 = (fConst47 * MathTools::cos((fConst5 * (fSlow18 + 2800.0f))));
-		fSlow34 = (fConst50 * MathTools::cos((fConst5 * (fSlow18 + 3000.0f))));
-		fSlow35 = (fConst53 * MathTools::cos((fConst5 * (fSlow18 + 3200.0f))));
-		fSlow36 = (fConst56 * MathTools::cos((fConst5 * (fSlow18 + 3400.0f))));
-		fSlow37 = (fConst59 * MathTools::cos((fConst5 * (fSlow18 + 3600.0f))));
-		fSlow38 = (fConst62 * MathTools::cos((fConst5 * (fSlow18 + 3800.0f))));
+		slowTrig = float(trigIn) * 2.f;
+		slowFreq = (float(freqCV) * float(freqKnob));
+
+		// Coef: a1
+		fSlow19 = (fConst4 * MathTools::cos((fConst5 * slowFreq)));
+		fSlow20 = (fConst8 * MathTools::cos((fConst5 * (slowFreq + 200.0f))));
+		fSlow21 = (fConst11 * MathTools::cos((fConst5 * (slowFreq + 400.0f))));
+		fSlow22 = (fConst14 * MathTools::cos((fConst5 * (slowFreq + 600.0f))));
+		fSlow23 = (fConst17 * MathTools::cos((fConst5 * (slowFreq + 800.0f))));
+		fSlow24 = (fConst20 * MathTools::cos((fConst5 * (slowFreq + 1000.0f))));
+		fSlow25 = (fConst23 * MathTools::cos((fConst5 * (slowFreq + 1200.0f))));
+		fSlow26 = (fConst26 * MathTools::cos((fConst5 * (slowFreq + 1400.0f))));
+		fSlow27 = (fConst29 * MathTools::cos((fConst5 * (slowFreq + 1600.0f))));
+		fSlow28 = (fConst32 * MathTools::cos((fConst5 * (slowFreq + 1800.0f))));
+		fSlow29 = (fConst35 * MathTools::cos((fConst5 * (slowFreq + 2000.0f))));
+		fSlow30 = (fConst38 * MathTools::cos((fConst5 * (slowFreq + 2200.0f))));
+		fSlow31 = (fConst41 * MathTools::cos((fConst5 * (slowFreq + 2400.0f))));
+		fSlow32 = (fConst44 * MathTools::cos((fConst5 * (slowFreq + 2600.0f))));
+		fSlow33 = (fConst47 * MathTools::cos((fConst5 * (slowFreq + 2800.0f))));
+		fSlow34 = (fConst50 * MathTools::cos((fConst5 * (slowFreq + 3000.0f))));
+		fSlow35 = (fConst53 * MathTools::cos((fConst5 * (slowFreq + 3200.0f))));
+		fSlow36 = (fConst56 * MathTools::cos((fConst5 * (slowFreq + 3400.0f))));
+		fSlow37 = (fConst59 * MathTools::cos((fConst5 * (slowFreq + 3600.0f))));
+		fSlow38 = (fConst62 * MathTools::cos((fConst5 * (slowFreq + 3800.0f))));
 	}
 
 	void set_param(int const param_id, const float val) override
@@ -439,8 +462,8 @@ private:
 	float fSlow14;
 	float fSlow15;
 	float adEnvRate;
-	float fSlowTrig;
-	float fSlow18;
+	float slowTrig;
+	float slowFreq;
 	float fSlow19;
 	float fSlow20;
 	float fSlow21;
