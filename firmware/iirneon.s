@@ -29,11 +29,11 @@ Disassembly of section .text:
     8028:	f000 e8fe 	blx	8228 <_exit>
 
 0000802c <main>:
-{
-	float params[4] = {0.1f, 0.2f, 0.3f, 0.4f};
-	float consts[4] = {fConst6, fConst9, fConst12, fConst15};
 	float mixweights[4] = {1.f, 0.25f, 0.111111112f, 0.0625f};
+
 	ParallelBPIIR iir{params, consts, mixweights};
+
+	// run it twice
 	float out = iir.calc_4iir(1.2f);
     802c:	ed9f0a26 	vldr	s0, [pc, #152]	; 80cc <main+0xa0>
 	float params[4] = {0.1f, 0.2f, 0.3f, 0.4f};
@@ -106,6 +106,8 @@ vld1q_f32 (const float32_t * __a)
     80b0:	ed9f0a06 	vldr	s0, [pc, #24]	; 80d0 <main+0xa4>
     80b4:	e1a00004 	mov	r0, r4
     80b8:	eb00005b 	bl	822c <_ZN13ParallelBPIIR9calc_4iirEf>
+
+	// force compiler to keep values:
 	volatile int x = out;
     80bc:	eebd0ac0 	vcvt.s32.f32	s0, s0
     80c0:	ed8d0a01 	vstr	s0, [sp, #4]
