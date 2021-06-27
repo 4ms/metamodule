@@ -2,12 +2,13 @@
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "gcem/include/gcem.hpp"
+#include "iirneon.hh"
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
 using namespace MathTools;
 
-class DjembeCore : public CoreProcessor {
+class DjembeCoreN : public CoreProcessor {
 	static constexpr uint32_t SAMPLERATE = 48000;
 	static inline const int NumInJacks = 5;
 	static inline const int NumOutJacks = 1;
@@ -19,88 +20,39 @@ class DjembeCore : public CoreProcessor {
 		"Freq", "Gain", "Sharpness", "Strike", "Trigger"};
 	static inline const StaticString<LongNameChars> description{"Djembe"};
 
-public:
 	enum Params { Freq = 0, Gain = 1, Sharpness = 2, Strike = 3, Trigger = 4 };
 
-	DjembeCore()
+public:
+	DjembeCoreN()
 	{
 		IOTA = 0;
 
-		// Todo: Combine these loops
-		for (int l0 = 0; (l0 < 2); l0 = (l0 + 1)) {
-			noise[l0] = 0;
+		for (int i = 0; (i < 2); i = (i + 1)) {
+			noise[i] = 0;
 		}
-		for (int l1 = 0; (l1 < 3); l1 = (l1 + 1)) {
-			noise_hp[l1] = 0.0f;
+		for (int i = 0; (i < 3); i = (i + 1)) {
+			noise_hp[i] = 0.0f;
+			noise_hp_lp[i] = 0.0f;
 		}
-		for (int l2 = 0; (l2 < 3); l2 = (l2 + 1)) {
-			noise_hp_lp[l2] = 0.0f;
+
+		for (int i = 0; (i < 2); i = (i + 1)) {
+			fVecTrig[i] = 0.0f;
+			iRec4[i] = 0;
 		}
-		for (int l3 = 0; (l3 < 2); l3 = (l3 + 1)) {
-			fVecTrig[l3] = 0.0f;
+
+		for (int iir_group = 0; iir_group < 5; iir_group++) {
+			iirs[iir_group].set_consts(&(iir_consts[iir_group * 4]));
 		}
-		for (int l4 = 0; (l4 < 2); l4 = (l4 + 1)) {
-			iRec4[l4] = 0;
-		}
-		for (int l5 = 0; (l5 < 3); l5 = (l5 + 1)) {
-			fRec0[l5] = 0.0f;
-		}
-		for (int l6 = 0; (l6 < 3); l6 = (l6 + 1)) {
-			fRec5[l6] = 0.0f;
-		}
-		for (int l7 = 0; (l7 < 3); l7 = (l7 + 1)) {
-			fRec6[l7] = 0.0f;
-		}
-		for (int l8 = 0; (l8 < 3); l8 = (l8 + 1)) {
-			fRec7[l8] = 0.0f;
-		}
-		for (int l9 = 0; (l9 < 3); l9 = (l9 + 1)) {
-			fRec8[l9] = 0.0f;
-		}
-		for (int l10 = 0; (l10 < 3); l10 = (l10 + 1)) {
-			fRec9[l10] = 0.0f;
-		}
-		for (int l11 = 0; (l11 < 3); l11 = (l11 + 1)) {
-			fRec10[l11] = 0.0f;
-		}
-		for (int l12 = 0; (l12 < 3); l12 = (l12 + 1)) {
-			fRec11[l12] = 0.0f;
-		}
-		for (int l13 = 0; (l13 < 3); l13 = (l13 + 1)) {
-			fRec12[l13] = 0.0f;
-		}
-		for (int l14 = 0; (l14 < 3); l14 = (l14 + 1)) {
-			fRec13[l14] = 0.0f;
-		}
-		for (int l15 = 0; (l15 < 3); l15 = (l15 + 1)) {
-			fRec14[l15] = 0.0f;
-		}
-		for (int l16 = 0; (l16 < 3); l16 = (l16 + 1)) {
-			fRec15[l16] = 0.0f;
-		}
-		for (int l17 = 0; (l17 < 3); l17 = (l17 + 1)) {
-			fRec16[l17] = 0.0f;
-		}
-		for (int l18 = 0; (l18 < 3); l18 = (l18 + 1)) {
-			fRec17[l18] = 0.0f;
-		}
-		for (int l19 = 0; (l19 < 3); l19 = (l19 + 1)) {
-			fRec18[l19] = 0.0f;
-		}
-		for (int l20 = 0; (l20 < 3); l20 = (l20 + 1)) {
-			fRec19[l20] = 0.0f;
-		}
-		for (int l21 = 0; (l21 < 3); l21 = (l21 + 1)) {
-			fRec20[l21] = 0.0f;
-		}
-		for (int l22 = 0; (l22 < 3); l22 = (l22 + 1)) {
-			fRec21[l22] = 0.0f;
-		}
-		for (int l23 = 0; (l23 < 3); l23 = (l23 + 1)) {
-			fRec22[l23] = 0.0f;
-		}
-		for (int l24 = 0; (l24 < 3); l24 = (l24 + 1)) {
-			fRec23[l24] = 0.0f;
+
+		for (int iir_group = 0; iir_group < 5; iir_group++) {
+			float n = iir_group * 4;
+			float weights[4] = {
+				1.f / ((n + 1) * (n + 1)),
+				1.f / ((n + 2) * (n + 2)),
+				1.f / ((n + 3) * (n + 3)),
+				1.f / ((n + 4) * (n + 4)),
+			};
+			iirs[iir_group].set_outmix(weights);
 		}
 
 		// UI
@@ -113,6 +65,19 @@ public:
 		trigIn = float(0.0f);
 		freqCV = float(1.0f);
 		freqKnob = float(60.0f);
+
+		for (int iir_group = 0; iir_group < 5; iir_group++) {
+			float slows[4];
+			for (int i = 0; i < 4; i++) {
+				int n = i + iir_group * 4;
+				slows[i] = iir_consts[n] * MathTools::cos((fConst5 * (60.f + 200.f * n)));
+			}
+			// slows[0] = iir_consts[iir_group * 4 + 0] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 0))));
+			// slows[1] = iir_consts[iir_group * 4 + 1] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 1))));
+			// slows[2] = iir_consts[iir_group * 4 + 2] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 2))));
+			// slows[3] = iir_consts[iir_group * 4 + 3] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 3))));
+			iirs[iir_group].set_slows(slows);
+		}
 	}
 
 	void update() override
@@ -122,82 +87,18 @@ public:
 		paramsUpdated = false;
 
 		// StrikeModel:
+		//PsuedoRandom:
 		noise[0] = (1103515245 * noise[1]) + 12345;
-		noise_hp[0] =
-			(4.65661287e-10f * float(noise[0])) - (fSlow7 * ((fSlow10 * noise_hp[2]) + (fSlow11 * noise_hp[1])));
+		noise_hp[0] = (4.65661287e-10f * noise[0]) - (fSlow7 * ((fSlow10 * noise_hp[2]) + (fSlow11 * noise_hp[1])));
 		noise_hp_lp[0] = (fSlow7 * (((fSlow9 * noise_hp[0]) + (fSlow12 * noise_hp[1])) + (fSlow9 * noise_hp[2]))) -
 						 (fSlow13 * ((fSlow14 * noise_hp_lp[2]) + (fSlow15 * noise_hp_lp[1])));
+		//Trigger signal
 		fVecTrig[0] = slowTrig;
+		//iRec4 is
 		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (slowTrig <= fVecTrig[1])) + (slowTrig > fVecTrig[1]));
-		float fTemp0 = (adEnvRate * float(iRec4[0]));
+		float fTemp0 = adEnvRate * iRec4[0];
 		float adEnv = MathTools::max<float>(0.0f, MathTools::min<float>(fTemp0, (2.0f - fTemp0)));
 		float noiseBurst = fSlow4 * (noise_hp_lp[2] + (noise_hp_lp[0] + (2.0f * noise_hp_lp[1]))) * adEnv;
-
-		fRec0[0] = (noiseBurst - ((fSlow19 * fRec0[1]) + (fConst6 * fRec0[2])));
-		fRec5[0] = (noiseBurst - ((fSlow20 * fRec5[1]) + (fConst9 * fRec5[2])));
-		fRec6[0] = (noiseBurst - ((fSlow21 * fRec6[1]) + (fConst12 * fRec6[2])));
-		fRec7[0] = (noiseBurst - ((fSlow22 * fRec7[1]) + (fConst15 * fRec7[2])));
-		fRec8[0] = (noiseBurst - ((fSlow23 * fRec8[1]) + (fConst18 * fRec8[2])));
-		fRec9[0] = (noiseBurst - ((fSlow24 * fRec9[1]) + (fConst21 * fRec9[2])));
-		fRec10[0] = (noiseBurst - ((fSlow25 * fRec10[1]) + (fConst24 * fRec10[2])));
-		fRec11[0] = (noiseBurst - ((fSlow26 * fRec11[1]) + (fConst27 * fRec11[2])));
-		fRec12[0] = (noiseBurst - ((fSlow27 * fRec12[1]) + (fConst30 * fRec12[2])));
-		fRec13[0] = (noiseBurst - ((fSlow28 * fRec13[1]) + (fConst33 * fRec13[2])));
-		fRec14[0] = (noiseBurst - ((fSlow29 * fRec14[1]) + (fConst36 * fRec14[2])));
-		fRec15[0] = (noiseBurst - ((fSlow30 * fRec15[1]) + (fConst39 * fRec15[2])));
-		fRec16[0] = (noiseBurst - ((fSlow31 * fRec16[1]) + (fConst42 * fRec16[2])));
-		fRec17[0] = (noiseBurst - ((fSlow32 * fRec17[1]) + (fConst45 * fRec17[2])));
-		fRec18[0] = (noiseBurst - ((fSlow33 * fRec18[1]) + (fConst48 * fRec18[2])));
-		fRec19[0] = (noiseBurst - ((fSlow34 * fRec19[1]) + (fConst51 * fRec19[2])));
-		fRec20[0] = (noiseBurst - ((fSlow35 * fRec20[1]) + (fConst54 * fRec20[2])));
-		fRec21[0] = (noiseBurst - ((fSlow36 * fRec21[1]) + (fConst57 * fRec21[2])));
-		fRec22[0] = (noiseBurst - ((fSlow37 * fRec22[1]) + (fConst60 * fRec22[2])));
-		fRec23[0] = (noiseBurst - ((fSlow38 * fRec23[1]) + (fConst63 * fRec23[2])));
-		//
-		// TODO: verify this is equivalent to the commented out stuff
-		// signalOut =
-		// 	0.0500000007f *
-		// 	((((((((((((((((((((fRec0[0] + (0.25f * (fRec5[0] - fRec5[2]))) + (0.111111112f * (fRec6[0] - fRec6[2]))) +
-		// 					  (0.0625f * (fRec7[0] - fRec7[2]))) +
-		// 					 (0.0399999991f * (fRec8[0] - fRec8[2]))) +
-		// 					(0.027777778f * (fRec9[0] - fRec9[2]))) +
-		// 				   (0.0204081628f * (fRec10[0] - fRec10[2]))) +
-		// 				  (0.015625f * (fRec11[0] - fRec11[2]))) +
-		// 				 (0.0123456791f * (fRec12[0] - fRec12[2]))) +
-		// 				(0.00999999978f * (fRec13[0] - fRec13[2]))) +
-		// 			   (0.00826446246f * (fRec14[0] - fRec14[2]))) +
-		// 			  (0.0069444445f * (fRec15[0] - fRec15[2]))) +
-		// 			 (0.00591715984f * (fRec16[0] - fRec16[2]))) +
-		// 			(0.00510204071f * (fRec17[0] - fRec17[2]))) +
-		// 		   (0.00444444455f * (fRec18[0] - fRec18[2]))) +
-		// 		  (0.00390625f * (fRec19[0] - fRec19[2]))) +
-		// 		 (0.00346020772f * (fRec20[0] - fRec20[2]))) +
-		// 		(0.00308641978f * (fRec21[0] - fRec21[2]))) +
-		// 	   (0.00277008303f * (fRec22[0] - fRec22[2]))) +
-		// 	  (0.00249999994f * (fRec23[0] - fRec23[2]))) -
-		// 	 fRec0[2]);
-		signalOut = 0.f;
-		signalOut += 1.0f * (fRec0[0] - fRec0[2]);
-		signalOut += 0.25f * (fRec5[0] - fRec5[2]);
-		signalOut += 0.111111112f * (fRec6[0] - fRec6[2]);
-		signalOut += 0.0625f * (fRec7[0] - fRec7[2]);
-		signalOut += 0.0399999991f * (fRec8[0] - fRec8[2]);
-		signalOut += 0.027777778f * (fRec9[0] - fRec9[2]);
-		signalOut += 0.0204081628f * (fRec10[0] - fRec10[2]);
-		signalOut += 0.015625f * (fRec11[0] - fRec11[2]);
-		signalOut += 0.0123456791f * (fRec12[0] - fRec12[2]);
-		signalOut += 0.00999999978f * (fRec13[0] - fRec13[2]);
-		signalOut += 0.00826446246f * (fRec14[0] - fRec14[2]);
-		signalOut += 0.0069444445f * (fRec15[0] - fRec15[2]);
-		signalOut += 0.00591715984f * (fRec16[0] - fRec16[2]);
-		signalOut += 0.00510204071f * (fRec17[0] - fRec17[2]);
-		signalOut += 0.00444444455f * (fRec18[0] - fRec18[2]);
-		signalOut += 0.00390625f * (fRec19[0] - fRec19[2]);
-		signalOut += 0.00346020772f * (fRec20[0] - fRec20[2]);
-		signalOut += 0.00308641978f * (fRec21[0] - fRec21[2]);
-		signalOut += 0.00277008303f * (fRec22[0] - fRec22[2]);
-		signalOut += 0.00249999994f * (fRec23[0] - fRec23[2]);
-		signalOut *= 0.05f;
 
 		noise[1] = noise[0];
 		noise_hp[2] = noise_hp[1];
@@ -206,47 +107,15 @@ public:
 		noise_hp_lp[1] = noise_hp_lp[0];
 		fVecTrig[1] = fVecTrig[0];
 		iRec4[1] = iRec4[0];
-		fRec0[2] = fRec0[1];
-		fRec0[1] = fRec0[0];
-		fRec5[2] = fRec5[1];
-		fRec5[1] = fRec5[0];
-		fRec6[2] = fRec6[1];
-		fRec6[1] = fRec6[0];
-		fRec7[2] = fRec7[1];
-		fRec7[1] = fRec7[0];
-		fRec8[2] = fRec8[1];
-		fRec8[1] = fRec8[0];
-		fRec9[2] = fRec9[1];
-		fRec9[1] = fRec9[0];
-		fRec10[2] = fRec10[1];
-		fRec10[1] = fRec10[0];
-		fRec11[2] = fRec11[1];
-		fRec11[1] = fRec11[0];
-		fRec12[2] = fRec12[1];
-		fRec12[1] = fRec12[0];
-		fRec13[2] = fRec13[1];
-		fRec13[1] = fRec13[0];
-		fRec14[2] = fRec14[1];
-		fRec14[1] = fRec14[0];
-		fRec15[2] = fRec15[1];
-		fRec15[1] = fRec15[0];
-		fRec16[2] = fRec16[1];
-		fRec16[1] = fRec16[0];
-		fRec17[2] = fRec17[1];
-		fRec17[1] = fRec17[0];
-		fRec18[2] = fRec18[1];
-		fRec18[1] = fRec18[0];
-		fRec19[2] = fRec19[1];
-		fRec19[1] = fRec19[0];
-		fRec20[2] = fRec20[1];
-		fRec20[1] = fRec20[0];
-		fRec21[2] = fRec21[1];
-		fRec21[1] = fRec21[0];
-		fRec22[2] = fRec22[1];
-		fRec22[1] = fRec22[0];
-		fRec23[2] = fRec23[1];
-		fRec23[1] = fRec23[0];
-		// }
+
+		//IIRs:
+		signalOut = 0.f;
+		signalOut += iirs[0].calc_4iir(noiseBurst);
+		signalOut += iirs[1].calc_4iir(noiseBurst);
+		signalOut += iirs[2].calc_4iir(noiseBurst);
+		signalOut += iirs[3].calc_4iir(noiseBurst);
+		signalOut += iirs[4].calc_4iir(noiseBurst);
+		signalOut *= 0.05f;
 	}
 
 	void update_params()
@@ -274,26 +143,14 @@ public:
 		slowFreq = (float(freqCV) * float(freqKnob));
 
 		// Coef: a1
-		fSlow19 = (fConst4 * MathTools::cos((fConst5 * slowFreq)));
-		fSlow20 = (fConst8 * MathTools::cos((fConst5 * (slowFreq + 200.0f))));
-		fSlow21 = (fConst11 * MathTools::cos((fConst5 * (slowFreq + 400.0f))));
-		fSlow22 = (fConst14 * MathTools::cos((fConst5 * (slowFreq + 600.0f))));
-		fSlow23 = (fConst17 * MathTools::cos((fConst5 * (slowFreq + 800.0f))));
-		fSlow24 = (fConst20 * MathTools::cos((fConst5 * (slowFreq + 1000.0f))));
-		fSlow25 = (fConst23 * MathTools::cos((fConst5 * (slowFreq + 1200.0f))));
-		fSlow26 = (fConst26 * MathTools::cos((fConst5 * (slowFreq + 1400.0f))));
-		fSlow27 = (fConst29 * MathTools::cos((fConst5 * (slowFreq + 1600.0f))));
-		fSlow28 = (fConst32 * MathTools::cos((fConst5 * (slowFreq + 1800.0f))));
-		fSlow29 = (fConst35 * MathTools::cos((fConst5 * (slowFreq + 2000.0f))));
-		fSlow30 = (fConst38 * MathTools::cos((fConst5 * (slowFreq + 2200.0f))));
-		fSlow31 = (fConst41 * MathTools::cos((fConst5 * (slowFreq + 2400.0f))));
-		fSlow32 = (fConst44 * MathTools::cos((fConst5 * (slowFreq + 2600.0f))));
-		fSlow33 = (fConst47 * MathTools::cos((fConst5 * (slowFreq + 2800.0f))));
-		fSlow34 = (fConst50 * MathTools::cos((fConst5 * (slowFreq + 3000.0f))));
-		fSlow35 = (fConst53 * MathTools::cos((fConst5 * (slowFreq + 3200.0f))));
-		fSlow36 = (fConst56 * MathTools::cos((fConst5 * (slowFreq + 3400.0f))));
-		fSlow37 = (fConst59 * MathTools::cos((fConst5 * (slowFreq + 3600.0f))));
-		fSlow38 = (fConst62 * MathTools::cos((fConst5 * (slowFreq + 3800.0f))));
+		for (int iir_group = 0; iir_group < 5; iir_group++) {
+			float slows[4];
+			for (int i = 0; i < 4; i++) {
+				int n = i + iir_group * 4;
+				slows[i] = iir_consts[n] * MathTools::cos((fConst5 * (slowFreq + 200.f * n)));
+			}
+			iirs[iir_group].set_slows(slows);
+		}
 	}
 
 	void set_param(int const param_id, const float val) override
@@ -372,83 +229,22 @@ private:
 
 	float IOTA;
 
+	ParallelBPIIR iirs[5];
+
 	float gainCV;
 	float gainKnob;
-	// float fConst1;
 	float strikeCV;
 	float strikeKnob;
 	int noise[2];
 	float noise_hp[3];
 	float noise_hp_lp[3];
-	// float fConst2;
 	float sharpCV;
 	float sharpnessKnob;
 	float trigIn;
 	float fVecTrig[2];
 	int iRec4[2];
-	// float fConst4;
-	// float fConst5;
 	float freqCV;
 	float freqKnob;
-	// float fConst6;
-	float fRec0[3];
-	// float fConst8;
-	// float fConst9;
-	float fRec5[3];
-	// float fConst11;
-	// float fConst12;
-	float fRec6[3];
-	// float fConst14;
-	// float fConst15;
-	float fRec7[3];
-	// float fConst17;
-	// float fConst18;
-	float fRec8[3];
-	// float fConst20;
-	// float fConst21;
-	float fRec9[3];
-	// float fConst23;
-	// float fConst24;
-	float fRec10[3];
-	// float fConst26;
-	// float fConst27;
-	float fRec11[3];
-	// float fConst29;
-	// float fConst30;
-	float fRec12[3];
-	// float fConst32;
-	// float fConst33;
-	float fRec13[3];
-	// float fConst35;
-	// float fConst36;
-	float fRec14[3];
-	// float fConst38;
-	// float fConst39;
-	float fRec15[3];
-	// float fConst41;
-	// float fConst42;
-	float fRec16[3];
-	// float fConst44;
-	// float fConst45;
-	float fRec17[3];
-	// float fConst47;
-	// float fConst48;
-	float fRec18[3];
-	// float fConst50;
-	// float fConst51;
-	float fRec19[3];
-	// float fConst53;
-	// float fConst54;
-	float fRec20[3];
-	// float fConst56;
-	// float fConst57;
-	float fRec21[3];
-	// float fConst59;
-	// float fConst60;
-	float fRec22[3];
-	// float fConst62;
-	// float fConst63;
-	float fRec23[3];
 	float strike0;
 	float strike1;
 	float strike2;
@@ -468,26 +264,6 @@ private:
 	float adEnvRate;
 	float slowTrig;
 	float slowFreq;
-	float fSlow19;
-	float fSlow20;
-	float fSlow21;
-	float fSlow22;
-	float fSlow23;
-	float fSlow24;
-	float fSlow25;
-	float fSlow26;
-	float fSlow27;
-	float fSlow28;
-	float fSlow29;
-	float fSlow30;
-	float fSlow31;
-	float fSlow32;
-	float fSlow33;
-	float fSlow34;
-	float fSlow35;
-	float fSlow36;
-	float fSlow37;
-	float fSlow38;
 	static constexpr float fConst1 = (3.14159274f / SAMPLERATE);
 	static constexpr float fConst2 = (0.00200000009f * SAMPLERATE);
 	static constexpr float fConst3 = gcem::pow(0.00100000005f, (1.66666663f / SAMPLERATE));
@@ -551,11 +327,15 @@ private:
 	static constexpr float fConst61 = gcem::pow(0.00100000005f, (33.3333321f / SAMPLERATE));
 	static constexpr float fConst62 = (0.0f - (2.0f * fConst61));
 	static constexpr float fConst63 = (fConst61 * fConst61);
+	static constexpr float iir_consts[20] = {
+		fConst4,  fConst8,	fConst11, fConst14, fConst17, fConst20, fConst23, fConst26, fConst29, fConst32,
+		fConst35, fConst38, fConst41, fConst44, fConst47, fConst50, fConst53, fConst56, fConst59, fConst62,
+	};
 
 public:
 	// clang-format off
 	static constexpr char typeID[20] = "DJEMBE";
-	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<DjembeCore>(); }
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<DjembeCoreN>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 	StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
 	StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
