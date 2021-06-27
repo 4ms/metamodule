@@ -1,5 +1,8 @@
-// #include "util/math.hh"
-#include <arm_neon.h>
+#ifdef CORE_CA7
+	#include <arm_neon.h>
+#else
+	#include "util/soft_neon.hh"
+#endif
 
 class ParallelBPIIR {
 	// Todo: re-arranging might improve cache performance
@@ -10,19 +13,36 @@ class ParallelBPIIR {
 	float32x4_t __attribute__((aligned(16))) outmixWeights;
 
 public:
-	// float[4]: par_weights: weighting (0..1) for each parallel IIR filter output in the mix
-	// float[4]: slows = control-dependant values (a1?)
-	// float[4]: consts = samplerate-dependant values (a2?)
-	ParallelBPIIR(float slows[4], float consts[4], float par_weights[4])
+	ParallelBPIIR()
 	{
 		fRec0567_1 = vdupq_n_f32(0.f);
 		fRec0567_2 = vdupq_n_f32(0.f);
-		fSlow19202122 = vld1q_f32(slows);
-		fConst691215 = vld1q_f32(consts);
-		outmixWeights = vld1q_f32(par_weights);
 	}
 
-	void update_slows(float slows[4])
+	// float[4]: par_weights: weighting (0..1) for each parallel IIR filter output in the mix
+	// float[4]: slows = control-dependant values (a1?)
+	// float[4]: consts = samplerate-dependant values (a2?)
+	ParallelBPIIR(const float slows[4], const float consts[4], const float par_weights[4])
+	{
+		fRec0567_1 = vdupq_n_f32(0.f);
+		fRec0567_2 = vdupq_n_f32(0.f);
+		set_slows(slows);
+		set_outmix(par_weights);
+		set_consts(consts);
+	}
+
+	~ParallelBPIIR() = default;
+
+	void set_outmix(const float par_weights[4])
+	{
+		outmixWeights = vld1q_f32(par_weights);
+	}
+	void set_consts(const float consts[4])
+	{
+		fConst691215 = vld1q_f32(consts);
+	}
+
+	void set_slows(const float slows[4])
 	{
 		fSlow19202122 = vld1q_f32(slows);
 	}
@@ -51,12 +71,16 @@ public:
 		float32x4_t outvec = vmulq_f32(diff0567_02, outmixWeights);
 		float32x2_t sum_tmp1 = vpadd_f32(vget_low_f32(outvec), vget_high_f32(outvec));
 
-		// We need to do this, but it compiles to a no-op:
+		// Todo:
+		// We need to do this:
 		// fRec0567_2 = fRec0567_1;
 		// fRec0567_1 = fRec0567_0;
+		// But it compiles to a no-op (same assembly if we remove those lines)
 		// There is no vmovq_f32(), so we need another solution.
+		// What we want is a vst1q_f32(fRec0567_1, {address where fRec0567_2 was loaded from});
+		// e.g: VSTR Q0, [R0, #16]
 
-		// This works, at the expense of a pipeline delay
+		// This works, at the expense of a pipeline delay, (but only for one of the max/movs)
 		fRec0567_2 = vmaxq_f32(fRec0567_1, fRec0567_1);
 		fRec0567_1 = vmaxq_f32(fRec0567_0, fRec0567_0);
 
@@ -66,7 +90,6 @@ public:
 		// 				  vgetq_lane_f32(fRec0567_1, 2),
 		// 				  vgetq_lane_f32(fRec0567_1, 3)};
 		// vst1q_f32(rec_1, fRec0567_2);
-
 		// float rec_0[4] = {vgetq_lane_f32(fRec0567_0, 0),
 		// 				  vgetq_lane_f32(fRec0567_0, 1),
 		// 				  vgetq_lane_f32(fRec0567_0, 2),
@@ -80,5 +103,3 @@ public:
 		return vget_lane_f32(sum_tmp1, 0) + vget_lane_f32(sum_tmp1, 1);
 	}
 };
-
-extern "C" void __exit() {}
