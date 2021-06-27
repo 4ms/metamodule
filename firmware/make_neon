@@ -1,0 +1,2 @@
+arm-none-eabi-g++ -g3 -Isrc/shared -mfloat-abi=hard -mfpu=neon-vfpv4 -mcpu=cortex-a7 -O3 -ffreestanding src/shared/CoreModules/iirneon.cpp
+arm-none-eabi-objdump -d -S a.out > iirneon.s

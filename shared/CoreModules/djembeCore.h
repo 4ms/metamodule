@@ -1,11 +1,12 @@
 #pragma once
 #include "CoreModules/moduleTypes.h"
-#include "NE10_dsp.h"
-#include "NE10_init.h"
+// #include "NE10_dsp.h"
+// #include "NE10_init.h"
 #include "coreProcessor.h"
 #include "gcem/include/gcem.hpp"
 #include "util/math.hh"
 #include "util/math_tables.hh"
+#include <arm_neon.h>
 
 using namespace MathTools;
 
@@ -27,8 +28,6 @@ class DjembeCore : public CoreProcessor {
 public:
 	DjembeCore()
 	{
-		ne10_init_dsp(NE10_OK);
-
 		IOTA = 0;
 
 		// Todo: Combine these loops
@@ -120,17 +119,31 @@ public:
 		freqKnob = float(60.0f);
 	}
 
-	struct IIR_tf2_Filter {
-		float signal[4];
-		float a1;
-		float a2;
-		float _pad0;
-		float _pad1;
-		float b0;
-		float b1;
-		float b2;
-		float _pad2;
-	};
+	// 	struct IIR_tf2_Filter {
+	// 		float signal[4];
+	// 		float a1;
+	// 		float a2;
+	// 		float _pad0;
+	// 		float _pad1;
+	// 		float b0;
+	// 		float b1;
+	// 		float b2;
+	// 		float _pad2;
+	// 	};
+
+	// m_aX = -1 * aX
+
+	// float filt1(float x0, float m_a1, float ym1, float m_a2, float ym2)
+	// {
+	// 	return x0 + m_a1 * ym1 + m_a2 * ym2;
+	// }
+	// void multacc4(float *dst, float *a, float *b)
+	// {
+	// 	dst[0] += a[0] * b[0];
+	// 	dst[1] += a[1] * b[1];
+	// 	dst[2] += a[2] * b[2];
+	// 	dst[3] += a[3] * b[3];
+	// }
 
 	void update() override
 	{
@@ -174,27 +187,50 @@ public:
 		fRec21[0] = (noiseBurst - ((fSlow36 * fRec21[1]) + (fConst57 * fRec21[2])));
 		fRec22[0] = (noiseBurst - ((fSlow37 * fRec22[1]) + (fConst60 * fRec22[2])));
 		fRec23[0] = (noiseBurst - ((fSlow38 * fRec23[1]) + (fConst63 * fRec23[2])));
-		signalOut = float(
-			(0.0500000007f *
-			 ((((((((((((((((((((fRec0[0] + (0.25f * (fRec5[0] - fRec5[2]))) + (0.111111112f * (fRec6[0] - fRec6[2]))) +
-							   (0.0625f * (fRec7[0] - fRec7[2]))) +
-							  (0.0399999991f * (fRec8[0] - fRec8[2]))) +
-							 (0.027777778f * (fRec9[0] - fRec9[2]))) +
-							(0.0204081628f * (fRec10[0] - fRec10[2]))) +
-						   (0.015625f * (fRec11[0] - fRec11[2]))) +
-						  (0.0123456791f * (fRec12[0] - fRec12[2]))) +
-						 (0.00999999978f * (fRec13[0] - fRec13[2]))) +
-						(0.00826446246f * (fRec14[0] - fRec14[2]))) +
-					   (0.0069444445f * (fRec15[0] - fRec15[2]))) +
-					  (0.00591715984f * (fRec16[0] - fRec16[2]))) +
-					 (0.00510204071f * (fRec17[0] - fRec17[2]))) +
-					(0.00444444455f * (fRec18[0] - fRec18[2]))) +
-				   (0.00390625f * (fRec19[0] - fRec19[2]))) +
-				  (0.00346020772f * (fRec20[0] - fRec20[2]))) +
-				 (0.00308641978f * (fRec21[0] - fRec21[2]))) +
-				(0.00277008303f * (fRec22[0] - fRec22[2]))) +
-			   (0.00249999994f * (fRec23[0] - fRec23[2]))) -
-			  fRec0[2])));
+		// signalOut =
+		// 	0.0500000007f *
+		// 	((((((((((((((((((((fRec0[0] + (0.25f * (fRec5[0] - fRec5[2]))) + (0.111111112f * (fRec6[0] - fRec6[2]))) +
+		// 					  (0.0625f * (fRec7[0] - fRec7[2]))) +
+		// 					 (0.0399999991f * (fRec8[0] - fRec8[2]))) +
+		// 					(0.027777778f * (fRec9[0] - fRec9[2]))) +
+		// 				   (0.0204081628f * (fRec10[0] - fRec10[2]))) +
+		// 				  (0.015625f * (fRec11[0] - fRec11[2]))) +
+		// 				 (0.0123456791f * (fRec12[0] - fRec12[2]))) +
+		// 				(0.00999999978f * (fRec13[0] - fRec13[2]))) +
+		// 			   (0.00826446246f * (fRec14[0] - fRec14[2]))) +
+		// 			  (0.0069444445f * (fRec15[0] - fRec15[2]))) +
+		// 			 (0.00591715984f * (fRec16[0] - fRec16[2]))) +
+		// 			(0.00510204071f * (fRec17[0] - fRec17[2]))) +
+		// 		   (0.00444444455f * (fRec18[0] - fRec18[2]))) +
+		// 		  (0.00390625f * (fRec19[0] - fRec19[2]))) +
+		// 		 (0.00346020772f * (fRec20[0] - fRec20[2]))) +
+		// 		(0.00308641978f * (fRec21[0] - fRec21[2]))) +
+		// 	   (0.00277008303f * (fRec22[0] - fRec22[2]))) +
+		// 	  (0.00249999994f * (fRec23[0] - fRec23[2]))) -
+		// 	 fRec0[2]);
+		signalOut = 0.f;
+		signalOut += 1.0f * (fRec0[0] - fRec0[2]);
+		signalOut += 0.25f * (fRec5[0] - fRec5[2]);
+		signalOut += 0.111111112f * (fRec6[0] - fRec6[2]);
+		signalOut += 0.0625f * (fRec7[0] - fRec7[2]);
+		signalOut += 0.0399999991f * (fRec8[0] - fRec8[2]);
+		signalOut += 0.027777778f * (fRec9[0] - fRec9[2]);
+		signalOut += 0.0204081628f * (fRec10[0] - fRec10[2]);
+		signalOut += 0.015625f * (fRec11[0] - fRec11[2]);
+		signalOut += 0.0123456791f * (fRec12[0] - fRec12[2]);
+		signalOut += 0.00999999978f * (fRec13[0] - fRec13[2]);
+		signalOut += 0.00826446246f * (fRec14[0] - fRec14[2]);
+		signalOut += 0.0069444445f * (fRec15[0] - fRec15[2]);
+		signalOut += 0.00591715984f * (fRec16[0] - fRec16[2]);
+		signalOut += 0.00510204071f * (fRec17[0] - fRec17[2]);
+		signalOut += 0.00444444455f * (fRec18[0] - fRec18[2]);
+		signalOut += 0.00390625f * (fRec19[0] - fRec19[2]);
+		signalOut += 0.00346020772f * (fRec20[0] - fRec20[2]);
+		signalOut += 0.00308641978f * (fRec21[0] - fRec21[2]);
+		signalOut += 0.00277008303f * (fRec22[0] - fRec22[2]);
+		signalOut += 0.00249999994f * (fRec23[0] - fRec23[2]);
+		signalOut *= 0.05f;
+
 		noise[1] = noise[0];
 		noise_hp[2] = noise_hp[1];
 		noise_hp[1] = noise_hp[0];
