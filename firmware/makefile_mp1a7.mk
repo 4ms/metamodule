@@ -167,9 +167,8 @@ MCU = -mcpu=cortex-a7 \
 	  -mthumb-interwork \
 	  -mtune=cortex-a7 \
 	  -funsafe-math-optimizations \
+	  -mvectorize-with-neon-quad \
 	  -ffast-math \
-	  -mvectorize-with-neon-double \
-	  # -mvectorize-with-neon-quad \
 
 AFLAGS = -mcpu=cortex-a7 \
 		 -mlittle-endian \
