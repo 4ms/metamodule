@@ -27,15 +27,15 @@ public:
 	{
 		IOTA = 0;
 
-		for (int i = 0; (i < 2); i = (i + 1)) {
+		for (int i = 0; i < 2; i++) {
 			noise[i] = 0;
 		}
-		for (int i = 0; (i < 3); i = (i + 1)) {
+		for (int i = 0; i < 3; i++) {
 			noise_hp[i] = 0.0f;
 			noise_hp_lp[i] = 0.0f;
 		}
 
-		for (int i = 0; (i < 2); i = (i + 1)) {
+		for (int i = 0; i < 2; i++) {
 			fVecTrig[i] = 0.0f;
 			iRec4[i] = 0;
 		}
@@ -70,7 +70,7 @@ public:
 			float slows[4];
 			for (int i = 0; i < 4; i++) {
 				int n = i + iir_group * 4;
-				slows[i] = iir_consts[n] * MathTools::cos((fConst5 * (freqKnob + 200.f * n)));
+				slows[i] = iir_slow_consts[n] * MathTools::cos((fConst5 * (freqKnob + 200.f * n)));
 			}
 			// slows[0] = iir_consts[iir_group * 4 + 0] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 0))));
 			// slows[1] = iir_consts[iir_group * 4 + 1] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 1))));
@@ -78,29 +78,39 @@ public:
 			// slows[3] = iir_consts[iir_group * 4 + 3] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 3))));
 			iirs[iir_group].set_slows(slows);
 		}
+
+		paramsNeedUpdating = true;
 	}
 
 	void update() override
 	{
-		if (paramsUpdated)
+		if (paramsNeedUpdating)
 			update_params();
-		paramsUpdated = false;
+		paramsNeedUpdating = false;
 
 		// StrikeModel:
 		//PsuedoRandom:
 		noise[0] = (1103515245 * noise[1]) + 12345;
+		// std::cout << "noise[0] = " << noise[0] << "\t";
+		// std::cout << "noise[1] = " << noise[1] << "\t";
 		noise_hp[0] = (4.65661287e-10f * noise[0]) - (fSlow7 * ((fSlow10 * noise_hp[2]) + (fSlow11 * noise_hp[1])));
+		// std::cout << "noise_hp[0] = " << noise_hp[0] << "\t";
+		// std::cout << "noise_hp[1] = " << noise_hp[1] << "\t";
 		noise_hp_lp[0] = (fSlow7 * (((fSlow9 * noise_hp[0]) + (fSlow12 * noise_hp[1])) + (fSlow9 * noise_hp[2]))) -
 						 (fSlow13 * ((fSlow14 * noise_hp_lp[2]) + (fSlow15 * noise_hp_lp[1])));
+		// std::cout << "lp[0] = " << noise_hp_lp[0] << "\t";
+		// std::cout << "lp[1] = " << noise_hp_lp[1] << "\t";
 		//Trigger signal
 		fVecTrig[0] = slowTrig;
-		//iRec4 is
-		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (slowTrig <= fVecTrig[1])) + (slowTrig > fVecTrig[1]));
+		// std::cout << "nVecTrig[0] = " << fVecTrig[0] << "\t";
+		// std::cout << "nVecTrig[1] = " << fVecTrig[1] << "\t";
+		//iRec4[0] is reset 1 on a rising edge, then goes +1 until reset again
+		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (fVecTrig[0] <= fVecTrig[1])) + (fVecTrig[0] > fVecTrig[1]));
+		// std::cout << "iRec4[0] = " << iRec4[0] << "\t";
+		// std::cout << "iRec4[1] = " << iRec4[1] << "\t";
 		float fTemp0 = adEnvRate * iRec4[0];
 		float adEnv = MathTools::max<float>(0.0f, MathTools::min<float>(fTemp0, (2.0f - fTemp0)));
 		float noiseBurst = fSlow4 * (noise_hp_lp[2] + (noise_hp_lp[0] + (2.0f * noise_hp_lp[1]))) * adEnv;
-
-		signalOut = noiseBurst;
 
 		noise[1] = noise[0];
 		noise_hp[2] = noise_hp[1];
@@ -110,14 +120,20 @@ public:
 		fVecTrig[1] = fVecTrig[0];
 		iRec4[1] = iRec4[0];
 
+		// std::cout << "neonnoise = " << noiseBurst << "\t";
+
+		// signalOut = iirs[0].calc_4iir(noiseBurst);
+
+		// std::cout << std::endl;
+
 		//IIRs:
 		signalOut = 0.f;
 		signalOut += iirs[0].calc_4iir(noiseBurst);
-		// signalOut += iirs[1].calc_4iir(noiseBurst);
-		// signalOut += iirs[2].calc_4iir(noiseBurst);
-		// signalOut += iirs[3].calc_4iir(noiseBurst);
-		// signalOut += iirs[4].calc_4iir(noiseBurst);
-		// signalOut *= 0.05f;
+		signalOut += iirs[1].calc_4iir(noiseBurst);
+		signalOut += iirs[2].calc_4iir(noiseBurst);
+		signalOut += iirs[3].calc_4iir(noiseBurst);
+		signalOut += iirs[4].calc_4iir(noiseBurst);
+		signalOut *= 0.05f;
 	}
 
 	void update_params()
@@ -141,7 +157,7 @@ public:
 		adEnvRate =
 			(1.0f / MathTools::max<float>(
 						1.0f, (fConst2 * MathTools::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
-		slowTrig = float(trigIn) * 2.f;
+		slowTrig = trigIn > 0.f ? 1.f : 0.f;
 		slowFreq = (float(freqCV) * float(freqKnob));
 
 		// Coef: a1
@@ -149,7 +165,7 @@ public:
 			float slows[4];
 			for (int i = 0; i < 4; i++) {
 				int n = i + iir_group * 4;
-				slows[i] = iir_consts[n] * MathTools::cos((fConst5 * (slowFreq + 200.f * n)));
+				slows[i] = iir_slow_consts[n] * MathTools::cos((fConst5 * (slowFreq + 200.f * n)));
 			}
 			iirs[iir_group].set_slows(slows);
 		}
@@ -160,22 +176,22 @@ public:
 		switch (param_id) {
 			case Freq:
 				freqKnob = MathTools::map_value(val, 0.f, 1.f, 20.f, 500.f);
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Gain:
 				gainKnob = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Sharpness:
 				sharpnessKnob = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Strike:
 				strikeKnob = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 		}
 	}
@@ -190,27 +206,27 @@ public:
 		switch (input_id) {
 			case Freq:
 				freqCV = expTable.interp(MathTools::constrain(val, 0.f, 1.0f));
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Gain:
 				gainCV = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Sharpness:
 				sharpCV = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Strike:
 				strikeCV = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Trigger:
 				trigIn = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 		}
 	}
@@ -226,7 +242,7 @@ public:
 	}
 
 public:
-	bool paramsUpdated = false;
+	bool paramsNeedUpdating = false;
 	float signalOut = 0;
 
 	float IOTA;
@@ -330,6 +346,12 @@ public:
 	static constexpr float fConst62 = (0.0f - (2.0f * fConst61));
 	static constexpr float fConst63 = (fConst61 * fConst61);
 	static constexpr float iir_consts[20] = {
+		fConst6,  fConst9,	fConst12, fConst15, fConst18, fConst21, fConst24, fConst27, fConst30, fConst33,
+		fConst36, fConst39, fConst42, fConst45, fConst48, fConst51, fConst54, fConst57, fConst60, fConst63,
+		// fConst4,  fConst8,	fConst11, fConst14, fConst17, fConst20, fConst23, fConst26, fConst29, fConst32,
+		// fConst35, fConst38, fConst41, fConst44, fConst47, fConst50, fConst53, fConst56, fConst59, fConst62,
+	};
+	static constexpr float iir_slow_consts[20] = {
 		fConst4,  fConst8,	fConst11, fConst14, fConst17, fConst20, fConst23, fConst26, fConst29, fConst32,
 		fConst35, fConst38, fConst41, fConst44, fConst47, fConst50, fConst53, fConst56, fConst59, fConst62,
 	};

@@ -6,15 +6,17 @@
 
 TEST_CASE("first test")
 {
-	constexpr int BufferSize = 256;
-	float no_outsig[BufferSize];
-	float ne_outsig[BufferSize];
+	constexpr int BufferSize = 255;
+	float no_outsig[256];
+	float ne_outsig[256];
+
 	{
 		DjembeCore no;
 		int n = 0;
 		// std::cout << "Initial no.noise[0]: " << no.noise[0] << std::endl;
 		// std::cout << "Initial no.noise[1]: " << no.noise[1] << std::endl;
 		no.update();
+		// no_outsig[n++] = no.get_output(0);
 		// std::cout << n << ": no.noise[0]: " << no.noise[0] << std::endl;
 		// std::cout << n << ": no.noise[1]: " << no.noise[1] << std::endl;
 
@@ -29,7 +31,7 @@ TEST_CASE("first test")
 		no.set_param(DjembeCore::Params::Strike, 0.3f);
 
 		// Trigger low for 3
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 3; i++) {
 			no.set_input(DjembeCore::Params::Trigger, 0.f);
 			no.update();
 			// std::cout << n << ": ne.noise[0]: " << no.noise[0] << std::endl;
@@ -55,11 +57,12 @@ TEST_CASE("first test")
 	}
 
 	{
-		int n = 0;
 		DjembeCoreN ne;
+		int n = 0;
 		// std::cout << "Initial ne.noise[0]: " << ne.noise[0] << std::endl;
 		// std::cout << "Initial ne.noise[1]: " << ne.noise[1] << std::endl;
 		ne.update();
+		// ne_outsig[n++] = ne.get_output(0);
 		// std::cout << n << ": ne.noise[0]: " << ne.noise[0] << std::endl;
 		// std::cout << n << ": ne.noise[1]: " << ne.noise[1] << std::endl;
 
@@ -74,7 +77,7 @@ TEST_CASE("first test")
 		ne.set_param(DjembeCore::Params::Strike, 0.3f);
 
 		// Trigger low for 3
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 3; i++) {
 			ne.set_input(DjembeCore::Params::Trigger, 0.f);
 			ne.update();
 			// std::cout << n << ": ne.noise[0]: " << ne.noise[0] << std::endl;
@@ -99,14 +102,20 @@ TEST_CASE("first test")
 			// std::cout << n << ": ne.noise[1]: " << ne.noise[1] << std::endl;
 			ne_outsig[n++] = ne.get_output(0);
 		}
+	}
 
-		for (int i = 0; i < 25; i++) {
-			std::cout << no_outsig[i] << ", ";
-			CHECK(no_outsig[i] == doctest::Approx(ne_outsig[i]));
-		}
-		std::cout << std::endl;
-		for (int i = 0; i < BufferSize; i++) {
-			// std::cout << ne_outsig[i] << ", ";
-		}
+	for (int i = 0; i < BufferSize; i++) {
+		// std::cout << no_outsig[i] << ", ";
+		// if (i % 10 == 0)
+		// 	std::cout << std::endl;
+		CHECK(no_outsig[i] == doctest::Approx(ne_outsig[i]));
+	}
+	// std::cout << std::endl;
+	// std::cout << std::endl;
+
+	for (int i = 0; i < BufferSize; i++) {
+		// std::cout << ne_outsig[i] << ", ";
+		// if (i % 10 == 0)
+		// 	std::cout << std::endl;
 	}
 }

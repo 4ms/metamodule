@@ -4,7 +4,6 @@
 #include "gcem/include/gcem.hpp"
 #include "util/math.hh"
 #include "util/math_tables.hh"
-
 using namespace MathTools;
 
 class DjembeCore : public CoreProcessor {
@@ -36,11 +35,9 @@ public:
 		for (int l2 = 0; (l2 < 3); l2 = (l2 + 1)) {
 			noise_hp_lp[l2] = 0.0f;
 		}
-		for (int l3 = 0; (l3 < 2); l3 = (l3 + 1)) {
-			fVecTrig[l3] = 0.0f;
-		}
-		for (int l4 = 0; (l4 < 2); l4 = (l4 + 1)) {
-			iRec4[l4] = 0;
+		for (int i = 0; i < 2; i++) {
+			iRec4[i] = 0;
+			fVecTrig[i] = float{0};
 		}
 		for (int l5 = 0; (l5 < 3); l5 = (l5 + 1)) {
 			fRec0[l5] = 0.0f;
@@ -113,22 +110,33 @@ public:
 		trigIn = float(0.0f);
 		freqCV = float(1.0f);
 		freqKnob = float(60.0f);
+		paramsNeedUpdating = true;
 	}
 
 	void update() override
 	{
-		if (paramsUpdated)
+		if (paramsNeedUpdating)
 			update_params();
-		paramsUpdated = false;
+		paramsNeedUpdating = false;
 
 		// StrikeModel:
 		noise[0] = (1103515245 * noise[1]) + 12345;
+		// std::cout << "noise[0] = " << noise[0] << "\t";
+		// std::cout << "noise[1] = " << noise[1] << "\t";
 		noise_hp[0] =
 			(4.65661287e-10f * float(noise[0])) - (fSlow7 * ((fSlow10 * noise_hp[2]) + (fSlow11 * noise_hp[1])));
+		// std::cout << "noise_hp[0] = " << noise_hp[0] << "\t";
+		// std::cout << "noise_hp[1] = " << noise_hp[1] << "\t";
 		noise_hp_lp[0] = (fSlow7 * (((fSlow9 * noise_hp[0]) + (fSlow12 * noise_hp[1])) + (fSlow9 * noise_hp[2]))) -
 						 (fSlow13 * ((fSlow14 * noise_hp_lp[2]) + (fSlow15 * noise_hp_lp[1])));
+		// std::cout << "lp[0] = " << noise_hp_lp[0] << "\t";
+		// std::cout << "lp[1] = " << noise_hp_lp[1] << "\t";
 		fVecTrig[0] = slowTrig;
+		// std::cout << "fVecTrig[0] = " << fVecTrig[0] << "\t";
+		// std::cout << "fVecTrig[1] = " << fVecTrig[1] << "\t";
 		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (slowTrig <= fVecTrig[1])) + (slowTrig > fVecTrig[1]));
+		// std::cout << "iRec4[0] = " << iRec4[0] << "\t";
+		// std::cout << "iRec4[1] = " << iRec4[1] << "\t";
 		float fTemp0 = (adEnvRate * float(iRec4[0]));
 		float adEnv = MathTools::max<float>(0.0f, MathTools::min<float>(fTemp0, (2.0f - fTemp0)));
 		float noiseBurst = fSlow4 * (noise_hp_lp[2] + (noise_hp_lp[0] + (2.0f * noise_hp_lp[1]))) * adEnv;
@@ -153,7 +161,7 @@ public:
 		fRec21[0] = (noiseBurst - ((fSlow36 * fRec21[1]) + (fConst57 * fRec21[2])));
 		fRec22[0] = (noiseBurst - ((fSlow37 * fRec22[1]) + (fConst60 * fRec22[2])));
 		fRec23[0] = (noiseBurst - ((fSlow38 * fRec23[1]) + (fConst63 * fRec23[2])));
-		//
+
 		// TODO: verify this is equivalent to the commented out stuff
 		// signalOut =
 		// 	0.0500000007f *
@@ -176,30 +184,29 @@ public:
 		// 	   (0.00277008303f * (fRec22[0] - fRec22[2]))) +
 		// 	  (0.00249999994f * (fRec23[0] - fRec23[2]))) -
 		// fRec0[2]);
+
 		signalOut = 0.f;
 		signalOut += 1.0f * (fRec0[0] - fRec0[2]);
 		signalOut += 0.25f * (fRec5[0] - fRec5[2]);
 		signalOut += 0.111111112f * (fRec6[0] - fRec6[2]);
 		signalOut += 0.0625f * (fRec7[0] - fRec7[2]);
-		// signalOut += 0.0399999991f * (fRec8[0] - fRec8[2]);
-		// signalOut += 0.027777778f * (fRec9[0] - fRec9[2]);
-		// signalOut += 0.0204081628f * (fRec10[0] - fRec10[2]);
-		// signalOut += 0.015625f * (fRec11[0] - fRec11[2]);
-		// signalOut += 0.0123456791f * (fRec12[0] - fRec12[2]);
-		// signalOut += 0.00999999978f * (fRec13[0] - fRec13[2]);
-		// signalOut += 0.00826446246f * (fRec14[0] - fRec14[2]);
-		// signalOut += 0.0069444445f * (fRec15[0] - fRec15[2]);
-		// signalOut += 0.00591715984f * (fRec16[0] - fRec16[2]);
-		// signalOut += 0.00510204071f * (fRec17[0] - fRec17[2]);
-		// signalOut += 0.00444444455f * (fRec18[0] - fRec18[2]);
-		// signalOut += 0.00390625f * (fRec19[0] - fRec19[2]);
-		// signalOut += 0.00346020772f * (fRec20[0] - fRec20[2]);
-		// signalOut += 0.00308641978f * (fRec21[0] - fRec21[2]);
-		// signalOut += 0.00277008303f * (fRec22[0] - fRec22[2]);
-		// signalOut += 0.00249999994f * (fRec23[0] - fRec23[2]);
-		// signalOut *= 0.05f;
-
-		// signalOut = adEnv;
+		signalOut += 0.0399999991f * (fRec8[0] - fRec8[2]);
+		signalOut += 0.027777778f * (fRec9[0] - fRec9[2]);
+		signalOut += 0.0204081628f * (fRec10[0] - fRec10[2]);
+		signalOut += 0.015625f * (fRec11[0] - fRec11[2]);
+		signalOut += 0.0123456791f * (fRec12[0] - fRec12[2]);
+		signalOut += 0.00999999978f * (fRec13[0] - fRec13[2]);
+		signalOut += 0.00826446246f * (fRec14[0] - fRec14[2]);
+		signalOut += 0.0069444445f * (fRec15[0] - fRec15[2]);
+		signalOut += 0.00591715984f * (fRec16[0] - fRec16[2]);
+		signalOut += 0.00510204071f * (fRec17[0] - fRec17[2]);
+		signalOut += 0.00444444455f * (fRec18[0] - fRec18[2]);
+		signalOut += 0.00390625f * (fRec19[0] - fRec19[2]);
+		signalOut += 0.00346020772f * (fRec20[0] - fRec20[2]);
+		signalOut += 0.00308641978f * (fRec21[0] - fRec21[2]);
+		signalOut += 0.00277008303f * (fRec22[0] - fRec22[2]);
+		signalOut += 0.00249999994f * (fRec23[0] - fRec23[2]);
+		signalOut *= 0.05f;
 
 		noise[1] = noise[0];
 		noise_hp[2] = noise_hp[1];
@@ -272,7 +279,8 @@ public:
 		adEnvRate =
 			(1.0f / MathTools::max<float>(
 						1.0f, (fConst2 * MathTools::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
-		slowTrig = float(trigIn) * 2.f;
+		slowTrig = trigIn > 0.f ? 1.f : 0.f;
+		// std::cout << "slowTrig = " << slowTrig << std::endl;
 		slowFreq = (float(freqCV) * float(freqKnob));
 
 		// Coef: a1
@@ -303,22 +311,22 @@ public:
 		switch (param_id) {
 			case Freq:
 				freqKnob = MathTools::map_value(val, 0.f, 1.f, 20.f, 500.f);
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Gain:
 				gainKnob = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Sharpness:
 				sharpnessKnob = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Strike:
 				strikeKnob = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 		}
 	}
@@ -333,27 +341,27 @@ public:
 		switch (input_id) {
 			case Freq:
 				freqCV = expTable.interp(MathTools::constrain(val, 0.f, 1.0f));
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Gain:
 				gainCV = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Sharpness:
 				sharpCV = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Strike:
 				strikeCV = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 
 			case Trigger:
 				trigIn = val;
-				paramsUpdated = true;
+				paramsNeedUpdating = true;
 				break;
 		}
 	}
@@ -369,7 +377,7 @@ public:
 	}
 
 public:
-	bool paramsUpdated = false;
+	bool paramsNeedUpdating = false;
 	float signalOut = 0;
 
 	float IOTA;

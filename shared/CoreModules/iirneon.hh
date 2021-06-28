@@ -6,7 +6,9 @@
 
 class ParallelBPIIR {
 	// Todo: re-arranging might improve cache performance
+public:
 	float32x4_t __attribute__((aligned(16))) fSlow19202122;
+	float32x4_t __attribute__((aligned(16))) fRec0567_0;
 	float32x4_t __attribute__((aligned(16))) fRec0567_1;
 	float32x4_t __attribute__((aligned(16))) fRec0567_2;
 	float32x4_t __attribute__((aligned(16))) fConst691215;
@@ -54,7 +56,7 @@ public:
 		// fRec6[0] = (in - ((fSlow21 * fRec6[1]) + (fConst12 * fRec6[2])));
 		// fRec7[0] = (in - ((fSlow22 * fRec7[1]) + (fConst15 * fRec7[2])));
 
-		float32x4_t fRec0567_0;
+		// float32x4_t fRec0567_0;
 		fRec0567_0 = vmulq_f32(fSlow19202122, fRec0567_1);
 		fRec0567_0 = vmlaq_f32(fRec0567_0, fConst691215, fRec0567_2);
 
@@ -81,8 +83,24 @@ public:
 		// e.g: VSTR Q0, [R0, #16]
 
 		// This works, at the expense of a pipeline delay, (but only for one of the max/movs)
-		fRec0567_2 = vmaxq_f32(fRec0567_1, fRec0567_1);
-		fRec0567_1 = vmaxq_f32(fRec0567_0, fRec0567_0);
+		// std::cout << "fSlow19 = " << fSlow19202122.v[0] << "\t";
+		// std::cout << "fConst6 = " << fConst691215.v[0] << "\t";
+		// std::cout << "fRec0[0] = " << fRec0567_0.v[0] << "\t";
+		// std::cout << "fRec0[1] = " << fRec0567_1.v[0] << "\t";
+		// std::cout << "fRec0[2] = " << fRec0567_2.v[0] << "\t";
+
+		fRec0567_2[0] = fRec0567_1[0];
+		fRec0567_2[1] = fRec0567_1[1];
+		fRec0567_2[2] = fRec0567_1[2];
+		fRec0567_2[3] = fRec0567_1[3];
+
+		fRec0567_1[0] = fRec0567_0[0];
+		fRec0567_1[1] = fRec0567_0[1];
+		fRec0567_1[2] = fRec0567_0[2];
+		fRec0567_1[3] = fRec0567_0[3];
+
+		// fRec0567_2 = vmaxq_f32(fRec0567_1, fRec0567_1);
+		// fRec0567_1 = vmaxq_f32(fRec0567_0, fRec0567_0);
 
 		// Doesn't generate a store:
 		// float rec_1[4] = {vgetq_lane_f32(fRec0567_1, 0),

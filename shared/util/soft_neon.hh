@@ -3,10 +3,26 @@
 
 struct float32x4_t {
 	float v[4];
+	float &operator[](unsigned i)
+	{
+		return v[i];
+	}
+	float operator[](unsigned i) const
+	{
+		return v[i];
+	}
 };
 
 struct float32x2_t {
 	float v[2];
+	float &operator[](unsigned i)
+	{
+		return v[i];
+	}
+	float operator[](unsigned i) const
+	{
+		return v[i];
+	}
 };
 
 inline float32x4_t vdupq_n_f32(float a)
@@ -30,15 +46,18 @@ inline float32x4_t vmulq_f32(float32x4_t a, float32x4_t b)
 	};
 }
 
-//FixMe: does not automatically update dst, must use it:
-//dst = vmlaq_f32(dst, a, b);
-inline float32x4_t vmlaq_f32(float32x4_t dst, float32x4_t a, float32x4_t b)
+inline float32x4_t vmlaq_f32(float32x4_t &dst, float32x4_t a, float32x4_t b)
 {
+	dst.v[0] += a.v[0] * b.v[0];
+	dst.v[1] += a.v[1] * b.v[1];
+	dst.v[2] += a.v[2] * b.v[2];
+	dst.v[3] += a.v[3] * b.v[3];
+
 	return {
-		dst.v[0] + a.v[0] * b.v[0],
-		dst.v[1] + a.v[1] * b.v[1],
-		dst.v[2] + a.v[2] * b.v[2],
-		dst.v[3] + a.v[3] * b.v[3],
+		dst.v[0],
+		dst.v[1],
+		dst.v[2],
+		dst.v[3],
 	};
 }
 
