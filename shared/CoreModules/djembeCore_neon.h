@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
+#include "debug.hh"
 #include "gcem/include/gcem.hpp"
 #include "iirneon.hh"
 #include "util/math.hh"
@@ -109,7 +110,8 @@ public:
 		iRec4[1] = iRec4[0];
 
 		//IIRs:
-		//460ns
+		//440ns vs. 500ns non-neon = 10% faster
+		// Debug::Pin1::high();
 		signalOut = 0.f;
 		signalOut += iirs[0].calc_4iir(noiseBurst);
 		signalOut += iirs[1].calc_4iir(noiseBurst);
@@ -117,6 +119,7 @@ public:
 		signalOut += iirs[3].calc_4iir(noiseBurst);
 		signalOut += iirs[4].calc_4iir(noiseBurst);
 		signalOut *= 0.05f;
+		// Debug::Pin1::low();
 	}
 
 	void update_params()
@@ -148,12 +151,9 @@ public:
 		adEnvRate =
 			1.0f / MathTools::max<float>(1.0f, (fConst2 * MathTools::min<float>(sharpCV + sharpnessKnob, 1.0f)));
 
-		// if freq
-
 		//640ns
-		// Debug::Pin1::high();
+		// if freq
 		set_freq_coef(freqCV * freqKnob);
-		// Debug::Pin1::low();
 	}
 
 	void update_freq()
@@ -244,7 +244,7 @@ public:
 		return 0;
 	}
 
-public:
+private:
 	bool paramsNeedUpdating = false;
 	bool freqNeedsUpdating = false;
 	float signalOut = 0;

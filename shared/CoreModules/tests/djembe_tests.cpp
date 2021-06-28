@@ -4,7 +4,7 @@
 #include <iostream>
 #include <stdint.h>
 
-// Skipping because neon implemenation has changed (improved) a bit
+// Skipping because neon implemenation has changed pitch a bit
 TEST_CASE("Soft-neon matches non-neon output" * doctest::skip(true))
 {
 	constexpr int BufferSize = 255;
