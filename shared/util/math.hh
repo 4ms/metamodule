@@ -179,9 +179,19 @@ static inline float cos(float x)
 	return sinTable.interp_wrap((x / (2.f * M_PI)) + 0.25f);
 }
 
+static inline float cos_close(float x)
+{
+	return sinTable.closest_wrap((x / (2.f * M_PI)) + 0.25f);
+}
+
 static inline float tan(float x)
 {
 	return tanTable.interp_wrap(x / M_PI);
+}
+
+static inline float tan_close(float x)
+{
+	return tanTable.closest_wrap(x / M_PI);
 }
 
 }; // namespace MathTools
