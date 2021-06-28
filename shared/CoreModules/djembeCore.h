@@ -175,12 +175,12 @@ public:
 		// 		(0.00308641978f * (fRec21[0] - fRec21[2]))) +
 		// 	   (0.00277008303f * (fRec22[0] - fRec22[2]))) +
 		// 	  (0.00249999994f * (fRec23[0] - fRec23[2]))) -
-		// 	 fRec0[2]);
-		// signalOut = 0.f;
-		// signalOut += 1.0f * (fRec0[0] - fRec0[2]);
-		// signalOut += 0.25f * (fRec5[0] - fRec5[2]);
-		// signalOut += 0.111111112f * (fRec6[0] - fRec6[2]);
-		// signalOut += 0.0625f * (fRec7[0] - fRec7[2]);
+		// fRec0[2]);
+		signalOut = 0.f;
+		signalOut += 1.0f * (fRec0[0] - fRec0[2]);
+		signalOut += 0.25f * (fRec5[0] - fRec5[2]);
+		signalOut += 0.111111112f * (fRec6[0] - fRec6[2]);
+		signalOut += 0.0625f * (fRec7[0] - fRec7[2]);
 		// signalOut += 0.0399999991f * (fRec8[0] - fRec8[2]);
 		// signalOut += 0.027777778f * (fRec9[0] - fRec9[2]);
 		// signalOut += 0.0204081628f * (fRec10[0] - fRec10[2]);
@@ -199,7 +199,7 @@ public:
 		// signalOut += 0.00249999994f * (fRec23[0] - fRec23[2]);
 		// signalOut *= 0.05f;
 
-		signalOut = noise[0];
+		// signalOut = adEnv;
 
 		noise[1] = noise[0];
 		noise_hp[2] = noise_hp[1];
