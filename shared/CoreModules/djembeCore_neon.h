@@ -8,7 +8,7 @@
 
 using namespace MathTools;
 
-class DjembeCoreN : public CoreProcessor {
+class DjembeCoreNeon : public CoreProcessor {
 	static constexpr uint32_t SAMPLERATE = 48000;
 	static inline const int NumInJacks = 5;
 	static inline const int NumOutJacks = 1;
@@ -23,7 +23,7 @@ class DjembeCoreN : public CoreProcessor {
 	enum Params { Freq = 0, Gain = 1, Sharpness = 2, Strike = 3, Trigger = 4 };
 
 public:
-	DjembeCoreN()
+	DjembeCoreNeon()
 	{
 		IOTA = 0;
 
@@ -46,7 +46,7 @@ public:
 
 		for (int iir_group = 0; iir_group < 5; iir_group++) {
 			float n = iir_group * 4;
-			float weights[4] = {
+			float __attribute__((aligned(16))) weights[4] = {
 				1.f / ((n + 1) * (n + 1)),
 				1.f / ((n + 2) * (n + 2)),
 				1.f / ((n + 3) * (n + 3)),
@@ -56,61 +56,49 @@ public:
 		}
 
 		// UI
-		gainCV = float(0.0f);
-		gainKnob = float(1.0f);
-		strikeCV = float(0.0f);
+		gainCV = 0.0f;
+		gainKnob = 1.0f;
+		strikeCV = 0.0f;
 		strikeKnob = float(0.29999999999999999f);
-		sharpCV = float(0.0f);
-		sharpnessKnob = float(0.5f);
-		trigIn = float(0.0f);
-		freqCV = float(1.0f);
+		sharpCV = 0.0f;
+		sharpnessKnob = 0.5f;
+		trigIn = 0.0f;
+		freqCV = 1.0f;
 		freqKnob = float(60.0f);
 
-		for (int iir_group = 0; iir_group < 5; iir_group++) {
-			float slows[4];
-			for (int i = 0; i < 4; i++) {
-				int n = i + iir_group * 4;
-				slows[i] = iir_slow_consts[n] * MathTools::cos((fConst5 * (freqKnob + 200.f * n)));
-			}
-			// slows[0] = iir_consts[iir_group * 4 + 0] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 0))));
-			// slows[1] = iir_consts[iir_group * 4 + 1] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 1))));
-			// slows[2] = iir_consts[iir_group * 4 + 2] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 2))));
-			// slows[3] = iir_consts[iir_group * 4 + 3] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 3))));
-			iirs[iir_group].set_slows(slows);
-		}
+		set_freq_coef(freqKnob * freqCV);
 
 		paramsNeedUpdating = true;
 	}
 
 	void update() override
 	{
-		if (paramsNeedUpdating)
+		//1038us
+		if (freqNeedsUpdating || paramsNeedUpdating) {
 			update_params();
-		paramsNeedUpdating = false;
+			paramsNeedUpdating = false;
+		}
+		// if (freqNeedsUpdating) {
+		// 	update_freq();
+		// 	freqNeedsUpdating = false;
+		// }
 
+		// 90ns:
 		// StrikeModel:
-		//PsuedoRandom:
+		// PsuedoRandom:
 		noise[0] = (1103515245 * noise[1]) + 12345;
-		// std::cout << "noise[0] = " << noise[0] << "\t";
-		// std::cout << "noise[1] = " << noise[1] << "\t";
-		noise_hp[0] = (4.65661287e-10f * noise[0]) - (fSlow7 * ((fSlow10 * noise_hp[2]) + (fSlow11 * noise_hp[1])));
-		// std::cout << "noise_hp[0] = " << noise_hp[0] << "\t";
-		// std::cout << "noise_hp[1] = " << noise_hp[1] << "\t";
-		noise_hp_lp[0] = (fSlow7 * (((fSlow9 * noise_hp[0]) + (fSlow12 * noise_hp[1])) + (fSlow9 * noise_hp[2]))) -
-						 (fSlow13 * ((fSlow14 * noise_hp_lp[2]) + (fSlow15 * noise_hp_lp[1])));
-		// std::cout << "lp[0] = " << noise_hp_lp[0] << "\t";
-		// std::cout << "lp[1] = " << noise_hp_lp[1] << "\t";
+		noise_hp[0] = (4.65661287e-10f * noise[0]) -
+					  (fSlowStrike1 * ((fSlowStrike3 * noise_hp[2]) + (fSlowStrike4 * noise_hp[1])));
+		noise_hp_lp[0] = (fSlowStrike1 * (((fSlowStrike2 * noise_hp[0]) + (fSlowStrike5 * noise_hp[1])) +
+										  (fSlowStrike2 * noise_hp[2]))) -
+						 (fSlowStrike6 * ((fSlowStrike7 * noise_hp_lp[2]) + (fSlowStrike8 * noise_hp_lp[1])));
 		//Trigger signal
-		fVecTrig[0] = slowTrig;
-		// std::cout << "nVecTrig[0] = " << fVecTrig[0] << "\t";
-		// std::cout << "nVecTrig[1] = " << fVecTrig[1] << "\t";
+		fVecTrig[0] = trigIn;
 		//iRec4[0] is reset 1 on a rising edge, then goes +1 until reset again
 		iRec4[0] = (((iRec4[1] + (iRec4[1] > 0)) * (fVecTrig[0] <= fVecTrig[1])) + (fVecTrig[0] > fVecTrig[1]));
-		// std::cout << "iRec4[0] = " << iRec4[0] << "\t";
-		// std::cout << "iRec4[1] = " << iRec4[1] << "\t";
 		float fTemp0 = adEnvRate * iRec4[0];
 		float adEnv = MathTools::max<float>(0.0f, MathTools::min<float>(fTemp0, (2.0f - fTemp0)));
-		float noiseBurst = fSlow4 * (noise_hp_lp[2] + (noise_hp_lp[0] + (2.0f * noise_hp_lp[1]))) * adEnv;
+		float noiseBurst = fSlowGainStrike * (noise_hp_lp[2] + (noise_hp_lp[0] + (2.0f * noise_hp_lp[1]))) * adEnv;
 
 		noise[1] = noise[0];
 		noise_hp[2] = noise_hp[1];
@@ -120,13 +108,8 @@ public:
 		fVecTrig[1] = fVecTrig[0];
 		iRec4[1] = iRec4[0];
 
-		// std::cout << "neonnoise = " << noiseBurst << "\t";
-
-		// signalOut = iirs[0].calc_4iir(noiseBurst);
-
-		// std::cout << std::endl;
-
 		//IIRs:
+		//460ns
 		signalOut = 0.f;
 		signalOut += iirs[0].calc_4iir(noiseBurst);
 		signalOut += iirs[1].calc_4iir(noiseBurst);
@@ -138,34 +121,54 @@ public:
 
 	void update_params()
 	{
-		strike0 = MathTools::min<float>((float(strikeCV) + float(strikeKnob)), 1.0f);
-		strike1 = MathTools::tan(fConst1 * ((15000.0f * strike0) + 500.0f));
-		strike2 = (1.0f / strike1);
-		strike3 = (((strike2 + 1.41421354f) / strike1) + 1.0f);
-		fSlow4 = (MathTools::min<float>((float(gainCV) + float(gainKnob)), 1.0f) / strike3);
-		fSlow5 = MathTools::tan(fConst1 * ((500.0f * strike0) + 40.0f));
-		fSlow6 = (1.0f / fSlow5);
-		fSlow7 = (1.0f / (((fSlow6 + 1.41421354f) / fSlow5) + 1.0f));
-		fSlow8 = (fSlow5 * fSlow5);
-		fSlow9 = (1.0f / fSlow8);
-		fSlow10 = (((fSlow6 + -1.41421354f) / fSlow5) + 1.0f);
-		fSlow11 = (2.0f * (1.0f - fSlow9));
-		fSlow12 = (0.0f - (2.0f / fSlow8));
-		fSlow13 = (1.0f / strike3);
-		fSlow14 = (((strike2 + -1.41421354f) / strike1) + 1.0f);
-		fSlow15 = (2.0f * (1.0f - (1.0f / (strike1 * strike1))));
-		adEnvRate =
-			(1.0f / MathTools::max<float>(
-						1.0f, (fConst2 * MathTools::min<float>((float(sharpCV) + float(sharpnessKnob)), 1.0f))));
-		slowTrig = trigIn > 0.f ? 1.f : 0.f;
-		slowFreq = (float(freqCV) * float(freqKnob));
+		//460ns to set_freq_coef
+		//if strike:
+		float strike0 = MathTools::min<float>(strikeCV + strikeKnob, 1.0f);
+		float strike1 = MathTools::tan_close(fConst1 * ((15000.0f * strike0) + 500.0f));
+		float strike2 = (1.0f / strike1);
+		float strike3 = (((strike2 + 1.41421354f) / strike1) + 1.0f);
 
+		//if gain || strike:
+		fSlowGainStrike = MathTools::min<float>(gainCV + gainKnob, 1.0f) / strike3;
+
+		//if strike:
+		float strike4 = MathTools::tan_close(fConst1 * ((500.0f * strike0) + 40.0f));
+		float strike5 = (1.0f / strike4);
+		fSlowStrike1 = (1.0f / (((strike5 + 1.41421354f) / strike4) + 1.0f));
+		float strike6 = (strike4 * strike4);
+		fSlowStrike2 = (1.0f / strike6);
+		fSlowStrike3 = (((strike5 + -1.41421354f) / strike4) + 1.0f);
+		fSlowStrike4 = (2.0f * (1.0f - fSlowStrike2));
+		fSlowStrike5 = (0.0f - (2.0f / strike6));
+		fSlowStrike6 = (1.0f / strike3);
+		fSlowStrike7 = (((strike2 + -1.41421354f) / strike1) + 1.0f);
+		fSlowStrike8 = (2.0f * (1.0f - (1.0f / (strike1 * strike1))));
+
+		//if sharp:
+		adEnvRate =
+			1.0f / MathTools::max<float>(1.0f, (fConst2 * MathTools::min<float>(sharpCV + sharpnessKnob, 1.0f)));
+
+		// if freq
+
+		//640ns
+		// Debug::Pin1::high();
+		set_freq_coef(freqCV * freqKnob);
+		// Debug::Pin1::low();
+	}
+
+	void update_freq()
+	{
+		set_freq_coef(freqCV * freqKnob);
+	}
+
+	void set_freq_coef(float freq)
+	{
 		// Coef: a1
 		for (int iir_group = 0; iir_group < 5; iir_group++) {
-			float slows[4];
+			float __attribute__((aligned(16))) slows[4];
 			for (int i = 0; i < 4; i++) {
 				int n = i + iir_group * 4;
-				slows[i] = iir_slow_consts[n] * MathTools::cos((fConst5 * (slowFreq + 200.f * n)));
+				slows[i] = iir_slow_consts[n] * MathTools::cos_close((fConst5 * (freq + 200.f * n)));
 			}
 			iirs[iir_group].set_slows(slows);
 		}
@@ -176,7 +179,7 @@ public:
 		switch (param_id) {
 			case Freq:
 				freqKnob = MathTools::map_value(val, 0.f, 1.f, 20.f, 500.f);
-				paramsNeedUpdating = true;
+				freqNeedsUpdating = true;
 				break;
 
 			case Gain:
@@ -206,7 +209,7 @@ public:
 		switch (input_id) {
 			case Freq:
 				freqCV = expTable.interp(MathTools::constrain(val, 0.f, 1.0f));
-				paramsNeedUpdating = true;
+				freqNeedsUpdating = true;
 				break;
 
 			case Gain:
@@ -225,7 +228,7 @@ public:
 				break;
 
 			case Trigger:
-				trigIn = val;
+				trigIn = val > 0.f ? 1.f : 0.f;
 				paramsNeedUpdating = true;
 				break;
 		}
@@ -243,6 +246,7 @@ public:
 
 public:
 	bool paramsNeedUpdating = false;
+	bool freqNeedsUpdating = false;
 	float signalOut = 0;
 
 	float IOTA;
@@ -263,25 +267,16 @@ public:
 	int iRec4[2];
 	float freqCV;
 	float freqKnob;
-	float strike0;
-	float strike1;
-	float strike2;
-	float strike3;
-	float fSlow4;
-	float fSlow5;
-	float fSlow6;
-	float fSlow7;
-	float fSlow8;
-	float fSlow9;
-	float fSlow10;
-	float fSlow11;
-	float fSlow12;
-	float fSlow13;
-	float fSlow14;
-	float fSlow15;
+	float fSlowGainStrike;
+	float fSlowStrike1;
+	float fSlowStrike2;
+	float fSlowStrike3;
+	float fSlowStrike4;
+	float fSlowStrike5;
+	float fSlowStrike6;
+	float fSlowStrike7;
+	float fSlowStrike8;
 	float adEnvRate;
-	float slowTrig;
-	float slowFreq;
 	static constexpr float fConst1 = (3.14159274f / SAMPLERATE);
 	static constexpr float fConst2 = (0.00200000009f * SAMPLERATE);
 	static constexpr float fConst3 = gcem::pow(0.00100000005f, (1.66666663f / SAMPLERATE));
@@ -348,8 +343,6 @@ public:
 	static constexpr float iir_consts[20] = {
 		fConst6,  fConst9,	fConst12, fConst15, fConst18, fConst21, fConst24, fConst27, fConst30, fConst33,
 		fConst36, fConst39, fConst42, fConst45, fConst48, fConst51, fConst54, fConst57, fConst60, fConst63,
-		// fConst4,  fConst8,	fConst11, fConst14, fConst17, fConst20, fConst23, fConst26, fConst29, fConst32,
-		// fConst35, fConst38, fConst41, fConst44, fConst47, fConst50, fConst53, fConst56, fConst59, fConst62,
 	};
 	static constexpr float iir_slow_consts[20] = {
 		fConst4,  fConst8,	fConst11, fConst14, fConst17, fConst20, fConst23, fConst26, fConst29, fConst32,
@@ -359,7 +352,7 @@ public:
 public:
 	// clang-format off
 	static constexpr char typeID[20] = "DJEMBE";
-	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<DjembeCoreN>(); }
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<DjembeCoreNeon>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 	StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
 	StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
