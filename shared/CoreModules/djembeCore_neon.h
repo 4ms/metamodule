@@ -70,7 +70,7 @@ public:
 			float slows[4];
 			for (int i = 0; i < 4; i++) {
 				int n = i + iir_group * 4;
-				slows[i] = iir_consts[n] * MathTools::cos((fConst5 * (60.f + 200.f * n)));
+				slows[i] = iir_consts[n] * MathTools::cos((fConst5 * (freqKnob + 200.f * n)));
 			}
 			// slows[0] = iir_consts[iir_group * 4 + 0] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 0))));
 			// slows[1] = iir_consts[iir_group * 4 + 1] * MathTools::cos((fConst5 * (60.f + 200.f * (iir_group * 4 + 1))));
@@ -100,6 +100,8 @@ public:
 		float adEnv = MathTools::max<float>(0.0f, MathTools::min<float>(fTemp0, (2.0f - fTemp0)));
 		float noiseBurst = fSlow4 * (noise_hp_lp[2] + (noise_hp_lp[0] + (2.0f * noise_hp_lp[1]))) * adEnv;
 
+		signalOut = noise[0];
+
 		noise[1] = noise[0];
 		noise_hp[2] = noise_hp[1];
 		noise_hp[1] = noise_hp[0];
@@ -109,13 +111,13 @@ public:
 		iRec4[1] = iRec4[0];
 
 		//IIRs:
-		signalOut = 0.f;
-		signalOut += iirs[0].calc_4iir(noiseBurst);
-		signalOut += iirs[1].calc_4iir(noiseBurst);
-		signalOut += iirs[2].calc_4iir(noiseBurst);
-		signalOut += iirs[3].calc_4iir(noiseBurst);
-		signalOut += iirs[4].calc_4iir(noiseBurst);
-		signalOut *= 0.05f;
+		// signalOut = 0.f;
+		// signalOut += iirs[0].calc_4iir(noiseBurst);
+		// signalOut += iirs[1].calc_4iir(noiseBurst);
+		// signalOut += iirs[2].calc_4iir(noiseBurst);
+		// signalOut += iirs[3].calc_4iir(noiseBurst);
+		// signalOut += iirs[4].calc_4iir(noiseBurst);
+		// signalOut *= 0.05f;
 	}
 
 	void update_params()
@@ -223,7 +225,7 @@ public:
 		return 0;
 	}
 
-private:
+public:
 	bool paramsUpdated = false;
 	float signalOut = 0;
 

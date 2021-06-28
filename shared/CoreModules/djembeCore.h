@@ -176,28 +176,30 @@ public:
 		// 	   (0.00277008303f * (fRec22[0] - fRec22[2]))) +
 		// 	  (0.00249999994f * (fRec23[0] - fRec23[2]))) -
 		// 	 fRec0[2]);
-		signalOut = 0.f;
-		signalOut += 1.0f * (fRec0[0] - fRec0[2]);
-		signalOut += 0.25f * (fRec5[0] - fRec5[2]);
-		signalOut += 0.111111112f * (fRec6[0] - fRec6[2]);
-		signalOut += 0.0625f * (fRec7[0] - fRec7[2]);
-		signalOut += 0.0399999991f * (fRec8[0] - fRec8[2]);
-		signalOut += 0.027777778f * (fRec9[0] - fRec9[2]);
-		signalOut += 0.0204081628f * (fRec10[0] - fRec10[2]);
-		signalOut += 0.015625f * (fRec11[0] - fRec11[2]);
-		signalOut += 0.0123456791f * (fRec12[0] - fRec12[2]);
-		signalOut += 0.00999999978f * (fRec13[0] - fRec13[2]);
-		signalOut += 0.00826446246f * (fRec14[0] - fRec14[2]);
-		signalOut += 0.0069444445f * (fRec15[0] - fRec15[2]);
-		signalOut += 0.00591715984f * (fRec16[0] - fRec16[2]);
-		signalOut += 0.00510204071f * (fRec17[0] - fRec17[2]);
-		signalOut += 0.00444444455f * (fRec18[0] - fRec18[2]);
-		signalOut += 0.00390625f * (fRec19[0] - fRec19[2]);
-		signalOut += 0.00346020772f * (fRec20[0] - fRec20[2]);
-		signalOut += 0.00308641978f * (fRec21[0] - fRec21[2]);
-		signalOut += 0.00277008303f * (fRec22[0] - fRec22[2]);
-		signalOut += 0.00249999994f * (fRec23[0] - fRec23[2]);
-		signalOut *= 0.05f;
+		// signalOut = 0.f;
+		// signalOut += 1.0f * (fRec0[0] - fRec0[2]);
+		// signalOut += 0.25f * (fRec5[0] - fRec5[2]);
+		// signalOut += 0.111111112f * (fRec6[0] - fRec6[2]);
+		// signalOut += 0.0625f * (fRec7[0] - fRec7[2]);
+		// signalOut += 0.0399999991f * (fRec8[0] - fRec8[2]);
+		// signalOut += 0.027777778f * (fRec9[0] - fRec9[2]);
+		// signalOut += 0.0204081628f * (fRec10[0] - fRec10[2]);
+		// signalOut += 0.015625f * (fRec11[0] - fRec11[2]);
+		// signalOut += 0.0123456791f * (fRec12[0] - fRec12[2]);
+		// signalOut += 0.00999999978f * (fRec13[0] - fRec13[2]);
+		// signalOut += 0.00826446246f * (fRec14[0] - fRec14[2]);
+		// signalOut += 0.0069444445f * (fRec15[0] - fRec15[2]);
+		// signalOut += 0.00591715984f * (fRec16[0] - fRec16[2]);
+		// signalOut += 0.00510204071f * (fRec17[0] - fRec17[2]);
+		// signalOut += 0.00444444455f * (fRec18[0] - fRec18[2]);
+		// signalOut += 0.00390625f * (fRec19[0] - fRec19[2]);
+		// signalOut += 0.00346020772f * (fRec20[0] - fRec20[2]);
+		// signalOut += 0.00308641978f * (fRec21[0] - fRec21[2]);
+		// signalOut += 0.00277008303f * (fRec22[0] - fRec22[2]);
+		// signalOut += 0.00249999994f * (fRec23[0] - fRec23[2]);
+		// signalOut *= 0.05f;
+
+		signalOut = noise[0];
 
 		noise[1] = noise[0];
 		noise_hp[2] = noise_hp[1];
@@ -366,7 +368,7 @@ public:
 		return 0;
 	}
 
-private:
+public:
 	bool paramsUpdated = false;
 	float signalOut = 0;
 
