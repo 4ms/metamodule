@@ -1,17 +1,17 @@
 #include "patchlist.hh"
 
 #ifndef METAMODULE_INTEGRATION_TESTS
-	#include "KP_FM_DRUM_DET.hh"
-	#include "KarplusStereo.hh"
-	#include "LPFBPF.hh"
-	#include "QuadDrum.hh"
-	#include "example_drum.hh"
-	#include "example_drum_verb_mono.h"
-	#include "example_duallfo.hh"
-	#include "example_karplus.hh"
-	#include "example_pitchShift_simple.hh"
+	// #include "KP_FM_DRUM_DET.hh"
+	// #include "KarplusStereo.hh"
+	// #include "LPFBPF.hh"
+	// #include "QuadDrum.hh"
+	// #include "example_drum.hh"
+	// #include "example_drum_verb_mono.h"
+	// #include "example_duallfo.hh"
+	// #include "example_karplus.hh"
+	// #include "example_pitchShift_simple.hh"
 	#include "example_stereo_verb.h"
-	#include "fadedelay_two.hh"
+	// #include "fadedelay_two.hh"
 	#include "simple_lfo_passthrru.hh"
 	#include "DjembeTest.hh"
 	#include "dualdjmebe.hh"
@@ -19,18 +19,14 @@
 
 PatchList::PatchList()
 	: _patches{
-		  {simple_lfo_passthrru},
-		  {DjembeTest},
-		  {dualdjmebe},
-		  {quaddjmebe},
-		  {example_stereo_verb},
-		  {examplePitchShiftSimple},
-		  {exampleDrum},
-		  {fadedelay_example},
-		  {example_drum_verb_mono},
+		  {simple_lfo_passthrru}, {DjembeTest}, {dualdjmebe}, {quaddjmebe}, {example_stereo_verb},
+		  // {examplePitchShiftSimple},
+		  // {exampleDrum},
+		  // {fadedelay_example},
+		  // {example_drum_verb_mono},
 		  // {QuadDrum},
 		  // {KP_FM_DRUM_DET},
-		  {KarplusStereo},
+		  // {KarplusStereo},
 		  // {LPFBPF},
 	  }
 {
