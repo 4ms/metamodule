@@ -49,7 +49,7 @@ TEST_CASE("Soft-neon matches non-neon output" * doctest::skip(true))
 	}
 
 	{
-		DjembeCoreN ne;
+		DjembeCoreNeon ne;
 		int n = 0;
 		ne.update();
 
