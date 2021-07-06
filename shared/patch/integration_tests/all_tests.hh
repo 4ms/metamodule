@@ -24,3 +24,4 @@
 #include "patch/integration_tests/test_sense_pins_CV.hh"
 #include "patch/integration_tests/test_sense_pins_audio.hh"
 #include "patch/integration_tests/test_sense_pins_gates.hh"
+#include "patch/integration_tests/test_quantizerCore.hh"

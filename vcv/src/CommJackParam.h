@@ -69,10 +69,13 @@ public:
 
 	void updateOutput()
 	{
-		_outputPort.setChannels(3);
+		_outputPort.setChannels(5);
 		_outputPort.setVoltage(_value, 0);
 		_outputPort.setVoltage(_jackID, 1);
 		_outputPort.setVoltage(_moduleID, 2);
+		// Ensure sum of all channels = _value
+		_outputPort.setVoltage(-1 * _jackID, 3);
+		_outputPort.setVoltage(-1 * _moduleID, 4);
 	}
 
 	void setValue(float in)
@@ -118,4 +121,3 @@ public:
 		return paramStatus.paramID;
 	}
 };
-
