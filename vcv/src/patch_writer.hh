@@ -240,7 +240,7 @@ public:
 			s += "            .num_jacks = " + std::to_string(patch.nets[i].num_jacks) + ",\n";
 			s += "            .jacks = {{\n";
 
-			for (int j = 0; j < patch.nets[i].num_jacks; j++) {
+			for (unsigned j = 0; j < patch.nets[i].num_jacks; j++) {
 				s += "                {";
 				s += ".module_id = " + std::to_string(patch.nets[i].jacks[j].module_id) + ", ";
 				s += ".jack_id = " + std::to_string(patch.nets[i].jacks[j].jack_id) + "},\n";
