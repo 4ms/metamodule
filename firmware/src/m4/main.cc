@@ -25,7 +25,7 @@ struct StaticBuffers {
 } _sb;
 } // namespace MetaModule
 
-void main(void)
+void main()
 {
 	using namespace MetaModule;
 
@@ -78,7 +78,7 @@ void main(void)
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
 
-	while (1) {
+	while (true) {
 		if (SharedBus::i2c.is_ready()) {
 			i2cqueue.update();
 		}
