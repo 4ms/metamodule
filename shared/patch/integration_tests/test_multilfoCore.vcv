@@ -177,7 +177,7 @@
       "model": "Notes",
       "params": [],
       "leftModuleId": 16,
-      "text": "Multi LFO Core Test\n\nKnobs A and a control LFO rate\n\nKnobs B and b control LFO phase\n\nKnobs C and c control pulsewidth\n\nWhen Knob D is above 50% the LFO will reset\n\nSine waveform is on CV Out 1\nPulse waveform is on CV Out 2\nSaw waveform is on Audio OUT L\nInverted Saw waveform is on Audio OUT R\n",
+      "text": "Multi LFO Core Test\n\nKnobs A and a control LFO rate\nA@100%, B@100%: ~350Hz\nA@0%, B@100%: 3.56Hz\nA@100%, B@0%: 10Hz\nA@0%,  B@0%: ~0.1Hz\n\nKnobs B and b control LFO phase\n\nKnobs C and c control pulsewidth:\nWith either knob at 0%, the other knob will make PW go from ~0% to 100%\n\nWhen Knob D is above ~15% the LFO will reset\n\nSine waveform is on CV Out 1\nPulse waveform is on CV Out 2\nSaw waveform is on Audio OUT L\nInverted Saw waveform is on Audio OUT R\n",
       "pos": [
         32,
         0
