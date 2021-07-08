@@ -37,6 +37,7 @@ struct DACUpdateConf : public DefaultPinChangeConf {
 	static constexpr bool on_falling_edge = true;
 	static constexpr uint32_t priority1 = 0;
 	static constexpr uint32_t priority2 = 0;
+	static constexpr uint32_t core = DACConfTarget::CoreNum;
 };
 
 using AnalogOutT = DacStream<mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>,
