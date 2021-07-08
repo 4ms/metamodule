@@ -16,4 +16,6 @@ struct DACConfTarget : DefaultSpiConf {
 
 	using AuxPin = FPin<GPIO::B, 14, PinMode::Output>;
 	static constexpr PinNoInit SaiLRClkPin = {GPIO::E, 4};
+
+	static constexpr uint32_t CoreNum = 2;
 };
