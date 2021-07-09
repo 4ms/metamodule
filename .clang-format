@@ -6,7 +6,7 @@ IndentWidth : 4
 ColumnLimit : 120
 AccessModifierOffset : -4
 AlignAfterOpenBracket: "Align"
-AlignOperands : "AlignAfterOperator"
+AlignOperands : "true"
 AllowAllArgumentsOnNextLine : "true"
 AllowShortBlocksOnASingleLine : "true"
 AllowShortFunctionsOnASingleLine: "All"
