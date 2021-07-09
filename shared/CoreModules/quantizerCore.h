@@ -1,7 +1,7 @@
 #pragma once
-
 #include "coreProcessor.h"
 #include "moduleTypes.h"
+#include "scalingConfig.hh"
 #include "util/math.hh"
 
 using namespace MathTools;
@@ -22,9 +22,11 @@ class QuantizerCore : public CoreProcessor {
 	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
 	virtual StaticString<LongNameChars> get_description() override { return description; }
 	// clang-format on
+
 public:
 	virtual void update(void) override
 	{
+		// Todo: base all values on Low/HighRangeVolts
 		if (notesActive > 0) {
 			float noteValue = (signalInput + 1.0f) * 60.0f;
 			int octave = noteValue / 12.0f;
