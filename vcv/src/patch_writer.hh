@@ -220,103 +220,94 @@ public:
 		ph.num_mapped_outs = pd.mapped_outs.size();
 	}
 
-	std::string printJack(Jack &jack)
+	std::string printJack(Jack &jack, std::string separator)
 	{
-		return "[m: " + std::to_string(jack.module_id) + ", " + "j: " + std::to_string(jack.jack_id) + "]";
+		return "module_id: " + std::to_string(jack.module_id) + "\n" + separator +
+			   "jack_id: " + std::to_string(jack.jack_id);
 	}
+	// std::string printJackItem(Jack &jack, std::string separator)
+	// {
+	// 	return "m: " + std::to_string(jack.module_id) + "\n" + separator + "j: " + std::to_string(jack.jack_id);
+	// }
 
 	std::string printPatch()
 	{
 		std::string s;
-		s = "PatchHeader: [\n";
-		s += "\theader_version: " + std::to_string(ph.header_version) + "\n";
-		s += "\tname_strlen: " + std::to_string(ph.name_strlen) + "\n";
-		s += "\tnum_modules: " + std::to_string(ph.num_modules) + "\n";
-		s += "\tnum_int_cables: " + std::to_string(ph.num_int_cables) + "\n";
-		s += "\tnum_mapped_ins: " + std::to_string(ph.num_mapped_ins) + "\n";
-		s += "\tnum_mapped_outs: " + std::to_string(ph.num_mapped_outs) + "\n";
-		s += "\tnum_static_knobs: " + std::to_string(ph.num_static_knobs) + "\n";
-		s += "\tnum_mapped_knobs: " + std::to_string(ph.num_mapped_knobs) + "\n";
-		s += "]\n";
+		s = "PatchHeader:\n";
+		s += "  header_version: " + std::to_string(ph.header_version) + "\n";
+		s += "  name_strlen: " + std::to_string(ph.name_strlen) + "\n";
+		s += "  num_modules: " + std::to_string(ph.num_modules) + "\n";
+		s += "  num_int_cables: " + std::to_string(ph.num_int_cables) + "\n";
+		s += "  num_mapped_ins: " + std::to_string(ph.num_mapped_ins) + "\n";
+		s += "  num_mapped_outs: " + std::to_string(ph.num_mapped_outs) + "\n";
+		s += "  num_static_knobs: " + std::to_string(ph.num_static_knobs) + "\n";
+		s += "  num_mapped_knobs: " + std::to_string(ph.num_mapped_knobs) + "\n";
 		s += "\n";
-		s += "PatchData: [\n";
-		s += "\tpatch_name: ";
+		s += "PatchData:\n";
+		s += "  patch_name: ";
 		s += pd.patch_name;
 		s += "\n";
 
-		s += "\tmodule_slugs: [\n";
+		s += "  module_slugs:\n";
 		int i = 0;
 		for (auto &x : pd.module_slugs) {
-			s += "\t\t" + std::to_string(i) + ": ";
+			s += "    " + std::to_string(i) + ": ";
 			s += x.cstr();
 			s += "\n";
 			i++;
 		}
-		s += "\t]\n";
+		s += "\n";
 
-		s += "\tint_cables: [\n";
+		s += "  int_cables: \n";
 		for (auto &x : pd.int_cables) {
-			s += "\t\t[\n";
-			s += "\t\t\tout: " + printJack(x.out) + "\n";
-			s += "\t\t\tins: [\n";
+			s += "      - out: \n";
+			s += "          " + printJack(x.out, "          ") + "\n";
+			s += "        ins: \n";
 			for (auto &in : x.ins) {
 				if (in.jack_id == -1 || in.module_id == -1)
 					break;
-				s += "\t\t\t\t" + printJack(in) + ",\n";
+				s += "          - " + printJack(in, "            ") + "\n";
 			}
-			s += "\t\t\t]\n";
-			s += "\t\t],\n";
 		}
-		s += "\t]\n";
+		s += "\n";
 
-		s += "\tmapped_ins: [\n";
+		s += "  mapped_ins: \n";
 		for (auto &x : pd.mapped_ins) {
-			s += "\t\t[\n";
-			s += "\t\t\tpanel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
-			s += "\t\t\tins: [\n";
+			s += "      - panel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
+			s += "        ins: \n";
 			for (auto &in : x.ins) {
 				if (in.jack_id == -1 || in.module_id == -1)
 					break;
-				s += "\t\t\t\t" + printJack(in) + ", \n";
+				s += "          - " + printJack(in, "            ") + ", \n";
 			}
-			s += "\t\t\t]\n";
-			s += "\t\t],\n";
 		}
-		s += "\t]\n";
+		s += "\n";
 
-		s += "\tmapped_outs: [\n";
+		s += "  mapped_outs: \n";
 		for (auto &x : pd.mapped_outs) {
-			s += "\t\t[\n";
-			s += "\t\t\tpanel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
-			s += "\t\t\tout: " + printJack(x.out) + "\n";
-			s += "\t\t],\n";
+			s += "    - panel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
+			s += "      out: \n";
+			s += "        " + printJack(x.out, "        ") + "\n";
 		}
-		s += "\t]\n";
+		s += "\n";
 
-		s += "\tstatic_knobs: [\n";
+		s += "  static_knobs: \n";
 		for (auto &x : pd.static_knobs) {
-			s += "\t\t[\n";
-			s += "\t\t\tmodule_id: " + std::to_string(x.module_id) + "\n";
-			s += "\t\t\tparam_id: " + std::to_string(x.param_id) + "\n";
-			s += "\t\t\tvalue: " + std::to_string(x.value) + "\n";
-			s += "\t\t],\n";
+			s += "    - module_id: " + std::to_string(x.module_id) + "\n";
+			s += "      param_id: " + std::to_string(x.param_id) + "\n";
+			s += "      value: " + std::to_string(x.value) + "\n";
 		}
-		s += "\t]\n";
+		s += "\n";
 
-		s += "\tmapped_knobs: [\n";
+		s += "  mapped_knobs: \n";
 		for (auto &x : pd.mapped_knobs) {
-			s += "\t\t[ ";
-			s += "panel_knob_id: " + std::to_string(x.panel_knob_id) + ", ";
-			s += "module_id: " + std::to_string(x.module_id) + ", ";
-			s += "param_id: " + std::to_string(x.param_id) + ", ";
-			s += "curve_type: " + std::to_string(x.curve_type) + ", ";
-			s += "range: " + std::to_string(x.range) + ", ";
-			s += "offset: " + std::to_string(x.offset) + ", ";
-			s += "],\n";
+			s += "    - panel_knob_id: " + std::to_string(x.panel_knob_id) + "\n";
+			s += "      module_id: " + std::to_string(x.module_id) + "\n";
+			s += "      param_id: " + std::to_string(x.param_id) + "\n";
+			s += "      curve_type: " + std::to_string(x.curve_type) + "\n";
+			s += "      range: " + std::to_string(x.range) + "\n";
+			s += "      offset: " + std::to_string(x.offset) + "\n";
 		}
-		s += "\t]\n";
-
-		s += "]\n";
 		s += "\n";
 
 		return s;
