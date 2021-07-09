@@ -1,8 +1,8 @@
 #pragma once
 
+#include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "math.hh"
-#include "CoreModules/moduleTypes.h"
 
 using namespace MathTools;
 
@@ -23,35 +23,26 @@ class VoltagesourceCore : public CoreProcessor {
 	virtual StaticString<LongNameChars> get_description() override { return description; }
 	// clang-format on
 public:
-	virtual void update(void) override
-	{
-	
-	}
+	virtual void update(void) override {}
 
-	VoltagesourceCore()
-	{
-	}
+	VoltagesourceCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
 			case 0:
-			output1=val;
-			break;
+				output1 = val;
+				break;
 			case 1:
-			output2=val;
-			break;
-			
+				output2 = val;
+				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override
-	{
-	}
+	virtual void set_samplerate(const float sr) override {}
 
 	virtual void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
-			
 		}
 	}
 
@@ -59,12 +50,12 @@ public:
 	{
 		float output = 0;
 		switch (output_id) {
-		case 0:
-		output = output1;
-		break;
-		case 1:
-		output = output2;
-		break;
+			case 0:
+				output = output1;
+				break;
+			case 1:
+				output = output2;
+				break;
 		}
 		return output;
 	}
@@ -77,7 +68,5 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-
-float output1, output2;
-	
+	float output1, output2;
 };
