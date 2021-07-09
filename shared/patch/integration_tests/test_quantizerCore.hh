@@ -48,7 +48,7 @@ static const Patch test_quantizerCore = {
         {.module_id = 1, .param_id = 9, .value = 1.000000f},
         {.module_id = 1, .param_id = 10, .value = 0.000000f},
         {.module_id = 1, .param_id = 11, .value = 0.000000f},
-        {.module_id = 2, .param_id = 0, .value = 0.000000f},
+        {.module_id = 2, .param_id = 0, .value = 0.201000f},
         {.module_id = 2, .param_id = 1, .value = 0.000000f},
     }},
     .num_static_knobs = 14,
