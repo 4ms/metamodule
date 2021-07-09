@@ -27,15 +27,14 @@ class PatchPlayer {
 		uint16_t param_id;
 	};
 
-public:
-	std::array<float, MAX_NODES_IN_PATCH> nodes;
-	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
-
-	// cached data:
 	enum {
 		NumInConns = Panel::NumOutJacks,
 		NumOutConns = Panel::NumInJacks,
 	};
+
+public:
+	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
+
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
 	Jack in_conns[NumInConns] = {{0, 0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
 	Knob knob_conns[Panel::NumKnobs]{{0, 0}};
@@ -45,7 +44,17 @@ public:
 	// 1 => reads "LFO #1", 2=> "LFO #2", etc.
 	uint8_t dup_module_index[MAX_MODULES_IN_PATCH] = {0};
 
+private:
 	bool is_loaded = false;
+	PatchHeader *header;
+	static const inline ModuleTypeSlug no_patch_loaded = "(Not Loaded)";
+
+	ModuleTypeSlug *module_slugs;
+	InternalCable *int_cables;
+	MappedInputJack *mapped_ins;
+	MappedOutputJack *mapped_outs;
+	StaticParam *static_knobs;
+	MappedKnob *mapped_knobs;
 
 public:
 	PatchPlayer()
@@ -53,19 +62,35 @@ public:
 		clear_cache();
 	}
 
+	const ModuleTypeSlug &get_patch_name()
+	{
+		if (is_loaded)
+			return header->patch_name;
+		else
+			return no_patch_loaded;
+	}
+
+	void load_patch_from_header(PatchHeader *ph)
+	{
+		header = ph;
+		module_slugs = new ModuleTypeSlug[ph->num_modules];
+		int_cables = new InternalCable[ph->num_int_cables];
+		mapped_ins = new MappedInputJack[ph->num_mapped_ins];
+		mapped_outs = new MappedOutputJack[ph->num_mapped_outs];
+		static_knobs = new StaticParam[ph->num_static_knobs];
+		mapped_knobs = new MappedKnob[ph->num_mapped_knobs];
+	}
+
 	// Loads the given patch as the active patch, and caches some pre-calculated values
-	bool load_patch(const Patch &p)
+	bool load_patch(PatchHeader *ph)
 	{
 		SMPThread::init();
 		clear_cache();
-		for (auto &n : nodes)
-			n = 0.f;
 
-		for (int i = 0; i < p.num_modules; i++) {
-			if constexpr (USE_NODES)
-				modules[i] = ModuleFactory::createWithParams(p.modules_used[i], nodes.data(), p.module_nodes[i]);
-			else
-				modules[i] = ModuleFactory::create(p.modules_used[i]);
+		load_patch_from_header(ph);
+
+		for (int i = 0; i < header->num_modules; i++) {
+			modules[i] = ModuleFactory::create(module_slugs[i]);
 
 			if (modules[i] == nullptr) {
 				is_loaded = false;
@@ -79,26 +104,26 @@ public:
 		// Todo: if we need to improve patch loading time by a small amount,
 		// it's a little faster to combine these two functions so we only do one loop over nets/jacks
 		// ...but it's harder to unit test.
-		mark_patched_jacks(p);
-		calc_panel_jack_connections(p);
-		calc_panel_knob_connections(p);
+		mark_patched_jacks();
+		calc_panel_jack_connections();
+		calc_panel_knob_connections();
 
 		// Set all initial knob values:
-		for (int i = 0; i < p.num_static_knobs; i++) {
-			const auto &k = p.static_knobs[i];
+		for (int i = 0; i < ph->num_static_knobs; i++) {
+			const auto &k = static_knobs[i];
 			modules[k.module_id]->set_param(k.param_id, k.value);
 		}
 
 		is_loaded = true;
 
-		calc_multiple_module_indicies(p);
+		calc_multiple_module_indicies();
 		return true;
 	}
 
 	// Runs the patch
-	void update_patch(const Patch &p)
+	void update_patch()
 	{
-		for (int module_i = 1; module_i < p.num_modules; module_i++) {
+		for (int module_i = 1; module_i < header->num_modules; module_i++) {
 			if (!SMPThread::is_running()) {
 				SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);
 			} else {
@@ -107,33 +132,36 @@ public:
 		}
 		SMPThread::join();
 
-		// Jacks
-		// We could save time by skipping panel jacks
-		// and changing set_panel_input and get_panel_output to
-		// access the in_conns[] and out_conns[] directly
-		if constexpr (USE_NODES == false) {
-			for (int net_i = 0; net_i < p.num_nets; net_i++) {
-				auto &net = p.nets[net_i];
-				auto &output = net.jacks[0];
+		// Note: we are skipping mapped ins/outs!
+		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
+			auto &cable = int_cables[net_i];
 
-				float out_val;
-				out_val = modules[output.module_id]->get_output(output.jack_id);
+			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
 
-				for (int jack_i = 1; jack_i < net.num_jacks; jack_i++) {
-					auto &jack = net.jacks[jack_i];
-					modules[jack.module_id]->set_input(jack.jack_id, out_val);
-				}
+			for (int jack_i = 0; jack_i < MAX_CONNECTIONS_PER_NODE - 1; jack_i++) {
+				auto &input_jack = cable.ins[jack_i];
+				if (input_jack.module_id < 0)
+					break;
+				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
 			}
 		}
 	}
 
-	void unload_patch(const Patch &p)
+	void unload_patch()
 	{
 		SMPThread::join();
 		is_loaded = false;
 		for (int i = 0; i < p.num_modules; i++) {
 			modules[i].reset(nullptr);
 		}
+
+		delete[] module_slugs;
+		delete[] int_cables;
+		delete[] mapped_ins;
+		delete[] mapped_outs;
+		delete[] static_knobs;
+		delete[] mapped_knobs;
+
 		clear_cache();
 		BigAllocControl::reset();
 	}
@@ -184,7 +212,7 @@ public:
 
 	// Jack patched/unpatched status
 
-	void mark_patched_jacks(const Patch &p)
+	void mark_patched_jacks()
 	{
 		if constexpr (USE_NODES == true)
 			return;
@@ -246,7 +274,7 @@ public:
 	}
 
 	// Cache all the panel jack connections
-	void calc_panel_jack_connections(const Patch &p)
+	void calc_panel_jack_connections()
 	{
 		if constexpr (USE_NODES == true)
 			return;
@@ -271,7 +299,7 @@ public:
 		}
 	}
 
-	void calc_panel_knob_connections(const Patch &p)
+	void calc_panel_knob_connections()
 	{
 		for (int i = 0; i < p.num_mapped_knobs; i++) {
 			auto &k = p.mapped_knobs[i];
@@ -305,7 +333,7 @@ public:
 	}
 
 	// Check for multiple instances of same module type, and cache the results
-	void calc_multiple_module_indicies(const Patch &p)
+	void calc_multiple_module_indicies()
 	{
 		// Todo: this is a naive implementation, perhaps can be made more efficient
 		for (int i = 0; i < p.num_modules; i++) {
