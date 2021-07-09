@@ -28,10 +28,10 @@ public:
 	{
 		// Todo: base all values on Low/HighRangeVolts
 		if (notesActive > 0) {
-			float noteValue = map_value(signalInput, -1.0f, 1.0f, 0.0f, static_cast<float>(totalNotes));
+			int noteValue = map_value(signalInput, -1.0f, 1.0f, 0.0f, static_cast<float>(totalNotes));
 			int octave = noteValue / 12.0f;
 
-			int tempNote = mapTable[(int)(noteValue + lowestNote) % 12] + octave * 12.0f;
+			int tempNote = mapTable[(noteValue + lowestNote) % 12] + octave * 12.0f;
 			if (tempNote <= totalNotes)
 				currentNote = tempNote;
 			signalOutput = (currentNote / static_cast<float>(totalNotes)) * 2.0f - 1.0f;
