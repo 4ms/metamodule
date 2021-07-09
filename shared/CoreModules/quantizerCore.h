@@ -28,13 +28,14 @@ public:
 	{
 		// Todo: base all values on Low/HighRangeVolts
 		if (notesActive > 0) {
-			float noteValue = (signalInput + 1.0f) * 60.0f;
+			float noteValue =
+				map_value(signalInput, -1.0f, 1.0f, static_cast<float>(lowestNote), static_cast<float>(highestNote));
 			int octave = noteValue / 12.0f;
 
-			int tempNote = mapTable[(int)noteValue % 12] + octave * 12.0f;
-			if (tempNote <= 120)
+			int tempNote = mapTable[(int)(noteValue + lowestNote) % 12] + octave * 12.0f;
+			if (tempNote <= totalNotes)
 				currentNote = tempNote;
-			signalOutput = (currentNote / 120.0f) * 2.0f - 1.0f;
+			signalOutput = (currentNote / static_cast<float>(totalNotes)) * 2.0f - 1.0f;
 		} else {
 			signalOutput = signalInput;
 		}
@@ -42,6 +43,17 @@ public:
 
 	QuantizerCore()
 	{
+		maxCalculatedVolt = ceilf(OutputHighRangeVolts);
+		if (OutputLowRangeVolts < 0) {
+			minCalculatedVolt = ceilf(fabsf(OutputLowRangeVolts)) * -1.0f;
+		} else {
+			minCalculatedVolt = ceilf(OutputLowRangeVolts);
+		}
+
+		lowestNote = 12 * minCalculatedVolt;
+		highestNote = 12 * maxCalculatedVolt;
+
+		totalNotes = (maxCalculatedVolt - minCalculatedVolt) * 12;
 		for (int i = 0; i < 12; i++) {
 			keyStatus[i] = false;
 			currentButton[i] = false;
@@ -100,10 +112,17 @@ private:
 
 	int mapTable[12];
 	int notesActive = 0;
+	int lowestNote;
+	int highestNote;
+
+	int totalNotes;
 
 	int firstActive = 0;
 	float signalInput = 0;
 	float signalOutput = 0;
+
+	int minCalculatedVolt = -5;
+	int maxCalculatedVolt = 5;
 
 	uint16_t currentScale = 0;
 	uint16_t lastScale = 0;
