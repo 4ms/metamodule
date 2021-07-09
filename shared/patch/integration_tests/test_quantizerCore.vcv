@@ -44,7 +44,8 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 1,
+      "leftModuleId": 3,
+      "rightModuleId": 4,
       "data": {
         "Mappings": [
           {
@@ -56,18 +57,34 @@
             "SrcObjType": "Knob"
           },
           {
+            "DstModID": 3,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 0,
+            "SrcObjID": 2,
+            "SrcObjType": "OutputJack"
+          },
+          {
             "DstModID": 1,
             "DstObjID": 0,
             "DstObjType": "OutputJack",
             "SrcModID": 0,
             "SrcObjID": 0,
             "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 2,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 0,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
           }
         ],
         "PatchName": "test_quantizerCore"
       },
       "pos": [
-        16,
+        20,
         0
       ]
     },
@@ -95,7 +112,7 @@
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 5,
@@ -115,7 +132,7 @@
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 10,
@@ -126,9 +143,10 @@
           "value": 0.0
         }
       ],
-      "rightModuleId": 0,
+      "leftModuleId": 2,
+      "rightModuleId": 3,
       "pos": [
-        8,
+        4,
         0
       ]
     },
@@ -144,12 +162,162 @@
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 0.00150000001
         }
       ],
+      "rightModuleId": 1,
       "pos": [
         0,
         0
+      ]
+    },
+    {
+      "id": 3,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "QUANTIZER",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        },
+        {
+          "id": 9,
+          "value": 1.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 1,
+      "rightModuleId": 0,
+      "pos": [
+        12,
+        0
+      ]
+    },
+    {
+      "id": 4,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 0,
+      "text": "",
+      "pos": [
+        36,
+        0
+      ]
+    },
+    {
+      "id": 5,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 2.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 2.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 16.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 6,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        20,
+        1
+      ]
+    },
+    {
+      "id": 6,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "leftModuleId": 7,
+      "rightModuleId": 5,
+      "pos": [
+        15,
+        1
+      ]
+    },
+    {
+      "id": 7,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Split",
+      "params": [],
+      "rightModuleId": 6,
+      "pos": [
+        10,
+        1
       ]
     }
   ],
@@ -161,6 +329,46 @@
       "inputModuleId": 1,
       "inputId": 0,
       "color": "#0986ad"
+    },
+    {
+      "id": 4,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 3,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 5,
+      "outputModuleId": 3,
+      "outputId": 0,
+      "inputModuleId": 6,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 6,
+      "outputModuleId": 6,
+      "outputId": 0,
+      "inputModuleId": 5,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 7,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 7,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 8,
+      "outputModuleId": 7,
+      "outputId": 0,
+      "inputModuleId": 5,
+      "inputId": 1,
+      "color": "#0c8e15"
     }
   ]
 }
