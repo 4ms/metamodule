@@ -228,9 +228,28 @@ public:
 		{
 			data.clear();
 		}
+
+		void print(uint8_t x)
+		{
+			printU8(x);
+		}
+		void print(uint16_t x)
+		{
+			printU16LE(x);
+		}
 		void print(uint32_t x)
 		{
 			printU32LE(x);
+		}
+
+		void printU8(uint8_t x)
+		{
+			data.push_back((x >> 0) & 0xFF);
+		}
+		void printU16LE(uint16_t x)
+		{
+			data.push_back((x >> 0) & 0xFF);
+			data.push_back((x >> 8) & 0xFF);
 		}
 		void printU32LE(uint32_t x)
 		{
@@ -239,13 +258,42 @@ public:
 			data.push_back((x >> 16) & 0xFF);
 			data.push_back((x >> 24) & 0xFF);
 		}
+
+		void printRaw(unsigned char *x, size_t size)
+		{
+			while (size--)
+				data.push_back(*x++);
+		}
 	};
 
 	ByteBlock::DataType printPatchBinary()
 	{
 		ByteBlock v;
-		v.printU32LE(0x12345678);
-		v.printU32LE(0x0A0B0C0D);
+
+		auto *header = reinterpret_cast<unsigned char *>(&ph);
+		v.printRaw(header, sizeof(ph));
+
+		auto *name = reinterpret_cast<unsigned char *>(&(pd.patch_name));
+		v.printRaw(name, sizeof(pd.patch_name));
+
+		for (size_t i = 0; i < pd.module_slugs.size(); i++)
+			v.printRaw(reinterpret_cast<unsigned char *>(&pd.module_slugs[i]), sizeof(pd.module_slugs[i]));
+
+		for (size_t i = 0; i < pd.int_cables.size(); i++)
+			v.printRaw(reinterpret_cast<unsigned char *>(&pd.int_cables[i]), sizeof(pd.int_cables[i]));
+
+		for (size_t i = 0; i < pd.mapped_ins.size(); i++)
+			v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_ins[i]), sizeof(pd.mapped_ins[i]));
+
+		for (size_t i = 0; i < pd.mapped_outs.size(); i++)
+			v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_outs[i]), sizeof(pd.mapped_outs[i]));
+
+		for (size_t i = 0; i < pd.static_knobs.size(); i++)
+			v.printRaw(reinterpret_cast<unsigned char *>(&pd.static_knobs[i]), sizeof(pd.static_knobs[i]));
+
+		for (size_t i = 0; i < pd.mapped_knobs.size(); i++)
+			v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_knobs[i]), sizeof(pd.mapped_knobs[i]));
+
 		return v.data;
 	}
 
