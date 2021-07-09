@@ -18,6 +18,7 @@ TEST_CASE("Quantizer parameter bounds")
 TEST_CASE("Basic Quantizer functionality")
 {
 	QuantizerCore q;
+	float range = InputHighRangeVolts - InputLowRangeVolts;
 
 	SUBCASE("all notes off, output = input")
 	{
@@ -80,5 +81,43 @@ TEST_CASE("Basic Quantizer functionality")
 
 		CHECK(q.get_output(0) == doctest::Approx(1 / 60.0f));
 	}
-	// Todo more tests
+
+	SUBCASE("Rounds to nearest value")
+	{
+		float out;
+
+		// All off except C E A
+		q.set_param(0, 1.f); // C = 0
+		q.set_param(1, 0.f);
+		q.set_param(2, 0.f);
+		q.set_param(3, 0.f);
+		q.set_param(4, 1.f); // E = 0.33
+		q.set_param(5, 0.f);
+		q.set_param(6, 0.f);
+		q.set_param(7, 0.f);
+		q.set_param(8, 0.f);
+		q.set_param(9, 1.f); // A = 0.75
+		q.set_param(10, 0.f);
+		q.set_param(11, 0.f);
+
+		q.set_input(0, 0.14f / InputHighRangeVolts);
+		q.update();
+		out = q.get_output(0) * InputHighRangeVolts;
+		CHECK(out == doctest::Approx(0.0f));
+
+		q.set_input(0, 0.17f / InputHighRangeVolts);
+		q.update();
+		out = q.get_output(0) * InputHighRangeVolts;
+		CHECK(out == doctest::Approx(0.3333333f));
+
+		q.set_input(0, 0.34f / InputHighRangeVolts);
+		q.update();
+		out = q.get_output(0) * InputHighRangeVolts;
+		CHECK(out == doctest::Approx(0.3333333f));
+
+		q.set_input(0, 0.56f / InputHighRangeVolts);
+		q.update();
+		out = q.get_output(0) * InputHighRangeVolts;
+		CHECK(out == doctest::Approx(0.75f));
+	}
 }
