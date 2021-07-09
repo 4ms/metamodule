@@ -28,7 +28,7 @@ public:
 	{
 		// Todo: base all values on Low/HighRangeVolts
 		if (notesActive > 0) {
-			int noteValue = map_value(signalInput, -1.0f, 1.0f, 0.0f, static_cast<float>(totalNotes));
+			int noteValue = closestInt(map_value(signalInput, -1.0f, 1.0f, 0.0f, static_cast<float>(totalNotes)));
 			int octave = noteValue / 12.0f;
 
 			int tempNote = mapTable[(noteValue + lowestNote) % 12] + octave * 12.0f;
@@ -174,5 +174,15 @@ private:
 				mapTable[i] = fillNote;
 			}
 		}
+	}
+
+	long closestInt(float input)
+	{
+		long output = 0;
+		if ((input - (long)input) >= 0.5f)
+			output = (long)input + 1;
+		else
+			output = (long)input;
+		return output;
 	}
 };
