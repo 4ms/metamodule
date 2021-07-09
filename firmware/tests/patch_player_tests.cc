@@ -119,7 +119,7 @@ TEST_CASE("Dup module index")
 TEST_CASE("MappedParam get_mapped_val")
 {
 
-	MappedParamC knob;
+	MappedKnob knob;
 	float mapped_low;
 	float mapped_high;
 	SUBCASE("Normal mappings (partial range)")

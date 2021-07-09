@@ -2,6 +2,337 @@
 #include "CommData.h"
 #include "patch/patch.hh"
 #include <map>
+#include <vector>
+
+struct PatchData {
+	ModuleTypeSlug patch_name;
+	std::vector<ModuleTypeSlug> module_slugs;
+	std::vector<InternalCable> int_cables;
+	std::vector<MappedInputJack> mapped_ins;
+	std::vector<MappedOutputJack> mapped_outs;
+	std::vector<StaticParam> static_knobs;
+	std::vector<MappedKnob> mapped_knobs;
+};
+
+class PatchFileWriter {
+	PatchHeader ph;
+	PatchData pd;
+	std::map<int, int> idMap;
+
+public:
+	PatchFileWriter() = default;
+
+	PatchFileWriter(std::vector<ModuleID> modules)
+	{
+		setModuleList(modules);
+	}
+
+	void setPatchName(std::string patchName)
+	{
+		ph.name_strlen = std::min(patchName.size(), pd.patch_name.capacity);
+		pd.patch_name = patchName.c_str();
+	}
+
+	void setModuleList(std::vector<ModuleID> &modules)
+	{
+		std::vector<int> vcv_mod_ids;
+
+		// Reserved for PANEL
+		vcv_mod_ids.push_back(-1);
+		pd.module_slugs.push_back("");
+
+		for (auto &mod : modules) {
+			if (strcmp(mod.typeID.cstr(), "PANEL_8") == 0) {
+				pd.module_slugs[0] = mod.typeID;
+				vcv_mod_ids[0] = mod.id;
+			} else {
+				pd.module_slugs.push_back(mod.typeID);
+				vcv_mod_ids.push_back(mod.id);
+			}
+		}
+		ph.num_modules = pd.module_slugs.size();
+
+		if (vcv_mod_ids[0] < 0)
+			return;
+		// error: no panel!
+
+		idMap = squash_ids(vcv_mod_ids);
+		ph.num_modules = modules.size();
+	}
+
+	void setJackList(std::vector<JackStatus> &jacks)
+	{
+		auto validJackId = [](int jackid) { return (jackid >= 0) && (jackid < MAX_JACKS_PER_MODULE); };
+
+		for (auto &cable : jacks) {
+			if (cable.connected && validJackId(cable.receivedJackId) && validJackId(cable.sendingJackId) &&
+				cable.receivedModuleId >= 0 && cable.sendingModuleId >= 0)
+			{
+				auto out_mod = idMap[cable.receivedModuleId];
+				auto out_jack = cable.receivedJackId;
+				auto in_mod = idMap[cable.sendingModuleId];
+				auto in_jack = cable.sendingJackId;
+
+				// Look for an existing entry:
+				auto found = std::find_if(pd.int_cables.begin(), pd.int_cables.end(), [=](const auto &x) {
+					return x.out.jack_id == out_jack && x.out.module_id == out_mod;
+				});
+
+				if (found != pd.int_cables.end()) {
+					// If int_cable entry exists, count number of in Jacks already in this entry
+					int num_ins = 0;
+					for (const auto &in : found->ins) {
+						if (in.jack_id == -1 || in.module_id == -1)
+							break;
+						num_ins++;
+					}
+					// If there's room, append this new entry, otherwise do nothing
+					if (num_ins < (MAX_CONNECTIONS_PER_NODE - 1)) {
+						found->ins[num_ins] = {
+							.module_id = static_cast<int16_t>(in_mod),
+							.jack_id = static_cast<int16_t>(in_jack),
+						};
+						if ((num_ins + 1) < (MAX_CONNECTIONS_PER_NODE - 1)) {
+							found->ins[num_ins + 1] = {-1, -1}; // terminator
+						}
+					}
+					// else log error: too many jacks stacked together
+				} else {
+					// Make a new entry:
+					pd.int_cables.push_back({
+						.out = {static_cast<int16_t>(out_mod), static_cast<int16_t>(out_jack)},
+						.ins = {{
+							{
+								.module_id = static_cast<int16_t>(in_mod),
+								.jack_id = static_cast<int16_t>(in_jack),
+							},
+							{-1, -1}, // terminator
+						}},
+					});
+				}
+			}
+		}
+		ph.num_int_cables = jacks.size();
+	}
+
+	void setParamList(std::vector<ParamStatus> &params)
+	{
+		// paramData = params;
+		pd.static_knobs.clear();
+		for (auto &param : params) {
+			pd.static_knobs.push_back({
+				.module_id = static_cast<int16_t>(idMap[param.moduleID]),
+				.param_id = static_cast<int16_t>(param.paramID),
+				.value = param.value,
+			});
+		}
+		ph.num_static_knobs = pd.static_knobs.size();
+	}
+
+	void addMaps(std::vector<Mapping> maps)
+	{
+		pd.mapped_knobs.clear();
+		pd.mapped_ins.clear();
+		pd.mapped_outs.clear();
+
+		for (auto &m : maps) {
+			if (m.dst.objType == LabelButtonID::Types::Knob) {
+				pd.mapped_knobs.push_back({
+					.panel_knob_id = static_cast<int16_t>(m.src.objID),
+					.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
+					.param_id = static_cast<int16_t>(m.dst.objID),
+				});
+			}
+
+			if (m.dst.objType == LabelButtonID::Types::InputJack) {
+				// Look for an existing entry:
+				auto found =
+					std::find_if(pd.mapped_ins.begin(), pd.mapped_ins.end(), [panel_jack = m.src.objID](const auto &x) {
+						return x.panel_jack_id == panel_jack;
+					});
+
+				if (found != pd.mapped_ins.end()) {
+					// Count number of entries in ins
+					int num_ins = 0;
+					for (const auto &in : found->ins) {
+						if (in.jack_id == -1 || in.module_id == -1)
+							break;
+						num_ins++;
+					}
+					// If there's room, append this new entry, otherwise do nothing
+					if (num_ins < (MAX_CONNECTIONS_PER_NODE - 1)) {
+						found->ins[num_ins] = {
+							.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
+							.jack_id = static_cast<int16_t>(m.dst.objID),
+						};
+						if ((num_ins + 1) < (MAX_CONNECTIONS_PER_NODE - 1)) {
+							found->ins[num_ins + 1] = {-1, -1}; // terminator
+						}
+					}
+					// else log error: too many jacks stacked together
+				} else {
+					// Make a new entry:
+					pd.mapped_ins.push_back({
+						.panel_jack_id = m.src.objID,
+						.ins = {{
+							{
+								.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
+								.jack_id = static_cast<int16_t>(m.dst.objID),
+							},
+							{-1, -1}, // terminator
+						}},
+					});
+				}
+			}
+
+			if (m.dst.objType == LabelButtonID::Types::OutputJack) {
+				// Update the mapped_outs entry if there already is one with the same panel_jack_id (Note that this is
+				// an error, since we can't have multiple outs assigned to a net, but we're going to roll with it).
+				// otherwise push it to the vector
+
+				// Look for an existing entry:
+				auto found =
+					std::find_if(pd.mapped_outs.begin(),
+								 pd.mapped_outs.end(),
+								 [panel_jack = m.src.objID](const auto &x) { return x.panel_jack_id == panel_jack; });
+
+				if (found != pd.mapped_outs.end()) {
+					// Update:
+					found->out.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]);
+					found->out.jack_id = static_cast<int16_t>(m.dst.objID);
+					// Todo: Log error: multiple module outputs mapped to same panel output jack
+				} else {
+					// Make a new entry:
+					pd.mapped_outs.push_back({
+						.panel_jack_id = m.src.objID,
+						.out =
+							{
+								.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
+								.jack_id = static_cast<int16_t>(m.dst.objID),
+							},
+					});
+				}
+			}
+		}
+
+		ph.num_mapped_knobs = pd.mapped_knobs.size();
+		ph.num_mapped_ins = pd.mapped_ins.size();
+		ph.num_mapped_outs = pd.mapped_outs.size();
+	}
+
+	std::string printJack(Jack &jack)
+	{
+		return "[m: " + std::to_string(jack.module_id) + ", " + "j: " + std::to_string(jack.jack_id) + "]";
+	}
+
+	std::string printPatch()
+	{
+		std::string s;
+		s = "PatchHeader: [\n";
+		s += "\theader_version: " + std::to_string(ph.header_version) + "\n";
+		s += "\tname_strlen: " + std::to_string(ph.name_strlen) + "\n";
+		s += "\tnum_modules: " + std::to_string(ph.num_modules) + "\n";
+		s += "\tnum_int_cables: " + std::to_string(ph.num_int_cables) + "\n";
+		s += "\tnum_mapped_ins: " + std::to_string(ph.num_mapped_ins) + "\n";
+		s += "\tnum_mapped_outs: " + std::to_string(ph.num_mapped_outs) + "\n";
+		s += "\tnum_static_knobs: " + std::to_string(ph.num_static_knobs) + "\n";
+		s += "\tnum_mapped_knobs: " + std::to_string(ph.num_mapped_knobs) + "\n";
+		s += "]\n";
+		s += "\n";
+		s += "PatchData: [\n";
+		s += "\tpatch_name: ";
+		s += pd.patch_name;
+		s += "\n";
+
+		s += "\tmodule_slugs: [\n";
+		int i = 0;
+		for (auto &x : pd.module_slugs) {
+			s += "\t\t" + std::to_string(i) + ": ";
+			s += x.cstr();
+			s += "\n";
+			i++;
+		}
+		s += "\t]\n";
+
+		s += "\tint_cables: [\n";
+		for (auto &x : pd.int_cables) {
+			s += "\t\t[\n";
+			s += "\t\t\tout: " + printJack(x.out) + "\n";
+			s += "\t\t\tins: [\n";
+			for (auto &in : x.ins) {
+				if (in.jack_id == -1 || in.module_id == -1)
+					break;
+				s += "\t\t\t\t" + printJack(in) + ",\n";
+			}
+			s += "\t\t\t]\n";
+			s += "\t\t],\n";
+		}
+		s += "\t]\n";
+
+		s += "\tmapped_ins: [\n";
+		for (auto &x : pd.mapped_ins) {
+			s += "\t\t[\n";
+			s += "\t\t\tpanel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
+			s += "\t\t\tins: [\n";
+			for (auto &in : x.ins) {
+				if (in.jack_id == -1 || in.module_id == -1)
+					break;
+				s += "\t\t\t\t" + printJack(in) + ", \n";
+			}
+			s += "\t\t\t]\n";
+			s += "\t\t],\n";
+		}
+		s += "\t]\n";
+
+		s += "\tmapped_outs: [\n";
+		for (auto &x : pd.mapped_outs) {
+			s += "\t\t[\n";
+			s += "\t\t\tpanel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
+			s += "\t\t\tout: " + printJack(x.out) + "\n";
+			s += "\t\t],\n";
+		}
+		s += "\t]\n";
+
+		s += "\tstatic_knobs: [\n";
+		for (auto &x : pd.static_knobs) {
+			s += "\t\t[\n";
+			s += "\t\t\tmodule_id: " + std::to_string(x.module_id) + "\n";
+			s += "\t\t\tparam_id: " + std::to_string(x.param_id) + "\n";
+			s += "\t\t\tvalue: " + std::to_string(x.value) + "\n";
+			s += "\t\t],\n";
+		}
+		s += "\t]\n";
+
+		s += "\tmapped_knobs: [\n";
+		for (auto &x : pd.mapped_knobs) {
+			s += "\t\t[ ";
+			s += "panel_knob_id: " + std::to_string(x.panel_knob_id) + ", ";
+			s += "module_id: " + std::to_string(x.module_id) + ", ";
+			s += "param_id: " + std::to_string(x.param_id) + ", ";
+			s += "curve_type: " + std::to_string(x.curve_type) + ", ";
+			s += "range: " + std::to_string(x.range) + ", ";
+			s += "offset: " + std::to_string(x.offset) + ", ";
+			s += "],\n";
+		}
+		s += "\t]\n";
+
+		s += "]\n";
+		s += "\n";
+
+		return s;
+	}
+
+	static std::map<int, int> squash_ids(std::vector<int> ids)
+	{
+		std::map<int, int> s;
+
+		int i = 0;
+		for (auto id : ids) {
+			s[id] = i++;
+		}
+		return s;
+	}
+};
 
 class PatchWriter {
 
@@ -50,12 +381,20 @@ public:
 		}
 	}
 
+	void createPatch()
+	{
+		generateModuleList();
+		generateStaticKnobList();
+		generateMappedKnobList();
+		generateNodeList();
+	}
+
 	void generateModuleList()
 	{
 		std::vector<int> vcv_mod_ids;
 
 		int i = 1;
-		vcv_mod_ids.push_back(-1);
+		vcv_mod_ids.push_back(-1); // Reserved for PANEL
 		for (auto &mod : moduleData) {
 			if (strcmp(mod.typeID.cstr(), "PANEL_8") == 0) {
 				p.modules_used[0] = mod.typeID;
@@ -152,7 +491,6 @@ public:
 					node_i++;
 				}
 
-				// FixMe: non-node code:
 				out_jack = cable.receivedJackId;
 				// scan existing nets for same output jack
 				bool found = false;
@@ -177,6 +515,7 @@ public:
 			}
 		}
 
+		// Fill unused nodes
 		unsigned unique_node_idx = MAX_NODES_IN_PATCH - 1;
 		for (int mod_i = 0; mod_i < p.num_modules; mod_i++) {
 			for (int node_i = 0; node_i < ModuleFactory::getNumJacks(p.modules_used[mod_i]); node_i++) {
@@ -184,14 +523,6 @@ public:
 					p.module_nodes[mod_i][node_i] = unique_node_idx--;
 			}
 		}
-	}
-
-	void createPatch()
-	{
-		generateModuleList();
-		generateStaticKnobList();
-		generateMappedKnobList();
-		generateNodeList();
 	}
 
 	static std::string printPatchStructText(std::string patchStructName, const Patch &patch)
@@ -242,8 +573,15 @@ public:
 
 			for (unsigned j = 0; j < patch.nets[i].num_jacks; j++) {
 				s += "                {";
-				s += ".module_id = " + std::to_string(patch.nets[i].jacks[j].module_id) + ", ";
-				s += ".jack_id = " + std::to_string(patch.nets[i].jacks[j].jack_id) + "},\n";
+				auto mod_id = patch.nets[i].jacks[j].module_id;
+				auto jack_id = patch.nets[i].jacks[j].jack_id;
+				s += ".module_id = " + std::to_string(mod_id) + ", ";
+				s += ".jack_id = " + std::to_string(jack_id) + "},";
+				s += "    // ";
+				s += patch.modules_used[mod_id].cstr();
+				s += ": ";
+				// s += p
+				s += "\n";
 			}
 
 			s += "            }},\n";

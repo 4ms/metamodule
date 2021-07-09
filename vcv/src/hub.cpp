@@ -109,19 +109,19 @@ struct MetaModuleHub : public CommModule {
 			if (--responseTimer == 0) {
 				printDebugFile();
 
-				Patch patch;
+				std::string patchName;
 				std::string patchDir;
 				if (patchNameText.substr(0, 5) == "test_")
 					patchDir = testPatchDir;
 				else
 					patchDir = examplePatchDir;
 				if (patchNameText != "" && patchNameText != "Enter Patch Name") {
-					patch.patch_name = patchNameText.c_str();
+					patchName = patchNameText.c_str();
 				} else {
 					std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
-					patch.patch_name = randomname.c_str();
+					patchName = randomname.c_str();
 				}
-				ReplaceString patchStructName{patch.patch_name.cstr()};
+				ReplaceString patchStructName{patchName};
 				patchStructName.replace_all(" ", "")
 					.replace_all("-", "")
 					.replace_all(",", "")
@@ -134,8 +134,9 @@ struct MetaModuleHub : public CommModule {
 					.replace_all("#", "")
 					.replace_all("!", "");
 				std::string patchFileName = patchDir + patchStructName.str + ".hh";
-				createPatchStruct(patch);
-				writeToFile(patchFileName, PatchWriter::printPatchStructText(patchStructName.str, patch));
+				// createPatchStruct(patch);
+				// writeToFile(patchFileName, PatchWriter::printPatchStructText(patchStructName.str, patch));
+				writePatchFile(patchFileName, patchName);
 
 				labelText = "Wrote patch file: ";
 				labelText += patchStructName.str + ".hh";
@@ -158,18 +159,33 @@ private:
 		return false;
 	}
 
-	void createPatchStruct(Patch &p)
+	void writePatchFile(std::string fileName, std::string patchName)
 	{
-		PatchWriter pw{p};
 		labelText = "Creating patch..";
 		updateDisplay();
 
-		pw.copyModuleList(centralData->moduleData);
-		pw.copyJackList(centralData->jackData);
-		pw.copyParamList(centralData->paramData);
+		PatchFileWriter pw;
+		pw.setModuleList(centralData->moduleData);
+		pw.setPatchName(patchName);
+		pw.setJackList(centralData->jackData);
+		pw.setParamList(centralData->paramData);
 		pw.addMaps(centralData->maps);
-		pw.createPatch();
+
+		writeToFile(fileName, pw.printPatch());
 	}
+
+	// void createPatchStruct(Patch &p)
+	// {
+	// 	PatchWriter pw{p};
+	// 	labelText = "Creating patch..";
+	// 	updateDisplay();
+
+	// 	pw.copyModuleList(centralData->moduleData);
+	// 	pw.copyJackList(centralData->jackData);
+	// 	pw.copyParamList(centralData->paramData);
+	// 	pw.addMaps(centralData->maps);
+	// 	pw.createPatch();
+	// }
 
 	void printDebugFile()
 	{

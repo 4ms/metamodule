@@ -11,27 +11,26 @@ const int MAX_PARAMS_IN_PATCH = 64;
 const int MAX_JACKS_PER_MODULE = 32;
 const int MAX_NODES_IN_PATCH = MAX_JACKS_PER_MODULE * MAX_MODULES_IN_PATCH;
 
-// FixMe: non-node only code:
-const int MAX_CONNECTIONS_PER_NODE = 4;
+const int MAX_CONNECTIONS_PER_NODE = 16;
+const int MAX_KNOBS_PER_MAPPING = 16;
 
 struct Jack {
-	uint16_t module_id;
-	uint16_t jack_id;
+	int16_t module_id;
+	int16_t jack_id;
 };
 
 struct StaticParam {
-	uint16_t module_id;
-	uint16_t param_id;
+	int16_t module_id;
+	int16_t param_id;
 	float value;
 };
 
 struct MappedParam {
-	uint16_t module_id;
-	uint16_t param_id;
-	uint16_t panel_knob_id;
+	int16_t module_id;
+	int16_t param_id;
+	int16_t panel_knob_id;
 };
 
-// FixMe: non-node only code:
 struct Net {
 	uint32_t num_jacks;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE> jacks;
@@ -70,16 +69,13 @@ struct PatchRef {
 	const Patch &patch;
 };
 
-struct NetC {
-	Jack out;
-	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
-};
+////////////////////////
 
-struct MappedParamC {
-	uint16_t module_id;
-	uint16_t param_id;
-	uint16_t panel_knob_id;
-	uint16_t curve_type; // reserved for future use
+struct MappedKnob {
+	int16_t panel_knob_id;
+	int16_t module_id;
+	int16_t param_id;
+	int16_t curve_type; // reserved for future use
 	float range;
 	float offset;
 
@@ -92,21 +88,41 @@ struct MappedParamC {
 	}
 };
 
-struct PatchHeader {
-	uint32_t format_version;
+// If number of ins exceeds MAX_CONNECTIONS_PER_NODE, then just add multiple InternalCable's
+struct InternalCable {
+	Jack out;
+	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
+};
 
+struct MappedInputJack {
+	int32_t panel_jack_id;
+	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
+};
+
+struct MappedOutputJack {
+	int32_t panel_jack_id;
+	Jack out;
+};
+
+struct PatchHeader {
+	uint16_t header_version;
 	uint16_t name_strlen;
 	uint16_t num_modules;
-	uint16_t num_nets;
+	uint16_t num_int_cables;
+	uint16_t num_mapped_ins;
+	uint16_t num_mapped_outs;
 	uint16_t num_static_knobs;
 	uint16_t num_mapped_knobs;
 };
 
 // Following PatchHeader is DATASIZE bytes of data,
-// where DATASIZE = name_strlen + num_modules*sizeof(ModuleTypeSlug) + num_nets*sizeof(NetC)
+// where DATASIZE = name_strlen + 1 + num_modules*sizeof(ModuleTypeSlug) + num_nets*sizeof(InternalCable)
 // 					+ num_static_knobs*sizeof(StaticParam) + num_mapped_knobs*sizeof(MappedParamC)
-// char patch_name[name_strlen];
-// ModuleTypeSlug modules_used[num_modules];
-// NetC nets[num_nets];
+//
+// char patch_name[name_strlen+1]; //null terminated
+// ModuleTypeSlug module_slugs[num_modules];
+// InternalCable int_cables[num_int_cables];
+// MappedInputJack mapped_ins[num_mapped_ins];
+// MappedOutputJack mapped_outs[num_mapped_outs];
 // StaticParam static_knobs[num_static_knobs];
-// MappedParam mapped_knobs[num_mapped_knobs];
+// MappedKnob mapped_knobs[num_mapped_knobs];
