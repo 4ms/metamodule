@@ -3,22 +3,10 @@
 #include "math.hh"
 
 struct QuantizerModule : CommModule {
-	enum ParamIds {
-		ENUMS(KEYPARAMS, 12),
-		NUM_PARAMS
-	};
-	enum InputIds {
-		SIGNAL_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		SIGNAL_OUTPUT,
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		ENUMS(LIGHTPARAMS, 12),
-		NUM_LIGHTS
-	};
+	enum ParamIds { ENUMS(KEYPARAMS, 12), NUM_PARAMS };
+	enum InputIds { SIGNAL_INPUT, NUM_INPUTS };
+	enum OutputIds { SIGNAL_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { ENUMS(LIGHTPARAMS, 12), NUM_LIGHTS };
 
 	QuantizerModule()
 	{
@@ -48,7 +36,8 @@ struct QuantizerWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/8hptemplate.svg")));
 
 		for (int i = 0; i < 12; i++) {
-			addLabeledToggle(noteNames[i], QuantizerModule::LIGHTPARAMS + i, QuantizerModule::KEYPARAMS + i, {0, i * 0.49f + 0.57f});
+			addLabeledToggle(
+				noteNames[i], QuantizerModule::LIGHTPARAMS + i, QuantizerModule::KEYPARAMS + i, {0, i * 0.49f + 0.57f});
 		}
 
 		addLabeledInput("IN", QuantizerModule::SIGNAL_INPUT, {0, 0});
