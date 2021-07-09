@@ -220,17 +220,46 @@ public:
 		ph.num_mapped_outs = pd.mapped_outs.size();
 	}
 
+	struct ByteBlock {
+		using DataType = std::vector<unsigned char>;
+		DataType data;
+
+		ByteBlock()
+		{
+			data.clear();
+		}
+		void print(uint32_t x)
+		{
+			printU32LE(x);
+		}
+		void printU32LE(uint32_t x)
+		{
+			data.push_back((x >> 0) & 0xFF);
+			data.push_back((x >> 8) & 0xFF);
+			data.push_back((x >> 16) & 0xFF);
+			data.push_back((x >> 24) & 0xFF);
+		}
+	};
+
+	ByteBlock::DataType printPatchBinary()
+	{
+		ByteBlock v;
+		v.printU32LE(0x12345678);
+		v.printU32LE(0x0A0B0C0D);
+		return v.data;
+	}
+
 	std::string printJack(Jack &jack, std::string separator)
 	{
 		return "module_id: " + std::to_string(jack.module_id) + "\n" + separator +
 			   "jack_id: " + std::to_string(jack.jack_id);
 	}
+
 	// std::string printJackItem(Jack &jack, std::string separator)
 	// {
 	// 	return "m: " + std::to_string(jack.module_id) + "\n" + separator + "j: " + std::to_string(jack.jack_id);
 	// }
-
-	std::string printPatch()
+	std::string printPatchYAML()
 	{
 		std::string s;
 		s = "PatchHeader:\n";

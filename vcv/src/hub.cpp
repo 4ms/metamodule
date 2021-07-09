@@ -133,13 +133,11 @@ struct MetaModuleHub : public CommModule {
 					.replace_all("?", "")
 					.replace_all("#", "")
 					.replace_all("!", "");
-				std::string patchFileName = patchDir + patchStructName.str + ".hh";
-				// createPatchStruct(patch);
-				// writeToFile(patchFileName, PatchWriter::printPatchStructText(patchStructName.str, patch));
+				std::string patchFileName = patchDir + patchStructName.str;
 				writePatchFile(patchFileName, patchName);
 
 				labelText = "Wrote patch file: ";
-				labelText += patchStructName.str + ".hh";
+				labelText += patchStructName.str + ".txt";
 				updateDisplay();
 			}
 		}
@@ -171,7 +169,8 @@ private:
 		pw.setParamList(centralData->paramData);
 		pw.addMaps(centralData->maps);
 
-		writeToFile(fileName, pw.printPatch());
+		writeToFile(fileName + ".txt", pw.printPatchYAML());
+		writeBinaryFile(fileName + ".mmpatch", pw.printPatchBinary());
 	}
 
 	// void createPatchStruct(Patch &p)
@@ -256,6 +255,13 @@ private:
 		std::ofstream myfile;
 		myfile.open(fileName);
 		myfile << textToWrite;
+		myfile.close();
+	}
+
+	void writeBinaryFile(std::string fileName, const std::vector<unsigned char> data)
+	{
+		std::ofstream myfile{fileName, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
+		myfile.write(reinterpret_cast<const char *>(data.data()), data.size());
 		myfile.close();
 	}
 };
