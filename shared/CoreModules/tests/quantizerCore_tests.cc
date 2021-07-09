@@ -100,24 +100,76 @@ TEST_CASE("Basic Quantizer functionality")
 		q.set_param(10, 0.f);
 		q.set_param(11, 0.f);
 
-		q.set_input(0, 0.14f / InputHighRangeVolts);
-		q.update();
-		out = q.get_output(0) * InputHighRangeVolts;
-		CHECK(out == doctest::Approx(0.0f));
+		SUBCASE("Round down to C")
+		{
+			q.set_input(0, 0.14f / InputHighRangeVolts);
+			q.update();
+			out = q.get_output(0) * InputHighRangeVolts;
+			CHECK(out == doctest::Approx(0.0f));
+		}
 
-		q.set_input(0, 0.17f / InputHighRangeVolts);
-		q.update();
-		out = q.get_output(0) * InputHighRangeVolts;
-		CHECK(out == doctest::Approx(0.3333333f));
+		SUBCASE("Round up to E")
+		{
+			q.set_input(0, 0.17f / InputHighRangeVolts);
+			q.update();
+			out = q.get_output(0) * InputHighRangeVolts;
+			CHECK(out == doctest::Approx(0.3333333f));
+		}
 
-		q.set_input(0, 0.34f / InputHighRangeVolts);
-		q.update();
-		out = q.get_output(0) * InputHighRangeVolts;
-		CHECK(out == doctest::Approx(0.3333333f));
+		SUBCASE("Round down to E")
+		{
+			q.set_input(0, 0.34f / InputHighRangeVolts);
+			q.update();
+			out = q.get_output(0) * InputHighRangeVolts;
+			CHECK(out == doctest::Approx(0.3333333f));
+		}
 
-		q.set_input(0, 0.56f / InputHighRangeVolts);
-		q.update();
-		out = q.get_output(0) * InputHighRangeVolts;
-		CHECK(out == doctest::Approx(0.75f));
+		SUBCASE("Round up to A")
+		{
+			q.set_input(0, 0.60f / InputHighRangeVolts);
+			q.update();
+			out = q.get_output(0) * InputHighRangeVolts;
+			CHECK(out == doctest::Approx(0.75f));
+		}
+
+		SUBCASE("Round down to A")
+		{
+			q.set_input(0, 0.77f / InputHighRangeVolts);
+			q.update();
+			out = q.get_output(0) * InputHighRangeVolts;
+			CHECK(out == doctest::Approx(0.75f));
+		}
+
+		SUBCASE("Round down to A")
+		{
+			q.set_input(0, 0.77f / InputHighRangeVolts);
+			q.update();
+			out = q.get_output(0) * InputHighRangeVolts;
+			CHECK(out == doctest::Approx(0.75f));
+		}
+
+		SUBCASE("Round up to C1")
+		{
+			q.set_input(0, 0.90f / InputHighRangeVolts);
+			q.update();
+			out = q.get_output(0) * InputHighRangeVolts;
+			CHECK(out == doctest::Approx(1.00f));
+		}
+
+		SUBCASE("Round down to C1")
+		{
+			q.set_input(0, 1.09f / InputHighRangeVolts);
+			q.update();
+			out = q.get_output(0) * InputHighRangeVolts;
+			CHECK(out == doctest::Approx(1.00f));
+		}
+
+		SUBCASE("Round up to E1")
+		{
+			q.set_input(0, 1.17f / InputHighRangeVolts);
+			q.update();
+			out = q.get_output(0) * InputHighRangeVolts;
+			CHECK(out == doctest::Approx(1.33f));
+		}
 	}
 }
