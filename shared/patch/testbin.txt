@@ -1,6 +1,6 @@
 PatchHeader:
   header_version: 4
-  name_strlen: 7
+  patch_name: testbin
   num_modules: 3
   num_int_cables: 6
   num_mapped_ins: 1
@@ -9,7 +9,6 @@ PatchHeader:
   num_mapped_knobs: 6
 
 PatchData:
-  patch_name: testbin
   module_slugs:
     0: PANEL_8
     1: MULTILFO
@@ -27,7 +26,7 @@ PatchData:
       - panel_jack_id: 2
         ins: 
           - module_id: 2
-            jack_id: 0, 
+            jack_id: 0
 
   mapped_outs: 
     - panel_jack_id: 0

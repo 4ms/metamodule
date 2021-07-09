@@ -5,7 +5,6 @@
 #include <vector>
 
 struct PatchData {
-	ModuleTypeSlug patch_name;
 	std::vector<ModuleTypeSlug> module_slugs;
 	std::vector<InternalCable> int_cables;
 	std::vector<MappedInputJack> mapped_ins;
@@ -29,8 +28,7 @@ public:
 
 	void setPatchName(std::string patchName)
 	{
-		ph.name_strlen = std::min(patchName.size(), pd.patch_name.capacity);
-		pd.patch_name = patchName.c_str();
+		ph.patch_name = patchName.c_str();
 	}
 
 	void setModuleList(std::vector<ModuleID> &modules)
@@ -273,9 +271,6 @@ public:
 		auto *header = reinterpret_cast<unsigned char *>(&ph);
 		v.printRaw(header, sizeof(ph));
 
-		auto *name = reinterpret_cast<unsigned char *>(&(pd.patch_name));
-		v.printRaw(name, sizeof(pd.patch_name));
-
 		for (size_t i = 0; i < pd.module_slugs.size(); i++)
 			v.printRaw(reinterpret_cast<unsigned char *>(&pd.module_slugs[i]), sizeof(pd.module_slugs[i]));
 
@@ -312,7 +307,9 @@ public:
 		std::string s;
 		s = "PatchHeader:\n";
 		s += "  header_version: " + std::to_string(ph.header_version) + "\n";
-		s += "  name_strlen: " + std::to_string(ph.name_strlen) + "\n";
+		s += "  patch_name: ";
+		s += ph.patch_name;
+		s += "\n";
 		s += "  num_modules: " + std::to_string(ph.num_modules) + "\n";
 		s += "  num_int_cables: " + std::to_string(ph.num_int_cables) + "\n";
 		s += "  num_mapped_ins: " + std::to_string(ph.num_mapped_ins) + "\n";
@@ -320,11 +317,8 @@ public:
 		s += "  num_static_knobs: " + std::to_string(ph.num_static_knobs) + "\n";
 		s += "  num_mapped_knobs: " + std::to_string(ph.num_mapped_knobs) + "\n";
 		s += "\n";
-		s += "PatchData:\n";
-		s += "  patch_name: ";
-		s += pd.patch_name;
-		s += "\n";
 
+		s += "PatchData:\n";
 		s += "  module_slugs:\n";
 		int i = 0;
 		for (auto &x : pd.module_slugs) {
@@ -355,7 +349,7 @@ public:
 			for (auto &in : x.ins) {
 				if (in.jack_id == -1 || in.module_id == -1)
 					break;
-				s += "          - " + printJack(in, "            ") + ", \n";
+				s += "          - " + printJack(in, "            ") + "\n";
 			}
 		}
 		s += "\n";

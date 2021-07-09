@@ -105,12 +105,16 @@ struct MappedOutputJack {
 };
 
 struct PatchHeader {
-	uint16_t header_version;
-	uint16_t name_strlen;
+	uint32_t header_version;
+
+	ModuleTypeSlug patch_name;
+
 	uint16_t num_modules;
 	uint16_t num_int_cables;
+
 	uint16_t num_mapped_ins;
 	uint16_t num_mapped_outs;
+
 	uint16_t num_static_knobs;
 	uint16_t num_mapped_knobs;
 };
