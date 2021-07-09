@@ -1,0 +1,118 @@
+PatchHeader:
+  header_version: 0
+  patch_name: anothertest
+  num_modules: 4
+  num_int_cables: 16
+  num_mapped_ins: 0
+  num_mapped_outs: 2
+  num_static_knobs: 21
+  num_mapped_knobs: 2
+
+PatchData:
+  module_slugs:
+    0: PANEL_8
+    1: DRUM
+    2: DRUM
+    3: MULTILFO
+
+  int_cables: 
+      - out: 
+          module_id: 3
+          jack_id: 3
+        ins: 
+          - module_id: 1
+            jack_id: 0
+          - module_id: 2
+            jack_id: 0
+
+  mapped_ins: 
+
+  mapped_outs: 
+    - panel_jack_id: 0
+      out: 
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 1
+      out: 
+        module_id: 2
+        jack_id: 0
+
+  static_knobs: 
+    - module_id: 1
+      param_id: 0
+      value: 0.429000
+    - module_id: 1
+      param_id: 1
+      value: 0.265500
+    - module_id: 1
+      param_id: 2
+      value: 0.175500
+    - module_id: 1
+      param_id: 3
+      value: 0.249000
+    - module_id: 1
+      param_id: 4
+      value: 0.000000
+    - module_id: 1
+      param_id: 5
+      value: 0.000000
+    - module_id: 1
+      param_id: 6
+      value: 0.423000
+    - module_id: 1
+      param_id: 7
+      value: 0.000000
+    - module_id: 1
+      param_id: 8
+      value: 0.328500
+    - module_id: 2
+      param_id: 0
+      value: 0.036000
+    - module_id: 2
+      param_id: 1
+      value: 0.412500
+    - module_id: 2
+      param_id: 2
+      value: 0.433500
+    - module_id: 2
+      param_id: 3
+      value: 0.189000
+    - module_id: 2
+      param_id: 4
+      value: 0.397500
+    - module_id: 2
+      param_id: 5
+      value: 0.369000
+    - module_id: 2
+      param_id: 6
+      value: 0.306000
+    - module_id: 2
+      param_id: 7
+      value: 0.567000
+    - module_id: 2
+      param_id: 8
+      value: 0.205500
+    - module_id: 3
+      param_id: 0
+      value: 0.277000
+    - module_id: 3
+      param_id: 1
+      value: 0.000000
+    - module_id: 3
+      param_id: 2
+      value: 0.475500
+
+  mapped_knobs: 
+    - panel_knob_id: 0
+      module_id: 1
+      param_id: 0
+      curve_type: 0
+      range: 0.000000
+      offset: 0.000000
+    - panel_knob_id: 1
+      module_id: 2
+      param_id: 0
+      curve_type: 0
+      range: 0.000000
+      offset: 0.000000
+
