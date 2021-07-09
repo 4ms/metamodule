@@ -149,7 +149,7 @@ void AudioStream::process(AudioStreamBlock &in,
 			i++;
 		}
 
-		player.update_patch(patch_list.cur_patch());
+		player.update_patch();
 
 		out_->l = get_audio_output(LEFT_OUT);
 		out_->r = get_audio_output(RIGHT_OUT);

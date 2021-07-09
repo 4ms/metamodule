@@ -69,7 +69,7 @@ struct PatchSelectorPage : PageBase {
 				continue;
 			}
 			screen.setCursor(2, y_pos);
-			screen.print(patch_list.get_patch(i).patch_name);
+			screen.print(patch_list.get_patch_name(i));
 			y_pos += lineheight;
 		}
 	}

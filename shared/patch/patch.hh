@@ -39,34 +39,23 @@ using NetList = std::array<Net, MAX_NODES_IN_PATCH>;
 
 using ModuleList = std::array<ModuleTypeSlug, MAX_MODULES_IN_PATCH>;
 using ModuleNodeList = uint8_t[MAX_JACKS_PER_MODULE]; // std::array<uint8_t, MAX_JACKS_PER_MODULE>;
-using NodeList = std::array<ModuleNodeList, MAX_MODULES_IN_PATCH>;
 using StaticParamList = std::array<StaticParam, MAX_PARAMS_IN_PATCH>;
 using MappedParamList = std::array<MappedParam, Panel::NumKnobs>;
 
 struct Patch {
 	ModuleTypeSlug patch_name;
+
+	uint32_t num_modules;
 	ModuleList modules_used;
-	int num_modules;
 
-	NodeList module_nodes;
-
-	// FixMe: non-node only code:
+	uint32_t num_nets;
 	NetList nets;
-	int num_nets;
 
+	uint32_t num_static_knobs;
 	StaticParamList static_knobs;
-	int num_static_knobs;
 
+	uint32_t num_mapped_knobs;
 	MappedParamList mapped_knobs;
-	int num_mapped_knobs;
-};
-
-struct PatchRef {
-	PatchRef(const Patch &p)
-		: patch(p)
-	{}
-
-	const Patch &patch;
 };
 
 ////////////////////////
@@ -120,10 +109,9 @@ struct PatchHeader {
 };
 
 // Following PatchHeader is DATASIZE bytes of data,
-// where DATASIZE = name_strlen + 1 + num_modules*sizeof(ModuleTypeSlug) + num_nets*sizeof(InternalCable)
-// 					+ num_static_knobs*sizeof(StaticParam) + num_mapped_knobs*sizeof(MappedParamC)
+// where DATASIZE = num_modules*sizeof(ModuleTypeSlug) + num_nets*sizeof(InternalCable)
+// 					+ num_static_knobs*sizeof(StaticParam) + num_mapped_knobs*sizeof(MappedKnob)
 //
-// char patch_name[name_strlen+1]; //null terminated
 // ModuleTypeSlug module_slugs[num_modules];
 // InternalCable int_cables[num_int_cables];
 // MappedInputJack mapped_ins[num_mapped_ins];

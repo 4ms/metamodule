@@ -7,53 +7,24 @@ struct PatchList {
 	// MARK: Change NumPatches here:
 	static const uint32_t NumPatches = 10; // Integration test patches
 #else
-	static const uint32_t NumPatches = 10; // Normal mode
+	static const uint32_t NumPatches = 2; // Normal mode
 #endif
 
 	PatchList();
 
-	const Patch &cur_patch()
-	{
-		if (_cur_patch_idx >= NumPatches)
-			_cur_patch_idx = 0;
-		return _patches[_cur_patch_idx].patch;
-	}
-
-	const Patch &get_patch(uint32_t patch_id)
+	ModuleTypeSlug &get_patch_name(uint32_t patch_id)
 	{
 		if (patch_id >= NumPatches)
-			return _patches[0].patch;
-		return _patches[patch_id].patch;
+			patch_id = 0;
+		return _patch_headers[patch_id]->patch_name;
 	}
 
-	uint32_t cur_patch_index()
+	void load_patch_header(PatchHeader *ph, void *base_addr)
 	{
-		return _cur_patch_idx;
-	}
-	void next_patch()
-	{
-		_cur_patch_idx++;
-		if (_cur_patch_idx == NumPatches)
-			_cur_patch_idx = 0;
-	}
-
-	void prev_patch()
-	{
-		if (_cur_patch_idx == 0)
-			_cur_patch_idx = NumPatches - 1;
-		else
-			_cur_patch_idx--;
-	}
-
-	void jump_to_patch(uint32_t patch_index)
-	{
-		if (patch_index >= NumPatches)
-			patch_index = NumPatches - 1;
-
-		_cur_patch_idx = patch_index;
+		ph = reinterpret_cast<PatchHeader *>(base_addr);
 	}
 
 private:
-	uint32_t _cur_patch_idx = 0;
-	PatchRef _patches[NumPatches];
+	std::array<PatchHeader *, NumPatches> _patch_headers;
+	std::array<void *, NumPatches> _patch_addrs;
 };
