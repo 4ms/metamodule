@@ -1,8 +1,8 @@
 PatchHeader:
-  header_version: 0
+  header_version: 2
   patch_name: anothertest
   num_modules: 4
-  num_int_cables: 16
+  num_int_cables: 1
   num_mapped_ins: 0
   num_mapped_outs: 2
   num_static_knobs: 21
