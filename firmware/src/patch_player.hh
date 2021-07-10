@@ -79,6 +79,16 @@ public:
 		mapped_outs = new MappedOutputJack[ph->num_mapped_outs];
 		static_knobs = new StaticParam[ph->num_static_knobs];
 		mapped_knobs = new MappedKnob[ph->num_mapped_knobs];
+
+		auto slugs_ptr = reinterpret_cast<ModuleTypeSlug *>(ph + 1);
+		for (int i = 0; i < ph->num_modules; i++)
+			module_slugs[i] = slugs_ptr[i];
+
+		auto int_cables_ptr = reinterpret_cast<InternalCable *>(slugs_ptr + ph->num_modules);
+		for (int i = 0; i < ph->num_int_cables; i++)
+			int_cables[i] = int_cables_ptr[i];
+
+		// TODO: fill these arrays with the data from ph + sizeof(PatchHeader)
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
