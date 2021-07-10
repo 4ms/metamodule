@@ -15,20 +15,13 @@
 #include "smp_api.hh"
 #include "sys/alloc_buffer.hh"
 #include <cstdint>
+#include <vector>
 
 namespace MetaModule
 {
 using PanelT = Panel;
 
 class PatchPlayer {
-
-	// struct Knob {
-	// 	uint16_t module_id;
-	// 	uint16_t param_id;
-	// 	float range;
-	// 	float offset;
-	// };
-
 	enum {
 		NumInConns = Panel::NumOutJacks,
 		NumOutConns = Panel::NumInJacks,
@@ -37,21 +30,14 @@ class PatchPlayer {
 public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
-	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
+	// out_conns[]: OutL OutR CVOut1 CVOut2 ClockOut, each element is a Jack
+	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}};
 
-	// in_conns[]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn, each a vector of jacks it's connected to
+	// in_conns[]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn, each element is a vector of Jacks it's connected to
 	std::array<std::vector<Jack>, NumInConns> in_conns;
+
+	// knob_conns[]: A B C D a b c d, each element is a vector of knobs it's mapped to
 	std::array<std::vector<MappedKnob>, Panel::NumKnobs> knob_conns;
-
-	// Index of each module that appears more than once.
-	// 0 = only appears once in the patch
-	// 1 => reads "LFO #1", 2=> "LFO #2", etc.
-	uint8_t dup_module_index[MAX_MODULES_IN_PATCH] = {0};
-
-private:
-	bool is_loaded = false;
-	PatchHeader *header;
-	static const inline ModuleTypeSlug no_patch_loaded = "(Not Loaded)";
 
 	ModuleTypeSlug *module_slugs;
 	InternalCable *int_cables;
@@ -60,18 +46,21 @@ private:
 	StaticParam *static_knobs;
 	MappedKnob *mapped_knobs;
 
+	bool is_loaded = false;
+
+private:
+	// Index of each module that appears more than once.
+	// 0 = only appears once in the patch
+	// 1 => reads "LFO #1", 2=> "LFO #2", etc.
+	uint8_t dup_module_index[MAX_MODULES_IN_PATCH] = {0};
+
+	PatchHeader *header;
+	static const inline ModuleTypeSlug no_patch_loaded = "(Not Loaded)";
+
 public:
 	PatchPlayer()
 	{
 		clear_cache();
-	}
-
-	const ModuleTypeSlug &get_patch_name()
-	{
-		if (is_loaded)
-			return header->patch_name;
-		else
-			return no_patch_loaded;
 	}
 
 	void load_patch_from_header(PatchHeader *ph)
@@ -99,7 +88,9 @@ public:
 	bool load_patch(PatchHeader *ph)
 	{
 		SMPThread::init();
-		clear_cache();
+
+		if (is_loaded)
+			unload_patch();
 
 		load_patch_from_header(ph);
 
@@ -116,7 +107,7 @@ public:
 		}
 
 		// Todo: if we need to improve patch loading time by a small amount,
-		// it's a little faster to combine these two functions so we only do one loop over nets/jacks
+		// it's a little faster to combine these functions so we only do one loop over nets/jacks
 		// ...but it's harder to unit test.
 		mark_patched_jacks();
 		calc_panel_jack_connections();
@@ -179,12 +170,12 @@ public:
 		BigAllocControl::reset();
 	}
 
-	// Getters and Setters:
+	// K-rate setters/getters:
 
 	void set_panel_param(int param_id, float val)
 	{
-		// if (!is_loaded)
-		// 	return;
+		if (!is_loaded)
+			return;
 		auto &knob_conn = knob_conns[param_id];
 		for (auto &k : knob_conn)
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
@@ -192,12 +183,10 @@ public:
 
 	void set_panel_input(int jack_id, float val)
 	{
-		// if (!is_loaded)
-		// 	return;
+		if (!is_loaded)
+			return;
 		// if (jack_id >= NumInConns)
 		// 	return;
-		// static_cast<PanelT *>(modules[0].get())->set_panel_input(jack_id, val);
-
 		auto &jacks = in_conns[jack_id];
 		for (auto &jack : jacks)
 			modules[jack.module_id]->set_input(jack.jack_id, val);
@@ -205,14 +194,65 @@ public:
 
 	float get_panel_output(int jack_id)
 	{
-		// if (!is_loaded)
-		// 	return 0.f;
-		// return static_cast<PanelT *>(modules[0].get())->get_panel_output(jack_id);
+		if (!is_loaded)
+			return 0.f;
 		auto &jack = out_conns[jack_id];
 		if (jack.module_id > 0)
 			return modules[jack.module_id]->get_output(jack.jack_id);
 		else
 			return 0.f;
+	}
+
+	// General info getters:
+
+	const ModuleTypeSlug &get_patch_name()
+	{
+		return is_loaded ? header->patch_name : no_patch_loaded;
+	}
+
+	int get_num_modules()
+	{
+		return is_loaded ? header->num_modules : 0;
+	}
+
+	int get_num_int_cables()
+	{
+		return is_loaded ? header->num_int_cables : 0;
+	}
+
+	int get_num_mapped_knobs()
+	{
+		return is_loaded ? header->num_mapped_knobs : 0;
+	}
+
+	const ModuleTypeSlug &get_module_name(int idx)
+	{
+		return (is_loaded && idx < header->num_modules) ? module_slugs[idx] : no_patch_loaded;
+	}
+
+	// Given the user-facing output jack id (0 = Audio Out L, 1 = Audio Out R, etc)
+	// Return the Jack {module_id, jack_id} that it's connected to
+	// {0,0} means not connected, or index out of range
+	Jack get_panel_output_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
+	{
+		// Todo: support multiple jacks connected to one net
+		if (jack_id >= Panel::NumUserFacingOutJacks || multiple_connection_id > 0)
+			return {.module_id = 0, .jack_id = 0};
+
+		return out_conns[jack_id];
+	}
+
+	// Given the user-facing panel input jack id (0 = Audio In L, 1 = Audio In R, etc)
+	// return the Jack {module_id, jack_id} that it's connected to.
+	// The optional multiple_connection_id is used if multiple jacks are connected to the panel jack (defaults to 0).
+	// {0,0} means not connected, or index out of range
+	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
+	{
+		// Todo: support multiple jacks connected to one net
+		if ((jack_id >= Panel::NumUserFacingInJacks) || (multiple_connection_id >= in_conns[jack_id].size()))
+			return {.module_id = 0, .jack_id = 0};
+
+		return in_conns[jack_id][multiple_connection_id];
 	}
 
 	static constexpr unsigned get_num_panel_knobs()
@@ -238,6 +278,8 @@ public:
 			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
 			for (int jack_i = 0; jack_i < MAX_CONNECTIONS_PER_NODE - 1; jack_i++) {
 				auto &input_jack = cable.ins[jack_i];
+				if (input_jack.jack_id < 0 || input_jack.module_id < 0)
+					break;
 				modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
 			}
 		}
@@ -271,8 +313,8 @@ public:
 		}
 	}
 
+private:
 	// Cache functions:
-
 	void clear_cache()
 	{
 		for (auto &d : dup_module_index)
@@ -308,31 +350,6 @@ public:
 		}
 	}
 
-	// Given the user-facing output jack id (0 = Audio Out L, 1 = Audio Out R, etc)
-	// Return the Jack {module_id, jack_id} that it's connected to
-	// {0,0} means not connected, or index out of range
-	Jack get_panel_output_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
-	{
-		// Todo: support multiple jacks connected to one net
-		if (jack_id >= Panel::NumUserFacingOutJacks || multiple_connection_id > 0)
-			return {.module_id = 0, .jack_id = 0};
-
-		return out_conns[jack_id];
-	}
-
-	// Given the user-facing panel input jack id (0 = Audio In L, 1 = Audio In R, etc)
-	// return the Jack {module_id, jack_id} that it's connected to.
-	// The optional multiple_connection_id is used if multiple jacks are connected to the panel jack (defaults to 0).
-	// {0,0} means not connected, or index out of range
-	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
-	{
-		// Todo: support multiple jacks connected to one net
-		if ((jack_id >= Panel::NumUserFacingInJacks) || (multiple_connection_id >= in_conns[jack_id].size()))
-			return {.module_id = 0, .jack_id = 0};
-
-		return in_conns[jack_id][multiple_connection_id];
-	}
-
 	// Check for multiple instances of same module type, and cache the results
 	// This is used to create unique names for modules (e.g. LFO#1, LFO#2,...)
 	void calc_multiple_module_indicies()
@@ -359,6 +376,7 @@ public:
 		}
 	}
 
+public:
 	// Return the mulitple-module-same-type index of the given module index
 	// 0 ==> this is the only module of its type
 	// >0 ==> a number to append to the module name, e.g. 1 ==> LFO#1, 2 ==> LFO#2, etc
