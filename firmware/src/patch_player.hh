@@ -22,10 +22,12 @@ using PanelT = Panel;
 
 class PatchPlayer {
 
-	struct Knob {
-		uint16_t module_id;
-		uint16_t param_id;
-	};
+	// struct Knob {
+	// 	uint16_t module_id;
+	// 	uint16_t param_id;
+	// 	float range;
+	// 	float offset;
+	// };
 
 	enum {
 		NumInConns = Panel::NumOutJacks,
@@ -36,8 +38,10 @@ public:
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}}; // [5]: OutL OutR CVOut1 CVOut2 ClockOut
-	Jack in_conns[NumInConns] = {{0, 0}}; // [9]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn
-	Knob knob_conns[Panel::NumKnobs]{{0, 0}};
+
+	// in_conns[]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn, each a vector of jacks it's connected to
+	std::array<std::vector<Jack>, NumInConns> in_conns;
+	std::array<std::vector<MappedKnob>, Panel::NumKnobs> knob_conns;
 
 	// Index of each module that appears more than once.
 	// 0 = only appears once in the patch
@@ -142,7 +146,6 @@ public:
 		}
 		SMPThread::join();
 
-		// Note: we are skipping mapped ins/outs!
 		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
 			auto &cable = int_cables[net_i];
 
@@ -161,7 +164,7 @@ public:
 	{
 		SMPThread::join();
 		is_loaded = false;
-		for (int i = 0; i < p.num_modules; i++) {
+		for (int i = 0; i < header->num_modules; i++) {
 			modules[i].reset(nullptr);
 		}
 
@@ -180,32 +183,37 @@ public:
 
 	void set_panel_param(int param_id, float val)
 	{
-		if (!is_loaded)
-			return;
-		auto &k = knob_conns[param_id];
-		modules[k.module_id]->set_param(k.param_id, val);
+		// if (!is_loaded)
+		// 	return;
+		auto &knob_conn = knob_conns[param_id];
+		for (auto &k : knob_conn)
+			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 	}
 
 	void set_panel_input(int jack_id, float val)
 	{
-		if (!is_loaded)
-			return;
-		static_cast<PanelT *>(modules[0].get())->set_panel_input(jack_id, val);
+		// if (!is_loaded)
+		// 	return;
+		// if (jack_id >= NumInConns)
+		// 	return;
+		// static_cast<PanelT *>(modules[0].get())->set_panel_input(jack_id, val);
+
+		auto &jacks = in_conns[jack_id];
+		for (auto &jack : jacks)
+			modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
 	float get_panel_output(int jack_id)
 	{
-		if (!is_loaded)
+		// if (!is_loaded)
+		// 	return 0.f;
+		// return static_cast<PanelT *>(modules[0].get())->get_panel_output(jack_id);
+		auto &jack = out_conns[jack_id];
+		if (jack.module_id > 0)
+			return modules[jack.module_id]->get_output(jack.jack_id);
+		else
 			return 0.f;
-		return static_cast<PanelT *>(modules[0].get())->get_panel_output(jack_id);
 	}
-
-	// float get_panel_param(int param_id)
-	// {
-	// 	if (!is_loaded)
-	// 		return 0.f;
-	// 	return static_cast<PanelT *>(modules[0].get())->get_param(param_id);
-	// }
 
 	static constexpr unsigned get_num_panel_knobs()
 	{
@@ -224,18 +232,13 @@ public:
 
 	void mark_patched_jacks()
 	{
-		if constexpr (USE_NODES == true)
-			return;
+		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
+			auto &cable = int_cables[net_i];
 
-		for (int net_i = 0; net_i < p.num_nets; net_i++) {
-			auto &net = p.nets[net_i];
-
-			for (int jack_i = 0; jack_i < net.num_jacks; jack_i++) {
-				auto &jack = net.jacks[jack_i];
-				if (jack_i == 0)
-					modules[jack.module_id]->mark_output_patched(jack.jack_id);
-				else
-					modules[jack.module_id]->mark_input_patched(jack.jack_id);
+			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
+			for (int jack_i = 0; jack_i < MAX_CONNECTIONS_PER_NODE - 1; jack_i++) {
+				auto &input_jack = cable.ins[jack_i];
+				modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
 			}
 		}
 	}
@@ -244,12 +247,14 @@ public:
 	{
 		if (panel_in_jack_id >= NumInConns)
 			return;
-		auto &jack = in_conns[panel_in_jack_id];
-		if (jack.module_id > 0) {
-			if (is_patched)
-				modules[jack.module_id]->mark_input_patched(jack.jack_id);
-			else
-				modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+		auto &jacks = in_conns[panel_in_jack_id];
+		for (auto &jack : jacks) {
+			if (jack.module_id > 0) {
+				if (is_patched)
+					modules[jack.module_id]->mark_input_patched(jack.jack_id);
+				else
+					modules[jack.module_id]->mark_input_unpatched(jack.jack_id);
+			}
 		}
 	}
 
@@ -277,44 +282,29 @@ public:
 			out_conn = {0, 0};
 
 		for (auto &in_conn : in_conns)
-			in_conn = {0, 0};
+			in_conn.clear();
 
 		for (auto &knob_conn : knob_conns)
-			knob_conn = {0, 0};
+			knob_conn.clear();
 	}
 
 	// Cache all the panel jack connections
 	void calc_panel_jack_connections()
 	{
-		if constexpr (USE_NODES == true)
-			return;
-
-		const int panelId = 0;
-		for (int net_i = 0; net_i < p.num_nets; net_i++) {
-			auto &net = p.nets[net_i];
-			for (int jack_i = 0; jack_i < net.num_jacks; jack_i++) {
-				auto &jack = net.jacks[jack_i];
-				if (jack.module_id == panelId) {
-					if (jack_i == 0) {
-						// panel jack is producer, which means it's a user-facing input (e.g. Audio In L)
-						if (jack.jack_id < Panel::NumUserFacingInJacks)
-							in_conns[jack.jack_id] = net.jacks[1];
-					} else {
-						// panel jack is consumer, which means it's a user-facing output (e.g. CV Out 3)
-						if (jack.jack_id < Panel::NumUserFacingOutJacks)
-							out_conns[jack.jack_id] = net.jacks[0];
-					}
-				}
-			}
+		for (int net_i = 0; net_i < header->num_mapped_ins; net_i++) {
+			auto &cable = mapped_ins[net_i];
+			auto panel_jack_id = cable.panel_jack_id;
+			if (panel_jack_id < 0 || panel_jack_id >= Panel::NumUserFacingInJacks)
+				break;
+			in_conns[panel_jack_id].push_back(cable.ins[0]);
 		}
 	}
 
 	void calc_panel_knob_connections()
 	{
-		for (int i = 0; i < p.num_mapped_knobs; i++) {
-			auto &k = p.mapped_knobs[i];
-			knob_conns[k.panel_knob_id].module_id = k.module_id;
-			knob_conns[k.panel_knob_id].param_id = k.param_id;
+		for (int i = 0; i < header->num_mapped_knobs; i++) {
+			auto &k = mapped_knobs[i];
+			knob_conns[k.panel_knob_id].push_back(k);
 		}
 	}
 
@@ -330,33 +320,35 @@ public:
 		return out_conns[jack_id];
 	}
 
-	// Given the user-facing input jack id (0 = Audio In L, 1 = Audio In R, etc)
-	// Return the Jack {module_id, jack_id} that it's connected to
+	// Given the user-facing panel input jack id (0 = Audio In L, 1 = Audio In R, etc)
+	// return the Jack {module_id, jack_id} that it's connected to.
+	// The optional multiple_connection_id is used if multiple jacks are connected to the panel jack (defaults to 0).
 	// {0,0} means not connected, or index out of range
 	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
 	{
 		// Todo: support multiple jacks connected to one net
-		if (jack_id >= Panel::NumUserFacingInJacks || multiple_connection_id > 0)
+		if ((jack_id >= Panel::NumUserFacingInJacks) || (multiple_connection_id >= in_conns[jack_id].size()))
 			return {.module_id = 0, .jack_id = 0};
 
-		return in_conns[jack_id];
+		return in_conns[jack_id][multiple_connection_id];
 	}
 
 	// Check for multiple instances of same module type, and cache the results
+	// This is used to create unique names for modules (e.g. LFO#1, LFO#2,...)
 	void calc_multiple_module_indicies()
 	{
 		// Todo: this is a naive implementation, perhaps can be made more efficient
-		for (int i = 0; i < p.num_modules; i++) {
-			auto &this_slug = p.modules_used[i];
+		for (int i = 0; i < header->num_modules; i++) {
+			auto &this_slug = module_slugs[i];
 
 			unsigned found = 1;
 			unsigned this_index = 0;
-			for (int j = 0; j < p.num_modules; j++) {
+			for (int j = 0; j < header->num_modules; j++) {
 				if (i == j) {
 					this_index = found;
 					continue;
 				}
-				auto &that_slug = p.modules_used[j];
+				auto &that_slug = module_slugs[j];
 				if (that_slug == this_slug) {
 					found++;
 				}
