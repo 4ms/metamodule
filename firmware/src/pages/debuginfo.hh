@@ -14,19 +14,19 @@ struct DebugInfoPage : PageBase {
 	{
 		screen.fill(Colors::pink);
 		PageWidgets::setup_header(screen);
-		screen.print(patch_list.cur_patch().patch_name);
+		screen.print(patch_player.get_patch_name());
 		PageWidgets::draw_jack_senses(screen, params, 180);
 		PageWidgets::draw_pot_values(screen, params, Colors::black, 214);
 		PageWidgets::draw_processor_stats(screen, Colors::blue, metaparams.audio_load);
 
 		screen.setFont(mf_find_font("fixed_5x8"));
 		uint16_t y_pos = 40;
-		for (int i = 0; i < patch_list.cur_patch().num_modules; i++) {
+		for (int i = 0; i < patch_player.get_num_modules(); i++) {
 			screen.setCursor(0, y_pos);
 			screen.printf("%d: %s (%s) #%d",
 						  i,
 						  patch_player.modules[i]->get_description().cstr(),
-						  patch_list.cur_patch().modules_used[i].cstr(),
+						  patch_player.get_module_name(i).cstr(),
 						  patch_player.get_multiple_module_index(i));
 			y_pos += 10;
 		}
