@@ -139,6 +139,9 @@ public:
 					.panel_knob_id = static_cast<int16_t>(m.src.objID),
 					.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
 					.param_id = static_cast<int16_t>(m.dst.objID),
+					.curve_type = 0,
+					.range = 1.f,
+					.offset = 0.f,
 				});
 			}
 
