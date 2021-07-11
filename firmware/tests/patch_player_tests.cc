@@ -2,6 +2,12 @@
 #include "patch_player.hh"
 #include <iostream>
 
+// The test data in these unit tests was generated using VCV rack to create a .mmpatch binary file.
+// This file is then converted to a raw C-array using:
+// xxd -i -c 8 patchfile.mmpatch > patchfile.hh
+// When generating a .mmpatch file, there's also a human-readable .txt file (actually is in YAML format)
+// The .txt file is useful for verifying the expected values
+
 #include "patches/unittest_patchheader.hh"
 
 TEST_CASE("Header loads ok")
@@ -44,12 +50,53 @@ TEST_CASE("Module list loads ok")
 }
 
 #include "patches/unittest_outmap.hh"
-TEST_CASE("Output jack mapping")
+TEST_CASE("Simple output jack mapping")
 {
 	auto *ph = reinterpret_cast<PatchHeader *>(unittest_outmap_mmpatch);
+	REQUIRE(ph->num_mapped_outs == 3);
 
 	MetaModule::PatchPlayer player;
 	player.load_patch_from_header(ph);
+
+	player.calc_panel_jack_connections();
+	// Note: All the expected values are taken from the unittest_outmap.txt YAML file
+
+	SUBCASE("Check if raw mapped_outs[] data was loaded OK")
+	{
+		CHECK(player.mapped_outs[0].panel_jack_id == 1);
+		CHECK(player.mapped_outs[0].out.module_id == 1);
+		CHECK(player.mapped_outs[0].out.jack_id == 1);
+
+		CHECK(player.mapped_outs[1].panel_jack_id == 0);
+		CHECK(player.mapped_outs[1].out.module_id == 1);
+		CHECK(player.mapped_outs[1].out.jack_id == 3);
+
+		CHECK(player.mapped_outs[2].panel_jack_id == 2);
+		CHECK(player.mapped_outs[2].out.module_id == 2);
+		CHECK(player.mapped_outs[2].out.jack_id == 1);
+
+		SUBCASE("Check if output connection data is correct")
+		{
+			Jack panel_out_0 = player.get_panel_output_connection(0);
+			CHECK(panel_out_0.module_id == 1);
+			CHECK(panel_out_0.jack_id == 3);
+
+			Jack panel_out_1 = player.get_panel_output_connection(1);
+			CHECK(panel_out_1.module_id == 1);
+			CHECK(panel_out_1.jack_id == 1);
+
+			Jack panel_out_2 = player.get_panel_output_connection(2);
+			CHECK(panel_out_2.module_id == 2);
+			CHECK(panel_out_2.jack_id == 1);
+
+			SUBCASE("Unmapped jacks are connected to 0,0")
+			{
+				Jack panel_out_3 = player.get_panel_output_connection(3);
+				CHECK(panel_out_3.module_id == 0);
+				CHECK(panel_out_3.jack_id == 0);
+			}
+		}
+	}
 }
 
 /*

@@ -326,7 +326,6 @@ public:
 		}
 	}
 
-private:
 	// Cache functions:
 	void clear_cache()
 	{
