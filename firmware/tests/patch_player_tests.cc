@@ -1,34 +1,55 @@
 #include "doctest.h"
 #include "patch_player.hh"
+#include <iostream>
 
 #include "patches/unittest_patchheader.hh"
 
-TEST_CASE("Test output jack mapping")
+TEST_CASE("Header loads ok")
 {
+	static const PatchHeader expected_header = {
+		.header_version = 1,
+		.patch_name = "unittest_patchheader",
+		.num_modules = 6,
+		.num_int_cables = 2,
+		.num_mapped_ins = 7,
+		.num_mapped_outs = 5,
+		.num_static_knobs = 23,
+		.num_mapped_knobs = 8,
+	};
 
-	SUBCASE("Header loads ok")
-	{
-		static const PatchHeader expected_header = {
-			.header_version = 1,
-			.patch_name = "unittest_patchheader",
-			.num_modules = 6,
-			.num_int_cables = 2,
-			.num_mapped_ins = 7,
-			.num_mapped_outs = 5,
-			.num_static_knobs = 23,
-			.num_mapped_knobs = 8,
-		};
+	auto *ph = reinterpret_cast<PatchHeader *>(unittest_patchheader_mmpatch);
+	CHECK(expected_header.header_version == ph->header_version);
+	CHECK(expected_header.patch_name == ph->patch_name);
+	CHECK(expected_header.num_modules == ph->num_modules);
+	CHECK(expected_header.num_int_cables == ph->num_int_cables);
+	CHECK(expected_header.num_mapped_ins == ph->num_mapped_ins);
+	CHECK(expected_header.num_mapped_outs == ph->num_mapped_outs);
+	CHECK(expected_header.num_static_knobs == ph->num_static_knobs);
+	CHECK(expected_header.num_mapped_knobs == ph->num_mapped_knobs);
+}
 
-		auto *ph = reinterpret_cast<PatchHeader *>(unittest_patchheader_mmpatch);
-		CHECK(expected_header.header_version == ph->header_version);
-		CHECK(expected_header.patch_name == ph->patch_name);
-		CHECK(expected_header.num_modules == ph->num_modules);
-		CHECK(expected_header.num_int_cables == ph->num_int_cables);
-		CHECK(expected_header.num_mapped_ins == ph->num_mapped_ins);
-		CHECK(expected_header.num_mapped_outs == ph->num_mapped_outs);
-		CHECK(expected_header.num_static_knobs == ph->num_static_knobs);
-		CHECK(expected_header.num_mapped_knobs == ph->num_mapped_knobs);
-	}
+TEST_CASE("Module list loads ok")
+{
+	auto *ph = reinterpret_cast<PatchHeader *>(unittest_patchheader_mmpatch);
+	REQUIRE(ph->num_modules == 6);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch_from_header(ph);
+	CHECK(strcmp(player.module_slugs[0].cstr(), "PANEL_8") == 0);
+	CHECK(strcmp(player.module_slugs[1].cstr(), "LFOSINE") == 0);
+	CHECK(strcmp(player.module_slugs[2].cstr(), "MULTILFO") == 0);
+	CHECK(strcmp(player.module_slugs[3].cstr(), "REVERB") == 0);
+	CHECK(strcmp(player.module_slugs[4].cstr(), "KARPLUS") == 0);
+	CHECK(strcmp(player.module_slugs[5].cstr(), "COMPLEXENVELOPE") == 0);
+}
+
+#include "patches/unittest_outmap.hh"
+TEST_CASE("Output jack mapping")
+{
+	auto *ph = reinterpret_cast<PatchHeader *>(unittest_outmap_mmpatch);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch_from_header(ph);
 }
 
 /*
