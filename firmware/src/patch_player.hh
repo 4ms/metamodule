@@ -81,7 +81,21 @@ public:
 		for (int i = 0; i < ph->num_int_cables; i++)
 			int_cables[i] = int_cables_ptr[i];
 
-		// TODO: fill these arrays with the data from ph + sizeof(PatchHeader)
+		auto mapped_ins_ptr = reinterpret_cast<MappedInputJack *>(int_cables_ptr + ph->num_int_cables);
+		for (int i = 0; i < ph->num_mapped_ins; i++)
+			mapped_ins[i] = mapped_ins_ptr[i];
+
+		auto mapped_outs_ptr = reinterpret_cast<MappedOutputJack *>(mapped_ins_ptr + ph->num_mapped_ins);
+		for (int i = 0; i < ph->num_mapped_outs; i++)
+			mapped_outs[i] = mapped_outs_ptr[i];
+
+		auto static_knobs_ptr = reinterpret_cast<StaticParam *>(mapped_outs_ptr + ph->num_mapped_outs);
+		for (int i = 0; i < ph->num_static_knobs; i++)
+			static_knobs[i] = static_knobs_ptr[i];
+
+		auto mapped_knobs_ptr = reinterpret_cast<MappedKnob *>(static_knobs_ptr + ph->num_static_knobs);
+		for (int i = 0; i < ph->num_mapped_knobs; i++)
+			mapped_knobs[i] = mapped_knobs_ptr[i];
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
