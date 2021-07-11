@@ -115,40 +115,34 @@ TEST_CASE("Internal cables: single and stacked")
 
 	bool found_cable1 = false;
 	bool found_cable2 = false;
+	Jack end_of_cable = Jack{-1, -1};
 
 	for (int net_i = 0; net_i < ph->num_int_cables; net_i++) {
 		auto &cable = player.int_cables[net_i];
 
 		// Check for cable1: 1->1 cable
 		// {1,3} -> {2,0}
-		if (cable.out.module_id == 1 && cable.out.jack_id == 3) {
-			if (cable.ins[0].module_id == 2 && cable.ins[0].jack_id == 0) {
-				// Make sure there's a terminator:
-				if (cable.ins[1].module_id == -1 && cable.ins[0].jack_id == -1)
+		if (cable.out == Jack{1, 3}) {
+			if (cable.ins[0] == Jack{2, 0}) {
+				if (cable.ins[1] == end_of_cable)
 					found_cable1 = true;
 			}
 		}
 
 		// Check for cable2: 1->2 cable
-		// {1,1} -> {2,1},{2,2}
-		if (cable.out.module_id == 1 && cable.out.jack_id == 1) {
-			if (cable.ins[0].module_id == 2 && cable.ins[0].jack_id == 1) {
-				if (cable.ins[1].module_id == 2 && cable.ins[1].jack_id == 2) {
-					// Make sure there's a terminator:
-					if (cable.ins[2].module_id == -1 && cable.ins[2].jack_id == -1)
-						found_cable2 = true;
-				}
-			}
-			// It's ok if the two ins are swapped, so check for that:
-			if (cable.ins[0].module_id == 2 && cable.ins[0].jack_id == 2) {
-				if (cable.ins[1].module_id == 2 && cable.ins[1].jack_id == 1) {
-					// Make sure there's a terminator:
-					if (cable.ins[2].module_id == -1 && cable.ins[2].jack_id == -1)
-						found_cable2 = true;
-				}
+		// {1,1} -> {2,1},{2,2}  or  {2,2},{2,1}
+		if (cable.out == Jack{1, 1}) {
+			if ((cable.ins[0] == Jack{2, 1} && cable.ins[1] == Jack{2, 2}) ||
+				(cable.ins[0] == Jack{2, 2} && cable.ins[1] == Jack{2, 1}))
+			{
+				if (cable.ins[2] == end_of_cable)
+					found_cable2 = true;
 			}
 		}
 	}
+
+	CHECK(found_cable1);
+	CHECK(found_cable2);
 }
 
 TEST_CASE("Output jack mapping to an virtual input jack that has a valid cable")
@@ -163,23 +157,56 @@ TEST_CASE("Output jack mapping to an virtual input jack that has a valid cable")
 
 	SUBCASE("Check if output connection data is correct")
 	{
-		Jack panel_out_0 = player.get_panel_output_connection(0);
-		CHECK(panel_out_0.module_id == 1);
-		CHECK(panel_out_0.jack_id == 3);
-
-		Jack panel_out_1 = player.get_panel_output_connection(1);
-		CHECK(panel_out_1.module_id == 1);
-		CHECK(panel_out_1.jack_id == 1);
-
-		Jack panel_out_2 = player.get_panel_output_connection(2);
-		CHECK(panel_out_2.module_id == 2);
-		CHECK(panel_out_2.jack_id == 1);
+		CHECK(player.get_panel_output_connection(0) == Jack{1, 3});
+		CHECK(player.get_panel_output_connection(1) == Jack{1, 1});
+		CHECK(player.get_panel_output_connection(2) == Jack{2, 1});
 
 		SUBCASE("Unmapped jack is connected to 0,0")
 		{
-			Jack panel_out_3 = player.get_panel_output_connection(3);
-			CHECK(panel_out_3.module_id == 0);
-			CHECK(panel_out_3.jack_id == 0);
+			CHECK(player.get_panel_output_connection(3) == Jack{0, 0});
+		}
+	}
+}
+
+#include "patches/unittest_inmapping.hh"
+// Note: we do not support multiple input mappings in VCV (yet), so aren't testing for it now
+// because there's no easy way to create the test data
+TEST_CASE("Simple input jack mapping")
+{
+	auto *ph = reinterpret_cast<PatchHeader *>(unittest_inmapping_mmpatch);
+	REQUIRE(ph->num_mapped_ins == 6);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch_from_header(ph);
+	player.calc_panel_jack_connections();
+
+	SUBCASE("Check if input connection data is correct")
+	{
+		CHECK(player.get_panel_input_connection(0) == Jack{1, 0});
+		CHECK(player.get_panel_input_connection(1) == Jack{1, 2});
+		CHECK(player.get_panel_input_connection(2) == Jack{2, 1});
+		CHECK(player.get_panel_input_connection(3) == Jack{2, 0});
+		CHECK(player.get_panel_input_connection(7) == Jack{1, 1});
+		CHECK(player.get_panel_input_connection(8) == Jack{1, 3});
+
+		SUBCASE("Unmapped jacks are connected to 0,0")
+		{
+			CHECK(player.get_panel_input_connection(4) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(5) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(6) == Jack{0, 0});
+		}
+
+		SUBCASE("All connections are 1->1")
+		{
+			CHECK(player.get_panel_input_connection(0, 1) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(1, 1) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(2, 1) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(3, 1) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(4, 1) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(5, 1) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(6, 1) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(7, 1) == Jack{0, 0});
+			CHECK(player.get_panel_input_connection(8, 1) == Jack{0, 0});
 		}
 	}
 }
