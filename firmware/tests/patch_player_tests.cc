@@ -57,9 +57,7 @@ TEST_CASE("Simple output jack mapping")
 
 	MetaModule::PatchPlayer player;
 	player.load_patch_from_header(ph);
-
 	player.calc_panel_jack_connections();
-	// Note: All the expected values are taken from the unittest_outmap.txt YAML file
 
 	SUBCASE("Check if raw mapped_outs[] data was loaded OK")
 	{
@@ -95,6 +93,42 @@ TEST_CASE("Simple output jack mapping")
 				CHECK(panel_out_3.module_id == 0);
 				CHECK(panel_out_3.jack_id == 0);
 			}
+		}
+	}
+}
+
+// TODO: int_cables tests here
+
+#include "patches/unittest_outmap_overlapping_cable.hh"
+TEST_CASE("Output jack mapping to an virtual input jack that has a valid cable")
+{
+	auto *ph = reinterpret_cast<PatchHeader *>(unittest_outmap_overlapping_cable_mmpatch);
+
+	CHECK(ph->num_mapped_outs == 3);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch_from_header(ph);
+	player.calc_panel_jack_connections();
+
+	SUBCASE("Check if output connection data is correct")
+	{
+		Jack panel_out_0 = player.get_panel_output_connection(0);
+		CHECK(panel_out_0.module_id == 1);
+		CHECK(panel_out_0.jack_id == 3);
+
+		Jack panel_out_1 = player.get_panel_output_connection(1);
+		CHECK(panel_out_1.module_id == 1);
+		CHECK(panel_out_1.jack_id == 1);
+
+		Jack panel_out_2 = player.get_panel_output_connection(2);
+		CHECK(panel_out_2.module_id == 2);
+		CHECK(panel_out_2.jack_id == 1);
+
+		SUBCASE("Unmapped jack is connected to 0,0")
+		{
+			Jack panel_out_3 = player.get_panel_output_connection(3);
+			CHECK(panel_out_3.module_id == 0);
+			CHECK(panel_out_3.jack_id == 0);
 		}
 	}
 }
