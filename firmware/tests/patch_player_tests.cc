@@ -59,19 +59,22 @@ TEST_CASE("Simple output jack mapping")
 	player.load_patch_from_header(ph);
 	player.calc_panel_jack_connections();
 
-	SUBCASE("Check if raw mapped_outs[] data was loaded OK")
+	SUBCASE("Check if mapped_outs[] data was loaded OK")
 	{
-		CHECK(player.mapped_outs[0].panel_jack_id == 1);
-		CHECK(player.mapped_outs[0].out.module_id == 1);
-		CHECK(player.mapped_outs[0].out.jack_id == 1);
+		// These tests are commented out because it doesn't matter if they're true or not,
+		// as long as the output connection data tests pass
+		// But they can be useful in debugging
+		// CHECK(player.mapped_outs[0].panel_jack_id == 1);
+		// CHECK(player.mapped_outs[0].out.module_id == 1);
+		// CHECK(player.mapped_outs[0].out.jack_id == 1);
 
-		CHECK(player.mapped_outs[1].panel_jack_id == 0);
-		CHECK(player.mapped_outs[1].out.module_id == 1);
-		CHECK(player.mapped_outs[1].out.jack_id == 3);
+		// CHECK(player.mapped_outs[1].panel_jack_id == 0);
+		// CHECK(player.mapped_outs[1].out.module_id == 1);
+		// CHECK(player.mapped_outs[1].out.jack_id == 3);
 
-		CHECK(player.mapped_outs[2].panel_jack_id == 2);
-		CHECK(player.mapped_outs[2].out.module_id == 2);
-		CHECK(player.mapped_outs[2].out.jack_id == 1);
+		// CHECK(player.mapped_outs[2].panel_jack_id == 2);
+		// CHECK(player.mapped_outs[2].out.module_id == 2);
+		// CHECK(player.mapped_outs[2].out.jack_id == 1);
 
 		SUBCASE("Check if output connection data is correct")
 		{
@@ -97,9 +100,57 @@ TEST_CASE("Simple output jack mapping")
 	}
 }
 
-// TODO: int_cables tests here
-
 #include "patches/unittest_outmap_overlapping_cable.hh"
+TEST_CASE("Internal cables: single and stacked")
+{
+	auto *ph = reinterpret_cast<PatchHeader *>(unittest_outmap_overlapping_cable_mmpatch);
+
+	// In VCV Rack, if two cables are stacked, they appear as two separate cables.
+	// Contrary to this, we consider them as a single cable, with one output and two inputs.
+	// So, this patch should have 2 cables (a 1->1 and a 1->2)
+	CHECK(ph->num_int_cables == 2);
+
+	MetaModule::PatchPlayer player;
+	player.load_patch_from_header(ph);
+
+	bool found_cable1 = false;
+	bool found_cable2 = false;
+
+	for (int net_i = 0; net_i < ph->num_int_cables; net_i++) {
+		auto &cable = player.int_cables[net_i];
+
+		// Check for cable1: 1->1 cable
+		// {1,3} -> {2,0}
+		if (cable.out.module_id == 1 && cable.out.jack_id == 3) {
+			if (cable.ins[0].module_id == 2 && cable.ins[0].jack_id == 0) {
+				// Make sure there's a terminator:
+				if (cable.ins[1].module_id == -1 && cable.ins[0].jack_id == -1)
+					found_cable1 = true;
+			}
+		}
+
+		// Check for cable2: 1->2 cable
+		// {1,1} -> {2,1},{2,2}
+		if (cable.out.module_id == 1 && cable.out.jack_id == 1) {
+			if (cable.ins[0].module_id == 2 && cable.ins[0].jack_id == 1) {
+				if (cable.ins[1].module_id == 2 && cable.ins[1].jack_id == 2) {
+					// Make sure there's a terminator:
+					if (cable.ins[2].module_id == -1 && cable.ins[2].jack_id == -1)
+						found_cable2 = true;
+				}
+			}
+			// It's ok if the two ins are swapped, so check for that:
+			if (cable.ins[0].module_id == 2 && cable.ins[0].jack_id == 2) {
+				if (cable.ins[1].module_id == 2 && cable.ins[1].jack_id == 1) {
+					// Make sure there's a terminator:
+					if (cable.ins[2].module_id == -1 && cable.ins[2].jack_id == -1)
+						found_cable2 = true;
+				}
+			}
+		}
+	}
+}
+
 TEST_CASE("Output jack mapping to an virtual input jack that has a valid cable")
 {
 	auto *ph = reinterpret_cast<PatchHeader *>(unittest_outmap_overlapping_cable_mmpatch);
