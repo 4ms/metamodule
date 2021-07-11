@@ -247,10 +247,9 @@ public:
 	// Given the user-facing output jack id (0 = Audio Out L, 1 = Audio Out R, etc)
 	// Return the Jack {module_id, jack_id} that it's connected to
 	// {0,0} means not connected, or index out of range
-	Jack get_panel_output_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
+	Jack get_panel_output_connection(unsigned jack_id)
 	{
-		// Todo: support multiple jacks connected to one net
-		if (jack_id >= Panel::NumUserFacingOutJacks || multiple_connection_id > 0)
+		if (jack_id >= Panel::NumUserFacingOutJacks)
 			return {.module_id = 0, .jack_id = 0};
 
 		return out_conns[jack_id];
@@ -352,7 +351,19 @@ private:
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id < 0 || panel_jack_id >= Panel::NumUserFacingInJacks)
 				break;
-			in_conns[panel_jack_id].push_back(cable.ins[0]);
+			for (int j = 0; j < MAX_CONNECTIONS_PER_NODE - 1; j++) {
+				if (cable.ins[j].module_id < 0 || cable.ins[j].jack_id < 0)
+					break;
+				in_conns[panel_jack_id].push_back(cable.ins[j]);
+			}
+		}
+
+		for (int net_i = 0; net_i < header->num_mapped_outs; net_i++) {
+			auto &cable = mapped_outs[net_i];
+			auto panel_jack_id = cable.panel_jack_id;
+			if (panel_jack_id < 0 || panel_jack_id >= Panel::NumUserFacingOutJacks)
+				break;
+			out_conns[panel_jack_id] = cable.out;
 		}
 	}
 
