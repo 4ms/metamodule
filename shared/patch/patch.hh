@@ -17,6 +17,10 @@ const int MAX_KNOBS_PER_MAPPING = 16;
 struct Jack {
 	int16_t module_id;
 	int16_t jack_id;
+	bool operator==(const Jack &other) const
+	{
+		return this->module_id == other.module_id && this->jack_id == other.jack_id;
+	}
 };
 
 struct StaticParam {
