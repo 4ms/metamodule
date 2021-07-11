@@ -162,8 +162,7 @@ private:
 		labelText = "Creating patch..";
 		updateDisplay();
 
-		PatchFileWriter pw;
-		pw.setModuleList(centralData->moduleData);
+		PatchFileWriter pw{centralData->moduleData};
 		pw.setPatchName(patchName);
 		pw.setJackList(centralData->jackData);
 		pw.setParamList(centralData->paramData);
@@ -172,19 +171,6 @@ private:
 		writeToFile(fileName + ".txt", pw.printPatchYAML());
 		writeBinaryFile(fileName + ".mmpatch", pw.printPatchBinary());
 	}
-
-	// void createPatchStruct(Patch &p)
-	// {
-	// 	PatchWriter pw{p};
-	// 	labelText = "Creating patch..";
-	// 	updateDisplay();
-
-	// 	pw.copyModuleList(centralData->moduleData);
-	// 	pw.copyJackList(centralData->jackData);
-	// 	pw.copyParamList(centralData->paramData);
-	// 	pw.addMaps(centralData->maps);
-	// 	pw.createPatch();
-	// }
 
 	void printDebugFile()
 	{

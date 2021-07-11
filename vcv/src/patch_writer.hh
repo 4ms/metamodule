@@ -19,9 +19,9 @@ class PatchFileWriter {
 	std::map<int, int> idMap;
 
 public:
-	PatchFileWriter() = default;
 	PatchFileWriter(std::vector<ModuleID> modules)
 	{
+		ph.header_version = 1;
 		setModuleList(modules);
 	}
 
