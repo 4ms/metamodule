@@ -72,7 +72,7 @@
             "SrcObjType": "OutputJack"
           }
         ],
-        "PatchName": "unittest_outmap"
+        "PatchName": "unittest_outmap_overlapping_cable"
       },
       "pos": [
         16,
@@ -131,5 +131,30 @@
       ]
     }
   ],
-  "cables": []
+  "cables": [
+    {
+      "id": 1,
+      "outputModuleId": 99,
+      "outputId": 3,
+      "inputModuleId": 100,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 3,
+      "outputModuleId": 99,
+      "outputId": 1,
+      "inputModuleId": 100,
+      "inputId": 2,
+      "color": "#0986ad"
+    },
+    {
+      "id": 2,
+      "outputModuleId": 99,
+      "outputId": 1,
+      "inputModuleId": 100,
+      "inputId": 1,
+      "color": "#c91847"
+    }
+  ]
 }
