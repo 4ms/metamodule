@@ -79,7 +79,7 @@ TEST_CASE("Basic Quantizer functionality")
 
 		q.update();
 
-		CHECK(q.get_output(0) == doctest::Approx(1 / 60.0f));
+		CHECK(q.get_output(0) == doctest::Approx(1.0f / 60.0f));
 	}
 
 	SUBCASE("Rounds to nearest value")

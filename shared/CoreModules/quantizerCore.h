@@ -30,8 +30,9 @@ public:
 		if (notesActive > 0) {
 			lastNote = currentNote;
 			currentNote = map_value(signalInput, -1.0f, 1.0f, 0.0f, static_cast<float>(totalNotes));
-			if (currentNote != lastNote) {
+			if ((currentNote != lastNote) || scaleChanged) {
 				signalOutput = static_cast<float>(calcNote(currentNote)) / static_cast<float>(totalNotes) * 2.0f - 1.0f;
+				scaleChanged = false;
 			}
 		} else {
 			signalOutput = signalInput;
@@ -57,9 +58,16 @@ public:
 	{
 		if (param_id >= 12 || param_id < 0)
 			return;
-		keyStatus[param_id] = (val > 0.1f);
-		for (int i = 0; i < 12; i++) {
-			notesActive += keyStatus[i];
+		bool newVal = val > 0.1f;
+		if (newVal == true && keyStatus[param_id] == false) {
+			keyStatus[param_id] = true;
+			notesActive++;
+			scaleChanged = true;
+		}
+		if (newVal == false && keyStatus[param_id] == true) {
+			keyStatus[param_id] = false;
+			notesActive--;
+			scaleChanged = true;
 		}
 	}
 	virtual void set_samplerate(const float sr) override {}
@@ -103,6 +111,8 @@ private:
 	float lastNote = 0;
 
 	int totalNotes;
+
+	bool scaleChanged = false;
 
 	float signalInput = 0;
 	float signalOutput = 0;
