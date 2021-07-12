@@ -10,6 +10,7 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+p->addModel(modelBipolarsource); 
 p->addModel(modelMultilfo); 
 p->addModel(modelEnvelopefollower); 
 p->addModel(modelVoltagesource); 
