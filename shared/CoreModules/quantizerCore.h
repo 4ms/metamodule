@@ -41,14 +41,14 @@ public:
 
 	QuantizerCore()
 	{
-		maxCalculatedVolt = ceilf(OutputHighRangeVolts);
-		if (OutputLowRangeVolts < 0) {
-			minCalculatedVolt = ceilf(fabsf(OutputLowRangeVolts)) * -1.0f;
-		} else {
-			minCalculatedVolt = ceilf(OutputLowRangeVolts);
-		}
+		// maxCalculatedVolt = ceilf(OutputHighRangeVolts);
+		// if (OutputLowRangeVolts < 0) {
+		// 	minCalculatedVolt = ceilf(fabsf(OutputLowRangeVolts)) * -1.0f;
+		// } else {
+		// 	minCalculatedVolt = ceilf(OutputLowRangeVolts);
+		// }
 
-		totalNotes = (maxCalculatedVolt - minCalculatedVolt) * 12;
+		totalNotes = (OutputHighRangeVolts - OutputLowRangeVolts) * 12;
 		for (int i = 0; i < 12; i++) {
 			keyStatus[i] = false;
 		}
@@ -118,9 +118,6 @@ private:
 	float signalOutput = 0;
 
 	int notesActive = 0;
-
-	int minCalculatedVolt = -5;
-	int maxCalculatedVolt = 5;
 
 	int calcNote(float inputNote)
 	{
