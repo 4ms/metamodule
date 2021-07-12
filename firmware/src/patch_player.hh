@@ -8,6 +8,7 @@
 	#include "debug.hh"
 #else
 	#include "../stubs/debug.hh"
+	#include <iostream>
 #endif
 #include "conf/hsem_conf.hh"
 #include "drivers/smp.hh"
@@ -45,6 +46,8 @@ public:
 	MappedOutputJack *mapped_outs;
 	StaticParam *static_knobs;
 	MappedKnob *mapped_knobs;
+
+	int *num_int_cable_ins;
 
 	bool is_loaded = false;
 
@@ -96,6 +99,9 @@ public:
 		auto mapped_knobs_ptr = reinterpret_cast<MappedKnob *>(static_knobs_ptr + ph->num_static_knobs);
 		for (int i = 0; i < ph->num_mapped_knobs; i++)
 			mapped_knobs[i] = mapped_knobs_ptr[i];
+
+		num_int_cable_ins = new int[ph->num_int_cables];
+		calc_int_cable_connections();
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
@@ -156,10 +162,8 @@ public:
 
 			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
 
-			for (int jack_i = 0; jack_i < MAX_CONNECTIONS_PER_NODE - 1; jack_i++) {
+			for (int jack_i = 0; jack_i < num_int_cable_ins[net_i]; jack_i++) {
 				auto &input_jack = cable.ins[jack_i];
-				if (input_jack.module_id < 0)
-					break;
 				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
 			}
 		}
@@ -179,6 +183,7 @@ public:
 		delete[] mapped_outs;
 		delete[] static_knobs;
 		delete[] mapped_knobs;
+		delete[] num_int_cable_ins;
 
 		clear_cache();
 		BigAllocControl::reset();
@@ -289,10 +294,8 @@ public:
 			auto &cable = int_cables[net_i];
 
 			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
-			for (int jack_i = 0; jack_i < MAX_CONNECTIONS_PER_NODE - 1; jack_i++) {
+			for (int jack_i = 0; jack_i < num_int_cable_ins[net_i]; jack_i++) {
 				auto &input_jack = cable.ins[jack_i];
-				if (input_jack.jack_id < 0 || input_jack.module_id < 0)
-					break;
 				modules[input_jack.module_id]->mark_input_patched(input_jack.jack_id);
 			}
 		}
@@ -342,6 +345,34 @@ public:
 			knob_conn.clear();
 	}
 
+	// Returns the index in int_cables[] for a cable that has the given Jack as an input
+	// Return -1 if does not exist
+	int find_int_cable_input_jack(Jack in)
+	{
+		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
+			auto &cable = int_cables[net_i];
+			for (int jack_i = 0; jack_i < num_int_cable_ins[net_i]; jack_i++) {
+				auto &input_jack = cable.ins[jack_i];
+				if (in == input_jack)
+					return net_i;
+			}
+		}
+		return -1;
+	}
+
+	void calc_int_cable_connections()
+	{
+		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
+			num_int_cable_ins[net_i] = MAX_CONNECTIONS_PER_NODE - 1;
+			auto &cable = int_cables[net_i];
+			for (int jack_i = 0; jack_i < MAX_CONNECTIONS_PER_NODE - 1; jack_i++) {
+				auto &input_jack = cable.ins[jack_i];
+				if (input_jack.module_id < 0)
+					num_int_cable_ins[net_i] = jack_i;
+			}
+		}
+	}
+
 	// Cache all the panel jack connections
 	void calc_panel_jack_connections()
 	{
@@ -353,7 +384,15 @@ public:
 			for (int j = 0; j < MAX_CONNECTIONS_PER_NODE - 1; j++) {
 				if (cable.ins[j].module_id < 0 || cable.ins[j].jack_id < 0)
 					break;
-				in_conns[panel_jack_id].push_back(cable.ins[j]);
+				int dup_int_cable = find_int_cable_input_jack(cable.ins[j]);
+				if (dup_int_cable == -1)
+					in_conns[panel_jack_id].push_back(cable.ins[j]);
+				else {
+					// TODO: handle a mapped and patched input jack:
+					// - ? Create a module that outputs the sum of two inputs, and adjust int_cables and in_mappings?
+					// - ? Keep the mapping and remove the int_cable entry?
+					// - ? Keep it as-is (ignore the mapping and keep the int_cable)
+				}
 			}
 		}
 

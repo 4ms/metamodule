@@ -194,19 +194,19 @@ TEST_CASE("Simple input jack mapping")
 			CHECK(player.get_panel_input_connection(4) == Jack{0, 0});
 			CHECK(player.get_panel_input_connection(5) == Jack{0, 0});
 			CHECK(player.get_panel_input_connection(6) == Jack{0, 0});
-		}
 
-		SUBCASE("All connections are 1->1")
-		{
-			CHECK(player.get_panel_input_connection(0, 1) == Jack{0, 0});
-			CHECK(player.get_panel_input_connection(1, 1) == Jack{0, 0});
-			CHECK(player.get_panel_input_connection(2, 1) == Jack{0, 0});
-			CHECK(player.get_panel_input_connection(3, 1) == Jack{0, 0});
-			CHECK(player.get_panel_input_connection(4, 1) == Jack{0, 0});
-			CHECK(player.get_panel_input_connection(5, 1) == Jack{0, 0});
-			CHECK(player.get_panel_input_connection(6, 1) == Jack{0, 0});
-			CHECK(player.get_panel_input_connection(7, 1) == Jack{0, 0});
-			CHECK(player.get_panel_input_connection(8, 1) == Jack{0, 0});
+			SUBCASE("All connections are 1->1")
+			{
+				CHECK(player.get_panel_input_connection(0, 1) == Jack{0, 0});
+				CHECK(player.get_panel_input_connection(1, 1) == Jack{0, 0});
+				CHECK(player.get_panel_input_connection(2, 1) == Jack{0, 0});
+				CHECK(player.get_panel_input_connection(3, 1) == Jack{0, 0});
+				CHECK(player.get_panel_input_connection(4, 1) == Jack{0, 0});
+				CHECK(player.get_panel_input_connection(5, 1) == Jack{0, 0});
+				CHECK(player.get_panel_input_connection(6, 1) == Jack{0, 0});
+				CHECK(player.get_panel_input_connection(7, 1) == Jack{0, 0});
+				CHECK(player.get_panel_input_connection(8, 1) == Jack{0, 0});
+			}
 		}
 	}
 }
