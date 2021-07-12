@@ -18,7 +18,6 @@ TEST_CASE("Quantizer parameter bounds")
 TEST_CASE("Basic Quantizer functionality")
 {
 	QuantizerCore q;
-	float range = InputHighRangeVolts - InputLowRangeVolts;
 
 	SUBCASE("all notes off, output = input")
 	{
