@@ -99,8 +99,8 @@ public:
 private:
 	bool keyStatus[12];
 
-	int currentNote = 0;
-	int lastNote = 0;
+	float currentNote = 0;
+	float lastNote = 0;
 
 	int totalNotes;
 
@@ -112,23 +112,23 @@ private:
 	int minCalculatedVolt = -5;
 	int maxCalculatedVolt = 5;
 
-	int calcNote(int inputNote)
+	int calcNote(float inputNote)
 	{
-		int lowestDiff = 40;
-		int calcDiff = 0;
+		float lowestDiff = 40;
+		float calcDiff = 0;
 		for (int i = 0; i < 12; i++) {
 			if (keyStatus[i] == true) {
-				int noteInOctave = inputNote % 12;
-				int thisDiff = i - noteInOctave;
-				int diffCompliment = 12 - abs(thisDiff);
-				if (abs(thisDiff) < abs(diffCompliment)) {
-					if (abs(thisDiff) < lowestDiff) {
-						lowestDiff = abs(thisDiff);
+				float noteInOctave = fmod(inputNote, 12);
+				float thisDiff = i - noteInOctave;
+				float diffCompliment = 12 - fabsf(thisDiff);
+				if (fabsf(thisDiff) < fabsf(diffCompliment)) {
+					if (fabsf(thisDiff) < lowestDiff) {
+						lowestDiff = fabsf(thisDiff);
 						calcDiff = thisDiff;
 					}
 				} else {
-					if (abs(diffCompliment) < lowestDiff) {
-						lowestDiff = abs(diffCompliment);
+					if (fabsf(diffCompliment) < lowestDiff) {
+						lowestDiff = fabsf(diffCompliment);
 						calcDiff = diffCompliment;
 					}
 				}

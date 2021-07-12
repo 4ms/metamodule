@@ -169,7 +169,7 @@ TEST_CASE("Basic Quantizer functionality")
 			q.set_input(0, 1.17f / InputHighRangeVolts);
 			q.update();
 			out = q.get_output(0) * InputHighRangeVolts;
-			CHECK(out == doctest::Approx(1.33f));
+			CHECK(out == doctest::Approx(1.33333333f));
 		}
 	}
 }
