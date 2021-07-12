@@ -29,9 +29,9 @@ public:
 		// Todo: base all values on Low/HighRangeVolts
 		if (notesActive > 0) {
 			lastNote = currentNote;
-			currentNote = map_value(signalInput, -1.0f, 1.0f, 0.0f, static_cast<float>(totalNotes));
+			currentNote = map_value(signalInput, -1.0f, 1.0f, 0.0f, inputRangeNotes);
 			if ((currentNote != lastNote) || scaleChanged) {
-				signalOutput = static_cast<float>(calcNote(currentNote)) / static_cast<float>(totalNotes) * 2.0f - 1.0f;
+				signalOutput = static_cast<float>(calcNote(currentNote)) / outputRangeNotes * 2.0f - 1.0f;
 				scaleChanged = false;
 			}
 		} else {
@@ -41,14 +41,8 @@ public:
 
 	QuantizerCore()
 	{
-		// maxCalculatedVolt = ceilf(OutputHighRangeVolts);
-		// if (OutputLowRangeVolts < 0) {
-		// 	minCalculatedVolt = ceilf(fabsf(OutputLowRangeVolts)) * -1.0f;
-		// } else {
-		// 	minCalculatedVolt = ceilf(OutputLowRangeVolts);
-		// }
-
-		totalNotes = (OutputHighRangeVolts - OutputLowRangeVolts) * 12;
+		outputRangeNotes = (OutputHighRangeVolts - OutputLowRangeVolts) * 12.f;
+		inputRangeNotes = (InputHighRangeVolts - InputLowRangeVolts) * 12.f;
 		for (int i = 0; i < 12; i++) {
 			keyStatus[i] = false;
 		}
@@ -110,7 +104,8 @@ private:
 	float currentNote = 0;
 	float lastNote = 0;
 
-	int totalNotes;
+	float outputRangeNotes;
+	float inputRangeNotes;
 
 	bool scaleChanged = false;
 
