@@ -137,10 +137,10 @@ constexpr float setPitchMultiple(float val)
 {
 	float pitchMultiple = 1;
 	if (val >= 0)
-		pitchMultiple = expTable.interp(constrain(val, 0.0f, 1.0f));
+		pitchMultiple = exp5Table.interp(constrain(val, 0.0f, 1.0f));
 	else {
 		float invertPitch = val * -1.0f;
-		pitchMultiple = 1.0f / expTable.interp(constrain(invertPitch, 0.0f, 1.0f));
+		pitchMultiple = 1.0f / exp5Table.interp(constrain(invertPitch, 0.0f, 1.0f));
 	}
 
 	return pitchMultiple;

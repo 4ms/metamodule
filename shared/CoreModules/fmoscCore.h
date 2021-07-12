@@ -52,7 +52,7 @@ public:
 	{
 		switch (param_id) {
 			case 0:
-				basePitch = 20.0f * expTable.interp(val);
+				basePitch = 20.0f * exp5Table.interp(val);
 				break;
 			case 1:
 				indexKnob = val;
