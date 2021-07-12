@@ -28,13 +28,11 @@ public:
 	{
 		// Todo: base all values on Low/HighRangeVolts
 		if (notesActive > 0) {
-			int noteValue = closestInt(map_value(signalInput, -1.0f, 1.0f, 0.0f, static_cast<float>(totalNotes)));
-			int octave = closestInt(static_cast<float>(noteValue) / 12.0f);
-
-			int tempNote = mapTable[(noteValue + lowestNote) % 12] + octave * 12.0f;
-			if (tempNote <= totalNotes)
-				currentNote = tempNote;
-			signalOutput = (currentNote / static_cast<float>(totalNotes)) * 2.0f - 1.0f;
+			lastNote = currentNote;
+			currentNote = map_value(signalInput, -1.0f, 1.0f, 0.0f, static_cast<float>(totalNotes));
+			if (currentNote != lastNote) {
+				signalOutput = static_cast<float>(calcNote(currentNote)) / static_cast<float>(totalNotes) * 2.0f - 1.0f;
+			}
 		} else {
 			signalOutput = signalInput;
 		}
@@ -49,15 +47,9 @@ public:
 			minCalculatedVolt = ceilf(OutputLowRangeVolts);
 		}
 
-		lowestNote = 12 * minCalculatedVolt;
-		highestNote = 12 * maxCalculatedVolt;
-
 		totalNotes = (maxCalculatedVolt - minCalculatedVolt) * 12;
 		for (int i = 0; i < 12; i++) {
 			keyStatus[i] = false;
-			currentButton[i] = false;
-			lastButton[i] = false;
-			mapTable[i] = i;
 		}
 	}
 
@@ -66,7 +58,9 @@ public:
 		if (param_id >= 12 || param_id < 0)
 			return;
 		keyStatus[param_id] = (val > 0.1f);
-		scaleUpdate();
+		for (int i = 0; i < 12; i++) {
+			notesActive += keyStatus[i];
+		}
 	}
 	virtual void set_samplerate(const float sr) override {}
 
@@ -104,85 +98,43 @@ public:
 
 private:
 	bool keyStatus[12];
-	bool currentButton[12];
-	bool lastButton[12];
 
 	int currentNote = 0;
-
-	int mapTable[12];
-	int notesActive = 0;
-	int lowestNote;
-	int highestNote;
+	int lastNote = 0;
 
 	int totalNotes;
 
-	int firstActive = 0;
 	float signalInput = 0;
 	float signalOutput = 0;
+
+	int notesActive = 0;
 
 	int minCalculatedVolt = -5;
 	int maxCalculatedVolt = 5;
 
-	uint16_t currentScale = 0;
-	uint16_t lastScale = 0;
-
-	void scaleUpdate()
+	int calcNote(int inputNote)
 	{
-		notesActive = 0;
-
-		for (int i = 0; i < 12; i++) {
-			notesActive += keyStatus[i] ? 1 : 0;
-		}
-
-		if (notesActive > 0) {
-			lastScale = currentScale;
-			currentScale = 0;
-			for (int i = 0; i < 12; i++) {
-				currentScale += keyStatus[i] << i;
-			}
-
-			if (currentScale != lastScale) {
-				firstActive = lowestValidNote();
-
-				genTable();
-			}
-		}
-	}
-
-	int lowestValidNote()
-	{
-		int tempNote = 13;
+		int lowestDiff = 40;
+		int calcDiff = 0;
 		for (int i = 0; i < 12; i++) {
 			if (keyStatus[i] == true) {
-				tempNote = min(tempNote, i);
-			}
-		}
-		return (tempNote);
-	}
-
-	void genTable()
-	{
-		int fillNote = firstActive;
-
-		for (int i = 0; i < 12; i++) {
-			if (i < firstActive)
-				mapTable[i] = fillNote;
-			else {
-				if (keyStatus[i] == true) {
-					fillNote = i;
+				int noteInOctave = inputNote % 12;
+				int thisDiff = i - noteInOctave;
+				int diffCompliment = 12 - abs(thisDiff);
+				if (abs(thisDiff) < abs(diffCompliment)) {
+					if (abs(thisDiff) < lowestDiff) {
+						lowestDiff = abs(thisDiff);
+						calcDiff = thisDiff;
+					}
+				} else {
+					if (abs(diffCompliment) < lowestDiff) {
+						lowestDiff = abs(diffCompliment);
+						calcDiff = diffCompliment;
+					}
 				}
-				mapTable[i] = fillNote;
 			}
 		}
-	}
-
-	long closestInt(float input)
-	{
-		long output = 0;
-		if ((input - (long)input) >= 0.5f)
-			output = (long)input + 1;
-		else
-			output = (long)input;
-		return output;
+		int outputNote = inputNote + calcDiff;
+		return outputNote;
 	}
 };
