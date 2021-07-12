@@ -31,7 +31,7 @@ public:
 			lastNote = currentNote;
 			currentNote = map_value(signalInput, -1.0f, 1.0f, 0.0f, inputRangeNotes);
 			if ((currentNote != lastNote) || scaleChanged) {
-				signalOutput = static_cast<float>(calcNote(currentNote)) / outputRangeNotes * 2.0f - 1.0f;
+				signalOutput = static_cast<float>(calcNote(currentNote)) / outputRangeNotes * rangeScaling - 1.0f;
 				scaleChanged = false;
 			}
 		} else {
@@ -43,6 +43,7 @@ public:
 	{
 		outputRangeNotes = (OutputHighRangeVolts - OutputLowRangeVolts) * 12.f;
 		inputRangeNotes = (InputHighRangeVolts - InputLowRangeVolts) * 12.f;
+		rangeScaling = 2.0f * outputRangeNotes / inputRangeNotes;
 		for (int i = 0; i < 12; i++) {
 			keyStatus[i] = false;
 		}
@@ -106,6 +107,7 @@ private:
 
 	float outputRangeNotes;
 	float inputRangeNotes;
+	float rangeScaling;
 
 	bool scaleChanged = false;
 
