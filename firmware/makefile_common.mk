@@ -52,6 +52,11 @@ LFLAGS = -Wl,--gc-sections \
 
 DEPFLAGS = -MMD -MP -MF $(BUILDDIR)/$(basename $<).d
 
+OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
+DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
+OBJECTS   += $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
+DEPS      += $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
+
 all: Makefile $(BIN) $(HEX)
 
 $(BIN): $(ELF)
@@ -82,7 +87,7 @@ $(BUILDDIR)/%.o: %.cpp $(BUILDDIR)/%.d
 	$(info Building $< at $(OPTFLAG))
 	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
-$(BUILDDIR)/%.o: %.s
+$(BUILDDIR)/%_s.o: %.s
 	@mkdir -p $(dir $@)
 	$(info Building $< at $(OPTFLAG))
 	@$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))

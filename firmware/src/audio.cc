@@ -4,12 +4,17 @@
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
+// #include "fft.hh"
+#include "convolve.hh"
 #include "panel.hh"
 #include "patch_player.hh"
 
 namespace MetaModule
 {
 constexpr bool DEBUG_PASSTHRU_AUDIO = false;
+// constexpr bool DEBUG_NE10_FFT = true;
+// static FFTfx fftfx;
+// static Convolver fftfx;
 
 // Clock in -> clock out latency: 1.33ms (one audio DMA half-transfer)
 // Gate In -> audio OUt latency: 1.90ms
@@ -73,6 +78,9 @@ AudioStream::AudioStream(PatchList &patches,
 		});
 
 	load_measure.init();
+
+	// if constexpr (DEBUG_NE10_FFT)
+	// 	fftfx.init();
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id)
@@ -93,7 +101,6 @@ uint32_t AudioStream::get_dac_output(int output_id)
 }
 // Todo: integrate these:
 // params.buttons[]
-// params.jack_senses[]
 
 void AudioStream::process(AudioStreamBlock &in,
 						  AudioStreamBlock &out,
@@ -113,6 +120,11 @@ void AudioStream::process(AudioStreamBlock &in,
 		output_silence(out, aux);
 		return;
 	}
+
+	// if constexpr (DEBUG_NE10_FFT) {
+	// 	fftfx.process(in, out);
+	// 	return;
+	// }
 
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
 		passthrough_audio(in, out, aux);

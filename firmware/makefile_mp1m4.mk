@@ -17,7 +17,8 @@ SYSTEM = $(DEVICEBASE)/stm32mp157c/templates/system_stm32mp1xx.c
 OPTFLAG = -O3
 include makefile_opts.mk
 
-SOURCES  = $(STARTUP)
+ASM_SOURCES  = $(STARTUP)
+
 SOURCES  += $(SYSTEM)
 SOURCES  += $(HALDIR)/src/stm32mp1xx_hal.c)
 SOURCES  += $(HALDIR)/src/stm32mp1xx_hal_i2c.c)
@@ -41,10 +42,6 @@ SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
 SOURCES  += $(DRIVERLIB)/drivers/tim.cc
 SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
-# SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver_dma.cc
-
-OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
-DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 
 INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(CMSIS)/Include \
