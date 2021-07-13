@@ -64,7 +64,7 @@
             "SrcObjType": "OutputJack"
           },
           {
-            "DstModID": 24,
+            "DstModID": 23,
             "DstObjID": 0,
             "DstObjType": "Knob",
             "SrcModID": 9,
@@ -72,7 +72,7 @@
             "SrcObjType": "Knob"
           },
           {
-            "DstModID": 24,
+            "DstModID": 23,
             "DstObjID": 1,
             "DstObjType": "Knob",
             "SrcModID": 9,
@@ -80,7 +80,7 @@
             "SrcObjType": "Knob"
           },
           {
-            "DstModID": 24,
+            "DstModID": 23,
             "DstObjID": 2,
             "DstObjType": "Knob",
             "SrcModID": 9,
@@ -88,7 +88,7 @@
             "SrcObjType": "Knob"
           },
           {
-            "DstModID": 24,
+            "DstModID": 23,
             "DstObjID": 0,
             "DstObjType": "InputJack",
             "SrcModID": 9,
@@ -96,15 +96,15 @@
             "SrcObjType": "InputJack"
           },
           {
-            "DstModID": 24,
-            "DstObjID": 3,
+            "DstModID": 23,
+            "DstObjID": 1,
             "DstObjType": "InputJack",
             "SrcModID": 9,
             "SrcObjID": 6,
             "SrcObjType": "InputJack"
           },
           {
-            "DstModID": 24,
+            "DstModID": 23,
             "DstObjID": 0,
             "DstObjType": "OutputJack",
             "SrcModID": 9,
@@ -115,7 +115,7 @@
         "PatchName": "testbin2"
       },
       "pos": [
-        16,
+        12,
         0
       ]
     },
@@ -142,18 +142,18 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 24,
+      "leftModuleId": 23,
       "rightModuleId": 9,
       "pos": [
-        8,
+        4,
         0
       ]
     },
     {
-      "id": 24,
+      "id": 23,
       "plugin": "4msCompany",
       "version": "1.0.0",
-      "model": "MULTILFO",
+      "model": "lfo",
       "params": [
         {
           "id": 0,

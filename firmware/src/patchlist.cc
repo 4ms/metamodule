@@ -13,15 +13,19 @@
 	// #include "example_stereo_verb.h"
 	// #include "fadedelay_two.hh"
 	// #include "simple_lfo_passthrru.hh"
-	#include "testbin.hh"
-	#include "anothertest.hh"
+	#include "mixerpass.hh"
 	#include "StereoVerb.hh"
+	#include "testbin3.hh"
+	#include "anothertest.hh"
+	#include "testbin2.hh"
 
 PatchList::PatchList()
 	: _patch_addrs{
-		  testbin_mmpatch,
-		  anothertest_mmpatch,
+		  testbin3_mmpatch,
+		  testbin2_mmpatch,
+		  mixerpass_mmpatch,
 		  StereoVerb_mmpatch,
+		  anothertest_mmpatch,
 	  }
 {
 	for (int i = 0; i < NumPatches; i++) {
