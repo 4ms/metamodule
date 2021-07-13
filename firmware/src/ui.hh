@@ -62,7 +62,16 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		player.load_patch(patch_list.cur_patch());
+		patch_list.set_cur_patch_index(0);
+		bool ok = player.load_patch(patch_list.cur_patch());
+		if (!ok) {
+			// Todo: handle error: display on screen, and try another patch?
+			// metaparams.error = Errors::CannotLoadPatch;
+			// metaparams.error_data = patch_list.cur_patch();
+			while (true)
+				;
+		}
+		mbox.loading_new_patch = false;
 
 		screen.init();
 		register_printf_destination(screen);
