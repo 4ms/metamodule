@@ -46,14 +46,14 @@ struct Params {
 
 	void clear()
 	{
-		for (unsigned i = 0; i < NumCVIn; i++)
-			cvjacks[i] = 0.f;
-		for (unsigned i = 0; i < NumGateIn; i++)
-			gate_ins[i].reset();
-		for (unsigned i = 0; i < NumRgbButton; i++)
-			buttons[i].reset();
-		for (unsigned i = 0; i < NumPot; i++)
-			knobs[i] = 0.f;
+		for (float &cvjack : cvjacks)
+			cvjack = 0.f;
+		for (auto &gate_in : gate_ins)
+			gate_in.reset();
+		for (auto &button : buttons)
+			button.reset();
+		for (float &knob : knobs)
+			knob = 0.f;
 		jack_senses = 0;
 	}
 
@@ -177,8 +177,8 @@ struct ParamBlock {
 using DoubleBufParamBlock = std::array<ParamBlock, 2>;
 
 struct UiAudioMailbox {
-	bool loading_new_patch = false;
-	bool audio_is_muted = false;
+	bool loading_new_patch = true;
+	bool audio_is_muted = true;
 	uint32_t new_patch_index;
 };
 

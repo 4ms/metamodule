@@ -132,7 +132,7 @@ void AudioStream::process(AudioStreamBlock &in,
 		player.set_panel_input(1, AudioFrame::scaleInput(-1.f * in_->r));
 
 		i = 0;
-		for (const auto &cv : params_->cvjacks) {
+		for (const auto cv : params_->cvjacks) {
 			// Todo: player.set_cv_input(i, cv);
 			player.set_panel_input(i + NumAudioInputs, cv);
 			i++;
@@ -144,7 +144,7 @@ void AudioStream::process(AudioStreamBlock &in,
 			i++;
 		}
 		i = 0;
-		for (const auto &knob : params_->knobs) {
+		for (const auto knob : params_->knobs) {
 			player.set_panel_param(i, knob);
 			i++;
 		}
