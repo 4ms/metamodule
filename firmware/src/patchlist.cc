@@ -15,15 +15,17 @@
 	// #include "simple_lfo_passthrru.hh"
 	#include "testbin.hh"
 	#include "anothertest.hh"
+	#include "StereoVerb.hh"
 
 PatchList::PatchList()
 	: _patch_addrs{
-		  ___shared_patch_testbin_mmpatch,
-		  ___shared_patch_anothertest_mmpatch,
+		  testbin_mmpatch,
+		  anothertest_mmpatch,
+		  StereoVerb_mmpatch,
 	  }
 {
 	for (int i = 0; i < NumPatches; i++) {
-		load_patch_header(_patch_headers[i], _patch_addrs[i]);
+		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
 	}
 }
 
@@ -49,7 +51,7 @@ PatchList::PatchList()
 	  }
 {
 	for (int i = 0; i < NumPatches; i++) {
-		load_patch_header(_patch_headers[i], _patch_addrs[i]);
+		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
 	}
 }
 

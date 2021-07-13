@@ -1,5 +1,5 @@
 PatchHeader:
-  header_version: 2
+  header_version: 1
   patch_name: anothertest
   num_modules: 4
   num_int_cables: 1
@@ -107,12 +107,12 @@ PatchData:
       module_id: 1
       param_id: 0
       curve_type: 0
-      range: 0.000000
+      range: 1.000000
       offset: 0.000000
     - panel_knob_id: 1
       module_id: 2
       param_id: 0
       curve_type: 0
-      range: 0.000000
+      range: 1.000000
       offset: 0.000000
 

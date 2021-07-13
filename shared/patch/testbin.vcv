@@ -44,6 +44,7 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 17,
       "data": {
         "Mappings": [
           {
@@ -96,7 +97,7 @@
           },
           {
             "DstModID": 16,
-            "DstObjID": 3,
+            "DstObjID": 1,
             "DstObjType": "OutputJack",
             "SrcModID": 9,
             "SrcObjID": 2,
@@ -106,7 +107,7 @@
         "PatchName": "testbin"
       },
       "pos": [
-        15,
+        16,
         0
       ]
     },
@@ -129,9 +130,10 @@
           "value": 0.475500047
         }
       ],
+      "rightModuleId": 17,
       "pos": [
         0,
-        1
+        0
       ]
     },
     {
@@ -157,8 +159,10 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 16,
+      "rightModuleId": 9,
       "pos": [
-        6,
+        8,
         0
       ]
     }

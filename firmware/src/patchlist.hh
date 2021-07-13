@@ -7,7 +7,7 @@ struct PatchList {
 	// MARK: Change NumPatches here:
 	static const uint32_t NumPatches = 10; // Integration test patches
 #else
-	static const uint32_t NumPatches = 2; // Normal mode
+	static const uint32_t NumPatches = 3; // Normal mode
 #endif
 
 	PatchList();
@@ -19,15 +19,16 @@ struct PatchList {
 		return _patch_headers[patch_id]->patch_name;
 	}
 
-	void load_patch_header(PatchHeader *ph, void *base_addr)
+	PatchHeader *load_patch_header(void *base_addr)
 	{
-		ph = reinterpret_cast<PatchHeader *>(base_addr);
+		return reinterpret_cast<PatchHeader *>(base_addr);
 	}
 
 	void set_cur_patch_index(int cur_idx)
 	{
 		_cur_patch_index = cur_idx;
 	}
+
 	int cur_patch_index()
 	{
 		return _cur_patch_index;
