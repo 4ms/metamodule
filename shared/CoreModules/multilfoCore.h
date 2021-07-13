@@ -34,8 +34,6 @@ public:
 		modPhase = phaccu + phaseOffset;
 		if (modPhase >= 1.0f)
 			modPhase -= 1.0f;
-
-		// modPhase = phaccu < 0.5f ? 0.4f : 0.5f;
 	}
 
 	MultilfoCore() {}
@@ -86,22 +84,21 @@ public:
 		float output = 0;
 		switch (output_id) {
 			case 0: // sin
-				output = modPhase;
-				// output = sinTable.interp(modPhase);
+				output = sinTable.interp(modPhase);
 				break;
 			case 1: // saw
-				// output = sawTable.interp(modPhase);
+				output = sawTable.interp(modPhase);
 				break;
 			case 2: // inverted saw
-				// output = isawTable.interp(modPhase);
+				output = isawTable.interp(modPhase);
 				break;
 			case 3: // pulse
-				// float finalPw = constrain(pwOffset + pwCV, 0.0f, 1.0f);
-				// if (modPhase < finalPw) {
-				// 	output = 1.0f;
-				// } else {
-				// 	output = -1.0f;
-				// }
+				float finalPw = constrain(pwOffset + pwCV, 0.0f, 1.0f);
+				if (modPhase < finalPw) {
+					output = 1.0f;
+				} else {
+					output = -1.0f;
+				}
 				break;
 		}
 		return output;
