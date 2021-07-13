@@ -49,32 +49,13 @@ struct Controls {
 	void start();
 	void update_params();
 
-	void store_pot_reading(uint32_t pot_id, uint32_t val)
-	{
-		latest_pot_reading[_pot_map[pot_id]] = val;
-	}
-	uint32_t get_pot_reading(uint32_t pot_id)
-	{
-		return latest_pot_reading[pot_id];
-	}
+	void store_pot_reading(uint32_t pot_id, uint32_t val);
+	void store_patchcv_reading(uint32_t patchcv);
+	void store_jacksense_reading(uint16_t reading);
 
-	void store_patchcv_reading(uint32_t patchcv)
-	{
-		latest_patchcv_reading = patchcv;
-	}
-	uint32_t get_patchcv_reading()
-	{
-		return latest_patchcv_reading;
-	}
-
-	void store_jacksense_reading(uint16_t reading)
-	{
-		latest_jacksense_reading = reading;
-	}
-	uint32_t get_jacksense_reading()
-	{
-		return latest_jacksense_reading;
-	}
+	uint32_t get_pot_reading(uint32_t pot_id);
+	uint32_t get_patchcv_reading();
+	uint32_t get_jacksense_reading();
 
 private:
 	Timekeeper read_controls_task;
@@ -93,7 +74,7 @@ private:
 
 	uint32_t latest_patchcv_reading;
 	uint16_t latest_jacksense_reading;
-	uint32_t latest_pot_reading[NumPot];
+	uint32_t latest_pot_reading[NumPot] = {0, 0, 0, 0, 0, 0, 0, 0};
 	const uint8_t _pot_map[NumPot] = {1, 4, 0, 5, 3, 6, 7, 2};
 	InterpParam<float, StreamConf::Audio::BlockSize> _knobs[NumPot];
 

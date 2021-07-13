@@ -173,4 +173,32 @@ Controls::Controls(MuxedADC &potadc,
 		// Debug::Pin2::low();
 	});
 }
+
+void Controls::store_pot_reading(uint32_t pot_id, uint32_t val)
+{
+	latest_pot_reading[_pot_map[pot_id]] = val > 4095 ? 4095 : val;
+}
+uint32_t Controls::get_pot_reading(uint32_t pot_id)
+{
+	return latest_pot_reading[pot_id];
+}
+
+void Controls::store_patchcv_reading(uint32_t patchcv)
+{
+	latest_patchcv_reading = patchcv > 4095 ? 4095 : patchcv;
+}
+uint32_t Controls::get_patchcv_reading()
+{
+	return latest_patchcv_reading;
+}
+
+void Controls::store_jacksense_reading(uint16_t reading)
+{
+	latest_jacksense_reading = reading;
+}
+uint32_t Controls::get_jacksense_reading()
+{
+	return latest_jacksense_reading;
+}
+
 } // namespace MetaModule
