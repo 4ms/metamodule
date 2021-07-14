@@ -59,7 +59,7 @@ public:
 
 	void setJackList(std::vector<JackStatus> &jacks)
 	{
-		auto validJackId = [](int jackid) { return (jackid >= 0) && (jackid < MAX_JACKS_PER_MODULE); };
+		auto validJackId = [](int jackid) { return (jackid >= 0) /*&& (jackid < MAX_JACKS_PER_MODULE)*/; };
 		pd.int_cables.clear();
 
 		for (auto &cable : jacks) {

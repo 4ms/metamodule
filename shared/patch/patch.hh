@@ -3,17 +3,11 @@
 #include "CoreModules/panel.hh"
 #include "util/static_string.hh"
 
-// #define USE_NODES
-static constexpr bool USE_NODES = false;
-
-const int MAX_MODULES_IN_PATCH = 16;
-const int MAX_PARAMS_IN_PATCH = 64;
-const int MAX_JACKS_PER_MODULE = 32;
-const int MAX_NODES_IN_PATCH = MAX_JACKS_PER_MODULE * MAX_MODULES_IN_PATCH;
-
+const int MAX_MODULES_IN_PATCH = 32;
 const int MAX_CONNECTIONS_PER_NODE = 16;
-const int MAX_KNOBS_PER_MAPPING = 16;
+const int MAX_KNOBS_PER_MAPPING = 16; //maximum number of knob mapped to a single panel knob
 
+//4 Bytes
 struct Jack {
 	int16_t module_id;
 	int16_t jack_id;
@@ -23,47 +17,14 @@ struct Jack {
 	}
 };
 
+//8 Bytes
 struct StaticParam {
 	int16_t module_id;
 	int16_t param_id;
 	float value;
 };
 
-struct MappedParam {
-	int16_t module_id;
-	int16_t param_id;
-	int16_t panel_knob_id;
-};
-
-struct Net {
-	uint32_t num_jacks;
-	std::array<Jack, MAX_CONNECTIONS_PER_NODE> jacks;
-};
-using NetList = std::array<Net, MAX_NODES_IN_PATCH>;
-
-using ModuleList = std::array<ModuleTypeSlug, MAX_MODULES_IN_PATCH>;
-using ModuleNodeList = uint8_t[MAX_JACKS_PER_MODULE]; // std::array<uint8_t, MAX_JACKS_PER_MODULE>;
-using StaticParamList = std::array<StaticParam, MAX_PARAMS_IN_PATCH>;
-using MappedParamList = std::array<MappedParam, Panel::NumKnobs>;
-
-struct Patch {
-	ModuleTypeSlug patch_name;
-
-	uint32_t num_modules;
-	ModuleList modules_used;
-
-	uint32_t num_nets;
-	NetList nets;
-
-	uint32_t num_static_knobs;
-	StaticParamList static_knobs;
-
-	uint32_t num_mapped_knobs;
-	MappedParamList mapped_knobs;
-};
-
-////////////////////////
-
+//16 Bytes
 struct MappedKnob {
 	int16_t panel_knob_id;
 	int16_t module_id;
@@ -82,21 +43,25 @@ struct MappedKnob {
 };
 
 // If number of ins exceeds MAX_CONNECTIONS_PER_NODE, then just add multiple InternalCable's
+// 64 Bytes
 struct InternalCable {
 	Jack out;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
 };
 
+//64 Bytes
 struct MappedInputJack {
 	int32_t panel_jack_id;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
 };
 
+// 8 Bytes
 struct MappedOutputJack {
 	int32_t panel_jack_id;
 	Jack out;
 };
 
+// 48 Bytes
 struct PatchHeader {
 	uint32_t header_version;
 
