@@ -18,14 +18,17 @@
 	#include "testbin3.hh"
 	#include "anothertest.hh"
 	#include "testbin2.hh"
+	#include "quaddjmebe.hh"
+	#include "dualdjmebe.hh"
 
 PatchList::PatchList()
 	: _patch_addrs{
-		  testbin3_mmpatch,
 		  testbin2_mmpatch,
+		  dualdjmebe_mmpatch,
+		  quaddjmebe_mmpatch,
+		  testbin3_mmpatch,
 		  mixerpass_mmpatch,
 		  StereoVerb_mmpatch,
-		  anothertest_mmpatch,
 	  }
 {
 	for (int i = 0; i < NumPatches; i++) {
