@@ -88,8 +88,9 @@ public:
 		// StrikeModel:
 		// PsuedoRandom:
 		noise[0] = (1103515245 * noise[1]) + 12345;
-		noise_hp[0] = (4.65661287e-10f * noise[0]) -
+		noise_hp[0] = (4.65661287e-10f * (float)noise[0]) -
 					  (fSlowStrike1 * ((fSlowStrike3 * noise_hp[2]) + (fSlowStrike4 * noise_hp[1])));
+
 		noise_hp_lp[0] = (fSlowStrike1 * (((fSlowStrike2 * noise_hp[0]) + (fSlowStrike5 * noise_hp[1])) +
 										  (fSlowStrike2 * noise_hp[2]))) -
 						 (fSlowStrike6 * ((fSlowStrike7 * noise_hp_lp[2]) + (fSlowStrike8 * noise_hp_lp[1])));
@@ -238,6 +239,7 @@ public:
 	{
 		switch (output_id) {
 			case 0:
+				// return noise_hp[0];
 				return signalOut;
 				break;
 		}

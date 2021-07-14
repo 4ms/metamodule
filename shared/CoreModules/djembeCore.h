@@ -124,6 +124,7 @@ public:
 		noise[0] = (1103515245 * noise[1]) + 12345;
 		noise_hp[0] =
 			(4.65661287e-10f * float(noise[0])) - (fSlow7 * ((fSlow10 * noise_hp[2]) + (fSlow11 * noise_hp[1])));
+
 		noise_hp_lp[0] = (fSlow7 * (((fSlow9 * noise_hp[0]) + (fSlow12 * noise_hp[1])) + (fSlow9 * noise_hp[2]))) -
 						 (fSlow13 * ((fSlow14 * noise_hp_lp[2]) + (fSlow15 * noise_hp_lp[1])));
 		fVecTrig[0] = slowTrig;
@@ -229,11 +230,11 @@ public:
 	void update_params()
 	{
 		strike0 = MathTools::min<float>((float(strikeCV) + float(strikeKnob)), 1.0f);
-		strike1 = MathTools::tan(fConst1 * ((15000.0f * strike0) + 500.0f));
+		strike1 = MathTools::tan_close(fConst1 * ((15000.0f * strike0) + 500.0f));
 		strike2 = (1.0f / strike1);
 		strike3 = (((strike2 + 1.41421354f) / strike1) + 1.0f);
 		fSlow4 = (MathTools::min<float>((float(gainCV) + float(gainKnob)), 1.0f) / strike3);
-		fSlow5 = MathTools::tan(fConst1 * ((500.0f * strike0) + 40.0f));
+		fSlow5 = MathTools::tan_close(fConst1 * ((500.0f * strike0) + 40.0f));
 		fSlow6 = (1.0f / fSlow5);
 		fSlow7 = (1.0f / (((fSlow6 + 1.41421354f) / fSlow5) + 1.0f));
 		fSlow8 = (fSlow5 * fSlow5);
@@ -251,26 +252,26 @@ public:
 		slowFreq = (float(freqCV) * float(freqKnob));
 
 		// Coef: a1
-		fSlow19 = (fConst4 * MathTools::cos((fConst5 * slowFreq)));
-		fSlow20 = (fConst8 * MathTools::cos((fConst5 * (slowFreq + 200.0f))));
-		fSlow21 = (fConst11 * MathTools::cos((fConst5 * (slowFreq + 400.0f))));
-		fSlow22 = (fConst14 * MathTools::cos((fConst5 * (slowFreq + 600.0f))));
-		fSlow23 = (fConst17 * MathTools::cos((fConst5 * (slowFreq + 800.0f))));
-		fSlow24 = (fConst20 * MathTools::cos((fConst5 * (slowFreq + 1000.0f))));
-		fSlow25 = (fConst23 * MathTools::cos((fConst5 * (slowFreq + 1200.0f))));
-		fSlow26 = (fConst26 * MathTools::cos((fConst5 * (slowFreq + 1400.0f))));
-		fSlow27 = (fConst29 * MathTools::cos((fConst5 * (slowFreq + 1600.0f))));
-		fSlow28 = (fConst32 * MathTools::cos((fConst5 * (slowFreq + 1800.0f))));
-		fSlow29 = (fConst35 * MathTools::cos((fConst5 * (slowFreq + 2000.0f))));
-		fSlow30 = (fConst38 * MathTools::cos((fConst5 * (slowFreq + 2200.0f))));
-		fSlow31 = (fConst41 * MathTools::cos((fConst5 * (slowFreq + 2400.0f))));
-		fSlow32 = (fConst44 * MathTools::cos((fConst5 * (slowFreq + 2600.0f))));
-		fSlow33 = (fConst47 * MathTools::cos((fConst5 * (slowFreq + 2800.0f))));
-		fSlow34 = (fConst50 * MathTools::cos((fConst5 * (slowFreq + 3000.0f))));
-		fSlow35 = (fConst53 * MathTools::cos((fConst5 * (slowFreq + 3200.0f))));
-		fSlow36 = (fConst56 * MathTools::cos((fConst5 * (slowFreq + 3400.0f))));
-		fSlow37 = (fConst59 * MathTools::cos((fConst5 * (slowFreq + 3600.0f))));
-		fSlow38 = (fConst62 * MathTools::cos((fConst5 * (slowFreq + 3800.0f))));
+		fSlow19 = (fConst4 * MathTools::cos_close((fConst5 * slowFreq)));
+		fSlow20 = (fConst8 * MathTools::cos_close((fConst5 * (slowFreq + 200.0f))));
+		fSlow21 = (fConst11 * MathTools::cos_close((fConst5 * (slowFreq + 400.0f))));
+		fSlow22 = (fConst14 * MathTools::cos_close((fConst5 * (slowFreq + 600.0f))));
+		fSlow23 = (fConst17 * MathTools::cos_close((fConst5 * (slowFreq + 800.0f))));
+		fSlow24 = (fConst20 * MathTools::cos_close((fConst5 * (slowFreq + 1000.0f))));
+		fSlow25 = (fConst23 * MathTools::cos_close((fConst5 * (slowFreq + 1200.0f))));
+		fSlow26 = (fConst26 * MathTools::cos_close((fConst5 * (slowFreq + 1400.0f))));
+		fSlow27 = (fConst29 * MathTools::cos_close((fConst5 * (slowFreq + 1600.0f))));
+		fSlow28 = (fConst32 * MathTools::cos_close((fConst5 * (slowFreq + 1800.0f))));
+		fSlow29 = (fConst35 * MathTools::cos_close((fConst5 * (slowFreq + 2000.0f))));
+		fSlow30 = (fConst38 * MathTools::cos_close((fConst5 * (slowFreq + 2200.0f))));
+		fSlow31 = (fConst41 * MathTools::cos_close((fConst5 * (slowFreq + 2400.0f))));
+		fSlow32 = (fConst44 * MathTools::cos_close((fConst5 * (slowFreq + 2600.0f))));
+		fSlow33 = (fConst47 * MathTools::cos_close((fConst5 * (slowFreq + 2800.0f))));
+		fSlow34 = (fConst50 * MathTools::cos_close((fConst5 * (slowFreq + 3000.0f))));
+		fSlow35 = (fConst53 * MathTools::cos_close((fConst5 * (slowFreq + 3200.0f))));
+		fSlow36 = (fConst56 * MathTools::cos_close((fConst5 * (slowFreq + 3400.0f))));
+		fSlow37 = (fConst59 * MathTools::cos_close((fConst5 * (slowFreq + 3600.0f))));
+		fSlow38 = (fConst62 * MathTools::cos_close((fConst5 * (slowFreq + 3800.0f))));
 	}
 
 	void set_param(int const param_id, const float val) override
@@ -337,6 +338,7 @@ public:
 	{
 		switch (output_id) {
 			case 0:
+				// return noise_hp[0];
 				return signalOut;
 				break;
 		}
