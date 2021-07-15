@@ -155,15 +155,15 @@ static inline float audioFreqToNorm(float input) // normalized filter frequency 
 	return output;
 }
 
-// Todo: needs tests
+// Returns 2^x
 static inline float pow2(float x)
 {
-	// expTable.interp(x) = 2^(x*5), where 0 <= x <= 1
 	x = x / 5.0f;
 	float res = 1.f;
 	for (;;) {
 		if (x < 1.f) {
-			res *= expTable.interp(x);
+			// Note: exp5Table.interp(x) = 2^(x*5), where 0 <= x <= 1
+			res *= exp5Table.interp(x);
 			break;
 		} else {
 			res *= 32.f;
@@ -173,7 +173,6 @@ static inline float pow2(float x)
 	return res;
 }
 
-// Todo: needs tests
 static inline float cos(float x)
 {
 	return sinTable.interp_wrap((x / (2.f * M_PI)) + 0.25f);
