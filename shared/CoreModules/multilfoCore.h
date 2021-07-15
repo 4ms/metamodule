@@ -38,15 +38,15 @@ public:
 
 	void combineKnobCVFreq()
 	{
-		auto knobFreq = exp5Table.closest(constrain(rawKnobVal, 0.f, 1.f));
-		finalRate = knobFreq * setPitchMultiple(rawCvVal);
+		auto knobFreq = exp5Table.closest(constrain(rawRateKnob, 0.f, 1.f));
+		finalRate = knobFreq * setPitchMultiple(rawRateCV);
 	}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
 			case 0:
-				rawKnobVal = val;
+				rawRateKnob = val;
 				rateChanged = true;
 				break;
 			case 1:
@@ -66,7 +66,7 @@ public:
 	{
 		switch (input_id) {
 			case 0:
-				rawCvVal = val;
+				rawRateCV = val;
 				rateChanged = true;
 				break;
 			case 1: // phase cv
@@ -90,7 +90,7 @@ public:
 		float output = 0;
 		switch (output_id) {
 			case 0: // sin
-				output = sinTable.interp(modPhase);
+				output = sinTable.interp_wrap(modPhase);
 				break;
 			case 1: // saw
 				output = modPhase * 2.f - 1.f;
@@ -99,13 +99,7 @@ public:
 				output = 1.f - modPhase * 2.f;
 				break;
 			case 3: // pulse
-				float finalPw = constrain(pwOffset + pwCV, 0.0f, 1.0f);
-				if (modPhase < finalPw) {
-					output = 1.0f;
-				} else {
-					output = -1.0f;
-				}
-				break;
+				output = (modPhase < (pwOffset + pwCV)) ? 1.f : -1.f;
 		}
 		return output;
 	}
@@ -128,10 +122,8 @@ private:
 	float phaccu = 0.f;
 	float finalRate = 0.1f;
 	float sampRate = 48000.f;
-	float lfoRate = 1.0f;
-	float rawKnobVal = 1.0f;
-	float rawCvVal = 1.0f;
-	float rateCV = 0.f;
+	float rawRateKnob = 0.0f;
+	float rawRateCV = 0.0f;
 	float phaseCV = 0.f;
 	float pwOffset = 0.5f;
 	float pwCV = 0.f;
