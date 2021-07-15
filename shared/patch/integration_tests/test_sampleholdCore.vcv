@@ -93,7 +93,7 @@
             "SrcObjType": "OutputJack"
           }
         ],
-        "PatchName": "test_14switchCore_clock"
+        "PatchName": "test_sampleholdCore"
       },
       "pos": [
         21,

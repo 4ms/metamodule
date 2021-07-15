@@ -89,7 +89,7 @@
             "SrcObjType": "Knob"
           }
         ],
-        "PatchName": ""
+        "PatchName": "test_bpfCore"
       },
       "pos": [
         16,

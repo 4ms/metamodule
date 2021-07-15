@@ -1,0 +1,169 @@
+PatchHeader:
+  header_version: 1
+  patch_name: test_stereomixerCore
+  num_modules: 6
+  num_int_cables: 4
+  num_mapped_ins: 0
+  num_mapped_outs: 2
+  num_static_knobs: 20
+  num_mapped_knobs: 8
+
+PatchData:
+  module_slugs:
+    0: PANEL_8
+    1: STEREOMIXER
+    2: LFOSINE
+    3: LFOSINE
+    4: LFOSINE
+    5: LFOSINE
+
+  int_cables: 
+      - out: 
+          module_id: 2
+          jack_id: 0
+        ins: 
+          - module_id: 1
+            jack_id: 0
+      - out: 
+          module_id: 3
+          jack_id: 0
+        ins: 
+          - module_id: 1
+            jack_id: 1
+      - out: 
+          module_id: 4
+          jack_id: 0
+        ins: 
+          - module_id: 1
+            jack_id: 2
+      - out: 
+          module_id: 5
+          jack_id: 0
+        ins: 
+          - module_id: 1
+            jack_id: 3
+
+  mapped_ins: 
+
+  mapped_outs: 
+    - panel_jack_id: 0
+      out: 
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 1
+      out: 
+        module_id: 1
+        jack_id: 1
+
+  static_knobs: 
+    - module_id: 1
+      param_id: 0
+      value: 0.000000
+    - module_id: 1
+      param_id: 1
+      value: 0.000000
+    - module_id: 1
+      param_id: 2
+      value: 0.000000
+    - module_id: 1
+      param_id: 3
+      value: 1.000000
+    - module_id: 1
+      param_id: 4
+      value: 0.496500
+    - module_id: 1
+      param_id: 5
+      value: 0.498000
+    - module_id: 1
+      param_id: 6
+      value: 0.332500
+    - module_id: 1
+      param_id: 7
+      value: 0.726000
+    - module_id: 2
+      param_id: 0
+      value: 0.250500
+    - module_id: 2
+      param_id: 1
+      value: 0.000000
+    - module_id: 2
+      param_id: 2
+      value: 1.000000
+    - module_id: 3
+      param_id: 0
+      value: 0.375000
+    - module_id: 3
+      param_id: 1
+      value: 0.000000
+    - module_id: 3
+      param_id: 2
+      value: 1.000000
+    - module_id: 4
+      param_id: 0
+      value: 0.520500
+    - module_id: 4
+      param_id: 1
+      value: 0.000000
+    - module_id: 4
+      param_id: 2
+      value: 1.000000
+    - module_id: 5
+      param_id: 0
+      value: 0.844500
+    - module_id: 5
+      param_id: 1
+      value: 0.000000
+    - module_id: 5
+      param_id: 2
+      value: 1.000000
+
+  mapped_knobs: 
+    - panel_knob_id: 0
+      module_id: 1
+      param_id: 0
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 1
+      module_id: 1
+      param_id: 1
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 2
+      module_id: 1
+      param_id: 2
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 3
+      module_id: 1
+      param_id: 3
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 4
+      module_id: 1
+      param_id: 4
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 5
+      module_id: 1
+      param_id: 5
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 6
+      module_id: 1
+      param_id: 6
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 7
+      module_id: 1
+      param_id: 7
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+

@@ -73,7 +73,7 @@
             "SrcObjType": "OutputJack"
           }
         ],
-        "PatchName": "test_comparatorCore"
+        "PatchName": "test_crossfadeCore"
       },
       "pos": [
         17,

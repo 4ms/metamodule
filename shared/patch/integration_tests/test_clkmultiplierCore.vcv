@@ -81,7 +81,7 @@
             "SrcObjType": "OutputJack"
           }
         ],
-        "PatchName": ""
+        "PatchName": "test_clkmultiplierCore"
       },
       "pos": [
         16,

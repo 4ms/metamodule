@@ -81,7 +81,7 @@
             "SrcObjType": "OutputJack"
           }
         ],
-        "PatchName": ""
+        "PatchName": "test_clkdividerCore"
       },
       "pos": [
         16,

@@ -144,7 +144,8 @@
             "SrcObjID": 6,
             "SrcObjType": "InputJack"
           }
-        ]
+        ],
+        "PatchName": "test_adCore"
       },
       "pos": [
         20,

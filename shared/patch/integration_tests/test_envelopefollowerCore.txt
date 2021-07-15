@@ -1,0 +1,131 @@
+PatchHeader:
+  header_version: 1
+  patch_name: test_envelopefollowerCore
+  num_modules: 6
+  num_int_cables: 4
+  num_mapped_ins: 0
+  num_mapped_outs: 3
+  num_static_knobs: 22
+  num_mapped_knobs: 0
+
+PatchData:
+  module_slugs:
+    0: PANEL_8
+    1: ENVELOPEFOLLOWER
+    2: LFOSINE
+    3: VCA
+    4: FMOSC
+    5: ADENV
+
+  int_cables: 
+      - out: 
+          module_id: 3
+          jack_id: 0
+        ins: 
+          - module_id: 1
+            jack_id: 0
+      - out: 
+          module_id: 4
+          jack_id: 0
+        ins: 
+          - module_id: 3
+            jack_id: 0
+      - out: 
+          module_id: 5
+          jack_id: 0
+        ins: 
+          - module_id: 3
+            jack_id: 1
+      - out: 
+          module_id: 2
+          jack_id: 0
+        ins: 
+          - module_id: 5
+            jack_id: 0
+
+  mapped_ins: 
+
+  mapped_outs: 
+    - panel_jack_id: 2
+      out: 
+        module_id: 1
+        jack_id: 1
+    - panel_jack_id: 3
+      out: 
+        module_id: 1
+        jack_id: 0
+    - panel_jack_id: 0
+      out: 
+        module_id: 3
+        jack_id: 0
+
+  static_knobs: 
+    - module_id: 1
+      param_id: 0
+      value: 0.540000
+    - module_id: 1
+      param_id: 1
+      value: 0.000000
+    - module_id: 1
+      param_id: 2
+      value: 0.000000
+    - module_id: 2
+      param_id: 0
+      value: 0.514500
+    - module_id: 2
+      param_id: 1
+      value: 0.000000
+    - module_id: 2
+      param_id: 2
+      value: 1.000000
+    - module_id: 3
+      param_id: 0
+      value: 0.500000
+    - module_id: 3
+      param_id: 1
+      value: 1.000000
+    - module_id: 3
+      param_id: 2
+      value: 0.000000
+    - module_id: 3
+      param_id: 3
+      value: 1.000000
+    - module_id: 4
+      param_id: 0
+      value: 0.280500
+    - module_id: 4
+      param_id: 1
+      value: 0.627000
+    - module_id: 4
+      param_id: 2
+      value: 0.318000
+    - module_id: 4
+      param_id: 3
+      value: 0.303000
+    - module_id: 4
+      param_id: 4
+      value: 0.564000
+    - module_id: 4
+      param_id: 5
+      value: 0.000000
+    - module_id: 4
+      param_id: 6
+      value: 0.000000
+    - module_id: 4
+      param_id: 7
+      value: 0.548500
+    - module_id: 5
+      param_id: 0
+      value: 0.000000
+    - module_id: 5
+      param_id: 1
+      value: 0.145500
+    - module_id: 5
+      param_id: 2
+      value: 0.000000
+    - module_id: 5
+      param_id: 3
+      value: 0.000000
+
+  mapped_knobs: 
+

@@ -89,7 +89,7 @@
             "SrcObjType": "OutputJack"
           }
         ],
-        "PatchName": ""
+        "PatchName": "test_bitcrushCore"
       },
       "pos": [
         16,
