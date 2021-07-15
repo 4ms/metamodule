@@ -4,8 +4,12 @@
 #include "util/static_string.hh"
 
 const int MAX_MODULES_IN_PATCH = 32;
-const int MAX_CONNECTIONS_PER_NODE = 16;
-const int MAX_KNOBS_PER_MAPPING = 16; //maximum number of knob mapped to a single panel knob
+
+//maximum number of jacks involved in a stacked cable (4 means 1 output -> 3 inputs)
+const int MAX_CONNECTIONS_PER_NODE = 4;
+
+//maximum number of knob mapped to a single panel knob
+const int MAX_KNOBS_PER_MAPPING = 16;
 
 //4 Bytes
 struct Jack {

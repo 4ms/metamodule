@@ -1,65 +1,50 @@
 #include "patchlist.hh"
 
-#ifndef METAMODULE_INTEGRATION_TESTS
-	// #include "KP_FM_DRUM_DET.hh"
-	// #include "KarplusStereo.hh"
-	// #include "LPFBPF.hh"
-	// #include "QuadDrum.hh"
-	// #include "example_drum.hh"
-	// #include "example_drum_verb_mono.h"
-	// #include "example_duallfo.hh"
-	// #include "example_karplus.hh"
-	// #include "example_pitchShift_simple.hh"
-	// #include "example_stereo_verb.h"
-	// #include "fadedelay_two.hh"
-	// #include "simple_lfo_passthrru.hh"
-	#include "mixerpass.hh"
-	#include "StereoVerb.hh"
-	#include "testbin3.hh"
-	#include "anothertest.hh"
-	#include "testbin2.hh"
-	#include "quaddjmebe.hh"
-	#include "dualdjmebe.hh"
-	#include "mappeddjmebe.hh"
-	#include "simplequaddjmebe.hh"
-	#include "unmappeddjmebe.hh"
+#include "patch/integration_tests/all_tests.hh"
+
+#include "StereoVerb.hh"
+#include "dualdjembe.hh"
+#include "mappeddjembe.hh"
+#include "mixerpass.hh"
+#include "quaddjembe.hh"
+#include "simplequaddjembe.hh"
 
 PatchList::PatchList()
 	: _patch_addrs{
-		  testbin2_mmpatch,
-		  mappeddjmebe_mmpatch,
-		  unmappeddjmebe_mmpatch,
-		  simplequaddjmebe_mmpatch,
-		  dualdjmebe_mmpatch,
-		  quaddjmebe_mmpatch,
-		  // testbin3_mmpatch,
 		  // mixerpass_mmpatch,
-		  // StereoVerb_mmpatch,
-	  }
-{
-	for (int i = 0; i < NumPatches; i++) {
-		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
-	}
-}
-
-#else
-	#include "patch/integration_tests/all_tests.hh"
-
-PatchList::PatchList()
-	: _patches{
-		  {test_quantizerCore},
-		  {test_14switchCore_cv},
-		  {test_bitcrushCore},
-		  {test_karplusCore},
-		  {test_clkdivideCore},
-		  {test_clkmultiplierCore},
-		  {test_comparatorCore},
-		  // {test_crossfadeCore},
-		  // {test_logicCore},
-		  // {test_minmaxCore}
-		  {test_sense_pins_CV},
-		  {test_sense_pins_gates},
-		  {test_sense_pins_audio},
+		  mappeddjembe_mmpatch,
+		  simplequaddjembe_mmpatch,
+		  dualdjembe_mmpatch,
+		  StereoVerb_mmpatch,
+		  quaddjembe_mmpatch,
+		  test_14switchCore_clock_mmpatch,
+		  test_14switchCore_cv_mmpatch,
+		  test_adCore_mmpatch,
+		  test_attCore_mmpatch,
+		  test_bitcrushCore_mmpatch,
+		  test_bpfCore_mmpatch,
+		  test_clkdividerCore_mmpatch,
+		  test_clkmultiplierCore_mmpatch,
+		  test_comparatorCore_mmpatch,
+		  test_crossfadeCore_mmpatch,
+		  test_eightstepCore_mmpatch,
+		  test_envelopefollowerCore_mmpatch,
+		  test_fourstepCore_mmpatch,
+		  test_gateCore_mmpatch,
+		  test_karplusCore_mmpatch,
+		  test_logicCore_mmpatch,
+		  test_minmaxCore_mmpatch,
+		  test_multilfoCore_mmpatch,
+		  test_octaveCore_mmpatch,
+		  test_pannerCore_mmpatch,
+		  test_quantizerCore_mmpatch,
+		  test_sampleholdCore_mmpatch,
+		  test_sendCore_mmpatch,
+		  test_sense_pins_CV_mmpatch,
+		  test_sense_pins_audio_mmpatch,
+		  test_sense_pins_gates_mmpatch,
+		  test_stereomixerCore_mmpatch,
+		  test_vcaCore_mmpatch,
 		  // MARK: Add patches below here:
 	  }
 {
@@ -67,5 +52,3 @@ PatchList::PatchList()
 		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
 	}
 }
-
-#endif

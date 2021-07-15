@@ -57,6 +57,7 @@ $(BUILDDIR_MP1M4)/firmware.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
 ## Patches
 
 PATCH_BINARIES = $(wildcard $(SHARED)/patch/*.mmpatch)
+PATCH_BINARIES += $(wildcard $(SHARED)/patch/integration_tests/*.mmpatch)
 PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_BINARIES)))
 
 patches: $(PATCH_HEADERS)

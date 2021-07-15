@@ -37,7 +37,7 @@
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 1.20811072e-32
         },
         {
           "id": 8,
@@ -80,7 +80,8 @@
             "SrcObjID": 1,
             "SrcObjType": "OutputJack"
           }
-        ]
+        ],
+        "PatchName": ""
       },
       "pos": [
         8,

@@ -1,0 +1,213 @@
+PatchHeader:
+  header_version: 1
+  patch_name: simple-quad-djembe
+  num_modules: 6
+  num_int_cables: 4
+  num_mapped_ins: 8
+  num_mapped_outs: 2
+  num_static_knobs: 24
+  num_mapped_knobs: 8
+
+PatchData:
+  module_slugs:
+    0: PANEL_8
+    1: DJEMBE
+    2: DJEMBE
+    3: STEREOMIXER
+    4: DJEMBE
+    5: DJEMBE
+
+  int_cables: 
+      - out: 
+          module_id: 4
+          jack_id: 0
+        ins: 
+          - module_id: 3
+            jack_id: 0
+      - out: 
+          module_id: 1
+          jack_id: 0
+        ins: 
+          - module_id: 3
+            jack_id: 1
+      - out: 
+          module_id: 2
+          jack_id: 0
+        ins: 
+          - module_id: 3
+            jack_id: 2
+      - out: 
+          module_id: 5
+          jack_id: 0
+        ins: 
+          - module_id: 3
+            jack_id: 3
+
+  mapped_ins: 
+      - panel_jack_id: 2
+        ins: 
+          - module_id: 4
+            jack_id: 2
+      - panel_jack_id: 4
+        ins: 
+          - module_id: 2
+            jack_id: 3
+      - panel_jack_id: 5
+        ins: 
+          - module_id: 5
+            jack_id: 2
+      - panel_jack_id: 3
+        ins: 
+          - module_id: 1
+            jack_id: 1
+      - panel_jack_id: 6
+        ins: 
+          - module_id: 4
+            jack_id: 4
+      - panel_jack_id: 7
+        ins: 
+          - module_id: 1
+            jack_id: 4
+      - panel_jack_id: 8
+        ins: 
+          - module_id: 2
+            jack_id: 4
+      - panel_jack_id: 0
+        ins: 
+          - module_id: 5
+            jack_id: 4
+
+  mapped_outs: 
+    - panel_jack_id: 1
+      out: 
+        module_id: 3
+        jack_id: 1
+    - panel_jack_id: 0
+      out: 
+        module_id: 3
+        jack_id: 0
+
+  static_knobs: 
+    - module_id: 1
+      param_id: 0
+      value: 0.151500
+    - module_id: 1
+      param_id: 1
+      value: 0.480000
+    - module_id: 1
+      param_id: 2
+      value: 0.511500
+    - module_id: 1
+      param_id: 3
+      value: 0.537000
+    - module_id: 2
+      param_id: 0
+      value: 0.000000
+    - module_id: 2
+      param_id: 1
+      value: 0.466500
+    - module_id: 2
+      param_id: 2
+      value: 0.499500
+    - module_id: 2
+      param_id: 3
+      value: 0.511500
+    - module_id: 3
+      param_id: 0
+      value: 1.000000
+    - module_id: 3
+      param_id: 1
+      value: 1.000000
+    - module_id: 3
+      param_id: 2
+      value: 1.000000
+    - module_id: 3
+      param_id: 3
+      value: 1.000000
+    - module_id: 3
+      param_id: 4
+      value: 0.442500
+    - module_id: 3
+      param_id: 5
+      value: 0.336000
+    - module_id: 3
+      param_id: 6
+      value: 0.672000
+    - module_id: 3
+      param_id: 7
+      value: 0.423000
+    - module_id: 4
+      param_id: 0
+      value: 0.276000
+    - module_id: 4
+      param_id: 1
+      value: 0.507000
+    - module_id: 4
+      param_id: 2
+      value: 0.456000
+    - module_id: 4
+      param_id: 3
+      value: 0.481500
+    - module_id: 5
+      param_id: 0
+      value: 0.000000
+    - module_id: 5
+      param_id: 1
+      value: 0.541500
+    - module_id: 5
+      param_id: 2
+      value: 0.486000
+    - module_id: 5
+      param_id: 3
+      value: 0.453000
+
+  mapped_knobs: 
+    - panel_knob_id: 0
+      module_id: 4
+      param_id: 0
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 1
+      module_id: 1
+      param_id: 0
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 2
+      module_id: 2
+      param_id: 0
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 3
+      module_id: 5
+      param_id: 0
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 4
+      module_id: 3
+      param_id: 4
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 5
+      module_id: 3
+      param_id: 5
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 6
+      module_id: 3
+      param_id: 6
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 7
+      module_id: 3
+      param_id: 7
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+
