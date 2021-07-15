@@ -61,8 +61,8 @@ PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_BINARIES)))
 
 patches: $(PATCH_HEADERS)
 
-$(SHARED)/patch/%.hh : $(SHARED)/patch/%.mmpatch 
-	cd $(SHARED)/patch && xxd -i -c 8 $(notdir $<) $(notdir $@)
+%.hh : %.mmpatch 
+	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
 ## Cleaning
 
