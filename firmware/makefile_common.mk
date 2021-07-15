@@ -13,6 +13,7 @@ SZOPTS 	= -d
 ELF 	= $(BUILDDIR)/$(BINARYNAME).elf
 HEX 	= $(BUILDDIR)/$(BINARYNAME).hex
 BIN 	= $(BUILDDIR)/$(BINARYNAME).bin
+TAG ?=
 
 EXTRA_CFLAGS ?= 
 EXTRA_CPPFLAGS ?=
@@ -69,27 +70,27 @@ $(HEX): $(ELF)
 	@$(SZ) $(SZOPTS) $(ELF)
 
 $(ELF): $(OBJECTS) $(LOADFILE)
-	$(info Linking...)
+	$(info $(TAG) Linking...)
 	@$(LD) $(LFLAGS) -o $@ $(OBJECTS)
 
 $(BUILDDIR)/%.o: %.c $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)
-	$(info Building $< at $(OPTFLAG))
+	$(info $(TAG) Building $< at $(OPTFLAG))
 	@$(CC) -c $(DEPFLAGS) $(OPTFLAG) $(CFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cc $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)
-	$(info Building $< at $(OPTFLAG))
+	$(info $(TAG) Building $< at $(OPTFLAG))
 	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%.o: %.cpp $(BUILDDIR)/%.d
 	@mkdir -p $(dir $@)
-	$(info Building $< at $(OPTFLAG))
+	$(info $(TAG) Building $< at $(OPTFLAG))
 	@$(CXX) -c $(DEPFLAGS) $(OPTFLAG) $(CXXFLAGS) $< -o $@
 
 $(BUILDDIR)/%_s.o: %.s
 	@mkdir -p $(dir $@)
-	$(info Building $< at $(OPTFLAG))
+	$(info $(TAG) Building $<)
 	@$(AS) $(AFLAGS) $< -o $@ > $(addprefix $(BUILDDIR)/, $(addsuffix .lst, $(basename $<)))
 
 %.d: ;

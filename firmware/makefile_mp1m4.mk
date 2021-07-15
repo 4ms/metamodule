@@ -75,5 +75,6 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 			  -DCORE_CM4 \
 			  -DARM_MATH_CM4 \
 
+TAG = [MP1M4]
 include makefile_common.mk
 

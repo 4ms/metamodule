@@ -186,6 +186,7 @@ UBOOTBUILDDIR = $(UBOOTDIR)/build
 UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 #####
 
+TAG = [MP1A7]
 include makefile_common.mk
 
 image: $(UIMG)

@@ -85,5 +85,6 @@ ARCH_CFLAGS += -D'__FPU_PRESENT=1' \
 			  -D$(EXTDEF)
 
 
+TAG = [H7M7]
 include makefile_common.mk
 
