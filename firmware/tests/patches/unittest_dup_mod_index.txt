@@ -1,0 +1,88 @@
+PatchHeader:
+  header_version: 1
+  patch_name: unittest_dup_mod_index
+  num_modules: 8
+  num_int_cables: 0
+  num_mapped_ins: 0
+  num_mapped_outs: 0
+  num_static_knobs: 19
+  num_mapped_knobs: 0
+
+PatchData:
+  module_slugs:
+    0: PANEL_8
+    1: LFOSINE
+    2: KARPLUS
+    3: LFOSINE
+    4: CLKMULTIPLIER
+    5: LFOSINE
+    6: LFOSINE
+    7: KARPLUS
+
+  int_cables: 
+
+  mapped_ins: 
+
+  mapped_outs: 
+
+  static_knobs: 
+    - module_id: 1
+      param_id: 0
+      value: 0.000000
+    - module_id: 1
+      param_id: 1
+      value: 0.000000
+    - module_id: 1
+      param_id: 2
+      value: 0.000000
+    - module_id: 2
+      param_id: 0
+      value: 0.000000
+    - module_id: 2
+      param_id: 1
+      value: 0.000000
+    - module_id: 2
+      param_id: 2
+      value: 0.000000
+    - module_id: 3
+      param_id: 0
+      value: 0.000000
+    - module_id: 3
+      param_id: 1
+      value: 0.000000
+    - module_id: 3
+      param_id: 2
+      value: 0.000000
+    - module_id: 4
+      param_id: 0
+      value: 0.000000
+    - module_id: 5
+      param_id: 0
+      value: 0.000000
+    - module_id: 5
+      param_id: 1
+      value: 0.000000
+    - module_id: 5
+      param_id: 2
+      value: 0.000000
+    - module_id: 6
+      param_id: 0
+      value: 0.000000
+    - module_id: 6
+      param_id: 1
+      value: 0.000000
+    - module_id: 6
+      param_id: 2
+      value: 0.000000
+    - module_id: 7
+      param_id: 0
+      value: 0.000000
+    - module_id: 7
+      param_id: 1
+      value: 0.000000
+    - module_id: 7
+      param_id: 2
+      value: 0.000000
+
+  mapped_knobs: 
+

@@ -1,0 +1,54 @@
+PatchHeader:
+  header_version: 1
+  patch_name: unittest_inmapping_overlapping
+  num_modules: 3
+  num_int_cables: 1
+  num_mapped_ins: 1
+  num_mapped_outs: 0
+  num_static_knobs: 6
+  num_mapped_knobs: 0
+
+PatchData:
+  module_slugs:
+    0: PANEL_8
+    1: MULTILFO
+    2: LFOSINE
+
+  int_cables: 
+      - out: 
+          module_id: 2
+          jack_id: 0
+        ins: 
+          - module_id: 1
+            jack_id: 0
+
+  mapped_ins: 
+      - panel_jack_id: 2
+        ins: 
+          - module_id: 1
+            jack_id: 0
+
+  mapped_outs: 
+
+  static_knobs: 
+    - module_id: 1
+      param_id: 0
+      value: 0.000000
+    - module_id: 1
+      param_id: 1
+      value: 0.000000
+    - module_id: 1
+      param_id: 2
+      value: 0.000000
+    - module_id: 2
+      param_id: 0
+      value: 0.000000
+    - module_id: 2
+      param_id: 1
+      value: 0.000000
+    - module_id: 2
+      param_id: 2
+      value: 0.000000
+
+  mapped_knobs: 
+

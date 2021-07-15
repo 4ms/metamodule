@@ -23,8 +23,8 @@ MFFONTDIR = $(LIBDIR)/mcufont/fonts
 MFDIR = $(LIBDIR)/mcufont/decoder
 include $(LIBDIR)/mcufont/decoder/mcufont.mk
 
-SOURCES  = $(STARTUP_H7)
-SOURCES  += $(SYSTEM_H7)
+ASM_SOURCES  = $(STARTUP_H7)
+SOURCES  = $(SYSTEM_H7)
 SOURCES  += $(wildcard $(HALDIR)/src/*.c)
 SOURCES  += $(wildcard $(DRIVERLIB)/drivers/*.cc)
 SOURCES  += $(wildcard $(TARGETDEVICEDIR)/drivers/*.cc)
@@ -45,9 +45,6 @@ SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
 SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
 SOURCES  += $(LIBDIR)/printf/printf.c
 SOURCES  += $(MFSRC)
-
-OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
-DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 
 INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(CMSIS)/Include \

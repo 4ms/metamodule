@@ -19,8 +19,8 @@ SYSTEM_H7 = system/system_stm32h7xx_dualcore_boot_cm4_cm7.c
 OPTFLAG = -O3
 include makefile_opts.mk
 
-SOURCES  = $(STARTUP_H7)
-SOURCES  += $(SYSTEM_H7)
+ASM_SOURCES  = $(STARTUP_H7)
+SOURCES  = $(SYSTEM_H7)
 SOURCES  += $(wildcard $(HALDIR)/src/*.c)
 SOURCES  += $(wildcard $(CORE_SRC)/*.c)
 SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
@@ -38,9 +38,6 @@ SOURCES  += $(DRIVERLIB)/drivers/tim.cc
 SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
 SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver_dma.cc
-
-OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(SOURCES))))
-DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 
 INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(CMSIS)/Include \

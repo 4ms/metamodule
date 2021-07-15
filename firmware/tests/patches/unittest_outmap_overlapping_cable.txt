@@ -1,0 +1,70 @@
+PatchHeader:
+  header_version: 1
+  patch_name: unittest_outmap_overlapping_cab
+  num_modules: 3
+  num_int_cables: 2
+  num_mapped_ins: 0
+  num_mapped_outs: 3
+  num_static_knobs: 6
+  num_mapped_knobs: 0
+
+PatchData:
+  module_slugs:
+    0: PANEL_8
+    1: MULTILFO
+    2: MULTILFO
+
+  int_cables: 
+      - out: 
+          module_id: 1
+          jack_id: 3
+        ins: 
+          - module_id: 2
+            jack_id: 0
+      - out: 
+          module_id: 1
+          jack_id: 1
+        ins: 
+          - module_id: 2
+            jack_id: 1
+          - module_id: 2
+            jack_id: 2
+
+  mapped_ins: 
+
+  mapped_outs: 
+    - panel_jack_id: 1
+      out: 
+        module_id: 1
+        jack_id: 1
+    - panel_jack_id: 0
+      out: 
+        module_id: 1
+        jack_id: 3
+    - panel_jack_id: 2
+      out: 
+        module_id: 2
+        jack_id: 1
+
+  static_knobs: 
+    - module_id: 1
+      param_id: 0
+      value: 0.000000
+    - module_id: 1
+      param_id: 1
+      value: 0.000000
+    - module_id: 1
+      param_id: 2
+      value: 0.000000
+    - module_id: 2
+      param_id: 0
+      value: 0.000000
+    - module_id: 2
+      param_id: 1
+      value: 0.000000
+    - module_id: 2
+      param_id: 2
+      value: 0.000000
+
+  mapped_knobs: 
+

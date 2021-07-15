@@ -38,6 +38,7 @@ ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth : 4
 IndentCaseLabels : "true"
 IndentPPDirectives : "BeforeHash"
+ReflowComments : "false"
 SpaceAfterCStyleCast : "false"
 SpaceAfterTemplateKeyword : "false"
 SpaceBeforeAssignmentOperators : "true"

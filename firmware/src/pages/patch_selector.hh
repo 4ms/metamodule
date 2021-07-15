@@ -34,7 +34,6 @@ struct PatchSelectorPage : PageBase {
 
 	void draw()
 	{
-
 		if (hi_patch_index != patch_list.cur_patch_index()) {
 			hi_patch_index = patch_list.cur_patch_index();
 			dest_hi_top_pos = patch_list.cur_patch_index() * lineheight + y_offset;
@@ -69,7 +68,7 @@ struct PatchSelectorPage : PageBase {
 				continue;
 			}
 			screen.setCursor(2, y_pos);
-			screen.print(patch_list.get_patch(i).patch_name);
+			screen.print(patch_list.get_patch_name(i));
 			y_pos += lineheight;
 		}
 	}

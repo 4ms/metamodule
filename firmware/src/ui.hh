@@ -62,7 +62,16 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		player.load_patch(patch_list.cur_patch());
+		patch_list.set_cur_patch_index(0);
+		bool ok = player.load_patch(patch_list.cur_patch());
+		if (!ok) {
+			// Todo: handle error: display on screen, and try another patch?
+			// metaparams.error = Errors::CannotLoadPatch;
+			// metaparams.error_data = patch_list.cur_patch();
+			while (true)
+				;
+		}
+		mbox.loading_new_patch = false;
 
 		screen.init();
 		register_printf_destination(screen);
@@ -143,14 +152,14 @@ public:
 		}
 
 		if (mbox.loading_new_patch && mbox.audio_is_muted) {
-			player.unload_patch(patch_list.cur_patch());
-			patch_list.jump_to_patch(mbox.new_patch_index);
+			player.unload_patch();
+			patch_list.set_cur_patch_index(mbox.new_patch_index);
 			bool ok = player.load_patch(patch_list.cur_patch());
 			if (!ok) {
 				// Todo: handle error: display on screen, and try another patch?
 				// metaparams.error = Errors::CannotLoadPatch;
 				// metaparams.error_data = patch_list.cur_patch();
-				while (1)
+				while (true)
 					;
 			}
 			mbox.loading_new_patch = false;

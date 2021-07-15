@@ -1,34 +1,45 @@
 #include "patchlist.hh"
 
 #ifndef METAMODULE_INTEGRATION_TESTS
-	#include "KP_FM_DRUM_DET.hh"
-	#include "KarplusStereo.hh"
-	#include "LPFBPF.hh"
-	#include "QuadDrum.hh"
-	#include "example_drum.hh"
-	#include "example_drum_verb_mono.h"
-	#include "example_duallfo.hh"
-	#include "example_karplus.hh"
-	#include "example_pitchShift_simple.hh"
-	#include "example_stereo_verb.h"
-	#include "fadedelay_two.hh"
-	#include "simple_lfo_passthrru.hh"
+	// #include "KP_FM_DRUM_DET.hh"
+	// #include "KarplusStereo.hh"
+	// #include "LPFBPF.hh"
+	// #include "QuadDrum.hh"
+	// #include "example_drum.hh"
+	// #include "example_drum_verb_mono.h"
+	// #include "example_duallfo.hh"
+	// #include "example_karplus.hh"
+	// #include "example_pitchShift_simple.hh"
+	// #include "example_stereo_verb.h"
+	// #include "fadedelay_two.hh"
+	// #include "simple_lfo_passthrru.hh"
+	#include "mixerpass.hh"
+	#include "StereoVerb.hh"
+	#include "testbin3.hh"
+	#include "anothertest.hh"
+	#include "testbin2.hh"
+	#include "quaddjmebe.hh"
+	#include "dualdjmebe.hh"
+	#include "mappeddjmebe.hh"
+	#include "simplequaddjmebe.hh"
+	#include "unmappeddjmebe.hh"
 
 PatchList::PatchList()
-	: _patches{
-		  {simple_lfo_passthrru},
-		  {example_stereo_verb},
-		  {examplePitchShiftSimple},
-		  {exampleDrum},
-		  {fadedelay_example},
-		  {example_drum_verb_mono},
-		  {QuadDrum},
-		  {KP_FM_DRUM_DET},
-		  {KarplusStereo},
-		  {LPFBPF},
+	: _patch_addrs{
+		  testbin2_mmpatch,
+		  mappeddjmebe_mmpatch,
+		  unmappeddjmebe_mmpatch,
+		  simplequaddjmebe_mmpatch,
+		  dualdjmebe_mmpatch,
+		  quaddjmebe_mmpatch,
+		  // testbin3_mmpatch,
+		  // mixerpass_mmpatch,
+		  // StereoVerb_mmpatch,
 	  }
 {
-	_cur_patch_idx = 0;
+	for (int i = 0; i < NumPatches; i++) {
+		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
+	}
 }
 
 #else
@@ -52,7 +63,9 @@ PatchList::PatchList()
 		  // MARK: Add patches below here:
 	  }
 {
-	_cur_patch_idx = 0;
+	for (int i = 0; i < NumPatches; i++) {
+		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
+	}
 }
 
 #endif

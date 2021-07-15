@@ -1,0 +1,232 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 97,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 101,
+      "rightModuleId": 103,
+      "data": {
+        "Mappings": [],
+        "PatchName": "unittest_dup_mod_index"
+      },
+      "pos": [
+        12,
+        0
+      ]
+    },
+    {
+      "id": 101,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 102,
+      "rightModuleId": 97,
+      "pos": [
+        8,
+        0
+      ]
+    },
+    {
+      "id": 102,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "KARPLUS",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 104,
+      "rightModuleId": 101,
+      "pos": [
+        4,
+        0
+      ]
+    },
+    {
+      "id": 103,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 97,
+      "rightModuleId": 105,
+      "pos": [
+        28,
+        0
+      ]
+    },
+    {
+      "id": 104,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "CLKMULTIPLIER",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 102,
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 105,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 103,
+      "rightModuleId": 106,
+      "pos": [
+        32,
+        0
+      ]
+    },
+    {
+      "id": 106,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "lfo",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 105,
+      "rightModuleId": 107,
+      "pos": [
+        36,
+        0
+      ]
+    },
+    {
+      "id": 107,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "KARPLUS",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 106,
+      "pos": [
+        40,
+        0
+      ]
+    }
+  ],
+  "cables": []
+}
