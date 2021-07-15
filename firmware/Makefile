@@ -16,19 +16,23 @@ export LINKSCRIPTDIR   	= system/linker
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
-all: embm4 h7 tests
+.PHONY: all embm4 mp1m4 patches clean flash_a7 flash_m7 flash_m4 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
+
+all: patches embm4 h7 tests
+
+# Binaries
 
 embm4: firmware_m4.h firmware_m4_vectors.h
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
 
-old_fashioned: 
+a7:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
-	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk
-	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
-	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
-	@$(MAKE) --no-print-directory tests
 
-$(BUILDDIR_MP1M4)/$(BINARYNAME).elf: mp1m4
+mp1m4: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
+
+h7:
+	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
+	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
 
 firmware_m4.h: $(BUILDDIR_MP1M4)/firmware.bin
 	xxd -i -c 8 $< $@
@@ -37,7 +41,9 @@ firmware_m4_vectors.h: $(BUILDDIR_MP1M4)/vectors.bin
 	xxd -i -c 8 $< $@
 
 $(BUILDDIR_MP1M4)/vectors.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
-	arm-none-eabi-objcopy --dump-section .isr_vector=$(BUILDDIR_MP1M4)/vectors.bin $<
+	arm-none-eabi-objcopy -O binary \
+		-j .isr_vector \
+		$< $@
 
 $(BUILDDIR_MP1M4)/firmware.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
 	arm-none-eabi-objcopy -O binary \
@@ -48,20 +54,17 @@ $(BUILDDIR_MP1M4)/firmware.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
 		-j .data \
 		$< $@
 
-a7:
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
+## Patches
 
-mp1m4:
-	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk
+PATCH_BINARIES = $(wildcard $(SHARED)/patch/*.mmpatch)
+PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_BINARIES)))
 
-h7:
-	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
-	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
+patches: $(PATCH_HEADERS)
 
-inttest: 
-	touch src/patchlist.cc 
-	touch src/patchlist.hh
-	@$(MAKE) --no-print-directory EXTDEF=METAMODULE_INTEGRATION_TESTS all
+$(SHARED)/patch/%.hh : $(SHARED)/patch/%.mmpatch 
+	cd $(SHARED)/patch && xxd -i -c 8 $(notdir $<) $(notdir $@)
+
+## Cleaning
 
 clean:
 	rm -rf $(BUILDDIR_H7M4)
@@ -89,6 +92,10 @@ $(BUILDDIR_H7M4)/$(BINARYNAME).hex:
 $(BUILDDIR_H7M7)/$(BINARYNAME).hex:
 	@$(MAKE) --no-print-directory -f makefile_m7.mk
 
+$(BUILDDIR_MP1M4)/$(BINARYNAME).elf:
+	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk
+
+## Flashing
 
 # ifeq (,$(wildcard $(JFLASHEXE)))
 #     $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
@@ -109,15 +116,14 @@ flash_h7: $(BUILDDIR_H7M7)/$(BINARYNAME).hex $(BUILDDIR_H7M4)/$(BINARYNAME).hex
 start_gdb:
 	JLinkGDBServer -select USB -device STM32MP15xx_M4_Bank1 -endian little -if SWD -speed 8000 -noir -nohalt
 
-tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
-	g++ -I../shared -std=c++17 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
-	cd $(TABLEGEN) && ./make_tables
+
+## Simulator
 
 simulate:
 	$(info Simulating screens...)
 	@cd ../screen_simulator && cargo run
 
-.PHONY: all clean flash_a7 flash_m7 flash_m4 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
+## Tests
 
 tests: module_tests core_tests util_tests mdrivlib_tests #vcv_tests
 
@@ -137,12 +143,16 @@ core_tests:
 	$(info ... Running CoreModule tests ...)
 	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile
 
+## Support files
+
+tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
+	g++ -I../shared -std=c++17 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
+	cd $(TABLEGEN) && ./make_tables
 
 generate_compile_txt:
 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \
     awk '/End of search list./ { show=0 } { if (show) printf "-I%s\n",$1 }; /#include <...> search starts here:/ { show=1; }' > compile_flags.txt
 
-#https://github.com/nickdiego/compiledb
 compile_commands:
 	compiledb make
 	compdb -p ./ list > compile_commands.tmp 2>/dev/null
