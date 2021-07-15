@@ -20,15 +20,21 @@
 	#include "testbin2.hh"
 	#include "quaddjmebe.hh"
 	#include "dualdjmebe.hh"
+	#include "mappeddjmebe.hh"
+	#include "simplequaddjmebe.hh"
+	#include "unmappeddjmebe.hh"
 
 PatchList::PatchList()
 	: _patch_addrs{
 		  testbin2_mmpatch,
+		  mappeddjmebe_mmpatch,
+		  unmappeddjmebe_mmpatch,
+		  simplequaddjmebe_mmpatch,
 		  dualdjmebe_mmpatch,
 		  quaddjmebe_mmpatch,
-		  testbin3_mmpatch,
-		  mixerpass_mmpatch,
-		  StereoVerb_mmpatch,
+		  // testbin3_mmpatch,
+		  // mixerpass_mmpatch,
+		  // StereoVerb_mmpatch,
 	  }
 {
 	for (int i = 0; i < NumPatches; i++) {

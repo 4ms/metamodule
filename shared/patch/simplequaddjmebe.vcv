@@ -55,8 +55,8 @@
             "SrcObjType": "OutputJack"
           },
           {
-            "DstModID": 129,
-            "DstObjID": 0,
+            "DstModID": 149,
+            "DstObjID": 2,
             "DstObjType": "InputJack",
             "SrcModID": 124,
             "SrcObjID": 2,
@@ -103,24 +103,8 @@
             "SrcObjType": "Knob"
           },
           {
-            "DstModID": 150,
-            "DstObjID": 0,
-            "DstObjType": "Knob",
-            "SrcModID": 124,
-            "SrcObjID": 4,
-            "SrcObjType": "Knob"
-          },
-          {
-            "DstModID": 127,
-            "DstObjID": 0,
-            "DstObjType": "Knob",
-            "SrcModID": 124,
-            "SrcObjID": 5,
-            "SrcObjType": "Knob"
-          },
-          {
             "DstModID": 126,
-            "DstObjID": 0,
+            "DstObjID": 3,
             "DstObjType": "InputJack",
             "SrcModID": 124,
             "SrcObjID": 4,
@@ -128,15 +112,15 @@
           },
           {
             "DstModID": 151,
-            "DstObjID": 0,
+            "DstObjID": 2,
             "DstObjType": "InputJack",
             "SrcModID": 124,
             "SrcObjID": 5,
             "SrcObjType": "InputJack"
           },
           {
-            "DstModID": 153,
-            "DstObjID": 0,
+            "DstModID": 125,
+            "DstObjID": 1,
             "DstObjType": "InputJack",
             "SrcModID": 124,
             "SrcObjID": 3,
@@ -151,7 +135,7 @@
             "SrcObjType": "InputJack"
           }
         ],
-        "PatchName": "quad-djmebe"
+        "PatchName": "simple-quad-djmebe"
       },
       "pos": [
         50,
@@ -181,7 +165,6 @@
           "value": 0.53700006
         }
       ],
-      "leftModuleId": 153,
       "pos": [
         23,
         1
@@ -213,85 +196,6 @@
       "pos": [
         23,
         2
-      ]
-    },
-    {
-      "id": 127,
-      "plugin": "4msCompany",
-      "version": "1.0.0",
-      "model": "CLKMULTIPLIER",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        }
-      ],
-      "rightModuleId": 153,
-      "pos": [
-        11,
-        1
-      ]
-    },
-    {
-      "id": 129,
-      "plugin": "4msCompany",
-      "version": "1.0.0",
-      "model": "QUANTIZER",
-      "params": [
-        {
-          "id": 0,
-          "value": 1.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 1.0
-        },
-        {
-          "id": 3,
-          "value": 1.0
-        },
-        {
-          "id": 4,
-          "value": 0.0
-        },
-        {
-          "id": 5,
-          "value": 1.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 1.0
-        },
-        {
-          "id": 8,
-          "value": 0.0
-        },
-        {
-          "id": 9,
-          "value": 1.0
-        },
-        {
-          "id": 10,
-          "value": 1.0
-        },
-        {
-          "id": 11,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 150,
-      "rightModuleId": 149,
-      "pos": [
-        15,
-        0
       ]
     },
     {
@@ -361,26 +265,8 @@
           "value": 0.481500059
         }
       ],
-      "leftModuleId": 129,
       "pos": [
         23,
-        0
-      ]
-    },
-    {
-      "id": 150,
-      "plugin": "4msCompany",
-      "version": "1.0.0",
-      "model": "CLKDIVIDER",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.377999991
-        }
-      ],
-      "rightModuleId": 129,
-      "pos": [
-        11,
         0
       ]
     },
@@ -439,87 +325,9 @@
         0,
         1
       ]
-    },
-    {
-      "id": 153,
-      "plugin": "4msCompany",
-      "version": "1.0.0",
-      "model": "QUANTIZER",
-      "params": [
-        {
-          "id": 0,
-          "value": 1.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 1.0
-        },
-        {
-          "id": 3,
-          "value": 1.0
-        },
-        {
-          "id": 4,
-          "value": 0.0
-        },
-        {
-          "id": 5,
-          "value": 1.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 1.0
-        },
-        {
-          "id": 8,
-          "value": 0.0
-        },
-        {
-          "id": 9,
-          "value": 1.0
-        },
-        {
-          "id": 10,
-          "value": 1.0
-        },
-        {
-          "id": 11,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 127,
-      "rightModuleId": 125,
-      "pos": [
-        15,
-        1
-      ]
     }
   ],
   "cables": [
-    {
-      "id": 87,
-      "outputModuleId": 127,
-      "outputId": 0,
-      "inputModuleId": 125,
-      "inputId": 4,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 96,
-      "outputModuleId": 150,
-      "outputId": 0,
-      "inputModuleId": 149,
-      "inputId": 4,
-      "color": "#c9b70e"
-    },
     {
       "id": 94,
       "outputModuleId": 149,
@@ -561,14 +369,6 @@
       "color": "#0986ad"
     },
     {
-      "id": 95,
-      "outputModuleId": 152,
-      "outputId": 0,
-      "inputModuleId": 150,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
       "id": 86,
       "outputModuleId": 152,
       "outputId": 2,
@@ -577,28 +377,20 @@
       "color": "#c91847"
     },
     {
-      "id": 85,
+      "id": 104,
       "outputModuleId": 152,
-      "outputId": 1,
-      "inputModuleId": 127,
-      "inputId": 0,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 109,
-      "outputModuleId": 129,
       "outputId": 0,
       "inputModuleId": 149,
-      "inputId": 0,
-      "color": "#c9b70e"
+      "inputId": 4,
+      "color": "#0986ad"
     },
     {
-      "id": 110,
-      "outputModuleId": 153,
-      "outputId": 0,
+      "id": 105,
+      "outputModuleId": 152,
+      "outputId": 1,
       "inputModuleId": 125,
-      "inputId": 0,
-      "color": "#0c8e15"
+      "inputId": 4,
+      "color": "#c9b70e"
     }
   ]
 }

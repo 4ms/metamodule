@@ -1,12 +1,12 @@
 PatchHeader:
   header_version: 1
   patch_name: dual-djmebe
-  num_modules: 5
-  num_int_cables: 2
-  num_mapped_ins: 1
+  num_modules: 4
+  num_int_cables: 1
+  num_mapped_ins: 2
   num_mapped_outs: 2
-  num_static_knobs: 12
-  num_mapped_knobs: 8
+  num_static_knobs: 9
+  num_mapped_knobs: 7
 
 PatchData:
   module_slugs:
@@ -14,7 +14,6 @@ PatchData:
     1: DJEMBE
     2: DJEMBE
     3: CLKMULTIPLIER
-    4: MULTILFO
 
   int_cables: 
       - out: 
@@ -23,20 +22,18 @@ PatchData:
         ins: 
           - module_id: 1
             jack_id: 4
-      - out: 
-          module_id: 4
-          jack_id: 3
-        ins: 
           - module_id: 2
             jack_id: 4
-          - module_id: 3
-            jack_id: 0
 
   mapped_ins: 
       - panel_jack_id: 2
         ins: 
           - module_id: 3
             jack_id: 1
+      - panel_jack_id: 6
+        ins: 
+          - module_id: 3
+            jack_id: 0
 
   mapped_outs: 
     - panel_jack_id: 0
@@ -76,23 +73,8 @@ PatchData:
     - module_id: 3
       param_id: 0
       value: 0.000000
-    - module_id: 4
-      param_id: 0
-      value: 0.000000
-    - module_id: 4
-      param_id: 1
-      value: 0.000000
-    - module_id: 4
-      param_id: 2
-      value: 0.222000
 
   mapped_knobs: 
-    - panel_knob_id: 0
-      module_id: 4
-      param_id: 0
-      curve_type: 0
-      range: 1.000000
-      offset: 0.000000
     - panel_knob_id: 1
       module_id: 1
       param_id: 0
