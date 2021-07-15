@@ -38,7 +38,7 @@ public:
 
 	void combineKnobCVFreq()
 	{
-		auto knobFreq = expTable.closest(constrain(rawKnobVal, 0.f, 1.f));
+		auto knobFreq = exp5Table.closest(constrain(rawKnobVal, 0.f, 1.f));
 		finalRate = knobFreq * setPitchMultiple(rawCvVal);
 	}
 

@@ -20,6 +20,12 @@
       "tags": []
 }, 
 {
+      "slug": "BIPOLARSOURCE",
+      "name": "Bipolarsource",
+      "description": "Bipolar Voltage Source",
+      "tags": []
+}, 
+{
       "slug": "MULTILFO",
       "name": "Multilfo",
       "description": "Multi Output LFO",

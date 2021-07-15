@@ -78,12 +78,12 @@ public:
 		int inputChannelNum = input_id % 4;
 		if (input_id < 4) {
 			signalInputs[inputChannelNum][0] = val;
-		} else {
-			if (rightConnected[input_id - 4]) {
-				signalInputs[inputChannelNum][1] = val;
-			} else {
+			if (rightConnected[input_id] == false)
 				signalInputs[inputChannelNum][1] = signalInputs[inputChannelNum][0];
-			}
+
+		} else {
+			if (rightConnected[input_id - 4])
+				signalInputs[inputChannelNum][1] = val;
 		}
 	}
 

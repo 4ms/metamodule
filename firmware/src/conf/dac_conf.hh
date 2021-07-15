@@ -28,6 +28,8 @@ struct MM_DACConf : DefaultSpiTransferConf {
 	static constexpr uint32_t NumChannelsPerChip = 2;
 
 	using AuxPin = DACConfTarget::AuxPin;
+
+	static constexpr float scaling = 0.790336f;
 };
 
 struct DACUpdateConf : public DefaultPinChangeConf {

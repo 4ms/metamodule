@@ -11,6 +11,7 @@ void init(Plugin *p)
 
 	// Add modules here 
 p->addModel(modelDjembe); 
+p->addModel(modelBipolarsource); 
 p->addModel(modelMultilfo); 
 p->addModel(modelEnvelopefollower); 
 p->addModel(modelVoltagesource); 

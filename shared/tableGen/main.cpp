@@ -210,7 +210,7 @@ void buildFoldTables()
 		float max = 0.f;
 		int start = (fold_size - 1) / 2;
 		for (int i = 0; i < 513; ++i) {
-			max = std::max(std::fabsf(fold[i + start]), max);
+			max = std::max(fabsf(fold[i + start]), max);
 			// the attenuation factor accounts for interpolation error, so
 			// we don't overestimate the 1/x curve and amplify to clipping
 			if (max == 0.0f)
@@ -270,9 +270,19 @@ void buildTrigTables()
 	}
 	myfile << "};" << endl;
 
-	const float voltageRange = 5.f;
-	const float powRange = (float)(trigTableLength - 1) / voltageRange;
-	myfile << "extern const InterpArray<float," << trigTableLength << "> expTable = " << endl;
+	float voltageRange = 5.f;
+	float powRange = (float)(trigTableLength - 1) / voltageRange;
+	myfile << "extern const InterpArray<float," << trigTableLength << "> exp5Table = " << endl;
+	myfile << "{";
+	for (int i = 0; i < trigTableLength; i++) {
+		float index = (float)i / powRange;
+		myfile << format_float(powf(2.0f, index)) << ",";
+	}
+	myfile << "};" << endl;
+
+	voltageRange = 10.f;
+	powRange = (float)(trigTableLength - 1) / voltageRange;
+	myfile << "extern const InterpArray<float," << trigTableLength << "> exp10Table = " << endl;
 	myfile << "{";
 	for (int i = 0; i < trigTableLength; i++) {
 		float index = (float)i / powRange;

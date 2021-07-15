@@ -96,6 +96,7 @@ uint32_t AudioStream::get_dac_output(int output_id)
 	auto raw_out = player.get_panel_output(output_id);
 	raw_out *= -1.f;
 	auto scaled_out = AudioFrame::scaleOutput(raw_out);
+	scaled_out *= MM_DACConf::scaling;
 	scaled_out += 0x00800000;
 	return scaled_out;
 }

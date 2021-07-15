@@ -63,9 +63,9 @@ public:
 		if (freqJack.isChanged()) {
 			float val = freqJack.getValue();
 			if (val >= 0.f)
-				cv_frequency = expTable.closest(constrain(val, 0.f, 1.f));
+				cv_frequency = exp5Table.closest(constrain(val, 0.f, 1.f));
 			else
-				cv_frequency = 1.0f / expTable.closest(constrain(-val, 0.0f, 1.f));
+				cv_frequency = 1.0f / exp5Table.closest(constrain(-val, 0.0f, 1.f));
 			combineKnobCVFreq();
 		}
 
@@ -84,7 +84,7 @@ public:
 	virtual void set_param(const int param_id, const float val) override
 	{
 		if (param_id == 0) {
-			auto expoval = expTable.closest(constrain(val, 0.f, 1.f));
+			auto expoval = exp5Table.closest(constrain(val, 0.f, 1.f));
 			knob_frequency = expoval * expoval;
 			combineKnobCVFreq();
 		}

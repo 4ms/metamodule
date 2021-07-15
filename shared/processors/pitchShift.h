@@ -40,9 +40,9 @@ public:
 		// pitchToFreq = ((expf(shiftAmount * 0.05776f) - 1.0f) * -1.0f) / (windowSize * 0.001f);
 
 		if (shiftAmount >= 0)
-			pitchToFreq = ((expTable.interp(shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize);
+			pitchToFreq = ((exp5Table.interp(shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize);
 		else {
-			pitchToFreq = ((1.0f / expTable.interp(-shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize);
+			pitchToFreq = ((1.0f / exp5Table.interp(-shiftAmount / 60.0f) - 1.0f) * -1.0f) / (windowSize);
 		}
 
 		phaccu += pitchToFreq;

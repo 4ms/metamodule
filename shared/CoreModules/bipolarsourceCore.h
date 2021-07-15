@@ -6,7 +6,7 @@
 
 using namespace MathTools;
 
-class VoltagesourceCore : public CoreProcessor {
+class BipolarsourceCore : public CoreProcessor {
 	static inline const int NumInJacks = 1;
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 1;
@@ -14,7 +14,7 @@ class VoltagesourceCore : public CoreProcessor {
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{};
 	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{};
 	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{};
-	static inline const StaticString<LongNameChars> description{"Voltage Source"};
+	static inline const StaticString<LongNameChars> description{"Bipolar Voltage Source"};
 
 	// clang-format off
 	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
@@ -25,16 +25,16 @@ class VoltagesourceCore : public CoreProcessor {
 public:
 	virtual void update(void) override {}
 
-	VoltagesourceCore() {}
+	BipolarsourceCore() {}
 
 	virtual void set_param(int const param_id, const float val) override
 	{
 		switch (param_id) {
 			case 0:
-				output1 = val;
+				output1 = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
 			case 1:
-				output2 = val;
+				output2 = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
 		}
 	}
@@ -62,11 +62,12 @@ public:
 
 	static std::unique_ptr<CoreProcessor> create()
 	{
-		return std::make_unique<VoltagesourceCore>();
+		return std::make_unique<BipolarsourceCore>();
 	}
-	static constexpr char typeID[20] = "VOLTAGESOURCE";
+	static constexpr char typeID[20] = "BIPOLARSOURCE";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	float output1, output2;
+	float output1;
+	float output2;
 };

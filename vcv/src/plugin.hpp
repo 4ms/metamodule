@@ -11,6 +11,7 @@ extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file 
 extern Model *modelDjembe; 
+extern Model *modelBipolarsource; 
 extern Model *modelMultilfo; 
 extern Model *modelEnvelopefollower; 
 extern Model *modelVoltagesource; 
