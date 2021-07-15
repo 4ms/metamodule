@@ -37,9 +37,17 @@ DEPDIR := $(BUILDDIR)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(basename $<).d
 TMPFILE = $(BUILDDIR)/runtests.out
 
-.PHONY: all tests clean
+.PHONY: all tests clean patches
 
-all: $(DOCTESTHEADER_DIR)/doctest.h tests
+all: $(DOCTESTHEADER_DIR)/doctest.h patches tests
+
+PATCH_BINARIES = $(wildcard $(TEST_DIR)/patches/*.mmpatch)
+PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_BINARIES)))
+
+patches: $(PATCH_HEADERS)
+
+%.hh : %.mmpatch 
+	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
