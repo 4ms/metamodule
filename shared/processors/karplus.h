@@ -1,16 +1,17 @@
 #pragma once
 
-#include "../util/math_tables.hh"
-//#include "debug.hh"
-#include "math.hh"
 #include "tools/dcBlock.h"
 #include "tools/delayLine.h"
 #include "tools/kneeCompress.h"
+#include "util/math.hh"
+#include "util/math_tables.hh"
 #include <cmath>
 
 using namespace MathTools;
 
 class Karplus {
+	static constexpr int taps = 6;
+
 public:
 	float update(float input)
 	{
@@ -53,14 +54,13 @@ public:
 	}
 
 private:
-	static const int taps = 6;
-	float apPeriods[taps];
+	alignas(16) float apPeriods[taps];
+
+	alignas(16) DelayLine<2400> delayLine[taps];
+
 	float sampleRate = 48000;
 	float spread = 1.0f;
-
 	float feedback = 0.995f;
-
-	DelayLine<2400> delayLine[taps];
 
 	float periodToSamples(float period)
 	{
@@ -68,6 +68,7 @@ private:
 	}
 	void update_delay_samples()
 	{
+		//NEON note: cannot vectorize this because of dependence between apPeriods[x] and [x-1]
 		for (int i = 1; i < taps; i++) {
 			apPeriods[i] = apPeriods[i - 1] / spread;
 			delayLine[i].set_delay_samples(periodToSamples(apPeriods[i]));
