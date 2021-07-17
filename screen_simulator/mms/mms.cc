@@ -8,6 +8,7 @@
 
 #include "pages/page_manager.hh"
 
+using namespace ScreenSimulator;
 struct Simulator {
 	PatchList patch_list;
 	MetaModule::PatchPlayer patch_player;
@@ -28,9 +29,9 @@ struct Simulator {
 
 	bool init()
 	{
-		auto &patch = patch_list.cur_patch();
-		bool loaded_ok = patch_player.load_patch(patch);
-		if (!loaded_ok)
+		patch_list.set_cur_patch_index(0);
+		bool ok = patch_player.load_patch(patch_list.cur_patch());
+		if (!ok)
 			return false;
 		pages.init();
 		return true;
@@ -55,13 +56,19 @@ extern "C" void rotary_back()
 
 extern "C" void rotary_push_fwd()
 {
-	sim.patch_list.next_patch();
+	uint32_t cur_patch_index = sim.patch_list.cur_patch_index();
+	uint32_t new_patch_index = (cur_patch_index == 0) ? (sim.patch_list.NumPatches - 1) : cur_patch_index - 1;
+	sim.patch_player.unload_patch();
+	sim.patch_list.set_cur_patch_index(new_patch_index);
 	sim.patch_player.load_patch(sim.patch_list.cur_patch());
 }
 
 extern "C" void rotary_push_back()
 {
-	sim.patch_list.prev_patch();
+	uint32_t cur_patch_index = sim.patch_list.cur_patch_index();
+	uint32_t new_patch_index = cur_patch_index == (sim.patch_list.NumPatches - 1) ? 0 : cur_patch_index + 1;
+	sim.patch_player.unload_patch();
+	sim.patch_list.set_cur_patch_index(new_patch_index);
 	sim.patch_player.load_patch(sim.patch_list.cur_patch());
 }
 

@@ -48,7 +48,7 @@ PatchList::PatchList()
 		  // MARK: Add patches below here:
 	  }
 {
-	for (int i = 0; i < NumPatches; i++) {
+	for (uint32_t i = 0; i < NumPatches; i++) {
 		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
 	}
 }
