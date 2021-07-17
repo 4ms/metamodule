@@ -4,7 +4,7 @@
 #include "CoreModules/panel_node.hh"
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
-#ifndef TESTPROJECT
+#if !defined(TESTPROJECT) && !defined(SIMULATOR)
 	#include "debug.hh"
 #else
 	#include "../stubs/debug.hh"
