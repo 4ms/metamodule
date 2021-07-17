@@ -17,6 +17,7 @@ public:
 	{
 		float output = input * taps;
 
+		//NEON note: cannot vectorize because "data ref analysis failed"
 		output += delayLine[0].update(input + delayLine[taps - 1].output * feedback);
 		for (int i = 1; i < taps; i++) {
 			output += delayLine[i].update(input + delayLine[i].output * feedback);

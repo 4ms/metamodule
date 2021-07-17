@@ -397,6 +397,7 @@ public:
 		}
 		return s;
 	}
+
 	PatchData &get_data()
 	{
 		return pd;

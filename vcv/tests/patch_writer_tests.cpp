@@ -4,7 +4,7 @@
 
 TEST_CASE("squash_ids() works")
 {
-	SUBCASE("y = id[x]  transfomrs to squashed[y] = x")
+	SUBCASE("y = id[x]  transforms to squashed[y] = x")
 	{
 		std::vector<int> ids = {1, 6, 25, 30, 9, 0, 2};
 		auto sq = PatchFileWriter::squash_ids(ids);
