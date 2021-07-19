@@ -16,8 +16,8 @@ namespace MetaModule
 namespace StaticBuffers
 {
 static inline __attribute__((section(".sysram"))) AudioStream::AudioStreamBlock audio_dma_block[4];
-static inline /*__attribute__((section(".sysram")))*/ uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
-static inline /*__attribute__((section(".sysram")))*/ MMScreenBufferConf::FrameBufferT screen_framebuf;
+static inline uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+static inline MMScreenBufferConf::FrameBufferT screen_framebuf;
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
 static inline __attribute__((section(".sysram"))) AuxSignalStreamBlock auxsignal_block[2];
 

@@ -8,6 +8,8 @@ struct StreamConf {
 		static constexpr int DMABlockSize = BlockSize * NumDMAHalfTransfers;
 		using SampleT = int32_t;
 		static inline const int SampleBits = 24;
+		static inline const int NumInChans = 6;
+		static inline const int NumOutChans = 8;
 	};
 
 	struct DAC {

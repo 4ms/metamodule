@@ -24,9 +24,10 @@ using AudioConf = StreamConf::Audio;
 class AudioStream {
 
 public:
-	using AudioFrame = GenericAudioFrame<AudioConf::SampleT, AudioConf::SampleBits>;
-	using AudioStreamBlock = std::array<AudioFrame, AudioConf::BlockSize>;
-	enum AudioChannels { LEFT, RIGHT };
+	using AudioInFrame = AudioFrame<AudioConf::SampleT, AudioConf::SampleBits, AudioConf::NumInChans>;
+	using AudioOutFrame = AudioFrame<AudioConf::SampleT, AudioConf::SampleBits, AudioConf::NumOutChans>;
+	using AudioInStreamBlock = std::array<AudioInFrame, AudioConf::BlockSize>;
+	using AudioOutStreamBlock = std::array<AudioOutFrame, AudioConf::BlockSize>;
 
 	AudioStream(PatchList &patches,
 				PatchPlayer &patchplayer,
@@ -35,20 +36,21 @@ public:
 				ParamCache &cache,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
-				AudioStreamBlock (&buffers)[4],
+				AudioInStreamBlock (&in_buffers)[2],
+				AudioOutStreamBlock (&out_buffers)[2],
 				AuxSignalStreamBlock (&auxsig)[2]);
 	void start();
 
-	void process(AudioStreamBlock &in, AudioStreamBlock &out, ParamBlock &params, AuxSignalStreamBlock &aux);
+	void process(AudioInStreamBlock &in, AudioOutStreamBlock &out, ParamBlock &params, AuxSignalStreamBlock &aux);
 
 private:
 	ParamCache &cache;
 	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
-	AudioStreamBlock &tx_buf_1;
-	AudioStreamBlock &tx_buf_2;
-	AudioStreamBlock &rx_buf_1;
-	AudioStreamBlock &rx_buf_2;
+	AudioOutStreamBlock &tx_buf_1;
+	AudioOutStreamBlock &tx_buf_2;
+	AudioInStreamBlock &rx_buf_1;
+	AudioInStreamBlock &rx_buf_2;
 	AuxSignalStreamBlock &auxsig_1;
 	AuxSignalStreamBlock &auxsig_2;
 
@@ -66,8 +68,8 @@ private:
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	uint32_t get_dac_output(int output_id);
-	void output_silence(AudioStreamBlock &out, AuxSignalStreamBlock &aux);
-	void passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out, AuxSignalStreamBlock &aux);
+	void output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
+	void passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
@@ -80,8 +82,5 @@ private:
 	static constexpr unsigned NumGateOutputs = PanelDef::NumGateOut;
 	static constexpr unsigned NumAudioOutputs = PanelDef::NumAudioOut;
 	static constexpr unsigned NumCVOutputs = PanelDef::NumDACOut;
-
-	static constexpr uint32_t LEFT_OUT = (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5) ? 1 : 0;
-	static constexpr uint32_t RIGHT_OUT = 1 - LEFT_OUT;
 };
 } // namespace MetaModule

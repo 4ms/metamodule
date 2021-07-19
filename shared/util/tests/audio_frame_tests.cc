@@ -6,23 +6,23 @@ TEST_CASE("audio_frame_tests: input_scales")
 {
 	AudioFrame a;
 
-	a.l = 0x00000000;
-	CHECK(((float)AudioFrame::scaleInput(a.l)) == doctest::Approx(0.0));
+	a.chan[0] = 0x00000000;
+	CHECK(((float)AudioFrame::scaleInput(a.chan[0])) == doctest::Approx(0.0));
 
-	a.l = 0x00400000;
-	CHECK(((float)AudioFrame::scaleInput(a.l)) == doctest::Approx(0.5));
+	a.chan[0] = 0x00400000;
+	CHECK(((float)AudioFrame::scaleInput(a.chan[0])) == doctest::Approx(0.5));
 
-	a.l = 0x007FFFFF;
-	CHECK(((float)AudioFrame::scaleInput(a.l)) == doctest::Approx(1.0));
+	a.chan[0] = 0x007FFFFF;
+	CHECK(((float)AudioFrame::scaleInput(a.chan[0])) == doctest::Approx(1.0));
 
-	a.r = 0x800000;
-	CHECK(((float)AudioFrame::scaleInput(a.r)) == doctest::Approx(-1.0));
+	a.chan[1] = 0x800000;
+	CHECK(((float)AudioFrame::scaleInput(a.chan[1])) == doctest::Approx(-1.0));
 
-	a.r = 0xC00000;
-	CHECK(((float)AudioFrame::scaleInput(a.r)) == doctest::Approx(-0.5));
+	a.chan[1] = 0xC00000;
+	CHECK(((float)AudioFrame::scaleInput(a.chan[1])) == doctest::Approx(-0.5));
 
-	a.r = 0xFFFFFF;
-	CHECK(((float)AudioFrame::scaleInput(a.r)) == doctest::Approx(0.0));
+	a.chan[1] = 0xFFFFFF;
+	CHECK(((float)AudioFrame::scaleInput(a.chan[1])) == doctest::Approx(0.0));
 }
 
 TEST_CASE("audio_frame_tests: output_scales")

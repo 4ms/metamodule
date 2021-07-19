@@ -1,10 +1,9 @@
 #include "math.hh"
 #include <stdint.h>
 
-template<typename SampleType, int UsedBits = sizeof(SampleType) * 8>
-struct GenericAudioFrame {
-	SampleType l;
-	SampleType r;
+template<typename SampleType, int UsedBits = sizeof(SampleType) * 8, int NumChannels = 2>
+struct AudioFrame {
+	SampleType chan[NumChannels];
 
 public:
 	static constexpr inline unsigned kSampleTypeBits = sizeof(SampleType) * 8;
