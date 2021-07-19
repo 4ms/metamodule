@@ -24,5 +24,5 @@
 # $(BUILDDIR)/$(SHARED)/CoreModules/multilfoCore.o: OPTFLAG = -O0
 
 #FixMe: for some reason gcc uses invalid alignmet in a VST1.8 instruction (base address is aligned to 4 bytes, but instruction requires 8-byte alignment). Why?? Setting -O0 fixes it...
-$(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
+# $(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
 #-----------------------------------

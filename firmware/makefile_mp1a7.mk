@@ -166,15 +166,15 @@ MCU = -mcpu=cortex-a7 \
 	  -munaligned-access \
 	  -mthumb-interwork \
 	  -mtune=cortex-a7 \
+	  -mno-unaligned-access \
 	  -funsafe-math-optimizations \
 	  -mvectorize-with-neon-quad \
 	  -fopt-info-vec-missed=vec.miss 
 	  # -ftree-vectorizer-verbose=n -fdump-tree-vect
 
-	  # -mno-unaligned-access \ # slower than unsafe-math-optimizations
 	  # -ffast-math \ # Karplus is silent
 
-# Note: -funsafe-math-optimizations or -mno-unaligned-access 
+# Note: -funsafe-math-optimizations and/or -mno-unaligned-access 
 # must be here or else we get alignment errors in some modules (e.g. Karplus)
 #
 # Example bad instruction: 
@@ -183,8 +183,6 @@ MCU = -mcpu=cortex-a7 \
 # See: https://gcc.gnu.org/projects/tree-ssa/vectorization.html quote: 
 # "To enable vectorization of floating point reductions use -ffast-math or -fassociative-math."
 # (note that -funsafe-math-optimizations implies -fassociative-math: https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html )
-#
-# Or you can specify -ffast-math because that implies -funsafe-math-optimizations, but that actually breaks Karplus (why?)
 
 AFLAGS = -mcpu=cortex-a7 \
 		 -mlittle-endian \
