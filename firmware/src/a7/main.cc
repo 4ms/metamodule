@@ -6,7 +6,7 @@
 #include "a7/conf/i2c_conf.hh"
 #include "a7/static_buffers.hh"
 #include "audio.hh"
-#include "codec_WM8731.hh"
+#include "codec_PCM3168.hh"
 #include "conf/dac_conf.hh"
 #include "debug.hh"
 #include "drivers/pin.hh"
@@ -29,9 +29,9 @@ struct Hardware : AppStartup, Debug, SharedBus {
 		: SharedBus{i2c_conf_codec}
 	{}
 
-	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
+	CodecPCM3168 codec0{SharedBus::i2c, codec0_sai_conf};
+	CodecPCM3168 codec1{SharedBus::i2c, codec1_sai_conf};
 	// 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
-	AnalogOutT dac;
 } _hw;
 
 } // namespace MetaModule
@@ -48,19 +48,19 @@ void main()
 	UiAudioMailbox mbox;
 
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
+	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
 	AudioStream audio{patch_list,
 					  patch_player,
-					  _hw.codec,
-					  _hw.dac,
+					  _hw.codec1,
 					  param_cache,
 					  mbox,
 					  StaticBuffers::param_blocks,
-					  StaticBuffers::audio_dma_block,
+					  StaticBuffers::audio_in_dma_block,
+					  StaticBuffers::audio_out_dma_block,
 					  StaticBuffers::auxsignal_block};
 
-	SharedBus::i2c.deinit();
+	// SharedBus::i2c.deinit();
 
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
@@ -72,14 +72,14 @@ void main()
 	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	// // Tell M4 we're done with init
-	HWSemaphore<MainCoreReady>::unlock();
+	// HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for M4 to be ready
-	while (HWSemaphore<M4_ready>::is_locked())
-		;
+	// while (HWSemaphore<M4_ready>::is_locked())
+	// ;
 
 	param_cache.clear();
-	ui.start();
+	// ui.start();
 	audio.start();
 
 	while (true) {
