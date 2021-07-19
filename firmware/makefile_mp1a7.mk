@@ -50,8 +50,8 @@ SOURCES = \
 		  $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc \
 		  $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
-		  $(DRIVERLIB)/drivers/sai.cc \
-		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
+		  $(TARGETDEVICEDIR)/drivers/sai_tdm.cc \
+		  $(DRIVERLIB)/drivers/codec_PCM3168.cc \
 		  $(SHARED)/util/math_tables.cc \
 		  $(CORE_SRC)/main.cc\
 		  $(CORE_SRC)/aux_core_main.cc\
@@ -62,21 +62,22 @@ SOURCES = \
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(LIBDIR)/printf/printf.c \
 		  $(MFSRC) \
-		  $(NE10DIR)/common/NE10_mask_table.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
-		  $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
-		  $(NE10DIR)/modules/dsp/NE10_fir.c \
-		  $(NE10DIR)/modules/dsp/NE10_fir_init.c \
-		  $(NE10DIR)/modules/dsp/NE10_iir.c \
-		  $(NE10DIR)/modules/dsp/NE10_iir_init.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
-		  $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
-		  $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
+
+		  # $(NE10DIR)/common/NE10_mask_table.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
+		  # $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fir.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fir_init.c \
+		  # $(NE10DIR)/modules/dsp/NE10_iir.c \
+		  # $(NE10DIR)/modules/dsp/NE10_iir_init.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
+		  # $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
 
 NE10_ASM_OPTIMIZATION = 1
 
