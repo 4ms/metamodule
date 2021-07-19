@@ -1,8 +1,11 @@
 #pragma once
+#include "drivers/codec_PCM3168.hh"
 #include <cstdint>
 
 struct StreamConf {
 	struct Audio {
+		using CodecT = mdrivlib::CodecPCM3168;
+
 		static constexpr int BlockSize = 64;
 		static constexpr int NumDMAHalfTransfers = 2;
 		static constexpr int DMABlockSize = BlockSize * NumDMAHalfTransfers;
