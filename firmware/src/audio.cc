@@ -21,13 +21,12 @@ constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 // Gate In -> audio OUt latency: 1.90ms
 AudioStream::AudioStream(PatchList &patches,
 						 PatchPlayer &patchplayer,
-						 ICodec &codec,
-						 AnalogOutT &dac,
+						 CodecT &codec,
 						 ParamCache &param_cache,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
-						 AudioInStreamBlock (&in_buffers)[2],
-						 AudioOutStreamBlock (&out_buffers)[2],
+						 AudioInStreamBlock (&in_buffers)[2],	//for 2 codecs, this will be [4]
+						 AudioOutStreamBlock (&out_buffers)[2], //ditto
 						 AuxSignalStreamBlock (&auxsig)[2])
 	: cache{param_cache}
 	, mbox{uiaudiomailbox}
@@ -86,16 +85,6 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id)
 	return scaled_out;
 	// return compressor.compress(scaled_out);
 }
-
-// uint32_t AudioStream::get_dac_output(int output_id)
-// {
-// 	auto raw_out = player.get_panel_output(output_id);
-// 	raw_out *= -1.f;
-// 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
-// 	scaled_out *= MM_DACConf::scaling;
-// 	scaled_out += 0x00800000;
-// 	return scaled_out;
-// }
 
 // Todo: integrate params.buttons[]
 

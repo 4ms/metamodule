@@ -1,6 +1,5 @@
 #pragma once
 #include "auxsignal.hh"
-#include "conf/dac_conf.hh"
 #include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
 #include "drivers/cycle_counter.hh"
@@ -19,6 +18,7 @@ using namespace mdrivlib;
 namespace MetaModule
 {
 using AudioConf = StreamConf::Audio;
+using CodecT = StreamConf::Audio::CodecT;
 
 // Todo: we don't need a codec virtual class, just use a type alias
 class AudioStream {
@@ -31,8 +31,7 @@ public:
 
 	AudioStream(PatchList &patches,
 				PatchPlayer &patchplayer,
-				ICodec &codec,
-				AnalogOutT &dac,
+				CodecT &codec,
 				ParamCache &cache,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
@@ -54,7 +53,7 @@ private:
 	AuxSignalStreamBlock &auxsig_1;
 	AuxSignalStreamBlock &auxsig_2;
 
-	ICodec &codec_;
+	CodecT &codec_;
 	uint32_t sample_rate_;
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
@@ -67,7 +66,6 @@ private:
 	uint32_t _mute_ctr = 0;
 
 	AudioConf::SampleT get_audio_output(int output_id);
-	uint32_t get_dac_output(int output_id);
 	void output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
 	void passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
 	void set_input(int input_id, AudioConf::SampleT in);
