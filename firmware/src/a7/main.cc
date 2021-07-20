@@ -7,7 +7,6 @@
 #include "a7/static_buffers.hh"
 #include "audio.hh"
 #include "codec_PCM3168.hh"
-#include "conf/dac_conf.hh"
 #include "debug.hh"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"

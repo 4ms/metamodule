@@ -176,8 +176,7 @@ void AudioStream::output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock 
 }
 
 static TriangleOscillator<48000> tri1{100};
-// static TriangleOscillator<48000> tri2{200};
-static uint32_t tri2 = 0;
+static TriangleOscillator<48000> tri2{200};
 void AudioStream::passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux)
 {
 
@@ -185,16 +184,21 @@ void AudioStream::passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock 
 	auto aux_ = aux.begin();
 	for (auto &out_ : out) {
 		tri1.update();
-		tri2++;
-		// tri2.update();
-		out_.chan[0] = in_->chan[0];
-		out_.chan[1] = in_->chan[1];
-		out_.chan[2] = in_->chan[2];
-		out_.chan[3] = in_->chan[3];
-		out_.chan[4] = in_->chan[4];
-		out_.chan[5] = in_->chan[5];
-		out_.chan[6] = tri2 >> 8;
-		out_.chan[7] = tri1.val() >> 8;
+		tri2.update();
+		// out_.chan[0] = in_->chan[0];
+		// out_.chan[1] = in_->chan[1];
+		// out_.chan[2] = in_->chan[2];
+		// out_.chan[3] = in_->chan[3];
+		// out_.chan[4] = in_->chan[4];
+		// out_.chan[5] = in_->chan[5];
+		out_.chan[0] = tri1.val() >> 8;
+		out_.chan[1] = tri2 >> 8;
+		out_.chan[2] = tri1.val() >> 8;
+		out_.chan[3] = tri2 >> 8;
+		out_.chan[4] = tri1.val() >> 8;
+		out_.chan[5] = tri2 >> 8;
+		out_.chan[6] = tri1.val() >> 8;
+		out_.chan[7] = tri2 >> 8;
 		aux_->clock_out = 0;
 		aux_++;
 		in_++;
