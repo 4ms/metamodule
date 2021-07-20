@@ -1,5 +1,6 @@
 #include "audio.hh"
 #include "arch.hh"
+#include "auxsignal.hh"
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
@@ -46,7 +47,7 @@ AudioStream::AudioStream(PatchList &patches,
 	codec_.init();
 	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
 							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
-							AudioConf::DMABlockSize * 2);
+							AudioConf::DMAOutBlockSize);
 	codec_.set_callbacks(
 		[this]() {
 			Debug::Pin0::high();
