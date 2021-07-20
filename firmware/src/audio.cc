@@ -13,7 +13,7 @@
 
 namespace MetaModule
 {
-constexpr bool DEBUG_PASSTHRU_AUDIO = false;
+constexpr bool DEBUG_PASSTHRU_AUDIO = true;
 // constexpr bool DEBUG_NE10_FFT = true;
 // static FFTfx fftfx;
 // static Convolver fftfx;
@@ -94,11 +94,17 @@ void AudioStream::process(AudioInStreamBlock &in,
 						  ParamBlock &param_block,
 						  AuxSignalStreamBlock &aux)
 {
-	param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
-	load_measure.start_measurement();
+	// param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
+	// load_measure.start_measurement();
 
-	cache.write_sync(param_block.params[0], param_block.metaparams);
-	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
+	// cache.write_sync(param_block.params[0], param_block.metaparams);
+	// mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
+
+	//Debug: passthrough audio and exit
+	if constexpr (DEBUG_PASSTHRU_AUDIO) {
+		passthrough_audio(in, out, aux);
+		return;
+	}
 
 	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch
 	// Todo: fade down before setting audio_is_muted to true
@@ -112,11 +118,6 @@ void AudioStream::process(AudioInStreamBlock &in,
 	// 	fftfx.process(in, out);
 	// 	return;
 	// }
-
-	if constexpr (DEBUG_PASSTHRU_AUDIO) {
-		passthrough_audio(in, out, aux);
-		return;
-	}
 
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 
@@ -174,19 +175,26 @@ void AudioStream::output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock 
 	}
 }
 
+static TriangleOscillator<48000> tri1{100};
+// static TriangleOscillator<48000> tri2{200};
+static uint32_t tri2 = 0;
 void AudioStream::passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux)
 {
+
 	auto in_ = in.begin();
 	auto aux_ = aux.begin();
 	for (auto &out_ : out) {
+		tri1.update();
+		tri2++;
+		// tri2.update();
 		out_.chan[0] = in_->chan[0];
 		out_.chan[1] = in_->chan[1];
 		out_.chan[2] = in_->chan[2];
 		out_.chan[3] = in_->chan[3];
 		out_.chan[4] = in_->chan[4];
 		out_.chan[5] = in_->chan[5];
-		out_.chan[6] = 0;
-		out_.chan[7] = 0;
+		out_.chan[6] = tri2 >> 8;
+		out_.chan[7] = tri1.val() >> 8;
 		aux_->clock_out = 0;
 		aux_++;
 		in_++;
