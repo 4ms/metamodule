@@ -9,6 +9,7 @@
 // #include "convolve.hh"
 #include "panel.hh"
 #include "patch_player.hh"
+#include "util/math_tables.hh"
 #include "util/zip.hh"
 
 namespace MetaModule
@@ -201,13 +202,13 @@ void AudioStream::sines_out(AudioOutStreamBlock &out)
 	static PhaseAccum<48000> phase8{8000};
 
 	for (auto &o : out) {
-		o.chan[0] = phase1.Process() >> 8;
-		o.chan[1] = phase2.Process() >> 8;
-		o.chan[2] = phase3.Process() >> 8;
-		o.chan[3] = phase4.Process() >> 8;
-		o.chan[4] = phase5.Process() >> 8;
-		o.chan[6] = phase7.Process() >> 8;
-		o.chan[7] = phase8.Process() >> 8;
+		o.chan[0] = sinTable.interp_wrap((float)phase1.Process() / (float)(0xFFFFFFFFUL));
+		o.chan[1] = sinTable.interp_wrap((float)phase2.Process() / (float)(0xFFFFFFFFUL));
+		o.chan[2] = sinTable.interp_wrap((float)phase3.Process() / (float)(0xFFFFFFFFUL));
+		o.chan[3] = sinTable.interp_wrap((float)phase4.Process() / (float)(0xFFFFFFFFUL));
+		o.chan[4] = sinTable.interp_wrap((float)phase5.Process() / (float)(0xFFFFFFFFUL));
+		o.chan[6] = sinTable.interp_wrap((float)phase7.Process() / (float)(0xFFFFFFFFUL));
+		o.chan[7] = sinTable.interp_wrap((float)phase8.Process() / (float)(0xFFFFFFFFUL));
 	}
 }
 
