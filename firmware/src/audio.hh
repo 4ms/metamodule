@@ -66,12 +66,14 @@ private:
 	uint32_t _mute_ctr = 0;
 
 	AudioConf::SampleT get_audio_output(int output_id);
-	void output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
-	void passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
+
+	void output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
+	void passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
+	void sines_out(AudioOutStreamBlock &out);
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;

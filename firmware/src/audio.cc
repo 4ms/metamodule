@@ -18,8 +18,6 @@ constexpr bool DEBUG_PASSTHRU_AUDIO = true;
 // static FFTfx fftfx;
 // static Convolver fftfx;
 
-// Clock in -> clock out latency: 1.33ms (one audio DMA half-transfer)
-// Gate In -> audio OUt latency: 1.90ms
 AudioStream::AudioStream(PatchList &patches,
 						 PatchPlayer &patchplayer,
 						 CodecT &codec,
@@ -175,33 +173,41 @@ void AudioStream::output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock 
 	}
 }
 
-static TriangleOscillator<48000> tri1{100};
-static TriangleOscillator<48000> tri2{200};
 void AudioStream::passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux)
 {
 
-	auto in_ = in.begin();
-	auto aux_ = aux.begin();
-	for (auto &out_ : out) {
-		tri1.update();
-		tri2.update();
-		// out_.chan[0] = in_->chan[0];
-		// out_.chan[1] = in_->chan[1];
-		// out_.chan[2] = in_->chan[2];
-		// out_.chan[3] = in_->chan[3];
-		// out_.chan[4] = in_->chan[4];
-		// out_.chan[5] = in_->chan[5];
-		out_.chan[0] = tri1.val() >> 8;
-		out_.chan[1] = tri2 >> 8;
-		out_.chan[2] = tri1.val() >> 8;
-		out_.chan[3] = tri2 >> 8;
-		out_.chan[4] = tri1.val() >> 8;
-		out_.chan[5] = tri2 >> 8;
-		out_.chan[6] = tri1.val() >> 8;
-		out_.chan[7] = tri2 >> 8;
-		aux_->clock_out = 0;
-		aux_++;
-		in_++;
+	for (auto [i, o, a] : zip(in, out, aux)) {
+		o.chan[0] = i.chan[0];
+		o.chan[1] = i.chan[1];
+		o.chan[2] = i.chan[2];
+		o.chan[3] = i.chan[3];
+		o.chan[4] = i.chan[4];
+		o.chan[5] = i.chan[5];
+		o.chan[6] = (i.chan[0] + i.chan[1]) / 2;
+		o.chan[7] = (i.chan[2] + i.chan[3]) / 2;
+		a.clock_out = 0;
+	}
+}
+
+void AudioStream::sines_out(AudioOutStreamBlock &out)
+{
+	static PhaseAccum<48000> phase1{80};
+	static PhaseAccum<48000> phase2{200};
+	static PhaseAccum<48000> phase3{250};
+	static PhaseAccum<48000> phase4{700};
+	static PhaseAccum<48000> phase5{900};
+	static PhaseAccum<48000> phase6{2200};
+	static PhaseAccum<48000> phase7{6500};
+	static PhaseAccum<48000> phase8{8000};
+
+	for (auto &o : out) {
+		o.chan[0] = phase1.Process() >> 8;
+		o.chan[1] = phase2.Process() >> 8;
+		o.chan[2] = phase3.Process() >> 8;
+		o.chan[3] = phase4.Process() >> 8;
+		o.chan[4] = phase5.Process() >> 8;
+		o.chan[6] = phase7.Process() >> 8;
+		o.chan[7] = phase8.Process() >> 8;
 	}
 }
 
