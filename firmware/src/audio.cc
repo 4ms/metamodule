@@ -14,7 +14,8 @@
 
 namespace MetaModule
 {
-constexpr bool DEBUG_PASSTHRU_AUDIO = true;
+constexpr bool DEBUG_PASSTHRU_AUDIO = false;
+constexpr bool DEBUG_SINEOUT_AUDIO = true;
 // constexpr bool DEBUG_NE10_FFT = true;
 // static FFTfx fftfx;
 // static Convolver fftfx;
@@ -103,6 +104,9 @@ void AudioStream::process(AudioInStreamBlock &in,
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
 		passthrough_audio(in, out, aux);
 		return;
+	} else if (DEBUG_SINEOUT_AUDIO) {
+		sines_out(in, out);
+		return;
 	}
 
 	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch
@@ -120,13 +124,14 @@ void AudioStream::process(AudioInStreamBlock &in,
 
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 
-		int i;
-
+		//Handle jacks being plugged/unplugged
 		propagate_sense_pins(params_);
 
 		//Pass audio/CV inputs to modules
 		for (int i = 0; i < AudioConf::NumInChans; i++)
 			player.set_panel_input(i, AudioInFrame::scaleInput(in_.chan[i]));
+		// for (auto [i, inchan] : countzip(in_.chan))
+		// 	player.set_panel_input(i, AudioInFrame::scaleInput(inchan));
 
 		//Pass Knob values to modules
 		int i = 0;
@@ -134,6 +139,8 @@ void AudioStream::process(AudioInStreamBlock &in,
 			player.set_panel_param(i, knob);
 			i++;
 		}
+		// for (auto [i, knob] : countzip(params_.knobs)
+		// 	player.set_panel_param(i, knob);
 
 		//Run each module
 		player.update_patch();
@@ -141,6 +148,8 @@ void AudioStream::process(AudioInStreamBlock &in,
 		//Get outputs from modules
 		for (int i = 0; i < AudioConf::NumOutChans; i++)
 			out_.chan[i] = get_audio_output(i);
+		// for (auto [i, outchan] : countzip(out_.chan))
+		// 	outchan = get_audio_output(i);
 
 		aux_.clock_out = player.get_panel_output(AudioConf::NumOutChans) > 0.5f ? 1 : 0;
 	}
@@ -183,33 +192,69 @@ void AudioStream::passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock 
 		o.chan[2] = i.chan[2];
 		o.chan[3] = i.chan[3];
 		o.chan[4] = i.chan[4];
-		o.chan[5] = i.chan[5];
-		o.chan[6] = (i.chan[0] + i.chan[1]) / 2;
-		o.chan[7] = (i.chan[2] + i.chan[3]) / 2;
+		o.chan[5] = 0x00040000;
+		o.chan[6] = 0x00100000; //AudioOutFrame::scaleOutput(AudioInFrame::scaleInput(i.chan[5]));
+		o.chan[7] = 0x00400000; //AudioOutFrame::scaleOutput(AudioInFrame::scaleInput(i.chan[5]));
 		a.clock_out = 0;
 	}
 }
 
-void AudioStream::sines_out(AudioOutStreamBlock &out)
+void AudioStream::sines_out(AudioInStreamBlock &in, AudioOutStreamBlock &out)
 {
-	static PhaseAccum<48000> phase1{80};
-	static PhaseAccum<48000> phase2{200};
-	static PhaseAccum<48000> phase3{250};
-	static PhaseAccum<48000> phase4{700};
-	static PhaseAccum<48000> phase5{900};
-	static PhaseAccum<48000> phase6{2200};
-	static PhaseAccum<48000> phase7{6500};
-	static PhaseAccum<48000> phase8{8000};
+	static PhaseAccum<48000> phase0{80};
+	static PhaseAccum<48000> phase1{200};
+	static PhaseAccum<48000> phase2{250};
+	static PhaseAccum<48000> phase3{700};
+	static PhaseAccum<48000> phase4{900};
+	static PhaseAccum<48000> phase5{2200};
+	static PhaseAccum<48000> phase6{1000};
+	static PhaseAccum<48000> phase7{1000};
+
+	//This assumes values are right aligned (max 0x00FFFFFF)
+	//and that unused bits in a sample <= log2(block size)
+	int32_t refsum = 0;
+	for (auto inframe : in)
+		refsum += inframe.chan[0];
+	float refavg = AudioInFrame::scaleInput(refsum >> MathTools::Log2<AudioConf::BlockSize>::val);
+
+	constexpr float refref = 0x004A3000UL / AudioInFrame::kOutScaling;
+	float temp_adj = refref / refavg;
+
+	int32_t pitchsum = 0;
+	for (auto inframe : in)
+		pitchsum += inframe.chan[5];
+	float pitchavg = AudioInFrame::scaleInput(pitchsum >> MathTools::Log2<AudioConf::BlockSize>::val);
+	float adjpitch = pitchavg * temp_adj;
+
+	//Adjusted
+	float freq_mult6 = exp5Table.interp(MathTools::constrain(adjpitch / 2.f + 0.5f, 0.f, 1.0f)); //1..1024
+	phase6.set_frequency(20 * freq_mult6);
+
+	//Unadjusted
+	float freq_mult7 = exp5Table.interp(MathTools::constrain(pitchavg / 2.f + 0.5f, 0.f, 1.0f)); //1..1024
+	phase7.set_frequency(20 * freq_mult7);
 
 	for (auto &o : out) {
-		o.chan[0] = sinTable.interp_wrap((float)phase1.Process() / (float)(0xFFFFFFFFUL));
-		o.chan[1] = sinTable.interp_wrap((float)phase2.Process() / (float)(0xFFFFFFFFUL));
-		o.chan[2] = sinTable.interp_wrap((float)phase3.Process() / (float)(0xFFFFFFFFUL));
-		o.chan[3] = sinTable.interp_wrap((float)phase4.Process() / (float)(0xFFFFFFFFUL));
-		o.chan[4] = sinTable.interp_wrap((float)phase5.Process() / (float)(0xFFFFFFFFUL));
-		o.chan[6] = sinTable.interp_wrap((float)phase7.Process() / (float)(0xFFFFFFFFUL));
-		o.chan[7] = sinTable.interp_wrap((float)phase8.Process() / (float)(0xFFFFFFFFUL));
+		o.chan[0] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase0.process_float()));
+		o.chan[1] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase1.process_float()));
+		o.chan[2] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase2.process_float()));
+		o.chan[3] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase3.process_float()));
+		o.chan[4] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase4.process_float()));
+		o.chan[6] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase6.process_float()));
+		o.chan[7] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase7.process_float()));
 	}
+
+	// Temp stability:
+	// ~1V/oct
+	// using exp10 table
+	//
+	// using adjpitch = pitchavg * (refref/refavg);
+	// Blowing on PCM chip --> 8.1kHz output deviates +70 and -70Hz.
+	// 1 semitone = 481Hz, so +/-70Hz = span 140Hz = +/-15cents = span 30cents
+	//
+	// using pitchavg: +65/-20Hz = span 85Hz = span 17cents
+	//
+	// using refavg/refref (inverted): deviates 260Hz (obviously, math is bad)
 }
 
 } // namespace MetaModule

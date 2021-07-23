@@ -73,7 +73,7 @@ private:
 
 	void output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
 	void passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
-	void sines_out(AudioOutStreamBlock &out);
+	void sines_out(AudioInStreamBlock &in, AudioOutStreamBlock &out);
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;
