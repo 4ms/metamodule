@@ -11,15 +11,21 @@ struct Debug {
 	using Pin3 = mdrivlib::FPin<mdrivlib::GPIO::A, 12, mdrivlib::PinMode::Output>;
 
 #elif defined(STM32MP1)
-	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::D, 5, mdrivlib::PinMode::Output>;
-	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::D, 6, mdrivlib::PinMode::Output>;
-	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::E, 15, mdrivlib::PinMode::Output>;
-	using Pin3 = mdrivlib::FPin<mdrivlib::GPIO::G, 15, mdrivlib::PinMode::Output>;
+	// using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::D, 5, mdrivlib::PinMode::Output>;
+	// using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::D, 6, mdrivlib::PinMode::Output>;
+	// using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::E, 15, mdrivlib::PinMode::Output>;
+	// using Pin3 = mdrivlib::FPin<mdrivlib::GPIO::G, 15, mdrivlib::PinMode::Output>;
 
 	using red_LED1 = mdrivlib::FPin<mdrivlib::GPIO::Z, 6, mdrivlib::PinMode::Output>;
 	using red_LED2 = mdrivlib::FPin<mdrivlib::GPIO::I, 8, mdrivlib::PinMode::Output>;
 	using green_LED1 = mdrivlib::FPin<mdrivlib::GPIO::Z, 7, mdrivlib::PinMode::Output>;
 	using green_LED2 = mdrivlib::FPin<mdrivlib::GPIO::I, 9, mdrivlib::PinMode::Output>;
+
+	// PCM3168 Dev board;
+	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::D, 11, mdrivlib::PinMode::Output>;
+	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::F, 6, mdrivlib::PinMode::Output>;
+	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::D, 12, mdrivlib::PinMode::Output>;
+	using Pin3 = mdrivlib::FPin<mdrivlib::GPIO::B, 6, mdrivlib::PinMode::Output>;
 
 	static inline red_LED1 red_LED1_init;
 	static inline red_LED2 red_LED2_init;
