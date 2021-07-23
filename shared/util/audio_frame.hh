@@ -1,9 +1,10 @@
 #include "math.hh"
+#include <array>
 #include <stdint.h>
 
 template<typename SampleType, int UsedBits = sizeof(SampleType) * 8, int NumChannels = 2>
 struct AudioFrame {
-	SampleType chan[NumChannels];
+	std::array<SampleType, NumChannels> chan;
 
 public:
 	static constexpr inline unsigned kSampleTypeBits = sizeof(SampleType) * 8;
