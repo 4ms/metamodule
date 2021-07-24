@@ -8,6 +8,7 @@
 #include "convolve.hh"
 #include "panel.hh"
 #include "patch_player.hh"
+#include "util/zip.hh"
 
 namespace MetaModule
 {
@@ -132,44 +133,41 @@ void AudioStream::process(AudioStreamBlock &in,
 		return;
 	}
 
-	auto in_ = in.begin();
-	auto params_ = param_block.params.begin();
-	auto aux_ = aux.begin();
-	auto out_ = out.begin();
-	for (; out_ < out.end(); in_++, params_++, aux_++, out_++) {
+	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
+
 		int i;
 
-		propagate_sense_pins(*params_);
+		propagate_sense_pins(params_);
 
-		player.set_panel_input(0, AudioFrame::scaleInput(-1.f * in_->l)); // inputs are inverted in hardware PCB p3
-		player.set_panel_input(1, AudioFrame::scaleInput(-1.f * in_->r));
+		player.set_panel_input(0, AudioFrame::scaleInput(-1.f * in_.l)); // inputs are inverted in hardware PCB p3
+		player.set_panel_input(1, AudioFrame::scaleInput(-1.f * in_.r));
 
 		i = 0;
-		for (const auto cv : params_->cvjacks) {
+		for (const auto cv : params_.cvjacks) {
 			// Todo: player.set_cv_input(i, cv);
 			player.set_panel_input(i + NumAudioInputs, cv);
 			i++;
 		}
 		i = 0;
-		for (const auto &gatein : params_->gate_ins) {
+		for (const auto &gatein : params_.gate_ins) {
 			// Todo: player.set_gate_input(i, gatein);
 			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
 			i++;
 		}
 		i = 0;
-		for (const auto knob : params_->knobs) {
+		for (const auto knob : params_.knobs) {
 			player.set_panel_param(i, knob);
 			i++;
 		}
 
 		player.update_patch();
 
-		out_->l = get_audio_output(LEFT_OUT);
-		out_->r = get_audio_output(RIGHT_OUT);
+		out_.l = get_audio_output(LEFT_OUT);
+		out_.r = get_audio_output(RIGHT_OUT);
 
-		aux_->dac1 = get_dac_output(2);
-		aux_->dac2 = get_dac_output(3);
-		aux_->clock_out = player.get_panel_output(4) > 0.5f ? 1 : 0;
+		aux_.dac1 = get_dac_output(2);
+		aux_.dac2 = get_dac_output(3);
+		aux_.clock_out = player.get_panel_output(4) > 0.5f ? 1 : 0;
 	}
 
 	load_measure.end_measurement();
@@ -192,33 +190,27 @@ void AudioStream::propagate_sense_pins(Params &params)
 
 void AudioStream::output_silence(AudioStreamBlock &out, AuxSignalStreamBlock &aux)
 {
-	auto aux_ = aux.begin();
-	for (auto &out_ : out) {
+	for (auto [out_, aux_] : zip(out, aux)) {
 		out_.l = 0;
 		out_.r = 0;
-		aux_->dac1 = 0x00800000;
-		aux_->dac2 = 0x00800000;
-		aux_->clock_out = 0;
-		aux_++;
+		aux_.dac1 = 0x00800000;
+		aux_.dac2 = 0x00800000;
+		aux_.clock_out = 0;
 	}
 }
 
 void AudioStream::passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out, AuxSignalStreamBlock &aux)
 {
-	auto in_ = in.begin();
-	auto aux_ = aux.begin();
-	for (auto &out_ : out) {
+	for (auto [in_, out_, aux_] : zip(in, out, aux)) {
 		if constexpr (target::TYPE == SupportedTargets::stm32h7x5) {
-			out_.l = -(in_->r); // inverted and channels swapped (H7 only)
-			out_.r = -(in_->l);
+			out_.l = -(in_.r); // inverted and channels swapped (H7 only)
+			out_.r = -(in_.l);
 		} else {
-			out_.l = -(in_->l); // inverted (MP1 only)
-			out_.r = -(in_->r);
+			out_.l = -(in_.l); // inverted (MP1 only)
+			out_.r = -(in_.r);
 		}
-		aux_->dac1 = 0x00800000;
-		aux_->dac2 = 0x00800000;
-		aux_++;
-		in_++;
+		aux_.dac1 = 0x00800000;
+		aux_.dac2 = 0x00800000;
 	}
 }
 

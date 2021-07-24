@@ -7,9 +7,9 @@ struct GenericAudioFrame {
 	SampleType r;
 
 public:
-	static const inline unsigned kSampleTypeBits = sizeof(SampleType) * 8;
-	static const inline unsigned kMaxValue = MathTools::ipow(2, UsedBits - 1);
-	static const inline float kOutScaling = static_cast<float>(kMaxValue);
+	static constexpr inline unsigned kSampleTypeBits = sizeof(SampleType) * 8;
+	static constexpr inline unsigned kMaxValue = MathTools::ipow(2, UsedBits - 1);
+	static constexpr inline float kOutScaling = static_cast<float>(kMaxValue);
 
 	static inline constexpr float scaleInput(SampleType val)
 	{
@@ -34,4 +34,3 @@ public:
 		}
 	}
 };
-
