@@ -34,6 +34,16 @@ struct PatchList {
 		return _patch_headers[_cur_patch_index];
 	}
 
+	uint32_t next_patch()
+	{
+		return _cur_patch_index >= (NumPatches - 1) ? 0 : _cur_patch_index + 1;
+	}
+
+	uint32_t prev_patch()
+	{
+		return _cur_patch_index == 0 ? (NumPatches - 1) : _cur_patch_index - 1;
+	}
+
 private:
 	std::array<PatchHeader *, NumPatches> _patch_headers;
 	// TODO: _patch_headers could be constructed directly from init list, and we don't need _patch_addrs

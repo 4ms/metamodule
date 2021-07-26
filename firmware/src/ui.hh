@@ -126,27 +126,20 @@ public:
 	void handle_rotary()
 	{
 		auto rotary = metaparams.rotary.use_motion();
-		if (rotary < 0) {
+		if (rotary < 0)
 			pages.prev_page();
-		}
-
-		if (rotary > 0) {
+		if (rotary > 0)
 			pages.next_page();
-		}
 
-		auto rotary_pushed = metaparams.rotary_pushed.use_motion();
-		if (rotary_pushed) {
-			auto now_tm = HAL_GetTick();
-			if ((now_tm - last_changed_page_tm) > 100) {
+		//Start changing patch
+		auto rotary_pushed_turned = metaparams.rotary_pushed.use_motion();
+		if (rotary_pushed_turned) {
+			if (auto now_tm = HAL_GetTick(); (now_tm - last_changed_page_tm) > 100) {
 				last_changed_page_tm = now_tm;
-				if (rotary_pushed < 0) {
-					uint32_t cur_patch_index = patch_list.cur_patch_index();
-					mbox.new_patch_index = (cur_patch_index == 0) ? (patch_list.NumPatches - 1) : cur_patch_index - 1;
-				}
-				if (rotary_pushed > 0) {
-					uint32_t cur_patch_index = patch_list.cur_patch_index();
-					mbox.new_patch_index = cur_patch_index == (patch_list.NumPatches - 1) ? 0 : cur_patch_index + 1;
-				}
+				if (rotary_pushed_turned < 0)
+					mbox.new_patch_index = patch_list.prev_patch();
+				else
+					mbox.new_patch_index = patch_list.next_patch();
 				mbox.loading_new_patch = true;
 			}
 		}
@@ -156,11 +149,8 @@ public:
 			patch_list.set_cur_patch_index(mbox.new_patch_index);
 			bool ok = player.load_patch(patch_list.cur_patch());
 			if (!ok) {
-				// Todo: handle error: display on screen, and try another patch?
-				// metaparams.error = Errors::CannotLoadPatch;
-				// metaparams.error_data = patch_list.cur_patch();
 				while (true)
-					;
+					; //Error
 			}
 			mbox.loading_new_patch = false;
 		}
