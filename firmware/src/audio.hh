@@ -35,8 +35,8 @@ public:
 				ParamCache &cache,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
-				AudioInStreamBlock (&in_buffers)[2],
-				AudioOutStreamBlock (&out_buffers)[2],
+				AudioInStreamBlock (&in_buffers)[4],
+				AudioOutStreamBlock (&out_buffers)[4],
 				AuxSignalStreamBlock (&auxsig)[2]);
 	void start();
 
@@ -46,10 +46,14 @@ private:
 	ParamCache &cache;
 	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
-	AudioOutStreamBlock &tx_buf_1;
-	AudioOutStreamBlock &tx_buf_2;
-	AudioInStreamBlock &rx_buf_1;
-	AudioInStreamBlock &rx_buf_2;
+	AudioOutStreamBlock &tx_buf_codecA_1;
+	AudioOutStreamBlock &tx_buf_codecA_2;
+	AudioOutStreamBlock &tx_buf_codecB_1;
+	AudioOutStreamBlock &tx_buf_codecB_2;
+	AudioInStreamBlock &rx_buf_codecA_1;
+	AudioInStreamBlock &rx_buf_codecA_2;
+	AudioInStreamBlock &rx_buf_codecB_1;
+	AudioInStreamBlock &rx_buf_codecB_2;
 	AuxSignalStreamBlock &auxsig_1;
 	AuxSignalStreamBlock &auxsig_2;
 

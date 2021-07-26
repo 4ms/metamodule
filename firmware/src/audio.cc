@@ -26,16 +26,20 @@ AudioStream::AudioStream(PatchList &patches,
 						 ParamCache &param_cache,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
-						 AudioInStreamBlock (&in_buffers)[2],	//for 2 codecs, this will be [4]
-						 AudioOutStreamBlock (&out_buffers)[2], //ditto
+						 AudioInStreamBlock (&in_buffers)[4],
+						 AudioOutStreamBlock (&out_buffers)[4],
 						 AuxSignalStreamBlock (&auxsig)[2])
 	: cache{param_cache}
 	, mbox{uiaudiomailbox}
 	, param_blocks{p}
-	, tx_buf_1{out_buffers[0]}
-	, tx_buf_2{out_buffers[1]}
-	, rx_buf_1{in_buffers[0]}
-	, rx_buf_2{in_buffers[1]}
+	, tx_buf_codecA_1{out_buffers[0]}
+	, tx_buf_codecA_2{out_buffers[1]}
+	, tx_buf_codecB_1{out_buffers[2]}
+	, tx_buf_codecB_2{out_buffers[3]}
+	, rx_buf_codecA_1{in_buffers[0]}
+	, rx_buf_codecA_2{in_buffers[1]}
+	, rx_buf_codecB_1{in_buffers[2]}
+	, rx_buf_codecB_2{in_buffers[3]}
 	, auxsig_1{auxsig[0]}
 	, auxsig_2{auxsig[1]}
 	, codec_{codec}
