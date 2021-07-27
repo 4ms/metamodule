@@ -244,6 +244,7 @@ void AudioStream::sines_out(AudioInStreamBlock &in, AudioOutStreamBlock &out)
 		o.chan[2] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase2.process_float()));
 		o.chan[3] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase3.process_float()));
 		o.chan[4] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase4.process_float()));
+		o.chan[5] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase5.process_float()));
 		o.chan[6] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase6.process_float()));
 		o.chan[7] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase7.process_float()));
 	}
