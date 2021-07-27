@@ -52,6 +52,7 @@ void main()
 	AudioStream audio{patch_list,
 					  patch_player,
 					  _hw.codec0,
+					  _hw.codec1,
 					  param_cache,
 					  mbox,
 					  StaticBuffers::param_blocks,

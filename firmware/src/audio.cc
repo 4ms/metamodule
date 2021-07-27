@@ -22,7 +22,8 @@ constexpr bool DEBUG_SINEOUT_AUDIO = false;
 
 AudioStream::AudioStream(PatchList &patches,
 						 PatchPlayer &patchplayer,
-						 CodecT &codec,
+						 CodecT &codecA,
+						 CodecT &codecB,
 						 ParamCache &param_cache,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
@@ -42,26 +43,31 @@ AudioStream::AudioStream(PatchList &patches,
 	, rx_buf_codecB_2{in_buffers[3]}
 	, auxsig_1{auxsig[0]}
 	, auxsig_2{auxsig[1]}
-	, codec_{codec}
-	, sample_rate_{codec.get_samplerate()}
+	, codecA_{codecA}
+	, codecB_{codecB}
+	, sample_rate_{codecA.get_samplerate()}
 	, patch_list{patches}
 	, player{patchplayer}
 {
 
-	codec_.init();
-	codec_.set_txrx_buffers(reinterpret_cast<uint8_t *>(tx_buf_1.data()),
-							reinterpret_cast<uint8_t *>(rx_buf_1.data()),
-							AudioConf::DMAOutBlockSize);
-	codec_.set_callbacks(
+	codecA_.init();
+	codecA_.set_tx_buffers(tx_buf_codecA_1);
+	codecA_.set_rx_buffers(rx_buf_codecA_1);
+
+	codecB_.init();
+	codecB_.set_tx_buffers(tx_buf_codecB_1);
+	codecB_.set_rx_buffers(rx_buf_codecB_1);
+
+	codecA_.set_callbacks(
 		[this]() {
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
 
 			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-				process(rx_buf_1, tx_buf_1, param_blocks[0], auxsig_1);
+				process(rx_buf_codecA_1, tx_buf_codecA_1, param_blocks[0], auxsig_1);
 			else {
-				process(rx_buf_2, tx_buf_2, param_blocks[0], auxsig_1);
+				process(rx_buf_codecA_2, tx_buf_codecA_2, param_blocks[0], auxsig_1);
 			}
 			Debug::Pin0::low();
 		},
@@ -70,9 +76,9 @@ AudioStream::AudioStream(PatchList &patches,
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
 			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-				process(rx_buf_2, tx_buf_2, param_blocks[1], auxsig_2);
+				process(rx_buf_codecA_2, tx_buf_codecA_2, param_blocks[1], auxsig_2);
 			else {
-				process(rx_buf_1, tx_buf_1, param_blocks[1], auxsig_2);
+				process(rx_buf_codecA_1, tx_buf_codecA_1, param_blocks[1], auxsig_2);
 			}
 			Debug::Pin0::low();
 		});
@@ -163,7 +169,8 @@ void AudioStream::process(AudioInStreamBlock &in,
 
 void AudioStream::start()
 {
-	codec_.start();
+	codecA_.start();
+	codecB_.start();
 }
 
 void AudioStream::propagate_sense_pins(Params &params)

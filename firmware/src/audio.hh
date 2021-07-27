@@ -31,7 +31,8 @@ public:
 
 	AudioStream(PatchList &patches,
 				PatchPlayer &patchplayer,
-				CodecT &codec,
+				CodecT &codecA,
+				CodecT &codecB,
 				ParamCache &cache,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
@@ -41,6 +42,12 @@ public:
 	void start();
 
 	void process(AudioInStreamBlock &in, AudioOutStreamBlock &out, ParamBlock &params, AuxSignalStreamBlock &aux);
+
+	void sett(std::array<AudioInFrame, 64> buf)
+	{
+		auto s = sizeof(buf[0]); //24 = 4 bytes/sample * 6 chan
+		auto s2 = sizeof(buf);	 //1536 = 24*64
+	}
 
 private:
 	ParamCache &cache;
@@ -57,7 +64,8 @@ private:
 	AuxSignalStreamBlock &auxsig_1;
 	AuxSignalStreamBlock &auxsig_2;
 
-	CodecT &codec_;
+	CodecT &codecA_;
+	CodecT &codecB_;
 	uint32_t sample_rate_;
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc

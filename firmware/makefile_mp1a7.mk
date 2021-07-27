@@ -170,7 +170,7 @@ MCU = -mcpu=cortex-a7 \
 	  -mno-unaligned-access \
 	  -funsafe-math-optimizations \
 	  -mvectorize-with-neon-quad \
-	  -fopt-info-vec-missed=vec.miss 
+	  # -fopt-info-vec-missed=vec.miss 
 	  # -ftree-vectorizer-verbose=n -fdump-tree-vect
 
 	  # -ffast-math \ # Karplus is silent
