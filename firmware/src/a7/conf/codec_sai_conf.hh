@@ -49,6 +49,9 @@ const SaiConfig codec0_sai_conf = {
 
 	.num_tdm_ins = 6,
 	.num_tdm_outs = 8,
+
+	.sync_send = SaiConfig::BlockASendsSync,
+	.sync_receive = SaiConfig::NoReceiveSync,
 };
 
 const SaiConfig codec1_sai_conf = {
@@ -56,7 +59,7 @@ const SaiConfig codec1_sai_conf = {
 	.tx_block = SAI1_Block_A,
 	.rx_block = SAI1_Block_B,
 
-	.mode = SaiConfig::TXMaster,
+	.mode = SaiConfig::TXExtSynced,
 
 	.dma_init_tx =
 		{
@@ -93,4 +96,8 @@ const SaiConfig codec1_sai_conf = {
 
 	.num_tdm_ins = 6,
 	.num_tdm_outs = 8,
+
+	.sync_send = SaiConfig::NoSendSync,
+	.sync_receive = SaiConfig::SyncToExtSAI,
+	.sync_receive_from = SaiConfig::SyncToSAI3,
 };
