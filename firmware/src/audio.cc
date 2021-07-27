@@ -196,7 +196,7 @@ void AudioStream::passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock 
 		o.chan[2] = i.chan[2];
 		o.chan[3] = i.chan[3];
 		o.chan[4] = i.chan[4];
-		o.chan[5] = 0x00040000;
+		o.chan[5] = i.chan[5];
 		o.chan[6] = 0x00100000; //AudioOutFrame::scaleOutput(AudioInFrame::scaleInput(i.chan[5]));
 		o.chan[7] = 0x00400000; //AudioOutFrame::scaleOutput(AudioInFrame::scaleInput(i.chan[5]));
 		a.clock_out = 0;
