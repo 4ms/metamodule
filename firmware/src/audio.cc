@@ -171,8 +171,8 @@ void AudioStream::process(AudioInStreamBlock &inA,
 
 void AudioStream::start()
 {
-	codecA_.start();
 	codecB_.start();
+	codecA_.start();
 }
 
 void AudioStream::propagate_sense_pins(Params &params)
@@ -289,16 +289,25 @@ void AudioStream::dual_passthrough(AudioInStreamBlock &inA,
 		outa.chan[3] = ina.chan[3];
 		outa.chan[4] = ina.chan[4];
 		outa.chan[5] = ina.chan[5];
-		outb.chan[6] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase0.process_float()));
-		outb.chan[7] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase1.process_float()));
-		outb.chan[0] = inb.chan[0];
-		outb.chan[1] = inb.chan[1];
-		outb.chan[2] = inb.chan[2];
-		outb.chan[3] = inb.chan[3];
-		outb.chan[4] = inb.chan[4];
-		outb.chan[5] = inb.chan[5];
-		outb.chan[6] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase2.process_float()));
-		outb.chan[7] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase3.process_float()));
+		outa.chan[6] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase0.process_float()));
+		outa.chan[7] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase1.process_float()));
+
+		outb.chan[0] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase2.process_float()));
+		outb.chan[1] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase3.process_float()));
+		outb.chan[2] = inb.chan[0];
+		outb.chan[3] = inb.chan[1];
+		outb.chan[4] = inb.chan[2];
+		outb.chan[5] = inb.chan[3];
+		outb.chan[6] = inb.chan[4];
+		outb.chan[7] = inb.chan[5];
+		// outb.chan[0] = 1;
+		// outb.chan[1] = 2;
+		// outb.chan[2] = 3;
+		// outb.chan[3] = 4;
+		// outb.chan[4] = 5;
+		// outb.chan[5] = 6;
+		// outb.chan[6] = 7;
+		// outb.chan[7] = 8;
 		a.clock_out = 0;
 	}
 }
