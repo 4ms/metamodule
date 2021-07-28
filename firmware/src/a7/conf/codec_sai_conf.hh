@@ -7,7 +7,7 @@
 using mdrivlib::GPIO;
 using mdrivlib::SaiConfig;
 
-const SaiConfig codec0_sai_conf = {
+const SaiConfig codecA_sai_conf = {
 	.sai = SAI3,
 	.tx_block = SAI3_Block_A,
 	.rx_block = SAI3_Block_B,
@@ -34,7 +34,7 @@ const SaiConfig codec0_sai_conf = {
 		},
 
 	.datasize = SAI_DATASIZE_24,
-	.framesize = 32,
+	.framesize = 256,
 	.samplerate = 48000,
 
 	.MCLK = {GPIO::D, 15, LL_GPIO_AF_6},
@@ -51,15 +51,15 @@ const SaiConfig codec0_sai_conf = {
 	.num_tdm_outs = 8,
 
 	.sync_send = SaiConfig::BlockASendsSync,
-	.sync_receive = SaiConfig::NoReceiveSync,
+	.sync_receive_from = SaiConfig::NoReceiveSync,
 };
 
-const SaiConfig codec1_sai_conf = {
+const SaiConfig codecB_sai_conf = {
 	.sai = SAI1,
 	.tx_block = SAI1_Block_A,
 	.rx_block = SAI1_Block_B,
 
-	.mode = SaiConfig::TXExtSynced,
+	.mode = SaiConfig::ExtSynced,
 
 	.dma_init_tx =
 		{
@@ -81,12 +81,12 @@ const SaiConfig codec1_sai_conf = {
 		},
 
 	.datasize = SAI_DATASIZE_24,
-	.framesize = 32,
+	.framesize = 256,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::E, 2, LL_GPIO_AF_6},
-	.SCLK = {GPIO::E, 5, LL_GPIO_AF_6},
-	.LRCLK = {GPIO::G, 15, LL_GPIO_AF_6},
+	.MCLK = {GPIO::E, 2, LL_GPIO_AF_6},	  //not used
+	.SCLK = {GPIO::E, 5, LL_GPIO_AF_6},	  //not used
+	.LRCLK = {GPIO::G, 15, LL_GPIO_AF_6}, //not used
 	.SD_DAC = {GPIO::E, 6, LL_GPIO_AF_6}, // SD A
 	.SD_ADC = {GPIO::E, 3, LL_GPIO_AF_6}, // SD B
 
@@ -98,6 +98,5 @@ const SaiConfig codec1_sai_conf = {
 	.num_tdm_outs = 8,
 
 	.sync_send = SaiConfig::NoSendSync,
-	.sync_receive = SaiConfig::SyncToExtSAI,
 	.sync_receive_from = SaiConfig::SyncToSAI3,
 };

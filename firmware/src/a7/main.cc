@@ -28,8 +28,8 @@ struct Hardware : AppStartup, Debug, SharedBus {
 		: SharedBus{i2c_conf_codec}
 	{}
 
-	CodecPCM3168 codec0{SharedBus::i2c, codec0_sai_conf};
-	CodecPCM3168 codec1{SharedBus::i2c, codec1_sai_conf};
+	CodecPCM3168 codecA{SharedBus::i2c, codecA_sai_conf};
+	CodecPCM3168 codecB{SharedBus::i2c, codecB_sai_conf};
 	// 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
 } _hw;
 
@@ -51,8 +51,8 @@ void main()
 
 	AudioStream audio{patch_list,
 					  patch_player,
-					  _hw.codec0,
-					  _hw.codec1,
+					  _hw.codecA,
+					  _hw.codecB,
 					  param_cache,
 					  mbox,
 					  StaticBuffers::param_blocks,

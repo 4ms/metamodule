@@ -14,8 +14,8 @@
 
 namespace MetaModule
 {
-constexpr bool DEBUG_PASSTHRU_AUDIO = true;
-constexpr bool DEBUG_SINEOUT_AUDIO = false;
+constexpr bool DEBUG_PASSTHRU_AUDIO = false;
+constexpr bool DEBUG_SINEOUT_AUDIO = true;
 // constexpr bool DEBUG_NE10_FFT = true;
 // static FFTfx fftfx;
 // static Convolver fftfx;
@@ -49,14 +49,13 @@ AudioStream::AudioStream(PatchList &patches,
 	, patch_list{patches}
 	, player{patchplayer}
 {
-
 	codecA_.init();
 	codecA_.set_tx_buffers(tx_buf_codecA_1);
 	codecA_.set_rx_buffers(rx_buf_codecA_1);
 
-	codecB_.init();
-	codecB_.set_tx_buffers(tx_buf_codecB_1);
-	codecB_.set_rx_buffers(rx_buf_codecB_1);
+	// codecB_.init();
+	// codecB_.set_tx_buffers(tx_buf_codecB_1);
+	// codecB_.set_rx_buffers(rx_buf_codecB_1);
 
 	codecA_.set_callbacks(
 		[this]() {
