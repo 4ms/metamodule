@@ -14,8 +14,8 @@
 
 namespace MetaModule
 {
-constexpr bool DEBUG_PASSTHRU_AUDIO = false;
-constexpr bool DEBUG_SINEOUT_AUDIO = true;
+constexpr bool DEBUG_PASSTHRU_AUDIO = true;
+constexpr bool DEBUG_SINEOUT_AUDIO = false;
 // constexpr bool DEBUG_NE10_FFT = true;
 // static FFTfx fftfx;
 // static Convolver fftfx;
@@ -53,9 +53,9 @@ AudioStream::AudioStream(PatchList &patches,
 	codecA_.set_tx_buffers(tx_buf_codecA_1);
 	codecA_.set_rx_buffers(rx_buf_codecA_1);
 
-	// codecB_.init();
-	// codecB_.set_tx_buffers(tx_buf_codecB_1);
-	// codecB_.set_rx_buffers(rx_buf_codecB_1);
+	codecB_.init();
+	codecB_.set_tx_buffers(tx_buf_codecB_1);
+	codecB_.set_rx_buffers(rx_buf_codecB_1);
 
 	codecA_.set_callbacks(
 		[this]() {
@@ -63,22 +63,20 @@ AudioStream::AudioStream(PatchList &patches,
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
 
-			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-				process(rx_buf_codecA_1, tx_buf_codecA_1, param_blocks[0], auxsig_1);
-			else {
-				process(rx_buf_codecA_2, tx_buf_codecA_2, param_blocks[0], auxsig_1);
-			}
+			// if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
+			// process(rx_buf_codecA_1, tx_buf_codecA_1, rx_buf_codecB_1, tx_buf_codecB_1, param_blocks[0], auxsig_1);
+			// else
+			process(rx_buf_codecA_2, tx_buf_codecA_2, rx_buf_codecB_2, tx_buf_codecB_2, param_blocks[0], auxsig_1);
 			Debug::Pin0::low();
 		},
 		[this]() {
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
-			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-				process(rx_buf_codecA_2, tx_buf_codecA_2, param_blocks[1], auxsig_2);
-			else {
-				process(rx_buf_codecA_1, tx_buf_codecA_1, param_blocks[1], auxsig_2);
-			}
+			// if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
+			// process(rx_buf_codecA_2, tx_buf_codecA_2, rx_buf_codecB_2, tx_buf_codecB_2, param_blocks[1], auxsig_2);
+			// else
+			process(rx_buf_codecA_1, tx_buf_codecA_1, rx_buf_codecB_1, tx_buf_codecB_1, param_blocks[1], auxsig_2);
 			Debug::Pin0::low();
 		});
 
@@ -98,8 +96,12 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id)
 
 // Todo: integrate params.buttons[]
 
-void AudioStream::process(AudioInStreamBlock &in,
-						  AudioOutStreamBlock &out,
+//process(audiobuff[1], param_blocks[1], auxsig[1])
+//audiobuf.inA, audiobuf.outA...
+void AudioStream::process(AudioInStreamBlock &inA,
+						  AudioOutStreamBlock &outA,
+						  AudioInStreamBlock &inB,
+						  AudioOutStreamBlock &outB,
 						  ParamBlock &param_block,
 						  AuxSignalStreamBlock &aux)
 {
@@ -111,10 +113,10 @@ void AudioStream::process(AudioInStreamBlock &in,
 
 	//Debug: passthrough audio and exit
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
-		passthrough_audio(in, out, aux);
+		dual_passthrough(inA, outA, inB, outB, aux);
 		return;
 	} else if (DEBUG_SINEOUT_AUDIO) {
-		sines_out(in, out);
+		dual_sines_out(outA, outB);
 		return;
 	}
 
@@ -122,7 +124,8 @@ void AudioStream::process(AudioInStreamBlock &in,
 	// Todo: fade down before setting audio_is_muted to true
 	mbox.audio_is_muted = mbox.loading_new_patch ? true : false;
 	if (mbox.audio_is_muted) {
-		output_silence(out, aux);
+		output_silence(outA, aux);
+		output_silence(outB, aux);
 		return;
 	}
 
@@ -131,7 +134,7 @@ void AudioStream::process(AudioInStreamBlock &in,
 	// 	return;
 	// }
 
-	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
+	for (auto [in_, out_, aux_, params_] : zip(inA, outA, aux, param_block.params)) {
 
 		//Handle jacks being plugged/unplugged
 		propagate_sense_pins(params_);
@@ -268,4 +271,77 @@ void AudioStream::sines_out(AudioInStreamBlock &in, AudioOutStreamBlock &out)
 	// using refavg/refref (inverted): deviates 260Hz (obviously, math is bad)
 }
 
+void AudioStream::dual_passthrough(AudioInStreamBlock &inA,
+								   AudioOutStreamBlock &outA,
+								   AudioInStreamBlock &inB,
+								   AudioOutStreamBlock &outB,
+								   AuxSignalStreamBlock &aux)
+{
+
+	static PhaseAccum<48000> phase0{80};
+	static PhaseAccum<48000> phase1{200};
+	static PhaseAccum<48000> phase2{250};
+	static PhaseAccum<48000> phase3{700};
+	for (auto [ina, inb, outa, outb, a] : zip(inA, inB, outA, outB, aux)) {
+		outa.chan[0] = ina.chan[0];
+		outa.chan[1] = ina.chan[1];
+		outa.chan[2] = ina.chan[2];
+		outa.chan[3] = ina.chan[3];
+		outa.chan[4] = ina.chan[4];
+		outa.chan[5] = ina.chan[5];
+		outb.chan[6] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase0.process_float()));
+		outb.chan[7] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase1.process_float()));
+		outb.chan[0] = inb.chan[0];
+		outb.chan[1] = inb.chan[1];
+		outb.chan[2] = inb.chan[2];
+		outb.chan[3] = inb.chan[3];
+		outb.chan[4] = inb.chan[4];
+		outb.chan[5] = inb.chan[5];
+		outb.chan[6] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase2.process_float()));
+		outb.chan[7] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase3.process_float()));
+		a.clock_out = 0;
+	}
+}
+
+void AudioStream::dual_sines_out(AudioOutStreamBlock &outA, AudioOutStreamBlock &outB)
+{
+	static PhaseAccum<48000> phase0{80};
+	static PhaseAccum<48000> phase1{200};
+	static PhaseAccum<48000> phase2{250};
+	static PhaseAccum<48000> phase3{700};
+	static PhaseAccum<48000> phase4{900};
+	static PhaseAccum<48000> phase5{2200};
+	static PhaseAccum<48000> phase6{6000};
+	static PhaseAccum<48000> phase7{12000};
+
+	static PhaseAccum<48000> phase8{60};
+	static PhaseAccum<48000> phase9{100};
+	static PhaseAccum<48000> phase10{175};
+	static PhaseAccum<48000> phase11{300};
+	static PhaseAccum<48000> phase12{375};
+	static PhaseAccum<48000> phase13{800};
+	static PhaseAccum<48000> phase14{4000};
+	static PhaseAccum<48000> phase15{8000};
+
+	for (auto &o : outA) {
+		o.chan[0] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase0.process_float()));
+		o.chan[1] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase1.process_float()));
+		o.chan[2] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase2.process_float()));
+		o.chan[3] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase3.process_float()));
+		o.chan[4] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase4.process_float()));
+		o.chan[5] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase5.process_float()));
+		o.chan[6] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase6.process_float()));
+		o.chan[7] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase7.process_float()));
+	}
+	for (auto &o : outB) {
+		o.chan[0] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase8.process_float()));
+		o.chan[1] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase9.process_float()));
+		o.chan[2] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase10.process_float()));
+		o.chan[3] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase11.process_float()));
+		o.chan[4] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase12.process_float()));
+		o.chan[5] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase13.process_float()));
+		o.chan[6] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase14.process_float()));
+		o.chan[7] = AudioOutFrame::scaleOutput(sinTable.interp_wrap(phase15.process_float()));
+	}
+}
 } // namespace MetaModule

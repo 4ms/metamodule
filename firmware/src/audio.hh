@@ -41,13 +41,12 @@ public:
 				AuxSignalStreamBlock (&auxsig)[2]);
 	void start();
 
-	void process(AudioInStreamBlock &in, AudioOutStreamBlock &out, ParamBlock &params, AuxSignalStreamBlock &aux);
-
-	void sett(std::array<AudioInFrame, 64> buf)
-	{
-		auto s = sizeof(buf[0]); //24 = 4 bytes/sample * 6 chan
-		auto s2 = sizeof(buf);	 //1536 = 24*64
-	}
+	void process(AudioInStreamBlock &inA,
+				 AudioOutStreamBlock &outA,
+				 AudioInStreamBlock &inB,
+				 AudioOutStreamBlock &outB,
+				 ParamBlock &param_block,
+				 AuxSignalStreamBlock &aux);
 
 private:
 	ParamCache &cache;
@@ -86,6 +85,13 @@ private:
 	void output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
 	void passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
 	void sines_out(AudioInStreamBlock &in, AudioOutStreamBlock &out);
+
+	void dual_sines_out(AudioOutStreamBlock &outA, AudioOutStreamBlock &outB);
+	void dual_passthrough(AudioInStreamBlock &inA,
+						  AudioOutStreamBlock &outA,
+						  AudioInStreamBlock &inB,
+						  AudioOutStreamBlock &outB,
+						  AuxSignalStreamBlock &aux);
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;
