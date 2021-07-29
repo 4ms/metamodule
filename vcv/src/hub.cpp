@@ -275,7 +275,7 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-no-words.svg")));
 		// setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-all-gray.svg")));
 
-		addParam(createParamCentered<BefacoPush>(mm2px(Vec(10, 50)), module, MetaModuleHub::GET_INFO));
+		addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
 
 		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
 		valueLabel->color = rack::color::BLACK;
@@ -293,34 +293,34 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		addChild(patchName);
 		patchName->selectAll(); // Doesn't work :(
 
-		addLabeledKnob("A", 0, {0, 0});
-		addLabeledKnob("B", 1, {1, 0});
-		addLabeledKnob("C", 2, {2, 0});
-		addLabeledKnob("D", 3, {3, 0});
-		addLabeledKnob("a", 4, {0, 1});
-		addLabeledKnob("b", 5, {1, 1});
-		addLabeledKnob("c", 6, {2, 1});
-		addLabeledKnob("d", 7, {3, 1});
+		addLabeledKnobMM("A", 0, {9, 38.9});
+		addLabeledKnobMM("B", 1, {29.4, 51.4});
+		addLabeledKnobMM("C", 2, {51.6, 51.6});
+		addLabeledKnobMM("D", 3, {72, 38.9});
+		addLabeledKnobMM("a", 4, {8.5, 59.5});
+		addLabeledKnobMM("b", 5, {31.9, 72.8});
+		addLabeledKnobMM("c", 6, {48.8, 72.8});
+		addLabeledKnobMM("d", 7, {72.2, 59.3});
 
-		addLabeledInput("CV IN 1", MetaModuleHub::CV_1, {0, 3});
-		addLabeledInput("CV IN 2", MetaModuleHub::CV_2, {1, 3});
-		addLabeledInput("CV IN 3", MetaModuleHub::CV_3, {2, 3});
-		addLabeledInput("CV IN 4", MetaModuleHub::CV_4, {3, 3});
+		addLabeledInputMM("CV IN 1", MetaModuleHub::CV_1, {7.6, 74.5});
+		addLabeledInputMM("CV IN 2", MetaModuleHub::CV_2, {20, 82.1});
+		addLabeledInputMM("CV IN 3", MetaModuleHub::CV_3, {60.7, 82.4});
+		addLabeledInputMM("CV IN 4", MetaModuleHub::CV_4, {73.1, 74.5});
 
-		addLabeledInput("Gate In 1", MetaModuleHub::GATE_IN_1, {0, 2});
-		addLabeledInput("Gate In 2", MetaModuleHub::GATE_IN_2, {1, 2});
-		addLabeledInput("Clock In", MetaModuleHub::CLOCK_IN, {2, 2});
+		addLabeledInputMM("Gate In 1", MetaModuleHub::GATE_IN_1, {9, 94.5});
+		addLabeledInputMM("Gate In 2", MetaModuleHub::GATE_IN_2, {71.7, 94.5});
+		addLabeledInputMM("Clock In", MetaModuleHub::CLOCK_IN, {40.4, 88.9});
 
-		addLabeledInput("Audio IN L", MetaModuleHub::AUDIO_IN_L, {0, 0});
-		addLabeledInput("Audio IN R", MetaModuleHub::AUDIO_IN_R, {1, 0});
+		addLabeledInputMM("Audio IN L", MetaModuleHub::AUDIO_IN_L, {8.2, 111.8});
+		addLabeledInputMM("Audio IN R", MetaModuleHub::AUDIO_IN_R, {23.4, 111.8});
 
-		addLabeledOutput("Audio OUT L", MetaModuleHub::AUDIO_OUT_L, {2, 0});
-		addLabeledOutput("Audio OUT R", MetaModuleHub::AUDIO_OUT_R, {3, 0});
+		addLabeledOutputMM("Audio OUT L", MetaModuleHub::AUDIO_OUT_L, {57.3, 111.8});
+		addLabeledOutputMM("Audio OUT R", MetaModuleHub::AUDIO_OUT_R, {72.8, 111.8});
 
-		addLabeledOutput("CV Out 1", MetaModuleHub::AUDIO_OUT_3, {1, 1});
-		addLabeledOutput("CV Out 2", MetaModuleHub::AUDIO_OUT_4, {2, 1});
+		addLabeledOutputMM("CV Out 1", MetaModuleHub::AUDIO_OUT_3, {25.7, 96.2});
+		addLabeledOutputMM("CV Out 2", MetaModuleHub::AUDIO_OUT_4, {55, 96.2});
 
-		addLabeledOutput("Clock Out", MetaModuleHub::CLOCK_OUT, {3, 2});
+		addLabeledOutputMM("Clock Out", MetaModuleHub::CLOCK_OUT, {40.4, 106.4});
 
 		// Todo:
 		// addLabeledToggle() for both RGB Buttons
