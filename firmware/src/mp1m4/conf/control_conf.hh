@@ -1,10 +1,15 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 
 namespace MetaModule
 {
+
+using mdrivlib::GPIO;
+using mdrivlib::PinNoInit;
+
 const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
 	.period_ns = 20000, // must be just a hair faster than 48kHz

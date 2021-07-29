@@ -1,5 +1,6 @@
 #pragma once
 #include "drivers/i2c_config_struct.hh"
+
 using mdrivlib::GPIO;
 
 constexpr uint32_t LEDUpdateHz = 100;

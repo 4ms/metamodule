@@ -10,7 +10,7 @@
 #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
 #include "drivers/stm32xx.h"
-#include "drivers/system_startup_m4.hh"
+#include "drivers/system_startup.hh"
 #include "m4/hsem_handler.hh"
 #include "params.hh"
 #include "screen_writer.hh"
@@ -33,7 +33,7 @@ void main()
 	RCC_Enable::HSEM_::set();
 	HWSemaphore<M4_ready>::lock();
 
-	target::corem4::SystemClocks start_clocks;
+	SystemStartup::init_clocks();
 	while (HWSemaphore<MainCoreReady>::is_locked())
 		;
 

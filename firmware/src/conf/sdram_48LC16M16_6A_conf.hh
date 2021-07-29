@@ -1,7 +1,7 @@
 #pragma once
 #include "drivers/sdram_config_struct.hh"
 
-constexpr SDRAMTimingConfig SDRAM_timing_48LC16M16_6A = {
+constexpr mdrivlib::SDRAMTimingConfig SDRAM_timing_48LC16M16_6A = {
 	.tRC_ns = 60,  //
 	.tRP_ns = 18,  //
 	.tMRD_ns = 14, // 14
@@ -17,11 +17,10 @@ constexpr SDRAMTimingConfig SDRAM_timing_48LC16M16_6A = {
 	.read_pipe_delay = 2,
 };
 
-constexpr SDRAMArchConfig SDRAM_arch_48LC16M16_6A = {
+constexpr mdrivlib::SDRAMArchConfig SDRAM_arch_48LC16M16_6A = {
 	.num_internal_banks = 4,
 	.bus_width_bits = 16,
 	.column_bits = 9,
 	.row_bits = 13,
 	.num_rows = 8192,
 };
-

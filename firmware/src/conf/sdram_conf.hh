@@ -5,7 +5,9 @@
 #include "conf/sdram_W9825G6KH_75_conf.hh"
 #include "drivers/sdram_config_struct.hh"
 
-constexpr SDRAMPinNames SDRAM_pin_names = {
+using mdrivlib::GPIO;
+
+constexpr mdrivlib::SDRAMPinNames SDRAM_pin_names = {
 	.A0{GPIO::F, 0, LL_GPIO_AF_12},
 	.A1{GPIO::F, 1, LL_GPIO_AF_12},
 	.A2{GPIO::F, 2, LL_GPIO_AF_12},
@@ -49,7 +51,7 @@ constexpr SDRAMPinNames SDRAM_pin_names = {
 
 constexpr uint32_t FMC_Clock = 224; // Todo: read/calc this from RCC... query System?
 
-constexpr SDRAMConfig SDRAM_AS4C_T7_conf = {
+constexpr mdrivlib::SDRAMConfig SDRAM_AS4C_T7_conf = {
 	.pin_list = {SDRAM_pin_names},
 	.timing = SDRAM_timing_AS4C16M16SA_7CN,
 	.arch = SDRAM_arch_AS4C16M16SA_7CN,
@@ -57,7 +59,7 @@ constexpr SDRAMConfig SDRAM_AS4C_T7_conf = {
 	.fmc_kernel_clock_MHz = FMC_Clock,
 };
 
-constexpr SDRAMConfig SDRAM_AS4C_T6_conf = {
+constexpr mdrivlib::SDRAMConfig SDRAM_AS4C_T6_conf = {
 	.pin_list = {SDRAM_pin_names},
 	.timing = SDRAM_timing_AS4C16M16SA_6CN,
 	.arch = SDRAM_arch_AS4C16M16SA_6CN,
@@ -65,7 +67,7 @@ constexpr SDRAMConfig SDRAM_AS4C_T6_conf = {
 	.fmc_kernel_clock_MHz = FMC_Clock,
 };
 
-constexpr SDRAMConfig SDRAM_48LC16M16_6A_conf = {
+constexpr mdrivlib::SDRAMConfig SDRAM_48LC16M16_6A_conf = {
 	.pin_list = {SDRAM_pin_names},
 	.timing = SDRAM_timing_48LC16M16_6A,
 	.arch = SDRAM_arch_48LC16M16_6A,
@@ -73,7 +75,7 @@ constexpr SDRAMConfig SDRAM_48LC16M16_6A_conf = {
 	.fmc_kernel_clock_MHz = FMC_Clock,
 };
 
-constexpr SDRAMConfig SDRAM_W9825_conf = {
+constexpr mdrivlib::SDRAMConfig SDRAM_W9825_conf = {
 	.pin_list = {SDRAM_pin_names},
 	.timing = SDRAM_timing_W9825G6KH_75,
 	.arch = SDRAM_arch_W9825G6KH_75,

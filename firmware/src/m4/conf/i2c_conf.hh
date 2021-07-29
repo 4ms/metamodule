@@ -1,9 +1,11 @@
 #pragma once
 #include "drivers/i2c_config_struct.hh"
 
+using mdrivlib::GPIO;
+
 constexpr uint32_t LEDUpdateHz = 100;
 
-const I2CConfig i2c_conf_m4 = {
+const mdrivlib::I2CConfig i2c_conf_m4 = {
 
 	.I2Cx = I2C3,
 	.SCL = {GPIO::A, 8, GPIO_AF4_I2C3},

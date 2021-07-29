@@ -53,7 +53,7 @@ AudioStream::AudioStream(PatchList &patches,
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
 
-			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
+			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
 				process(rx_buf_1, tx_buf_1, param_blocks[0], auxsig_1);
 			else {
 				// SystemCache::invalidate_dcache_by_range(&rx_buf_2, sizeof(AudioStreamBlock));
@@ -67,7 +67,7 @@ AudioStream::AudioStream(PatchList &patches,
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
-			if constexpr (target::TYPE == SupportedTargets::stm32h7x5)
+			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
 				process(rx_buf_2, tx_buf_2, param_blocks[1], auxsig_2);
 			else {
 				// SystemCache::invalidate_dcache_by_range(&rx_buf_1, sizeof(AudioStreamBlock));
@@ -202,7 +202,7 @@ void AudioStream::output_silence(AudioStreamBlock &out, AuxSignalStreamBlock &au
 void AudioStream::passthrough_audio(AudioStreamBlock &in, AudioStreamBlock &out, AuxSignalStreamBlock &aux)
 {
 	for (auto [in_, out_, aux_] : zip(in, out, aux)) {
-		if constexpr (target::TYPE == SupportedTargets::stm32h7x5) {
+		if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5) {
 			out_.l = -(in_.r); // inverted and channels swapped (H7 only)
 			out_.r = -(in_.l);
 		} else {

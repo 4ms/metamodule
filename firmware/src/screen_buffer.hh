@@ -15,7 +15,7 @@ using ScreenConfT = MMScreenBufferConf;
 // template <typename ScreenConfT>
 
 class ScreenFrameBuffer {
-	target::DMA2DTransfer dma2d;
+	mdrivlib::DMA2DTransfer dma2d;
 	ScreenConfT::FrameBufferT &framebuf;
 
 public:
@@ -464,10 +464,9 @@ public:
 
 	void flush_cache()
 	{
-		if constexpr (target::TYPE == mdrivlib::SupportedTargets::stm32mp1_ca7) {
-			using namespace mdrivlib;
+		if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32mp1_ca7) {
 #ifndef SIMULATOR
-			SystemCache::clean_dcache_by_range(&framebuf, sizeof(ScreenConfT::FrameBufferT));
+			mdrivlib::SystemCache::clean_dcache_by_range(&framebuf, sizeof(ScreenConfT::FrameBufferT));
 #endif
 			__DSB();
 			// do mem2mem xfer

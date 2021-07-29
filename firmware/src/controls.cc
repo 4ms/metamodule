@@ -8,6 +8,8 @@
 namespace MetaModule
 {
 
+using namespace mdrivlib;
+
 void Controls::update_debouncers()
 {
 	rotary.update();
