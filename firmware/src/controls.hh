@@ -14,22 +14,24 @@
 #include "params.hh"
 #include "util/interp_param.hh"
 
-using namespace mdrivlib;
-
 namespace MetaModule
 {
+
+using mdrivlib::DebouncedPin;
+using mdrivlib::PinPolarity;
+
 struct Controls {
-	Controls(MuxedADC &potadc,
+	Controls(mdrivlib::MuxedADC &potadc,
 			 CVAdcChipT &cvadc,
 			 DoubleBufParamBlock &param_blocks_ref,
-			 GPIOExpander &gpio_expander,
+			 mdrivlib::GPIOExpander &gpio_expander,
 			 DoubleAuxSignalStreamBlock &auxsignal_blocks_ref);
 
-	MuxedADC &potadc;
+	mdrivlib::MuxedADC &potadc;
 	CVAdcChipT &cvadc;
-	GPIOExpander &jacksense_reader;
+	mdrivlib::GPIOExpander &jacksense_reader;
 
-	RotaryEncoder<RotaryHalfStep> rotary = {
+	mdrivlib::RotaryEncoder<mdrivlib::RotaryHalfStep> rotary = {
 		MMControlPins::rotA.gpio,
 		MMControlPins::rotA.pin,
 		MMControlPins::rotB.gpio,
@@ -58,8 +60,8 @@ struct Controls {
 	uint32_t get_jacksense_reading();
 
 private:
-	Timekeeper read_controls_task;
-	Timekeeper read_cvadc_task;
+	mdrivlib::Timekeeper read_controls_task;
+	mdrivlib::Timekeeper read_cvadc_task;
 
 	DoubleBufParamBlock &param_blocks;
 	Params *cur_params;
@@ -68,7 +70,7 @@ private:
 	bool _first_param = true;
 
 	DoubleAuxSignalStreamBlock &auxstream_blocks;
-	PinChangeInt<DACUpdateConf> auxstream_updater;
+	mdrivlib::PinChangeInt<DACUpdateConf> auxstream_updater;
 	GPIOStream<FPin<GPIO::E, 0, PinMode::Output>, CircularBuffer<uint8_t, StreamConf::DAC::BlockSize>> clock_out;
 	AnalogOutT dac;
 

@@ -26,7 +26,9 @@ namespace MetaModule
 {
 static void app_startup()
 {
-	target::RCC_Enable::HSEM_::set();
+	using namespace mdrivlib;
+
+	core_m4::RCC_Enable::HSEM_::set();
 
 	// Tell A7 we're not ready yet
 	HWSemaphore<M4_ready>::lock();

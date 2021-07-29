@@ -12,7 +12,9 @@ namespace MetaModule
 struct AppStartup {
 	AppStartup()
 	{
-		target::RCC_Enable::HSEM_::set();
+		using namespace mdrivlib;
+
+		RCC_Enable::HSEM_::set();
 		HWSemaphore<MainCoreReady>::disable_channel_ISR();
 		HWSemaphore<MainCoreReady>::lock();
 

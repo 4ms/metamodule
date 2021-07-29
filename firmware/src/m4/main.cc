@@ -28,8 +28,9 @@ struct StaticBuffers {
 void main()
 {
 	using namespace MetaModule;
+	using namespace mdrivlib;
 
-	target::RCC_Enable::HSEM_::set();
+	RCC_Enable::HSEM_::set();
 	HWSemaphore<M4_ready>::lock();
 
 	target::corem4::SystemClocks start_clocks;
