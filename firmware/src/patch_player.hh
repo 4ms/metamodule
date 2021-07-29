@@ -107,7 +107,7 @@ public:
 	// Loads the given patch as the active patch, and caches some pre-calculated values
 	bool load_patch(PatchHeader *ph)
 	{
-		SMPThread::init();
+		mdrivlib::SMPThread::init();
 
 		if (is_loaded)
 			unload_patch();
@@ -149,15 +149,15 @@ public:
 	void update_patch()
 	{
 		for (int module_i = 1; module_i < header->num_modules; module_i++) {
-			if (!SMPThread::is_running()) {
-				SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);
+			if (!mdrivlib::SMPThread::is_running()) {
+				mdrivlib::SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);
 			} else {
 				Debug::Pin2::high();
 				modules[module_i]->update();
 				Debug::Pin2::low();
 			}
 		}
-		SMPThread::join();
+		mdrivlib::SMPThread::join();
 
 		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
 			auto &cable = int_cables[net_i];
@@ -173,7 +173,7 @@ public:
 
 	void unload_patch()
 	{
-		SMPThread::join();
+		mdrivlib::SMPThread::join();
 		is_loaded = false;
 		for (int i = 0; i < header->num_modules; i++) {
 			modules[i].reset(nullptr);
