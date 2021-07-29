@@ -1,8 +1,12 @@
 #pragma once
 #include "drivers/codec_PCM3168.hh"
+#include "util/audio_frame.hh"
 #include <cstdint>
 
-struct StreamConf {
+namespace MetaModule
+{
+//Dual PCM3168 Conf:
+struct StreamConfDualCodec {
 	struct Audio {
 		using CodecT = mdrivlib::CodecPCM3168;
 
@@ -15,7 +19,64 @@ struct StreamConf {
 		static constexpr int NumInChans = 6;
 		static constexpr int NumOutChans = 8;
 		static constexpr int NumCodecs = 2;
-		// static constexpr int DMAInBlockSize = BlockSize * NumDMAHalfTransfers * NumInChans;
-		// static constexpr int DMAOutBlockSize = BlockSize * NumDMAHalfTransfers * NumOutChans;
+
+		using AudioInFrame = AudioFrame<SampleT, SampleBits, NumInChans>;
+		using AudioInBuffer = std::array<AudioInFrame, BlockSize>;
+		struct AudioInBlock {
+			AudioInBuffer codecA[2];
+			AudioInBuffer codecB[2];
+		};
+
+		using AudioOutFrame = AudioFrame<SampleT, SampleBits, NumOutChans>;
+		using AudioOutBuffer = std::array<AudioOutFrame, BlockSize>;
+		struct AudioOutBlock {
+			AudioOutBuffer codecA[2];
+			AudioOutBuffer codecB[2];
+		};
+
+		struct CombinedAudioBlock {
+			AudioInBuffer &in_codecA;
+			AudioInBuffer &in_codecB;
+			AudioOutBuffer &out_codecA;
+			AudioOutBuffer &out_codecB;
+		};
 	};
 };
+
+struct StreamConfSingleCodec {
+	struct Audio {
+		using CodecT = mdrivlib::CodecPCM3168;
+
+		//BlockSize: Number of Frames processed each time AudioStream::process() is called
+		static constexpr int BlockSize = 64;
+
+		static constexpr int NumDMAHalfTransfers = 2;
+		using SampleT = int32_t;
+		static constexpr int SampleBits = 24;
+		static constexpr int NumInChans = 6;
+		static constexpr int NumOutChans = 8;
+
+		static constexpr int NumCodecs = 1;
+
+		using AudioInFrame = AudioFrame<SampleT, SampleBits, NumInChans>;
+		using AudioInBuffer = std::array<AudioInFrame, BlockSize>;
+		struct AudioInBlock {
+			AudioInBuffer codec[2];
+		};
+
+		using AudioOutFrame = AudioFrame<SampleT, SampleBits, NumOutChans>;
+		using AudioOutBuffer = std::array<AudioOutFrame, BlockSize>;
+		struct AudioOutBlock {
+			AudioOutBuffer codec[2];
+		};
+
+		struct CombinedAudioBlock {
+			AudioInBuffer &in_codec;
+			AudioOutBuffer &out_codec;
+		};
+	};
+};
+
+using StreamConf = StreamConfDualCodec;
+
+} // namespace MetaModule

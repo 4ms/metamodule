@@ -1,3 +1,4 @@
+#pragma once
 #include "math.hh"
 #include <array>
 #include <stdint.h>

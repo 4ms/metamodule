@@ -8,42 +8,26 @@
 #include "patch_player.hh"
 #include "patchlist.hh"
 #include "processors/tools/kneeCompress.h"
-#include "util/audio_frame.hh"
 #include "util/interp_param.hh"
 #include "util/math.hh"
 #include "util/oscs.hh"
 #include <array>
 
-using namespace mdrivlib;
 namespace MetaModule
 {
+//using namespace mdrivlib;
+
 using AudioConf = StreamConf::Audio;
-using CodecT = StreamConf::Audio::CodecT;
+
+using AudioInBlock = AudioConf::AudioInBlock;
+using AudioOutBlock = AudioConf::AudioOutBlock;
+using AudioInBuffer = AudioConf::AudioInBuffer;
+using AudioOutBuffer = AudioConf::AudioOutBuffer;
+
+using CodecT = AudioConf::CodecT;
 
 class AudioStream {
-
 public:
-	using AudioInFrame = AudioFrame<AudioConf::SampleT, AudioConf::SampleBits, AudioConf::NumInChans>;
-	using AudioInBuffer = std::array<AudioInFrame, AudioConf::BlockSize>;
-	struct AudioInBlock {
-		AudioInBuffer codecA[2];
-		AudioInBuffer codecB[2];
-	};
-
-	using AudioOutFrame = AudioFrame<AudioConf::SampleT, AudioConf::SampleBits, AudioConf::NumOutChans>;
-	using AudioOutBuffer = std::array<AudioOutFrame, AudioConf::BlockSize>;
-	struct AudioOutBlock {
-		AudioOutBuffer codecA[2];
-		AudioOutBuffer codecB[2];
-	};
-
-	struct CombinedAudioBlock {
-		AudioInBuffer &in_codecA;
-		AudioInBuffer &in_codecB;
-		AudioOutBuffer &out_codecA;
-		AudioOutBuffer &out_codecB;
-	};
-
 	AudioStream(PatchList &patches,
 				PatchPlayer &patchplayer,
 				CodecT &codecA,
@@ -54,15 +38,16 @@ public:
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
 				DoubleAuxSignalStreamBlock &auxs);
+
 	void start();
 
-	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxSignalStreamBlock &aux);
+	void process(AudioConf::CombinedAudioBlock &audio, ParamBlock &param_block, AuxSignalStreamBlock &aux);
 
 private:
 	ParamCache &cache;
 	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
-	CombinedAudioBlock audio_blocks[2];
+	AudioConf::CombinedAudioBlock audio_blocks[2];
 	DoubleAuxSignalStreamBlock &auxsigs;
 
 	CodecT &codecA_;
@@ -75,7 +60,7 @@ private:
 	PatchList &patch_list;
 	PatchPlayer &player;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
-	CycleCounter load_measure;
+	mdrivlib::CycleCounter load_measure;
 	uint32_t _mute_ctr = 0;
 
 	AudioConf::SampleT get_audio_output(int output_id);
