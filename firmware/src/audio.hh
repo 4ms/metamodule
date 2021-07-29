@@ -20,14 +20,29 @@ namespace MetaModule
 using AudioConf = StreamConf::Audio;
 using CodecT = StreamConf::Audio::CodecT;
 
-// Todo: we don't need a codec virtual class, just use a type alias
 class AudioStream {
 
 public:
 	using AudioInFrame = AudioFrame<AudioConf::SampleT, AudioConf::SampleBits, AudioConf::NumInChans>;
+	using AudioInBuffer = std::array<AudioInFrame, AudioConf::BlockSize>;
+	struct AudioInBlock {
+		AudioInBuffer codecA[2];
+		AudioInBuffer codecB[2];
+	};
+
 	using AudioOutFrame = AudioFrame<AudioConf::SampleT, AudioConf::SampleBits, AudioConf::NumOutChans>;
-	using AudioInStreamBlock = std::array<AudioInFrame, AudioConf::BlockSize>;
-	using AudioOutStreamBlock = std::array<AudioOutFrame, AudioConf::BlockSize>;
+	using AudioOutBuffer = std::array<AudioOutFrame, AudioConf::BlockSize>;
+	struct AudioOutBlock {
+		AudioOutBuffer codecA[2];
+		AudioOutBuffer codecB[2];
+	};
+
+	struct CombinedAudioBlock {
+		AudioInBuffer &in_codecA;
+		AudioInBuffer &in_codecB;
+		AudioOutBuffer &out_codecA;
+		AudioOutBuffer &out_codecB;
+	};
 
 	AudioStream(PatchList &patches,
 				PatchPlayer &patchplayer,
@@ -36,32 +51,19 @@ public:
 				ParamCache &cache,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
-				AudioInStreamBlock (&in_buffers)[4],
-				AudioOutStreamBlock (&out_buffers)[4],
-				AuxSignalStreamBlock (&auxsig)[2]);
+				AudioInBlock &audio_in_block,
+				AudioOutBlock &audio_out_block,
+				DoubleAuxSignalStreamBlock &auxs);
 	void start();
 
-	void process(AudioInStreamBlock &inA,
-				 AudioOutStreamBlock &outA,
-				 AudioInStreamBlock &inB,
-				 AudioOutStreamBlock &outB,
-				 ParamBlock &param_block,
-				 AuxSignalStreamBlock &aux);
+	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxSignalStreamBlock &aux);
 
 private:
 	ParamCache &cache;
 	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
-	AudioOutStreamBlock &tx_buf_codecA_1;
-	AudioOutStreamBlock &tx_buf_codecA_2;
-	AudioOutStreamBlock &tx_buf_codecB_1;
-	AudioOutStreamBlock &tx_buf_codecB_2;
-	AudioInStreamBlock &rx_buf_codecA_1;
-	AudioInStreamBlock &rx_buf_codecA_2;
-	AudioInStreamBlock &rx_buf_codecB_1;
-	AudioInStreamBlock &rx_buf_codecB_2;
-	AuxSignalStreamBlock &auxsig_1;
-	AuxSignalStreamBlock &auxsig_2;
+	CombinedAudioBlock audio_blocks[2];
+	DoubleAuxSignalStreamBlock &auxsigs;
 
 	CodecT &codecA_;
 	CodecT &codecB_;
@@ -82,16 +84,13 @@ private:
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
 
-	void output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
-	void passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux);
-	void sines_out(AudioInStreamBlock &in, AudioOutStreamBlock &out);
+	void output_silence(AudioOutBuffer &out, AuxSignalStreamBlock &aux);
+	void passthrough_audio(AudioInBuffer &in, AudioOutBuffer &out, AuxSignalStreamBlock &aux);
+	void sines_out(AudioInBuffer &in, AudioOutBuffer &out);
 
-	void dual_sines_out(AudioOutStreamBlock &outA, AudioOutStreamBlock &outB);
-	void dual_passthrough(AudioInStreamBlock &inA,
-						  AudioOutStreamBlock &outA,
-						  AudioInStreamBlock &inB,
-						  AudioOutStreamBlock &outB,
-						  AuxSignalStreamBlock &aux);
+	void dual_sines_out(AudioOutBuffer &outA, AudioOutBuffer &outB);
+	void dual_passthrough(
+		AudioInBuffer &inA, AudioOutBuffer &outA, AudioInBuffer &inB, AudioOutBuffer &outB, AuxSignalStreamBlock &aux);
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;

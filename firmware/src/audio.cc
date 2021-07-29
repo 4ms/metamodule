@@ -27,22 +27,21 @@ AudioStream::AudioStream(PatchList &patches,
 						 ParamCache &param_cache,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
-						 AudioInStreamBlock (&in_buffers)[4],
-						 AudioOutStreamBlock (&out_buffers)[4],
-						 AuxSignalStreamBlock (&auxsig)[2])
+						 AudioInBlock &audio_in_block,
+						 AudioOutBlock &audio_out_block,
+						 DoubleAuxSignalStreamBlock &auxs)
 	: cache{param_cache}
 	, mbox{uiaudiomailbox}
 	, param_blocks{p}
-	, tx_buf_codecA_1{out_buffers[0]}
-	, tx_buf_codecA_2{out_buffers[1]}
-	, tx_buf_codecB_1{out_buffers[2]}
-	, tx_buf_codecB_2{out_buffers[3]}
-	, rx_buf_codecA_1{in_buffers[0]}
-	, rx_buf_codecA_2{in_buffers[1]}
-	, rx_buf_codecB_1{in_buffers[2]}
-	, rx_buf_codecB_2{in_buffers[3]}
-	, auxsig_1{auxsig[0]}
-	, auxsig_2{auxsig[1]}
+	, audio_blocks{{.in_codecA = audio_in_block.codecA[0],
+					.in_codecB = audio_in_block.codecB[0],
+					.out_codecA = audio_out_block.codecA[0],
+					.out_codecB = audio_out_block.codecB[0]},
+				   {.in_codecA = audio_in_block.codecA[1],
+					.in_codecB = audio_in_block.codecB[1],
+					.out_codecA = audio_out_block.codecA[1],
+					.out_codecB = audio_out_block.codecB[1]}}
+	, auxsigs{auxs}
 	, codecA_{codecA}
 	, codecB_{codecB}
 	, sample_rate_{codecA.get_samplerate()}
@@ -50,33 +49,32 @@ AudioStream::AudioStream(PatchList &patches,
 	, player{patchplayer}
 {
 	codecA_.init();
-	codecA_.set_tx_buffers(tx_buf_codecA_1);
-	codecA_.set_rx_buffers(rx_buf_codecA_1);
+	codecA_.set_tx_buffers(audio_blocks[0].out_codecA);
+	codecA_.set_rx_buffers(audio_blocks[0].in_codecA);
 
 	codecB_.init();
-	codecB_.set_tx_buffers(tx_buf_codecB_1);
-	codecB_.set_rx_buffers(rx_buf_codecB_1);
+	codecB_.set_tx_buffers(audio_blocks[0].out_codecB);
+	codecB_.set_rx_buffers(audio_blocks[0].in_codecB);
 
 	codecA_.set_callbacks(
 		[this]() {
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
 			HWSemaphore<ParamsBuf2Lock>::unlock();
-
-			// if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-			// process(rx_buf_codecA_1, tx_buf_codecA_1, rx_buf_codecB_1, tx_buf_codecB_1, param_blocks[0], auxsig_1);
-			// else
-			process(rx_buf_codecA_2, tx_buf_codecA_2, rx_buf_codecB_2, tx_buf_codecB_2, param_blocks[0], auxsig_1);
+			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
+				process(audio_blocks[0], param_blocks[0], auxsigs[0]);
+			else
+				process(audio_blocks[1], param_blocks[0], auxsigs[0]);
 			Debug::Pin0::low();
 		},
 		[this]() {
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf2Lock>::lock();
 			HWSemaphore<ParamsBuf1Lock>::unlock();
-			// if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-			// process(rx_buf_codecA_2, tx_buf_codecA_2, rx_buf_codecB_2, tx_buf_codecB_2, param_blocks[1], auxsig_2);
-			// else
-			process(rx_buf_codecA_1, tx_buf_codecA_1, rx_buf_codecB_1, tx_buf_codecB_1, param_blocks[1], auxsig_2);
+			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
+				process(audio_blocks[1], param_blocks[1], auxsigs[1]);
+			else
+				process(audio_blocks[0], param_blocks[1], auxsigs[1]);
 			Debug::Pin0::low();
 		});
 
@@ -96,15 +94,13 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id)
 
 // Todo: integrate params.buttons[]
 
-//process(audiobuff[1], param_blocks[1], auxsig[1])
-//audiobuf.inA, audiobuf.outA...
-void AudioStream::process(AudioInStreamBlock &inA,
-						  AudioOutStreamBlock &outA,
-						  AudioInStreamBlock &inB,
-						  AudioOutStreamBlock &outB,
-						  ParamBlock &param_block,
-						  AuxSignalStreamBlock &aux)
+void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxSignalStreamBlock &aux)
 {
+	auto &inA = audio_block.in_codecA;
+	auto &inB = audio_block.in_codecB;
+	auto &outA = audio_block.out_codecA;
+	auto &outB = audio_block.out_codecB;
+
 	// param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
 	// load_measure.start_measurement();
 
@@ -140,10 +136,8 @@ void AudioStream::process(AudioInStreamBlock &inA,
 		propagate_sense_pins(params_);
 
 		//Pass audio/CV inputs to modules
-		for (int i = 0; i < AudioConf::NumInChans; i++)
-			player.set_panel_input(i, AudioInFrame::scaleInput(in_.chan[i]));
-		// for (auto [i, inchan] : countzip(in_.chan))
-		// 	player.set_panel_input(i, AudioInFrame::scaleInput(inchan));
+		for (auto [i, inchan] : countzip(in_.chan))
+			player.set_panel_input(i, AudioInFrame::scaleInput(inchan));
 
 		//Pass Knob values to modules
 		int i = 0;
@@ -158,10 +152,8 @@ void AudioStream::process(AudioInStreamBlock &inA,
 		player.update_patch();
 
 		//Get outputs from modules
-		for (int i = 0; i < AudioConf::NumOutChans; i++)
-			out_.chan[i] = get_audio_output(i);
-		// for (auto [i, outchan] : countzip(out_.chan))
-		// 	outchan = get_audio_output(i);
+		for (auto [i, outchan] : countzip(out_.chan))
+			outchan = get_audio_output(i);
 
 		aux_.clock_out = player.get_panel_output(AudioConf::NumOutChans) > 0.5f ? 1 : 0;
 	}
@@ -185,18 +177,18 @@ void AudioStream::propagate_sense_pins(Params &params)
 	// Note: PCB has an error where out jack sense pins do not work, so we don't check them yet
 }
 
-void AudioStream::output_silence(AudioOutStreamBlock &out, AuxSignalStreamBlock &aux)
+void AudioStream::output_silence(AudioOutBuffer &out, AuxSignalStreamBlock &aux)
 {
 	auto aux_ = aux.begin();
 	for (auto &out_ : out) {
-		for (int i = 0; i < AudioConf::NumOutChans; i++)
-			out_.chan[i] = get_audio_output(i);
+		for (auto &outchan : out_.chan)
+			outchan = 0;
 		aux_->clock_out = 0;
 		aux_++;
 	}
 }
 
-void AudioStream::passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock &out, AuxSignalStreamBlock &aux)
+void AudioStream::passthrough_audio(AudioInBuffer &in, AudioOutBuffer &out, AuxSignalStreamBlock &aux)
 {
 
 	for (auto [i, o, a] : zip(in, out, aux)) {
@@ -206,13 +198,13 @@ void AudioStream::passthrough_audio(AudioInStreamBlock &in, AudioOutStreamBlock 
 		o.chan[3] = i.chan[3];
 		o.chan[4] = i.chan[4];
 		o.chan[5] = i.chan[5];
-		o.chan[6] = 0x00100000; //AudioOutFrame::scaleOutput(AudioInFrame::scaleInput(i.chan[5]));
-		o.chan[7] = 0x00400000; //AudioOutFrame::scaleOutput(AudioInFrame::scaleInput(i.chan[5]));
+		o.chan[6] = 0x00100000;
+		o.chan[7] = 0x00400000;
 		a.clock_out = 0;
 	}
 }
 
-void AudioStream::sines_out(AudioInStreamBlock &in, AudioOutStreamBlock &out)
+void AudioStream::sines_out(AudioInBuffer &in, AudioOutBuffer &out)
 {
 	static PhaseAccum<48000> phase0{80};
 	static PhaseAccum<48000> phase1{200};
@@ -271,11 +263,8 @@ void AudioStream::sines_out(AudioInStreamBlock &in, AudioOutStreamBlock &out)
 	// using refavg/refref (inverted): deviates 260Hz (obviously, math is bad)
 }
 
-void AudioStream::dual_passthrough(AudioInStreamBlock &inA,
-								   AudioOutStreamBlock &outA,
-								   AudioInStreamBlock &inB,
-								   AudioOutStreamBlock &outB,
-								   AuxSignalStreamBlock &aux)
+void AudioStream::dual_passthrough(
+	AudioInBuffer &inA, AudioOutBuffer &outA, AudioInBuffer &inB, AudioOutBuffer &outB, AuxSignalStreamBlock &aux)
 {
 
 	static PhaseAccum<48000> phase0{80};
@@ -300,19 +289,11 @@ void AudioStream::dual_passthrough(AudioInStreamBlock &inA,
 		outb.chan[5] = inb.chan[3];
 		outb.chan[6] = inb.chan[4];
 		outb.chan[7] = inb.chan[5];
-		// outb.chan[0] = 1;
-		// outb.chan[1] = 2;
-		// outb.chan[2] = 3;
-		// outb.chan[3] = 4;
-		// outb.chan[4] = 5;
-		// outb.chan[5] = 6;
-		// outb.chan[6] = 7;
-		// outb.chan[7] = 8;
 		a.clock_out = 0;
 	}
 }
 
-void AudioStream::dual_sines_out(AudioOutStreamBlock &outA, AudioOutStreamBlock &outB)
+void AudioStream::dual_sines_out(AudioOutBuffer &outA, AudioOutBuffer &outB)
 {
 	static PhaseAccum<48000> phase0{80};
 	static PhaseAccum<48000> phase1{200};
