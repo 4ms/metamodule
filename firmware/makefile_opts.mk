@@ -7,7 +7,7 @@
 # $(BUILDDIR)/src/m4/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/controls.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/screen.o: OPTFLAG = -O0
-$(BUILDDIR)/src/audio.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 # $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
