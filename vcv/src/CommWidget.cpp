@@ -28,6 +28,18 @@ void CommModuleWidget::addLabeledKnob(const std::string labelText,
 	addParam(p);
 }
 
+void CommModuleWidget::addLabeledKnobMM(const std::string labelText,
+										const int knobID,
+										const Vec position,
+										const float defaultValue)
+{
+	addLabel(labelText, position, {LabelButtonID::Types::Knob, knobID, -1});
+	auto p = createParamCentered<RoundBlackKnob>(mm2px(position), module, knobID);
+	if (p->paramQuantity)
+		p->paramQuantity->defaultValue = defaultValue;
+	addParam(p);
+}
+
 void CommModuleWidget::addLabeledInput(const std::string labelText, const int inputID, const Vec position)
 {
 	const Vec pos = {
@@ -38,6 +50,12 @@ void CommModuleWidget::addLabeledInput(const std::string labelText, const int in
 	addInput(createInputCentered<PJ301MPort>(mm2px(pos), module, inputID));
 }
 
+void CommModuleWidget::addLabeledInputMM(const std::string labelText, const int inputID, const Vec position)
+{
+	addLabel(labelText, position, {LabelButtonID::Types::InputJack, inputID, -1});
+	addInput(createInputCentered<PJ301MPort>(mm2px(position), module, inputID));
+}
+
 void CommModuleWidget::addLabeledOutput(const std::string labelText, const int outputID, const Vec position)
 {
 	const Vec pos = {
@@ -46,6 +64,12 @@ void CommModuleWidget::addLabeledOutput(const std::string labelText, const int o
 	};
 	addLabel(labelText, pos, {LabelButtonID::Types::OutputJack, outputID, -1});
 	addOutput(createOutputCentered<PJ301MPort>(mm2px(pos), module, outputID));
+}
+
+void CommModuleWidget::addLabeledOutputMM(const std::string labelText, const int outputID, const Vec position)
+{
+	addLabel(labelText, position, {LabelButtonID::Types::OutputJack, outputID, -1});
+	addOutput(createOutputCentered<PJ301MPort>(mm2px(position), module, outputID));
 }
 
 LabeledButton *CommModuleWidget::createLabel()
