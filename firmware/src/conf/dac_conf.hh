@@ -14,14 +14,14 @@
 	#include "m7/conf/dac_conf_target.hh"
 #endif
 
-struct MM_DACConf : DefaultSpiTransferConf {
+struct MM_DACConf : mdrivlib::DefaultSpiTransferConf {
 	struct SpiConf : DACConfTarget {
 		static constexpr uint16_t NumChips = 2;
 		static constexpr uint16_t priority1 = 1;
 		static constexpr uint16_t priority2 = 3;
 		static constexpr bool use_hardware_ss = false;
 		static constexpr uint16_t data_size = 24;
-		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
+		static constexpr mdrivlib::SpiDataDir data_dir = mdrivlib::SpiDataDir::TXOnly;
 		static constexpr uint8_t FifoThreshold = 1;
 		static constexpr bool LSBfirst = false;
 	};
@@ -32,7 +32,7 @@ struct MM_DACConf : DefaultSpiTransferConf {
 	static constexpr float scaling = 0.790336f;
 };
 
-struct DACUpdateConf : public DefaultPinChangeConf {
+struct DACUpdateConf : public mdrivlib::DefaultPinChangeConf {
 	static constexpr uint32_t pin = DACConfTarget::SaiLRClkPin.pin;
 	static constexpr GPIO port = DACConfTarget::SaiLRClkPin.gpio;
 	static constexpr bool on_rising_edge = true;
@@ -42,5 +42,5 @@ struct DACUpdateConf : public DefaultPinChangeConf {
 	static constexpr uint32_t core = DACConfTarget::CoreNum;
 };
 
-using AnalogOutT = DacStream<mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>,
-							 CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize>>;
+using AnalogOutT = mdrivlib::DacStream<mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>,
+									   CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize>>;

@@ -9,17 +9,15 @@
 #include "drivers/spi_screen_ST77XX.hh"
 #include "drivers/spi_screen_driver.hh"
 #include "drivers/stm32xx.h"
-#include "drivers/system.hh"
 
 #include "examples/hardware-tests/memory_transfer_test.hh"
 
-using namespace mdrivlib;
 using ScreenWriterConfT = MMScreenConf;
 
 namespace MetaModule
 {
 // template <typename ScreenWriterConfT>
-class ScreenFrameWriter : public DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT> {
+class ScreenFrameWriter : public mdrivlib::DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT> {
 	static constexpr uint32_t FrameSize = ScreenWriterConfT::FrameBytes;
 	static constexpr uint32_t HalfFrameSize = ScreenWriterConfT::HalfFrameBytes;
 
@@ -73,7 +71,7 @@ public:
 
 	void init()
 	{
-		DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
+		mdrivlib::DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
 		init_display(generic_st7789);
 		set_rotation(ScreenWriterConfT::rotation);
 
@@ -198,7 +196,7 @@ protected:
 		static constexpr uint32_t src_burst = 0b100;
 		static constexpr uint32_t dst_burst = 0b100;
 	};
-	MemoryTransfer<ScreenMemXferConfT> mem_xfer;
+	mdrivlib::MemoryTransfer<ScreenMemXferConfT> mem_xfer;
 
 	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
 	{

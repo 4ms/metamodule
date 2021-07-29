@@ -6,8 +6,14 @@
 #include "drivers/spi_screen_config_struct.hh"
 #include "drivers/spi_screen_driver.hh"
 
-struct MMScreenConf : DefaultSpiScreenConf {
-	struct ScreenSpiConf : DefaultSpiConf {
+using mdrivlib::FPin;
+using mdrivlib::GPIO;
+using mdrivlib::PinMode;
+using mdrivlib::PinNoInit;
+using mdrivlib::SpiDataDir;
+
+struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
+	struct ScreenSpiConf : mdrivlib::DefaultSpiConf {
 		static constexpr uint16_t PeriphNum = 4; // SPI4
 		static constexpr uint16_t NumChips = 1;
 		static constexpr IRQType IRQn = SPI4_IRQn;
@@ -61,4 +67,4 @@ struct MMScreenConf : DefaultSpiScreenConf {
 	static constexpr uint32_t HalfFrameBytes = sizeof(HalfFrameBufferT);
 };
 
-using ScreenTransferDriverT = target::DMATransfer<typename MMScreenConf::DMAConf>;
+using ScreenTransferDriverT = mdrivlib::DMATransfer<typename MMScreenConf::DMAConf>;

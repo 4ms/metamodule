@@ -4,6 +4,9 @@
 #include "drivers/sai_config_struct.hh"
 #include "drivers/stm32xx.h"
 
+using mdrivlib::GPIO;
+using mdrivlib::SaiConfig;
+
 const SaiConfig codec_sai_conf = {
 	.sai = SAI1,
 	.tx_block = SAI1_Block_B,

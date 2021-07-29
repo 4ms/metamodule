@@ -8,6 +8,8 @@
 namespace MetaModule
 {
 
+using namespace mdrivlib;
+
 void Controls::update_debouncers()
 {
 	rotary.update();
@@ -127,10 +129,10 @@ void Controls::start()
 	auxstream_updater.start();
 }
 
-Controls::Controls(MuxedADC &potadc,
+Controls::Controls(mdrivlib::MuxedADC &potadc,
 				   CVAdcChipT &cvadc,
 				   DoubleBufParamBlock &param_blocks_ref,
-				   GPIOExpander &gpio_expander,
+				   mdrivlib::GPIOExpander &gpio_expander,
 				   DoubleAuxSignalStreamBlock &auxsignal_blocks_ref)
 	: potadc(potadc)
 	, cvadc(cvadc)

@@ -1,7 +1,7 @@
 #pragma once
 #include "drivers/sdram_config_struct.hh"
 
-constexpr SDRAMTimingConfig SDRAM_timing_AS4C16M16SA_6CN = {
+constexpr mdrivlib::SDRAMTimingConfig SDRAM_timing_AS4C16M16SA_6CN = {
 	.tRC_ns = 60,
 	.tRP_ns = 18,
 	.tMRD_ns = 12,
@@ -17,7 +17,7 @@ constexpr SDRAMTimingConfig SDRAM_timing_AS4C16M16SA_6CN = {
 	.read_pipe_delay = 2,
 };
 
-constexpr SDRAMArchConfig SDRAM_arch_AS4C16M16SA_6CN = {
+constexpr mdrivlib::SDRAMArchConfig SDRAM_arch_AS4C16M16SA_6CN = {
 	.num_internal_banks = 4,
 	.bus_width_bits = 16,
 	.column_bits = 9,

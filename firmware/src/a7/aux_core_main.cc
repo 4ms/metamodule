@@ -9,6 +9,7 @@
 extern "C" void aux_core_main()
 {
 	using namespace MetaModule;
+	using namespace mdrivlib;
 
 	while (HWSemaphore<MainCoreReady>::is_locked())
 		;

@@ -6,6 +6,9 @@
 
 namespace MetaModule
 {
+using mdrivlib::GPIO;
+using mdrivlib::PinNoInit;
+
 const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
 	.period_ns = 20800, // must be just a hair faster than 48kHz

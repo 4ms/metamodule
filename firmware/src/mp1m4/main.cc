@@ -1,5 +1,4 @@
 #include "auxsignal.hh"
-#include "boot/system_startup_m4.hh"
 #include "conf/adc_spi_conf.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
@@ -13,7 +12,7 @@
 #include "drivers/pca9685_led_driver.hh"
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
-#include "drivers/system.hh"
+#include "drivers/system_startup.hh"
 #include "mp1m4/hsem_handler.hh"
 #include "muxed_adc.hh"
 #include "params.hh"
@@ -26,7 +25,7 @@ namespace MetaModule
 {
 static void app_startup()
 {
-	target::RCC_Enable::HSEM_::set();
+	core_m4::RCC_Enable::HSEM_::set();
 
 	// Tell A7 we're not ready yet
 	HWSemaphore<M4_ready>::lock();
@@ -35,7 +34,7 @@ static void app_startup()
 	while (HWSemaphore<MainCoreReady>::is_locked())
 		;
 
-	target::SystemClocks init_system_clocks{};
+	SystemClocks init_system_clocks{};
 };
 
 struct StaticBuffers {

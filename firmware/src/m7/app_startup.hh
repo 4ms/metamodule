@@ -12,17 +12,19 @@ namespace MetaModule
 struct AppStartup {
 	AppStartup()
 	{
-		target::RCC_Enable::HSEM_::set();
+		using namespace mdrivlib;
+
+		RCC_Enable::HSEM_::set();
 		HWSemaphore<MainCoreReady>::disable_channel_ISR();
 		HWSemaphore<MainCoreReady>::lock();
 
-		target::corem7::SystemStartup::wait_for_cm4_sleep();
+		SystemStartup::wait_for_cm4_sleep();
 
-		target::System::SetVectorTable(0x08000000);
-		target::System::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf, 500);
+		System::SetVectorTable(0x08000000);
+		SystemStartup::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf, 500);
 		NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
 
-		target::corem7::SystemStartup::init_caches();
+		SystemStartup::init_caches();
 
 		HAL_NVIC_SetPriority(MemoryManagement_IRQn, 0, 0);
 		HAL_NVIC_SetPriority(BusFault_IRQn, 0, 0);
@@ -32,7 +34,7 @@ struct AppStartup {
 		HAL_NVIC_SetPriority(PendSV_IRQn, 0, 0);
 		HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 
-		target::corem7::SystemStartup::tell_cm4_to_wakeup();
+		SystemStartup::tell_cm4_to_wakeup();
 	}
 };
 } // namespace MetaModule
