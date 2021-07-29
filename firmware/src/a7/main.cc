@@ -53,11 +53,11 @@ void main()
 					  patch_player,
 					  _hw.codecA,
 					  _hw.codecB,
+					  StaticBuffers::audio_in_dma_block,
+					  StaticBuffers::audio_out_dma_block,
 					  param_cache,
 					  mbox,
 					  StaticBuffers::param_blocks,
-					  StaticBuffers::audio_in_dma_block,
-					  StaticBuffers::audio_out_dma_block,
 					  StaticBuffers::auxsignal_block};
 
 	// SharedBus::i2c.deinit();

@@ -24,11 +24,11 @@ AudioStream::AudioStream(PatchList &patches,
 						 PatchPlayer &patchplayer,
 						 CodecT &codecA,
 						 CodecT &codecB,
+						 AudioInBlock &audio_in_block,
+						 AudioOutBlock &audio_out_block,
 						 ParamCache &param_cache,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
-						 AudioInBlock &audio_in_block,
-						 AudioOutBlock &audio_out_block,
 						 DoubleAuxSignalStreamBlock &auxs)
 	: cache{param_cache}
 	, mbox{uiaudiomailbox}
