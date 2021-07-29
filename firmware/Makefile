@@ -16,19 +16,21 @@ export LINKSCRIPTDIR   	= system/linker
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
-.PHONY: all embm4 mp1m4 patches clean flash_a7 flash_m7 flash_m4 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
+.PHONY: all mp1 mp1m4 patches clean flash_a7 flash_m7 flash_m4 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
 
-all: patches embm4 h7 tests
+all: patches mp1 h7 tests
 
 # Binaries
 
-embm4: firmware_m4.h firmware_m4_vectors.h
+mp1: firmware_m4.h firmware_m4_vectors.h
+	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk all 
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
 
 a7:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
 
-mp1m4: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
+mp1m4:
+	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk all
 
 h7:
 	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
