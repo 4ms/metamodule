@@ -15,20 +15,6 @@ export LINKSCRIPTDIR   	= system/linker
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
-ifeq "$(MAKECMDGOALS)" "mini"
-endif
-
-ifeq "$(MAKECMDGOALS)" "medium"
-export BINARYNAME 		= main-medium
-endif
-
-ifeq "$(MAKECMDGOALS)" "max"
-export BINARYNAME 		= main-max
-endif
-
-ifeq "$(MAKECMDGOALS)" "pcmdev"
-endif
-
 .PHONY: all mp1-mini mp1-pcmdev mp1m4 patches clean flash_a7 flash_m7 flash_m4 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
 
 all: patches mp1-mini h7 tests
@@ -39,9 +25,9 @@ mp1-mini: firmware_m4.h firmware_m4_vectors.h
 	@$(MAKE) BINARYNAME=mini --no-print-directory -f makefile_mp1m4.mk mini
 	@$(MAKE) BINARYNAME=mini --no-print-directory -f makefile_mp1a7.mk mini
 
-mp1-pcmdev: firmware_m4.h firmware_m4_vectors.h
-	@$(MAKE) BINARYNAME=pcmdev --no-print-directory -f makefile_mp1m4.mk pcmdev 
-	@$(MAKE) BINARYNAME=pcmdev --no-print-directory -f makefile_mp1a7.mk pcmdev 
+# mp1-pcmdev: firmware_m4.h firmware_m4_vectors.h
+# 	@$(MAKE) BINARYNAME=pcmdev --no-print-directory -f makefile_mp1m4.mk pcmdev 
+# 	@$(MAKE) BINARYNAME=pcmdev --no-print-directory -f makefile_mp1a7.mk pcmdev 
 
 # a7:
 # 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all 

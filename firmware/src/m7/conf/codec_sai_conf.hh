@@ -5,10 +5,11 @@
 #include "drivers/sai_config_struct.hh"
 #include "drivers/stm32xx.h"
 
+namespace MetaModule
+{
+
 using mdrivlib::GPIO;
 using mdrivlib::SaiConfig;
-
-using CodecT = mdrivlib::CodecWM8731;
 
 const SaiConfig codec_sai_conf = {
 	.sai = SAI1,
@@ -46,3 +47,5 @@ const SaiConfig codec_sai_conf = {
 	.SD_DAC = {GPIO::E, 3, GPIO_AF6_SAI1},
 	.SD_ADC = {GPIO::E, 6, GPIO_AF6_SAI1},
 };
+
+} // namespace MetaModule

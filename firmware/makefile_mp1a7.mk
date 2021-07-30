@@ -76,6 +76,7 @@ SOURCES = \
 		  $(DRIVERLIB)/drivers/i2c.cc \
 		  $(TARGETDEVICEDIR)/drivers/sai_tdm.cc \
 		  $(DRIVERLIB)/drivers/codec_PCM3168.cc \
+		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
 		  $(SHARED)/util/math_tables.cc \
 		  $(CORE_SRC)/main.cc\
 		  $(CORE_SRC)/aux_core_main.cc\

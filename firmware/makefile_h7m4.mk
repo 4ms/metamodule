@@ -2,6 +2,10 @@
 
 $(info --------------------)
 $(info Building for H7 M4 core)
+
+#mini only
+MDIR = src/mini
+
 BUILDDIR = $(BUILDDIR_H7M4)
 LOADFILE = $(LINKSCRIPTDIR)/stm32h755xx_flash_CM4.ld
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
@@ -51,6 +55,7 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \
+			-I$(MDIR) \
 			-Isrc/conf \
 			-Isrc/m4/conf \
 			-I$(CORE_SRC) \

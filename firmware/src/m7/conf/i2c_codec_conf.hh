@@ -5,7 +5,7 @@ using mdrivlib::GPIO;
 
 constexpr uint32_t LEDUpdateHz = 100;
 
-const mdrivlib::I2CConfig i2c_conf_m7 = {
+const mdrivlib::I2CConfig i2c_codec_conf = {
 	.I2Cx = I2C1,
 	.SCL = {GPIO::B, 6, GPIO_AF4_I2C1},
 	.SDA = {GPIO::B, 7, GPIO_AF4_I2C1},

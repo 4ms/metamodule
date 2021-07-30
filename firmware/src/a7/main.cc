@@ -1,14 +1,12 @@
-#include "a7/app_startup.hh"
-#include "a7/hsem_handler.hh"
-#include "drivers/hsem.hh"
-//#include "conf/i2c_codec_conf.hh"
 #include "a7/static_buffers.hh"
+#include "app_startup.hh"
 #include "audio.hh"
-#include "codec_PCM3168.hh"
 #include "conf/board_codec_conf.hh"
 #include "debug.hh"
+#include "drivers/hsem.hh"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
+#include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
@@ -36,11 +34,14 @@ void main()
 	UiAudioMailbox mbox;
 
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
+
+#if !defined(DUAL_PCM3168_DEV)
 	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
+#endif
 
 	AudioStream audio{patch_list,
 					  patch_player,
-					  _hw.codec,
+					  Hardware::codec,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
 					  param_cache,
@@ -59,15 +60,19 @@ void main()
 	// Enable ISR for LedBufFrameLock:
 	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
+#if !defined(DUAL_PCM3168_DEV)
 	// // Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
+#endif
 
 	param_cache.clear();
+#if !defined(DUAL_PCM3168_DEV)
 	ui.start();
+#endif
 	audio.start();
 
 	while (true) {
