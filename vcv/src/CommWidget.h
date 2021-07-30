@@ -12,7 +12,7 @@ protected:
 	const float kTextOffset = 5;
 	const float kTopMargin = 13;
 	const float kBottomMargin = 15;
-	const float kGridSpacingX = 60;
+	const float kGridSpacingX = 30;
 	const float kModuleHeight = 128.5f;
 
 public:
