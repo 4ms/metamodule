@@ -1,5 +1,4 @@
 #pragma once
-#include "audio.hh"
 #include "auxsignal.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "drivers/mpu.hh"
@@ -10,19 +9,17 @@
 extern char _dma_buffer_start;
 extern char _dma_buffer_region_size;
 
-// StaticBuffers sets up our regions of memory that have specific requirements in the Cortex M7/M4 architecture.
-// The attributes are defined in the linker file.
-// - Audio DMA Buffer must have a static address and be in certain SRAM regions, and be non-cacheable.
-// - Screen framebuffer is large, must be fast, and accessible to M7 and the M4 controlling the MDMA
-// - LED Frame buffer needs to be accessible to both cores
-// - Param Blocks need to be accessible to both cores (speed may be a concern too)
 namespace MetaModule
 {
+
+// StaticBuffers sets up our regions of memory that have specific requirements in the Cortex M7/M4 architecture.
+// The sections are defined in the linker file.
 struct StaticBuffers {
-	static inline __attribute__((section(".dma_buffer"))) AudioStreamBlock audio_dma_block[4];
+	static inline __attribute__((section(".dma_buffer"))) StreamConf::Audio::AudioInBlock audio_in_dma_block;
+	static inline __attribute__((section(".dma_buffer"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block;
 	static inline __attribute__((section(".axisram"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	static inline __attribute__((section(".dma_buffer"))) DoubleBufParamBlock param_blocks;
-	static inline __attribute__((section(".dma_buffer"))) AuxSignalStreamBlock auxsignal_block[2];
+	static inline __attribute__((section(".dma_buffer"))) DoubleAuxSignalStreamBlock auxsignal_block;
 	static inline __attribute__((section(".axisram"))) MMScreenBufferConf::FrameBufferT screen_framebuf;
 
 	struct CacheDisabler {
