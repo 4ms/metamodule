@@ -11,12 +11,16 @@
 #include <functional>
 #include <iostream>
 
+static const int MAX_CHANNELS = 128;
+
 struct MetaModuleHub : public CommModule {
+
+	ParamHandle paramHandles[MAX_CHANNELS];
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
 	enum OutputIds { AUDIO_OUT_L, AUDIO_OUT_R, AUDIO_OUT_3, AUDIO_OUT_4, CLOCK_OUT, NUM_OUTPUTS };
-	enum LightIds { NUM_LIGHTS };
+	enum LightIds { WRITE_LIGHT, NUM_LIGHTS };
 
 	std::string labelText = "";
 	std::string patchNameText = "";
@@ -27,7 +31,20 @@ struct MetaModuleHub : public CommModule {
 	MetaModuleHub()
 	{
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+
+		for (int id = 0; id < MAX_CHANNELS; id++) {
+			paramHandles[id].color = nvgRGB(0xff, 0xff, 0x40);
+			APP->engine->addParamHandle(&paramHandles[id]);
+		}
+
 		selfID.typeID = "PANEL_8";
+	}
+
+	~MetaModuleHub()
+	{
+		for (int id = 0; id < MAX_CHANNELS; id++) {
+			APP->engine->removeParamHandle(&paramHandles[id]);
+		}
 	}
 
 	json_t *dataToJson() override
@@ -275,7 +292,8 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-no-words.svg")));
 		// setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-all-gray.svg")));
 
-		addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
+		// addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
+		addLabeledToggleMM("WRITE", MetaModuleHub::WRITE_LIGHT, MetaModuleHub::GET_INFO, {70, 19.5});
 
 		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
 		valueLabel->color = rack::color::BLACK;
