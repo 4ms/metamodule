@@ -283,13 +283,13 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		valueLabel->fontSize = 10;
 		addChild(valueLabel);
 
-		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(20, 45)));
+		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(24.6, 9.6)));
 		if (expModule != nullptr && expModule->patchNameText.length() > 0)
 			patchName->text = this->expModule->patchNameText;
 		else
 			patchName->text = "Enter Patch Name";
 		patchName->color = rack::color::WHITE;
-		patchName->box.size = {mm2px(Vec(40, 10))};
+		patchName->box.size = {mm2px(Vec(33.6, 31.3))};
 		addChild(patchName);
 		patchName->selectAll(); // Doesn't work :(
 
