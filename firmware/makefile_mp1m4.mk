@@ -2,31 +2,17 @@
 
 $(info --------------------)
 
-ifeq "$(MAKECMDGOALS)" "mini"
-$(info Building for MP1 M4 core, mini module)
-TAG := [MP1M4-MINI]
-MDIR := src/mini
+ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
+	target_board = $(word 1,$(MAKECMDGOALS))
+    $(info --------------------)
+    $(info Building for MP1 M4 core, $(target_board) module)
+else
+    $(error Board not supported)
 endif
 
-ifeq "$(MAKECMDGOALS)" "medium"
-$(info Building for MP1 M4 core, medium module)
-TAG := [MP1M4-MED]
-MDIR := src/medium
-endif
-
-ifeq "$(MAKECMDGOALS)" "max"
-$(info Building for MP1 M4 core, max module)
-TAG := [MP1M4-MAX]
-MDIR := src/max
-endif
-
-ifeq "$(MAKECMDGOALS)" "pcmdev"
-$(info Building for MP1 M4 core, pcmdev module)
-TAG := [MP1M4-PCMDEV]
-MDIR := src/pcmdev
-endif
-
-BUILDDIR = $(BUILDDIR_MP1M4)
+TAG := [MP1M4-$(target_board)]
+MDIR := src/$(target_board)
+BUILDDIR = $(BUILDDIR_MP1M4)/$(target_board)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_m4.ld
 CORE_SRC = src/mp1m4
 HAL_CONF_INC = src/mp1m4
@@ -102,18 +88,18 @@ include makefile_common.mk
 
 all: firmware_m4.h firmware_m4_vectors.h
 
-firmware_m4.h: $(BUILDDIR_MP1M4)/firmware.bin
+firmware_m4.h: $(BUILDDIR)/firmware.bin
 	xxd -i -c 8 $< $@
 
-firmware_m4_vectors.h: $(BUILDDIR_MP1M4)/vectors.bin
+firmware_m4_vectors.h: $(BUILDDIR)/vectors.bin
 	xxd -i -c 8 $< $@
 
-$(BUILDDIR_MP1M4)/vectors.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
+$(BUILDDIR)/vectors.bin: $(BUILDDIR)/$(BINARYNAME).elf
 	arm-none-eabi-objcopy -O binary \
 		-j .isr_vector \
 		$< $@
 
-$(BUILDDIR_MP1M4)/firmware.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
+$(BUILDDIR)/firmware.bin: $(BUILDDIR)/$(BINARYNAME).elf
 	arm-none-eabi-objcopy -O binary \
 		-j .text \
 		-j .startup_copro_fw.Reset_Handler \

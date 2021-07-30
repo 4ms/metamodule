@@ -1,4 +1,3 @@
-#include "a7/static_buffers.hh"
 #include "app_startup.hh"
 #include "audio.hh"
 #include "conf/board_codec_conf.hh"
@@ -12,6 +11,7 @@
 #include "patchlist.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
+#include "static_buffers.hh"
 #include "ui.hh"
 
 namespace MetaModule
@@ -60,19 +60,15 @@ void main()
 	// Enable ISR for LedBufFrameLock:
 	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
-#if !defined(DUAL_PCM3168_DEV)
 	// // Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
-#endif
 
 	param_cache.clear();
-#if !defined(DUAL_PCM3168_DEV)
 	ui.start();
-#endif
 	audio.start();
 
 	while (true) {

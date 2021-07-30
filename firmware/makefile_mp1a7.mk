@@ -1,34 +1,18 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
-$(info --------------------)
-
-ifeq "$(MAKECMDGOALS)" "mini"
-$(info Building for MP1 A7 core, mini module)
-TAG := [MP1A7-MINI]
-MDIR := src/mini
+ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
+	target_board = $(word 1,$(MAKECMDGOALS))
+    $(info --------------------)
+    $(info Building for MP1 A7 core, $(target_board) module)
+else
+    $(error Board not supported)
 endif
 
-ifeq "$(MAKECMDGOALS)" "medium"
-$(info Building for MP1 A7 core, medium module)
-TAG := [MP1A7-MED]
-MDIR := src/medium
-endif
-
-ifeq "$(MAKECMDGOALS)" "max"
-$(info Building for MP1 A7 core, max module)
-TAG := [MP1A7-MAX]
-MDIR := src/max
-endif
-
-ifeq "$(MAKECMDGOALS)" "pcmdev"
-$(info Building for MP1 A7 core, PCM3168-DEV module)
-TAG := [MP1A7-PCMDEV]
-MDIR := src/pcmdev
-endif
-
-BUILDDIR = $(BUILDDIR_MP1A7)
+TAG := [MP1A7-$(target_board)]
+MDIR := src/$(target_board)
+BUILDDIR = $(BUILDDIR_MP1A7)/$(target_board)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
-CORE_SRC = src/a7
+core_src = src/a7
 HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
@@ -51,6 +35,16 @@ include $(LIBDIR)/mcufont/decoder/mcufont.mk
 NE10DIR = $(LIBDIR)/ne10/ne10
 
 ASM_SOURCES = $(STARTUP_CA7)
+
+ifeq ($(target_board),pcmdev)
+main_source = src/pcmdev/main.cc
+audio_source = src/pcmdev/audio-dualcodec.cc
+EXTDEF = DUAL_PCM3168_DEV
+else
+main_source = $(core_src)/main.cc
+audio_source = src/audio.cc
+endif
+
 
 SOURCES = \
 		  system/libc_stub.c\
@@ -78,12 +72,12 @@ SOURCES = \
 		  $(DRIVERLIB)/drivers/codec_PCM3168.cc \
 		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
 		  $(SHARED)/util/math_tables.cc \
-		  $(CORE_SRC)/main.cc\
-		  $(CORE_SRC)/aux_core_main.cc\
+		  $(main_source) \
+		  $(audio_source) \
+		  $(core_src)/aux_core_main.cc\
 		  src/patchlist.cc\
 		  src/pages/page_manager.cc \
 		  src/print.cc \
-		  src/audio.cc \
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(LIBDIR)/printf/printf.c \
 		  $(MFSRC) \
@@ -248,9 +242,10 @@ max: all
 
 pcmdev: all
 
+
 # Todo: get this working:
-# install-uboot:
-	# $(info Please enter the sd card device node:)
+install-uboot:
+	$(info Please enter the sd card device node:)
 	# ls -l /dev/disk*  #if macOS
 	# ls -l /dev/sd*    #if linux
 	# getinput(devXX)  #How to do this?

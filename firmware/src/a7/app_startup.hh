@@ -33,8 +33,8 @@ struct AppStartup {
 
 #if !defined(DUAL_PCM3168_DEV)
 		Copro::reset();
-		Copro::load_vector_data(build_mp1corem4_vectors_bin, build_mp1corem4_vectors_bin_len);
-		Copro::load_firmware_data(build_mp1corem4_firmware_bin, build_mp1corem4_firmware_bin_len);
+		Copro::load_vector_data(build_mp1corem4_mini_vectors_bin, build_mp1corem4_mini_vectors_bin_len);
+		Copro::load_firmware_data(build_mp1corem4_mini_firmware_bin, build_mp1corem4_mini_firmware_bin_len);
 		L1C_CleanDCacheAll();
 		__DSB();
 		__ISB();

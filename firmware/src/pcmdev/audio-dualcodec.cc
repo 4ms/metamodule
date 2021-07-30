@@ -1,4 +1,4 @@
-#include "audio.hh"
+#include "audio-dualcodec.hh"
 #include "arch.hh"
 #include "conf/hsem_conf.hh"
 #include "debug.hh"

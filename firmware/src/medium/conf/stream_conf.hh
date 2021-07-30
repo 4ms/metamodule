@@ -5,7 +5,7 @@
 namespace MetaModule
 {
 
-struct StreamConfSingleCodec {
+struct StreamConfSingleCodec6x8 {
 	struct Audio {
 
 		//BlockSize: Number of Frames processed each time AudioStream::process() is called
@@ -38,6 +38,6 @@ struct StreamConfSingleCodec {
 	};
 };
 
-using StreamConf = StreamConfDualCodec;
+using StreamConf = StreamConfSingleCodec6x8;
 
 } // namespace MetaModule

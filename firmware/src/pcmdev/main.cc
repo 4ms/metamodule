@@ -1,20 +1,17 @@
-#include "a7/hsem_handler.hh"
-#include "drivers/hsem.hh"
-// #include "drivers/qspi_flash_driver.hh"
-#include "a7/app_startup.hh"
-#include "a7/conf/i2c_conf.hh"
-#include "a7/static_buffers.hh"
-#include "audio.hh"
-#include "codec_PCM3168.hh"
+#include "app_startup.hh"
+#include "audio-dualcodec.hh"
 #include "conf/board_codec_conf.hh"
 #include "debug.hh"
+#include "drivers/hsem.hh"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
+#include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
+#include "static_buffers.hh"
 #include "ui.hh"
 
 namespace MetaModule
@@ -36,13 +33,13 @@ void main()
 	ParamCache param_cache;
 	UiAudioMailbox mbox;
 
-	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
+	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
 	AudioStream audio{patch_list,
 					  patch_player,
-					  _hw.codecA,
-					  _hw.codecB,
+					  Hardware::codecA,
+					  Hardware::codecB,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
 					  param_cache,
