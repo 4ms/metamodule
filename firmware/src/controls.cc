@@ -98,8 +98,8 @@ void Controls::start()
 		_buffer_full = false;
 
 		for (auto &aux : auxstream_blocks[0]) {
-			// dac.queue_sample(0, aux.dac1);
-			// dac.queue_sample(1, aux.dac2);
+			dac.queue_sample(0, aux.dac1);
+			dac.queue_sample(1, aux.dac2);
 			clock_out.queue_sample(aux.clock_out);
 		}
 		// Debug::Pin1::low();
@@ -115,8 +115,8 @@ void Controls::start()
 		_buffer_full = false;
 
 		for (auto &aux : auxstream_blocks[1]) {
-			// dac.queue_sample(0, aux.dac1);
-			// dac.queue_sample(1, aux.dac2);
+			dac.queue_sample(0, aux.dac1);
+			dac.queue_sample(1, aux.dac2);
 			clock_out.queue_sample(aux.clock_out);
 		}
 		// Debug::Pin1::low();
@@ -152,23 +152,18 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 		if (_buffer_full) {
 			return;
 		}
-		// Todo: these enable/disable blocks aren't necessary, right?
-		// HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
-		// HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 		update_debouncers();
 		update_params();
-		// HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
-		// HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 	});
 
 	// 72us, 0.5us wide
 	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 
-	// dac.init();
+	dac.init();
 	auxstream_updater.init([&]() {
 		// Debug::Pin2::high();
 		static bool rising_edge = false;
-		// dac.output_next();
+		dac.output_next();
 		rising_edge = !rising_edge;
 		if (rising_edge)
 			clock_out.output_next();

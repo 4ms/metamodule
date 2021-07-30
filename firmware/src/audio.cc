@@ -1,17 +1,16 @@
 #include "audio.hh"
 #include "arch.hh"
-#include "auxsignal.hh"
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
-// #include "fft.hh"
-// #include "convolve.hh"
 #include "panel.hh"
 #include "patch_player.hh"
 #include "util/countzip.hh"
 #include "util/math_tables.hh"
 #include "util/zip.hh"
+// #include "fft.hh"
+// #include "convolve.hh"
 
 namespace MetaModule
 {
@@ -20,7 +19,7 @@ using namespace mdrivlib;
 
 constexpr bool DEBUG_PASSTHRU_AUDIO = true;
 constexpr bool DEBUG_SINEOUT_AUDIO = false;
-// constexpr bool DEBUG_NE10_FFT = true;
+constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;
 // static Convolver fftfx;
 
@@ -105,9 +104,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	auto &outA = audio_block.out_codecA;
 	auto &outB = audio_block.out_codecB;
 
+	// Commented out for PCM3168 dev board:
 	// param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
 	// load_measure.start_measurement();
 
+	// Commented out for PCM3168 dev board:
 	// cache.write_sync(param_block.params[0], param_block.metaparams);
 	// mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
 

@@ -73,7 +73,7 @@ private:
 	mdrivlib::PinChangeInt<DACUpdateConf> auxstream_updater;
 	mdrivlib::GPIOStream<FPin<GPIO::E, 0, PinMode::Output>, CircularBuffer<uint8_t, StreamConf::Audio::BlockSize>>
 		clock_out;
-	// AnalogOutT dac;
+	AnalogOutT dac;
 
 	uint32_t latest_patchcv_reading;
 	uint16_t latest_jacksense_reading;

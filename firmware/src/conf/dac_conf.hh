@@ -42,5 +42,13 @@ struct DACUpdateConf : public mdrivlib::DefaultPinChangeConf {
 	static constexpr uint32_t core = DACConfTarget::CoreNum;
 };
 
-//using AnalogOutT = mdrivlib::DacStream<mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>,
-//									   CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize>>;
+#if defined(BOARD_HAS_DAC)
+using AnalogOutT = mdrivlib::DacStream<mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>,
+									   CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize>>;
+#else
+struct AnalogOutT {
+	void init() {}
+	void queue_sample(uint32_t, uint32_t) {}
+	void output_next() {}
+};
+#endif
