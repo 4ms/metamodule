@@ -32,7 +32,8 @@ class AudioStream {
 public:
 	AudioStream(PatchList &patches,
 				PatchPlayer &patchplayer,
-				CodecT &codec,
+				CodecT &codecA,
+				CodecT &codecB,
 				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
 				ParamCache &cache,
@@ -51,7 +52,8 @@ private:
 	CombinedAudioBlock audio_blocks[2];
 	DoubleAuxSignalStreamBlock &auxsigs;
 
-	CodecT &codec_;
+	CodecT &codecA_;
+	CodecT &codecB_;
 	uint32_t sample_rate_;
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
@@ -70,7 +72,7 @@ private:
 	void propagate_sense_pins(Params &params);
 
 	void output_silence(AudioOutBuffer &out, AuxSignalStreamBlock &aux);
-	void passthrough(AudioInBuffer &in, AudioOutBuffer &out, AuxSignalStreamBlock &aux);
+	void passthrough_audio(AudioInBuffer &in, AudioOutBuffer &out, AuxSignalStreamBlock &aux);
 	void sines_out(AudioInBuffer &in, AudioOutBuffer &out);
 
 	void dual_sines_out(AudioOutBuffer &outA, AudioOutBuffer &outB);

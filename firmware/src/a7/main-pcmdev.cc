@@ -1,7 +1,8 @@
-#include "a7/app_startup.hh"
 #include "a7/hsem_handler.hh"
 #include "drivers/hsem.hh"
-//#include "conf/i2c_codec_conf.hh"
+// #include "drivers/qspi_flash_driver.hh"
+#include "a7/app_startup.hh"
+#include "a7/conf/i2c_conf.hh"
 #include "a7/static_buffers.hh"
 #include "audio.hh"
 #include "codec_PCM3168.hh"
@@ -36,11 +37,12 @@ void main()
 	UiAudioMailbox mbox;
 
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
+	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
 	AudioStream audio{patch_list,
 					  patch_player,
-					  _hw.codec,
+					  _hw.codecA,
+					  _hw.codecB,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
 					  param_cache,
@@ -60,14 +62,14 @@ void main()
 	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	// // Tell M4 we're done with init
-	HWSemaphore<MainCoreReady>::unlock();
+	// HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for M4 to be ready
-	while (HWSemaphore<M4_ready>::is_locked())
-		;
+	// while (HWSemaphore<M4_ready>::is_locked())
+	// ;
 
 	param_cache.clear();
-	ui.start();
+	// ui.start();
 	audio.start();
 
 	while (true) {

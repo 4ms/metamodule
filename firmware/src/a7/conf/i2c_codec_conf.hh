@@ -20,3 +20,4 @@ const mdrivlib::I2CConfig i2c_conf_codec = {
 	.priority1 = 0,
 	.priority2 = 1,
 };
+

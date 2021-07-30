@@ -14,6 +14,9 @@
 	#include "m7/conf/dac_conf_target.hh"
 #endif
 
+namespace MetaModule
+{
+
 struct MM_DACConf : mdrivlib::DefaultSpiTransferConf {
 	struct SpiConf : DACConfTarget {
 		static constexpr uint16_t NumChips = 2;
@@ -52,3 +55,5 @@ struct AnalogOutT {
 	void output_next() {}
 };
 #endif
+
+} // namespace MetaModule

@@ -1,7 +1,31 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
 $(info --------------------)
-$(info Building for MP1 M4 core)
+
+ifeq "$(MAKECMDGOALS)" "mini"
+$(info Building for MP1 M4 core, mini module)
+TAG := [MP1M4-MINI]
+MDIR := src/mini
+endif
+
+ifeq "$(MAKECMDGOALS)" "medium"
+$(info Building for MP1 M4 core, medium module)
+TAG := [MP1M4-MED]
+MDIR := src/medium
+endif
+
+ifeq "$(MAKECMDGOALS)" "max"
+$(info Building for MP1 M4 core, max module)
+TAG := [MP1M4-MAX]
+MDIR := src/max
+endif
+
+ifeq "$(MAKECMDGOALS)" "pcmdev"
+$(info Building for MP1 M4 core, pcmdev module)
+TAG := [MP1M4-PCMDEV]
+MDIR := src/pcmdev
+endif
+
 BUILDDIR = $(BUILDDIR_MP1M4)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_m4.ld
 CORE_SRC = src/mp1m4
@@ -55,11 +79,10 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \
-			-Isrc/conf \
-			-Isrc/mp1m4/conf \
-			-Isystem \
+			-I$(MDIR) \
 			-I$(CORE_SRC) \
 			-I$(HAL_CONF_INC) \
+			-Isystem \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \
 			-I$(SHARED)/CoreModules \
@@ -75,6 +98,35 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 			  -DCORE_CM4 \
 			  -DARM_MATH_CM4 \
 
-TAG = [MP1M4]
 include makefile_common.mk
+
+all: firmware_m4.h firmware_m4_vectors.h
+
+firmware_m4.h: $(BUILDDIR_MP1M4)/firmware.bin
+	xxd -i -c 8 $< $@
+
+firmware_m4_vectors.h: $(BUILDDIR_MP1M4)/vectors.bin
+	xxd -i -c 8 $< $@
+
+$(BUILDDIR_MP1M4)/vectors.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy -O binary \
+		-j .isr_vector \
+		$< $@
+
+$(BUILDDIR_MP1M4)/firmware.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy -O binary \
+		-j .text \
+		-j .startup_copro_fw.Reset_Handler \
+		-j .rodata \
+		-j .init_array \
+		-j .data \
+		$< $@
+
+mini: all
+
+medium: all
+
+max: all
+
+pcmdev: all
 

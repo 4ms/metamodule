@@ -1,7 +1,31 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
 $(info --------------------)
-$(info Building for MP1 A7 core)
+
+ifeq "$(MAKECMDGOALS)" "mini"
+$(info Building for MP1 A7 core, mini module)
+TAG := [MP1A7-MINI]
+MDIR := src/mini
+endif
+
+ifeq "$(MAKECMDGOALS)" "medium"
+$(info Building for MP1 A7 core, medium module)
+TAG := [MP1A7-MED]
+MDIR := src/medium
+endif
+
+ifeq "$(MAKECMDGOALS)" "max"
+$(info Building for MP1 A7 core, max module)
+TAG := [MP1A7-MAX]
+MDIR := src/max
+endif
+
+ifeq "$(MAKECMDGOALS)" "pcmdev"
+$(info Building for MP1 A7 core, PCM3168-DEV module)
+TAG := [MP1A7-PCMDEV]
+MDIR := src/pcmdev
+endif
+
 BUILDDIR = $(BUILDDIR_MP1A7)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
 CORE_SRC = src/a7
@@ -112,7 +136,7 @@ ASM_SOURCES += \
 INCLUDES = -I. \
 		   -Isrc \
 		   -Isrc/a7 \
-		   -Isrc/a7/conf \
+		   -I$(MDIR) \
 		   -I$(HALDIR)/include \
 		   -I$(CMSIS)/Core_A/Include \
 		   -I$(CMSIS)/Include \
@@ -200,10 +224,9 @@ UBOOTBUILDDIR = $(UBOOTDIR)/build
 UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 #####
 
-TAG = [MP1A7]
 include makefile_common.mk
 
-image: $(UIMG)
+all: $(UIMG)
 
 $(UBOOT_MKIMAGE): $(UBOOTSRCDIR)
 	cd $(UBOOTSRCDIR) && make O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
@@ -216,6 +239,13 @@ clean_uboot:
 	rm -rf $(UBOOTBUILDDIR)
 
 
+mini: all
+
+medium: all
+
+max: all
+
+pcmdev: all
 
 # Todo: get this working:
 # install-uboot:
