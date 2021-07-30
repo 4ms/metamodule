@@ -1,3 +1,4 @@
+#include "audio.hh"
 #include "conf/codec_sai_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/i2c_conf.hh"
@@ -32,9 +33,12 @@ struct Hardware : AppStartup, SDRAMPeriph, Debug, SharedBus {
 		, SharedBus{i2c_conf_m7}
 	{}
 
-	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
+	CodecWM8731 codecA{SharedBus::i2c, codec_sai_conf};
+	CodecWM8731 codecB{SharedBus::i2c, codec_sai_conf}; //not real!
+
 	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
-	AnalogOutT dac;
+
+	// AnalogOutT dac;
 } _hw;
 
 } // namespace MetaModule
@@ -54,12 +58,13 @@ void main()
 
 	AudioStream audio{patch_list,
 					  patch_player,
-					  _hw.codec,
-					  _hw.dac,
+					  _hw.codecA,
+					  _hw.codecB,
+					  StaticBuffers::audio_in_dma_block,
+					  StaticBuffers::audio_out_dma_block,
 					  param_cache,
 					  mbox,
 					  StaticBuffers::param_blocks,
-					  StaticBuffers::audio_dma_block,
 					  StaticBuffers::auxsignal_block};
 
 	SharedBus::i2c.deinit();

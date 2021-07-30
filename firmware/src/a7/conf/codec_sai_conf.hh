@@ -1,4 +1,5 @@
 #pragma once
+#include "drivers/codec_PCM3168.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/sai_config_struct.hh"
@@ -6,6 +7,8 @@
 
 using mdrivlib::GPIO;
 using mdrivlib::SaiConfig;
+
+using CodecT = mdrivlib::CodecPCM3168;
 
 const SaiConfig codecA_sai_conf = {
 	.sai = SAI3,

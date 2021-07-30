@@ -1,4 +1,5 @@
 #pragma once
+#include "drivers/codec_WM8731.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/sai_config_struct.hh"
@@ -6,6 +7,8 @@
 
 using mdrivlib::GPIO;
 using mdrivlib::SaiConfig;
+
+using CodecT = mdrivlib::CodecWM8731;
 
 const SaiConfig codec_sai_conf = {
 	.sai = SAI1,

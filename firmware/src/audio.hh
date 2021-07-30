@@ -1,5 +1,6 @@
 #pragma once
 #include "auxsignal.hh"
+#include "conf/codec_sai_conf.hh"
 #include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
 #include "drivers/codec_PCM3168.hh"
@@ -16,7 +17,6 @@
 
 namespace MetaModule
 {
-using CodecT = mdrivlib::CodecPCM3168;
 
 using AudioConf = StreamConf::Audio;
 
