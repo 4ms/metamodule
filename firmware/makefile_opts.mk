@@ -25,5 +25,5 @@
 # $(BUILDDIR)/$(DRIVERLIB)/target/stm32mp1/drivers/sai_tdm.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/codec_PCM3168.o: OPTFLAG = -O0
 
-# $(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
+$(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
 #-----------------------------------

@@ -17,7 +17,7 @@ namespace MetaModule
 
 using namespace mdrivlib;
 
-constexpr bool DEBUG_PASSTHRU_AUDIO = true;
+constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 constexpr bool DEBUG_SINEOUT_AUDIO = false;
 constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;
@@ -90,13 +90,13 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	auto &in = audio_block.in_codec;
 	auto &out = audio_block.out_codec;
 
-	// Commented out for PCM3168 dev board:
-	// param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
-	// load_measure.start_measurement();
+#if !defined(DUAL_PCM3168_DEV)
+	param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
+	load_measure.start_measurement();
 
-	// Commented out for PCM3168 dev board:
-	// cache.write_sync(param_block.params[0], param_block.metaparams);
-	// mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
+	cache.write_sync(param_block.params[0], param_block.metaparams);
+	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
+#endif
 
 	//Debug: passthrough audio and exit
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
@@ -125,18 +125,20 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		//Handle jacks being plugged/unplugged
 		propagate_sense_pins(params_);
 
-		//Pass audio/CV inputs to modules
+		//Pass audio inputs to modules
 		for (auto [i, inchan] : countzip(in_.chan))
 			player.set_panel_input(i, AudioInFrame::scaleInput(inchan));
 
+		//Pass CV values to modules
+		for (auto [i, cv] : countzip(params_.cvjacks))
+			player.set_panel_input(i + NumAudioInputs, cv);
+
+		for (auto [i, gatein] : countzip(params_.gate_ins))
+			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
+
 		//Pass Knob values to modules
-		int i = 0;
-		for (const auto knob : params_.knobs) {
+		for (auto [i, knob] : countzip(params_.knobs))
 			player.set_panel_param(i, knob);
-			i++;
-		}
-		// for (auto [i, knob] : countzip(params_.knobs)
-		// 	player.set_panel_param(i, knob);
 
 		//Run each module
 		player.update_patch();
