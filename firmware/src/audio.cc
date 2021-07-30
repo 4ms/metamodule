@@ -9,6 +9,7 @@
 // #include "convolve.hh"
 #include "panel.hh"
 #include "patch_player.hh"
+#include "util/countzip.hh"
 #include "util/math_tables.hh"
 #include "util/zip.hh"
 

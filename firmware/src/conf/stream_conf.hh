@@ -1,5 +1,5 @@
 #pragma once
-#include "drivers/codec_PCM3168.hh"
+// #include "drivers/codec_PCM3168.hh"
 #include "util/audio_frame.hh"
 #include <cstdint>
 
@@ -8,7 +8,6 @@ namespace MetaModule
 //Dual PCM3168 Conf:
 struct StreamConfDualCodec {
 	struct Audio {
-		using CodecT = mdrivlib::CodecPCM3168;
 
 		//BlockSize: Number of Frames processed each time AudioStream::process() is called
 		static constexpr int BlockSize = 64;
@@ -45,7 +44,6 @@ struct StreamConfDualCodec {
 
 struct StreamConfSingleCodec {
 	struct Audio {
-		using CodecT = mdrivlib::CodecPCM3168;
 
 		//BlockSize: Number of Frames processed each time AudioStream::process() is called
 		static constexpr int BlockSize = 64;

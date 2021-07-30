@@ -2,6 +2,7 @@
 #include "auxsignal.hh"
 #include "conf/stream_conf.hh"
 #include "drivers/codec.hh"
+#include "drivers/codec_PCM3168.hh"
 #include "drivers/cycle_counter.hh"
 #include "drivers/stm32xx.h"
 #include "params.hh"
@@ -15,16 +16,17 @@
 
 namespace MetaModule
 {
-//using namespace mdrivlib;
+using CodecT = mdrivlib::CodecPCM3168;
 
 using AudioConf = StreamConf::Audio;
 
+using AudioInFrame = AudioConf::AudioInFrame;
+using AudioOutFrame = AudioConf::AudioOutFrame;
 using AudioInBlock = AudioConf::AudioInBlock;
 using AudioOutBlock = AudioConf::AudioOutBlock;
 using AudioInBuffer = AudioConf::AudioInBuffer;
 using AudioOutBuffer = AudioConf::AudioOutBuffer;
-
-using CodecT = AudioConf::CodecT;
+using CombinedAudioBlock = AudioConf::CombinedAudioBlock;
 
 class AudioStream {
 public:
@@ -41,13 +43,13 @@ public:
 
 	void start();
 
-	void process(AudioConf::CombinedAudioBlock &audio, ParamBlock &param_block, AuxSignalStreamBlock &aux);
+	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxSignalStreamBlock &aux);
 
 private:
 	ParamCache &cache;
 	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
-	AudioConf::CombinedAudioBlock audio_blocks[2];
+	CombinedAudioBlock audio_blocks[2];
 	DoubleAuxSignalStreamBlock &auxsigs;
 
 	CodecT &codecA_;
