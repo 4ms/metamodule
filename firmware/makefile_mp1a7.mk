@@ -183,12 +183,12 @@ MCU = -mcpu=cortex-a7 \
 	  -mlittle-endian \
 	  -mfpu=neon-vfpv4 \
 	  -mfloat-abi=hard \
-	  -munaligned-access \
 	  -mthumb-interwork \
 	  -mtune=cortex-a7 \
 	  -mno-unaligned-access \
 	  -funsafe-math-optimizations \
 	  -mvectorize-with-neon-quad \
+
 	  # -fopt-info-vec-missed=vec.miss 
 	  # -ftree-vectorizer-verbose=n -fdump-tree-vect
 
