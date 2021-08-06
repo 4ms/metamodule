@@ -11,11 +11,12 @@
 #include <functional>
 #include <iostream>
 
-static const int MAX_CHANNELS = 128;
+static const int MAX_CHANNELS = 8;
 
 struct MetaModuleHub : public CommModule {
 
 	ParamHandle paramHandles[MAX_CHANNELS];
+	bool knobMapped[MAX_CHANNELS];
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
@@ -33,8 +34,9 @@ struct MetaModuleHub : public CommModule {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
 		for (int id = 0; id < MAX_CHANNELS; id++) {
-			paramHandles[id].color = nvgRGB(0xff, 0xff, 0x40);
+			paramHandles[id].color = nvgRGB(rand() % 256, rand() % 256, rand() % 256);
 			APP->engine->addParamHandle(&paramHandles[id]);
+			knobMapped[id] = false;
 		}
 
 		selfID.typeID = "PANEL_8";
@@ -122,6 +124,16 @@ struct MetaModuleHub : public CommModule {
 			updatePatchName();
 			updateDisplay();
 		}
+
+		for (int i = 0; i < MAX_CHANNELS; i++) {
+			if (knobMapped[i]) {
+				Module *module = paramHandles[i].module;
+				int paramId = paramHandles[i].paramId;
+				ParamQuantity *paramQuantity = module->paramQuantities[paramId];
+				paramQuantity->setValue(params[i].getValue());
+			}
+		}
+
 		if (responseTimer) {
 			if (--responseTimer == 0) {
 				printDebugFile();
@@ -361,6 +373,14 @@ struct MetaModuleHubWidget : CommModuleWidget {
 			currentSourceIsThisButton = centralData->getMappingSource() == button.id;
 			centralData->abortMappingProcedure();
 			valueLabel->text = "Aborted mapping";
+
+			int buttonNum = button.id.objID;
+			APP->engine->updateParamHandle(&expModule->paramHandles[buttonNum], 1, buttonNum, true);
+			if (expModule->knobMapped[buttonNum] == false)
+				expModule->knobMapped[buttonNum] = true;
+			else {
+				expModule->knobMapped[buttonNum] = false;
+			}
 		}
 		if (!currentSourceIsThisButton) {
 			centralData->startMappingProcedure(button.id);
