@@ -434,7 +434,15 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 		int paramId = touchedParam->paramQuantity->paramId;
 
 		//	Create mapping
-		APP->engine->updateParamHandle(&_hub.expModule->paramHandles[1], moduleId, paramId, true);
+		int mapNum = centralData->getMappingSource().objID;
+		if (_hub.expModule->knobMapped[mapNum] == false) {
+			APP->engine->updateParamHandle(&_hub.expModule->paramHandles[mapNum], moduleId, paramId, true);
+			centralData->abortMappingProcedure();
+			_hub.expModule->knobMapped[mapNum] = true;
+		} else {
+			centralData->abortMappingProcedure();
+			_hub.expModule->knobMapped[mapNum] = false;
+		}
 		// if (expModule->knobMapped[buttonNum] == false)
 		// 	expModule->knobMapped[buttonNum] = true;
 		// else {
