@@ -281,6 +281,18 @@ private:
 	}
 };
 
+struct MetaModuleHubWidget;
+
+class HubKnobLabel : public LabeledButton {
+public:
+	// HubKnobLabel(CommModuleWidget &parent);
+	HubKnobLabel(MetaModuleHubWidget &hub);
+	void onDeselect(const event::Deselect &e) override;
+
+private:
+	MetaModuleHubWidget &_hub;
+};
+
 struct MetaModuleHubWidget : CommModuleWidget {
 
 	Label *valueLabel;
@@ -356,16 +368,14 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		// addLabeledToggle() for both RGB Buttons
 	}
 
-	virtual LabeledButton *createLabel() override
+	LabeledButton *createLabel() override
 	{
 		auto tmp = new LabeledButton{*this};
 		tmp->isOnHub = true;
 		return tmp;
 	}
 
-	class HubKnobLabel : public LabeledButton {};
-
-	virtual void notifyLabelButtonClicked(LabeledButton &button) override
+	void notifyLabelButtonClicked(LabeledButton &button) override
 	{
 		button.id.moduleID = module->id; // workaround for VCV passing bad ptr to module
 
@@ -383,23 +393,62 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		}
 	}
 
-	virtual void addLabeledKnobMM(const std::string labelText,
-								  const int knobID,
-								  const Vec position,
-								  const float defaultValue = 0.f) override
+	void addLabeledKnobMM(const std::string labelText,
+						  const int knobID,
+						  const Vec position,
+						  const float defaultValue = 0.f) override
 	{
-		HubKnobLabel *button = createLabel();
-		button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 4.0f, pos.y + kTextOffset));
+
+		auto *button = new HubKnobLabel{*this};
+		button->box.pos = mm2px(Vec(position.x - kKnobSpacingX / 4.0f, position.y + kTextOffset));
 		button->box.size.x = kGridSpacingX / 2.0f;
 		button->box.size.y = 12;
 		button->text = labelText;
-		button->id = id;
+		button->id = {LabelButtonID::Types::Knob, knobID, -1};
 		addChild(button);
+
 		auto p = createParamCentered<RoundBlackKnob>(mm2px(position), module, knobID);
 		if (p->paramQuantity)
 			p->paramQuantity->defaultValue = defaultValue;
 		addParam(p);
 	}
 };
+
+HubKnobLabel::HubKnobLabel(MetaModuleHubWidget &hub)
+	: LabeledButton{static_cast<CommModuleWidget &>(hub)}
+	, _hub{hub}
+{}
+
+// HubKnobLabel::HubKnobLabel(CommModuleWidget &parent)
+// 	: LabeledButton{static_cast<CommModuleWidget &>(parent)}
+// {}
+
+void HubKnobLabel::onDeselect(const event::Deselect &e)
+{
+	// if (!_hub.expModule)
+	// 	return;
+	// if (!module)
+	// 	return;
+
+	// Check if a ParamWidget was touched
+	ParamWidget *touchedParam = APP->scene->rack->touchedParam;
+	if (touchedParam) {
+		APP->scene->rack->touchedParam = NULL;
+		int moduleId = touchedParam->paramQuantity->module->id;
+		int paramId = touchedParam->paramQuantity->paramId;
+
+		//	Create mapping
+		//	module->learnParam(id, moduleId, paramId);
+		// APP->engine->updateParamHandle(&_hub.expModule->paramHandles[1], moduleId, paramId, true);
+		// if (expModule->knobMapped[buttonNum] == false)
+		// 	expModule->knobMapped[buttonNum] = true;
+		// else {
+		// 	expModule->knobMapped[buttonNum] = false;
+		// }
+	} else {
+		//	Abort mapping
+		//	module->disableLearn(id);
+	}
+}
 
 Model *modelMetaModuleHub = createModel<MetaModuleHub, MetaModuleHubWidget>("metaModuleHubModule");
