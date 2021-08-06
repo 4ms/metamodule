@@ -285,7 +285,6 @@ struct MetaModuleHubWidget;
 
 class HubKnobLabel : public LabeledButton {
 public:
-	// HubKnobLabel(CommModuleWidget &parent);
 	HubKnobLabel(MetaModuleHubWidget &hub);
 	void onDeselect(const event::Deselect &e) override;
 
@@ -400,6 +399,7 @@ struct MetaModuleHubWidget : CommModuleWidget {
 	{
 
 		auto *button = new HubKnobLabel{*this};
+		button->isOnHub = true;
 		button->box.pos = mm2px(Vec(position.x - kKnobSpacingX / 4.0f, position.y + kTextOffset));
 		button->box.size.x = kGridSpacingX / 2.0f;
 		button->box.size.y = 12;
@@ -419,10 +419,6 @@ HubKnobLabel::HubKnobLabel(MetaModuleHubWidget &hub)
 	, _hub{hub}
 {}
 
-// HubKnobLabel::HubKnobLabel(CommModuleWidget &parent)
-// 	: LabeledButton{static_cast<CommModuleWidget &>(parent)}
-// {}
-
 void HubKnobLabel::onDeselect(const event::Deselect &e)
 {
 	// if (!_hub.expModule)
@@ -438,8 +434,7 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 		int paramId = touchedParam->paramQuantity->paramId;
 
 		//	Create mapping
-		//	module->learnParam(id, moduleId, paramId);
-		// APP->engine->updateParamHandle(&_hub.expModule->paramHandles[1], moduleId, paramId, true);
+		APP->engine->updateParamHandle(&_hub.expModule->paramHandles[1], moduleId, paramId, true);
 		// if (expModule->knobMapped[buttonNum] == false)
 		// 	expModule->knobMapped[buttonNum] = true;
 		// else {
