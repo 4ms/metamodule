@@ -21,11 +21,7 @@ void CommModuleWidget::addLabeledKnob(const std::string labelText,
 		gridToXCentered(position.x),
 		gridToYFromTop(position.y),
 	};
-	addLabel(labelText, pos, {LabelButtonID::Types::Knob, knobID, -1});
-	auto p = createParamCentered<RoundBlackKnob>(mm2px(pos), module, knobID);
-	if (p->paramQuantity)
-		p->paramQuantity->defaultValue = defaultValue;
-	addParam(p);
+	addLabeledKnobMM(labelText, knobID, pos, defaultValue);
 }
 
 void CommModuleWidget::addLabeledKnobMM(const std::string labelText,

@@ -363,6 +363,8 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		return tmp;
 	}
 
+	class HubKnobLabel : public LabeledButton {};
+
 	virtual void notifyLabelButtonClicked(LabeledButton &button) override
 	{
 		button.id.moduleID = module->id; // workaround for VCV passing bad ptr to module
@@ -373,20 +375,30 @@ struct MetaModuleHubWidget : CommModuleWidget {
 			currentSourceIsThisButton = centralData->getMappingSource() == button.id;
 			centralData->abortMappingProcedure();
 			valueLabel->text = "Aborted mapping";
-
-			int buttonNum = button.id.objID;
-			APP->engine->updateParamHandle(&expModule->paramHandles[buttonNum], 1, buttonNum, true);
-			if (expModule->knobMapped[buttonNum] == false)
-				expModule->knobMapped[buttonNum] = true;
-			else {
-				expModule->knobMapped[buttonNum] = false;
-			}
 		}
 		if (!currentSourceIsThisButton) {
 			centralData->startMappingProcedure(button.id);
 			valueLabel->text = "Start Mapping from: " + std::to_string(static_cast<int>(button.id.objType)) + ", " +
 							   std::to_string(button.id.objID);
 		}
+	}
+
+	virtual void addLabeledKnobMM(const std::string labelText,
+								  const int knobID,
+								  const Vec position,
+								  const float defaultValue = 0.f) override
+	{
+		HubKnobLabel *button = createLabel();
+		button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 4.0f, pos.y + kTextOffset));
+		button->box.size.x = kGridSpacingX / 2.0f;
+		button->box.size.y = 12;
+		button->text = labelText;
+		button->id = id;
+		addChild(button);
+		auto p = createParamCentered<RoundBlackKnob>(mm2px(position), module, knobID);
+		if (p->paramQuantity)
+			p->paramQuantity->defaultValue = defaultValue;
+		addParam(p);
 	}
 };
 
