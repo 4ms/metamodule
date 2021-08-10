@@ -40,7 +40,7 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLQ = 17,
 			.PLLR = 37,
 			.PLLRGE = RCC_PLL3IFRANGE_1,
-			.PLLFRACV = 6660,
+			.PLLFRACV = 6685,
 			.PLLMODE = RCC_PLL_FRACTIONAL,
 		},
 	.PLL4 =
@@ -90,5 +90,5 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.Sai3ClockSelection = RCC_SAI3CLKSOURCE_PLL3_Q,
 	.Spi1ClockSelection = RCC_SPI1CLKSOURCE_PLL4,
 	.Spi23ClockSelection = RCC_SPI23CLKSOURCE_PLL4,
-	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PLL4,
+	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK2, //PLL4,
 };
