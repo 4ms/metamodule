@@ -292,6 +292,11 @@ private:
 	MetaModuleHubWidget &_hub;
 };
 
+class HubKnob : public RoundBlackKnob {
+public:
+	void onButton(const event::Button &e) override;
+};
+
 struct MetaModuleHubWidget : CommModuleWidget {
 
 	Label *valueLabel;
@@ -407,7 +412,7 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		button->id = {LabelButtonID::Types::Knob, knobID, -1};
 		addChild(button);
 
-		auto p = createParamCentered<RoundBlackKnob>(mm2px(position), module, knobID);
+		auto p = createParamCentered<HubKnob>(mm2px(position), module, knobID);
 		if (p->paramQuantity)
 			p->paramQuantity->defaultValue = defaultValue;
 		addParam(p);
@@ -438,10 +443,18 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 			int mapNum = centralData->getMappingSource().objID;
 			if (_hub.expModule->paramHandles[mapNum].moduleId == moduleId &&
 				_hub.expModule->paramHandles[mapNum].paramId == paramId)
-			{
+			{ // destination knob is already mapped, unmap
 				_hub.expModule->knobMapped[mapNum] = false;
-			} else {
+			} else { // destination knob is not mapped, map
 				_hub.expModule->knobMapped[mapNum] = true;
+				for (int i = 0; i < 8; i++) {
+					if (i != mapNum) {
+						if (_hub.expModule->paramHandles[i].moduleId == moduleId) {
+							if (_hub.expModule->paramHandles[i].paramId == paramId)
+								_hub.expModule->knobMapped[i] = false;
+						}
+					}
+				}
 			}
 			APP->engine->updateParamHandle(&_hub.expModule->paramHandles[mapNum], moduleId, paramId, true);
 			centralData->abortMappingProcedure();
@@ -456,6 +469,137 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 	} else {
 		//	Abort mapping
 		//	module->disableLearn(id);
+	}
+}
+
+struct ParamLabel : ui::MenuLabel {
+	ParamWidget *paramWidget;
+	void step() override
+	{
+		text = paramWidget->paramQuantity->getString();
+		MenuLabel::step();
+	}
+};
+
+struct ParamField : ui::TextField {
+	ParamWidget *paramWidget;
+
+	void step() override
+	{
+		// Keep selected
+		APP->event->setSelected(this);
+		TextField::step();
+	}
+
+	void setParamWidget(ParamWidget *paramWidget)
+	{
+		this->paramWidget = paramWidget;
+		if (paramWidget->paramQuantity)
+			text = paramWidget->paramQuantity->getDisplayValueString();
+		selectAll();
+	}
+
+	void onSelectKey(const event::SelectKey &e) override
+	{
+		if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
+			float oldValue = paramWidget->paramQuantity->getValue();
+			if (paramWidget->paramQuantity)
+				paramWidget->paramQuantity->setDisplayValueString(text);
+			float newValue = paramWidget->paramQuantity->getValue();
+
+			if (oldValue != newValue) {
+				// Push ParamChange history action
+				history::ParamChange *h = new history::ParamChange;
+				h->moduleId = paramWidget->paramQuantity->module->id;
+				h->paramId = paramWidget->paramQuantity->paramId;
+				h->oldValue = oldValue;
+				h->newValue = newValue;
+				APP->history->push(h);
+			}
+
+			ui::MenuOverlay *overlay = getAncestorOfType<ui::MenuOverlay>();
+			overlay->requestDelete();
+			e.consume(this);
+		}
+
+		if (!e.getTarget())
+			TextField::onSelectKey(e);
+	}
+};
+
+struct ParamResetItem : ui::MenuItem {
+	ParamWidget *paramWidget;
+	void onAction(const event::Action &e) override
+	{
+		paramWidget->resetAction();
+	}
+};
+
+struct ParamFineItem : ui::MenuItem {};
+
+struct ParamUnmapItem : ui::MenuItem {
+	ParamWidget *paramWidget;
+	void onAction(const event::Action &e) override
+	{
+		engine::ParamHandle *paramHandle =
+			APP->engine->getParamHandle(paramWidget->paramQuantity->module->id, paramWidget->paramQuantity->paramId);
+		if (paramHandle) {
+			APP->engine->updateParamHandle(paramHandle, -1, 0);
+		}
+	}
+};
+
+void HubKnob::onButton(const event::Button &e)
+{
+	math::Vec c = box.size.div(2);
+	float dist = e.pos.minus(c).norm();
+	if (dist <= c.x) {
+		OpaqueWidget::onButton(e);
+
+		// Touch parameter
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
+			if (paramQuantity) {
+				APP->scene->rack->touchedParam = this;
+			}
+			e.consume(this);
+		}
+
+		// Right click to open context menu
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
+			ui::Menu *menu = createMenu();
+
+			ParamLabel *paramLabel = new ParamLabel;
+			paramLabel->paramWidget = this;
+			menu->addChild(paramLabel);
+
+			ParamField *paramField = new ParamField;
+			paramField->box.size.x = 100;
+			paramField->setParamWidget(this);
+			menu->addChild(paramField);
+
+			ParamResetItem *resetItem = new ParamResetItem;
+			resetItem->text = "Initialize";
+			resetItem->rightText = "Double-click";
+			resetItem->paramWidget = this;
+			menu->addChild(resetItem);
+
+			// ParamFineItem *fineItem = new ParamFineItem;
+			// fineItem->text = "Fine adjust";
+			// fineItem->rightText = RACK_MOD_CTRL_NAME "+drag";
+			// fineItem->disabled = true;
+			// menu->addChild(fineItem);
+
+			engine::ParamHandle *paramHandle =
+				paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId) : NULL;
+			if (paramHandle) {
+				ParamUnmapItem *unmapItem = new ParamUnmapItem;
+				unmapItem->text = "Unmap";
+				unmapItem->rightText = paramHandle->text;
+				unmapItem->paramWidget = this;
+				menu->addChild(unmapItem);
+			}
+			e.consume(this);
+		}
 	}
 }
 
