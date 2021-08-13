@@ -527,6 +527,52 @@ struct ParamField : ui::TextField {
 	}
 };
 
+struct MapField : ui::TextField {
+	ParamWidget *paramWidget;
+
+	void step() override
+	{
+		// Keep selected
+		APP->event->setSelected(this);
+		TextField::step();
+	}
+
+	void setParamWidget(ParamWidget *paramWidget)
+	{
+		this->paramWidget = paramWidget;
+		if (paramWidget->paramQuantity)
+			text = paramWidget->paramQuantity->getDisplayValueString();
+		selectAll();
+	}
+
+	void onSelectKey(const event::SelectKey &e) override
+	{
+		if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
+			float oldValue = paramWidget->paramQuantity->getValue();
+			if (paramWidget->paramQuantity)
+				paramWidget->paramQuantity->setDisplayValueString(text);
+			float newValue = paramWidget->paramQuantity->getValue();
+
+			if (oldValue != newValue) {
+				// Push ParamChange history action
+				history::ParamChange *h = new history::ParamChange;
+				h->moduleId = paramWidget->paramQuantity->module->id;
+				h->paramId = paramWidget->paramQuantity->paramId;
+				h->oldValue = oldValue;
+				h->newValue = newValue;
+				APP->history->push(h);
+			}
+
+			ui::MenuOverlay *overlay = getAncestorOfType<ui::MenuOverlay>();
+			overlay->requestDelete();
+			e.consume(this);
+		}
+
+		if (!e.getTarget())
+			TextField::onSelectKey(e);
+	}
+};
+
 struct ParamResetItem : ui::MenuItem {
 	ParamWidget *paramWidget;
 	void onAction(const event::Action &e) override
@@ -576,6 +622,13 @@ void HubKnob::onButton(const event::Button &e)
 			paramField->box.size.x = 100;
 			paramField->setParamWidget(this);
 			menu->addChild(paramField);
+
+			for (int i = 0; i < 8; i++) {
+				MapField *m = new MapField;
+				m->box.size.x = 100;
+				m->setParamWidget(this);
+				menu->addChild(m);
+			}
 
 			ParamResetItem *resetItem = new ParamResetItem;
 			resetItem->text = "Initialize";
