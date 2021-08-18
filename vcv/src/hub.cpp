@@ -282,20 +282,26 @@ private:
 	}
 };
 
-class HubKnob : public RoundBlackKnob {
-public:
-	void onButton(const event::Button &e) override;
-};
-
 struct MetaModuleHubWidget;
 
 class HubKnobLabel : public LabeledButton {
 public:
 	HubKnobLabel(MetaModuleHubWidget &hub);
 	void onDeselect(const event::Deselect &e) override;
+	MetaModuleHubWidget &_hub;
 
 private:
-	MetaModuleHubWidget &_hub;
+};
+
+class HubKnob : public RoundBlackKnob {
+public:
+	void onButton(const event::Button &e) override;
+	HubKnob(HubKnobLabel &_hubKnobLabel)
+		: hubKnobLabel{_hubKnobLabel}
+	{}
+	HubKnobLabel &hubKnobLabel;
+
+private:
 };
 
 struct MetaModuleHubWidget : CommModuleWidget {
@@ -413,9 +419,17 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		button->id = {LabelButtonID::Types::Knob, knobID, -1};
 		addChild(button);
 
-		auto p = createParamCentered<HubKnob>(mm2px(position), module, knobID);
-		if (p->paramQuantity)
+		auto *p = new HubKnob(*button);
+		p->box.pos = mm2px(position);
+		p->box.pos = p->box.pos.minus(p->box.size.div(2));
+		if (module) {
+			p->paramQuantity = module->paramQuantities[knobID];
 			p->paramQuantity->defaultValue = defaultValue;
+		}
+		/*auto p = createParamCentered<HubKnob>(mm2px(position), module, knobID);
+		if (p->paramQuantity)
+			p->paramQuantity->defaultValue = defaultValue;*/
+
 		addParam(p);
 	}
 };
@@ -507,14 +521,22 @@ void HubKnob::onButton(const event::Button &e)
 			resetItem->paramWidget = this;
 			menu->addChild(resetItem);
 
-			MapFieldLabel *paramLabel2 = new MapFieldLabel;
-			paramLabel2->paramWidget = this;
-			menu->addChild(paramLabel2);
+			auto _knobMapped = this->hubKnobLabel._hub.expModule->knobMapped;
+			auto knobNum = this->hubKnobLabel.id.objID;
+			auto thisParam = this->hubKnobLabel._hub.expModule->paramHandles[knobNum];
 
-			MapField *m = new MapField;
-			m->box.size.x = 100;
-			m->setParamWidget(this);
-			menu->addChild(m);
+			if (_knobMapped[knobNum]) {
+
+				MapFieldEntry *paramLabel2 = new MapFieldEntry;
+				paramLabel2->moduleId = thisParam.moduleId;
+				paramLabel2->paramId = thisParam.paramId;
+				menu->addChild(paramLabel2);
+
+				MapField *m = new MapField;
+				m->box.size.x = 100;
+				m->setParamWidget(this);
+				menu->addChild(m);
+			}
 
 			// ParamFineItem *fineItem = new ParamFineItem;
 			// fineItem->text = "Fine adjust";

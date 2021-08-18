@@ -9,6 +9,16 @@ struct MapFieldLabel : ui::MenuLabel {
 	}
 };
 
+struct MapFieldEntry : ui::MenuLabel {
+	int moduleId;
+	int paramId;
+	void step() override
+	{
+		text = "Module " + std::to_string(moduleId) + " Param " + std::to_string(paramId);
+		MenuLabel::step();
+	}
+};
+
 struct MapField : ui::TextField {
 	ParamWidget *paramWidget;
 
