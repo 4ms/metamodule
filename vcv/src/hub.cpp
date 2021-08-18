@@ -12,12 +12,12 @@
 #include <functional>
 #include <iostream>
 
-static const int MAX_CHANNELS = 8;
+static const int NUM_KNOBS = 8;
 
 struct MetaModuleHub : public CommModule {
 
-	ParamHandle paramHandles[MAX_CHANNELS];
-	bool knobMapped[MAX_CHANNELS];
+	ParamHandle paramHandles[NUM_KNOBS];
+	bool knobMapped[NUM_KNOBS];
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
@@ -34,7 +34,7 @@ struct MetaModuleHub : public CommModule {
 	{
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-		for (int id = 0; id < MAX_CHANNELS; id++) {
+		for (int id = 0; id < NUM_KNOBS; id++) {
 			paramHandles[id].color = nvgRGB(rand() % 256, rand() % 256, rand() % 256);
 			APP->engine->addParamHandle(&paramHandles[id]);
 			knobMapped[id] = false;
@@ -45,7 +45,7 @@ struct MetaModuleHub : public CommModule {
 
 	~MetaModuleHub()
 	{
-		for (int id = 0; id < MAX_CHANNELS; id++) {
+		for (int id = 0; id < NUM_KNOBS; id++) {
 			APP->engine->removeParamHandle(&paramHandles[id]);
 		}
 	}
@@ -126,7 +126,7 @@ struct MetaModuleHub : public CommModule {
 			updateDisplay();
 		}
 
-		for (int i = 0; i < MAX_CHANNELS; i++) {
+		for (int i = 0; i < NUM_KNOBS; i++) {
 			if (knobMapped[i]) {
 				Module *module = paramHandles[i].module;
 				int paramId = paramHandles[i].paramId;
@@ -448,7 +448,7 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 				_hub.expModule->knobMapped[mapNum] = false;
 			} else { // destination knob is not mapped, map
 				_hub.expModule->knobMapped[mapNum] = true;
-				for (int i = 0; i < 8; i++) {
+				for (int i = 0; i < NUM_KNOBS; i++) {
 					if (i != mapNum) {
 						if (_hub.expModule->paramHandles[i].moduleId == moduleId) {
 							if (_hub.expModule->paramHandles[i].paramId == paramId)
@@ -501,18 +501,20 @@ void HubKnob::onButton(const event::Button &e)
 			paramField->setParamWidget(this);
 			menu->addChild(paramField);
 
-			for (int i = 0; i < 8; i++) {
-				MapField *m = new MapField;
-				m->box.size.x = 100;
-				m->setParamWidget(this);
-				menu->addChild(m);
-			}
-
 			ParamResetItem *resetItem = new ParamResetItem;
 			resetItem->text = "Initialize";
 			resetItem->rightText = "Double-click";
 			resetItem->paramWidget = this;
 			menu->addChild(resetItem);
+
+			MapFieldLabel *paramLabel2 = new MapFieldLabel;
+			paramLabel2->paramWidget = this;
+			menu->addChild(paramLabel2);
+
+			MapField *m = new MapField;
+			m->box.size.x = 100;
+			m->setParamWidget(this);
+			menu->addChild(m);
 
 			// ParamFineItem *fineItem = new ParamFineItem;
 			// fineItem->text = "Fine adjust";
