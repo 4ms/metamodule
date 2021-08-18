@@ -19,6 +19,100 @@ struct MapFieldEntry : ui::MenuLabel {
 	}
 };
 
+struct LevelQuantity : Quantity {
+	void setValue(float value) override {}
+	float getValue() override
+	{
+		return 0;
+	}
+	float getMinValue() override
+	{
+		return -2.0;
+	}
+	float getMaxValue() override
+	{
+		return 2.0;
+	}
+	float getDefaultValue() override
+	{
+		return 0.0;
+	}
+	float getDisplayValue() override
+	{
+		return 0;
+	}
+	void setDisplayValue(float displayValue) override
+	{
+		setValue(std::log2(displayValue / 100));
+	}
+	std::string getLabel() override
+	{
+		return "Level";
+	}
+	std::string getUnit() override
+	{
+		return "";
+	}
+};
+
+struct OffsetQuantity : Quantity {
+	void setValue(float value) override {}
+	float getValue() override
+	{
+		return 0;
+	}
+	float getMinValue() override
+	{
+		return -2.0;
+	}
+	float getMaxValue() override
+	{
+		return 2.0;
+	}
+	float getDefaultValue() override
+	{
+		return 0.0;
+	}
+	float getDisplayValue() override
+	{
+		return 0;
+	}
+	void setDisplayValue(float displayValue) override
+	{
+		setValue(std::log2(displayValue / 100));
+	}
+	std::string getLabel() override
+	{
+		return "Offset";
+	}
+	std::string getUnit() override
+	{
+		return "";
+	}
+};
+
+struct LevelField : ui::Slider {
+	LevelField()
+	{
+		quantity = new LevelQuantity;
+	}
+	~LevelField()
+	{
+		delete quantity;
+	}
+};
+
+struct OffsetField : ui::Slider {
+	OffsetField()
+	{
+		quantity = new OffsetQuantity;
+	}
+	~OffsetField()
+	{
+		delete quantity;
+	}
+};
+
 struct MapField : ui::TextField {
 	ParamWidget *paramWidget;
 

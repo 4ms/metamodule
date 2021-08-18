@@ -18,6 +18,8 @@ struct MetaModuleHub : public CommModule {
 
 	ParamHandle paramHandles[NUM_KNOBS];
 	bool knobMapped[NUM_KNOBS];
+	float offsets[NUM_KNOBS];
+	float levels[NUM_KNOBS];
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
@@ -532,10 +534,13 @@ void HubKnob::onButton(const event::Button &e)
 				paramLabel2->paramId = thisParam.paramId;
 				menu->addChild(paramLabel2);
 
-				MapField *m = new MapField;
-				m->box.size.x = 100;
-				m->setParamWidget(this);
-				menu->addChild(m);
+				OffsetField *o = new OffsetField;
+				o->box.size.x = 100;
+				menu->addChild(o);
+
+				LevelField *l = new LevelField;
+				l->box.size.x = 100;
+				menu->addChild(l);
 			}
 
 			// ParamFineItem *fineItem = new ParamFineItem;
