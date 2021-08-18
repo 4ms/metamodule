@@ -492,11 +492,11 @@ void HubKnob::onButton(const event::Button &e)
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
 			ui::Menu *menu = createMenu();
 
-			ParamLabel *paramLabel = new ParamLabel;
+			MapFieldLabel *paramLabel = new MapFieldLabel;
 			paramLabel->paramWidget = this;
 			menu->addChild(paramLabel);
 
-			ParamField *paramField = new ParamField;
+			MapField *paramField = new MapField;
 			paramField->box.size.x = 100;
 			paramField->setParamWidget(this);
 			menu->addChild(paramField);
