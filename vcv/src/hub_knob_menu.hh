@@ -19,15 +19,15 @@ struct MapFieldEntry : ui::MenuLabel {
 	}
 };
 
-struct LevelQuantity : Quantity {
+struct MinQuantity : Quantity {
 private:
 	float &_levelValue;
-	float minLevel = -1;
+	float minLevel = 0;
 	float maxLevel = 1;
 
 public:
-	LevelQuantity(float &levelValue)
-		: _levelValue(levelValue)
+	MinQuantity(std::vector<float> &inRange)
+		: _levelValue(inRange[0])
 	{}
 	void setValue(float value) override
 	{
@@ -67,7 +67,7 @@ public:
 	}
 	std::string getLabel() override
 	{
-		return "Level";
+		return "Minimum";
 	}
 	std::string getUnit() override
 	{
@@ -75,39 +75,39 @@ public:
 	}
 };
 
-struct OffsetQuantity : Quantity {
+struct MaxQuantity : Quantity {
 private:
-	float &_offsetValue;
-	float minOffset = -1;
-	float maxOffset = 1;
+	float &_levelValue;
+	float minLevel = 0;
+	float maxLevel = 1;
 
 public:
-	OffsetQuantity(float &offsetValue)
-		: _offsetValue(offsetValue)
+	MaxQuantity(std::vector<float> &inRange)
+		: _levelValue(inRange[1])
 	{}
 	void setValue(float value) override
 	{
-		if (value >= minOffset && value <= maxOffset)
-			_offsetValue = value;
+		if (value >= minLevel && value <= maxLevel)
+			_levelValue = value;
 		else {
-			if (value > maxOffset)
-				_offsetValue = maxOffset;
-			else if (value < minOffset) {
-				_offsetValue = minOffset;
+			if (value > maxLevel)
+				_levelValue = maxLevel;
+			else if (value < minLevel) {
+				_levelValue = minLevel;
 			}
 		}
 	}
 	float getValue() override
 	{
-		return _offsetValue;
+		return _levelValue;
 	}
 	float getMinValue() override
 	{
-		return minOffset;
+		return minLevel;
 	}
 	float getMaxValue() override
 	{
-		return maxOffset;
+		return maxLevel;
 	}
 	float getDefaultValue() override
 	{
@@ -123,7 +123,7 @@ public:
 	}
 	std::string getLabel() override
 	{
-		return "Offset";
+		return "Maximum";
 	}
 	std::string getUnit() override
 	{
@@ -131,25 +131,25 @@ public:
 	}
 };
 
-struct LevelField : ui::Slider {
+struct MinField : ui::Slider {
 public:
-	LevelField(float &levelValue)
+	MinField(std::vector<float> &inRange)
 	{
-		quantity = new LevelQuantity(levelValue);
+		quantity = new MinQuantity(inRange);
 	}
-	~LevelField()
+	~MinField()
 	{
 		delete quantity;
 	}
 };
 
-struct OffsetField : ui::Slider {
+struct MaxField : ui::Slider {
 public:
-	OffsetField(float &offsetValue)
+	MaxField(std::vector<float> &inRange)
 	{
-		quantity = new OffsetQuantity(offsetValue);
+		quantity = new MaxQuantity(inRange);
 	}
-	~OffsetField()
+	~MaxField()
 	{
 		delete quantity;
 	}

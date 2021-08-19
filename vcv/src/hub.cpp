@@ -18,8 +18,7 @@ struct MetaModuleHub : public CommModule {
 
 	ParamHandle paramHandles[NUM_KNOBS];
 	bool knobMapped[NUM_KNOBS];
-	float offsets[NUM_KNOBS];
-	float levels[NUM_KNOBS];
+	std::vector<float> mapRange[8];
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
@@ -40,6 +39,7 @@ struct MetaModuleHub : public CommModule {
 			paramHandles[id].color = nvgRGB(rand() % 256, rand() % 256, rand() % 256);
 			APP->engine->addParamHandle(&paramHandles[id]);
 			knobMapped[id] = false;
+			mapRange[id] = {0, 1};
 		}
 
 		selfID.typeID = "PANEL_8";
@@ -133,7 +133,9 @@ struct MetaModuleHub : public CommModule {
 				Module *module = paramHandles[i].module;
 				int paramId = paramHandles[i].paramId;
 				ParamQuantity *paramQuantity = module->paramQuantities[paramId];
-				paramQuantity->setValue(params[i].getValue() * levels[i] + offsets[i]);
+				auto newMappedVal =
+					MathTools::map_value(params[i].getValue(), 0.0f, 1.0f, mapRange[i].at(0), mapRange[i].at(1));
+				paramQuantity->setValue(newMappedVal);
 			}
 		}
 
@@ -535,11 +537,11 @@ void HubKnob::onButton(const event::Button &e)
 				paramLabel2->paramId = thisParam.paramId;
 				menu->addChild(paramLabel2);
 
-				OffsetField *o = new OffsetField(hubModule->offsets[knobNum]);
+				MinField *o = new MinField(hubModule->mapRange[knobNum]);
 				o->box.size.x = 100;
 				menu->addChild(o);
 
-				LevelField *l = new LevelField(hubModule->levels[knobNum]);
+				MaxField *l = new MaxField(hubModule->mapRange[knobNum]);
 				l->box.size.x = 100;
 				menu->addChild(l);
 			}
