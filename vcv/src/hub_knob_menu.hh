@@ -20,18 +20,38 @@ struct MapFieldEntry : ui::MenuLabel {
 };
 
 struct LevelQuantity : Quantity {
-	void setValue(float value) override {}
+private:
+	float &_levelValue;
+	float minLevel = -1;
+	float maxLevel = 1;
+
+public:
+	LevelQuantity(float &levelValue)
+		: _levelValue(levelValue)
+	{}
+	void setValue(float value) override
+	{
+		if (value >= minLevel && value <= maxLevel)
+			_levelValue = value;
+		else {
+			if (value > maxLevel)
+				_levelValue = maxLevel;
+			else if (value < minLevel) {
+				_levelValue = minLevel;
+			}
+		}
+	}
 	float getValue() override
 	{
-		return 0;
+		return _levelValue;
 	}
 	float getMinValue() override
 	{
-		return -2.0;
+		return minLevel;
 	}
 	float getMaxValue() override
 	{
-		return 2.0;
+		return maxLevel;
 	}
 	float getDefaultValue() override
 	{
@@ -39,11 +59,11 @@ struct LevelQuantity : Quantity {
 	}
 	float getDisplayValue() override
 	{
-		return 0;
+		return getValue();
 	}
 	void setDisplayValue(float displayValue) override
 	{
-		setValue(std::log2(displayValue / 100));
+		setValue(displayValue);
 	}
 	std::string getLabel() override
 	{
@@ -56,18 +76,38 @@ struct LevelQuantity : Quantity {
 };
 
 struct OffsetQuantity : Quantity {
-	void setValue(float value) override {}
+private:
+	float &_offsetValue;
+	float minOffset = -1;
+	float maxOffset = 1;
+
+public:
+	OffsetQuantity(float &offsetValue)
+		: _offsetValue(offsetValue)
+	{}
+	void setValue(float value) override
+	{
+		if (value >= minOffset && value <= maxOffset)
+			_offsetValue = value;
+		else {
+			if (value > maxOffset)
+				_offsetValue = maxOffset;
+			else if (value < minOffset) {
+				_offsetValue = minOffset;
+			}
+		}
+	}
 	float getValue() override
 	{
-		return 0;
+		return _offsetValue;
 	}
 	float getMinValue() override
 	{
-		return -2.0;
+		return minOffset;
 	}
 	float getMaxValue() override
 	{
-		return 2.0;
+		return maxOffset;
 	}
 	float getDefaultValue() override
 	{
@@ -75,11 +115,11 @@ struct OffsetQuantity : Quantity {
 	}
 	float getDisplayValue() override
 	{
-		return 0;
+		return getValue();
 	}
 	void setDisplayValue(float displayValue) override
 	{
-		setValue(std::log2(displayValue / 100));
+		setValue(displayValue);
 	}
 	std::string getLabel() override
 	{
@@ -92,9 +132,10 @@ struct OffsetQuantity : Quantity {
 };
 
 struct LevelField : ui::Slider {
-	LevelField()
+public:
+	LevelField(float &levelValue)
 	{
-		quantity = new LevelQuantity;
+		quantity = new LevelQuantity(levelValue);
 	}
 	~LevelField()
 	{
@@ -103,9 +144,10 @@ struct LevelField : ui::Slider {
 };
 
 struct OffsetField : ui::Slider {
-	OffsetField()
+public:
+	OffsetField(float &offsetValue)
 	{
-		quantity = new OffsetQuantity;
+		quantity = new OffsetQuantity(offsetValue);
 	}
 	~OffsetField()
 	{

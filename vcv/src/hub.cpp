@@ -133,7 +133,7 @@ struct MetaModuleHub : public CommModule {
 				Module *module = paramHandles[i].module;
 				int paramId = paramHandles[i].paramId;
 				ParamQuantity *paramQuantity = module->paramQuantities[paramId];
-				paramQuantity->setValue(params[i].getValue());
+				paramQuantity->setValue(params[i].getValue() * levels[i] + offsets[i]);
 			}
 		}
 
@@ -526,6 +526,7 @@ void HubKnob::onButton(const event::Button &e)
 			auto _knobMapped = this->hubKnobLabel._hub.expModule->knobMapped;
 			auto knobNum = this->hubKnobLabel.id.objID;
 			auto thisParam = this->hubKnobLabel._hub.expModule->paramHandles[knobNum];
+			auto hubModule = this->hubKnobLabel._hub.expModule;
 
 			if (_knobMapped[knobNum]) {
 
@@ -534,11 +535,11 @@ void HubKnob::onButton(const event::Button &e)
 				paramLabel2->paramId = thisParam.paramId;
 				menu->addChild(paramLabel2);
 
-				OffsetField *o = new OffsetField;
+				OffsetField *o = new OffsetField(hubModule->offsets[knobNum]);
 				o->box.size.x = 100;
 				menu->addChild(o);
 
-				LevelField *l = new LevelField;
+				LevelField *l = new LevelField(hubModule->levels[knobNum]);
 				l->box.size.x = 100;
 				menu->addChild(l);
 			}
