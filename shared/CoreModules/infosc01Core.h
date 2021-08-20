@@ -343,29 +343,29 @@ public:
 	{
 		switch (param_id) {
 			case (PitchKnob):
-				param_pitch.set_from_float(val);
+				param_pitch.set_from_positive_float(val);
 				break;
 			case (TrackKnob):
-				param_track.set_from_float(val);
+				param_track.set_from_positive_float(val);
 				break;
 			case (RangeKnob):
-				param_range.set_from_float(val);
+				param_range.set_from_positive_float(val);
 				break;
 			case (FMKnob):
-				param_fm.set_from_float(val);
+				param_fm.set_from_positive_float(val);
 				break;
 			case (AbsKnob):
-				param_abs.set_from_float(val);
+				param_abs.set_from_positive_float(val);
 				break;
 			case (PhaseKnob):
-				param_phase.set_from_float(val);
+				param_phase.set_from_positive_float(val);
 				break;
 			case (ModshapeKnob):
 				param_modshape = MathTools::constrain<int32_t>(val * 4, 0, 3);
 				//[0,0.25) => 0, [0.25,0.5) => 1, [0.5,0.75) => 2, [0.75,..] => 3
 				break;
 			case (WaveKnob):
-				param_wave.set_from_float(val);
+				param_wave.set_from_positive_float(val);
 				break;
 		}
 	}

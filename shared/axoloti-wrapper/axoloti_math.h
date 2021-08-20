@@ -66,6 +66,12 @@ struct frac32_s {
 			val = f * (1UL << 27UL);
 	}
 
+	//Converts 0..+1 to -1<<27..1<<27
+	void set_from_positive_float(float f)
+	{
+		set_from_float(f * 2.f - 1.f);
+	}
+
 	//converts -1<<27..1<<27 to -1..+1
 	float to_float() const
 	{
@@ -98,6 +104,12 @@ struct frac32_u {
 			val = 0;
 		else
 			val = f * (1UL << 27UL);
+	}
+
+	//Converts 0..+1 to -1<<27..1<<27
+	void set_from_positive_float(float f)
+	{
+		set_from_float(f);
 	}
 
 	//converts -1<<27..1<<27 to -1..+1
