@@ -12,13 +12,13 @@ static inline int32_t ___SMMUL(int32_t op1, int32_t op2)
 static inline int32_t ___SMMLA(int32_t op1, int32_t op2, int32_t op3)
 {
 	//multAcc_32x32_keep32(a, x, y)
-	return op1 + (int32_t)(((int64_t)op2 * op3) >> 32);
+	return op3 + (int32_t)(((int64_t)op1 * op2) >> 32);
 }
 
 static inline int32_t ___SMMLS(int32_t op1, int32_t op2, int32_t op3)
 {
 	//multSub_32x32_keep32(a, x, y)
-	return op1 - (int32_t)(((int64_t)op2 * op3) >> 32);
+	return op3 - (int32_t)(((int64_t)op1 * op2) >> 32);
 }
 
 static inline float _VSQRTF(float op1)
