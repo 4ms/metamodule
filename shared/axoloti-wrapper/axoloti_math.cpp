@@ -43,11 +43,13 @@ void axoloti_math_init(void)
 			// *p++ = (int16_t)(q >> 16); //Q31 => Q15 -1 to +1 in Q15 which is S | dec 15 | frac 15
 		}
 
-		int32_t *p32 = (int32_t *)sine2t;
 		for (i = 0; i < SINE2TSIZE + 1; i++) {
 			float f = i * 2 * PI_F / (float)SINE2TSIZE;
-			*p32++ = (int32_t)((float)INT32_MAX * sinf(f));
+			sine2t[i] = (int32_t)((float)INT32_MAX * sinf(f));
 		}
+		//Fix: sine2t[1024] should be 0x7FFFFFFF but is 0x80000000
+		//The reason is that the float value of INT32_MAX cannot be precisely represented by a float
+		sine2t[1024] = 0x7FFFFFFF;
 
 		p = (short *)windowt;
 		for (i = 0; i < WINDOWSIZE + 1; i++) {
