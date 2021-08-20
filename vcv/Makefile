@@ -40,7 +40,7 @@ compile_commands:
 	rm compile_commands.json 
 	mv compile_commands_with_headers.json compile_commands.json
 
-tests: core_tests util_tests vcv_tests
+tests: core_tests util_tests vcv_tests axo_tests
 
 core_tests:
 	$(info ... Running CoreModule tests ...)
@@ -54,5 +54,9 @@ vcv_tests:
 	$(info ... Running vcv plugin tests ...)
 	@$(MAKE) --no-print-directory -f tests/Makefile
 
-.PHONY: tests core_tests vcv_tests util_tests
+axo_tests:
+	$(info ... Running Axoloti-wrapper tests ...)
+	@cd $(SHARED)/axoloti-wrapper && $(MAKE) --no-print-directory -f tests/Makefile
+
+.PHONY: tests core_tests vcv_tests util_tests axo_tests
 
