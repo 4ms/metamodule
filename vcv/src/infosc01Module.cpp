@@ -28,6 +28,11 @@ struct Infosc01Module : public CommModule {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		core = ModuleFactory::create("INFOSC01");
 		selfID.typeID = "INFOSC01";
+
+		for (auto &j : inputJacks)
+			j->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
+		// inputJacks[Infosc01Module::PitchInJack]->scale = [](float f) { return f / 5.0f; };
+		outputJacks[Infosc01Module::WaveOutJack]->scale = [](float f) { return f * 5.0f; };
 	}
 };
 
