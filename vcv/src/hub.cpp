@@ -13,12 +13,44 @@
 #include <iostream>
 
 static const int NUM_KNOBS = 8;
+static const int NUM_MAPPINGS_PER_KNOB = 8;
+
+class KnobMaps {
+public:
+	ParamHandle paramHandles[NUM_MAPPINGS_PER_KNOB];
+	std::vector<float> mapRange[NUM_MAPPINGS_PER_KNOB];
+
+	KnobMaps()
+	{
+		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
+			paramHandles[i].color = nvgRGB(rand() % 256, rand() % 256, rand() % 256);
+			APP->engine->addParamHandle(&paramHandles[i]);
+			mapRange[i] = {0, 1};
+		}
+	}
+
+	~KnobMaps()
+	{
+		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
+			APP->engine->removeParamHandle(&paramHandles[i]);
+		}
+	}
+
+	int getNumMaps()
+	{
+		int num = 0;
+		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
+			if (paramHandles[i].moduleId != -1) {
+				num++;
+			}
+		}
+		return num;
+	}
+};
 
 struct MetaModuleHub : public CommModule {
 
-	ParamHandle paramHandles[NUM_KNOBS];
-	bool knobMapped[NUM_KNOBS];
-	std::vector<float> mapRange[8];
+	KnobMaps knobMaps[NUM_KNOBS];
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
@@ -35,22 +67,10 @@ struct MetaModuleHub : public CommModule {
 	{
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 
-		for (int id = 0; id < NUM_KNOBS; id++) {
-			paramHandles[id].color = nvgRGB(rand() % 256, rand() % 256, rand() % 256);
-			APP->engine->addParamHandle(&paramHandles[id]);
-			knobMapped[id] = false;
-			mapRange[id] = {0, 1};
-		}
-
 		selfID.typeID = "PANEL_8";
 	}
 
-	~MetaModuleHub()
-	{
-		for (int id = 0; id < NUM_KNOBS; id++) {
-			APP->engine->removeParamHandle(&paramHandles[id]);
-		}
-	}
+	~MetaModuleHub() {}
 
 	json_t *dataToJson() override
 	{
@@ -129,13 +149,16 @@ struct MetaModuleHub : public CommModule {
 		}
 
 		for (int i = 0; i < NUM_KNOBS; i++) {
-			if (knobMapped[i]) {
-				Module *module = paramHandles[i].module;
-				int paramId = paramHandles[i].paramId;
-				ParamQuantity *paramQuantity = module->paramQuantities[paramId];
-				auto newMappedVal =
-					MathTools::map_value(params[i].getValue(), 0.0f, 1.0f, mapRange[i].at(0), mapRange[i].at(1));
-				paramQuantity->setValue(newMappedVal);
+			for (int x = 0; x < knobMaps[i].getNumMaps(); i++) {
+				bool knobMapped = (knobMaps[i].paramHandles[x].moduleId != -1);
+				if (knobMapped) {
+					Module *module = knobMaps[i].paramHandles[x].module;
+					int paramId = knobMaps[i].paramHandles[x].paramId;
+					ParamQuantity *paramQuantity = module->paramQuantities[paramId];
+					auto newMappedVal = MathTools::map_value(
+						params[i].getValue(), 0.0f, 1.0f, knobMaps[i].mapRange[x].at(0), knobMaps[i].mapRange[x].at(1));
+					paramQuantity->setValue(newMappedVal);
+				}
 			}
 		}
 
@@ -459,32 +482,14 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 
 		//	Create mapping
 		if (_hub.expModule->id != moduleId) { // button on module clicked
-			int mapNum = centralData->getMappingSource().objID;
-			if (_hub.expModule->paramHandles[mapNum].moduleId == moduleId &&
-				_hub.expModule->paramHandles[mapNum].paramId == paramId)
-			{ // destination knob is already mapped, unmap
-				_hub.expModule->knobMapped[mapNum] = false;
-			} else { // destination knob is not mapped, map
-				_hub.expModule->knobMapped[mapNum] = true;
-				for (int i = 0; i < NUM_KNOBS; i++) {
-					if (i != mapNum) {
-						if (_hub.expModule->paramHandles[i].moduleId == moduleId) {
-							if (_hub.expModule->paramHandles[i].paramId == paramId)
-								_hub.expModule->knobMapped[i] = false;
-						}
-					}
-				}
-			}
-			APP->engine->updateParamHandle(&_hub.expModule->paramHandles[mapNum], moduleId, paramId, true);
+			int knobToMap = centralData->getMappingSource().objID;
+			int paramNum = _hub.expModule->knobMaps[knobToMap].getNumMaps();
+			APP->engine->updateParamHandle(
+				&_hub.expModule->knobMaps[knobToMap].paramHandles[paramNum], moduleId, paramId, true);
 			centralData->abortMappingProcedure();
 		} else { // button on hub clicked, abort
 			centralData->abortMappingProcedure();
 		}
-		// if (expModule->knobMapped[buttonNum] == false)
-		// 	expModule->knobMapped[buttonNum] = true;
-		// else {
-		// 	expModule->knobMapped[buttonNum] = false;
-		// }
 	} else {
 		//	Abort mapping
 		//	module->disableLearn(id);
@@ -525,25 +530,29 @@ void HubKnob::onButton(const event::Button &e)
 			resetItem->paramWidget = this;
 			menu->addChild(resetItem);
 
-			auto _knobMapped = this->hubKnobLabel._hub.expModule->knobMapped;
 			auto knobNum = this->hubKnobLabel.id.objID;
-			auto thisParam = this->hubKnobLabel._hub.expModule->paramHandles[knobNum];
 			auto hubModule = this->hubKnobLabel._hub.expModule;
 
-			if (_knobMapped[knobNum]) {
+			auto thisMap = this->hubKnobLabel._hub.expModule->knobMaps[knobNum];
+			if (thisMap.getNumMaps() > 0) {
+				for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
+					bool knobMapped = thisMap.paramHandles[x].moduleId > -1;
+					if (knobMapped) {
 
-				MapFieldEntry *paramLabel2 = new MapFieldEntry;
-				paramLabel2->moduleId = thisParam.moduleId;
-				paramLabel2->paramId = thisParam.paramId;
-				menu->addChild(paramLabel2);
+						MapFieldEntry *paramLabel2 = new MapFieldEntry;
+						paramLabel2->moduleId = thisMap.paramHandles[x].moduleId;
+						paramLabel2->paramId = thisMap.paramHandles[x].paramId;
+						menu->addChild(paramLabel2);
 
-				MinField *o = new MinField(hubModule->mapRange[knobNum]);
-				o->box.size.x = 100;
-				menu->addChild(o);
+						MinField *o = new MinField(hubModule->knobMaps[knobNum].mapRange[x]);
+						o->box.size.x = 100;
+						menu->addChild(o);
 
-				MaxField *l = new MaxField(hubModule->mapRange[knobNum]);
-				l->box.size.x = 100;
-				menu->addChild(l);
+						MaxField *l = new MaxField(hubModule->knobMaps[knobNum].mapRange[x]);
+						l->box.size.x = 100;
+						menu->addChild(l);
+					}
+				}
 			}
 
 			// ParamFineItem *fineItem = new ParamFineItem;
