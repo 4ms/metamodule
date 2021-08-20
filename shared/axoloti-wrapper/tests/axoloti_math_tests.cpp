@@ -12,8 +12,8 @@ float float_sin(int32_t x)
 	q = sin_q31(x);
 
 	float f = q / Q31_MAX_POSITIVE_VAL;
-	std::cout << std::dec << "sin_q31(" << ((float)x / Q31_MAX_POSITIVE_VAL) << " == 0x" << std::hex << x << ") = " << f
-			  << " = 0x" << std::hex << q << std::endl;
+	// std::cout << std::dec << "sin_q31(" << ((float)x / Q31_MAX_POSITIVE_VAL) << " == 0x" << std::hex << x << ") = " << f
+	// 		  << " = 0x" << std::hex << q << std::endl;
 	return f;
 }
 
@@ -21,7 +21,7 @@ float sine2t_f(int32_t x)
 {
 	int32_t q = sine2t[x];
 	float f = q / Q31_MAX_POSITIVE_VAL;
-	std::cout << std::dec << "sine2t[" << x << "] = " << f << " = 0x" << std::hex << q << std::endl;
+	// std::cout << std::dec << "sine2t[" << x << "] = " << f << " = 0x" << std::hex << q << std::endl;
 	return f;
 }
 
@@ -84,7 +84,8 @@ TEST_CASE("Math tests")
 		}
 	}
 
-	//TODO: SMMLA, SMMLS, VSQRTF, CLZ, SSAT, USAT
+	//TODO: SMMLS, VSQRTF, CLZ, SSAT, USAT
+	//TODO: more robust SMMLA
 	SUBCASE("SMMLA")
 	{
 		int32_t x = 12345;
@@ -153,5 +154,15 @@ TEST_CASE("Math tests")
 		{
 			CHECK(float_sin(0xC0000000) == doctest::Approx(-1.0f));
 		}
+	}
+
+	SUBCASE("pitcht is a table of 256 elements and goes from nearly-0 to +1.0 in Q31")
+	{
+		//+0.00000845 .. +1.0 in Q31
+		// for (auto p : pitcht)
+		// 	std::cout << p << ", ";
+
+		//TODO test this more!
+		CHECK(mtof48k_ext_q31(0x2666668) == 0x554ab60);
 	}
 }

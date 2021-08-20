@@ -4,6 +4,7 @@
 #include "axoloti-wrapper/axoloti_math.h"
 #include "coreProcessor.h"
 #include "util/math.hh"
+// #include <iostream>
 
 using namespace MathTools;
 
@@ -74,6 +75,7 @@ public:
 
 	Infosc01Core()
 	{
+		axoloti_math_init();
 		/////////////////////////////////////////////
 		// MARK: Init Code:
 		static int32_t _array[LENGTH]; // __attribute__((section(".sdram")));
@@ -94,6 +96,9 @@ public:
 
 		P1 = 0;
 		P2 = 0;
+
+		Ppitch = 0;
+		Prange = 0;
 		// END MARK: Init Code
 		////////////////////////////////////////////
 	}
@@ -116,22 +121,27 @@ public:
 		// MARK: S-rate Code:
 		// int32_t phs1 = inlet_pm << 8;
 		int32_t phs2 = param_phase + (inlet_phase << 5);
+		// std::cout << "phs2 = " << std::hex << phs2 << ", ";
 		for (int i = 0; i < 4; i++) {
 			wave = wave > 0 ? wave : (___SMMUL(wave, Abs) << 5);
 			lp += (wave - lp) >> 3;
 			wave = lp;
 			hp += (wave - hp) >> 6;
 			wave -= hp;
+			// std::cout << "fbass = " << std::hex << fbass << ", ";
 			int32_t Fbass = fbass + (___SMMUL(fbass, inlet_lin) << 9);
 			P1 += Fbass + (___SMMUL(fm, wave));
 
 			int32_t w1, w2;
 
 			w1 = SHAPE((uint32_t)(P1 << 1), param_modshape);
+			// std::cout << "w1 = " << std::hex << w1 << ", ";
 
 			w2 = SHAPE((uint32_t)(P1 << 2), param_modshape);
+			// std::cout << "w2 = " << std::hex << w2 << ", ";
 
 			w3 = SHAPE((uint32_t)(P1 << 3), param_modshape);
+			// std::cout << "w3 = " << std::hex << w3 << ", ";
 
 			w3 += (___SMMUL(w1 - w3, mix) << 1) + w2;
 			r = w3;
@@ -142,6 +152,8 @@ public:
 			w3 += (___SMMUL(w1 - w3, mix) << 1) + w2;
 			wave = w3;
 			LP += (r - LP) >> 2;
+
+			// std::cout << std::endl;
 		}
 
 		outlet_wave = LP >> 1;
@@ -154,9 +166,13 @@ public:
 		////////////////////////////////////////////
 		// MARK: K-rate Code:
 		int32_t Pitch = param_pitch + inlet_pitch;
+		// std::cout << "Pitch = " << std::hex << Pitch << ", ";
+
 		// int32_t r;
 		Ppitch += __SSAT(Pitch - Ppitch, 20);
 		int64_t pitch = Ppitch;
+		// std::cout << "pitch = " << std::hex << pitch << ", ";
+
 		int64_t bass = inlet_range + param_range;
 		Prange += __SSAT(bass - Prange, 20);
 		int32_t track = ___SMMUL(pitch << 1, param_track << 4); //<<4;
@@ -207,7 +223,15 @@ public:
 		out = out > 0 ? out : -out;
 		out = out % (limit << 2);
 		out = (out > (limit << 1) ? (limit << 2) - out : out) - limit;
-		MTOFEXTENDED(pitch + bass, fbass)
+		int32_t pb = pitch + bass;
+		// std::cout << "pb = " << std::hex << pb << ", ";
+		//MTOFEXTENDED(pitch + bass, fbass);
+		fbass = mtof48k_ext_q31(pb);
+
+		// std::cout << "pitch = " << std::hex << pitch << ", ";
+		// std::cout << "bass = " << std::hex << bass << ", ";
+		// std::cout << "mtofextended(" << pb << ") = " << std::hex << fbass << ", ";
+
 		fbass = fbass >> 4;
 		ppitch = pqnt;
 
@@ -312,6 +336,7 @@ public:
 		}
 		// END MARK: K-rate Code
 		////////////////////////////////////////////
+		// std::cout << std::endl;
 	}
 
 	void set_param(int param_id, float val) override
@@ -358,23 +383,23 @@ public:
 		return outlet_wave.to_float();
 	}
 
-private:
+public:
 	//Inlets:
 	// frac32_s inlets[NumInJacks];
-	frac32_s inlet_pitch;
-	frac32_s inlet_range;
-	frac32_s inlet_fm;
-	frac32_s inlet_mod;
-	frac32_s inlet_abs;
-	frac32_s inlet_lin;
-	frac32_s inlet_phase;
-	frac32_s inlet_pm;
+	frac32_s inlet_pitch{0};
+	frac32_s inlet_range{0};
+	frac32_s inlet_fm{0};
+	frac32_s inlet_mod{0};
+	frac32_s inlet_abs{0};
+	frac32_s inlet_lin{0};
+	frac32_s inlet_phase{0};
+	frac32_s inlet_pm{0};
 	// int32buffer inlet_lin;
 	// int32buffer inlet_phase;
 	// int32buffer inlet_pm;
-	frac32_s inlet_scan;
-	bool inlet_add;
-	bool inlet_rst;
+	frac32_s inlet_scan{0};
+	bool inlet_add = false;
+	bool inlet_rst = false;
 
 	//Outlets:
 	//int32buffer &outlet_wave;
@@ -383,13 +408,13 @@ private:
 	//Params:
 	// frac32_s params[NumKnobs];
 	frac32_s param_pitch{0};
-	frac32_s param_track;
-	frac32_s param_range;
-	frac32_s param_fm;
-	frac32_s param_abs;
+	frac32_s param_track{0};
+	frac32_s param_range{0};
+	frac32_s param_fm{0};
+	frac32_s param_abs{0};
 	frac32_u param_phase{0};
 	int32_t param_modshape = 0; //Selector: 0 1 2 3
-	frac32_s param_wave;
+	frac32_s param_wave{0};
 
 	//S/K rate counter
 	uint32_t s_rate_counter = 0;
