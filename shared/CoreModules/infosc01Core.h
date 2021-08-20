@@ -336,8 +336,8 @@ public:
 				param_phase.set_from_float(val);
 				break;
 			case (ModshapeKnob):
-				param_modshape = MathTools::constrain<int32_t>(
-					val * 4, 0, 3); //[0,0.25) => 0, [0.25,0.5) => 1, [0.5,0.75) => 2, [0.75,..] => 3
+				param_modshape = MathTools::constrain<int32_t>(val * 4, 0, 3);
+				//[0,0.25) => 0, [0.25,0.5) => 1, [0.5,0.75) => 2, [0.75,..] => 3
 				break;
 			case (WaveKnob):
 				param_wave.set_from_float(val);
@@ -382,13 +382,13 @@ private:
 
 	//Params:
 	// frac32_s params[NumKnobs];
-	frac32_s param_pitch;
+	frac32_s param_pitch{0};
 	frac32_s param_track;
 	frac32_s param_range;
 	frac32_s param_fm;
 	frac32_s param_abs;
-	frac32_u param_phase;
-	int32_t param_modshape; //Selector: 0 1 2 3
+	frac32_u param_phase{0};
+	int32_t param_modshape = 0; //Selector: 0 1 2 3
 	frac32_s param_wave;
 
 	//S/K rate counter

@@ -1,6 +1,6 @@
 #include "CommModule.h"
 #include "CommWidget.h"
-// #include "infosc01Core.h"
+#include "infosc01Core.h"
 #include "util/math.hh"
 
 struct Infosc01Module : public CommModule {
@@ -43,18 +43,18 @@ struct Infosc01Widget : CommModuleWidget {
 		setModule(module);
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/12hptemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hptemplate.svg")));
 
 		for (int i = 0; i < Infosc01Module::NUM_PARAMS /*Infosc01Core::NumKnobs*/; i++) {
 			float x = i % 4;
 			float y = i >> 2;
-			addLabeledKnob("A" /*Infosc01Core::KnobNames[i].cstr()*/, i, {x, y});
+			addLabeledKnob(Infosc01Core::KnobNames[i].cstr(), i, {x, y});
 		}
 
 		for (int i = 0; i < Infosc01Module::NUM_INPUTS; i++) {
-			float x = i % 4;
-			float y = i >> 2;
-			addLabeledInput("IN", i, {x, y});
+			float x = (i + 1) % 4;
+			float y = (i + 1) >> 2;
+			addLabeledInput(Infosc01Core::InJackNames[i].cstr(), i, {x, y});
 		}
 
 		addLabeledOutput("Out", Infosc01Module::WaveOutJack, {0, 0});
