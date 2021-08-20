@@ -5,22 +5,9 @@
 
 struct Infosc01Module : public CommModule {
 
-	enum ParamIds { PitchKnob, TrackKnob, RangeKnob, FMKnob, AbsKnob, PhaseKnob, ModshapeKnob, WaveKnob, NUM_PARAMS };
-	enum InputIds {
-		PitchInJack,
-		RangeInJack,
-		FMInJack,
-		ModInJack,
-		AbsInJack,
-		LinInJack,
-		PhaseInJack,
-		PMInJack,
-		ScanInJack,
-		AddInJack,
-		ResetInJack,
-		NUM_INPUTS
-	};
-	enum OutputIds { WaveOutJack, NUM_OUTPUTS };
+	enum { NUM_PARAMS = Infosc01Core::NumKnobs };
+	enum { NUM_INPUTS = Infosc01Core::NumInJacks };
+	enum { NUM_OUTPUTS = Infosc01Core::NumOutJacks };
 	enum LightIds { NUM_LIGHTS };
 
 	Infosc01Module()
@@ -31,8 +18,7 @@ struct Infosc01Module : public CommModule {
 
 		for (auto &j : inputJacks)
 			j->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
-		// inputJacks[Infosc01Module::PitchInJack]->scale = [](float f) { return f / 5.0f; };
-		outputJacks[Infosc01Module::WaveOutJack]->scale = [](float f) { return f * 5.0f; };
+		outputJacks[Infosc01Core::WaveOutJack]->scale = [](float f) { return f * 5.0f; };
 	}
 };
 
@@ -50,19 +36,19 @@ struct Infosc01Widget : CommModuleWidget {
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hptemplate.svg")));
 
-		for (int i = 0; i < Infosc01Module::NUM_PARAMS /*Infosc01Core::NumKnobs*/; i++) {
+		for (int i = 0; i < Infosc01Core::NumKnobs; i++) {
 			float x = i % 4;
 			float y = i >> 2;
 			addLabeledKnob(Infosc01Core::KnobNames[i].cstr(), i, {x, y});
 		}
 
-		for (int i = 0; i < Infosc01Module::NUM_INPUTS; i++) {
+		for (int i = 0; i < Infosc01Core::NumInJacks; i++) {
 			float x = (i + 1) % 4;
 			float y = (i + 1) >> 2;
 			addLabeledInput(Infosc01Core::InJackNames[i].cstr(), i, {x, y});
 		}
 
-		addLabeledOutput("Out", Infosc01Module::WaveOutJack, {0, 0});
+		addLabeledOutput("Out", Infosc01Core::WaveOutJack, {0, 0});
 
 		addModuleTitle("Infinite Osc");
 	}
