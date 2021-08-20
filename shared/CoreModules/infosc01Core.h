@@ -4,7 +4,6 @@
 #include "axoloti-wrapper/axoloti_math.h"
 #include "coreProcessor.h"
 #include "util/math.hh"
-// #include <iostream>
 
 using namespace MathTools;
 
@@ -73,9 +72,17 @@ public:
 	// END MARK: Local Data
 	//////////////////////////////////////////
 
+	// Any variables declared in K-rate code and used in S-rate code must be declared here instead of in K-rate code:
+	int32_t Abs;
+	int32_t fbass;
+	int32_t fm;
+	uint32_t mix;
+	int32_t r;
+
 	Infosc01Core()
 	{
 		axoloti_math_init();
+
 		/////////////////////////////////////////////
 		// MARK: Init Code:
 		static int32_t _array[LENGTH]; // __attribute__((section(".sdram")));
@@ -103,13 +110,6 @@ public:
 		////////////////////////////////////////////
 	}
 
-	// Any variables declared in K-rate code and used in S-rate code must be declared here and NOT in K-rate code:
-	int32_t Abs;
-	int32_t fbass;
-	int32_t fm;
-	uint32_t mix;
-	int32_t r;
-
 	void update(void) override
 	{
 		if (s_rate_counter++ >= s_rate_ratio) {
@@ -119,29 +119,23 @@ public:
 
 		////////////////////////////////////////////
 		// MARK: S-rate Code:
-		// int32_t phs1 = inlet_pm << 8;
+
+		// int32_t phs1 = inlet_pm << 8; // commented out because it's not used, and compiler gives a warning
 		int32_t phs2 = param_phase + (inlet_phase << 5);
-		// std::cout << "phs2 = " << std::hex << phs2 << ", ";
 		for (int i = 0; i < 4; i++) {
 			wave = wave > 0 ? wave : (___SMMUL(wave, Abs) << 5);
 			lp += (wave - lp) >> 3;
 			wave = lp;
 			hp += (wave - hp) >> 6;
 			wave -= hp;
-			// std::cout << "fbass = " << std::hex << fbass << ", ";
 			int32_t Fbass = fbass + (___SMMUL(fbass, inlet_lin) << 9);
 			P1 += Fbass + (___SMMUL(fm, wave));
 
 			int32_t w1, w2;
 
 			w1 = SHAPE((uint32_t)(P1 << 1), param_modshape);
-			// std::cout << "w1 = " << std::hex << w1 << ", ";
-
 			w2 = SHAPE((uint32_t)(P1 << 2), param_modshape);
-			// std::cout << "w2 = " << std::hex << w2 << ", ";
-
 			w3 = SHAPE((uint32_t)(P1 << 3), param_modshape);
-			// std::cout << "w3 = " << std::hex << w3 << ", ";
 
 			w3 += (___SMMUL(w1 - w3, mix) << 1) + w2;
 			r = w3;
@@ -152,11 +146,10 @@ public:
 			w3 += (___SMMUL(w1 - w3, mix) << 1) + w2;
 			wave = w3;
 			LP += (r - LP) >> 2;
-
-			// std::cout << std::endl;
 		}
 
 		outlet_wave = LP >> 1;
+
 		// END MARKL S-rate Code
 		////////////////////////////////////////////
 	}
@@ -165,13 +158,12 @@ public:
 	{
 		////////////////////////////////////////////
 		// MARK: K-rate Code:
-		int32_t Pitch = param_pitch + inlet_pitch;
-		// std::cout << "Pitch = " << std::hex << Pitch << ", ";
 
-		// int32_t r;
+		int32_t Pitch = param_pitch + inlet_pitch;
+
+		// int32_t r; //commented out because only used in S-rate code
 		Ppitch += __SSAT(Pitch - Ppitch, 20);
 		int64_t pitch = Ppitch;
-		// std::cout << "pitch = " << std::hex << pitch << ", ";
 
 		int64_t bass = inlet_range + param_range;
 		Prange += __SSAT(bass - Prange, 20);
@@ -217,28 +209,21 @@ public:
 		}
 
 		/*uint32_t*/ mix = ((uint64_t)pitch << 8) / 3;
-		// int32_t fbass;
+		// int32_t fbass; //commented out because mix and fbass are used in S-rate, so need to be class member variables
 
 		out = (int64_t)pitch + bass + limit;
 		out = out > 0 ? out : -out;
 		out = out % (limit << 2);
 		out = (out > (limit << 1) ? (limit << 2) - out : out) - limit;
-		int32_t pb = pitch + bass;
-		// std::cout << "pb = " << std::hex << pb << ", ";
-		//MTOFEXTENDED(pitch + bass, fbass);
-		fbass = mtof48k_ext_q31(pb);
-
-		// std::cout << "pitch = " << std::hex << pitch << ", ";
-		// std::cout << "bass = " << std::hex << bass << ", ";
-		// std::cout << "mtofextended(" << pb << ") = " << std::hex << fbass << ", ";
+		MTOFEXTENDED(pitch + bass, fbass);
 
 		fbass = fbass >> 4;
 		ppitch = pqnt;
 
-		/*int32_t*/ fm = param_fm + inlet_fm;
+		/*int32_t*/ fm = param_fm + inlet_fm; //fm is now a member variable (used in S-rate)
 		fm = (fm - (___SMMUL(fm, fbass) << 4)) << 3;
 
-		/*int32_t*/ Abs = inlet_abs + param_abs;
+		/*int32_t*/ Abs = inlet_abs + param_abs; //Abs is now a member variable (used in S-rate)
 
 		if (inlet_rst && !rst) {
 			rst = 1;
@@ -334,9 +319,9 @@ public:
 			s1 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
 			s2 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
 		}
+
 		// END MARK: K-rate Code
 		////////////////////////////////////////////
-		// std::cout << std::endl;
 	}
 
 	void set_param(int param_id, float val) override
@@ -374,7 +359,33 @@ public:
 	void set_input(const int input_id, const float val) override
 	{
 		switch (input_id) {
-			//TODO: inlets
+			case (AbsInJack):
+				inlet_abs.set_from_float(val);
+				break;
+			case (PitchInJack):
+				inlet_pitch.set_from_float(val);
+				break;
+			case (RangeInJack):
+				inlet_range.set_from_float(val);
+				break;
+			case (FMInJack):
+				inlet_fm.set_from_float(val);
+				break;
+			case (ModInJack):
+				inlet_mod.set_from_float(val);
+				break;
+			case (LinInJack):
+				inlet_lin.set_from_float(val);
+				break;
+			case (PhaseInJack):
+				inlet_phase.set_from_float(val);
+				break;
+			case (PMInJack):
+				inlet_pm.set_from_float(val);
+				break;
+			case (ScanInJack):
+				inlet_scan.set_from_float(val);
+				break;
 		}
 	}
 
@@ -385,7 +396,6 @@ public:
 
 public:
 	//Inlets:
-	// frac32_s inlets[NumInJacks];
 	frac32_s inlet_pitch{0};
 	frac32_s inlet_range{0};
 	frac32_s inlet_fm{0};
@@ -406,7 +416,6 @@ public:
 	frac32_s outlet_wave;
 
 	//Params:
-	// frac32_s params[NumKnobs];
 	frac32_s param_pitch{0};
 	frac32_s param_track{0};
 	frac32_s param_range{0};
