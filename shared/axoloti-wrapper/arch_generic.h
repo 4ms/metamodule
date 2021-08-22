@@ -83,9 +83,11 @@ static inline int32_t float_to_q27(float fop1)
 
 static inline int32_t rand_s32(void)
 {
-	return reinterpret_cast<int32_t>(rand());
+	// return reinterpret_cast<int32_t>(rand());
 
 	// This function differs from the standard C rand() definition, standard C
 	// rand() only returns positive numbers, while rand_s32() returns the full
 	// signed 32 bit range.
+	static uint32_t randSeed = 22222;
+	return randSeed = (randSeed * 196314165) + 1234567; // + RNG->DR;
 }
