@@ -35,9 +35,7 @@ void main()
 
 	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 
-#if !defined(DUAL_PCM3168_DEV)
 	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
-#endif
 
 	AudioStream audio{patch_list,
 					  patch_player,

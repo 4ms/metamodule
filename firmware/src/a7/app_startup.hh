@@ -8,11 +8,9 @@
 #include "drivers/stm32xx.h"
 #include "drivers/system_startup.hh"
 
-#if !defined(DUAL_PCM3168_DEV)
-	#include "drivers/copro_control.hh"
-	#include "firmware_m4.h"
-	#include "firmware_m4_vectors.h"
-#endif
+#include "drivers/copro_control.hh"
+#include "firmware_m4.h"
+#include "firmware_m4_vectors.h"
 
 namespace MetaModule
 {
@@ -31,7 +29,6 @@ struct AppStartup {
 
 		SecondaryCore::start();
 
-#if !defined(DUAL_PCM3168_DEV)
 		Copro::reset();
 		Copro::load_vector_data(build_mp1corem4_mini_vectors_bin, build_mp1corem4_mini_vectors_bin_len);
 		Copro::load_firmware_data(build_mp1corem4_mini_firmware_bin, build_mp1corem4_mini_firmware_bin_len);
@@ -39,7 +36,6 @@ struct AppStartup {
 		__DSB();
 		__ISB();
 		Copro::start();
-#endif
 	}
 };
 
