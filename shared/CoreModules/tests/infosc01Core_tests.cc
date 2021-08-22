@@ -13,10 +13,10 @@ TEST_CASE("Check params are set")
 		CHECK(inf.param_phase.val == 0x00000000);
 
 		inf.set_param(Infosc01Core::PhaseKnob, 0.5);
-		CHECK(inf.param_phase.val == 0x04000000); //1<<26 = 0.5 in Q27
+		CHECK(inf.param_phase.val == 0x40000000); //1<<26 = 0.5 in Q27
 
 		inf.set_param(Infosc01Core::PhaseKnob, 1.0);
-		CHECK(inf.param_phase.val == 0x08000000); //1<<27 = 1.0 in Q27
+		CHECK(inf.param_phase.val == 0x80000000); //1<<27 = 1.0 in Q27
 	}
 
 	SUBCASE("Phase knob is unsigned, clamps at 0")

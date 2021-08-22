@@ -396,34 +396,34 @@ public:
 
 public:
 	//Inlets:
-	frac32_s inlet_pitch{0};
-	frac32_s inlet_range{0};
-	frac32_s inlet_fm{0};
-	frac32_s inlet_mod{0};
-	frac32_s inlet_abs{0};
-	frac32_s inlet_lin{0};
-	frac32_s inlet_phase{0};
-	frac32_s inlet_pm{0};
+	frac32_s<27> inlet_pitch{0};
+	frac32_s<27> inlet_range{0};
+	frac32_s<27> inlet_fm{0};
+	frac32_s<27> inlet_mod{0};
+	frac32_s<27> inlet_abs{0};
+	frac32_s<27> inlet_lin{0};
+	frac32_s<27> inlet_phase{0};
+	frac32_s<27> inlet_pm{0};
 	// int32buffer inlet_lin;
 	// int32buffer inlet_phase;
 	// int32buffer inlet_pm;
-	frac32_s inlet_scan{0};
+	frac32_s<27> inlet_scan{0};
 	bool inlet_add = false;
 	bool inlet_rst = false;
 
 	//Outlets:
 	//int32buffer &outlet_wave;
-	frac32_s outlet_wave;
+	frac32_s<27> outlet_wave;
 
 	//Params:
-	frac32_s param_pitch{0};
-	frac32_s param_track{0};
-	frac32_s param_range{0};
-	frac32_s param_fm{0};
-	frac32_s param_abs{0};
-	frac32_u param_phase{0};
+	frac32_s<27> param_pitch{0};
+	frac32_s<27> param_track{0};
+	frac32_s<27> param_range{0};
+	frac32_s<27> param_fm{0};
+	frac32_s<27> param_abs{0};
+	frac32_u<31> param_phase{0};
 	int32_t param_modshape = 0; //Selector: 0 1 2 3
-	frac32_s param_wave{0};
+	frac32_s<27> param_wave{0};
 
 	//S/K rate counter
 	uint32_t s_rate_counter = 0;

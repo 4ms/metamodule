@@ -42,7 +42,8 @@ extern uint16_t expt[EXPTSIZE];
 #define LOGTSIZEN 8
 extern uint16_t logt[LOGTSIZE];
 
-//Q27 format: -16..+16
+//signed Q27 format, aka signed Q4.27 (-16..+16)
+template<unsigned MaxBits = 27>
 struct frac32_s {
 	int32_t val;
 
@@ -55,34 +56,35 @@ struct frac32_s {
 		return val;
 	}
 
-	//Converts -1..+1 to -1<<27..1<<27
+	//Converts -1..+1 to -1<<MAxBits..1<<MaxBits
 	void set_from_float(float f)
 	{
 		if (f > 1.f)
-			val = 1UL << 27UL;
+			val = 1UL << MaxBits;
 		else if (f < -1.f)
-			f = -(1L << 27L);
+			f = -(1L << MaxBits);
 		else
-			val = f * (1UL << 27UL);
+			val = f * (1UL << MaxBits);
 	}
 
-	//Converts 0..+1 to -1<<27..1<<27
+	//Converts 0..+1 to -1<<MaxBits..1<<MaxBits
 	void set_from_positive_float(float f)
 	{
 		set_from_float(f * 2.f - 1.f);
 	}
 
-	//converts -1<<27..1<<27 to -1..+1
+	//converts -1<<MaxBits..1<<MaxBits to -1..+1
 	float to_float() const
 	{
-		if (val >= 1L << 27L)
+		if (val >= 1L << MaxBits)
 			return 1.f;
-		if (val <= -(1L << 27L))
+		if (val <= -(1L << MaxBits))
 			return -1.f;
-		return (float)val / (float)(1UL << 27UL);
+		return (float)val / (float)(1UL << MaxBits);
 	}
 };
 
+template<unsigned MaxBits = 27>
 struct frac32_u {
 	int32_t val;
 
@@ -99,27 +101,27 @@ struct frac32_u {
 	void set_from_float(float f)
 	{
 		if (f > 1.f)
-			val = 1UL << 27UL;
+			val = 1UL << MaxBits;
 		else if (f < 0.f)
 			val = 0;
 		else
-			val = f * (1UL << 27UL);
+			val = f * (1UL << MaxBits);
 	}
 
-	//Converts 0..+1 to -1<<27..1<<27
+	//Converts 0..+1 to -1<<MaxBits..1<<MaxBits
 	void set_from_positive_float(float f)
 	{
 		set_from_float(f);
 	}
 
-	//converts -1<<27..1<<27 to -1..+1
+	//converts -1<<MaxBits..1<<MaxBits to -1..+1
 	float to_float() const
 	{
-		if (val >= 1L << 27L)
+		if (val >= 1L << MaxBits)
 			return 1.f;
 		if (val <= 0)
 			return 0.f;
-		return (float)val / (float)(1UL << 27UL);
+		return (float)val / (float)(1UL << MaxBits);
 	}
 };
 
