@@ -4,21 +4,27 @@
 
 #include "StereoVerb.hh"
 #include "dualdjembe.hh"
+#include "dualinfosc1.hh"
+#include "infosc1.hh"
 #include "mappeddjembe.hh"
 #include "mixerpass.hh"
+#include "octinfosc.hh"
 #include "quaddjembe.hh"
 #include "simplequaddjembe.hh"
 
 PatchList::PatchList()
 	: _patch_addrs{
 		  // mixerpass_mmpatch,
+		  infosc1_mmpatch,
+		  dualinfosc1_mmpatch,
+		  octinfosc_mmpatch,
 		  mappeddjembe_mmpatch,
 		  simplequaddjembe_mmpatch,
 		  dualdjembe_mmpatch,
 		  StereoVerb_mmpatch,
-		  quaddjembe_mmpatch,
-		  test_14switchCore_clock_mmpatch,
-		  test_14switchCore_cv_mmpatch,
+		  // quaddjembe_mmpatch,
+		  // test_14switchCore_clock_mmpatch,
+		  // test_14switchCore_cv_mmpatch,
 		  test_adCore_mmpatch,
 		  test_attCore_mmpatch,
 		  test_bitcrushCore_mmpatch,
