@@ -21,8 +21,8 @@
 #include <cmath>
 #include <cstdint>
 
-//Todo: these might not be valid defs. Also add some for A7 etc
-#if defined(__ARM__) && defined(__CORTEX_M4__)
+//TODO: sort which functions the compiler handles better, and which we should force assembly:
+#if 0 //defined(CORE_CM7)
 	#include "arch_arm.h"
 #else
 	#include "arch_generic.h"
