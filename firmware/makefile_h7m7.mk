@@ -2,6 +2,9 @@
 
 $(info --------------------)
 $(info Building for H7 M7 core)
+
+MDIR = src/mini
+
 BUILDDIR = $(BUILDDIR_H7M7)
 LOADFILE = $(LINKSCRIPTDIR)/stm32h755xx_flash_CM7.ld
 MCU = -mcpu=cortex-m7 -mfpu=fpv5-d16 -mthumb -mlittle-endian -mfloat-abi=hard
@@ -61,6 +64,7 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-Isrc \
 			-Isrc/conf \
 			-I$(CORE_SRC) \
+			-I$(MDIR) \
 			-I$(HAL_CONF_INC) \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \

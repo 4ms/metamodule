@@ -71,7 +71,7 @@ private:
 
 	DoubleAuxSignalStreamBlock &auxstream_blocks;
 	mdrivlib::PinChangeInt<DACUpdateConf> auxstream_updater;
-	mdrivlib::GPIOStream<FPin<GPIO::E, 0, PinMode::Output>, CircularBuffer<uint8_t, StreamConf::DAC::BlockSize>>
+	mdrivlib::GPIOStream<FPin<GPIO::E, 0, PinMode::Output>, CircularBuffer<uint8_t, StreamConf::Audio::BlockSize>>
 		clock_out;
 	AnalogOutT dac;
 

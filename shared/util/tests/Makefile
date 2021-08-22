@@ -17,6 +17,7 @@ BUILDDIR = $(TEST_DIR)/build
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
 			-I. \
+			-I.. \
 			-I$(TEST_DIR) \
 			-Wno-unused-const-variable \
 			-DTESTPROJECT \

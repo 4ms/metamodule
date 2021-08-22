@@ -3,6 +3,9 @@
 #include "drivers/pin.hh"
 #include "drivers/spi_transfer_config_struct.hh"
 
+namespace MetaModule
+{
+
 using mdrivlib::FPin;
 using mdrivlib::GPIO;
 using mdrivlib::PinMode;
@@ -24,3 +27,5 @@ struct DACConfTarget : mdrivlib::DefaultSpiConf {
 
 	static constexpr uint32_t CoreNum = 2;
 };
+
+} // namespace MetaModule

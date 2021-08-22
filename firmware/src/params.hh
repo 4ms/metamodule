@@ -31,12 +31,12 @@ struct RotaryMotion {
 
 struct Params {
 	// Sampled at audio sample rate:
-	float cvjacks[NumCVIn] = {0.f};
-	Toggler gate_ins[NumGateIn];
-	Toggler buttons[2];
+	std::array<float, NumCVIn> cvjacks{};
+	std::array<Toggler, NumGateIn> gate_ins{};
+	std::array<Toggler, 2> buttons{};
 
 	// Same value for an entire block:
-	float knobs[NumPot] = {0.f};
+	std::array<float, NumPot> knobs{};
 	uint16_t jack_senses;
 
 	Params()

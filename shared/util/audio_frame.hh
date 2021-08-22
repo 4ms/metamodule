@@ -1,10 +1,12 @@
+#pragma once
 #include "math.hh"
-#include <stdint.h>
+#include <array>
+#include <cstdint>
+#include <type_traits>
 
-template<typename SampleType, int UsedBits = sizeof(SampleType) * 8>
-struct GenericAudioFrame {
-	SampleType l;
-	SampleType r;
+template<typename SampleType, int UsedBits = sizeof(SampleType) * 8, int NumChannels = 2>
+struct AudioFrame {
+	std::array<SampleType, NumChannels> chan;
 
 public:
 	static constexpr inline unsigned kSampleTypeBits = sizeof(SampleType) * 8;
@@ -17,8 +19,13 @@ public:
 	}
 	static inline constexpr SampleType scaleOutput(const float val)
 	{
-		const float v = MathTools::constrain(val, -1.f, (kOutScaling - 1.f) / kOutScaling);
-		return static_cast<SampleType>(v * kOutScaling);
+		if constexpr (std::is_signed_v<SampleType>) {
+			const float v = MathTools::constrain(val, -1.f, (kOutScaling - 1.f) / kOutScaling);
+			return static_cast<SampleType>(v * kOutScaling);
+		} else {
+			const float v = MathTools::constrain(val * 0.5f + 0.5f, 0.f, 1.0f);
+			return v * (MathTools::ipow(2, UsedBits) - 1);
+		}
 	}
 
 	static inline constexpr SampleType sign_extend(const SampleType &v) noexcept

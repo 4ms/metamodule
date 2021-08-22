@@ -1,41 +1,27 @@
-#include "conf/codec_sai_conf.hh"
+#include "app_startup.hh"
+#include "audio.hh"
 #include "conf/hsem_conf.hh"
-#include "conf/i2c_conf.hh"
-#include "conf/qspi_flash_conf.hh"
 #include "conf/sdram_conf.hh"
 #include "debug.hh"
-#include "drivers/arch.hh"
-#include "drivers/codec_WM8731.hh"
-#include "drivers/dac_MCP48FVBxx.hh"
-#include "drivers/gpio_expander.hh"
 #include "drivers/hsem.hh"
 #include "drivers/qspi_flash_driver.hh"
 #include "drivers/sdram.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 #include "drivers/system_startup.hh"
-#include "m7/app_startup.hh"
-#include "m7/static_buffers.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
+#include "static_buffers.hh"
 #include "ui.hh"
 
 namespace MetaModule
 {
 
-// Define the hardware elements used by Core M7
-// This initializes the SystemClocks (RCC) and other system resources
-// and then initializes the external chips that this core uses, before main() runs
-struct Hardware : AppStartup, SDRAMPeriph, Debug, SharedBus {
-	Hardware()
+struct SystemInit : AppStartup, Debug, SDRAMPeriph, Hardware {
+	SystemInit()
 		: SDRAMPeriph{SDRAM_48LC16M16_6A_conf}
-		, SharedBus{i2c_conf_m7}
 	{}
-
-	CodecWM8731 codec{SharedBus::i2c, codec_sai_conf};
-	QSpiFlash qspi{qspi_flash_conf}; // not used yet, but will hold patches, and maybe graphics/fonts
-	AnalogOutT dac;
-} _hw;
+} _sysinit;
 
 } // namespace MetaModule
 
@@ -54,12 +40,12 @@ void main()
 
 	AudioStream audio{patch_list,
 					  patch_player,
-					  _hw.codec,
-					  _hw.dac,
+					  Hardware::codec,
+					  StaticBuffers::audio_in_dma_block,
+					  StaticBuffers::audio_out_dma_block,
 					  param_cache,
 					  mbox,
 					  StaticBuffers::param_blocks,
-					  StaticBuffers::audio_dma_block,
 					  StaticBuffers::auxsignal_block};
 
 	SharedBus::i2c.deinit();

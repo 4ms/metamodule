@@ -1,10 +1,18 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
-$(info --------------------)
-$(info Building for MP1 A7 core)
-BUILDDIR = $(BUILDDIR_MP1A7)
+ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
+	target_board = $(word 1,$(MAKECMDGOALS))
+    $(info --------------------)
+    $(info Building for MP1 A7 core, $(target_board) module)
+else
+    $(error Board not supported)
+endif
+
+TAG := [MP1A7-$(target_board)]
+MDIR := src/$(target_board)
+BUILDDIR = $(BUILDDIR_MP1A7)/$(target_board)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
-CORE_SRC = src/a7
+core_src = src/a7
 HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
@@ -28,6 +36,16 @@ NE10DIR = $(LIBDIR)/ne10/ne10
 
 ASM_SOURCES = $(STARTUP_CA7)
 
+ifeq ($(target_board),pcmdev)
+main_source = src/pcmdev/main.cc
+audio_source = src/pcmdev/audio-dualcodec.cc
+EXTDEF = DUAL_PCM3168_DEV
+else
+main_source = $(core_src)/main.cc
+audio_source = src/audio.cc
+endif
+
+
 SOURCES = \
 		  system/libc_stub.c\
 		  system/libcpp_stub.cc \
@@ -50,15 +68,16 @@ SOURCES = \
 		  $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc \
 		  $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc \
 		  $(DRIVERLIB)/drivers/i2c.cc \
-		  $(DRIVERLIB)/drivers/sai.cc \
+		  $(TARGETDEVICEDIR)/drivers/sai_tdm.cc \
+		  $(DRIVERLIB)/drivers/codec_PCM3168.cc \
 		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
 		  $(SHARED)/util/math_tables.cc \
-		  $(CORE_SRC)/main.cc\
-		  $(CORE_SRC)/aux_core_main.cc\
+		  $(main_source) \
+		  $(audio_source) \
+		  $(core_src)/aux_core_main.cc\
 		  src/patchlist.cc\
 		  src/pages/page_manager.cc \
 		  src/print.cc \
-		  src/audio.cc \
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(LIBDIR)/printf/printf.c \
 		  $(MFSRC) \
@@ -78,6 +97,22 @@ SOURCES = \
 		  $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
 		  $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
 		  $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
+
+		  # $(NE10DIR)/common/NE10_mask_table.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
+		  # $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fir.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fir_init.c \
+		  # $(NE10DIR)/modules/dsp/NE10_iir.c \
+		  # $(NE10DIR)/modules/dsp/NE10_iir_init.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
+		  # $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
 
 NE10_ASM_OPTIMIZATION = 1
 
@@ -112,7 +147,7 @@ ASM_SOURCES += \
 INCLUDES = -I. \
 		   -Isrc \
 		   -Isrc/a7 \
-		   -Isrc/a7/conf \
+		   -I$(MDIR) \
 		   -I$(HALDIR)/include \
 		   -I$(CMSIS)/Core_A/Include \
 		   -I$(CMSIS)/Include \
@@ -164,13 +199,13 @@ MCU = -mcpu=cortex-a7 \
 	  -mlittle-endian \
 	  -mfpu=neon-vfpv4 \
 	  -mfloat-abi=hard \
-	  -munaligned-access \
 	  -mthumb-interwork \
 	  -mtune=cortex-a7 \
 	  -mno-unaligned-access \
 	  -funsafe-math-optimizations \
 	  -mvectorize-with-neon-quad \
-	  -fopt-info-vec-missed=vec.miss 
+
+	  # -fopt-info-vec-missed=vec.miss 
 	  # -ftree-vectorizer-verbose=n -fdump-tree-vect
 
 	  # -ffast-math \ # Karplus is silent
@@ -200,10 +235,9 @@ UBOOTBUILDDIR = $(UBOOTDIR)/build
 UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 #####
 
-TAG = [MP1A7]
 include makefile_common.mk
 
-image: $(UIMG)
+all: $(UIMG)
 
 $(UBOOT_MKIMAGE): $(UBOOTSRCDIR)
 	cd $(UBOOTSRCDIR) && make O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
@@ -216,10 +250,18 @@ clean_uboot:
 	rm -rf $(UBOOTBUILDDIR)
 
 
+mini: all
+
+medium: all
+
+max: all
+
+pcmdev: all
+
 
 # Todo: get this working:
-# install-uboot:
-	# $(info Please enter the sd card device node:)
+install-uboot:
+	$(info Please enter the sd card device node:)
 	# ls -l /dev/disk*  #if macOS
 	# ls -l /dev/sd*    #if linux
 	# getinput(devXX)  #How to do this?

@@ -152,13 +152,8 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 		if (_buffer_full) {
 			return;
 		}
-		// Todo: these enable/disable blocks aren't necessary, right?
-		// HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
-		// HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 		update_debouncers();
 		update_params();
-		// HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
-		// HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 	});
 
 	// 72us, 0.5us wide

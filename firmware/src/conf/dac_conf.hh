@@ -14,6 +14,9 @@
 	#include "m7/conf/dac_conf_target.hh"
 #endif
 
+namespace MetaModule
+{
+
 struct MM_DACConf : mdrivlib::DefaultSpiTransferConf {
 	struct SpiConf : DACConfTarget {
 		static constexpr uint16_t NumChips = 2;
@@ -42,5 +45,15 @@ struct DACUpdateConf : public mdrivlib::DefaultPinChangeConf {
 	static constexpr uint32_t core = DACConfTarget::CoreNum;
 };
 
+#if defined(BOARD_HAS_DAC)
 using AnalogOutT = mdrivlib::DacStream<mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>,
 									   CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize>>;
+#else
+struct AnalogOutT {
+	void init() {}
+	void queue_sample(uint32_t, uint32_t) {}
+	void output_next() {}
+};
+#endif
+
+} // namespace MetaModule

@@ -1,4 +1,4 @@
-#include "audio.hh"
+#include "audio-dualcodec.hh"
 #include "arch.hh"
 #include "conf/hsem_conf.hh"
 #include "debug.hh"
@@ -17,7 +17,7 @@ namespace MetaModule
 
 using namespace mdrivlib;
 
-constexpr bool DEBUG_PASSTHRU_AUDIO = false;
+constexpr bool DEBUG_PASSTHRU_AUDIO = true;
 constexpr bool DEBUG_SINEOUT_AUDIO = false;
 constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;
@@ -25,7 +25,8 @@ constexpr bool DEBUG_NE10_FFT = false;
 
 AudioStream::AudioStream(PatchList &patches,
 						 PatchPlayer &patchplayer,
-						 CodecT &codec,
+						 CodecT &codecA,
+						 CodecT &codecB,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
 						 ParamCache &param_cache,
@@ -35,19 +36,30 @@ AudioStream::AudioStream(PatchList &patches,
 	: cache{param_cache}
 	, mbox{uiaudiomailbox}
 	, param_blocks{p}
-	, audio_blocks{{.in_codec = audio_in_block.codec[0], .out_codec = audio_out_block.codec[0]},
-				   {.in_codec = audio_in_block.codec[1], .out_codec = audio_out_block.codec[1]}}
+	, audio_blocks{{.in_codecA = audio_in_block.codecA[0],
+					.in_codecB = audio_in_block.codecB[0],
+					.out_codecA = audio_out_block.codecA[0],
+					.out_codecB = audio_out_block.codecB[0]},
+				   {.in_codecA = audio_in_block.codecA[1],
+					.in_codecB = audio_in_block.codecB[1],
+					.out_codecA = audio_out_block.codecA[1],
+					.out_codecB = audio_out_block.codecB[1]}}
 	, auxsigs{auxs}
-	, codec_{codec}
-	, sample_rate_{codec.get_samplerate()}
+	, codecA_{codecA}
+	, codecB_{codecB}
+	, sample_rate_{codecA.get_samplerate()}
 	, patch_list{patches}
 	, player{patchplayer}
 {
-	codec_.init();
-	codec_.set_tx_buffers(audio_blocks[0].out_codec);
-	codec_.set_rx_buffers(audio_blocks[0].in_codec);
+	codecA_.init();
+	codecA_.set_tx_buffers(audio_blocks[0].out_codecA);
+	codecA_.set_rx_buffers(audio_blocks[0].in_codecA);
 
-	codec_.set_callbacks(
+	codecB_.init();
+	codecB_.set_tx_buffers(audio_blocks[0].out_codecB);
+	codecB_.set_rx_buffers(audio_blocks[0].in_codecB);
+
+	codecA_.set_callbacks(
 		[this]() {
 			Debug::Pin0::high();
 			HWSemaphore<ParamsBuf1Lock>::lock();
@@ -87,24 +99,25 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id)
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxSignalStreamBlock &aux)
 {
-	auto &in = audio_block.in_codec;
-	auto &out = audio_block.out_codec;
+	auto &inA = audio_block.in_codecA;
+	auto &inB = audio_block.in_codecB;
+	auto &outA = audio_block.out_codecA;
+	auto &outB = audio_block.out_codecB;
 
-#if !defined(DUAL_PCM3168_DEV)
-	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
-	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
-	load_measure.start_measurement();
+	// Commented out for PCM3168 dev board:
+	// param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
+	// load_measure.start_measurement();
 
-	cache.write_sync(param_block.params[0], param_block.metaparams);
-	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
-#endif
+	// Commented out for PCM3168 dev board:
+	// cache.write_sync(param_block.params[0], param_block.metaparams);
+	// mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
 
 	//Debug: passthrough audio and exit
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
-		passthrough(in, out, aux);
+		dual_passthrough(inA, outA, inB, outB, aux);
 		return;
 	} else if (DEBUG_SINEOUT_AUDIO) {
-		sines_out(in, out);
+		dual_sines_out(outA, outB);
 		return;
 	}
 
@@ -112,7 +125,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	// Todo: fade down before setting audio_is_muted to true
 	mbox.audio_is_muted = mbox.loading_new_patch ? true : false;
 	if (mbox.audio_is_muted) {
-		output_silence(out, aux);
+		output_silence(outA, aux);
+		output_silence(outB, aux);
 		return;
 	}
 
@@ -121,25 +135,23 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	// 	return;
 	// }
 
-	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
+	for (auto [in_, out_, aux_, params_] : zip(inA, outA, aux, param_block.params)) {
 
 		//Handle jacks being plugged/unplugged
 		propagate_sense_pins(params_);
 
-		//Pass audio inputs to modules
+		//Pass audio/CV inputs to modules
 		for (auto [i, inchan] : countzip(in_.chan))
 			player.set_panel_input(i, AudioInFrame::scaleInput(inchan));
 
-		//Pass CV values to modules
-		for (auto [i, cv] : countzip(params_.cvjacks))
-			player.set_panel_input(i + NumAudioInputs, cv);
-
-		for (auto [i, gatein] : countzip(params_.gate_ins))
-			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
-
 		//Pass Knob values to modules
-		for (auto [i, knob] : countzip(params_.knobs))
+		int i = 0;
+		for (const auto knob : params_.knobs) {
 			player.set_panel_param(i, knob);
+			i++;
+		}
+		// for (auto [i, knob] : countzip(params_.knobs)
+		// 	player.set_panel_param(i, knob);
 
 		//Run each module
 		player.update_patch();
@@ -156,7 +168,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 void AudioStream::start()
 {
-	codec_.start();
+	codecB_.start();
+	codecA_.start();
 }
 
 void AudioStream::propagate_sense_pins(Params &params)
@@ -180,7 +193,7 @@ void AudioStream::output_silence(AudioOutBuffer &out, AuxSignalStreamBlock &aux)
 	}
 }
 
-void AudioStream::passthrough(AudioInBuffer &in, AudioOutBuffer &out, AuxSignalStreamBlock &aux)
+void AudioStream::passthrough_audio(AudioInBuffer &in, AudioOutBuffer &out, AuxSignalStreamBlock &aux)
 {
 
 	for (auto [i, o, a] : zip(in, out, aux)) {

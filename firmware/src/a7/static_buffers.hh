@@ -1,25 +1,23 @@
 #pragma once
-#include "audio.hh"
+#include "auxsignal.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "conf/stream_conf.hh"
 #include "leds.hh"
 #include "params.hh"
 
-// StaticBuffers sets up our regions of memory that have specific requirements in the target chip architecture.
-// The attributes are defined in the linker file.
-// - Audio DMA Buffer must have a static address and be in certain SRAM regions, and be non-cacheable.
-// - Screen framebuffer is large, must be fast, and accessible to both cores (and in some cases, DMA friendly)
-// - LED Frame buffer needs to be accessible to both cores
-// - Param Blocks need to be accessible to both cores (speed may be a concern too)
 namespace MetaModule
 {
+
+// StaticBuffers sets up our regions of memory that have specific requirements in the target chip architecture.
+// The sections are defined in the linker file.
 namespace StaticBuffers
 {
-static inline __attribute__((section(".sysram"))) AudioStream::AudioStreamBlock audio_dma_block[4];
-static inline /*__attribute__((section(".sysram")))*/ uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
-static inline /*__attribute__((section(".sysram")))*/ MMScreenBufferConf::FrameBufferT screen_framebuf;
+static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock audio_in_dma_block;
+static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block;
+static inline uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+static inline MMScreenBufferConf::FrameBufferT screen_framebuf;
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
-static inline __attribute__((section(".sysram"))) AuxSignalStreamBlock auxsignal_block[2];
+static inline __attribute__((section(".sysram"))) DoubleAuxSignalStreamBlock auxsignal_block;
 
 static void init()
 {

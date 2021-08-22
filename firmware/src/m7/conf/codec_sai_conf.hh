@@ -1,8 +1,12 @@
 #pragma once
+#include "drivers/codec_WM8731.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/sai_config_struct.hh"
 #include "drivers/stm32xx.h"
+
+namespace MetaModule
+{
 
 using mdrivlib::GPIO;
 using mdrivlib::SaiConfig;
@@ -43,3 +47,5 @@ const SaiConfig codec_sai_conf = {
 	.SD_DAC = {GPIO::E, 3, GPIO_AF6_SAI1},
 	.SD_ADC = {GPIO::E, 6, GPIO_AF6_SAI1},
 };
+
+} // namespace MetaModule

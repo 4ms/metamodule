@@ -1,8 +1,18 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
 $(info --------------------)
-$(info Building for MP1 M4 core)
-BUILDDIR = $(BUILDDIR_MP1M4)
+
+ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
+	target_board = $(word 1,$(MAKECMDGOALS))
+    $(info --------------------)
+    $(info Building for MP1 M4 core, $(target_board) module)
+else
+    $(error Board not supported)
+endif
+
+TAG := [MP1M4-$(target_board)]
+MDIR := src/$(target_board)
+BUILDDIR = $(BUILDDIR_MP1M4)/$(target_board)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_m4.ld
 CORE_SRC = src/mp1m4
 HAL_CONF_INC = src/mp1m4
@@ -55,11 +65,10 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \
-			-Isrc/conf \
-			-Isrc/mp1m4/conf \
-			-Isystem \
+			-I$(MDIR) \
 			-I$(CORE_SRC) \
 			-I$(HAL_CONF_INC) \
+			-Isystem \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \
 			-I$(SHARED)/CoreModules \
@@ -75,6 +84,35 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 			  -DCORE_CM4 \
 			  -DARM_MATH_CM4 \
 
-TAG = [MP1M4]
 include makefile_common.mk
+
+all: firmware_m4.h firmware_m4_vectors.h
+
+firmware_m4.h: $(BUILDDIR)/firmware.bin
+	xxd -i -c 8 $< $@
+
+firmware_m4_vectors.h: $(BUILDDIR)/vectors.bin
+	xxd -i -c 8 $< $@
+
+$(BUILDDIR)/vectors.bin: $(BUILDDIR)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy -O binary \
+		-j .isr_vector \
+		$< $@
+
+$(BUILDDIR)/firmware.bin: $(BUILDDIR)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy -O binary \
+		-j .text \
+		-j .startup_copro_fw.Reset_Handler \
+		-j .rodata \
+		-j .init_array \
+		-j .data \
+		$< $@
+
+mini: all
+
+medium: all
+
+max: all
+
+pcmdev: all
 

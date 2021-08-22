@@ -19,35 +19,35 @@ TEST_CASE("Basic TriangleOscillator usage")
 
 	loops = updates_per_cycle / 8;
 	while (loops--) {
-		val = tri.Process();
+		val = tri.process();
 	}
 	val_approx = (float)val / (float)(0xFFFFFFFF);
 	CHECK(val_approx == doctest::Approx(0.25));
 
 	loops = updates_per_cycle / 8;
 	while (loops--) {
-		val = tri.Process();
+		val = tri.process();
 	}
 	val_approx = (float)val / (float)(0xFFFFFFFF);
 	CHECK(val_approx == doctest::Approx(0.50));
 
 	loops = updates_per_cycle / 4;
 	while (loops--) {
-		val = tri.Process();
+		val = tri.process();
 	}
 	val_approx = (float)val / (float)(0xFFFFFFFF);
 	CHECK(val_approx == doctest::Approx(1.00));
 
 	loops = updates_per_cycle / 4;
 	while (loops--) {
-		val = tri.Process();
+		val = tri.process();
 	}
 	val_approx = (float)val / (float)(0xFFFFFFFF);
 	CHECK(val_approx == doctest::Approx(0.50));
 
 	loops = updates_per_cycle / 4;
 	while (loops--) {
-		val = tri.Process();
+		val = tri.process();
 	}
 	val_approx = (float)val / (float)(0xFFFFFFFF);
 	CHECK(val_approx == doctest::Approx(0.00));

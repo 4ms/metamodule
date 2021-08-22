@@ -6,7 +6,7 @@ export BUILDDIR_H7M7 	= build/h7corem7
 export BUILDDIR_H7M4 	= build/h7corem4
 export BUILDDIR_MP1A7 	= build/mp1corea7
 export BUILDDIR_MP1M4 	= build/mp1corem4
-export BINARYNAME 		= main
+export BINARYNAME  		= main
 export LIBDIR 			= lib
 export DEVICEBASE		= $(LIBDIR)/cmsis-device
 export CMSIS 			= $(LIBDIR)/cmsis
@@ -16,45 +16,29 @@ export LINKSCRIPTDIR   	= system/linker
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
-.PHONY: all mp1 mp1m4 patches clean flash_a7 flash_m7 flash_m4 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
+export VALID_BOARDS = mini medium max pcmdev
 
-all: patches mp1 h7 tests
+
+.PHONY: all mp1-mini mp1-pcmdev patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
+
+all: patches mp1-mini mp1-pcmdev h7 tests
 
 # Binaries
 
-mp1: firmware_m4.h firmware_m4_vectors.h
-	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk all 
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
+mp1-mini:
+	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk mini
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk mini
 
-a7:
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk all image
+mp1-pcmdev:
+	# @$(MAKE) --no-print-directory -f makefile_mp1m4.mk pcmdev 
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk pcmdev 
 
-mp1m4:
-	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk all
-
-h7:
+h7:  #mini only
 	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
 	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
 
-firmware_m4.h: $(BUILDDIR_MP1M4)/firmware.bin
-	xxd -i -c 8 $< $@
 
-firmware_m4_vectors.h: $(BUILDDIR_MP1M4)/vectors.bin
-	xxd -i -c 8 $< $@
 
-$(BUILDDIR_MP1M4)/vectors.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
-	arm-none-eabi-objcopy -O binary \
-		-j .isr_vector \
-		$< $@
-
-$(BUILDDIR_MP1M4)/firmware.bin: $(BUILDDIR_MP1M4)/$(BINARYNAME).elf
-	arm-none-eabi-objcopy -O binary \
-		-j .text \
-		-j .startup_copro_fw.Reset_Handler \
-		-j .rodata \
-		-j .init_array \
-		-j .data \
-		$< $@
 
 ## Patches
 
@@ -89,14 +73,14 @@ clean_uboot:
 	$(MAKE) --no-print-directory clean_uboot -f makefile_mp1a7.mk
 
 
-$(BUILDDIR_H7M4)/$(BINARYNAME).hex:
-	@$(MAKE) --no-print-directory -f makefile_m4.mk
+# $(BUILDDIR_H7M4)/$(BINARYNAME).hex:
+# 	@$(MAKE) --no-print-directory -f makefile_m4.mk
 
-$(BUILDDIR_H7M7)/$(BINARYNAME).hex:
-	@$(MAKE) --no-print-directory -f makefile_m7.mk
+# $(BUILDDIR_H7M7)/$(BINARYNAME).hex:
+# 	@$(MAKE) --no-print-directory -f makefile_m7.mk
 
-$(BUILDDIR_MP1M4)/$(BINARYNAME).elf:
-	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk
+# $(BUILDDIR_MP1M4)/$(BINARYNAME).elf:
+# 	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk
 
 ## Flashing
 
@@ -104,17 +88,16 @@ $(BUILDDIR_MP1M4)/$(BINARYNAME).elf:
 #     $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
 # endif
 
-flash_a7:
-	$(info SD card must be mounted)
-	cp $(BUILDDIR_MP1M4)/$(BINARYNAME).elf /Volumes/BAREAPP/m4-main.elf
-	cp $(BUILDDIR_MP1A7)/$(BINARYNAME).uimg /Volumes/BAREAPP/a7-main.uimg
-	diskutil unmount /Volumes/BAREAPP
+# install_a7:
+# 	$(info SD card must be mounted)
+# 	cp $(BUILDDIR_MP1A7)/$(BINARYNAME).uimg /Volumes/BAREAPP/a7-main.uimg
+# 	diskutil unmount /Volumes/BAREAPP
 
-flash_mp1m4:
-	$(JFLASHEXE) -openprjflashing/metamodule-mp1-cm4.jflash -open$(BUILDDIR_MP1M4)/$(BINARYNAME).hex -auto -exit
+# flash_mp1m4:
+# 	$(JFLASHEXE) -openprjflashing/metamodule-mp1-cm4.jflash -open$(BUILDDIR_MP1M4)/$(BINARYNAME).hex -auto -exit
 
-flash_h7: $(BUILDDIR_H7M7)/$(BINARYNAME).hex $(BUILDDIR_H7M4)/$(BINARYNAME).hex
-	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_H7M7)/$(BINARYNAME).hex -auto -open$(BUILDDIR_H7M4)/$(BINARYNAME).hex -auto -exit
+flash_h7: h7
+	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_H7M7)/main.hex -auto -open$(BUILDDIR_H7M4)/main.hex -auto -exit
 
 start_gdb:
 	JLinkGDBServer -select USB -device STM32MP15xx_M4_Bank1 -endian little -if SWD -speed 8000 -noir -nohalt
