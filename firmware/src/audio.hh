@@ -62,6 +62,7 @@ private:
 	PatchPlayer &player;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	CycleCounter load_measure;
+	float load_lpf = 0.f;
 	uint32_t _mute_ctr = 0;
 
 	AudioConf::SampleT get_audio_output(int output_id);

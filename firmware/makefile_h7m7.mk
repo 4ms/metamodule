@@ -45,6 +45,7 @@ SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
 SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
 SOURCES  += $(LIBDIR)/printf/printf.c
 SOURCES  += $(MFSRC)
+SOURCES  += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 
 INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(CMSIS)/Include \
@@ -82,6 +83,7 @@ ARCH_CFLAGS += -D'__FPU_PRESENT=1' \
 			  -DSTM32H745xx \
 			  -DSTM32H7x5xx \
 			  -DSTM32H7 \
+			  -DCORE_CM7 \
 			  -D$(EXTDEF)
 
 

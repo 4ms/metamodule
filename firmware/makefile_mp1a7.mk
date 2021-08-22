@@ -62,6 +62,7 @@ SOURCES = \
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(LIBDIR)/printf/printf.c \
 		  $(MFSRC) \
+		  $(SHARED)/axoloti-wrapper/axoloti_math.cpp \
 		  $(NE10DIR)/common/NE10_mask_table.c \
 		  $(NE10DIR)/modules/dsp/NE10_fft.c \
 		  $(NE10DIR)/modules/dsp/NE10_fft_float32.c \

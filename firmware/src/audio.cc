@@ -109,7 +109,8 @@ void AudioStream::process(AudioStreamBlock &in,
 						  ParamBlock &param_block,
 						  AuxSignalStreamBlock &aux)
 {
-	param_block.metaparams.audio_load = load_measure.get_last_measurement_load_percent();
+	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
+	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 	load_measure.start_measurement();
 
 	cache.write_sync(param_block.params[0], param_block.metaparams);

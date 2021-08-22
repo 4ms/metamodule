@@ -1,4 +1,4 @@
-# This is meant to be run from the CoreModules/ dir
+# This is meant to be run from the axoloti-wrapper/ dir
 # make -f tests/Makefile
 
 TEST_DIR ?= tests
@@ -11,7 +11,7 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
-TEST_SOURCES += ../axoloti-wrapper/axoloti_math.cpp
+TEST_SOURCES += axoloti_math.cpp
 
 BUILDDIR = $(TEST_DIR)/build
 
@@ -49,11 +49,6 @@ $(BUILDDIR)/%.o: %.cc
 
 #FixMe: This kludge lets us build util/%.o, but it's not pretty or general
 $(BUILDDIR)/%.o: ../%.cc
-	@mkdir -p $(dir $@)
-	$(info Building $<)
-	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
-
-$(BUILDDIR)/%.o: ../%.cpp
 	@mkdir -p $(dir $@)
 	$(info Building $<)
 	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@

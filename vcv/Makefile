@@ -5,7 +5,7 @@ SHARED_DIR = src/shared
 SHARED = $(SHARED_DIR)
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS += -std=c++17 -Isrc -I$(SHARED_DIR)/util -I$(SHARED_DIR)/processors -I$(SHARED_DIR)/CoreModules -I$(SHARED_DIR)/patch -I$(SHARED_DIR)
+FLAGS += -std=c++17 -Isrc -I$(SHARED_DIR)/util -I$(SHARED_DIR)/processors -I$(SHARED_DIR)/CoreModules -I$(SHARED_DIR)/patch -I$(SHARED_DIR) -I$(SHARED_DIR)/axoloti-wrapper
 CFLAGS +=
 CXXFLAGS += 
 
@@ -17,6 +17,7 @@ LDFLAGS +=
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/*.cpp)
 SOURCES += $(wildcard $(SHARED_DIR)/util/*.cc)
+SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
@@ -39,7 +40,7 @@ compile_commands:
 	rm compile_commands.json 
 	mv compile_commands_with_headers.json compile_commands.json
 
-tests: core_tests util_tests vcv_tests
+tests: core_tests util_tests vcv_tests axo_tests
 
 core_tests:
 	$(info ... Running CoreModule tests ...)
@@ -53,5 +54,12 @@ vcv_tests:
 	$(info ... Running vcv plugin tests ...)
 	@$(MAKE) --no-print-directory -f tests/Makefile
 
-.PHONY: tests core_tests vcv_tests util_tests
+axo_tests:
+	$(info ... Running Axoloti-wrapper tests ...)
+	@cd $(SHARED)/axoloti-wrapper && $(MAKE) --no-print-directory -f tests/Makefile
+
+win_dist:
+	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
+
+.PHONY: tests core_tests vcv_tests util_tests axo_tests
 
