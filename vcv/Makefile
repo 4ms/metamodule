@@ -58,5 +58,8 @@ axo_tests:
 	$(info ... Running Axoloti-wrapper tests ...)
 	@cd $(SHARED)/axoloti-wrapper && $(MAKE) --no-print-directory -f tests/Makefile
 
+win_dist:
+	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
+
 .PHONY: tests core_tests vcv_tests util_tests axo_tests
 
