@@ -18,7 +18,7 @@ static const int NUM_MAPPINGS_PER_KNOB = 8;
 class KnobMaps {
 public:
 	ParamHandle paramHandles[NUM_MAPPINGS_PER_KNOB];
-	std::vector<float> mapRange[NUM_MAPPINGS_PER_KNOB];
+	std::pair<float, float> mapRange[NUM_MAPPINGS_PER_KNOB];
 
 	KnobMaps()
 	{
@@ -183,8 +183,11 @@ struct MetaModuleHub : public CommModule {
 					Module *module = knobMaps[i].paramHandles[x].module;
 					int paramId = knobMaps[i].paramHandles[x].paramId;
 					ParamQuantity *paramQuantity = module->paramQuantities[paramId];
-					auto newMappedVal = MathTools::map_value(
-						params[i].getValue(), 0.0f, 1.0f, knobMaps[i].mapRange[x].at(0), knobMaps[i].mapRange[x].at(1));
+					auto newMappedVal = MathTools::map_value(params[i].getValue(),
+															 0.0f,
+															 1.0f,
+															 knobMaps[i].mapRange[x].first,
+															 knobMaps[i].mapRange[x].second);
 					paramQuantity->setValue(newMappedVal);
 				}
 			}

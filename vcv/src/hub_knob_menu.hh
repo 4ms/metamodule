@@ -22,12 +22,12 @@ struct MapFieldEntry : ui::MenuLabel {
 struct MinQuantity : Quantity {
 private:
 	float &_levelValue;
-	float minLevel = 0;
-	float maxLevel = 1;
+	const float minLevel = 0;
+	const float maxLevel = 1;
 
 public:
-	MinQuantity(std::vector<float> &inRange)
-		: _levelValue(inRange[0])
+	MinQuantity(std::pair<float, float> &inRange)
+		: _levelValue(inRange.first)
 	{}
 	void setValue(float value) override
 	{
@@ -78,12 +78,12 @@ public:
 struct MaxQuantity : Quantity {
 private:
 	float &_levelValue;
-	float minLevel = 0;
-	float maxLevel = 1;
+	const float minLevel = 0;
+	const float maxLevel = 1;
 
 public:
-	MaxQuantity(std::vector<float> &inRange)
-		: _levelValue(inRange[1])
+	MaxQuantity(std::pair<float, float> &inRange)
+		: _levelValue(inRange.second)
 	{}
 	void setValue(float value) override
 	{
@@ -133,7 +133,7 @@ public:
 
 struct MinField : ui::Slider {
 public:
-	MinField(std::vector<float> &inRange)
+	MinField(std::pair<float, float> &inRange)
 	{
 		quantity = new MinQuantity(inRange);
 	}
@@ -145,7 +145,7 @@ public:
 
 struct MaxField : ui::Slider {
 public:
-	MaxField(std::vector<float> &inRange)
+	MaxField(std::pair<float, float> &inRange)
 	{
 		quantity = new MaxQuantity(inRange);
 	}
