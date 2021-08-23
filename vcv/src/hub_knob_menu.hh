@@ -87,15 +87,7 @@ public:
 	{}
 	void setValue(float value) override
 	{
-		if (value >= minLevel && value <= maxLevel)
-			_levelValue = value;
-		else {
-			if (value > maxLevel)
-				_levelValue = maxLevel;
-			else if (value < minLevel) {
-				_levelValue = minLevel;
-			}
-		}
+		_levelValue = MathTools::constrain(value, 0.0f, 1.0f);
 	}
 	float getValue() override
 	{
@@ -103,11 +95,11 @@ public:
 	}
 	float getMinValue() override
 	{
-		return minLevel;
+		return 0;
 	}
 	float getMaxValue() override
 	{
-		return maxLevel;
+		return 1;
 	}
 	float getDefaultValue() override
 	{
