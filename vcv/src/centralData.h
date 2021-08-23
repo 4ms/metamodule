@@ -139,16 +139,16 @@ public:
 
 		_currentMap.dst = dest;
 
-		bool found = false;
-		for (auto &m : maps) {
-			if (m.src == _currentMap.src) {
-				found = true;
-				m.dst = _currentMap.dst;
-				break;
-			}
-		}
-		if (!found)
-			maps.push_back(_currentMap);
+		// bool found = false;
+		// for (auto &m : maps) {
+		// 	if (m.src == _currentMap.src) {
+		// 		found = true;
+		// 		m.dst = _currentMap.dst;
+		// 		break;
+		// 	}
+		// }
+		// if (!found)
+		maps.push_back(_currentMap);
 
 		_currentMap.clear();
 
