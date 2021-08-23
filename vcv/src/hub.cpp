@@ -4,6 +4,7 @@
 #include "CoreModules/moduleTypes.h"
 #include "hub_knob_menu.hh"
 #include "localPath.h"
+#include "paletteHub.hh"
 #include "patch_writer.hh"
 #include "plugin.hpp"
 #include "string.h"
@@ -20,11 +21,10 @@ public:
 	ParamHandle paramHandles[NUM_MAPPINGS_PER_KNOB];
 	std::pair<float, float> mapRange[NUM_MAPPINGS_PER_KNOB];
 
-	KnobMaps()
+	KnobMaps(NVGcolor mapColor)
 	{
-		auto randColor = nvgRGB(rand() % 256, rand() % 256, rand() % 256);
 		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
-			paramHandles[i].color = randColor;
+			paramHandles[i].color = mapColor;
 			APP->engine->addParamHandle(&paramHandles[i]);
 			mapRange[i] = {0, 1};
 		}
@@ -66,7 +66,14 @@ public:
 
 struct MetaModuleHub : public CommModule {
 
-	KnobMaps knobMaps[NUM_KNOBS];
+	KnobMaps knobMaps[NUM_KNOBS]{PaletteHub::color[0],
+								 PaletteHub::color[1],
+								 PaletteHub::color[2],
+								 PaletteHub::color[3],
+								 PaletteHub::color[4],
+								 PaletteHub::color[5],
+								 PaletteHub::color[6],
+								 PaletteHub::color[7]};
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };

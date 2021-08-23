@@ -1,4 +1,5 @@
 #include "CommWidget.h"
+#include "paletteHub.hh"
 
 void CommModuleWidget::addModuleTitle(const std::string moduleTitle)
 {
@@ -188,20 +189,6 @@ void LabeledButton::updateState()
 	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
 
-static inline const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
-static inline const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
-
-static inline const NVGcolor labelPalette[8] = {
-	rack::color::BLACK,
-	BROWN,
-	rack::color::RED,
-	ORANGE,
-	rack::color::YELLOW,
-	rack::color::GREEN,
-	rack::color::BLUE,
-	rack::color::MAGENTA,
-};
-
 void LabeledButton::draw(const DrawArgs &args)
 {
 	updateState();
@@ -211,7 +198,7 @@ void LabeledButton::draw(const DrawArgs &args)
 
 	if (isMapped) {
 		unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
-		nvgStrokeColor(args.vg, labelPalette[palid]);
+		nvgStrokeColor(args.vg, PaletteHub::color[palid]);
 		nvgStrokeWidth(args.vg, 2.0f);
 	}
 	if (!isMapped) {
