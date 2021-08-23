@@ -100,6 +100,8 @@ struct MetaModuleHub : public CommModule {
 			json_object_set_new(thisMapJ, "SrcModID", json_integer(m.src.moduleID));
 			json_object_set_new(thisMapJ, "SrcObjID", json_integer(m.src.objID));
 			json_object_set_new(thisMapJ, "SrcObjType", json_string(m.src.objTypeStr()));
+			json_object_set_new(thisMapJ, "RangeMin", json_real(m.range_min));
+			json_object_set_new(thisMapJ, "RangeMax", json_real(m.range_max));
 
 			json_array_append(mapsJ, thisMapJ);
 			json_decref(thisMapJ);
@@ -129,24 +131,34 @@ struct MetaModuleHub : public CommModule {
 					json_t *val;
 
 					val = json_object_get(mappingJ, "DstModID");
-					if (json_is_integer(val))
-						mapping.dst.moduleID = json_integer_value(val);
+					mapping.dst.moduleID = json_is_integer(val) ? json_integer_value(val) : -1;
+
 					val = json_object_get(mappingJ, "DstObjID");
-					if (json_is_integer(val))
-						mapping.dst.objID = json_integer_value(val);
+					mapping.dst.objID = json_is_integer(val) ? json_integer_value(val) : -1;
+
 					val = json_object_get(mappingJ, "DstObjType");
 					if (json_is_string(val))
 						mapping.dst.setObjTypeFromString(json_string_value(val));
+					else
+						mapping.dst.objType = LabelButtonID::Types::None;
 
 					val = json_object_get(mappingJ, "SrcModID");
-					if (json_is_integer(val))
-						mapping.src.moduleID = json_integer_value(val);
+					mapping.src.moduleID = json_is_integer(val) ? json_integer_value(val) : -1;
+
 					val = json_object_get(mappingJ, "SrcObjID");
-					if (json_is_integer(val))
-						mapping.src.objID = json_integer_value(val);
+					mapping.src.objID = json_is_integer(val) ? json_integer_value(val) : -1;
+
 					val = json_object_get(mappingJ, "SrcObjType");
 					if (json_is_string(val))
 						mapping.src.setObjTypeFromString(json_string_value(val));
+					else
+						mapping.src.objType = LabelButtonID::Types::None;
+
+					val = json_object_get(mappingJ, "RangeMin");
+					mapping.range_min = json_is_real(val) ? json_real_value(val) : 0.f;
+
+					val = json_object_get(mappingJ, "RangeMax");
+					mapping.range_max = json_is_real(val) ? json_real_value(val) : 1.f;
 
 					centralData->maps.push_back(mapping);
 				}
