@@ -47,6 +47,21 @@ public:
 		}
 		return num;
 	}
+
+	int firstAvailable()
+	{
+		int availableSlot = -1;
+		int tempNum = NUM_MAPPINGS_PER_KNOB;
+		if (getNumMaps() < 8) {
+			for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
+				if (paramHandles[i].moduleId == -1) {
+					tempNum = std::min<int>(tempNum, i);
+				}
+			}
+			availableSlot = tempNum;
+		}
+		return availableSlot;
+	}
 };
 
 struct MetaModuleHub : public CommModule {
@@ -150,7 +165,7 @@ struct MetaModuleHub : public CommModule {
 		}
 
 		for (int i = 0; i < NUM_KNOBS; i++) {
-			for (int x = 0; x < knobMaps[i].getNumMaps(); x++) {
+			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
 				bool knobMapped = (knobMaps[i].paramHandles[x].moduleId) != -1;
 				if (knobMapped) {
 					Module *module = knobMaps[i].paramHandles[x].module;
@@ -484,12 +499,24 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 		//	Create mapping
 		if (_hub.expModule->id != moduleId) { // button on module clicked
 			int knobToMap = centralData->getMappingSource().objID;
-			int paramNum = _hub.expModule->knobMaps[knobToMap].getNumMaps();
-			APP->engine->updateParamHandle(
-				&_hub.expModule->knobMaps[knobToMap].paramHandles[paramNum], moduleId, paramId, true);
-			centralData->abortMappingProcedure();
-			_hub.expModule->labelText = std::to_string(_hub.expModule->knobMaps[0].getNumMaps());
-			_hub.expModule->updateDisplay();
+			for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
+				auto thisHandle = _hub.expModule->knobMaps[knobToMap].paramHandles[i];
+				bool duplicateMap = (thisHandle.moduleId == moduleId && thisHandle.paramId == paramId);
+				if (!duplicateMap) {
+					auto lowestEmpty = _hub.expModule->knobMaps[knobToMap].firstAvailable();
+					if (lowestEmpty != -1) {
+						APP->engine->updateParamHandle(
+							&_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty], moduleId, paramId, true);
+						centralData->abortMappingProcedure();
+					} else {
+						centralData->abortMappingProcedure();
+					}
+				} else {
+					APP->engine->updateParamHandle(&_hub.expModule->knobMaps[knobToMap].paramHandles[i], -1, 0, true);
+					centralData->abortMappingProcedure();
+				}
+			}
+
 		} else { // button on hub clicked, abort
 			centralData->abortMappingProcedure();
 		}
