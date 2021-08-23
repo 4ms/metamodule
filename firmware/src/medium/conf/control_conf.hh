@@ -18,16 +18,18 @@ const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 };
 
 struct MMControlPins {
-	static constexpr PinNoInit rotA{GPIO::G, 13};
-	static constexpr PinNoInit rotB{GPIO::G, 12};
-	static constexpr PinNoInit rotS{GPIO::A, 3};
+	static constexpr PinNoInit rotA{GPIO::A, 15};
+	static constexpr PinNoInit rotB{GPIO::C, 7};
+	static constexpr PinNoInit rotS{GPIO::B, 14};
 
-	static constexpr PinNoInit but0{GPIO::F, 11};
-	static constexpr PinNoInit but1{GPIO::C, 3};
+	static constexpr PinNoInit but0{GPIO::I, 2};
 
-	static constexpr PinNoInit clkin{GPIO::A, 14};
-	static constexpr PinNoInit gate1{GPIO::F, 5};
-	static constexpr PinNoInit gate2{GPIO::D, 10};
+	static constexpr PinNoInit gate_in_1{GPIO::I, 3};
+	static constexpr PinNoInit gate_in_2{GPIO::H, 9};
+};
+
+struct MultiGPIOReader {
+	//
 };
 
 } // namespace MetaModule

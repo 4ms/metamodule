@@ -1,10 +1,8 @@
 #pragma once
 #include "auxsignal.hh"
-#include "conf/adc_spi_conf.hh"
 #include "conf/auxstream_conf.hh"
 #include "conf/control_conf.hh"
 #include "drivers/debounced_switch.hh"
-#include "drivers/gpio_expander.hh"
 #include "drivers/i2c.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
@@ -24,14 +22,11 @@ using mdrivlib::PinPolarity;
 struct Controls {
 
 	Controls(mdrivlib::MuxedADC &potadc,
-			 CVAdcChipT &cvadc,
 			 DoubleBufParamBlock &param_blocks_ref,
-			 mdrivlib::GPIOExpander &gpio_expander,
 			 DoubleAuxStreamBlock &auxsignal_blocks_ref);
 
 	mdrivlib::MuxedADC &potadc;
-	CVAdcChipT &cvadc;
-	mdrivlib::GPIOExpander &jacksense_reader;
+	MultiGPIOReader jacksense_reader;
 
 	mdrivlib::RotaryEncoder<mdrivlib::RotaryHalfStep> rotary = {
 		MMControlPins::rotA.gpio,
@@ -40,13 +35,11 @@ struct Controls {
 		MMControlPins::rotB.pin,
 	};
 
-	DebouncedPin<MMControlPins::but0.gpio, MMControlPins::but0.pin, PinPolarity::Inverted> button0;
-	DebouncedPin<MMControlPins::but1.gpio, MMControlPins::but1.pin, PinPolarity::Inverted> button1;
 	DebouncedPin<MMControlPins::rotS.gpio, MMControlPins::rotS.pin, PinPolarity::Inverted> rotary_button;
+	DebouncedPin<MMControlPins::but0.gpio, MMControlPins::but0.pin, PinPolarity::Inverted> button0;
 
-	DebouncedPin<MMControlPins::clkin.gpio, MMControlPins::clkin.pin, PinPolarity::Normal> clock_in;
-	DebouncedPin<MMControlPins::gate1.gpio, MMControlPins::gate1.pin, PinPolarity::Normal> gate_in1;
-	DebouncedPin<MMControlPins::gate2.gpio, MMControlPins::gate2.pin, PinPolarity::Normal> gate_in2;
+	DebouncedPin<MMControlPins::gate_in_1.gpio, MMControlPins::gate_in_1.pin, PinPolarity::Normal> gate_in_1;
+	DebouncedPin<MMControlPins::gate_in_2.gpio, MMControlPins::gate_in_2.pin, PinPolarity::Normal> gate_in_2;
 
 	void update_debouncers();
 	void start();

@@ -15,11 +15,9 @@ void Controls::update_debouncers()
 	rotary.update();
 	rotary_button.update();
 	button0.update();
-	button1.update();
 
-	gate_in1.update();
-	gate_in2.update();
-	clock_in.update();
+	gate_in_1.update();
+	gate_in_2.update();
 }
 
 // first param in block: 2.0-2.4us, @ 48kHz
@@ -27,17 +25,9 @@ void Controls::update_debouncers()
 // load 6.8%
 void Controls::update_params()
 {
-	cur_params->cvjacks[0] = (2047.5f - static_cast<float>(cvadc.get_val(0))) / 2047.5f;
-	cur_params->cvjacks[1] = (2047.5f - static_cast<float>(cvadc.get_val(1))) / 2047.5f;
-	// Oops! CV C and CV D are swapped:
-	cur_params->cvjacks[2] = (2047.5f - static_cast<float>(cvadc.get_val(3))) / 2047.5f;
-	cur_params->cvjacks[3] = (2047.5f - static_cast<float>(cvadc.get_val(2))) / 2047.5f;
-
 	cur_params->buttons[0].copy_state(button0);
-	cur_params->buttons[1].copy_state(button1);
-	cur_params->gate_ins[0].copy_state(gate_in1);
-	cur_params->gate_ins[1].copy_state(gate_in2);
-	cur_params->gate_ins[2].copy_state(clock_in);
+	cur_params->gate_ins[0].copy_state(gate_in_1);
+	cur_params->gate_ins[1].copy_state(gate_in_2);
 	cur_params->jack_senses = get_jacksense_reading();
 
 	if (_first_param) {
@@ -85,8 +75,6 @@ void Controls::update_params()
 void Controls::start()
 {
 	potadc.start();
-	cvadc.start();
-	jacksense_reader.start();
 
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
@@ -120,16 +108,12 @@ void Controls::start()
 }
 
 Controls::Controls(mdrivlib::MuxedADC &potadc,
-				   CVAdcChipT &cvadc,
 				   DoubleBufParamBlock &param_blocks_ref,
-				   mdrivlib::GPIOExpander &gpio_expander,
 				   DoubleAuxStreamBlock &auxsignal_blocks_ref)
 	: potadc(potadc)
-	, cvadc(cvadc)
-	, jacksense_reader{gpio_expander}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
-	, cur_metaparams(&param_blocks[0].metaparams)
+	, cur_metaparams(&param_blocks_ref[0].metaparams)
 	, _buffer_full{false}
 	, auxstream_blocks{auxsignal_blocks_ref}
 {
@@ -145,9 +129,6 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 		update_debouncers();
 		update_params();
 	});
-
-	// 72us, 0.5us wide
-	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 
 	auxstream.init();
 	auxstream_updater.init([&]() {
