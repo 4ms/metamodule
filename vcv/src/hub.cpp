@@ -99,6 +99,8 @@ struct MetaModuleHub : public CommModule {
 	{
 		json_t *rootJ = json_object();
 		json_t *mapsJ = json_array();
+		saveMappingRanges();
+
 		for (auto &m : centralData->maps) {
 			json_t *thisMapJ = json_object();
 			json_object_set_new(thisMapJ, "DstModID", json_integer(m.dst.moduleID));
@@ -170,6 +172,31 @@ struct MetaModuleHub : public CommModule {
 					centralData->maps.push_back(mapping);
 				}
 			}
+			loadMappings();
+		}
+	}
+
+	void saveMappingRanges()
+	{
+		for (int i = 0; i < NUM_KNOBS; i++) {
+			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
+				LabelButtonID dst = {LabelButtonID::Types::Knob,
+									 knobMaps[i].paramHandles[x].paramId,
+									 knobMaps[i].paramHandles[x].moduleId};
+				LabelButtonID src = {LabelButtonID::Types::Knob, i, id};
+				centralData->setMapRange(src, dst, knobMaps[i].mapRange[x].first, knobMaps[i].mapRange[x].second);
+			}
+		}
+	}
+
+	void loadMappings()
+	{
+		for (auto &m : centralData->maps) {
+			auto knobToMap = m.src.objID;
+			auto lowestEmpty = knobMaps[knobToMap].firstAvailable();
+			APP->engine->updateParamHandle(&knobMaps[knobToMap].paramHandles[lowestEmpty], m.dst.moduleID, m.dst.objID);
+			auto [min, max] = centralData->getMapRange(m.src, m.dst);
+			knobMaps[knobToMap].mapRange[lowestEmpty] = {min, max};
 		}
 	}
 
@@ -203,6 +230,7 @@ struct MetaModuleHub : public CommModule {
 		if (responseTimer) {
 			if (--responseTimer == 0) {
 				printDebugFile();
+				saveMappingRanges();
 
 				std::string patchName;
 				std::string patchDir;
