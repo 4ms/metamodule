@@ -519,16 +519,13 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 				bool duplicateMap = (thisHandle.moduleId == moduleId && thisHandle.paramId == paramId);
 				if (!duplicateMap) {
 					auto lowestEmpty = _hub.expModule->knobMaps[knobToMap].firstAvailable();
-					if (lowestEmpty != -1) {
+					if (lowestEmpty != -1) { // create mapping
 						APP->engine->updateParamHandle(
 							&_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty], moduleId, paramId, true);
-						centralData->abortMappingProcedure();
+						centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
 					} else {
 						centralData->abortMappingProcedure();
 					}
-				} else {
-					APP->engine->updateParamHandle(&_hub.expModule->knobMaps[knobToMap].paramHandles[i], -1, 0, true);
-					centralData->abortMappingProcedure();
 				}
 			}
 
