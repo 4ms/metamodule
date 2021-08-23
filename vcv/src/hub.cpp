@@ -22,8 +22,9 @@ public:
 
 	KnobMaps()
 	{
+		auto randColor = nvgRGB(rand() % 256, rand() % 256, rand() % 256);
 		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
-			paramHandles[i].color = nvgRGB(rand() % 256, rand() % 256, rand() % 256);
+			paramHandles[i].color = randColor;
 			APP->engine->addParamHandle(&paramHandles[i]);
 			mapRange[i] = {0, 1};
 		}
@@ -149,8 +150,8 @@ struct MetaModuleHub : public CommModule {
 		}
 
 		for (int i = 0; i < NUM_KNOBS; i++) {
-			for (int x = 0; x < knobMaps[i].getNumMaps(); i++) {
-				bool knobMapped = (knobMaps[i].paramHandles[x].moduleId != -1);
+			for (int x = 0; x < knobMaps[i].getNumMaps(); x++) {
+				bool knobMapped = (knobMaps[i].paramHandles[x].moduleId) != -1;
 				if (knobMapped) {
 					Module *module = knobMaps[i].paramHandles[x].module;
 					int paramId = knobMaps[i].paramHandles[x].paramId;
@@ -487,6 +488,8 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 			APP->engine->updateParamHandle(
 				&_hub.expModule->knobMaps[knobToMap].paramHandles[paramNum], moduleId, paramId, true);
 			centralData->abortMappingProcedure();
+			_hub.expModule->labelText = std::to_string(_hub.expModule->knobMaps[0].getNumMaps());
+			_hub.expModule->updateDisplay();
 		} else { // button on hub clicked, abort
 			centralData->abortMappingProcedure();
 		}
@@ -533,10 +536,10 @@ void HubKnob::onButton(const event::Button &e)
 			auto knobNum = this->hubKnobLabel.id.objID;
 			auto hubModule = this->hubKnobLabel._hub.expModule;
 
-			auto thisMap = this->hubKnobLabel._hub.expModule->knobMaps[knobNum];
+			auto &thisMap = hubModule->knobMaps[knobNum];
 			if (thisMap.getNumMaps() > 0) {
 				for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
-					bool knobMapped = thisMap.paramHandles[x].moduleId > -1;
+					bool knobMapped = thisMap.paramHandles[x].moduleId != -1;
 					if (knobMapped) {
 
 						MapFieldEntry *paramLabel2 = new MapFieldEntry;
