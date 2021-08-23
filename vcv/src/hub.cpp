@@ -491,7 +491,7 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 
 	// Check if a ParamWidget was touched
 	ParamWidget *touchedParam = APP->scene->rack->touchedParam;
-	if (touchedParam) {
+	if (touchedParam && centralData->isMappingInProgress()) {
 		APP->scene->rack->touchedParam = NULL;
 		int moduleId = touchedParam->paramQuantity->module->id;
 		int paramId = touchedParam->paramQuantity->paramId;
