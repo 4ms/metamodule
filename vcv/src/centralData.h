@@ -1,10 +1,10 @@
 #pragma once
 #include "CommData.h"
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <mutex>
 #include <vector>
-#include <algorithm>
 
 class CentralData {
 	static inline std::mutex mtx;
@@ -155,6 +155,29 @@ public:
 		_isMappingInProgress = false;
 	}
 
+	void setMapRange(LabelButtonID src, LabelButtonID dst, float rmin, float rmax)
+	{
+		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
+		if (m == maps.end())
+			return;
+		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
+		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
+	}
+
+	std::pair<float, float> getMapRange(LabelButtonID src, LabelButtonID dst)
+	{
+		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
+		float min, max;
+		if (m == maps.end()) {
+			min = 0.f;
+			max = 0.f;
+		} else {
+			min = m->range_min;
+			max = m->range_max;
+		}
+		return {min, max};
+	}
+
 	void unregisterMapByDest(LabelButtonID dest)
 	{
 		std::lock_guard mguard{mtx};
@@ -175,6 +198,7 @@ public:
 	{
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
 	}
+
 	LabelButtonID getMappedSrcFromDst(LabelButtonID &b)
 	{
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
@@ -182,6 +206,7 @@ public:
 			return obj->src;
 		return {LabelButtonID::Types::None, -1, -1};
 	}
+	// TODO: Get rid of this, not multi-map friendly. Or return a vector of mappings
 	LabelButtonID getMappedDstFromSrc(LabelButtonID &b)
 	{
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
