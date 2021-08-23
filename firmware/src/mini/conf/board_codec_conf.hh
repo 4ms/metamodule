@@ -9,7 +9,7 @@ namespace MetaModule
 {
 
 enum class Boards { Mini, Medium, Max, PCMDev };
-constexpr Boards Board = Boards::PCMDev;
+constexpr Boards Board = Boards::Mini;
 
 using CodecT = mdrivlib::CodecWM8731;
 

@@ -12,12 +12,13 @@ endif
 #TODO: Build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
 #so don't build it twice for mini/max
 
+target_src := src/$(target_board)
+target_chip_src := src/$(target_board)/mp1
+core_src := src/a7
+
 TAG := [MP1A7-$(target_board)]
-MDIR := src/$(target_board)
 BUILDDIR = $(BUILDDIR_MP1A7)/$(target_board)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
-core_src = src/a7
-HAL_CONF_INC = src/a7
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
@@ -156,8 +157,9 @@ ASM_SOURCES += \
 
 INCLUDES = -I. \
 		   -Isrc \
-		   -Isrc/a7 \
-		   -I$(MDIR) \
+		   -I$(core_src) \
+		   -I$(target_src) \
+		   -I$(target_chip_src) \
 		   -I$(HALDIR)/include \
 		   -I$(CMSIS)/Core_A/Include \
 		   -I$(CMSIS)/Include \

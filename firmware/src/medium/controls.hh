@@ -44,8 +44,6 @@ struct Controls {
 	DebouncedPin<MMControlPins::but1.gpio, MMControlPins::but1.pin, PinPolarity::Inverted> button1;
 	DebouncedPin<MMControlPins::rotS.gpio, MMControlPins::rotS.pin, PinPolarity::Inverted> rotary_button;
 
-	// Todo: std::tuple<GateIn1Type, GateIn2Type, ClockInType> gate_ins;
-	// gate_in<0>.update();
 	DebouncedPin<MMControlPins::clkin.gpio, MMControlPins::clkin.pin, PinPolarity::Normal> clock_in;
 	DebouncedPin<MMControlPins::gate1.gpio, MMControlPins::gate1.pin, PinPolarity::Normal> gate_in1;
 	DebouncedPin<MMControlPins::gate2.gpio, MMControlPins::gate2.pin, PinPolarity::Normal> gate_in2;

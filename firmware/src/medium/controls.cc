@@ -91,7 +91,6 @@ void Controls::start()
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
-		// Debug::Pin1::high();
 		cur_metaparams = &param_blocks[0].metaparams;
 		cur_params = param_blocks[0].params.begin();
 		_first_param = true;
@@ -99,13 +98,11 @@ void Controls::start()
 
 		for (auto &aux : auxstream_blocks[0])
 			auxstream.queue_data(aux);
-		// Debug::Pin1::low();
 	});
 
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
-		// Debug::Pin1::high();
 		cur_metaparams = &param_blocks[1].metaparams;
 		cur_params = param_blocks[1].params.begin();
 		_first_param = true;
@@ -113,7 +110,6 @@ void Controls::start()
 
 		for (auto &aux : auxstream_blocks[1])
 			auxstream.queue_data(aux);
-		// Debug::Pin1::low();
 	});
 	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();

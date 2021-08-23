@@ -1,6 +1,6 @@
 #pragma once
-#include "a7/conf/rcc_conf.hh"
 #include "conf/hsem_conf.hh"
+#include "conf/rcc_conf.hh"
 #include "drivers/arch.hh"
 #include "drivers/hsem.hh"
 #include "drivers/rcc.hh"
