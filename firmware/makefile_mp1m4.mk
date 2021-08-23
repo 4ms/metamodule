@@ -11,7 +11,7 @@ else
 endif
 
 TAG := [MP1M4-$(target_board)]
-MDIR := src/$(target_board)
+target_src := src/$(target_board)
 BUILDDIR = $(BUILDDIR_MP1M4)/$(target_board)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_m4.ld
 CORE_SRC = src/mp1m4
@@ -26,6 +26,7 @@ SYSTEM = $(DEVICEBASE)/stm32mp157c/templates/system_stm32mp1xx.c
 
 OPTFLAG = -O3
 include makefile_opts.mk
+
 
 ASM_SOURCES  = $(STARTUP)
 
@@ -65,7 +66,7 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \
-			-I$(MDIR) \
+			-I$(target_src) \
 			-I$(CORE_SRC) \
 			-I$(HAL_CONF_INC) \
 			-Isystem \
@@ -86,13 +87,13 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 
 include makefile_common.mk
 
-all: firmware_m4.h firmware_m4_vectors.h
+all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h
 
-firmware_m4.h: $(BUILDDIR)/firmware.bin
-	xxd -i -c 8 $< $@
+$(target_src)/firmware_m4.h: $(BUILDDIR)/firmware.bin
+	cd $(dir $<) && xxd -i -c 8 $(notdir $<) ../../../$@
 
-firmware_m4_vectors.h: $(BUILDDIR)/vectors.bin
-	xxd -i -c 8 $< $@
+$(target_src)/firmware_m4_vectors.h: $(BUILDDIR)/vectors.bin
+	cd $(dir $<) && xxd -i -c 8 $(notdir $<) ../../../$@
 
 $(BUILDDIR)/vectors.bin: $(BUILDDIR)/$(BINARYNAME).elf
 	arm-none-eabi-objcopy -O binary \
