@@ -44,8 +44,10 @@ struct LabelButtonID {
 
 struct Mapping {
 	LabelButtonID src;
-	LabelButtonID dst; // Todo: vector of destinations
-					   // Todo: vector of amounts
+	LabelButtonID dst;
+	float range_min = 0.f;
+	float range_max = 1.f;
+
 	void clear()
 	{
 		dst.moduleID = -1;
@@ -54,6 +56,8 @@ struct Mapping {
 		src.objID = -1;
 		dst.objType = LabelButtonID::Types::None;
 		src.objType = LabelButtonID::Types::None;
+		range_min = 0.f;
+		range_max = 1.f;
 	}
 };
 struct ModuleID {
