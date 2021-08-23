@@ -22,8 +22,6 @@ struct MapFieldEntry : ui::MenuLabel {
 struct MinQuantity : Quantity {
 private:
 	float &_levelValue;
-	const float minLevel = 0;
-	const float maxLevel = 1;
 
 public:
 	MinQuantity(std::pair<float, float> &inRange)
@@ -31,15 +29,7 @@ public:
 	{}
 	void setValue(float value) override
 	{
-		if (value >= minLevel && value <= maxLevel)
-			_levelValue = value;
-		else {
-			if (value > maxLevel)
-				_levelValue = maxLevel;
-			else if (value < minLevel) {
-				_levelValue = minLevel;
-			}
-		}
+		_levelValue = MathTools::constrain(value, 0.0f, 1.0f);
 	}
 	float getValue() override
 	{
@@ -47,11 +37,11 @@ public:
 	}
 	float getMinValue() override
 	{
-		return minLevel;
+		return 0;
 	}
 	float getMaxValue() override
 	{
-		return maxLevel;
+		return 1;
 	}
 	float getDefaultValue() override
 	{
@@ -78,8 +68,6 @@ public:
 struct MaxQuantity : Quantity {
 private:
 	float &_levelValue;
-	const float minLevel = 0;
-	const float maxLevel = 1;
 
 public:
 	MaxQuantity(std::pair<float, float> &inRange)
