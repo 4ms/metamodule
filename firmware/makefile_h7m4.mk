@@ -10,8 +10,12 @@ BUILDDIR = $(BUILDDIR_H7M4)
 LOADFILE = $(LINKSCRIPTDIR)/stm32h755xx_flash_CM4.ld
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
-CORE_SRC = src/m4
-HAL_CONF_INC = src/m4
+
+core_src = src/m4
+target_src := src/$(target_board)
+target_core_src := src/$(target_board)/m4
+hal_conf_inc = $(core_src)
+
 HALDIR = $(HALBASE)/stm32h7x5
 DEVICEDIR = $(DEVICEBASE)/stm32h7x5
 TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32h7x5
@@ -26,9 +30,9 @@ include makefile_opts.mk
 ASM_SOURCES  = $(STARTUP_H7)
 SOURCES  = $(SYSTEM_H7)
 SOURCES  += $(wildcard $(HALDIR)/src/*.c)
-SOURCES  += $(wildcard $(CORE_SRC)/*.c)
-SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
-SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
+SOURCES  += $(wildcard $(core_src)/*.c)
+SOURCES  += $(wildcard $(core_src)/*.cc)
+SOURCES  += $(wildcard $(core_src)/*.cpp)
 SOURCES  += system/libc_stub.c
 SOURCES  += system/libcpp_stub.cc
 SOURCES  += system/new.cc
@@ -55,11 +59,10 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \
-			-I$(MDIR) \
-			-Isrc/conf \
-			-Isrc/m4/conf \
-			-I$(CORE_SRC) \
-			-I$(HAL_CONF_INC) \
+			-I$(core_src) \
+			-I$(target_src) \
+			-I$(target_core_src) \
+			-I$(hal_conf_inc) \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \
 			-I$(SHARED)/CoreModules \

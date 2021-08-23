@@ -10,12 +10,14 @@ else
     $(error Board not supported)
 endif
 
-TAG := [MP1M4-$(target_board)]
 target_src := src/$(target_board)
+target_core_src := $(target_src)/mp1m4
+core_src = src/mp1m4
+hal_conf_inc = src/mp1m4
+
+TAG := [MP1M4-$(target_board)]
 BUILDDIR = $(BUILDDIR_MP1M4)/$(target_board)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_m4.ld
-CORE_SRC = src/mp1m4
-HAL_CONF_INC = src/mp1m4
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
@@ -38,9 +40,9 @@ SOURCES  += $(HALDIR)/src/stm32mp1xx_hal_rcc.c)
 SOURCES  += $(HALDIR)/src/stm32mp1xx_ll_tim.c)
 SOURCES  += $(HALDIR)/src/stm32mp1xx_hal_dma.c)
 SOURCES  += $(HALDIR)/src/stm32mp1xx_hal_cortex.c)
-SOURCES  += $(wildcard $(CORE_SRC)/*.c)
-SOURCES  += $(wildcard $(CORE_SRC)/*.cc)
-SOURCES  += $(wildcard $(CORE_SRC)/*.cpp)
+SOURCES  += $(wildcard $(core_src)/*.c)
+SOURCES  += $(wildcard $(core_src)/*.cc)
+SOURCES  += $(wildcard $(core_src)/*.cpp)
 SOURCES  += src/controls.cc
 SOURCES  += system/libc_stub.c
 SOURCES  += system/libcpp_stub.cc
@@ -67,8 +69,9 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I. \
 			-Isrc \
 			-I$(target_src) \
-			-I$(CORE_SRC) \
-			-I$(HAL_CONF_INC) \
+			-I$(target_core_src) \
+			-I$(core_src) \
+			-I$(hal_conf_inc) \
 			-Isystem \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \

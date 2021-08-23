@@ -149,8 +149,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		for (auto [i, gate_out] : countzip(aux_.gate_out))
 			gate_out = player.get_panel_output(i + AudioConf::NumOutChans) > 0.5f ? 1 : 0;
-
-		// aux_.clock_out = player.get_panel_output(AudioConf::NumOutChans) > 0.5f ? 1 : 0;
 	}
 
 	load_measure.end_measurement();
