@@ -1,5 +1,6 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
+# First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 	target_board = $(word 1,$(MAKECMDGOALS))
     $(info --------------------)
@@ -7,6 +8,9 @@ ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 else
     $(error Board not supported)
 endif
+
+#TODO: Build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
+#so don't build it twice for mini/max
 
 TAG := [MP1A7-$(target_board)]
 MDIR := src/$(target_board)
@@ -36,10 +40,16 @@ NE10DIR = $(LIBDIR)/ne10/ne10
 
 ASM_SOURCES = $(STARTUP_CA7)
 
-ifeq ($(target_board),pcmdev)
+ifeq "$(target_board)" "pcmdev"
 main_source = src/pcmdev/main.cc
 audio_source = src/pcmdev/audio-dualcodec.cc
 EXTDEF = DUAL_PCM3168_DEV
+else ifeq "$(target_board)" "max"
+main_source = $(core_src)/main.cc
+audio_source = src/audio.cc
+else ifeq "$(target_board)" "medium"
+main_source = $(core_src)/main.cc
+audio_source = src/audio.cc
 else
 main_source = $(core_src)/main.cc
 audio_source = src/audio.cc

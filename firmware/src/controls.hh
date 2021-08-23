@@ -1,12 +1,13 @@
 #pragma once
 #include "auxsignal.hh"
 #include "conf/adc_spi_conf.hh"
+#include "conf/auxstream_conf.hh"
 #include "conf/control_conf.hh"
-#include "conf/dac_conf.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/gpio_expander.hh"
 #include "drivers/i2c.hh"
 #include "drivers/pin.hh"
+#include "drivers/pin_change.hh"
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
@@ -21,11 +22,12 @@ using mdrivlib::DebouncedPin;
 using mdrivlib::PinPolarity;
 
 struct Controls {
+
 	Controls(mdrivlib::MuxedADC &potadc,
 			 CVAdcChipT &cvadc,
 			 DoubleBufParamBlock &param_blocks_ref,
 			 mdrivlib::GPIOExpander &gpio_expander,
-			 DoubleAuxSignalStreamBlock &auxsignal_blocks_ref);
+			 DoubleAuxStreamBlock &auxsignal_blocks_ref);
 
 	mdrivlib::MuxedADC &potadc;
 	CVAdcChipT &cvadc;
@@ -37,6 +39,7 @@ struct Controls {
 		MMControlPins::rotB.gpio,
 		MMControlPins::rotB.pin,
 	};
+
 	DebouncedPin<MMControlPins::but0.gpio, MMControlPins::but0.pin, PinPolarity::Inverted> button0;
 	DebouncedPin<MMControlPins::but1.gpio, MMControlPins::but1.pin, PinPolarity::Inverted> button1;
 	DebouncedPin<MMControlPins::rotS.gpio, MMControlPins::rotS.pin, PinPolarity::Inverted> rotary_button;
@@ -69,11 +72,9 @@ private:
 	bool _buffer_full = true;
 	bool _first_param = true;
 
-	DoubleAuxSignalStreamBlock &auxstream_blocks;
-	mdrivlib::PinChangeInt<DACUpdateConf> auxstream_updater;
-	mdrivlib::GPIOStream<FPin<GPIO::E, 0, PinMode::Output>, CircularBuffer<uint8_t, StreamConf::Audio::BlockSize>>
-		clock_out;
-	AnalogOutT dac;
+	DoubleAuxStreamBlock &auxstream_blocks;
+	mdrivlib::PinChangeInt<AuxStreamUpdateConf> auxstream_updater;
+	AuxStream auxstream;
 
 	uint32_t latest_patchcv_reading;
 	uint16_t latest_jacksense_reading;

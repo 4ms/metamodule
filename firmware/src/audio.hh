@@ -38,18 +38,18 @@ public:
 				ParamCache &cache,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
-				DoubleAuxSignalStreamBlock &auxs);
+				DoubleAuxStreamBlock &auxs);
 
 	void start();
 
-	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxSignalStreamBlock &aux);
+	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxStreamBlock &aux);
 
 private:
 	ParamCache &cache;
 	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
-	DoubleAuxSignalStreamBlock &auxsigs;
+	DoubleAuxStreamBlock &auxsigs;
 
 	CodecT &codec_;
 	uint32_t sample_rate_;
@@ -70,13 +70,7 @@ private:
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
 
-	void output_silence(AudioOutBuffer &out, AuxSignalStreamBlock &aux);
-	void passthrough(AudioInBuffer &in, AudioOutBuffer &out, AuxSignalStreamBlock &aux);
-	void sines_out(AudioInBuffer &in, AudioOutBuffer &out);
-
-	void dual_sines_out(AudioOutBuffer &outA, AudioOutBuffer &outB);
-	void dual_passthrough(
-		AudioInBuffer &inA, AudioOutBuffer &outA, AudioInBuffer &inB, AudioOutBuffer &outB, AuxSignalStreamBlock &aux);
+	void output_silence(AudioOutBuffer &out, AuxStreamBlock &aux);
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;

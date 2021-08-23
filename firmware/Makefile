@@ -19,15 +19,19 @@ export TABLEGEN 		= $(SHARED)/tableGen
 export VALID_BOARDS = mini medium max pcmdev
 
 
-.PHONY: all mp1-mini mp1-pcmdev patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
+.PHONY: all mp1-mini mp1-pcmdev mp1-med patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
 
-all: patches mp1-mini mp1-pcmdev h7 tests
+all: patches mp1-mini mp1-med h7 tests
 
 # Binaries
 
 mp1-mini:
 	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk mini
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk mini
+
+mp1-med:
+	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk medium
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk medium
 
 mp1-pcmdev:
 	# @$(MAKE) --no-print-directory -f makefile_mp1m4.mk pcmdev 
@@ -58,8 +62,10 @@ clean:
 	rm -rf $(BUILDDIR_H7M7)
 	rm -rf $(BUILDDIR_MP1A7)
 	rm -rf $(BUILDDIR_MP1M4)
-	rm -f firmware_m4*.h
-	rm -f firmware_m4*.h
+	rm -f src/mini/firmware_m4*.h
+	rm -f src/medium/firmware_m4*.h
+	rm -f src/max/firmware_m4*.h
+	rm -f src/pcmdev/firmware_m4*.h
 	@$(MAKE) --no-print-directory -f tests/Makefile clean
 	@cd $(DRIVERLIB) && $(MAKE) --no-print-directory -f tests/Makefile clean
 	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile clean

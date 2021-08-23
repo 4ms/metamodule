@@ -4,6 +4,7 @@
 
 namespace MetaModule
 {
+
 //Dual PCM3168 Conf:
 struct StreamConfDualCodec {
 	struct Audio {

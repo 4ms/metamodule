@@ -17,7 +17,7 @@ static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlo
 static inline uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 static inline MMScreenBufferConf::FrameBufferT screen_framebuf;
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
-static inline __attribute__((section(".sysram"))) DoubleAuxSignalStreamBlock auxsignal_block;
+static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block;
 
 static void init()
 {

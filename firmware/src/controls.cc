@@ -97,11 +97,8 @@ void Controls::start()
 		_first_param = true;
 		_buffer_full = false;
 
-		for (auto &aux : auxstream_blocks[0]) {
-			dac.queue_sample(0, aux.dac1);
-			dac.queue_sample(1, aux.dac2);
-			clock_out.queue_sample(aux.clock_out);
-		}
+		for (auto &aux : auxstream_blocks[0])
+			auxstream.queue_data(aux);
 		// Debug::Pin1::low();
 	});
 
@@ -114,11 +111,8 @@ void Controls::start()
 		_first_param = true;
 		_buffer_full = false;
 
-		for (auto &aux : auxstream_blocks[1]) {
-			dac.queue_sample(0, aux.dac1);
-			dac.queue_sample(1, aux.dac2);
-			clock_out.queue_sample(aux.clock_out);
-		}
+		for (auto &aux : auxstream_blocks[1])
+			auxstream.queue_data(aux);
 		// Debug::Pin1::low();
 	});
 	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
@@ -133,7 +127,7 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 				   CVAdcChipT &cvadc,
 				   DoubleBufParamBlock &param_blocks_ref,
 				   mdrivlib::GPIOExpander &gpio_expander,
-				   DoubleAuxSignalStreamBlock &auxsignal_blocks_ref)
+				   DoubleAuxStreamBlock &auxsignal_blocks_ref)
 	: potadc(potadc)
 	, cvadc(cvadc)
 	, jacksense_reader{gpio_expander}
@@ -159,14 +153,10 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 	// 72us, 0.5us wide
 	read_cvadc_task.init(cvadc_tim_conf, [&cvadc]() { cvadc.read_and_switch_channels(); });
 
-	dac.init();
+	auxstream.init();
 	auxstream_updater.init([&]() {
 		// Debug::Pin2::high();
-		static bool rising_edge = false;
-		dac.output_next();
-		rising_edge = !rising_edge;
-		if (rising_edge)
-			clock_out.output_next();
+		auxstream.output_next();
 		// Debug::Pin2::low();
 	});
 }

@@ -19,7 +19,7 @@ struct StaticBuffers {
 	static inline __attribute__((section(".dma_buffer"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block;
 	static inline __attribute__((section(".axisram"))) uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	static inline __attribute__((section(".dma_buffer"))) DoubleBufParamBlock param_blocks;
-	static inline __attribute__((section(".dma_buffer"))) DoubleAuxSignalStreamBlock auxsignal_block;
+	static inline __attribute__((section(".dma_buffer"))) DoubleAuxStreamBlock auxsignal_block;
 	static inline __attribute__((section(".axisram"))) MMScreenBufferConf::FrameBufferT screen_framebuf;
 
 	struct CacheDisabler {
