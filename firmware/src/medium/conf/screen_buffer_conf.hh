@@ -3,7 +3,7 @@
 #include <cstdint>
 
 struct MMScreenBufferConf {
-	static constexpr uint32_t width = 320;
+	static constexpr uint32_t width = 240;
 	static constexpr uint32_t height = 240;
 	enum Rotation { None, CW90, Flip180, CCW90 };
 	static constexpr Rotation rotation = CW90;

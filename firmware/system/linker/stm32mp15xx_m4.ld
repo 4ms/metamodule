@@ -14,6 +14,9 @@ MEMORY
 	SHAREDMEM    (RW)	: ORIGIN = 0x10040000, LENGTH = (128K - __SHARED_PTR_SIZE) /* shared with ca7 */
 }
 
+/* Split up SHAREDMEM into 64K sections, use top (SRAM4) for SHAREDMEM, and combine bottom (SRAM3) with m_data (SRAM2)
+ * which gives us enough to fit 240x320 screen (need ~38k more)
+ */
 _params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM);
 /* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
 
