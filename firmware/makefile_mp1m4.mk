@@ -10,7 +10,13 @@ else
 endif
 
 target_src := src/$(target_board)
-target_chip_src := src/$(target_board)/mp1
+
+ifeq "$(target_board)" "mini"
+	target_chip_src := src/$(target_board)/mp1
+else
+	target_chip_src := src/$(target_board)
+endif
+
 core_src = src/mp1m4
 hal_conf_inc = src/mp1m4 
 

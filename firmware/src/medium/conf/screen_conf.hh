@@ -33,7 +33,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr bool pulse_hardware_ss = true;
 	};
 
-	struct DMAConf : DefaultDMAConf {
+	struct DMAConf : mdrivlib::DefaultDMAConf {
 		static constexpr unsigned DMAx = 2;
 		static constexpr unsigned StreamNum = 3;
 		static constexpr unsigned RequestNum = DMA_REQUEST_SPI4_TX;

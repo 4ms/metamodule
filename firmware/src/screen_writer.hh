@@ -13,6 +13,7 @@
 #include "examples/hardware-tests/memory_transfer_test.hh"
 
 using ScreenWriterConfT = MMScreenConf;
+using namespace mdrivlib;
 
 namespace MetaModule
 {
@@ -188,7 +189,7 @@ protected:
 	int _width;
 	int _height;
 
-	struct ScreenMemXferConfT : MemoryTransferDefaultConfT {
+	struct ScreenMemXferConfT : mdrivlib::MemoryTransferDefaultConfT {
 		static constexpr unsigned channel = 0;
 		static constexpr bool swap_bytes = false;
 		static constexpr bool bufferable_write_mode = true;

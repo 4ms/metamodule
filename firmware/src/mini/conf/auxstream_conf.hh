@@ -10,7 +10,7 @@
 #if defined(STM32MP1)
 	#include "conf/dac_conf_target.hh"
 #elif defined(STM32H7)
-	#include "m7/conf/dac_conf_target.hh"
+	#include "conf/dac_conf_target.hh"
 #endif
 
 namespace MetaModule

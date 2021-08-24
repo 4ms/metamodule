@@ -1,19 +1,19 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
 $(info --------------------)
-$(info Building for H7 M4 core)
+$(info Building for H7 M4 core, mini module)
 
 #mini only
-MDIR = src/mini
+target_board := mini
 
 BUILDDIR = $(BUILDDIR_H7M4)
 LOADFILE = $(LINKSCRIPTDIR)/stm32h755xx_flash_CM4.ld
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
 
-core_src = src/m4
+core_src = src/h7m4
 target_src := src/$(target_board)
-target_core_src := src/$(target_board)/m4
+target_core_src := src/$(target_board)/h7
 hal_conf_inc = $(core_src)
 
 HALDIR = $(HALBASE)/stm32h7x5
@@ -30,12 +30,10 @@ include makefile_opts.mk
 ASM_SOURCES  = $(STARTUP_H7)
 SOURCES  = $(SYSTEM_H7)
 SOURCES  += $(wildcard $(HALDIR)/src/*.c)
-SOURCES  += $(wildcard $(core_src)/*.c)
-SOURCES  += $(wildcard $(core_src)/*.cc)
-SOURCES  += $(wildcard $(core_src)/*.cpp)
 SOURCES  += system/libc_stub.c
 SOURCES  += system/libcpp_stub.cc
 SOURCES  += system/new.cc
+SOURCES  += $(target_core_src)/main-m4.cc
 SOURCES  += $(target_src)/controls.cc
 SOURCES  += $(DRIVERLIB)/drivers/hal_handlers.cc
 SOURCES  += $(DRIVERLIB)/drivers/i2c.cc

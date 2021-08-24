@@ -1,11 +1,11 @@
 #pragma once
 #include "conf/hsem_conf.hh"
+#include "conf/rcc_conf.hh"
 #include "drivers/arch.hh"
 #include "drivers/hsem.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 #include "drivers/system_startup.hh"
-#include "m7/conf/rcc_conf.hh"
 
 namespace MetaModule
 {
