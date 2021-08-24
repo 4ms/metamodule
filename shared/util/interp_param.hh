@@ -1,6 +1,6 @@
 #pragma once
 
-template<typename T, unsigned int num_updates>
+template<typename T, int num_updates>
 struct InterpParam {
 	InterpParam()
 		: cur_val{0}
