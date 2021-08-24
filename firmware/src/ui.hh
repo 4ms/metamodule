@@ -6,6 +6,7 @@
 #include "drivers/i2c.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/memory_transfer.hh"
+#include "drivers/timekeeper.hh"
 #include "hsem_handler.hh"
 #include "leds.hh"
 #include "pages/page_manager.hh"
@@ -39,8 +40,8 @@ private:
 	uint32_t last_changed_page_tm = 0;
 
 public:
-	static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
-	static constexpr uint32_t Hz = static_cast<float>(Hz_i);
+	// static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
+	// static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 	Ui(PatchList &pl,
 	   PatchPlayer &pp,
 	   ParamCache &pc,

@@ -3,6 +3,7 @@
 #include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/i2c_conf.hh"
+#include "conf/led_driver_conf.hh"
 #include "conf/screen_conf.hh"
 #include "controls.hh"
 #include "debug.hh"

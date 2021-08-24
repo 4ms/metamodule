@@ -9,7 +9,6 @@ using namespace mdrivlib;
 namespace MetaModule
 {
 
-template<size_t LEDUpdateRate>
 class SharedBusQueue {
 	enum I2CClients {
 		SelectPots,

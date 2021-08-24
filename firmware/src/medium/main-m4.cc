@@ -56,7 +56,7 @@ void main()
 	Controls controls{potadc, *param_block_base, *auxsignal_buffer};
 
 	// SharedBus
-	SharedBusQueue<LEDUpdateHz> i2cqueue{controls};
+	SharedBusQueue i2cqueue{controls};
 	SharedBus::i2c.enable_IT(i2c_conf_controls.priority1, i2c_conf_controls.priority2);
 
 	controls.start();
