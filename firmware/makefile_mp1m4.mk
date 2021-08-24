@@ -57,7 +57,10 @@ SOURCES  += $(DRIVERLIB)/drivers/pin.cc
 SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
 SOURCES  += $(DRIVERLIB)/drivers/tim.cc
 SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
+
+ifeq "$(target_board)" "mini"
 SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
+endif
 
 INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(CMSIS)/Include \
