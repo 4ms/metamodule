@@ -28,10 +28,12 @@ void Controls::update_params()
 	cur_params->buttons[0].copy_state(button0);
 	cur_params->gate_ins[0].copy_state(gate_in_1);
 	cur_params->gate_ins[1].copy_state(gate_in_2);
-	cur_params->jack_senses = get_jacksense_reading();
 
 	if (_first_param) {
 		_first_param = false;
+
+		cur_params->jack_senses = jacksense_reader.read_sense_pins();
+		store_jacksense_reading(cur_params->jack_senses);
 
 		// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
 		for (int i = 0; i < NumPot; i++) {
@@ -62,6 +64,8 @@ void Controls::update_params()
 		_rotary_moved_while_pressed = (pressed && new_rotary_motion);
 
 	} else {
+		cur_params->jack_senses = get_jacksense_reading();
+
 		// Interpolate the knobs
 		for (int i = 0; i < NumPot; i++)
 			cur_params->knobs[i] = _knobs[i].next();

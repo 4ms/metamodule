@@ -10,6 +10,9 @@ namespace MetaModule
 using mdrivlib::GPIO;
 using mdrivlib::PinNoInit;
 
+template<GPIO port, uint16_t pin>
+using FPin = mdrivlib::FPin<port, pin, mdrivlib::PinMode::Input>;
+
 const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
 	.period_ns = 20000, // must be just a hair faster than 48kHz
@@ -29,7 +32,120 @@ struct MMControlPins {
 };
 
 struct MultiGPIOReader {
-	//
+	using AudioIn1 = FPin<GPIO::I, 5>;
+	using AudioIn2 = FPin<GPIO::G, 12>;
+	using AudioIn3 = FPin<GPIO::D, 14>;
+	using AudioIn4 = FPin<GPIO::A, 7>;
+	using AudioIn5 = FPin<GPIO::A, 14>;
+	using AudioIn6 = FPin<GPIO::D, 8>;
+	using AudioOut1 = FPin<GPIO::A, 2>;
+	using AudioOut2 = FPin<GPIO::B, 12>;
+	using AudioOut3 = FPin<GPIO::B, 13>;
+	using AudioOut4 = FPin<GPIO::D, 11>;
+	using AudioOut5 = FPin<GPIO::B, 0>;
+	using AudioOut6 = FPin<GPIO::B, 10>;
+	using AudioOut7 = FPin<GPIO::C, 4>;
+	using AudioOut8 = FPin<GPIO::D, 13>;
+	using PatchCV = FPin<GPIO::G, 6>;
+	using GateIn1 = FPin<GPIO::I, 0>;
+	using GateIn2 = FPin<GPIO::I, 4>;
+	using GateOut1 = FPin<GPIO::F, 11>;
+	using GateOut2 = FPin<GPIO::B, 6>;
+
+	template<enum GPIO port>
+	using PortRead = mdrivlib::PortRead<port>;
+
+	template<uint32_t pin_num, uint32_t jack_num>
+	struct PackedBit {
+		static uint32_t extract(uint32_t port_reading)
+		{
+			auto pin_reading = port_reading & (1 << pin_num);
+			if constexpr (pin_num >= jack_num)
+				return pin_reading >> (pin_num - jack_num);
+			else
+				return pin_reading << (jack_num - pin_num);
+		}
+	};
+	enum JackOrder {
+		AIn1,
+		AIn2,
+		AIn3,
+		AIn4,
+		AIn5,
+		AIn6,
+		AOut1,
+		AOut2,
+		AOut3,
+		AOut4,
+		AOut5,
+		AOut6,
+		AOut7,
+		AOut8,
+		GIn1,
+		GIn2,
+		GOut1,
+		GOut2,
+		PCV
+	};
+
+	uint32_t read_sense_pins()
+	{
+		uint32_t val = 0;
+		auto A = PortRead<GPIO::A>::read();
+		val |= PackedBit<AudioIn4::PinNum_v, AIn4>::extract(A);
+		val |= PackedBit<AudioIn5::PinNum_v, AIn5>::extract(A);
+		val |= PackedBit<AudioOut1::PinNum_v, AOut1>::extract(A);
+
+		auto B = PortRead<GPIO::B>::read();
+		val |= PackedBit<AudioOut5::PinNum_v, AOut5>::extract(B);
+		val |= PackedBit<AudioOut2::PinNum_v, AOut2>::extract(B);
+		val |= PackedBit<AudioOut3::PinNum_v, AOut3>::extract(B);
+		val |= PackedBit<AudioOut6::PinNum_v, AOut6>::extract(B);
+		val |= PackedBit<GateOut2::PinNum_v, GOut2>::extract(B);
+
+		auto C = PortRead<GPIO::C>::read();
+		val |= PackedBit<AudioOut7::PinNum_v, AOut7>::extract(C);
+
+		auto D = PortRead<GPIO::D>::read();
+		val |= PackedBit<AudioIn3::PinNum_v, AIn3>::extract(D);
+		val |= PackedBit<AudioIn6::PinNum_v, AIn6>::extract(D);
+		val |= PackedBit<AudioOut4::PinNum_v, AOut4>::extract(D);
+		val |= PackedBit<AudioOut8::PinNum_v, AOut8>::extract(D);
+
+		auto F = PortRead<GPIO::F>::read();
+		val |= PackedBit<GateOut1::PinNum_v, GOut1>::extract(F);
+
+		auto G = PortRead<GPIO::G>::read();
+		val |= PackedBit<AudioIn2::PinNum_v, AIn2>::extract(G);
+		val |= PackedBit<PatchCV::PinNum_v, PCV>::extract(G);
+
+		auto I = PortRead<GPIO::I>::read();
+		val |= PackedBit<AudioIn1::PinNum_v, AIn1>::extract(I);
+		val |= PackedBit<GateIn1::PinNum_v, GIn1>::extract(I);
+		val |= PackedBit<GateIn2::PinNum_v, GIn2>::extract(I);
+
+		return val;
+	}
+
+	AudioIn1 init_AudioIn1;
+	AudioIn2 init_AudioIn2;
+	AudioIn3 init_AudioIn3;
+	AudioIn4 init_AudioIn4;
+	AudioIn5 init_AudioIn5;
+	AudioIn6 init_AudioIn6;
+	AudioOut1 init_AudioOut1;
+	AudioOut2 init_AudioOut2;
+	AudioOut3 init_AudioOut3;
+	AudioOut4 init_AudioOut4;
+	AudioOut5 init_AudioOut5;
+	AudioOut6 init_AudioOut6;
+	AudioOut7 init_AudioOut7;
+	AudioOut8 init_AudioOut8;
+	PatchCV init_PatchCV;
+	GateIn1 init_GateIn1;
+	GateIn2 init_GateIn2;
+	GateOut1 init_GateOut1;
+	GateOut2 init_GateOut2;
 };
 
 } // namespace MetaModule
