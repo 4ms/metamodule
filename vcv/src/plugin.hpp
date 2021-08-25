@@ -10,6 +10,7 @@ extern CentralData *centralData;
 extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file 
+extern Model *modelHubMedium;
 extern Model *modelInfosc01; 
 extern Model *modelDjembe; 
 extern Model *modelBipolarsource; 

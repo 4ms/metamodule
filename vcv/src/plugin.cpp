@@ -10,6 +10,7 @@ void init(Plugin *p)
 	pluginInstance = p;
 
 	// Add modules here 
+	p->addModel(modelHubMedium);
 	p->addModel(modelInfosc01); 
 p->addModel(modelDjembe); 
 p->addModel(modelBipolarsource); 

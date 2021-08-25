@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [ 
 {
+      "slug": "PANEL_MED",
+      "name": "PanelMedium",
+      "description": "Panel Medium 26HP",
+      "tags": []
+},
+    {
       "slug": "INFOSC01",
       "name": "Infosc01",
       "description": "infinite-oscillator-01",
