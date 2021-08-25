@@ -290,34 +290,34 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		addChild(patchName);
 		patchName->selectAll(); // Doesn't work :(
 
-		addLabeledKnobMM("A", 0, {9, 38.9});
-		addLabeledKnobMM("B", 1, {29.4, 51.4});
-		addLabeledKnobMM("C", 2, {51.6, 51.6});
-		addLabeledKnobMM("D", 3, {72, 38.9});
-		addLabeledKnobMM("a", 4, {8.5, 59.5});
-		addLabeledKnobMM("b", 5, {31.9, 72.8});
-		addLabeledKnobMM("c", 6, {48.8, 72.8});
-		addLabeledKnobMM("d", 7, {72.2, 59.3});
+		addLabeledKnobPx("A", 0, mm2px({9, 38.9}));
+		addLabeledKnobPx("B", 1, mm2px({29.4, 51.4}));
+		addLabeledKnobPx("C", 2, mm2px({51.6, 51.6}));
+		addLabeledKnobPx("D", 3, mm2px({72, 38.9}));
+		addLabeledKnobPx("a", 4, mm2px({8.5, 59.5}));
+		addLabeledKnobPx("b", 5, mm2px({31.9, 72.8}));
+		addLabeledKnobPx("c", 6, mm2px({48.8, 72.8}));
+		addLabeledKnobPx("d", 7, mm2px({72.2, 59.3}));
 
-		addLabeledInputMM("CV IN 1", MetaModuleHub::CV_1, {7.6, 74.5});
-		addLabeledInputMM("CV IN 2", MetaModuleHub::CV_2, {20, 82.1});
-		addLabeledInputMM("CV IN 3", MetaModuleHub::CV_3, {60.7, 82.4});
-		addLabeledInputMM("CV IN 4", MetaModuleHub::CV_4, {73.1, 74.5});
+		addLabeledInputPx("CV IN 1", MetaModuleHub::CV_1, mm2px({7.6, 74.5}));
+		addLabeledInputPx("CV IN 2", MetaModuleHub::CV_2, mm2px({20, 82.1}));
+		addLabeledInputPx("CV IN 3", MetaModuleHub::CV_3, mm2px({60.7, 82.4}));
+		addLabeledInputPx("CV IN 4", MetaModuleHub::CV_4, mm2px({73.1, 74.5}));
 
-		addLabeledInputMM("Gate In 1", MetaModuleHub::GATE_IN_1, {9, 94.5});
-		addLabeledInputMM("Gate In 2", MetaModuleHub::GATE_IN_2, {71.7, 94.5});
-		addLabeledInputMM("Clock In", MetaModuleHub::CLOCK_IN, {40.4, 88.9});
+		addLabeledInputPx("Gate In 1", MetaModuleHub::GATE_IN_1, mm2px({9, 94.5}));
+		addLabeledInputPx("Gate In 2", MetaModuleHub::GATE_IN_2, mm2px({71.7, 94.5}));
+		addLabeledInputPx("Clock In", MetaModuleHub::CLOCK_IN, mm2px({40.4, 88.9}));
 
-		addLabeledInputMM("Audio IN L", MetaModuleHub::AUDIO_IN_L, {8.2, 111.8});
-		addLabeledInputMM("Audio IN R", MetaModuleHub::AUDIO_IN_R, {23.4, 111.8});
+		addLabeledInputPx("Audio IN L", MetaModuleHub::AUDIO_IN_L, mm2px({8.2, 111.8}));
+		addLabeledInputPx("Audio IN R", MetaModuleHub::AUDIO_IN_R, mm2px({23.4, 111.8}));
 
-		addLabeledOutputMM("Audio OUT L", MetaModuleHub::AUDIO_OUT_L, {57.3, 111.8});
-		addLabeledOutputMM("Audio OUT R", MetaModuleHub::AUDIO_OUT_R, {72.8, 111.8});
+		addLabeledOutputPx("Audio OUT L", MetaModuleHub::AUDIO_OUT_L, mm2px({57.3, 111.8}));
+		addLabeledOutputPx("Audio OUT R", MetaModuleHub::AUDIO_OUT_R, mm2px({72.8, 111.8}));
 
-		addLabeledOutputMM("CV Out 1", MetaModuleHub::AUDIO_OUT_3, {25.7, 96.2});
-		addLabeledOutputMM("CV Out 2", MetaModuleHub::AUDIO_OUT_4, {55, 96.2});
+		addLabeledOutputPx("CV Out 1", MetaModuleHub::AUDIO_OUT_3, mm2px({25.7, 96.2}));
+		addLabeledOutputPx("CV Out 2", MetaModuleHub::AUDIO_OUT_4, mm2px({55, 96.2}));
 
-		addLabeledOutputMM("Clock Out", MetaModuleHub::CLOCK_OUT, {40.4, 106.4});
+		addLabeledOutputPx("Clock Out", MetaModuleHub::CLOCK_OUT, mm2px({40.4, 106.4}));
 
 		// Todo:
 		// addLabeledToggle() for both RGB Buttons

@@ -17,24 +17,24 @@ void CommModuleWidget::addLabeledKnob(const std::string labelText,
 									  const Vec position,
 									  const float defaultValue)
 {
-	const Vec pos = {
+	const Vec posPx = mm2px({
 		gridToXCentered(position.x),
 		gridToYFromTop(position.y),
-	};
-	addLabel(labelText, pos, {LabelButtonID::Types::Knob, knobID, -1});
-	auto p = createParamCentered<RoundBlackKnob>(mm2px(pos), module, knobID);
+	});
+	addLabel(labelText, posPx, {LabelButtonID::Types::Knob, knobID, -1});
+	auto p = createParamCentered<RoundBlackKnob>(posPx, module, knobID);
 	if (p->paramQuantity)
 		p->paramQuantity->defaultValue = defaultValue;
 	addParam(p);
 }
 
-void CommModuleWidget::addLabeledKnobMM(const std::string labelText,
+void CommModuleWidget::addLabeledKnobPx(const std::string labelText,
 										const int knobID,
-										const Vec position,
+										const Vec posPx,
 										const float defaultValue)
 {
-	addLabel(labelText, position, {LabelButtonID::Types::Knob, knobID, -1});
-	auto p = createParamCentered<RoundBlackKnob>(mm2px(position), module, knobID);
+	addLabel(labelText, posPx, {LabelButtonID::Types::Knob, knobID, -1});
+	auto p = createParamCentered<RoundBlackKnob>(posPx, module, knobID);
 	if (p->paramQuantity)
 		p->paramQuantity->defaultValue = defaultValue;
 	addParam(p);
@@ -42,34 +42,34 @@ void CommModuleWidget::addLabeledKnobMM(const std::string labelText,
 
 void CommModuleWidget::addLabeledInput(const std::string labelText, const int inputID, const Vec position)
 {
-	const Vec pos = {
+	const Vec posPx = mm2px({
 		gridToXCentered(position.x),
 		gridToYFromBottom(position.y),
-	};
-	addLabel(labelText, pos, {LabelButtonID::Types::InputJack, inputID, -1});
-	addInput(createInputCentered<PJ301MPort>(mm2px(pos), module, inputID));
+	});
+	addLabel(labelText, posPx, {LabelButtonID::Types::InputJack, inputID, -1});
+	addInput(createInputCentered<PJ301MPort>(posPx, module, inputID));
 }
 
-void CommModuleWidget::addLabeledInputMM(const std::string labelText, const int inputID, const Vec position)
+void CommModuleWidget::addLabeledInputPx(const std::string labelText, const int inputID, const Vec posPx)
 {
-	addLabel(labelText, position, {LabelButtonID::Types::InputJack, inputID, -1});
-	addInput(createInputCentered<PJ301MPort>(mm2px(position), module, inputID));
+	addLabel(labelText, posPx, {LabelButtonID::Types::InputJack, inputID, -1});
+	addInput(createInputCentered<PJ301MPort>(posPx, module, inputID));
 }
 
 void CommModuleWidget::addLabeledOutput(const std::string labelText, const int outputID, const Vec position)
 {
-	const Vec pos = {
+	const Vec posPx = mm2px({
 		gridToXCentered(position.x),
 		gridToYFromBottom(position.y),
-	};
-	addLabel(labelText, pos, {LabelButtonID::Types::OutputJack, outputID, -1});
-	addOutput(createOutputCentered<PJ301MPort>(mm2px(pos), module, outputID));
+	});
+	addLabel(labelText, posPx, {LabelButtonID::Types::OutputJack, outputID, -1});
+	addOutput(createOutputCentered<PJ301MPort>(posPx, module, outputID));
 }
 
-void CommModuleWidget::addLabeledOutputMM(const std::string labelText, const int outputID, const Vec position)
+void CommModuleWidget::addLabeledOutputPx(const std::string labelText, const int outputID, const Vec position)
 {
 	addLabel(labelText, position, {LabelButtonID::Types::OutputJack, outputID, -1});
-	addOutput(createOutputCentered<PJ301MPort>(mm2px(position), module, outputID));
+	addOutput(createOutputCentered<PJ301MPort>(position, module, outputID));
 }
 
 LabeledButton *CommModuleWidget::createLabel()
@@ -82,7 +82,7 @@ LabeledButton *CommModuleWidget::createLabel()
 void CommModuleWidget::addLabel(const std::string labelText, const Vec pos, const LabelButtonID id)
 {
 	LabeledButton *button = createLabel();
-	button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 2.0f, pos.y + kTextOffset));
+	button->box.pos = Vec(pos.x - mm2px(kKnobSpacingX) / 2.0f, pos.y + mm2px(kTextOffset));
 	button->box.size.x = kGridSpacingX;
 	button->box.size.y = 18;
 	button->text = labelText;
@@ -101,7 +101,7 @@ void CommModuleWidget::addLabeledToggle(const std::string labelText,
 	};
 	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(pos), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({pos.x - 3.0f, pos.y - 3.0f}), module, lightID));
-	addLabel(labelText, {pos.x + 17, pos.y - 6.7f}, {LabelButtonID::Types::Toggle, paramID, -1});
+	addLabel(labelText, mm2px({pos.x + 17, pos.y - 6.7f}), {LabelButtonID::Types::Toggle, paramID, -1});
 }
 
 constexpr float CommModuleWidget::gridToYFromTop(const float y)

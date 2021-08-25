@@ -25,9 +25,9 @@ protected:
 	void addLabeledOutput(const std::string labelText, const int outputID, const Vec position);
 
 	void
-	addLabeledKnobMM(const std::string labelText, const int knobID, const Vec position, const float defaultValue = 0.f);
-	void addLabeledInputMM(const std::string labelText, const int inputID, const Vec position);
-	void addLabeledOutputMM(const std::string labelText, const int outputID, const Vec position);
+	addLabeledKnobPx(const std::string labelText, const int knobID, const Vec position, const float defaultValue = 0.f);
+	void addLabeledInputPx(const std::string labelText, const int inputID, const Vec position);
+	void addLabeledOutputPx(const std::string labelText, const int outputID, const Vec position);
 
 	void addLabeledToggle(const std::string labelText, const int lightID, const int paramID, const Vec position);
 	void addModuleTitle(const std::string moduleTitle);
