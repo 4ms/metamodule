@@ -200,8 +200,10 @@ void LabeledButton::draw(const DrawArgs &args)
 		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
 		if (isMapped) {
 			unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
-			nvgStrokeColor(args.vg, PaletteHub::color[palid]);
-			nvgStrokeWidth(args.vg, 2.0f);
+			if (!isOnHub && !isTypeKnob) {
+				nvgStrokeColor(args.vg, PaletteHub::color[palid]);
+				nvgStrokeWidth(args.vg, 2.0f);
+			}
 		}
 		if (!isMapped) {
 			nvgStrokeColor(args.vg, rack::color::WHITE);
