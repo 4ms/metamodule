@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/moduleTypes.h"
-#include "CoreModules/panel.hh"
+#include "CoreModules/panel_mini.hh"
 #include "util/static_string.hh"
 
 const int MAX_MODULES_IN_PATCH = 32;

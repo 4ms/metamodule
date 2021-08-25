@@ -11,4 +11,5 @@ struct PanelDef {
 	static constexpr uint32_t NumGateOut = 1;
 	static constexpr uint32_t NumMetaCV = 1;
 	static constexpr uint32_t NumRgbButton = 2;
+	static constexpr uint32_t NumMetaRgbButton = 0;
 };
