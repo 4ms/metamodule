@@ -19,25 +19,27 @@ public:
 	virtual void notifyLabelButtonClicked(LabeledButton &button);
 
 protected:
-	void
-	addLabeledKnob(const std::string labelText, const int knobID, const Vec position, const float defaultValue = 0.f);
-	void addLabeledInput(const std::string labelText, const int inputID, const Vec position);
-	void addLabeledOutput(const std::string labelText, const int outputID, const Vec position);
+	void addLabeledKnob(const std::string labelText, int knobID, Vec posGrid, float defaultValue = 0.f);
+	void addSmallLabeledKnob(const std::string labelText, int knobID, Vec posGrid, float defaultValue = 0.f);
+	void addLabeledInput(const std::string labelText, int inputID, Vec posGrid);
+	void addLabeledOutput(const std::string labelText, int outputID, Vec posGrid);
 
-	void
-	addLabeledKnobPx(const std::string labelText, const int knobID, const Vec position, const float defaultValue = 0.f);
-	void addLabeledInputPx(const std::string labelText, const int inputID, const Vec position);
-	void addLabeledOutputPx(const std::string labelText, const int outputID, const Vec position);
+	void addLabeledKnobPx(const std::string labelText, int knobID, Vec posPx, float defaultValue = 0.f);
+	void addSmallLabeledKnobPx(const std::string labelText, int knobID, Vec posPx, float defaultValue = 0.f);
+	void addLabeledInputPx(const std::string labelText, int inputID, Vec posPx);
+	void addLabeledOutputPx(const std::string labelText, int outputID, Vec posPx);
 
-	void addLabeledToggle(const std::string labelText, const int lightID, const int paramID, const Vec position);
+	void addLabeledToggle(const std::string labelText, int lightID, int paramID, Vec posGrid);
 	void addModuleTitle(const std::string moduleTitle);
 
 private:
 	constexpr float gridToYFromTop(const float y);
 	constexpr float gridToYFromBottom(const float y);
 	constexpr float gridToXCentered(const float x);
-	Vec grid2mm(Vec position);
-	Vec grid2px(Vec position);
+	Vec gridFromTop2mm(Vec posGrid);
+	Vec gridFromBottom2mm(Vec posGrid);
+	Vec gridFromTop2px(Vec posGrid);
+	Vec gridFromBottom2px(Vec posGrid);
 
 	void addLabel(const std::string labelText, const Vec pos, const LabelButtonID id);
 	virtual LabeledButton *createLabel();
