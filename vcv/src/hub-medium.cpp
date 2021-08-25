@@ -2,20 +2,20 @@
 #include "CommModule.h"
 #include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
+#include "CoreModules/panel_medium_defs.hh"
 #include "plugin.hpp"
 #include "util/math.hh"
 
 struct HubMedium : public CommModule {
 
-	enum ParamIds { NUM_PARAMS = 13 };
-	enum InputIds { NUM_INPUTS = 8 };
-	enum OutputIds { NUM_OUTPUTS = 10 };
+	enum ParamIds { NUM_PARAMS = PanelDef::NumPot + PanelDef::NumMetaRgbButton };
+	enum InputIds { NUM_INPUTS = PanelDef::NumAudioIn + PanelDef::NumGateIn };
+	enum OutputIds { NUM_OUTPUTS = PanelDef::NumAudioOut + PanelDef::NumGateOut };
 	enum LightIds { NUM_LIGHTS = 0 };
 
 	HubMedium()
 	{
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		// core = ModuleFactory::create("PANEL_MED");
 		selfID.typeID = "PANEL_MED";
 	}
 
