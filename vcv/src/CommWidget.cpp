@@ -193,31 +193,33 @@ void LabeledButton::draw(const DrawArgs &args)
 {
 	updateState();
 
-	nvgBeginPath(args.vg);
-	nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
+	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
 
-	if (isMapped) {
-		unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
-		nvgStrokeColor(args.vg, PaletteHub::color[palid]);
-		nvgStrokeWidth(args.vg, 2.0f);
-	}
-	if (!isMapped) {
-		nvgStrokeColor(args.vg, rack::color::WHITE);
-		nvgStrokeWidth(args.vg, 0.0);
-	}
-	if (isPossibleMapDest) {
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.8f));
-	} else if (isCurrentMapSrc) {
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
-	} else {
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+	if ((isOnHub) || (!isOnHub && !isTypeKnob)) {
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
+		if (isMapped) {
+			unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
+			nvgStrokeColor(args.vg, PaletteHub::color[palid]);
+			nvgStrokeWidth(args.vg, 2.0f);
+		}
+		if (!isMapped) {
+			nvgStrokeColor(args.vg, rack::color::WHITE);
+			nvgStrokeWidth(args.vg, 0.0);
+		}
+		if (isPossibleMapDest) {
+			nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.8f));
+		} else if (isCurrentMapSrc) {
+			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
+		} else {
+			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+		}
+		nvgStroke(args.vg);
+		nvgFill(args.vg);
 	}
 
 	if (APP->event->hoveredWidget == this)
 		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.4f));
-
-	nvgStroke(args.vg);
-	nvgFill(args.vg);
 
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
@@ -232,7 +234,11 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 		return;
 	}
 
-	_parent.notifyLabelButtonClicked(*this);
+	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
+
+	if (isOnHub || (!isOnHub && !isTypeKnob)) {
+		_parent.notifyLabelButtonClicked(*this);
+	}
 
 	if (quantity)
 		quantity->setMax();
