@@ -294,10 +294,10 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		addLabeledKnobPx("B", 1, mm2px({29.4, 51.4}));
 		addLabeledKnobPx("C", 2, mm2px({51.6, 51.6}));
 		addLabeledKnobPx("D", 3, mm2px({72, 38.9}));
-		addLabeledKnobPx("a", 4, mm2px({8.5, 59.5}));
-		addLabeledKnobPx("b", 5, mm2px({31.9, 72.8}));
-		addLabeledKnobPx("c", 6, mm2px({48.8, 72.8}));
-		addLabeledKnobPx("d", 7, mm2px({72.2, 59.3}));
+		addSmallLabeledKnobPx("a", 4, mm2px({8.5, 59.5}));
+		addSmallLabeledKnobPx("b", 5, mm2px({31.9, 72.8}));
+		addSmallLabeledKnobPx("c", 6, mm2px({48.8, 72.8}));
+		addSmallLabeledKnobPx("d", 7, mm2px({72.2, 59.3}));
 
 		addLabeledInputPx("CV IN 1", MetaModuleHub::CV_1, mm2px({7.6, 74.5}));
 		addLabeledInputPx("CV IN 2", MetaModuleHub::CV_2, mm2px({20, 82.1}));
