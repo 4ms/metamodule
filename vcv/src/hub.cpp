@@ -389,6 +389,7 @@ private:
 class HubKnob : public RoundBlackKnob {
 public:
 	void onButton(const event::Button &e) override;
+	void draw(const DrawArgs &args) override;
 	HubKnob(HubKnobLabel &_hubKnobLabel)
 		: hubKnobLabel{_hubKnobLabel}
 	{}
@@ -570,6 +571,28 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 	} else {
 		//	Abort mapping
 		//	module->disableLearn(id);
+	}
+}
+
+void HubKnob::draw(const DrawArgs &args)
+{
+	RoundBlackKnob::draw(args);
+
+	auto knobNum = this->hubKnobLabel.id.objID;
+
+	NVGcolor color = PaletteHub::color[knobNum];
+	auto hubMod = this->hubKnobLabel._hub.expModule;
+	bool isKnobMapped = hubMod->knobMaps[knobNum].getNumMaps() > 0;
+	if (isKnobMapped) {
+		nvgBeginPath(args.vg);
+		const float radius = 6;
+		// nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, radius);
+		nvgRect(args.vg, box.size.x - radius, box.size.y - radius, radius, radius);
+		nvgFillColor(args.vg, color);
+		nvgFill(args.vg);
+		nvgStrokeColor(args.vg, color::mult(color, 0.5));
+		nvgStrokeWidth(args.vg, 1.0);
+		nvgStroke(args.vg);
 	}
 }
 
