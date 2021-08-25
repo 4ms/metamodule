@@ -36,6 +36,9 @@ private:
 	constexpr float gridToYFromTop(const float y);
 	constexpr float gridToYFromBottom(const float y);
 	constexpr float gridToXCentered(const float x);
+	Vec grid2mm(Vec position);
+	Vec grid2px(Vec position);
+
 	void addLabel(const std::string labelText, const Vec pos, const LabelButtonID id);
 	virtual LabeledButton *createLabel();
 };

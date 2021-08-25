@@ -118,6 +118,16 @@ constexpr float CommModuleWidget::gridToXCentered(const float x)
 	return kKnobSpacingX * (x + 0.5f);
 }
 
+Vec CommModuleWidget::grid2mm(Vec position)
+{
+	return {gridToXCentered(position.x), gridToYFromTop(position.y)};
+}
+
+Vec CommModuleWidget::grid2px(Vec position)
+{
+	return mm2px(grid2mm(position));
+}
+
 // Todo: disallow creating an InputJack mapping to a patched jack
 // Can probably not highlight input jacks that are patched (if we can get that info from the module or centralData)
 // Consider how to handle:
