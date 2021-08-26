@@ -40,21 +40,20 @@ struct HubMediumWidget : CommModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParamCentered<RoundBlackKnob>((Vec(22.31, 43.16)), module, 0));
+		addParam(createParamCentered<BefacoPush>((Vec(22.31, 43.16)), module, 0));
 
-		addParam(createParamCentered<RoundBlackKnob>((Vec(64.57, 53.24)), module, 1));
-		// addSmallLabeledKnobPx("x", 1, {64.57, 53.24});
-		addParam(createParamCentered<RoundBlackKnob>((Vec(27.94, 88.42)), module, 2));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(343.34, 92.99)), module, 3));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(295.26, 117.58)), module, 4));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(64.57, 120.56)), module, 5));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(34.23, 166.3)), module, 6));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(341.35, 166.41)), module, 7));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(94.21, 193.61)), module, 8));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(280.72, 193.68)), module, 9));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(155.15, 213.81)), module, 10));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(220.04, 214.26)), module, 11));
-		addParam(createParamCentered<RoundBlackKnob>((Vec(44.14, 226.16)), module, 12));
+		addSmallLabeledKnobPx("", 1, {64.57, 53.24});
+		addSmallLabeledKnobPx("", 2, {27.94, 88.42});
+		addSmallLabeledKnobPx("", 3, {343.34, 92.99});
+		addSmallLabeledKnobPx("", 4, {295.26, 117.58});
+		addSmallLabeledKnobPx("", 5, {64.57, 120.56});
+		addLabeledKnobPx("", 6, {34.23, 166.3});
+		addLabeledKnobPx("", 7, {341.35, 166.41});
+		addLabeledKnobPx("", 8, {94.21, 193.61});
+		addLabeledKnobPx("", 9, {280.72, 193.68});
+		addLabeledKnobPx("", 10, {155.15, 213.81});
+		addLabeledKnobPx("", 11, {220.04, 214.26});
+		addSmallLabeledKnobPx("", 12, {44.14, 226.16});
 
 		addInput(createInputCentered<PJ301MPort>((Vec(22.9, 274.7)), module, 0));
 		addInput(createInputCentered<PJ301MPort>((Vec(66.42, 274.7)), module, 1));
