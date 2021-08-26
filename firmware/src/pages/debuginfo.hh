@@ -31,7 +31,7 @@ struct DebugInfoPage : PageBase {
 			y_pos += 10;
 		}
 		screen.setTextColor(Colors::black);
-		for (int i = 0; i < Panel::NumUserFacingOutJacks; i++) {
+		for (int i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
 			screen.setCursor(0, y_pos);
 			screen.printf("OUT %d: {%d, %d}",
 						  i,
@@ -40,7 +40,7 @@ struct DebugInfoPage : PageBase {
 			y_pos += 8;
 		}
 		y_pos = 40;
-		for (int i = 0; i < Panel::NumUserFacingInJacks; i++) {
+		for (int i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
 			screen.setCursor(160, y_pos);
 			screen.printf("IN %d: {%d, %d}",
 						  i,

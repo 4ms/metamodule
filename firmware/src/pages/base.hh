@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/panel_conf.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"

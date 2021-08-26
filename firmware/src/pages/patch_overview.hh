@@ -43,8 +43,8 @@ struct JackMapPage : PageBase {
 		int y = PageWidgets::list_ypos;
 
 		if (patch_player.is_loaded) {
-			int num_ins = Panel::NumUserFacingInJacks;
-			int num_outs = Panel::NumUserFacingOutJacks;
+			int num_ins = PanelDef::NumUserFacingInJacks;
+			int num_outs = PanelDef::NumUserFacingOutJacks;
 
 			for (int i = 0; i < (num_ins + num_outs); i++) {
 				Jack jack;

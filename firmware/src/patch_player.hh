@@ -11,6 +11,7 @@
 	#include <iostream>
 #endif
 #include "conf/hsem_conf.hh"
+#include "conf/panel_conf.hh"
 #include "drivers/smp.hh"
 #include "patch/patch.hh"
 #include "smp_api.hh"
@@ -20,12 +21,11 @@
 
 namespace MetaModule
 {
-using PanelT = Panel;
 
 class PatchPlayer {
 	enum {
-		NumInConns = Panel::NumOutJacks,
-		NumOutConns = Panel::NumInJacks,
+		NumInConns = PanelDef::NumOutJacks,
+		NumOutConns = PanelDef::NumInJacks,
 	};
 
 public:
@@ -38,7 +38,7 @@ public:
 	std::array<std::vector<Jack>, NumInConns> in_conns;
 
 	// knob_conns[]: A B C D a b c d, each element is a vector of knobs it's mapped to
-	std::array<std::vector<MappedKnob>, Panel::NumKnobs> knob_conns;
+	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs> knob_conns;
 
 	ModuleTypeSlug *module_slugs;
 	InternalCable *int_cables;
@@ -256,7 +256,7 @@ public:
 	// {0,0} means not connected, or index out of range
 	Jack get_panel_output_connection(unsigned jack_id)
 	{
-		if (jack_id >= Panel::NumUserFacingOutJacks)
+		if (jack_id >= PanelDef::NumUserFacingOutJacks)
 			return {.module_id = 0, .jack_id = 0};
 
 		return out_conns[jack_id];
@@ -269,7 +269,7 @@ public:
 	Jack get_panel_input_connection(unsigned jack_id, unsigned multiple_connection_id = 0)
 	{
 		// Todo: support multiple jacks connected to one net
-		if ((jack_id >= Panel::NumUserFacingInJacks) || (multiple_connection_id >= in_conns[jack_id].size()))
+		if ((jack_id >= PanelDef::NumUserFacingInJacks) || (multiple_connection_id >= in_conns[jack_id].size()))
 			return {.module_id = 0, .jack_id = 0};
 
 		return in_conns[jack_id][multiple_connection_id];
@@ -277,15 +277,15 @@ public:
 
 	static constexpr unsigned get_num_panel_knobs()
 	{
-		return Panel::NumKnobs;
+		return PanelDef::NumKnobs;
 	}
 	static constexpr unsigned get_num_panel_inputs()
 	{
-		return Panel::NumInJacks;
+		return PanelDef::NumInJacks;
 	}
 	static constexpr unsigned get_num_panel_outputs()
 	{
-		return Panel::NumOutJacks;
+		return PanelDef::NumOutJacks;
 	}
 
 	// Jack patched/unpatched status
@@ -381,7 +381,7 @@ public:
 		for (int net_i = 0; net_i < header->num_mapped_ins; net_i++) {
 			auto &cable = mapped_ins[net_i];
 			auto panel_jack_id = cable.panel_jack_id;
-			if (panel_jack_id < 0 || panel_jack_id >= Panel::NumUserFacingInJacks)
+			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingInJacks)
 				break;
 			for (int j = 0; j < MAX_CONNECTIONS_PER_NODE - 1; j++) {
 				if (cable.ins[j].module_id < 0 || cable.ins[j].jack_id < 0)
@@ -401,7 +401,7 @@ public:
 		for (int net_i = 0; net_i < header->num_mapped_outs; net_i++) {
 			auto &cable = mapped_outs[net_i];
 			auto panel_jack_id = cable.panel_jack_id;
-			if (panel_jack_id < 0 || panel_jack_id >= Panel::NumUserFacingOutJacks)
+			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingOutJacks)
 				break;
 			out_conns[panel_jack_id] = cable.out;
 		}

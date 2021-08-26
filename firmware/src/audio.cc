@@ -163,7 +163,7 @@ void AudioStream::start()
 
 void AudioStream::propagate_sense_pins(Params &params)
 {
-	for (int i = 0; i < Panel::NumUserFacingInJacks; i++) {
+	for (int i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
 		auto pin_bit = jacksense_pin_order[i];
 		bool sense = params.jack_senses & (1 << pin_bit);
 		player.set_input_jack_patched_status(i, sense);
