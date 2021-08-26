@@ -21,24 +21,6 @@ public:
 		"In L", "In R", "CV A", "CV B", "CV C", "CV D", "GateIn1", "GateIn2", "ClockIn"};
 	static inline const StaticString<LongNameChars> description{"Panel"};
 
-	// Jack Sense bits as defined by jack sense pin connections to external GPIO expander chip:
-	//    Lin, bit 6
-	//    Rin, bit 7
-	//    CVA, bit 0
-	//    CVB, bit 1
-	//    CVC, bit 2
-	//    CVD, bit 3
-	//    Gt1, bit 10
-	//    Gt2, bit 11
-	//    CkIn, bit 12
-	//    Lout, bit 8
-	//    Rout, bit 9
-	//    CVO1, bit 4
-	//    CVO2, bit 5
-	//    CkO, bit 13
-	//    Pat, bit 14
-	static inline const unsigned jacksense_pin_order[15] = {6, 7, 0, 1, 2, 3, 10, 11, 12, 8, 9, 4, 5, 13, 14};
-
 	// user_facing_outs are inputs as seen by the patch (the patch outputs to the user_facing_outs), and vice-versa
 	// the patch inputs from the user_facing_ins, so the latter are outputs
 	float user_facing_outs[NumUserFacingOutJacks];

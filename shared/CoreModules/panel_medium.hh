@@ -4,7 +4,7 @@
 #include "panel_medium_defs.hh"
 
 // Todo: DAC out, gate out, gate in
-class Panel : public CoreProcessor {
+class PanelMedium : public CoreProcessor {
 public:
 	static constexpr int NumKnobs = PanelDef::NumPot;
 	static constexpr int NumOutJacks = PanelDef::NumAudioIn + PanelDef::NumCVIn + PanelDef::NumGateIn;
@@ -23,16 +23,13 @@ public:
 	static inline const StaticString<LongNameChars> description{"Panel"};
 	static constexpr char typeID[20] = "PANEL_MED";
 
-	static inline const unsigned jacksense_pin_order[18] = {
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
-
 	// user_facing_outs are inputs as seen by the patch (the patch outputs to the user_facing_outs), and vice-versa
 	// the patch inputs from the user_facing_ins, so the latter are outputs
 	float user_facing_outs[NumUserFacingOutJacks];
 	float user_facing_ins[NumUserFacingInJacks];
 	float params[NumKnobs];
 
-	Panel() {}
+	PanelMedium() {}
 
 	void update() override {}
 	void set_samplerate(const float sr) override {}
@@ -88,7 +85,7 @@ public:
 	}
 
 	// clang-format off
-	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<Panel>(); }
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<PanelMedium>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
 	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }

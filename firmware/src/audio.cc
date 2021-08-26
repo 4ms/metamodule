@@ -2,10 +2,12 @@
 #include "arch.hh"
 #include "audio_test_signals.hh"
 #include "conf/hsem_conf.hh"
+#include "conf/jack_sense_conf.hh"
+#include "conf/panel_conf.hh"
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
-#include "panel.hh"
+//#include "panel.hh"
 #include "patch_player.hh"
 #include "util/countzip.hh"
 #include "util/math_tables.hh"
@@ -162,7 +164,7 @@ void AudioStream::start()
 void AudioStream::propagate_sense_pins(Params &params)
 {
 	for (int i = 0; i < Panel::NumUserFacingInJacks; i++) {
-		auto pin_bit = Panel::jacksense_pin_order[i];
+		auto pin_bit = jacksense_pin_order[i];
 		bool sense = params.jack_senses & (1 << pin_bit);
 		player.set_input_jack_patched_status(i, sense);
 	}
