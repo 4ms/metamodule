@@ -19,7 +19,7 @@ namespace MetaModule
 
 using namespace mdrivlib;
 
-constexpr bool DEBUG_PASSTHRU_AUDIO = false;
+constexpr bool DEBUG_PASSTHRU_AUDIO = true;
 constexpr bool DEBUG_SINEOUT_AUDIO = false;
 constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;

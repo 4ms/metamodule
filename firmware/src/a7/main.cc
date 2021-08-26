@@ -35,7 +35,7 @@ void main()
 
 	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 
-	//Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
+	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
 	AudioStream audio{patch_list,
 					  patch_player,
@@ -66,7 +66,7 @@ void main()
 		;
 
 	param_cache.clear();
-	//ui.start();
+	// ui.start();
 	audio.start();
 
 	while (true) {
