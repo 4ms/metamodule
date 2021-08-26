@@ -24,6 +24,11 @@ protected:
 	void addLabeledInput(const std::string labelText, int inputID, Vec posGrid);
 	void addLabeledOutput(const std::string labelText, int outputID, Vec posGrid);
 
+	void addLabeledKnobMM(const std::string labelText, int knobID, Vec posMM, float defaultValue = 0.f);
+	void addSmallLabeledKnobMM(const std::string labelText, int knobID, Vec posMM, float defaultValue = 0.f);
+	void addLabeledInputMM(const std::string labelText, int inputID, Vec posMM);
+	void addLabeledOutputMM(const std::string labelText, int outputID, Vec posMM);
+
 	void addLabeledKnobPx(const std::string labelText, int knobID, Vec posPx, float defaultValue = 0.f);
 	void addSmallLabeledKnobPx(const std::string labelText, int knobID, Vec posPx, float defaultValue = 0.f);
 	void addLabeledInputPx(const std::string labelText, int inputID, Vec posPx);
