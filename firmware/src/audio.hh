@@ -65,6 +65,7 @@ private:
 	uint32_t _mute_ctr = 0;
 
 	AudioConf::SampleT get_audio_output(int output_id);
+	uint32_t get_dac_output(int output_id);
 	void set_input(int input_id, AudioConf::SampleT in);
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();

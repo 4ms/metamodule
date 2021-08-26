@@ -10,6 +10,7 @@ namespace MetaModule
 
 struct AuxStreamFrame {
 	std::array<uint32_t, 2> gate_out;
+	void set_output(uint32_t, uint32_t) {}
 };
 
 using GPIO = mdrivlib::GPIO;
@@ -26,6 +27,9 @@ struct AuxStreamUpdateConf : mdrivlib::DefaultPinChangeConf {
 };
 
 struct AuxStream {
+	static constexpr bool BoardHasDac = false;
+	static constexpr float DACscaling = 0.f;
+
 	using ClockOutPin1 = mdrivlib::FPin<GPIO::F, 6, PinMode::Output>;
 	using ClockOutPin2 = mdrivlib::FPin<GPIO::D, 12, PinMode::Output>;
 	using BufferType = CircularBuffer<uint8_t, StreamConf::Audio::BlockSize>;

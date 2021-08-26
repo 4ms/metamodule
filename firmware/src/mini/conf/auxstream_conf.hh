@@ -20,6 +20,13 @@ struct AuxStreamFrame {
 	std::array<uint32_t, 1> gate_out;
 	uint32_t dac1;
 	uint32_t dac2;
+	void set_output(uint32_t chan, uint32_t val)
+	{
+		if (chan == 0)
+			dac1 = val;
+		else
+			dac2 = val;
+	}
 };
 
 struct AuxStreamUpdateConf : public mdrivlib::DefaultPinChangeConf {
@@ -46,11 +53,12 @@ struct MM_DACConf : mdrivlib::DefaultSpiTransferConf {
 	static constexpr uint32_t NumChannelsPerChip = 2;
 
 	using AuxPin = DACConfTarget::AuxPin;
-
-	static constexpr float scaling = 0.790336f;
 };
 
 struct AuxStream {
+	static constexpr bool BoardHasDac = true;
+	static constexpr float DACscaling = 0.790336f;
+
 	using DacType = mdrivlib::DacSpi_MCP48FVBxx<MM_DACConf>;
 	using DacBufferType = CircularBuffer<StreamConf::DAC::SampleT, StreamConf::DAC::BufferSize>;
 	mdrivlib::DacStream<DacType, DacBufferType> dac;

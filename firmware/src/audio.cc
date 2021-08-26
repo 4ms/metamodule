@@ -86,6 +86,15 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id)
 	// return compressor.compress(scaled_out);
 }
 
+uint32_t AudioStream::get_dac_output(int output_id)
+{
+	auto raw_out = player.get_panel_output(output_id);
+	raw_out *= -1.f;
+	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
+	scaled_out *= AuxStream::DACscaling;
+	scaled_out += 0x00800000;
+	return scaled_out;
+}
 // Todo: integrate params.buttons[]
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxStreamBlock &aux)
@@ -151,6 +160,14 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		for (auto [i, gate_out] : countzip(aux_.gate_out))
 			gate_out = player.get_panel_output(i + AudioConf::NumOutChans) > 0.5f ? 1 : 0;
+
+		//can we use an iterator that's zero-length if there's no DAC?
+		//for [auto &dac_:aux_.get_dacs()] {
+		//
+		if constexpr (AuxStream::BoardHasDac) {
+			aux_.set_output(0, get_dac_output(2));
+			aux_.set_output(1, get_dac_output(3));
+		}
 	}
 
 	load_measure.end_measurement();

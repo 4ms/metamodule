@@ -12,9 +12,8 @@ MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 ARCH_CFLAGS = -DARM_MATH_CM4 -DCORE_CM4
 
 core_src = src/h7m4
-target_src := src/$(target_board)
-target_core_src := src/$(target_board)/h7
-hal_conf_inc = $(core_src)
+target_src := src/mini
+target_core_src := src/mini/h7
 
 HALDIR = $(HALBASE)/stm32h7x5
 DEVICEDIR = $(DEVICEBASE)/stm32h7x5
@@ -60,7 +59,6 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(core_src) \
 			-I$(target_src) \
 			-I$(target_core_src) \
-			-I$(hal_conf_inc) \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \
 			-I$(SHARED)/CoreModules \
