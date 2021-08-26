@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="375.17" height="365.25" viewBox="0 0 375.17 365.25">
+<svg xmlns="http://www.w3.org/2000/svg" width="132.35mm" height="128.85mm" viewBox="0 0 375.17 365.25">
   <g id="artwork">
-    <rect x="0.5" y="0.5" width="374.17" height="364.25" style="fill: #ffffff;stroke: #231f20"/>
+    <rect x="0.5" y="0.5" width="374.17" height="364.25" style="fill: #fff;stroke: #231f20"/>
     <g>
       <path d="M356.76,13a4.54,4.54,0,0,0,0-9.07h-8.44a4.54,4.54,0,0,0,0,9.07Z" transform="translate(0.5 0.5)"/>
       <path d="M356.76,360.29a4.54,4.54,0,0,0,0-9.07h-8.44a4.54,4.54,0,0,0,0,9.07Z" transform="translate(0.5 0.5)"/>
@@ -360,36 +360,36 @@
     <rect x="103.68" y="34.23" width="167.81" height="126.99" style="fill: #231f20"/>
   </g>
   <g id="components">
-    <circle cx="22.31" cy="43.16" r="9" style="fill: #ff0000"/>
-    <circle cx="22.9" cy="274.7" r="9" style="fill: #00ff00"/>
-    <circle cx="66.42" cy="274.7" r="9" style="fill: #00ff00"/>
-    <circle cx="109.61" cy="282.75" r="9" style="fill: #00ff00"/>
-    <circle cx="153.13" cy="282.75" r="9" style="fill: #00ff00"/>
-    <circle cx="166.12" cy="324.18" r="9" style="fill: #00ff00"/>
-    <circle cx="222.16" cy="282.79" r="9" style="fill: #0000ff"/>
-    <circle cx="265.68" cy="282.79" r="9" style="fill: #0000ff"/>
-    <circle cx="308.9" cy="282.15" r="9" style="fill: #0000ff"/>
-    <circle cx="316.22" cy="238.83" r="9" style="fill: #0000ff"/>
-    <circle cx="352.74" cy="219.83" r="9" style="fill: #0000ff"/>
-    <circle cx="352.42" cy="282.15" r="9" style="fill: #0000ff"/>
-    <circle cx="338.73" cy="324.2" r="9" style="fill: #0000ff"/>
-    <circle cx="295.21" cy="324.2" r="9" style="fill: #0000ff"/>
-    <circle cx="252.8" cy="324.18" r="9" style="fill: #0000ff"/>
-    <circle cx="209.28" cy="324.18" r="9" style="fill: #0000ff"/>
-    <circle cx="122.6" cy="324.18" r="9" style="fill: #00ff00"/>
-    <circle cx="79.86" cy="324.15" r="9" style="fill: #00ff00"/>
-    <circle cx="36.34" cy="324.15" r="9" style="fill: #00ff00"/>
-    <circle cx="295.26" cy="117.58" r="9" style="fill: #ff0000"/>
-    <circle cx="341.35" cy="166.41" r="9" style="fill: #ff0000"/>
-    <circle cx="280.72" cy="193.68" r="9" style="fill: #ff0000"/>
-    <circle cx="44.14" cy="226.16" r="9" style="fill: #ff0000"/>
-    <circle cx="343.34" cy="92.99" r="9" style="fill: #ff0000"/>
-    <circle cx="220.04" cy="214.26" r="9" style="fill: #ff0000"/>
-    <circle cx="155.15" cy="213.81" r="9" style="fill: #ff0000"/>
-    <circle cx="94.21" cy="193.61" r="9" style="fill: #ff0000"/>
-    <circle cx="64.57" cy="53.24" r="9" style="fill: #ff0000"/>
-    <circle cx="64.57" cy="120.56" r="9" style="fill: #ff0000"/>
-    <circle cx="34.23" cy="166.3" r="9" style="fill: #ff0000"/>
-    <circle cx="27.94" cy="88.42" r="9" style="fill: #ff0000"/>
+    <circle cx="22.31" cy="43.16" r="9" style="fill: #ff0000;"/>
+    <circle cx="22.9" cy="274.7" r="9" style="fill: #00ff00;"/>
+    <circle cx="66.42" cy="274.7" r="9" style="fill: #00ff00;"/>
+    <circle cx="109.61" cy="282.75" r="9" style="fill: #00ff00;"/>
+    <circle cx="153.13" cy="282.75" r="9" style="fill: #00ff00;"/>
+    <circle cx="166.12" cy="324.18" r="9" style="fill: #00ff00;"/>
+    <circle cx="222.16" cy="282.79" r="9" style="fill: #0000ff;"/>
+    <circle cx="265.68" cy="282.79" r="9" style="fill: #0000ff;"/>
+    <circle cx="308.9" cy="282.15" r="9" style="fill: #0000ff;"/>
+    <circle cx="316.22" cy="238.83" r="9" style="fill: #0000ff;"/>
+    <circle cx="352.74" cy="219.83" r="9" style="fill: #0000ff;"/>
+    <circle cx="352.42" cy="282.15" r="9" style="fill: #0000ff;"/>
+    <circle cx="338.73" cy="324.2" r="9" style="fill: #0000ff;"/>
+    <circle cx="295.21" cy="324.2" r="9" style="fill: #0000ff;"/>
+    <circle cx="252.8" cy="324.18" r="9" style="fill: #0000ff;"/>
+    <circle cx="209.28" cy="324.18" r="9" style="fill: #0000ff;"/>
+    <circle cx="122.6" cy="324.18" r="9" style="fill: #00ff00;"/>
+    <circle cx="79.86" cy="324.15" r="9" style="fill: #00ff00;"/>
+    <circle cx="36.34" cy="324.15" r="9" style="fill: #00ff00;"/>
+    <circle cx="295.26" cy="117.58" r="9" style="fill: #ff0000;"/>
+    <circle cx="341.35" cy="166.41" r="9" style="fill: #ff0000;"/>
+    <circle cx="280.72" cy="193.68" r="9" style="fill: #ff0000;"/>
+    <circle cx="44.14" cy="226.16" r="9" style="fill: #ff0000;"/>
+    <circle cx="343.34" cy="92.99" r="9" style="fill: #ff0000;"/>
+    <circle cx="220.04" cy="214.26" r="9" style="fill: #ff0000;"/>
+    <circle cx="155.15" cy="213.81" r="9" style="fill: #ff0000;"/>
+    <circle cx="94.21" cy="193.61" r="9" style="fill: #ff0000;"/>
+    <circle cx="64.57" cy="53.24" r="9" style="fill: #ff0000;"/>
+    <circle cx="64.57" cy="120.56" r="9" style="fill: #ff0000;"/>
+    <circle cx="34.23" cy="166.3" r="9" style="fill: #ff0000;"/>
+    <circle cx="27.94" cy="88.42" r="9" style="fill: #ff0000;"/>
   </g>
 </svg>

@@ -55,25 +55,25 @@ struct HubMediumWidget : CommModuleWidget {
 		addLabeledKnobPx("", 11, {220.04, 214.26});
 		addSmallLabeledKnobPx("", 12, {44.14, 226.16});
 
-		addInput(createInputCentered<PJ301MPort>((Vec(22.9, 274.7)), module, 0));
-		addInput(createInputCentered<PJ301MPort>((Vec(66.42, 274.7)), module, 1));
-		addInput(createInputCentered<PJ301MPort>((Vec(109.61, 282.75)), module, 2));
-		addInput(createInputCentered<PJ301MPort>((Vec(153.13, 282.75)), module, 3));
-		addInput(createInputCentered<PJ301MPort>((Vec(36.34, 324.15)), module, 4));
-		addInput(createInputCentered<PJ301MPort>((Vec(79.86, 324.15)), module, 5));
-		addInput(createInputCentered<PJ301MPort>((Vec(122.6, 324.18)), module, 6));
-		addInput(createInputCentered<PJ301MPort>((Vec(166.12, 324.18)), module, 7));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(22.9, 274.7)), module, 0));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(66.42, 274.7)), module, 1));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(109.61, 282.75)), module, 2));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(153.13, 282.75)), module, 3));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(36.34, 324.15)), module, 4));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(79.86, 324.15)), module, 5));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(122.6, 324.18)), module, 6));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(166.12, 324.18)), module, 7));
 
-		addOutput(createOutputCentered<PJ301MPort>((Vec(352.74, 219.83)), module, 0));
-		addOutput(createOutputCentered<PJ301MPort>((Vec(316.22, 238.83)), module, 1));
-		addOutput(createOutputCentered<PJ301MPort>((Vec(308.9, 282.15)), module, 2));
-		addOutput(createOutputCentered<PJ301MPort>((Vec(352.42, 282.15)), module, 3));
-		addOutput(createOutputCentered<PJ301MPort>((Vec(222.16, 282.79)), module, 4));
-		addOutput(createOutputCentered<PJ301MPort>((Vec(265.68, 282.79)), module, 5));
-		addOutput(createOutputCentered<PJ301MPort>((Vec(209.28, 324.18)), module, 6));
-		addOutput(createOutputCentered<PJ301MPort>((Vec(252.8, 324.18)), module, 7));
-		addOutput(createOutputCentered<PJ301MPort>((Vec(295.21, 324.2)), module, 8));
-		addOutput(createOutputCentered<PJ301MPort>((Vec(338.73, 324.2)), module, 9));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(352.74, 219.83)), module, 0));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(316.22, 238.83)), module, 1));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(308.9, 282.15)), module, 2));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(352.42, 282.15)), module, 3));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(222.16, 282.79)), module, 4));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(265.68, 282.79)), module, 5));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(209.28, 324.18)), module, 6));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(252.8, 324.18)), module, 7));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(295.21, 324.2)), module, 8));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(338.73, 324.2)), module, 9));
 	}
 };
 
