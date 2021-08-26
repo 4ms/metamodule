@@ -7,7 +7,6 @@
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
-//#include "panel.hh"
 #include "patch_player.hh"
 #include "util/countzip.hh"
 #include "util/math_tables.hh"
