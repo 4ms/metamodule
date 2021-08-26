@@ -17,6 +17,11 @@ void CommModuleWidget::addLabeledKnob(const std::string labelText, int knobID, V
 	addLabeledKnobPx(labelText, knobID, gridFromTop2px(posGrid), defaultValue);
 }
 
+void CommModuleWidget::addLabeledKnobMM(const std::string labelText, int knobID, Vec posMM, float defaultValue)
+{
+	addLabeledKnobPx(labelText, knobID, mm2px(posMM), defaultValue);
+}
+
 void CommModuleWidget::addLabeledKnobPx(const std::string labelText, int knobID, Vec posPx, float defaultValue)
 {
 	addLabel(labelText, posPx, {LabelButtonID::Types::Knob, knobID, -1});
@@ -29,6 +34,11 @@ void CommModuleWidget::addLabeledKnobPx(const std::string labelText, int knobID,
 void CommModuleWidget::addSmallLabeledKnob(const std::string labelText, int knobID, Vec posGrid, float defaultValue)
 {
 	addLabeledKnobPx(labelText, knobID, gridFromTop2px(posGrid), defaultValue);
+}
+
+void CommModuleWidget::addSmallLabeledKnobMM(const std::string labelText, int knobID, Vec posMM, float defaultValue)
+{
+	addLabeledKnobPx(labelText, knobID, mm2px(posMM), defaultValue);
 }
 
 void CommModuleWidget::addSmallLabeledKnobPx(const std::string labelText, int knobID, Vec posPx, float defaultValue)
@@ -45,6 +55,11 @@ void CommModuleWidget::addLabeledInput(const std::string labelText, int inputID,
 	addLabeledInputPx(labelText, inputID, gridFromBottom2px(posGrid));
 }
 
+void CommModuleWidget::addLabeledInputMM(const std::string labelText, int inputID, Vec posMM)
+{
+	addLabeledInputPx(labelText, inputID, mm2px(posMM));
+}
+
 void CommModuleWidget::addLabeledInputPx(const std::string labelText, int inputID, Vec posPx)
 {
 	addLabel(labelText, posPx, {LabelButtonID::Types::InputJack, inputID, -1});
@@ -56,6 +71,10 @@ void CommModuleWidget::addLabeledOutput(const std::string labelText, int outputI
 	addLabeledOutputPx(labelText, outputID, gridFromBottom2px(posGrid));
 }
 
+void CommModuleWidget::addLabeledOutputMM(const std::string labelText, int outputID, Vec posMM)
+{
+	addLabeledOutputPx(labelText, outputID, mm2px(posMM));
+}
 void CommModuleWidget::addLabeledOutputPx(const std::string labelText, int outputID, Vec posPx)
 {
 	addLabel(labelText, posPx, {LabelButtonID::Types::OutputJack, outputID, -1});
