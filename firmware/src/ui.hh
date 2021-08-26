@@ -40,8 +40,6 @@ private:
 	uint32_t last_changed_page_tm = 0;
 
 public:
-	// static constexpr uint32_t Hz_i = AnimationUpdateRate / led_update_freq_Hz;
-	// static constexpr uint32_t Hz = static_cast<float>(Hz_i);
 	Ui(PatchList &pl,
 	   PatchPlayer &pp,
 	   ParamCache &pc,
@@ -73,14 +71,20 @@ public:
 		}
 		mbox.loading_new_patch = false;
 
-		screen.init();
-		register_printf_destination(screen);
-		pages.init();
+		// Disabling Screen until we have it for mp1-med
+		// screen.init();
+		// register_printf_destination(screen);
+		// pages.init();
 
-		leds.but[0].set_background(Colors::grey);
-		leds.but[1].set_background(Colors::grey);
-		leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
-		leds.rotaryLED.set_background(Colors::green);
+		//Disabling LEDs for now, until we figure out how to integrate them in patches
+		// Mini:
+		// leds.but[0].set_background(Colors::grey);
+		// leds.but[1].set_background(Colors::grey);
+		// leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
+		// leds.rotaryLED.set_background(Colors::green);
+		//
+		// Medium:
+		// leds.but[0].set_background(Colors::cyan);
 
 		// Todo: led animation rate depends on I2C rate... not easy to set  maybe we can have it self-calibrate against
 		// the SysTick?
@@ -97,7 +101,7 @@ public:
 		});
 		HWSemaphore<LEDFrameBufLock>::enable_channel_ISR();
 
-		screen_draw_task.init(
+		update_ui_task.init(
 			{
 				.TIMx = TIM5,
 				.period_ns = 1000000000 / 33, // =  33Hz
@@ -106,21 +110,25 @@ public:
 
 			},
 			[&]() { update_ui(); });
-		screen_draw_task.start();
+		update_ui_task.start();
 	}
 
 	void update_ui()
 	{
+		Debug::Pin1::high();
 		param_cache.read_sync(&params, &metaparams);
-		handle_rotary();
+		// handle_rotary();
 
+		Debug::Pin1::low();
 		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
 			return;
 		}
-		HWSemaphore<ScreenFrameBufLock>::lock();
-		pages.display_current_page();
-		screen.flush_cache();
-		HWSemaphore<ScreenFrameBufLock>::unlock();
+
+		// HWSemaphore<ScreenFrameBufLock>::lock();
+		// Disabling Screen for medium
+		// pages.display_current_page();
+		// screen.flush_cache();
+		// HWSemaphore<ScreenFrameBufLock>::unlock();
 	}
 
 	void handle_rotary()
@@ -157,7 +165,7 @@ public:
 	}
 
 private:
-	Timekeeper screen_draw_task;
+	Timekeeper update_ui_task;
 
 	void update_led_states()
 	{

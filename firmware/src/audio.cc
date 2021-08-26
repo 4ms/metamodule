@@ -85,6 +85,7 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id)
 	// return compressor.compress(scaled_out);
 }
 
+//Todo: the scaling and offset shouold be part of the AuxStream, so we can support different types of DACs
 uint32_t AudioStream::get_dac_output(int output_id)
 {
 	auto raw_out = player.get_panel_output(output_id);
@@ -159,7 +160,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		//can we use an iterator that's zero-length if there's no DAC?
 		//for [auto &dac_:aux_.get_dacs()] {
-		//
+		//FixMe: simplify this, but need to test on mini and medium
 		if constexpr (PanelDef::NumDACOut > 0) {
 			for (int i = 0; i < PanelDef::NumDACOut; i++)
 				aux_.set_output(i, get_dac_output(PanelDef::NumAudioOut + i));
