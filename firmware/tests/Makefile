@@ -23,6 +23,7 @@ CXXFLAGS = 	-Wall \
 			-I. \
 			-I.. \
 			-Isrc \
+			-Isrc/mini \
 			-I../src \
 			-I../shared \
 			-I../../shared \
