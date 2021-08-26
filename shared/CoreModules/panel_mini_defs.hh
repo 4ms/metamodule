@@ -13,6 +13,7 @@ struct PanelDef {
 	static constexpr uint32_t NumRgbButton = 2;
 	static constexpr uint32_t NumMetaRgbButton = 0;
 
+	//Todo put this in panel_conf and add things like "FirstGateOutJackIdx"
 	static constexpr int NumKnobs = NumPot;
 	static constexpr int NumOutJacks = NumAudioIn + NumCVIn + NumGateIn;
 	static constexpr int NumInJacks = NumAudioOut + NumDACOut + NumGateOut;

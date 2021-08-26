@@ -158,15 +158,18 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
 
-		for (auto [i, gate_out] : countzip(aux_.gate_out))
-			gate_out = player.get_panel_output(i + AudioConf::NumOutChans) > 0.5f ? 1 : 0;
-
 		//can we use an iterator that's zero-length if there's no DAC?
 		//for [auto &dac_:aux_.get_dacs()] {
 		//
-		if constexpr (AuxStream::BoardHasDac) {
-			aux_.set_output(0, get_dac_output(2));
-			aux_.set_output(1, get_dac_output(3));
+		if constexpr (PanelDef::NumDACOut > 0) {
+			for (int i = 0; i < PanelDef::NumDACOut; i++)
+				aux_.set_output(i, get_dac_output(PanelDef::NumAudioOut + i));
+			for (int i = 0; i < PanelDef::NumGateOut; i++)
+				aux_.gate_out[i] =
+					player.get_panel_output(PanelDef::NumAudioOut + PanelDef::NumDACOut + i) > 0.5f ? 1 : 0;
+		} else {
+			for (auto [i, gate_out] : countzip(aux_.gate_out))
+				gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 		}
 	}
 
