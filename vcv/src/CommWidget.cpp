@@ -194,16 +194,25 @@ void LabeledButton::draw(const DrawArgs &args)
 	updateState();
 
 	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
-
-	if ((isOnHub) || (!isOnHub && !isTypeKnob)) {
+	if (isTypeKnob) {
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
+		nvgStrokeColor(args.vg, rack::color::WHITE);
+		nvgStrokeWidth(args.vg, 0.0);
+		if (isCurrentMapSrc) {
+			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
+		} else {
+			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+		}
+		nvgStroke(args.vg);
+		nvgFill(args.vg);
+	} else {
 		nvgBeginPath(args.vg);
 		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
 		if (isMapped) {
 			unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
-			if (!isOnHub && !isTypeKnob) {
-				nvgStrokeColor(args.vg, PaletteHub::color[palid]);
-				nvgStrokeWidth(args.vg, 2.0f);
-			}
+			nvgStrokeColor(args.vg, PaletteHub::color[palid]);
+			nvgStrokeWidth(args.vg, 2.0f);
 		}
 		if (!isMapped) {
 			nvgStrokeColor(args.vg, rack::color::WHITE);
