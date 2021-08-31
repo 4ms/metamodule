@@ -78,8 +78,8 @@ public:
 		// if ((w * h) > MaxSizeForDirectWrite)
 		// 	fastFillRect(x, y, w, h, color);
 		// else {
-		for (int xi = x; xi < (x + w); xi++) {
-			for (int yi = y; yi < (y + h); yi++) {
+		for (int yi = y; yi < (y + h); yi++) {
+			for (int xi = x; xi < (x + w); xi++) {
 				framebuf[xi + yi * _width] = color;
 			}
 		}
@@ -109,8 +109,8 @@ public:
 		int16_t max_x = (x + w) > _width ? _width : x + w;
 		int16_t max_y = (h + y) > _height ? _height : y + h;
 
-		for (int xi = x; xi < max_x; xi++) {
-			for (int yi = y; yi < max_y; yi++) {
+		for (int yi = y; yi < max_y; yi++) {
+			for (int xi = x; xi < max_x; xi++) {
 				draw_blended_pix(xi, yi, color, alpha);
 			}
 		}
