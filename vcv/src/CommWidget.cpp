@@ -195,17 +195,22 @@ void LabeledButton::draw(const DrawArgs &args)
 
 	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
 	if (isTypeKnob) {
-		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
-		nvgStrokeColor(args.vg, rack::color::WHITE);
-		nvgStrokeWidth(args.vg, 0.0);
-		if (isCurrentMapSrc) {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
+		if (isOnHub) {
+			nvgBeginPath(args.vg);
+			nvgRoundedRect(args.vg, -10, -40, 50, 50, 5.0);
+			nvgStrokeColor(args.vg, rack::color::WHITE);
+			nvgStrokeWidth(args.vg, 0.0);
+			if (isCurrentMapSrc) {
+				auto knobNum = this->id.objID;
+				nvgFillColor(args.vg, PaletteHub::color[knobNum]);
+			} else {
+				nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+			}
+			nvgStroke(args.vg);
+			nvgFill(args.vg);
+
 		} else {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
 		}
-		nvgStroke(args.vg);
-		nvgFill(args.vg);
 	} else {
 		nvgBeginPath(args.vg);
 		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
