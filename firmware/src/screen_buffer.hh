@@ -88,7 +88,7 @@ public:
 
 	void fastFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
-		uintptr_t starting_addr = reinterpret_cast<uintptr_t>(&framebuf[x + y * _width]);
+		auto starting_addr = reinterpret_cast<uintptr_t>(&framebuf[x + y * _width]);
 		dma2d.fillrect_rgb565(starting_addr, w, h, _width, color);
 	}
 
