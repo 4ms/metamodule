@@ -17,18 +17,18 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.dma_init_tx =
 		{
 			.DMAx = DMA2,
-			.stream = DMA2_Stream3,
+			.stream = DMA2_Stream1,
 			.channel = DMA_REQUEST_SAI3_A,
-			.IRQn = DMA2_Stream3_IRQn,
+			.IRQn = DMA2_Stream1_IRQn,
 			.pri = 1,
 			.subpri = 1,
 		},
 	.dma_init_rx =
 		{
 			.DMAx = DMA2,
-			.stream = DMA2_Stream4,
+			.stream = DMA2_Stream2,
 			.channel = DMA_REQUEST_SAI3_B,
-			.IRQn = DMA2_Stream4_IRQn,
+			.IRQn = DMA2_Stream2_IRQn,
 			.pri = 1,
 			.subpri = 1,
 		},
@@ -65,18 +65,18 @@ const SaiConfig codec_ext_sai_conf = {
 	.dma_init_tx =
 		{
 			.DMAx = DMA2,
-			.stream = DMA2_Stream1,
+			.stream = DMA2_Stream4,
 			.channel = DMA_REQUEST_SAI1_A,
-			.IRQn = DMA2_Stream1_IRQn,
+			.IRQn = DMA2_Stream4_IRQn,
 			.pri = 1,
 			.subpri = 1,
 		},
 	.dma_init_rx =
 		{
 			.DMAx = DMA2,
-			.stream = DMA2_Stream2,
+			.stream = DMA2_Stream6,
 			.channel = DMA_REQUEST_SAI1_B,
-			.IRQn = DMA2_Stream2_IRQn,
+			.IRQn = DMA2_Stream6_IRQn,
 			.pri = 1,
 			.subpri = 1,
 		},
