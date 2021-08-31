@@ -72,9 +72,9 @@ public:
 		mbox.loading_new_patch = false;
 
 		// Disabling Screen until we have it for mp1-med
-		// screen.init();
-		// register_printf_destination(screen);
-		// pages.init();
+		screen.init();
+		register_printf_destination(screen);
+		pages.init();
 
 		//Disabling LEDs for now, until we figure out how to integrate them in patches
 		// Mini:
@@ -94,7 +94,7 @@ public:
 		// led_update_task.start();
 		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() {
 			if (HWSemaphore<LEDFrameBufLock>::lock() == HWSemaphoreFlag::LockedOk) {
-				update_led_states();
+				// update_led_states();
 				// Todo: doesn't this cause the ISR to trigger itself?
 				HWSemaphore<LEDFrameBufLock>::unlock();
 			}
@@ -115,20 +115,19 @@ public:
 
 	void update_ui()
 	{
-		Debug::Pin1::high();
 		param_cache.read_sync(&params, &metaparams);
-		// handle_rotary();
+		handle_rotary();
 
-		Debug::Pin1::low();
 		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
 			return;
 		}
 
-		// HWSemaphore<ScreenFrameBufLock>::lock();
-		// Disabling Screen for medium
-		// pages.display_current_page();
-		// screen.flush_cache();
-		// HWSemaphore<ScreenFrameBufLock>::unlock();
+		HWSemaphore<ScreenFrameBufLock>::lock();
+		Debug::Pin1::high();
+		pages.display_current_page();
+		screen.flush_cache();
+		Debug::Pin1::low();
+		HWSemaphore<ScreenFrameBufLock>::unlock();
 	}
 
 	void handle_rotary()
