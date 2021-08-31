@@ -1,13 +1,13 @@
 #----------------------------------
 # Uncomment to compile unoptimized:
 # $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
-$(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/timekeeper.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/controls.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/screen.o: OPTFLAG = -O0
-$(BUILDDIR)/src/audio.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 # $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
