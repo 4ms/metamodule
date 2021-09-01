@@ -33,7 +33,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr bool pulse_hardware_ss = true;
 	};
 
-	struct DMAConf : DefaultDMAConf {
+	struct DMAConf : mdrivlib::DefaultDMAConf {
 		static constexpr unsigned DMAx = 2;
 		static constexpr unsigned StreamNum = 3;
 		static constexpr unsigned RequestNum = DMA_REQUEST_SPI4_TX;
@@ -52,6 +52,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 
 	using DCPin = FPin<GPIO::H, 4, PinMode::Output>;
 
+	static constexpr bool IsInverted = true;
 	static constexpr uint32_t rowstart = 80;
 	static constexpr uint32_t colstart = 0;
 

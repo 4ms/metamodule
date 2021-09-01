@@ -51,6 +51,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 
 	using DCPin = FPin<GPIO::A, 6, PinMode::Output>;
 
+	static constexpr bool IsInverted = false;
 	static constexpr uint32_t rowstart = 80;
 	static constexpr uint32_t colstart = 0;
 

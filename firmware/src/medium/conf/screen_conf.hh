@@ -5,6 +5,7 @@
 #include "drivers/interrupt.hh"
 #include "drivers/spi_screen_config_struct.hh"
 #include "drivers/spi_screen_driver.hh"
+#include "spi_screen_ST77XX.hh"
 
 using mdrivlib::FPin;
 using mdrivlib::GPIO;
@@ -52,6 +53,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 
 	using DCPin = FPin<GPIO::H, 4, PinMode::Output>;
 
+	static constexpr bool IsInverted = false;
 	static constexpr uint32_t rowstart = 0;
 	static constexpr uint32_t colstart = 0;
 

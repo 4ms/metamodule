@@ -72,8 +72,11 @@ public:
 
 	void init()
 	{
-		mdrivlib::DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
-		init_display(generic_st7789);
+		DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
+		using InitCommands = ST7789Init<ScreenWriterConfT::width,
+										ScreenWriterConfT::height,
+										ScreenWriterConfT::IsInverted ? ST77XX::Inverted : ST77XX::NotInverted>;
+		init_display_driver<InitCommands>();
 		set_rotation(ScreenWriterConfT::rotation);
 
 		////TESTS:
@@ -86,6 +89,7 @@ public:
 		/////
 	}
 
+	//TODO: incorporate the MADCTL stuff in ST7789Init
 	void set_rotation(ScreenWriterConfT::Rotation rot)
 	{
 		_rotation = rot;
@@ -223,30 +227,19 @@ protected:
 		transmit_blocking<Cmd>(ST77XX::RAMWR);
 	}
 
-	// Todo re-write as just a sequence of commands with delays
-	// Make a fake transmit_blocking<>(uint8_t) and fake HAL_Delay() to record results
-	void init_display(const uint8_t *addr)
+	template<typename InitCmds>
+	void init_display_driver()
 	{
-		uint8_t numCommands, cmd, numArgs;
-		uint16_t ms;
-
-		numCommands = *addr++;					 // Number of commands to follow
-		while (numCommands--) {					 // For each command...
-			cmd = *addr++;						 // Read command
-			numArgs = *addr++;					 // Number of args to follow
-			ms = numArgs & ST77XX::ST_CMD_DELAY; // If hibit set, delay follows args
-			numArgs &= ~ST77XX::ST_CMD_DELAY;	 // Mask out delay bit
-			transmit_blocking<Cmd>(cmd);
+		for (auto c : InitCmds::cmds) {
+			transmit_blocking<Cmd>(c.cmd);
+			int numArgs = c.num_args;
+			uint32_t args = c.args;
 			while (numArgs--) {
-				transmit_blocking<Data>(*addr++);
+				transmit_blocking<Data>(args & 0x000000FF);
+				args >>= 8;
 			}
-
-			if (ms) {
-				ms = *addr++; // Read post-command delay time (ms)
-				if (ms == 255)
-					ms = 500; // If 255, delay for 500 ms
-				HAL_Delay(ms);
-			}
+			if (c.delay_ms)
+				HAL_Delay(c.delay_ms);
 		}
 	}
 };
