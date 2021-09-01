@@ -249,7 +249,7 @@ UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 
 include makefile_common.mk
 
-all: $(UIMG)
+uimg: $(UIMG)
 
 $(UBOOT_MKIMAGE): $(UBOOTSRCDIR)
 	cd $(UBOOTSRCDIR) && make O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
