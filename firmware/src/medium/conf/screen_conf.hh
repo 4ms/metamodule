@@ -52,7 +52,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 
 	using DCPin = FPin<GPIO::H, 4, PinMode::Output>;
 
-	static constexpr uint32_t rowstart = 00;
+	static constexpr uint32_t rowstart = 0;
 	static constexpr uint32_t colstart = 0;
 
 	static constexpr uint32_t width = MMScreenBufferConf::width;

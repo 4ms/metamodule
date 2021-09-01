@@ -35,7 +35,7 @@ static void app_startup()
 };
 
 struct StaticBuffers {
-	static inline MMScreenConf::FrameBufferT screen_writebuf;
+	static inline __attribute__((section(".static_buffer"))) MMScreenConf::HalfFrameBufferT half_screen_writebuf;
 } _sb;
 } // namespace MetaModule
 
@@ -62,7 +62,7 @@ void main()
 	controls.start();
 
 	// Screen: Full frame transfer mode
-	ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::screen_writebuf, MMScreenConf::FrameBytes};
+	ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::half_screen_writebuf, MMScreenConf::FrameBytes};
 	screen_writer.init();
 
 	HWSemaphore<ScreenFrameBufLock>::clear_ISR();
