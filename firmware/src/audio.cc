@@ -144,11 +144,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	//	_mute_ctr = 10;
 	//}
 
-	// if constexpr (DEBUG_NE10_FFT) {
-	// 	fftfx.process(in, out);
-	// 	return;
-	// }
-
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 
 		//Handle jacks being plugged/unplugged
@@ -156,7 +151,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		//Pass audio inputs to modules
 		for (auto [i, inchan] : countzip(in_.chan))
-			player.set_panel_input(i, AudioInFrame::scaleInput(inchan));
+			player.set_panel_input(PanelDef::audioin_order[i], AudioInFrame::scaleInput(inchan));
 
 		//Pass CV values to modules
 		for (auto [i, cv] : countzip(params_.cvjacks))

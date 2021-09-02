@@ -26,4 +26,6 @@ struct PanelDef {
 	static constexpr char NumJacks = NumInJacks + NumOutJacks + NumMetaCV;
 	static constexpr char ShortJackNames[NumJacks][5] = {
 		"CVA", "CVB", "CVC", "CVD", "Lin", "Rin", "Lout", "Rout", "Gt1", "Gt2", "CkIn", "CkO", "CVO1", "CVO2", "Pat"};
+
+	static constexpr uint32_t audioin_order[NumAudioIn] = {0, 1};
 };

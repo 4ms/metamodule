@@ -42,4 +42,5 @@ struct PanelDef {
 														 "GO1",
 														 "GO2",
 														 "PCV"};
+	static constexpr uint32_t audioin_order[NumAudioIn] = {3, 2, 1, 0, 5, 4};
 };
