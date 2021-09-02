@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleTypes.h"
-#include "CoreModules/panel_node.hh"
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
 #if !defined(TESTPROJECT) && !defined(SIMULATOR)
@@ -115,7 +114,10 @@ public:
 		load_patch_from_header(ph);
 
 		for (int i = 0; i < header->num_modules; i++) {
-			modules[i] = ModuleFactory::create(module_slugs[i]);
+			if (i == 0)
+				modules[i] = ModuleFactory::create(PanelDef::typeID);
+			else
+				modules[i] = ModuleFactory::create(module_slugs[i]);
 
 			if (modules[i] == nullptr) {
 				is_loaded = false;
@@ -164,6 +166,7 @@ public:
 				Debug::Pin2::low();
 			}
 
+			// LEave this here until we are sure it's working OK on Mini
 			// for (int module_i = 1; module_i < header->num_modules; module_i++) {
 			// 	if (!mdrivlib::SMPThread::is_running()) {
 			// 		mdrivlib::SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);

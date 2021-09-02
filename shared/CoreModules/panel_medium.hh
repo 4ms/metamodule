@@ -21,7 +21,6 @@ public:
 	static inline const std::array<StaticString<NameChars>, NumUserFacingInJacks> OutJackNames{
 		"In1", "In2", "In3", "In4", "In5", "In6", "GateIn1", "GateIn2"};
 	static inline const StaticString<LongNameChars> description{"Panel"};
-	static constexpr char typeID[20] = "PANEL_MED";
 
 	// user_facing_outs are inputs as seen by the patch (the patch outputs to the user_facing_outs), and vice-versa
 	// the patch inputs from the user_facing_ins, so the latter are outputs
@@ -86,7 +85,7 @@ public:
 
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<PanelMedium>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
+	static inline bool s_registered = ModuleFactory::registerModuleType(PanelDef::typeID, description, create);
 	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
 	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
 	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }

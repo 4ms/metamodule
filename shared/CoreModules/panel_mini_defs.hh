@@ -3,6 +3,8 @@
 
 struct PanelDef {
 	static constexpr uint32_t PanelID = 0;
+	static constexpr char typeID[20] = "PANEL_8";
+
 	static constexpr uint32_t NumAudioIn = 2;
 	static constexpr uint32_t NumAudioOut = 2;
 	static constexpr uint32_t NumDACOut = 2;

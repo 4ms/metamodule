@@ -1,8 +1,11 @@
 #pragma once
+#include "util/static_string.hh"
 #include <cstdint>
 
 struct PanelDef {
 	static constexpr uint32_t PanelID = 1;
+	static constexpr char typeID[20] = "PANEL_MED";
+
 	static constexpr uint32_t NumAudioIn = 6;
 	static constexpr uint32_t NumAudioOut = 8;
 	static constexpr uint32_t NumDACOut = 0;
