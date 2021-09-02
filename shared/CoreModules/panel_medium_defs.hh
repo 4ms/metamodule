@@ -21,4 +21,25 @@ struct PanelDef {
 	static constexpr int NumUserFacingOutJacks = NumInJacks;
 	// User-facing in jacks, like "Audio In 1", is an output jack as seen by other virtual modules
 	static constexpr int NumUserFacingInJacks = NumOutJacks;
+
+	static constexpr char NumJacks = NumInJacks + NumOutJacks + NumMetaCV;
+	static constexpr char ShortJackNames[NumJacks][5] = {"In1",
+														 "In2",
+														 "In3",
+														 "In4",
+														 "In5",
+														 "In6",
+														 "GI1",
+														 "GI2",
+														 "Out1",
+														 "Out2",
+														 "Out3",
+														 "Out4",
+														 "Out5",
+														 "Out6",
+														 "Out7",
+														 "Out8",
+														 "GO1",
+														 "GO2",
+														 "PCV"};
 };
