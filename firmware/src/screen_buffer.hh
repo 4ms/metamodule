@@ -54,7 +54,9 @@ public:
 	{
 		// Fixme: fix fastFillRect for A7
 		// fastFillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
-		fillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+		// fillRect(0, 0, ScreenConfT::width, ScreenConfT::height, c.Rgb565());
+
+		fillRect(0, 0, _width, _height, c.Rgb565());
 	}
 
 	void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, Color c)

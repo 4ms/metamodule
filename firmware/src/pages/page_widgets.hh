@@ -108,7 +108,7 @@ struct PageWidgets {
 
 		const uint16_t yoffset = y_pos;
 		const uint16_t box_height = 16;
-		const uint16_t box_width = 240 / 8;
+		const uint16_t box_width = MMScreenBufferConf::width / 8;
 
 		const unsigned pin_order[15] = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 4, 5, 14};
 		const char names[15][5] = {"CVA",

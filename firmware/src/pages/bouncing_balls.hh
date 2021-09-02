@@ -11,10 +11,10 @@ struct BouncingBallsPage : PageBase {
 	{}
 
 	static inline BouncingBall balls[4] = {
-		{90, {220, 30}, {-1, 1}, {239, 239}},
-		{60, {220, 30}, {-1, 2}, {239, 239}},
-		{50, {20, 10}, {2, -1}, {239, 239}},
-		{40, {10, 220}, {2, 3}, {239, 239}},
+		{90, {220, 30}, {-1, 1}, {MMScreenBufferConf::height - 1, MMScreenBufferConf::width - 1}},
+		{60, {220, 30}, {-1, 2}, {MMScreenBufferConf::height - 1, MMScreenBufferConf::width - 1}},
+		{50, {20, 10}, {2, -1}, {MMScreenBufferConf::height - 1, MMScreenBufferConf::width - 1}},
+		{40, {10, 220}, {2, 3}, {MMScreenBufferConf::height - 1, MMScreenBufferConf::width - 1}},
 	};
 
 	static inline Color ball_colors[4] = {
@@ -32,7 +32,6 @@ struct BouncingBallsPage : PageBase {
 			ball.update();
 			auto pos = ball.get_pos();
 			screen.blend64FillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565(), 0.5f);
-			// pm->screen.fillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565());
 			i++;
 		}
 	}
