@@ -13,14 +13,15 @@ class SharedBusQueue {
 public:
 	SharedBusQueue(Controls &controls)
 		: controls{controls}
-	{}
+	{
+		controls.potadc.select_pot_source(mux_channel_order[cur_pot], ain_channel_order[cur_pot]);
+	}
 
 	void update()
 	{
 		switch (cur_client) {
 
 			case SelectChannel: {
-				controls.potadc.select_pot_source(mux_channel_order[cur_pot]);
 				auto chan = static_cast<MuxedADC::Channel>(ain_channel_order[cur_pot]);
 				controls.potadc.select_adc_channel(chan);
 				cur_client = RequestRead;
@@ -45,8 +46,8 @@ public:
 					cur_client = SelectChannel;
 				} else {
 					cur_client = RequestRead;
-					controls.potadc.select_pot_source(mux_channel_order[cur_pot]);
 				}
+				controls.potadc.select_pot_source(mux_channel_order[cur_pot], ain_channel_order[cur_pot]);
 			} break;
 
 			default:
