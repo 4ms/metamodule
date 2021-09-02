@@ -71,13 +71,9 @@ void main()
 
 	while (true) {
 		HAL_Delay(500);
-		// for (uint32_t i = 0; i < 100000000UL; i++)
-		// 	__NOP();
 		Debug::red_LED1::high();
 
 		HAL_Delay(500);
-		// for (uint32_t i = 0; i < 100000000UL; i++)
-		// 	__NOP();
 		Debug::red_LED1::low();
 	}
 }
