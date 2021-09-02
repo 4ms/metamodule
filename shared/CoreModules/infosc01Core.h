@@ -441,7 +441,7 @@ public:
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Pitch", "Track", "Range", "FM", "Abs", "Phase", "Modshape", "Wave"};
 	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Out"};
 	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Pitch", "Range", "FM", "Mod", "Abs", "Lin", "Phase", "PM", "Scan", "Add", "Reset"};
-	static inline const StaticString<LongNameChars> description{"infinite-oscillator-01"};
+	static inline const StaticString<LongNameChars> description{"InfOsc"};
 	static constexpr char typeID[20] = "INFOSC01";
 
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<Infosc01Core>(); }
