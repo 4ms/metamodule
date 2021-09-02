@@ -10,76 +10,65 @@ namespace MetaModule
 {
 
 class SharedBusQueue {
-	enum I2CClients {
-		SelectPots,
-		RequestReadPots,
-		CollectReadPots,
-
-		SelectPatchCV,
-		RequestReadPatchCV,
-		CollectReadPatchCV,
-	};
-	I2CClients cur_client = SelectPots;
-	uint8_t cur_pot;
-
 public:
 	SharedBusQueue(Controls &controls)
 		: controls{controls}
 	{}
 
-	// Loop is at ~366Hz (2.73ms)
-	// with GPIO Exp it's at 185Hz (5.4ms) -- vs audio block @64 runs at 750Hz
 	void update()
 	{
 		switch (cur_client) {
 
-			case SelectPots:
+			case SelectChannel: {
 				HWSemaphore<LEDFrameBufLock>::unlock();
-				cur_pot = 0;
-				controls.potadc.select_pot_source(cur_pot);
-				controls.potadc.select_adc_channel(MuxedADC::Channel::Pots);
-				cur_client = RequestReadPots;
-				break;
+				controls.potadc.select_pot_source(mux_channel_order[cur_pot]);
+				auto chan = static_cast<MuxedADC::Channel>(ain_channel_order[cur_pot]);
+				controls.potadc.select_adc_channel(chan);
+				cur_client = RequestRead;
+			} break;
 
-			case RequestReadPots:
+			case RequestRead: {
 				controls.potadc.request_reading();
-				cur_client = CollectReadPots;
-				break;
+				cur_client = CollectRead;
+			} break;
 
-			case CollectReadPots:
-				controls.store_pot_reading(cur_pot, controls.potadc.collect_reading());
-				if (++cur_pot >= 8) {
-					cur_client = SelectPatchCV;
+			case CollectRead: {
+				auto reading = controls.potadc.collect_reading();
+				controls.store_pot_reading(cur_pot, reading);
+
+				auto last_ain_channel = ain_channel_order[cur_pot];
+				if (++cur_pot >= NumADCs) {
 					cur_pot = 0;
-				} else
-					cur_client = RequestReadPots;
-				controls.potadc.select_pot_source(cur_pot);
-				break;
+					HWSemaphore<M4_ready>::unlock();
+				}
 
-			case SelectPatchCV:
-				controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);
-				cur_client = RequestReadPatchCV;
-				break;
-
-			case RequestReadPatchCV:
-				controls.potadc.request_reading();
-				cur_client = CollectReadPatchCV;
-				break;
-
-			case CollectReadPatchCV:
-				controls.store_patchcv_reading(controls.potadc.collect_reading());
-				cur_client = SelectPots;
-				HWSemaphore<M4_ready>::unlock();
-				break;
+				if (ain_channel_order[cur_pot] != last_ain_channel) {
+					cur_client = SelectChannel;
+				} else {
+					cur_client = RequestRead;
+					controls.potadc.select_pot_source(mux_channel_order[cur_pot]);
+				}
+			} break;
 
 			default:
-				cur_client = SelectPots;
+				cur_client = SelectChannel;
 				break;
 		}
 	}
 
 private:
 	Controls &controls;
+	static constexpr uint32_t NumADCs = PanelDef::NumPot + PanelDef::NumMetaCV;
+	static constexpr uint8_t mux_channel_order[NumADCs] = {0, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7};
+	static constexpr uint8_t ain_channel_order[NumADCs] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1};
+
+	enum I2CClients {
+		SelectChannel,
+		RequestRead,
+		CollectRead,
+	};
+	I2CClients cur_client = SelectChannel;
+	uint8_t cur_pot = 0;
 };
 
 // Todo: create class RoundRobinHandler {

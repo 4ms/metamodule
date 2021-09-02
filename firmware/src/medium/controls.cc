@@ -36,7 +36,7 @@ void Controls::update_params()
 		store_jacksense_reading(cur_params->jack_senses);
 
 		// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
-		for (int i = 0; i < NumPot; i++) {
+		for (int i = 0; i < PanelDef::NumPot; i++) {
 			_knobs[i].set_new_value(get_pot_reading(i) / 4095.0f);
 			cur_params->knobs[i] = _knobs[i].next();
 		}
