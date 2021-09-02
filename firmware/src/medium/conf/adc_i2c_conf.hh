@@ -4,12 +4,14 @@
 using mdrivlib::GPIO;
 using mdrivlib::PinAF;
 
-const mdrivlib::MuxedADC_Config muxed_adc_conf{
-	.SEL0{GPIO::B, 15, PinAF::AFNone},
-	.SEL1{GPIO::B, 3, PinAF::AFNone},
-	.SEL2{GPIO::B, 4, PinAF::AFNone},
-	.adc_conf =
-		{
-			//
-		},
+const mdrivlib::DualMuxedADC_Config muxed_adc_conf{
+	.SEL0{GPIO::E, 13, PinAF::AFNone},
+	.SEL1{GPIO::H, 8, PinAF::AFNone},
+	.SEL2{GPIO::D, 10, PinAF::AFNone},
+
+	.bSEL0{GPIO::B, 15, PinAF::AFNone},
+	.bSEL1{GPIO::B, 3, PinAF::AFNone},
+	.bSEL2{GPIO::B, 4, PinAF::AFNone},
+
+	.adc_conf = {},
 };

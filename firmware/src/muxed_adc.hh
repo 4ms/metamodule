@@ -24,6 +24,16 @@ public:
 		, _adc{i2c, conf.adc_conf}
 	{}
 
+	MuxedADC(I2CPeriph &i2c, const DualMuxedADC_Config &conf)
+		: _pot_sel{{conf.SEL0.gpio, conf.SEL0.pin, PinMode::Output},
+				   {conf.SEL1.gpio, conf.SEL1.pin, PinMode::Output},
+				   {conf.SEL2.gpio, conf.SEL2.pin, PinMode::Output}}
+		, _pot_sel_b{{conf.bSEL0.gpio, conf.bSEL0.pin, PinMode::Output},
+					 {conf.bSEL1.gpio, conf.bSEL1.pin, PinMode::Output},
+					 {conf.bSEL2.gpio, conf.bSEL2.pin, PinMode::Output}}
+		, _adc{i2c, conf.adc_conf}
+	{}
+
 	void start()
 	{
 		auto err = _adc.send_config();
@@ -35,6 +45,19 @@ public:
 		_pot_sel[0].set_to(pot & 0b001);
 		_pot_sel[1].set_to(pot & 0b010);
 		_pot_sel[2].set_to(pot & 0b100);
+	}
+
+	void select_pot_source(unsigned pot, unsigned chipnum)
+	{
+		if (chipnum == 0) {
+			_pot_sel[0].set_to(pot & 0b001);
+			_pot_sel[1].set_to(pot & 0b010);
+			_pot_sel[2].set_to(pot & 0b100);
+		} else {
+			_pot_sel_b[0].set_to(pot & 0b001);
+			_pot_sel_b[1].set_to(pot & 0b010);
+			_pot_sel_b[2].set_to(pot & 0b100);
+		}
 	}
 
 	void select_adc_channel(Channel chan)
@@ -56,6 +79,8 @@ public:
 
 private:
 	Pin _pot_sel[3];
+	Pin _pot_sel_b[3];
+
 	ADC_I2C_MAX11645 _adc;
 
 	void handle_error(ADC_I2C_MAX11645::Error err)
