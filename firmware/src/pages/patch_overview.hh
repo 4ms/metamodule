@@ -96,7 +96,6 @@ struct KnobMapPage : PageBase {
 		screen.setFont(PageWidgets::list_font);
 		const uint16_t y_pos = PageWidgets::list_ypos;
 		const uint16_t line_height = PageWidgets::list_lineheight;
-		const char knob_name[8][2] = {"A", "B", "C", "D", "a", "b", "c", "d"};
 
 		if (patch_player.is_loaded) {
 			int i = 0;
@@ -106,8 +105,8 @@ struct KnobMapPage : PageBase {
 
 				screen.setTextColor(Colors::black);
 				screen.setCursor(2, y_pos + line_height * i);
-				screen.print(knob_name[knob_conn[0].panel_knob_id]);
-				screen.print(" = ");
+				screen.print(patch_player.modules[0]->knob_name(knob_conn[0].panel_knob_id));
+				screen.print("= ");
 
 				for (auto &knob : knob_conn) {
 					screen.setTextColor(Colors::white.blend(Colors::black, 0.75f));
