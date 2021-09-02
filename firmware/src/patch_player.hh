@@ -148,16 +148,33 @@ public:
 	// Runs the patch
 	void update_patch()
 	{
-		for (int module_i = 1; module_i < header->num_modules; module_i++) {
-			if (!mdrivlib::SMPThread::is_running()) {
-				mdrivlib::SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);
-			} else {
-				// Debug::Pin2::high();
+		if (header->num_modules < 2)
+			return;
+
+		if (header->num_modules == 2)
+			modules[1]->update();
+		else {
+			mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2);
+			mdrivlib::SMPControl::write<SMPRegister::NumModules>(header->num_modules);
+			mdrivlib::SMPControl::write<SMPRegister::IndexIncrement>(2);
+			mdrivlib::SMPControl::notify<SMPCommand::UpdateListOfModules>();
+			for (int module_i = 1; module_i < header->num_modules; module_i += 2) {
+				Debug::Pin2::high();
 				modules[module_i]->update();
-				// Debug::Pin2::low();
+				Debug::Pin2::low();
 			}
+
+			// for (int module_i = 1; module_i < header->num_modules; module_i++) {
+			// 	if (!mdrivlib::SMPThread::is_running()) {
+			// 		mdrivlib::SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);
+			// 	} else {
+			// 		Debug::Pin2::high();
+			// 		modules[module_i]->update();
+			// 		Debug::Pin2::low();
+			// 	}
+			// }
+			mdrivlib::SMPThread::join();
 		}
-		mdrivlib::SMPThread::join();
 
 		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
 			auto &cable = int_cables[net_i];
