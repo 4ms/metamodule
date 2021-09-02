@@ -2,6 +2,7 @@
 #include <cstdint>
 
 struct PanelDef {
+	static constexpr uint32_t PanelID = 1;
 	static constexpr uint32_t NumAudioIn = 6;
 	static constexpr uint32_t NumAudioOut = 8;
 	static constexpr uint32_t NumDACOut = 0;
