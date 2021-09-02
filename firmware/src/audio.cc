@@ -120,14 +120,29 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch
 	// Todo: fade down before setting audio_is_muted to true
-	if (mbox.loading_new_patch) {
-		output_silence(out, aux);
-		if (_mute_ctr == 0)
-			_mute_ctr = 10;
-		if (--_mute_ctr)
-			mbox.audio_is_muted = true;
+	mbox.audio_is_muted = mbox.loading_new_patch ? true : false;
+	if (mbox.audio_is_muted) {
+		//FixMe:
+		//output_silence(out, aux);
 		return;
 	}
+
+	//if (mbox.loading_new_patch) {
+	//	Debug::Pin3::high();
+	//	//This would be a fade down over 10 blocks:
+	//	if (_mute_ctr)
+	//		_mute_ctr--;
+	//	else {
+	//		output_silence(out, aux);
+	//		Debug::Pin3::low();
+	//		load_measure.end_measurement();
+	//		mbox.audio_is_muted = true;
+	//		return;
+	//	}
+	//} else {
+	//	mbox.audio_is_muted = false;
+	//	_mute_ctr = 10;
+	//}
 
 	// if constexpr (DEBUG_NE10_FFT) {
 	// 	fftfx.process(in, out);
