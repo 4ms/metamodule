@@ -12,6 +12,8 @@
 #include "patch/integration_tests/test_envelopefollowerCore.hh"
 #include "patch/integration_tests/test_fourstepCore.hh"
 #include "patch/integration_tests/test_gateCore.hh"
+#include "patch/integration_tests/test_inputs_1234.hh"
+#include "patch/integration_tests/test_inputs_56g1g2.hh"
 #include "patch/integration_tests/test_karplusCore.hh"
 #include "patch/integration_tests/test_logicCore.hh"
 #include "patch/integration_tests/test_minmaxCore.hh"

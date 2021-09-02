@@ -1,0 +1,229 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 46,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "metaModuleHubModule",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 52,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 51,
+            "DstObjID": 0,
+            "DstObjType": "InputJack",
+            "SrcModID": 46,
+            "SrcObjID": 0,
+            "SrcObjType": "InputJack"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 1,
+            "DstObjType": "InputJack",
+            "SrcModID": 46,
+            "SrcObjID": 1,
+            "SrcObjType": "InputJack"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 4,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 46,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 1,
+            "DstObjType": "OutputJack",
+            "SrcModID": 46,
+            "SrcObjID": 1,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 2,
+            "DstObjType": "InputJack",
+            "SrcModID": 46,
+            "SrcObjID": 2,
+            "SrcObjType": "InputJack"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 3,
+            "DstObjType": "InputJack",
+            "SrcModID": 46,
+            "SrcObjID": 3,
+            "SrcObjType": "InputJack"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 4,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 6,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 5,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 7,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 7,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 5,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 6,
+            "SrcObjType": "Knob"
+          }
+        ],
+        "PatchName": "test_inputs_1234"
+      },
+      "pos": [
+        18,
+        0
+      ]
+    },
+    {
+      "id": 51,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "STEREOMIXER",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.612000108
+        },
+        {
+          "id": 3,
+          "value": 0.401999921
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 52,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 46,
+      "text": "Patch the Out 1 and Out 2 to speakers/headphones, panning Out 1 to the left ear and Out 2 to the right.\n\nOne at a time, patch a signal input the first 4 input jacks (Audio and CV)\n\nEach pair of knobs 1/2, 3/4, 5/6, 7/8 is Level and Pan for an input\n\n\nVerify the each input signal can be controlled in volume and panning by its respective knobs.\n\n",
+      "pos": [
+        34,
+        0
+      ]
+    }
+  ],
+  "cables": []
+}
