@@ -19,7 +19,7 @@ namespace MetaModule
 
 using namespace mdrivlib;
 
-constexpr bool DEBUG_PASSTHRU_AUDIO = true;
+constexpr bool DEBUG_PASSTHRU_AUDIO = false;
 constexpr bool DEBUG_SINEOUT_AUDIO = false;
 constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;
@@ -120,9 +120,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch
 	// Todo: fade down before setting audio_is_muted to true
-	mbox.audio_is_muted = mbox.loading_new_patch ? true : false;
-	if (mbox.audio_is_muted) {
+	if (mbox.loading_new_patch) {
 		output_silence(out, aux);
+		if (_mute_ctr == 0)
+			_mute_ctr = 10;
+		if (--_mute_ctr)
+			mbox.audio_is_muted = true;
 		return;
 	}
 
