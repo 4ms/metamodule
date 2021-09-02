@@ -37,7 +37,7 @@ struct Params {
 
 	// Same value for an entire block:
 	std::array<float, NumPot> knobs{};
-	uint16_t jack_senses;
+	uint32_t jack_senses;
 
 	Params()
 	{
