@@ -159,7 +159,8 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 
 void Controls::store_pot_reading(uint32_t pot_id, uint32_t val)
 {
-	latest_pot_reading[_pot_map[pot_id]] = val > 4095 ? 4095 : val;
+	//latest_pot_reading[_pot_map[pot_id]] = val > 4095 ? 4095 : val;
+	latest_pot_reading[pot_id] = val > 4095 ? 4095 : val;
 }
 uint32_t Controls::get_pot_reading(uint32_t pot_id)
 {
