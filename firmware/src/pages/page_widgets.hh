@@ -110,32 +110,67 @@ struct PageWidgets {
 		const uint16_t box_height = 16;
 		const uint16_t box_width = MMScreenBufferConf::width / 8;
 
-		const unsigned pin_order[15] = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 4, 5, 14};
-		const char names[15][5] = {"CVA",
-								   "CVB",
-								   "CVC",
-								   "CVD",
-								   "Lin",
-								   "Rin",
-								   "Lout",
-								   "Rout",
-								   "Gt1",
-								   "Gt2",
-								   "CkIn",
-								   "CkO",
-								   "CVO1",
-								   "CVO2",
-								   "Pat"};
-		for (unsigned i = 0; i < 15; i++) {
-			auto pin = pin_order[i];
-			bool plugged = params.jack_senses & (1 << pin);
-			bool works = (pin != 4 && pin != 5 && pin != 8 && pin != 9 && pin != 13);
-			uint16_t xpos = (i & 0b0111) * box_width;
-			uint16_t ypos = i > 7 ? yoffset + box_height : yoffset;
-			auto color = works ? (plugged ? patched_rect_color : unpatched_rect_color) : notworking_rect_color;
-			screen.blendRect(xpos, ypos, box_width, box_height, color.Rgb565(), box_alpha);
-			screen.setCursor(xpos + 3, ypos);
-			screen.print(names[i]);
+		const uint32_t NumJacks = PanelDef::NumInJacks + PanelDef::NumOutJacks + PanelDef::NumMetaCV;
+
+		if constexpr (PanelDef::PanelID == 0) {
+			const unsigned pin_order[NumJacks] = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 4, 5, 14};
+			const char names[NumJacks][5] = {"CVA",
+											 "CVB",
+											 "CVC",
+											 "CVD",
+											 "Lin",
+											 "Rin",
+											 "Lout",
+											 "Rout",
+											 "Gt1",
+											 "Gt2",
+											 "CkIn",
+											 "CkO",
+											 "CVO1",
+											 "CVO2",
+											 "Pat"};
+			for (unsigned i = 0; i < NumJacks; i++) {
+				auto pin = pin_order[i];
+				bool plugged = params.jack_senses & (1 << pin);
+				bool works = (pin != 4 && pin != 5 && pin != 8 && pin != 9 && pin != 13);
+				uint16_t xpos = (i & 0b0111) * box_width;
+				uint16_t ypos = i > 7 ? yoffset + box_height : yoffset;
+				auto color = works ? (plugged ? patched_rect_color : unpatched_rect_color) : notworking_rect_color;
+				screen.blendRect(xpos, ypos, box_width, box_height, color.Rgb565(), box_alpha);
+				screen.setCursor(xpos + 3, ypos);
+				screen.print(names[i]);
+			}
+		} else if constexpr (PanelDef::PanelID == 1) {
+			// const unsigned pin_order[NumJacks] = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 4, 5, 14};
+			const char names[NumJacks][5] = {"In1",
+											 "In2",
+											 "In3",
+											 "In4",
+											 "In5",
+											 "In6",
+											 "GI1",
+											 "GI2",
+											 "Out1",
+											 "Out2",
+											 "Out3",
+											 "Out4",
+											 "Out5",
+											 "Out6",
+											 "Out7",
+											 "Out8",
+											 "GO1",
+											 "GO2",
+											 "PCV"};
+			for (unsigned i = 0; i < NumJacks; i++) {
+				auto pin = i; //pin_order[i];
+				bool plugged = params.jack_senses & (1 << pin);
+				uint16_t xpos = (i & 0b0111) * box_width;
+				uint16_t ypos = i > 15 ? yoffset + box_height * 2 : i > 7 ? yoffset + box_height : yoffset;
+				auto color = plugged ? patched_rect_color : unpatched_rect_color;
+				screen.blendRect(xpos, ypos, box_width, box_height, color.Rgb565(), box_alpha);
+				screen.setCursor(xpos + 3, ypos);
+				screen.print(names[i]);
+			}
 		}
 	}
 };
