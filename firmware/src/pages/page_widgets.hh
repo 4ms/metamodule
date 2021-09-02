@@ -108,31 +108,40 @@ struct PageWidgets {
 
 		const uint16_t yoffset = y_pos;
 		const uint16_t box_height = 16;
-		const uint16_t box_width = MMScreenBufferConf::width / 8;
 
 		if constexpr (PanelDef::PanelID == 0) {
+			const uint16_t boxes_per_row = 8;
+			const uint16_t box_width = MMScreenBufferConf::viewWidth / boxes_per_row;
 			const unsigned pin_order[PanelDef::NumJacks] = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 4, 5, 14};
 			for (unsigned i = 0; i < PanelDef::NumJacks; i++) {
 				auto pin = pin_order[i];
 				bool plugged = params.jack_senses & (1 << pin);
 				bool works = (pin != 4 && pin != 5 && pin != 8 && pin != 9 && pin != 13);
 				uint16_t xpos = (i & 0b0111) * box_width;
-				uint16_t ypos = i > 7 ? yoffset + box_height : yoffset;
+				uint16_t ypos = i >= boxes_per_row ? yoffset + box_height : yoffset;
 				auto color = works ? (plugged ? patched_rect_color : unpatched_rect_color) : notworking_rect_color;
 				screen.blendRect(xpos, ypos, box_width, box_height, color.Rgb565(), box_alpha);
 				screen.setCursor(xpos + 3, ypos);
 				screen.print(PanelDef::ShortJackNames[i]);
 			}
 		} else if constexpr (PanelDef::PanelID == 1) {
+			const uint16_t boxes_per_row = 10;
+			const uint16_t box_width = MMScreenBufferConf::viewWidth / boxes_per_row;
+			uint16_t xpos = 0;
+			uint16_t ypos = yoffset;
 			for (unsigned i = 0; i < PanelDef::NumJacks; i++) {
 				auto pin = i; //pin_order[i];
 				bool plugged = params.jack_senses & (1 << pin);
-				uint16_t xpos = (i & 0b0111) * box_width;
-				uint16_t ypos = i > 15 ? yoffset + box_height * 2 : i > 7 ? yoffset + box_height : yoffset;
 				auto color = plugged ? patched_rect_color : unpatched_rect_color;
 				screen.blendRect(xpos, ypos, box_width, box_height, color.Rgb565(), box_alpha);
 				screen.setCursor(xpos + 3, ypos);
 				screen.print(PanelDef::ShortJackNames[i]);
+
+				xpos += box_width;
+				if (i == boxes_per_row - 1) {
+					xpos = 0;
+					ypos += box_height;
+				}
 			}
 		}
 	}

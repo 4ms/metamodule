@@ -13,10 +13,10 @@ struct PatchSelectorPage : PageBase {
 
 	void calc_scroll_offset()
 	{
-		if ((int32_t)patch_list.NumPatches <= (240 - y_offset) / lineheight)
+		if ((int32_t)patch_list.NumPatches <= (MMScreenBufferConf::viewHeight - y_offset) / lineheight)
 			scroll_offset_px = 0;
-		else if ((cur_hi_top_pos + scroll_offset_px) > (240 - lineheight)) {
-			scroll_offset_px = 240 - lineheight - cur_hi_top_pos;
+		else if ((cur_hi_top_pos + scroll_offset_px) > (MMScreenBufferConf::viewHeight - lineheight)) {
+			scroll_offset_px = MMScreenBufferConf::viewHeight - lineheight - cur_hi_top_pos;
 		} else if ((cur_hi_top_pos + scroll_offset_px) < (y_offset)) {
 			scroll_offset_px = y_offset - cur_hi_top_pos;
 		}
@@ -45,11 +45,11 @@ struct PatchSelectorPage : PageBase {
 		PageWidgets::setup_header(screen);
 		screen.print("Select a patch:");
 		screen.setFont(PageWidgets::subheader_font);
-		screen.drawHLine(0, y_offset, 240, Colors::grey.Rgb565());
+		screen.drawHLine(0, y_offset, MMScreenBufferConf::viewWidth, Colors::grey.Rgb565());
 		if (scroll_offset_px < 0)
-			screen.printf_at(230, y_offset, "^");
-		if ((int)patch_list.NumPatches * lineheight + scroll_offset_px > (240 - y_offset))
-			screen.printf_at(230, 210, "v");
+			screen.printf_at(MMScreenBufferConf::viewWidth - 10, y_offset, "^");
+		if ((int)patch_list.NumPatches * lineheight + scroll_offset_px > (MMScreenBufferConf::viewHeight - y_offset))
+			screen.printf_at(MMScreenBufferConf::viewWidth - 10, 210, "v");
 
 		if (animation_ctr) {
 			animation_ctr--;
@@ -59,7 +59,15 @@ struct PatchSelectorPage : PageBase {
 
 		calc_scroll_offset();
 
-		screen.blendRect(0, cur_hi_top_pos + scroll_offset_px + 2, 240, lineheight, Colors::cyan.Rgb565(), 0.6f);
+		//Highlight bar
+		screen.blendRect(0,
+						 cur_hi_top_pos + scroll_offset_px + 2,
+						 MMScreenBufferConf::viewWidth,
+						 lineheight,
+						 Colors::cyan.Rgb565(),
+						 0.6f);
+
+		//Names of patches
 		screen.setTextColor(Colors::black);
 		int16_t y_pos = y_offset + scroll_offset_px;
 		for (unsigned i = 0; i < PatchList::NumPatches; i++) {
