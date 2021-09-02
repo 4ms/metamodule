@@ -7,18 +7,19 @@
 namespace MetaModule
 {
 
-using mdrivlib::GPIO;
-using mdrivlib::PinNoInit;
-
-template<GPIO port, uint16_t pin>
-using FPin = mdrivlib::FPin<port, pin, mdrivlib::PinMode::Input>;
-
 const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 	.TIMx = TIM6,
 	.period_ns = 20000, // must be just a hair faster than 48kHz
 	.priority1 = 2,		// same group as global Semaphore unlock, so that
 	.priority2 = 3,
 };
+
+using mdrivlib::GPIO;
+using mdrivlib::PinNoInit;
+using mdrivlib::PinPull;
+
+template<GPIO port, uint16_t pin>
+using FPin = mdrivlib::FPin<port, pin, mdrivlib::PinMode::Input>;
 
 struct MMControlPins {
 	static constexpr PinNoInit rotA{GPIO::A, 15};
@@ -31,6 +32,7 @@ struct MMControlPins {
 	static constexpr PinNoInit gate_in_2{GPIO::H, 9};
 };
 
+//TODO: parameterize this and put it in mdrivlib
 struct MultiGPIOReader {
 	using AudioIn1 = FPin<GPIO::I, 5>;
 	using AudioIn2 = FPin<GPIO::G, 12>;
@@ -73,6 +75,8 @@ struct MultiGPIOReader {
 		AIn4,
 		AIn5,
 		AIn6,
+		GIn1,
+		GIn2,
 		AOut1,
 		AOut2,
 		AOut3,
@@ -81,8 +85,6 @@ struct MultiGPIOReader {
 		AOut6,
 		AOut7,
 		AOut8,
-		GIn1,
-		GIn2,
 		GOut1,
 		GOut2,
 		PCV
@@ -127,25 +129,25 @@ struct MultiGPIOReader {
 		return val;
 	}
 
-	AudioIn1 init_AudioIn1;
-	AudioIn2 init_AudioIn2;
-	AudioIn3 init_AudioIn3;
-	AudioIn4 init_AudioIn4;
-	AudioIn5 init_AudioIn5;
-	AudioIn6 init_AudioIn6;
-	AudioOut1 init_AudioOut1;
-	AudioOut2 init_AudioOut2;
-	AudioOut3 init_AudioOut3;
-	AudioOut4 init_AudioOut4;
-	AudioOut5 init_AudioOut5;
-	AudioOut6 init_AudioOut6;
-	AudioOut7 init_AudioOut7;
-	AudioOut8 init_AudioOut8;
-	PatchCV init_PatchCV;
-	GateIn1 init_GateIn1;
-	GateIn2 init_GateIn2;
-	GateOut1 init_GateOut1;
-	GateOut2 init_GateOut2;
+	AudioIn1 init_AudioIn1{PinPull::Up};
+	AudioIn2 init_AudioIn2{PinPull::Up};
+	AudioIn3 init_AudioIn3{PinPull::Up};
+	AudioIn4 init_AudioIn4{PinPull::Up};
+	AudioIn5 init_AudioIn5{PinPull::Up};
+	AudioIn6 init_AudioIn6{PinPull::Up};
+	AudioOut1 init_AudioOut1{PinPull::Up};
+	AudioOut2 init_AudioOut2{PinPull::Up};
+	AudioOut3 init_AudioOut3{PinPull::Up};
+	AudioOut4 init_AudioOut4{PinPull::Up};
+	AudioOut5 init_AudioOut5{PinPull::Up};
+	AudioOut6 init_AudioOut6{PinPull::Up};
+	AudioOut7 init_AudioOut7{PinPull::Up};
+	AudioOut8 init_AudioOut8{PinPull::Up};
+	PatchCV init_PatchCV{PinPull::Up};
+	GateIn1 init_GateIn1{PinPull::Up};
+	GateIn2 init_GateIn2{PinPull::Up};
+	GateOut1 init_GateOut1{PinPull::Up};
+	GateOut2 init_GateOut2{PinPull::Up};
 };
 
 } // namespace MetaModule
