@@ -70,7 +70,6 @@ private:
 	uint32_t latest_patchcv_reading;
 	uint16_t latest_jacksense_reading;
 	uint32_t latest_pot_reading[PanelDef::NumPot] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	const uint8_t _pot_map[PanelDef::NumPot] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 	InterpParam<float, StreamConf::Audio::BlockSize> _knobs[PanelDef::NumPot];
 
 	bool _rotary_moved_while_pressed = false;

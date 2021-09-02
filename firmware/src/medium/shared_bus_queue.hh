@@ -20,7 +20,6 @@ public:
 		switch (cur_client) {
 
 			case SelectChannel: {
-				HWSemaphore<LEDFrameBufLock>::unlock();
 				controls.potadc.select_pot_source(mux_channel_order[cur_pot]);
 				auto chan = static_cast<MuxedADC::Channel>(ain_channel_order[cur_pot]);
 				controls.potadc.select_adc_channel(chan);
@@ -34,7 +33,7 @@ public:
 
 			case CollectRead: {
 				auto reading = controls.potadc.collect_reading();
-				controls.store_pot_reading(cur_pot, reading);
+				controls.store_pot_reading(pot_order[cur_pot], reading);
 
 				auto last_ain_channel = ain_channel_order[cur_pot];
 				if (++cur_pot >= NumADCs) {
@@ -61,6 +60,9 @@ private:
 	static constexpr uint32_t NumADCs = PanelDef::NumPot + PanelDef::NumMetaCV;
 	static constexpr uint8_t mux_channel_order[NumADCs] = {0, 2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7};
 	static constexpr uint8_t ain_channel_order[NumADCs] = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1};
+	static constexpr uint8_t PatchCVID = NumADCs;
+	static constexpr uint8_t pot_order[NumADCs] = {7, 6, 0, 8, 9, 2, 1, 10, 5, 11, 3, PatchCVID, 4};
+	uint8_t cur_pot = 0;
 
 	enum I2CClients {
 		SelectChannel,
@@ -68,7 +70,6 @@ private:
 		CollectRead,
 	};
 	I2CClients cur_client = SelectChannel;
-	uint8_t cur_pot = 0;
 };
 
 // Todo: create class RoundRobinHandler {
