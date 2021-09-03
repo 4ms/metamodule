@@ -56,7 +56,7 @@ void operator delete[](void *p, std::nothrow_t) noexcept
 	operator delete(p);
 }
 
-static char *heap_end;
+static char *heap_end = nullptr;
 // Defined by the linker
 extern char _sheap;
 
@@ -72,14 +72,14 @@ extern "C" size_t _sbrk(int incr)
 
 	char *prev_heap_end;
 
-	if (heap_end == 0) {
+	if (heap_end == nullptr) {
 		heap_end = &_sheap;
 	}
 	prev_heap_end = heap_end;
 
 	if (heap_end + incr > &_eheap) {
 		// OOM!!!
-		while (1)
+		while (true)
 			;
 	}
 

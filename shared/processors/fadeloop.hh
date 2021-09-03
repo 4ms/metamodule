@@ -6,6 +6,7 @@
 
 template<typename BufferType>
 class FadeLoopExt {
+protected:
 	BufferType &buffer;
 	using DataType = typename std::remove_reference_t<decltype(buffer[0])>;
 	static constexpr unsigned long MAX_LENGTH = sizeof(BufferType) / sizeof(DataType);
@@ -122,9 +123,53 @@ private:
 // FadeLoop is a simple wrapper for FadeLoopExt,
 // where the buffer is std::array, allocated in the "big" heap
 template<typename DataType, unsigned long MAX_LENGTH>
-struct FadeLoop : FadeLoopExt<std::array<DataType, MAX_LENGTH>> {
+struct FadeLoop {
+	using BufferType = std::array<DataType, MAX_LENGTH>;
+
 	FadeLoop()
-		: FadeLoopExt<std::array<DataType, MAX_LENGTH>>{*(new BigAlloc<std::array<DataType, MAX_LENGTH>>)}
+		: buf{new BigAlloc<BufferType>}
+		, fadeloop{*buf}
 	{}
+
+	DataType process(DataType val_to_write)
+	{
+		return fadeloop.process(val_to_write);
+	}
+	DataType read()
+	{
+		return fadeloop.read();
+	}
+	void write(DataType val)
+	{
+		fadeloop.write(val);
+	}
+	void set_fade_speed(float val)
+	{
+		fadeloop.set_fade_speed(val);
+	}
+	void change_delay(unsigned long length)
+	{
+		fadeloop.change_delay(length);
+	}
+	bool is_crossfading()
+	{
+		return fadeloop.is_crossfading();
+	}
+
+	~FadeLoop()
+	{
+		delete buf;
+	}
+
+	BigAlloc<BufferType> *buf;
+	FadeLoopExt<BufferType> fadeloop;
 };
 
+//TODO get this working, so it deletes
+template<typename DataType, unsigned long MAX_LENGTH>
+struct FadeLoop2 : FadeLoopExt<std::array<DataType, MAX_LENGTH>> {
+	FadeLoop2()
+		: FadeLoopExt<std::array<DataType, MAX_LENGTH>>{
+			  *(std::make_unique<BigAlloc<std::array<DataType, MAX_LENGTH>>>())}
+	{}
+};
