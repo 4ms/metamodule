@@ -19,13 +19,6 @@ public:
 	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Freq", "Reset"};
 	static inline const StaticString<LongNameChars> description{"SineLFO"};
 
-	// clang-format off
-	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
-	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
-	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
-	virtual StaticString<LongNameChars> get_description() override { return description; }
-	// clang-format on
-
 	NodeLFOCore()
 	{
 		freqJack = 0.f;
@@ -60,12 +53,20 @@ public:
 
 	void check_changes()
 	{
+		//Freq jack range is -10 .. 10 octaves,
+		//Freq jack expects -1..+1 to represent -10V to +10V
 		if (freqJack.isChanged()) {
 			float val = freqJack.getValue();
-			if (val >= 0.f)
-				cv_frequency = exp5Table.closest(constrain(val, 0.f, 1.f));
+			if (val == 0.f)
+				cv_frequency = 1.0f;
+			else if (val >= 1.f)
+				cv_frequency = 1024.f;
+			else if (val <= -1.f)
+				cv_frequency = 1.f / 1024.f;
+			else if (val > 0.f)
+				cv_frequency = exp10Table.closest(val);
 			else
-				cv_frequency = 1.0f / exp5Table.closest(constrain(-val, 0.0f, 1.f));
+				cv_frequency = 1.0f / exp10Table.closest(-val);
 			combineKnobCVFreq();
 		}
 
@@ -81,11 +82,11 @@ public:
 		}
 	}
 
-	virtual void set_param(const int param_id, const float val) override
+	//
+	void set_param(const int param_id, const float val) override
 	{
 		if (param_id == 0) {
-			auto expoval = exp5Table.closest(constrain(val, 0.f, 1.f));
-			knob_frequency = expoval * expoval;
+			knob_frequency = exp10Table.closest(constrain(val, 0.f, 1.f)); //knob range is 10 octaves
 			combineKnobCVFreq();
 		}
 		if (param_id == 1) {
@@ -95,12 +96,13 @@ public:
 			level = val;
 		}
 	}
-	virtual void set_samplerate(const float sr) override
+
+	void set_samplerate(const float sr) override
 	{
 		sampleRate = sr;
 	}
 
-	virtual void set_input(const int input_id, const float val) override
+	void set_input(const int input_id, const float val) override
 	{
 		if (input_id == 0) {
 			freqJack = val;
@@ -110,12 +112,19 @@ public:
 		}
 	}
 
-	virtual float get_output(const int output_id) const override
+	float get_output(const int output_id) const override
 	{
 		if (output_id == 0)
 			return sinOut;
 		return 0.f;
 	}
+
+	// clang-format off
+	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
+	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
+	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
+	virtual StaticString<LongNameChars> get_description() override { return description; }
+	// clang-format on
 
 	static std::unique_ptr<CoreProcessor> create()
 	{
