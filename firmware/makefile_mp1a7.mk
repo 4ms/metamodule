@@ -262,9 +262,9 @@ clean_uboot:
 	rm -rf $(UBOOTBUILDDIR)
 
 
-mini: all
+mini: uimg
 
-medium: all
+medium: uimg
 
 max: all
 

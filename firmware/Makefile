@@ -31,7 +31,7 @@ mp1-mini:
 
 mp1-med:
 	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk medium
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk medium
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk medium 
 
 mp1-pcmdev:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk pcmdev 
