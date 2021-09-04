@@ -150,8 +150,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		propagate_sense_pins(params_);
 
 		//Pass audio inputs to modules
-		for (auto [i, inchan] : countzip(in_.chan))
-			player.set_panel_input(PanelDef::audioin_order[i], AudioInFrame::scaleInput(inchan));
+		for (auto [i, inchan] : countzip(in_.chan)) {
+			auto pin_bit = jacksense_pin_order[i];
+			auto val = (params_.jack_senses & (1 << pin_bit)) ? AudioInFrame::scaleInput(inchan) : 0;
+			player.set_panel_input(PanelDef::audioin_order[i], val);
+		}
 
 		//Pass CV values to modules
 		for (auto [i, cv] : countzip(params_.cvjacks))
@@ -193,7 +196,15 @@ void AudioStream::propagate_sense_pins(Params &params)
 		bool sense = params.jack_senses & (1 << pin_bit);
 		player.set_input_jack_patched_status(i, sense);
 	}
+
 	// Note: p3 PCB has an error where out jack sense pins do not work, so we don't check them yet
+	if constexpr (PanelDef::PanelID != 0) {
+		// for (int i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
+		// 	auto pin_bit = jacksense_pin_order[i];
+		// 	bool sense = params.jack_senses & (1 << pin_bit);
+		// 	player.set_input_jack_patched_status(i, sense);
+		// }
+	}
 }
 
 void AudioStream::output_silence(AudioOutBuffer &out, AuxStreamBlock &aux)
