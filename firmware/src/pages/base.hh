@@ -12,6 +12,7 @@ struct PatchInfo {
 	PatchPlayer &patch_player;
 	Params &params;
 	MetaParams &metaparams;
+	UiAudioMailbox &mbox;
 };
 
 struct PageBase {
@@ -19,6 +20,7 @@ struct PageBase {
 	PatchPlayer &patch_player;
 	Params &params;
 	MetaParams &metaparams;
+	UiAudioMailbox &mbox;
 	ScreenFrameBuffer &screen;
 
 	PageBase(PatchInfo info, ScreenFrameBuffer &screen_)
@@ -26,6 +28,7 @@ struct PageBase {
 		, patch_player{info.patch_player}
 		, params{info.params}
 		, metaparams{info.metaparams}
+		, mbox{info.mbox}
 		, screen{screen_}
 	{}
 };

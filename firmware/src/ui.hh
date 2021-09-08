@@ -50,7 +50,7 @@ public:
 		, screen{screenbuf}
 		, param_cache{pc}
 		, mbox{uiaudiomailbox}
-		, pages{pl, pp, params, metaparams, screen}
+		, pages{pl, pp, params, metaparams, mbox, screen}
 		, patch_list{pl}
 		, player{pp}
 	{}
@@ -132,35 +132,11 @@ public:
 
 	void handle_rotary()
 	{
-		auto rotary = metaparams.rotary.use_motion();
-		if (rotary < 0)
-			pages.prev_page();
-		if (rotary > 0)
-			pages.next_page();
-
-		//Start changing patch
 		auto rotary_pushed_turned = metaparams.rotary_pushed.use_motion();
-		if (rotary_pushed_turned) {
-			if (auto now_tm = HAL_GetTick(); (now_tm - last_changed_page_tm) > 100) {
-				last_changed_page_tm = now_tm;
-				if (rotary_pushed_turned < 0)
-					mbox.new_patch_index = patch_list.prev_patch();
-				else
-					mbox.new_patch_index = patch_list.next_patch();
-				mbox.loading_new_patch = true;
-			}
-		}
-
-		if (mbox.loading_new_patch && mbox.audio_is_muted) {
-			player.unload_patch();
-			patch_list.set_cur_patch_index(mbox.new_patch_index);
-			bool ok = player.load_patch(patch_list.cur_patch());
-			if (!ok) {
-				while (true)
-					; //Error
-			}
-			mbox.loading_new_patch = false;
-		}
+		if (rotary_pushed_turned < 0)
+			pages.prev_page();
+		if (rotary_pushed_turned > 0)
+			pages.next_page();
 	}
 
 private:

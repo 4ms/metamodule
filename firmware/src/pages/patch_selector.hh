@@ -13,6 +13,7 @@ struct PatchSelectorPage : PageBase {
 
 	void calc_scroll_offset()
 	{
+		metaparams.rotary.use_motion();
 		if ((int32_t)patch_list.NumPatches <= (MMScreenBufferConf::viewHeight - y_offset) / lineheight)
 			scroll_offset_px = 0;
 		else if ((cur_hi_top_pos + scroll_offset_px) > ((int32_t)MMScreenBufferConf::viewHeight - lineheight)) {
@@ -30,6 +31,40 @@ struct PatchSelectorPage : PageBase {
 		animation_ctr = 0;
 		scroll_offset_px = 0;
 		calc_scroll_offset();
+	}
+
+	uint32_t last_changed_page_tm;
+
+	void change_patch()
+	{
+		//Start changing patch
+		auto rotary = metaparams.rotary.use_motion();
+		if (rotary) {
+			if (auto now_tm = HAL_GetTick(); (now_tm - last_changed_page_tm) > 100) {
+				last_changed_page_tm = now_tm;
+				if (rotary < 0)
+					mbox.new_patch_index = patch_list.prev_patch();
+				else
+					mbox.new_patch_index = patch_list.next_patch();
+				mbox.loading_new_patch = true;
+			}
+		}
+
+		if (mbox.loading_new_patch && mbox.audio_is_muted) {
+			auto orig_patch = patch_list.cur_patch();
+			patch_player.unload_patch();
+			patch_list.set_cur_patch_index(mbox.new_patch_index);
+			bool ok = patch_player.load_patch(patch_list.cur_patch());
+			if (!ok) {
+				// PageManager::set_message("Can't load patch");
+				patch_player.unload_patch();
+				patch_player.load_patch(orig_patch);
+			}
+			// else
+			// 	PageManager::clear_message();
+
+			mbox.loading_new_patch = false;
+		}
 	}
 
 	void draw()

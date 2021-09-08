@@ -34,20 +34,27 @@ class PageManager {
 	PatchSelectorPage patch_selector_page;
 	DebugInfoPage debug_info_page;
 	PageWidgets widgets;
+	PatchList &patch_list;
+	PatchPlayer &player;
+	UiAudioMailbox &mbox;
+	std::string message;
 
 public:
 	Page cur_page;
 
-	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, ScreenFrameBuffer &s)
-		: balls_page{{pl, pp, p, m}, s}
-		, overview_page{{pl, pp, p, m}, s}
-		, jack_map_page{{pl, pp, p, m}, s}
-		, knob_map_page{{pl, pp, p, m}, s}
-		, patch_layout_page{{pl, pp, p, m}, s}
-		, modules_in_patch_page{{pl, pp, p, m}, s}
-		, patch_selector_page{{pl, pp, p, m}, s}
-		, debug_info_page{{pl, pp, p, m}, s}
+	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, UiAudioMailbox &mbox, ScreenFrameBuffer &s)
+		: balls_page{{pl, pp, p, m, mbox}, s}
+		, overview_page{{pl, pp, p, m, mbox}, s}
+		, jack_map_page{{pl, pp, p, m, mbox}, s}
+		, knob_map_page{{pl, pp, p, m, mbox}, s}
+		, patch_layout_page{{pl, pp, p, m, mbox}, s}
+		, modules_in_patch_page{{pl, pp, p, m, mbox}, s}
+		, patch_selector_page{{pl, pp, p, m, mbox}, s}
+		, debug_info_page{{pl, pp, p, m, mbox}, s}
 		, cur_page{Page::PatchOverview}
+		, patch_list{pl}
+		, player{pp}
+		, mbox{mbox}
 	{}
 
 	void init();
@@ -55,6 +62,7 @@ public:
 	void prev_page();
 	void jump_to_page(Page p);
 	void display_current_page();
+	void set_message(std::string_view message);
 
 private:
 	void start_page();
