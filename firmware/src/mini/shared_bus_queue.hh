@@ -34,7 +34,7 @@ public:
 				HWSemaphore<LEDFrameBufLock>::unlock();
 				cur_pot = 0;
 				controls.potadc.select_pot_source(cur_pot);
-				controls.potadc.select_adc_channel(MuxedADC::Channel::Pots);
+				controls.potadc.select_adc_channel(MuxedADC::Channel::MuxA);
 				cur_client = RequestReadPots;
 			} break;
 
@@ -77,7 +77,7 @@ public:
 			}
 
 			case SelectPatchCV: {
-				controls.potadc.select_adc_channel(MuxedADC::Channel::PatchCV);
+				controls.potadc.select_adc_channel(MuxedADC::Channel::MuxB);
 				cur_client = RequestReadPatchCV;
 			} break;
 

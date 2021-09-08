@@ -6,15 +6,15 @@
 
 // Thin wrapper over 2-channel ADC MAX11645 (I2C) and 8x1 MUX (via GPIOs)
 // ADC Channel 0 is connected to the 8=>1 mux, with a pot wiper on each input.
-// The 3 GPIO pins selecting which pot is active.
-// ADC Channel 1 is connected to Patch CV
+// ADC Channel 1 is connected to another 8=>1 mux, or to a single analog source.
+// There are 3 GPIO pins selecting which pot is active for each mux
 namespace mdrivlib
 {
 class MuxedADC {
 public:
 	enum class Channel : uint8_t {
-		Pots = 0,
-		PatchCV = 1,
+		MuxA = 0,
+		MuxB = 1,
 	};
 
 	MuxedADC(I2CPeriph &i2c, const MuxedADC_Config &conf)
