@@ -16,7 +16,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 	struct ScreenSpiConf : mdrivlib::DefaultSpiConf {
 		static constexpr uint16_t PeriphNum = 6; // SPI6
 		static constexpr uint16_t NumChips = 1;
-		static constexpr IRQType IRQn = SPI6_IRQn;
+		static constexpr IRQn_Type IRQn = SPI6_IRQn;
 		static constexpr uint16_t priority1 = 2;
 		static constexpr uint16_t priority2 = 3;
 		static constexpr PinNoInit SCLK = {GPIO::A, 5, LL_GPIO_AF_8};

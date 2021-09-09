@@ -13,7 +13,7 @@ using mdrivlib::PinNoInit;
 
 struct DACConfTarget : mdrivlib::DefaultSpiConf {
 	static constexpr uint16_t PeriphNum = 2; // SPI2
-	static constexpr IRQType IRQn = SPI2_IRQn;
+	static constexpr IRQn_Type IRQn = SPI2_IRQn;
 	static constexpr PinNoInit SCLK = {GPIO::A, 9, LL_GPIO_AF_5};
 	static constexpr PinNoInit COPI = {GPIO::B, 15, LL_GPIO_AF_5};
 	static constexpr PinNoInit CIPO = {GPIO::A, 0};

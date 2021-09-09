@@ -13,7 +13,7 @@ using mdrivlib::SpiDataDir;
 struct SpiAdcConf : mdrivlib::DefaultSpiConf {
 	static constexpr uint16_t PeriphNum = 1; // SPI1
 	static constexpr uint16_t NumChips = 2;
-	static constexpr IRQType IRQn = SPI1_IRQn;
+	static constexpr IRQn_Type IRQn = SPI1_IRQn;
 	static constexpr uint16_t priority1 = 0;
 	static constexpr uint16_t priority2 = 1;
 	static constexpr PinNoInit SCLK = {GPIO::A, 5, LL_GPIO_AF_5};
