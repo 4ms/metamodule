@@ -25,7 +25,7 @@ void Controls::update_debouncers()
 // load 6.8%
 void Controls::update_params()
 {
-	cur_params->buttons[0].copy_state(button0);
+	//cur_params->buttons[0].copy_state(button0);
 	cur_params->gate_ins[0].copy_state(gate_in_1);
 	cur_params->gate_ins[1].copy_state(gate_in_2);
 
