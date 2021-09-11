@@ -8,9 +8,9 @@ void PageManager::init()
 	patch_list.set_cur_patch_index(0);
 	bool ok = player.load_patch(patch_list.cur_patch());
 	if (!ok)
-		set_message("Can't load patch");
+		mbox.set_message("Can't load patch");
 	else
-		clear_message();
+		mbox.clear_message();
 
 	mbox.loading_new_patch = false;
 
@@ -114,21 +114,6 @@ void PageManager::display_current_page()
 			balls_page.draw();
 			break;
 	}
-}
-
-void PageManager::set_message(std::string_view m)
-{
-	message = m;
-}
-
-void PageManager::clear_message()
-{
-	message = "";
-}
-
-std::string_view PageManager::get_message()
-{
-	return message;
 }
 
 } // namespace MetaModule

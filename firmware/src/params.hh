@@ -3,6 +3,8 @@
 #include "conf/stream_conf.hh"
 #include "util/debouncer.hh"
 #include <array>
+#include <string>
+#include <string_view>
 
 namespace MetaModule
 {
@@ -177,6 +179,22 @@ struct UiAudioMailbox {
 	bool loading_new_patch = true;
 	bool audio_is_muted = true;
 	uint32_t new_patch_index;
+	std::string message;
+
+	void set_message(std::string_view m)
+	{
+		message = m;
+	}
+
+	void clear_message()
+	{
+		message = "";
+	}
+
+	std::string_view get_message()
+	{
+		return message;
+	}
 };
 
 } // namespace MetaModule

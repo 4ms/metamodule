@@ -37,7 +37,6 @@ class PageManager {
 	PatchList &patch_list;
 	PatchPlayer &player;
 	UiAudioMailbox &mbox;
-	std::string message;
 
 public:
 	Page cur_page;

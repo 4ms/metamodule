@@ -1,10 +1,12 @@
 ---
 CompileFlags:
 	Add: [
-	"-I../../H7/src",
-	"-I../../H7/lib/mdrivlib",
+	"-I../../firmware/src",
+	"-I../../firmware/src/medium",
+	"-I../../firmware/lib/mdrivlib",
 	"-I../../shared",
-	"-I../../H7/lib/mcufont/decoder",
-	"-I../../H7/lib/mcufont/fonts",
+	"-I../../firmware/lib/mcufont/decoder",
+	"-I../../firmware/lib/mcufont/fonts",
 	"-DSIMULATOR",
+	"-std=c++2a"
 	]
