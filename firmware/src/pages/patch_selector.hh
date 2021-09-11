@@ -15,7 +15,7 @@ struct PatchSelectorPage : PageBase {
 	{
 		if ((int32_t)patch_list.NumPatches <= (MMScreenBufferConf::viewHeight - y_offset) / lineheight)
 			scroll_offset_px = 0;
-		else if ((cur_hi_top_pos + scroll_offset_px) > (MMScreenBufferConf::viewHeight - lineheight)) {
+		else if ((cur_hi_top_pos + scroll_offset_px) > ((int32_t)MMScreenBufferConf::viewHeight - lineheight)) {
 			scroll_offset_px = MMScreenBufferConf::viewHeight - lineheight - cur_hi_top_pos;
 		} else if ((cur_hi_top_pos + scroll_offset_px) < (y_offset)) {
 			scroll_offset_px = y_offset - cur_hi_top_pos;
@@ -48,7 +48,8 @@ struct PatchSelectorPage : PageBase {
 		screen.drawHLine(0, y_offset, MMScreenBufferConf::viewWidth, Colors::grey.Rgb565());
 		if (scroll_offset_px < 0)
 			screen.printf_at(MMScreenBufferConf::viewWidth - 10, y_offset, "^");
-		if ((int)patch_list.NumPatches * lineheight + scroll_offset_px > (MMScreenBufferConf::viewHeight - y_offset))
+		if (patch_list.NumPatches * lineheight + scroll_offset_px >
+			((int32_t)MMScreenBufferConf::viewHeight - y_offset))
 			screen.printf_at(MMScreenBufferConf::viewWidth - 10, 210, "v");
 
 		if (animation_ctr) {
