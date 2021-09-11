@@ -2,7 +2,7 @@ extern crate libc;
 use minifb::{Key, Window, WindowOptions};
 
 const WIDTH: usize = 240;
-const HEIGHT: usize = 240;
+const HEIGHT: usize = 320;
 
 #[link(name = "metamodulescreen")]
 extern "C" {
@@ -43,7 +43,7 @@ fn main() {
 
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
 
-    let mut window = Window::new("Test window", WIDTH, HEIGHT, WindowOptions::default())
+    let mut window = Window::new("Test window", HEIGHT, WIDTH, WindowOptions::default())
         .unwrap_or_else(|e| {
             panic!("{}", e);
         });
@@ -109,6 +109,6 @@ fn main() {
             }
         }
 
-        window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
+        window.update_with_buffer(&buffer, HEIGHT, WIDTH).unwrap();
     }
 }
