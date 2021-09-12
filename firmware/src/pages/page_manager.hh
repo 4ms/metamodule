@@ -50,10 +50,10 @@ public:
 		, modules_in_patch_page{{pl, pp, p, m, mbox}, s}
 		, patch_selector_page{{pl, pp, p, m, mbox}, s}
 		, debug_info_page{{pl, pp, p, m, mbox}, s}
-		, cur_page{Page::PatchOverview}
 		, patch_list{pl}
 		, player{pp}
 		, mbox{mbox}
+		, cur_page{Page::PatchOverview}
 	{}
 
 	void init();

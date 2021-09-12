@@ -33,21 +33,16 @@ struct PatchSelectorPage : PageBase {
 		calc_scroll_offset();
 	}
 
-	uint32_t last_changed_page_tm;
-
 	void change_patch()
 	{
 		//Start changing patch
 		auto rotary = metaparams.rotary.use_motion();
 		if (rotary) {
-			if (auto now_tm = HAL_GetTick(); (now_tm - last_changed_page_tm) > 100) {
-				last_changed_page_tm = now_tm;
-				if (rotary < 0)
-					mbox.new_patch_index = patch_list.prev_patch();
-				else
-					mbox.new_patch_index = patch_list.next_patch();
-				mbox.loading_new_patch = true;
-			}
+			if (rotary < 0)
+				mbox.new_patch_index = patch_list.prev_patch();
+			else
+				mbox.new_patch_index = patch_list.next_patch();
+			mbox.loading_new_patch = true;
 		}
 
 		if (mbox.loading_new_patch && mbox.audio_is_muted) {
@@ -127,7 +122,36 @@ struct PatchSelectorPage : PageBase {
 
 	const int32_t num_animation_steps = 6;
 	const int32_t lineheight = 24;
-	const int32_t y_offset = 48;
+	static constexpr int32_t y_offset = 44;
+	static constexpr int32_t scrollbox_size = MMScreenBufferConf::viewHeight - y_offset;
+};
+
+class Rect {
+	int32_t x;
+	int32_t y;
+	int32_t width;
+	int32_t height;
+};
+
+template<size_t MaxItems>
+class ScrollBox {
+public:
+	struct Options {
+		bool show_scrollbar;
+		Color highlight;
+	};
+	ScrollBox(Rect bounding_box, Options options);
+	void add_text_item(std::string str);
+	void add_text_item(const char *str);
+	void add_graphic_item();
+
+	int32_t get_num_items();
+
+private:
+	Rect box;
+	Options opts;
+	int32_t num_items;
+	int32_t lineheights[MaxItems];
 };
 
 } // namespace MetaModule

@@ -16,9 +16,10 @@ struct Simulator {
 	ScreenConfT::FrameBufferT framebuf;
 	ScreenFrameBuffer screen{framebuf};
 	MetaModule::PageManager pages;
+	MetaModule::UiAudioMailbox mbox;
 
 	Simulator()
-		: pages{patch_list, patch_player, params, metaparams, screen}
+		: pages{patch_list, patch_player, params, metaparams, mbox, screen}
 	{
 		params.clear();
 		metaparams.clear();
