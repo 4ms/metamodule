@@ -1,6 +1,6 @@
 PatchHeader:
   header_version: 1
-  patch_name: quad-djembe
+  patch_name: QuadDjembe
   num_modules: 11
   num_int_cables: 14
   num_mapped_ins: 5
@@ -199,7 +199,7 @@ PatchData:
       value: 0.672000
     - module_id: 4
       param_id: 7
-      value: 0.423000
+      value: 0.402000
     - module_id: 5
       param_id: 0
       value: 0.276000

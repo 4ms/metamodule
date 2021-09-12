@@ -1,5 +1,5 @@
 {
-  "version": "1.1.6",
+  "version": "1.dev.2db08f1",
   "modules": [
     {
       "id": 124,
@@ -55,7 +55,7 @@
             "SrcObjType": "Knob"
           },
           {
-            "DstModID": 125,
+            "DstModID": 161,
             "DstObjID": 0,
             "DstObjType": "OutputJack",
             "SrcModID": 124,
@@ -63,7 +63,7 @@
             "SrcObjType": "OutputJack"
           },
           {
-            "DstModID": 126,
+            "DstModID": 162,
             "DstObjID": 0,
             "DstObjType": "OutputJack",
             "SrcModID": 124,
@@ -111,7 +111,7 @@
             "SrcObjType": "Knob"
           },
           {
-            "DstModID": 126,
+            "DstModID": 161,
             "DstObjID": 2,
             "DstObjType": "Knob",
             "SrcModID": 124,
@@ -119,8 +119,8 @@
             "SrcObjType": "Knob"
           },
           {
-            "DstModID": 126,
-            "DstObjID": 3,
+            "DstModID": 162,
+            "DstObjID": 2,
             "DstObjType": "Knob",
             "SrcModID": 124,
             "SrcObjID": 7,
@@ -135,10 +135,10 @@
             "SrcObjType": "InputJack"
           }
         ],
-        "PatchName": "dual-djembe"
+        "PatchName": "DjembeReverb"
       },
       "pos": [
-        38,
+        62,
         0
       ]
     },
@@ -239,6 +239,78 @@
         0,
         0
       ]
+    },
+    {
+      "id": 161,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "REVERB",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0569999889
+        },
+        {
+          "id": 1,
+          "value": 0.233999982
+        },
+        {
+          "id": 2,
+          "value": 0.457500011
+        },
+        {
+          "id": 3,
+          "value": 0.20100002
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        }
+      ],
+      "pos": [
+        34,
+        0
+      ]
+    },
+    {
+      "id": 162,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "REVERB",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.115500011
+        },
+        {
+          "id": 1,
+          "value": 0.172499999
+        },
+        {
+          "id": 2,
+          "value": 0.843000054
+        },
+        {
+          "id": 3,
+          "value": 0.453000039
+        },
+        {
+          "id": 4,
+          "value": 0.0659999922
+        },
+        {
+          "id": 5,
+          "value": 0.035999991
+        }
+      ],
+      "pos": [
+        34,
+        1
+      ]
     }
   ],
   "cables": [
@@ -265,6 +337,22 @@
       "inputModuleId": 125,
       "inputId": 4,
       "color": "#c9b70e"
+    },
+    {
+      "id": 117,
+      "outputModuleId": 125,
+      "outputId": 0,
+      "inputModuleId": 161,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 118,
+      "outputModuleId": 126,
+      "outputId": 0,
+      "inputModuleId": 162,
+      "inputId": 0,
+      "color": "#c91847"
     }
   ]
 }

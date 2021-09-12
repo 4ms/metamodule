@@ -44,11 +44,10 @@
           "value": 0.0
         }
       ],
-      "rightModuleId": 60,
       "data": {
         "Mappings": [
           {
-            "DstModID": 60,
+            "DstModID": 159,
             "DstObjID": 0,
             "DstObjType": "OutputJack",
             "SrcModID": 46,
@@ -56,7 +55,79 @@
             "SrcObjType": "OutputJack"
           },
           {
-            "DstModID": 60,
+            "DstModID": 160,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 46,
+            "SrcObjID": 1,
+            "SrcObjType": "OutputJack"
+          },
+          {
+            "DstModID": 160,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 160,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 160,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 160,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 159,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 4,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 159,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 5,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 159,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 6,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 159,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 46,
+            "SrcObjID": 7,
+            "SrcObjType": "Knob"
+          },
+          {
+            "DstModID": 160,
             "DstObjID": 0,
             "DstObjType": "InputJack",
             "SrcModID": 46,
@@ -64,124 +135,103 @@
             "SrcObjType": "InputJack"
           },
           {
-            "DstModID": 60,
-            "DstObjID": 0,
-            "DstObjType": "Knob",
-            "SrcModID": 46,
-            "SrcObjID": 0,
-            "SrcObjType": "Knob"
-          },
-          {
-            "DstModID": 61,
-            "DstObjID": 0,
+            "DstModID": 160,
+            "DstObjID": 1,
             "DstObjType": "InputJack",
             "SrcModID": 46,
             "SrcObjID": 1,
             "SrcObjType": "InputJack"
           },
           {
-            "DstModID": 61,
-            "DstObjID": 0,
-            "DstObjType": "OutputJack",
-            "SrcModID": 46,
-            "SrcObjID": 1,
-            "SrcObjType": "OutputJack"
-          },
-          {
-            "DstModID": 61,
-            "DstObjID": 0,
-            "DstObjType": "Knob",
-            "SrcModID": 46,
-            "SrcObjID": 1,
-            "SrcObjType": "Knob"
-          },
-          {
-            "DstModID": 62,
-            "DstObjID": 0,
-            "DstObjType": "Knob",
-            "SrcModID": 46,
-            "SrcObjID": 2,
-            "SrcObjType": "Knob"
-          },
-          {
-            "DstModID": 62,
-            "DstObjID": 0,
+            "DstModID": 160,
+            "DstObjID": 2,
             "DstObjType": "InputJack",
             "SrcModID": 46,
             "SrcObjID": 2,
             "SrcObjType": "InputJack"
           },
           {
-            "DstModID": 62,
-            "DstObjID": 0,
-            "DstObjType": "OutputJack",
-            "SrcModID": 46,
-            "SrcObjID": 2,
-            "SrcObjType": "OutputJack"
-          },
-          {
-            "DstModID": 63,
-            "DstObjID": 0,
-            "DstObjType": "Knob",
-            "SrcModID": 46,
-            "SrcObjID": 3,
-            "SrcObjType": "Knob"
-          },
-          {
-            "DstModID": 63,
-            "DstObjID": 0,
-            "DstObjType": "OutputJack",
-            "SrcModID": 46,
-            "SrcObjID": 3,
-            "SrcObjType": "OutputJack"
-          },
-          {
-            "DstModID": 63,
+            "DstModID": 159,
             "DstObjID": 0,
             "DstObjType": "InputJack",
             "SrcModID": 46,
             "SrcObjID": 3,
+            "SrcObjType": "InputJack"
+          },
+          {
+            "DstModID": 159,
+            "DstObjID": 1,
+            "DstObjType": "InputJack",
+            "SrcModID": 46,
+            "SrcObjID": 4,
+            "SrcObjType": "InputJack"
+          },
+          {
+            "DstModID": 159,
+            "DstObjID": 2,
+            "DstObjType": "InputJack",
+            "SrcModID": 46,
+            "SrcObjID": 5,
             "SrcObjType": "InputJack"
           }
         ],
-        "PatchName": "Quad LFO"
+        "PatchName": "Infinite Osc"
       },
       "pos": [
-        0,
+        47,
         0
       ]
     },
     {
-      "id": 60,
+      "id": 159,
       "plugin": "4msCompany",
       "version": "1.0.0",
-      "model": "lfo",
+      "model": "INFOSC01",
       "params": [
         {
           "id": 0,
-          "value": 0.0
+          "value": 0.5
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 0.5
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.5
+        },
+        {
+          "id": 3,
+          "value": 0.5
+        },
+        {
+          "id": 4,
+          "value": 0.398999989
+        },
+        {
+          "id": 5,
+          "value": 0.388499975
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
         }
       ],
-      "leftModuleId": 46,
-      "rightModuleId": 61,
+      "leftModuleId": 160,
       "pos": [
         16,
         0
       ]
     },
     {
-      "id": 61,
+      "id": 160,
       "plugin": "4msCompany",
       "version": "1.0.0",
-      "model": "lfo",
+      "model": "INFOSC01",
       "params": [
         {
           "id": 0,
@@ -193,64 +243,32 @@
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.5
+        },
+        {
+          "id": 4,
+          "value": 0.66899997
+        },
+        {
+          "id": 5,
+          "value": 0.851999879
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
         }
       ],
-      "leftModuleId": 60,
-      "rightModuleId": 62,
+      "rightModuleId": 159,
       "pos": [
-        20,
-        0
-      ]
-    },
-    {
-      "id": 62,
-      "plugin": "4msCompany",
-      "version": "1.0.0",
-      "model": "lfo",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 1.0
-        }
-      ],
-      "leftModuleId": 61,
-      "rightModuleId": 63,
-      "pos": [
-        24,
-        0
-      ]
-    },
-    {
-      "id": 63,
-      "plugin": "4msCompany",
-      "version": "1.0.0",
-      "model": "lfo",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 1.0
-        }
-      ],
-      "leftModuleId": 62,
-      "pos": [
-        28,
+        0,
         0
       ]
     }
