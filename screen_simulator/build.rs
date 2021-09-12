@@ -39,6 +39,7 @@ fn main() {
     src.push(String::from("../firmware/src/patchlist.cc"));
     src.push(String::from("../firmware/src/pages/page_manager.cc"));
     src.push(String::from("../shared/util/math_tables.cc"));
+    src.push(String::from("../shared/axoloti-wrapper/axoloti_math.cpp"));
 
     use glob::glob;
     for entry in glob("../shared/CoreModules/*.cpp").expect("Bad glob pattern") {

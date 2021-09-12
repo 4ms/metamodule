@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace ScreenSimulator
+namespace mdrivlib
 {
 struct SystemCache {
 	static void invalidate_dcache() {}
@@ -18,4 +18,4 @@ struct SystemCache {
 
 	static void clean_dcache_by_range(void *addr, int32_t size) {}
 };
-} // namespace ScreenSimulator
+} // namespace mdrivlib

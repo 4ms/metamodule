@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace ScreenSimulator
+namespace mdrivlib
 {
 struct DMA2DTransfer {
 	void init() {}
@@ -21,4 +21,4 @@ struct DMA2DTransfer {
 	}
 };
 
-} // namespace ScreenSimulator
+} // namespace mdrivlib

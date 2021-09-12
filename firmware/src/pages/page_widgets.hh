@@ -83,7 +83,7 @@ struct PageWidgets {
 		int y = y_pos;
 		const int box_height = 15;
 		const int box_width = 30;
-		for (int i = 0; i < PanelDef::NumCVIn + PanelDef::NumKnobs; i++) {
+		for (unsigned i = 0; i < PanelDef::NumCVIn + PanelDef::NumKnobs; i++) {
 			screen.setCursor((i & 0b111) * box_width + 3, y);
 			if (i >= PanelDef::NumKnobs)
 				screen.print((int16_t)(params.cvjacks[i - PanelDef::NumKnobs] * 100));

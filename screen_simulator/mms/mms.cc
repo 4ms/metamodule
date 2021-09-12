@@ -8,7 +8,6 @@
 
 #include "pages/page_manager.hh"
 
-using namespace ScreenSimulator;
 struct Simulator {
 	PatchList patch_list;
 	MetaModule::PatchPlayer patch_player;
@@ -99,7 +98,7 @@ extern "C" void refresh()
 
 extern "C" uint16_t get_pixel(uint16_t x, uint16_t y)
 {
-	return (sim.framebuf[x + y * 240]);
+	return (sim.framebuf[x + y * ScreenConfT::viewWidth]);
 }
 
 size_t get_heap_size()

@@ -1,7 +1,7 @@
 extern crate libc;
 use minifb::{Key, Window, WindowOptions};
 
-const WIDTH: usize = 240;
+const WIDTH: usize = 320;
 const HEIGHT: usize = 240;
 
 #[link(name = "metamodulescreen")]

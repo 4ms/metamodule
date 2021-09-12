@@ -3,17 +3,14 @@
 
 namespace mdrivlib
 {
-enum SupportedTargets {
+enum Targets {
 	simulator,
 	stm32mp1_ca7,
 };
-}
 
-namespace ScreenSimulator {
-constexpr bool TARGET_FOUND = true;
-constexpr auto TYPE = mdrivlib::SupportedTargets::simulator;
-}
-namespace target = ScreenSimulator;
+constexpr bool TargetIsFound = true;
+constexpr auto TargetName = mdrivlib::Targets::simulator;
+} // namespace mdrivlib
 
 #define __DSB()
 
