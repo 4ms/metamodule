@@ -2,6 +2,10 @@
 
 #include "patch/integration_tests/all_tests.hh"
 
+#include "DjembeReverb.hh"
+#include "InfiniteOsc.hh"
+#include "QuadDjembe.hh"
+#include "QuadLFO.hh"
 #include "StereoVerb.hh"
 #include "dualdjembe.hh"
 #include "dualinfosc1.hh"
@@ -16,21 +20,23 @@
 
 PatchList::PatchList()
 	: _patch_addrs{
-		  // mixerpass_mmpatch,
-		  infosc1_mmpatch,
-		  // dualinfosc1_mmpatch,
-		  octinfosc_mmpatch,
-		  // mappeddjembe_mmpatch,
-		  simplequaddjembe_mmpatch,
-		  // dualdjembe_mmpatch,
-		  mono_verb_mmpatch,
+		  DjembeReverb_mmpatch,
+		  InfiniteOsc_mmpatch,
+		  QuadDjembe_mmpatch,
+		  QuadLFO_mmpatch,
 		  StereoVerb_mmpatch,
-		  quad_LFO_mmpatch,
-		  // test_inputs_1234_mmpatch,
+		  infosc1_mmpatch,
+		  octinfosc_mmpatch,
+		  simplequaddjembe_mmpatch,
+		  mono_verb_mmpatch,
+		  dualinfosc1_mmpatch,
+		  mappeddjembe_mmpatch,
+		  dualdjembe_mmpatch,
+		  test_inputs_1234_mmpatch,
+		  quaddjembe_mmpatch,
 		  test_inputs_56g1g2_mmpatch,
-		  // quaddjembe_mmpatch,
-		  // test_14switchCore_clock_mmpatch,
-		  // test_14switchCore_cv_mmpatch,
+		  test_14switchCore_clock_mmpatch,
+		  test_14switchCore_cv_mmpatch,
 		  test_adCore_mmpatch,
 		  test_attCore_mmpatch,
 		  test_bitcrushCore_mmpatch,

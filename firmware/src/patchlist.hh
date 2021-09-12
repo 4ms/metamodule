@@ -3,7 +3,7 @@
 
 struct PatchList {
 
-	static constexpr int32_t NumPatches = 33;
+	static constexpr int32_t NumPatches = 43;
 
 	PatchList();
 

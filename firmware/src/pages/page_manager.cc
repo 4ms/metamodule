@@ -5,7 +5,7 @@ namespace MetaModule
 
 void PageManager::init()
 {
-	cur_page = Page::BouncingBalls;
+	cur_page = Page::PatchSelector;
 	display_current_page();
 }
 
