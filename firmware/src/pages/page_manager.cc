@@ -14,7 +14,7 @@ void PageManager::init()
 
 	mbox.loading_new_patch = false;
 
-	cur_page = Page::PatchSelector;
+	jump_to_page(Page::PatchSelector);
 	display_current_page();
 }
 
