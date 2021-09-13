@@ -77,8 +77,8 @@ extern "C" void rotary_push_fwd()
 
 extern "C" void rotary_push_back()
 {
-	sim.metaparams.rotary_pushed.motion++;
-	sim.metaparams.rotary_pushed.abs_pos++;
+	sim.metaparams.rotary_pushed.motion--;
+	sim.metaparams.rotary_pushed.abs_pos--;
 }
 
 extern "C" void rotary_press()
