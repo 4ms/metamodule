@@ -51,11 +51,12 @@ struct PatchSelectorPage : PageBase {
 			patch_list.set_cur_patch_index(mbox.new_patch_index);
 			bool ok = patch_player.load_patch(patch_list.cur_patch());
 			if (!ok) {
-				mbox.set_message("Can't load patch");
+				// mbox.set_message("Can't load patch");
 				patch_player.unload_patch();
 				patch_player.load_patch(orig_patch);
-			} else
-				mbox.clear_message();
+			}
+			// else
+			// mbox.clear_message();
 
 			mbox.loading_new_patch = false;
 		}

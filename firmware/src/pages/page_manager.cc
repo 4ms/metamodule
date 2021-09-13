@@ -7,10 +7,10 @@ void PageManager::init()
 {
 	patch_list.set_cur_patch_index(0);
 	bool ok = player.load_patch(patch_list.cur_patch());
-	if (!ok)
-		mbox.set_message("Can't load patch");
-	else
-		mbox.clear_message();
+	// if (!ok)
+	// 	mbox.set_message("Can't load patch");
+	// else
+	// 	mbox.clear_message();
 
 	mbox.loading_new_patch = false;
 

@@ -4,7 +4,6 @@
 
 #include "DjembeReverb.hh"
 #include "InfiniteOsc.hh"
-#include "QuadDjembe.hh"
 #include "QuadLFO.hh"
 #include "StereoVerb.hh"
 #include "dualdjembe.hh"
@@ -22,7 +21,7 @@ PatchList::PatchList()
 	: _patch_addrs{
 		  DjembeReverb_mmpatch,
 		  InfiniteOsc_mmpatch,
-		  QuadDjembe_mmpatch,
+		  quaddjembe_mmpatch,
 		  QuadLFO_mmpatch,
 		  StereoVerb_mmpatch,
 		  infosc1_mmpatch,
