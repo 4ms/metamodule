@@ -5,6 +5,7 @@
 #include "drivers/dma2d_transfer.hh"
 #include "mcufont.h"
 #include "pages/fonts.hh"
+#include "pages/geometry.hh"
 #include "printf.h"
 #include "util/colors.hh"
 
@@ -183,7 +184,7 @@ public:
 		blendPixel(x, y, color, (uint8_t)(f_alpha * 255.f));
 	}
 
-	// Sets a pixel in the framebuffer. Not bounds checked.
+	// Sets a pixel in the framebuffer. Not bounds checked, and does not respect clipping rect!
 	void drawPixel(int16_t x, int16_t y, uint16_t color)
 	{
 		framebuf[x + y * _width] = color;
@@ -193,34 +194,36 @@ public:
 	// Line
 	//
 
+	//Draws a solid horizontal line onto the buffer, respecting the clipping rect
 	void drawHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
 	{
-		if (y < 0 || y >= _height)
+		if (y < clip_rect.top || y >= clip_rect.bottom)
 			return;
-		if (x < 0) {
+		if (x < clip_rect.left) {
 			w += x;
-			x = 0;
+			x = clip_rect.left;
 		}
-		int16_t max_x = (w + x) >= _width ? _width : x + w;
+		int16_t max_x = (w + x) >= clip_rect.right ? clip_rect.right : x + w;
 
 		for (int16_t xi = x; xi < max_x; xi++) {
 			drawPixel(xi, y, color);
 		}
 	}
 
+	// Blends a horizontal line on the buffer, respecting the clipping rect
 	void blendHLine(int16_t x, int16_t y, int16_t w, uint16_t color, uint8_t alpha)
 	{
 		if (alpha > 252) {
 			drawHLine(x, y, w, color);
 			return;
 		}
-		if (alpha < 4 || y < 0 || y >= _height)
+		if (alpha < 4 || y < clip_rect.top || y >= clip_rect.bottom)
 			return;
-		if (x < 0) {
+		if (x < clip_rect.left) {
 			w += x;
-			x = 0;
+			x = clip_rect.left;
 		}
-		int16_t max_x = (w + x) >= _width ? _width : x + w;
+		int16_t max_x = (w + x) >= clip_rect.right ? clip_rect.right : x + w;
 
 		// Todo: try reading all pixels onto stack, then blend and write all at once
 		// Might give a performance boost, due to caching
@@ -473,6 +476,21 @@ public:
 		}
 	}
 
+	void set_clip_rect(RectC rect)
+	{
+		clip_rect = rect;
+	}
+
+	void set_clip_rect(Rect rect)
+	{
+		clip_rect = RectC{rect.left, rect.top, rect.right(), rect.bottom()};
+	}
+
+	void clear_clip_rect()
+	{
+		clip_rect = RectC{0, 0, ScreenConfT::viewWidth, ScreenConfT::viewHeight};
+	}
+
 	const mf_font_s *_font;
 	mf_align_t _alignment;
 	uint16_t textcolor;
@@ -489,6 +507,7 @@ protected:
 
 private:
 	char _textbuf[255];
+	RectC clip_rect{0, 0, ScreenConfT::viewWidth, ScreenConfT::viewHeight};
 };
 
 void register_printf_destination(ScreenFrameBuffer &screen);

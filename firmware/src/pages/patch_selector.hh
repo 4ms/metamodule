@@ -108,6 +108,8 @@ struct PatchSelectorPage : PageBase {
 
 		calc_scroll_offset();
 
+		screen.set_clip_rect(box);
+
 		//Selection Highlight bar
 		screen.blendRect(
 			0, cur_sel_patch_top_y + scroll_offset_px + 2, box.width(), lineheight, Colors::cyan.Rgb565(), 0.6f);
@@ -122,7 +124,7 @@ struct PatchSelectorPage : PageBase {
 		screen.setTextColor(Colors::black);
 		int16_t y_pos = box.top + scroll_offset_px;
 		for (unsigned i = 0; i < PatchList::NumPatches; i++) {
-			if (y_pos < box.top) {
+			if ((y_pos + lineheight) < box.top) {
 				y_pos += lineheight;
 				continue;
 			}
@@ -132,6 +134,8 @@ struct PatchSelectorPage : PageBase {
 			screen.print(patch_list.get_patch_name(i));
 			y_pos += lineheight;
 		}
+
+		screen.clear_clip_rect();
 	}
 
 	void stop_page() {}
