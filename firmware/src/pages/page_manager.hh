@@ -67,6 +67,4 @@ private:
 	void start_page();
 };
 
-struct DisplayPage {};
-
 } // namespace MetaModule

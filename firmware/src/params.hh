@@ -3,8 +3,7 @@
 #include "conf/stream_conf.hh"
 #include "util/debouncer.hh"
 #include <array>
-// #include <string>
-// #include <string_view>
+#include <string>
 
 namespace MetaModule
 {
@@ -135,6 +134,7 @@ struct ParamCache {
 	{
 		clear();
 	}
+
 	void write_sync(Params &p_, MetaParams &m_)
 	{
 		_new_data = false; // protects against multiple write_syncs without a read_sync, and then one write_sync
@@ -179,22 +179,22 @@ struct UiAudioMailbox {
 	bool loading_new_patch = true;
 	bool audio_is_muted = true;
 	uint32_t new_patch_index;
-	// std::string message;
+	std::string message;
 
-	// void set_message(std::string_view m)
-	// {
-	// 	message = m;
-	// }
+	void set_message(const std::string m)
+	{
+		message = m;
+	}
 
-	// void clear_message()
-	// {
-	// 	message = "";
-	// }
+	void clear_message()
+	{
+		message = "";
+	}
 
-	// std::string_view get_message()
-	// {
-	// 	return message;
-	// }
+	std::string get_message() const
+	{
+		return message;
+	}
 };
 
 } // namespace MetaModule

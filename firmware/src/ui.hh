@@ -50,7 +50,7 @@ public:
 		, screen{screenbuf}
 		, param_cache{pc}
 		, mbox{uiaudiomailbox}
-		, pages{pl, pp, params, metaparams, mbox, screen}
+		, pages{pl, pp, params, metaparams, uiaudiomailbox, screen}
 		, patch_list{pl}
 		, player{pp}
 	{}
@@ -60,18 +60,6 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		patch_list.set_cur_patch_index(0);
-		bool ok = player.load_patch(patch_list.cur_patch());
-		if (!ok) {
-			// Todo: handle error: display on screen, and try another patch?
-			// metaparams.error = Errors::CannotLoadPatch;
-			// metaparams.error_data = patch_list.cur_patch();
-			while (true)
-				;
-		}
-		mbox.loading_new_patch = false;
-
-		// Disabling Screen until we have it for mp1-med
 		screen.init();
 		register_printf_destination(screen);
 		pages.init();
@@ -82,9 +70,6 @@ public:
 		// leds.but[1].set_background(Colors::grey);
 		// leds.clockLED.set_background(Colors::blue.blend(Colors::black, 0.5f));
 		// leds.rotaryLED.set_background(Colors::green);
-		//
-		// Medium:
-		// leds.but[0].set_background(Colors::cyan);
 
 		// Todo: led animation rate depends on I2C rate... not easy to set  maybe we can have it self-calibrate against
 		// the SysTick?

@@ -13,21 +13,29 @@ struct PatchSelectorPage : PageBase {
 
 	void calc_scroll_offset()
 	{
-		metaparams.rotary.use_motion();
+		metaparams.rotary.use_motion(); //?? why?
+
 		if ((int32_t)patch_list.NumPatches <= (MMScreenBufferConf::viewHeight - y_offset) / lineheight)
 			scroll_offset_px = 0;
-		else if ((cur_hi_top_pos + scroll_offset_px) > ((int32_t)MMScreenBufferConf::viewHeight - lineheight)) {
-			scroll_offset_px = MMScreenBufferConf::viewHeight - lineheight - cur_hi_top_pos;
-		} else if ((cur_hi_top_pos + scroll_offset_px) < (y_offset)) {
-			scroll_offset_px = y_offset - cur_hi_top_pos;
+		else if (scroll_offset_px > ((int32_t)MMScreenBufferConf::viewHeight - lineheight - cur_sel_patch_top_y)) {
+			scroll_offset_px = MMScreenBufferConf::viewHeight - lineheight - cur_sel_patch_top_y;
+		} else if (scroll_offset_px < y_offset - cur_sel_patch_top_y) {
+			scroll_offset_px = y_offset - cur_sel_patch_top_y;
 		}
+	}
+
+	int32_t idx_to_top_y(int32_t idx)
+	{
+		return idx * lineheight + y_offset;
 	}
 
 	void start()
 	{
-		hi_patch_index = patch_list.cur_patch_index();
-		cur_hi_top_pos = hi_patch_index * lineheight + y_offset;
-		dest_hi_top_pos = cur_hi_top_pos;
+		selected_patch_idx = patch_list.cur_patch_index();
+		active_patch_idx = selected_patch_idx;
+
+		cur_sel_patch_top_y = idx_to_top_y(selected_patch_idx);
+		dst_sel_patch_top_y = cur_sel_patch_top_y;
 		animation_ctr = 0;
 		scroll_offset_px = 0;
 		calc_scroll_offset();
@@ -51,23 +59,29 @@ struct PatchSelectorPage : PageBase {
 			patch_list.set_cur_patch_index(mbox.new_patch_index);
 			bool ok = patch_player.load_patch(patch_list.cur_patch());
 			if (!ok) {
-				// mbox.set_message("Can't load patch");
+				mbox.set_message("Can't load patch");
 				patch_player.unload_patch();
 				patch_player.load_patch(orig_patch);
-			}
-			// else
-			// mbox.clear_message();
+			} else
+				mbox.clear_message();
 
 			mbox.loading_new_patch = false;
 		}
 	}
 
+	void check_rotary()
+	{
+		auto rotary = metaparams.rotary.use_motion();
+	}
+
 	void draw()
 	{
-		if (hi_patch_index != patch_list.cur_patch_index()) {
-			hi_patch_index = patch_list.cur_patch_index();
-			dest_hi_top_pos = patch_list.cur_patch_index() * lineheight + y_offset;
-			animation_step_size = (dest_hi_top_pos - cur_hi_top_pos) / num_animation_steps;
+		check_rotary();
+
+		if (selected_patch_idx != patch_list.cur_patch_index()) {
+			selected_patch_idx = patch_list.cur_patch_index();
+			dst_sel_patch_top_y = patch_list.cur_patch_index() * lineheight + y_offset;
+			animation_step_size = (dst_sel_patch_top_y - cur_sel_patch_top_y) / num_animation_steps;
 			animation_ctr = num_animation_steps;
 		}
 
@@ -76,6 +90,8 @@ struct PatchSelectorPage : PageBase {
 		screen.print("Select a patch:");
 		screen.setFont(PageWidgets::subheader_font);
 		screen.drawHLine(0, y_offset, MMScreenBufferConf::viewWidth, Colors::grey.Rgb565());
+
+		//Print scroll bar up/down arrows
 		if (scroll_offset_px < 0)
 			screen.printf_at(MMScreenBufferConf::viewWidth - 10, y_offset, "^");
 		if (patch_list.NumPatches * lineheight + scroll_offset_px >
@@ -84,15 +100,15 @@ struct PatchSelectorPage : PageBase {
 
 		if (animation_ctr) {
 			animation_ctr--;
-			cur_hi_top_pos += animation_step_size;
+			cur_sel_patch_top_y += animation_step_size;
 		} else
-			cur_hi_top_pos = dest_hi_top_pos;
+			cur_sel_patch_top_y = dst_sel_patch_top_y;
 
 		calc_scroll_offset();
 
 		//Highlight bar
 		screen.blendRect(0,
-						 cur_hi_top_pos + scroll_offset_px + 2,
+						 cur_sel_patch_top_y + scroll_offset_px + 2,
 						 MMScreenBufferConf::viewWidth,
 						 lineheight,
 						 Colors::cyan.Rgb565(),
@@ -106,6 +122,8 @@ struct PatchSelectorPage : PageBase {
 				y_pos += lineheight;
 				continue;
 			}
+			if (y_pos > MMScreenBufferConf::viewHeight)
+				break;
 			screen.setCursor(2, y_pos);
 			screen.print(patch_list.get_patch_name(i));
 			y_pos += lineheight;
@@ -114,11 +132,13 @@ struct PatchSelectorPage : PageBase {
 
 	void stop_page() {}
 
-	uint8_t hi_patch_index;
+	uint8_t selected_patch_idx;
+	uint8_t active_patch_idx;
+
 	int32_t animation_ctr;
 	int32_t animation_step_size;
-	int16_t cur_hi_top_pos;
-	int16_t dest_hi_top_pos;
+	int16_t cur_sel_patch_top_y;
+	int16_t dst_sel_patch_top_y;
 	int16_t scroll_offset_px;
 
 	const int32_t num_animation_steps = 6;
