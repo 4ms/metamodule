@@ -13,26 +13,30 @@ struct PatchSelectorPage : PageBase {
 
 	void calc_scroll_offset()
 	{
-		metaparams.rotary.use_motion(); //?? why?
+		//metaparams.rotary.use_motion(); //?? why?
 
-		if ((int32_t)patch_list.NumPatches <= (MMScreenBufferConf::viewHeight - y_offset) / lineheight)
+		//Disable scrolling if the number of lines fits on the screen
+		if ((int32_t)patch_list.NumPatches <= (box.height() / lineheight))
 			scroll_offset_px = 0;
-		else if (scroll_offset_px > ((int32_t)MMScreenBufferConf::viewHeight - lineheight - cur_sel_patch_top_y)) {
-			scroll_offset_px = MMScreenBufferConf::viewHeight - lineheight - cur_sel_patch_top_y;
-		} else if (scroll_offset_px < y_offset - cur_sel_patch_top_y) {
-			scroll_offset_px = y_offset - cur_sel_patch_top_y;
+
+		//Check if scroll_offset_px puts current selection hightlight bar off-screen:
+		else if (scroll_offset_px > (box.bottom - lineheight - cur_sel_patch_top_y)) {
+			scroll_offset_px = box.bottom - lineheight - cur_sel_patch_top_y;
+		} else if (scroll_offset_px < box.top - cur_sel_patch_top_y) {
+			scroll_offset_px = box.top - cur_sel_patch_top_y;
 		}
 	}
 
 	int32_t idx_to_top_y(int32_t idx)
 	{
-		return idx * lineheight + y_offset;
+		return idx * lineheight + box.top;
 	}
 
 	void start()
 	{
-		selected_patch_idx = patch_list.cur_patch_index();
-		active_patch_idx = selected_patch_idx;
+		active_patch_idx = patch_list.cur_patch_index();
+		if (selected_patch_idx < 0 || selected_patch_idx >= patch_list.NumPatches)
+			selected_patch_idx = active_patch_idx;
 
 		cur_sel_patch_top_y = idx_to_top_y(selected_patch_idx);
 		dst_sel_patch_top_y = cur_sel_patch_top_y;
@@ -41,15 +45,10 @@ struct PatchSelectorPage : PageBase {
 		calc_scroll_offset();
 	}
 
-	void change_patch()
+	void handle_changing_patch(uint32_t new_patch_index)
 	{
-		//Start changing patch
-		auto rotary = metaparams.rotary.use_motion();
-		if (rotary) {
-			if (rotary < 0)
-				mbox.new_patch_index = patch_list.prev_patch();
-			else
-				mbox.new_patch_index = patch_list.next_patch();
+		if (!mbox.loading_new_patch && (new_patch_index != patch_list.cur_patch_index())) {
+			mbox.new_patch_index = new_patch_index;
 			mbox.loading_new_patch = true;
 		}
 
@@ -65,6 +64,7 @@ struct PatchSelectorPage : PageBase {
 			} else
 				mbox.clear_message();
 
+			active_patch_idx = patch_list.cur_patch_index();
 			mbox.loading_new_patch = false;
 		}
 	}
@@ -72,32 +72,34 @@ struct PatchSelectorPage : PageBase {
 	void check_rotary()
 	{
 		auto rotary = metaparams.rotary.use_motion();
+		if (rotary > 0)
+			selected_patch_idx = selected_patch_idx == patch_list.NumPatches - 1 ? 0 : selected_patch_idx + 1;
+		if (rotary < 0)
+			selected_patch_idx = selected_patch_idx == 0 ? patch_list.NumPatches - 1 : selected_patch_idx - 1;
+		if (rotary) {
+			dst_sel_patch_top_y = idx_to_top_y(selected_patch_idx);
+			animation_step_size = (dst_sel_patch_top_y - cur_sel_patch_top_y) / NumAnimationSteps;
+			animation_ctr = NumAnimationSteps;
+		}
 	}
 
 	void draw()
 	{
 		check_rotary();
 
-		if (selected_patch_idx != patch_list.cur_patch_index()) {
-			selected_patch_idx = patch_list.cur_patch_index();
-			dst_sel_patch_top_y = patch_list.cur_patch_index() * lineheight + y_offset;
-			animation_step_size = (dst_sel_patch_top_y - cur_sel_patch_top_y) / num_animation_steps;
-			animation_ctr = num_animation_steps;
-		}
-
 		screen.fill(Colors::white);
 		PageWidgets::setup_header(screen);
 		screen.print("Select a patch:");
 		screen.setFont(PageWidgets::subheader_font);
-		screen.drawHLine(0, y_offset, MMScreenBufferConf::viewWidth, Colors::grey.Rgb565());
+		screen.drawHLine(0, box.top, box.width(), Colors::grey.Rgb565());
 
 		//Print scroll bar up/down arrows
 		if (scroll_offset_px < 0)
-			screen.printf_at(MMScreenBufferConf::viewWidth - 10, y_offset, "^");
-		if (patch_list.NumPatches * lineheight + scroll_offset_px >
-			((int32_t)MMScreenBufferConf::viewHeight - y_offset))
-			screen.printf_at(MMScreenBufferConf::viewWidth - 10, 210, "v");
+			screen.printf_at(box.right - 10, box.top, "^");
+		if (patch_list.NumPatches * lineheight + scroll_offset_px > box.height())
+			screen.printf_at(box.right - 10, 210, "v");
 
+		// Step animation
 		if (animation_ctr) {
 			animation_ctr--;
 			cur_sel_patch_top_y += animation_step_size;
@@ -106,23 +108,25 @@ struct PatchSelectorPage : PageBase {
 
 		calc_scroll_offset();
 
-		//Highlight bar
-		screen.blendRect(0,
-						 cur_sel_patch_top_y + scroll_offset_px + 2,
-						 MMScreenBufferConf::viewWidth,
-						 lineheight,
-						 Colors::cyan.Rgb565(),
-						 0.6f);
+		//Selection Highlight bar
+		screen.blendRect(
+			0, cur_sel_patch_top_y + scroll_offset_px + 2, box.width(), lineheight, Colors::cyan.Rgb565(), 0.6f);
+
+		//Active Highlight bar
+		auto active_patch_top_y = idx_to_top_y(active_patch_idx) + scroll_offset_px + 2;
+		if (active_patch_top_y >= box.top && (active_patch_top_y + lineheight) <= box.bottom) {
+			screen.blendRect(0, active_patch_top_y, box.width(), lineheight, Colors::green.Rgb565(), 0.4f);
+		}
 
 		//Names of patches
 		screen.setTextColor(Colors::black);
-		int16_t y_pos = y_offset + scroll_offset_px;
+		int16_t y_pos = box.top + scroll_offset_px;
 		for (unsigned i = 0; i < PatchList::NumPatches; i++) {
-			if (y_pos < y_offset) {
+			if (y_pos < box.top) {
 				y_pos += lineheight;
 				continue;
 			}
-			if (y_pos > MMScreenBufferConf::viewHeight)
+			if (y_pos > box.bottom)
 				break;
 			screen.setCursor(2, y_pos);
 			screen.print(patch_list.get_patch_name(i));
@@ -132,8 +136,8 @@ struct PatchSelectorPage : PageBase {
 
 	void stop_page() {}
 
-	uint8_t selected_patch_idx;
-	uint8_t active_patch_idx;
+	int32_t selected_patch_idx{};
+	int32_t active_patch_idx{};
 
 	int32_t animation_ctr;
 	int32_t animation_step_size;
@@ -141,18 +145,16 @@ struct PatchSelectorPage : PageBase {
 	int16_t dst_sel_patch_top_y;
 	int16_t scroll_offset_px;
 
-	const int32_t num_animation_steps = 6;
+	static constexpr int32_t NumAnimationSteps = 6;
 	const int32_t lineheight = 24;
-	static constexpr int32_t y_offset = 44;
-	static constexpr int32_t scrollbox_size = MMScreenBufferConf::viewHeight - y_offset;
+
+	static constexpr RectC box{
+		.left = 0, .top = 44, .right = MMScreenBufferConf::viewWidth, .bottom = MMScreenBufferConf::viewHeight};
 };
 
-class Rect {
-	int32_t x;
-	int32_t y;
-	int32_t width;
-	int32_t height;
-};
+///////////////////////////////////////////
+// WIP: Generic ScrollBox class:
+//
 
 template<size_t MaxItems>
 class ScrollBox {
