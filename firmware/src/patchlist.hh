@@ -2,7 +2,7 @@
 #include "patch/patch.hh"
 
 struct PatchList {
-
+	//Todo: Deduce this directly from size of constructor
 	static constexpr int32_t NumPatches = 43;
 
 	PatchList();
@@ -19,6 +19,11 @@ struct PatchList {
 		return reinterpret_cast<PatchHeader *>(base_addr);
 	}
 
+	PatchHeader *cur_patch()
+	{
+		return _patch_headers[_cur_patch_index];
+	}
+
 	void set_cur_patch_index(int cur_idx)
 	{
 		_cur_patch_index = cur_idx;
@@ -29,17 +34,12 @@ struct PatchList {
 		return _cur_patch_index;
 	}
 
-	PatchHeader *cur_patch()
-	{
-		return _patch_headers[_cur_patch_index];
-	}
-
-	uint32_t next_patch()
+	uint32_t next_patch_index()
 	{
 		return _cur_patch_index >= (NumPatches - 1) ? 0 : _cur_patch_index + 1;
 	}
 
-	uint32_t prev_patch()
+	uint32_t prev_patch_index()
 	{
 		return _cur_patch_index == 0 ? (NumPatches - 1) : _cur_patch_index - 1;
 	}
