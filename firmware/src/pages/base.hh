@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "pages/geometry.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
