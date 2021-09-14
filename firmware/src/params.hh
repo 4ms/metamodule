@@ -93,14 +93,16 @@ struct MetaParams {
 	}
 
 	// Copies some data, adds other data (rotary motion)
-	void update_with(const MetaParams &that)
+	// Used with write_sync()
+	void update_with(MetaParams &that)
 	{
 		patchcv = that.patchcv;
-		rotary_button.copy_state(that.rotary_button);
+		rotary_button.transfer_events(that.rotary_button);
 		rotary.add_motion(that.rotary);
 		rotary_pushed.add_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
 	}
+
 	void copy(const MetaParams &that)
 	{
 		patchcv = that.patchcv;
@@ -109,10 +111,11 @@ struct MetaParams {
 		rotary_pushed = that.rotary_pushed;
 		audio_load = that.audio_load;
 	}
+
 	void transfer(MetaParams &that)
 	{
 		patchcv = that.patchcv;
-		rotary_button.copy_state(that.rotary_button);
+		rotary_button.transfer_events(that.rotary_button);
 		rotary.transfer_motion(that.rotary);
 		rotary_pushed.transfer_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
@@ -137,6 +140,8 @@ struct ParamCache {
 
 	void write_sync(Params &p_, MetaParams &m_)
 	{
+		//FIXME: Use an atomic (STREX and LDREX) for new_data to prevent data race
+
 		_new_data = false; // protects against multiple write_syncs without a read_sync, and then one write_sync
 						   // interupting a read_sync in progress
 		p.copy(p_);

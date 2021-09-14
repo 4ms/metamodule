@@ -85,6 +85,24 @@ public:
 		got_falling_edge_ = other.got_falling_edge_;
 	}
 
+	// Update the toggler with more recent events from another toggler
+	void update_state(const Toggler &other)
+	{
+		if (other.got_falling_edge_)
+			got_falling_edge_ = true;
+
+		else if (other.got_rising_edge_)
+			got_rising_edge_ = true;
+	}
+
+	// Update the toggler with more recent events AND clear the other toggler
+	void transfer_events(Toggler &other)
+	{
+		update_state(other);
+		other.got_falling_edge_ = false;
+		other.got_rising_edge_ = false;
+	}
+
 	Toggler &operator=(const Toggler &other)
 	{
 		copy_state(other);

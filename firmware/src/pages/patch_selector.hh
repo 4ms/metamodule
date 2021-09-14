@@ -11,27 +11,6 @@ struct PatchSelectorPage : PageBase {
 		: PageBase{info, screen}
 	{}
 
-	void calc_scroll_offset()
-	{
-		//metaparams.rotary.use_motion(); //?? why?
-
-		//Disable scrolling if the number of lines fits on the screen
-		if ((int32_t)patch_list.NumPatches <= (box.height() / lineheight))
-			scroll_offset_px = 0;
-
-		//Check if scroll_offset_px puts current selection hightlight bar off-screen:
-		else if (scroll_offset_px > (box.bottom - lineheight - cur_sel_patch_top_y)) {
-			scroll_offset_px = box.bottom - lineheight - cur_sel_patch_top_y;
-		} else if (scroll_offset_px < box.top - cur_sel_patch_top_y) {
-			scroll_offset_px = box.top - cur_sel_patch_top_y;
-		}
-	}
-
-	int32_t idx_to_top_y(int32_t idx)
-	{
-		return idx * lineheight + box.top;
-	}
-
 	void start()
 	{
 		active_patch_idx = patch_list.cur_patch_index();
@@ -45,44 +24,6 @@ struct PatchSelectorPage : PageBase {
 		calc_scroll_offset();
 	}
 
-	void handle_changing_patch(uint32_t new_patch_index)
-	{
-		if (!mbox.loading_new_patch && (new_patch_index != patch_list.cur_patch_index())) {
-			mbox.new_patch_index = new_patch_index;
-			mbox.loading_new_patch = true;
-		}
-
-		if (mbox.loading_new_patch && mbox.audio_is_muted) {
-			auto orig_patch = patch_list.cur_patch();
-			patch_player.unload_patch();
-			patch_list.set_cur_patch_index(mbox.new_patch_index);
-			bool ok = patch_player.load_patch(patch_list.cur_patch());
-			if (!ok) {
-				mbox.set_message("Can't load patch");
-				patch_player.unload_patch();
-				patch_player.load_patch(orig_patch);
-			} else
-				mbox.clear_message();
-
-			active_patch_idx = patch_list.cur_patch_index();
-			mbox.loading_new_patch = false;
-		}
-	}
-
-	void check_rotary()
-	{
-		auto rotary = metaparams.rotary.use_motion();
-		if (rotary > 0)
-			selected_patch_idx = selected_patch_idx == patch_list.NumPatches - 1 ? 0 : selected_patch_idx + 1;
-		if (rotary < 0)
-			selected_patch_idx = selected_patch_idx == 0 ? patch_list.NumPatches - 1 : selected_patch_idx - 1;
-		if (rotary) {
-			dst_sel_patch_top_y = idx_to_top_y(selected_patch_idx);
-			animation_step_size = (dst_sel_patch_top_y - cur_sel_patch_top_y) / NumAnimationSteps;
-			animation_ctr = NumAnimationSteps;
-		}
-	}
-
 	void draw()
 	{
 		check_rotary();
@@ -92,6 +33,8 @@ struct PatchSelectorPage : PageBase {
 		screen.print("Select a patch:");
 		screen.setFont(PageWidgets::subheader_font);
 		screen.drawHLine(0, box.top, box.width(), Colors::grey.Rgb565());
+
+		screen.set_clip_rect(box);
 
 		//Print scroll bar up/down arrows
 		if (scroll_offset_px < 0)
@@ -108,13 +51,11 @@ struct PatchSelectorPage : PageBase {
 
 		calc_scroll_offset();
 
-		screen.set_clip_rect(box);
-
 		//Selection Highlight bar
 		screen.blendRect(
 			0, cur_sel_patch_top_y + scroll_offset_px + 2, box.width(), lineheight, Colors::cyan.Rgb565(), 0.6f);
 
-		//Active Highlight bar
+		//Active Patch Highlight bar
 		auto active_patch_top_y = idx_to_top_y(active_patch_idx) + scroll_offset_px + 2;
 		if (active_patch_top_y >= box.top && (active_patch_top_y + lineheight) <= box.bottom) {
 			screen.blendRect(0, active_patch_top_y, box.width(), lineheight, Colors::green.Rgb565(), 0.4f);
@@ -136,6 +77,76 @@ struct PatchSelectorPage : PageBase {
 		}
 
 		screen.clear_clip_rect();
+	}
+
+	void start_changing_patch(uint32_t new_patch_index)
+	{
+		if (!mbox.loading_new_patch && (new_patch_index != patch_list.cur_patch_index())) {
+			mbox.new_patch_index = new_patch_index;
+			mbox.loading_new_patch = true;
+		}
+	}
+
+	void handle_changing_patch()
+	{
+		if (mbox.loading_new_patch && mbox.audio_is_muted) {
+			auto orig_patch = patch_list.cur_patch();
+			patch_player.unload_patch();
+			patch_list.set_cur_patch_index(mbox.new_patch_index);
+			bool ok = patch_player.load_patch(patch_list.cur_patch());
+			// if (!ok) {
+			// 	mbox.set_message("Can't load patch");
+			// 	patch_player.unload_patch();
+			// 	patch_player.load_patch(orig_patch);
+			// } else
+			// 	mbox.clear_message();
+
+			active_patch_idx = patch_list.cur_patch_index();
+			mbox.loading_new_patch = false;
+		}
+	}
+
+	void check_rotary()
+	{
+		auto rotary = metaparams.rotary.use_motion();
+		if (rotary > 0)
+			selected_patch_idx = selected_patch_idx == patch_list.NumPatches - 1 ? 0 : selected_patch_idx + 1;
+		if (rotary < 0)
+			selected_patch_idx = selected_patch_idx == 0 ? patch_list.NumPatches - 1 : selected_patch_idx - 1;
+		if (rotary) {
+			dst_sel_patch_top_y = idx_to_top_y(selected_patch_idx);
+			animation_step_size = (dst_sel_patch_top_y - cur_sel_patch_top_y) / NumAnimationSteps;
+			animation_ctr = NumAnimationSteps;
+		}
+
+		if (metaparams.rotary_button.is_just_released()) {
+			Debug::Pin3::high();
+			start_changing_patch(selected_patch_idx);
+			Debug::Pin3::low();
+		}
+		handle_changing_patch();
+	}
+
+	void calc_scroll_offset()
+	{
+		//Clear any pending motion
+		metaparams.rotary.use_motion();
+
+		//Disable scrolling if the number of lines fits on the screen
+		if ((int32_t)patch_list.NumPatches <= (box.height() / lineheight))
+			scroll_offset_px = 0;
+
+		//Check if scroll_offset_px puts current selection hightlight bar off-screen:
+		else if (scroll_offset_px > (box.bottom - lineheight - cur_sel_patch_top_y)) {
+			scroll_offset_px = box.bottom - lineheight - cur_sel_patch_top_y;
+		} else if (scroll_offset_px < box.top - cur_sel_patch_top_y) {
+			scroll_offset_px = box.top - cur_sel_patch_top_y;
+		}
+	}
+
+	int32_t idx_to_top_y(int32_t idx)
+	{
+		return idx * lineheight + box.top;
 	}
 
 	void stop_page() {}

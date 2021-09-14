@@ -161,9 +161,9 @@ public:
 			mdrivlib::SMPControl::write<SMPRegister::IndexIncrement>(2);
 			mdrivlib::SMPControl::notify<SMPCommand::UpdateListOfModules>();
 			for (int module_i = 1; module_i < header->num_modules; module_i += 2) {
-				Debug::Pin2::high();
+				// Debug::Pin2::high();
 				modules[module_i]->update();
-				Debug::Pin2::low();
+				// Debug::Pin2::low();
 			}
 
 			// LEave this here until we are sure it's working OK on Mini

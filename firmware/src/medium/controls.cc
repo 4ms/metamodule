@@ -52,8 +52,9 @@ void Controls::update_params()
 		if (rotary_button.is_just_released()) {
 			if (_rotary_moved_while_pressed)
 				cur_metaparams->rotary_button.reset();
-			else
+			else {
 				cur_metaparams->rotary_button.register_falling_edge();
+			}
 		}
 
 		// Rotary turning
