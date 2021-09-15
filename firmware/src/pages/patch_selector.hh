@@ -188,15 +188,20 @@ public:
 
 	void set_selection(int32_t idx)
 	{
-		cur_selected_item_idx = idx;
+		selected_item_idx = idx;
+	}
+
+	int32_t get_selection()
+	{
+		return selected_item_idx;
 	}
 
 	void focus()
 	{
-		if (cur_selected_item_idx < 0 || cur_selected_item_idx >= num_items)
-			cur_selected_item_idx = 0;
+		if (selected_item_idx < 0 || selected_item_idx >= num_items)
+			selected_item_idx = 0;
 
-		cur_selected_item_top_y = item_abs_top(cur_selected_item_idx);
+		cur_selected_item_top_y = item_abs_top(selected_item_idx);
 		dst_selected_item_top_y = cur_selected_item_top_y;
 		animation_ctr = 0;
 		scroll_offset_px = 0;
@@ -224,12 +229,12 @@ public:
 
 	int32_t get_item_top(int32_t idx)
 	{
-		return item_abs_top(idx) + scroll_offset_px + 2;
+		return item_abs_top(idx) + scroll_offset_px + ItemTopMargin;
 	}
 
 	void calc_scroll_offset()
 	{
-		auto cur_selected_item_bottom_y = cur_selected_item_top_y + item_line_height(cur_selected_item_idx);
+		auto cur_selected_item_bottom_y = cur_selected_item_top_y + item_line_height(selected_item_idx);
 		//Disable scrolling if all items fit on the screen
 		if (item_top(num_items) <= box.height())
 			scroll_offset_px = 0;
@@ -263,9 +268,9 @@ public:
 
 		//Selection Highlight bar
 		_screen.blendRect(0,
-						  cur_selected_item_top_y + scroll_offset_px + 2,
+						  cur_selected_item_top_y + scroll_offset_px + ItemTopMargin,
 						  box.width(),
-						  item_line_height(cur_selected_item_idx),
+						  item_line_height(selected_item_idx),
 						  opts.highlight.Rgb565(),
 						  0.6f);
 
@@ -286,22 +291,22 @@ public:
 		_screen.clear_clip_rect();
 	}
 
-	void sel_next()
+	void animate_next()
 	{
-		cur_selected_item_idx = cur_selected_item_idx == num_items - 1 ? 0 : cur_selected_item_idx + 1;
+		selected_item_idx = selected_item_idx == num_items - 1 ? 0 : selected_item_idx + 1;
 		_animate_to_selection();
 	}
 
-	void sel_prev()
+	void animate_prev()
 	{
-		cur_selected_item_idx = cur_selected_item_idx == 0 ? num_items - 1 : cur_selected_item_idx - 1;
+		selected_item_idx = selected_item_idx == 0 ? num_items - 1 : selected_item_idx - 1;
 		_animate_to_selection();
 	}
 
 private:
 	void _animate_to_selection()
 	{
-		dst_selected_item_top_y = item_abs_top(cur_selected_item_idx);
+		dst_selected_item_top_y = item_abs_top(selected_item_idx);
 		animation_step_size = (dst_selected_item_top_y - cur_selected_item_top_y) / opts.num_animation_steps;
 		animation_ctr = opts.num_animation_steps;
 	}
@@ -312,14 +317,14 @@ private:
 	Options opts;
 	int32_t num_items = 0;
 	int32_t scroll_offset_px;
-	int32_t cur_selected_item_idx = 0;
+	int32_t selected_item_idx = 0;
 	int32_t cur_selected_item_top_y;
-	int32_t dst_selected_item_idx = 0;
 	int32_t dst_selected_item_top_y;
 	int32_t animation_ctr = 0;
 	int32_t animation_step_size;
 
 	static constexpr int32_t LeftMargin = 2;
+	static constexpr int32_t ItemTopMargin = 2;
 
 	// int32_t line_heights[MaxItems];
 	// int32_t line_abs_pos[MaxItems];
@@ -357,11 +362,11 @@ struct PatchScrollPage : public ScrollBox<PatchScrollPage>, PageBase {
 		screen.drawHLine(0, box.top, box.width(), Colors::grey.Rgb565());
 
 		//Active Patch Highlight bar
-		// ...get_item_top()
 		// auto active_patch_top_y = idx_to_top_y(active_patch_idx) + scroll_offset_px + 2;
-		// if (active_patch_top_y >= box.top && (active_patch_top_y + lineheight) <= box.bottom) {
-		// 	screen.blendRect(0, active_patch_top_y, box.width(), lineheight, Colors::green.Rgb565(), 0.4f);
-		// }
+		auto active_patch_top_y = get_item_top(active_patch_idx);
+		if (active_patch_top_y >= box.top && (active_patch_top_y + lineheight) <= box.bottom) {
+			screen.blendRect(0, active_patch_top_y, box.width(), lineheight, Colors::green.Rgb565(), 0.4f);
+		}
 
 		ScrollBox<PatchScrollPage>::draw_scroll_box();
 	}
@@ -403,15 +408,13 @@ struct PatchScrollPage : public ScrollBox<PatchScrollPage>, PageBase {
 	{
 		auto rotary = metaparams.rotary.use_motion();
 		if (rotary > 0)
-			ScrollBox<PatchScrollPage>::sel_next();
+			ScrollBox<PatchScrollPage>::animate_next();
 		if (rotary < 0)
-			ScrollBox<PatchScrollPage>::sel_prev();
-		if (rotary)
-			ScrollBox<PatchScrollPage>::animate_to_selection();
+			ScrollBox<PatchScrollPage>::animate_prev();
 
-		if (metaparams.rotary_button.is_just_released()) {
-			start_changing_patch(selected_patch_idx);
-		}
+		if (metaparams.rotary_button.is_just_released())
+			start_changing_patch(ScrollBox<PatchScrollPage>::get_selection());
+
 		handle_changing_patch();
 	}
 
