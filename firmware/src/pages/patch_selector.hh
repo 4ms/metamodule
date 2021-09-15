@@ -6,8 +6,8 @@
 namespace MetaModule
 {
 
-struct PatchSelectorPage : PageBase {
-	PatchSelectorPage(PatchInfo info, ScreenFrameBuffer &screen)
+struct PatchSelectorPage1 : PageBase {
+	PatchSelectorPage1(PatchInfo info, ScreenFrameBuffer &screen)
 		: PageBase{info, screen}
 	{}
 
@@ -79,7 +79,7 @@ struct PatchSelectorPage : PageBase {
 		screen.clear_clip_rect();
 	}
 
-	void start_changing_patch(uint32_t new_patch_index)
+	void start_changing_patch(int32_t new_patch_index)
 	{
 		if (!mbox.loading_new_patch && (new_patch_index != patch_list.cur_patch_index())) {
 			mbox.new_patch_index = new_patch_index;
@@ -277,7 +277,7 @@ public:
 		//Names of patches
 		_screen.setTextColor(Colors::black);
 		int16_t y_pos = box.top + scroll_offset_px;
-		for (unsigned i = 0; i < num_items; i++) {
+		for (int i = 0; i < num_items; i++) {
 			if ((y_pos + item_line_height(i)) < box.top) {
 				y_pos += item_line_height(i);
 				continue;
@@ -330,25 +330,25 @@ private:
 	// int32_t line_abs_pos[MaxItems];
 };
 
-struct PatchScrollPage : public ScrollBox<PatchScrollPage>, PageBase {
-	PatchScrollPage(PatchInfo info, ScreenFrameBuffer &screen)
+struct PatchSelectorPage : PageBase, public ScrollBox<PatchSelectorPage> {
+	PatchSelectorPage(PatchInfo info, ScreenFrameBuffer &screen)
 		: PageBase{info, screen}
-		, ScrollBox<PatchScrollPage>{screen,
-									 {
-										 .bounding_box = box,
-										 .num_items = patch_list.NumPatches,
-										 .show_scrollbar = true,
-										 .highlight = Colors::cyan,
-										 .lineheight = 24,
-										 .num_animation_steps = 6,
-									 }}
+		, ScrollBox<PatchSelectorPage>{screen,
+									   {
+										   .bounding_box = box,
+										   .num_items = patch_list.NumPatches,
+										   .show_scrollbar = true,
+										   .highlight = Colors::cyan,
+										   .lineheight = 24,
+										   .num_animation_steps = 6,
+									   }}
 	{}
 
 	void start()
 	{
 		active_patch_idx = patch_list.cur_patch_index();
-		ScrollBox<PatchScrollPage>::focus();
-		ScrollBox<PatchScrollPage>::set_selection(active_patch_idx);
+		ScrollBox<PatchSelectorPage>::focus();
+		ScrollBox<PatchSelectorPage>::set_selection(active_patch_idx);
 	}
 
 	void draw()
@@ -368,7 +368,7 @@ struct PatchScrollPage : public ScrollBox<PatchScrollPage>, PageBase {
 			screen.blendRect(0, active_patch_top_y, box.width(), lineheight, Colors::green.Rgb565(), 0.4f);
 		}
 
-		ScrollBox<PatchScrollPage>::draw_scroll_box();
+		ScrollBox<PatchSelectorPage>::draw_scroll_box();
 	}
 
 	void draw_scrollbox_element(int32_t i)
@@ -377,7 +377,7 @@ struct PatchScrollPage : public ScrollBox<PatchScrollPage>, PageBase {
 		screen.print(patch_list.get_patch_name(i));
 	}
 
-	void start_changing_patch(uint32_t new_patch_index)
+	void start_changing_patch(int32_t new_patch_index)
 	{
 		if (!mbox.loading_new_patch && (new_patch_index != patch_list.cur_patch_index())) {
 			mbox.new_patch_index = new_patch_index;
@@ -408,12 +408,12 @@ struct PatchScrollPage : public ScrollBox<PatchScrollPage>, PageBase {
 	{
 		auto rotary = metaparams.rotary.use_motion();
 		if (rotary > 0)
-			ScrollBox<PatchScrollPage>::animate_next();
+			ScrollBox<PatchSelectorPage>::animate_next();
 		if (rotary < 0)
-			ScrollBox<PatchScrollPage>::animate_prev();
+			ScrollBox<PatchSelectorPage>::animate_prev();
 
 		if (metaparams.rotary_button.is_just_released())
-			start_changing_patch(ScrollBox<PatchScrollPage>::get_selection());
+			start_changing_patch(ScrollBox<PatchSelectorPage>::get_selection());
 
 		handle_changing_patch();
 	}
