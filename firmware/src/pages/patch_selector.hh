@@ -6,8 +6,8 @@
 namespace MetaModule
 {
 
-struct PatchSelectorPage1 : PageBase {
-	PatchSelectorPage1(PatchInfo info, ScreenFrameBuffer &screen)
+struct PatchSelectorPage2 : PageBase {
+	PatchSelectorPage2(PatchInfo info, ScreenFrameBuffer &screen)
 		: PageBase{info, screen}
 	{}
 
@@ -198,7 +198,7 @@ public:
 
 	void focus()
 	{
-		if (selected_item_idx < 0 || selected_item_idx >= num_items)
+		if (selected_item_idx < 0 || selected_item_idx >= opts.num_items)
 			selected_item_idx = 0;
 
 		cur_selected_item_top_y = item_abs_top(selected_item_idx);
@@ -236,7 +236,7 @@ public:
 	{
 		auto cur_selected_item_bottom_y = cur_selected_item_top_y + item_line_height(selected_item_idx);
 		//Disable scrolling if all items fit on the screen
-		if (item_top(num_items) <= box.height())
+		if (item_top(opts.num_items) <= box.height())
 			scroll_offset_px = 0;
 
 		//Scroll up or down if scroll_offset_px puts cur_selected_item off-screen:
@@ -254,7 +254,7 @@ public:
 		//Print scroll bar up/down arrows
 		if (scroll_offset_px < 0)
 			_screen.printf_at(box.right - 10, box.top, "^");
-		if (item_top(num_items) + scroll_offset_px > box.height())
+		if (item_top(opts.num_items) + scroll_offset_px > box.height())
 			_screen.printf_at(box.right - 10, 210, "v");
 
 		// Step animation
@@ -277,7 +277,7 @@ public:
 		//Names of patches
 		_screen.setTextColor(Colors::black);
 		int16_t y_pos = box.top + scroll_offset_px;
-		for (int i = 0; i < num_items; i++) {
+		for (int i = 0; i < opts.num_items; i++) {
 			if ((y_pos + item_line_height(i)) < box.top) {
 				y_pos += item_line_height(i);
 				continue;
@@ -285,7 +285,7 @@ public:
 			if (y_pos > box.bottom)
 				break;
 			_screen.setCursor(LeftMargin, y_pos);
-			static_cast<ParentWidget &>(*this).draw_scrollbox_element(i);
+			static_cast<ParentWidget *>(this)->draw_scrollbox_element(i);
 			y_pos += item_line_height(i);
 		}
 		_screen.clear_clip_rect();
@@ -293,13 +293,13 @@ public:
 
 	void animate_next()
 	{
-		selected_item_idx = selected_item_idx == num_items - 1 ? 0 : selected_item_idx + 1;
+		selected_item_idx = selected_item_idx == opts.num_items - 1 ? 0 : selected_item_idx + 1;
 		_animate_to_selection();
 	}
 
 	void animate_prev()
 	{
-		selected_item_idx = selected_item_idx == 0 ? num_items - 1 : selected_item_idx - 1;
+		selected_item_idx = selected_item_idx == 0 ? opts.num_items - 1 : selected_item_idx - 1;
 		_animate_to_selection();
 	}
 
@@ -315,7 +315,6 @@ private:
 	ScreenFrameBuffer &_screen;
 	RectC box;
 	Options opts;
-	int32_t num_items = 0;
 	int32_t scroll_offset_px;
 	int32_t selected_item_idx = 0;
 	int32_t cur_selected_item_top_y;
@@ -331,24 +330,26 @@ private:
 };
 
 struct PatchSelectorPage : PageBase, public ScrollBox<PatchSelectorPage> {
+	using ScrollBoxT = ScrollBox<PatchSelectorPage>;
+
 	PatchSelectorPage(PatchInfo info, ScreenFrameBuffer &screen)
 		: PageBase{info, screen}
-		, ScrollBox<PatchSelectorPage>{screen,
-									   {
-										   .bounding_box = box,
-										   .num_items = patch_list.NumPatches,
-										   .show_scrollbar = true,
-										   .highlight = Colors::cyan,
-										   .lineheight = 24,
-										   .num_animation_steps = 6,
-									   }}
+		, ScrollBoxT{screen,
+					 {
+						 .bounding_box = box,
+						 .num_items = patch_list.NumPatches,
+						 .show_scrollbar = true,
+						 .highlight = Colors::cyan,
+						 .lineheight = 24,
+						 .num_animation_steps = 6,
+					 }}
 	{}
 
 	void start()
 	{
 		active_patch_idx = patch_list.cur_patch_index();
-		ScrollBox<PatchSelectorPage>::focus();
-		ScrollBox<PatchSelectorPage>::set_selection(active_patch_idx);
+		ScrollBoxT::focus();
+		ScrollBoxT::set_selection(active_patch_idx);
 	}
 
 	void draw()
@@ -368,7 +369,7 @@ struct PatchSelectorPage : PageBase, public ScrollBox<PatchSelectorPage> {
 			screen.blendRect(0, active_patch_top_y, box.width(), lineheight, Colors::green.Rgb565(), 0.4f);
 		}
 
-		ScrollBox<PatchSelectorPage>::draw_scroll_box();
+		ScrollBoxT::draw_scroll_box();
 	}
 
 	void draw_scrollbox_element(int32_t i)
@@ -408,12 +409,12 @@ struct PatchSelectorPage : PageBase, public ScrollBox<PatchSelectorPage> {
 	{
 		auto rotary = metaparams.rotary.use_motion();
 		if (rotary > 0)
-			ScrollBox<PatchSelectorPage>::animate_next();
+			ScrollBoxT::animate_next();
 		if (rotary < 0)
-			ScrollBox<PatchSelectorPage>::animate_prev();
+			ScrollBoxT::animate_prev();
 
 		if (metaparams.rotary_button.is_just_released())
-			start_changing_patch(ScrollBox<PatchSelectorPage>::get_selection());
+			start_changing_patch(ScrollBoxT::get_selection());
 
 		handle_changing_patch();
 	}
