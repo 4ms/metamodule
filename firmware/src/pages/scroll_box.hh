@@ -1,3 +1,4 @@
+#pragma once
 #include "pages/geometry.hh"
 #include "screen_buffer.hh"
 #include "util/colors.hh"
@@ -5,13 +6,15 @@
 namespace MetaModule
 {
 
+enum ScrollMethod { BySelection, ByScreen };
+
 template<typename ParentWidget>
 class ScrollBox {
 public:
 	struct Options {
 		RectC bounding_box;
-		int32_t num_items;
 		bool show_scrollbar;
+		ScrollMethod scroll_method;
 		Color highlight;
 		int32_t lineheight;
 		int32_t num_animation_steps;
@@ -34,7 +37,7 @@ public:
 
 	void focus()
 	{
-		if (selected_item_idx < 0 || selected_item_idx >= opts.num_items)
+		if (selected_item_idx < 0 || selected_item_idx >= num_items)
 			selected_item_idx = 0;
 
 		cur_selected_item_top_y = item_abs_top(selected_item_idx);
@@ -70,16 +73,18 @@ public:
 
 	void calc_scroll_offset()
 	{
-		auto cur_selected_item_bottom_y = cur_selected_item_top_y + item_line_height(selected_item_idx);
-		//Disable scrolling if all items fit on the screen
-		if (item_top(opts.num_items) <= box.height())
-			scroll_offset_px = 0;
+		if (opts.scroll_method == BySelection) {
+			auto cur_selected_item_bottom_y = cur_selected_item_top_y + item_line_height(selected_item_idx);
+			//Disable scrolling if all items fit on the screen
+			if (item_top(num_items) <= box.height())
+				scroll_offset_px = 0;
 
-		//Scroll up or down if scroll_offset_px puts cur_selected_item off-screen:
-		else if ((scroll_offset_px + cur_selected_item_bottom_y) > box.bottom) {
-			scroll_offset_px = box.bottom - cur_selected_item_bottom_y;
-		} else if ((scroll_offset_px + cur_selected_item_top_y) < box.top) {
-			scroll_offset_px = box.top - cur_selected_item_top_y;
+			//Scroll up or down if scroll_offset_px puts cur_selected_item off-screen:
+			else if ((scroll_offset_px + cur_selected_item_bottom_y) > box.bottom) {
+				scroll_offset_px = box.bottom - cur_selected_item_bottom_y;
+			} else if ((scroll_offset_px + cur_selected_item_top_y) < box.top) {
+				scroll_offset_px = box.top - cur_selected_item_top_y;
+			}
 		}
 	}
 
@@ -90,28 +95,36 @@ public:
 		//Print scroll bar up/down arrows
 		if (scroll_offset_px < 0)
 			_screen.printf_at(box.right - 10, box.top, "^");
-		if (item_top(opts.num_items) + scroll_offset_px > box.height())
+		if (item_top(num_items) + scroll_offset_px > box.height())
 			_screen.printf_at(box.right - 10, 210, "v");
 
 		// Step animation
 		if (animation_ctr) {
 			animation_ctr--;
-			cur_selected_item_top_y += animation_step_size;
-		} else
-			cur_selected_item_top_y = dst_selected_item_top_y;
+			if (opts.scroll_method == BySelection)
+				cur_selected_item_top_y += animation_step_size;
+			else if (opts.scroll_method == ByScreen)
+				scroll_offset_px += animation_step_size;
+		} else {
+			if (opts.scroll_method == BySelection)
+				cur_selected_item_top_y = dst_selected_item_top_y;
+			else if (opts.scroll_method == ByScreen)
+				scroll_offset_px = dst_scroll_offset_px;
+		}
 
 		calc_scroll_offset();
 
 		//Selection Highlight bar
-		_screen.blendRect(0,
-						  cur_selected_item_top_y + scroll_offset_px + ItemTopMargin,
-						  box.width(),
-						  item_line_height(selected_item_idx),
-						  opts.highlight.Rgb565(),
-						  0.6f);
+		if (opts.highlight != Colors::white)
+			_screen.blendRect(0,
+							  cur_selected_item_top_y + scroll_offset_px + ItemTopMargin,
+							  box.width(),
+							  item_line_height(selected_item_idx),
+							  opts.highlight.Rgb565(),
+							  0.6f);
 
 		int16_t y_pos = box.top + scroll_offset_px;
-		for (int i = 0; i < opts.num_items; i++) {
+		for (int i = 0; i < num_items; i++) {
 			if ((y_pos + item_line_height(i)) < box.top) {
 				y_pos += item_line_height(i);
 				continue;
@@ -125,16 +138,34 @@ public:
 		_screen.clear_clip_rect();
 	}
 
+	void set_num_items(int32_t num)
+	{
+		num_items = num;
+	}
+
 	void animate_next()
 	{
-		selected_item_idx = selected_item_idx == opts.num_items - 1 ? 0 : selected_item_idx + 1;
+		selected_item_idx = selected_item_idx == num_items - 1 ? 0 : selected_item_idx + 1;
 		_animate_to_selection();
 	}
 
 	void animate_prev()
 	{
-		selected_item_idx = selected_item_idx == 0 ? opts.num_items - 1 : selected_item_idx - 1;
+		selected_item_idx = selected_item_idx == 0 ? num_items - 1 : selected_item_idx - 1;
 		_animate_to_selection();
+	}
+
+	void scroll_screen_up()
+	{
+		dst_scroll_offset_px = scroll_offset_px + opts.lineheight;
+		animation_step_size = opts.lineheight / opts.num_animation_steps;
+		animation_ctr = opts.num_animation_steps;
+	}
+	void scroll_screen_down()
+	{
+		dst_scroll_offset_px = scroll_offset_px - opts.lineheight;
+		animation_step_size = (-opts.lineheight) / opts.num_animation_steps;
+		animation_ctr = opts.num_animation_steps;
 	}
 
 private:
@@ -149,12 +180,14 @@ private:
 	ScreenFrameBuffer &_screen;
 	RectC box;
 	Options opts;
+	int32_t num_items;
 	int32_t scroll_offset_px;
 	int32_t selected_item_idx = 0;
 	int32_t cur_selected_item_top_y;
 	int32_t dst_selected_item_top_y;
 	int32_t animation_ctr = 0;
 	int32_t animation_step_size;
+	int32_t dst_scroll_offset_px = 0;
 
 	static constexpr int32_t LeftMargin = 2;
 	static constexpr int32_t ItemTopMargin = 2;

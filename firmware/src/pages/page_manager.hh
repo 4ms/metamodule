@@ -64,7 +64,8 @@ public:
 	void set_message(std::string_view message);
 
 private:
-	void start_page();
+	void focus_page();
+	void blur_page();
 };
 
 } // namespace MetaModule

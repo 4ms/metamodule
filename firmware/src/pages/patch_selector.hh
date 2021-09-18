@@ -15,17 +15,18 @@ struct PatchSelectorPage : PageBase, public ScrollBox<PatchSelectorPage> {
 		, ScrollBoxT{screen,
 					 {
 						 .bounding_box = box,
-						 .num_items = patch_list.NumPatches,
 						 .show_scrollbar = true,
+						 .scroll_method = ScrollMethod::BySelection,
 						 .highlight = Colors::cyan,
-						 .lineheight = 24,
+						 .lineheight = lineheight,
 						 .num_animation_steps = 6,
 					 }}
 	{}
 
-	void start()
+	void focus()
 	{
 		active_patch_idx = patch_list.cur_patch_index();
+		ScrollBoxT::set_num_items(patch_list.NumPatches);
 		ScrollBoxT::focus();
 		ScrollBoxT::set_selection(active_patch_idx);
 	}
@@ -41,13 +42,26 @@ struct PatchSelectorPage : PageBase, public ScrollBox<PatchSelectorPage> {
 		screen.drawHLine(0, box.top, box.width(), Colors::grey.Rgb565());
 
 		//Active Patch Highlight bar
-		// auto active_patch_top_y = idx_to_top_y(active_patch_idx) + scroll_offset_px + 2;
 		auto active_patch_top_y = get_item_top(active_patch_idx);
 		if (active_patch_top_y >= box.top && (active_patch_top_y + lineheight) <= box.bottom) {
 			screen.blendRect(0, active_patch_top_y, box.width(), lineheight, Colors::green.Rgb565(), 0.4f);
 		}
 
 		ScrollBoxT::draw_scroll_box();
+	}
+
+	void check_rotary()
+	{
+		auto rotary = metaparams.rotary.use_motion();
+		if (rotary > 0)
+			ScrollBoxT::animate_next();
+		if (rotary < 0)
+			ScrollBoxT::animate_prev();
+
+		if (metaparams.rotary_button.is_just_released())
+			start_changing_patch(ScrollBoxT::get_selection());
+
+		handle_changing_patch();
 	}
 
 	void draw_scrollbox_element(int32_t i)
@@ -83,31 +97,10 @@ struct PatchSelectorPage : PageBase, public ScrollBox<PatchSelectorPage> {
 		}
 	}
 
-	void check_rotary()
-	{
-		auto rotary = metaparams.rotary.use_motion();
-		if (rotary > 0)
-			ScrollBoxT::animate_next();
-		if (rotary < 0)
-			ScrollBoxT::animate_prev();
-
-		if (metaparams.rotary_button.is_just_released())
-			start_changing_patch(ScrollBoxT::get_selection());
-
-		handle_changing_patch();
-	}
-
-	int32_t idx_to_top_y(int32_t idx)
-	{
-		return idx * lineheight + box.top;
-	}
-
-	void stop_page() {}
+	void blur() {}
 
 	int32_t active_patch_idx = 0;
-
-	const int32_t lineheight = 24;
-
+	static constexpr int32_t lineheight = 24;
 	static constexpr RectC box{
 		.left = 0, .top = 44, .right = MMScreenBufferConf::viewWidth, .bottom = MMScreenBufferConf::viewHeight};
 };

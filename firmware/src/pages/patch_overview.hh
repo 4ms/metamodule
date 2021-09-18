@@ -2,6 +2,7 @@
 #include "pages/base.hh"
 #include "pages/fonts.hh"
 #include "pages/page_widgets.hh"
+#include "pages/scroll_box.hh"
 
 namespace MetaModule
 {
@@ -139,48 +140,75 @@ struct KnobMapPage : PageBase {
 	}
 };
 
-struct PatchLayoutPage : PageBase {
+struct PatchLayoutPage : PageBase, ScrollBox<PatchLayoutPage> {
+	using ScrollBoxT = ScrollBox<PatchLayoutPage>;
+	static constexpr RectC box{
+		.left = 0,
+		.top = PageWidgets::list_ypos,
+		.right = MMScreenBufferConf::viewWidth,
+		.bottom = MMScreenBufferConf::viewHeight,
+	};
+
 	PatchLayoutPage(PatchInfo info, ScreenFrameBuffer &screen)
 		: PageBase{info, screen}
+		, ScrollBoxT{screen,
+					 {
+						 .bounding_box = box,
+						 .show_scrollbar = false,
+						 .scroll_method = ScrollMethod::ByScreen,
+						 .highlight = Colors::white, //none?
+						 .lineheight = PageWidgets::list_lineheight,
+						 .num_animation_steps = 6,
+					 }}
 	{}
+
+	void focus()
+	{
+		ScrollBoxT::set_num_items(patch_player.get_num_int_cables());
+		ScrollBoxT::focus();
+		ScrollBoxT::set_selection(0);
+	}
 
 	void draw()
 	{
+		auto rotary = metaparams.rotary.use_motion();
+		if (rotary > 0)
+			ScrollBoxT::scroll_screen_down();
+		if (rotary < 0)
+			ScrollBoxT::scroll_screen_up();
+
 		screen.fill(PatchOverviewPage::bgcolor);
 		PageWidgets::setup_header(screen);
 		screen.print(patch_player.get_patch_name());
 		PageWidgets::setup_sub_header(screen);
 		screen.print("Internal cables:");
 
+		ScrollBoxT::draw_scroll_box();
+	}
+
+	void draw_scrollbox_element(int32_t i)
+	{
+		screen.setTextColor(Colors::black);
 		screen.setFont(PageWidgets::list_font);
-		uint16_t y_pos = PageWidgets::list_ypos;
-		if (patch_player.is_loaded) {
-			for (int i = 0; i < patch_player.get_num_int_cables(); i++) {
-				auto &cable = patch_player.int_cables[i];
-				screen.setCursor(PageWidgets::margin_left, y_pos);
-				screen.setTextColor(Colors::black);
-				PageWidgets::print_module_name(screen, patch_player, cable.out.module_id);
-				screen.print(": ");
-				screen.setTextColor(Colors::blue.blend(Colors::black, 0.25f));
-				screen.print(patch_player.modules[cable.out.module_id]->outjack_name(cable.out.jack_id));
+		screen.print("X");
+		auto &cable = patch_player.int_cables[i];
+		PageWidgets::print_module_name(screen, patch_player, cable.out.module_id);
+		screen.print(": ");
+		screen.setTextColor(Colors::blue.blend(Colors::black, 0.25f));
+		screen.print(patch_player.modules[cable.out.module_id]->outjack_name(cable.out.jack_id));
 
-				for (int j = 1; j < MAX_CONNECTIONS_PER_NODE - 1; j++) {
-					auto &input_jack = cable.ins[j];
-					if (input_jack.jack_id < 0 || input_jack.module_id < 0)
-						break;
-					y_pos += PageWidgets::list_lineheight;
-					screen.setCursor(PageWidgets::margin_left, y_pos);
-
-					screen.setTextColor(Colors::grey);
-					screen.print("  => ");
-					screen.setTextColor(Colors::black);
-					PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
-					screen.print(": ");
-					screen.setTextColor(Colors::blue.blend(Colors::black, 0.25f));
-					screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
-				}
-				y_pos += PageWidgets::list_lineheight;
-			}
+		for (int j = 1; j < MAX_CONNECTIONS_PER_NODE - 1; j++) {
+			auto &input_jack = cable.ins[j];
+			if (input_jack.jack_id < 0 || input_jack.module_id < 0)
+				break;
+			//newline?
+			screen.setTextColor(Colors::grey);
+			screen.print(" =>");
+			screen.setTextColor(Colors::black);
+			PageWidgets::print_module_name(screen, patch_player, input_jack.module_id);
+			screen.print(": ");
+			screen.setTextColor(Colors::blue.blend(Colors::black, 0.25f));
+			screen.print(patch_player.modules[input_jack.module_id]->injack_name(input_jack.jack_id));
 		}
 	}
 };
