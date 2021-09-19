@@ -1,7 +1,7 @@
 #pragma once
-#include "pages/geometry.hh"
 #include "screen_buffer.hh"
 #include "util/colors.hh"
+#include "util/geometry.hh"
 
 namespace MetaModule
 {

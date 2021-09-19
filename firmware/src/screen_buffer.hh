@@ -5,9 +5,9 @@
 #include "drivers/dma2d_transfer.hh"
 #include "mcufont.h"
 #include "pages/fonts.hh"
-#include "pages/geometry.hh"
 #include "printf.h"
 #include "util/colors.hh"
+#include "util/geometry.hh"
 
 extern "C" void _draw_text_pixel_callback(int16_t x, int16_t y, uint8_t count, uint8_t alpha, void *state);
 extern "C" uint8_t _char_cursor_callback(int16_t x0, int16_t y0, mf_char character, void *state);
@@ -67,13 +67,13 @@ public:
 
 	void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	{
-		if (x >= _width || y >= _height)
+		if (x >= clip_rect.width() || y >= clip_rect.height())
 			return;
-		if ((x + w) > _width)
-			w = _width - x;
+		if ((x + w) > clip_rect.width())
+			w = clip_rect.width() - x;
 
-		if ((h + y) > _height)
-			h = _height - y;
+		if ((h + y) > clip_rect.height())
+			h = clip_rect.height() - y;
 
 		// Fixme: fix fastFillRect for A7
 		// Todo: Measure and set this for optimal performance
@@ -83,7 +83,7 @@ public:
 		// else {
 		for (int yi = y; yi < (y + h); yi++) {
 			for (int xi = x; xi < (x + w); xi++) {
-				framebuf[xi + yi * _width] = color;
+				framebuf[xi + yi * clip_rect.width()] = color;
 			}
 		}
 		// }
@@ -98,7 +98,7 @@ public:
 	void blendRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, float f_alpha)
 	{
 		// Todo with DMA2D
-		if (x >= _width || y >= _height)
+		if (x >= clip_rect.right || y >= clip_rect.bottom)
 			return;
 
 		uint8_t alpha = f_alpha * 255.f;
@@ -109,14 +109,32 @@ public:
 			return;
 		}
 
-		int16_t max_x = (x + w) > _width ? _width : x + w;
-		int16_t max_y = (h + y) > _height ? _height : y + h;
+		int16_t max_x = (x + w) > clip_rect.right ? clip_rect.right : x + w;
+		int16_t max_y = (h + y) > clip_rect.bottom ? clip_rect.bottom : y + h;
+
+		if (max_x < clip_rect.left || max_y < clip_rect.top)
+			return;
+
+		if (x < clip_rect.left)
+			x = clip_rect.left;
+
+		if (y < clip_rect.top)
+			y = clip_rect.top;
 
 		for (int yi = y; yi < max_y; yi++) {
 			for (int xi = x; xi < max_x; xi++) {
 				draw_blended_pix(xi, yi, color, alpha);
 			}
 		}
+	}
+
+	void blendRect(Rect r, uint16_t color, float f_alpha)
+	{
+		blendRect(r.left, r.top, r.width, r.height, color, f_alpha);
+	}
+	void blendRect(RectC r, uint16_t color, float f_alpha)
+	{
+		blendRect(r.left, r.top, r.width(), r.height(), color, f_alpha);
 	}
 
 	//
