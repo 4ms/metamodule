@@ -17,6 +17,7 @@ struct PatchSelectorPage : PageBase, public ScrollBox<PatchSelectorPage> {
 						 .bounding_box = box,
 						 .show_scrollbar = true,
 						 .scroll_method = ScrollMethod::BySelection,
+						 .loop = true,
 						 .highlight = Colors::cyan,
 						 .lineheight = lineheight,
 						 .num_animation_steps = 6,
@@ -40,14 +41,24 @@ struct PatchSelectorPage : PageBase, public ScrollBox<PatchSelectorPage> {
 		screen.print("Select a patch:");
 		screen.setFont(PageWidgets::subheader_font);
 		screen.drawHLine(0, box.top, box.width(), Colors::grey.Rgb565());
-
-		//Active Patch Highlight bar
-		auto active_patch_top_y = get_item_top(active_patch_idx);
-		if (active_patch_top_y >= box.top && (active_patch_top_y + lineheight) <= box.bottom) {
-			screen.blendRect(0, active_patch_top_y, box.width(), lineheight, Colors::green.Rgb565(), 0.4f);
-		}
-
+		draw_active_patch_highlight_bar();
 		ScrollBoxT::draw_scroll_box();
+	}
+
+	void draw_active_patch_highlight_bar()
+	{
+		auto active_patch_top_y = item_abs_scrolled_top(active_patch_idx) + ScrollBoxT::ItemTopMargin;
+		const RectC bar{
+			.left = 0,
+			.top = active_patch_top_y,
+			.right = box.right,
+			.bottom = active_patch_top_y + lineheight,
+		};
+		if (box.y_intersects(bar)) {
+			screen.set_clip_rect(box);
+			screen.blendRect(bar, Colors::green.Rgb565(), 0.4f);
+			screen.clear_clip_rect();
+		}
 	}
 
 	void check_rotary()

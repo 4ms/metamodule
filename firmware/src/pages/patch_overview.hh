@@ -156,6 +156,7 @@ struct PatchLayoutPage : PageBase, ScrollBox<PatchLayoutPage> {
 						 .bounding_box = box,
 						 .show_scrollbar = false,
 						 .scroll_method = ScrollMethod::ByScreen,
+						 .loop = false,
 						 .highlight = Colors::white, //none?
 						 .lineheight = PageWidgets::list_lineheight,
 						 .num_animation_steps = 6,
