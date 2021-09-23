@@ -132,6 +132,8 @@ public:
 	void transfer_buffer_to_screen()
 	{
 		if (using_half_buffer_transfers) {
+			//Total setup times = 12.5+1.6+12.5+1.6 = 28.2us, every 16Hz (or 33Hz) = <0.1 %
+			// Debug::Pin5::high(); // time to setup the first mem_xfer = 12-13us
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 
 			set_pos(0, 0, _width - 1, _height - 1);
@@ -139,10 +141,12 @@ public:
 
 			// Debug::Pin2::high(); // start MDMA xfer #1
 			mem_xfer.register_callback([&]() {
-				// Debug::Pin2::low();	 // completed MDMA xfer#1
+				// Debug::Pin4::high(); // time to setup the SPI transfer = 1.6us, starting 180us after first mem_xfer
+				// Debug::Pin2::low(); // completed MDMA xfer#1
 				// Debug::Pin3::high(); // start BDMA transfer #1
 				config_dma_transfer(dst_addr, HalfFrameSize);
 				start_dma_transfer([&]() {
+					// Debug::Pin5::high(); //time to setup mem_xfer = 12-13us, starting 12ms after first SPI transfer
 					// Debug::Pin3::low(); // completed BDMA xfer #1
 
 					//Start transferring the second half:
@@ -151,6 +155,7 @@ public:
 
 					// Debug::Pin2::high(); // start MDMA xfer #2
 					mem_xfer.register_callback([&]() {
+						// Debug::Pin4::high(); //time to setup second SPI transfer = 1.6us, starting 180us after mem_xfer
 						// Debug::Pin2::low();	 // completed MDMA xfer #2
 						// Debug::Pin3::high(); // start BDMA xfer #2
 						config_dma_transfer(dst_addr, HalfFrameSize);
@@ -158,11 +163,15 @@ public:
 							// Debug::Pin3::low(); // completed BDMA xfer #3
 							HWSemaphore<ScreenFrameWriteLock>::unlock();
 						});
+						// Debug::Pin4::low(); //end setup measurement
 					});
 					mem_xfer.start_transfer();
+					// Debug::Pin5::low(); //end setup measurement
 				});
+				// Debug::Pin4::low(); //end setup measurement
 			});
 			mem_xfer.start_transfer();
+			// Debug::Pin5::low(); //end setup measurement
 
 		} else if (!direct_mode) {
 			// Debug::Pin3::high();

@@ -77,14 +77,14 @@ public:
 		// update_animation() just update the TriOsc and fade (but not write actual color to the framebuffer)
 		// led_update_task.init(led_update_animation_task_conf, [this]() { leds.update_animation(); });
 		// led_update_task.start();
-		HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() {
-			if (HWSemaphore<LEDFrameBufLock>::lock() == HWSemaphoreFlag::LockedOk) {
-				// update_led_states();
-				// Todo: doesn't this cause the ISR to trigger itself?
-				HWSemaphore<LEDFrameBufLock>::unlock();
-			}
-		});
-		HWSemaphore<LEDFrameBufLock>::enable_channel_ISR();
+		// HWSemaphoreCoreHandler::register_channel_ISR<LEDFrameBufLock>([&]() {
+		// 	if (HWSemaphore<LEDFrameBufLock>::lock() == HWSemaphoreFlag::LockedOk) {
+		// 		// update_led_states();
+		// 		// Todo: doesn't this cause the ISR to trigger itself?
+		// 		HWSemaphore<LEDFrameBufLock>::unlock();
+		// 	}
+		// });
+		// HWSemaphore<LEDFrameBufLock>::enable_channel_ISR();
 
 		update_ui_task.init(
 			{
@@ -100,8 +100,10 @@ public:
 
 	void update_ui()
 	{
+		Debug::Pin4::high();
 		param_cache.read_sync(&params, &metaparams);
 		handle_rotary();
+		Debug::Pin4::low();
 
 		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
 			return;

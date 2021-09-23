@@ -20,9 +20,12 @@ void Controls::update_debouncers()
 	gate_in_2.update();
 }
 
+// Mini:
 // first param in block: 2.0-2.4us, @ 48kHz
 // second param in block: 1.3-1.5us @ 48kHz
 // load 6.8%
+// Medium:
+// to be measured... but it's 2.8us total for this + update_debouncers
 void Controls::update_params()
 {
 	//cur_params->buttons[0].copy_state(button0);
@@ -84,6 +87,7 @@ void Controls::start()
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
+		//28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
 		cur_metaparams = &param_blocks[0].metaparams;
 		cur_params = param_blocks[0].params.begin();
 		_first_param = true;
@@ -125,7 +129,7 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 
-	// mp1 m4: 20.1us, width= 4.1us
+	// mp1 m4: every ~20us + 60us gap every 64 pulses (1.3ms), width= 2.8us ... ~14% load
 	read_controls_task.init(control_read_tim_conf, [this]() {
 		if (_buffer_full) {
 			return;
@@ -136,9 +140,8 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 
 	auxstream.init();
 	auxstream_updater.init([&]() {
-		// Debug::Pin2::high();
+		//0.35us wide, every 20.83us = 1.68% load
 		auxstream.output_next();
-		// Debug::Pin2::low();
 	});
 }
 

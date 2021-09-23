@@ -11,10 +11,10 @@ const mdrivlib::I2CConfig i2c_conf_controls = {
 	.SDA = {GPIO::H, 5, LL_GPIO_AF_4},
 	.timing =
 		{
-			.PRESC = 0x00,
-			.SCLDEL_SDADEL = 0x60,
-			.SCLH = 0x11,
-			.SCLL = 0x73,
+			.PRESC = 0x10,
+			.SCLDEL_SDADEL = 0x70,
+			.SCLH = 0x7D,
+			.SCLL = 0xBC,
 
 		},
 	.priority1 = 0,

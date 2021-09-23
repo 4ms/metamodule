@@ -61,18 +61,16 @@ void main()
 
 	controls.start();
 
-	// Screen: Full frame transfer mode
+	// Screen: Half frame transfer mode
+	// TODO: find memory to do a full frame transfer
 	ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::half_screen_writebuf, MMScreenConf::FrameBytes};
 	screen_writer.init();
 
 	HWSemaphore<ScreenFrameBufLock>::clear_ISR();
 	HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>([&]() {
-		// Todo: ideally we would disable this ISR here, then enable it when transfer has completed
-		// HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
-		// Debug::Pin2::high();
+		//@16Hz screen refresh rate: 60ms, 12us width
 		screen_writer.transfer_buffer_to_screen();
-		// Debug::Pin2::low();
 	});
 	HWSemaphore<ScreenFrameBufLock>::enable_channel_ISR();
 
@@ -82,11 +80,15 @@ void main()
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
 
 	while (true) {
+		Debug::Pin2::high();
 		if (SharedBus::i2c.is_ready()) {
-			Debug::red_LED2::low();
+			// Debug::red_LED2::high();
+			Debug::Pin3::high();
 			i2cqueue.update();
-			Debug::red_LED2::high();
+			Debug::Pin3::low();
+			// Debug::red_LED2::low();
 		}
+		Debug::Pin2::low();
 		__NOP();
 	}
 }
