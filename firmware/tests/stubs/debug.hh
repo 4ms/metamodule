@@ -9,6 +9,8 @@ struct Debug {
 	using Pin1 = PinStub;
 	using Pin2 = PinStub;
 	using Pin3 = PinStub;
+	using Pin4 = PinStub;
+	using Pin5 = PinStub;
 	using red_LED1 = PinStub;
 	using red_LED2 = PinStub;
 	using green_LED1 = PinStub;
