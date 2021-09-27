@@ -55,7 +55,6 @@ struct Controls {
 
 private:
 	mdrivlib::Timekeeper read_controls_task;
-	mdrivlib::Timekeeper read_cvadc_task;
 
 	DoubleBufParamBlock &param_blocks;
 	Params *cur_params;

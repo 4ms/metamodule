@@ -108,7 +108,6 @@ void Controls::start()
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();
-	read_cvadc_task.start();
 	auxstream_updater.start();
 }
 
