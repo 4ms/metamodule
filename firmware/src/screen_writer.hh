@@ -134,26 +134,26 @@ public:
 		if (using_half_buffer_transfers) {
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 
-			set_pos(0, 0, _width - 1, (_height / 2) - 1);
-			config_dma_transfer(dst_addr, HalfFrameSize);
+			set_pos(0, 0, _width - 1, _height - 1);
 			mem_xfer.config_transfer(dst, src, HalfFrameSize);
 
 			// Debug::Pin2::high(); // start MDMA xfer #1
 			mem_xfer.register_callback([&]() {
 				// Debug::Pin2::low();	 // completed MDMA xfer#1
 				// Debug::Pin3::high(); // start BDMA transfer #1
+				config_dma_transfer(dst_addr, HalfFrameSize);
 				start_dma_transfer([&]() {
 					// Debug::Pin3::low(); // completed BDMA xfer #1
 
 					//Start transferring the second half:
-					set_pos(0, _height / 2, _width - 1, _height - 1);
-					config_dma_transfer(dst_addr, HalfFrameSize);
+					// set_pos(0, _height / 2, _width - 1, _height - 1);
 					mem_xfer.config_transfer(dst, src_2nd_half, HalfFrameSize);
 
 					// Debug::Pin2::high(); // start MDMA xfer #2
 					mem_xfer.register_callback([&]() {
 						// Debug::Pin2::low();	 // completed MDMA xfer #2
 						// Debug::Pin3::high(); // start BDMA xfer #2
+						config_dma_transfer(dst_addr, HalfFrameSize);
 						start_dma_transfer([&]() {
 							// Debug::Pin3::low(); // completed BDMA xfer #3
 							HWSemaphore<ScreenFrameWriteLock>::unlock();
