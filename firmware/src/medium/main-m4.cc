@@ -10,6 +10,7 @@
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
 #include "drivers/system_startup.hh"
+#include "lvgl/lvgl.h"
 #include "mp1m4/hsem_handler.hh"
 #include "muxed_adc.hh"
 #include "params.hh"
@@ -41,6 +42,7 @@ struct StaticBuffers {
 
 void main()
 {
+	lv_init();
 	using namespace MetaModule;
 
 	app_startup();
@@ -61,8 +63,6 @@ void main()
 
 	controls.start();
 
-	// Screen: Half frame transfer mode
-	// TODO: find memory to do a full frame transfer
 	ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::half_screen_writebuf, MMScreenConf::FrameBytes};
 	screen_writer.init();
 
