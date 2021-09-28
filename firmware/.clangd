@@ -57,7 +57,7 @@ CompileFlags:
 	]
 ---
 If:
-	PathMatch: [".*mp1.*m4.*"]
+	PathMatch: [".*mp1.*m4.*", ".*medium.*m4.*"]
 CompileFlags:
 	Add: [
 		"-Isrc/mp1m4",
@@ -73,7 +73,7 @@ CompileFlags:
 ---
 If:
 	PathMatch: [".*stm32h7.*", ".*m4.*", ".*m7.*"]
-	PathExclude: [".*a7.*", ".*mp1.*"]
+	PathExclude: [".*a7.*", ".*mp1.*", ".*medium.*"]
 CompileFlags:
 	Add: [
 		"-DSTM32H7x5",
