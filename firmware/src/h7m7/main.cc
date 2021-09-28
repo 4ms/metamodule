@@ -12,7 +12,7 @@
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
-#include "ui.hh"
+// #include "ui.hh"
 
 namespace MetaModule
 {
@@ -35,8 +35,8 @@ void main()
 	ParamCache param_cache;
 	UiAudioMailbox mbox;
 
-	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
+	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
+	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
 	AudioStream audio{patch_list,
 					  patch_player,
@@ -66,7 +66,7 @@ void main()
 		;
 
 	param_cache.clear();
-	ui.start();
+	// ui.start();
 	audio.start();
 
 	while (true) {
