@@ -63,21 +63,32 @@ void main()
 
 	controls.start();
 
-	ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::half_screen_writebuf, MMScreenConf::FrameBytes};
-	screen_writer.init();
+	// ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::half_screen_writebuf, MMScreenConf::FrameBytes};
+	// screen_writer.init();
 
-	HWSemaphore<ScreenFrameBufLock>::clear_ISR();
-	HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>([&]() {
-		//@16Hz screen refresh rate: 60ms, 12us width
-		screen_writer.transfer_buffer_to_screen();
-	});
-	HWSemaphore<ScreenFrameBufLock>::enable_channel_ISR();
+	//HWSemaphore<ScreenFrameBufLock>::clear_ISR();
+	//HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
+	//HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>([&]() {
+	//	//@16Hz screen refresh rate: 60ms, 12us width
+	//	screen_writer.transfer_buffer_to_screen();
+	//});
+	//HWSemaphore<ScreenFrameBufLock>::enable_channel_ISR();
 
-	HWSemaphore<ScreenFrameWriteLock>::disable_channel_ISR();
-	HWSemaphore<ScreenFrameWriteLock>::unlock();
+	//HWSemaphore<ScreenFrameWriteLock>::disable_channel_ISR();
+	//HWSemaphore<ScreenFrameWriteLock>::unlock();
 
-	HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
+	//HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
+
+	Timekeeper update_screen_task;
+	update_screen_task.init(
+		{
+			.TIMx = TIM5,
+			.period_ns = 1000000000 / 333, // =  333Hz = 3ms
+			.priority1 = 2,
+			.priority2 = 2,
+		},
+		[] { lv_timer_handler(); });
+	update_screen_task.start();
 
 	while (true) {
 		Debug::Pin2::high();
