@@ -218,10 +218,9 @@ public:
 		set_pos(xstart, ystart, xend, yend);
 		auto buffer_size_bytes = (xend - xstart + 1) * (yend - ystart + 1) * 2;
 		config_dma_transfer(reinterpret_cast<uint32_t>(buffer), buffer_size_bytes);
-		start_dma_transfer([cb = std::move(cb)] {
-			//
+		start_dma_transfer([callback = std::forward<decltype(cb)>(cb)] {
 			// HWSemaphore<ScreenFrameWriteLock>::unlock();
-			cb();
+			callback();
 		});
 	}
 
