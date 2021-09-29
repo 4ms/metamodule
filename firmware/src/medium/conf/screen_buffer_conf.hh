@@ -15,5 +15,6 @@ struct MMScreenBufferConf {
 	static constexpr uint32_t viewWidth = 320;
 	static constexpr uint32_t viewHeight = 240;
 
-	using FrameBufferT = std::array<uint16_t, width * height>;
+	using pixel_t = uint16_t;
+	using FrameBufferT = std::array<pixel_t, width * height>;
 };

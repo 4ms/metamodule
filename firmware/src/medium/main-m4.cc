@@ -10,7 +10,7 @@
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
 #include "drivers/system_startup.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl_driver.hh"
 #include "mp1m4/hsem_handler.hh"
 #include "muxed_adc.hh"
 #include "params.hh"
@@ -35,14 +35,41 @@ static void app_startup()
 	SystemClocks init_system_clocks{};
 };
 
-struct StaticBuffers {
-	static inline __attribute__((section(".static_buffer"))) MMScreenConf::HalfFrameBufferT half_screen_writebuf;
-} _sb;
+class MMDisplay {
+	static inline ScreenFrameWriter spi_driver;
+	static inline Timekeeper update_tasks;
+
+public:
+	static void init()
+	{
+		spi_driver.init();
+		update_tasks.init(
+			{
+				.TIMx = TIM5,
+				.period_ns = 1000000000 / 333, // =  333Hz = 3ms
+				.priority1 = 2,
+				.priority2 = 2,
+			},
+			[] { lv_timer_handler(); });
+	}
+	static void start()
+	{
+		update_tasks.start();
+	}
+
+	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
+	{
+		spi_driver.transfer_partial_frame(
+			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p), [&] {
+				lv_disp_flush_ready(disp_drv);
+			});
+	}
+};
+
 } // namespace MetaModule
 
 void main()
 {
-	lv_init();
 	using namespace MetaModule;
 
 	app_startup();
@@ -79,16 +106,10 @@ void main()
 
 	//HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
 
-	Timekeeper update_screen_task;
-	update_screen_task.init(
-		{
-			.TIMx = TIM5,
-			.period_ns = 1000000000 / 333, // =  333Hz = 3ms
-			.priority1 = 2,
-			.priority2 = 2,
-		},
-		[] { lv_timer_handler(); });
-	update_screen_task.start();
+	MMDisplay::init();
+	LVGLDriver<MMScreenBufferConf::viewHeight, MMScreenBufferConf::viewHeight> gui{MMDisplay::flush_to_screen};
+
+	MMDisplay::start();
 
 	while (true) {
 		Debug::Pin2::high();

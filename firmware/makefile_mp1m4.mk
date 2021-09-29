@@ -57,7 +57,6 @@ SOURCES  += $(DRIVERLIB)/drivers/pin.cc
 SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
 SOURCES  += $(DRIVERLIB)/drivers/tim.cc
 SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
-SOURCES  += $(core_src)/lvgl.cc
 SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/core/*.c)
 SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/draw/*.c)
 SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/*.c)
