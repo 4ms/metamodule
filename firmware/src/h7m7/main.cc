@@ -9,6 +9,7 @@
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 #include "drivers/system_startup.hh"
+#include "hsem_handler.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
