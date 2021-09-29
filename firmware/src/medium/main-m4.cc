@@ -38,6 +38,7 @@ static void app_startup()
 class MMDisplay {
 	static inline ScreenFrameWriter spi_driver;
 	static inline Timekeeper update_tasks;
+	static inline bool ready = false;
 
 public:
 	static void init()
@@ -50,17 +51,28 @@ public:
 				.priority1 = 2,
 				.priority2 = 2,
 			},
-			[] { lv_timer_handler(); });
+			[] { ready = true; }); //lv_timer_handler(); });
 	}
+
 	static void start()
 	{
 		update_tasks.start();
 	}
 
+	static bool is_ready()
+	{
+		return ready;
+	}
+
+	static void clear_ready()
+	{
+		ready = false;
+	}
+
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 	{
 		spi_driver.transfer_partial_frame(
-			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p), [&] {
+			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p), [=] {
 				lv_disp_flush_ready(disp_drv);
 			});
 	}
@@ -107,7 +119,7 @@ void main()
 	//HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
 
 	MMDisplay::init();
-	LVGLDriver<MMScreenBufferConf::viewHeight, MMScreenBufferConf::viewHeight> gui{MMDisplay::flush_to_screen};
+	LVGLDriver<MMScreenBufferConf::viewWidth, MMScreenBufferConf::viewHeight> gui{MMDisplay::flush_to_screen};
 
 	MMDisplay::start();
 
@@ -121,6 +133,12 @@ void main()
 			// Debug::red_LED2::low();
 		}
 		Debug::Pin2::low();
+		if (MMDisplay::is_ready()) {
+			Debug::Pin1::high();
+			MMDisplay::clear_ready();
+			lv_timer_handler(); //calls disp.flush_cb -> MMDisplay::flush_to_screen -> spi_driver.transfer_partial_frame
+			Debug::Pin1::low();
+		}
 		__NOP();
 	}
 }
