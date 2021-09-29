@@ -1,23 +1,20 @@
 /**
  * @file lv_conf.h
- * Configuration file for v8.1.0-dev
+ * Configuration file for v8.0.2
  */
 
 /*
- * Copy this file as `lv_conf.h`
- * 1. simply next to the `lvgl` folder
- * 2. or any other places and
- *    - define `LV_CONF_INCLUDE_SIMPLE`
- *    - add the path as include path
+ * COPY THIS FILE AS `lv_conf.h` NEXT TO the `lvgl` FOLDER
  */
 
-/* clang-format off */
 #if 1 /*Set it to "1" to enable content*/
 
 #ifndef LV_CONF_H
 #define LV_CONF_H
+/* clang-format off */
 
 #include <stdint.h>
+
 
 /*====================
    COLOR SETTINGS
@@ -26,15 +23,15 @@
 /*Color depth: 1 (1 byte per pixel), 8 (RGB332), 16 (RGB565), 32 (ARGB8888)*/
 #define LV_COLOR_DEPTH     16
 
-/*Swap the 2 bytes of RGB565 color. Useful if the display has an 8-bit interface (e.g. SPI)*/
-#define LV_COLOR_16_SWAP   0
+/*Swap the 2 bytes of RGB565 color. Useful if the display has a 8 bit interface (e.g. SPI)*/
+#define LV_COLOR_16_SWAP   1
 
 /*Enable more complex drawing routines to manage screens transparency.
  *Can be used if the UI is above another layer, e.g. an OSD menu or video player.
  *Requires `LV_COLOR_DEPTH = 32` colors and the screen's `bg_opa` should be set to non LV_OPA_COVER value*/
 #define LV_COLOR_SCREEN_TRANSP    0
 
-/*Images pixels with this color will not be drawn if they are chroma keyed)*/
+/*Images pixels with this color will not be drawn if they are  chroma keyed)*/
 #define LV_COLOR_CHROMA_KEY    lv_color_hex(0x00ff00)         /*pure green*/
 
 /*=========================
@@ -49,12 +46,6 @@
 
 /*Set an address for the memory pool instead of allocating it as a normal array. Can be in external SRAM too.*/
 #  define LV_MEM_ADR          0     /*0: unused*/
-/*Instead of an address give a memory allocator that will be called to get a memory pool for LVGL. E.g. my_malloc*/
-#if LV_MEM_ADR == 0
-//#define LV_MEM_POOL_INCLUDE   your_alloc_library  /* Uncomment if using an external allocator*/
-//#define LV_MEM_POOL_ALLOC     your_alloc          /* Uncomment if using an external allocator*/
-#endif
-
 #else       /*LV_MEM_CUSTOM*/
 #  define LV_MEM_CUSTOM_INCLUDE <stdlib.h>   /*Header for the dynamic memory function*/
 #  define LV_MEM_CUSTOM_ALLOC     malloc
@@ -69,7 +60,7 @@
    HAL SETTINGS
  *====================*/
 
-/*Default display refresh period. LVG will redraw changed areas with this period time*/
+/*Default display refresh period. LVG will redraw changed ares with this period time*/
 #define LV_DISP_DEF_REFR_PERIOD     30      /*[ms]*/
 
 /*Input device read period in milliseconds*/
@@ -77,10 +68,10 @@
 
 /*Use a custom tick source that tells the elapsed time in milliseconds.
  *It removes the need to manually update the tick with `lv_tick_inc()`)*/
-#define LV_TICK_CUSTOM     0
+#define LV_TICK_CUSTOM     1
 #if LV_TICK_CUSTOM
-#define LV_TICK_CUSTOM_INCLUDE  "Arduino.h"         /*Header for the system time function*/
-#define LV_TICK_CUSTOM_SYS_TIME_EXPR (millis())     /*Expression evaluating to current system time in ms*/
+#define LV_TICK_CUSTOM_INCLUDE  "stm32xx.h"         /*Header for the system time function*/
+#define LV_TICK_CUSTOM_SYS_TIME_EXPR (HAL_GetTick())     /*Expression evaluating to current system time in ms*/
 #endif   /*LV_TICK_CUSTOM*/
 
 /*Default Dot Per Inch. Used to initialize default sizes such as widgets sized, style paddings.
@@ -104,13 +95,6 @@
  *LV_SHADOW_CACHE_SIZE is the max. shadow size to buffer, where shadow size is `shadow_width + radius`
  *Caching has LV_SHADOW_CACHE_SIZE^2 RAM cost*/
 #define LV_SHADOW_CACHE_SIZE    0
-
-/* Set number of maximally cached circle data.
- * The circumference of 1/4 circle are saved for anti-aliasing
- * radius * 4 bytes are used per circle (the most often used radiuses are saved)
- * 0: to disable caching */
-#define LV_CIRCLE_CACHE_SIZE    4
-
 #endif /*LV_DRAW_COMPLEX*/
 
 /*Default image cache size. Image caching keeps the images opened.
@@ -122,7 +106,6 @@
 
 /*Maximum buffer size to allocate for rotation. Only used if software rotation is enabled in the display driver.*/
 #define LV_DISP_ROT_MAX_BUF         (10*1024)
-
 /*-------------
  * GPU
  *-----------*/
@@ -148,25 +131,6 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 
 /*Use NXP's VG-Lite GPU iMX RTxxx platforms*/
 #define LV_USE_GPU_NXP_VG_LITE   0
-
-/*Use SDL renderer API*/
-#ifndef LV_USE_GPU_SDL
-#  ifdef CONFIG_LV_USE_GPU_SDL
-#    define LV_USE_GPU_SDL CONFIG_LV_USE_GPU_SDL
-#  else
-#    define  LV_USE_GPU_SDL   0
-#  endif
-#endif
-#if LV_USE_GPU_SDL
-#  define LV_USE_EXTERNAL_RENDERER 1
-#  ifndef LV_GPU_SDL_INCLUDE
-#    define LV_GPU_SDL_INCLUDE_PATH <SDL2/SDL.h>
-#  endif
-#endif
-
-#ifndef LV_USE_EXTERNAL_RENDERER
-#  define LV_USE_EXTERNAL_RENDERER 0
-#endif
 
 /*-------------
  * Logging
@@ -224,7 +188,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 /*1: Show CPU usage and FPS count in the right bottom corner*/
 #define LV_USE_PERF_MONITOR     0
 
-/*1: Show the used memory and the memory fragmentation in the left bottom corner
+/*1: Show the used memory and the memory fragmentation  in the left bottom corner
  * Requires LV_MEM_CUSTOM = 0*/
 #define LV_USE_MEM_MONITOR      0
 
@@ -244,14 +208,11 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #define LV_USE_USER_DATA      1
 
 /*Garbage Collector settings
- *Used if lvgl is bound to higher level language and the memory is managed by that language*/
+ *Used if lvgl is binded to higher level language and the memory is managed by that language*/
 #define LV_ENABLE_GC 0
 #if LV_ENABLE_GC != 0
 #  define LV_GC_INCLUDE "gc.h"                           /*Include Garbage Collector related things*/
 #endif /*LV_ENABLE_GC*/
-
-/*1: Enable API to take snapshot for object*/
-#define LV_USE_SNAPSHOT         1
 
 /*=====================
  *  COMPILER SETTINGS
@@ -387,7 +348,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #define LV_TXT_COLOR_CMD "#"
 
 /*Support bidirectional texts. Allows mixing Left-to-Right and Right-to-Left texts.
- *The direction will be processed according to the Unicode Bidirectional Algorithm:
+ *The direction will be processed according to the Unicode Bidirectioanl Algorithm:
  *https://www.w3.org/International/articles/inline-bidi-markup/uba-basics*/
 #define LV_USE_BIDI         0
 #if LV_USE_BIDI
@@ -421,6 +382,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #define LV_USE_CANVAS       1
 
 #define LV_USE_CHECKBOX     1
+
 
 #define LV_USE_DROPDOWN     1   /*Requires: lv_label*/
 
@@ -506,7 +468,6 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 /*-----------
  * Themes
  *----------*/
-
 /*A simple, impressive and very complete theme*/
 #define LV_USE_THEME_DEFAULT    1
 #if LV_USE_THEME_DEFAULT
@@ -521,7 +482,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 # define LV_THEME_DEFAULT_TRANSITON_TIME    80
 #endif /*LV_USE_THEME_DEFAULT*/
 
-/*A very simple theme that is a good starting point for a custom theme*/
+/*An very simple them that is a good starting point for a custom theme*/
  #define LV_USE_THEME_BASIC    1
 
 /*A theme designed for monochrome displays*/
