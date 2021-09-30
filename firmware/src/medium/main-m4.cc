@@ -115,19 +115,20 @@ void main()
 	lv_obj_t *slider1 = lv_slider_create(lv_scr_act());
 	lv_obj_set_x(slider1, 30);
 	lv_obj_set_y(slider1, 10);
-	lv_obj_set_size(slider1, 200, 50);
+	lv_obj_set_size(slider1, 15, 100);
 
 	Timekeeper slider_tm;
-	int32_t slider_val = 70;
+	int32_t slider_val = 30;
 	slider_tm.init(
 		{
 			.TIMx = TIM17,
-			.period_ns = 1000000000 / 3, // =  3Hz
+			.period_ns = 1000000000 / 30, // =  30Hz
 			.priority1 = 2,
 			.priority2 = 2,
 		},
 		[slider1 = slider1, &slider_val = slider_val] {
-			if (slider_val-- == 0)
+			slider_val -= 1;
+			if (slider_val == 0)
 				slider_val = 100;
 			lv_slider_set_value(slider1, slider_val, LV_ANIM_ON);
 		});
