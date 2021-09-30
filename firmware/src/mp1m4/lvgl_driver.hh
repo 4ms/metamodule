@@ -14,6 +14,15 @@ class LVGLDriver {
 	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
 	lv_disp_drv_t disp_drv;
 
+	static void round16(lv_disp_drv_t *disp, lv_area_t *area)
+	{
+		area->y1 = area->y1 & 0x07;
+		area->y2 = (area->y2 & 0x07) + 8;
+
+		area->x1 = area->x1 & 0x07;
+		area->x2 = (area->x2 & 0x07) + 8;
+	}
+
 public:
 	LVGLDriver(flush_cb_t flush_cb)
 	{
@@ -22,6 +31,7 @@ public:
 		lv_disp_drv_init(&disp_drv);
 		disp_drv.draw_buf = &disp_buf;
 		disp_drv.flush_cb = flush_cb;
+		// disp_drv.rounder_cb = round16;
 		disp_drv.hor_res = ScreenWidth;
 		disp_drv.ver_res = ScreenHeight;
 
