@@ -28,7 +28,6 @@ void Controls::update_debouncers()
 // to be measured... but it's 2.8us total for this + update_debouncers
 void Controls::update_params()
 {
-	//cur_params->buttons[0].copy_state(button0);
 	cur_params->gate_ins[0].copy_state(gate_in_1);
 	cur_params->gate_ins[1].copy_state(gate_in_2);
 
@@ -67,6 +66,9 @@ void Controls::update_params()
 		cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
 		_rotary_moved_while_pressed = (pressed && new_rotary_motion);
 
+		// Meta button
+		cur_metaparams->meta_buttons[0].copy_state(button0);
+
 	} else {
 		cur_params->jack_senses = get_jacksense_reading();
 
@@ -80,35 +82,31 @@ void Controls::update_params()
 		_buffer_full = true;
 }
 
+template<int block_num>
+void Controls::start_param_block()
+{
+	//28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
+	cur_metaparams = &param_blocks[block_num].metaparams;
+	cur_params = param_blocks[block_num].params.begin();
+	_first_param = true;
+	_buffer_full = false;
+
+	for (auto &aux : auxstream_blocks[block_num])
+		auxstream.queue_data(aux);
+}
+
 void Controls::start()
 {
 	potadc.start();
 
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
-		//28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
-		cur_metaparams = &param_blocks[0].metaparams;
-		cur_params = param_blocks[0].params.begin();
-		_first_param = true;
-		_buffer_full = false;
-
-		for (auto &aux : auxstream_blocks[0])
-			auxstream.queue_data(aux);
-	});
+	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() { start_param_block<0>(); });
+	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
-		cur_metaparams = &param_blocks[1].metaparams;
-		cur_params = param_blocks[1].params.begin();
-		_first_param = true;
-		_buffer_full = false;
-
-		for (auto &aux : auxstream_blocks[1])
-			auxstream.queue_data(aux);
-	});
-	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
+	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() { start_param_block<1>(); });
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();

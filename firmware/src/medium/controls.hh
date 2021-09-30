@@ -72,5 +72,8 @@ private:
 	InterpParam<float, StreamConf::Audio::BlockSize> _knobs[PanelDef::NumPot];
 
 	bool _rotary_moved_while_pressed = false;
+
+	template<int block_num>
+	void start_param_block();
 };
 } // namespace MetaModule
