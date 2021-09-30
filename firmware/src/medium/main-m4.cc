@@ -51,7 +51,7 @@ public:
 				.priority1 = 2,
 				.priority2 = 2,
 			},
-			[] { ready = true; }); //lv_timer_handler(); });
+			[] { ready = true; });
 	}
 
 	static void start()
@@ -69,12 +69,19 @@ public:
 		ready = false;
 	}
 
+	static inline lv_disp_drv_t *last_used_disp_drv;
+	static void end_flush()
+	{
+		lv_disp_flush_ready(last_used_disp_drv);
+	}
+
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 	{
+		last_used_disp_drv = disp_drv;
 		spi_driver.transfer_partial_frame(
-			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p), [=] {
-				lv_disp_flush_ready(disp_drv);
-			});
+			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p), end_flush
+			// [=] { lv_disp_flush_ready(disp_drv); }
+		);
 	}
 };
 
@@ -102,26 +109,29 @@ void main()
 
 	controls.start();
 
-	// ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::half_screen_writebuf, MMScreenConf::FrameBytes};
-	// screen_writer.init();
-
-	//HWSemaphore<ScreenFrameBufLock>::clear_ISR();
-	//HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
-	//HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>([&]() {
-	//	//@16Hz screen refresh rate: 60ms, 12us width
-	//	screen_writer.transfer_buffer_to_screen();
-	//});
-	//HWSemaphore<ScreenFrameBufLock>::enable_channel_ISR();
-
-	//HWSemaphore<ScreenFrameWriteLock>::disable_channel_ISR();
-	//HWSemaphore<ScreenFrameWriteLock>::unlock();
-
-	//HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
-
 	MMDisplay::init();
 	LVGLDriver<MMScreenBufferConf::viewWidth, MMScreenBufferConf::viewHeight> gui{MMDisplay::flush_to_screen};
-
 	MMDisplay::start();
+	lv_obj_t *slider1 = lv_slider_create(lv_scr_act());
+	lv_obj_set_x(slider1, 30);
+	lv_obj_set_y(slider1, 10);
+	lv_obj_set_size(slider1, 200, 50);
+
+	Timekeeper slider_tm;
+	int32_t slider_val = 70;
+	slider_tm.init(
+		{
+			.TIMx = TIM17,
+			.period_ns = 1000000000 / 3, // =  3Hz
+			.priority1 = 2,
+			.priority2 = 2,
+		},
+		[slider1 = slider1, &slider_val = slider_val] {
+			if (slider_val-- == 0)
+				slider_val = 100;
+			lv_slider_set_value(slider1, slider_val, LV_ANIM_ON);
+		});
+	slider_tm.start();
 
 	while (true) {
 		Debug::Pin2::high();

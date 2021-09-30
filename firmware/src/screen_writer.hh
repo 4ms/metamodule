@@ -212,16 +212,13 @@ public:
 		}
 	}
 
-	void transfer_partial_frame(int xstart, int ystart, int xend, int yend, uint16_t *buffer, Interrupt::ISRType &&cb)
+	void transfer_partial_frame(int xstart, int ystart, int xend, int yend, uint16_t *buffer, auto cb)
 	{
 		// HWSemaphore<ScreenFrameWriteLock>::lock();
 		set_pos(xstart, ystart, xend, yend);
 		auto buffer_size_bytes = (xend - xstart + 1) * (yend - ystart + 1) * 2;
 		config_dma_transfer(reinterpret_cast<uint32_t>(buffer), buffer_size_bytes);
-		start_dma_transfer([callback = std::forward<decltype(cb)>(cb)] {
-			// HWSemaphore<ScreenFrameWriteLock>::unlock();
-			callback();
-		});
+		start_dma_transfer(cb);
 	}
 
 protected:
