@@ -182,7 +182,6 @@ public:
 			// Debug::Pin5::low(); //end setup measurement
 
 		} else if (mode == FullFrameDoubleBuffer) {
-			// Debug::Pin3::high();
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 			set_pos(0, 0, _width - 1, _height - 1);
 
@@ -191,34 +190,29 @@ public:
 
 			// Setup the mem-to-mem transfer
 			mem_xfer.config_transfer(dst, src, FrameSize);
-			mem_xfer.register_callback([&] {
-				// Debug::Pin3::high();
-				start_dma_transfer([]() { HWSemaphore<ScreenFrameWriteLock>::unlock(); });
-				// HWSemaphore<ScreenFrameWriteLock>::unlock();
-				// Debug::Pin3::low();
-			});
+			mem_xfer.register_callback(
+				[&] { start_dma_transfer([]() { HWSemaphore<ScreenFrameWriteLock>::unlock(); }); });
 			mem_xfer.start_transfer();
-			// Debug::Pin3::low();
 
 		} else if (mode == FullFrameDirect) {
-			// Debug::Pin3::high();
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 			set_pos(0, 0, _width - 1, _height - 1);
 			config_dma_transfer(reinterpret_cast<uint32_t>(src), FrameSize);
-			start_dma_transfer([] {
-				// Debug::Pin3::low();
-				HWSemaphore<ScreenFrameWriteLock>::unlock();
-			});
+			start_dma_transfer([] { HWSemaphore<ScreenFrameWriteLock>::unlock(); });
 		}
 	}
 
-	void transfer_partial_frame(int xstart, int ystart, int xend, int yend, uint16_t *buffer, auto cb)
+	void register_partial_frame_cb(auto cb)
 	{
-		// HWSemaphore<ScreenFrameWriteLock>::lock();
+		register_callback(cb);
+	}
+
+	void transfer_partial_frame(int xstart, int ystart, int xend, int yend, uint16_t *buffer)
+	{
 		set_pos(xstart, ystart, xend, yend);
 		auto buffer_size_bytes = (xend - xstart + 1) * (yend - ystart + 1) * 2;
 		config_dma_transfer(reinterpret_cast<uint32_t>(buffer), buffer_size_bytes);
-		start_dma_transfer(cb);
+		start_dma_transfer();
 	}
 
 protected:

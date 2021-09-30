@@ -36,37 +36,39 @@ static void app_startup()
 };
 
 class MMDisplay {
-	static inline ScreenFrameWriter spi_driver;
-	static inline Timekeeper update_tasks;
-	static inline bool ready = false;
+	static inline ScreenFrameWriter _spi_driver;
+	static inline Timekeeper _run_lv_tasks_tmr;
+	static inline bool _ready = false;
 
 public:
 	static void init()
 	{
-		spi_driver.init();
-		update_tasks.init(
+		_spi_driver.init();
+		_spi_driver.register_partial_frame_cb(end_flush);
+
+		_run_lv_tasks_tmr.init(
 			{
 				.TIMx = TIM5,
 				.period_ns = 1000000000 / 333, // =  333Hz = 3ms
 				.priority1 = 2,
 				.priority2 = 2,
 			},
-			[] { ready = true; });
+			[] { _ready = true; });
 	}
 
 	static void start()
 	{
-		update_tasks.start();
+		_run_lv_tasks_tmr.start();
 	}
 
 	static bool is_ready()
 	{
-		return ready;
+		return _ready;
 	}
 
 	static void clear_ready()
 	{
-		ready = false;
+		_ready = false;
 	}
 
 	static inline lv_disp_drv_t *last_used_disp_drv;
@@ -78,10 +80,8 @@ public:
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 	{
 		last_used_disp_drv = disp_drv;
-		spi_driver.transfer_partial_frame(
-			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p), end_flush
-			// [=] { lv_disp_flush_ready(disp_drv); }
-		);
+		_spi_driver.transfer_partial_frame(
+			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p));
 	}
 };
 
