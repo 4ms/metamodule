@@ -1,6 +1,5 @@
 #pragma once
 #include "CoreModules/panel_mini_defs.hh"
-#include <arm_neon.h>
 #include <cstdint>
 namespace MetaModule
 {
