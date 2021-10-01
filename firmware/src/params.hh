@@ -132,11 +132,11 @@ struct MetaParams {
 //
 // Todo: use HSEM to allow for multiple cores and inverted ISR priorities
 // Todo: "cache" isn't the best name for this, think of something better...
-struct ParamCache {
+struct ParamQueue {
 	Params p;
 	MetaParams m;
 
-	ParamCache()
+	ParamQueue()
 	{
 		clear();
 	}

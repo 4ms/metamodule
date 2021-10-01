@@ -30,7 +30,7 @@ void main()
 
 	PatchList patch_list;
 	PatchPlayer patch_player;
-	ParamCache param_cache;
+	ParamQueue param_cache;
 	UiAudioMailbox mbox;
 
 	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};

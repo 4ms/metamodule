@@ -28,7 +28,7 @@ private:
 
 	// Ui stores its own copy of params and metaparams because while it's accessing these in order to draw the screen,
 	// respond to rotary motion, etc. the audio process loop might interrupt it and update the values in ParamCache
-	ParamCache &param_cache;
+	ParamQueue &param_queue;
 	Params params;
 	MetaParams metaparams;
 
@@ -42,13 +42,13 @@ private:
 public:
 	Ui(PatchList &pl,
 	   PatchPlayer &pp,
-	   ParamCache &pc,
+	   ParamQueue &pc,
 	   UiAudioMailbox &uiaudiomailbox,
 	   LedFrame<AnimationUpdateRate> &l,
 	   MMScreenBufferConf::FrameBufferT &screenbuf)
 		: leds{l}
 		, screen{screenbuf}
-		, param_cache{pc}
+		, param_queue{pc}
 		, mbox{uiaudiomailbox}
 		, pages{pl, pp, params, metaparams, uiaudiomailbox, screen}
 		, patch_list{pl}
@@ -100,20 +100,16 @@ public:
 
 	void update_ui()
 	{
-		Debug::Pin4::high();
-		param_cache.read_sync(&params, &metaparams);
+		param_queue.read_sync(&params, &metaparams);
 		handle_rotary();
-		Debug::Pin4::low();
 
 		if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
 			return;
 		}
 
 		HWSemaphore<ScreenFrameBufLock>::lock();
-		Debug::Pin1::high();
 		pages.display_current_page();
 		screen.flush_cache();
-		Debug::Pin1::low();
 		HWSemaphore<ScreenFrameBufLock>::unlock();
 	}
 

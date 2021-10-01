@@ -14,7 +14,6 @@
 #include "mp1m4/hsem_handler.hh"
 #include "muxed_adc.hh"
 #include "params.hh"
-#include "screen_writer.hh"
 #include "shared_bus.hh"
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
@@ -33,56 +32,6 @@ static void app_startup()
 		;
 
 	SystemClocks init_system_clocks{};
-};
-
-class MMDisplay {
-	static inline ScreenFrameWriter _spi_driver;
-	static inline Timekeeper _run_lv_tasks_tmr;
-	static inline bool _ready = false;
-
-public:
-	static void init()
-	{
-		_spi_driver.init();
-		_spi_driver.register_partial_frame_cb(end_flush);
-
-		_run_lv_tasks_tmr.init(
-			{
-				.TIMx = TIM5,
-				.period_ns = 1000000000 / 333, // =  333Hz = 3ms
-				.priority1 = 2,
-				.priority2 = 2,
-			},
-			[] { _ready = true; });
-	}
-
-	static void start()
-	{
-		_run_lv_tasks_tmr.start();
-	}
-
-	static bool is_ready()
-	{
-		return _ready;
-	}
-
-	static void clear_ready()
-	{
-		_ready = false;
-	}
-
-	static inline lv_disp_drv_t *last_used_disp_drv;
-	static void end_flush()
-	{
-		lv_disp_flush_ready(last_used_disp_drv);
-	}
-
-	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
-	{
-		last_used_disp_drv = disp_drv;
-		_spi_driver.transfer_partial_frame(
-			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p));
-	}
 };
 
 } // namespace MetaModule
@@ -110,7 +59,6 @@ void main()
 	controls.start();
 
 	MMDisplay::init();
-	LVGLDriver<MMScreenBufferConf::viewWidth, MMScreenBufferConf::viewHeight> gui{MMDisplay::flush_to_screen};
 	MMDisplay::start();
 	lv_obj_t *slider1 = lv_slider_create(lv_scr_act());
 	lv_obj_set_x(slider1, 30);

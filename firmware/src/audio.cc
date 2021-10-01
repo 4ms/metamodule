@@ -30,7 +30,7 @@ AudioStream::AudioStream(PatchList &patches,
 						 CodecT &codec,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
-						 ParamCache &param_cache,
+						 ParamQueue &param_cache,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
 						 DoubleAuxStreamBlock &auxs)
@@ -107,7 +107,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	load_measure.start_measurement();
 
 	cache.write_sync(param_block.params[0], param_block.metaparams);
-	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
+	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamQueue));
 
 	//Debug: passthrough audio and exit
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
