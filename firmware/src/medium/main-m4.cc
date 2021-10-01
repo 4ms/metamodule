@@ -117,12 +117,16 @@ void main()
 	lv_obj_set_y(slider1, 10);
 	lv_obj_set_size(slider1, 15, 100);
 
+	//This will be pages.init();
+	//then pages.start(); calls the TIM17 which updates the gui elements based on params and metaparams
+	//and handles rotary event to change pages (calling focus() and blur())
+	//Example animation
 	Timekeeper slider_tm;
 	int32_t slider_val = 30;
 	slider_tm.init(
 		{
 			.TIMx = TIM17,
-			.period_ns = 1000000000 / 30, // =  30Hz
+			.period_ns = 1000000000 / 60, // =  60Hz
 			.priority1 = 2,
 			.priority2 = 2,
 		},
@@ -135,15 +139,12 @@ void main()
 	slider_tm.start();
 
 	while (true) {
-		Debug::Pin2::high();
 		if (SharedBus::i2c.is_ready()) {
-			// Debug::red_LED2::high();
-			Debug::Pin3::high();
+			Debug::red_LED2::high();
 			i2cqueue.update();
-			Debug::Pin3::low();
-			// Debug::red_LED2::low();
+			Debug::red_LED2::low();
 		}
-		Debug::Pin2::low();
+
 		if (MMDisplay::is_ready()) {
 			Debug::Pin1::high();
 			MMDisplay::clear_ready();

@@ -9,9 +9,9 @@
 
 #if 1 /*Set it to "1" to enable content*/
 
-#ifndef LV_CONF_H
-#define LV_CONF_H
-/* clang-format off */
+	#ifndef LV_CONF_H
+		#define LV_CONF_H
+	/* clang-format off */
 
 #include <stdint.h>
 
@@ -61,7 +61,7 @@
  *====================*/
 
 /*Default display refresh period. LVG will redraw changed ares with this period time*/
-#define LV_DISP_DEF_REFR_PERIOD     30      /*[ms]*/
+#define LV_DISP_DEF_REFR_PERIOD     16      /*[ms]*/
 
 /*Input device read period in milliseconds*/
 #define LV_INDEV_DEF_READ_PERIOD    30      /*[ms]*/
