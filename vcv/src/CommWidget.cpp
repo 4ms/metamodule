@@ -92,12 +92,9 @@ LabeledButton *CommModuleWidget::createLabel()
 void CommModuleWidget::addLabel(const std::string labelText, Vec posPx, LabelButtonID id)
 {
 	LabeledButton *button = createLabel();
-	button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2.0f, posPx.y + mm2px(kTextOffset));
-	button->box.size.x = kKnobSpacingX;
+	button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
+	button->box.size.x = mm2px(kKnobSpacingX);
 	button->box.size.y = 18;
-	// button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 4.0f, pos.y + kTextOffset));
-	// button->box.size.x = kGridSpacingX / 2.0f;
-	// button->box.size.y = 12;
 	button->text = labelText;
 	button->id = id;
 	addChild(button);
@@ -118,7 +115,7 @@ void CommModuleWidget::addLabeledToggleMM(const std::string labelText,
 {
 	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(position), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({position.x - 3.0f, position.y - 3.0f}), module, lightID));
-	addLabel(labelText, {position.x + 17, position.y - 6.7f}, {LabelButtonID::Types::Toggle, paramID, -1});
+	addLabel(labelText, {position.x, position.y - 6.7f}, {LabelButtonID::Types::Toggle, paramID, -1});
 }
 
 constexpr float CommModuleWidget::gridToYFromTop(const float y)
@@ -225,6 +222,7 @@ void LabeledButton::draw(const DrawArgs &args)
 
 	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
 	if (isTypeKnob) {
+		// Todo: move hub knob to hub's override
 		if (isOnHub) {
 			nvgBeginPath(args.vg);
 			nvgRoundedRect(args.vg, -10, -40, 50, 50, 5.0);
@@ -238,8 +236,6 @@ void LabeledButton::draw(const DrawArgs &args)
 			}
 			nvgStroke(args.vg);
 			nvgFill(args.vg);
-
-		} else {
 		}
 	} else {
 		nvgBeginPath(args.vg);
@@ -258,7 +254,7 @@ void LabeledButton::draw(const DrawArgs &args)
 		} else if (isCurrentMapSrc) {
 			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
 		} else {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.0f));
 		}
 		nvgStroke(args.vg);
 		nvgFill(args.vg);

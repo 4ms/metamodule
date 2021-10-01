@@ -394,8 +394,6 @@ public:
 		: hubKnobLabel{_hubKnobLabel}
 	{}
 	HubKnobLabel &hubKnobLabel;
-
-private:
 };
 
 struct MetaModuleHubWidget : CommModuleWidget {
@@ -498,18 +496,22 @@ struct MetaModuleHubWidget : CommModuleWidget {
 	void
 	addLabeledKnobMM(const std::string labelText, const int knobID, const Vec position, const float defaultValue = 0.f)
 	{
+		Vec posPx = mm2px(position);
 
 		auto *button = new HubKnobLabel{*this};
 		button->isOnHub = true;
-		button->box.pos = mm2px(Vec(position.x - kKnobSpacingX / 4.0f, position.y + kTextOffset));
-		button->box.size.x = kGridSpacingX / 2.0f;
+
+		// button->box.pos = mm2px(Vec(position.x - 10, position.y + kTextOffset));
+		// button->box.size.x = kGridSpacingX / 2.0f;
+		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
+		button->box.size.x = mm2px(kKnobSpacingX);
 		button->box.size.y = 12;
 		button->text = labelText;
 		button->id = {LabelButtonID::Types::Knob, knobID, -1};
 		addChild(button);
 
 		auto *p = new HubKnob(*button);
-		p->box.pos = mm2px(position);
+		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
 		if (module) {
 			p->paramQuantity = module->paramQuantities[knobID];
@@ -571,7 +573,6 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 
 void HubKnob::draw(const DrawArgs &args)
 {
-
 	RoundBlackKnob::draw(args);
 
 	auto knobNum = this->hubKnobLabel.id.objID;
