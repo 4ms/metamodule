@@ -1,0 +1,82 @@
+PatchHeader:
+  header_version: 1
+  patch_name: abc
+  num_modules: 3
+  num_int_cables: 0
+  num_mapped_ins: 0
+  num_mapped_outs: 2
+  num_static_knobs: 6
+  num_mapped_knobs: 5
+
+PatchData:
+  module_slugs:
+    0: PANEL_8
+    1: MULTILFO
+    2: LFOSINE
+
+  int_cables: 
+
+  mapped_ins: 
+
+  mapped_outs: 
+    - panel_jack_id: 0
+      out: 
+        module_id: 2
+        jack_id: 0
+    - panel_jack_id: 1
+      out: 
+        module_id: 1
+        jack_id: 1
+
+  static_knobs: 
+    - module_id: 1
+      param_id: 0
+      value: 0.540000
+    - module_id: 1
+      param_id: 1
+      value: 0.001500
+    - module_id: 1
+      param_id: 2
+      value: 0.000000
+    - module_id: 2
+      param_id: 0
+      value: 0.540000
+    - module_id: 2
+      param_id: 1
+      value: 0.458500
+    - module_id: 2
+      param_id: 2
+      value: 1.000000
+
+  mapped_knobs: 
+    - panel_knob_id: 0
+      module_id: 2
+      param_id: 0
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 0
+      module_id: 1
+      param_id: 0
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 1
+      module_id: 2
+      param_id: 1
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 2
+      module_id: 1
+      param_id: 2
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 3
+      module_id: 1
+      param_id: 1
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+

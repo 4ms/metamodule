@@ -281,25 +281,41 @@ TEST_CASE("mappings")
 			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
 		}
 
-		SUBCASE("Add other mappings, but still can access the original src or dest by providing one of the pair")
+		SUBCASE("Default range is 0..1")
 		{
-			LabelButtonID dst2;
-			dst2.moduleID = 888;
-			dst2.objID = 999;
-			dst2.objType = LabelButtonID::Types::Knob;
-			LabelButtonID src2;
-			src2.moduleID = 777;
-			src2.objID = 666;
-			src2.objType = LabelButtonID::Types::Knob;
-			cd.startMappingProcedure(src2);
-			cd.registerMapDest(dst2);
+			auto [min, max] = cd.getMapRange(src, dst);
+			CHECK(min == doctest::Approx(0.f));
+			CHECK(max == doctest::Approx(1.f));
 
-			auto should_be_src = cd.getMappedSrcFromDst(dst);
-			CHECK(should_be_src == src);
-
-			auto should_be_dst = cd.getMappedDstFromSrc(src);
-			CHECK(should_be_dst == dst);
+			SUBCASE("Can set a range and read it back")
+			{
+				cd.setMapRange(src, dst, 0.24f, 0.78f);
+				auto [min, max] = cd.getMapRange(src, dst);
+				CHECK(min == doctest::Approx(0.24f));
+				CHECK(max == doctest::Approx(0.78f));
+			}
 		}
+		// Not multi-map friendly
+		// 		SUBCASE("Add other mappings, but still can access the original src or dest by providing one of the
+		// pair")
+		// 		{
+		// 			LabelButtonID dst2;
+		// 			dst2.moduleID = 888;
+		// 			dst2.objID = 999;
+		// 			dst2.objType = LabelButtonID::Types::Knob;
+		// 			LabelButtonID src2;
+		// 			src2.moduleID = 777;
+		// 			src2.objID = 666;
+		// 			src2.objType = LabelButtonID::Types::Knob;
+		// 			cd.startMappingProcedure(src2);
+		// 			cd.registerMapDest(dst2);
+
+		// 			auto should_be_src = cd.getMappedSrcFromDst(dst);
+		// 			CHECK(should_be_src == src);
+
+		// 			auto should_be_dst = cd.getMappedDstFromSrc(src);
+		// 			CHECK(should_be_dst == dst);
+		// 		}
 
 		SUBCASE("Removing a mapping")
 		{

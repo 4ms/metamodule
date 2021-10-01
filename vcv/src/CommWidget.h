@@ -12,7 +12,7 @@ protected:
 	const float kTextOffset = 5;
 	const float kTopMargin = 13;
 	const float kBottomMargin = 15;
-	const float kGridSpacingX = 60;
+	const float kGridSpacingX = 30;
 	const float kModuleHeight = 128.5f;
 
 public:
@@ -70,8 +70,8 @@ public:
 	LabeledButton(CommModuleWidget &parent)
 		: _parent{parent}
 	{}
-	virtual void draw(const DrawArgs &args) override;
-	virtual void onDragStart(const event::DragStart &e) override;
+	void draw(const DrawArgs &args) override;
+	void onDragStart(const event::DragStart &e) override;
 	void updateState();
 	void createMapping(LabelButtonID srcId);
 

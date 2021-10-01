@@ -16,6 +16,7 @@
 #include "quad_LFO.hh"
 #include "quaddjembe.hh"
 #include "simplequaddjembe.hh"
+#include "testnew2.hh"
 
 PatchList::PatchList()
 	: _patch_addrs{
@@ -30,6 +31,8 @@ PatchList::PatchList()
 		  mono_verb_mmpatch,
 		  dualinfosc1_mmpatch,
 		  mappeddjembe_mmpatch,
+		  testnew2_mmpatch,
+		  // simplequaddjembe_mmpatch,
 		  dualdjembe_mmpatch,
 		  test_inputs_1234_mmpatch,
 		  quaddjembe_mmpatch,

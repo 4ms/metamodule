@@ -1,4 +1,5 @@
 #include "CommWidget.h"
+#include "paletteHub.hh"
 
 void CommModuleWidget::addModuleTitle(const std::string moduleTitle)
 {
@@ -94,6 +95,9 @@ void CommModuleWidget::addLabel(const std::string labelText, Vec posPx, LabelBut
 	button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2.0f, posPx.y + mm2px(kTextOffset));
 	button->box.size.x = kGridSpacingX;
 	button->box.size.y = 18;
+	//button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 4.0f, pos.y + kTextOffset));
+	//button->box.size.x = kGridSpacingX / 2.0f;
+	//button->box.size.y = 12;
 	button->text = labelText;
 	button->id = id;
 	addChild(button);
@@ -105,6 +109,16 @@ void CommModuleWidget::addLabeledToggle(const std::string labelText, int lightID
 	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(posMM), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({posMM.x - 3.0f, posMM.y - 3.0f}), module, lightID));
 	addLabel(labelText, mm2px({posMM.x + 17, posMM.y - 6.7f}), {LabelButtonID::Types::Toggle, paramID, -1});
+}
+
+void CommModuleWidget::addLabeledToggleMM(const std::string labelText,
+										  const int lightID,
+										  const int paramID,
+										  const Vec position)
+{
+	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(position), module, paramID));
+	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({position.x - 3.0f, position.y - 3.0f}), module, lightID));
+	addLabel(labelText, {position.x + 17, position.y - 6.7f}, {LabelButtonID::Types::Toggle, paramID, -1});
 }
 
 constexpr float CommModuleWidget::gridToYFromTop(const float y)
@@ -205,49 +219,53 @@ void LabeledButton::updateState()
 	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
 
-static inline const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
-static inline const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
-
-static inline const NVGcolor labelPalette[8] = {
-	rack::color::BLACK,
-	BROWN,
-	rack::color::RED,
-	ORANGE,
-	rack::color::YELLOW,
-	rack::color::GREEN,
-	rack::color::BLUE,
-	rack::color::MAGENTA,
-};
-
 void LabeledButton::draw(const DrawArgs &args)
 {
 	updateState();
 
-	nvgBeginPath(args.vg);
-	nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
+	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
+	if (isTypeKnob) {
+		if (isOnHub) {
+			nvgBeginPath(args.vg);
+			nvgRoundedRect(args.vg, -10, -40, 50, 50, 5.0);
+			nvgStrokeColor(args.vg, rack::color::WHITE);
+			nvgStrokeWidth(args.vg, 0.0);
+			if (isCurrentMapSrc) {
+				auto knobNum = this->id.objID;
+				nvgFillColor(args.vg, PaletteHub::color[knobNum]);
+			} else {
+				nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+			}
+			nvgStroke(args.vg);
+			nvgFill(args.vg);
 
-	if (isMapped) {
-		unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
-		nvgStrokeColor(args.vg, labelPalette[palid]);
-		nvgStrokeWidth(args.vg, 2.0f);
-	}
-	if (!isMapped) {
-		nvgStrokeColor(args.vg, rack::color::WHITE);
-		nvgStrokeWidth(args.vg, 0.0);
-	}
-	if (isPossibleMapDest) {
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.8f));
-	} else if (isCurrentMapSrc) {
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
+		} else {
+		}
 	} else {
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+		nvgBeginPath(args.vg);
+		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
+		if (isMapped) {
+			unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
+			nvgStrokeColor(args.vg, PaletteHub::color[palid]);
+			nvgStrokeWidth(args.vg, 2.0f);
+		}
+		if (!isMapped) {
+			nvgStrokeColor(args.vg, rack::color::WHITE);
+			nvgStrokeWidth(args.vg, 0.0);
+		}
+		if (isPossibleMapDest) {
+			nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.8f));
+		} else if (isCurrentMapSrc) {
+			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
+		} else {
+			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+		}
+		nvgStroke(args.vg);
+		nvgFill(args.vg);
 	}
 
 	if (APP->event->hoveredWidget == this)
 		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.4f));
-
-	nvgStroke(args.vg);
-	nvgFill(args.vg);
 
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
@@ -262,7 +280,11 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 		return;
 	}
 
-	_parent.notifyLabelButtonClicked(*this);
+	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
+
+	if (isOnHub || (!isOnHub && !isTypeKnob)) {
+		_parent.notifyLabelButtonClicked(*this);
+	}
 
 	if (quantity)
 		quantity->setMax();
