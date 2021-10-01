@@ -381,6 +381,7 @@ class HubKnobLabel : public LabeledButton {
 public:
 	HubKnobLabel(MetaModuleHubWidget &hub);
 	void onDeselect(const event::Deselect &e) override;
+	void draw(const DrawArgs &args) override;
 	MetaModuleHubWidget &_hub;
 
 private:
@@ -501,8 +502,6 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		auto *button = new HubKnobLabel{*this};
 		button->isOnHub = true;
 
-		// button->box.pos = mm2px(Vec(position.x - 10, position.y + kTextOffset));
-		// button->box.size.x = kGridSpacingX / 2.0f;
 		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
 		button->box.size.x = mm2px(kKnobSpacingX);
 		button->box.size.y = 12;
@@ -569,6 +568,30 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 		//	Abort mapping
 		//	module->disableLearn(id);
 	}
+}
+
+void HubKnobLabel::draw(const DrawArgs &args)
+{
+	updateState();
+
+	nvgBeginPath(args.vg);
+	nvgRoundedRect(args.vg, 0, -40, box.size.x, 40 + box.size.y, 5.0);
+	nvgStrokeColor(args.vg, rack::color::WHITE);
+	nvgStrokeWidth(args.vg, 0.0);
+	if (isCurrentMapSrc) {
+		auto knobNum = this->id.objID;
+		nvgFillColor(args.vg, PaletteHub::color[knobNum]);
+	} else {
+		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+	}
+	nvgStroke(args.vg);
+	nvgFill(args.vg);
+
+	nvgBeginPath(args.vg);
+	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
+	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
+	nvgFontSize(args.vg, 10.0f);
+	nvgText(args.vg, box.size.x / 2.0f, box.size.y / 2.0f, text.c_str(), NULL);
 }
 
 void HubKnob::draw(const DrawArgs &args)

@@ -220,24 +220,9 @@ void LabeledButton::draw(const DrawArgs &args)
 {
 	updateState();
 
-	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
-	if (isTypeKnob) {
-		// Todo: move hub knob to hub's override
-		if (isOnHub) {
-			nvgBeginPath(args.vg);
-			nvgRoundedRect(args.vg, -10, -40, 50, 50, 5.0);
-			nvgStrokeColor(args.vg, rack::color::WHITE);
-			nvgStrokeWidth(args.vg, 0.0);
-			if (isCurrentMapSrc) {
-				auto knobNum = this->id.objID;
-				nvgFillColor(args.vg, PaletteHub::color[knobNum]);
-			} else {
-				nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
-			}
-			nvgStroke(args.vg);
-			nvgFill(args.vg);
-		}
-	} else {
+	bool isTypeJack =
+		this->id.objType == LabelButtonID::Types::InputJack || this->id.objType == LabelButtonID::Types::OutputJack;
+	if (isTypeJack) {
 		nvgBeginPath(args.vg);
 		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
 		if (isMapped) {
