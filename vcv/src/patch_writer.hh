@@ -1,6 +1,7 @@
 #pragma once
 #include "CommData.h"
 #include "patch/patch.hh"
+#include <algorithm>
 #include <map>
 #include <vector>
 
@@ -140,8 +141,8 @@ public:
 					.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
 					.param_id = static_cast<int16_t>(m.dst.objID),
 					.curve_type = 0,
-					.range = 1.f,
-					.offset = 0.f,
+					.range = m.range_max - m.range_min,
+					.offset = m.range_min,
 				});
 			}
 
