@@ -387,10 +387,11 @@ public:
 private:
 };
 
-class HubKnob : public RoundBlackKnob {
+template<typename BaseKnobT>
+class HubKnob : public BaseKnobT {
 public:
 	void onButton(const event::Button &e) override;
-	void draw(const DrawArgs &args) override;
+	void draw(const typename BaseKnobT::DrawArgs &args) override;
 	HubKnob(HubKnobLabel &_hubKnobLabel)
 		: hubKnobLabel{_hubKnobLabel}
 	{}
@@ -436,14 +437,14 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		addChild(patchName);
 		patchName->selectAll(); // Doesn't work :(
 
-		addLabeledKnobMM("A", 0, {9, 38.9});
-		addLabeledKnobMM("B", 1, {29.4, 51.4});
-		addLabeledKnobMM("C", 2, {51.6, 51.6});
-		addLabeledKnobMM("D", 3, {72, 38.9});
-		addSmallLabeledKnobMM("a", 4, {8.5, 59.5});
-		addSmallLabeledKnobMM("b", 5, {31.9, 72.8});
-		addSmallLabeledKnobMM("c", 6, {48.8, 72.8});
-		addSmallLabeledKnobMM("d", 7, {72.2, 59.3});
+		addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
+		addLabeledKnobMM<RoundBlackKnob>("B", 1, {29.4, 51.4});
+		addLabeledKnobMM<RoundBlackKnob>("C", 2, {51.6, 51.6});
+		addLabeledKnobMM<RoundBlackKnob>("D", 3, {72, 38.9});
+		addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.5, 59.5});
+		addLabeledKnobMM<RoundSmallBlackKnob>("b", 5, {31.9, 72.8});
+		addLabeledKnobMM<RoundSmallBlackKnob>("c", 6, {48.8, 72.8});
+		addLabeledKnobMM<RoundSmallBlackKnob>("d", 7, {72.2, 59.3});
 
 		addLabeledInputMM("CV IN 1", MetaModuleHub::CV_1, {7.6, 74.5});
 		addLabeledInputMM("CV IN 2", MetaModuleHub::CV_2, {20, 82.1});
@@ -494,6 +495,7 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		}
 	}
 
+	template<typename KnobType>
 	void
 	addLabeledKnobMM(const std::string labelText, const int knobID, const Vec position, const float defaultValue = 0.f)
 	{
@@ -509,17 +511,13 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		button->id = {LabelButtonID::Types::Knob, knobID, -1};
 		addChild(button);
 
-		auto *p = new HubKnob(*button);
+		auto *p = new HubKnob<KnobType>(*button);
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
 		if (module) {
 			p->paramQuantity = module->paramQuantities[knobID];
 			p->paramQuantity->defaultValue = defaultValue;
 		}
-		/*auto p = createParamCentered<HubKnob>(mm2px(position), module, knobID);
-		if (p->paramQuantity)
-			p->paramQuantity->defaultValue = defaultValue;*/
-
 		addParam(p);
 	}
 };
@@ -575,14 +573,16 @@ void HubKnobLabel::draw(const DrawArgs &args)
 	updateState();
 
 	nvgBeginPath(args.vg);
-	nvgRoundedRect(args.vg, 0, -40, box.size.x, 40 + box.size.y, 5.0);
+	float padding_x = 2;
+	float knob_height = 40;
+	nvgRoundedRect(args.vg, padding_x, -knob_height, box.size.x - padding_x * 2, knob_height + box.size.y, 5.0);
 	nvgStrokeColor(args.vg, rack::color::WHITE);
 	nvgStrokeWidth(args.vg, 0.0);
 	if (isCurrentMapSrc) {
 		auto knobNum = this->id.objID;
 		nvgFillColor(args.vg, PaletteHub::color[knobNum]);
 	} else {
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.1f));
+		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.0f));
 	}
 	nvgStroke(args.vg);
 	nvgFill(args.vg);
@@ -590,11 +590,12 @@ void HubKnobLabel::draw(const DrawArgs &args)
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
-	nvgFontSize(args.vg, 10.0f);
+	nvgFontSize(args.vg, 8.0f);
 	nvgText(args.vg, box.size.x / 2.0f, box.size.y / 2.0f, text.c_str(), NULL);
 }
 
-void HubKnob::draw(const DrawArgs &args)
+template<typename BaseKnobT>
+void HubKnob<BaseKnobT>::draw(const typename BaseKnobT::DrawArgs &args)
 {
 	RoundBlackKnob::draw(args);
 
@@ -609,7 +610,7 @@ void HubKnob::draw(const DrawArgs &args)
 			nvgBeginPath(args.vg);
 			const float radius = 6;
 			// nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, radius);
-			nvgRect(args.vg, box.size.x - radius, box.size.y - radius, radius, radius);
+			nvgRect(args.vg, this->box.size.x - radius, this->box.size.y - radius, radius, radius);
 			nvgFillColor(args.vg, color);
 			nvgFill(args.vg);
 			nvgStrokeColor(args.vg, color::mult(color, 0.5));
@@ -619,16 +620,17 @@ void HubKnob::draw(const DrawArgs &args)
 	}
 }
 
-void HubKnob::onButton(const event::Button &e)
+template<typename BaseKnobT>
+void HubKnob<BaseKnobT>::onButton(const event::Button &e)
 {
-	math::Vec c = box.size.div(2);
+	math::Vec c = this->box.size.div(2);
 	float dist = e.pos.minus(c).norm();
 	if (dist <= c.x) {
 		OpaqueWidget::onButton(e);
 
 		// Touch parameter
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
-			if (paramQuantity) {
+			if (this->paramQuantity) {
 				APP->scene->rack->touchedParam = this;
 			}
 			e.consume(this);
@@ -685,7 +687,9 @@ void HubKnob::onButton(const event::Button &e)
 			// menu->addChild(fineItem);
 
 			engine::ParamHandle *paramHandle =
-				paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId) : NULL;
+				this->paramQuantity
+					? APP->engine->getParamHandle(this->paramQuantity->module->id, this->paramQuantity->paramId)
+					: NULL;
 			if (paramHandle) {
 				ParamUnmapItem *unmapItem = new ParamUnmapItem;
 				unmapItem->text = "Unmap";

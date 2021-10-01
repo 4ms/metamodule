@@ -249,9 +249,9 @@ void LabeledButton::draw(const DrawArgs &args)
 		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.4f));
 
 	nvgBeginPath(args.vg);
-	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
+	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_BOTTOM);
 	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
-	nvgFontSize(args.vg, 10.0f);
+	nvgFontSize(args.vg, 8.0f);
 	nvgText(args.vg, box.size.x / 2.0f, box.size.y / 2.0f, text.c_str(), NULL);
 }
 
