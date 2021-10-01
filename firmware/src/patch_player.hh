@@ -15,6 +15,7 @@
 #include "patch/patch.hh"
 #include "smp_api.hh"
 #include "sys/alloc_buffer.hh"
+#include "util/math.hh"
 #include <cstdint>
 #include <vector>
 
@@ -198,8 +199,10 @@ public:
 		if (!is_loaded)
 			return;
 		auto &knob_conn = knob_conns[param_id];
-		for (auto &k : knob_conn)
+		for (auto &k : knob_conn) {
+			float mapped_val = MathTools::constrain(val * k.range + k.offset, 0.f, 1.f);
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
+		}
 	}
 
 	void set_panel_input(int jack_id, float val)
