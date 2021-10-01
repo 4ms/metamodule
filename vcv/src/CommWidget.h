@@ -35,6 +35,7 @@ protected:
 	void addLabeledOutputPx(const std::string labelText, int outputID, Vec posPx);
 
 	void addLabeledToggle(const std::string labelText, int lightID, int paramID, Vec posGrid);
+	void addLabeledToggleMM(const std::string labelText, const int lightID, const int paramID, const Vec position);
 	void addModuleTitle(const std::string moduleTitle);
 
 private:

@@ -93,11 +93,11 @@ void CommModuleWidget::addLabel(const std::string labelText, Vec posPx, LabelBut
 {
 	LabeledButton *button = createLabel();
 	button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2.0f, posPx.y + mm2px(kTextOffset));
-	button->box.size.x = kGridSpacingX;
+	button->box.size.x = kKnobSpacingX;
 	button->box.size.y = 18;
-	//button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 4.0f, pos.y + kTextOffset));
-	//button->box.size.x = kGridSpacingX / 2.0f;
-	//button->box.size.y = 12;
+	// button->box.pos = mm2px(Vec(pos.x - kKnobSpacingX / 4.0f, pos.y + kTextOffset));
+	// button->box.size.x = kGridSpacingX / 2.0f;
+	// button->box.size.y = 12;
 	button->text = labelText;
 	button->id = id;
 	addChild(button);
