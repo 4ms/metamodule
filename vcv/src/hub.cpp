@@ -495,10 +495,8 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		}
 	}
 
-	void addLabeledKnobMM(const std::string labelText,
-						  const int knobID,
-						  const Vec position,
-						  const float defaultValue = 0.f) override
+	void
+	addLabeledKnobMM(const std::string labelText, const int knobID, const Vec position, const float defaultValue = 0.f)
 	{
 
 		auto *button = new HubKnobLabel{*this};
