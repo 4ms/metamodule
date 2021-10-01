@@ -3,18 +3,18 @@
 #include "patch/integration_tests/all_tests.hh"
 
 #include "StereoVerb.hh"
-#include "abc.hh"
 #include "dualdjembe.hh"
 #include "mappeddjembe.hh"
 #include "mixerpass.hh"
 #include "quaddjembe.hh"
 #include "simplequaddjembe.hh"
+#include "testnew2.hh"
 
 PatchList::PatchList()
 	: _patch_addrs{
 		  // mixerpass_mmpatch,
 		  mappeddjembe_mmpatch,
-		  abc_mmpatch,
+		  testnew2_mmpatch,
 		  // simplequaddjembe_mmpatch,
 		  dualdjembe_mmpatch,
 		  StereoVerb_mmpatch,
