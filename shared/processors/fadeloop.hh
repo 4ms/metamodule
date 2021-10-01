@@ -166,12 +166,10 @@ struct FadeLoop {
 };
 
 //TODO get this working, so it deletes
-/*
-template<typename DataType, unsigned long MAX_LENGTH>
-struct FadeLoop2 : FadeLoopExt<std::array<DataType, MAX_LENGTH>> {
-	FadeLoop2()
-		: FadeLoopExt<std::array<DataType, MAX_LENGTH>>{
-			  *(std::make_unique<BigAlloc<std::array<DataType, MAX_LENGTH>>>())}
-	{}
-};
-*/
+// template<typename DataType, unsigned long MAX_LENGTH>
+// struct FadeLoop2 : FadeLoopExt<std::array<DataType, MAX_LENGTH>> {
+// 	FadeLoop2()
+// 		: FadeLoopExt<std::array<DataType, MAX_LENGTH>>{
+// 			  *(std::make_unique<BigAlloc<std::array<DataType, MAX_LENGTH>>>())}
+// 	{}
+// };
