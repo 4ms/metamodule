@@ -25,8 +25,7 @@ constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;
 // static Convolver fftfx;
 
-AudioStream::AudioStream(PatchList &patches,
-						 PatchPlayer &patchplayer,
+AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 CodecT &codec,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
@@ -42,7 +41,6 @@ AudioStream::AudioStream(PatchList &patches,
 	, auxsigs{auxs}
 	, codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
-	, patch_list{patches}
 	, player{patchplayer}
 {
 	codec_.init();

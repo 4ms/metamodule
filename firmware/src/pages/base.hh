@@ -1,9 +1,9 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "lvgl/lvgl.h"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
-#include "screen_buffer.hh"
 #include "util/geometry.hh"
 
 namespace MetaModule
@@ -22,15 +22,13 @@ struct PageBase {
 	Params &params;
 	MetaParams &metaparams;
 	UiAudioMailbox &mbox;
-	ScreenFrameBuffer &screen;
 
-	PageBase(PatchInfo info, ScreenFrameBuffer &screen_)
+	PageBase(PatchInfo info)
 		: patch_list{info.patch_list}
 		, patch_player{info.patch_player}
 		, params{info.params}
 		, metaparams{info.metaparams}
 		, mbox{info.mbox}
-		, screen{screen_}
 	{}
 };
 } // namespace MetaModule

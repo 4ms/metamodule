@@ -44,7 +44,7 @@ public:
 class MMDisplay {
 	static inline ScreenFrameWriter _spi_driver;
 	static inline Timekeeper _run_lv_tasks_tmr;
-	static inline bool _ready = false;
+	static inline volatile bool _ready = false;
 
 public:
 	static void init()

@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/screen_buffer_conf.hh"
 #include "pages/base.hh"
 #include "pages/bouncing_ball.hh"
 
@@ -6,8 +7,8 @@ namespace MetaModule
 {
 
 struct BouncingBallsPage : PageBase {
-	BouncingBallsPage(PatchInfo info, ScreenFrameBuffer &screen)
-		: PageBase{info, screen}
+	BouncingBallsPage(PatchInfo info)
+		: PageBase{info}
 	{}
 
 	static inline BouncingBall balls[4] = {
@@ -24,14 +25,17 @@ struct BouncingBallsPage : PageBase {
 		Colors::black,
 	};
 
-	void draw()
+	void focus() {}
+	void blur() {}
+	void update()
 	{
-		screen.fill(Colors::white);
+		// screen.fill(Colors::white);
 		int i = 0;
 		for (auto &ball : balls) {
 			ball.update();
 			auto pos = ball.get_pos();
-			screen.blend64FillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565(), 0.5f);
+			// lv_draw_rect({pos.x, pos.y},
+			// 	screen.blend64FillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565(), 0.5f);
 			i++;
 		}
 	}

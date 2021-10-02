@@ -57,19 +57,19 @@ SOURCES  += $(DRIVERLIB)/drivers/pin.cc
 SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
 SOURCES  += $(DRIVERLIB)/drivers/tim.cc
 SOURCES  += $(DRIVERLIB)/drivers/timekeeper.cc
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/core/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/draw/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/flex/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/grid/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/others/snapshot/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/themes/*/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/widgets/*/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/font/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/gpu/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/hal/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/misc/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/widgets/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/core/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/draw/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/flex/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/grid/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/others/snapshot/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/themes/*/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/widgets/*/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/font/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/gpu/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/hal/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/misc/*.c)
+# SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/widgets/*.c)
 
 ifeq "$(target_board)" "mini"
 SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
@@ -97,7 +97,7 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(SHARED)/CoreModules \
 			-I$(SHARED)/util \
 			-I$(SHARED)/patch \
-			-I$(LIBDIR)/lvgl \
+			# -I$(LIBDIR)/lvgl \
 
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 

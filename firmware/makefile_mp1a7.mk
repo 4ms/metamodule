@@ -88,26 +88,41 @@ SOURCES = \
 		  $(core_src)/aux_core_main.cc\
 		  src/patchlist.cc\
 		  src/pages/page_manager.cc \
-		  src/print.cc \
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
-		  $(LIBDIR)/printf/printf.c \
-		  $(MFSRC) \
 		  $(SHARED)/axoloti-wrapper/axoloti_math.cpp \
-		  $(NE10DIR)/common/NE10_mask_table.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
-		  $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
-		  $(NE10DIR)/modules/dsp/NE10_fir.c \
-		  $(NE10DIR)/modules/dsp/NE10_fir_init.c \
-		  $(NE10DIR)/modules/dsp/NE10_iir.c \
-		  $(NE10DIR)/modules/dsp/NE10_iir_init.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
-		  $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
-		  $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
+		  
+		  # $(LIBDIR)/printf/printf.c \
+		  # src/print.cc \
+		  # $(MFSRC) \
+		  # $(NE10DIR)/common/NE10_mask_table.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
+		  # $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fir.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fir_init.c \
+		  # $(NE10DIR)/modules/dsp/NE10_iir.c \
+		  # $(NE10DIR)/modules/dsp/NE10_iir_init.c \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
+		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
+		  # $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
+
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/core/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/draw/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/flex/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/grid/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/others/snapshot/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/themes/*/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/widgets/*/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/font/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/gpu/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/hal/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/misc/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/widgets/*.c)
 
 		  # $(NE10DIR)/common/NE10_mask_table.c \
 		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
@@ -174,12 +189,13 @@ INCLUDES = -I. \
 		   -I$(SHARED)/CoreModules \
 		   -I$(SHARED)/util \
 		   -I$(SHARED)/patch \
-		   -I$(LIBDIR)/printf \
-		   -I$(MFINC) \
-		   -I$(MFFONTDIR) \
-		   -I$(NE10DIR)/inc \
-		   -I$(NE10DIR)/common \
-		   -I$(NE10DIR)/modules/dsp \
+		   -I$(LIBDIR)/lvgl \
+		   # -I$(LIBDIR)/printf \
+		   # -I$(MFINC) \
+		   # -I$(MFFONTDIR) \
+		   # -I$(NE10DIR)/inc \
+		   # -I$(NE10DIR)/common \
+		   # -I$(NE10DIR)/modules/dsp \
 
 #D-Cache L1: 32 KB, 128 Sets, 64 Bytes/Line, 4-Way
 EXTRA_CFLAGS = --param l1-cache-size=32 \

@@ -8,11 +8,10 @@
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_player.hh"
-#include "patchlist.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
-// #include "ui.hh"
+#include "ui.hh"
 
 namespace MetaModule
 {
@@ -28,21 +27,19 @@ void main()
 
 	StaticBuffers::init();
 
-	PatchList patch_list;
 	PatchPlayer patch_player;
-	ParamQueue param_cache;
+	ParamQueue param_queue;
 	UiAudioMailbox mbox;
 
 	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 
-	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
+	Ui ui{patch_player, param_queue, mbox};
 
-	AudioStream audio{patch_list,
-					  patch_player,
+	AudioStream audio{patch_player,
 					  Hardware::codec,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
-					  param_cache,
+					  param_queue,
 					  mbox,
 					  StaticBuffers::param_blocks,
 					  StaticBuffers::auxsignal_block};
@@ -65,16 +62,22 @@ void main()
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
 
-	param_cache.clear();
-	// ui.start();
+	param_queue.clear();
+	ui.start();
 	audio.start();
 
 	while (true) {
-		HAL_Delay(500);
-		Debug::red_LED1::high();
+		// HAL_Delay(500);
+		// Debug::red_LED1::high();
 
-		HAL_Delay(500);
-		Debug::red_LED1::low();
+		// HAL_Delay(500);
+		// Debug::red_LED1::low();
+		if (MMDisplay::is_ready()) {
+			Debug::Pin1::high();
+			MMDisplay::clear_ready();
+			lv_timer_handler(); //calls disp.flush_cb -> MMDisplay::flush_to_screen -> spi_driver.transfer_partial_frame
+			Debug::Pin1::low();
+		}
 	}
 }
 

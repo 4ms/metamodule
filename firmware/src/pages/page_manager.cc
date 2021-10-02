@@ -14,8 +14,10 @@ void PageManager::init()
 
 	mbox.loading_new_patch = false;
 
-	jump_to_page(Page::PatchSelector);
-	display_current_page();
+	// jump_to_page(Page::PatchOverview);
+	cur_page = Page::PatchOverview;
+	focus_page();
+	// update_current_page();
 }
 
 void PageManager::next_page()
@@ -48,7 +50,7 @@ void PageManager::focus_page()
 	switch (cur_page) {
 		default:
 		case PatchOverview:
-			// overview_page.start();
+			overview_page.focus();
 			break;
 
 		case ModulesInPatch:
@@ -64,11 +66,11 @@ void PageManager::focus_page()
 			break;
 
 		case PatchLayout:
-			patch_layout_page.focus();
+			// patch_layout_page.focus();
 			break;
 
 		case PatchSelector:
-			patch_selector_page.focus();
+			// patch_selector_page.focus();
 			break;
 
 		case DebugInfo:
@@ -76,7 +78,7 @@ void PageManager::focus_page()
 			break;
 
 		case BouncingBalls:
-			// balls_page.start();
+			balls_page.focus();
 			break;
 	}
 }
@@ -85,7 +87,7 @@ void PageManager::blur_page()
 	switch (cur_page) {
 		default:
 		case PatchOverview:
-			// overview_page.start();
+			overview_page.blur();
 			break;
 
 		case ModulesInPatch:
@@ -101,11 +103,11 @@ void PageManager::blur_page()
 			break;
 
 		case PatchLayout:
-			patch_layout_page.blur();
+			// patch_layout_page.blur();
 			break;
 
 		case PatchSelector:
-			patch_selector_page.blur();
+			// patch_selector_page.blur();
 			break;
 
 		case DebugInfo:
@@ -113,45 +115,45 @@ void PageManager::blur_page()
 			break;
 
 		case BouncingBalls:
-			// balls_page.start();
+			balls_page.blur();
 			break;
 	}
 }
 
-void PageManager::display_current_page()
+void PageManager::update_current_page()
 {
 	switch (cur_page) {
 		default:
 		case PatchOverview:
-			overview_page.draw();
+			overview_page.update();
 			break;
 
 		case ModulesInPatch:
-			modules_in_patch_page.draw();
+			// modules_in_patch_page.draw();
 			break;
 
 		case JackMap:
-			jack_map_page.draw();
+			// jack_map_page.draw();
 			break;
 
 		case PotMap:
-			knob_map_page.draw();
+			// knob_map_page.draw();
 			break;
 
 		case PatchLayout:
-			patch_layout_page.draw();
+			// patch_layout_page.draw();
 			break;
 
 		case PatchSelector:
-			patch_selector_page.draw();
+			// patch_selector_page.draw();
 			break;
 
 		case DebugInfo:
-			debug_info_page.draw();
+			// debug_info_page.draw();
 			break;
 
 		case BouncingBalls:
-			balls_page.draw();
+			balls_page.update();
 			break;
 	}
 }
