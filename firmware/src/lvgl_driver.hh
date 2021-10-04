@@ -4,13 +4,14 @@
 
 namespace MetaModule
 {
-template<size_t ScreenWidth, size_t ScreenHeight>
 class LVGLDriver {
-	//Buffer
+	static constexpr uint32_t ScreenWidth = MMScreenBufferConf::viewWidth;
+	static constexpr uint32_t ScreenHeight = MMScreenBufferConf::viewHeight;
 	static constexpr size_t BufferSize = ScreenHeight * ScreenWidth / 10;
-	lv_disp_draw_buf_t disp_buf;
 	lv_color_t buf_1[BufferSize];
 	lv_color_t buf_2[BufferSize];
+
+	lv_disp_draw_buf_t disp_buf;
 
 	//Display driver
 	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
@@ -91,7 +92,6 @@ public:
 	}
 
 private:
-	static inline LVGLDriver<MMScreenBufferConf::viewWidth, MMScreenBufferConf::viewHeight> gui{
-		MMDisplay::flush_to_screen};
+	static inline LVGLDriver gui{MMDisplay::flush_to_screen};
 };
 } // namespace MetaModule
