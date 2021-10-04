@@ -14,6 +14,7 @@ struct PatchOverviewPage : PageBase {
 
 	bool is_init = false;
 	lv_obj_t *slider1;
+	int32_t slider_val = 30;
 
 	static constexpr Color bgcolor = Colors::white;
 	static constexpr Color subheader_fg = Colors::black;
@@ -21,9 +22,12 @@ struct PatchOverviewPage : PageBase {
 	void init()
 	{
 		slider1 = lv_slider_create(lv_scr_act());
+		slider_val = 30;
 		lv_obj_set_x(slider1, 30);
 		lv_obj_set_y(slider1, 10);
 		lv_obj_set_size(slider1, 15, 100);
+		lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
+
 		is_init = true;
 	}
 
@@ -36,6 +40,13 @@ struct PatchOverviewPage : PageBase {
 	void blur() {}
 	void update()
 	{
+		slider_val += 1;
+		if (slider_val <= 1)
+			slider_val = 99;
+		if (slider_val > 99)
+			slider_val = 1;
+		lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
+
 		// screen.fill(bgcolor);
 		// PageWidgets::setup_header(screen);
 		// screen.setTextWrap(true);

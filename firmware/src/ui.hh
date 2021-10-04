@@ -42,21 +42,15 @@ public:
 
 	void start()
 	{
+		MMDisplay::init();
+		MMDisplay::start();
+
 		params.clear();
 		metaparams.clear();
 		// register_printf_destination(screen);
 		pages.init();
 
-		MMDisplay::init();
-		MMDisplay::start();
-
-		slider1 = lv_slider_create(lv_scr_act());
-		slider_val = 30;
-		lv_obj_set_x(slider1, 30);
-		lv_obj_set_y(slider1, 10);
-		lv_obj_set_size(slider1, 15, 100);
-		lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
-		slider_tm.init(
+		page_update_tm.init(
 			{
 				.TIMx = TIM17,
 				.period_ns = 1000000000 / 60, // =  60Hz
@@ -64,17 +58,11 @@ public:
 				.priority2 = 2,
 			},
 			[&] { update_ui(); });
-		slider_tm.start();
+		page_update_tm.start();
 	}
 
 	void update_ui()
 	{
-		//Takes ~4us on A7
-		slider_val -= 1;
-		if (slider_val <= 1)
-			slider_val = 99;
-		lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
-
 		// using namespace mdrivlib;
 		// param_queue.read_sync(&params, &metaparams);
 		// handle_rotary();
@@ -84,7 +72,7 @@ public:
 		// }
 
 		// HWSemaphore<ScreenFrameBufLock>::lock();
-		// pages.update_current_page();
+		pages.update_current_page();
 
 		// screen.flush_cache();
 		// HWSemaphore<ScreenFrameBufLock>::unlock();
@@ -100,6 +88,6 @@ public:
 	}
 
 private:
-	Timekeeper slider_tm;
+	Timekeeper page_update_tm;
 };
 } // namespace MetaModule
