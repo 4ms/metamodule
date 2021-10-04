@@ -2,6 +2,7 @@
 #include "conf/hsem_conf.hh"
 #include "conf/screen_conf.hh"
 #include "debug.hh"
+#include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "drivers/memory_transfer.hh"
 #include "drivers/pin.hh"
@@ -212,6 +213,9 @@ public:
 		set_pos(xstart, ystart, xend, yend);
 		auto buffer_size_bytes = (xend - xstart + 1) * (yend - ystart + 1) * 2;
 		config_dma_transfer(reinterpret_cast<uint32_t>(buffer), buffer_size_bytes);
+		mdrivlib::SystemCache::clean_dcache_by_range(buffer, buffer_size_bytes);
+		__DSB();
+
 		start_dma_transfer();
 	}
 
