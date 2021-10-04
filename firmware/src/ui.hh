@@ -37,12 +37,12 @@ public:
 		, mbox{uiaudiomailbox}
 		, pages{patch_list, pp, params, metaparams, uiaudiomailbox}
 	{
-		// MMDisplay::init();
+		MMDisplay::init();
 	}
 
 	void start()
 	{
-		MMDisplay::init();
+		// MMDisplay::init();
 		MMDisplay::start();
 
 		params.clear();
@@ -63,19 +63,10 @@ public:
 
 	void update_ui()
 	{
-		// using namespace mdrivlib;
-		// param_queue.read_sync(&params, &metaparams);
-		// handle_rotary();
-
-		// if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
-		// 	return;
-		// }
-
-		// HWSemaphore<ScreenFrameBufLock>::lock();
+		using namespace mdrivlib;
+		param_queue.read_sync(&params, &metaparams);
+		handle_rotary();
 		pages.update_current_page();
-
-		// screen.flush_cache();
-		// HWSemaphore<ScreenFrameBufLock>::unlock();
 	}
 
 	void handle_rotary()

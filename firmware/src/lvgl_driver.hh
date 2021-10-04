@@ -11,7 +11,10 @@ class LVGLDriver {
 	lv_color_t buf_1[BufferSize];
 	lv_color_t buf_2[BufferSize];
 
-	lv_disp_draw_buf_t disp_buf;
+	// v8:
+	// lv_disp_draw_buf_t disp_buf;
+	// v7:
+	lv_disp_buf_t disp_buf;
 
 	//Display driver
 	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
@@ -30,9 +33,15 @@ public:
 	LVGLDriver(flush_cb_t flush_cb)
 	{
 		lv_init();
-		lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
+
+		// lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
+		lv_disp_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
+
 		lv_disp_drv_init(&disp_drv);
-		disp_drv.draw_buf = &disp_buf;
+
+		// disp_drv.draw_buf = &disp_buf;
+		disp_drv.buffer = &disp_buf;
+
 		disp_drv.flush_cb = flush_cb;
 		// disp_drv.rounder_cb = round16;
 		disp_drv.hor_res = ScreenWidth;

@@ -102,11 +102,12 @@ void Controls::start()
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() { start_param_block<0>(); });
-	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() { start_param_block<1>(); });
+
+	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();
@@ -129,11 +130,14 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 
 	// mp1 m4: every ~20us + 60us gap every 64 pulses (1.3ms), width= 2.8us ... ~14% load
 	read_controls_task.init(control_read_tim_conf, [this]() {
+		Debug::Pin3::high();
 		if (_buffer_full) {
+			Debug::Pin3::low();
 			return;
 		}
 		update_debouncers();
 		update_params();
+		Debug::Pin3::low();
 	});
 
 	auxstream.init();

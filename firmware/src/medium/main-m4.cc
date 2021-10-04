@@ -10,7 +10,6 @@
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
 #include "drivers/system_startup.hh"
-// #include "lvgl_driver.hh"
 #include "mp1m4/hsem_handler.hh"
 #include "muxed_adc.hh"
 #include "params.hh"
@@ -56,35 +55,8 @@ void main()
 	SharedBusQueue i2cqueue{controls};
 	SharedBus::i2c.enable_IT(i2c_conf_controls.priority1, i2c_conf_controls.priority2);
 
+	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 	controls.start();
-
-	// MMDisplay::init();
-	// MMDisplay::start();
-	// lv_obj_t *slider1 = lv_slider_create(lv_scr_act());
-	// lv_obj_set_x(slider1, 30);
-	// lv_obj_set_y(slider1, 10);
-	// lv_obj_set_size(slider1, 15, 100);
-
-	//This will be pages.init();
-	//then pages.start(); calls the TIM17 which updates the gui elements based on params and metaparams
-	//and handles rotary event to change pages (calling focus() and blur())
-	//Example animation
-	// Timekeeper slider_tm;
-	// int32_t slider_val = 30;
-	// slider_tm.init(
-	// 	{
-	// 		.TIMx = TIM17,
-	// 		.period_ns = 1000000000 / 60, // =  60Hz
-	// 		.priority1 = 2,
-	// 		.priority2 = 2,
-	// 	},
-	// 	[slider1 = slider1, &slider_val = slider_val] {
-	// 		slider_val -= 1;
-	// 		if (slider_val == 0)
-	// 			slider_val = 100;
-	// 		lv_slider_set_value(slider1, slider_val, LV_ANIM_ON);
-	// 	});
-	// slider_tm.start();
 
 	while (true) {
 		if (SharedBus::i2c.is_ready()) {
@@ -92,14 +64,8 @@ void main()
 			i2cqueue.update();
 			Debug::red_LED2::low();
 		}
-
-		// if (MMDisplay::is_ready()) {
-		// 	Debug::Pin1::high();
-		// 	MMDisplay::clear_ready();
-		// 	lv_timer_handler(); //calls disp.flush_cb -> MMDisplay::flush_to_screen -> spi_driver.transfer_partial_frame
-		// 	Debug::Pin1::low();
-		// }
 		__NOP();
+		// __WFI();
 	}
 }
 
