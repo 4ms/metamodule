@@ -110,19 +110,7 @@ SOURCES = \
 		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
 		  # $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
 
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/core/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/draw/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/flex/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/grid/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/others/snapshot/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/themes/*/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/widgets/*/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/font/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/gpu/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/hal/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/misc/*.c)
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/widgets/*.c)
+SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
 
 		  # $(NE10DIR)/common/NE10_mask_table.c \
 		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
