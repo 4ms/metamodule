@@ -55,7 +55,7 @@ public:
 		lv_obj_set_x(slider1, 30);
 		lv_obj_set_y(slider1, 10);
 		lv_obj_set_size(slider1, 15, 100);
-		lv_slider_set_value(slider1, slider_val, LV_ANIM_ON);
+		lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
 		slider_tm.init(
 			{
 				.TIMx = TIM17,
@@ -70,12 +70,10 @@ public:
 	void update_ui()
 	{
 		//Takes ~4us on A7
-		Debug::Pin2::high();
 		slider_val -= 1;
-		if (slider_val <= 0)
-			slider_val = 100;
-		lv_slider_set_value(slider1, slider_val, LV_ANIM_ON);
-		Debug::Pin2::low();
+		if (slider_val <= 1)
+			slider_val = 99;
+		lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
 
 		// using namespace mdrivlib;
 		// param_queue.read_sync(&params, &metaparams);
