@@ -39,8 +39,8 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr unsigned StreamNum = 3;
 		static constexpr unsigned RequestNum = DMA_REQUEST_SPI4_TX;
 		static constexpr IRQn_Type IRQn = DMA1_Stream3_IRQn;
-		static constexpr uint32_t pri = 7;
-		static constexpr uint32_t subpri = 3;
+		static constexpr uint32_t pri = 1;
+		static constexpr uint32_t subpri = 1;
 		static constexpr Direction dir = Mem2Periph;
 		static constexpr bool circular = false;
 		static constexpr TransferSize transfer_size_mem = HalfWord;
