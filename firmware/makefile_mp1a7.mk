@@ -140,35 +140,35 @@ SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/widgets/*.c)
 		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
 		  # $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
 
-NE10_ASM_OPTIMIZATION = 1
+# NE10_ASM_OPTIMIZATION = 1
 
-ifneq ($(NE10_ASM_OPTIMIZATION),)
-SOURCES += \
-		  $(NE10DIR)/modules/dsp/NE10_fft_float32.neon.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.c \
-		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.c \
+# ifneq ($(NE10_ASM_OPTIMIZATION),)
+# SOURCES += \
+# 		  $(NE10DIR)/modules/dsp/NE10_fft_float32.neon.c \
+# 		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.c \
+# 		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.c \
 
-ASM_SOURCES += \
-		  $(NE10DIR)/modules/dsp/NE10_fft_float32.neon.s \
-		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.s \
-		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.s \
+# ASM_SOURCES += \
+# 		  $(NE10DIR)/modules/dsp/NE10_fft_float32.neon.s \
+# 		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.s \
+# 		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.s \
 
-NE10_CFLAGS = -DNE10_UNROLL_LEVEL=0
-else
-SOURCES += \
-	$(NE10DIR)/modules/dsp/NE10_fft_float32.neonintrinsic.c \
-	$(NE10DIR)/modules/dsp/NE10_fft_int32.neonintrinsic.c \
-	$(NE10DIR)/modules/dsp/NE10_fft_int16.neonintrinsic.c \
-	$(NE10DIR)/modules/dsp/NE10_rfft_float32.neonintrinsic.c \
+# NE10_CFLAGS = -DNE10_UNROLL_LEVEL=0
+# else
+# SOURCES += \
+# 	$(NE10DIR)/modules/dsp/NE10_fft_float32.neonintrinsic.c \
+# 	$(NE10DIR)/modules/dsp/NE10_fft_int32.neonintrinsic.c \
+# 	$(NE10DIR)/modules/dsp/NE10_fft_int16.neonintrinsic.c \
+# 	$(NE10DIR)/modules/dsp/NE10_rfft_float32.neonintrinsic.c \
 
-NE10_CFLAGS = -DNE10_UNROLL_LEVEL=1
-endif
+# NE10_CFLAGS = -DNE10_UNROLL_LEVEL=1
+# endif
 
-ASM_SOURCES += \
-		  $(NE10DIR)/modules/dsp/NE10_fir.neon.s \
-		  $(NE10DIR)/modules/dsp/NE10_iir.neon.s \
-		  $(NE10DIR)/common/NE10header.s \
-		  $(NE10DIR)/common/versionheader.s \
+# ASM_SOURCES += \
+# 		  $(NE10DIR)/modules/dsp/NE10_fir.neon.s \
+# 		  $(NE10DIR)/modules/dsp/NE10_iir.neon.s \
+# 		  $(NE10DIR)/common/NE10header.s \
+# 		  $(NE10DIR)/common/versionheader.s \
 
 INCLUDES = -I. \
 		   -Isrc \
@@ -201,8 +201,8 @@ INCLUDES = -I. \
 EXTRA_CFLAGS = --param l1-cache-size=32 \
 	 		   --param l1-cache-line-size=64 \
 			   --param l2-cache-size=256 \
-				-DNE10_ENABLE_DSP \
-				$(NE10_CFLAGS) \
+				# -DNE10_ENABLE_DSP \
+				# $(NE10_CFLAGS) \
 
 EXTRA_CPPFLAGS = $(LTOFLAG)
 
@@ -215,13 +215,13 @@ ARCH_CFLAGS += -DUSE_HAL_DRIVER \
 			  -DSTM32MP157Cxx \
 			  -DSTM32MP1 \
 			  -DCORE_CA7 \
-              -DENABLE_NE10_FIR_FLOAT_NEON \
-              -DENABLE_NE10_FIR_DECIMATE_FLOAT_NEON \
-              -DENABLE_NE10_FIR_INTERPOLATE_FLOAT_NEON \
-              -DENABLE_NE10_FIR_LATTICE_FLOAT_NEON \
-              -DENABLE_NE10_FIR_SPARSE_FLOAT_NEON \
-              -DENABLE_NE10_IIR_LATTICE_FLOAT_NEON \
 			  -D$(EXTDEF)
+              # -DENABLE_NE10_FIR_FLOAT_NEON \
+              # -DENABLE_NE10_FIR_DECIMATE_FLOAT_NEON \
+              # -DENABLE_NE10_FIR_INTERPOLATE_FLOAT_NEON \
+              # -DENABLE_NE10_FIR_LATTICE_FLOAT_NEON \
+              # -DENABLE_NE10_FIR_SPARSE_FLOAT_NEON \
+              # -DENABLE_NE10_IIR_LATTICE_FLOAT_NEON \
 
 MCU = -mcpu=cortex-a7 \
 	  -mlittle-endian \
