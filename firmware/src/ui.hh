@@ -28,13 +28,16 @@ private:
 
 	UiAudioMailbox &mbox;
 
+	int32_t slider_val;
+	lv_obj_t *slider1;
+
 public:
 	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
 		: param_queue{pc}
 		, mbox{uiaudiomailbox}
 		, pages{patch_list, pp, params, metaparams, uiaudiomailbox}
 	{
-		MMDisplay::init();
+		// MMDisplay::init();
 	}
 
 	void start()
@@ -44,13 +47,20 @@ public:
 		// register_printf_destination(screen);
 		pages.init();
 
+		MMDisplay::init();
 		MMDisplay::start();
 
+		slider1 = lv_slider_create(lv_scr_act());
+		slider_val = 30;
+		lv_obj_set_x(slider1, 30);
+		lv_obj_set_y(slider1, 10);
+		lv_obj_set_size(slider1, 15, 100);
+		lv_slider_set_value(slider1, slider_val, LV_ANIM_ON);
 		slider_tm.init(
 			{
 				.TIMx = TIM17,
 				.period_ns = 1000000000 / 60, // =  60Hz
-				.priority1 = 2,
+				.priority1 = 1,
 				.priority2 = 2,
 			},
 			[&] { update_ui(); });
@@ -59,16 +69,24 @@ public:
 
 	void update_ui()
 	{
-		using namespace mdrivlib;
-		param_queue.read_sync(&params, &metaparams);
-		handle_rotary();
+		//Takes ~4us on A7
+		Debug::Pin2::high();
+		slider_val -= 1;
+		if (slider_val <= 0)
+			slider_val = 100;
+		lv_slider_set_value(slider1, slider_val, LV_ANIM_ON);
+		Debug::Pin2::low();
+
+		// using namespace mdrivlib;
+		// param_queue.read_sync(&params, &metaparams);
+		// handle_rotary();
 
 		// if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
 		// 	return;
 		// }
 
 		// HWSemaphore<ScreenFrameBufLock>::lock();
-		pages.update_current_page();
+		// pages.update_current_page();
 
 		// screen.flush_cache();
 		// HWSemaphore<ScreenFrameBufLock>::unlock();

@@ -73,6 +73,7 @@ void main()
 		// HAL_Delay(500);
 		// Debug::red_LED1::low();
 		if (MMDisplay::is_ready()) {
+			//Takes 584us when slider needs updating [1.64ms of pixels]
 			Debug::Pin1::high();
 			MMDisplay::clear_ready();
 			lv_timer_handler(); //calls disp.flush_cb -> MMDisplay::flush_to_screen -> spi_driver.transfer_partial_frame
