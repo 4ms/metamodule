@@ -55,6 +55,7 @@ class MMDisplay {
 	static inline ScreenFrameWriter _spi_driver;
 	static inline Timekeeper _run_lv_tasks_tmr;
 	static inline volatile bool _ready = false;
+	static inline lv_disp_drv_t *last_used_disp_drv;
 
 public:
 	static void init()
@@ -87,7 +88,6 @@ public:
 		_ready = false;
 	}
 
-	static inline lv_disp_drv_t *last_used_disp_drv;
 	static void end_flush()
 	{
 		lv_disp_flush_ready(last_used_disp_drv);
