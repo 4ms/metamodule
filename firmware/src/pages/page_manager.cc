@@ -53,20 +53,24 @@ void PageManager::focus_page(PageChangeDirection dir)
 			overview_page.focus(dir);
 			break;
 
+		case ArcTestJQ:
+			arc_test_page.focus(dir);
+			break;
+
 			// case ModulesInPatch:
-			// 	// modules_in_patch_page.start();
+			// modules_in_patch_page.focus(dir);
 			// 	break;
 
-			// case JackMap:
-			// 	// jack_map_page.start();
-			// 	break;
+		case JackMap:
+			jack_map_page.focus(dir);
+			break;
 
 			// case PotMap:
-			// 	// knob_map_page.start();
+			// knob_map_page.focus(dir);
 			// 	break;
 
 			// case PatchLayout:
-			// 	// patch_layout_page.focus();
+			// patch_layout_page.focus(dir);
 			// 	break;
 
 		case PatchSelector:
@@ -74,7 +78,7 @@ void PageManager::focus_page(PageChangeDirection dir)
 			break;
 
 			// case DebugInfo:
-			// 	// debug_info_page.start();
+			// debug_info_page.focus(dir);
 			// 	break;
 
 		case BouncingBalls:
@@ -90,20 +94,24 @@ void PageManager::blur_page()
 			overview_page.blur();
 			break;
 
+		case ArcTestJQ:
+			arc_test_page.blur();
+			break;
+
 			// case ModulesInPatch:
-			// 	// modules_in_patch_page.start();
+			// modules_in_patch_page.blur();
 			// 	break;
 
-			// case JackMap:
-			// 	// jack_map_page.start();
-			// 	break;
+		case JackMap:
+			jack_map_page.blur();
+			break;
 
 			// case PotMap:
-			// 	// knob_map_page.start();
+			// knob_map_page.blur();
 			// 	break;
 
 			// case PatchLayout:
-			// 	// patch_layout_page.blur();
+			// patch_layout_page.blur();
 			// 	break;
 
 		case PatchSelector:
@@ -111,7 +119,7 @@ void PageManager::blur_page()
 			break;
 
 			// case DebugInfo:
-			// 	// debug_info_page.start();
+			// debug_info_page.blur();
 			// 	break;
 
 		case BouncingBalls:
@@ -128,13 +136,17 @@ void PageManager::update_current_page()
 			overview_page.update();
 			break;
 
+		case ArcTestJQ:
+			arc_test_page.update();
+			break;
+
 			// case ModulesInPatch:
 			// 	// modules_in_patch_page.draw();
 			// 	break;
 
-			// case JackMap:
-			// 	// jack_map_page.draw();
-			// 	break;
+		case JackMap:
+			jack_map_page.update();
+			break;
 
 			// case PotMap:
 			// 	// knob_map_page.draw();

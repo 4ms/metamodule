@@ -1,7 +1,5 @@
 #pragma once
-#include "lvgl/src/lv_core/lv_disp.h"
 #include "pages/base.hh"
-// #include "pages/fonts.hh"
 // #include "pages/page_widgets.hh"
 // #include "pages/scroll_box.hh"
 
@@ -114,17 +112,32 @@ struct JackMapPage : PageBase {
 	}
 
 	struct {
-		lv_obj_t *screen1;
+		lv_obj_t *screen;
 	} base_ui, *ui;
 
 	bool is_init = false;
 
 	void init()
 	{
-		//
+		//Write codes screen
+		ui->screen = lv_obj_create(nullptr, nullptr);
 
 		is_init = true;
 	}
+
+	void focus(PageChangeDirection dir)
+	{
+		if (!is_init)
+			init();
+
+		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
+							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
+																	   LV_SCR_LOAD_ANIM_FADE_ON;
+		lv_scr_load_anim(ui->screen, animation_style, 500, 0, false);
+	}
+
+	void blur() {}
+
 	void update()
 	{
 		// screen.fill(PatchOverviewPage::bgcolor);
