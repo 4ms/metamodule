@@ -111,6 +111,7 @@ SOURCES = \
 		  # $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
 
 SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
+SOURCES  += $(wildcard src/pages/fonts/*.c)
 
 		  # $(NE10DIR)/common/NE10_mask_table.c \
 		  # $(NE10DIR)/modules/dsp/NE10_fft.c \

@@ -1,6 +1,7 @@
+#include "lvgl/src/lv_font/lv_font.h"
+
 extern "C" {
-#include "mf_rlefont.h"
-extern const struct mf_rlefont_s mf_rlefont_fixed_10x20;
-extern const struct mf_rlefont_s mf_rlefont_fixed_7x14;
-extern const struct mf_rlefont_s mf_rlefont_fixed_5x8;
+LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_12)
+LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_10)
+LV_FONT_DECLARE(lv_font_simsun_12)
 }
