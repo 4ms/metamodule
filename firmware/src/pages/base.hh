@@ -8,6 +8,9 @@
 
 namespace MetaModule
 {
+
+enum class PageChangeDirection { Back, Forward, Jump };
+
 struct PatchInfo {
 	PatchList &patch_list;
 	PatchPlayer &patch_player;

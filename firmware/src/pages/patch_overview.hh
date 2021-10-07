@@ -1,4 +1,5 @@
 #pragma once
+#include "lvgl/src/lv_core/lv_disp.h"
 #include "pages/base.hh"
 // #include "pages/fonts.hh"
 // #include "pages/page_widgets.hh"
@@ -10,34 +11,28 @@ namespace MetaModule
 struct PatchOverviewPage : PageBase {
 	PatchOverviewPage(PatchInfo info)
 		: PageBase{info}
-	{}
+	{
+		ui = &base_ui;
+	}
+
+	struct {
+		lv_obj_t *screen1;
+		lv_obj_t *screen1_lmeter_1;
+	} base_ui, *ui;
+
+	lv_style_t style_screen1_lmeter_1_main;
 
 	bool is_init = false;
 	lv_obj_t *slider1;
 	int32_t slider_val = 30;
 
-	struct {
-		lv_obj_t *screen1;
-		lv_obj_t *screen1_lmeter_1;
-		// lv_obj_t *screen1_slider_1;
-		// lv_obj_t *screen1_slider_2;
-		// lv_obj_t *screen1_img_1;
-	} base_ui, *ui;
-
-	lv_style_t style_screen1_lmeter_1_main;
-
-	static constexpr Color bgcolor = Colors::white;
-	static constexpr Color subheader_fg = Colors::black;
-
 	void init()
 	{
-		ui = &base_ui;
-
 		//Write codes screen1
-		// ui->screen1 = lv_obj_create(nullptr, nullptr);
+		ui->screen1 = lv_obj_create(nullptr, nullptr);
 
 		//Write codes screen1_lmeter_1
-		ui->screen1_lmeter_1 = lv_linemeter_create(lv_scr_act(), nullptr);
+		ui->screen1_lmeter_1 = lv_linemeter_create(ui->screen1, nullptr);
 
 		//Write style LV_LINEMETER_PART_MAIN for screen1_lmeter_1
 		static lv_style_t style_screen1_lmeter_1_main;
@@ -68,7 +63,7 @@ struct PatchOverviewPage : PageBase {
 		lv_linemeter_set_value(ui->screen1_lmeter_1, 75);
 		lv_linemeter_set_angle_offset(ui->screen1_lmeter_1, 0);
 
-		slider1 = lv_slider_create(lv_scr_act(), nullptr);
+		slider1 = lv_slider_create(ui->screen1, nullptr);
 		slider_val = 30;
 		lv_obj_set_x(slider1, 30);
 		lv_obj_set_y(slider1, 10);
@@ -77,11 +72,17 @@ struct PatchOverviewPage : PageBase {
 		is_init = true;
 	}
 
-	void focus()
+	void focus(PageChangeDirection dir)
 	{
 		if (!is_init)
 			init();
+
+		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
+							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
+																	   LV_SCR_LOAD_ANIM_FADE_ON;
+		lv_scr_load_anim(ui->screen1, animation_style, 500, 0, false);
 	}
+
 	void blur() {}
 
 	void update()
@@ -108,9 +109,23 @@ struct PatchOverviewPage : PageBase {
 struct JackMapPage : PageBase {
 	JackMapPage(PatchInfo info)
 		: PageBase{info}
-	{}
+	{
+		ui = &base_ui;
+	}
 
-	void draw()
+	struct {
+		lv_obj_t *screen1;
+	} base_ui, *ui;
+
+	bool is_init = false;
+
+	void init()
+	{
+		//
+
+		is_init = true;
+	}
+	void update()
 	{
 		// screen.fill(PatchOverviewPage::bgcolor);
 		// PageWidgets::setup_header(screen);

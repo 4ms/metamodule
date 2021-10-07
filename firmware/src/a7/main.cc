@@ -71,15 +71,8 @@ void main()
 		// Debug::red_LED1::high();
 		// HAL_Delay(500);
 		// Debug::red_LED1::low();
-		if (MMDisplay::is_ready()) {
-			Debug::Pin1::high();
-			MMDisplay::clear_ready();
-			//v8:
-			//lv_timer_handler();
-			//v7:
-			lv_task_handler();
-			Debug::Pin1::low();
-		}
+
+		ui.update();
 	}
 }
 

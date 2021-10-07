@@ -28,8 +28,7 @@ private:
 
 	UiAudioMailbox &mbox;
 
-	int32_t slider_val;
-	lv_obj_t *slider1;
+	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input};
 
 public:
 	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
@@ -37,12 +36,11 @@ public:
 		, mbox{uiaudiomailbox}
 		, pages{patch_list, pp, params, metaparams, uiaudiomailbox}
 	{
-		MMDisplay::init();
+		MMDisplay::init(metaparams);
 	}
 
 	void start()
 	{
-		// MMDisplay::init();
 		MMDisplay::start();
 
 		params.clear();
@@ -57,16 +55,29 @@ public:
 				.priority1 = 1,
 				.priority2 = 2,
 			},
-			[&] { update_ui(); });
+			[&] { update_ui_task(); });
 		page_update_tm.start();
 	}
 
-	void update_ui()
+	void update()
 	{
-		using namespace mdrivlib;
+		if (MMDisplay::is_ready()) {
+			Debug::Pin1::high();
+			MMDisplay::clear_ready();
+			//v8:
+			//lv_timer_handler();
+			lv_task_handler();
+			Debug::Pin1::low();
+		}
+	}
+
+	void update_ui_task()
+	{
+		Debug::Pin3::high();
 		param_queue.read_sync(&params, &metaparams);
 		handle_rotary();
 		pages.update_current_page();
+		Debug::Pin3::low();
 	}
 
 	void handle_rotary()

@@ -16,7 +16,7 @@ void PageManager::init()
 
 	// jump_to_page(Page::PatchOverview);
 	cur_page = Page::PatchOverview;
-	focus_page();
+	focus_page(PageChangeDirection::Jump);
 	// update_current_page();
 }
 
@@ -26,7 +26,7 @@ void PageManager::next_page()
 	cur_page = static_cast<Page>(static_cast<unsigned>(cur_page) + 1);
 	if (cur_page >= LAST_PAGE)
 		cur_page = Page::PatchOverview;
-	focus_page();
+	focus_page(PageChangeDirection::Forward);
 }
 void PageManager::prev_page()
 {
@@ -35,50 +35,50 @@ void PageManager::prev_page()
 		cur_page = static_cast<Page>(static_cast<unsigned>(LAST_PAGE) - 1);
 	else
 		cur_page = static_cast<Page>(static_cast<unsigned>(cur_page) - 1);
-	focus_page();
+	focus_page(PageChangeDirection::Back);
 }
 
 void PageManager::jump_to_page(Page p)
 {
 	blur_page();
 	cur_page = p;
-	focus_page();
+	focus_page(PageChangeDirection::Jump);
 }
 
-void PageManager::focus_page()
+void PageManager::focus_page(PageChangeDirection dir)
 {
 	switch (cur_page) {
 		default:
 		case PatchOverview:
-			overview_page.focus();
+			overview_page.focus(dir);
 			break;
 
-		case ModulesInPatch:
-			// modules_in_patch_page.start();
-			break;
+			// case ModulesInPatch:
+			// 	// modules_in_patch_page.start();
+			// 	break;
 
-		case JackMap:
-			// jack_map_page.start();
-			break;
+			// case JackMap:
+			// 	// jack_map_page.start();
+			// 	break;
 
-		case PotMap:
-			// knob_map_page.start();
-			break;
+			// case PotMap:
+			// 	// knob_map_page.start();
+			// 	break;
 
-		case PatchLayout:
-			// patch_layout_page.focus();
-			break;
+			// case PatchLayout:
+			// 	// patch_layout_page.focus();
+			// 	break;
 
 		case PatchSelector:
-			// patch_selector_page.focus();
+			patch_selector_page.focus(dir);
 			break;
 
-		case DebugInfo:
-			// debug_info_page.start();
-			break;
+			// case DebugInfo:
+			// 	// debug_info_page.start();
+			// 	break;
 
 		case BouncingBalls:
-			balls_page.focus();
+			balls_page.focus(dir);
 			break;
 	}
 }
@@ -90,29 +90,29 @@ void PageManager::blur_page()
 			overview_page.blur();
 			break;
 
-		case ModulesInPatch:
-			// modules_in_patch_page.start();
-			break;
+			// case ModulesInPatch:
+			// 	// modules_in_patch_page.start();
+			// 	break;
 
-		case JackMap:
-			// jack_map_page.start();
-			break;
+			// case JackMap:
+			// 	// jack_map_page.start();
+			// 	break;
 
-		case PotMap:
-			// knob_map_page.start();
-			break;
+			// case PotMap:
+			// 	// knob_map_page.start();
+			// 	break;
 
-		case PatchLayout:
-			// patch_layout_page.blur();
-			break;
+			// case PatchLayout:
+			// 	// patch_layout_page.blur();
+			// 	break;
 
 		case PatchSelector:
-			// patch_selector_page.blur();
+			patch_selector_page.blur();
 			break;
 
-		case DebugInfo:
-			// debug_info_page.start();
-			break;
+			// case DebugInfo:
+			// 	// debug_info_page.start();
+			// 	break;
 
 		case BouncingBalls:
 			balls_page.blur();
@@ -128,29 +128,29 @@ void PageManager::update_current_page()
 			overview_page.update();
 			break;
 
-		case ModulesInPatch:
-			// modules_in_patch_page.draw();
-			break;
+			// case ModulesInPatch:
+			// 	// modules_in_patch_page.draw();
+			// 	break;
 
-		case JackMap:
-			// jack_map_page.draw();
-			break;
+			// case JackMap:
+			// 	// jack_map_page.draw();
+			// 	break;
 
-		case PotMap:
-			// knob_map_page.draw();
-			break;
+			// case PotMap:
+			// 	// knob_map_page.draw();
+			// 	break;
 
-		case PatchLayout:
-			// patch_layout_page.draw();
-			break;
+			// case PatchLayout:
+			// 	// patch_layout_page.draw();
+			// 	break;
 
 		case PatchSelector:
-			// patch_selector_page.draw();
+			patch_selector_page.update();
 			break;
 
-		case DebugInfo:
-			// debug_info_page.draw();
-			break;
+			// case DebugInfo:
+			// 	// debug_info_page.draw();
+			// 	break;
 
 		case BouncingBalls:
 			balls_page.update();

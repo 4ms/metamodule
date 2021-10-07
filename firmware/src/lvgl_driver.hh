@@ -1,4 +1,5 @@
 #include "lvgl/lvgl.h"
+#include "params.hh"
 #include "screen_writer.hh"
 #include "timekeeper.hh"
 
@@ -13,11 +14,15 @@ class LVGLDriver {
 
 	// v8:
 	// lv_disp_draw_buf_t disp_buf;
-	// v7:
 	lv_disp_buf_t disp_buf;
+	lv_indev_drv_t indev_drv;
+	lv_indev_t *indev;
+
+	//Callbacks
+	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
+	using indev_cb_t = bool(lv_indev_drv_t *indev, lv_indev_data_t *data);
 
 	//Display driver
-	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
 	lv_disp_drv_t disp_drv;
 
 	static void round16(lv_disp_drv_t *disp, lv_area_t *area)
@@ -30,24 +35,26 @@ class LVGLDriver {
 	}
 
 public:
-	LVGLDriver(flush_cb_t flush_cb)
+	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb)
 	{
 		lv_init();
 
 		// lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
 		lv_disp_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
-
 		lv_disp_drv_init(&disp_drv);
-
 		// disp_drv.draw_buf = &disp_buf;
 		disp_drv.buffer = &disp_buf;
-
 		disp_drv.flush_cb = flush_cb;
 		// disp_drv.rounder_cb = round16;
 		disp_drv.hor_res = ScreenWidth;
 		disp_drv.ver_res = ScreenHeight;
-
 		lv_disp_drv_register(&disp_drv);
+
+		lv_indev_drv_init(&indev_drv);
+		indev_drv.type = LV_INDEV_TYPE_ENCODER;
+		indev_drv.read_cb = indev_cb;
+		indev = lv_indev_drv_register(&indev_drv);
+		lv_indev_enable(indev, true);
 	}
 };
 
@@ -56,10 +63,12 @@ class MMDisplay {
 	static inline Timekeeper _run_lv_tasks_tmr;
 	static inline volatile bool _ready = false;
 	static inline lv_disp_drv_t *last_used_disp_drv;
+	static inline MetaParams *m;
 
 public:
-	static void init()
+	static void init(MetaParams &metaparams)
 	{
+		m = &metaparams;
 		_spi_driver.init();
 		_spi_driver.register_partial_frame_cb(end_flush);
 
@@ -100,7 +109,17 @@ public:
 			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p));
 	}
 
-private:
-	static inline LVGLDriver gui{MMDisplay::flush_to_screen};
+	static bool read_input(lv_indev_drv_t *indev, lv_indev_data_t *data)
+	{
+		data->enc_diff = m->rotary.use_motion();
+		if (m->rotary_button.is_pressed())
+			Debug::Pin2::high();
+		else
+			Debug::Pin2::low();
+		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+
+		bool have_more_data_to_send = false;
+		return have_more_data_to_send;
+	}
 };
 } // namespace MetaModule
