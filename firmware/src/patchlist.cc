@@ -19,6 +19,7 @@
 
 PatchList::PatchList()
 	: _patch_addrs{
+		  quaddjembe_mmpatch,
 		  test_inputs_1234_mmpatch,
 		  DjembeReverb_mmpatch,
 		  InfiniteOsc_mmpatch,
@@ -32,7 +33,6 @@ PatchList::PatchList()
 		  dualinfosc1_mmpatch,
 		  mappeddjembe_mmpatch,
 		  dualdjembe_mmpatch,
-		  quaddjembe_mmpatch,
 		  test_inputs_56g1g2_mmpatch,
 		  test_14switchCore_clock_mmpatch,
 		  test_14switchCore_cv_mmpatch,
