@@ -20,7 +20,7 @@ struct ArcTestJQPage : PageBase {
 	void init()
 	{
 		setup_scr_Main_Example(ui);
-		// custom_init(ui);
+		custom_init(ui);
 
 		//Added by DG:
 		// lv_arc_set_adjustable(ui->Main_Example_arc_1, true);
