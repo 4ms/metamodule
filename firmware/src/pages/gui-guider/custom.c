@@ -35,7 +35,6 @@
 
 void custom_init(lv_ui *ui)
 {
-	// lv_obj_set_style_local_bg_color(ui->Main_Example, 0, LV_STATE_DEFAULT, lv_color_hex(0x000000));
 	static lv_style_t style_bg;
 	lv_style_reset(&style_bg);
 	lv_style_set_bg_color(&style_bg, LV_STATE_DEFAULT, lv_color_hex(0x000000));

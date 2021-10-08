@@ -5,7 +5,7 @@
 #include "pages/arc_test_jq.hh"
 #include "pages/patch_overview.hh"
 #include "pages/patch_selector.hh"
-// #include "pages/sketches_test_jq.hh"
+#include "pages/sketches_test_jq.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
@@ -23,7 +23,7 @@ enum Page : unsigned {
 	// PatchLayout,
 	// DebugInfo,
 	ArcTestJQ,
-	// SketchesTest,
+	SketchesTest,
 
 	LAST_PAGE,
 };
@@ -36,7 +36,7 @@ class PageManager {
 	JackMapPage jack_map_page;
 	PatchSelectorPage patch_selector_page;
 	ArcTestJQPage arc_test_page;
-	// SketchesTestPage sketches_test_page;
+	SketchesTestPage sketches_test_page;
 
 	// KnobMapPage knob_map_page;
 	// PatchLayoutPage patch_layout_page;
@@ -57,7 +57,8 @@ public:
 		, overview_page{info}
 		, jack_map_page{info}
 		, patch_selector_page{info}
-		, arc_test_page{info} // , sketches_test_page{info}
+		, arc_test_page{info}
+		, sketches_test_page{info}
 
 		// , knob_map_page{info}
 		// , patch_layout_page{info}

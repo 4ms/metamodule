@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "custom.h"
+#include "events_init.h"
+#include "gui_guider.h"
 #include "lvgl/lvgl.h"
 #include <stdio.h>
-#include "gui_guider.h"
-#include "events_init.h"
-#include "custom.h"
 
-
-void setup_scr_symbol_sketches(lv_ui *ui){
+void setup_scr_symbol_sketches(lv_ui *ui)
+{
 
 	//Write codes symbol_sketches
 	ui->symbol_sketches = lv_obj_create(NULL, NULL);
@@ -102,7 +102,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	//Write style state: LV_STATE_DEFAULT for style_symbol_sketches_slider_1_indic
 	lv_style_set_radius(&style_symbol_sketches_slider_1_indic, LV_STATE_DEFAULT, 50);
 	lv_style_set_bg_color(&style_symbol_sketches_slider_1_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
-	lv_style_set_bg_grad_color(&style_symbol_sketches_slider_1_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
+	lv_style_set_bg_grad_color(
+		&style_symbol_sketches_slider_1_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
 	lv_style_set_bg_grad_dir(&style_symbol_sketches_slider_1_indic, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
 	lv_style_set_bg_opa(&style_symbol_sketches_slider_1_indic, LV_STATE_DEFAULT, 255);
 	lv_obj_add_style(ui->symbol_sketches_slider_1, LV_SLIDER_PART_INDIC, &style_symbol_sketches_slider_1_indic);
@@ -138,8 +139,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_obj_add_style(ui->symbol_sketches_slider_1, LV_SLIDER_PART_KNOB, &style_symbol_sketches_slider_1_knob);
 	lv_obj_set_pos(ui->symbol_sketches_slider_1, 21, 105);
 	lv_obj_set_size(ui->symbol_sketches_slider_1, 11, 117);
-	lv_slider_set_range(ui->symbol_sketches_slider_1,0, 100);
-	lv_slider_set_value(ui->symbol_sketches_slider_1,50,false);
+	lv_slider_set_range(ui->symbol_sketches_slider_1, 0, 100);
+	lv_slider_set_value(ui->symbol_sketches_slider_1, 50, false);
 
 	//Write codes symbol_sketches_bar_1
 	ui->symbol_sketches_bar_1 = lv_bar_create(ui->symbol_sketches, NULL);
@@ -173,9 +174,9 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_obj_add_style(ui->symbol_sketches_bar_1, LV_BAR_PART_INDIC, &style_symbol_sketches_bar_1_indic);
 	lv_obj_set_pos(ui->symbol_sketches_bar_1, 65, 58);
 	lv_obj_set_size(ui->symbol_sketches_bar_1, 90, 20);
-	lv_bar_set_anim_time(ui->symbol_sketches_bar_1,1000);
-	lv_bar_set_value(ui->symbol_sketches_bar_1,50,LV_ANIM_OFF);
-	lv_bar_set_range(ui->symbol_sketches_bar_1,0,100);
+	lv_bar_set_anim_time(ui->symbol_sketches_bar_1, 1000);
+	lv_bar_set_value(ui->symbol_sketches_bar_1, 50, LV_ANIM_OFF);
+	lv_bar_set_range(ui->symbol_sketches_bar_1, 0, 100);
 
 	//Write codes symbol_sketches_bar_2
 	ui->symbol_sketches_bar_2 = lv_bar_create(ui->symbol_sketches, NULL);
@@ -209,9 +210,9 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_obj_add_style(ui->symbol_sketches_bar_2, LV_BAR_PART_INDIC, &style_symbol_sketches_bar_2_indic);
 	lv_obj_set_pos(ui->symbol_sketches_bar_2, 20, 9);
 	lv_obj_set_size(ui->symbol_sketches_bar_2, 18, 82);
-	lv_bar_set_anim_time(ui->symbol_sketches_bar_2,1000);
-	lv_bar_set_value(ui->symbol_sketches_bar_2,50,LV_ANIM_OFF);
-	lv_bar_set_range(ui->symbol_sketches_bar_2,0,100);
+	lv_bar_set_anim_time(ui->symbol_sketches_bar_2, 1000);
+	lv_bar_set_value(ui->symbol_sketches_bar_2, 50, LV_ANIM_OFF);
+	lv_bar_set_range(ui->symbol_sketches_bar_2, 0, 100);
 
 	//Write codes symbol_sketches_slider_2
 	ui->symbol_sketches_slider_2 = lv_slider_create(ui->symbol_sketches, NULL);
@@ -223,7 +224,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	//Write style state: LV_STATE_DEFAULT for style_symbol_sketches_slider_2_indic
 	lv_style_set_radius(&style_symbol_sketches_slider_2_indic, LV_STATE_DEFAULT, 50);
 	lv_style_set_bg_color(&style_symbol_sketches_slider_2_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
-	lv_style_set_bg_grad_color(&style_symbol_sketches_slider_2_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
+	lv_style_set_bg_grad_color(
+		&style_symbol_sketches_slider_2_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
 	lv_style_set_bg_grad_dir(&style_symbol_sketches_slider_2_indic, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
 	lv_style_set_bg_opa(&style_symbol_sketches_slider_2_indic, LV_STATE_DEFAULT, 255);
 	lv_obj_add_style(ui->symbol_sketches_slider_2, LV_SLIDER_PART_INDIC, &style_symbol_sketches_slider_2_indic);
@@ -259,8 +261,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_obj_add_style(ui->symbol_sketches_slider_2, LV_SLIDER_PART_KNOB, &style_symbol_sketches_slider_2_knob);
 	lv_obj_set_pos(ui->symbol_sketches_slider_2, 56, 104);
 	lv_obj_set_size(ui->symbol_sketches_slider_2, 11, 117);
-	lv_slider_set_range(ui->symbol_sketches_slider_2,0, 100);
-	lv_slider_set_value(ui->symbol_sketches_slider_2,50,false);
+	lv_slider_set_range(ui->symbol_sketches_slider_2, 0, 100);
+	lv_slider_set_value(ui->symbol_sketches_slider_2, 50, false);
 
 	//Write codes symbol_sketches_slider_3
 	ui->symbol_sketches_slider_3 = lv_slider_create(ui->symbol_sketches, NULL);
@@ -272,7 +274,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	//Write style state: LV_STATE_DEFAULT for style_symbol_sketches_slider_3_indic
 	lv_style_set_radius(&style_symbol_sketches_slider_3_indic, LV_STATE_DEFAULT, 50);
 	lv_style_set_bg_color(&style_symbol_sketches_slider_3_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
-	lv_style_set_bg_grad_color(&style_symbol_sketches_slider_3_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
+	lv_style_set_bg_grad_color(
+		&style_symbol_sketches_slider_3_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
 	lv_style_set_bg_grad_dir(&style_symbol_sketches_slider_3_indic, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
 	lv_style_set_bg_opa(&style_symbol_sketches_slider_3_indic, LV_STATE_DEFAULT, 255);
 	lv_obj_add_style(ui->symbol_sketches_slider_3, LV_SLIDER_PART_INDIC, &style_symbol_sketches_slider_3_indic);
@@ -308,8 +311,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_obj_add_style(ui->symbol_sketches_slider_3, LV_SLIDER_PART_KNOB, &style_symbol_sketches_slider_3_knob);
 	lv_obj_set_pos(ui->symbol_sketches_slider_3, 279, 107);
 	lv_obj_set_size(ui->symbol_sketches_slider_3, 11, 117);
-	lv_slider_set_range(ui->symbol_sketches_slider_3,0, 100);
-	lv_slider_set_value(ui->symbol_sketches_slider_3,50,false);
+	lv_slider_set_range(ui->symbol_sketches_slider_3, 0, 100);
+	lv_slider_set_value(ui->symbol_sketches_slider_3, 50, false);
 
 	//Write codes symbol_sketches_slider_4
 	ui->symbol_sketches_slider_4 = lv_slider_create(ui->symbol_sketches, NULL);
@@ -321,7 +324,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	//Write style state: LV_STATE_DEFAULT for style_symbol_sketches_slider_4_indic
 	lv_style_set_radius(&style_symbol_sketches_slider_4_indic, LV_STATE_DEFAULT, 50);
 	lv_style_set_bg_color(&style_symbol_sketches_slider_4_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
-	lv_style_set_bg_grad_color(&style_symbol_sketches_slider_4_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
+	lv_style_set_bg_grad_color(
+		&style_symbol_sketches_slider_4_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
 	lv_style_set_bg_grad_dir(&style_symbol_sketches_slider_4_indic, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
 	lv_style_set_bg_opa(&style_symbol_sketches_slider_4_indic, LV_STATE_DEFAULT, 255);
 	lv_obj_add_style(ui->symbol_sketches_slider_4, LV_SLIDER_PART_INDIC, &style_symbol_sketches_slider_4_indic);
@@ -357,8 +361,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_obj_add_style(ui->symbol_sketches_slider_4, LV_SLIDER_PART_KNOB, &style_symbol_sketches_slider_4_knob);
 	lv_obj_set_pos(ui->symbol_sketches_slider_4, 222, 106);
 	lv_obj_set_size(ui->symbol_sketches_slider_4, 16, 117);
-	lv_slider_set_range(ui->symbol_sketches_slider_4,0, 100);
-	lv_slider_set_value(ui->symbol_sketches_slider_4,50,false);
+	lv_slider_set_range(ui->symbol_sketches_slider_4, 0, 100);
+	lv_slider_set_value(ui->symbol_sketches_slider_4, 50, false);
 
 	//Write codes symbol_sketches_slider_5
 	ui->symbol_sketches_slider_5 = lv_slider_create(ui->symbol_sketches, NULL);
@@ -370,7 +374,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	//Write style state: LV_STATE_DEFAULT for style_symbol_sketches_slider_5_indic
 	lv_style_set_radius(&style_symbol_sketches_slider_5_indic, LV_STATE_DEFAULT, 50);
 	lv_style_set_bg_color(&style_symbol_sketches_slider_5_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
-	lv_style_set_bg_grad_color(&style_symbol_sketches_slider_5_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
+	lv_style_set_bg_grad_color(
+		&style_symbol_sketches_slider_5_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
 	lv_style_set_bg_grad_dir(&style_symbol_sketches_slider_5_indic, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
 	lv_style_set_bg_opa(&style_symbol_sketches_slider_5_indic, LV_STATE_DEFAULT, 255);
 	lv_obj_add_style(ui->symbol_sketches_slider_5, LV_SLIDER_PART_INDIC, &style_symbol_sketches_slider_5_indic);
@@ -406,8 +411,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_obj_add_style(ui->symbol_sketches_slider_5, LV_SLIDER_PART_KNOB, &style_symbol_sketches_slider_5_knob);
 	lv_obj_set_pos(ui->symbol_sketches_slider_5, 168, 105);
 	lv_obj_set_size(ui->symbol_sketches_slider_5, 11, 117);
-	lv_slider_set_range(ui->symbol_sketches_slider_5,0, 100);
-	lv_slider_set_value(ui->symbol_sketches_slider_5,50,false);
+	lv_slider_set_range(ui->symbol_sketches_slider_5, 0, 100);
+	lv_slider_set_value(ui->symbol_sketches_slider_5, 50, false);
 
 	//Write codes symbol_sketches_lmeter_2
 	ui->symbol_sketches_lmeter_2 = lv_linemeter_create(ui->symbol_sketches, NULL);
@@ -429,8 +434,10 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_style_set_line_color(&style_symbol_sketches_lmeter_2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
 	lv_style_set_line_width(&style_symbol_sketches_lmeter_2_main, LV_STATE_DEFAULT, 4);
 	lv_style_set_line_opa(&style_symbol_sketches_lmeter_2_main, LV_STATE_DEFAULT, 255);
-	lv_style_set_scale_grad_color(&style_symbol_sketches_lmeter_2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-	lv_style_set_scale_end_color(&style_symbol_sketches_lmeter_2_main, LV_STATE_DEFAULT, lv_color_make(0x8c, 0x8c, 0x8c));
+	lv_style_set_scale_grad_color(
+		&style_symbol_sketches_lmeter_2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
+	lv_style_set_scale_end_color(
+		&style_symbol_sketches_lmeter_2_main, LV_STATE_DEFAULT, lv_color_make(0x8c, 0x8c, 0x8c));
 	lv_style_set_scale_width(&style_symbol_sketches_lmeter_2_main, LV_STATE_DEFAULT, 10);
 	lv_style_set_scale_end_line_width(&style_symbol_sketches_lmeter_2_main, LV_STATE_DEFAULT, 4);
 	lv_obj_add_style(ui->symbol_sketches_lmeter_2, LV_LINEMETER_PART_MAIN, &style_symbol_sketches_lmeter_2_main);
@@ -451,7 +458,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	//Write style state: LV_STATE_DEFAULT for style_symbol_sketches_slider_6_indic
 	lv_style_set_radius(&style_symbol_sketches_slider_6_indic, LV_STATE_DEFAULT, 50);
 	lv_style_set_bg_color(&style_symbol_sketches_slider_6_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
-	lv_style_set_bg_grad_color(&style_symbol_sketches_slider_6_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
+	lv_style_set_bg_grad_color(
+		&style_symbol_sketches_slider_6_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
 	lv_style_set_bg_grad_dir(&style_symbol_sketches_slider_6_indic, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
 	lv_style_set_bg_opa(&style_symbol_sketches_slider_6_indic, LV_STATE_DEFAULT, 255);
 	lv_obj_add_style(ui->symbol_sketches_slider_6, LV_SLIDER_PART_INDIC, &style_symbol_sketches_slider_6_indic);
@@ -487,8 +495,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_obj_add_style(ui->symbol_sketches_slider_6, LV_SLIDER_PART_KNOB, &style_symbol_sketches_slider_6_knob);
 	lv_obj_set_pos(ui->symbol_sketches_slider_6, 120, 104);
 	lv_obj_set_size(ui->symbol_sketches_slider_6, 11, 117);
-	lv_slider_set_range(ui->symbol_sketches_slider_6,0, 100);
-	lv_slider_set_value(ui->symbol_sketches_slider_6,50,false);
+	lv_slider_set_range(ui->symbol_sketches_slider_6, 0, 100);
+	lv_slider_set_value(ui->symbol_sketches_slider_6, 50, false);
 
 	//Write codes symbol_sketches_slider_7
 	ui->symbol_sketches_slider_7 = lv_slider_create(ui->symbol_sketches, NULL);
@@ -500,7 +508,8 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	//Write style state: LV_STATE_DEFAULT for style_symbol_sketches_slider_7_indic
 	lv_style_set_radius(&style_symbol_sketches_slider_7_indic, LV_STATE_DEFAULT, 50);
 	lv_style_set_bg_color(&style_symbol_sketches_slider_7_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
-	lv_style_set_bg_grad_color(&style_symbol_sketches_slider_7_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
+	lv_style_set_bg_grad_color(
+		&style_symbol_sketches_slider_7_indic, LV_STATE_DEFAULT, lv_color_make(0x4b, 0xaf, 0xfa));
 	lv_style_set_bg_grad_dir(&style_symbol_sketches_slider_7_indic, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
 	lv_style_set_bg_opa(&style_symbol_sketches_slider_7_indic, LV_STATE_DEFAULT, 255);
 	lv_obj_add_style(ui->symbol_sketches_slider_7, LV_SLIDER_PART_INDIC, &style_symbol_sketches_slider_7_indic);
@@ -536,6 +545,6 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_obj_add_style(ui->symbol_sketches_slider_7, LV_SLIDER_PART_KNOB, &style_symbol_sketches_slider_7_knob);
 	lv_obj_set_pos(ui->symbol_sketches_slider_7, 87, 106);
 	lv_obj_set_size(ui->symbol_sketches_slider_7, 17, 117);
-	lv_slider_set_range(ui->symbol_sketches_slider_7,0, 100);
-	lv_slider_set_value(ui->symbol_sketches_slider_7,50,false);
+	lv_slider_set_range(ui->symbol_sketches_slider_7, 0, 100);
+	lv_slider_set_value(ui->symbol_sketches_slider_7, 50, false);
 }
