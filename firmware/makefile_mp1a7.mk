@@ -33,9 +33,9 @@ LTOFLAG = -flto=auto
 
 include makefile_opts.mk
 
-MFFONTDIR = $(LIBDIR)/mcufont/fonts
-MFDIR = $(LIBDIR)/mcufont/decoder
-include $(LIBDIR)/mcufont/decoder/mcufont.mk
+# MFFONTDIR = $(LIBDIR)/mcufont/fonts
+# MFDIR = $(LIBDIR)/mcufont/decoder
+# include $(LIBDIR)/mcufont/decoder/mcufont.mk
 
 NE10DIR = $(LIBDIR)/ne10/ne10
 
@@ -112,6 +112,7 @@ SOURCES = \
 
 SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
 SOURCES  += $(wildcard src/pages/fonts/*.c)
+SOURCES  += $(wildcard src/pages/gui-guider/*.c)
 
 		  # $(NE10DIR)/common/NE10_mask_table.c \
 		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
@@ -179,6 +180,7 @@ INCLUDES = -I. \
 		   -I$(SHARED)/util \
 		   -I$(SHARED)/patch \
 		   -I$(LIBDIR)/lvgl \
+		   -I$(LIBDIR)/lvgl/lvgl/src/lv_font \
 		   # -I$(LIBDIR)/printf \
 		   # -I$(MFINC) \
 		   # -I$(MFFONTDIR) \

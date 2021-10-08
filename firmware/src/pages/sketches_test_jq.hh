@@ -7,11 +7,11 @@ namespace MetaModule
 {
 // Todo: this should display User-set names for jacks:
 // Instead of "Drum#3:Out", should be "Kick Out"
-struct ArcTestJQPage : PageBase {
+struct SketchesTestPage : PageBase {
 	lv_ui base_ui, *ui;
 	bool is_init = false;
 
-	ArcTestJQPage(PatchInfo info)
+	SketchesTestPage(PatchInfo info)
 		: PageBase{info}
 	{
 		ui = &base_ui;
@@ -19,16 +19,16 @@ struct ArcTestJQPage : PageBase {
 
 	void init()
 	{
-		setup_scr_Main_Example(ui);
-		// custom_init(ui);
+		setup_scr_symbol_sketches(ui);
+		custom_init(ui);
 
-		//Added by DG:
-		// lv_arc_set_adjustable(ui->Main_Example_arc_1, true);
-		// lv_arc_set_adjustable(ui->Main_Example_arc_2, true);
-		// lv_arc_set_adjustable(ui->Main_Example_arc_3, true);
-		// lv_arc_set_adjustable(ui->Main_Example_arc_4, true);
-		// lv_arc_set_adjustable(ui->Main_Example_arc_5, true);
-		// lv_arc_set_adjustable(ui->Main_Example_arc_6, true);
+		////Added by DG:
+		//lv_arc_set_adjustable(ui->Main_Example_arc_1, true);
+		//lv_arc_set_adjustable(ui->Main_Example_arc_2, true);
+		//lv_arc_set_adjustable(ui->Main_Example_arc_3, true);
+		//lv_arc_set_adjustable(ui->Main_Example_arc_4, true);
+		//lv_arc_set_adjustable(ui->Main_Example_arc_5, true);
+		//lv_arc_set_adjustable(ui->Main_Example_arc_6, true);
 
 		is_init = true;
 	}

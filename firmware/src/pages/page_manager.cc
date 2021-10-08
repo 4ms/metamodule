@@ -57,6 +57,10 @@ void PageManager::focus_page(PageChangeDirection dir)
 			arc_test_page.focus(dir);
 			break;
 
+			// case SketchesTest:
+			// 	sketches_test_page.focus(dir);
+			// 	break;
+
 			// case ModulesInPatch:
 			// modules_in_patch_page.focus(dir);
 			// 	break;
@@ -97,6 +101,10 @@ void PageManager::blur_page()
 		case ArcTestJQ:
 			arc_test_page.blur();
 			break;
+
+			// case SketchesTest:
+			// 	sketches_test_page.blur();
+			// 	break;
 
 			// case ModulesInPatch:
 			// modules_in_patch_page.blur();
@@ -139,6 +147,10 @@ void PageManager::update_current_page()
 		case ArcTestJQ:
 			arc_test_page.update();
 			break;
+
+			// case SketchesTest:
+			// 	sketches_test_page.update();
+			// 	break;
 
 			// case ModulesInPatch:
 			// 	// modules_in_patch_page.draw();
