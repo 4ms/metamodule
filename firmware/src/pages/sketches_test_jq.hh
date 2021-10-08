@@ -5,59 +5,18 @@
 
 namespace MetaModule
 {
-// Todo: this should display User-set names for jacks:
-// Instead of "Drum#3:Out", should be "Kick Out"
 struct SketchesTestPage : PageBase {
-	lv_ui base_ui, *ui;
-	bool is_init = false;
-
 	SketchesTestPage(PatchInfo info)
 		: PageBase{info}
-	{
-		ui = &base_ui;
-	}
+	{}
 
-	void init()
+	void init() override
 	{
 		setup_scr_symbol_sketches(ui);
-		static lv_style_t style_bg;
-		lv_style_reset(&style_bg);
-		lv_style_set_bg_color(&style_bg, LV_STATE_DEFAULT, lv_color_hex(0x000000));
-		lv_obj_add_style(ui->symbol_sketches, LV_OBJ_PART_MAIN, &style_bg);
-		// custom_init(ui);
-
-		////Added by DG:
-		//lv_arc_set_adjustable(ui->Main_Example_arc_1, true);
-		//lv_arc_set_adjustable(ui->Main_Example_arc_2, true);
-		//lv_arc_set_adjustable(ui->Main_Example_arc_3, true);
-		//lv_arc_set_adjustable(ui->Main_Example_arc_4, true);
-		//lv_arc_set_adjustable(ui->Main_Example_arc_5, true);
-		//lv_arc_set_adjustable(ui->Main_Example_arc_6, true);
-
-		is_init = true;
+		screen = ui->symbol_sketches;
+		//init_bg();
 	}
 
-	void focus(PageChangeDirection dir)
-	{
-		if (!is_init)
-			init();
-
-		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
-							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
-																	   LV_SCR_LOAD_ANIM_FADE_ON;
-		lv_scr_load_anim(ui->symbol_sketches, animation_style, 500, 0, false);
-	}
-
-	void blur() {}
-
-	void update()
-	{
-		// lv_arc_set_value(ui->Main_Example_arc_1, params.knobs[0] * 100.f);
-		// lv_arc_set_value(ui->Main_Example_arc_2, params.knobs[1] * 100.f);
-		// lv_arc_set_value(ui->Main_Example_arc_3, params.knobs[2] * 100.f);
-		// lv_arc_set_value(ui->Main_Example_arc_4, params.knobs[3] * 100.f);
-		// lv_arc_set_value(ui->Main_Example_arc_5, params.knobs[4] * 100.f);
-		// lv_arc_set_value(ui->Main_Example_arc_6, params.knobs[5] * 100.f);
-	}
+	void update() override {}
 };
 } // namespace MetaModule

@@ -28,8 +28,8 @@ struct PageBase {
 	MetaParams &metaparams;
 	UiAudioMailbox &mbox;
 
-	lv_ui base_ui{};
-	lv_ui *ui = &base_ui;
+	static inline lv_ui base_ui{};
+	static inline lv_ui *ui = &base_ui;
 	lv_obj_t *screen;
 	lv_style_t style_bg;
 
@@ -62,7 +62,7 @@ struct PageBase {
 		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
 							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
 																	   LV_SCR_LOAD_ANIM_FADE_ON;
-		lv_scr_load_anim(ui->Main_Example, animation_style, 500, 0, false);
+		lv_scr_load_anim(screen, animation_style, 500, 0, false);
 	}
 
 	virtual void blur() {}

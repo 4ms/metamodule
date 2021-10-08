@@ -8,13 +8,13 @@ namespace MetaModule
 struct ArcTestJQPage : PageBase {
 	ArcTestJQPage(PatchInfo info)
 		: PageBase{info}
-	{
-		screen = ui->Main_Example;
-	}
+	{}
 
 	void init() override
 	{
+
 		setup_scr_Main_Example(ui);
+		screen = ui->Main_Example;
 		// init_bg();
 
 		//Added by DG:

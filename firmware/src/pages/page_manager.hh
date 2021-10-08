@@ -5,10 +5,11 @@
 #include "pages/arc_test_jq.hh"
 // #include "pages/patch_overview.hh"
 // #include "pages/patch_selector.hh"
-// #include "pages/sketches_test_jq.hh"
+#include "pages/sketches_test_jq.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
+#include <variant>
 // #include "screen_buffer.hh"
 
 namespace MetaModule
@@ -23,20 +24,31 @@ enum Page : unsigned {
 	// PatchLayout,
 	// DebugInfo,
 	ArcTestJQ,
-	// SketchesTest,
+	SketchesTest,
 
 	LAST_PAGE,
 };
 
 class PageManager {
+	// using PageVariants = std::variant< //
+	// 	ArcTestJQPage,				   //
+	// 	SketchesTestPage			   //
+	// 	>;
+
 	PatchInfo info;
+
+	std::array<std::unique_ptr<PageBase>, LAST_PAGE> pages = {
+		std::make_unique<ArcTestJQPage>(info),
+		std::make_unique<SketchesTestPage>(info),
+	};
 
 	// BouncingBallsPage balls_page;
 	// PatchOverviewPage overview_page;
 	// JackMapPage jack_map_page;
 	// PatchSelectorPage patch_selector_page;
-	ArcTestJQPage arc_test_page;
+	// ArcTestJQPage arc_test_page;
 	// SketchesTestPage sketches_test_page;
+	// std::unique_ptr<PageBase> pages;
 
 	// KnobMapPage knob_map_page;
 	// PatchLayoutPage patch_layout_page;
@@ -56,7 +68,7 @@ public:
 		// , overview_page{info}
 		// , jack_map_page{info}
 		// , patch_selector_page{info}
-		, arc_test_page{info} // , sketches_test_page{info}
+		// , arc_test_page{info}  , sketches_test_page{info}
 
 		// , knob_map_page{info}
 		// , patch_layout_page{info}
