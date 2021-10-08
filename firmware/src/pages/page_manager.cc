@@ -15,7 +15,7 @@ void PageManager::init()
 	mbox.loading_new_patch = false;
 
 	// jump_to_page(Page::PatchOverview);
-	cur_page = Page::PatchOverview;
+	// cur_page = Page::PatchOverview;
 	focus_page(PageChangeDirection::Jump);
 	// update_current_page();
 }
@@ -25,7 +25,7 @@ void PageManager::next_page()
 	blur_page();
 	cur_page = static_cast<Page>(static_cast<unsigned>(cur_page) + 1);
 	if (cur_page >= LAST_PAGE)
-		cur_page = Page::PatchOverview;
+		cur_page = static_cast<Page>(0);
 	focus_page(PageChangeDirection::Forward);
 }
 void PageManager::prev_page()
@@ -49,25 +49,25 @@ void PageManager::focus_page(PageChangeDirection dir)
 {
 	switch (cur_page) {
 		default:
-		case PatchOverview:
-			overview_page.focus(dir);
-			break;
+			// case PatchOverview:
+			// 	overview_page.focus(dir);
+			// 	break;
 
 		case ArcTestJQ:
 			arc_test_page.focus(dir);
 			break;
 
-		case SketchesTest:
-			sketches_test_page.focus(dir);
-			break;
+			// case SketchesTest:
+			// 	sketches_test_page.focus(dir);
+			// 	break;
 
 			// case ModulesInPatch:
 			// modules_in_patch_page.focus(dir);
 			// 	break;
 
-		case JackMap:
-			jack_map_page.focus(dir);
-			break;
+			// case JackMap:
+			// 	jack_map_page.focus(dir);
+			// 	break;
 
 			// case PotMap:
 			// knob_map_page.focus(dir);
@@ -77,42 +77,42 @@ void PageManager::focus_page(PageChangeDirection dir)
 			// patch_layout_page.focus(dir);
 			// 	break;
 
-		case PatchSelector:
-			patch_selector_page.focus(dir);
-			break;
+			// case PatchSelector:
+			// 	patch_selector_page.focus(dir);
+			// 	break;
 
 			// case DebugInfo:
 			// debug_info_page.focus(dir);
 			// 	break;
 
-		case BouncingBalls:
-			balls_page.focus(dir);
-			break;
+			// case BouncingBalls:
+			// 	balls_page.focus(dir);
+			// 	break;
 	}
 }
 void PageManager::blur_page()
 {
 	switch (cur_page) {
 		default:
-		case PatchOverview:
-			overview_page.blur();
-			break;
+			// case PatchOverview:
+			// 	overview_page.blur();
+			// 	break;
 
 		case ArcTestJQ:
 			arc_test_page.blur();
 			break;
 
-		case SketchesTest:
-			sketches_test_page.blur();
-			break;
+			// case SketchesTest:
+			// 	sketches_test_page.blur();
+			// 	break;
 
 			// case ModulesInPatch:
 			// modules_in_patch_page.blur();
 			// 	break;
 
-		case JackMap:
-			jack_map_page.blur();
-			break;
+			// case JackMap:
+			// 	jack_map_page.blur();
+			// 	break;
 
 			// case PotMap:
 			// knob_map_page.blur();
@@ -122,17 +122,17 @@ void PageManager::blur_page()
 			// patch_layout_page.blur();
 			// 	break;
 
-		case PatchSelector:
-			patch_selector_page.blur();
-			break;
+			// case PatchSelector:
+			// 	patch_selector_page.blur();
+			// 	break;
 
 			// case DebugInfo:
 			// debug_info_page.blur();
 			// 	break;
 
-		case BouncingBalls:
-			balls_page.blur();
-			break;
+			// case BouncingBalls:
+			// 	balls_page.blur();
+			// 	break;
 	}
 }
 
@@ -140,25 +140,25 @@ void PageManager::update_current_page()
 {
 	switch (cur_page) {
 		default:
-		case PatchOverview:
-			overview_page.update();
-			break;
+			// case PatchOverview:
+			// 	overview_page.update();
+			// 	break;
 
 		case ArcTestJQ:
 			arc_test_page.update();
 			break;
 
-		case SketchesTest:
-			sketches_test_page.update();
-			break;
+			// case SketchesTest:
+			// 	sketches_test_page.update();
+			// 	break;
 
 			// case ModulesInPatch:
 			// 	// modules_in_patch_page.draw();
 			// 	break;
 
-		case JackMap:
-			jack_map_page.update();
-			break;
+			// case JackMap:
+			// 	jack_map_page.update();
+			// 	break;
 
 			// case PotMap:
 			// 	// knob_map_page.draw();
@@ -168,17 +168,17 @@ void PageManager::update_current_page()
 			// 	// patch_layout_page.draw();
 			// 	break;
 
-		case PatchSelector:
-			patch_selector_page.update();
-			break;
+			// case PatchSelector:
+			// 	patch_selector_page.update();
+			// 	break;
 
 			// case DebugInfo:
 			// 	// debug_info_page.draw();
 			// 	break;
 
-		case BouncingBalls:
-			balls_page.update();
-			break;
+			// case BouncingBalls:
+			// 	balls_page.update();
+			// 	break;
 	}
 }
 

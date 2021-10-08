@@ -1,11 +1,11 @@
 #pragma once
-#include "pages/bouncing_balls.hh"
+// #include "pages/bouncing_balls.hh"
 // #include "pages/debuginfo.hh"
 // #include "pages/page_widgets.hh"
 #include "pages/arc_test_jq.hh"
-#include "pages/patch_overview.hh"
-#include "pages/patch_selector.hh"
-#include "pages/sketches_test_jq.hh"
+// #include "pages/patch_overview.hh"
+// #include "pages/patch_selector.hh"
+// #include "pages/sketches_test_jq.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
@@ -14,16 +14,16 @@
 namespace MetaModule
 {
 enum Page : unsigned {
-	PatchOverview = 0,
-	PatchSelector,
-	BouncingBalls,
+	// PatchOverview = 0,
+	// PatchSelector,
+	// BouncingBalls,
 	// ModulesInPatch,
-	JackMap,
+	// JackMap,
 	// PotMap,
 	// PatchLayout,
 	// DebugInfo,
 	ArcTestJQ,
-	SketchesTest,
+	// SketchesTest,
 
 	LAST_PAGE,
 };
@@ -31,12 +31,12 @@ enum Page : unsigned {
 class PageManager {
 	PatchInfo info;
 
-	BouncingBallsPage balls_page;
-	PatchOverviewPage overview_page;
-	JackMapPage jack_map_page;
-	PatchSelectorPage patch_selector_page;
+	// BouncingBallsPage balls_page;
+	// PatchOverviewPage overview_page;
+	// JackMapPage jack_map_page;
+	// PatchSelectorPage patch_selector_page;
 	ArcTestJQPage arc_test_page;
-	SketchesTestPage sketches_test_page;
+	// SketchesTestPage sketches_test_page;
 
 	// KnobMapPage knob_map_page;
 	// PatchLayoutPage patch_layout_page;
@@ -52,13 +52,11 @@ public:
 	Page cur_page;
 
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, UiAudioMailbox &mbox)
-		: info{pl, pp, p, m, mbox}
-		, balls_page{info}
-		, overview_page{info}
-		, jack_map_page{info}
-		, patch_selector_page{info}
-		, arc_test_page{info}
-		, sketches_test_page{info}
+		: info{pl, pp, p, m, mbox} // , balls_page{info}
+		// , overview_page{info}
+		// , jack_map_page{info}
+		// , patch_selector_page{info}
+		, arc_test_page{info} // , sketches_test_page{info}
 
 		// , knob_map_page{info}
 		// , patch_layout_page{info}
@@ -68,7 +66,7 @@ public:
 		, patch_list{pl}
 		, player{pp}
 		, mbox{mbox}
-		, cur_page{Page::PatchOverview}
+		, cur_page{Page::ArcTestJQ}
 	{}
 
 	void init();

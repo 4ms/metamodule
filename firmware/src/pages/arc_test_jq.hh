@@ -5,22 +5,17 @@
 
 namespace MetaModule
 {
-// Todo: this should display User-set names for jacks:
-// Instead of "Drum#3:Out", should be "Kick Out"
 struct ArcTestJQPage : PageBase {
-	lv_ui base_ui, *ui;
-	bool is_init = false;
-
 	ArcTestJQPage(PatchInfo info)
 		: PageBase{info}
 	{
-		ui = &base_ui;
+		screen = ui->Main_Example;
 	}
 
-	void init()
+	void init() override
 	{
 		setup_scr_Main_Example(ui);
-		custom_init(ui);
+		// init_bg();
 
 		//Added by DG:
 		lv_arc_set_adjustable(ui->Main_Example_arc_1, true);
@@ -29,24 +24,9 @@ struct ArcTestJQPage : PageBase {
 		lv_arc_set_adjustable(ui->Main_Example_arc_4, true);
 		lv_arc_set_adjustable(ui->Main_Example_arc_5, true);
 		lv_arc_set_adjustable(ui->Main_Example_arc_6, true);
-
-		is_init = true;
 	}
 
-	void focus(PageChangeDirection dir)
-	{
-		if (!is_init)
-			init();
-
-		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
-							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
-																	   LV_SCR_LOAD_ANIM_FADE_ON;
-		lv_scr_load_anim(ui->Main_Example, animation_style, 500, 0, false);
-	}
-
-	void blur() {}
-
-	void update()
+	void update() override
 	{
 		// 2 3 6
 		// 1 5 4
