@@ -2,12 +2,12 @@
  * Copyright 2021 NXP
  * SPDX-License-Identifier: MIT
  */
-/*
-#include "custom.h"
-#include "events_init.h"
-#include "gui_guider.h"
+
 #include "lvgl/lvgl.h"
 #include <stdio.h>
+#include "gui_guider.h"
+#include "events_init.h"
+#include "custom.h"
 
 
 void setup_scr_symbol_sketches(lv_ui *ui){
@@ -349,7 +349,7 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_style_reset(&style_symbol_sketches_slider_4_knob);
 
 	//Write style state: LV_STATE_DEFAULT for style_symbol_sketches_slider_4_knob
-	lv_style_set_radius(&style_symbol_sketches_slider_4_knob, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_symbol_sketches_slider_4_knob, LV_STATE_DEFAULT, 15);
 	lv_style_set_bg_color(&style_symbol_sketches_slider_4_knob, LV_STATE_DEFAULT, lv_color_make(0xf0, 0xf0, 0xf0));
 	lv_style_set_bg_grad_color(&style_symbol_sketches_slider_4_knob, LV_STATE_DEFAULT, lv_color_make(0xf0, 0xf0, 0xf0));
 	lv_style_set_bg_grad_dir(&style_symbol_sketches_slider_4_knob, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -539,4 +539,3 @@ void setup_scr_symbol_sketches(lv_ui *ui){
 	lv_slider_set_range(ui->symbol_sketches_slider_7,0, 100);
 	lv_slider_set_value(ui->symbol_sketches_slider_7,50,false);
 }
-*/

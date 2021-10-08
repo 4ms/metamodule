@@ -9,10 +9,11 @@
 extern "C" {
 #endif
 
-#include "guider_fonts.h"
 #include "lvgl/lvgl.h"
+#include "guider_fonts.h"
 
-typedef struct {
+typedef struct
+{
 	lv_obj_t *Main_Example;
 	lv_obj_t *Main_Example_btn_1;
 	lv_obj_t *Main_Example_btn_1_label;
@@ -33,20 +34,22 @@ typedef struct {
 	lv_obj_t *Main_Example_arc_5;
 	lv_obj_t *Main_Example_arc_6;
 	lv_obj_t *Main_Example_label_1;
-	// lv_obj_t *symbol_sketches;
-	// lv_obj_t *symbol_sketches_sw_1;
-	// lv_obj_t *symbol_sketches_arc_1;
-	// lv_obj_t *symbol_sketches_slider_1;
-	// lv_obj_t *symbol_sketches_bar_1;
-	// lv_obj_t *symbol_sketches_bar_2;
-	// lv_obj_t *symbol_sketches_slider_2;
-	// lv_obj_t *symbol_sketches_slider_3;
-	// lv_obj_t *symbol_sketches_slider_4;
-	// lv_obj_t *symbol_sketches_slider_5;
-	// lv_obj_t *symbol_sketches_lmeter_2;
-	// lv_obj_t *symbol_sketches_slider_6;
-	// lv_obj_t *symbol_sketches_slider_7;
-} lv_ui;
+	lv_obj_t *Main_Example_label_2;
+	lv_obj_t *Main_Example_label_3;
+	lv_obj_t *symbol_sketches;
+	lv_obj_t *symbol_sketches_sw_1;
+	lv_obj_t *symbol_sketches_arc_1;
+	lv_obj_t *symbol_sketches_slider_1;
+	lv_obj_t *symbol_sketches_bar_1;
+	lv_obj_t *symbol_sketches_bar_2;
+	lv_obj_t *symbol_sketches_slider_2;
+	lv_obj_t *symbol_sketches_slider_3;
+	lv_obj_t *symbol_sketches_slider_4;
+	lv_obj_t *symbol_sketches_slider_5;
+	lv_obj_t *symbol_sketches_lmeter_2;
+	lv_obj_t *symbol_sketches_slider_6;
+	lv_obj_t *symbol_sketches_slider_7;
+}lv_ui;
 
 void setup_ui(lv_ui *ui);
 extern lv_ui guider_ui;

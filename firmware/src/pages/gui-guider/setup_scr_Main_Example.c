@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "custom.h"
-#include "events_init.h"
-#include "gui_guider.h"
 #include "lvgl/lvgl.h"
 #include <stdio.h>
+#include "gui_guider.h"
+#include "events_init.h"
+#include "custom.h"
 
-void setup_scr_Main_Example(lv_ui *ui)
-{
+
+void setup_scr_Main_Example(lv_ui *ui){
+
 	//Write codes Main_Example
 	ui->Main_Example = lv_obj_create(NULL, NULL);
 
@@ -37,10 +38,8 @@ void setup_scr_Main_Example(lv_ui *ui)
 	lv_obj_set_size(ui->Main_Example_btn_1, 80, 30);
 	ui->Main_Example_btn_1_label = lv_label_create(ui->Main_Example_btn_1, NULL);
 	lv_label_set_text(ui->Main_Example_btn_1_label, "PARAMETER 3");
-	lv_obj_set_style_local_text_color(
-		ui->Main_Example_btn_1_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
-	lv_obj_set_style_local_text_font(
-		ui->Main_Example_btn_1_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
+	lv_obj_set_style_local_text_color(ui->Main_Example_btn_1_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
+	lv_obj_set_style_local_text_font(ui->Main_Example_btn_1_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
 
 	//Write codes Main_Example_btn_2
 	ui->Main_Example_btn_2 = lv_btn_create(ui->Main_Example, NULL);
@@ -65,10 +64,8 @@ void setup_scr_Main_Example(lv_ui *ui)
 	lv_obj_set_size(ui->Main_Example_btn_2, 80, 30);
 	ui->Main_Example_btn_2_label = lv_label_create(ui->Main_Example_btn_2, NULL);
 	lv_label_set_text(ui->Main_Example_btn_2_label, "LFO SPEED");
-	lv_obj_set_style_local_text_color(
-		ui->Main_Example_btn_2_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
-	lv_obj_set_style_local_text_font(
-		ui->Main_Example_btn_2_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
+	lv_obj_set_style_local_text_color(ui->Main_Example_btn_2_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
+	lv_obj_set_style_local_text_font(ui->Main_Example_btn_2_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
 
 	//Write codes Main_Example_btn_3
 	ui->Main_Example_btn_3 = lv_btn_create(ui->Main_Example, NULL);
@@ -93,10 +90,8 @@ void setup_scr_Main_Example(lv_ui *ui)
 	lv_obj_set_size(ui->Main_Example_btn_3, 77, 30);
 	ui->Main_Example_btn_3_label = lv_label_create(ui->Main_Example_btn_3, NULL);
 	lv_label_set_text(ui->Main_Example_btn_3_label, "PARAMETER 6");
-	lv_obj_set_style_local_text_color(
-		ui->Main_Example_btn_3_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
-	lv_obj_set_style_local_text_font(
-		ui->Main_Example_btn_3_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
+	lv_obj_set_style_local_text_color(ui->Main_Example_btn_3_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
+	lv_obj_set_style_local_text_font(ui->Main_Example_btn_3_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
 
 	//Write codes Main_Example_btn_4
 	ui->Main_Example_btn_4 = lv_btn_create(ui->Main_Example, NULL);
@@ -121,10 +116,8 @@ void setup_scr_Main_Example(lv_ui *ui)
 	lv_obj_set_size(ui->Main_Example_btn_4, 80, 30);
 	ui->Main_Example_btn_4_label = lv_label_create(ui->Main_Example_btn_4, NULL);
 	lv_label_set_text(ui->Main_Example_btn_4_label, "PARAMETER 1");
-	lv_obj_set_style_local_text_color(
-		ui->Main_Example_btn_4_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
-	lv_obj_set_style_local_text_font(
-		ui->Main_Example_btn_4_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
+	lv_obj_set_style_local_text_color(ui->Main_Example_btn_4_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
+	lv_obj_set_style_local_text_font(ui->Main_Example_btn_4_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
 
 	//Write codes Main_Example_btn_5
 	ui->Main_Example_btn_5 = lv_btn_create(ui->Main_Example, NULL);
@@ -149,10 +142,8 @@ void setup_scr_Main_Example(lv_ui *ui)
 	lv_obj_set_size(ui->Main_Example_btn_5, 80, 30);
 	ui->Main_Example_btn_5_label = lv_label_create(ui->Main_Example_btn_5, NULL);
 	lv_label_set_text(ui->Main_Example_btn_5_label, "PARAMETER 5");
-	lv_obj_set_style_local_text_color(
-		ui->Main_Example_btn_5_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
-	lv_obj_set_style_local_text_font(
-		ui->Main_Example_btn_5_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
+	lv_obj_set_style_local_text_color(ui->Main_Example_btn_5_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
+	lv_obj_set_style_local_text_font(ui->Main_Example_btn_5_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
 
 	//Write codes Main_Example_btn_6
 	ui->Main_Example_btn_6 = lv_btn_create(ui->Main_Example, NULL);
@@ -177,10 +168,8 @@ void setup_scr_Main_Example(lv_ui *ui)
 	lv_obj_set_size(ui->Main_Example_btn_6, 80, 30);
 	ui->Main_Example_btn_6_label = lv_label_create(ui->Main_Example_btn_6, NULL);
 	lv_label_set_text(ui->Main_Example_btn_6_label, "PARAMETER 4");
-	lv_obj_set_style_local_text_color(
-		ui->Main_Example_btn_6_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
-	lv_obj_set_style_local_text_font(
-		ui->Main_Example_btn_6_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
+	lv_obj_set_style_local_text_color(ui->Main_Example_btn_6_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x3c, 0x3c));
+	lv_obj_set_style_local_text_font(ui->Main_Example_btn_6_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_12);
 
 	//Write codes Main_Example_arc_1
 	ui->Main_Example_arc_1 = lv_arc_create(ui->Main_Example, NULL);
@@ -416,6 +405,60 @@ void setup_scr_Main_Example(lv_ui *ui)
 	lv_style_set_pad_top(&style_Main_Example_label_1_main, LV_STATE_DEFAULT, 0);
 	lv_style_set_pad_bottom(&style_Main_Example_label_1_main, LV_STATE_DEFAULT, 0);
 	lv_obj_add_style(ui->Main_Example_label_1, LV_LABEL_PART_MAIN, &style_Main_Example_label_1_main);
-	lv_obj_set_pos(ui->Main_Example_label_1, 20, 142);
-	lv_obj_set_size(ui->Main_Example_label_1, 280, 0);
+	lv_obj_set_pos(ui->Main_Example_label_1, 15, 142);
+	lv_obj_set_size(ui->Main_Example_label_1, 290, 0);
+
+	//Write codes Main_Example_label_2
+	ui->Main_Example_label_2 = lv_label_create(ui->Main_Example, NULL);
+	lv_label_set_text(ui->Main_Example_label_2, "HEADERS");
+	lv_label_set_long_mode(ui->Main_Example_label_2, LV_LABEL_LONG_BREAK);
+	lv_label_set_align(ui->Main_Example_label_2, LV_LABEL_ALIGN_CENTER);
+
+	//Write style LV_LABEL_PART_MAIN for Main_Example_label_2
+	static lv_style_t style_Main_Example_label_2_main;
+	lv_style_reset(&style_Main_Example_label_2_main);
+
+	//Write style state: LV_STATE_DEFAULT for style_Main_Example_label_2_main
+	lv_style_set_radius(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, 30);
+	lv_style_set_bg_color(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, lv_color_make(0x78, 0x78, 0x78));
+	lv_style_set_bg_grad_color(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, lv_color_make(0x78, 0x78, 0x78));
+	lv_style_set_bg_grad_dir(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
+	lv_style_set_bg_opa(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, 0);
+	lv_style_set_text_color(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
+	lv_style_set_text_font(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_13);
+	lv_style_set_text_letter_space(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, 3);
+	lv_style_set_pad_left(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, 0);
+	lv_style_set_pad_right(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, 0);
+	lv_style_set_pad_top(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, 0);
+	lv_style_set_pad_bottom(&style_Main_Example_label_2_main, LV_STATE_DEFAULT, 0);
+	lv_obj_add_style(ui->Main_Example_label_2, LV_LABEL_PART_MAIN, &style_Main_Example_label_2_main);
+	lv_obj_set_pos(ui->Main_Example_label_2, 10, 142);
+	lv_obj_set_size(ui->Main_Example_label_2, 100, 0);
+
+	//Write codes Main_Example_label_3
+	ui->Main_Example_label_3 = lv_label_create(ui->Main_Example, NULL);
+	lv_label_set_text(ui->Main_Example_label_3, "HEADERS");
+	lv_label_set_long_mode(ui->Main_Example_label_3, LV_LABEL_LONG_BREAK);
+	lv_label_set_align(ui->Main_Example_label_3, LV_LABEL_ALIGN_CENTER);
+
+	//Write style LV_LABEL_PART_MAIN for Main_Example_label_3
+	static lv_style_t style_Main_Example_label_3_main;
+	lv_style_reset(&style_Main_Example_label_3_main);
+
+	//Write style state: LV_STATE_DEFAULT for style_Main_Example_label_3_main
+	lv_style_set_radius(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, 30);
+	lv_style_set_bg_color(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, lv_color_make(0x78, 0x78, 0x78));
+	lv_style_set_bg_grad_color(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, lv_color_make(0x78, 0x78, 0x78));
+	lv_style_set_bg_grad_dir(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
+	lv_style_set_bg_opa(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, 0);
+	lv_style_set_text_color(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
+	lv_style_set_text_font(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, &lv_font_MuseoSansCondensed_700_13);
+	lv_style_set_text_letter_space(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, 3);
+	lv_style_set_pad_left(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, 0);
+	lv_style_set_pad_right(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, 0);
+	lv_style_set_pad_top(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, 0);
+	lv_style_set_pad_bottom(&style_Main_Example_label_3_main, LV_STATE_DEFAULT, 0);
+	lv_obj_add_style(ui->Main_Example_label_3, LV_LABEL_PART_MAIN, &style_Main_Example_label_3_main);
+	lv_obj_set_pos(ui->Main_Example_label_3, 210, 142);
+	lv_obj_set_size(ui->Main_Example_label_3, 100, 0);
 }
