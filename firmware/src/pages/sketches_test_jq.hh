@@ -8,14 +8,13 @@ namespace MetaModule
 struct SketchesTestPage : PageBase {
 	SketchesTestPage(PatchInfo info)
 		: PageBase{info}
-	{}
-
-	void init() override
 	{
 		setup_scr_symbol_sketches(ui);
 		screen = ui->symbol_sketches;
-		//init_bg();
+		init_bg();
 	}
+
+	void init() override {}
 
 	void update() override {}
 };
