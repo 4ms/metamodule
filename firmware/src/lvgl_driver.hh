@@ -1,4 +1,5 @@
 #include "lvgl/lvgl.h"
+#include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
 #include "screen_writer.hh"
 #include "timekeeper.hh"
@@ -49,6 +50,9 @@ public:
 		disp_drv.hor_res = ScreenWidth;
 		disp_drv.ver_res = ScreenHeight;
 		lv_disp_drv_register(&disp_drv);
+		// auto disp =
+		// lv_disp_set_bg_color(disp, lv_color_make(0x28, 0x28, 0x28));
+		// lv_disp_set_bg_opa(disp, LV_OPA_50);
 
 		lv_indev_drv_init(&indev_drv);
 		indev_drv.type = LV_INDEV_TYPE_ENCODER;
@@ -112,10 +116,6 @@ public:
 	static bool read_input(lv_indev_drv_t *indev, lv_indev_data_t *data)
 	{
 		data->enc_diff = m->rotary.use_motion();
-		if (m->rotary_button.is_pressed())
-			Debug::Pin2::high();
-		else
-			Debug::Pin2::low();
 		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
 
 		bool have_more_data_to_send = false;

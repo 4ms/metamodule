@@ -453,7 +453,7 @@ struct ArcTestJQPage : PageBase {
 		lv_style_set_bg_color(&style_screen_arc_4_bg, LV_STATE_DEFAULT, lv_color_make(0x28, 0x28, 0x28));
 		lv_style_set_bg_grad_color(&style_screen_arc_4_bg, LV_STATE_DEFAULT, lv_color_make(0x28, 0x28, 0x28));
 		lv_style_set_bg_grad_dir(&style_screen_arc_4_bg, LV_STATE_DEFAULT, LV_GRAD_DIR_HOR);
-		lv_style_set_bg_opa(&style_screen_arc_4_bg, LV_STATE_DEFAULT, 255);
+		lv_style_set_bg_opa(&style_screen_arc_4_bg, LV_STATE_DEFAULT, 0);
 		lv_style_set_border_width(&style_screen_arc_4_bg, LV_STATE_DEFAULT, 0);
 		lv_style_set_line_color(&style_screen_arc_4_bg, LV_STATE_DEFAULT, lv_color_make(0x78, 0x78, 0x78));
 		lv_style_set_line_width(&style_screen_arc_4_bg, LV_STATE_DEFAULT, 16);
@@ -470,7 +470,7 @@ struct ArcTestJQPage : PageBase {
 		lv_obj_set_pos(ui->screen_arc_4, 230, 75);
 		lv_obj_set_size(ui->screen_arc_4, 60, 60);
 		lv_arc_set_bg_angles(ui->screen_arc_4, 120, 60);
-		lv_arc_set_angles(ui->screen_arc_4, 120, 10);
+		lv_arc_set_angles(ui->screen_arc_4, 120, 120); //120, 10 breaks
 		lv_arc_set_rotation(ui->screen_arc_4, 0);
 		lv_obj_set_style_local_pad_top(ui->screen_arc_4, LV_ARC_PART_BG, LV_STATE_DEFAULT, 0);
 		lv_obj_set_style_local_pad_bottom(ui->screen_arc_4, LV_ARC_PART_BG, LV_STATE_DEFAULT, 0);

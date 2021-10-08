@@ -26,4 +26,5 @@
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/codec_PCM3168.o: OPTFLAG = -O0
 
 $(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
+# $(BUILDDIR)/lib/lvgl/lvgl/src/lv_widgets/lv_arc.o: OPTFLAG = -O0
 #-----------------------------------
