@@ -59,14 +59,6 @@ public:
 		indev_drv.read_cb = indev_cb;
 		indev = lv_indev_drv_register(&indev_drv);
 		lv_indev_enable(indev, true);
-
-		LV_THEME_DEFAULT_INIT(LV_THEME_DEFAULT_COLOR_PRIMARY,
-							  LV_THEME_DEFAULT_COLOR_SECONDARY,
-							  LV_THEME_MATERIAL_FLAG_LIGHT,
-							  LV_THEME_DEFAULT_FONT_SMALL,
-							  LV_THEME_DEFAULT_FONT_NORMAL,
-							  LV_THEME_DEFAULT_FONT_SUBTITLE,
-							  LV_THEME_DEFAULT_FONT_TITLE);
 	}
 };
 
