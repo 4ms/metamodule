@@ -49,6 +49,7 @@ struct PageBase {
 	{
 		lv_style_reset(&style_bg);
 		lv_style_set_bg_color(&style_bg, LV_STATE_DEFAULT, lv_color_hex(0x000000));
+		lv_obj_set_size(screen, LV_HOR_RES_MAX, LV_VER_RES_MAX);
 		lv_obj_add_style(screen, LV_OBJ_PART_MAIN, &style_bg);
 	}
 
