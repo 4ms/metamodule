@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "custom.h"
+#include "events_init.h"
+#include "gui_guider.h"
 #include "lvgl/lvgl.h"
 #include <stdio.h>
-#include "gui_guider.h"
-#include "events_init.h"
-#include "custom.h"
 
-
-void setup_scr_Knob_view(lv_ui *ui){
+void setup_scr_Knob_view(lv_ui *ui)
+{
 
 	//Write codes Knob_view
 	ui->Knob_view = lv_obj_create(NULL, NULL);
