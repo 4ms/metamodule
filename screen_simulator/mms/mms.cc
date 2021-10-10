@@ -20,25 +20,20 @@ struct Simulator {
 	MetaModule::PatchPlayer patch_player;
 	MetaModule::UiAudioMailbox mbox;
 
+	static inline MetaModule::LVGLDriver gui{MetaModule::MMDisplay::flush_to_screen, MetaModule::MMDisplay::read_input};
+
 	Simulator()
 		: pages{patch_list, patch_player, params, metaparams, mbox}
 	{
-		MetaModule::MMDisplay::init();
-	}
-
-	uint16_t get_pixel(uint16_t x, uint16_t y)
-	{
-		return MetaModule::MMDisplay::framebuffer[x][y].full;
+		MetaModule::MMDisplay::init(metaparams);
 	}
 
 	bool init()
 	{
-		params.clear();
-		metaparams.clear();
-		pages.init();
-
 		MetaModule::MMDisplay::start();
 
+		params.clear();
+		metaparams.clear();
 		pages.init();
 
 		return true;
@@ -46,6 +41,7 @@ struct Simulator {
 
 	void update_ui()
 	{
+		//Todo: enable this:
 		//param_queue.read_sync(&params, &metaparams);
 		handle_rotary();
 		pages.update_current_page();
@@ -58,6 +54,11 @@ struct Simulator {
 			pages.prev_page();
 		if (rotary_pushed_turned > 0)
 			pages.next_page();
+	}
+
+	uint16_t get_pixel(uint16_t x, uint16_t y)
+	{
+		return MetaModule::MMDisplay::framebuffer[x][y].full;
 	}
 };
 
