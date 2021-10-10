@@ -11,7 +11,7 @@ struct SketchesTestPage : PageBase {
 	{
 		setup_scr_symbol_sketches(ui);
 		screen = ui->symbol_sketches;
-		// init_bg();
+		init_bg();
 	}
 
 	void init() override {}
