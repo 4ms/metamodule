@@ -58,6 +58,7 @@ void Controls::update_params()
 				cur_metaparams->rotary_button.register_falling_edge();
 			}
 		}
+		cur_metaparams->rotary_button.set_state(rotary_button.is_pressed());
 
 		// Rotary turning
 		int new_rotary_motion = rotary.read();
@@ -102,11 +103,12 @@ void Controls::start()
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() { start_param_block<0>(); });
-	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() { start_param_block<1>(); });
+
+	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();

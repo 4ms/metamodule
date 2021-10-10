@@ -93,6 +93,8 @@ public:
 
 		else if (other.got_rising_edge_)
 			got_rising_edge_ = true;
+
+		is_high_ = other.is_high_;
 	}
 
 	// Update the toggler with more recent events AND clear the other toggler

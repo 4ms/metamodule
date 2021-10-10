@@ -52,8 +52,8 @@ void main()
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 
-	// Enable ISR for LedBufFrameLock:
-	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
+	// Needed for LED refresh
+	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	// // Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
@@ -68,15 +68,10 @@ void main()
 	while (true) {
 		// HAL_Delay(500);
 		// Debug::red_LED1::high();
-
 		// HAL_Delay(500);
 		// Debug::red_LED1::low();
-		if (MMDisplay::is_ready()) {
-			Debug::Pin1::high();
-			MMDisplay::clear_ready();
-			lv_timer_handler(); //calls disp.flush_cb -> MMDisplay::flush_to_screen -> spi_driver.transfer_partial_frame
-			Debug::Pin1::low();
-		}
+
+		ui.update();
 	}
 }
 

@@ -20,50 +20,56 @@ private:
 
 	UiAudioMailbox &mbox;
 
+	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input};
+
 public:
 	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
 		: param_queue{pc}
 		, mbox{uiaudiomailbox}
 		, pages{patch_list, pp, params, metaparams, uiaudiomailbox}
 	{
-		MMDisplay::init();
+		MMDisplay::init(metaparams);
 	}
 
 	void start()
 	{
+		MMDisplay::start();
+
 		params.clear();
 		metaparams.clear();
 		// register_printf_destination(screen);
 		pages.init();
 
-		MMDisplay::start();
-
-		ui_update_tmr.init(
+		page_update_tm.init(
 			{
 				.TIMx = TIM17,
 				.period_ns = 1000000000 / 60, // =  60Hz
-				.priority1 = 2,
+				.priority1 = 1,
 				.priority2 = 2,
 			},
-			[&] { update_ui(); });
-		ui_update_tmr.start();
+			[&] { update_ui_task(); });
+		page_update_tm.start();
 	}
 
-	void update_ui()
+	void update()
 	{
-		using namespace mdrivlib;
+		if (MMDisplay::is_ready()) {
+			Debug::Pin1::high();
+			MMDisplay::clear_ready();
+			//v8:
+			//lv_timer_handler();
+			lv_task_handler();
+			Debug::Pin1::low();
+		}
+	}
+
+	void update_ui_task()
+	{
+		Debug::Pin3::high();
 		param_queue.read_sync(&params, &metaparams);
 		handle_rotary();
-
-		// if (HWSemaphore<ScreenFrameWriteLock>::is_locked()) {
-		// 	return;
-		// }
-
-		// HWSemaphore<ScreenFrameBufLock>::lock();
 		pages.update_current_page();
-
-		// screen.flush_cache();
-		// HWSemaphore<ScreenFrameBufLock>::unlock();
+		Debug::Pin3::low();
 	}
 
 	void handle_rotary()
@@ -76,6 +82,6 @@ public:
 	}
 
 private:
-	Timekeeper ui_update_tmr;
+	Timekeeper page_update_tm;
 };
 } // namespace MetaModule
