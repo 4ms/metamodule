@@ -1,6 +1,7 @@
 fn main() {
     println!("cargo:rerun-if-changed=../firmware/lib/lvgl/lv_conf.h");
     println!("cargo:rerun-if-changed=../firmware/src/pages/");
+    println!("cargo:rerun-if-changed=mms/lvgl_driver.hh");
     println!("cargo:rerun-if-changed=mms/mms.cc");
 
     use glob::glob;
