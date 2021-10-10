@@ -1,18 +1,10 @@
 #pragma once
-#include "conf/hsem_conf.hh"
 #include "debug.hh"
-#include "drivers/hsem.hh"
-#include "drivers/i2c.hh"
-#include "drivers/interrupt.hh"
-#include "drivers/memory_transfer.hh"
 #include "drivers/timekeeper.hh"
-#include "hsem_handler.hh"
 #include "lvgl_driver.hh"
 #include "pages/page_manager.hh"
 #include "params.hh"
 #include "patchlist.hh"
-#include "sys/alloc_buffer.hh"
-#include "sys/mem_usage.hh"
 
 namespace MetaModule
 {
@@ -46,7 +38,7 @@ public:
 
 		MMDisplay::start();
 
-		slider_tm.init(
+		ui_update_tmr.init(
 			{
 				.TIMx = TIM17,
 				.period_ns = 1000000000 / 60, // =  60Hz
@@ -54,7 +46,7 @@ public:
 				.priority2 = 2,
 			},
 			[&] { update_ui(); });
-		slider_tm.start();
+		ui_update_tmr.start();
 	}
 
 	void update_ui()
@@ -84,6 +76,6 @@ public:
 	}
 
 private:
-	Timekeeper slider_tm;
+	Timekeeper ui_update_tmr;
 };
 } // namespace MetaModule

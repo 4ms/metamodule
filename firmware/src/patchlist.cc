@@ -17,6 +17,9 @@
 #include "quaddjembe.hh"
 #include "simplequaddjembe.hh"
 
+namespace MetaModule
+{
+
 PatchList::PatchList()
 	: _patch_addrs{
 		  DjembeReverb_mmpatch,
@@ -69,3 +72,4 @@ PatchList::PatchList()
 		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
 	}
 }
+} // namespace MetaModule

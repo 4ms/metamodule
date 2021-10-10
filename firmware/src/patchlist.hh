@@ -1,6 +1,9 @@
 #pragma once
 #include "patch/patch.hh"
 
+namespace MetaModule
+{
+
 struct PatchList {
 	//Todo: Deduce this directly from size of constructor
 	static constexpr int32_t NumPatches = 43;
@@ -50,3 +53,4 @@ private:
 	std::array<void *, NumPatches> _patch_addrs;
 	int _cur_patch_index = 0;
 };
+} // namespace MetaModule

@@ -1,4 +1,7 @@
+extern crate chrono;
 extern crate libc;
+extern crate timer;
+
 use minifb::{Key, Window, WindowOptions};
 
 const WIDTH: usize = 320;
@@ -8,13 +11,15 @@ const HEIGHT: usize = 240;
 extern "C" {
     fn init_screen() -> bool;
     fn get_pixel(x: u16, y: u16) -> u16;
-    fn refresh() -> ();
+    fn update_ui() -> ();
     fn rotary_back() -> ();
     fn rotary_fwd() -> ();
     fn rotary_push_back() -> ();
     fn rotary_push_fwd() -> ();
     fn rotary_press() -> ();
     fn rotary_release() -> ();
+    fn lv_timer_handler() -> ();
+    fn fake_HAL_IncTick() -> ();
 }
 
 fn get_ext_color(x: usize, y: usize) -> u32 {
@@ -81,6 +86,24 @@ fn main() {
         },
     ];
 
+    //TODO:
+    //setup a periodic timer to call lv_timer_handler() every 3ms or so
+    //setup a periodic timer to call fake_HAL_IncTick() with every ms
+
+    let lv_timer = timer::Timer::new();
+    let _guard = lv_timer.schedule_repeating(chrono::Duration::milliseconds(3), move || {
+        unsafe {
+            lv_timer_handler();
+        };
+    });
+
+    let inc_timer = timer::Timer::new();
+    let _guard = inc_timer.schedule_repeating(chrono::Duration::milliseconds(1), move || {
+        unsafe {
+            fake_HAL_IncTick();
+        };
+    });
+
     //33Hz refresh rate (matches hardware)
     window.limit_update_rate(Some(std::time::Duration::from_micros(33300)));
 
@@ -96,7 +119,7 @@ fn main() {
             }
         }
 
-        unsafe { refresh() };
+        unsafe { update_ui() };
 
         let mut x: usize = 0;
         let mut y: usize = 0;

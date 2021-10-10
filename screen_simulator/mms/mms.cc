@@ -1,4 +1,3 @@
-#include "stubs/drivers/arch.hh"
 #include "stubs/sys/alloc_buffer.hh"
 #include <cstdint>
 
@@ -6,41 +5,50 @@
 #define _DMA2D_TRANSFER_HH
 #include "stubs/drivers/dma2d_transfer.hh"
 
+#include "lvgl_driver.hh"
 #include "pages/page_manager.hh"
+#include "params.hh"
+#include "patchlist.hh"
 
 struct Simulator {
-	PatchList patch_list;
-	MetaModule::PatchPlayer patch_player;
+	MetaModule::PageManager pages;
+	MetaModule::ParamQueue param_queue;
+
 	MetaModule::Params params;
 	MetaModule::MetaParams metaparams;
-	ScreenConfT::FrameBufferT framebuf;
-	ScreenFrameBuffer screen{framebuf};
-	MetaModule::PageManager pages;
+	MetaModule::PatchList patch_list;
+	MetaModule::PatchPlayer patch_player;
 	MetaModule::UiAudioMailbox mbox;
 
 	Simulator()
-		: pages{patch_list, patch_player, params, metaparams, mbox, screen}
+		: pages{patch_list, patch_player, params, metaparams, mbox}
 	{
-		params.clear();
-		metaparams.clear();
-		screen.init();
-		register_printf_destination(screen);
+		MetaModule::MMDisplay::init();
+	}
+
+	uint16_t get_pixel(uint16_t x, uint16_t y)
+	{
+		return MetaModule::MMDisplay::framebuffer[x][y].full;
 	}
 
 	bool init()
 	{
-		patch_list.set_cur_patch_index(0);
-		bool ok = patch_player.load_patch(patch_list.cur_patch());
-		if (!ok)
-			return false;
+		params.clear();
+		metaparams.clear();
 		pages.init();
+
+		MetaModule::MMDisplay::start();
+
+		pages.init();
+
 		return true;
 	}
 
-	void refresh()
+	void update_ui()
 	{
+		//param_queue.read_sync(&params, &metaparams);
 		handle_rotary();
-		pages.display_current_page();
+		pages.update_current_page();
 	}
 
 	void handle_rotary()
@@ -101,26 +109,17 @@ extern "C" void init_screen()
 	sim.init();
 }
 
-extern "C" void refresh()
+extern "C" void update_ui()
 {
-	sim.refresh();
+	sim.update_ui();
 }
 
 extern "C" uint16_t get_pixel(uint16_t x, uint16_t y)
 {
-	return (sim.framebuf[x + y * ScreenConfT::viewWidth]);
+	return sim.get_pixel(x, y);
 }
 
 size_t get_heap_size()
 {
 	return 0;
 }
-
-// void change_patch(uint32_t new_patch_index)
-// {
-// 	uint32_t cur_patch_index = sim.patch_list.cur_patch_index();
-// 	// uint32_t new_patch_index = (cur_patch_index == 0) ? (sim.patch_list.NumPatches - 1) : cur_patch_index - 1;
-// 	sim.patch_player.unload_patch();
-// 	sim.patch_list.set_cur_patch_index(new_patch_index);
-// 	sim.patch_player.load_patch(sim.patch_list.cur_patch());
-// }

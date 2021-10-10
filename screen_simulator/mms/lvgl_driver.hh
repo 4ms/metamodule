@@ -1,9 +1,10 @@
 #include "lvgl/lvgl.h"
-#include "screen_writer.hh"
-#include "timekeeper.hh"
+#include <cstddef>
+#include <cstdint>
 
 namespace MetaModule
 {
+
 template<size_t ScreenWidth, size_t ScreenHeight>
 class LVGLDriver {
 	//Buffer
@@ -31,34 +32,21 @@ public:
 	}
 };
 
-class LVGLInputDriver {
-	lv_indev_drv_t indev;
-};
-
 class MMDisplay {
-	static inline ScreenFrameWriter _spi_driver;
-	static inline Timekeeper _run_lv_tasks_tmr;
+	static constexpr size_t ScreenWidth = 320;
+	static constexpr size_t ScreenHeight = 240;
+	//static inline Timekeeper _run_lv_tasks_tmr;
 	static inline volatile bool _ready = false;
 
 public:
 	static void init()
 	{
-		_spi_driver.init();
-		_spi_driver.register_partial_frame_cb(end_flush);
-
-		_run_lv_tasks_tmr.init(
-			{
-				.TIMx = TIM5,
-				.period_ns = 1000000000 / 333, // =  333Hz = 3ms update lvgl tasks rate
-				.priority1 = 2,
-				.priority2 = 2,
-			},
-			[] { _ready = true; });
+		//setup timer to run every few ms that sets ready=true
 	}
 
 	static void start()
 	{
-		_run_lv_tasks_tmr.start();
+		// _run_lv_tasks_tmr.start();
 	}
 
 	static bool is_ready()
@@ -71,21 +59,19 @@ public:
 		_ready = false;
 	}
 
-	static inline lv_disp_drv_t *last_used_disp_drv;
-	static void end_flush()
-	{
-		lv_disp_flush_ready(last_used_disp_drv);
-	}
-
+	static inline lv_color_t framebuffer[ScreenWidth][ScreenHeight];
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 	{
-		last_used_disp_drv = disp_drv;
-		_spi_driver.transfer_partial_frame(
-			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p));
+		for (int y = area->y1; y <= area->y2; y++) {
+			for (int x = area->x1; x <= area->x2; x++) {
+				framebuffer[y][x] = *color_p;
+				color_p++;
+			}
+		}
+		lv_disp_flush_ready(disp_drv);
 	}
 
 private:
-	static inline LVGLDriver<MMScreenBufferConf::viewWidth, MMScreenBufferConf::viewHeight> gui{
-		MMDisplay::flush_to_screen};
+	static inline LVGLDriver<ScreenWidth, ScreenHeight> gui{MMDisplay::flush_to_screen};
 };
 } // namespace MetaModule

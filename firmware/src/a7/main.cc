@@ -61,7 +61,6 @@ void main()
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
-
 	param_queue.clear();
 	ui.start();
 	audio.start();

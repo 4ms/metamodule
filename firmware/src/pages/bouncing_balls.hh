@@ -30,14 +30,14 @@ struct BouncingBallsPage : PageBase {
 	void update()
 	{
 		// screen.fill(Colors::white);
-		int i = 0;
-		for (auto &ball : balls) {
-			ball.update();
-			auto pos = ball.get_pos();
-			// lv_draw_rect({pos.x, pos.y},
-			// 	screen.blend64FillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565(), 0.5f);
-			i++;
-		}
+		// int i = 0;
+		// for (auto &ball : balls) {
+		// ball.update();
+		// auto pos = ball.get_pos();
+		// lv_draw_rect({pos.x, pos.y},
+		// 	screen.blend64FillCircle(pos.x, pos.y, ball.get_radius(), ball_colors[i].Rgb565(), 0.5f);
+		// i++;
+		// }
 	}
 };
 } // namespace MetaModule

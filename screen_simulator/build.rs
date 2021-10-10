@@ -1,47 +1,42 @@
 fn main() {
+    println!("cargo:rerun-if-changed=../firmware/lib/lvgl/lv_conf.h");
     println!("cargo:rerun-if-changed=../firmware/src/pages/");
     println!("cargo:rerun-if-changed=mms/mms.cc");
 
+    use glob::glob;
+
     //
-    // Build mcufont library
+    // Build lvgl library
     //
-    let mut mcufont_src: Vec<String> = Vec::new();
-    mcufont_src.push(String::from("../firmware/lib/mcufont/decoder/mf_font.c"));
-    mcufont_src.push(String::from("../firmware/lib/mcufont/decoder/mf_kerning.c"));
-    mcufont_src.push(String::from("../firmware/lib/mcufont/decoder/mf_bwfont.c"));
-    mcufont_src.push(String::from("../firmware/lib/mcufont/decoder/mf_rlefont.c"));
-    mcufont_src.push(String::from(
-        "../firmware/lib/mcufont/decoder/mf_scaledfont.c",
-    ));
-    mcufont_src.push(String::from(
-        "../firmware/lib/mcufont/decoder/mf_wordwrap.c",
-    ));
-    mcufont_src.push(String::from(
-        "../firmware/lib/mcufont/decoder/mf_encoding.c",
-    ));
-    mcufont_src.push(String::from("../firmware/lib/mcufont/decoder/mf_justify.c"));
+    let mut lvgl_src: Vec<String> = Vec::new();
+    for entry in glob("../firmware/lib/lvgl/lvgl/src/**/*.c").expect("Bad glob pattern") {
+        if let Ok(path) = entry {
+            let f_name = String::from(path.to_string_lossy());
+            lvgl_src.push(format!("{}", f_name));
+        }
+    }
+    lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
     let mut builder = cc::Build::new();
     let build = builder
         .cpp(false)
-        .files(mcufont_src.iter())
-        .include("../firmware/lib/mcufont/decoder")
-        .include("../firmware/lib/mcufont/fonts")
-        .flag("-Wno-unused-parameter");
-    build.compile("mcufont");
+        .files(lvgl_src.iter())
+        .include("mms/stubs")
+        .include("../firmware/lib/lvgl")
+        .include("../firmware/lib/lvgl/lvgl")
+        .flag("-Wno-deprecated-anon-enum-enum-conversion");
+    build.compile("lvgl");
 
     //
     // Build mms app
     //
     let mut src: Vec<String> = Vec::new();
     src.push(String::from("mms/mms.cc"));
-    src.push(String::from("../firmware/lib/printf/printf.c"));
-    src.push(String::from("../firmware/src/print.cc"));
+    src.push(String::from("mms/stubs/hal_tick.c"));
     src.push(String::from("../firmware/src/patchlist.cc"));
     src.push(String::from("../firmware/src/pages/page_manager.cc"));
     src.push(String::from("../shared/util/math_tables.cc"));
     src.push(String::from("../shared/axoloti-wrapper/axoloti_math.cpp"));
 
-    use glob::glob;
     for entry in glob("../shared/CoreModules/*.cpp").expect("Bad glob pattern") {
         if let Ok(path) = entry {
             let f_name = String::from(path.to_string_lossy());
@@ -49,7 +44,7 @@ fn main() {
         }
     }
 
-    println!("cargo:rerun-rustc-link-lib=mcufont");
+    println!("cargo:rerun-rustc-link-lib=lvgl");
     let mut builder = cc::Build::new();
     let build = builder
         .cpp(true)
@@ -62,8 +57,7 @@ fn main() {
         .include("../shared/util")
         .include("../shared/patch")
         .include("../firmware/src")
-        .include("../firmware/lib/mcufont/decoder")
-        .include("../firmware/lib/mcufont/fonts")
+        .include("../firmware/lib/lvgl")
         .flag("-DSIMULATOR")
         .flag("-std=c++2a")
         .flag("-Wno-unused-parameter");
