@@ -111,8 +111,8 @@ typedef struct
 	lv_obj_t *Knob_view3_label_7;
 }lv_ui;
 
-void setup_ui(lv_ui *ui);
-extern lv_ui guider_ui;
+// void setup_ui(lv_ui *ui);
+// extern lv_ui guider_ui;
 void setup_scr_Main_Example(lv_ui *ui);
 void setup_scr_symbol_sketches(lv_ui *ui);
 void setup_scr_Knob_view(lv_ui *ui);
