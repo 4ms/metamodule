@@ -43,6 +43,7 @@ struct PageBase {
 		, mbox{info.mbox}
 	{}
 
+	virtual ~PageBase() = default;
 	virtual void init() {}
 
 	void init_bg()
