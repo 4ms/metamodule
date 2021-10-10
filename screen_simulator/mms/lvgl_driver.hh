@@ -74,14 +74,9 @@ public:
 
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 	{
-		for (int x = area->x1; x <= area->x2; x++) {
-			for (int y = area->y1; y <= area->y2; y++) {
-				if (y > 120)
-					framebuffer[x][y].full = 0xf800;
-				else if (x > 160)
-					framebuffer[x][y].full = 0x00ff;
-				else
-					framebuffer[x][y] = *color_p;
+		for (int y = area->y1; y <= area->y2; y++) {
+			for (int x = area->x1; x <= area->x2; x++) {
+				framebuffer[x][y] = *color_p;
 				color_p++;
 			}
 		}

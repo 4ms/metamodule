@@ -11,7 +11,7 @@ struct ArcTestJQPage : PageBase {
 	{
 		setup_scr_Main_Example(ui);
 		screen = ui->Main_Example;
-		init_bg();
+		// init_bg();
 	}
 
 	void init() override
