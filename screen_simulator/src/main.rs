@@ -126,7 +126,7 @@ fn main() {
         let mut x: usize = 0;
         let mut y: usize = 0;
         for i in buffer.iter_mut() {
-            *i = get_ext_color(x, y);
+            *i = get_ext_color(x, y); //0..319, 0..239
             x = x + 1;
             if x == WIDTH {
                 x = 0;

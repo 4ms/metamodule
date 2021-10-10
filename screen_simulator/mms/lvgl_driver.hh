@@ -60,19 +60,28 @@ class MMDisplay {
 	static inline MetaParams *m;
 
 public:
+	static inline lv_color_t framebuffer[ScreenWidth][ScreenHeight];
+
 	static void init(MetaModule::MetaParams &metaparams)
 	{
 		m = &metaparams;
+		for (auto &line : framebuffer)
+			for (auto &pixel : line)
+				pixel.full = 0xf800; //default to red
 	}
 
 	static void start() {}
 
-	static inline lv_color_t framebuffer[ScreenWidth][ScreenHeight];
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 	{
 		for (int x = area->x1; x <= area->x2; x++) {
 			for (int y = area->y1; y <= area->y2; y++) {
-				framebuffer[x][y] = *color_p;
+				if (y > 120)
+					framebuffer[x][y].full = 0xf800;
+				else if (x > 160)
+					framebuffer[x][y].full = 0x00ff;
+				else
+					framebuffer[x][y] = *color_p;
 				color_p++;
 			}
 		}
