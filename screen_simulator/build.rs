@@ -34,10 +34,23 @@ fn main() {
     src.push(String::from("mms/stubs/hal_tick.c"));
     src.push(String::from("../firmware/src/patchlist.cc"));
     src.push(String::from("../firmware/src/pages/page_manager.cc"));
+    src.push(String::from(
+        "../firmware/src/pages/gui-guider/setup_scr_Main_Example.c",
+    ));
+    src.push(String::from(
+        "../firmware/src/pages/gui-guider/setup_scr_symbol_sketches.c",
+    ));
     src.push(String::from("../shared/util/math_tables.cc"));
     src.push(String::from("../shared/axoloti-wrapper/axoloti_math.cpp"));
 
     for entry in glob("../shared/CoreModules/*.cpp").expect("Bad glob pattern") {
+        if let Ok(path) = entry {
+            let f_name = String::from(path.to_string_lossy());
+            src.push(format!("{}", f_name));
+        }
+    }
+    //fonts
+    for entry in glob("../firmware/src/pages/fonts/*.c").expect("Bad glob pattern") {
         if let Ok(path) = entry {
             let f_name = String::from(path.to_string_lossy());
             src.push(format!("{}", f_name));
@@ -50,7 +63,6 @@ fn main() {
         .cpp(true)
         .files(src.iter())
         .flag("--includestubs/sys/alloc_buffer.hh")
-        .include("../firmware/lib/printf")
         .include("mms")
         .include("mms/stubs")
         .include("../shared")
@@ -58,6 +70,7 @@ fn main() {
         .include("../shared/patch")
         .include("../firmware/src")
         .include("../firmware/lib/lvgl")
+        .include("../firmware/lib/lvgl/lvgl/src/lv_font")
         .flag("-DSIMULATOR")
         .flag("-std=c++2a")
         .flag("-Wno-unused-parameter");
