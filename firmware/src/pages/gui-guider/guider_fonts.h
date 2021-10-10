@@ -10,7 +10,7 @@ extern "C" {
 LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_13)
 LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_12)
 LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_10)
-LV_FONT_DECLARE(lv_font_simsun_12)
+// LV_FONT_DECLARE(lv_font_simsun_12)
 
 #ifdef __cplusplus
 }
