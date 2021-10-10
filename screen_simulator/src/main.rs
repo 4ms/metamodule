@@ -1,6 +1,7 @@
-extern crate chrono;
 extern crate libc;
 extern crate timer;
+
+extern crate chrono;
 
 use minifb::{Key, Window, WindowOptions};
 
@@ -18,7 +19,7 @@ extern "C" {
     fn rotary_push_fwd() -> ();
     fn rotary_press() -> ();
     fn rotary_release() -> ();
-    fn lv_timer_handler() -> ();
+    fn lv_task_handler() -> ();
     fn fake_HAL_IncTick() -> ();
 }
 
@@ -84,16 +85,17 @@ fn main() {
             is_pressed: false,
             action: &|| unsafe { rotary_push_fwd() },
         },
+        // KeyHandler {
+        //     key: Key::Semicolon,
+        //     is_pressed: false,
+        //     action: &|| print!("semicolon\n"),
+        // },
     ];
-
-    //TODO:
-    //setup a periodic timer to call lv_timer_handler() every 3ms or so
-    //setup a periodic timer to call fake_HAL_IncTick() with every ms
 
     let lv_timer = timer::Timer::new();
     let _guard = lv_timer.schedule_repeating(chrono::Duration::milliseconds(3), move || {
         unsafe {
-            lv_timer_handler();
+            lv_task_handler();
         };
     });
 
