@@ -2,10 +2,10 @@
 // #include "pages/bouncing_balls.hh"
 // #include "pages/debuginfo.hh"
 // #include "pages/page_widgets.hh"
-// #include "pages/arc_test_jq.hh"
+#include "pages/arc_test_jq.hh"
 #include "pages/patch_overview.hh"
 #include "pages/patch_selector.hh"
-// #include "pages/sketches_test_jq.hh"
+#include "pages/sketches_test_jq.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
@@ -16,14 +16,15 @@ namespace MetaModule
 class PageManager {
 	PatchInfo info;
 
-	static constexpr size_t LAST_PAGE = 2;
+	static constexpr size_t LAST_PAGE = 5;
 	std::array<std::unique_ptr<PageBase>, LAST_PAGE> pages = {
-		std::make_unique<PatchOverviewPage>(info), std::make_unique<PatchSelectorPage>(info),
-		// std::make_unique<ArcTestJQPage>(info),
-		// std::make_unique<SketchesTestPage>(info),
-		// std::make_unique<KnobView1>(info),
+		std::make_unique<PatchOverviewPage>(info),
+		std::make_unique<PatchSelectorPage>(info),
+		std::make_unique<ArcTestJQPage>(info),
+		std::make_unique<SketchesTestPage>(info),
+		// std::make_unique<AudioCVInsPage>(info),
 		// std::make_unique<KnobView2>(info),
-		// std::make_unique<KnobView3>(info),
+		std::make_unique<KnobView3>(info),
 	};
 	// BouncingBallsPage balls_page;
 	// JackMapPage jack_map_page;
