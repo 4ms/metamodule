@@ -1,10 +1,6 @@
 #include "stubs/sys/alloc_buffer.hh"
 #include <cstdint>
 
-// Override dma2d to our stub:
-#define _DMA2D_TRANSFER_HH
-#include "stubs/drivers/dma2d_transfer.hh"
-
 #include "lvgl_driver.hh"
 #include "pages/page_manager.hh"
 #include "params.hh"
@@ -68,14 +64,12 @@ extern "C" void rotary_fwd()
 {
 	sim.metaparams.rotary.motion++;
 	sim.metaparams.rotary.abs_pos++;
-	// sim.pages.next_page();
 }
 
 extern "C" void rotary_back()
 {
 	sim.metaparams.rotary.motion--;
 	sim.metaparams.rotary.abs_pos--;
-	// sim.pages.prev_page();
 }
 
 extern "C" void rotary_push_fwd()
@@ -102,7 +96,7 @@ extern "C" void rotary_release()
 
 extern "C" void jump_to_page(unsigned page_num)
 {
-	sim.pages.jump_to_page(static_cast<MetaModule::Page>(page_num));
+	sim.pages.jump_to_page(page_num);
 }
 
 extern "C" void init_screen()
