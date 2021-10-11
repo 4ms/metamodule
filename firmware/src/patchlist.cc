@@ -22,8 +22,8 @@ namespace MetaModule
 
 PatchList::PatchList()
 	: _patch_addrs{
-		  quaddjembe_mmpatch,
 		  test_inputs_1234_mmpatch,
+		  quaddjembe_mmpatch,
 		  DjembeReverb_mmpatch,
 		  InfiniteOsc_mmpatch,
 		  quaddjembe_mmpatch,

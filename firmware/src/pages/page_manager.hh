@@ -1,4 +1,5 @@
 #pragma once
+#include "pages/arc_test_jq.hh"
 // #include "pages/bouncing_balls.hh"
 // #include "pages/debuginfo.hh"
 // #include "pages/page_widgets.hh"
@@ -9,26 +10,21 @@
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
-#include <variant>
-// #include "screen_buffer.hh"
 
 namespace MetaModule
 {
 
 class PageManager {
-	// using PageVariants = std::variant< //
-	// 	ArcTestJQPage,				   //
-	// 	SketchesTestPage			   //
-	// 	>;
-
 	PatchInfo info;
 
-	std::array<std::unique_ptr<PageBase>, 3> pages = {
-		std::make_unique<PatchOverviewPage>(info),
+	static constexpr size_t LAST_PAGE = 3;
+	std::array<std::unique_ptr<PageBase>, LAST_PAGE> pages = {
 		std::make_unique<ArcTestJQPage>(info),
-		std::make_unique<SketchesTestPage>(info),
+		// std::make_unique<SketchesTestPage>(info),
+		std::make_unique<KnobView1>(info),
+		// std::make_unique<KnobView2>(info),
+		// std::make_unique<KnobView3>(info),
 	};
-
 	// BouncingBallsPage balls_page;
 	// JackMapPage jack_map_page;
 	// PatchSelectorPage patch_selector_page;
@@ -42,14 +38,13 @@ class PageManager {
 	UiAudioMailbox &mbox;
 
 public:
-	unsigned cur_page;
+	unsigned cur_page = 0;
 
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, UiAudioMailbox &mbox)
 		: info{pl, pp, p, m, mbox}
 		, patch_list{pl}
 		, player{pp}
 		, mbox{mbox}
-		, cur_page{0}
 	{}
 
 	void init();
