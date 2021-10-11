@@ -32,8 +32,6 @@ struct PageBase {
 	static inline lv_ui *ui = &base_ui;
 	lv_obj_t *screen;
 
-	bool is_init = false;
-
 	PageBase(PatchInfo info)
 		: patch_list{info.patch_list}
 		, patch_player{info.patch_player}
@@ -53,11 +51,6 @@ struct PageBase {
 
 	virtual void focus(PageChangeDirection dir)
 	{
-		if (!is_init) {
-			init();
-			is_init = true;
-		}
-
 		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
 							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
 																	   LV_SCR_LOAD_ANIM_FADE_ON;

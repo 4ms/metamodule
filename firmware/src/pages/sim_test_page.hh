@@ -1,17 +1,16 @@
 #pragma once
 #include "pages/base.hh"
-#include "pages/page_widgets.hh"
+// #include "pages/page_widgets.hh"
 
 namespace MetaModule
 {
 
 struct SimulationTestPage : PageBase {
-	lv_obj_t _screen;
 	SimulationTestPage(PatchInfo info)
 		: PageBase{info}
-	{
-		screen = &_screen;
-	}
+	{}
+
+	void init() override {}
 
 	void update() override
 	{

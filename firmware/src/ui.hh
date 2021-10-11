@@ -11,7 +11,7 @@ namespace MetaModule
 
 class Ui {
 private:
-	PageManager pages;
+	PageManager page_manager;
 	ParamQueue &param_queue;
 
 	Params params;
@@ -26,19 +26,18 @@ public:
 	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
 		: param_queue{pc}
 		, mbox{uiaudiomailbox}
-		, pages{patch_list, pp, params, metaparams, uiaudiomailbox}
-	{
-		MMDisplay::init(metaparams);
-	}
+		, page_manager{patch_list, pp, params, metaparams, uiaudiomailbox}
+	{}
 
-	void start()
+	GCC_OPTIMIZE_OFF void start()
 	{
-		MMDisplay::start();
 
 		params.clear();
 		metaparams.clear();
 		// register_printf_destination(screen);
-		pages.init();
+
+		MMDisplay::init(metaparams);
+		page_manager.init();
 
 		page_update_tm.init(
 			{
@@ -49,9 +48,10 @@ public:
 			},
 			[&] { update_ui_task(); });
 		page_update_tm.start();
+		MMDisplay::start();
 	}
 
-	void update()
+	GCC_OPTIMIZE_OFF void update()
 	{
 		if (MMDisplay::is_ready()) {
 			Debug::Pin1::high();
@@ -63,12 +63,12 @@ public:
 		}
 	}
 
-	void update_ui_task()
+	GCC_OPTIMIZE_OFF void update_ui_task()
 	{
 		Debug::Pin3::high();
 		param_queue.read_sync(&params, &metaparams);
 		handle_rotary();
-		pages.update_current_page();
+		page_manager.update_current_page();
 		Debug::Pin3::low();
 	}
 
@@ -76,9 +76,9 @@ public:
 	{
 		auto rotary_pushed_turned = metaparams.rotary_pushed.use_motion();
 		if (rotary_pushed_turned < 0)
-			pages.prev_page();
+			page_manager.prev_page();
 		if (rotary_pushed_turned > 0)
-			pages.next_page();
+			page_manager.next_page();
 	}
 
 private:

@@ -1,7 +1,5 @@
 #pragma once
 #include "pages/base.hh"
-// #include "pages/page_widgets.hh"
-// #include "pages/scroll_box.hh"
 
 namespace MetaModule
 {
@@ -60,7 +58,8 @@ struct PatchOverviewPage : PageBase {
 		lv_obj_set_y(slider1, 10);
 		lv_obj_set_size(slider1, 15, 100);
 		lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
-		is_init = true;
+
+		init_bg();
 	}
 
 	void update() override
@@ -81,6 +80,7 @@ struct PatchOverviewPage : PageBase {
 		// screen.print(patch_player.get_patch_name());
 	}
 };
+/*
 
 // Todo: this should display User-set names for jacks:
 // Instead of "Drum#3:Out", should be "Kick Out"
@@ -216,7 +216,7 @@ struct KnobMapPage : PageBase {
 	}
 };
 
-struct PatchLayoutPage : PageBase /*, ScrollBox<PatchLayoutPage>*/ {
+struct PatchLayoutPage : PageBase{
 	// using ScrollBoxT = ScrollBox<PatchLayoutPage>;
 	// static constexpr RectC box{
 	// 	.left = 0,
@@ -317,5 +317,5 @@ struct ModulesInPatchPage : PageBase {
 		// }
 	}
 };
-
+*/
 } // namespace MetaModule
