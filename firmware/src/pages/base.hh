@@ -51,8 +51,8 @@ struct PageBase {
 
 	virtual void focus(PageChangeDirection dir)
 	{
-		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
-							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
+		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
+							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
 																	   LV_SCR_LOAD_ANIM_FADE_ON;
 		lv_scr_load_anim(screen, animation_style, 500, 0, false);
 	}
