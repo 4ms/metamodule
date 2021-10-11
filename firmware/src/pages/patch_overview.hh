@@ -7,30 +7,23 @@ namespace MetaModule
 {
 
 struct PatchOverviewPage : PageBase {
+
 	PatchOverviewPage(PatchInfo info)
 		: PageBase{info}
-	{
-		ui = &base_ui;
-	}
+	{}
 
-	struct {
-		lv_obj_t *screen1;
-		lv_obj_t *screen1_lmeter_1;
-	} base_ui, *ui;
-
+	lv_obj_t *screen1_lmeter_1;
 	lv_style_t style_screen1_lmeter_1_main;
-
-	bool is_init = false;
 	lv_obj_t *slider1;
 	int32_t slider_val = 30;
 
-	void init()
+	void init() override
 	{
 		//Write codes screen1
-		ui->screen1 = lv_obj_create(nullptr, nullptr);
+		screen = lv_obj_create(nullptr, nullptr);
 
 		//Write codes screen1_lmeter_1
-		ui->screen1_lmeter_1 = lv_linemeter_create(ui->screen1, nullptr);
+		screen1_lmeter_1 = lv_linemeter_create(screen, nullptr);
 
 		//Write style LV_LINEMETER_PART_MAIN for screen1_lmeter_1
 		static lv_style_t style_screen1_lmeter_1_main;
@@ -53,15 +46,15 @@ struct PatchOverviewPage : PageBase {
 		lv_style_set_scale_end_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0xb5, 0xb5, 0xb5));
 		lv_style_set_scale_width(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 6);
 		lv_style_set_scale_end_line_width(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 10);
-		lv_obj_add_style(ui->screen1_lmeter_1, LV_LINEMETER_PART_MAIN, &style_screen1_lmeter_1_main);
-		lv_obj_set_pos(ui->screen1_lmeter_1, 211, 4);
-		lv_obj_set_size(ui->screen1_lmeter_1, 97, 97);
-		lv_linemeter_set_scale(ui->screen1_lmeter_1, 300, 100);
-		lv_linemeter_set_range(ui->screen1_lmeter_1, 0, 100);
-		lv_linemeter_set_value(ui->screen1_lmeter_1, 75);
-		lv_linemeter_set_angle_offset(ui->screen1_lmeter_1, 0);
+		lv_obj_add_style(screen1_lmeter_1, LV_LINEMETER_PART_MAIN, &style_screen1_lmeter_1_main);
+		lv_obj_set_pos(screen1_lmeter_1, 211, 4);
+		lv_obj_set_size(screen1_lmeter_1, 97, 97);
+		lv_linemeter_set_scale(screen1_lmeter_1, 300, 100);
+		lv_linemeter_set_range(screen1_lmeter_1, 0, 100);
+		lv_linemeter_set_value(screen1_lmeter_1, 75);
+		lv_linemeter_set_angle_offset(screen1_lmeter_1, 0);
 
-		slider1 = lv_slider_create(ui->screen1, nullptr);
+		slider1 = lv_slider_create(screen, nullptr);
 		slider_val = 30;
 		lv_obj_set_x(slider1, 30);
 		lv_obj_set_y(slider1, 10);
@@ -70,20 +63,7 @@ struct PatchOverviewPage : PageBase {
 		is_init = true;
 	}
 
-	void focus(PageChangeDirection dir)
-	{
-		if (!is_init)
-			init();
-
-		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
-							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
-																	   LV_SCR_LOAD_ANIM_FADE_ON;
-		lv_scr_load_anim(ui->screen1, animation_style, 500, 0, false);
-	}
-
-	void blur() {}
-
-	void update()
+	void update() override
 	{
 		//slider_val = 100.f * params.knobs[0];
 		slider_val++;
@@ -93,7 +73,7 @@ struct PatchOverviewPage : PageBase {
 
 		float knob = params.knobs[1];
 		int slider_val2 = knob * 100.f;
-		lv_linemeter_set_value(ui->screen1_lmeter_1, slider_val2);
+		lv_linemeter_set_value(screen1_lmeter_1, slider_val2);
 
 		// screen.fill(bgcolor);
 		// PageWidgets::setup_header(screen);
@@ -123,17 +103,6 @@ struct JackMapPage : PageBase {
 		ui->screen = lv_obj_create(nullptr, nullptr);
 
 		is_init = true;
-	}
-
-	void focus(PageChangeDirection dir)
-	{
-		if (!is_init)
-			init();
-
-		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
-							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
-																	   LV_SCR_LOAD_ANIM_FADE_ON;
-		lv_scr_load_anim(ui->screen, animation_style, 500, 0, false);
 	}
 
 	void blur() {}
