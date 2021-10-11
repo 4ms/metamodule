@@ -31,7 +31,6 @@ struct PageBase {
 	static inline lv_ui base_ui{};
 	static inline lv_ui *ui = &base_ui;
 	lv_obj_t *screen;
-	lv_style_t style_bg;
 
 	bool is_init = false;
 
@@ -48,10 +47,8 @@ struct PageBase {
 
 	void init_bg()
 	{
-		lv_style_reset(&style_bg);
-		lv_style_set_bg_color(&style_bg, LV_STATE_DEFAULT, lv_color_hex(0x000000));
 		lv_obj_set_size(screen, LV_HOR_RES_MAX, LV_VER_RES_MAX);
-		lv_obj_add_style(screen, LV_OBJ_PART_MAIN, &style_bg);
+		lv_obj_set_style_local_bg_color(screen, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x000000));
 	}
 
 	virtual void focus(PageChangeDirection dir)
