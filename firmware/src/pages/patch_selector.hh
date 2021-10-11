@@ -7,7 +7,10 @@ namespace MetaModule
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info}
-	{}
+	{
+		_instance = this;
+	}
+	static inline PatchSelectorPage *_instance;
 
 	lv_obj_t *patch_selector;
 	lv_obj_t *patch_selector_patchlist;
@@ -15,6 +18,20 @@ struct PatchSelectorPage : PageBase {
 	lv_group_t *group;
 
 	int32_t active_patch_idx = 0;
+
+	static void patch_selector_event_cb(lv_obj_t *obj, lv_event_t event)
+	{
+		switch (event) {
+			case LV_EVENT_VALUE_CHANGED: {
+				uint16_t sel = lv_dropdown_get_selected(obj);
+				if (sel != _instance->patch_list.cur_patch_index())
+					_instance->start_changing_patch(sel);
+			} break;
+
+			default:
+				break;
+		}
+	}
 
 	void init() override
 	{
@@ -26,8 +43,13 @@ struct PatchSelectorPage : PageBase {
 
 		//Write codes patch_selector_patchlist
 		patch_selector_patchlist = lv_dropdown_create(patch_selector, nullptr);
-		lv_dropdown_set_options(patch_selector_patchlist,
-								"list1\nlist2\nlist3\npatch4\npatch5\npatch6\npatch7\npatch8");
+		lv_dropdown_set_text(patch_selector_patchlist, "Select a Patch:");
+
+		for (int i = 0; i < patch_list.NumPatches; i++)
+			lv_dropdown_add_option(patch_selector_patchlist, patch_list.get_patch_name(i), i);
+
+		// lv_dropdown_set_options(patch_selector_patchlist, "list1\nlist2\nlist3\npatch4\npatch5\npatch6\npatch7\npatch8");
+
 		lv_dropdown_set_max_height(patch_selector_patchlist, 200);
 
 		//Write style LV_DROPDOWN_PART_MAIN for patch_selector_patchlist
@@ -93,6 +115,9 @@ struct PatchSelectorPage : PageBase {
 
 		lv_group_add_obj(group, patch_selector_patchlist);
 
+		//Event callback
+		lv_obj_set_event_cb(patch_selector_patchlist, patch_selector_event_cb);
+
 		slider1 = lv_slider_create(patch_selector, nullptr);
 		lv_obj_set_x(slider1, 30);
 		lv_obj_set_y(slider1, 110);
@@ -109,6 +134,7 @@ struct PatchSelectorPage : PageBase {
 
 	void update() override
 	{
+		handle_changing_patch();
 		// screen.fill(Colors::white);
 		// PageWidgets::setup_header(screen);
 		// screen.print("Select a patch:");
