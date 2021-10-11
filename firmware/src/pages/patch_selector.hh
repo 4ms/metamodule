@@ -45,10 +45,9 @@ struct PatchSelectorPage : PageBase {
 		patch_selector_patchlist = lv_dropdown_create(patch_selector, nullptr);
 		lv_dropdown_set_text(patch_selector_patchlist, "Select a Patch:");
 
+		lv_dropdown_clear_options(patch_selector_patchlist);
 		for (int i = 0; i < patch_list.NumPatches; i++)
 			lv_dropdown_add_option(patch_selector_patchlist, patch_list.get_patch_name(i), i);
-
-		// lv_dropdown_set_options(patch_selector_patchlist, "list1\nlist2\nlist3\npatch4\npatch5\npatch6\npatch7\npatch8");
 
 		lv_dropdown_set_max_height(patch_selector_patchlist, 200);
 
@@ -135,13 +134,6 @@ struct PatchSelectorPage : PageBase {
 	void update() override
 	{
 		handle_changing_patch();
-		// screen.fill(Colors::white);
-		// PageWidgets::setup_header(screen);
-		// screen.print("Select a patch:");
-		// screen.setFont(PageWidgets::subheader_font);
-		// screen.drawHLine(0, box.top, box.width(), Colors::grey.Rgb565());
-		// draw_active_patch_highlight_bar();
-		// ScrollBoxT::draw_scroll_box();
 	}
 
 	void start_changing_patch(int32_t new_patch_index)
