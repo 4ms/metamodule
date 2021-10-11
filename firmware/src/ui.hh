@@ -29,7 +29,7 @@ public:
 		, page_manager{patch_list, pp, params, metaparams, uiaudiomailbox}
 	{}
 
-	GCC_OPTIMIZE_OFF void start()
+	void start()
 	{
 
 		params.clear();
@@ -51,7 +51,7 @@ public:
 		MMDisplay::start();
 	}
 
-	GCC_OPTIMIZE_OFF void update()
+	void update()
 	{
 		if (MMDisplay::is_ready()) {
 			Debug::Pin1::high();
@@ -63,7 +63,7 @@ public:
 		}
 	}
 
-	GCC_OPTIMIZE_OFF void update_ui_task()
+	void update_ui_task()
 	{
 		Debug::Pin3::high();
 		param_queue.read_sync(&params, &metaparams);

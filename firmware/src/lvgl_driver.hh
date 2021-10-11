@@ -64,7 +64,7 @@ class MMDisplay {
 	static inline MetaParams *m;
 
 public:
-	GCC_OPTIMIZE_OFF static void init(MetaParams &metaparams)
+	static void init(MetaParams &metaparams)
 	{
 		m = &metaparams;
 		_spi_driver.init();
