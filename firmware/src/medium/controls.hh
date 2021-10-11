@@ -2,6 +2,7 @@
 #include "auxsignal.hh"
 #include "conf/auxstream_conf.hh"
 #include "conf/control_conf.hh"
+#include "drivers/adc_builtin_driver.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/i2c.hh"
 #include "drivers/pin.hh"
@@ -16,6 +17,8 @@
 namespace MetaModule
 {
 
+using mdrivlib::AdcChanNum;
+using mdrivlib::AdcPeriphNum;
 using mdrivlib::DebouncedPin;
 using mdrivlib::PinPolarity;
 
@@ -26,6 +29,15 @@ struct Controls {
 			 DoubleAuxStreamBlock &auxsignal_blocks_ref);
 
 	mdrivlib::MuxedADC &potadc;
+
+	mdrivlib::Pin pot_pins[2]{
+		{GPIO::C, 3, PinMode::Analog}, //pot 2
+		{GPIO::A, 3, PinMode::Analog}, //pot 3
+	};
+
+	mdrivlib::AdcChan<AdcPeriphNum::_1, AdcChanNum::_13, uint16_t> pot2; //PC3
+	mdrivlib::AdcChan<AdcPeriphNum::_1, AdcChanNum::_15, uint16_t> pot3; //PA3
+
 	MultiGPIOReader jacksense_reader;
 
 	mdrivlib::RotaryEncoder<mdrivlib::RotaryHalfStep> rotary = {

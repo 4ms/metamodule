@@ -99,6 +99,8 @@ void Controls::start_param_block()
 void Controls::start()
 {
 	potadc.start();
+	AdcPeriph<AdcPeriphNum::_1>::init_dma(adc_internal_defs);
+	AdcPeriph<AdcPeriphNum::_1>::start_adc();
 
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
@@ -154,6 +156,10 @@ void Controls::store_pot_reading(uint32_t pot_id, uint32_t val)
 }
 uint32_t Controls::get_pot_reading(uint32_t pot_id)
 {
+	if (pot_id == 2)
+		return pot2.get_val();
+	if (pot_id == 3)
+		return pot3.get_val();
 	return latest_pot_reading[pot_id];
 }
 
