@@ -3,7 +3,7 @@
 // #include "pages/debuginfo.hh"
 // #include "pages/page_widgets.hh"
 #include "pages/arc_test_jq.hh"
-// #include "pages/patch_overview.hh"
+#include "pages/patch_overview.hh"
 // #include "pages/patch_selector.hh"
 #include "pages/sketches_test_jq.hh"
 #include "params.hh"
@@ -14,20 +14,6 @@
 
 namespace MetaModule
 {
-enum Page : unsigned {
-	// PatchOverview = 0,
-	// PatchSelector,
-	// BouncingBalls,
-	// ModulesInPatch,
-	// JackMap,
-	// PotMap,
-	// PatchLayout,
-	// DebugInfo,
-	ArcTestJQ,
-	SketchesTest,
-
-	LAST_PAGE,
-};
 
 class PageManager {
 	// using PageVariants = std::variant< //
@@ -37,54 +23,39 @@ class PageManager {
 
 	PatchInfo info;
 
-	std::array<std::unique_ptr<PageBase>, LAST_PAGE> pages = {
+	std::array<std::unique_ptr<PageBase>, 3> pages = {
+		std::make_unique<PatchOverviewPage>(info),
 		std::make_unique<ArcTestJQPage>(info),
 		std::make_unique<SketchesTestPage>(info),
 	};
 
 	// BouncingBallsPage balls_page;
-	// PatchOverviewPage overview_page;
 	// JackMapPage jack_map_page;
 	// PatchSelectorPage patch_selector_page;
-	// ArcTestJQPage arc_test_page;
-	// SketchesTestPage sketches_test_page;
-	// std::unique_ptr<PageBase> pages;
-
 	// KnobMapPage knob_map_page;
 	// PatchLayoutPage patch_layout_page;
 	// ModulesInPatchPage modules_in_patch_page;
 	// DebugInfoPage debug_info_page;
-	// PageWidgets widgets;
 
 	PatchList &patch_list;
 	PatchPlayer &player;
 	UiAudioMailbox &mbox;
 
 public:
-	Page cur_page;
+	unsigned cur_page;
 
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, UiAudioMailbox &mbox)
-		: info{pl, pp, p, m, mbox} // , balls_page{info}
-		// , overview_page{info}
-		// , jack_map_page{info}
-		// , patch_selector_page{info}
-		// , arc_test_page{info}  , sketches_test_page{info}
-
-		// , knob_map_page{info}
-		// , patch_layout_page{info}
-		// , modules_in_patch_page{info}
-		// , debug_info_page{info}
-
+		: info{pl, pp, p, m, mbox}
 		, patch_list{pl}
 		, player{pp}
 		, mbox{mbox}
-		, cur_page{Page::ArcTestJQ}
+		, cur_page{0}
 	{}
 
 	void init();
 	void next_page();
 	void prev_page();
-	void jump_to_page(Page p);
+	void jump_to_page(unsigned p);
 	void update_current_page();
 	void set_message(std::string_view message);
 
