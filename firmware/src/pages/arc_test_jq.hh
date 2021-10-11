@@ -8,14 +8,14 @@ namespace MetaModule
 struct ArcTestJQPage : PageBase {
 	ArcTestJQPage(PatchInfo info)
 		: PageBase{info}
+	{}
+
+	void init() override
 	{
 		setup_scr_Main_Example(ui);
 		screen = ui->Main_Example;
 		init_bg();
-	}
 
-	void init() override
-	{
 		lv_arc_set_adjustable(ui->Main_Example_arc_1, true);
 		lv_arc_set_adjustable(ui->Main_Example_arc_2, true);
 		lv_arc_set_adjustable(ui->Main_Example_arc_3, true);
