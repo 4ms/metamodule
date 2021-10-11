@@ -62,8 +62,8 @@ void main()
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
 	param_queue.clear();
-	ui.start();
 	audio.start();
+	ui.start();
 
 	while (true) {
 		// HAL_Delay(500);
