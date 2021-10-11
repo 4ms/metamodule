@@ -40,6 +40,7 @@ CompileFlags:
 		"-Ilib/cmsis/Core_A/Include",
 		"-Ilib/cmsis-device/stm32mp157c/include",
 		"-Ilib/lvgl",
+		"-Ilib/lvgl/lvgl/src/lv_font",
 		"-Ilib/mdrivlib",
 		"-Ilib/mdrivlib/drivers",
 		"-Ilib/mdrivlib/target/stm32mp1",
