@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
@@ -31,6 +32,8 @@ struct MMControlPins {
 	static constexpr PinNoInit gate_in_1{GPIO::I, 3};
 	static constexpr PinNoInit gate_in_2{GPIO::H, 9};
 };
+
+const mdrivlib::DMA_LL_Config adc_internal_defs{.DMAx = DMA1, .stream = 6};
 
 //TODO: parameterize this and put it in mdrivlib
 struct MultiGPIOReader {
