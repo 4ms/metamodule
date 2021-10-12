@@ -30,13 +30,14 @@ struct Controls {
 
 	mdrivlib::MuxedADC &potadc;
 
-	mdrivlib::Pin pot_pins[2]{
-		{GPIO::C, 3, PinMode::Analog}, //pot 2
-		{GPIO::A, 3, PinMode::Analog}, //pot 3
-	};
+	uint16_t pot_vals[4];
+	// mdrivlib::Pin pot_pins[2]{
+	// 	{GPIO::C, 3, PinMode::Analog}, //pot 2
+	// 	{GPIO::A, 3, PinMode::Analog}, //pot 3
+	// };
 
-	mdrivlib::AdcChan<AdcPeriphNum::_1, AdcChanNum::_13, uint16_t> pot2; //PC3
-	mdrivlib::AdcChan<AdcPeriphNum::_1, AdcChanNum::_15, uint16_t> pot3; //PA3
+	// mdrivlib::AdcChan<AdcPeriphNum::_1, AdcChanNum::_13, uint16_t> pot2; //PC3
+	// mdrivlib::AdcChan<AdcPeriphNum::_1, AdcChanNum::_15, uint16_t> pot3; //PA3
 
 	MultiGPIOReader jacksense_reader;
 

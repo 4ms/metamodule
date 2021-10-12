@@ -41,7 +41,7 @@ void main()
 
 	app_startup();
 
-	SharedBus::i2c.init(i2c_conf_controls);
+	// SharedBus::i2c.init(i2c_conf_controls);
 
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
@@ -52,18 +52,24 @@ void main()
 	Controls controls{potadc, *param_block_base, *auxsignal_buffer};
 
 	// SharedBus
-	SharedBusQueue i2cqueue{controls};
-	SharedBus::i2c.enable_IT(i2c_conf_controls.priority1, i2c_conf_controls.priority2);
+	// SharedBusQueue i2cqueue{controls};
+	// SharedBus::i2c.enable_IT(i2c_conf_controls.priority1, i2c_conf_controls.priority2);
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 	controls.start();
 
+	uint32_t ctr = 0x10000;
 	while (true) {
-		if (SharedBus::i2c.is_ready()) {
-			Debug::red_LED2::high();
-			i2cqueue.update();
-			Debug::red_LED2::low();
-		}
+		if (!ctr)
+			HWSemaphore<M4_ready>::unlock();
+		else
+			ctr--;
+
+		// if (SharedBus::i2c.is_ready()) {
+		// 	Debug::red_LED2::high();
+		// 	i2cqueue.update();
+		// 	Debug::red_LED2::low();
+		// }
 		__NOP();
 		// __WFI();
 	}

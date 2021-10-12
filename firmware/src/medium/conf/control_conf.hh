@@ -33,7 +33,7 @@ struct MMControlPins {
 	static constexpr PinNoInit gate_in_2{GPIO::H, 9};
 };
 
-const mdrivlib::DMA_LL_Config adc_internal_defs{.DMAx = DMA1, .stream = 6};
+const mdrivlib::DMA_LL_Config adc_internal_defs{.DMAx = DMA2, .stream = 7};
 
 //TODO: parameterize this and put it in mdrivlib
 struct MultiGPIOReader {
