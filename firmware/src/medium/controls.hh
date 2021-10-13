@@ -25,7 +25,7 @@ struct PotAdcConf : AdcPeriphConf {
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = true;
 	static constexpr auto oversampling_ratio = 1024;
-	static constexpr auto oversampling_right_bitshift = 10;
+	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift10Right;
 	static constexpr auto use_dma = true;
 	static constexpr auto dma_periph_num = DMA_2;
 	static constexpr auto stream_num = 7;
@@ -36,12 +36,23 @@ struct PotAdcConf : AdcPeriphConf {
 	static constexpr auto clock_div = mdrivlib::PLL_Div2;
 };
 
-enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotL, PotR, PotQ };
+enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotQ, PotL, PotR, PatchCV };
 
 constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA}, //, mdrivlib::AdcSamplingTime::_32Cycles},
 	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotB},
 	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotC},
+	AdcChannelConf{{GPIO::F, 12}, mdrivlib::AdcChanNum::_6, PotD},
+	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotE},
+	AdcChannelConf{{GPIO::C, 0}, mdrivlib::AdcChanNum::_10, PotF},
+	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_0, PotX}, //ANA0
+	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_1, PotY}, //ANA1
+	AdcChannelConf{{GPIO::F, 13}, mdrivlib::AdcChanNum::_2, PotZ},
+	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotQ}, //Pot10: was PF14 on p4 PCB: change to PC5
+	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotL},
+	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotR},
+	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PatchCV},
+	//0-19 minus _4 _7 _9 _12 _14 _16 _17
 });
 /////////////
 
