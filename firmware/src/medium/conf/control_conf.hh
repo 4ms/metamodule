@@ -40,8 +40,8 @@ using mdrivlib::AdcPeriphConf;
 struct PotAdcConf : AdcPeriphConf {
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = true;
-	static constexpr auto oversampling_ratio = 1024;
-	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift10Right;
+	static constexpr auto oversampling_ratio = 128;
+	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift7Right;
 	static constexpr auto use_dma = true;
 	static constexpr auto dma_periph_num = DMA_2;
 	static constexpr auto stream_num = 7;
@@ -49,27 +49,45 @@ struct PotAdcConf : AdcPeriphConf {
 	static constexpr auto dma_priority = Low;
 	static constexpr auto use_dma_fifo = false;
 	static constexpr auto use_dma_irq = false;
-	static constexpr auto clock_div = mdrivlib::PLL_Div2;
+	static constexpr auto clock_div = mdrivlib::PLL_Div4;
+
+	struct DmaConf : mdrivlib::DefaultDMAConf {
+		static constexpr auto DMAx = 2;
+		static constexpr auto StreamNum = 7;
+		static constexpr auto RequestNum = DMA_REQUEST_ADC1;
+		static constexpr auto dir = Periph2Mem;
+		static constexpr auto circular = true;
+		static constexpr auto transfer_size_mem = HalfWord;
+		static constexpr auto transfer_size_periph = HalfWord;
+		static constexpr auto dma_priority = Low;
+		static constexpr auto mem_inc = true;
+		static constexpr auto periph_inc = false;
+		static constexpr auto enable_fifo = false;
+	};
 };
 
 enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotQ, PotL, PotR, PatchCV };
 
+constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_32Cycles;
+
 constexpr auto PotConfs = std::to_array({
-	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA}, //, mdrivlib::AdcSamplingTime::_32Cycles},
-	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotB},
-	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotC},
-	AdcChannelConf{{GPIO::F, 12}, mdrivlib::AdcChanNum::_6, PotD},
-	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotE},
-	AdcChannelConf{{GPIO::C, 0}, mdrivlib::AdcChanNum::_10, PotF},
+	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
+	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotB, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotC, AdcSampTime},
+	AdcChannelConf{{GPIO::F, 12}, mdrivlib::AdcChanNum::_6, PotD, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotE, AdcSampTime},
+	AdcChannelConf{{GPIO::C, 0}, mdrivlib::AdcChanNum::_10, PotF, AdcSampTime},
 	//PotX is ANA0. hack: use PF13 here to set it to analog mode, since on PCB p4 we have it connected to Pot9
-	AdcChannelConf{{GPIO::F, 13}, mdrivlib::AdcChanNum::_0, PotX},
+	AdcChannelConf{{GPIO::F, 13}, mdrivlib::AdcChanNum::_0, PotX, AdcSampTime},
 	//PotY is ANA1. hack: use PF14 here to set it to analog mode, since on PCB p4 we have it connected to Pot10
-	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_1, PotY},
-	AdcChannelConf{{GPIO::A, 1}, mdrivlib::AdcChanNum::_17, PotZ}, //Z = Pot9 on sch: was PF13 on p4 PCB: changed to PA1
-	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotQ}, //Q = Pot10 on sch: was PF14 on p4 PCB: changed to PC5
-	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotL},
-	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotR},
-	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PatchCV},
+	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_1, PotY, AdcSampTime},
+	//Z = Pot9 on sch: was PF13 on p4 PCB: changed to PA1
+	AdcChannelConf{{GPIO::A, 1}, mdrivlib::AdcChanNum::_17, PotZ, AdcSampTime},
+	//Q = Pot10 on sch: was PF14 on p4 PCB: changed to PC5
+	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotQ, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotL, AdcSampTime},
+	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotR, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PatchCV, AdcSampTime},
 });
 
 //TODO: parameterize this and put it in mdrivlib
