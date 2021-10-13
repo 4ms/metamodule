@@ -98,87 +98,6 @@ void Controls::start_param_block()
 
 void Controls::start()
 {
-	//Pin pot2{GPIO::C, 3, PinMode::Analog};
-	//Pin pot3{GPIO::A, 3, PinMode::Analog};
-	//Clocks::ADC::enable(ADC1);
-
-	//ADC_InitTypeDef adc_init = {
-	//	.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2,
-	//	.Resolution = ADC_RESOLUTION_16B,
-	//	.ScanConvMode = ADC_SCAN_ENABLE,
-	//	.EOCSelection = ADC_EOC_SEQ_CONV, //was single
-	//	.LowPowerAutoWait = DISABLE,
-	//	.ContinuousConvMode = ENABLE, //was disable
-	//	.NbrOfConversion = 2,
-	//	.DiscontinuousConvMode = DISABLE,
-	//	.NbrOfDiscConversion = 0,
-	//	.ExternalTrigConv = ADC_SOFTWARE_START,
-	//	.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE,
-	//	.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR,
-	//	.Overrun = ADC_OVR_DATA_OVERWRITTEN,
-	//	.LeftBitShift = ADC_LEFTBITSHIFT_NONE,
-	//	.OversamplingMode = ENABLE,
-	//	.Oversampling =
-	//		{
-	//			.Ratio = 1024,
-	//			.RightBitShift = ADC_RIGHTBITSHIFT_10,
-	//			.TriggeredMode = ADC_TRIGGEREDMODE_SINGLE_TRIGGER,
-	//			.OversamplingStopReset = ADC_REGOVERSAMPLING_RESUMED_MODE,
-	//		},
-	//};
-	//ADC_HandleTypeDef hadc = {
-	//	.Instance = ADC1,
-	//	.Init = adc_init,
-	//};
-	//HAL_ADC_Init(&hadc);
-
-	//DMA_HandleTypeDef hdma_adc1;
-	//hdma_adc1.Instance = DMA2_Stream7;
-	//hdma_adc1.Init.Request = DMA_REQUEST_ADC1;
-	//hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
-	//hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
-	//hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
-	//hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-	//hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-	//hdma_adc1.Init.Mode = DMA_CIRCULAR;
-	//hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
-	//hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-	//HAL_DMA_Init(&hdma_adc1);
-	//__HAL_LINKDMA(&hadc, DMA_Handle, hdma_adc1);
-
-	//ADC_MultiModeTypeDef multimode = {.Mode = ADC_MODE_INDEPENDENT};
-	//HAL_ADCEx_MultiModeConfigChannel(&hadc, &multimode);
-
-	//ADC_ChannelConfTypeDef pot_2_conf = {
-	//	.Channel = ADC_CHANNEL_13,
-	//	.Rank = ADC_REGULAR_RANK_1,
-	//	.SamplingTime = ADC_SAMPLETIME_810CYCLES_5,
-	//	.SingleDiff = ADC_SINGLE_ENDED,
-	//	.OffsetNumber = ADC_OFFSET_NONE,
-	//	.Offset = 0,
-	//	.OffsetRightShift = DISABLE,
-	//	.OffsetSignedSaturation = DISABLE,
-	//};
-	//ADC_ChannelConfTypeDef pot_3_conf = {
-	//	.Channel = ADC_CHANNEL_15,
-	//	.Rank = ADC_REGULAR_RANK_2,
-	//	.SamplingTime = ADC_SAMPLETIME_810CYCLES_5,
-	//	.SingleDiff = ADC_SINGLE_ENDED,
-	//	.OffsetNumber = ADC_OFFSET_NONE,
-	//	.Offset = 0,
-	//	.OffsetRightShift = DISABLE,
-	//	.OffsetSignedSaturation = DISABLE,
-	//};
-	//HAL_ADC_ConfigChannel(&hadc, &pot_2_conf);
-	//HAL_ADC_ConfigChannel(&hadc, &pot_3_conf);
-
-	//InterruptManager::register_and_start_isr(DMA2_Stream7_IRQn, 2, 2, [&] {
-	//	Debug::Pin2::high();
-	//	//HAL_ADC_IRQHandler(&hadc);
-	//	Debug::Pin2::low();
-	//});
-	//HAL_ADC_Start_DMA(&hadc, (uint32_t *)pot_vals, 2);
-
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
 	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() { start_param_block<0>(); });
@@ -201,6 +120,10 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &
 	, _buffer_full{false}
 	, auxstream_blocks{auxsignal_blocks_ref}
 {
+	InterruptManager::register_and_start_isr(DMA2_Stream7_IRQn, 2, 2, [&] {
+		Debug::Pin2::high();
+		Debug::Pin2::low();
+	});
 	pot_adc.start();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:

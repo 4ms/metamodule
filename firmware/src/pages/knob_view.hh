@@ -32,9 +32,11 @@ struct KnobView3 : PageBase {
 
 	void update() override
 	{
-
-		//2 6 5
-		//3 1 4
+		//GUI Guider knobs are laid out like this:
+		//arc_2 arc_3 arc_6
+		//arc_1 arc_5 arc_4
+		//Param1 Param2 Param3
+		//Param4 Param5 Param6
 		lv_arc_set_value(ui->Knob_view3_arc_2, params.knobs[0] * 100.f);
 		lv_arc_set_value(ui->Knob_view3_arc_3, params.knobs[1] * 100.f);
 		lv_arc_set_value(ui->Knob_view3_arc_6, params.knobs[2] * 100.f);
@@ -42,9 +44,9 @@ struct KnobView3 : PageBase {
 		lv_arc_set_value(ui->Knob_view3_arc_5, params.knobs[4] * 100.f);
 		lv_arc_set_value(ui->Knob_view3_arc_4, params.knobs[5] * 100.f);
 
-		//7 11 8 9 10 12
-		//7 12 8 11 9 10
-		//7 12 8 9 10 11
+		//GUI Guider knobs are laid out like this:
+		//  X     Y      Z      L     R     Q
+		//arc_7 arc_12 arc_8 arc_10 arc_11 arc_9
 		lv_arc_set_value(ui->Knob_view3_arc_7, params.knobs[6] * 100.f);
 		lv_arc_set_value(ui->Knob_view3_arc_12, params.knobs[7] * 100.f);
 		lv_arc_set_value(ui->Knob_view3_arc_8, params.knobs[8] * 100.f);

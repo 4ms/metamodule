@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
+#include "drivers/adc_builtin_conf.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
@@ -33,7 +34,43 @@ struct MMControlPins {
 	static constexpr PinNoInit gate_in_2{GPIO::H, 9};
 };
 
-const mdrivlib::DMA_LL_Config adc_internal_defs{.DMAx = DMA2, .stream = 7};
+using mdrivlib::AdcChannelConf;
+using mdrivlib::AdcPeriphConf;
+
+struct PotAdcConf : AdcPeriphConf {
+	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
+	static constexpr auto oversample = true;
+	static constexpr auto oversampling_ratio = 1024;
+	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift10Right;
+	static constexpr auto use_dma = true;
+	static constexpr auto dma_periph_num = DMA_2;
+	static constexpr auto stream_num = 7;
+	static constexpr auto request_num = DMA_REQUEST_ADC1;
+	static constexpr auto dma_priority = Low;
+	static constexpr auto use_dma_fifo = false;
+	static constexpr auto use_dma_irq = false;
+	static constexpr auto clock_div = mdrivlib::PLL_Div2;
+};
+
+enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotQ, PotL, PotR, PatchCV };
+
+constexpr auto PotConfs = std::to_array({
+	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA}, //, mdrivlib::AdcSamplingTime::_32Cycles},
+	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotB},
+	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotC},
+	AdcChannelConf{{GPIO::F, 12}, mdrivlib::AdcChanNum::_6, PotD},
+	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotE},
+	AdcChannelConf{{GPIO::C, 0}, mdrivlib::AdcChanNum::_10, PotF},
+	//PotX is ANA0. hack: use PF13 here to set it to analog mode, since on PCB p4 we have it connected to Pot9
+	AdcChannelConf{{GPIO::F, 13}, mdrivlib::AdcChanNum::_0, PotX},
+	//PotY is ANA1. hack: use PF14 here to set it to analog mode, since on PCB p4 we have it connected to Pot10
+	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_1, PotY},
+	AdcChannelConf{{GPIO::A, 1}, mdrivlib::AdcChanNum::_17, PotZ}, //Z = Pot9 on sch: was PF13 on p4 PCB: changed to PA1
+	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotQ}, //Q = Pot10 on sch: was PF14 on p4 PCB: changed to PC5
+	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotL},
+	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotR},
+	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PatchCV},
+});
 
 //TODO: parameterize this and put it in mdrivlib
 struct MultiGPIOReader {
