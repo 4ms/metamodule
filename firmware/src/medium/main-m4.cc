@@ -41,35 +41,22 @@ void main()
 
 	app_startup();
 
-	// SharedBus::i2c.init(i2c_conf_controls);
-
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
 
-	// Controls
-	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
-	Controls controls{potadc, *param_block_base, *auxsignal_buffer};
-
-	// SharedBus
-	// SharedBusQueue i2cqueue{controls};
-	// SharedBus::i2c.enable_IT(i2c_conf_controls.priority1, i2c_conf_controls.priority2);
+	Controls controls{*param_block_base, *auxsignal_buffer};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 	controls.start();
 
 	uint32_t ctr = 0x10000;
 	while (true) {
-		if (!ctr)
+		if (ctr == 1)
 			HWSemaphore<M4_ready>::unlock();
-		else
+		if (ctr > 0)
 			ctr--;
 
-		// if (SharedBus::i2c.is_ready()) {
-		// 	Debug::red_LED2::high();
-		// 	i2cqueue.update();
-		// 	Debug::red_LED2::low();
-		// }
 		__NOP();
 		// __WFI();
 	}

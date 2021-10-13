@@ -98,91 +98,86 @@ void Controls::start_param_block()
 
 void Controls::start()
 {
-	// potadc.start();
+	//Pin pot2{GPIO::C, 3, PinMode::Analog};
+	//Pin pot3{GPIO::A, 3, PinMode::Analog};
+	//Clocks::ADC::enable(ADC1);
 
-	// AdcPeriph<AdcPeriphNum::_1>::init_dma(adc_internal_defs);
-	// AdcPeriph<AdcPeriphNum::_1>::start_adc();
+	//ADC_InitTypeDef adc_init = {
+	//	.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2,
+	//	.Resolution = ADC_RESOLUTION_16B,
+	//	.ScanConvMode = ADC_SCAN_ENABLE,
+	//	.EOCSelection = ADC_EOC_SEQ_CONV, //was single
+	//	.LowPowerAutoWait = DISABLE,
+	//	.ContinuousConvMode = ENABLE, //was disable
+	//	.NbrOfConversion = 2,
+	//	.DiscontinuousConvMode = DISABLE,
+	//	.NbrOfDiscConversion = 0,
+	//	.ExternalTrigConv = ADC_SOFTWARE_START,
+	//	.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE,
+	//	.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR,
+	//	.Overrun = ADC_OVR_DATA_OVERWRITTEN,
+	//	.LeftBitShift = ADC_LEFTBITSHIFT_NONE,
+	//	.OversamplingMode = ENABLE,
+	//	.Oversampling =
+	//		{
+	//			.Ratio = 1024,
+	//			.RightBitShift = ADC_RIGHTBITSHIFT_10,
+	//			.TriggeredMode = ADC_TRIGGEREDMODE_SINGLE_TRIGGER,
+	//			.OversamplingStopReset = ADC_REGOVERSAMPLING_RESUMED_MODE,
+	//		},
+	//};
+	//ADC_HandleTypeDef hadc = {
+	//	.Instance = ADC1,
+	//	.Init = adc_init,
+	//};
+	//HAL_ADC_Init(&hadc);
 
-	Pin pot2{GPIO::C, 3, PinMode::Analog};
-	Pin pot3{GPIO::A, 3, PinMode::Analog};
-	Clocks::ADC::enable(ADC1);
+	//DMA_HandleTypeDef hdma_adc1;
+	//hdma_adc1.Instance = DMA2_Stream7;
+	//hdma_adc1.Init.Request = DMA_REQUEST_ADC1;
+	//hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
+	//hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
+	//hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
+	//hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+	//hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+	//hdma_adc1.Init.Mode = DMA_CIRCULAR;
+	//hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
+	//hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+	//HAL_DMA_Init(&hdma_adc1);
+	//__HAL_LINKDMA(&hadc, DMA_Handle, hdma_adc1);
 
-	ADC_InitTypeDef adc_init = {
-		.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2,
-		.Resolution = ADC_RESOLUTION_16B,
-		.ScanConvMode = ADC_SCAN_ENABLE,
-		.EOCSelection = ADC_EOC_SEQ_CONV, //was single
-		.LowPowerAutoWait = DISABLE,
-		.ContinuousConvMode = ENABLE, //was disable
-		.NbrOfConversion = 2,
-		.DiscontinuousConvMode = DISABLE,
-		.NbrOfDiscConversion = 0,
-		.ExternalTrigConv = ADC_SOFTWARE_START,
-		.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE,
-		.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR,
-		.Overrun = ADC_OVR_DATA_OVERWRITTEN,
-		.LeftBitShift = ADC_LEFTBITSHIFT_NONE,
-		.OversamplingMode = ENABLE,
-		.Oversampling =
-			{
-				.Ratio = 1024,
-				.RightBitShift = ADC_RIGHTBITSHIFT_10,
-				.TriggeredMode = ADC_TRIGGEREDMODE_SINGLE_TRIGGER,
-				.OversamplingStopReset = ADC_REGOVERSAMPLING_RESUMED_MODE,
-			},
-	};
-	ADC_HandleTypeDef hadc = {
-		.Instance = ADC1,
-		.Init = adc_init,
-	};
-	HAL_ADC_Init(&hadc);
+	//ADC_MultiModeTypeDef multimode = {.Mode = ADC_MODE_INDEPENDENT};
+	//HAL_ADCEx_MultiModeConfigChannel(&hadc, &multimode);
 
-	DMA_HandleTypeDef hdma_adc1;
-	hdma_adc1.Instance = DMA2_Stream7;
-	hdma_adc1.Init.Request = DMA_REQUEST_ADC1;
-	hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
-	hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
-	hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
-	hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-	hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-	hdma_adc1.Init.Mode = DMA_CIRCULAR;
-	hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
-	hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-	HAL_DMA_Init(&hdma_adc1);
-	__HAL_LINKDMA(&hadc, DMA_Handle, hdma_adc1);
+	//ADC_ChannelConfTypeDef pot_2_conf = {
+	//	.Channel = ADC_CHANNEL_13,
+	//	.Rank = ADC_REGULAR_RANK_1,
+	//	.SamplingTime = ADC_SAMPLETIME_810CYCLES_5,
+	//	.SingleDiff = ADC_SINGLE_ENDED,
+	//	.OffsetNumber = ADC_OFFSET_NONE,
+	//	.Offset = 0,
+	//	.OffsetRightShift = DISABLE,
+	//	.OffsetSignedSaturation = DISABLE,
+	//};
+	//ADC_ChannelConfTypeDef pot_3_conf = {
+	//	.Channel = ADC_CHANNEL_15,
+	//	.Rank = ADC_REGULAR_RANK_2,
+	//	.SamplingTime = ADC_SAMPLETIME_810CYCLES_5,
+	//	.SingleDiff = ADC_SINGLE_ENDED,
+	//	.OffsetNumber = ADC_OFFSET_NONE,
+	//	.Offset = 0,
+	//	.OffsetRightShift = DISABLE,
+	//	.OffsetSignedSaturation = DISABLE,
+	//};
+	//HAL_ADC_ConfigChannel(&hadc, &pot_2_conf);
+	//HAL_ADC_ConfigChannel(&hadc, &pot_3_conf);
 
-	ADC_MultiModeTypeDef multimode = {.Mode = ADC_MODE_INDEPENDENT};
-	HAL_ADCEx_MultiModeConfigChannel(&hadc, &multimode);
-
-	ADC_ChannelConfTypeDef pot_2_conf = {
-		.Channel = ADC_CHANNEL_13,
-		.Rank = ADC_REGULAR_RANK_1,
-		.SamplingTime = ADC_SAMPLETIME_810CYCLES_5,
-		.SingleDiff = ADC_SINGLE_ENDED,
-		.OffsetNumber = ADC_OFFSET_NONE,
-		.Offset = 0,
-		.OffsetRightShift = DISABLE,
-		.OffsetSignedSaturation = DISABLE,
-	};
-	ADC_ChannelConfTypeDef pot_3_conf = {
-		.Channel = ADC_CHANNEL_15,
-		.Rank = ADC_REGULAR_RANK_2,
-		.SamplingTime = ADC_SAMPLETIME_810CYCLES_5,
-		.SingleDiff = ADC_SINGLE_ENDED,
-		.OffsetNumber = ADC_OFFSET_NONE,
-		.Offset = 0,
-		.OffsetRightShift = DISABLE,
-		.OffsetSignedSaturation = DISABLE,
-	};
-	HAL_ADC_ConfigChannel(&hadc, &pot_2_conf);
-	HAL_ADC_ConfigChannel(&hadc, &pot_3_conf);
-
-	InterruptManager::register_and_start_isr(DMA2_Stream7_IRQn, 2, 2, [&] {
-		Debug::Pin2::high();
-		//HAL_ADC_IRQHandler(&hadc);
-		Debug::Pin2::low();
-	});
-	HAL_ADC_Start_DMA(&hadc, (uint32_t *)pot_vals, 2);
+	//InterruptManager::register_and_start_isr(DMA2_Stream7_IRQn, 2, 2, [&] {
+	//	Debug::Pin2::high();
+	//	//HAL_ADC_IRQHandler(&hadc);
+	//	Debug::Pin2::low();
+	//});
+	//HAL_ADC_Start_DMA(&hadc, (uint32_t *)pot_vals, 2);
 
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
@@ -199,16 +194,15 @@ void Controls::start()
 	auxstream_updater.start();
 }
 
-Controls::Controls(mdrivlib::MuxedADC &potadc,
-				   DoubleBufParamBlock &param_blocks_ref,
-				   DoubleAuxStreamBlock &auxsignal_blocks_ref)
-	: potadc(potadc)
-	, param_blocks(param_blocks_ref)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &auxsignal_blocks_ref)
+	: param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams)
 	, _buffer_full{false}
 	, auxstream_blocks{auxsignal_blocks_ref}
 {
+	pot_adc.start();
+
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
@@ -229,31 +223,16 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 	});
 }
 
-void Controls::store_pot_reading(uint32_t pot_id, uint32_t val)
-{
-	if (pot_id >= PanelDef::NumPot)
-		store_patchcv_reading(val);
-	else
-		latest_pot_reading[pot_id] = val > 4095 ? 4095 : val;
-}
 uint32_t Controls::get_pot_reading(uint32_t pot_id)
 {
-	if (pot_id == 1)
-		return pot_vals[0] >> 4;
-	//return pot2.get_val();
-	if (pot_id == 2)
-		return pot_vals[1] >> 4;
-	// return pot3.get_val();
-	return 0; //latest_pot_reading[pot_id];
+	if (pot_id < NumPotAdcs)
+		return pot_vals[pot_id] >> 4;
+	return 0;
 }
 
-void Controls::store_patchcv_reading(uint32_t patchcv)
-{
-	latest_patchcv_reading = patchcv > 4095 ? 4095 : patchcv;
-}
 uint32_t Controls::get_patchcv_reading()
 {
-	return latest_patchcv_reading;
+	return 0; //pot_vals[PatchCV] >> 4;
 }
 
 void Controls::store_jacksense_reading(uint16_t reading)

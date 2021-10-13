@@ -2,7 +2,7 @@
 #include "auxsignal.hh"
 #include "conf/auxstream_conf.hh"
 #include "conf/control_conf.hh"
-#include "drivers/adc_builtin_driver.hh"
+#include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/i2c.hh"
 #include "drivers/pin.hh"
@@ -17,27 +17,42 @@
 namespace MetaModule
 {
 
-using mdrivlib::AdcChanNum;
-using mdrivlib::AdcPeriphNum;
+//controls conf:
+using mdrivlib::AdcChannelConf;
+using mdrivlib::AdcPeriphConf;
+
+struct PotAdcConf : AdcPeriphConf {
+	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
+	static constexpr auto oversample = true;
+	static constexpr auto oversampling_ratio = 1024;
+	static constexpr auto oversampling_right_bitshift = 10;
+	static constexpr auto use_dma = true;
+	static constexpr auto dma_periph_num = DMA_2;
+	static constexpr auto stream_num = 7;
+	static constexpr auto request_num = DMA_REQUEST_ADC1;
+	static constexpr auto dma_priority = Low;
+	static constexpr auto use_dma_fifo = false;
+	static constexpr auto use_dma_irq = false;
+};
+
+enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotL, PotR, PotQ };
+
+constexpr auto PotConfs = std::to_array({
+	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA}, //, mdrivlib::AdcSamplingTime::_32Cycles},
+	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotB},
+	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotC},
+});
+//
 using mdrivlib::DebouncedPin;
 using mdrivlib::PinPolarity;
 
 struct Controls {
+	Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &auxsignal_blocks_ref);
 
-	Controls(mdrivlib::MuxedADC &potadc,
-			 DoubleBufParamBlock &param_blocks_ref,
-			 DoubleAuxStreamBlock &auxsignal_blocks_ref);
+	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
+	/*non cacheable, in static buffer?*/ static inline std::array<uint16_t, NumPotAdcs> pot_vals;
 
-	mdrivlib::MuxedADC &potadc;
-
-	uint16_t pot_vals[4];
-	// mdrivlib::Pin pot_pins[2]{
-	// 	{GPIO::C, 3, PinMode::Analog}, //pot 2
-	// 	{GPIO::A, 3, PinMode::Analog}, //pot 3
-	// };
-
-	// mdrivlib::AdcChan<AdcPeriphNum::_1, AdcChanNum::_13, uint16_t> pot2; //PC3
-	// mdrivlib::AdcChan<AdcPeriphNum::_1, AdcChanNum::_15, uint16_t> pot3; //PA3
+	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
 	MultiGPIOReader jacksense_reader;
 
@@ -58,13 +73,10 @@ struct Controls {
 	void start();
 	void update_params();
 
-	void store_pot_reading(uint32_t pot_id, uint32_t val);
-	void store_patchcv_reading(uint32_t patchcv);
 	void store_jacksense_reading(uint16_t reading);
-
+	uint32_t get_jacksense_reading();
 	uint32_t get_pot_reading(uint32_t pot_id);
 	uint32_t get_patchcv_reading();
-	uint32_t get_jacksense_reading();
 
 private:
 	mdrivlib::Timekeeper read_controls_task;
@@ -79,9 +91,7 @@ private:
 	mdrivlib::PinChangeInt<AuxStreamUpdateConf> auxstream_updater;
 	AuxStream auxstream;
 
-	uint32_t latest_patchcv_reading;
 	uint16_t latest_jacksense_reading;
-	uint32_t latest_pot_reading[PanelDef::NumPot] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	InterpParam<float, StreamConf::Audio::BlockSize> _knobs[PanelDef::NumPot];
 
 	bool _rotary_moved_while_pressed = false;

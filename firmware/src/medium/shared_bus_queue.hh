@@ -8,7 +8,7 @@
 using namespace mdrivlib;
 namespace MetaModule
 {
-
+/*
 class SharedBusQueue {
 public:
 	SharedBusQueue(Controls &controls)
@@ -76,6 +76,7 @@ private:
 	};
 	I2CClients cur_client = SelectChannel;
 };
+*/
 
 // Todo: create class RoundRobinHandler {
 //    void add_to_sequence(T &&func); or add_to_sequence(std::function<void(void)> &&func);
