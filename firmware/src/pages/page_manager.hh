@@ -16,11 +16,13 @@ namespace MetaModule
 class PageManager {
 	PatchInfo info;
 
-	static constexpr size_t LAST_PAGE = 3;
+	static constexpr size_t LAST_PAGE = 4;
 	std::array<std::unique_ptr<PageBase>, LAST_PAGE> pages = {
 		std::make_unique<PatchSelectorPage>(info),
 		std::make_unique<KnobView3>(info),
-		std::make_unique<PatchOverviewPage>(info),
+		std::make_unique<SMRTestPage>(info),
+		std::make_unique<SMRTestLargePage>(info),
+		// std::make_unique<PatchOverviewPage>(info),
 		// std::make_unique<ArcTestJQPage>(info),
 		// std::make_unique<SketchesTestPage>(info),
 		// std::make_unique<AudioCVInsPage>(info),

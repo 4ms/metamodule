@@ -20,31 +20,45 @@ struct SketchesTestPage : PageBase {
 	void update() override {}
 };
 
-// struct AudioCVInsPage : PageBase {
-// 	AudioCVInsPage(PatchInfo info)
-// 		: PageBase{info}
-// 	{}
-
-// 	void init() override
-// 	{
-// 		setup_scr_AudioCV_Ins(ui);
-// 		screen = ui->AudioCV_Ins;
-// 		init_bg();
-// 	}
-
-// 	void update() override {}
-// };
-
-struct KnobView2 : PageBase {
-	KnobView2(PatchInfo info)
+struct AudioCVInsPage : PageBase {
+	AudioCVInsPage(PatchInfo info)
 		: PageBase{info}
 	{}
 
 	void init() override
 	{
-		setup_scr_Knob_view2(ui);
-		screen = ui->Knob_view2;
-		// init_bg();
+		setup_scr_AudioCV_Ins(ui);
+		screen = ui->AudioCV_Ins;
+		init_bg();
+	}
+
+	void update() override {}
+};
+
+struct SMRTestPage : PageBase {
+	SMRTestPage(PatchInfo info)
+		: PageBase{info}
+	{}
+
+	void init() override
+	{
+		setup_scr_module_test_small(ui);
+		screen = ui->module_test_small;
+		init_bg();
+	}
+
+	void update() override {}
+};
+struct SMRTestLargePage : PageBase {
+	SMRTestLargePage(PatchInfo info)
+		: PageBase{info}
+	{}
+
+	void init() override
+	{
+		setup_scr_module_test_large(ui);
+		screen = ui->module_test_large;
+		init_bg();
 	}
 
 	void update() override {}
