@@ -33,6 +33,7 @@ struct PotAdcConf : AdcPeriphConf {
 	static constexpr auto dma_priority = Low;
 	static constexpr auto use_dma_fifo = false;
 	static constexpr auto use_dma_irq = false;
+	static constexpr auto clock_div = mdrivlib::PLL_Div2;
 };
 
 enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotL, PotR, PotQ };
@@ -42,7 +43,8 @@ constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotB},
 	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotC},
 });
-//
+/////////////
+
 using mdrivlib::DebouncedPin;
 using mdrivlib::PinPolarity;
 
