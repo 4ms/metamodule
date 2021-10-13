@@ -120,10 +120,10 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &
 	, _buffer_full{false}
 	, auxstream_blocks{auxsignal_blocks_ref}
 {
-	InterruptManager::register_and_start_isr(DMA2_Stream7_IRQn, 2, 2, [&] {
-		Debug::Pin2::high();
-		Debug::Pin2::low();
-	});
+	// InterruptManager::register_and_start_isr(DMA2_Stream7_IRQn, 2, 2, [&] {
+	// 	Debug::Pin2::high();
+	// 	Debug::Pin2::low();
+	// });
 	pot_adc.start();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
@@ -155,7 +155,7 @@ uint32_t Controls::get_pot_reading(uint32_t pot_id)
 
 uint32_t Controls::get_patchcv_reading()
 {
-	return 0; //pot_vals[PatchCV] >> 4;
+	return pot_vals[PatchCV] >> 4;
 }
 
 void Controls::store_jacksense_reading(uint16_t reading)
