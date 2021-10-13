@@ -40,8 +40,8 @@ using mdrivlib::AdcPeriphConf;
 struct PotAdcConf : AdcPeriphConf {
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = true;
-	static constexpr auto oversampling_ratio = 128;
-	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift7Right;
+	static constexpr auto oversampling_ratio = 256;
+	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift8Right;
 	static constexpr auto use_dma = true;
 	static constexpr auto dma_periph_num = DMA_2;
 	static constexpr auto stream_num = 7;
@@ -49,7 +49,7 @@ struct PotAdcConf : AdcPeriphConf {
 	static constexpr auto dma_priority = Low;
 	static constexpr auto use_dma_fifo = false;
 	static constexpr auto use_dma_irq = false;
-	static constexpr auto clock_div = mdrivlib::PLL_Div4;
+	static constexpr auto clock_div = mdrivlib::PLL_Div2;
 
 	struct DmaConf : mdrivlib::DefaultDMAConf {
 		static constexpr auto DMAx = 2;
@@ -68,7 +68,7 @@ struct PotAdcConf : AdcPeriphConf {
 
 enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotQ, PotL, PotR, PatchCV };
 
-constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_32Cycles;
+constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_64Cycles;
 
 constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
