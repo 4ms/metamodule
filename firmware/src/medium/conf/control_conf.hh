@@ -35,34 +35,19 @@ struct MMControlPins {
 };
 
 using mdrivlib::AdcChannelConf;
-using mdrivlib::AdcPeriphConf;
 
-struct PotAdcConf : AdcPeriphConf {
+struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = true;
 	static constexpr auto oversampling_ratio = 256;
 	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift8Right;
-	static constexpr auto use_dma = true;
-	static constexpr auto dma_periph_num = DMA_2;
-	static constexpr auto stream_num = 7;
-	static constexpr auto request_num = DMA_REQUEST_ADC1;
-	static constexpr auto dma_priority = Low;
-	static constexpr auto use_dma_fifo = false;
-	static constexpr auto use_dma_irq = false;
 	static constexpr auto clock_div = mdrivlib::PLL_Div2;
 
-	struct DmaConf : mdrivlib::DefaultDMAConf {
+	struct DmaConf : mdrivlib::DefaultAdcPeriphConf::DmaConf {
 		static constexpr auto DMAx = 2;
 		static constexpr auto StreamNum = 7;
 		static constexpr auto RequestNum = DMA_REQUEST_ADC1;
-		static constexpr auto dir = Periph2Mem;
-		static constexpr auto circular = true;
-		static constexpr auto transfer_size_mem = HalfWord;
-		static constexpr auto transfer_size_periph = HalfWord;
-		static constexpr auto dma_priority = Low;
-		static constexpr auto mem_inc = true;
-		static constexpr auto periph_inc = false;
-		static constexpr auto enable_fifo = false;
+		static constexpr auto dma_priority = High;
 	};
 };
 
