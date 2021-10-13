@@ -2,13 +2,16 @@
 // #include "pages/bouncing_balls.hh"
 // #include "pages/debuginfo.hh"
 // #include "pages/page_widgets.hh"
-#include "pages/arc_test_jq.hh"
-#include "pages/patch_overview.hh"
-#include "pages/patch_selector.hh"
-#include "pages/sketches_test_jq.hh"
+// #include "pages/arc_test_jq.hh"
+// #include "pages/patch_overview.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
+
+//Pages:
+#include "pages/knob_view.hh"
+#include "pages/patch_selector.hh"
+#include "pages/sketches_test_jq.hh"
 
 namespace MetaModule
 {

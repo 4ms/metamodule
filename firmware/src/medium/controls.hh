@@ -45,14 +45,16 @@ constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::F, 12}, mdrivlib::AdcChanNum::_6, PotD},
 	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotE},
 	AdcChannelConf{{GPIO::C, 0}, mdrivlib::AdcChanNum::_10, PotF},
-	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_0, PotX}, //ANA0
-	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_1, PotY}, //ANA1
-	AdcChannelConf{{GPIO::F, 13}, mdrivlib::AdcChanNum::_2, PotZ},
-	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotQ}, //Pot10: was PF14 on p4 PCB: change to PC5
+	//PotX is ANA0. hack: use PF13 here to set it to analog mode, since on PCB p4 we have it connected to Pot9
+	AdcChannelConf{{GPIO::F, 13}, mdrivlib::AdcChanNum::_0, PotX},
+	//PotY is ANA1. hack: use PF14 here to set it to analog mode, since on PCB p4 we have it connected to Pot10
+	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_1, PotY},
+	AdcChannelConf{{GPIO::A, 1}, mdrivlib::AdcChanNum::_17, PotZ}, //Pot9: was PF13 on p4 PCB: changed to PA1
+	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotQ},  //Pot10: was PF14 on p4 PCB: changed to PC5
 	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotL},
 	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotR},
 	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PatchCV},
-	//0-19 minus _4 _7 _9 _12 _14 _16 _17
+	//0-19 minus _2 _4 _7 _9 _12 _14 _16
 });
 /////////////
 
