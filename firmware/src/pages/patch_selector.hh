@@ -14,10 +14,7 @@ struct PatchSelectorPage : PageBase {
 
 	lv_obj_t *patch_selector;
 	lv_obj_t *patch_selector_patchlist;
-	// lv_obj_t *slider1;
-	lv_group_t *group;
-
-	// int32_t active_patch_idx = 0;
+	// lv_group_t *group;
 
 	static void patch_selector_event_cb(lv_obj_t *obj, lv_event_t event)
 	{
@@ -39,7 +36,7 @@ struct PatchSelectorPage : PageBase {
 		patch_selector = lv_obj_create(nullptr, nullptr);
 
 		group = lv_group_create();
-		lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		// lv_indev_set_group(lv_indev_get_next(nullptr), group);
 
 		//Write codes patch_selector_patchlist
 		patch_selector_patchlist = lv_dropdown_create(patch_selector, nullptr);
