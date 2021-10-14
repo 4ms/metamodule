@@ -136,7 +136,7 @@ struct GroupArcSketchesPage1 : PageBase {
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_2, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_3, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_4, true);
-		// lv_arc_set_adjustable(ui->group_arc_sketches_arc_5, true); //crashes!
+		lv_arc_set_adjustable(ui->group_arc_sketches_arc_5, true); //crashes!
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_6, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_7, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_8, true);
@@ -177,12 +177,12 @@ struct GroupArcSketchesPage2 : PageBase {
 
 	void update() override
 	{
-		// lv_arc_set_value(ui->group_arc_sketches2_arc_1, params.knobs[0] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches2_arc_2, params.knobs[1] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches2_arc_3, params.knobs[2] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches2_arc_4, params.knobs[3] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches2_arc_5, params.knobs[4] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches2_arc_6, params.knobs[5] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches2_arc_1, params.knobs[0] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches2_arc_2, params.knobs[1] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches2_arc_3, params.knobs[2] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches2_arc_4, params.knobs[3] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches2_arc_5, params.knobs[4] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches2_arc_6, params.knobs[5] * 100.f);
 	}
 };
 
@@ -200,18 +200,18 @@ struct GroupArcSketchesPage3 : PageBase {
 
 	void update() override
 	{
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_1, params.knobs[0] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_2, params.knobs[1] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_3, params.knobs[2] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_4, params.knobs[3] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_5, params.knobs[4] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_6, params.knobs[5] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_7, params.knobs[6] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_8, params.knobs[7] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_9, params.knobs[8] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_10, params.knobs[9] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_11, params.knobs[10] * 100.f);
-		// lv_arc_set_value(ui->group_arc_sketches3_arc_12, params.knobs[11] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_1, params.knobs[0] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_2, params.knobs[1] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_3, params.knobs[2] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_4, params.knobs[3] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_5, params.knobs[4] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_6, params.knobs[5] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_7, params.knobs[6] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_8, params.knobs[7] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_9, params.knobs[8] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_10, params.knobs[9] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_11, params.knobs[10] * 100.f);
+		lv_arc_set_value(ui->group_arc_sketches3_arc_12, params.knobs[11] * 100.f);
 	}
 };
 
