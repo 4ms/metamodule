@@ -626,7 +626,7 @@ void setup_scr_Knob_view3(lv_ui *ui){
 
 	//Write codes Knob_view3_label_8
 	ui->Knob_view3_label_8 = lv_label_create(ui->Knob_view3, NULL);
-	lv_label_set_text(ui->Knob_view3_label_8, "PARAMETER 2");
+	lv_label_set_text(ui->Knob_view3_label_8, "PARAMETER2");
 	lv_label_set_long_mode(ui->Knob_view3_label_8, LV_LABEL_LONG_BREAK);
 	lv_label_set_align(ui->Knob_view3_label_8, LV_LABEL_ALIGN_CENTER);
 
@@ -653,7 +653,7 @@ void setup_scr_Knob_view3(lv_ui *ui){
 
 	//Write codes Knob_view3_label_9
 	ui->Knob_view3_label_9 = lv_label_create(ui->Knob_view3, NULL);
-	lv_label_set_text(ui->Knob_view3_label_9, "PARAMETER 1");
+	lv_label_set_text(ui->Knob_view3_label_9, "PARAMETER1");
 	lv_label_set_long_mode(ui->Knob_view3_label_9, LV_LABEL_LONG_BREAK);
 	lv_label_set_align(ui->Knob_view3_label_9, LV_LABEL_ALIGN_CENTER);
 
@@ -680,7 +680,7 @@ void setup_scr_Knob_view3(lv_ui *ui){
 
 	//Write codes Knob_view3_label_10
 	ui->Knob_view3_label_10 = lv_label_create(ui->Knob_view3, NULL);
-	lv_label_set_text(ui->Knob_view3_label_10, "PARAMETER 5");
+	lv_label_set_text(ui->Knob_view3_label_10, "PARAMETER5");
 	lv_label_set_long_mode(ui->Knob_view3_label_10, LV_LABEL_LONG_BREAK);
 	lv_label_set_align(ui->Knob_view3_label_10, LV_LABEL_ALIGN_CENTER);
 
@@ -707,7 +707,7 @@ void setup_scr_Knob_view3(lv_ui *ui){
 
 	//Write codes Knob_view3_label_11
 	ui->Knob_view3_label_11 = lv_label_create(ui->Knob_view3, NULL);
-	lv_label_set_text(ui->Knob_view3_label_11, "PARAMETER 6");
+	lv_label_set_text(ui->Knob_view3_label_11, "PARAMETER6");
 	lv_label_set_long_mode(ui->Knob_view3_label_11, LV_LABEL_LONG_BREAK);
 	lv_label_set_align(ui->Knob_view3_label_11, LV_LABEL_ALIGN_CENTER);
 
@@ -761,7 +761,7 @@ void setup_scr_Knob_view3(lv_ui *ui){
 
 	//Write codes Knob_view3_label_13
 	ui->Knob_view3_label_13 = lv_label_create(ui->Knob_view3, NULL);
-	lv_label_set_text(ui->Knob_view3_label_13, "PARAMETER 4");
+	lv_label_set_text(ui->Knob_view3_label_13, "PARAMETER4");
 	lv_label_set_long_mode(ui->Knob_view3_label_13, LV_LABEL_LONG_BREAK);
 	lv_label_set_align(ui->Knob_view3_label_13, LV_LABEL_ALIGN_CENTER);
 
