@@ -86,12 +86,12 @@ extern "C" void rotary_push_back()
 
 extern "C" void rotary_press()
 {
-	sim.metaparams.rotary_button.register_falling_edge();
+	sim.metaparams.rotary_button.register_rising_edge();
 }
 
 extern "C" void rotary_release()
 {
-	sim.metaparams.rotary_button.register_rising_edge();
+	sim.metaparams.rotary_button.register_falling_edge();
 }
 
 extern "C" void jump_to_page(unsigned page_num)

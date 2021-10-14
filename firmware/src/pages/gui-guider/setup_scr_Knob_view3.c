@@ -734,7 +734,7 @@ void setup_scr_Knob_view3(lv_ui *ui){
 
 	//Write codes Knob_view3_label_12
 	ui->Knob_view3_label_12 = lv_label_create(ui->Knob_view3, NULL);
-	lv_label_set_text(ui->Knob_view3_label_12, "PARAMETER 3");
+	lv_label_set_text(ui->Knob_view3_label_12, "PARAMETER3");
 	lv_label_set_long_mode(ui->Knob_view3_label_12, LV_LABEL_LONG_BREAK);
 	lv_label_set_align(ui->Knob_view3_label_12, LV_LABEL_ALIGN_CENTER);
 

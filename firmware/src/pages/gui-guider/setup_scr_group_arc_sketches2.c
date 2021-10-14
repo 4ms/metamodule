@@ -40,7 +40,7 @@ void setup_scr_group_arc_sketches2(lv_ui *ui){
 	lv_style_set_line_color(&style_group_arc_sketches2_arc_1_indic, LV_STATE_DEFAULT, lv_color_make(0xf5, 0xf5, 0x96));
 	lv_style_set_line_width(&style_group_arc_sketches2_arc_1_indic, LV_STATE_DEFAULT, 9);
 	lv_obj_add_style(ui->group_arc_sketches2_arc_1, LV_ARC_PART_INDIC, &style_group_arc_sketches2_arc_1_indic);
-	lv_obj_set_pos(ui->group_arc_sketches2_arc_1, 138.5, 99);
+	lv_obj_set_pos(ui->group_arc_sketches2_arc_1, 138, 99);
 	lv_obj_set_size(ui->group_arc_sketches2_arc_1, 43, 43);
 	lv_arc_set_bg_angles(ui->group_arc_sketches2_arc_1, 120, 60);
 	lv_arc_set_angles(ui->group_arc_sketches2_arc_1, 120, 220);
@@ -215,7 +215,7 @@ void setup_scr_group_arc_sketches2(lv_ui *ui){
 	lv_style_set_line_color(&style_group_arc_sketches2_arc_6_indic, LV_STATE_DEFAULT, lv_color_make(0xaa, 0xa7, 0xd7));
 	lv_style_set_line_width(&style_group_arc_sketches2_arc_6_indic, LV_STATE_DEFAULT, 9);
 	lv_obj_add_style(ui->group_arc_sketches2_arc_6, LV_ARC_PART_INDIC, &style_group_arc_sketches2_arc_6_indic);
-	lv_obj_set_pos(ui->group_arc_sketches2_arc_6, 73.5, 34);
+	lv_obj_set_pos(ui->group_arc_sketches2_arc_6, 73, 34);
 	lv_obj_set_size(ui->group_arc_sketches2_arc_6, 173, 173);
 	lv_arc_set_bg_angles(ui->group_arc_sketches2_arc_6, 120, 60);
 	lv_arc_set_angles(ui->group_arc_sketches2_arc_6, 120, 2);

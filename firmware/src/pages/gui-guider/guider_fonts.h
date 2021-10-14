@@ -7,10 +7,17 @@ extern "C" {
 
 #include "lv_font.h"
 
+LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_16)
 LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_13)
 LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_12)
 LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_10)
-// LV_FONT_DECLARE(lv_font_simsun_12)
+LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_16)
+LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_14)
+LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_13)
+LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_12)
+LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_10)
+LV_FONT_DECLARE(lv_font_simsun_12)
+LV_FONT_DECLARE(myriad_16)
 
 #ifdef __cplusplus
 }
