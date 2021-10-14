@@ -220,7 +220,7 @@ public:
 			return;
 		auto &knob_conn = knob_conns[param_id];
 		for (auto &k : knob_conn) {
-			float mapped_val = MathTools::constrain(val * k.range + k.offset, 0.f, 1.f);
+			// float mapped_val = MathTools::constrain(val * k.range + k.offset, 0.f, 1.f);
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
