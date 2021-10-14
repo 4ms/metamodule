@@ -27,18 +27,18 @@ extern "C" void aux_core_main()
 
 		// Process a module command
 		if (command == SMPCommand::UpdateModule) {
-			Debug::Pin3::high();
+			// Debug::Pin3::high();
 			auto module_idx = SMPControl::read<ModuleID>();
 			patch_player->modules[module_idx]->update();
 
 			// signal we're done
 			// SMPControl::write<DoneZero>(0);
 			SMPThread::signal_done();
-			Debug::Pin3::low();
+			// Debug::Pin3::low();
 		}
 
 		if (command == SMPCommand::UpdateListOfModules) {
-			Debug::Pin3::high();
+			// Debug::Pin3::high();
 			// ModuleID = 1, ParamVal = 6, ParamID = 2: 0 1 2 3 4 5
 			// ==> i=1;i<6;i+=2 ==> 1 3 5
 			// ModuleID = 0...
@@ -52,7 +52,7 @@ extern "C" void aux_core_main()
 			// signal we're done
 			SMPThread::signal_done();
 			// SMPControl::write<DoneZero>(0);
-			Debug::Pin3::low();
+			// Debug::Pin3::low();
 		}
 
 		// Update a param command

@@ -1,0 +1,4 @@
+CompileFlags:
+	Remove: [
+		"-std=c++20"
+	]

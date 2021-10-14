@@ -51,7 +51,7 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLN = 99,
 			.PLLP = 6,
 			.PLLQ = 5,
-			.PLLR = 8,
+			.PLLR = 9,
 			.PLLRGE = RCC_PLL4IFRANGE_1,
 			.PLLFRACV = 0,
 			.PLLMODE = RCC_PLL_INTEGER,
@@ -84,11 +84,12 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 };
 
 const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
-	.PeriphClockSelection =
-		RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI3 | RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI23 | RCC_PERIPHCLK_SPI45,
+	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI3 | RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI23 |
+							RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_ADC,
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_HSI,
 	.Sai3ClockSelection = RCC_SAI3CLKSOURCE_PLL3_Q,
 	.Spi1ClockSelection = RCC_SPI1CLKSOURCE_PLL4,
 	.Spi23ClockSelection = RCC_SPI23CLKSOURCE_PLL4,
-	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK2, //PLL4,
+	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK2,
+	.AdcClockSelection = RCC_ADCCLKSOURCE_PLL4, //PLL4R: 66MHz
 };

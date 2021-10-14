@@ -13,7 +13,6 @@
 #include "mp1m4/hsem_handler.hh"
 #include "muxed_adc.hh"
 #include "params.hh"
-#include "screen_writer.hh"
 #include "shared_bus.hh"
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
@@ -34,9 +33,6 @@ static void app_startup()
 	SystemClocks init_system_clocks{};
 };
 
-struct StaticBuffers {
-	static inline __attribute__((section(".static_buffer"))) MMScreenConf::HalfFrameBufferT half_screen_writebuf;
-} _sb;
 } // namespace MetaModule
 
 void main()
@@ -45,49 +41,24 @@ void main()
 
 	app_startup();
 
-	SharedBus::i2c.init(i2c_conf_controls);
-
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto screen_readbuf = SharedMemory::read_address_of<MMScreenConf::FrameBufferT *>(SharedMemory::ScreenBufLocation);
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
 
-	// Controls
-	MuxedADC potadc{SharedBus::i2c, muxed_adc_conf};
-	Controls controls{potadc, *param_block_base, *auxsignal_buffer};
+	Controls controls{*param_block_base, *auxsignal_buffer};
 
-	// SharedBus
-	SharedBusQueue i2cqueue{controls};
-	SharedBus::i2c.enable_IT(i2c_conf_controls.priority1, i2c_conf_controls.priority2);
-
+	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 	controls.start();
 
-	// Screen: Full frame transfer mode
-	ScreenFrameWriter screen_writer{screen_readbuf, &StaticBuffers::half_screen_writebuf, MMScreenConf::FrameBytes};
-	screen_writer.init();
-
-	HWSemaphore<ScreenFrameBufLock>::clear_ISR();
-	HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ScreenFrameBufLock>([&]() {
-		// Todo: ideally we would disable this ISR here, then enable it when transfer has completed
-		// HWSemaphore<ScreenFrameBufLock>::disable_channel_ISR();
-		// Debug::Pin2::high();
-		screen_writer.transfer_buffer_to_screen();
-		// Debug::Pin2::low();
-	});
-	HWSemaphore<ScreenFrameBufLock>::enable_channel_ISR();
-
-	HWSemaphore<ScreenFrameWriteLock>::disable_channel_ISR();
-	HWSemaphore<ScreenFrameWriteLock>::unlock();
-
-	HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
-
+	uint32_t ctr = 0x10000;
 	while (true) {
-		if (SharedBus::i2c.is_ready()) {
-			Debug::red_LED2::low();
-			i2cqueue.update();
-			Debug::red_LED2::high();
-		}
+		if (ctr == 1)
+			HWSemaphore<M4_ready>::unlock();
+		if (ctr > 0)
+			ctr--;
+
 		__NOP();
+		// __WFI();
 	}
 }
 

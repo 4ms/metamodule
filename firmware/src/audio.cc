@@ -25,12 +25,11 @@ constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;
 // static Convolver fftfx;
 
-AudioStream::AudioStream(PatchList &patches,
-						 PatchPlayer &patchplayer,
+AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 CodecT &codec,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
-						 ParamCache &param_cache,
+						 ParamQueue &param_cache,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
 						 DoubleAuxStreamBlock &auxs)
@@ -42,7 +41,6 @@ AudioStream::AudioStream(PatchList &patches,
 	, auxsigs{auxs}
 	, codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
-	, patch_list{patches}
 	, player{patchplayer}
 {
 	codec_.init();
@@ -107,7 +105,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	load_measure.start_measurement();
 
 	cache.write_sync(param_block.params[0], param_block.metaparams);
-	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamCache));
+	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamQueue));
 
 	//Debug: passthrough audio and exit
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {

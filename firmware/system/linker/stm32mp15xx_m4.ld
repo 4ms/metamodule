@@ -9,15 +9,13 @@ __SHARED_PTR_SIZE = 256;
 MEMORY
 {
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
-	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = 0x00020000
-	m_data       (RW)  	: ORIGIN = 0x10020000, LENGTH = 0x00020000
-	SHAREDMEM    (RW)	: ORIGIN = 0x10040000, LENGTH = (128K - __SHARED_PTR_SIZE) /* shared with ca7 */
+	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = 0x00040000
+	m_data	     (RW)	: ORIGIN = 0x10040000, LENGTH = (128K - __SHARED_PTR_SIZE) 
+	SHAREDMEM    (RW)   : ORIGIN = (0x10060000 - __SHARED_PTR_SIZE), LENGTH = __SHARED_PTR_SIZE
 }
 
-/* Split up SHAREDMEM into 64K sections, use top (SRAM4) for SHAREDMEM, and combine bottom (SRAM3) with m_data (SRAM2)
- * which gives us enough to fit 240x320 screen (need ~38k more)
- */
-_params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM);
+_params_ptr = ORIGIN(SHAREDMEM);
+/* _params_ptr = ORIGIN(m_data) + LENGTH(m_data); */
 /* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
 
 SECTIONS

@@ -30,12 +30,11 @@ using CombinedAudioBlock = AudioConf::CombinedAudioBlock;
 
 class AudioStream {
 public:
-	AudioStream(PatchList &patches,
-				PatchPlayer &patchplayer,
+	AudioStream(PatchPlayer &patchplayer,
 				CodecT &codec,
 				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
-				ParamCache &cache,
+				ParamQueue &cache,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
 				DoubleAuxStreamBlock &auxs);
@@ -45,7 +44,7 @@ public:
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxStreamBlock &aux);
 
 private:
-	ParamCache &cache;
+	ParamQueue &cache;
 	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
@@ -57,7 +56,6 @@ private:
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()
 
-	PatchList &patch_list;
 	PatchPlayer &player;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	CycleCounter load_measure;

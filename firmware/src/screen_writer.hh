@@ -2,6 +2,7 @@
 #include "conf/hsem_conf.hh"
 #include "conf/screen_conf.hh"
 #include "debug.hh"
+#include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "drivers/memory_transfer.hh"
 #include "drivers/pin.hh"
@@ -22,8 +23,12 @@ class ScreenFrameWriter : public mdrivlib::DmaSpiScreenDriver<ScreenWriterConfT,
 	static constexpr uint32_t FrameSize = ScreenWriterConfT::FrameBytes;
 	static constexpr uint32_t HalfFrameSize = ScreenWriterConfT::HalfFrameBytes;
 
-	bool using_half_buffer_transfers;
-	bool direct_mode;
+	//Transfer mode:
+	//*DoubleBuffer modes copy the buffer using MDMA or BDMA, and then transfer the copy via DMA+SPI
+	//*Direct modes just use SPI+DMA
+	//PartialFrame means the transferred region is variable sized
+	enum TransferMode { Unknown, HalfFrameDoubleBuffer, FullFrameDoubleBuffer, FullFrameDirect, PartialFrameDirect };
+	TransferMode mode{Unknown};
 
 	uint32_t dst_addr;
 	void *dst;
@@ -35,8 +40,7 @@ public:
 	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_,
 					  ScreenWriterConfT::HalfFrameBufferT *writebuf_,
 					  size_t writebuffer_size)
-		: using_half_buffer_transfers{true}
-		, direct_mode{false}
+		: mode{HalfFrameDoubleBuffer}
 		, dst_addr{reinterpret_cast<uint32_t>(writebuf_)}
 		, dst{reinterpret_cast<void *>(writebuf_)}
 		, src{reinterpret_cast<void *>(readbuf_->data())}
@@ -49,8 +53,7 @@ public:
 	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_,
 					  ScreenWriterConfT::FrameBufferT *writebuf_,
 					  size_t writebuffer_size)
-		: using_half_buffer_transfers{false}
-		, direct_mode{false}
+		: mode{FullFrameDoubleBuffer}
 		, dst_addr{reinterpret_cast<uint32_t>(writebuf_)}
 		, dst{reinterpret_cast<void *>(writebuf_->data())}
 		, src{reinterpret_cast<void *>(readbuf_->data())}
@@ -62,10 +65,16 @@ public:
 
 	// Direct transfer mode
 	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_, size_t writebuffer_size)
-		: using_half_buffer_transfers{false}
-		, direct_mode{true}
+		: mode{FullFrameDirect}
 		, src{reinterpret_cast<void *>(readbuf_->data())}
 		, src_2nd_half{src}
+		, _rowstart{ScreenWriterConfT::rowstart}
+		, _colstart{ScreenWriterConfT::colstart}
+	{}
+
+	// Direct Partial transfer mode
+	ScreenFrameWriter()
+		: mode{PartialFrameDirect}
 		, _rowstart{ScreenWriterConfT::rowstart}
 		, _colstart{ScreenWriterConfT::colstart}
 	{}
@@ -131,7 +140,9 @@ public:
 
 	void transfer_buffer_to_screen()
 	{
-		if (using_half_buffer_transfers) {
+		if (mode == HalfFrameDoubleBuffer) {
+			//Total setup times = 12.5+1.6+12.5+1.6 = 28.2us, every 16Hz (or 33Hz) = <0.1 %
+			// Debug::Pin5::high(); // time to setup the first mem_xfer = 12-13us
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 
 			set_pos(0, 0, _width - 1, _height - 1);
@@ -139,10 +150,12 @@ public:
 
 			// Debug::Pin2::high(); // start MDMA xfer #1
 			mem_xfer.register_callback([&]() {
-				// Debug::Pin2::low();	 // completed MDMA xfer#1
+				// Debug::Pin4::high(); // time to setup the SPI transfer = 1.6us, starting 180us after first mem_xfer
+				// Debug::Pin2::low(); // completed MDMA xfer#1
 				// Debug::Pin3::high(); // start BDMA transfer #1
 				config_dma_transfer(dst_addr, HalfFrameSize);
 				start_dma_transfer([&]() {
+					// Debug::Pin5::high(); //time to setup mem_xfer = 12-13us, starting 12ms after first SPI transfer
 					// Debug::Pin3::low(); // completed BDMA xfer #1
 
 					//Start transferring the second half:
@@ -151,6 +164,7 @@ public:
 
 					// Debug::Pin2::high(); // start MDMA xfer #2
 					mem_xfer.register_callback([&]() {
+						// Debug::Pin4::high(); //time to setup second SPI transfer = 1.6us, starting 180us after mem_xfer
 						// Debug::Pin2::low();	 // completed MDMA xfer #2
 						// Debug::Pin3::high(); // start BDMA xfer #2
 						config_dma_transfer(dst_addr, HalfFrameSize);
@@ -158,14 +172,17 @@ public:
 							// Debug::Pin3::low(); // completed BDMA xfer #3
 							HWSemaphore<ScreenFrameWriteLock>::unlock();
 						});
+						// Debug::Pin4::low(); //end setup measurement
 					});
 					mem_xfer.start_transfer();
+					// Debug::Pin5::low(); //end setup measurement
 				});
+				// Debug::Pin4::low(); //end setup measurement
 			});
 			mem_xfer.start_transfer();
+			// Debug::Pin5::low(); //end setup measurement
 
-		} else if (!direct_mode) {
-			// Debug::Pin3::high();
+		} else if (mode == FullFrameDoubleBuffer) {
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 			set_pos(0, 0, _width - 1, _height - 1);
 
@@ -174,25 +191,32 @@ public:
 
 			// Setup the mem-to-mem transfer
 			mem_xfer.config_transfer(dst, src, FrameSize);
-			mem_xfer.register_callback([&] {
-				// Debug::Pin3::high();
-				start_dma_transfer([]() { HWSemaphore<ScreenFrameWriteLock>::unlock(); });
-				// HWSemaphore<ScreenFrameWriteLock>::unlock();
-				// Debug::Pin3::low();
-			});
+			mem_xfer.register_callback(
+				[&] { start_dma_transfer([]() { HWSemaphore<ScreenFrameWriteLock>::unlock(); }); });
 			mem_xfer.start_transfer();
-			// Debug::Pin3::low();
 
-		} else {
-			// Debug::Pin3::high();
+		} else if (mode == FullFrameDirect) {
 			HWSemaphore<ScreenFrameWriteLock>::lock();
 			set_pos(0, 0, _width - 1, _height - 1);
 			config_dma_transfer(reinterpret_cast<uint32_t>(src), FrameSize);
-			start_dma_transfer([] {
-				// Debug::Pin3::low();
-				HWSemaphore<ScreenFrameWriteLock>::unlock();
-			});
+			start_dma_transfer([] { HWSemaphore<ScreenFrameWriteLock>::unlock(); });
 		}
+	}
+
+	void register_partial_frame_cb(auto cb)
+	{
+		register_callback(cb);
+	}
+
+	void transfer_partial_frame(int xstart, int ystart, int xend, int yend, uint16_t *buffer)
+	{
+		set_pos(xstart, ystart, xend, yend);
+		auto buffer_size_bytes = (xend - xstart + 1) * (yend - ystart + 1) * 2;
+		config_dma_transfer(reinterpret_cast<uint32_t>(buffer), buffer_size_bytes);
+		mdrivlib::SystemCache::clean_dcache_by_range(buffer, buffer_size_bytes);
+		__DSB();
+
+		start_dma_transfer();
 	}
 
 protected:

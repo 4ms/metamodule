@@ -39,6 +39,8 @@ CompileFlags:
 		"-Ilib/stm32-hal/stm32mp1/include",
 		"-Ilib/cmsis/Core_A/Include",
 		"-Ilib/cmsis-device/stm32mp157c/include",
+		"-Ilib/lvgl",
+		"-Ilib/lvgl/lvgl/src/lv_font",
 		"-Ilib/mdrivlib",
 		"-Ilib/mdrivlib/drivers",
 		"-Ilib/mdrivlib/target/stm32mp1",
@@ -57,7 +59,7 @@ CompileFlags:
 	]
 ---
 If:
-	PathMatch: [".*mp1.*m4.*"]
+	PathMatch: [".*mp1.*m4.*", ".*medium.*m4.*"]
 CompileFlags:
 	Add: [
 		"-Isrc/mp1m4",
@@ -73,7 +75,7 @@ CompileFlags:
 ---
 If:
 	PathMatch: [".*stm32h7.*", ".*m4.*", ".*m7.*"]
-	PathExclude: [".*a7.*", ".*mp1.*"]
+	PathExclude: [".*a7.*", ".*mp1.*", ".*medium.*"]
 CompileFlags:
 	Add: [
 		"-DSTM32H7x5",

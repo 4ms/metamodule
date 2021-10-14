@@ -18,8 +18,13 @@
 #include "simplequaddjembe.hh"
 #include "testnew2.hh"
 
+namespace MetaModule
+{
+
 PatchList::PatchList()
 	: _patch_addrs{
+		  test_inputs_1234_mmpatch,
+		  quaddjembe_mmpatch,
 		  DjembeReverb_mmpatch,
 		  InfiniteOsc_mmpatch,
 		  quaddjembe_mmpatch,
@@ -34,8 +39,6 @@ PatchList::PatchList()
 		  testnew2_mmpatch,
 		  // simplequaddjembe_mmpatch,
 		  dualdjembe_mmpatch,
-		  test_inputs_1234_mmpatch,
-		  quaddjembe_mmpatch,
 		  test_inputs_56g1g2_mmpatch,
 		  test_14switchCore_clock_mmpatch,
 		  test_14switchCore_cv_mmpatch,
@@ -72,3 +75,4 @@ PatchList::PatchList()
 		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
 	}
 }
+} // namespace MetaModule

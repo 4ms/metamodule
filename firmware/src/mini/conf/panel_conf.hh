@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/panel_mini_defs.hh"
+#include <cstdint>
 namespace MetaModule
 {
 static constexpr uint32_t NumAudioIn = PanelDef::NumAudioIn;
@@ -11,4 +12,5 @@ static constexpr uint32_t NumGateIn = PanelDef::NumGateIn;
 static constexpr uint32_t NumGateOut = PanelDef::NumGateOut;
 static constexpr uint32_t NumPatchCV = PanelDef::NumMetaCV;
 static constexpr uint32_t NumRgbButton = PanelDef::NumRgbButton;
+static constexpr uint32_t NumMetaRgbButton = PanelDef::NumMetaRgbButton;
 } // namespace MetaModule

@@ -5,6 +5,11 @@ namespace MetaModule
 
 void PageManager::init()
 {
+	for (auto &page : pages)
+		page->init();
+
+	//Todo: page manager doesn't load patches, send a load_patch command via uiaudiomailbox
+	//Audio is more suited to load patches, or maybe a 3rd object (patch manager)
 	patch_list.set_cur_patch_index(0);
 	bool ok = player.load_patch(patch_list.cur_patch());
 	if (!ok)
@@ -14,146 +19,47 @@ void PageManager::init()
 
 	mbox.loading_new_patch = false;
 
-	jump_to_page(Page::PatchSelector);
-	display_current_page();
+	focus_page(PageChangeDirection::Jump);
 }
 
 void PageManager::next_page()
 {
 	blur_page();
-	cur_page = static_cast<Page>(static_cast<unsigned>(cur_page) + 1);
+	cur_page++;
 	if (cur_page >= LAST_PAGE)
-		cur_page = Page::PatchOverview;
-	focus_page();
+		cur_page = 0;
+	focus_page(PageChangeDirection::Forward);
 }
 void PageManager::prev_page()
 {
 	blur_page();
-	if (static_cast<unsigned>(cur_page) == 0)
-		cur_page = static_cast<Page>(static_cast<unsigned>(LAST_PAGE) - 1);
+	if (cur_page == 0)
+		cur_page = LAST_PAGE - 1;
 	else
-		cur_page = static_cast<Page>(static_cast<unsigned>(cur_page) - 1);
-	focus_page();
+		cur_page--;
+	focus_page(PageChangeDirection::Back);
 }
 
-void PageManager::jump_to_page(Page p)
+void PageManager::jump_to_page(unsigned p)
 {
 	blur_page();
 	cur_page = p;
-	focus_page();
+	focus_page(PageChangeDirection::Jump);
 }
 
-void PageManager::focus_page()
+void PageManager::focus_page(PageChangeDirection dir)
 {
-	switch (cur_page) {
-		default:
-		case PatchOverview:
-			// overview_page.start();
-			break;
-
-		case ModulesInPatch:
-			// modules_in_patch_page.start();
-			break;
-
-		case JackMap:
-			// jack_map_page.start();
-			break;
-
-		case PotMap:
-			// knob_map_page.start();
-			break;
-
-		case PatchLayout:
-			patch_layout_page.focus();
-			break;
-
-		case PatchSelector:
-			patch_selector_page.focus();
-			break;
-
-		case DebugInfo:
-			// debug_info_page.start();
-			break;
-
-		case BouncingBalls:
-			// balls_page.start();
-			break;
-	}
+	pages[cur_page]->focus(dir);
 }
+
 void PageManager::blur_page()
 {
-	switch (cur_page) {
-		default:
-		case PatchOverview:
-			// overview_page.start();
-			break;
-
-		case ModulesInPatch:
-			// modules_in_patch_page.start();
-			break;
-
-		case JackMap:
-			// jack_map_page.start();
-			break;
-
-		case PotMap:
-			// knob_map_page.start();
-			break;
-
-		case PatchLayout:
-			patch_layout_page.blur();
-			break;
-
-		case PatchSelector:
-			patch_selector_page.blur();
-			break;
-
-		case DebugInfo:
-			// debug_info_page.start();
-			break;
-
-		case BouncingBalls:
-			// balls_page.start();
-			break;
-	}
+	pages[cur_page]->blur();
 }
 
-void PageManager::display_current_page()
+void PageManager::update_current_page()
 {
-	switch (cur_page) {
-		default:
-		case PatchOverview:
-			overview_page.draw();
-			break;
-
-		case ModulesInPatch:
-			modules_in_patch_page.draw();
-			break;
-
-		case JackMap:
-			jack_map_page.draw();
-			break;
-
-		case PotMap:
-			knob_map_page.draw();
-			break;
-
-		case PatchLayout:
-			patch_layout_page.draw();
-			break;
-
-		case PatchSelector:
-			patch_selector_page.draw();
-			break;
-
-		case DebugInfo:
-			debug_info_page.draw();
-			break;
-
-		case BouncingBalls:
-			balls_page.draw();
-			break;
-	}
+	pages[cur_page]->update();
 }
 
 } // namespace MetaModule

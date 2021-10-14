@@ -1,0 +1,152 @@
+/*
+ * Copyright 2021 NXP
+ * SPDX-License-Identifier: MIT
+ */
+
+#ifndef GUI_GUIDER_H
+#define GUI_GUIDER_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "lvgl/lvgl.h"
+#include "guider_fonts.h"
+
+typedef struct
+{
+	lv_obj_t *Main_Example;
+	lv_obj_t *Main_Example_btn_1;
+	lv_obj_t *Main_Example_btn_1_label;
+	lv_obj_t *Main_Example_btn_2;
+	lv_obj_t *Main_Example_btn_2_label;
+	lv_obj_t *Main_Example_btn_3;
+	lv_obj_t *Main_Example_btn_3_label;
+	lv_obj_t *Main_Example_btn_4;
+	lv_obj_t *Main_Example_btn_4_label;
+	lv_obj_t *Main_Example_btn_5;
+	lv_obj_t *Main_Example_btn_5_label;
+	lv_obj_t *Main_Example_btn_6;
+	lv_obj_t *Main_Example_btn_6_label;
+	lv_obj_t *Main_Example_arc_1;
+	lv_obj_t *Main_Example_arc_2;
+	lv_obj_t *Main_Example_arc_3;
+	lv_obj_t *Main_Example_arc_4;
+	lv_obj_t *Main_Example_arc_5;
+	lv_obj_t *Main_Example_arc_6;
+	lv_obj_t *Main_Example_label_1;
+	lv_obj_t *Main_Example_label_2;
+	lv_obj_t *Main_Example_label_3;
+	lv_obj_t *symbol_sketches;
+	lv_obj_t *symbol_sketches_sw_1;
+	lv_obj_t *symbol_sketches_arc_1;
+	lv_obj_t *symbol_sketches_slider_1;
+	lv_obj_t *symbol_sketches_bar_1;
+	lv_obj_t *symbol_sketches_bar_2;
+	lv_obj_t *symbol_sketches_slider_2;
+	lv_obj_t *symbol_sketches_slider_3;
+	lv_obj_t *symbol_sketches_slider_4;
+	lv_obj_t *symbol_sketches_slider_5;
+	lv_obj_t *symbol_sketches_lmeter_2;
+	lv_obj_t *symbol_sketches_slider_6;
+	lv_obj_t *symbol_sketches_slider_7;
+	lv_obj_t *AudioCV_Ins;
+	lv_obj_t *AudioCV_Ins_cont_1;
+	lv_obj_t *AudioCV_Ins_bar_1;
+	lv_obj_t *AudioCV_Ins_bar_2;
+	lv_obj_t *AudioCV_Ins_bar_3;
+	lv_obj_t *AudioCV_Ins_bar_4;
+	lv_obj_t *AudioCV_Ins_bar_5;
+	lv_obj_t *AudioCV_Ins_bar_6;
+	lv_obj_t *AudioCV_Ins_cont_2;
+	lv_obj_t *AudioCV_Ins_label_3;
+	lv_obj_t *AudioCV_Ins_label_4;
+	lv_obj_t *AudioCV_Ins_label_6;
+	lv_obj_t *AudioCV_Ins_label_7;
+	lv_obj_t *AudioCV_Ins_label_8;
+	lv_obj_t *AudioCV_Ins_label_9;
+	lv_obj_t *AudioCV_Ins_label_10;
+	lv_obj_t *AudioCV_Ins_label_11;
+	lv_obj_t *AudioCV_Ins_bar_7;
+	lv_obj_t *AudioCV_Ins_bar_8;
+	lv_obj_t *AudioCV_Ins_bar_9;
+	lv_obj_t *AudioCV_Ins_bar_10;
+	lv_obj_t *AudioCV_Ins_bar_11;
+	lv_obj_t *AudioCV_Ins_bar_12;
+	lv_obj_t *Knob_view3;
+	lv_obj_t *Knob_view3_arc_1;
+	lv_obj_t *Knob_view3_arc_2;
+	lv_obj_t *Knob_view3_arc_3;
+	lv_obj_t *Knob_view3_arc_4;
+	lv_obj_t *Knob_view3_arc_5;
+	lv_obj_t *Knob_view3_arc_6;
+	lv_obj_t *Knob_view3_arc_7;
+	lv_obj_t *Knob_view3_arc_8;
+	lv_obj_t *Knob_view3_arc_9;
+	lv_obj_t *Knob_view3_arc_10;
+	lv_obj_t *Knob_view3_arc_11;
+	lv_obj_t *Knob_view3_arc_12;
+	lv_obj_t *Knob_view3_cont_1;
+	lv_obj_t *Knob_view3_label_2;
+	lv_obj_t *Knob_view3_label_3;
+	lv_obj_t *Knob_view3_label_4;
+	lv_obj_t *Knob_view3_label_5;
+	lv_obj_t *Knob_view3_label_6;
+	lv_obj_t *Knob_view3_label_7;
+	lv_obj_t *Knob_view3_label_8;
+	lv_obj_t *Knob_view3_label_9;
+	lv_obj_t *Knob_view3_label_10;
+	lv_obj_t *Knob_view3_label_11;
+	lv_obj_t *Knob_view3_label_12;
+	lv_obj_t *Knob_view3_label_13;
+	lv_obj_t *AudioCV_Gates;
+	lv_obj_t *AudioCV_Gates_bar_2;
+	lv_obj_t *AudioCV_Gates_bar_3;
+	lv_obj_t *AudioCV_Gates_bar_4;
+	lv_obj_t *AudioCV_Gates_bar_5;
+	lv_obj_t *AudioCV_Gates_bar_6;
+	lv_obj_t *AudioCV_Gates_cont_2;
+	lv_obj_t *AudioCV_Gates_label_3;
+	lv_obj_t *AudioCV_Gates_label_4;
+	lv_obj_t *AudioCV_Gates_label_6;
+	lv_obj_t *AudioCV_Gates_label_7;
+	lv_obj_t *AudioCV_Gates_label_8;
+	lv_obj_t *AudioCV_Gates_label_9;
+	lv_obj_t *AudioCV_Gates_label_10;
+	lv_obj_t *AudioCV_Gates_label_11;
+	lv_obj_t *AudioCV_Gates_bar_8;
+	lv_obj_t *AudioCV_Gates_bar_13;
+	lv_obj_t *AudioCV_Gates_bar_14;
+	lv_obj_t *AudioCV_Gates_bar_15;
+	lv_obj_t *AudioCV_Gates_bar_16;
+	lv_obj_t *AudioCV_Gates_bar_17;
+	lv_obj_t *AudioCV_Gates_bar_20;
+	lv_obj_t *AudioCV_Gates_bar_22;
+	lv_obj_t *AudioCV_Gates_bar_28;
+	lv_obj_t *AudioCV_Gates_bar_29;
+	lv_obj_t *AudioCV_Gates_bar_31;
+	lv_obj_t *AudioCV_Gates_label_12;
+	lv_obj_t *AudioCV_Gates_label_13;
+	lv_obj_t *AudioCV_Gates_label_14;
+	lv_obj_t *AudioCV_Gates_label_15;
+	lv_obj_t *module_test_small;
+	lv_obj_t *module_test_small_img_1;
+	lv_obj_t *module_test_large;
+	lv_obj_t *module_test_large_img_1;
+}lv_ui;
+
+void setup_ui(lv_ui *ui);
+extern lv_ui guider_ui;
+void setup_scr_Main_Example(lv_ui *ui);
+void setup_scr_symbol_sketches(lv_ui *ui);
+void setup_scr_AudioCV_Ins(lv_ui *ui);
+void setup_scr_Knob_view3(lv_ui *ui);
+void setup_scr_AudioCV_Gates(lv_ui *ui);
+void setup_scr_module_test_small(lv_ui *ui);
+void setup_scr_module_test_large(lv_ui *ui);
+LV_IMG_DECLARE(_module_graphic_SMR_small_alpha_246x240);
+LV_IMG_DECLARE(_module_graphic_SMR_small_alpha_320x240);
+
+#ifdef __cplusplus
+}
+#endif
+#endif

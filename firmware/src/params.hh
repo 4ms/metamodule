@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
+#include "util/colors.hh"
 #include "util/debouncer.hh"
 #include <array>
 #include <string>
@@ -74,6 +75,8 @@ struct MetaParams {
 	Toggler rotary_button;
 	RotaryMotion rotary;
 	RotaryMotion rotary_pushed;
+	std::array<Toggler, NumMetaRgbButton> meta_buttons{};
+
 	uint8_t audio_load = 0;
 
 	MetaParams()
@@ -129,11 +132,11 @@ struct MetaParams {
 //
 // Todo: use HSEM to allow for multiple cores and inverted ISR priorities
 // Todo: "cache" isn't the best name for this, think of something better...
-struct ParamCache {
+struct ParamQueue {
 	Params p;
 	MetaParams m;
 
-	ParamCache()
+	ParamQueue()
 	{
 		clear();
 	}

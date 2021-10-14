@@ -20,12 +20,14 @@ void Controls::update_debouncers()
 	gate_in_2.update();
 }
 
+// Mini:
 // first param in block: 2.0-2.4us, @ 48kHz
 // second param in block: 1.3-1.5us @ 48kHz
 // load 6.8%
+// Medium:
+// to be measured... but it's 2.8us total for this + update_debouncers
 void Controls::update_params()
 {
-	//cur_params->buttons[0].copy_state(button0);
 	cur_params->gate_ins[0].copy_state(gate_in_1);
 	cur_params->gate_ins[1].copy_state(gate_in_2);
 
@@ -56,6 +58,7 @@ void Controls::update_params()
 				cur_metaparams->rotary_button.register_falling_edge();
 			}
 		}
+		cur_metaparams->rotary_button.set_state(rotary_button.is_pressed());
 
 		// Rotary turning
 		int new_rotary_motion = rotary.read();
@@ -63,6 +66,9 @@ void Controls::update_params()
 		cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
 		cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
 		_rotary_moved_while_pressed = (pressed && new_rotary_motion);
+
+		// Meta button
+		cur_metaparams->meta_buttons[0].copy_state(button0);
 
 	} else {
 		cur_params->jack_senses = get_jacksense_reading();
@@ -77,33 +83,29 @@ void Controls::update_params()
 		_buffer_full = true;
 }
 
+template<int block_num>
+void Controls::start_param_block()
+{
+	//28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
+	cur_metaparams = &param_blocks[block_num].metaparams;
+	cur_params = param_blocks[block_num].params.begin();
+	_first_param = true;
+	_buffer_full = false;
+
+	for (auto &aux : auxstream_blocks[block_num])
+		auxstream.queue_data(aux);
+}
+
 void Controls::start()
 {
-	potadc.start();
-
 	HWSemaphore<ParamsBuf1Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf1Lock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() {
-		cur_metaparams = &param_blocks[0].metaparams;
-		cur_params = param_blocks[0].params.begin();
-		_first_param = true;
-		_buffer_full = false;
-
-		for (auto &aux : auxstream_blocks[0])
-			auxstream.queue_data(aux);
-	});
+	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf1Lock>([&]() { start_param_block<0>(); });
 
 	HWSemaphore<ParamsBuf2Lock>::clear_ISR();
 	HWSemaphore<ParamsBuf2Lock>::disable_channel_ISR();
-	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() {
-		cur_metaparams = &param_blocks[1].metaparams;
-		cur_params = param_blocks[1].params.begin();
-		_first_param = true;
-		_buffer_full = false;
+	HWSemaphoreCoreHandler::register_channel_ISR<ParamsBuf2Lock>([&]() { start_param_block<1>(); });
 
-		for (auto &aux : auxstream_blocks[1])
-			auxstream.queue_data(aux);
-	});
 	HWSemaphore<ParamsBuf1Lock>::enable_channel_ISR();
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
@@ -111,21 +113,24 @@ void Controls::start()
 	auxstream_updater.start();
 }
 
-Controls::Controls(mdrivlib::MuxedADC &potadc,
-				   DoubleBufParamBlock &param_blocks_ref,
-				   DoubleAuxStreamBlock &auxsignal_blocks_ref)
-	: potadc(potadc)
-	, param_blocks(param_blocks_ref)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &auxsignal_blocks_ref)
+	: param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams)
 	, _buffer_full{false}
 	, auxstream_blocks{auxsignal_blocks_ref}
 {
+	// InterruptManager::register_and_start_isr(DMA2_Stream7_IRQn, 2, 2, [&] {
+	// 	Debug::Pin2::high();
+	// 	Debug::Pin2::low();
+	// });
+	pot_adc.start();
+
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 
-	// mp1 m4: 20.1us, width= 4.1us
+	// mp1 m4: every ~20us + 60us gap every 64 pulses (1.3ms), width= 2.8us ... ~14% load
 	read_controls_task.init(control_read_tim_conf, [this]() {
 		if (_buffer_full) {
 			return;
@@ -136,31 +141,21 @@ Controls::Controls(mdrivlib::MuxedADC &potadc,
 
 	auxstream.init();
 	auxstream_updater.init([&]() {
-		// Debug::Pin2::high();
+		//0.35us wide, every 20.83us = 1.68% load
 		auxstream.output_next();
-		// Debug::Pin2::low();
 	});
 }
 
-void Controls::store_pot_reading(uint32_t pot_id, uint32_t val)
-{
-	if (pot_id >= PanelDef::NumPot)
-		store_patchcv_reading(val);
-	else
-		latest_pot_reading[pot_id] = val > 4095 ? 4095 : val;
-}
 uint32_t Controls::get_pot_reading(uint32_t pot_id)
 {
-	return latest_pot_reading[pot_id];
+	if (pot_id < NumPotAdcs)
+		return pot_vals[pot_id] >> 4;
+	return 0;
 }
 
-void Controls::store_patchcv_reading(uint32_t patchcv)
-{
-	latest_patchcv_reading = patchcv > 4095 ? 4095 : patchcv;
-}
 uint32_t Controls::get_patchcv_reading()
 {
-	return latest_patchcv_reading;
+	return pot_vals[PatchCV] >> 4;
 }
 
 void Controls::store_jacksense_reading(uint16_t reading)

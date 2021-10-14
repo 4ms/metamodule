@@ -35,20 +35,24 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 	};
 
 	struct DMAConf : mdrivlib::DefaultDMAConf {
-		static constexpr unsigned DMAx = 1;
-		static constexpr unsigned StreamNum = 3;
-		static constexpr unsigned RequestNum = DMA_REQUEST_SPI4_TX;
-		static constexpr IRQn_Type IRQn = DMA1_Stream3_IRQn;
-		static constexpr uint32_t pri = 7;
-		static constexpr uint32_t subpri = 3;
-		static constexpr Direction dir = Mem2Periph;
-		static constexpr bool circular = false;
-		static constexpr TransferSize transfer_size_mem = HalfWord;
-		static constexpr TransferSize transfer_size_periph = HalfWord;
-		static constexpr uint8_t dma_priority = Low;
-		static constexpr bool mem_inc = true;
-		static constexpr bool periph_inc = false;
-		static constexpr bool half_transfer_interrupt_enable = false;
+		static constexpr auto DMAx = 1;
+		static constexpr auto StreamNum = 3;
+		static constexpr auto RequestNum = DMA_REQUEST_SPI4_TX;
+		static constexpr auto IRQn = DMA1_Stream3_IRQn;
+		static constexpr auto pri = 1;
+		static constexpr auto subpri = 1;
+		static constexpr auto dir = Mem2Periph;
+		static constexpr auto circular = false;
+		static constexpr auto transfer_size_mem = HalfWord;
+		static constexpr auto transfer_size_periph = HalfWord;
+		static constexpr auto dma_priority = Low;
+		static constexpr auto mem_inc = true;
+		static constexpr auto periph_inc = false;
+		static constexpr auto half_transfer_interrupt_enable = false;
+		static constexpr auto enable_fifo = true;
+		static constexpr auto fifo_threshold = FifoHalfFull;
+		static constexpr auto mem_burst = Single;
+		static constexpr auto periph_burst = Single;
 	};
 
 	using DCPin = FPin<GPIO::H, 4, PinMode::Output>;

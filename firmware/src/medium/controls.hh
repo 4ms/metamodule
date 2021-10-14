@@ -2,6 +2,7 @@
 #include "auxsignal.hh"
 #include "conf/auxstream_conf.hh"
 #include "conf/control_conf.hh"
+#include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
 #include "drivers/i2c.hh"
 #include "drivers/pin.hh"
@@ -20,12 +21,12 @@ using mdrivlib::DebouncedPin;
 using mdrivlib::PinPolarity;
 
 struct Controls {
+	Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &auxsignal_blocks_ref);
 
-	Controls(mdrivlib::MuxedADC &potadc,
-			 DoubleBufParamBlock &param_blocks_ref,
-			 DoubleAuxStreamBlock &auxsignal_blocks_ref);
+	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
+	std::array<uint16_t, NumPotAdcs> pot_vals;
+	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
-	mdrivlib::MuxedADC &potadc;
 	MultiGPIOReader jacksense_reader;
 
 	mdrivlib::RotaryEncoder<mdrivlib::RotaryHalfStep> rotary = {
@@ -45,13 +46,10 @@ struct Controls {
 	void start();
 	void update_params();
 
-	void store_pot_reading(uint32_t pot_id, uint32_t val);
-	void store_patchcv_reading(uint32_t patchcv);
 	void store_jacksense_reading(uint16_t reading);
-
+	uint32_t get_jacksense_reading();
 	uint32_t get_pot_reading(uint32_t pot_id);
 	uint32_t get_patchcv_reading();
-	uint32_t get_jacksense_reading();
 
 private:
 	mdrivlib::Timekeeper read_controls_task;
@@ -66,11 +64,12 @@ private:
 	mdrivlib::PinChangeInt<AuxStreamUpdateConf> auxstream_updater;
 	AuxStream auxstream;
 
-	uint32_t latest_patchcv_reading;
 	uint16_t latest_jacksense_reading;
-	uint32_t latest_pot_reading[PanelDef::NumPot] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	InterpParam<float, StreamConf::Audio::BlockSize> _knobs[PanelDef::NumPot];
 
 	bool _rotary_moved_while_pressed = false;
+
+	template<int block_num>
+	void start_param_block();
 };
 } // namespace MetaModule

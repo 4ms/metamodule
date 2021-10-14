@@ -9,10 +9,11 @@
 #include "drivers/stm32xx.h"
 #include "drivers/system.hh"
 #include "drivers/system_startup.hh"
+#include "hsem_handler.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
-#include "ui.hh"
+// #include "ui.hh"
 
 namespace MetaModule
 {
@@ -32,11 +33,11 @@ void main()
 
 	PatchList patch_list;
 	PatchPlayer patch_player;
-	ParamCache param_cache;
+	ParamQueue param_cache;
 	UiAudioMailbox mbox;
 
-	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
-	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
+	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
+	// Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
 
 	AudioStream audio{patch_list,
 					  patch_player,
@@ -66,7 +67,7 @@ void main()
 		;
 
 	param_cache.clear();
-	ui.start();
+	// ui.start();
 	audio.start();
 
 	while (true) {

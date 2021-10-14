@@ -8,7 +8,7 @@
 using namespace mdrivlib;
 namespace MetaModule
 {
-
+/*
 class SharedBusQueue {
 public:
 	SharedBusQueue(Controls &controls)
@@ -39,7 +39,10 @@ public:
 				auto last_ain_channel = ain_channel_order[cur_pot];
 				if (++cur_pot >= NumADCs) {
 					cur_pot = 0;
-					HWSemaphore<M4_ready>::unlock();
+					if (!read_all_pots) {
+						read_all_pots = true;
+						HWSemaphore<M4_ready>::unlock();
+					}
 				}
 
 				if (ain_channel_order[cur_pot] != last_ain_channel) {
@@ -64,6 +67,7 @@ private:
 	static constexpr uint8_t PatchCVID = NumADCs;
 	static constexpr uint8_t pot_order[NumADCs] = {7, 6, 0, 8, 9, 2, 1, 10, 5, 11, 3, PatchCVID, 4};
 	uint8_t cur_pot = 0;
+	bool read_all_pots = false;
 
 	enum I2CClients {
 		SelectChannel,
@@ -72,6 +76,7 @@ private:
 	};
 	I2CClients cur_client = SelectChannel;
 };
+*/
 
 // Todo: create class RoundRobinHandler {
 //    void add_to_sequence(T &&func); or add_to_sequence(std::function<void(void)> &&func);

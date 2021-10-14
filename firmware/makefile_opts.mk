@@ -1,7 +1,7 @@
 #----------------------------------
 # Uncomment to compile unoptimized:
 # $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O1
 # $(BUILDDIR)/src/m7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/timekeeper.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/main.o: OPTFLAG = -O0
@@ -23,7 +23,9 @@
 # $(BUILDDIR)/$(SHARED)/CoreModules/fmoscCore.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(SHARED)/CoreModules/multilfoCore.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/target/stm32mp1/drivers/sai_tdm.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(DRIVERLIB)/target/stm32mp1/drivers/adc_builtin_driver.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/codec_PCM3168.o: OPTFLAG = -O0
 
 $(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
+# $(BUILDDIR)/lib/lvgl/lvgl/src/lv_widgets/lv_arc.o: OPTFLAG = -O0
 #-----------------------------------

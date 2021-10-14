@@ -8,7 +8,6 @@
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_player.hh"
-#include "patchlist.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
@@ -28,21 +27,19 @@ void main()
 
 	StaticBuffers::init();
 
-	PatchList patch_list;
 	PatchPlayer patch_player;
-	ParamCache param_cache;
+	ParamQueue param_queue;
 	UiAudioMailbox mbox;
 
-	LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
+	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 
-	Ui<LEDUpdateHz> ui{patch_list, patch_player, param_cache, mbox, leds, StaticBuffers::screen_framebuf};
+	Ui ui{patch_player, param_queue, mbox};
 
-	AudioStream audio{patch_list,
-					  patch_player,
+	AudioStream audio{patch_player,
 					  Hardware::codec,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
-					  param_cache,
+					  param_queue,
 					  mbox,
 					  StaticBuffers::param_blocks,
 					  StaticBuffers::auxsignal_block};
@@ -55,8 +52,8 @@ void main()
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 
-	// Enable ISR for LedBufFrameLock:
-	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
+	// Needed for LED refresh
+	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	// // Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
@@ -64,17 +61,17 @@ void main()
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
-
-	param_cache.clear();
-	ui.start();
+	param_queue.clear();
 	audio.start();
+	ui.start();
 
 	while (true) {
-		HAL_Delay(500);
-		Debug::red_LED1::high();
+		// HAL_Delay(500);
+		// Debug::red_LED1::high();
+		// HAL_Delay(500);
+		// Debug::red_LED1::low();
 
-		HAL_Delay(500);
-		Debug::red_LED1::low();
+		ui.update();
 	}
 }
 
