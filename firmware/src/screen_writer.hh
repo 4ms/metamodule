@@ -208,6 +208,7 @@ public:
 		register_callback(cb);
 	}
 
+	//~110us, as needed, typically 2.5ms spaced
 	void transfer_partial_frame(int xstart, int ystart, int xend, int yend, uint16_t *buffer)
 	{
 		set_pos(xstart, ystart, xend, yend);

@@ -65,6 +65,7 @@ SOURCES = \
 		  $(HALDIR)/src/stm32mp1xx_hal_dma.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c \
+		  $(HALDIR)/src/stm32mp1xx_hal_uart.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c \
 		  $(HALDIR)/src/stm32mp1xx_ll_tim.c \
@@ -86,10 +87,7 @@ SOURCES = \
 		  src/pages/page_manager.cc \
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(SHARED)/axoloti-wrapper/axoloti_math.cpp \
-		  
 		  # $(LIBDIR)/printf/printf.c \
-		  # src/print.cc \
-		  # $(MFSRC) \
 		  # $(NE10DIR)/common/NE10_mask_table.c \
 		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
 		  # $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
@@ -178,7 +176,7 @@ INCLUDES = -I. \
 		   -I$(SHARED)/patch \
 		   -I$(LIBDIR)/lvgl \
 		   -I$(LIBDIR)/lvgl/lvgl/src/lv_font \
-		   # -I$(LIBDIR)/printf \
+		   -I$(LIBDIR)/printf \
 		   # -I$(MFINC) \
 		   # -I$(MFFONTDIR) \
 		   # -I$(NE10DIR)/inc \

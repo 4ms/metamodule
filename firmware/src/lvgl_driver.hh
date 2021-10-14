@@ -1,8 +1,10 @@
 #include "lvgl/lvgl.h"
 #include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
+// #include "printf.h"
 #include "screen_writer.hh"
 #include "timekeeper.hh"
+#include "uart.hh"
 
 namespace MetaModule
 {
@@ -26,9 +28,16 @@ class LVGLDriver {
 	//Display driver
 	lv_disp_drv_t disp_drv;
 
+	// #ifdef LV_USE_LOG
+	static inline Uart<UART4_BASE> log_uart;
+	// #endif
+
 public:
+	//~600us
 	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb)
 	{
+		//printf_("LVLDriver start ctro");
+
 		lv_init();
 
 		// lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
@@ -49,12 +58,45 @@ public:
 		indev_drv.read_cb = indev_cb;
 		indev = lv_indev_drv_register(&indev_drv);
 		lv_indev_enable(indev, true);
+
+		lv_log_register_print_cb(log_cb);
+	}
+
+	static void log_cb(lv_log_level_t level, const char *file, uint32_t line, const char *fn_name, const char *dsc)
+	{
+		if (level == LV_LOG_LEVEL_ERROR)
+			log_uart.write("ERROR: ");
+		if (level == LV_LOG_LEVEL_WARN)
+			log_uart.write("WARNING: ");
+		if (level == LV_LOG_LEVEL_INFO)
+			log_uart.write("INFO: ");
+		if (level == LV_LOG_LEVEL_TRACE)
+			log_uart.write("TRACE: ");
+
+		log_uart.write("File: ");
+		log_uart.write(file);
+
+		log_uart.write("#");
+		log_uart.write(line);
+
+		log_uart.write(": ");
+		log_uart.write(fn_name);
+		log_uart.write(": ");
+		log_uart.write(dsc);
+		log_uart.write("\n\r");
 	}
 };
 
-class LVGLInputDriver {
-	lv_indev_drv_t indev;
-};
+// #ifdef LV_LOG_PRINTF
+// extern "C" void _putchar(char character)
+// {
+// 	while ((UART4->ISR & UART_FLAG_TXE) == RESET)
+// 		;
+// 	UART4->TDR = character;
+// 	while ((UART4->ISR & UART_FLAG_TC) == RESET)
+// 		;
+// }
+// #endif
 
 class MMDisplay {
 	static inline ScreenFrameWriter _spi_driver;
