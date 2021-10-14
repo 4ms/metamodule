@@ -36,7 +36,6 @@ struct AudioCVInsPage : PageBase {
 };
 
 struct SMRTestPage : PageBase {
-	lv_group_t *group;
 	lv_style_t style_highlight;
 
 	SMRTestPage(PatchInfo info)
@@ -61,7 +60,6 @@ struct SMRTestPage : PageBase {
 		lv_style_set_outline_opa(&style_highlight, LV_STATE_DEFAULT, 0);
 
 		group = lv_group_create();
-		lv_indev_set_group(lv_indev_get_next(nullptr), group);
 		lv_group_add_obj(group, ui->module_test_small_btn_1);
 		lv_group_add_obj(group, ui->module_test_small_btn_2);
 		lv_group_add_obj(group, ui->module_test_small_btn_3);
