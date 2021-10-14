@@ -5,6 +5,7 @@ namespace MetaModule
 
 void PageManager::init()
 {
+	//54ms for a bunch of pages
 	for (auto &page : pages)
 		page->init();
 

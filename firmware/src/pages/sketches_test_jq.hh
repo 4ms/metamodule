@@ -45,17 +45,14 @@ struct SMRTestPage : PageBase {
 
 	void init() override
 	{
+		//17ms with styles removed. Presumably 24ms with them in
 		setup_scr_module_test_small(ui);
 		screen = ui->module_test_small;
 		init_bg();
 
 		lv_style_init(&style_highlight);
 
-		//Write style state: LV_STATE_DEFAULT for style_module_test_small_btn_1_main
 		lv_style_set_radius(&style_highlight, LV_STATE_DEFAULT, 80);
-		// lv_style_set_bg_color(&style_highlight, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		// lv_style_set_bg_grad_color(&style_highlight, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		// lv_style_set_bg_grad_dir(&style_highlight, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
 		lv_style_set_bg_opa(&style_highlight, LV_STATE_DEFAULT, 0);
 		lv_style_set_border_color(&style_highlight, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
 		lv_style_set_border_width(&style_highlight, LV_STATE_DEFAULT, 2);
