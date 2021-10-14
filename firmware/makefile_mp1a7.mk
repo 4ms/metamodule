@@ -33,10 +33,6 @@ LTOFLAG = -flto=auto
 
 include makefile_opts.mk
 
-# MFFONTDIR = $(LIBDIR)/mcufont/fonts
-# MFDIR = $(LIBDIR)/mcufont/decoder
-# include $(LIBDIR)/mcufont/decoder/mcufont.mk
-
 NE10DIR = $(LIBDIR)/ne10/ne10
 
 ASM_SOURCES = $(STARTUP_CA7)
