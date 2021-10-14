@@ -34,8 +34,6 @@ struct MMControlPins {
 	static constexpr PinNoInit gate_in_2{GPIO::H, 9};
 };
 
-using mdrivlib::AdcChannelConf;
-
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = true;
@@ -47,14 +45,13 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 		static constexpr auto DMAx = 2;
 		static constexpr auto StreamNum = 7;
 		static constexpr auto RequestNum = DMA_REQUEST_ADC1;
-		static constexpr auto dma_priority = High;
+		static constexpr auto dma_priority = Low;
 	};
 };
 
+using mdrivlib::AdcChannelConf;
 enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotQ, PotL, PotR, PatchCV };
-
 constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_64Cycles;
-
 constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotB, AdcSampTime},
