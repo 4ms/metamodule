@@ -3,6 +3,8 @@
 #include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
 #include "CoreModules/panel_medium_defs.hh"
+#include "knob_map.hh"
+#include "paletteHub.hh"
 #include "plugin.hpp"
 #include "util/math.hh"
 
@@ -13,11 +15,33 @@ struct HubMedium : public CommModule {
 	enum OutputIds { NUM_OUTPUTS = PanelDef::NumAudioOut + PanelDef::NumGateOut };
 	enum LightIds { NUM_LIGHTS = 0 };
 
+	KnobMap<8> knobMaps[PanelDef::NumPot]{
+		PaletteHub::color[0],
+		PaletteHub::color[1],
+		PaletteHub::color[2],
+		PaletteHub::color[3],
+		PaletteHub::color[4],
+		PaletteHub::color[5],
+		PaletteHub::color[6],
+		PaletteHub::color[7],
+		PaletteHub::color[8],
+		PaletteHub::color[9],
+		PaletteHub::color[10],
+		PaletteHub::color[11],
+	};
+
+	std::string labelText = "";
+	std::string patchNameText = "";
+
+	long responseTimer = 0;
+	bool buttonAlreadyHandled = false;
+
 	HubMedium()
 	{
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		selfID.typeID = "PANEL_MED";
 	}
+	~HubMedium() = default;
 
 	void process(const ProcessArgs &args) override {}
 };
