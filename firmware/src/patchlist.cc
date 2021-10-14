@@ -36,7 +36,7 @@ PatchList::PatchList()
 		  mono_verb_mmpatch,
 		  dualinfosc1_mmpatch,
 		  mappeddjembe_mmpatch,
-		  testnew2_mmpatch,
+		  // testnew2_mmpatch,
 		  // simplequaddjembe_mmpatch,
 		  dualdjembe_mmpatch,
 		  test_inputs_56g1g2_mmpatch,
