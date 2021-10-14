@@ -55,7 +55,6 @@ SOURCES  += system/libcpp_stub.cc
 SOURCES  += system/new.cc
 SOURCES  += $(DRIVERLIB)/drivers/hal_handlers.cc
 SOURCES  += $(DRIVERLIB)/drivers/i2c.cc
-SOURCES  += $(TARGETDEVICEDIR)/drivers/adc_builtin_driver.cc 
 SOURCES  += $(TARGETDEVICEDIR_CM4)/drivers/interrupt_handler.cc
 SOURCES  += $(DRIVERLIB)/drivers/pin.cc
 SOURCES  += $(DRIVERLIB)/drivers/rotary.cc
