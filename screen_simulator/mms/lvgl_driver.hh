@@ -50,6 +50,21 @@ public:
 		indev_drv.read_cb = indev_cb;
 		indev = lv_indev_drv_register(&indev_drv);
 		lv_indev_enable(indev, true);
+
+		lv_log_register_print_cb(log_cb);
+	}
+	static void log_cb(lv_log_level_t level, const char *file, uint32_t line, const char *fn_name, const char *dsc)
+	{
+		if (level == LV_LOG_LEVEL_ERROR)
+			printf("ERROR: ");
+		if (level == LV_LOG_LEVEL_WARN)
+			printf("WARNING: ");
+		if (level == LV_LOG_LEVEL_INFO)
+			printf("INFO: ");
+		if (level == LV_LOG_LEVEL_TRACE)
+			printf("TRACE: ");
+
+		printf("File: %s:%d (in %s): %s\n\r", file, line, fn_name, dsc);
 	}
 };
 
