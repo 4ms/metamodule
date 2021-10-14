@@ -8,11 +8,11 @@ class LabeledButton;
 class CommModuleWidget : public app::ModuleWidget {
 protected:
 	const float kKnobSpacingY = 17;
-	const float kKnobSpacingX = 20.32f;
+	const float kKnobSpacingX = 18;
 	const float kTextOffset = 5;
 	const float kTopMargin = 13;
 	const float kBottomMargin = 15;
-	const float kGridSpacingX = 60;
+	const float kGridSpacingX = 30;
 	const float kModuleHeight = 128.5f;
 
 public:
@@ -35,6 +35,7 @@ protected:
 	void addLabeledOutputPx(const std::string labelText, int outputID, Vec posPx);
 
 	void addLabeledToggle(const std::string labelText, int lightID, int paramID, Vec posGrid);
+	void addLabeledToggleMM(const std::string labelText, const int lightID, const int paramID, const Vec position);
 	void addModuleTitle(const std::string moduleTitle);
 
 private:
@@ -70,8 +71,8 @@ public:
 	LabeledButton(CommModuleWidget &parent)
 		: _parent{parent}
 	{}
-	virtual void draw(const DrawArgs &args) override;
-	virtual void onDragStart(const event::DragStart &e) override;
+	void draw(const DrawArgs &args) override;
+	void onDragStart(const event::DragStart &e) override;
 	void updateState();
 	void createMapping(LabelButtonID srcId);
 

@@ -16,6 +16,7 @@
 #include "quad_LFO.hh"
 #include "quaddjembe.hh"
 #include "simplequaddjembe.hh"
+#include "testnew2.hh"
 
 namespace MetaModule
 {
@@ -35,6 +36,8 @@ PatchList::PatchList()
 		  mono_verb_mmpatch,
 		  dualinfosc1_mmpatch,
 		  mappeddjembe_mmpatch,
+		  testnew2_mmpatch,
+		  // simplequaddjembe_mmpatch,
 		  dualdjembe_mmpatch,
 		  test_inputs_56g1g2_mmpatch,
 		  test_14switchCore_clock_mmpatch,
