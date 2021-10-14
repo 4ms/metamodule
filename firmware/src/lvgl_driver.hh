@@ -1,7 +1,7 @@
 #include "lvgl/lvgl.h"
 #include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
-// #include "printf.h"
+#include "printf.h"
 #include "screen_writer.hh"
 #include "timekeeper.hh"
 #include "uart.hh"
@@ -28,15 +28,15 @@ class LVGLDriver {
 	//Display driver
 	lv_disp_drv_t disp_drv;
 
-	// #ifdef LV_USE_LOG
+#ifdef LV_USE_LOG
 	static inline Uart<UART4_BASE> log_uart;
-	// #endif
+#endif
 
 public:
 	//~600us
 	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb)
 	{
-		//printf_("LVLDriver start ctro");
+		printf("LVLDriver started ctor\n\r");
 
 		lv_init();
 
@@ -86,17 +86,19 @@ public:
 		log_uart.write("\n\r");
 	}
 };
+#ifdef LV_LOG_PRINTF
+extern "C" void _putchar(char character)
+{
+	// while ((UART4->ISR & UART_FLAG_TXE) == RESET)
+	// 	;
+	UART4->TDR = character;
+	while ((UART4->ISR & USART_ISR_TXFT) == 0)
+		;
+	// while ((UART4->ISR & UART_FLAG_TC) == RESET)
+	// 	;
+}
 
-// #ifdef LV_LOG_PRINTF
-// extern "C" void _putchar(char character)
-// {
-// 	while ((UART4->ISR & UART_FLAG_TXE) == RESET)
-// 		;
-// 	UART4->TDR = character;
-// 	while ((UART4->ISR & UART_FLAG_TC) == RESET)
-// 		;
-// }
-// #endif
+#endif
 
 class MMDisplay {
 	static inline ScreenFrameWriter _spi_driver;

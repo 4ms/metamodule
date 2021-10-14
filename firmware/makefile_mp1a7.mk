@@ -87,7 +87,7 @@ SOURCES = \
 		  src/pages/page_manager.cc \
 		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
 		  $(SHARED)/axoloti-wrapper/axoloti_math.cpp \
-		  # $(LIBDIR)/printf/printf.c \
+		  $(LIBDIR)/printf/printf.c \
 		  # $(NE10DIR)/common/NE10_mask_table.c \
 		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
 		  # $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
