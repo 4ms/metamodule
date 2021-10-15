@@ -15,20 +15,21 @@
 #include <functional>
 #include <iostream>
 
-constexpr int NUM_KNOBS = PanelDef::NumKnobs;
 constexpr int NUM_MAPPINGS_PER_KNOB = 8;
 
 struct MetaModuleHub : public CommModule {
 
-	std::map<int, KnobMap<NUM_MAPPINGS_PER_KNOB>> knobMaps;
-	// KnobMap<NUM_MAPPINGS_PER_KNOB> knobMaps[NUM_KNOBS]{PaletteHub::color[0],
-	// 												   PaletteHub::color[1],
-	// 												   PaletteHub::color[2],
-	// 												   PaletteHub::color[3],
-	// 												   PaletteHub::color[4],
-	// 												   PaletteHub::color[5],
-	// 												   PaletteHub::color[6],
-	// 												   PaletteHub::color[7]};
+	std::vector<KnobMap<NUM_MAPPINGS_PER_KNOB>> knobMaps;
+	// std::array<KnobMap<NUM_MAPPINGS_PER_KNOB>, PanelDef::NumKnobs> knobMaps{{
+	// 	{0, PaletteHub::color[0]},
+	// 	{1, PaletteHub::color[1]},
+	// 	{2, PaletteHub::color[2]},
+	// 	{3, PaletteHub::color[3]},
+	// 	{4, PaletteHub::color[4]},
+	// 	{5, PaletteHub::color[5]},
+	// 	{6, PaletteHub::color[6]},
+	// 	{7, PaletteHub::color[7]},
+	// }};
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
@@ -43,9 +44,13 @@ struct MetaModuleHub : public CommModule {
 
 	MetaModuleHub()
 	{
-		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		printf("MMHub ctor()\n");
+		for (int i = 0; i < PanelDef::NumKnobs; i++)
+			knobMaps.emplace_back(i, PaletteHub::color[i]);
 
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		selfID.typeID = "PANEL_8";
+		printf("MMHub ctor() end\n");
 	}
 
 	~MetaModuleHub() {}
@@ -135,11 +140,10 @@ struct MetaModuleHub : public CommModule {
 	{
 		for (auto &knobmap : knobMaps) {
 			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
-				LabelButtonID dst = {LabelButtonID::Types::Knob,
-									 knobmap.second.paramHandles[x].paramId,
-									 knobmap.second.paramHandles[x].moduleId};
-				LabelButtonID src = {LabelButtonID::Types::Knob, knobmap.first, id};
-				centralData->setMapRange(src, dst, knobmap.second.mapRange[x].first, knobmap.second.mapRange[x].second);
+				LabelButtonID dst = {
+					LabelButtonID::Types::Knob, knobmap.paramHandles[x].paramId, knobmap.paramHandles[x].moduleId};
+				LabelButtonID src = {LabelButtonID::Types::Knob, knobmap.paramId, id};
+				centralData->setMapRange(src, dst, knobmap.mapRange[x].first, knobmap.mapRange[x].second);
 			}
 		}
 	}
@@ -148,12 +152,13 @@ struct MetaModuleHub : public CommModule {
 	{
 		for (auto &m : centralData->maps) {
 			auto knobToMap = m.src.objID;
-			KnobMap<NUM_MAPPINGS_PER_KNOB> km{PaletteHub::color[knobToMap]};
-			km.paramId = knobToMap;
-
-			// knobMaps.push_back();
-
+			// Todo: knobMaps[knobToMap].mapping.push_back({});
+			// auto &ph = knobMaps[knobToMap].mapping.last();
+			//
 			auto lowestEmpty = knobMaps[knobToMap].firstAvailable();
+			knobMaps[knobToMap].paramHandles[lowestEmpty].color = PaletteHub::color[knobToMap];
+			printf("loadMappings: Adding paramhandle &%x", &knobMaps[knobToMap].paramHandles[lowestEmpty]);
+			APP->engine->addParamHandle(&knobMaps[knobToMap].paramHandles[lowestEmpty]);
 			APP->engine->updateParamHandle(&knobMaps[knobToMap].paramHandles[lowestEmpty], m.dst.moduleID, m.dst.objID);
 			auto [min, max] = centralData->getMapRange(m.src, m.dst);
 			knobMaps[knobToMap].mapRange[lowestEmpty] = {min, max};
@@ -170,18 +175,21 @@ struct MetaModuleHub : public CommModule {
 			updateDisplay();
 		}
 
-		for (int i = 0; i < NUM_KNOBS; i++) {
+		for (auto &knobmap : knobMaps) {
+			// Todo: for(auto &mapping : knobmap)
+			// auto &ph = mapping.paramHandle;
+			// auto &mr = mapping.mapRange;
 			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
-				bool knobMapped = (knobMaps[i].paramHandles[x].moduleId) != -1;
+				bool knobMapped = (knobmap.paramHandles[x].moduleId) != -1;
 				if (knobMapped) {
-					Module *module = knobMaps[i].paramHandles[x].module;
-					int paramId = knobMaps[i].paramHandles[x].paramId;
+					Module *module = knobmap.paramHandles[x].module;
+					int paramId = knobmap.paramHandles[x].paramId;
 					ParamQuantity *paramQuantity = module->paramQuantities[paramId];
-					auto newMappedVal = MathTools::map_value(params[i].getValue(),
+					auto newMappedVal = MathTools::map_value(params[knobmap.paramId].getValue(),
 															 0.0f,
 															 1.0f,
-															 knobMaps[i].mapRange[x].first,
-															 knobMaps[i].mapRange[x].second);
+															 knobmap.mapRange[x].first,
+															 knobmap.mapRange[x].second);
 					paramQuantity->setValue(newMappedVal);
 				}
 			}
@@ -376,6 +384,8 @@ struct MetaModuleHubWidget : CommModuleWidget {
 			expModule->redrawPatchName = [&]() { this->patchName->text = this->expModule->patchNameText; };
 		}
 
+		printf("Created MMHubWidget\n");
+
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-no-words.svg")));
 
 		// addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
@@ -489,42 +499,52 @@ HubKnobLabel::HubKnobLabel(MetaModuleHubWidget &hub)
 
 void HubKnobLabel::onDeselect(const event::Deselect &e)
 {
-	// if (!_hub.expModule)
-	// 	return;
+	printf("Entering onDeselect()\n");
+	if (!_hub.expModule)
+		return;
 	// if (!module)
 	// 	return;
 
 	// Check if a ParamWidget was touched
 	ParamWidget *touchedParam = APP->scene->rack->touchedParam;
 	if (touchedParam && centralData->isMappingInProgress()) {
-		APP->scene->rack->touchedParam = NULL;
 		int moduleId = touchedParam->paramQuantity->module->id;
 		int paramId = touchedParam->paramQuantity->paramId;
+		APP->scene->rack->touchedParam = NULL;
 
 		//	Create mapping
 		if (_hub.expModule->id != moduleId) { // button on module clicked
 			int knobToMap = centralData->getMappingSource().objID;
+			// Search if mapping already exists
+			bool duplicateMap = false;
 			for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
 				auto thisHandle = _hub.expModule->knobMaps[knobToMap].paramHandles[i];
-				bool duplicateMap = (thisHandle.moduleId == moduleId && thisHandle.paramId == paramId);
-				if (!duplicateMap) {
-					auto lowestEmpty = _hub.expModule->knobMaps[knobToMap].firstAvailable();
-					if (lowestEmpty != -1) { // create mapping
-						APP->engine->updateParamHandle(
-							&_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty], moduleId, paramId, true);
-						centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
-					} else {
-						centralData->abortMappingProcedure();
-					}
-				}
+				duplicateMap = (thisHandle.moduleId == moduleId && thisHandle.paramId == paramId);
 			}
 
-		} else { // button on hub clicked, abort
+			if (!duplicateMap) {
+				auto lowestEmpty = _hub.expModule->knobMaps[knobToMap].firstAvailable();
+				if (lowestEmpty != -1) {
+					// create mapping
+					_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty].color = PaletteHub::color[knobToMap];
+					printf("Adding paramhandle &%x", &_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty]);
+					APP->engine->addParamHandle(&_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty]);
+					APP->engine->updateParamHandle(
+						&_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty], moduleId, paramId, true);
+					centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
+				} else {
+					centralData->abortMappingProcedure();
+				}
+			} else {
+				// TODO remove mapping?
+			}
+		} else { // user clicked on a hub knob, abort
 			centralData->abortMappingProcedure();
 		}
 	} else {
-		//	Abort mapping
-		//	module->disableLearn(id);
+		//	Whatever we touched, it wasn't another module's knob
+		//	Or-- a mapping is not in progress
+		// Either way, just ignore the event
 	}
 }
 
