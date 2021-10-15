@@ -15,21 +15,10 @@
 #include <functional>
 #include <iostream>
 
-struct MetaModuleHub : public CommModule {
+struct HubBase : public CommModule {
+	static constexpr int NUM_MAPPINGS_PER_KNOB = 8;
 
-	enum ParamIds { ENUMS(KNOBS, PanelDef::NumPot), GET_INFO, NUM_PARAMS };
-	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
-	enum OutputIds { AUDIO_OUT_L, AUDIO_OUT_R, AUDIO_OUT_3, AUDIO_OUT_4, CLOCK_OUT, NUM_OUTPUTS };
-	enum LightIds { WRITE_LIGHT, NUM_LIGHTS };
-
-	KnobMap<8> knobMaps[PanelDef::NumPot]{PaletteHub::color[0],
-										  PaletteHub::color[1],
-										  PaletteHub::color[2],
-										  PaletteHub::color[3],
-										  PaletteHub::color[4],
-										  PaletteHub::color[5],
-										  PaletteHub::color[6],
-										  PaletteHub::color[7]};
+	std::vector<KnobMap<NUM_MAPPINGS_PER_KNOB>> knobMaps;
 
 	std::string labelText = "";
 	std::string patchNameText = "";
@@ -37,13 +26,8 @@ struct MetaModuleHub : public CommModule {
 	long responseTimer = 0;
 	bool buttonAlreadyHandled = false;
 
-	MetaModuleHub()
-	{
-		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		selfID.typeID = "PANEL_8";
-	}
-
-	~MetaModuleHub() = default;
+	HubBase() = default;
+	~HubBase() = default;
 
 	json_t *dataToJson() override
 	{
@@ -128,14 +112,17 @@ struct MetaModuleHub : public CommModule {
 
 	void saveMappingRanges()
 	{
-		for (int i = 0; i < NUM_KNOBS; i++) {
+		// Todo use countzip
+		int i = 0;
+		for (auto &knobmap : knobMaps) {
 			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
-				LabelButtonID dst = {LabelButtonID::Types::Knob,
-									 knobMaps[i].paramHandles[x].paramId,
-									 knobMaps[i].paramHandles[x].moduleId};
+				auto &paramHandle = knobmap.paramHandles[x];
+				auto &maprange = knobmap.mapRange[x];
+				LabelButtonID dst = {LabelButtonID::Types::Knob, paramHandle.paramId, paramHandle.moduleId};
 				LabelButtonID src = {LabelButtonID::Types::Knob, i, id};
-				centralData->setMapRange(src, dst, knobMaps[i].mapRange[x].first, knobMaps[i].mapRange[x].second);
+				centralData->setMapRange(src, dst, maprange.first, maprange.second);
 			}
+			i++;
 		}
 	}
 
@@ -369,8 +356,8 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-no-words.svg")));
 
 		// addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
-		addLabeledToggleMM("WRITE", MetaModuleHub::WRITE_LIGHT, MetaModuleHub::GET_INFO, {70, 19.5});
-
+		// addLabeledToggleMM("WRITE", MetaModuleHub::WRITE_LIGHT, MetaModuleHub::GET_INFO, {70, 19.5});
+/*
 		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
 		valueLabel->color = rack::color::BLACK;
 		valueLabel->text = "";
@@ -415,7 +402,7 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		addLabeledOutputMM("CV Out 2", MetaModuleHub::AUDIO_OUT_4, {55, 96.2});
 
 		addLabeledOutputMM("Clock Out", MetaModuleHub::CLOCK_OUT, {40.4, 106.4});
-
+*/
 		// Todo:
 		// addLabeledToggle() for both RGB Buttons
 	}
