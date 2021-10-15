@@ -15,20 +15,20 @@ struct HubMedium : public CommModule {
 	enum OutputIds { NUM_OUTPUTS = PanelDef::NumAudioOut + PanelDef::NumGateOut };
 	enum LightIds { NUM_LIGHTS = 0 };
 
-	KnobMap<8> knobMaps[PanelDef::NumPot]{
-		PaletteHub::color[0],
-		PaletteHub::color[1],
-		PaletteHub::color[2],
-		PaletteHub::color[3],
-		PaletteHub::color[4],
-		PaletteHub::color[5],
-		PaletteHub::color[6],
-		PaletteHub::color[7],
-		PaletteHub::color[8],
-		PaletteHub::color[9],
-		PaletteHub::color[10],
-		PaletteHub::color[11],
-	};
+	// KnobMap<8> knobMaps[PanelDef::NumPot]{
+	// 	PaletteHub::color[0],
+	// 	PaletteHub::color[1],
+	// 	PaletteHub::color[2],
+	// 	PaletteHub::color[3],
+	// 	PaletteHub::color[4],
+	// 	PaletteHub::color[5],
+	// 	PaletteHub::color[6],
+	// 	PaletteHub::color[7],
+	// 	PaletteHub::color[8],
+	// 	PaletteHub::color[9],
+	// 	PaletteHub::color[10],
+	// 	PaletteHub::color[11],
+	// };
 
 	std::string labelText = "";
 	std::string patchNameText = "";
