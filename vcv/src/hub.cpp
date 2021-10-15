@@ -139,29 +139,29 @@ struct MetaModuleHub : public CommModule {
 	void saveMappingRanges()
 	{
 		for (auto &knobmap : knobMaps) {
-			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
+			for (auto &mapping : knobmap.maps) {
 				LabelButtonID dst = {
-					LabelButtonID::Types::Knob, knobmap.paramHandles[x].paramId, knobmap.paramHandles[x].moduleId};
-				LabelButtonID src = {LabelButtonID::Types::Knob, knobmap.paramId, id};
-				centralData->setMapRange(src, dst, knobmap.mapRange[x].first, knobmap.mapRange[x].second);
+					LabelButtonID::Types::Knob,
+					mapping.paramHandle.paramId,
+					mapping.paramHandle.moduleId,
+				};
+				LabelButtonID src = {
+					LabelButtonID::Types::Knob,
+					knobmap.paramId,
+					id, // this module ID
+				};
+				centralData->setMapRange(src, dst, mapping.range.first, mapping.range.second);
 			}
 		}
 	}
 
 	void loadMappings()
 	{
+		// Clear all maps in all knobMaps first?
 		for (auto &m : centralData->maps) {
 			auto knobToMap = m.src.objID;
-			// Todo: knobMaps[knobToMap].mapping.push_back({});
-			// auto &ph = knobMaps[knobToMap].mapping.last();
-			//
-			auto lowestEmpty = knobMaps[knobToMap].firstAvailable();
-			knobMaps[knobToMap].paramHandles[lowestEmpty].color = PaletteHub::color[knobToMap];
-			printf("loadMappings: Adding paramhandle &%x", &knobMaps[knobToMap].paramHandles[lowestEmpty]);
-			APP->engine->addParamHandle(&knobMaps[knobToMap].paramHandles[lowestEmpty]);
-			APP->engine->updateParamHandle(&knobMaps[knobToMap].paramHandles[lowestEmpty], m.dst.moduleID, m.dst.objID);
 			auto [min, max] = centralData->getMapRange(m.src, m.dst);
-			knobMaps[knobToMap].mapRange[lowestEmpty] = {min, max};
+			knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
 		}
 	}
 
@@ -176,20 +176,14 @@ struct MetaModuleHub : public CommModule {
 		}
 
 		for (auto &knobmap : knobMaps) {
-			// Todo: for(auto &mapping : knobmap)
-			// auto &ph = mapping.paramHandle;
-			// auto &mr = mapping.mapRange;
-			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
-				bool knobMapped = (knobmap.paramHandles[x].moduleId) != -1;
-				if (knobMapped) {
-					Module *module = knobmap.paramHandles[x].module;
-					int paramId = knobmap.paramHandles[x].paramId;
+			for (auto &mapping : knobmap.maps) {
+				bool isKnobMapped = (mapping.paramHandle.moduleId) != -1;
+				if (isKnobMapped) {
+					Module *module = mapping.paramHandle.module;
+					int paramId = mapping.paramHandle.paramId;
 					ParamQuantity *paramQuantity = module->paramQuantities[paramId];
-					auto newMappedVal = MathTools::map_value(params[knobmap.paramId].getValue(),
-															 0.0f,
-															 1.0f,
-															 knobmap.mapRange[x].first,
-															 knobmap.mapRange[x].second);
+					auto newMappedVal = MathTools::map_value(
+						params[knobmap.paramId].getValue(), 0.0f, 1.0f, mapping.range.first, mapping.range.second);
 					paramQuantity->setValue(newMappedVal);
 				}
 			}
@@ -513,30 +507,13 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 		APP->scene->rack->touchedParam = NULL;
 
 		//	Create mapping
-		if (_hub.expModule->id != moduleId) { // button on module clicked
+		if (_hub.expModule->id != moduleId) {
 			int knobToMap = centralData->getMappingSource().objID;
-			// Search if mapping already exists
-			bool duplicateMap = false;
-			for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
-				auto thisHandle = _hub.expModule->knobMaps[knobToMap].paramHandles[i];
-				duplicateMap = (thisHandle.moduleId == moduleId && thisHandle.paramId == paramId);
-			}
-
-			if (!duplicateMap) {
-				auto lowestEmpty = _hub.expModule->knobMaps[knobToMap].firstAvailable();
-				if (lowestEmpty != -1) {
-					// create mapping
-					_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty].color = PaletteHub::color[knobToMap];
-					printf("Adding paramhandle &%x", &_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty]);
-					APP->engine->addParamHandle(&_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty]);
-					APP->engine->updateParamHandle(
-						&_hub.expModule->knobMaps[knobToMap].paramHandles[lowestEmpty], moduleId, paramId, true);
-					centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
-				} else {
-					centralData->abortMappingProcedure();
-				}
+			if (!_hub.expModule->knobMaps[knobToMap].mapping_already_exists(moduleId, paramId)) {
+				_hub.expModule->knobMaps[knobToMap].create(moduleId, paramId, PaletteHub::color[knobToMap]);
+				centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
 			} else {
-				// TODO remove mapping?
+				// Clicked on an existing mapping: remove mapping? Do nothing?
 			}
 		} else { // user clicked on a hub knob, abort
 			centralData->abortMappingProcedure();
@@ -635,28 +612,26 @@ void HubKnob<BaseKnobT>::onButton(const event::Button &e)
 			resetItem->paramWidget = this;
 			menu->addChild(resetItem);
 
-			auto knobNum = this->hubKnobLabel.id.objID;
-			auto hubModule = this->hubKnobLabel._hub.expModule;
+			auto knobNum = hubKnobLabel.id.objID;
+			auto hubModule = hubKnobLabel._hub.expModule;
 
 			auto &thisMap = hubModule->knobMaps[knobNum];
-			if (thisMap.getNumMaps() > 0) {
-				for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
-					bool knobMapped = thisMap.paramHandles[x].moduleId != -1;
-					if (knobMapped) {
+			for (auto &mapping : thisMap.maps) {
+				bool knobMapped = mapping.paramHandle.moduleId != -1;
+				if (knobMapped) {
 
-						MapFieldEntry *paramLabel2 = new MapFieldEntry;
-						paramLabel2->moduleId = thisMap.paramHandles[x].moduleId;
-						paramLabel2->paramId = thisMap.paramHandles[x].paramId;
-						menu->addChild(paramLabel2);
+					MapFieldEntry *paramLabel2 = new MapFieldEntry;
+					paramLabel2->moduleId = mapping.paramHandle.moduleId;
+					paramLabel2->paramId = mapping.paramHandle.paramId;
+					menu->addChild(paramLabel2);
 
-						MinField *o = new MinField(hubModule->knobMaps[knobNum].mapRange[x]);
-						o->box.size.x = 100;
-						menu->addChild(o);
+					MinField *o = new MinField(mapping.range);
+					o->box.size.x = 100;
+					menu->addChild(o);
 
-						MaxField *l = new MaxField(hubModule->knobMaps[knobNum].mapRange[x]);
-						l->box.size.x = 100;
-						menu->addChild(l);
-					}
+					MaxField *l = new MaxField(mapping.range);
+					l->box.size.x = 100;
+					menu->addChild(l);
 				}
 			}
 
