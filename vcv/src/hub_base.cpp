@@ -112,7 +112,9 @@ struct HubBase : public CommModule {
 
 	void saveMappingRanges()
 	{
-		// Todo use countzip
+		// Todo use countzip or i = knobmap.param_id
+		// Todo: use zip or knobmap.mappings is a vector of Mappings
+		// 		struct Mapping {ParamHandle paramHandle; MapRange mapRange};
 		int i = 0;
 		for (auto &knobmap : knobMaps) {
 			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
@@ -130,6 +132,7 @@ struct HubBase : public CommModule {
 	{
 		for (auto &m : centralData->maps) {
 			auto knobToMap = m.src.objID;
+			// Todo: push_back to knobMaps vector
 			auto lowestEmpty = knobMaps[knobToMap].firstAvailable();
 			APP->engine->updateParamHandle(&knobMaps[knobToMap].paramHandles[lowestEmpty], m.dst.moduleID, m.dst.objID);
 			auto [min, max] = centralData->getMapRange(m.src, m.dst);
@@ -147,21 +150,20 @@ struct HubBase : public CommModule {
 			updateDisplay();
 		}
 
-		for (int i = 0; i < NUM_KNOBS; i++) {
+		int i = 0;
+		for (auto &knobmap : knobMaps) {
 			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
-				bool knobMapped = (knobMaps[i].paramHandles[x].moduleId) != -1;
+				bool knobMapped = (knobmap.paramHandles[x].moduleId) != -1;
 				if (knobMapped) {
-					Module *module = knobMaps[i].paramHandles[x].module;
-					int paramId = knobMaps[i].paramHandles[x].paramId;
+					Module *module = knobmap.paramHandles[x].module;
+					int paramId = knobmap.paramHandles[x].paramId;
 					ParamQuantity *paramQuantity = module->paramQuantities[paramId];
-					auto newMappedVal = MathTools::map_value(params[i].getValue(),
-															 0.0f,
-															 1.0f,
-															 knobMaps[i].mapRange[x].first,
-															 knobMaps[i].mapRange[x].second);
+					auto newMappedVal = MathTools::map_value(
+						params[i].getValue(), 0.0f, 1.0f, knobmap.mapRange[x].first, knobmap.mapRange[x].second);
 					paramQuantity->setValue(newMappedVal);
 				}
 			}
+			i++;
 		}
 
 		if (responseTimer) {
@@ -357,52 +359,52 @@ struct MetaModuleHubWidget : CommModuleWidget {
 
 		// addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
 		// addLabeledToggleMM("WRITE", MetaModuleHub::WRITE_LIGHT, MetaModuleHub::GET_INFO, {70, 19.5});
-/*
-		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
-		valueLabel->color = rack::color::BLACK;
-		valueLabel->text = "";
-		valueLabel->fontSize = 10;
-		addChild(valueLabel);
+		/*
+				valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
+				valueLabel->color = rack::color::BLACK;
+				valueLabel->text = "";
+				valueLabel->fontSize = 10;
+				addChild(valueLabel);
 
-		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(24.6, 9.6)));
-		if (expModule != nullptr && expModule->patchNameText.length() > 0)
-			patchName->text = this->expModule->patchNameText;
-		else
-			patchName->text = "Enter Patch Name";
-		patchName->color = rack::color::WHITE;
-		patchName->box.size = {mm2px(Vec(33.6, 31.3))};
-		addChild(patchName);
-		patchName->selectAll(); // Doesn't work :(
+				patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(24.6, 9.6)));
+				if (expModule != nullptr && expModule->patchNameText.length() > 0)
+					patchName->text = this->expModule->patchNameText;
+				else
+					patchName->text = "Enter Patch Name";
+				patchName->color = rack::color::WHITE;
+				patchName->box.size = {mm2px(Vec(33.6, 31.3))};
+				addChild(patchName);
+				patchName->selectAll(); // Doesn't work :(
 
-		addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
-		addLabeledKnobMM<RoundBlackKnob>("B", 1, {29.4, 51.7});
-		addLabeledKnobMM<RoundBlackKnob>("C", 2, {51.6, 51.7});
-		addLabeledKnobMM<RoundBlackKnob>("D", 3, {72, 38.9});
-		addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.6, 59.6});
-		addLabeledKnobMM<RoundSmallBlackKnob>("b", 5, {32.1, 73.0});
-		addLabeledKnobMM<RoundSmallBlackKnob>("c", 6, {49.0, 73.0});
-		addLabeledKnobMM<RoundSmallBlackKnob>("d", 7, {72.6, 59.6});
+				addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
+				addLabeledKnobMM<RoundBlackKnob>("B", 1, {29.4, 51.7});
+				addLabeledKnobMM<RoundBlackKnob>("C", 2, {51.6, 51.7});
+				addLabeledKnobMM<RoundBlackKnob>("D", 3, {72, 38.9});
+				addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.6, 59.6});
+				addLabeledKnobMM<RoundSmallBlackKnob>("b", 5, {32.1, 73.0});
+				addLabeledKnobMM<RoundSmallBlackKnob>("c", 6, {49.0, 73.0});
+				addLabeledKnobMM<RoundSmallBlackKnob>("d", 7, {72.6, 59.6});
 
-		addLabeledInputMM("CV IN 1", MetaModuleHub::CV_1, {7.6, 74.5});
-		addLabeledInputMM("CV IN 2", MetaModuleHub::CV_2, {20, 82.1});
-		addLabeledInputMM("CV IN 3", MetaModuleHub::CV_3, {60.7, 82.4});
-		addLabeledInputMM("CV IN 4", MetaModuleHub::CV_4, {73.1, 74.5});
+				addLabeledInputMM("CV IN 1", MetaModuleHub::CV_1, {7.6, 74.5});
+				addLabeledInputMM("CV IN 2", MetaModuleHub::CV_2, {20, 82.1});
+				addLabeledInputMM("CV IN 3", MetaModuleHub::CV_3, {60.7, 82.4});
+				addLabeledInputMM("CV IN 4", MetaModuleHub::CV_4, {73.1, 74.5});
 
-		addLabeledInputMM("Gate In 1", MetaModuleHub::GATE_IN_1, {9, 94.5});
-		addLabeledInputMM("Gate In 2", MetaModuleHub::GATE_IN_2, {71.7, 94.5});
-		addLabeledInputMM("Clock In", MetaModuleHub::CLOCK_IN, {40.4, 88.9});
+				addLabeledInputMM("Gate In 1", MetaModuleHub::GATE_IN_1, {9, 94.5});
+				addLabeledInputMM("Gate In 2", MetaModuleHub::GATE_IN_2, {71.7, 94.5});
+				addLabeledInputMM("Clock In", MetaModuleHub::CLOCK_IN, {40.4, 88.9});
 
-		addLabeledInputMM("Audio IN L", MetaModuleHub::AUDIO_IN_L, {8.2, 111.8});
-		addLabeledInputMM("Audio IN R", MetaModuleHub::AUDIO_IN_R, {23.4, 111.8});
+				addLabeledInputMM("Audio IN L", MetaModuleHub::AUDIO_IN_L, {8.2, 111.8});
+				addLabeledInputMM("Audio IN R", MetaModuleHub::AUDIO_IN_R, {23.4, 111.8});
 
-		addLabeledOutputMM("Audio OUT L", MetaModuleHub::AUDIO_OUT_L, {57.3, 111.8});
-		addLabeledOutputMM("Audio OUT R", MetaModuleHub::AUDIO_OUT_R, {72.8, 111.8});
+				addLabeledOutputMM("Audio OUT L", MetaModuleHub::AUDIO_OUT_L, {57.3, 111.8});
+				addLabeledOutputMM("Audio OUT R", MetaModuleHub::AUDIO_OUT_R, {72.8, 111.8});
 
-		addLabeledOutputMM("CV Out 1", MetaModuleHub::AUDIO_OUT_3, {25.7, 96.2});
-		addLabeledOutputMM("CV Out 2", MetaModuleHub::AUDIO_OUT_4, {55, 96.2});
+				addLabeledOutputMM("CV Out 1", MetaModuleHub::AUDIO_OUT_3, {25.7, 96.2});
+				addLabeledOutputMM("CV Out 2", MetaModuleHub::AUDIO_OUT_4, {55, 96.2});
 
-		addLabeledOutputMM("Clock Out", MetaModuleHub::CLOCK_OUT, {40.4, 106.4});
-*/
+				addLabeledOutputMM("Clock Out", MetaModuleHub::CLOCK_OUT, {40.4, 106.4});
+		*/
 		// Todo:
 		// addLabeledToggle() for both RGB Buttons
 	}

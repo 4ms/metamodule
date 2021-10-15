@@ -6,6 +6,7 @@ public:
 	// Todo: use a vector not an array
 	rack::ParamHandle paramHandles[NUM_MAPPINGS_PER_KNOB];
 	std::pair<float, float> mapRange[NUM_MAPPINGS_PER_KNOB];
+	int paramId{};
 
 	KnobMap(NVGcolor mapColor)
 	{

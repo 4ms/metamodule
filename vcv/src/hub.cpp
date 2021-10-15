@@ -20,14 +20,15 @@ constexpr int NUM_MAPPINGS_PER_KNOB = 8;
 
 struct MetaModuleHub : public CommModule {
 
-	KnobMap<NUM_MAPPINGS_PER_KNOB> knobMaps[NUM_KNOBS]{PaletteHub::color[0],
-													   PaletteHub::color[1],
-													   PaletteHub::color[2],
-													   PaletteHub::color[3],
-													   PaletteHub::color[4],
-													   PaletteHub::color[5],
-													   PaletteHub::color[6],
-													   PaletteHub::color[7]};
+	std::map<int, KnobMap<NUM_MAPPINGS_PER_KNOB>> knobMaps;
+	// KnobMap<NUM_MAPPINGS_PER_KNOB> knobMaps[NUM_KNOBS]{PaletteHub::color[0],
+	// 												   PaletteHub::color[1],
+	// 												   PaletteHub::color[2],
+	// 												   PaletteHub::color[3],
+	// 												   PaletteHub::color[4],
+	// 												   PaletteHub::color[5],
+	// 												   PaletteHub::color[6],
+	// 												   PaletteHub::color[7]};
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
@@ -132,13 +133,13 @@ struct MetaModuleHub : public CommModule {
 
 	void saveMappingRanges()
 	{
-		for (int i = 0; i < NUM_KNOBS; i++) {
+		for (auto &knobmap : knobMaps) {
 			for (int x = 0; x < NUM_MAPPINGS_PER_KNOB; x++) {
 				LabelButtonID dst = {LabelButtonID::Types::Knob,
-									 knobMaps[i].paramHandles[x].paramId,
-									 knobMaps[i].paramHandles[x].moduleId};
-				LabelButtonID src = {LabelButtonID::Types::Knob, i, id};
-				centralData->setMapRange(src, dst, knobMaps[i].mapRange[x].first, knobMaps[i].mapRange[x].second);
+									 knobmap.second.paramHandles[x].paramId,
+									 knobmap.second.paramHandles[x].moduleId};
+				LabelButtonID src = {LabelButtonID::Types::Knob, knobmap.first, id};
+				centralData->setMapRange(src, dst, knobmap.second.mapRange[x].first, knobmap.second.mapRange[x].second);
 			}
 		}
 	}
@@ -147,6 +148,11 @@ struct MetaModuleHub : public CommModule {
 	{
 		for (auto &m : centralData->maps) {
 			auto knobToMap = m.src.objID;
+			KnobMap<NUM_MAPPINGS_PER_KNOB> km{PaletteHub::color[knobToMap]};
+			km.paramId = knobToMap;
+
+			// knobMaps.push_back();
+
 			auto lowestEmpty = knobMaps[knobToMap].firstAvailable();
 			APP->engine->updateParamHandle(&knobMaps[knobToMap].paramHandles[lowestEmpty], m.dst.moduleID, m.dst.objID);
 			auto [min, max] = centralData->getMapRange(m.src, m.dst);
