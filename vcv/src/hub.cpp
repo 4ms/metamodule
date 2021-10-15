@@ -2,7 +2,9 @@
 #include "CommModule.h"
 #include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
+#include "CoreModules/panel_mini_defs.hh"
 #include "hub_knob_menu.hh"
+#include "knob_map.hh"
 #include "localPath.h"
 #include "paletteHub.hh"
 #include "patch_writer.hh"
@@ -13,67 +15,19 @@
 #include <functional>
 #include <iostream>
 
-static const int NUM_KNOBS = 8;
-static const int NUM_MAPPINGS_PER_KNOB = 8;
-
-class KnobMaps {
-public:
-	ParamHandle paramHandles[NUM_MAPPINGS_PER_KNOB];
-	std::pair<float, float> mapRange[NUM_MAPPINGS_PER_KNOB];
-
-	KnobMaps(NVGcolor mapColor)
-	{
-		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
-			paramHandles[i].color = mapColor;
-			APP->engine->addParamHandle(&paramHandles[i]);
-			mapRange[i] = {0, 1};
-		}
-	}
-
-	~KnobMaps()
-	{
-		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
-			APP->engine->removeParamHandle(&paramHandles[i]);
-		}
-	}
-
-	int getNumMaps()
-	{
-		int num = 0;
-		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
-			if (paramHandles[i].moduleId != -1) {
-				num++;
-			}
-		}
-		return num;
-	}
-
-	int firstAvailable()
-	{
-		int availableSlot = -1;
-		int tempNum = NUM_MAPPINGS_PER_KNOB;
-		if (getNumMaps() < 8) {
-			for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
-				if (paramHandles[i].moduleId == -1) {
-					tempNum = std::min<int>(tempNum, i);
-				}
-			}
-			availableSlot = tempNum;
-		}
-		return availableSlot;
-	}
-};
+constexpr int NUM_KNOBS = PanelDef::NumKnobs;
+constexpr int NUM_MAPPINGS_PER_KNOB = 8;
 
 struct MetaModuleHub : public CommModule {
 
-	KnobMaps knobMaps[NUM_KNOBS]{PaletteHub::color[0],
-								 PaletteHub::color[1],
-								 PaletteHub::color[2],
-								 PaletteHub::color[3],
-								 PaletteHub::color[4],
-								 PaletteHub::color[5],
-								 PaletteHub::color[6],
-								 PaletteHub::color[7]};
+	KnobMap<NUM_MAPPINGS_PER_KNOB> knobMaps[NUM_KNOBS]{PaletteHub::color[0],
+													   PaletteHub::color[1],
+													   PaletteHub::color[2],
+													   PaletteHub::color[3],
+													   PaletteHub::color[4],
+													   PaletteHub::color[5],
+													   PaletteHub::color[6],
+													   PaletteHub::color[7]};
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
