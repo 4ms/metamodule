@@ -20,16 +20,6 @@ constexpr int NUM_MAPPINGS_PER_KNOB = 8;
 struct MetaModuleHub : public CommModule {
 
 	std::vector<KnobMap<NUM_MAPPINGS_PER_KNOB>> knobMaps;
-	// std::array<KnobMap<NUM_MAPPINGS_PER_KNOB>, PanelDef::NumKnobs> knobMaps{{
-	// 	{0, PaletteHub::color[0]},
-	// 	{1, PaletteHub::color[1]},
-	// 	{2, PaletteHub::color[2]},
-	// 	{3, PaletteHub::color[3]},
-	// 	{4, PaletteHub::color[4]},
-	// 	{5, PaletteHub::color[5]},
-	// 	{6, PaletteHub::color[6]},
-	// 	{7, PaletteHub::color[7]},
-	// }};
 
 	enum ParamIds { ENUMS(KNOBS, 8), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
@@ -44,13 +34,11 @@ struct MetaModuleHub : public CommModule {
 
 	MetaModuleHub()
 	{
-		printf("MMHub ctor()\n");
 		for (int i = 0; i < PanelDef::NumKnobs; i++)
-			knobMaps.emplace_back(i, PaletteHub::color[i]);
+			knobMaps.emplace_back(i);
 
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		selfID.typeID = "PANEL_8";
-		printf("MMHub ctor() end\n");
 	}
 
 	~MetaModuleHub() {}
@@ -140,6 +128,10 @@ struct MetaModuleHub : public CommModule {
 	{
 		for (auto &knobmap : knobMaps) {
 			for (auto &mapping : knobmap.maps) {
+				// printf("Updating map range in centralData for knob %d to module %d knob %d\n",
+				// 	   knobmap.paramId,
+				// 	   mapping.paramHandle.moduleId,
+				// 	   mapping.paramHandle.paramId);
 				LabelButtonID dst = {
 					LabelButtonID::Types::Knob,
 					mapping.paramHandle.paramId,
@@ -160,6 +152,7 @@ struct MetaModuleHub : public CommModule {
 		// Clear all maps in all knobMaps first?
 		for (auto &m : centralData->maps) {
 			auto knobToMap = m.src.objID;
+			printf("Loading a mapping for knob %d\n", knobToMap);
 			auto [min, max] = centralData->getMapRange(m.src, m.dst);
 			knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
 		}
@@ -493,9 +486,11 @@ HubKnobLabel::HubKnobLabel(MetaModuleHubWidget &hub)
 
 void HubKnobLabel::onDeselect(const event::Deselect &e)
 {
-	printf("Entering onDeselect()\n");
-	if (!_hub.expModule)
+	printf("Entering HubKnobLabel::onDeselect()\n");
+	if (!_hub.expModule) {
+		printf("---No _hub.expModule, aborting\n");
 		return;
+	}
 	// if (!module)
 	// 	return;
 
@@ -506,22 +501,37 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 		int paramId = touchedParam->paramQuantity->paramId;
 		APP->scene->rack->touchedParam = NULL;
 
-		//	Create mapping
 		if (_hub.expModule->id != moduleId) {
-			int knobToMap = centralData->getMappingSource().objID;
-			if (!_hub.expModule->knobMaps[knobToMap].mapping_already_exists(moduleId, paramId)) {
-				_hub.expModule->knobMaps[knobToMap].create(moduleId, paramId, PaletteHub::color[knobToMap]);
+
+			// Check if it already exists
+			bool is_already_mapped = false;
+			for (auto &knobmap : _hub.expModule->knobMaps) {
+				if (knobmap.mapping_already_exists(moduleId, paramId)) {
+					is_already_mapped = true;
+					break;
+				}
+			}
+			if (!is_already_mapped) {
+				int knobToMap = centralData->getMappingSource().objID;
+				//^^^ this shoudl just be our own paramId
+
+				printf("Creating mapping for knob %d to module %d knob %d\n", knobToMap, moduleId, paramId);
+				auto &knobmap = _hub.expModule->knobMaps[knobToMap];
+				printf("OnDeselect: before knobmap.create(), size is %zu", knobmap.maps.size());
+				knobmap.create(moduleId, paramId, PaletteHub::color[knobToMap]);
+				printf("OnDeselect: after knobmap.create(), size is %zu", knobmap.maps.size());
 				centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
 			} else {
-				// Clicked on an existing mapping: remove mapping? Do nothing?
+				printf("Clicked on existing mapping: aborting procedure\n");
+				centralData->abortMappingProcedure();
 			}
-		} else { // user clicked on a hub knob, abort
+		} else {
+			printf("Clicked on hub knob: aborting procedure\n");
 			centralData->abortMappingProcedure();
 		}
 	} else {
-		//	Whatever we touched, it wasn't another module's knob
-		//	Or-- a mapping is not in progress
-		// Either way, just ignore the event
+		printf("Clicked on something other than a param widget. Or we don't have a mapping in progress");
+		centralData->abortMappingProcedure();
 	}
 }
 
