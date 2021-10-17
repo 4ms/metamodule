@@ -128,10 +128,6 @@ struct MetaModuleHub : public CommModule {
 	{
 		for (auto &knobmap : knobMaps) {
 			for (auto &mapping : knobmap.maps) {
-				// printf("Updating map range in centralData for knob %d to module %d knob %d\n",
-				// 	   knobmap.paramId,
-				// 	   mapping.paramHandle.moduleId,
-				// 	   mapping.paramHandle.paramId);
 				LabelButtonID dst = {
 					LabelButtonID::Types::Knob,
 					mapping.paramHandle.paramId,
@@ -152,7 +148,6 @@ struct MetaModuleHub : public CommModule {
 		// Clear all maps in all knobMaps first?
 		for (auto &m : centralData->maps) {
 			auto knobToMap = m.src.objID;
-			printf("Loading a mapping for knob %d\n", knobToMap);
 			auto [min, max] = centralData->getMapRange(m.src, m.dst);
 			knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
 		}
@@ -370,9 +365,6 @@ struct MetaModuleHubWidget : CommModuleWidget {
 			expModule->updatePatchName = [&]() { this->expModule->patchNameText = this->patchName->text; };
 			expModule->redrawPatchName = [&]() { this->patchName->text = this->expModule->patchNameText; };
 		}
-
-		printf("Created MMHubWidget\n");
-
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-no-words.svg")));
 
 		// addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
@@ -486,9 +478,7 @@ HubKnobLabel::HubKnobLabel(MetaModuleHubWidget &hub)
 
 void HubKnobLabel::onDeselect(const event::Deselect &e)
 {
-	printf("Entering HubKnobLabel::onDeselect()\n");
 	if (!_hub.expModule) {
-		printf("---No _hub.expModule, aborting\n");
 		return;
 	}
 	// if (!module)
@@ -513,44 +503,17 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 			}
 			if (!is_already_mapped) {
 				int knobToMap = centralData->getMappingSource().objID;
-				//^^^ this should just be our own paramId
 				auto &knobmap = _hub.expModule->knobMaps[knobToMap];
-
-				printf("1. Creating mapping for knob %d to module %d knob %d\n", knobToMap, moduleId, paramId);
-				// TODO: if (knob.create())...
-				knobmap.create(moduleId, paramId, PaletteHub::color[knobToMap]);
-				for (auto &m : knobmap.maps) {
-					ParamHandle *ph = APP->engine->getParamHandle(m.paramHandle.moduleId, m.paramHandle.paramId);
-					printf("APP->engine->getParamHandle(%d, %d) = %p, knobmap.maps[].paramHandle = %p\n",
-						   m.paramHandle.moduleId,
-						   m.paramHandle.paramId,
-						   ph,
-						   &m.paramHandle);
+				if (knobmap.create(moduleId, paramId, PaletteHub::color[knobToMap])) {
+					centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
 				}
-
-				// paramId++;
-				// printf("2. Creating mapping for knob %d to module %d knob %d\n", knobToMap, moduleId, paramId);
-				// knobmap.create(moduleId, paramId, PaletteHub::color[knobToMap]);
-				// for (auto &m : knobmap.maps) {
-				// 	ParamHandle *ph = APP->engine->getParamHandle(m.paramHandle.moduleId, m.paramHandle.paramId);
-				// 	printf("APP->engine->getParamHandle(%d, %d) = %p, knobmap.maps[].paramHandle = %p\n",
-				// 		   m.paramHandle.moduleId,
-				// 		   m.paramHandle.paramId,
-				// 		   ph,
-				// 		   &m.paramHandle);
-				// }
-
-				centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
 			} else {
-				printf("Clicked on existing mapping: aborting procedure\n");
 				centralData->abortMappingProcedure();
 			}
 		} else {
-			printf("Clicked on hub knob: aborting procedure\n");
 			centralData->abortMappingProcedure();
 		}
 	} else {
-		printf("Clicked on something other than a param widget. Or we don't have a mapping in progress");
 		centralData->abortMappingProcedure();
 	}
 }
