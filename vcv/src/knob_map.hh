@@ -7,44 +7,57 @@ public:
 	struct Mapping {
 		rack::ParamHandle paramHandle;
 		std::pair<float, float> range;
+
+		Mapping()
+		{
+			printf("Mapping ctor\n");
+		}
+		~Mapping()
+		{
+			printf("~Mapping dtor\n");
+		}
 	};
-	std::vector<Mapping> maps;
+	std::array<Mapping, NUM_MAPPINGS_PER_KNOB> maps;
 
 	KnobMap(int param_id)
 		: paramId{param_id}
-	{}
+	{
+		printf("KnobMap ctor %d\n", paramId);
+	}
 
 	void create(int otherModuleId, int otherParamId, NVGcolor mapColor, float min = 0.f, float max = 1.0f)
 	{
-		printf("knobMap[%d].create() start: map size is %d\n", paramId, maps.size());
-		maps.emplace_back(); //{}, std::make_pair(0.f, 1.f));
-		printf("knobMap[%d].create() emplace_back: map size is %d\n", paramId, maps.size());
+		int new_idx = firstAvailable();
+		if (new_idx == -1)
+			return;
 
-		auto &ph = maps.back().paramHandle;
+		auto &ph = maps[new_idx].paramHandle;
 		ph.color = mapColor;
+		ph.text = "Hub knob";
 		APP->engine->addParamHandle(&ph);
 		APP->engine->updateParamHandle(&ph, otherModuleId, otherParamId, true);
-		printf("knobMap[%d].create() after updateParamHandle: map size is %d\n", paramId, maps.size());
 
-		maps.back().range = {min, max};
+		maps[new_idx].range = {min, max};
 
-		printf("knobMap[%d]: Added Mapping: maps[%d] moduleId: %d, paramId: %d, &%p\n",
+		printf("knobMap[%d]: Added Mapping: maps[%zu] moduleId: %d, paramId: %d, module: &%p, ph:&%p\n",
 			   paramId,
 			   maps.size() - 1,
-			   otherModuleId,
-			   otherParamId,
+			   ph.moduleId,
+			   ph.paramId,
+			   ph.module,
 			   &ph);
 	}
 
 	Mapping *find_mapping(int otherModuleId, int otherParamId)
 	{
-		printf("knobMap[%d].find_mapping: maps size is %d\n", paramId, maps.size());
+		printf("knobMap[%d].find_mapping: maps size is %zu\n", paramId, maps.size());
 		for (auto &m : maps) {
-			printf("find_mapping(module %d, param %d)... checking m:%d p:%d\n",
+			printf("find_mapping(module %d, param %d)... checking m:%d p:%d, module:%p\n",
 				   otherModuleId,
 				   otherParamId,
 				   m.paramHandle.moduleId,
-				   m.paramHandle.paramId);
+				   m.paramHandle.paramId,
+				   m.paramHandle.module);
 			if ((m.paramHandle.moduleId == otherModuleId) && (m.paramHandle.paramId == otherParamId)) {
 				printf("Mapping for module %d, param %d found\n", otherModuleId, otherParamId);
 				return &m;
@@ -68,18 +81,42 @@ public:
 
 	~KnobMap()
 	{
-		printf("KnobMap[%d] dtor()\n", paramId);
-		// 	for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
-		// 		if (APP->engine->getParamHandle(paramHandles[i].moduleId, paramHandles[i].paramId)) {
-		// 			APP->engine->removeParamHandle(&paramHandles[i]);
-		// 			printf("KnobMap dtor(): removeParamHandle %x\n", &paramHandles[i]);
-		// 		}
-		// 	}
+		printf("KnobMap[%d] dtor():\n", paramId);
+		for (auto &map : maps) {
+			printf("Map: m: %d p %d: ", map.paramHandle.moduleId, map.paramHandle.paramId);
+			if (APP->engine->getParamHandle(map.paramHandle.moduleId, map.paramHandle.paramId)) {
+				APP->engine->removeParamHandle(&map.paramHandle);
+				printf("removeParamHandle %p.\n", &map.paramHandle);
+			} else {
+				printf("getParamHandle was null.\n");
+			}
+		}
+
 		printf("end KnobMap dtor()\n");
 	}
 
 	int getNumMaps()
 	{
-		return maps.size();
+		int num = 0;
+		for (auto &map : maps) {
+			if (map.paramHandle.moduleId != -1) {
+				num++;
+			}
+		}
+		// printf("getNumMaps() = %d\n", num);
+		return num;
+	}
+
+	int firstAvailable()
+	{
+		int availableSlot = -1;
+		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
+			if (maps[i].paramHandle.moduleId == -1) {
+				availableSlot = i;
+				break;
+			}
+		}
+		printf("firstAvailable() = %d\n", availableSlot);
+		return availableSlot;
 	}
 };

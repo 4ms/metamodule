@@ -513,13 +513,33 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 			}
 			if (!is_already_mapped) {
 				int knobToMap = centralData->getMappingSource().objID;
-				//^^^ this shoudl just be our own paramId
-
-				printf("Creating mapping for knob %d to module %d knob %d\n", knobToMap, moduleId, paramId);
+				//^^^ this should just be our own paramId
 				auto &knobmap = _hub.expModule->knobMaps[knobToMap];
-				printf("OnDeselect: before knobmap.create(), size is %zu", knobmap.maps.size());
+
+				printf("1. Creating mapping for knob %d to module %d knob %d\n", knobToMap, moduleId, paramId);
+				// TODO: if (knob.create())...
 				knobmap.create(moduleId, paramId, PaletteHub::color[knobToMap]);
-				printf("OnDeselect: after knobmap.create(), size is %zu", knobmap.maps.size());
+				for (auto &m : knobmap.maps) {
+					ParamHandle *ph = APP->engine->getParamHandle(m.paramHandle.moduleId, m.paramHandle.paramId);
+					printf("APP->engine->getParamHandle(%d, %d) = %p, knobmap.maps[].paramHandle = %p\n",
+						   m.paramHandle.moduleId,
+						   m.paramHandle.paramId,
+						   ph,
+						   &m.paramHandle);
+				}
+
+				// paramId++;
+				// printf("2. Creating mapping for knob %d to module %d knob %d\n", knobToMap, moduleId, paramId);
+				// knobmap.create(moduleId, paramId, PaletteHub::color[knobToMap]);
+				// for (auto &m : knobmap.maps) {
+				// 	ParamHandle *ph = APP->engine->getParamHandle(m.paramHandle.moduleId, m.paramHandle.paramId);
+				// 	printf("APP->engine->getParamHandle(%d, %d) = %p, knobmap.maps[].paramHandle = %p\n",
+				// 		   m.paramHandle.moduleId,
+				// 		   m.paramHandle.paramId,
+				// 		   ph,
+				// 		   &m.paramHandle);
+				// }
+
 				centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
 			} else {
 				printf("Clicked on existing mapping: aborting procedure\n");
