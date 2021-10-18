@@ -7,7 +7,7 @@ struct PaletteHub {
 
 	static inline const NVGcolor BLACK = nvgRGB(0x00, 0x00, 0x00);
 	static inline const NVGcolor RED = nvgRGB(0xff, 0x00, 0x00);
-	static inline const NVGcolor RED2 = nvgRGB(0xdf, 0x20, 0x10);
+	static inline const NVGcolor PURPLE = nvgRGB(0x80, 0x00, 0x40);
 	static inline const NVGcolor GREEN = nvgRGB(0x00, 0xff, 0x00);
 	static inline const NVGcolor BLUE = nvgRGB(0x00, 0x00, 0xff);
 	static inline const NVGcolor CYAN = nvgRGB(0x00, 0xff, 0xff);
@@ -19,18 +19,17 @@ struct PaletteHub {
 	static inline const NVGcolor WHITE = nvgRGB(0xff, 0xff, 0xff);
 
 	static inline const NVGcolor color[12] = {
-		CYAN,
-		BROWN,
 		RED,
 		ORANGE,
 		YELLOW,
 		GREEN,
+		CYAN,
 		BLUE,
+		PURPLE,
 		MAGENTA,
-		RED2,
+		BROWN,
 		GRAY25,
 		GRAY50,
 		GRAY75,
-
 	};
 };

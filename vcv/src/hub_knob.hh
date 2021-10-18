@@ -4,15 +4,6 @@
 #include "knob_map.hh"
 #include "paletteHub.hh"
 
-// HubKnobLabel needs to know:
-// parent module->id (onDeselect aborts mapping if we deselected by clicking on the hub)
-// All knobMaps of parent module [Todo: don't need this, can check with centralData or with VCV engin)
-// knobMap for this knob (onDeselect: knobmap.create()
-//
-// HubKnob needs to know:
-// parent module ptr (draw() checks if it's null before reading knobMaps)
-// parent module knobMap for this knob
-// onButton (right-click menu): this knobMap so it can draw all mappings
 class HubKnobLabel : public LabeledButton {
 public:
 	// Constructor for widget-only view:

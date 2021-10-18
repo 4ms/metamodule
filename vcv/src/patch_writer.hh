@@ -40,7 +40,8 @@ public:
 		pd.module_slugs.push_back("");
 
 		for (auto &mod : modules) {
-			if (strcmp(mod.typeID.cstr(), "PANEL_8") == 0) {
+			if (mod.typeID.is_equal("PANEL_8") || mod.typeID.is_equal("PANEL_MED")) {
+				// if (strcmp(mod.typeID.cstr(), "PANEL_8") == 0) {
 				pd.module_slugs[0] = mod.typeID;
 				vcv_mod_ids[0] = mod.id;
 			} else {
