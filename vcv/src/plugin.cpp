@@ -9,15 +9,15 @@ void init(Plugin *p)
 
 	pluginInstance = p;
 
-	// Add modules here 
+	// Add modules here
 	p->addModel(modelHubMedium);
-	p->addModel(modelInfosc01); 
-p->addModel(modelDjembe); 
-p->addModel(modelBipolarsource); 
-p->addModel(modelMultilfo); 
-p->addModel(modelEnvelopefollower); 
-p->addModel(modelVoltagesource); 
-p->addModel(modelNoise);
+	p->addModel(modelInfosc01);
+	p->addModel(modelDjembe);
+	p->addModel(modelBipolarsource);
+	p->addModel(modelMultilfo);
+	p->addModel(modelEnvelopefollower);
+	p->addModel(modelVoltagesource);
+	p->addModel(modelNoise);
 	p->addModel(modelSampleplayer);
 	p->addModel(modelSlewlimiter);
 	p->addModel(modelBandpassfilter);
@@ -60,8 +60,7 @@ p->addModel(modelNoise);
 	p->addModel(modelVCA);
 	p->addModel(modelComparator);
 	p->addModel(modelSend);
-
-	p->addModel(modelMetaModuleHub);
+	// p->addModel(modelMetaModuleMiniHub);
 
 	// Any other plugin initialization may go here.
 	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup

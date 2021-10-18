@@ -9,14 +9,14 @@ extern CentralData *centralData;
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin *pluginInstance;
 
-// Declare each Model, defined in each module source file 
+// Declare each Model, defined in each module source file
 extern Model *modelHubMedium;
-extern Model *modelInfosc01; 
-extern Model *modelDjembe; 
-extern Model *modelBipolarsource; 
-extern Model *modelMultilfo; 
-extern Model *modelEnvelopefollower; 
-extern Model *modelVoltagesource; 
+extern Model *modelInfosc01;
+extern Model *modelDjembe;
+extern Model *modelBipolarsource;
+extern Model *modelMultilfo;
+extern Model *modelEnvelopefollower;
+extern Model *modelVoltagesource;
 extern Model *modelNoise;
 extern Model *modelSampleplayer;
 extern Model *modelSlewlimiter;
@@ -61,4 +61,4 @@ extern Model *modelVCA;
 extern Model *modelComparator;
 extern Model *modelSend;
 
-extern Model *modelMetaModuleHub;
+// extern Model *modelMetaModuleMiniHub;

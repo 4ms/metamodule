@@ -13,13 +13,13 @@
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [ 
-{
+	{
       "slug": "PANEL_MED",
       "name": "PanelMedium",
       "description": "Panel Medium 26HP",
       "tags": []
-},
-    {
+	},
+{
       "slug": "INFOSC01",
       "name": "Infosc01",
       "description": "infinite-oscillator-01",
@@ -257,12 +257,6 @@
       "slug": "send",
       "name": "Send",
       "description": "",
-      "tags": []
-    },
-    {
-      "slug": "metaModuleHubModule",
-      "name": "MetaModule Hub",
-      "description": "MetaModule 16HP 8 knobs, stereo Audio In, 4-channel audio out, 4 CV inputs, 2 gate in, clock in/out, two RGB buttons",
       "tags": []
     },
     {
