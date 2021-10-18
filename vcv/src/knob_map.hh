@@ -86,4 +86,16 @@ public:
 		}
 		return availableSlot;
 	}
+
+	NVGcolor get_color(int otherModuleId, int otherParamId)
+	{
+		auto map = find_mapping(otherModuleId, otherParamId);
+		if (map)
+			return map->color;
+
+		if (maps.size())
+			return maps[0].color;
+
+		return NVGcolor{};
+	}
 };

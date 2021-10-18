@@ -15,22 +15,18 @@
 #include <functional>
 #include <iostream>
 
-constexpr int NUM_MAPPINGS_PER_KNOB = 8;
-
 struct MetaModuleHubBase : public CommModule {
 
+	static constexpr int NUM_MAPPINGS_PER_KNOB = 8;
 	std::vector<KnobMap<NUM_MAPPINGS_PER_KNOB>> knobMaps;
 
-	MetaModuleHubBase()
-	{
-		for (int i = 0; i < PanelDef::NumKnobs; i++)
-			knobMaps.emplace_back(i);
+	std::string labelText = "";
+	std::string patchNameText = "";
+	long responseTimer = 0;
+	bool buttonAlreadyHandled = false;
 
-		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		selfID.typeID = "PANEL_8";
-	}
-
-	~MetaModuleHubBase() {}
+	MetaModuleHubBase() = default;
+	~MetaModuleHubBase() = default;
 
 	json_t *dataToJson() override
 	{
@@ -142,16 +138,22 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	void process(const ProcessArgs &args) override
+	// Hub class needs to call this from its process
+	//  process_patchbutton(params[GET_INFO].getValue());
+	//  process_knobmaps();
+	void processPatchButton(float patchButtonState)
 	{
-		if (buttonJustPressed()) {
+		if (buttonJustPressed(patchButtonState)) {
 			responseTimer = 48000 / 4; // todo: set this to the sampleRate
 			centralData->requestAllParamDataAllModules();
 			labelText = "Requesting all modules send their data";
 			updatePatchName();
 			updateDisplay();
 		}
+	}
 
+	void processKnobMaps()
+	{
 		for (auto &knobmap : knobMaps) {
 			for (auto &mapping : knobmap.maps) {
 				bool isKnobMapped = (mapping.paramHandle.moduleId) != -1;
@@ -165,7 +167,10 @@ struct MetaModuleHubBase : public CommModule {
 				}
 			}
 		}
+	}
 
+	void processCreatePatchFile()
+	{
 		if (responseTimer) {
 			if (--responseTimer == 0) {
 				printDebugFile();
@@ -206,9 +211,9 @@ struct MetaModuleHubBase : public CommModule {
 	}
 
 private:
-	bool buttonJustPressed()
+	bool buttonJustPressed(bool button_value)
 	{
-		if (params[GET_INFO].getValue() > 0.f) {
+		if (button_value > 0.f) {
 			if (!buttonAlreadyHandled) {
 				buttonAlreadyHandled = true;
 				return true;
@@ -218,6 +223,10 @@ private:
 		}
 		return false;
 	}
+
+	////////// put this in PatchFileWriter, or a new class PatchTextFileWriter and rename the other
+	/// PatchBinaryFileWriter
+	// centralData ==> string
 
 	void writePatchFile(std::string fileName, std::string patchName)
 	{
@@ -312,6 +321,9 @@ private:
 		myfile.write(reinterpret_cast<const char *>(data.data()), data.size());
 		myfile.close();
 	}
+	//
+	//
+	///////////////////////// end move to PatchFileWriter
 };
 
 struct MetaModuleHubWidget;
@@ -483,6 +495,7 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 		if (_hub.expModule->id != moduleId) {
 
 			// Check if it already exists
+			// Todo: Use centralData or APP->engine to accomodate multiple Hubs
 			bool is_already_mapped = false;
 			for (auto &knobmap : _hub.expModule->knobMaps) {
 				if (knobmap.mapping_already_exists(moduleId, paramId)) {
@@ -540,6 +553,7 @@ void HubKnob<BaseKnobT>::draw(const typename BaseKnobT::DrawArgs &args)
 
 	auto knobNum = this->hubKnobLabel.id.objID;
 
+	// FixMe: color should be read from knobMaps[knobNum].
 	NVGcolor color = PaletteHub::color[knobNum];
 	auto hubMod = this->hubKnobLabel._hub.expModule;
 
