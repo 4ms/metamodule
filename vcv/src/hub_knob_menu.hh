@@ -1,3 +1,4 @@
+#pragma once
 #include "plugin.hpp"
 
 struct MapFieldLabel : ui::MenuLabel {
