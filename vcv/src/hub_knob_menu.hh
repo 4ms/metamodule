@@ -13,20 +13,30 @@ struct MapFieldLabel : ui::MenuLabel {
 struct MapFieldEntry : ui::MenuLabel {
 	int moduleId;
 	int paramId;
+	std::string moduleName;
+	std::string paramName;
+
 	void step() override
 	{
-		text = "Module " + std::to_string(moduleId) + " Param " + std::to_string(paramId);
+		if (moduleName.empty())
+			moduleName = std::to_string(moduleId);
+		if (paramName.empty())
+			paramName = std::to_string(paramId);
+
+		text = moduleName + /*" (ID#" + std::to_string(moduleId) + ") ,*/ " knob: " + paramName;
 		MenuLabel::step();
 	}
 };
 
-struct MinQuantity : Quantity {
+struct PercentQuantity : Quantity {
 private:
 	float &_levelValue;
+	std::string _label;
 
 public:
-	MinQuantity(std::pair<float, float> &inRange)
-		: _levelValue(inRange.first)
+	PercentQuantity(float &inRange, std::string label)
+		: _levelValue{inRange}
+		, _label{label}
 	{}
 	void setValue(float value) override
 	{
@@ -50,65 +60,19 @@ public:
 	}
 	float getDisplayValue() override
 	{
-		return getValue();
+		return getValue() * 100.f;
 	}
 	void setDisplayValue(float displayValue) override
 	{
-		setValue(displayValue);
+		setValue(displayValue / 100.f);
 	}
 	std::string getLabel() override
 	{
-		return "Minimum";
+		return _label;
 	}
 	std::string getUnit() override
 	{
-		return "";
-	}
-};
-
-struct MaxQuantity : Quantity {
-private:
-	float &_levelValue;
-
-public:
-	MaxQuantity(std::pair<float, float> &inRange)
-		: _levelValue(inRange.second)
-	{}
-	void setValue(float value) override
-	{
-		_levelValue = MathTools::constrain(value, 0.0f, 1.0f);
-	}
-	float getValue() override
-	{
-		return _levelValue;
-	}
-	float getMinValue() override
-	{
-		return 0;
-	}
-	float getMaxValue() override
-	{
-		return 1;
-	}
-	float getDefaultValue() override
-	{
-		return 0.0;
-	}
-	float getDisplayValue() override
-	{
-		return getValue();
-	}
-	void setDisplayValue(float displayValue) override
-	{
-		setValue(displayValue);
-	}
-	std::string getLabel() override
-	{
-		return "Maximum";
-	}
-	std::string getUnit() override
-	{
-		return "";
+		return "%";
 	}
 };
 
@@ -116,7 +80,7 @@ struct MinField : ui::Slider {
 public:
 	MinField(std::pair<float, float> &inRange)
 	{
-		quantity = new MinQuantity(inRange);
+		quantity = new PercentQuantity(inRange.first, "Minimum");
 	}
 	~MinField()
 	{
@@ -128,7 +92,7 @@ struct MaxField : ui::Slider {
 public:
 	MaxField(std::pair<float, float> &inRange)
 	{
-		quantity = new MaxQuantity(inRange);
+		quantity = new PercentQuantity(inRange.second, "Maximum");
 	}
 	~MaxField()
 	{

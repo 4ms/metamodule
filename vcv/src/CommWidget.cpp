@@ -27,8 +27,10 @@ void CommModuleWidget::addLabeledKnobPx(const std::string labelText, int knobID,
 {
 	addLabel(labelText, posPx, {LabelButtonID::Types::Knob, knobID, -1});
 	auto p = createParamCentered<RoundBlackKnob>(posPx, module, knobID);
-	if (p->paramQuantity)
+	if (p->paramQuantity) {
 		p->paramQuantity->defaultValue = defaultValue;
+		p->paramQuantity->label = labelText;
+	}
 	addParam(p);
 }
 
@@ -46,8 +48,10 @@ void CommModuleWidget::addSmallLabeledKnobPx(const std::string labelText, int kn
 {
 	addLabel(labelText, posPx, {LabelButtonID::Types::Knob, knobID, -1});
 	auto p = createParamCentered<RoundSmallBlackKnob>(posPx, module, knobID);
-	if (p->paramQuantity)
+	if (p->paramQuantity) {
 		p->paramQuantity->defaultValue = defaultValue;
+		p->paramQuantity->label = labelText;
+	}
 	addParam(p);
 }
 

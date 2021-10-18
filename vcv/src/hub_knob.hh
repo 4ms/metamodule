@@ -103,13 +103,14 @@ public:
 				KnobMap *thisMap = hubKnobLabel._knobmap;
 				if (thisMap) {
 					for (auto &mapping : thisMap->maps) {
-						bool knobMapped = mapping.paramHandle.moduleId != -1;
+						auto &ph = mapping.paramHandle;
+						bool knobMapped = ph.moduleId != -1;
 						if (knobMapped) {
-
-							// Todo: get Module name? get Param name?
 							MapFieldEntry *paramLabel2 = new MapFieldEntry;
-							paramLabel2->moduleId = mapping.paramHandle.moduleId;
-							paramLabel2->paramId = mapping.paramHandle.paramId;
+							paramLabel2->moduleName = ph.module->model->name;
+							paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
+							paramLabel2->moduleId = ph.moduleId;
+							paramLabel2->paramId = ph.paramId;
 							menu->addChild(paramLabel2);
 
 							MinField *o = new MinField(mapping.range);
