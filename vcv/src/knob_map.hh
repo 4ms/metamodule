@@ -10,10 +10,12 @@ public:
 		rack::ParamHandle paramHandle;
 		std::pair<float, float> range;
 	};
-	std::vector<Mapping *> maps;
-	// Todo: if we use a std::vector<std::unique_ptr<Mapping>> maps;
+	// std::vector<Mapping *> maps;
+	std::vector<std::unique_ptr<Mapping>> maps;
+	// Todo: if we use a
 	// then we can't do knobMaps.push_back() or emplace_back() because knobMaps is vector
 	// and thus is relocates elements as the size increases
+
 	KnobMap()
 		: paramId{-1}
 	{
@@ -28,8 +30,8 @@ public:
 
 	bool create(int otherModuleId, int otherParamId, NVGcolor mapColor, float min = 0.f, float max = 1.0f)
 	{
-		// auto &m = maps.emplace_back(std::make_unique<Mapping>());
-		auto &m = maps.emplace_back(new Mapping);
+		auto &m = maps.emplace_back(std::make_unique<Mapping>());
+		// auto &m = maps.emplace_back(new Mapping);
 
 		auto &ph = m->paramHandle;
 		color = mapColor;
@@ -57,9 +59,7 @@ public:
 				APP->engine->removeParamHandle(&map->paramHandle);
 			}
 			printf("~deleted a map %d %d\n", map->paramHandle.moduleId, map->paramHandle.paramId);
-			delete map;
 		}
-		maps.clear();
 	}
 
 	int getNumMaps()
