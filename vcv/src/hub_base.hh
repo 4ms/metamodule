@@ -173,7 +173,6 @@ struct MetaModuleHubBase : public CommModule {
 	{
 		if (responseTimer) {
 			if (--responseTimer == 0) {
-				printDebugFile();
 				saveMappingRanges();
 
 				std::string patchName;
@@ -224,10 +223,6 @@ private:
 		return false;
 	}
 
-	////////// put this in PatchFileWriter, or a new class PatchTextFileWriter and rename the other
-	/// PatchBinaryFileWriter
-	// centralData ==> string
-
 	void writePatchFile(std::string fileName, std::string patchName)
 	{
 		labelText = "Creating patch..";
@@ -243,69 +238,69 @@ private:
 		writeBinaryFile(fileName + ".mmpatch", pw.printPatchBinary());
 	}
 
-	void printDebugFile()
-	{
-		std::string str = "";
-		appendModuleList(str);
-		appendParamList(str);
-		appendCableList(str);
-		appendMappingList(str);
+	// void printDebugFile()
+	// {
+	// 	std::string str = "";
+	// 	appendModuleList(str);
+	// 	appendParamList(str);
+	// 	appendCableList(str);
+	// 	appendMappingList(str);
 
-		labelText = "Printing debug file...";
-		updateDisplay();
+	// 	labelText = "Printing debug file...";
+	// 	updateDisplay();
 
-		writeToFile(debugFile, str);
-	}
+	// 	writeToFile(debugFile, str);
+	// }
 
-	void appendModuleList(std::string &str)
-	{
-		for (auto &mod : centralData->moduleData) {
-			str += "Module slug in centralData = ";
-			str += mod.typeID;
-			str += ". CoreModule slug = ";
-			str += ModuleFactory::getModuleSlug(mod.typeID);
-			str += " (";
-			str += ModuleFactory::getModuleTypeName(mod.typeID);
-			str += ") ";
-			str += ". VCV Rack unique ID = " + std::to_string(mod.id) + "\n";
-		}
-	}
+	// void appendModuleList(std::string &str)
+	// {
+	// 	for (auto &mod : centralData->moduleData) {
+	// 		str += "Module slug in centralData = ";
+	// 		str += mod.typeID;
+	// 		str += ". CoreModule slug = ";
+	// 		str += ModuleFactory::getModuleSlug(mod.typeID);
+	// 		str += " (";
+	// 		str += ModuleFactory::getModuleTypeName(mod.typeID);
+	// 		str += ") ";
+	// 		str += ". VCV Rack unique ID = " + std::to_string(mod.id) + "\n";
+	// 	}
+	// }
 
-	void appendCableList(std::string &str)
-	{
-		for (auto jData : centralData->jackData) {
-			if (jData.connected == true) {
-				str += "Input jack " + std::to_string(jData.sendingJackId);
-				str += " on module " + std::to_string(jData.sendingModuleId);
-				str += " is connected to output jack " + std::to_string(jData.receivedJackId);
-				str += " on module " + std::to_string(jData.receivedModuleId) + "\n";
-			} else {
-				str += "Input jack " + std::to_string(jData.sendingJackId) + " on module " +
-					   std::to_string(jData.sendingModuleId) + " not connected" + "\n";
-			}
-		}
-	}
+	// void appendCableList(std::string &str)
+	// {
+	// 	for (auto jData : centralData->jackData) {
+	// 		if (jData.connected == true) {
+	// 			str += "Input jack " + std::to_string(jData.sendingJackId);
+	// 			str += " on module " + std::to_string(jData.sendingModuleId);
+	// 			str += " is connected to output jack " + std::to_string(jData.receivedJackId);
+	// 			str += " on module " + std::to_string(jData.receivedModuleId) + "\n";
+	// 		} else {
+	// 			str += "Input jack " + std::to_string(jData.sendingJackId) + " on module " +
+	// 				   std::to_string(jData.sendingModuleId) + " not connected" + "\n";
+	// 		}
+	// 	}
+	// }
 
-	void appendParamList(std::string &str)
-	{
-		for (auto pData : centralData->paramData) {
-			str += "Parameter # " + std::to_string(pData.paramID) + " on module # " + std::to_string(pData.moduleID) +
-				   " value is " + std::to_string(pData.value) + "\n";
-		}
-	}
+	// void appendParamList(std::string &str)
+	// {
+	// 	for (auto pData : centralData->paramData) {
+	// 		str += "Parameter # " + std::to_string(pData.paramID) + " on module # " + std::to_string(pData.moduleID) +
+	// 			   " value is " + std::to_string(pData.value) + "\n";
+	// 	}
+	// }
 
-	void appendMappingList(std::string &str)
-	{
-		for (auto &m : centralData->maps) {
-			str += "Mapping: src param ID = " + std::to_string(m.src.objID);
-			str += " type = " + std::to_string((int)m.src.objType);
-			str += " moduleID = " + std::to_string(m.src.moduleID);
-			str += " ==> dst param ID = " + std::to_string(m.dst.objID);
-			str += " type = " + std::to_string((int)m.dst.objType);
-			str += " moduleID = " + std::to_string(m.dst.moduleID);
-			str += "\n";
-		}
-	}
+	// void appendMappingList(std::string &str)
+	// {
+	// 	for (auto &m : centralData->maps) {
+	// 		str += "Mapping: src param ID = " + std::to_string(m.src.objID);
+	// 		str += " type = " + std::to_string((int)m.src.objType);
+	// 		str += " moduleID = " + std::to_string(m.src.moduleID);
+	// 		str += " ==> dst param ID = " + std::to_string(m.dst.objID);
+	// 		str += " type = " + std::to_string((int)m.dst.objType);
+	// 		str += " moduleID = " + std::to_string(m.dst.moduleID);
+	// 		str += "\n";
+	// 	}
+	// }
 
 	void writeToFile(std::string fileName, std::string textToWrite)
 	{
@@ -321,56 +316,14 @@ private:
 		myfile.write(reinterpret_cast<const char *>(data.data()), data.size());
 		myfile.close();
 	}
-	//
-	//
-	///////////////////////// end move to PatchFileWriter
 };
 
 struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 	Label *valueLabel;
-	LedDisplayTextField *patchName;
-	MetaModuleHubBase *expModule;
+	MetaModuleHubBase *hubModule;
 
-	MetaModuleHubBaseWidget() = default; // MetaModuleHubBase *module)
-	// {
-	// We'll have to copy this boilerplate into each Hub module, since it's customized for each size hub
-	//
-	// setModule(module);
-	// expModule = module;
-
-	// if (expModule != nullptr) {
-	// 	expModule->updateDisplay = [&]() { this->valueLabel->text = this->expModule->labelText; };
-	// 	expModule->updatePatchName = [&]() { this->expModule->patchNameText = this->patchName->text; };
-	// 	expModule->redrawPatchName = [&]() { this->patchName->text = this->expModule->patchNameText; };
-	// }
-	// setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-no-words.svg")));
-
-	// // addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
-	// addLabeledToggleMM("WRITE", MetaModuleHub::WRITE_LIGHT, MetaModuleHub::GET_INFO, {70, 19.5});
-
-	// valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
-	// valueLabel->color = rack::color::BLACK;
-	// valueLabel->text = "";
-	// valueLabel->fontSize = 10;
-	// addChild(valueLabel);
-
-	// patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(24.6, 9.6)));
-	// if (expModule != nullptr && expModule->patchNameText.length() > 0)
-	// 	patchName->text = this->expModule->patchNameText;
-	// else
-	// 	patchName->text = "Enter Patch Name";
-	// patchName->color = rack::color::WHITE;
-	// patchName->box.size = {mm2px(Vec(33.6, 31.3))};
-	// addChild(patchName);
-
-	// addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
-	// addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.6, 59.6});
-	// addLabeledInputMM("CV IN 1", MetaModuleHub::CV_1, {7.6, 74.5});
-	// addLabeledOutputMM("CV Out 1", MetaModuleHub::AUDIO_OUT_3, {25.7, 96.2});
-	// Todo:
-	// addLabeledToggle() for both RGB Buttons
-	// }
+	MetaModuleHubBaseWidget() = default;
 
 	LabeledButton *createLabel() override
 	{
@@ -405,10 +358,13 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 		HubKnobLabel *button;
 
-		if (expModule)
-			button = new HubKnobLabel{*this, expModule->knobMaps[knobID]};
-		else
+		if (hubModule) {
+			printf("HubModule is not null\n");
+			button = new HubKnobLabel{*this, hubModule->knobMaps[knobID]};
+		} else {
+			printf("HubModule is null\n");
 			button = new HubKnobLabel{*this};
+		}
 		button->isOnHub = true;
 
 		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));

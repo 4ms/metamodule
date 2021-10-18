@@ -15,14 +15,14 @@
 #include <fstream>
 #include <functional>
 
-struct MetaModuleMiniHub : public MetaModuleHubBase {
+struct HubMini : public MetaModuleHubBase {
 
 	enum ParamIds { ENUMS(KNOBS, PanelDef::NumKnobs), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
 	enum OutputIds { AUDIO_OUT_L, AUDIO_OUT_R, AUDIO_OUT_3, AUDIO_OUT_4, CLOCK_OUT, NUM_OUTPUTS };
 	enum LightIds { WRITE_LIGHT, NUM_LIGHTS };
 
-	MetaModuleMiniHub()
+	HubMini()
 	{
 		for (int i = 0; i < PanelDef::NumKnobs; i++)
 			knobMaps.emplace_back(i);
@@ -31,7 +31,7 @@ struct MetaModuleMiniHub : public MetaModuleHubBase {
 		selfID.typeID = "PANEL_8";
 	}
 
-	~MetaModuleMiniHub() {}
+	~HubMini() {}
 
 	void process(const ProcessArgs &args) override
 	{
@@ -41,27 +41,23 @@ struct MetaModuleMiniHub : public MetaModuleHubBase {
 	}
 };
 
-struct MetaModuleMiniHubWidget : CommModuleWidget {
-
-	Label *valueLabel;
-	Label *valueLabel2;
+struct HubMiniWidget : MetaModuleHubBaseWidget {
 	LedDisplayTextField *patchName;
-	MetaModuleMiniHub *expModule;
 
-	MetaModuleMiniHubWidget(MetaModuleMiniHub *module)
+	HubMiniWidget(HubMini *module)
 	{
 		setModule(module);
-		expModule = module;
+		hubModule = module;
 
-		if (expModule != nullptr) {
-			expModule->updateDisplay = [&]() { this->valueLabel->text = this->expModule->labelText; };
-			expModule->updatePatchName = [&]() { this->expModule->patchNameText = this->patchName->text; };
-			expModule->redrawPatchName = [&]() { this->patchName->text = this->expModule->patchNameText; };
+		if (hubModule != nullptr) {
+			hubModule->updateDisplay = [&]() { this->valueLabel->text = this->hubModule->labelText; };
+			hubModule->updatePatchName = [&]() { this->hubModule->patchNameText = this->patchName->text; };
+			hubModule->redrawPatchName = [&]() { this->patchName->text = this->hubModule->patchNameText; };
 		}
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-no-words.svg")));
 
 		// addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
-		addLabeledToggleMM("WRITE", MetaModuleMiniHub::WRITE_LIGHT, MetaModuleMiniHub::GET_INFO, {70, 19.5});
+		addLabeledToggleMM("WRITE", HubMini::WRITE_LIGHT, HubMini::GET_INFO, {70, 19.5});
 
 		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
 		valueLabel->color = rack::color::BLACK;
@@ -70,8 +66,8 @@ struct MetaModuleMiniHubWidget : CommModuleWidget {
 		addChild(valueLabel);
 
 		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(24.6, 9.6)));
-		if (expModule != nullptr && expModule->patchNameText.length() > 0)
-			patchName->text = this->expModule->patchNameText;
+		if (hubModule != nullptr && hubModule->patchNameText.length() > 0)
+			patchName->text = this->hubModule->patchNameText;
 		else
 			patchName->text = "Enter Patch Name";
 		patchName->color = rack::color::WHITE;
@@ -79,35 +75,35 @@ struct MetaModuleMiniHubWidget : CommModuleWidget {
 		addChild(patchName);
 		patchName->selectAll(); // Doesn't work :(
 
-		// addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
-		// addLabeledKnobMM<RoundBlackKnob>("B", 1, {29.4, 51.7});
-		// addLabeledKnobMM<RoundBlackKnob>("C", 2, {51.6, 51.7});
-		// addLabeledKnobMM<RoundBlackKnob>("D", 3, {72, 38.9});
-		// addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.6, 59.6});
-		// addLabeledKnobMM<RoundSmallBlackKnob>("b", 5, {32.1, 73.0});
-		// addLabeledKnobMM<RoundSmallBlackKnob>("c", 6, {49.0, 73.0});
-		// addLabeledKnobMM<RoundSmallBlackKnob>("d", 7, {72.6, 59.6});
+		addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
+		addLabeledKnobMM<RoundBlackKnob>("B", 1, {29.4, 51.7});
+		addLabeledKnobMM<RoundBlackKnob>("C", 2, {51.6, 51.7});
+		addLabeledKnobMM<RoundBlackKnob>("D", 3, {72, 38.9});
+		addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.6, 59.6});
+		addLabeledKnobMM<RoundSmallBlackKnob>("b", 5, {32.1, 73.0});
+		addLabeledKnobMM<RoundSmallBlackKnob>("c", 6, {49.0, 73.0});
+		addLabeledKnobMM<RoundSmallBlackKnob>("d", 7, {72.6, 59.6});
 
-		addLabeledInputMM("CV IN 1", MetaModuleMiniHub::CV_1, {7.6, 74.5});
-		addLabeledInputMM("CV IN 2", MetaModuleMiniHub::CV_2, {20, 82.1});
-		addLabeledInputMM("CV IN 3", MetaModuleMiniHub::CV_3, {60.7, 82.4});
-		addLabeledInputMM("CV IN 4", MetaModuleMiniHub::CV_4, {73.1, 74.5});
+		addLabeledInputMM("CV IN 1", HubMini::CV_1, {7.6, 74.5});
+		addLabeledInputMM("CV IN 2", HubMini::CV_2, {20, 82.1});
+		addLabeledInputMM("CV IN 3", HubMini::CV_3, {60.7, 82.4});
+		addLabeledInputMM("CV IN 4", HubMini::CV_4, {73.1, 74.5});
 
-		addLabeledInputMM("Gate In 1", MetaModuleMiniHub::GATE_IN_1, {9, 94.5});
-		addLabeledInputMM("Gate In 2", MetaModuleMiniHub::GATE_IN_2, {71.7, 94.5});
-		addLabeledInputMM("Clock In", MetaModuleMiniHub::CLOCK_IN, {40.4, 88.9});
+		addLabeledInputMM("Gate In 1", HubMini::GATE_IN_1, {9, 94.5});
+		addLabeledInputMM("Gate In 2", HubMini::GATE_IN_2, {71.7, 94.5});
+		addLabeledInputMM("Clock In", HubMini::CLOCK_IN, {40.4, 88.9});
 
-		addLabeledInputMM("Audio IN L", MetaModuleMiniHub::AUDIO_IN_L, {8.2, 111.8});
-		addLabeledInputMM("Audio IN R", MetaModuleMiniHub::AUDIO_IN_R, {23.4, 111.8});
+		addLabeledInputMM("Audio IN L", HubMini::AUDIO_IN_L, {8.2, 111.8});
+		addLabeledInputMM("Audio IN R", HubMini::AUDIO_IN_R, {23.4, 111.8});
 
-		addLabeledOutputMM("Audio OUT L", MetaModuleMiniHub::AUDIO_OUT_L, {57.3, 111.8});
-		addLabeledOutputMM("Audio OUT R", MetaModuleMiniHub::AUDIO_OUT_R, {72.8, 111.8});
+		addLabeledOutputMM("Audio OUT L", HubMini::AUDIO_OUT_L, {57.3, 111.8});
+		addLabeledOutputMM("Audio OUT R", HubMini::AUDIO_OUT_R, {72.8, 111.8});
 
-		addLabeledOutputMM("CV Out 1", MetaModuleMiniHub::AUDIO_OUT_3, {25.7, 96.2});
-		addLabeledOutputMM("CV Out 2", MetaModuleMiniHub::AUDIO_OUT_4, {55, 96.2});
+		addLabeledOutputMM("CV Out 1", HubMini::AUDIO_OUT_3, {25.7, 96.2});
+		addLabeledOutputMM("CV Out 2", HubMini::AUDIO_OUT_4, {55, 96.2});
 
-		addLabeledOutputMM("Clock Out", MetaModuleMiniHub::CLOCK_OUT, {40.4, 106.4});
+		addLabeledOutputMM("Clock Out", HubMini::CLOCK_OUT, {40.4, 106.4});
 	}
 };
 
-Model *modelMetaModuleMiniHub = createModel<MetaModuleMiniHub, MetaModuleMiniHubWidget>("PANEL_8");
+Model *modelHubMini = createModel<HubMini, HubMiniWidget>("PANEL_8");
