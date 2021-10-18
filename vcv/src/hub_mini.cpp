@@ -18,7 +18,7 @@ struct HubMini : public MetaModuleHubBase {
 	HubMini()
 	{
 		for (int i = 0; i < PanelDef::NumKnobs; i++)
-			knobMaps.emplace_back(i);
+			knobMaps.push_back(i);
 
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		selfID.typeID = "PANEL_8";

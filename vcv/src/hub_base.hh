@@ -117,15 +117,15 @@ struct MetaModuleHubBase : public CommModule {
 			for (auto &mapping : knobmap.maps) {
 				LabelButtonID dst = {
 					LabelButtonID::Types::Knob,
-					mapping.paramHandle.paramId,
-					mapping.paramHandle.moduleId,
+					mapping->paramHandle.paramId,
+					mapping->paramHandle.moduleId,
 				};
 				LabelButtonID src = {
 					LabelButtonID::Types::Knob,
 					knobmap.paramId,
 					id, // this module ID
 				};
-				centralData->setMapRange(src, dst, mapping.range.first, mapping.range.second);
+				centralData->setMapRange(src, dst, mapping->range.first, mapping->range.second);
 			}
 		}
 	}
@@ -156,13 +156,13 @@ struct MetaModuleHubBase : public CommModule {
 	{
 		for (auto &knobmap : knobMaps) {
 			for (auto &mapping : knobmap.maps) {
-				bool isKnobMapped = (mapping.paramHandle.moduleId) != -1;
+				bool isKnobMapped = (mapping->paramHandle.moduleId) != -1;
 				if (isKnobMapped) {
-					Module *module = mapping.paramHandle.module;
-					int paramId = mapping.paramHandle.paramId;
+					Module *module = mapping->paramHandle.module;
+					int paramId = mapping->paramHandle.paramId;
 					ParamQuantity *paramQuantity = module->paramQuantities[paramId];
 					auto newMappedVal = MathTools::map_value(
-						params[knobmap.paramId].getValue(), 0.0f, 1.0f, mapping.range.first, mapping.range.second);
+						params[knobmap.paramId].getValue(), 0.0f, 1.0f, mapping->range.first, mapping->range.second);
 					paramQuantity->setValue(newMappedVal);
 				}
 			}

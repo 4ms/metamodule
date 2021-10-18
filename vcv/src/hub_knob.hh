@@ -92,7 +92,7 @@ public:
 				KnobMap *thisMap = hubKnobLabel._knobmap;
 				if (thisMap) {
 					for (auto &mapping : thisMap->maps) {
-						auto &ph = mapping.paramHandle;
+						auto &ph = mapping->paramHandle;
 						bool knobMapped = ph.moduleId != -1;
 						if (knobMapped) {
 							MapFieldEntry *paramLabel2 = new MapFieldEntry;
@@ -102,11 +102,11 @@ public:
 							paramLabel2->paramId = ph.paramId;
 							menu->addChild(paramLabel2);
 
-							MinField *o = new MinField(mapping.range);
+							MinField *o = new MinField(mapping->range);
 							o->box.size.x = 100;
 							menu->addChild(o);
 
-							MaxField *l = new MaxField(mapping.range);
+							MaxField *l = new MaxField(mapping->range);
 							l->box.size.x = 100;
 							menu->addChild(l);
 						}

@@ -15,19 +15,24 @@ public:
 	// Note: While a vector makes adding and removing mappings simple, VCV doesn't support this since it keeps a raw
 	// pointer to the vector element, and appending to a vector can cause re-location of previous elements
 	// So we have to use an array, and we have a fixed # of maximum mappings per knob
-	std::array<Mapping, NUM_MAPPINGS_PER_KNOB> maps;
+	// std::array<Mapping, NUM_MAPPINGS_PER_KNOB> maps;
+	std::vector<Mapping *> maps;
+	// Todo: if we use a std::vector<std::unique_ptr<Mapping>> maps;
+	// then we can't do knobMaps.push_back() or emplace_back() because knobMaps is vector
+	// and thus is relocates elements as the size increases
 
 	KnobMap(int param_id)
 		: paramId{param_id}
-	{}
+	{
+		printf("KnobMap ctor %d\n", paramId);
+	}
 
 	bool create(int otherModuleId, int otherParamId, NVGcolor mapColor, float min = 0.f, float max = 1.0f)
 	{
-		int new_idx = firstAvailable();
-		if (new_idx == -1)
-			return false;
+		// auto &m = maps.emplace_back(std::make_unique<Mapping>());
+		auto &m = maps.emplace_back(new Mapping);
 
-		auto &ph = maps[new_idx].paramHandle;
+		auto &ph = m->paramHandle;
 		color = mapColor;
 		ph.color = mapColor;
 		ph.text = "Mapped to MetaModule";
@@ -41,69 +46,47 @@ public:
 		APP->engine->addParamHandle(&ph);
 		APP->engine->updateParamHandle(&ph, otherModuleId, otherParamId, true);
 
-		maps[new_idx].range = {min, max};
+		m->range = {min, max};
 		return true;
-	}
-
-	Mapping *find_mapping(int otherModuleId, int otherParamId)
-	{
-		for (auto &m : maps) {
-			if ((m.paramHandle.moduleId == otherModuleId) && (m.paramHandle.paramId == otherParamId)) {
-				return &m;
-			}
-		}
-		return nullptr;
-	}
-
-	void update_range(int otherModuleId, int otherParamId, float min, float max)
-	{
-		auto m = find_mapping(otherModuleId, otherParamId);
-		if (m)
-			m->range = {min, max};
-	}
-
-	bool mapping_already_exists(int otherModuleId, int otherParamId)
-	{
-		return find_mapping(otherModuleId, otherParamId) != nullptr;
 	}
 
 	~KnobMap()
 	{
+		printf("~KnobMap dtor %d\n", paramId);
 		for (auto &map : maps) {
-			if (APP->engine->getParamHandle(map.paramHandle.moduleId, map.paramHandle.paramId)) {
-				APP->engine->removeParamHandle(&map.paramHandle);
+			if (APP->engine->getParamHandle(map->paramHandle.moduleId, map->paramHandle.paramId)) {
+				APP->engine->removeParamHandle(&map->paramHandle);
 			}
+			printf("~deleted a map %d %d\n", map->paramHandle.moduleId, map->paramHandle.paramId);
+			delete map;
 		}
+		maps.clear();
 	}
 
 	int getNumMaps()
 	{
 		int num = 0;
 		for (auto &map : maps) {
-			if (map.paramHandle.moduleId != -1) {
+			if (map->paramHandle.moduleId != -1) {
 				num++;
 			}
 		}
 		return num;
 	}
 
-	int firstAvailable()
-	{
-		int availableSlot = -1;
-		for (int i = 0; i < NUM_MAPPINGS_PER_KNOB; i++) {
-			if (maps[i].paramHandle.moduleId == -1) {
-				availableSlot = i;
-				break;
-			}
-		}
-		return availableSlot;
-	}
-
-	// Returns the color of the specified mapping, if it exists;
-	// Else it returns the color of the first mapping, if any exist;
-	// Else it returns an empty color
 	NVGcolor get_color()
 	{
 		return color;
 	}
+
+private:
+	// Mapping *find_mapping(int otherModuleId, int otherParamId)
+	// {
+	// 	for (auto &m : maps) {
+	// 		if ((m->paramHandle.moduleId == otherModuleId) && (m->paramHandle.paramId == otherParamId)) {
+	// 			return &m->get();
+	// 		}
+	// 	}
+	// 	return nullptr;
+	// }
 };
