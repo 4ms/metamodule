@@ -5,7 +5,7 @@ SHARED_DIR = src/shared
 SHARED = $(SHARED_DIR)
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS += -std=c++17 -Isrc -I$(SHARED_DIR)/util -I$(SHARED_DIR)/processors -I$(SHARED_DIR)/CoreModules -I$(SHARED_DIR)/patch -I$(SHARED_DIR) -I$(SHARED_DIR)/axoloti-wrapper
+FLAGS += -std=c++2a -Isrc -I$(SHARED_DIR)/util -I$(SHARED_DIR)/processors -I$(SHARED_DIR)/CoreModules -I$(SHARED_DIR)/patch -I$(SHARED_DIR) -I$(SHARED_DIR)/axoloti-wrapper
 CFLAGS +=
 CXXFLAGS += 
 
