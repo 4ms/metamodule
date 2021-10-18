@@ -26,9 +26,7 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 			// 	}
 			// }
 			if (!is_already_mapped) {
-				int knobToMap = centralData->getMappingSource().objID;
 				int thisKnob = id.objID;
-				assert(knobToMap == thisKnob);
 				if (_knobmap->create(moduleId, paramId, PaletteHub::color[thisKnob])) {
 					centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
 				}
