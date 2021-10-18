@@ -41,7 +41,7 @@ struct MetaModuleMiniHub : public MetaModuleHubBase {
 	}
 };
 
-struct MetaModuleMiniHubWidget : MetaModuleHubBaseWidget {
+struct MetaModuleMiniHubWidget : CommModuleWidget {
 
 	Label *valueLabel;
 	Label *valueLabel2;
@@ -79,14 +79,14 @@ struct MetaModuleMiniHubWidget : MetaModuleHubBaseWidget {
 		addChild(patchName);
 		patchName->selectAll(); // Doesn't work :(
 
-		addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
-		addLabeledKnobMM<RoundBlackKnob>("B", 1, {29.4, 51.7});
-		addLabeledKnobMM<RoundBlackKnob>("C", 2, {51.6, 51.7});
-		addLabeledKnobMM<RoundBlackKnob>("D", 3, {72, 38.9});
-		addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.6, 59.6});
-		addLabeledKnobMM<RoundSmallBlackKnob>("b", 5, {32.1, 73.0});
-		addLabeledKnobMM<RoundSmallBlackKnob>("c", 6, {49.0, 73.0});
-		addLabeledKnobMM<RoundSmallBlackKnob>("d", 7, {72.6, 59.6});
+		// addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
+		// addLabeledKnobMM<RoundBlackKnob>("B", 1, {29.4, 51.7});
+		// addLabeledKnobMM<RoundBlackKnob>("C", 2, {51.6, 51.7});
+		// addLabeledKnobMM<RoundBlackKnob>("D", 3, {72, 38.9});
+		// addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.6, 59.6});
+		// addLabeledKnobMM<RoundSmallBlackKnob>("b", 5, {32.1, 73.0});
+		// addLabeledKnobMM<RoundSmallBlackKnob>("c", 6, {49.0, 73.0});
+		// addLabeledKnobMM<RoundSmallBlackKnob>("d", 7, {72.6, 59.6});
 
 		addLabeledInputMM("CV IN 1", MetaModuleMiniHub::CV_1, {7.6, 74.5});
 		addLabeledInputMM("CV IN 2", MetaModuleMiniHub::CV_2, {20, 82.1});
@@ -110,4 +110,4 @@ struct MetaModuleMiniHubWidget : MetaModuleHubBaseWidget {
 	}
 };
 
-// Model *modelMetaModuleMiniHub = createModel<MetaModuleMiniHub, MetaModuleMiniHubWidget>("metaModuleMiniHubModule");
+Model *modelMetaModuleMiniHub = createModel<MetaModuleMiniHub, MetaModuleMiniHubWidget>("PANEL_8");

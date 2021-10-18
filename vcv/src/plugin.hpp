@@ -60,5 +60,4 @@ extern Model *modelFadeDelay;
 extern Model *modelVCA;
 extern Model *modelComparator;
 extern Model *modelSend;
-
-// extern Model *modelMetaModuleMiniHub;
+extern Model *modelMetaModuleMiniHub;
