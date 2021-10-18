@@ -1,12 +1,16 @@
+#pragma once
+#include <array>
 #include <rack.hpp>
 
-template<int NUM_MAPPINGS_PER_KNOB = 8>
 class KnobMap {
+	static constexpr int NUM_MAPPINGS_PER_KNOB = 8;
+
 public:
 	int paramId{};
 	struct Mapping {
 		rack::ParamHandle paramHandle;
 		std::pair<float, float> range;
+		NVGcolor color;
 	};
 	// Note: While a vector makes adding and removing mappings simple, VCV doesn't support this since it keeps a raw
 	// pointer to the vector element, and appending to a vector can cause re-location of previous elements
@@ -24,6 +28,7 @@ public:
 			return false;
 
 		auto &ph = maps[new_idx].paramHandle;
+		maps[new_idx].color = mapColor;
 		ph.color = mapColor;
 		ph.text = "Hub knob"; // TODO, something meaningful
 		APP->engine->addParamHandle(&ph);

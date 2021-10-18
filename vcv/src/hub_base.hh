@@ -1,9 +1,9 @@
+#pragma once
 #include "CommData.h"
 #include "CommModule.h"
 #include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
-#include "CoreModules/panel_mini_defs.hh"
-#include "hub_knob_menu.hh"
+#include "hub_knob.hh"
 #include "knob_map.hh"
 #include "localPath.h"
 #include "paletteHub.hh"
@@ -13,15 +13,17 @@
 #include "util/string_util.hh"
 #include <fstream>
 #include <functional>
-#include <iostream>
 
 struct MetaModuleHubBase : public CommModule {
 
 	static constexpr int NUM_MAPPINGS_PER_KNOB = 8;
-	std::vector<KnobMap<NUM_MAPPINGS_PER_KNOB>> knobMaps;
+	std::vector<KnobMap> knobMaps;
 
+	// std::function<void()> updatePatchName;
+	// std::function<void()> redrawPatchName;
 	std::string labelText = "";
 	std::string patchNameText = "";
+
 	long responseTimer = 0;
 	bool buttonAlreadyHandled = false;
 
@@ -139,8 +141,6 @@ struct MetaModuleHubBase : public CommModule {
 	}
 
 	// Hub class needs to call this from its process
-	//  process_patchbutton(params[GET_INFO].getValue());
-	//  process_knobmaps();
 	void processPatchButton(float patchButtonState)
 	{
 		if (buttonJustPressed(patchButtonState)) {
@@ -326,99 +326,51 @@ private:
 	///////////////////////// end move to PatchFileWriter
 };
 
-struct MetaModuleHubWidget;
-
-class HubKnobLabel : public LabeledButton {
-public:
-	HubKnobLabel(MetaModuleHubWidget &hub);
-	void onDeselect(const event::Deselect &e) override;
-	void draw(const DrawArgs &args) override;
-	MetaModuleHubWidget &_hub;
-
-private:
-};
-
-template<typename BaseKnobT>
-class HubKnob : public BaseKnobT {
-public:
-	void onButton(const event::Button &e) override;
-	void draw(const typename BaseKnobT::DrawArgs &args) override;
-	HubKnob(HubKnobLabel &_hubKnobLabel)
-		: hubKnobLabel{_hubKnobLabel}
-	{}
-	HubKnobLabel &hubKnobLabel;
-};
-
-struct MetaModuleHubWidget : CommModuleWidget {
+struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 	Label *valueLabel;
-	Label *valueLabel2;
 	LedDisplayTextField *patchName;
-	MetaModuleHub *expModule; // for debugging text only
+	MetaModuleHubBase *expModule;
 
-	MetaModuleHubWidget(MetaModuleHub *module)
-	{
-		setModule(module);
-		expModule = module;
+	MetaModuleHubBaseWidget() = default; // MetaModuleHubBase *module)
+	// {
+	// We'll have to copy this boilerplate into each Hub module, since it's customized for each size hub
+	//
+	// setModule(module);
+	// expModule = module;
 
-		if (expModule != nullptr) {
-			expModule->updateDisplay = [&]() { this->valueLabel->text = this->expModule->labelText; };
-			expModule->updatePatchName = [&]() { this->expModule->patchNameText = this->patchName->text; };
-			expModule->redrawPatchName = [&]() { this->patchName->text = this->expModule->patchNameText; };
-		}
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-no-words.svg")));
+	// if (expModule != nullptr) {
+	// 	expModule->updateDisplay = [&]() { this->valueLabel->text = this->expModule->labelText; };
+	// 	expModule->updatePatchName = [&]() { this->expModule->patchNameText = this->patchName->text; };
+	// 	expModule->redrawPatchName = [&]() { this->patchName->text = this->expModule->patchNameText; };
+	// }
+	// setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-no-words.svg")));
 
-		// addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
-		addLabeledToggleMM("WRITE", MetaModuleHub::WRITE_LIGHT, MetaModuleHub::GET_INFO, {70, 19.5});
+	// // addParam(createParamCentered<BefacoPush>(mm2px(Vec(69.7, 19.5)), module, MetaModuleHub::GET_INFO));
+	// addLabeledToggleMM("WRITE", MetaModuleHub::WRITE_LIGHT, MetaModuleHub::GET_INFO, {70, 19.5});
 
-		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
-		valueLabel->color = rack::color::BLACK;
-		valueLabel->text = "";
-		valueLabel->fontSize = 10;
-		addChild(valueLabel);
+	// valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
+	// valueLabel->color = rack::color::BLACK;
+	// valueLabel->text = "";
+	// valueLabel->fontSize = 10;
+	// addChild(valueLabel);
 
-		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(24.6, 9.6)));
-		if (expModule != nullptr && expModule->patchNameText.length() > 0)
-			patchName->text = this->expModule->patchNameText;
-		else
-			patchName->text = "Enter Patch Name";
-		patchName->color = rack::color::WHITE;
-		patchName->box.size = {mm2px(Vec(33.6, 31.3))};
-		addChild(patchName);
-		patchName->selectAll(); // Doesn't work :(
+	// patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(24.6, 9.6)));
+	// if (expModule != nullptr && expModule->patchNameText.length() > 0)
+	// 	patchName->text = this->expModule->patchNameText;
+	// else
+	// 	patchName->text = "Enter Patch Name";
+	// patchName->color = rack::color::WHITE;
+	// patchName->box.size = {mm2px(Vec(33.6, 31.3))};
+	// addChild(patchName);
 
-		addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
-		addLabeledKnobMM<RoundBlackKnob>("B", 1, {29.4, 51.7});
-		addLabeledKnobMM<RoundBlackKnob>("C", 2, {51.6, 51.7});
-		addLabeledKnobMM<RoundBlackKnob>("D", 3, {72, 38.9});
-		addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.6, 59.6});
-		addLabeledKnobMM<RoundSmallBlackKnob>("b", 5, {32.1, 73.0});
-		addLabeledKnobMM<RoundSmallBlackKnob>("c", 6, {49.0, 73.0});
-		addLabeledKnobMM<RoundSmallBlackKnob>("d", 7, {72.6, 59.6});
-
-		addLabeledInputMM("CV IN 1", MetaModuleHub::CV_1, {7.6, 74.5});
-		addLabeledInputMM("CV IN 2", MetaModuleHub::CV_2, {20, 82.1});
-		addLabeledInputMM("CV IN 3", MetaModuleHub::CV_3, {60.7, 82.4});
-		addLabeledInputMM("CV IN 4", MetaModuleHub::CV_4, {73.1, 74.5});
-
-		addLabeledInputMM("Gate In 1", MetaModuleHub::GATE_IN_1, {9, 94.5});
-		addLabeledInputMM("Gate In 2", MetaModuleHub::GATE_IN_2, {71.7, 94.5});
-		addLabeledInputMM("Clock In", MetaModuleHub::CLOCK_IN, {40.4, 88.9});
-
-		addLabeledInputMM("Audio IN L", MetaModuleHub::AUDIO_IN_L, {8.2, 111.8});
-		addLabeledInputMM("Audio IN R", MetaModuleHub::AUDIO_IN_R, {23.4, 111.8});
-
-		addLabeledOutputMM("Audio OUT L", MetaModuleHub::AUDIO_OUT_L, {57.3, 111.8});
-		addLabeledOutputMM("Audio OUT R", MetaModuleHub::AUDIO_OUT_R, {72.8, 111.8});
-
-		addLabeledOutputMM("CV Out 1", MetaModuleHub::AUDIO_OUT_3, {25.7, 96.2});
-		addLabeledOutputMM("CV Out 2", MetaModuleHub::AUDIO_OUT_4, {55, 96.2});
-
-		addLabeledOutputMM("Clock Out", MetaModuleHub::CLOCK_OUT, {40.4, 106.4});
-
-		// Todo:
-		// addLabeledToggle() for both RGB Buttons
-	}
+	// addLabeledKnobMM<RoundBlackKnob>("A", 0, {9, 38.9});
+	// addLabeledKnobMM<RoundSmallBlackKnob>("a", 4, {8.6, 59.6});
+	// addLabeledInputMM("CV IN 1", MetaModuleHub::CV_1, {7.6, 74.5});
+	// addLabeledOutputMM("CV Out 1", MetaModuleHub::AUDIO_OUT_3, {25.7, 96.2});
+	// Todo:
+	// addLabeledToggle() for both RGB Buttons
+	// }
 
 	LabeledButton *createLabel() override
 	{
@@ -451,14 +403,20 @@ struct MetaModuleHubWidget : CommModuleWidget {
 	{
 		Vec posPx = mm2px(position);
 
-		auto *button = new HubKnobLabel{*this};
+		HubKnobLabel *button;
+
+		if (expModule)
+			button = new HubKnobLabel{*this, expModule->knobMaps[knobID]};
+		else
+			button = new HubKnobLabel{*this};
 		button->isOnHub = true;
 
 		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
 		button->box.size.x = mm2px(kKnobSpacingX);
 		button->box.size.y = 12;
 		button->text = labelText;
-		button->id = {LabelButtonID::Types::Knob, knobID, -1};
+		button->id = {
+			LabelButtonID::Types::Knob, knobID, -1}; // moduleID is -1 for now, since we might not have a module
 		addChild(button);
 
 		auto *p = new HubKnob<KnobType>(*button);
@@ -471,186 +429,3 @@ struct MetaModuleHubWidget : CommModuleWidget {
 		addParam(p);
 	}
 };
-
-HubKnobLabel::HubKnobLabel(MetaModuleHubWidget &hub)
-	: LabeledButton{static_cast<CommModuleWidget &>(hub)}
-	, _hub{hub}
-{}
-
-void HubKnobLabel::onDeselect(const event::Deselect &e)
-{
-	if (!_hub.expModule) {
-		return;
-	}
-	// if (!module)
-	// 	return;
-
-	// Check if a ParamWidget was touched
-	ParamWidget *touchedParam = APP->scene->rack->touchedParam;
-	if (touchedParam && centralData->isMappingInProgress()) {
-		int moduleId = touchedParam->paramQuantity->module->id;
-		int paramId = touchedParam->paramQuantity->paramId;
-		APP->scene->rack->touchedParam = NULL;
-
-		if (_hub.expModule->id != moduleId) {
-
-			// Check if it already exists
-			// Todo: Use centralData or APP->engine to accomodate multiple Hubs
-			bool is_already_mapped = false;
-			for (auto &knobmap : _hub.expModule->knobMaps) {
-				if (knobmap.mapping_already_exists(moduleId, paramId)) {
-					is_already_mapped = true;
-					break;
-				}
-			}
-			if (!is_already_mapped) {
-				int knobToMap = centralData->getMappingSource().objID;
-				auto &knobmap = _hub.expModule->knobMaps[knobToMap];
-				if (knobmap.create(moduleId, paramId, PaletteHub::color[knobToMap])) {
-					centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
-				}
-			} else {
-				centralData->abortMappingProcedure();
-			}
-		} else {
-			centralData->abortMappingProcedure();
-		}
-	} else {
-		centralData->abortMappingProcedure();
-	}
-}
-
-void HubKnobLabel::draw(const DrawArgs &args)
-{
-	updateState();
-
-	nvgBeginPath(args.vg);
-	float padding_x = 2;
-	float knob_height = 40;
-	nvgRoundedRect(args.vg, padding_x, -knob_height, box.size.x - padding_x * 2, knob_height + box.size.y, 5.0);
-	nvgStrokeColor(args.vg, rack::color::WHITE);
-	nvgStrokeWidth(args.vg, 0.0);
-	if (isCurrentMapSrc) {
-		auto knobNum = this->id.objID;
-		nvgFillColor(args.vg, PaletteHub::color[knobNum]);
-	} else {
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.0f));
-	}
-	nvgStroke(args.vg);
-	nvgFill(args.vg);
-
-	nvgBeginPath(args.vg);
-	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
-	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
-	nvgFontSize(args.vg, 8.0f);
-	nvgText(args.vg, box.size.x / 2.0f, box.size.y / 2.0f, text.c_str(), NULL);
-}
-
-template<typename BaseKnobT>
-void HubKnob<BaseKnobT>::draw(const typename BaseKnobT::DrawArgs &args)
-{
-	RoundBlackKnob::draw(args);
-
-	auto knobNum = this->hubKnobLabel.id.objID;
-
-	// FixMe: color should be read from knobMaps[knobNum].
-	NVGcolor color = PaletteHub::color[knobNum];
-	auto hubMod = this->hubKnobLabel._hub.expModule;
-
-	if (hubMod != nullptr) {
-		bool isKnobMapped = hubMod->knobMaps[knobNum].getNumMaps() > 0;
-		if (isKnobMapped) {
-			nvgBeginPath(args.vg);
-			const float radius = 6;
-			// nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, radius);
-			nvgRect(args.vg, this->box.size.x - radius, this->box.size.y - radius, radius, radius);
-			nvgFillColor(args.vg, color);
-			nvgFill(args.vg);
-			nvgStrokeColor(args.vg, color::mult(color, 0.5));
-			nvgStrokeWidth(args.vg, 1.0);
-			nvgStroke(args.vg);
-		}
-	}
-}
-
-template<typename BaseKnobT>
-void HubKnob<BaseKnobT>::onButton(const event::Button &e)
-{
-	math::Vec c = this->box.size.div(2);
-	float dist = e.pos.minus(c).norm();
-	if (dist <= c.x) {
-		OpaqueWidget::onButton(e);
-
-		// Touch parameter
-		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
-			if (this->paramQuantity) {
-				APP->scene->rack->touchedParam = this;
-			}
-			e.consume(this);
-		}
-
-		// Right click to open context menu
-		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-			ui::Menu *menu = createMenu();
-
-			MapFieldLabel *paramLabel = new MapFieldLabel;
-			paramLabel->paramWidget = this;
-			menu->addChild(paramLabel);
-
-			MapField *paramField = new MapField;
-			paramField->box.size.x = 100;
-			paramField->setParamWidget(this);
-			menu->addChild(paramField);
-
-			ParamResetItem *resetItem = new ParamResetItem;
-			resetItem->text = "Initialize";
-			resetItem->rightText = "Double-click";
-			resetItem->paramWidget = this;
-			menu->addChild(resetItem);
-
-			auto knobNum = hubKnobLabel.id.objID;
-			auto hubModule = hubKnobLabel._hub.expModule;
-
-			auto &thisMap = hubModule->knobMaps[knobNum];
-			for (auto &mapping : thisMap.maps) {
-				bool knobMapped = mapping.paramHandle.moduleId != -1;
-				if (knobMapped) {
-
-					MapFieldEntry *paramLabel2 = new MapFieldEntry;
-					paramLabel2->moduleId = mapping.paramHandle.moduleId;
-					paramLabel2->paramId = mapping.paramHandle.paramId;
-					menu->addChild(paramLabel2);
-
-					MinField *o = new MinField(mapping.range);
-					o->box.size.x = 100;
-					menu->addChild(o);
-
-					MaxField *l = new MaxField(mapping.range);
-					l->box.size.x = 100;
-					menu->addChild(l);
-				}
-			}
-
-			// ParamFineItem *fineItem = new ParamFineItem;
-			// fineItem->text = "Fine adjust";
-			// fineItem->rightText = RACK_MOD_CTRL_NAME "+drag";
-			// fineItem->disabled = true;
-			// menu->addChild(fineItem);
-
-			engine::ParamHandle *paramHandle =
-				this->paramQuantity
-					? APP->engine->getParamHandle(this->paramQuantity->module->id, this->paramQuantity->paramId)
-					: NULL;
-			if (paramHandle) {
-				ParamUnmapItem *unmapItem = new ParamUnmapItem;
-				unmapItem->text = "Unmap";
-				unmapItem->rightText = paramHandle->text;
-				unmapItem->paramWidget = this;
-				menu->addChild(unmapItem);
-			}
-			e.consume(this);
-		}
-	}
-}
-
-Model *modelMetaModuleHub = createModel<MetaModuleHub, MetaModuleHubWidget>("metaModuleHubModule");
