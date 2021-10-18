@@ -19,8 +19,8 @@ struct MetaModuleHubBase : public CommModule {
 	static constexpr int NUM_MAPPINGS_PER_KNOB = 8;
 	std::vector<KnobMap> knobMaps;
 
-	// std::function<void()> updatePatchName;
-	// std::function<void()> redrawPatchName;
+	std::function<void()> updatePatchName;
+	std::function<void()> redrawPatchName;
 	std::string labelText = "";
 	std::string patchNameText = "";
 
