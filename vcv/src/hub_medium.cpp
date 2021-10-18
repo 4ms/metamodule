@@ -8,7 +8,7 @@
 #include "patch_writer.hh"
 #include "plugin.hpp"
 
-struct HubMedium : MetaModuleHubBase {
+struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 
 	enum ParamIds { ENUMS(KNOBS, PanelDef::NumPot), WRITE_PATCH, NUM_PARAMS };
 	enum InputIds { NUM_INPUTS = PanelDef::NumInJacks };
@@ -17,9 +17,6 @@ struct HubMedium : MetaModuleHubBase {
 
 	HubMedium()
 	{
-		for (int i = 0; i < PanelDef::NumKnobs; i++)
-			knobMaps.push_back(i);
-
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		selfID.typeID = "PANEL_MED";
 	}
@@ -34,7 +31,7 @@ struct HubMedium : MetaModuleHubBase {
 	}
 };
 
-struct HubMediumWidget : MetaModuleHubBaseWidget {
+struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 	LedDisplayTextField *patchName;
 
 	Vec fixDPI(Vec v)

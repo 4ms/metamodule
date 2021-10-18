@@ -3,8 +3,6 @@
 #include <rack.hpp>
 
 class KnobMap {
-	static constexpr int NUM_MAPPINGS_PER_KNOB = 8;
-
 public:
 	int paramId{};
 	NVGcolor color;
@@ -12,14 +10,15 @@ public:
 		rack::ParamHandle paramHandle;
 		std::pair<float, float> range;
 	};
-	// Note: While a vector makes adding and removing mappings simple, VCV doesn't support this since it keeps a raw
-	// pointer to the vector element, and appending to a vector can cause re-location of previous elements
-	// So we have to use an array, and we have a fixed # of maximum mappings per knob
-	// std::array<Mapping, NUM_MAPPINGS_PER_KNOB> maps;
 	std::vector<Mapping *> maps;
 	// Todo: if we use a std::vector<std::unique_ptr<Mapping>> maps;
 	// then we can't do knobMaps.push_back() or emplace_back() because knobMaps is vector
 	// and thus is relocates elements as the size increases
+	KnobMap()
+		: paramId{-1}
+	{
+		printf("KnobMap ctor %d\n", paramId);
+	}
 
 	KnobMap(int param_id)
 		: paramId{param_id}

@@ -8,7 +8,7 @@
 #include "patch_writer.hh"
 #include "plugin.hpp"
 
-struct HubMini : public MetaModuleHubBase {
+struct HubMini : public MetaModuleHubBase<PanelDef::NumKnobs> {
 
 	enum ParamIds { ENUMS(KNOBS, PanelDef::NumKnobs), GET_INFO, NUM_PARAMS };
 	enum InputIds { AUDIO_IN_L, AUDIO_IN_R, CV_1, CV_2, CV_3, CV_4, GATE_IN_1, GATE_IN_2, CLOCK_IN, NUM_INPUTS };
@@ -17,9 +17,6 @@ struct HubMini : public MetaModuleHubBase {
 
 	HubMini()
 	{
-		for (int i = 0; i < PanelDef::NumKnobs; i++)
-			knobMaps.push_back(i);
-
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		selfID.typeID = "PANEL_8";
 	}
@@ -34,7 +31,7 @@ struct HubMini : public MetaModuleHubBase {
 	}
 };
 
-struct HubMiniWidget : MetaModuleHubBaseWidget {
+struct HubMiniWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 	LedDisplayTextField *patchName;
 
 	HubMiniWidget(HubMini *module)

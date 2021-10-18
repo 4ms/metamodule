@@ -10,14 +10,15 @@
 #include "patch_writer.hh"
 #include "plugin.hpp"
 #include "string.h"
+#include "util/math.hh"
 #include "util/string_util.hh"
 #include <fstream>
 #include <functional>
 
+template<int NumKnobMaps>
 struct MetaModuleHubBase : public CommModule {
 
-	static constexpr int NUM_MAPPINGS_PER_KNOB = 8;
-	std::vector<KnobMap> knobMaps;
+	std::array<KnobMap, NumKnobMaps> knobMaps;
 
 	std::function<void()> updatePatchName;
 	std::function<void()> redrawPatchName;
@@ -27,8 +28,12 @@ struct MetaModuleHubBase : public CommModule {
 	long responseTimer = 0;
 	bool buttonAlreadyHandled = false;
 
-	MetaModuleHubBase() = default;
-	~MetaModuleHubBase() = default;
+	MetaModuleHubBase()
+	{
+		for (int i = 0; i < NumKnobMaps; i++)
+			knobMaps[i].paramId = i;
+	}
+	// ~MetaModuleHubBase() = default;
 
 	json_t *dataToJson() override
 	{
@@ -318,10 +323,11 @@ private:
 	}
 };
 
+template<size_t NumKnobMaps>
 struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 	Label *valueLabel;
-	MetaModuleHubBase *hubModule;
+	MetaModuleHubBase<NumKnobMaps> *hubModule;
 
 	MetaModuleHubBaseWidget() = default;
 
