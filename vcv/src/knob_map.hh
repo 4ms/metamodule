@@ -19,7 +19,9 @@ public:
 
 	KnobMap(int param_id)
 		: paramId{param_id}
-	{}
+	{
+		printf("KnobMap paramId=%d ctor\n", paramId);
+	}
 
 	bool create(int otherModuleId, int otherParamId, NVGcolor mapColor, float min = 0.f, float max = 1.0f)
 	{
@@ -28,11 +30,20 @@ public:
 			return false;
 
 		auto &ph = maps[new_idx].paramHandle;
-		maps[new_idx].color = mapColor;
+		color = mapColor;
 		ph.color = mapColor;
-		ph.text = "Hub knob"; // TODO, something meaningful
+		ph.text = "Mapped to MetaModule";
+
+		// Check for existing, and clear it
+		auto existingPh = APP->engine->getParamHandle(otherModuleId, otherParamId);
+		if (existingPh) {
+			printf("in create: Removing ph m: %d, p: %d\n", otherModuleId, otherParamId);
+			existingPh->moduleId = -1;
+			APP->engine->removeParamHandle(existingPh);
+		}
 		APP->engine->addParamHandle(&ph);
 		APP->engine->updateParamHandle(&ph, otherModuleId, otherParamId, true);
+		printf("Added paramHandle m: %d, p: %d\n", otherModuleId, otherParamId);
 
 		maps[new_idx].range = {min, max};
 		return true;
@@ -62,10 +73,15 @@ public:
 
 	~KnobMap()
 	{
+		printf("~KnobMap paramId = %d dtor\n", paramId);
 		for (auto &map : maps) {
 			if (APP->engine->getParamHandle(map.paramHandle.moduleId, map.paramHandle.paramId)) {
+				printf("Removing ph m: %d, p: %d\n", map.paramHandle.moduleId, map.paramHandle.paramId);
 				APP->engine->removeParamHandle(&map.paramHandle);
-			}
+			} else if (map.paramHandle.moduleId != -1)
+				printf("Not found in APP->engine->getParamHandle(m: %d, p: %d)\n",
+					   map.paramHandle.moduleId,
+					   map.paramHandle.paramId);
 		}
 	}
 
