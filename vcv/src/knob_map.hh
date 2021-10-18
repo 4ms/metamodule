@@ -7,10 +7,10 @@ class KnobMap {
 
 public:
 	int paramId{};
+	NVGcolor color;
 	struct Mapping {
 		rack::ParamHandle paramHandle;
 		std::pair<float, float> range;
-		NVGcolor color;
 	};
 	// Note: While a vector makes adding and removing mappings simple, VCV doesn't support this since it keeps a raw
 	// pointer to the vector element, and appending to a vector can cause re-location of previous elements
@@ -92,15 +92,11 @@ public:
 		return availableSlot;
 	}
 
-	NVGcolor get_color(int otherModuleId, int otherParamId)
+	// Returns the color of the specified mapping, if it exists;
+	// Else it returns the color of the first mapping, if any exist;
+	// Else it returns an empty color
+	NVGcolor get_color()
 	{
-		auto map = find_mapping(otherModuleId, otherParamId);
-		if (map)
-			return map->color;
-
-		if (maps.size())
-			return maps[0].color;
-
-		return NVGcolor{};
+		return color;
 	}
 };

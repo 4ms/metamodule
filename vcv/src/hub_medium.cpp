@@ -3,55 +3,39 @@
 #include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
 #include "CoreModules/panel_medium_defs.hh"
-#include "knob_map.hh"
-#include "paletteHub.hh"
+#include "hub_base.hh"
+#include "localPath.h"
+#include "patch_writer.hh"
 #include "plugin.hpp"
-#include "util/math.hh"
 
-struct HubMedium : public CommModule {
+struct HubMedium : MetaModuleHubBase {
 
-	enum ParamIds { NUM_PARAMS = PanelDef::NumPot + PanelDef::NumMetaRgbButton };
+	enum ParamIds { ENUMS(KNOBS, PanelDef::NumPot + PanelDef::NumMetaRgbButton), WRITE_PATCH, NUM_PARAMS };
 	enum InputIds { NUM_INPUTS = PanelDef::NumAudioIn + PanelDef::NumGateIn };
 	enum OutputIds { NUM_OUTPUTS = PanelDef::NumAudioOut + PanelDef::NumGateOut };
 	enum LightIds { NUM_LIGHTS = 0 };
 
-	// KnobMap<8> knobMaps[PanelDef::NumPot]{
-	// 	PaletteHub::color[0],
-	// 	PaletteHub::color[1],
-	// 	PaletteHub::color[2],
-	// 	PaletteHub::color[3],
-	// 	PaletteHub::color[4],
-	// 	PaletteHub::color[5],
-	// 	PaletteHub::color[6],
-	// 	PaletteHub::color[7],
-	// 	PaletteHub::color[8],
-	// 	PaletteHub::color[9],
-	// 	PaletteHub::color[10],
-	// 	PaletteHub::color[11],
-	// };
-
-	std::string labelText = "";
-	std::string patchNameText = "";
-
-	long responseTimer = 0;
-	bool buttonAlreadyHandled = false;
-
 	HubMedium()
 	{
+		for (int i = 0; i < PanelDef::NumKnobs; i++)
+			knobMaps.emplace_back(i);
+
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		selfID.typeID = "PANEL_MED";
 	}
+
 	~HubMedium() = default;
 
-	void process(const ProcessArgs &args) override {}
+	void process(const ProcessArgs &args) override
+	{
+		processPatchButton(params[WRITE_PATCH].getValue());
+		processKnobMaps();
+		processCreatePatchFile();
+	}
 };
 
-struct HubMediumWidget : CommModuleWidget {
-
-	HubMedium *mainModule;
-
-	Label *valueLabel;
-	Label *recLabel;
+struct HubMediumWidget : MetaModuleHubBaseWidget {
+	LedDisplayTextField *patchName;
 
 	Vec fixDPI(Vec v)
 	{
@@ -61,7 +45,13 @@ struct HubMediumWidget : CommModuleWidget {
 	HubMediumWidget(HubMedium *module)
 	{
 		setModule(module);
-		mainModule = module;
+		hubModule = module;
+
+		if (hubModule != nullptr) {
+			hubModule->updateDisplay = [&]() { this->valueLabel->text = this->hubModule->labelText; };
+			hubModule->updatePatchName = [&]() { this->hubModule->patchNameText = this->patchName->text; };
+			hubModule->redrawPatchName = [&]() { this->patchName->text = this->hubModule->patchNameText; };
+		}
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-medium.svg")));
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
@@ -69,20 +59,36 @@ struct HubMediumWidget : CommModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
+		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
+		valueLabel->color = rack::color::BLACK;
+		valueLabel->text = "";
+		valueLabel->fontSize = 10;
+		addChild(valueLabel);
+
+		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(24.6, 9.6)));
+		if (hubModule != nullptr && hubModule->patchNameText.length() > 0)
+			patchName->text = this->hubModule->patchNameText;
+		else
+			patchName->text = "Enter Patch Name";
+		patchName->color = rack::color::WHITE;
+		patchName->box.size = {mm2px(Vec(33.6, 31.3))};
+		addChild(patchName);
+		patchName->selectAll(); // Doesn't work :(
+
 		addParam(createParamCentered<BefacoPush>((Vec(22.31, 43.16)), module, 0));
 
-		addSmallLabeledKnobPx("", 1, fixDPI({64.57, 53.24}));
-		addSmallLabeledKnobPx("", 2, fixDPI({27.94, 88.42}));
-		addSmallLabeledKnobPx("", 3, fixDPI({343.34, 92.99}));
-		addSmallLabeledKnobPx("", 4, fixDPI({295.26, 117.58}));
-		addSmallLabeledKnobPx("", 5, fixDPI({64.57, 120.56}));
-		addLabeledKnobPx("", 6, fixDPI({34.23, 166.3}));
-		addLabeledKnobPx("", 7, fixDPI({341.35, 166.41}));
-		addLabeledKnobPx("", 8, fixDPI({94.21, 193.61}));
-		addLabeledKnobPx("", 9, fixDPI({280.72, 193.68}));
-		addLabeledKnobPx("", 10, fixDPI({155.15, 213.81}));
-		addLabeledKnobPx("", 11, fixDPI({220.04, 214.26}));
-		addSmallLabeledKnobPx("", 12, fixDPI({44.14, 226.16}));
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 1, fixDPI({64.57, 53.24}));
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 2, fixDPI({27.94, 88.42}));
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 3, fixDPI({343.34, 92.99}));
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 4, fixDPI({295.26, 117.58}));
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 5, fixDPI({64.57, 120.56}));
+		addLabeledKnobPx<RoundBlackKnob>("", 6, fixDPI({34.23, 166.3}));
+		addLabeledKnobPx<RoundBlackKnob>("", 7, fixDPI({341.35, 166.41}));
+		addLabeledKnobPx<RoundBlackKnob>("", 8, fixDPI({94.21, 193.61}));
+		addLabeledKnobPx<RoundBlackKnob>("", 9, fixDPI({280.72, 193.68}));
+		addLabeledKnobPx<RoundBlackKnob>("", 10, fixDPI({155.15, 213.81}));
+		addLabeledKnobPx<RoundBlackKnob>("", 11, fixDPI({220.04, 214.26}));
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 12, fixDPI({44.14, 226.16}));
 
 		addInput(createInputCentered<PJ301MPort>(fixDPI({22.9, 274.7}), module, 0));
 		addInput(createInputCentered<PJ301MPort>(fixDPI({66.42, 274.7}), module, 1));

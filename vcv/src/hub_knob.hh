@@ -54,9 +54,7 @@ public:
 				const float radius = 6;
 				// nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, radius);
 				nvgRect(args.vg, this->box.size.x - radius, this->box.size.y - radius, radius, radius);
-				// FixMe: color should be read from knobmap
-				auto knobNum = hubKnobLabel.id.objID;
-				NVGcolor color = PaletteHub::color[knobNum];
+				NVGcolor color = knobmap->get_color();
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
 				nvgStrokeColor(args.vg, color::mult(color, 0.5));

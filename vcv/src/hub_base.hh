@@ -144,7 +144,7 @@ struct MetaModuleHubBase : public CommModule {
 	void processPatchButton(float patchButtonState)
 	{
 		if (buttonJustPressed(patchButtonState)) {
-			responseTimer = 48000 / 4; // todo: set this to the sampleRate
+			responseTimer = 48000 / 4; // TODO: set this to the sampleRate
 			centralData->requestAllParamDataAllModules();
 			labelText = "Requesting all modules send their data";
 			updatePatchName();
@@ -352,17 +352,13 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 	template<typename KnobType>
 	void
-	addLabeledKnobMM(const std::string labelText, const int knobID, const Vec position, const float defaultValue = 0.f)
+	addLabeledKnobPx(const std::string labelText, const int knobID, const Vec posPx, const float defaultValue = 0.f)
 	{
-		Vec posPx = mm2px(position);
-
 		HubKnobLabel *button;
 
 		if (hubModule) {
-			printf("HubModule is not null\n");
 			button = new HubKnobLabel{*this, hubModule->knobMaps[knobID]};
 		} else {
-			printf("HubModule is null\n");
 			button = new HubKnobLabel{*this};
 		}
 		button->isOnHub = true;
@@ -383,5 +379,13 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 			p->paramQuantity->defaultValue = defaultValue;
 		}
 		addParam(p);
+	}
+
+	template<typename KnobType>
+	void
+	addLabeledKnobMM(const std::string labelText, const int knobID, const Vec posMM, const float defaultValue = 0.f)
+	{
+		Vec posPx = mm2px(posMM);
+		addLabeledKnobPx<KnobType>(labelText, knobID, posPx, defaultValue);
 	}
 };
