@@ -1,5 +1,6 @@
 #pragma once
-#include <cstring>
+#include <cstddef>
+#include <string>
 
 template<size_t CAPACITY>
 struct StaticString {
@@ -31,6 +32,10 @@ struct StaticString {
 	bool operator==(const StaticString<CAP2> &rhs) const
 	{
 		return (strcmp(data, rhs.data) == 0);
+	}
+
+	bool is_equal(const char *rhs) const {
+		return (strcmp(data, rhs) == 0);
 	}
 
 	operator const char *() const
