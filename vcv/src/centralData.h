@@ -134,21 +134,27 @@ public:
 	{
 		std::lock_guard mguard{mtx};
 
-		if (!_isMappingInProgress)
+		if (!_isMappingInProgress) {
+			printf("??? registerMapDest() called but we aren't mapping!\n");
 			return;
+		}
 
 		_currentMap.dst = dest;
 
-		// bool found = false;
-		// for (auto &m : maps) {
-		// 	if (m.src == _currentMap.src) {
-		// 		found = true;
-		// 		m.dst = _currentMap.dst;
-		// 		break;
-		// 	}
-		// }
-		// if (!found)
-		maps.push_back(_currentMap);
+		// Look for an existing map to the dst knob
+		bool found = false;
+		for (auto &m : maps) {
+			if (m.dst == _currentMap.dst) {
+				found = true;
+				printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
+				m.src = _currentMap.src;
+				break;
+			}
+		}
+		if (!found) {
+			printf("Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID, _currentMap.dst.objID);
+			maps.push_back(_currentMap);
+		}
 
 		_currentMap.clear();
 
