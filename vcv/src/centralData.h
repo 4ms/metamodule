@@ -25,6 +25,7 @@ public:
 	void remove_and_erase(T &vec, RT p)
 	{
 		vec.erase(std::remove_if(vec.begin(), vec.end(), p), vec.end());
+		// std::erase_if(vec, p);
 	}
 
 	void unregisterModule(ModuleID mod)
@@ -162,6 +163,17 @@ public:
 		_isMappingInProgress = false;
 	}
 
+	bool registerMapping(LabelButtonID src, LabelButtonID dst, float rmin, float rmax)
+	{
+		std::lock_guard mguard{mtx};
+
+		if (!isLabelButtonDstMapped(dst)) {
+			maps.push_back({src, dst, rmin, rmax});
+			return true;
+		}
+		return false;
+	}
+
 	void setMapRange(LabelButtonID src, LabelButtonID dst, float rmin, float rmax)
 	{
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
@@ -190,6 +202,13 @@ public:
 		std::lock_guard mguard{mtx};
 
 		remove_and_erase(maps, [&](const auto &m) { return (m.dst == dest); });
+	}
+
+	void unregisterMapsBySrcModule(int moduleId)
+	{
+		std::lock_guard mguard{mtx};
+
+		remove_and_erase(maps, [=](const auto &m) { return (m.src.moduleID == moduleId); });
 	}
 
 	bool isLabelButtonMapped(LabelButtonID &b)

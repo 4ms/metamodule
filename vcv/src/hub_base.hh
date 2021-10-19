@@ -39,7 +39,7 @@ struct MetaModuleHubBase : public CommModule {
 	{
 		json_t *rootJ = json_object();
 		json_t *mapsJ = json_array();
-		saveMappingRanges();
+		refreshMappings();
 
 		for (auto &m : centralData->maps) {
 			json_t *thisMapJ = json_object();
@@ -116,24 +116,24 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	void saveMappingRanges()
+	void refreshMappings()
 	{
+		centralData->unregisterMapsBySrcModule(id);
 		for (auto &knobmap : knobMaps) {
 			for (auto &mapping : knobmap.maps) {
-				// Check if it still exists in APP->engine
-				if (!APP->engine->getParamHandle(mapping->paramHandle.moduleId, mapping->paramHandle.paramId)) {
+				if (mapping->paramHandle.moduleId > -1) {
+					LabelButtonID dst = {
+						LabelButtonID::Types::Knob,
+						mapping->paramHandle.paramId,
+						mapping->paramHandle.moduleId,
+					};
+					LabelButtonID src = {
+						LabelButtonID::Types::Knob,
+						knobmap.paramId,
+						id, // this module ID
+					};
+					centralData->registerMapping(src, dst, mapping->range.first, mapping->range.second);
 				}
-				LabelButtonID dst = {
-					LabelButtonID::Types::Knob,
-					mapping->paramHandle.paramId,
-					mapping->paramHandle.moduleId,
-				};
-				LabelButtonID src = {
-					LabelButtonID::Types::Knob,
-					knobmap.paramId,
-					id, // this module ID
-				};
-				centralData->setMapRange(src, dst, mapping->range.first, mapping->range.second);
 			}
 		}
 	}
@@ -181,7 +181,7 @@ struct MetaModuleHubBase : public CommModule {
 	{
 		if (responseTimer) {
 			if (--responseTimer == 0) {
-				saveMappingRanges();
+				refreshMappings();
 
 				std::string patchName;
 				std::string patchDir;
