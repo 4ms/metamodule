@@ -136,3 +136,64 @@ public:
 	}
 	HubKnobLabel &hubKnobLabel;
 };
+
+// Todo: will make converting existing modules easier if we don't have to redefine the class of all knobs
+// This is exactly like BaseKnobT except we override createContextMenu() to use MMParamUnmapItem instead of
+// ParamUnmapItem
+template<typename BaseKnobT>
+class MMKnob : public BaseKnobT {
+public:
+	MMKnob() = default;
+
+	void onButton(const event::Button &e) override
+	{
+		OpaqueWidget::onButton(e);
+
+		// Touch parameter
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
+			if (this->paramQuantity) {
+				APP->scene->rack->touchedParam = this;
+			}
+			e.consume(this);
+		}
+
+		// Right click to open context menu
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
+			createContextMenu();
+			e.consume(this);
+		}
+	}
+
+	void createContextMenu()
+	{
+		ui::Menu *menu = createMenu();
+
+		MapFieldLabel *paramLabel = new MapFieldLabel;
+		paramLabel->paramWidget = this;
+		menu->addChild(paramLabel);
+
+		MapField *paramField = new MapField;
+		paramField->box.size.x = 100;
+		paramField->setParamWidget(this);
+		menu->addChild(paramField);
+
+		ParamResetItem *resetItem = new ParamResetItem;
+		resetItem->text = "Initialize";
+		resetItem->rightText = "Double-click";
+		resetItem->paramWidget = this;
+		menu->addChild(resetItem);
+
+		engine::ParamHandle *paramHandle =
+			this->paramQuantity
+				? APP->engine->getParamHandle(this->paramQuantity->module->id, this->paramQuantity->paramId)
+				: NULL;
+		if (paramHandle) {
+			MMParamUnmapItem *unmapItem = new MMParamUnmapItem;
+			unmapItem->text = "Unmap";
+			unmapItem->rightText = paramHandle->text;
+			unmapItem->paramWidget = this;
+			menu->addChild(unmapItem);
+		}
+	}
+	// HubKnobLabel &hubKnobLabel;
+};
