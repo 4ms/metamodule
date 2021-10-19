@@ -120,6 +120,9 @@ struct MetaModuleHubBase : public CommModule {
 	{
 		for (auto &knobmap : knobMaps) {
 			for (auto &mapping : knobmap.maps) {
+				// Check if it still exists in APP->engine
+				if (!APP->engine->getParamHandle(mapping->paramHandle.moduleId, mapping->paramHandle.paramId)) {
+				}
 				LabelButtonID dst = {
 					LabelButtonID::Types::Knob,
 					mapping->paramHandle.paramId,
