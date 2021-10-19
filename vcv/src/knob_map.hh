@@ -1,4 +1,5 @@
 #pragma once
+#include "plugin.hpp"
 #include <array>
 #include <rack.hpp>
 
@@ -37,7 +38,7 @@ public:
 		auto existingPh = APP->engine->getParamHandle(otherModuleId, otherParamId);
 		if (existingPh) {
 			APP->engine->updateParamHandle(existingPh, -1, 0, true);
-			// TODO: remove from centralData
+			centralData->unregisterMapByDest({LabelButtonID::Types::Knob, otherParamId, otherModuleId});
 		}
 		APP->engine->addParamHandle(&ph);
 		APP->engine->updateParamHandle(&ph, otherModuleId, otherParamId, true);
