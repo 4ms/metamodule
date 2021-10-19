@@ -58,7 +58,7 @@ public:
 
 	int getNumMaps()
 	{
-		return maps.size();
+		return std::count_if(maps.begin(), maps.end(), [](auto &m) { return m->paramHandle.moduleId != -1; });
 	}
 
 	NVGcolor get_color()
