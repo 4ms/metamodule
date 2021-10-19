@@ -2,6 +2,7 @@
 #include "plugin.hpp"
 #include <array>
 #include <rack.hpp>
+#include <vector>
 
 class KnobMap {
 public:
@@ -10,23 +11,43 @@ public:
 	struct Mapping {
 		rack::ParamHandle paramHandle;
 		std::pair<float, float> range;
+		Mapping() = default;
 	};
+	// Todo: vector might not be the best container, since we don't need it to be ordered and contigious.
 	std::vector<std::unique_ptr<Mapping>> maps;
 
 	KnobMap()
 		: paramId{-1}
-	{
-		// printf("KnobMap ctor %d\n", paramId);
-	}
+	{}
 
 	KnobMap(int param_id)
 		: paramId{param_id}
+	{}
+
+	~KnobMap()
 	{
-		// printf("KnobMap ctor %d\n", paramId);
+		// Must remove all paramHandles from APP->engine before module is destructed
+		for (auto &map : maps) {
+			map->paramHandle.moduleId = -1;
+			APP->engine->removeParamHandle(&map->paramHandle);
+		}
+	}
+
+	void cleanupMaps()
+	{
+		for (auto &map : maps) {
+			if (map->paramHandle.moduleId == -1) {
+				APP->engine->removeParamHandle(&map->paramHandle);
+			}
+		}
+
+		std::erase_if(maps, [](auto &m) { return m->paramHandle.moduleId == -1; });
 	}
 
 	bool create(int otherModuleId, int otherParamId, NVGcolor mapColor, float min = 0.f, float max = 1.0f)
 	{
+		cleanupMaps();
+
 		auto &m = maps.emplace_back(std::make_unique<Mapping>());
 
 		auto &ph = m->paramHandle;
@@ -45,15 +66,6 @@ public:
 
 		m->range = {min, max};
 		return true;
-	}
-
-	~KnobMap()
-	{
-		// Must remove all paramHandles from APP->engine before module is destructed
-		for (auto &map : maps) {
-			map->paramHandle.moduleId = -1;
-			APP->engine->removeParamHandle(&map->paramHandle);
-		}
 	}
 
 	int getNumMaps()
