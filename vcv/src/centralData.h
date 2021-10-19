@@ -146,13 +146,14 @@ public:
 		for (auto &m : maps) {
 			if (m.dst == _currentMap.dst) {
 				found = true;
-				printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
+				// printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
 				m.src = _currentMap.src;
 				break;
 			}
 		}
 		if (!found) {
-			printf("Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID, _currentMap.dst.objID);
+			// printf("Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID,
+			// _currentMap.dst.objID);
 			maps.push_back(_currentMap);
 		}
 
@@ -212,7 +213,7 @@ public:
 			return obj->src;
 		return {LabelButtonID::Types::None, -1, -1};
 	}
-	// TODO: Get rid of this, not multi-map friendly. Or return a vector of mappings
+	// TODO: only allow this if type is not Knob (because it's not multi-map friendly)
 	LabelButtonID getMappedDstFromSrc(LabelButtonID &b)
 	{
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
