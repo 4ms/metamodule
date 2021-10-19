@@ -124,8 +124,8 @@ public:
 						? APP->engine->getParamHandle(this->paramQuantity->module->id, this->paramQuantity->paramId)
 						: NULL;
 				if (paramHandle) {
-					ParamUnmapItem *unmapItem = new ParamUnmapItem;
-					unmapItem->text = "Unmap";
+					MMParamUnmapItem *unmapItem = new MMParamUnmapItem;
+					unmapItem->text = "Un-map";
 					unmapItem->rightText = paramHandle->text;
 					unmapItem->paramWidget = this;
 					menu->addChild(unmapItem);

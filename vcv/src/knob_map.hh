@@ -56,9 +56,12 @@ public:
 		printf("~KnobMap dtor %d\n", paramId);
 		for (auto &map : maps) {
 			if (APP->engine->getParamHandle(map->paramHandle.moduleId, map->paramHandle.paramId)) {
-				APP->engine->removeParamHandle(&map->paramHandle);
+				if (map->paramHandle.moduleId > -1) {
+					printf("~found a ph %d %d\n", map->paramHandle.moduleId, map->paramHandle.paramId);
+					map->paramHandle.moduleId = -1;
+					APP->engine->removeParamHandle(&map->paramHandle);
+				}
 			}
-			printf("~deleted a map %d %d\n", map->paramHandle.moduleId, map->paramHandle.paramId);
 		}
 	}
 

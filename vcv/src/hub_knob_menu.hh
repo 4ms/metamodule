@@ -156,14 +156,19 @@ struct ParamResetItem : ui::MenuItem {
 
 struct ParamFineItem : ui::MenuItem {};
 
-struct ParamUnmapItem : ui::MenuItem {
+struct MMParamUnmapItem : ui::MenuItem {
 	ParamWidget *paramWidget;
 	void onAction(const event::Action &e) override
 	{
-		engine::ParamHandle *paramHandle =
+		ParamHandle *paramHandle =
 			APP->engine->getParamHandle(paramWidget->paramQuantity->module->id, paramWidget->paramQuantity->paramId);
 		if (paramHandle) {
-			APP->engine->updateParamHandle(paramHandle, -1, 0);
-		}
+			// APP->engine->updateParamHandle(paramHandle, -1, 0);
+			printf("Removed ph m: %d, p: %d\n",
+				   paramWidget->paramQuantity->module->id,
+				   paramWidget->paramQuantity->paramId);
+			APP->engine->removeParamHandle(paramHandle);
+		} else
+			printf("ph not found\n");
 	}
 };
