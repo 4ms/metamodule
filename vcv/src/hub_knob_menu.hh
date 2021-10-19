@@ -145,30 +145,3 @@ struct MapField : ui::TextField {
 			TextField::onSelectKey(e);
 	}
 };
-
-struct ParamResetItem : ui::MenuItem {
-	ParamWidget *paramWidget;
-	void onAction(const event::Action &e) override
-	{
-		paramWidget->resetAction();
-	}
-};
-
-struct ParamFineItem : ui::MenuItem {};
-
-// This is exactly like ParamUnmapItem except we added a call to centralData->unregisterMapByDest()
-struct MMParamUnmapItem : ui::MenuItem {
-	ParamWidget *paramWidget;
-	void onAction(const event::Action &e) override
-	{
-		ParamHandle *paramHandle =
-			APP->engine->getParamHandle(paramWidget->paramQuantity->module->id, paramWidget->paramQuantity->paramId);
-		if (paramHandle) {
-			APP->engine->updateParamHandle(paramHandle, -1, 0);
-			centralData->unregisterMapByDest({LabelButtonID::Types::Knob,
-											  paramWidget->paramQuantity->paramId,
-											  paramWidget->paramQuantity->module->id});
-		} else
-			printf("ph not found\n");
-	}
-};

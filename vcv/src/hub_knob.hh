@@ -34,7 +34,7 @@ public:
 
 	void draw(const typename BaseKnobT::DrawArgs &args) override
 	{
-		RoundBlackKnob::draw(args);
+		BaseKnobT::draw(args);
 
 		KnobMap *knobmap = hubKnobLabel._knobmap;
 
@@ -113,19 +113,13 @@ public:
 					}
 				}
 
-				// ParamFineItem *fineItem = new ParamFineItem;
-				// fineItem->text = "Fine adjust";
-				// fineItem->rightText = RACK_MOD_CTRL_NAME "+drag";
-				// fineItem->disabled = true;
-				// menu->addChild(fineItem);
-
 				engine::ParamHandle *paramHandle =
 					this->paramQuantity
 						? APP->engine->getParamHandle(this->paramQuantity->module->id, this->paramQuantity->paramId)
 						: NULL;
 				if (paramHandle) {
-					MMParamUnmapItem *unmapItem = new MMParamUnmapItem;
-					unmapItem->text = "Un-map";
+					ParamUnmapItem *unmapItem = new ParamUnmapItem;
+					unmapItem->text = "Unmap";
 					unmapItem->rightText = paramHandle->text;
 					unmapItem->paramWidget = this;
 					menu->addChild(unmapItem);
@@ -134,12 +128,35 @@ public:
 			}
 		}
 	}
+
+	// This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
+	struct ParamUnmapItem : ui::MenuItem {
+		ParamWidget *paramWidget;
+		void onAction(const event::Action &e) override
+		{
+			ParamHandle *paramHandle = APP->engine->getParamHandle(paramWidget->paramQuantity->module->id,
+																   paramWidget->paramQuantity->paramId);
+			if (paramHandle) {
+				APP->engine->updateParamHandle(paramHandle, -1, 0);
+			}
+		}
+	};
+
+	struct ParamResetItem : ui::MenuItem {
+		ParamWidget *paramWidget;
+		void onAction(const event::Action &e) override
+		{
+			paramWidget->resetAction();
+		}
+	};
+
 	HubKnobLabel &hubKnobLabel;
 };
 
 // Todo: will make converting existing modules easier if we don't have to redefine the class of all knobs
 // This is exactly like BaseKnobT except we override createContextMenu() to use MMParamUnmapItem instead of
 // ParamUnmapItem
+/*
 template<typename BaseKnobT>
 class MMKnob : public BaseKnobT {
 public:
@@ -195,5 +212,21 @@ public:
 			menu->addChild(unmapItem);
 		}
 	}
-	// HubKnobLabel &hubKnobLabel;
+
+	// This is exactly like ParamUnmapItem except we added a call to centralData->unregisterMapByDest()
+	struct MMParamUnmapItem : ui::MenuItem {
+		ParamWidget *paramWidget;
+		void onAction(const event::Action &e) override
+		{
+			ParamHandle *paramHandle = APP->engine->getParamHandle(paramWidget->paramQuantity->module->id,
+																   paramWidget->paramQuantity->paramId);
+			if (paramHandle) {
+				APP->engine->updateParamHandle(paramHandle, -1, 0);
+				centralData->unregisterMapByDest({LabelButtonID::Types::Knob,
+												  paramWidget->paramQuantity->paramId,
+												  paramWidget->paramQuantity->module->id});
+			}
+		}
+	};
 };
+*/
