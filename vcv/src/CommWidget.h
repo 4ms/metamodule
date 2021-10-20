@@ -3,6 +3,7 @@
 #include <rack.hpp>
 using namespace rack;
 
+// forward declare
 class LabeledButton;
 
 class CommModuleWidget : public app::ModuleWidget {
@@ -48,29 +49,7 @@ private:
 	Vec gridFromBottom2px(Vec posGrid);
 
 	void addLabel(const std::string labelText, const Vec pos, const LabelButtonID id);
-	virtual LabeledButton *createLabel();
-};
-
-class LabeledButton : public Button {
-
-public:
-	LabeledButton(CommModuleWidget &parent)
-		: _parent{parent}
-	{}
-	void draw(const DrawArgs &args) override;
-	void onDragStart(const event::DragStart &e) override;
-	void updateState();
-	void createMapping(LabelButtonID srcId);
-
-	LabelButtonID id;
-	bool isMapped = false;
-	bool isOnHub = false;
-	bool isPossibleMapDest = false;
-	bool isCurrentMapSrc = false;
-	LabelButtonID mappedToId{LabelButtonID::Types::None, -1, -1};
-
-private:
-	CommModuleWidget &_parent;
+	void addLabeledButton(const std::string labelText, const Vec pos, const LabelButtonID id);
 };
 
 class MetaModuleTextBox : public LedDisplayTextField {

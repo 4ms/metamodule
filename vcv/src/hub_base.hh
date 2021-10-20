@@ -3,6 +3,7 @@
 #include "CommModule.h"
 #include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
+#include "LabeledButton.hh"
 #include "hub_knob.hh"
 #include "knob_map.hh"
 #include "localPath.h"
@@ -140,7 +141,6 @@ struct MetaModuleHubBase : public CommModule {
 
 	void loadMappings()
 	{
-		// Clear all maps in all knobMaps first?
 		for (auto &m : centralData->maps) {
 			auto knobToMap = m.src.objID;
 			auto [min, max] = centralData->getMapRange(m.src, m.dst);
@@ -160,6 +160,7 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
+	// Hub class needs to call this from its process
 	void processKnobMaps()
 	{
 		for (auto &knobmap : knobMaps) {
@@ -177,6 +178,7 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
+	// Hub class needs to call this from its process
 	void processCreatePatchFile()
 	{
 		if (responseTimer) {
@@ -334,13 +336,6 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 	MetaModuleHubBaseWidget() = default;
 
-	LabeledButton *createLabel() override
-	{
-		auto tmp = new LabeledButton{*this};
-		tmp->isOnHub = true;
-		return tmp;
-	}
-
 	void notifyLabelButtonClicked(LabeledButton &button) override
 	{
 		button.id.moduleID = module->id; // workaround for VCV passing bad ptr to module
@@ -360,8 +355,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	}
 
 	template<typename KnobType>
-	void
-	addLabeledKnobPx(const std::string labelText, const int knobID, const Vec posPx, const float defaultValue = 0.f)
+	void addLabeledKnobPx(const std::string labelText, int knobID, Vec posPx, float defaultValue = 0.f)
 	{
 		HubKnobLabel *button;
 
@@ -376,8 +370,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		button->box.size.x = mm2px(kKnobSpacingX);
 		button->box.size.y = 12;
 		button->text = labelText;
-		button->id = {
-			LabelButtonID::Types::Knob, knobID, -1}; // moduleID is -1 for now, since we might not have a module
+		button->id = {LabelButtonID::Types::Knob, knobID, hubModule ? hubModule->id : -1};
 		addChild(button);
 
 		auto *p = new HubKnob<KnobType>(*button);
@@ -391,8 +384,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	}
 
 	template<typename KnobType>
-	void
-	addLabeledKnobMM(const std::string labelText, const int knobID, const Vec posMM, const float defaultValue = 0.f)
+	void addLabeledKnobMM(const std::string labelText, int knobID, Vec posMM, float defaultValue = 0.f)
 	{
 		Vec posPx = mm2px(posMM);
 		addLabeledKnobPx<KnobType>(labelText, knobID, posPx, defaultValue);

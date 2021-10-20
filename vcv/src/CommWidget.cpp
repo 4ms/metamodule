@@ -1,4 +1,5 @@
 #include "CommWidget.h"
+#include "LabeledButton.hh"
 #include "paletteHub.hh"
 
 void CommModuleWidget::addModuleTitle(const std::string moduleTitle)
@@ -12,6 +13,8 @@ void CommModuleWidget::addModuleTitle(const std::string moduleTitle)
 	moduleLabel->fontSize = 13;
 	addChild(moduleLabel);
 }
+
+// Knobs
 
 void CommModuleWidget::addLabeledKnob(const std::string labelText, int knobID, Vec posGrid, float defaultValue)
 {
@@ -55,6 +58,8 @@ void CommModuleWidget::addSmallLabeledKnobPx(const std::string labelText, int kn
 	addParam(p);
 }
 
+// Input Jacks
+
 void CommModuleWidget::addLabeledInput(const std::string labelText, int inputID, Vec posGrid)
 {
 	addLabeledInputPx(labelText, inputID, gridFromBottom2px(posGrid));
@@ -67,9 +72,11 @@ void CommModuleWidget::addLabeledInputMM(const std::string labelText, int inputI
 
 void CommModuleWidget::addLabeledInputPx(const std::string labelText, int inputID, Vec posPx)
 {
-	addLabel(labelText, posPx, {LabelButtonID::Types::InputJack, inputID, -1});
+	addLabeledButton(labelText, posPx, {LabelButtonID::Types::InputJack, inputID, -1});
 	addInput(createInputCentered<PJ301MPort>(posPx, module, inputID));
 }
+
+// Output Jacks
 
 void CommModuleWidget::addLabeledOutput(const std::string labelText, int outputID, Vec posGrid)
 {
@@ -82,26 +89,8 @@ void CommModuleWidget::addLabeledOutputMM(const std::string labelText, int outpu
 }
 void CommModuleWidget::addLabeledOutputPx(const std::string labelText, int outputID, Vec posPx)
 {
-	addLabel(labelText, posPx, {LabelButtonID::Types::OutputJack, outputID, -1});
+	addLabeledButton(labelText, posPx, {LabelButtonID::Types::OutputJack, outputID, -1});
 	addOutput(createOutputCentered<PJ301MPort>(posPx, module, outputID));
-}
-
-LabeledButton *CommModuleWidget::createLabel()
-{
-	auto tmp = new LabeledButton{*this};
-	tmp->isOnHub = false;
-	return tmp;
-}
-
-void CommModuleWidget::addLabel(const std::string labelText, Vec posPx, LabelButtonID id)
-{
-	LabeledButton *button = createLabel();
-	button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
-	button->box.size.x = mm2px(kKnobSpacingX);
-	button->box.size.y = 18;
-	button->text = labelText;
-	button->id = id;
-	addChild(button);
 }
 
 void CommModuleWidget::addLabeledToggle(const std::string labelText, int lightID, int paramID, Vec posGrid)
@@ -120,6 +109,31 @@ void CommModuleWidget::addLabeledToggleMM(const std::string labelText,
 	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(position), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({position.x - 3.0f, position.y - 3.0f}), module, lightID));
 	addLabel(labelText, mm2px({position.x, position.y - 1.f}), {LabelButtonID::Types::Toggle, paramID, -1});
+}
+
+void CommModuleWidget::addLabel(const std::string labelText, Vec posPx, LabelButtonID id)
+{
+	auto label = new CenterLabel{};
+	label->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
+	label->box.size.x = mm2px(kKnobSpacingX);
+	label->box.size.y = 18;
+	label->text = labelText;
+	label->fontSize = 8;
+	label->alignment = rack::ui::Label::Alignment::CENTER_ALIGNMENT;
+	label->color = rack::color::BLACK;
+	addChild(label);
+}
+
+void CommModuleWidget::addLabeledButton(const std::string labelText, Vec posPx, LabelButtonID id)
+{
+	LabeledButton *button = new LabeledButton{*this};
+	button->isOnHub = false;
+	button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
+	button->box.size.x = mm2px(kKnobSpacingX);
+	button->box.size.y = 18;
+	button->text = labelText;
+	button->id = id;
+	addChild(button);
 }
 
 constexpr float CommModuleWidget::gridToYFromTop(const float y)
@@ -189,90 +203,6 @@ void CommModuleWidget::notifyLabelButtonClicked(LabeledButton &button)
 	} else {
 		// Todo: Initiate a mapping (virtual module clicked first)
 	}
-}
-
-void LabeledButton::createMapping(LabelButtonID srcId)
-{
-	isMapped = true;
-	mappedToId = srcId;
-	centralData->registerMapDest(id);
-}
-
-void LabeledButton::updateState()
-{
-	if (_parent.module != nullptr)
-		if (_parent.module->id > 0)
-			id.moduleID = _parent.module->id;
-
-	isCurrentMapSrc = false;
-	isPossibleMapDest = false;
-	if (!isOnHub) {
-		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == id.objType)) {
-			isPossibleMapDest = true;
-		}
-		mappedToId = centralData->getMappedSrcFromDst(this->id);
-	} else {
-		if (centralData->isMappingInProgress() && (centralData->getMappingSource() == id)) {
-			isCurrentMapSrc = true;
-		}
-		mappedToId = centralData->getMappedDstFromSrc(this->id);
-	}
-	isMapped = mappedToId.objType != LabelButtonID::Types::None;
-}
-
-void LabeledButton::draw(const DrawArgs &args)
-{
-	updateState();
-
-	bool isTypeJack =
-		this->id.objType == LabelButtonID::Types::InputJack || this->id.objType == LabelButtonID::Types::OutputJack;
-	if (isTypeJack) {
-		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
-		if (isMapped) {
-			unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
-			nvgStrokeColor(args.vg, PaletteHub::color[palid]);
-			nvgStrokeWidth(args.vg, 2.0f);
-		}
-		if (!isMapped) {
-			nvgStrokeColor(args.vg, rack::color::WHITE);
-			nvgStrokeWidth(args.vg, 0.0);
-		}
-		if (isPossibleMapDest) {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.8f));
-		} else if (isCurrentMapSrc) {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
-		} else {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.0f));
-		}
-		nvgStroke(args.vg);
-		nvgFill(args.vg);
-	}
-
-	if (APP->event->hoveredWidget == this)
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.4f));
-
-	nvgBeginPath(args.vg);
-	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_BOTTOM);
-	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
-	nvgFontSize(args.vg, 8.0f);
-	nvgText(args.vg, box.size.x / 2.0f, box.size.y / 2.0f, text.c_str(), NULL);
-}
-
-void LabeledButton::onDragStart(const event::DragStart &e)
-{
-	if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
-		return;
-	}
-
-	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
-
-	if (isOnHub || (!isOnHub && !isTypeKnob)) {
-		_parent.notifyLabelButtonClicked(*this);
-	}
-
-	if (quantity)
-		quantity->setMax();
 }
 
 void MetaModuleTextBox::draw(const DrawArgs &args)
