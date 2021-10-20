@@ -15,24 +15,11 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 		APP->scene->rack->touchedParam = NULL;
 
 		if (id.moduleID != moduleId) {
-
-			// Check if it already exists
-			// Todo: Use centralData or APP->engine to accomodate multiple Hubs
-			bool is_already_mapped = false;
-			// for (auto &knobmap : _hub.expModule->knobMaps) {
-			// 	if (knobmap.mapping_already_exists(moduleId, paramId)) {
-			// 		is_already_mapped = true;
-			// 		break;
-			// 	}
-			// }
-			if (!is_already_mapped) {
-				int thisKnob = id.objID;
-				if (_knobmap->create(moduleId, paramId, PaletteHub::color[thisKnob])) {
-					centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
-				}
-			} else {
-				// already mapped
-				centralData->abortMappingProcedure();
+			// Todo: Check if already mapped to a different hub.
+			// Use centralData or APP->engine to accomodate multiple Hubs
+			int thisKnob = id.objID;
+			if (_knobmap->create(moduleId, paramId, PaletteHub::color[thisKnob])) {
+				centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
 			}
 		} else {
 			// clicked on another knob on this hub
