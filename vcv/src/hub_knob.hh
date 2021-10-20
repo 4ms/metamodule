@@ -39,18 +39,25 @@ public:
 		KnobMap *knobmap = hubKnobLabel._knobmap;
 
 		if (knobmap) {
-			bool isKnobMapped = knobmap->getNumMaps() > 0;
-			if (isKnobMapped) {
+			const float radius = 6;
+			const float spacing = 2;
+			auto numMaps = std::min(knobmap->getNumMaps(), 16);
+			float x = this->box.size.x - radius;
+			float y = this->box.size.y - radius;
+			for (int i = 0; i < numMaps; i++) {
 				nvgBeginPath(args.vg);
-				const float radius = 6;
-				// nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, radius);
-				nvgRect(args.vg, this->box.size.x - radius, this->box.size.y - radius, radius, radius);
+				nvgRect(args.vg, x, y, radius, radius);
 				NVGcolor color = knobmap->get_color();
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
 				nvgStrokeColor(args.vg, color::mult(color, 0.5));
 				nvgStrokeWidth(args.vg, 1.0);
 				nvgStroke(args.vg);
+				if (i % 4 == 3) {
+					x = this->box.size.x - radius;
+					y -= radius + spacing;
+				} else
+					x -= radius + spacing;
 			}
 		}
 	}
