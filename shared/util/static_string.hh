@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
-#include <string>
+//#include <string.h>
+#include <cstring>
 
 template<size_t CAPACITY>
 struct StaticString {
@@ -34,7 +35,8 @@ struct StaticString {
 		return (strcmp(data, rhs.data) == 0);
 	}
 
-	bool is_equal(const char *rhs) const {
+	bool is_equal(const char *rhs) const
+	{
 		return (strcmp(data, rhs) == 0);
 	}
 
