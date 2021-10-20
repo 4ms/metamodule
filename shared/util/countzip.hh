@@ -108,3 +108,9 @@ auto countzip(T &&...t)
 {
 	return CountZip::details::Zipper<T...>{std::forward<T>(t)...};
 }
+
+template<typename... T>
+auto enumerate(T &&...t)
+{
+	return CountZip::details::Zipper<T...>{std::forward<T>(t)...};
+}
