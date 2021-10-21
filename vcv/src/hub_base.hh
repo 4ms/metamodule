@@ -143,10 +143,12 @@ struct MetaModuleHubBase : public CommModule {
 	void loadMappings()
 	{
 		for (auto &m : centralData->maps) {
+			if (m.src.objType == LabelButtonID::Types::Knob) {
 			auto knobToMap = m.src.objID;
 			auto [min, max] = centralData->getMapRange(m.src, m.dst);
 			knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
 		}
+	}
 	}
 
 	// Hub class needs to call this from its process
