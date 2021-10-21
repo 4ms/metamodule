@@ -4,6 +4,7 @@
 #include "CoreModules/moduleTypes.h"
 #include "CoreModules/panel_medium_defs.hh"
 #include "hub_base.hh"
+#include "hub_jack.hh"
 #include "localPath.h"
 #include "patch_writer.hh"
 #include "plugin.hpp"
@@ -88,25 +89,26 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 10, fixDPI({343.34, 92.99})); // r
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 11, fixDPI({44.14, 226.16})); // q
 
-		addInput(createInputCentered<PJ301MPort>(fixDPI({36.34, 324.15}), module, 0));
-		addInput(createInputCentered<PJ301MPort>(fixDPI({79.86, 324.15}), module, 1));
-		addInput(createInputCentered<PJ301MPort>(fixDPI({122.6, 324.18}), module, 2));
-		addInput(createInputCentered<PJ301MPort>(fixDPI({166.12, 324.18}), module, 3));
-		addInput(createInputCentered<PJ301MPort>(fixDPI({109.61, 282.75}), module, 4));
-		addInput(createInputCentered<PJ301MPort>(fixDPI({153.13, 282.75}), module, 5));
-		addInput(createInputCentered<PJ301MPort>(fixDPI({22.9, 274.7}), module, 6));
-		addInput(createInputCentered<PJ301MPort>(fixDPI({66.42, 274.7}), module, 7));
+		// addInput(createInputCentered<PJ301MPort>(fixDPI({36.34, 324.15}), module, 0));
+		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({36.34, 324.15}), JackInOut::Input);
+		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({79.86, 324.15}), JackInOut::Input);
+		addLabeledJackPx<PJ301MPort>("", 2, fixDPI({122.6, 324.18}), JackInOut::Input);
+		addLabeledJackPx<PJ301MPort>("", 3, fixDPI({166.12, 324.18}), JackInOut::Input);
+		addLabeledJackPx<PJ301MPort>("", 4, fixDPI({109.61, 282.75}), JackInOut::Input);
+		addLabeledJackPx<PJ301MPort>("", 5, fixDPI({153.13, 282.75}), JackInOut::Input);
+		addLabeledJackPx<PJ301MPort>("", 6, fixDPI({22.9, 274.7}), JackInOut::Input);
+		addLabeledJackPx<PJ301MPort>("", 7, fixDPI({66.42, 274.7}), JackInOut::Input);
 
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({209.28, 324.18}), module, 0));
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({252.8, 324.18}), module, 1));
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({295.21, 324.2}), module, 2));
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({338.73, 324.2}), module, 3));
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({222.16, 282.79}), module, 4));
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({265.68, 282.79}), module, 5));
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({308.9, 282.15}), module, 6));
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({352.42, 282.15}), module, 7));
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({316.22, 238.83}), module, 8));
-		addOutput(createOutputCentered<PJ301MPort>(fixDPI({352.74, 219.83}), module, 9));
+		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({209.28, 324.18}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({252.8, 324.18}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 2, fixDPI({295.21, 324.2}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 3, fixDPI({338.73, 324.2}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 4, fixDPI({222.16, 282.79}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 5, fixDPI({265.68, 282.79}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 6, fixDPI({308.9, 282.15}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 7, fixDPI({352.42, 282.15}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 8, fixDPI({316.22, 238.83}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 9, fixDPI({352.74, 219.83}), JackInOut::Output);
 	}
 };
 

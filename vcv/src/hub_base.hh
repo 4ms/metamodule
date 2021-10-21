@@ -4,6 +4,7 @@
 #include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
 #include "LabeledButton.hh"
+#include "hub_jack.hh"
 #include "hub_knob.hh"
 #include "knob_map.hh"
 #include "localPath.h"
@@ -355,12 +356,12 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	}
 
 	template<typename KnobType>
-	void addLabeledKnobPx(const std::string labelText, int knobID, Vec posPx, float defaultValue = 0.f)
+	void addLabeledKnobPx(const std::string labelText, int knobId, Vec posPx, float defaultValue = 0.f)
 	{
 		HubKnobLabel *button;
 
 		if (hubModule) {
-			button = new HubKnobLabel{*this, hubModule->knobMaps[knobID]};
+			button = new HubKnobLabel{*this, hubModule->knobMaps[knobId]};
 		} else {
 			button = new HubKnobLabel{*this};
 		}
@@ -370,23 +371,50 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		button->box.size.x = mm2px(kKnobSpacingX);
 		button->box.size.y = 12;
 		button->text = labelText;
-		button->id = {LabelButtonID::Types::Knob, knobID, hubModule ? hubModule->id : -1};
+		button->id = {LabelButtonID::Types::Knob, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
 
 		auto *p = new HubKnob<KnobType>(*button);
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
 		if (module) {
-			p->paramQuantity = module->paramQuantities[knobID];
+			p->paramQuantity = module->paramQuantities[knobId];
 			p->paramQuantity->defaultValue = defaultValue;
 		}
 		addParam(p);
 	}
 
 	template<typename KnobType>
-	void addLabeledKnobMM(const std::string labelText, int knobID, Vec posMM, float defaultValue = 0.f)
+	void addLabeledKnobMM(const std::string labelText, int knobId, Vec posMM, float defaultValue = 0.f)
 	{
 		Vec posPx = mm2px(posMM);
-		addLabeledKnobPx<KnobType>(labelText, knobID, posPx, defaultValue);
+		addLabeledKnobPx<KnobType>(labelText, knobId, posPx, defaultValue);
+	}
+
+	enum class JackInOut { Input, Output };
+
+	template<typename JackType>
+	void addLabeledJackPx(const std::string labelText, int jackId, Vec posPx, JackInOut inout)
+	{
+		auto jack = new HubJackLabel{*this};
+		jack->isOnHub = true;
+		jack->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
+		jack->box.size.x = mm2px(kKnobSpacingX);
+		jack->box.size.y = 12;
+		jack->text = labelText;
+		auto type = inout == JackInOut::Input ? LabelButtonID::Types::InputJack : LabelButtonID::Types::OutputJack;
+		jack->id = {type, jackId, hubModule ? hubModule->id : -1};
+		addChild(jack);
+
+		auto *p = new HubJack<JackType>(*jack);
+		p->box.pos = posPx;
+		p->box.pos = p->box.pos.minus(p->box.size.div(2));
+		p->module = module;
+		p->type = inout == JackInOut::Input ? app::PortWidget::INPUT : app::PortWidget::OUTPUT;
+		p->portId = jackId;
+		if (inout == JackInOut::Input)
+			addInput(p);
+		else
+			addOutput(p);
 	}
 };
