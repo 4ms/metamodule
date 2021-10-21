@@ -1,5 +1,6 @@
 #include "CommWidget.h"
 #include "LabeledButton.hh"
+#include "MappableJack.hh"
 #include "paletteHub.hh"
 
 void CommModuleWidget::addModuleTitle(const std::string moduleTitle)
@@ -72,8 +73,9 @@ void CommModuleWidget::addLabeledInputMM(const std::string labelText, int inputI
 
 void CommModuleWidget::addLabeledInputPx(const std::string labelText, int inputID, Vec posPx)
 {
-	addLabeledButton(labelText, posPx, {LabelButtonID::Types::InputJack, inputID, -1});
-	addInput(createInputCentered<PJ301MPort>(posPx, module, inputID));
+	// addLabeledButton(labelText, posPx, {LabelButtonID::Types::InputJack, inputID, -1});
+	addLabel(labelText, posPx, {LabelButtonID::Types::Knob, inputID, -1});
+	addInput(createInputCentered<MappableJack<PJ301MPort>>(posPx, module, inputID));
 }
 
 // Output Jacks
