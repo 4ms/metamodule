@@ -49,7 +49,6 @@ private:
 	Vec gridFromBottom2px(Vec posGrid);
 
 	void addLabel(const std::string labelText, const Vec pos, const LabelButtonID id);
-	void addLabeledButton(const std::string labelText, const Vec pos, const LabelButtonID id);
 };
 
 class MetaModuleTextBox : public LedDisplayTextField {

@@ -126,18 +126,6 @@ void CommModuleWidget::addLabel(const std::string labelText, Vec posPx, LabelBut
 	addChild(label);
 }
 
-void CommModuleWidget::addLabeledButton(const std::string labelText, Vec posPx, LabelButtonID id)
-{
-	LabeledButton *button = new LabeledButton{*this};
-	button->isOnHub = false;
-	button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
-	button->box.size.x = mm2px(kKnobSpacingX);
-	button->box.size.y = 18;
-	button->text = labelText;
-	button->id = id;
-	addChild(button);
-}
-
 constexpr float CommModuleWidget::gridToYFromTop(const float y)
 {
 	return y * kKnobSpacingY + kTopMargin;
