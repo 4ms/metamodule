@@ -82,7 +82,7 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 	if (!isTypeKnob) {
 		id.moduleID = _parent.getModuleId();
 
-		printf("LabeledButton::onDragStart() moduleID=%d\n", id.moduleID);
+		printf("LabeledButton::onDragStart() non-Knob moduleID=%d\n", id.moduleID);
 		if (centralData->isMappingInProgress()) {
 			if (centralData->getMappingSource().objType == id.objType) {
 				if (isMapped) {

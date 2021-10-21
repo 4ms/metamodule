@@ -4,11 +4,45 @@
 #include "knob_map.hh"
 #include "paletteHub.hh"
 
+// todo: this whole class is exactly the same as HubKnobMapButton
+// except for touchedJack vs touchedParam, and having _knobmap
+// Maybe HubMapButton is the base class for both, and each implements its own registerMapping() and getTouched()
 class HubJackMapButton : public LabeledButton {
 public:
 	HubJackMapButton(CommModuleWidget &parent)
 		: LabeledButton{static_cast<CommModuleWidget &>(parent)}
 	{}
+
+	void onDragStart(const event::DragStart &e) override
+	{
+		if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
+			return;
+		}
+
+		id.moduleID = _parent.getModuleId();
+
+		printf("HubJackMapButton::onDragStart() moduleID=%d\n", id.moduleID);
+		bool currentSourceIsThisButton = false;
+
+		if (centralData->isMappingInProgress()) {
+			printf("Mapping is in progress, aborting.\n");
+			currentSourceIsThisButton = (centralData->getMappingSource() == id);
+			centralData->abortMappingProcedure();
+			// TODO: centraData->sendMessage("Aborted mapping");
+			// valueLabel->text = "Aborted mapping";
+		}
+		if (!currentSourceIsThisButton) {
+			printf("currentSource is not this button: starting mapping\n");
+			centralData->startMappingProcedure(id);
+			// TODO: centraData->sendMessage("Started mapping...");
+			// valueLabel->text = "Start Mapping from: " + std::to_string(static_cast<int>(button.id.objType)) + ", " +
+			// std::to_string(button.id.objID);
+		}
+
+		if (quantity)
+			quantity->setMax();
+	}
+
 	void onDeselect(const event::Deselect &e) override
 	{
 		// Check if a ParamWidget was touched
