@@ -205,11 +205,13 @@ public:
 		remove_and_erase(maps, [&](const auto &m) { return (m.dst == dest); });
 	}
 
-	void unregisterMapsBySrcModule(int moduleId)
+	void unregisterKnobMapsBySrcModule(int moduleId)
 	{
 		std::lock_guard mguard{mtx};
 
-		remove_and_erase(maps, [=](const auto &m) { return (m.src.moduleID == moduleId); });
+		remove_and_erase(maps, [=](const auto &m) {
+			return (m.src.objType == LabelButtonID::Types::Knob && m.src.moduleID == moduleId);
+		});
 	}
 
 	bool isLabelButtonMapped(LabelButtonID &b)

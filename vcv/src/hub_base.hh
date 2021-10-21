@@ -120,7 +120,7 @@ struct MetaModuleHubBase : public CommModule {
 
 	void refreshMappings()
 	{
-		centralData->unregisterMapsBySrcModule(id);
+		centralData->unregisterKnobMapsBySrcModule(id);
 		for (auto &knobmap : knobMaps) {
 			for (auto &mapping : knobmap.maps) {
 				if (mapping->paramHandle.moduleId > -1) {
