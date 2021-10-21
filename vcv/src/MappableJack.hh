@@ -3,7 +3,9 @@
 #include "plugin.hpp"
 #include <rack.hpp>
 
-template<typename BaseJackT>
+enum class MappableJackType { Input, Output };
+
+template<MappableJackType InputOrOutput, typename BaseJackT>
 class MappableJack : public BaseJackT {
 public:
 	MappableJack() = default;
@@ -14,17 +16,13 @@ public:
 
 		int moduleId = this->module ? this->module->id : -1;
 		if (moduleId >= 0 && this->portId >= 0) {
-			LabelButtonID tryInputJack = {LabelButtonID::Types::InputJack, this->portId, moduleId};
-			LabelButtonID tryOutputJack = {LabelButtonID::Types::OutputJack, this->portId, moduleId};
 			LabelButtonID id;
-			bool isMapped = false;
-			if (centralData->isLabelButtonDstMapped(tryInputJack)) {
-				isMapped = true;
-				id = tryInputJack;
-			} else if (centralData->isLabelButtonDstMapped(tryOutputJack)) {
-				isMapped = true;
-				id = tryOutputJack;
-			}
+			if constexpr (InputOrOutput == MappableJackType::Input)
+				id = {LabelButtonID::Types::InputJack, this->portId, moduleId};
+			else
+				id = {LabelButtonID::Types::OutputJack, this->portId, moduleId};
+
+			bool isMapped = centralData->isLabelButtonDstMapped(id);
 
 			// Draw mapped circle
 			if (isMapped) {
@@ -46,10 +44,20 @@ public:
 	{
 		OpaqueWidget::onButton(e);
 
-		// Touch port
+		// Register this jack with CentralData as the "TouchedJack",
+		// Hub jacks can use this to determine what jack you clicked on after clicking on the Hub Jack Mapping Button,
+		// when creating a new mapping
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
 			centralData->registerTouchedJack(this);
 			e.consume(this);
 		}
 	}
+
+	// TODO: right-click menui
 };
+
+template<typename BaseJackT>
+using MappableInputJack = MappableJack<MappableJackType::Input, BaseJackT>;
+
+template<typename BaseJackT>
+using MappableOutputJack = MappableJack<MappableJackType::Output, BaseJackT>;

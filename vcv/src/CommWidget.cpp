@@ -73,9 +73,8 @@ void CommModuleWidget::addLabeledInputMM(const std::string labelText, int inputI
 
 void CommModuleWidget::addLabeledInputPx(const std::string labelText, int inputID, Vec posPx)
 {
-	// addLabeledButton(labelText, posPx, {LabelButtonID::Types::InputJack, inputID, -1});
 	addLabel(labelText, posPx, {LabelButtonID::Types::Knob, inputID, -1});
-	addInput(createInputCentered<MappableJack<PJ301MPort>>(posPx, module, inputID));
+	addInput(createInputCentered<MappableInputJack<PJ301MPort>>(posPx, module, inputID));
 }
 
 // Output Jacks
@@ -89,10 +88,11 @@ void CommModuleWidget::addLabeledOutputMM(const std::string labelText, int outpu
 {
 	addLabeledOutputPx(labelText, outputID, mm2px(posMM));
 }
+
 void CommModuleWidget::addLabeledOutputPx(const std::string labelText, int outputID, Vec posPx)
 {
-	addLabeledButton(labelText, posPx, {LabelButtonID::Types::OutputJack, outputID, -1});
-	addOutput(createOutputCentered<PJ301MPort>(posPx, module, outputID));
+	addLabel(labelText, posPx, {LabelButtonID::Types::OutputJack, outputID, -1});
+	addOutput(createOutputCentered<MappableOutputJack<PJ301MPort>>(posPx, module, outputID));
 }
 
 void CommModuleWidget::addLabeledToggle(const std::string labelText, int lightID, int paramID, Vec posGrid)
