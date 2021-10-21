@@ -3,9 +3,6 @@
 #include <rack.hpp>
 using namespace rack;
 
-// forward declare
-class LabeledButton;
-
 class CommModuleWidget : public app::ModuleWidget {
 protected:
 	const float kKnobSpacingY = 17;

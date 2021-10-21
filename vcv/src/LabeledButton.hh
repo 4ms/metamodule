@@ -24,9 +24,3 @@ public:
 protected:
 	CommModuleWidget &_parent;
 };
-
-class CenterLabel : public Label {
-public:
-	CenterLabel() = default;
-	void draw(const DrawArgs &args) override;
-};

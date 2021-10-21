@@ -1,5 +1,5 @@
 #include "CommWidget.h"
-#include "LabeledButton.hh"
+#include "CenterLabel.hh"
 #include "MappableJack.hh"
 #include "paletteHub.hh"
 
