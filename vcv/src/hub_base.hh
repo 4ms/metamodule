@@ -112,6 +112,12 @@ struct MetaModuleHubBase : public CommModule {
 					mapping.range_max = json_is_real(val) ? json_real_value(val) : 1.f;
 
 					centralData->maps.push_back(mapping);
+					// printf("Loaded mapping from json: type: %s src: m:%d knob:%d, dst: m:%d knob:%d\n",
+					// 	   mapping.src.objTypeStr(),
+					// 	   mapping.src.moduleID,
+					// 	   mapping.src.objID,
+					// 	   mapping.dst.moduleID,
+					// 	   mapping.dst.objID);
 				}
 			}
 			loadMappings();
@@ -120,6 +126,9 @@ struct MetaModuleHubBase : public CommModule {
 
 	void refreshMappings()
 	{
+		// user might have right-clicked a knob and selected Unmap
+		// Or user may have changed min/max sliders
+		// We don't get a notification of this, so we need to rebuild the knob maps
 		centralData->unregisterKnobMapsBySrcModule(id);
 		for (auto &knobmap : knobMaps) {
 			for (auto &mapping : knobmap.maps) {
@@ -135,6 +144,12 @@ struct MetaModuleHubBase : public CommModule {
 						id, // this module ID
 					};
 					centralData->registerMapping(src, dst, mapping->range.first, mapping->range.second);
+					// printf("refreshing knob mappings: centralData->registerMapping(src: m:%d knob:%d, dst: m:%d "
+					// 	   "knob:%d, )\n",
+					// 	   src.moduleID,
+					// 	   src.objID,
+					// 	   dst.moduleID,
+					// 	   dst.objID);
 				}
 			}
 		}
@@ -144,11 +159,11 @@ struct MetaModuleHubBase : public CommModule {
 	{
 		for (auto &m : centralData->maps) {
 			if (m.src.objType == LabelButtonID::Types::Knob) {
-			auto knobToMap = m.src.objID;
-			auto [min, max] = centralData->getMapRange(m.src, m.dst);
-			knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
+				auto knobToMap = m.src.objID;
+				auto [min, max] = centralData->getMapRange(m.src, m.dst);
+				knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
+			}
 		}
-	}
 	}
 
 	// Hub class needs to call this from its process
