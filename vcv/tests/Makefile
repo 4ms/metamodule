@@ -19,6 +19,7 @@ CXXFLAGS = 	-Wall \
 			-I../src\
 			-Isrc\
 			-Isrc/shared \
+			-I$(TEST_DIR) \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:
