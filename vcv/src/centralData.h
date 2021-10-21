@@ -4,7 +4,6 @@
 #include <iostream>
 #include <map>
 #include <mutex>
-#include <rack.hpp>
 #include <vector>
 
 class CentralData {
@@ -244,15 +243,15 @@ public:
 		return {LabelButtonID::Types::None, -1, -1};
 	}
 
-	void registerTouchedJack(rack::app::PortWidget *touched)
+	void registerTouchedJack(LabelButtonID touched)
 	{
-		lastTouchedPort = touched;
+		lastTouchedJack = touched;
 	}
 
-	rack::app::PortWidget *getAndClearTouchedJack()
+	LabelButtonID getAndClearTouchedJack()
 	{
-		auto tmp = lastTouchedPort;
-		lastTouchedPort = nullptr;
+		auto tmp = lastTouchedJack;
+		lastTouchedJack = {LabelButtonID::Types::None, -1, -1};
 		return tmp;
 	}
 
@@ -268,7 +267,7 @@ private:
 	bool _isMappingInProgress = false;
 	Mapping _currentMap;
 
-	rack::app::PortWidget *lastTouchedPort = nullptr;
+	LabelButtonID lastTouchedJack{LabelButtonID::Types::None, -1, -1};
 };
 
 // Todo for mappings:

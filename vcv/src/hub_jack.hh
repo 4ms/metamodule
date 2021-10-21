@@ -45,22 +45,21 @@ public:
 
 	void onDeselect(const event::Deselect &e) override
 	{
-		// Check if a ParamWidget was touched
+		// Check if a MappableJack was touched
 		auto touchedJack = centralData->getAndClearTouchedJack();
 
-		if (touchedJack && centralData->isMappingInProgress()) {
-			if (touchedJack->module) {
-				int moduleId = touchedJack->module->id;
-				int jackId = touchedJack->portId;
-
-				if (id.moduleID != moduleId) {
+		if (touchedJack.objType == id.objType && centralData->isMappingInProgress()) {
+			if (touchedJack.moduleID > -1) {
+				if (id.moduleID != touchedJack.moduleID) {
 					// Todo: Check if already mapped to a different hub. Use centralData to query if the moduleId has
 					// been registered as a hub
-					centralData->registerMapDest({id.objType, jackId, moduleId});
+					centralData->registerMapDest({id.objType, touchedJack.objID, touchedJack.moduleID});
+				} else {
+					// clicked on another jack on this hub
+					centralData->abortMappingProcedure();
 				}
 			} else {
-
-				// clicked on another knob on this hub
+				// Touched Jack is on an invalid or uninitialzed module (shouldn't happen, but...)
 				centralData->abortMappingProcedure();
 			}
 		} else {
@@ -123,16 +122,16 @@ public:
 		}
 	}
 
-	void onButton(const event::Button &e) override
-	{
-		OpaqueWidget::onButton(e);
+	// void onButton(const event::Button &e) override
+	// {
+	// 	OpaqueWidget::onButton(e);
 
-		// Touch port
-		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
-			centralData->registerTouchedJack(this);
-			e.consume(this);
-		}
-	}
+	// 	// Touch port
+	// 	if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
+	// 		centralData->registerTouchedJack(hubJackLabel.id);
+	// 		e.consume(this);
+	// 	}
+	// }
 
 private:
 	HubJackMapButton &hubJackLabel;

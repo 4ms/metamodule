@@ -38,7 +38,7 @@ public:
 		// Hub jacks can use this to determine what jack you clicked on after clicking on the Hub Jack Mapping Button,
 		// when creating a new mapping
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
-			centralData->registerTouchedJack(this);
+			centralData->registerTouchedJack(getId());
 			e.consume(this);
 		}
 
