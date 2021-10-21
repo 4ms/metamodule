@@ -337,24 +337,6 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 	MetaModuleHubBaseWidget() = default;
 
-	void notifyLabelButtonClicked(LabeledButton &button) override
-	{
-		button.id.moduleID = module->id; // workaround for VCV passing bad ptr to module
-
-		bool currentSourceIsThisButton = false;
-
-		if (centralData->isMappingInProgress()) {
-			currentSourceIsThisButton = centralData->getMappingSource() == button.id;
-			centralData->abortMappingProcedure();
-			valueLabel->text = "Aborted mapping";
-		}
-		if (!currentSourceIsThisButton) {
-			centralData->startMappingProcedure(button.id);
-			valueLabel->text = "Start Mapping from: " + std::to_string(static_cast<int>(button.id.objType)) + ", " +
-							   std::to_string(button.id.objID);
-		}
-	}
-
 	template<typename KnobType>
 	void addLabeledKnobPx(const std::string labelText, int knobId, Vec posPx, float defaultValue = 0.f)
 	{

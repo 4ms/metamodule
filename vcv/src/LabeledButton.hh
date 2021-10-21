@@ -21,7 +21,7 @@ public:
 	bool isCurrentMapSrc = false;
 	LabelButtonID mappedToId{LabelButtonID::Types::None, -1, -1};
 
-private:
+protected:
 	CommModuleWidget &_parent;
 };
 

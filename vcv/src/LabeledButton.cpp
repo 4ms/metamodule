@@ -79,8 +79,26 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 
 	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
 
-	if (isOnHub || !isTypeKnob) {
-		_parent.notifyLabelButtonClicked(*this);
+	if (!isTypeKnob) {
+		id.moduleID = _parent.getModuleId();
+
+		printf("LabeledButton::onDragStart() moduleID=%d\n", id.moduleID);
+		if (centralData->isMappingInProgress()) {
+			if (centralData->getMappingSource().objType == id.objType) {
+				if (isMapped) {
+					centralData->unregisterMapByDest(id);
+					if (mappedToId == centralData->getMappingSource()) {
+						isMapped = false;
+						mappedToId.moduleID = -1;
+						mappedToId.objID = -1;
+					} else {
+						createMapping(centralData->getMappingSource());
+					}
+				} else {
+					createMapping(centralData->getMappingSource());
+				}
+			}
+		}
 	}
 
 	if (quantity)

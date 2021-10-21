@@ -17,7 +17,7 @@ protected:
 	const float kModuleHeight = 128.5f;
 
 public:
-	virtual void notifyLabelButtonClicked(LabeledButton &button);
+	int getModuleId();
 
 protected:
 	void addLabeledKnob(const std::string labelText, int knobID, Vec posGrid, float defaultValue = 0.f);

@@ -19,6 +19,7 @@ public:
 	{}
 
 	void onDeselect(const event::Deselect &e) override;
+	void onDragStart(const event::DragStart &e) override;
 	void draw(const DrawArgs &args) override;
 	KnobMap *_knobmap;
 };

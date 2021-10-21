@@ -15,7 +15,11 @@ void HubKnobMapButton::onDeselect(const event::Deselect &e)
 		int paramId = touchedParam->paramQuantity->paramId;
 		APP->scene->rack->touchedParam = NULL;
 
+		// Todo: clean up this logic, don't have two calls to abortMappingProcedure()
 		if (id.moduleID != moduleId) {
+			printf("HubKnobMapButton::onDeselect our id=%d, touchedParam->paramQuantity->moduleId=%d\n",
+				   id.moduleID,
+				   moduleId);
 			// Todo: Check if already mapped to a different hub. Use centralData to query if the moduleId has been
 			// registered as a hub
 			int thisKnob = id.objID;
@@ -58,4 +62,34 @@ void HubKnobMapButton::draw(const DrawArgs &args)
 	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
 	nvgFontSize(args.vg, 8.0f);
 	nvgText(args.vg, box.size.x / 2.0f, box.size.y / 2.0f, text.c_str(), NULL);
+}
+
+void HubKnobMapButton::onDragStart(const event::DragStart &e)
+{
+	if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
+		return;
+	}
+
+	id.moduleID = _parent.getModuleId();
+
+	printf("HubKnobMapButton::onDragStart() moduleID=%d\n", id.moduleID);
+	bool currentSourceIsThisButton = false;
+
+	if (centralData->isMappingInProgress()) {
+		printf("Mapping is in progress, aborting.\n");
+		currentSourceIsThisButton = (centralData->getMappingSource() == id);
+		centralData->abortMappingProcedure();
+		// TODO: centraData->sendMessage("Aborted mapping");
+		// valueLabel->text = "Aborted mapping";
+	}
+	if (!currentSourceIsThisButton) {
+		printf("currentSource is not this button: starting mapping\n");
+		centralData->startMappingProcedure(id);
+		// TODO: centraData->sendMessage("Started mapping...");
+		// valueLabel->text = "Start Mapping from: " + std::to_string(static_cast<int>(button.id.objType)) + ", " +
+		// std::to_string(button.id.objID);
+	}
+
+	if (quantity)
+		quantity->setMax();
 }

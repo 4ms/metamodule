@@ -170,39 +170,12 @@ Vec CommModuleWidget::gridFromBottom2px(Vec posGrid)
 	return mm2px(gridFromBottom2mm(posGrid));
 }
 
-// Todo: disallow creating an InputJack mapping to a patched jack
-// Can probably not highlight input jacks that are patched (if we can get that info from the module or centralData)
-// Consider how to handle:
-// User makes the InJack mapping on an unpatched jack, then patches the jack
-//
-// Or allow everything but then give an error when creating the patch?
-//
-// Related todo: how to handle patching the Panel jacks to its own modules...!
-void CommModuleWidget::notifyLabelButtonClicked(LabeledButton &button)
+int CommModuleWidget::getModuleId()
 {
-	button.id.moduleID = module->id;
-
-	if (centralData->isMappingInProgress()) {
-		if (centralData->getMappingSource().objType == button.id.objType) {
-
-			if (button.isMapped) {
-				centralData->unregisterMapByDest(button.id);
-
-				if (button.mappedToId == centralData->getMappingSource()) {
-					button.isMapped = false;
-					button.mappedToId.moduleID = -1;
-					button.mappedToId.objID = -1;
-				} else {
-					button.createMapping(centralData->getMappingSource());
-				}
-
-			} else {
-				button.createMapping(centralData->getMappingSource());
-			}
-		}
-	} else {
-		// Todo: Initiate a mapping (virtual module clicked first)
-	}
+	if (module)
+		return module->id;
+	else
+		return -1;
 }
 
 void MetaModuleTextBox::draw(const DrawArgs &args)
