@@ -2,7 +2,7 @@
 #include "CommModule.h"
 #include "paletteHub.hh"
 
-void HubKnobLabel::onDeselect(const event::Deselect &e)
+void HubKnobMapButton::onDeselect(const event::Deselect &e)
 {
 	if (!_knobmap)
 		return;
@@ -32,7 +32,7 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 	}
 }
 
-void HubKnobLabel::draw(const DrawArgs &args)
+void HubKnobMapButton::draw(const DrawArgs &args)
 {
 	updateState();
 

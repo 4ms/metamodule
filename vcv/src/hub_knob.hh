@@ -4,16 +4,16 @@
 #include "knob_map.hh"
 #include "paletteHub.hh"
 
-class HubKnobLabel : public LabeledButton {
+class HubKnobMapButton : public LabeledButton {
 public:
 	// Constructor for widget-only view:
-	HubKnobLabel(CommModuleWidget &parent)
+	HubKnobMapButton(CommModuleWidget &parent)
 		: LabeledButton{static_cast<CommModuleWidget &>(parent)}
 		, _knobmap{nullptr}
 	{}
 
 	// Constructor for use as a module:
-	HubKnobLabel(CommModuleWidget &parent, KnobMap &knobmap)
+	HubKnobMapButton(CommModuleWidget &parent, KnobMap &knobmap)
 		: LabeledButton{static_cast<CommModuleWidget &>(parent)}
 		, _knobmap(&knobmap)
 	{}
@@ -26,7 +26,7 @@ public:
 template<typename BaseKnobT>
 class HubKnob : public BaseKnobT {
 public:
-	HubKnob(HubKnobLabel &_hubKnobLabel)
+	HubKnob(HubKnobMapButton &_hubKnobLabel)
 		: hubKnobLabel{_hubKnobLabel}
 	{}
 
@@ -156,5 +156,5 @@ public:
 	};
 
 private:
-	HubKnobLabel &hubKnobLabel;
+	HubKnobMapButton &hubKnobLabel;
 };

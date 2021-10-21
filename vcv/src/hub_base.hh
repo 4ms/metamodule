@@ -358,12 +358,12 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	template<typename KnobType>
 	void addLabeledKnobPx(const std::string labelText, int knobId, Vec posPx, float defaultValue = 0.f)
 	{
-		HubKnobLabel *button;
+		HubKnobMapButton *button;
 
 		if (hubModule) {
-			button = new HubKnobLabel{*this, hubModule->knobMaps[knobId]};
+			button = new HubKnobMapButton{*this, hubModule->knobMaps[knobId]};
 		} else {
-			button = new HubKnobLabel{*this};
+			button = new HubKnobMapButton{*this};
 		}
 		button->isOnHub = true;
 
@@ -396,25 +396,25 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	template<typename JackType>
 	void addLabeledJackPx(const std::string labelText, int jackId, Vec posPx, JackInOut inout)
 	{
-		auto jack = new HubJackLabel{*this};
-		jack->isOnHub = true;
-		jack->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
-		jack->box.size.x = mm2px(kKnobSpacingX);
-		jack->box.size.y = 12;
-		jack->text = labelText;
+		auto mapButton = new HubJackMapButton{*this};
+		mapButton->isOnHub = true;
+		mapButton->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
+		mapButton->box.size.x = mm2px(kKnobSpacingX);
+		mapButton->box.size.y = 12;
+		mapButton->text = labelText;
 		auto type = inout == JackInOut::Input ? LabelButtonID::Types::InputJack : LabelButtonID::Types::OutputJack;
-		jack->id = {type, jackId, hubModule ? hubModule->id : -1};
-		addChild(jack);
+		mapButton->id = {type, jackId, hubModule ? hubModule->id : -1};
+		addChild(mapButton);
 
-		auto *p = new HubJack<JackType>(*jack);
-		p->box.pos = posPx;
-		p->box.pos = p->box.pos.minus(p->box.size.div(2));
-		p->module = module;
-		p->type = inout == JackInOut::Input ? app::PortWidget::INPUT : app::PortWidget::OUTPUT;
-		p->portId = jackId;
+		auto *jack = new HubJack<JackType>(*mapButton);
+		jack->box.pos = posPx;
+		jack->box.pos = jack->box.pos.minus(jack->box.size.div(2));
+		jack->module = module;
+		jack->type = inout == JackInOut::Input ? app::PortWidget::INPUT : app::PortWidget::OUTPUT;
+		jack->portId = jackId;
 		if (inout == JackInOut::Input)
-			addInput(p);
+			addInput(jack);
 		else
-			addOutput(p);
+			addOutput(jack);
 	}
 };

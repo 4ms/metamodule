@@ -4,9 +4,9 @@
 #include "knob_map.hh"
 #include "paletteHub.hh"
 
-class HubJackLabel : public LabeledButton {
+class HubJackMapButton : public LabeledButton {
 public:
-	HubJackLabel(CommModuleWidget &parent)
+	HubJackMapButton(CommModuleWidget &parent)
 		: LabeledButton{static_cast<CommModuleWidget &>(parent)}
 	{}
 	void onDeselect(const event::Deselect &e) override
@@ -67,7 +67,7 @@ public:
 template<typename BaseJackT>
 class HubJack : public BaseJackT {
 public:
-	HubJack(HubJackLabel &_hubJackLabel)
+	HubJack(HubJackMapButton &_hubJackLabel)
 		: hubJackLabel{_hubJackLabel}
 	{}
 
@@ -75,6 +75,7 @@ public:
 	{
 		BaseJackT::draw(args);
 
+		// Draw mapped circle
 		if (hubJackLabel.isMapped) {
 			const float radius = 4;
 			NVGcolor color = PaletteHub::color[hubJackLabel.id.objID];
@@ -100,5 +101,5 @@ public:
 	}
 
 private:
-	HubJackLabel &hubJackLabel;
+	HubJackMapButton &hubJackLabel;
 };
