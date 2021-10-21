@@ -1,4 +1,5 @@
 #pragma once
+#include "hub_knob_menu.hh"
 #include "paletteHub.hh"
 #include "plugin.hpp"
 #include <rack.hpp>
@@ -14,29 +15,18 @@ public:
 	{
 		BaseJackT::draw(args);
 
-		int moduleId = this->module ? this->module->id : -1;
-		if (moduleId >= 0 && this->portId >= 0) {
-			LabelButtonID id;
-			if constexpr (InputOrOutput == MappableJackType::Input)
-				id = {LabelButtonID::Types::InputJack, this->portId, moduleId};
-			else
-				id = {LabelButtonID::Types::OutputJack, this->portId, moduleId};
-
-			bool isMapped = centralData->isLabelButtonDstMapped(id);
-
-			// Draw mapped circle
-			if (isMapped) {
-				const float radius = 4;
-				int srcPortId = centralData->getMappedSrcFromDst(id).objID;
-				NVGcolor color = PaletteHub::color[srcPortId];
-				nvgBeginPath(args.vg);
-				nvgCircle(args.vg, this->box.size.x - radius, this->box.size.y - radius, radius);
-				nvgFillColor(args.vg, color);
-				nvgFill(args.vg);
-				nvgStrokeColor(args.vg, color::mult(color, 0.5));
-				nvgStrokeWidth(args.vg, 1.0f);
-				nvgStroke(args.vg);
-			}
+		auto id = getId();
+		if ((id.moduleID >= 0) && centralData->isLabelButtonDstMapped(id)) {
+			const float radius = 4;
+			int srcPortId = centralData->getMappedSrcFromDst(id).objID;
+			NVGcolor color = PaletteHub::color[srcPortId];
+			nvgBeginPath(args.vg);
+			nvgCircle(args.vg, this->box.size.x - radius, this->box.size.y - radius, radius);
+			nvgFillColor(args.vg, color);
+			nvgFill(args.vg);
+			nvgStrokeColor(args.vg, color::mult(color, 0.5));
+			nvgStrokeWidth(args.vg, 1.0f);
+			nvgStroke(args.vg);
 		}
 	}
 
@@ -51,9 +41,55 @@ public:
 			centralData->registerTouchedJack(this);
 			e.consume(this);
 		}
+
+		// Right click to open context menu
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
+			ui::Menu *menu = createMenu();
+
+			// MapFieldLabel *paramLabel = new MapFieldLabel;
+			// paramLabel->paramWidget = this;
+			// menu->addChild(paramLabel);
+
+			// MapField *paramField = new MapField;
+			// paramField->box.size.x = 100;
+			// paramField->setParamWidget(this);
+			// menu->addChild(paramField);
+
+			if ((getId().moduleID >= 0) && centralData->isLabelButtonDstMapped(getId())) {
+				JackUnmapItem *unmapItem = new JackUnmapItem{getId()};
+				unmapItem->text = "Unmap";
+				// unmapItem->rightText = paramHandle->text;
+				menu->addChild(unmapItem);
+			} else {
+				ui::MenuItem *label = new ui::MenuItem;
+				label->text = "Not mapped";
+				label->rightText = "Click a MetaModule jack to begin mapping";
+				menu->addChild(label);
+			}
+			e.consume(this);
+		}
 	}
 
-	// TODO: right-click menui
+private:
+	LabelButtonID getId()
+	{
+		int moduleId = this->module ? this->module->id : -1;
+		if constexpr (InputOrOutput == MappableJackType::Input)
+			return {LabelButtonID::Types::InputJack, this->portId, moduleId};
+		else
+			return {LabelButtonID::Types::OutputJack, this->portId, moduleId};
+	}
+
+	struct JackUnmapItem : ui::MenuItem {
+		const LabelButtonID _id;
+		JackUnmapItem(LabelButtonID id)
+			: _id{id}
+		{}
+		void onAction(const event::Action &e) override
+		{
+			centralData->unregisterMapByDest(_id);
+		}
+	};
 };
 
 template<typename BaseJackT>

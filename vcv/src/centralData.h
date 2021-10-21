@@ -223,7 +223,7 @@ public:
 	{
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
 	}
-	bool isLabelButtonDstMapped(LabelButtonID &b)
+	bool isLabelButtonDstMapped(const LabelButtonID &b)
 	{
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
 	}
