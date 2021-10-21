@@ -12,7 +12,7 @@ void LabeledButton::updateState()
 {
 	// if (_parent.module != nullptr)
 	// 	if (_parent.module->id > 0)
-	// 		id.moduleID = _parent.module->id;
+	id.moduleID = _parent.getModuleId();
 
 	isCurrentMapSrc = false;
 	isPossibleMapDest = false;
@@ -20,12 +20,12 @@ void LabeledButton::updateState()
 		if (centralData->isMappingInProgress() && (centralData->getMappingSource() == id)) {
 			isCurrentMapSrc = true;
 		}
-		mappedToId = centralData->getMappedDstFromSrc(this->id);
+		mappedToId = centralData->getMappedDstFromSrc(id);
 	} else {
 		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == id.objType)) {
 			isPossibleMapDest = true;
 		}
-		mappedToId = centralData->getMappedSrcFromDst(this->id);
+		mappedToId = centralData->getMappedSrcFromDst(id);
 	}
 	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
@@ -80,7 +80,7 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
 
 	if (!isTypeKnob) {
-		id.moduleID = _parent.getModuleId();
+		// id.moduleID = _parent.getModuleId();
 
 		printf("LabeledButton::onDragStart() non-Knob moduleID=%d\n", id.moduleID);
 		if (centralData->isMappingInProgress()) {

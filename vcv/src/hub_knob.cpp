@@ -70,7 +70,7 @@ void HubKnobMapButton::onDragStart(const event::DragStart &e)
 		return;
 	}
 
-	id.moduleID = _parent.getModuleId();
+	// id.moduleID = _parent.getModuleId();
 
 	printf("HubKnobMapButton::onDragStart() moduleID=%d\n", id.moduleID);
 	bool currentSourceIsThisButton = false;
