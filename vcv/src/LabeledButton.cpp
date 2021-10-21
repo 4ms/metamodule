@@ -16,16 +16,16 @@ void LabeledButton::updateState()
 
 	isCurrentMapSrc = false;
 	isPossibleMapDest = false;
-	if (!isOnHub) {
-		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == id.objType)) {
-			isPossibleMapDest = true;
-		}
-		mappedToId = centralData->getMappedSrcFromDst(this->id);
-	} else {
+	if (isOnHub) {
 		if (centralData->isMappingInProgress() && (centralData->getMappingSource() == id)) {
 			isCurrentMapSrc = true;
 		}
 		mappedToId = centralData->getMappedDstFromSrc(this->id);
+	} else {
+		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == id.objType)) {
+			isPossibleMapDest = true;
+		}
+		mappedToId = centralData->getMappedSrcFromDst(this->id);
 	}
 	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
@@ -37,31 +37,33 @@ void LabeledButton::draw(const DrawArgs &args)
 	bool isTypeJack =
 		this->id.objType == LabelButtonID::Types::InputJack || this->id.objType == LabelButtonID::Types::OutputJack;
 	if (isTypeJack) {
+		if (isMapped) {
+			const float radius = 4;
+			// Todo: get the knobmap so we can get the color
+			NVGcolor color = PaletteHub::color[(isOnHub ? id.objID : mappedToId.objID) & 0x7];
+			nvgBeginPath(args.vg);
+			nvgCircle(args.vg, this->box.size.x - radius, this->box.size.y - radius, radius);
+			nvgFillColor(args.vg, color);
+			nvgFill(args.vg);
+			nvgStrokeColor(args.vg, color::mult(color, 0.5));
+			nvgStrokeWidth(args.vg, 1.0f);
+			nvgStroke(args.vg);
+			// } else {
+		}
+
+		// const int jackHeight = 30;
+		NVGcolor color = isPossibleMapDest ? rack::color::alpha(rack::color::YELLOW, 0.8f)
+										   : rack::color::alpha(rack::color::BLACK, 0.0f);
 		nvgBeginPath(args.vg);
 		nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 5.0);
-		if (isMapped) {
-			unsigned palid = (isOnHub ? id.objID : mappedToId.objID) & 0x7; // Todo: handle more than 8 colors
-			nvgStrokeColor(args.vg, PaletteHub::color[palid]);
-			nvgStrokeWidth(args.vg, 2.0f);
-		}
-		if (!isMapped) {
-			nvgStrokeColor(args.vg, rack::color::WHITE);
-			nvgStrokeWidth(args.vg, 0.0);
-		}
-		if (isPossibleMapDest) {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.8f));
-		} else if (isCurrentMapSrc) {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLUE, 0.8f));
-		} else {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.0f));
-		}
-		nvgStroke(args.vg);
+		nvgFillColor(args.vg, color);
 		nvgFill(args.vg);
 	}
 
-	if (APP->event->hoveredWidget == this)
-		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.4f));
+	// if (APP->event->hoveredWidget == this)
+	// 	nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.4f));
 
+	// Draw text
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_BOTTOM);
 	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));

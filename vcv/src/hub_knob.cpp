@@ -9,14 +9,15 @@ void HubKnobLabel::onDeselect(const event::Deselect &e)
 
 	// Check if a ParamWidget was touched
 	ParamWidget *touchedParam = APP->scene->rack->touchedParam;
+
 	if (touchedParam && centralData->isMappingInProgress()) {
 		int moduleId = touchedParam->paramQuantity->module->id;
 		int paramId = touchedParam->paramQuantity->paramId;
 		APP->scene->rack->touchedParam = NULL;
 
 		if (id.moduleID != moduleId) {
-			// Todo: Check if already mapped to a different hub.
-			// Use centralData or APP->engine to accomodate multiple Hubs
+			// Todo: Check if already mapped to a different hub. Use centralData to query if the moduleId has been
+			// registered as a hub
 			int thisKnob = id.objID;
 			if (_knobmap->create(moduleId, paramId, PaletteHub::color[thisKnob])) {
 				centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
@@ -35,6 +36,7 @@ void HubKnobLabel::draw(const DrawArgs &args)
 {
 	updateState();
 
+	// Draw huge background rect to highlight a mapping has begun from this knob
 	nvgBeginPath(args.vg);
 	float padding_x = 2;
 	float knob_height = 40;

@@ -21,8 +21,6 @@ public:
 	void onDeselect(const event::Deselect &e) override;
 	void draw(const DrawArgs &args) override;
 	KnobMap *_knobmap;
-
-private:
 };
 
 template<typename BaseKnobT>
@@ -157,5 +155,6 @@ public:
 		}
 	};
 
+private:
 	HubKnobLabel &hubKnobLabel;
 };
