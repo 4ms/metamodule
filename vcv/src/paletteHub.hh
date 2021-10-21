@@ -18,7 +18,20 @@ struct PaletteHub {
 	static inline const NVGcolor GRAY75 = nvgRGB(0xc0, 0xc0, 0xc0);
 	static inline const NVGcolor WHITE = nvgRGB(0xff, 0xff, 0xff);
 
-	static inline const NVGcolor color[12] = {
+	static inline const NVGcolor color[24] = {
+		RED,
+		ORANGE,
+		YELLOW,
+		GREEN,
+		CYAN,
+		BLUE,
+		PURPLE,
+		MAGENTA,
+		BROWN,
+		GRAY25,
+		GRAY50,
+		GRAY75,
+		// repeat
 		RED,
 		ORANGE,
 		YELLOW,
