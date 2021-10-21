@@ -79,8 +79,7 @@ void LabeledButton::onDragStart(const event::DragStart &e)
 
 	bool isTypeKnob = this->id.objType == LabelButtonID::Types::Knob;
 
-	// FixMe: same as (isOnHub || !isTypeKnob)
-	if (isOnHub || (!isOnHub && !isTypeKnob)) {
+	if (isOnHub || !isTypeKnob) {
 		_parent.notifyLabelButtonClicked(*this);
 	}
 
