@@ -1,5 +1,6 @@
 #pragma once
 #include "LabeledButton.hh"
+#include "MapMarks.hh"
 #include "hub_knob_menu.hh"
 #include "knob_map.hh"
 #include "paletteHub.hh"
@@ -73,21 +74,18 @@ public:
 		updateState();
 
 		// Draw huge background rect to highlight a mapping has begun from this knob
-		nvgBeginPath(args.vg);
-		float padding_x = 2;
-		float knob_height = 40;
-		nvgRoundedRect(args.vg, padding_x, -knob_height, box.size.x - padding_x * 2, knob_height + box.size.y, 5.0);
-		nvgStrokeColor(args.vg, rack::color::WHITE);
-		nvgStrokeWidth(args.vg, 0.0);
-		// Draw solid bg if this knob is the active mapping source
 		if (isCurrentMapSrc) {
+			float padding_x = 2;
+			float knob_height = 40;
 			auto knobNum = id.objID;
-			nvgFillColor(args.vg, PaletteHub::color[knobNum]);
-		} else {
-			nvgFillColor(args.vg, rack::color::alpha(rack::color::BLACK, 0.0f));
+			nvgBeginPath(args.vg);
+			nvgRoundedRect(args.vg, padding_x, -knob_height, box.size.x - padding_x * 2, knob_height + box.size.y, 5.0);
+			nvgStrokeColor(args.vg, rack::color::WHITE);
+			nvgStrokeWidth(args.vg, 0.0);
+			nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color[knobNum], 0.75f));
+			nvgStroke(args.vg);
+			nvgFill(args.vg);
 		}
-		nvgStroke(args.vg);
-		nvgFill(args.vg);
 
 		nvgBeginPath(args.vg);
 		nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
@@ -110,15 +108,11 @@ public:
 
 		// Draw mapped circle
 		if (hubJackLabel.isMapped) {
-			const float radius = 4;
 			NVGcolor color = PaletteHub::color[hubJackLabel.id.objID];
-			nvgBeginPath(args.vg);
-			nvgCircle(args.vg, this->box.size.x - radius, this->box.size.y - radius, radius);
-			nvgFillColor(args.vg, color);
-			nvgFill(args.vg);
-			nvgStrokeColor(args.vg, color::mult(color, 0.5));
-			nvgStrokeWidth(args.vg, 1.0f);
-			nvgStroke(args.vg);
+			if (hubJackLabel.id.objType == LabelButtonID::Types::InputJack)
+				MapMark::markInputJack(args.vg, this->box, color);
+			else
+				MapMark::markOutputJack(args.vg, this->box, color);
 		}
 	}
 

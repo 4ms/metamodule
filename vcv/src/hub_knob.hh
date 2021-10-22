@@ -1,5 +1,6 @@
 #pragma once
 #include "LabeledButton.hh"
+#include "MapMarks.hh"
 #include "hub_knob_menu.hh"
 #include "knob_map.hh"
 #include "paletteHub.hh"
@@ -38,25 +39,24 @@ public:
 		KnobMap *knobmap = hubKnobLabel._knobmap;
 
 		if (knobmap) {
-			const float radius = 6;
-			const float spacing = 2;
+			const float spacing = 8;
 			auto numMaps = std::min(knobmap->getNumMaps(), 16);
-			float x = this->box.size.x - radius;
-			float y = this->box.size.y - radius;
+			auto _box = this->box;
 			for (int i = 0; i < numMaps; i++) {
-				nvgBeginPath(args.vg);
-				nvgRect(args.vg, x, y, radius, radius);
 				NVGcolor color = knobmap->get_color();
-				nvgFillColor(args.vg, color);
-				nvgFill(args.vg);
-				nvgStrokeColor(args.vg, color::mult(color, 0.5));
-				nvgStrokeWidth(args.vg, 1.0);
-				nvgStroke(args.vg);
+				MapMark::markKnob(args.vg, _box, color);
+				// nvgBeginPath(args.vg);
+				// nvgRect(args.vg, x, y, radius, radius);
+				// nvgFillColor(args.vg, color);
+				// nvgFill(args.vg);
+				// nvgStrokeColor(args.vg, color::mult(color, 0.5));
+				// nvgStrokeWidth(args.vg, 1.0);
+				// nvgStroke(args.vg);
 				if (i % 4 == 3) {
-					x = this->box.size.x - radius;
-					y -= radius + spacing;
+					_box.size.x = this->box.size.x;
+					_box.size.y -= spacing;
 				} else
-					x -= radius + spacing;
+					_box.size.x -= spacing;
 			}
 		}
 	}

@@ -36,7 +36,7 @@ struct MapMark {
 
 	static void markKnob(NVGcontext *vg, rack::math::Rect box, NVGcolor color)
 	{
-		const float radius = 4.f;
+		const float radius = 6.f;
 		nvgBeginPath(vg);
 		nvgRect(vg, box.size.x - radius, box.size.y - radius, radius, radius);
 		nvgFillColor(vg, color);
