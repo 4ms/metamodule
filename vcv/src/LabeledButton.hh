@@ -3,10 +3,10 @@
 #include <rack.hpp>
 using namespace rack;
 
-class LabeledButton : public Button {
+class HubMapButton : public Button {
 
 public:
-	LabeledButton(CommModuleWidget &parent)
+	HubMapButton(CommModuleWidget &parent)
 		: _parent{parent}
 	{}
 	void draw(const DrawArgs &args) override;

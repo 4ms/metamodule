@@ -8,10 +8,10 @@
 // todo: this whole class is exactly the same as HubKnobMapButton
 // except for touchedJack vs touchedParam, and having _knobmap
 // Maybe HubMapButton is the base class for both, and each implements its own registerMapping() and getTouched()
-class HubJackMapButton : public LabeledButton {
+class HubJackMapButton : public HubMapButton {
 public:
 	HubJackMapButton(CommModuleWidget &parent)
-		: LabeledButton{static_cast<CommModuleWidget &>(parent)}
+		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
 	{}
 
 	void onDragStart(const event::DragStart &e) override

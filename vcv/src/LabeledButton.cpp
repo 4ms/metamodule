@@ -1,14 +1,14 @@
 #include "LabeledButton.hh"
 #include "paletteHub.hh"
 
-void LabeledButton::createMapping(LabelButtonID srcId)
+void HubMapButton::createMapping(LabelButtonID srcId)
 {
 	isMapped = true;
 	mappedToId = srcId;
 	centralData->registerMapDest(id);
 }
 
-void LabeledButton::updateState()
+void HubMapButton::updateState()
 {
 	// if (_parent.module != nullptr)
 	// 	if (_parent.module->id > 0)
@@ -30,7 +30,7 @@ void LabeledButton::updateState()
 	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
 
-void LabeledButton::draw(const DrawArgs &args)
+void HubMapButton::draw(const DrawArgs &args)
 {
 	updateState();
 
@@ -71,7 +71,7 @@ void LabeledButton::draw(const DrawArgs &args)
 	nvgText(args.vg, box.size.x / 2.0f, box.size.y * 0.75f, text.c_str(), NULL);
 }
 
-void LabeledButton::onDragStart(const event::DragStart &e)
+void HubMapButton::onDragStart(const event::DragStart &e)
 {
 	if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
 		return;

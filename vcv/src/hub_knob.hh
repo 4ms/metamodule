@@ -5,17 +5,17 @@
 #include "knob_map.hh"
 #include "paletteHub.hh"
 
-class HubKnobMapButton : public LabeledButton {
+class HubKnobMapButton : public HubMapButton {
 public:
 	// Constructor for widget-only view:
 	HubKnobMapButton(CommModuleWidget &parent)
-		: LabeledButton{static_cast<CommModuleWidget &>(parent)}
+		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
 		, _knobmap{nullptr}
 	{}
 
 	// Constructor for use as a module:
 	HubKnobMapButton(CommModuleWidget &parent, KnobMap &knobmap)
-		: LabeledButton{static_cast<CommModuleWidget &>(parent)}
+		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
 		, _knobmap(&knobmap)
 	{}
 
