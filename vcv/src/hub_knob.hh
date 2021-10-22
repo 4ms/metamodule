@@ -1,5 +1,5 @@
 #pragma once
-#include "LabeledButton.hh"
+#include "HubMapButton.hh"
 #include "MapMarks.hh"
 #include "hub_knob_menu.hh"
 #include "knob_map.hh"
@@ -7,6 +7,8 @@
 
 class HubKnobMapButton : public HubMapButton {
 public:
+	KnobMap *_knobmap;
+
 	// Constructor for widget-only view:
 	HubKnobMapButton(CommModuleWidget &parent)
 		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
@@ -19,10 +21,38 @@ public:
 		, _knobmap(&knobmap)
 	{}
 
-	void onDeselect(const event::Deselect &e) override;
-	void onDragStart(const event::DragStart &e) override;
-	void draw(const DrawArgs &args) override;
-	KnobMap *_knobmap;
+	void onDeselect(const event::Deselect &e) override
+	{
+		if (!_knobmap)
+			return;
+
+		// Check if a ParamWidget was touched
+		ParamWidget *touchedParam = APP->scene->rack->touchedParam;
+
+		bool registerSuccess = false;
+
+		if (centralData->isMappingInProgress()) {
+			if (touchedParam && touchedParam->paramQuantity) {
+				int moduleId = touchedParam->paramQuantity->module->id;
+				int paramId = touchedParam->paramQuantity->paramId;
+				APP->scene->rack->touchedParam = NULL;
+				if (moduleId > -1) {
+					if (id.moduleID != moduleId) {
+						// Todo: Check if already mapped to a different hub. Use centralData to query if the moduleId
+						// has been registered as a hub
+						if (_knobmap->create(moduleId, paramId, PaletteHub::color[id.objID])) {
+							centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
+							registerSuccess = true;
+						}
+					}
+				}
+			}
+		}
+
+		if (!registerSuccess) {
+			centralData->abortMappingProcedure();
+		}
+	}
 };
 
 template<typename BaseKnobT>
@@ -45,13 +75,6 @@ public:
 			for (int i = 0; i < numMaps; i++) {
 				NVGcolor color = knobmap->get_color();
 				MapMark::markKnob(args.vg, _box, color);
-				// nvgBeginPath(args.vg);
-				// nvgRect(args.vg, x, y, radius, radius);
-				// nvgFillColor(args.vg, color);
-				// nvgFill(args.vg);
-				// nvgStrokeColor(args.vg, color::mult(color, 0.5));
-				// nvgStrokeWidth(args.vg, 1.0);
-				// nvgStroke(args.vg);
 				if (i % 4 == 3) {
 					_box.size.x = this->box.size.x;
 					_box.size.y -= spacing;

@@ -3,7 +3,6 @@
 #include "CommModule.h"
 #include "CommWidget.h"
 #include "CoreModules/moduleTypes.h"
-#include "LabeledButton.hh"
 #include "hub_jack.hh"
 #include "hub_knob.hh"
 #include "knob_map.hh"

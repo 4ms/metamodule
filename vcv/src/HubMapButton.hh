@@ -11,8 +11,6 @@ public:
 	{}
 	void draw(const DrawArgs &args) override;
 	void onDragStart(const event::DragStart &e) override;
-	void updateState();
-	void createMapping(LabelButtonID srcId);
 
 	LabelButtonID id;
 	bool isMapped = false;
@@ -21,6 +19,8 @@ public:
 	bool isCurrentMapSrc = false;
 	LabelButtonID mappedToId{LabelButtonID::Types::None, -1, -1};
 
-protected:
+private:
+	void _createMapping(LabelButtonID srcId);
+	void _updateState();
 	CommModuleWidget &_parent;
 };
