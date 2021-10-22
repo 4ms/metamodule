@@ -8,6 +8,7 @@
 
 class CentralData {
 	static inline std::mutex mtx;
+	static inline const std::array<ModuleTypeSlug, 2> ValidHubSlugs = {"PANEL_8", "PANEL_MED"};
 
 public:
 	enum MessageType {
@@ -15,17 +16,11 @@ public:
 		RequestAllParamData,
 	};
 
+	// Modules
 	void registerModule(ModuleID mod)
 	{
 		std::lock_guard mguard{mtx};
 		moduleData.push_back(mod);
-	}
-
-	template<typename T, typename RT>
-	void remove_and_erase(T &vec, RT p)
-	{
-		vec.erase(std::remove_if(vec.begin(), vec.end(), p), vec.end());
-		// std::erase_if(vec, p);
 	}
 
 	void unregisterModule(ModuleID mod)
@@ -48,6 +43,21 @@ public:
 
 		auto sz = moduleData.size();
 		return sz;
+	}
+
+	bool isRegisteredHub(int moduleId)
+	{
+		auto module_it = std::find_if(moduleData.begin(), moduleData.end(), [=](auto &m) {
+			if (m.id == moduleId) {
+				for (auto &hubname : ValidHubSlugs) {
+					if (hubname == m.typeID)
+						return true;
+				}
+			}
+			return false;
+		});
+		bool moduleFoundAndIsHub = (module_it != moduleData.end());
+		return moduleFoundAndIsHub;
 	}
 
 	void updateParamStatus(ParamStatus updatedParam)
@@ -260,7 +270,6 @@ public:
 	std::vector<ModuleID> moduleData;
 	std::vector<JackStatus> jackData;
 	std::vector<ParamStatus> paramData;
-
 	std::vector<Mapping> maps;
 
 private:
@@ -268,6 +277,13 @@ private:
 	Mapping _currentMap;
 
 	LabelButtonID lastTouchedJack{LabelButtonID::Types::None, -1, -1};
+
+	template<typename T, typename RT>
+	void remove_and_erase(T &vec, RT p)
+	{
+		vec.erase(std::remove_if(vec.begin(), vec.end(), p), vec.end());
+		// std::erase_if(vec, p);
+	}
 };
 
 // Todo for mappings:

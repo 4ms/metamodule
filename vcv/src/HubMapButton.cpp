@@ -90,8 +90,10 @@ bool HubMapButton::registerMapping(int moduleId, int objId)
 	if (centralData->isMappingInProgress()) {
 		if (moduleId > -1) {
 			if (id.moduleID != moduleId) {
+				if (!centralData->isRegisteredHub(moduleId)) {
 					centralData->registerMapDest({id.objType, objId, moduleId});
 					return true;
+				}
 			}
 		}
 	}
