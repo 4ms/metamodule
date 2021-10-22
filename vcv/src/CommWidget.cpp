@@ -52,6 +52,7 @@ void CommModuleWidget::addSmallLabeledKnobPx(const std::string labelText, int kn
 {
 	addLabel(labelText, posPx, {LabelButtonID::Types::Knob, knobID, -1});
 	auto p = createParamCentered<RoundSmallBlackKnob>(posPx, module, knobID);
+	// Todo: set this in the CommModule using configParam()
 	if (p->paramQuantity) {
 		p->paramQuantity->defaultValue = defaultValue;
 		p->paramQuantity->label = labelText;
