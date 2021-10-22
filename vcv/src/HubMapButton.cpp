@@ -84,3 +84,16 @@ void HubMapButton::onDragStart(const event::DragStart &e)
 	if (quantity)
 		quantity->setMax();
 }
+
+bool HubMapButton::registerMapping(int moduleId, int objId)
+{
+	if (centralData->isMappingInProgress()) {
+		if (moduleId > -1) {
+			if (id.moduleID != moduleId) {
+					centralData->registerMapDest({id.objType, objId, moduleId});
+					return true;
+			}
+		}
+	}
+	return false;
+}

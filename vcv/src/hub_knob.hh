@@ -26,27 +26,18 @@ public:
 		if (!_knobmap)
 			return;
 
-		// Check if a ParamWidget was touched
-		ParamWidget *touchedParam = APP->scene->rack->touchedParam;
-
 		bool registerSuccess = false;
 
-		if (centralData->isMappingInProgress()) {
-			if (touchedParam && touchedParam->paramQuantity) {
-				int moduleId = touchedParam->paramQuantity->module->id;
-				int paramId = touchedParam->paramQuantity->paramId;
-				APP->scene->rack->touchedParam = NULL;
-				if (moduleId > -1) {
-					if (id.moduleID != moduleId) {
-						// Todo: Check if already mapped to a different hub. Use centralData to query if the moduleId
-						// has been registered as a hub
-						if (_knobmap->create(moduleId, paramId, PaletteHub::color[id.objID])) {
-							centralData->registerMapDest({LabelButtonID::Types::Knob, paramId, moduleId});
-							registerSuccess = true;
-						}
-					}
-				}
-			}
+		// Check if a ParamWidget was touched
+		ParamWidget *touchedParam = APP->scene->rack->touchedParam;
+		if (touchedParam && touchedParam->paramQuantity) {
+			int moduleId = touchedParam->paramQuantity->module->id;
+			int objId = touchedParam->paramQuantity->paramId;
+			APP->scene->rack->touchedParam = NULL;
+
+			registerSuccess = registerMapping(moduleId, objId);
+			if (registerSuccess)
+				_knobmap->create(moduleId, objId, PaletteHub::color[id.objID]);
 		}
 
 		if (!registerSuccess) {

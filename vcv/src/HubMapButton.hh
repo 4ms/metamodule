@@ -12,6 +12,8 @@ public:
 	void draw(const DrawArgs &args) override;
 	void onDragStart(const event::DragStart &e) override;
 
+	bool registerMapping(int moduleId, int objId);
+
 	LabelButtonID id;
 	bool isMapped = false;
 	bool isOnHub = false;

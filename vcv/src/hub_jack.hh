@@ -11,25 +11,15 @@ public:
 
 	void onDeselect(const event::Deselect &e) override
 	{
-		// Check if a MappableJack was touched
+		bool registerSuccess = false;
 		auto touchedJack = centralData->getAndClearTouchedJack();
-
-		bool registerSucess = false;
-
-		if (centralData->isMappingInProgress()) {
-			if (touchedJack.objType == id.objType) {
-				if (touchedJack.moduleID > -1) {
-					if (id.moduleID != touchedJack.moduleID) {
-						// Todo: Check if already mapped to a different hub. Use centralData to query if the moduleId
-						// has been registered as a hub
-						centralData->registerMapDest({id.objType, touchedJack.objID, touchedJack.moduleID});
-						registerSucess = true;
-					}
-				}
-			}
+		if (touchedJack.objType == id.objType) {
+			int moduleId = touchedJack.moduleID;
+			int objId = touchedJack.objID;
+			registerSuccess = registerMapping(moduleId, objId);
 		}
 
-		if (!registerSucess) {
+		if (!registerSuccess) {
 			centralData->abortMappingProcedure();
 		}
 	}
