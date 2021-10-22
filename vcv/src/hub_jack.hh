@@ -122,17 +122,6 @@ public:
 		}
 	}
 
-	// void onButton(const event::Button &e) override
-	// {
-	// 	OpaqueWidget::onButton(e);
-
-	// 	// Touch port
-	// 	if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
-	// 		centralData->registerTouchedJack(hubJackLabel.id);
-	// 		e.consume(this);
-	// 	}
-	// }
-
 private:
 	HubJackMapButton &hubJackLabel;
 };

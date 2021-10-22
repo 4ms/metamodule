@@ -1,4 +1,5 @@
 #pragma once
+#include "MapMarks.hh"
 #include "hub_knob_menu.hh"
 #include "paletteHub.hh"
 #include "plugin.hpp"
@@ -13,20 +14,26 @@ public:
 
 	void draw(const typename BaseJackT::DrawArgs &args) override
 	{
+		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType)) {
+			nvgBeginPath(args.vg);
+			const float margin = 0;
+			nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y + margin);
+			NVGcolor color = rack::color::alpha(rack::color::YELLOW, 0.25f);
+			nvgFillColor(args.vg, color);
+			nvgFill(args.vg);
+		}
+
 		BaseJackT::draw(args);
 
 		auto id = getId();
 		if ((id.moduleID >= 0) && centralData->isLabelButtonDstMapped(id)) {
-			const float radius = 4;
+			// const float radius = 4;
 			int srcPortId = centralData->getMappedSrcFromDst(id).objID;
 			NVGcolor color = PaletteHub::color[srcPortId];
-			nvgBeginPath(args.vg);
-			nvgCircle(args.vg, this->box.size.x - radius, this->box.size.y - radius, radius);
-			nvgFillColor(args.vg, color);
-			nvgFill(args.vg);
-			nvgStrokeColor(args.vg, color::mult(color, 0.5));
-			nvgStrokeWidth(args.vg, 1.0f);
-			nvgStroke(args.vg);
+			if constexpr (InputOrOutput == MappableJackType::Output)
+				MapMark::markOutputJack(args.vg, this->box, color);
+			else
+				MapMark::markInputJack(args.vg, this->box, color);
 		}
 	}
 
@@ -46,18 +53,10 @@ public:
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
 			ui::Menu *menu = createMenu();
 
-			// MapFieldLabel *paramLabel = new MapFieldLabel;
-			// paramLabel->paramWidget = this;
-			// menu->addChild(paramLabel);
-
-			// MapField *paramField = new MapField;
-			// paramField->box.size.x = 100;
-			// paramField->setParamWidget(this);
-			// menu->addChild(paramField);
-
 			if ((getId().moduleID >= 0) && centralData->isLabelButtonDstMapped(getId())) {
 				JackUnmapItem *unmapItem = new JackUnmapItem{getId()};
 				unmapItem->text = "Unmap";
+				// TODO: can we write which MetaModule jack it's mapped to?
 				// unmapItem->rightText = paramHandle->text;
 				menu->addChild(unmapItem);
 			} else {
