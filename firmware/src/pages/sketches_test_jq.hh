@@ -88,7 +88,7 @@ struct SMRTestPage : PageBase {
 		//Fix roller style
 		static lv_style_t style_module_test_small_roller_1_selected;
 		lv_style_reset(&style_module_test_small_roller_1_selected);
-		lv_style_set_text_line_space(&style_module_test_small_roller_1_selected, LV_STATE_DEFAULT, -5);
+		lv_style_set_text_line_space(&style_module_test_small_roller_1_selected, LV_STATE_DEFAULT, 0);
 		lv_obj_add_style(
 			ui->module_test_small_roller_1, LV_ROLLER_PART_SELECTED, &style_module_test_small_roller_1_selected);
 
