@@ -50,6 +50,7 @@ typedef struct
 	lv_obj_t *symbol_sketches_slider_6;
 	lv_obj_t *symbol_sketches_slider_7;
 	lv_obj_t *symbol_sketches_ddlist_1;
+	lv_obj_t *symbol_sketches_ddlist_2;
 	lv_obj_t *AudioCV_Ins;
 	lv_obj_t *AudioCV_Ins_cont_1;
 	lv_obj_t *AudioCV_Ins_bar_1;
@@ -234,7 +235,7 @@ typedef struct
 	lv_obj_t *module_test_small_spread;
 	lv_obj_t *module_test_small_spread_label;
 	lv_obj_t *module_test_small_cont_1;
-	lv_obj_t *module_test_small_param_list;
+	lv_obj_t *module_test_small_roller_1;
 	lv_obj_t *group_arc_sketches;
 	lv_obj_t *group_arc_sketches_arc_1;
 	lv_obj_t *group_arc_sketches_arc_2;

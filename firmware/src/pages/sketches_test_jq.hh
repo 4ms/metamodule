@@ -36,83 +36,221 @@ struct AudioCVInsPage : PageBase {
 };
 
 struct SMRTestPage : PageBase {
-	lv_style_t style_highlight;
+	static inline lv_style_t style_highlight;
+	static inline int32_t cur_selected = -1;
+	static inline lv_obj_t *button[51];
 
 	SMRTestPage(PatchInfo info)
 		: PageBase{info}
 	{}
 
+	static void roller_cb(lv_obj_t *obj, lv_event_t event)
+	{
+		if (obj != ui->module_test_small_roller_1)
+			return;
+
+		if (event == LV_EVENT_KEY) {
+			//Turn off old button
+			if (cur_selected >= 0) {
+				lv_obj_remove_style(button[cur_selected], LV_BTN_PART_MAIN, &style_highlight);
+				lv_event_send_refresh(button[cur_selected]);
+			}
+
+			//Get the new button
+			cur_selected = lv_roller_get_selected(obj);
+			printf("cur_selected: %d\r\n", cur_selected);
+
+			//Turn on new button
+			lv_obj_add_style(button[cur_selected], LV_BTN_PART_MAIN, &style_highlight);
+			lv_event_send_refresh(button[cur_selected]);
+		}
+	}
+
 	void init() override
 	{
-		//17ms with styles removed. Presumably 24ms with them in
 		setup_scr_module_test_small(ui);
 		screen = ui->module_test_small;
 		init_bg();
 
 		lv_style_init(&style_highlight);
-
-		lv_style_set_radius(&style_highlight, LV_STATE_DEFAULT, 80);
-		lv_style_set_bg_opa(&style_highlight, LV_STATE_DEFAULT, 0);
-		lv_style_set_border_color(&style_highlight, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-		lv_style_set_border_width(&style_highlight, LV_STATE_DEFAULT, 2);
-		lv_style_set_border_opa(&style_highlight, LV_STATE_DEFAULT, 0);
+		lv_style_set_radius(&style_highlight, LV_STATE_DEFAULT, 120);
 		lv_style_set_outline_color(&style_highlight, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-		lv_style_set_outline_opa(&style_highlight, LV_STATE_DEFAULT, 0);
+		lv_style_set_outline_width(&style_highlight, LV_STATE_DEFAULT, 4);
+		lv_style_set_outline_opa(&style_highlight, LV_STATE_DEFAULT, 200);
 
 		group = lv_group_create();
 
-		lv_group_add_obj(group, ui->module_test_small_param_list);
-		lv_group_add_obj(group, ui->module_test_small_freq_nudge1);
-		lv_group_add_obj(group, ui->module_test_small_freq_cv1);
-		lv_group_add_obj(group, ui->module_test_small_lock1);
-		lv_group_add_obj(group, ui->module_test_small_freq_switch1);
-		lv_group_add_obj(group, ui->module_test_small_button_lock1);
-		lv_group_add_obj(group, ui->module_test_small_button_lock2);
-		lv_group_add_obj(group, ui->module_test_small_button_lock3);
-		lv_group_add_obj(group, ui->module_test_small_button_lock4);
-		lv_group_add_obj(group, ui->module_test_small_button_lock5);
-		lv_group_add_obj(group, ui->module_test_small_button_lock6);
-		lv_group_add_obj(group, ui->module_test_small_freq_nudge2);
-		lv_group_add_obj(group, ui->module_test_small_freq_cv2);
-		lv_group_add_obj(group, ui->module_test_small_lock2);
-		lv_group_add_obj(group, ui->module_test_small_freq_switch2);
-		lv_group_add_obj(group, ui->module_test_small_slider1);
-		lv_group_add_obj(group, ui->module_test_small_slider2);
-		lv_group_add_obj(group, ui->module_test_small_slider3);
-		lv_group_add_obj(group, ui->module_test_small_slider4);
-		lv_group_add_obj(group, ui->module_test_small_slider5);
-		lv_group_add_obj(group, ui->module_test_small_slider6);
-		lv_group_add_obj(group, ui->module_test_small_switch_cv_slew);
-		lv_group_add_obj(group, ui->module_test_small_lvl_cv1);
-		lv_group_add_obj(group, ui->module_test_small_lvl_cv2);
-		lv_group_add_obj(group, ui->module_test_small_lvl_cv3);
-		lv_group_add_obj(group, ui->module_test_small_lvl_cv4);
-		lv_group_add_obj(group, ui->module_test_small_lvl_cv5);
-		lv_group_add_obj(group, ui->module_test_small_lvl_cv6);
-		lv_group_add_obj(group, ui->module_test_small_env_out1);
-		lv_group_add_obj(group, ui->module_test_small_env_out2);
-		lv_group_add_obj(group, ui->module_test_small_env_out3);
-		lv_group_add_obj(group, ui->module_test_small_rotate_cv);
-		lv_group_add_obj(group, ui->module_test_small_env_out4);
-		lv_group_add_obj(group, ui->module_test_small_env_out5);
-		lv_group_add_obj(group, ui->module_test_small_env_out6);
-		lv_group_add_obj(group, ui->module_test_small_post_pre_switch);
-		lv_group_add_obj(group, ui->module_test_small_fast_slow_switch);
-		lv_group_add_obj(group, ui->module_test_small_input_odds);
-		lv_group_add_obj(group, ui->module_test_small_input_evens);
-		lv_group_add_obj(group, ui->module_test_small_rotate_trig_cntr);
-		lv_group_add_obj(group, ui->module_test_small_rotate_trig_clkw);
-		lv_group_add_obj(group, ui->module_test_small_output_odds);
-		lv_group_add_obj(group, ui->module_test_small_output_evens);
-		lv_group_add_obj(group, ui->module_test_small_scale_cv);
-		lv_group_add_obj(group, ui->module_test_small_res_q_cv);
-		lv_group_add_obj(group, ui->module_test_small_rotate_scale);
-		lv_group_add_obj(group, ui->module_test_small_morph_cv);
-		lv_group_add_obj(group, ui->module_test_small_spread_cv);
-		lv_group_add_obj(group, ui->module_test_small_scale_r_switch);
-		lv_group_add_obj(group, ui->module_test_small_res_q);
-		lv_group_add_obj(group, ui->module_test_small_morph);
-		lv_group_add_obj(group, ui->module_test_small_spread);
+		lv_group_add_obj(group, ui->module_test_small_roller_1);
+		lv_obj_set_event_cb(ui->module_test_small_roller_1, roller_cb);
+
+		// FIX radius:
+		// :%s/radius(\(.*\), 50);/radius(\1, 70);/
+		//Fix roller style
+		static lv_style_t style_module_test_small_roller_1_selected;
+		lv_style_reset(&style_module_test_small_roller_1_selected);
+		lv_style_set_text_line_space(&style_module_test_small_roller_1_selected, LV_STATE_DEFAULT, -5);
+		lv_obj_add_style(
+			ui->module_test_small_roller_1, LV_ROLLER_PART_SELECTED, &style_module_test_small_roller_1_selected);
+
+		lv_roller_set_visible_row_count(ui->module_test_small_roller_1, 10);
+		lv_roller_set_align(ui->module_test_small_roller_1, LV_ALIGN_CENTER);
+		lv_roller_set_options(ui->module_test_small_roller_1,
+							  "Freq Odds\n"
+							  "Freq CV-O\n"
+							  "Lock Gate-O\n"
+							  "Lock 1/135\n"
+							  "Lock Ch.1\n"
+							  "Lock Ch.2\n"
+							  "Lock Ch.3\n"
+							  "Lock Ch.4\n"
+							  "Lock Ch.5\n"
+							  "Lock Ch.6\n"
+							  "Freq Evens\n"
+							  "Freq CV-E\n"
+							  "Lock Gate-E\n"
+							  "Lock 2/246\n"
+							  "Level Ch.1\n"
+							  "Level Ch.2\n"
+							  "Level Ch.3\n"
+							  "Level Ch.4\n"
+							  "Level Ch.5\n"
+							  "Level Ch.6\n"
+							  "Slew\n"
+							  "Lvl CV Ch.1\n"
+							  "Lvl CV Ch.2\n"
+							  "Lvl CV Ch.3\n"
+							  "Lvl CV Ch.4\n"
+							  "Lvl CV Ch.5\n"
+							  "Lvl CV Ch.6\n"
+							  "Env Out Ch.1\n"
+							  "Env Out Ch.2\n"
+							  "Env Out Ch.3\n"
+							  "Rotate CV\n"
+							  "Env Out Ch.4\n"
+							  "Env Out Ch.5\n"
+							  "Env Out Ch.6\n"
+							  "Pre/Post\n"
+							  "Fast/Trig/Slow\n"
+							  "Input Odds\n"
+							  "Input Evens\n"
+							  "Rotate <-\n"
+							  "Rotate ->\n"
+							  "Output Odds\n"
+							  "Output Evens\n"
+							  "Scale CV\n"
+							  "Res CV\n"
+							  "Rotate Scale\n"
+							  "Morph CV\n"
+							  "Spread CV\n"
+							  "ROTATE|SCALE\n"
+							  "Res (Q)\n"
+							  "Morph\n"
+							  "Spread",
+							  LV_ROLLER_MODE_INIFINITE);
+
+		int i = 0;
+		button[i++] = (ui->module_test_small_freq_nudge1);
+		button[i++] = (ui->module_test_small_freq_cv1);
+		button[i++] = (ui->module_test_small_lock1);
+		button[i++] = (ui->module_test_small_freq_switch1);
+		button[i++] = (ui->module_test_small_button_lock1);
+		button[i++] = (ui->module_test_small_button_lock2);
+		button[i++] = (ui->module_test_small_button_lock3);
+		button[i++] = (ui->module_test_small_button_lock4);
+		button[i++] = (ui->module_test_small_button_lock5);
+		button[i++] = (ui->module_test_small_button_lock6);
+		button[i++] = (ui->module_test_small_freq_nudge2);
+		button[i++] = (ui->module_test_small_freq_cv2);
+		button[i++] = (ui->module_test_small_lock2);
+		button[i++] = (ui->module_test_small_freq_switch2);
+		button[i++] = (ui->module_test_small_slider1);
+		button[i++] = (ui->module_test_small_slider2);
+		button[i++] = (ui->module_test_small_slider3);
+		button[i++] = (ui->module_test_small_slider4);
+		button[i++] = (ui->module_test_small_slider5);
+		button[i++] = (ui->module_test_small_slider6);
+		button[i++] = (ui->module_test_small_switch_cv_slew);
+		button[i++] = (ui->module_test_small_lvl_cv1);
+		button[i++] = (ui->module_test_small_lvl_cv2);
+		button[i++] = (ui->module_test_small_lvl_cv3);
+		button[i++] = (ui->module_test_small_lvl_cv4);
+		button[i++] = (ui->module_test_small_lvl_cv5);
+		button[i++] = (ui->module_test_small_lvl_cv6);
+		button[i++] = (ui->module_test_small_env_out1);
+		button[i++] = (ui->module_test_small_env_out2);
+		button[i++] = (ui->module_test_small_env_out3);
+		button[i++] = (ui->module_test_small_rotate_cv);
+		button[i++] = (ui->module_test_small_env_out4);
+		button[i++] = (ui->module_test_small_env_out5);
+		button[i++] = (ui->module_test_small_env_out6);
+		button[i++] = (ui->module_test_small_post_pre_switch);
+		button[i++] = (ui->module_test_small_fast_slow_switch);
+		button[i++] = (ui->module_test_small_input_odds);
+		button[i++] = (ui->module_test_small_input_evens);
+		button[i++] = (ui->module_test_small_rotate_trig_cntr);
+		button[i++] = (ui->module_test_small_rotate_trig_clkw);
+		button[i++] = (ui->module_test_small_output_odds);
+		button[i++] = (ui->module_test_small_output_evens);
+		button[i++] = (ui->module_test_small_scale_cv);
+		button[i++] = (ui->module_test_small_res_q_cv);
+		button[i++] = (ui->module_test_small_rotate_scale);
+		button[i++] = (ui->module_test_small_morph_cv);
+		button[i++] = (ui->module_test_small_spread_cv);
+		button[i++] = (ui->module_test_small_scale_r_switch);
+		button[i++] = (ui->module_test_small_res_q);
+		button[i++] = (ui->module_test_small_morph);
+		button[i++] = (ui->module_test_small_spread);
+		// lv_group_add_obj(group, ui->module_test_small_freq_nudge1);
+		// lv_group_add_obj(group, ui->module_test_small_freq_cv1);
+		// lv_group_add_obj(group, ui->module_test_small_lock1);
+		// lv_group_add_obj(group, ui->module_test_small_freq_switch1);
+		// lv_group_add_obj(group, ui->module_test_small_button_lock1);
+		// lv_group_add_obj(group, ui->module_test_small_button_lock2);
+		// lv_group_add_obj(group, ui->module_test_small_button_lock3);
+		// lv_group_add_obj(group, ui->module_test_small_button_lock4);
+		// lv_group_add_obj(group, ui->module_test_small_button_lock5);
+		// lv_group_add_obj(group, ui->module_test_small_button_lock6);
+		// lv_group_add_obj(group, ui->module_test_small_freq_nudge2);
+		// lv_group_add_obj(group, ui->module_test_small_freq_cv2);
+		// lv_group_add_obj(group, ui->module_test_small_lock2);
+		// lv_group_add_obj(group, ui->module_test_small_freq_switch2);
+		// lv_group_add_obj(group, ui->module_test_small_slider1);
+		// lv_group_add_obj(group, ui->module_test_small_slider2);
+		// lv_group_add_obj(group, ui->module_test_small_slider3);
+		// lv_group_add_obj(group, ui->module_test_small_slider4);
+		// lv_group_add_obj(group, ui->module_test_small_slider5);
+		// lv_group_add_obj(group, ui->module_test_small_slider6);
+		// lv_group_add_obj(group, ui->module_test_small_switch_cv_slew);
+		// lv_group_add_obj(group, ui->module_test_small_lvl_cv1);
+		// lv_group_add_obj(group, ui->module_test_small_lvl_cv2);
+		// lv_group_add_obj(group, ui->module_test_small_lvl_cv3);
+		// lv_group_add_obj(group, ui->module_test_small_lvl_cv4);
+		// lv_group_add_obj(group, ui->module_test_small_lvl_cv5);
+		// lv_group_add_obj(group, ui->module_test_small_lvl_cv6);
+		// lv_group_add_obj(group, ui->module_test_small_env_out1);
+		// lv_group_add_obj(group, ui->module_test_small_env_out2);
+		// lv_group_add_obj(group, ui->module_test_small_env_out3);
+		// lv_group_add_obj(group, ui->module_test_small_rotate_cv);
+		// lv_group_add_obj(group, ui->module_test_small_env_out4);
+		// lv_group_add_obj(group, ui->module_test_small_env_out5);
+		// lv_group_add_obj(group, ui->module_test_small_env_out6);
+		// lv_group_add_obj(group, ui->module_test_small_post_pre_switch);
+		// lv_group_add_obj(group, ui->module_test_small_fast_slow_switch);
+		// lv_group_add_obj(group, ui->module_test_small_input_odds);
+		// lv_group_add_obj(group, ui->module_test_small_input_evens);
+		// lv_group_add_obj(group, ui->module_test_small_rotate_trig_cntr);
+		// lv_group_add_obj(group, ui->module_test_small_rotate_trig_clkw);
+		// lv_group_add_obj(group, ui->module_test_small_output_odds);
+		// lv_group_add_obj(group, ui->module_test_small_output_evens);
+		// lv_group_add_obj(group, ui->module_test_small_scale_cv);
+		// lv_group_add_obj(group, ui->module_test_small_res_q_cv);
+		// lv_group_add_obj(group, ui->module_test_small_rotate_scale);
+		// lv_group_add_obj(group, ui->module_test_small_morph_cv);
+		// lv_group_add_obj(group, ui->module_test_small_spread_cv);
+		// lv_group_add_obj(group, ui->module_test_small_scale_r_switch);
+		// lv_group_add_obj(group, ui->module_test_small_res_q);
+		// lv_group_add_obj(group, ui->module_test_small_morph);
+		// lv_group_add_obj(group, ui->module_test_small_spread);
 	}
 
 	void update() override {}

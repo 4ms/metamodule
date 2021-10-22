@@ -8,6 +8,8 @@
 #include "gui_guider.h"
 #include "events_init.h"
 #include "custom.h"
+#include "lvgl/src/lv_core/lv_obj_style_dec.h"
+#include "lvgl/src/lv_widgets/lv_roller.h"
 
 
 void setup_scr_module_test_small(lv_ui *ui){
@@ -42,7 +44,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_freq_nudge1_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_freq_nudge1_main
-	lv_style_set_radius(&style_module_test_small_freq_nudge1_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_freq_nudge1_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_freq_nudge1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_freq_nudge1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_freq_nudge1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -67,7 +69,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_freq_cv1_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_freq_cv1_main
-	lv_style_set_radius(&style_module_test_small_freq_cv1_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_freq_cv1_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_freq_cv1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_freq_cv1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_freq_cv1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -92,7 +94,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_lock1_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_lock1_main
-	lv_style_set_radius(&style_module_test_small_lock1_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_lock1_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_lock1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_lock1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_lock1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -117,7 +119,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_freq_switch1_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_freq_switch1_main
-	lv_style_set_radius(&style_module_test_small_freq_switch1_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_freq_switch1_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_freq_switch1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_freq_switch1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_freq_switch1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -142,7 +144,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_button_lock1_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_button_lock1_main
-	lv_style_set_radius(&style_module_test_small_button_lock1_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_button_lock1_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_button_lock1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_button_lock1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_button_lock1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -167,7 +169,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_button_lock2_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_button_lock2_main
-	lv_style_set_radius(&style_module_test_small_button_lock2_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_button_lock2_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_button_lock2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_button_lock2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_button_lock2_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -192,7 +194,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_button_lock3_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_button_lock3_main
-	lv_style_set_radius(&style_module_test_small_button_lock3_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_button_lock3_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_button_lock3_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_button_lock3_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_button_lock3_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -217,7 +219,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_button_lock4_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_button_lock4_main
-	lv_style_set_radius(&style_module_test_small_button_lock4_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_button_lock4_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_button_lock4_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_button_lock4_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_button_lock4_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -242,7 +244,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_button_lock5_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_button_lock5_main
-	lv_style_set_radius(&style_module_test_small_button_lock5_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_button_lock5_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_button_lock5_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_button_lock5_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_button_lock5_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -267,7 +269,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_button_lock6_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_button_lock6_main
-	lv_style_set_radius(&style_module_test_small_button_lock6_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_button_lock6_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_button_lock6_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_button_lock6_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_button_lock6_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -292,7 +294,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_freq_nudge2_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_freq_nudge2_main
-	lv_style_set_radius(&style_module_test_small_freq_nudge2_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_freq_nudge2_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_freq_nudge2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_freq_nudge2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_freq_nudge2_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -317,7 +319,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_freq_cv2_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_freq_cv2_main
-	lv_style_set_radius(&style_module_test_small_freq_cv2_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_freq_cv2_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_freq_cv2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_freq_cv2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_freq_cv2_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -342,7 +344,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_lock2_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_lock2_main
-	lv_style_set_radius(&style_module_test_small_lock2_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_lock2_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_lock2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_lock2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_lock2_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -367,7 +369,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_freq_switch2_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_freq_switch2_main
-	lv_style_set_radius(&style_module_test_small_freq_switch2_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_freq_switch2_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_freq_switch2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_freq_switch2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_freq_switch2_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -392,7 +394,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_slider1_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_slider1_main
-	lv_style_set_radius(&style_module_test_small_slider1_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_slider1_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_slider1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_slider1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_slider1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -417,7 +419,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_slider2_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_slider2_main
-	lv_style_set_radius(&style_module_test_small_slider2_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_slider2_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_slider2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_slider2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_slider2_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -442,7 +444,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_slider3_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_slider3_main
-	lv_style_set_radius(&style_module_test_small_slider3_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_slider3_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_slider3_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_slider3_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_slider3_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -467,7 +469,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_slider4_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_slider4_main
-	lv_style_set_radius(&style_module_test_small_slider4_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_slider4_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_slider4_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_slider4_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_slider4_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -492,7 +494,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_slider5_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_slider5_main
-	lv_style_set_radius(&style_module_test_small_slider5_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_slider5_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_slider5_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_slider5_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_slider5_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -517,7 +519,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_slider6_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_slider6_main
-	lv_style_set_radius(&style_module_test_small_slider6_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_slider6_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_slider6_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_slider6_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_slider6_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -542,7 +544,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_switch_cv_slew_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_switch_cv_slew_main
-	lv_style_set_radius(&style_module_test_small_switch_cv_slew_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_switch_cv_slew_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_switch_cv_slew_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_switch_cv_slew_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_switch_cv_slew_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -567,7 +569,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_lvl_cv1_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_lvl_cv1_main
-	lv_style_set_radius(&style_module_test_small_lvl_cv1_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_lvl_cv1_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_lvl_cv1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_lvl_cv1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_lvl_cv1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -592,7 +594,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_lvl_cv2_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_lvl_cv2_main
-	lv_style_set_radius(&style_module_test_small_lvl_cv2_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_lvl_cv2_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_lvl_cv2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_lvl_cv2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_lvl_cv2_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -617,7 +619,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_lvl_cv3_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_lvl_cv3_main
-	lv_style_set_radius(&style_module_test_small_lvl_cv3_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_lvl_cv3_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_lvl_cv3_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_lvl_cv3_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_lvl_cv3_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -642,7 +644,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_lvl_cv4_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_lvl_cv4_main
-	lv_style_set_radius(&style_module_test_small_lvl_cv4_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_lvl_cv4_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_lvl_cv4_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_lvl_cv4_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_lvl_cv4_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -667,7 +669,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_lvl_cv5_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_lvl_cv5_main
-	lv_style_set_radius(&style_module_test_small_lvl_cv5_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_lvl_cv5_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_lvl_cv5_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_lvl_cv5_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_lvl_cv5_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -692,7 +694,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_lvl_cv6_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_lvl_cv6_main
-	lv_style_set_radius(&style_module_test_small_lvl_cv6_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_lvl_cv6_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_lvl_cv6_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_lvl_cv6_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_lvl_cv6_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -717,7 +719,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_env_out1_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_env_out1_main
-	lv_style_set_radius(&style_module_test_small_env_out1_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_env_out1_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_env_out1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_env_out1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_env_out1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -742,7 +744,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_env_out2_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_env_out2_main
-	lv_style_set_radius(&style_module_test_small_env_out2_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_env_out2_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_env_out2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_env_out2_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_env_out2_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -767,7 +769,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_env_out3_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_env_out3_main
-	lv_style_set_radius(&style_module_test_small_env_out3_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_env_out3_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_env_out3_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_env_out3_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_env_out3_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -792,7 +794,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_rotate_cv_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_rotate_cv_main
-	lv_style_set_radius(&style_module_test_small_rotate_cv_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_rotate_cv_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_rotate_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_rotate_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_rotate_cv_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -817,7 +819,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_env_out4_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_env_out4_main
-	lv_style_set_radius(&style_module_test_small_env_out4_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_env_out4_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_env_out4_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_env_out4_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_env_out4_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -842,7 +844,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_env_out5_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_env_out5_main
-	lv_style_set_radius(&style_module_test_small_env_out5_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_env_out5_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_env_out5_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_env_out5_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_env_out5_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -867,7 +869,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_env_out6_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_env_out6_main
-	lv_style_set_radius(&style_module_test_small_env_out6_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_env_out6_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_env_out6_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_env_out6_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_env_out6_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -892,7 +894,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_post_pre_switch_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_post_pre_switch_main
-	lv_style_set_radius(&style_module_test_small_post_pre_switch_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_post_pre_switch_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_post_pre_switch_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_post_pre_switch_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_post_pre_switch_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -917,7 +919,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_fast_slow_switch_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_fast_slow_switch_main
-	lv_style_set_radius(&style_module_test_small_fast_slow_switch_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_fast_slow_switch_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_fast_slow_switch_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_fast_slow_switch_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_fast_slow_switch_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -942,7 +944,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_input_odds_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_input_odds_main
-	lv_style_set_radius(&style_module_test_small_input_odds_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_input_odds_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_input_odds_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_input_odds_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_input_odds_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -967,7 +969,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_input_evens_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_input_evens_main
-	lv_style_set_radius(&style_module_test_small_input_evens_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_input_evens_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_input_evens_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_input_evens_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_input_evens_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -992,7 +994,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_rotate_trig_cntr_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_rotate_trig_cntr_main
-	lv_style_set_radius(&style_module_test_small_rotate_trig_cntr_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_rotate_trig_cntr_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_rotate_trig_cntr_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_rotate_trig_cntr_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_rotate_trig_cntr_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1017,7 +1019,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_rotate_trig_clkw_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_rotate_trig_clkw_main
-	lv_style_set_radius(&style_module_test_small_rotate_trig_clkw_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_rotate_trig_clkw_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_rotate_trig_clkw_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_rotate_trig_clkw_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_rotate_trig_clkw_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1042,7 +1044,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_output_odds_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_output_odds_main
-	lv_style_set_radius(&style_module_test_small_output_odds_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_output_odds_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_output_odds_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_output_odds_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_output_odds_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1067,7 +1069,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_output_evens_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_output_evens_main
-	lv_style_set_radius(&style_module_test_small_output_evens_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_output_evens_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_output_evens_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_output_evens_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_output_evens_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1092,7 +1094,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_scale_cv_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_scale_cv_main
-	lv_style_set_radius(&style_module_test_small_scale_cv_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_scale_cv_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_scale_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_scale_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_scale_cv_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1117,7 +1119,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_res_q_cv_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_res_q_cv_main
-	lv_style_set_radius(&style_module_test_small_res_q_cv_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_res_q_cv_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_res_q_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_res_q_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_res_q_cv_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1142,7 +1144,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_rotate_scale_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_rotate_scale_main
-	lv_style_set_radius(&style_module_test_small_rotate_scale_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_rotate_scale_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_rotate_scale_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_rotate_scale_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_rotate_scale_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1167,7 +1169,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_morph_cv_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_morph_cv_main
-	lv_style_set_radius(&style_module_test_small_morph_cv_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_morph_cv_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_morph_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_morph_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_morph_cv_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1192,7 +1194,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_spread_cv_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_spread_cv_main
-	lv_style_set_radius(&style_module_test_small_spread_cv_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_spread_cv_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_spread_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_spread_cv_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_spread_cv_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1217,7 +1219,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_scale_r_switch_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_scale_r_switch_main
-	lv_style_set_radius(&style_module_test_small_scale_r_switch_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_scale_r_switch_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_scale_r_switch_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_scale_r_switch_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_scale_r_switch_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1242,7 +1244,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_res_q_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_res_q_main
-	lv_style_set_radius(&style_module_test_small_res_q_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_res_q_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_res_q_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_res_q_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_res_q_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1267,7 +1269,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_morph_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_morph_main
-	lv_style_set_radius(&style_module_test_small_morph_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_morph_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_morph_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_morph_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_morph_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1292,7 +1294,7 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_style_reset(&style_module_test_small_spread_main);
 
 	//Write style state: LV_STATE_DEFAULT for style_module_test_small_spread_main
-	lv_style_set_radius(&style_module_test_small_spread_main, LV_STATE_DEFAULT, 50);
+	lv_style_set_radius(&style_module_test_small_spread_main, LV_STATE_DEFAULT, 70);
 	lv_style_set_bg_color(&style_module_test_small_spread_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_color(&style_module_test_small_spread_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
 	lv_style_set_bg_grad_dir(&style_module_test_small_spread_main, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
@@ -1336,43 +1338,38 @@ void setup_scr_module_test_small(lv_ui *ui){
 	lv_cont_set_layout(ui->module_test_small_cont_1, LV_LAYOUT_OFF);
 	lv_cont_set_fit(ui->module_test_small_cont_1, LV_FIT_NONE);
 
-	//Write codes module_test_small_param_list
-	ui->module_test_small_param_list = lv_dropdown_create(ui->module_test_small, NULL);
-	lv_dropdown_set_options(ui->module_test_small_param_list, "PARAM2\nPARAM3\nPARAM4\nPARAM5\nPARAM6\nPARAM7\nPARAM8");
-	lv_dropdown_set_max_height(ui->module_test_small_param_list, 209);
-	lv_dropdown_set_symbol(ui->module_test_small_param_list, NULL);
+	//Write codes module_test_small_roller_1
+	ui->module_test_small_roller_1 = lv_roller_create(ui->module_test_small, NULL);
 
-	//Write style LV_DROPDOWN_PART_SELECTED for module_test_small_param_list
-	static lv_style_t style_module_test_small_param_list_selected;
-	lv_style_reset(&style_module_test_small_param_list_selected);
+	//Write style LV_ROLLER_PART_BG for module_test_small_roller_1
+	static lv_style_t style_module_test_small_roller_1_bg;
+	lv_style_reset(&style_module_test_small_roller_1_bg);
 
-	//Write style state: LV_STATE_DEFAULT for style_module_test_small_param_list_selected
-	lv_style_set_radius(&style_module_test_small_param_list_selected, LV_STATE_DEFAULT, 10);
-	lv_style_set_bg_color(&style_module_test_small_param_list_selected, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-	lv_style_set_bg_grad_color(&style_module_test_small_param_list_selected, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-	lv_style_set_bg_grad_dir(&style_module_test_small_param_list_selected, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
-	lv_style_set_bg_opa(&style_module_test_small_param_list_selected, LV_STATE_DEFAULT, 255);
-	lv_style_set_border_color(&style_module_test_small_param_list_selected, LV_STATE_DEFAULT, lv_color_make(0xe1, 0xe6, 0xee));
-	lv_style_set_border_width(&style_module_test_small_param_list_selected, LV_STATE_DEFAULT, 4);
-	lv_style_set_text_color(&style_module_test_small_param_list_selected, LV_STATE_DEFAULT, lv_color_make(0x00, 0x00, 0x00));
-	lv_style_set_text_font(&style_module_test_small_param_list_selected, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_700_13);
-	lv_obj_add_style(ui->module_test_small_param_list, LV_DROPDOWN_PART_SELECTED, &style_module_test_small_param_list_selected);
+	//Write style state: LV_STATE_DEFAULT for style_module_test_small_roller_1_bg
+	lv_style_set_radius(&style_module_test_small_roller_1_bg, LV_STATE_DEFAULT, 0);
+	lv_style_set_bg_color(&style_module_test_small_roller_1_bg, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
+	lv_style_set_bg_grad_color(&style_module_test_small_roller_1_bg, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
+	lv_style_set_bg_grad_dir(&style_module_test_small_roller_1_bg, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
+	lv_style_set_bg_opa(&style_module_test_small_roller_1_bg, LV_STATE_DEFAULT, 255);
+	lv_style_set_border_color(&style_module_test_small_roller_1_bg, LV_STATE_DEFAULT, lv_color_make(0xdf, 0xe7, 0xed));
+	lv_style_set_border_width(&style_module_test_small_roller_1_bg, LV_STATE_DEFAULT, 0);
+	lv_style_set_text_color(&style_module_test_small_roller_1_bg, LV_STATE_DEFAULT, lv_color_make(0x33, 0x33, 0x33));
+	lv_obj_add_style(ui->module_test_small_roller_1, LV_ROLLER_PART_BG, &style_module_test_small_roller_1_bg);
 
-	//Write style LV_DROPDOWN_PART_LIST for module_test_small_param_list
-	static lv_style_t style_module_test_small_param_list_list;
-	lv_style_reset(&style_module_test_small_param_list_list);
+	//Write style LV_ROLLER_PART_SELECTED for module_test_small_roller_1
+	static lv_style_t style_module_test_small_roller_1_selected;
+	lv_style_reset(&style_module_test_small_roller_1_selected);
 
-	//Write style state: LV_STATE_DEFAULT for style_module_test_small_param_list_list
-	lv_style_set_radius(&style_module_test_small_param_list_list, LV_STATE_DEFAULT, 3);
-	lv_style_set_bg_color(&style_module_test_small_param_list_list, LV_STATE_DEFAULT, lv_color_make(0xe6, 0xe6, 0xe6));
-	lv_style_set_bg_grad_color(&style_module_test_small_param_list_list, LV_STATE_DEFAULT, lv_color_make(0xe6, 0xe6, 0xe6));
-	lv_style_set_bg_grad_dir(&style_module_test_small_param_list_list, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
-	lv_style_set_bg_opa(&style_module_test_small_param_list_list, LV_STATE_DEFAULT, 255);
-	lv_style_set_border_color(&style_module_test_small_param_list_list, LV_STATE_DEFAULT, lv_color_make(0xe1, 0xe6, 0xee));
-	lv_style_set_border_width(&style_module_test_small_param_list_list, LV_STATE_DEFAULT, 1);
-	lv_style_set_text_color(&style_module_test_small_param_list_list, LV_STATE_DEFAULT, lv_color_make(0x00, 0x00, 0x00));
-	lv_style_set_text_font(&style_module_test_small_param_list_list, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_500_12);
-	lv_obj_add_style(ui->module_test_small_param_list, LV_DROPDOWN_PART_LIST, &style_module_test_small_param_list_list);
-	lv_obj_set_pos(ui->module_test_small_param_list, 249, 3);
-	lv_obj_set_width(ui->module_test_small_param_list, 68);
+	//Write style state: LV_STATE_DEFAULT for style_module_test_small_roller_1_selected
+	lv_style_set_bg_color(&style_module_test_small_roller_1_selected, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
+	lv_style_set_bg_grad_color(&style_module_test_small_roller_1_selected, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
+	lv_style_set_bg_grad_dir(&style_module_test_small_roller_1_selected, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
+	lv_style_set_bg_opa(&style_module_test_small_roller_1_selected, LV_STATE_DEFAULT, 255);
+	lv_style_set_text_color(&style_module_test_small_roller_1_selected, LV_STATE_DEFAULT, lv_color_make(0xFF, 0xFF, 0xFF));
+	lv_obj_add_style(ui->module_test_small_roller_1, LV_ROLLER_PART_SELECTED, &style_module_test_small_roller_1_selected);
+	lv_obj_set_pos(ui->module_test_small_roller_1, 248, 0);
+	//lv_roller_set_options(ui->module_test_small_roller_1,"PARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM\nPARAM1\nPARAM2\nPARAM3\nPARAM4\nPARAM5\nPARAM6\nPARAM7\nPARAM8\nPARAM9\n",LV_ROLLER_MODE_INIFINITE);
+	lv_obj_set_style_local_text_font(ui->module_test_small_roller_1, LV_ROLLER_PART_BG, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_700_10);
+	lv_obj_set_style_local_text_font(ui->module_test_small_roller_1, LV_ROLLER_PART_BG, LV_STATE_FOCUSED, &lv_font_MuseoSansRounded_700_10);
+	lv_obj_set_style_local_text_font(ui->module_test_small_roller_1, LV_ROLLER_PART_SELECTED, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_700_10);
 }
