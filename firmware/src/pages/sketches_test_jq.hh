@@ -46,7 +46,7 @@ struct SMRTestPage : PageBase {
 
 	static void roller_cb(lv_obj_t *obj, lv_event_t event)
 	{
-		if (obj != ui->module_test_small_roller_1)
+		if (obj != ui->module_test_small_roller_2)
 			return;
 
 		if (event == LV_EVENT_KEY) {
@@ -72,29 +72,25 @@ struct SMRTestPage : PageBase {
 		screen = ui->module_test_small;
 		init_bg();
 
+		//Highlight for buttons
 		lv_style_init(&style_highlight);
 		lv_style_set_radius(&style_highlight, LV_STATE_DEFAULT, 120);
 		lv_style_set_outline_color(&style_highlight, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
 		lv_style_set_outline_width(&style_highlight, LV_STATE_DEFAULT, 4);
 		lv_style_set_outline_opa(&style_highlight, LV_STATE_DEFAULT, 200);
 
-		group = lv_group_create();
-
-		lv_group_add_obj(group, ui->module_test_small_roller_1);
-		lv_obj_set_event_cb(ui->module_test_small_roller_1, roller_cb);
-
-		// FIX radius:
-		// :%s/radius(\(.*\), 50);/radius(\1, 70);/
 		//Fix roller style
-		static lv_style_t style_module_test_small_roller_1_selected;
-		lv_style_reset(&style_module_test_small_roller_1_selected);
-		lv_style_set_text_line_space(&style_module_test_small_roller_1_selected, LV_STATE_DEFAULT, 0);
-		lv_obj_add_style(
-			ui->module_test_small_roller_1, LV_ROLLER_PART_SELECTED, &style_module_test_small_roller_1_selected);
+		static lv_style_t style_roller_tweak;
+		lv_style_reset(&style_roller_tweak);
+		lv_style_set_pad_hor(&style_roller_tweak, LV_STATE_DEFAULT, 2);
+		lv_style_set_pad_ver(&style_roller_tweak, LV_STATE_DEFAULT, 10);
+		lv_style_set_pad_inner(&style_roller_tweak, LV_STATE_DEFAULT, 0);
+		lv_style_set_text_line_space(&style_roller_tweak, LV_STATE_DEFAULT, 7);
+		lv_obj_add_style(ui->module_test_small_roller_2, LV_ROLLER_PART_BG, &style_roller_tweak);
+		lv_obj_add_style(ui->module_test_small_roller_2, LV_ROLLER_PART_SELECTED, &style_roller_tweak);
 
-		lv_roller_set_visible_row_count(ui->module_test_small_roller_1, 10);
-		lv_roller_set_align(ui->module_test_small_roller_1, LV_ALIGN_CENTER);
-		lv_roller_set_options(ui->module_test_small_roller_1,
+		lv_roller_set_align(ui->module_test_small_roller_2, LV_ALIGN_CENTER);
+		lv_roller_set_options(ui->module_test_small_roller_2,
 							  "Freq Odds\n"
 							  "Freq CV-O\n"
 							  "Lock Gate-O\n"
@@ -148,6 +144,11 @@ struct SMRTestPage : PageBase {
 							  "Spread",
 							  LV_ROLLER_MODE_INIFINITE);
 
+		//Event and group for roller
+		group = lv_group_create();
+		lv_group_add_obj(group, ui->module_test_small_roller_2);
+		lv_obj_set_event_cb(ui->module_test_small_roller_2, roller_cb);
+
 		int i = 0;
 		button[i++] = (ui->module_test_small_freq_nudge1);
 		button[i++] = (ui->module_test_small_freq_cv1);
@@ -200,57 +201,6 @@ struct SMRTestPage : PageBase {
 		button[i++] = (ui->module_test_small_res_q);
 		button[i++] = (ui->module_test_small_morph);
 		button[i++] = (ui->module_test_small_spread);
-		// lv_group_add_obj(group, ui->module_test_small_freq_nudge1);
-		// lv_group_add_obj(group, ui->module_test_small_freq_cv1);
-		// lv_group_add_obj(group, ui->module_test_small_lock1);
-		// lv_group_add_obj(group, ui->module_test_small_freq_switch1);
-		// lv_group_add_obj(group, ui->module_test_small_button_lock1);
-		// lv_group_add_obj(group, ui->module_test_small_button_lock2);
-		// lv_group_add_obj(group, ui->module_test_small_button_lock3);
-		// lv_group_add_obj(group, ui->module_test_small_button_lock4);
-		// lv_group_add_obj(group, ui->module_test_small_button_lock5);
-		// lv_group_add_obj(group, ui->module_test_small_button_lock6);
-		// lv_group_add_obj(group, ui->module_test_small_freq_nudge2);
-		// lv_group_add_obj(group, ui->module_test_small_freq_cv2);
-		// lv_group_add_obj(group, ui->module_test_small_lock2);
-		// lv_group_add_obj(group, ui->module_test_small_freq_switch2);
-		// lv_group_add_obj(group, ui->module_test_small_slider1);
-		// lv_group_add_obj(group, ui->module_test_small_slider2);
-		// lv_group_add_obj(group, ui->module_test_small_slider3);
-		// lv_group_add_obj(group, ui->module_test_small_slider4);
-		// lv_group_add_obj(group, ui->module_test_small_slider5);
-		// lv_group_add_obj(group, ui->module_test_small_slider6);
-		// lv_group_add_obj(group, ui->module_test_small_switch_cv_slew);
-		// lv_group_add_obj(group, ui->module_test_small_lvl_cv1);
-		// lv_group_add_obj(group, ui->module_test_small_lvl_cv2);
-		// lv_group_add_obj(group, ui->module_test_small_lvl_cv3);
-		// lv_group_add_obj(group, ui->module_test_small_lvl_cv4);
-		// lv_group_add_obj(group, ui->module_test_small_lvl_cv5);
-		// lv_group_add_obj(group, ui->module_test_small_lvl_cv6);
-		// lv_group_add_obj(group, ui->module_test_small_env_out1);
-		// lv_group_add_obj(group, ui->module_test_small_env_out2);
-		// lv_group_add_obj(group, ui->module_test_small_env_out3);
-		// lv_group_add_obj(group, ui->module_test_small_rotate_cv);
-		// lv_group_add_obj(group, ui->module_test_small_env_out4);
-		// lv_group_add_obj(group, ui->module_test_small_env_out5);
-		// lv_group_add_obj(group, ui->module_test_small_env_out6);
-		// lv_group_add_obj(group, ui->module_test_small_post_pre_switch);
-		// lv_group_add_obj(group, ui->module_test_small_fast_slow_switch);
-		// lv_group_add_obj(group, ui->module_test_small_input_odds);
-		// lv_group_add_obj(group, ui->module_test_small_input_evens);
-		// lv_group_add_obj(group, ui->module_test_small_rotate_trig_cntr);
-		// lv_group_add_obj(group, ui->module_test_small_rotate_trig_clkw);
-		// lv_group_add_obj(group, ui->module_test_small_output_odds);
-		// lv_group_add_obj(group, ui->module_test_small_output_evens);
-		// lv_group_add_obj(group, ui->module_test_small_scale_cv);
-		// lv_group_add_obj(group, ui->module_test_small_res_q_cv);
-		// lv_group_add_obj(group, ui->module_test_small_rotate_scale);
-		// lv_group_add_obj(group, ui->module_test_small_morph_cv);
-		// lv_group_add_obj(group, ui->module_test_small_spread_cv);
-		// lv_group_add_obj(group, ui->module_test_small_scale_r_switch);
-		// lv_group_add_obj(group, ui->module_test_small_res_q);
-		// lv_group_add_obj(group, ui->module_test_small_morph);
-		// lv_group_add_obj(group, ui->module_test_small_spread);
 	}
 
 	void update() override {}
@@ -270,7 +220,7 @@ struct GroupArcSketchesPage1 : PageBase {
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_2, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_3, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_4, true);
-		lv_arc_set_adjustable(ui->group_arc_sketches_arc_5, true); //crashes!
+		lv_arc_set_adjustable(ui->group_arc_sketches_arc_5, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_6, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_7, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_8, true);

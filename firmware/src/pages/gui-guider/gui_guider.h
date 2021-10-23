@@ -131,7 +131,7 @@ typedef struct
 	lv_obj_t *Knob_view3_label_12;
 	lv_obj_t *Knob_view3_label_13;
 	lv_obj_t *module_test_small;
-	lv_obj_t *module_test_small_SMR;
+	lv_obj_t *module_test_small_mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm;
 	lv_obj_t *module_test_small_freq_nudge1;
 	lv_obj_t *module_test_small_freq_nudge1_label;
 	lv_obj_t *module_test_small_freq_cv1;
@@ -235,7 +235,7 @@ typedef struct
 	lv_obj_t *module_test_small_spread;
 	lv_obj_t *module_test_small_spread_label;
 	lv_obj_t *module_test_small_cont_1;
-	lv_obj_t *module_test_small_roller_1;
+	lv_obj_t *module_test_small_roller_2;
 	lv_obj_t *group_arc_sketches;
 	lv_obj_t *group_arc_sketches_arc_1;
 	lv_obj_t *group_arc_sketches_arc_2;
