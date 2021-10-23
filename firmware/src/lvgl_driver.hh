@@ -36,7 +36,7 @@ public:
 	//~600us
 	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb)
 	{
-		printf("LVLDriver started ctor\n\r");
+		printf("\n\rLVLDriver started\n\r");
 
 		lv_init();
 
@@ -49,9 +49,6 @@ public:
 		disp_drv.hor_res = ScreenWidth;
 		disp_drv.ver_res = ScreenHeight;
 		lv_disp_drv_register(&disp_drv);
-		// auto disp =
-		// lv_disp_set_bg_color(disp, lv_color_make(0x28, 0x28, 0x28));
-		// lv_disp_set_bg_opa(disp, LV_OPA_50);
 
 		lv_indev_drv_init(&indev_drv);
 		indev_drv.type = LV_INDEV_TYPE_ENCODER;
@@ -59,9 +56,12 @@ public:
 		indev = lv_indev_drv_register(&indev_drv);
 		lv_indev_enable(indev, true);
 
+#ifdef LV_USE_LOG
 		lv_log_register_print_cb(log_cb);
+#endif
 	}
 
+#ifdef LV_USE_LOG
 	static void log_cb(lv_log_level_t level, const char *file, uint32_t line, const char *fn_name, const char *dsc)
 	{
 		if (level == LV_LOG_LEVEL_ERROR)
@@ -85,8 +85,10 @@ public:
 		log_uart.write(dsc);
 		log_uart.write("\n\r");
 	}
+#endif
 };
-#ifdef LV_LOG_PRINTF
+
+// #ifdef LV_LOG_PRINTF
 extern "C" void _putchar(char character)
 {
 	// while ((UART4->ISR & UART_FLAG_TXE) == RESET)
@@ -98,7 +100,7 @@ extern "C" void _putchar(char character)
 	// 	;
 }
 
-#endif
+// #endif
 
 class MMDisplay {
 	static inline ScreenFrameWriter _spi_driver;
