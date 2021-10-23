@@ -363,11 +363,10 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		} else {
 			button = new HubKnobMapButton{*this};
 		}
-		button->isOnHub = true;
 
-		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
+		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y - mm2px(kKnobSpacingY) / 2); // top-left
 		button->box.size.x = mm2px(kKnobSpacingX);
-		button->box.size.y = 12;
+		button->box.size.y = mm2px(kKnobSpacingY);
 		button->text = labelText;
 		button->id = {LabelButtonID::Types::Knob, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
@@ -395,10 +394,10 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	void addLabeledJackPx(const std::string labelText, int jackId, Vec posPx, JackInOut inout)
 	{
 		auto mapButton = new HubJackMapButton{*this};
-		mapButton->isOnHub = true;
-		mapButton->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y + mm2px(kTextOffset));
+
+		mapButton->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y - mm2px(kKnobSpacingY) / 2); // top-left
 		mapButton->box.size.x = mm2px(kKnobSpacingX);
-		mapButton->box.size.y = 12;
+		mapButton->box.size.y = mm2px(kKnobSpacingY);
 		mapButton->text = labelText;
 		auto type = inout == JackInOut::Input ? LabelButtonID::Types::InputJack : LabelButtonID::Types::OutputJack;
 		mapButton->id = {type, jackId, hubModule ? hubModule->id : -1};

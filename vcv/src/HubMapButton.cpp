@@ -1,5 +1,6 @@
 #include "HubMapButton.hh"
 #include "paletteHub.hh"
+#include <cstdio>
 
 void HubMapButton::_createMapping(LabelButtonID srcId)
 {
@@ -13,18 +14,10 @@ void HubMapButton::_updateState()
 	id.moduleID = _parent.getModuleId();
 
 	isCurrentMapSrc = false;
-	isPossibleMapDest = false;
-	if (isOnHub) {
-		if (centralData->isMappingInProgress() && (centralData->getMappingSource() == id)) {
-			isCurrentMapSrc = true;
-		}
-		mappedToId = centralData->getMappedDstFromSrc(id);
-	} else {
-		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == id.objType)) {
-			isPossibleMapDest = true;
-		}
-		mappedToId = centralData->getMappedSrcFromDst(id);
+	if (centralData->isMappingInProgress() && (centralData->getMappingSource() == id)) {
+		isCurrentMapSrc = true;
 	}
+	mappedToId = centralData->getMappedDstFromSrc(id);
 	isMapped = mappedToId.objType != LabelButtonID::Types::None;
 }
 
@@ -35,10 +28,9 @@ void HubMapButton::draw(const DrawArgs &args)
 	// Draw huge background rect to highlight a mapping has begun from this knob
 	if (isCurrentMapSrc) {
 		float padding_x = 2;
-		float knob_height = 40;
 		auto knobNum = id.objID;
 		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, padding_x, -knob_height, box.size.x - padding_x * 2, knob_height + box.size.y, 5.0);
+		nvgRoundedRect(args.vg, padding_x, 0, box.size.x - padding_x * 2, box.size.y, 5.0);
 		nvgStrokeColor(args.vg, rack::color::WHITE);
 		nvgStrokeWidth(args.vg, 0.0);
 		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color[knobNum], 0.75f));

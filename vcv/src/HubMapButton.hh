@@ -16,8 +16,6 @@ public:
 
 	LabelButtonID id;
 	bool isMapped = false;
-	bool isOnHub = false;
-	bool isPossibleMapDest = false;
 	bool isCurrentMapSrc = false;
 	LabelButtonID mappedToId{LabelButtonID::Types::None, -1, -1};
 
