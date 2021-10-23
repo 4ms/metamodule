@@ -90,6 +90,8 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_set_pos(patch_selector_patchlist, 5, 20);
 		lv_obj_set_width(patch_selector_patchlist, 310);
 
+		init_bg();
+
 		//Group
 		group = lv_group_create();
 		lv_group_add_obj(group, patch_selector_patchlist);
@@ -98,7 +100,6 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_set_event_cb(patch_selector_patchlist, patch_selector_event_cb);
 
 		screen = patch_selector;
-		init_bg();
 	}
 
 	void update() override

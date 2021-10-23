@@ -46,6 +46,7 @@ struct PageBase {
 
 	void init_bg()
 	{
+		group = lv_group_create();
 		lv_obj_set_size(screen, LV_HOR_RES_MAX, LV_VER_RES_MAX);
 		lv_obj_set_style_local_bg_color(screen, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x000000));
 	}

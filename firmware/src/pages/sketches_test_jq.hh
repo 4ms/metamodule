@@ -72,6 +72,11 @@ struct SMRTestPage : PageBase {
 		screen = ui->module_test_small;
 		init_bg();
 
+		//Event and group for roller
+		//group = lv_group_create();
+		lv_group_add_obj(group, ui->module_test_small_roller_2);
+		lv_obj_set_event_cb(ui->module_test_small_roller_2, roller_cb);
+
 		//Highlight for buttons
 		lv_style_init(&style_highlight);
 		lv_style_set_radius(&style_highlight, LV_STATE_DEFAULT, 120);
@@ -143,11 +148,6 @@ struct SMRTestPage : PageBase {
 							  "Morph\n"
 							  "Spread",
 							  LV_ROLLER_MODE_INIFINITE);
-
-		//Event and group for roller
-		group = lv_group_create();
-		lv_group_add_obj(group, ui->module_test_small_roller_2);
-		lv_obj_set_event_cb(ui->module_test_small_roller_2, roller_cb);
 
 		int i = 0;
 		button[i++] = (ui->module_test_small_freq_nudge1);
