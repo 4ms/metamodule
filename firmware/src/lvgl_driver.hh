@@ -151,12 +151,26 @@ public:
 			area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p));
 	}
 
+	static inline bool should_send_button_release = false;
+
 	static bool read_input(lv_indev_drv_t *indev, lv_indev_data_t *data)
 	{
-		data->enc_diff = m->rotary.use_motion();
-		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+		if (should_send_button_release) {
+			data->state = LV_INDEV_STATE_REL;
+			should_send_button_release = false;
+			return false;
+		}
 
 		bool have_more_data_to_send = false;
+
+		data->enc_diff = m->rotary.use_motion();
+		auto just_released = m->rotary_button.is_just_released();
+		if (just_released) {
+			data->state = LV_INDEV_STATE_PR;
+			should_send_button_release = true;
+			have_more_data_to_send = true;
+		}
+
 		return have_more_data_to_send;
 	}
 };
