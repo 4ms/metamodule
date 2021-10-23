@@ -52,13 +52,17 @@ struct PageBase {
 
 	virtual void focus(PageChangeDirection dir)
 	{
-		if (group)
+		if (group) {
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
+			lv_group_set_editing(group, true);
+		}
 
-		auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
-							   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
-																	   LV_SCR_LOAD_ANIM_FADE_ON;
-		lv_scr_load_anim(screen, animation_style, 500, 0, false);
+		// auto animation_style = dir == PageChangeDirection::Back	   ? LV_SCR_LOAD_ANIM_MOVE_RIGHT :
+		// 					   dir == PageChangeDirection::Forward ? LV_SCR_LOAD_ANIM_MOVE_LEFT :
+		// 															   LV_SCR_LOAD_ANIM_FADE_ON;
+		// auto animation_style = LV_SCR_LOAD_ANIM_FADE_ON;
+		// lv_scr_load_anim(screen, animation_style, 200, 0, false);
+		lv_scr_load(screen);
 	}
 
 	virtual void blur() {}
