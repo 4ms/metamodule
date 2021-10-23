@@ -185,11 +185,19 @@ struct MetaModuleHubBase : public CommModule {
 				bool isKnobMapped = (mapping->paramHandle.moduleId) != -1;
 				if (isKnobMapped) {
 					Module *module = mapping->paramHandle.module;
-					int paramId = mapping->paramHandle.paramId;
-					ParamQuantity *paramQuantity = module->paramQuantities[paramId];
-					auto newMappedVal = MathTools::map_value(
-						params[knobmap.paramId].getValue(), 0.0f, 1.0f, mapping->range.first, mapping->range.second);
-					paramQuantity->setValue(newMappedVal);
+					if (module) {
+						int paramId = mapping->paramHandle.paramId;
+						ParamQuantity *paramQuantity = module->paramQuantities[paramId];
+						auto newMappedVal = MathTools::map_value(params[knobmap.paramId].getValue(),
+																 0.0f,
+																 1.0f,
+																 mapping->range.first,
+																 mapping->range.second);
+						paramQuantity->setValue(newMappedVal);
+					} else {
+						// disable the mapping because the module was deleted
+						mapping->paramHandle.moduleId = -1;
+					}
 				}
 			}
 		}
