@@ -51,10 +51,11 @@ void Controls::update_params()
 			_rotary_moved_while_pressed = false;
 			cur_metaparams->rotary_button.register_rising_edge();
 		}
+
 		if (rotary_button.is_just_released()) {
-			if (_rotary_moved_while_pressed)
+			if (_rotary_moved_while_pressed) {
 				cur_metaparams->rotary_button.reset();
-			else {
+			} else {
 				cur_metaparams->rotary_button.register_falling_edge();
 			}
 		}
@@ -65,7 +66,8 @@ void Controls::update_params()
 		bool pressed = rotary_button.is_pressed();
 		cur_metaparams->rotary.motion = pressed ? 0 : new_rotary_motion;
 		cur_metaparams->rotary_pushed.motion = pressed ? new_rotary_motion : 0;
-		_rotary_moved_while_pressed = (pressed && new_rotary_motion);
+		//"If rotary was turned at any point since button was pressed" --> logical OR of all (pressed AND new_motion)
+		_rotary_moved_while_pressed |= pressed && (new_rotary_motion != 0);
 
 		// Meta button
 		cur_metaparams->meta_buttons[0].copy_state(button0);
