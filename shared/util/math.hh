@@ -204,4 +204,36 @@ static inline float tan_close(float x)
 	return tanTable.closest_wrap(x / M_PI);
 }
 
+// Apply a hysteresis threshold on a gate signal. Assumes 0.0f = off, 1.0f = on
+// Converts a real-world analog signal (0.f to 1.0f) to a clean gate (0 or 1, but not in between)
+// and debounces chatter when crossing the threshold -- without introducing delay like debouncers typically do.
+// Slightly slower than hysteresis_feedback(), but with more intuitive parameters.
+// The input must exceed the turn_on threshold to make the output 1
+// and must go below turn_off threshold to make the output 0
+// Returns updated output, which should be passed as old_val the next time the function is called
+static inline float hysteresis_gate(float turn_off_thresh, float turn_on_thresh, float last_output, float new_input)
+{
+	float feedback_amt = (turn_on_thresh - turn_off_thresh) * 0.5f;
+	float feedback = feedback_amt * last_output;
+	float test_signal = new_input + feedback;
+	float threshold = (turn_on_thresh + turn_off_thresh) * 0.5f;
+	return test_signal > threshold ? 1.f : 0.f;
+}
+
+// Apply a hysteresis threshold on a gate signal. Assumes 0.0f = off, 1.0f = on
+// Converts a real-world analog signal (0.f to 1.0f) to a clean gate (0 or 1, but not in between)
+// and debounces chatter when crossing the threshold -- without introducing delay like debouncers typically do.
+// Slightly faster version of hysteresis_gate(), where the two params are half the sum/difference of the on/off thresholds
+// @param: feedback_coef: feedback amount (typically a small value, 0.1 for example)
+// @param: thresh: threshold for turning on or off, after applying feedback. Typically 0.5f;
+// @param: last_output: the last output value (0.f or 1.f)
+// @param: new_input: the input value (0.f to 1.0f)
+// The input must exceed the turn_on threshold to make the output 1
+// and must go below turn_off threshold to make the output 0
+// Returns updated output, which should be passed as old_val the next time the function is called
+static inline float hysteresis_feedback(float feedback_coef, float thresh, float last_output, float new_input)
+{
+	return (new_input + last_output * feedback_coef) > thresh ? 1.f : 0.f;
+}
+
 }; // namespace MathTools

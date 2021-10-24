@@ -322,3 +322,115 @@ TEST_CASE("pow2")
 	x = 15.324234;
 	CHECK(MathTools::pow2(x) == doctest::Approx(powf(2.f, x)));
 }
+
+TEST_CASE("hysteresis_gate")
+{
+	float input;
+	float output = 0.f;
+
+	input = 0.f;
+	output = MathTools::hysteresis_gate(0.4f, 0.6f, output, input);
+	CHECK(output == 0.f);
+
+	input = 0.f;
+	output = MathTools::hysteresis_gate(0.4f, 0.6f, output, input);
+	CHECK(output == 0.f);
+
+	THEN("Fully high input --> high output")
+	{
+		input = 1.f;
+		output = MathTools::hysteresis_gate(0.4f, 0.6f, output, input);
+		CHECK(output == 1.f);
+
+		THEN("input goes fully low --> low output")
+		{
+			input = 0.f;
+			output = MathTools::hysteresis_gate(0.4f, 0.6f, output, input);
+			CHECK(output == 0.f);
+
+			THEN("input rises to 0.5 --> low output")
+			{
+				input = 0.5f;
+				output = MathTools::hysteresis_gate(0.4f, 0.6f, output, input);
+				CHECK(output == 0.f);
+
+				THEN("input rises to 0.6001 --> high output")
+				{
+					input = 0.6001f;
+					output = MathTools::hysteresis_gate(0.4f, 0.6f, output, input);
+					CHECK(output == 1.f);
+
+					THEN("input falls to 0.5 --> high output")
+					{
+						input = 0.5f;
+						output = MathTools::hysteresis_gate(0.4f, 0.6f, output, input);
+						CHECK(output == 1.f);
+
+						THEN("input falls to 0.3999 --> low output")
+						{
+							input = 0.3999f;
+							output = MathTools::hysteresis_gate(0.4f, 0.6f, output, input);
+							CHECK(output == 0.f);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+TEST_CASE("hysteresis_feedback")
+{
+	float input;
+	float output = 0.f;
+
+	input = 0.f;
+	output = MathTools::hysteresis_feedback(0.1f, 0.5f, output, input);
+	CHECK(output == 0.f);
+
+	input = 0.f;
+	output = MathTools::hysteresis_feedback(0.1f, 0.5f, output, input);
+	CHECK(output == 0.f);
+
+	THEN("Fully high input --> high output")
+	{
+		input = 1.f;
+		output = MathTools::hysteresis_feedback(0.1f, 0.5f, output, input);
+		CHECK(output == 1.f);
+
+		THEN("input goes fully low --> low output")
+		{
+			input = 0.f;
+			output = MathTools::hysteresis_feedback(0.1f, 0.5f, output, input);
+			CHECK(output == 0.f);
+
+			THEN("input rises to 0.5 --> low output")
+			{
+				input = 0.5f;
+				output = MathTools::hysteresis_feedback(0.1f, 0.5f, output, input);
+				CHECK(output == 0.f);
+
+				THEN("input rises to 0.6001 --> high output")
+				{
+					input = 0.6001f;
+					output = MathTools::hysteresis_feedback(0.1f, 0.5f, output, input);
+					CHECK(output == 1.f);
+
+					THEN("input falls to 0.5 --> high output")
+					{
+						input = 0.5f;
+						output = MathTools::hysteresis_feedback(0.1f, 0.5f, output, input);
+						CHECK(output == 1.f);
+
+						THEN("input falls to 0.3999 --> low output")
+						{
+							input = 0.3999f;
+							output = MathTools::hysteresis_feedback(0.1f, 0.5f, output, input);
+							CHECK(output == 0.f);
+						}
+					}
+				}
+			}
+		}
+	}
+}
