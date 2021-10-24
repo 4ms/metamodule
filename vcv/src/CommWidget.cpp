@@ -98,20 +98,28 @@ void CommModuleWidget::addLabeledOutputPx(const std::string labelText, int outpu
 
 void CommModuleWidget::addLabeledToggle(const std::string labelText, int lightID, int paramID, Vec posGrid)
 {
-	const Vec posMM = {gridToXCentered(posGrid.x), gridToYFromBottom(posGrid.y)};
-	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(posMM), module, paramID));
-	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({posMM.x - 3.0f, posMM.y - 3.0f}), module, lightID));
-	addLabel(labelText, mm2px({posMM.x + 17, posMM.y - 6.7f}), {LabelButtonID::Types::Toggle, paramID, -1});
+	const Vec posMM = {gridToXCentered(posGrid.x), gridToYFromTop(posGrid.y)};
+	addLabeledToggleMM(labelText, lightID, paramID, posMM);
 }
 
-void CommModuleWidget::addLabeledToggleMM(const std::string labelText,
-										  const int lightID,
-										  const int paramID,
-										  const Vec position)
+void CommModuleWidget::addLabeledToggleMM(const std::string labelText, int lightID, int paramID, Vec posMM)
 {
-	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(position), module, paramID));
-	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({position.x - 3.0f, position.y - 3.0f}), module, lightID));
-	addLabel(labelText, mm2px({position.x, position.y - 1.f}), {LabelButtonID::Types::Toggle, paramID, -1});
+	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(posMM), module, paramID));
+	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({posMM.x - 3.0f, posMM.y - 3.0f}), module, lightID));
+	addLabel(labelText, /*posMM*/ mm2px({posMM.x, posMM.y - 1.f}), {LabelButtonID::Types::Toggle, paramID, -1});
+}
+
+void CommModuleWidget::addLabeledMomentary(const std::string labelText, int lightID, int paramID, Vec posGrid)
+{
+	const Vec posMM = {gridToXCentered(posGrid.x), gridToYFromTop(posGrid.y)};
+	addLabeledMomentaryMM(labelText, lightID, paramID, posMM);
+}
+
+void CommModuleWidget::addLabeledMomentaryMM(const std::string labelText, int lightID, int paramID, Vec posMM)
+{
+	addParam(createParamCentered<MomentarySwitch<LEDBezel>>(mm2px(posMM), module, paramID));
+	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({posMM.x - 3.0f, posMM.y - 3.0f}), module, lightID));
+	addLabel(labelText, posMM, {LabelButtonID::Types::Toggle, paramID, -1});
 }
 
 void CommModuleWidget::addLabel(const std::string labelText, Vec posPx, LabelButtonID id)
