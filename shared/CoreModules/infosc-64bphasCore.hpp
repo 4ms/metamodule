@@ -151,6 +151,7 @@ public:
 		MTOFEXTENDED(param_rate, rate)
 		rate >>= 10;
 
+		param_gen = gen_button | (gen_jack == 1.f);
 		if (param_gen && !gen) {
 			gen = 1;
 			// codec_clearbuffer();
@@ -196,7 +197,7 @@ public:
 				param_damped = (val > 0.5f);
 				break;
 			case (GenMomentary):
-				param_gen = (val > 0.5f);
+				gen_button = (val > 0.5f);
 				break;
 			case (ShiftKnob):
 				param_shift.set_from_positive_float(val);
@@ -219,6 +220,9 @@ public:
 		switch (input_id) {
 			case (PitchInJack):
 				inlet_pitch.set_from_float(val);
+				break;
+			case (GenJack):
+				gen_jack = MathTools::hysteresis_feedback(0.1f, 0.5f, gen_jack, val);
 				break;
 		}
 	}
@@ -243,6 +247,8 @@ public:
 	bool param_octaved{false};
 	bool param_damped{false};
 	bool param_gen{false};
+	bool gen_button{false};
+	float gen_jack{false};
 	frac32_u<27> param_shift{0};
 	frac32_s<27> param_rate{0};
 	frac32_s<27> param_mod{0};
@@ -255,15 +261,15 @@ public:
 public:
 	// Auto generated:
 	// clang-format off
-	static inline const int NumInJacks = 1;
+	static inline const int NumInJacks = 2;
 	static inline const int NumOutJacks = 1;
 	static inline const int NumKnobs = 11;
 	enum Knob {PitchKnob, TrackKnob, RangeKnob, StackNumber, OctaveToggle, DampedToggle, GenMomentary, ShiftKnob, RateKnob, ModKnob, IndexrelatedToggle};
-	enum InJack {PitchInJack};
+	enum InJack {PitchInJack,GenJack}; //TrackJack, RangeJack, StackJack, GenJack, ShiftJack, RateJack, ModJack};
 	enum OutJack {WaveOutJack};
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Pitch", "Track", "Range", "Stack#", "Oct", "Damped", "Gen", "Shift", "Rate", "Mod", "IndexRel"};
 	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Out"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Pitch"};
+	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Pitch","Gen"};//"Track", "Range", "Stack#","Gen", "Shift", "Rate", "Mod"};
 	static inline const StaticString<LongNameChars> description{"infinite-oscillator-64bphase"};
 	static constexpr char typeID[20] = "INFOSC64";
 
