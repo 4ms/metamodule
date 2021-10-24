@@ -119,7 +119,7 @@ void CommModuleWidget::addLabeledMomentaryMM(const std::string labelText, int li
 {
 	addParam(createParamCentered<MomentarySwitch<LEDBezel>>(mm2px(posMM), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({posMM.x - 3.0f, posMM.y - 3.0f}), module, lightID));
-	addLabel(labelText, posMM, {LabelButtonID::Types::Toggle, paramID, -1});
+	addLabel(labelText, mm2px(posMM), {LabelButtonID::Types::Toggle, paramID, -1});
 }
 
 void CommModuleWidget::addLabel(const std::string labelText, Vec posPx, LabelButtonID id)
