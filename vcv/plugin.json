@@ -26,6 +26,12 @@
       "tags": []
 	},
 {
+      "slug": "INFOSC64",
+      "name": "Infosc-64bit-phase",
+      "description": "infinite-oscillator-64bit-Phase",
+      "tags": []
+}, 
+{
       "slug": "INFOSC01",
       "name": "Infosc01",
       "description": "infinite-oscillator-01",
