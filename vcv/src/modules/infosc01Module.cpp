@@ -16,8 +16,21 @@ struct Infosc01Module : public CommModule {
 		core = ModuleFactory::create("INFOSC01");
 		selfID.typeID = "INFOSC01";
 
-		for (auto &j : inputJacks)
-			j->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
+		constexpr float AxolotiPitchCorrection = 240.f / 256.f;
+		inputJacks[Infosc01Core::PitchInJack]->scale = [](float f) {
+			return MathTools::constrain(f / (5.f / AxolotiPitchCorrection), -1.f, 1.f);
+		};
+		inputJacks[Infosc01Core::RangeInJack]->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
+		inputJacks[Infosc01Core::FMInJack]->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
+		inputJacks[Infosc01Core::ModInJack]->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
+		inputJacks[Infosc01Core::AbsInJack]->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
+		inputJacks[Infosc01Core::LinInJack]->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
+		inputJacks[Infosc01Core::PhaseInJack]->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
+		inputJacks[Infosc01Core::PMInJack]->scale = [](float f) { return MathTools::constrain(f / 5.f, -1.f, 1.f); };
+		inputJacks[Infosc01Core::ScanInJack]->scale = [](float f) { return MathTools::constrain(f, 0.f, 1.f); };
+		inputJacks[Infosc01Core::AddInJack]->scale = [](float f) { return MathTools::constrain(f, 0.f, 1.f); };
+		inputJacks[Infosc01Core::ResetInJack]->scale = [](float f) { return MathTools::constrain(f, 0.f, 1.f); };
+
 		outputJacks[Infosc01Core::WaveOutJack]->scale = [](float f) { return f * 5.0f; };
 	}
 };
