@@ -160,7 +160,7 @@ public:
 			}
 			// int hrm = 1;
 			int32_t gain = 0x7FFFFFFF; //(1 << 31) - 1;
-			for (int j = 1; j < 128; j++) {
+			for (int j = 1; j < 2; j++) {
 				for (int i = 0; i < 4096; i++) {
 					wave[i] += ___SMMUL(sine2t[(i * j + (j << 8)) & 4095], gain) / j >> 4;
 				}
