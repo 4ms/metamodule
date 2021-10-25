@@ -5,9 +5,11 @@
 #include "DjembeReverb.hh"
 #include "InfiniteOsc.hh"
 #include "InfiniteOsc64bDual.hh"
-#include "QuadDjembe.hh"
+#include "QuadDjembe2.hh"
+#include "QuadDjembemed.hh"
 #include "QuadLFO.hh"
 #include "StereoVerb.hh"
+#include "djembe.hh"
 #include "dualdjembe.hh"
 #include "dualinfosc1.hh"
 #include "infosc1.hh"
@@ -17,6 +19,7 @@
 #include "octinfosc.hh"
 #include "quad_LFO.hh"
 #include "simplequaddjembe.hh"
+#include "test33.hh"
 #include "testnew2.hh"
 
 namespace MetaModule
@@ -25,13 +28,15 @@ namespace MetaModule
 PatchList::PatchList()
 	: _patch_addrs{
 		  test_inputs_1234_mmpatch,
-		  QuadDjembe_mmpatch,
+		  QuadDjembe2_mmpatch,
+		  test33_mmpatch,
+		  djembe_mmpatch,
 		  InfiniteOsc64bDual_mmpatch,
 		  // DjembeReverb_mmpatch,
-		  InfiniteOsc_mmpatch,
+		  // InfiniteOsc_mmpatch,
 		  QuadLFO_mmpatch,
 		  StereoVerb_mmpatch,
-		  infosc1_mmpatch,
+		  // infosc1_mmpatch,
 		  octinfosc_mmpatch,
 		  simplequaddjembe_mmpatch,
 		  mono_verb_mmpatch,
