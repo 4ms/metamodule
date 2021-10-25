@@ -37,8 +37,8 @@ struct MMControlPins {
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = true;
-	static constexpr auto oversampling_ratio = 256;
-	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift8Right;
+	static constexpr auto oversampling_ratio = 512;
+	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift9Right;
 	static constexpr auto clock_div = mdrivlib::PLL_Div2;
 
 	struct DmaConf : mdrivlib::DefaultAdcPeriphConf::DmaConf {
