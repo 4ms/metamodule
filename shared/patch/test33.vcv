@@ -1,0 +1,264 @@
+{
+  "version": "1.1.6",
+  "modules": [
+    {
+      "id": 169,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "PANEL_MED",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.45600006
+        },
+        {
+          "id": 2,
+          "value": 0.679499924
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.00150000001
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 0.0
+        },
+        {
+          "id": 12,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 171,
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 171,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 169,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 170,
+            "DstObjID": 4,
+            "DstObjType": "InputJack",
+            "SrcModID": 169,
+            "SrcObjID": 6,
+            "SrcObjType": "InputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 171,
+            "DstObjID": 1,
+            "DstObjType": "OutputJack",
+            "SrcModID": 169,
+            "SrcObjID": 1,
+            "SrcObjType": "OutputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 172,
+            "DstObjID": 4,
+            "DstObjType": "InputJack",
+            "SrcModID": 169,
+            "SrcObjID": 7,
+            "SrcObjType": "InputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 170,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 169,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 172,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 169,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 172,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 169,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          }
+        ],
+        "PatchName": "test33"
+      },
+      "pos": [
+        30,
+        1
+      ]
+    },
+    {
+      "id": 170,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "DJEMBE",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.368999988
+        },
+        {
+          "id": 2,
+          "value": 0.607500017
+        },
+        {
+          "id": 3,
+          "value": 0.354000002
+        }
+      ],
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 171,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "STEREOMIXER",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.327000111
+        },
+        {
+          "id": 5,
+          "value": 0.61499995
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 169,
+      "pos": [
+        14,
+        1
+      ]
+    },
+    {
+      "id": 172,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "DJEMBE",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.45600006
+        },
+        {
+          "id": 1,
+          "value": 0.578999996
+        },
+        {
+          "id": 2,
+          "value": 0.679499924
+        },
+        {
+          "id": 3,
+          "value": 0.679499924
+        }
+      ],
+      "pos": [
+        0,
+        1
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 141,
+      "outputModuleId": 170,
+      "outputId": 0,
+      "inputModuleId": 171,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 142,
+      "outputModuleId": 172,
+      "outputId": 0,
+      "inputModuleId": 171,
+      "inputId": 1,
+      "color": "#0c8e15"
+    }
+  ]
+}
