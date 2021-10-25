@@ -41,33 +41,32 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, auxsigs{auxs}
 	, codec_{codec}
 	, sample_rate_{codec.get_samplerate()}
-	, player{patchplayer}
-{
+	, player{patchplayer} {
 	codec_.init();
 	codec_.set_tx_buffers(audio_blocks[0].out_codec);
 	codec_.set_rx_buffers(audio_blocks[0].in_codec);
 
 	codec_.set_callbacks(
 		[this]() {
-			Debug::Pin0::high();
-			HWSemaphore<ParamsBuf1Lock>::lock();
-			HWSemaphore<ParamsBuf2Lock>::unlock();
-			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-				process(audio_blocks[0], param_blocks[0], auxsigs[0]);
-			else
-				process(audio_blocks[1], param_blocks[0], auxsigs[0]);
-			Debug::Pin0::low();
+		Debug::Pin0::high();
+		HWSemaphore<ParamsBuf1Lock>::lock();
+		HWSemaphore<ParamsBuf2Lock>::unlock();
+		if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
+			process(audio_blocks[0], param_blocks[0], auxsigs[0]);
+		else
+			process(audio_blocks[1], param_blocks[0], auxsigs[0]);
+		Debug::Pin0::low();
 		},
 		[this]() {
-			Debug::Pin0::high();
-			HWSemaphore<ParamsBuf2Lock>::lock();
-			HWSemaphore<ParamsBuf1Lock>::unlock();
-			if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-				process(audio_blocks[1], param_blocks[1], auxsigs[1]);
-			else
-				process(audio_blocks[0], param_blocks[1], auxsigs[1]);
-			Debug::Pin0::low();
-		});
+		Debug::Pin0::high();
+		HWSemaphore<ParamsBuf2Lock>::lock();
+		HWSemaphore<ParamsBuf1Lock>::unlock();
+		if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
+			process(audio_blocks[1], param_blocks[1], auxsigs[1]);
+		else
+			process(audio_blocks[0], param_blocks[1], auxsigs[1]);
+		Debug::Pin0::low();
+	});
 
 	load_measure.init();
 
@@ -75,17 +74,15 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	// 	fftfx.init();
 }
 
-AudioConf::SampleT AudioStream::get_audio_output(int output_id)
-{
+AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	auto raw_out = player.get_panel_output(output_id);
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
 	return scaled_out;
 	// return compressor.compress(scaled_out);
 }
 
-//Todo: the scaling and offset shouold be part of the AuxStream, so we can support different types of DACs
-uint32_t AudioStream::get_dac_output(int output_id)
-{
+// Todo: the scaling and offset shouold be part of the AuxStream, so we can support different types of DACs
+uint32_t AudioStream::get_dac_output(int output_id) {
 	auto raw_out = player.get_panel_output(output_id);
 	raw_out *= -1.f;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
@@ -95,8 +92,7 @@ uint32_t AudioStream::get_dac_output(int output_id)
 }
 // Todo: integrate params.buttons[]
 
-void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxStreamBlock &aux)
-{
+void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxStreamBlock &aux) {
 	auto &in = audio_block.in_codec;
 	auto &out = audio_block.out_codec;
 
@@ -107,7 +103,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	cache.write_sync(param_block.params[0], param_block.metaparams);
 	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamQueue));
 
-	//Debug: passthrough audio and exit
+	// Debug: passthrough audio and exit
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
 		AudioTestSignal::passthrough(in, out, aux);
 		return;
@@ -120,12 +116,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	// Todo: fade down before setting audio_is_muted to true
 	mbox.audio_is_muted = mbox.loading_new_patch ? true : false;
 	if (mbox.audio_is_muted) {
-		//FixMe:
-		//output_silence(out, aux);
+		// FixMe:
+		// output_silence(out, aux);
 		return;
 	}
 
-	//if (mbox.loading_new_patch) {
+	// if (mbox.loading_new_patch) {
 	//	Debug::Pin3::high();
 	//	//This would be a fade down over 10 blocks:
 	//	if (_mute_ctr)
@@ -137,38 +133,40 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	//		mbox.audio_is_muted = true;
 	//		return;
 	//	}
-	//} else {
+	// } else {
 	//	mbox.audio_is_muted = false;
 	//	_mute_ctr = 10;
-	//}
+	// }
 
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 
-		//Handle jacks being plugged/unplugged
+		// Handle jacks being plugged/unplugged
 		propagate_sense_pins(params_);
 
-		//Pass audio inputs to modules
+		// Pass audio inputs to modules
 		for (auto [i, inchan] : countzip(in_.chan)) {
 			auto pin_bit = jacksense_pin_order[i];
+			// Todo: send 0 on the first time the jack is detected as unpatched (and then don't call set_panel_input
+			// until patched)
 			auto val = (params_.jack_senses & (1 << pin_bit)) ? AudioInFrame::scaleInput(inchan) : 0;
 			player.set_panel_input(PanelDef::audioin_order[i], val);
 		}
 
-		//Pass CV values to modules
+		// Pass CV values to modules
 		for (auto [i, cv] : countzip(params_.cvjacks))
 			player.set_panel_input(i + NumAudioInputs, cv);
 
 		for (auto [i, gatein] : countzip(params_.gate_ins))
 			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
 
-		//Pass Knob values to modules
+		// Pass Knob values to modules
 		for (auto [i, knob] : countzip(params_.knobs))
 			player.set_panel_param(i, knob);
 
-		//Run each module
+		// Run each module
 		player.update_patch();
 
-		//Get outputs from modules
+		// Get outputs from modules
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
 
@@ -182,13 +180,11 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	load_measure.end_measurement();
 }
 
-void AudioStream::start()
-{
+void AudioStream::start() {
 	codec_.start();
 }
 
-void AudioStream::propagate_sense_pins(Params &params)
-{
+void AudioStream::propagate_sense_pins(Params &params) {
 	for (int i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
 		auto pin_bit = jacksense_pin_order[i];
 		bool sense = params.jack_senses & (1 << pin_bit);
@@ -205,8 +201,7 @@ void AudioStream::propagate_sense_pins(Params &params)
 	}
 }
 
-void AudioStream::output_silence(AudioOutBuffer &out, AuxStreamBlock &aux)
-{
+void AudioStream::output_silence(AudioOutBuffer &out, AuxStreamBlock &aux) {
 	for (auto [out_, aux_] : zip(out, aux)) {
 		for (auto &outchan : out_.chan)
 			outchan = 0;
