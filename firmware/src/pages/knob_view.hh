@@ -13,8 +13,7 @@ struct KnobView3 : PageBase {
 	void init() override
 	{
 		setup_scr_Knob_view3(ui);
-		screen = ui->Knob_view3;
-		init_bg();
+		init_bg(ui->Knob_view3);
 
 		lv_arc_set_adjustable(ui->Knob_view3_arc_1, true);
 		lv_arc_set_adjustable(ui->Knob_view3_arc_2, true);

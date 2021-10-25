@@ -31,7 +31,7 @@ struct PageBase {
 	static inline lv_ui base_ui{};
 	static inline lv_ui *ui = &base_ui;
 	lv_group_t *group = nullptr;
-	lv_obj_t *screen;
+	lv_obj_t *screen = nullptr;
 
 	PageBase(PatchInfo info)
 		: patch_list{info.patch_list}
@@ -44,9 +44,10 @@ struct PageBase {
 	virtual ~PageBase() = default;
 	virtual void init() {}
 
-	void init_bg()
+	void init_bg(lv_obj_t *screen_ptr)
 	{
 		group = lv_group_create();
+		screen = screen_ptr;
 		lv_obj_set_size(screen, LV_HOR_RES_MAX, LV_VER_RES_MAX);
 		lv_obj_set_style_local_bg_color(screen, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x000000));
 	}

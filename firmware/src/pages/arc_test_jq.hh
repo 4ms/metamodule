@@ -13,8 +13,7 @@ struct ArcTestJQPage : PageBase {
 	void init() override
 	{
 		setup_scr_Main_Example(ui);
-		screen = ui->Main_Example;
-		init_bg();
+		init_bg(ui->Main_Example);
 
 		lv_arc_set_adjustable(ui->Main_Example_arc_1, true);
 		lv_arc_set_adjustable(ui->Main_Example_arc_2, true);

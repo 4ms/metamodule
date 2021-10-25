@@ -13,8 +13,7 @@ struct SketchesTestPage : PageBase {
 	void init() override
 	{
 		setup_scr_symbol_sketches(ui);
-		screen = ui->symbol_sketches;
-		init_bg();
+		init_bg(ui->symbol_sketches);
 	}
 
 	void update() override {}
@@ -28,8 +27,7 @@ struct AudioCVInsPage : PageBase {
 	void init() override
 	{
 		setup_scr_AudioCV_Ins(ui);
-		screen = ui->AudioCV_Ins;
-		init_bg();
+		init_bg(ui->AudioCV_Ins);
 	}
 
 	void update() override {}
@@ -69,8 +67,7 @@ struct SMRTestPage : PageBase {
 	void init() override
 	{
 		setup_scr_module_test_small(ui);
-		screen = ui->module_test_small;
-		init_bg();
+		init_bg(ui->module_test_small);
 
 		//Event and group for roller
 		//group = lv_group_create();
@@ -214,8 +211,7 @@ struct GroupArcSketchesPage1 : PageBase {
 	void init() override
 	{
 		setup_scr_group_arc_sketches(ui);
-		screen = ui->group_arc_sketches;
-		init_bg();
+		init_bg(ui->group_arc_sketches);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_1, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_2, true);
 		lv_arc_set_adjustable(ui->group_arc_sketches_arc_3, true);
@@ -255,8 +251,7 @@ struct GroupArcSketchesPage2 : PageBase {
 	void init() override
 	{
 		setup_scr_group_arc_sketches2(ui);
-		screen = ui->group_arc_sketches2;
-		init_bg();
+		init_bg(ui->group_arc_sketches2);
 	}
 
 	void update() override
@@ -278,8 +273,7 @@ struct GroupArcSketchesPage3 : PageBase {
 	void init() override
 	{
 		setup_scr_group_arc_sketches3(ui);
-		screen = ui->group_arc_sketches3;
-		init_bg();
+		init_bg(ui->group_arc_sketches3);
 	}
 
 	void update() override
@@ -308,7 +302,7 @@ struct GroupArcSketchesPage4 : PageBase {
 	{
 		setup_scr_group_arc_sketches4(ui);
 		screen = ui->group_arc_sketches4;
-		init_bg();
+		init_bg(ui->group_arc_sketches4);
 	}
 
 	void update() override

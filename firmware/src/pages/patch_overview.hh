@@ -10,69 +10,69 @@ struct PatchOverviewPage : PageBase {
 		: PageBase{info}
 	{}
 
-	lv_obj_t *screen1_lmeter_1;
-	lv_style_t style_screen1_lmeter_1_main;
-	lv_obj_t *slider1;
-	int32_t slider_val = 30;
+	// lv_obj_t *screen1_lmeter_1;
+	// lv_style_t style_screen1_lmeter_1_main;
+	// lv_obj_t *slider1;
+	// int32_t slider_val = 30;
 
 	void init() override
 	{
-		//Write codes screen1
-		screen = lv_obj_create(nullptr, nullptr);
+		////Write codes screen1
+		//screen = lv_obj_create(nullptr, nullptr);
 
-		//Write codes screen1_lmeter_1
-		screen1_lmeter_1 = lv_linemeter_create(screen, nullptr);
+		////Write codes screen1_lmeter_1
+		//screen1_lmeter_1 = lv_linemeter_create(screen, nullptr);
 
-		//Write style LV_LINEMETER_PART_MAIN for screen1_lmeter_1
-		static lv_style_t style_screen1_lmeter_1_main;
-		lv_style_reset(&style_screen1_lmeter_1_main);
+		////Write style LV_LINEMETER_PART_MAIN for screen1_lmeter_1
+		//static lv_style_t style_screen1_lmeter_1_main;
+		//lv_style_reset(&style_screen1_lmeter_1_main);
 
-		//Write style state: LV_STATE_DEFAULT for style_screen1_lmeter_1_main
-		lv_style_set_radius(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 58);
-		lv_style_set_bg_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_bg_grad_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_bg_grad_dir(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_HOR);
-		lv_style_set_bg_opa(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 255);
-		lv_style_set_pad_left(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 5);
-		lv_style_set_pad_right(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 5);
-		lv_style_set_pad_top(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 5);
-		lv_style_set_pad_bottom(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 5);
-		lv_style_set_line_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0x00, 0x59, 0xff));
-		lv_style_set_line_width(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 10);
-		lv_style_set_line_opa(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 255);
-		lv_style_set_scale_grad_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0x00, 0x59, 0xff));
-		lv_style_set_scale_end_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0xb5, 0xb5, 0xb5));
-		lv_style_set_scale_width(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 6);
-		lv_style_set_scale_end_line_width(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 10);
-		lv_obj_add_style(screen1_lmeter_1, LV_LINEMETER_PART_MAIN, &style_screen1_lmeter_1_main);
-		lv_obj_set_pos(screen1_lmeter_1, 211, 4);
-		lv_obj_set_size(screen1_lmeter_1, 97, 97);
-		lv_linemeter_set_scale(screen1_lmeter_1, 300, 100);
-		lv_linemeter_set_range(screen1_lmeter_1, 0, 100);
-		lv_linemeter_set_value(screen1_lmeter_1, 75);
-		lv_linemeter_set_angle_offset(screen1_lmeter_1, 0);
+		////Write style state: LV_STATE_DEFAULT for style_screen1_lmeter_1_main
+		//lv_style_set_radius(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 58);
+		//lv_style_set_bg_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
+		//lv_style_set_bg_grad_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
+		//lv_style_set_bg_grad_dir(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, LV_GRAD_DIR_HOR);
+		//lv_style_set_bg_opa(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 255);
+		//lv_style_set_pad_left(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 5);
+		//lv_style_set_pad_right(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 5);
+		//lv_style_set_pad_top(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 5);
+		//lv_style_set_pad_bottom(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 5);
+		//lv_style_set_line_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0x00, 0x59, 0xff));
+		//lv_style_set_line_width(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 10);
+		//lv_style_set_line_opa(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 255);
+		//lv_style_set_scale_grad_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0x00, 0x59, 0xff));
+		//lv_style_set_scale_end_color(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, lv_color_make(0xb5, 0xb5, 0xb5));
+		//lv_style_set_scale_width(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 6);
+		//lv_style_set_scale_end_line_width(&style_screen1_lmeter_1_main, LV_STATE_DEFAULT, 10);
+		//lv_obj_add_style(screen1_lmeter_1, LV_LINEMETER_PART_MAIN, &style_screen1_lmeter_1_main);
+		//lv_obj_set_pos(screen1_lmeter_1, 211, 4);
+		//lv_obj_set_size(screen1_lmeter_1, 97, 97);
+		//lv_linemeter_set_scale(screen1_lmeter_1, 300, 100);
+		//lv_linemeter_set_range(screen1_lmeter_1, 0, 100);
+		//lv_linemeter_set_value(screen1_lmeter_1, 75);
+		//lv_linemeter_set_angle_offset(screen1_lmeter_1, 0);
 
-		slider1 = lv_slider_create(screen, nullptr);
-		slider_val = 30;
-		lv_obj_set_x(slider1, 30);
-		lv_obj_set_y(slider1, 10);
-		lv_obj_set_size(slider1, 15, 100);
-		lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
+		//slider1 = lv_slider_create(screen, nullptr);
+		//slider_val = 30;
+		//lv_obj_set_x(slider1, 30);
+		//lv_obj_set_y(slider1, 10);
+		//lv_obj_set_size(slider1, 15, 100);
+		//lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
 
-		init_bg();
+		//init_bg();
 	}
 
 	void update() override
 	{
 		//slider_val = 100.f * params.knobs[0];
-		slider_val++;
-		if (slider_val > 100)
-			slider_val = 0;
-		lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
+		// slider_val++;
+		// if (slider_val > 100)
+		// 	slider_val = 0;
+		// lv_slider_set_value(slider1, slider_val, LV_ANIM_OFF);
 
-		float knob = params.knobs[1];
-		int slider_val2 = knob * 100.f;
-		lv_linemeter_set_value(screen1_lmeter_1, slider_val2);
+		// float knob = params.knobs[1];
+		// int slider_val2 = knob * 100.f;
+		// lv_linemeter_set_value(screen1_lmeter_1, slider_val2);
 
 		// screen.fill(bgcolor);
 		// PageWidgets::setup_header(screen);
