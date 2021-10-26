@@ -131,7 +131,7 @@ typedef struct
 	lv_obj_t *Knob_view3_label_12;
 	lv_obj_t *Knob_view3_label_13;
 	lv_obj_t *module_test_small;
-	lv_obj_t *module_test_small_mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm;
+	lv_obj_t *module_test_small_SMR_panel;
 	lv_obj_t *module_test_small_freq_nudge1;
 	lv_obj_t *module_test_small_freq_nudge1_label;
 	lv_obj_t *module_test_small_freq_cv1;
@@ -306,6 +306,9 @@ typedef struct
 	lv_obj_t *Dropdown1b_patch_name;
 	lv_obj_t *Dropdown1b_imgbtn_1;
 	lv_obj_t *Dropdown1b_imgbtn_1_label;
+	lv_obj_t *Dropdown_only;
+	lv_obj_t *Dropdown_only_background_simulation;
+	lv_obj_t *Dropdown_only_patch_dropdown;
 }lv_ui;
 
 void setup_ui(lv_ui *ui);
@@ -322,6 +325,7 @@ void setup_scr_group_arc_sketches3(lv_ui *ui);
 void setup_scr_group_arc_sketches4(lv_ui *ui);
 void setup_scr_Dropdown1(lv_ui *ui);
 void setup_scr_Dropdown1b(lv_ui *ui);
+void setup_scr_Dropdown_only(lv_ui *ui);
 LV_IMG_DECLARE(_Asset_73_alpha_52x92);
 LV_IMG_DECLARE(_Asset_71_alpha_27x55);
 LV_IMG_DECLARE(_module_graphic_SMR_small_alpha_246x240);
