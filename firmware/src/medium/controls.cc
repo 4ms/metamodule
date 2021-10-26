@@ -29,8 +29,6 @@ void Controls::update_params() {
 	cur_params->gate_ins[0].copy_state(gate_in_1);
 	cur_params->gate_ins[1].copy_state(gate_in_2);
 
-	Debug::Pin1::high();
-
 	// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
 	if (_new_adc_data_ready) {
 		for (int i = 0; i < PanelDef::NumPot; i++) {
@@ -85,8 +83,6 @@ void Controls::update_params() {
 	cur_params++;
 	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
 		_buffer_full = true;
-
-	Debug::Pin1::low();
 }
 
 template<int block_num>
@@ -125,6 +121,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &
 	, _buffer_full{false}
 	, auxstream_blocks{auxsignal_blocks_ref} {
 
+	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {

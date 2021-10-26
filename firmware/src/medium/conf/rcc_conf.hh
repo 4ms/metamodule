@@ -91,5 +91,5 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.Spi1ClockSelection = RCC_SPI1CLKSOURCE_PLL4,
 	.Spi23ClockSelection = RCC_SPI23CLKSOURCE_PLL4,
 	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK2,
-	.AdcClockSelection = RCC_ADCCLKSOURCE_PLL4, //PLL4R: 66MHz
+	.AdcClockSelection = RCC_ADCCLKSOURCE_PLL4, // PLL4R: 66MHz vs PER vs PLL3
 };

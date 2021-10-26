@@ -65,14 +65,22 @@ private:
 	AuxStream auxstream;
 
 	uint16_t latest_jacksense_reading;
-	static constexpr size_t NumParamUpdatesPerAdcReading = 155;
 	// Todo: calc this from AdcSampTime, PotAdcConf::oversampling_ratio, and ADC periph clock (PLL_Div2... rcc...)
-	// PLL Clock = PLL4 = 66MHz
-	// "Div2" --> 33MHz
-	// Maybe it gets /4 somewhere? ==> 8.25MHz
-	// 8.25MHz / 2clks / 13 channels / 1024 OS = 309.87Hz
-	// 48000 / 309.87Hz = 155.. we add 1 to be safe it doesn't overflow
-	InterpParam<float, NumParamUpdatesPerAdcReading + 1> _knobs[PanelDef::NumPot];
+
+	// Tested with APB clock (rcc set to PER, but don't think that matters. clock_div set to APBClk_Div1):
+	//  APB1 clk = 104.5MHz
+	//  gets divided by 2.25???  ==> 46.4MHz
+	//  46.4MHz / 2clks / 13 channels / 1024 OS = 1.742kHz
+	//  48000 / 1742Hz = 27.. we add 1 to be safe it doesn't overflow
+	//  Had ~30mV of noise @ 1.742kHz
+
+	// Tested with PLL4 clock (rcc set to PLL4, clock_div set to PLL_Div1)
+	//  PLL4 Clk: 66MHz
+	//  gets divided by 4 ==> 16.5MHz
+	//  16.5MHz / 2clks / 13 channels / 1024 OS = 619.74Hz
+	//  48000 / 619.74 = 77.45.. we round up so it doesn't overshoot
+	static constexpr size_t NumParamUpdatesPerAdcReading = 78;
+	InterpParam<float, NumParamUpdatesPerAdcReading> _knobs[PanelDef::NumPot];
 	float f_knobs[PanelDef::NumPot];
 
 	bool _rotary_moved_while_pressed = false;

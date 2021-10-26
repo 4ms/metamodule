@@ -27,9 +27,7 @@ struct MMControlPins {
 	static constexpr PinNoInit rotA{GPIO::A, 15};
 	static constexpr PinNoInit rotB{GPIO::C, 7};
 	static constexpr PinNoInit rotS{GPIO::B, 14};
-
 	static constexpr PinNoInit but0{GPIO::I, 2};
-
 	static constexpr PinNoInit gate_in_1{GPIO::I, 3};
 	static constexpr PinNoInit gate_in_2{GPIO::H, 9};
 };
@@ -40,7 +38,10 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr auto oversample = true;
 	static constexpr auto oversampling_ratio = 1024;
 	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift10Right;
-	static constexpr auto clock_div = mdrivlib::PLL_Div2;
+	static constexpr auto clock_div = mdrivlib::PLL_Div1;
+
+	static constexpr bool enable_end_of_sequence_isr = true;
+	static constexpr bool enable_end_of_conversion_isr = false;
 
 	struct DmaConf : mdrivlib::DefaultAdcPeriphConf::DmaConf {
 		static constexpr auto DMAx = 2;
