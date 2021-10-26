@@ -1,24 +1,23 @@
 #pragma once
 
 #include "coreProcessor.h"
-#include "dsp/minblep.hpp"
 #include "moduleTypes.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
+#include <dsp/.hpp>
+#include <dsp/minblep.hpp>
 
 namespace simd
 {
-float pow(float x)
-{
+float pow(float x) {
 	return std::pow(x);
 }
 } // namespace simd
-//using simd::float_4;
+// using simd::float_4;
 
 // Accurate only on [0, 1]
 template<typename T>
-T sin2pi_pade_05_7_6(T x)
-{
+T sin2pi_pade_05_7_6(T x) {
 	x -= 0.5f;
 	return (T(-6.28319) * x + T(35.353) * simd::pow(x, 3) - T(44.9043) * simd::pow(x, 5) +
 			T(16.0951) * simd::pow(x, 7)) /
@@ -26,16 +25,14 @@ T sin2pi_pade_05_7_6(T x)
 }
 
 template<typename T>
-T sin2pi_pade_05_5_4(T x)
-{
+T sin2pi_pade_05_5_4(T x) {
 	x -= 0.5f;
 	return (T(-6.283185307) * x + T(33.19863968) * simd::pow(x, 3) - T(32.44191367) * simd::pow(x, 5)) /
 		   (1 + T(1.296008659) * simd::pow(x, 2) + T(0.7028072946) * simd::pow(x, 4));
 }
 
 template<typename T>
-T expCurve(T x)
-{
+T expCurve(T x) {
 	return (3 + x * (-13 + 5 * x)) / (3 + 2 * x);
 }
 using namespace rack;
@@ -66,19 +63,16 @@ struct VoltageControlledOscillator {
 	T triValue = 0.f;
 	T sinValue = 0.f;
 
-	void setPitch(T pitch)
-	{
+	void setPitch(T pitch) {
 		freq = dsp::FREQ_C4 * dsp::approxExp2_taylor5(pitch + 30) / 1073741824;
 	}
 
-	void setPulseWidth(T pulseWidth)
-	{
+	void setPulseWidth(T pulseWidth) {
 		const float pwMin = 0.01f;
 		this->pulseWidth = simd::clamp(pulseWidth, pwMin, 1.f - pwMin);
 	}
 
-	void process(float deltaTime, T syncValue)
-	{
+	void process(float deltaTime, T syncValue) {
 		// Advance phase
 		T deltaPhase = simd::clamp(freq * deltaTime, 1e-6f, 0.35f);
 		if (soft) {
@@ -192,8 +186,7 @@ struct VoltageControlledOscillator {
 		sinValue += sinMinBlep.process();
 	}
 
-	T sin(T phase)
-	{
+	T sin(T phase) {
 		T v;
 		if (analog) {
 			// Quadratic approximation of sine, slightly richer harmonics
@@ -208,13 +201,11 @@ struct VoltageControlledOscillator {
 		}
 		return v;
 	}
-	T sin()
-	{
+	T sin() {
 		return sinValue;
 	}
 
-	T tri(T phase)
-	{
+	T tri(T phase) {
 		T v;
 		if (analog) {
 			T x = phase + 0.25f;
@@ -228,13 +219,11 @@ struct VoltageControlledOscillator {
 		}
 		return v;
 	}
-	T tri()
-	{
+	T tri() {
 		return triValue;
 	}
 
-	T saw(T phase)
-	{
+	T saw(T phase) {
 		T v;
 		T x = phase + 0.5f;
 		x -= simd::trunc(x);
@@ -245,23 +234,19 @@ struct VoltageControlledOscillator {
 		}
 		return v;
 	}
-	T saw()
-	{
+	T saw() {
 		return sawValue;
 	}
 
-	T sqr(T phase)
-	{
+	T sqr(T phase) {
 		T v = simd::ifelse(phase < pulseWidth, 1.f, -1.f);
 		return v;
 	}
-	T sqr()
-	{
+	T sqr() {
 		return sqrValue;
 	}
 
-	T light()
-	{
+	T light() {
 		return simd::sin(2 * T(M_PI) * phase);
 	}
 };
