@@ -35,6 +35,7 @@ struct MMControlPins {
 };
 
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
+	static constexpr mdrivlib::AdcResolution resolution = mdrivlib::Bits12;
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = true;
 	static constexpr auto oversampling_ratio = 512;

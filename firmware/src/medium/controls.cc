@@ -151,13 +151,12 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &
 uint32_t Controls::get_pot_reading(uint32_t pot_id)
 {
 	if (pot_id < NumPotAdcs)
-		return pot_vals[pot_id] >> 4;
+		return pot_vals[pot_id]; // >> 4;
 	return 0;
 }
 
 uint32_t Controls::get_patchcv_reading()
-{
-	return pot_vals[PatchCV] >> 4;
+	return pot_vals[PatchCV]; // >> 4;
 }
 
 void Controls::store_jacksense_reading(uint16_t reading)
