@@ -38,8 +38,8 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 	static constexpr mdrivlib::AdcResolution resolution = mdrivlib::Bits12;
 	static constexpr auto adc_periph_num = mdrivlib::AdcPeriphNum::_1;
 	static constexpr auto oversample = true;
-	static constexpr auto oversampling_ratio = 512;
-	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift9Right;
+	static constexpr auto oversampling_ratio = 1024;
+	static constexpr auto oversampling_right_bitshift = mdrivlib::AdcOversampleRightBitShift::Shift10Right;
 	static constexpr auto clock_div = mdrivlib::PLL_Div2;
 
 	struct DmaConf : mdrivlib::DefaultAdcPeriphConf::DmaConf {
@@ -52,7 +52,7 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 
 using mdrivlib::AdcChannelConf;
 enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotQ, PotL, PotR, PatchCV };
-constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_64Cycles;
+constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_2Cycles;
 constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotB, AdcSampTime},
@@ -60,20 +60,20 @@ constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::F, 12}, mdrivlib::AdcChanNum::_6, PotD, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotE, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 0}, mdrivlib::AdcChanNum::_10, PotF, AdcSampTime},
-	//PotX is ANA0. hack: use PF13 here to set it to analog mode, since on PCB p4 we have it connected to Pot9
+	// PotX is ANA0. hack: use PF13 here to set it to analog mode, since on PCB p4 we have it connected to Pot9
 	AdcChannelConf{{GPIO::F, 13}, mdrivlib::AdcChanNum::_0, PotX, AdcSampTime},
-	//PotY is ANA1. hack: use PF14 here to set it to analog mode, since on PCB p4 we have it connected to Pot10
+	// PotY is ANA1. hack: use PF14 here to set it to analog mode, since on PCB p4 we have it connected to Pot10
 	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_1, PotY, AdcSampTime},
-	//Z = Pot9 on sch: was PF13 on p4 PCB: changed to PA1
+	// Z = Pot9 on sch: was PF13 on p4 PCB: changed to PA1
 	AdcChannelConf{{GPIO::A, 1}, mdrivlib::AdcChanNum::_17, PotZ, AdcSampTime},
-	//Q = Pot10 on sch: was PF14 on p4 PCB: changed to PC5
+	// Q = Pot10 on sch: was PF14 on p4 PCB: changed to PC5
 	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotQ, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotL, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotR, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PatchCV, AdcSampTime},
 });
 
-//TODO: parameterize this and put it in mdrivlib
+// TODO: parameterize this and put it in mdrivlib
 struct MultiGPIOReader {
 	using AudioIn1 = FPin<GPIO::I, 5>;
 	using AudioIn2 = FPin<GPIO::G, 12>;
@@ -100,8 +100,7 @@ struct MultiGPIOReader {
 
 	template<uint32_t pin_num, uint32_t jack_num>
 	struct PackedBit {
-		static uint32_t extract(uint32_t port_reading)
-		{
+		static uint32_t extract(uint32_t port_reading) {
 			auto pin_reading = port_reading & (1 << pin_num);
 			if constexpr (pin_num >= jack_num)
 				return pin_reading >> (pin_num - jack_num);
@@ -131,8 +130,7 @@ struct MultiGPIOReader {
 		PCV
 	};
 
-	uint32_t read_sense_pins()
-	{
+	uint32_t read_sense_pins() {
 		uint32_t val = 0;
 		auto A = PortRead<GPIO::A>::read();
 		val |= PackedBit<AudioIn4::PinNum_v, AIn4>::extract(A);

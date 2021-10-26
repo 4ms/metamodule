@@ -65,9 +65,19 @@ private:
 	AuxStream auxstream;
 
 	uint16_t latest_jacksense_reading;
-	InterpParam<float, StreamConf::Audio::BlockSize> _knobs[PanelDef::NumPot];
+	static constexpr size_t NumParamUpdatesPerAdcReading = 155;
+	// Todo: calc this from AdcSampTime, PotAdcConf::oversampling_ratio, and ADC periph clock (PLL_Div2... rcc...)
+	// PLL Clock = PLL4 = 66MHz
+	// "Div2" --> 33MHz
+	// Maybe it gets /4 somewhere? ==> 8.25MHz
+	// 8.25MHz / 2clks / 13 channels / 1024 OS = 309.87Hz
+	// 48000 / 309.87Hz = 155.. we add 1 to be safe it doesn't overflow
+	InterpParam<float, NumParamUpdatesPerAdcReading + 1> _knobs[PanelDef::NumPot];
+	float f_knobs[PanelDef::NumPot];
 
 	bool _rotary_moved_while_pressed = false;
+
+	bool _new_adc_data_ready = false;
 
 	template<int block_num>
 	void start_param_block();
