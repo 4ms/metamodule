@@ -11,7 +11,7 @@ class AttCore : public CoreProcessor {
 	static inline const int NumKnobs = 2;
 
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Level 1", "Level 2"};
-	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Out 1","Out 2"};
+	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Out 1", "Out 2"};
 	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"In 1", "In 2"};
 	static inline const StaticString<LongNameChars> description{"Attenuverter"};
 
@@ -23,16 +23,14 @@ class AttCore : public CoreProcessor {
 	// clang-format on
 
 public:
-	virtual void update(void) override
-	{
-		out1 = in1 * level1;
-		out2 = in2 * level2;
+	virtual void update(void) override {
+		out1 = (in1Connected ? in1 : 1.f) * level1;
+		out2 = (in2Connected ? in2 : 1.f) * level2;
 	}
 
-	AttCore() {}
+	AttCore() = default;
 
-	virtual void set_param(const int param_id, const float val) override
-	{
+	void set_param(int param_id, float val) override {
 		float mappedVal = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 		switch (param_id) {
 			case 0:
@@ -43,58 +41,52 @@ public:
 				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override {}
 
-	virtual void set_input(const int input_id, const float val) override
-	{
+	void set_samplerate(const float sr) override {
+	}
+
+	void set_input(int input_id, float val) override {
 		switch (input_id) {
 			case 0:
-				if (in1Connected)
-					in1 = val;
-				else
-					in1 = 1.0f;
+				in1 = val;
 				break;
 			case 1:
-				if (in2Connected)
-					in2 = val;
-				else
-					in2 = 1.0f;
+				in2 = 1.0f;
+				break;
+			default:
 				break;
 		}
 	}
 
-	virtual float get_output(const int output_id) const override
-	{
-		float output = 0;
+	float get_output(int output_id) const override {
 		switch (output_id) {
 			case 0:
-				output = out1;
+				return out1;
 				break;
 			case 1:
-				output = out2;
+				return out2;
+				break;
+			default:
+				return 0;
 				break;
 		}
-		return output;
 	}
 
-	virtual void mark_input_unpatched(const int input_id) override
-	{
+	void mark_input_unpatched(int input_id) override {
 		if (input_id == 0)
-			in1Connected = 0;
+			in1Connected = false;
 		else if (input_id == 1)
-			in2Connected = 0;
+			in2Connected = false;
 	}
 
-	virtual void mark_input_patched(const int input_id) override
-	{
+	void mark_input_patched(int input_id) override {
 		if (input_id == 0)
-			in1Connected = 1;
+			in1Connected = true;
 		else if (input_id == 1)
-			in2Connected = 1;
+			in2Connected = true;
 	}
 
-	static std::unique_ptr<CoreProcessor> create()
-	{
+	static std::unique_ptr<CoreProcessor> create() {
 		return std::make_unique<AttCore>();
 	}
 	static constexpr char typeID[20] = "ATTENVERT2";
@@ -108,6 +100,6 @@ private:
 	float level1 = 0;
 	float level2 = 0;
 
-	int in1Connected = 0;
-	int in2Connected = 0;
+	bool in1Connected = false;
+	bool in2Connected = false;
 };
