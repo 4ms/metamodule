@@ -26,11 +26,10 @@ public:
 	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
 		: param_queue{pc}
 		, mbox{uiaudiomailbox}
-		, page_manager{patch_list, pp, params, metaparams, uiaudiomailbox}
-	{}
+		, page_manager{patch_list, pp, params, metaparams, uiaudiomailbox} {
+	}
 
-	void start()
-	{
+	void start() {
 
 		params.clear();
 		metaparams.clear();
@@ -51,19 +50,18 @@ public:
 		MMDisplay::start();
 	}
 
-	void update()
-	{
+	void update() {
 		if (MMDisplay::is_ready()) {
 			// Debug::Pin1::high();
 			MMDisplay::clear_ready();
-			//v8:
-			//lv_timer_handler();
+			// v8:
+			// lv_timer_handler();
 			lv_task_handler();
 			// Debug::Pin1::low();
 		}
 	}
 
-	void update_ui_task()
+	void update_ui_task() {
 		// Debug::Pin3::high();
 		param_queue.read_sync(&params, &metaparams);
 		handle_rotary();
@@ -71,8 +69,7 @@ public:
 		// Debug::Pin3::low();
 	}
 
-	void handle_rotary()
-	{
+	void handle_rotary() {
 		auto rotary_pushed_turned = metaparams.rotary_pushed.use_motion();
 		if (rotary_pushed_turned < 0)
 			page_manager.prev_page();
