@@ -9,7 +9,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.224999979
+          "value": 0.187499925
         },
         {
           "id": 1,
@@ -21,7 +21,7 @@
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": 0.162000015
         }
       ],
       "pos": [
@@ -65,7 +65,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.325776368
+          "value": 0.196240187
         }
       ],
       "pos": [
@@ -125,7 +125,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.415499955
+          "value": 0.424499959
         },
         {
           "id": 1,
@@ -137,7 +137,7 @@
         },
         {
           "id": 3,
-          "value": 0.26699999
+          "value": 0.360000014
         }
       ],
       "pos": [
@@ -153,7 +153,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.416000217
+          "value": 0.592000127
         }
       ],
       "pos": [
@@ -169,7 +169,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.425999939
+          "value": 0.0
         },
         {
           "id": 1,
@@ -181,7 +181,7 @@
         },
         {
           "id": 3,
-          "value": 0.443999916
+          "value": 0.0
         }
       ],
       "pos": [
@@ -250,38 +250,17 @@
       "params": [
         {
           "id": 0,
-          "value": 0.410000712
+          "value": 0.415000021
         },
         {
           "id": 1,
-          "value": 0.529800177
+          "value": 0.430999964
         }
       ],
       "leftModuleId": 157,
       "pos": [
         16,
         2
-      ]
-    },
-    {
-      "id": 160,
-      "plugin": "Core",
-      "version": "1.1.6",
-      "model": "AudioInterface",
-      "params": [],
-      "data": {
-        "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: iMac Speakers",
-          "offset": 0,
-          "maxChannels": 8,
-          "sampleRate": 44100,
-          "blockSize": 256
-        }
-      },
-      "pos": [
-        50,
-        0
       ]
     },
     {
@@ -292,11 +271,11 @@
       "params": [
         {
           "id": 0,
-          "value": 0.415499955
+          "value": 0.424499959
         },
         {
           "id": 1,
-          "value": 0.26699999
+          "value": 0.360000014
         },
         {
           "id": 2,
@@ -316,15 +295,15 @@
         },
         {
           "id": 6,
-          "value": 0.224999979
+          "value": 0.187499925
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 0.162000015
         },
         {
           "id": 8,
-          "value": 0.925499976
+          "value": 0.557499886
         },
         {
           "id": 9,
@@ -396,6 +375,46 @@
             "RangeMax": 1.0
           },
           {
+            "DstModID": 126,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 174,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 126,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 174,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 151,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 174,
+            "SrcObjID": 4,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 151,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 174,
+            "SrcObjID": 5,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
             "DstModID": 125,
             "DstObjID": 0,
             "DstObjType": "Knob",
@@ -426,6 +445,26 @@
             "RangeMax": 0.352000415
           },
           {
+            "DstModID": 158,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 174,
+            "SrcObjID": 9,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.415000021,
+            "RangeMax": 0.618000388
+          },
+          {
+            "DstModID": 158,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 174,
+            "SrcObjID": 10,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.430999964,
+            "RangeMax": 0.633000076
+          },
+          {
             "DstModID": 150,
             "DstObjID": 0,
             "DstObjType": "Knob",
@@ -433,10 +472,10 @@
             "SrcObjID": 11,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
-            "RangeMax": 0.416000217
+            "RangeMax": 0.592000127
           }
         ],
-        "PatchName": "QuadDjembe2"
+        "PatchName": "QuadDjembe"
       },
       "pos": [
         59,
