@@ -54,22 +54,21 @@ public:
 	void update()
 	{
 		if (MMDisplay::is_ready()) {
-			Debug::Pin1::high();
+			// Debug::Pin1::high();
 			MMDisplay::clear_ready();
 			//v8:
 			//lv_timer_handler();
 			lv_task_handler();
-			Debug::Pin1::low();
+			// Debug::Pin1::low();
 		}
 	}
 
 	void update_ui_task()
-	{
-		Debug::Pin3::high();
+		// Debug::Pin3::high();
 		param_queue.read_sync(&params, &metaparams);
 		handle_rotary();
 		page_manager.update_current_page();
-		Debug::Pin3::low();
+		// Debug::Pin3::low();
 	}
 
 	void handle_rotary()
