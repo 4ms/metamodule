@@ -7,21 +7,61 @@
 
 enum class MappableJackType { Input, Output };
 
-template<MappableJackType InputOrOutput, typename BaseJackT>
-class MappableJack : public BaseJackT {
-public:
-	MappableJack() = default;
+class MapButton : public Widget {
+	LabelButtonID::Types objType;
 
-	void draw(const typename BaseJackT::DrawArgs &args) override
+public:
+	MapButton(LabelButtonID::Types parent_type)
+		: objType{parent_type}
+	{}
+
+	void draw(const DrawArgs &args) override
 	{
-		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType)) {
+		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == objType)) {
 			nvgBeginPath(args.vg);
-			const float margin = 0;
-			nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y + margin);
+			nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y);
 			NVGcolor color = rack::color::alpha(rack::color::YELLOW, 0.25f);
 			nvgFillColor(args.vg, color);
 			nvgFill(args.vg);
+		} else {
+			nvgBeginPath(args.vg);
+			nvgRect(args.vg, -this->box.size.x / 2, -this->box.size.y / 2, this->box.size.x, this->box.size.y);
+			NVGcolor color = rack::color::alpha(rack::color::RED, 0.25f);
+			nvgFillColor(args.vg, color);
+			nvgFill(args.vg);
 		}
+	}
+
+	void onButton(const event::Button &e) override
+	{
+		e.setTarget(this->parent);
+		printf("clicked: size %f,%f pos %f,%f\n", this->box.size.x, this->box.size.y, this->box.pos.x, this->box.pos.y);
+	}
+};
+
+template<MappableJackType InputOrOutput, typename BaseJackT>
+class MappableJack : public BaseJackT {
+	MapButton *border;
+
+public:
+	MappableJack()
+	{
+		border = new MapButton{getId().objType};
+		this->addChild(border);
+		border->box.size = Vec{this->box.size.x + 10, this->box.size.y + 10};
+		border->box.pos = Vec{-5, -5}; // Vec{this->box.pos.x - 5, this->box.pos.y - 5};
+	}
+
+	void draw(const typename BaseJackT::DrawArgs &args) override
+	{
+		// if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType)) {
+		// 	nvgBeginPath(args.vg);
+		// 	const float margin = 0;
+		// 	nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y + margin);
+		// 	NVGcolor color = rack::color::alpha(rack::color::YELLOW, 0.25f);
+		// 	nvgFillColor(args.vg, color);
+		// 	nvgFill(args.vg);
+		// }
 
 		BaseJackT::draw(args);
 
