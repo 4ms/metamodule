@@ -92,6 +92,7 @@ void CommModuleWidget::addLabeledOutputMM(const std::string labelText, int outpu
 
 void CommModuleWidget::addLabeledOutputPx(const std::string labelText, int outputID, Vec posPx)
 {
+	printf("addLabeledOutput: pos = %f,%f\n", posPx.x, posPx.y);
 	addLabel(labelText, posPx, {LabelButtonID::Types::OutputJack, outputID, -1});
 	addOutput(createOutputCentered<MappableOutputJack<PJ301MPort>>(posPx, module, outputID));
 }

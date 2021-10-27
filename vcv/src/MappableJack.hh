@@ -7,70 +7,71 @@
 
 enum class MappableJackType { Input, Output };
 
-class MapButton : public Button {
-	LabelButtonID::Types objType;
+// class MapButton : public Button {
+// 	LabelButtonID::Types objType;
 
-public:
-	MapButton(LabelButtonID::Types parent_type)
-		: objType{parent_type}
-	{}
+// public:
+// 	MapButton(LabelButtonID::Types parent_type)
+// 		: objType{parent_type}
+// 	{}
 
-	void draw(const DrawArgs &args) override
-	{
-		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == objType)) {
-			nvgBeginPath(args.vg);
-			nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y);
-			NVGcolor color = rack::color::alpha(rack::color::YELLOW, 0.25f);
-			nvgFillColor(args.vg, color);
-			nvgFill(args.vg);
-		} else {
-			nvgBeginPath(args.vg);
-			nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
-			NVGcolor color = rack::color::alpha(rack::color::RED, 0.25f);
-			nvgFillColor(args.vg, color);
-			nvgFill(args.vg);
-		}
-	}
-	void onButton(const event::Button &e) override
-	{
-		printf("onButton\n");
-		// this->parent->onButton(e);
-		// e.setTarget(this->parent);
-	}
+// 	void draw(const DrawArgs &args) override
+// 	{
+// 		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == objType)) {
+// 			nvgBeginPath(args.vg);
+// 			nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y);
+// 			NVGcolor color = rack::color::alpha(rack::color::YELLOW, 0.25f);
+// 			nvgFillColor(args.vg, color);
+// 			nvgFill(args.vg);
+// 		} else {
+// 			nvgBeginPath(args.vg);
+// 			nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
+// 			NVGcolor color = rack::color::alpha(rack::color::RED, 0.25f);
+// 			nvgFillColor(args.vg, color);
+// 			nvgFill(args.vg);
+// 		}
+// 	}
+// 	void onButton(const event::Button &e) override
+// 	{
+// 		printf("onButton\n");
+// 		// this->parent->onButton(e);
+// 		// e.setTarget(this->parent);
+// 	}
 
-	void onDragStart(const event::DragStart &e) override
-	{
-		printf("onDragStart\n");
-		// this->parent->onDragStart(e);
-		// e.setTarget(this->parent);
-	}
-};
+// 	void onDragStart(const event::DragStart &e) override
+// 	{
+// 		printf("onDragStart\n");
+// 		// this->parent->onDragStart(e);
+// 		// e.setTarget(this->parent);
+// 	}
+// };
 
 template<MappableJackType InputOrOutput, typename BaseJackT>
 class MappableJack : public BaseJackT {
 	// BaseJackT *jack;
-	MapButton *border;
+	// MapButton *border;
 
 public:
 	MappableJack()
 	{
-		// jack = new BaseJackT;
-		// addChild(jack);
-		// jack->box.size = this->box.size;
-		border = new MapButton{getId().objType};
 		const float margin = 10;
-		this->box.size = Vec{this->box.size.x + margin * 2, this->box.size.y + margin * 2};
-		this->box.pos = Vec{-margin, -margin};
-		border->box = this->box;
-		this->addChild(border);
+		this->sw->box.pos = this->sw->box.pos.plus(Vec{margin/2, margin/2});
+		this->fb->box.pos = this->fb->box.pos.plus(Vec{margin/2, margin/2});
+		this->box = this->box.grow(Vec{margin, margin});
+		// this->box.pos = this->box.pos.minus(Vec{margin,  margin});
+		// this->box.size = Vec{this->box.size.x + margin * 2, this->box.size.y + margin * 2};
+		printf("MappableJack(): fb->box.pos = %f,%f size=%f,%f\n",
+			   this->fb->box.pos.x,
+			   this->fb->box.pos.y,
+			   this->fb->box.size.x,
+			   this->fb->box.size.y);
 	}
 
 	void draw(const typename BaseJackT::DrawArgs &args) override
 	{
 		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType)) {
 			nvgBeginPath(args.vg);
-			const float margin = 0;
-			nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y + margin);
+			nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
 			NVGcolor color = rack::color::alpha(rack::color::YELLOW, 0.25f);
 			nvgFillColor(args.vg, color);
 			nvgFill(args.vg);
@@ -93,24 +94,31 @@ public:
 	void onDragStart(const event::DragStart &e) override
 	{
 		printf("MappableJack got onDragStart\n");
+		printf(
+			"    box.pos = %f,%f size=%f,%f\n", this->box.pos.x, this->box.pos.y, this->box.size.x, this->box.size.y);
 	}
 
 	void onButton(const event::Button &e) override
 	{
 		printf("MappableJack got onButton\n");
 
-		OpaqueWidget::onButton(e);
-
 		// Register this jack with CentralData as the "TouchedJack",
 		// Hub jacks can use this to determine what jack you clicked on after clicking on the Hub Jack Mapping Button,
 		// when creating a new mapping
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
-			centralData->registerTouchedJack(getId());
-			e.consume(this);
+			printf("MappableJack got left click\n");
+			if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType)) {
+				printf("MappableJack registered touchedJack\n");
+				centralData->registerTouchedJack(getId());
+				OpaqueWidget::onButton(e);
+				e.consume(this);
+			}
 		}
 
 		// Right click to open context menu
-		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
+		else if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0)
+		{
+			OpaqueWidget::onButton(e);
 			ui::Menu *menu = createMenu();
 
 			if ((getId().moduleID >= 0) && centralData->isLabelButtonDstMapped(getId())) {
@@ -126,7 +134,8 @@ public:
 				menu->addChild(label);
 			}
 			e.consume(this);
-		}
+		} else
+			OpaqueWidget::onButton(e);
 	}
 
 private:
