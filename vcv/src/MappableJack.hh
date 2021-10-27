@@ -55,8 +55,9 @@ public:
 	MappableJack()
 	{
 		const float margin = 10;
-		this->sw->box.pos = this->sw->box.pos.plus(Vec{margin/2, margin/2});
-		this->fb->box.pos = this->fb->box.pos.plus(Vec{margin/2, margin/2});
+		this->sw->box.pos = this->sw->box.pos.plus(Vec{margin / 2, margin / 2});
+		this->fb->box.pos = this->fb->box.pos.plus(Vec{margin / 2, margin / 2});
+		this->shadow->box.pos = this->shadow->box.pos.plus(Vec{margin / 2, margin / 2});
 		this->box = this->box.grow(Vec{margin, margin});
 		// this->box.pos = this->box.pos.minus(Vec{margin,  margin});
 		// this->box.size = Vec{this->box.size.x + margin * 2, this->box.size.y + margin * 2};
