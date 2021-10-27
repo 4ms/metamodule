@@ -7,7 +7,7 @@
 
 enum class MappableJackType { Input, Output };
 
-class MapButton : public Widget {
+class MapButton : public Button {
 	LabelButtonID::Types objType;
 
 public:
@@ -25,43 +25,56 @@ public:
 			nvgFill(args.vg);
 		} else {
 			nvgBeginPath(args.vg);
-			nvgRect(args.vg, -this->box.size.x / 2, -this->box.size.y / 2, this->box.size.x, this->box.size.y);
+			nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
 			NVGcolor color = rack::color::alpha(rack::color::RED, 0.25f);
 			nvgFillColor(args.vg, color);
 			nvgFill(args.vg);
 		}
 	}
-
 	void onButton(const event::Button &e) override
 	{
-		e.setTarget(this->parent);
-		printf("clicked: size %f,%f pos %f,%f\n", this->box.size.x, this->box.size.y, this->box.pos.x, this->box.pos.y);
+		printf("onButton\n");
+		// this->parent->onButton(e);
+		// e.setTarget(this->parent);
+	}
+
+	void onDragStart(const event::DragStart &e) override
+	{
+		printf("onDragStart\n");
+		// this->parent->onDragStart(e);
+		// e.setTarget(this->parent);
 	}
 };
 
 template<MappableJackType InputOrOutput, typename BaseJackT>
 class MappableJack : public BaseJackT {
+	// BaseJackT *jack;
 	MapButton *border;
 
 public:
 	MappableJack()
 	{
+		// jack = new BaseJackT;
+		// addChild(jack);
+		// jack->box.size = this->box.size;
 		border = new MapButton{getId().objType};
+		const float margin = 10;
+		this->box.size = Vec{this->box.size.x + margin * 2, this->box.size.y + margin * 2};
+		this->box.pos = Vec{-margin, -margin};
+		border->box = this->box;
 		this->addChild(border);
-		border->box.size = Vec{this->box.size.x + 10, this->box.size.y + 10};
-		border->box.pos = Vec{-5, -5}; // Vec{this->box.pos.x - 5, this->box.pos.y - 5};
 	}
 
 	void draw(const typename BaseJackT::DrawArgs &args) override
 	{
-		// if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType)) {
-		// 	nvgBeginPath(args.vg);
-		// 	const float margin = 0;
-		// 	nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y + margin);
-		// 	NVGcolor color = rack::color::alpha(rack::color::YELLOW, 0.25f);
-		// 	nvgFillColor(args.vg, color);
-		// 	nvgFill(args.vg);
-		// }
+		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType)) {
+			nvgBeginPath(args.vg);
+			const float margin = 0;
+			nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y + margin);
+			NVGcolor color = rack::color::alpha(rack::color::YELLOW, 0.25f);
+			nvgFillColor(args.vg, color);
+			nvgFill(args.vg);
+		}
 
 		BaseJackT::draw(args);
 
@@ -77,8 +90,15 @@ public:
 		}
 	}
 
+	void onDragStart(const event::DragStart &e) override
+	{
+		printf("MappableJack got onDragStart\n");
+	}
+
 	void onButton(const event::Button &e) override
 	{
+		printf("MappableJack got onButton\n");
+
 		OpaqueWidget::onButton(e);
 
 		// Register this jack with CentralData as the "TouchedJack",
