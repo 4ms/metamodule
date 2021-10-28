@@ -26,14 +26,15 @@ void HubMapButton::draw(const DrawArgs &args)
 	_updateState();
 
 	// Draw huge background rect to highlight a mapping has begun from this knob
-	if (isCurrentMapSrc) {
+	if (isCurrentMapSrc || _hovered) {
 		float padding_x = 2;
 		auto knobNum = id.objID;
 		nvgBeginPath(args.vg);
 		nvgRoundedRect(args.vg, padding_x, 0, box.size.x - padding_x * 2, box.size.y, 5.0);
 		nvgStrokeColor(args.vg, rack::color::WHITE);
 		nvgStrokeWidth(args.vg, 0.0);
-		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color[knobNum], 0.75f));
+		float alpha = isCurrentMapSrc ? 0.75 : 0.5;
+		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color[knobNum], alpha));
 		nvgStroke(args.vg);
 		nvgFill(args.vg);
 	}
@@ -75,6 +76,22 @@ void HubMapButton::onDragStart(const event::DragStart &e)
 
 	if (quantity)
 		quantity->setMax();
+}
+void HubMapButton::onHover(const event::Hover &e)
+{
+	e.consume(this);
+}
+
+void HubMapButton::onLeave(const event::Leave &e)
+{
+	_hovered = false;
+	e.consume(this);
+}
+
+void HubMapButton::onEnter(const event::Enter &e)
+{
+	_hovered = true;
+	e.consume(this);
 }
 
 bool HubMapButton::registerMapping(int moduleId, int objId)

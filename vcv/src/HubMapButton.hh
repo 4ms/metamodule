@@ -11,6 +11,9 @@ public:
 	{}
 	void draw(const DrawArgs &args) override;
 	void onDragStart(const event::DragStart &e) override;
+	void onHover(const event::Hover &e) override;
+	void onLeave(const event::Leave &e) override;
+	void onEnter(const event::Enter &e) override;
 
 	bool registerMapping(int moduleId, int objId);
 
@@ -22,5 +25,6 @@ public:
 private:
 	void _createMapping(LabelButtonID srcId);
 	void _updateState();
+	bool _hovered{false};
 	CommModuleWidget &_parent;
 };
