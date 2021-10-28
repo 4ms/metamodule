@@ -3,7 +3,7 @@
 #include "hub_knob_menu.hh"
 #include "paletteHub.hh"
 #include "plugin.hpp"
-#include <concepts>
+// #include <concepts>
 #include <rack.hpp>
 
 enum class MappableJackType { Input, Output };
@@ -12,58 +12,57 @@ template<MappableJackType InputOrOutput, typename BaseJackT>
 // requires(std::is_base_of<app::SvgPort, BaseJackT>() == true)
 class MappableJack : public BaseJackT {
 	static_assert(std::is_base_of<app::SvgPort, BaseJackT>(), "Jack class must derive from SvgPort");
+	static constexpr float margin = 10;
 
 public:
 	MappableJack()
 	{
-		const float margin = 10;
 		this->sw->box.pos = this->sw->box.pos.plus(Vec{margin / 2, margin / 2});
 		this->fb->box.pos = this->fb->box.pos.plus(Vec{margin / 2, margin / 2});
 		this->shadow->box.pos = this->shadow->box.pos.plus(Vec{margin / 2, margin / 2});
 		this->box = this->box.grow(Vec{margin, margin});
-		printf("MappableJack(): fb->box.pos = %f,%f size=%f,%f\n",
-			   this->fb->box.pos.x,
-			   this->fb->box.pos.y,
-			   this->fb->box.size.x,
-			   this->fb->box.size.y);
 	}
 
 	void draw(const typename BaseJackT::DrawArgs &args) override
 	{
-		if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType)) {
-			nvgBeginPath(args.vg);
-			nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
-			NVGcolor color = rack::color::alpha(rack::color::YELLOW, 0.25f);
-			nvgFillColor(args.vg, color);
-			nvgFill(args.vg);
-			NVGcolor strokecolor = rack::color::alpha(rack::color::YELLOW, 0.75f);
-			nvgStrokeColor(args.vg, strokecolor);
-			nvgStrokeWidth(args.vg, 2);
-			nvgStroke(args.vg);
-		}
-
 		BaseJackT::draw(args);
+		if (centralData->isMappingInProgress()) {
+			auto src = centralData->getMappingSource();
+			if (src.objType == getId().objType) {
+				auto srcId = src.objID;
+				nvgBeginPath(args.vg);
+				nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
+				float alpha = this->hovered ? 0.75 : 0.4;
+				NVGcolor color = rack::color::alpha(PaletteHub::color[srcId], alpha);
+				nvgFillColor(args.vg, color);
+				nvgFill(args.vg);
+			} else {
+				nvgBeginPath(args.vg);
+				nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
+				NVGcolor color = rack::color::alpha(color::WHITE, 0.5f);
+				nvgFillColor(args.vg, color);
+				nvgFill(args.vg);
+				// dim out BaseJackT::draw()?
+			}
+		}
 
 		auto id = getId();
 		if ((id.moduleID >= 0) && centralData->isLabelButtonDstMapped(id)) {
 			int srcPortId = centralData->getMappedSrcFromDst(id).objID;
 			NVGcolor color = PaletteHub::color[srcPortId];
+			Rect box = this->box.grow(Vec{-margin / 2, -margin / 2});
 			if constexpr (InputOrOutput == MappableJackType::Output)
-				MapMark::markOutputJack(args.vg, this->box, color);
+				MapMark::markOutputJack(args.vg, box, color);
 			else
-				MapMark::markInputJack(args.vg, this->box, color);
+				MapMark::markInputJack(args.vg, box, color);
 		}
 	}
 
 	void onDragStart(const event::DragStart &e) override
 	{
-		printf("MappableJack got onDragStart\n");
-
 		if (!(centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType))) {
-			printf("MappableJack onDragStart not mapping, fwd to PortWidget\n");
 			PortWidget::onDragStart(e);
 		} else {
-			printf("MappableJack onDragStart is mapping, registered touchedJack\n");
 			centralData->registerTouchedJack(getId());
 			e.consume(this);
 		}
@@ -71,7 +70,6 @@ public:
 
 	void onButton(const event::Button &e) override
 	{
-		printf("MappableJack got onButton\n");
 		OpaqueWidget::onButton(e);
 
 		// Right click to open context menu
@@ -91,6 +89,11 @@ public:
 			}
 			e.consume(this);
 		}
+	}
+
+	void onHover(const event::Hover &e) override
+	{
+		e.consume(this);
 	}
 
 private:
