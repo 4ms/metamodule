@@ -6,15 +6,15 @@ struct MapMark {
 
 	static void markInputJack(NVGcontext *vg, rack::math::Rect box, NVGcolor color)
 	{
-		const float radius = 4.f;
+		const float base_size = 4.f;
 		const float extraHeight = 3.f;
-		const float widthRatio = 0.66f;
+		const float widthRatio = 0.80f;
 		nvgBeginPath(vg);
 		nvgRect(vg,
-				box.size.x - radius * widthRatio,
-				box.size.y - radius - extraHeight,
-				radius * widthRatio,
-				radius + extraHeight);
+				box.size.x - base_size * widthRatio,
+				box.size.y - base_size - extraHeight,
+				base_size * widthRatio,
+				base_size + extraHeight);
 		nvgFillColor(vg, color);
 		nvgFill(vg);
 		nvgStrokeColor(vg, rack::color::mult(color, 0.5f));
