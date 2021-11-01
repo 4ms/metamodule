@@ -8,6 +8,20 @@
 
 using namespace MathTools;
 
+struct LFOCoreDefs {
+	using NameString = StaticString<CoreProcessor::NameChars>;
+	using DescString = StaticString<CoreProcessor::LongNameChars>;
+
+	static inline const int NumInJacks = 2;
+	static inline const int NumOutJacks = 1;
+	static inline const int NumKnobs = 3;
+
+	static inline const std::array<NameString, NumKnobs> KnobNames{"Freq", "Phase", "Level"};
+	static inline const std::array<NameString, NumOutJacks> OutJackNames{"Sine"};
+	static inline const std::array<NameString, NumInJacks> InJackNames{"Freq", "Reset"};
+	static inline const DescString description{"SineLFO"};
+};
+
 class NodeLFOCore : public CoreProcessor {
 public:
 	static inline const int NumInJacks = 2;
@@ -19,8 +33,7 @@ public:
 	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Freq", "Reset"};
 	static inline const StaticString<LongNameChars> description{"SineLFO"};
 
-	NodeLFOCore()
-	{
+	NodeLFOCore() {
 		freqJack = 0.f;
 		resetJack = 0.f;
 		sinOut = 0.f;
@@ -29,15 +42,13 @@ public:
 	NodeLFOCore(float &nFreq, float &nReset, float &nOut)
 		: freqJack{nFreq}
 		, resetJack{nReset}
-		, sinOut{nOut}
-	{
+		, sinOut{nOut} {
 		freqJack = 0.f;
 		resetJack = 0.f;
 		sinOut = 0.f;
 	}
 
-	virtual void update() override
-	{
+	virtual void update() override {
 		check_changes();
 
 		if (doReset) {
@@ -51,10 +62,9 @@ public:
 		sinOut = sinTable.interp_wrap(phaccu + phaseOffset) * level;
 	}
 
-	void check_changes()
-	{
-		//Freq jack range is -10 .. 10 octaves,
-		//Freq jack expects -1..+1 to represent -10V to +10V
+	void check_changes() {
+		// Freq jack range is -10 .. 10 octaves,
+		// Freq jack expects -1..+1 to represent -10V to +10V
 		if (freqJack.isChanged()) {
 			float val = freqJack.getValue();
 			if (val == 0.f)
@@ -83,10 +93,9 @@ public:
 	}
 
 	//
-	void set_param(const int param_id, const float val) override
-	{
+	void set_param(const int param_id, const float val) override {
 		if (param_id == 0) {
-			knob_frequency = exp10Table.closest(constrain(val, 0.f, 1.f)); //knob range is 10 octaves
+			knob_frequency = exp10Table.closest(constrain(val, 0.f, 1.f)); // knob range is 10 octaves
 			combineKnobCVFreq();
 		}
 		if (param_id == 1) {
@@ -97,13 +106,11 @@ public:
 		}
 	}
 
-	void set_samplerate(const float sr) override
-	{
+	void set_samplerate(const float sr) override {
 		sampleRate = sr;
 	}
 
-	void set_input(const int input_id, const float val) override
-	{
+	void set_input(const int input_id, const float val) override {
 		if (input_id == 0) {
 			freqJack = val;
 		}
@@ -112,8 +119,7 @@ public:
 		}
 	}
 
-	float get_output(const int output_id) const override
-	{
+	float get_output(const int output_id) const override {
 		if (output_id == 0)
 			return sinOut;
 		return 0.f;
@@ -126,12 +132,10 @@ public:
 	virtual StaticString<LongNameChars> get_description() override { return description; }
 	// clang-format on
 
-	static std::unique_ptr<CoreProcessor> create()
-	{
+	static std::unique_ptr<CoreProcessor> create() {
 		return std::make_unique<NodeLFOCore>();
 	}
-	static std::unique_ptr<CoreProcessor> create(float *nodelist, const uint8_t *idx)
-	{
+	static std::unique_ptr<CoreProcessor> create(float *nodelist, const uint8_t *idx) {
 		return std::make_unique<NodeLFOCore>(nodelist[idx[0]], nodelist[idx[1]], nodelist[idx[2]]);
 	}
 	static constexpr char typeID[20] = "LFOSINE";
@@ -159,8 +163,7 @@ private:
 	bool lastReset = false;
 	bool doReset = false;
 
-	void combineKnobCVFreq()
-	{
+	void combineKnobCVFreq() {
 		frequency = knob_frequency + cv_frequency;
 	}
 };
