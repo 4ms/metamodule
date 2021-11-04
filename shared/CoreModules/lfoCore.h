@@ -39,17 +39,7 @@ public:
 		sinOut = 0.f;
 	}
 
-	NodeLFOCore(float &nFreq, float &nReset, float &nOut)
-		: freqJack{nFreq}
-		, resetJack{nReset}
-		, sinOut{nOut} {
-		freqJack = 0.f;
-		resetJack = 0.f;
-		sinOut = 0.f;
-	}
-
-	virtual void update() override {
-		// check_changes();
+	void update() override {
 
 		if (doReset) {
 			phaccu = 0.f;
@@ -130,20 +120,15 @@ public:
 	static std::unique_ptr<CoreProcessor> create() {
 		return std::make_unique<NodeLFOCore>();
 	}
-	static std::unique_ptr<CoreProcessor> create(float *nodelist, const uint8_t *idx) {
-		return std::make_unique<NodeLFOCore>(nodelist[idx[0]], nodelist[idx[1]], nodelist[idx[2]]);
-	}
 	static constexpr char typeID[20] = "LFOSINE";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
-	static inline bool s_registered_wp =
-		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);
 
 private:
 	const float GateThreshold = 0.1f;
 
-	RefParameter<float> freqJack = nodes[0];
-	RefParameter<float> resetJack = nodes[1];
-	RefParameter<float> sinOut = nodes[2];
+	Parameter<float> freqJack = nodes[0];
+	Parameter<float> resetJack = nodes[1];
+	Parameter<float> sinOut = nodes[2];
 
 	// knobs
 	float phaseOffset = 0;
