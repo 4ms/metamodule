@@ -33,11 +33,7 @@ public:
 	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Freq", "Reset"};
 	static inline const StaticString<LongNameChars> description{"SineLFO"};
 
-	NodeLFOCore() {
-		freqJack = 0.f;
-		resetJack = 0.f;
-		sinOut = 0.f;
-	}
+	NodeLFOCore() = default;
 
 	void update() override {
 
@@ -126,9 +122,9 @@ public:
 private:
 	const float GateThreshold = 0.1f;
 
-	Parameter<float> freqJack = nodes[0];
-	Parameter<float> resetJack = nodes[1];
-	Parameter<float> sinOut = nodes[2];
+	Parameter<float> freqJack{0.f};
+	Parameter<float> resetJack{0.f};
+	Parameter<float> sinOut{0.f};
 
 	// knobs
 	float phaseOffset = 0;
