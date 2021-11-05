@@ -5,19 +5,19 @@ def CHECK(check, desc):
     if check == True:
         print(f"[pass]: {desc}")
     else:
-        print(f"!FAIL!: {desc}")
+        print(f"****FAIL: {desc}")
 
 def CHECK_EQ(actual, expected, desc):
     if actual == expected:
         print(f"[pass]: {desc}")
     else:
-        print(f"**FAIL: {desc}. Actual: {actual} Expected: {expected}")
+        print(f"****FAIL: {desc}. Actual: {actual} Expected: {expected}")
 
 def test_circle_colors():
     # Create test data
     testdata = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 229.55 364.25">
       <g id="components">
-        <circle id="knob-red" cx="1.1" cy="11.11" r="11.34" style="fill: red"/>
+        <circle id="Knob Red" cx="1.1" cy="11.11" r="11.34" style="fill: red"/>
         <circle id="knob-shorthex" cx="2.2" cy="22.22" r="11.34" style="fill: #f00"/>
         <circle id="knob-fullhex" cx="3.3" cy="33.33" r="11.34" style="fill: #ff0000"/>
 
@@ -67,6 +67,8 @@ def test_circle_colors():
     CHECK_EQ(sum(k['knob_style']=='large' for k in components['params']), 1, "... 1 large knob")
     CHECK_EQ(sum(k['default_value']==0.5 for k in components['params']), 1, "... 1 center-det knob")
     CHECK_EQ(sum(k['default_value']==0.0 for k in components['params']), 6, "... 6 default=0 knobs")
+    CHECK_EQ(sum(k['name']=='KNOB_RED' for k in components['params']), 1, "... 1 named 'KNOB_RED'")
+    CHECK_EQ(sum(k['display_name']=='Knob Red' for k in components['params']), 1, "... 1 display named 'Knob Red'")
 
     CHECK_EQ(len(components['inputs']) , 4, "Found 4 input jacks")
     CHECK_EQ(sum(k['signal_type']=='analog' for k in components['inputs']), 3, "... 3 analog inputs")
@@ -84,6 +86,6 @@ def test_circle_colors():
     CHECK_EQ(sum(k['switch_type']=='3-position toggle' for k in components['switches']), 1, "... 1 3pos switch")
     CHECK_EQ(len(components['widgets']) , 3, "Found 3 custom widgets")
 
-##Main
-test_circle_colors()
+if __name__ == "__main__":
+    test_circle_colors()
 
