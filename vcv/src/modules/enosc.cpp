@@ -1,50 +1,49 @@
 #include "CommModule.h"
 #include "CommWidget.h"
+#include "CoreModules/defs/EnOscDefs.hh"
 #include "CoreModules/moduleTypes.h"
 #include "math.hh"
 
-struct EnOsc : CommModule {
+struct EnOscModule : CommModule {
+	using Defs = EnOscDefs;
 
-	enum ParamIds { FREQ_KNOB, SHAPE_KNOB, LEVEL_KNOB, NUM_PARAMS };
-	enum InputIds { FM_INPUT, RESET_INPUT, NUM_INPUTS };
-	enum OutputIds { LFO_OUTPUT, NUM_OUTPUTS };
-	enum LightIds { REC_LIGHT, NUM_LIGHTS };
-
-	LfoModule()
+	EnOscModule()
 	{
-		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		core = ModuleFactory::create("LFOSINE");
-		selfID.typeID = "LFOSINE";
+		configComm(Defs::NumKnobs, Defs::NumInJacks, Defs::NumOutJacks, 0);
+		core = ModuleFactory::create(Defs::slug);
+		selfID.typeID = Defs::slug;
 
-		outputJacks[LfoModule::LFO_OUTPUT]->scale = [](float f) { return f * 5.0f; };
+		// outputJacks[LfoModule::LFO_OUTPUT]->scale = [](float f) { return f * 5.0f; };
 	}
 };
 
-struct LfoWidget : CommModuleWidget {
+struct EnOscWidget : CommModuleWidget {
+	using Defs = EnOscDefs;
 
-	LfoModule *mainModule;
+	CommModule *mainModule;
 
-	Label *valueLabel;
-	Label *recLabel;
-
-	LfoWidget(LfoModule *module)
+	EnOscWidget(CommModule *module)
 	{
 		setModule(static_cast<Module *>(module));
 		mainModule = module;
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/adjTest.svg")));
+		std::string svg_name{Defs::svg_filename}; // clone it because asset::plugin requires a string
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, svg_name)));
 
-		addLabeledKnob("SPEED", LfoModule::FREQ_KNOB, {0, 0});
-		addLabeledKnob("PHASE", LfoModule::SHAPE_KNOB, {0, 1});
-		addLabeledKnob("LEVEL", LfoModule::LEVEL_KNOB, {0, 2});
+		for (auto knob : Defs::Knobs) {
+			addLabeledKnobMM(knob.short_name.data(), knob.id, {knob.x, knob.y});
+		}
 
-		addLabeledInput("FM", LfoModule::FM_INPUT, {0, 2});
-		addLabeledInput("RESET", LfoModule::RESET_INPUT, {0, 1});
+		for (auto injack : Defs::InJacks) {
+			// addLabeledInputMM("FM", LfoModule::FM_INPUT, {0, 2});
+		}
 
-		addLabeledOutput("OUT", LfoModule::LFO_OUTPUT, {0, 0});
+		for (auto outjack : Defs::OutJacks) {
+			// addLabeledOutputMM("OUT", LfoModule::LFO_OUTPUT, {0, 0});
+		}
 
-		addModuleTitle("LFO");
+		addModuleTitle(Defs::slug.data());
 	}
 };
 
-Model *modelLFO = createModel<LfoModule, LfoWidget>("lfo");
+Model *modelEnOsc = createModel<EnOscModule, EnOscWidget>(EnOscDefs::slug.data());

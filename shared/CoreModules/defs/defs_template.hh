@@ -6,9 +6,9 @@
 struct KnobDef {
 	uint32_t id; // matches id used in patch files, and in CoreModule::set_param(id, val)
 
-	// Todo: what units? 72dpi points from top-left? Or 75dpi? Or mm?
-	uint32_t x;
-	uint32_t y;
+	// Todo: what units? mm?
+	float x;
+	float y;
 
 	float default_val;
 	enum { Small, Medium, Large } knob_type;
@@ -24,6 +24,10 @@ struct KnobDef {
 	std::string_view description;
 };
 
+struct InJackDef {};
+
+struct OutJackDef {};
+
 struct ModuleDefsBase {
 
 	static constexpr std::string_view slug{""};
@@ -36,6 +40,12 @@ struct ModuleDefsBase {
 	// Knobs
 	static constexpr uint32_t NumKnobs = 0;
 	static constexpr std::array<KnobDef, NumKnobs> Knobs{};
+
+	static constexpr uint32_t NumInJacks = 0;
+	static constexpr std::array<KnobDef, NumInJacks> InJacks{};
+
+	static constexpr uint32_t NumOutJacks = 0;
+	static constexpr std::array<KnobDef, NumOutJacks> OutJacks{};
 
 	constexpr uint32_t get_width_px() {
 		// 240px = 5.059" so 1HP = 0.2" = 9.488px
