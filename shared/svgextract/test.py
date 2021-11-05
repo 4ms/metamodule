@@ -11,7 +11,7 @@ def CHECK_EQ(actual, expected, desc):
     if actual == expected:
         print(f"[pass]: {desc}")
     else:
-        print(f"!FAIL!: {desc}. Actual: {actual} Expected: {expected}")
+        print(f"**FAIL: {desc}. Actual: {actual} Expected: {expected}")
 
 def test_circle_colors():
     # Create test data
@@ -62,17 +62,27 @@ def test_circle_colors():
     tree = xml.etree.ElementTree.parse(testfilename)
     components = panel_to_components(tree)
     CHECK_EQ(len(components['params']) , 7, "Found 7 knobs")
+    CHECK_EQ(sum(k['knob_style']=='small' for k in components['params']), 2, "... 2 small knobs")
+    CHECK_EQ(sum(k['knob_style']=='medium' for k in components['params']), 4, "... 4 medium knobs")
+    CHECK_EQ(sum(k['knob_style']=='large' for k in components['params']), 1, "... 1 large knob")
+    CHECK_EQ(sum(k['default_value']==0.5 for k in components['params']), 1, "... 1 center-det knob")
+    CHECK_EQ(sum(k['default_value']==0.0 for k in components['params']), 6, "... 6 default=0 knobs")
+
     CHECK_EQ(len(components['inputs']) , 4, "Found 4 input jacks")
+    CHECK_EQ(sum(k['signal_type']=='analog' for k in components['inputs']), 3, "... 3 analog inputs")
+    CHECK_EQ(sum(k['signal_type']=='gate' for k in components['inputs']), 1, "... 1 digital input")
+
     CHECK_EQ(len(components['outputs']) , 4, "Found 4 output jacks")
+    CHECK_EQ(sum(k['signal_type']=='analog' for k in components['outputs']), 3, "... 3 analog outputs")
+    CHECK_EQ(sum(k['signal_type']=='gate' for k in components['outputs']), 1, "... 1 digital output")
+
     CHECK_EQ(len(components['lights']) , 2, "Found 2 lights")
     CHECK_EQ(len(components['switches']) , 4, "Found 4 switches/buttons")
+    CHECK_EQ(sum(k['switch_type']=='latching button' for k in components['switches']), 1, "... 1 latching button")
+    CHECK_EQ(sum(k['switch_type']=='momentary button' for k in components['switches']), 1, "... 1 momentary button")
+    CHECK_EQ(sum(k['switch_type']=='2-position toggle' for k in components['switches']), 1, "... 1 2pos switch")
+    CHECK_EQ(sum(k['switch_type']=='3-position toggle' for k in components['switches']), 1, "... 1 3pos switch")
     CHECK_EQ(len(components['widgets']) , 3, "Found 3 custom widgets")
-    num_small_knobs = sum(k['knob_style']=='small' for k in components['params'])
-    CHECK_EQ(num_small_knobs, 2, "Found 2 small knobs")
-    num_med_knobs = sum(k['knob_style']=='medium' for k in components['params'])
-    CHECK_EQ(num_med_knobs, 4, "Found 4 medium knobs")
-    num_large_knobs = sum(k['knob_style']=='large' for k in components['params'])
-    CHECK_EQ(num_large_knobs, 1, "Found 1 large knob")
 
 ##Main
 test_circle_colors()
