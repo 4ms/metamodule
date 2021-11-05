@@ -257,11 +257,12 @@ p->addModel(model{identifier});
 to the init() function in plugin.cpp.""")
 
 def get_knob_style_from_radius(radius):
-    if radius < 10:
+    r = float(radius)
+    if r < 10:
         return "small"
-    if radius < 15:
+    if r < 15:
         return "medium"
-    if radius < 20:
+    if r < 20:
         return "large"
     return "unknown"
 
