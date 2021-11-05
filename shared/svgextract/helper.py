@@ -258,13 +258,13 @@ to the init() function in plugin.cpp.""")
 
 def get_knob_style_from_radius(radius):
     r = float(radius)
-    if r < 10:
-        return "small"
+    if r < 10 and r > 3:
+        return "small" #<10
     if r < 15:
-        return "medium"
-    if r < 20:
-        return "large"
-    return "unknown"
+        return "medium" #10-15
+    if r < 30:
+        return "large" #15-30
+    return "unknown" #under 3 or over 30 is not a known knob
 
 def panel_to_components(tree):
     ns = {
@@ -292,6 +292,7 @@ def panel_to_components(tree):
     components['outputs'] = []
     components['lights'] = []
     components['widgets'] = []
+    components['switches'] = []
 
     for el in circles + rects:
         c = {}
@@ -366,22 +367,22 @@ def panel_to_components(tree):
 
         #Orange: Button - Latching
         elif color == '#ff8000':
-            components['switch_type'] = "latching button"
+            c['switch_type'] = "latching button"
             components['switches'].append(c)
 
         #Light Orange: Button - Momentary
         elif color == '#ffc000':
-            components['switch_type'] = "momentary button"
+            c['switch_type'] = "momentary button"
             components['switches'].append(c)
 
         #Deep Pink: Switch - 2pos
         elif color == '#ff0080':
-            components['switch_type'] = "2-position toggle"
+            c['switch_type'] = "2-position toggle"
             components['switches'].append(c)
 
         #Hot Pink: Switch - 3pos
         elif color == '#ff00c0':
-            components['switch_type'] = "3-position toggle"
+            c['switch_type'] = "3-position toggle"
             components['switches'].append(c)
 
         elif color == '#ffff00' or color == '#ff0' or color == 'yellow':
@@ -396,6 +397,7 @@ def panel_to_components(tree):
     components['outputs'] = sorted(components['outputs'], key=top_left_sort)
     components['lights'] = sorted(components['lights'], key=top_left_sort)
     components['widgets'] = sorted(components['widgets'], key=top_left_sort)
+    components['switches'] = sorted(components['switches'], key=top_left_sort)
 
     print(f"Found {len(components['params'])} params, {len(components['inputs'])} inputs, {len(components['outputs'])} outputs, {len(components['lights'])} lights, and {len(components['widgets'])} custom widgets.")
     return components

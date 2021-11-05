@@ -7,37 +7,50 @@ def CHECK(check, desc):
     else:
         print(f"!FAIL!: {desc}")
 
+def CHECK_EQ(actual, expected, desc):
+    if actual == expected:
+        print(f"[pass]: {desc}")
+    else:
+        print(f"!FAIL!: {desc}. Actual: {actual} Expected: {expected}")
+
 def test_circle_colors():
     # Create test data
     testdata = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 229.55 364.25">
       <g id="components">
-        <circle cx="175.8" cy="77.47" r="11.34" style="fill: red"/>
-        <circle cx="114.45" cy="61.09" r="11.34" style="fill: red"/>
-        <circle cx="31.7" cy="144.09" r="11.34" style="fill: red"/>
-        <circle cx="52.85" cy="77.47" r="11.34" style="fill: #ff8080"/>
-        <circle cx="61.02" cy="207.97" r="11.34" style="fill: #ff8080"/>
-        <circle cx="167.9" cy="208.04" r="11.34" style="fill: #ff8080"/>
-        <circle cx="197.21" cy="144.09" r="11.34" style="fill: #ff8080"/>
-        <circle cx="114.63" cy="140.8" r="17.01" style="fill: #ff8080"/>
-        <circle cx="114.46" cy="207.68" r="7.09" style="fill: red"/>
-        <circle cx="213.27" cy="102.85" r="8.5" style="fill: #ff0"/>
-        <circle cx="213.27" cy="201.64" r="8.5" style="fill: #ff0"/>
-        <circle cx="15.99" cy="214.89" r="8.5" style="fill: #ff0"/>
-        <circle cx="15.99" cy="102.85" r="8.5" style="fill: #ff0"/>
-        <circle cx="208.59" cy="42.37" r="11.34" style="fill: #ff0"/>
-        <circle cx="20.67" cy="42.37" r="11.34" style="fill: #ff0"/>
-        <circle cx="133.35" cy="262.62" r="11.34" style="fill: lime"/>
-        <circle cx="95.91" cy="262.62" r="11.34" style="fill: lime"/>
-        <circle cx="21.03" cy="262.62" r="11.34" style="fill: lime"/>
-        <circle cx="21.03" cy="305.82" r="11.34" style="fill: lime"/>
-        <circle cx="58.47" cy="275.72" r="11.34" style="fill: lime"/>
-        <circle cx="58.47" cy="318.92" r="11.34" style="fill: lime"/>
-        <circle cx="95.91" cy="305.82" r="11.34" style="fill: lime"/>
-        <circle cx="133.35" cy="305.82" r="11.34" style="fill: lime"/>
-        <circle cx="170.79" cy="275.72" r="7.09" style="fill: lime"/>
-        <circle cx="170.79" cy="318.92" r="7.09" style="fill: lime"/>
-        <circle cx="207.81" cy="262.62" r="11.34" style="fill: blue"/>
-        <circle cx="208.19" cy="305.82" r="11.34" style="fill: blue"/>
+        <circle id="knob-red" cx="1.1" cy="11.11" r="11.34" style="fill: red"/>
+        <circle id="knob-shorthex" cx="2.2" cy="22.22" r="11.34" style="fill: #f00"/>
+        <circle id="knob-fullhex" cx="3.3" cy="33.33" r="11.34" style="fill: #ff0000"/>
+
+        <circle id="knob-center" cx="4.4" cy="44.44" r="11.34" style="fill: #ff8080"/>
+        <circle id="knob-red-big" cx="5.1" cy="11.1" r="15.34" style="fill: red"/>
+        <circle id="knob-red-small" cx="6.1" cy="11.1" r="9.01" style="fill: red"/>
+        <circle id="knob-red-small" cx="7.1" cy="11.1" r="9.01" style="fill: red"/>
+
+        <circle id="in-analog-lime" cx="8.1" cy="88.1" r="5.00" style="fill: lime"/>
+        <circle id="in-analog-0f0" cx="9.1" cy="99.1" r="5.00" style="fill: #0f0"/>
+        <circle id="in-analog-00ff00" cx="10.1" cy="101.1" r="5.00" style="fill: #00ff00"/>
+        <circle id="in-digital" cx="11.1" cy="111.1" r="5.00" style="fill: #80ff80"/>
+
+        <circle id="out-analog-blue" cx="12.1" cy="128.1" r="5.00" style="fill: blue"/>
+        <circle id="out-analog-00f" cx="13.1" cy="139.1" r="5.00" style="fill: #00f"/>
+        <circle id="out-analog-0000ff" cx="14.1" cy="141.1" r="5.00" style="fill: #0000ff"/>
+        <circle id="out-digital" cx="15.1" cy="151.1" r="5.00" style="fill: #8080ff"/>
+
+        <circle id="led" cx="16.1" cy="161.1" r="5.00" style="fill: #f0f"/>
+        <circle id="led" cx="16.1" cy="161.1" r="5.00" style="fill: #ff00ff"/>
+            
+        <circle id="button-latch" cx="17.1" cy="161.1" r="5.00" style="fill: #ff8000"/>
+        <circle id="button-momentary" cx="18.1" cy="161.1" r="5.00" style="fill: #ffc000"/>
+        <circle id="switch-2pos" cx="19.1" cy="161.1" r="5.00" style="fill: #ff0080"/>
+        <circle id="switch-1pos" cx="20.1" cy="161.1" r="5.00" style="fill: #ff00c0"/>
+
+        <circle id="widget-yellow" cx="16.1" cy="161.1" r="5.00" style="fill: yellow"/>
+        <circle id="widget-ff0" cx="16.1" cy="161.1" r="5.00" style="fill: #ff0"/>
+        <circle id="widget-ffff00" cx="16.1" cy="161.1" r="5.00" style="fill: #ffff00"/>
+
+        <circle id="unknown" cx="16.1" cy="161.1" r="5.00" style="fill: #123456"/>
+
+        <path id="ignore-paths" cx="99.1" cy="11.1" r="9.01" style="fill: red"/>
       </g>
     </svg>"""
 
@@ -48,6 +61,19 @@ def test_circle_colors():
 
     tree = xml.etree.ElementTree.parse(testfilename)
     components = panel_to_components(tree)
+    CHECK_EQ(len(components['params']) , 7, "Found 7 knobs")
+    CHECK_EQ(len(components['inputs']) , 4, "Found 4 input jacks")
+    CHECK_EQ(len(components['outputs']) , 4, "Found 4 output jacks")
+    CHECK_EQ(len(components['lights']) , 2, "Found 2 lights")
+    CHECK_EQ(len(components['switches']) , 4, "Found 4 switches/buttons")
+    CHECK_EQ(len(components['widgets']) , 3, "Found 3 custom widgets")
+    num_small_knobs = sum(k['knob_style']=='small' for k in components['params'])
+    CHECK_EQ(num_small_knobs, 2, "Found 2 small knobs")
+    num_med_knobs = sum(k['knob_style']=='medium' for k in components['params'])
+    CHECK_EQ(num_med_knobs, 4, "Found 4 medium knobs")
+    num_large_knobs = sum(k['knob_style']=='large' for k in components['params'])
+    CHECK_EQ(num_large_knobs, 1, "Found 1 large knob")
 
+##Main
 test_circle_colors()
 
