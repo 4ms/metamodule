@@ -31,16 +31,16 @@ struct EnOscWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, svg_name)));
 
 		for (auto knob : Defs::Knobs) {
-			addLabeledKnobMM(knob.short_name.data(), knob.id, {knob.x, knob.y});
+			addLabeledKnobMM(knob.long_name.data(), knob.id, Vec{knob.x, knob.y});
 		}
 
-		for (auto injack : Defs::InJacks) {
-			// addLabeledInputMM("FM", LfoModule::FM_INPUT, {0, 2});
-		}
+		// for (auto injack : Defs::InJacks) {
+		// addLabeledInputMM("FM", LfoModule::FM_INPUT, {0, 2});
+		// }
 
-		for (auto outjack : Defs::OutJacks) {
-			// addLabeledOutputMM("OUT", LfoModule::LFO_OUTPUT, {0, 0});
-		}
+		// for (auto outjack : Defs::OutJacks) {
+		// addLabeledOutputMM("OUT", LfoModule::LFO_OUTPUT, {0, 0});
+		// }
 
 		addModuleTitle(Defs::slug.data());
 	}

@@ -52,8 +52,10 @@ struct ModuleDefsBase {
 		return static_cast<uint32_t>((float)width_hp * 9.488f);
 	}
 
-	static constexpr uint32_t mm2um(float mm) {
-		return static_cast<uint32_t>(1000.f * mm);
+	static constexpr float px2mm_72dpi(float mm) {
+		float inches = mm / 25.4f;
+		constexpr float pix_per_inch = 72.f;
+		return inches * pix_per_inch;
 	}
 
 	// Need a lookup function somewhere LVGL sees, like:

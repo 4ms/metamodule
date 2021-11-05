@@ -1,4 +1,4 @@
-from helper import panel_to_components
+from svgextract import panel_to_components
 import xml.etree.ElementTree
 
 def CHECK(check, desc):
@@ -22,7 +22,7 @@ def test_circle_colors():
         <circle id="knob-fullhex" cx="3.3" cy="33.33" r="11.34" style="fill: #ff0000"/>
 
         <circle id="knob-center" cx="4.4" cy="44.44" r="11.34" style="fill: #ff8080"/>
-        <circle id="knob-red-big" cx="5.1" cy="11.1" r="15.34" style="fill: red"/>
+        <circle id="knob-red-big" cx="5.1" cy="11.1" r="31.38" style="fill: red"/>
         <circle id="knob-red-small" cx="6.1" cy="11.1" r="9.01" style="fill: red"/>
         <circle id="knob-red-small" cx="7.1" cy="11.1" r="9.01" style="fill: red"/>
 

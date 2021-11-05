@@ -62,4 +62,4 @@ extern Model *modelComparator;
 extern Model *modelSend;
 extern Model *modelHubMini;
 extern Model *modelInfosc64bphas;
-// extern Model *modelEnOsc;
+extern Model *modelEnOsc;

@@ -20,6 +20,12 @@
       "tags": []
     },
 	{
+      "slug": "EnOsc",
+      "name": "EnOsc",
+      "description": "Ensemble Oscillator",
+      "tags": []
+	},
+	{
       "slug": "PANEL_MED",
       "name": "PanelMedium",
       "description": "Panel Medium 26HP",

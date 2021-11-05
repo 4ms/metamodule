@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import sys
-import os
+# import os
 import re
-import json
+# import json
 import xml.etree.ElementTree
 
 
@@ -43,16 +43,23 @@ def str_to_identifier(s):
     s = re.sub(r'\W', '_', s)
     return s
 
-
 def get_knob_style_from_radius(radius):
     r = float(radius)
     if r < 10 and r > 3:
-        return "small" #<10
-    if r < 15:
-        return "medium" #10-15
-    if r < 30:
-        return "large" #15-30
-    return "unknown" #under 3 or over 30 is not a known knob
+        return "small" #<10: 8.5 typical
+    if r < 20:
+        return "medium" #10-20: 17.01 typical
+    if r < 40:
+        return "large" #15-40: 31.18 typical
+    return "unknown" #under 3 or over 40 is not a known knob
+
+def get_button_style_from_radius(radius):
+    r = float(radius)
+    if r < 10 and r > 3:
+        return "small" #<10: 7.09 typical?
+    if r < 40:
+        return "medium" #10-40: 11.34 typical
+    return "unknown" #under 3 or over 40 is not a known style
 
 def panel_to_components(tree):
     ns = {
