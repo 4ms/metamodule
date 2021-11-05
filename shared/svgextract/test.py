@@ -67,8 +67,10 @@ def test_circle_colors():
     CHECK_EQ(sum(k['knob_style']=='large' for k in components['params']), 1, "... 1 large knob")
     CHECK_EQ(sum(k['default_value']==0.5 for k in components['params']), 1, "... 1 center-det knob")
     CHECK_EQ(sum(k['default_value']==0.0 for k in components['params']), 6, "... 6 default=0 knobs")
+
     CHECK_EQ(sum(k['name']=='KNOB_RED' for k in components['params']), 1, "... 1 named 'KNOB_RED'")
     CHECK_EQ(sum(k['display_name']=='Knob Red' for k in components['params']), 1, "... 1 display named 'Knob Red'")
+    CHECK_EQ(sum(k['cx']==1.1 and k['cy']==11.11 for k in components['params']), 1, "... 1 knob at x=1.1, y=11.11")
 
     CHECK_EQ(len(components['inputs']) , 4, "Found 4 input jacks")
     CHECK_EQ(sum(k['signal_type']=='analog' for k in components['inputs']), 3, "... 3 analog inputs")
