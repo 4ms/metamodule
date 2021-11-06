@@ -17,22 +17,24 @@ struct EnOscInfo : ModuleInfoBase { //{SLUG}Info
 	static constexpr int NumSwitches = 6;
 
 	static constexpr std::array<KnobDef, NumKnobs> Knobs{{
-		{.id = 0,
-		 .x = px_to_mm<72>(53.68f),
-		 .y = px_to_mm<72>(78.08f),
-		 .default_val = 0.f,
-		 .knob_type = KnobDef::Medium,
-		 .short_name = "Scale",
-		 .long_name = "Scale",
-		 .description = "Scale Selection 1-10"},
-		{.id = 1,
-		 .x = px_to_mm<72>(114.85f),
-		 .y = px_to_mm<72>(61.59f),
-		 .default_val = 0.5f,
-		 .knob_type = KnobDef::Medium,
-		 .short_name = "Spread",
-		 .long_name = "Spread",
-		 .description = "Oscillator Spread"},
+		{
+			.id = 0,
+			.x_mm = px_to_mm<72>(53.68f),
+			.y_mm = px_to_mm<72>(78.08f),
+			.default_val = 0.f,
+			.knob_style = KnobDef::Medium,
+			.short_name = "Scale",
+			.long_name = "Scale",
+		},
+		{
+			.id = 1,
+			.x_mm = px_to_mm<72>(114.85f),
+			.y_mm = px_to_mm<72>(61.59f),
+			.default_val = 0.5f,
+			.knob_style = KnobDef::Medium,
+			.short_name = "Spread",
+			.long_name = "Spread",
+		},
 	}};
 
 	/// not used:

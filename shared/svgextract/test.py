@@ -100,12 +100,6 @@ def test_format_for_display():
     CHECK_EQ(format_for_display("Knob-12"), "Knob-12", "Doesn't strip -##: Knob-12 => Knob-12")
 
 
-def test_components_to_infofile():
-    components = {}
-    components['params'] = []
-    c = {}
-    c['name'] = "Knob 1"
-
 
 if __name__ == "__main__":
     test_circle_colors()

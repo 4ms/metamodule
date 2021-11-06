@@ -1,8 +1,9 @@
 #include "CommModule.h"
 #include "CommWidget.h"
-#include "CoreModules/info/enoscInfo.hh"
+//#include "CoreModules/info/enoscInfo.hh"
 #include "CoreModules/moduleTypes.h"
 #include "math.hh"
+#include "svgextract/test.hpp"
 
 struct EnOscModule : CommModule {
 	using Defs = EnOscInfo;
@@ -31,7 +32,7 @@ struct EnOscWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, svg_name)));
 
 		for (auto knob : Defs::Knobs) {
-			addLabeledKnobMM(knob.long_name.data(), knob.id, Vec{knob.x, knob.y});
+			addLabeledKnobMM(knob.long_name.data(), knob.id, {knob.x_mm, knob.y_mm});
 		}
 
 		// for (auto injack : Defs::InJacks) {

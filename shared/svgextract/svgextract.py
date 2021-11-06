@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-# import os
+import os
 import re
 # import json
 import xml.etree.ElementTree
@@ -43,6 +43,19 @@ def str_to_identifier(s):
     s = re.sub(r'\W', '_', s)
     return s
 
+
+def remove_trailing_dash_number(name):
+    #Chop off -\d$
+    if name[-2:-1] == '-' and name[-1:].isdigit():
+        name = name[:-2]
+    return name
+
+
+def format_for_display(comp_name):
+    comp_name = remove_trailing_dash_number(comp_name)
+    return comp_name.title().replace('_',' ')
+
+
 def get_knob_style_from_radius(radius):
     r = float(radius)
     if r < 10 and r > 3:
@@ -53,6 +66,7 @@ def get_knob_style_from_radius(radius):
         return "Large" #15-40: 31.18 typical
     return "Medium" #under 3 or over 40 is not a known knob
 
+
 def get_button_style_from_radius(radius):
     r = float(radius)
     if r < 10 and r > 3:
@@ -60,6 +74,7 @@ def get_button_style_from_radius(radius):
     if r < 40:
         return "medium" #10-40: 11.34 typical
     return "unknown" #under 3 or over 40 is not a known style
+
 
 def panel_to_components(tree):
     ns = {
@@ -72,6 +87,9 @@ def panel_to_components(tree):
     #TODO: extract size
     #TODO: extract module name (full name)
     #TODO: extract slug
+    #TODO: extract knob long name and description (or is that to be done manually?)
+    #.... maybe SVG id = "ShortName#LongName" or "ShortName"
+    #.... and description is in some help file
     components['HP'] = 16
     components['ModuleName'] = "Ensemble Oscillator"
     components['slug'] = "EnOsc"
@@ -103,8 +121,9 @@ def panel_to_components(tree):
         name = el.get('{http://www.inkscape.org/namespaces/inkscape}label')
         if name is None:
             name = el.get('id')
-        c['name'] = remove_trailing_dash_number(name) #str_to_identifier(name).upper()
-        #c['display_name'] = name
+        c['raw_name'] = name
+        c['display_name'] = format_for_display(name)
+        c['enum_name'] = str_to_identifier(remove_trailing_dash_number(name))
 
         # Get position
         if el.tag == "{http://www.w3.org/2000/svg}rect":
@@ -126,7 +145,6 @@ def panel_to_components(tree):
 
         # Get color
         style = el.get('style')
-        #color_match = re.search(r'fill:\S*#(.{6});', style)
         color_match = re.search(r'fill:\s*(.*)', style)
         color = ''
         color = color_match.group(1).lower() if color_match is not None else ''
@@ -146,22 +164,22 @@ def panel_to_components(tree):
 
         #Green: Input jack, analog (CV or audio): 
         elif color == '#00ff00' or color == '#0f0' or color == 'lime':
-            c['signal_type'] = "analog"
+            c['signal_type'] = "Analog"
             components['inputs'].append(c)
 
         #Light Green: Input jack, digital (gate or trig):
         elif color == '#80ff80':
-            c['signal_type'] = "gate"
+            c['signal_type'] = "Gate"
             components['inputs'].append(c)
 
         #Blue: Output jack, analog (CV or audio)
         elif color == '#0000ff' or color == '#00f' or color == 'blue':
-            c['signal_type'] = "analog"
+            c['signal_type'] = "Analog"
             components['outputs'].append(c)
 
         #Light Blue: Output jack, digital (gate or trig):
         elif color == '#8080ff':
-            c['signal_type'] = "gate"
+            c['signal_type'] = "Gate"
             components['outputs'].append(c)
 
         #Magenta: LED
@@ -170,22 +188,22 @@ def panel_to_components(tree):
 
         #Orange: Button - Latching
         elif color == '#ff8000':
-            c['switch_type'] = "latching button"
+            c['switch_type'] = "LatchingButton"
             components['switches'].append(c)
 
         #Light Orange: Button - Momentary
         elif color == '#ffc000':
-            c['switch_type'] = "momentary button"
+            c['switch_type'] = "MomentaryButton"
             components['switches'].append(c)
 
         #Deep Pink: Switch - 2pos
         elif color == '#ff0080':
-            c['switch_type'] = "2-position toggle"
+            c['switch_type'] = "Toggle2pos"
             components['switches'].append(c)
 
         #Hot Pink: Switch - 3pos
         elif color == '#ff00c0':
-            c['switch_type'] = "3-position toggle"
+            c['switch_type'] = "Toggle3pos"
             components['switches'].append(c)
 
         elif color == '#ffff00' or color == '#ff0' or color == 'yellow':
@@ -205,15 +223,20 @@ def panel_to_components(tree):
     print(f"Found {len(components['params'])} params, {len(components['inputs'])} inputs, {len(components['outputs'])} outputs, {len(components['lights'])} lights, and {len(components['widgets'])} custom widgets.")
     return components
 
-def remove_trailing_dash_number(name):
-    #Chop off -\d$
-    if name[-2:-1] == '-' and name[-1:].isdigit():
-        name = name[:-2]
-    return name
 
-def format_for_display(comp_name):
-    comp_name = remove_trailing_dash_number(comp_name)
-    return comp_name.title().replace('_',' ')
+def make_enum(enum_name, item_prefix, list):
+    source = f"""
+    enum {enum_name} {{"""
+    i = 0
+    for k in list:
+        source += f"""
+        {item_prefix}{k['enum_name']} = {str(i)},"""
+        i = i + 1
+    source += f"""
+    }};"""
+    return source
+
+
 
 def components_to_infofile(components):
     slug = components['slug']
@@ -229,51 +252,92 @@ struct {slug}Info : ModuleInfoBase {{
     static constexpr auto LongNameChars = CoreProcessor::LongNameChars;
 
     static constexpr std::string_view slug{{"{slug}"}};
+    static inline const StaticString<LongNameChars> description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
     static constexpr std::string_view svg_filename{{"res/{slug}-artwork.svg"}};
 
     static constexpr int NumKnobs = {len(components['params'])};
-    static constexpr int NumInJacks = {len(components['inputs'])};
-    static constexpr int NumOutJacks = {len(components['outputs'])};
-    static constexpr int NumSwitches = {len(components['switches'])};
-    
-    enum Knob {{
-        """
-    i = 0
-    for k in components['params']:
-        source += f"""Knob{str_to_identifier(k['name'])} = {str(i)}, 
-        """
-        i = i + 1
-    source += f"""}};
+    {make_enum("", "Knob", components['params'])}
 
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{{{"""
-
     for k in components['params']:
         source += f"""
-        {{.id = {"Knob" + str_to_identifier(k['name'])},
-         .x = px_to_mm<72>({k['cx']}f),
-         .y = px_to_mm<72>({k['cy']}f),
-         .default_val = {k['default_value']},
-         .knob_type = KnobDef::{k['knob_style']},
-         .short_name = "{format_for_display(k['name'])}",
-         .long_name = "{format_for_display(k['name'])}",
-         .description = "{format_for_display(k['name'])}
-         }},""" 
-    
+        {{
+            .id = Knob{k['enum_name']},
+            .x_mm = px_to_mm<72>({k['cx']}f),
+            .y_mm = px_to_mm<72>({k['cy']}f),
+            .short_name = "{k['display_name']}",
+            .long_name = "{k['display_name']}",
+            .default_val = {k['default_value']},
+            .knob_style = KnobDef::{k['knob_style']},
+        }},""" 
     source += f"""
     }}}};
 
-    static inline const StaticString<LongNameChars> description{{"{components['ModuleName']}"}};
+    static constexpr int NumInJacks = {len(components['inputs'])};
+    {make_enum("", "Input", components['inputs'])}
+
+    static constexpr std::array<InJackDef, NumInJacks> Inputs{{{{"""
+    for k in components['inputs']:
+        source += f"""
+        {{
+            .id = Input{k['enum_name']},
+            .x_mm = px_to_mm<72>({k['cx']}f),
+            .y_mm = px_to_mm<72>({k['cy']}f),
+            .short_name = "{k['display_name']}",
+            .long_name = "{k['display_name']}",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
+        }},""" 
+    source += f"""
+    }}}};
+
+    static constexpr int NumOutJacks = {len(components['outputs'])};
+    {make_enum("", "Output", components['outputs'])}
+
+    static constexpr std::array<OutJackDef, NumOutJacks> Outputs{{{{"""
+    for k in components['outputs']:
+        source += f"""
+        {{
+            .id = Output{k['enum_name']},
+            .x_mm = px_to_mm<72>({k['cx']}f),
+            .y_mm = px_to_mm<72>({k['cy']}f),
+            .short_name = "{k['display_name']}",
+            .long_name = "{k['display_name']}",
+            .signal_type = OutJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
+        }},""" 
+    source += f"""
+    }}}};
+
+    static constexpr int NumSwitches = {len(components['switches'])};
+    {make_enum("", "Switch", components['switches'])}
+
+    static constexpr std::array<SwitchDef, NumSwitches> Switches{{{{"""
+    for k in components['switches']:
+        source += f"""
+        {{
+            .id = Switch{k['enum_name']},
+            .x_mm = px_to_mm<72>({k['cx']}f),
+            .y_mm = px_to_mm<72>({k['cy']}f),
+            .short_name = "{k['display_name']}",
+            .long_name = "{k['display_name']}",
+            .switch_type = SwitchDef::{k['switch_type']},
+        }},""" 
+    source += f"""
+    }}}};
+
 }};
 """
     return source
 
-def createinfofile(svgfilename):
+def createinfofile(svgfilename, infofilename):
     print(svgfilename)
     tree = xml.etree.ElementTree.parse(svgfilename)
     components = panel_to_components(tree)
     infofiletext = components_to_infofile(components)
-    print(infofiletext)
+    with open(infofilename, "w") as f:
+        f.write(infofiletext)
+        print(f"Created file: {infofilename}")
 
 def usage(script):
     text = f"""VCV Rack Plugin Helper Utility
@@ -295,7 +359,9 @@ def parse_args(args):
 
     cmd = args.pop(0)
     if cmd == 'createinfo':
-        createinfofile(args.pop(0))
+        inputfile = args.pop(0)
+        outputfile = args.pop(0)
+        createinfofile(inputfile, outputfile)
     # elif cmd == 'createmodule':
     #     create_module(*args)
     # elif cmd == 'createmanifest':

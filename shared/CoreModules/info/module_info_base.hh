@@ -3,41 +3,76 @@
 #include <cstddef>
 #include <string>
 
+// Would be great to use this as a base class for all *DEf classes, but then we can't use direct initialization
+// struct BaseComponentDef {
+// 	uint32_t id;
+
+// 	float x_mm;
+// 	float y_mm;
+
+// 	std::string_view short_name;
+// 	std::string_view long_name;
+// };
+
 struct KnobDef {
-	uint32_t id; // matches id used in patch files, and in CoreModule::set_param(id, val)
+	uint32_t id;
 
-	// Todo: what units? mm?
-	float x;
-	float y;
-
-	float default_val;
-	enum { Small, Medium, Large } knob_type;
-
-	// TODO: should we use these (they're from VCV, I think)
-	// float display_base;
-	// float display_mult;
-	// float display_offset;
-	// std::string units;
+	float x_mm;
+	float y_mm;
 
 	std::string_view short_name;
 	std::string_view long_name;
-	std::string_view description;
+
+	float default_val;
+	enum { Small, Medium, Large } knob_style;
 };
 
-struct InJackDef {};
+struct InJackDef {
+	uint32_t id;
 
-struct OutJackDef {};
+	float x_mm;
+	float y_mm;
 
+	std::string_view short_name;
+	std::string_view long_name;
+
+	float unpatched_val;
+	enum { Analog, Gate } signal_type;
+};
+
+struct OutJackDef {
+	uint32_t id;
+
+	float x_mm;
+	float y_mm;
+
+	std::string_view short_name;
+	std::string_view long_name;
+
+	enum { Analog, Gate } signal_type;
+};
+
+struct SwitchDef {
+	uint32_t id;
+
+	float x_mm;
+	float y_mm;
+
+	std::string_view short_name;
+	std::string_view long_name;
+
+	enum { MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos } switch_type;
+};
+
+// Base structure for a module's ModuleInfo
+// A module's ModuleInfo class should derive from this class
+// and must override all data members with the actual values of the module
 struct ModuleInfoBase {
-
 	static constexpr std::string_view slug{""};
 
-	// Image
 	static constexpr uint32_t width_hp = 0;
-
 	static constexpr std::string_view svg_filename{""};
 
-	// Knobs
 	static constexpr uint32_t NumKnobs = 0;
 	static constexpr std::array<KnobDef, NumKnobs> Knobs{};
 
@@ -47,18 +82,23 @@ struct ModuleInfoBase {
 	static constexpr uint32_t NumOutJacks = 0;
 	static constexpr std::array<KnobDef, NumOutJacks> OutJacks{};
 
+	// Converts HP to px for a 240x320px screen
+	// TODO: make dimensions explicit
 	constexpr uint32_t get_width_px() {
 		// 240px = 5.059" so 1HP = 0.2" = 9.488px
 		return static_cast<uint32_t>((float)width_hp * 9.488f);
 	}
 
+	// Converts px to mm, at a given DPI (template argument)
+	// Useful with 72-dpi SVG files, since VCV Rack's px2mm() assumes 75dpi
 	template<size_t DPI>
 	static constexpr float px_to_mm(float px) {
 		constexpr float pix_per_inch = DPI;
+		constexpr float mm_per_inch = 25.4f;
 		float inches = px / pix_per_inch;
-		return inches * 25.4;
+		return inches * mm_per_inch;
 	}
-
-	// Need a lookup function somewhere LVGL sees, like:
-	// lv_img_dsc_t* get_module_image_from_slug(StaticString<31> slug);
 };
+
+// TODO: Need a lookup function somewhere LVGL sees, like:
+// lv_img_dsc_t* get_module_image_from_slug(StaticString<31> slug);
