@@ -30,6 +30,9 @@ public:
 		return 0.f;
 	}
 
+	void set_samplerate(float sr) override {
+	}
+
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<EnOscCore>(); } //{SLUG}Core
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, description, create);

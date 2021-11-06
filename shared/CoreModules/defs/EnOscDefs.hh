@@ -20,20 +20,16 @@ struct EnOscDefs : ModuleDefsBase { //{SLUG}Defs
 
 	static constexpr std::array<KnobDef, NumKnobs> Knobs{{
 		{.id = 0,
-		 // .x = px2mm_72dpi(77.47f),
-		 // .y = px2mm_72dpi(52.85f),
-		 .x = (53.68f),
-		 .y = (78.08f),
+		 .x = px_to_mm<72>(53.68f),
+		 .y = px_to_mm<72>(78.08f),
 		 .default_val = 0.f,
 		 .knob_type = KnobDef::Medium,
 		 .short_name = "Scale",
 		 .long_name = "Scale",
 		 .description = "Scale Selection 1-10"},
 		{.id = 1,
-		 .x = (114.85f),
-		 .y = (61.59f),
-		 // .x = px2mm_72dpi(61.09f),
-		 // .y = px2mm_72dpi(114.45),
+		 .x = px_to_mm<72>(114.85f),
+		 .y = px_to_mm<72>(61.59f),
 		 .default_val = 0.5f,
 		 .knob_type = KnobDef::Medium,
 		 .short_name = "Spread",
@@ -41,6 +37,7 @@ struct EnOscDefs : ModuleDefsBase { //{SLUG}Defs
 		 .description = "Oscillator Spread"},
 	}};
 
+	/// not used:
 	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{
 		"Scale", "Spread",
 		// "Pitch",
