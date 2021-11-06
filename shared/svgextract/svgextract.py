@@ -46,12 +46,12 @@ def str_to_identifier(s):
 def get_knob_style_from_radius(radius):
     r = float(radius)
     if r < 10 and r > 3:
-        return "small" #<10: 8.5 typical
+        return "Small" #<10: 8.5 typical
     if r < 20:
-        return "medium" #10-20: 17.01 typical
+        return "Medium" #10-20: 17.01 typical
     if r < 40:
-        return "large" #15-40: 31.18 typical
-    return "unknown" #under 3 or over 40 is not a known knob
+        return "Large" #15-40: 31.18 typical
+    return "Medium" #under 3 or over 40 is not a known knob
 
 def get_button_style_from_radius(radius):
     r = float(radius)
@@ -67,6 +67,15 @@ def panel_to_components(tree):
         "inkscape": "http://www.inkscape.org/namespaces/inkscape",
     }
 
+    components = {}
+
+    #TODO: extract size
+    #TODO: extract module name (full name)
+    #TODO: extract slug
+    components['HP'] = 16
+    components['ModuleName'] = "Ensemble Oscillator"
+    components['slug'] = "EnOsc"
+
     # Get components layer
     root = tree.getroot()
     groups = root.findall(".//svg:g[@inkscape:label='components']", ns)
@@ -81,7 +90,6 @@ def panel_to_components(tree):
     circles = components_group.findall(".//svg:circle", ns)
     rects = components_group.findall(".//svg:rect", ns)
 
-    components = {}
     components['params'] = []
     components['inputs'] = []
     components['outputs'] = []
@@ -95,8 +103,8 @@ def panel_to_components(tree):
         name = el.get('{http://www.inkscape.org/namespaces/inkscape}label')
         if name is None:
             name = el.get('id')
-        c['name'] = str_to_identifier(name).upper()
-        c['display_name'] = name
+        c['name'] = remove_trailing_dash_number(name) #str_to_identifier(name).upper()
+        #c['display_name'] = name
 
         # Get position
         if el.tag == "{http://www.w3.org/2000/svg}rect":
@@ -126,13 +134,13 @@ def panel_to_components(tree):
 
         #Red: Default fully-CCW knob
         if color == '#ff0000' or color == '#f00' or color == 'red':
-            c['default_value'] = 0.0
+            c['default_value'] = "0.f"
             c['knob_style'] = get_knob_style_from_radius(el.get('r'))
             components['params'].append(c)
 
         #Light Red/Coral: Center Detent knob
         elif color == '#ff8080':
-            c['default_value'] = 0.5
+            c['default_value'] = "0.5f"
             c['knob_style'] = get_knob_style_from_radius(el.get('r'))
             components['params'].append(c)
 
@@ -197,158 +205,75 @@ def panel_to_components(tree):
     print(f"Found {len(components['params'])} params, {len(components['inputs'])} inputs, {len(components['outputs'])} outputs, {len(components['lights'])} lights, and {len(components['widgets'])} custom widgets.")
     return components
 
+def remove_trailing_dash_number(name):
+    #Chop off -\d$
+    if name[-2:-1] == '-' and name[-1:].isdigit():
+        name = name[:-2]
+    return name
+
+def format_for_display(comp_name):
+    comp_name = remove_trailing_dash_number(comp_name)
+    return comp_name.title().replace('_',' ')
 
 def components_to_infofile(components):
-    source = ""
+    slug = components['slug']
 
-    return source
+    #TODO: embed knob description and long name vs short name in svg
+    source = f"""
+#pragma once
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/info/module_info_base.hh"
 
+struct {slug}Info : ModuleInfoBase {{
+    static constexpr auto NameChars = CoreProcessor::NameChars;
+    static constexpr auto LongNameChars = CoreProcessor::LongNameChars;
 
-def components_to_source(components, slug):
-    identifier = str_to_identifier(slug)
-    source = ""
+    static constexpr std::string_view slug{{"{slug}"}};
+    static constexpr uint32_t width_hp = {components['HP']};
+    static constexpr std::string_view svg_filename{{"res/{slug}-artwork.svg"}};
 
-    source += f"""#include "plugin.hpp"
+    static constexpr int NumKnobs = {len(components['params'])};
+    static constexpr int NumInJacks = {len(components['inputs'])};
+    static constexpr int NumOutJacks = {len(components['outputs'])};
+    static constexpr int NumSwitches = {len(components['switches'])};
+    
+    enum Knob {{
+        """
+    i = 0
+    for k in components['params']:
+        source += f"""Knob{str_to_identifier(k['name'])} = {str(i)}, 
+        """
+        i = i + 1
+    source += f"""}};
 
+    static constexpr std::array<KnobDef, NumKnobs> Knobs{{{{"""
 
-struct {identifier} : Module {{"""
-
-    # Params
-    source += """
-    enum ParamIds {"""
-    for c in components['params']:
+    for k in components['params']:
         source += f"""
-        {c['name']}_PARAM,"""
-    source += """
-        NUM_PARAMS
-    };"""
-
-    # Inputs
-    source += """
-    enum InputIds {"""
-    for c in components['inputs']:
-        source += f"""
-        {c['name']}_INPUT,"""
-    source += """
-        NUM_INPUTS
-    };"""
-
-    # Outputs
-    source += """
-    enum OutputIds {"""
-    for c in components['outputs']:
-        source += f"""
-        {c['name']}_OUTPUT,"""
-    source += """
-        NUM_OUTPUTS
-    };"""
-
-    # Lights
-    source += """
-    enum LightIds {"""
-    for c in components['lights']:
-        source += f"""
-        {c['name']}_LIGHT,"""
-    source += """
-        NUM_LIGHTS
-    };"""
-
-
+        {{.id = {"Knob" + str_to_identifier(k['name'])},
+         .x = px_to_mm<72>({k['cx']}f),
+         .y = px_to_mm<72>({k['cy']}f),
+         .default_val = {k['default_value']},
+         .knob_type = KnobDef::{k['knob_style']},
+         .short_name = "{format_for_display(k['name'])}",
+         .long_name = "{format_for_display(k['name'])}",
+         .description = "{format_for_display(k['name'])}
+         }},""" 
+    
     source += f"""
+    }}}};
 
-    {identifier}() {{
-        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);"""
-
-    for c in components['params']:
-        source += f"""
-        configParam({c['name']}_PARAM, 0.f, 1.f, 0.f, "");"""
-
-    source += """
-    }
-
-    void process(const ProcessArgs& args) override {
-    }
-};"""
-
-    source += f"""
-
-
-struct {identifier}Widget : ModuleWidget {{
-    {identifier}Widget({identifier}* module) {{
-        setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/{slug}.svg")));
-
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));"""
-
-
-    # Params
-    if len(components['params']) > 0:
-        source += "\n"
-    for c in components['params']:
-        if 'x' in c:
-            source += f"""
-        addParam(createParam<RoundBlackKnob>(mm2px(Vec({c['x']}, {c['y']})), module, {identifier}::{c['name']}_PARAM));"""
-        else:
-            source += f"""
-        addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec({c['cx']}, {c['cy']})), module, {identifier}::{c['name']}_PARAM));"""
-
-    # Inputs
-    if len(components['inputs']) > 0:
-        source += "\n"
-    for c in components['inputs']:
-        if 'x' in c:
-            source += f"""
-        addInput(createInput<PJ301MPort>(mm2px(Vec({c['x']}, {c['y']})), module, {identifier}::{c['name']}_INPUT));"""
-        else:
-            source += f"""
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec({c['cx']}, {c['cy']})), module, {identifier}::{c['name']}_INPUT));"""
-
-    # Outputs
-    if len(components['outputs']) > 0:
-        source += "\n"
-    for c in components['outputs']:
-        if 'x' in c:
-            source += f"""
-        addOutput(createOutput<PJ301MPort>(mm2px(Vec({c['x']}, {c['y']})), module, {identifier}::{c['name']}_OUTPUT));"""
-        else:
-            source += f"""
-        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec({c['cx']}, {c['cy']})), module, {identifier}::{c['name']}_OUTPUT));"""
-
-    # Lights
-    if len(components['lights']) > 0:
-        source += "\n"
-    for c in components['lights']:
-        if 'x' in c:
-            source += f"""
-        addChild(createLight<MediumLight<RedLight>>(mm2px(Vec({c['x']}, {c['y']})), module, {identifier}::{c['name']}_LIGHT));"""
-        else:
-            source += f"""
-        addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec({c['cx']}, {c['cy']})), module, {identifier}::{c['name']}_LIGHT));"""
-
-    # Widgets
-    if len(components['widgets']) > 0:
-        source += "\n"
-    for c in components['widgets']:
-        if 'x' in c:
-            source += f"""
-        // mm2px(Vec({c['width']}, {c['height']}))
-        addChild(createWidget<Widget>(mm2px(Vec({c['x']}, {c['y']}))));"""
-        else:
-            source += f"""
-        addChild(createWidgetCentered<Widget>(mm2px(Vec({c['cx']}, {c['cy']}))));"""
-
-    source += f"""
-    }}
+    static inline const StaticString<LongNameChars> description{{"{components['ModuleName']}"}};
 }};
-
-
-Model* model{identifier} = createModel<{identifier}, {identifier}Widget>("{slug}");"""
-
+"""
     return source
 
+def createinfofile(svgfilename):
+    print(svgfilename)
+    tree = xml.etree.ElementTree.parse(svgfilename)
+    components = panel_to_components(tree)
+    infofiletext = components_to_infofile(components)
+    print(infofiletext)
 
 def usage(script):
     text = f"""VCV Rack Plugin Helper Utility
@@ -356,24 +281,8 @@ def usage(script):
 Usage: {script} <command> ...
 Commands:
 
-createplugin <slug> [plugin dir]
-
-    A directory will be created and initialized with a minimal plugin template.
-    If no plugin directory is given, the slug is used.
-
-createmanifest <slug> [plugin dir]
-
-    Creates a `plugin.json` manifest file in an existing plugin directory.
-    If no plugin directory is given, the current directory is used.
-
-createmodule <module slug> [panel file] [source file]
-
-    Adds a new module to the plugin manifest in the current directory.
-    If a panel and source file are given, generates a template source file initialized with components from a panel file.
-    Example:
-        {script} createmodule MyModule res/MyModule.svg src/MyModule.cpp
-
-    See https://vcvrack.com/manual/PanelTutorial.html for creating SVG panel files.
+createinfo [svg file name]
+    Creates a ModuleInfo struct and saves it in a file
 """
     print(text)
 
@@ -384,9 +293,9 @@ def parse_args(args):
         usage(script)
         return
 
-    # cmd = args.pop(0)
-    # if cmd == 'createplugin':
-    #     create_plugin(*args)
+    cmd = args.pop(0)
+    if cmd == 'createinfo':
+        createinfofile(args.pop(0))
     # elif cmd == 'createmodule':
     #     create_module(*args)
     # elif cmd == 'createmanifest':

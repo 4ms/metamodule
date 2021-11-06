@@ -1,4 +1,6 @@
 from svgextract import panel_to_components
+from svgextract import format_for_display
+
 import xml.etree.ElementTree
 
 def CHECK(check, desc):
@@ -62,11 +64,11 @@ def test_circle_colors():
     tree = xml.etree.ElementTree.parse(testfilename)
     components = panel_to_components(tree)
     CHECK_EQ(len(components['params']) , 7, "Found 7 knobs")
-    CHECK_EQ(sum(k['knob_style']=='small' for k in components['params']), 2, "... 2 small knobs")
-    CHECK_EQ(sum(k['knob_style']=='medium' for k in components['params']), 4, "... 4 medium knobs")
-    CHECK_EQ(sum(k['knob_style']=='large' for k in components['params']), 1, "... 1 large knob")
-    CHECK_EQ(sum(k['default_value']==0.5 for k in components['params']), 1, "... 1 center-det knob")
-    CHECK_EQ(sum(k['default_value']==0.0 for k in components['params']), 6, "... 6 default=0 knobs")
+    CHECK_EQ(sum(k['knob_style']=='Small' for k in components['params']), 2, "... 2 small knobs")
+    CHECK_EQ(sum(k['knob_style']=='Medium' for k in components['params']), 4, "... 4 medium knobs")
+    CHECK_EQ(sum(k['knob_style']=='Large' for k in components['params']), 1, "... 1 large knob")
+    CHECK_EQ(sum(k['default_value']=="0.5f" for k in components['params']), 1, "... 1 center-det knob")
+    CHECK_EQ(sum(k['default_value']=="0.f" for k in components['params']), 6, "... 6 default=0 knobs")
 
     CHECK_EQ(sum(k['name']=='KNOB_RED' for k in components['params']), 1, "... 1 named 'KNOB_RED'")
     CHECK_EQ(sum(k['display_name']=='Knob Red' for k in components['params']), 1, "... 1 display named 'Knob Red'")
@@ -88,6 +90,24 @@ def test_circle_colors():
     CHECK_EQ(sum(k['switch_type']=='3-position toggle' for k in components['switches']), 1, "... 1 3pos switch")
     CHECK_EQ(len(components['widgets']) , 3, "Found 3 custom widgets")
 
+def test_format_for_display():
+    CHECK_EQ(format_for_display("Knob-1"), "Knob", "Strips trailing -#: Knob-1 => Knob")
+    CHECK_EQ(format_for_display("Cross_FM-2"), "Cross Fm", "Cross_FM-2")
+    CHECK_EQ(format_for_display("Other_Knob"), "Other Knob", "_ => space: Other_Knob => Other Knob")
+    CHECK_EQ(format_for_display("other_knob"), "Other Knob", "Capitalizes every word: other_knob => Other Knob")
+    CHECK_EQ(format_for_display("Shift--1"), "Shift-", "Can end in a '-': Shift--1 => Shift-")
+    CHECK_EQ(format_for_display("Shift-"), "Shift-", "...Shift- => Shift-")
+    CHECK_EQ(format_for_display("Knob-12"), "Knob-12", "Doesn't strip -##: Knob-12 => Knob-12")
+
+
+def test_components_to_infofile():
+    components = {}
+    components['params'] = []
+    c = {}
+    c['name'] = "Knob 1"
+
+
 if __name__ == "__main__":
     test_circle_colors()
+    test_format_for_display()
 
