@@ -639,12 +639,12 @@
   <g id="components">
     <circle id="Out_B" data-name="Out B" cx="208.7" cy="305.91" r="11.34" style="fill: blue"/>
     <circle id="Out_A" data-name="Out A" cx="208.7" cy="262.78" r="11.34" style="fill: blue"/>
-    <circle id="Freeze" cx="171.32" cy="319.02" r="7.09" style="fill: lime"/>
+    <circle id="Freeze" cx="171.32" cy="319.02" r="7.09" style="fill: #80FF80"/>
     <circle id="Warp" cx="133.86" cy="305.93" r="11.34" style="fill: lime"/>
     <circle id="Twist" cx="96.46" cy="305.93" r="11.34" style="fill: lime"/>
     <circle id="Balance" cx="59" cy="319" r="11.34" style="fill: lime"/>
     <circle id="Root" cx="21.45" cy="305.91" r="11.34" style="fill: lime"/>
-    <circle id="Learn" cx="171.32" cy="275.86" r="7.09" style="fill: lime"/>
+    <circle id="Learn" cx="171.32" cy="275.86" r="7.09" style="fill: #80FF80"/>
     <circle id="Cross_FM" data-name="Cross FM" cx="133.86" cy="262.78" r="11.34" style="fill: lime"/>
     <circle id="Spread" cx="96.46" cy="262.78" r="11.34" style="fill: lime"/>
     <circle id="Scale" cx="59" cy="275.86" r="11.34" style="fill: lime"/>
