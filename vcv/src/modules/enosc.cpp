@@ -1,11 +1,11 @@
 #include "CommModule.h"
 #include "CommWidget.h"
-#include "CoreModules/defs/EnOscDefs.hh"
+#include "CoreModules/info/enoscInfo.hh"
 #include "CoreModules/moduleTypes.h"
 #include "math.hh"
 
 struct EnOscModule : CommModule {
-	using Defs = EnOscDefs;
+	using Defs = EnOscInfo;
 
 	EnOscModule()
 	{
@@ -18,7 +18,7 @@ struct EnOscModule : CommModule {
 };
 
 struct EnOscWidget : CommModuleWidget {
-	using Defs = EnOscDefs;
+	using Defs = EnOscInfo;
 
 	CommModule *mainModule;
 
@@ -46,4 +46,4 @@ struct EnOscWidget : CommModuleWidget {
 	}
 };
 
-Model *modelEnOsc = createModel<EnOscModule, EnOscWidget>(EnOscDefs::slug.data());
+Model *modelEnOsc = createModel<EnOscModule, EnOscWidget>(EnOscInfo::slug.data());

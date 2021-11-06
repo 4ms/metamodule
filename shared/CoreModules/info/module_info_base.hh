@@ -28,7 +28,7 @@ struct InJackDef {};
 
 struct OutJackDef {};
 
-struct ModuleDefsBase {
+struct ModuleInfoBase {
 
 	static constexpr std::string_view slug{""};
 

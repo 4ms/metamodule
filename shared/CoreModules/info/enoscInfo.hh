@@ -1,10 +1,8 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/defs/defs_template.hh"
+#include "CoreModules/info/module_info_base.hh"
 
-// EnOscDefs.hh: //{SLUG}Defs.hh
-
-struct EnOscDefs : ModuleDefsBase { //{SLUG}Defs
+struct EnOscInfo : ModuleInfoBase { //{SLUG}Info
 	static constexpr auto NameChars = CoreProcessor::NameChars;
 	static constexpr auto LongNameChars = CoreProcessor::LongNameChars;
 

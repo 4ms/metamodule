@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/defs/EnOscDefs.hh" //{SLUG}Defs.hh
+#include "CoreModules/info/enoscInfo.hh" //{slug}Info.hh
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "util/math.hh"
@@ -9,7 +9,7 @@
 // TODO: can we make this a template of type EnOscDefs ?
 
 class EnOscCore : public CoreProcessor { //{SLUG}Core
-	using Info = EnOscDefs;				 //{SLUG}Defs
+	using Info = EnOscInfo;				 //{SLUG}Info
 	static constexpr int NumInJacks = Info::NumInJacks;
 	static constexpr int NumOutJacks = Info::NumOutJacks;
 	static constexpr int NumKnobs = Info::NumKnobs;

@@ -198,6 +198,12 @@ def panel_to_components(tree):
     return components
 
 
+def components_to_infofile(components):
+    source = ""
+
+    return source
+
+
 def components_to_source(components, slug):
     identifier = str_to_identifier(slug)
     source = ""
