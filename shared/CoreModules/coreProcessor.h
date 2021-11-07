@@ -3,13 +3,18 @@
 #include <array>
 #include <memory>
 
+// TODO:
+//  - remove nodes[]
+//  - remove Num*
+//  - remove *Names
+//  - maybe make *_name(idx) pure virtual constexpr
+//
 class CoreProcessor {
 public:
 	static const unsigned MAX_JACKS_PER_MODULE = 16;
 	float nodes[MAX_JACKS_PER_MODULE];
 
-	CoreProcessor()
-	{
+	CoreProcessor() {
 		for (unsigned i = 0; i < MAX_JACKS_PER_MODULE; i++)
 			nodes[i] = 0.f;
 	}
@@ -40,13 +45,20 @@ public:
 	virtual StaticString<LongNameChars> get_description() { return description; }
 	// clang-format on
 
-	virtual void mark_all_inputs_unpatched() {}
-	virtual void mark_input_unpatched(const int input_id) {}
-	virtual void mark_input_patched(const int input_id) {}
+	virtual void mark_all_inputs_unpatched() {
+	}
+	virtual void mark_input_unpatched(const int input_id) {
+	}
+	virtual void mark_input_patched(const int input_id) {
+	}
 
-	virtual void mark_all_outputs_unpatched() {}
-	virtual void mark_output_unpatched(const int output_id) {}
-	virtual void mark_output_patched(const int output_id) {}
+	virtual void mark_all_outputs_unpatched() {
+	}
+	virtual void mark_output_unpatched(const int output_id) {
+	}
+	virtual void mark_output_patched(const int output_id) {
+	}
 
-	virtual ~CoreProcessor() {}
+	virtual ~CoreProcessor() {
+	}
 };

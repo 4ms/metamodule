@@ -42,8 +42,7 @@ struct EnOscWidget : CommModuleWidget {
 		setModule(static_cast<Module *>(module));
 		mainModule = module;
 
-		// std::string svg_name{Defs::svg_filename}; // clone it because asset::plugin requires a string
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/16hptemplate.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, Defs::svg_filename.data())));
 
 		for (auto knob : Defs::Knobs) {
 			switch (knob.knob_style) {

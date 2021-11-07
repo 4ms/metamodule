@@ -1,15 +1,12 @@
 #pragma once
-#include "CoreModules/info/enoscInfo.hh" //{slug}Info.hh
+#include "CoreModules/info/enosc_info.hh"
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
-// Generator: SLUG = EnOsc
-// TODO: can we make this a template of type EnOscDefs ?
-
-class EnOscCore : public CoreProcessor { //{SLUG}Core
-	using Info = EnOscInfo;				 //{SLUG}Info
+class EnOscCore : public CoreProcessor {
+	using Info = EnOscInfo;
 	static constexpr int NumInJacks = Info::NumInJacks;
 	static constexpr int NumOutJacks = Info::NumOutJacks;
 	static constexpr int NumKnobs = Info::NumKnobs;
@@ -34,11 +31,11 @@ public:
 	}
 
 	// clang-format off
-	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<EnOscCore>(); } //{SLUG}Core
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<EnOscCore>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, description, create);
-	StaticString<NameChars> knob_name(unsigned idx) override { return (idx < Info::NumKnobs) ? Info::KnobNames[idx] : ""; }
-	StaticString<NameChars> injack_name(unsigned idx) override { return (idx < Info::NumInJacks) ? Info::InJackNames[idx] : ""; }
-	StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < Info::NumOutJacks) ? Info::OutJackNames[idx] : ""; }
+	StaticString<NameChars> knob_name(unsigned idx) override { return (idx < Info::NumKnobs) ? Info::Knobs[idx].short_name : ""; }
+	StaticString<NameChars> injack_name(unsigned idx) override { return (idx < Info::NumInJacks) ? Info::InJacks[idx].short_name: ""; }
+	StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < Info::NumOutJacks) ? Info::OutJacks[idx].short_name : ""; }
 	StaticString<LongNameChars> get_description() override { return Info::description; }
 	// clang-format on
 
