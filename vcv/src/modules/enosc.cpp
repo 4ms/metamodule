@@ -81,10 +81,10 @@ struct EnOscWidget : CommModuleWidget {
 				addParam(createParamCentered<MomentarySwitch<LEDBezel>>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
 				addChild(
 					createLight<LEDBezelLight<WhiteLight>>(mm2px({sw.x_mm - 3.0f, sw.y_mm - 3.0f}), module, light_id));
-				// } else if (sw.switch_type == SwitchDef::Toggle2pos) {
-				// 	addParam(createParamCentered<NKK>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
-				// } else if (sw.switch_type == SwitchDef::Toggle3pos) {
-				// 	addParam(createParamCentered<NKK>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
+			} else if (sw.switch_type == SwitchDef::Toggle2pos) {
+				addParam(createParamCentered<NKK>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
+			} else if (sw.switch_type == SwitchDef::Toggle3pos) {
+				addParam(createParamCentered<NKK>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
 			}
 		}
 
