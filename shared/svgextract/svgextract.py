@@ -15,10 +15,10 @@ class UserException(Exception):
     pass
 
 
-def find(f, array):
-    for a in array:
-        if f(a):
-            return f
+# def find(f, array):
+#     for a in array:
+#         if f(a):
+#             return f
 
 def input_default(prompt, default=""):
     str = input(f"{prompt} [{default}]: ")
@@ -330,14 +330,23 @@ struct {slug}Info : ModuleInfoBase {{
 """
     return source
 
-def createinfofile(svgfilename, infofilename):
-    print(svgfilename)
+
+def createInfoFile(svgfilename, infofilename):
     tree = xml.etree.ElementTree.parse(svgfilename)
     components = panel_to_components(tree)
     infofiletext = components_to_infofile(components)
     with open(infofilename, "w") as f:
         f.write(infofiletext)
-        print(f"Created file: {infofilename}")
+        print(f"Wrote info file: {infofilename}")
+
+
+def extractArtwork(svgfilename, artworkFilename):
+    #artworkFilename = resourceDir + "/" + slug + "_artwork.svg"
+    tree = xml.etree.ElementTree.parse(svgfilename)
+    #tree = extractSvgArtwork(tree)
+    tree.write(artworkFilename)
+    print(f"Wrote artwork file: {artworkFilename}")
+
 
 def usage(script):
     text = f"""VCV Rack Plugin Helper Utility
@@ -345,8 +354,12 @@ def usage(script):
 Usage: {script} <command> ...
 Commands:
 
-createinfo [svg file name]
+createinfo [svg file name] [output ModuleInfo file name]
     Creates a ModuleInfo struct and saves it in a file
+
+extractart [svg file name] [output SVG file name]
+    Saves a new SVG file with the components layer removed
+
 """
     print(text)
 
@@ -358,16 +371,13 @@ def parse_args(args):
         return
 
     cmd = args.pop(0)
+    inputfile = args.pop(0)
+    outputfile = args.pop(0)
     if cmd == 'createinfo':
-        inputfile = args.pop(0)
-        outputfile = args.pop(0)
-        createinfofile(inputfile, outputfile)
-    # elif cmd == 'createmodule':
-    #     create_module(*args)
-    # elif cmd == 'createmanifest':
-    #     create_manifest(*args)
-    # else:
-    #     print(f"Command not found: {cmd}")
+        createInfoFile(inputfile, outputfile)
+    if cmd == 'extractart':
+        extractArtwork(inputfile, outputfile)
+
 
 
 if __name__ == "__main__":
