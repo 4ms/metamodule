@@ -3,17 +3,6 @@
 #include <cstddef>
 #include <string>
 
-// Would be great to use this as a base class for all *DEf classes, but then we can't use direct initialization
-// struct BaseComponentDef {
-// 	uint32_t id;
-
-// 	float x_mm;
-// 	float y_mm;
-
-// 	std::string_view short_name;
-// 	std::string_view long_name;
-// };
-
 struct KnobDef {
 	uint32_t id;
 
@@ -81,6 +70,9 @@ struct ModuleInfoBase {
 
 	static constexpr uint32_t NumOutJacks = 0;
 	static constexpr std::array<KnobDef, NumOutJacks> OutJacks{};
+
+	static constexpr uint32_t NumSwitches = 0;
+	static constexpr std::array<KnobDef, NumSwitches> Switches{};
 
 	// Converts HP to px for a 240x320px screen
 	// TODO: make dimensions explicit

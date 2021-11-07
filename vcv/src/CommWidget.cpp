@@ -106,7 +106,7 @@ void CommModuleWidget::addLabeledToggleMM(const std::string labelText, int light
 {
 	addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px(posMM), module, paramID));
 	addChild(createLight<LEDBezelLight<WhiteLight>>(mm2px({posMM.x - 3.0f, posMM.y - 3.0f}), module, lightID));
-	addLabel(labelText, /*posMM*/ mm2px({posMM.x, posMM.y - 1.f}), {LabelButtonID::Types::Toggle, paramID, -1});
+	addLabel(labelText, mm2px({posMM.x, posMM.y - 1.f}), {LabelButtonID::Types::Toggle, paramID, -1});
 }
 
 void CommModuleWidget::addLabeledMomentary(const std::string labelText, int lightID, int paramID, Vec posGrid)

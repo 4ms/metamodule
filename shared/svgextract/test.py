@@ -70,24 +70,24 @@ def test_circle_colors():
     CHECK_EQ(sum(k['default_value']=="0.5f" for k in components['params']), 1, "... 1 center-det knob")
     CHECK_EQ(sum(k['default_value']=="0.f" for k in components['params']), 6, "... 6 default=0 knobs")
 
-    CHECK_EQ(sum(k['name']=='KNOB_RED' for k in components['params']), 1, "... 1 named 'KNOB_RED'")
+    CHECK_EQ(sum(k['enum_name']=='Knob_Red' for k in components['params']), 1, "... 1 named 'Knob_Red'")
     CHECK_EQ(sum(k['display_name']=='Knob Red' for k in components['params']), 1, "... 1 display named 'Knob Red'")
     CHECK_EQ(sum(k['cx']==1.1 and k['cy']==11.11 for k in components['params']), 1, "... 1 knob at x=1.1, y=11.11")
 
     CHECK_EQ(len(components['inputs']) , 4, "Found 4 input jacks")
-    CHECK_EQ(sum(k['signal_type']=='analog' for k in components['inputs']), 3, "... 3 analog inputs")
-    CHECK_EQ(sum(k['signal_type']=='gate' for k in components['inputs']), 1, "... 1 digital input")
+    CHECK_EQ(sum(k['signal_type']=='Analog' for k in components['inputs']), 3, "... 3 analog inputs")
+    CHECK_EQ(sum(k['signal_type']=='Gate' for k in components['inputs']), 1, "... 1 digital input")
 
     CHECK_EQ(len(components['outputs']) , 4, "Found 4 output jacks")
-    CHECK_EQ(sum(k['signal_type']=='analog' for k in components['outputs']), 3, "... 3 analog outputs")
-    CHECK_EQ(sum(k['signal_type']=='gate' for k in components['outputs']), 1, "... 1 digital output")
+    CHECK_EQ(sum(k['signal_type']=='Analog' for k in components['outputs']), 3, "... 3 analog outputs")
+    CHECK_EQ(sum(k['signal_type']=='Gate' for k in components['outputs']), 1, "... 1 digital output")
 
     CHECK_EQ(len(components['lights']) , 2, "Found 2 lights")
     CHECK_EQ(len(components['switches']) , 4, "Found 4 switches/buttons")
-    CHECK_EQ(sum(k['switch_type']=='latching button' for k in components['switches']), 1, "... 1 latching button")
-    CHECK_EQ(sum(k['switch_type']=='momentary button' for k in components['switches']), 1, "... 1 momentary button")
-    CHECK_EQ(sum(k['switch_type']=='2-position toggle' for k in components['switches']), 1, "... 1 2pos switch")
-    CHECK_EQ(sum(k['switch_type']=='3-position toggle' for k in components['switches']), 1, "... 1 3pos switch")
+    CHECK_EQ(sum(k['switch_type']=='LatchingButton' for k in components['switches']), 1, "... 1 latching button")
+    CHECK_EQ(sum(k['switch_type']=='MomentaryButton' for k in components['switches']), 1, "... 1 momentary button")
+    CHECK_EQ(sum(k['switch_type']=='Toggle2pos' for k in components['switches']), 1, "... 1 2pos switch")
+    CHECK_EQ(sum(k['switch_type']=='Toggle3pos' for k in components['switches']), 1, "... 1 3pos switch")
     CHECK_EQ(len(components['widgets']) , 3, "Found 3 custom widgets")
 
 def test_format_for_display():

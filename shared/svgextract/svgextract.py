@@ -277,7 +277,7 @@ struct {slug}Info : ModuleInfoBase {{
     static constexpr int NumInJacks = {len(components['inputs'])};
     {make_enum("", "Input", components['inputs'])}
 
-    static constexpr std::array<InJackDef, NumInJacks> Inputs{{{{"""
+    static constexpr std::array<InJackDef, NumInJacks> InJacks{{{{"""
     for k in components['inputs']:
         source += f"""
         {{
@@ -295,7 +295,7 @@ struct {slug}Info : ModuleInfoBase {{
     static constexpr int NumOutJacks = {len(components['outputs'])};
     {make_enum("", "Output", components['outputs'])}
 
-    static constexpr std::array<OutJackDef, NumOutJacks> Outputs{{{{"""
+    static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{{{"""
     for k in components['outputs']:
         source += f"""
         {{
