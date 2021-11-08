@@ -28,7 +28,7 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
 
-all: $(TARGET)
+all: $(TARGET) res
 	@$(MAKE) --no-print-directory tests
 
 run: install

@@ -87,8 +87,6 @@ struct EnOscWidget : CommModuleWidget {
 				addParam(createParamCentered<NKK>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
 			}
 		}
-
-		// addModuleTitle(Defs::slug.data());
 	}
 };
 

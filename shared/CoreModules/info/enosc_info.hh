@@ -14,7 +14,7 @@ struct EnOscInfo : ModuleInfoBase {
 
     static constexpr int NumKnobs = 9;
     
-    enum  {
+    enum {
         KnobSpread = 0,
         KnobScale = 1,
         KnobPitch = 2,
@@ -29,8 +29,8 @@ struct EnOscInfo : ModuleInfoBase {
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{
         {
             .id = KnobSpread,
-            .x_mm = px_to_mm<75>(114.85f),
-            .y_mm = px_to_mm<75>(61.59f),
+            .x_mm = px_to_mm<72>(114.85f),
+            .y_mm = px_to_mm<72>(61.59f),
             .short_name = "Spread",
             .long_name = "Spread",
             .default_val = 0.f,
@@ -38,8 +38,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = KnobScale,
-            .x_mm = px_to_mm<75>(53.68f),
-            .y_mm = px_to_mm<75>(78.08f),
+            .x_mm = px_to_mm<72>(53.68f),
+            .y_mm = px_to_mm<72>(78.08f),
             .short_name = "Scale",
             .long_name = "Scale",
             .default_val = 0.5f,
@@ -47,8 +47,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = KnobPitch,
-            .x_mm = px_to_mm<75>(176.54f),
-            .y_mm = px_to_mm<75>(78.08f),
+            .x_mm = px_to_mm<72>(176.54f),
+            .y_mm = px_to_mm<72>(78.08f),
             .short_name = "Pitch",
             .long_name = "Pitch",
             .default_val = 0.f,
@@ -56,8 +56,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = KnobRoot,
-            .x_mm = px_to_mm<75>(115.14f),
-            .y_mm = px_to_mm<75>(140.92f),
+            .x_mm = px_to_mm<72>(115.14f),
+            .y_mm = px_to_mm<72>(140.92f),
             .short_name = "Root",
             .long_name = "Root",
             .default_val = 0.5f,
@@ -65,8 +65,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = KnobBalance,
-            .x_mm = px_to_mm<75>(32.3f),
-            .y_mm = px_to_mm<75>(144.18f),
+            .x_mm = px_to_mm<72>(32.3f),
+            .y_mm = px_to_mm<72>(144.18f),
             .short_name = "Balance",
             .long_name = "Balance",
             .default_val = 0.f,
@@ -74,8 +74,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = KnobCross_FM,
-            .x_mm = px_to_mm<75>(197.81f),
-            .y_mm = px_to_mm<75>(144.18f),
+            .x_mm = px_to_mm<72>(197.81f),
+            .y_mm = px_to_mm<72>(144.18f),
             .short_name = "Cross Fm",
             .long_name = "Cross Fm",
             .default_val = 0.5f,
@@ -83,8 +83,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = KnobDetune,
-            .x_mm = px_to_mm<75>(115.07f),
-            .y_mm = px_to_mm<75>(207.86f),
+            .x_mm = px_to_mm<72>(115.07f),
+            .y_mm = px_to_mm<72>(207.86f),
             .short_name = "Detune",
             .long_name = "Detune",
             .default_val = 0.f,
@@ -92,8 +92,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = KnobTwist,
-            .x_mm = px_to_mm<75>(61.35f),
-            .y_mm = px_to_mm<75>(208.2f),
+            .x_mm = px_to_mm<72>(61.35f),
+            .y_mm = px_to_mm<72>(208.2f),
             .short_name = "Twist",
             .long_name = "Twist",
             .default_val = 0.5f,
@@ -101,8 +101,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = KnobWarp,
-            .x_mm = px_to_mm<75>(168.4f),
-            .y_mm = px_to_mm<75>(208.2f),
+            .x_mm = px_to_mm<72>(168.4f),
+            .y_mm = px_to_mm<72>(208.2f),
             .short_name = "Warp",
             .long_name = "Warp",
             .default_val = 0.5f,
@@ -112,7 +112,7 @@ struct EnOscInfo : ModuleInfoBase {
 
     static constexpr int NumInJacks = 10;
     
-    enum  {
+    enum {
         InputPitch = 0,
         InputSpread = 1,
         InputCross_FM = 2,
@@ -128,8 +128,8 @@ struct EnOscInfo : ModuleInfoBase {
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
             .id = InputPitch,
-            .x_mm = px_to_mm<75>(21.45f),
-            .y_mm = px_to_mm<75>(262.78f),
+            .x_mm = px_to_mm<72>(21.45f),
+            .y_mm = px_to_mm<72>(262.78f),
             .short_name = "Pitch",
             .long_name = "Pitch",
             .unpatched_val = 0.f,
@@ -137,8 +137,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = InputSpread,
-            .x_mm = px_to_mm<75>(96.46f),
-            .y_mm = px_to_mm<75>(262.78f),
+            .x_mm = px_to_mm<72>(96.46f),
+            .y_mm = px_to_mm<72>(262.78f),
             .short_name = "Spread",
             .long_name = "Spread",
             .unpatched_val = 0.f,
@@ -146,8 +146,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = InputCross_FM,
-            .x_mm = px_to_mm<75>(133.86f),
-            .y_mm = px_to_mm<75>(262.78f),
+            .x_mm = px_to_mm<72>(133.86f),
+            .y_mm = px_to_mm<72>(262.78f),
             .short_name = "Cross Fm",
             .long_name = "Cross Fm",
             .unpatched_val = 0.f,
@@ -155,8 +155,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = InputScale,
-            .x_mm = px_to_mm<75>(59.0f),
-            .y_mm = px_to_mm<75>(275.86f),
+            .x_mm = px_to_mm<72>(59.0f),
+            .y_mm = px_to_mm<72>(275.86f),
             .short_name = "Scale",
             .long_name = "Scale",
             .unpatched_val = 0.f,
@@ -164,8 +164,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = InputLearn,
-            .x_mm = px_to_mm<75>(171.32f),
-            .y_mm = px_to_mm<75>(275.86f),
+            .x_mm = px_to_mm<72>(171.32f),
+            .y_mm = px_to_mm<72>(275.86f),
             .short_name = "Learn",
             .long_name = "Learn",
             .unpatched_val = 0.f,
@@ -173,8 +173,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = InputRoot,
-            .x_mm = px_to_mm<75>(21.45f),
-            .y_mm = px_to_mm<75>(305.91f),
+            .x_mm = px_to_mm<72>(21.45f),
+            .y_mm = px_to_mm<72>(305.91f),
             .short_name = "Root",
             .long_name = "Root",
             .unpatched_val = 0.f,
@@ -182,8 +182,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = InputTwist,
-            .x_mm = px_to_mm<75>(96.46f),
-            .y_mm = px_to_mm<75>(305.93f),
+            .x_mm = px_to_mm<72>(96.46f),
+            .y_mm = px_to_mm<72>(305.93f),
             .short_name = "Twist",
             .long_name = "Twist",
             .unpatched_val = 0.f,
@@ -191,8 +191,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = InputWarp,
-            .x_mm = px_to_mm<75>(133.86f),
-            .y_mm = px_to_mm<75>(305.93f),
+            .x_mm = px_to_mm<72>(133.86f),
+            .y_mm = px_to_mm<72>(305.93f),
             .short_name = "Warp",
             .long_name = "Warp",
             .unpatched_val = 0.f,
@@ -200,8 +200,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = InputBalance,
-            .x_mm = px_to_mm<75>(59.0f),
-            .y_mm = px_to_mm<75>(319.0f),
+            .x_mm = px_to_mm<72>(59.0f),
+            .y_mm = px_to_mm<72>(319.0f),
             .short_name = "Balance",
             .long_name = "Balance",
             .unpatched_val = 0.f,
@@ -209,8 +209,8 @@ struct EnOscInfo : ModuleInfoBase {
         },
         {
             .id = InputFreeze,
-            .x_mm = px_to_mm<75>(171.32f),
-            .y_mm = px_to_mm<75>(319.02f),
+            .x_mm = px_to_mm<72>(171.32f),
+            .y_mm = px_to_mm<72>(319.02f),
             .short_name = "Freeze",
             .long_name = "Freeze",
             .unpatched_val = 0.f,
@@ -220,7 +220,7 @@ struct EnOscInfo : ModuleInfoBase {
 
     static constexpr int NumOutJacks = 2;
     
-    enum  {
+    enum {
         OutputOut_A = 0,
         OutputOut_B = 1,
     };
@@ -228,16 +228,16 @@ struct EnOscInfo : ModuleInfoBase {
     static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
         {
             .id = OutputOut_A,
-            .x_mm = px_to_mm<75>(208.7f),
-            .y_mm = px_to_mm<75>(262.78f),
+            .x_mm = px_to_mm<72>(208.7f),
+            .y_mm = px_to_mm<72>(262.78f),
             .short_name = "Out A",
             .long_name = "Out A",
             .signal_type = OutJackDef::Analog,
         },
         {
             .id = OutputOut_B,
-            .x_mm = px_to_mm<75>(208.7f),
-            .y_mm = px_to_mm<75>(305.91f),
+            .x_mm = px_to_mm<72>(208.7f),
+            .y_mm = px_to_mm<72>(305.91f),
             .short_name = "Out B",
             .long_name = "Out B",
             .signal_type = OutJackDef::Analog,
@@ -246,7 +246,7 @@ struct EnOscInfo : ModuleInfoBase {
 
     static constexpr int NumSwitches = 6;
     
-    enum  {
+    enum {
         SwitchLearn = 0,
         SwitchFreeze = 1,
         SwitchCross_FM = 2,
@@ -258,48 +258,48 @@ struct EnOscInfo : ModuleInfoBase {
     static constexpr std::array<SwitchDef, NumSwitches> Switches{{
         {
             .id = SwitchLearn,
-            .x_mm = px_to_mm<75>(21.21f),
-            .y_mm = px_to_mm<75>(42.53f),
+            .x_mm = px_to_mm<72>(21.21f),
+            .y_mm = px_to_mm<72>(42.53f),
             .short_name = "Learn",
             .long_name = "Learn",
             .switch_type = SwitchDef::MomentaryButton,
         },
         {
             .id = SwitchFreeze,
-            .x_mm = px_to_mm<75>(209.14f),
-            .y_mm = px_to_mm<75>(42.53f),
+            .x_mm = px_to_mm<72>(209.14f),
+            .y_mm = px_to_mm<72>(42.53f),
             .short_name = "Freeze",
             .long_name = "Freeze",
             .switch_type = SwitchDef::MomentaryButton,
         },
         {
             .id = SwitchCross_FM,
-            .x_mm = px_to_mm<75>(213.81f),
-            .y_mm = px_to_mm<75>(102.95f),
+            .x_mm = px_to_mm<72>(213.81f),
+            .y_mm = px_to_mm<72>(102.95f),
             .short_name = "Cross Fm",
             .long_name = "Cross Fm",
             .switch_type = SwitchDef::Toggle3pos,
         },
         {
             .id = SwitchScale,
-            .x_mm = px_to_mm<75>(16.51f),
-            .y_mm = px_to_mm<75>(103.03f),
+            .x_mm = px_to_mm<72>(16.51f),
+            .y_mm = px_to_mm<72>(103.03f),
             .short_name = "Scale",
             .long_name = "Scale",
             .switch_type = SwitchDef::Toggle3pos,
         },
         {
             .id = SwitchWarp,
-            .x_mm = px_to_mm<75>(213.81f),
-            .y_mm = px_to_mm<75>(201.73f),
+            .x_mm = px_to_mm<72>(213.81f),
+            .y_mm = px_to_mm<72>(201.73f),
             .short_name = "Warp",
             .long_name = "Warp",
             .switch_type = SwitchDef::Toggle3pos,
         },
         {
             .id = SwitchTwist,
-            .x_mm = px_to_mm<75>(16.51f),
-            .y_mm = px_to_mm<75>(215.06f),
+            .x_mm = px_to_mm<72>(16.51f),
+            .y_mm = px_to_mm<72>(215.06f),
             .short_name = "Twist",
             .long_name = "Twist",
             .switch_type = SwitchDef::Toggle3pos,
