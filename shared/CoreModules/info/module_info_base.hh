@@ -1,3 +1,4 @@
+#pragma once
 #include "util/static_string.hh"
 #include <array>
 #include <cstddef>

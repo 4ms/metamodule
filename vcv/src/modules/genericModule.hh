@@ -1,5 +1,7 @@
+#pragma once
 #include "CommModule.h"
 #include "CommWidget.h"
+#include "CoreModules/info/module_info_base.hh"
 #include "CoreModules/moduleTypes.h"
 #include "MappableJack.hh"
 #include "math.hh"
