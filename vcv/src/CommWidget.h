@@ -55,16 +55,16 @@ class MetaModuleTextBox : public LedDisplayTextField {
 struct SubMiniToggle3pos : rack::app::SvgSwitch {
 	SubMiniToggle3pos()
 	{
-		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_0.svg")));
-		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_1.svg")));
-		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_2.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_2.svg")));
 	}
 };
 
 struct SubMiniToggle2pos : rack::app::SvgSwitch {
 	SubMiniToggle2pos()
 	{
-		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_0.svg")));
-		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_2.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_2.svg")));
 	}
 };

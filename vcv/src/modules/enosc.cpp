@@ -97,10 +97,10 @@ struct EnOscWidget : CommModuleWidget {
 				light_id += 3;
 
 			} else if (sw.switch_type == SwitchDef::Toggle2pos) {
-				addParam(createParamCentered<NKK>(pos, module, param_id));
+				addParam(createParamCentered<SubMiniToggle2pos>(pos, module, param_id));
 
 			} else if (sw.switch_type == SwitchDef::Toggle3pos) {
-				addParam(createParamCentered<NKK>(pos, module, param_id));
+				addParam(createParamCentered<SubMiniToggle3pos>(pos, module, param_id));
 			}
 		}
 	}
