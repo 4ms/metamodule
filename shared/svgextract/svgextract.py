@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-
 import sys
+import os
 import re
 import xml.etree.ElementTree
 from lxml import etree
@@ -158,9 +158,10 @@ def panel_to_components(tree):
                 components['ModuleName'] += m
 
     if components['slug'] is None:
-        print("No text element with name or id 'slug' was found in the 'components' layer/group. Aborting.")
-        return
-    print(f"Slug found: \"{components['slug']}\"")
+        print("No text element with name or id 'slug' was found in the 'components' layer/group. Setting slug to 'UNNAMED'.")
+        components['slug'] = "UNNAMED"
+    else:
+        print(f"Slug found: \"{components['slug']}\"")
 
     if components['ModuleName'] is None:
         print("No text element with name or id 'modulename' was found in the 'components' layer/group. Setting ModuleName to 'Unnamed'")
@@ -392,26 +393,34 @@ struct {slug}Info : ModuleInfoBase {{
     return source
 
 
-def createInfoFile(svgfilename, infofilename):
-    tree = xml.etree.ElementTree.parse(svgfilename)
+def createInfoFile(svgFilename, infoFilePath):
+    if os.path.isdir(infoFilePath) == False:
+        print(f"Not a directory: {infoFilePath}. Aborting without creating an info file.")
+        return
+    if os.path.isfile(svgFilename) == False:
+        print(f"Not a file: {svgFilename}. Aborting without creating an info file.")
+        return
+    tree = xml.etree.ElementTree.parse(svgFilename)
     components = panel_to_components(tree)
-    infofiletext = components_to_infofile(components)
-    with open(infofilename, "w") as f:
-        f.write(infofiletext)
-        print(f"Wrote info file: {infofilename}")
+    infoFileText = components_to_infofile(components)
+    infoFileName = os.path.join(infoFilePath, components['slug'].lower()+"_info.hh")
+    with open(infoFileName, "w") as f:
+        f.write(infoFileText)
+        print(f"Wrote info file: {infoFileName}")
+    return components['slug']
 
 
-def extractArtwork(svgfilename, artworkFilename):
-    print(f"reading from {svgfilename}, writing to {artworkFilename}")
+def extractArtwork(svgFilename, artworkFilename):
+    print(f"reading from {svgFilename}, writing to {artworkFilename}")
 
-    tree = etree.parse(svgfilename)
+    tree = etree.parse(svgFilename)
     root = tree.getroot()
     comps = root.findall(".//*[@id='components']")
     if len(comps) == 0:
         print("No group (or any element) with id = 'components' found in svg file")
         return
     if len(comps) > 1:
-        print("More than 1 group or element with id = 'components' found in svg file! Using the first one.")
+        print("More than 1 group or element with id = 'components' found in svg file. Using the first one.")
 
     g = comps[0]
     g.clear()
@@ -426,10 +435,19 @@ def usage(script):
 Usage: {script} <command> ...
 Commands:
 
-createinfo [svg file name] [output ModuleInfo file name]
-    Creates a ModuleInfo struct and saves it in a file
+processsvg [input svg file name]
+    Runs createinfo and extractart on the given file. 
+    Uses environmant variables $METAMODULE_INFO_DIR and $METAMODULE_ARTWORK_DIR if found,
+    otherwise prompts user for the values
 
-extractart [svg file name] [output SVG file name]
+createinfo [input svg file name] [output path for ModuleInfo file]
+    Creates a ModuleInfo struct and saves it to a file in the given path.
+    The file will be named "slug_info.hh", where "slug" is the lower-case
+    string of the text element with name/id "slug" found in the components layer/group
+    of the SVG file.
+    File will be overwritten if it exists.
+
+extractart [input svg file name] [output SVG file name]
     Saves a new SVG file with the components layer removed
 
 """
@@ -444,11 +462,28 @@ def parse_args(args):
 
     cmd = args.pop(0)
     inputfile = args.pop(0)
-    outputfile = args.pop(0)
+
+    if cmd == 'processsvg':
+        outputpath = os.getenv('METAMODULE_INFO_DIR')
+        if outputpath is None:
+            outputpath = input_default("Directory to save ModuleInfo file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../CoreModules/info"))
+        slug = createInfoFile(inputfile, outputpath)
+        if slug is None:
+            return
+
+        outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
+        if outputpath is None:
+            outputpath = input_default("Directory to save SVG artwork file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../vcv/res"))
+        extractArtwork(inputfile, os.path.join(outputpath, slug.lower() + "-artwork.svg"))
+        return
+
+    output= args.pop(0)
     if cmd == 'createinfo':
-        createInfoFile(inputfile, outputfile)
+        createInfoFile(inputfile, output)
+        return
     if cmd == 'extractart':
-        extractArtwork(inputfile, outputfile)
+        extractArtwork(inputfile, output)
+        return
 
 
 
