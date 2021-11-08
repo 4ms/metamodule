@@ -1,7 +1,13 @@
 #include "plugin.hpp"
+#include "modules/genericModule.hh"
 
 Plugin *pluginInstance;
 CentralData *centralData;
+
+/////// TODO: Auto generated:
+#include "CoreModules/info/enosc_info.hh"
+auto modelEnOsc = createModelFromInfo<EnOscInfo>();
+///////
 
 void init(Plugin *p)
 {
@@ -9,7 +15,11 @@ void init(Plugin *p)
 
 	pluginInstance = p;
 
+	// TODO: Auto generated
 	// Add modules here
+	p->addModel(modelEnOsc);
+	///////
+
 	p->addModel(modelHubMedium);
 	p->addModel(modelInfosc01);
 	p->addModel(modelDjembe);
@@ -62,9 +72,4 @@ void init(Plugin *p)
 	p->addModel(modelSend);
 	p->addModel(modelHubMini);
 	p->addModel(modelInfosc64bphas);
-	p->addModel(modelEnOsc);
-
-	// Any other plugin initialization may go here.
-	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup
-	// times of Rack.
 }
