@@ -1,4 +1,4 @@
 ---
 CompileFlags:
-	Add: [-std=c++17]
+	Add: [-std=c++2a]
 	Remove: [-march=nocona]
