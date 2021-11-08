@@ -2,7 +2,7 @@
 #include "modules/genericModule.hh"
 
 Plugin *pluginInstance;
-CentralData *centralData;
+std::unique_ptr<CentralData> centralData;
 
 /////// TODO: Auto generated:
 #include "CoreModules/info/enosc_info.hh"
@@ -11,7 +11,7 @@ auto modelEnOsc = createModelFromInfo<EnOscInfo>();
 
 void init(Plugin *p)
 {
-	centralData = new CentralData;
+	centralData = std::make_unique<CentralData>();
 
 	pluginInstance = p;
 

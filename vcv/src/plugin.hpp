@@ -4,7 +4,8 @@
 
 using namespace rack;
 
-extern CentralData *centralData;
+// extern CentralData *centralData;
+extern std::unique_ptr<CentralData> centralData;
 
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin *pluginInstance;
