@@ -344,6 +344,7 @@ def extractArtwork(svgfilename, artworkFilename):
     #artworkFilename = resourceDir + "/" + slug + "_artwork.svg"
     tree = xml.etree.ElementTree.parse(svgfilename)
     #tree = extractSvgArtwork(tree)
+    print(f"reading from {svgfilename}, writing to {artworkFilename}")
     tree.write(artworkFilename)
     print(f"Wrote artwork file: {artworkFilename}")
 

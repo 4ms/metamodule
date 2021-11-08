@@ -62,5 +62,21 @@ axo_tests:
 win_dist:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
 
+#TODO: how to do this? 
+INFO_FILES = $(wildcard $(SHARED)/CoreModules/info/*_info.hh)
+SVG_SOURCES = $(addsuffix .svg, $(SHARED)/CoreModules/svg/$(notdir $(basename $(INFO_FILES)))) #enosc_info.svg
+
+modules: $(SVG_SOURCES)
+
+$(SHARED)/CoreModules/info/%.hh: $(SHARED)/CoreModules/svg/%.svg
+	python3 $(SHARED)/svgextract/svgextract.py createinfo $< $@
+	#python3 $(SHARED)/svgextract/svgextract.py extractart $< vcv/res/$(subst _info,-artwork,$(notdir $<))
+	
+
+enoscmodule:
+	python3 shared/svgextract/svgextract.py createinfo shared/CoreModules/svg/enosc_info.svg shared/CoreModules/info/enosc_info.hh
+	python3 shared/svgextract/svgextract.py extractart shared/CoreModules/svg/enosc_info.svg vcv/res/enosc-artwork.svg
+
+
 .PHONY: tests core_tests vcv_tests util_tests axo_tests
 
