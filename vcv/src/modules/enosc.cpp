@@ -88,7 +88,7 @@ struct EnOscWidget : CommModuleWidget {
 			}
 		}
 
-		addModuleTitle(Defs::slug.data());
+		// addModuleTitle(Defs::slug.data());
 	}
 };
 
