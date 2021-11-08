@@ -5,6 +5,7 @@ import os
 import re
 # import json
 import xml.etree.ElementTree
+from lxml import etree
 
 
 # Version check
@@ -341,10 +342,19 @@ def createInfoFile(svgfilename, infofilename):
 
 
 def extractArtwork(svgfilename, artworkFilename):
-    #artworkFilename = resourceDir + "/" + slug + "_artwork.svg"
-    tree = xml.etree.ElementTree.parse(svgfilename)
-    #tree = extractSvgArtwork(tree)
     print(f"reading from {svgfilename}, writing to {artworkFilename}")
+
+    tree = etree.parse(svgfilename)
+    root = tree.getroot()
+    comps = root.findall(".//*[@id='components']")
+    if len(comps) == 0:
+        print("No group (or any element) with id = 'components' found in svg file")
+        return
+    if len(comps) > 1:
+        print("More than 1 group or element with id = 'components' found in svg file! Using the first one.")
+
+    g = comps[0]
+    g.clear()
     tree.write(artworkFilename)
     print(f"Wrote artwork file: {artworkFilename}")
 
