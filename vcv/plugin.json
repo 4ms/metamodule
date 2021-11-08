@@ -26,6 +26,12 @@
       "tags": []
 	},
 	{
+      "slug": "BuffMult",
+      "name": "BuffMult",
+      "description": "Buffered Multiple",
+      "tags": []
+	},
+	{
       "slug": "PANEL_MED",
       "name": "PanelMedium",
       "description": "Panel Medium 26HP",

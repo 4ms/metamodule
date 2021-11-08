@@ -7,6 +7,8 @@ std::unique_ptr<CentralData> centralData;
 /////// TODO: Auto generated:
 #include "CoreModules/info/enosc_info.hh"
 auto modelEnOsc = createModelFromInfo<EnOscInfo>();
+#include "CoreModules/info/buffmult_info.hh"
+auto modelBuffMult = createModelFromInfo<BuffMultInfo>();
 ///////
 
 void init(Plugin *p)
@@ -18,6 +20,7 @@ void init(Plugin *p)
 	// TODO: Auto generated
 	// Add modules here
 	p->addModel(modelEnOsc);
+	p->addModel(modelBuffMult);
 	///////
 
 	p->addModel(modelHubMedium);
