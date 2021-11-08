@@ -76,29 +76,35 @@ def get_button_style_from_radius(radius):
 
 
 def deduce_dpi(root):
-    raw_width = root.get('width')
-    raw_height = root.get('height')
+    widthInches = get_dim_inches(root.get('width'))
+    heightInches = get_dim_inches(root.get('height'))
     viewBox = root.get('viewBox')
-    if raw_width is None or raw_height is None or viewBox is None: 
-        print("Warning: DPI cannot be deduced, using 72dpi")
+    if widthInches == 0 or heightInches == 0 or viewBox is None:
+        print("Warning DPI cannot be deduced, width, height, or viewBox is missing or 0 in root node. Using 72dpi")
         return 72
+
     viewBoxDims = viewBox.split(" ")
     viewWidth = float(viewBoxDims[2]) - float(viewBoxDims[0])
     viewHeight = float(viewBoxDims[3]) - float(viewBoxDims[1])
-    widthInches = float(re.sub("[^0-9.-]","", raw_width))
-    if re.sub("[0-9.-]","", raw_width) == "mm":
-        widthInches /= 25.4
-    heightInches = float(re.sub("[^0-9.-]","", raw_height))
-    if re.sub("[0-9.-]","", raw_height) == "mm":
-        heightInches /= 25.4
     hDPI = round(viewWidth / widthInches)
     vDPI = round(viewHeight / heightInches)
-
     if vDPI is not hDPI:
         print(f"Warning: Horizontal DPI is {hDPI} and Vertical DPI is {vDPI}, which are not equal. Using horizontal value")
     else:
         print(f"DPI deduced as {hDPI}")
+
     return hDPI
+
+
+def get_dim_inches(dimString):
+    if dimString is None:
+        return 0
+    dimInches = float(re.sub("[^0-9.-]","", dimString))
+    if dimInches is None:
+        return 0
+    if re.sub("[0-9.-]","", dimString) == "mm":
+        dimInches /= 25.4
+    return dimInches
 
 
 def panel_to_components(tree):
@@ -109,15 +115,11 @@ def panel_to_components(tree):
 
     components = {}
 
-    #TODO: extract size
     #TODO: extract module name (full name)
     #TODO: extract slug
     #TODO: extract knob long name and description (or is that to be done manually?)
     #.... maybe SVG id = "ShortName#LongName" or "ShortName"
     #.... and description is in some help file
-    components['HP'] = 16
-    components['ModuleName'] = "Ensemble Oscillator"
-    components['slug'] = "EnOsc"
 
     # Get components layer
     root = tree.getroot()
@@ -134,6 +136,12 @@ def panel_to_components(tree):
     rects = components_group.findall(".//svg:rect", ns)
 
     components['dpi'] = deduce_dpi(root)
+    components['HP'] = round(get_dim_inches(root.get('width')) / 0.2)
+    print(f"HP deduced as {components['HP']}")
+
+    components['ModuleName'] = "Ensemble Oscillator"
+    components['slug'] = "EnOsc"
+
     components['params'] = []
     components['inputs'] = []
     components['outputs'] = []
@@ -269,9 +277,8 @@ def components_to_infofile(components):
     slug = components['slug']
     DPI = components['dpi']
 
-    #TODO: embed knob description and long name vs short name in svg
-    source = f"""
-#pragma once
+    #TODO: embed knob long name vs short name in svg
+    source = f"""#pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/module_info_base.hh"
 
