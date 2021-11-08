@@ -139,8 +139,34 @@ def panel_to_components(tree):
     components['HP'] = round(get_dim_inches(root.get('width')) / 0.2)
     print(f"HP deduced as {components['HP']}")
 
-    components['ModuleName'] = "Ensemble Oscillator"
-    components['slug'] = "EnOsc"
+    texts = components_group.findall(".//svg:text", ns)
+    for t in texts:
+        name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
+        if name is None:
+            name = t.get('id')
+        if name is None:
+            continue
+
+        if name == "slug":
+            components['slug'] = ""
+            for m in t.itertext():
+                components['slug'] += m
+
+        if name == "modulename":
+            components['ModuleName'] = ""
+            for m in t.itertext():
+                components['ModuleName'] += m
+
+    if components['slug'] is None:
+        print("No text element with name or id 'slug' was found in the 'components' layer/group. Aborting.")
+        return
+    print(f"Slug found: \"{components['slug']}\"")
+
+    if components['ModuleName'] is None:
+        print("No text element with name or id 'modulename' was found in the 'components' layer/group. Setting ModuleName to 'Unnamed'")
+        components['ModuleName'] = "Unnamed"
+    else:
+        print(f"Module Name found: \"{components['ModuleName']}\"")
 
     components['params'] = []
     components['inputs'] = []
@@ -389,6 +415,7 @@ def extractArtwork(svgfilename, artworkFilename):
 
     g = comps[0]
     g.clear()
+    print("Removed components layer")
     tree.write(artworkFilename)
     print(f"Wrote artwork file: {artworkFilename}")
 
