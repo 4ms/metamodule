@@ -51,3 +51,20 @@ private:
 class MetaModuleTextBox : public LedDisplayTextField {
 	virtual void draw(const DrawArgs &args) override;
 };
+
+struct SubMiniToggle3pos : rack::app::SvgSwitch {
+	SubMiniToggle3pos()
+	{
+		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_0.svg")));
+		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_1.svg")));
+		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_2.svg")));
+	}
+};
+
+struct SubMiniToggle2pos : rack::app::SvgSwitch {
+	SubMiniToggle2pos()
+	{
+		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_0.svg")));
+		addFrame(APP->window->loadSvg(asset::system("res/SubMiniToggle_2.svg")));
+	}
+};
