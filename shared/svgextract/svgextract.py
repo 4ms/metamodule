@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-import os
 import re
-# import json
 import xml.etree.ElementTree
 from lxml import etree
 
@@ -46,7 +44,7 @@ def str_to_identifier(s):
 
 
 def remove_trailing_dash_number(name):
-    #Chop off -\d$
+    #Chop off -[\d]
     if name[-2:-1] == '-' and name[-1:].isdigit():
         name = name[:-2]
     return name
@@ -75,6 +73,32 @@ def get_button_style_from_radius(radius):
     if r < 40:
         return "medium" #10-40: 11.34 typical
     return "unknown" #under 3 or over 40 is not a known style
+
+
+def deduce_dpi(root):
+    raw_width = root.get('width')
+    raw_height = root.get('height')
+    viewBox = root.get('viewBox')
+    if raw_width is None or raw_height is None or viewBox is None: 
+        print("Warning: DPI cannot be deduced, using 72dpi")
+        return 72
+    viewBoxDims = viewBox.split(" ")
+    viewWidth = float(viewBoxDims[2]) - float(viewBoxDims[0])
+    viewHeight = float(viewBoxDims[3]) - float(viewBoxDims[1])
+    widthInches = float(re.sub("[^0-9.-]","", raw_width))
+    if re.sub("[0-9.-]","", raw_width) == "mm":
+        widthInches /= 25.4
+    heightInches = float(re.sub("[^0-9.-]","", raw_height))
+    if re.sub("[0-9.-]","", raw_height) == "mm":
+        heightInches /= 25.4
+    hDPI = round(viewWidth / widthInches)
+    vDPI = round(viewHeight / heightInches)
+
+    if vDPI is not hDPI:
+        print(f"Warning: Horizontal DPI is {hDPI} and Vertical DPI is {vDPI}, which are not equal. Using horizontal value")
+    else:
+        print(f"DPI deduced as {hDPI}")
+    return hDPI
 
 
 def panel_to_components(tree):
@@ -109,6 +133,7 @@ def panel_to_components(tree):
     circles = components_group.findall(".//svg:circle", ns)
     rects = components_group.findall(".//svg:rect", ns)
 
+    components['dpi'] = deduce_dpi(root)
     components['params'] = []
     components['inputs'] = []
     components['outputs'] = []
@@ -226,8 +251,10 @@ def panel_to_components(tree):
 
 
 def make_enum(enum_name, item_prefix, list):
+    if len(enum_name) > 0:
+        enum_name = enum_name + " "
     source = f"""
-    enum {enum_name} {{"""
+    enum {enum_name}{{"""
     i = 0
     for k in list:
         source += f"""
@@ -238,9 +265,9 @@ def make_enum(enum_name, item_prefix, list):
     return source
 
 
-
 def components_to_infofile(components):
     slug = components['slug']
+    DPI = components['dpi']
 
     #TODO: embed knob description and long name vs short name in svg
     source = f"""
@@ -265,8 +292,8 @@ struct {slug}Info : ModuleInfoBase {{
         source += f"""
         {{
             .id = Knob{k['enum_name']},
-            .x_mm = px_to_mm<75>({k['cx']}f),
-            .y_mm = px_to_mm<75>({k['cy']}f),
+            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .default_val = {k['default_value']},
@@ -283,8 +310,8 @@ struct {slug}Info : ModuleInfoBase {{
         source += f"""
         {{
             .id = Input{k['enum_name']},
-            .x_mm = px_to_mm<75>({k['cx']}f),
-            .y_mm = px_to_mm<75>({k['cy']}f),
+            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .unpatched_val = 0.f,
@@ -301,8 +328,8 @@ struct {slug}Info : ModuleInfoBase {{
         source += f"""
         {{
             .id = Output{k['enum_name']},
-            .x_mm = px_to_mm<75>({k['cx']}f),
-            .y_mm = px_to_mm<75>({k['cy']}f),
+            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .signal_type = OutJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
@@ -318,8 +345,8 @@ struct {slug}Info : ModuleInfoBase {{
         source += f"""
         {{
             .id = Switch{k['enum_name']},
-            .x_mm = px_to_mm<75>({k['cx']}f),
-            .y_mm = px_to_mm<75>({k['cy']}f),
+            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .switch_type = SwitchDef::{k['switch_type']},
