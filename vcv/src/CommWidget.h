@@ -3,6 +3,7 @@
 #include <rack.hpp>
 using namespace rack;
 
+// TODO: CommModuleWidget will go away, in favor of ModuleInfo technique (used by EnOsc)
 class CommModuleWidget : public app::ModuleWidget {
 protected:
 	const float kKnobSpacingY = 17;
@@ -13,10 +14,6 @@ protected:
 	const float kGridSpacingX = 30;
 	const float kModuleHeight = 128.5f;
 
-public:
-	int getModuleId();
-
-protected:
 	void addLabeledKnob(const std::string labelText, int knobID, Vec posGrid, float defaultValue = 0.f);
 	void addSmallLabeledKnob(const std::string labelText, int knobID, Vec posGrid, float defaultValue = 0.f);
 	void addLabeledInput(const std::string labelText, int inputID, Vec posGrid);

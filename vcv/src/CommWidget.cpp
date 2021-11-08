@@ -169,14 +169,6 @@ Vec CommModuleWidget::gridFromBottom2px(Vec posGrid)
 	return mm2px(gridFromBottom2mm(posGrid));
 }
 
-int CommModuleWidget::getModuleId()
-{
-	if (module)
-		return module->id;
-	else
-		return -1;
-}
-
 void MetaModuleTextBox::draw(const DrawArgs &args)
 {
 	// Todo: draw it a custom way

@@ -11,7 +11,7 @@ void HubMapButton::_createMapping(LabelButtonID srcId)
 
 void HubMapButton::_updateState()
 {
-	id.moduleID = _parent.getModuleId();
+	id.moduleID = _parent.module ? _parent.module->id : -1;
 
 	isCurrentMapSrc = false;
 	if (centralData->isMappingInProgress() && (centralData->getMappingSource() == id)) {
