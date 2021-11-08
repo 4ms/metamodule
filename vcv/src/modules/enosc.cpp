@@ -10,7 +10,17 @@ struct EnOscModule : CommModule {
 
 	EnOscModule()
 	{
-		configComm(Defs::NumKnobs + Defs::NumSwitches, Defs::NumInJacks, Defs::NumOutJacks, Defs::NumSwitches);
+		constexpr auto NumParams = Defs::NumKnobs + Defs::NumSwitches;
+		// Calculate number of LED elements (we only support LEDs that are in buttons)
+		constexpr auto NumRGBLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw) {
+			return sw.switch_type == SwitchDef::MomentaryButton;
+		});
+		constexpr auto NumMonoLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw) {
+			return sw.switch_type == SwitchDef::LatchingButton;
+		});
+		constexpr auto NumLEDElements = NumRGBLEDButtons * 3 + NumMonoLEDButtons;
+		configComm(NumParams, Defs::NumInJacks, Defs::NumOutJacks, NumLEDElements);
+
 		core = ModuleFactory::create(Defs::slug);
 		selfID.typeID = Defs::slug;
 
@@ -69,22 +79,28 @@ struct EnOscWidget : CommModuleWidget {
 				createOutputCentered<MappableOutputJack<PJ301MPort>>(mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
 		}
 
+		int light_id = 0;
 		for (auto sw : Defs::Switches) {
 			auto param_id = sw.id + Defs::NumKnobs;
-			auto light_id = sw.id;
+			auto pos = mm2px({sw.x_mm, sw.y_mm});
 
 			if (sw.switch_type == SwitchDef::LatchingButton) {
-				addParam(createParamCentered<LatchingSwitch<LEDBezel>>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
-				addChild(
-					createLight<LEDBezelLight<WhiteLight>>(mm2px({sw.x_mm - 3.0f, sw.y_mm - 3.0f}), module, light_id));
+				// These use a single white LED
+				addParam(createParamCentered<LatchingSwitch<LEDBezel>>(pos, module, param_id));
+				addChild(createLightCentered<LEDBezelLight<WhiteLight>>(pos, module, light_id));
+				light_id++;
+
 			} else if (sw.switch_type == SwitchDef::MomentaryButton) {
-				addParam(createParamCentered<MomentarySwitch<LEDBezel>>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
-				addChild(
-					createLight<LEDBezelLight<WhiteLight>>(mm2px({sw.x_mm - 3.0f, sw.y_mm - 3.0f}), module, light_id));
+				// These use an RGB LED (3 elements)
+				addParam(createParamCentered<MomentarySwitch<LEDBezel>>(pos, module, param_id));
+				addChild(createLightCentered<LEDBezelLight<RedGreenBlueLight>>(pos, module, light_id));
+				light_id += 3;
+
 			} else if (sw.switch_type == SwitchDef::Toggle2pos) {
-				addParam(createParamCentered<NKK>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
+				addParam(createParamCentered<NKK>(pos, module, param_id));
+
 			} else if (sw.switch_type == SwitchDef::Toggle3pos) {
-				addParam(createParamCentered<NKK>(mm2px({sw.x_mm, sw.y_mm}), module, param_id));
+				addParam(createParamCentered<NKK>(pos, module, param_id));
 			}
 		}
 	}
