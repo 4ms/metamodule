@@ -70,12 +70,12 @@ modules: $(SVG_SOURCES)
 
 $(SHARED)/CoreModules/info/%.hh: $(SHARED)/CoreModules/svg/%.svg
 	python3 $(SHARED)/svgextract/svgextract.py createinfo $< $@
-	#python3 $(SHARED)/svgextract/svgextract.py extractart $< vcv/res/$(subst _info,-artwork,$(notdir $<))
+	#python3 $(SHARED)/svgextract/svgextract.py extractart $< res/$(subst _info,-artwork,$(notdir $<))
 	
 
 enoscmodule:
-	python3 shared/svgextract/svgextract.py createinfo shared/CoreModules/svg/enosc_info.svg shared/CoreModules/info/enosc_info.hh
-	python3 shared/svgextract/svgextract.py extractart shared/CoreModules/svg/enosc_info.svg vcv/res/enosc-artwork.svg
+	python3 $(SHARED)/svgextract/svgextract.py createinfo $(SHARED)/CoreModules/svg/enosc_info.svg $(SHARED)/CoreModules/info/enosc_info.hh
+	python3 $(SHARED)/svgextract/svgextract.py extractart $(SHARED)/CoreModules/svg/enosc_info.svg res/enosc-artwork.svg
 
 
 .PHONY: tests core_tests vcv_tests util_tests axo_tests
