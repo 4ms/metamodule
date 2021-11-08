@@ -254,7 +254,7 @@ struct {slug}Info : ModuleInfoBase {{
     static constexpr std::string_view slug{{"{slug}"}};
     static inline const StaticString<LongNameChars> description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
-    static constexpr std::string_view svg_filename{{"res/{slug}-artwork.svg"}};
+    static constexpr std::string_view svg_filename{{"res/{slug.lower()}-artwork.svg"}};
 
     static constexpr int NumKnobs = {len(components['params'])};
     {make_enum("", "Knob", components['params'])}
@@ -264,8 +264,8 @@ struct {slug}Info : ModuleInfoBase {{
         source += f"""
         {{
             .id = Knob{k['enum_name']},
-            .x_mm = px_to_mm<72>({k['cx']}f),
-            .y_mm = px_to_mm<72>({k['cy']}f),
+            .x_mm = px_to_mm<75>({k['cx']}f),
+            .y_mm = px_to_mm<75>({k['cy']}f),
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .default_val = {k['default_value']},
@@ -282,8 +282,8 @@ struct {slug}Info : ModuleInfoBase {{
         source += f"""
         {{
             .id = Input{k['enum_name']},
-            .x_mm = px_to_mm<72>({k['cx']}f),
-            .y_mm = px_to_mm<72>({k['cy']}f),
+            .x_mm = px_to_mm<75>({k['cx']}f),
+            .y_mm = px_to_mm<75>({k['cy']}f),
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .unpatched_val = 0.f,
@@ -300,8 +300,8 @@ struct {slug}Info : ModuleInfoBase {{
         source += f"""
         {{
             .id = Output{k['enum_name']},
-            .x_mm = px_to_mm<72>({k['cx']}f),
-            .y_mm = px_to_mm<72>({k['cy']}f),
+            .x_mm = px_to_mm<75>({k['cx']}f),
+            .y_mm = px_to_mm<75>({k['cy']}f),
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .signal_type = OutJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
@@ -317,8 +317,8 @@ struct {slug}Info : ModuleInfoBase {{
         source += f"""
         {{
             .id = Switch{k['enum_name']},
-            .x_mm = px_to_mm<72>({k['cx']}f),
-            .y_mm = px_to_mm<72>({k['cy']}f),
+            .x_mm = px_to_mm<75>({k['cx']}f),
+            .y_mm = px_to_mm<75>({k['cy']}f),
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .switch_type = SwitchDef::{k['switch_type']},
