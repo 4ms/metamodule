@@ -3,12 +3,16 @@ import sys
 import os
 import re
 import xml.etree.ElementTree
-from lxml import etree
+# from lxml import etree
 
 
 # Version check
 f"Python 3.6+ is required"
 
+ns = {
+    "svg": "http://www.w3.org/2000/svg",
+    "inkscape": "http://www.inkscape.org/namespaces/inkscape",
+}
 
 class UserException(Exception):
     pass
@@ -108,10 +112,6 @@ def get_dim_inches(dimString):
 
 
 def panel_to_components(tree):
-    ns = {
-        "svg": "http://www.w3.org/2000/svg",
-        "inkscape": "http://www.inkscape.org/namespaces/inkscape",
-    }
 
     components = {}
 
@@ -432,9 +432,9 @@ def createInfoFile(svgFilename, infoFilePath):
 def extractArtwork(svgFilename, artworkFilename):
     print(f"reading from {svgFilename}, writing to {artworkFilename}")
 
-    tree = etree.parse(svgFilename)
+    tree = xml.etree.ElementTree.parse(svgFilename)
     root = tree.getroot()
-    comps = root.findall(".//*[@id='components']")
+    comps = root.findall(".//*[@id='components']",ns)
     if len(comps) == 0:
         print("No group (or any element) with id = 'components' found in svg file")
         return
@@ -444,6 +444,8 @@ def extractArtwork(svgFilename, artworkFilename):
     g = comps[0]
     g.clear()
     print("Removed components layer")
+    xml.etree.ElementTree.register_namespace('', "http://www.w3.org/2000/svg")
+    xml.etree.ElementTree.register_namespace('', "http://www.inkscape.org/namespaces/inkscape")
     tree.write(artworkFilename)
     print(f"Wrote artwork file: {artworkFilename}")
 
