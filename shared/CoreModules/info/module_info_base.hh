@@ -75,7 +75,7 @@ struct ModuleInfoBase {
 
 	// Converts HP to px for a 240x320px screen
 	// TODO: make dimensions explicit
-	constexpr uint32_t get_width_px() {
+	static constexpr uint32_t get_width_px() {
 		// 240px = 5.059" so 1HP = 0.2" = 9.488px
 		return static_cast<uint32_t>((float)width_hp * 9.488f);
 	}
@@ -88,6 +88,15 @@ struct ModuleInfoBase {
 		constexpr float mm_per_inch = 25.4f;
 		float inches = px / pix_per_inch;
 		return inches * mm_per_inch;
+	}
+
+	// Converts mm to pixels, when the screen height (in pixels) is known,
+	// assuming 3U = screen height
+	template<size_t PixelsPer3U>
+	static constexpr float mm_to_px(float mm) {
+		constexpr float MMper3U = 128.5f;
+		constexpr float pixels_per_mm = PixelsPer3U / MMper3U;
+		return mm * pixels_per_mm;
 	}
 };
 
