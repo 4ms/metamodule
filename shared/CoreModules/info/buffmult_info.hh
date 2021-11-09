@@ -113,4 +113,26 @@ struct BuffMultInfo : ModuleInfoBase {
     static constexpr std::array<SwitchDef, NumSwitches> Switches{{
     }};
 
+    static constexpr int NumDiscreteLeds = 2;
+    
+    enum {
+        LedInput_1_LED = 0,
+        LedInput_2_LED = 1,
+    };
+
+    static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{
+        {
+            .id = LedInput_1_LED,
+            .x_mm = px_to_mm<72>(36.15f),
+            .y_mm = px_to_mm<72>(62.81f),
+            .led_color = LedDef::Red,
+        },
+        {
+            .id = LedInput_2_LED,
+            .x_mm = px_to_mm<72>(36.15f),
+            .y_mm = px_to_mm<72>(201.01f),
+            .led_color = LedDef::Red,
+        },
+    }};
+
 };

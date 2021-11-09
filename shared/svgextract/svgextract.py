@@ -245,6 +245,8 @@ def panel_to_components(tree):
 
         #Magenta: LED
         elif color == '#ff00ff' or color == '#f0f':
+            #TODO: what factor determines LED color?
+            c['led_color'] = "Red"
             components['lights'].append(c)
 
         #Orange: Button - Latching
@@ -390,6 +392,21 @@ struct {slug}Info : ModuleInfoBase {{
     source += f"""
     }}}};
 
+    static constexpr int NumDiscreteLeds = {len(components['lights'])};
+    {make_enum("", "Led", components['lights'])}
+
+    static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{{{"""
+    for k in components['lights']:
+        source += f"""
+        {{
+            .id = Led{k['enum_name']},
+            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
+            .led_color = LedDef::{k['led_color']},
+        }},""" 
+    source += f"""
+    }}}};
+
 }};
 """
     return source
@@ -431,6 +448,20 @@ def extractArtwork(svgFilename, artworkFilename):
     print(f"Wrote artwork file: {artworkFilename}")
 
 
+def processSvg(svgFilename):
+    outputpath = os.getenv('METAMODULE_INFO_DIR')
+    if outputpath is None:
+        outputpath = input_default("Directory to save ModuleInfo file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../CoreModules/info"))
+    slug = createInfoFile(svgFilename, outputpath)
+    if slug is None:
+        return
+
+    outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
+    if outputpath is None:
+        outputpath = input_default("Directory to save SVG artwork file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../vcv/res"))
+    extractArtwork(svgFilename, os.path.join(outputpath, slug.lower() + "-artwork.svg"))
+
+
 def usage(script):
     text = f"""VCV Rack Plugin Helper Utility
 
@@ -458,7 +489,7 @@ extractart [input svg file name] [output SVG file name]
 
 def parse_args(args):
     script = args.pop(0)
-    if len(args) == 0:
+    if len(args) < 2:
         usage(script)
         return
 
@@ -466,23 +497,19 @@ def parse_args(args):
     inputfile = args.pop(0)
 
     if cmd == 'processsvg':
-        outputpath = os.getenv('METAMODULE_INFO_DIR')
-        if outputpath is None:
-            outputpath = input_default("Directory to save ModuleInfo file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../CoreModules/info"))
-        slug = createInfoFile(inputfile, outputpath)
-        if slug is None:
-            return
+        processSvg(inputfile)
+        return
 
-        outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
-        if outputpath is None:
-            outputpath = input_default("Directory to save SVG artwork file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../vcv/res"))
-        extractArtwork(inputfile, os.path.join(outputpath, slug.lower() + "-artwork.svg"))
+    if len(args) == 0:
+        usage(script)
         return
 
     output= args.pop(0)
+
     if cmd == 'createinfo':
         createInfoFile(inputfile, output)
         return
+
     if cmd == 'extractart':
         extractArtwork(inputfile, output)
         return

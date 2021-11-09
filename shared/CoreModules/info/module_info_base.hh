@@ -6,52 +6,47 @@
 
 struct KnobDef {
 	uint32_t id;
-
 	float x_mm;
 	float y_mm;
-
 	std::string_view short_name;
 	std::string_view long_name;
-
 	float default_val;
 	enum { Small, Medium, Large } knob_style;
 };
 
 struct InJackDef {
 	uint32_t id;
-
 	float x_mm;
 	float y_mm;
-
 	std::string_view short_name;
 	std::string_view long_name;
-
 	float unpatched_val;
 	enum { Analog, Gate } signal_type;
 };
 
 struct OutJackDef {
 	uint32_t id;
-
 	float x_mm;
 	float y_mm;
-
 	std::string_view short_name;
 	std::string_view long_name;
-
 	enum { Analog, Gate } signal_type;
 };
 
 struct SwitchDef {
 	uint32_t id;
-
 	float x_mm;
 	float y_mm;
-
 	std::string_view short_name;
 	std::string_view long_name;
-
 	enum { MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos } switch_type;
+};
+
+struct LedDef {
+	uint32_t id;
+	float x_mm;
+	float y_mm;
+	enum { Red, Blue, White, Green, RedWhite, RedBlue, BlueGreen, RedGreenBlue } led_color;
 };
 
 // Base structure for a module's ModuleInfo
@@ -74,6 +69,9 @@ struct ModuleInfoBase {
 
 	static constexpr uint32_t NumSwitches = 0;
 	static constexpr std::array<KnobDef, NumSwitches> Switches{};
+
+	static constexpr uint32_t NumDiscreteLeds = 0;
+	static constexpr std::array<LedDef, NumDiscreteLeds> Leds{};
 
 	// Converts HP to px for a 240x320px screen
 	// TODO: make dimensions explicit

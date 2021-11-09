@@ -12,14 +12,15 @@ struct GenericModule : CommModule {
 	GenericModule()
 	{
 		constexpr auto NumParams = Defs::NumKnobs + Defs::NumSwitches;
-		// Calculate number of LED elements (we only support LEDs that are in buttons)
+
+		// Calculate number of LED elements
 		constexpr auto NumRGBLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw) {
 			return sw.switch_type == SwitchDef::MomentaryButton;
 		});
 		constexpr auto NumMonoLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw) {
 			return sw.switch_type == SwitchDef::LatchingButton;
 		});
-		constexpr auto NumLEDElements = NumRGBLEDButtons * 3 + NumMonoLEDButtons;
+		constexpr auto NumLEDElements = Defs::NumDiscreteLeds + NumRGBLEDButtons * 3 + NumMonoLEDButtons;
 		configComm(NumParams, Defs::NumInJacks, Defs::NumOutJacks, NumLEDElements);
 
 		core = ModuleFactory::create(Defs::slug);
@@ -105,9 +106,16 @@ struct GenericModuleWidget : CommModuleWidget {
 				addParam(createParamCentered<SubMiniToggle3pos>(pos, module, param_id));
 			}
 		}
+
+		for (auto led : Defs::Leds) {
+			auto pos = mm2px({led.x_mm, led.y_mm});
+			addChild(createLightCentered<MediumLight<RedLight>>(pos, module, light_id));
+			light_id++;
+		}
 	}
 };
 
+// Helper function
 template<typename T>
 Model *createModelFromInfo()
 {
