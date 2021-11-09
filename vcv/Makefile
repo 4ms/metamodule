@@ -62,20 +62,17 @@ axo_tests:
 win_dist:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
 
-#TODO: how to do this? 
 INFO_FILES = $(wildcard $(SHARED)/CoreModules/info/*_info.hh)
-SVG_SOURCES = $(addsuffix .svg, $(SHARED)/CoreModules/svg/$(notdir $(basename $(INFO_FILES)))) #enosc_info.svg
+SVG_SOURCES = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
 
-modules: $(SVG_SOURCES)
+modules: $(INFO_FILES)
+
+#Relative to the svgextract script?
+METAMODULE_ARTWORK_DIR ?= res/
+METAMODULE_INFO_DIR ?= $(SHARED)/CoreModules/info/
 
 $(SHARED)/CoreModules/info/%.hh: $(SHARED)/CoreModules/svg/%.svg
-	python3 $(SHARED)/svgextract/svgextract.py createinfo $< $@
-	#python3 $(SHARED)/svgextract/svgextract.py extractart $< res/$(subst _info,-artwork,$(notdir $<))
-	
-
-enoscmodule:
-	python3 $(SHARED)/svgextract/svgextract.py createinfo $(SHARED)/CoreModules/svg/enosc_info.svg $(SHARED)/CoreModules/info/enosc_info.hh
-	python3 $(SHARED)/svgextract/svgextract.py extractart $(SHARED)/CoreModules/svg/enosc_info.svg res/enosc-artwork.svg
+	python3 $(SHARED)/svgextract/svgextract.py processsvg $<
 
 
 .PHONY: tests core_tests vcv_tests util_tests axo_tests
