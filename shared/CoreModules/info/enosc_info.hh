@@ -305,4 +305,10 @@ struct EnOscInfo : ModuleInfoBase {
         },
     }};
 
+    static constexpr int NumDiscreteLeds = 0;
+    
+
+    static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{
+    }};
+
 };

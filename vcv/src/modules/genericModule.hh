@@ -5,8 +5,9 @@
 #include "CoreModules/moduleTypes.h"
 #include "MappableJack.hh"
 #include "math.hh"
+#include "util/base_concepts.hh"
 
-template<typename Defs>
+template<Derived<ModuleInfoBase> Defs>
 struct GenericModule : CommModule {
 
 	GenericModule()
@@ -45,7 +46,7 @@ struct GenericModule : CommModule {
 	}
 };
 
-template<typename Defs>
+template<Derived<ModuleInfoBase> Defs>
 struct GenericModuleWidget : CommModuleWidget {
 
 	CommModule *mainModule;
