@@ -286,6 +286,8 @@ def panel_to_components(tree):
 
 
 def make_enum(enum_name, item_prefix, list):
+    if len(list) == 0:
+        return ""
     if len(enum_name) > 0:
         enum_name = enum_name + " "
     source = f"""
