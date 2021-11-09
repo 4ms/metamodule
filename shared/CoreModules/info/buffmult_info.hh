@@ -13,8 +13,6 @@ struct BuffMultInfo : ModuleInfoBase {
 
     static constexpr int NumKnobs = 0;
     
-    enum {
-    };
 
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{
     }};
@@ -111,8 +109,6 @@ struct BuffMultInfo : ModuleInfoBase {
 
     static constexpr int NumSwitches = 0;
     
-    enum {
-    };
 
     static constexpr std::array<SwitchDef, NumSwitches> Switches{{
     }};
