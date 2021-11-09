@@ -42,7 +42,7 @@ struct ModuleViewPage : PageBase {
 	lv_obj_t *roller;
 	lv_style_t button_style;
 	lv_style_t roller_style;
-	lv_style_t roller_selection_style;
+	lv_style_t roller_sel_style;
 
 	void init() override {
 		constexpr auto width_px = static_cast<int>(Info::width_hp * 9.488f);
@@ -82,6 +82,8 @@ struct ModuleViewPage : PageBase {
 		}
 
 		roller = lv_roller_create(base, nullptr);
+
+		// Style for roller items
 		lv_style_reset(&roller_style);
 		lv_style_set_radius(&roller_style, LV_STATE_DEFAULT, 5);
 		lv_style_set_bg_color(&roller_style, LV_STATE_DEFAULT, lv_color_make(0x00, 0x00, 0x00));
@@ -91,21 +93,31 @@ struct ModuleViewPage : PageBase {
 		lv_style_set_border_color(&roller_style, LV_STATE_DEFAULT, lv_color_make(0xdf, 0xe7, 0xed));
 		lv_style_set_border_width(&roller_style, LV_STATE_DEFAULT, 0);
 		lv_style_set_text_color(&roller_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
+		lv_style_set_pad_hor(&roller_style, LV_STATE_DEFAULT, 2);
+		lv_style_set_pad_ver(&roller_style, LV_STATE_DEFAULT, 10);
+		lv_style_set_pad_inner(&roller_style, LV_STATE_DEFAULT, 0);
+		lv_style_set_text_line_space(&roller_style, LV_STATE_DEFAULT, 7);
 		lv_obj_add_style(roller, LV_ROLLER_PART_BG, &roller_style);
 
-		lv_style_reset(&roller_selection_style);
-		lv_style_set_bg_color(&roller_selection_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-		lv_style_set_bg_grad_color(&roller_selection_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-		lv_style_set_bg_grad_dir(&roller_selection_style, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
-		lv_style_set_bg_opa(&roller_selection_style, LV_STATE_DEFAULT, 255);
-		lv_style_set_text_color(&roller_selection_style, LV_STATE_DEFAULT, lv_color_make(0x00, 0x00, 0x00));
-		lv_obj_add_style(roller, LV_ROLLER_PART_SELECTED, &roller_selection_style);
+		// Style for roller selection
+		lv_style_reset(&roller_sel_style);
+		lv_style_set_bg_color(&roller_sel_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
+		lv_style_set_bg_grad_color(&roller_sel_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
+		lv_style_set_bg_grad_dir(&roller_sel_style, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
+		lv_style_set_bg_opa(&roller_sel_style, LV_STATE_DEFAULT, 255);
+		lv_style_set_text_color(&roller_sel_style, LV_STATE_DEFAULT, lv_color_make(0x00, 0x00, 0x00));
+		lv_style_set_pad_hor(&roller_sel_style, LV_STATE_DEFAULT, 2);
+		lv_style_set_pad_ver(&roller_sel_style, LV_STATE_DEFAULT, 10);
+		lv_style_set_pad_inner(&roller_sel_style, LV_STATE_DEFAULT, 0);
+		lv_style_set_text_line_space(&roller_sel_style, LV_STATE_DEFAULT, 7);
+
+		lv_obj_add_style(roller, LV_ROLLER_PART_SELECTED, &roller_sel_style);
 
 		lv_obj_set_pos(roller, width_px, 1);
 
 		lv_obj_set_style_local_text_font(roller, LV_ROLLER_PART_BG, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_700_12);
 		lv_obj_set_style_local_text_font(
-			roller, LV_ROLLER_PART_SELECTED, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_500_12);
+			roller, LV_ROLLER_PART_SELECTED, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_700_12);
 
 		init_bg(base);
 
@@ -113,7 +125,15 @@ struct ModuleViewPage : PageBase {
 		lv_group_add_obj(group, roller);
 		lv_obj_set_event_cb(roller, roller_cb);
 
+		// Highlight for buttons
+		lv_style_init(&style_highlight);
+		lv_style_set_radius(&style_highlight, LV_STATE_DEFAULT, 120);
+		lv_style_set_outline_color(&style_highlight, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
+		lv_style_set_outline_width(&style_highlight, LV_STATE_DEFAULT, 4);
+		lv_style_set_outline_opa(&style_highlight, LV_STATE_DEFAULT, 200);
+
 		// Add options
+		lv_roller_set_align(roller, LV_ALIGN_CENTER);
 		lv_roller_set_options(roller, "\n", LV_ROLLER_MODE_INFINITE);
 		lv_roller_set_visible_row_count(roller, 7);
 	}
