@@ -69,8 +69,6 @@ struct ModuleViewPage : PageBase {
 		lv_obj_set_size(module_img, width_px, height_px);
 		lv_obj_set_click(module_img, false);
 		lv_img_set_src(module_img, img);
-		// lv_img_set_pivot(module_img, 0, 0);
-		// lv_img_set_angle(module_img, 0);
 
 		// Button style
 		lv_style_reset(&button_style);
