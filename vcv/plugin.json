@@ -12,7 +12,13 @@
   "sourceUrl": "",
   "donateUrl": "",
   "changelogUrl": "",
-  "modules": [ 
+  "modules": [
+    {
+      "slug": "SMR",
+      "name": "SMR",
+      "description": "Spectral Multiband Resonator",
+      "tags": []
+    }, 
     {
       "slug": "PANEL_8",
       "name": "MetaModuleMini",

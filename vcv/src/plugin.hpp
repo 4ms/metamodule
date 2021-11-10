@@ -11,9 +11,9 @@ extern std::unique_ptr<CentralData> centralData;
 extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file
-extern Model *modelEnOsc;
-extern Model *modelBuffMult;
-
+//////////////// Auto generated ///////////////////////
+// Add models below here
+extern Model *modelSMR;
 extern Model *modelHubMedium;
 extern Model *modelInfosc01;
 extern Model *modelDjembe;
@@ -66,3 +66,6 @@ extern Model *modelComparator;
 extern Model *modelSend;
 extern Model *modelHubMini;
 extern Model *modelInfosc64bphas;
+extern Model *modelEnOsc;
+extern Model *modelBuffMult;
+//////////////////////////////////////////////////

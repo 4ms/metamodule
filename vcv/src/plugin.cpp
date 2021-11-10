@@ -4,12 +4,18 @@
 Plugin *pluginInstance;
 std::unique_ptr<CentralData> centralData;
 
-/////// TODO: Auto generated:
-#include "CoreModules/info/enosc_info.hh"
+//////////////// Auto generated ///////////////////////
+// include and define models below here
+
+#include "CoreModules/info/SMR_info.hh"
+auto modelSMR = createModelFromInfo<SMRInfo>();
+
+#include "CoreModules/info/EnOsc_info.hh"
 auto modelEnOsc = createModelFromInfo<EnOscInfo>();
-#include "CoreModules/info/buffmult_info.hh"
+
+#include "CoreModules/info/BuffMult_info.hh"
 auto modelBuffMult = createModelFromInfo<BuffMultInfo>();
-///////
+///////////////////////////////////////////////////////
 
 void init(Plugin *p)
 {
@@ -17,12 +23,10 @@ void init(Plugin *p)
 
 	pluginInstance = p;
 
-	// TODO: Auto generated
-	// Add modules here
-	p->addModel(modelEnOsc);
-	p->addModel(modelBuffMult);
-	///////
-
+	//////////////// Auto generated ///////////////////////
+	// Add models below here
+    p->addModel(modelSMR);
+    
 	p->addModel(modelHubMedium);
 	p->addModel(modelInfosc01);
 	p->addModel(modelDjembe);
@@ -75,4 +79,7 @@ void init(Plugin *p)
 	p->addModel(modelSend);
 	p->addModel(modelHubMini);
 	p->addModel(modelInfosc64bphas);
+	p->addModel(modelEnOsc);
+	p->addModel(modelBuffMult);
+	///////////////////////////////////////////////////////
 }
