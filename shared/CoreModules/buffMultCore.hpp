@@ -59,9 +59,9 @@ public:
 
 	float get_led_brightness(int led_id) const override {
 		switch (led_id) {
-			case Info::LedInput_1_LED:
+			case Info::LedInput_1_Led:
 				return std::clamp(in[0], 0.f, 1.f);
-			case Info::LedInput_2_LED:
+			case Info::LedInput_2_Led:
 				return std::clamp(is_second_input_patched ? in[1] : in[0], 0.f, 1.f);
 			default:
 				return 0.f;
