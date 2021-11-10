@@ -11,7 +11,7 @@ struct KnobDef {
 	std::string_view short_name;
 	std::string_view long_name;
 	float default_val;
-	enum { Small, Medium, Large } knob_style;
+	enum { Small, Medium, Large, Slider25mm } knob_style;
 };
 
 struct InJackDef {

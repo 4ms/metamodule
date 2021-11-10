@@ -222,11 +222,15 @@ def panel_to_components(tree):
             c['height'] = round(height, 3)
             c['cx'] = round(x + width / 2, 3)
             c['cy'] = round(y + height / 2, 3)
+            shape = "rect"
         elif el.tag == "{http://www.w3.org/2000/svg}circle":
             cx = float(el.get('cx'))
             cy = float(el.get('cy'))
             c['cx'] = round(cx, 3)
             c['cy'] = round(cy, 3)
+            shape = "circle"
+        else:
+            shape = "unknown"
 
         # Get color --> component type
         style = el.get('style')
@@ -236,13 +240,16 @@ def panel_to_components(tree):
         color = expand_color_synonyms(color)
         c['color'] = color
 
-        #Red: Default fully-CCW knob
+        #Red: Knob or slider
         if color.startswith("#ff00") and color!="#ff00ff":
             def_val_int = int(color[-2:], 16)
             if def_val_int <= 128:
                 c['encoder'] = False
                 c['default_value'] = str(def_val_int / 128) + "f"
-                c['knob_style'] = get_knob_style_from_radius(el.get('r'))
+                if shape == "circle":
+                    c['knob_style'] = get_knob_style_from_radius(el.get('r'))
+                else:
+                    c['knob_style'] = "Slider25mm"
                 components['params'].append(c)
 
         #Deep Purple: Encodeer
@@ -349,7 +356,7 @@ struct {slug}Info : ModuleInfoBase {{
     static constexpr std::string_view slug{{"{slug}"}};
     static inline const StaticString<LongNameChars> description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
-    static constexpr std::string_view svg_filename{{"res/{slug.lower()}-artwork.svg"}};
+    static constexpr std::string_view svg_filename{{"res/{slug}-artwork.svg"}};
 
     static constexpr int NumKnobs = {len(components['params'])};
     {make_enum("", "Knob", components['params'])}
@@ -452,7 +459,7 @@ def createInfoFile(svgFilename, infoFilePath):
     tree = xml.etree.ElementTree.parse(svgFilename)
     components = panel_to_components(tree)
     infoFileText = components_to_infofile(components)
-    infoFileName = os.path.join(infoFilePath, components['slug'].lower()+"_info.hh")
+    infoFileName = os.path.join(infoFilePath, components['slug']+"_info.hh")
     with open(infoFileName, "w") as f:
         f.write(infoFileText)
         print(f"Wrote info file: {infoFileName}")
@@ -495,7 +502,7 @@ def processSvg(svgFilename):
     outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
     if outputpath is None:
         outputpath = input_default("Directory to save SVG artwork file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../vcv/res"))
-    extractArtwork(svgFilename, os.path.join(outputpath, slug.lower() + "-artwork.svg"))
+    extractArtwork(svgFilename, os.path.join(outputpath, slug + "-artwork.svg"))
 
 
 def usage(script):
