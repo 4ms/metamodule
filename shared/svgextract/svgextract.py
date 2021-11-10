@@ -212,16 +212,26 @@ def panel_to_components(tree):
         c['color'] = color
 
         #Red: Default fully-CCW knob
-        if color == '#ff0000' or color == '#f00' or color == 'red':
-            c['default_value'] = "0.f"
-            c['knob_style'] = get_knob_style_from_radius(el.get('r'))
-            components['params'].append(c)
+        if color == 'red' or color == '#f00':
+            color = '#ff0000'
 
-        #Light Red/Coral: Center Detent knob
-        elif color == '#ff8080':
-            c['default_value'] = "0.5f"
-            c['knob_style'] = get_knob_style_from_radius(el.get('r'))
-            components['params'].append(c)
+        if color.startswith("#ff00") and color is not "#ff00ff" and color is not "#f0f":
+            def_val_int = int(color[-2:], 16)
+            if def_val_int < 128:
+                c['default_value'] = str(def_val_int / 127) + "f"
+                c['knob_style'] = get_knob_style_from_radius(el.get('r'))
+                components['params'].append(c)
+
+        #if color == '#ff0000' or color == '#f00' or color == 'red':
+        #    c['default_value'] = "0.f"
+        #    c['knob_style'] = get_knob_style_from_radius(el.get('r'))
+        #    components['params'].append(c)
+
+        ##Light Red/Coral: Center Detent knob
+        #elif color == '#ff8080':
+        #    c['default_value'] = "0.5f"
+        #    c['knob_style'] = get_knob_style_from_radius(el.get('r'))
+        #    components['params'].append(c)
 
         #Green: Input jack, analog (CV or audio): 
         elif color == '#00ff00' or color == '#0f0' or color == 'lime':
