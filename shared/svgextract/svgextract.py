@@ -449,6 +449,11 @@ def extractArtwork(svgFilename, artworkFilename):
     tree.write(artworkFilename)
     print(f"Wrote artwork file: {artworkFilename}")
 
+    #TODO: convert artwork file to PNG
+    #resize to 240px height
+    #save in METAMODULE_PNG_DIR
+    #Run lvgl script
+
 
 def processSvg(svgFilename):
     outputpath = os.getenv('METAMODULE_INFO_DIR')

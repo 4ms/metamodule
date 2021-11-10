@@ -8,8 +8,9 @@
 #include "patch_player.hh"
 #include "patchlist.hh"
 
-//Pages:
+// Pages:
 #include "pages/knob_view.hh"
+#include "pages/module_view.hh"
 #include "pages/patch_selector.hh"
 #include "pages/sketches_test_jq.hh"
 
@@ -19,10 +20,11 @@ namespace MetaModule
 class PageManager {
 	PatchInfo info;
 
-	static constexpr size_t LAST_PAGE = 4;
+	static constexpr size_t LAST_PAGE = 5;
 	std::array<std::unique_ptr<PageBase>, LAST_PAGE> pages = {
 		std::make_unique<PatchSelectorPage>(info),
 		std::make_unique<KnobView3>(info),
+		std::make_unique<ModuleViewPage>(info),
 		// std::make_unique<GroupArcSketchesPage1>(info),
 		std::make_unique<GroupArcSketchesPage2>(info),
 		// std::make_unique<GroupArcSketchesPage3>(info),
@@ -55,8 +57,8 @@ public:
 		: info{pl, pp, p, m, mbox}
 		, patch_list{pl}
 		, player{pp}
-		, mbox{mbox}
-	{}
+		, mbox{mbox} {
+	}
 
 	void init();
 	void next_page();
