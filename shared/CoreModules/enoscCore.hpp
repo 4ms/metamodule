@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/info/enosc_info.hh"
+#include "CoreModules/info/EnOsc_info.hh"
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "util/math.hh"

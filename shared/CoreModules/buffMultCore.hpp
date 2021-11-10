@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/info/buffmult_info.hh"
+#include "CoreModules/info/BuffMult_info.hh"
 #include "CoreModules/moduleTypes.h"
 #include "coreProcessor.h"
 #include "util/math.hh"
