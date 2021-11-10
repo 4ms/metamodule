@@ -637,8 +637,6 @@
     <path d="M114.63,243.49a95.45,95.45,0,0,0-27.32,3.66L54.93,258l-1.93.69c-6.1,2.23-10.37,7.52-10.37,13.55v44.9c0,.3,0,16.44,0,16.73l0-41.18V333c0,8.08,7,13.19,15.72,13.19A33.93,33.93,0,0,0,70.28,344l.35-.14c19.09-7.62,44-7,44-7s24.77-.51,43.86,7.1l.35.14c3.26,1.45,8.64,2.05,12.08,2.05,8.68,0,15.71-5.11,15.71-13.19V292.69l0,41.18c0-.29,0-16.43,0-16.73v-44.9c0-6-4.27-11.32-10.36-13.55l-1.94-.69L142,247.15A95.47,95.47,0,0,0,114.63,243.49Z" transform="translate(0.51 0.13)" style="fill: none;stroke: #231f20;stroke-width: 1.05091px"/>
   </g>
   <g id="components">
-    <circle id="Out_B" data-name="Out B" cx="208.7" cy="305.91" r="11.34" style="fill: blue"/>
-    <circle id="Out_A" data-name="Out A" cx="208.7" cy="262.78" r="11.34" style="fill: blue"/>
     <circle id="Freeze" cx="171.32" cy="319.02" r="11.34" style="fill: #80ff80"/>
     <circle id="Warp" cx="133.86" cy="305.93" r="11.34" style="fill: lime"/>
     <circle id="Twist" cx="96.46" cy="305.93" r="11.34" style="fill: lime"/>
@@ -651,19 +649,21 @@
     <circle id="Pitch" cx="21.45" cy="262.78" r="11.34" style="fill: lime"/>
     <circle id="Warp-2" data-name="Warp" cx="168.4" cy="208.2" r="17.01" style="fill: #ff8080"/>
     <circle id="Detune" cx="115.07" cy="207.86" r="8.5" style="fill: red"/>
-    <circle id="Twist-2" data-name="Twist" cx="61.35" cy="208.2" r="17.01" style="fill: #ff8080"/>
-    <circle id="Cross_FM-2" data-name="Cross FM" cx="197.81" cy="144.18" r="17.01" style="fill: #ff8080"/>
-    <circle id="Root-2" data-name="Root" cx="115.14" cy="140.92" r="31.18" style="fill: #ff8080"/>
-    <circle id="Balance-2" data-name="Balance" cx="32.3" cy="144.18" r="17.01" style="fill: red"/>
-    <circle id="Pitch-2" data-name="Pitch" cx="176.54" cy="78.08" r="17.01" style="fill: red"/>
-    <circle id="Spread-2" data-name="Spread" cx="114.85" cy="61.59" r="17.01" style="fill: red"/>
-    <circle id="Scale-2" data-name="Scale" cx="53.68" cy="78.08" r="17.01" style="fill: #ff8080"/>
-    <circle id="Warp-3" data-name="Warp" cx="213.81" cy="201.73" r="8.5" style="fill: #ff00c0"/>
-    <circle id="Twist-3" data-name="Twist" cx="16.51" cy="215.06" r="8.5" style="fill: #ff00c0"/>
-    <circle id="Cross_FM-3" data-name="Cross FM" cx="213.81" cy="102.95" r="8.5" style="fill: #ff00c0"/>
-    <circle id="Scale-3" data-name="Scale" cx="16.51" cy="103.03" r="8.5" style="fill: #ff00c0"/>
+    <circle id="Twist-2" data-name="Twist" cx="61.35" cy="208.2" r="17.01" style="fill: #ff0000"/>
+    <circle id="Cross_FM-2" data-name="Cross FM" cx="197.81" cy="144.18" r="17.01" style="fill: #ff0000"/>
+    <circle id="Root-2" data-name="Root" cx="115.14" cy="140.92" r="31.18" style="fill: #ff0040"/>
+    <circle id="Balance-2" data-name="Balance" cx="32.3" cy="144.18" r="17.01" style="fill: #ff0040"/>
+    <circle id="Pitch-2" data-name="Pitch" cx="176.54" cy="78.08" r="17.01" style="fill: #ff0040"/>
+    <circle id="Spread-2" data-name="Spread" cx="114.85" cy="61.59" r="17.01" style="fill: #ff0040"/>
+    <circle id="Scale-2" data-name="Scale" cx="53.68" cy="78.08" r="17.01" style="fill: #ff0000"/>
+    <circle id="Warp-3" data-name="Warp" cx="213.81" cy="201.73" r="8.5" style="fill: #ffc080"/>
+    <circle id="Twist-3" data-name="Twist" cx="16.51" cy="215.06" r="8.5" style="fill: #ffc080"/>
+    <circle id="Cross_FM-3" data-name="Cross FM" cx="213.81" cy="102.95" r="8.5" style="fill: #ffc080"/>
+    <circle id="Scale-3" data-name="Scale" cx="16.51" cy="103.03" r="8.5" style="fill: #ffc080"/>
     <circle id="Freeze-2" data-name="Freeze" cx="209.14" cy="42.53" r="11.34" style="fill: #ffc000"/>
     <circle id="Learn-2" data-name="Learn" cx="21.21" cy="42.53" r="11.34" style="fill: #ffc000"/>
+    <circle id="Out_A" data-name="Out A" cx="208.7" cy="262.78" r="11.34" style="fill: blue"/>
+    <circle id="Out_B" data-name="Out B" cx="208.7" cy="305.91" r="11.34" style="fill: blue"/>
     <text id="slug" transform="translate(147.58 349.24)" style="font-size: 6px;font-family: MyriadPro-Regular, Myriad Pro">EnOsc</text>
     <text id="modulename" transform="translate(178.06 349.17)" style="font-size: 6px;font-family: MyriadPro-Regular, Myriad Pro">Ensemble Oscill<tspan x="39.21" y="0" style="letter-spacing: -0.00390625em">a</tspan><tspan x="42.08" y="0" style="letter-spacing: -0.006022135416666667em">t</tspan><tspan x="44.03" y="0">or</tspan></text>
   </g>
