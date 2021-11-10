@@ -5,8 +5,7 @@ import re
 import xml.etree.ElementTree
 import random
 import string
-# from lxml import etree
-
+from xml_helper import register_all_namespaces
 
 # Version check
 f"Python 3.6+ is required"
@@ -19,11 +18,6 @@ ns = {
 class UserException(Exception):
     pass
 
-
-# def find(f, array):
-#     for a in array:
-#         if f(a):
-#             return f
 
 def input_default(prompt, default=""):
     str = input(f"{prompt} [{default}]: ")
@@ -103,7 +97,7 @@ def deduce_dpi(root):
     heightInches = get_dim_inches(root.get('height'))
     viewBox = root.get('viewBox')
     if widthInches == 0 or heightInches == 0 or viewBox is None:
-        print("Warning DPI cannot be deduced, width, height, or viewBox is missing or 0 in root node. Using 72dpi")
+        print("WARNING: DPI cannot be deduced, width, height, or viewBox is missing or 0 in root node. Using 72dpi")
         return 72
 
     viewBoxDims = viewBox.split(" ")
@@ -112,7 +106,7 @@ def deduce_dpi(root):
     hDPI = round(viewWidth / widthInches)
     vDPI = round(viewHeight / heightInches)
     if vDPI is not hDPI:
-        print(f"Warning: Horizontal DPI is {hDPI} and Vertical DPI is {vDPI}, which are not equal. Using horizontal value")
+        print(f"WARNING: Horizontal DPI is {hDPI} and Vertical DPI is {vDPI}, which are not equal. Using horizontal value")
     else:
         print(f"DPI deduced as {hDPI}")
 
@@ -144,7 +138,7 @@ def panel_to_components(tree):
     if len(groups) < 1:
         groups = root.findall(".//svg:g[@id='components']", ns)
     if len(groups) < 1:
-        raise UserException("Could not find \"components\" layer on panel")
+        raise UserException("ERROR: Could not find \"components\" layer on panel")
     components_group = groups[0]
 
     # Deduce DPI and HP:
@@ -178,12 +172,12 @@ def panel_to_components(tree):
                 components['ModuleName'] += m
 
     if components['slug'] == "UNNAMED":
-        print("No text element with name or id 'slug' was found in the 'components' layer/group. Setting slug to 'UNNAMED'.")
+        print("WARNING: No text element with name or id 'slug' was found in the 'components' layer/group. Setting slug to 'UNNAMED'.")
     else:
         print(f"Slug found: \"{components['slug']}\"")
 
     if components['ModuleName'] is None:
-        print("No text element with name or id 'modulename' was found in the 'components' layer/group. Setting ModuleName to 'Unnamed'")
+        print("WARNING: No text element with name or id 'modulename' was found in the 'components' layer/group. Setting ModuleName to 'Unnamed'")
     else:
         print(f"Module Name found: \"{components['ModuleName']}\"")
 
@@ -212,7 +206,6 @@ def panel_to_components(tree):
         if name is None:
             name = ''.join(random.choices(string.ascii_uppercase, k=6))
             print("Unnamed component found: generating random name: " + name)
-            print(f"cx = {el.get('cx')}, cy = {el.get('cy')}")
         c['raw_name'] = name
         c['display_name'] = format_for_display(name)
         c['enum_name'] = format_as_enum_item(name)
@@ -455,8 +448,7 @@ def createInfoFile(svgFilename, infoFilePath):
     if os.path.isfile(svgFilename) == False:
         print(f"Not a file: {svgFilename}. Aborting without creating an info file.")
         return
-    xml.etree.ElementTree.register_namespace('', "http://www.w3.org/2000/svg")
-    xml.etree.ElementTree.register_namespace('', "http://www.inkscape.org/namespaces/inkscape")
+    register_all_namespaces(svgFilename)
     tree = xml.etree.ElementTree.parse(svgFilename)
     components = panel_to_components(tree)
     infoFileText = components_to_infofile(components)
@@ -469,8 +461,7 @@ def createInfoFile(svgFilename, infoFilePath):
 
 def extractArtwork(svgFilename, artworkFilename):
     print(f"reading from {svgFilename}, writing to {artworkFilename}")
-    xml.etree.ElementTree.register_namespace('', "http://www.w3.org/2000/svg")
-    xml.etree.ElementTree.register_namespace('', "http://www.inkscape.org/namespaces/inkscape")
+    register_all_namespaces(svgFilename)
 
     tree = xml.etree.ElementTree.parse(svgFilename)
     root = tree.getroot()
@@ -484,8 +475,6 @@ def extractArtwork(svgFilename, artworkFilename):
     g = comps[0]
     g.clear()
     print("Removed components layer")
-    xml.etree.ElementTree.register_namespace('', "http://www.w3.org/2000/svg")
-    xml.etree.ElementTree.register_namespace('', "http://www.inkscape.org/namespaces/inkscape")
     tree.write(artworkFilename)
     print(f"Wrote artwork file: {artworkFilename}")
 
