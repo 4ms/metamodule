@@ -70,6 +70,10 @@ struct GenericModuleWidget : CommModuleWidget {
 					addParam(
 						createParamCentered<Davies1900hLargeBlackKnob>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
 					break;
+				case KnobDef::Slider25mm:
+					addParam(createParamCentered<LEDLightSlider<WhiteLight>>(
+						mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
+					break;
 			}
 		}
 
