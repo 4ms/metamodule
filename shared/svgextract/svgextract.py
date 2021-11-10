@@ -3,6 +3,8 @@ import sys
 import os
 import re
 import xml.etree.ElementTree
+import random
+import string
 # from lxml import etree
 
 
@@ -41,22 +43,27 @@ def str_to_identifier(s):
     if s[0].isdigit():
         s = "_" + s
     # Capitalize first letter
-    s = s[0].upper() + s[1:]
+    s = s.title()
     # Replace special characters with underscore
     s = re.sub(r'\W', '_', s)
     return s
 
 
 def remove_trailing_dash_number(name):
-    #Chop off -[\d]
+    #Chop off -[\d\d] or -[\d]
+    if name[-3:-2] == '-' and name[-2:].isdigit() and name[-1:].isdigit():
+        name = name[:-3]
     if name[-2:-1] == '-' and name[-1:].isdigit():
         name = name[:-2]
     return name
 
 
 def format_for_display(comp_name):
-    comp_name = remove_trailing_dash_number(comp_name)
-    return comp_name.title().replace('_',' ')
+    return comp_name.replace('_',' ')
+
+
+def format_as_enum_item(comp_name):
+    return str_to_identifier(comp_name)
 
 
 def get_knob_style_from_radius(radius):
@@ -77,6 +84,18 @@ def get_button_style_from_radius(radius):
     if r < 40:
         return "medium" #10-40: 11.34 typical
     return "unknown" #under 3 or over 40 is not a known style
+
+
+def expand_color_synonyms(color):
+    if color == 'red' or color == '#f00': color = '#ff0000'
+    if color == 'lime' or color == '#0f0': color = '#00ff00'
+    if color == 'blue' or color == '#00f': color = '#0000ff'
+    if color == 'yellow' or color == '#ff0': color = '#ffff00'
+    if color == 'magenta' or color == '#f0f': color = '#ff00ff'
+    if color == 'cyan' or color == '#0ff': color = '#00ffff'
+    if color == 'black' or color == '#000': color = '#000000'
+    if color == 'white' or color == '#fff': color = '#ffffff'
+    return color
 
 
 def deduce_dpi(root):
@@ -114,14 +133,11 @@ def get_dim_inches(dimString):
 def panel_to_components(tree):
 
     components = {}
-
-    #TODO: extract module name (full name)
-    #TODO: extract slug
     #TODO: extract knob long name and description (or is that to be done manually?)
     #.... maybe SVG id = "ShortName#LongName" or "ShortName"
     #.... and description is in some help file
 
-    # Get components layer
+    # Get components layer/group
     root = tree.getroot()
     groups = root.findall(".//svg:g[@inkscape:label='components']", ns)
     # Illustrator uses `id` for the group name.
@@ -129,21 +145,25 @@ def panel_to_components(tree):
         groups = root.findall(".//svg:g[@id='components']", ns)
     if len(groups) < 1:
         raise UserException("Could not find \"components\" layer on panel")
-
-    # Get circles and rects
     components_group = groups[0]
-    circles = components_group.findall(".//svg:circle", ns)
-    rects = components_group.findall(".//svg:rect", ns)
 
+    # Deduce DPI and HP:
     components['dpi'] = deduce_dpi(root)
     components['HP'] = round(get_dim_inches(root.get('width')) / 0.2)
     print(f"HP deduced as {components['HP']}")
 
+    # Set default slug and ModuleName
+    components['slug'] = "UNNAMED"
+    components['ModuleName'] = "Unnamed"
+
+    # Scan all text elements: look for slug and ModuleName
     texts = components_group.findall(".//svg:text", ns)
     for t in texts:
         name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
         if name is None:
             name = t.get('id')
+        if name is None:
+            name = t.get('data-name')
         if name is None:
             continue
 
@@ -157,18 +177,18 @@ def panel_to_components(tree):
             for m in t.itertext():
                 components['ModuleName'] += m
 
-    if components['slug'] is None:
+    if components['slug'] == "UNNAMED":
         print("No text element with name or id 'slug' was found in the 'components' layer/group. Setting slug to 'UNNAMED'.")
-        components['slug'] = "UNNAMED"
     else:
         print(f"Slug found: \"{components['slug']}\"")
 
     if components['ModuleName'] is None:
         print("No text element with name or id 'modulename' was found in the 'components' layer/group. Setting ModuleName to 'Unnamed'")
-        components['ModuleName'] = "Unnamed"
     else:
         print(f"Module Name found: \"{components['ModuleName']}\"")
 
+
+    # Scan all circles and rects for components
     components['params'] = []
     components['inputs'] = []
     components['outputs'] = []
@@ -176,15 +196,26 @@ def panel_to_components(tree):
     components['widgets'] = []
     components['switches'] = []
 
+    circles = components_group.findall(".//svg:circle", ns)
+    rects = components_group.findall(".//svg:rect", ns)
+
     for el in circles + rects:
         c = {}
         # Get name
         name = el.get('{http://www.inkscape.org/namespaces/inkscape}label')
         if name is None:
+            name = el.get('data-name')
+        if name is None:
             name = el.get('id')
+            if name is not None:
+                name = remove_trailing_dash_number(name)
+        if name is None:
+            name = ''.join(random.choices(string.ascii_uppercase, k=6))
+            print("Unnamed component found: generating random name: " + name)
+            print(f"cx = {el.get('cx')}, cy = {el.get('cy')}")
         c['raw_name'] = name
         c['display_name'] = format_for_display(name)
-        c['enum_name'] = str_to_identifier(remove_trailing_dash_number(name))
+        c['enum_name'] = format_as_enum_item(name)
 
         # Get position
         if el.tag == "{http://www.w3.org/2000/svg}rect":
@@ -204,37 +235,32 @@ def panel_to_components(tree):
             c['cx'] = round(cx, 3)
             c['cy'] = round(cy, 3)
 
-        # Get color
+        # Get color --> component type
         style = el.get('style')
         color_match = re.search(r'fill:\s*(.*)', style)
         color = ''
         color = color_match.group(1).lower() if color_match is not None else ''
+        color = expand_color_synonyms(color)
         c['color'] = color
 
         #Red: Default fully-CCW knob
-        if color == 'red' or color == '#f00':
-            color = '#ff0000'
-
-        if color.startswith("#ff00") and color is not "#ff00ff" and color is not "#f0f":
+        if color.startswith("#ff00") and color!="#ff00ff":
             def_val_int = int(color[-2:], 16)
-            if def_val_int < 128:
-                c['default_value'] = str(def_val_int / 127) + "f"
+            if def_val_int <= 128:
+                c['encoder'] = False
+                c['default_value'] = str(def_val_int / 128) + "f"
                 c['knob_style'] = get_knob_style_from_radius(el.get('r'))
                 components['params'].append(c)
 
-        #if color == '#ff0000' or color == '#f00' or color == 'red':
-        #    c['default_value'] = "0.f"
-        #    c['knob_style'] = get_knob_style_from_radius(el.get('r'))
-        #    components['params'].append(c)
-
-        ##Light Red/Coral: Center Detent knob
-        #elif color == '#ff8080':
-        #    c['default_value'] = "0.5f"
-        #    c['knob_style'] = get_knob_style_from_radius(el.get('r'))
-        #    components['params'].append(c)
+        #Deep Purple: Encodeer
+        elif color == '#c000c0':
+            c['encoder'] = True
+            c['default_value'] = "0.0f"
+            c['knob_style'] = get_knob_style_from_radius(el.get('r'))
+            components['params'].append(c)
 
         #Green: Input jack, analog (CV or audio): 
-        elif color == '#00ff00' or color == '#0f0' or color == 'lime':
+        elif color == '#00ff00':
             c['signal_type'] = "Analog"
             components['inputs'].append(c)
 
@@ -244,7 +270,7 @@ def panel_to_components(tree):
             components['inputs'].append(c)
 
         #Blue: Output jack, analog (CV or audio)
-        elif color == '#0000ff' or color == '#00f' or color == 'blue':
+        elif color == '#0000ff':
             c['signal_type'] = "Analog"
             components['outputs'].append(c)
 
@@ -254,8 +280,8 @@ def panel_to_components(tree):
             components['outputs'].append(c)
 
         #Magenta: LED
-        elif color == '#ff00ff' or color == '#f0f':
-            #TODO: what factor determines LED color?
+        elif color == '#ff00ff':
+            #TODO: led color is in the name in parenthesis
             c['led_color'] = "Red"
             components['lights'].append(c)
 
@@ -270,16 +296,16 @@ def panel_to_components(tree):
             components['switches'].append(c)
 
         #Deep Pink: Switch - 2pos
-        elif color == '#ff0080':
+        elif color == '#ff8080':
             c['switch_type'] = "Toggle2pos"
             components['switches'].append(c)
 
         #Hot Pink: Switch - 3pos
-        elif color == '#ff00c0':
+        elif color == '#ffc080':
             c['switch_type'] = "Toggle3pos"
             components['switches'].append(c)
 
-        elif color == '#ffff00' or color == '#ff0' or color == 'yellow':
+        elif color == '#ffff00':
             components['widgets'].append(c)
         else:
             print(f"Unknown color: {color} found at {cx},{cy}. Skipping.")
@@ -429,6 +455,8 @@ def createInfoFile(svgFilename, infoFilePath):
     if os.path.isfile(svgFilename) == False:
         print(f"Not a file: {svgFilename}. Aborting without creating an info file.")
         return
+    xml.etree.ElementTree.register_namespace('', "http://www.w3.org/2000/svg")
+    xml.etree.ElementTree.register_namespace('', "http://www.inkscape.org/namespaces/inkscape")
     tree = xml.etree.ElementTree.parse(svgFilename)
     components = panel_to_components(tree)
     infoFileText = components_to_infofile(components)
@@ -441,6 +469,8 @@ def createInfoFile(svgFilename, infoFilePath):
 
 def extractArtwork(svgFilename, artworkFilename):
     print(f"reading from {svgFilename}, writing to {artworkFilename}")
+    xml.etree.ElementTree.register_namespace('', "http://www.w3.org/2000/svg")
+    xml.etree.ElementTree.register_namespace('', "http://www.inkscape.org/namespaces/inkscape")
 
     tree = xml.etree.ElementTree.parse(svgFilename)
     root = tree.getroot()

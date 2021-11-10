@@ -1,5 +1,6 @@
 from svgextract import panel_to_components
 from svgextract import format_for_display
+from svgextract import remove_trailing_dash_number
 
 import xml.etree.ElementTree
 
@@ -23,7 +24,10 @@ def test_circle_colors():
         <circle id="knob-shorthex" cx="2.2" cy="22.22" r="11.34" style="fill: #f00"/>
         <circle id="knob-fullhex" cx="3.3" cy="33.33" r="11.34" style="fill: #ff0000"/>
 
-        <circle id="knob-center" cx="4.4" cy="44.44" r="11.34" style="fill: #ff8080"/>
+        <circle id="knob-25" cx="4.4" cy="44.44" r="11.34" style="fill: #ff0020"/>
+        <circle id="knob-center" cx="4.3" cy="44.44" r="11.34" style="fill: #ff0040"/>
+        <circle id="knob-75" cx="4.2" cy="44.44" r="11.34" style="fill: #ff0060"/>
+        <circle id="knob-100" cx="4.1" cy="44.44" r="11.34" style="fill: #ff0080"/>
         <circle id="knob-red-big" cx="5.1" cy="11.1" r="31.38" style="fill: red"/>
         <circle id="knob-red-small" cx="6.1" cy="11.1" r="9.01" style="fill: red"/>
         <circle id="knob-red-small" cx="7.1" cy="11.1" r="9.01" style="fill: red"/>
@@ -40,19 +44,27 @@ def test_circle_colors():
 
         <circle id="led" cx="16.1" cy="161.1" r="5.00" style="fill: #f0f"/>
         <circle id="led" cx="16.1" cy="161.1" r="5.00" style="fill: #ff00ff"/>
+        <circle cx="10" cy="10" r="5.00" style="fill: #f0f"/>
             
         <circle id="button-latch" cx="17.1" cy="161.1" r="5.00" style="fill: #ff8000"/>
         <circle id="button-momentary" cx="18.1" cy="161.1" r="5.00" style="fill: #ffc000"/>
-        <circle id="switch-2pos" cx="19.1" cy="161.1" r="5.00" style="fill: #ff0080"/>
-        <circle id="switch-1pos" cx="20.1" cy="161.1" r="5.00" style="fill: #ff00c0"/>
+        <circle id="switch-2pos" cx="19.1" cy="161.1" r="5.00" style="fill: #ff8080"/>
+        <circle id="switch-1pos" cx="20.1" cy="161.1" r="5.00" style="fill: #ffc080"/>
 
         <circle id="widget-yellow" cx="16.1" cy="161.1" r="5.00" style="fill: yellow"/>
         <circle id="widget-ff0" cx="16.1" cy="161.1" r="5.00" style="fill: #ff0"/>
         <circle id="widget-ffff00" cx="16.1" cy="161.1" r="5.00" style="fill: #ffff00"/>
 
-        <circle id="unknown" cx="16.1" cy="161.1" r="5.00" style="fill: #123456"/>
+        <circle id="unknown-color" cx="16.1" cy="161.1" r="5.00" style="fill: #123456"/>
+
+        <circle id="rotary-med" cx="96.1" cy="161.1" r="11.34" style="fill: #C000C0"/>
+        <circle id="rotary-sm" cx="96.1" cy="161.1" r="9.0" style="fill: #C000C0"/>
+        <circle id="rotary-large" cx="96.1" cy="161.1" r="31" style="fill: #C000C0"/>
 
         <path id="ignore-paths" cx="99.1" cy="11.1" r="9.01" style="fill: red"/>
+
+        <text id="slug">TestModule</text>
+        <text id="modulename">Test Module</text>
       </g>
     </svg>"""
 
@@ -63,12 +75,17 @@ def test_circle_colors():
 
     tree = xml.etree.ElementTree.parse(testfilename)
     components = panel_to_components(tree)
-    CHECK_EQ(len(components['params']) , 7, "Found 7 knobs")
-    CHECK_EQ(sum(k['knob_style']=='Small' for k in components['params']), 2, "... 2 small knobs")
-    CHECK_EQ(sum(k['knob_style']=='Medium' for k in components['params']), 4, "... 4 medium knobs")
-    CHECK_EQ(sum(k['knob_style']=='Large' for k in components['params']), 1, "... 1 large knob")
-    CHECK_EQ(sum(k['default_value']=="0.5f" for k in components['params']), 1, "... 1 center-det knob")
-    CHECK_EQ(sum(k['default_value']=="0.f" for k in components['params']), 6, "... 6 default=0 knobs")
+    CHECK_EQ(len(components['params']) , 13, "Found 13 knobs")
+    CHECK_EQ(sum(k['knob_style']=='Small' for k in components['params']), 3, "... 3 small knobs")
+    CHECK_EQ(sum(k['knob_style']=='Medium' for k in components['params']), 8, "... 8 medium knobs")
+    CHECK_EQ(sum(k['knob_style']=='Large' for k in components['params']), 2, "... 2 large knob")
+    CHECK_EQ(sum(k['default_value']=="0.25f" for k in components['params']), 1, "... 1 default 25% knob")
+    CHECK_EQ(sum(k['default_value']=="0.5f" for k in components['params']), 1, "... 1 default 50% knob")
+    CHECK_EQ(sum(k['default_value']=="0.75f" for k in components['params']), 1, "... 1 default 75% knob")
+    CHECK_EQ(sum(k['default_value']=="1.0f" for k in components['params']), 1, "... 1 default 100% knob")
+    CHECK_EQ(sum(k['default_value']=="0.0f" for k in components['params']), 9, "... 9 default=0% knobs (includes encoders)")
+
+    CHECK_EQ(sum(k['encoder']==True for k in components['params']), 3, "... 3 encoders")
 
     CHECK_EQ(sum(k['enum_name']=='Knob_Red' for k in components['params']), 1, "... 1 named 'Knob_Red'")
     CHECK_EQ(sum(k['display_name']=='Knob Red' for k in components['params']), 1, "... 1 display named 'Knob Red'")
@@ -82,7 +99,7 @@ def test_circle_colors():
     CHECK_EQ(sum(k['signal_type']=='Analog' for k in components['outputs']), 3, "... 3 analog outputs")
     CHECK_EQ(sum(k['signal_type']=='Gate' for k in components['outputs']), 1, "... 1 digital output")
 
-    CHECK_EQ(len(components['lights']) , 2, "Found 2 lights")
+    CHECK_EQ(len(components['lights']) , 3, "Found 3 lights")
     CHECK_EQ(len(components['switches']) , 4, "Found 4 switches/buttons")
     CHECK_EQ(sum(k['switch_type']=='LatchingButton' for k in components['switches']), 1, "... 1 latching button")
     CHECK_EQ(sum(k['switch_type']=='MomentaryButton' for k in components['switches']), 1, "... 1 momentary button")
@@ -90,14 +107,19 @@ def test_circle_colors():
     CHECK_EQ(sum(k['switch_type']=='Toggle3pos' for k in components['switches']), 1, "... 1 3pos switch")
     CHECK_EQ(len(components['widgets']) , 3, "Found 3 custom widgets")
 
+    CHECK_EQ(sum((k['cx']==10 and k['cy']==10) for k in components['lights']), 1, "... 1 (random named) light at 10, 10")
+
+    CHECK_EQ(components['slug'], "TestModule", "Slug is TestModule")
+    CHECK_EQ(components['ModuleName'], "Test Module", "ModuleName is Test Module")
+
 def test_format_for_display():
-    CHECK_EQ(format_for_display("Knob-1"), "Knob", "Strips trailing -#: Knob-1 => Knob")
-    CHECK_EQ(format_for_display("Cross_FM-2"), "Cross Fm", "Cross_FM-2")
-    CHECK_EQ(format_for_display("Other_Knob"), "Other Knob", "_ => space: Other_Knob => Other Knob")
-    CHECK_EQ(format_for_display("other_knob"), "Other Knob", "Capitalizes every word: other_knob => Other Knob")
-    CHECK_EQ(format_for_display("Shift--1"), "Shift-", "Can end in a '-': Shift--1 => Shift-")
-    CHECK_EQ(format_for_display("Shift-"), "Shift-", "...Shift- => Shift-")
-    CHECK_EQ(format_for_display("Knob-12"), "Knob-12", "Doesn't strip -##: Knob-12 => Knob-12")
+    CHECK_EQ(remove_trailing_dash_number("Knob-1"), "Knob", "Strips trailing -#: Knob-1 => Knob")
+    CHECK_EQ(remove_trailing_dash_number("Shift--1"), "Shift-", "...Can end in a '-': Shift--1 => Shift-")
+    CHECK_EQ(remove_trailing_dash_number("Shift-"), "Shift-", "...Keeps dash if no number following: Shift- => Shift-")
+    CHECK_EQ(remove_trailing_dash_number("Knob-12"), "Knob", "... Knob-12 => Knob")
+    CHECK_EQ(format_for_display(remove_trailing_dash_number("Cross_FM-2")), "Cross FM", "format for display and strip dash: Cross_FM-2 ==> Cross FM")
+    CHECK_EQ(format_for_display("Other_Knob"), "Other Knob", "... underscore => space: Other_Knob => Other Knob")
+    CHECK_EQ(format_for_display("other_knob_Cap"), "other knob Cap", "... Does not change capitalization")
 
 
 
