@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/info/enosc_info.hh"
+#include "CoreModules/info/EnOsc_info.hh"
 #include "CoreModules/info/module_info_base.hh"
 #include "pages/base.hh"
 #include "pages/images/image_list.hh"
