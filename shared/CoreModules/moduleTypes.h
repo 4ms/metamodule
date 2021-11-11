@@ -1,8 +1,8 @@
 #pragma once
-#include "coreProcessor.h"
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/info/module_info_base.hh"
 #include "util/static_string.hh"
 #include <array>
-#include <string.h>
 
 using ModuleTypeSlug = StaticString<31>;
 
@@ -27,6 +27,10 @@ public:
 		creation_funcs[id] = funcCreate;
 		return already_exists;
 	}
+	static bool
+	registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate, ModuleInfoBase *info) {
+		return registerModuleType(typeslug, name, funcCreate);
+	}
 
 	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
@@ -36,19 +40,19 @@ public:
 		return nullptr;
 	}
 
-	static const char *getModuleTypeName(ModuleTypeSlug typeslug) {
+	static std::string_view getModuleTypeName(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
-			return module_names[id];
+			return module_names[id].c_str();
 		return "Not found.";
 	}
 
 	// Returns the slug if it's valid and registered.
 	// Otherwise returns "????"
-	static const char *getModuleSlug(ModuleTypeSlug typeslug) {
+	static std::string_view getModuleSlug(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
-			return module_slugs[id];
+			return module_slugs[id].c_str();
 
 		return "????";
 	}
