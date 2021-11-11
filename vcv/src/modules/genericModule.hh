@@ -32,7 +32,7 @@ struct GenericModule : CommModule {
 
 		for (auto sw : Defs::Switches) {
 			if (sw.switch_type == SwitchDef::Encoder) {
-				configParam(sw.id, -INFINITY, INFINITY, 0.0f, sw.long_name.data());
+				configParam(Defs::NumKnobs + sw.id, -INFINITY, INFINITY, 0.0f, sw.long_name.data());
 			} else {
 				float max = 1.f;
 				if (sw.switch_type == SwitchDef::Toggle3pos)
