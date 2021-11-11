@@ -262,6 +262,7 @@ struct EnOscInfo : ModuleInfoBase {
             .short_name = "Learn",
             .long_name = "Learn",
             .switch_type = SwitchDef::MomentaryButton,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchFreeze,
@@ -270,6 +271,7 @@ struct EnOscInfo : ModuleInfoBase {
             .short_name = "Freeze",
             .long_name = "Freeze",
             .switch_type = SwitchDef::MomentaryButton,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchCross_Fm,
@@ -278,6 +280,7 @@ struct EnOscInfo : ModuleInfoBase {
             .short_name = "Cross FM",
             .long_name = "Cross FM",
             .switch_type = SwitchDef::Toggle3pos,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchScale,
@@ -286,6 +289,7 @@ struct EnOscInfo : ModuleInfoBase {
             .short_name = "Scale",
             .long_name = "Scale",
             .switch_type = SwitchDef::Toggle3pos,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchWarp,
@@ -294,6 +298,7 @@ struct EnOscInfo : ModuleInfoBase {
             .short_name = "Warp",
             .long_name = "Warp",
             .switch_type = SwitchDef::Toggle3pos,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchTwist,
@@ -302,6 +307,7 @@ struct EnOscInfo : ModuleInfoBase {
             .short_name = "Twist",
             .long_name = "Twist",
             .switch_type = SwitchDef::Toggle3pos,
+            .encoder_knob_style = SwitchDef::None,
         },
     }};
 
