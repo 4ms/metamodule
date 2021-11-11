@@ -244,7 +244,6 @@ def panel_to_components(tree):
         if color.startswith("#ff00") and color!="#ff00ff":
             def_val_int = int(color[-2:], 16)
             if def_val_int <= 128:
-                c['encoder'] = False
                 c['default_value'] = str(def_val_int / 128) + "f"
                 if shape == "circle":
                     c['knob_style'] = get_knob_style_from_radius(el.get('r'))
@@ -252,12 +251,6 @@ def panel_to_components(tree):
                     c['knob_style'] = "Slider25mm"
                 components['params'].append(c)
 
-        #Deep Purple: Encodeer
-        elif color == '#c000c0':
-            c['encoder'] = True
-            c['default_value'] = "0.0f"
-            c['knob_style'] = get_knob_style_from_radius(el.get('r'))
-            components['params'].append(c)
 
         #Green: Input jack, analog (CV or audio): 
         elif color == '#00ff00':
@@ -285,23 +278,33 @@ def panel_to_components(tree):
             c['led_color'] = "Red"
             components['lights'].append(c)
 
+        #Deep Purple: Encodeer
+        elif color == '#c000c0':
+            c['switch_type'] = "Encoder"
+            c['encoder_knob_style'] = get_knob_style_from_radius(el.get('r'))
+            components['switches'].append(c)
+
         #Orange: Button - Latching
         elif color == '#ff8000':
+            c['encoder_knob_style'] = "None"
             c['switch_type'] = "LatchingButton"
             components['switches'].append(c)
 
         #Light Orange: Button - Momentary
         elif color == '#ffc000':
+            c['encoder_knob_style'] = "None"
             c['switch_type'] = "MomentaryButton"
             components['switches'].append(c)
 
         #Deep Pink: Switch - 2pos
         elif color == '#ff8080':
+            c['encoder_knob_style'] = "None"
             c['switch_type'] = "Toggle2pos"
             components['switches'].append(c)
 
         #Hot Pink: Switch - 3pos
         elif color == '#ffc080':
+            c['encoder_knob_style'] = "None"
             c['switch_type'] = "Toggle3pos"
             components['switches'].append(c)
 
@@ -424,6 +427,7 @@ struct {slug}Info : ModuleInfoBase {{
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .switch_type = SwitchDef::{k['switch_type']},
+            .encoder_knob_style = SwitchDef::{k['encoder_knob_style']},
         }},""" 
     source += f"""
     }}}};

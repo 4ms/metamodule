@@ -11,7 +11,7 @@ struct SMRInfo : ModuleInfoBase {
     static constexpr uint32_t width_hp = 26;
     static constexpr std::string_view svg_filename{"res/SMR-artwork.svg"};
 
-    static constexpr int NumKnobs = 12;
+    static constexpr int NumKnobs = 11;
     
     enum {
         KnobFreq_Odds = 0,
@@ -22,10 +22,9 @@ struct SMRInfo : ModuleInfoBase {
         KnobSlider_4 = 5,
         KnobSlider_5 = 6,
         KnobSlider_6 = 7,
-        KnobRotate = 8,
-        KnobMorph = 9,
-        KnobSpread = 10,
-        KnobRes__Q_ = 11,
+        KnobMorph = 8,
+        KnobSpread = 9,
+        KnobRes__Q_ = 10,
     };
 
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{
@@ -100,15 +99,6 @@ struct SMRInfo : ModuleInfoBase {
             .long_name = "Slider 6",
             .default_val = 1.0f,
             .knob_style = KnobDef::Slider25mm,
-        },
-        {
-            .id = KnobRotate,
-            .x_mm = px_to_mm<72>(186.43f),
-            .y_mm = px_to_mm<72>(284.99f),
-            .short_name = "Rotate",
-            .long_name = "Rotate",
-            .default_val = 0.0f,
-            .knob_style = KnobDef::Medium,
         },
         {
             .id = KnobMorph,
@@ -417,7 +407,7 @@ struct SMRInfo : ModuleInfoBase {
         },
     }};
 
-    static constexpr int NumSwitches = 12;
+    static constexpr int NumSwitches = 13;
     
     enum {
         SwitchLock_Button_1 = 0,
@@ -431,7 +421,8 @@ struct SMRInfo : ModuleInfoBase {
         SwitchCv_Slew = 8,
         SwitchPost_Pre = 9,
         SwitchFast___Slow = 10,
-        SwitchScale_Rotation = 11,
+        SwitchRotate = 11,
+        SwitchScale_Rotation = 12,
     };
 
     static constexpr std::array<SwitchDef, NumSwitches> Switches{{
@@ -442,6 +433,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Lock Button 1",
             .long_name = "Lock Button 1",
             .switch_type = SwitchDef::MomentaryButton,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchLock_Button_2,
@@ -450,6 +442,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Lock Button 2",
             .long_name = "Lock Button 2",
             .switch_type = SwitchDef::MomentaryButton,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchLock_Button_3,
@@ -458,6 +451,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Lock Button 3",
             .long_name = "Lock Button 3",
             .switch_type = SwitchDef::MomentaryButton,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchLock_Button_4,
@@ -466,6 +460,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Lock Button 4",
             .long_name = "Lock Button 4",
             .switch_type = SwitchDef::MomentaryButton,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchLock_Button_5,
@@ -474,6 +469,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Lock Button 5",
             .long_name = "Lock Button 5",
             .switch_type = SwitchDef::MomentaryButton,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchLock_Button_6,
@@ -482,6 +478,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Lock Button 6",
             .long_name = "Lock Button 6",
             .switch_type = SwitchDef::MomentaryButton,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchOdds_Or_1,
@@ -490,6 +487,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Odds or 1",
             .long_name = "Odds or 1",
             .switch_type = SwitchDef::Toggle2pos,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = Switch_6_Or_Evens,
@@ -498,6 +496,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "6 or Evens",
             .long_name = "6 or Evens",
             .switch_type = SwitchDef::Toggle2pos,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchCv_Slew,
@@ -506,6 +505,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "CV Slew",
             .long_name = "CV Slew",
             .switch_type = SwitchDef::Toggle2pos,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchPost_Pre,
@@ -514,6 +514,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Post Pre",
             .long_name = "Post Pre",
             .switch_type = SwitchDef::Toggle2pos,
+            .encoder_knob_style = SwitchDef::None,
         },
         {
             .id = SwitchFast___Slow,
@@ -522,6 +523,16 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Fast | Slow",
             .long_name = "Fast | Slow",
             .switch_type = SwitchDef::Toggle3pos,
+            .encoder_knob_style = SwitchDef::None,
+        },
+        {
+            .id = SwitchRotate,
+            .x_mm = px_to_mm<72>(186.43f),
+            .y_mm = px_to_mm<72>(284.99f),
+            .short_name = "Rotate",
+            .long_name = "Rotate",
+            .switch_type = SwitchDef::Encoder,
+            .encoder_knob_style = SwitchDef::Medium,
         },
         {
             .id = SwitchScale_Rotation,
@@ -530,6 +541,7 @@ struct SMRInfo : ModuleInfoBase {
             .short_name = "Scale Rotation",
             .long_name = "Scale Rotation",
             .switch_type = SwitchDef::Toggle2pos,
+            .encoder_knob_style = SwitchDef::None,
         },
     }};
 

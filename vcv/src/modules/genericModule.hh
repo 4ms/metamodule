@@ -31,10 +31,14 @@ struct GenericModule : CommModule {
 			configParam(knob.id, 0.f, 1.f, knob.default_val, knob.long_name.data());
 
 		for (auto sw : Defs::Switches) {
-			float max = 1.f;
-			if (sw.switch_type == SwitchDef::Toggle3pos)
-				max = 2.f;
-			configParam(Defs::NumKnobs + sw.id, 0.f, max, 0.f, sw.long_name.data());
+			if (sw.switch_type == SwitchDef::Encoder) {
+				configParam(sw.id, -INFINITY, INFINITY, 0.0f, sw.long_name.data());
+			} else {
+				float max = 1.f;
+				if (sw.switch_type == SwitchDef::Toggle3pos)
+					max = 2.f;
+				configParam(Defs::NumKnobs + sw.id, 0.f, max, 0.f, sw.long_name.data());
+			}
 		}
 
 		// TODO: let us set the in/out conversion functions somehow...
@@ -109,6 +113,13 @@ struct GenericModuleWidget : CommModuleWidget {
 
 			} else if (sw.switch_type == SwitchDef::Toggle3pos) {
 				addParam(createParamCentered<SubMiniToggle3pos>(pos, module, param_id));
+
+			} else if (sw.switch_type == SwitchDef::Encoder) {
+				// TODO: add un-lined knobs
+				if (sw.encoder_knob_style == SwitchDef::Small)
+					addParam(createParamCentered<Trimpot>(pos, module, param_id));
+				else if (sw.encoder_knob_style == SwitchDef::Medium)
+					addParam(createParamCentered<Davies1900hBlackKnob>(pos, module, param_id));
 			}
 		}
 

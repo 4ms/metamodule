@@ -39,7 +39,8 @@ struct SwitchDef {
 	float y_mm;
 	std::string_view short_name;
 	std::string_view long_name;
-	enum { MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos } switch_type;
+	enum { MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, Encoder } switch_type;
+	enum { None, Small, Medium, Large } encoder_knob_style;
 };
 
 struct LedDef {

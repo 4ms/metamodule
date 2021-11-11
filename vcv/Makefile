@@ -65,7 +65,7 @@ win_dist:
 INFO_FILES = $(wildcard $(SHARED)/CoreModules/info/*_info.hh)
 SVG_SOURCES = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
 
-modules: $(INFO_FILES)
+modules: $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
 
 #Relative to the svgextract script?
 METAMODULE_ARTWORK_DIR ?= res/

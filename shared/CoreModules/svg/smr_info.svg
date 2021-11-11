@@ -24,14 +24,14 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.5323901"
-     inkscape:cx="250.26265"
-     inkscape:cy="249.61007"
+     inkscape:cx="254.1781"
+     inkscape:cy="246.99977"
      inkscape:window-width="1312"
      inkscape:window-height="1081"
      inkscape:window-x="89"
      inkscape:window-y="25"
      inkscape:window-maximized="0"
-     inkscape:current-layer="components" />
+     inkscape:current-layer="svg2801" />
   <g
      id="faceplate">
     <g
@@ -3253,7 +3253,7 @@
        cx="186.43"
        cy="284.99"
        r="19.84"
-       style="fill: red" />
+       style="fill: #C000C0" />
     <circle
        id="Res_Q_CV"
        data-name="Res (Q) CV"

@@ -75,17 +75,15 @@ def test_circle_colors():
 
     tree = xml.etree.ElementTree.parse(testfilename)
     components = panel_to_components(tree)
-    CHECK_EQ(len(components['params']) , 13, "Found 13 knobs")
-    CHECK_EQ(sum(k['knob_style']=='Small' for k in components['params']), 3, "... 3 small knobs")
-    CHECK_EQ(sum(k['knob_style']=='Medium' for k in components['params']), 8, "... 8 medium knobs")
-    CHECK_EQ(sum(k['knob_style']=='Large' for k in components['params']), 2, "... 2 large knob")
+    CHECK_EQ(len(components['params']) , 10, "Found 10 knobs")
+    CHECK_EQ(sum(k['knob_style']=='Small' for k in components['params']), 2, "... 2 small knobs")
+    CHECK_EQ(sum(k['knob_style']=='Medium' for k in components['params']), 7, "... 7 medium knobs")
+    CHECK_EQ(sum(k['knob_style']=='Large' for k in components['params']), 1, "... 1 large knob")
     CHECK_EQ(sum(k['default_value']=="0.25f" for k in components['params']), 1, "... 1 default 25% knob")
     CHECK_EQ(sum(k['default_value']=="0.5f" for k in components['params']), 1, "... 1 default 50% knob")
     CHECK_EQ(sum(k['default_value']=="0.75f" for k in components['params']), 1, "... 1 default 75% knob")
     CHECK_EQ(sum(k['default_value']=="1.0f" for k in components['params']), 1, "... 1 default 100% knob")
-    CHECK_EQ(sum(k['default_value']=="0.0f" for k in components['params']), 9, "... 9 default=0% knobs (includes encoders)")
-
-    CHECK_EQ(sum(k['encoder']==True for k in components['params']), 3, "... 3 encoders")
+    CHECK_EQ(sum(k['default_value']=="0.0f" for k in components['params']), 6, "... 6 default=0% knobs")
 
     CHECK_EQ(sum(k['enum_name']=='Knob_Red' for k in components['params']), 1, "... 1 named 'Knob_Red'")
     CHECK_EQ(sum(k['display_name']=='Knob Red' for k in components['params']), 1, "... 1 display named 'Knob Red'")
@@ -100,11 +98,12 @@ def test_circle_colors():
     CHECK_EQ(sum(k['signal_type']=='Gate' for k in components['outputs']), 1, "... 1 digital output")
 
     CHECK_EQ(len(components['lights']) , 3, "Found 3 lights")
-    CHECK_EQ(len(components['switches']) , 4, "Found 4 switches/buttons")
+    CHECK_EQ(len(components['switches']) , 7, "Found 7 switches/buttons/encoders")
     CHECK_EQ(sum(k['switch_type']=='LatchingButton' for k in components['switches']), 1, "... 1 latching button")
     CHECK_EQ(sum(k['switch_type']=='MomentaryButton' for k in components['switches']), 1, "... 1 momentary button")
     CHECK_EQ(sum(k['switch_type']=='Toggle2pos' for k in components['switches']), 1, "... 1 2pos switch")
     CHECK_EQ(sum(k['switch_type']=='Toggle3pos' for k in components['switches']), 1, "... 1 3pos switch")
+    CHECK_EQ(sum(k['switch_type']=='Encoder' for k in components['switches']), 3, "... 3 encoders")
     CHECK_EQ(len(components['widgets']) , 3, "Found 3 custom widgets")
 
     CHECK_EQ(sum((k['cx']==10 and k['cy']==10) for k in components['lights']), 1, "... 1 (random named) light at 10, 10")
