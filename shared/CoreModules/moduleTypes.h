@@ -27,9 +27,23 @@ public:
 		creation_funcs[id] = funcCreate;
 		return already_exists;
 	}
+
 	static bool
-	registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate, ModuleInfoBase *info) {
-		return registerModuleType(typeslug, name, funcCreate);
+	registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate, ModuleInfoBase info) {
+		bool already_exists = true;
+		int id = getTypeID(typeslug);
+		if (id == -1) {
+			already_exists = false;
+			id = next_id;
+			next_id++;
+			if (next_id >= MAX_MODULE_TYPES)
+				next_id = 0; // FixMe: Report/handle this ERROR!
+			module_slugs[id] = typeslug;
+		}
+		infos[id] = info;
+		module_names[id] = name;
+		creation_funcs[id] = funcCreate;
+		return already_exists;
 	}
 
 	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug) {
@@ -45,6 +59,13 @@ public:
 		if (id >= 0)
 			return module_names[id].c_str();
 		return "Not found.";
+	}
+
+	static ModuleInfoBase getModuleInfo(ModuleTypeSlug typeslug) {
+		int id = getTypeID(typeslug);
+		if (id >= 0)
+			return infos[id];
+		return ModuleInfoBase{};
 	}
 
 	// Returns the slug if it's valid and registered.
@@ -71,5 +92,6 @@ private:
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline std::array<ModuleTypeSlug, MAX_MODULE_TYPES> module_slugs;
 	static inline std::array<StaticString<CoreProcessor::LongNameChars>, MAX_MODULE_TYPES> module_names;
+	static inline std::array<ModuleInfoBase, MAX_MODULE_TYPES> infos;
 	static inline int next_id = 0;
 };

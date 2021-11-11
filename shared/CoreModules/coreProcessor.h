@@ -3,15 +3,13 @@
 #include <array>
 #include <memory>
 
-// TODO:
+// TODO: after switching to ModuleInfo
 //  - remove Num*
 //  - remove *Names
 //  - maybe make *_name(idx) pure virtual constexpr
 //
 class CoreProcessor {
 public:
-	static const unsigned MAX_JACKS_PER_MODULE = 16;
-
 	CoreProcessor() = default;
 
 	virtual void update() = 0;
