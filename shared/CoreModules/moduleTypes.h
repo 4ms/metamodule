@@ -4,10 +4,6 @@
 #include <array>
 #include <string.h>
 
-#if defined(STM32H7) || defined(STM32F7)
-	#define __MODULE_FACTORY_SAVE_SPACE
-#endif
-
 using ModuleTypeSlug = StaticString<31>;
 
 class ModuleFactory {
@@ -17,8 +13,7 @@ class ModuleFactory {
 public:
 	ModuleFactory() = delete;
 
-	static bool registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate)
-	{
+	static bool registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate) {
 		bool already_exists = true;
 		int id = getTypeID(typeslug);
 		if (id == -1) {
@@ -27,55 +22,34 @@ public:
 			next_id++;
 			module_slugs[id] = typeslug;
 		}
-#ifndef __MODULE_FACTORY_SAVE_SPACE
 		module_names[id] = name;
-#endif
 		creation_funcs[id] = funcCreate;
 		return already_exists;
 	}
 
-	static bool registerModuleType(ModuleTypeSlug typeslug,
-								   const char *name,
-								   CreateModuleFuncWithParams funcCreate,
-								   uint8_t numInputJacks,
-								   uint8_t numOutputJacks,
-								   uint8_t numParams)
-	{
-		bool already_exists = true;
-		int new_id = getTypeID(typeslug);
-		if (new_id == -1) {
-			already_exists = false;
-			new_id = next_id;
-			next_id++;
-			module_slugs[new_id] = typeslug;
-		}
-#ifndef __MODULE_FACTORY_SAVE_SPACE
-		module_names[new_id] = name;
-#endif
-		output_jack_offsets[new_id] = numInputJacks;
-		total_jacks[new_id] = numInputJacks + numOutputJacks;
-		total_params[new_id] = numParams;
-		creation_funcs_wp[new_id] = funcCreate;
-		return already_exists;
-	}
+	// static bool registerModuleType(ModuleTypeSlug typeslug,
+	// 							   const char *name,
+	// 							   CreateModuleFuncWithParams funcCreate,
+	// 							   uint8_t numInputJacks,
+	// 							   uint8_t numOutputJacks,
+	// 							   uint8_t numParams) {
+	// 	bool already_exists = true;
+	// 	int new_id = getTypeID(typeslug);
+	// 	if (new_id == -1) {
+	// 		already_exists = false;
+	// 		new_id = next_id;
+	// 		next_id++;
+	// 		module_slugs[new_id] = typeslug;
+	// 	}
+	// 	module_names[new_id] = name;
+	// 	output_jack_offsets[new_id] = numInputJacks;
+	// 	total_jacks[new_id] = numInputJacks + numOutputJacks;
+	// 	total_params[new_id] = numParams;
+	// 	creation_funcs_wp[new_id] = funcCreate;
+	// 	return already_exists;
+	// }
 
-	static std::unique_ptr<CoreProcessor>
-	createWithParams(const ModuleTypeSlug typeslug, float *nodes, const uint8_t *indices)
-	{
-		int id = getTypeID(typeslug);
-		if (id >= 0)
-			return creation_funcs_wp[id](nodes, indices);
-
-		return nullptr;
-	}
-
-	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug, float *nodes, const uint8_t *indices)
-	{
-		return createWithParams(typeslug, nodes, indices);
-	}
-
-	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug)
-	{
+	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
 			return creation_funcs[id]();
@@ -83,21 +57,14 @@ public:
 		return nullptr;
 	}
 
-	static const char *getModuleTypeName(ModuleTypeSlug typeslug)
-	{
+	static const char *getModuleTypeName(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
-#ifndef __MODULE_FACTORY_SAVE_SPACE
 			return module_names[id];
-#else
-			return module_slugs[id];
-#endif
-
 		return "Not found.";
 	}
 
-	static const char *getModuleSlug(ModuleTypeSlug typeslug)
-	{
+	static const char *getModuleSlug(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
 			return module_slugs[id];
@@ -105,8 +72,7 @@ public:
 		return "????";
 	}
 
-	static uint8_t getOutJackOffset(ModuleTypeSlug typeslug)
-	{
+	static uint8_t getOutJackOffset(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
 			return output_jack_offsets[id];
@@ -114,8 +80,7 @@ public:
 		return 0;
 	}
 
-	static uint8_t getNumJacks(ModuleTypeSlug typeslug)
-	{
+	static uint8_t getNumJacks(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
 			return total_jacks[id];
@@ -123,8 +88,7 @@ public:
 		return 0;
 	}
 
-	static uint8_t getNumParams(ModuleTypeSlug typeslug)
-	{
+	static uint8_t getNumParams(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
 			return total_params[id];
@@ -132,8 +96,7 @@ public:
 		return 0;
 	}
 
-	static int getTypeID(ModuleTypeSlug typeslug)
-	{
+	static int getTypeID(ModuleTypeSlug typeslug) {
 		for (int i = 0; i < MAX_MODULE_TYPES; i++) {
 			auto &slug = module_slugs[i];
 			if (slug == typeslug)
@@ -145,11 +108,8 @@ public:
 private:
 	static inline const int MAX_MODULE_TYPES = 256;
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
-	static inline std::array<CreateModuleFuncWithParams, MAX_MODULE_TYPES> creation_funcs_wp;
 	static inline std::array<ModuleTypeSlug, MAX_MODULE_TYPES> module_slugs;
-#ifndef __MODULE_FACTORY_SAVE_SPACE
 	static inline std::array<StaticString<CoreProcessor::LongNameChars>, MAX_MODULE_TYPES> module_names;
-#endif
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> output_jack_offsets;
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> total_jacks;
 	static inline std::array<uint8_t, MAX_MODULE_TYPES> total_params;
