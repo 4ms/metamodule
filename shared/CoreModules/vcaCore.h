@@ -24,23 +24,15 @@ class VCACore : public CoreProcessor {
 	virtual StaticString<LongNameChars> get_description() override { return description; }
 	// clang-format on
 public:
-	VCACore() {}
+	VCACore() = default;
 
-	VCACore(float &in, float &CV, float &output)
-		: input{in}
-		, cv{CV}
-		, vcaOutput{output}
-	{}
-
-	virtual void update(void) override
-	{
+	virtual void update(void) override {
 		auto clippedOutput = constrain(input * preGain, -1.0f, 1.0f);
 		auto vcaCtrl = constrain(offset + cv * cvAmount, -1.0f, 1.0f) * postGain;
 		vcaOutput = clippedOutput * vcaCtrl;
 	}
 
-	virtual void set_param(int const param_id, const float val) override
-	{
+	virtual void set_param(int const param_id, const float val) override {
 		switch (param_id) {
 			case 0:
 				preGain = map_value(val, 0.0f, 1.0f, 1.0f, 20.0f);
@@ -56,10 +48,10 @@ public:
 				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override {}
+	virtual void set_samplerate(const float sr) override {
+	}
 
-	virtual void set_input(const int input_id, const float val) override
-	{
+	virtual void set_input(const int input_id, const float val) override {
 		switch (input_id) {
 			case 0:
 				input = val;
@@ -70,8 +62,7 @@ public:
 		}
 	}
 
-	virtual float get_output(const int output_id) const override
-	{
+	virtual float get_output(const int output_id) const override {
 		float output = 0;
 		switch (output_id) {
 			case 0:
@@ -81,17 +72,16 @@ public:
 		return output;
 	}
 
-	static std::unique_ptr<CoreProcessor> create()
-	{
+	static std::unique_ptr<CoreProcessor> create() {
 		return std::make_unique<VCACore>();
 	}
 	static constexpr char typeID[20] = "VCA";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
 
 private:
-	RefParameter<float> input = nodes[0];
-	RefParameter<float> cv = nodes[1];
-	RefParameter<float> vcaOutput = nodes[2];
+	float input = 0;
+	float cv = 0;
+	float vcaOutput = 0;
 
 	float preGain = 1;
 	float postGain = 1;
