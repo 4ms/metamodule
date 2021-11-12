@@ -29,7 +29,7 @@ public:
 	}
 
 	static bool
-	registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate, ModuleInfoBase info) {
+	registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate, ModuleInfo info) {
 		bool already_exists = true;
 		int id = getTypeID(typeslug);
 		if (id == -1) {
@@ -61,11 +61,11 @@ public:
 		return "Not found.";
 	}
 
-	static ModuleInfoBase getModuleInfo(ModuleTypeSlug typeslug) {
+	static ModuleInfo &getModuleInfo(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
 			return infos[id];
-		return ModuleInfoBase{};
+		return nullmodule;
 	}
 
 	// Returns the slug if it's valid and registered.
@@ -92,6 +92,7 @@ private:
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline std::array<ModuleTypeSlug, MAX_MODULE_TYPES> module_slugs;
 	static inline std::array<StaticString<CoreProcessor::LongNameChars>, MAX_MODULE_TYPES> module_names;
-	static inline std::array<ModuleInfoBase, MAX_MODULE_TYPES> infos;
+	static inline std::array<ModuleInfo, MAX_MODULE_TYPES> infos;
 	static inline int next_id = 0;
+	static inline ModuleInfo nullmodule{};
 };

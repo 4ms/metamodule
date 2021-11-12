@@ -2,6 +2,7 @@
 #include "util/static_string.hh"
 #include <array>
 #include <cstddef>
+#include <span>
 #include <string>
 
 struct KnobDef {
@@ -101,5 +102,24 @@ struct ModuleInfoBase {
 	}
 };
 
-// TODO: Need a lookup function somewhere LVGL sees, like:
-// lv_img_dsc_t* get_module_image_from_slug(StaticString<31> slug);
+struct ModuleInfo {
+	std::string_view slug{""};
+	uint32_t width_hp = 0;
+	std::string_view svg_filename{""};
+
+	uint32_t NumKnobs = 0;
+	// const std::span<KnobDef> Knobs{};
+	const KnobDef *Knobs; // works!
+
+	// uint32_t NumInJacks = 0;
+	// std::array<KnobDef, NumInJacks> InJacks{};
+
+	// uint32_t NumOutJacks = 0;
+	// std::array<KnobDef, NumOutJacks> OutJacks{};
+
+	// uint32_t NumSwitches = 0;
+	// std::array<KnobDef, NumSwitches> Switches{};
+
+	// uint32_t NumDiscreteLeds = 0;
+	// std::array<LedDef, NumDiscreteLeds> Leds{};
+};
