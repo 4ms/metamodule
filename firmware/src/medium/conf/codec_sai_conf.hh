@@ -43,7 +43,7 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.SD_DAC = {GPIO::D, 1, LL_GPIO_AF_6}, // SD A
 	.SD_ADC = {GPIO::E, 1, LL_GPIO_AF_6}, // SD B
 
-	.reset_pin = {GPIO::H, 10, 0},
+	.reset_pin = {GPIO::F, 1, 0},
 
 	.bus_address = 0b00,
 
@@ -54,7 +54,7 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.sync_receive_from = SaiConfig::NoReceiveSync,
 };
 
-//External header
+// External header
 const SaiConfig codec_ext_sai_conf = {
 	.sai = SAI1,
 	.tx_block = SAI1_Block_A,
@@ -85,7 +85,7 @@ const SaiConfig codec_ext_sai_conf = {
 	.framesize = 256,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::E, 2, LL_GPIO_AF_6},	  //not used
+	.MCLK = {GPIO::E, 2, LL_GPIO_AF_6},	  // not used
 	.SCLK = {GPIO::E, 5, LL_GPIO_AF_6},	  //
 	.LRCLK = {GPIO::G, 15, LL_GPIO_AF_6}, //
 	.SD_DAC = {GPIO::D, 6, LL_GPIO_AF_6}, // SD A

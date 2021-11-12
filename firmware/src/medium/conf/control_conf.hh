@@ -24,12 +24,12 @@ template<GPIO port, uint16_t pin>
 using FPin = mdrivlib::FPin<port, pin, mdrivlib::PinMode::Input>;
 
 struct MMControlPins {
-	static constexpr PinNoInit rotA{GPIO::A, 15};
-	static constexpr PinNoInit rotB{GPIO::C, 7};
-	static constexpr PinNoInit rotS{GPIO::B, 14};
-	static constexpr PinNoInit but0{GPIO::I, 2};
-	static constexpr PinNoInit gate_in_1{GPIO::I, 3};
-	static constexpr PinNoInit gate_in_2{GPIO::H, 9};
+	static constexpr PinNoInit rotA{GPIO::G, 8};
+	static constexpr PinNoInit rotB{GPIO::G, 5};
+	static constexpr PinNoInit rotS{GPIO::F, 11};
+	static constexpr PinNoInit but0{GPIO::A, 15};
+	static constexpr PinNoInit gate_in_1{GPIO::D, 14};
+	static constexpr PinNoInit gate_in_2{GPIO::G, 12};
 };
 
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
@@ -55,20 +55,18 @@ using mdrivlib::AdcChannelConf;
 enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotQ, PotL, PotR, PatchCV };
 constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_2Cycles;
 constexpr auto PotConfs = std::to_array({
-	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
+	AdcChannelConf{{GPIO::B, 0}, mdrivlib::AdcChanNum::_9, PotA, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotB, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotC, AdcSampTime},
-	AdcChannelConf{{GPIO::F, 12}, mdrivlib::AdcChanNum::_6, PotD, AdcSampTime},
+	AdcChannelConf{{GPIO::F, 12}, mdrivlib::AdcChanNum::_6, PotC, AdcSampTime},
+	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotD, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotE, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 0}, mdrivlib::AdcChanNum::_10, PotF, AdcSampTime},
-	// PotX is ANA0. hack: use PF13 here to set it to analog mode, since on PCB p4 we have it connected to Pot9
-	AdcChannelConf{{GPIO::F, 13}, mdrivlib::AdcChanNum::_0, PotX, AdcSampTime},
-	// PotY is ANA1. hack: use PF14 here to set it to analog mode, since on PCB p4 we have it connected to Pot10
-	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_1, PotY, AdcSampTime},
-	// Z = Pot9 on sch: was PF13 on p4 PCB: changed to PA1
-	AdcChannelConf{{GPIO::A, 1}, mdrivlib::AdcChanNum::_17, PotZ, AdcSampTime},
-	// Q = Pot10 on sch: was PF14 on p4 PCB: changed to PC5
-	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotQ, AdcSampTime},
+	// PotX is ANA0. hack: use PF14 here to set it to analog mode, since it's unconnected on PCB
+	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_1, PotX, AdcSampTime},
+	// PotY is ANA1. hack: use PF14 here to set it to analog mode
+	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_0, PotY, AdcSampTime},
+	AdcChannelConf{{GPIO::C, 2}, mdrivlib::AdcChanNum::_12, PotZ, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotQ, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotL, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotR, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PatchCV, AdcSampTime},
@@ -76,25 +74,25 @@ constexpr auto PotConfs = std::to_array({
 
 // TODO: parameterize this and put it in mdrivlib
 struct MultiGPIOReader {
-	using AudioIn1 = FPin<GPIO::I, 5>;
-	using AudioIn2 = FPin<GPIO::G, 12>;
-	using AudioIn3 = FPin<GPIO::D, 14>;
-	using AudioIn4 = FPin<GPIO::A, 7>;
-	using AudioIn5 = FPin<GPIO::A, 14>;
-	using AudioIn6 = FPin<GPIO::D, 8>;
-	using AudioOut1 = FPin<GPIO::A, 2>;
-	using AudioOut2 = FPin<GPIO::B, 12>;
-	using AudioOut3 = FPin<GPIO::B, 13>;
-	using AudioOut4 = FPin<GPIO::D, 11>;
-	using AudioOut5 = FPin<GPIO::B, 0>;
-	using AudioOut6 = FPin<GPIO::B, 10>;
-	using AudioOut7 = FPin<GPIO::C, 4>;
-	using AudioOut8 = FPin<GPIO::D, 13>;
-	using PatchCV = FPin<GPIO::G, 6>;
-	using GateIn1 = FPin<GPIO::I, 0>;
-	using GateIn2 = FPin<GPIO::I, 4>;
-	using GateOut1 = FPin<GPIO::F, 11>;
-	using GateOut2 = FPin<GPIO::B, 6>;
+	using AudioIn1 = FPin<GPIO::I, 10>;
+	using AudioIn2 = FPin<GPIO::H, 6>;
+	using AudioIn3 = FPin<GPIO::H, 7>;
+	using AudioIn4 = FPin<GPIO::I, 11>;
+	using AudioIn5 = FPin<GPIO::A, 13>;
+	using AudioIn6 = FPin<GPIO::Z, 3>;
+	using AudioOut1 = FPin<GPIO::B, 13>;
+	using AudioOut2 = FPin<GPIO::B, 10>;
+	using AudioOut3 = FPin<GPIO::A, 7>;
+	using AudioOut4 = FPin<GPIO::B, 11>;
+	using AudioOut5 = FPin<GPIO::B, 12>;
+	using AudioOut6 = FPin<GPIO::C, 4>;
+	using AudioOut7 = FPin<GPIO::C, 5>;
+	using AudioOut8 = FPin<GPIO::G, 14>;
+	using PatchCV = FPin<GPIO::A, 2>;
+	using GateIn1 = FPin<GPIO::A, 14>;
+	using GateIn2 = FPin<GPIO::Z, 0>;
+	using GateOut1 = FPin<GPIO::G, 1>;
+	using GateOut2 = FPin<GPIO::G, 14>;
 
 	template<enum GPIO port>
 	using PortRead = mdrivlib::PortRead<port>;

@@ -10,7 +10,6 @@
 #include "drivers/rotary.hh"
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
-#include "muxed_adc.hh"
 #include "params.hh"
 #include "util/interp_param.hh"
 

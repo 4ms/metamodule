@@ -1,7 +1,5 @@
 #include "auxsignal.hh"
-#include "conf/adc_i2c_conf.hh"
 #include "conf/hsem_conf.hh"
-#include "conf/i2c_conf.hh"
 #include "conf/screen_conf.hh"
 #include "controls.hh"
 #include "debug.hh"
@@ -11,7 +9,6 @@
 #include "drivers/register_access.hh"
 #include "drivers/system_startup.hh"
 #include "mp1m4/hsem_handler.hh"
-#include "muxed_adc.hh"
 #include "params.hh"
 #include "shared_bus.hh"
 #include "shared_bus_queue.hh"
@@ -19,8 +16,7 @@
 
 namespace MetaModule
 {
-static void app_startup()
-{
+static void app_startup() {
 	core_m4::RCC_Enable::HSEM_::set();
 
 	// Tell A7 we're not ready yet
@@ -35,8 +31,7 @@ static void app_startup()
 
 } // namespace MetaModule
 
-void main()
-{
+void main() {
 	using namespace MetaModule;
 
 	app_startup();
@@ -62,8 +57,7 @@ void main()
 	}
 }
 
-void recover_from_task_fault()
-{
+void recover_from_task_fault() {
 	while (true)
 		;
 }
