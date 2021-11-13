@@ -20,7 +20,7 @@ private:
 
 	UiAudioMailbox &mbox;
 
-	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input};
+	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::buf_1, MMDisplay::buf_2};
 
 public:
 	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
