@@ -76,6 +76,7 @@ ModuleInfo testinfo{
 	// .Knobs = std::span{ar},
 	.NumKnobs = TestInfo::Knobs.size(),
 	.Knobs = TestInfo::Knobs.data(),
+	.KnobSpan = TestInfo::Knobs,
 
 };
 
@@ -117,6 +118,7 @@ TEST_CASE("Register derived object uses its values, not ModuleInfoBase") {
 	CHECK(ModuleFactory::getModuleInfo("DEF").NumKnobs == 2);
 
 	const std::span t{knobs, 2};
+	const std::span<const KnobDef> knobspan(TestInfo::Knobs);
 
 	// constexpr const std::span<KnobDef> knob{Knobs};
 
