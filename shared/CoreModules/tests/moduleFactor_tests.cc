@@ -71,35 +71,11 @@ KnobDef ar[2] = {
 ModuleInfo testinfo{
 	.slug = "mno",
 	.width_hp = 4,
-	// .Knobs = {TestInfo::Knobs.data(), TestInfo::Knobs.size()},
-	// .Knobs = {TestInfo::Knobs},
-	// .Knobs = std::span{ar},
 	.NumKnobs = TestInfo::Knobs.size(),
 	.Knobs = TestInfo::Knobs.data(),
 	.KnobSpan = TestInfo::Knobs,
 
 };
-
-// constinit KnobDef Knobs[2] = {
-// 	{
-// 		.id = 1,
-// 		.x_mm = ModuleInfoBase::px_to_mm<72>(114.85f),
-// 		.y_mm = ModuleInfoBase::px_to_mm<72>(61.59f),
-// 		.short_name = "Spread",
-// 		.long_name = "Spread",
-// 		.default_val = 0.5f,
-// 		.knob_style = KnobDef::Medium,
-// 	},
-// 	{
-// 		.id = 2,
-// 		.x_mm = ModuleInfoBase::px_to_mm<72>(53.68f),
-// 		.y_mm = ModuleInfoBase::px_to_mm<72>(78.08f),
-// 		.short_name = "Scale",
-// 		.long_name = "Scale",
-// 		.default_val = 0.0f,
-// 		.knob_style = KnobDef::Medium,
-// 	},
-// };
 
 TEST_CASE("Register derived object uses its values, not ModuleInfoBase") {
 	bool already_exists = ModuleFactory::registerModuleType("ABC", "abc module", create);
@@ -117,17 +93,7 @@ TEST_CASE("Register derived object uses its values, not ModuleInfoBase") {
 	// CHECK(knobs.size() == 2);
 	CHECK(ModuleFactory::getModuleInfo("DEF").NumKnobs == 2);
 
-	const std::span t{knobs, 2};
-	const std::span<const KnobDef> knobspan(TestInfo::Knobs);
-
-	// constexpr const std::span<KnobDef> knob{Knobs};
-
-	// already_exists = ModuleFactory::registerModuleType("DEF", "def module", create, ModuleInfoBase{});
-	// CHECK_FALSE(already_exists);
-
-	// already_exists = ModuleFactory::registerModuleType("HIJ", "hij module", create, TestInfo{});
-	// CHECK_FALSE(already_exists);
-
-	// auto info = ModuleFactory::getModuleInfo("HIJ");
-	// CHECK(info.width_hp == 2); // Fails!
+	CHECK(ModuleFactory::getModuleInfo("DEF").KnobSpan.size() == 2);
+	CHECK(ModuleFactory::getModuleInfo("DEF").KnobSpan[0].short_name == "Spread");
+	CHECK(ModuleFactory::getModuleInfo("DEF").KnobSpan[1].short_name == "Scale");
 }

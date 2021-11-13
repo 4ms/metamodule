@@ -43,6 +43,7 @@ public:
 		infos[id].width_hp = info.width_hp;
 		infos[id].Knobs = info.Knobs;
 		infos[id].NumKnobs = info.NumKnobs;
+		infos[id].KnobSpan = info.KnobSpan;
 		module_names[id] = name;
 		creation_funcs[id] = funcCreate;
 		return already_exists;
