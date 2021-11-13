@@ -1,7 +1,7 @@
 ---
 CompileFlags:
 	Add: [
-		"-std=c++20",
+		"-std=gnu++20",
 		"-I..",
 		"-I../..",
 	]

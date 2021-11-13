@@ -16,7 +16,7 @@ TEST_SOURCES += ../axoloti-wrapper/axoloti_math.cpp
 BUILDDIR = $(TEST_DIR)/build
 
 CXXFLAGS = 	-Wall \
-		 	-std=gnu++2a \
+		 	-std=gnu++20 \
 			-I. \
 			-I.. \
 			-I$(TEST_DIR) \
