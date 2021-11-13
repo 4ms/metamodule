@@ -1,9 +1,8 @@
 #pragma once
 #include "util/static_string.hh"
 #include <array>
-#include <cstddef>
 #include <span>
-#include <string>
+#include <string_view>
 
 struct KnobDef {
 	uint32_t id;
@@ -103,24 +102,12 @@ struct ModuleInfoBase {
 };
 
 struct ModuleInfo {
-	std::string_view slug{""};
+	// std::string_view slug{""}; //TODO: we really dont need this right?
 	uint32_t width_hp = 0;
 	std::string_view svg_filename{""};
-
-	uint32_t NumKnobs = 0;
-	const KnobDef *Knobs; // works!
-
-	std::span<const KnobDef> KnobSpan;
-
-	// uint32_t NumInJacks = 0;
-	// std::array<KnobDef, NumInJacks> InJacks{};
-
-	// uint32_t NumOutJacks = 0;
-	// std::array<KnobDef, NumOutJacks> OutJacks{};
-
-	// uint32_t NumSwitches = 0;
-	// std::array<KnobDef, NumSwitches> Switches{};
-
-	// uint32_t NumDiscreteLeds = 0;
-	// std::array<LedDef, NumDiscreteLeds> Leds{};
+	std::span<const KnobDef> Knobs;
+	std::span<const InJackDef> InJacks;
+	std::span<const OutJackDef> OutJacks;
+	std::span<const SwitchDef> Switches;
+	std::span<const LedDef> Leds;
 };

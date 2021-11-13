@@ -40,10 +40,7 @@ public:
 				next_id = 0; // FixMe: Report/handle this ERROR!
 			module_slugs[id] = typeslug;
 		}
-		infos[id].width_hp = info.width_hp;
-		infos[id].Knobs = info.Knobs;
-		infos[id].NumKnobs = info.NumKnobs;
-		infos[id].KnobSpan = info.KnobSpan;
+		infos[id] = info;
 		module_names[id] = name;
 		creation_funcs[id] = funcCreate;
 		return already_exists;
