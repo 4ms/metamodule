@@ -81,6 +81,7 @@ extern "C" {
 // #define HAL_CORTEX_MODULE_ENABLED
 
 /* User-created defines: (4ms/Dan Green) */
+#define HAL_LTDC_MODULE_ENABLED
 #define LL_DMA_MODULE_ENABLED
 // #define LL_BDMA_MODULE_ENABLED
 #define LL_TIM_MODULE_ENABLED
@@ -95,12 +96,12 @@ extern "C" {
  *        (when HSE is used as system clock source, directly or through the PLL).
  */
 #if !defined(HSE_VALUE)
-	#define HSE_VALUE ((uint32_t)24000000) /*!< Value of the External oscillator in Hz : FPGA case fixed to 60MHZ */
-#endif									   /* HSE_VALUE */
+#define HSE_VALUE ((uint32_t)24000000) /*!< Value of the External oscillator in Hz : FPGA case fixed to 60MHZ */
+#endif								   /* HSE_VALUE */
 
 #if !defined(HSE_STARTUP_TIMEOUT)
-	#define HSE_STARTUP_TIMEOUT ((uint32_t)100U) /*!< Time out for HSE start up, in ms */
-#endif											 /* HSE_STARTUP_TIMEOUT */
+#define HSE_STARTUP_TIMEOUT ((uint32_t)100U) /*!< Time out for HSE start up, in ms */
+#endif										 /* HSE_STARTUP_TIMEOUT */
 
 /**
  * @brief Internal High Speed oscillator (HSI) value.
@@ -108,21 +109,21 @@ extern "C" {
  *        (when HSI is used as system clock source, directly or through the PLL).
  */
 #if !defined(HSI_VALUE)
-	#define HSI_VALUE ((uint32_t)64000000) /*!< Value of the Internal oscillator in Hz*/
-#endif									   /* HSI_VALUE */
+#define HSI_VALUE ((uint32_t)64000000) /*!< Value of the Internal oscillator in Hz*/
+#endif								   /* HSI_VALUE */
 
 /**
  * @brief Time out for HSI start up value in ms.
  */
 #if !defined(HSI_STARTUP_TIMEOUT)
-	#define HSI_STARTUP_TIMEOUT 5000U /*!< Time out for HSI start up, in ms */
-#endif								  /* HSI_STARTUP_TIMEOUT */
+#define HSI_STARTUP_TIMEOUT 5000U /*!< Time out for HSI start up, in ms */
+#endif							  /* HSI_STARTUP_TIMEOUT */
 
 /**
  * @brief Internal Low Speed oscillator (LSI) value.
  */
 #if !defined(LSI_VALUE)
-	#define LSI_VALUE 32000U
+#define LSI_VALUE 32000U
 #endif /* LSI_VALUE */ /*!< Value of the Internal Low Speed oscillator in Hz                                           \
 						   The real value may vary depending on the variations                                         \
 						   in voltage and temperature.  */
@@ -131,24 +132,24 @@ extern "C" {
  * @brief External Low Speed oscillator (LSE) value.
  */
 #if !defined(LSE_VALUE)
-	#define LSE_VALUE ((uint32_t)32768U) /*!< Value of the External oscillator in Hz*/
-#endif									 /* LSE_VALUE */
+#define LSE_VALUE ((uint32_t)32768U) /*!< Value of the External oscillator in Hz*/
+#endif								 /* LSE_VALUE */
 
 /**
  * @brief Time out for LSE start up value in ms.
  */
 
 #if !defined(LSE_STARTUP_TIMEOUT)
-	#define LSE_STARTUP_TIMEOUT ((uint32_t)5000U) /*!< Time out for LSE start up, in ms */
-#endif											  /* LSE_STARTUP_TIMEOUT */
+#define LSE_STARTUP_TIMEOUT ((uint32_t)5000U) /*!< Time out for LSE start up, in ms */
+#endif										  /* LSE_STARTUP_TIMEOUT */
 
 /**
  * @brief Internal  oscillator (CSI) default value.
  *        This value is the default CSI value after Reset.
  */
 #if !defined(CSI_VALUE)
-	#define CSI_VALUE 4000000U /*!< Value of the Internal oscillator in Hz*/
-#endif						   /* CSI_VALUE */
+#define CSI_VALUE 4000000U /*!< Value of the Internal oscillator in Hz*/
+#endif					   /* CSI_VALUE */
 
 /**
  * @brief External clock source for I2S peripheral
@@ -156,8 +157,8 @@ extern "C" {
  *        frequency, this source is inserted directly through I2S_CKIN pad.
  */
 #if !defined(EXTERNAL_CLOCK_VALUE)
-	#define EXTERNAL_CLOCK_VALUE 12288000U /*!< Value of the External clock in Hz*/
-#endif									   /* EXTERNAL_CLOCK_VALUE */
+#define EXTERNAL_CLOCK_VALUE 12288000U /*!< Value of the External clock in Hz*/
+#endif								   /* EXTERNAL_CLOCK_VALUE */
 
 /* Tip: To avoid modifying this file each time you need to use different HSE,
    ===  you can define the HSE value in your toolchain compiler preprocessor. */
@@ -187,192 +188,192 @@ extern "C" {
  */
 
 #ifdef HAL_RCC_MODULE_ENABLED
-	#include "stm32mp1xx_hal_rcc.h"
+#include "stm32mp1xx_hal_rcc.h"
 #endif /* HAL_RCC_MODULE_ENABLED */
 
 #ifdef HAL_HSEM_MODULE_ENABLED
-	#include "stm32mp1xx_hal_hsem.h"
+#include "stm32mp1xx_hal_hsem.h"
 #endif /* HAL_HSEM_MODULE_ENABLED */
 
 #ifdef HAL_GPIO_MODULE_ENABLED
-	#include "stm32mp1xx_hal_gpio.h"
+#include "stm32mp1xx_hal_gpio.h"
 #endif /* HAL_GPIO_MODULE_ENABLED */
 
 #ifdef HAL_DMA_MODULE_ENABLED
-	#include "stm32mp1xx_hal_dma.h"
+#include "stm32mp1xx_hal_dma.h"
 #endif /* HAL_DMA_MODULE_ENABLED */
 
 #ifdef HAL_MDMA_MODULE_ENABLED
-	#include "stm32mp1xx_hal_mdma.h"
+#include "stm32mp1xx_hal_mdma.h"
 #endif /* HAL_MDMA_MODULE_ENABLED */
 
 #ifdef HAL_CORTEX_MODULE_ENABLED
-	#include "stm32mp1xx_hal_cortex.h"
+#include "stm32mp1xx_hal_cortex.h"
 #endif /* HAL_CORTEX_MODULE_ENABLED */
 
 #ifdef HAL_ADC_MODULE_ENABLED
-	#include "stm32mp1xx_hal_adc.h"
+#include "stm32mp1xx_hal_adc.h"
 #endif /* HAL_ADC_MODULE_ENABLED */
 
 #ifdef HAL_CEC_MODULE_ENABLED
-	#include "stm32mp1xx_hal_cec.h"
+#include "stm32mp1xx_hal_cec.h"
 #endif /* HAL_CEC_MODULE_ENABLED */
 
 #ifdef HAL_CRC_MODULE_ENABLED
-	#include "stm32mp1xx_hal_crc.h"
+#include "stm32mp1xx_hal_crc.h"
 #endif /* HAL_CRC_MODULE_ENABLED */
 
 #ifdef HAL_CRYP_MODULE_ENABLED
-	#include "stm32mp1xx_hal_cryp.h"
+#include "stm32mp1xx_hal_cryp.h"
 #endif /* HAL_CRYP_MODULE_ENABLED */
 
 #ifdef HAL_DAC_MODULE_ENABLED
-	#include "stm32mp1xx_hal_dac.h"
+#include "stm32mp1xx_hal_dac.h"
 #endif /* HAL_DAC_MODULE_ENABLED */
 
 #ifdef HAL_DCMI_MODULE_ENABLED
-	#include "stm32mp1xx_hal_dcmi.h"
+#include "stm32mp1xx_hal_dcmi.h"
 #endif /* HAL_DCMI_MODULE_ENABLED */
 
 #ifdef HAL_DFSDM_MODULE_ENABLED
-	#include "stm32mp1xx_hal_dfsdm.h"
+#include "stm32mp1xx_hal_dfsdm.h"
 #endif /* HAL_DFSDM_MODULE_ENABLED */
 
 #ifdef HAL_DSI_MODULE_ENABLED
-	#include "stm32mp1xx_hal_dsi.h"
+#include "stm32mp1xx_hal_dsi.h"
 #endif /* HAL_DSI_MODULE_ENABLED */
 
 #ifdef HAL_ETH_MODULE_ENABLED
-	#include "stm32mp1xx_hal_eth.h"
+#include "stm32mp1xx_hal_eth.h"
 #endif /* HAL_ETH_MODULE_ENABLED */
 
 #ifdef HAL_EXTI_MODULE_ENABLED
-	#include "stm32mp1xx_hal_exti.h"
+#include "stm32mp1xx_hal_exti.h"
 #endif /* HAL_EXTI_MODULE_ENABLED */
 
 #ifdef HAL_FDCAN_MODULE_ENABLED
-	#include "stm32mp1xx_hal_fdcan.h"
+#include "stm32mp1xx_hal_fdcan.h"
 #endif /* HAL_FDCAN_MODULE_ENABLED */
 
 #ifdef HAL_HASH_MODULE_ENABLED
-	#include "stm32mp1xx_hal_hash.h"
+#include "stm32mp1xx_hal_hash.h"
 #endif /* HAL_HASH_MODULE_ENABLED */
 
 #ifdef HAL_HCD_MODULE_ENABLED
-	#include "stm32mp1xx_hal_hcd.h"
+#include "stm32mp1xx_hal_hcd.h"
 #endif /* HAL_HASH_MODULE_ENABLED */
 
 #ifdef HAL_I2C_MODULE_ENABLED
-	#include "stm32mp1xx_hal_i2c.h"
+#include "stm32mp1xx_hal_i2c.h"
 #endif /* HAL_I2C_MODULE_ENABLED */
 
 #ifdef HAL_I2S_MODULE_ENABLED
-	#include "stm32mp1xx_hal_i2s.h"
+#include "stm32mp1xx_hal_i2s.h"
 #endif /* HAL_I2S_MODULE_ENABLED */
 
 #ifdef HAL_IPCC_MODULE_ENABLED
-	#include "stm32mp1xx_hal_ipcc.h"
+#include "stm32mp1xx_hal_ipcc.h"
 #endif /* HAL_IPCC_MODULE_ENABLED */
 
 #ifdef HAL_IWDG_MODULE_ENABLED
-	#include "stm32mp1xx_hal_iwdg.h"
+#include "stm32mp1xx_hal_iwdg.h"
 #endif /* HAL_IWDG_MODULE_ENABLED */
 
 #ifdef HAL_IWDG_MODULE_ENABLED
-	#include "stm32mp1xx_hal_iwdg.h"
+#include "stm32mp1xx_hal_iwdg.h"
 #endif /* HAL_IWDG_MODULE_ENABLED */
 
 #ifdef HAL_LPTIM_MODULE_ENABLED
-	#include "stm32mp1xx_hal_lptim.h"
+#include "stm32mp1xx_hal_lptim.h"
 #endif /* HAL_LPTIM_MODULE_ENABLED */
 
 #ifdef HAL_LTDC_MODULE_ENABLED
-	#include "stm32mp1xx_hal_ltdc.h"
+#include "stm32mp1xx_hal_ltdc.h"
 #endif /* HAL_LTDC_MODULE_ENABLED */
 
 #ifdef HAL_NAND_MODULE_ENABLED
-	#include "stm32mp1xx_hal_nand.h"
+#include "stm32mp1xx_hal_nand.h"
 #endif /* HAL_NAND_MODULE_ENABLED */
 
 #ifdef HAL_NOR_MODULE_ENABLED
-	#include "stm32mp1xx_hal_nor.h"
+#include "stm32mp1xx_hal_nor.h"
 #endif /* HAL_NOR_MODULE_ENABLED */
 
 #ifdef HAL_PCD_MODULE_ENABLED
-	#include "stm32mp1xx_hal_pcd.h"
+#include "stm32mp1xx_hal_pcd.h"
 #endif /* HAL_PCD_MODULE_ENABLED */
 
 #ifdef HAL_PWR_MODULE_ENABLED
-	#include "stm32mp1xx_hal_pwr.h"
+#include "stm32mp1xx_hal_pwr.h"
 #endif /* HAL_PWR_MODULE_ENABLED */
 
 #ifdef HAL_QSPI_MODULE_ENABLED
-	#include "stm32mp1xx_hal_qspi.h"
+#include "stm32mp1xx_hal_qspi.h"
 #endif /* HAL_QSPI_MODULE_ENABLED */
 
 #ifdef HAL_RNG_MODULE_ENABLED
-	#include "stm32mp1xx_hal_rng.h"
+#include "stm32mp1xx_hal_rng.h"
 #endif /* HAL_RNG_MODULE_ENABLED */
 
 #ifdef HAL_SAI_MODULE_ENABLED
-	#include "stm32mp1xx_hal_sai.h"
+#include "stm32mp1xx_hal_sai.h"
 #endif /* HAL_SAI_MODULE_ENABLED */
 
 #ifdef HAL_SD_MODULE_ENABLED
-	#include "stm32mp1xx_hal_sd.h"
+#include "stm32mp1xx_hal_sd.h"
 #endif /* HAL_SD_MODULE_ENABLED */
 
 #ifdef HAL_SMARTCARD_MODULE_ENABLED
-	#include "stm32mp1xx_hal_smartcard.h"
+#include "stm32mp1xx_hal_smartcard.h"
 #endif /* HAL_SMARTCARD_MODULE_ENABLED */
 
 #ifdef HAL_SMBUS_MODULE_ENABLED
-	#include "stm32mp1xx_hal_smbus.h"
+#include "stm32mp1xx_hal_smbus.h"
 #endif /* HAL_SMBUS_MODULE_ENABLED */
 
 #ifdef HAL_SPDIFRX_MODULE_ENABLED
-	#include "stm32mp1xx_hal_spdifrx.h"
+#include "stm32mp1xx_hal_spdifrx.h"
 #endif /* HAL_SPDIFRX_MODULE_ENABLED */
 
 #ifdef HAL_SPI_MODULE_ENABLED
-	#include "stm32mp1xx_hal_spi.h"
+#include "stm32mp1xx_hal_spi.h"
 #endif /* HAL_SPI_MODULE_ENABLED */
 
 #ifdef HAL_SRAM_MODULE_ENABLED
-	#include "stm32mp1xx_hal_sram.h"
+#include "stm32mp1xx_hal_sram.h"
 #endif /* HAL_SRAM_MODULE_ENABLED */
 
 #ifdef HAL_RTC_MODULE_ENABLED
-	#include "stm32mp1xx_hal_rtc.h"
+#include "stm32mp1xx_hal_rtc.h"
 #endif /* HAL_RTC_MODULE_ENABLED */
 
 #ifdef HAL_TAMP_MODULE_ENABLED
-	#include "stm32mp1xx_hal_tamp.h"
+#include "stm32mp1xx_hal_tamp.h"
 #endif /* HAL_TAMP_MODULE_ENABLED */
 
 #ifdef HAL_TIM_MODULE_ENABLED
-	#include "stm32mp1xx_hal_tim.h"
+#include "stm32mp1xx_hal_tim.h"
 #endif /* HAL_TIM_MODULE_ENABLED */
 
 #ifdef HAL_TMPSENS_MODULE_ENABLED
-	#include "stm32mp1xx_hal_tmpsens.h"
+#include "stm32mp1xx_hal_tmpsens.h"
 #endif /* HAL_TMPSENS_MODULE_ENABLED */
 
 #ifdef HAL_UART_MODULE_ENABLED
-	#include "stm32mp1xx_hal_uart.h"
+#include "stm32mp1xx_hal_uart.h"
 #endif /* HAL_UART_MODULE_ENABLED */
 
 #ifdef HAL_USART_MODULE_ENABLED
-	#include "stm32mp1xx_hal_usart.h"
+#include "stm32mp1xx_hal_usart.h"
 #endif /* HAL_USART_MODULE_ENABLED */
 
 #ifdef HAL_WWDG_MODULE_ENABLED
-	#include "stm32mp1xx_hal_wwdg.h"
+#include "stm32mp1xx_hal_wwdg.h"
 #endif /* HAL_WWDG_MODULE_ENABLED */
 
 /*User added (4ms/Dan Green) */
 #ifdef LL_DMA_MODULE_ENABLED
-	#include "stm32mp1xx_ll_dma.h"
+#include "stm32mp1xx_ll_dma.h"
 #endif
 
 // #ifdef LL_BDMA_MODULE_ENABLED
@@ -380,11 +381,11 @@ extern "C" {
 // #endif
 
 #ifdef LL_TIM_MODULE_ENABLED
-	#include "stm32mp1xx_ll_tim.h"
+#include "stm32mp1xx_ll_tim.h"
 #endif
 
 #ifdef LL_BUS_MODULE_ENABLED
-	#include "stm32mp1xx_ll_bus.h"
+#include "stm32mp1xx_ll_bus.h"
 #endif
 
 // #ifdef LL_FMC_MODULE_ENABLED
@@ -392,28 +393,28 @@ extern "C" {
 // #endif
 
 #ifdef LL_GPIO_MODULE_ENABLED
-	#include "stm32mp1xx_ll_gpio.h"
+#include "stm32mp1xx_ll_gpio.h"
 #endif
 
 #ifdef LL_ADC_MODULE_ENABLED
-	#include "stm32mp1xx_ll_adc.h"
+#include "stm32mp1xx_ll_adc.h"
 #endif
 
 /* Exported macro ------------------------------------------------------------*/
 #ifdef USE_FULL_ASSERT
-	/**
-	 * @brief  The assert_param macro is used for function's parameters check.
-	 * @param  expr: If expr is false, it calls assert_failed function
-	 *         which reports the name of the source file and the source
-	 *         line number of the call that failed.
-	 *         If expr is true, it returns no value.
-	 * @retval None
-	 */
-	#define assert_param(expr) ((expr) ? (void)0U : assert_failed((uint8_t *)__FILE__, __LINE__))
+/**
+ * @brief  The assert_param macro is used for function's parameters check.
+ * @param  expr: If expr is false, it calls assert_failed function
+ *         which reports the name of the source file and the source
+ *         line number of the call that failed.
+ *         If expr is true, it returns no value.
+ * @retval None
+ */
+#define assert_param(expr) ((expr) ? (void)0U : assert_failed((uint8_t *)__FILE__, __LINE__))
 /* Exported functions ------------------------------------------------------- */
 void assert_failed(uint8_t *file, uint32_t line);
 #else
-	#define assert_param(expr) ((void)0)
+#define assert_param(expr) ((void)0)
 #endif /* USE_FULL_ASSERT */
 
 #ifdef __cplusplus

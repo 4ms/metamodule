@@ -85,7 +85,7 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 
 const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI3 | RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI23 |
-							RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_ADC | RCC_PERIPHCLK_SDMMC12,
+							RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_ADC | RCC_PERIPHCLK_SDMMC12 | RCC_PERIPHCLK_LTDC,
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_HSI,
 	.Sai3ClockSelection = RCC_SAI3CLKSOURCE_PLL3_Q,
 	.Spi1ClockSelection = RCC_SPI1CLKSOURCE_PLL4,
@@ -94,4 +94,5 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.Sdmmc12ClockSelection =
 		RCC_SDMMC12CLKSOURCE_HSI, // See MP15x Errata: 2.3.5 Incorrect reset of glitch-free kernel clock switch
 	.AdcClockSelection = RCC_ADCCLKSOURCE_PLL4, // PLL4R: 66MHz vs PER vs PLL3
+
 };
