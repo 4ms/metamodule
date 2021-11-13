@@ -1,9 +1,9 @@
+#include "conf/screen_buffer_conf.hh"
 #include "drivers/screen_ltdc.hh"
 #include "lvgl/lvgl.h"
 #include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
 #include "printf.h"
-#include "screen_writer.hh"
 #include "timekeeper.hh"
 #include "uart.hh"
 #include <span>
@@ -28,7 +28,7 @@ class LVGLDriver {
 	lv_disp_drv_t disp_drv;
 
 #ifdef LV_USE_LOG
-	static inline Uart<UART4_BASE> log_uart;
+	static inline mdrivlib::Uart<UART4_BASE> log_uart;
 #endif
 
 public:
@@ -100,8 +100,7 @@ extern "C" void _putchar(char character) {
 // #endif
 
 class MMDisplay {
-	static inline ScreenFrameWriter _spi_driver;
-	static inline Timekeeper _run_lv_tasks_tmr;
+	static inline mdrivlib::Timekeeper _run_lv_tasks_tmr;
 	static inline volatile bool _ready = false;
 	static inline lv_disp_drv_t *last_used_disp_drv;
 	static inline MetaParams *m;
@@ -112,23 +111,13 @@ public:
 	static inline lv_color_t buf_2[BufferSize];
 
 private:
-	// // ptrs to buffers, so we can swap them quickly
-	// static inline lv_color_t *bufptr1;
-	// static inline lv_color_t *bufptr2;
-
-	static inline ScreenParallelWriter _ltdc_driver{
-		MMScreenBufferConf::viewWidth, MMScreenBufferConf::viewHeight, buf_1};
+	static inline ScreenParallelWriter<MMScreenBufferConf> _ltdc_driver{buf_1};
 
 public:
 	static void init(MetaParams &metaparams) {
 		m = &metaparams;
-		// bufptr1 = buf_1;
-		// bufptr2 = buf_2;
 
-		// Init the ST7789 driver chip via SPI
-		_spi_driver.init();
 		_ltdc_driver.init();
-		// _spi_driver.register_partial_frame_cb(end_flush);
 
 		_run_lv_tasks_tmr.init(
 			{
@@ -152,22 +141,7 @@ public:
 		_ready = false;
 	}
 
-	// static void end_flush()
-	// {
-	// 	lv_disp_flush_ready(last_used_disp_drv);
-	// }
-
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
-		// last_used_disp_drv = disp_drv;
-		// _spi_driver.transfer_partial_frame(
-		// 	area->x1, area->y1, area->x2, area->y2, reinterpret_cast<uint16_t *>(color_p));
-
-		// Swap bufptrs so that lvgl draws to the other buffer
-		// auto tmp = bufptr1;
-		// bufptr1 = bufptr2;
-		// bufptr2 = tmp;
-		// std::swap(bufptr1, bufptr2);
-
 		_ltdc_driver.set_buffer((void *)color_p);
 		lv_disp_flush_ready(disp_drv);
 	}
