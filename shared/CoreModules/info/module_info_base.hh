@@ -108,7 +108,7 @@ struct ModuleInfo {
 	std::string_view svg_filename{""};
 
 	uint32_t NumKnobs = 0;
-	// const std::span<KnobDef> Knobs{};
+	// const std::span<KnobDef> Knobs;
 	const KnobDef *Knobs; // works!
 
 	// uint32_t NumInJacks = 0;
