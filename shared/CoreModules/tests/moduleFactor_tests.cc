@@ -71,7 +71,19 @@ TEST_CASE("Register ModuleTypes with an object constructed from static constexpr
 		CHECK(knobs.size() == 2);
 
 		SUBCASE("Test actual EnOscInfo data") {
-			bool already_exists = ModuleFactory::registerModuleType("EnOsc2", "EnOsc module", create, enoscinfo);
+			already_exists = ModuleFactory::registerModuleType("EnOsc2", "EnOsc module", create, enoscinfo);
+			// already_exists = ModuleFactory::registerModuleType("EnOsc2",
+			// 												   "EnOsc module",
+			// 												   create,
+			// 												   {
+			// 													   .width_hp = EnOscInfo::width_hp,
+			// 													   .svg_filename = EnOscInfo::svg_filename,
+			// 													   .Knobs = EnOscInfo::Knobs,
+			// 													   .InJacks = EnOscInfo::InJacks,
+			// 													   .OutJacks = EnOscInfo::OutJacks,
+			// 													   .Switches = EnOscInfo::Switches,
+			// 													   .Leds = EnOscInfo::Leds,
+			// 												   });
 			CHECK_FALSE(already_exists);
 
 			auto info = ModuleFactory::getModuleInfo("EnOsc2");
