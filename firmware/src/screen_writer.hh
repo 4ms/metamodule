@@ -13,12 +13,13 @@
 
 #include "examples/hardware-tests/memory_transfer_test.hh"
 
-using ScreenWriterConfT = MMScreenConf;
 using namespace mdrivlib;
 
 namespace MetaModule
 {
-// template <typename ScreenWriterConfT>
+// TODO: Make this class more general so it can be part of mdrivlib
+//  template <typename ScreenWriterConfT>
+using ScreenWriterConfT = MMScreenConf;
 class ScreenFrameWriter : public mdrivlib::DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT> {
 	static constexpr uint32_t FrameSize = ScreenWriterConfT::FrameBytes;
 	static constexpr uint32_t HalfFrameSize = ScreenWriterConfT::HalfFrameBytes;
