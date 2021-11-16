@@ -34,11 +34,10 @@ public:
 	}
 
 	void start() {
-
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, StaticBuffers::framebuf1);
+		MMDisplay::init(metaparams, StaticBuffers::framebuf2);
 		page_manager.init();
 
 		page_update_tm.init(
