@@ -36,13 +36,6 @@ class PageManager {
 		// std::make_unique<AudioCVInsPage>(info),
 		// std::make_unique<KnobView2>(info),
 	};
-	// BouncingBallsPage balls_page;
-	// JackMapPage jack_map_page;
-	// PatchSelectorPage patch_selector_page;
-	// KnobMapPage knob_map_page;
-	// PatchLayoutPage patch_layout_page;
-	// ModulesInPatchPage modules_in_patch_page;
-	// DebugInfoPage debug_info_page;
 
 	PatchList &patch_list;
 	PatchPlayer &player;
