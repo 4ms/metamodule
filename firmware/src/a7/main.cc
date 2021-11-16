@@ -45,8 +45,11 @@ void main() {
 
 	// SharedBus::i2c.deinit();
 
+	//Used by mini, but will be deprecated:
+	static uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
-	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
+	SharedMemory::write_address_of(&led_frame_buffer, SharedMemory::LEDFrameBufLocation);
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 

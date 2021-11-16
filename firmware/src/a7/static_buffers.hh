@@ -15,10 +15,11 @@ namespace StaticBuffers
 {
 static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock audio_in_dma_block;
 static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block;
-static inline uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
+
 using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height>;
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1;
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
+
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
 static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block;
 

@@ -22,8 +22,7 @@ struct SystemInit : AppStartup, Debug, Hardware {
 
 } // namespace MetaModule
 
-void main()
-{
+void main() {
 	using namespace MetaModule;
 
 	StaticBuffers::init();
@@ -49,6 +48,7 @@ void main()
 
 	// SharedBus::i2c.deinit();
 
+	static uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
 	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
@@ -82,7 +82,6 @@ void main()
 	}
 }
 
-void recover_from_task_fault()
-{
+void recover_from_task_fault() {
 	main();
 }
