@@ -21,8 +21,7 @@ struct SystemInit : AppStartup, Debug, Hardware {
 
 } // namespace MetaModule
 
-void main()
-{
+void main() {
 	using namespace MetaModule;
 
 	StaticBuffers::init();
@@ -48,7 +47,6 @@ void main()
 
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(&StaticBuffers::led_frame_buffer, SharedMemory::LEDFrameBufLocation);
-	SharedMemory::write_address_of(&StaticBuffers::screen_framebuf, SharedMemory::ScreenBufLocation);
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 
@@ -75,7 +73,6 @@ void main()
 	}
 }
 
-void recover_from_task_fault()
-{
+void recover_from_task_fault() {
 	main();
 }
