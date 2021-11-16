@@ -6,8 +6,7 @@ namespace MetaModule
 
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
-		: PageBase{info}
-	{
+		: PageBase{info} {
 		_instance = this;
 	}
 	static inline PatchSelectorPage *_instance;
@@ -15,8 +14,7 @@ struct PatchSelectorPage : PageBase {
 	lv_obj_t *patch_selector;
 	lv_obj_t *patch_selector_patchlist;
 
-	static void patch_selector_event_cb(lv_obj_t *obj, lv_event_t event)
-	{
+	static void patch_selector_event_cb(lv_obj_t *obj, lv_event_t event) {
 		switch (event) {
 			case LV_EVENT_VALUE_CHANGED: {
 				uint16_t sel = lv_dropdown_get_selected(obj);
@@ -29,8 +27,7 @@ struct PatchSelectorPage : PageBase {
 		}
 	}
 
-	void init() override
-	{
+	void init() override {
 		patch_selector = lv_obj_create(nullptr, nullptr);
 
 		patch_selector_patchlist = lv_dropdown_create(patch_selector, nullptr);
@@ -99,21 +96,19 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_set_event_cb(patch_selector_patchlist, patch_selector_event_cb);
 	}
 
-	void update() override
-	{
+	void update() override {
 		handle_changing_patch();
 	}
 
-	void start_changing_patch(int32_t new_patch_index)
-	{
+	void start_changing_patch(int32_t new_patch_index) {
 		if (!mbox.loading_new_patch && (new_patch_index != patch_list.cur_patch_index())) {
 			mbox.new_patch_index = new_patch_index;
 			mbox.loading_new_patch = true;
+			printf("Loading patch %s\n\r", patch_list.get_patch_name(new_patch_index).c_str());
 		}
 	}
 
-	void handle_changing_patch()
-	{
+	void handle_changing_patch() {
 		if (mbox.loading_new_patch && mbox.audio_is_muted) {
 			auto orig_patch = patch_list.cur_patch();
 			patch_player.unload_patch();

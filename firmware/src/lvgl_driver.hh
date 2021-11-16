@@ -88,18 +88,11 @@ public:
 #endif
 };
 
-// #ifdef LV_LOG_PRINTF
 extern "C" void _putchar(char character) {
-	// while ((UART4->ISR & UART_FLAG_TXE) == RESET)
-	// 	;
 	UART4->TDR = character;
 	while ((UART4->ISR & USART_ISR_TXFT) == 0)
 		;
-	// while ((UART4->ISR & UART_FLAG_TC) == RESET)
-	// 	;
 }
-
-// #endif
 
 class MMDisplay {
 	static inline mdrivlib::Timekeeper _run_lv_tasks_tmr;
@@ -117,19 +110,14 @@ public:
 		m = &metaparams;
 
 		_screen_configure.setup_driver_chip<ScreenConf>();
-
-		for (int y = 0; y < ScreenBufferConf::viewHeight; y++) {
-			for (int x = 0; x < ScreenBufferConf::viewWidth; x++) {
-				if (x < 160)
-					buf[x + y * ScreenBufferConf::viewWidth].full = 0xF800;
-				else if (y < 120)
-					buf[x + y * ScreenBufferConf::viewWidth].full = 0x07E0;
-				else
-					buf[x + y * ScreenBufferConf::viewWidth].full = 0x001F;
-			}
-		}
-
 		_ltdc_driver.init(buf.data());
+
+		// for (int i = 0; i < 16; i++) {
+		// 	for (auto &px : buf)
+		// 		px.full = (1 << i);
+		// 	_ltdc_driver.set_buffer(buf.data());
+		// 	__BKPT();
+		// }
 
 		_run_lv_tasks_tmr.init(
 			{
@@ -176,7 +164,6 @@ public:
 			should_send_button_release = true;
 			have_more_data_to_send = true;
 		}
-
 		return have_more_data_to_send;
 	}
 };

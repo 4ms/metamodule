@@ -2,12 +2,10 @@
 
 #include "drivers/stm32xx.h"
 
+//FIXME: This isn't used, remove it once we're sure
 const RCC_OscInitTypeDef rcc_osc_conf = {
 	.OscillatorType = RCC_OSCILLATORTYPE_HSE,
 	.HSEState = RCC_HSE_ON,
-	// .HSIDivValue
-	//FixME: PLL2 is ignored because it's in use (MPU clock), and the HAL_RCC_OscConfig() exits with an error.
-	//Also, PLL3 is in use (MCU clock), so it would exit with an error there too. PLL4 never gets set.
 	.PLL =
 		{
 			.PLLState = RCC_PLL_ON,
@@ -20,44 +18,6 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLFRACV = 2048,
 			.PLLMODE = RCC_PLL_FRACTIONAL,
 		},
-	// .PLL2 =
-	// 	{
-	// 		.PLLState = RCC_PLL_ON,
-	// 		.PLLSource = RCC_PLL12SOURCE_HSE,
-	// 		.PLLM = 3,
-	// 		.PLLN = 66,
-	// 		.PLLP = 2,
-	// 		.PLLQ = 1,
-	// 		.PLLR = 1,
-	// 		.PLLFRACV = 5120,
-	// 		.PLLMODE = RCC_PLL_FRACTIONAL,
-	// 	},
-	// .PLL3 =
-	// 	{
-	// 		.PLLState = RCC_PLL_ON,
-	// 		.PLLSource = RCC_PLL3SOURCE_HSE,
-	// 		.PLLM = 2,
-	// 		.PLLN = 34,
-	// 		.PLLP = 2,
-	// 		.PLLQ = 17,
-	// 		.PLLR = 37,
-	// 		.PLLRGE = RCC_PLL3IFRANGE_1,
-	// 		.PLLFRACV = 6685,
-	// 		.PLLMODE = RCC_PLL_FRACTIONAL,
-	// 	},
-	// .PLL4 =
-	// 	{
-	// 		.PLLState = RCC_PLL_ON,
-	// 		.PLLSource = RCC_PLL4SOURCE_HSE,
-	// 		.PLLM = 4,
-	// 		.PLLN = 99,
-	// 		.PLLP = 6,
-	// 		.PLLQ = 115,
-	// 		.PLLR = 9,
-	// 		.PLLRGE = RCC_PLL4IFRANGE_1,
-	// 		.PLLFRACV = 0,
-	// 		.PLLMODE = RCC_PLL_INTEGER,
-	// 	},
 };
 
 const RCC_ClkInitTypeDef rcc_clk_conf = {
