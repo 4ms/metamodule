@@ -61,10 +61,10 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 	static constexpr ColorFormat color_format = RGB565;
 
 	static constexpr uint32_t HSyncWidth = 10;
-	static constexpr uint32_t HBackPorch = 10;
-	static constexpr uint32_t HFrontPorch = 38;
+	static constexpr uint32_t HBackPorch = 12;
+	static constexpr uint32_t HFrontPorch = 12; //38
 	static constexpr uint32_t VSyncWidth = 4;
-	static constexpr uint32_t VBackPorch = 4;
+	static constexpr uint32_t VBackPorch = 8;
 	static constexpr uint32_t VFrontPorch = 8;
 
 	// TODO: remove if not used
