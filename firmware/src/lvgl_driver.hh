@@ -1,5 +1,6 @@
-#include "conf/screen_buffer_conf.hh"
+#include "conf/screen_ltdc_conf.hh"
 #include "drivers/screen_ltdc.hh"
+#include "drivers/screen_ltdc_st77XX_setup.hh"
 #include "lvgl/lvgl.h"
 #include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
@@ -111,12 +112,14 @@ public:
 	static inline lv_color_t buf_2[BufferSize];
 
 private:
-	static inline ScreenParallelWriter<MMScreenBufferConf> _ltdc_driver{buf_1};
+	static inline ScreenParallelWriter<ScreenConf> _ltdc_driver{buf_1};
+	static inline mdrivlib::ST77XXParallelSetup<ScreenControlConf> _screen_configure;
 
 public:
 	static void init(MetaParams &metaparams) {
 		m = &metaparams;
 
+		_screen_configure.setup_driver_chip<ScreenConf>();
 		_ltdc_driver.init();
 
 		_run_lv_tasks_tmr.init(

@@ -7,7 +7,6 @@ ColumnLimit : 120
 AccessModifierOffset : -4
 AlignAfterOpenBracket: "Align"
 AlignOperands : "AlignAfterOperator"
-AlignArrayOfStructures : "Left"
 AllowAllArgumentsOnNextLine : "true"
 AllowShortBlocksOnASingleLine : "true"
 AllowShortFunctionsOnASingleLine: "false"
@@ -37,7 +36,7 @@ BreakBeforeTernaryOperators : true
 BreakConstructorInitializers : "BeforeComma"
 BreakInheritanceList : "AfterColon"
 ConstructorInitializerIndentWidth: 4
-ContinuationIndentWidth : 0 
+ContinuationIndentWidth : 4
 IndentCaseLabels : "true"
 IndentPPDirectives : "None"
 LambdaBodyIndentation : "OuterScope"
