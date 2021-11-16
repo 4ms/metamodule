@@ -20,9 +20,6 @@ using mdrivlib::GPIO;
 using mdrivlib::PinNoInit;
 using mdrivlib::PinPull;
 
-template<GPIO port, uint16_t pin>
-using FPinIn = mdrivlib::FPin<port, pin, mdrivlib::PinMode::Input>;
-
 struct MMControlPins {
 	static constexpr PinNoInit rotA{GPIO::G, 8};
 	static constexpr PinNoInit rotB{GPIO::G, 5};
@@ -73,7 +70,13 @@ constexpr auto PotConfs = std::to_array({
 });
 
 // TODO: parameterize this and put it in mdrivlib
+// template <GPIO port uin16_t pin, uint16_t order>
+// concept OrderedFPinTs;
+// template <OrderedFPinTs...>
 struct MultiGPIOReader {
+	template<GPIO port, uint16_t pin>
+	using FPinIn = mdrivlib::FPin<port, pin, mdrivlib::PinMode::Input>;
+
 	using AudioIn1 = FPinIn<GPIO::I, 10>;
 	using AudioIn2 = FPinIn<GPIO::H, 6>;
 	using AudioIn3 = FPinIn<GPIO::H, 7>;
