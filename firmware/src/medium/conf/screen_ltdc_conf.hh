@@ -4,19 +4,12 @@
 #include "drivers/parallel_writer_conf.hh"
 #include "pin.hh"
 
-using mdrivlib::FPin;
-using mdrivlib::GPIO;
-using mdrivlib::PinMode;
-using mdrivlib::PinNoInit;
-
-// static constexpr PinNoInit SCLK = {GPIO::E, 12, LL_GPIO_AF_5};
-// static constexpr PinNoInit COPI = {GPIO::E, 6, LL_GPIO_AF_5}; // p4: PE14
-// static constexpr PinNoInit CIPO = {GPIO::A, 0};
-// static constexpr PinNoInit CS0 = {GPIO::E, 11, LL_GPIO_AF_5};
-// using DCPin = FPin<GPIO::H, 5, PinMode::Output>; // p4: PH4
-
 namespace MetaModule
 {
+
+using mdrivlib::GPIO;
+using mdrivlib::PinNoInit;
+
 struct ScreenConf : mdrivlib::LTDCScreenConf {
 	static constexpr PinNoInit r[8]{
 		{GPIO::Unused},
@@ -54,10 +47,10 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 	static constexpr PinNoInit vsync{GPIO::I, 9, LL_GPIO_AF_14};
 	static constexpr PinNoInit hsync{GPIO::C, 6, LL_GPIO_AF_14};
 
-	static constexpr uint32_t width = MMScreenBufferConf::width;
-	static constexpr uint32_t height = MMScreenBufferConf::height;
-	static constexpr uint32_t viewWidth = MMScreenBufferConf::viewWidth;
-	static constexpr uint32_t viewHeight = MMScreenBufferConf::viewHeight;
+	static constexpr uint32_t width = ScreenBufferConf::width;
+	static constexpr uint32_t height = ScreenBufferConf::height;
+	static constexpr uint32_t viewWidth = ScreenBufferConf::viewWidth;
+	static constexpr uint32_t viewHeight = ScreenBufferConf::viewHeight;
 	static constexpr uint32_t rowstart = 0;
 	static constexpr uint32_t colstart = 0;
 

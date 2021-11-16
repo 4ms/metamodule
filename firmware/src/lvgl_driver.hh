@@ -1,3 +1,4 @@
+#include "conf/screen_buffer_conf.hh"
 #include "conf/screen_ltdc_conf.hh"
 #include "drivers/screen_ltdc.hh"
 #include "drivers/screen_ltdc_st77XX_setup.hh"
@@ -12,8 +13,8 @@
 namespace MetaModule
 {
 class LVGLDriver {
-	static constexpr uint32_t ScreenWidth = MMScreenBufferConf::viewWidth;
-	static constexpr uint32_t ScreenHeight = MMScreenBufferConf::viewHeight;
+	static constexpr uint32_t ScreenWidth = ScreenBufferConf::viewWidth;
+	static constexpr uint32_t ScreenHeight = ScreenBufferConf::viewHeight;
 
 	// v8:
 	// lv_disp_draw_buf_t disp_buf;
@@ -105,7 +106,7 @@ class MMDisplay {
 	static inline volatile bool _ready = false;
 	static inline lv_disp_drv_t *last_used_disp_drv;
 	static inline MetaParams *m;
-	static constexpr size_t BufferSize = MMScreenBufferConf::viewWidth * MMScreenBufferConf::viewHeight;
+	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
 
 private:
 	static inline ScreenParallelWriter<ScreenConf> _ltdc_driver;
@@ -117,14 +118,14 @@ public:
 
 		_screen_configure.setup_driver_chip<ScreenConf>();
 
-		for (int y = 0; y < MMScreenBufferConf::viewHeight; y++) {
-			for (int x = 0; x < MMScreenBufferConf::viewWidth; x++) {
+		for (int y = 0; y < ScreenBufferConf::viewHeight; y++) {
+			for (int x = 0; x < ScreenBufferConf::viewWidth; x++) {
 				if (x < 160)
-					buf[x + y * MMScreenBufferConf::viewWidth].full = 0xF800;
+					buf[x + y * ScreenBufferConf::viewWidth].full = 0xF800;
 				else if (y < 120)
-					buf[x + y * MMScreenBufferConf::viewWidth].full = 0x07E0;
+					buf[x + y * ScreenBufferConf::viewWidth].full = 0x07E0;
 				else
-					buf[x + y * MMScreenBufferConf::viewWidth].full = 0x001F;
+					buf[x + y * ScreenBufferConf::viewWidth].full = 0x001F;
 			}
 		}
 

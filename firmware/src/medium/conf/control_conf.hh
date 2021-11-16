@@ -21,7 +21,7 @@ using mdrivlib::PinNoInit;
 using mdrivlib::PinPull;
 
 template<GPIO port, uint16_t pin>
-using FPin = mdrivlib::FPin<port, pin, mdrivlib::PinMode::Input>;
+using FPinIn = mdrivlib::FPin<port, pin, mdrivlib::PinMode::Input>;
 
 struct MMControlPins {
 	static constexpr PinNoInit rotA{GPIO::G, 8};
@@ -74,25 +74,25 @@ constexpr auto PotConfs = std::to_array({
 
 // TODO: parameterize this and put it in mdrivlib
 struct MultiGPIOReader {
-	using AudioIn1 = FPin<GPIO::I, 10>;
-	using AudioIn2 = FPin<GPIO::H, 6>;
-	using AudioIn3 = FPin<GPIO::H, 7>;
-	using AudioIn4 = FPin<GPIO::I, 11>;
-	using AudioIn5 = FPin<GPIO::A, 13>;
-	using AudioIn6 = FPin<GPIO::Z, 3>;
-	using AudioOut1 = FPin<GPIO::B, 13>;
-	using AudioOut2 = FPin<GPIO::B, 10>;
-	using AudioOut3 = FPin<GPIO::A, 7>;
-	using AudioOut4 = FPin<GPIO::B, 11>;
-	using AudioOut5 = FPin<GPIO::B, 12>;
-	using AudioOut6 = FPin<GPIO::C, 4>;
-	using AudioOut7 = FPin<GPIO::C, 5>;
-	using AudioOut8 = FPin<GPIO::G, 14>;
-	using PatchCV = FPin<GPIO::A, 2>;
-	using GateIn1 = FPin<GPIO::A, 14>;
-	using GateIn2 = FPin<GPIO::Z, 0>;
-	using GateOut1 = FPin<GPIO::G, 1>;
-	using GateOut2 = FPin<GPIO::G, 14>;
+	using AudioIn1 = FPinIn<GPIO::I, 10>;
+	using AudioIn2 = FPinIn<GPIO::H, 6>;
+	using AudioIn3 = FPinIn<GPIO::H, 7>;
+	using AudioIn4 = FPinIn<GPIO::I, 11>;
+	using AudioIn5 = FPinIn<GPIO::A, 13>;
+	using AudioIn6 = FPinIn<GPIO::Z, 3>;
+	using AudioOut1 = FPinIn<GPIO::B, 13>;
+	using AudioOut2 = FPinIn<GPIO::B, 10>;
+	using AudioOut3 = FPinIn<GPIO::A, 7>;
+	using AudioOut4 = FPinIn<GPIO::B, 11>;
+	using AudioOut5 = FPinIn<GPIO::B, 12>;
+	using AudioOut6 = FPinIn<GPIO::C, 4>;
+	using AudioOut7 = FPinIn<GPIO::C, 5>;
+	using AudioOut8 = FPinIn<GPIO::G, 14>;
+	using PatchCV = FPinIn<GPIO::A, 2>;
+	using GateIn1 = FPinIn<GPIO::A, 14>;
+	using GateIn2 = FPinIn<GPIO::Z, 0>;
+	using GateOut1 = FPinIn<GPIO::G, 1>;
+	using GateOut2 = FPinIn<GPIO::G, 14>;
 
 	template<enum GPIO port>
 	using PortRead = mdrivlib::PortRead<port>;

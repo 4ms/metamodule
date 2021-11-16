@@ -3,10 +3,12 @@
 #include "drivers/dma_config_struct.hh"
 #include "drivers/dma_transfer.hh"
 #include "drivers/interrupt.hh"
-#include "drivers/spi_screen_config_struct.hh"
 #include "drivers/spi_dma_datacmd_driver.hh"
+#include "drivers/spi_screen_config_struct.hh"
 #include "spi_screen_ST77XX.hh"
 
+namespace MetaModule
+{
 using mdrivlib::FPin;
 using mdrivlib::GPIO;
 using mdrivlib::PinMode;
@@ -61,12 +63,12 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 	static constexpr uint32_t rowstart = 0;
 	static constexpr uint32_t colstart = 0;
 
-	static constexpr uint32_t width = MMScreenBufferConf::width;
-	static constexpr uint32_t height = MMScreenBufferConf::height;
+	static constexpr uint32_t width = ScreenBufferConf::width;
+	static constexpr uint32_t height = ScreenBufferConf::height;
 	enum Rotation { None, CW90, Flip180, CCW90 };
 	static constexpr Rotation rotation = CW90; // Todo: set this from ScreenBufferConfT
 
-	using FrameBufferT = MMScreenBufferConf::FrameBufferT;
+	using FrameBufferT = std::array<uint16_t, width * height>;
 
 	using HalfFrameBufferT = std::array<uint16_t, width * height / 2>;
 	static constexpr uint32_t FrameBytes = sizeof(FrameBufferT);
@@ -74,3 +76,4 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 };
 
 using ScreenTransferDriverT = mdrivlib::DMATransfer<typename MMScreenConf::DMAConf>;
+} // namespace MetaModule

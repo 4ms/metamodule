@@ -5,11 +5,12 @@
 #include "pages/page_manager.hh"
 #include "params.hh"
 #include "patchlist.hh"
+#include "static_buffers.hh"
 
 namespace MetaModule
 {
-static __attribute__((section(".ddma"))) std::array<lv_color_t, ScreenConf::width * ScreenConf::height> buf_1;
-static __attribute__((section(".ddma"))) std::array<lv_color_t, ScreenConf::width * ScreenConf::height> buf_2;
+namespace StaticBuffers
+{} // namespace StaticBuffers
 
 class Ui {
 private:
@@ -22,7 +23,8 @@ private:
 
 	UiAudioMailbox &mbox;
 
-	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, buf_1, buf_2};
+	static inline LVGLDriver gui{
+		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
 	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
@@ -36,7 +38,7 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, buf_1);
+		MMDisplay::init(metaparams, StaticBuffers::framebuf1);
 		page_manager.init();
 
 		page_update_tm.init(
