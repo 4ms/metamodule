@@ -26,11 +26,11 @@ namespace MetaModule
 
 PatchList::PatchList()
 	: _patch_addrs{
+		  InfiniteOsc64bDual_mmpatch,
 		  knob_test_mmpatch,
 		  test_inputs_1234_mmpatch,
 		  QuadDjembe_mmpatch,
 		  djembe_mmpatch,
-		  InfiniteOsc64bDual_mmpatch,
 		  // DjembeReverb_mmpatch,
 		  // InfiniteOsc_mmpatch,
 		  QuadLFO_mmpatch,

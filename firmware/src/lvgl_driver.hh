@@ -107,20 +107,28 @@ class MMDisplay {
 	static inline MetaParams *m;
 	static constexpr size_t BufferSize = MMScreenBufferConf::viewWidth * MMScreenBufferConf::viewHeight;
 
-public:
-	static inline lv_color_t buf_1[BufferSize];
-	static inline lv_color_t buf_2[BufferSize];
-
 private:
-	static inline ScreenParallelWriter<ScreenConf> _ltdc_driver{buf_1};
+	static inline ScreenParallelWriter<ScreenConf> _ltdc_driver;
 	static inline mdrivlib::ST77XXParallelSetup<ScreenControlConf> _screen_configure;
 
 public:
-	static void init(MetaParams &metaparams) {
+	static void init(MetaParams &metaparams, std::span<lv_color_t, BufferSize> buf) {
 		m = &metaparams;
 
 		_screen_configure.setup_driver_chip<ScreenConf>();
-		_ltdc_driver.init();
+
+		for (int y = 0; y < MMScreenBufferConf::viewHeight; y++) {
+			for (int x = 0; x < MMScreenBufferConf::viewWidth; x++) {
+				if (x < 160)
+					buf[x + y * MMScreenBufferConf::viewWidth].full = 0xF800;
+				else if (y < 120)
+					buf[x + y * MMScreenBufferConf::viewWidth].full = 0x07E0;
+				else
+					buf[x + y * MMScreenBufferConf::viewWidth].full = 0x001F;
+			}
+		}
+
+		_ltdc_driver.init(buf.data());
 
 		_run_lv_tasks_tmr.init(
 			{

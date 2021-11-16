@@ -21,10 +21,10 @@ class PageManager {
 
 	static constexpr size_t LAST_PAGE = 4;
 	std::array<std::unique_ptr<PageBase>, LAST_PAGE> pages = {
+		std::make_unique<GroupArcSketchesPage2>(info),
 		std::make_unique<PatchSelectorPage>(info),
 		std::make_unique<KnobView3>(info),
 		// std::make_unique<GroupArcSketchesPage1>(info),
-		std::make_unique<GroupArcSketchesPage2>(info),
 		// std::make_unique<GroupArcSketchesPage3>(info),
 		// std::make_unique<GroupArcSketchesPage4>(info),
 		// std::make_unique<Dropdown1bPage>(info),
@@ -55,8 +55,8 @@ public:
 		: info{pl, pp, p, m, mbox}
 		, patch_list{pl}
 		, player{pp}
-		, mbox{mbox}
-	{}
+		, mbox{mbox} {
+	}
 
 	void init();
 	void next_page();

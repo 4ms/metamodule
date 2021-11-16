@@ -8,6 +8,8 @@
 
 namespace MetaModule
 {
+static __attribute__((section(".ddma"))) std::array<lv_color_t, ScreenConf::width * ScreenConf::height> buf_1;
+static __attribute__((section(".ddma"))) std::array<lv_color_t, ScreenConf::width * ScreenConf::height> buf_2;
 
 class Ui {
 private:
@@ -20,7 +22,7 @@ private:
 
 	UiAudioMailbox &mbox;
 
-	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, MMDisplay::buf_1, MMDisplay::buf_2};
+	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, buf_1, buf_2};
 
 public:
 	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
@@ -33,9 +35,8 @@ public:
 
 		params.clear();
 		metaparams.clear();
-		// register_printf_destination(screen);
 
-		MMDisplay::init(metaparams);
+		MMDisplay::init(metaparams, buf_1);
 		page_manager.init();
 
 		page_update_tm.init(
@@ -78,6 +79,6 @@ public:
 	}
 
 private:
-	Timekeeper page_update_tm;
+	mdrivlib::Timekeeper page_update_tm;
 };
 } // namespace MetaModule
