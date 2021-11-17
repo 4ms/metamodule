@@ -35,7 +35,6 @@ void Controls::update_params() {
 			_knobs[i].set_new_value(get_pot_reading(i) / 4095.0f);
 		}
 		_new_adc_data_ready = false;
-		Debug::Pin2::low();
 	}
 
 	for (int i = 0; i < PanelDef::NumPot; i++)
@@ -126,7 +125,6 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {
 			ADC1->ISR = tmp | ADC_ISR_EOS;
-			Debug::Pin2::high();
 			_new_adc_data_ready = true;
 		}
 	});
