@@ -95,7 +95,28 @@ struct MultiGPIOReader {
 	using GateIn1 = FPinIn<GPIO::A, 14>;
 	using GateIn2 = FPinIn<GPIO::Z, 0>;
 	using GateOut1 = FPinIn<GPIO::G, 1>;
-	using GateOut2 = FPinIn<GPIO::G, 14>;
+	using GateOut2 = FPinIn<GPIO::F, 13>;
+	enum JackOrder {
+		AIn1,  //bit 0
+		AIn2,  //bit 1
+		AIn3,  //bit 2
+		AIn5,  //bit 3 <<Ain5 and Ain4 are swapped
+		AIn4,  //bit 4 <<
+		AIn6,  //bit 5
+		GIn1,  //bit 6
+		GIn2,  //bit 7
+		PCV,   //bit 8
+		AOut1, //bit 9
+		AOut2, //bit 10
+		AOut3, //bit 11
+		AOut4, //bit 12
+		AOut5, //bit 13
+		AOut6, //bit 14
+		AOut7, //bit 15
+		AOut8, //bit 16
+		GOut1, //bit 17
+		GOut2, //bit 18
+	};
 
 	template<enum GPIO port>
 	using PortRead = mdrivlib::PortRead<port>;
@@ -110,62 +131,69 @@ struct MultiGPIOReader {
 				return pin_reading << (jack_num - pin_num);
 		}
 	};
-	enum JackOrder {
-		AIn1,
-		AIn2,
-		AIn3,
-		AIn4,
-		AIn5,
-		AIn6,
-		GIn1,
-		GIn2,
-		AOut1,
-		AOut2,
-		AOut3,
-		AOut4,
-		AOut5,
-		AOut6,
-		AOut7,
-		AOut8,
-		GOut1,
-		GOut2,
-		PCV
-	};
+
+	// TODO: can we do something like this, using fold expression to avoid having to manually re-arrange this
+	// template<enum GPIO port>
+	// uint32_t read_port_pins() {
+	// 	uint32_t val = 0;
+	// 	if constexpr(pin.gpio == port)
+	// 		val |= PackedBit<...?
+	// 	return val;
+	// }
 
 	uint32_t read_sense_pins() {
 		uint32_t val = 0;
-		auto A = PortRead<GPIO::A>::read();
-		val |= PackedBit<AudioIn4::PinNum_v, AIn4>::extract(A);
-		val |= PackedBit<AudioIn5::PinNum_v, AIn5>::extract(A);
-		val |= PackedBit<AudioOut1::PinNum_v, AOut1>::extract(A);
+		{
+			auto port = PortRead<GPIO::A>::read();
+			val |= PackedBit<AudioIn5::PinNum_v, AIn5>::extract(port);
+			val |= PackedBit<AudioOut3::PinNum_v, AOut3>::extract(port);
+			val |= PackedBit<PatchCV::PinNum_v, PCV>::extract(port);
+			val |= PackedBit<GateIn1::PinNum_v, GIn1>::extract(port);
+		}
 
-		auto B = PortRead<GPIO::B>::read();
-		val |= PackedBit<AudioOut5::PinNum_v, AOut5>::extract(B);
-		val |= PackedBit<AudioOut2::PinNum_v, AOut2>::extract(B);
-		val |= PackedBit<AudioOut3::PinNum_v, AOut3>::extract(B);
-		val |= PackedBit<AudioOut6::PinNum_v, AOut6>::extract(B);
-		val |= PackedBit<GateOut2::PinNum_v, GOut2>::extract(B);
+		{
+			auto port = PortRead<GPIO::B>::read();
+			val |= PackedBit<AudioOut1::PinNum_v, AOut1>::extract(port);
+			val |= PackedBit<AudioOut2::PinNum_v, AOut2>::extract(port);
+			val |= PackedBit<AudioOut4::PinNum_v, AOut4>::extract(port);
+			val |= PackedBit<AudioOut5::PinNum_v, AOut5>::extract(port);
+		}
 
-		auto C = PortRead<GPIO::C>::read();
-		val |= PackedBit<AudioOut7::PinNum_v, AOut7>::extract(C);
+		{
+			auto port = PortRead<GPIO::C>::read();
+			val |= PackedBit<AudioOut6::PinNum_v, AOut6>::extract(port);
+			val |= PackedBit<AudioOut7::PinNum_v, AOut7>::extract(port);
+		}
 
-		auto D = PortRead<GPIO::D>::read();
-		val |= PackedBit<AudioIn3::PinNum_v, AIn3>::extract(D);
-		val |= PackedBit<AudioIn6::PinNum_v, AIn6>::extract(D);
-		val |= PackedBit<AudioOut4::PinNum_v, AOut4>::extract(D);
-		val |= PackedBit<AudioOut8::PinNum_v, AOut8>::extract(D);
+		{
+			auto port = PortRead<GPIO::F>::read();
+			val |= PackedBit<GateOut2::PinNum_v, GOut2>::extract(port);
+		}
 
-		auto F = PortRead<GPIO::F>::read();
-		val |= PackedBit<GateOut1::PinNum_v, GOut1>::extract(F);
+		{
+			auto port = PortRead<GPIO::G>::read();
+			val |= PackedBit<AudioOut8::PinNum_v, AOut8>::extract(port);
+			val |= PackedBit<GateOut1::PinNum_v, GOut1>::extract(port);
+			val |= PackedBit<GateOut2::PinNum_v, GOut2>::extract(port);
+		}
 
-		auto G = PortRead<GPIO::G>::read();
-		val |= PackedBit<AudioIn2::PinNum_v, AIn2>::extract(G);
-		val |= PackedBit<PatchCV::PinNum_v, PCV>::extract(G);
+		{
+			auto port = PortRead<GPIO::H>::read();
+			val |= PackedBit<AudioIn2::PinNum_v, AIn2>::extract(port);
+			val |= PackedBit<AudioIn3::PinNum_v, AIn3>::extract(port);
+		}
 
-		auto I = PortRead<GPIO::I>::read();
-		val |= PackedBit<AudioIn1::PinNum_v, AIn1>::extract(I);
-		val |= PackedBit<GateIn1::PinNum_v, GIn1>::extract(I);
-		val |= PackedBit<GateIn2::PinNum_v, GIn2>::extract(I);
+		{
+			auto port = PortRead<GPIO::I>::read();
+			val |= PackedBit<AudioIn1::PinNum_v, AIn1>::extract(port);
+			val |= PackedBit<AudioIn4::PinNum_v, AIn4>::extract(port);
+		}
+
+		{
+			auto port = PortRead<GPIO::Z>::read();
+			val |= PackedBit<GateIn2::PinNum_v, GIn2>::extract(port);
+			val |= PackedBit<AudioIn6::PinNum_v, AIn6>::extract(port);
+		}
 
 		return val;
 	}
