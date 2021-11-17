@@ -116,6 +116,7 @@ struct PatchSelectorPage : PageBase {
 			bool ok = patch_player.load_patch(patch_list.cur_patch());
 			if (!ok) {
 				mbox.set_message("Can't load patch");
+				printf("Can't load patch\n\r");
 				patch_player.unload_patch();
 				patch_player.load_patch(orig_patch);
 			} else
