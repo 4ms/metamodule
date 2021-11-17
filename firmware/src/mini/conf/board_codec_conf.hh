@@ -8,15 +8,12 @@
 namespace MetaModule
 {
 
-enum class Boards { Mini, Medium, Max, PCMDev };
-constexpr Boards Board = Boards::Mini;
-
 using CodecT = mdrivlib::CodecWM8731;
 
 struct Hardware : SharedBus {
 	Hardware()
-		: SharedBus{i2c_codec_conf}
-	{}
+		: SharedBus{i2c_codec_conf} {
+	}
 	static inline CodecT codec{SharedBus::i2c, codec_sai_conf};
 };
 
