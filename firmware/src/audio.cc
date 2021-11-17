@@ -190,13 +190,13 @@ void AudioStream::propagate_sense_pins(Params &params) {
 		player.set_input_jack_patched_status(i, sense);
 	}
 
-	// Note: p3 PCB has an error where out jack sense pins do not work, so we don't check them yet
+	// Note: p3 PCB has an error where out jack sense pins do not work
 	if constexpr (PanelDef::PanelID != 0) {
-		// for (int i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
-		// 	auto pin_bit = jacksense_pin_order[i];
-		// 	bool sense = params.jack_senses & (1 << pin_bit);
-		// 	player.set_input_jack_patched_status(i, sense);
-		// }
+		for (int i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
+			auto pin_bit = jacksense_pin_order[i + PanelDef::NumUserFacingInJacks];
+			bool sense = params.jack_senses & (1 << pin_bit);
+			player.set_output_jack_patched_status(i, sense);
+		}
 	}
 }
 
