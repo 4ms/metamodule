@@ -43,8 +43,6 @@ void main() {
 					  StaticBuffers::param_blocks,
 					  StaticBuffers::auxsignal_block};
 
-	// SharedBus::i2c.deinit();
-
 	//Used by mini, but will be deprecated:
 	static uint32_t led_frame_buffer[PCA9685Driver::kNumLedsPerChip];
 
