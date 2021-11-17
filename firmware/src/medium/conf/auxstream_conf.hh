@@ -54,6 +54,29 @@ struct AuxStream {
 		gate_out_1.output_next();
 		gate_out_2.output_next();
 	}
+
+	void test_outputs() {
+		AuxStream::ClockOutPin1::high();
+		AuxStream::ClockOutPin2::high();
+		AuxStream::ClockOutPin1::low();
+		AuxStream::ClockOutPin2::low();
+		mdrivlib::FPin<GPIO::B, 7, PinMode::Output> blue;
+		blue.high();
+		mdrivlib::FPin<GPIO::B, 8, PinMode::Output> red;
+		red.high();
+		mdrivlib::FPin<GPIO::B, 9, PinMode::Output> green;
+		green.high();
+		//magenta
+		blue.low();
+		red.low();
+		//white
+		green.low();
+		//yellow
+		blue.high();
+		//cyan
+		red.high();
+		blue.low();
+	}
 };
 
 } // namespace MetaModule

@@ -67,11 +67,6 @@ void main() {
 	ui.start();
 
 	while (true) {
-		// HAL_Delay(500);
-		// Debug::red_LED1::high();
-		// HAL_Delay(500);
-		// Debug::red_LED1::low();
-
 		ui.update();
 	}
 }
