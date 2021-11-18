@@ -24,8 +24,7 @@
 
 namespace MetaModule
 {
-static void app_startup()
-{
+static void app_startup() {
 	core_m4::RCC_Enable::HSEM_::set();
 
 	// Tell A7 we're not ready yet
@@ -43,8 +42,7 @@ struct StaticBuffers {
 } _sb;
 } // namespace MetaModule
 
-void main()
-{
+void main() {
 	using namespace MetaModule;
 
 	app_startup();
@@ -90,7 +88,7 @@ void main()
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 2);
 
-	while (1) {
+	while (true) {
 		if (SharedBus::i2c.is_ready()) {
 			Debug::red_LED2::low();
 			i2cqueue.update();
@@ -100,8 +98,7 @@ void main()
 	}
 }
 
-void recover_from_task_fault()
-{
+void recover_from_task_fault() {
 	while (1)
 		;
 }

@@ -14,8 +14,7 @@
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
 
-#include "conf/qspi_flash_conf.hh"
-#include "qspi_flash_driver.hh"
+#include "u-boot-norflash/norflash-loader.hh"
 
 namespace MetaModule
 {
@@ -42,13 +41,11 @@ void main() {
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
 
-	QSpiFlash flash{qspi_flash_conf};
-	bool flashok = flash.Test();
-
-	if (!flashok) {
-		while (true)
-			;
-	}
+	//Todo: expand this to load the SSBL.
+	// - Need hardware with a bigger nor flash chip (128mbit)
+	// - Need to determine the address of the ssbl
+	// - Probably need to compile a special FSBL that looks in NOR flash instead of SDMMC for the SSBL
+	//NorFlashLoader load{};
 
 	Controls controls{*param_block_base, *auxsignal_buffer};
 
