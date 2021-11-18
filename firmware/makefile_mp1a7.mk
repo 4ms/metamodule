@@ -68,11 +68,13 @@ SOURCES = \
 		  $(HALDIR)/src/stm32mp1xx_hal_uart.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c \
+		  $(HALDIR)/src/stm32mp1xx_hal_qspi.c \
 		  $(HALDIR)/src/stm32mp1xx_hal_ltdc.c \
 		  $(HALDIR)/src/stm32mp1xx_ll_tim.c \
 		  $(DRIVERLIB)/drivers/pin.cc \
 		  $(DRIVERLIB)/drivers/timekeeper.cc \
 		  $(DRIVERLIB)/drivers/tim.cc \
+		  $(DRIVERLIB)/drivers/qspi_flash_driver.cc \
 		  $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc \
 		  $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc \
 		  $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc \

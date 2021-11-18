@@ -51,6 +51,10 @@ void main() {
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 
+	// QSpiFlash flash{qspi_flash_conf};
+
+	// flash.Test();
+
 	// Needed for LED refresh
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 

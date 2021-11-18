@@ -14,6 +14,9 @@
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
 
+#include "conf/qspi_flash_conf.hh"
+#include "qspi_flash_driver.hh"
+
 namespace MetaModule
 {
 static void app_startup() {
@@ -38,6 +41,14 @@ void main() {
 
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
+
+	QSpiFlash flash{qspi_flash_conf};
+	bool flashok = flash.Test();
+
+	if (!flashok) {
+		while (true)
+			;
+	}
 
 	Controls controls{*param_block_base, *auxsignal_buffer};
 
