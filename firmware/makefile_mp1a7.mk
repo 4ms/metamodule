@@ -27,7 +27,7 @@ TARGETDEVICEDIR_CA7 = $(DRIVERLIB)/target/stm32mp1_ca7
 STARTUP_CA7	= $(TARGETDEVICEDIR_CA7)/boot/startup_ca7.s
 SHARED = src/shared
 
-OPTFLAG = -O3
+OPTFLAG = -O3 
 # LTOFLAG =
 LTOFLAG = -flto=auto
 
@@ -53,80 +53,83 @@ audio_source = src/audio.cc
 endif
 
 
-SOURCES = \
-		  system/libc_stub.c\
-		  system/libcpp_stub.cc \
-		  system/new.cc \
-		  system/mmu_ca7.c \
-		  $(TARGETDEVICEDIR_CA7)/boot/system_ca7.c \
-		  $(TARGETDEVICEDIR_CA7)/boot/irq_ctrl.c \
-		  $(HALDIR)/src/stm32mp1xx_hal.c \
-		  $(HALDIR)/src/stm32mp1xx_hal_sai.c \
-		  $(HALDIR)/src/stm32mp1xx_hal_dma.c \
-		  $(HALDIR)/src/stm32mp1xx_hal_i2c.c \
-		  $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c \
-		  $(HALDIR)/src/stm32mp1xx_hal_uart.c \
-		  $(HALDIR)/src/stm32mp1xx_hal_rcc.c \
-		  $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c \
-		  $(HALDIR)/src/stm32mp1xx_hal_qspi.c \
-		  $(HALDIR)/src/stm32mp1xx_hal_ltdc.c \
-		  $(HALDIR)/src/stm32mp1xx_ll_tim.c \
-		  $(DRIVERLIB)/drivers/pin.cc \
-		  $(DRIVERLIB)/drivers/timekeeper.cc \
-		  $(DRIVERLIB)/drivers/tim.cc \
-		  $(DRIVERLIB)/drivers/qspi_flash_driver.cc \
-		  $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc \
-		  $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc \
-		  $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc \
-		  $(DRIVERLIB)/drivers/i2c.cc \
-		  $(TARGETDEVICEDIR)/drivers/sai_tdm.cc \
-		  $(DRIVERLIB)/drivers/codec_PCM3168.cc \
-		  $(DRIVERLIB)/drivers/codec_WM8731.cc \
-		  $(SHARED)/util/math_tables.cc \
-		  $(main_source) \
-		  $(audio_source) \
-		  $(core_src)/aux_core_main.cc\
-		  src/patchlist.cc\
-		  src/pages/page_manager.cc \
-		  $(wildcard $(SHARED)/CoreModules/*.cpp) \
-		  $(SHARED)/axoloti-wrapper/axoloti_math.cpp \
-		  $(LIBDIR)/printf/printf.c \
-		  # $(NE10DIR)/common/NE10_mask_table.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
-		  # $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fir.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fir_init.c \
-		  # $(NE10DIR)/modules/dsp/NE10_iir.c \
-		  # $(NE10DIR)/modules/dsp/NE10_iir_init.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
-		  # $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
+SOURCES =
+SOURCES += system/libc_stub.c
+SOURCES += system/libcpp_stub.cc
+SOURCES += system/new.cc
+SOURCES += system/mmu_ca7.c
+SOURCES += $(TARGETDEVICEDIR_CA7)/boot/system_ca7.c
+SOURCES += $(TARGETDEVICEDIR_CA7)/boot/irq_ctrl.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sai.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_ltdc.c
+# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
+# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_ll_tim.c
+SOURCES += $(DRIVERLIB)/drivers/pin.cc
+SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
+SOURCES += $(DRIVERLIB)/drivers/tim.cc
+SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
+SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc
+SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc
+SOURCES += $(DRIVERLIB)/drivers/i2c.cc
+SOURCES += $(TARGETDEVICEDIR)/drivers/sai_tdm.cc
+SOURCES += $(DRIVERLIB)/drivers/codec_PCM3168.cc
+# SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
+SOURCES += $(DRIVERLIB)/drivers/codec_WM8731.cc
+SOURCES += $(SHARED)/util/math_tables.cc
+SOURCES += $(main_source)
+SOURCES += $(audio_source)
+SOURCES += $(core_src)/aux_core_main.cc
+SOURCES += src/patchlist.cc
+SOURCES += src/pages/page_manager.cc
+SOURCES += $(wildcard $(SHARED)/CoreModules/*.cpp)
+SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
+SOURCES += $(LIBDIR)/printf/printf.c
 
-SOURCES  += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
-SOURCES  += $(wildcard src/pages/gui-guider/*.c)
-SOURCES  += $(wildcard src/pages/fonts/*.c)
-SOURCES  += $(wildcard src/pages/images/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
+SOURCES += $(wildcard src/pages/gui-guider/*.c)
+SOURCES += $(wildcard src/pages/fonts/*.c)
+SOURCES += $(wildcard src/pages/images/*.c)
 
-		  # $(NE10DIR)/common/NE10_mask_table.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
-		  # $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fir.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fir_init.c \
-		  # $(NE10DIR)/modules/dsp/NE10_iir.c \
-		  # $(NE10DIR)/modules/dsp/NE10_iir_init.c \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
-		  # $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
-		  # $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
+# SOURCES += $(NE10DIR)/common/NE10_mask_table.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_float32.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_rfft_float32.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_int32.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_int16.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fir.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fir_init.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_iir.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_iir_init.c
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_init_dsp.c
+
+
+# SOURCES += $(NE10DIR)/common/NE10_mask_table.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fir.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fir_init.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_iir.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_iir_init.c \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
+# SOURCES += $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
 
 # NE10_ASM_OPTIMIZATION = 1
 
@@ -158,33 +161,34 @@ SOURCES  += $(wildcard src/pages/images/*.c)
 # 		  $(NE10DIR)/common/NE10header.s \
 # 		  $(NE10DIR)/common/versionheader.s \
 
-INCLUDES = -I. \
-		   -Isrc \
-		   -I$(core_src) \
-		   -I$(target_src) \
-		   -I$(target_chip_src) \
-		   -I$(HALDIR)/include \
-		   -I$(CMSIS)/Core_A/Include \
-		   -I$(CMSIS)/Include \
-		   -I$(DEVICEDIR)/include \
-		   -I$(DRIVERLIB) \
-		   -I$(DRIVERLIB)/drivers \
-		   -I$(TARGETDEVICEDIR) \
-		   -I$(TARGETDEVICEDIR)/drivers \
-		   -I$(TARGETDEVICEDIR_CA7) \
-		   -I$(TARGETDEVICEDIR_CA7)/drivers \
-		   -I$(SHARED) \
-		   -I$(SHARED)/CoreModules \
-		   -I$(SHARED)/util \
-		   -I$(SHARED)/patch \
-		   -I$(LIBDIR)/lvgl \
-		   -I$(LIBDIR)/lvgl/lvgl/src/lv_font \
-		   -I$(LIBDIR)/printf \
-		   # -I$(MFINC) \
-		   # -I$(MFFONTDIR) \
-		   # -I$(NE10DIR)/inc \
-		   # -I$(NE10DIR)/common \
-		   # -I$(NE10DIR)/modules/dsp \
+INCLUDES = 
+INCLUDES += 	-I.
+INCLUDES +=		-Isrc
+INCLUDES +=		-I$(core_src)
+INCLUDES +=		-I$(target_src)
+INCLUDES +=		-I$(target_chip_src)
+INCLUDES +=		-I$(HALDIR)/include
+INCLUDES +=		-I$(CMSIS)/Core_A/Include
+INCLUDES +=		-I$(CMSIS)/Include
+INCLUDES +=		-I$(DEVICEDIR)/include
+INCLUDES +=		-I$(DRIVERLIB)
+INCLUDES +=		-I$(DRIVERLIB)/drivers
+INCLUDES +=		-I$(TARGETDEVICEDIR)
+INCLUDES +=		-I$(TARGETDEVICEDIR)/drivers
+INCLUDES +=		-I$(TARGETDEVICEDIR_CA7)
+INCLUDES +=		-I$(TARGETDEVICEDIR_CA7)/drivers
+INCLUDES +=		-I$(SHARED)
+INCLUDES +=		-I$(SHARED)/CoreModules
+INCLUDES +=		-I$(SHARED)/util
+INCLUDES +=		-I$(SHARED)/patch
+INCLUDES +=		-I$(LIBDIR)/lvgl
+INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
+INCLUDES +=		-I$(LIBDIR)/printf
+# INCLUDES +=		-I$(MFINC)
+# INCLUDES +=		-I$(MFFONTDIR)
+# INCLUDES +=		-I$(NE10DIR)/inc
+# INCLUDES +=		-I$(NE10DIR)/common
+# INCLUDES +=		-I$(NE10DIR)/modules/dsp
 
 #D-Cache L1: 32 KB, 128 Sets, 64 Bytes/Line, 4-Way
 EXTRA_CFLAGS = --param l1-cache-size=32 \

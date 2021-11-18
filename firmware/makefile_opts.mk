@@ -10,7 +10,8 @@
 # $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
-# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
+$(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
+$(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/sdram.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/system.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_i2c.o: OPTFLAG = -O0
@@ -26,6 +27,6 @@
 # $(BUILDDIR)/$(DRIVERLIB)/target/stm32mp1/drivers/adc_builtin_driver.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/codec_PCM3168.o: OPTFLAG = -O0
 
-$(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
+# $(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/lvgl/lvgl/src/lv_widgets/lv_arc.o: OPTFLAG = -O0
 #-----------------------------------
