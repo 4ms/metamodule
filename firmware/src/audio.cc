@@ -29,11 +29,11 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 CodecT &codec,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
-						 ParamQueue &param_cache,
+						 ParamQueue &queue,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
 						 DoubleAuxStreamBlock &auxs)
-	: cache{param_cache}
+	: param_queue{queue}
 	, mbox{uiaudiomailbox}
 	, param_blocks{p}
 	, audio_blocks{{.in_codec = audio_in_block.codec[0], .out_codec = audio_out_block.codec[0]},
@@ -99,9 +99,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
 	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 	load_measure.start_measurement();
-
-	cache.write_sync(param_block.params[0], param_block.metaparams);
-	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamQueue));
 
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
 		AudioTestSignal::passthrough(in, out, aux);
@@ -175,6 +172,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, gate_out] : countzip(aux_.gate_out))
 			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
+	param_queue.write_sync(param_block.params[0], param_block.metaparams);
+	mdrivlib::SystemCache::clean_dcache_by_range(&param_queue, sizeof(ParamQueue));
 
 	load_measure.end_measurement();
 }

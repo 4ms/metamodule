@@ -34,7 +34,7 @@ public:
 				CodecT &codec,
 				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
-				ParamQueue &cache,
+				ParamQueue &queue,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
 				DoubleAuxStreamBlock &auxs);
@@ -44,7 +44,7 @@ public:
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxStreamBlock &aux);
 
 private:
-	ParamQueue &cache;
+	ParamQueue &param_queue;
 	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
