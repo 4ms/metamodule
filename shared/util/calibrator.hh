@@ -24,7 +24,7 @@ public:
 		constexpr float TargetRange = TargetHighValue - TargetLowValue;
 		float t_slope = TargetRange / (high_measurement - low_measurement);
 		float t_offset = low_measurement - TargetLowValue / t_slope;
-		if (MathTools::f_abs(t_offset - zero_measurement) > 0.0001) {
+		if (MathTools::f_abs(t_offset - zero_measurement) > 0.0001f) {
 			return false;
 		}
 		_slope = t_slope;
