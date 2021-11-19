@@ -1,7 +1,6 @@
 #include "audio.hh"
 #include "arch.hh"
 #include "audio_test_signals.hh"
-#include "calibration.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
@@ -9,6 +8,7 @@
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "patch_player.hh"
+#include "util/calibrator.hh"
 #include "util/countzip.hh"
 #include "util/math_tables.hh"
 #include "util/zip.hh"
@@ -71,7 +71,17 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	load_measure.init();
 
-	Calibration::calibrate_chan(3, AudioInFrame::scaleInput(12610), AudioInFrame::scaleInput(6352));
+	// Do this, then we don't have to also scale.
+	// But we still need to clamp
+	// constexpr uint32_t TenVolts = 0x007FFFFF;
+	// constexpr uint32_t TwoVolts = TenVolts / 5;
+	// constexpr uint32_t FourVolts = TwoVolts * 2;
+	// // use the raw int value read when calibrating (can be a float since we'll probably average it over 200ms or
+	// whatever) incal[3].calibrate_chan<TwoVolts, FourVolts>(6352.f / 32768.f * 83886308..., 12610.f / 32768.f);
+	//
+	// This converts float to volts
+	// incal[3].calibrate_chan<2, 4>(6352.f / 32768.f, 12610.f / 32768.f);
+
 	// if constexpr (DEBUG_NE10_FFT)
 	// 	fftfx.init();
 }
@@ -148,8 +158,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			// until patched)
 			auto scaled_input = AudioInFrame::scaleInput(inchan);
 
-			if (i == 3)
-				scaled_input = Calibration::adjust_chan(i, scaled_input);
+			scaled_input = incal[i].adjust(scaled_input);
 
 			auto val = (params_.jack_senses & (1 << pin_bit)) ? scaled_input : 0;
 			player.set_panel_input(PanelDef::audioin_order[i], val);
