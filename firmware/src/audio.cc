@@ -80,7 +80,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	// whatever) incal[3].calibrate_chan<TwoVolts, FourVolts>(6352.f / 32768.f * 83886308..., 12610.f / 32768.f);
 	//
 	// This converts float to volts
-	// incal[3].calibrate_chan<2, 4>(6352.f / 32768.f, 12610.f / 32768.f);
+	incal[3].calibrate_chan<2, 4, 10>(6352.f / 32768.f, 12603.f / 32768.f);
 
 	// if constexpr (DEBUG_NE10_FFT)
 	// 	fftfx.init();

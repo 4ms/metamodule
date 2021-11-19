@@ -32,11 +32,11 @@ public:
 		return true;
 	}
 
-	template<int TargetLowValue, int TargetHighValue>
+	template<int TargetLowValue, int TargetHighValue, int Divider = 1>
 	void calibrate_chan(float low_measurement, float high_measurement) {
-		constexpr float TargetRange = TargetHighValue - TargetLowValue;
+		constexpr float TargetRange = (float)(TargetHighValue - TargetLowValue) / (float)Divider;
 		_slope = TargetRange / (high_measurement - low_measurement);
-		_offset = low_measurement - TargetLowValue / _slope;
+		_offset = low_measurement - ((float)TargetLowValue / (float)Divider) / _slope;
 	}
 
 private:
