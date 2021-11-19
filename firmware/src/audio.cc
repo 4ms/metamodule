@@ -156,8 +156,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			auto pin_bit = jacksense_pin_order[i];
 			// Todo: send 0 on the first time the jack is detected as unpatched (and then don't call set_panel_input
 			// until patched)
-			auto scaled_input = AudioInFrame::scaleInput(inchan);
 
+			auto scaled_input = AudioInFrame::scaleInput(inchan);
+			// If using adjust() to convert 24bit to a calibrated float, then replace above with:
+			// auto scaled_input = AudioInFrame::sign_extend(inchan);
 			scaled_input = incal[i].adjust(scaled_input);
 
 			auto val = (params_.jack_senses & (1 << pin_bit)) ? scaled_input : 0;
