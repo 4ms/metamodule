@@ -1,6 +1,7 @@
 #include "audio.hh"
 #include "arch.hh"
 #include "audio_test_signals.hh"
+#include "calibration.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/jack_sense_conf.hh"
 #include "conf/panel_conf.hh"
@@ -70,6 +71,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	load_measure.init();
 
+	Calibration::calibrate_chan(3, AudioInFrame::scaleInput(12610), AudioInFrame::scaleInput(6352));
 	// if constexpr (DEBUG_NE10_FFT)
 	// 	fftfx.init();
 }
@@ -144,8 +146,15 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			auto pin_bit = jacksense_pin_order[i];
 			// Todo: send 0 on the first time the jack is detected as unpatched (and then don't call set_panel_input
 			// until patched)
-			auto val = (params_.jack_senses & (1 << pin_bit)) ? AudioInFrame::scaleInput(inchan) : 0;
+			auto scaled_input = AudioInFrame::scaleInput(inchan);
+
+			if (i == 3)
+				scaled_input = Calibration::adjust_chan(i, scaled_input);
+
+			auto val = (params_.jack_senses & (1 << pin_bit)) ? scaled_input : 0;
 			player.set_panel_input(PanelDef::audioin_order[i], val);
+
+			param_block.metaparams.ins[i].update(scaled_input);
 		}
 
 		// Pass CV values to modules

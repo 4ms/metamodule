@@ -1,8 +1,10 @@
 #pragma once
 #include "conf/panel_conf.hh"
 #include "conf/stream_conf.hh"
+#include "util/analyzed_signal.hh"
 #include "util/colors.hh"
 #include "util/debouncer.hh"
+#include "util/zip.hh"
 #include <array>
 #include <string>
 
@@ -12,19 +14,16 @@ struct RotaryMotion {
 	int32_t abs_pos = 0;
 	int32_t motion = 0;
 
-	int32_t use_motion()
-	{
+	int32_t use_motion() {
 		auto tmp = motion;
 		motion = 0;
 		return tmp;
 	}
-	void add_motion(const RotaryMotion &that)
-	{
+	void add_motion(const RotaryMotion &that) {
 		motion += that.motion;
 		abs_pos += that.motion;
 	}
-	void transfer_motion(RotaryMotion &that)
-	{
+	void transfer_motion(RotaryMotion &that) {
 		auto that_motion = that.use_motion();
 		motion += that_motion;
 		abs_pos += that_motion;
@@ -38,13 +37,11 @@ struct Params {
 	std::array<float, NumPot> knobs{};
 	uint32_t jack_senses;
 
-	Params()
-	{
+	Params() {
 		clear();
 	}
 
-	void clear()
-	{
+	void clear() {
 		for (float &cvjack : cvjacks)
 			cvjack = 0.f;
 		for (auto &gate_in : gate_ins)
@@ -56,8 +53,7 @@ struct Params {
 		jack_senses = 0;
 	}
 
-	void copy(const Params &that)
-	{
+	void copy(const Params &that) {
 		for (unsigned i = 0; i < NumCVIn; i++)
 			cvjacks[i] = that.cvjacks[i];
 		for (unsigned i = 0; i < NumGateIn; i++)
@@ -76,16 +72,15 @@ struct MetaParams {
 	RotaryMotion rotary;
 	RotaryMotion rotary_pushed;
 	std::array<Toggler, NumMetaRgbButton> meta_buttons{};
+	std::array<AnalyzedSignal<1000>, NumAudioIn> ins;
 
 	uint8_t audio_load = 0;
 
-	MetaParams()
-	{
+	MetaParams() {
 		clear();
 	}
 
-	void clear()
-	{
+	void clear() {
 		patchcv = 0.f;
 		rotary_button.reset();
 		rotary.motion = 0;
@@ -93,35 +88,47 @@ struct MetaParams {
 		rotary_pushed.motion = 0;
 		rotary_pushed.abs_pos = 0;
 		audio_load = 0;
+		for (auto &in : ins)
+			in.reset_to(0);
 	}
 
-	// Copies some data, adds other data (rotary motion)
+	// For rotary motion: adds events in `that` to events in `this`, leaving `that` untouched
+	// For buttons: moves events from `that` to `this`, removing them from `this`
+	// Copies non-event signals (CV, audio)
 	// Used with write_sync()
-	void update_with(MetaParams &that)
-	{
+	void update_with(MetaParams &that) {
 		patchcv = that.patchcv;
 		rotary_button.transfer_events(that.rotary_button);
 		rotary.add_motion(that.rotary);
 		rotary_pushed.add_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
+		for (auto [in, thatin] : zip(ins, that.ins)) {
+			in.min = thatin.min;
+			in.max = thatin.max;
+			in.avg = thatin.avg;
+			in.iir = thatin.iir;
+			thatin.reset_to(thatin.iir);
+		}
 	}
 
-	void copy(const MetaParams &that)
-	{
-		patchcv = that.patchcv;
-		rotary_button.copy_state(that.rotary_button);
-		rotary = that.rotary;
-		rotary_pushed = that.rotary_pushed;
-		audio_load = that.audio_load;
-	}
-
-	void transfer(MetaParams &that)
-	{
+	// For buttons: moves events from `that` to `this`, removing them from `this`
+	// Moves rotary motion events from `that` to `this` (removing them from `that`, and adding them to existing events
+	// in `this`
+	// Copies non-event signals (CV, audio)
+	// Used with read_sync()
+	void transfer(MetaParams &that) {
 		patchcv = that.patchcv;
 		rotary_button.transfer_events(that.rotary_button);
 		rotary.transfer_motion(that.rotary);
 		rotary_pushed.transfer_motion(that.rotary_pushed);
 		audio_load = that.audio_load;
+		for (auto [in, thatin] : zip(ins, that.ins)) {
+			in.min = thatin.min;
+			in.max = thatin.max;
+			in.avg = thatin.avg;
+			in.iir = thatin.iir;
+			thatin.reset_to(thatin.iir);
+		}
 	}
 };
 
@@ -136,14 +143,12 @@ struct ParamQueue {
 	Params p;
 	MetaParams m;
 
-	ParamQueue()
-	{
+	ParamQueue() {
 		clear();
 	}
 
-	void write_sync(Params &p_, MetaParams &m_)
-	{
-		//FIXME: Use an atomic (STREX and LDREX) for new_data to prevent data race
+	void write_sync(Params &p_, MetaParams &m_) {
+		// FIXME: Use an atomic (STREX and LDREX) for new_data to prevent data race
 
 		_new_data = false; // protects against multiple write_syncs without a read_sync, and then one write_sync
 						   // interupting a read_sync in progress
@@ -152,8 +157,7 @@ struct ParamQueue {
 		_new_data = true;
 	}
 
-	bool read_sync(Params *params, MetaParams *metaparams)
-	{
+	bool read_sync(Params *params, MetaParams *metaparams) {
 		if (!_new_data)
 			return false;
 		if (!_new_data)
@@ -164,8 +168,7 @@ struct ParamQueue {
 		return true;
 	}
 
-	void clear()
-	{
+	void clear() {
 		_new_data = false;
 		p.clear();
 		m.clear();
@@ -189,18 +192,15 @@ struct UiAudioMailbox {
 	uint32_t new_patch_index;
 	std::string message;
 
-	void set_message(const std::string m)
-	{
+	void set_message(const std::string m) {
 		message = m;
 	}
 
-	void clear_message()
-	{
+	void clear_message() {
 		message = "";
 	}
 
-	std::string get_message() const
-	{
+	std::string get_message() const {
 		return message;
 	}
 };
