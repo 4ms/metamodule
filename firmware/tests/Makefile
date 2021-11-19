@@ -14,7 +14,7 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 
 CXXFLAGS = 	-Wall \
-		 	-std=gnu++2a \
+		 	-std=gnu++20 \
 			-I$(DOCTEST_DIR) \
 			-I$(TEST_DIR) \
 			-I$(TEST_DIR)/stubs \
