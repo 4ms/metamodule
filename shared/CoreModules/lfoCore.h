@@ -49,7 +49,7 @@ public:
 	}
 
 	virtual void update() override {
-		check_changes();
+		// check_changes();
 
 		if (doReset) {
 			phaccu = 0.f;
@@ -62,35 +62,11 @@ public:
 		sinOut = sinTable.interp_wrap(phaccu + phaseOffset) * level;
 	}
 
-	void check_changes() {
-		// Freq jack range is -10 .. 10 octaves,
-		// Freq jack expects -1..+1 to represent -10V to +10V
-		if (freqJack.isChanged()) {
-			float val = freqJack.getValue();
-			if (val == 0.f)
-				cv_frequency = 1.0f;
-			else if (val >= 1.f)
-				cv_frequency = 1024.f;
-			else if (val <= -1.f)
-				cv_frequency = 1.f / 1024.f;
-			else if (val > 0.f)
-				cv_frequency = exp10Table.closest(val);
-			else
-				cv_frequency = 1.0f / exp10Table.closest(-val);
-			combineKnobCVFreq();
-		}
-
-		if (resetJack.isChanged()) {
-			// Todo: check hystersis here
-			if (resetJack > GateThreshold) {
-				if (!lastReset) {
-					doReset = true;
-				}
-				lastReset = true;
-			} else
-				lastReset = false;
-		}
-	}
+	// void check_changes() {
+	// if (resetJack.isChanged()) {
+	// Todo: check hystersis here
+	// }
+	// }
 
 	//
 	void set_param(const int param_id, const float val) override {
@@ -112,10 +88,29 @@ public:
 
 	void set_input(const int input_id, const float val) override {
 		if (input_id == 0) {
-			freqJack = val;
+			// Freq jack range is -10 .. 10 octaves,
+			// Freq jack expects -1..+1 to represent -10V to +10V
+			if (val == 0.f)
+				cv_frequency = 1.0f;
+			else if (val >= 1.f)
+				cv_frequency = 1024.f;
+			else if (val <= -1.f)
+				cv_frequency = 1.f / 1024.f;
+			else if (val > 0.f)
+				cv_frequency = exp10Table.closest(val);
+			else
+				cv_frequency = 1.0f / exp10Table.closest(-val);
+			combineKnobCVFreq();
 		}
 		if (input_id == 1) {
 			resetJack = val;
+			if (resetJack > GateThreshold) {
+				if (!lastReset) {
+					doReset = true;
+				}
+				lastReset = true;
+			} else
+				lastReset = false;
 		}
 	}
 
@@ -164,6 +159,6 @@ private:
 	bool doReset = false;
 
 	void combineKnobCVFreq() {
-		frequency = knob_frequency + cv_frequency;
+		frequency = knob_frequency * cv_frequency;
 	}
 };
