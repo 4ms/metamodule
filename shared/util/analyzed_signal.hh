@@ -17,14 +17,13 @@ struct AnalyzedSignal {
 			min = newval;
 		if (newval > max)
 			max = newval;
-		// iir = iir * iir_coef_inv + newval * iir_coef;
 		iir += iir_coef * (newval - iir);
 	}
 
 	void reset_to(float curval) {
 		avg = curval;
 		iir = curval;
-		min = std::numeric_limits<float>::max();
-		max = std::numeric_limits<float>::min();
+		min = curval; // std::numeric_limits<float>::max();
+		max = curval; // std::numeric_limits<float>::min();
 	}
 };
