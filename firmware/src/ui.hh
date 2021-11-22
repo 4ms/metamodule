@@ -35,7 +35,6 @@ public:
 
 		params.clear();
 		metaparams.clear();
-		// register_printf_destination(screen);
 
 		MMDisplay::init(metaparams);
 		page_manager.init();
@@ -54,26 +53,18 @@ public:
 
 	void update() {
 		if (MMDisplay::is_ready()) {
-			// Debug::Pin1::high();
 			MMDisplay::clear_ready();
 			// v8:
 			// lv_timer_handler();
 			lv_task_handler();
-			// Debug::Pin1::low();
 		}
-		Debug::Pin1::low();
-		// 1.2MHz:
-		output_debug_info();
-		Debug::Pin1::high();
+		// output_debug_info();
 	}
 
 	void update_ui_task() {
-		// Debug::Pin3::high();
 		param_queue.read_sync(&params, &metaparams);
 		handle_rotary();
 		page_manager.update_current_page();
-
-		// Debug::Pin3::low();
 	}
 
 	void handle_rotary() {
