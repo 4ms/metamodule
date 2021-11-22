@@ -54,6 +54,22 @@ patches: $(PATCH_HEADERS)
 %.hh : %.mmpatch 
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
+
+## Module images
+MODULEIMG_SVGS = $(wildcard ../vcv/res/*-artwork.svg)
+MODULEIMG_PNG240S = $(addprefix src/pages/images/,$(addsuffix _240.png, $(subst -,_,$(basename $(notdir $(MODULEIMG_SVGS))))))
+#MODULEIMG_C = $(addsuffix .c, $(basename $(MODULEIMG_PNG240S)))
+MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
+
+images: $(MODULEIMG_C)
+
+src/pages/images/%_artwork_240.png : ../vcv/res/%-artwork.svg
+	inkscape --export-type="png" --export-id="faceplate" --export-filename=- $< | convert -resize x240 - $@
+
+src/pages/images/%.c : src/pages/images/%.png
+	../../lv_img_conv/lv_img_conv.js -c CF_TRUE_COLOR -t c --force $<
+	#add to src/pages/image_list.hh: LV_IMG_DECLARE(imgname) and if (slug=="Slug") return &imgname;
+
 ## Cleaning
 
 clean:
