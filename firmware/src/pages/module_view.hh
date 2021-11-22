@@ -7,24 +7,23 @@
 
 namespace MetaModule
 {
-// template <typename Info>
 struct ModuleViewPage : PageBase {
-	using Info = EnOscInfo;
-
 	static inline lv_style_t style_highlight;
 	static inline int32_t cur_selected = -1;
-	static inline lv_obj_t *button[Info::NumKnobs + Info::NumInJacks + Info::NumOutJacks + Info::NumSwitches];
+	static inline std::vector<lv_obj_t *> button;
 	static inline lv_obj_t *base;
 	static inline lv_obj_t *module_img;
 	static inline lv_obj_t *roller;
 	static inline lv_style_t button_style;
 	static inline lv_style_t roller_style;
 	static inline lv_style_t roller_sel_style;
-	static inline int num_btns = 0;
 	static inline std::string opts;
+
+	static inline std::string_view slug;
 
 	ModuleViewPage(PatchInfo info)
 		: PageBase{info} {
+		slug = "EnOsc";
 	}
 
 	static void roller_cb(lv_obj_t *obj, lv_event_t event) {
@@ -49,16 +48,15 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void _add_button(int x, int y) {
-		auto &b = button[num_btns];
+		auto &b = button.emplace_back();
 		b = lv_btn_create(base, nullptr);
 		lv_obj_add_style(b, LV_BTN_PART_MAIN, &button_style);
 		lv_obj_set_pos(b, x - 6, y - 6);
 		lv_obj_set_size(b, 12, 12);
-		num_btns++;
 	}
 
 	void init() override {
-		auto img = ModuleImages::get_image_by_slug(Info::slug);
+		auto img = ModuleImages::get_image_by_slug(slug);
 		auto width_px = img->header.w;
 		auto height_px = img->header.h; // assert == 240?
 
@@ -85,31 +83,33 @@ struct ModuleViewPage : PageBase {
 
 		// TODO: Draw an element (or copy an img?) at each knob/jack/switch/button/slider position
 		// TODO: make buttons_ordered[] an ordered array of copies of the button[] ptrs, and browse using that
-		// ... also need to sort the strings, too.. hmm...
+		// ... also need to sort the strngs, too.. hmm...
 		int i = 0;
 		opts.clear();
-		for (const auto el : Info::Knobs) {
-			_add_button(Info::mm_to_px<240>(el.x_mm), Info::mm_to_px<240>(el.y_mm));
+		auto info = ModuleFactory::getModuleInfo(slug);
+
+		for (const auto el : info.Knobs) {
+			_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
 			opts += el.short_name;
 			opts += "\n";
 		}
-		for (const auto el : Info::InJacks) {
-			_add_button(Info::mm_to_px<240>(el.x_mm), Info::mm_to_px<240>(el.y_mm));
+		for (const auto el : info.InJacks) {
+			_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
 			opts += el.short_name;
 			opts += "\n";
 		}
-		for (const auto el : Info::OutJacks) {
-			_add_button(Info::mm_to_px<240>(el.x_mm), Info::mm_to_px<240>(el.y_mm));
+		for (const auto el : info.OutJacks) {
+			_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
 			opts += el.short_name;
 			opts += "\n";
 		}
-		for (const auto el : Info::Switches) {
-			_add_button(Info::mm_to_px<240>(el.x_mm), Info::mm_to_px<240>(el.y_mm));
+		for (const auto el : info.Switches) {
+			_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
 			opts += el.short_name;
 			opts += "\n";
 		}
-		// for (const auto el : Info::Sliders) {
-		// 	_add_button(Info::mm_to_px<240>(el.x_mm), Info::mm_to_px<240>(el.y_mm));
+		// for (const auto el : info.Sliders) {
+		// 	_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
 		// opts += el.short_name;
 		// opts += "\n";
 		// }
