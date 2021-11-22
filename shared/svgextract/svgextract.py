@@ -6,6 +6,8 @@ import xml.etree.ElementTree
 import random
 import string
 from xml_helper import register_all_namespaces
+from shutil import which
+import subprocess
 
 # Version check
 f"Python 3.6+ is required"
@@ -17,6 +19,20 @@ ns = {
 
 class UserException(Exception):
     pass
+
+
+def appendToFileAfterMarker(filename, marker, newText):
+    with open(filename, 'r') as file :
+      filedata = file.read()
+
+    prettyNewText = newText.replace('\n',' ').replace('\t', ' ')
+    if filedata.find(newText) == -1:
+        filedata = filedata.replace(marker, marker + newText)
+        print(f"Updated {filename} with {prettyNewText}")
+        with open(filename, 'w') as file:
+            file.write(filedata)
+    else:
+        print(f"Didn't update {filename} with {prettyNewText}, already exists in file")
 
 
 def input_default(prompt, default=""):
@@ -487,12 +503,49 @@ def extractArtwork(svgFilename, artworkFilename):
     g.clear()
     print("Removed components layer")
     tree.write(artworkFilename)
-    print(f"Wrote artwork file: {artworkFilename}")
+    print(f"Wrote artwork svg file for vcv: {artworkFilename}")
 
-    #TODO: convert artwork file to PNG
-    #resize to 240px height
-    #save in METAMODULE_PNG_DIR
-    #Run lvgl script
+   
+def createlvimg(artworkSvgFilename, pngFilename):
+    inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
+    if inkscapeBin is None:
+        print("inkscape is not found. Please put it in your shell PATH, or set INKSCAPE_BIN_PATH to the path to the binary")
+        print("Aborting")
+        return
+    convertBin = which('convert') or which('magick') or os.getenv('IMAGEMAGICK_BIN_PATH')
+    if convertBin is None:
+        print("convert or magick is not found. Please put it in your shell PATH, or set IMAGEMAGICK_BIN_PATH to the path to the binary")
+        print("Aborting")
+        return
+
+    print(f"svgextract.py: converting {pngFilename} with inkscape and convert.")
+    try:
+        subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {pngFilename}', shell=True, check=True)
+    except:
+        print(f"Failed running {inkscapeBin} and {convertBin}. Aborting")
+        return
+
+    print(f"Created {pngFilename} from {artworkSvgFilename}")
+
+    lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/lv_img_conv/lv_img_conv.js"
+    try:
+        subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', pngFilename], check=True)
+    except subprocess.CalledProcessError:
+        print("lv_img_conv.js failed. Try 1) `git submodule update --init` and/or 2) `cd shared/svgextract/lv_img_conv && npm install`")
+        return
+    print(f"Created {pngFilename.strip('.png')}.c file from {pngFilename}")
+
+
+def appendImageList(slug, artwork_Carray, image_list_file):
+    newText = f'''LV_IMG_DECLARE({artwork_Carray});
+'''
+    appendToFileAfterMarker(image_list_file, "// DECLARE HERE\n", newText)
+
+    newText = f'''
+\t\tif (slug == "{slug}")
+\t\t\treturn &{artwork_Carray};
+'''
+    appendToFileAfterMarker(image_list_file, "// SLUG TO IMAGE HERE\n", newText)
 
 
 def processSvg(svgFilename):
@@ -510,14 +563,14 @@ def processSvg(svgFilename):
 
 
 def usage(script):
-    text = f"""VCV Rack Plugin Helper Utility
+    text = f"""MetaModule SVG Helper Utility
 
 Usage: {script} <command> ...
 Commands:
 
 processsvg [input svg file name]
-    Runs createinfo and extractart on the given file. 
-    Uses environmant variables $METAMODULE_INFO_DIR and $METAMODULE_ARTWORK_DIR if found,
+    Runs createinfo and extractart on the given file.
+    Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR, METAMODULE_PNG_DIR if found,
     otherwise prompts user for the values
 
 createinfo [input svg file name] [output path for ModuleInfo file]
@@ -527,8 +580,22 @@ createinfo [input svg file name] [output path for ModuleInfo file]
     of the SVG file.
     File will be overwritten if it exists.
 
-extractart [input svg file name] [output SVG file name]
+extractart [input SVG file name] [output artwork SVG file name]
     Saves a new SVG file with the components layer removed
+
+createlvimg [input artwork SVG file name] [output C file name]
+    Converts the artwork SVG to a PNG, scales it to 240px high, and then
+    converts it to a .c file using the LVGL image converter.
+
+    Requires these commands to be present on $PATH, or else found at the associated env variable:
+        inkscape            (INKSCAPE_BIN_PATH)
+        convert             (IMAGEMAGICK_BIN_PATH)
+
+appendimglist [C array name] [image_list.hh filename]
+    C array name is the name of an image array (in c format, created by lv_img_conv).
+    The second argument is the path to the image_list.hh file that should be updated with this new array.
+    Does not update the image_list.hh file if the exact string to be inserted is already found.
+    The slug is the first part of the C array name, up to the first underscore (EnOsc_artwork_240 => EnOsc)
 
 """
     print(text)
@@ -561,7 +628,13 @@ def parse_args(args):
         extractArtwork(inputfile, output)
         return
 
+    if cmd == 'createlvimg':
+        createlvimg(inputfile, output)
+        return
 
+    if cmd == 'appendimglist':
+        slug = inputfile.split('_')[0]
+        appendImageList(slug, inputfile, output)
 
 if __name__ == "__main__":
     try:
