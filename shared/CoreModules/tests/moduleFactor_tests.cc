@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "info/enosc_info.hh"
+#include "info/EnOsc_info.hh"
 #include "moduleTypes.h"
 #include <iostream>
 #include <span>
@@ -48,7 +48,7 @@ struct TestInfo : ModuleInfoBase {
 	}};
 };
 
-constexpr ModuleInfo testinfo{
+constexpr ModuleInfoView testinfo{
 	.width_hp = 4,
 	.svg_filename = "",
 	.Knobs = TestInfo::Knobs,
@@ -71,7 +71,8 @@ TEST_CASE("Register ModuleTypes with an object constructed from static constexpr
 		CHECK(knobs.size() == 2);
 
 		SUBCASE("Test actual EnOscInfo data") {
-			already_exists = ModuleFactory::registerModuleType("EnOsc2", "EnOsc module", create, enoscinfo);
+			already_exists = ModuleFactory::registerModuleType(
+				"EnOsc2", "EnOsc module", create, ModuleInfoView::makeView<EnOscInfo>());
 			// already_exists = ModuleFactory::registerModuleType("EnOsc2",
 			// 												   "EnOsc module",
 			// 												   create,

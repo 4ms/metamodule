@@ -1,4 +1,5 @@
 #pragma once
+#include "util/base_concepts.hh"
 #include "util/static_string.hh"
 #include <array>
 #include <span>
@@ -52,7 +53,7 @@ struct LedDef {
 
 // Base structure for a module's ModuleInfo
 // A module's ModuleInfo class should derive from this class
-// and must override all data members with the actual values of the module
+// and override all non-empty data members with the actual values of the module
 struct ModuleInfoBase {
 	static constexpr std::string_view slug{""};
 
@@ -112,4 +113,17 @@ struct ModuleInfoView {
 	std::span<const OutJackDef> OutJacks;
 	std::span<const SwitchDef> Switches;
 	std::span<const LedDef> Leds;
+
+	template<Derived<ModuleInfoBase> T>
+	static constexpr ModuleInfoView makeView() {
+		return {
+			.width_hp = T::width_hp,
+			.svg_filename = T::svg_filename,
+			.Knobs = T::Knobs,
+			.InJacks = T::InJacks,
+			.OutJacks = T::OutJacks,
+			.Switches = T::Switches,
+			.Leds = T::Leds,
+		};
+	}
 };

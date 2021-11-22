@@ -316,12 +316,12 @@ struct EnOscInfo : ModuleInfoBase {
 	static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{}};
 };
 
-constexpr ModuleInfo enoscinfo{
-	.width_hp = EnOscInfo::width_hp,
-	.svg_filename = EnOscInfo::svg_filename,
-	.Knobs = EnOscInfo::Knobs,
-	.InJacks = EnOscInfo::InJacks,
-	.OutJacks = EnOscInfo::OutJacks,
-	.Switches = EnOscInfo::Switches,
-	.Leds = EnOscInfo::Leds,
-};
+// constexpr ModuleInfo enoscinfo{
+// 	.width_hp = EnOscInfo::width_hp,
+// 	.svg_filename = EnOscInfo::svg_filename,
+// 	.Knobs = EnOscInfo::Knobs,
+// 	.InJacks = EnOscInfo::InJacks,
+// 	.OutJacks = EnOscInfo::OutJacks,
+// 	.Switches = EnOscInfo::Switches,
+// 	.Leds = EnOscInfo::Leds,
+// };
