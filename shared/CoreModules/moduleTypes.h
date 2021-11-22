@@ -29,7 +29,7 @@ public:
 	}
 
 	static bool
-	registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate, ModuleInfo info) {
+	registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate, ModuleInfoView info) {
 		bool already_exists = true;
 		int id = getTypeID(typeslug);
 		if (id == -1) {
@@ -61,7 +61,7 @@ public:
 		return "Not found.";
 	}
 
-	static ModuleInfo &getModuleInfo(ModuleTypeSlug typeslug) {
+	static ModuleInfoView &getModuleInfo(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
 			return infos[id];
@@ -92,7 +92,7 @@ private:
 	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline std::array<ModuleTypeSlug, MAX_MODULE_TYPES> module_slugs;
 	static inline std::array<StaticString<CoreProcessor::LongNameChars>, MAX_MODULE_TYPES> module_names;
-	static inline std::array<ModuleInfo, MAX_MODULE_TYPES> infos;
+	static inline std::array<ModuleInfoView, MAX_MODULE_TYPES> infos;
 	static inline int next_id = 0;
-	static inline ModuleInfo nullmodule{};
+	static inline ModuleInfoView nullmodule{};
 };

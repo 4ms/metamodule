@@ -101,7 +101,9 @@ struct ModuleInfoBase {
 	}
 };
 
-struct ModuleInfo {
+// A View into a type derived from ModuleInfoBase
+// E.g. a view of a specific module's knob/jack/etc information
+struct ModuleInfoView {
 	// std::string_view slug{""}; //TODO: we really dont need this right?
 	uint32_t width_hp = 0;
 	std::string_view svg_filename{""};
