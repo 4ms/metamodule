@@ -23,7 +23,7 @@ struct ModuleViewPage : PageBase {
 
 	ModuleViewPage(PatchInfo info)
 		: PageBase{info} {
-		slug = "EnOsc";
+		slug = "SMR";
 	}
 
 	static void roller_cb(lv_obj_t *obj, lv_event_t event) {

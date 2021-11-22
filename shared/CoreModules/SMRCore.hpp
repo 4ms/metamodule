@@ -1,7 +1,7 @@
 #pragma once
+#include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/SMR_info.hh"
 #include "CoreModules/moduleTypes.h"
-#include "CoreModules/coreProcessor.h"
 #include "util/math.hh"
 
 class SMRCore : public CoreProcessor {
@@ -35,7 +35,7 @@ public:
 
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<SMRCore>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, description, create);
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, description, create, ModuleInfoView::makeView<Info>());
 	StaticString<NameChars> knob_name(unsigned idx) override { return (idx < Info::NumKnobs) ? Info::Knobs[idx].short_name : ""; }
 	StaticString<NameChars> injack_name(unsigned idx) override { return (idx < Info::NumInJacks) ? Info::InJacks[idx].short_name: ""; }
 	StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < Info::NumOutJacks) ? Info::OutJacks[idx].short_name : ""; }
@@ -44,4 +44,3 @@ public:
 
 private:
 };
-
