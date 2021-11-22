@@ -21,6 +21,7 @@ export VALID_BOARDS = mini medium max pcmdev
 
 .PHONY: all mp1-mini mp1-pcmdev mp1-med patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
 
+
 all: patches mp1-med tests #mp1-mini h7 
 
 # Binaries
@@ -58,17 +59,16 @@ patches: $(PATCH_HEADERS)
 ## Module images
 MODULEIMG_SVGS = $(wildcard ../vcv/res/*-artwork.svg)
 MODULEIMG_PNG240S = $(addprefix src/pages/images/,$(addsuffix _240.png, $(subst -,_,$(basename $(notdir $(MODULEIMG_SVGS))))))
-#MODULEIMG_C = $(addsuffix .c, $(basename $(MODULEIMG_PNG240S)))
 MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
 
 images: $(MODULEIMG_C)
 
-src/pages/images/%_artwork_240.png : ../vcv/res/%-artwork.svg
-	inkscape --export-type="png" --export-id="faceplate" --export-filename=- $< | convert -resize x240 - $@
+src/pages/images/%_artwork_240.c: ../vcv/res/%-artwork.svg
+	$(info Converting $<)
+	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< $(subst .c,.png,$@)
+	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork_240 src/pages/images/image_list.hh
 
-src/pages/images/%.c : src/pages/images/%.png
-	../../lv_img_conv/lv_img_conv.js -c CF_TRUE_COLOR -t c --force $<
-	#add to src/pages/image_list.hh: LV_IMG_DECLARE(imgname) and if (slug=="Slug") return &imgname;
+.SECONDARY: $(MODULEIMG_PNG240S)
 
 ## Cleaning
 
