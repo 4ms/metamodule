@@ -127,3 +127,16 @@ TEST_CASE("Register ModuleTypes with an object constructed from static constexpr
 		}
 	}
 }
+
+TEST_CASE("ModuleInfoView::makeView<T>() matches T:: fields") {
+
+	auto v = ModuleInfoView::makeView<EnOscInfo>();
+	CHECK(v.width_hp == EnOscInfo::width_hp);
+	CHECK(v.svg_filename == EnOscInfo::svg_filename);
+	CHECK(v.Knobs.size() == EnOscInfo::Knobs.size());
+	// 													   .Knobs = EnOscInfo::Knobs,
+	// 													   .InJacks = EnOscInfo::InJacks,
+	// 													   .OutJacks = EnOscInfo::OutJacks,
+	// 													   .Switches = EnOscInfo::Switches,
+	// 													   .Leds = EnOscInfo::Leds,
+}
