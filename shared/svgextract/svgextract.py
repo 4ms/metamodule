@@ -506,12 +506,26 @@ def extractArtwork(svgFilename, artworkFilename):
     print(f"Wrote artwork svg file for vcv: {artworkFilename}")
 
 
-def extractSmallArtwork(svgFilename):
+def createComponentImageCompositeCmd(svgFilename, pngFilename):
+    PXSCALE = 240/(5.059*72)
+    JACKSIZE_X = 20
+    JACKSIZE_Y = 18
+    OFFX = -JACKSIZE_X / 2
+    OFFY = -JACKSIZE_Y / 2
+    register_all_namespaces(svgFilename)
+    tree = xml.etree.ElementTree.parse(svgFilename)
+    components = panel_to_components(tree)
+    cmd = f"{pngFilename}"
+    for c in components['outputs'] + components['inputs']:
+        cmd += f" src/pages/images/jack-black.png -geometry +{PXSCALE*c['cx'] + OFFX}+{PXSCALE*c['cy'] + OFFY} -composite"
+    
+    cmd += " " + pngFilename.strip(".png") + "_comps.png"
     # magick EnOsc_artwork_240.png jack-black.png -geometry +5+10 -composite jack-black.png -geometry +40+20 -composite tt.png
-    return
+    return cmd
 
    
 def createlvimg(artworkSvgFilename, pngFilename):
+    # Find programs needed
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
     if inkscapeBin is None:
         print("inkscape is not found. Please put it in your shell PATH, or set INKSCAPE_BIN_PATH to the path to the binary")
@@ -523,6 +537,7 @@ def createlvimg(artworkSvgFilename, pngFilename):
         print("Aborting")
         return
 
+    # SVG ==> PNG
     print(f"svgextract.py: converting {pngFilename} with inkscape and convert.")
     try:
         subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-id-only --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {pngFilename}', shell=True, check=True)
@@ -530,8 +545,13 @@ def createlvimg(artworkSvgFilename, pngFilename):
         print(f"Failed running {inkscapeBin} and {convertBin}. Aborting")
         return
 
+    cmd = createComponentImageCompositeCmd(artworkSvgFilename, pngFilename)
+    print("Going to run "+ cmd)
+    subprocess.run(f'{convertBin} {cmd}', shell=True, check=True)
+
     print(f"Created {pngFilename} from {artworkSvgFilename}")
 
+    # PNG ==> LVGL image (C file with array)
     lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/lv_img_conv/lv_img_conv.js"
     try:
         subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', pngFilename], check=True)
@@ -539,6 +559,10 @@ def createlvimg(artworkSvgFilename, pngFilename):
         print("lv_img_conv.js failed. Try 1) `git submodule update --init` and/or 2) `cd shared/svgextract/lv_img_conv && npm install`")
         return
     print(f"Created {pngFilename.strip('.png')}.c file from {pngFilename}")
+
+
+
+
 
 
 def appendImageList(slug, artwork_Carray, image_list_file):
