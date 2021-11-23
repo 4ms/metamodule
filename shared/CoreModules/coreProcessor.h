@@ -24,6 +24,7 @@ public:
 
 	static constexpr size_t NameChars = 15;
 	static constexpr size_t LongNameChars = 39;
+
 	static constexpr unsigned NumKnobs = 0;
 	static constexpr unsigned NumOutJacks = 0;
 	static constexpr unsigned NumInJacks = 0;

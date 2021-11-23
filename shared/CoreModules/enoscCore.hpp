@@ -1,15 +1,12 @@
 #pragma once
+#include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/EnOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "CoreModules/coreProcessor.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
 class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
-	static constexpr int NumInJacks = Info::NumInJacks;
-	static constexpr int NumOutJacks = Info::NumOutJacks;
-	static constexpr int NumKnobs = Info::NumKnobs;
 
 public:
 	EnOscCore() = default;
@@ -56,13 +53,10 @@ public:
 		}
 	}
 
+	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<EnOscCore>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, description, create, ModuleInfoView::makeView<Info>());
-	StaticString<NameChars> knob_name(unsigned idx) override { return (idx < Info::NumKnobs) ? Info::Knobs[idx].short_name : ""; }
-	StaticString<NameChars> injack_name(unsigned idx) override { return (idx < Info::NumInJacks) ? Info::InJacks[idx].short_name: ""; }
-	StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < Info::NumOutJacks) ? Info::OutJacks[idx].short_name : ""; }
-	StaticString<LongNameChars> get_description() override { return Info::description; }
 	// clang-format on
 
 private:
