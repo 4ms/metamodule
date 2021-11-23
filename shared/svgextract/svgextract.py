@@ -369,11 +369,8 @@ def components_to_infofile(components):
 #include "CoreModules/info/module_info_base.hh"
 
 struct {slug}Info : ModuleInfoBase {{
-    static constexpr auto NameChars = CoreProcessor::NameChars;
-    static constexpr auto LongNameChars = CoreProcessor::LongNameChars;
-
     static constexpr std::string_view slug{{"{slug}"}};
-    static inline const StaticString<LongNameChars> description{{"{components['ModuleName']}"}};
+    static constexpr std::string_view description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
     static constexpr std::string_view svg_filename{{"res/{slug}-artwork.svg"}};
 

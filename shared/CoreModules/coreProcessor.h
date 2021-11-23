@@ -6,7 +6,7 @@
 // TODO: after switching to ModuleInfo
 //  - remove Num*
 //  - remove *Names
-//  - maybe make *_name(idx) pure virtual constexpr
+//  - remove *_name(idx)
 //
 class CoreProcessor {
 public:
@@ -17,11 +17,11 @@ public:
 	virtual void set_param(const int param_id, const float val) = 0;
 	virtual void set_input(const int input_id, const float val) = 0;
 	virtual float get_output(const int output_id) const = 0;
-
 	virtual float get_led_brightness(const int led_id) const {
 		return 0;
 	}
 
+	////////////REMOVE:
 	static constexpr size_t NameChars = 15;
 	static constexpr size_t LongNameChars = 39;
 
@@ -40,11 +40,11 @@ public:
 	virtual StaticString<NameChars> outjack_name(unsigned idx) {
 		return (idx < NumOutJacks) ? OutJackNames[idx] : "";
 	}
-
 	static inline const StaticString<LongNameChars> description{};
 	virtual StaticString<LongNameChars> get_description() {
 		return description;
 	}
+	/////////:Remove
 
 	virtual void mark_all_inputs_unpatched() {
 	}

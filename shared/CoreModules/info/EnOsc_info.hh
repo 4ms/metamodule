@@ -3,11 +3,8 @@
 #include "CoreModules/info/module_info_base.hh"
 
 struct EnOscInfo : ModuleInfoBase {
-	static constexpr auto NameChars = CoreProcessor::NameChars;
-	static constexpr auto LongNameChars = CoreProcessor::LongNameChars;
-
 	static constexpr std::string_view slug{"EnOsc"};
-	static inline const StaticString<LongNameChars> description{"Ensemble Oscillator"};
+	static constexpr std::string_view description{"Ensemble Oscillator"};
 	static constexpr uint32_t width_hp = 16;
 	static constexpr std::string_view svg_filename{"res/EnOsc-artwork.svg"};
 
