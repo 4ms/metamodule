@@ -1,6 +1,6 @@
 #pragma once
-#include "coreProcessor.h"
-#include "moduleTypes.h"
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/moduleFactory.hh"
 #include "panel_medium_defs.hh"
 
 // Todo: DAC out, gate out, gate in

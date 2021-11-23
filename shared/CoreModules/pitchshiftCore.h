@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "processors/pitchShift.h"
 #include "util/math.hh"
 

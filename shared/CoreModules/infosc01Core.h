@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "axoloti-wrapper/axoloti_math.h"
-#include "coreProcessor.h"
+#include "CoreModules/coreProcessor.h"
 #include "util/math.hh"
 
 using namespace MathTools;

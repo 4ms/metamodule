@@ -1,6 +1,6 @@
 #pragma once
-#include "CoreModules/moduleTypes.h"
-#include "coreProcessor.h"
+#include "CoreModules/moduleFactory.hh"
+#include "CoreModules/coreProcessor.h"
 #include "util/math.hh"
 
 #define FAUSTFLOAT float

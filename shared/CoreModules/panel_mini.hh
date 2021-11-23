@@ -1,6 +1,6 @@
 #pragma once
-#include "coreProcessor.h"
-#include "moduleTypes.h"
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/moduleFactory.hh"
 #include "panel_mini_defs.hh"
 #include "util/parameter.h"
 

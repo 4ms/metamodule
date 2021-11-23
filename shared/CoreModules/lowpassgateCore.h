@@ -2,9 +2,9 @@
 
 #include "../processors/lpg.h"
 #include "../processors/tools/expDecay.h"
-#include "CoreModules/moduleTypes.h"
-#include "coreProcessor.h"
-#include "math.hh"
+#include "CoreModules/moduleFactory.hh"
+#include "CoreModules/coreProcessor.h"
+#include "util/math.hh"
 #include "processors/tools/windowComparator.h"
 
 using namespace MathTools;

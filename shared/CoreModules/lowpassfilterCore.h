@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../processors/lpf.h"
-#include "CoreModules/moduleTypes.h"
-#include "coreProcessor.h"
-#include "math.hh"
+#include "CoreModules/moduleFactory.hh"
+#include "CoreModules/coreProcessor.h"
+#include "util/math.hh"
 #include "processors/moogLadder.h"
 #include "util/math_tables.hh"
 

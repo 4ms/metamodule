@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/SMR_info.hh"
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "util/math.hh"
 
 class SMRCore : public CoreProcessor {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CoreModules/moduleTypes.h"
-#include "coreProcessor.h"
-#include "math.hh"
+#include "CoreModules/moduleFactory.hh"
+#include "CoreModules/coreProcessor.h"
+#include "util/math.hh"
 
 using namespace MathTools;
 

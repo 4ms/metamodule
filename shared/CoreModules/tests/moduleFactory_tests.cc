@@ -1,6 +1,6 @@
 #include "doctest.h"
 #include "info/EnOsc_info.hh"
-#include "moduleTypes.h"
+#include "moduleFactory.hh"
 #include <iostream>
 #include <span>
 #include <stdint.h>

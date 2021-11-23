@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CoreModules/moduleTypes.h"
-#include "coreProcessor.h"
+#include "CoreModules/moduleFactory.hh"
+#include "CoreModules/coreProcessor.h"
 #include "processors/bit_crush.h"
 #include "util/math.hh"
 
