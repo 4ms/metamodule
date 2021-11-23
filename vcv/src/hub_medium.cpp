@@ -1,7 +1,7 @@
 #include "CommData.h"
 #include "CommModule.h"
 #include "CommWidget.h"
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "CoreModules/panel_medium_defs.hh"
 #include "hub_base.hh"
 #include "hub_jack.hh"

@@ -2,7 +2,7 @@
 #include "CommData.h"
 #include "CommModule.h"
 #include "CommWidget.h"
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "hub_jack.hh"
 #include "hub_knob.hh"
 #include "knob_map.hh"

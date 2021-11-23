@@ -2,7 +2,7 @@
 #include "CommModule.h"
 #include "CommWidget.h"
 #include "CoreModules/info/module_info_base.hh"
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "MappableJack.hh"
 #include "math.hh"
 #include "util/base_concepts.hh"
