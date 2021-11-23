@@ -505,6 +505,11 @@ def extractArtwork(svgFilename, artworkFilename):
     tree.write(artworkFilename)
     print(f"Wrote artwork svg file for vcv: {artworkFilename}")
 
+
+def extractSmallArtwork(svgFilename):
+    # magick EnOsc_artwork_240.png jack-black.png -geometry +5+10 -composite jack-black.png -geometry +40+20 -composite tt.png
+    return
+
    
 def createlvimg(artworkSvgFilename, pngFilename):
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
@@ -520,7 +525,7 @@ def createlvimg(artworkSvgFilename, pngFilename):
 
     print(f"svgextract.py: converting {pngFilename} with inkscape and convert.")
     try:
-        subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {pngFilename}', shell=True, check=True)
+        subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-id-only --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {pngFilename}', shell=True, check=True)
     except:
         print(f"Failed running {inkscapeBin} and {convertBin}. Aborting")
         return

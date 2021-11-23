@@ -57,13 +57,15 @@ patches: $(PATCH_HEADERS)
 
 
 ## Module images
-MODULEIMG_SVGS = $(wildcard ../vcv/res/*-artwork.svg)
-MODULEIMG_PNG240S = $(addprefix src/pages/images/,$(addsuffix _240.png, $(subst -,_,$(basename $(notdir $(MODULEIMG_SVGS))))))
+# MODULEIMG_SVGS = $(wildcard ../vcv/res/*-artwork.svg)
+MODULEIMG_SVGS = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
+MODULEIMG_PNG240S = $(addprefix src/pages/images/,$(addsuffix _240.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
 MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
 
 images: $(MODULEIMG_C)
 
-src/pages/images/%_artwork_240.c: ../vcv/res/%-artwork.svg
+# src/pages/images/%_artwork_240.c: ../vcv/res/%-artwork.svg
+src/pages/images/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
 	$(info Converting $<)
 	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< $(subst .c,.png,$@)
 	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork_240 src/pages/images/image_list.hh
