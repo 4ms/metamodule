@@ -8,7 +8,7 @@ struct SMRInfo : ModuleInfoBase {
     static constexpr uint32_t width_hp = 26;
     static constexpr std::string_view svg_filename{"res/SMR-artwork.svg"};
 
-    static constexpr int NumKnobs = 12;
+    static constexpr int NumKnobs = 11;
     
     enum {
         KnobFreq_Nudge_Odds = 0,
@@ -19,10 +19,9 @@ struct SMRInfo : ModuleInfoBase {
         KnobSlider_4 = 5,
         KnobSlider_5 = 6,
         KnobSlider_6 = 7,
-        KnobRotate = 8,
-        KnobMorph = 9,
-        KnobSpread = 10,
-        KnobRes__Q_ = 11,
+        KnobMorph = 8,
+        KnobSpread = 9,
+        KnobRes__Q_ = 10,
     };
 
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{
@@ -105,16 +104,6 @@ struct SMRInfo : ModuleInfoBase {
             .default_val = 1.0f,
             .knob_style = KnobDef::Slider25mm,
             .orientation = KnobDef::Vertical,
-        },
-        {
-            .id = KnobRotate,
-            .x_mm = px_to_mm<72>(186.43f),
-            .y_mm = px_to_mm<72>(284.99f),
-            .short_name = "Rotate",
-            .long_name = "Rotate",
-            .default_val = 0.0f,
-            .knob_style = KnobDef::Medium,
-            .orientation = KnobDef::Round,
         },
         {
             .id = KnobMorph,
@@ -426,7 +415,7 @@ struct SMRInfo : ModuleInfoBase {
         },
     }};
 
-    static constexpr int NumSwitches = 12;
+    static constexpr int NumSwitches = 13;
     
     enum {
         SwitchLock_Button_1 = 0,
@@ -440,7 +429,8 @@ struct SMRInfo : ModuleInfoBase {
         SwitchCv_Slew = 8,
         SwitchPost_Pre = 9,
         SwitchFast___Slow = 10,
-        SwitchScale_Rotation = 11,
+        SwitchRotate = 11,
+        SwitchScale_Rotation = 12,
     };
 
     static constexpr std::array<SwitchDef, NumSwitches> Switches{{
@@ -553,6 +543,16 @@ struct SMRInfo : ModuleInfoBase {
             .switch_type = SwitchDef::Toggle3pos,
             .orientation = SwitchDef::Horizontal,
             .encoder_knob_style = SwitchDef::None,
+        },
+        {
+            .id = SwitchRotate,
+            .x_mm = px_to_mm<72>(186.43f),
+            .y_mm = px_to_mm<72>(284.99f),
+            .short_name = "Rotate",
+            .long_name = "Rotate",
+            .switch_type = SwitchDef::Encoder,
+            .orientation = SwitchDef::Round,
+            .encoder_knob_style = SwitchDef::Medium,
         },
         {
             .id = SwitchScale_Rotation,

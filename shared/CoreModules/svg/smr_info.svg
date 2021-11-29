@@ -657,7 +657,7 @@
     <rect id="Scale_Rotation" data-name="Scale Rotation" x="16.32" y="310.89" width="11.34" height="17.01" style="fill: #ff8080"/>
     <circle id="Spread_CV" data-name="Spread CV" cx="325.7" cy="283.22" r="11.34" style="fill: lime"/>
     <circle id="Morph_CV" data-name="Morph CV" cx="267.54" cy="283.22" r="11.34" style="fill: lime"/>
-    <circle id="Rotate" cx="186.43" cy="284.99" r="19.84" style="fill: red"/>
+    <circle id="Rotate" cx="186.43" cy="284.99" r="19.84" style="fill: #c000c0"/>
     <circle id="Res_Q_CV" data-name="Res (Q) CV" cx="105.72" cy="283.22" r="11.34" style="fill: lime"/>
     <circle id="Scale_CV" data-name="Scale CV" cx="47.62" cy="283.22" r="11.34" style="fill: lime"/>
     <circle id="evens" cx="344.06" cy="247.16" r="11.34" style="fill: blue"/>
