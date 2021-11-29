@@ -65,18 +65,22 @@ struct GenericModuleWidget : CommModuleWidget {
 		for (auto knob : Defs::Knobs) {
 			switch (knob.knob_style) {
 				case KnobDef::Small:
-					addParam(createParamCentered<Trimpot>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
+					addParam(createParamCentered<Small9mmKnob>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
 					break;
 				case KnobDef::Medium:
-					addParam(createParamCentered<Davies1900hBlackKnob>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
+					addParam(
+						createParamCentered<Davies1900hBlackKnob4ms>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
 					break;
 				case KnobDef::Large:
-					addParam(
-						createParamCentered<Davies1900hLargeBlackKnob>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
+					addParam(createParamCentered<DaviesLarge4ms>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
 					break;
 				case KnobDef::Slider25mm:
-					addParam(createParamCentered<LEDLightSlider<WhiteLight>>(
-						mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
+					if (knob.orientation == KnobDef::Vertical)
+						addParam(createParamCentered<LEDLightSlider<WhiteLight>>(
+							mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
+					else
+						addParam(createParamCentered<LEDLightSlider<WhiteLight>>(
+							mm2px({knob.x_mm, knob.y_mm}), module, knob.id)); // TODO: Horizontal slider widget
 					break;
 			}
 		}
@@ -109,17 +113,23 @@ struct GenericModuleWidget : CommModuleWidget {
 				light_id += 3;
 
 			} else if (sw.switch_type == SwitchDef::Toggle2pos) {
-				addParam(createParamCentered<SubMiniToggle2pos>(pos, module, param_id));
+				if (sw.orientation == SwitchDef::Vertical)
+					addParam(createParamCentered<SubMiniToggle2pos>(pos, module, param_id));
+				else
+					addParam(createParamCentered<SubMiniToggleHoriz2pos>(pos, module, param_id));
 
 			} else if (sw.switch_type == SwitchDef::Toggle3pos) {
-				addParam(createParamCentered<SubMiniToggle3pos>(pos, module, param_id));
+				if (sw.orientation == SwitchDef::Vertical)
+					addParam(createParamCentered<SubMiniToggle3pos>(pos, module, param_id));
+				else
+					addParam(createParamCentered<SubMiniToggleHoriz3pos>(pos, module, param_id));
 
 			} else if (sw.switch_type == SwitchDef::Encoder) {
 				// TODO: add un-lined knobs
 				if (sw.encoder_knob_style == SwitchDef::Small)
-					addParam(createParamCentered<Trimpot>(pos, module, param_id));
+					addParam(createParamCentered<Small9mmUnlinedKnob>(pos, module, param_id));
 				else if (sw.encoder_knob_style == SwitchDef::Medium)
-					addParam(createParamCentered<Davies1900hBlackKnob>(pos, module, param_id));
+					addParam(createParamCentered<Davies1900hBlackKnobUnlined4ms>(pos, module, param_id));
 			}
 		}
 
