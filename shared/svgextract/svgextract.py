@@ -228,6 +228,7 @@ def panel_to_components(tree):
 
         # Get position
         if el.tag == "{http://www.w3.org/2000/svg}rect":
+            shape = "rect"
             x = float(el.get('x'))
             y = float(el.get('y'))
             width = float(el.get('width'))
@@ -238,13 +239,24 @@ def panel_to_components(tree):
             c['height'] = round(height, 3)
             c['cx'] = round(x + width / 2, 3)
             c['cy'] = round(y + height / 2, 3)
-            shape = "rect"
+            tr = el.get('transform') 
+            if tr and ("rotate(90)" in tr or "rotate(270)" in tr or "rotate(-90)" in tr):
+                tmp = c['width']
+                c['width'] = c['height']
+                c['height'] = tmp
+            if c['width'] > c['height']:
+                c['orientation'] = "Horizontal"
+            else:
+                c['orientation'] = "Vertical"
+
         elif el.tag == "{http://www.w3.org/2000/svg}circle":
+            shape = "circle"
             cx = float(el.get('cx'))
             cy = float(el.get('cy'))
             c['cx'] = round(cx, 3)
             c['cy'] = round(cy, 3)
-            shape = "circle"
+            c['orientation'] = "Round"
+
         else:
             shape = "unknown"
 
@@ -312,16 +324,20 @@ def panel_to_components(tree):
             c['switch_type'] = "MomentaryButton"
             components['switches'].append(c)
 
-        #Deep Pink: Switch - 2pos
+        #Deep Pink rectangle: Switch - 2pos
         elif color == '#ff8080':
             c['encoder_knob_style'] = "None"
             c['switch_type'] = "Toggle2pos"
+            if c['orientation'] == "Round":
+                c['orientation'] = "Vertical"
             components['switches'].append(c)
 
-        #Hot Pink: Switch - 3pos
+        #Hot Pink rectangle: Switch - 3pos
         elif color == '#ffc080':
             c['encoder_knob_style'] = "None"
             c['switch_type'] = "Toggle3pos"
+            if c['orientation'] == "Round":
+                c['orientation'] = "Vertical"
             components['switches'].append(c)
 
         elif color == '#ffff00':
@@ -388,6 +404,7 @@ struct {slug}Info : ModuleInfoBase {{
             .long_name = "{k['display_name']}",
             .default_val = {k['default_value']},
             .knob_style = KnobDef::{k['knob_style']},
+            .orientation = KnobDef::{k['orientation']},
         }},""" 
     source += f"""
     }}}};
@@ -440,6 +457,7 @@ struct {slug}Info : ModuleInfoBase {{
             .short_name = "{k['display_name']}",
             .long_name = "{k['display_name']}",
             .switch_type = SwitchDef::{k['switch_type']},
+            .orientation = SwitchDef::{k['orientation']},
             .encoder_knob_style = SwitchDef::{k['encoder_knob_style']},
         }},""" 
     source += f"""

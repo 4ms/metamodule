@@ -7,7 +7,7 @@ def register_all_namespaces(filename):
         if namespaces[ns] not in uniques:
             uniques.append(namespaces[ns])
             xml.etree.ElementTree.register_namespace(ns, namespaces[ns])
-            print(f"registered ns {ns}: {namespaces[ns]}")
-        else:
-            print(f"skipped existing ns {ns}: {namespaces[ns]}")
+            # print(f"registered ns {ns}: {namespaces[ns]}")
+        # else:
+            # print(f"skipped existing ns {ns}: {namespaces[ns]}")
 

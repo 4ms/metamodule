@@ -13,6 +13,7 @@ struct KnobDef {
 	std::string_view long_name;
 	float default_val;
 	enum { Small, Medium, Large, Slider25mm } knob_style;
+	enum { Round, Vertical, Horizontal } orientation; // for sliders
 };
 
 struct InJackDef {
@@ -41,6 +42,7 @@ struct SwitchDef {
 	std::string_view short_name;
 	std::string_view long_name;
 	enum { MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, Encoder } switch_type;
+	enum { Round, Vertical, Horizontal } orientation;
 	enum { None, Small, Medium, Large } encoder_knob_style;
 };
 
