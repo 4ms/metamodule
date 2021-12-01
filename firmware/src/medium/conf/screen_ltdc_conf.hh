@@ -14,7 +14,7 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 	static constexpr PinNoInit r[8]{
 		{GPIO::Unused},
 		{GPIO::Unused},
-		{GPIO::Unused},
+		{GPIO::H, 8, LL_GPIO_AF_14},  // LTDC_R2
 		{GPIO::H, 9, LL_GPIO_AF_14},  // LTDC_R3
 		{GPIO::H, 10, LL_GPIO_AF_14}, // LTDC_R4
 		{GPIO::A, 9, LL_GPIO_AF_14},  // LTDC_R5
@@ -35,7 +35,7 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 	static constexpr PinNoInit b[8]{
 		{GPIO::Unused},
 		{GPIO::Unused},
-		{GPIO::Unused},
+		{GPIO::G, 10, LL_GPIO_AF_14}, // LTDC_B2
 		{GPIO::D, 10, LL_GPIO_AF_14}, // LTDC_B3
 		{GPIO::I, 4, LL_GPIO_AF_14},  // LTDC_B4
 		{GPIO::I, 5, LL_GPIO_AF_14},  // LTDC_B5
@@ -76,6 +76,7 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 struct ScreenControlConf : mdrivlib::ParallelWriterConf {
 	static constexpr size_t BusWidth = 8;
 	static constexpr std::array<PinNoInit, BusWidth> data{{
+		{ScreenConf::b[2].gpio, ScreenConf::b[2].pin}, //comment out for p5
 		{ScreenConf::b[3].gpio, ScreenConf::b[3].pin},
 		{ScreenConf::b[4].gpio, ScreenConf::b[4].pin},
 		{ScreenConf::b[5].gpio, ScreenConf::b[5].pin},
@@ -83,11 +84,12 @@ struct ScreenControlConf : mdrivlib::ParallelWriterConf {
 		{ScreenConf::b[7].gpio, ScreenConf::b[7].pin},
 		{ScreenConf::g[2].gpio, ScreenConf::g[2].pin},
 		{ScreenConf::g[3].gpio, ScreenConf::g[3].pin},
-		{ScreenConf::g[4].gpio, ScreenConf::g[4].pin},
+		// {ScreenConf::g[4].gpio, ScreenConf::g[4].pin}, //uncomment for p6, comment for p6
 	}};
 	static constexpr PinNoInit chip_sel{GPIO::E, 11};	 //pin 38: "CSX"
 	static constexpr PinNoInit write_latch{GPIO::H, 5};	 //pin 36: "DC" on p5 schematic, "WRX" in ST7789V datasheet
 	static constexpr PinNoInit datacmd_sel{GPIO::E, 12}; //pin 37: "SCK" on p5 schematic, "DCX" in ST7789V datasheet
+	static constexpr PinNoInit reset{GPIO::E, 15};
 
 	static constexpr uint32_t DataSetupTime = 3;		//ST7789V datasheet: Sec 7.4.1. T(DST) = 10ns
 	static constexpr uint32_t WriteLatchAfterDelay = 3; //ST7789V datasheet: Sec 7.4.1. T(AHT) = 10ns
