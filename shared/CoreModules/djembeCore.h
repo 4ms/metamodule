@@ -1,6 +1,6 @@
 #pragma once
-#include "CoreModules/moduleTypes.h"
-#include "coreProcessor.h"
+#include "CoreModules/moduleFactory.hh"
+#include "CoreModules/coreProcessor.h"
 // #include "debug.hh"
 #include "gcem/include/gcem.hpp"
 #include "util/math.hh"

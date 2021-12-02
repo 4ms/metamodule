@@ -1,7 +1,7 @@
 #pragma once
-#include "coreProcessor.h"
-#include "math.hh"
-#include "moduleTypes.h"
+#include "CoreModules/coreProcessor.h"
+#include "util/math.hh"
+#include "CoreModules/moduleFactory.hh"
 #include "processors/tools/windowComparator.h"
 
 using namespace MathTools;

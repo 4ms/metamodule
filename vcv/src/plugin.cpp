@@ -1,15 +1,32 @@
 #include "plugin.hpp"
+#include "modules/genericModule.hh"
 
 Plugin *pluginInstance;
-CentralData *centralData;
+std::unique_ptr<CentralData> centralData;
+
+//////////////// Auto generated ///////////////////////
+// include and define models below here
+
+#include "CoreModules/info/SMR_info.hh"
+auto modelSMR = createModelFromInfo<SMRInfo>();
+
+#include "CoreModules/info/EnOsc_info.hh"
+auto modelEnOsc = createModelFromInfo<EnOscInfo>();
+
+#include "CoreModules/info/BuffMult_info.hh"
+auto modelBuffMult = createModelFromInfo<BuffMultInfo>();
+///////////////////////////////////////////////////////
 
 void init(Plugin *p)
 {
-	centralData = new CentralData;
+	centralData = std::make_unique<CentralData>();
 
 	pluginInstance = p;
 
-	// Add modules here
+	//////////////// Auto generated ///////////////////////
+	// Add models below here
+    p->addModel(modelSMR);
+    
 	p->addModel(modelHubMedium);
 	p->addModel(modelInfosc01);
 	p->addModel(modelDjembe);
@@ -62,8 +79,7 @@ void init(Plugin *p)
 	p->addModel(modelSend);
 	p->addModel(modelHubMini);
 	p->addModel(modelInfosc64bphas);
-
-	// Any other plugin initialization may go here.
-	// As an alternative, consider lazy-loading assets and lookup tables when your module is created to reduce startup
-	// times of Rack.
+	p->addModel(modelEnOsc);
+	p->addModel(modelBuffMult);
+	///////////////////////////////////////////////////////
 }

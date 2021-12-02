@@ -4,15 +4,14 @@ template<typename T>
 class Parameter {
 public:
 	Parameter()
-		: currentVal(0)
-	{}
+		: currentVal(0) {
+	}
 
 	Parameter(T initVal)
-		: currentVal(initVal)
-	{}
+		: currentVal(initVal) {
+	}
 
-	void setValue(const T input)
-	{
+	void setValue(const T input) {
 		if (input != currentVal) {
 			changed = true;
 			currentVal = input;
@@ -23,26 +22,22 @@ public:
 	// Todo: is this the behavior we want? Or do we just care if it's different at this point in time?
 	// The edge-case is: x.setValue(0); x.isChanged(); x.setValue(1); x.setValue(0);
 	// ...should isChanged() return true or false?
-	bool isChanged()
-	{
+	bool isChanged() {
 		bool changeStatus = changed;
 		changed = false;
 		return changeStatus;
 	}
 
-	T getValue() const
-	{
+	T getValue() const {
 		return currentVal;
 	}
 
-	operator T() const
-	{
+	operator T() const {
 		return getValue();
 	}
 
-	void operator=(const T &that)
-	{
-		this->setValue(that);
+	void operator=(const T &that) {
+		setValue(that);
 	}
 
 private:
@@ -56,17 +51,15 @@ class RefParameter {
 public:
 	RefParameter(T &initVal)
 		: currentVal{initVal}
-		, lastVal{0}
-	{}
+		, lastVal{0} {
+	}
 
-	void setValue(const T input)
-	{
+	void setValue(const T input) {
 		currentVal = input;
 	}
 
 	// Returns true if inner value is different than it was the last time isChanged() was called
-	bool isChanged()
-	{
+	bool isChanged() {
 		if (currentVal == lastVal)
 			return false;
 
@@ -74,18 +67,15 @@ public:
 		return true;
 	}
 
-	T getValue() const
-	{
+	T getValue() const {
 		return currentVal;
 	}
 
-	operator T() const
-	{
+	operator T() const {
 		return getValue();
 	}
 
-	void operator=(const T &that)
-	{
+	void operator=(const T &that) {
 		this->setValue(that);
 	}
 
@@ -93,4 +83,3 @@ private:
 	T &currentVal;
 	T lastVal;
 };
-

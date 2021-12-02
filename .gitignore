@@ -34,3 +34,5 @@ firmware_m4_vectors.h
 *.swo
 *.swp
 firmware/vec.miss
+
+shared/svgextract/test_circle_colors_data.xml

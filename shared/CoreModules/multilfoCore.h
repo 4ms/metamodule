@@ -1,11 +1,9 @@
 #pragma once
 
-#include "CoreModules/moduleTypes.h"
-#include "coreProcessor.h"
+#include "CoreModules/moduleFactory.hh"
+#include "CoreModules/coreProcessor.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
-
-using namespace MathTools;
 
 class MultilfoCore : public CoreProcessor {
 	static inline const int NumInJacks = 4;
@@ -21,8 +19,7 @@ class MultilfoCore : public CoreProcessor {
 public:
 	MultilfoCore() = default;
 
-	virtual void update(void) override
-	{
+	void update() override {
 		if (rateChanged) {
 			combineKnobCVFreq();
 			rateChanged = false;
@@ -36,14 +33,12 @@ public:
 			modPhase -= 1.0f;
 	}
 
-	void combineKnobCVFreq()
-	{
-		auto knobFreq = exp5Table.closest(constrain(rawRateKnob, 0.f, 1.f));
-		finalRate = knobFreq * setPitchMultiple(rawRateCV);
+	void combineKnobCVFreq() {
+		auto knobFreq = exp5Table.closest(MathTools::constrain(rawRateKnob, 0.f, 1.f));
+		finalRate = knobFreq * MathTools::setPitchMultiple(rawRateCV);
 	}
 
-	virtual void set_param(int const param_id, const float val) override
-	{
+	void set_param(int const param_id, const float val) override {
 		switch (param_id) {
 			case 0:
 				rawRateKnob = val;
@@ -57,13 +52,12 @@ public:
 				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override
-	{
+
+	void set_samplerate(const float sr) override {
 		sampRate = sr;
 	}
 
-	virtual void set_input(const int input_id, const float val) override
-	{
+	void set_input(const int input_id, const float val) override {
 		switch (input_id) {
 			case 0:
 				rawRateCV = val;
@@ -85,8 +79,7 @@ public:
 		}
 	}
 
-	virtual float get_output(const int output_id) const override
-	{
+	float get_output(const int output_id) const override {
 		float output = 0;
 		switch (output_id) {
 			case 0: // sin
@@ -104,8 +97,7 @@ public:
 		return output;
 	}
 
-	static std::unique_ptr<CoreProcessor> create()
-	{
+	static std::unique_ptr<CoreProcessor> create() {
 		return std::make_unique<MultilfoCore>();
 	}
 	static constexpr char typeID[20] = "MULTILFO";

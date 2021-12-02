@@ -1,5 +1,5 @@
 #pragma once
-#include "math.hh"
+#include "util/math.hh"
 #include <array>
 #include <cstdint>
 #include <type_traits>
@@ -13,12 +13,10 @@ public:
 	static constexpr inline unsigned kMaxValue = MathTools::ipow(2, UsedBits - 1);
 	static constexpr inline float kOutScaling = static_cast<float>(kMaxValue);
 
-	static inline constexpr float scaleInput(SampleType val)
-	{
+	static inline constexpr float scaleInput(SampleType val) {
 		return sign_extend(val) / kOutScaling;
 	}
-	static inline constexpr SampleType scaleOutput(const float val)
-	{
+	static inline constexpr SampleType scaleOutput(const float val) {
 		if constexpr (std::is_signed_v<SampleType>) {
 			const float v = MathTools::constrain(val, -1.f, (kOutScaling - 1.f) / kOutScaling);
 			return static_cast<SampleType>(v * kOutScaling);
@@ -28,15 +26,12 @@ public:
 		}
 	}
 
-	static inline constexpr SampleType sign_extend(const SampleType &v) noexcept
-	{
+	static inline constexpr SampleType sign_extend(const SampleType &v) noexcept {
 		static_assert((sizeof(SampleType) * 8u) >= UsedBits, "SampleType is smaller than the specified width");
 		if constexpr ((sizeof(SampleType) * 8u) == UsedBits)
 			return v;
 		else {
-			using S = struct {
-				signed Val : UsedBits;
-			};
+			using S = struct { signed Val : UsedBits; };
 			return reinterpret_cast<const S *>(&v)->Val;
 		}
 	}

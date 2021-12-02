@@ -8,6 +8,7 @@
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "patch_player.hh"
+#include "util/calibrator.hh"
 #include "util/countzip.hh"
 #include "util/math_tables.hh"
 #include "util/zip.hh"
@@ -29,11 +30,11 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 CodecT &codec,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
-						 ParamQueue &param_cache,
+						 ParamQueue &queue,
 						 UiAudioMailbox &uiaudiomailbox,
 						 DoubleBufParamBlock &p,
 						 DoubleAuxStreamBlock &auxs)
-	: cache{param_cache}
+	: param_queue{queue}
 	, mbox{uiaudiomailbox}
 	, param_blocks{p}
 	, audio_blocks{{.in_codec = audio_in_block.codec[0], .out_codec = audio_out_block.codec[0]},
@@ -70,6 +71,17 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	load_measure.init();
 
+	// Do this, then we don't have to also scale.
+	// But we still need to clamp
+	// constexpr uint32_t TenVolts = 0x007FFFFF;
+	// constexpr uint32_t TwoVolts = TenVolts / 5;
+	// constexpr uint32_t FourVolts = TwoVolts * 2;
+	// // use the raw int value read when calibrating (can be a float since we'll probably average it over 200ms or
+	// whatever) incal[3].calibrate_chan<TwoVolts, FourVolts>(6352.f / 32768.f * 83886308..., 12610.f / 32768.f);
+	//
+	// This converts float to volts
+	incal[3].calibrate_chan<2, 4, 10>(6352.f / 32768.f, 12603.f / 32768.f);
+
 	// if constexpr (DEBUG_NE10_FFT)
 	// 	fftfx.init();
 }
@@ -99,9 +111,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
 	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 	load_measure.start_measurement();
-
-	cache.write_sync(param_block.params[0], param_block.metaparams);
-	mdrivlib::SystemCache::clean_dcache_by_range(&cache, sizeof(ParamQueue));
 
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
 		AudioTestSignal::passthrough(in, out, aux);
@@ -147,8 +156,16 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			auto pin_bit = jacksense_pin_order[i];
 			// Todo: send 0 on the first time the jack is detected as unpatched (and then don't call set_panel_input
 			// until patched)
-			auto val = (params_.jack_senses & (1 << pin_bit)) ? AudioInFrame::scaleInput(inchan) : 0;
+
+			auto scaled_input = AudioInFrame::scaleInput(inchan);
+			// If using adjust() to convert 24bit to a calibrated float, then replace above with:
+			// auto scaled_input = AudioInFrame::sign_extend(inchan);
+			scaled_input = incal[i].adjust(scaled_input);
+
+			auto val = (params_.jack_senses & (1 << pin_bit)) ? scaled_input : 0;
 			player.set_panel_input(PanelDef::audioin_order[i], val);
+
+			param_block.metaparams.ins[i].update(scaled_input);
 		}
 
 		// Pass CV values to modules
@@ -175,6 +192,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, gate_out] : countzip(aux_.gate_out))
 			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
+	param_queue.write_sync(param_block.params[0], param_block.metaparams);
+	mdrivlib::SystemCache::clean_dcache_by_range(&param_queue, sizeof(ParamQueue));
 
 	load_measure.end_measurement();
 }

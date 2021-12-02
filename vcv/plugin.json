@@ -12,13 +12,31 @@
   "sourceUrl": "",
   "donateUrl": "",
   "changelogUrl": "",
-  "modules": [ 
+  "modules": [
+    {
+      "slug": "SMR",
+      "name": "SMR",
+      "description": "Spectral Multiband Resonator",
+      "tags": []
+    }, 
     {
       "slug": "PANEL_8",
       "name": "MetaModuleMini",
       "description": "MetaModule 16HP 8 knobs, stereo Audio In, 4-channel audio out, 4 CV inputs, 2 gate in, clock in/out, two RGB buttons",
       "tags": []
     },
+	{
+      "slug": "EnOsc",
+      "name": "EnOsc",
+      "description": "Ensemble Oscillator",
+      "tags": []
+	},
+	{
+      "slug": "BuffMult",
+      "name": "BuffMult",
+      "description": "Buffered Multiple",
+      "tags": []
+	},
 	{
       "slug": "PANEL_MED",
       "name": "PanelMedium",

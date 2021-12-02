@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
 #if !defined(TESTPROJECT) && !defined(SIMULATOR)

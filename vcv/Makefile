@@ -28,7 +28,7 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
 
-all: $(TARGET)
+all: $(TARGET) res
 	@$(MAKE) --no-print-directory tests
 
 run: install
@@ -61,6 +61,19 @@ axo_tests:
 
 win_dist:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
+
+INFO_FILES = $(wildcard $(SHARED)/CoreModules/info/*_info.hh)
+SVG_SOURCES = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
+
+modules: $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
+
+#Relative to the svgextract script?
+METAMODULE_ARTWORK_DIR ?= res/
+METAMODULE_INFO_DIR ?= $(SHARED)/CoreModules/info/
+
+$(SHARED)/CoreModules/info/%.hh: $(SHARED)/CoreModules/svg/%.svg
+	python3 $(SHARED)/svgextract/svgextract.py processsvg $<
+
 
 .PHONY: tests core_tests vcv_tests util_tests axo_tests
 

@@ -1,7 +1,6 @@
 #pragma once
 #include <cstddef>
-#include <cstring>
-#include <string>
+#include <string_view>
 
 // A null-terminated string with fixed compile-time capacity
 template<size_t CAPACITY>
@@ -44,11 +43,13 @@ struct StaticString {
 
 	template<size_t CAP2>
 	bool operator==(const StaticString<CAP2> &rhs) const {
-		return (strcmp(data, rhs.data) == 0);
+		return std::string_view{data} == std::string_view{rhs};
+		// return (strcmp(data, rhs.data) == 0);
 	}
 
 	bool is_equal(const char *rhs) const {
-		return (strcmp(data, rhs) == 0);
+		return std::string_view{data} == std::string_view{rhs};
+		// return (strcmp(data, rhs) == 0);
 	}
 
 	operator const char *() const {

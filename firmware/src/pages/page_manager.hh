@@ -8,8 +8,9 @@
 #include "patch_player.hh"
 #include "patchlist.hh"
 
-//Pages:
+// Pages:
 #include "pages/knob_view.hh"
+#include "pages/module_view.hh"
 #include "pages/patch_selector.hh"
 #include "pages/sketches_test_jq.hh"
 
@@ -24,11 +25,12 @@ class PageManager {
 		std::make_unique<GroupArcSketchesPage2>(info),
 		std::make_unique<PatchSelectorPage>(info),
 		std::make_unique<KnobView3>(info),
+		std::make_unique<ModuleViewPage>(info),
 		// std::make_unique<GroupArcSketchesPage1>(info),
 		// std::make_unique<GroupArcSketchesPage3>(info),
 		// std::make_unique<GroupArcSketchesPage4>(info),
 		// std::make_unique<Dropdown1bPage>(info),
-		std::make_unique<SMRTestPage>(info),
+		// std::make_unique<SMRTestPage>(info),
 		// std::make_unique<SMRTestLargePage>(info),
 		// std::make_unique<PatchOverviewPage>(info),
 		// std::make_unique<ArcTestJQPage>(info),

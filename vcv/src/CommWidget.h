@@ -3,6 +3,7 @@
 #include <rack.hpp>
 using namespace rack;
 
+// TODO: CommModuleWidget will go away, in favor of ModuleInfo technique (used by EnOsc)
 class CommModuleWidget : public app::ModuleWidget {
 protected:
 	const float kKnobSpacingY = 17;
@@ -13,10 +14,6 @@ protected:
 	const float kGridSpacingX = 30;
 	const float kModuleHeight = 128.5f;
 
-public:
-	int getModuleId();
-
-protected:
 	void addLabeledKnob(const std::string labelText, int knobID, Vec posGrid, float defaultValue = 0.f);
 	void addSmallLabeledKnob(const std::string labelText, int knobID, Vec posGrid, float defaultValue = 0.f);
 	void addLabeledInput(const std::string labelText, int inputID, Vec posGrid);
@@ -53,4 +50,73 @@ private:
 
 class MetaModuleTextBox : public LedDisplayTextField {
 	virtual void draw(const DrawArgs &args) override;
+};
+
+struct Davies1900hBlackKnob4ms : Davies1900hKnob {
+	Davies1900hBlackKnob4ms()
+	{
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Davies1900hBlack_4ms.svg")));
+	}
+};
+
+struct Davies1900hBlackKnobUnlined4ms : Davies1900hKnob {
+	Davies1900hBlackKnobUnlined4ms()
+	{
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Davies1900hBlackUnlined_4ms.svg")));
+	}
+};
+
+struct DaviesLarge4ms : Davies1900hKnob {
+	DaviesLarge4ms()
+	{
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/DaviesLarge_4ms.svg")));
+	}
+};
+
+struct Small9mmKnob : RoundKnob {
+	Small9mmKnob()
+	{
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/9mmKnob.svg")));
+	}
+};
+
+struct Small9mmUnlinedKnob : RoundKnob {
+	Small9mmUnlinedKnob()
+	{
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/9mmUnlinedKnob.svg")));
+	}
+};
+
+struct SubMiniToggle3pos : rack::app::SvgSwitch {
+	SubMiniToggle3pos()
+	{
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_2.svg")));
+	}
+};
+
+struct SubMiniToggleHoriz3pos : rack::app::SvgSwitch {
+	SubMiniToggleHoriz3pos()
+	{
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_2.svg")));
+	}
+};
+
+struct SubMiniToggle2pos : rack::app::SvgSwitch {
+	SubMiniToggle2pos()
+	{
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_2.svg")));
+	}
+};
+
+struct SubMiniToggleHoriz2pos : rack::app::SvgSwitch {
+	SubMiniToggleHoriz2pos()
+	{
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_2.svg")));
+	}
 };

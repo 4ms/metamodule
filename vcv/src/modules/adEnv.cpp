@@ -1,6 +1,6 @@
 #include "CommModule.h"
 #include "CommWidget.h"
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "math.hh"
 
 // Todo: separate out the "core" from this and put it in CoreModules/

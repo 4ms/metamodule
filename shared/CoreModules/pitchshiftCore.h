@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "processors/pitchShift.h"
 #include "util/math.hh"
 
@@ -24,18 +24,10 @@ class PitchshiftCore : public CoreProcessor {
 	virtual StaticString<LongNameChars> get_description() override { return description; }
 	// clang-format on
 public:
-	PitchshiftCore() {}
+	PitchshiftCore() {
+	}
 
-	PitchshiftCore(float &in, float &shift, float &window, float &mix, float &out)
-		: signalInput{in}
-		, shiftCV{shift}
-		, windowCV{window}
-		, mixCV{mix}
-		, signalOutput{out}
-	{}
-
-	virtual void update(void) override
-	{
+	void update(void) override {
 		auto finalWindow = constrain(windowOffset + windowCV, 0.0f, 1.0f);
 		p.windowSize = map_value(finalWindow, 0.0f, 1.0f, 20.0f, static_cast<float>(maxWindowSize));
 		p.shiftAmount = coarseShift + fineShift + (shiftCV * 12.0f);
@@ -43,8 +35,7 @@ public:
 		signalOutput = p.update(signalInput);
 	}
 
-	virtual void set_param(int const param_id, const float val) override
-	{
+	void set_param(int const param_id, const float val) override {
 		switch (param_id) {
 			case 0:
 				coarseShift = map_value(val, 0.0f, 1.0f, -12.0f, 12.0f);
@@ -60,13 +51,11 @@ public:
 				break;
 		}
 	}
-	virtual void set_samplerate(const float sr) override
-	{
+	void set_samplerate(const float sr) override {
 		p.setSampleRate(sr);
 	}
 
-	virtual void set_input(const int input_id, const float val) override
-	{
+	void set_input(const int input_id, const float val) override {
 		switch (input_id) {
 			case 0:
 				signalInput = val;
@@ -83,8 +72,7 @@ public:
 		}
 	}
 
-	virtual float get_output(const int output_id) const override
-	{
+	float get_output(const int output_id) const override {
 		float output = 0;
 		switch (output_id) {
 			case 0:
@@ -94,30 +82,22 @@ public:
 		return output;
 	}
 
-	static std::unique_ptr<CoreProcessor> create()
-	{
+	static std::unique_ptr<CoreProcessor> create() {
 		return std::make_unique<PitchshiftCore>();
 	}
-	static std::unique_ptr<CoreProcessor> create(float *nodelist, const uint8_t *idx)
-	{
-		return std::make_unique<PitchshiftCore>(
-			nodelist[idx[0]], nodelist[idx[1]], nodelist[idx[2]], nodelist[idx[3]], nodelist[idx[4]]);
-	}
+
 	static constexpr char typeID[20] = "PITCHSHIFT";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
-	static inline bool s_registered_wp =
-		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);
 
 private:
 	const static inline long maxWindowSize = 9600;
 	PitchShift<maxWindowSize> p;
 
-	float &signalInput = nodes[0];
-	float &shiftCV = nodes[1];
-	float &windowCV = nodes[2];
-	float &mixCV = nodes[3];
-	float &signalOutput = nodes[4];
-
+	float signalInput = 0;
+	float shiftCV = 0;
+	float windowCV = 0;
+	float mixCV = 0;
+	float signalOutput = 0;
 	float coarseShift = 0;
 	float fineShift = 0;
 	float mixOffset = 0;

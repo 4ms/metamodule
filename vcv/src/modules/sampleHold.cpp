@@ -1,6 +1,6 @@
 #include "CommModule.h"
 #include "CommWidget.h"
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "math.hh"
 
 struct SampleHoldModule : CommModule {

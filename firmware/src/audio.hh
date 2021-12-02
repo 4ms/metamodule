@@ -10,6 +10,7 @@
 #include "patch_player.hh"
 #include "patchlist.hh"
 #include "processors/tools/kneeCompress.h"
+#include "util/calibrator.hh"
 #include "util/interp_param.hh"
 #include "util/math.hh"
 #include "util/oscs.hh"
@@ -34,7 +35,7 @@ public:
 				CodecT &codec,
 				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
-				ParamQueue &cache,
+				ParamQueue &queue,
 				UiAudioMailbox &uiaudiomailbox,
 				DoubleBufParamBlock &p,
 				DoubleAuxStreamBlock &auxs);
@@ -44,7 +45,7 @@ public:
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxStreamBlock &aux);
 
 private:
-	ParamQueue &cache;
+	ParamQueue &param_queue;
 	UiAudioMailbox &mbox;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
@@ -52,6 +53,8 @@ private:
 
 	CodecT &codec_;
 	uint32_t sample_rate_;
+
+	Calibrator incal[NumAudioIn];
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()

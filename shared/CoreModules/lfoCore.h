@@ -1,7 +1,7 @@
 #pragma once
 
-#include "coreProcessor.h"
-#include "moduleTypes.h"
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/moduleFactory.hh"
 #include "util/math.hh"
 #include "util/math_tables.hh"
 #include "util/parameter.h"
@@ -33,23 +33,9 @@ public:
 	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Freq", "Reset"};
 	static inline const StaticString<LongNameChars> description{"SineLFO"};
 
-	NodeLFOCore() {
-		freqJack = 0.f;
-		resetJack = 0.f;
-		sinOut = 0.f;
-	}
+	NodeLFOCore() = default;
 
-	NodeLFOCore(float &nFreq, float &nReset, float &nOut)
-		: freqJack{nFreq}
-		, resetJack{nReset}
-		, sinOut{nOut} {
-		freqJack = 0.f;
-		resetJack = 0.f;
-		sinOut = 0.f;
-	}
-
-	virtual void update() override {
-		check_changes();
+	void update() override {
 
 		if (doReset) {
 			phaccu = 0.f;
@@ -62,35 +48,11 @@ public:
 		sinOut = sinTable.interp_wrap(phaccu + phaseOffset) * level;
 	}
 
-	void check_changes() {
-		// Freq jack range is -10 .. 10 octaves,
-		// Freq jack expects -1..+1 to represent -10V to +10V
-		if (freqJack.isChanged()) {
-			float val = freqJack.getValue();
-			if (val == 0.f)
-				cv_frequency = 1.0f;
-			else if (val >= 1.f)
-				cv_frequency = 1024.f;
-			else if (val <= -1.f)
-				cv_frequency = 1.f / 1024.f;
-			else if (val > 0.f)
-				cv_frequency = exp10Table.closest(val);
-			else
-				cv_frequency = 1.0f / exp10Table.closest(-val);
-			combineKnobCVFreq();
-		}
-
-		if (resetJack.isChanged()) {
-			// Todo: check hystersis here
-			if (resetJack > GateThreshold) {
-				if (!lastReset) {
-					doReset = true;
-				}
-				lastReset = true;
-			} else
-				lastReset = false;
-		}
-	}
+	// void check_changes() {
+	// if (resetJack.isChanged()) {
+	// Todo: check hystersis here
+	// }
+	// }
 
 	//
 	void set_param(const int param_id, const float val) override {
@@ -112,10 +74,29 @@ public:
 
 	void set_input(const int input_id, const float val) override {
 		if (input_id == 0) {
-			freqJack = val;
+			// Freq jack range is -10 .. 10 octaves,
+			// Freq jack expects -1..+1 to represent -10V to +10V
+			if (val == 0.f)
+				cv_frequency = 1.0f;
+			else if (val >= 1.f)
+				cv_frequency = 1024.f;
+			else if (val <= -1.f)
+				cv_frequency = 1.f / 1024.f;
+			else if (val > 0.f)
+				cv_frequency = exp10Table.closest(val);
+			else
+				cv_frequency = 1.0f / exp10Table.closest(-val);
+			combineKnobCVFreq();
 		}
 		if (input_id == 1) {
 			resetJack = val;
+			if (resetJack > GateThreshold) {
+				if (!lastReset) {
+					doReset = true;
+				}
+				lastReset = true;
+			} else
+				lastReset = false;
 		}
 	}
 
@@ -135,20 +116,15 @@ public:
 	static std::unique_ptr<CoreProcessor> create() {
 		return std::make_unique<NodeLFOCore>();
 	}
-	static std::unique_ptr<CoreProcessor> create(float *nodelist, const uint8_t *idx) {
-		return std::make_unique<NodeLFOCore>(nodelist[idx[0]], nodelist[idx[1]], nodelist[idx[2]]);
-	}
 	static constexpr char typeID[20] = "LFOSINE";
 	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
-	static inline bool s_registered_wp =
-		ModuleFactory::registerModuleType(typeID, description, create, NumInJacks, NumOutJacks, NumKnobs);
 
 private:
 	const float GateThreshold = 0.1f;
 
-	RefParameter<float> freqJack = nodes[0];
-	RefParameter<float> resetJack = nodes[1];
-	RefParameter<float> sinOut = nodes[2];
+	Parameter<float> freqJack{0.f};
+	Parameter<float> resetJack{0.f};
+	Parameter<float> sinOut{0.f};
 
 	// knobs
 	float phaseOffset = 0;
@@ -164,6 +140,6 @@ private:
 	bool doReset = false;
 
 	void combineKnobCVFreq() {
-		frequency = knob_frequency + cv_frequency;
+		frequency = knob_frequency * cv_frequency;
 	}
 };

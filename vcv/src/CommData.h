@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/moduleTypes.h"
+#include "CoreModules/moduleFactory.hh"
 #include "util/math.hh"
 #include <string>
 #include <vector>
