@@ -5,13 +5,12 @@
 #include "pages/page_manager.hh"
 #include "params.hh"
 #include "patchlist.hh"
+#include "static_buffers.hh"
 #include "util/analyzed_signal.hh"
 #include "util/countzip.hh"
 
 namespace MetaModule
 {
-namespace StaticBuffers
-{} // namespace StaticBuffers
 
 class Ui {
 private:
@@ -78,7 +77,6 @@ public:
 	}
 
 private:
-			if (pot < pot_min[i])
 	mdrivlib::Timekeeper page_update_tm;
 
 	uint32_t last_dbg_output_tm = 0;
