@@ -48,6 +48,9 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI3 | RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI23 |
 							RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_ADC | RCC_PERIPHCLK_SDMMC12 | RCC_PERIPHCLK_LTDC,
+	//104: 63.883Hz
+	//105: 63.275Hz
+	//112: 59.32Hz
 	.PLL4 =
 		{
 			.PLLState = RCC_PLL_ON,
@@ -55,7 +58,7 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 			.PLLM = 4,
 			.PLLN = 99,
 			.PLLP = 6,
-			.PLLQ = 102,
+			.PLLQ = 112,
 			.PLLR = 9,
 			.PLLRGE = RCC_PLL4IFRANGE_1,
 			.PLLFRACV = 0,
