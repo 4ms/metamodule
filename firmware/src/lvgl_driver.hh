@@ -109,7 +109,7 @@ public:
 	static void init(MetaParams &metaparams, std::span<lv_color_t, BufferSize> buf) {
 		m = &metaparams;
 
-		_screen_configure.setup_driver_chip(mdrivlib::ST77XX::ST7789RGBInit<ScreenConf>::cmds);
+		_screen_configure.setup_driver_chip(ST7789RGBInit::cmds);
 		_ltdc_driver.init(buf.data());
 
 		// for (int i = 0; i < 16; i++) {
