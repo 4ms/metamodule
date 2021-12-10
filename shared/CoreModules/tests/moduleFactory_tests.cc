@@ -89,7 +89,7 @@ TEST_CASE("Register ModuleTypes with an object constructed from static constexpr
 
 			auto info = ModuleFactory::getModuleInfo("EnOsc2");
 			CHECK(info.width_hp == 16);
-			CHECK(info.svg_filename == "res/EnOsc-artwork.svg");
+			CHECK(info.svg_filename == "res/modules/EnOsc-artwork.svg");
 			CHECK(info.Knobs[0].short_name == "Spread");
 			CHECK(info.Knobs[1].short_name == "Scale");
 			CHECK(info.Knobs[2].short_name == "Pitch");

@@ -6,7 +6,7 @@ struct BuffMultInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"BuffMult"};
     static constexpr std::string_view description{"Buffered Multiple"};
     static constexpr uint32_t width_hp = 3;
-    static constexpr std::string_view svg_filename{"res/BuffMult-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/BuffMult-artwork.svg"};
 
     static constexpr int NumKnobs = 0;
     

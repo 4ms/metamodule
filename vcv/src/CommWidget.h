@@ -55,68 +55,68 @@ class MetaModuleTextBox : public LedDisplayTextField {
 struct Davies1900hBlackKnob4ms : Davies1900hKnob {
 	Davies1900hBlackKnob4ms()
 	{
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Davies1900hBlack_4ms.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Davies1900hBlack.svg")));
 	}
 };
 
 struct Davies1900hBlackKnobUnlined4ms : Davies1900hKnob {
 	Davies1900hBlackKnobUnlined4ms()
 	{
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Davies1900hBlackUnlined_4ms.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Davies1900hBlack_no_pip.svg")));
 	}
 };
 
 struct DaviesLarge4ms : Davies1900hKnob {
 	DaviesLarge4ms()
 	{
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/DaviesLarge_4ms.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Davies_large.svg")));
 	}
 };
 
 struct Small9mmKnob : RoundKnob {
 	Small9mmKnob()
 	{
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/9mmKnob.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/9mm_knob.svg")));
 	}
 };
 
 struct Small9mmUnlinedKnob : RoundKnob {
 	Small9mmUnlinedKnob()
 	{
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/9mmUnlinedKnob.svg")));
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/9mm_knob_no_pip.svg")));
 	}
 };
 
 struct SubMiniToggle3pos : rack::app::SvgSwitch {
 	SubMiniToggle3pos()
 	{
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_1.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_2.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggle_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggle_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggle_2.svg")));
 	}
 };
 
 struct SubMiniToggleHoriz3pos : rack::app::SvgSwitch {
 	SubMiniToggleHoriz3pos()
 	{
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_1.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_2.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggleH_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggleH_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggleH_2.svg")));
 	}
 };
 
 struct SubMiniToggle2pos : rack::app::SvgSwitch {
 	SubMiniToggle2pos()
 	{
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggle_2.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggle_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggle_2.svg")));
 	}
 };
 
 struct SubMiniToggleHoriz2pos : rack::app::SvgSwitch {
 	SubMiniToggleHoriz2pos()
 	{
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/SubMiniToggleH_2.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggleH_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggleH_2.svg")));
 	}
 };

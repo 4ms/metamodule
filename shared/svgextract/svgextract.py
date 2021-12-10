@@ -388,7 +388,7 @@ struct {slug}Info : ModuleInfoBase {{
     static constexpr std::string_view slug{{"{slug}"}};
     static constexpr std::string_view description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
-    static constexpr std::string_view svg_filename{{"res/{slug}-artwork.svg"}};
+    static constexpr std::string_view svg_filename{{"res/modules/{slug}-artwork.svg"}};
 
     static constexpr int NumKnobs = {len(components['params'])};
     {make_enum("", "Knob", components['params'])}
@@ -601,7 +601,7 @@ def processSvg(svgFilename):
     # VCV Artwork file
     outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
     if outputpath is None:
-        outputpath = input_default("Directory to save SVG artwork file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../vcv/res"))
+        outputpath = input_default("Directory to save SVG artwork file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../vcv/res/modules"))
     extractArtwork(svgFilename, os.path.join(outputpath, slug + "-artwork.svg"))
 
     # Core Module files
