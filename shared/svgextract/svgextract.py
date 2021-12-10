@@ -482,8 +482,15 @@ struct {slug}Info : ModuleInfoBase {{
 """
     return source
 
+def pathFromHere(path):
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)),path)
 
-def createInfoFile(svgFilename, infoFilePath):
+def createInfoFile(svgFilename, infoFilePath = None):
+    if infoFilePath == None:
+        infoFilePath = os.getenv('METAMODULE_INFO_DIR')
+        if infoFilePath is None:
+            infoFilePath = input_default("Directory to save ModuleInfo file", pathFromHere("../CoreModules/info")))
+
     if os.path.isdir(infoFilePath) == False:
         print(f"Not a directory: {infoFilePath}. Aborting without creating an info file.")
         return
@@ -501,7 +508,13 @@ def createInfoFile(svgFilename, infoFilePath):
     return components['slug']
 
 
-def extractArtwork(svgFilename, artworkFilename):
+def extractArtworkLayer(svgFilename, artworkFilename = None, slug = None):
+    if artworkFilename == None:
+        outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
+        if outputpath is None:
+            outputpath = input_default("Directory to save SVG artwork file", pathFromHere("../../vcv/res/modules"))
+        artworkFilename = os.path.join(outputpath, slug + "-artwork.svg")
+
     print(f"reading from {svgFilename}, writing to {artworkFilename}")
     register_all_namespaces(svgFilename)
 
@@ -588,30 +601,22 @@ def appendImageList(slug, artwork_Carray, image_list_file):
 
 
 def processSvg(svgFilename):
-    # Info File
-    outputpath = os.getenv('METAMODULE_INFO_DIR')
-    if outputpath is None:
-        outputpath = input_default("Directory to save ModuleInfo file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../CoreModules/info"))
-    slug = createInfoFile(svgFilename, outputpath)
+    slug = createInfoFile(svgFilename)
+
     if slug is None:
         print("No slug found, aborting")
         return
 
-    # VCV Artwork file
-    outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
-    if outputpath is None:
-        outputpath = input_default("Directory to save SVG artwork file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../vcv/res/modules"))
-    extractArtwork(svgFilename, os.path.join(outputpath, slug + "-artwork.svg"))
-
-    # Core Module files
-    coreModuleDir = os.getenv('METAMODULE_COREMODULE_DIR')
-    if coreModuleDir is None:
-        coreModuleDir = input_default("CoreModule dir", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../shared/CoreModules/"))
-    createCoreModule(slug, coreModuleDir)
+    extractArtworkLayer(svgFilename, None, slug)
+    createCoreModule(slug)
     
 
+def createCoreModule(slug, coreModuleDir = None):
+    if coreModuleDir == None:
+        coreModuleDir = os.getenv('METAMODULE_COREMODULE_DIR')
+        if coreModuleDir is None:
+            coreModuleDir = input_default("CoreModule dir", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../shared/CoreModules/"))
 
-def createCoreModule(slug, coreModuleDir):
     newCoreFileName = slug + 'Core.hpp'
     if not os.path.exists(newCoreFileName):
         # Replace 'Slug' in template file with our slug, then write to a new file
@@ -641,7 +646,7 @@ processsvg [input svg file name]
     Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR, METAMODULE_COREMODULE_DIR if found,
     otherwise prompts user for the values
 
-createinfo [input svg file name] [output path for ModuleInfo file]
+createinfo [input svg file name] {{optional output path for ModuleInfo file}}
     Creates a ModuleInfo struct and saves it to a file in the given path. The
     file will be named "slug_info.hh", where "slug" is the string of the text
     element with name/id "slug" found in the components layer/group of the SVG
@@ -681,18 +686,21 @@ def parse_args(args):
         processSvg(inputfile)
         return
 
+    if cmd == 'createinfo':
+        output = args.pop(0) if len(args) > 0 else None
+        createInfoFile(inputfile, output)
+        return
+
+    # Two args required for all other cmds:
+
     if len(args) == 0:
         usage(script)
         return
 
-    output= args.pop(0)
-
-    if cmd == 'createinfo':
-        createInfoFile(inputfile, output)
-        return
+    output = args.pop(0)
 
     if cmd == 'extractart':
-        extractArtwork(inputfile, output)
+        extractArtworkLayer(inputfile, output)
         return
 
     if cmd == 'createlvimg':
