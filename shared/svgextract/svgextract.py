@@ -521,22 +521,22 @@ def extractArtwork(svgFilename, artworkFilename):
     print(f"Wrote artwork svg file for vcv: {artworkFilename}")
 
 
-def createComponentImageCompositeCmd(svgFilename, pngFilename):
-    PXSCALE = 240/(5.059*72)
-    JACKSIZE_X = 20
-    JACKSIZE_Y = 18
-    OFFX = -JACKSIZE_X / 2
-    OFFY = -JACKSIZE_Y / 2
-    register_all_namespaces(svgFilename)
-    tree = xml.etree.ElementTree.parse(svgFilename)
-    components = panel_to_components(tree)
-    cmd = f"{pngFilename}"
-    for c in components['outputs'] + components['inputs']:
-        cmd += f" src/pages/images/jack-black.png -geometry +{PXSCALE*c['cx'] + OFFX}+{PXSCALE*c['cy'] + OFFY} -composite"
+# def createComponentImageCompositeCmd(svgFilename, pngFilename):
+#     PXSCALE = 240/(5.059*72)
+#     JACKSIZE_X = 20
+#     JACKSIZE_Y = 18
+#     OFFX = -JACKSIZE_X / 2
+#     OFFY = -JACKSIZE_Y / 2
+#     register_all_namespaces(svgFilename)
+#     tree = xml.etree.ElementTree.parse(svgFilename)
+#     components = panel_to_components(tree)
+#     cmd = f"{pngFilename}"
+#     for c in components['outputs'] + components['inputs']:
+#         cmd += f" src/pages/images/jack-black.png -geometry +{PXSCALE*c['cx'] + OFFX}+{PXSCALE*c['cy'] + OFFY} -composite"
     
-    cmd += " " + pngFilename.strip(".png") + "_comps.png"
-    # magick EnOsc_artwork_240.png jack-black.png -geometry +5+10 -composite jack-black.png -geometry +40+20 -composite tt.png
-    return cmd
+#     cmd += " " + pngFilename.strip(".png") + "_comps.png"
+#     # magick EnOsc_artwork_240.png jack-black.png -geometry +5+10 -composite jack-black.png -geometry +40+20 -composite tt.png
+#     return cmd
 
    
 def createlvimg(artworkSvgFilename, pngFilename):
@@ -560,11 +560,10 @@ def createlvimg(artworkSvgFilename, pngFilename):
         print(f"Failed running {inkscapeBin} and {convertBin}. Aborting")
         return
 
-    cmd = createComponentImageCompositeCmd(artworkSvgFilename, pngFilename)
-    print("Going to run "+ cmd)
-    subprocess.run(f'{convertBin} {cmd}', shell=True, check=True)
-
-    print(f"Created {pngFilename} from {artworkSvgFilename}")
+    # cmd = createComponentImageCompositeCmd(artworkSvgFilename, pngFilename)
+    # print("Going to run "+ cmd)
+    # subprocess.run(f'{convertBin} {cmd}', shell=True, check=True)
+    # print(f"Created {pngFilename} from {artworkSvgFilename}")
 
     # PNG ==> LVGL image (C file with array)
     lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/lv_img_conv/lv_img_conv.js"
