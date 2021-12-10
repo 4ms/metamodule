@@ -8,6 +8,7 @@
 LV_IMG_DECLARE(jack_x);
 LV_IMG_DECLARE(knob9mm_x);
 LV_IMG_DECLARE(knob_x);
+LV_IMG_DECLARE(button_x);
 LV_IMG_DECLARE(knob_unlined_x);
 LV_IMG_DECLARE(switch_left);
 LV_IMG_DECLARE(switch_right);
@@ -143,9 +144,11 @@ struct ModuleViewPage : PageBase {
 				sw = &switch_left;
 			else if (el.switch_type == SwitchDef::Encoder)
 				sw = &knob_unlined_x;
+			else if (el.switch_type == SwitchDef::MomentaryButton || el.switch_type == SwitchDef::LatchingButton)
+				sw = &button_x;
 			else
 				continue;
-			lv_canvas_draw_img(canvas, x - sw->header.w / 2, y - sw->header.h / 2, &sw, &img_dsc);
+			lv_canvas_draw_img(canvas, x - sw->header.w / 2, y - sw->header.h / 2, sw, &img_dsc);
 		}
 		// for (const auto el : info.Sliders) {
 		// 	_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
