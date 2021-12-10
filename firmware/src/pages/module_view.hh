@@ -10,6 +10,8 @@ LV_IMG_DECLARE(knob9mm_x);
 LV_IMG_DECLARE(knob_x);
 LV_IMG_DECLARE(button_x);
 LV_IMG_DECLARE(knob_unlined_x);
+LV_IMG_DECLARE(knob_large_x);
+LV_IMG_DECLARE(slider_x);
 LV_IMG_DECLARE(switch_left);
 LV_IMG_DECLARE(switch_right);
 LV_IMG_DECLARE(switch_up);
@@ -113,6 +115,10 @@ struct ModuleViewPage : PageBase {
 				knob = &knob9mm_x;
 			else if (el.knob_style == KnobDef::Medium)
 				knob = &knob_x;
+			else if (el.knob_style == KnobDef::Large)
+				knob = &knob_large_x;
+			else if (el.knob_style == KnobDef::Slider25mm)
+				knob = &slider_x;
 			else
 				continue;
 			lv_canvas_draw_img(canvas, x - knob->header.w / 2, y - knob->header.h / 2, knob, &img_dsc);
