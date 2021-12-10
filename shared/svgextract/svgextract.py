@@ -576,10 +576,6 @@ def createlvimg(artworkSvgFilename, pngFilename):
     print(f"Created {pngFilename.strip('.png')}.c file from {pngFilename}")
 
 
-
-
-
-
 def appendImageList(slug, artwork_Carray, image_list_file):
     newText = f'''LV_IMG_DECLARE({artwork_Carray});
 '''
@@ -593,17 +589,46 @@ def appendImageList(slug, artwork_Carray, image_list_file):
 
 
 def processSvg(svgFilename):
+    # Info File
     outputpath = os.getenv('METAMODULE_INFO_DIR')
     if outputpath is None:
         outputpath = input_default("Directory to save ModuleInfo file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../CoreModules/info"))
     slug = createInfoFile(svgFilename, outputpath)
     if slug is None:
+        print("No slug found, aborting")
         return
 
+    # VCV Artwork file
     outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
     if outputpath is None:
         outputpath = input_default("Directory to save SVG artwork file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../vcv/res"))
     extractArtwork(svgFilename, os.path.join(outputpath, slug + "-artwork.svg"))
+
+    # Core Module files
+    coreModuleDir = os.getenv('METAMODULE_COREMODULE_DIR')
+    if coreModuleDir is None:
+        coreModuleDir = input_default("CoreModule dir", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../shared/CoreModules/"))
+    createCoreModule(slug, coreModuleDir)
+    
+
+
+def createCoreModule(slug, coreModuleDir):
+    newCoreFileName = slug + 'Core.hpp'
+    if not os.path.exists(newCoreFileName):
+        # Replace 'Slug' in template file with our slug, then write to a new file
+        coreTemplateFilename = 'template_core_hpp.tmpl'
+        with open(os.path.join(coreModuleDir, coreTemplateFilename), 'r') as file :
+            filedata = file.read()
+        filedata = filedata.replace('Slug', slug)
+        with open(os.path.join(coreModuleDir, newCoreFileName), 'w') as file:
+            file.write(filedata)
+            print(f"Wrote file {newCoreFileName} in {coreModuleDir}")
+
+    newCoreCPPFileName = slug+'Core.cpp'
+    if not os.path.exists(newCoreCPPFileName):
+        with open(os.path.join(coreModuleDir, newCoreCPPFileName), 'w') as file:
+            file.write("#include " + '\"' + newCoreFileName + '\"')
+            print(f"Wrote file {newCoreCPPFileName} in {coreModuleDir}")
 
 
 def usage(script):
@@ -613,16 +638,15 @@ Usage: {script} <command> ...
 Commands:
 
 processsvg [input svg file name]
-    Runs createinfo and extractart on the given file.
-    Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR, METAMODULE_PNG_DIR if found,
+    Runs createinfo, extractart, and createcorefiles on the given file.
+    Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR, METAMODULE_COREMODULE_DIR if found,
     otherwise prompts user for the values
 
 createinfo [input svg file name] [output path for ModuleInfo file]
-    Creates a ModuleInfo struct and saves it to a file in the given path.
-    The file will be named "slug_info.hh", where "slug" is the lower-case
-    string of the text element with name/id "slug" found in the components layer/group
-    of the SVG file.
-    File will be overwritten if it exists.
+    Creates a ModuleInfo struct and saves it to a file in the given path. The
+    file will be named "slug_info.hh", where "slug" is the string of the text
+    element with name/id "slug" found in the components layer/group of the SVG
+    file. File will be overwritten if it exists.
 
 extractart [input SVG file name] [output artwork SVG file name]
     Saves a new SVG file with the components layer removed
