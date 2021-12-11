@@ -665,9 +665,9 @@
     <circle id="Rotate_Trig" data-name="Rotate Trig Down" cx="257" cy="244.85" r="11.34" style="fill: #80ff80"/>
     <circle id="Rotate_CV_In" data-name="Rotate CV In" cx="186.72" cy="209.63" r="11.34" style="fill: lime"/>
     <circle id="Rotate_Trig-2" data-name="Rotate Trig Up" cx="116.35" cy="243.84" r="11.34" style="fill: #80ff80"/>
-    <circle id="IN_evens" data-name="IN evens" cx="66.79" cy="247.28" r="11.34" style="fill: lime"/>
+    <circle id="IN_evens" data-name="In Evens" cx="66.79" cy="247.28" r="11.34" style="fill: lime"/>
     <circle id="Input_Clip_RedWhite_" data-name="Input Clip (RedWhite)" cx="45.51" cy="230.23" r="4.96" style="fill: #f0f"/>
-    <circle id="IN_odds" data-name="IN odds" cx="25.44" cy="247.06" r="11.34" style="fill: lime"/>
+    <circle id="IN_odds" data-name="In Odds" cx="25.44" cy="247.06" r="11.34" style="fill: lime"/>
     <rect id="Fast_Slow" data-name="Fast | Slow" x="349.59" y="203.11" width="11.34" height="17.01" transform="translate(566.87 -143.65) rotate(90)" style="fill: #ffc080"/>
     <rect id="Post_Pre" data-name="Post Pre" x="349.59" y="178.74" width="11.34" height="17.01" transform="translate(542.5 -168.02) rotate(90)" style="fill: #ff8080"/>
     <circle id="Env._Out_6" data-name="Env. Out 6" cx="316.41" cy="206.48" r="11.34" style="fill: blue"/>

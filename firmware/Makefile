@@ -22,7 +22,7 @@ export VALID_BOARDS = mini medium max pcmdev
 .PHONY: all mp1-mini mp1-pcmdev mp1-med patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
 
 
-all: patches moduleinfo images mp1-med tests #mp1-mini h7 
+all: patches images mp1-med tests #mp1-mini h7 
 
 # Binaries
 
@@ -59,24 +59,23 @@ patches: $(PATCH_HEADERS)
 MODULEIMG_SVGS = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
 MODULEIMG_PNG240S = $(addprefix src/pages/images/,$(addsuffix _240.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
 MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
+INFO_FILES = $(addprefix $(SHARED)/CoreModules/info/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
 
-images: $(MODULEIMG_C)
+images: $(MODULEIMG_C) $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
 
-src/pages/images/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
-	$(info Converting $<)
+src/pages/images/%_artwork_240.c $(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
+	$(info Creating 240px-height lvgl img from full-sized svg artwork $<)
 	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< $(subst .c,.png,$@)
+	$(info Checking if $* needs to be added to src/pages/images/image_list.hh)
 	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork_240 src/pages/images/image_list.hh
+	$(info Creating ModuleInfo header file from $<)
+	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
 
 ## Module Info files
+# moduleinfo: $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
 
-INFO_FILES = $(addprefix $(SHARED)/CoreModules/info/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
-
-moduleinfo: $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
-
-$(SHARED)/CoreModules/info/%.hh: $(SHARED)/CoreModules/svg/%.svg
-	##FIXME: processsvg creates the info file and the vcv artwork svg: we just need the info file here
-	python3 $(SHARED)/svgextract/svgextract.py processsvg $<
+# $(SHARED)/CoreModules/info/%.hh: $(SHARED)/CoreModules/svg/%.svg
 
 .SECONDARY: $(MODULEIMG_PNG240S)
 

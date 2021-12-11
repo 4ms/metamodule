@@ -1,1 +1,1 @@
-#include "enoscCore.hpp"
+#include "EnOscCore.hpp"
