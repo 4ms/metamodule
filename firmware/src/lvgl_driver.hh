@@ -1,13 +1,14 @@
 #include "conf/screen_buffer_conf.hh"
-#include "conf/screen_ltdc_conf.hh"
-#include "drivers/screen_ILI9341.hh"
-//#include "drivers/screen_ST77XX.hh"
-#include "drivers/screen_ltdc.hh"
-#include "drivers/screen_ltdc_setup.hh"
+#include "conf/screen_conf.hh"
+//#include "drivers/screen_ILI9341.hh"
+#include "drivers/screen_ST77XX.hh"
+//#include "drivers/screen_ltdc.hh"
+//#include "drivers/screen_ltdc_setup.hh"
 #include "lvgl/lvgl.h"
 #include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
 #include "printf.h"
+#include "screen_writer.hh"
 #include "timekeeper.hh"
 #include "uart.hh"
 #include <span>
@@ -104,23 +105,31 @@ class MMDisplay {
 	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
 
 private:
-	static inline ScreenParallelWriter<ScreenConf> _ltdc_driver;
-	static inline mdrivlib::LTDCParallelSetup<ScreenControlConf> _screen_configure;
+	static inline ScreenFrameWriter _spi_driver;
+	// static inline ScreenParallelWriter<ScreenConf> _ltdc_driver;
+	// static inline mdrivlib::LTDCParallelSetup<ScreenControlConf> _screen_configure;
+
+	static inline std::array<lv_color_t, BufferSize> testbuf;
 
 public:
-	static void init(MetaParams &metaparams, std::span<lv_color_t, BufferSize> buf) {
+	static void init(MetaParams &metaparams, std::span<lv_color_t> initial_buf) {
 		m = &metaparams;
 
-		_screen_configure.setup_driver_chip(mdrivlib::ST77XX::ST7789InitLTDC<ScreenConf>::cmds);
-		// _screen_configure.setup_driver_chip(mdrivlib::ILI9341::ILI9341InitLTDC::cmds);
-		_ltdc_driver.init(buf.data());
+		_spi_driver.init();
+		_spi_driver.register_partial_frame_cb(end_flush);
+		// _screen_configure.setup_driver_chip(mdrivlib::ST77XX::ST7789InitLTDC<ScreenConf>::cmds);
+		// _ltdc_driver.init(buf.data());
+		
 
 		// for (int i = 0; i < 16; i++) {
-		// 	for (auto &px : buf)
+		// 	for (auto &px : testbuf)
 		// 		px.full = (1 << i);
-		// 	_ltdc_driver.set_buffer(buf.data());
+		// 	// _ltdc_driver.set_buffer(buf.data());
+		// 	_spi_driver.transfer_partial_frame(0, 0, 320, 240, reinterpret_cast<uint16_t *>(testbuf.data()));
 		// 	__BKPT();
 		// }
+		// for (auto &px : testbuf)
+		// 	px.full = (1 << 10);
 
 		_run_lv_tasks_tmr.init(
 			{
@@ -144,9 +153,16 @@ public:
 		_ready = false;
 	}
 
+	static void end_flush() {
+		lv_disp_flush_ready(last_used_disp_drv);
+	}
+
 	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
-		_ltdc_driver.set_buffer((void *)color_p);
-		lv_disp_flush_ready(disp_drv);
+		last_used_disp_drv = disp_drv;
+		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
+		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
+		// _ltdc_driver.set_buffer((void *)color_p);
+		// lv_disp_flush_ready(disp_drv);
 	}
 
 	static inline bool should_send_button_release = false;

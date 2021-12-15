@@ -7,11 +7,12 @@
 #include "drivers/memory_transfer.hh"
 #include "drivers/pin.hh"
 #include "drivers/spi.hh"
+#include "drivers/spi_dma_datacmd_driver.hh"
 #include "drivers/spi_screen_ST77XX.hh"
-#include "drivers/spi_screen_driver.hh"
 #include "drivers/stm32xx.h"
 
 #include "examples/hardware-tests/memory_transfer_test.hh"
+#include <span>
 
 using namespace mdrivlib;
 
@@ -20,7 +21,7 @@ namespace MetaModule
 // TODO: Make this class more general so it can be part of mdrivlib
 //  template <typename ScreenWriterConfT>
 using ScreenWriterConfT = MMScreenConf;
-class ScreenFrameWriter : public mdrivlib::DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT> {
+class ScreenFrameWriter : public mdrivlib::SpiDmaDataCmdDriver<ScreenWriterConfT, ScreenTransferDriverT> {
 	static constexpr uint32_t FrameSize = ScreenWriterConfT::FrameBytes;
 	static constexpr uint32_t HalfFrameSize = ScreenWriterConfT::HalfFrameBytes;
 
@@ -47,8 +48,8 @@ public:
 		, src{reinterpret_cast<void *>(readbuf_->data())}
 		, src_2nd_half{reinterpret_cast<void *>((uint32_t)(&readbuf_[0]) + HalfFrameSize)}
 		, _rowstart{ScreenWriterConfT::rowstart}
-		, _colstart{ScreenWriterConfT::colstart}
-	{}
+		, _colstart{ScreenWriterConfT::colstart} {
+	}
 
 	// Full frame buffer mode
 	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_,
@@ -62,7 +63,8 @@ public:
 		, _rowstart{ScreenWriterConfT::rowstart}
 		, _colstart{ScreenWriterConfT::colstart}
 
-	{}
+	{
+	}
 
 	// Direct transfer mode
 	ScreenFrameWriter(ScreenWriterConfT::FrameBufferT *readbuf_, size_t writebuffer_size)
@@ -70,23 +72,24 @@ public:
 		, src{reinterpret_cast<void *>(readbuf_->data())}
 		, src_2nd_half{src}
 		, _rowstart{ScreenWriterConfT::rowstart}
-		, _colstart{ScreenWriterConfT::colstart}
-	{}
+		, _colstart{ScreenWriterConfT::colstart} {
+	}
 
 	// Direct Partial transfer mode
 	ScreenFrameWriter()
 		: mode{PartialFrameDirect}
 		, _rowstart{ScreenWriterConfT::rowstart}
-		, _colstart{ScreenWriterConfT::colstart}
-	{}
+		, _colstart{ScreenWriterConfT::colstart} {
+	}
 
-	void init()
-	{
-		DmaSpiScreenDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
-		using InitCommands = ST7789Init<ScreenWriterConfT::width,
-										ScreenWriterConfT::height,
-										ScreenWriterConfT::IsInverted ? ST77XX::Inverted : ST77XX::NotInverted>;
-		init_display_driver<InitCommands>();
+	void init() {
+		SpiDmaDataCmdDriver<ScreenWriterConfT, ScreenTransferDriverT>::init();
+		_reset();
+		using InitCommands =
+			mdrivlib::ST77XX::ST7789Init<ScreenWriterConfT::width,
+										 ScreenWriterConfT::height,
+										 ScreenWriterConfT::IsInverted ? ST77XX::Inverted : ST77XX::NotInverted>;
+		init_display_driver(InitCommands::cmds);
 		set_rotation(ScreenWriterConfT::rotation);
 
 		////TESTS:
@@ -100,8 +103,7 @@ public:
 	}
 
 	//TODO: incorporate the MADCTL stuff in ST7789Init
-	void set_rotation(ScreenWriterConfT::Rotation rot)
-	{
+	void set_rotation(ScreenWriterConfT::Rotation rot) {
 		_rotation = rot;
 
 		uint8_t madctl = 0;
@@ -139,8 +141,7 @@ public:
 		transmit_blocking<Data>(madctl);
 	}
 
-	void transfer_buffer_to_screen()
-	{
+	void transfer_buffer_to_screen() {
 		if (mode == HalfFrameDoubleBuffer) {
 			//Total setup times = 12.5+1.6+12.5+1.6 = 28.2us, every 16Hz (or 33Hz) = <0.1 %
 			// Debug::Pin5::high(); // time to setup the first mem_xfer = 12-13us
@@ -204,14 +205,12 @@ public:
 		}
 	}
 
-	void register_partial_frame_cb(auto cb)
-	{
+	void register_partial_frame_cb(auto cb) {
 		register_callback(cb);
 	}
 
 	//~110us, as needed, typically 2.5ms spaced
-	void transfer_partial_frame(int xstart, int ystart, int xend, int yend, uint16_t *buffer)
-	{
+	void transfer_partial_frame(int xstart, int ystart, int xend, int yend, uint16_t *buffer) {
 		set_pos(xstart, ystart, xend, yend);
 		auto buffer_size_bytes = (xend - xstart + 1) * (yend - ystart + 1) * 2;
 		config_dma_transfer(reinterpret_cast<uint32_t>(buffer), buffer_size_bytes);
@@ -240,8 +239,7 @@ protected:
 	};
 	mdrivlib::MemoryTransfer<ScreenMemXferConfT> mem_xfer;
 
-	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend)
-	{
+	void set_pos(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend) {
 		Xstart += _xstart;
 		Ystart += _ystart;
 		Xend += _xstart;
@@ -255,10 +253,8 @@ protected:
 		transmit_blocking<Cmd>(ST77XX::RAMWR);
 	}
 
-	template<typename InitCmds>
-	void init_display_driver()
-	{
-		for (auto c : InitCmds::cmds) {
+	void init_display_driver(std::span<const ST77XX::InitCommand> cmds) {
+		for (auto &c : cmds) {
 			transmit_blocking<Cmd>(c.cmd);
 			int numArgs = c.num_args;
 			uint32_t args = c.args;
@@ -269,6 +265,19 @@ protected:
 			if (c.delay_ms)
 				HAL_Delay(c.delay_ms);
 		}
+	}
+
+	void _reset() {
+		Pin reset_pin{ScreenWriterConfT::ResetPin, PinMode::Output};
+		reset_pin.high();
+		volatile int i = 10000; //10000 = high for 123us
+		while (i)
+			i = i - 1;
+		reset_pin.low();
+		i = 1000; //1000 = low for 12.6us
+		while (i)
+			i = i - 1;
+		reset_pin.high();
 	}
 };
 } // namespace MetaModule

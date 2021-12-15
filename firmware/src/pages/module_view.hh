@@ -5,6 +5,18 @@
 #include "pages/images/image_list.hh"
 #include <string>
 
+LV_IMG_DECLARE(jack_x);
+LV_IMG_DECLARE(knob9mm_x);
+LV_IMG_DECLARE(knob_x);
+LV_IMG_DECLARE(button_x);
+LV_IMG_DECLARE(knob_unlined_x);
+LV_IMG_DECLARE(knob_large_x);
+LV_IMG_DECLARE(slider_x);
+LV_IMG_DECLARE(switch_left);
+LV_IMG_DECLARE(switch_right);
+LV_IMG_DECLARE(switch_up);
+LV_IMG_DECLARE(switch_down);
+
 namespace MetaModule
 {
 struct ModuleViewPage : PageBase {
@@ -18,6 +30,10 @@ struct ModuleViewPage : PageBase {
 	static inline lv_style_t roller_style;
 	static inline lv_style_t roller_sel_style;
 	static inline std::string opts;
+
+	static inline lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
+	static inline lv_obj_t *canvas;
+	static inline lv_draw_img_dsc_t img_dsc;
 
 	static inline std::string_view slug;
 
@@ -56,17 +72,17 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void init() override {
-		auto img = ModuleImages::get_image_by_slug(slug);
+		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
 		auto width_px = img->header.w;
 		auto height_px = img->header.h; // assert == 240?
 
 		base = lv_obj_create(nullptr, nullptr);
 
-		module_img = lv_img_create(base, nullptr);
-		lv_obj_set_pos(module_img, 0, 0);
-		lv_obj_set_size(module_img, width_px, height_px);
-		lv_obj_set_click(module_img, false);
-		lv_img_set_src(module_img, img);
+		canvas = lv_canvas_create(base, nullptr);
+		lv_canvas_set_buffer(canvas, buffer, width_px, height_px, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		lv_draw_img_dsc_init(&img_dsc);
+		img_dsc.opa = LV_OPA_COVER;
+		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
 
 		// Button style
 		lv_style_reset(&button_style);
@@ -81,7 +97,6 @@ struct ModuleViewPage : PageBase {
 		lv_style_set_outline_color(&button_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xd6, 0x00));
 		lv_style_set_outline_opa(&button_style, LV_STATE_DEFAULT, 0);
 
-		// TODO: Draw an element (or copy an img?) at each knob/jack/switch/button/slider position
 		// TODO: make buttons_ordered[] an ordered array of copies of the button[] ptrs, and browse using that
 		// ... also need to sort the strngs, too.. hmm...
 		int i = 0;
@@ -89,24 +104,57 @@ struct ModuleViewPage : PageBase {
 		auto info = ModuleFactory::getModuleInfo(slug);
 
 		for (const auto el : info.Knobs) {
-			_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
+			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
+			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+			_add_button(x, y);
 			opts += el.short_name;
 			opts += "\n";
+
+			const lv_img_dsc_t *knob = nullptr;
+			if (el.knob_style == KnobDef::Small)
+				knob = &knob9mm_x;
+			else if (el.knob_style == KnobDef::Medium)
+				knob = &knob_x;
+			else if (el.knob_style == KnobDef::Large)
+				knob = &knob_large_x;
+			else if (el.knob_style == KnobDef::Slider25mm)
+				knob = &slider_x;
+			else
+				continue;
+			lv_canvas_draw_img(canvas, x - knob->header.w / 2, y - knob->header.h / 2, knob, &img_dsc);
 		}
 		for (const auto el : info.InJacks) {
-			_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
+			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
+			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+			_add_button(x, y);
 			opts += el.short_name;
 			opts += "\n";
+			lv_canvas_draw_img(canvas, x - jack_x.header.w / 2, y - jack_x.header.h / 2, &jack_x, &img_dsc);
 		}
 		for (const auto el : info.OutJacks) {
-			_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
+			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
+			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+			_add_button(x, y);
 			opts += el.short_name;
 			opts += "\n";
+			lv_canvas_draw_img(canvas, x - jack_x.header.w / 2, y - jack_x.header.h / 2, &jack_x, &img_dsc);
 		}
 		for (const auto el : info.Switches) {
-			_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
+			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
+			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+			_add_button(x, y);
 			opts += el.short_name;
 			opts += "\n";
+			const lv_img_dsc_t *sw = nullptr;
+			if (el.switch_type == SwitchDef::Toggle2pos || el.switch_type == SwitchDef::Toggle3pos)
+				sw = &switch_left;
+			else if (el.switch_type == SwitchDef::Encoder)
+				sw = &knob_unlined_x;
+			else if (el.switch_type == SwitchDef::MomentaryButton || el.switch_type == SwitchDef::LatchingButton)
+				sw = &button_x;
+			else
+				continue;
+			lv_canvas_draw_img(canvas, x - sw->header.w / 2, y - sw->header.h / 2, sw, &img_dsc);
 		}
 		// for (const auto el : info.Sliders) {
 		// 	_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
@@ -165,11 +213,11 @@ struct ModuleViewPage : PageBase {
 		lv_style_set_radius(&style_highlight, LV_STATE_DEFAULT, 120);
 		lv_style_set_outline_color(&style_highlight, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
 		lv_style_set_outline_width(&style_highlight, LV_STATE_DEFAULT, 4);
-		lv_style_set_outline_opa(&style_highlight, LV_STATE_DEFAULT, 200);
+		lv_style_set_outline_opa(&style_highlight, LV_STATE_DEFAULT, 255);
 
 		// Add options
-		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_INFINITE);
-		lv_roller_set_visible_row_count(roller, 14);
+		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_visible_row_count(roller, 11);
 	}
 
 	void update() override {

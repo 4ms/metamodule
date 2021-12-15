@@ -12,6 +12,10 @@ import subprocess
 # Version check
 f"Python 3.6+ is required"
 
+def Log(x):
+    TAG = "    svgextract: "
+    print(TAG+x)
+
 ns = {
     "svg": "http://www.w3.org/2000/svg",
     "inkscape": "http://www.inkscape.org/namespaces/inkscape",
@@ -28,11 +32,11 @@ def appendToFileAfterMarker(filename, marker, newText):
     prettyNewText = newText.replace('\n',' ').replace('\t', ' ')
     if filedata.find(newText) == -1:
         filedata = filedata.replace(marker, marker + newText)
-        print(f"Updated {filename} with {prettyNewText}")
+        Log(f"Updated {filename} with {prettyNewText}")
         with open(filename, 'w') as file:
             file.write(filedata)
     else:
-        print(f"Didn't update {filename} with {prettyNewText}, already exists in file")
+        Log(f"Didn't update {filename} with {prettyNewText}, already exists in file")
 
 
 def input_default(prompt, default=""):
@@ -113,7 +117,7 @@ def deduce_dpi(root):
     heightInches = get_dim_inches(root.get('height'))
     viewBox = root.get('viewBox')
     if widthInches == 0 or heightInches == 0 or viewBox is None:
-        print("WARNING: DPI cannot be deduced, width, height, or viewBox is missing or 0 in root node. Using 72dpi")
+        Log("WARNING: DPI cannot be deduced, width, height, or viewBox is missing or 0 in root node. Using 72dpi")
         return 72
 
     viewBoxDims = viewBox.split(" ")
@@ -122,9 +126,9 @@ def deduce_dpi(root):
     hDPI = round(viewWidth / widthInches)
     vDPI = round(viewHeight / heightInches)
     if vDPI is not hDPI:
-        print(f"WARNING: Horizontal DPI is {hDPI} and Vertical DPI is {vDPI}, which are not equal. Using horizontal value")
+        Log(f"WARNING: Horizontal DPI is {hDPI} and Vertical DPI is {vDPI}, which are not equal. Using horizontal value")
     else:
-        print(f"DPI deduced as {hDPI}")
+        Log(f"DPI deduced as {hDPI}")
 
     return hDPI
 
@@ -160,7 +164,7 @@ def panel_to_components(tree):
     # Deduce DPI and HP:
     components['dpi'] = deduce_dpi(root)
     components['HP'] = round(get_dim_inches(root.get('width')) / 0.2)
-    print(f"HP deduced as {components['HP']}")
+    Log(f"HP deduced as {components['HP']}")
 
     # Set default slug and ModuleName
     components['slug'] = "UNNAMED"
@@ -188,14 +192,14 @@ def panel_to_components(tree):
                 components['ModuleName'] += m
 
     if components['slug'] == "UNNAMED":
-        print("WARNING: No text element with name or id 'slug' was found in the 'components' layer/group. Setting slug to 'UNNAMED'.")
+        Log("WARNING: No text element with name or id 'slug' was found in the 'components' layer/group. Setting slug to 'UNNAMED'.")
     else:
-        print(f"Slug found: \"{components['slug']}\"")
+        Log(f"Slug found: \"{components['slug']}\"")
 
     if components['ModuleName'] is None:
-        print("WARNING: No text element with name or id 'modulename' was found in the 'components' layer/group. Setting ModuleName to 'Unnamed'")
+        Log("WARNING: No text element with name or id 'modulename' was found in the 'components' layer/group. Setting ModuleName to 'Unnamed'")
     else:
-        print(f"Module Name found: \"{components['ModuleName']}\"")
+        Log(f"Module Name found: \"{components['ModuleName']}\"")
 
 
     # Scan all circles and rects for components
@@ -221,7 +225,7 @@ def panel_to_components(tree):
                 name = remove_trailing_dash_number(name)
         if name is None:
             name = ''.join(random.choices(string.ascii_uppercase, k=6))
-            print("Unnamed component found: generating random name: " + name)
+            Log("Unnamed component found: generating random name: " + name)
         c['raw_name'] = name
         c['display_name'] = format_for_display(name)
         c['enum_name'] = format_as_enum_item(name)
@@ -343,7 +347,7 @@ def panel_to_components(tree):
         elif color == '#ffff00':
             components['widgets'].append(c)
         else:
-            print(f"Unknown color: {color} found at {cx},{cy}. Skipping.")
+            Log(f"Unknown color: {color} found at {cx},{cy}. Skipping.")
 
     # Sort components
     top_left_sort = lambda w: (w['cy'], w['cx'])
@@ -354,7 +358,7 @@ def panel_to_components(tree):
     components['widgets'] = sorted(components['widgets'], key=top_left_sort)
     components['switches'] = sorted(components['switches'], key=top_left_sort)
 
-    print(f"Found {len(components['params'])} params, {len(components['inputs'])} inputs, {len(components['outputs'])} outputs, {len(components['lights'])} lights, and {len(components['widgets'])} custom widgets.")
+    Log(f"Found {len(components['params'])} params, {len(components['inputs'])} inputs, {len(components['outputs'])} outputs, {len(components['lights'])} lights, and {len(components['widgets'])} custom widgets.")
     return components
 
 
@@ -388,7 +392,7 @@ struct {slug}Info : ModuleInfoBase {{
     static constexpr std::string_view slug{{"{slug}"}};
     static constexpr std::string_view description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
-    static constexpr std::string_view svg_filename{{"res/{slug}-artwork.svg"}};
+    static constexpr std::string_view svg_filename{{"res/modules/{slug}-artwork.svg"}};
 
     static constexpr int NumKnobs = {len(components['params'])};
     {make_enum("", "Knob", components['params'])}
@@ -482,13 +486,20 @@ struct {slug}Info : ModuleInfoBase {{
 """
     return source
 
+def pathFromHere(path):
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)),path)
 
-def createInfoFile(svgFilename, infoFilePath):
+def createInfoFile(svgFilename, infoFilePath = None):
+    if infoFilePath == None:
+        infoFilePath = os.getenv('METAMODULE_INFO_DIR')
+        if infoFilePath is None:
+            infoFilePath = input_default("Directory to save ModuleInfo file", pathFromHere("../CoreModules/info"))
+
     if os.path.isdir(infoFilePath) == False:
-        print(f"Not a directory: {infoFilePath}. Aborting without creating an info file.")
+        Log(f"Not a directory: {infoFilePath}. Aborting without creating an info file.")
         return
     if os.path.isfile(svgFilename) == False:
-        print(f"Not a file: {svgFilename}. Aborting without creating an info file.")
+        Log(f"Not a file: {svgFilename}. Aborting without creating an info file.")
         return
     register_all_namespaces(svgFilename)
     tree = xml.etree.ElementTree.parse(svgFilename)
@@ -497,87 +508,91 @@ def createInfoFile(svgFilename, infoFilePath):
     infoFileName = os.path.join(infoFilePath, components['slug']+"_info.hh")
     with open(infoFileName, "w") as f:
         f.write(infoFileText)
-        print(f"Wrote info file: {infoFileName}")
+        Log(f"Wrote info file: {infoFileName}")
+    
+    if components['slug']:
+        createCoreModule(components['slug'])
     return components['slug']
 
 
-def extractArtwork(svgFilename, artworkFilename):
-    print(f"reading from {svgFilename}, writing to {artworkFilename}")
+def extractArtworkLayer(svgFilename, artworkFilename = None, slug = None):
+    if artworkFilename == None:
+        outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
+        if outputpath is None:
+            outputpath = input_default("Directory to save SVG artwork file", pathFromHere("../../vcv/res/modules"))
+        artworkFilename = os.path.join(outputpath, slug + "-artwork.svg")
+
+    Log(f"reading from {svgFilename}, writing to {artworkFilename}")
     register_all_namespaces(svgFilename)
 
     tree = xml.etree.ElementTree.parse(svgFilename)
     root = tree.getroot()
     comps = root.findall(".//*[@id='components']",ns)
     if len(comps) == 0:
-        print("No group (or any element) with id = 'components' found in svg file")
+        Log("No group (or any element) with id = 'components' found in svg file")
         return
     if len(comps) > 1:
-        print("More than 1 group or element with id = 'components' found in svg file. Using the first one.")
+        Log("More than 1 group or element with id = 'components' found in svg file. Using the first one.")
 
     g = comps[0]
     g.clear()
-    print("Removed components layer")
+    Log("Removed components layer")
     tree.write(artworkFilename)
-    print(f"Wrote artwork svg file for vcv: {artworkFilename}")
+    Log(f"Wrote artwork svg file for vcv: {artworkFilename}")
 
 
-def createComponentImageCompositeCmd(svgFilename, pngFilename):
-    PXSCALE = 240/(5.059*72)
-    JACKSIZE_X = 20
-    JACKSIZE_Y = 18
-    OFFX = -JACKSIZE_X / 2
-    OFFY = -JACKSIZE_Y / 2
-    register_all_namespaces(svgFilename)
-    tree = xml.etree.ElementTree.parse(svgFilename)
-    components = panel_to_components(tree)
-    cmd = f"{pngFilename}"
-    for c in components['outputs'] + components['inputs']:
-        cmd += f" src/pages/images/jack-black.png -geometry +{PXSCALE*c['cx'] + OFFX}+{PXSCALE*c['cy'] + OFFY} -composite"
+# def createComponentImageCompositeCmd(svgFilename, pngFilename):
+#     PXSCALE = 240/(5.059*72)
+#     JACKSIZE_X = 20
+#     JACKSIZE_Y = 18
+#     OFFX = -JACKSIZE_X / 2
+#     OFFY = -JACKSIZE_Y / 2
+#     register_all_namespaces(svgFilename)
+#     tree = xml.etree.ElementTree.parse(svgFilename)
+#     components = panel_to_components(tree)
+#     cmd = f"{pngFilename}"
+#     for c in components['outputs'] + components['inputs']:
+#         cmd += f" src/pages/images/jack-black.png -geometry +{PXSCALE*c['cx'] + OFFX}+{PXSCALE*c['cy'] + OFFY} -composite"
     
-    cmd += " " + pngFilename.strip(".png") + "_comps.png"
-    # magick EnOsc_artwork_240.png jack-black.png -geometry +5+10 -composite jack-black.png -geometry +40+20 -composite tt.png
-    return cmd
+#     cmd += " " + pngFilename.strip(".png") + "_comps.png"
+#     # magick EnOsc_artwork_240.png jack-black.png -geometry +5+10 -composite jack-black.png -geometry +40+20 -composite tt.png
+#     return cmd
 
    
 def createlvimg(artworkSvgFilename, pngFilename):
     # Find programs needed
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
     if inkscapeBin is None:
-        print("inkscape is not found. Please put it in your shell PATH, or set INKSCAPE_BIN_PATH to the path to the binary")
-        print("Aborting")
+        Log("inkscape is not found. Please put it in your shell PATH, or set INKSCAPE_BIN_PATH to the path to the binary")
+        Log("Aborting")
         return
     convertBin = which('convert') or which('magick') or os.getenv('IMAGEMAGICK_BIN_PATH')
     if convertBin is None:
-        print("convert or magick is not found. Please put it in your shell PATH, or set IMAGEMAGICK_BIN_PATH to the path to the binary")
-        print("Aborting")
+        Log("convert or magick is not found. Please put it in your shell PATH, or set IMAGEMAGICK_BIN_PATH to the path to the binary")
+        Log("Aborting")
         return
 
     # SVG ==> PNG
-    print(f"svgextract.py: converting {pngFilename} with inkscape and convert.")
+    Log(f"converting {pngFilename} with inkscape and convert.")
     try:
         subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-id-only --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {pngFilename}', shell=True, check=True)
     except:
-        print(f"Failed running {inkscapeBin} and {convertBin}. Aborting")
+        Log(f"Failed running {inkscapeBin} and {convertBin}. Aborting")
         return
 
-    cmd = createComponentImageCompositeCmd(artworkSvgFilename, pngFilename)
-    print("Going to run "+ cmd)
-    subprocess.run(f'{convertBin} {cmd}', shell=True, check=True)
-
-    print(f"Created {pngFilename} from {artworkSvgFilename}")
+    # cmd = createComponentImageCompositeCmd(artworkSvgFilename, pngFilename)
+    # Log("Going to run "+ cmd)
+    # subprocess.run(f'{convertBin} {cmd}', shell=True, check=True)
+    # Log(f"Created {pngFilename} from {artworkSvgFilename}")
 
     # PNG ==> LVGL image (C file with array)
     lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/lv_img_conv/lv_img_conv.js"
     try:
         subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', pngFilename], check=True)
     except subprocess.CalledProcessError:
-        print("lv_img_conv.js failed. Try 1) `git submodule update --init` and/or 2) `cd shared/svgextract/lv_img_conv && npm install`")
+        Log("lv_img_conv.js failed. Try 1) `git submodule update --init` and/or 2) `cd shared/svgextract/lv_img_conv && npm install`")
         return
-    print(f"Created {pngFilename.strip('.png')}.c file from {pngFilename}")
-
-
-
-
+    Log(f"Created {pngFilename.strip('.png')}.c file from {pngFilename}")
 
 
 def appendImageList(slug, artwork_Carray, image_list_file):
@@ -593,17 +608,37 @@ def appendImageList(slug, artwork_Carray, image_list_file):
 
 
 def processSvg(svgFilename):
-    outputpath = os.getenv('METAMODULE_INFO_DIR')
-    if outputpath is None:
-        outputpath = input_default("Directory to save ModuleInfo file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../CoreModules/info"))
-    slug = createInfoFile(svgFilename, outputpath)
+    slug = createInfoFile(svgFilename)
+
     if slug is None:
+        Log("No slug found, aborting")
         return
 
-    outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
-    if outputpath is None:
-        outputpath = input_default("Directory to save SVG artwork file", os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../vcv/res"))
-    extractArtwork(svgFilename, os.path.join(outputpath, slug + "-artwork.svg"))
+    extractArtworkLayer(svgFilename, None, slug)
+    
+
+def createCoreModule(slug, coreModuleDir = None):
+    if coreModuleDir == None:
+        coreModuleDir = os.getenv('METAMODULE_COREMODULE_DIR')
+        if coreModuleDir is None:
+            coreModuleDir = input_default("CoreModule dir", pathFromHere("../../shared/CoreModules/"))
+
+    newCoreFileName = slug + 'Core.hpp'
+    if not os.path.exists(newCoreFileName):
+        # Replace 'Slug' in template file with our slug, then write to a new file
+        coreTemplateFilename = 'template_core_hpp.tmpl'
+        with open(os.path.join(coreModuleDir, coreTemplateFilename), 'r') as file :
+            filedata = file.read()
+        filedata = filedata.replace('Slug', slug)
+        with open(os.path.join(coreModuleDir, newCoreFileName), 'w') as file:
+            file.write(filedata)
+            Log(f"Wrote file {newCoreFileName} in {coreModuleDir}")
+
+    newCoreCPPFileName = slug+'Core.cpp'
+    if not os.path.exists(newCoreCPPFileName):
+        with open(os.path.join(coreModuleDir, newCoreCPPFileName), 'w') as file:
+            file.write("#include " + '\"' + newCoreFileName + '\"')
+            Log(f"Wrote file {newCoreCPPFileName} in {coreModuleDir}")
 
 
 def usage(script):
@@ -613,16 +648,15 @@ Usage: {script} <command> ...
 Commands:
 
 processsvg [input svg file name]
-    Runs createinfo and extractart on the given file.
-    Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR, METAMODULE_PNG_DIR if found,
+    Runs createinfo, extractart, and createcorefiles on the given file.
+    Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR, METAMODULE_COREMODULE_DIR if found,
     otherwise prompts user for the values
 
-createinfo [input svg file name] [output path for ModuleInfo file]
-    Creates a ModuleInfo struct and saves it to a file in the given path.
-    The file will be named "slug_info.hh", where "slug" is the lower-case
-    string of the text element with name/id "slug" found in the components layer/group
-    of the SVG file.
-    File will be overwritten if it exists.
+createinfo [input svg file name] {{optional output path for ModuleInfo file}}
+    Creates a ModuleInfo struct and saves it to a file in the given path. The
+    file will be named "slug_info.hh", where "slug" is the string of the text
+    element with name/id "slug" found in the components layer/group of the SVG
+    file. File will be overwritten if it exists.
 
 extractart [input SVG file name] [output artwork SVG file name]
     Saves a new SVG file with the components layer removed
@@ -658,18 +692,21 @@ def parse_args(args):
         processSvg(inputfile)
         return
 
+    if cmd == 'createinfo':
+        output = args.pop(0) if len(args) > 0 else None
+        createInfoFile(inputfile, output)
+        return
+
+    # Two args required for all other cmds:
+
     if len(args) == 0:
         usage(script)
         return
 
-    output= args.pop(0)
-
-    if cmd == 'createinfo':
-        createInfoFile(inputfile, output)
-        return
+    output = args.pop(0)
 
     if cmd == 'extractart':
-        extractArtwork(inputfile, output)
+        extractArtworkLayer(inputfile, output)
         return
 
     if cmd == 'createlvimg':

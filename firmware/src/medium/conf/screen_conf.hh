@@ -22,7 +22,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr uint16_t priority1 = 2;
 		static constexpr uint16_t priority2 = 3;
 		static constexpr PinNoInit SCLK = {GPIO::E, 12, LL_GPIO_AF_5};
-		static constexpr PinNoInit COPI = {GPIO::E, 6, LL_GPIO_AF_5}; // p4: PE14
+		static constexpr PinNoInit COPI = {GPIO::E, 6, LL_GPIO_AF_5};
 		static constexpr PinNoInit CIPO = {GPIO::A, 0};
 		static constexpr PinNoInit CS0 = {GPIO::E, 11, LL_GPIO_AF_5};
 		static constexpr bool use_hardware_ss = true;
@@ -56,7 +56,8 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr auto periph_burst = Single;
 	};
 
-	using DCPin = FPin<GPIO::H, 5, PinMode::Output>; // p4: PH4
+	using DCPin = FPin<GPIO::H, 5, PinMode::Output>;
+	static constexpr PinNoInit ResetPin{GPIO::E, 15};
 
 	static constexpr bool IsInverted = false;
 	static constexpr uint32_t rowstart = 0;

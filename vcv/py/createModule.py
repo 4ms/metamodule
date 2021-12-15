@@ -14,25 +14,6 @@ def input_default(prompt, default=""):
     return str
 
 
-def createCoreModule(slug, coreModuleDir):
-    coreTemplateFilename = 'template_core_hpp.tmpl'
-    with open(os.path.join(coreModuleDir, coreTemplateFilename), 'r') as file :
-      filedata = file.read()
-
-    filedata = filedata.replace('Slug', slug)
-
-    newCoreFileName = slug + 'Core.hpp'
-    with open(os.path.join(coreModuleDir, newCoreFileName), 'w') as file:
-      file.write(filedata)
-
-    newCoreCPPFileName = slug+'Core.cpp'
-
-    with open(os.path.join(coreModuleDir, newCoreCPPFileName), 'w') as file:
-      file.write("#include " + '\"' + newCoreFileName + '\"')
-
-    print(f"Wrote files {newCoreCPPFileName} and {newCoreFileName} in {coreModuleDir}")
-
-
 def appendToFileAfterMarker(filename, marker, newText):
     with open(filename, 'r') as file :
       filedata = file.read()
@@ -92,9 +73,6 @@ def usage(script):
 
 Usage: {script} command ... 
 Commands:
-
-createcore [SlugName]
-    creates SlugNameCore.hpp and .cpp in the dir specified by METAMODULE_COREMODULE_DIR
 
 addtoplugin [SlugName] ["optional description in quotes"]
     adds the given slug (and optional description) to the VCV plugin registry

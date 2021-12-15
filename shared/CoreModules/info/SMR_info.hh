@@ -6,7 +6,7 @@ struct SMRInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"SMR"};
     static constexpr std::string_view description{"Spectral Multiband Resonator"};
     static constexpr uint32_t width_hp = 26;
-    static constexpr std::string_view svg_filename{"res/SMR-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/SMR-artwork.svg"};
 
     static constexpr int NumKnobs = 11;
     
@@ -283,8 +283,8 @@ struct SMRInfo : ModuleInfoBase {
             .id = InputIn_Odds,
             .x_mm = px_to_mm<72>(25.44f),
             .y_mm = px_to_mm<72>(247.06f),
-            .short_name = "IN odds",
-            .long_name = "IN odds",
+            .short_name = "In Odds",
+            .long_name = "In Odds",
             .unpatched_val = 0.f,
             .signal_type = InJackDef::Analog,
         },
@@ -292,8 +292,8 @@ struct SMRInfo : ModuleInfoBase {
             .id = InputIn_Evens,
             .x_mm = px_to_mm<72>(66.79f),
             .y_mm = px_to_mm<72>(247.28f),
-            .short_name = "IN evens",
-            .long_name = "IN evens",
+            .short_name = "In Evens",
+            .long_name = "In Evens",
             .unpatched_val = 0.f,
             .signal_type = InJackDef::Analog,
         },
