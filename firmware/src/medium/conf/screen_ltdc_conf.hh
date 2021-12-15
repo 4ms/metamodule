@@ -2,8 +2,6 @@
 #include "conf/screen_buffer_conf.hh"
 #include "drivers/ltdc_screen_config_struct.hh"
 #include "drivers/parallel_writer_conf.hh"
-//#include "drivers/spi_screen_ST77XX.hh"
-#include "drivers/screen_ILI9341.hh"
 #include "pin.hh"
 
 namespace MetaModule

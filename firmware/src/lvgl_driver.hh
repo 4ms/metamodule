@@ -1,7 +1,7 @@
 #include "conf/screen_buffer_conf.hh"
 #include "conf/screen_ltdc_conf.hh"
-//#include "drivers/screen_ILI9341.hh"
-#include "drivers/screen_ST77XX.hh"
+#include "drivers/screen_ILI9341.hh"
+//#include "drivers/screen_ST77XX.hh"
 #include "drivers/screen_ltdc.hh"
 #include "drivers/screen_ltdc_setup.hh"
 #include "lvgl/lvgl.h"
@@ -112,6 +112,7 @@ public:
 		m = &metaparams;
 
 		_screen_configure.setup_driver_chip(mdrivlib::ST77XX::ST7789InitLTDC<ScreenConf>::cmds);
+		// _screen_configure.setup_driver_chip(mdrivlib::ILI9341::ILI9341InitLTDC::cmds);
 		_ltdc_driver.init(buf.data());
 
 		// for (int i = 0; i < 16; i++) {
