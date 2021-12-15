@@ -1,7 +1,8 @@
 #include "conf/screen_buffer_conf.hh"
 #include "conf/screen_ltdc_conf.hh"
+#include "drivers/screen_ILI9341.hh"
 #include "drivers/screen_ltdc.hh"
-#include "drivers/screen_ltdc_st77XX_setup.hh"
+#include "drivers/screen_ltdc_setup.hh"
 #include "lvgl/lvgl.h"
 #include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
@@ -103,13 +104,13 @@ class MMDisplay {
 
 private:
 	static inline ScreenParallelWriter<ScreenConf> _ltdc_driver;
-	static inline mdrivlib::ST77XXParallelSetup<ScreenControlConf> _screen_configure;
+	static inline mdrivlib::LTDCParallelSetup<ScreenControlConf> _screen_configure;
 
 public:
 	static void init(MetaParams &metaparams, std::span<lv_color_t, BufferSize> buf) {
 		m = &metaparams;
 
-		_screen_configure.setup_driver_chip(ST7789RGBInit::cmds);
+		_screen_configure.setup_driver_chip(mdrivlib::ILI9341::ILI9341InitLTDC::cmds);
 		_ltdc_driver.init(buf.data());
 
 		// for (int i = 0; i < 16; i++) {

@@ -2,7 +2,8 @@
 #include "conf/screen_buffer_conf.hh"
 #include "drivers/ltdc_screen_config_struct.hh"
 #include "drivers/parallel_writer_conf.hh"
-#include "drivers/spi_screen_ST77XX.hh"
+//#include "drivers/spi_screen_ST77XX.hh"
+#include "drivers/screen_ILI9341.hh"
 #include "pin.hh"
 
 namespace MetaModule
@@ -99,73 +100,72 @@ struct ScreenControlConf : mdrivlib::ParallelWriterConf {
 	static constexpr uint32_t WriteLatchAfterDelay = 3; //ST7789V datasheet: Sec 7.4.1. T(AHT) = 10ns
 };
 
-//FixMe: gcc 10.2 doesn't support using enum? Or...?
-using namespace mdrivlib::ST77XX;
-struct ST7789RGBInit {
-	using ConfT = ScreenConf;
-	using InitCommand = mdrivlib::ST77XX::InitCommand;
-	// using enum mdrivlib::ST77XX::Command;
-	// using enum mdrivlib::ST77XX::MADCTL_Rotation;
-	// using enum mdrivlib::ST77XX::RAMCTRL_Args;
-	// using enum mdrivlib::ST77XX::COLMOD_Args;
-	// using enum mdrivlib::ST77XX::MADCTL_Arg;
+//FixMe: gcc 10.2 doesn't support using enum?
+//using namespace mdrivlib::ST77XX;
+//struct ST7789RGBInit {
+//	using ConfT = ScreenConf;
+//	using InitCommand = mdrivlib::ST77XX::InitCommand;
+//	// using enum mdrivlib::ST77XX::Command;
+//	// using enum mdrivlib::ST77XX::MADCTL_Rotation;
+//	// using enum mdrivlib::ST77XX::RAMCTRL_Args;
+//	// using enum mdrivlib::ST77XX::COLMOD_Args;
+//	// using enum mdrivlib::ST77XX::MADCTL_Arg;
 
-	static constexpr std::array cmds = {
-		InitCommand{SLPIN, 0, 10},
-		InitCommand{SWRESET, 0, 150},
-		InitCommand{SLPOUT, 0, 120},
+//	static constexpr std::array cmds = {
+//		InitCommand{SLPIN, 0, 10},
+//		InitCommand{SWRESET, 0, 150},
+//		InitCommand{SLPOUT, 0, 120},
 
-		InitCommand{MADCTL,
-					1,
-					0,
-					ConfT::rotation == ConfT::NoRotation ? MADCTL_ROT0
-					: ConfT::rotation == ConfT::CW90	 ? MADCTL_ROTCW90
-					: ConfT::rotation == ConfT::Flip180	 ? MADCTL_ROT180
-														 : MADCTL_ROTCCW90},
+//		InitCommand{MADCTL,
+//					1,
+//					0,
+//					ConfT::rotation == ConfT::NoRotation ? MADCTL_ROT0
+//					: ConfT::rotation == ConfT::CW90	 ? MADCTL_ROTCW90
+//					: ConfT::rotation == ConfT::Flip180	 ? MADCTL_ROT180
+//														 : MADCTL_ROTCCW90},
 
-		InitCommand{COLMOD, 1, 0, 0x55},
+//		InitCommand{COLMOD, 1, 0, 0x55},
 
-		InitCommand{ConfT::IsInverted == mdrivlib::ST77XX::Inverted ? INVON : INVOFF, 0, 0},
+//		InitCommand{ConfT::IsInverted == mdrivlib::ST77XX::Inverted ? INVON : INVOFF, 0, 0},
 
-		InitCommand{CASET, 4, 0, InitCommand::makecmd(0, ConfT::viewWidth)},
-		InitCommand{RASET, 4, 0, InitCommand::makecmd(0, ConfT::viewHeight)},
+//		InitCommand{CASET, 4, 0, InitCommand::makecmd(0, ConfT::viewWidth)},
+//		InitCommand{RASET, 4, 0, InitCommand::makecmd(0, ConfT::viewHeight)},
 
-		//// seq 2
-		//Enable Table 2 Commands:
-		InitCommand{CMD2EN, 4, 1, InitCommand::makecmd(0x5A, 0x69, 0x02, 0x01)},
+//		//// seq 2
+//		//Enable Table 2 Commands:
+//		InitCommand{CMD2EN, 4, 1, InitCommand::makecmd(0x5A, 0x69, 0x02, 0x01)},
 
-		// RGB Control: V/H back porch
-		InitCommand{
-			RGBCTRL,
-			3,
-			0,
-			InitCommand::makecmd(
-				RGBCTRL_DE_Mode | RGBCTRL_UseRAM, ConfT::VBackPorch, ConfT::HBackPorch /*+ ConfT::HSyncWidth*/, 0)},
+//		// RGB Control: V/H back porch
+//		InitCommand{
+//			RGBCTRL,
+//			3,
+//			0,
+//			InitCommand::makecmd(
+//				RGBCTRL_DE_Mode | RGBCTRL_UseRAM, ConfT::VBackPorch, ConfT::HBackPorch /*+ ConfT::HSyncWidth*/, 0)},
 
-		// RAM Control: set RGB mode. EPF and MTD don't matter
-		InitCommand{RAMCTRL, 2, 0, InitCommand::makecmd(RAMCTRL_RGB_IF, RAMCTRL_EPF_DEFAULT, 0, 0)},
+//		// RAM Control: set RGB mode. EPF and MTD don't matter
+//		InitCommand{RAMCTRL, 2, 0, InitCommand::makecmd(RAMCTRL_RGB_IF, RAMCTRL_EPF_DEFAULT, 0, 0)},
 
-		InitCommand{FRCTRL2, 1, 10, 0x0F}, //0x0F = 60Hz, 0x0E = 62Hz
+//		InitCommand{FRCTRL2, 1, 10, 0x0F}, //0x0F = 60Hz, 0x0E = 62Hz
 
-		//InitCommand{GCTRL, 4, 10, InitCommand::makecmd(0x2A, 0x2B, 0x22 + 6, 0x75)},
+//		//InitCommand{GCTRL, 4, 10, InitCommand::makecmd(0x2A, 0x2B, 0x22 + 6, 0x75)},
 
-		//InitCommand{CABCCTRL, 1, 10, 0b0010}, //LED no reversed, init state LEDPWM low, LEDPWM fixed to on, LEDPWM Polarity 0/high
+//		//InitCommand{CABCCTRL, 1, 10, 0b0010}, //LED no reversed, init state LEDPWM low, LEDPWM fixed to on, LEDPWM Polarity 0/high
 
-		//InitCommand{PWMFRSEL, 1, 10, (0x04 << 3) | 0x00}, //CS = 4, CLK = 0 => 666kHz PWM
+//		//InitCommand{PWMFRSEL, 1, 10, (0x04 << 3) | 0x00}, //CS = 4, CLK = 0 => 666kHz PWM
 
-		// Porch setting: Not sure if this wants V or H porch?
-		// InitCommand{PORCTRL, 3, 0, InitCommand::makecmd(ConfT::HBackPorch, ConfT::HFrontPorch, 0, 0)},
+//		// Porch setting: Not sure if this wants V or H porch?
+//		// InitCommand{PORCTRL, 3, 0, InitCommand::makecmd(ConfT::HBackPorch, ConfT::HFrontPorch, 0, 0)},
 
-		//Max brightness
-		// InitCommand{WRDISBV, 1, 0, 0xFF0000FF},
+//		//Max brightness
+//		// InitCommand{WRDISBV, 1, 0, 0xFF0000FF},
 
-		// Normal display on
-		// InitCommand{NORON, 0, 10},
+//		// Normal display on
+//		// InitCommand{NORON, 0, 10},
 
-		InitCommand{DISPON, 0, 100},
-		InitCommand{SLPOUT, 0, 100},
-		InitCommand{RAMWR, 0, 50},
-	};
-};
-
+//		InitCommand{DISPON, 0, 100},
+//		InitCommand{SLPOUT, 0, 100},
+//		InitCommand{RAMWR, 0, 50},
+//	};
+//};
 } // namespace MetaModule
