@@ -20,12 +20,14 @@
 #include "octinfosc.hh"
 #include "quad_LFO.hh"
 #include "simplequaddjembe.hh"
+#include "t_info_1.hh"
 
 namespace MetaModule
 {
 
 PatchList::PatchList()
 	: _patch_addrs{
+		  t_info_1_mmpatch,
 		  InfiniteOsc64bDual_mmpatch,
 		  knob_test_mmpatch,
 		  test_inputs_1234_mmpatch,
@@ -34,7 +36,7 @@ PatchList::PatchList()
 		  // DjembeReverb_mmpatch,
 		  // InfiniteOsc_mmpatch,
 		  QuadLFO_mmpatch,
-		  StereoVerb_mmpatch,
+		  // StereoVerb_mmpatch,
 		  // infosc1_mmpatch,
 		  octinfosc_mmpatch,
 		  simplequaddjembe_mmpatch,
