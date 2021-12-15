@@ -99,7 +99,6 @@ struct ModuleViewPage : PageBase {
 
 		// TODO: make buttons_ordered[] an ordered array of copies of the button[] ptrs, and browse using that
 		// ... also need to sort the strngs, too.. hmm...
-		int i = 0;
 		opts.clear();
 		auto info = ModuleFactory::getModuleInfo(slug);
 
