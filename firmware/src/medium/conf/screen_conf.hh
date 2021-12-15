@@ -5,7 +5,6 @@
 #include "drivers/interrupt.hh"
 #include "drivers/spi_dma_datacmd_driver.hh"
 #include "drivers/spi_screen_config_struct.hh"
-#include "spi_screen_ST77XX.hh"
 
 namespace MetaModule
 {
