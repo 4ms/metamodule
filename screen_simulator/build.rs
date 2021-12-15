@@ -11,10 +11,9 @@ fn add_glob_files(globpath: &str, path_vec: &mut Vec<String>) {
 fn main() {
     println!("cargo:rerun-if-changed=../firmware/lib/lvgl/lv_conf.h");
     println!("cargo:rerun-if-changed=../firmware/src/pages/");
+    println!("cargo:rerun-if-chnaged=../firmware/src/pages/page_manager.cc");
     println!("cargo:rerun-if-changed=../firmware/src/pages/gui-guider");
-    println!(
-        "cargo:rerun-if-changed=../firmware/src/pages/gui-guider/setup_scr_module_test_small.c"
-    );
+    println!("cargo:rerun-if-changed=../firmware/src/patchlist.cc");
     println!("cargo:rerun-if-changed=mms/lvgl_driver.hh");
     println!("cargo:rerun-if-changed=mms/mms.cc");
     //println!("cargo:rustc-env=RANLIB=ranlib"); //doesn't work, the idea is to suppress ranlib
@@ -26,6 +25,7 @@ fn main() {
     let mut lvgl_src: Vec<String> = Vec::new();
     add_glob_files("../firmware/lib/lvgl/lvgl/src/**/*.c", &mut lvgl_src);
     add_glob_files("../firmware/src/pages/images/*.c", &mut lvgl_src);
+    add_glob_files("../firmware/src/pages/images/components/*.c", &mut lvgl_src);
     lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
 
     let mut builder = cc::Build::new();
