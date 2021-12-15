@@ -6,9 +6,9 @@
 #include "drivers/hsem.hh"
 #include "drivers/memory_transfer.hh"
 #include "drivers/pin.hh"
+#include "drivers/screen_ST77XX.hh"
 #include "drivers/spi.hh"
 #include "drivers/spi_dma_datacmd_driver.hh"
-#include "drivers/spi_screen_ST77XX.hh"
 #include "drivers/stm32xx.h"
 
 #include "examples/hardware-tests/memory_transfer_test.hh"
@@ -253,14 +253,11 @@ protected:
 		transmit_blocking<Cmd>(ST77XX::RAMWR);
 	}
 
-	void init_display_driver(std::span<const ST77XX::InitCommand> cmds) {
+	void init_display_driver(std::span<const ScreenInitCommand> cmds) {
 		for (auto &c : cmds) {
 			transmit_blocking<Cmd>(c.cmd);
-			int numArgs = c.num_args;
-			uint32_t args = c.args;
-			while (numArgs--) {
-				transmit_blocking<Data>(args & 0x000000FF);
-				args >>= 8;
+			for (int i = 0; i < c.num_args; i++) {
+				transmit_blocking<Data>(c.args[i]);
 			}
 			if (c.delay_ms)
 				HAL_Delay(c.delay_ms);
@@ -269,15 +266,21 @@ protected:
 
 	void _reset() {
 		Pin reset_pin{ScreenWriterConfT::ResetPin, PinMode::Output};
+		// reset_pin.high();
+		// volatile int i = 10000; //10000 = high for 123us
+		// while (i)
+		// 	i = i - 1;
+		// reset_pin.low();
+		// i = 1000; //1000 = low for 12.6us
+		// while (i)
+		// 	i = i - 1;
+		// reset_pin.high();
 		reset_pin.high();
-		volatile int i = 10000; //10000 = high for 123us
-		while (i)
-			i = i - 1;
+		HAL_Delay(1);
 		reset_pin.low();
-		i = 1000; //1000 = low for 12.6us
-		while (i)
-			i = i - 1;
+		HAL_Delay(10);
 		reset_pin.high();
+		HAL_Delay(120);
 	}
 };
 } // namespace MetaModule
