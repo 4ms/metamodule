@@ -6,7 +6,7 @@ PatchHeader:
   num_mapped_ins: 0
   num_mapped_outs: 0
   num_static_knobs: 39
-  num_mapped_knobs: 4
+  num_mapped_knobs: 12
 
 PatchData:
   module_slugs:
@@ -41,7 +41,7 @@ PatchData:
   static_knobs: 
     - module_id: 2
       param_id: 0
-      value: 0.500000
+      value: 0.000000
     - module_id: 2
       param_id: 1
       value: 0.000000
@@ -177,8 +177,56 @@ PatchData:
       range: 1.000000
       offset: 0.000000
     - panel_knob_id: 3
+      module_id: 2
+      param_id: 0
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 4
+      module_id: 2
+      param_id: 7
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 5
+      module_id: 2
+      param_id: 1
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 6
+      module_id: 1
+      param_id: 8
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 7
+      module_id: 1
+      param_id: 9
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 8
       module_id: 1
       param_id: 1
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 9
+      module_id: 2
+      param_id: 6
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 10
+      module_id: 2
+      param_id: 8
+      curve_type: 0
+      range: 1.000000
+      offset: 0.000000
+    - panel_knob_id: 11
+      module_id: 2
+      param_id: 5
       curve_type: 0
       range: 1.000000
       offset: 0.000000

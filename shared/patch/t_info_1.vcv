@@ -197,11 +197,91 @@
             "RangeMax": 1.0
           },
           {
+            "DstModID": 11,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 10,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 11,
+            "DstObjID": 7,
+            "DstObjType": "Knob",
+            "SrcModID": 10,
+            "SrcObjID": 4,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 11,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 10,
+            "SrcObjID": 5,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 9,
+            "DstObjID": 8,
+            "DstObjType": "Knob",
+            "SrcModID": 10,
+            "SrcObjID": 6,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 9,
+            "DstObjID": 9,
+            "DstObjType": "Knob",
+            "SrcModID": 10,
+            "SrcObjID": 7,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
             "DstModID": 9,
             "DstObjID": 1,
             "DstObjType": "Knob",
             "SrcModID": 10,
-            "SrcObjID": 3,
+            "SrcObjID": 8,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 11,
+            "DstObjID": 6,
+            "DstObjType": "Knob",
+            "SrcModID": 10,
+            "SrcObjID": 9,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 11,
+            "DstObjID": 8,
+            "DstObjType": "Knob",
+            "SrcModID": 10,
+            "SrcObjID": 10,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0
+          },
+          {
+            "DstModID": 11,
+            "DstObjID": 5,
+            "DstObjType": "Knob",
+            "SrcModID": 10,
+            "SrcObjID": 11,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0
@@ -222,7 +302,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.5
+          "value": 0.0
         },
         {
           "id": 1,
