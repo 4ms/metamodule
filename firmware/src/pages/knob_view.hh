@@ -7,11 +7,10 @@ namespace MetaModule
 {
 struct KnobView3 : PageBase {
 	KnobView3(PatchInfo info)
-		: PageBase{info}
-	{}
+		: PageBase{info} {
+	}
 
-	void init() override
-	{
+	void init() override {
 		setup_scr_Knob_view3(ui);
 		init_bg(ui->Knob_view3);
 
@@ -27,10 +26,20 @@ struct KnobView3 : PageBase {
 		lv_arc_set_adjustable(ui->Knob_view3_arc_10, true);
 		lv_arc_set_adjustable(ui->Knob_view3_arc_11, true);
 		lv_arc_set_adjustable(ui->Knob_view3_arc_12, true);
+
+		// 	int i = 0;
+		// 	for (auto &knob_conn : patch_player.knob_conns) {
+		// 		if (!knob_conn.size())
+		// 			continue;
+		// 		screen.print(patch_player.modules[0]->knob_name(knob_conn[0].panel_knob_id));
+		// 		for (auto &knob : knob_conn) {
+		// 			PageWidgets::print_module_name(screen, patch_player, knob.module_id);
+		// 			screen.print(patch_player.modules[knob.module_id]->knob_name(knob.param_id));
+		// 		}
+		// 		i++;
 	}
 
-	void update() override
-	{
+	void update() override {
 		//GUI Guider knobs are laid out like this:
 		//arc_2 arc_3 arc_6
 		//arc_1 arc_5 arc_4
@@ -52,6 +61,30 @@ struct KnobView3 : PageBase {
 		lv_arc_set_value(ui->Knob_view3_arc_10, params.knobs[9] * 100.f); //PotL
 		lv_arc_set_value(ui->Knob_view3_arc_11, params.knobs[10] * 100.f);
 		lv_arc_set_value(ui->Knob_view3_arc_9, params.knobs[11] * 100.f); //PotQ
+
+		if (patch_player.is_loaded) {
+			lv_label_set_text(ui->Knob_view3_label_9, get_knob_list_string(patch_player.knob_conns[0]));
+			lv_label_set_text(ui->Knob_view3_label_8, get_knob_list_string(patch_player.knob_conns[1]));
+			lv_label_set_text(ui->Knob_view3_label_12, get_knob_list_string(patch_player.knob_conns[2]));
+			lv_label_set_text(ui->Knob_view3_label_13, get_knob_list_string(patch_player.knob_conns[3]));
+			lv_label_set_text(ui->Knob_view3_label_10, get_knob_list_string(patch_player.knob_conns[4]));
+			lv_label_set_text(ui->Knob_view3_label_11, get_knob_list_string(patch_player.knob_conns[5]));
+			// lv_label_set_text(ui->Knob_view3_label_8, "PARAMETER2");  //2
+			// lv_label_set_text(ui->Knob_view3_label_12, "PARAMETER3"); //3
+			// lv_label_set_text(ui->Knob_view3_label_13, "PARAMETER4"); //4
+			// lv_label_set_text(ui->Knob_view3_label_10, "PARAMETER5"); //5
+			// lv_label_set_text(ui->Knob_view3_label_11, "PARAMETER6"); //6
+		}
+	}
+
+	const char *get_knob_list_string(std::vector<MappedKnob> &mapped_knobs) {
+		//TODO: handle multi-maps
+		if (mapped_knobs.size()) {
+			auto slug = patch_player.module_slugs[mapped_knobs[0].module_id];
+			auto &info = ModuleFactory::getModuleInfo(slug);
+			return info.Knobs[mapped_knobs[0].param_id].short_name.data();
+		} else
+			return "-";
 	}
 };
 } // namespace MetaModule
