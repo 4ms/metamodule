@@ -63,31 +63,39 @@ struct KnobView3 : PageBase {
 		lv_arc_set_value(ui->Knob_view3_arc_9, params.knobs[11] * 100.f); //PotQ
 
 		if (patch_player.is_loaded) {
-			lv_label_set_text(ui->Knob_view3_label_9, get_knob_list_string(patch_player.knob_conns[0]).c_str());
-			lv_label_set_text(ui->Knob_view3_label_8, get_knob_list_string(patch_player.knob_conns[1]).c_str());
-			lv_label_set_text(ui->Knob_view3_label_12, get_knob_list_string(patch_player.knob_conns[2]).c_str());
-			lv_label_set_text(ui->Knob_view3_label_13, get_knob_list_string(patch_player.knob_conns[3]).c_str());
-			lv_label_set_text(ui->Knob_view3_label_10, get_knob_list_string(patch_player.knob_conns[4]).c_str());
-			lv_label_set_text(ui->Knob_view3_label_11, get_knob_list_string(patch_player.knob_conns[5]).c_str());
-			// lv_label_set_text(ui->Knob_view3_label_8, "PARAMETER2");  //2
-			// lv_label_set_text(ui->Knob_view3_label_12, "PARAMETER3"); //3
-			// lv_label_set_text(ui->Knob_view3_label_13, "PARAMETER4"); //4
-			// lv_label_set_text(ui->Knob_view3_label_10, "PARAMETER5"); //5
-			// lv_label_set_text(ui->Knob_view3_label_11, "PARAMETER6"); //6
+			lv_label_set_text(ui->Knob_view3_label_9, get_knob_list_string(patch_player.knob_conns[0], 16).c_str());
+			lv_label_set_text(ui->Knob_view3_label_8, get_knob_list_string(patch_player.knob_conns[1], 16).c_str());
+			lv_label_set_text(ui->Knob_view3_label_12, get_knob_list_string(patch_player.knob_conns[2], 16).c_str());
+			lv_label_set_text(ui->Knob_view3_label_13, get_knob_list_string(patch_player.knob_conns[3], 16).c_str());
+			lv_label_set_text(ui->Knob_view3_label_10, get_knob_list_string(patch_player.knob_conns[4], 16).c_str());
+			lv_label_set_text(ui->Knob_view3_label_11, get_knob_list_string(patch_player.knob_conns[5], 16).c_str());
+
+			lv_label_set_text(ui->Knob_view3_label_2, get_knob_list_string(patch_player.knob_conns[6], 6).c_str());	 //X
+			lv_label_set_text(ui->Knob_view3_label_3, get_knob_list_string(patch_player.knob_conns[7], 6).c_str());	 //Y
+			lv_label_set_text(ui->Knob_view3_label_4, get_knob_list_string(patch_player.knob_conns[8], 6).c_str());	 //Z
+			lv_label_set_text(ui->Knob_view3_label_5, get_knob_list_string(patch_player.knob_conns[9], 6).c_str());	 //L
+			lv_label_set_text(ui->Knob_view3_label_6, get_knob_list_string(patch_player.knob_conns[10], 6).c_str()); //R
+			lv_label_set_text(ui->Knob_view3_label_7, get_knob_list_string(patch_player.knob_conns[11], 6).c_str()); //Q
 		}
 	}
 
-	std::string get_knob_list_string(std::vector<MappedKnob> &mapped_knobs) {
+	std::string get_knob_list_string(std::vector<MappedKnob> &mapped_knobs, int max_chars = 0) {
 		//TODO: handle multi-maps
-		if (mapped_knobs.size()) {
-			auto slug = patch_player.module_slugs[mapped_knobs[0].module_id];
-			auto &info = ModuleFactory::getModuleInfo(slug);
-			if (info.width_hp)
-				return info.Knobs[mapped_knobs[0].param_id].short_name.data();
-			else
-				return slug.c_str();
-		} else
+		if (mapped_knobs.size() == 0)
 			return "-";
+		auto slug = patch_player.module_slugs[mapped_knobs[0].module_id];
+		auto &info = ModuleFactory::getModuleInfo(slug);
+		if (info.width_hp == 0)
+			return slug.c_str();
+
+		std::string short_name{info.Knobs[mapped_knobs[0].param_id].short_name};
+		int slug_len = slug.length() + 2;
+		if (max_chars == 0 || (slug_len + short_name.length()) <= max_chars)
+			return std::string{slug}.append(": ").append(short_name);
+		else if (short_name.length() <= max_chars)
+			return short_name;
+		else
+			return short_name.substr(0, max_chars);
 	}
 };
 } // namespace MetaModule
