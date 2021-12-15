@@ -63,12 +63,12 @@ struct KnobView3 : PageBase {
 		lv_arc_set_value(ui->Knob_view3_arc_9, params.knobs[11] * 100.f); //PotQ
 
 		if (patch_player.is_loaded) {
-			lv_label_set_text(ui->Knob_view3_label_9, get_knob_list_string(patch_player.knob_conns[0]));
-			lv_label_set_text(ui->Knob_view3_label_8, get_knob_list_string(patch_player.knob_conns[1]));
-			lv_label_set_text(ui->Knob_view3_label_12, get_knob_list_string(patch_player.knob_conns[2]));
-			lv_label_set_text(ui->Knob_view3_label_13, get_knob_list_string(patch_player.knob_conns[3]));
-			lv_label_set_text(ui->Knob_view3_label_10, get_knob_list_string(patch_player.knob_conns[4]));
-			lv_label_set_text(ui->Knob_view3_label_11, get_knob_list_string(patch_player.knob_conns[5]));
+			lv_label_set_text(ui->Knob_view3_label_9, get_knob_list_string(patch_player.knob_conns[0]).c_str());
+			lv_label_set_text(ui->Knob_view3_label_8, get_knob_list_string(patch_player.knob_conns[1]).c_str());
+			lv_label_set_text(ui->Knob_view3_label_12, get_knob_list_string(patch_player.knob_conns[2]).c_str());
+			lv_label_set_text(ui->Knob_view3_label_13, get_knob_list_string(patch_player.knob_conns[3]).c_str());
+			lv_label_set_text(ui->Knob_view3_label_10, get_knob_list_string(patch_player.knob_conns[4]).c_str());
+			lv_label_set_text(ui->Knob_view3_label_11, get_knob_list_string(patch_player.knob_conns[5]).c_str());
 			// lv_label_set_text(ui->Knob_view3_label_8, "PARAMETER2");  //2
 			// lv_label_set_text(ui->Knob_view3_label_12, "PARAMETER3"); //3
 			// lv_label_set_text(ui->Knob_view3_label_13, "PARAMETER4"); //4
@@ -77,12 +77,15 @@ struct KnobView3 : PageBase {
 		}
 	}
 
-	const char *get_knob_list_string(std::vector<MappedKnob> &mapped_knobs) {
+	std::string get_knob_list_string(std::vector<MappedKnob> &mapped_knobs) {
 		//TODO: handle multi-maps
 		if (mapped_knobs.size()) {
 			auto slug = patch_player.module_slugs[mapped_knobs[0].module_id];
 			auto &info = ModuleFactory::getModuleInfo(slug);
-			return info.Knobs[mapped_knobs[0].param_id].short_name.data();
+			if (info.width_hp)
+				return info.Knobs[mapped_knobs[0].param_id].short_name.data();
+			else
+				return slug.c_str();
 		} else
 			return "-";
 	}
