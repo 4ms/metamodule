@@ -153,11 +153,11 @@ void setup_scr_Dropdown1b(lv_ui *ui) {
 	//Write codes Dropdown1b_main_buttons
 	ui->Dropdown1b_main_buttons = lv_btnmatrix_create(ui->Dropdown1b_popup_menu, NULL);
 	static const char *Dropdown1b_main_buttons_text_map[] = {
-		"LOAD",
+		"Play",
 		"\n",
-		"EXPLORE",
+		"Explore",
 		"\n",
-		"ADVANCED",
+		"Advanced...",
 		"",
 	};
 	lv_btnmatrix_set_map(ui->Dropdown1b_main_buttons, Dropdown1b_main_buttons_text_map);
@@ -200,9 +200,7 @@ void setup_scr_Dropdown1b(lv_ui *ui) {
 
 	//Write codes Dropdown1b_patch_description
 	ui->Dropdown1b_patch_description = lv_label_create(ui->Dropdown1b_popup_menu, NULL);
-	lv_label_set_text(ui->Dropdown1b_patch_description,
-					  "Patch description, lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
-					  "tempor incididunt ut labore");
+	lv_label_set_text(ui->Dropdown1b_patch_description, "Patch description...");
 	lv_label_set_long_mode(ui->Dropdown1b_patch_description, LV_LABEL_LONG_BREAK);
 	lv_label_set_align(ui->Dropdown1b_patch_description, LV_LABEL_ALIGN_LEFT);
 
@@ -230,37 +228,37 @@ void setup_scr_Dropdown1b(lv_ui *ui) {
 	lv_obj_set_pos(ui->Dropdown1b_patch_description, 0, 25);
 	lv_obj_set_size(ui->Dropdown1b_patch_description, 280, 0);
 
-	//Write codes Dropdown1b_patch_nam_bg
-	ui->Dropdown1b_patch_nam_bg = lv_canvas_create(ui->Dropdown1b_popup_menu, NULL);
+	////Write codes Dropdown1b_patch_nam_bg
+	//ui->Dropdown1b_patch_nam_bg = lv_canvas_create(ui->Dropdown1b_popup_menu, NULL);
 
-	//Write style LV_CANVAS_PART_MAIN for Dropdown1b_patch_nam_bg
-	static lv_style_t style_Dropdown1b_patch_nam_bg_main;
-	lv_style_reset(&style_Dropdown1b_patch_nam_bg_main);
+	////Write style LV_CANVAS_PART_MAIN for Dropdown1b_patch_nam_bg
+	//static lv_style_t style_Dropdown1b_patch_nam_bg_main;
+	//lv_style_reset(&style_Dropdown1b_patch_nam_bg_main);
 
-	//Write style state: LV_STATE_DEFAULT for style_Dropdown1b_patch_nam_bg_main
-	lv_style_set_image_recolor(&style_Dropdown1b_patch_nam_bg_main, LV_STATE_DEFAULT, lv_color_make(0xa0, 0xa0, 0xa0));
-	lv_style_set_image_recolor_opa(&style_Dropdown1b_patch_nam_bg_main, LV_STATE_DEFAULT, 255);
-	lv_obj_add_style(ui->Dropdown1b_patch_nam_bg, LV_CANVAS_PART_MAIN, &style_Dropdown1b_patch_nam_bg_main);
-	lv_obj_set_pos(ui->Dropdown1b_patch_nam_bg, 0, 17);
-	lv_obj_set_size(ui->Dropdown1b_patch_nam_bg, 280, 8);
-	lv_color_t *buf_Dropdown1b_patch_nam_bg = (lv_color_t *)lv_mem_alloc(280 * 8 * 4);
-	lv_canvas_set_buffer(ui->Dropdown1b_patch_nam_bg, buf_Dropdown1b_patch_nam_bg, 280, 8, LV_IMG_CF_TRUE_COLOR);
+	////Write style state: LV_STATE_DEFAULT for style_Dropdown1b_patch_nam_bg_main
+	//lv_style_set_image_recolor(&style_Dropdown1b_patch_nam_bg_main, LV_STATE_DEFAULT, lv_color_make(0xa0, 0xa0, 0xa0));
+	//lv_style_set_image_recolor_opa(&style_Dropdown1b_patch_nam_bg_main, LV_STATE_DEFAULT, 255);
+	//lv_obj_add_style(ui->Dropdown1b_patch_nam_bg, LV_CANVAS_PART_MAIN, &style_Dropdown1b_patch_nam_bg_main);
+	//lv_obj_set_pos(ui->Dropdown1b_patch_nam_bg, 0, 17);
+	//lv_obj_set_size(ui->Dropdown1b_patch_nam_bg, 280, 8);
+	//lv_color_t *buf_Dropdown1b_patch_nam_bg = (lv_color_t *)lv_mem_alloc(280 * 8 * 4);
+	//lv_canvas_set_buffer(ui->Dropdown1b_patch_nam_bg, buf_Dropdown1b_patch_nam_bg, 280, 8, LV_IMG_CF_TRUE_COLOR);
 
-	//Write codes Dropdown1b_line_header
-	ui->Dropdown1b_line_header = lv_canvas_create(ui->Dropdown1b_popup_menu, NULL);
+	////Write codes Dropdown1b_line_header
+	//ui->Dropdown1b_line_header = lv_canvas_create(ui->Dropdown1b_popup_menu, NULL);
 
-	//Write style LV_CANVAS_PART_MAIN for Dropdown1b_line_header
-	static lv_style_t style_Dropdown1b_line_header_main;
-	lv_style_reset(&style_Dropdown1b_line_header_main);
+	////Write style LV_CANVAS_PART_MAIN for Dropdown1b_line_header
+	//static lv_style_t style_Dropdown1b_line_header_main;
+	//lv_style_reset(&style_Dropdown1b_line_header_main);
 
-	//Write style state: LV_STATE_DEFAULT for style_Dropdown1b_line_header_main
-	lv_style_set_image_recolor(&style_Dropdown1b_line_header_main, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x8c, 0xcd));
-	lv_style_set_image_recolor_opa(&style_Dropdown1b_line_header_main, LV_STATE_DEFAULT, 255);
-	lv_obj_add_style(ui->Dropdown1b_line_header, LV_CANVAS_PART_MAIN, &style_Dropdown1b_line_header_main);
-	lv_obj_set_pos(ui->Dropdown1b_line_header, 0, 24);
-	lv_obj_set_size(ui->Dropdown1b_line_header, 280, 2);
-	lv_color_t *buf_Dropdown1b_line_header = (lv_color_t *)lv_mem_alloc(280 * 2 * 4);
-	lv_canvas_set_buffer(ui->Dropdown1b_line_header, buf_Dropdown1b_line_header, 280, 2, LV_IMG_CF_TRUE_COLOR);
+	////Write style state: LV_STATE_DEFAULT for style_Dropdown1b_line_header_main
+	//lv_style_set_image_recolor(&style_Dropdown1b_line_header_main, LV_STATE_DEFAULT, lv_color_make(0x3c, 0x8c, 0xcd));
+	//lv_style_set_image_recolor_opa(&style_Dropdown1b_line_header_main, LV_STATE_DEFAULT, 255);
+	//lv_obj_add_style(ui->Dropdown1b_line_header, LV_CANVAS_PART_MAIN, &style_Dropdown1b_line_header_main);
+	//lv_obj_set_pos(ui->Dropdown1b_line_header, 0, 24);
+	//lv_obj_set_size(ui->Dropdown1b_line_header, 280, 2);
+	//lv_color_t *buf_Dropdown1b_line_header = (lv_color_t *)lv_mem_alloc(280 * 2 * 4);
+	//lv_canvas_set_buffer(ui->Dropdown1b_line_header, buf_Dropdown1b_line_header, 280, 2, LV_IMG_CF_TRUE_COLOR);
 
 	//Write codes Dropdown1b_patch_name
 	ui->Dropdown1b_patch_name = lv_label_create(ui->Dropdown1b_popup_menu, NULL);

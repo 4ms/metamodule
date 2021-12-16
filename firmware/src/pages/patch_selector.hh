@@ -10,16 +10,30 @@ struct PatchSelectorPage : PageBase {
 		_instance = this;
 	}
 	static inline PatchSelectorPage *_instance;
+	static inline lv_group_t *popup_group;
 
 	lv_obj_t *patch_selector;
 	lv_obj_t *patch_selector_patchlist;
 
 	static void patch_selector_event_cb(lv_obj_t *obj, lv_event_t event) {
+
 		switch (event) {
 			case LV_EVENT_VALUE_CHANGED: {
 				uint16_t sel = lv_dropdown_get_selected(obj);
-				if (sel != _instance->patch_list.cur_patch_index())
-					_instance->start_changing_patch(sel);
+				lv_label_set_text(ui->Dropdown1b_patch_name, _instance->patch_list.get_patch_name(sel));
+				lv_label_set_text(ui->Dropdown1b_patch_description, "TODO: Patch descriptions...");
+				lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
+				lv_group_set_editing(popup_group, true);
+
+				// lv_group_add_obj(popup_group, ui->Dropdown1b_popup_menu); //containter
+				// lv_obj_set_click(ui->Dropdown1b_popup_menu, true);
+
+				lv_group_add_obj(popup_group, ui->Dropdown1b_main_buttons); //button matrix
+				lv_obj_set_click(ui->Dropdown1b_main_buttons, true);
+
+				lv_obj_set_hidden(ui->Dropdown1b_popup_menu, false);
+				// if (sel != _instance->patch_list.cur_patch_index())
+				// 	_instance->start_changing_patch(sel);
 			} break;
 
 			default:
@@ -95,9 +109,14 @@ struct PatchSelectorPage : PageBase {
 		//Event callback
 		lv_obj_set_event_cb(patch_selector_patchlist, patch_selector_event_cb);
 
-		//hack: set base of dropdown1b to be our own screen:
+		// Pop-up window:
+		// hack: set base of dropdown1b to be our own screen:
 		ui->Dropdown1b = patch_selector;
 		setup_scr_Dropdown1b(ui);
+		lv_obj_set_hidden(ui->Dropdown1b_popup_menu, true);
+
+		popup_group = lv_group_create();
+		lv_group_add_obj(popup_group, ui->Dropdown1b_popup_menu);
 	}
 
 	void update() override {
