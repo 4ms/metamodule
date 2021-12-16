@@ -94,6 +94,10 @@ struct PatchSelectorPage : PageBase {
 
 		//Event callback
 		lv_obj_set_event_cb(patch_selector_patchlist, patch_selector_event_cb);
+
+		//hack: set base of dropdown1b to be our own screen:
+		ui->Dropdown1b = patch_selector;
+		setup_scr_Dropdown1b(ui);
 	}
 
 	void update() override {
