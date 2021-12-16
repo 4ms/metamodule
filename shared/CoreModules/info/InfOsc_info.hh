@@ -25,7 +25,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = KnobTrack,
             .x_mm = px_to_mm<72>(43.62f),
-            .y_mm = px_to_mm<72>(43.72f),
+            .y_mm = px_to_mm<72>(46.55f),
             .short_name = "Track",
             .long_name = "Track",
             .default_val = 0.5f,
@@ -35,7 +35,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = KnobAbs,
             .x_mm = px_to_mm<72>(108.12f),
-            .y_mm = px_to_mm<72>(43.72f),
+            .y_mm = px_to_mm<72>(46.55f),
             .short_name = "Abs",
             .long_name = "Abs",
             .default_val = 0.0f,
@@ -45,7 +45,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = KnobRange,
             .x_mm = px_to_mm<72>(172.62f),
-            .y_mm = px_to_mm<72>(43.72f),
+            .y_mm = px_to_mm<72>(46.55f),
             .short_name = "Range",
             .long_name = "Range",
             .default_val = 0.5f,
@@ -55,7 +55,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = KnobFm,
             .x_mm = px_to_mm<72>(43.62f),
-            .y_mm = px_to_mm<72>(105.2f),
+            .y_mm = px_to_mm<72>(105.5f),
             .short_name = "FM",
             .long_name = "FM",
             .default_val = 0.0f,
@@ -65,7 +65,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = KnobPhase,
             .x_mm = px_to_mm<72>(172.62f),
-            .y_mm = px_to_mm<72>(105.2f),
+            .y_mm = px_to_mm<72>(105.5f),
             .short_name = "Phase",
             .long_name = "Phase",
             .default_val = 0.0f,
@@ -124,7 +124,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputPm,
             .x_mm = px_to_mm<72>(35.96f),
-            .y_mm = px_to_mm<72>(213.03f),
+            .y_mm = px_to_mm<72>(214.54f),
             .short_name = "PM",
             .long_name = "PM",
             .unpatched_val = 0.f,
@@ -133,7 +133,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputScan,
             .x_mm = px_to_mm<72>(83.96f),
-            .y_mm = px_to_mm<72>(213.03f),
+            .y_mm = px_to_mm<72>(214.54f),
             .short_name = "Scan",
             .long_name = "Scan",
             .unpatched_val = 0.f,
@@ -142,7 +142,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputAdd,
             .x_mm = px_to_mm<72>(131.96f),
-            .y_mm = px_to_mm<72>(213.03f),
+            .y_mm = px_to_mm<72>(214.54f),
             .short_name = "Add",
             .long_name = "Add",
             .unpatched_val = 0.f,
@@ -151,7 +151,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputReset,
             .x_mm = px_to_mm<72>(179.96f),
-            .y_mm = px_to_mm<72>(213.03f),
+            .y_mm = px_to_mm<72>(214.54f),
             .short_name = "Reset",
             .long_name = "Reset",
             .unpatched_val = 0.f,
@@ -160,7 +160,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputMod,
             .x_mm = px_to_mm<72>(35.96f),
-            .y_mm = px_to_mm<72>(262.13f),
+            .y_mm = px_to_mm<72>(263.64f),
             .short_name = "Mod",
             .long_name = "Mod",
             .unpatched_val = 0.f,
@@ -169,7 +169,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputAbs,
             .x_mm = px_to_mm<72>(83.96f),
-            .y_mm = px_to_mm<72>(262.13f),
+            .y_mm = px_to_mm<72>(263.64f),
             .short_name = "Abs",
             .long_name = "Abs",
             .unpatched_val = 0.f,
@@ -178,7 +178,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputLin,
             .x_mm = px_to_mm<72>(131.96f),
-            .y_mm = px_to_mm<72>(262.13f),
+            .y_mm = px_to_mm<72>(263.64f),
             .short_name = "Lin",
             .long_name = "Lin",
             .unpatched_val = 0.f,
@@ -187,7 +187,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputPhase,
             .x_mm = px_to_mm<72>(179.96f),
-            .y_mm = px_to_mm<72>(262.13f),
+            .y_mm = px_to_mm<72>(263.64f),
             .short_name = "Phase",
             .long_name = "Phase",
             .unpatched_val = 0.f,
@@ -196,7 +196,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputPitch,
             .x_mm = px_to_mm<72>(35.96f),
-            .y_mm = px_to_mm<72>(309.72f),
+            .y_mm = px_to_mm<72>(311.23f),
             .short_name = "Pitch",
             .long_name = "Pitch",
             .unpatched_val = 0.f,
@@ -205,7 +205,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputRange,
             .x_mm = px_to_mm<72>(83.96f),
-            .y_mm = px_to_mm<72>(309.72f),
+            .y_mm = px_to_mm<72>(311.23f),
             .short_name = "Range",
             .long_name = "Range",
             .unpatched_val = 0.f,
@@ -214,7 +214,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = InputFm,
             .x_mm = px_to_mm<72>(131.96f),
-            .y_mm = px_to_mm<72>(309.72f),
+            .y_mm = px_to_mm<72>(311.23f),
             .short_name = "FM",
             .long_name = "FM",
             .unpatched_val = 0.f,
@@ -232,7 +232,7 @@ struct InfOscInfo : ModuleInfoBase {
         {
             .id = OutputOut,
             .x_mm = px_to_mm<72>(179.96f),
-            .y_mm = px_to_mm<72>(309.72f),
+            .y_mm = px_to_mm<72>(311.23f),
             .short_name = "Out",
             .long_name = "Out",
             .signal_type = OutJackDef::Analog,
