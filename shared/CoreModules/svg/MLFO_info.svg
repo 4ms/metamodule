@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="115.45" height="370.19" viewBox="0 0 115.45 370.19">
-  <g id="Layer_1" data-name="Layer 1">
+  <g id="faceplate" data-name="faceplate">
     <rect x="0.13" y="0.13" width="115.2" height="364.25" style="fill: #ededed;stroke: #9d9d9e;stroke-miterlimit: 10;stroke-width: 0.25px"/>
     <path d="M100.21,261.94c-.29-8.38-6.12-15.07-13.28-15.07H28.57c-7.16,0-13,6.69-13.28,15.07H15.2v46.63l0,7.18c0,.18,0,.36,0,.54v19.84a5.68,5.68,0,0,0,5.67,5.67h73.7a5.69,5.69,0,0,0,5.67-5.67V261.94Z"/>
     <g>
