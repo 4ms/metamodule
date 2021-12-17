@@ -148,35 +148,20 @@ def get_dim_inches(dimString):
         dimInches /= 25.4
     return dimInches
 
-
-def panel_to_components(tree):
-
-    components = {}
-    #TODO: extract knob long name and description (or is that to be done manually?)
-    #.... maybe SVG id = "ShortName#LongName" or "ShortName"
-    #.... and description is in some help file
-
-    # Get components layer/group
-    root = tree.getroot()
+def get_components_group(root):
     groups = root.findall(".//svg:g[@inkscape:label='components']", ns)
     # Illustrator uses `id` for the group name.
     if len(groups) < 1:
         groups = root.findall(".//svg:g[@id='components']", ns)
     if len(groups) < 1:
         raise UserException("ERROR: Could not find \"components\" layer on panel")
-    components_group = groups[0]
+    return groups[0]
 
-    # Deduce DPI and HP:
-    components['dpi'] = deduce_dpi(root)
-    components['HP'] = round(get_dim_inches(root.get('width')) / 0.2)
-    Log(f"HP deduced as {components['HP']}")
 
-    # Set default slug and ModuleName
-    components['slug'] = "UNNAMED"
-    components['ModuleName'] = "Unnamed"
-
-    # Scan all text elements: look for slug and ModuleName
+def find_slug_and_modulename(components_group):
     texts = components_group.findall(".//svg:text", ns)
+    slug = "Unnamed"
+    moduleName = "Unnamed"
     for t in texts:
         name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
         if name is None:
@@ -187,14 +172,65 @@ def panel_to_components(tree):
             continue
 
         if name == "slug":
-            components['slug'] = ""
+            slug = ""
             for m in t.itertext():
-                components['slug'] += m
+                slug += m
 
         if name == "modulename":
-            components['ModuleName'] = ""
+            moduleName = ""
             for m in t.itertext():
-                components['ModuleName'] += m
+                moduleName += m
+
+    return slug, moduleName
+
+
+def panel_to_components(tree):
+
+    components = {}
+    #TODO: extract knob long name and description (or is that to be done manually?)
+    #.... maybe SVG id = "ShortName#LongName" or "ShortName"
+    #.... and description is in some help file
+
+    root = tree.getroot()
+    components_group = get_components_group(root)
+    # groups = root.findall(".//svg:g[@inkscape:label='components']", ns)
+    # # Illustrator uses `id` for the group name.
+    # if len(groups) < 1:
+    #     groups = root.findall(".//svg:g[@id='components']", ns)
+    # if len(groups) < 1:
+    #     raise UserException("ERROR: Could not find \"components\" layer on panel")
+    # components_group = groups[0]
+
+    # Deduce DPI and HP:
+    components['dpi'] = deduce_dpi(root)
+    components['HP'] = round(get_dim_inches(root.get('width')) / 0.2)
+    Log(f"HP deduced as {components['HP']}")
+
+    # Set default slug and ModuleName
+    components['slug'], components['ModuleName'] = find_slug_and_modulename(components_group)
+    # components['slug'] = "UNNAMED"
+    # components['ModuleName'] = "Unnamed"
+
+    # # Scan all text elements: look for slug and ModuleName
+    # texts = components_group.findall(".//svg:text", ns)
+    # for t in texts:
+    #     name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
+    #     if name is None:
+    #         name = t.get('id')
+    #     if name is None:
+    #         name = t.get('data-name')
+    #     if name is None:
+    #         continue
+
+    #     if name == "slug":
+    #         components['slug'] = ""
+    #         for m in t.itertext():
+    #             components['slug'] += m
+
+    #     if name == "modulename":
+    #         components['ModuleName'] = ""
+    #         for m in t.itertext():
+    #             components['ModuleName'] += m
 
     if components['slug'] == "UNNAMED":
         Log("WARNING: No text element with name or id 'slug' was found in the 'components' layer/group. Setting slug to 'UNNAMED'.")
@@ -491,8 +527,10 @@ struct {slug}Info : ModuleInfoBase {{
 """
     return source
 
+
 def pathFromHere(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)),path)
+
 
 def createInfoFile(svgFilename, infoFilePath = None):
     if infoFilePath == None:
@@ -532,15 +570,12 @@ def extractArtworkLayer(svgFilename, artworkFilename = None, slug = None):
 
     tree = xml.etree.ElementTree.parse(svgFilename)
     root = tree.getroot()
-    comps = root.findall(".//*[@id='components']",ns)
-    if len(comps) == 0:
-        Log("No group (or any element) with id = 'components' found in svg file")
-        return
-    if len(comps) > 1:
-        Log("More than 1 group or element with id = 'components' found in svg file. Using the first one.")
+    components_group = get_components_group(root)
 
-    g = comps[0]
-    g.clear()
+    slug, _ = find_slug_and_modulename(components_group)
+    appendPluginFiles(slug)
+
+    components_group.clear()
     Log("Removed components layer")
     tree.write(artworkFilename)
     Log(f"Wrote artwork svg file for vcv: {artworkFilename}")
@@ -646,14 +681,58 @@ def createCoreModule(slug, coreModuleDir = None):
             Log(f"Wrote file {newCoreCPPFileName} in {coreModuleDir}")
 
 
+def appendPluginFiles(slug, pluginDir = None, description=""):
+    if pluginDir == None:
+        pluginDir = os.getenv('METAMODULE_VCV_DIR')
+        if pluginDir is None:
+            pluginDir = input_default("Metamodule/VCV dir", pathFromHere("../../vcv/"))
+    plugincpp = os.path.join(pluginDir, 'src/plugin.cpp')
+    pluginhpp = os.path.join(pluginDir, 'src/plugin.hpp')
+    pluginjson = os.path.join(pluginDir, 'plugin.json')
+    if description=="":
+        description = slug
+    modelName = 'model' + slug
+
+    # Append to plugins.cpp file
+    marker = '// Add models below here'
+    newText = f'''
+    p->addModel({modelName});
+    '''
+    appendToFileAfterMarker(plugincpp, marker, newText)
+
+    # Append more to plugins.cpp
+    marker = "// include and define models below here\n"
+    newText = f'''
+#include "CoreModules/info/{slug}_info.hh"
+auto {modelName} = createModelFromInfo<{slug}Info>();
+'''
+    appendToFileAfterMarker(plugincpp, marker, newText)
+
+    # Append to plugins.hpp file
+    marker = '// Add models below here\n'
+    newText = f'extern Model *{modelName};\n'
+    appendToFileAfterMarker(pluginhpp, marker, newText)
+
+    # Append plugin.json
+    newText=f'''
+    {{
+      "slug": "{slug}",
+      "name": "{slug}",
+      "description": "{description}",
+      "tags": []
+    }},'''
+    marker = '"modules": ['
+    appendToFileAfterMarker(pluginjson, marker, newText)
+
+
 def usage(script):
-    text = f"""MetaModule SVG Helper Utility
+    print(f"""MetaModule SVG Helper Utility
 
 Usage: {script} <command> ...
 Commands:
 
 processsvg [input svg file name]
-    Runs createinfo, extractart, and createcorefiles on the given file.
+    Runs createinfo, extractforvcv, and createcorefiles on the given file.
     Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR, METAMODULE_COREMODULE_DIR if found,
     otherwise prompts user for the values
 
@@ -663,8 +742,9 @@ createinfo [input svg file name] {{optional output path for ModuleInfo file}}
     element with name/id "slug" found in the components layer/group of the SVG
     file. File will be overwritten if it exists.
 
-extractart [input SVG file name] [output artwork SVG file name]
-    Saves a new SVG file with the components layer removed
+extractforvcv [input SVG file name] [output artwork SVG file name]
+    Saves a new VCV artwork SVG file with the components layer removed.
+    Also makes sure the Slug (found in the SVG file) exists as a model in the VCV plugin, and adds it if not.
 
 createlvimg [input artwork SVG file name] [output C file name]
     Converts the artwork SVG to a PNG, scales it to 240px high, and then
@@ -680,8 +760,7 @@ appendimglist [C array name] [image_list.hh filename]
     Does not update the image_list.hh file if the exact string to be inserted is already found.
     The slug is the first part of the C array name, up to the first underscore (EnOsc_artwork_240 => EnOsc)
 
-"""
-    print(text)
+""")
 
 
 def parse_args(args):
@@ -710,7 +789,7 @@ def parse_args(args):
 
     output = args.pop(0)
 
-    if cmd == 'extractart':
+    if cmd == 'extractforvcv':
         extractArtworkLayer(inputfile, output)
         return
 

@@ -76,7 +76,7 @@ modules: $(INFO_FILES) $(MODULE_ARTWORK_FILES) $(SHARED)/svgextract/svgextract.p
 
 $(METAMODULE_ARTWORK_DIR)/%-artwork.svg: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
 	$(info Creating VCV artwork image from $<)
-	@python3 $(SHARED)/svgextract/svgextract.py extractart $< $@
+	@python3 $(SHARED)/svgextract/svgextract.py extractforvcv $< $@
 
 $(METAMODULE_INFO_DIR)/%_info.hh: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
 	$(info Creating ModuleInfo header file from $<)

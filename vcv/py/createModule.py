@@ -69,7 +69,8 @@ auto {modelName} = createModelFromInfo<{slug}Info>();
 
 
 def usage(script):
-    text = f"""CoreModule creation helper
+    text = f"""DEPRECATED!
+    CoreModule creation helper
 
 Usage: {script} command ... 
 Commands:
@@ -89,15 +90,16 @@ def parse_args(args):
 
     cmd = args.pop(0)
     if cmd == 'createcore':
-        if len(args) < 1:
-            usage(script)
-            return
-        slug = args.pop(0)
-        coreModuleDir = os.getenv('METAMODULE_COREMODULE_DIR')
-        if coreModuleDir is None:
-            coreModuleDir = input_default("CoreModule dir", os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../shared/CoreModules/")))
-        createCoreModule(slug, coreModuleDir)
-        return
+        print("Not a valid command, use svgextract.py")
+        # if len(args) < 1:
+        #     usage(script)
+        #     return
+        # slug = args.pop(0)
+        # coreModuleDir = os.getenv('METAMODULE_COREMODULE_DIR')
+        # if coreModuleDir is None:
+        #     coreModuleDir = input_default("CoreModule dir", os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),"../../shared/CoreModules/")))
+        # createCoreModule(slug, coreModuleDir)
+        # return
 
     elif cmd == 'addtoplugin':
         if len(args) < 2:
@@ -105,7 +107,7 @@ def parse_args(args):
             return
         slug = args.pop(0)
         desc = args.pop(0)
-        vcvDir = os.getenv('METAMODULE_COREMODULE_DIR')
+        vcvDir = os.getenv('METAMODULE_VCV_DIR')
         if vcvDir is None:
             vcvDir = input_default("VCV Plugin dir", os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),"../")))
         appendPluginFiles(slug, vcvDir, desc)
