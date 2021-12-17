@@ -35,40 +35,25 @@ struct ModuleViewPage : PageBase {
 	static inline lv_obj_t *canvas;
 	static inline lv_draw_img_dsc_t img_dsc;
 
-	static inline std::string_view slug;
+	std::string_view slug;
 
 	ModuleViewPage(PatchInfo info)
-		: PageBase{info} {
-		slug = "SMR";
+		: PageBase{info}
+		, slug{"EnOsc"} {
 	}
 
-	static void roller_cb(lv_obj_t *obj, lv_event_t event) {
-		if (obj != roller)
-			return;
-
-		if (event == LV_EVENT_KEY) {
-			// Turn off old button
-			if (cur_selected >= 0) {
-				lv_obj_remove_style(button[cur_selected], LV_BTN_PART_MAIN, &style_highlight);
-				lv_event_send_refresh(button[cur_selected]);
-			}
-
-			// Get the new button
-			cur_selected = lv_roller_get_selected(obj);
-			printf("moduleview: cur_selected: %d\r\n", cur_selected);
-
-			// Turn on new button
-			lv_obj_add_style(button[cur_selected], LV_BTN_PART_MAIN, &style_highlight);
-			lv_event_send_refresh(button[cur_selected]);
-		}
+	ModuleViewPage(PatchInfo info, std::string_view module_slug)
+		: PageBase{info}
+		, slug(module_slug) {
 	}
 
-	void _add_button(int x, int y) {
-		auto &b = button.emplace_back();
-		b = lv_btn_create(base, nullptr);
-		lv_obj_add_style(b, LV_BTN_PART_MAIN, &button_style);
-		lv_obj_set_pos(b, x - 6, y - 6);
-		lv_obj_set_size(b, 12, 12);
+	void load_module_page(std::string_view module_slug) {
+		set_slug(module_slug);
+		init();
+	}
+
+	void set_slug(std::string_view module_slug) {
+		slug = module_slug;
 	}
 
 	void init() override {
@@ -155,14 +140,10 @@ struct ModuleViewPage : PageBase {
 				continue;
 			lv_canvas_draw_img(canvas, x - sw->header.w / 2, y - sw->header.h / 2, sw, &img_dsc);
 		}
-		// for (const auto el : info.Sliders) {
-		// 	_add_button(ModuleInfoBase::mm_to_px<240>(el.x_mm), ModuleInfoBase::mm_to_px<240>(el.y_mm));
-		// opts += el.short_name;
-		// opts += "\n";
-		// }
 
 		// remove final \n
-		opts.pop_back();
+		if (opts.length() > 0)
+			opts.pop_back();
 
 		roller = lv_roller_create(base, nullptr);
 		lv_obj_set_pos(roller, width_px, 1);
@@ -220,6 +201,36 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
+	}
+
+private:
+	static void roller_cb(lv_obj_t *obj, lv_event_t event) {
+		if (obj != roller)
+			return;
+
+		if (event == LV_EVENT_KEY) {
+			// Turn off old button
+			if (cur_selected >= 0) {
+				lv_obj_remove_style(button[cur_selected], LV_BTN_PART_MAIN, &style_highlight);
+				lv_event_send_refresh(button[cur_selected]);
+			}
+
+			// Get the new button
+			cur_selected = lv_roller_get_selected(obj);
+			printf("moduleview: cur_selected: %d\r\n", cur_selected);
+
+			// Turn on new button
+			lv_obj_add_style(button[cur_selected], LV_BTN_PART_MAIN, &style_highlight);
+			lv_event_send_refresh(button[cur_selected]);
+		}
+	}
+
+	void _add_button(int x, int y) {
+		auto &b = button.emplace_back();
+		b = lv_btn_create(base, nullptr);
+		lv_obj_add_style(b, LV_BTN_PART_MAIN, &button_style);
+		lv_obj_set_pos(b, x - 6, y - 6);
+		lv_obj_set_size(b, 12, 12);
 	}
 };
 
