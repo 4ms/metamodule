@@ -1,30 +1,14 @@
 #pragma once
-
-#include "CoreModules/moduleFactory.hh"
 #include "CoreModules/coreProcessor.h"
-#include "util/math.hh"
+#include "CoreModules/info/Drum_info.hh"
+#include "CoreModules/moduleFactory.hh"
+
 #include "processors/envelope.h"
 #include "processors/twoOpFMOscillator.h"
-#include "util/math_tables.hh"
-
-using namespace MathTools;
 
 class DrumCore : public CoreProcessor {
-	static inline const int NumInJacks = 6;
-	static inline const int NumOutJacks = 1;
-	static inline const int NumKnobs = 9;
-
-	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Pitch", "Pitch Env", "Pitch Amt", "Ratio", "FM Env", "FM Amt", "Tone Env", "Noise Env", "Noise Mix"};
-	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{"Gate", "V/OCT", "Noise Env", "FM Env", "Pitch Env", "Tone Env"};
-	static inline const StaticString<LongNameChars> description{"Drum"};
-
-	// clang-format off
-	virtual StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
-	virtual StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
-	virtual StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
-	virtual StaticString<LongNameChars> get_description() override { return description; }
-	// clang-format on
+	using Info = DrumInfo;
+	using ThisCore = DrumCore;
 
 private:
 	enum { pitchEnvelope, fmEnvelope, toneEnvelope, noiseEnvelope };
@@ -64,8 +48,7 @@ private:
 	InterpArray<float, 3> toneReleaseTimes = {10, 500, 4000};
 
 public:
-	virtual void update(void) override
-	{
+	void update(void) override {
 		auto freqCalc =
 			baseFrequency + (envelopes[pitchEnvelope].update(gateIn) * 4000.0f * (pitchAmount * pitchAmount));
 		osc.set_frequency(1, baseFrequency * ratio);
@@ -83,8 +66,7 @@ public:
 		drumOutput = interpolate(toneOutput, noiseOut, noiseBlend);
 	}
 
-	DrumCore()
-	{
+	DrumCore() {
 		for (int i = 0; i < 4; i++) {
 			envelopes[i].sustainEnable = false;
 			envelopes[i].set_attack_curve(0);
@@ -121,8 +103,7 @@ public:
 		setPitchEnvelope();
 	}
 
-	virtual void set_param(int const param_id, const float val) override
-	{
+	void set_param(int const param_id, const float val) override {
 		switch (param_id) {
 			case 0:
 				baseFrequency = map_value(val, 0.0f, 1.0f, 10.0f, 1000.0f);
@@ -158,8 +139,7 @@ public:
 		}
 	}
 
-	void setFMEnvelope()
-	{
+	void setFMEnvelope() {
 		float val = constrain(baseFMEnvTime + FMEnvCV, 0.0f, 1.0f);
 		envelopes[fmEnvelope].set_envelope_time(0, map_value(val, 0.0f, 1.0f, 1.0f, 100.0f));
 		envelopes[fmEnvelope].set_envelope_time(2, map_value(val, 0.0f, 1.0f, 10.0f, 8000.0f));
@@ -167,8 +147,7 @@ public:
 		envelopes[fmEnvelope].set_sustain(map_value(val, 0.0f, 1.0f, 0.0f, 0.3f));
 	}
 
-	void setToneEnvelope()
-	{
+	void setToneEnvelope() {
 		float val = constrain(baseToneEnvTime + toneEnvCV, 0.0f, 1.0f);
 		envelopes[toneEnvelope].set_envelope_time(0, toneAttackTimes.interp(val));
 		envelopes[toneEnvelope].set_envelope_time(1, toneHoldTimes.interp(val));
@@ -177,8 +156,7 @@ public:
 		envelopes[toneEnvelope].set_sustain(toneBreakPoint.interp(val));
 	}
 
-	void setNoiseEnvelope()
-	{
+	void setNoiseEnvelope() {
 		float val = constrain(baseNoiseEnvTime + noiseEnvCV, 0.0f, 1.0f);
 		envelopes[noiseEnvelope].set_envelope_time(0, map_value(val, 0.0f, 1.0f, 1.0f, 50.0f));
 		envelopes[noiseEnvelope].set_envelope_time(2, map_value(val, 0.0f, 1.0f, 30.0f, 100.0f));
@@ -186,24 +164,21 @@ public:
 		envelopes[noiseEnvelope].set_sustain(map_value(val, 0.0f, 1.0f, 0.0f, 0.25f));
 	}
 
-	void setPitchEnvelope()
-	{
+	void setPitchEnvelope() {
 		float val = constrain(pitchEnvCV + basePitchEnvTime, 0.0f, 1.0f);
 		envelopes[pitchEnvelope].set_envelope_time(2, pitchDecayTimes.interp(val));
 		envelopes[pitchEnvelope].set_envelope_time(3, pitchReleaseTimes.interp(val));
 		envelopes[pitchEnvelope].set_sustain(pitchBreakPoint.interp(val));
 	}
 
-	virtual void set_samplerate(const float sr) override
-	{
+	void set_samplerate(const float sr) override {
 		for (int i = 0; i < 4; i++) {
 			envelopes[i].set_samplerate(sr);
 		}
 		osc.set_samplerate(sr);
 	}
 
-	virtual void set_input(const int input_id, const float val) override
-	{
+	void set_input(const int input_id, const float val) override {
 		switch (input_id) {
 			case 0:
 				gateIn = val;
@@ -230,8 +205,7 @@ public:
 		}
 	}
 
-	virtual float get_output(const int output_id) const override
-	{
+	float get_output(const int output_id) const override {
 		float output = 0;
 		switch (output_id) {
 			case 0:
@@ -241,23 +215,20 @@ public:
 		return output;
 	}
 
-	virtual void mark_input_unpatched(const int input_id) override
-	{
+	void mark_input_unpatched(const int input_id) override {
 		if (input_id == 1) {
 			pitchConnected = false;
 		}
 	}
-	virtual void mark_input_patched(const int input_id) override
-	{
+	void mark_input_patched(const int input_id) override {
 		if (input_id == 1) {
 			pitchConnected = true;
 		}
 	}
 
-	static std::unique_ptr<CoreProcessor> create()
-	{
-		return std::make_unique<DrumCore>();
-	}
-	static constexpr char typeID[20] = "DRUM";
-	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
+	// Boilerplate to auto-register in ModuleFactory
+	// clang-format off
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
+	// clang-format on
 };
