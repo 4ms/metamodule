@@ -79,7 +79,7 @@ struct KnobView3 : PageBase {
 		}
 	}
 
-	std::string get_knob_list_string(std::vector<MappedKnob> &mapped_knobs, int max_chars = 0) {
+	std::string get_knob_list_string(std::vector<MappedKnob> &mapped_knobs, unsigned max_chars = 0) {
 		//TODO: handle multi-maps
 		if (mapped_knobs.size() == 0)
 			return "-";

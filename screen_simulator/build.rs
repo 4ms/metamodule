@@ -11,6 +11,7 @@ fn add_glob_files(globpath: &str, path_vec: &mut Vec<String>) {
 fn main() {
     println!("cargo:rerun-if-changed=../firmware/lib/lvgl/lv_conf.h");
     println!("cargo:rerun-if-changed=../firmware/src/pages/");
+    println!("cargo:rerun-if-changed=../firmware/src/pages/images");
     println!("cargo:rerun-if-chnaged=../firmware/src/pages/page_manager.cc");
     println!("cargo:rerun-if-changed=../firmware/src/pages/gui-guider");
     println!("cargo:rerun-if-changed=../firmware/src/patchlist.cc");
