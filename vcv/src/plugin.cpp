@@ -25,11 +25,11 @@ void init(Plugin *p)
 
 	//////////////// Auto generated ///////////////////////
 	// Add models below here
+	p->addModel(modelHubMedium);
 	p->addModel(modelSMR);
 	p->addModel(modelEnOsc);
 	p->addModel(modelBuffMult);
 
-	// p->addModel(modelHubMedium);
 	// p->addModel(modelInfosc01);
 	// p->addModel(modelDjembe);
 	// p->addModel(modelBipolarsource);

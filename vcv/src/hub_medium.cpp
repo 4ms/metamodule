@@ -19,7 +19,7 @@ struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 	HubMedium()
 	{
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		selfID.typeID = "PANEL_MED";
+		selfID.typeID = "PanelMedium";
 	}
 
 	~HubMedium() = default;
@@ -112,4 +112,4 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 	}
 };
 
-Model *modelHubMedium = createModel<HubMedium, HubMediumWidget>("PANEL_MED");
+Model *modelHubMedium = createModel<HubMedium, HubMediumWidget>("PanelMedium");

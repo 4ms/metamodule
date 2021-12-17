@@ -13,10 +13,10 @@ extern Plugin *pluginInstance;
 // Declare each Model, defined in each module source file
 //////////////// Auto generated ///////////////////////
 // Add models below here
+extern Model *modelHubMedium;
 extern Model *modelSMR;
 extern Model *modelEnOsc;
 extern Model *modelBuffMult;
-// extern Model *modelHubMedium;
 // extern Model *modelInfosc01;
 // extern Model *modelDjembe;
 // extern Model *modelBipolarsource;

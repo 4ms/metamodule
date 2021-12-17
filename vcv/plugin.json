@@ -13,6 +13,12 @@
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [
+	{
+      "slug": "PanelMedium",
+      "name": "Hub 28HP",
+      "description": "Hub 28HP",
+      "tags": []
+	},
     {
       "slug": "SMR",
       "name": "SMR",
