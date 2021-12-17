@@ -1,29 +1,21 @@
 #pragma once
-#include "CoreModules/moduleFactory.hh"
 #include "CoreModules/coreProcessor.h"
-// #include "debug.hh"
+#include "CoreModules/info/Djembe_info.hh"
+#include "CoreModules/moduleFactory.hh"
+
 #include "gcem/include/gcem.hpp"
 #include "util/math.hh"
-#include "util/math_tables.hh"
-using namespace MathTools;
 
 class DjembeCore : public CoreProcessor {
-	static constexpr uint32_t SAMPLERATE = 48000;
-	static inline const int NumInJacks = 5;
-	static inline const int NumOutJacks = 1;
-	static inline const int NumKnobs = 4;
+	using Info = DjembeInfo;
+	using ThisCore = DjembeCore;
 
-	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{"Freq", "Gain", "Sharpness", "Strike"};
-	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{"Output"};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{
-		"Freq", "Gain", "Sharpness", "Strike", "Trigger"};
-	static inline const StaticString<LongNameChars> description{"Djembe"};
+	static constexpr uint32_t SAMPLERATE = 48000;
 
 public:
 	enum Params { Freq = 0, Gain = 1, Sharpness = 2, Strike = 3, Trigger = 4 };
 
-	DjembeCore()
-	{
+	DjembeCore() {
 		IOTA = 0;
 
 		// Todo: Combine these loops
@@ -114,8 +106,7 @@ public:
 		paramsNeedUpdating = true;
 	}
 
-	void update() override
-	{
+	void update() override {
 		if (paramsNeedUpdating)
 			update_params();
 		paramsNeedUpdating = false;
@@ -227,8 +218,7 @@ public:
 		fRec23[1] = fRec23[0];
 	}
 
-	void update_params()
-	{
+	void update_params() {
 		strike0 = MathTools::min<float>((float(strikeCV) + float(strikeKnob)), 1.0f);
 		strike1 = MathTools::tan_close(fConst1 * ((15000.0f * strike0) + 500.0f));
 		strike2 = (1.0f / strike1);
@@ -274,8 +264,7 @@ public:
 		fSlow38 = (fConst62 * MathTools::cos_close((fConst5 * (slowFreq + 3800.0f))));
 	}
 
-	void set_param(int const param_id, const float val) override
-	{
+	void set_param(int const param_id, const float val) override {
 		switch (param_id) {
 			case Freq:
 				freqKnob = MathTools::map_value(val, 0.f, 1.f, 20.f, 500.f);
@@ -299,13 +288,11 @@ public:
 		}
 	}
 
-	void set_samplerate(const float sr) override
-	{
+	void set_samplerate(const float sr) override {
 		// Todo!
 	}
 
-	void set_input(const int input_id, const float val) override
-	{
+	void set_input(const int input_id, const float val) override {
 		switch (input_id) {
 			case Freq:
 				freqCV = exp5Table.interp(MathTools::constrain(val, 0.f, 1.0f));
@@ -334,8 +321,7 @@ public:
 		}
 	}
 
-	float get_output(const int output_id) const override
-	{
+	float get_output(const int output_id) const override {
 		switch (output_id) {
 			case 0:
 				// return noise_hp[0];
@@ -532,14 +518,10 @@ private:
 	static constexpr float fConst63 = (fConst61 * fConst61);
 
 public:
+	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
-	static constexpr char typeID[20] = "DJEMBE";
-	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<DjembeCore>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(typeID, description, create);
-	StaticString<NameChars> knob_name(unsigned idx) override { return (idx < NumKnobs) ? KnobNames[idx] : ""; }
-	StaticString<NameChars> injack_name(unsigned idx) override { return (idx < NumInJacks) ? InJackNames[idx] : ""; }
-	StaticString<NameChars> outjack_name(unsigned idx) override { return (idx < NumOutJacks) ? OutJackNames[idx] : ""; }
-	StaticString<LongNameChars> get_description() override { return description; }
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
 };
 
