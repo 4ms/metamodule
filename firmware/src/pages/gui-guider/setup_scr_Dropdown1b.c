@@ -188,8 +188,14 @@ void setup_scr_Dropdown1b(lv_ui *ui) {
 	//Write style state: LV_STATE_DEFAULT for style_Dropdown1b_main_buttons_btn
 	lv_style_set_radius(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, 8);
 	lv_style_set_bg_color(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-	lv_style_set_bg_grad_color(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-	lv_style_set_bg_grad_dir(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
+	lv_style_set_bg_grad_dir(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, LV_GRAD_DIR_NONE);
+
+	//Added by DG:
+	lv_style_set_bg_grad_dir(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, LV_GRAD_DIR_NONE);
+	lv_style_set_bg_color(&style_Dropdown1b_main_buttons_btn, LV_STATE_FOCUSED, lv_color_make(0xd6, 0xdd, 0xe3));
+	lv_style_set_bg_color(&style_Dropdown1b_main_buttons_btn, LV_STATE_PRESSED, lv_color_make(0xe6, 0xdd, 0x53));
+	//end
+
 	lv_style_set_bg_opa(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, 255);
 	lv_style_set_border_color(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, lv_color_make(0xd6, 0xdd, 0xe3));
 	lv_style_set_border_width(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, 0);
@@ -290,20 +296,20 @@ void setup_scr_Dropdown1b(lv_ui *ui) {
 	lv_cont_set_fit(ui->Dropdown1b_popup_menu, LV_FIT_NONE);
 
 	//Write codes Dropdown1b_imgbtn_1
-	//ui->Dropdown1b_imgbtn_1 = lv_imgbtn_create(ui->Dropdown1b, NULL);
+	ui->Dropdown1b_imgbtn_1 = lv_imgbtn_create(ui->Dropdown1b, NULL);
 
-	////Write style LV_IMGBTN_PART_MAIN for Dropdown1b_imgbtn_1
-	//static lv_style_t style_Dropdown1b_imgbtn_1_main;
-	//lv_style_reset(&style_Dropdown1b_imgbtn_1_main);
+	//Write style LV_IMGBTN_PART_MAIN for Dropdown1b_imgbtn_1
+	static lv_style_t style_Dropdown1b_imgbtn_1_main;
+	lv_style_reset(&style_Dropdown1b_imgbtn_1_main);
 
-	////Write style state: LV_STATE_DEFAULT for style_Dropdown1b_imgbtn_1_main
-	//lv_style_set_text_color(&style_Dropdown1b_imgbtn_1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-	//lv_style_set_image_recolor(&style_Dropdown1b_imgbtn_1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-	//lv_style_set_image_recolor_opa(&style_Dropdown1b_imgbtn_1_main, LV_STATE_DEFAULT, 0);
-	//lv_style_set_image_opa(&style_Dropdown1b_imgbtn_1_main, LV_STATE_DEFAULT, 255);
-	//lv_obj_add_style(ui->Dropdown1b_imgbtn_1, LV_IMGBTN_PART_MAIN, &style_Dropdown1b_imgbtn_1_main);
-	//lv_obj_set_pos(ui->Dropdown1b_imgbtn_1, 28, 143);
-	//lv_obj_set_size(ui->Dropdown1b_imgbtn_1, 27, 55);
-	//lv_imgbtn_set_src(ui->Dropdown1b_imgbtn_1, LV_BTN_STATE_RELEASED, &_Asset_71_alpha_27x55);
-	//lv_imgbtn_set_checkable(ui->Dropdown1b_imgbtn_1, true);
+	//Write style state: LV_STATE_DEFAULT for style_Dropdown1b_imgbtn_1_main
+	lv_style_set_text_color(&style_Dropdown1b_imgbtn_1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
+	lv_style_set_image_recolor(&style_Dropdown1b_imgbtn_1_main, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
+	lv_style_set_image_recolor_opa(&style_Dropdown1b_imgbtn_1_main, LV_STATE_DEFAULT, 0);
+	lv_style_set_image_opa(&style_Dropdown1b_imgbtn_1_main, LV_STATE_DEFAULT, 255);
+	lv_obj_add_style(ui->Dropdown1b_imgbtn_1, LV_IMGBTN_PART_MAIN, &style_Dropdown1b_imgbtn_1_main);
+	lv_obj_set_pos(ui->Dropdown1b_imgbtn_1, 28, 143);
+	lv_obj_set_size(ui->Dropdown1b_imgbtn_1, 27, 48);
+	lv_imgbtn_set_src(ui->Dropdown1b_imgbtn_1, LV_BTN_STATE_RELEASED, &back_but_orange_neg_27x48);
+	lv_imgbtn_set_checkable(ui->Dropdown1b_imgbtn_1, true);
 }
