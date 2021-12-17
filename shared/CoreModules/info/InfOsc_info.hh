@@ -1,0 +1,254 @@
+#pragma once
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/info/module_info_base.hh"
+
+struct InfOscInfo : ModuleInfoBase {
+    static constexpr std::string_view slug{"InfOsc"};
+    static constexpr std::string_view description{"Infinite Oscillator"};
+    static constexpr uint32_t width_hp = 15;
+    static constexpr std::string_view svg_filename{"res/modules/InfOsc-artwork.svg"};
+
+    static constexpr int NumKnobs = 8;
+    
+    enum {
+        KnobTrack = 0,
+        KnobAbs = 1,
+        KnobRange = 2,
+        KnobFm = 3,
+        KnobPhase = 4,
+        KnobPitch = 5,
+        KnobWave = 6,
+        KnobModshape = 7,
+    };
+
+    static constexpr std::array<KnobDef, NumKnobs> Knobs{{
+        {
+            .id = KnobTrack,
+            .x_mm = px_to_mm<72>(43.62f),
+            .y_mm = px_to_mm<72>(46.55f),
+            .short_name = "Track",
+            .long_name = "Track",
+            .default_val = 0.5f,
+            .knob_style = KnobDef::Medium,
+            .orientation = KnobDef::Round,
+        },
+        {
+            .id = KnobAbs,
+            .x_mm = px_to_mm<72>(108.12f),
+            .y_mm = px_to_mm<72>(46.55f),
+            .short_name = "Abs",
+            .long_name = "Abs",
+            .default_val = 0.0f,
+            .knob_style = KnobDef::Medium,
+            .orientation = KnobDef::Round,
+        },
+        {
+            .id = KnobRange,
+            .x_mm = px_to_mm<72>(172.62f),
+            .y_mm = px_to_mm<72>(46.55f),
+            .short_name = "Range",
+            .long_name = "Range",
+            .default_val = 0.5f,
+            .knob_style = KnobDef::Medium,
+            .orientation = KnobDef::Round,
+        },
+        {
+            .id = KnobFm,
+            .x_mm = px_to_mm<72>(43.62f),
+            .y_mm = px_to_mm<72>(105.5f),
+            .short_name = "FM",
+            .long_name = "FM",
+            .default_val = 0.0f,
+            .knob_style = KnobDef::Medium,
+            .orientation = KnobDef::Round,
+        },
+        {
+            .id = KnobPhase,
+            .x_mm = px_to_mm<72>(172.62f),
+            .y_mm = px_to_mm<72>(105.5f),
+            .short_name = "Phase",
+            .long_name = "Phase",
+            .default_val = 0.0f,
+            .knob_style = KnobDef::Medium,
+            .orientation = KnobDef::Round,
+        },
+        {
+            .id = KnobPitch,
+            .x_mm = px_to_mm<72>(108.13f),
+            .y_mm = px_to_mm<72>(117.06f),
+            .short_name = "Pitch",
+            .long_name = "Pitch",
+            .default_val = 0.5f,
+            .knob_style = KnobDef::Large,
+            .orientation = KnobDef::Round,
+        },
+        {
+            .id = KnobWave,
+            .x_mm = px_to_mm<72>(172.52f),
+            .y_mm = px_to_mm<72>(164.62f),
+            .short_name = "Wave",
+            .long_name = "Wave",
+            .default_val = 0.0f,
+            .knob_style = KnobDef::Medium,
+            .orientation = KnobDef::Round,
+        },
+        {
+            .id = KnobModshape,
+            .x_mm = px_to_mm<72>(43.3f),
+            .y_mm = px_to_mm<72>(164.67f),
+            .short_name = "Modshape",
+            .long_name = "Modshape",
+            .default_val = 0.0f,
+            .knob_style = KnobDef::Medium,
+            .orientation = KnobDef::Round,
+        },
+    }};
+
+    static constexpr int NumInJacks = 11;
+    
+    enum {
+        InputPm = 0,
+        InputScan = 1,
+        InputAdd = 2,
+        InputReset = 3,
+        InputMod = 4,
+        InputAbs = 5,
+        InputLin = 6,
+        InputPhase = 7,
+        InputPitch = 8,
+        InputRange = 9,
+        InputFm = 10,
+    };
+
+    static constexpr std::array<InJackDef, NumInJacks> InJacks{{
+        {
+            .id = InputPm,
+            .x_mm = px_to_mm<72>(35.96f),
+            .y_mm = px_to_mm<72>(214.54f),
+            .short_name = "PM",
+            .long_name = "PM",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputScan,
+            .x_mm = px_to_mm<72>(83.96f),
+            .y_mm = px_to_mm<72>(214.54f),
+            .short_name = "Scan",
+            .long_name = "Scan",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputAdd,
+            .x_mm = px_to_mm<72>(131.96f),
+            .y_mm = px_to_mm<72>(214.54f),
+            .short_name = "Add",
+            .long_name = "Add",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputReset,
+            .x_mm = px_to_mm<72>(179.96f),
+            .y_mm = px_to_mm<72>(214.54f),
+            .short_name = "Reset",
+            .long_name = "Reset",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputMod,
+            .x_mm = px_to_mm<72>(35.96f),
+            .y_mm = px_to_mm<72>(263.64f),
+            .short_name = "Mod",
+            .long_name = "Mod",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputAbs,
+            .x_mm = px_to_mm<72>(83.96f),
+            .y_mm = px_to_mm<72>(263.64f),
+            .short_name = "Abs",
+            .long_name = "Abs",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputLin,
+            .x_mm = px_to_mm<72>(131.96f),
+            .y_mm = px_to_mm<72>(263.64f),
+            .short_name = "Lin",
+            .long_name = "Lin",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputPhase,
+            .x_mm = px_to_mm<72>(179.96f),
+            .y_mm = px_to_mm<72>(263.64f),
+            .short_name = "Phase",
+            .long_name = "Phase",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputPitch,
+            .x_mm = px_to_mm<72>(35.96f),
+            .y_mm = px_to_mm<72>(311.23f),
+            .short_name = "Pitch",
+            .long_name = "Pitch",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputRange,
+            .x_mm = px_to_mm<72>(83.96f),
+            .y_mm = px_to_mm<72>(311.23f),
+            .short_name = "Range",
+            .long_name = "Range",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputFm,
+            .x_mm = px_to_mm<72>(131.96f),
+            .y_mm = px_to_mm<72>(311.23f),
+            .short_name = "FM",
+            .long_name = "FM",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+    }};
+
+    static constexpr int NumOutJacks = 1;
+    
+    enum {
+        OutputOut = 0,
+    };
+
+    static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
+        {
+            .id = OutputOut,
+            .x_mm = px_to_mm<72>(179.96f),
+            .y_mm = px_to_mm<72>(311.23f),
+            .short_name = "Out",
+            .long_name = "Out",
+            .signal_type = OutJackDef::Analog,
+        },
+    }};
+
+    static constexpr int NumSwitches = 0;
+    
+
+    static constexpr std::array<SwitchDef, NumSwitches> Switches{{
+    }};
+
+    static constexpr int NumDiscreteLeds = 0;
+    
+
+    static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{
+    }};
+
+};
