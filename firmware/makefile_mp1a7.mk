@@ -97,6 +97,7 @@ SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
 SOURCES += $(wildcard src/pages/gui-guider/*.c)
 SOURCES += $(wildcard src/pages/fonts/*.c)
 SOURCES += $(wildcard src/pages/images/*.c)
+SOURCES += $(wildcard src/pages/images/ui/*.c)
 SOURCES += $(wildcard src/pages/images/components/*.c)
 
 # SOURCES += $(NE10DIR)/common/NE10_mask_table.c

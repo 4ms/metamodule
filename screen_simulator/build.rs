@@ -26,6 +26,7 @@ fn main() {
     let mut lvgl_src: Vec<String> = Vec::new();
     add_glob_files("../firmware/lib/lvgl/lvgl/src/**/*.c", &mut lvgl_src);
     add_glob_files("../firmware/src/pages/images/*.c", &mut lvgl_src);
+    add_glob_files("../firmware/src/pages/images/ui/*.c", &mut lvgl_src);
     add_glob_files("../firmware/src/pages/images/components/*.c", &mut lvgl_src);
     lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
 
