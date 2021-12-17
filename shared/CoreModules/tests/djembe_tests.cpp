@@ -1,11 +1,10 @@
-#include "CoreModules/djembeCore.h"
+#include "CoreModules/DjembeCore.hpp"
 #include "CoreModules/djembeCore_neon.h"
 #include "doctest.h"
 #include <iostream>
 #include <stdint.h>
 
-TEST_CASE("Soft-neon matches non-neon output")
-{
+TEST_CASE("Soft-neon matches non-neon output") {
 	constexpr int BufferSize = 255;
 	float no_outsig[256];
 	float ne_outsig[256];
