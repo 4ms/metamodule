@@ -23,6 +23,12 @@ std::unique_ptr<CoreProcessor> create() {
 	return std::unique_ptr<TestCoreMod>();
 }
 
+constexpr ModuleInfoView aBCInfo{
+	.width_hp = 40,
+	.svg_filename = "abc.svg",
+	.module_name = "ABC module",
+};
+
 struct TestInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"HIJ"};
 	static constexpr uint32_t width_hp = 2;
@@ -51,17 +57,18 @@ struct TestInfo : ModuleInfoBase {
 constexpr ModuleInfoView testinfo{
 	.width_hp = 4,
 	.svg_filename = "",
+	.module_name = "def info",
 	.Knobs = TestInfo::Knobs,
 };
 
 TEST_CASE("Register ModuleTypes with an object constructed from static constexpr members of ModuleInfoBase") {
-	bool already_exists = ModuleFactory::registerModuleType("ABC", "abc module", create);
+	bool already_exists = ModuleFactory::registerModuleType("ABC", create, aBCInfo);
 	auto slug = ModuleFactory::getModuleSlug("ABC");
 	CHECK(slug == "ABC");
 	CHECK_FALSE(already_exists);
 
 	SUBCASE("Test if Knob info get stored and retreived OK") {
-		already_exists = ModuleFactory::registerModuleType("DEF", "def module", create, testinfo);
+		already_exists = ModuleFactory::registerModuleType("DEF", create, testinfo);
 		CHECK_FALSE(already_exists);
 
 		CHECK(ModuleFactory::getModuleInfo("DEF").width_hp == 4);
@@ -71,8 +78,7 @@ TEST_CASE("Register ModuleTypes with an object constructed from static constexpr
 		CHECK(knobs.size() == 2);
 
 		SUBCASE("Test actual EnOscInfo data") {
-			already_exists = ModuleFactory::registerModuleType(
-				"EnOsc2", "EnOsc module", create, ModuleInfoView::makeView<EnOscInfo>());
+			already_exists = ModuleFactory::registerModuleType("EnOsc2", create, ModuleInfoView::makeView<EnOscInfo>());
 			// already_exists = ModuleFactory::registerModuleType("EnOsc2",
 			// 												   "EnOsc module",
 			// 												   create,
