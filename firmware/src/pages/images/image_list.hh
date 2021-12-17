@@ -4,6 +4,7 @@
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(ComplexEG_artwork_240);
 LV_IMG_DECLARE(Pan_artwork_240);
 LV_IMG_DECLARE(MultiLFO_artwork_240);
 LV_IMG_DECLARE(Follow_artwork_240);
@@ -22,6 +23,9 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "ComplexEG")
+			return &ComplexEG_artwork_240;
 
 		if (slug == "Pan")
 			return &Pan_artwork_240;
