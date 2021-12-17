@@ -307,7 +307,7 @@ void setup_scr_group_arc_sketches2(lv_ui *ui);
 void setup_scr_group_arc_sketches3(lv_ui *ui);
 void setup_scr_group_arc_sketches4(lv_ui *ui);
 void setup_scr_Dropdown1b(lv_ui *ui);
-LV_IMG_DECLARE(back_but_orange_neg_27x48);
+LV_IMG_DECLARE(back_but_orange_neg_57x100);
 
 #ifdef __cplusplus
 }
