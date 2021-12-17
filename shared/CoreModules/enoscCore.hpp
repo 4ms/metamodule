@@ -5,6 +5,7 @@
 
 class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
+	using ThisCore = EnOscCore;
 
 public:
 	EnOscCore() = default;
@@ -31,8 +32,8 @@ public:
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
-	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<EnOscCore>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, description, create, ModuleInfoView::makeView<Info>());
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
 
 private:

@@ -5,6 +5,7 @@
 
 class Atvert2Core : public CoreProcessor {
 	using Info = Atvert2Info;
+	using ThisCore = Atvert2Core;
 
 public:
 	Atvert2Core() = default;
@@ -31,8 +32,8 @@ public:
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
-	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<Atvert2Core>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, description, create, ModuleInfoView::makeView<Info>());
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
 
 private:
