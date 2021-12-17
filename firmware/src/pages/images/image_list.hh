@@ -10,7 +10,6 @@ LV_IMG_DECLARE(Follow_artwork_240);
 LV_IMG_DECLARE(FM_artwork_240);
 LV_IMG_DECLARE(Drum_artwork_240);
 LV_IMG_DECLARE(Djembe_artwork_240);
-LV_IMG_DECLARE(ComplexEG_artwork_240);
 LV_IMG_DECLARE(Atvert2_artwork_240);
 LV_IMG_DECLARE(StMix_artwork_240);
 LV_IMG_DECLARE(InfOsc_artwork_240);
@@ -41,9 +40,6 @@ struct ModuleImages {
 
 		if (slug == "Djembe")
 			return &Djembe_artwork_240;
-
-		if (slug == "ComplexEG")
-			return &ComplexEG_artwork_240;
 
 		if (slug == "Atvert2")
 			return &Atvert2_artwork_240;

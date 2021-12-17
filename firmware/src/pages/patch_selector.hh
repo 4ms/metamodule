@@ -194,7 +194,7 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_set_click(ui->Dropdown1b_imgbtn_1, true);
 		lv_obj_set_click(ui->Dropdown1b_button_play, true);
 		lv_obj_set_click(ui->Dropdown1b_button_explore, true);
-		lv_group_add_obj(popup_group, ui->Dropdown1b_cont);
+		//lv_group_add_obj(popup_group, ui->Dropdown1b_cont);
 		lv_group_add_obj(popup_group, ui->Dropdown1b_imgbtn_1);
 		lv_group_add_obj(popup_group, ui->Dropdown1b_button_play);
 		lv_group_add_obj(popup_group, ui->Dropdown1b_button_explore);
