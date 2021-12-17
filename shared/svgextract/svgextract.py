@@ -127,8 +127,13 @@ def deduce_dpi(root):
     vDPI = round(viewHeight / heightInches)
     if vDPI is not hDPI:
         Log(f"WARNING: Horizontal DPI is {hDPI} and Vertical DPI is {vDPI}, which are not equal. Using horizontal value")
-    else:
-        Log(f"DPI deduced as {hDPI}")
+        vDPI = hDPI
+
+    if hDPI == 1:
+        Log(f"File is possibly already in 72DPI pixels for the root object units. Using 72 for DPI")
+        hDPI = 72
+
+    Log(f"DPI deduced as {hDPI}")
 
     return hDPI
 
@@ -573,7 +578,7 @@ def createlvimg(artworkSvgFilename, pngFilename):
         return
 
     # SVG ==> PNG
-    Log(f"converting {pngFilename} with inkscape and convert.")
+    Log(f"converting {artworkSvgFilename} to {pngFilename} with inkscape and convert.")
     try:
         subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-id-only --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {pngFilename}', shell=True, check=True)
     except:
