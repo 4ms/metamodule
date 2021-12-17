@@ -125,19 +125,6 @@ struct PatchSelectorPage : PageBase {
 		lv_style_set_pad_top(&style_Dropdown1b_cont, LV_STATE_DEFAULT, 0);
 		lv_style_set_pad_bottom(&style_Dropdown1b_cont, LV_STATE_DEFAULT, 0);
 
-		// static lv_style_t style_Dropdown1b_main_buttons_bg;
-		// lv_style_reset(&style_Dropdown1b_main_buttons_bg);
-		// lv_style_set_radius(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, 4);
-		// lv_style_set_bg_color(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		// lv_style_set_bg_opa(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, 255);
-		// lv_style_set_border_color(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		// lv_style_set_border_width(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, 255);
-		// lv_style_set_pad_left(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, 5);
-		// lv_style_set_pad_right(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, 5);
-		// lv_style_set_pad_top(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, 7);
-		// lv_style_set_pad_bottom(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, 5);
-		// lv_style_set_pad_inner(&style_Dropdown1b_main_buttons_bg, LV_STATE_DEFAULT, 6);
-
 		static lv_style_t style_Dropdown1b_main_buttons_btn;
 		lv_style_reset(&style_Dropdown1b_main_buttons_btn);
 		lv_style_set_radius(&style_Dropdown1b_main_buttons_btn, LV_STATE_DEFAULT, 8);
