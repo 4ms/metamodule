@@ -53,9 +53,9 @@ struct MultiLFOInfo : ModuleInfoBase {
     
     enum {
         InputReset = 0,
-        InputPw = 1,
-        InputRate = 2,
-        InputPhase = 3,
+        InputPw_Cv = 1,
+        InputRate_Cv = 2,
+        InputPhase_Cv = 3,
     };
 
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
@@ -69,29 +69,29 @@ struct MultiLFOInfo : ModuleInfoBase {
             .signal_type = InJackDef::Analog,
         },
         {
-            .id = InputPw,
+            .id = InputPw_Cv,
             .x_mm = px_to_mm<72>(83.63f),
             .y_mm = px_to_mm<72>(167.36f),
-            .short_name = "PW",
-            .long_name = "PW",
+            .short_name = "PW CV",
+            .long_name = "PW CV",
             .unpatched_val = 0.f,
             .signal_type = InJackDef::Analog,
         },
         {
-            .id = InputRate,
+            .id = InputRate_Cv,
             .x_mm = px_to_mm<72>(32.1f),
             .y_mm = px_to_mm<72>(214.57f),
-            .short_name = "Rate",
-            .long_name = "Rate",
+            .short_name = "Rate CV",
+            .long_name = "Rate CV",
             .unpatched_val = 0.f,
             .signal_type = InJackDef::Analog,
         },
         {
-            .id = InputPhase,
+            .id = InputPhase_Cv,
             .x_mm = px_to_mm<72>(83.63f),
             .y_mm = px_to_mm<72>(214.57f),
-            .short_name = "Phase",
-            .long_name = "Phase",
+            .short_name = "Phase CV",
+            .long_name = "Phase CV",
             .unpatched_val = 0.f,
             .signal_type = InJackDef::Analog,
         },

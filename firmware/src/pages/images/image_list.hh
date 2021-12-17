@@ -4,6 +4,16 @@
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(Source_artwork_240);
+LV_IMG_DECLARE(Slew_artwork_240);
+LV_IMG_DECLARE(PitchShift_artwork_240);
+LV_IMG_DECLARE(Noise_artwork_240);
+LV_IMG_DECLARE(KPLS_artwork_240);
+LV_IMG_DECLARE(HPF_artwork_240);
+LV_IMG_DECLARE(Gate_artwork_240);
+LV_IMG_DECLARE(Detune_artwork_240);
+LV_IMG_DECLARE(BPF_artwork_240);
+LV_IMG_DECLARE(PanelMed_artwork_240);
 LV_IMG_DECLARE(ComplexEG_artwork_240);
 LV_IMG_DECLARE(Pan_artwork_240);
 LV_IMG_DECLARE(MultiLFO_artwork_240);
@@ -23,6 +33,36 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "Source")
+			return &Source_artwork_240;
+
+		if (slug == "Slew")
+			return &Slew_artwork_240;
+
+		if (slug == "PitchShift")
+			return &PitchShift_artwork_240;
+
+		if (slug == "Noise")
+			return &Noise_artwork_240;
+
+		if (slug == "KPLS")
+			return &KPLS_artwork_240;
+
+		if (slug == "HPF")
+			return &HPF_artwork_240;
+
+		if (slug == "Gate")
+			return &Gate_artwork_240;
+
+		if (slug == "Detune")
+			return &Detune_artwork_240;
+
+		if (slug == "BPF")
+			return &BPF_artwork_240;
+
+		if (slug == "PanelMed")
+			return &PanelMed_artwork_240;
 
 		if (slug == "ComplexEG")
 			return &ComplexEG_artwork_240;

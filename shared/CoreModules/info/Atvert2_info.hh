@@ -49,7 +49,7 @@ struct Atvert2Info : ModuleInfoBase {
         {
             .id = InputIn_1,
             .x_mm = px_to_mm<72>(29.28f),
-            .y_mm = px_to_mm<72>(167.1f),
+            .y_mm = px_to_mm<72>(168.85f),
             .short_name = "In 1",
             .long_name = "In 1",
             .unpatched_val = 0.f,
@@ -58,7 +58,7 @@ struct Atvert2Info : ModuleInfoBase {
         {
             .id = InputIn_2,
             .x_mm = px_to_mm<72>(29.28f),
-            .y_mm = px_to_mm<72>(215.19f),
+            .y_mm = px_to_mm<72>(214.97f),
             .short_name = "In 2",
             .long_name = "In 2",
             .unpatched_val = 0.f,
@@ -77,7 +77,7 @@ struct Atvert2Info : ModuleInfoBase {
         {
             .id = OutputOut_1,
             .x_mm = px_to_mm<72>(29.28f),
-            .y_mm = px_to_mm<72>(264.29f),
+            .y_mm = px_to_mm<72>(264.07f),
             .short_name = "Out 1",
             .long_name = "Out 1",
             .signal_type = OutJackDef::Analog,
@@ -85,7 +85,7 @@ struct Atvert2Info : ModuleInfoBase {
         {
             .id = OutputOut_2,
             .x_mm = px_to_mm<72>(29.28f),
-            .y_mm = px_to_mm<72>(311.88f),
+            .y_mm = px_to_mm<72>(312.29f),
             .short_name = "Out 2",
             .long_name = "Out 2",
             .signal_type = OutJackDef::Analog,

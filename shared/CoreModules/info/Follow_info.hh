@@ -59,7 +59,7 @@ struct FollowInfo : ModuleInfoBase {
         {
             .id = InputInput,
             .x_mm = px_to_mm<72>(28.93f),
-            .y_mm = px_to_mm<72>(214.54f),
+            .y_mm = px_to_mm<72>(214.97f),
             .short_name = "Input",
             .long_name = "Input",
             .unpatched_val = 0.f,
@@ -78,7 +78,7 @@ struct FollowInfo : ModuleInfoBase {
         {
             .id = OutputGate,
             .x_mm = px_to_mm<72>(28.93f),
-            .y_mm = px_to_mm<72>(263.64f),
+            .y_mm = px_to_mm<72>(264.07f),
             .short_name = "Gate",
             .long_name = "Gate",
             .signal_type = OutJackDef::Analog,
@@ -86,7 +86,7 @@ struct FollowInfo : ModuleInfoBase {
         {
             .id = OutputEnv,
             .x_mm = px_to_mm<72>(28.93f),
-            .y_mm = px_to_mm<72>(311.23f),
+            .y_mm = px_to_mm<72>(312.29f),
             .short_name = "Env",
             .long_name = "Env",
             .signal_type = OutJackDef::Analog,
