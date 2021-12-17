@@ -20,8 +20,8 @@ struct DJInfo : ModuleInfoBase {
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{
         {
             .id = KnobPitch,
-            .x_mm = px_to_mm<1>(32.88f),
-            .y_mm = px_to_mm<1>(57.97f),
+            .x_mm = px_to_mm<72>(32.88f),
+            .y_mm = px_to_mm<72>(57.97f),
             .short_name = "Pitch",
             .long_name = "Pitch",
             .default_val = 0.25f,
@@ -30,8 +30,8 @@ struct DJInfo : ModuleInfoBase {
         },
         {
             .id = KnobSharpness,
-            .x_mm = px_to_mm<1>(84.41f),
-            .y_mm = px_to_mm<1>(57.97f),
+            .x_mm = px_to_mm<72>(84.41f),
+            .y_mm = px_to_mm<72>(57.97f),
             .short_name = "Sharpness",
             .long_name = "Sharpness",
             .default_val = 0.0f,
@@ -40,8 +40,8 @@ struct DJInfo : ModuleInfoBase {
         },
         {
             .id = KnobHit,
-            .x_mm = px_to_mm<1>(32.88f),
-            .y_mm = px_to_mm<1>(119.21f),
+            .x_mm = px_to_mm<72>(32.88f),
+            .y_mm = px_to_mm<72>(119.21f),
             .short_name = "Hit",
             .long_name = "Hit",
             .default_val = 0.5f,
@@ -50,8 +50,8 @@ struct DJInfo : ModuleInfoBase {
         },
         {
             .id = KnobStrike_Amt,
-            .x_mm = px_to_mm<1>(84.41f),
-            .y_mm = px_to_mm<1>(119.21f),
+            .x_mm = px_to_mm<72>(84.41f),
+            .y_mm = px_to_mm<72>(119.21f),
             .short_name = "Strike Amt",
             .long_name = "Strike Amt",
             .default_val = 0.5f,
@@ -73,8 +73,8 @@ struct DJInfo : ModuleInfoBase {
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
             .id = InputPitch,
-            .x_mm = px_to_mm<1>(31.73f),
-            .y_mm = px_to_mm<1>(214.66f),
+            .x_mm = px_to_mm<72>(31.73f),
+            .y_mm = px_to_mm<72>(214.66f),
             .short_name = "Pitch",
             .long_name = "Pitch",
             .unpatched_val = 0.f,
@@ -82,8 +82,8 @@ struct DJInfo : ModuleInfoBase {
         },
         {
             .id = InputSharp,
-            .x_mm = px_to_mm<1>(82.92f),
-            .y_mm = px_to_mm<1>(214.66f),
+            .x_mm = px_to_mm<72>(82.92f),
+            .y_mm = px_to_mm<72>(214.66f),
             .short_name = "Sharp",
             .long_name = "Sharp",
             .unpatched_val = 0.f,
@@ -91,8 +91,8 @@ struct DJInfo : ModuleInfoBase {
         },
         {
             .id = InputHit,
-            .x_mm = px_to_mm<1>(31.73f),
-            .y_mm = px_to_mm<1>(263.38f),
+            .x_mm = px_to_mm<72>(31.73f),
+            .y_mm = px_to_mm<72>(263.38f),
             .short_name = "Hit",
             .long_name = "Hit",
             .unpatched_val = 0.f,
@@ -100,8 +100,8 @@ struct DJInfo : ModuleInfoBase {
         },
         {
             .id = InputStrike,
-            .x_mm = px_to_mm<1>(82.92f),
-            .y_mm = px_to_mm<1>(263.38f),
+            .x_mm = px_to_mm<72>(82.92f),
+            .y_mm = px_to_mm<72>(263.38f),
             .short_name = "Strike",
             .long_name = "Strike",
             .unpatched_val = 0.f,
@@ -109,8 +109,8 @@ struct DJInfo : ModuleInfoBase {
         },
         {
             .id = InputTrigger,
-            .x_mm = px_to_mm<1>(31.73f),
-            .y_mm = px_to_mm<1>(312.1f),
+            .x_mm = px_to_mm<72>(31.73f),
+            .y_mm = px_to_mm<72>(312.1f),
             .short_name = "Trigger",
             .long_name = "Trigger",
             .unpatched_val = 0.f,
@@ -127,8 +127,8 @@ struct DJInfo : ModuleInfoBase {
     static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
         {
             .id = OutputOut,
-            .x_mm = px_to_mm<1>(82.92f),
-            .y_mm = px_to_mm<1>(312.1f),
+            .x_mm = px_to_mm<72>(82.92f),
+            .y_mm = px_to_mm<72>(312.1f),
             .short_name = "Out",
             .long_name = "Out",
             .signal_type = OutJackDef::Analog,

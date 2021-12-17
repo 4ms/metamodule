@@ -17,8 +17,8 @@ struct PANInfo : ModuleInfoBase {
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{
         {
             .id = KnobPan,
-            .x_mm = px_to_mm<1>(28.93f),
-            .y_mm = px_to_mm<1>(47.42f),
+            .x_mm = px_to_mm<72>(28.93f),
+            .y_mm = px_to_mm<72>(47.42f),
             .short_name = "Pan",
             .long_name = "Pan",
             .default_val = 0.5f,
@@ -37,8 +37,8 @@ struct PANInfo : ModuleInfoBase {
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
             .id = InputCv,
-            .x_mm = px_to_mm<1>(29.28f),
-            .y_mm = px_to_mm<1>(167.1f),
+            .x_mm = px_to_mm<72>(29.28f),
+            .y_mm = px_to_mm<72>(167.1f),
             .short_name = "CV",
             .long_name = "CV",
             .unpatched_val = 0.f,
@@ -46,8 +46,8 @@ struct PANInfo : ModuleInfoBase {
         },
         {
             .id = InputIn,
-            .x_mm = px_to_mm<1>(29.28f),
-            .y_mm = px_to_mm<1>(215.19f),
+            .x_mm = px_to_mm<72>(29.28f),
+            .y_mm = px_to_mm<72>(215.19f),
             .short_name = "In",
             .long_name = "In",
             .unpatched_val = 0.f,
@@ -65,16 +65,16 @@ struct PANInfo : ModuleInfoBase {
     static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
         {
             .id = OutputOut_1,
-            .x_mm = px_to_mm<1>(29.28f),
-            .y_mm = px_to_mm<1>(264.29f),
+            .x_mm = px_to_mm<72>(29.28f),
+            .y_mm = px_to_mm<72>(264.29f),
             .short_name = "Out 1",
             .long_name = "Out 1",
             .signal_type = OutJackDef::Analog,
         },
         {
             .id = OutputOut_2,
-            .x_mm = px_to_mm<1>(29.28f),
-            .y_mm = px_to_mm<1>(311.88f),
+            .x_mm = px_to_mm<72>(29.28f),
+            .y_mm = px_to_mm<72>(311.88f),
             .short_name = "Out 2",
             .long_name = "Out 2",
             .signal_type = OutJackDef::Analog,
