@@ -110,6 +110,7 @@ struct ModuleInfoView {
 	// std::string_view slug{""}; //TODO: we really dont need this right?
 	uint32_t width_hp = 0;
 	std::string_view svg_filename{""};
+	std::string_view module_name{""};
 	std::span<const KnobDef> Knobs;
 	std::span<const InJackDef> InJacks;
 	std::span<const OutJackDef> OutJacks;

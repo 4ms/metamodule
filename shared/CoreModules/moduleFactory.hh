@@ -12,24 +12,7 @@ class ModuleFactory {
 public:
 	ModuleFactory() = delete;
 
-	static bool registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate) {
-		bool already_exists = true;
-		int id = getTypeID(typeslug);
-		if (id == -1) {
-			already_exists = false;
-			id = next_id;
-			next_id++;
-			if (next_id >= MAX_MODULE_TYPES)
-				next_id = 0; // FixMe: Report/handle this ERROR!
-			module_slugs[id] = typeslug;
-		}
-		module_names[id] = name;
-		creation_funcs[id] = funcCreate;
-		return already_exists;
-	}
-
-	static bool
-	registerModuleType(ModuleTypeSlug typeslug, const char *name, CreateModuleFunc funcCreate, ModuleInfoView info) {
+	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate, ModuleInfoView info) {
 		bool already_exists = true;
 		int id = getTypeID(typeslug);
 		if (id == -1) {
@@ -41,7 +24,7 @@ public:
 			module_slugs[id] = typeslug;
 		}
 		infos[id] = info;
-		module_names[id] = name;
+		module_names[id] = info.module_name;
 		creation_funcs[id] = funcCreate;
 		return already_exists;
 	}
@@ -70,6 +53,7 @@ public:
 
 	// Returns the slug if it's valid and registered.
 	// Otherwise returns "????"
+	// TODO: Test performance vs. using a std::map
 	static std::string_view getModuleSlug(ModuleTypeSlug typeslug) {
 		int id = getTypeID(typeslug);
 		if (id >= 0)
