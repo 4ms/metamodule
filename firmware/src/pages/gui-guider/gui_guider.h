@@ -9,11 +9,10 @@
 extern "C" {
 #endif
 
-#include "lvgl/lvgl.h"
-#include "guider_fonts.h"
-
-typedef struct
-{
+#include "guider_fonts.h"
+#include "lvgl/lvgl.h"
+
+typedef struct {
 	lv_obj_t *Main_Example;
 	lv_obj_t *Main_Example_btn_1;
 	lv_obj_t *Main_Example_btn_1_label;
@@ -281,35 +280,19 @@ typedef struct
 	lv_obj_t *group_arc_sketches4_arc_10;
 	lv_obj_t *group_arc_sketches4_arc_9;
 	lv_obj_t *group_arc_sketches4_arc_8;
-	lv_obj_t *Dropdown1;
-	lv_obj_t *Dropdown1_background_simulation;
-	lv_obj_t *Dropdown1_patch_dropdown;
-	lv_obj_t *Dropdown1_dimming_simulation;
-	lv_obj_t *Dropdown1_popup_menu;
-	lv_obj_t *Dropdown1_main_buttons;
-	lv_obj_t *Dropdown1_patch_description;
-	lv_obj_t *Dropdown1_patch_nam_bg;
-	lv_obj_t *Dropdown1_line_header;
-	lv_obj_t *Dropdown1_patch_name;
-	lv_obj_t *Dropdown1_back_button;
-	lv_obj_t *Dropdown1_back_button_label;
-	lv_obj_t *Dropdown1_back_txt;
 	lv_obj_t *Dropdown1b;
-	lv_obj_t *Dropdown1b_background_simulation;
-	lv_obj_t *Dropdown1b_patch_dropdown;
-	lv_obj_t *Dropdown1b_dimming_simulation;
-	lv_obj_t *Dropdown1b_popup_menu;
-	lv_obj_t *Dropdown1b_main_buttons;
+	lv_obj_t *Dropdown1b_cont;
+	lv_obj_t *Dropdown1b_button_play;
+	lv_obj_t *Dropdown1b_button_play_label;
+	lv_obj_t *Dropdown1b_button_explore;
+	lv_obj_t *Dropdown1b_button_explore_label;
 	lv_obj_t *Dropdown1b_patch_description;
 	lv_obj_t *Dropdown1b_patch_nam_bg;
 	lv_obj_t *Dropdown1b_line_header;
 	lv_obj_t *Dropdown1b_patch_name;
 	lv_obj_t *Dropdown1b_imgbtn_1;
 	lv_obj_t *Dropdown1b_imgbtn_1_label;
-	lv_obj_t *Dropdown_only;
-	lv_obj_t *Dropdown_only_background_simulation;
-	lv_obj_t *Dropdown_only_patch_dropdown;
-}lv_ui;
+} lv_ui;
 
 void setup_ui(lv_ui *ui);
 extern lv_ui guider_ui;
@@ -323,12 +306,8 @@ void setup_scr_group_arc_sketches(lv_ui *ui);
 void setup_scr_group_arc_sketches2(lv_ui *ui);
 void setup_scr_group_arc_sketches3(lv_ui *ui);
 void setup_scr_group_arc_sketches4(lv_ui *ui);
-void setup_scr_Dropdown1(lv_ui *ui);
 void setup_scr_Dropdown1b(lv_ui *ui);
-void setup_scr_Dropdown_only(lv_ui *ui);
-LV_IMG_DECLARE(_Asset_73_alpha_52x92);
-LV_IMG_DECLARE(_Asset_71_alpha_27x55);
-LV_IMG_DECLARE(_module_graphic_SMR_small_alpha_246x240);
+LV_IMG_DECLARE(back_but_orange_neg_27x48);
 
 #ifdef __cplusplus
 }
