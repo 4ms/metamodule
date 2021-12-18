@@ -3,6 +3,10 @@
 #include "CoreModules/info/BPF_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
+#include "processors/bpf.h"
+#include "processors/oberheimBPF.h"
+#include "util/math.hh"
+
 class BPFCore : public CoreProcessor {
 	using Info = BPFInfo;
 	using ThisCore = BPFCore;
@@ -10,24 +14,60 @@ class BPFCore : public CoreProcessor {
 public:
 	BPFCore() = default;
 
-	void update() override {
+	void update(void) override {
+		float filterFreq = 523.25f * setPitchMultiple(constrain(cutoffCV + cutoffOffset, -1.0f, 1.0f));
+		if (mode == 0) {
+			bpf.q = map_value(filterQ, 0.0f, 1.0f, 1.0f, 20.0f);
+			bpf.cutoff.setValue(filterFreq);
+			signalOutput = bpf.update(signalInput);
+		} else if (mode == 1) {
+			ober.q = map_value(filterQ, 0.0f, 1.0f, 1.0f, 20.0f);
+			ober.cutoff.setValue(audioFreqToNorm(filterFreq));
+			signalOutput = ober.update(signalInput);
+		}
 	}
 
-	void set_param(int param_id, float val) override {
+	void set_param(int const param_id, const float val) override {
+		switch (param_id) {
+			case 0:
+				cutoffOffset = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
+				break;
+			case 1:
+				filterQ = val;
+				break;
+			case 2:
+				mode = val;
+				break;
+		}
 	}
 
-	void set_input(int input_id, float val) override {
+	void set_samplerate(const float sr) override {
+		bpf.sampleRate.setValue(sr);
 	}
 
-	float get_output(int output_id) const override {
-		return 0.f;
+	void set_input(const int input_id, const float val) override {
+		switch (input_id) {
+			case 0:
+				signalInput = val;
+				break;
+			case 1:
+				cutoffCV = val;
+				break;
+		}
 	}
 
-	void set_samplerate(float sr) override {
+	float get_output(const int output_id) const override {
+		float output = 0;
+		switch (output_id) {
+			case 0:
+				output = signalOutput;
+				break;
+		}
+		return output;
 	}
 
-	float get_led_brightness(int led_id) const override {
-		return 0.f;
+	float get_led_brightness(const int led_id) const override {
+		return mode;
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
@@ -37,4 +77,12 @@ public:
 	// clang-format on
 
 private:
+	int mode = 0;
+	float filterQ = 1;
+	BandPassFilter bpf;
+	OberBPF ober;
+	float cutoffCV = 0;
+	float cutoffOffset = 0;
+	float signalInput = 0;
+	float signalOutput = 0;
 };
