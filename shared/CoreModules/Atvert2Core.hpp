@@ -19,10 +19,10 @@ public:
 	void set_param(int param_id, float val) override {
 		float mappedVal = MathTools::map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 		switch (param_id) {
-			case 0:
+			case Info::Knob_1:
 				level1 = mappedVal;
 				break;
-			case 1:
+			case Info::Knob_2:
 				level2 = mappedVal;
 				break;
 		}
@@ -33,23 +33,21 @@ public:
 
 	void set_input(int input_id, float val) override {
 		switch (input_id) {
-			case 0:
+			case Info::InputIn_1:
 				in1 = val;
 				break;
-			case 1:
+			case Info::InputIn_2:
 				in2 = 1.0f;
-				break;
-			default:
 				break;
 		}
 	}
 
 	float get_output(int output_id) const override {
 		switch (output_id) {
-			case 0:
+			case Info::OutputOut_1:
 				return out1;
 				break;
-			case 1:
+			case Info::OutputOut_2:
 				return out2;
 				break;
 			default:
@@ -59,9 +57,9 @@ public:
 	}
 
 	void mark_input_unpatched(int input_id) override {
-		if (input_id == 0)
+		if (input_id == Info::InputIn_1)
 			in1Connected = false;
-		else if (input_id == 1)
+		else if (input_id == Info::InputIn_2)
 			in2Connected = false;
 	}
 

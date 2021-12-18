@@ -17,34 +17,33 @@ public:
 
 	void set_param(int const param_id, const float val) override {
 		switch (param_id) {
-			case 0:
+			case Info::Knob_1:
 				output1 = MathTools::map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
-			case 1:
+			case Info::Knob_2:
 				output2 = MathTools::map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
 		}
 	}
+
 	void set_samplerate(const float sr) override {
 	}
 
 	void set_input(const int input_id, const float val) override {
-		switch (input_id) {
-		}
 	}
 
 	float get_output(const int output_id) const override {
-		float output = 0;
 		switch (output_id) {
-			case 0:
-				output = output1;
+			case Info::Output_1:
+				return output1;
 				break;
-			case 1:
-				output = output2;
+			case Info::Output_2:
+				return output2;
 				break;
 		}
-		return output;
+		return 0;
 	}
+
 	float get_led_brightness(int led_id) const override {
 		return 0.f;
 	}
