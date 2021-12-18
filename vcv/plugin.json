@@ -13,6 +13,120 @@
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [
+    {
+      "slug": "StMix",
+      "name": "StMix",
+      "description": "StMix",
+      "tags": []
+    },
+    {
+      "slug": "Source",
+      "name": "Source",
+      "description": "Source",
+      "tags": []
+    },
+    {
+      "slug": "Slew",
+      "name": "Slew",
+      "description": "Slew",
+      "tags": []
+    },
+    {
+      "slug": "PitchShift",
+      "name": "PitchShift",
+      "description": "PitchShift",
+      "tags": []
+    },
+    {
+      "slug": "Pan",
+      "name": "Pan",
+      "description": "Pan",
+      "tags": []
+    },
+    {
+      "slug": "Noise",
+      "name": "Noise",
+      "description": "Noise",
+      "tags": []
+    },
+    {
+      "slug": "MultiLFO",
+      "name": "MultiLFO",
+      "description": "MultiLFO",
+      "tags": []
+    },
+    {
+      "slug": "KPLS",
+      "name": "KPLS",
+      "description": "KPLS",
+      "tags": []
+    },
+    {
+      "slug": "InfOsc",
+      "name": "InfOsc",
+      "description": "InfOsc",
+      "tags": []
+    },
+    {
+      "slug": "HPF",
+      "name": "HPF",
+      "description": "HPF",
+      "tags": []
+    },
+    {
+      "slug": "Gate",
+      "name": "Gate",
+      "description": "Gate",
+      "tags": []
+    },
+    {
+      "slug": "Follow",
+      "name": "Follow",
+      "description": "Follow",
+      "tags": []
+    },
+    {
+      "slug": "FM",
+      "name": "FM",
+      "description": "FM",
+      "tags": []
+    },
+    {
+      "slug": "Drum",
+      "name": "Drum",
+      "description": "Drum",
+      "tags": []
+    },
+    {
+      "slug": "Djembe",
+      "name": "Djembe",
+      "description": "Djembe",
+      "tags": []
+    },
+    {
+      "slug": "Detune",
+      "name": "Detune",
+      "description": "Detune",
+      "tags": []
+    },
+    {
+      "slug": "ComplexEG",
+      "name": "ComplexEG",
+      "description": "ComplexEG",
+      "tags": []
+    },
+    {
+      "slug": "BPF",
+      "name": "BPF",
+      "description": "BPF",
+      "tags": []
+    },
+    {
+      "slug": "Atvert2",
+      "name": "Atvert2",
+      "description": "Atvert2",
+      "tags": []
+    },
 	{
       "slug": "PanelMedium",
       "name": "Hub 28HP",
