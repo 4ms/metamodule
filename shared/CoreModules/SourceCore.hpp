@@ -3,6 +3,8 @@
 #include "CoreModules/info/Source_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
+#include "util/math.hh"
+
 class SourceCore : public CoreProcessor {
 	using Info = SourceInfo;
 	using ThisCore = SourceCore;
@@ -10,22 +12,39 @@ class SourceCore : public CoreProcessor {
 public:
 	SourceCore() = default;
 
-	void update() override {
+	void update(void) override {
 	}
 
-	void set_param(int param_id, float val) override {
+	void set_param(int const param_id, const float val) override {
+		switch (param_id) {
+			case 0:
+				output1 = MathTools::map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
+				break;
+			case 1:
+				output2 = MathTools::map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
+				break;
+		}
+	}
+	void set_samplerate(const float sr) override {
 	}
 
-	void set_input(int input_id, float val) override {
+	void set_input(const int input_id, const float val) override {
+		switch (input_id) {
+		}
 	}
 
-	float get_output(int output_id) const override {
-		return 0.f;
+	float get_output(const int output_id) const override {
+		float output = 0;
+		switch (output_id) {
+			case 0:
+				output = output1;
+				break;
+			case 1:
+				output = output2;
+				break;
+		}
+		return output;
 	}
-
-	void set_samplerate(float sr) override {
-	}
-
 	float get_led_brightness(int led_id) const override {
 		return 0.f;
 	}
@@ -37,4 +56,6 @@ public:
 	// clang-format on
 
 private:
+	float output1;
+	float output2;
 };
