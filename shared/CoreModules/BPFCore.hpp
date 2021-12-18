@@ -29,13 +29,13 @@ public:
 
 	void set_param(int const param_id, const float val) override {
 		switch (param_id) {
-			case 0:
+			case Info::KnobCutoff:
 				cutoffOffset = map_value(val, 0.0f, 1.0f, -1.0f, 1.0f);
 				break;
-			case 1:
+			case Info::KnobQ:
 				filterQ = val;
 				break;
-			case 2:
+			case (Info::SwitchMode + Info::NumKnobs):
 				mode = val;
 				break;
 		}
@@ -47,23 +47,17 @@ public:
 
 	void set_input(const int input_id, const float val) override {
 		switch (input_id) {
-			case 0:
+			case Info::InputInput:
 				signalInput = val;
 				break;
-			case 1:
+			case Info::InputCv:
 				cutoffCV = val;
 				break;
 		}
 	}
 
 	float get_output(const int output_id) const override {
-		float output = 0;
-		switch (output_id) {
-			case 0:
-				output = signalOutput;
-				break;
-		}
-		return output;
+		return signalOutput;
 	}
 
 	float get_led_brightness(const int led_id) const override {
