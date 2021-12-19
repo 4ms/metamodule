@@ -68,7 +68,7 @@ src/pages/images/%_artwork_240.c $(SHARED)/CoreModules/info/%_info.hh: $(SHARED)
 	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< $(subst .c,.png,$@)
 	$(info Checking if $* needs to be added to src/pages/images/image_list.hh)
 	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork_240 src/pages/images/image_list.hh
-	$(info Creating ModuleInfo header file from $<)
+	$(info Creating ModuleInfo header file and coremodule stub if needed from $<)
 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
 
