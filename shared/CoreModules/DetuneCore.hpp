@@ -64,16 +64,16 @@ public:
 
 	void set_param(const int param_id, const float val) override {
 		switch (param_id) {
-			case 0:
+			case Info::KnobW_Speed:
 				wowGen.frequency = MathTools::map_value(val, 0.0f, 1.0f, 0.1f, 5.0f);
 				break;
-			case 1:
+			case Info::KnobW_Depth:
 				wowDepth = val;
 				break;
-			case 2:
+			case Info::KnobF_Speed:
 				flutterGen.frequency = MathTools::map_value(val, 0.0f, 1.0f, 5.0f, 30.0f);
 				break;
-			case 3:
+			case Info::KnobF_Depth:
 				flutterDepth = val;
 				break;
 		}
@@ -87,32 +87,28 @@ public:
 
 	void set_input(const int input_id, const float val) override {
 		switch (input_id) {
-			case 0:
+			case Info::InputInput:
 				signalInput = val;
 				break;
-			case 1:
+			case Info::InputDetune:
 				cvAmount = val;
 				break;
 		}
 	}
 
 	float get_output(const int output_id) const override {
-		float output = 0;
-		switch (output_id) {
-			case 0:
-				output = signalOutput;
-				break;
-		}
-		return output;
+		if (output_id == Info::OutputOut)
+			return signalOutput;
+		return 0.f;
 	}
 
 	void mark_input_unpatched(const int input_id) override {
-		if (input_id == 1)
+		if (input_id == Info::InputDetune)
 			detuneCvConnected = false;
 	}
 
 	void mark_input_patched(const int input_id) override {
-		if (input_id == 1)
+		if (input_id == Info::InputDetune)
 			detuneCvConnected = true;
 	}
 
