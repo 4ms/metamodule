@@ -672,13 +672,13 @@ def createCoreModule(slug, coreModuleDir = None):
         filedata = filedata.replace('Slug', slug)
         with open(os.path.join(coreModuleDir, newCoreFileName), 'w') as file:
             file.write(filedata)
-            Log(f"Wrote file {newCoreFileName} in {coreModuleDir}")
+            Log(f"Created new file {newCoreFileName} in {coreModuleDir} because it didn't exist")
 
     newCoreCPPFileName = slug+'Core.cpp'
     if not os.path.exists(newCoreCPPFileName):
         with open(os.path.join(coreModuleDir, newCoreCPPFileName), 'w') as file:
             file.write("#include " + '\"' + newCoreFileName + '\"')
-            Log(f"Wrote file {newCoreCPPFileName} in {coreModuleDir}")
+            Log(f"Created file {newCoreCPPFileName} in {coreModuleDir} because it didn't exist")
 
 
 def appendPluginFiles(slug, pluginDir = None, description=""):
