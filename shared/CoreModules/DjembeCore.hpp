@@ -13,8 +13,6 @@ class DjembeCore : public CoreProcessor {
 	static constexpr uint32_t SAMPLERATE = 48000;
 
 public:
-	enum Params { Freq = 0, Gain = 1, Sharpness = 2, Strike = 3, Trigger = 4 };
-
 	DjembeCore() {
 		IOTA = 0;
 
@@ -266,22 +264,22 @@ public:
 
 	void set_param(int const param_id, const float val) override {
 		switch (param_id) {
-			case Freq:
+			case Info::KnobPitch:
 				freqKnob = MathTools::map_value(val, 0.f, 1.f, 20.f, 500.f);
 				paramsNeedUpdating = true;
 				break;
 
-			case Gain:
+			case Info::KnobHit:
 				gainKnob = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Sharpness:
+			case Info::KnobSharpness:
 				sharpnessKnob = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Strike:
+			case Info::KnobStrike_Amt:
 				strikeKnob = val;
 				paramsNeedUpdating = true;
 				break;
@@ -294,27 +292,27 @@ public:
 
 	void set_input(const int input_id, const float val) override {
 		switch (input_id) {
-			case Freq:
+			case Info::InputPitch_Cv:
 				freqCV = exp5Table.interp(MathTools::constrain(val, 0.f, 1.0f));
 				paramsNeedUpdating = true;
 				break;
 
-			case Gain:
+			case Info::InputHit_Cv:
 				gainCV = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Sharpness:
+			case Info::InputSharp_Cv:
 				sharpCV = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Strike:
+			case Info::InputStrike_Cv:
 				strikeCV = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Trigger:
+			case Info::InputTrigger:
 				trigIn = val;
 				paramsNeedUpdating = true;
 				break;
@@ -322,13 +320,9 @@ public:
 	}
 
 	float get_output(const int output_id) const override {
-		switch (output_id) {
-			case 0:
-				// return noise_hp[0];
-				return signalOut;
-				break;
-		}
-		return 0;
+		if (output_id == Info::OutputOut)
+			return signalOut;
+		return 0.f;
 	}
 
 private:
