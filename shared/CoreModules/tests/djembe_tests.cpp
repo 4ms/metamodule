@@ -3,7 +3,7 @@
 #include "doctest.h"
 #include <iostream>
 #include <stdint.h>
-
+/*
 TEST_CASE("Soft-neon matches non-neon output") {
 	constexpr int BufferSize = 255;
 	float no_outsig[256];
@@ -87,3 +87,4 @@ TEST_CASE("Soft-neon matches non-neon output") {
 		CHECK(no_outsig[i] == doctest::Approx(ne_outsig[i]));
 	}
 }
+*/
