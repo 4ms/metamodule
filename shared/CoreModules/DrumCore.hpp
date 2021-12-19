@@ -90,23 +90,23 @@ public:
 			baseFrequency + (envelopes[pitchEnvelope].update(gateIn) * 4000.0f * (pitchAmount * pitchAmount));
 		osc.set_frequency(1, baseFrequency * ratio);
 		if (pitchConnected) {
-			osc.set_frequency(0, freqCalc * setPitchMultiple(pitchCV));
+			osc.set_frequency(0, freqCalc * MathTools::setPitchMultiple(pitchCV));
 		} else {
 			osc.set_frequency(0, freqCalc);
 		}
 
 		osc.modAmount = envelopes[fmEnvelope].update(gateIn) * fmAmount;
-		auto noiseOut = randomNumber(-1.0f, 1.0f) * envelopes[noiseEnvelope].update(gateIn);
+		auto noiseOut = MathTools::randomNumber(-1.0f, 1.0f) * envelopes[noiseEnvelope].update(gateIn);
 
 		auto toneOutput = osc.update() * envelopes[toneEnvelope].update(gateIn);
 
-		drumOutput = interpolate(toneOutput, noiseOut, noiseBlend);
+		drumOutput = MathTools::interpolate(toneOutput, noiseOut, noiseBlend);
 	}
 
 	void set_param(int param_id, float val) override {
 		switch (param_id) {
 			case Info::KnobPitch:
-				baseFrequency = map_value(val, 0.0f, 1.0f, 10.0f, 1000.0f);
+				baseFrequency = MathTools::map_value(val, 0.0f, 1.0f, 10.0f, 1000.0f);
 				break;
 			case Info::KnobPitch_Env: // pitch envelope
 				basePitchEnvTime = val;
@@ -116,7 +116,7 @@ public:
 				pitchAmount = val;
 				break;
 			case Info::KnobRatio:
-				ratio = map_value(val, 0.0f, 1.0f, 1.0f, 16.0f);
+				ratio = MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 16.0f);
 				break;
 			case Info::KnobFm_Env: // fm envelope
 				baseFMEnvTime = val;
@@ -140,15 +140,15 @@ public:
 	}
 
 	void setFMEnvelope() {
-		float val = constrain(baseFMEnvTime + FMEnvCV, 0.0f, 1.0f);
-		envelopes[fmEnvelope].set_envelope_time(0, map_value(val, 0.0f, 1.0f, 1.0f, 100.0f));
-		envelopes[fmEnvelope].set_envelope_time(2, map_value(val, 0.0f, 1.0f, 10.0f, 8000.0f));
-		envelopes[fmEnvelope].set_envelope_time(3, map_value(val, 0.0f, 1.0f, 10.0f, 3000.0f));
-		envelopes[fmEnvelope].set_sustain(map_value(val, 0.0f, 1.0f, 0.0f, 0.3f));
+		float val = MathTools::constrain(baseFMEnvTime + FMEnvCV, 0.0f, 1.0f);
+		envelopes[fmEnvelope].set_envelope_time(0, MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 100.0f));
+		envelopes[fmEnvelope].set_envelope_time(2, MathTools::map_value(val, 0.0f, 1.0f, 10.0f, 8000.0f));
+		envelopes[fmEnvelope].set_envelope_time(3, MathTools::map_value(val, 0.0f, 1.0f, 10.0f, 3000.0f));
+		envelopes[fmEnvelope].set_sustain(MathTools::map_value(val, 0.0f, 1.0f, 0.0f, 0.3f));
 	}
 
 	void setToneEnvelope() {
-		float val = constrain(baseToneEnvTime + toneEnvCV, 0.0f, 1.0f);
+		float val = MathTools::constrain(baseToneEnvTime + toneEnvCV, 0.0f, 1.0f);
 		envelopes[toneEnvelope].set_envelope_time(0, toneAttackTimes.interp(val));
 		envelopes[toneEnvelope].set_envelope_time(1, toneHoldTimes.interp(val));
 		envelopes[toneEnvelope].set_envelope_time(2, toneDecayTimes.interp(val));
@@ -157,15 +157,15 @@ public:
 	}
 
 	void setNoiseEnvelope() {
-		float val = constrain(baseNoiseEnvTime + noiseEnvCV, 0.0f, 1.0f);
-		envelopes[noiseEnvelope].set_envelope_time(0, map_value(val, 0.0f, 1.0f, 1.0f, 50.0f));
-		envelopes[noiseEnvelope].set_envelope_time(2, map_value(val, 0.0f, 1.0f, 30.0f, 100.0f));
-		envelopes[noiseEnvelope].set_envelope_time(3, map_value(val, 0.0f, 1.0f, 100.0f, 3000.0f));
-		envelopes[noiseEnvelope].set_sustain(map_value(val, 0.0f, 1.0f, 0.0f, 0.25f));
+		float val = MathTools::constrain(baseNoiseEnvTime + noiseEnvCV, 0.0f, 1.0f);
+		envelopes[noiseEnvelope].set_envelope_time(0, MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 50.0f));
+		envelopes[noiseEnvelope].set_envelope_time(2, MathTools::map_value(val, 0.0f, 1.0f, 30.0f, 100.0f));
+		envelopes[noiseEnvelope].set_envelope_time(3, MathTools::map_value(val, 0.0f, 1.0f, 100.0f, 3000.0f));
+		envelopes[noiseEnvelope].set_sustain(MathTools::map_value(val, 0.0f, 1.0f, 0.0f, 0.25f));
 	}
 
 	void setPitchEnvelope() {
-		float val = constrain(pitchEnvCV + basePitchEnvTime, 0.0f, 1.0f);
+		float val = MathTools::constrain(pitchEnvCV + basePitchEnvTime, 0.0f, 1.0f);
 		envelopes[pitchEnvelope].set_envelope_time(2, pitchDecayTimes.interp(val));
 		envelopes[pitchEnvelope].set_envelope_time(3, pitchReleaseTimes.interp(val));
 		envelopes[pitchEnvelope].set_sustain(pitchBreakPoint.interp(val));
