@@ -63,12 +63,14 @@ INFO_FILES = $(addprefix $(SHARED)/CoreModules/info/, $(addsuffix .hh, $(basenam
 
 images: $(MODULEIMG_C) $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
 
-src/pages/images/%_artwork_240.c $(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
-	$(info Creating 240px-height lvgl img from full-sized svg artwork $<)
+src/pages/images/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
+	$(info $*: Creating 240px-height lvgl img from full-sized svg artwork $<)
 	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< $(subst .c,.png,$@)
-	$(info Checking if $* needs to be added to src/pages/images/image_list.hh)
+	$(info $*: Checking if it needs to be added to LVGL image_list.hh)
 	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork_240 src/pages/images/image_list.hh
-	$(info Creating ModuleInfo header file and coremodule stub if needed from $<)
+
+$(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
+	$(info $*: Creating ModuleInfo header file [and coremodule stub if needed])
 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
 

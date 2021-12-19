@@ -664,7 +664,7 @@ def createCoreModule(slug, coreModuleDir = None):
             coreModuleDir = input_default("CoreModule dir", pathFromHere("../../shared/CoreModules/"))
 
     newCoreFileName = slug + 'Core.hpp'
-    if not os.path.exists(newCoreFileName):
+    if not os.path.exists(os.path.join(coreModuleDir, newCoreFileName)):
         # Replace 'Slug' in template file with our slug, then write to a new file
         coreTemplateFilename = 'template_core_hpp.tmpl'
         with open(os.path.join(coreModuleDir, coreTemplateFilename), 'r') as file :
@@ -675,7 +675,7 @@ def createCoreModule(slug, coreModuleDir = None):
             Log(f"Created new file {newCoreFileName} in {coreModuleDir} because it didn't exist")
 
     newCoreCPPFileName = slug+'Core.cpp'
-    if not os.path.exists(newCoreCPPFileName):
+    if not os.path.exists(os.path.join(coreModuleDir, newCoreCPPFileName)):
         with open(os.path.join(coreModuleDir, newCoreCPPFileName), 'w') as file:
             file.write("#include " + '\"' + newCoreFileName + '\"')
             Log(f"Created file {newCoreCPPFileName} in {coreModuleDir} because it didn't exist")
