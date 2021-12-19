@@ -48,24 +48,6 @@ private:
 	InterpArray<float, 3> toneReleaseTimes = {10, 500, 4000};
 
 public:
-	void update(void) override {
-		auto freqCalc =
-			baseFrequency + (envelopes[pitchEnvelope].update(gateIn) * 4000.0f * (pitchAmount * pitchAmount));
-		osc.set_frequency(1, baseFrequency * ratio);
-		if (pitchConnected) {
-			osc.set_frequency(0, freqCalc * setPitchMultiple(pitchCV));
-		} else {
-			osc.set_frequency(0, freqCalc);
-		}
-
-		osc.modAmount = envelopes[fmEnvelope].update(gateIn) * fmAmount;
-		auto noiseOut = randomNumber(-1.0f, 1.0f) * envelopes[noiseEnvelope].update(gateIn);
-
-		auto toneOutput = osc.update() * envelopes[toneEnvelope].update(gateIn);
-
-		drumOutput = interpolate(toneOutput, noiseOut, noiseBlend);
-	}
-
 	DrumCore() {
 		for (int i = 0; i < 4; i++) {
 			envelopes[i].sustainEnable = false;
@@ -103,37 +85,55 @@ public:
 		setPitchEnvelope();
 	}
 
-	void set_param(int const param_id, const float val) override {
+	void update() override {
+		auto freqCalc =
+			baseFrequency + (envelopes[pitchEnvelope].update(gateIn) * 4000.0f * (pitchAmount * pitchAmount));
+		osc.set_frequency(1, baseFrequency * ratio);
+		if (pitchConnected) {
+			osc.set_frequency(0, freqCalc * setPitchMultiple(pitchCV));
+		} else {
+			osc.set_frequency(0, freqCalc);
+		}
+
+		osc.modAmount = envelopes[fmEnvelope].update(gateIn) * fmAmount;
+		auto noiseOut = randomNumber(-1.0f, 1.0f) * envelopes[noiseEnvelope].update(gateIn);
+
+		auto toneOutput = osc.update() * envelopes[toneEnvelope].update(gateIn);
+
+		drumOutput = interpolate(toneOutput, noiseOut, noiseBlend);
+	}
+
+	void set_param(int param_id, float val) override {
 		switch (param_id) {
-			case 0:
+			case Info::KnobPitch:
 				baseFrequency = map_value(val, 0.0f, 1.0f, 10.0f, 1000.0f);
 				break;
-			case 1: // pitch envelope
+			case Info::KnobPitch_Env: // pitch envelope
 				basePitchEnvTime = val;
 				setPitchEnvelope();
 				break;
-			case 2:
+			case Info::KnobPitch_Amt:
 				pitchAmount = val;
 				break;
-			case 3:
+			case Info::KnobRatio:
 				ratio = map_value(val, 0.0f, 1.0f, 1.0f, 16.0f);
 				break;
-			case 4: // fm envelope
+			case Info::KnobFm_Env: // fm envelope
 				baseFMEnvTime = val;
 				setFMEnvelope();
 				break;
-			case 5:
+			case Info::KnobFm_Amt:
 				fmAmount = val;
 				break;
-			case 6: // tone envelope
+			case Info::KnobTone_Env: // tone envelope
 				baseToneEnvTime = val;
 				setToneEnvelope();
 				break;
-			case 7: // noise envelope
+			case Info::KnobNoise_Env: // noise envelope
 				baseNoiseEnvTime = val;
 				setNoiseEnvelope();
 				break;
-			case 8:
+			case Info::KnobNoise_Blend:
 				noiseBlend = val;
 				break;
 		}
@@ -171,57 +171,62 @@ public:
 		envelopes[pitchEnvelope].set_sustain(pitchBreakPoint.interp(val));
 	}
 
-	void set_samplerate(const float sr) override {
+	void set_samplerate(float sr) override {
 		for (int i = 0; i < 4; i++) {
 			envelopes[i].set_samplerate(sr);
 		}
 		osc.set_samplerate(sr);
 	}
 
-	void set_input(const int input_id, const float val) override {
+	void set_input(int input_id, float val) override {
 		switch (input_id) {
-			case 0:
+			case Info::InputTrigger:
 				gateIn = val;
 				break;
-			case 1:
+			case Info::InputV_Oct:
 				pitchCV = val;
 				break;
-			case 2:
+			case Info::InputN_Env_Cv:
 				noiseEnvCV = val;
 				setNoiseEnvelope();
 				break;
-			case 3:
+			case Info::InputFm_Env_Cv:
 				FMEnvCV = val;
 				setFMEnvelope();
 				break;
-			case 4:
+			case Info::InputP_Env_Cv:
 				pitchEnvCV = val;
 				setPitchEnvelope();
 				break;
-			case 5:
+			case Info::InputT_Env_Cv:
 				toneEnvCV = val;
 				setToneEnvelope();
 				break;
-		}
-	}
 
-	float get_output(const int output_id) const override {
-		float output = 0;
-		switch (output_id) {
-			case 0:
-				output = drumOutput;
+			case Info::InputP_Amt_Cv:
+				break;
+			case Info::InputN_Blend_Cv:
+				break;
+			case Info::InputFm_Amt_Cv:
+				break;
+			case Info::InputRatio_Cv:
 				break;
 		}
-		return output;
 	}
 
-	void mark_input_unpatched(const int input_id) override {
-		if (input_id == 1) {
+	float get_output(int output_id) const override {
+		if (output_id == Info::OutputOut)
+			return drumOutput;
+		return 0.f;
+	}
+
+	void mark_input_unpatched(int input_id) override {
+		if (input_id == Info::InputV_Oct) {
 			pitchConnected = false;
 		}
 	}
-	void mark_input_patched(const int input_id) override {
-		if (input_id == 1) {
+	void mark_input_patched(int input_id) override {
+		if (input_id == Info::InputV_Oct) {
 			pitchConnected = true;
 		}
 	}
