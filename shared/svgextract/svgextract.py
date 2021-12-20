@@ -223,13 +223,13 @@ def panel_to_components(tree):
     #.... and description is in some help file
 
     root = tree.getroot()
-    components_group = get_components_group(root)
 
     # Deduce DPI and HP:
     components['dpi'] = deduce_dpi(root)
     components['HP'] = round(get_dim_inches(root.get('width')) / 0.2)
     Log(f"HP deduced as {components['HP']}")
 
+    components_group = get_components_group(root)
     components['slug'], components['ModuleName'] = find_slug_and_modulename(components_group)
 
     if components['slug'] == "Unnamed":
@@ -390,15 +390,22 @@ def panel_to_components(tree):
             Log(f"Unknown color: {color} found at {cx},{cy}. Skipping.")
 
     # Sort components
-    top_left_sort = lambda w: (w['cy'], w['cx'])
-    components['params'] = sorted(components['params'], key=top_left_sort)
-    components['inputs'] = sorted(components['inputs'], key=top_left_sort)
-    components['outputs'] = sorted(components['outputs'], key=top_left_sort)
-    components['lights'] = sorted(components['lights'], key=top_left_sort)
-    components['widgets'] = sorted(components['widgets'], key=top_left_sort)
-    components['switches'] = sorted(components['switches'], key=top_left_sort)
+    components['params'].reverse()
+    components['inputs'].reverse()
+    components['outputs'].reverse()
+    components['lights'].reverse()
+    components['widgets'].reverse()
+    components['switches'].reverse()
 
-    Log(f"Found {len(components['params'])} params, {len(components['inputs'])} inputs, {len(components['outputs'])} outputs, {len(components['lights'])} lights, and {len(components['widgets'])} custom widgets.")
+    # top_left_sort = lambda w: (w['cy'], w['cx'])
+    # components['params'] = sorted(components['params'], key=top_left_sort)
+    # components['inputs'] = sorted(components['inputs'], key=top_left_sort)
+    # components['outputs'] = sorted(components['outputs'], key=top_left_sort)
+    # components['lights'] = sorted(components['lights'], key=top_left_sort)
+    # components['widgets'] = sorted(components['widgets'], key=top_left_sort)
+    # components['switches'] = sorted(components['switches'], key=top_left_sort)
+
+    # Log(f"Found {len(components['params'])} params, {len(components['inputs'])} inputs, {len(components['outputs'])} outputs, {len(components['lights'])} lights, and {len(components['widgets'])} custom widgets.")
     return components
 
 
