@@ -181,6 +181,37 @@ def find_slug_and_modulename(components_group):
             for m in t.itertext():
                 moduleName += m
 
+    subgroups = components_group.findall(".//svg:g", ns)
+    if slug == "Unnamed":
+        for t in subgroups:
+            name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
+            if name is None:
+                name = t.get('id')
+            if name is None:
+                name = t.get('data-name')
+            if name is None:
+                continue
+            if name == "slug":
+                slug = ""
+                for m in t.itertext():
+                    slug += m
+                slug = re.sub(r'\W+', '', slug).strip()
+
+    if moduleName == "Unnamed":
+        for t in subgroups:
+            name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
+            if name is None:
+                name = t.get('id')
+            if name is None:
+                name = t.get('data-name')
+            if name is None:
+                continue
+            if name == "modulename":
+                moduleName = ""
+                for m in t.itertext():
+                    moduleName += m
+                moduleName = re.sub(r'[\W]+', ' ', moduleName).strip()
+
     return slug, moduleName
 
 
@@ -193,55 +224,23 @@ def panel_to_components(tree):
 
     root = tree.getroot()
     components_group = get_components_group(root)
-    # groups = root.findall(".//svg:g[@inkscape:label='components']", ns)
-    # # Illustrator uses `id` for the group name.
-    # if len(groups) < 1:
-    #     groups = root.findall(".//svg:g[@id='components']", ns)
-    # if len(groups) < 1:
-    #     raise UserException("ERROR: Could not find \"components\" layer on panel")
-    # components_group = groups[0]
 
     # Deduce DPI and HP:
     components['dpi'] = deduce_dpi(root)
     components['HP'] = round(get_dim_inches(root.get('width')) / 0.2)
     Log(f"HP deduced as {components['HP']}")
 
-    # Set default slug and ModuleName
     components['slug'], components['ModuleName'] = find_slug_and_modulename(components_group)
-    # components['slug'] = "UNNAMED"
-    # components['ModuleName'] = "Unnamed"
 
-    # # Scan all text elements: look for slug and ModuleName
-    # texts = components_group.findall(".//svg:text", ns)
-    # for t in texts:
-    #     name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
-    #     if name is None:
-    #         name = t.get('id')
-    #     if name is None:
-    #         name = t.get('data-name')
-    #     if name is None:
-    #         continue
-
-    #     if name == "slug":
-    #         components['slug'] = ""
-    #         for m in t.itertext():
-    #             components['slug'] += m
-
-    #     if name == "modulename":
-    #         components['ModuleName'] = ""
-    #         for m in t.itertext():
-    #             components['ModuleName'] += m
-
-    if components['slug'] == "UNNAMED":
+    if components['slug'] == "Unnamed":
         Log("WARNING: No text element with name or id 'slug' was found in the 'components' layer/group. Setting slug to 'UNNAMED'.")
     else:
         Log(f"Slug found: \"{components['slug']}\"")
 
-    if components['ModuleName'] is None:
+    if components['ModuleName'] == "Unnamed":
         Log("WARNING: No text element with name or id 'modulename' was found in the 'components' layer/group. Setting ModuleName to 'Unnamed'")
     else:
         Log(f"Module Name found: \"{components['ModuleName']}\"")
-
 
     # Scan all circles and rects for components
     components['params'] = []
