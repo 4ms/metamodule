@@ -3,6 +3,9 @@
 #include "CoreModules/info/Slew_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
+#include "processors/tools/expDecay.h"
+#include "util/math.hh"
+
 class SlewCore : public CoreProcessor {
 	using Info = SlewInfo;
 	using ThisCore = SlewCore;
@@ -11,19 +14,33 @@ public:
 	SlewCore() = default;
 
 	void update() override {
+		signalOutput = slew.update(signalInput);
 	}
 
 	void set_param(int param_id, float val) override {
+		switch (param_id) {
+			case Info::KnobRise:
+				slew.attackTime = MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 2000.0f);
+				break;
+			case Info::KnobFall:
+				slew.decayTime = MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 2000.0f);
+				break;
+		}
 	}
 
 	void set_input(int input_id, float val) override {
+		if (input_id == Info::InputIn)
+			signalInput = val;
 	}
 
 	float get_output(int output_id) const override {
+		if (output_id == Info::OutputOut)
+			return signalOutput;
 		return 0.f;
 	}
 
 	void set_samplerate(float sr) override {
+		slew.set_samplerate(sr);
 	}
 
 	float get_led_brightness(int led_id) const override {
@@ -37,4 +54,7 @@ public:
 	// clang-format on
 
 private:
+	ExpDecay slew;
+	float signalInput = 0;
+	float signalOutput = 0;
 };
