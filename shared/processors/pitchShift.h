@@ -4,8 +4,6 @@
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
-using namespace MathTools;
-
 template<int maxWindowSize>
 class PitchShift {
 private:
@@ -15,13 +13,9 @@ private:
 	float sampleRate = 48000;
 
 public:
-	PitchShift() {}
-	float shiftAmount = 1;
-	float windowSize = 500;
-	float mix = 0;
+	PitchShift() = default;
 
-	float update(float input)
-	{
+	float update(float input) {
 		float output1 = 0;
 		float output2 = 0;
 		if (incrementalPitch == 0)
@@ -53,11 +47,14 @@ public:
 		pitchDelay.updateSample(input);
 		pitchDelay.incrementWriteHead();
 		float wet = (output1 * window1 + output2 * window2);
-		return (interpolate(input, wet, mix));
+		return (MathTools::interpolate(input, wet, mix));
 	}
 
-	void setSampleRate(float sr)
-	{
+	void setSampleRate(float sr) {
 		sampleRate = sr;
 	}
+
+	float shiftAmount = 1;
+	float windowSize = 500;
+	float mix = 0;
 };
