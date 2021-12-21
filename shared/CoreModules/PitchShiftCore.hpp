@@ -43,7 +43,7 @@ public:
 			case Info::InputInput:
 				signalInput = val;
 				break;
-			case Info::InputFine_Cv:
+			case Info::InputPitch_Cv:
 				shiftCV = val;
 				break;
 			case Info::InputWindow_Cv:
