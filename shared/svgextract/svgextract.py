@@ -25,12 +25,15 @@ class UserException(Exception):
     pass
 
 
-def appendToFileAfterMarker(filename, marker, newText):
+def appendToFileAfterMarker(filename, marker, newText, matchText=None):
+    if matchText == None:
+        matchText = newText
+
     with open(filename, 'r') as file :
       filedata = file.read()
 
     prettyNewText = newText.replace('\n',' ').replace('\t', ' ')
-    if filedata.find(newText) == -1:
+    if filedata.find(matchText) == -1:
         filedata = filedata.replace(marker, marker + newText)
         Log(f"Updated {filename} with {prettyNewText}")
         with open(filename, 'w') as file:
@@ -701,10 +704,8 @@ def appendPluginFiles(slug, pluginDir = None, description=""):
 
     # Append to plugins.cpp file
     marker = '// Add models below here'
-    newText = f'''
-    p->addModel({modelName});
-    '''
-    appendToFileAfterMarker(plugincpp, marker, newText)
+    newText = f'p->addModel({modelName});'
+    appendToFileAfterMarker(plugincpp, marker, "\n\t" + newText, newText)
 
     # Append more to plugins.cpp
     marker = "// include and define models below here\n"
@@ -720,6 +721,7 @@ auto {modelName} = createModelFromInfo<{slug}Info>();
     appendToFileAfterMarker(pluginhpp, marker, newText)
 
     # Append plugin.json
+    # TODO: Use a json library because appendToFileAfterMarker gets confused easily (whitespace, trailing comma...)
     newText=f'''
     {{
       "slug": "{slug}",
@@ -727,8 +729,9 @@ auto {modelName} = createModelFromInfo<{slug}Info>();
       "description": "{description}",
       "tags": []
     }},'''
+    matchText = f'"slug": "{slug}",'
     marker = '"modules": ['
-    appendToFileAfterMarker(pluginjson, marker, newText)
+    appendToFileAfterMarker(pluginjson, marker, newText, matchText)
 
 
 def usage(script):
