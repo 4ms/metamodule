@@ -25,8 +25,8 @@ public:
 				leftLevel = level[i];
 				rightLevel = level[i] * MathTools::map_value(pan[i], 0.0f, 0.5f, 0.0f, 1.0f);
 			}
-			tempLeft += signalInputs[i][0] * leftLevel;
-			tempRight += signalInputs[i][1] * rightLevel;
+			tempLeft += leftInputs[i] * leftLevel;
+			tempRight += rightInputs[i] * rightLevel;
 		}
 
 		leftOut = tempLeft;
@@ -65,36 +65,40 @@ public:
 	void set_input(int input_id, float val) override {
 		switch (input_id) {
 			case Info::InputIn_1_L:
-				signalInputs[0][0] = val;
+				leftInputs[0] = val;
 				if (!rightConnected[0])
-					signalInputs[0][1] = val;
+					rightInputs[0] = val;
 				break;
 			case Info::InputIn_2_L:
-				signalInputs[1][0] = val;
+				leftInputs[1] = val;
 				if (!rightConnected[0])
-					signalInputs[1][1] = val;
+					rightInputs[1] = val;
 				break;
 			case Info::InputIn_3_L:
-				signalInputs[2][0] = val;
+				leftInputs[2] = val;
 				if (!rightConnected[0])
-					signalInputs[2][1] = val;
+					rightInputs[2] = val;
 				break;
 			case Info::InputIn_4_L:
-				signalInputs[3][0] = val;
+				leftInputs[3] = val;
 				if (!rightConnected[0])
-					signalInputs[3][1] = val;
+					rightInputs[3] = val;
 				break;
 			case Info::InputIn_1_R:
-				signalInputs[0][1] = val;
+				if (rightConnected[0])
+					rightInputs[0] = val;
 				break;
 			case Info::InputIn_2_R:
-				signalInputs[1][1] = val;
+				if (rightConnected[1])
+					rightInputs[1] = val;
 				break;
 			case Info::InputIn_3_R:
-				signalInputs[2][1] = val;
+				if (rightConnected[2])
+					rightInputs[2] = val;
 				break;
 			case Info::InputIn_4_R:
-				signalInputs[3][1] = val;
+				if (rightConnected[3])
+					rightInputs[3] = val;
 				break;
 		}
 	}
@@ -155,7 +159,8 @@ public:
 	// clang-format on
 
 private:
-	float signalInputs[4][2]{{0}, {0}};
+	float leftInputs[4]{0, 0, 0.0};
+	float rightInputs[4]{0, 0, 0.0};
 	float level[4]{1.f, 1.f, 1.f, 1.f};
 	float pan[4]{0.5f, 0.5f, 0.5f, 0.5f};
 	float leftOut = 0;

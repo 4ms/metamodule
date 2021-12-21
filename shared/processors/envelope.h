@@ -84,9 +84,8 @@ public:
 		if (sustainEnable) {
 			if (stage < 3)
 				stageSelect = stage;
-			else {
+			else
 				stageSelect = 3;
-			}
 		} else {
 			stageSelect = stage;
 		}
