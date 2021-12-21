@@ -127,12 +127,6 @@
       "description": "Atvert2",
       "tags": []
     },
-	{
-      "slug": "PanelMedium",
-      "name": "Hub 28HP",
-      "description": "Hub 28HP",
-      "tags": []
-	},
     {
       "slug": "SMR",
       "name": "SMR",
@@ -149,6 +143,12 @@
       "slug": "BuffMult",
       "name": "BuffMult",
       "description": "Buffered Multiple",
+      "tags": []
+	},
+	{
+      "slug": "PanelMedium",
+      "name": "Hub 28HP",
+      "description": "Hub 28HP",
       "tags": []
 	}
   ]
