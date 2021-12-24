@@ -27,6 +27,7 @@ CXXFLAGS = 	-Wall \
 			-I../src \
 			-I../shared \
 			-I../../shared \
+			-I../lib/etl \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:

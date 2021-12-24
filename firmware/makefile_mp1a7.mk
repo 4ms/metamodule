@@ -186,6 +186,7 @@ INCLUDES +=		-I$(SHARED)/patch
 INCLUDES +=		-I$(LIBDIR)/lvgl
 INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
 INCLUDES +=		-I$(LIBDIR)/printf
+INCLUDES += 	-I$(LIBDIR)/etl/include
 # INCLUDES +=		-I$(MFINC)
 # INCLUDES +=		-I$(MFFONTDIR)
 # INCLUDES +=		-I$(NE10DIR)/inc
