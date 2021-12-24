@@ -24,7 +24,8 @@ CompileFlags:
 		"-DCORE_CM4",
 		"-D__FPU_PRESENT=1",
 		"-flto=*",
-		"-mvectorize-with-neon-*"
+		"-mvectorize-with-neon-*",
+		"-mthumb-interwork"
 	]
 	Add: [
 		"--target=arm-none-eabi", 
