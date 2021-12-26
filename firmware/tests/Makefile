@@ -27,7 +27,7 @@ CXXFLAGS = 	-Wall \
 			-I../src \
 			-I../shared \
 			-I../../shared \
-			-I../lib/etl \
+			-Ilib/etl/include \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:
@@ -64,7 +64,7 @@ $(BUILDDIR)/%.o: %.cc
 $(BUILDDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(info Building $<)
-	$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
+	@$(CXX) -c $(DEPFLAGS) $(CXXFLAGS) $< -o $@
 
 
 tests: $(BUILDDIR)/runtests 

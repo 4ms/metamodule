@@ -5,4 +5,5 @@ CompileFlags:
 		"-I..",
 		"-I../..",
 		"-Itests",
+		"-I../../firmware/lib/etl/include",
 	]
