@@ -49,7 +49,7 @@ struct PatchSelectorPage : PageBase {
 
 		lv_dropdown_clear_options(patch_selector_patchlist);
 		for (int i = 0; i < patch_list.NumPatches; i++)
-			lv_dropdown_add_option(patch_selector_patchlist, patch_list.get_patch_name(i), i);
+			lv_dropdown_add_option(patch_selector_patchlist, patch_list.get_patch_name(i).data(), i);
 
 		lv_dropdown_set_max_height(patch_selector_patchlist, 200);
 
@@ -205,7 +205,7 @@ struct PatchSelectorPage : PageBase {
 		if (!mbox.loading_new_patch && (new_patch_index != patch_list.cur_patch_index())) {
 			mbox.new_patch_index = new_patch_index;
 			mbox.loading_new_patch = true;
-			printf("Loading patch %s\n\r", patch_list.get_patch_name(new_patch_index).c_str());
+			printf("Loading patch %s\n\r", patch_list.get_patch_name(new_patch_index).data());
 		}
 	}
 
