@@ -1,9 +1,12 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/module_info_base.hh"
+#include "etl/map.h"
 #include "util/static_string.hh"
 #include <array>
+//#include <string_view>
 
+//using ModuleTypeSlug = std::string_view;
 using ModuleTypeSlug = StaticString<31>;
 
 class ModuleFactory {
@@ -13,70 +16,48 @@ public:
 	ModuleFactory() = delete;
 
 	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate, ModuleInfoView info) {
-		bool already_exists = true;
-		int id = getTypeID(typeslug);
-		if (id == -1) {
-			already_exists = false;
-			id = next_id;
-			next_id++;
-			if (next_id >= MAX_MODULE_TYPES)
-				next_id = 0; // FixMe: Report/handle this ERROR!
-			module_slugs[id] = typeslug;
-		}
-		infos[id] = info;
-		module_names[id] = info.module_name;
-		creation_funcs[id] = funcCreate;
+		auto m = creation_funcs.find(typeslug);
+		bool already_exists = !(m == creation_funcs.end());
+
+		infos[typeslug] = info;
+		creation_funcs[typeslug] = funcCreate;
 		return already_exists;
 	}
 
 	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug) {
-		int id = getTypeID(typeslug);
-		if (id >= 0)
-			return creation_funcs[id]();
-
-		return nullptr;
+		auto m = creation_funcs.find(typeslug);
+		if (m != creation_funcs.end())
+			return m->second();
+		else
+			return nullptr;
 	}
 
 	static std::string_view getModuleTypeName(ModuleTypeSlug typeslug) {
-		int id = getTypeID(typeslug);
-		if (id >= 0)
-			return module_names[id].c_str();
-		return "Not found.";
+		auto m = infos.find(typeslug);
+		if (m != infos.end())
+			return m->second.module_name;
+		else
+			return "Not found.";
 	}
 
 	static ModuleInfoView &getModuleInfo(ModuleTypeSlug typeslug) {
-		int id = getTypeID(typeslug);
-		if (id >= 0)
-			return infos[id];
-		return nullmodule;
+		auto m = infos.find(typeslug);
+		if (m != infos.end())
+			return m->second;
+		else
+			return nullmodule;
 	}
 
-	// Returns the slug if it's valid and registered.
-	// Otherwise returns "????"
-	// TODO: Test performance vs. using a std::map
-	static std::string_view getModuleSlug(ModuleTypeSlug typeslug) {
-		int id = getTypeID(typeslug);
-		if (id >= 0)
-			return module_slugs[id].c_str();
-
-		return "????";
-	}
-
-	static int getTypeID(ModuleTypeSlug typeslug) {
-		for (int i = 0; i < MAX_MODULE_TYPES; i++) {
-			auto &slug = module_slugs[i];
-			if (slug == typeslug)
-				return i;
-		}
-		return -1;
+	// Returns true if slug is valid and registered.
+	static bool isValidSlug(ModuleTypeSlug typeslug) {
+		auto m = infos.find(typeslug);
+		return (m != infos.end());
 	}
 
 private:
-	static inline const int MAX_MODULE_TYPES = 512;
-	static inline std::array<CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
-	static inline std::array<ModuleTypeSlug, MAX_MODULE_TYPES> module_slugs;
-	static inline std::array<StaticString<CoreProcessor::LongNameChars>, MAX_MODULE_TYPES> module_names;
-	static inline std::array<ModuleInfoView, MAX_MODULE_TYPES> infos;
-	static inline int next_id = 0;
+	static constexpr int MAX_MODULE_TYPES = 512;
+	static inline etl::map<std::string_view, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
+	static inline etl::map<std::string_view, ModuleInfoView, MAX_MODULE_TYPES> infos;
+
 	static inline ModuleInfoView nullmodule{};
 };
