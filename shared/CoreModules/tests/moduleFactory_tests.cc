@@ -63,9 +63,9 @@ constexpr ModuleInfoView testinfo{
 
 TEST_CASE("Register ModuleTypes with an object constructed from static constexpr members of ModuleInfoBase") {
 	bool already_exists = ModuleFactory::registerModuleType("ABC", create, aBCInfo);
-	auto slug = ModuleFactory::getModuleSlug("ABC");
-	CHECK(slug == "ABC");
 	CHECK_FALSE(already_exists);
+
+	CHECK(ModuleFactory::isValidSlug("ABC"));
 
 	SUBCASE("Test if Knob info get stored and retreived OK") {
 		already_exists = ModuleFactory::registerModuleType("DEF", create, testinfo);
@@ -79,18 +79,6 @@ TEST_CASE("Register ModuleTypes with an object constructed from static constexpr
 
 		SUBCASE("Test actual EnOscInfo data") {
 			already_exists = ModuleFactory::registerModuleType("EnOsc2", create, ModuleInfoView::makeView<EnOscInfo>());
-			// already_exists = ModuleFactory::registerModuleType("EnOsc2",
-			// 												   "EnOsc module",
-			// 												   create,
-			// 												   {
-			// 													   .width_hp = EnOscInfo::width_hp,
-			// 													   .svg_filename = EnOscInfo::svg_filename,
-			// 													   .Knobs = EnOscInfo::Knobs,
-			// 													   .InJacks = EnOscInfo::InJacks,
-			// 													   .OutJacks = EnOscInfo::OutJacks,
-			// 													   .Switches = EnOscInfo::Switches,
-			// 													   .Leds = EnOscInfo::Leds,
-			// 												   });
 			CHECK_FALSE(already_exists);
 
 			auto info = ModuleFactory::getModuleInfo("EnOsc2");
@@ -118,8 +106,7 @@ TEST_CASE("Register ModuleTypes with an object constructed from static constexpr
 			// Leds
 			//
 			SUBCASE("Test unregistered slug") {
-				auto slug = ModuleFactory::getModuleSlug("NotFound");
-				CHECK(slug == "????");
+				CHECK_FALSE(ModuleFactory::isValidSlug("NotFound"));
 
 				auto info = ModuleFactory::getModuleInfo("NotFound");
 				CHECK(info.width_hp == 0);
