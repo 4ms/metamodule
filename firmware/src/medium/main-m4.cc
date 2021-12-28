@@ -13,8 +13,8 @@
 #include "shared_bus.hh"
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
-
-#include "u-boot-norflash/norflash-loader.hh"
+//
+//#include "u-boot-norflash/norflash-loader.hh"
 
 namespace MetaModule
 {

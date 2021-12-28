@@ -13,6 +13,8 @@
 #include "static_buffers.hh"
 #include "ui.hh"
 
+#include "u-boot-norflash/norflash-loader.hh"
+
 namespace MetaModule
 {
 
@@ -25,6 +27,8 @@ void main() {
 	using namespace MetaModule;
 
 	StaticBuffers::init();
+
+	NorFlashLoader load{};
 
 	PatchPlayer patch_player;
 	ParamQueue param_queue;
