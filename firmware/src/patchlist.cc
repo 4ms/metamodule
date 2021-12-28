@@ -1,4 +1,5 @@
 #include "patchlist.hh"
+#include "test6.hh"
 #include "v2patch.hh"
 // #include "patch/integration_tests/all_tests.hh"
 
@@ -27,7 +28,7 @@ namespace MetaModule
 
 PatchList::PatchList()
 	: _patch_addrs{
-		  v2patch_mmpatch,
+		  v2patch_mmpatch, test6_mmpatch,
 		  // t_info_1_mmpatch,
 		  // InfiniteOsc64bDual_mmpatch,
 		  // knob_test_mmpatch,

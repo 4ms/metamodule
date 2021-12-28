@@ -6,7 +6,7 @@ namespace MetaModule
 
 struct PatchList {
 	//Todo: Deduce this directly from size of constructor
-	static constexpr int32_t NumPatches = 1;
+	static constexpr int32_t NumPatches = 2;
 
 	PatchList();
 
