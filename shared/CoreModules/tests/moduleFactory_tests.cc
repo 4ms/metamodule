@@ -38,12 +38,10 @@ public:
 
 TEST_CASE("Static objects register automatically") {
 	constexpr char typeID[20] = "abcabc";
-	std::cout << "Checking for abcabc by abcabc_slug" << std::endl;
 	CHECK(ModuleFactory::isValidSlug(abcabc_slug));
 	auto cf1 = ModuleFactory::create(abcabc_slug);
 	CHECK(cf1 != nullptr);
 
-	std::cout << "Checking for abcabc by typeID" << std::endl;
 	CHECK(ModuleFactory::isValidSlug(typeID));
 	auto cf = ModuleFactory::create(typeID);
 	CHECK(cf != nullptr);
