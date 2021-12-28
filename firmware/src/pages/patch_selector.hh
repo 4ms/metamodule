@@ -23,16 +23,17 @@ struct PatchSelectorPage : PageBase {
 					// lv_label_set_text(ui->Dropdown1b_patch_name, _instance->patch_list.get_patch_name(sel));
 					// lv_label_set_text(ui->Dropdown1b_patch_description, "TODO: Patch descriptions...");
 
-					lv_group_set_editing(_instance->group, false);
-					lv_obj_set_hidden(ui->Dropdown1b_cont, false);
-					lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
-					lv_group_set_editing(popup_group, true);
-					printf("Event is patch_selector_patchlist\n");
+					// lv_group_set_editing(_instance->group, false);
+					// lv_obj_set_hidden(ui->Dropdown1b_cont, false);
+					// lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
+					// lv_group_set_editing(popup_group, true);
+					// printf("Event is patch_selector_patchlist\n");
+
+					if (sel != _instance->patch_list.cur_patch_index())
+						_instance->start_changing_patch(sel);
 				} else
 					printf("Event not patch_selector_patchlist\n");
 
-				// if (sel != _instance->patch_list.cur_patch_index())
-				// 	_instance->start_changing_patch(sel);
 			} break;
 
 			default:
@@ -214,7 +215,9 @@ struct PatchSelectorPage : PageBase {
 			auto orig_patch = patch_list.cur_patch();
 			patch_player.unload_patch();
 			patch_list.set_cur_patch_index(mbox.new_patch_index);
+			Debug::Pin1::high();
 			bool ok = patch_player.load_patch(patch_list.cur_patch());
+			Debug::Pin1::low();
 			if (!ok) {
 				mbox.set_message("Can't load patch");
 				printf("Can't load patch\n\r");
