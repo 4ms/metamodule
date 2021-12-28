@@ -63,19 +63,16 @@ INFO_FILES = $(addprefix $(SHARED)/CoreModules/info/, $(addsuffix .hh, $(basenam
 
 images: $(MODULEIMG_C) $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
 
-src/pages/images/%_artwork_240.c $(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
-	$(info Creating 240px-height lvgl img from full-sized svg artwork $<)
+src/pages/images/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
+	$(info $*: Creating 240px-height lvgl img from full-sized svg artwork $<)
 	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< $(subst .c,.png,$@)
-	$(info Checking if $* needs to be added to src/pages/images/image_list.hh)
+	$(info $*: Checking if it needs to be added to LVGL image_list.hh)
 	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork_240 src/pages/images/image_list.hh
-	$(info Creating ModuleInfo header file from $<)
+
+$(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
+	$(info $*: Creating ModuleInfo header file [and coremodule stub if needed])
 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
-
-## Module Info files
-# moduleinfo: $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
-
-# $(SHARED)/CoreModules/info/%.hh: $(SHARED)/CoreModules/svg/%.svg
 
 .SECONDARY: $(MODULEIMG_PNG240S)
 
@@ -101,16 +98,6 @@ clean_a7:
 
 clean_uboot:
 	$(MAKE) --no-print-directory clean_uboot -f makefile_mp1a7.mk
-
-
-# $(BUILDDIR_H7M4)/$(BINARYNAME).hex:
-# 	@$(MAKE) --no-print-directory -f makefile_m4.mk
-
-# $(BUILDDIR_H7M7)/$(BINARYNAME).hex:
-# 	@$(MAKE) --no-print-directory -f makefile_m7.mk
-
-# $(BUILDDIR_MP1M4)/$(BINARYNAME).elf:
-# 	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk
 
 ## Flashing
 

@@ -22,10 +22,10 @@ class PageManager {
 
 	static constexpr size_t LAST_PAGE = 4;
 	std::array<std::unique_ptr<PageBase>, LAST_PAGE> pages = {
-		std::make_unique<GroupArcSketchesPage2>(info),
+		std::make_unique<ModuleViewPage>(info, "Djembe"),
 		std::make_unique<PatchSelectorPage>(info),
+		std::make_unique<GroupArcSketchesPage2>(info),
 		std::make_unique<KnobView3>(info),
-		std::make_unique<ModuleViewPage>(info, "EnOsc"),
 		// std::make_unique<GroupArcSketchesPage1>(info),
 		// std::make_unique<GroupArcSketchesPage3>(info),
 		// std::make_unique<GroupArcSketchesPage4>(info),

@@ -40,7 +40,7 @@ public:
 		pd.module_slugs.push_back("");
 
 		for (auto &mod : modules) {
-			if (mod.typeID.is_equal("PANEL_8") || mod.typeID.is_equal("PANEL_MED")) {
+			if (mod.typeID.is_equal("PANEL_8") || mod.typeID.is_equal("PanelMedium")) {
 				// if (strcmp(mod.typeID.cstr(), "PANEL_8") == 0) {
 				pd.module_slugs[0] = mod.typeID;
 				vcv_mod_ids[0] = mod.id;
@@ -313,7 +313,7 @@ public:
 		s = "PatchHeader:\n";
 		s += "  header_version: " + std::to_string(ph.header_version) + "\n";
 		s += "  patch_name: ";
-		s += ph.patch_name;
+		s += ph.patch_name.c_str();
 		s += "\n";
 		s += "  num_modules: " + std::to_string(ph.num_modules) + "\n";
 		s += "  num_int_cables: " + std::to_string(ph.num_int_cables) + "\n";

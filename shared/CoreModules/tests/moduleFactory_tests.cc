@@ -17,11 +17,50 @@ struct TestCoreMod : public CoreProcessor {
 	float get_output(const int output_id) const override {
 		return 0.f;
 	}
+
+	static std::unique_ptr<CoreProcessor> create() {
+		return std::make_unique<TestCoreMod>();
+	}
 };
 
-std::unique_ptr<CoreProcessor> create() {
-	return std::unique_ptr<TestCoreMod>();
+static constexpr std::string_view abcabc_slug{"abcabc"};
+constexpr ModuleInfoView abcabcInfo{
+	.width_hp = 40,
+	.svg_filename = "abcabc.svg",
+	.module_name = "abcabc module",
+};
+
+class AutoInit {
+public:
+	static inline bool g_abcabc_already_exists =
+		ModuleFactory::registerModuleType(abcabc_slug, TestCoreMod::create, abcabcInfo);
+};
+
+TEST_CASE("Static objects register automatically") {
+	constexpr char typeID[20] = "abcabc";
+	CHECK(ModuleFactory::isValidSlug(abcabc_slug));
+	auto cf1 = ModuleFactory::create(abcabc_slug);
+	CHECK(cf1 != nullptr);
+
+	CHECK(ModuleFactory::isValidSlug(typeID));
+	auto cf = ModuleFactory::create(typeID);
+	CHECK(cf != nullptr);
+
+	auto nm = ModuleFactory::getModuleTypeName(typeID);
+	CHECK(nm == "abcabc module");
+
+	auto info = ModuleFactory::getModuleInfo(typeID);
+	CHECK(info.width_hp == 40);
+	CHECK(info.module_name == "abcabc module");
+
+	CHECK_FALSE(AutoInit::g_abcabc_already_exists);
 }
+
+constexpr ModuleInfoView ABCInfo{
+	.width_hp = 40,
+	.svg_filename = "abc.svg",
+	.module_name = "ABC module",
+};
 
 struct TestInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"HIJ"};
@@ -48,20 +87,36 @@ struct TestInfo : ModuleInfoBase {
 	}};
 };
 
-constexpr ModuleInfoView testinfo{
-	.width_hp = 4,
-	.svg_filename = "",
-	.Knobs = TestInfo::Knobs,
-};
+TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView") {
 
-TEST_CASE("Register ModuleTypes with an object constructed from static constexpr members of ModuleInfoBase") {
-	bool already_exists = ModuleFactory::registerModuleType("ABC", "abc module", create);
-	auto slug = ModuleFactory::getModuleSlug("ABC");
-	CHECK(slug == "ABC");
+	bool already_exists = ModuleFactory::registerModuleType("ABC", TestCoreMod::create, ABCInfo);
 	CHECK_FALSE(already_exists);
 
+	CHECK(ModuleFactory::isValidSlug("ABC"));
+	CHECK_FALSE(ModuleFactory::isValidSlug("DEF"));
+
+	constexpr char typeID[20] = "ABC";
+	CHECK(ModuleFactory::isValidSlug(typeID));
+
+	auto nm = ModuleFactory::getModuleTypeName(typeID);
+	CHECK(nm == "ABC module");
+
+	auto info = ModuleFactory::getModuleInfo(typeID);
+	CHECK(info.width_hp == 40);
+	CHECK(info.module_name == "ABC module");
+
+	auto cf = ModuleFactory::create(typeID);
+	CHECK(cf != nullptr);
+
 	SUBCASE("Test if Knob info get stored and retreived OK") {
-		already_exists = ModuleFactory::registerModuleType("DEF", "def module", create, testinfo);
+		constexpr ModuleInfoView testinfo{
+			.width_hp = 4,
+			.svg_filename = "",
+			.module_name = "def info",
+			.Knobs = TestInfo::Knobs,
+		};
+
+		already_exists = ModuleFactory::registerModuleType("DEF", TestCoreMod::create, testinfo);
 		CHECK_FALSE(already_exists);
 
 		CHECK(ModuleFactory::getModuleInfo("DEF").width_hp == 4);
@@ -71,20 +126,8 @@ TEST_CASE("Register ModuleTypes with an object constructed from static constexpr
 		CHECK(knobs.size() == 2);
 
 		SUBCASE("Test actual EnOscInfo data") {
-			already_exists = ModuleFactory::registerModuleType(
-				"EnOsc2", "EnOsc module", create, ModuleInfoView::makeView<EnOscInfo>());
-			// already_exists = ModuleFactory::registerModuleType("EnOsc2",
-			// 												   "EnOsc module",
-			// 												   create,
-			// 												   {
-			// 													   .width_hp = EnOscInfo::width_hp,
-			// 													   .svg_filename = EnOscInfo::svg_filename,
-			// 													   .Knobs = EnOscInfo::Knobs,
-			// 													   .InJacks = EnOscInfo::InJacks,
-			// 													   .OutJacks = EnOscInfo::OutJacks,
-			// 													   .Switches = EnOscInfo::Switches,
-			// 													   .Leds = EnOscInfo::Leds,
-			// 												   });
+			already_exists =
+				ModuleFactory::registerModuleType("EnOsc2", TestCoreMod::create, ModuleInfoView::makeView<EnOscInfo>());
 			CHECK_FALSE(already_exists);
 
 			auto info = ModuleFactory::getModuleInfo("EnOsc2");
@@ -110,10 +153,9 @@ TEST_CASE("Register ModuleTypes with an object constructed from static constexpr
 
 			// Switches
 			// Leds
-			//
+
 			SUBCASE("Test unregistered slug") {
-				auto slug = ModuleFactory::getModuleSlug("NotFound");
-				CHECK(slug == "????");
+				CHECK_FALSE(ModuleFactory::isValidSlug("NotFound"));
 
 				auto info = ModuleFactory::getModuleInfo("NotFound");
 				CHECK(info.width_hp == 0);
@@ -139,4 +181,42 @@ TEST_CASE("ModuleInfoView::makeView<T>() matches T:: fields") {
 	// 													   .OutJacks = EnOscInfo::OutJacks,
 	// 													   .Switches = EnOscInfo::Switches,
 	// 													   .Leds = EnOscInfo::Leds,
+}
+
+std::string_view get_str() {
+	return "module4";
+}
+TEST_CASE("ETL::map tests") {
+	SUBCASE("string -> string") {
+		etl::map<std::string, std::string, 4> m;
+		m["ABC"] = "DEF";
+		CHECK(m["ABC"] == "DEF");
+	}
+
+	SUBCASE("string -> struct") {
+		etl::map<std::string, ModuleInfoView, 4> m;
+		ModuleInfoView info{.width_hp = 4};
+		m["module4"] = info;
+		CHECK(m["module4"].width_hp == 4);
+	}
+
+	SUBCASE("StaticString -> struct") {
+		// using KeyT = StaticString<31>; //TODO: Figure out why this doens't work:
+		//--Do we need to add operator < to SS<>?
+		using KeyT = std::string_view;
+		etl::map<KeyT, ModuleInfoView, 4> m;
+		ModuleInfoView info{.width_hp = 4};
+		KeyT slug{"module4"};
+		m[slug] = info;
+		CHECK(m[slug].width_hp == 4);
+		CHECK(m["module4"].width_hp == 4);
+		CHECK(m[get_str()].width_hp == 4);
+		KeyT otherslug = slug;
+		CHECK(m[otherslug].width_hp == 4);
+
+		//Static string converts
+		StaticString<31> ss{"module4"};
+		CHECK(m[ss.c_str()].width_hp == 4);
+		CHECK(m[ss].width_hp == 4);
+	}
 }

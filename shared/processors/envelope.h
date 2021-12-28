@@ -2,9 +2,6 @@
 
 #include "processors/tools/windowComparator.h"
 #include "util/math.hh"
-#include "util/math_tables.hh"
-
-using namespace MathTools;
 
 class Envelope {
 private:
@@ -26,52 +23,49 @@ private:
 	bool lastGate;
 	WindowComparator gateInput;
 
-	float calcRise(float curve)
-	{
+	float calcRise(float curve) {
 		float rise = 0;
 		float interpVal = 0.0f;
 		if (curve <= 0.5f) {
 			auto expoRise = pow9Table.closest(phaccu);
 			interpVal = curve * 2.0f;
-			rise = interpolate(expoRise, phaccu, interpVal);
+			rise = MathTools::interpolate(expoRise, phaccu, interpVal);
 		} else {
 			interpVal = curve * 2.0f - 1.0f;
 			auto logRise = 1.0f - pow9Table.closest(1.0f - phaccu);
-			rise = interpolate(phaccu, logRise, interpVal);
+			rise = MathTools::interpolate(phaccu, logRise, interpVal);
 		}
 
-		return (map_value(rise, 0.0f, 1.0f, attackSample, 1.0f));
+		return (MathTools::map_value(rise, 0.0f, 1.0f, attackSample, 1.0f));
 	}
 
-	float calcFall(float fallFrom, float fallTo, float curve)
-	{
+	float calcFall(float fallFrom, float fallTo, float curve) {
 		float fall = 0;
-		auto linearCurve = map_value(phaccu, 0.0f, 1.0f, fallFrom, fallTo);
+		auto linearCurve = MathTools::map_value(phaccu, 0.0f, 1.0f, fallFrom, fallTo);
 
 		float interpVal = 0.0f;
 		if (curve <= 0.5f) {
-			auto expoFall = map_value(pow9Table.closest(1.0f - phaccu), 1.0f, 0.0f, fallFrom, fallTo);
+			auto expoFall = MathTools::map_value(pow9Table.closest(1.0f - phaccu), 1.0f, 0.0f, fallFrom, fallTo);
 			interpVal = curve * 2.0f;
-			fall = interpolate(expoFall, linearCurve, interpVal);
+			fall = MathTools::interpolate(expoFall, linearCurve, interpVal);
 		} else {
 			interpVal = curve * 2.0f - 1.0f;
-			auto logFall = map_value(pow9Table.closest(phaccu), 0.0f, 1.0f, fallFrom, fallTo);
-			fall = interpolate(linearCurve, logFall, interpVal);
+			auto logFall = MathTools::map_value(pow9Table.closest(phaccu), 0.0f, 1.0f, fallFrom, fallTo);
+			fall = MathTools::interpolate(linearCurve, logFall, interpVal);
 		}
 		return fall;
 	}
 
 public:
 	bool sustainEnable = true;
-	Envelope() {}
+	Envelope() {
+	}
 
-    int getStage()
-	{
+	int getStage() {
 		return stage;
 	}
 
-	float update(float input)
-	{
+	float update(float input) {
 		lastGate = gateInput.get_output();
 		gateInput.update(input);
 		if (gateInput.get_output() > lastGate) {
@@ -90,9 +84,8 @@ public:
 		if (sustainEnable) {
 			if (stage < 3)
 				stageSelect = stage;
-			else {
+			else
 				stageSelect = 3;
-			}
 		} else {
 			stageSelect = stage;
 		}
@@ -138,14 +131,13 @@ public:
 				envOut = calcFall(sustainLevel, 0.0f, releaseCurve);
 			}
 		}
-		if(stage<4)
-		releaseSample=envOut;
+		if (stage < 4)
+			releaseSample = envOut;
 		lastSample = envOut;
 		return envOut;
 	}
 
-	void set_envelope_time(int _envStage, float milliseconds)
-	{
+	void set_envelope_time(int _envStage, float milliseconds) {
 		envTimes[_envStage] = milliseconds;
 		if (_envStage == 1) // hold stage
 		{
@@ -157,28 +149,23 @@ public:
 		}
 	}
 
-	void set_samplerate(float sr)
-	{
+	void set_samplerate(float sr) {
 		sampleRate = sr;
 	}
 
-	void set_sustain(float _sustainLevel)
-	{
+	void set_sustain(float _sustainLevel) {
 		sustainLevel = _sustainLevel;
 	}
 
-	void set_attack_curve(float val)
-	{
+	void set_attack_curve(float val) {
 		attackCurve = val;
 	}
 
-	void set_decay_curve(float val)
-	{
+	void set_decay_curve(float val) {
 		decayCurve = val;
 	}
 
-	void set_release_curve(float val)
-	{
+	void set_release_curve(float val) {
 		releaseCurve = val;
 	}
 };

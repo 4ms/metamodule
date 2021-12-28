@@ -24,7 +24,8 @@ CompileFlags:
 		"-DCORE_CM4",
 		"-D__FPU_PRESENT=1",
 		"-flto=*",
-		"-mvectorize-with-neon-*"
+		"-mvectorize-with-neon-*",
+		"-mthumb-interwork"
 	]
 	Add: [
 		"--target=arm-none-eabi", 
@@ -40,6 +41,7 @@ CompileFlags:
 		"-Ilib/cmsis-device/stm32mp157c/include",
 		"-Ilib/lvgl",
 		"-Ilib/lvgl/lvgl/src/lv_font",
+		"-Ilib/etl/include",
 		"-Ilib/mdrivlib",
 		"-Ilib/mdrivlib/drivers",
 		"-Ilib/mdrivlib/target/stm32mp1",

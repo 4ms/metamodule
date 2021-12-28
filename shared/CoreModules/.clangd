@@ -4,4 +4,6 @@ CompileFlags:
 		"-std=gnu++20",
 		"-I..",
 		"-I../..",
+		"-Itests",
+		"-I../../firmware/lib/etl/include",
 	]

@@ -21,30 +21,8 @@ public:
 		return 0;
 	}
 
-	////////////REMOVE:
 	static constexpr size_t NameChars = 15;
 	static constexpr size_t LongNameChars = 39;
-
-	static constexpr unsigned NumKnobs = 0;
-	static constexpr unsigned NumOutJacks = 0;
-	static constexpr unsigned NumInJacks = 0;
-	static inline const std::array<StaticString<NameChars>, NumKnobs> KnobNames{};
-	static inline const std::array<StaticString<NameChars>, NumOutJacks> OutJackNames{};
-	static inline const std::array<StaticString<NameChars>, NumInJacks> InJackNames{};
-	virtual StaticString<NameChars> knob_name(unsigned idx) {
-		return (idx < NumKnobs) ? KnobNames[idx] : "";
-	}
-	virtual StaticString<NameChars> injack_name(unsigned idx) {
-		return (idx < NumInJacks) ? InJackNames[idx] : "";
-	}
-	virtual StaticString<NameChars> outjack_name(unsigned idx) {
-		return (idx < NumOutJacks) ? OutJackNames[idx] : "";
-	}
-	static inline const StaticString<LongNameChars> description{};
-	virtual StaticString<LongNameChars> get_description() {
-		return description;
-	}
-	/////////:Remove
 
 	virtual void mark_all_inputs_unpatched() {
 	}

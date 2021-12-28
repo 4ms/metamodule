@@ -25,14 +25,14 @@ struct DropDownOnlyPage : PageBase {
 	}
 
 	void init() override {
-		setup_scr_Dropdown_only(ui);
-		init_bg(ui->Dropdown_only);
+		// setup_scr_Dropdown_only(ui);
+		// init_bg(ui->Dropdown_only);
 
-		lv_dropdown_clear_options(ui->Dropdown_only_patch_dropdown);
-		for (int i = 0; i < patch_list.NumPatches; i++)
-			lv_dropdown_add_option(ui->Dropdown_only_patch_dropdown, patch_list.get_patch_name(i), i);
+		// lv_dropdown_clear_options(ui->Dropdown_only_patch_dropdown);
+		// for (int i = 0; i < patch_list.NumPatches; i++)
+		// 	lv_dropdown_add_option(ui->Dropdown_only_patch_dropdown, patch_list.get_patch_name(i), i);
 
-		lv_group_add_obj(group, ui->Dropdown_only_patch_dropdown);
+		// lv_group_add_obj(group, ui->Dropdown_only_patch_dropdown);
 	}
 
 	void update() override {

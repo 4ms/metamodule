@@ -17,7 +17,6 @@
 extern "C" {
 #endif
 
-LV_IMG_DECLARE(back_but_orange_neg_27x48);
 void custom_init(lv_ui *ui);
 
 #ifdef __cplusplus

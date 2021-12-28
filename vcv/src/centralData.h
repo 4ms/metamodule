@@ -8,7 +8,7 @@
 
 class CentralData {
 	static inline std::mutex mtx;
-	static inline const std::array<ModuleTypeSlug, 2> ValidHubSlugs = {"PANEL_8", "PANEL_MED"};
+	static inline const std::array<ModuleTypeSlug, 2> ValidHubSlugs = {"PANEL_8", "PanelMedium"};
 
 public:
 	enum MessageType {

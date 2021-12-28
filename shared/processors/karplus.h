@@ -3,18 +3,13 @@
 #include "tools/dcBlock.h"
 #include "tools/delayLine.h"
 #include "tools/kneeCompress.h"
-#include "util/math.hh"
-#include "util/math_tables.hh"
 #include <cmath>
-
-using namespace MathTools;
 
 class Karplus {
 	static constexpr int taps = 6;
 
 public:
-	float update(float input)
-	{
+	float update(float input) {
 		float output = input * taps;
 
 		//NEON note: cannot vectorize because "data ref analysis failed"
@@ -27,31 +22,26 @@ public:
 		return output;
 	}
 
-	Karplus()
-	{
+	Karplus() {
 		set_samplerate(48000.0f);
 	}
-	void set_samplerate(float sr)
-	{
+	void set_samplerate(float sr) {
 		sampleRate = sr;
 	}
 
-	void set_frequency(float inFreq)
-	{
+	void set_frequency(float inFreq) {
 		apPeriods[0] = 1.0f / inFreq;
 		delayLine[0].set_delay_samples(periodToSamples(apPeriods[0]));
 		update_delay_samples();
 	}
 
-	void set_spread(float _spread)
-	{
-		spread = map_value(_spread, 0.0f, 1.0f, 1.001f, 1.01f);
+	void set_spread(float _spread) {
+		spread = MathTools::map_value(_spread, 0.0f, 1.0f, 1.001f, 1.01f);
 		update_delay_samples();
 	}
 
-	void set_decay(float val)
-	{
-		feedback = map_value(val, 0.0f, 1.0f, 0.98f, 1.0f);
+	void set_decay(float val) {
+		feedback = MathTools::map_value(val, 0.0f, 1.0f, 0.98f, 1.0f);
 	}
 
 private:
@@ -63,12 +53,10 @@ private:
 	float spread = 1.0f;
 	float feedback = 0.995f;
 
-	float periodToSamples(float period)
-	{
+	float periodToSamples(float period) {
 		return (period * sampleRate);
 	}
-	void update_delay_samples()
-	{
+	void update_delay_samples() {
 		//NEON note: cannot vectorize this because of dependence between apPeriods[x] and [x-1]
 		for (int i = 1; i < taps; i++) {
 			apPeriods[i] = apPeriods[i - 1] / spread;

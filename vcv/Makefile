@@ -15,7 +15,7 @@ LDFLAGS +=
 
 # Add .cpp files to the build
 SOURCES += $(wildcard src/*.cpp)
-SOURCES += $(wildcard src/modules/*.cpp)
+#SOURCES += $(wildcard src/modules/*.cpp)
 SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/*.cpp)
 SOURCES += $(wildcard $(SHARED_DIR)/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
@@ -62,17 +62,25 @@ axo_tests:
 win_dist:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
 
-INFO_FILES = $(wildcard $(SHARED)/CoreModules/info/*_info.hh)
-SVG_SOURCES = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
 
-modules: $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
+METAMODULE_ARTWORK_DIR ?= res/modules
+METAMODULE_INFO_DIR ?= $(SHARED)/CoreModules/info
+METAMODULE_PNG_DIR ?= ../firmware/src/pages/images
+METAMODULE_COREMODULE_DIR ?= $(SHARED)/CoreModules
 
-#Relative to the svgextract script?
-METAMODULE_ARTWORK_DIR ?= res/
-METAMODULE_INFO_DIR ?= $(SHARED)/CoreModules/info/
+MODULEIMG_SVGS = $(wildcard $(METAMODULE_COREMODULE_DIR)/svg/*_info.svg)
+INFO_FILES = $(addprefix $(METAMODULE_INFO_DIR)/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
+MODULE_ARTWORK_FILES = $(addprefix $(METAMODULE_ARTWORK_DIR)/, $(subst _info,-artwork,$(notdir $(MODULEIMG_SVGS))))
 
-$(SHARED)/CoreModules/info/%.hh: $(SHARED)/CoreModules/svg/%.svg
-	python3 $(SHARED)/svgextract/svgextract.py processsvg $<
+modules: $(INFO_FILES) $(MODULE_ARTWORK_FILES) $(SHARED)/svgextract/svgextract.py
+
+$(METAMODULE_ARTWORK_DIR)/%-artwork.svg: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
+	$(info Creating VCV artwork image from $<)
+	@python3 $(SHARED)/svgextract/svgextract.py extractforvcv $< $@
+
+$(METAMODULE_INFO_DIR)/%_info.hh: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
+	$(info Creating ModuleInfo header file from $<)
+	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
 
 .PHONY: tests core_tests vcv_tests util_tests axo_tests
