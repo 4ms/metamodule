@@ -183,28 +183,26 @@ TEST_CASE("ModuleInfoView::makeView<T>() matches T:: fields") {
 	// 													   .Leds = EnOscInfo::Leds,
 }
 
-std::string_view get_str() {
+etl::string_view get_str() {
 	return "module4";
 }
 TEST_CASE("ETL::map tests") {
 	SUBCASE("string -> string") {
-		etl::map<std::string, std::string, 4> m;
+		etl::unordered_map<etl::string<3>, std::string, 4> m;
 		m["ABC"] = "DEF";
 		CHECK(m["ABC"] == "DEF");
 	}
 
 	SUBCASE("string -> struct") {
-		etl::map<std::string, ModuleInfoView, 4> m;
+		etl::unordered_map<etl::string<10>, ModuleInfoView, 4> m;
 		ModuleInfoView info{.width_hp = 4};
 		m["module4"] = info;
 		CHECK(m["module4"].width_hp == 4);
 	}
 
-	SUBCASE("StaticString -> struct") {
-		// using KeyT = StaticString<31>; //TODO: Figure out why this doens't work:
-		//--Do we need to add operator < to SS<>?
-		using KeyT = std::string_view;
-		etl::map<KeyT, ModuleInfoView, 4> m;
+	SUBCASE("string_view -> struct") {
+		using KeyT = etl::string_view;
+		etl::unordered_map<KeyT, ModuleInfoView, 4> m;
 		ModuleInfoView info{.width_hp = 4};
 		KeyT slug{"module4"};
 		m[slug] = info;
@@ -217,6 +215,5 @@ TEST_CASE("ETL::map tests") {
 		//Static string converts
 		StaticString<31> ss{"module4"};
 		CHECK(m[ss.c_str()].width_hp == 4);
-		CHECK(m[ss].width_hp == 4);
 	}
 }

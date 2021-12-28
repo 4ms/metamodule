@@ -1,8 +1,8 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/module_info_base.hh"
-#include "etl/map.h"
 #include "etl/string.h"
+#include "etl/unordered_map.h"
 #include "util/static_string.hh"
 #include <array>
 
@@ -58,8 +58,8 @@ private:
 	//Note: we can't use a string_view for the map key because the map is populated on initialization
 	//and the char[] that the string_view points to might not be initialized yet -- resulting in an element with el.first.length() == 0
 	//Ideally, we'd use StaticString<31>, but there is some functionality missing in StaticString which map requires
-	static inline etl::map<etl::string<31>, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
-	static inline etl::map<etl::string<31>, ModuleInfoView, MAX_MODULE_TYPES> infos;
+	static inline etl::unordered_map<etl::string<31>, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
+	static inline etl::unordered_map<etl::string<31>, ModuleInfoView, MAX_MODULE_TYPES> infos;
 
 	static inline ModuleInfoView nullmodule{};
 };
