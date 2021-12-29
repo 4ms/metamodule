@@ -133,8 +133,8 @@ TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView")
 			auto info = ModuleFactory::getModuleInfo("EnOsc2");
 			CHECK(info.width_hp == 16);
 			CHECK(info.svg_filename == "res/modules/EnOsc-artwork.svg");
-			CHECK(info.Knobs[0].short_name == "Spread");
-			CHECK(info.Knobs[1].short_name == "Scale");
+			CHECK(info.Knobs[0].short_name == "Scale");
+			CHECK(info.Knobs[1].short_name == "Spread");
 			CHECK(info.Knobs[2].short_name == "Pitch");
 			CHECK(info.Knobs[2].knob_style == KnobDef::Medium);
 			CHECK(info.Knobs[2].default_val == 0.5f);
@@ -142,8 +142,8 @@ TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView")
 			CHECK(info.Knobs.size() == 9);
 
 			CHECK(info.InJacks.size() == 10);
-			CHECK(info.InJacks[2].short_name == "Cross FM");
-			CHECK(info.InJacks[2].x_mm == EnOscInfo::px_to_mm<72>(133.86f));
+			CHECK(info.InJacks[2].short_name == "Scale");
+			CHECK(info.InJacks[2].x_mm == EnOscInfo::px_to_mm<72>(59.0f));
 
 			CHECK(info.OutJacks.size() == 2);
 			CHECK(info.OutJacks[0].short_name == "Out A");
