@@ -12,7 +12,7 @@ const mdrivlib::QSPIFlashConfig qspi_flash_conf = {
 	.cs = {GPIO::B, 6, LL_GPIO_AF_10},
 
 	/* QSPI freq = QUADSPICLK /(1 + ClockPrescaler) = 240 MHz/(2+1) = 80 Mhz */
-	.clock_division = 2, // Todo: set this to our final chip's max
+	.clock_division = 9, // Todo: set this to our final chip's max
 	.IRQ_pri = 2,
 	.IRQ_subpri = 2,
 };
