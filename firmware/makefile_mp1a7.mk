@@ -261,17 +261,20 @@ UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 
 include makefile_common.mk
 
-uimg: $(UIMG)
+uimg: $(BIN)
 
-$(UBOOT_MKIMAGE): $(UBOOTSRCDIR)
-	cd $(UBOOTSRCDIR) && make O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
-	cd $(UBOOTSRCDIR) && make -j16 O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- all
+## Disabled u-boot building from the app
+# uimg: $(UIMG)
 
-$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
-	@$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+# $(UBOOT_MKIMAGE): $(UBOOTSRCDIR)
+# 	cd $(UBOOTSRCDIR) && make O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
+# 	cd $(UBOOTSRCDIR) && make -j16 O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- all
 
-clean_uboot:
-	rm -rf $(UBOOTBUILDDIR)
+# $(UIMG): $(BIN) $(UBOOT_MKIMAGE)
+# 	@$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+
+# clean_uboot:
+# 	rm -rf $(UBOOTBUILDDIR)
 
 
 mini: uimg
