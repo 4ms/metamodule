@@ -14,7 +14,7 @@ struct NorFlashLoader {
 	NorFlashLoader()
 		: flash{qspi_flash_conf} {
 
-		printf("Erasing Flash\n\r");
+		printf("QSPI is initialized.\n\r");
 
 		Debug::blue_LED1::high();
 		Debug::green_LED1::high();
@@ -27,6 +27,7 @@ struct NorFlashLoader {
 			printf("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
 			ok = flash.Erase(QSpiFlash::BLOCK_64K, i * QSPI_64KBLOCK_SIZE, QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
+				printf("Error erasing block #%d\n\r", i);
 				while (true) {
 					Debug::green_LED1::low();
 					HAL_Delay(250);
@@ -42,6 +43,7 @@ struct NorFlashLoader {
 		printf("Writing %d bytes to 0x%x\n\r", u_boot_spl_stm32_len, 0x00);
 		ok = flash.Write(u_boot_spl_stm32, 0x00, u_boot_spl_stm32_len); // ~100k
 		if (!ok) {
+			printf("Error writing\n\r");
 			while (true) {
 				Debug::red_LED1::low();
 				HAL_Delay(250);
@@ -53,10 +55,11 @@ struct NorFlashLoader {
 
 		//Verify
 		{
-			auto *data = new uint8_t[u_boot_spl_stm32_len];
 			printf("Reading %d bytes to 0x%x\n\r", u_boot_spl_stm32_len, 0x00);
-			ok = flash.Read(data, 0, u_boot_spl_stm32_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+			auto data = std::make_unique<uint8_t[]>(u_boot_spl_stm32_len);
+			ok = flash.Read(data.get(), 0, u_boot_spl_stm32_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
+				printf("Error reading\n\r");
 				while (true) {
 					Debug::blue_LED1::low();
 					Debug::blue_LED1::high();
@@ -64,6 +67,10 @@ struct NorFlashLoader {
 			}
 			for (int i = 0; i < u_boot_spl_stm32_len; i++) {
 				if (data[i] != u_boot_spl_stm32[i]) {
+					printf("Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r",
+						   i,
+						   data[i],
+						   u_boot_spl_stm32[i]);
 					while (true) {
 						Debug::blue_LED1::low();
 						Debug::red_LED1::low();
@@ -76,15 +83,15 @@ struct NorFlashLoader {
 					}
 				}
 			}
-			delete[] data;
 		}
 
 		//Write FSBL2 @ 256k, blue + red on. Error: flash green
 		Debug::red_LED1::low();
 		Debug::blue_LED1::low();
-		printf("Writing %d bytes to 0x%x\n\r", u_boot_spl_stm32_len, 256*1024);
+		printf("Writing %d bytes to 0x%x\n\r", u_boot_spl_stm32_len, 256 * 1024);
 		ok = flash.Write(u_boot_spl_stm32, 256 * 1024, u_boot_spl_stm32_len);
 		if (!ok) {
+			printf("Error writing\n\r");
 			while (true) {
 				Debug::green_LED1::low();
 				HAL_Delay(250);
@@ -102,6 +109,7 @@ struct NorFlashLoader {
 			printf("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
 			ok = flash.Erase(QSpiFlash::BLOCK_64K, i * QSPI_64KBLOCK_SIZE, QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
+				printf("Error erasing block #%d\n\r", i);
 				while (true) {
 					Debug::green_LED1::low();
 					HAL_Delay(250);
@@ -114,10 +122,10 @@ struct NorFlashLoader {
 
 		//Write SSBL @ 512k (2M length), green on
 		Debug::green_LED1::low();
-		printf("Writing %d bytes to 0x%x\n\r", u_boot_img_len, 512*1024);
+		printf("Writing %d bytes to 0x%x\n\r", u_boot_img_len, 512 * 1024);
 		ok = flash.Write(u_boot_img, 512 * 1024, u_boot_img_len);
-
 		if (!ok) {
+			printf("Error writing\n\r");
 			while (true) {
 				Debug::red_LED1::low();
 				HAL_Delay(250);
@@ -129,10 +137,11 @@ struct NorFlashLoader {
 
 		//Verify
 		{
-			auto *data = new uint8_t[u_boot_img_len];
-			printf("Reading %d bytes from 0x%x\n\r", u_boot_img_len, 512*1024);
-			ok = flash.Read(data, 512*1024, u_boot_img_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+			printf("Reading %d bytes from 0x%x\n\r", u_boot_img_len, 512 * 1024);
+			auto data = std::make_unique<uint8_t[]>(u_boot_spl_stm32_len);
+			ok = flash.Read(data.get(), 512 * 1024, u_boot_img_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
+				printf("Error reading\n\r");
 				while (true) {
 					Debug::blue_LED1::low();
 					HAL_Delay(250);
@@ -142,6 +151,8 @@ struct NorFlashLoader {
 			}
 			for (int i = 0; i < u_boot_img_len; i++) {
 				if (data[i] != u_boot_img[i]) {
+					printf(
+						"Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r", i, data[i], u_boot_img[i]);
 					while (true) {
 						Debug::blue_LED1::low();
 						Debug::red_LED1::low();
@@ -154,7 +165,7 @@ struct NorFlashLoader {
 					}
 				}
 			}
-			delete[] data;
 		}
+		printf("Successfully wrote SPL and u-boot to QSPI Flash\r\n");
 	}
 };
