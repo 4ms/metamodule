@@ -250,13 +250,13 @@ AFLAGS = -mcpu=cortex-a7 \
 		 -mfloat-abi=hard \
 
 #### U-BOOT
-UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
-LOADADDR 	= 0xC2000040
-ENTRYPOINT 	= $(LOADADDR)
-UBOOTDIR 	= $(LIBDIR)/u-boot
-UBOOTSRCDIR = $(UBOOTDIR)/u-boot-stm32mp1-baremetal
-UBOOTBUILDDIR = $(UBOOTDIR)/build
-UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
+# UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
+# LOADADDR 	= 0xC2000040
+# ENTRYPOINT 	= $(LOADADDR)
+# UBOOTDIR 	= $(LIBDIR)/u-boot
+# UBOOTSRCDIR = $(UBOOTDIR)/u-boot-stm32mp1-baremetal
+# UBOOTBUILDDIR = $(UBOOTDIR)/build
+# UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 #####
 
 include makefile_common.mk
