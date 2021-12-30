@@ -7,6 +7,11 @@
 #include <array>
 #include <memory>
 
+//TODO:
+// - load the application uimg (or bin) onto QSPI Flash
+//	  - figure out what address to write to
+// - figure out the u-boot bootcmd to load app from QSPI flash
+// - Try dual mode since booting is pretty slow
 struct NorFlashLoader {
 	using QSpiFlash = mdrivlib::QSpiFlash;
 	QSpiFlash flash;
