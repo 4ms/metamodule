@@ -15,4 +15,9 @@ const mdrivlib::QSPIFlashConfig qspi_flash_conf = {
 	.clock_division = 9, // Todo: set this to our final chip's max
 	.IRQ_pri = 2,
 	.IRQ_subpri = 2,
+
+	.flash_size_bytes = 0x0100'0000,
+	.flash_size_address_bits = mdrivlib::QSPIFlashConfig::AddrBits24,
+
+	.io_mode = mdrivlib::QSPIFlashConfig::SDR,
 };
