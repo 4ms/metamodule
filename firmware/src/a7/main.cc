@@ -13,7 +13,9 @@
 #include "static_buffers.hh"
 #include "ui.hh"
 
+#ifdef METAMODULE_NORFLASH_LOADER_MODE
 #include "u-boot-norflash/norflash-loader.hh"
+#endif
 
 namespace MetaModule
 {
@@ -26,9 +28,11 @@ struct SystemInit : AppStartup, Debug, Hardware {
 void main() {
 	using namespace MetaModule;
 
-	StaticBuffers::init();
-
+#ifdef METAMODULE_NORFLASH_LOADER_MODE
 	NorFlashLoader load{};
+#endif
+
+	StaticBuffers::init();
 
 	PatchPlayer patch_player;
 	ParamQueue param_queue;

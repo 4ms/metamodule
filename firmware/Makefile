@@ -19,7 +19,7 @@ export TABLEGEN 		= $(SHARED)/tableGen
 export VALID_BOARDS = mini medium max pcmdev
 
 
-.PHONY: all mp1-mini mp1-pcmdev mp1-med patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate
+.PHONY: all mp1-mini mp1-pcmdev mp1-med patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate nor-flash-loader u-boot
 
 
 all: patches images mp1-med tests #mp1-mini h7 
@@ -40,6 +40,10 @@ mp1-pcmdev:
 h7:  #mini only
 	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
 	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
+
+nor-flash-loader:
+	touch src/a7/main.cc
+	$(MAKE) EXTDEF=METAMODULE_NORFLASH_LOADER_MODE --no-print-directory -f makefile_mp1a7.mk medium
 
 u-boot:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk u-boot

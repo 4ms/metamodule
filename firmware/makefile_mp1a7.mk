@@ -189,6 +189,7 @@ INCLUDES +=		-I$(LIBDIR)/lvgl
 INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
 INCLUDES +=		-I$(LIBDIR)/printf
 INCLUDES += 	-I$(LIBDIR)/etl/include
+
 # INCLUDES +=		-I$(MFINC)
 # INCLUDES +=		-I$(MFFONTDIR)
 # INCLUDES +=		-I$(NE10DIR)/inc
@@ -201,6 +202,7 @@ EXTRA_CFLAGS = --param l1-cache-size=32 \
 			   --param l2-cache-size=256 \
 				# -DNE10_ENABLE_DSP \
 				# $(NE10_CFLAGS) \
+
 
 EXTRA_CPPFLAGS = $(LTOFLAG)
 
@@ -276,19 +278,19 @@ $(UBOOT_MKIMAGE):
 	$(info Automatic U-boot re-building is disabled. Use `make u-boot` to manually re-build)
 
 u-boot:
-	cd $(UBOOTSRCDIR) && rm -rf ../build && $(ubootbuildcmd)
+	cd $(UBOOTSRCDIR) && $(ubootbuildcmd)
 	$(info Creating .h files from u-boot and spl images)
 	cp $(UBOOTDIR)/build/u-boot.img $(UBOOTDIR)/build/u-boot-spl.stm32 src/u-boot-norflash/
 	cd src/u-boot-norflash && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
 	cd src/u-boot-norflash && xxd -i -c 8 u-boot.img u-boot-img.h
 
+clean_uboot:
+	rm -rf $(UBOOTBUILDDIR)
+
 UBOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
 $(UIMG): $(BIN) $(UBOOT_MKIMAGE)
 	$(UBOOT_MKIMAGE_CMD)
-
-# clean_uboot:
-# 	rm -rf $(UBOOTBUILDDIR)
 
 
 mini: uimg
