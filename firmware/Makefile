@@ -41,6 +41,8 @@ h7:  #mini only
 	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
 	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
 
+u-boot:
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk u-boot
 
 ## Patches
 

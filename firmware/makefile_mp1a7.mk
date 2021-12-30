@@ -2,11 +2,13 @@
 
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
-	target_board = $(word 1,$(MAKECMDGOALS))
-    $(info --------------------)
-    $(info Building for MP1 A7 core, $(target_board) module)
+target_board = $(word 1,$(MAKECMDGOALS))
+$(info --------------------)
+$(info Building for MP1 A7 core, $(target_board) module)
+else ifeq ($(MAKECMDGOALS),u-boot)
+$(info Building u-boot)
 else
-    $(error Board not supported)
+$(error Board not supported)
 endif
 
 #TODO: Build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
@@ -250,28 +252,40 @@ AFLAGS = -mcpu=cortex-a7 \
 		 -mfloat-abi=hard \
 
 #### U-BOOT
-# UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
-# LOADADDR 	= 0xC2000040
-# ENTRYPOINT 	= $(LOADADDR)
-# UBOOTDIR 	= $(LIBDIR)/u-boot
-# UBOOTSRCDIR = $(UBOOTDIR)/u-boot-stm32mp1-baremetal
-# UBOOTBUILDDIR = $(UBOOTDIR)/build
-# UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
+UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
+LOADADDR 	= 0xC2000040
+ENTRYPOINT 	= $(LOADADDR)
+UBOOTDIR 	= $(LIBDIR)/u-boot
+UBOOTSRCDIR = $(UBOOTDIR)/u-boot-stm32mp1-baremetal
+UBOOTBUILDDIR = $(UBOOTDIR)/build
+UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
 #####
 
 include makefile_common.mk
 
-uimg: $(BIN)
+arch = $(shell uname -m)
+ifeq ($(arch),arm64)
+ubootbuildcmd = arch -x86_64 zsh -c "make O=../build CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig && make -j16 O=../build CROSS_COMPILE=arm-none-eabi- all"
+else
+ubootbuildcmd = make O=../build CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig && make -j16 O=../build CROSS_COMPILE=arm-none-eabi- all
+endif
 
-## Disabled u-boot building from the app
-# uimg: $(UIMG)
+uimg: $(UIMG)
 
-# $(UBOOT_MKIMAGE): $(UBOOTSRCDIR)
-# 	cd $(UBOOTSRCDIR) && make O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
-# 	cd $(UBOOTSRCDIR) && make -j16 O=$(PWD)/$(UBOOTBUILDDIR) CROSS_COMPILE=arm-none-eabi- all
+$(UBOOT_MKIMAGE):
+	$(info Automatic U-boot re-building is disabled. Use `make u-boot` to manually re-build)
 
-# $(UIMG): $(BIN) $(UBOOT_MKIMAGE)
-# 	@$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+u-boot:
+	cd $(UBOOTSRCDIR) && rm -rf ../build && $(ubootbuildcmd)
+	$(info Creating .h files from u-boot and spl images)
+	cp $(UBOOTDIR)/build/u-boot.img $(UBOOTDIR)/build/u-boot-spl.stm32 src/u-boot-norflash/
+	cd src/u-boot-norflash && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
+	cd src/u-boot-norflash && xxd -i -c 8 u-boot.img u-boot-img.h
+
+UBOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+
+$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
+	$(UBOOT_MKIMAGE_CMD)
 
 # clean_uboot:
 # 	rm -rf $(UBOOTBUILDDIR)
@@ -296,4 +310,3 @@ install-uboot:
 	# scripts/partition-sdcard.sh $(devXX)
 	# scripts/copy-bootloader.sh $(devXX) $(UBOOTBUILDDIR)/
 	# scripts/copy-app-to-sdcard.sh $(UIMG) $(devXX)
-
