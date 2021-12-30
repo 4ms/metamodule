@@ -53,8 +53,7 @@ struct NorFlashLoader {
 
 		//Verify
 		{
-			auto *data = new uint8_t[101977];
-			//uint8_t data[u_boot_spl_stm32_len];
+			auto *data = new uint8_t[u_boot_spl_stm32_len];
 			printf("Reading %d bytes to 0x%x\n\r", u_boot_spl_stm32_len, 0x00);
 			ok = flash.Read(data, 0, u_boot_spl_stm32_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
@@ -83,6 +82,7 @@ struct NorFlashLoader {
 		//Write FSBL2 @ 256k, blue + red on. Error: flash green
 		Debug::red_LED1::low();
 		Debug::blue_LED1::low();
+		printf("Writing %d bytes to 0x%x\n\r", u_boot_spl_stm32_len, 256*1024);
 		ok = flash.Write(u_boot_spl_stm32, 256 * 1024, u_boot_spl_stm32_len);
 		if (!ok) {
 			while (true) {
@@ -114,6 +114,7 @@ struct NorFlashLoader {
 
 		//Write SSBL @ 512k (2M length), green on
 		Debug::green_LED1::low();
+		printf("Writing %d bytes to 0x%x\n\r", u_boot_img_len, 512*1024);
 		ok = flash.Write(u_boot_img, 512 * 1024, u_boot_img_len);
 
 		if (!ok) {
@@ -125,5 +126,35 @@ struct NorFlashLoader {
 			}
 		}
 		Debug::green_LED1::high();
+
+		//Verify
+		{
+			auto *data = new uint8_t[u_boot_img_len];
+			printf("Reading %d bytes from 0x%x\n\r", u_boot_img_len, 512*1024);
+			ok = flash.Read(data, 512*1024, u_boot_img_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+			if (!ok) {
+				while (true) {
+					Debug::blue_LED1::low();
+					HAL_Delay(250);
+					Debug::blue_LED1::high();
+					HAL_Delay(250);
+				}
+			}
+			for (int i = 0; i < u_boot_img_len; i++) {
+				if (data[i] != u_boot_img[i]) {
+					while (true) {
+						Debug::blue_LED1::low();
+						Debug::red_LED1::low();
+						Debug::green_LED1::low();
+						HAL_Delay(250);
+						Debug::blue_LED1::high();
+						Debug::red_LED1::high();
+						Debug::green_LED1::high();
+						HAL_Delay(250);
+					}
+				}
+			}
+			delete[] data;
+		}
 	}
 };
