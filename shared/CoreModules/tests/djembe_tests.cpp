@@ -1,4 +1,6 @@
-#include "CoreModules/DjembeCore.hpp"
+//Hack: include the .cc file:
+#include "CoreModules/DjembeCore.cc"
+
 #include "CoreModules/DjembeCore_neon.h"
 #include "CoreModules/info/Djembe_info.hh"
 #include "doctest.h"
