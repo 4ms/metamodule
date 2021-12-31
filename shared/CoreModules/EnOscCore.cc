@@ -1,14 +1,13 @@
-#pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/SMR_info.hh"
+#include "CoreModules/info/EnOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
-class SMRCore : public CoreProcessor {
-	using Info = SMRInfo;
-	using ThisCore = SMRCore;
+class EnOscCore : public CoreProcessor {
+	using Info = EnOscInfo;
+	using ThisCore = EnOscCore;
 
 public:
-	SMRCore() = default;
+	EnOscCore() = default;
 
 	void update() override {
 	}

@@ -1,4 +1,3 @@
-#pragma once
 #include "CoreModules/moduleFactory.hh"
 #include "axoloti-wrapper/axoloti_math.h"
 #include "CoreModules/coreProcessor.h"

@@ -1,4 +1,3 @@
-#pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/Djembe_info.hh"
 #include "CoreModules/moduleFactory.hh"

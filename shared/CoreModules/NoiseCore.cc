@@ -1,16 +1,20 @@
-#pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/EnOsc_info.hh"
+#include "CoreModules/info/Noise_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
-class EnOscCore : public CoreProcessor {
-	using Info = EnOscInfo;
-	using ThisCore = EnOscCore;
+#include "util/math.hh"
+
+class NoiseCore : public CoreProcessor {
+	using Info = NoiseInfo;
+	using ThisCore = NoiseCore;
 
 public:
-	EnOscCore() = default;
+	NoiseCore() = default;
 
 	void update() override {
+		whiteNoise = MathTools::randomNumber(-1.0f, 1.0f);
+		//FIXME: make pink noise
+		pinkNoise = whiteNoise;
 	}
 
 	void set_param(int param_id, float val) override {
@@ -20,6 +24,10 @@ public:
 	}
 
 	float get_output(int output_id) const override {
+		if (output_id == Info::OutputWhite)
+			return whiteNoise;
+		if (output_id == Info::OutputPink)
+			return pinkNoise;
 		return 0.f;
 	}
 
@@ -37,4 +45,6 @@ public:
 	// clang-format on
 
 private:
+	float whiteNoise = 0;
+	float pinkNoise = 0;
 };

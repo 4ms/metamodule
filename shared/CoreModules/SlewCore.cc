@@ -1,50 +1,45 @@
-#pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Pan_info.hh"
+#include "CoreModules/info/Slew_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
+#include "processors/tools/expDecay.h"
 #include "util/math.hh"
 
-class PanCore : public CoreProcessor {
-	using Info = PanInfo;
-	using ThisCore = PanCore;
+class SlewCore : public CoreProcessor {
+	using Info = SlewInfo;
+	using ThisCore = SlewCore;
 
 public:
-	PanCore() = default;
+	SlewCore() = default;
 
 	void update() override {
-		float finalPan = MathTools::constrain(panPosition + panCV, 0.0f, 1.0f);
-		leftOut = signalInput * (1.0f - finalPan);
-		rightOut = signalInput * finalPan;
+		signalOutput = slew.update(signalInput);
 	}
 
 	void set_param(int param_id, float val) override {
-		if (param_id == Info::KnobPan)
-			panPosition = val;
+		switch (param_id) {
+			case Info::KnobRise:
+				slew.attackTime = MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 2000.0f);
+				break;
+			case Info::KnobFall:
+				slew.decayTime = MathTools::map_value(val, 0.0f, 1.0f, 1.0f, 2000.0f);
+				break;
+		}
 	}
 
 	void set_input(int input_id, float val) override {
-		switch (input_id) {
-			case Info::InputIn:
-				signalInput = val;
-				break;
-			case Info::InputCv:
-				panCV = val;
-		}
+		if (input_id == Info::InputIn)
+			signalInput = val;
 	}
 
 	float get_output(int output_id) const override {
-		switch (output_id) {
-			case Info::OutputOut_1:
-				return leftOut;
-
-			case Info::OutputOut_2:
-				return leftOut;
-		}
+		if (output_id == Info::OutputOut)
+			return signalOutput;
 		return 0.f;
 	}
 
 	void set_samplerate(float sr) override {
+		slew.set_samplerate(sr);
 	}
 
 	float get_led_brightness(int led_id) const override {
@@ -58,9 +53,7 @@ public:
 	// clang-format on
 
 private:
-	float panPosition = 0;
+	ExpDecay slew;
 	float signalInput = 0;
-	float leftOut = 0;
-	float rightOut = 0;
-	float panCV = 0;
+	float signalOutput = 0;
 };

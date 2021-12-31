@@ -91,7 +91,7 @@ SOURCES += $(audio_source)
 SOURCES += $(core_src)/aux_core_main.cc
 SOURCES += src/patchlist.cc
 SOURCES += src/pages/page_manager.cc
-SOURCES += $(wildcard $(SHARED)/CoreModules/*.cpp)
+SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(LIBDIR)/printf/printf.c
 
