@@ -14,10 +14,11 @@
 
 namespace MetaModule
 {
+enum class CoProMode { Enabled, Disabled };
+enum class Core2Mode { Enabled, Disabled };
 
 struct AppStartup {
-	AppStartup()
-	{
+	AppStartup(CoProMode copro_mode = CoProMode::Enabled, Core2Mode core2_mode = Core2Mode::Enabled) {
 		using namespace mdrivlib;
 
 		RCC_Enable::HSEM_::set();
@@ -27,15 +28,22 @@ struct AppStartup {
 
 		SystemStartup::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
 
-		SecondaryCore::start();
+		if (core2_mode == Core2Mode::Enabled)
+			SecondaryCore::start();
 
-		Copro::reset();
-		Copro::load_vector_data(vectors_bin, vectors_bin_len);
-		Copro::load_firmware_data(firmware_bin, firmware_bin_len);
+		if (copro_mode == CoProMode::Enabled) {
+			Copro::reset();
+			Copro::load_vector_data(vectors_bin, vectors_bin_len);
+			Copro::load_firmware_data(firmware_bin, firmware_bin_len);
+		}
+
 		L1C_CleanDCacheAll();
 		__DSB();
 		__ISB();
-		Copro::start();
+
+		if (copro_mode == CoProMode::Enabled) {
+			Copro::start();
+		}
 	}
 };
 
