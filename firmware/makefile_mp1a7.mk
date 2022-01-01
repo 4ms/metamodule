@@ -1,59 +1,50 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
+#TODO: Build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
+#so don't build it twice for mini/max/etc
+
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 target_board = $(word 1,$(MAKECMDGOALS))
 $(info --------------------)
-$(info Building for MP1 A7 core, $(target_board) module)
+$(info Building for MP1 A7 core, target: $(target_board))
 else ifeq ($(MAKECMDGOALS),u-boot)
 $(info Building u-boot)
 else
 $(error Board not supported)
 endif
 
-#TODO: Build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
-#so don't build it twice for mini/max
-
+# target/chip/core specific source dirs
 target_src := src/$(target_board)
 target_chip_src := src/$(target_board)/mp1
 core_src := src/a7
 
+ifeq "$(target_board)" "pcmdev"
+main_source = src/pcmdev/main.cc
+audio_source = src/pcmdev/audio-dualcodec.cc
+EXTDEF = DUAL_PCM3168_DEV
+else ifeq "$(target_board)" "norflash-loader"
+main_source = $(target_src)/main.cc
+else
+main_source = $(core_src)/main.cc
+audio_source = src/audio.cc
+endif
+
 TAG := [MP1A7-$(target_board)]
+
 BUILDDIR = $(BUILDDIR_MP1A7)/$(target_board)
 LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
 HALDIR = $(HALBASE)/stm32mp1
 DEVICEDIR = $(DEVICEBASE)/stm32mp157c
 TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
 TARGETDEVICEDIR_CA7 = $(DRIVERLIB)/target/stm32mp1_ca7
-
 STARTUP_CA7	= $(TARGETDEVICEDIR_CA7)/boot/startup_ca7.s
 SHARED = src/shared
-
-OPTFLAG = -O3 
-# LTOFLAG =
-LTOFLAG = -flto=auto
-
-include makefile_opts.mk
-
+ASM_SOURCES = $(STARTUP_CA7)
 NE10DIR = $(LIBDIR)/ne10/ne10
 
-ASM_SOURCES = $(STARTUP_CA7)
-
-ifeq "$(target_board)" "pcmdev"
-main_source = src/pcmdev/main.cc
-audio_source = src/pcmdev/audio-dualcodec.cc
-EXTDEF = DUAL_PCM3168_DEV
-else ifeq "$(target_board)" "max"
-main_source = $(core_src)/main.cc
-audio_source = src/audio.cc
-else ifeq "$(target_board)" "medium"
-main_source = $(core_src)/main.cc
-audio_source = src/audio.cc
-else
-main_source = $(core_src)/main.cc
-audio_source = src/audio.cc
-endif
-
+OPTFLAG = -O3 
+LTOFLAG = -flto=auto
 
 SOURCES =
 SOURCES += system/libc_stub.c
@@ -63,37 +54,39 @@ SOURCES += system/mmu_ca7.c
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/system_ca7.c
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/irq_ctrl.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal.c
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sai.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
+SOURCES += $(DRIVERLIB)/drivers/pin.cc
+SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
+SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
+SOURCES += $(LIBDIR)/printf/printf.c
+SOURCES += $(main_source)
+
+ifneq "$(target_board)" "norflash-loader"
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sai.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc.c
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_ltdc.c
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_tim.c
-SOURCES += $(DRIVERLIB)/drivers/pin.cc
 SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES += $(DRIVERLIB)/drivers/tim.cc
-SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc
 SOURCES += $(DRIVERLIB)/drivers/i2c.cc
 SOURCES += $(TARGETDEVICEDIR)/drivers/sai_tdm.cc
 SOURCES += $(DRIVERLIB)/drivers/codec_PCM3168.cc
-SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 SOURCES += $(DRIVERLIB)/drivers/codec_WM8731.cc
 SOURCES += $(SHARED)/util/math_tables.cc
-SOURCES += $(main_source)
 SOURCES += $(audio_source)
 SOURCES += $(core_src)/aux_core_main.cc
 SOURCES += src/patchlist.cc
 SOURCES += src/pages/page_manager.cc
 SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
-SOURCES += $(LIBDIR)/printf/printf.c
 
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
 SOURCES += $(wildcard src/pages/gui-guider/*.c)
@@ -117,23 +110,6 @@ SOURCES += $(wildcard src/pages/images/components/*.c)
 # SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp
 # SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp
 # SOURCES += $(NE10DIR)/modules/dsp/NE10_init_dsp.c
-
-
-# SOURCES += $(NE10DIR)/common/NE10_mask_table.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_float32.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_rfft_float32.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_int32.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_int16.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fir.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fir_init.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_iir.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_iir_init.c \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp \
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_init_dsp.c \
 
 # NE10_ASM_OPTIMIZATION = 1
 
@@ -165,6 +141,8 @@ SOURCES += $(wildcard src/pages/images/components/*.c)
 # 		  $(NE10DIR)/common/NE10header.s \
 # 		  $(NE10DIR)/common/versionheader.s \
 
+endif # ifneq "$(target_board)" "norflash-loader"
+
 INCLUDES = 
 INCLUDES += 	-I.
 INCLUDES +=		-Isrc
@@ -189,9 +167,6 @@ INCLUDES +=		-I$(LIBDIR)/lvgl
 INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
 INCLUDES +=		-I$(LIBDIR)/printf
 INCLUDES += 	-I$(LIBDIR)/etl/include
-
-# INCLUDES +=		-I$(MFINC)
-# INCLUDES +=		-I$(MFFONTDIR)
 # INCLUDES +=		-I$(NE10DIR)/inc
 # INCLUDES +=		-I$(NE10DIR)/common
 # INCLUDES +=		-I$(NE10DIR)/modules/dsp
@@ -202,7 +177,6 @@ EXTRA_CFLAGS = --param l1-cache-size=32 \
 			   --param l2-cache-size=256 \
 				# -DNE10_ENABLE_DSP \
 				# $(NE10_CFLAGS) \
-
 
 EXTRA_CPPFLAGS = $(LTOFLAG)
 
@@ -235,7 +209,6 @@ MCU = -mcpu=cortex-a7 \
 
 	  # -fopt-info-vec-missed=vec.miss 
 	  # -ftree-vectorizer-verbose=n -fdump-tree-vect
-
 	  # -ffast-math \ # Karplus is silent
 
 # Note: -funsafe-math-optimizations and/or -mno-unaligned-access 
@@ -261,28 +234,31 @@ UBOOTDIR 	= $(LIBDIR)/u-boot
 UBOOTSRCDIR = $(UBOOTDIR)/u-boot-stm32mp1-baremetal
 UBOOTBUILDDIR = $(UBOOTDIR)/build
 UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
-#####
 
-include makefile_common.mk
+uboot_base_buildcmd := make O=../build CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig && \
+					   make -j16 O=../build DEVICE_TREE=stm32mp157c-metamodule-p6 CROSS_COMPILE=arm-none-eabi- u-boot-spl.stm32
 
-arch = $(shell uname -m)
-ifeq ($(arch),arm64)
-ubootbuildcmd = arch -x86_64 zsh -c "make O=../build CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig && make -j16 O=../build DEVICE_TREE=stm32mp157c-metamodule-p6 CROSS_COMPILE=arm-none-eabi- all"
+ifeq ($(shell uname -m),arm64)
+ubootbuildcmd = arch -x86_64 zsh -c "$(uboot_base_buildcmd)"
 else
-ubootbuildcmd = make O=../build CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig && make -j16 O=../build CROSS_COMPILE=arm-none-eabi- all
+ubootbuildcmd = $(uboot_base_buildcmd)
 endif
+
+## Build targets
+
+include makefile_opts.mk
+include makefile_common.mk
 
 uimg: $(UIMG)
 
 $(UBOOT_MKIMAGE):
-	$(info Automatic U-boot re-building is disabled. Use `make u-boot` to manually re-build)
+	$(error Use `make u-boot` to build U-Boot and re-run this.)
 
 u-boot:
 	cd $(UBOOTSRCDIR) && $(ubootbuildcmd)
-	$(info Creating .h files from u-boot and spl images)
-	cp $(UBOOTDIR)/build/u-boot.img $(UBOOTDIR)/build/u-boot-spl.stm32 src/u-boot-norflash/
+	$(info Creating .h file from u-boot-spl image)
+	cp $(UBOOTDIR)/build/u-boot-spl.stm32 src/u-boot-norflash/
 	cd src/u-boot-norflash && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
-	cd src/u-boot-norflash && xxd -i -c 8 u-boot.img u-boot-img.h
 
 clean_uboot:
 	rm -rf $(UBOOTBUILDDIR)
@@ -297,10 +273,11 @@ mini: uimg
 
 medium: uimg
 
-max: all
+max: uimg
 
-pcmdev: all
+pcmdev: uimg
 
+norflash-loader: uimg
 
 # Todo: get this working:
 install-uboot:
