@@ -28,7 +28,7 @@ namespace MetaModule
 
 PatchList::PatchList()
 	: _patch_addrs{
-		  v2patch_mmpatch, test6_mmpatch,
+		  test6_mmpatch, v2patch_mmpatch,
 		  // t_info_1_mmpatch,
 		  // InfiniteOsc64bDual_mmpatch,
 		  // knob_test_mmpatch,
