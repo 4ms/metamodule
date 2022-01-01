@@ -268,10 +268,12 @@ UBOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e 
 $(UIMG): $(BIN) $(UBOOT_MKIMAGE)
 	$(UBOOT_MKIMAGE_CMD)
 
+%-uimg.h : %.uimg 
+	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
+
+medium: uimg $(BUILDDIR_MP1A7)/medium/$(BINARYNAME)-uimg.h
 
 mini: uimg
-
-medium: uimg
 
 max: uimg
 

@@ -19,7 +19,7 @@ export TABLEGEN 		= $(SHARED)/tableGen
 export VALID_BOARDS = mini medium max pcmdev norflash-loader
 
 
-.PHONY: all mp1-mini mp1-pcmdev mp1-med patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate nor-flash-loader u-boot
+.PHONY: all mp1-mini mp1-pcmdev mp1-med patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate norflash-loader u-boot
 
 
 all: patches images mp1-med tests #mp1-mini h7 
@@ -42,8 +42,6 @@ h7:  #mini only
 	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
 
 norflash-loader: mp1-med
-	cp build/mp1corea7/medium/main.uimg src/norflash-loader/
-	cd src/norflash-loader/ && xxd -i -c 8 main.uimg main-uimg.h
 	$(MAKE) --no-print-directory -f makefile_mp1a7.mk norflash-loader
 
 u-boot:
