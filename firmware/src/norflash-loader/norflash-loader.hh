@@ -1,174 +1,113 @@
 #pragma once
-//#include "debug.hh"
+#include "medium/debug.hh"
 #include "qspi_flash_driver.hh"
 #include <array>
 #include <memory>
 
 // Images:
-#include "main-uimg.h"
+#include "build/mp1corea7/medium/main-uimg.h"
 #include "u-boot-spl-stm32.h"
 
 struct NorFlashLoader {
 	using QSpiFlash = mdrivlib::QSpiFlash;
 	QSpiFlash flash;
 
+	void erase_write_and_verify(uint8_t *data, uint32_t start_block_num, uint32_t len_bytes) {
+		if (!len_bytes)
+			return;
+
+		uint32_t num_blocks = ((len_bytes + 1) / QSPI_64KBLOCK_SIZE) + 1;
+		if (len_bytes % QSPI_64KBLOCK_SIZE)
+			num_blocks--;
+		erase_blocks(start_block_num, start_block_num + num_blocks);
+
+		uint32_t start_addr = start_block_num * QSPI_64KBLOCK_SIZE;
+		write(data, start_addr, len_bytes);
+	}
+
+	void erase_blocks(int range_start, int range_end) {
+		for (int i = range_start; i < range_end; i++) {
+			Debug::red_LED1::low();
+			printf("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
+			bool ok = flash.Erase(QSpiFlash::BLOCK_64K, i * QSPI_64KBLOCK_SIZE, QSpiFlash::EXECUTE_FOREGROUND);
+			if (!ok) {
+				printf("Error erasing block #%d\n\r", i);
+				while (true) {
+					Debug::green_LED1::low();
+					HAL_Delay(250);
+					Debug::green_LED1::high();
+					HAL_Delay(250);
+				}
+			}
+			Debug::red_LED1::high();
+		}
+	}
+
+	void write(uint8_t *data, uint32_t addr, uint32_t len) {
+		Debug::blue_LED1::low();
+		printf("Writing %d bytes to 0x%x\n\r", len, 0x00);
+		bool ok = flash.Write(data, 0x00, len);
+		if (!ok) {
+			printf("Error writing\n\r");
+			while (true) {
+				Debug::red_LED1::low();
+				HAL_Delay(250);
+				Debug::red_LED1::high();
+				HAL_Delay(250);
+			}
+		}
+		Debug::blue_LED1::high();
+	}
+
+	void verify(uint8_t *data, uint32_t addr, uint32_t len) {
+		printf("Reading %d bytes to 0x%x\n\r", len, 0x00);
+		auto read_data = std::make_unique<uint8_t[]>(len);
+		bool ok = flash.Read(read_data.get(), 0, len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+		if (!ok) {
+			printf("Error reading\n\r");
+			while (true) {
+				Debug::blue_LED1::low();
+				Debug::blue_LED1::high();
+			}
+		}
+		for (int i = 0; i < len; i++) {
+			if (read_data[i] != data[i]) {
+				printf("Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r", i, read_data[i], data[i]);
+				while (true) {
+					Debug::blue_LED1::low();
+					Debug::red_LED1::low();
+					Debug::green_LED1::low();
+					HAL_Delay(250);
+					Debug::blue_LED1::high();
+					Debug::red_LED1::high();
+					Debug::green_LED1::high();
+					HAL_Delay(250);
+				}
+			}
+		}
+	}
+
 	NorFlashLoader(const mdrivlib::QSPIFlashConfig &conf)
 		: flash{conf} {
 
 		printf("QSPI is initialized.\n\r");
 
-		Debug::blue_LED1::high();
-		Debug::green_LED1::high();
-
-		bool ok;
-
-		//Erase 64kblocks for FSBL1 + 2: Red on. Error: flash green
-		for (int i = 0; i < 8; i++) {
-			Debug::red_LED1::low();
-			printf("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
-			ok = flash.Erase(QSpiFlash::BLOCK_64K, i * QSPI_64KBLOCK_SIZE, QSpiFlash::EXECUTE_FOREGROUND);
-			if (!ok) {
-				printf("Error erasing block #%d\n\r", i);
-				while (true) {
-					Debug::green_LED1::low();
-					HAL_Delay(250);
-					Debug::green_LED1::high();
-					HAL_Delay(250);
-				}
-			}
-			Debug::red_LED1::high();
-		}
-
-		// Write FSBL1: blue on. Error: flash red
-		Debug::blue_LED1::low();
-		printf("Writing %d bytes to 0x%x\n\r", u_boot_spl_stm32_len, 0x00);
-		ok = flash.Write(u_boot_spl_stm32, 0x00, u_boot_spl_stm32_len); // ~100k
-		if (!ok) {
-			printf("Error writing\n\r");
-			while (true) {
-				Debug::red_LED1::low();
-				HAL_Delay(250);
-				Debug::red_LED1::high();
-				HAL_Delay(250);
-			}
-		}
-		Debug::blue_LED1::high();
-
-		//Verify
-		{
-			printf("Reading %d bytes to 0x%x\n\r", u_boot_spl_stm32_len, 0x00);
-			auto data = std::make_unique<uint8_t[]>(u_boot_spl_stm32_len);
-			ok = flash.Read(data.get(), 0, u_boot_spl_stm32_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
-			if (!ok) {
-				printf("Error reading\n\r");
-				while (true) {
-					Debug::blue_LED1::low();
-					Debug::blue_LED1::high();
-				}
-			}
-			for (int i = 0; i < u_boot_spl_stm32_len; i++) {
-				if (data[i] != u_boot_spl_stm32[i]) {
-					printf("Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r",
-						   i,
-						   data[i],
-						   u_boot_spl_stm32[i]);
-					while (true) {
-						Debug::blue_LED1::low();
-						Debug::red_LED1::low();
-						Debug::green_LED1::low();
-						HAL_Delay(250);
-						Debug::blue_LED1::high();
-						Debug::red_LED1::high();
-						Debug::green_LED1::high();
-						HAL_Delay(250);
-					}
-				}
-			}
-		}
-
-		//Write FSBL2 @ 256k, blue + red on. Error: flash green
-		Debug::red_LED1::low();
-		Debug::blue_LED1::low();
-		printf("Writing %d bytes to 0x%x\n\r", u_boot_spl_stm32_len, 256 * 1024);
-		ok = flash.Write(u_boot_spl_stm32, 256 * 1024, u_boot_spl_stm32_len);
-		if (!ok) {
-			printf("Error writing\n\r");
-			while (true) {
-				Debug::green_LED1::low();
-				HAL_Delay(250);
-				Debug::green_LED1::high();
-				HAL_Delay(250);
-			}
-		}
 		Debug::red_LED1::high();
 		Debug::blue_LED1::high();
-
-		uint32_t ssbl_len = main_uimg_len;
-		uint8_t *ssbl_data = main_uimg;
-
-		//Erase 64kblocks for SSBL: Red on. Error: flash green
-		const int num_blocks = (ssbl_len / QSPI_64KBLOCK_SIZE) + 1;
-		for (int i = 8; i < (8 + num_blocks); i++) {
-			Debug::red_LED1::low();
-			printf("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
-			ok = flash.Erase(QSpiFlash::BLOCK_64K, i * QSPI_64KBLOCK_SIZE, QSpiFlash::EXECUTE_FOREGROUND);
-			if (!ok) {
-				printf("Error erasing block #%d\n\r", i);
-				while (true) {
-					Debug::green_LED1::low();
-					HAL_Delay(250);
-					Debug::green_LED1::high();
-					HAL_Delay(250);
-				}
-			}
-			Debug::red_LED1::high();
-		}
-
-		//Write SSBL @ 512k (2M length), green on
-		Debug::green_LED1::low();
-		printf("Writing %d bytes to 0x%x\n\r", ssbl_len, 512 * 1024);
-		ok = flash.Write(ssbl_data, 512 * 1024, ssbl_len);
-		if (!ok) {
-			printf("Error writing\n\r");
-			while (true) {
-				Debug::red_LED1::low();
-				HAL_Delay(250);
-				Debug::red_LED1::high();
-				HAL_Delay(250);
-			}
-		}
 		Debug::green_LED1::high();
 
-		//Verify
-		{
-			printf("Reading %d bytes from 0x%x\n\r", ssbl_len, 512 * 1024);
-			auto data = std::make_unique<uint8_t[]>(u_boot_spl_stm32_len);
-			ok = flash.Read(data.get(), 512 * 1024, ssbl_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
-			if (!ok) {
-				printf("Error reading\n\r");
-				while (true) {
-					Debug::blue_LED1::low();
-					HAL_Delay(250);
-					Debug::blue_LED1::high();
-					HAL_Delay(250);
-				}
-			}
-			for (int i = 0; i < ssbl_len; i++) {
-				if (data[i] != ssbl_data[i]) {
-					printf("Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r", i, data[i], ssbl_data[i]);
-					while (true) {
-						Debug::blue_LED1::low();
-						Debug::red_LED1::low();
-						Debug::green_LED1::low();
-						HAL_Delay(250);
-						Debug::blue_LED1::high();
-						Debug::red_LED1::high();
-						Debug::green_LED1::high();
-						HAL_Delay(250);
-					}
-				}
-			}
-		}
+		// Write FSBL1 @ first block: Success = red turns on
+		erase_write_and_verify(u_boot_spl_stm32, 0, u_boot_spl_stm32_len);
+		Debug::red_LED1::low();
+
+		// Write FSBL2 @ block 4 = 0x40000: Success =  blue turns on (magenta)
+		erase_write_and_verify(u_boot_spl_stm32, 4, u_boot_spl_stm32_len);
+		Debug::blue_LED1::low();
+
+		// Write app data @ block 8 = 0x80000: Sucess = green turns on (white)
+		erase_write_and_verify(main_uimg, 8, main_uimg_len);
+		Debug::green_LED1::low();
+
 		printf("Successfully wrote SPL and application to QSPI Flash\r\n");
 	}
 };
