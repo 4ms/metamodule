@@ -41,7 +41,7 @@ h7:  #mini only
 	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
 	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
 
-norflash-loader:
+norflash-loader: mp1-med
 	cp build/mp1corea7/medium/main.uimg src/norflash-loader/
 	cd src/norflash-loader/ && xxd -i -c 8 main.uimg main-uimg.h
 	$(MAKE) --no-print-directory -f makefile_mp1a7.mk norflash-loader
