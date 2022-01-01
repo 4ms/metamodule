@@ -2,7 +2,9 @@
 #include "conf/qspi_flash_conf.hh"
 #include "debug.hh"
 #include "qspi_flash_driver.hh"
-#include "u-boot-img.h"
+//#include "u-boot-img.h"
+//#include "main-bin.h"
+#include "main-uimg.h"
 #include "u-boot-spl-stm32.h"
 #include <array>
 #include <memory>
@@ -107,8 +109,11 @@ struct NorFlashLoader {
 		Debug::red_LED1::high();
 		Debug::blue_LED1::high();
 
+		uint32_t ssbl_len = main_uimg_len;
+		uint8_t *ssbl_data = main_uimg;
+
 		//Erase 64kblocks for SSBL: Red on. Error: flash green
-		const int num_blocks = (u_boot_img_len / QSPI_64KBLOCK_SIZE) + 1;
+		const int num_blocks = (ssbl_len / QSPI_64KBLOCK_SIZE) + 1;
 		for (int i = 8; i < (8 + num_blocks); i++) {
 			Debug::red_LED1::low();
 			printf("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
@@ -127,8 +132,8 @@ struct NorFlashLoader {
 
 		//Write SSBL @ 512k (2M length), green on
 		Debug::green_LED1::low();
-		printf("Writing %d bytes to 0x%x\n\r", u_boot_img_len, 512 * 1024);
-		ok = flash.Write(u_boot_img, 512 * 1024, u_boot_img_len);
+		printf("Writing %d bytes to 0x%x\n\r", ssbl_len, 512 * 1024);
+		ok = flash.Write(ssbl_data, 512 * 1024, ssbl_len);
 		if (!ok) {
 			printf("Error writing\n\r");
 			while (true) {
@@ -142,9 +147,9 @@ struct NorFlashLoader {
 
 		//Verify
 		{
-			printf("Reading %d bytes from 0x%x\n\r", u_boot_img_len, 512 * 1024);
+			printf("Reading %d bytes from 0x%x\n\r", ssbl_len, 512 * 1024);
 			auto data = std::make_unique<uint8_t[]>(u_boot_spl_stm32_len);
-			ok = flash.Read(data.get(), 512 * 1024, u_boot_img_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+			ok = flash.Read(data.get(), 512 * 1024, ssbl_len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
 				printf("Error reading\n\r");
 				while (true) {
@@ -154,10 +159,9 @@ struct NorFlashLoader {
 					HAL_Delay(250);
 				}
 			}
-			for (int i = 0; i < u_boot_img_len; i++) {
-				if (data[i] != u_boot_img[i]) {
-					printf(
-						"Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r", i, data[i], u_boot_img[i]);
+			for (int i = 0; i < ssbl_len; i++) {
+				if (data[i] != ssbl_data[i]) {
+					printf("Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r", i, data[i], ssbl_data[i]);
 					while (true) {
 						Debug::blue_LED1::low();
 						Debug::red_LED1::low();

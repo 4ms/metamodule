@@ -43,6 +43,8 @@ h7:  #mini only
 
 nor-flash-loader:
 	touch src/a7/main.cc
+	cp build/mp1corea7/medium/main.uimg src/u-boot-norflash/ && cd src/u-boot-norflash/ && xxd -i -c 8 main.uimg main-uimg.h
+	#FixMe: need a nor-flash-loader target instead of medium.
 	$(MAKE) EXTDEF=METAMODULE_NORFLASH_LOADER_MODE --no-print-directory -f makefile_mp1a7.mk medium
 
 u-boot:
