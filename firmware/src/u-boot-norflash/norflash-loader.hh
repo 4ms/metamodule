@@ -2,18 +2,13 @@
 #include "conf/qspi_flash_conf.hh"
 #include "debug.hh"
 #include "qspi_flash_driver.hh"
-//#include "u-boot-img.h"
-//#include "main-bin.h"
-#include "main-uimg.h"
-#include "u-boot-spl-stm32.h"
 #include <array>
 #include <memory>
 
-//TODO:
-// - load the application uimg (or bin) onto QSPI Flash
-//	  - figure out what address to write to
-// - figure out the u-boot bootcmd to load app from QSPI flash
-// - Try dual mode since booting is pretty slow
+// Images:
+#include "main-uimg.h"
+#include "u-boot-spl-stm32.h"
+
 struct NorFlashLoader {
 	using QSpiFlash = mdrivlib::QSpiFlash;
 	QSpiFlash flash;
@@ -175,6 +170,6 @@ struct NorFlashLoader {
 				}
 			}
 		}
-		printf("Successfully wrote SPL and u-boot to QSPI Flash\r\n");
+		printf("Successfully wrote SPL and application to QSPI Flash\r\n");
 	}
 };
