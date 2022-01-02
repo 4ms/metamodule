@@ -31,11 +31,12 @@ void PageManager::next_page() {
 			break;
 		case PageId::Knobs:
 			cur_page = PageId::Module;
+			cur_module_idx = 1;
+			page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
 			break;
 		case PageId::Module:
 			cur_module_idx++;
 			if (cur_module_idx >= info.patch_player.get_num_modules()) {
-				cur_module_idx = 0;
 				cur_page = PageId::PatchSel;
 			} else {
 				page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
@@ -50,14 +51,16 @@ void PageManager::prev_page() {
 	switch (cur_page) {
 		case PageId::PatchSel:
 			cur_page = PageId::Module;
+			cur_module_idx = 1;
+			page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
 			break;
 		case PageId::Knobs:
 			cur_page = PageId::PatchSel;
 			break;
 		case PageId::Module:
 			cur_module_idx--;
-			if (cur_module_idx >= info.patch_player.get_num_modules()) {
-				cur_module_idx = 0;
+			if (cur_module_idx == 0 || cur_module_idx >= info.patch_player.get_num_modules()) {
+				cur_module_idx = 1;
 				cur_page = PageId::Knobs;
 			} else {
 				page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);

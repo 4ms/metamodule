@@ -43,7 +43,7 @@ class PageManager {
 
 public:
 	PageId cur_page = PageId::PatchSel;
-	unsigned cur_module_idx = 0;
+	unsigned cur_module_idx = 1;
 
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, UiAudioMailbox &mbox)
 		: info{pl, pp, p, m, mbox}
