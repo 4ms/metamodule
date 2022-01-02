@@ -239,9 +239,9 @@ uboot_base_buildcmd := make O=../build CROSS_COMPILE=arm-none-eabi- stm32mp15x_b
 					   make -j16 O=../build DEVICE_TREE=stm32mp157c-metamodule-p6 CROSS_COMPILE=arm-none-eabi- u-boot-spl.stm32
 
 ifeq ($(shell uname -m),arm64)
-ubootbuildcmd = arch -x86_64 zsh -c "$(uboot_base_buildcmd)"
+uboot_buildcmd = arch -x86_64 zsh -c "$(uboot_base_buildcmd)"
 else
-ubootbuildcmd = $(uboot_base_buildcmd)
+uboot_buildcmd = $(uboot_base_buildcmd)
 endif
 
 ## Build targets
@@ -255,10 +255,10 @@ $(UBOOT_MKIMAGE):
 	$(error Use `make u-boot` to build U-Boot and re-run this.)
 
 u-boot:
-	cd $(UBOOTSRCDIR) && $(ubootbuildcmd)
+	cd $(UBOOTSRCDIR) && $(uboot_buildcmd)
 	$(info Creating .h file from u-boot-spl image)
-	cp $(UBOOTDIR)/build/u-boot-spl.stm32 src/u-boot-norflash/
-	cd src/u-boot-norflash && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
+	cp $(UBOOTDIR)/build/u-boot-spl.stm32 src/norflash-loader/
+	cd src/norflash-loader && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
 
 clean_uboot:
 	rm -rf $(UBOOTBUILDDIR)
