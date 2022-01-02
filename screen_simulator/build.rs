@@ -1,13 +1,3 @@
-fn add_glob_files(globpath: &str, path_vec: &mut Vec<String>) {
-    use glob::glob;
-    for entry in glob(globpath).expect("Bad glob pattern") {
-        if let Ok(path) = entry {
-            let f_name = String::from(path.to_string_lossy());
-            path_vec.push(format!("{}", f_name));
-        }
-    }
-}
-
 fn main() {
     println!("cargo:rerun-if-changed=../firmware/lib/lvgl/lv_conf.h");
     println!("cargo:rerun-if-changed=../firmware/src/pages/");
@@ -21,7 +11,7 @@ fn main() {
     //warnings by setting ranlib to be a script that runs `ranlib -no_warning_for_no_symbols`
 
     //
-    // Build lvgl library
+    // Build lvgl + display library
     //
     let mut lvgl_src: Vec<String> = Vec::new();
     add_glob_files("../firmware/lib/lvgl/lvgl/src/**/*.c", &mut lvgl_src);
@@ -50,7 +40,7 @@ fn main() {
     src.push(String::from("../firmware/src/pages/page_manager.cc"));
     src.push(String::from("../shared/util/math_tables.cc"));
     src.push(String::from("../shared/axoloti-wrapper/axoloti_math.cpp"));
-    add_glob_files("../shared/CoreModules/*.cpp", &mut src);
+    add_glob_files("../shared/CoreModules/*.cc", &mut src);
     add_glob_files("../firmware/src/pages/fonts/*.c", &mut src);
     add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut src);
 
@@ -62,6 +52,7 @@ fn main() {
         .flag("--includestubs/sys/alloc_buffer.hh")
         .include("mms")
         .include("mms/stubs")
+        .include("../firmware/lib/etl/include")
         .include("../shared")
         .include("../shared/util")
         .include("../shared/patch")
@@ -74,4 +65,14 @@ fn main() {
     build.compile("metamodulescreen");
 
     // CXXFLAGS=-std=c++11 cargo build
+}
+
+fn add_glob_files(globpath: &str, path_vec: &mut Vec<String>) {
+    use glob::glob;
+    for entry in glob(globpath).expect("Bad glob pattern") {
+        if let Ok(path) = entry {
+            let f_name = String::from(path.to_string_lossy());
+            path_vec.push(format!("{}", f_name));
+        }
+    }
 }

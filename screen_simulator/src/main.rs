@@ -3,7 +3,7 @@ extern crate timer;
 
 extern crate chrono;
 
-use minifb::{Key, Window, WindowOptions};
+use minifb::{Key, ScaleMode, Window, WindowOptions};
 
 const WIDTH: usize = 320;
 const HEIGHT: usize = 240;
@@ -49,10 +49,20 @@ fn main() {
 
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
 
-    let mut window = Window::new("MetaModule", WIDTH, HEIGHT, WindowOptions::default())
-        .unwrap_or_else(|e| {
-            panic!("{}", e);
-        });
+    let wo = WindowOptions {
+        borderless: true,
+        title: true,
+        resize: true,
+        scale: minifb::Scale::X1,
+        scale_mode: ScaleMode::AspectRatioStretch,
+        topmost: false,
+        transparency: false,
+        none: false,
+    };
+
+    let mut window = Window::new("MetaModule", WIDTH, HEIGHT, wo).unwrap_or_else(|e| {
+        panic!("{}", e);
+    });
 
     let mut keys: [KeyHandler; 6] = [
         KeyHandler {

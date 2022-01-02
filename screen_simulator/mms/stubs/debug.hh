@@ -1,8 +1,10 @@
 #pragma once
 template<int dummy>
 struct DebugPin {
-	static void high();
-	static void low();
+	static void high() {
+	}
+	static void low() {
+	}
 };
 
 struct Debug {

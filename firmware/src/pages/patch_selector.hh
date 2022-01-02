@@ -215,9 +215,7 @@ struct PatchSelectorPage : PageBase {
 			auto orig_patch = patch_list.cur_patch();
 			patch_player.unload_patch();
 			patch_list.set_cur_patch_index(mbox.new_patch_index);
-			Debug::Pin1::high();
 			bool ok = patch_player.load_patch(patch_list.cur_patch());
-			Debug::Pin1::low();
 			if (!ok) {
 				mbox.set_message("Can't load patch");
 				printf("Can't load patch\n\r");
