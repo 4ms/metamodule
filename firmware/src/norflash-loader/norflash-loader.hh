@@ -1,6 +1,7 @@
 #pragma once
 #include "medium/debug.hh"
 #include "qspi_flash_driver.hh"
+#include "uart_log.hh"
 #include <array>
 #include <memory>
 

@@ -10,7 +10,7 @@
 #include "printf.h"
 #include "screen_writer.hh"
 #include "timekeeper.hh"
-#include "uart.hh"
+#include "uart_log.hh"
 #include <span>
 
 namespace MetaModule
@@ -32,9 +32,9 @@ class LVGLDriver {
 	// Display driver
 	lv_disp_drv_t disp_drv;
 
-#ifdef LV_USE_LOG
-	static inline mdrivlib::Uart<UART4_BASE> log_uart;
-#endif
+	// #ifdef LV_USE_LOG
+	// 	static inline mdrivlib::Uart<UART4_BASE> log_uart;
+	// #endif
 
 public:
 	//~600us
@@ -68,34 +68,28 @@ public:
 #ifdef LV_USE_LOG
 	static void log_cb(lv_log_level_t level, const char *file, uint32_t line, const char *fn_name, const char *dsc) {
 		if (level == LV_LOG_LEVEL_ERROR)
-			log_uart.write("ERROR: ");
+			UartLog::log_uart.write("ERROR: ");
 		if (level == LV_LOG_LEVEL_WARN)
-			log_uart.write("WARNING: ");
+			UartLog::log_uart.write("WARNING: ");
 		if (level == LV_LOG_LEVEL_INFO)
-			log_uart.write("INFO: ");
+			UartLog::log_uart.write("INFO: ");
 		if (level == LV_LOG_LEVEL_TRACE)
-			log_uart.write("TRACE: ");
+			UartLog::log_uart.write("TRACE: ");
 
-		log_uart.write("File: ");
-		log_uart.write(file);
+		UartLog::log_uart.write("File: ");
+		UartLog::log_uart.write(file);
 
-		log_uart.write("#");
-		log_uart.write(line);
+		UartLog::log_uart.write("#");
+		UartLog::log_uart.write(line);
 
-		log_uart.write(": ");
-		log_uart.write(fn_name);
-		log_uart.write(": ");
-		log_uart.write(dsc);
-		log_uart.write("\n\r");
+		UartLog::log_uart.write(": ");
+		UartLog::log_uart.write(fn_name);
+		UartLog::log_uart.write(": ");
+		UartLog::log_uart.write(dsc);
+		UartLog::log_uart.write("\n\r");
 	}
 #endif
 };
-
-extern "C" void _putchar(char character) {
-	UART4->TDR = character;
-	while ((UART4->ISR & USART_ISR_TXFT) == 0)
-		;
-}
 
 class MMDisplay {
 	static inline mdrivlib::Timekeeper _run_lv_tasks_tmr;
@@ -119,7 +113,6 @@ public:
 		_spi_driver.register_partial_frame_cb(end_flush);
 		// _screen_configure.setup_driver_chip(mdrivlib::ST77XX::ST7789InitLTDC<ScreenConf>::cmds);
 		// _ltdc_driver.init(buf.data());
-		
 
 		// for (int i = 0; i < 16; i++) {
 		// 	for (auto &px : testbuf)
