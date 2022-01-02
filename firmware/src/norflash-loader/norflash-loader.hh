@@ -1,6 +1,5 @@
 #pragma once
 #include "medium/debug.hh"
-#include "printf.h"
 #include "qspi_flash_driver.hh"
 #include "uart_log.hh"
 #include <memory>
@@ -9,6 +8,8 @@
 #include "build/mp1corea7/medium/main-uimg.h"
 #include "u-boot-spl-stm32.h"
 
+namespace MetaModule
+{
 struct NorFlashLoader {
 	using QSpiFlash = mdrivlib::QSpiFlash;
 	QSpiFlash flash;
@@ -31,10 +32,10 @@ struct NorFlashLoader {
 	void erase_blocks(int range_start, int range_end) {
 		for (int i = range_start; i < range_end; i++) {
 			Debug::red_LED1::low();
-			printf_("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
+			UartLog::log("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
 			bool ok = flash.Erase(QSpiFlash::BLOCK_64K, i * QSPI_64KBLOCK_SIZE, QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
-				printf_("Error erasing block #%d\n\r", i);
+				UartLog::log("Error erasing block #%d\n\r", i);
 				while (true) {
 					Debug::green_LED1::low();
 					HAL_Delay(250);
@@ -48,10 +49,10 @@ struct NorFlashLoader {
 
 	void write(uint8_t *data, uint32_t addr, uint32_t len) {
 		Debug::blue_LED1::low();
-		printf("Writing %d bytes to 0x%x\n\r", len, addr);
+		UartLog::log("Writing %d bytes to 0x%x\n\r", len, addr);
 		bool ok = flash.Write(data, addr, len);
 		if (!ok) {
-			printf("Error writing\n\r");
+			UartLog::log("Error writing\n\r");
 			while (true) {
 				Debug::red_LED1::low();
 				HAL_Delay(250);
@@ -63,11 +64,11 @@ struct NorFlashLoader {
 	}
 
 	void verify(uint8_t *data, uint32_t addr, uint32_t len) {
-		printf("Reading %d bytes to 0x%x\n\r", len, addr);
+		UartLog::log("Reading %d bytes to 0x%x\n\r", len, addr);
 		auto read_data = std::make_unique<uint8_t[]>(len);
 		bool ok = flash.Read(read_data.get(), addr, len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 		if (!ok) {
-			printf("Error reading\n\r");
+			UartLog::log("Error reading\n\r");
 			while (true) {
 				Debug::blue_LED1::low();
 				Debug::blue_LED1::high();
@@ -75,7 +76,8 @@ struct NorFlashLoader {
 		}
 		for (int i = 0; i < len; i++) {
 			if (read_data[i] != data[i]) {
-				printf("Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r", i, read_data[i], data[i]);
+				UartLog::log(
+					"Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r", i, read_data[i], data[i]);
 				while (true) {
 					Debug::blue_LED1::low();
 					Debug::red_LED1::low();
@@ -93,7 +95,7 @@ struct NorFlashLoader {
 	NorFlashLoader(const mdrivlib::QSPIFlashConfig &conf)
 		: flash{conf} {
 
-		printf("QSPI is initialized.\n\r");
+		UartLog::log("QSPI is initialized.\n\r");
 
 		Debug::red_LED1::high();
 		Debug::blue_LED1::high();
@@ -111,6 +113,7 @@ struct NorFlashLoader {
 		erase_write_and_verify(main_uimg, 8, main_uimg_len);
 		Debug::green_LED1::low();
 
-		printf("Successfully wrote SPL and application to QSPI Flash\r\n");
+		UartLog::log("Successfully wrote SPL and application to QSPI Flash\r\n");
 	}
 };
+} // namespace MetaModule

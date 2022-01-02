@@ -63,7 +63,7 @@ SOURCES += $(DRIVERLIB)/drivers/pin.cc
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
 SOURCES += $(LIBDIR)/printf/printf.c
-SOURCES += src/putchar.cc
+SOURCES += src/uart_log.cc
 SOURCES += $(main_source)
 
 ifneq "$(target_board)" "norflash-loader"

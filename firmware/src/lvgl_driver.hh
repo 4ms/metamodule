@@ -7,7 +7,6 @@
 #include "lvgl/lvgl.h"
 #include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
-#include "printf.h"
 #include "screen_writer.hh"
 #include "timekeeper.hh"
 #include "uart_log.hh"
@@ -32,14 +31,9 @@ class LVGLDriver {
 	// Display driver
 	lv_disp_drv_t disp_drv;
 
-	// #ifdef LV_USE_LOG
-	// 	static inline mdrivlib::Uart<UART4_BASE> log_uart;
-	// #endif
-
 public:
-	//~600us
 	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb, std::span<lv_color_t> buffer1, std::span<lv_color_t> buffer2) {
-		printf("\n\rLVLDriver started\n\r");
+		UartLog::log("\n\rLVGLDriver started\n\r");
 
 		lv_init();
 
@@ -68,25 +62,26 @@ public:
 #ifdef LV_USE_LOG
 	static void log_cb(lv_log_level_t level, const char *file, uint32_t line, const char *fn_name, const char *dsc) {
 		if (level == LV_LOG_LEVEL_ERROR)
-			UartLog::log_uart.write("ERROR: ");
+			UartLog::log("ERROR: ");
 		if (level == LV_LOG_LEVEL_WARN)
-			UartLog::log_uart.write("WARNING: ");
+			UartLog::log("WARNING: ");
 		if (level == LV_LOG_LEVEL_INFO)
-			UartLog::log_uart.write("INFO: ");
+			UartLog::log("INFO: ");
 		if (level == LV_LOG_LEVEL_TRACE)
-			UartLog::log_uart.write("TRACE: ");
+			UartLog::log("TRACE: ");
 
-		UartLog::log_uart.write("File: ");
-		UartLog::log_uart.write(file);
+		UartLog::log("File: %s #%d: %s: %s\n\r", file, line, fn_name, dsc);
+		// UartLog::log_uart.write("File: ");
+		// UartLog::log_uart.write(file);
 
-		UartLog::log_uart.write("#");
-		UartLog::log_uart.write(line);
+		// UartLog::log_uart.write("#");
+		// UartLog::log_uart.write(line);
 
-		UartLog::log_uart.write(": ");
-		UartLog::log_uart.write(fn_name);
-		UartLog::log_uart.write(": ");
-		UartLog::log_uart.write(dsc);
-		UartLog::log_uart.write("\n\r");
+		// UartLog::log_uart.write(": ");
+		// UartLog::log_uart.write(fn_name);
+		// UartLog::log_uart.write(": ");
+		// UartLog::log_uart.write(dsc);
+		// UartLog::log_uart.write("\n\r");
 	}
 #endif
 };
