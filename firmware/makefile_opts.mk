@@ -2,6 +2,7 @@
 # Uncomment to compile unoptimized:
 # $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O1
+$(BUILDDIR)/src/norflash-loader/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/timekeeper.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/main.o: OPTFLAG = -O0
