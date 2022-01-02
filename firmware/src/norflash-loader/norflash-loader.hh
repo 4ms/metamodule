@@ -17,7 +17,7 @@ struct NorFlashLoader {
 			return;
 
 		uint32_t num_blocks = ((len_bytes + 1) / QSPI_64KBLOCK_SIZE) + 1;
-		if (len_bytes % QSPI_64KBLOCK_SIZE)
+		if ((len_bytes % QSPI_64KBLOCK_SIZE) == 0)
 			num_blocks--;
 		erase_blocks(start_block_num, start_block_num + num_blocks);
 
