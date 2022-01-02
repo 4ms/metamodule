@@ -5,8 +5,9 @@ namespace MetaModule
 
 void PageManager::init() {
 	//54ms for a bunch of pages
-	for (auto &page : pages)
-		page->init();
+	page_knobs.init();
+	page_module.init();
+	page_patch.init();
 
 	//Todo: page manager doesn't load patches, send a load_patch command via uiaudiomailbox
 	//Audio is more suited to load patches, or maybe a 3rd object (patch manager)
@@ -19,41 +20,85 @@ void PageManager::init() {
 
 	mbox.loading_new_patch = false;
 
-	focus_page(PageChangeDirection::Jump);
+	_focus_page(PageChangeDirection::Jump);
 }
 
 void PageManager::next_page() {
-	blur_page();
-	cur_page++;
-	if (cur_page >= LAST_PAGE)
-		cur_page = 0;
-	focus_page(PageChangeDirection::Forward);
+	_blur_page();
+	switch (cur_page) {
+		case PageId::PatchSel:
+			cur_page = PageId::Knobs;
+			break;
+		case PageId::Knobs:
+			cur_page = PageId::Module;
+			break;
+		case PageId::Module:
+			cur_module_idx++;
+			if (cur_module_idx >= info.patch_player.get_num_modules()) {
+				cur_module_idx = 0;
+				cur_page = PageId::PatchSel;
+			} else {
+				page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
+			}
+			break;
+	};
+	_focus_page(PageChangeDirection::Forward);
 }
+
 void PageManager::prev_page() {
-	blur_page();
-	if (cur_page == 0)
-		cur_page = LAST_PAGE - 1;
-	else
-		cur_page--;
-	focus_page(PageChangeDirection::Back);
+	_blur_page();
+	switch (cur_page) {
+		case PageId::PatchSel:
+			cur_page = PageId::Module;
+			break;
+		case PageId::Knobs:
+			cur_page = PageId::PatchSel;
+			break;
+		case PageId::Module:
+			cur_module_idx--;
+			if (cur_module_idx >= info.patch_player.get_num_modules()) {
+				cur_module_idx = 0;
+				cur_page = PageId::Knobs;
+			} else {
+				page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
+			}
+			break;
+	};
+	_focus_page(PageChangeDirection::Back);
 }
 
-void PageManager::jump_to_page(unsigned p) {
-	blur_page();
-	cur_page = p;
-	focus_page(PageChangeDirection::Jump);
+void PageManager::jump_to_page(PageId page) {
+	_blur_page();
+	cur_page = page;
+	_focus_page(PageChangeDirection::Jump);
 }
 
-void PageManager::focus_page(PageChangeDirection dir) {
-	pages[cur_page]->focus(dir);
+PageBase *PageManager::_get_cur_page() {
+	switch (cur_page) {
+		case PageId::PatchSel:
+			return &page_patch;
+		case PageId::Knobs:
+			return &page_knobs;
+		case PageId::Module:
+			return &page_module;
+		default:
+			return nullptr;
+	};
 }
 
-void PageManager::blur_page() {
-	pages[cur_page]->blur();
+void PageManager::_focus_page(PageChangeDirection dir) {
+	if (auto p = _get_cur_page())
+		p->focus(dir);
+}
+
+void PageManager::_blur_page() {
+	if (auto p = _get_cur_page())
+		p->blur();
 }
 
 void PageManager::update_current_page() {
-	pages[cur_page]->update();
+	if (auto p = _get_cur_page())
+		p->update();
 }
 
 } // namespace MetaModule
