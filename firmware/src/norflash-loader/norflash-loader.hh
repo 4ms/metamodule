@@ -1,8 +1,8 @@
 #pragma once
 #include "medium/debug.hh"
+#include "printf.h"
 #include "qspi_flash_driver.hh"
 #include "uart_log.hh"
-#include <array>
 #include <memory>
 
 // Images:
@@ -17,22 +17,24 @@ struct NorFlashLoader {
 		if (!len_bytes)
 			return;
 
-		uint32_t num_blocks = ((len_bytes + 1) / QSPI_64KBLOCK_SIZE) + 1;
+		uint32_t num_blocks = (len_bytes / QSPI_64KBLOCK_SIZE) + 1;
 		if ((len_bytes % QSPI_64KBLOCK_SIZE) == 0)
 			num_blocks--;
 		erase_blocks(start_block_num, start_block_num + num_blocks);
 
 		uint32_t start_addr = start_block_num * QSPI_64KBLOCK_SIZE;
 		write(data, start_addr, len_bytes);
+
+		verify(data, start_addr, len_bytes);
 	}
 
 	void erase_blocks(int range_start, int range_end) {
 		for (int i = range_start; i < range_end; i++) {
 			Debug::red_LED1::low();
-			printf("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
+			printf_("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
 			bool ok = flash.Erase(QSpiFlash::BLOCK_64K, i * QSPI_64KBLOCK_SIZE, QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
-				printf("Error erasing block #%d\n\r", i);
+				printf_("Error erasing block #%d\n\r", i);
 				while (true) {
 					Debug::green_LED1::low();
 					HAL_Delay(250);
@@ -46,8 +48,8 @@ struct NorFlashLoader {
 
 	void write(uint8_t *data, uint32_t addr, uint32_t len) {
 		Debug::blue_LED1::low();
-		printf("Writing %d bytes to 0x%x\n\r", len, 0x00);
-		bool ok = flash.Write(data, 0x00, len);
+		printf("Writing %d bytes to 0x%x\n\r", len, addr);
+		bool ok = flash.Write(data, addr, len);
 		if (!ok) {
 			printf("Error writing\n\r");
 			while (true) {
@@ -61,9 +63,9 @@ struct NorFlashLoader {
 	}
 
 	void verify(uint8_t *data, uint32_t addr, uint32_t len) {
-		printf("Reading %d bytes to 0x%x\n\r", len, 0x00);
+		printf("Reading %d bytes to 0x%x\n\r", len, addr);
 		auto read_data = std::make_unique<uint8_t[]>(len);
-		bool ok = flash.Read(read_data.get(), 0, len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+		bool ok = flash.Read(read_data.get(), addr, len, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 		if (!ok) {
 			printf("Error reading\n\r");
 			while (true) {
