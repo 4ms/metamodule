@@ -24,28 +24,22 @@ struct ModuleViewPage : PageBase {
 	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
 		: PageBase{info}
 		, base(lv_obj_create(nullptr, nullptr))
+		, canvas(lv_canvas_create(base, nullptr))
 		, slug(module_slug) {
+
 		_instance = this;
 		_init_styles();
-		canvas = lv_canvas_create(base, nullptr);
+		init_bg(base);
 		lv_canvas_set_buffer(canvas, buffer, 240, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
-
 		lv_draw_img_dsc_init(&img_dsc);
 		img_dsc.opa = LV_OPA_COVER;
 
 		roller = lv_roller_create(base, nullptr);
+		lv_group_add_obj(group, roller);
+		lv_obj_set_event_cb(roller, roller_cb);
 	}
 
 	void load_module_page(std::string_view module_slug) {
-		// if (canvas)
-		// 	lv_obj_del(canvas);
-		// if (roller)
-		// 	lv_obj_del(roller);
-		// if (base)
-		// 	lv_obj_del(base); //also deletes canvas and roller
-		if (group)
-			lv_group_del(group);
-
 		set_slug(module_slug);
 		init();
 	}
@@ -62,7 +56,7 @@ struct ModuleViewPage : PageBase {
 		auto width_px = img->header.w;
 		auto height_px = img->header.h; // assert == 240?
 		lv_canvas_fill_bg(canvas, lv_color_make(0, 0, 0), LV_OPA_COVER);
-		// lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
+		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
 
 		//Create text list (roller options) and buttons over components
 
@@ -78,18 +72,18 @@ struct ModuleViewPage : PageBase {
 			opts += el.short_name;
 			opts += "\n";
 
-			// const lv_img_dsc_t *knob = nullptr;
-			// if (el.knob_style == KnobDef::Small)
-			// 	knob = &knob9mm_x;
-			// else if (el.knob_style == KnobDef::Medium)
-			// 	knob = &knob_x;
-			// else if (el.knob_style == KnobDef::Large)
-			// 	knob = &knob_large_x;
-			// else if (el.knob_style == KnobDef::Slider25mm)
-			// 	knob = &slider_x;
-			// else
-			// 	continue;
-			// lv_canvas_draw_img(canvas, x - knob->header.w / 2, y - knob->header.h / 2, knob, &img_dsc);
+			const lv_img_dsc_t *knob = nullptr;
+			if (el.knob_style == KnobDef::Small)
+				knob = &knob9mm_x;
+			else if (el.knob_style == KnobDef::Medium)
+				knob = &knob_x;
+			else if (el.knob_style == KnobDef::Large)
+				knob = &knob_large_x;
+			else if (el.knob_style == KnobDef::Slider25mm)
+				knob = &slider_x;
+			else
+				continue;
+			lv_canvas_draw_img(canvas, x - knob->header.w / 2, y - knob->header.h / 2, knob, &img_dsc);
 		}
 		// for (const auto el : info.InJacks) {
 		// 	int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
@@ -138,12 +132,6 @@ struct ModuleViewPage : PageBase {
 		lv_obj_set_style_local_text_font(
 			roller, LV_ROLLER_PART_SELECTED, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_700_12);
 		lv_roller_set_align(roller, LV_ALIGN_CENTER);
-
-		// Event and group for roller
-		init_bg(base);
-
-		lv_group_add_obj(group, roller);
-		lv_obj_set_event_cb(roller, roller_cb);
 
 		// Add text list to roller options
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
