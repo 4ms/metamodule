@@ -51,7 +51,7 @@ void PageManager::prev_page() {
 	switch (cur_page) {
 		case PageId::PatchSel:
 			cur_page = PageId::Module;
-			cur_module_idx = 1;
+			cur_module_idx = info.patch_player.get_num_modules() - 1;
 			page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
 			break;
 		case PageId::Knobs:
