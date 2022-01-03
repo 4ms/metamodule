@@ -51,7 +51,7 @@ public:
 		lv_indev_drv_init(&indev_drv);
 		indev_drv.type = LV_INDEV_TYPE_ENCODER;
 		indev_drv.read_cb = indev_cb;
-		indev = lv_indev_drv_register(&indev_drv);
+		indev = lv_indev_drv_register(&indev_drv); // NOLINT
 		lv_indev_enable(indev, true);
 
 #ifdef LV_USE_LOG
