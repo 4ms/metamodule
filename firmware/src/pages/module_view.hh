@@ -27,6 +27,12 @@ struct ModuleViewPage : PageBase {
 		, slug(module_slug) {
 		_instance = this;
 		_init_styles();
+		canvas = lv_canvas_create(base, nullptr);
+		lv_canvas_set_buffer(canvas, buffer, 240, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
+
+		lv_draw_img_dsc_init(&img_dsc);
+		img_dsc.opa = LV_OPA_COVER;
+
 		roller = lv_roller_create(base, nullptr);
 	}
 
@@ -52,14 +58,10 @@ struct ModuleViewPage : PageBase {
 	void init() override {
 
 		//Draw module image
-		auto width_px = 100;
-		// const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
-		// auto width_px = img->header.w;
-		// auto height_px = img->header.h; // assert == 240?
-		// canvas = lv_canvas_create(base, nullptr);
-		// lv_canvas_set_buffer(canvas, buffer, width_px, height_px, LV_IMG_CF_TRUE_COLOR_ALPHA);
-		// lv_draw_img_dsc_init(&img_dsc);
-		// img_dsc.opa = LV_OPA_COVER;
+		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
+		auto width_px = img->header.w;
+		auto height_px = img->header.h; // assert == 240?
+		lv_canvas_fill_bg(canvas, lv_color_make(0, 0, 0), LV_OPA_COVER);
 		// lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
 
 		//Create text list (roller options) and buttons over components
