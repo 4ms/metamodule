@@ -32,12 +32,12 @@ struct PatchSelectorPage : PageBase {
 					if (sel != _instance->patch_list.cur_patch_index())
 						_instance->start_changing_patch(sel);
 				} else
-					printf("Event not patch_selector_patchlist\n");
+					printf("Event not patch_selector_patchlist\n\r");
 
 			} break;
 
 			default:
-				printf("Event not LV_EVENT_VALUE_CHANGED\n");
+				printf("Event not LV_EVENT_VALUE_CHANGED\n\r");
 				break;
 		}
 	}
