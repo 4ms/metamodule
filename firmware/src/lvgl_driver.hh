@@ -1,7 +1,7 @@
 #include "conf/screen_buffer_conf.hh"
 #include "conf/screen_conf.hh"
-//#include "drivers/screen_ILI9341.hh"
 #include "drivers/screen_ST77XX.hh"
+//#include "drivers/screen_ILI9341.hh"
 //#include "drivers/screen_ltdc.hh"
 //#include "drivers/screen_ltdc_setup.hh"
 #include "lvgl/lvgl.h"
@@ -37,11 +37,9 @@ public:
 
 		lv_init();
 
-		// lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
-
 		lv_disp_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
 		lv_disp_drv_init(&disp_drv);
-		// disp_drv.draw_buf = &disp_buf;
+		// disp_drv.draw_buf = &disp_buf; //v8
 		disp_drv.buffer = &disp_buf;
 		disp_drv.flush_cb = flush_cb;
 		disp_drv.hor_res = ScreenWidth;
@@ -71,17 +69,6 @@ public:
 			UartLog::log("TRACE: ");
 
 		UartLog::log("File: %s #%d: %s: %s\n\r", file, line, fn_name, dsc);
-		// UartLog::log_uart.write("File: ");
-		// UartLog::log_uart.write(file);
-
-		// UartLog::log_uart.write("#");
-		// UartLog::log_uart.write(line);
-
-		// UartLog::log_uart.write(": ");
-		// UartLog::log_uart.write(fn_name);
-		// UartLog::log_uart.write(": ");
-		// UartLog::log_uart.write(dsc);
-		// UartLog::log_uart.write("\n\r");
 	}
 #endif
 };
@@ -106,6 +93,8 @@ public:
 
 		_spi_driver.init();
 		_spi_driver.register_partial_frame_cb(end_flush);
+
+		// LTDC mode:
 		// _screen_configure.setup_driver_chip(mdrivlib::ST77XX::ST7789InitLTDC<ScreenConf>::cmds);
 		// _ltdc_driver.init(buf.data());
 
@@ -149,6 +138,7 @@ public:
 		last_used_disp_drv = disp_drv;
 		auto pixbuf = reinterpret_cast<uint16_t *>(color_p);
 		_spi_driver.transfer_partial_frame(area->x1, area->y1, area->x2, area->y2, pixbuf);
+		// LTDC mode:
 		// _ltdc_driver.set_buffer((void *)color_p);
 		// lv_disp_flush_ready(disp_drv);
 	}
