@@ -20,27 +20,26 @@ LV_IMG_DECLARE(switch_down);
 namespace MetaModule
 {
 struct ModuleViewPage : PageBase {
-	ModuleViewPage(PatchInfo info)
-		: PageBase{info}
-		, slug{"EnOsc"} {
-		_instance = this;
-		_init_styles();
-	}
 
-	ModuleViewPage(PatchInfo info, std::string_view module_slug)
+	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
 		: PageBase{info}
+		, base(lv_obj_create(nullptr, nullptr))
 		, slug(module_slug) {
 		_instance = this;
 		_init_styles();
+		roller = lv_roller_create(base, nullptr);
 	}
 
 	void load_module_page(std::string_view module_slug) {
-		if (base)
-			lv_obj_del(base); //also deletes canvas and roller
+		// if (canvas)
+		// 	lv_obj_del(canvas);
+		// if (roller)
+		// 	lv_obj_del(roller);
+		// if (base)
+		// 	lv_obj_del(base); //also deletes canvas and roller
 		if (group)
 			lv_group_del(group);
 
-		button.clear();
 		set_slug(module_slug);
 		init();
 	}
@@ -49,85 +48,85 @@ struct ModuleViewPage : PageBase {
 		slug = module_slug;
 	}
 
+	std::string opts;
 	void init() override {
-		base = lv_obj_create(nullptr, nullptr);
 
 		//Draw module image
-		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
-		auto width_px = img->header.w;
-		auto height_px = img->header.h; // assert == 240?
-		canvas = lv_canvas_create(base, nullptr);
-		lv_canvas_set_buffer(canvas, buffer, width_px, height_px, LV_IMG_CF_TRUE_COLOR_ALPHA);
-		lv_draw_img_dsc_init(&img_dsc);
-		img_dsc.opa = LV_OPA_COVER;
-		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
+		auto width_px = 100;
+		// const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
+		// auto width_px = img->header.w;
+		// auto height_px = img->header.h; // assert == 240?
+		// canvas = lv_canvas_create(base, nullptr);
+		// lv_canvas_set_buffer(canvas, buffer, width_px, height_px, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		// lv_draw_img_dsc_init(&img_dsc);
+		// img_dsc.opa = LV_OPA_COVER;
+		// lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
 
 		//Create text list (roller options) and buttons over components
-		std::string opts;
 
+		opts.clear();
 		auto info = ModuleFactory::getModuleInfo(slug);
-		button.clear();
-		button.reserve(info.InJacks.size() + info.OutJacks.size() + info.Knobs.size() + info.Switches.size());
+		// button.clear();
+		//button.reserve(info.InJacks.size() + info.OutJacks.size() + info.Knobs.size() + info.Switches.size());
 
 		for (const auto el : info.Knobs) {
 			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
 			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-			_add_button(x, y);
+			// _add_button(x, y);
 			opts += el.short_name;
 			opts += "\n";
 
-			const lv_img_dsc_t *knob = nullptr;
-			if (el.knob_style == KnobDef::Small)
-				knob = &knob9mm_x;
-			else if (el.knob_style == KnobDef::Medium)
-				knob = &knob_x;
-			else if (el.knob_style == KnobDef::Large)
-				knob = &knob_large_x;
-			else if (el.knob_style == KnobDef::Slider25mm)
-				knob = &slider_x;
-			else
-				continue;
-			lv_canvas_draw_img(canvas, x - knob->header.w / 2, y - knob->header.h / 2, knob, &img_dsc);
+			// const lv_img_dsc_t *knob = nullptr;
+			// if (el.knob_style == KnobDef::Small)
+			// 	knob = &knob9mm_x;
+			// else if (el.knob_style == KnobDef::Medium)
+			// 	knob = &knob_x;
+			// else if (el.knob_style == KnobDef::Large)
+			// 	knob = &knob_large_x;
+			// else if (el.knob_style == KnobDef::Slider25mm)
+			// 	knob = &slider_x;
+			// else
+			// 	continue;
+			// lv_canvas_draw_img(canvas, x - knob->header.w / 2, y - knob->header.h / 2, knob, &img_dsc);
 		}
-		for (const auto el : info.InJacks) {
-			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-			_add_button(x, y);
-			opts += el.short_name;
-			opts += "\n";
-			lv_canvas_draw_img(canvas, x - jack_x.header.w / 2, y - jack_x.header.h / 2, &jack_x, &img_dsc);
-		}
-		for (const auto el : info.OutJacks) {
-			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-			_add_button(x, y);
-			opts += el.short_name;
-			opts += "\n";
-			lv_canvas_draw_img(canvas, x - jack_x.header.w / 2, y - jack_x.header.h / 2, &jack_x, &img_dsc);
-		}
-		for (const auto el : info.Switches) {
-			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-			_add_button(x, y);
-			opts += el.short_name;
-			opts += "\n";
-			const lv_img_dsc_t *sw = nullptr;
-			if (el.switch_type == SwitchDef::Toggle2pos || el.switch_type == SwitchDef::Toggle3pos)
-				sw = &switch_left;
-			else if (el.switch_type == SwitchDef::Encoder)
-				sw = &knob_unlined_x;
-			else if (el.switch_type == SwitchDef::MomentaryButton || el.switch_type == SwitchDef::LatchingButton)
-				sw = &button_x;
-			else
-				continue;
-			lv_canvas_draw_img(canvas, x - sw->header.w / 2, y - sw->header.h / 2, sw, &img_dsc);
-		}
+		// for (const auto el : info.InJacks) {
+		// 	int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
+		// 	int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+		// 	_add_button(x, y);
+		// 	opts += el.short_name;
+		// 	opts += "\n";
+		// 	lv_canvas_draw_img(canvas, x - jack_x.header.w / 2, y - jack_x.header.h / 2, &jack_x, &img_dsc);
+		// }
+		// for (const auto el : info.OutJacks) {
+		// 	int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
+		// 	int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+		// 	_add_button(x, y);
+		// 	opts += el.short_name;
+		// 	opts += "\n";
+		// 	lv_canvas_draw_img(canvas, x - jack_x.header.w / 2, y - jack_x.header.h / 2, &jack_x, &img_dsc);
+		// }
+		// for (const auto el : info.Switches) {
+		// 	int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
+		// 	int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+		// 	_add_button(x, y);
+		// 	opts += el.short_name;
+		// 	opts += "\n";
+		// 	const lv_img_dsc_t *sw = nullptr;
+		// 	if (el.switch_type == SwitchDef::Toggle2pos || el.switch_type == SwitchDef::Toggle3pos)
+		// 		sw = &switch_left;
+		// 	else if (el.switch_type == SwitchDef::Encoder)
+		// 		sw = &knob_unlined_x;
+		// 	else if (el.switch_type == SwitchDef::MomentaryButton || el.switch_type == SwitchDef::LatchingButton)
+		// 		sw = &button_x;
+		// 	else
+		// 		continue;
+		// 	lv_canvas_draw_img(canvas, x - sw->header.w / 2, y - sw->header.h / 2, sw, &img_dsc);
+		// }
 
 		// remove final \n
 		if (opts.length() > 0)
 			opts.pop_back();
 
-		roller = lv_roller_create(base, nullptr);
 		lv_obj_set_pos(roller, width_px, 0);
 		lv_obj_set_size(roller, 320 - width_px, 240);
 		lv_obj_add_style(roller, LV_ROLLER_PART_BG, &roller_style);
@@ -140,6 +139,7 @@ struct ModuleViewPage : PageBase {
 
 		// Event and group for roller
 		init_bg(base);
+
 		lv_group_add_obj(group, roller);
 		lv_obj_set_event_cb(roller, roller_cb);
 
@@ -150,7 +150,7 @@ struct ModuleViewPage : PageBase {
 		//Select first element
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 		cur_selected = 0;
-		lv_obj_add_style(button[cur_selected], LV_BTN_PART_MAIN, &style_highlight);
+		// lv_obj_add_style(button[cur_selected], LV_BTN_PART_MAIN, &style_highlight);
 	}
 
 	void update() override {
@@ -162,15 +162,14 @@ private:
 	static inline lv_style_t button_style;
 	static inline lv_style_t roller_style;
 	static inline lv_style_t roller_sel_style;
+	static inline lv_style_t style_highlight;
 
-	lv_style_t style_highlight;
-	int32_t cur_selected = -1;
+	int32_t cur_selected = 0;
 	std::vector<lv_obj_t *> button;
-	lv_obj_t *roller;
+	lv_obj_t *roller = nullptr;
 	lv_obj_t *base = nullptr;
-
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
-	lv_obj_t *canvas;
+	lv_obj_t *canvas = nullptr;
 	lv_draw_img_dsc_t img_dsc;
 
 	std::string_view slug;
@@ -180,21 +179,21 @@ private:
 			return;
 
 		if (event == LV_EVENT_KEY) {
-			auto &but = _instance->button;
+			// auto &but = _instance->button;
 
-			// Turn off old button
-			if (_instance->cur_selected >= 0) {
-				lv_obj_remove_style(but[_instance->cur_selected], LV_BTN_PART_MAIN, &_instance->style_highlight);
-				lv_event_send_refresh(but[_instance->cur_selected]);
-			}
+			// // Turn off old button
+			// if (_instance->cur_selected >= 0) {
+			// 	lv_obj_remove_style(but[_instance->cur_selected], LV_BTN_PART_MAIN, &_instance->style_highlight);
+			// 	lv_event_send_refresh(but[_instance->cur_selected]);
+			// }
 
-			// Get the new button
-			_instance->cur_selected = lv_roller_get_selected(obj);
-			printf("moduleview: cur_selected: %d\r\n", _instance->cur_selected);
+			// // Get the new button
+			// _instance->cur_selected = lv_roller_get_selected(obj);
+			// printf("moduleview: cur_selected: %d\r\n", _instance->cur_selected);
 
-			// Turn on new button
-			lv_obj_add_style(but[_instance->cur_selected], LV_BTN_PART_MAIN, &_instance->style_highlight);
-			lv_event_send_refresh(but[_instance->cur_selected]);
+			// // Turn on new button
+			// lv_obj_add_style(but[_instance->cur_selected], LV_BTN_PART_MAIN, &_instance->style_highlight);
+			// lv_event_send_refresh(but[_instance->cur_selected]);
 		}
 	}
 
