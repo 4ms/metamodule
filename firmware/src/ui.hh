@@ -55,25 +55,37 @@ public:
 	void update() {
 		if (MMDisplay::is_ready()) {
 			MMDisplay::clear_ready();
-			// v8:
-			// lv_timer_handler();
+			// lv_timer_handler(); //v8
+			page_update_tm.stop();
 			lv_task_handler();
+			if (flag_prev_page) {
+				page_manager.prev_page();
+				flag_prev_page = false;
+			}
+			if (flag_next_page) {
+				page_manager.next_page();
+				flag_next_page = false;
+			}
+			page_update_tm.start();
 		}
 		// output_debug_info();
 	}
 
 	void update_ui_task() {
-		param_queue.read_sync(&params, &metaparams);
-		handle_rotary();
-		page_manager.update_current_page();
+		bool read_ok = param_queue.read_sync(&params, &metaparams);
+		if (read_ok) {
+			handle_rotary();
+			page_manager.update_current_page();
+		}
 	}
 
 	void handle_rotary() {
 		auto rotary_pushed_turned = metaparams.rotary_pushed.use_motion();
+		//Queue the call to next/prev_page here because it can be slow, e.g. if the page has lots of images
 		if (rotary_pushed_turned < 0)
-			page_manager.prev_page();
+			flag_prev_page = true;
 		if (rotary_pushed_turned > 0)
-			page_manager.next_page();
+			flag_next_page = true;
 	}
 
 private:
@@ -88,6 +100,9 @@ private:
 	uint32_t readings = 0;
 	static constexpr float iir_coef = 1.f / 1000.f;
 	static constexpr float iir_coef_inv = 1.f - iir_coef;
+
+	bool flag_next_page = false;
+	bool flag_prev_page = false;
 
 	void output_debug_info() {
 		for (auto [i, pot] : enumerate(params.knobs)) {
