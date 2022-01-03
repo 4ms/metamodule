@@ -38,22 +38,21 @@ struct PageBase {
 		, patch_player{info.patch_player}
 		, params{info.params}
 		, metaparams{info.metaparams}
-		, mbox{info.mbox}
-	{}
+		, mbox{info.mbox} {
+	}
 
 	virtual ~PageBase() = default;
-	virtual void init() {}
+	virtual void init() {
+	}
 
-	void init_bg(lv_obj_t *screen_ptr)
-	{
+	void init_bg(lv_obj_t *screen_ptr) {
 		group = lv_group_create();
 		screen = screen_ptr;
 		lv_obj_set_size(screen, LV_HOR_RES_MAX, LV_VER_RES_MAX);
 		lv_obj_set_style_local_bg_color(screen, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x000000));
 	}
 
-	virtual void focus(PageChangeDirection dir)
-	{
+	virtual void focus(PageChangeDirection dir) {
 		if (group) {
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
 			lv_group_set_editing(group, true);
@@ -67,8 +66,10 @@ struct PageBase {
 		lv_scr_load(screen);
 	}
 
-	virtual void blur() {}
+	virtual void blur() {
+	}
 
-	virtual void update() {}
+	virtual void update() {
+	}
 };
 } // namespace MetaModule
