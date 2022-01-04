@@ -40,7 +40,7 @@ PRIVATE &param_prepareonly &param_cpu &param_dualport
 RESet
 SYStem.RESet
 SYStem.CPU STM32MP157A-CA7
-SYStem.JtagClock 10MHz
+SYStem.JtagClock 77.75MHz
 CORE.ASSIGN 1.
 Trace.DISable
 SYStem.Up
@@ -68,7 +68,7 @@ Data.Set A:&QSPI_BASE+0x0C  %Long 0xFF          ; QUADSPI_FCR, QUADSPI flag clea
 //EXIT QUAD INPUT/OUTPUT MODE(QPI), to make the single spi mode
 //0xF5 is for MACRONIX & MICRON SPI flash memories
 //0x38 is for Spansion
-GOSUB WRITEBYTE_QPI   0x38
+; GOSUB WRITEBYTE_QPI   0x38
 
 GOSUB READ_ID_TEST
 
@@ -96,7 +96,7 @@ IF &progflash
 (
   FLASH.ReProgram.ALL
 ;  Data.LOAD.auto *
-  Data.LOAD.Binary * 0x70080000
+  Data.LOAD.Binary * 0x80000
   FLASH.ReProgram.off
 
   ; Reset device
@@ -162,7 +162,8 @@ FlashDeclaration:
 
   FLASH.RES
 
-  &FlashDriver="snor_stm32mp157.bin"
+;  &FlashDriver="snor_stm32mp157.bin"
+  &FlashDriver="spi64_stmqspi.bin"
   &FlashSize=0x1000000       ;16Mbytes
   &FlashBaseAddr=0x70000000  ;SPI AHB base address
   
