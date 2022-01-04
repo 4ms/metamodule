@@ -56,17 +56,19 @@ SOURCES += $(TARGETDEVICEDIR_CA7)/boot/irq_ctrl.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
 SOURCES += $(DRIVERLIB)/drivers/pin.cc
-SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
 SOURCES += $(LIBDIR)/printf/printf.c
 SOURCES += src/uart_log.cc
 SOURCES += $(main_source)
 
-ifneq "$(target_board)" "norflash-loader"
+ifeq "$(target_board)" "norflash-loader"
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
+SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
+
+else
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
