@@ -61,20 +61,21 @@ GOSUB PINMUX_CONFIG
 
 ; ------------------------------------------------------------------------------
 ; Flash Controller Init
-Data.Set A:&QSPI_BASE+0x00  %Long 0x04000311    ; QUADSPI_CR, QUADSPI control register, enable clk and prescaler (/4)
-Data.Set A:&QSPI_BASE+0x04  %Long 0x00170100    ; QUADSPI_DCR, 0x00190100=flash size 2^26 (64MBytes), 0x00170100==16Mbytes
+Data.Set A:&QSPI_BASE+0x00  %Long 0x04000311    ; QUADSPI_CR, QUADSPI control register, enable clk and prescaler (/4), FIFO lvl = 3, Abort now and enable
+Data.Set A:&QSPI_BASE+0x04  %Long 0x00170000    ; QUADSPI_DCR, 0x00190100=flash size 2^26 (64MBytes) CS min time = 2 cycles, 0x00170000==16Mbytes, CS min time = 1 cycle
 Data.Set A:&QSPI_BASE+0x0C  %Long 0xFF          ; QUADSPI_FCR, QUADSPI flag clear register
 
 //EXIT QUAD INPUT/OUTPUT MODE(QPI), to make the single spi mode
 //0xF5 is for MACRONIX & MICRON SPI flash memories
 //0x38 is for Spansion
-; GOSUB WRITEBYTE_QPI   0x38
+GOSUB WRITEBYTE_QPI   0x38
 
 GOSUB READ_ID_TEST
 
 //switch QSPI to the memory mapped mode
 Data.Set  A:&QSPI_BASE      %Long  (Data.Long(A:&QSPI_BASE)&~0x1)  ;disable
-Data.Set  A:&QSPI_BASE+0x14 %Long  0x0D003513   ; FMODE, READ cmd(0x13), ADSize 32b and so on...
+;Data.Set  A:&QSPI_BASE+0x14 %Long  0x0D003513   ; FMODE = mem mapped, Data/addr/instr on single line, no dummy cycles, no alt bits, READ cmd(0x13), ADSize 32b and so on...
+Data.Set  A:&QSPI_BASE+0x14 %Long  0x0D0025EB   ; FMODE = mem mapped, Data/addr/instr on single line, no dummy cycles, no alt bits, FASTREAD cmd(0x0B), ADSize 24b and so on...
 Data.Set  A:&QSPI_BASE      %Long  (Data.Long(A:&QSPI_BASE)|0x1)  ;enable
 
 ; ------------------------------------------------------------------------------
@@ -114,20 +115,20 @@ READ_ID_TEST:
 
 Data.Set A:&QSPI_FCR %LE %Long 0x1F  ;clear status
 
-// 1 instruction , 4 read data
+// 1 instruction , 4 bytes to read
 Data.Set A:&QSPI_DLR  %Long 0x3  ; 4byte data read
 
-&ccr=0x19F             ; imode with insturction  1byte instruction write (1: 1 instruction line)
-&ccr=&ccr|(0x1<<24.)   ; dmode single
-&ccr=&ccr|(0x1<<26.)   ; indirect read mode
+&ccr=0x19F             ; imode = 1 (instr on single line) + instruction 0x9F = READ_ID
+&ccr=&ccr|(0x1<<24.)   ; dmode = 1 (data on single line)
+&ccr=&ccr|(0x1<<26.)   ; FMODE = 1 (indirect read mode)
 Data.Set A:&QSPI_CCR %LE %Long &ccr
 
 &read_data=Data.Long(A:&QSPI_DR)  ;read little endian
 
-PRINT "1st 0x" &read_data&0xFF        " (Manufacture)"
-PRINT "2nd 0x" (&read_data>>8.)&0xFF  " (Device ID)"
-PRINT "3rd 0x" (&read_data>>16.)&0xFF 
-PRINT "4th 0x" (&read_data>>24.)&0xFF 
+PRINT "1st 0x" &read_data&0xFF        " (Manufacture, Cypress = 0x01)"
+PRINT "2nd 0x" (&read_data>>8.)&0xFF  " (Device ID, S25FL128/256L = 0x60)"
+PRINT "3rd 0x" (&read_data>>16.)&0xFF " (Density 128MB = 0x18)" 
+PRINT "4th 0x" (&read_data>>24.)&0xFF " (Not used = 0xFF)"
 
 RETURN
 )
@@ -141,7 +142,10 @@ SCREEN.OFF
 
 Data.Set A:(&QSPI_BASE+0xC) %LE %Long 0x1F  ;clear status
 
-&ccr=(0x3<<8)|&wdata       ; imode with insturction  1byte instruction write (3: 4 instruction lines)
+Data.Set A:(&QSPI_BASE+0x14) %LE %Long 0x106; //imode = 1 line, cmd = 0x06: Write Enable
+
+;&ccr=(0x3<<8)|&wdata       ; imode with insturction  1byte instruction write (3: 4 instruction lines)
+&ccr=(0x1<<8)|&wdata       ; imode with insturction  1byte instruction write (1: 1 instruction lines)
 Data.Set A:(&QSPI_BASE+0x14) %LE %Long &ccr
 
 SCREEN.ON
@@ -163,6 +167,7 @@ FlashDeclaration:
   &FlashBaseAddr=0x70000000  ;SPI AHB base address
   
    FLASH.Create  2. &FlashBaseAddr++(&FlashSize-0x1)    0x10000   TARGET2   Byte
+;   FLASH.Create  2. &FlashBaseAddr++(&FlashSize-0x1)    0x10000   SPI64   Byte   ;S25FL128 is listed as "SPI64" in flashlist.pdf, bbut t32 doesn't recognize it
 
   IF "&DualPort"=="0"
     FLASH.TARGET2 0x30000000 0x30002000 0x4000 ~~/demo/arm/flash/byte/&FlashDriver
