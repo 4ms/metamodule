@@ -1,5 +1,6 @@
 #pragma once
 #include "pages/base.hh"
+#include "pages/lvgl_string_helper.hh"
 
 namespace MetaModule
 {
@@ -36,103 +37,154 @@ struct PatchSelectorPage : PageBase {
 		//Event callback
 		lv_obj_set_event_cb(patch_selector_patchlist, patch_selector_event_cb);
 
-		// Pop-up window:
+		setup_popup();
+	}
 
+	void setup_popup() {
 		// Container
-		ui->Dropdown1b_cont = lv_cont_create(patch_selector, nullptr);
+		//ui->Dropdown1b_cont = lv_cont_create(patch_selector, nullptr);
+		ui->Dropdown1b_cont = lv_obj_create(nullptr, nullptr);
 		lv_obj_add_style(ui->Dropdown1b_cont, LV_CONT_PART_MAIN, &style_popup_cont);
-		lv_obj_set_pos(ui->Dropdown1b_cont, 20, 20);
-		lv_obj_set_size(ui->Dropdown1b_cont, 280, 200);
-		lv_obj_set_click(ui->Dropdown1b_cont, true);
-		lv_cont_set_layout(ui->Dropdown1b_cont, LV_LAYOUT_OFF);
-		lv_cont_set_fit(ui->Dropdown1b_cont, LV_FIT_NONE);
+		// lv_obj_set_pos(ui->Dropdown1b_cont, 20, 20);
+		// lv_obj_set_size(ui->Dropdown1b_cont, 280, 200);
+		// lv_cont_set_layout(ui->Dropdown1b_cont, LV_LAYOUT_OFF);
+		// lv_cont_set_fit(ui->Dropdown1b_cont, LV_FIT_NONE);
 
 		ui->Dropdown1b_patch_name = lv_label_create(ui->Dropdown1b_cont, nullptr);
 		lv_obj_add_style(ui->Dropdown1b_patch_name, LV_LABEL_PART_MAIN, &style_popup_patchname);
-		lv_obj_set_pos(ui->Dropdown1b_patch_name, 0, 0);
-		lv_obj_align(ui->Dropdown1b_patch_name, ui->Dropdown1b_cont, LV_ALIGN_IN_TOP_MID, 0, 0);
-		lv_obj_set_size(ui->Dropdown1b_patch_name, 280, 0);
 
 		ui->Dropdown1b_patch_description = lv_label_create(ui->Dropdown1b_cont, nullptr);
 		lv_label_set_long_mode(ui->Dropdown1b_patch_description, LV_LABEL_LONG_BREAK);
 		lv_label_set_align(ui->Dropdown1b_patch_description, LV_LABEL_ALIGN_LEFT);
 		lv_obj_add_style(ui->Dropdown1b_patch_description, LV_LABEL_PART_MAIN, &style_popup_desc);
-		lv_obj_set_pos(ui->Dropdown1b_patch_description, 0, 25);
-		lv_obj_set_size(ui->Dropdown1b_patch_description, 280, 0);
-
-		//Back image button
-		ui->Dropdown1b_imgbtn_1 = lv_imgbtn_create(ui->Dropdown1b_cont, nullptr);
-		lv_obj_add_style(ui->Dropdown1b_imgbtn_1, LV_IMGBTN_PART_MAIN, &style_popup_backbut);
-		lv_obj_set_size(ui->Dropdown1b_imgbtn_1, 57, 100);
-		lv_obj_align(ui->Dropdown1b_imgbtn_1, ui->Dropdown1b_cont, LV_ALIGN_IN_BOTTOM_LEFT, 10, -20);
-		lv_imgbtn_set_src(ui->Dropdown1b_imgbtn_1, LV_BTN_STATE_RELEASED, &back_but_orange_neg_57x100);
-		lv_imgbtn_set_checkable(ui->Dropdown1b_imgbtn_1, false);
 
 		//Play button
 		ui->Dropdown1b_button_play = lv_btn_create(ui->Dropdown1b_cont, nullptr);
 		lv_obj_add_style(ui->Dropdown1b_button_play, LV_BTN_PART_MAIN, &style_popup_buttons);
-		lv_obj_align(ui->Dropdown1b_button_play, ui->Dropdown1b_imgbtn_1, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
-		//lv_obj_set_pos(ui->Dropdown1b_button_play, 38, 94);
-		//lv_obj_set_size(ui->Dropdown1b_button_play, 241, 104);
 		ui->Dropdown1b_button_play_label = lv_label_create(ui->Dropdown1b_button_play, nullptr);
 		lv_label_set_text(ui->Dropdown1b_button_play_label, "Play");
 
 		// Explore button
 		ui->Dropdown1b_button_explore = lv_btn_create(ui->Dropdown1b_cont, ui->Dropdown1b_button_play);
 		lv_obj_add_style(ui->Dropdown1b_button_explore, LV_BTN_PART_MAIN, &style_popup_buttons);
-		lv_obj_align(ui->Dropdown1b_button_explore, ui->Dropdown1b_button_play, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
-
 		ui->Dropdown1b_button_explore_label = lv_label_create(ui->Dropdown1b_button_explore, nullptr);
 		lv_label_set_text(ui->Dropdown1b_button_explore_label, "Explore...");
 
-		// Popup group
+		//Back image button
+		ui->Dropdown1b_imgbtn_1 = lv_imgbtn_create(ui->Dropdown1b_cont, nullptr);
+		lv_obj_add_style(ui->Dropdown1b_imgbtn_1, LV_IMGBTN_PART_MAIN, &style_popup_backbut);
+		lv_imgbtn_set_src(ui->Dropdown1b_imgbtn_1, LV_BTN_STATE_RELEASED, &back_but_orange_neg_57x100);
+		lv_imgbtn_set_checkable(ui->Dropdown1b_imgbtn_1, false);
+
+		// Layout
+		lv_obj_set_pos(ui->Dropdown1b_patch_name, 0, 0);
+		lv_obj_align(ui->Dropdown1b_patch_name, ui->Dropdown1b_cont, LV_ALIGN_IN_TOP_MID, 0, 4);
+		lv_obj_set_size(ui->Dropdown1b_patch_name, 320, 10);
+
+		lv_obj_align(ui->Dropdown1b_patch_description, ui->Dropdown1b_patch_name, LV_ALIGN_IN_TOP_MID, 0, 4);
+		// lv_obj_set_pos(ui->Dropdown1b_patch_description, 0, 25);
+		lv_obj_set_size(ui->Dropdown1b_patch_description, 320, 10);
+
+		lv_obj_set_size(ui->Dropdown1b_imgbtn_1, 57, 100);
+		lv_obj_align(ui->Dropdown1b_imgbtn_1, ui->Dropdown1b_cont, LV_ALIGN_IN_BOTTOM_LEFT, 10, -20);
+		lv_obj_align(ui->Dropdown1b_button_play, ui->Dropdown1b_imgbtn_1, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
+		lv_obj_align(ui->Dropdown1b_button_explore, ui->Dropdown1b_button_play, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+
+		// group
 		popup_group = lv_group_create();
-		lv_obj_set_click(ui->Dropdown1b_imgbtn_1, true);
-		lv_obj_set_click(ui->Dropdown1b_button_play, true);
-		lv_obj_set_click(ui->Dropdown1b_button_explore, true);
-		//lv_group_add_obj(popup_group, ui->Dropdown1b_cont);
-		lv_group_add_obj(popup_group, ui->Dropdown1b_imgbtn_1);
+		lv_group_set_wrap(popup_group, true);
 		lv_group_add_obj(popup_group, ui->Dropdown1b_button_play);
 		lv_group_add_obj(popup_group, ui->Dropdown1b_button_explore);
+		lv_group_add_obj(popup_group, ui->Dropdown1b_imgbtn_1);
+		// lv_obj_set_click(ui->Dropdown1b_button_play, true);
+		// lv_obj_set_click(ui->Dropdown1b_button_explore, true);
+		// lv_obj_set_click(ui->Dropdown1b_imgbtn_1, true);
 		lv_obj_set_event_cb(ui->Dropdown1b_imgbtn_1, patch_selector_event_cb);
 		lv_obj_set_event_cb(ui->Dropdown1b_button_play, patch_selector_event_cb);
 		lv_obj_set_event_cb(ui->Dropdown1b_button_explore, patch_selector_event_cb);
 
-		lv_obj_set_hidden(ui->Dropdown1b_cont, true);
+		hide_popup();
+		printf("ui->Dropdown1b_cont = %p\n\r", ui->Dropdown1b_cont);
+		printf("ui->Dropdown1b_imgbtn_1 = %p\n\r", ui->Dropdown1b_imgbtn_1);
+		printf("ui->Dropdown1b_button_play = %p\n\r", ui->Dropdown1b_button_play);
+		printf("ui->Dropdown1b_button_explore = %p\n\r", ui->Dropdown1b_button_explore);
+	}
+
+	void show_popup() {
+		lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
+		lv_group_set_editing(popup_group, false);
+		lv_scr_load(ui->Dropdown1b_cont);
+		// lv_obj_set_hidden(ui->Dropdown1b_cont, false);
+		// lv_group_remove_obj(patch_selector_patchlist);
+		// lv_group_add_obj(group, ui->Dropdown1b_button_play);
+		// lv_group_add_obj(group, ui->Dropdown1b_button_explore);
+		// lv_group_add_obj(group, ui->Dropdown1b_imgbtn_1);
+	}
+
+	void hide_popup() {
+		focus(PageChangeDirection::Jump);
+		// lv_obj_set_hidden(ui->Dropdown1b_cont, true);
+		// lv_group_add_obj(group, patch_selector_patchlist);
+		// lv_group_remove_obj(ui->Dropdown1b_button_play);
+		// lv_group_remove_obj(ui->Dropdown1b_button_explore);
+		// lv_group_remove_obj(ui->Dropdown1b_imgbtn_1);
 	}
 
 	void update() override {
 		handle_changing_patch();
 	}
 
-	void focus(PageChangeDirection dir) override {
-		lv_obj_set_hidden(ui->Dropdown1b_cont, true);
-		PageBase::focus(dir);
-	}
+	// void focus(PageChangeDirection dir) override {
+	//	lv_obj_set_hidden(ui->Dropdown1b_cont, true);
+	// PageBase::focus(dir);
+	// }
 
 	static void patch_selector_event_cb(lv_obj_t *obj, lv_event_t event) {
 		switch (event) {
 			case LV_EVENT_VALUE_CHANGED: {
 				if (obj == _instance->patch_selector_patchlist) {
-					uint16_t sel = lv_dropdown_get_selected(obj);
-					lv_label_set_text(ui->Dropdown1b_patch_name, _instance->patch_list.get_patch_name(sel));
+					selected_patch = lv_dropdown_get_selected(obj);
+					lv_label_set_text(ui->Dropdown1b_patch_name, _instance->patch_list.get_patch_name(selected_patch));
 					lv_label_set_text(ui->Dropdown1b_patch_description, "TODO: Patch descriptions...");
 
-					lv_group_set_editing(_instance->group, false);
-					lv_obj_set_hidden(ui->Dropdown1b_cont, false);
-					lv_indev_set_group(lv_indev_get_next(nullptr), _instance->popup_group);
-					lv_group_set_editing(_instance->popup_group, true);
-					printf("Event is patch_selector_patchlist\n");
+					_instance->show_popup();
+					// lv_group_set_editing(_instance->group, false);
+					// lv_obj_set_hidden(ui->Dropdown1b_cont, false);
+					// lv_indev_set_group(lv_indev_get_next(nullptr), _instance->popup_group);
+					// lv_group_set_editing(_instance->popup_group, true);
+					printf("Event obj is patch_selector_patchlist\n");
 
-					// if (sel != _instance->patch_list.cur_patch_index())
-					// 	_instance->start_changing_patch(sel);
+				} else if (obj == ui->Dropdown1b_button_play) {
+					printf("Event obj is Play\n\r");
+				} else if (obj == ui->Dropdown1b_button_explore) {
+					printf("Event obj is Explore\n\r");
+				} else if (obj == ui->Dropdown1b_imgbtn_1) {
+					printf("Event obj is Back\n\r");
 				} else
-					printf("Event not patch_selector_patchlist\n\r");
+					printf("Event obj not patch_selector_patchlist\n\r");
 
 			} break;
 
+			case LV_EVENT_CLICKED: {
+				if (obj == ui->Dropdown1b_button_explore) {
+					printf("Explore\n\r");
+				} else if (obj == ui->Dropdown1b_button_play) {
+					printf("Playing patch# %d\n\r", selected_patch);
+					_instance->start_changing_patch(selected_patch);
+				} else if (obj == ui->Dropdown1b_imgbtn_1) {
+					printf("Back\n\r");
+					_instance->hide_popup();
+				}
+			} break;
+
 			default:
-				printf("Event not LV_EVENT_VALUE_CHANGED\n\r");
+				printf("Event = %s, obj.coords = {%d, %d}, {%d, %d}. obj=%p\n\r",
+					   LVGLStrings::Events[event].data(),
+					   obj->coords.x1,
+					   obj->coords.y1,
+					   obj->coords.x2,
+					   obj->coords.y2,
+					   obj);
 				break;
 		}
 	}
@@ -165,6 +217,8 @@ struct PatchSelectorPage : PageBase {
 
 private:
 	static inline PatchSelectorPage *_instance;
+	static inline uint32_t selected_patch = 0;
+
 	lv_group_t *popup_group;
 
 	lv_obj_t *patch_selector;
