@@ -19,6 +19,21 @@ void __throw_logic_error(char const *) {
 	while (true)
 		;
 }
+
+//Needed to compile at -O0 when using std::string
+template<typename T>
+struct allocator {
+	allocator();
+	allocator(const std::allocator<char> &);
+	~allocator();
+};
+template<>
+allocator<char>::allocator() = default;
+template<>
+allocator<char>::~allocator() = default;
+template<>
+allocator<char>::allocator(const std::allocator<char> &) = default;
+
 } // namespace std
 
 extern "C" void __cxa_pure_virtual() {
