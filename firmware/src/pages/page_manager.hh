@@ -21,22 +21,6 @@ class PageManager {
 	PatchSelectorPage page_patch{info};
 	KnobView3 page_knobs{info};
 
-	// static constexpr size_t LAST_PAGE = 3;
-	// std::array<std::unique_ptr<PageBase>, LAST_PAGE> pages = {
-	// 	std::make_unique<GroupArcSketchesPage2>(info), std::make_unique<KnobView3>(info),
-	// std::make_unique<GroupArcSketchesPage1>(info),
-	// std::make_unique<GroupArcSketchesPage3>(info),
-	// std::make_unique<GroupArcSketchesPage4>(info),
-	// std::make_unique<Dropdown1bPage>(info),
-	// std::make_unique<SMRTestPage>(info),
-	// std::make_unique<SMRTestLargePage>(info),
-	// std::make_unique<PatchOverviewPage>(info),
-	// std::make_unique<ArcTestJQPage>(info),
-	// std::make_unique<SketchesTestPage>(info),
-	// std::make_unique<AudioCVInsPage>(info),
-	// std::make_unique<KnobView2>(info),
-	// };
-
 	PatchList &patch_list;
 	PatchPlayer &player;
 	UiAudioMailbox &mbox;
