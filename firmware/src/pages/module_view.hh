@@ -53,7 +53,6 @@ struct ModuleViewPage : PageBase {
 		slug = module_slug;
 	}
 
-	std::string opts;
 	void init() override {
 
 		//Draw module image
@@ -159,6 +158,7 @@ private:
 	static inline lv_style_t roller_sel_style;
 	static inline lv_style_t style_highlight;
 
+	std::string opts;
 	int32_t cur_selected = 0;
 	std::vector<lv_obj_t *> button;
 	lv_obj_t *roller = nullptr;

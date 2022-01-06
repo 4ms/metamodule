@@ -280,18 +280,6 @@ typedef struct {
 	lv_obj_t *group_arc_sketches4_arc_10;
 	lv_obj_t *group_arc_sketches4_arc_9;
 	lv_obj_t *group_arc_sketches4_arc_8;
-	lv_obj_t *Dropdown1b;
-	lv_obj_t *Dropdown1b_cont;
-	lv_obj_t *Dropdown1b_button_play;
-	lv_obj_t *Dropdown1b_button_play_label;
-	lv_obj_t *Dropdown1b_button_explore;
-	lv_obj_t *Dropdown1b_button_explore_label;
-	lv_obj_t *Dropdown1b_patch_description;
-	lv_obj_t *Dropdown1b_patch_nam_bg;
-	lv_obj_t *Dropdown1b_line_header;
-	lv_obj_t *Dropdown1b_patch_name;
-	lv_obj_t *Dropdown1b_imgbtn_1;
-	lv_obj_t *Dropdown1b_imgbtn_1_label;
 } lv_ui;
 
 void setup_ui(lv_ui *ui);
@@ -306,7 +294,6 @@ void setup_scr_group_arc_sketches(lv_ui *ui);
 void setup_scr_group_arc_sketches2(lv_ui *ui);
 void setup_scr_group_arc_sketches3(lv_ui *ui);
 void setup_scr_group_arc_sketches4(lv_ui *ui);
-void setup_scr_Dropdown1b(lv_ui *ui);
 LV_IMG_DECLARE(back_but_orange_neg_57x100);
 
 #ifdef __cplusplus
