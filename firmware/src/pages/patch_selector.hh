@@ -78,6 +78,7 @@ struct PatchSelectorPage : PageBase {
 		//Back image button
 		popup_backbut = lv_imgbtn_create(popup_cont, nullptr);
 		lv_obj_add_style(popup_backbut, LV_IMGBTN_PART_MAIN, &style_popup_backbut);
+		lv_obj_set_size(popup_backbut, 57, 100);
 		lv_imgbtn_set_src(popup_backbut, LV_BTN_STATE_RELEASED, &back_but_orange_neg_57x100);
 		lv_imgbtn_set_checkable(popup_backbut, false);
 
@@ -93,15 +94,14 @@ struct PatchSelectorPage : PageBase {
 		// lv_obj_set_pos(popup_desc, 0, 25);
 		lv_obj_set_size(popup_desc, 320, 10);
 
-		// Back Button: bottom left corner
-		// Play button: to the right of Back, top-aligned
-		// Explore button: below Play
-		lv_obj_set_size(popup_backbut, 57, 100);
-		lv_obj_align(popup_backbut, popup_cont, LV_ALIGN_IN_BOTTOM_LEFT, 10, -20);
-		lv_obj_align(popup_playbut, popup_backbut, LV_ALIGN_OUT_RIGHT_TOP, 0, 0);
-		lv_obj_align(popup_explorebut, popup_playbut, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+		// Explore button: bottom center, up 10px
+		lv_obj_align(popup_explorebut, popup_cont, LV_ALIGN_IN_BOTTOM_MID, 0, -10);
+		// Play button, above Explore, up 10px
+		lv_obj_align(popup_playbut, popup_explorebut, LV_ALIGN_OUT_TOP_MID, 0, -10);
+		// Back button: to the left of Play, top-aligned, 10px spacing
+		lv_obj_align(popup_backbut, popup_playbut, LV_ALIGN_OUT_LEFT_TOP, -10, 0);
 
-		// group
+		// Popup Group
 		popup_group = lv_group_create();
 		lv_group_set_wrap(popup_group, true);
 		lv_group_add_obj(popup_group, popup_playbut);
@@ -118,6 +118,7 @@ struct PatchSelectorPage : PageBase {
 		LVGLMemory::print_mem_usage("PatchSel::show_popup 0");
 		lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
 		lv_group_set_editing(popup_group, false);
+		lv_group_focus_obj(popup_backbut);
 		//Popup is a container:
 		lv_obj_set_hidden(popup_cont, false);
 		// Popup is a screen:
@@ -283,33 +284,28 @@ private:
 		lv_style_set_border_width(&style_popup_cont, LV_STATE_DEFAULT, 0);
 		lv_style_set_border_opa(&style_popup_cont, LV_STATE_DEFAULT, 0);
 		lv_style_set_pad_inner(&style_popup_cont, LV_STATE_DEFAULT, 10);
-		lv_style_set_pad_right(&style_popup_cont, LV_STATE_DEFAULT, 4);
-		lv_style_set_pad_left(&style_popup_cont, LV_STATE_DEFAULT, 4);
-		lv_style_set_pad_top(&style_popup_cont, LV_STATE_DEFAULT, 4);
-		lv_style_set_pad_bottom(&style_popup_cont, LV_STATE_DEFAULT, 4);
+		lv_style_set_pad_all(&style_popup_cont, LV_STATE_DEFAULT, 4);
 
 		lv_style_init(&style_popup_buttons);
 		lv_style_set_radius(&style_popup_buttons, LV_STATE_DEFAULT, 8);
 		lv_style_set_bg_color(&style_popup_buttons, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_bg_color(&style_popup_buttons, LV_STATE_FOCUSED, lv_color_make(0xd6, 0xdd, 0x53));
+		lv_style_set_bg_color(&style_popup_buttons, LV_STATE_FOCUSED, lv_color_make(0xff, 0xc3, 0x70));
 		lv_style_set_bg_color(&style_popup_buttons, LV_STATE_PRESSED, lv_color_make(0xf6, 0xdd, 0x53));
 		lv_style_set_bg_opa(&style_popup_buttons, LV_STATE_DEFAULT, 255);
 		lv_style_set_border_color(&style_popup_buttons, LV_STATE_DEFAULT, lv_color_make(0x32, 0x32, 0x32));
 		lv_style_set_border_width(&style_popup_buttons, LV_STATE_DEFAULT, 2);
 		lv_style_set_text_color(&style_popup_buttons, LV_STATE_DEFAULT, lv_color_make(0x32, 0x32, 0x32));
-		lv_style_set_pad_inner(&style_popup_buttons, LV_STATE_DEFAULT, 8);
-		lv_style_set_pad_hor(&style_popup_buttons, LV_STATE_DEFAULT, 4);
-		lv_style_set_pad_ver(&style_popup_buttons, LV_STATE_DEFAULT, 4);
-		lv_style_set_margin_hor(&style_popup_buttons, LV_STATE_DEFAULT, 8);
-		lv_style_set_margin_ver(&style_popup_buttons, LV_STATE_DEFAULT, 8);
 
 		lv_style_init(&style_popup_backbut);
-		lv_style_set_pad_left(&style_popup_backbut, LV_STATE_DEFAULT, 5);
-		lv_style_set_pad_right(&style_popup_backbut, LV_STATE_DEFAULT, 5);
-		lv_style_set_pad_top(&style_popup_backbut, LV_STATE_DEFAULT, 5);
-		lv_style_set_pad_bottom(&style_popup_backbut, LV_STATE_DEFAULT, 5);
 		lv_style_set_image_opa(&style_popup_backbut, LV_STATE_DEFAULT, 255);
-		lv_style_set_margin_hor(&style_popup_backbut, LV_STATE_DEFAULT, 8);
+		lv_style_set_radius(&style_popup_backbut, LV_STATE_FOCUSED, 6);
+		lv_style_set_outline_color(&style_popup_backbut, LV_STATE_FOCUSED, lv_theme_get_color_secondary());
+		lv_style_set_outline_width(&style_popup_backbut, LV_STATE_FOCUSED, LV_DPX(2));
+		lv_style_set_outline_opa(&style_popup_backbut, LV_STATE_DEFAULT, LV_OPA_0);
+		lv_style_set_outline_opa(&style_popup_backbut, LV_STATE_FOCUSED, LV_OPA_50);
+		lv_style_set_image_recolor(&style_popup_backbut, LV_STATE_FOCUSED, lv_color_hex(0x888888));
+		//lv_style_set_outline_pad(&style_popup_backbut, LV_STATE_FOCUSED, 4);
+		//lv_style_set_outline_blend_mode(&style_popup_backbut, LV_STATE_FOCUSED, LV_BLEND_MODE_NORMAL);
 
 		lv_style_init(&style_popup_desc);
 		lv_style_set_radius(&style_popup_desc, LV_STATE_DEFAULT, 0);
