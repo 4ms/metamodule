@@ -19,7 +19,7 @@ CXXFLAGS = 	-Wall \
 		 	-std=gnu++20 \
 			-I. \
 			-I.. \
-			-I../../firmware/lib/etl/include \
+			-I../../shared/etl/include \
 			-I$(TEST_DIR) \
 			-Wno-unused-const-variable \
 			-DTESTPROJECT \

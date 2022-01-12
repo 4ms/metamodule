@@ -26,8 +26,7 @@ CXXFLAGS = 	-Wall \
 			-Isrc/mini \
 			-I../src \
 			-I../shared \
-			-I../../shared \
-			-Ilib/etl/include \
+			-I../shared/etl/include \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:

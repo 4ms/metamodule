@@ -19,6 +19,7 @@ CXXFLAGS = 	-Wall \
 			-I../src\
 			-Isrc\
 			-Isrc/shared \
+			-Isrc/shared/etl/include \
 			-I$(TEST_DIR) \
 			-DTESTPROJECT \
 
