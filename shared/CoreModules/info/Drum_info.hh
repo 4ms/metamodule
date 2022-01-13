@@ -133,7 +133,7 @@ struct DrumInfo : ModuleInfoBase {
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
             .id = InputTrigger,
-            .x_mm = px_to_mm<72>(36.47f),
+            .x_mm = px_to_mm<72>(36.54f),
             .y_mm = px_to_mm<72>(214.33f),
             .short_name = "Trigger",
             .long_name = "Trigger",
@@ -142,7 +142,7 @@ struct DrumInfo : ModuleInfoBase {
         },
         {
             .id = InputV_Oct,
-            .x_mm = px_to_mm<72>(84.75f),
+            .x_mm = px_to_mm<72>(84.82f),
             .y_mm = px_to_mm<72>(214.33f),
             .short_name = "V/Oct",
             .long_name = "V/Oct",
@@ -151,7 +151,7 @@ struct DrumInfo : ModuleInfoBase {
         },
         {
             .id = InputP_Env_Cv,
-            .x_mm = px_to_mm<72>(133.03f),
+            .x_mm = px_to_mm<72>(133.11f),
             .y_mm = px_to_mm<72>(214.33f),
             .short_name = "P Env CV",
             .long_name = "P Env CV",
@@ -160,7 +160,7 @@ struct DrumInfo : ModuleInfoBase {
         },
         {
             .id = InputP_Amt_Cv,
-            .x_mm = px_to_mm<72>(181.31f),
+            .x_mm = px_to_mm<72>(181.39f),
             .y_mm = px_to_mm<72>(214.33f),
             .short_name = "P Amt CV",
             .long_name = "P Amt CV",
@@ -169,8 +169,8 @@ struct DrumInfo : ModuleInfoBase {
         },
         {
             .id = InputRatio_Cv,
-            .x_mm = px_to_mm<72>(36.47f),
-            .y_mm = px_to_mm<72>(262.41f),
+            .x_mm = px_to_mm<72>(36.54f),
+            .y_mm = px_to_mm<72>(263.05f),
             .short_name = "Ratio CV",
             .long_name = "Ratio CV",
             .unpatched_val = 0.f,
@@ -178,8 +178,8 @@ struct DrumInfo : ModuleInfoBase {
         },
         {
             .id = InputFm_Env_Cv,
-            .x_mm = px_to_mm<72>(84.75f),
-            .y_mm = px_to_mm<72>(262.41f),
+            .x_mm = px_to_mm<72>(84.82f),
+            .y_mm = px_to_mm<72>(263.05f),
             .short_name = "FM Env CV",
             .long_name = "FM Env CV",
             .unpatched_val = 0.f,
@@ -187,8 +187,8 @@ struct DrumInfo : ModuleInfoBase {
         },
         {
             .id = InputFm_Amt_Cv,
-            .x_mm = px_to_mm<72>(133.03f),
-            .y_mm = px_to_mm<72>(262.41f),
+            .x_mm = px_to_mm<72>(133.11f),
+            .y_mm = px_to_mm<72>(263.05f),
             .short_name = "FM Amt CV",
             .long_name = "FM Amt CV",
             .unpatched_val = 0.f,
@@ -196,8 +196,8 @@ struct DrumInfo : ModuleInfoBase {
         },
         {
             .id = InputT_Env_Cv,
-            .x_mm = px_to_mm<72>(181.31f),
-            .y_mm = px_to_mm<72>(262.41f),
+            .x_mm = px_to_mm<72>(181.39f),
+            .y_mm = px_to_mm<72>(263.05f),
             .short_name = "T Env CV",
             .long_name = "T Env CV",
             .unpatched_val = 0.f,
@@ -205,8 +205,8 @@ struct DrumInfo : ModuleInfoBase {
         },
         {
             .id = InputN_Env_Cv,
-            .x_mm = px_to_mm<72>(84.75f),
-            .y_mm = px_to_mm<72>(310.12f),
+            .x_mm = px_to_mm<72>(84.82f),
+            .y_mm = px_to_mm<72>(311.77f),
             .short_name = "N Env CV",
             .long_name = "N Env CV",
             .unpatched_val = 0.f,
@@ -214,8 +214,8 @@ struct DrumInfo : ModuleInfoBase {
         },
         {
             .id = InputN_Blend_Cv,
-            .x_mm = px_to_mm<72>(133.03f),
-            .y_mm = px_to_mm<72>(310.12f),
+            .x_mm = px_to_mm<72>(133.11f),
+            .y_mm = px_to_mm<72>(311.77f),
             .short_name = "N Blend CV",
             .long_name = "N Blend CV",
             .unpatched_val = 0.f,
@@ -233,16 +233,16 @@ struct DrumInfo : ModuleInfoBase {
     static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
         {
             .id = OutputInv_Out,
-            .x_mm = px_to_mm<72>(36.47f),
-            .y_mm = px_to_mm<72>(310.12f),
+            .x_mm = px_to_mm<72>(36.54f),
+            .y_mm = px_to_mm<72>(311.77f),
             .short_name = "Inv Out",
             .long_name = "Inv Out",
             .signal_type = OutJackDef::Analog,
         },
         {
             .id = OutputOut,
-            .x_mm = px_to_mm<72>(181.31f),
-            .y_mm = px_to_mm<72>(310.12f),
+            .x_mm = px_to_mm<72>(181.39f),
+            .y_mm = px_to_mm<72>(311.77f),
             .short_name = "Out",
             .long_name = "Out",
             .signal_type = OutJackDef::Analog,

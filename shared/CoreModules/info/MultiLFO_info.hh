@@ -29,7 +29,7 @@ struct MultiLFOInfo : ModuleInfoBase {
         },
         {
             .id = KnobPhase,
-            .x_mm = px_to_mm<72>(30.19f),
+            .x_mm = px_to_mm<72>(31.96f),
             .y_mm = px_to_mm<72>(119.41f),
             .short_name = "Phase",
             .long_name = "Phase",
@@ -39,7 +39,7 @@ struct MultiLFOInfo : ModuleInfoBase {
         },
         {
             .id = KnobPw,
-            .x_mm = px_to_mm<72>(81.72f),
+            .x_mm = px_to_mm<72>(83.49f),
             .y_mm = px_to_mm<72>(119.75f),
             .short_name = "PW",
             .long_name = "PW",

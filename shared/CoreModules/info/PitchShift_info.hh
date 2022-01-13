@@ -5,7 +5,7 @@
 struct PitchShiftInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"PitchShift"};
     static constexpr std::string_view description{"Pitch Shifter"};
-    static constexpr uint32_t width_hp = 6;
+    static constexpr uint32_t width_hp = 7;
     static constexpr std::string_view svg_filename{"res/modules/PitchShift-artwork.svg"};
 
     static constexpr int NumKnobs = 4;
@@ -20,7 +20,7 @@ struct PitchShiftInfo : ModuleInfoBase {
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{
         {
             .id = KnobCoarse,
-            .x_mm = px_to_mm<72>(43.33f),
+            .x_mm = px_to_mm<72>(50.53f),
             .y_mm = px_to_mm<72>(46.91f),
             .short_name = "Coarse",
             .long_name = "Coarse",
@@ -30,7 +30,7 @@ struct PitchShiftInfo : ModuleInfoBase {
         },
         {
             .id = KnobFine,
-            .x_mm = px_to_mm<72>(43.32f),
+            .x_mm = px_to_mm<72>(50.52f),
             .y_mm = px_to_mm<72>(94.87f),
             .short_name = "Fine",
             .long_name = "Fine",
@@ -40,7 +40,7 @@ struct PitchShiftInfo : ModuleInfoBase {
         },
         {
             .id = KnobWindow,
-            .x_mm = px_to_mm<72>(43.32f),
+            .x_mm = px_to_mm<72>(50.52f),
             .y_mm = px_to_mm<72>(139.62f),
             .short_name = "Window",
             .long_name = "Window",
@@ -50,7 +50,7 @@ struct PitchShiftInfo : ModuleInfoBase {
         },
         {
             .id = KnobMix,
-            .x_mm = px_to_mm<72>(43.32f),
+            .x_mm = px_to_mm<72>(50.52f),
             .y_mm = px_to_mm<72>(184.38f),
             .short_name = "Mix",
             .long_name = "Mix",
@@ -63,35 +63,35 @@ struct PitchShiftInfo : ModuleInfoBase {
     static constexpr int NumInJacks = 4;
     
     enum {
-        InputInput = 0,
-        InputPitch_Cv = 1,
+        InputCoarse_Cv = 0,
+        InputFine_Cv = 1,
         InputWindow_Cv = 2,
         InputMix_Cv = 3,
     };
 
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
-            .id = InputInput,
-            .x_mm = px_to_mm<72>(26.09f),
+            .id = InputCoarse_Cv,
+            .x_mm = px_to_mm<72>(30.92f),
             .y_mm = px_to_mm<72>(232.48f),
-            .short_name = "Input",
-            .long_name = "Input",
+            .short_name = "Coarse CV",
+            .long_name = "Coarse CV",
             .unpatched_val = 0.f,
             .signal_type = InJackDef::Analog,
         },
         {
-            .id = InputPitch_Cv,
-            .x_mm = px_to_mm<72>(60.56f),
+            .id = InputFine_Cv,
+            .x_mm = px_to_mm<72>(69.92f),
             .y_mm = px_to_mm<72>(232.48f),
-            .short_name = "Pitch CV",
-            .long_name = "Pitch CV",
+            .short_name = "Fine CV",
+            .long_name = "Fine CV",
             .unpatched_val = 0.f,
             .signal_type = InJackDef::Analog,
         },
         {
             .id = InputWindow_Cv,
-            .x_mm = px_to_mm<72>(26.09f),
-            .y_mm = px_to_mm<72>(281.59f),
+            .x_mm = px_to_mm<72>(30.92f),
+            .y_mm = px_to_mm<72>(281.58f),
             .short_name = "Window CV",
             .long_name = "Window CV",
             .unpatched_val = 0.f,
@@ -99,8 +99,8 @@ struct PitchShiftInfo : ModuleInfoBase {
         },
         {
             .id = InputMix_Cv,
-            .x_mm = px_to_mm<72>(60.56f),
-            .y_mm = px_to_mm<72>(281.59f),
+            .x_mm = px_to_mm<72>(69.92f),
+            .y_mm = px_to_mm<72>(281.58f),
             .short_name = "Mix CV",
             .long_name = "Mix CV",
             .unpatched_val = 0.f,
@@ -117,8 +117,8 @@ struct PitchShiftInfo : ModuleInfoBase {
     static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
         {
             .id = OutputOut,
-            .x_mm = px_to_mm<72>(60.56f),
-            .y_mm = px_to_mm<72>(326.12f),
+            .x_mm = px_to_mm<72>(69.92f),
+            .y_mm = px_to_mm<72>(326.11f),
             .short_name = "Out",
             .long_name = "Out",
             .signal_type = OutJackDef::Analog,

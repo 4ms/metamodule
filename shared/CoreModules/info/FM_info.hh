@@ -24,7 +24,7 @@ struct FMInfo : ModuleInfoBase {
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{
         {
             .id = KnobPitch,
-            .x_mm = px_to_mm<72>(32.88f),
+            .x_mm = px_to_mm<72>(31.96f),
             .y_mm = px_to_mm<72>(40.33f),
             .short_name = "Pitch",
             .long_name = "Pitch",
@@ -34,7 +34,7 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = KnobMix,
-            .x_mm = px_to_mm<72>(84.41f),
+            .x_mm = px_to_mm<72>(83.49f),
             .y_mm = px_to_mm<72>(40.33f),
             .short_name = "Mix",
             .long_name = "Mix",
@@ -44,7 +44,7 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = KnobIndex,
-            .x_mm = px_to_mm<72>(32.88f),
+            .x_mm = px_to_mm<72>(31.96f),
             .y_mm = px_to_mm<72>(83.47f),
             .short_name = "Index",
             .long_name = "Index",
@@ -54,7 +54,7 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = KnobIndex_Cv,
-            .x_mm = px_to_mm<72>(84.41f),
+            .x_mm = px_to_mm<72>(83.49f),
             .y_mm = px_to_mm<72>(83.47f),
             .short_name = "Index CV",
             .long_name = "Index CV",
@@ -64,7 +64,7 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = KnobRatio_C,
-            .x_mm = px_to_mm<72>(32.88f),
+            .x_mm = px_to_mm<72>(31.96f),
             .y_mm = px_to_mm<72>(126.62f),
             .short_name = "Ratio C",
             .long_name = "Ratio C",
@@ -74,7 +74,7 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = KnobRatio_F,
-            .x_mm = px_to_mm<72>(84.41f),
+            .x_mm = px_to_mm<72>(83.49f),
             .y_mm = px_to_mm<72>(126.62f),
             .short_name = "Ratio F",
             .long_name = "Ratio F",
@@ -84,7 +84,7 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = KnobShape,
-            .x_mm = px_to_mm<72>(32.88f),
+            .x_mm = px_to_mm<72>(31.96f),
             .y_mm = px_to_mm<72>(169.76f),
             .short_name = "Shape",
             .long_name = "Shape",
@@ -94,7 +94,7 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = KnobShape_Cv,
-            .x_mm = px_to_mm<72>(84.41f),
+            .x_mm = px_to_mm<72>(83.49f),
             .y_mm = px_to_mm<72>(169.76f),
             .short_name = "Shape CV",
             .long_name = "Shape CV",
@@ -117,8 +117,8 @@ struct FMInfo : ModuleInfoBase {
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
             .id = InputV_Oct_P,
-            .x_mm = px_to_mm<72>(33.02f),
-            .y_mm = px_to_mm<72>(214.61f),
+            .x_mm = px_to_mm<72>(31.96f),
+            .y_mm = px_to_mm<72>(214.56f),
             .short_name = "V/Oct P",
             .long_name = "V/Oct P",
             .unpatched_val = 0.f,
@@ -126,8 +126,8 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = InputV_Oct_S,
-            .x_mm = px_to_mm<72>(84.55f),
-            .y_mm = px_to_mm<72>(214.61f),
+            .x_mm = px_to_mm<72>(83.49f),
+            .y_mm = px_to_mm<72>(214.56f),
             .short_name = "V/Oct S",
             .long_name = "V/Oct S",
             .unpatched_val = 0.f,
@@ -135,8 +135,8 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = InputMix_Cv,
-            .x_mm = px_to_mm<72>(33.02f),
-            .y_mm = px_to_mm<72>(263.71f),
+            .x_mm = px_to_mm<72>(31.96f),
+            .y_mm = px_to_mm<72>(263.28f),
             .short_name = "Mix CV",
             .long_name = "Mix CV",
             .unpatched_val = 0.f,
@@ -144,8 +144,8 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = InputIndex_Cv_In,
-            .x_mm = px_to_mm<72>(84.55f),
-            .y_mm = px_to_mm<72>(263.71f),
+            .x_mm = px_to_mm<72>(83.49f),
+            .y_mm = px_to_mm<72>(263.28f),
             .short_name = "Index CV In",
             .long_name = "Index CV In",
             .unpatched_val = 0.f,
@@ -153,8 +153,8 @@ struct FMInfo : ModuleInfoBase {
         },
         {
             .id = InputShape_Cv,
-            .x_mm = px_to_mm<72>(33.02f),
-            .y_mm = px_to_mm<72>(311.3f),
+            .x_mm = px_to_mm<72>(31.96f),
+            .y_mm = px_to_mm<72>(312.0f),
             .short_name = "Shape CV",
             .long_name = "Shape CV",
             .unpatched_val = 0.f,
@@ -171,8 +171,8 @@ struct FMInfo : ModuleInfoBase {
     static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
         {
             .id = OutputOut,
-            .x_mm = px_to_mm<72>(84.55f),
-            .y_mm = px_to_mm<72>(311.3f),
+            .x_mm = px_to_mm<72>(83.49f),
+            .y_mm = px_to_mm<72>(312.0f),
             .short_name = "Out",
             .long_name = "Out",
             .signal_type = OutJackDef::Analog,
