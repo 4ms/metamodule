@@ -309,6 +309,9 @@ def panel_to_components(tree):
 
         # Get color --> component type
         style = el.get('style')
+        if style is None:
+            print(f"Error: {shape} shape with no style found at {c['cx']}, {c['cy']}")
+            continue
         color_match = re.search(r'fill:\s*(.*)', style)
         color = ''
         color = color_match.group(1).lower() if color_match is not None else ''
