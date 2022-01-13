@@ -119,6 +119,7 @@ void init(Plugin *p)
 	p->addModel(modelSeq4);
 	p->addModel(modelQuant);
 	p->addModel(modelProb8);
+	p->addModel(modelOctave);
 	p->addModel(modelMNMX);
 	p->addModel(modelLPF);
 	p->addModel(modelAtvert2);
@@ -160,7 +161,6 @@ void init(Plugin *p)
 	// p->addModel(modelKarplus);
 	// p->addModel(modelGateseq16);
 	// p->addModel(modelGateseq8);
-	// p->addModel(modelOctave);
 	// p->addModel(modelMinmax);
 	// p->addModel(modelDrum);
 	// p->addModel(modelComplexenvelope);
