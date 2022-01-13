@@ -4,6 +4,11 @@
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(Verb_artwork_240);
+LV_IMG_DECLARE(Switch41_artwork_240);
+LV_IMG_DECLARE(Seq8_artwork_240);
+LV_IMG_DECLARE(Quant_artwork_240);
+LV_IMG_DECLARE(Prob8_artwork_240);
 LV_IMG_DECLARE(Source_artwork_240);
 LV_IMG_DECLARE(Slew_artwork_240);
 LV_IMG_DECLARE(PitchShift_artwork_240);
@@ -33,6 +38,21 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "Verb")
+			return &Verb_artwork_240;
+
+		if (slug == "Switch41")
+			return &Switch41_artwork_240;
+
+		if (slug == "Seq8")
+			return &Seq8_artwork_240;
+
+		if (slug == "Quant")
+			return &Quant_artwork_240;
+
+		if (slug == "Prob8")
+			return &Prob8_artwork_240;
 
 		if (slug == "Source")
 			return &Source_artwork_240;
