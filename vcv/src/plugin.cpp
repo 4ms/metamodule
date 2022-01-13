@@ -7,6 +7,36 @@ std::unique_ptr<CentralData> centralData;
 //////////////// Auto generated ///////////////////////
 // include and define models below here
 
+#include "CoreModules/info/Verb_info.hh"
+auto modelVerb = createModelFromInfo<VerbInfo>();
+
+#include "CoreModules/info/Switch41_info.hh"
+auto modelSwitch41 = createModelFromInfo<Switch41Info>();
+
+#include "CoreModules/info/Switch14_info.hh"
+auto modelSwitch14 = createModelFromInfo<Switch14Info>();
+
+#include "CoreModules/info/Seq8_info.hh"
+auto modelSeq8 = createModelFromInfo<Seq8Info>();
+
+#include "CoreModules/info/Seq4_info.hh"
+auto modelSeq4 = createModelFromInfo<Seq4Info>();
+
+#include "CoreModules/info/Quant_info.hh"
+auto modelQuant = createModelFromInfo<QuantInfo>();
+
+#include "CoreModules/info/Prob8_info.hh"
+auto modelProb8 = createModelFromInfo<Prob8Info>();
+
+#include "CoreModules/info/Octave_info.hh"
+auto modelOctave = createModelFromInfo<OctaveInfo>();
+
+#include "CoreModules/info/MNMX_info.hh"
+auto modelMNMX = createModelFromInfo<MNMXInfo>();
+
+#include "CoreModules/info/LPF_info.hh"
+auto modelLPF = createModelFromInfo<LPFInfo>();
+
 #include "CoreModules/info/StMix_info.hh"
 auto modelStMix = createModelFromInfo<StMixInfo>();
 
@@ -82,6 +112,15 @@ void init(Plugin *p)
 
 	//////////////// Auto generated ///////////////////////
 	// Add models below here
+	p->addModel(modelVerb);
+	p->addModel(modelSwitch41);
+	p->addModel(modelSwitch14);
+	p->addModel(modelSeq8);
+	p->addModel(modelSeq4);
+	p->addModel(modelQuant);
+	p->addModel(modelProb8);
+	p->addModel(modelMNMX);
+	p->addModel(modelLPF);
 	p->addModel(modelAtvert2);
 	p->addModel(modelBPF);
 	p->addModel(modelBuffMult);

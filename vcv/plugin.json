@@ -14,6 +14,66 @@
   "changelogUrl": "",
   "modules": [
     {
+      "slug": "Verb",
+      "name": "Verb",
+      "description": "Verb",
+      "tags": []
+    },
+    {
+      "slug": "Switch41",
+      "name": "Switch41",
+      "description": "Switch41",
+      "tags": []
+    },
+    {
+      "slug": "Switch14",
+      "name": "Switch14",
+      "description": "Switch14",
+      "tags": []
+    },
+    {
+      "slug": "Seq8",
+      "name": "Seq8",
+      "description": "Seq8",
+      "tags": []
+    },
+    {
+      "slug": "Seq4",
+      "name": "Seq4",
+      "description": "Seq4",
+      "tags": []
+    },
+    {
+      "slug": "Quant",
+      "name": "Quant",
+      "description": "Quant",
+      "tags": []
+    },
+    {
+      "slug": "Prob8",
+      "name": "Prob8",
+      "description": "Prob8",
+      "tags": []
+    },
+    {
+      "slug": "Octave",
+      "name": "Octave",
+      "description": "Octave",
+      "tags": []
+    },
+    {
+      "slug": "MNMX",
+      "name": "MNMX",
+      "description": "MNMX",
+      "tags": []
+    },
+    {
+      "slug": "LPF",
+      "name": "LPF",
+      "description": "LPF",
+      "tags": []
+    },
+    {
       "slug": "StMix",
       "name": "StMix",
       "description": "StMix",
