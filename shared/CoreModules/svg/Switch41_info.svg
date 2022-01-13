@@ -73,7 +73,7 @@
     <circle id="In_3" data-name="In 3" cx="31.89" cy="214.56" r="11.34" style="fill: lime"/>
     <circle id="In_2" data-name="In 2" cx="83.42" cy="167.17" r="11.34" style="fill: lime"/>
     <circle id="In_1" data-name="In 1" cx="31.89" cy="167.17" r="11.34" style="fill: lime"/>
-    <text id="slug" transform="translate(77.45 369.44)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro"><tspan style="letter-spacing: -0.0078125em">S</tspan><tspan x="1.46" y="0">wi</tspan><tspan x="4.37" y="0" style="letter-spacing: -0.006184895833333333em">t</tspan><tspan x="5.34" y="0">ch4:1</tspan></text>
+    <text id="slug" transform="translate(77.45 369.44)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro"><tspan style="letter-spacing: -0.0078125em">S</tspan><tspan x="1.46" y="0">wi</tspan><tspan x="4.37" y="0" style="letter-spacing: -0.006184895833333333em">t</tspan><tspan x="5.34" y="0">ch41</tspan></text>
     <text id="modulename" transform="translate(97.41 369.44)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro">4 <tspan x="2.17" y="0" style="letter-spacing: -0.005859375em">t</tspan><tspan x="3.15" y="0" style="letter-spacing: -0.0003255208333333333em">o 1 </tspan><tspan x="7.61" y="0" style="letter-spacing: -0.0078125em">S</tspan><tspan x="9.06" y="0">wi</tspan><tspan x="11.97" y="0" style="letter-spacing: -0.005859375em">t</tspan><tspan x="12.95" y="0">ch</tspan></text>
   </g>
 </svg>
