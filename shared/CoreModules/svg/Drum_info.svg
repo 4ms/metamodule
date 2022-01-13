@@ -320,18 +320,18 @@
     </g>
   </g>
   <g id="components">
-    <circle id="Out" cx="181.31" cy="310.12" r="11.34" style="fill: blue"/>
-    <circle id="N_Blend_CV" data-name="N Blend CV" cx="133.03" cy="310.12" r="11.34" style="fill: lime"/>
-    <circle id="N_Env_CV" data-name="N Env CV" cx="84.75" cy="310.12" r="11.34" style="fill: lime"/>
-    <circle id="Inv_Out" data-name="Inv Out" cx="36.47" cy="310.12" r="11.34" style="fill: blue"/>
-    <circle id="T_Env_CV" data-name="T Env CV" cx="181.31" cy="262.41" r="11.34" style="fill: lime"/>
-    <circle id="FM_Amt_CV" data-name="FM Amt CV" cx="133.03" cy="262.41" r="11.34" style="fill: lime"/>
-    <circle id="FM_Env_CV" data-name="FM Env CV" cx="84.75" cy="262.41" r="11.34" style="fill: lime"/>
-    <circle id="Ratio_CV" data-name="Ratio CV" cx="36.47" cy="262.41" r="11.34" style="fill: lime"/>
-    <circle id="P_Amt_CV" data-name="P Amt CV" cx="181.31" cy="214.33" r="11.34" style="fill: lime"/>
-    <circle id="P_Env_CV" data-name="P Env CV" cx="133.03" cy="214.33" r="11.34" style="fill: lime"/>
-    <circle id="V_Oct" data-name="V/Oct" cx="84.75" cy="214.33" r="11.34" style="fill: lime"/>
-    <circle id="Trigger" cx="36.47" cy="214.33" r="11.34" style="fill: lime"/>
+    <circle id="Out" cx="181.39" cy="311.77" r="11.34" style="fill: blue"/>
+    <circle id="N_Blend_CV" data-name="N Blend CV" cx="133.11" cy="311.77" r="11.34" style="fill: lime"/>
+    <circle id="N_Env_CV" data-name="N Env CV" cx="84.82" cy="311.77" r="11.34" style="fill: lime"/>
+    <circle id="Inv_Out" data-name="Inv Out" cx="36.54" cy="311.77" r="11.34" style="fill: blue"/>
+    <circle id="T_Env_CV" data-name="T Env CV" cx="181.39" cy="263.05" r="11.34" style="fill: lime"/>
+    <circle id="FM_Amt_CV" data-name="FM Amt CV" cx="133.11" cy="263.05" r="11.34" style="fill: lime"/>
+    <circle id="FM_Env_CV" data-name="FM Env CV" cx="84.82" cy="263.05" r="11.34" style="fill: lime"/>
+    <circle id="Ratio_CV" data-name="Ratio CV" cx="36.54" cy="263.05" r="11.34" style="fill: lime"/>
+    <circle id="P_Amt_CV" data-name="P Amt CV" cx="181.39" cy="214.33" r="11.34" style="fill: lime"/>
+    <circle id="P_Env_CV" data-name="P Env CV" cx="133.11" cy="214.33" r="11.34" style="fill: lime"/>
+    <circle id="V_Oct" data-name="V/Oct" cx="84.82" cy="214.33" r="11.34" style="fill: lime"/>
+    <circle id="Trigger" cx="36.54" cy="214.33" r="11.34" style="fill: lime"/>
     <circle id="Noise_Blend" data-name="Noise Blend" cx="172.59" cy="163.19" r="17.01" style="fill: red"/>
     <circle id="Noise_Env" data-name="Noise Env" cx="108.12" cy="163.19" r="17.01" style="fill: red"/>
     <circle id="Tone_Env" data-name="Tone Env" cx="43.62" cy="163.19" r="17.01" style="fill: #ff0020"/>
