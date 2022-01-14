@@ -20,7 +20,7 @@ struct DjembeInfo : ModuleInfoBase {
     static constexpr std::array<KnobDef, NumKnobs> Knobs{{
         {
             .id = KnobPitch,
-            .x_mm = px_to_mm<72>(32.88f),
+            .x_mm = px_to_mm<72>(31.96f),
             .y_mm = px_to_mm<72>(57.97f),
             .short_name = "Pitch",
             .long_name = "Pitch",
@@ -30,7 +30,7 @@ struct DjembeInfo : ModuleInfoBase {
         },
         {
             .id = KnobSharpness,
-            .x_mm = px_to_mm<72>(84.41f),
+            .x_mm = px_to_mm<72>(83.49f),
             .y_mm = px_to_mm<72>(57.97f),
             .short_name = "Sharpness",
             .long_name = "Sharpness",
@@ -40,7 +40,7 @@ struct DjembeInfo : ModuleInfoBase {
         },
         {
             .id = KnobHit,
-            .x_mm = px_to_mm<72>(32.88f),
+            .x_mm = px_to_mm<72>(31.96f),
             .y_mm = px_to_mm<72>(119.21f),
             .short_name = "Hit",
             .long_name = "Hit",
@@ -50,7 +50,7 @@ struct DjembeInfo : ModuleInfoBase {
         },
         {
             .id = KnobStrike_Amt,
-            .x_mm = px_to_mm<72>(84.41f),
+            .x_mm = px_to_mm<72>(83.49f),
             .y_mm = px_to_mm<72>(119.21f),
             .short_name = "Strike Amt",
             .long_name = "Strike Amt",
@@ -73,7 +73,7 @@ struct DjembeInfo : ModuleInfoBase {
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
             .id = InputPitch_Cv,
-            .x_mm = px_to_mm<72>(31.73f),
+            .x_mm = px_to_mm<72>(32.13f),
             .y_mm = px_to_mm<72>(214.66f),
             .short_name = "Pitch CV",
             .long_name = "Pitch CV",
@@ -82,7 +82,7 @@ struct DjembeInfo : ModuleInfoBase {
         },
         {
             .id = InputSharp_Cv,
-            .x_mm = px_to_mm<72>(82.92f),
+            .x_mm = px_to_mm<72>(83.32f),
             .y_mm = px_to_mm<72>(214.66f),
             .short_name = "Sharp CV",
             .long_name = "Sharp CV",
@@ -91,7 +91,7 @@ struct DjembeInfo : ModuleInfoBase {
         },
         {
             .id = InputHit_Cv,
-            .x_mm = px_to_mm<72>(31.73f),
+            .x_mm = px_to_mm<72>(32.13f),
             .y_mm = px_to_mm<72>(263.38f),
             .short_name = "Hit CV",
             .long_name = "Hit CV",
@@ -100,7 +100,7 @@ struct DjembeInfo : ModuleInfoBase {
         },
         {
             .id = InputStrike_Cv,
-            .x_mm = px_to_mm<72>(82.92f),
+            .x_mm = px_to_mm<72>(83.32f),
             .y_mm = px_to_mm<72>(263.38f),
             .short_name = "Strike CV",
             .long_name = "Strike CV",
@@ -109,7 +109,7 @@ struct DjembeInfo : ModuleInfoBase {
         },
         {
             .id = InputTrigger,
-            .x_mm = px_to_mm<72>(31.73f),
+            .x_mm = px_to_mm<72>(32.13f),
             .y_mm = px_to_mm<72>(312.1f),
             .short_name = "Trigger",
             .long_name = "Trigger",
@@ -127,7 +127,7 @@ struct DjembeInfo : ModuleInfoBase {
     static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
         {
             .id = OutputOut,
-            .x_mm = px_to_mm<72>(82.92f),
+            .x_mm = px_to_mm<72>(83.32f),
             .y_mm = px_to_mm<72>(312.1f),
             .short_name = "Out",
             .long_name = "Out",
