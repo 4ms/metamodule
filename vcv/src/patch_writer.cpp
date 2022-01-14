@@ -1,4 +1,5 @@
 #include "patch_writer.hpp"
+#include "util/countzip.hh"
 #include <algorithm>
 
 #define RYML_SINGLE_HDR_DEFINE_NOW
@@ -248,20 +249,37 @@ std::string PatchFileWriter::printJack(Jack &jack, std::string separator)
 
 std::string PatchFileWriter::printPatchYAML()
 {
-	// ryml::Tree tree;
-	// ryml::NodeRef root = tree.rootref();
+	ryml::Tree tree;
+	ryml::NodeRef root = tree.rootref();
+	root |= ryml::MAP;
 
-	// root |= ryml::MAP;
-	// root["header_version"] << std::to_string(ph.header_version);
-	// root["patch_name"] << ph.patch_name.c_str();
-	// root["num_modules"] << std::to_string(ph.num_modules);
-	// root["num_int_cables"] << std::to_string(ph.num_int_cables);
-	// root["num_mapped_ins"] << std::to_string(ph.num_mapped_ins);
-	// root["num_mapped_outs"] << std::to_string(ph.num_mapped_outs);
-	// root["num_mapped_knobs"] << std::to_string(ph.num_mapped_knobs);
+	ryml::NodeRef header = root["PatchHeader"];
+	header |= ryml::MAP;
+	header["header_version"] << std::to_string(ph.header_version);
+	header["patch_name"] << ph.patch_name.c_str();
+	header["num_modules"] << std::to_string(ph.num_modules);
+	header["num_int_cables"] << std::to_string(ph.num_int_cables);
+	header["num_mapped_ins"] << std::to_string(ph.num_mapped_ins);
+	header["num_mapped_outs"] << std::to_string(ph.num_mapped_outs);
+	header["num_mapped_knobs"] << std::to_string(ph.num_mapped_knobs);
 
-	// return "";
+	ryml::NodeRef data = root["PatchData"];
+	data |= ryml::MAP;
 
+	ryml::NodeRef slugs = data["module_slugs"];
+	slugs |= ryml::MAP;
+	for (auto [i, x] : enumerate(pd.module_slugs)) {
+		auto idx_s = std::to_string(i);
+		ryml::csubstr idx(idx_s.data(), idx_s.length());
+		slugs[idx] = x._data;
+	}
+
+	ryml::NodeRef int_cables = data["int_cables"];
+	slugs |= ryml::MAP;
+
+	return ryml::emitrs<std::string>(tree);
+
+	//////////////////////////////////
 	std::string s;
 	s = "PatchHeader:\n";
 	s += "  header_version: " + std::to_string(ph.header_version) + "\n";

@@ -2,6 +2,54 @@
 #include "patch_writer.hpp"
 #include <iostream>
 
+#include "ryml_all.hpp"
+
+TEST_CASE("Basic hierarchal YAML Usage")
+{
+	ryml::Tree tree;
+	ryml::NodeRef root = tree.rootref();
+	root |= ryml::MAP;
+
+	ryml::NodeRef level1 = root["Level1"];
+	ryml::NodeRef level2 = root["Level2"];
+	level1 |= ryml::MAP;
+	level2 |= ryml::MAP;
+
+	level1["subA"] = "item A within level 1";
+	level1["subB"] = "item B within level 1";
+
+	level2["subA"] = "item A within level 2";
+	level2["subB"] = "item B within level 2";
+
+	// clang-format off
+	CHECK(ryml::emitrs<std::string>(tree) == R"(Level1:
+  subA: item A within level 1
+  subB: item B within level 1
+Level2:
+  subA: item A within level 2
+  subB: item B within level 2
+)");
+	// clang-format on
+}
+
+TEST_CASE("Numbers as keys")
+{
+	ryml::Tree tree;
+	ryml::NodeRef root = tree.rootref();
+	root |= ryml::MAP;
+
+	root["0"] = "SLUG1";
+	root["1"] = "SLUG2";
+	root["2"] = "SLUG3";
+
+	// clang-format off
+	CHECK(ryml::emitrs<std::string>(tree) == R"(0: SLUG1
+1: SLUG2
+2: SLUG3
+)");
+	// clang-format on
+}
+
 TEST_CASE("squash_ids() works")
 {
 	SUBCASE("y = id[x]  transforms to squashed[y] = x")
