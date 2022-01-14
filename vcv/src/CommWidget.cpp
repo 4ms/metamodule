@@ -1,7 +1,7 @@
-#include "CommWidget.h"
-#include "CenterLabel.hh"
-#include "MappableJack.hh"
-#include "paletteHub.hh"
+#include "CommWidget.hpp"
+#include "CenterLabel.hpp"
+#include "MappableJack.hpp"
+#include "paletteHub.hpp"
 
 void CommModuleWidget::addModuleTitle(const std::string moduleTitle)
 {

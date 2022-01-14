@@ -1,4 +1,4 @@
-#include "patch_writer.hh"
+#include "patch_writer.hpp"
 #include <algorithm>
 
 #define RYML_SINGLE_HDR_DEFINE_NOW

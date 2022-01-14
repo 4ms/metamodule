@@ -1,5 +1,5 @@
 #pragma once
-#include "CommData.h"
+#include "CommData.hpp"
 #include <algorithm>
 #include <iostream>
 #include <map>

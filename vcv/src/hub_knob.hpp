@@ -1,9 +1,9 @@
 #pragma once
-#include "HubMapButton.hh"
-#include "MapMarks.hh"
-#include "hub_knob_menu.hh"
-#include "knob_map.hh"
-#include "paletteHub.hh"
+#include "HubMapButton.hpp"
+#include "MapMarks.hpp"
+#include "hub_knob_menu.hpp"
+#include "knob_map.hpp"
+#include "paletteHub.hpp"
 
 class HubKnobMapButton : public HubMapButton {
 public:

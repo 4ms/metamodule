@@ -10,7 +10,7 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
-TEST_SOURCES += src/patch_writer.cc
+TEST_SOURCES += src/patch_writer.cpp
 
 BUILDDIR = $(TEST_DIR)/build
 

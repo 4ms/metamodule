@@ -1,5 +1,5 @@
-#include "HubMapButton.hh"
-#include "paletteHub.hh"
+#include "HubMapButton.hpp"
+#include "paletteHub.hpp"
 #include <cstdio>
 
 void HubMapButton::_createMapping(LabelButtonID srcId)

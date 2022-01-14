@@ -1,7 +1,7 @@
 #pragma once
-#include "MapMarks.hh"
-#include "hub_knob_menu.hh"
-#include "paletteHub.hh"
+#include "MapMarks.hpp"
+#include "hub_knob_menu.hpp"
+#include "paletteHub.hpp"
 #include "plugin.hpp"
 // #include <concepts>
 #include <rack.hpp>

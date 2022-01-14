@@ -1,4 +1,4 @@
-#include "centralData.h"
+#include "central_data.hpp"
 #include "doctest.h"
 
 TEST_CASE("getNumModules() and register/unregistering modules")

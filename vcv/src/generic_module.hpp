@@ -1,9 +1,9 @@
 #pragma once
-#include "CommModule.h"
-#include "CommWidget.h"
+#include "CommModule.hpp"
+#include "CommWidget.hpp"
 #include "CoreModules/info/module_info_base.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "MappableJack.hh"
+#include "MappableJack.hpp"
 #include "math.hh"
 #include "util/base_concepts.hh"
 

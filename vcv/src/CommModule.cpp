@@ -1,5 +1,5 @@
-#include "CommModule.h"
-#include "CommData.h"
+#include "CommModule.hpp"
+#include "CommData.hpp"
 
 CommModule::CommModule() {}
 
@@ -91,4 +91,3 @@ void CommModule::configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int
 		commParams.push_back(std::make_unique<CommParam>(params[i], i));
 	}
 }
-

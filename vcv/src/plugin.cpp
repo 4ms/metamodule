@@ -1,5 +1,5 @@
 #include "plugin.hpp"
-#include "modules/genericModule.hh"
+#include "generic_module.hpp"
 
 Plugin *pluginInstance;
 std::unique_ptr<CentralData> centralData;

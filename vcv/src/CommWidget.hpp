@@ -1,5 +1,5 @@
 #pragma once
-#include "CommModule.h"
+#include "CommModule.hpp"
 #include <rack.hpp>
 using namespace rack;
 

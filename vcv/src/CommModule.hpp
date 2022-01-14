@@ -1,7 +1,6 @@
 #pragma once
-
-#include "CommData.h"
-#include "CommJackParam.h"
+#include "CommData.hpp"
+#include "CommJackParam.hpp"
 #include "CoreModules/coreProcessor.h"
 #include "plugin.hpp"
 

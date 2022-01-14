@@ -1,5 +1,5 @@
 #pragma once
-#include "CommData.h"
+#include "CommData.hpp"
 #include "patch/patch.hh"
 #include "util/byte_block.hh"
 #include <map>

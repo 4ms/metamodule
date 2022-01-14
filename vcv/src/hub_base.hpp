@@ -1,20 +1,20 @@
 #pragma once
-#include "CommData.h"
-#include "CommModule.h"
-#include "CommWidget.h"
+#include "CommData.hpp"
+#include "CommModule.hpp"
+#include "CommWidget.hpp"
 #include "CoreModules/moduleFactory.hh"
-#include "hub_jack.hh"
-#include "hub_knob.hh"
-#include "knob_map.hh"
-#include "localPath.h"
-#include "paletteHub.hh"
-#include "patch_writer.hh"
+#include "hub_jack.hpp"
+#include "hub_knob.hpp"
+#include "knob_map.hpp"
+#include "localPath.hpp"
+#include "paletteHub.hpp"
+#include "patch_writer.hpp"
 #include "plugin.hpp"
-#include "string.h"
 #include "util/math.hh"
 #include "util/string_util.hh"
 #include <fstream>
 #include <functional>
+#include <string.h>
 
 template<int NumKnobMaps>
 struct MetaModuleHubBase : public CommModule {
