@@ -2,8 +2,7 @@
 #include "util/countzip.hh"
 #include <algorithm>
 
-#define RYML_SINGLE_HDR_DEFINE_NOW
-#include "ryml_all.hpp"
+#include "ryml_serial.hpp"
 
 PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules)
 {
@@ -127,8 +126,8 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 				.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
 				.param_id = static_cast<int16_t>(m.dst.objID),
 				.curve_type = 0,
-				.range = m.range_max - m.range_min,
-				.offset = m.range_min,
+				.min = m.range_min,
+				.max = m.range_max,
 			});
 		}
 
@@ -236,34 +235,13 @@ ByteBlock::DataType PatchFileWriter::printPatchBinary()
 	return v.data;
 }
 
-std::string PatchFileWriter::printJack(Jack &jack, std::string separator)
-{
-	return "module_id: " + std::to_string(jack.module_id) + "\n" + separator +
-		   "jack_id: " + std::to_string(jack.jack_id);
-}
-
-void write(ryml::NodeRef *n, Jack const &jack)
-{
-	*n |= ryml::MAP;
-	n->append_child() << ryml::key("module_id") << jack.module_id;
-	n->append_child() << ryml::key("jack_id") << jack.jack_id;
-}
-
 std::string PatchFileWriter::printPatchYAML()
 {
 	ryml::Tree tree;
 	ryml::NodeRef root = tree.rootref();
 	root |= ryml::MAP;
 
-	ryml::NodeRef header = root["PatchHeader"];
-	header |= ryml::MAP;
-	header["header_version"] << std::to_string(ph.header_version);
-	header["patch_name"] << ph.patch_name.c_str();
-	header["num_modules"] << std::to_string(ph.num_modules);
-	header["num_int_cables"] << std::to_string(ph.num_int_cables);
-	header["num_mapped_ins"] << std::to_string(ph.num_mapped_ins);
-	header["num_mapped_outs"] << std::to_string(ph.num_mapped_outs);
-	header["num_mapped_knobs"] << std::to_string(ph.num_mapped_knobs);
+	root["PatchHeader"] << ph;
 
 	ryml::NodeRef data = root["PatchData"];
 	data |= ryml::MAP;
@@ -327,34 +305,11 @@ std::string PatchFileWriter::printPatchYAML()
 		el["module_id"] << x.module_id;
 		el["param_id"] << x.param_id;
 		el["curve_type"] << x.curve_type;
-		el["range"] << x.range;
-		el["offset"] << x.offset;
+		el["min"] << x.min;
+		el["max"] << x.max;
 	}
-	return ryml::emitrs<std::string>(tree);
 
-	//////////////////////////////////
-	std::string s;
-
-	s += "  static_knobs: \n";
-	for (auto &x : pd.static_knobs) {
-		s += "    - module_id: " + std::to_string(x.module_id) + "\n";
-		s += "      param_id: " + std::to_string(x.param_id) + "\n";
-		s += "      value: " + std::to_string(x.value) + "\n";
-	}
-	s += "\n";
-
-	s += "  mapped_knobs: \n";
-	for (auto &x : pd.mapped_knobs) {
-		s += "    - panel_knob_id: " + std::to_string(x.panel_knob_id) + "\n";
-		s += "      module_id: " + std::to_string(x.module_id) + "\n";
-		s += "      param_id: " + std::to_string(x.param_id) + "\n";
-		s += "      curve_type: " + std::to_string(x.curve_type) + "\n";
-		s += "      range: " + std::to_string(x.range) + "\n";
-		s += "      offset: " + std::to_string(x.offset) + "\n";
-	}
-	s += "\n";
-
-	return s;
+	return ryml::emitrs_json<std::string>(tree);
 }
 
 std::map<int, int> PatchFileWriter::squash_ids(std::vector<int> ids)
