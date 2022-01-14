@@ -242,13 +242,16 @@ std::string PatchFileWriter::printJack(Jack &jack, std::string separator)
 		   "jack_id: " + std::to_string(jack.jack_id);
 }
 
-// std::string printJackItem(Jack &jack, std::string separator)
-// {
-// 	return "m: " + std::to_string(jack.module_id) + "\n" + separator + "j: " + std::to_string(jack.jack_id);
-// }
+void write(ryml::NodeRef *n, Jack const &jack)
+{
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("module_id") << jack.module_id;
+	n->append_child() << ryml::key("jack_id") << jack.jack_id;
+}
 
 std::string PatchFileWriter::printPatchYAML()
 {
+	const char numstrs[][10] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 	ryml::Tree tree;
 	ryml::NodeRef root = tree.rootref();
 	root |= ryml::MAP;
@@ -270,73 +273,49 @@ std::string PatchFileWriter::printPatchYAML()
 	slugs |= ryml::MAP;
 	for (auto [i, x] : enumerate(pd.module_slugs)) {
 		auto idx_s = std::to_string(i);
-		ryml::csubstr idx(idx_s.data(), idx_s.length());
-		slugs[idx] = x._data;
+		ryml::csubstr idx(idx_s.c_str(), idx_s.length());
+		ryml::csubstr slug(x.c_str(), x.length());
+		slugs.append_child() << ryml::key(idx) << slug;
 	}
 
 	ryml::NodeRef int_cables = data["int_cables"];
-	slugs |= ryml::MAP;
+	int_cables |= ryml::SEQ;
+	for (auto &x : pd.int_cables) {
+		ryml::NodeRef el = int_cables.append_child({ryml::MAP});
+		el["out"] << x.out;
+		el["ins"] |= ryml::SEQ;
+		for (auto [in_i, in] : enumerate(x.ins)) {
+			if (in.jack_id < 0 || in.module_id < 0)
+				break;
+			el["ins"][in_i] << in;
+		}
+	}
+
+	ryml::NodeRef mapped_ins = data["mapped_ins"];
+	mapped_ins |= ryml::SEQ;
+	for (auto &x : pd.mapped_ins) {
+		ryml::NodeRef el = mapped_ins.append_child({ryml::MAP});
+		el["panel_jack_id"] << x.panel_jack_id;
+		el["ins"] |= ryml::SEQ;
+		for (auto [in_i, in] : enumerate(x.ins)) {
+			if (in.jack_id < 0 || in.module_id < 0)
+				break;
+			el["ins"][in_i] << in;
+		}
+	}
+
+	ryml::NodeRef mapped_outs = data["mapped_outs"];
+	mapped_outs |= ryml::SEQ;
+	for (auto &x : pd.mapped_outs) {
+		ryml::NodeRef el = mapped_outs.append_child({ryml::MAP});
+		el["panel_jack_id"] << x.panel_jack_id;
+		el["out"] << x.out;
+	}
 
 	return ryml::emitrs<std::string>(tree);
 
 	//////////////////////////////////
 	std::string s;
-	s = "PatchHeader:\n";
-	s += "  header_version: " + std::to_string(ph.header_version) + "\n";
-	s += "  patch_name: ";
-	s += ph.patch_name.c_str();
-	s += "\n";
-	s += "  num_modules: " + std::to_string(ph.num_modules) + "\n";
-	s += "  num_int_cables: " + std::to_string(ph.num_int_cables) + "\n";
-	s += "  num_mapped_ins: " + std::to_string(ph.num_mapped_ins) + "\n";
-	s += "  num_mapped_outs: " + std::to_string(ph.num_mapped_outs) + "\n";
-	s += "  num_static_knobs: " + std::to_string(ph.num_static_knobs) + "\n";
-	s += "  num_mapped_knobs: " + std::to_string(ph.num_mapped_knobs) + "\n";
-	s += "\n";
-
-	s += "PatchData:\n";
-	s += "  module_slugs:\n";
-	int i = 0;
-	for (auto &x : pd.module_slugs) {
-		s += "    " + std::to_string(i) + ": ";
-		s += x.cstr();
-		s += "\n";
-		i++;
-	}
-	s += "\n";
-
-	s += "  int_cables: \n";
-	for (auto &x : pd.int_cables) {
-		s += "      - out: \n";
-		s += "          " + printJack(x.out, "          ") + "\n";
-		s += "        ins: \n";
-		for (auto &in : x.ins) {
-			if (in.jack_id == -1 || in.module_id == -1)
-				break;
-			s += "          - " + printJack(in, "            ") + "\n";
-		}
-	}
-	s += "\n";
-
-	s += "  mapped_ins: \n";
-	for (auto &x : pd.mapped_ins) {
-		s += "      - panel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
-		s += "        ins: \n";
-		for (auto &in : x.ins) {
-			if (in.jack_id == -1 || in.module_id == -1)
-				break;
-			s += "          - " + printJack(in, "            ") + "\n";
-		}
-	}
-	s += "\n";
-
-	s += "  mapped_outs: \n";
-	for (auto &x : pd.mapped_outs) {
-		s += "    - panel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
-		s += "      out: \n";
-		s += "        " + printJack(x.out, "        ") + "\n";
-	}
-	s += "\n";
 
 	s += "  static_knobs: \n";
 	for (auto &x : pd.static_knobs) {
