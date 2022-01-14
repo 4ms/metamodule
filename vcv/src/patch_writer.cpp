@@ -251,7 +251,6 @@ void write(ryml::NodeRef *n, Jack const &jack)
 
 std::string PatchFileWriter::printPatchYAML()
 {
-	const char numstrs[][10] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 	ryml::Tree tree;
 	ryml::NodeRef root = tree.rootref();
 	root |= ryml::MAP;
@@ -312,6 +311,25 @@ std::string PatchFileWriter::printPatchYAML()
 		el["out"] << x.out;
 	}
 
+	ryml::NodeRef static_knobs = data["static_knobs"];
+	static_knobs |= ryml::SEQ;
+	for (auto &x : pd.static_knobs) {
+		ryml::NodeRef el = static_knobs.append_child({ryml::MAP});
+		el["module_id"] << x.module_id;
+		el["param_id"] << x.param_id;
+		el["value"] << x.value;
+	}
+
+	ryml::NodeRef mapped_knobs = data["mapped_knobs"];
+	mapped_knobs |= ryml::SEQ;
+	for (auto &x : pd.mapped_knobs) {
+		ryml::NodeRef el = mapped_knobs.append_child({ryml::MAP});
+		el["module_id"] << x.module_id;
+		el["param_id"] << x.param_id;
+		el["curve_type"] << x.curve_type;
+		el["range"] << x.range;
+		el["offset"] << x.offset;
+	}
 	return ryml::emitrs<std::string>(tree);
 
 	//////////////////////////////////
