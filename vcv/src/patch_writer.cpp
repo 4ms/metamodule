@@ -309,7 +309,7 @@ std::string PatchFileWriter::printPatchYAML()
 		el["max"] << x.max;
 	}
 
-	return ryml::emitrs_json<std::string>(tree);
+	return ryml::emitrs<std::string>(tree);
 }
 
 std::map<int, int> PatchFileWriter::squash_ids(std::vector<int> ids)

@@ -31,8 +31,4 @@ public:
 
 	PatchData &get_data();
 	static std::map<int, int> squash_ids(std::vector<int> ids);
-
-private:
-	std::string printJack(Jack &jack, std::string separator);
-	// std::string printJackItem(Jack &jack, std::string separator);
 };
