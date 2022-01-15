@@ -1,17 +1,15 @@
+#include "patch/patch.hh"
 #define RYML_SINGLE_HDR_DEFINE_NOW
 #include "ryml_all.hpp"
+#include "ryml_serial_chars.hh"
 
-#include "patch/patch.hh"
-
-void write(ryml::NodeRef *n, Jack const &jack)
-{
+void write(ryml::NodeRef *n, Jack const &jack) {
 	*n |= ryml::MAP;
 	n->append_child() << ryml::key("module_id") << jack.module_id;
 	n->append_child() << ryml::key("jack_id") << jack.jack_id;
 }
 
-void write(ryml::NodeRef *n, PatchHeader const &ph)
-{
+void write(ryml::NodeRef *n, PatchHeader const &ph) {
 	*n |= ryml::MAP;
 	n->append_child() << ryml::key("header_version") << std::to_string(ph.header_version);
 	n->append_child() << ryml::key("patch_name") << ph.patch_name.c_str();
@@ -23,22 +21,7 @@ void write(ryml::NodeRef *n, PatchHeader const &ph)
 	n->append_child() << ryml::key("num_mapped_knobs") << std::to_string(ph.num_mapped_knobs);
 }
 
-// Needed?
-template<size_t CAPACITY>
-bool from_chars(ryml::csubstr buf, StaticString<CAPACITY> *s)
-{
-	size_t sz = std::min(buf.len, CAPACITY);
-	size_t i = 0;
-	for (; i < sz; i++) {
-		if (buf[i])
-			s->_data[i] = buf[i];
-	}
-	s->_data[i] = '\0';
-	return i != 0;
-}
-
-bool read(ryml::NodeRef const &n, PatchHeader *ph)
-{
+bool read(ryml::NodeRef const &n, PatchHeader *ph) {
 	if (n.num_children() != 8)
 		return false;
 	if (n.child(0).key() != "header_version")

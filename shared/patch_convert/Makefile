@@ -1,12 +1,13 @@
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
-			-I../ryml\
+			-Iryml \
 			-I../\
 			-I../etl/include\
 
 SOURCES =
 SOURCES += patch_convert.cc
-SOURCES += ryml/ryml_serial.cpp
+SOURCES += ryml/ryml_serial.cc
+SOURCES += patch_to_yaml.cc
 
 BUILDDIR = build
 
