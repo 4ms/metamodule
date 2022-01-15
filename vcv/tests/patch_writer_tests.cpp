@@ -2,7 +2,8 @@
 #include "patch_writer.hpp"
 #include <iostream>
 
-#include "ryml_all.hpp"
+#include "ryml_serial.hpp"
+//#include "ryml_all.hpp"
 
 TEST_CASE("Basic hierarchal YAML Usage")
 {
@@ -219,6 +220,123 @@ R"(0: 000
 8: 678
 )");
 	// clang-format on
+}
+
+TEST_CASE("Can parse patch header, field by field")
+{
+	// clang-format off
+	char yml_buf[] =
+R"(
+PatchHeader:
+  header_version: 1
+  patch_name: test123
+  num_modules: 4
+  num_int_cables: 5
+  num_mapped_ins: 6
+  num_mapped_outs: 7
+  num_static_knobs: 8
+  num_mapped_knobs: 9
+)";
+	// clang-format on
+
+	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yml_buf));
+
+	CHECK(tree.size() == 10); // Root + PatchHeader: + 8 children
+	CHECK(tree[0].key() == "PatchHeader");
+	CHECK(tree[0].num_children() == 8);
+	CHECK(tree[0].child(0).key() == "header_version");
+	CHECK(tree[0].child(1).key() == "patch_name");
+	CHECK(tree[0].child(2).key() == "num_modules");
+	CHECK(tree[0].child(3).key() == "num_int_cables");
+	CHECK(tree[0].child(4).key() == "num_mapped_ins");
+	CHECK(tree[0].child(5).key() == "num_mapped_outs");
+	CHECK(tree[0].child(6).key() == "num_static_knobs");
+	CHECK(tree[0].child(7).key() == "num_mapped_knobs");
+
+	CHECK(tree[0].child(0).val() == "1");
+	CHECK(tree[0].child(1).val() == "test123");
+	CHECK(tree[0].child(2).val() == "4");
+	CHECK(tree[0].child(3).val() == "5");
+	CHECK(tree[0].child(4).val() == "6");
+	CHECK(tree[0].child(5).val() == "7");
+	CHECK(tree[0].child(6).val() == "8");
+	CHECK(tree[0].child(7).val() == "9");
+
+	PatchHeader ph;
+	tree[0]["header_version"] >> ph.header_version;
+	tree[0]["patch_name"] >> ph.patch_name;
+	tree[0]["num_modules"] >> ph.num_modules;
+	tree[0]["num_int_cables"] >> ph.num_int_cables;
+	tree[0]["num_mapped_ins"] >> ph.num_mapped_ins;
+	tree[0]["num_mapped_outs"] >> ph.num_mapped_outs;
+	tree[0]["num_static_knobs"] >> ph.num_static_knobs;
+	tree[0]["num_mapped_knobs"] >> ph.num_mapped_knobs;
+	CHECK(ph.header_version == 1);
+	CHECK(ph.patch_name.is_equal("test123"));
+	CHECK(ph.num_modules == 4);
+	CHECK(ph.num_int_cables == 5);
+	CHECK(ph.num_mapped_ins == 6);
+	CHECK(ph.num_mapped_outs == 7);
+	CHECK(ph.num_static_knobs == 8);
+	CHECK(ph.num_mapped_knobs == 9);
+}
+
+TEST_CASE("Can create a ryml::Tree from a PatchHeader using operator>>")
+{
+	ryml::Tree tree;
+	PatchHeader ph_in{
+		.header_version = 1,
+		.patch_name = "test123",
+		.num_modules = 4,
+		.num_int_cables = 5,
+		.num_mapped_ins = 6,
+		.num_mapped_outs = 7,
+		.num_static_knobs = 8,
+		.num_mapped_knobs = 9,
+	};
+	tree.rootref() << ph_in;
+
+	PatchHeader ph_out;
+	tree.rootref() >> ph_out;
+	CHECK(ph_out.header_version == ph_in.header_version);
+	CHECK(ph_out.patch_name.is_equal(ph_in.patch_name));
+	CHECK(ph_out.num_modules == ph_in.num_modules);
+	CHECK(ph_out.num_int_cables == ph_in.num_int_cables);
+	CHECK(ph_out.num_mapped_ins == ph_in.num_mapped_ins);
+	CHECK(ph_out.num_mapped_outs == ph_in.num_mapped_outs);
+	CHECK(ph_out.num_static_knobs == ph_in.num_static_knobs);
+	CHECK(ph_out.num_mapped_knobs == ph_in.num_mapped_knobs);
+}
+
+TEST_CASE("Can parse patch header using operator<<")
+{
+	// clang-format off
+	char yml_buf[] =
+R"(
+  header_version: 1
+  patch_name: test123
+  num_modules: 4
+  num_int_cables: 5
+  num_mapped_ins: 6
+  num_mapped_outs: 7
+  num_static_knobs: 8
+  num_mapped_knobs: 9
+)";
+	// clang-format on
+
+	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yml_buf));
+
+	PatchHeader ph_out;
+
+	tree.rootref() >> ph_out;
+	CHECK(ph_out.header_version == 1);
+	CHECK(ph_out.patch_name.is_equal("test123"));
+	CHECK(ph_out.num_modules == 4);
+	CHECK(ph_out.num_int_cables == 5);
+	CHECK(ph_out.num_mapped_ins == 6);
+	CHECK(ph_out.num_mapped_outs == 7);
+	CHECK(ph_out.num_static_knobs == 8);
+	CHECK(ph_out.num_mapped_knobs == 9);
 }
 
 TEST_CASE("squash_ids() works")
