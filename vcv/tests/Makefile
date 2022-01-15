@@ -11,7 +11,8 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 TEST_SOURCES += src/patch_writer.cpp
-TEST_SOURCES += src/shared/ryml/ryml_serial.cpp
+TEST_SOURCES += src/shared/patch_convert/ryml/ryml_serial.cc
+TEST_SOURCES += src/shared/patch_convert/patch_to_yaml.cc
 
 BUILDDIR = $(TEST_DIR)/build
 
@@ -21,7 +22,7 @@ CXXFLAGS = 	-Wall \
 			-I../src\
 			-Isrc\
 			-Isrc/shared \
-			-Isrc/shared/ryml \
+			-Isrc/shared/patch_convert/ryml \
 			-Isrc/shared/etl/include \
 			-I$(TEST_DIR) \
 			-DTESTPROJECT \
