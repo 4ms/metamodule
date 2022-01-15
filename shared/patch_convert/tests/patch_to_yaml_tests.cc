@@ -3,7 +3,7 @@
 #include "ryml_serial.hh"
 #include <iostream>
 
-TEST_CASE("Correct output produced") {
+TEST_CASE("Correct yaml output produced") {
 	PatchHeader ph{
 		.header_version = 1,
 		.patch_name = "test123",
@@ -28,8 +28,8 @@ TEST_CASE("Correct output produced") {
 	Jack END{-1, -1};
 	pd.int_cables.push_back({out1, {{in1, in2, END}}});
 
-	CHECK(MAX_CONNECTIONS_PER_NODE == 3);
-	// if MAX_CONNECTIONS_PER_NODE > 3, then we need a terminator at the end of this:
+	CHECK(MAX_CONNECTIONS_PER_NODE == 4);
+	// if MAX_CONNECTIONS_PER_NODE > 4, then we need a terminator at the end of this:
 	pd.int_cables.push_back({out2, {{in3, in4, in5}}});
 
 	pd.mapped_ins.push_back({1, {{in1, END}}});

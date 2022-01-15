@@ -12,6 +12,7 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 TEST_SOURCES += ../ryml/ryml_serial.cc
 TEST_SOURCES += ../patch_to_yaml.cc
+TEST_SOURCES += ../yaml_to_patch.cc
 
 BUILDDIR = $(TEST_DIR)/build
 

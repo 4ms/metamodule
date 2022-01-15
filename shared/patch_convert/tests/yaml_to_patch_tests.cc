@@ -1,0 +1,192 @@
+#include "../yaml_to_patch.hh"
+#include "doctest.h"
+#include "ryml_serial.hh"
+#include <iostream>
+
+TEST_CASE("Correct header and data produced from yaml") {
+	std::string yamlhdr =
+		// clang-format off
+R"(PatchHeader:
+  header_version: 1
+  patch_name: 'Test Patch 99'
+  num_modules: 4
+  num_int_cables: 2
+  num_mapped_ins: 3
+  num_mapped_outs: 2
+  num_static_knobs: 5
+  num_mapped_knobs: 4
+PatchData:
+  module_slugs:
+    0: PanelMedium
+    1: Module1
+    2: Module2
+    3: Module3
+  int_cables:
+    - out:
+        module_id: 1
+        jack_id: 2
+      ins:
+        - module_id: 3
+          jack_id: 4
+        - module_id: 5
+          jack_id: 6
+    - out:
+        module_id: 11
+        jack_id: 22
+      ins:
+        - module_id: 33
+          jack_id: 44
+        - module_id: 55
+          jack_id: 66
+        - module_id: 77
+          jack_id: 88
+  mapped_ins:
+    - panel_jack_id: 1
+      ins:
+        - module_id: 3
+          jack_id: 4
+    - panel_jack_id: 2
+      ins:
+        - module_id: 5
+          jack_id: 6
+        - module_id: 33
+          jack_id: 44
+    - panel_jack_id: 3
+      ins:
+        - module_id: 77
+          jack_id: 88
+  mapped_outs:
+    - panel_jack_id: 4
+      out:
+        module_id: 1
+        jack_id: 2
+    - panel_jack_id: 5
+      out:
+        module_id: 11
+        jack_id: 22
+  static_knobs:
+    - module_id: 1
+      param_id: 2
+      value: 0.3
+    - module_id: 2
+      param_id: 3
+      value: 0.4
+    - module_id: 3
+      param_id: 4
+      value: 0.5
+    - module_id: 4
+      param_id: 5
+      value: 0.6
+    - module_id: 5
+      param_id: 6
+      value: 0.7
+  mapped_knobs:
+    - module_id: 2
+      param_id: 3
+      curve_type: 1
+      min: 0.1
+      max: 0.95
+    - module_id: 3
+      param_id: 4
+      curve_type: 2
+      min: 0.2
+      max: 0.85
+    - module_id: 4
+      param_id: 5
+      curve_type: 3
+      min: 0.3
+      max: 0.75
+    - module_id: 5
+      param_id: 6
+      curve_type: 4
+      min: 0.4
+      max: 0.65
+)";
+	// clang-format on
+
+	PatchHeader ph;
+	PatchData pd;
+	CHECK(yaml_string_to_patch(yamlhdr, ph, pd));
+
+	CHECK(ph.header_version == 1);
+	CHECK(ph.patch_name.is_equal("Test Patch 99"));
+	CHECK(ph.num_modules == 4);
+	CHECK(ph.num_int_cables == 2);
+	CHECK(ph.num_mapped_ins == 3);
+	CHECK(ph.num_mapped_outs == 2);
+	CHECK(ph.num_static_knobs == 5);
+	CHECK(ph.num_mapped_knobs == 4);
+
+	CHECK(pd.module_slugs.size() == 4);
+	CHECK(pd.module_slugs[0].is_equal("PanelMedium"));
+	CHECK(pd.module_slugs[1].is_equal("Module1"));
+	CHECK(pd.module_slugs[2].is_equal("Module2"));
+	CHECK(pd.module_slugs[3].is_equal("Module3"));
+
+	CHECK(pd.int_cables.size() == 2);
+	CHECK(pd.int_cables[0].out == Jack{1, 2});
+	CHECK(pd.int_cables[0].ins[0] == Jack{3, 4});
+	CHECK(pd.int_cables[0].ins[1] == Jack{5, 6});
+	CHECK(pd.int_cables[0].ins[2] == Jack{-1, -1});
+	CHECK(pd.int_cables[1].out == Jack{11, 22});
+	CHECK(pd.int_cables[1].ins[0] == Jack{33, 44});
+	CHECK(pd.int_cables[1].ins[1] == Jack{55, 66});
+	CHECK(pd.int_cables[1].ins[2] == Jack{77, 88});
+
+	CHECK(pd.mapped_ins.size() == 3);
+	CHECK(pd.mapped_ins[0].panel_jack_id == 1);
+	CHECK(pd.mapped_ins[0].ins[0] == Jack{3, 4});
+	CHECK(pd.mapped_ins[0].ins[1] == Jack{-1, -1});
+	CHECK(pd.mapped_ins[1].panel_jack_id == 2);
+	CHECK(pd.mapped_ins[1].ins[0] == Jack{5, 6});
+	CHECK(pd.mapped_ins[1].ins[1] == Jack{33, 44});
+	CHECK(pd.mapped_ins[1].ins[2] == Jack{-1, -1});
+	CHECK(pd.mapped_ins[2].panel_jack_id == 3);
+	CHECK(pd.mapped_ins[2].ins[0] == Jack{77, 88});
+	CHECK(pd.mapped_ins[2].ins[1] == Jack{-1, -1});
+
+	CHECK(pd.mapped_outs.size() == 2);
+	CHECK(pd.mapped_outs[0].panel_jack_id == 4);
+	CHECK(pd.mapped_outs[0].out == Jack{1, 2});
+	CHECK(pd.mapped_outs[1].panel_jack_id == 5);
+	CHECK(pd.mapped_outs[1].out == Jack{11, 22});
+
+	CHECK(pd.static_knobs.size() == 5);
+	CHECK(pd.static_knobs[0].module_id == 1);
+	CHECK(pd.static_knobs[0].param_id == 2);
+	CHECK(pd.static_knobs[0].value == 0.3f);
+	CHECK(pd.static_knobs[1].module_id == 2);
+	CHECK(pd.static_knobs[1].param_id == 3);
+	CHECK(pd.static_knobs[1].value == 0.4f);
+	CHECK(pd.static_knobs[2].module_id == 3);
+	CHECK(pd.static_knobs[2].param_id == 4);
+	CHECK(pd.static_knobs[2].value == 0.5f);
+	CHECK(pd.static_knobs[3].module_id == 4);
+	CHECK(pd.static_knobs[3].param_id == 5);
+	CHECK(pd.static_knobs[3].value == 0.6f);
+	CHECK(pd.static_knobs[4].module_id == 5);
+	CHECK(pd.static_knobs[4].param_id == 6);
+	CHECK(pd.static_knobs[4].value == 0.7f);
+
+	CHECK(pd.mapped_knobs.size() == 4);
+	CHECK(pd.mapped_knobs[0].module_id == 2);
+	CHECK(pd.mapped_knobs[0].param_id == 3);
+	CHECK(pd.mapped_knobs[0].curve_type == 1);
+	CHECK(pd.mapped_knobs[0].min == 0.1f);
+	CHECK(pd.mapped_knobs[0].max == 0.95f);
+	CHECK(pd.mapped_knobs[1].module_id == 3);
+	CHECK(pd.mapped_knobs[1].param_id == 4);
+	CHECK(pd.mapped_knobs[1].curve_type == 2);
+	CHECK(pd.mapped_knobs[1].min == 0.2f);
+	CHECK(pd.mapped_knobs[1].max == 0.85f);
+	CHECK(pd.mapped_knobs[2].module_id == 4);
+	CHECK(pd.mapped_knobs[2].param_id == 5);
+	CHECK(pd.mapped_knobs[2].curve_type == 3);
+	CHECK(pd.mapped_knobs[2].min == 0.3f);
+	CHECK(pd.mapped_knobs[2].max == 0.75f);
+	CHECK(pd.mapped_knobs[3].module_id == 5);
+	CHECK(pd.mapped_knobs[3].param_id == 6);
+	CHECK(pd.mapped_knobs[3].curve_type == 4);
+	CHECK(pd.mapped_knobs[3].min == 0.4f);
+	CHECK(pd.mapped_knobs[3].max == 0.65f);
+}
