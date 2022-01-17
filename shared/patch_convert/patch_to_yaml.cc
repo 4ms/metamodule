@@ -70,6 +70,7 @@ std::string patch_to_yaml_string(PatchHeader const &ph, PatchData const &pd) {
 	mapped_knobs |= ryml::SEQ;
 	for (auto &x : pd.mapped_knobs) {
 		ryml::NodeRef el = mapped_knobs.append_child({ryml::MAP});
+		el["panel_knob_id"] << x.panel_knob_id;
 		el["module_id"] << x.module_id;
 		el["param_id"] << x.param_id;
 		el["curve_type"] << x.curve_type;
