@@ -6,7 +6,7 @@ namespace MetaModule
 
 struct PatchList {
 	//Todo: Deduce this directly from size of constructor
-	static constexpr int32_t NumPatches = 2;
+	static constexpr int32_t NumPatches = 3;
 
 	PatchList();
 
@@ -41,6 +41,7 @@ struct PatchList {
 	}
 
 private:
+	PatchHeader _patch_header_yml;
 	std::array<PatchHeader *, NumPatches> _patch_headers;
 	// TODO: _patch_headers could be constructed directly from init list, and we don't need _patch_addrs
 	std::array<void *, NumPatches> _patch_addrs;

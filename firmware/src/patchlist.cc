@@ -1,6 +1,11 @@
 #include "patchlist.hh"
+#include "patch_convert/yaml_to_patch.hh"
+#include "util/zip.hh"
+
+#include "Djembe2.hh"
 #include "test6.hh"
 #include "v2patch.hh"
+
 // #include "patch/integration_tests/all_tests.hh"
 
 // #include "DjembeReverb.hh"
@@ -28,7 +33,8 @@ namespace MetaModule
 
 PatchList::PatchList()
 	: _patch_addrs{
-		  test6_mmpatch, v2patch_mmpatch,
+		  test6_mmpatch, v2patch_mmpatch, Djembe2_yml,
+
 		  // t_info_1_mmpatch,
 		  // InfiniteOsc64bDual_mmpatch,
 		  // knob_test_mmpatch,
@@ -78,8 +84,18 @@ PatchList::PatchList()
 		  // test_vcaCore_mmpatch,
 		  // MARK: Add patches below here:
 	  } {
-	for (uint32_t i = 0; i < NumPatches; i++) {
-		_patch_headers[i] = load_patch_header(_patch_addrs[i]);
-	}
+	//for (uint32_t i = 0; i < NumPatches; i++)
+	//_patch_headers[i] = load_patch_header(_patch_addrs[i]);
+	//
+	// for (auto [pheader, paddr] : zip(_patch_headers, _patch_addrs))
+	// 	pheader = load_patch_header(paddr);
+
+	// Do it manually for now to test out yml loading:
+	_patch_headers[0] = load_patch_header(_patch_addrs[0]);
+	_patch_headers[1] = load_patch_header(_patch_addrs[1]);
+
+	std::string yamlstr{reinterpret_cast<char *>(Djembe2_yml)}; //unsigned char -> char
+	yaml_string_to_patchheader(yamlstr, _patch_header_yml);
+	_patch_headers[2] = &_patch_header_yml;
 }
 } // namespace MetaModule
