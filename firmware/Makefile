@@ -49,15 +49,14 @@ u-boot:
 
 ## Patches
 
-PATCH_BINARIES = $(wildcard $(SHARED)/patch/*.mmpatch)
-PATCH_BINARIES += $(wildcard $(SHARED)/patch/integration_tests/*.mmpatch)
-PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_BINARIES)))
+PATCH_FILES = $(wildcard $(SHARED)/patch/*.yml)
+PATCH_BINARIES += $(wildcard $(SHARED)/patch/integration_tests/*.yml)
+PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_FILES)))
 
 patches: $(PATCH_HEADERS)
 
-%.hh : %.mmpatch 
+%.hh : %.yml 
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
-
 
 ## Module images
 
