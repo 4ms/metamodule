@@ -113,19 +113,22 @@ bool read(ryml::NodeRef const &n, MappedOutputJack *j) {
 }
 
 bool read(ryml::NodeRef const &n, MappedKnob *k) {
-	if (n.num_children() != 5)
+	if (n.num_children() != 6)
 		return false;
-	if (n.child(0).key() != "module_id")
+	if (n.child(0).key() != "panel_knob_id")
 		return false;
-	if (n.child(1).key() != "param_id")
+	if (n.child(1).key() != "module_id")
 		return false;
-	if (n.child(2).key() != "curve_type")
+	if (n.child(2).key() != "param_id")
 		return false;
-	if (n.child(3).key() != "min")
+	if (n.child(3).key() != "curve_type")
 		return false;
-	if (n.child(4).key() != "max")
+	if (n.child(4).key() != "min")
+		return false;
+	if (n.child(5).key() != "max")
 		return false;
 
+	n["panel_knob_id"] >> k->panel_knob_id;
 	n["module_id"] >> k->module_id;
 	n["param_id"] >> k->param_id;
 	n["curve_type"] >> k->curve_type;
