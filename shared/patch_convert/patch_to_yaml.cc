@@ -5,6 +5,8 @@
 #include "util/countzip.hh"
 
 std::string patch_to_yaml_string(PatchHeader const &ph, PatchData const &pd) {
+	RymlInit::init_once();
+
 	ryml::Tree tree;
 	ryml::NodeRef root = tree.rootref();
 	root |= ryml::MAP;

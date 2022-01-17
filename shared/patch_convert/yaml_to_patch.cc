@@ -2,6 +2,7 @@
 #include "ryml_serial.hh"
 
 bool yaml_string_to_patch(std::string yaml, PatchHeader &ph, PatchData &pd) {
+	RymlInit::init_once();
 
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yaml.data(), yaml.size()));
 
@@ -32,6 +33,7 @@ bool yaml_string_to_patch(std::string yaml, PatchHeader &ph, PatchData &pd) {
 }
 
 bool yaml_string_to_patchheader(std::string yaml, PatchHeader &ph) {
+	RymlInit::init_once();
 
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yaml.data(), yaml.size()));
 

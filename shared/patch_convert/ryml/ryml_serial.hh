@@ -18,3 +18,8 @@ bool read(ryml::NodeRef const &n, MappedInputJack *j);
 bool read(ryml::NodeRef const &n, MappedOutputJack *j);
 bool read(ryml::NodeRef const &n, MappedKnob *k);
 bool read(ryml::NodeRef const &n, StaticParam *k);
+
+namespace RymlInit
+{
+void init_once();
+};
