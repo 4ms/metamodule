@@ -42,7 +42,7 @@ public:
 	// knob_conns[]: A B C D a b c d, each element is a vector of knobs it's mapped to
 	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs> knob_conns;
 
-	int *num_int_cable_ins;
+	std::vector<int> num_int_cable_ins;
 
 	bool is_loaded = false;
 
@@ -68,8 +68,7 @@ public:
 		ph = patchheader;
 		pd = patchdata;
 
-		//TODO: use a vector, reserve num_int_cables elements
-		num_int_cable_ins = new int[ph->num_int_cables];
+		num_int_cable_ins.reserve(ph->num_int_cables);
 		calc_int_cable_connections();
 	}
 
@@ -77,7 +76,12 @@ public:
 	bool load_patch(PatchHeader *patchheader, PatchData *patchdata) {
 		mdrivlib::SMPThread::init();
 
-		load_patch_header_data(ph, pd);
+		if (patchheader == nullptr)
+			return false;
+		if (patchdata == nullptr)
+			return false;
+
+		load_patch_header_data(patchheader, patchdata);
 
 		for (int i = 0; i < ph->num_modules; i++) {
 			//FIXME: Do we ever do anything with modules[0] ? Perhaps just UI displaying names, which we can get from a defs file
@@ -164,13 +168,7 @@ public:
 			modules[i].reset(nullptr);
 		}
 
-		// pd->module_slugs.clear();
-		// pd->int_cables.clear();
-		// pd->mapped_ins.clear();
-		// pd->mapped_outs.clear();
-		// pd->static_knobs.clear();
-		// pd->mapped_knobs.clear();
-		delete[] num_int_cable_ins;
+		num_int_cable_ins.clear();
 
 		clear_cache();
 		BigAllocControl::reset();
@@ -385,6 +383,7 @@ public:
 		for (int i = 0; i < ph->num_mapped_knobs; i++) {
 			auto &k = pd->mapped_knobs[i];
 			knob_conns[k.panel_knob_id].push_back(k);
+			printf("Panel knob %d conn to\r\n", k.panel_knob_id);
 		}
 	}
 
