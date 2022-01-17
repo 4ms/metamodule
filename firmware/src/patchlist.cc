@@ -1,5 +1,6 @@
 #include "patchlist.hh"
 #include "patch_convert/yaml_to_patch.hh"
+#include "patchlist_ryml_tests.hh"
 #include "util/zip.hh"
 
 #include "Djembe2.hh"
@@ -58,5 +59,12 @@ PatchList::PatchList()
 		std::string yamlstr{reinterpret_cast<char *>(yamldata)}; //unsigned char -> char
 		yaml_string_to_patch(yamlstr, patchheader, patchdata);
 	}
+
+	if (!PatchListTargetTests::run_all_tests()) {
+		printf("FAILED yaml tests\r\n");
+		while (true)
+			;
+	}
 }
+
 } // namespace MetaModule

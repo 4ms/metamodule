@@ -87,6 +87,7 @@ SOURCES += $(SHARED)/util/math_tables.cc
 SOURCES += $(audio_source)
 SOURCES += $(core_src)/aux_core_main.cc
 SOURCES += src/patchlist.cc
+SOURCES += src/patchlist_ryml_tests.cc
 SOURCES += src/pages/page_manager.cc
 SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
