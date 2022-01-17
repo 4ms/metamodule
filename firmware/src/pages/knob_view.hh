@@ -83,7 +83,7 @@ struct KnobView3 : PageBase {
 		//TODO: handle multi-maps
 		if (mapped_knobs.size() == 0)
 			return "-";
-		std::string slug{patch_player.module_slugs[mapped_knobs[0].module_id]};
+		std::string slug{patch_player.get_module_name(mapped_knobs[0].module_id)};
 		auto &info = ModuleFactory::getModuleInfo(slug.c_str());
 		if (info.width_hp == 0)
 			return slug;

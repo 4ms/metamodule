@@ -8,51 +8,12 @@
 
 // #include "patch/integration_tests/all_tests.hh"
 
-// #include "DjembeReverb.hh"
-// #include "InfiniteOsc.hh"
-// #include "InfiniteOsc64bDual.hh"
-// #include "QuadDjembe.hh"
-// // #include "QuadDjembemed.hh"
-// #include "QuadLFO.hh"
-// #include "StereoVerb.hh"
-// #include "djembe.hh"
-// #include "dualdjembe.hh"
-// #include "dualinfosc1.hh"
-// #include "infosc1.hh"
-// #include "knob_test.hh"
-// #include "mappeddjembe.hh"
-// #include "mixerpass.hh"
-// #include "mono_verb.hh"
-// #include "octinfosc.hh"
-// #include "quad_LFO.hh"
-// #include "simplequaddjembe.hh"
-// #include "t_info_1.hh"
-
 namespace MetaModule
 {
-
 PatchList::PatchList()
-	: _patch_addrs{
-		  test6_mmpatch, v2patch_mmpatch, Djembe2_yml,
+	: _raw_patch_yaml_files{
+		  Djembe2_yml,
 
-		  // t_info_1_mmpatch,
-		  // InfiniteOsc64bDual_mmpatch,
-		  // knob_test_mmpatch,
-		  // test_inputs_1234_mmpatch,
-		  // QuadDjembe_mmpatch,
-		  // djembe_mmpatch,
-		  // // DjembeReverb_mmpatch,
-		  // // InfiniteOsc_mmpatch,
-		  // QuadLFO_mmpatch,
-		  // // StereoVerb_mmpatch,
-		  // // infosc1_mmpatch,
-		  // octinfosc_mmpatch,
-		  // simplequaddjembe_mmpatch,
-		  // mono_verb_mmpatch,
-		  // dualinfosc1_mmpatch,
-		  // mappeddjembe_mmpatch,
-		  // simplequaddjembe_mmpatch,
-		  // dualdjembe_mmpatch,
 		  // test_inputs_56g1g2_mmpatch,
 		  // test_14switchCore_clock_mmpatch,
 		  // test_14switchCore_cv_mmpatch,
@@ -84,18 +45,18 @@ PatchList::PatchList()
 		  // test_vcaCore_mmpatch,
 		  // MARK: Add patches below here:
 	  } {
-	//for (uint32_t i = 0; i < NumPatches; i++)
-	//_patch_headers[i] = load_patch_header(_patch_addrs[i]);
-	//
-	// for (auto [pheader, paddr] : zip(_patch_headers, _patch_addrs))
-	// 	pheader = load_patch_header(paddr);
 
-	// Do it manually for now to test out yml loading:
-	_patch_headers[0] = load_patch_header(_patch_addrs[0]);
-	_patch_headers[1] = load_patch_header(_patch_addrs[1]);
+	// TODO: read from filesystem like this:
+	// for (auto f : files_in_dir("patches/"){
+	// 		std::string yamldata = read(f);
+	//		if (ok) ...
+	// 		yaml_string_to_patch(yamldata, patchheader, patchdata);
+	// }
 
-	std::string yamlstr{reinterpret_cast<char *>(Djembe2_yml)}; //unsigned char -> char
-	yaml_string_to_patchheader(yamlstr, _patch_header_yml);
-	_patch_headers[2] = &_patch_header_yml;
+	for (auto [yamldata, patchheader, patchdata] : zip(_raw_patch_yaml_files, _patch_headers, _patch_data)) {
+		//Note: we use a std::string because it allocates the space that ryml needs to parse in place
+		std::string yamlstr{reinterpret_cast<char *>(yamldata)}; //unsigned char -> char
+		yaml_string_to_patch(yamlstr, patchheader, patchdata);
+	}
 }
 } // namespace MetaModule
