@@ -8,8 +8,8 @@ struct Debug {
 	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::A, 11, mdrivlib::PinMode::Output>;
 	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::A, 12, mdrivlib::PinMode::Output>;
 	using Pin3 = mdrivlib::FPin<mdrivlib::GPIO::A, 10, mdrivlib::PinMode::Output>;
-	using Pin4 = mdrivlib::FPin<mdrivlib::GPIO::Z, 1, mdrivlib::PinMode::Output>; // Not exposed on p5
-	using Pin5 = mdrivlib::FPin<mdrivlib::GPIO::Z, 2, mdrivlib::PinMode::Output>; // Not exposed on p5
+	// using Pin4 = mdrivlib::FPin<mdrivlib::GPIO::Z, 1, mdrivlib::PinMode::Output>; // Not exposed on p5
+	// using Pin5 = mdrivlib::FPin<mdrivlib::GPIO::Z, 2, mdrivlib::PinMode::Output>; // Not exposed on p5
 
 	using red_LED1 = mdrivlib::FPin<mdrivlib::GPIO::Z, 6, mdrivlib::PinMode::Output>;
 	using blue_LED1 = mdrivlib::FPin<mdrivlib::GPIO::I, 8, mdrivlib::PinMode::Output>;
@@ -23,8 +23,8 @@ struct Debug {
 	static inline Pin1 pin_1_init;
 	static inline Pin2 pin_2_init;
 	static inline Pin3 pin_3_init;
-	static inline Pin4 pin_4_init;
-	static inline Pin5 pin_5_init;
+	// static inline Pin4 pin_4_init;
+	// static inline Pin5 pin_5_init;
 };
 
 #define GCC_OPTIMIZE_OFF __attribute__((optimize("-O0")))
