@@ -45,13 +45,13 @@ struct MappedKnob {
 };
 
 // If number of ins exceeds MAX_CONNECTIONS_PER_NODE, then just add multiple InternalCable's
-// 64 Bytes
+// 16 Bytes
 struct InternalCable {
 	Jack out;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
 };
 
-// 64 Bytes
+// 16 Bytes
 struct MappedInputJack {
 	int32_t panel_jack_id;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
