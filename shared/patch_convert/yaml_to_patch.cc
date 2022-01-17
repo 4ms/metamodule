@@ -1,8 +1,6 @@
 #include "yaml_to_patch.hh"
 #include "ryml_serial.hh"
 
-#include <iostream>
-
 bool yaml_string_to_patch(std::string yaml, PatchHeader &ph, PatchData &pd) {
 
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yaml.data(), yaml.size()));
@@ -29,6 +27,22 @@ bool yaml_string_to_patch(std::string yaml, PatchHeader &ph, PatchData &pd) {
 	data_root["mapped_outs"] >> pd.mapped_outs;
 	data_root["static_knobs"] >> pd.static_knobs;
 	data_root["mapped_knobs"] >> pd.mapped_knobs;
+
+	return true;
+}
+
+bool yaml_string_to_patchheader(std::string yaml, PatchHeader &ph) {
+
+	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yaml.data(), yaml.size()));
+
+	if (tree.num_children(0) < 1)
+		return false;
+
+	ryml::NodeRef header_root = tree[0];
+	if (header_root.key() != "PatchHeader")
+		return false;
+
+	header_root >> ph;
 
 	return true;
 }
