@@ -1,5 +1,9 @@
 #pragma once
 #include "patch/patch.hh"
+
+// Required for ryml_all.hpp, which uses va_list
+#include <cstdarg>
+//
 #include "ryml_all.hpp"
 #include "ryml_serial_chars.hh"
 

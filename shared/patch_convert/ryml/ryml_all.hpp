@@ -2,7 +2,7 @@
 //
 // Rapid YAML - a library to parse and emit YAML, and do it fast.
 //
-// https://github.com/biojppm/rapidyaml
+// https://github.com/danngreen/rapidyaml
 //
 // DO NOT EDIT. This file is generated automatically.
 // This is an amalgamated single-header version of the library.
@@ -23,7 +23,7 @@
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // LICENSE.txt
-// https://github.com/biojppm/rapidyaml/LICENSE.txt
+// https://github.com/danngreen/rapidyaml/LICENSE.txt
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -73,7 +73,7 @@
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/c4core_all.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/c4core_all.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/c4core_all.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -760,7 +760,7 @@ C4_FOR_EACH(PRN_STRUCT_OFFSETS, a, b, c);
 #    define C4_CONSTEXPR11
 #    define C4_CONSTEXPR14
 //#    define C4_NOEXCEPT
-#  elif __cplusplus < 201402
+#  elif __cplusplus == 201103
 #    define C4_CONSTEXPR11 constexpr
 #    define C4_CONSTEXPR14
 //#    define C4_NOEXCEPT noexcept
@@ -784,6 +784,14 @@ C4_FOR_EACH(PRN_STRUCT_OFFSETS, a, b, c);
 //#    define C4_NOEXCEPT noexcept
 #  endif
 #endif  // _MSC_VER
+
+
+#if C4_CPP < 17
+#define C4_IF_CONSTEXPR
+#else
+#define C4_IF_CONSTEXPR constexpr
+#endif
+
 
 //------------------------------------------------------------
 
@@ -4788,8 +4796,8 @@ public:
 
     C4_ALWAYS_INLINE int compare(ro_substr const that) const { return this->compare(that.str, that.len); }
 
-    C4_ALWAYS_INLINE bool operator== (std::nullptr_t) const { return str == nullptr; }
-    C4_ALWAYS_INLINE bool operator!= (std::nullptr_t) const { return str != nullptr; }
+    C4_ALWAYS_INLINE bool operator== (std::nullptr_t) const { return str == nullptr || len == 0; }
+    C4_ALWAYS_INLINE bool operator!= (std::nullptr_t) const { return str != nullptr || len == 0; }
 
     C4_ALWAYS_INLINE bool operator== (C const c) const { return this->compare(c) == 0; }
     C4_ALWAYS_INLINE bool operator!= (C const c) const { return this->compare(c) != 0; }
@@ -6459,40 +6467,44 @@ inline OStream& operator<< (OStream& os, basic_substring<C> s)
 
 // fast_float by Daniel Lemire
 // fast_float by João Paulo Magalhaes
-
-
+//
 // with contributions from Eugene Golushkov
 // with contributions from Maksim Kita
 // with contributions from Marcin Wojdyr
 // with contributions from Neal Richardson
 // with contributions from Tim Paine
 // with contributions from Fabio Pellacini
-
-
-// Permission is hereby granted, free of charge, to any
-// person obtaining a copy of this software and associated
-// documentation files (the "Software"), to deal in the
-// Software without restriction, including without
-// limitation the rights to use, copy, modify, merge,
-// publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software
-// is furnished to do so, subject to the following
-// conditions:
-// 
-// The above copyright notice and this permission notice
-// shall be included in all copies or substantial portions
-// of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
-// ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-// SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-// IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-// DEALINGS IN THE SOFTWARE.
-
+//
+// MIT License Notice
+//
+//    MIT License
+//    
+//    Copyright (c) 2021 The fast_float authors
+//    
+//    Permission is hereby granted, free of charge, to any
+//    person obtaining a copy of this software and associated
+//    documentation files (the "Software"), to deal in the
+//    Software without restriction, including without
+//    limitation the rights to use, copy, modify, merge,
+//    publish, distribute, sublicense, and/or sell copies of
+//    the Software, and to permit persons to whom the Software
+//    is furnished to do so, subject to the following
+//    conditions:
+//    
+//    The above copyright notice and this permission notice
+//    shall be included in all copies or substantial portions
+//    of the Software.
+//    
+//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+//    ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+//    TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+//    PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+//    SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+//    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+//    OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+//    IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+//    DEALINGS IN THE SOFTWARE.
+//
 
 #ifndef FASTFLOAT_FAST_FLOAT_H
 #define FASTFLOAT_FAST_FLOAT_H
@@ -6557,7 +6569,6 @@ from_chars_result from_chars_advanced(const char *first, const char *last,
 }
 #endif // FASTFLOAT_FAST_FLOAT_H
 
-
 #ifndef FASTFLOAT_FLOAT_COMMON_H
 #define FASTFLOAT_FLOAT_COMMON_H
 
@@ -6567,6 +6578,8 @@ from_chars_result from_chars_advanced(const char *first, const char *last,
 #include <cassert>
 //included above:
 //#include <cstring>
+//included above:
+//#include <type_traits>
 
 #if (defined(__x86_64) || defined(__x86_64__) || defined(_M_X64)   \
        || defined(__amd64) || defined(__aarch64__) || defined(_M_ARM64) \
@@ -6605,7 +6618,7 @@ from_chars_result from_chars_advanced(const char *first, const char *last,
 #ifdef _WIN32
 #define FASTFLOAT_IS_BIG_ENDIAN 0
 #else
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__ARM_EABI__)
 #include <machine/endian.h>
 #elif defined(sun) || defined(__sun)
 #include <sys/byteorder.h>
@@ -6782,6 +6795,8 @@ constexpr static float powers_of_ten_float[] = {1e0, 1e1, 1e2, 1e3, 1e4, 1e5,
                                                 1e6, 1e7, 1e8, 1e9, 1e10};
 
 template <typename T> struct binary_format {
+  using equiv_uint = typename std::conditional<sizeof(T) == 4, uint32_t, uint64_t>::type;
+
   static inline constexpr int mantissa_explicit_bits();
   static inline constexpr int minimum_exponent();
   static inline constexpr int infinite_power();
@@ -6795,6 +6810,9 @@ template <typename T> struct binary_format {
   static inline constexpr int smallest_power_of_ten();
   static inline constexpr T exact_power_of_ten(int64_t power);
   static inline constexpr size_t max_digits();
+  static inline constexpr equiv_uint exponent_mask();
+  static inline constexpr equiv_uint mantissa_mask();
+  static inline constexpr equiv_uint hidden_bit_mask();
 };
 
 template <> inline constexpr int binary_format<double>::mantissa_explicit_bits() {
@@ -6902,6 +6920,33 @@ template <> inline constexpr size_t binary_format<float>::max_digits() {
   return 114;
 }
 
+template <> inline constexpr binary_format<float>::equiv_uint
+    binary_format<float>::exponent_mask() {
+  return 0x7F800000;
+}
+template <> inline constexpr binary_format<double>::equiv_uint
+    binary_format<double>::exponent_mask() {
+  return 0x7FF0000000000000;
+}
+
+template <> inline constexpr binary_format<float>::equiv_uint
+    binary_format<float>::mantissa_mask() {
+  return 0x007FFFFF;
+}
+template <> inline constexpr binary_format<double>::equiv_uint
+    binary_format<double>::mantissa_mask() {
+  return 0x000FFFFFFFFFFFFF;
+}
+
+template <> inline constexpr binary_format<float>::equiv_uint
+    binary_format<float>::hidden_bit_mask() {
+  return 0x00800000;
+}
+template <> inline constexpr binary_format<double>::equiv_uint
+    binary_format<double>::hidden_bit_mask() {
+  return 0x0010000000000000;
+}
+
 template<typename T>
 fastfloat_really_inline void to_float(bool negative, adjusted_mantissa am, T &value) {
   uint64_t word = am.mantissa;
@@ -6923,7 +6968,6 @@ fastfloat_really_inline void to_float(bool negative, adjusted_mantissa am, T &va
 } // namespace fast_float
 
 #endif
-
 
 #ifndef FASTFLOAT_ASCII_NUMBER_H
 #define FASTFLOAT_ASCII_NUMBER_H
@@ -7158,7 +7202,6 @@ parsed_number_string parse_number_string(const char *p, const char *pend, parse_
 } // namespace fast_float
 
 #endif
-
 
 #ifndef FASTFLOAT_FAST_TABLE_H
 #define FASTFLOAT_FAST_TABLE_H
@@ -7861,7 +7904,6 @@ using powers = powers_template<>;
 
 #endif
 
-
 #ifndef FASTFLOAT_DECIMAL_TO_BINARY_H
 #define FASTFLOAT_DECIMAL_TO_BINARY_H
 
@@ -8057,7 +8099,6 @@ adjusted_mantissa compute_float(int64_t q, uint64_t w)  noexcept  {
 } // namespace fast_float
 
 #endif
-
 
 #ifndef FASTFLOAT_BIGINT_H
 #define FASTFLOAT_BIGINT_H
@@ -8652,7 +8693,6 @@ struct bigint {
 
 #endif
 
-
 #ifndef FASTFLOAT_ASCII_NUMBER_H
 #define FASTFLOAT_ASCII_NUMBER_H
 
@@ -8888,7 +8928,6 @@ parsed_number_string parse_number_string(const char *p, const char *pend, parse_
 
 #endif
 
-
 #ifndef FASTFLOAT_DIGIT_COMPARISON_H
 #define FASTFLOAT_DIGIT_COMPARISON_H
 
@@ -8936,40 +8975,24 @@ fastfloat_really_inline int32_t scientific_exponent(parsed_number_string& num) n
 // this converts a native floating-point number to an extended-precision float.
 template <typename T>
 fastfloat_really_inline adjusted_mantissa to_extended(T value) noexcept {
+  using equiv_uint = typename binary_format<T>::equiv_uint;
+  constexpr equiv_uint exponent_mask = binary_format<T>::exponent_mask();
+  constexpr equiv_uint mantissa_mask = binary_format<T>::mantissa_mask();
+  constexpr equiv_uint hidden_bit_mask = binary_format<T>::hidden_bit_mask();
+
   adjusted_mantissa am;
   int32_t bias = binary_format<T>::mantissa_explicit_bits() - binary_format<T>::minimum_exponent();
-  if (std::is_same<T, float>::value) {
-    constexpr uint32_t exponent_mask = 0x7F800000;
-    constexpr uint32_t mantissa_mask = 0x007FFFFF;
-    constexpr uint64_t hidden_bit_mask = 0x00800000;
-    uint32_t bits;
-    ::memcpy(&bits, &value, sizeof(T));
-    if ((bits & exponent_mask) == 0) {
-      // denormal
-      am.power2 = 1 - bias;
-      am.mantissa = bits & mantissa_mask;
-    } else {
-      // normal
-      am.power2 = int32_t((bits & exponent_mask) >> binary_format<T>::mantissa_explicit_bits());
-      am.power2 -= bias;
-      am.mantissa = (bits & mantissa_mask) | hidden_bit_mask;
-    }
+  equiv_uint bits;
+  ::memcpy(&bits, &value, sizeof(T));
+  if ((bits & exponent_mask) == 0) {
+    // denormal
+    am.power2 = 1 - bias;
+    am.mantissa = bits & mantissa_mask;
   } else {
-    constexpr uint64_t exponent_mask = 0x7FF0000000000000;
-    constexpr uint64_t mantissa_mask = 0x000FFFFFFFFFFFFF;
-    constexpr uint64_t hidden_bit_mask = 0x0010000000000000;
-    uint64_t bits;
-    ::memcpy(&bits, &value, sizeof(T));
-    if ((bits & exponent_mask) == 0) {
-      // denormal
-      am.power2 = 1 - bias;
-      am.mantissa = bits & mantissa_mask;
-    } else {
-      // normal
-      am.power2 = int32_t((bits & exponent_mask) >> binary_format<T>::mantissa_explicit_bits());
-      am.power2 -= bias;
-      am.mantissa = (bits & mantissa_mask) | hidden_bit_mask;
-    }
+    // normal
+    am.power2 = int32_t((bits & exponent_mask) >> binary_format<T>::mantissa_explicit_bits());
+    am.power2 -= bias;
+    am.mantissa = (bits & mantissa_mask) | hidden_bit_mask;
   }
 
   return am;
@@ -8994,7 +9017,7 @@ fastfloat_really_inline void round(adjusted_mantissa& am, callback cb) noexcept 
   if (-am.power2 >= mantissa_shift) {
     // have a denormal float
     int32_t shift = -am.power2 + 1;
-    cb(am, std::min(shift, 64));
+    cb(am, std::min(shift, int32_t(64)));
     // check for round-up: if rounding-nearest carried us to the hidden bit.
     am.power2 = (am.mantissa < (uint64_t(1) << binary_format<T>::mantissa_explicit_bits())) ? 0 : 1;
     return;
@@ -9313,7 +9336,6 @@ inline adjusted_mantissa digit_comp(parsed_number_string& num, adjusted_mantissa
 } // namespace fast_float
 
 #endif
-
 
 #ifndef FASTFLOAT_PARSE_NUMBER_H
 #define FASTFLOAT_PARSE_NUMBER_H
@@ -16077,14 +16099,14 @@ bool is_debugger_attached()
 
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/c4core_all.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/c4core_all.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/export.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/export.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/export.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -16108,14 +16130,14 @@ bool is_debugger_attached()
 #endif /* C4_YML_EXPORT_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/export.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/export.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/common.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/common.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/common.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -16125,14 +16147,14 @@ bool is_debugger_attached()
 //included above:
 //#include <cstddef>
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/substr.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/substr.hpp
 //#include <c4/substr.hpp>
 #if !defined(C4_SUBSTR_HPP_) && !defined(_C4_SUBSTR_HPP_)
 #error "amalgamate: file c4/substr.hpp must have been included at this point"
 #endif /* C4_SUBSTR_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/export.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/export.hpp
 //#include <c4/yml/export.hpp>
 #if !defined(C4_YML_EXPORT_HPP_) && !defined(_C4_YML_EXPORT_HPP_)
 #error "amalgamate: file c4/yml/export.hpp must have been included at this point"
@@ -16337,14 +16359,14 @@ do                                                                      \
 #endif /* _C4_YML_COMMON_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/common.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/common.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/tree.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -16353,14 +16375,14 @@ do                                                                      \
 
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/error.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/error.hpp
 //#include "c4/error.hpp"
 #if !defined(C4_ERROR_HPP_) && !defined(_C4_ERROR_HPP_)
 #error "amalgamate: file c4/error.hpp must have been included at this point"
 #endif /* C4_ERROR_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/types.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/types.hpp
 //#include "c4/types.hpp"
 #if !defined(C4_TYPES_HPP_) && !defined(_C4_TYPES_HPP_)
 #error "amalgamate: file c4/types.hpp must have been included at this point"
@@ -16368,7 +16390,7 @@ do                                                                      \
 
 #ifndef _C4_YML_COMMON_HPP_
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/common.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/common.hpp
 //#include "c4/yml/common.hpp"
 #if !defined(C4_YML_COMMON_HPP_) && !defined(_C4_YML_COMMON_HPP_)
 #error "amalgamate: file c4/yml/common.hpp must have been included at this point"
@@ -16377,7 +16399,7 @@ do                                                                      \
 #endif
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/charconv.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/charconv.hpp
 //#include <c4/charconv.hpp>
 #if !defined(C4_CHARCONV_HPP_) && !defined(_C4_CHARCONV_HPP_)
 #error "amalgamate: file c4/charconv.hpp must have been included at this point"
@@ -17680,14 +17702,14 @@ C4_SUPPRESS_WARNING_GCC_CLANG_POP
 #endif /* _C4_YML_TREE_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/node.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -17701,14 +17723,14 @@ C4_SUPPRESS_WARNING_GCC_CLANG_POP
 //#include <cstddef>
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
 #endif /* C4_YML_TREE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/base64.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/base64.hpp
 //#include "c4/base64.hpp"
 #if !defined(C4_BASE64_HPP_) && !defined(_C4_BASE64_HPP_)
 #error "amalgamate: file c4/base64.hpp must have been included at this point"
@@ -18675,14 +18697,14 @@ bool NodeRef::visit_stacked(Visitor fn, size_t indentation_level, bool skip_root
 #endif /* _C4_YML_NODE_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/writer.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/writer.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/writer.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -18694,7 +18716,7 @@ bool NodeRef::visit_stacked(Visitor fn, size_t indentation_level, bool skip_root
 #endif
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/substr.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/substr.hpp
 //#include <c4/substr.hpp>
 #if !defined(C4_SUBSTR_HPP_) && !defined(_C4_SUBSTR_HPP_)
 #error "amalgamate: file c4/substr.hpp must have been included at this point"
@@ -18925,14 +18947,14 @@ struct WriterBuf
 #endif /* _C4_YML_WRITER_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/writer.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/writer.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/detail/parser_dbg.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -18963,9 +18985,6 @@ struct WriterBuf
 #pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
 // some debugging scaffolds
-
-#define _c4prsp(sp) ((int)(sp).len), (sp).str
-
 #define _c4err(fmt, ...)   \
     do { if(c4::is_debugger_attached()) { C4_DEBUG_BREAK(); } \
          this->_err("\n" "%s:%d: ERROR parsing yml: " fmt     , __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
@@ -18981,6 +19000,20 @@ struct WriterBuf
 #   define _c4dbgq(msg)
 #endif
 
+#define _c4prsp(sp) ((int)(sp).len), (sp).str
+#define _c4prc(c) (__c4prc(c) ? 2 : 1), (__c4prc(c) ? __c4prc(c) : &c)
+inline const char *__c4prc(const char &c)
+{
+    switch(c)
+    {
+    case '\0': return "\\0";
+    case '\r': return "\\r";
+    case '\t': return "\\t";
+    case '\n': return "\\n";
+    default: return nullptr;
+    };
+};
+
 #pragma clang diagnostic pop
 #pragma GCC diagnostic pop
 
@@ -18992,7 +19025,7 @@ struct WriterBuf
 #endif /* _C4_YML_DETAIL_PARSER_DBG_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp)
 
 #define C4_YML_EMIT_DEF_HPP_
 
@@ -19001,7 +19034,7 @@ struct WriterBuf
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/emit.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -19376,7 +19409,7 @@ CharOwningContainer emitrs_json(NodeRef const& n)
 } // namespace c4
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.def.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.def.hpp
 //#include "c4/yml/emit.def.hpp"
 #if !defined(C4_YML_EMIT_DEF_HPP_) && !defined(_C4_YML_EMIT_DEF_HPP_)
 #error "amalgamate: file c4/yml/emit.def.hpp must have been included at this point"
@@ -19386,14 +19419,14 @@ CharOwningContainer emitrs_json(NodeRef const& n)
 #endif /* _C4_YML_EMIT_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/emit.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/emit.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/emit.def.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.def.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.def.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -19402,7 +19435,7 @@ CharOwningContainer emitrs_json(NodeRef const& n)
 
 #ifndef _C4_YML_EMIT_HPP_
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.hpp
 //#include "c4/yml/emit.hpp"
 #if !defined(C4_YML_EMIT_HPP_) && !defined(_C4_YML_EMIT_HPP_)
 #error "amalgamate: file c4/yml/emit.hpp must have been included at this point"
@@ -19410,7 +19443,7 @@ CharOwningContainer emitrs_json(NodeRef const& n)
 
 #endif
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
 //#include "c4/yml/detail/parser_dbg.hpp"
 #if !defined(C4_YML_DETAIL_PARSER_DBG_HPP_) && !defined(_C4_YML_DETAIL_PARSER_DBG_HPP_)
 #error "amalgamate: file c4/yml/detail/parser_dbg.hpp must have been included at this point"
@@ -19881,14 +19914,14 @@ void Emitter<Writer>::_write_scalar_json(csubstr s, bool as_key, bool was_quoted
 #endif /* _C4_YML_EMIT_DEF_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/emit.def.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/emit.def.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/detail/stack.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/stack.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/stack.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20158,14 +20191,14 @@ void stack<T, N>::_cb(Callbacks const& cb)
 #endif /* _C4_YML_DETAIL_STACK_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/detail/stack.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/detail/stack.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/parse.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/parse.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/parse.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20174,7 +20207,7 @@ void stack<T, N>::_cb(Callbacks const& cb)
 
 #ifndef _C4_YML_TREE_HPP_
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
@@ -20184,7 +20217,7 @@ void stack<T, N>::_cb(Callbacks const& cb)
 
 #ifndef _C4_YML_NODE_HPP_
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
@@ -20194,7 +20227,7 @@ void stack<T, N>::_cb(Callbacks const& cb)
 
 #ifndef _C4_YML_DETAIL_STACK_HPP_
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/stack.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/stack.hpp
 //#include "c4/yml/detail/stack.hpp"
 #if !defined(C4_YML_DETAIL_STACK_HPP_) && !defined(_C4_YML_DETAIL_STACK_HPP_)
 #error "amalgamate: file c4/yml/detail/stack.hpp must have been included at this point"
@@ -20268,6 +20301,13 @@ public:
         _resize_locations(num_source_lines);
     }
 
+    /** Reserve a certain capacity for the character arena used to
+     * filter scalars. */
+    void reserve_filter_arena(size_t num_characters)
+    {
+        _resize_filter_arena(num_characters);
+    }
+
     /** @} */
 
 public:
@@ -20283,6 +20323,10 @@ public:
 
     /** Get the latest YAML buffer parsed by this object. */
     csubstr source() const { return m_buf; }
+
+    size_t stack_capacity() const { return m_stack.capacity(); }
+    size_t locations_capacity() const { return m_newline_offsets_capacity; }
+    size_t filter_arena_capacity() const { return m_filter_arena.len; }
 
     /** @} */
 
@@ -20462,7 +20506,8 @@ private:
     bool    _scan_scalar(csubstr *C4_RESTRICT scalar, bool *C4_RESTRICT quoted);
 
     csubstr _scan_comment();
-    csubstr _scan_quoted_scalar(const char q);
+    csubstr _scan_squot_scalar();
+    csubstr _scan_dquot_scalar();
     csubstr _scan_block();
     substr  _scan_plain_scalar_impl(csubstr currscalar, csubstr peeked_line, size_t indentation);
     substr  _scan_plain_scalar_expl(csubstr currscalar, csubstr peeked_line);
@@ -20470,12 +20515,14 @@ private:
     csubstr _scan_to_next_nonempty_line(size_t indentation);
     csubstr _extend_scanned_scalar(csubstr currscalar);
 
-    csubstr _filter_squot_scalar(substr s);
+    csubstr _filter_squot_scalar(const substr s);
     csubstr _filter_dquot_scalar(substr s);
     csubstr _filter_plain_scalar(substr s, size_t indentation);
     csubstr _filter_block_scalar(substr s, BlockStyle_e style, BlockChomp_e chomp, size_t indentation);
-    substr  _filter_whitespace(substr s, size_t indentation=0, bool leading_whitespace=true, bool filter_tabs=false);
-    substr  _filter_leading_and_trailing_whitespace_at_newline(substr r, size_t *C4_RESTRICT i, char next);
+    template<bool backslash_is_escape, bool keep_trailing_whitespace>
+    bool    _filter_nl(substr scalar, size_t *C4_RESTRICT pos, size_t *C4_RESTRICT filter_arena_pos, size_t indentation);
+    template<bool keep_trailing_whitespace>
+    void    _filter_ws(substr scalar, size_t *C4_RESTRICT pos, size_t *C4_RESTRICT filter_arena_pos);
 
     void  _handle_finished_file();
     void  _handle_line();
@@ -20674,6 +20721,10 @@ private:
     void addrem_flags(size_t on, size_t off, State * s);
     void rem_flags(size_t off, State * s);
 
+    void _resize_filter_arena(size_t num_characters);
+    void _grow_filter_arena(size_t num_characters);
+    void _finish_filter_arena(substr filtered, size_t pos);
+
     void _prepare_locations() const;         // only changes mutable members
     void _resize_locations(size_t sz) const; // only changes mutable members
     void _mark_locations_dirty();
@@ -20685,7 +20736,6 @@ private:
     void _clr();
     void _cp(Parser const* that);
     void _mv(Parser *that);
-    void _cb(Callbacks const& cb);
 
 #ifdef RYML_DBG
     void _dbg(const char *msg, ...) const;
@@ -20717,6 +20767,8 @@ private:
     csubstr m_key_anchor;
     size_t  m_val_anchor_indentation;
     csubstr m_val_anchor;
+
+    substr m_filter_arena;
 
     mutable size_t *m_newline_offsets;
     mutable size_t  m_newline_offsets_size;
@@ -20827,14 +20879,14 @@ RYML_DEPRECATED("use parse_in_arena() instead") inline void parse(csubstr filena
 #endif /* _C4_YML_PARSE_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/parse.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/parse.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/std/map.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/std/map.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/std/map.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20844,7 +20896,7 @@ RYML_DEPRECATED("use parse_in_arena() instead") inline void parse(csubstr filena
 /** @file map.hpp write/read std::map to/from a YAML tree. */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
@@ -20891,14 +20943,14 @@ bool read(c4::yml::NodeRef const& n, std::map<K, V, Less, Alloc> * m)
 #endif // _C4_YML_STD_MAP_HPP_
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/std/map.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/std/map.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/std/string.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/std/string.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/std/string.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20909,7 +20961,7 @@ bool read(c4::yml::NodeRef const& n, std::map<K, V, Less, Alloc> * m)
 
 // everything we need is implemented here:
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/std/string.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/std/string.hpp
 //#include <c4/std/string.hpp>
 #if !defined(C4_STD_STRING_HPP_) && !defined(_C4_STD_STRING_HPP_)
 #error "amalgamate: file c4/std/string.hpp must have been included at this point"
@@ -20919,14 +20971,14 @@ bool read(c4::yml::NodeRef const& n, std::map<K, V, Less, Alloc> * m)
 #endif // C4_YML_STD_STRING_HPP_
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/std/string.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/std/string.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/std/vector.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/std/vector.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/std/vector.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20934,14 +20986,14 @@ bool read(c4::yml::NodeRef const& n, std::map<K, V, Less, Alloc> * m)
 #define _C4_YML_STD_VECTOR_HPP_
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
 #endif /* C4_YML_NODE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/std/vector.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/std/vector.hpp
 //#include <c4/std/vector.hpp>
 #if !defined(C4_STD_VECTOR_HPP_) && !defined(_C4_STD_VECTOR_HPP_)
 #error "amalgamate: file c4/std/vector.hpp must have been included at this point"
@@ -20985,14 +21037,14 @@ bool read(c4::yml::NodeRef const& n, std::vector<V, Alloc> *vec)
 #endif // _C4_YML_STD_VECTOR_HPP_
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/std/vector.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/std/vector.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/std/std.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/std/std.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/std/std.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -21000,21 +21052,21 @@ bool read(c4::yml::NodeRef const& n, std::vector<V, Alloc> *vec)
 #define _C4_YML_STD_STD_HPP_
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/std/string.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/std/string.hpp
 //#include "c4/yml/std/string.hpp"
 #if !defined(C4_YML_STD_STRING_HPP_) && !defined(_C4_YML_STD_STRING_HPP_)
 #error "amalgamate: file c4/yml/std/string.hpp must have been included at this point"
 #endif /* C4_YML_STD_STRING_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/std/vector.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/std/vector.hpp
 //#include "c4/yml/std/vector.hpp"
 #if !defined(C4_YML_STD_VECTOR_HPP_) && !defined(_C4_YML_STD_VECTOR_HPP_)
 #error "amalgamate: file c4/yml/std/vector.hpp must have been included at this point"
 #endif /* C4_YML_STD_VECTOR_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/std/map.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/std/map.hpp
 //#include "c4/yml/std/map.hpp"
 #if !defined(C4_YML_STD_MAP_HPP_) && !defined(_C4_YML_STD_MAP_HPP_)
 #error "amalgamate: file c4/yml/std/map.hpp must have been included at this point"
@@ -21024,20 +21076,20 @@ bool read(c4::yml::NodeRef const& n, std::vector<V, Alloc> *vec)
 #endif // _C4_YML_STD_STD_HPP_
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/std/std.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/std/std.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/common.cpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/common.cpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/common.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/common.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/common.hpp
 //#include "c4/yml/common.hpp"
 #if !defined(C4_YML_COMMON_HPP_) && !defined(_C4_YML_COMMON_HPP_)
 #error "amalgamate: file c4/yml/common.hpp must have been included at this point"
@@ -21162,41 +21214,41 @@ void error(const char *msg, size_t msg_len, Location loc)
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/common.cpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/common.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/tree.cpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.cpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
 #endif /* C4_YML_TREE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
 //#include "c4/yml/detail/parser_dbg.hpp"
 #if !defined(C4_YML_DETAIL_PARSER_DBG_HPP_) && !defined(_C4_YML_DETAIL_PARSER_DBG_HPP_)
 #error "amalgamate: file c4/yml/detail/parser_dbg.hpp must have been included at this point"
 #endif /* C4_YML_DETAIL_PARSER_DBG_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
 #endif /* C4_YML_NODE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/stack.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/stack.hpp
 //#include "c4/yml/detail/stack.hpp"
 #if !defined(C4_YML_DETAIL_STACK_HPP_) && !defined(_C4_YML_DETAIL_STACK_HPP_)
 #error "amalgamate: file c4/yml/detail/stack.hpp must have been included at this point"
@@ -23137,27 +23189,27 @@ C4_SUPPRESS_WARNING_MSVC_POP
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/tree.cpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/tree.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/parse.cpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/parse.cpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/parse.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/parse.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/parse.hpp
 //#include "c4/yml/parse.hpp"
 #if !defined(C4_YML_PARSE_HPP_) && !defined(_C4_YML_PARSE_HPP_)
 #error "amalgamate: file c4/yml/parse.hpp must have been included at this point"
 #endif /* C4_YML_PARSE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/error.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/error.hpp
 //#include "c4/error.hpp"
 #if !defined(C4_ERROR_HPP_) && !defined(_C4_ERROR_HPP_)
 #error "amalgamate: file c4/error.hpp must have been included at this point"
@@ -23172,7 +23224,7 @@ C4_SUPPRESS_WARNING_MSVC_POP
 //#include <stdio.h>
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
 //#include "c4/yml/detail/parser_dbg.hpp"
 #if !defined(C4_YML_DETAIL_PARSER_DBG_HPP_) && !defined(_C4_YML_DETAIL_PARSER_DBG_HPP_)
 #error "amalgamate: file c4/yml/detail/parser_dbg.hpp must have been included at this point"
@@ -23180,14 +23232,14 @@ C4_SUPPRESS_WARNING_MSVC_POP
 
 #ifdef RYML_DBG
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/print.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/print.hpp
 //#include "c4/yml/detail/print.hpp"
 #if !defined(C4_YML_DETAIL_PRINT_HPP_) && !defined(_C4_YML_DETAIL_PRINT_HPP_)
 #error "amalgamate: file c4/yml/detail/print.hpp must have been included at this point"
 #endif /* C4_YML_DETAIL_PRINT_HPP_ */
 
 #endif
-
+#define RYML_FILTER_ARENA
 
 #if defined(_MSC_VER)
 #   pragma warning(push)
@@ -23208,32 +23260,28 @@ C4_SUPPRESS_WARNING_MSVC_POP
 namespace c4 {
 namespace yml {
 
-static bool _is_scalar_next__runk(csubstr s)
+namespace {
+bool _is_scalar_next__runk(csubstr s)
 {
     return !(s.begins_with(": ") || s.begins_with_any("#,:{}[]%&") || s.begins_with("? ") || s == "-" || s.begins_with("- "));
 }
 
-static bool _is_scalar_next__rseq_rval(csubstr s)
+bool _is_scalar_next__rseq_rval(csubstr s)
 {
     return !(s.begins_with_any("[{!&") || s.begins_with("? ") || s.begins_with("- ") || s == "-");
 }
 
-static bool _is_scalar_next__rseq_rnxt(csubstr s)
-{
-    return !(s.begins_with("- ") || s == "-");
-}
-
-static bool _is_scalar_next__rmap(csubstr s)
+bool _is_scalar_next__rmap(csubstr s)
 {
     return !(s.begins_with(": ") || s.begins_with_any("#,!&") || s.begins_with("? "));
 }
 
-static bool _is_scalar_next__rmap_val(csubstr s)
+bool _is_scalar_next__rmap_val(csubstr s)
 {
     return !(s.begins_with("- ") || s.begins_with_any("{[") || s == "-");
 }
 
-static bool _is_doc_sep(csubstr s)
+bool _is_doc_sep(csubstr s)
 {
     constexpr const csubstr dashes = "---";
     constexpr const csubstr ellipsis = "...";
@@ -23244,6 +23292,40 @@ static bool _is_doc_sep(csubstr s)
         return s == ellipsis || s.sub(3).begins_with_any(whitesp);
     return false;
 }
+
+/** @p i is set to the first non whitespace character after the line
+ * @return the number of empty lines after the initial position */
+size_t count_following_newlines(csubstr r, size_t *C4_RESTRICT i, size_t indentation)
+{
+    RYML_ASSERT(r[*i] == '\n');
+    size_t numnl_following = 0;
+    ++(*i);
+    for( ; *i < r.len; ++(*i))
+    {
+        if(r.str[*i] == '\n')
+        {
+            ++numnl_following;
+            if(indentation) // skip the indentation after the newline
+            {
+                size_t stop = *i + indentation;
+                for( ; *i < r.len; ++(*i))
+                {
+                    if(r.str[*i] != ' ' && r.str[*i] != '\r')
+                        break;
+                    if(*i >= stop)
+                        break;
+                }
+            }
+        }
+        else if(r.str[*i] == ' ' || r.str[*i] == '\t' || r.str[*i] == '\r')  // skip leading whitespace
+            ;
+        else
+            break;
+    }
+    return numnl_following;
+}
+
+} // anon namespace
 
 
 //-----------------------------------------------------------------------------
@@ -23272,6 +23354,7 @@ Parser::Parser(Callbacks const& cb)
     , m_key_anchor()
     , m_val_anchor_indentation(0)
     , m_val_anchor()
+    , m_filter_arena()
     , m_newline_offsets()
     , m_newline_offsets_size(0)
     , m_newline_offsets_capacity(0)
@@ -23299,6 +23382,7 @@ Parser::Parser(Parser &&that)
     , m_key_anchor(that.m_key_anchor)
     , m_val_anchor_indentation(that.m_val_anchor_indentation)
     , m_val_anchor(that.m_val_anchor)
+    , m_filter_arena(that.m_filter_arena)
     , m_newline_offsets(that.m_newline_offsets)
     , m_newline_offsets_size(that.m_newline_offsets_size)
     , m_newline_offsets_capacity(that.m_newline_offsets_capacity)
@@ -23325,6 +23409,7 @@ Parser::Parser(Parser const& that)
     , m_key_anchor(that.m_key_anchor)
     , m_val_anchor_indentation(that.m_val_anchor_indentation)
     , m_val_anchor(that.m_val_anchor)
+    , m_filter_arena()
     , m_newline_offsets()
     , m_newline_offsets_size()
     , m_newline_offsets_capacity()
@@ -23336,6 +23421,10 @@ Parser::Parser(Parser const& that)
         _RYML_CB_CHECK(m_stack.m_callbacks, m_newline_offsets_capacity == that.m_newline_offsets_capacity);
         memcpy(m_newline_offsets, that.m_newline_offsets, that.m_newline_offsets_size * sizeof(size_t));
         m_newline_offsets_size = that.m_newline_offsets_size;
+    }
+    if(that.m_filter_arena.len)
+    {
+        _resize_filter_arena(that.m_filter_arena.len);
     }
 }
 
@@ -23359,6 +23448,7 @@ Parser& Parser::operator=(Parser &&that)
     m_key_anchor = (that.m_key_anchor);
     m_val_anchor_indentation = (that.m_val_anchor_indentation);
     m_val_anchor = (that.m_val_anchor);
+    m_filter_arena = that.m_filter_arena;
     m_newline_offsets = (that.m_newline_offsets);
     m_newline_offsets_size = (that.m_newline_offsets_size);
     m_newline_offsets_capacity = (that.m_newline_offsets_capacity);
@@ -23387,6 +23477,8 @@ Parser& Parser::operator=(Parser const& that)
     m_key_anchor = (that.m_key_anchor);
     m_val_anchor_indentation = (that.m_val_anchor_indentation);
     m_val_anchor = (that.m_val_anchor);
+    if(that.m_filter_arena.len > 0)
+        _resize_filter_arena(that.m_filter_arena.len);
     if(that.m_newline_offsets_capacity > m_newline_offsets_capacity)
         _resize_locations(that.m_newline_offsets_capacity);
     _RYML_CB_CHECK(m_stack.m_callbacks, m_newline_offsets_capacity >= that.m_newline_offsets_capacity);
@@ -23416,19 +23508,11 @@ void Parser::_clr()
     m_key_anchor = {};
     m_val_anchor_indentation = {};
     m_val_anchor = {};
+    m_filter_arena = {};
     m_newline_offsets = {};
     m_newline_offsets_size = {};
     m_newline_offsets_capacity = {};
     m_newline_offsets_buf = {};
-}
-
-void Parser::_cb(Callbacks const& cb)
-{
-    if(cb != m_stack.m_callbacks)
-    {
-        _free();
-        m_stack.m_callbacks = cb;
-    }
 }
 
 void Parser::_free()
@@ -23441,6 +23525,11 @@ void Parser::_free()
         m_newline_offsets_capacity = 0u;
         m_newline_offsets_buf = 0u;
     }
+    if(m_filter_arena.len)
+    {
+        _RYML_CB_FREE(m_stack.m_callbacks, m_filter_arena.str, char, m_filter_arena.len);
+        m_filter_arena = {};
+    }
     m_stack._free();
 }
 
@@ -23448,9 +23537,6 @@ void Parser::_free()
 //-----------------------------------------------------------------------------
 void Parser::_reset()
 {
-    while(m_stack.size() > 1)
-        m_stack.pop();
-
     _RYML_CB_ASSERT(m_stack.m_callbacks, m_stack.size() == 1);
     m_stack.clear();
     m_stack.push({});
@@ -25274,12 +25360,12 @@ csubstr Parser::_slurp_doc_scalar()
     if(s.begins_with('\''))
     {
         m_state->scalar_col = m_state->line_contents.current_col(s);
-        return _scan_quoted_scalar('\'');
+        return _scan_squot_scalar();
     }
     else if(s.begins_with('"'))
     {
         m_state->scalar_col = m_state->line_contents.current_col(s);
-        return _scan_quoted_scalar('"');
+        return _scan_dquot_scalar();
     }
     else if(s.begins_with('|') || s.begins_with('>'))
     {
@@ -25319,7 +25405,7 @@ bool Parser::_scan_scalar(csubstr *C4_RESTRICT scalar, bool *C4_RESTRICT quoted)
     {
         _c4dbgp("got a ': scanning single-quoted scalar");
         m_state->scalar_col = m_state->line_contents.current_col(s);
-        *scalar = _scan_quoted_scalar('\'');
+        *scalar = _scan_squot_scalar();
         *quoted = true;
         return true;
     }
@@ -25327,7 +25413,7 @@ bool Parser::_scan_scalar(csubstr *C4_RESTRICT scalar, bool *C4_RESTRICT quoted)
     {
         _c4dbgp("got a \": scanning double-quoted scalar");
         m_state->scalar_col = m_state->line_contents.current_col(s);
-        *scalar = _scan_quoted_scalar('"');
+        *scalar = _scan_dquot_scalar();
         *quoted = true;
         return true;
     }
@@ -25359,12 +25445,6 @@ bool Parser::_scan_scalar(csubstr *C4_RESTRICT scalar, bool *C4_RESTRICT quoted)
                 s = s.left_of(s.first_of(",]"));
             }
             s = s.trimr(' ');
-        }
-        else if(has_all(RNXT))
-        {
-            if( ! _is_scalar_next__rseq_rnxt(s))
-                return false;
-            _c4err("internal error");
         }
         else
         {
@@ -26738,14 +26818,10 @@ csubstr Parser::_scan_comment()
 }
 
 //-----------------------------------------------------------------------------
-csubstr Parser::_scan_quoted_scalar(const char q)
+csubstr Parser::_scan_squot_scalar()
 {
-    _RYML_CB_ASSERT(m_stack.m_callbacks, q == '\'' || q == '"');
-
     // quoted scalars can spread over multiple lines!
     // nice explanation here: http://yaml-multiline.info/
-
-    bool needs_filter = false;
 
     // a span to the end of the file
     size_t b = m_state->pos.offset;
@@ -26758,11 +26834,13 @@ csubstr Parser::_scan_quoted_scalar(const char q)
         _line_progressed((size_t)(s.begin() - m_buf.sub(b).begin()));
     }
     b = m_state->pos.offset; // take this into account
-    _RYML_CB_ASSERT(m_stack.m_callbacks, s.begins_with(q));
+    _RYML_CB_ASSERT(m_stack.m_callbacks, s.begins_with('\''));
 
     // skip the opening quote
     _line_progressed(1);
     s = s.sub(1);
+
+    bool needs_filter = false;
 
     size_t numlines = 1; // we already have one line
     size_t pos = npos; // find the pos of the matching quote
@@ -26770,58 +26848,27 @@ csubstr Parser::_scan_quoted_scalar(const char q)
     {
         const csubstr line = m_state->line_contents.rem;
         bool line_is_blank = true;
-
-        if(q == '\'') // scalars with single quotes
+        _c4dbgpf("scanning single quoted scalar @ line[%zd]: ~~~%.*s~~~", m_state->pos.line, _c4prsp(line));
+        for(size_t i = 0; i < line.len; ++i)
         {
-            _c4dbgpf("scanning single quoted scalar @ line[%zd]:  line=\"%.*s\"", m_state->pos.line, _c4prsp(line));
-            for(size_t i = 0; i < line.len; ++i)
+            const char curr = line.str[i];
+            if(curr == '\'') // single quotes are escaped with two single quotes
             {
-                const char curr = line.str[i];
-                if(curr == '\'') // single quotes are escaped with two single quotes
-                {
-                    const char next = i+1 < line.len ? line.str[i+1] : '~';
-                    if(next != '\'') // so just look for the first quote
-                    {                // without another after it
-                        pos = i;
-                        break;
-                    }
-                    else
-                    {
-                        needs_filter = true; // needs filter to remove escaped quotes
-                        ++i; // skip the escaped quote
-                    }
-                }
-                else if(curr != ' ')
-                {
-                    line_is_blank = false;
-                }
-            }
-        }
-        else // scalars with double quotes
-        {
-            _c4dbgpf("scanning double quoted scalar @ line[%zd]:  line='%.*s'", m_state->pos.line, _c4prsp(line));
-            for(size_t i = 0; i < line.len; ++i)
-            {
-                const char curr = line.str[i];
-                if(curr != ' ')
-                {
-                    line_is_blank = false;
-                }
-                // every \ is an escape
-                if(curr == '\\')
-                {
-                    const char next = i+1 < line.len ? line.str[i+1] : '~';
-                    needs_filter = true;
-                    if(next == '"' || next == '\\')
-                    {
-                        ++i;
-                    }
-                }
-                else if(curr == '"')
-                {
+                const char next = i+1 < line.len ? line.str[i+1] : '~';
+                if(next != '\'') // so just look for the first quote
+                {                // without another after it
                     pos = i;
                     break;
                 }
+                else
+                {
+                    needs_filter = true; // needs filter to remove escaped quotes
+                    ++i; // skip the escaped quote
+                }
+            }
+            else if(curr != ' ')
+            {
+                line_is_blank = false;
             }
         }
 
@@ -26841,7 +26888,7 @@ csubstr Parser::_scan_quoted_scalar(const char q)
         else
         {
             _RYML_CB_ASSERT(m_stack.m_callbacks, pos >= 0 && pos < m_buf.len);
-            _RYML_CB_ASSERT(m_stack.m_callbacks, m_buf[m_state->pos.offset + pos] == q);
+            _RYML_CB_ASSERT(m_stack.m_callbacks, m_buf[m_state->pos.offset + pos] == '\'');
             _line_progressed(pos + 1); // progress beyond the quote
             pos = m_state->pos.offset - b - 1; // but we stop before it
             break;
@@ -26855,29 +26902,124 @@ csubstr Parser::_scan_quoted_scalar(const char q)
     {
         _c4err("reached end of file while looking for closing quote");
     }
-    else if(pos == 0)
-    {
-        s.clear();
-        _RYML_CB_ASSERT(m_stack.m_callbacks,  ! needs_filter);
-    }
     else
     {
+        _RYML_CB_ASSERT(m_stack.m_callbacks, pos > 0);
         _RYML_CB_ASSERT(m_stack.m_callbacks, s.end() >= m_buf.begin() && s.end() <= m_buf.end());
-        _RYML_CB_ASSERT(m_stack.m_callbacks, s.end() == m_buf.end() || *s.end() == q);
+        _RYML_CB_ASSERT(m_stack.m_callbacks, s.end() == m_buf.end() || *s.end() == '\'');
         s = s.sub(0, pos-1);
     }
 
     if(needs_filter)
     {
-        csubstr ret;
-        if(q == '\'')
+        csubstr ret = _filter_squot_scalar(s);
+        _RYML_CB_ASSERT(m_stack.m_callbacks, ret.len <= s.len || s.empty() || s.trim(' ').empty());
+        _c4dbgpf("final scalar: \"%.*s\"", _c4prsp(ret));
+        return ret;
+    }
+
+    _c4dbgpf("final scalar: \"%.*s\"", _c4prsp(s));
+
+    return s;
+}
+
+//-----------------------------------------------------------------------------
+csubstr Parser::_scan_dquot_scalar()
+{
+    // quoted scalars can spread over multiple lines!
+    // nice explanation here: http://yaml-multiline.info/
+
+    // a span to the end of the file
+    size_t b = m_state->pos.offset;
+    substr s = m_buf.sub(b);
+    if(s.begins_with(' '))
+    {
+        s = s.triml(' ');
+        _RYML_CB_ASSERT(m_stack.m_callbacks, m_buf.sub(b).is_super(s));
+        _RYML_CB_ASSERT(m_stack.m_callbacks, s.begin() >= m_buf.sub(b).begin());
+        _line_progressed((size_t)(s.begin() - m_buf.sub(b).begin()));
+    }
+    b = m_state->pos.offset; // take this into account
+    _RYML_CB_ASSERT(m_stack.m_callbacks, s.begins_with('"'));
+
+    // skip the opening quote
+    _line_progressed(1);
+    s = s.sub(1);
+
+    bool needs_filter = false;
+
+    size_t numlines = 1; // we already have one line
+    size_t pos = npos; // find the pos of the matching quote
+    while( ! _finished_file())
+    {
+        const csubstr line = m_state->line_contents.rem;
+        bool line_is_blank = true;
+        _c4dbgpf("scanning double quoted scalar @ line[%zd]:  line='%.*s'", m_state->pos.line, _c4prsp(line));
+        for(size_t i = 0; i < line.len; ++i)
         {
-            ret = _filter_squot_scalar(s);
+            const char curr = line.str[i];
+            if(curr != ' ')
+            {
+                line_is_blank = false;
+            }
+            // every \ is an escape
+            if(curr == '\\')
+            {
+                const char next = i+1 < line.len ? line.str[i+1] : '~';
+                needs_filter = true;
+                if(next == '"' || next == '\\')
+                {
+                    ++i;
+                }
+            }
+            else if(curr == '"')
+            {
+                pos = i;
+                break;
+            }
         }
-        else if(q == '"')
+
+        // leading whitespace also needs filtering
+        needs_filter = needs_filter
+            || numlines > 1
+            || line_is_blank
+            || (_at_line_begin() && line.begins_with(' '))
+            || (m_state->line_contents.full.last_of('\r') != csubstr::npos);
+
+        if(pos == npos)
         {
-            ret = _filter_dquot_scalar(s);
+            _line_progressed(line.len);
+            ++numlines;
+            _c4dbgpf("scanning scalar @ line[%zd]: sofar=\"%.*s\"", m_state->pos.line, _c4prsp(s.sub(0, m_state->pos.offset-b)));
         }
+        else
+        {
+            _RYML_CB_ASSERT(m_stack.m_callbacks, pos >= 0 && pos < m_buf.len);
+            _RYML_CB_ASSERT(m_stack.m_callbacks, m_buf[m_state->pos.offset + pos] == '"');
+            _line_progressed(pos + 1); // progress beyond the quote
+            pos = m_state->pos.offset - b - 1; // but we stop before it
+            break;
+        }
+
+        _line_ended();
+        _scan_line();
+    }
+
+    if(pos == npos)
+    {
+        _c4err("reached end of file while looking for closing quote");
+    }
+    else
+    {
+        _RYML_CB_ASSERT(m_stack.m_callbacks, pos > 0);
+        _RYML_CB_ASSERT(m_stack.m_callbacks, s.end() == m_buf.end() || *s.end() == '"');
+        _RYML_CB_ASSERT(m_stack.m_callbacks, s.end() >= m_buf.begin() && s.end() <= m_buf.end());
+        s = s.sub(0, pos-1);
+    }
+
+    if(needs_filter)
+    {
+        csubstr ret = _filter_dquot_scalar(s);
         _RYML_CB_ASSERT(m_stack.m_callbacks, ret.len <= s.len || s.empty() || s.trim(' ').empty());
         _c4dbgpf("final scalar: \"%.*s\"", _c4prsp(ret));
         return ret;
@@ -26945,7 +27087,7 @@ csubstr Parser::_scan_block()
     _line_ended();
     _scan_line();
 
-    _c4dbgpf("scanning block:  style=%s  chomp=%s  indentation=%zu", newline==BLOCK_FOLD ? "fold" : "literal",
+    _c4dbgpf("scanning block: style=%s  chomp=%s  indentation=%zu", newline==BLOCK_FOLD ? "fold" : "literal",
         chomp==CHOMP_CLIP ? "clip" : (chomp==CHOMP_STRIP ? "strip" : "keep"), indentation);
 
     // start with a zero-length block, already pointing at the right place
@@ -27044,331 +27186,400 @@ csubstr Parser::_scan_block()
     C4_UNUSED(num_lines);
     C4_UNUSED(first);
 
+    if(indentation == npos)
+    {
+        _c4dbgpf("scanning block: set indentation from provisional: %zu", provisional_indentation);
+        indentation = provisional_indentation;
+    }
+
     if(num_lines)
         _line_ended_undo();
 
-    _c4dbgpf("scanning block: raw='%.*s'", _c4prsp(raw_block));
+    _c4dbgpf("scanning block: raw=~~~%.*s~~~", _c4prsp(raw_block));
 
     // ok! now we strip the newlines and spaces according to the specs
     s = _filter_block_scalar(raw_block, newline, chomp, indentation);
 
-    _c4dbgpf("scanning block: final='%.*s'", _c4prsp(s));
+    _c4dbgpf("scanning block: final=~~~%.*s~~~", _c4prsp(s));
 
     return s;
 }
 
+
 //-----------------------------------------------------------------------------
-csubstr Parser::_filter_plain_scalar(substr s, size_t indentation)
+
+template<bool backslash_is_escape, bool keep_trailing_whitespace>
+bool Parser::_filter_nl(substr r, size_t *C4_RESTRICT i, size_t *C4_RESTRICT pos, size_t indentation)
 {
-    _c4dbgpf("filtering plain scalar: indentation=%zu before='%.*s'", indentation, _c4prsp(s));
+    // a debugging scaffold:
+    #if 0
+    #define _c4dbgfnl(fmt, ...) _c4dbgpf("filter_nl[%zu]: " fmt, *i, __VA_ARGS__)
+    #else
+    #define _c4dbgfnl(...)
+    #endif
 
-    // do a first sweep to clean leading whitespace from the indentation
-    substr r = _filter_whitespace(s, indentation);
+    const char curr = r[*i];
+    bool replaced = false;
 
-    // now another sweep for newlines
-    for(size_t i = 0; i < r.len; ++i)
+    _RYML_CB_ASSERT(m_stack.m_callbacks, indentation != npos);
+    _RYML_CB_ASSERT(m_stack.m_callbacks, curr == '\n');
+
+    _c4dbgfnl("found newline. sofar=[%zu]~~~%.*s~~~", *pos, _c4prsp(m_filter_arena.first(*pos)));
+    size_t ii = *i;
+    size_t numnl_following = count_following_newlines(r, &ii, indentation);
+    if(numnl_following)
     {
-        const char curr = r[i];
-        const char next = i+1 < r.len ? r[i+1] : '\0';
-        _RYML_CB_ASSERT(m_stack.m_callbacks, curr != '\r' && next != '\r');
-        if(curr == '\n')
+        if(ii < r.len)
         {
-            _c4dbgpf("filtering plain scalar: i=%zu: current='%.*s'", i, _c4prsp(r.first(i)));
-            if(next != '\n')
+            _c4dbgfnl("%zu consecutive (empty) lines in the middle. totalws=%zd", 1+numnl_following, ii - *i);
+            for(size_t j = 0; j < numnl_following; ++j)
+                m_filter_arena.str[(*pos)++] = '\n';
+        }
+        else
+        {
+            _c4dbgfnl("%zu consecutive (empty) lines at the end. totalws=%zu remaining=%zu", 1+numnl_following, ii - *i, r.len-*i);
+            for(size_t j = 0; j < numnl_following; ++j)
+                m_filter_arena.str[(*pos)++] = '\n';
+        }
+    }
+    else
+    {
+        if(r.first_not_of(" \t", *i+1) != npos)
+        {
+            m_filter_arena.str[(*pos)++] = ' ';
+            _c4dbgfnl("single newline. convert to space. ii=%zu/%zu. sofar=[%zu]~~~%.*s~~~", ii, r.len, *pos, _c4prsp(m_filter_arena.first(*pos)));
+            replaced = true;
+        }
+        else
+        {
+            if C4_IF_CONSTEXPR (keep_trailing_whitespace)
             {
-                if(next == ' ' || next == '\t')
-                {
-                    _c4dbgp("filtering plain scalar: next is whitespace");
-                    size_t e = r.first_not_of(" \t", i+1); // we are sure i+1
-                    if(e == csubstr::npos)
-                    {
-                        _c4dbgpf("filtering plain scalar: whitespace all the way to the end. stop at %zu", i+1);
-                        r.len = i;
-                    }
-                    else if(r[e] == '\n' || r[e] == '\r')
-                    {
-                        _RYML_CB_ASSERT(m_stack.m_callbacks, e > i);
-                        _c4dbgpf("filtering plain scalar: whitespace-only line, len=%zu. keep newline.", e-i);
-                        r = r.erase_range(i+1, e+1);
-                    }
-                    else
-                    {
-                        _c4dbgpf("filtering plain scalar: standard line, remove prev newline and leading whitespace.", e-i);
-                        r = r.erase_range(i, e);
-                    }
-                }
-                else if(i + 1 < r.len)
-                {
-                    size_t lastnws = r.first(i).last_not_of(" \t");
-                    if(lastnws != csubstr::npos && lastnws+1 < i)
-                    {
-                        _c4dbgpf("filtering plain scalar: remove %zu whitespace characters at line end (%zu,%zu)", i - lastnws, lastnws+1, i);
-                        r = r.erase_range(lastnws+1, i);
-                        i = lastnws+1;
-                    }
-                    _c4dbgpf("filtering plain scalar: filter single newline at %zu", i);
-                    r[i] = ' '; // a single unix newline: turn it into a space
-                }
-                else
-                {
-                    _c4dbgpf("filtering plain scalar: trim terminating newline at %zu", r.len);
-                    --r.len; // trim terminating newline
-                }
+                m_filter_arena.str[(*pos)++] = ' ';
+                _c4dbgfnl("single newline. convert to space. ii=%zu/%zu. sofar=[%zu]~~~%.*s~~~", ii, r.len, *pos, _c4prsp(m_filter_arena.first(*pos)));
+                replaced = true;
             }
             else
             {
-                _c4dbgp("filtering plain scalar: multiple newlines");
-                _RYML_CB_ASSERT(m_stack.m_callbacks, next == '\n');
-                r = r.erase(i, 1);  // erase one
-                _RYML_CB_ASSERT(m_stack.m_callbacks, r[i] == '\n');
-                size_t nl = r.sub(i).first_not_of('\n');
-                if(nl == csubstr::npos)
-                {
-                    _c4dbgpf("filtering plain scalar: newlines starting at %zu go up to the end at %zu", i, r.len);
-                    break;
-                }
-                _c4dbgpf("filtering plain scalar: erasing one of %zu newlines found at %zu", nl, i);
-                _RYML_CB_ASSERT(m_stack.m_callbacks, nl > 0);
-                i += nl; // and skip the rest
+                _c4dbgfnl("last newline, everything else is whitespace. ii=%zu/%zu", ii, r.len);
+                *i = r.len;
             }
         }
-        else if(curr == '\r')
+        if C4_IF_CONSTEXPR (backslash_is_escape)
         {
-            _c4dbgpf("filtering plain scalar: i=%zu: removing carriage return \\r", i);
-            r = r.erase(i, 1);
+            if(ii < r.len && r.str[ii] == '\\')
+            {
+                const char next = ii+1 < r.len ? r.str[ii+1] : '\0';
+                if(next == ' ' || next == '\t')
+                {
+                    _c4dbgfnl("extend skip to backslash%s", "");
+                    ++ii;
+                }
+            }
         }
+    }
+    *i = ii - 1; // correct for the loop increment
+
+    #undef _c4dbgfnl
+
+    return replaced;
+}
+
+
+//-----------------------------------------------------------------------------
+
+template<bool keep_trailing_whitespace>
+void Parser::_filter_ws(substr r, size_t *C4_RESTRICT i, size_t *C4_RESTRICT pos)
+{
+    // a debugging scaffold:
+    #if 0
+    #define _c4dbgfws(fmt, ...) _c4dbgpf("filt_nl[%zu]: " fmt, *i, __VA_ARGS__)
+    #else
+    #define _c4dbgfws(...)
+    #endif
+
+    const char curr = r[*i];
+    _c4dbgfws("found whitespace '%.*s'", _c4prc(curr));
+    _RYML_CB_ASSERT(m_stack.m_callbacks, curr == ' ' || curr == '\t');
+
+    size_t first = *i > 0 ? r.first_not_of(" \t", *i) : r.first_not_of(' ', *i);
+    if(first != npos)
+    {
+        if(r[first] == '\n' || r[first] == '\r') // skip trailing whitespace
+        {
+            _c4dbgfws("whitespace is trailing on line. firstnonws='%.*s'@%zu", _c4prc(r[first]), first);
+            *i = first - 1; // correct for the loop increment
+        }
+        else // a legit whitespace
+        {
+            m_filter_arena.str[(*pos)++] = curr;
+            _c4dbgfws("legit whitespace. sofar=[%zu]~~~%.*s~~~", *pos, _c4prsp(m_filter_arena.first(*pos)));
+        }
+    }
+    else
+    {
+        _c4dbgfws("... everything else is trailing whitespace%s", "");
+        if C4_IF_CONSTEXPR (keep_trailing_whitespace)
+            for(size_t j = *i; j < r.len; ++j)
+                m_filter_arena.str[(*pos)++] = r[j];
+        *i = r.len;
+    }
+
+    #undef _c4dbgfws
+}
+
+
+//-----------------------------------------------------------------------------
+csubstr Parser::_filter_plain_scalar(substr s, size_t indentation)
+{
+    // a debugging scaffold:
+    #if 0
+    #define _c4dbgfps(...) _c4dbgpf("filt_plain_scalar" __VA_ARGS__)
+    #else
+    #define _c4dbgfps(...)
+    #endif
+
+    _c4dbgfps("before=~~~%.*s~~~", _c4prsp(s));
+
+    substr r = s.triml(" \t");
+    _grow_filter_arena(r.len);
+    size_t pos = 0; // the filtered size
+    bool filtered_chars = false;
+    for(size_t i = 0; i < r.len; ++i)
+    {
+        const char curr = r.str[i];
+        _c4dbgfps("[%zu]: '%.*s'", i, _c4prc(curr));
+        if(curr == ' ' || curr == '\t')
+        {
+            _filter_ws</*keep_trailing_ws*/false>(r, &i, &pos);
+        }
+        else if(curr == '\n')
+        {
+            filtered_chars = _filter_nl</*backslash_is_escape*/false, /*keep_trailing_ws*/false>(r, &i, &pos, indentation);
+        }
+        else if(curr == '\r')  // skip \r --- https://stackoverflow.com/questions/1885900
+        {
+            ;
+        }
+        else
+        {
+            m_filter_arena.str[pos++] = r[i];
+        }
+    }
+
+    _RYML_CB_ASSERT(m_stack.m_callbacks, pos <= m_filter_arena.len);
+    if(pos < r.len || filtered_chars)
+    {
+        _finish_filter_arena(r, pos);
+        r.len = pos;
     }
 
     _RYML_CB_ASSERT(m_stack.m_callbacks, s.len >= r.len);
-    _c4dbgpf("filtering plain scalar: num filtered chars=%zd", s.len - r.len);
-    _c4dbgpf("filtering plain scalar: after='%.*s'", _c4prsp(r));
+    _c4dbgfps("#filteredchars=%zd after=~~~%.*s~~~", s.len - r.len, _c4prsp(r));
 
-#ifdef RYML_DBG
-    for(size_t i = r.len; i < s.len; ++i)
-    {
-        s[i] = '~';
-    }
-#endif
-
+    #undef _c4dbgfps
     return r;
 }
+
 
 //-----------------------------------------------------------------------------
 csubstr Parser::_filter_squot_scalar(substr s)
 {
-    _c4dbgpf("filtering single-quoted scalar: before=~~~%.*s~~~", _c4prsp(s));
+    // a debugging scaffold:
+    #if 0
+    #define _c4dbgfsq(...) _c4dbgpf("filt_squo_scalar")
+    #else
+    #define _c4dbgfsq(...)
+    #endif
 
-    // do a first sweep to clean leading whitespace
-    substr r = _filter_whitespace(s);
+    // from the YAML spec for double-quoted scalars:
+    // https://yaml.org/spec/1.2-old/spec.html#style/flow/single-quoted
 
-    // now another sweep for quotes and newlines
+    _c4dbgfsq(": before=~~~%.*s~~~", _c4prsp(s));
+
+    _grow_filter_arena(s.len);
+    substr r = s;
+    size_t pos = 0; // the filtered size
+    bool filtered_chars = false;
     for(size_t i = 0; i < r.len; ++i)
     {
         const char curr = r[i];
-        //const char prev = i   > 0     ? r[i-1] : '\0';
-        const char next = i+1 < r.len ? r[i+1] : '\0';
-        if(curr == '\'' && (curr == next))
+        _c4dbgfsq("[%zu]: '%.*s'", i, _c4prc(curr));
+        if(curr == ' ' || curr == '\t')
         {
-            _c4dbgpf("filtering single-quoted scalar: i=%zu: turn two consecutive single quotes into one. curr=~~~%.*s~~~", i, _c4prsp(r.first(i)));
-            r = r.erase(i+1, 1);
+            _filter_ws</*keep_trailing_ws*/true>(r, &i, &pos);
         }
         else if(curr == '\n')
         {
-            r = _filter_leading_and_trailing_whitespace_at_newline(r, &i, next);
+            filtered_chars = _filter_nl</*backslash_is_escape*/false, /*keep_trailing_ws*/true>(r, &i, &pos, /*indentation*/0);
+        }
+        else if(curr == '\r')  // skip \r --- https://stackoverflow.com/questions/1885900
+        {
+            ;
+        }
+        else if(curr == '\'')
+        {
+            char next = i+1 < r.len ? r[i+1] : '\0';
+            if(next == '\'')
+            {
+                _c4dbgfsq("[%zu]: two consecutive quotes", i);
+                filtered_chars = true;
+                m_filter_arena.str[pos++] = '\'';
+                ++i;
+            }
+        }
+        else
+        {
+            m_filter_arena.str[pos++] = curr;
         }
     }
 
-    _RYML_CB_ASSERT(m_stack.m_callbacks, s.len >= r.len);
-    _c4dbgpf("filtering single-quoted scalar: #filteredchars=%zd after=~~~%.*s~~~", s.len - r.len, _c4prsp(r));
-
-#ifdef RYML_DBG
-    for(size_t i = r.len; i < s.len; ++i)
+    _RYML_CB_ASSERT(m_stack.m_callbacks, pos <= m_filter_arena.len);
+    if(pos < r.len || filtered_chars)
     {
-        s[i] = '~';
+        _finish_filter_arena(r, pos);
+        r.len = pos;
     }
-#endif
 
+    _RYML_CB_ASSERT(m_stack.m_callbacks, s.len >= r.len);
+    _c4dbgpf(": #filteredchars=%zd after=~~~%.*s~~~", s.len - r.len, _c4prsp(r));
+
+    #undef _c4dbgfsq
     return r;
 }
+
 
 //-----------------------------------------------------------------------------
 csubstr Parser::_filter_dquot_scalar(substr s)
 {
-    _c4dbgpf("filtering double-quoted scalar: before=~~~%.*s~~~", _c4prsp(s));
+    // a debugging scaffold:
+    #if 0
+    #define _c4dbgfdq(...) _c4dbgpf("filt_dquo_scalar")
+    #else
+    #define _c4dbgfdq(...)
+    #endif
 
-    // do a first sweep to clean leading whitespace
-    substr r = _filter_whitespace(s, 0, true, true);
+    _c4dbgfdq(": before=~~~%.*s~~~", _c4prsp(s));
 
+    // from the YAML spec for double-quoted scalars:
+    // https://yaml.org/spec/1.2-old/spec.html#style/flow/double-quoted
+    //
+    // All leading and trailing white space characters are excluded
+    // from the content. Each continuation line must therefore contain
+    // at least one non-space character. Empty lines, if any, are
+    // consumed as part of the line folding.
+
+    _grow_filter_arena(s.len);
+    substr r = s;
+    size_t pos = 0; // the filtered size
+    bool filtered_chars = false;
     for(size_t i = 0; i < r.len; ++i)
     {
         const char curr = r[i];
-        char next = i+1 < r.len ? r[i+1] : '\0';
-        if(curr == '\\')
+        _c4dbgfdq("[%zu]: '%.*s'", i, _c4prc(curr));
+        if(curr == ' ' || curr == '\t')
         {
-            if(next == curr)
-            {
-                r = r.erase(i+1, 1); // turn two consecutive backslashes into one
-            }
-            else if(next == '\n')
-            {
-                r = r.erase(i, 2);  // newlines are escaped with \ -- delete both
-                i = i > 0 ? i - 1 : 0;
-            }
-            else if(next == '"')
-            {
-                r = r.erase(i, 1);  // fix escaped double quotes
-            }
-            else if(next == 'n')
-            {
-                r = r.erase(i+1, 1);
-                r[i] = '\n';
-            }
-            else if(next == 't')
-            {
-                r = r.erase(i+1, 1);
-                r[i] = '\t';
-            }
-            else if(next == '/')
-            {
-                r = r.erase(i, 1);  // fix escaped /
-            }
-            else if(next == ' ')
-            {
-                r = r.erase(i, 1);
-            }
+            _filter_ws</*keep_trailing_ws*/true>(r, &i, &pos);
         }
         else if(curr == '\n')
         {
-            r = _filter_leading_and_trailing_whitespace_at_newline(r, &i, next);
+            filtered_chars = _filter_nl</*backslash_is_escape*/true, /*keep_trailing_ws*/true>(r, &i, &pos, /*indentation*/0);
         }
+        else if(curr == '\r')  // skip \r --- https://stackoverflow.com/questions/1885900
+        {
+            ;
+        }
+        else if(curr == '\\')
+        {
+            char next = i+1 < r.len ? r[i+1] : '\0';
+            _c4dbgfdq("[%zu]: backslash, next='%.*s'", i, _c4prc(next));
+            filtered_chars = true;
+            if(next == '\r')
+            {
+                if(i+2 < r.len && r[i+2] == '\n')
+                {
+                    ++i; // newline escaped with \ -- skip both (add only one as i is loop-incremented)
+                    next = '\n';
+                    _c4dbgfdq("[%zu]: was \\r\\n, now next='\\n'", i);
+                }
+            }
+            // remember the loop will also increment i
+            if(next == '\n')
+            {
+                size_t ii = i + 2;
+                for( ; ii < r.len; ++ii)
+                {
+                    if(r.str[ii] == ' ' || r.str[ii] == '\t')  // skip leading whitespace
+                        ;
+                    else
+                        break;
+                }
+                i += ii - i - 1;
+            }
+            else if(next == '\r' || next == ' ' || next == '\t')
+            {
+                //++i;
+            }
+            else if(next == 'n')
+            {
+                m_filter_arena.str[pos++] = '\n';
+                ++i;
+            }
+            else if(next == 'r')
+            {
+                //m_filter_arena.str[pos++] = '\r';
+                ++i;
+            }
+            else if(next == 't')
+            {
+                m_filter_arena.str[pos++] = '\t';
+                ++i;
+            }
+            else if(next == 'b')
+            {
+                m_filter_arena.str[pos++] = '\b';
+                ++i;
+            }
+            else if(next == 'x')
+            {
+                m_filter_arena.str[pos++] = '\\';
+                m_filter_arena.str[pos++] = 'x';
+                ++i; // loop will increment next
+            }
+            else if(next == 'u')
+            {
+                m_filter_arena.str[pos++] = '\\';
+                m_filter_arena.str[pos++] = 'u';
+                ++i; // loop will increment next
+            }
+            else if(next == '\\')
+            {
+                m_filter_arena.str[pos++] = '\\';
+                ++i;
+            }
+            else if(next == '"' || next == '/')
+            {
+                m_filter_arena.str[pos++] = next;
+                ++i;
+            }
+            _c4dbgfdq("[%zu]: backslash...sofar=[%zu]~~~%.*s~~~", i, pos, _c4prsp(m_filter_arena.first(pos)));
+        }
+        else
+        {
+            m_filter_arena.str[pos++] = curr;
+        }
+    }
+
+    _RYML_CB_ASSERT(m_stack.m_callbacks, pos <= m_filter_arena.len);
+    if(pos < r.len || filtered_chars)
+    {
+        _finish_filter_arena(r, pos);
+        r.len = pos;
     }
 
     _RYML_CB_ASSERT(m_stack.m_callbacks, s.len >= r.len);
-    _c4dbgpf("filtering double-quoted scalar: #filteredchars=%zd after=~~~%.*s~~~", s.len - r.len, _c4prsp(r));
+    _c4dbgpf(": #filteredchars=%zd after=~~~%.*s~~~", s.len - r.len, _c4prsp(r));
 
-#ifdef RYML_DBG
-    for(size_t i = r.len; i < s.len; ++i)
-    {
-        s[i] = '~';
-    }
-#endif
-
-    return r;
-}
-
-//-----------------------------------------------------------------------------
-/** @p leading_whitespace when true, remove every leading spaces from the
- * beginning of each line */
-substr Parser::_filter_whitespace(substr r, size_t indentation, bool leading_whitespace, bool filter_tabs)
-{
-    _c4dbgpf("filtering whitespace: indentation=%zu leading=%d before=~~~%.*s~~~", indentation, leading_whitespace, _c4prsp(r));
-
-    for(size_t i = 0; i < r.len; ++i)
-    {
-        const char curr = r[i];
-        const char prev = i > 0 ? r[i-1] : '\0';
-        if(curr == ' ' || (filter_tabs && curr == '\t'))
-        {
-            _c4dbgpf("filtering whitespace: found space at i=%zu. len=%zu. sofar=~~~%.*s~~~", i, r.len, _c4prsp(r.first(i)));
-            if(prev == '\n')
-            {
-                csubstr ss = r.sub(i);
-                ss = ss.left_of(!filter_tabs ? ss.first_not_of(' ') : ss.first_not_of(" \t"));
-                _RYML_CB_ASSERT(m_stack.m_callbacks, ss.len >= 1);
-                size_t num = ss.len;
-                // _RYML_CB_ASSERT(m_stack.m_callbacks, num >= indentation); // empty lines are allowed
-                _c4dbgpf("filtering whitespace: line has %zu leading spaces", num);
-                if(leading_whitespace)
-                    num = ss.len;
-                else if(indentation != csubstr::npos)
-                    num = num < indentation ? num : indentation;
-                _c4dbgpf("filtering whitespace: r.erase(start=%zu,num=%zu), len=%zu", i, num, r.len);
-                r = r.erase(i, num);
-                if(i < r.len && r[i] != ' ')
-                    --i; // i is incremented next
-            }
-            else if(leading_whitespace && i == 0)
-            {
-                size_t len = r.first_not_of(' ');
-                _c4dbgpf("filtering whitespace: remove %zu leading spaces", len);
-                if(len && len != npos && (r[len] == '\n' || r[len] == '\r'))
-                {
-                    r = r.erase(0, len);
-                    if(i < r.len && r[i] != ' ')
-                        --i; // i is incremented next
-                }
-            }
-        }
-        // erase \r --- https://stackoverflow.com/questions/1885900
-        else if(curr == '\r')
-        {
-            _c4dbgpf("filtering whitespace: remove \\r: i=%zu len=%zu. curr=~~~%.*s~~~", i, r.len, _c4prsp(r.first(i)));
-            r = r.erase(i, 1);
-            --i; // i is incremented next
-        }
-    }
-
-    _c4dbgpf("filtering whitespace: after=~~~%.*s~~~", _c4prsp(r));
-
-    return r;
-}
-
-//-----------------------------------------------------------------------------
-substr Parser::_filter_leading_and_trailing_whitespace_at_newline(substr r, size_t *C4_RESTRICT i, char next)
-{
-    _RYML_CB_ASSERT(m_stack.m_callbacks, r[*i] == '\n');
-
-    // from the YAML spec for double-quoted scalars:
-    // https://yaml.org/spec/1.2/spec.html#id2787109
-    //
-    // All leading and trailing white space characters are
-    // excluded from the content. Each continuation line must
-    // therefore contain at least one non-space character.
-    // Empty lines, if any, are consumed as part of the line
-    // folding.
-    //
-    // ... so - erase trailing whitespace (ie whitespace before
-    // the newline):
-    if(*i > 0)
-    {
-        size_t numws = 0;
-        char prev = r[*i-1]; // safe because we know that i>0
-        while(prev == ' ' || prev == '\t')
-        {
-            ++numws;
-            if(*i < 1+numws) // ie, i-1-numws < 0
-                break;
-            prev = r[*i-1-numws];
-        }
-        if(numws && numws < *i)
-        {
-            r = r.erase(*i-numws, numws);
-            *i -= numws;
-        }
-    }
-    if(next == '\n')
-    {
-        r = r.erase(*i+1, 1); // keep only first of consecutive newlines
-        while(*i+1 < r.len && r[*i+1] == '\n')
-            ++(*i);
-    }
-    else
-    {
-        r[*i] = ' '; // a single unix newline: turn it into a space
-    }
-    // erase leading whitespace (ie whitespace after the newline)
-    if(*i < r.len)
-    {
-        size_t numws = 0;
-        for(char c : r.sub(*i + 1))
-        {
-            if(c != ' ' && c != '\t')
-                break;
-            ++numws;
-        }
-        if(numws)
-            r = r.erase(*i + 1, numws);
-    }
+    #undef _c4dbgfdq
 
     return r;
 }
@@ -27376,121 +27587,201 @@ substr Parser::_filter_leading_and_trailing_whitespace_at_newline(substr r, size
 //-----------------------------------------------------------------------------
 csubstr Parser::_filter_block_scalar(substr s, BlockStyle_e style, BlockChomp_e chomp, size_t indentation)
 {
-    _c4dbgpf("filtering block: ~~~%.*s~~~", _c4prsp(s));
+    // a debugging scaffold:
+    #if 0
+    #define _c4dbgfbl _c4dbgpf
+    #else
+    #define _c4dbgfbl(...)
+    #endif
+
+    _c4dbgfbl("filt_block: indentation=%zu before=[%zu]~~~%.*s~~~", indentation, s.len, _c4prsp(s));
 
     substr r = s;
-
-    r = _filter_whitespace(s, indentation, /*leading whitespace*/false);
-    {
-        size_t numws_at_begin = r.first_not_of(' ');
-        if(numws_at_begin > indentation)
-            r = r.erase(0, indentation);
-        else
-            r = r.erase(0, numws_at_begin);
-    }
-
-    _c4dbgpf("filtering block: after whitespace=~~~%.*s~~~", _c4prsp(r));
-
-    _RYML_CB_ASSERT(m_stack.m_callbacks, r.find('\r') == csubstr::npos); // filter whitespace must remove this
-
-    switch(chomp)
-    {
-    case CHOMP_KEEP: // nothing to do, keep everything
-        _c4dbgp("filtering block: chomp=KEEP (+)");
-        break;
-    case CHOMP_STRIP: // strip all newlines from the end
-    {
-        _c4dbgp("filtering block: chomp=STRIP (-)");
-        r = r.trimr('\n');
-        break;
-    }
-    case CHOMP_CLIP: // clip to a single newline
-    {
-        _c4dbgp("filtering block: chomp=CLIP");
-        auto pos = r.last_not_of("\n");
-        if(pos != npos && pos+1 < r.len)
-        {
-            ++pos;
-            r = r.left_of(pos, /*include_pos*/true);
-        }
-        break;
-    }
-    default:
-        _c4err("unknown chomp style");
-    }
-
-    _c4dbgpf("filtering block: after chomp=~~~%.*s~~~", _c4prsp(r));
 
     switch(style)
     {
     case BLOCK_LITERAL:
-        break;
+        {
+            _c4dbgp("filt_block: style=literal");
+            // trim leading whitespace up to indentation
+            {
+                size_t numws = r.first_not_of(' ');
+                if(numws != npos)
+                {
+                    if(numws > indentation)
+                        r = r.sub(indentation);
+                    else
+                        r = r.sub(numws);
+                }
+            }
+            _c4dbgfbl("filt_block: after triml=[%zu]~~~%.*s~~~", r.len, _c4prsp(r));
+            _grow_filter_arena(r.len);
+            size_t pos = 0; // the filtered size
+            for(size_t i = 0; i < r.len; ++i)
+            {
+                const char curr = r.str[i];
+                _c4dbgfbl("filt_block[%zu]='%.*s'", i, _c4prc(curr));
+                if(curr == '\r')
+                    continue;
+                m_filter_arena.str[pos++] = curr;
+                if(curr == '\n')
+                {
+                    // skip indentation
+                    size_t first = r.first_not_of(' ', i+1);
+                    if(first != npos)
+                    {
+                        first -= i+1;
+                        if(first > indentation)
+                            first = indentation;
+                        i += first;
+                    }
+                }
+            }
+            _RYML_CB_ASSERT(m_stack.m_callbacks, pos <= m_filter_arena.len);
+            if(pos < r.len)
+            {
+                _finish_filter_arena(r, pos);
+                r.len = pos;
+            }
+            break;
+        }
     case BLOCK_FOLD:
         {
-            auto pos = r.last_not_of('\n'); // do not fold trailing newlines
-            if((pos != npos) && (pos < r.len))
+            _c4dbgp("filt_block: style=fold");
+            size_t lastnonnl = r.last_not_of('\n'); // do not fold trailing newlines
+            if(lastnonnl == npos) // not multiline, no need to filter
             {
-                ++pos; // point pos at the first newline char
-                substr t = r.sub(0, pos);
-                bool found_non_space_so_far = false;
-                bool is_indented = t.triml('\n').begins_with_any(" \t");
-                for(size_t i = 1; i < t.len; ++i)
+                _c4dbgp("filt_block: no folding needed");
+            }
+            else
+            {
+                _c4dbgp("filt_block: needs folding");
+                _grow_filter_arena(r.len);
+                size_t pos = 0; // the filtered size
+                bool filtered_chars = false;
+                bool started = false;
+                bool is_indented = false;
+                substr t = r.first(lastnonnl + 1);  // everything up to the first trailing newline
+                size_t i = r.first_not_of(' ');
+                _c4dbgfbl("filt_block: first non space at %zu", i);
+                _RYML_CB_ASSERT(m_stack.m_callbacks, i != npos);
+                if(i > indentation)
                 {
-                    const char curr = t[i];
-                    if(curr != '\n')
+                    is_indented = true;
+                    i = indentation;
+                }
+                _c4dbgfbl("filt_block: start folding at %zu, is_indented=%d", i, (int)is_indented);
+                auto on_change_indentation = [&](size_t numnl_following, size_t last_newl, size_t first_non_whitespace){
+                    _c4dbgfbl("filt_block[%zu]: add 1+%zu newlines", i, numnl_following);
+                    for(size_t j = 0; j < 1 + numnl_following; ++j)
+                        m_filter_arena.str[pos++] = '\n';
+                    for(i = last_newl + 1 + indentation; i < first_non_whitespace; ++i)
                     {
-                        if(curr != ' ')
-                            found_non_space_so_far = true;
-                        continue;
+                        _c4dbgfbl("filt_block[%zu]: add '%.*s'", i, _c4prc(t.str[i]));
+                        m_filter_arena.str[pos++] = t.str[i];
                     }
-                    size_t nextl = t.first_not_of('\n', i+1);
-                    _c4dbgpf("filtering block[fold]: i=%zu nextl=%zu. curr=~~~%.*s~~~", i, nextl, _c4prsp(r.first(i)));
-                    if((!is_indented) && found_non_space_so_far)
+                    --i;
+                };
+                for( ; i < t.len; ++i)
+                {
+                    const char curr = t.str[i];
+                    _c4dbgfbl("filt_block[%zu]='%.*s'", i, _c4prc(curr));
+                    if(curr == '\n')
                     {
-                        if(nextl == i+1)
+                        filtered_chars = true;
+                        size_t first_non_whitespace = i;
+                        size_t numnl_following = count_following_newlines(t, &first_non_whitespace, indentation);
+                        while(first_non_whitespace < t.len && t[first_non_whitespace] == '\t')
+                            ++first_non_whitespace;
+                        if(first_non_whitespace == t.len)
                         {
-                            if((t[nextl] != ' ') && (t[nextl] != '\t'))
+                            _c4dbgfbl("filt_block[%zu]: #newlines=%zu. no more characters", i, numnl_following);
+                            for(size_t j = 0; j < 1 + numnl_following; ++j)
+                                m_filter_arena.str[pos++] = '\n';
+                            i = t.len - 1;
+                            continue;
+                        }
+                        _c4dbgfbl("filt_block[%zu]: #newlines=%zu firstnonws[%zu]='%.*s'", i, numnl_following, first_non_whitespace, _c4prc(t[first_non_whitespace]));
+                        size_t last_newl = t.last_of('\n', first_non_whitespace);
+                        size_t this_indentation = first_non_whitespace - last_newl - 1;
+                        _c4dbgfbl("filt_block[%zu]: #newlines=%zu firstnonws=%zu lastnewl=%zu this_indentation=%zu vs indentation=%zu", i, numnl_following, first_non_whitespace, last_newl, this_indentation, indentation);
+                        _RYML_CB_ASSERT(m_stack.m_callbacks, first_non_whitespace >= last_newl + 1);
+                        _RYML_CB_ASSERT(m_stack.m_callbacks, this_indentation >= indentation);
+                        if(!started)
+                        {
+                            _c4dbgfbl("filt_block[%zu]: #newlines=%zu. write all leading newlines", i, numnl_following);
+                            for(size_t j = 0; j < 1 + numnl_following; ++j)
+                                m_filter_arena.str[pos++] = '\n';
+                            if(this_indentation > indentation)
                             {
-                                _c4dbgpf("filtering block[fold]: i=%zu nextl=%zu: single newline, replace with space. curr=~~~%.*s~~~", i, nextl, _c4prsp(r.first(i)));
-                                t[i] = ' ';
+                                is_indented = true;
+                                _c4dbgfbl("filt_block[%zu]: advance ->%zu", i, last_newl + indentation);
+                                i = last_newl + indentation;
                             }
                             else
                             {
-                                _c4dbgpf("filtering block[fold]: i=%zu nextl=%zu entering indented mode. curr=~~~%.*s~~~", i, nextl, _c4prsp(r.first(i)));
-                                is_indented = true;
+                                i = first_non_whitespace - 1;
+                                _c4dbgfbl("filt_block[%zu]: advance ->%zu", i, first_non_whitespace);
                             }
                         }
-                        else if(nextl != csubstr::npos && t[nextl] != ' ' && t[nextl] != '\t')
+                        else if(this_indentation == indentation)
                         {
-                            _c4dbgpf("filtering block[fold]: i=%zu nextl=%zu: remove 1 newline. curr=~~~%.*s~~~",
-                                     i, nextl, _c4prsp(r.first(i)));
-                            _RYML_CB_ASSERT(m_stack.m_callbacks, nextl >= 1);
-                            t = t.erase(i, 1);
-                            i = nextl-1;
-                            if(i)
-                                --i;
+                            _c4dbgfbl("filt_block[%zu]: same indentation", i);
+                            if(!is_indented)
+                            {
+                                if(numnl_following == 0)
+                                {
+                                    _c4dbgfbl("filt_block[%zu]: fold!", i);
+                                    m_filter_arena.str[pos++] = ' ';
+                                }
+                                else
+                                {
+                                    _c4dbgfbl("filt_block[%zu]: add %zu newlines", i, numnl_following);
+                                    for(size_t j = 0; j < numnl_following; ++j)
+                                        m_filter_arena.str[pos++] = '\n';
+                                }
+                                i = first_non_whitespace - 1;
+                                _c4dbgfbl("filt_block[%zu]: advance %zu->%zu", i, i, first_non_whitespace);
+                            }
+                            else
+                            {
+                                _c4dbgfbl("filt_block[%zu]: back to ref indentation", i);
+                                is_indented = false;
+                                on_change_indentation(numnl_following, last_newl, first_non_whitespace);
+                                _c4dbgfbl("filt_block[%zu]: advance %zu->%zu", i, i, first_non_whitespace);
+                            }
+                        }
+                        else
+                        {
+                            _c4dbgfbl("filt_block[%zu]: increased indentation.", i);
+                            is_indented = true;
+                            _RYML_CB_ASSERT(m_stack.m_callbacks, this_indentation > indentation);
+                            on_change_indentation(numnl_following, last_newl, first_non_whitespace);
+                            _c4dbgfbl("filt_block[%zu]: advance %zu->%zu", i, i, first_non_whitespace);
                         }
                     }
-                    else
+                    else if(curr != '\r')
                     {
-                        _RYML_CB_ASSERT(m_stack.m_callbacks, is_indented || !found_non_space_so_far);
-                        if(t[nextl] != ' ' && t[nextl] != '\t')
-                        {
-                            _c4dbgpf("filtering block[fold]: i=%zu nextl=%zu leaving indented mode. curr=~~~%.*s~~~", i, nextl, _c4prsp(r.first(i)));
-                            is_indented = false;
-                            i = nextl;
-                        }
+                        if(curr != '\t')
+                            started = true;
+                        m_filter_arena.str[pos++] = curr;
                     }
                 }
                 // copy over the trailing newlines
-                substr nl = r.sub(pos);
-                _RYML_CB_ASSERT(m_stack.m_callbacks, t.len + nl.len <= r.len);
-                for(size_t i = 0; i < nl.len; ++i)
+                csubstr nl = r.sub(lastnonnl + 1);
+                _RYML_CB_ASSERT(m_stack.m_callbacks, pos + nl.len <= r.len);
+                for(const char c : nl)
                 {
-                    r[t.len + i] = nl[i];
+                    if(c == '\r')
+                        continue;
+                    m_filter_arena.str[pos++] = c;
                 }
-                // now trim r
-                r = r.sub(0, t.len + nl.len);
+                _RYML_CB_ASSERT(m_stack.m_callbacks, pos <= m_filter_arena.len);
+                if(pos < r.len || filtered_chars)
+                {
+                    _finish_filter_arena(r, pos);
+                    r.len = pos;
+                }
             }
         }
         break;
@@ -27498,12 +27789,42 @@ csubstr Parser::_filter_block_scalar(substr s, BlockStyle_e style, BlockChomp_e 
         _c4err("unknown block style");
     }
 
-    _c4dbgpf("filtering block: final=~~~%.*s~~~", _c4prsp(r));
+    _RYML_CB_ASSERT(m_stack.m_callbacks, s.len >= r.len);
+    _c4dbgfbl("filt_block: #filteredchars=%zd after=~~~%.*s~~~", s.len - r.len, _c4prsp(r));
 
-#ifdef RYML_DBG
-    for(size_t i = r.len; i < s.len; ++i)
-        s[i] = '~';
-#endif
+    switch(chomp)
+    {
+    case CHOMP_KEEP: // nothing to do, keep everything
+        _c4dbgp("filt_block: chomp=KEEP (+)");
+        break;
+    case CHOMP_STRIP: // strip all newlines from the end
+    {
+        _c4dbgp("filt_block: chomp=STRIP (-)");
+        r = r.trimr("\r\n");
+        break;
+    }
+    case CHOMP_CLIP: // clip to a single newline
+    {
+        _c4dbgp("filt_block: chomp=CLIP");
+        size_t i = r.last_not_of("\n\r");
+        if(i != npos)
+        {
+            ++i; // this is the character before \n, so add one to put it at \n
+            if(i < r.len && r[i] == '\r')
+                ++i;
+            if(i < r.len && r[i] == '\n')
+                ++i;
+            r = r.first(i);
+        }
+        break;
+    }
+    default:
+        _c4err("unknown chomp style");
+    }
+
+    _c4dbgfbl("filt_block: final=[%zu]~~~%.*s~~~", r.len, _c4prsp(r));
+
+    #undef _c4dbgfbl
 
     return r;
 }
@@ -27611,15 +27932,15 @@ int Parser::_fmt_msg(char *buf, int buflen, const char *fmt, va_list args) const
     // next line: print the yaml src line
     if( ! m_file.empty())
     {
-        del = snprintf(buf + pos, static_cast<size_t>(len), "%.*s:%zd: '", (int)m_file.len, m_file.str, m_state->pos.line);
+        del = snprintf(buf + pos, static_cast<size_t>(len), "%.*s:%zd: ~~~", (int)m_file.len, m_file.str, m_state->pos.line);
     }
     else
     {
-        del = snprintf(buf + pos, static_cast<size_t>(len), "line %zd: '", m_state->pos.line);
+        del = snprintf(buf + pos, static_cast<size_t>(len), "line %zd: ~~~", m_state->pos.line);
     }
     int offs = del;
     _wrapbuf();
-    del = snprintf(buf + pos, static_cast<size_t>(len), "%.*s' (sz=%zd)\n",
+    del = snprintf(buf + pos, static_cast<size_t>(len), "%.*s~~~ (sz=%zd)\n",
                    (int)lc.stripped.len, lc.stripped.str, lc.stripped.len);
     _wrapbuf();
 
@@ -27703,6 +28024,48 @@ int Parser::_prfl(char *buf, int buflen, size_t v)
 }
 
 #undef _wrapbuf
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+void Parser::_grow_filter_arena(size_t num_characters_needed)
+{
+    _c4dbgpf("grow: arena=%zu numchars=%zu", m_filter_arena.len, num_characters_needed);
+    if(num_characters_needed <= m_filter_arena.len)
+        return;
+    size_t sz = m_filter_arena.len << 1;
+    _c4dbgpf("grow: sz=%zu", sz);
+    sz = num_characters_needed > sz ? num_characters_needed : sz;
+    _c4dbgpf("grow: sz=%zu", sz);
+    sz = sz < 128u ? 128u : sz;
+    _c4dbgpf("grow: sz=%zu", sz);
+    _RYML_CB_ASSERT(m_stack.m_callbacks, sz >= num_characters_needed);
+    _resize_filter_arena(sz);
+}
+
+void Parser::_resize_filter_arena(size_t num_characters)
+{
+    if(num_characters > m_filter_arena.len)
+    {
+        _c4dbgpf("resize: sz=%zu", num_characters);
+        char *prev = m_filter_arena.str;
+        if(m_filter_arena.str)
+        {
+            _RYML_CB_ASSERT(m_stack.m_callbacks, m_filter_arena.len > 0);
+            _RYML_CB_FREE(m_stack.m_callbacks, m_filter_arena.str, char, m_filter_arena.len);
+        }
+        m_filter_arena.str = _RYML_CB_ALLOC_HINT(m_stack.m_callbacks, char, num_characters, prev);
+        m_filter_arena.len = num_characters;
+    }
+}
+
+void Parser::_finish_filter_arena(substr filtered, size_t pos)
+{
+    _RYML_CB_ASSERT(m_stack.m_callbacks, pos <= filtered.len);
+    memcpy(filtered.str, m_filter_arena.str, pos);
+}
 
 
 //-----------------------------------------------------------------------------
@@ -27911,20 +28274,20 @@ bool Parser::_locations_dirty() const
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/parse.cpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/parse.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/node.cpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/node.cpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/node.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
@@ -27972,14 +28335,14 @@ size_t NodeRef::deserialize_val(c4::fmt::base64_wrapper w) const
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/node.cpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/node.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/preprocess.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -28003,7 +28366,7 @@ size_t NodeRef::deserialize_val(c4::fmt::base64_wrapper w) const
 //#include "./common.hpp"
 #endif
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/substr.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/substr.hpp
 //#include <c4/substr.hpp>
 #if !defined(C4_SUBSTR_HPP_) && !defined(_C4_SUBSTR_HPP_)
 #error "amalgamate: file c4/substr.hpp must have been included at this point"
@@ -28138,27 +28501,27 @@ CharContainer preprocess_rxmap(csubstr rxmap)
 #endif /* _C4_YML_PREPROCESS_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/preprocess.cpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.cpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.hpp
 //#include "c4/yml/preprocess.hpp"
 #if !defined(C4_YML_PREPROCESS_HPP_) && !defined(_C4_YML_PREPROCESS_HPP_)
 #error "amalgamate: file c4/yml/preprocess.hpp must have been included at this point"
 #endif /* C4_YML_PREPROCESS_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
 //#include "c4/yml/detail/parser_dbg.hpp"
 #if !defined(C4_YML_DETAIL_PARSER_DBG_HPP_) && !defined(_C4_YML_DETAIL_PARSER_DBG_HPP_)
 #error "amalgamate: file c4/yml/detail/parser_dbg.hpp must have been included at this point"
@@ -28418,14 +28781,14 @@ size_t preprocess_rxmap(csubstr s, substr buf)
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.cpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/detail/checks.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/checks.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/checks.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -28433,7 +28796,7 @@ size_t preprocess_rxmap(csubstr s, substr buf)
 #define C4_YML_DETAIL_CHECKS_HPP_
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
@@ -28637,14 +29000,14 @@ inline void check_arena(Tree const& t)
 #endif /* C4_YML_DETAIL_CHECKS_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/detail/checks.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/detail/checks.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/detail/print.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/print.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/print.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -28652,14 +29015,14 @@ inline void check_arena(Tree const& t)
 #define C4_YML_DETAIL_PRINT_HPP_
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
 #endif /* C4_YML_TREE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
@@ -28790,14 +29153,14 @@ inline size_t print_tree(Tree const& p, size_t node=NONE)
 #endif /* C4_YML_DETAIL_PRINT_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/detail/print.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/detail/print.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/yml.hpp
-// https://github.com/biojppm/rapidyaml/src/c4/yml/yml.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/yml.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -28805,35 +29168,35 @@ inline size_t print_tree(Tree const& p, size_t node=NONE)
 #define _C4_YML_YML_HPP_
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
 #endif /* C4_YML_TREE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
 #endif /* C4_YML_NODE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.hpp
 //#include "c4/yml/emit.hpp"
 #if !defined(C4_YML_EMIT_HPP_) && !defined(_C4_YML_EMIT_HPP_)
 #error "amalgamate: file c4/yml/emit.hpp must have been included at this point"
 #endif /* C4_YML_EMIT_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/parse.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/parse.hpp
 //#include "c4/yml/parse.hpp"
 #if !defined(C4_YML_PARSE_HPP_) && !defined(_C4_YML_PARSE_HPP_)
 #error "amalgamate: file c4/yml/parse.hpp must have been included at this point"
 #endif /* C4_YML_PARSE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.hpp
 //#include "c4/yml/preprocess.hpp"
 #if !defined(C4_YML_PREPROCESS_HPP_) && !defined(_C4_YML_PREPROCESS_HPP_)
 #error "amalgamate: file c4/yml/preprocess.hpp must have been included at this point"
@@ -28843,14 +29206,14 @@ inline size_t print_tree(Tree const& p, size_t node=NONE)
 #endif // _C4_YML_YML_HPP_
 
 
-// (end https://github.com/biojppm/rapidyaml/src/c4/yml/yml.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/c4/yml/yml.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/ryml.hpp
-// https://github.com/biojppm/rapidyaml/src/ryml.hpp
+// https://github.com/danngreen/rapidyaml/src/ryml.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -28858,7 +29221,7 @@ inline size_t print_tree(Tree const& p, size_t node=NONE)
 #define _RYML_HPP_
 
 // amalgamate: removed include of
-// https://github.com/biojppm/rapidyaml/src/c4/yml/yml.hpp
+// https://github.com/danngreen/rapidyaml/src/c4/yml/yml.hpp
 //#include "c4/yml/yml.hpp"
 #if !defined(C4_YML_YML_HPP_) && !defined(_C4_YML_YML_HPP_)
 #error "amalgamate: file c4/yml/yml.hpp must have been included at this point"
@@ -28873,7 +29236,7 @@ using namespace c4;
 #endif /* _RYML_HPP_ */
 
 
-// (end https://github.com/biojppm/rapidyaml/src/ryml.hpp)
+// (end https://github.com/danngreen/rapidyaml/src/ryml.hpp)
 
 #endif /* _RYML_SINGLE_HEADER_AMALGAMATED_HPP_ */
 
