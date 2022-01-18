@@ -46,12 +46,12 @@ TMPFILE = $(BUILDDIR)/runtests.out
 
 all: $(DOCTESTHEADER_DIR)/doctest.h patches tests
 
-PATCH_BINARIES = $(wildcard $(TEST_DIR)/patches/*.mmpatch)
-PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_BINARIES)))
+PATCH_FILES = $(wildcard $(TEST_DIR)/patches/*.yml)
+PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_FILES)))
 
 patches: $(PATCH_HEADERS)
 
-%.hh : %.mmpatch 
+%.hh : %.yml 
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
 $(BUILDDIR)/%.o: %.c
