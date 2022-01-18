@@ -54,13 +54,13 @@ struct KnobView3 : PageBase {
 
 		//GUI Guider knobs are laid out like this:
 		//  X     Y      Z      L     R     Q
-		//arc_7 arc_12 arc_8 arc_10 arc_11 arc_9
+		//arc_7 arc_12 arc_8 arc_11 arc_9 arc_10
 		lv_arc_set_value(ui->Knob_view3_arc_7, params.knobs[6] * 100.f);
 		lv_arc_set_value(ui->Knob_view3_arc_12, params.knobs[7] * 100.f);
 		lv_arc_set_value(ui->Knob_view3_arc_8, params.knobs[8] * 100.f);
-		lv_arc_set_value(ui->Knob_view3_arc_10, params.knobs[9] * 100.f); //PotL
-		lv_arc_set_value(ui->Knob_view3_arc_11, params.knobs[10] * 100.f);
-		lv_arc_set_value(ui->Knob_view3_arc_9, params.knobs[11] * 100.f); //PotQ
+		lv_arc_set_value(ui->Knob_view3_arc_11, params.knobs[9] * 100.f);  //PotL
+		lv_arc_set_value(ui->Knob_view3_arc_9, params.knobs[10] * 100.f);  //PotR
+		lv_arc_set_value(ui->Knob_view3_arc_10, params.knobs[11] * 100.f); //PotQ
 
 		if (patch_player.is_loaded) {
 			lv_label_set_text(ui->Knob_view3_label_9, get_knob_list_string(patch_player.knob_conns[0], 16).c_str());

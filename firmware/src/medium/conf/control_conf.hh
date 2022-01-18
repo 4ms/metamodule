@@ -49,7 +49,7 @@ struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
 };
 
 using mdrivlib::AdcChannelConf;
-enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotQ, PotL, PotR, PatchCV };
+enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotX, PotY, PotZ, PotL, PotR, PotQ, PatchCV };
 constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_2Cycles;
 constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::B, 0}, mdrivlib::AdcChanNum::_9, PotA, AdcSampTime},
@@ -58,14 +58,14 @@ constexpr auto PotConfs = std::to_array({
 	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotD, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotE, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 0}, mdrivlib::AdcChanNum::_10, PotF, AdcSampTime},
-	// PotX is ANA0. hack: use PF14 here to set it to analog mode, since it's unconnected on PCB
+	// PotX is ANA0. hack: use PF14 here to set it to analog mode, since PF14 is unconnected on PCB
 	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_1, PotX, AdcSampTime},
 	// PotY is ANA1. hack: use PF14 here to set it to analog mode
 	AdcChannelConf{{GPIO::F, 14}, mdrivlib::AdcChanNum::_0, PotY, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 2}, mdrivlib::AdcChanNum::_12, PotZ, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotQ, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotL, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotR, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotQ, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PatchCV, AdcSampTime},
 });
 
