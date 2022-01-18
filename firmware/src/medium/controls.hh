@@ -86,7 +86,7 @@ private:
 
 	bool _new_adc_data_ready = false;
 
-	template<int block_num>
+	template<size_t block_num>
 	void start_param_block();
 };
 } // namespace MetaModule

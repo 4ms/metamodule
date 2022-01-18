@@ -3,7 +3,6 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "hsem_handler.hh"
-#include <cstring>
 
 namespace MetaModule
 {
@@ -84,9 +83,10 @@ void Controls::update_params() {
 		_buffer_full = true;
 }
 
-template<int block_num>
-// requires(block_num == 0 || block_num == 1)
+template<size_t block_num>
 void Controls::start_param_block() {
+	static_assert(block_num <= 1, "There is only block 0 and block 1");
+
 	// 28us width, every 1.3ms (audio block rate for 64-frame blocks) = 2.15% load
 	cur_metaparams = &param_blocks[block_num].metaparams;
 	cur_params = param_blocks[block_num].params.begin();
