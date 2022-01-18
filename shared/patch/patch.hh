@@ -33,25 +33,25 @@ struct MappedKnob {
 	int16_t module_id;
 	int16_t param_id;
 	int16_t curve_type; // reserved for future use
-	float range;
-	float offset;
+	float min;
+	float max;
 
 	// Returns the value of the mapped knob, given the panel knob value
-	// Return value goes from offset to offset+range as panel_val goes from 0 to 1
-	// If range<0 then mapping will be reversed direction
-	float get_mapped_val(float panel_val) {
-		return range * panel_val + offset;
+	// Return value goes from min to max as panel_val goes from 0 to 1
+	// If max < min then mapping will be reversed direction
+	float get_mapped_val(float panel_val) const {
+		return (max - min) * panel_val + min;
 	}
 };
 
 // If number of ins exceeds MAX_CONNECTIONS_PER_NODE, then just add multiple InternalCable's
-// 64 Bytes
+// 16 Bytes
 struct InternalCable {
 	Jack out;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
 };
 
-// 64 Bytes
+// 16 Bytes
 struct MappedInputJack {
 	int32_t panel_jack_id;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;

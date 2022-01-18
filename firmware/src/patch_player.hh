@@ -7,15 +7,16 @@
 #include "debug.hh"
 #else
 #include "../stubs/debug.hh"
-#include <iostream>
 #endif
 #include "conf/hsem_conf.hh"
 #include "conf/panel_conf.hh"
 #include "drivers/smp.hh"
 #include "patch/patch.hh"
+#include "patch_convert/patch_data.hh"
 #include "smp_api.hh"
 #include "sys/alloc_buffer.hh"
 #include "util/math.hh"
+#include <array>
 #include <cstdint>
 #include <vector>
 
@@ -29,6 +30,7 @@ class PatchPlayer {
 	};
 
 public:
+	//TODO: why not use a vector here?
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
 	// out_conns[]: OutL OutR CVOut1 CVOut2 ClockOut, each element is a Jack
@@ -40,14 +42,7 @@ public:
 	// knob_conns[]: A B C D a b c d, each element is a vector of knobs it's mapped to
 	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs> knob_conns;
 
-	ModuleTypeSlug *module_slugs;
-	InternalCable *int_cables;
-	MappedInputJack *mapped_ins;
-	MappedOutputJack *mapped_outs;
-	StaticParam *static_knobs;
-	MappedKnob *mapped_knobs;
-
-	int *num_int_cable_ins;
+	std::vector<int> num_int_cable_ins;
 
 	bool is_loaded = false;
 
@@ -57,7 +52,8 @@ private:
 	// 1 => reads "LFO #1", 2=> "LFO #2", etc.
 	uint8_t dup_module_index[MAX_MODULES_IN_PATCH] = {0};
 
-	PatchHeader *header;
+	PatchHeader *ph;
+	PatchData *pd;
 	static const inline ModuleTypeSlug no_patch_loaded = "(Not Loaded)";
 
 public:
@@ -65,58 +61,34 @@ public:
 		clear_cache();
 	}
 
-	void load_patch_from_header(PatchHeader *ph) {
-		header = ph;
-		module_slugs = new ModuleTypeSlug[ph->num_modules];
-		int_cables = new InternalCable[ph->num_int_cables];
-		mapped_ins = new MappedInputJack[ph->num_mapped_ins];
-		mapped_outs = new MappedOutputJack[ph->num_mapped_outs];
-		static_knobs = new StaticParam[ph->num_static_knobs];
-		mapped_knobs = new MappedKnob[ph->num_mapped_knobs];
+	void load_patch_header_data(PatchHeader *patchheader, PatchData *patchdata) {
+		if (is_loaded)
+			unload_patch();
 
-		auto slugs_ptr = reinterpret_cast<ModuleTypeSlug *>(ph + 1);
-		for (int i = 0; i < ph->num_modules; i++)
-			module_slugs[i] = slugs_ptr[i];
+		ph = patchheader;
+		pd = patchdata;
 
-		auto int_cables_ptr = reinterpret_cast<InternalCable *>(slugs_ptr + ph->num_modules);
-		for (int i = 0; i < ph->num_int_cables; i++)
-			int_cables[i] = int_cables_ptr[i];
-
-		auto mapped_ins_ptr = reinterpret_cast<MappedInputJack *>(int_cables_ptr + ph->num_int_cables);
-		for (int i = 0; i < ph->num_mapped_ins; i++)
-			mapped_ins[i] = mapped_ins_ptr[i];
-
-		auto mapped_outs_ptr = reinterpret_cast<MappedOutputJack *>(mapped_ins_ptr + ph->num_mapped_ins);
-		for (int i = 0; i < ph->num_mapped_outs; i++)
-			mapped_outs[i] = mapped_outs_ptr[i];
-
-		auto static_knobs_ptr = reinterpret_cast<StaticParam *>(mapped_outs_ptr + ph->num_mapped_outs);
-		for (int i = 0; i < ph->num_static_knobs; i++)
-			static_knobs[i] = static_knobs_ptr[i];
-
-		auto mapped_knobs_ptr = reinterpret_cast<MappedKnob *>(static_knobs_ptr + ph->num_static_knobs);
-		for (int i = 0; i < ph->num_mapped_knobs; i++)
-			mapped_knobs[i] = mapped_knobs_ptr[i];
-
-		num_int_cable_ins = new int[ph->num_int_cables];
+		num_int_cable_ins.reserve(ph->num_int_cables);
 		calc_int_cable_connections();
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
-	bool load_patch(PatchHeader *ph) {
+	bool load_patch(PatchHeader *patchheader, PatchData *patchdata) {
 		mdrivlib::SMPThread::init();
 
-		if (is_loaded)
-			unload_patch();
+		if (patchheader == nullptr)
+			return false;
+		if (patchdata == nullptr)
+			return false;
 
-		load_patch_from_header(ph);
+		load_patch_header_data(patchheader, patchdata);
 
-		for (int i = 0; i < header->num_modules; i++) {
-			//FIXME: Do we every do anythign with modules[0] ? Perhaps just UI displaying names, which we can get from a defs file
+		for (int i = 0; i < ph->num_modules; i++) {
+			//FIXME: Do we ever do anything with modules[0] ? Perhaps just UI displaying names, which we can get from a defs file
 			if (i == 0)
 				modules[i] = ModuleFactory::create(PanelDef::typeID);
 			else
-				modules[i] = ModuleFactory::create(module_slugs[i]);
+				modules[i] = ModuleFactory::create(pd->module_slugs[i]);
 
 			if (modules[i] == nullptr) {
 				is_loaded = false;
@@ -136,7 +108,7 @@ public:
 
 		// Set all initial knob values:
 		for (int i = 0; i < ph->num_static_knobs; i++) {
-			const auto &k = static_knobs[i];
+			const auto &k = pd->static_knobs[i];
 			modules[k.module_id]->set_param(k.param_id, k.value);
 		}
 
@@ -148,17 +120,17 @@ public:
 
 	// Runs the patch
 	void update_patch() {
-		if (header->num_modules < 2)
+		if (ph->num_modules < 2)
 			return;
 
-		if (header->num_modules == 2)
+		if (ph->num_modules == 2)
 			modules[1]->update();
 		else {
 			mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2);
-			mdrivlib::SMPControl::write<SMPRegister::NumModules>(header->num_modules);
+			mdrivlib::SMPControl::write<SMPRegister::NumModules>(ph->num_modules);
 			mdrivlib::SMPControl::write<SMPRegister::IndexIncrement>(2);
 			mdrivlib::SMPControl::notify<SMPCommand::UpdateListOfModules>();
-			for (int module_i = 1; module_i < header->num_modules; module_i += 2) {
+			for (int module_i = 1; module_i < ph->num_modules; module_i += 2) {
 				// Debug::Pin2::high();
 				modules[module_i]->update();
 				// Debug::Pin2::low();
@@ -177,8 +149,8 @@ public:
 			mdrivlib::SMPThread::join();
 		}
 
-		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
-			auto &cable = int_cables[net_i];
+		for (int net_i = 0; net_i < ph->num_int_cables; net_i++) {
+			auto &cable = pd->int_cables[net_i];
 
 			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
 
@@ -192,17 +164,11 @@ public:
 	void unload_patch() {
 		mdrivlib::SMPThread::join();
 		is_loaded = false;
-		for (int i = 0; i < header->num_modules; i++) {
+		for (int i = 0; i < ph->num_modules; i++) {
 			modules[i].reset(nullptr);
 		}
 
-		delete[] module_slugs;
-		delete[] int_cables;
-		delete[] mapped_ins;
-		delete[] mapped_outs;
-		delete[] static_knobs;
-		delete[] mapped_knobs;
-		delete[] num_int_cable_ins;
+		num_int_cable_ins.clear();
 
 		clear_cache();
 		BigAllocControl::reset();
@@ -214,8 +180,7 @@ public:
 		if (!is_loaded)
 			return;
 		auto &knob_conn = knob_conns[param_id];
-		for (auto &k : knob_conn) {
-			// float mapped_val = MathTools::constrain(val * k.range + k.offset, 0.f, 1.f);
+		for (auto const &k : knob_conn) {
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
@@ -226,14 +191,14 @@ public:
 		// if (jack_id >= NumInConns)
 		// 	return;
 		auto &jacks = in_conns[jack_id];
-		for (auto &jack : jacks)
+		for (auto const &jack : jacks)
 			modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
 	float get_panel_output(int jack_id) {
 		if (!is_loaded)
 			return 0.f;
-		auto &jack = out_conns[jack_id];
+		auto const &jack = out_conns[jack_id];
 		if (jack.module_id > 0)
 			return modules[jack.module_id]->get_output(jack.jack_id);
 		else
@@ -243,23 +208,30 @@ public:
 	// General info getters:
 
 	const ModuleTypeSlug &get_patch_name() {
-		return is_loaded ? header->patch_name : no_patch_loaded;
+		return is_loaded ? ph->patch_name : no_patch_loaded;
 	}
 
 	int get_num_modules() {
-		return is_loaded ? header->num_modules : 0;
+		return is_loaded ? ph->num_modules : 0;
 	}
 
 	int get_num_int_cables() {
-		return is_loaded ? header->num_int_cables : 0;
+		return is_loaded ? ph->num_int_cables : 0;
 	}
 
 	int get_num_mapped_knobs() {
-		return is_loaded ? header->num_mapped_knobs : 0;
+		return is_loaded ? ph->num_mapped_knobs : 0;
 	}
 
 	const ModuleTypeSlug &get_module_name(int idx) {
-		return (is_loaded && idx < header->num_modules) ? module_slugs[idx] : no_patch_loaded;
+		return (is_loaded && idx < ph->num_modules) ? pd->module_slugs[idx] : no_patch_loaded;
+	}
+
+	InternalCable &get_int_cable(int idx) {
+		if (idx < pd->int_cables.size())
+			return pd->int_cables[idx];
+		else
+			return pd->int_cables[0]; //error
 	}
 
 	// Given the user-facing output jack id (0 = Audio Out L, 1 = Audio Out R, etc)
@@ -297,8 +269,8 @@ public:
 	// Jack patched/unpatched status
 
 	void mark_patched_jacks() {
-		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
-			auto &cable = int_cables[net_i];
+		for (int net_i = 0; net_i < ph->num_int_cables; net_i++) {
+			auto const &cable = pd->int_cables[net_i];
 
 			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
 			for (int jack_i = 0; jack_i < num_int_cable_ins[net_i]; jack_i++) {
@@ -311,8 +283,8 @@ public:
 	void set_input_jack_patched_status(int panel_in_jack_id, bool is_patched) {
 		if (panel_in_jack_id >= NumInConns)
 			return;
-		auto &jacks = in_conns[panel_in_jack_id];
-		for (auto &jack : jacks) {
+		auto const &jacks = in_conns[panel_in_jack_id];
+		for (auto const &jack : jacks) {
 			if (jack.module_id > 0) {
 				if (is_patched)
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
@@ -325,7 +297,7 @@ public:
 	void set_output_jack_patched_status(int panel_out_jack_id, bool is_patched) {
 		if (panel_out_jack_id >= NumOutConns)
 			return;
-		auto &jack = out_conns[panel_out_jack_id];
+		auto const &jack = out_conns[panel_out_jack_id];
 		if (jack.module_id > 0) {
 			if (is_patched)
 				modules[jack.module_id]->mark_output_patched(jack.jack_id);
@@ -352,8 +324,8 @@ public:
 	// Returns the index in int_cables[] for a cable that has the given Jack as an input
 	// Return -1 if does not exist
 	int find_int_cable_input_jack(Jack in) {
-		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
-			auto &cable = int_cables[net_i];
+		for (int net_i = 0; net_i < ph->num_int_cables; net_i++) {
+			auto &cable = pd->int_cables[net_i];
 			for (int jack_i = 0; jack_i < num_int_cable_ins[net_i]; jack_i++) {
 				auto &input_jack = cable.ins[jack_i];
 				if (in == input_jack)
@@ -364,9 +336,9 @@ public:
 	}
 
 	void calc_int_cable_connections() {
-		for (int net_i = 0; net_i < header->num_int_cables; net_i++) {
+		for (int net_i = 0; net_i < ph->num_int_cables; net_i++) {
 			num_int_cable_ins[net_i] = MAX_CONNECTIONS_PER_NODE - 1;
-			auto &cable = int_cables[net_i];
+			auto &cable = pd->int_cables[net_i];
 			for (int jack_i = 0; jack_i < MAX_CONNECTIONS_PER_NODE - 1; jack_i++) {
 				auto &input_jack = cable.ins[jack_i];
 				if (input_jack.module_id < 0)
@@ -377,8 +349,8 @@ public:
 
 	// Cache all the panel jack connections
 	void calc_panel_jack_connections() {
-		for (int net_i = 0; net_i < header->num_mapped_ins; net_i++) {
-			auto &cable = mapped_ins[net_i];
+		for (int net_i = 0; net_i < ph->num_mapped_ins; net_i++) {
+			auto &cable = pd->mapped_ins[net_i];
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingInJacks)
 				break;
@@ -397,8 +369,8 @@ public:
 			}
 		}
 
-		for (int net_i = 0; net_i < header->num_mapped_outs; net_i++) {
-			auto &cable = mapped_outs[net_i];
+		for (int net_i = 0; net_i < ph->num_mapped_outs; net_i++) {
+			auto &cable = pd->mapped_outs[net_i];
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingOutJacks)
 				break;
@@ -407,8 +379,8 @@ public:
 	}
 
 	void calc_panel_knob_connections() {
-		for (int i = 0; i < header->num_mapped_knobs; i++) {
-			auto &k = mapped_knobs[i];
+		for (int i = 0; i < ph->num_mapped_knobs; i++) {
+			auto &k = pd->mapped_knobs[i];
 			knob_conns[k.panel_knob_id].push_back(k);
 		}
 	}
@@ -417,17 +389,17 @@ public:
 	// This is used to create unique names for modules (e.g. LFO#1, LFO#2,...)
 	void calc_multiple_module_indicies() {
 		// Todo: this is a naive implementation, perhaps can be made more efficient
-		for (int i = 0; i < header->num_modules; i++) {
-			auto &this_slug = module_slugs[i];
+		for (int i = 0; i < ph->num_modules; i++) {
+			auto &this_slug = pd->module_slugs[i];
 
 			unsigned found = 1;
 			unsigned this_index = 0;
-			for (int j = 0; j < header->num_modules; j++) {
+			for (int j = 0; j < ph->num_modules; j++) {
 				if (i == j) {
 					this_index = found;
 					continue;
 				}
-				auto &that_slug = module_slugs[j];
+				auto &that_slug = pd->module_slugs[j];
 				if (that_slug == this_slug) {
 					found++;
 				}

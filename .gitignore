@@ -36,3 +36,7 @@ firmware_m4_vectors.h
 firmware/vec.miss
 
 shared/svgextract/test_circle_colors_data.xml
+
+shared/patch_convert/patch_convert
+
+*.d

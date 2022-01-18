@@ -12,7 +12,7 @@ void PageManager::init() {
 	//Todo: page manager doesn't load patches, send a load_patch command via uiaudiomailbox
 	//Audio is more suited to load patches, or maybe a 3rd object (patch manager)
 	patch_list.set_cur_patch_index(0);
-	bool ok = player.load_patch(patch_list.cur_patch());
+	bool ok = player.load_patch(patch_list.get_cur_patch_header(), patch_list.get_cur_patch_data());
 	if (!ok)
 		mbox.set_message("Can't load patch");
 	else
@@ -32,14 +32,14 @@ void PageManager::next_page() {
 		case PageId::Knobs:
 			cur_page = PageId::Module;
 			cur_module_idx = 1;
-			page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
+			page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
 			break;
 		case PageId::Module:
 			cur_module_idx++;
 			if (cur_module_idx >= info.patch_player.get_num_modules()) {
 				cur_page = PageId::PatchSel;
 			} else {
-				page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
+				page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
 			}
 			break;
 	};
@@ -52,7 +52,7 @@ void PageManager::prev_page() {
 		case PageId::PatchSel:
 			cur_page = PageId::Module;
 			cur_module_idx = info.patch_player.get_num_modules() - 1;
-			page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
+			page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
 			break;
 		case PageId::Knobs:
 			cur_page = PageId::PatchSel;
@@ -63,7 +63,7 @@ void PageManager::prev_page() {
 				cur_module_idx = 1;
 				cur_page = PageId::Knobs;
 			} else {
-				page_module.load_module_page(info.patch_player.module_slugs[cur_module_idx]);
+				page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
 			}
 			break;
 	};

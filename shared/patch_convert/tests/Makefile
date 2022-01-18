@@ -1,4 +1,4 @@
-# This is meant to be run from the vcv/ dir
+# This is meant to be run from the patch_convert/ dir
 # make -f tests/Makefile
 
 TEST_DIR ?= tests
@@ -10,20 +10,19 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
-TEST_SOURCES += src/patch_writer.cpp
-TEST_SOURCES += src/shared/patch_convert/ryml/ryml_serial.cc
-TEST_SOURCES += src/shared/patch_convert/patch_to_yaml.cc
+TEST_SOURCES += ../ryml/ryml_serial.cc
+TEST_SOURCES += ../patch_to_yaml.cc
+TEST_SOURCES += ../yaml_to_patch.cc
 
 BUILDDIR = $(TEST_DIR)/build
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
 			-I$(DOCTEST_DIR) \
-			-I../src\
-			-Isrc\
-			-Isrc/shared \
-			-Isrc/shared/patch_convert/ryml \
-			-Isrc/shared/etl/include \
+			-I \
+			-Iryml \
+			-I.. \
+			-I../etl/include \
 			-I$(TEST_DIR) \
 			-DTESTPROJECT \
 

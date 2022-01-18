@@ -1,8 +1,9 @@
 #include "patch_writer.hpp"
+#include "patch_convert/patch_to_yaml.hh"
+//#include "util/countzip.hh"
 #include <algorithm>
 
-#define RYML_SINGLE_HDR_DEFINE_NOW
-#include "ryml_all.hpp"
+#include "ryml_serial.hh"
 
 PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules)
 {
@@ -126,8 +127,8 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 				.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
 				.param_id = static_cast<int16_t>(m.dst.objID),
 				.curve_type = 0,
-				.range = m.range_max - m.range_min,
-				.offset = m.range_min,
+				.min = m.range_min,
+				.max = m.range_max,
 			});
 		}
 
@@ -235,111 +236,9 @@ ByteBlock::DataType PatchFileWriter::printPatchBinary()
 	return v.data;
 }
 
-std::string PatchFileWriter::printJack(Jack &jack, std::string separator)
-{
-	return "module_id: " + std::to_string(jack.module_id) + "\n" + separator +
-		   "jack_id: " + std::to_string(jack.jack_id);
-}
-
-// std::string printJackItem(Jack &jack, std::string separator)
-// {
-// 	return "m: " + std::to_string(jack.module_id) + "\n" + separator + "j: " + std::to_string(jack.jack_id);
-// }
-
 std::string PatchFileWriter::printPatchYAML()
 {
-	// ryml::Tree tree;
-	// ryml::NodeRef root = tree.rootref();
-
-	// root |= ryml::MAP;
-	// root["header_version"] << std::to_string(ph.header_version);
-	// root["patch_name"] << ph.patch_name.c_str();
-	// root["num_modules"] << std::to_string(ph.num_modules);
-	// root["num_int_cables"] << std::to_string(ph.num_int_cables);
-	// root["num_mapped_ins"] << std::to_string(ph.num_mapped_ins);
-	// root["num_mapped_outs"] << std::to_string(ph.num_mapped_outs);
-	// root["num_mapped_knobs"] << std::to_string(ph.num_mapped_knobs);
-
-	// return "";
-
-	std::string s;
-	s = "PatchHeader:\n";
-	s += "  header_version: " + std::to_string(ph.header_version) + "\n";
-	s += "  patch_name: ";
-	s += ph.patch_name.c_str();
-	s += "\n";
-	s += "  num_modules: " + std::to_string(ph.num_modules) + "\n";
-	s += "  num_int_cables: " + std::to_string(ph.num_int_cables) + "\n";
-	s += "  num_mapped_ins: " + std::to_string(ph.num_mapped_ins) + "\n";
-	s += "  num_mapped_outs: " + std::to_string(ph.num_mapped_outs) + "\n";
-	s += "  num_static_knobs: " + std::to_string(ph.num_static_knobs) + "\n";
-	s += "  num_mapped_knobs: " + std::to_string(ph.num_mapped_knobs) + "\n";
-	s += "\n";
-
-	s += "PatchData:\n";
-	s += "  module_slugs:\n";
-	int i = 0;
-	for (auto &x : pd.module_slugs) {
-		s += "    " + std::to_string(i) + ": ";
-		s += x.cstr();
-		s += "\n";
-		i++;
-	}
-	s += "\n";
-
-	s += "  int_cables: \n";
-	for (auto &x : pd.int_cables) {
-		s += "      - out: \n";
-		s += "          " + printJack(x.out, "          ") + "\n";
-		s += "        ins: \n";
-		for (auto &in : x.ins) {
-			if (in.jack_id == -1 || in.module_id == -1)
-				break;
-			s += "          - " + printJack(in, "            ") + "\n";
-		}
-	}
-	s += "\n";
-
-	s += "  mapped_ins: \n";
-	for (auto &x : pd.mapped_ins) {
-		s += "      - panel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
-		s += "        ins: \n";
-		for (auto &in : x.ins) {
-			if (in.jack_id == -1 || in.module_id == -1)
-				break;
-			s += "          - " + printJack(in, "            ") + "\n";
-		}
-	}
-	s += "\n";
-
-	s += "  mapped_outs: \n";
-	for (auto &x : pd.mapped_outs) {
-		s += "    - panel_jack_id: " + std::to_string(x.panel_jack_id) + "\n";
-		s += "      out: \n";
-		s += "        " + printJack(x.out, "        ") + "\n";
-	}
-	s += "\n";
-
-	s += "  static_knobs: \n";
-	for (auto &x : pd.static_knobs) {
-		s += "    - module_id: " + std::to_string(x.module_id) + "\n";
-		s += "      param_id: " + std::to_string(x.param_id) + "\n";
-		s += "      value: " + std::to_string(x.value) + "\n";
-	}
-	s += "\n";
-
-	s += "  mapped_knobs: \n";
-	for (auto &x : pd.mapped_knobs) {
-		s += "    - panel_knob_id: " + std::to_string(x.panel_knob_id) + "\n";
-		s += "      module_id: " + std::to_string(x.module_id) + "\n";
-		s += "      param_id: " + std::to_string(x.param_id) + "\n";
-		s += "      curve_type: " + std::to_string(x.curve_type) + "\n";
-		s += "      range: " + std::to_string(x.range) + "\n";
-		s += "      offset: " + std::to_string(x.offset) + "\n";
-	}
-	s += "\n";
-
-	return s;
+	return patch_to_yaml_string(ph, pd);
 }
 
 std::map<int, int> PatchFileWriter::squash_ids(std::vector<int> ids)

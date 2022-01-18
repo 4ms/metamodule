@@ -1,7 +1,0 @@
----
-CompileFlags:
-	Add: [
-			"-std=c++17",
-			"-I/Users/dann/4ms/stm32/meta-module/shared",
-		]
-

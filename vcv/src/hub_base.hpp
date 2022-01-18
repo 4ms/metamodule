@@ -238,7 +238,7 @@ struct MetaModuleHubBase : public CommModule {
 				writePatchFile(patchFileName, patchName);
 
 				labelText = "Wrote patch file: ";
-				labelText += patchStructName.str + ".txt";
+				labelText += patchStructName.str + ".yml";
 				updateDisplay();
 			}
 		}
@@ -269,7 +269,7 @@ private:
 		pw.setParamList(centralData->paramData);
 		pw.addMaps(centralData->maps);
 
-		writeToFile(fileName + ".txt", pw.printPatchYAML());
+		writeToFile(fileName + ".yml", pw.printPatchYAML());
 		writeBinaryFile(fileName + ".mmpatch", pw.printPatchBinary());
 	}
 

@@ -1,6 +1,6 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
-#TODO: Build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
+#TODO: Once we have multiple a7 versions, build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
 #so don't build it twice for mini/max/etc
 
 # First target of the make command is the board we should build for. Check if it's valid.
@@ -87,9 +87,12 @@ SOURCES += $(SHARED)/util/math_tables.cc
 SOURCES += $(audio_source)
 SOURCES += $(core_src)/aux_core_main.cc
 SOURCES += src/patchlist.cc
+SOURCES += src/patchlist_ryml_tests.cc
 SOURCES += src/pages/page_manager.cc
 SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
+SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
+SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
 
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
 SOURCES += $(wildcard src/pages/gui-guider/*.c)
@@ -97,6 +100,7 @@ SOURCES += $(wildcard src/pages/fonts/*.c)
 SOURCES += $(wildcard src/pages/images/*.c)
 SOURCES += $(wildcard src/pages/images/ui/*.c)
 SOURCES += $(wildcard src/pages/images/components/*.c)
+
 
 # SOURCES += $(NE10DIR)/common/NE10_mask_table.c
 # SOURCES += $(NE10DIR)/modules/dsp/NE10_fft.c
@@ -170,6 +174,8 @@ INCLUDES +=		-I$(LIBDIR)/lvgl
 INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
 INCLUDES +=		-I$(LIBDIR)/printf
 INCLUDES += 	-I$(SHARED)/etl/include
+INCLUDES += 	-I$(SHARED)/patch_convert
+INCLUDES += 	-I$(SHARED)/patch_convert/ryml
 # INCLUDES +=		-I$(NE10DIR)/inc
 # INCLUDES +=		-I$(NE10DIR)/common
 # INCLUDES +=		-I$(NE10DIR)/modules/dsp
@@ -268,7 +274,7 @@ clean_uboot:
 
 UBOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
-$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
+$(UIMG): $(BIN) #$(UBOOT_MKIMAGE)
 	$(UBOOT_MKIMAGE_CMD)
 
 %-uimg.h : %.uimg 

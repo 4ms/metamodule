@@ -5,7 +5,7 @@ SHARED_DIR = src/shared
 SHARED = $(SHARED_DIR)
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS += -std=c++2a -Isrc -I$(SHARED_DIR)/util -I$(SHARED_DIR)/processors -I$(SHARED_DIR)/CoreModules -I$(SHARED_DIR)/patch -I$(SHARED_DIR) -I$(SHARED_DIR)/axoloti-wrapper -I$(SHARED_DIR)/etl/include
+FLAGS += -std=c++2a -Isrc -I$(SHARED_DIR)/util -I$(SHARED_DIR)/processors -I$(SHARED_DIR)/CoreModules -I$(SHARED_DIR)/patch -I$(SHARED_DIR)/patch_convert/ryml -I$(SHARED_DIR) -I$(SHARED_DIR)/axoloti-wrapper -I$(SHARED_DIR)/etl/include
 CFLAGS +=
 CXXFLAGS += 
 
@@ -18,6 +18,8 @@ SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/*.cc)
 SOURCES += $(wildcard $(SHARED_DIR)/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
+SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
+SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.

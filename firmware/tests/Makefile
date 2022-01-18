@@ -12,6 +12,8 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
+TEST_SOURCES += ../shared/patch_convert/yaml_to_patch.cc
+TEST_SOURCES += ../shared/patch_convert/ryml/ryml_serial.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++20 \
@@ -23,10 +25,12 @@ CXXFLAGS = 	-Wall \
 			-I. \
 			-I.. \
 			-Isrc \
-			-Isrc/mini \
+			-Isrc/medium \
 			-I../src \
 			-I../shared \
 			-I../shared/etl/include \
+			-I../shared/patch_convert \
+			-I../shared/patch_convert/ryml \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:
@@ -42,12 +46,12 @@ TMPFILE = $(BUILDDIR)/runtests.out
 
 all: $(DOCTESTHEADER_DIR)/doctest.h patches tests
 
-PATCH_BINARIES = $(wildcard $(TEST_DIR)/patches/*.mmpatch)
-PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_BINARIES)))
+PATCH_FILES = $(wildcard $(TEST_DIR)/patches/*.yml)
+PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_FILES)))
 
 patches: $(PATCH_HEADERS)
 
-%.hh : %.mmpatch 
+%.hh : %.yml 
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
 $(BUILDDIR)/%.o: %.c

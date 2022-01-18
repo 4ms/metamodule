@@ -1,5 +1,8 @@
 #----------------------------------
 # Uncomment to compile unoptimized:
+# $(BUILDDIR)/src/patchlist_ryml_tests.o: OPTFLAG = -O0
+# $(BUILDDIR)/$(SHARED)/patch_convert/ryml/ryml_serial.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/pages/page_manager.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/pages/page_manager.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O1

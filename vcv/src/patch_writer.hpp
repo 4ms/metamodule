@@ -1,18 +1,10 @@
 #pragma once
 #include "CommData.hpp"
 #include "patch/patch.hh"
+#include "patch_convert/patch_to_yaml.hh"
 #include "util/byte_block.hh"
 #include <map>
 #include <vector>
-
-struct PatchData {
-	std::vector<ModuleTypeSlug> module_slugs;
-	std::vector<InternalCable> int_cables;
-	std::vector<MappedInputJack> mapped_ins;
-	std::vector<MappedOutputJack> mapped_outs;
-	std::vector<StaticParam> static_knobs;
-	std::vector<MappedKnob> mapped_knobs;
-};
 
 class PatchFileWriter {
 	PatchHeader ph;
@@ -31,8 +23,4 @@ public:
 
 	PatchData &get_data();
 	static std::map<int, int> squash_ids(std::vector<int> ids);
-
-private:
-	std::string printJack(Jack &jack, std::string separator);
-	// std::string printJackItem(Jack &jack, std::string separator);
 };
