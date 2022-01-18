@@ -383,7 +383,6 @@ public:
 		for (int i = 0; i < ph->num_mapped_knobs; i++) {
 			auto &k = pd->mapped_knobs[i];
 			knob_conns[k.panel_knob_id].push_back(k);
-			printf("Panel knob %d conn to\r\n", k.panel_knob_id);
 		}
 	}
 
