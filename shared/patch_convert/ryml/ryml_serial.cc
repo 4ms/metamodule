@@ -3,6 +3,8 @@
 #include "ryml_all.hpp"
 #include "ryml_serial_chars.hh"
 
+#include "printf.h"
+
 void write(ryml::NodeRef *n, Jack const &jack) {
 	*n |= ryml::MAP;
 	n->append_child() << ryml::key("module_id") << jack.module_id;
@@ -163,7 +165,10 @@ void init_once() {
 	if (!already_init) {
 		already_init = true;
 		callbacks.m_error = [](const char *msg, size_t /*msg_len*/, c4::yml::Location loc, void * /*user_data*/) {
-			printf("%s: in %s %zu:%zu)", msg, loc.name.data(), loc.line, loc.col);
+			if (loc.name.empty())
+				printf("[ryml] %s\r\n", msg);
+			else
+				printf("[ryml] %s in %s %zu:%zu)\r\n", msg, loc.name.data(), loc.line, loc.col);
 		};
 		c4::yml::set_callbacks(callbacks);
 	}

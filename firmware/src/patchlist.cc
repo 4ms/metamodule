@@ -61,7 +61,8 @@ PatchList::PatchList()
 	}
 
 	if (!PatchListTargetTests::run_all_tests()) {
-		printf("FAILED yaml tests\r\n");
+
+		//printf("FAILED yaml tests\r\n");
 		while (true)
 			;
 	}
