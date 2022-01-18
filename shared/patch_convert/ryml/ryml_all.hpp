@@ -15810,6 +15810,8 @@ time_type currtime()
     QueryPerformanceCounter(&ts);
     time_type usecs = time_type(ts.QuadPart) * ifreq;
     return usecs;
+#elif defined(__ARM_EABI__)
+	return time_type{0};
 #elif defined(C4_LINUX)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
