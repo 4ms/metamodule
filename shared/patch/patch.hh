@@ -39,7 +39,7 @@ struct MappedKnob {
 	// Returns the value of the mapped knob, given the panel knob value
 	// Return value goes from min to max as panel_val goes from 0 to 1
 	// If max < min then mapping will be reversed direction
-	float get_mapped_val(float panel_val) {
+	float get_mapped_val(float panel_val) const {
 		return (max - min) * panel_val + min;
 	}
 };

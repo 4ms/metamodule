@@ -180,8 +180,7 @@ public:
 		if (!is_loaded)
 			return;
 		auto &knob_conn = knob_conns[param_id];
-		for (auto &k : knob_conn) {
-			// float mapped_val = MathTools::constrain(val * k.range + k.offset, 0.f, 1.f);
+		for (auto const &k : knob_conn) {
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
@@ -192,7 +191,7 @@ public:
 		// if (jack_id >= NumInConns)
 		// 	return;
 		auto &jacks = in_conns[jack_id];
-		for (auto &jack : jacks)
+		for (auto const &jack : jacks)
 			modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
@@ -271,7 +270,7 @@ public:
 
 	void mark_patched_jacks() {
 		for (int net_i = 0; net_i < ph->num_int_cables; net_i++) {
-			auto &cable = pd->int_cables[net_i];
+			auto const &cable = pd->int_cables[net_i];
 
 			modules[cable.out.module_id]->mark_output_patched(cable.out.jack_id);
 			for (int jack_i = 0; jack_i < num_int_cable_ins[net_i]; jack_i++) {
@@ -284,8 +283,8 @@ public:
 	void set_input_jack_patched_status(int panel_in_jack_id, bool is_patched) {
 		if (panel_in_jack_id >= NumInConns)
 			return;
-		auto &jacks = in_conns[panel_in_jack_id];
-		for (auto &jack : jacks) {
+		auto const &jacks = in_conns[panel_in_jack_id];
+		for (auto const &jack : jacks) {
 			if (jack.module_id > 0) {
 				if (is_patched)
 					modules[jack.module_id]->mark_input_patched(jack.jack_id);
