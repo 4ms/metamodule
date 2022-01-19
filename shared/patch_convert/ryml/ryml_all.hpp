@@ -2,7 +2,7 @@
 //
 // Rapid YAML - a library to parse and emit YAML, and do it fast.
 //
-// https://github.com/danngreen/rapidyaml
+// https://github.com/biojppm/rapidyaml
 //
 // DO NOT EDIT. This file is generated automatically.
 // This is an amalgamated single-header version of the library.
@@ -23,7 +23,7 @@
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // LICENSE.txt
-// https://github.com/danngreen/rapidyaml/LICENSE.txt
+// https://github.com/biojppm/rapidyaml/LICENSE.txt
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -73,7 +73,7 @@
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/c4core_all.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/c4core_all.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/c4core_all.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -6620,7 +6620,7 @@ from_chars_result from_chars_advanced(const char *first, const char *last,
 #elif defined _WIN32
 #define FASTFLOAT_IS_BIG_ENDIAN 0
 #else
-#if defined(__APPLE__) || defined(__FreeBSD_)
+#if defined(__APPLE__) || defined(__FreeBSD__)
 #include <machine/endian.h>
 #elif defined(sun) || defined(__sun)
 #include <sys/byteorder.h>
@@ -9019,7 +9019,7 @@ fastfloat_really_inline void round(adjusted_mantissa& am, callback cb) noexcept 
   if (-am.power2 >= mantissa_shift) {
     // have a denormal float
     int32_t shift = -am.power2 + 1;
-    cb(am, std::min<int64_t>(shift, 64));
+    cb(am, std::min<int32_t>(shift, 64));
     // check for round-up: if rounding-nearest carried us to the hidden bit.
     am.power2 = (am.mantissa < (uint64_t(1) << binary_format<T>::mantissa_explicit_bits())) ? 0 : 1;
     return;
@@ -15810,14 +15810,14 @@ time_type currtime()
     QueryPerformanceCounter(&ts);
     time_type usecs = time_type(ts.QuadPart) * ifreq;
     return usecs;
-#elif defined(__ARM_EABI__)
-	return time_type{0};
 #elif defined(C4_LINUX)
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
     time_type usecs = time_type(1.e6) * time_type(ts.tv_sec)
                     + time_type(1.e-3) * time_type(ts.tv_nsec);
     return usecs;
+#elif defined(__NEWLIB__)
+	return time_type{0};
 #else
     auto time_point = std::chrono::high_resolution_clock::now();
     auto duration = time_point.time_since_epoch();
@@ -16103,14 +16103,14 @@ bool is_debugger_attached()
 
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/c4core_all.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/c4core_all.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/export.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/export.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/export.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -16134,14 +16134,14 @@ bool is_debugger_attached()
 #endif /* C4_YML_EXPORT_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/export.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/export.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/common.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/common.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/common.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -16151,14 +16151,14 @@ bool is_debugger_attached()
 //included above:
 //#include <cstddef>
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/substr.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/substr.hpp
 //#include <c4/substr.hpp>
 #if !defined(C4_SUBSTR_HPP_) && !defined(_C4_SUBSTR_HPP_)
 #error "amalgamate: file c4/substr.hpp must have been included at this point"
 #endif /* C4_SUBSTR_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/export.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/export.hpp
 //#include <c4/yml/export.hpp>
 #if !defined(C4_YML_EXPORT_HPP_) && !defined(_C4_YML_EXPORT_HPP_)
 #error "amalgamate: file c4/yml/export.hpp must have been included at this point"
@@ -16363,14 +16363,14 @@ do                                                                      \
 #endif /* _C4_YML_COMMON_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/common.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/common.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/tree.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -16379,14 +16379,14 @@ do                                                                      \
 
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/error.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/error.hpp
 //#include "c4/error.hpp"
 #if !defined(C4_ERROR_HPP_) && !defined(_C4_ERROR_HPP_)
 #error "amalgamate: file c4/error.hpp must have been included at this point"
 #endif /* C4_ERROR_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/types.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/types.hpp
 //#include "c4/types.hpp"
 #if !defined(C4_TYPES_HPP_) && !defined(_C4_TYPES_HPP_)
 #error "amalgamate: file c4/types.hpp must have been included at this point"
@@ -16394,7 +16394,7 @@ do                                                                      \
 
 #ifndef _C4_YML_COMMON_HPP_
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/common.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/common.hpp
 //#include "c4/yml/common.hpp"
 #if !defined(C4_YML_COMMON_HPP_) && !defined(_C4_YML_COMMON_HPP_)
 #error "amalgamate: file c4/yml/common.hpp must have been included at this point"
@@ -16403,7 +16403,7 @@ do                                                                      \
 #endif
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/charconv.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/charconv.hpp
 //#include <c4/charconv.hpp>
 #if !defined(C4_CHARCONV_HPP_) && !defined(_C4_CHARCONV_HPP_)
 #error "amalgamate: file c4/charconv.hpp must have been included at this point"
@@ -17706,14 +17706,14 @@ C4_SUPPRESS_WARNING_GCC_CLANG_POP
 #endif /* _C4_YML_TREE_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/node.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -17727,14 +17727,14 @@ C4_SUPPRESS_WARNING_GCC_CLANG_POP
 //#include <cstddef>
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
 #endif /* C4_YML_TREE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/base64.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/base64.hpp
 //#include "c4/base64.hpp"
 #if !defined(C4_BASE64_HPP_) && !defined(_C4_BASE64_HPP_)
 #error "amalgamate: file c4/base64.hpp must have been included at this point"
@@ -18701,14 +18701,14 @@ bool NodeRef::visit_stacked(Visitor fn, size_t indentation_level, bool skip_root
 #endif /* _C4_YML_NODE_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/writer.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/writer.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/writer.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -18720,7 +18720,7 @@ bool NodeRef::visit_stacked(Visitor fn, size_t indentation_level, bool skip_root
 #endif
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/substr.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/substr.hpp
 //#include <c4/substr.hpp>
 #if !defined(C4_SUBSTR_HPP_) && !defined(_C4_SUBSTR_HPP_)
 #error "amalgamate: file c4/substr.hpp must have been included at this point"
@@ -18951,14 +18951,14 @@ struct WriterBuf
 #endif /* _C4_YML_WRITER_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/writer.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/writer.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/detail/parser_dbg.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -19029,7 +19029,7 @@ inline const char *__c4prc(const char &c)
 #endif /* _C4_YML_DETAIL_PARSER_DBG_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp)
 
 #define C4_YML_EMIT_DEF_HPP_
 
@@ -19038,7 +19038,7 @@ inline const char *__c4prc(const char &c)
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/emit.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -19413,7 +19413,7 @@ CharOwningContainer emitrs_json(NodeRef const& n)
 } // namespace c4
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.def.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.def.hpp
 //#include "c4/yml/emit.def.hpp"
 #if !defined(C4_YML_EMIT_DEF_HPP_) && !defined(_C4_YML_EMIT_DEF_HPP_)
 #error "amalgamate: file c4/yml/emit.def.hpp must have been included at this point"
@@ -19423,14 +19423,14 @@ CharOwningContainer emitrs_json(NodeRef const& n)
 #endif /* _C4_YML_EMIT_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/emit.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/emit.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/emit.def.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.def.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.def.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -19439,20 +19439,13 @@ CharOwningContainer emitrs_json(NodeRef const& n)
 
 #ifndef _C4_YML_EMIT_HPP_
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.hpp
 //#include "c4/yml/emit.hpp"
 #if !defined(C4_YML_EMIT_HPP_) && !defined(_C4_YML_EMIT_HPP_)
 #error "amalgamate: file c4/yml/emit.hpp must have been included at this point"
 #endif /* C4_YML_EMIT_HPP_ */
 
 #endif
-// amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
-//#include "c4/yml/detail/parser_dbg.hpp"
-#if !defined(C4_YML_DETAIL_PARSER_DBG_HPP_) && !defined(_C4_YML_DETAIL_PARSER_DBG_HPP_)
-#error "amalgamate: file c4/yml/detail/parser_dbg.hpp must have been included at this point"
-#endif /* C4_YML_DETAIL_PARSER_DBG_HPP_ */
-
 
 namespace c4 {
 namespace yml {
@@ -19738,7 +19731,6 @@ void Emitter<Writer>::_write_scalar_block(csubstr s, size_t ilevel, bool explici
     RYML_ASSERT(s.find("\r") == csubstr::npos);
     csubstr trimmed = s.trimr('\n');
     size_t numnewlines_at_end = s.len - trimmed.len;
-    _c4dbgpf("numnl=%zu s=[%zu]~~~%.*s~~~ trimmed=[%zu]~~~%.*s~~~", numnewlines_at_end, s.len, _c4prsp(s), trimmed.len, _c4prsp(trimmed));
     if(numnewlines_at_end == 0)
     {
         this->Writer::_do_write("|-\n");
@@ -19792,16 +19784,9 @@ void Emitter<Writer>::_write_scalar(csubstr s, bool was_quoted)
     // this block of code needed to be moved to before the needs_quotes
     // assignment to workaround a g++ optimizer bug where (s.str != nullptr)
     // was evaluated as true even if s.str was actually a nullptr (!!!)
-    if(s.len == 0)
+    if(s.len == size_t(0))
     {
-        if(s.str != nullptr)
-        {
-            this->Writer::_do_write("''");
-        }
-        else
-        {
-            this->Writer::_do_write('~');
-        }
+        this->Writer::_do_write('~');
         return;
     }
 
@@ -19918,14 +19903,14 @@ void Emitter<Writer>::_write_scalar_json(csubstr s, bool as_key, bool was_quoted
 #endif /* _C4_YML_EMIT_DEF_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/emit.def.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/emit.def.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/detail/stack.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/stack.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/stack.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20195,14 +20180,14 @@ void stack<T, N>::_cb(Callbacks const& cb)
 #endif /* _C4_YML_DETAIL_STACK_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/detail/stack.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/detail/stack.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/parse.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/parse.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/parse.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20211,7 +20196,7 @@ void stack<T, N>::_cb(Callbacks const& cb)
 
 #ifndef _C4_YML_TREE_HPP_
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
@@ -20221,7 +20206,7 @@ void stack<T, N>::_cb(Callbacks const& cb)
 
 #ifndef _C4_YML_NODE_HPP_
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
@@ -20231,7 +20216,7 @@ void stack<T, N>::_cb(Callbacks const& cb)
 
 #ifndef _C4_YML_DETAIL_STACK_HPP_
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/stack.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/stack.hpp
 //#include "c4/yml/detail/stack.hpp"
 #if !defined(C4_YML_DETAIL_STACK_HPP_) && !defined(_C4_YML_DETAIL_STACK_HPP_)
 #error "amalgamate: file c4/yml/detail/stack.hpp must have been included at this point"
@@ -20570,14 +20555,15 @@ private:
 
     NodeData* _append_val(csubstr val, bool quoted=false);
     NodeData* _append_key_val(csubstr val, bool val_quoted=false);
-    inline NodeData* _append_val_null() { return _append_val({}/*"~"*/); }
-    inline NodeData* _append_key_val_null() { return _append_key_val({}/*"~"*/); }
     bool  _rval_dash_start_or_continue_seq();
 
     void  _store_scalar(csubstr const& s, bool is_quoted);
-    void  _store_scalar_null() { _store_scalar({}/*"~"*/, false); }
     csubstr _consume_scalar();
     void  _move_scalar_from_top();
+
+    inline NodeData* _append_val_null(const char *str) { _RYML_CB_ASSERT(m_stack.m_callbacks, str >= m_buf.begin() && str <= m_buf.end()); return _append_val({str, size_t(0)}); }
+    inline NodeData* _append_key_val_null(const char *str) { _RYML_CB_ASSERT(m_stack.m_callbacks, str >= m_buf.begin() && str <= m_buf.end()); return _append_key_val({str, size_t(0)}); }
+    inline void      _store_scalar_null(const char *str) {  _RYML_CB_ASSERT(m_stack.m_callbacks, str >= m_buf.begin() && str <= m_buf.end()); _store_scalar({str, size_t(0)}, false); }
 
     void  _set_indentation(size_t behind);
     void  _save_indentation(size_t behind=0);
@@ -20883,14 +20869,14 @@ RYML_DEPRECATED("use parse_in_arena() instead") inline void parse(csubstr filena
 #endif /* _C4_YML_PARSE_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/parse.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/parse.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/std/map.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/std/map.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/std/map.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20900,7 +20886,7 @@ RYML_DEPRECATED("use parse_in_arena() instead") inline void parse(csubstr filena
 /** @file map.hpp write/read std::map to/from a YAML tree. */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
@@ -20947,14 +20933,14 @@ bool read(c4::yml::NodeRef const& n, std::map<K, V, Less, Alloc> * m)
 #endif // _C4_YML_STD_MAP_HPP_
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/std/map.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/std/map.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/std/string.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/std/string.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/std/string.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20965,7 +20951,7 @@ bool read(c4::yml::NodeRef const& n, std::map<K, V, Less, Alloc> * m)
 
 // everything we need is implemented here:
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/std/string.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/std/string.hpp
 //#include <c4/std/string.hpp>
 #if !defined(C4_STD_STRING_HPP_) && !defined(_C4_STD_STRING_HPP_)
 #error "amalgamate: file c4/std/string.hpp must have been included at this point"
@@ -20975,14 +20961,14 @@ bool read(c4::yml::NodeRef const& n, std::map<K, V, Less, Alloc> * m)
 #endif // C4_YML_STD_STRING_HPP_
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/std/string.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/std/string.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/std/vector.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/std/vector.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/std/vector.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -20990,14 +20976,14 @@ bool read(c4::yml::NodeRef const& n, std::map<K, V, Less, Alloc> * m)
 #define _C4_YML_STD_VECTOR_HPP_
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
 #endif /* C4_YML_NODE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/std/vector.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/std/vector.hpp
 //#include <c4/std/vector.hpp>
 #if !defined(C4_STD_VECTOR_HPP_) && !defined(_C4_STD_VECTOR_HPP_)
 #error "amalgamate: file c4/std/vector.hpp must have been included at this point"
@@ -21041,14 +21027,14 @@ bool read(c4::yml::NodeRef const& n, std::vector<V, Alloc> *vec)
 #endif // _C4_YML_STD_VECTOR_HPP_
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/std/vector.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/std/vector.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/std/std.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/std/std.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/std/std.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -21056,21 +21042,21 @@ bool read(c4::yml::NodeRef const& n, std::vector<V, Alloc> *vec)
 #define _C4_YML_STD_STD_HPP_
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/std/string.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/std/string.hpp
 //#include "c4/yml/std/string.hpp"
 #if !defined(C4_YML_STD_STRING_HPP_) && !defined(_C4_YML_STD_STRING_HPP_)
 #error "amalgamate: file c4/yml/std/string.hpp must have been included at this point"
 #endif /* C4_YML_STD_STRING_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/std/vector.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/std/vector.hpp
 //#include "c4/yml/std/vector.hpp"
 #if !defined(C4_YML_STD_VECTOR_HPP_) && !defined(_C4_YML_STD_VECTOR_HPP_)
 #error "amalgamate: file c4/yml/std/vector.hpp must have been included at this point"
 #endif /* C4_YML_STD_VECTOR_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/std/map.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/std/map.hpp
 //#include "c4/yml/std/map.hpp"
 #if !defined(C4_YML_STD_MAP_HPP_) && !defined(_C4_YML_STD_MAP_HPP_)
 #error "amalgamate: file c4/yml/std/map.hpp must have been included at this point"
@@ -21080,20 +21066,20 @@ bool read(c4::yml::NodeRef const& n, std::vector<V, Alloc> *vec)
 #endif // _C4_YML_STD_STD_HPP_
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/std/std.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/std/std.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/common.cpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/common.cpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/common.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/common.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/common.hpp
 //#include "c4/yml/common.hpp"
 #if !defined(C4_YML_COMMON_HPP_) && !defined(_C4_YML_COMMON_HPP_)
 #error "amalgamate: file c4/yml/common.hpp must have been included at this point"
@@ -21218,41 +21204,41 @@ void error(const char *msg, size_t msg_len, Location loc)
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/common.cpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/common.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/tree.cpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.cpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
 #endif /* C4_YML_TREE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
 //#include "c4/yml/detail/parser_dbg.hpp"
 #if !defined(C4_YML_DETAIL_PARSER_DBG_HPP_) && !defined(_C4_YML_DETAIL_PARSER_DBG_HPP_)
 #error "amalgamate: file c4/yml/detail/parser_dbg.hpp must have been included at this point"
 #endif /* C4_YML_DETAIL_PARSER_DBG_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
 #endif /* C4_YML_NODE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/stack.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/stack.hpp
 //#include "c4/yml/detail/stack.hpp"
 #if !defined(C4_YML_DETAIL_STACK_HPP_) && !defined(_C4_YML_DETAIL_STACK_HPP_)
 #error "amalgamate: file c4/yml/detail/stack.hpp must have been included at this point"
@@ -23193,27 +23179,27 @@ C4_SUPPRESS_WARNING_MSVC_POP
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/tree.cpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/tree.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/parse.cpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/parse.cpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/parse.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/parse.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/parse.hpp
 //#include "c4/yml/parse.hpp"
 #if !defined(C4_YML_PARSE_HPP_) && !defined(_C4_YML_PARSE_HPP_)
 #error "amalgamate: file c4/yml/parse.hpp must have been included at this point"
 #endif /* C4_YML_PARSE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/error.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/error.hpp
 //#include "c4/error.hpp"
 #if !defined(C4_ERROR_HPP_) && !defined(_C4_ERROR_HPP_)
 #error "amalgamate: file c4/error.hpp must have been included at this point"
@@ -23228,7 +23214,7 @@ C4_SUPPRESS_WARNING_MSVC_POP
 //#include <stdio.h>
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
 //#include "c4/yml/detail/parser_dbg.hpp"
 #if !defined(C4_YML_DETAIL_PARSER_DBG_HPP_) && !defined(_C4_YML_DETAIL_PARSER_DBG_HPP_)
 #error "amalgamate: file c4/yml/detail/parser_dbg.hpp must have been included at this point"
@@ -23236,7 +23222,7 @@ C4_SUPPRESS_WARNING_MSVC_POP
 
 #ifdef RYML_DBG
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/print.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/print.hpp
 //#include "c4/yml/detail/print.hpp"
 #if !defined(C4_YML_DETAIL_PRINT_HPP_) && !defined(_C4_YML_DETAIL_PRINT_HPP_)
 #error "amalgamate: file c4/yml/detail/print.hpp must have been included at this point"
@@ -23767,7 +23753,7 @@ bool Parser::_handle_unk()
         _move_key_tag_to_val_tag();
         _push_level();
         _start_map(start_as_child);
-        _store_scalar("", false);
+        _store_scalar_null(rem.str);
         addrem_flags(RVAL, RKEY);
         _save_indentation();
         _line_progressed(2);
@@ -23780,7 +23766,7 @@ bool Parser::_handle_unk()
         _move_key_tag_to_val_tag();
         _push_level();
         _start_map(start_as_child);
-        _store_scalar("", false);
+        _store_scalar_null(rem.str);
         addrem_flags(RVAL, RKEY);
         _save_indentation();
         _line_progressed(1);
@@ -24071,14 +24057,14 @@ bool Parser::_handle_seq_expl()
         else if(rem.begins_with(", "))
         {
             _c4dbgp("found ',' -- the value was null");
-            _append_val_null();
+            _append_val_null(rem.str - 1);
             _line_progressed(2);
             return true;
         }
         else if(rem.begins_with(','))
         {
             _c4dbgp("found ',' -- the value was null");
-            _append_val_null();
+            _append_val_null(rem.str - 1);
             _line_progressed(1);
             return true;
         }
@@ -24333,7 +24319,7 @@ bool Parser::_handle_seq_impl()
                 _move_val_anchor_to_key_anchor();
                 _push_level();
                 _start_map();
-                _store_scalar({}, /*is_quoted*/false);
+                _store_scalar_null(rem.str);
                 addrem_flags(RVAL, RKEY);
                 RYML_CHECK(_maybe_set_indentation_from_anchor_or_tag()); // one of them must exist
                 _line_progressed(rem.begins_with(": ") ? 2u : 1u);
@@ -24345,7 +24331,7 @@ bool Parser::_handle_seq_impl()
                 addrem_flags(RNXT, RVAL); // before _push_level!
                 _push_level();
                 _start_map();
-                _store_scalar({}, /*is_quoted*/false);
+                _store_scalar_null(rem.str);
                 addrem_flags(RVAL, RKEY);
                 _c4dbgpf("set indentation from map anchor: %zu", m_state->indref + 2);
                 _set_indentation(m_state->indref + 2); // this is the column where the map starts
@@ -24373,7 +24359,7 @@ bool Parser::_rval_dash_start_or_continue_seq()
     {
         _c4dbgp("prev val was empty");
         addrem_flags(RNXT, RVAL);
-        _append_val_null();
+        _append_val_null(&m_state->line_contents.full[ind]);
         return false;
     }
     _c4dbgp("val is a nested seq, indented");
@@ -24414,7 +24400,7 @@ bool Parser::_handle_map_expl()
         if(has_all(SSCL))
         {
             _c4dbgp("the last val was null");
-            _append_key_val_null();
+            _append_key_val_null(rem.str - 1);
             rem_flags(RVAL);
         }
         _pop_level();
@@ -24483,7 +24469,7 @@ bool Parser::_handle_map_expl()
             if(!has_all(SSCL))
             {
                 _c4dbgp("no key was found, defaulting to empty key ''");
-                _store_scalar("", false);
+                _store_scalar_null(rem.str);
             }
             return true;
         }
@@ -24495,7 +24481,7 @@ bool Parser::_handle_map_expl()
             if(!has_all(SSCL))
             {
                 _c4dbgp("no key was found, defaulting to empty key ''");
-                _store_scalar("", false);
+                _store_scalar_null(rem.str);
             }
             return true;
         }
@@ -24509,7 +24495,7 @@ bool Parser::_handle_map_expl()
         else if(rem.begins_with(','))
         {
             _c4dbgp("prev scalar was a key with null value");
-            _append_key_val_null();
+            _append_key_val_null(rem.str - 1);
             _line_progressed(1);
             return true;
         }
@@ -24518,7 +24504,7 @@ bool Parser::_handle_map_expl()
             _c4dbgp("map terminates after a key...");
             _RYML_CB_ASSERT(m_stack.m_callbacks, has_all(SSCL));
             _c4dbgp("the last val was null");
-            _append_key_val_null();
+            _append_key_val_null(rem.str - 1);
             rem_flags(RVAL);
             if(has_all(RSEQIMAP))
             {
@@ -24545,7 +24531,7 @@ bool Parser::_handle_map_expl()
         else if(rem.begins_with('}'))
         {
             _c4dbgp("the last val was null");
-            _append_key_val_null();
+            _append_key_val_null(rem.str - 1);
             _line_progressed(1);
             return true;
         }
@@ -24562,7 +24548,7 @@ bool Parser::_handle_map_expl()
                 if(!has_all(SSCL))
                 {
                     _c4dbgp("no key was found, defaulting to empty key ''");
-                    _store_scalar("", false);
+                    _store_scalar_null(rem.str);
                 }
                 return true;
             }
@@ -24631,7 +24617,7 @@ bool Parser::_handle_map_expl()
         else if(rem.begins_with(','))
         {
             _c4dbgp("appending empty val");
-            _append_key_val_null();
+            _append_key_val_null(rem.str - 1);
             addrem_flags(RKEY, RVAL);
             _line_progressed(1);
             if(has_any(RSEQIMAP))
@@ -24647,7 +24633,7 @@ bool Parser::_handle_map_expl()
             _c4dbgp("stopping implicitly nested 1x map");
             if(has_any(SSCL))
             {
-                _append_key_val_null();
+                _append_key_val_null(rem.str - 1);
             }
             _stop_seqimap();
             _pop_level();
@@ -24707,12 +24693,12 @@ bool Parser::_handle_map_impl()
         {
             _c4dbgpf("it's a%s scalar", is_quoted ? " quoted" : "");
             if(has_all(CPLX|SSCL))
-                _append_key_val_null();
+                _append_key_val_null(rem.str - 1);
             _store_scalar(rem, is_quoted);
             if(has_all(CPLX|RSET))
             {
                 _c4dbgp("it's a complex key, so use null value '~'");
-                _append_key_val_null();
+                _append_key_val_null(rem.str);
             }
             rem = m_state->line_contents.rem;
 
@@ -24746,7 +24732,7 @@ bool Parser::_handle_map_impl()
             add_flags(CPLX);
             _line_progressed(2);
             if(has_any(SSCL))
-                _append_key_val_null();
+                _append_key_val_null(rem.str - 1);
             return true;
         }
         else if(has_all(CPLX) && rem.begins_with(':'))
@@ -24770,7 +24756,7 @@ bool Parser::_handle_map_impl()
             if(!has_all(SSCL))
             {
                 _c4dbgp("key was empty...");
-                _store_scalar("", false);
+                _store_scalar_null(rem.str);
             }
             addrem_flags(RVAL, RKEY);
             _line_progressed(2);
@@ -24782,7 +24768,7 @@ bool Parser::_handle_map_impl()
             if(!has_all(SSCL))
             {
                 _c4dbgp("key was empty...");
-                _store_scalar("", false);
+                _store_scalar_null(rem.str);
             }
             addrem_flags(RVAL, RKEY);
             _line_progressed(1);
@@ -25006,7 +24992,7 @@ bool Parser::_handle_key_anchors_and_refs()
         {
             _RYML_CB_ASSERT(m_stack.m_callbacks, has_any(RKEY));
             _c4dbgp("there is a stored key, so this anchor is for the next element");
-            _append_key_val_null();
+            _append_key_val_null(rem.str - 1);
             rem_flags(CPLX);
             return true;
         }
@@ -25196,10 +25182,11 @@ bool Parser::_handle_types()
     {
         _RYML_CB_ASSERT(m_stack.m_callbacks, has_any(RKEY));
         _c4dbgp("there is a stored key, so this tag is for the next element");
-        _append_key_val_null();
+        _append_key_val_null(rem.str - 1);
         rem_flags(CPLX);
     }
 
+    const char *tag_beginning = rem.str;
     size_t tag_indentation = m_state->line_contents.current_col(t);
     _c4dbgpf("there was a tag: '%.*s', indentation=%zu", _c4prsp(t), tag_indentation);
     _RYML_CB_ASSERT(m_stack.m_callbacks, t.end() > m_state->line_contents.rem.begin());
@@ -25228,8 +25215,8 @@ bool Parser::_handle_types()
         if(rem == ':' || rem.begins_with(": "))
         {
             _c4dbgp("the last val was null, and this is a tag from a null key");
-            _append_key_val_null();
-            _store_scalar_null();
+            _append_key_val_null(tag_beginning - 1);
+            _store_scalar_null(rem.str - 1);
             // do not change the flag to key, it is ~
             _RYML_CB_ASSERT(m_stack.m_callbacks, rem.begin() > m_state->line_contents.rem.begin());
             size_t token_len = rem == ':' ? 1 : 2;
@@ -25574,7 +25561,7 @@ bool Parser::_scan_scalar(csubstr *C4_RESTRICT scalar, bool *C4_RESTRICT quoted)
     if(s == '~' || s == "null" || s == "Null" || s == "NULL")
     {
         _c4dbgpf("scalar was '%.*s', so use {}", _c4prsp(s));
-        s = {};
+        s.len = 0u;
     }
 
     *scalar = s;
@@ -26221,7 +26208,7 @@ void Parser::_end_stream()
         else if(m_tree->is_map(m_state->node_id))
         {
             _c4dbgp("append null key val...");
-            added = _append_key_val_null();
+            added = _append_key_val_null(m_state->line_contents.rem.str);
             if(has_any(RSEQIMAP))
             {
                 _stop_seqimap();
@@ -26242,7 +26229,7 @@ void Parser::_end_stream()
     }
     else if(has_all(RSEQ|RVAL) && has_none(EXPL))
     {
-        added = _append_val_null();
+        added = _append_val_null(m_state->line_contents.rem.str);
     }
 
     if(added)
@@ -26345,10 +26332,12 @@ void Parser::_start_map(bool as_child)
             m_tree->to_map(m_state->node_id);
             _c4dbgpf("start_map: id=%zd", m_state->node_id);
         }
+        m_tree->_p(m_state->node_id)->m_val.scalar.str = m_state->line_contents.rem.str;
         _write_val_anchor(m_state->node_id);
     }
     else
     {
+        _RYML_CB_ASSERT(m_stack.m_callbacks, parent_id != NONE);
         m_state->node_id = parent_id;
         _c4dbgpf("start_map: id=%zd", m_state->node_id);
         type_bits as_doc = 0;
@@ -26367,15 +26356,13 @@ void Parser::_start_map(bool as_child)
         if(m_key_anchor.not_empty())
             m_key_anchor_was_before = true;
         _write_val_anchor(parent_id);
-        if(parent_id != NONE)
+        if(m_stack.size() >= 2)
         {
-            if(m_stack.size() >= 2)
-            {
-                State const& parent_state = m_stack.top(1);
-                if(parent_state.flags & RSET)
-                    add_flags(RSET);
-            }
+            State const& parent_state = m_stack.top(1);
+            if(parent_state.flags & RSET)
+                add_flags(RSET);
         }
+        m_tree->_p(parent_id)->m_val.scalar.str = m_state->line_contents.rem.str;
     }
     if( ! m_val_tag.empty())
     {
@@ -26422,13 +26409,13 @@ void Parser::_stop_map()
     {
         _c4dbgpf("stop_map[%zu]: RVAL", m_state->node_id);
         if(!has_all(SSCL))
-            _store_scalar({}, /*is_quoted*/false);
-        _append_key_val_null();
+            _store_scalar_null(m_state->line_contents.rem.str);
+        _append_key_val_null(m_state->line_contents.rem.str);
     }
     else if(has_all(CPLX|RKEY))
     {
-        _store_scalar({}, /*is_quoted*/false);
-        _append_key_val_null();
+        _store_scalar_null(m_state->line_contents.rem.str);
+        _append_key_val_null(m_state->line_contents.rem.str);
     }
 }
 
@@ -26474,6 +26461,7 @@ void Parser::_start_seq(bool as_child)
             _c4dbgpf("start_seq: id=%zd%s", m_state->node_id, as_doc ? " as doc" : "");
         }
         _write_val_anchor(m_state->node_id);
+        m_tree->_p(m_state->node_id)->m_val.scalar.str = m_state->line_contents.rem.str;
     }
     else
     {
@@ -26493,6 +26481,7 @@ void Parser::_start_seq(bool as_child)
         _move_scalar_from_top();
         _c4dbgpf("start_seq: id=%zd%s", m_state->node_id, as_doc ? " as_doc" : "");
         _write_val_anchor(parent_id);
+        m_tree->_p(parent_id)->m_val.scalar.str = m_state->line_contents.rem.str;
     }
     if( ! m_val_tag.empty())
     {
@@ -26535,7 +26524,7 @@ void Parser::_start_seqimap()
         _c4dbgpf("node %zu has no children yet, using empty key", m_state->node_id);
         _push_level();
         _start_map();
-        _store_scalar("", false);
+        _store_scalar_null(m_state->line_contents.rem.str);
     }
     add_flags(RSEQIMAP|EXPL);
 }
@@ -26660,7 +26649,7 @@ bool Parser::_handle_indentation()
         {
             if(has_all(RMAP))
             {
-                _append_key_val_null();
+                _append_key_val_null(rem.sub(ind).str - 1);
                 addrem_flags(RKEY, RVAL);
             }
             else if(has_all(RSEQ))
@@ -26698,12 +26687,12 @@ bool Parser::_handle_indentation()
             if(has_all(RMAP))
             {
                 _RYML_CB_ASSERT(m_stack.m_callbacks, has_all(SSCL));
-                _append_key_val_null();
+                _append_key_val_null(rem.sub(ind).str - 1);
             }
             else if(has_all(RSEQ))
             {
                 _RYML_CB_ASSERT(m_stack.m_callbacks, has_none(SSCL));
-                _append_val_null();
+                _append_val_null(rem.sub(ind).str - 1);
             }
         }
         // search the stack frame to jump to based on its indentation
@@ -28094,70 +28083,43 @@ Location Parser::location(Tree const& tree, size_t node) const
     _RYML_CB_CHECK(m_stack.m_callbacks, m_buf.len == m_newline_offsets_buf.len);
     if(tree.has_key(node))
     {
-        csubstr k = tree.key(node);
-        if(k.str)
-        {
-            _RYML_CB_ASSERT(m_stack.m_callbacks, k.is_sub(m_buf));
-            _RYML_CB_ASSERT(m_stack.m_callbacks, m_buf.is_super(k));
-            return val_location(k.str);
-        }
-        else
-        {
-            _RYML_CB_ERR(m_stack.m_callbacks, "not implemented");
-        }
+        _RYML_CB_ASSERT(m_stack.m_callbacks, tree.key(node).is_sub(m_buf));
+        _RYML_CB_ASSERT(m_stack.m_callbacks, m_buf.is_super(tree.key(node)));
+        return val_location(tree.key(node).str);
     }
     else if(tree.has_val(node))
     {
-        csubstr v = tree.val(node);
-        if(v.str)
-        {
-            _RYML_CB_ASSERT(m_stack.m_callbacks, v.is_sub(m_buf));
-            _RYML_CB_ASSERT(m_stack.m_callbacks, m_buf.is_super(v));
-            return val_location(v.str);
-        }
-        else
-        {
-            _RYML_CB_ERR(m_stack.m_callbacks, "not implemented");
-        }
+        _RYML_CB_ASSERT(m_stack.m_callbacks, tree.val(node).is_sub(m_buf));
+        _RYML_CB_ASSERT(m_stack.m_callbacks, m_buf.is_super(tree.val(node)));
+        return val_location(tree.val(node).str);
     }
-    else if(tree.is_seq(node) || tree.is_map(node))
+    else if(tree.is_container(node))
     {
         _RYML_CB_ASSERT(m_stack.m_callbacks, !tree.has_key(node));
-        if(tree.has_children(node))
+        if(!tree.is_stream(node))
         {
-            Location loc = location(tree, tree.first_child(node));
-            if(loc.offset > 0)
+            const char *node_start = tree._p(node)->m_val.scalar.str;  // this was stored in the container
+            if(tree.has_children(node))
             {
-                // Improve the location for the container by trying to
-                // find a token where the container starts: search
-                // back for the last non-whitespace prior to the
-                // child's offset:
-                size_t offs = m_buf.last_not_of(" \t\r\n", loc.offset);
-                if(offs != npos)
+                size_t child = tree.first_child(node);
+                if(tree.has_key(child))
                 {
-                    if(tree.is_seq(node))
-                    {
-                        if(m_buf[offs] == '[' || (m_buf[offs] == '-' && !tree.is_doc(node)))
-                        {
-                            return val_location(&m_buf.str[offs]);
-                        }
-                    }
-                    else
-                    {
-                        _RYML_CB_ASSERT(m_stack.m_callbacks, tree.is_map(node));
-                        if(m_buf[offs] == '{' || (m_buf[offs] == '-' && !tree.is_doc(node)))
-                        {
-                            return val_location(&m_buf.str[offs]);
-                        }
-                    }
+                    // when a map starts, the container was set after the key
+                    csubstr k = tree.key(child);
+                    if(node_start > k.str)
+                        node_start = k.str;
                 }
             }
-            return loc;
+            return val_location(node_start);
         }
-        else
+        else // it's a stream
         {
-            _RYML_CB_ERR(m_stack.m_callbacks, "not implemented");
+            return val_location(m_buf.str); // just return the front of the buffer
         }
+    }
+    else if(tree.type(node) == NOTYPE)
+    {
+        return val_location(m_buf.str);
     }
     _RYML_CB_ERR(m_stack.m_callbacks, "unknown node type");
     return {};
@@ -28200,7 +28162,7 @@ Location Parser::val_location(const char *val) const
         line = m_newline_offsets;
         while(count)
         {
-            step = count / 2;
+            step = count >> 1;
             it = line + step;
             if(*it < offset)
             {
@@ -28213,9 +28175,17 @@ Location Parser::val_location(const char *val) const
             }
         }
     }
-    _RYML_CB_ASSERT(m_stack.m_callbacks, line != nullptr);
+    if(line)
+    {
+        _RYML_CB_ASSERT(m_stack.m_callbacks, *line > offset);
+    }
+    else
+    {
+        _RYML_CB_ASSERT(m_stack.m_callbacks, m_buf.empty());
+        _RYML_CB_ASSERT(m_stack.m_callbacks, m_newline_offsets_size == 1);
+        line = m_newline_offsets;
+    }
     _RYML_CB_ASSERT(m_stack.m_callbacks, line >= m_newline_offsets && line < m_newline_offsets + m_newline_offsets_size);;
-    _RYML_CB_ASSERT(m_stack.m_callbacks, *line > offset);
     Location loc = {};
     loc.name = m_file;
     loc.offset = offset;
@@ -28230,7 +28200,6 @@ Location Parser::val_location(const char *val) const
 void Parser::_prepare_locations() const
 {
     _RYML_CB_ASSERT(m_stack.m_callbacks, !m_file.empty());
-    _RYML_CB_ASSERT(m_stack.m_callbacks, !m_buf.empty());
     size_t numnewlines = 1u + m_buf.count('\n');
     _resize_locations(numnewlines);
     m_newline_offsets_size = 0;
@@ -28260,7 +28229,7 @@ void Parser::_mark_locations_dirty()
 
 bool Parser::_locations_dirty() const
 {
-    return (!m_newline_offsets_buf.empty()) && (!m_newline_offsets_size);
+    return !m_newline_offsets_size;
 }
 
 } // namespace yml
@@ -28278,20 +28247,20 @@ bool Parser::_locations_dirty() const
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/parse.cpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/parse.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/node.cpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/node.cpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/node.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
@@ -28339,14 +28308,14 @@ size_t NodeRef::deserialize_val(c4::fmt::base64_wrapper w) const
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/node.cpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/node.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/preprocess.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -28370,7 +28339,7 @@ size_t NodeRef::deserialize_val(c4::fmt::base64_wrapper w) const
 //#include "./common.hpp"
 #endif
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/substr.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/substr.hpp
 //#include <c4/substr.hpp>
 #if !defined(C4_SUBSTR_HPP_) && !defined(_C4_SUBSTR_HPP_)
 #error "amalgamate: file c4/substr.hpp must have been included at this point"
@@ -28505,27 +28474,27 @@ CharContainer preprocess_rxmap(csubstr rxmap)
 #endif /* _C4_YML_PREPROCESS_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/preprocess.cpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.cpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.cpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
 #ifdef RYML_SINGLE_HDR_DEFINE_NOW
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.hpp
 //#include "c4/yml/preprocess.hpp"
 #if !defined(C4_YML_PREPROCESS_HPP_) && !defined(_C4_YML_PREPROCESS_HPP_)
 #error "amalgamate: file c4/yml/preprocess.hpp must have been included at this point"
 #endif /* C4_YML_PREPROCESS_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/parser_dbg.hpp
 //#include "c4/yml/detail/parser_dbg.hpp"
 #if !defined(C4_YML_DETAIL_PARSER_DBG_HPP_) && !defined(_C4_YML_DETAIL_PARSER_DBG_HPP_)
 #error "amalgamate: file c4/yml/detail/parser_dbg.hpp must have been included at this point"
@@ -28785,14 +28754,14 @@ size_t preprocess_rxmap(csubstr s, substr buf)
 #endif /* RYML_SINGLE_HDR_DEFINE_NOW */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.cpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.cpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/detail/checks.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/checks.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/checks.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -28800,7 +28769,7 @@ size_t preprocess_rxmap(csubstr s, substr buf)
 #define C4_YML_DETAIL_CHECKS_HPP_
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
@@ -29004,14 +28973,14 @@ inline void check_arena(Tree const& t)
 #endif /* C4_YML_DETAIL_CHECKS_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/detail/checks.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/detail/checks.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/detail/print.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/detail/print.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/detail/print.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -29019,14 +28988,14 @@ inline void check_arena(Tree const& t)
 #define C4_YML_DETAIL_PRINT_HPP_
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
 #endif /* C4_YML_TREE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
@@ -29157,14 +29126,14 @@ inline size_t print_tree(Tree const& p, size_t node=NONE)
 #endif /* C4_YML_DETAIL_PRINT_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/detail/print.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/detail/print.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/c4/yml/yml.hpp
-// https://github.com/danngreen/rapidyaml/src/c4/yml/yml.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/yml.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -29172,35 +29141,35 @@ inline size_t print_tree(Tree const& p, size_t node=NONE)
 #define _C4_YML_YML_HPP_
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/tree.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/tree.hpp
 //#include "c4/yml/tree.hpp"
 #if !defined(C4_YML_TREE_HPP_) && !defined(_C4_YML_TREE_HPP_)
 #error "amalgamate: file c4/yml/tree.hpp must have been included at this point"
 #endif /* C4_YML_TREE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/node.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/node.hpp
 //#include "c4/yml/node.hpp"
 #if !defined(C4_YML_NODE_HPP_) && !defined(_C4_YML_NODE_HPP_)
 #error "amalgamate: file c4/yml/node.hpp must have been included at this point"
 #endif /* C4_YML_NODE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/emit.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/emit.hpp
 //#include "c4/yml/emit.hpp"
 #if !defined(C4_YML_EMIT_HPP_) && !defined(_C4_YML_EMIT_HPP_)
 #error "amalgamate: file c4/yml/emit.hpp must have been included at this point"
 #endif /* C4_YML_EMIT_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/parse.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/parse.hpp
 //#include "c4/yml/parse.hpp"
 #if !defined(C4_YML_PARSE_HPP_) && !defined(_C4_YML_PARSE_HPP_)
 #error "amalgamate: file c4/yml/parse.hpp must have been included at this point"
 #endif /* C4_YML_PARSE_HPP_ */
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/preprocess.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/preprocess.hpp
 //#include "c4/yml/preprocess.hpp"
 #if !defined(C4_YML_PREPROCESS_HPP_) && !defined(_C4_YML_PREPROCESS_HPP_)
 #error "amalgamate: file c4/yml/preprocess.hpp must have been included at this point"
@@ -29210,14 +29179,14 @@ inline size_t print_tree(Tree const& p, size_t node=NONE)
 #endif // _C4_YML_YML_HPP_
 
 
-// (end https://github.com/danngreen/rapidyaml/src/c4/yml/yml.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/c4/yml/yml.hpp)
 
 
 
 //********************************************************************************
 //--------------------------------------------------------------------------------
 // src/ryml.hpp
-// https://github.com/danngreen/rapidyaml/src/ryml.hpp
+// https://github.com/biojppm/rapidyaml/src/ryml.hpp
 //--------------------------------------------------------------------------------
 //********************************************************************************
 
@@ -29225,7 +29194,7 @@ inline size_t print_tree(Tree const& p, size_t node=NONE)
 #define _RYML_HPP_
 
 // amalgamate: removed include of
-// https://github.com/danngreen/rapidyaml/src/c4/yml/yml.hpp
+// https://github.com/biojppm/rapidyaml/src/c4/yml/yml.hpp
 //#include "c4/yml/yml.hpp"
 #if !defined(C4_YML_YML_HPP_) && !defined(_C4_YML_YML_HPP_)
 #error "amalgamate: file c4/yml/yml.hpp must have been included at this point"
@@ -29240,7 +29209,7 @@ using namespace c4;
 #endif /* _RYML_HPP_ */
 
 
-// (end https://github.com/danngreen/rapidyaml/src/ryml.hpp)
+// (end https://github.com/biojppm/rapidyaml/src/ryml.hpp)
 
 #endif /* _RYML_SINGLE_HEADER_AMALGAMATED_HPP_ */
 
