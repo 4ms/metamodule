@@ -45,9 +45,9 @@ struct AuxStream {
 	void init() {
 	}
 
-	void queue_data(AuxStreamFrame &aux) {
-		gate_out_1.queue_sample(aux.gate_out[0]);
-		gate_out_2.queue_sample(aux.gate_out[1]);
+	void queue_data(AuxStreamFrame &frame) {
+		gate_out_1.queue_sample(frame.gate_out[0]);
+		gate_out_2.queue_sample(frame.gate_out[1]);
 	}
 
 	void output_next() {
