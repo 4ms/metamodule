@@ -3,8 +3,8 @@
 #include "drivers/dma_config_struct.hh"
 #include "drivers/dma_transfer.hh"
 #include "drivers/interrupt.hh"
+#include "drivers/spi_dma_datacmd_driver.hh"
 #include "drivers/spi_screen_config_struct.hh"
-#include "drivers/spi_screen_driver.hh"
 
 using mdrivlib::FPin;
 using mdrivlib::GPIO;
@@ -55,6 +55,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 	};
 
 	using DCPin = FPin<GPIO::H, 4, PinMode::Output>;
+	static constexpr PinNoInit ResetPin{GPIO::E, 15}; //NOT REAL!
 
 	static constexpr bool IsInverted = true;
 	static constexpr uint32_t rowstart = 80;
