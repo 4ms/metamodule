@@ -2,6 +2,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "util/static_string.hh"
 #include <array>
+//#include <vector>
 
 const int MAX_MODULES_IN_PATCH = 32;
 
@@ -49,12 +50,14 @@ struct MappedKnob {
 struct InternalCable {
 	Jack out;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
+	//std::vector<Jack> ins;
 };
 
 // 16 Bytes
 struct MappedInputJack {
 	int32_t panel_jack_id;
 	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
+	//std::vector<Jack> ins;
 };
 
 // 8 Bytes
@@ -62,30 +65,3 @@ struct MappedOutputJack {
 	int32_t panel_jack_id;
 	Jack out;
 };
-
-// 48 Bytes
-// struct PatchHeader {
-// 	uint32_t header_version;
-
-// 	ModuleTypeSlug patch_name;
-
-// 	uint16_t num_modules;
-// 	uint16_t num_int_cables;
-
-// 	uint16_t num_mapped_ins;
-// 	uint16_t num_mapped_outs;
-
-// 	uint16_t num_static_knobs;
-// 	uint16_t num_mapped_knobs;
-// };
-
-// Following PatchHeader is DATASIZE bytes of data,
-// where DATASIZE = num_modules*sizeof(ModuleTypeSlug) + num_nets*sizeof(InternalCable)
-// 					+ num_static_knobs*sizeof(StaticParam) + num_mapped_knobs*sizeof(MappedKnob)
-//
-// ModuleTypeSlug module_slugs[num_modules];
-// InternalCable int_cables[num_int_cables];
-// MappedInputJack mapped_ins[num_mapped_ins];
-// MappedOutputJack mapped_outs[num_mapped_outs];
-// StaticParam static_knobs[num_static_knobs];
-// MappedKnob mapped_knobs[num_mapped_knobs];
