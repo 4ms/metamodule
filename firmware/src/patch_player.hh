@@ -145,9 +145,12 @@ public:
 			mdrivlib::SMPThread::join();
 		}
 
-		for (auto &cable : pd->int_cables) {
+		for (auto [net_i, cable] : enumerate(pd->int_cables)) {
 			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
-			for (auto &input_jack : cable.ins) {
+			// TODO: test timing vs. using vector for InternalCable::ins
+			//for (auto &input_jack : cable.ins)
+			for (int jack_i = 0; jack_i < num_int_cable_ins[net_i]; jack_i++) {
+				auto const &input_jack = cable.ins[jack_i];
 				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
 			}
 		}
@@ -169,8 +172,6 @@ public:
 	// K-rate setters/getters:
 
 	void set_panel_param(int param_id, float val) {
-		if (!is_loaded)
-			return;
 		auto &knob_conn = knob_conns[param_id];
 		for (auto const &k : knob_conn) {
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
@@ -178,18 +179,12 @@ public:
 	}
 
 	void set_panel_input(int jack_id, float val) {
-		if (!is_loaded)
-			return;
-		// if (jack_id >= NumInConns)
-		// 	return;
 		auto &jacks = in_conns[jack_id];
 		for (auto const &jack : jacks)
 			modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
 	float get_panel_output(int jack_id) {
-		if (!is_loaded)
-			return 0.f;
 		auto const &jack = out_conns[jack_id];
 		if (jack.module_id > 0)
 			return modules[jack.module_id]->get_output(jack.jack_id);
@@ -326,13 +321,13 @@ public:
 	}
 
 	void calc_int_cable_connections() {
-		for (int net_i = 0; net_i < pd->int_cables.size(); net_i++) {
+		for (auto [net_i, cable] : enumerate(pd->int_cables)) {
 			num_int_cable_ins[net_i] = MAX_CONNECTIONS_PER_NODE - 1;
-			auto &cable = pd->int_cables[net_i];
-			for (int jack_i = 0; jack_i < MAX_CONNECTIONS_PER_NODE - 1; jack_i++) {
-				auto &input_jack = cable.ins[jack_i];
-				if (input_jack.module_id < 0)
+			for (auto [jack_i, input_jack] : enumerate(cable.ins)) {
+				if (input_jack.module_id < 0) {
 					num_int_cable_ins[net_i] = jack_i;
+					break; //FIXME: we want a break here, right?
+				}
 			}
 		}
 	}
@@ -345,12 +340,12 @@ public:
 			auto panel_jack_id = cable.panel_jack_id;
 			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingInJacks)
 				break;
-			for (int j = 0; j < MAX_CONNECTIONS_PER_NODE - 1; j++) {
-				if (cable.ins[j].module_id < 0 || cable.ins[j].jack_id < 0)
+			for (auto const &input_jack : cable.ins) {
+				if (input_jack.module_id < 0 || input_jack.jack_id < 0)
 					break;
-				int dup_int_cable = find_int_cable_input_jack(cable.ins[j]);
+				int dup_int_cable = find_int_cable_input_jack(input_jack);
 				if (dup_int_cable == -1)
-					in_conns[panel_jack_id].push_back(cable.ins[j]);
+					in_conns[panel_jack_id].push_back(input_jack);
 				else {
 					// TODO: handle a mapped and patched input jack:
 					// - ? Create a module that outputs the sum of two inputs, and adjust int_cables and in_mappings?
