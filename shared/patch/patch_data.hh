@@ -1,9 +1,10 @@
 #pragma once
-#include "patch/patch.hh"
+#include "patch.hh"
 #include <vector>
 
 //72B = 6 vec * 12B ea (data, sz, cap)
 struct PatchData {
+	ModuleTypeSlug patch_name;
 	std::vector<ModuleTypeSlug> module_slugs;  //32B
 	std::vector<InternalCable> int_cables;	   //16B
 	std::vector<MappedInputJack> mapped_ins;   //16B

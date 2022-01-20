@@ -1,21 +1,14 @@
+#include "../ryml/ryml_serial.hh"
 #include "../yaml_to_patch.hh"
 #include "doctest.h"
-#include "ryml_serial.hh"
 #include <iostream>
 
 TEST_CASE("Correct header and data produced from yaml") {
 	std::string yamlhdr =
 		// clang-format off
-R"(PatchHeader:
-  header_version: 1
-  patch_name: 'Test Patch 99'
-  num_modules: 4
-  num_int_cables: 2
-  num_mapped_ins: 3
-  num_mapped_outs: 2
-  num_static_knobs: 5
-  num_mapped_knobs: 4
+R"(
 PatchData:
+  patch_name: 'Test Patch 99'
   module_slugs:
     0: PanelMedium
     1: Module1
@@ -104,18 +97,17 @@ PatchData:
 )";
 	// clang-format on
 
-	PatchHeader ph;
 	PatchData pd;
-	CHECK(yaml_string_to_patch(yamlhdr, ph, pd));
+	CHECK(yaml_string_to_patch(yamlhdr, pd));
 
-	CHECK(ph.header_version == 1);
-	CHECK(ph.patch_name.is_equal("Test Patch 99"));
-	CHECK(ph.num_modules == 4);
-	CHECK(ph.num_int_cables == 2);
-	CHECK(ph.num_mapped_ins == 3);
-	CHECK(ph.num_mapped_outs == 2);
-	CHECK(ph.num_static_knobs == 5);
-	CHECK(ph.num_mapped_knobs == 4);
+	// CHECK(ph.header_version == 1);
+	CHECK(pd.patch_name.is_equal("Test Patch 99"));
+	// CHECK(ph.num_modules == 4);
+	// CHECK(ph.num_int_cables == 2);
+	// CHECK(ph.num_mapped_ins == 3);
+	// CHECK(ph.num_mapped_outs == 2);
+	// CHECK(ph.num_static_knobs == 5);
+	// CHECK(ph.num_mapped_knobs == 4);
 
 	CHECK(pd.module_slugs.size() == 4);
 	CHECK(pd.module_slugs[0].is_equal("PanelMedium"));

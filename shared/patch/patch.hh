@@ -64,20 +64,20 @@ struct MappedOutputJack {
 };
 
 // 48 Bytes
-struct PatchHeader {
-	uint32_t header_version;
+// struct PatchHeader {
+// 	uint32_t header_version;
 
-	ModuleTypeSlug patch_name;
+// 	ModuleTypeSlug patch_name;
 
-	uint16_t num_modules;
-	uint16_t num_int_cables;
+// 	uint16_t num_modules;
+// 	uint16_t num_int_cables;
 
-	uint16_t num_mapped_ins;
-	uint16_t num_mapped_outs;
+// 	uint16_t num_mapped_ins;
+// 	uint16_t num_mapped_outs;
 
-	uint16_t num_static_knobs;
-	uint16_t num_mapped_knobs;
-};
+// 	uint16_t num_static_knobs;
+// 	uint16_t num_mapped_knobs;
+// };
 
 // Following PatchHeader is DATASIZE bytes of data,
 // where DATASIZE = num_modules*sizeof(ModuleTypeSlug) + num_nets*sizeof(InternalCable)

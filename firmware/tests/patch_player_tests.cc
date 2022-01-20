@@ -54,16 +54,8 @@
 
 TEST_CASE("Simple output jack mapping") {
 	std::string patchyml{// clang-format off
-R"(PatchHeader: 
-  header_version: 1
+R"(PatchData:
   patch_name: unittest_outmap
-  num_modules: 3
-  num_int_cables: 0
-  num_mapped_ins: 0
-  num_mapped_outs: 3
-  num_static_knobs: 0
-  num_mapped_knobs: 0
-PatchData:
   module_slugs:
     0: PANEL_8
     1: MULTILFO
@@ -87,16 +79,14 @@ PatchData:
   mapped_knobs: 
 )"};
 						 // clang-format on
-
-	PatchHeader ph;
 	PatchData pd;
-	CHECK(yaml_string_to_patch(patchyml, ph, pd));
+	CHECK(yaml_string_to_patch(patchyml, pd));
 
 	MetaModule::PatchPlayer player;
-	player.load_patch_header_data(&ph, &pd);
+	player.load_patch_header_data(&pd);
 	player.calc_panel_jack_connections();
 
-	REQUIRE(ph.num_mapped_outs == 3);
+	REQUIRE(pd.mapped_outs.size() == 3);
 
 	SUBCASE("Check if mapped_outs[] data was loaded OK") {
 		SUBCASE("Check if output connection data is correct") {
@@ -115,16 +105,8 @@ PatchData:
 TEST_CASE("Internal cables: single and stacked") {
 	// clang-format off
 	std::string patchyml{R"( 
-PatchHeader:
-  header_version: 1
-  patch_name: unittest_outmap_overlapping_cab
-  num_modules: 3
-  num_int_cables: 2
-  num_mapped_ins: 0
-  num_mapped_outs: 3
-  num_static_knobs: 0
-  num_mapped_knobs: 0
 PatchData:
+  patch_name: unittest_outmap_overlapping_cab
   module_slugs:
     0: PANEL_8
     1: MULTILFO
@@ -163,17 +145,16 @@ PatchData:
 	)"};
 	// clang-format on
 
-	PatchHeader ph;
 	PatchData pd;
-	CHECK(yaml_string_to_patch(patchyml, ph, pd));
+	CHECK(yaml_string_to_patch(patchyml, pd));
 
 	// In VCV Rack, if two cables are stacked, they appear as two separate cables.
 	// Contrary to this, we consider them as a single cable, with one output and two inputs.
 	// So, this patch should have 2 cables (a 1->1 and a 1->2)
-	CHECK(ph.num_int_cables == 2);
+	CHECK(pd.int_cables.size() == 2);
 
 	MetaModule::PatchPlayer player;
-	player.load_patch_header_data(&ph, &pd);
+	player.load_patch_header_data(&pd);
 	player.calc_panel_jack_connections();
 
 	bool found_cable1 = false;
@@ -183,7 +164,7 @@ PatchData:
 
 	Jack end_of_cable = Jack{-1, -1};
 
-	for (int net_i = 0; net_i < ph.num_int_cables; net_i++) {
+	for (int net_i = 0; net_i < pd.int_cables.size(); net_i++) {
 		auto &cable = player.get_int_cable(net_i);
 
 		// Check for cable1: 1->1 cable
@@ -222,7 +203,7 @@ PatchData:
 	}
 
 	SUBCASE("It's OK to have a Panel output jack mapping to an virtual input jack that has a valid cable") {
-		CHECK(ph.num_mapped_outs == 3);
+		CHECK(pd.mapped_outs.size() == 3);
 
 		SUBCASE("Check if output connection data is correct") {
 			// printf("player.get_panel_output_connection(0) == Jack{%d, %d}\n",
@@ -253,16 +234,8 @@ PatchData:
 TEST_CASE("Simple input jack mapping") {
 	// clang-format off
 	std::string patchyml{R"( 
-PatchHeader:
-  header_version: 1
-  patch_name: unittest_inmapping
-  num_modules: 3
-  num_int_cables: 0
-  num_mapped_ins: 6
-  num_mapped_outs: 0
-  num_static_knobs: 0
-  num_mapped_knobs: 0
 PatchData:
+  patch_name: unittest_inmapping
   module_slugs:
     0: PANEL_8
     1: MIXER4
@@ -299,15 +272,14 @@ PatchData:
 	)"};
 	// clang-format on
 
-	PatchHeader ph;
 	PatchData pd;
 
 	MetaModule::PatchPlayer player;
-	yaml_string_to_patch(patchyml, ph, pd);
-	player.load_patch_header_data(&ph, &pd);
+	yaml_string_to_patch(patchyml, pd);
+	player.load_patch_header_data(&pd);
 	player.calc_panel_jack_connections();
 
-	REQUIRE(ph.num_mapped_ins == 6);
+	REQUIRE(pd.mapped_ins.size() == 6);
 
 	SUBCASE("Check if input connection data is correct") {
 		CHECK(player.get_panel_input_connection(0) == Jack{1, 0});
@@ -339,16 +311,8 @@ PatchData:
 TEST_CASE("Input jack is patched and mapped to a panel jack -- for now we ignore the mapping") {
 	// clang-format off
 	std::string patchyml{R"( 
-PatchHeader:
-  header_version: 1
-  patch_name: unittest_inmapping_overlapping
-  num_modules: 3
-  num_int_cables: 1
-  num_mapped_ins: 1
-  num_mapped_outs: 0
-  num_static_knobs: 0
-  num_mapped_knobs: 0
 PatchData:
+  patch_name: unittest_inmapping_overlapping
   module_slugs:
     0: PANEL_8
     1: MULTILFO
@@ -371,16 +335,15 @@ PatchData:
 	)"};
 	// clang-format on
 
-	PatchHeader ph;
 	PatchData pd;
 
 	MetaModule::PatchPlayer player;
-	yaml_string_to_patch(patchyml, ph, pd);
-	player.load_patch_header_data(&ph, &pd);
+	yaml_string_to_patch(patchyml, pd);
+	player.load_patch_header_data(&pd);
 	player.calc_panel_jack_connections();
 
-	REQUIRE(ph.num_mapped_ins == 1);
-	REQUIRE(ph.num_int_cables == 1);
+	REQUIRE(pd.mapped_ins.size() == 1);
+	REQUIRE(pd.int_cables.size() == 1);
 
 	SUBCASE("No input mappings are present") {
 		CHECK(player.get_panel_input_connection(0) == Jack{0, 0});
@@ -406,16 +369,8 @@ TEST_CASE("Dup module index") {
 	SUBCASE("If there's more than one of a module type, get the correct 'dup index' for each") {
 		// clang-format off
 	std::string patchyml{R"( 
-PatchHeader:
-  header_version: 1
-  patch_name: unittest_dup_mod_index
-  num_modules: 8
-  num_int_cables: 0
-  num_mapped_ins: 0
-  num_mapped_outs: 0
-  num_static_knobs: 0
-  num_mapped_knobs: 0
 PatchData:
+  patch_name: unittest_dup_mod_index
   module_slugs:
     0: PANEL_8
     1: LFOSINE
@@ -433,15 +388,14 @@ PatchData:
 	)"};
 		// clang-format on
 
-		PatchHeader ph;
 		PatchData pd;
 
 		MetaModule::PatchPlayer player;
-		yaml_string_to_patch(patchyml, ph, pd);
-		player.load_patch_header_data(&ph, &pd);
+		yaml_string_to_patch(patchyml, pd);
+		player.load_patch_header_data(&pd);
 		player.calc_multiple_module_indicies();
 
-		REQUIRE(ph.num_modules == 8);
+		REQUIRE(pd.module_slugs.size() == 8);
 		CHECK(player.get_multiple_module_index(0) == 0); // PANEL_8
 		CHECK(player.get_multiple_module_index(1) == 1); // LFOSINE 1
 		CHECK(player.get_multiple_module_index(2) == 1); // KARPLUS 1

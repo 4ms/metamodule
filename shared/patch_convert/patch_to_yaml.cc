@@ -1,20 +1,21 @@
 #include "patch_to_yaml.hh"
 #include "ryml/ryml_all.hpp"
-#include "ryml_serial.hh"
+#include "ryml/ryml_serial.hh"
 #include "util/byte_block.hh"
 #include "util/countzip.hh"
 
-std::string patch_to_yaml_string(PatchHeader const &ph, PatchData const &pd) {
+std::string patch_to_yaml_string(PatchData const &pd) {
 	RymlInit::init_once();
 
 	ryml::Tree tree;
 	ryml::NodeRef root = tree.rootref();
 	root |= ryml::MAP;
 
-	root["PatchHeader"] << ph;
-
 	ryml::NodeRef data = root["PatchData"];
 	data |= ryml::MAP;
+
+	//data.append_child() << ryml::key("patch_name") << pd.patch_name.c_str();
+	data["patch_name"] << pd.patch_name;
 
 	ryml::NodeRef slugs = data["module_slugs"];
 	slugs |= ryml::MAP;

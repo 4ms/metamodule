@@ -1,7 +1,7 @@
 #include "patchlist_ryml_tests.hh"
-#include "patch_convert/patch_data.hh"
+#include "patch/patch_data.hh"
 #include "patch_convert/yaml_to_patch.hh"
-#include "ryml_serial.hh"
+#include "ryml/ryml_serial.hh"
 
 namespace
 {
@@ -218,7 +218,7 @@ R"(0: 000
 	return true;
 }
 
-bool TEST_CASE_Can_parse_patch_header_field_by_field() {
+bool TEST_CASE_Can_parse_a_struct_field_by_field() {
 	// clang-format off
 	char yml_buf[] =
 R"(
@@ -257,30 +257,79 @@ PatchHeader:
 	CHECK(tree[0].child(6).val() == "8");
 	CHECK(tree[0].child(7).val() == "9");
 
-	PatchHeader ph;
-	tree[0]["header_version"] >> ph.header_version;
-	tree[0]["patch_name"] >> ph.patch_name;
-	tree[0]["num_modules"] >> ph.num_modules;
-	tree[0]["num_int_cables"] >> ph.num_int_cables;
-	tree[0]["num_mapped_ins"] >> ph.num_mapped_ins;
-	tree[0]["num_mapped_outs"] >> ph.num_mapped_outs;
-	tree[0]["num_static_knobs"] >> ph.num_static_knobs;
-	tree[0]["num_mapped_knobs"] >> ph.num_mapped_knobs;
-	CHECK(ph.header_version == 1);
-	CHECK(ph.patch_name.is_equal("test123"));
-	CHECK(ph.num_modules == 4);
-	CHECK(ph.num_int_cables == 5);
-	CHECK(ph.num_mapped_ins == 6);
-	CHECK(ph.num_mapped_outs == 7);
-	CHECK(ph.num_static_knobs == 8);
-	CHECK(ph.num_mapped_knobs == 9);
+	// PatchHeader ph;
+	// tree[0]["header_version"] >> ph.header_version;
+	// tree[0]["patch_name"] >> ph.patch_name;
+	// tree[0]["num_modules"] >> ph.num_modules;
+	// tree[0]["num_int_cables"] >> ph.num_int_cables;
+	// tree[0]["num_mapped_ins"] >> ph.num_mapped_ins;
+	// tree[0]["num_mapped_outs"] >> ph.num_mapped_outs;
+	// tree[0]["num_static_knobs"] >> ph.num_static_knobs;
+	// tree[0]["num_mapped_knobs"] >> ph.num_mapped_knobs;
+	// CHECK(ph.header_version == 1);
+	// CHECK(ph.patch_name.is_equal("test123"));
+	// CHECK(ph.num_modules == 4);
+	// CHECK(ph.num_int_cables == 5);
+	// CHECK(ph.num_mapped_ins == 6);
+	// CHECK(ph.num_mapped_outs == 7);
+	// CHECK(ph.num_static_knobs == 8);
+	// CHECK(ph.num_mapped_knobs == 9);
 
+	return true;
+}
+
+struct _TestPatchHeader {
+	uint32_t header_version;
+
+	ModuleTypeSlug patch_name;
+
+	uint16_t num_modules;
+	uint16_t num_int_cables;
+
+	uint16_t num_mapped_ins;
+	uint16_t num_mapped_outs;
+
+	uint16_t num_static_knobs;
+	uint16_t num_mapped_knobs;
+};
+
+void write(ryml::NodeRef *n, _TestPatchHeader const &ph) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("header_version") << std::to_string(ph.header_version);
+	n->append_child() << ryml::key("patch_name") << ph.patch_name.c_str();
+	n->append_child() << ryml::key("num_modules") << std::to_string(ph.num_modules);
+	n->append_child() << ryml::key("num_int_cables") << std::to_string(ph.num_int_cables);
+	n->append_child() << ryml::key("num_mapped_ins") << std::to_string(ph.num_mapped_ins);
+	n->append_child() << ryml::key("num_mapped_outs") << std::to_string(ph.num_mapped_outs);
+	n->append_child() << ryml::key("num_static_knobs") << std::to_string(ph.num_static_knobs);
+	n->append_child() << ryml::key("num_mapped_knobs") << std::to_string(ph.num_mapped_knobs);
+}
+
+bool read(ryml::NodeRef const &n, _TestPatchHeader *ph) {
+	if (n.num_children() != 8)
+		return false;
+	if (n.child(0).key() != "header_version")
+		return false;
+	if (n.child(1).key() != "patch_name")
+		return false;
+	if (n.child(2).key() != "num_modules")
+		return false;
+	//TODO: rest of fields...
+
+	n["header_version"] >> ph->header_version;
+	n["patch_name"] >> ph->patch_name;
+	n["num_modules"] >> ph->num_modules;
+	n["num_int_cables"] >> ph->num_int_cables;
+	n["num_mapped_ins"] >> ph->num_mapped_ins;
+	n["num_mapped_outs"] >> ph->num_mapped_outs;
+	n["num_static_knobs"] >> ph->num_static_knobs;
+	n["num_mapped_knobs"] >> ph->num_mapped_knobs;
 	return true;
 }
 
 bool TEST_CASE_Can_create_a_rymlTree_from_a_PatchHeader_using_operator_lshift() {
 	ryml::Tree tree;
-	PatchHeader ph_in{
+	_TestPatchHeader ph_in{
 		.header_version = 1,
 		.patch_name = "test123",
 		.num_modules = 4,
@@ -292,7 +341,7 @@ bool TEST_CASE_Can_create_a_rymlTree_from_a_PatchHeader_using_operator_lshift() 
 	};
 	tree.rootref() << ph_in;
 
-	PatchHeader ph_out;
+	_TestPatchHeader ph_out;
 	tree.rootref() >> ph_out;
 	CHECK(ph_out.header_version == ph_in.header_version);
 	CHECK(ph_out.patch_name.is_equal(ph_in.patch_name));
@@ -323,7 +372,7 @@ R"(
 
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yml_buf));
 
-	PatchHeader ph_out;
+	_TestPatchHeader ph_out;
 
 	tree.rootref() >> ph_out;
 	CHECK(ph_out.header_version == 1);
@@ -341,16 +390,8 @@ R"(
 bool TEST_CASE_Correct_header_and_data_produced_from_yaml() {
 	std::string yamlhdr =
 		// clang-format off
-R"(PatchHeader:
-  header_version: 1
+R"(PatchData:
   patch_name: 'Test Patch 99'
-  num_modules: 4
-  num_int_cables: 2
-  num_mapped_ins: 3
-  num_mapped_outs: 2
-  num_static_knobs: 5
-  num_mapped_knobs: 4
-PatchData:
   module_slugs:
     0: PanelMedium
     1: Module1
@@ -443,18 +484,10 @@ PatchData:
 )";
 	// clang-format on
 
-	PatchHeader ph;
 	PatchData pd;
-	CHECK(yaml_string_to_patch(yamlhdr, ph, pd));
+	CHECK(yaml_string_to_patch(yamlhdr, pd));
 
-	CHECK(ph.header_version == 1);
-	CHECK(ph.patch_name.is_equal("Test Patch 99"));
-	CHECK(ph.num_modules == 4);
-	CHECK(ph.num_int_cables == 2);
-	CHECK(ph.num_mapped_ins == 3);
-	CHECK(ph.num_mapped_outs == 2);
-	CHECK(ph.num_static_knobs == 5);
-	CHECK(ph.num_mapped_knobs == 4);
+	CHECK(pd.patch_name.is_equal("Test Patch 99"));
 
 	CHECK(pd.module_slugs.size() == 4);
 	CHECK(pd.module_slugs[0].is_equal("PanelMedium"));
@@ -554,7 +587,7 @@ bool run_all_tests() {
 		return false;
 	if (!TEST_CASE_Can_use_const_char_for_keys())
 		return false;
-	if (!TEST_CASE_Can_parse_patch_header_field_by_field())
+	if (!TEST_CASE_Can_parse_a_struct_field_by_field())
 		return false;
 	if (!TEST_CASE_Can_create_a_rymlTree_from_a_PatchHeader_using_operator_lshift())
 		return false;

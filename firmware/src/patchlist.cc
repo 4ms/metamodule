@@ -54,10 +54,10 @@ PatchList::PatchList()
 	// 		yaml_string_to_patch(yamldata, patchheader, patchdata);
 	// }
 
-	for (auto [yamldata, patchheader, patchdata] : zip(_raw_patch_yaml_files, _patch_headers, _patch_data)) {
+	for (auto [yamldata, patchdata] : zip(_raw_patch_yaml_files, _patch_data)) {
 		//Note: we use a std::string because it allocates the space that ryml needs to parse in place
 		std::string yamlstr{reinterpret_cast<char *>(yamldata)}; //unsigned char -> char
-		yaml_string_to_patch(yamlstr, patchheader, patchdata);
+		yaml_string_to_patch(yamlstr, patchdata);
 	}
 
 	if (!PatchListTargetTests::run_all_tests()) {

@@ -1,6 +1,6 @@
 #pragma once
 #include "patch/patch.hh"
-#include "patch_convert/patch_data.hh"
+#include "patch/patch_data.hh"
 
 namespace MetaModule
 {
@@ -14,13 +14,7 @@ struct PatchList {
 	ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
 		if (patch_id >= NumPatches)
 			patch_id = 0;
-		return _patch_headers[patch_id].patch_name;
-	}
-
-	PatchHeader *get_cur_patch_header() {
-		if (_cur_patch_index >= NumPatches)
-			_cur_patch_index = 0;
-		return &_patch_headers[_cur_patch_index];
+		return _patch_data[patch_id].patch_name;
 	}
 
 	PatchData *get_cur_patch_data() {
@@ -60,7 +54,6 @@ private:
 	// char *_raw_patch_yaml_file_data;
 	std::array<void *, NumPatches> _raw_patch_yaml_files;
 
-	std::array<PatchHeader, NumPatches> _patch_headers;
 	std::array<PatchData, NumPatches> _patch_data;
 	uint32_t _cur_patch_index = 0;
 };

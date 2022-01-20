@@ -205,16 +205,15 @@ struct PatchSelectorPage : PageBase {
 
 	void handle_changing_patch() {
 		if (mbox.loading_new_patch && mbox.audio_is_muted) {
-			auto orig_patch_header = patch_list.get_cur_patch_header();
 			auto orig_patch_data = patch_list.get_cur_patch_data();
 			patch_player.unload_patch();
 			patch_list.set_cur_patch_index(mbox.new_patch_index);
-			bool ok = patch_player.load_patch(patch_list.get_cur_patch_header(), patch_list.get_cur_patch_data());
+			bool ok = patch_player.load_patch(patch_list.get_cur_patch_data());
 			if (!ok) {
 				mbox.set_message("Can't load patch");
 				printf("Can't load patch\n\r");
 				patch_player.unload_patch();
-				patch_player.load_patch(orig_patch_header, orig_patch_data);
+				patch_player.load_patch(orig_patch_data);
 			} else
 				mbox.clear_message();
 
