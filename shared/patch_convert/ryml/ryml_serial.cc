@@ -81,7 +81,7 @@ bool read(ryml::NodeRef const &n, MappedOutputJack *j) {
 }
 
 bool read(ryml::NodeRef const &n, MappedKnob *k) {
-	if (n.num_children() != 6)
+	if (n.num_children() < 6)
 		return false;
 	if (n.child(0).key() != "panel_knob_id")
 		return false;
@@ -102,6 +102,9 @@ bool read(ryml::NodeRef const &n, MappedKnob *k) {
 	n["curve_type"] >> k->curve_type;
 	n["min"] >> k->min;
 	n["max"] >> k->max;
+
+	if (n.child(6).key() == "alias_name")
+		n["alias_name"] >> k->alias_name;
 
 	return true;
 }

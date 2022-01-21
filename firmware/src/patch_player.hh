@@ -131,17 +131,6 @@ public:
 				modules[module_i]->update();
 				// Debug::Pin2::low();
 			}
-
-			// LEave this here until we are sure it's working OK on Mini
-			// for (int module_i = 1; module_i < header->num_modules; module_i++) {
-			// 	if (!mdrivlib::SMPThread::is_running()) {
-			// 		mdrivlib::SMPThread::launch_command<SMPCommand::UpdateModule, SMPRegister::ModuleID>(module_i);
-			// 	} else {
-			// 		Debug::Pin2::high();
-			// 		modules[module_i]->update();
-			// 		Debug::Pin2::low();
-			// 	}
-			// }
 			mdrivlib::SMPThread::join();
 		}
 
@@ -212,6 +201,10 @@ public:
 
 	const ModuleTypeSlug &get_module_name(int idx) {
 		return (is_loaded && idx < pd->module_slugs.size()) ? pd->module_slugs[idx] : no_patch_loaded;
+	}
+
+	StaticString<15> const &get_panel_knob_name(int param_id) {
+		return pd->mapped_knobs[param_id].alias_name;
 	}
 
 	InternalCable &get_int_cable(int idx) {

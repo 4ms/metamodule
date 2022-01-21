@@ -79,6 +79,8 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 		el["curve_type"] << x.curve_type;
 		el["min"] << x.min;
 		el["max"] << x.max;
+		if (x.alias_name.length())
+			el["alias_name"] << x.alias_name;
 	}
 
 	return ryml::emitrs<std::string>(tree);

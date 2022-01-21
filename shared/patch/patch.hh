@@ -36,6 +36,7 @@ struct MappedKnob {
 	int16_t curve_type; // reserved for future use
 	float min;
 	float max;
+	StaticString<15> alias_name;
 
 	// Returns the value of the mapped knob, given the panel knob value
 	// Return value goes from min to max as panel_val goes from 0 to 1
