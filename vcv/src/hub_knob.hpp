@@ -109,6 +109,14 @@ public:
 				resetItem->paramWidget = this;
 				menu->addChild(resetItem);
 
+				MenuSeparator *sep = new MenuSeparator;
+				menu->addChild(sep);
+
+				// TODO: look at rack::app::ParamField in Rack/src/app/ParamWidget
+				MapField *alias_name = new MapField;
+				alias_name->box.size.x = 100;
+				menu->addChild(alias_name);
+
 				KnobMap *thisMap = hubKnobLabel._knobmap;
 				if (thisMap) {
 					for (auto &mapping : thisMap->maps) {
