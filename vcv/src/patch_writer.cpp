@@ -1,19 +1,17 @@
 #include "patch_writer.hpp"
 #include "patch_convert/patch_to_yaml.hh"
-//#include "util/countzip.hh"
 #include <algorithm>
 
-#include "ryml_serial.hh"
+#include "patch_convert/ryml/ryml_serial.hh"
 
 PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules)
 {
-	ph.header_version = 1;
 	setModuleList(modules);
 }
 
 void PatchFileWriter::setPatchName(std::string patchName)
 {
-	ph.patch_name = patchName.c_str();
+	pd.patch_name = patchName.c_str();
 }
 
 void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules)
@@ -34,14 +32,11 @@ void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules)
 			vcv_mod_ids.push_back(mod.id);
 		}
 	}
-	ph.num_modules = pd.module_slugs.size();
-
 	if (vcv_mod_ids[0] < 0)
 		return;
 	// error: no panel!
 
 	idMap = squash_ids(vcv_mod_ids);
-	ph.num_modules = modules.size();
 }
 
 void PatchFileWriter::setJackList(std::vector<JackStatus> &jacks)
@@ -97,7 +92,6 @@ void PatchFileWriter::setJackList(std::vector<JackStatus> &jacks)
 			}
 		}
 	}
-	ph.num_int_cables = pd.int_cables.size();
 }
 
 void PatchFileWriter::setParamList(std::vector<ParamStatus> &params)
@@ -111,7 +105,6 @@ void PatchFileWriter::setParamList(std::vector<ParamStatus> &params)
 			.value = param.value,
 		});
 	}
-	ph.num_static_knobs = pd.static_knobs.size();
 }
 
 void PatchFileWriter::addMaps(std::vector<Mapping> maps)
@@ -202,43 +195,39 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 			}
 		}
 	}
-
-	ph.num_mapped_knobs = pd.mapped_knobs.size();
-	ph.num_mapped_ins = pd.mapped_ins.size();
-	ph.num_mapped_outs = pd.mapped_outs.size();
 }
 
 ByteBlock::DataType PatchFileWriter::printPatchBinary()
 {
 	ByteBlock v;
 
-	auto *header = reinterpret_cast<unsigned char *>(&ph);
-	v.printRaw(header, sizeof(ph));
+	// auto *header = reinterpret_cast<unsigned char *>(&ph);
+	// v.printRaw(header, sizeof(ph));
 
-	for (size_t i = 0; i < pd.module_slugs.size(); i++)
-		v.printRaw(reinterpret_cast<unsigned char *>(&pd.module_slugs[i]), sizeof(pd.module_slugs[i]));
+	// for (size_t i = 0; i < pd.module_slugs.size(); i++)
+	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.module_slugs[i]), sizeof(pd.module_slugs[i]));
 
-	for (size_t i = 0; i < pd.int_cables.size(); i++)
-		v.printRaw(reinterpret_cast<unsigned char *>(&pd.int_cables[i]), sizeof(pd.int_cables[i]));
+	// for (size_t i = 0; i < pd.int_cables.size(); i++)
+	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.int_cables[i]), sizeof(pd.int_cables[i]));
 
-	for (size_t i = 0; i < pd.mapped_ins.size(); i++)
-		v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_ins[i]), sizeof(pd.mapped_ins[i]));
+	// for (size_t i = 0; i < pd.mapped_ins.size(); i++)
+	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_ins[i]), sizeof(pd.mapped_ins[i]));
 
-	for (size_t i = 0; i < pd.mapped_outs.size(); i++)
-		v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_outs[i]), sizeof(pd.mapped_outs[i]));
+	// for (size_t i = 0; i < pd.mapped_outs.size(); i++)
+	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_outs[i]), sizeof(pd.mapped_outs[i]));
 
-	for (size_t i = 0; i < pd.static_knobs.size(); i++)
-		v.printRaw(reinterpret_cast<unsigned char *>(&pd.static_knobs[i]), sizeof(pd.static_knobs[i]));
+	// for (size_t i = 0; i < pd.static_knobs.size(); i++)
+	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.static_knobs[i]), sizeof(pd.static_knobs[i]));
 
-	for (size_t i = 0; i < pd.mapped_knobs.size(); i++)
-		v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_knobs[i]), sizeof(pd.mapped_knobs[i]));
+	// for (size_t i = 0; i < pd.mapped_knobs.size(); i++)
+	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_knobs[i]), sizeof(pd.mapped_knobs[i]));
 
 	return v.data;
 }
 
 std::string PatchFileWriter::printPatchYAML()
 {
-	return patch_to_yaml_string(ph, pd);
+	return patch_to_yaml_string(pd);
 }
 
 std::map<int, int> PatchFileWriter::squash_ids(std::vector<int> ids)

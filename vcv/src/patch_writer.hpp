@@ -7,7 +7,6 @@
 #include <vector>
 
 class PatchFileWriter {
-	PatchHeader ph;
 	PatchData pd;
 	std::map<int, int> idMap;
 
