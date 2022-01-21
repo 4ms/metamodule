@@ -46,8 +46,8 @@
         "external": 0
       },
       "pos": [
-        38,
-        1
+        76,
+        2
       ]
     },
     {
@@ -56,6 +56,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
+      "rightModuleId": 21,
       "data": {
         "audio": {
           "driver": 5,
@@ -66,8 +67,8 @@
         }
       },
       "pos": [
-        58,
-        1
+        56,
+        2
       ]
     },
     {
@@ -79,8 +80,8 @@
       "leftModuleId": 21,
       "rightModuleId": 14,
       "pos": [
-        33,
-        1
+        71,
+        2
       ]
     },
     {
@@ -89,10 +90,11 @@
       "version": "1.4.0",
       "model": "Split",
       "params": [],
+      "leftModuleId": 16,
       "rightModuleId": 20,
       "pos": [
-        28,
-        1
+        66,
+        2
       ]
     },
     {
@@ -127,7 +129,7 @@
         },
         {
           "id": 6,
-          "value": 0.803499758
+          "value": 0.731500089
         },
         {
           "id": 7,
@@ -135,7 +137,7 @@
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 0.457500011
         },
         {
           "id": 9,
@@ -147,7 +149,7 @@
         },
         {
           "id": 11,
-          "value": 0.160499856
+          "value": 0.23999992
         },
         {
           "id": 12,
@@ -279,6 +281,28 @@
             "AliasName": ""
           },
           {
+            "DstModID": 30,
+            "DstObjID": 4,
+            "DstObjType": "InputJack",
+            "SrcModID": 22,
+            "SrcObjID": 6,
+            "SrcObjType": "InputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 4,
+            "DstObjType": "InputJack",
+            "SrcModID": 22,
+            "SrcObjID": 7,
+            "SrcObjType": "InputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
             "DstModID": 25,
             "DstObjID": 0,
             "DstObjType": "Knob",
@@ -287,25 +311,14 @@
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 25,
-            "DstObjID": 1,
-            "DstObjType": "Knob",
-            "SrcModID": 22,
-            "SrcObjID": 1,
-            "SrcObjType": "Knob",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": "Sharp-1"
+            "AliasName": "Pitch 1"
           },
           {
             "DstModID": 25,
             "DstObjID": 3,
             "DstObjType": "Knob",
             "SrcModID": 22,
-            "SrcObjID": 2,
+            "SrcObjID": 1,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
@@ -316,33 +329,44 @@
             "DstObjID": 0,
             "DstObjType": "Knob",
             "SrcModID": 22,
-            "SrcObjID": 3,
+            "SrcObjID": 2,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 24,
-            "DstObjID": 1,
-            "DstObjType": "Knob",
-            "SrcModID": 22,
-            "SrcObjID": 4,
-            "SrcObjType": "Knob",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
+            "AliasName": "Pitch-2"
           },
           {
             "DstModID": 24,
             "DstObjID": 3,
             "DstObjType": "Knob",
             "SrcModID": 22,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": "Strike-2"
+          },
+          {
+            "DstModID": 30,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 4,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": "Pitch3"
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
             "SrcObjID": 5,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
-            "AliasName": ""
+            "AliasName": "Pitch4"
           },
           {
             "DstModID": 23,
@@ -353,7 +377,7 @@
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
-            "AliasName": ""
+            "AliasName": "P-shift-1"
           },
           {
             "DstModID": 23,
@@ -364,10 +388,54 @@
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
-            "AliasName": "Wndw"
+            "AliasName": ""
+          },
+          {
+            "DstModID": 30,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 8,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": "Sharp 3"
+          },
+          {
+            "DstModID": 28,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 9,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 28,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 10,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 29,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 11,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
           }
         ],
-        "PatchName": "Djembe-2"
+        "PatchName": "Djembe-4"
       },
       "pos": [
         62,
@@ -382,7 +450,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.803499758
+          "value": 0.731500089
         },
         {
           "id": 1,
@@ -412,7 +480,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.61800009
+          "value": 0.443499893
         },
         {
           "id": 1,
@@ -424,7 +492,7 @@
         },
         {
           "id": 3,
-          "value": 0.450000048
+          "value": 0.61800009
         }
       ],
       "leftModuleId": 23,
@@ -454,7 +522,7 @@
         },
         {
           "id": 3,
-          "value": 0.443499893
+          "value": 0.388499856
         }
       ],
       "rightModuleId": 23,
@@ -491,7 +559,7 @@
         },
         {
           "id": 5,
-          "value": 0.678499997
+          "value": 0.636499941
         },
         {
           "id": 6,
@@ -499,7 +567,7 @@
         },
         {
           "id": 7,
-          "value": 0.51700002
+          "value": 0.611499786
         }
       ],
       "rightModuleId": 22,
@@ -541,7 +609,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.160499856
+          "value": 0.23999992
         },
         {
           "id": 1,
@@ -555,6 +623,64 @@
       "pos": [
         0,
         0
+      ]
+    },
+    {
+      "id": 30,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "Djembe",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.433500022
+        },
+        {
+          "id": 1,
+          "value": 0.457500011
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 0.443499893
+        }
+      ],
+      "rightModuleId": 31,
+      "pos": [
+        9,
+        1
+      ]
+    },
+    {
+      "id": 31,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "Djembe",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.450000048
+        },
+        {
+          "id": 1,
+          "value": 0.388499856
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 0.443499893
+        }
+      ],
+      "leftModuleId": 30,
+      "pos": [
+        17,
+        1
       ]
     }
   ],
@@ -592,44 +718,12 @@
       "color": "#c91847"
     },
     {
-      "id": 50,
-      "outputModuleId": 25,
-      "outputId": 0,
-      "inputModuleId": 26,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 51,
-      "outputModuleId": 24,
-      "outputId": 0,
-      "inputModuleId": 26,
-      "inputId": 2,
-      "color": "#0c8e15"
-    },
-    {
       "id": 52,
       "outputModuleId": 24,
       "outputId": 0,
       "inputModuleId": 28,
       "inputId": 1,
       "color": "#c91847"
-    },
-    {
-      "id": 49,
-      "outputModuleId": 23,
-      "outputId": 0,
-      "inputModuleId": 26,
-      "inputId": 4,
-      "color": "#0986ad"
-    },
-    {
-      "id": 54,
-      "outputModuleId": 28,
-      "outputId": 0,
-      "inputModuleId": 26,
-      "inputId": 6,
-      "color": "#c9b70e"
     },
     {
       "id": 57,
@@ -654,6 +748,38 @@
       "inputModuleId": 20,
       "inputId": 0,
       "color": "#0986ad"
+    },
+    {
+      "id": 49,
+      "outputModuleId": 23,
+      "outputId": 0,
+      "inputModuleId": 26,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 54,
+      "outputModuleId": 28,
+      "outputId": 0,
+      "inputModuleId": 26,
+      "inputId": 2,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 50,
+      "outputModuleId": 30,
+      "outputId": 0,
+      "inputModuleId": 26,
+      "inputId": 4,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 60,
+      "outputModuleId": 31,
+      "outputId": 0,
+      "inputModuleId": 26,
+      "inputId": 6,
+      "color": "#c9b70e"
     }
   ]
 }

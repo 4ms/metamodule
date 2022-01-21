@@ -4,8 +4,9 @@
 #include "util/zip.hh"
 
 #include "Djembe2.hh"
-#include "test6.hh"
-#include "v2patch.hh"
+#include "Djembe4.hh"
+// #include "test6.hh"
+// #include "v2patch.hh"
 
 // #include "patch/integration_tests/all_tests.hh"
 
@@ -13,7 +14,7 @@ namespace MetaModule
 {
 PatchList::PatchList()
 	: _raw_patch_yaml_files{
-		  Djembe2_yml,
+		  Djembe2_yml, Djembe4_yml,
 
 		  // test_inputs_56g1g2_mmpatch,
 		  // test_14switchCore_clock_mmpatch,

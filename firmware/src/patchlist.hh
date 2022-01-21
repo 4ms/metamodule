@@ -7,7 +7,7 @@ namespace MetaModule
 
 struct PatchList {
 	//Todo: NumPatches will be set by the number of valid patches loaded from the filesystem
-	static constexpr int32_t NumPatches = 1;
+	static constexpr int32_t NumPatches = 2;
 
 	PatchList();
 
