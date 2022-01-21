@@ -47,6 +47,7 @@ struct Mapping {
 	LabelButtonID dst;
 	float range_min = 0.f;
 	float range_max = 1.f;
+	std::string alias_name{""};
 
 	void clear()
 	{
@@ -58,6 +59,7 @@ struct Mapping {
 		src.objType = LabelButtonID::Types::None;
 		range_min = 0.f;
 		range_max = 1.f;
+		alias_name = "";
 	}
 };
 struct ModuleID {

@@ -173,12 +173,12 @@ public:
 		_isMappingInProgress = false;
 	}
 
-	bool registerMapping(LabelButtonID src, LabelButtonID dst, float rmin, float rmax)
+	bool registerMapping(LabelButtonID src, LabelButtonID dst, float rmin, float rmax, std::string alias)
 	{
 		std::lock_guard mguard{mtx};
 
 		if (!isLabelButtonDstMapped(dst)) {
-			maps.push_back({src, dst, rmin, rmax});
+			maps.push_back({src, dst, rmin, rmax, alias});
 			return true;
 		}
 		return false;
@@ -192,6 +192,14 @@ public:
 		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
 		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
 	}
+
+	// void setMapAliasName(LabelButtonID src, LabelButtonID dst, std::string newname)
+	// {
+	// 	auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
+	// 	if (m == maps.end())
+	// 		return;
+	// 	m->alias_name = newname;
+	// }
 
 	std::pair<float, float> getMapRange(LabelButtonID src, LabelButtonID dst)
 	{

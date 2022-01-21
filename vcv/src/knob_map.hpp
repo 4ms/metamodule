@@ -8,13 +8,14 @@ class KnobMap {
 public:
 	int paramId{};
 	NVGcolor color;
-	struct Mapping {
+	std::string alias_name{""};
+	struct MappingDest {
 		rack::ParamHandle paramHandle;
 		std::pair<float, float> range;
-		Mapping() = default;
+		MappingDest() = default;
 	};
 	// Todo: vector might not be the best container, since we don't need it to be ordered and contigious.
-	std::vector<std::unique_ptr<Mapping>> maps;
+	std::vector<std::unique_ptr<MappingDest>> maps;
 
 	KnobMap()
 		: paramId{-1}
@@ -44,11 +45,16 @@ public:
 		std::erase_if(maps, [](auto &m) { return m->paramHandle.moduleId == -1; });
 	}
 
-	bool create(int otherModuleId, int otherParamId, NVGcolor mapColor, float min = 0.f, float max = 1.0f)
+	bool create(int otherModuleId,
+				int otherParamId,
+				NVGcolor mapColor,
+				float min = 0.f,
+				float max = 1.0f,
+				std::string alias_name = "")
 	{
 		cleanupMaps();
 
-		auto &m = maps.emplace_back(std::make_unique<Mapping>());
+		auto &m = maps.emplace_back(std::make_unique<MappingDest>());
 
 		auto &ph = m->paramHandle;
 		color = mapColor;
@@ -65,6 +71,7 @@ public:
 		APP->engine->updateParamHandle(&ph, otherModuleId, otherParamId, true);
 
 		m->range = {min, max};
+
 		return true;
 	}
 
@@ -76,5 +83,15 @@ public:
 	NVGcolor get_color()
 	{
 		return color;
+	}
+
+	std::string get_alias_name()
+	{
+		return alias_name;
+	}
+
+	void set_alias_name(std::string_view newname)
+	{
+		alias_name = newname;
 	}
 };

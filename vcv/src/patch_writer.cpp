@@ -122,6 +122,7 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 				.curve_type = 0,
 				.min = m.range_min,
 				.max = m.range_max,
+				.alias_name = m.alias_name.c_str(),
 			});
 		}
 

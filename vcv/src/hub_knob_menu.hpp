@@ -1,4 +1,5 @@
 #pragma once
+#include "knob_map.hpp"
 #include "plugin.hpp"
 
 struct MapFieldLabel : ui::MenuLabel {
@@ -7,6 +8,40 @@ struct MapFieldLabel : ui::MenuLabel {
 	{
 		text = paramWidget->paramQuantity->getString();
 		MenuLabel::step();
+	}
+};
+
+struct HubKnobAliasNameMenuField : ui::TextField {
+	KnobMap *knobmap = nullptr;
+
+	HubKnobAliasNameMenuField(KnobMap *km)
+		: knobmap{km}
+	{
+		text = knobmap->alias_name;
+	}
+
+	void step() override
+	{
+		// Keep selected
+		APP->event->setSelected(this);
+		TextField::step();
+	}
+
+	void onSelectKey(const event::SelectKey &e) override
+	{
+		if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
+			if (knobmap) {
+				knobmap->set_alias_name(text);
+			}
+
+			// Close menu when user presses Enter:
+			ui::MenuOverlay *overlay = getAncestorOfType<ui::MenuOverlay>();
+			overlay->requestDelete();
+			e.consume(this);
+		}
+
+		if (!e.getTarget())
+			TextField::onSelectKey(e);
 	}
 };
 
@@ -23,7 +58,7 @@ struct MapFieldEntry : ui::MenuLabel {
 		if (paramName.empty())
 			paramName = std::to_string(paramId);
 
-		text = moduleName + /*" (ID#" + std::to_string(moduleId) + ") ,*/ " knob: " + paramName;
+		text = moduleName + ": " + paramName;
 		MenuLabel::step();
 	}
 };

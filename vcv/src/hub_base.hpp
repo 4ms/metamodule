@@ -52,6 +52,7 @@ struct MetaModuleHubBase : public CommModule {
 			json_object_set_new(thisMapJ, "SrcObjType", json_string(m.src.objTypeStr()));
 			json_object_set_new(thisMapJ, "RangeMin", json_real(m.range_min));
 			json_object_set_new(thisMapJ, "RangeMax", json_real(m.range_max));
+			json_object_set_new(thisMapJ, "AliasName", json_string(m.alias_name.c_str()));
 
 			json_array_append(mapsJ, thisMapJ);
 			json_decref(thisMapJ);
@@ -110,6 +111,12 @@ struct MetaModuleHubBase : public CommModule {
 					val = json_object_get(mappingJ, "RangeMax");
 					mapping.range_max = json_is_real(val) ? json_real_value(val) : 1.f;
 
+					val = json_object_get(mappingJ, "AliasName");
+					if (json_is_string(val))
+						mapping.alias_name = json_string_value(val);
+					else
+						mapping.alias_name = "";
+
 					centralData->maps.push_back(mapping);
 					// printf("Loaded mapping from json: type: %s src: m:%d knob:%d, dst: m:%d knob:%d\n",
 					// 	   mapping.src.objTypeStr(),
@@ -142,7 +149,8 @@ struct MetaModuleHubBase : public CommModule {
 						knobmap.paramId,
 						id, // this module ID
 					};
-					centralData->registerMapping(src, dst, mapping->range.first, mapping->range.second);
+					centralData->registerMapping(
+						src, dst, mapping->range.first, mapping->range.second, knobmap.alias_name);
 					// printf("refreshing knob mappings: centralData->registerMapping(src: m:%d knob:%d, dst: m:%d "
 					// 	   "knob:%d, )\n",
 					// 	   src.moduleID,
@@ -159,8 +167,11 @@ struct MetaModuleHubBase : public CommModule {
 		for (auto &m : centralData->maps) {
 			if (m.src.objType == LabelButtonID::Types::Knob) {
 				auto knobToMap = m.src.objID;
-				auto [min, max] = centralData->getMapRange(m.src, m.dst);
+				float min = m.range_min;
+				float max = m.range_max;
+				// auto [min, max] = centralData->getMapRange(m.src, m.dst);
 				knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
+				knobMaps[knobToMap].set_alias_name(m.alias_name);
 			}
 		}
 	}

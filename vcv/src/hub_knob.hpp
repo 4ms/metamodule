@@ -7,23 +7,23 @@
 
 class HubKnobMapButton : public HubMapButton {
 public:
-	KnobMap *_knobmap;
+	KnobMap *knobmap;
 
 	// Constructor for widget-only view:
 	HubKnobMapButton(CommModuleWidget &parent)
 		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
-		, _knobmap{nullptr}
+		, knobmap{nullptr}
 	{}
 
 	// Constructor for use as a module:
 	HubKnobMapButton(CommModuleWidget &parent, KnobMap &knobmap)
 		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
-		, _knobmap(&knobmap)
+		, knobmap(&knobmap)
 	{}
 
 	void onDeselect(const event::Deselect &e) override
 	{
-		if (!_knobmap)
+		if (!knobmap)
 			return;
 
 		bool registerSuccess = false;
@@ -37,27 +37,29 @@ public:
 
 			registerSuccess = registerMapping(moduleId, objId);
 			if (registerSuccess)
-				_knobmap->create(moduleId, objId, PaletteHub::color[id.objID]);
+				knobmap->create(moduleId, objId, PaletteHub::color[id.objID]);
 		}
 
 		if (!registerSuccess) {
 			centralData->abortMappingProcedure();
 		}
 	}
+
+	// TODO: add right-click menu, same as in HubKnob
 };
 
 template<typename BaseKnobT>
 class HubKnob : public BaseKnobT {
 public:
-	HubKnob(HubKnobMapButton &_hubKnobLabel)
-		: hubKnobLabel{_hubKnobLabel}
+	HubKnob(HubKnobMapButton &hubknob_mapbut)
+		: hubKnobMapBut{hubknob_mapbut}
 	{}
 
 	void draw(const typename BaseKnobT::DrawArgs &args) override
 	{
 		BaseKnobT::draw(args);
 
-		KnobMap *knobmap = hubKnobLabel._knobmap;
+		KnobMap *knobmap = hubKnobMapBut.knobmap;
 
 		if (knobmap) {
 			const float spacing = 8;
@@ -112,12 +114,13 @@ public:
 				MenuSeparator *sep = new MenuSeparator;
 				menu->addChild(sep);
 
-				// TODO: look at rack::app::ParamField in Rack/src/app/ParamWidget
-				MapField *alias_name = new MapField;
-				alias_name->box.size.x = 100;
-				menu->addChild(alias_name);
+				KnobMap *thisMap = hubKnobMapBut.knobmap;
 
-				KnobMap *thisMap = hubKnobLabel._knobmap;
+				// TODO: look at rack::app::ParamField in Rack/src/app/ParamWidget
+				auto aliasItem = new HubKnobAliasNameMenuField{thisMap};
+				aliasItem->box.size.x = 100;
+				menu->addChild(aliasItem);
+
 				if (thisMap) {
 					for (auto &mapping : thisMap->maps) {
 						auto &ph = mapping->paramHandle;
@@ -179,5 +182,5 @@ public:
 	};
 
 private:
-	HubKnobMapButton &hubKnobLabel;
+	HubKnobMapButton &hubKnobMapBut;
 };
