@@ -7,6 +7,9 @@ std::unique_ptr<CentralData> centralData;
 //////////////// Auto generated ///////////////////////
 // include and define models below here
 
+#include "CoreModules/info/Sequant_info.hh"
+auto modelSequant = createModelFromInfo<SequantInfo>();
+
 #include "CoreModules/info/Verb_info.hh"
 auto modelVerb = createModelFromInfo<VerbInfo>();
 
@@ -112,6 +115,7 @@ void init(Plugin *p)
 
 	//////////////// Auto generated ///////////////////////
 	// Add models below here
+	p->addModel(modelSequant);
 	p->addModel(modelVerb);
 	p->addModel(modelSwitch41);
 	p->addModel(modelSwitch14);

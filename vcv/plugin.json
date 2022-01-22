@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [
     {
+      "slug": "Sequant",
+      "name": "Sequant",
+      "description": "Sequant",
+      "tags": []
+    },
+    {
       "slug": "Verb",
       "name": "Verb",
       "description": "Verb",

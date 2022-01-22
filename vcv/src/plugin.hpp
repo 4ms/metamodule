@@ -13,6 +13,7 @@ extern Plugin *pluginInstance;
 // Declare each Model, defined in each module source file
 //////////////// Auto generated ///////////////////////
 // Add models below here
+extern Model *modelSequant;
 extern Model *modelVerb;
 extern Model *modelSwitch41;
 extern Model *modelSwitch14;
