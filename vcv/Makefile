@@ -33,7 +33,7 @@ SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
 SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
 
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
-SOURCES = $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
+SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
 INCLUDES += -I$(RYMLDIR)/src

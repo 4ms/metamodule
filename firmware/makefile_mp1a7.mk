@@ -102,7 +102,7 @@ SOURCES += $(wildcard src/pages/images/ui/*.c)
 SOURCES += $(wildcard src/pages/images/components/*.c)
 
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
-SOURCES = $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
+SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 # RYMLSOURCES += $(RYMLDIR)/src/c4/yml/common.cpp
 # RYMLSOURCES += $(RYMLDIR)/src/c4/yml/node.cpp
