@@ -3,6 +3,9 @@
 
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR ?= $(TEST_DIR)
+BUILDDIR = $(TEST_DIR)/build
+RYMLDIR = src/shared/patch_convert/ryml/rapidyaml
+
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cpp)
@@ -10,11 +13,12 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_tests.cpp)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
-TEST_SOURCES += src/patch_writer.cpp
-TEST_SOURCES += src/shared/patch_convert/ryml/ryml_serial.cc
 TEST_SOURCES += src/shared/patch_convert/patch_to_yaml.cc
+TEST_SOURCES += src/shared/patch_convert/ryml/ryml_serial.cc
+TEST_SOURCES += src/patch_writer.cpp
+TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
+TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
-BUILDDIR = $(TEST_DIR)/build
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
@@ -25,6 +29,8 @@ CXXFLAGS = 	-Wall \
 			-Isrc/shared/patch_convert/ryml \
 			-Isrc/shared/etl/include \
 			-I$(TEST_DIR) \
+			-I$(RYMLDIR)/src \
+			-I$(RYMLDIR)/ext/c4core/src \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:

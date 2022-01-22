@@ -5,7 +5,18 @@ SHARED_DIR = src/shared
 SHARED = $(SHARED_DIR)
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS += -std=c++2a -Isrc -I$(SHARED_DIR)/util -I$(SHARED_DIR)/processors -I$(SHARED_DIR)/CoreModules -I$(SHARED_DIR)/patch -I$(SHARED_DIR)/patch_convert/ryml -I$(SHARED_DIR) -I$(SHARED_DIR)/axoloti-wrapper -I$(SHARED_DIR)/etl/include
+FLAGS += -std=c++2a
+
+INCLUDES = -Isrc
+INCLUDES += -I$(SHARED_DIR)/util
+INCLUDES += -I$(SHARED_DIR)/processors
+INCLUDES += -I$(SHARED_DIR)/CoreModules
+INCLUDES += -I$(SHARED_DIR)/patch
+INCLUDES += -I$(SHARED_DIR)/patch_convert/ryml
+INCLUDES += -I$(SHARED_DIR)
+INCLUDES += -I$(SHARED_DIR)/axoloti-wrapper
+INCLUDES += -I$(SHARED_DIR)/etl/include
+
 CFLAGS +=
 CXXFLAGS += 
 
@@ -20,6 +31,15 @@ SOURCES += $(wildcard $(SHARED_DIR)/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
 SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
+
+RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
+SOURCES = $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
+SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+
+INCLUDES += -I$(RYMLDIR)/src
+INCLUDES += -I$(RYMLDIR)/ext/c4core/src
+
+FLAGS += $(INCLUDES)
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
