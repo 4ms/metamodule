@@ -3,6 +3,9 @@
 
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR ?= $(TEST_DIR)
+
+RYMLDIR = ../ryml/rapidyaml
+
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cpp)
@@ -13,6 +16,8 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 TEST_SOURCES += ../ryml/ryml_serial.cc
 TEST_SOURCES += ../patch_to_yaml.cc
 TEST_SOURCES += ../yaml_to_patch.cc
+TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
+TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
 BUILDDIR = $(TEST_DIR)/build
 
@@ -23,6 +28,8 @@ CXXFLAGS = 	-Wall \
 			-Iryml \
 			-I.. \
 			-I../etl/include \
+			-I$(RYMLDIR)/src \
+			-I$(RYMLDIR)/ext/c4core/src \
 			-I$(TEST_DIR) \
 			-DTESTPROJECT \
 

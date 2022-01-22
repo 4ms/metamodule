@@ -15,3 +15,6 @@
 	url = git@github.com:lvgl/lv_img_conv.git
 [submodule "shared/etl"]
 	url = https://github.com/ETLCPP/etl.git
+[submodule "shared/patch_convert/ryml/rapidyaml"]
+	path = shared/patch_convert/ryml/rapidyaml
+	url = https://github.com/biojppm/rapidyaml.git

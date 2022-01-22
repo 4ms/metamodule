@@ -1,5 +1,4 @@
 #include "patch_to_yaml.hh"
-#include "ryml/ryml_all.hpp"
 #include "ryml/ryml_serial.hh"
 #include "util/byte_block.hh"
 #include "util/countzip.hh"

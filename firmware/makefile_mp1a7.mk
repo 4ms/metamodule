@@ -101,6 +101,24 @@ SOURCES += $(wildcard src/pages/images/*.c)
 SOURCES += $(wildcard src/pages/images/ui/*.c)
 SOURCES += $(wildcard src/pages/images/components/*.c)
 
+RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
+SOURCES = $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
+SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/common.cpp
+# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/node.cpp
+# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/parse.cpp
+# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/preprocess.cpp
+# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/tree.cpp
+# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/base64.cpp
+# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/char_traits.cpp
+# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/error.cpp
+# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/format.cpp
+# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/language.cpp
+# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/memory_resource.cpp
+# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/memory_util.cpp
+# SOURCES += $(RYMLSOURCES)
+
+
 
 # SOURCES += $(NE10DIR)/common/NE10_mask_table.c
 # SOURCES += $(NE10DIR)/modules/dsp/NE10_fft.c
@@ -179,6 +197,8 @@ INCLUDES += 	-I$(SHARED)/patch_convert/ryml
 # INCLUDES +=		-I$(NE10DIR)/inc
 # INCLUDES +=		-I$(NE10DIR)/common
 # INCLUDES +=		-I$(NE10DIR)/modules/dsp
+INCLUDES += 	-I$(RYMLDIR)/src
+INCLUDES += 	-I$(RYMLDIR)/ext/c4core/src
 
 #D-Cache L1: 32 KB, 128 Sets, 64 Bytes/Line, 4-Way
 EXTRA_CFLAGS = --param l1-cache-size=32 \

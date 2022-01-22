@@ -1,12 +1,8 @@
 #pragma once
 #include "patch/patch.hh"
-
-///// cstdarg is required for ryml_all.hpp, which uses va_list
-#include <cstdarg>
-/////
-#include "ryml_all.hpp"
-/////
-
+#include "ryml_std.hpp"
+//
+#include "ryml.hpp"
 #include "ryml_serial_chars.hh"
 
 void write(ryml::NodeRef *n, Jack const &jack);

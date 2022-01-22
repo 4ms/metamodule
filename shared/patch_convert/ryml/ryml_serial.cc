@@ -1,9 +1,9 @@
+#include "ryml_std.hpp"
+//
 #include "patch/patch.hh"
-#define RYML_SINGLE_HDR_DEFINE_NOW
-#include "ryml_all.hpp"
-#include "ryml_serial_chars.hh"
-
 #include "printf.h"
+#include "ryml.hpp"
+#include "ryml_serial_chars.hh"
 
 void write(ryml::NodeRef *n, Jack const &jack) {
 	*n |= ryml::MAP;
