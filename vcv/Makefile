@@ -3,9 +3,8 @@ RACK_DIR ?= ../..
 
 SHARED_DIR = src/shared
 SHARED = $(SHARED_DIR)
+RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 
-# FLAGS will be passed to both the C and C++ compiler
-FLAGS += -std=c++2a
 
 INCLUDES = -Isrc
 INCLUDES += -I$(SHARED_DIR)/util
@@ -16,6 +15,12 @@ INCLUDES += -I$(SHARED_DIR)/patch_convert/ryml
 INCLUDES += -I$(SHARED_DIR)
 INCLUDES += -I$(SHARED_DIR)/axoloti-wrapper
 INCLUDES += -I$(SHARED_DIR)/etl/include
+INCLUDES += -I$(RYMLDIR)/src
+INCLUDES += -I$(RYMLDIR)/ext/c4core/src
+
+# FLAGS will be passed to both the C and C++ compiler
+FLAGS += -std=c++2a
+FLAGS += $(INCLUDES)
 
 CFLAGS +=
 CXXFLAGS += 
@@ -32,14 +37,9 @@ SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
 SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
 
-RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
-INCLUDES += -I$(RYMLDIR)/src
-INCLUDES += -I$(RYMLDIR)/ext/c4core/src
-
-FLAGS += $(INCLUDES)
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
@@ -62,7 +62,7 @@ compile_commands:
 	rm compile_commands.json 
 	mv compile_commands_with_headers.json compile_commands.json
 
-tests: core_tests util_tests vcv_tests axo_tests
+tests: core_tests util_tests vcv_tests axo_tests patch_convert_tests
 
 core_tests:
 	$(info ... Running CoreModule tests ...)
@@ -79,6 +79,10 @@ vcv_tests:
 axo_tests:
 	$(info ... Running Axoloti-wrapper tests ...)
 	@cd $(SHARED)/axoloti-wrapper && $(MAKE) --no-print-directory -f tests/Makefile
+
+patch_convert_tests:
+	$(info ... Running patch convert (yaml<-->patch) tests ...)
+	@cd $(SHARED)/patch_convert && $(MAKE) --no-print-directory -f tests/Makefile
 
 win_dist:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist

@@ -207,13 +207,23 @@ R"(0: 000
 	// clang-format on
 }
 
-TEST_CASE("Can parse patch header, field by field") {
+struct SomeStruct {
+	int header_version;
+	StaticString<31> patch_name;
+	int num_modules;
+	int num_int_cables;
+	int num_mapped_ins;
+	int num_mapped_outs;
+	int num_static_knobs;
+	int num_mapped_knobs;
+};
+
+TEST_CASE("Can parse a struct, field by field") {
 	// clang-format off
 	char yml_buf[] =
-R"(
-PatchHeader:
+R"(SomeStruct:
   header_version: 1
-  patch_name: test123
+  patch_name: "test123"
   num_modules: 4
   num_int_cables: 5
   num_mapped_ins: 6
@@ -226,7 +236,7 @@ PatchHeader:
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yml_buf));
 
 	CHECK(tree.size() == 10); // Root + PatchHeader: + 8 children
-	CHECK(tree[0].key() == "PatchHeader");
+	CHECK(tree[0].key() == "SomeStruct");
 	CHECK(tree[0].num_children() == 8);
 	CHECK(tree[0].child(0).key() == "header_version");
 	CHECK(tree[0].child(1).key() == "patch_name");
@@ -246,7 +256,7 @@ PatchHeader:
 	CHECK(tree[0].child(6).val() == "8");
 	CHECK(tree[0].child(7).val() == "9");
 
-	PatchHeader ph;
+	SomeStruct ph;
 	tree[0]["header_version"] >> ph.header_version;
 	tree[0]["patch_name"] >> ph.patch_name;
 	tree[0]["num_modules"] >> ph.num_modules;
@@ -263,60 +273,4 @@ PatchHeader:
 	CHECK(ph.num_mapped_outs == 7);
 	CHECK(ph.num_static_knobs == 8);
 	CHECK(ph.num_mapped_knobs == 9);
-}
-
-TEST_CASE("Can create a ryml::Tree from a PatchHeader using operator>>") {
-	ryml::Tree tree;
-	PatchHeader ph_in{
-		.header_version = 1,
-		.patch_name = "test123",
-		.num_modules = 4,
-		.num_int_cables = 5,
-		.num_mapped_ins = 6,
-		.num_mapped_outs = 7,
-		.num_static_knobs = 8,
-		.num_mapped_knobs = 9,
-	};
-	tree.rootref() << ph_in;
-
-	PatchHeader ph_out;
-	tree.rootref() >> ph_out;
-	CHECK(ph_out.header_version == ph_in.header_version);
-	CHECK(ph_out.patch_name.is_equal(ph_in.patch_name));
-	CHECK(ph_out.num_modules == ph_in.num_modules);
-	CHECK(ph_out.num_int_cables == ph_in.num_int_cables);
-	CHECK(ph_out.num_mapped_ins == ph_in.num_mapped_ins);
-	CHECK(ph_out.num_mapped_outs == ph_in.num_mapped_outs);
-	CHECK(ph_out.num_static_knobs == ph_in.num_static_knobs);
-	CHECK(ph_out.num_mapped_knobs == ph_in.num_mapped_knobs);
-}
-
-TEST_CASE("Can parse patch header using operator<<") {
-	// clang-format off
-	char yml_buf[] =
-R"(
-  header_version: 1
-  patch_name: test123
-  num_modules: 4
-  num_int_cables: 5
-  num_mapped_ins: 6
-  num_mapped_outs: 7
-  num_static_knobs: 8
-  num_mapped_knobs: 9
-)";
-	// clang-format on
-
-	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yml_buf));
-
-	PatchHeader ph_out;
-
-	tree.rootref() >> ph_out;
-	CHECK(ph_out.header_version == 1);
-	CHECK(ph_out.patch_name.is_equal("test123"));
-	CHECK(ph_out.num_modules == 4);
-	CHECK(ph_out.num_int_cables == 5);
-	CHECK(ph_out.num_mapped_ins == 6);
-	CHECK(ph_out.num_mapped_outs == 7);
-	CHECK(ph_out.num_static_knobs == 8);
-	CHECK(ph_out.num_mapped_knobs == 9);
 }

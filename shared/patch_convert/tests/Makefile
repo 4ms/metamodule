@@ -4,7 +4,7 @@
 TEST_DIR ?= tests
 DOCTESTHEADER_DIR ?= $(TEST_DIR)
 
-RYMLDIR = ../ryml/rapidyaml
+RYMLDIR = ryml/rapidyaml
 
 TEST_SOURCES = $(TEST_DIR)/doctest.cc
 TEST_SOURCES += $(wildcard $(TEST_DIR)/*_test.cc)

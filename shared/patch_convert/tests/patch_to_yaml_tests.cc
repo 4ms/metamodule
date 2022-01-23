@@ -4,20 +4,11 @@
 #include <iostream>
 
 TEST_CASE("Correct yaml output produced") {
-	PatchHeader ph{
-		.header_version = 1,
-		.patch_name = "test123",
-		.num_modules = 4,
-		.num_int_cables = 2,
-		.num_mapped_ins = 3,
-		.num_mapped_outs = 2,
-		.num_static_knobs = 5,
-		.num_mapped_knobs = 4,
-	};
-
 	PatchData pd{
 		.module_slugs{"PanelMedium", "Module1", "Module2", "Module3"},
 	};
+	pd.patch_name = "test123";
+
 	Jack out1{1, 2};
 	Jack out2{11, 22};
 	Jack in1{3, 4};
@@ -81,19 +72,11 @@ TEST_CASE("Correct yaml output produced") {
 	pd.static_knobs.push_back({4, 5, 0.6f});
 	pd.static_knobs.push_back({5, 6, 0.7f});
 
-	auto yaml = patch_to_yaml_string(ph, pd);
+	auto yaml = patch_to_yaml_string(pd);
 	CHECK(yaml ==
 		  // clang-format off
-R"(PatchHeader:
-  header_version: 1
+R"(PatchData:
   patch_name: test123
-  num_modules: 4
-  num_int_cables: 2
-  num_mapped_ins: 3
-  num_mapped_outs: 2
-  num_static_knobs: 5
-  num_mapped_knobs: 4
-PatchData:
   module_slugs:
     0: PanelMedium
     1: Module1
@@ -159,22 +142,26 @@ PatchData:
       param_id: 6
       value: 0.7
   mapped_knobs:
-    - module_id: 2
+    - panel_knob_id: 1
+      module_id: 2
       param_id: 3
       curve_type: 1
       min: 0.1
       max: 0.95
-    - module_id: 3
+    - panel_knob_id: 2
+      module_id: 3
       param_id: 4
       curve_type: 2
       min: 0.2
       max: 0.85
-    - module_id: 4
+    - panel_knob_id: 3
+      module_id: 4
       param_id: 5
       curve_type: 3
       min: 0.3
       max: 0.75
-    - module_id: 5
+    - panel_knob_id: 4
+      module_id: 5
       param_id: 6
       curve_type: 4
       min: 0.4
