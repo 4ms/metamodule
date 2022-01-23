@@ -1,13 +1,20 @@
+RYMLDIR = ryml/rapidyaml
+
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2a \
 			-Iryml \
 			-I../\
 			-I../etl/include\
+			-I$(RYMLDIR)/src \
+			-I$(RYMLDIR)/ext/c4core/src
+
 
 SOURCES =
 SOURCES += patch_convert.cc
 SOURCES += ryml/ryml_serial.cc
 SOURCES += patch_to_yaml.cc
+SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
+SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
 BUILDDIR = build
 
