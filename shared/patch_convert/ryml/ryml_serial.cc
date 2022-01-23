@@ -12,11 +12,13 @@ void write(ryml::NodeRef *n, Jack const &jack) {
 }
 
 bool read(ryml::NodeRef const &n, Jack *jack) {
-	if (n.num_children() != 2)
+	if (n.num_children() < 2)
 		return false;
-	if (n.child(0).key() != "module_id")
+	if (!n.is_map())
 		return false;
-	if (n.child(1).key() != "jack_id")
+	if (!n.has_child("module_id"))
+		return false;
+	if (!n.has_child("jack_id"))
 		return false;
 
 	n["module_id"] >> jack->module_id;
@@ -25,14 +27,19 @@ bool read(ryml::NodeRef const &n, Jack *jack) {
 }
 
 bool read(ryml::NodeRef const &n, InternalCable *cable) {
-	if (n.num_children() != 2)
+	if (n.num_children() < 2)
 		return false;
-	if (n.child(0).key() != "out")
+	if (!n.is_map())
 		return false;
-	if (n.child(1).key() != "ins")
+	if (!n.has_child("out"))
+		return false;
+	if (!n.has_child("ins"))
 		return false;
 
 	n["out"] >> cable->out;
+
+	if (n["ins"].num_children() < 1)
+		return false;
 
 	unsigned i = 0;
 	for (auto &in : n["ins"].children())
@@ -48,9 +55,11 @@ bool read(ryml::NodeRef const &n, InternalCable *cable) {
 bool read(ryml::NodeRef const &n, MappedInputJack *j) {
 	if (n.num_children() < 2)
 		return false;
-	if (n.child(0).key() != "panel_jack_id")
+	if (!n.is_map())
 		return false;
-	if (n.child(1).key() != "ins")
+	if (!n.has_child("panel_jack_id"))
+		return false;
+	if (!n.has_child("ins"))
 		return false;
 
 	n["panel_jack_id"] >> j->panel_jack_id;
@@ -63,7 +72,7 @@ bool read(ryml::NodeRef const &n, MappedInputJack *j) {
 	if (i < (MAX_CONNECTIONS_PER_NODE - 1))
 		j->ins[i] = Jack{-1, -1};
 
-	if (n.child(3).key() == "alias_name")
+	if (n.has_child("alias_name"))
 		n["alias_name"] >> j->alias_name;
 
 	return true;
@@ -72,15 +81,17 @@ bool read(ryml::NodeRef const &n, MappedInputJack *j) {
 bool read(ryml::NodeRef const &n, MappedOutputJack *j) {
 	if (n.num_children() < 2)
 		return false;
-	if (n.child(0).key() != "panel_jack_id")
+	if (!n.is_map())
 		return false;
-	if (n.child(1).key() != "out")
+	if (!n.has_child("panel_jack_id"))
+		return false;
+	if (!n.has_child("out"))
 		return false;
 
 	n["panel_jack_id"] >> j->panel_jack_id;
 	n["out"] >> j->out;
 
-	if (n.child(3).key() == "alias_name")
+	if (n.has_child("alias_name"))
 		n["alias_name"] >> j->alias_name;
 
 	return true;
@@ -89,17 +100,19 @@ bool read(ryml::NodeRef const &n, MappedOutputJack *j) {
 bool read(ryml::NodeRef const &n, MappedKnob *k) {
 	if (n.num_children() < 6)
 		return false;
-	if (n.child(0).key() != "panel_knob_id")
+	if (!n.is_map())
 		return false;
-	if (n.child(1).key() != "module_id")
+	if (!n.has_child("panel_knob_id"))
 		return false;
-	if (n.child(2).key() != "param_id")
+	if (!n.has_child("module_id"))
 		return false;
-	if (n.child(3).key() != "curve_type")
+	if (!n.has_child("param_id"))
 		return false;
-	if (n.child(4).key() != "min")
+	if (!n.has_child("curve_type"))
 		return false;
-	if (n.child(5).key() != "max")
+	if (!n.has_child("min"))
+		return false;
+	if (!n.has_child("max"))
 		return false;
 
 	n["panel_knob_id"] >> k->panel_knob_id;
@@ -109,20 +122,22 @@ bool read(ryml::NodeRef const &n, MappedKnob *k) {
 	n["min"] >> k->min;
 	n["max"] >> k->max;
 
-	if (n.child(6).key() == "alias_name")
+	if (n.has_child("alias_name"))
 		n["alias_name"] >> k->alias_name;
 
 	return true;
 }
 
 bool read(ryml::NodeRef const &n, StaticParam *k) {
-	if (n.num_children() != 3)
+	if (n.num_children() < 3)
 		return false;
-	if (n.child(0).key() != "module_id")
+	if (!n.is_map())
 		return false;
-	if (n.child(1).key() != "param_id")
+	if (!n.has_child("module_id"))
 		return false;
-	if (n.child(2).key() != "value")
+	if (!n.has_child("param_id"))
+		return false;
+	if (!n.has_child("value"))
 		return false;
 
 	n["module_id"] >> k->module_id;
