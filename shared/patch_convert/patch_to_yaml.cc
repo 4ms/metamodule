@@ -49,6 +49,8 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 				break;
 			el["ins"][in_i] << in;
 		}
+		if (x.alias_name.length())
+			el["alias_name"] << x.alias_name;
 	}
 
 	ryml::NodeRef mapped_outs = data["mapped_outs"];
@@ -57,6 +59,8 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 		ryml::NodeRef el = mapped_outs.append_child({ryml::MAP});
 		el["panel_jack_id"] << x.panel_jack_id;
 		el["out"] << x.out;
+		if (x.alias_name.length())
+			el["alias_name"] << x.alias_name;
 	}
 
 	ryml::NodeRef static_knobs = data["static_knobs"];

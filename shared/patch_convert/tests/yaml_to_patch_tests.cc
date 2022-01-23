@@ -34,7 +34,8 @@ PatchData:
         - module_id: 77
           jack_id: 88
   mapped_ins:
-    - panel_jack_id: 1
+    - alias_name: MappedInJ1
+      panel_jack_id: 1
       ins:
         - module_id: 3
           jack_id: 4
@@ -44,6 +45,7 @@ PatchData:
           jack_id: 6
         - module_id: 33
           jack_id: 44
+      alias_name: MappedInJ2
     - panel_jack_id: 3
       ins:
         - module_id: 77
@@ -53,7 +55,8 @@ PatchData:
       out:
         module_id: 1
         jack_id: 2
-    - panel_jack_id: 5
+    - alias_name: MOut5
+      panel_jack_id: 5
       out:
         module_id: 11
         jack_id: 22
@@ -74,22 +77,28 @@ PatchData:
       param_id: 6
       value: 0.7
   mapped_knobs:
-    - module_id: 2
+    - alias_name: Knob1
+      panel_knob_id: 1
+      module_id: 2
       param_id: 3
       curve_type: 1
       min: 0.1
       max: 0.95
-    - module_id: 3
+    - panel_knob_id: 2
+      alias_name: Knob2
+      module_id: 3
       param_id: 4
       curve_type: 2
       min: 0.2
       max: 0.85
-    - module_id: 4
+    - panel_knob_id: 3
+      module_id: 4
       param_id: 5
       curve_type: 3
       min: 0.3
       max: 0.75
-    - module_id: 5
+    - panel_knob_id: 4
+      module_id: 5
       param_id: 6
       curve_type: 4
       min: 0.4
@@ -100,14 +109,7 @@ PatchData:
 	PatchData pd;
 	CHECK(yaml_string_to_patch(yamlhdr, pd));
 
-	// CHECK(ph.header_version == 1);
 	CHECK(pd.patch_name.is_equal("Test Patch 99"));
-	// CHECK(ph.num_modules == 4);
-	// CHECK(ph.num_int_cables == 2);
-	// CHECK(ph.num_mapped_ins == 3);
-	// CHECK(ph.num_mapped_outs == 2);
-	// CHECK(ph.num_static_knobs == 5);
-	// CHECK(ph.num_mapped_knobs == 4);
 
 	CHECK(pd.module_slugs.size() == 4);
 	CHECK(pd.module_slugs[0].is_equal("PanelMedium"));
@@ -126,20 +128,25 @@ PatchData:
 	CHECK(pd.int_cables[1].ins[2] == Jack{77, 88});
 
 	CHECK(pd.mapped_ins.size() == 3);
+	CHECK(pd.mapped_ins[0].alias_name.is_equal("MappedInJ1"));
 	CHECK(pd.mapped_ins[0].panel_jack_id == 1);
 	CHECK(pd.mapped_ins[0].ins[0] == Jack{3, 4});
 	CHECK(pd.mapped_ins[0].ins[1] == Jack{-1, -1});
+	CHECK(pd.mapped_ins[1].alias_name.is_equal("MappedInJ2"));
 	CHECK(pd.mapped_ins[1].panel_jack_id == 2);
 	CHECK(pd.mapped_ins[1].ins[0] == Jack{5, 6});
 	CHECK(pd.mapped_ins[1].ins[1] == Jack{33, 44});
 	CHECK(pd.mapped_ins[1].ins[2] == Jack{-1, -1});
+	CHECK(pd.mapped_ins[2].alias_name.is_equal(""));
 	CHECK(pd.mapped_ins[2].panel_jack_id == 3);
 	CHECK(pd.mapped_ins[2].ins[0] == Jack{77, 88});
 	CHECK(pd.mapped_ins[2].ins[1] == Jack{-1, -1});
 
 	CHECK(pd.mapped_outs.size() == 2);
+	CHECK(pd.mapped_outs[0].alias_name.is_equal(""));
 	CHECK(pd.mapped_outs[0].panel_jack_id == 4);
 	CHECK(pd.mapped_outs[0].out == Jack{1, 2});
+	CHECK(pd.mapped_outs[1].alias_name.is_equal("MOut5"));
 	CHECK(pd.mapped_outs[1].panel_jack_id == 5);
 	CHECK(pd.mapped_outs[1].out == Jack{11, 22});
 
@@ -161,21 +168,27 @@ PatchData:
 	CHECK(pd.static_knobs[4].value == 0.7f);
 
 	CHECK(pd.mapped_knobs.size() == 4);
+	CHECK(pd.mapped_knobs[0].panel_knob_id == 1);
+	CHECK(pd.mapped_knobs[0].alias_name.is_equal("Knob1"));
 	CHECK(pd.mapped_knobs[0].module_id == 2);
 	CHECK(pd.mapped_knobs[0].param_id == 3);
 	CHECK(pd.mapped_knobs[0].curve_type == 1);
 	CHECK(pd.mapped_knobs[0].min == 0.1f);
 	CHECK(pd.mapped_knobs[0].max == 0.95f);
+	CHECK(pd.mapped_knobs[1].panel_knob_id == 2);
+	CHECK(pd.mapped_knobs[1].alias_name.is_equal("Knob2"));
 	CHECK(pd.mapped_knobs[1].module_id == 3);
 	CHECK(pd.mapped_knobs[1].param_id == 4);
 	CHECK(pd.mapped_knobs[1].curve_type == 2);
 	CHECK(pd.mapped_knobs[1].min == 0.2f);
 	CHECK(pd.mapped_knobs[1].max == 0.85f);
+	CHECK(pd.mapped_knobs[2].panel_knob_id == 3);
 	CHECK(pd.mapped_knobs[2].module_id == 4);
 	CHECK(pd.mapped_knobs[2].param_id == 5);
 	CHECK(pd.mapped_knobs[2].curve_type == 3);
 	CHECK(pd.mapped_knobs[2].min == 0.3f);
 	CHECK(pd.mapped_knobs[2].max == 0.75f);
+	CHECK(pd.mapped_knobs[3].panel_knob_id == 4);
 	CHECK(pd.mapped_knobs[3].module_id == 5);
 	CHECK(pd.mapped_knobs[3].param_id == 6);
 	CHECK(pd.mapped_knobs[3].curve_type == 4);

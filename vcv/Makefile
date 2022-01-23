@@ -5,7 +5,6 @@ SHARED_DIR = src/shared
 SHARED = $(SHARED_DIR)
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 
-
 INCLUDES = -Isrc
 INCLUDES += -I$(SHARED_DIR)/util
 INCLUDES += -I$(SHARED_DIR)/processors
@@ -29,7 +28,7 @@ CXXFLAGS +=
 # Static libraries are fine, but they should be added to this plugin's build system.
 LDFLAGS +=
 
-# Add .cpp files to the build
+# Add source files to the build
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/*.cc)
 SOURCES += $(wildcard $(SHARED_DIR)/util/*.cc)
@@ -40,7 +39,6 @@ SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
-
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
 DISTRIBUTABLES += res
@@ -49,8 +47,9 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
 
-all: $(TARGET) res
-	@$(MAKE) --no-print-directory tests
+all: plugin res tests
+
+plugin: $(TARGET)
 
 run: install
 	$(shell $(RACK_DIR)/Rack &)
@@ -108,5 +107,5 @@ $(METAMODULE_INFO_DIR)/%_info.hh: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
 
-.PHONY: tests core_tests vcv_tests util_tests axo_tests
+.PHONY: all plugin tests core_tests vcv_tests util_tests axo_tests patch_convert_tests compile_commands run
 

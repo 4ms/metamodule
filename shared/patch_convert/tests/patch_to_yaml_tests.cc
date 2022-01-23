@@ -23,12 +23,12 @@ TEST_CASE("Correct yaml output produced") {
 	// if MAX_CONNECTIONS_PER_NODE > 4, then we need a terminator at the end of this:
 	pd.int_cables.push_back({out2, {{in3, in4, in5}}});
 
-	pd.mapped_ins.push_back({1, {{in1, END}}});
+	pd.mapped_ins.push_back({1, {{in1, END}}, "MapIn1"});
 	pd.mapped_ins.push_back({2, {{in2, in3, END}}});
 	pd.mapped_ins.push_back({3, {{in5, END}}});
 
 	pd.mapped_outs.push_back({4, out1});
-	pd.mapped_outs.push_back({5, out2});
+	pd.mapped_outs.push_back({5, out2, "MapOut2"});
 
 	pd.mapped_knobs.push_back(MappedKnob{
 		.panel_knob_id = 1,
@@ -37,6 +37,7 @@ TEST_CASE("Correct yaml output produced") {
 		.curve_type = 1,
 		.min = 0.1f,
 		.max = 0.95f,
+		.alias_name = "MapKnob1",
 	});
 
 	pd.mapped_knobs.push_back(MappedKnob{
@@ -106,6 +107,7 @@ R"(PatchData:
       ins:
         - module_id: 3
           jack_id: 4
+      alias_name: MapIn1
     - panel_jack_id: 2
       ins:
         - module_id: 5
@@ -125,6 +127,7 @@ R"(PatchData:
       out:
         module_id: 11
         jack_id: 22
+      alias_name: MapOut2
   static_knobs:
     - module_id: 1
       param_id: 2
@@ -148,6 +151,7 @@ R"(PatchData:
       curve_type: 1
       min: 0.1
       max: 0.95
+      alias_name: MapKnob1
     - panel_knob_id: 2
       module_id: 3
       param_id: 4
