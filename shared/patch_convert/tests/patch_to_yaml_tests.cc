@@ -16,16 +16,13 @@ TEST_CASE("Correct yaml output produced") {
 	Jack in3{33, 44};
 	Jack in4{55, 66};
 	Jack in5{77, 88};
-	Jack END{-1, -1};
-	pd.int_cables.push_back({out1, {{in1, in2, END}}});
 
-	CHECK(MAX_CONNECTIONS_PER_NODE == 4);
-	// if MAX_CONNECTIONS_PER_NODE > 4, then we need a terminator at the end of this:
+	pd.int_cables.push_back({out1, {{in1, in2}}});
 	pd.int_cables.push_back({out2, {{in3, in4, in5}}});
 
-	pd.mapped_ins.push_back({1, {{in1, END}}, "MapIn1"});
-	pd.mapped_ins.push_back({2, {{in2, in3, END}}});
-	pd.mapped_ins.push_back({3, {{in5, END}}});
+	pd.mapped_ins.push_back({1, {{in1}}, "MapIn1"});
+	pd.mapped_ins.push_back({2, {{in2, in3}}});
+	pd.mapped_ins.push_back({3, {{in5}}});
 
 	pd.mapped_outs.push_back({4, out1});
 	pd.mapped_outs.push_back({5, out2, "MapOut2"});

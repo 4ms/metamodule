@@ -16,6 +16,14 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 	//data.append_child() << ryml::key("patch_name") << pd.patch_name.c_str();
 	data["patch_name"] << pd.patch_name;
 
+	// TODO: Added write() for each type (MappedKnob, etc) so we can do:
+	// data["module_slugs"] << pd.module_slugs;
+	// data["int_cables"] << pd.int_cables;
+	// data["mapped_ins"] << pd.mapped_ins;
+	// data["mapped_outs"] << pd.mapped_outs;
+	// data["static_knobs"] << pd.static_knobs;
+	// data["mapped_knobs"] << pd.mapped_knobs;
+
 	ryml::NodeRef slugs = data["module_slugs"];
 	slugs |= ryml::MAP;
 	for (auto [i, x] : enumerate(pd.module_slugs)) {
@@ -30,12 +38,7 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 	for (auto &x : pd.int_cables) {
 		ryml::NodeRef el = int_cables.append_child({ryml::MAP});
 		el["out"] << x.out;
-		el["ins"] |= ryml::SEQ;
-		for (auto [in_i, in] : enumerate(x.ins)) {
-			if (in.jack_id < 0 || in.module_id < 0)
-				break;
-			el["ins"][in_i] << in;
-		}
+		el["ins"] << x.ins;
 	}
 
 	ryml::NodeRef mapped_ins = data["mapped_ins"];
@@ -43,12 +46,7 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 	for (auto &x : pd.mapped_ins) {
 		ryml::NodeRef el = mapped_ins.append_child({ryml::MAP});
 		el["panel_jack_id"] << x.panel_jack_id;
-		el["ins"] |= ryml::SEQ;
-		for (auto [in_i, in] : enumerate(x.ins)) {
-			if (in.jack_id < 0 || in.module_id < 0)
-				break;
-			el["ins"][in_i] << in;
-		}
+		el["ins"] << x.ins;
 		if (x.alias_name.length())
 			el["alias_name"] << x.alias_name;
 	}
