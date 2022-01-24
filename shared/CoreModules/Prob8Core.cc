@@ -1,6 +1,8 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/Prob8_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "processors/tools/clockPhase.h"
+#include "util/math.hh"
 
 class Prob8Core : public CoreProcessor {
 	using Info = Prob8Info;
@@ -10,15 +12,42 @@ public:
 	Prob8Core() = default;
 
 	void update() override {
+		cp.update();
+		lastStep = currentStep;
+		currentStep = cp.getCount() % 8;
+		if (currentStep != lastStep) {
+			randNum = MathTools::randomNumber(0.0f, 0.99f);
+		}
+		if ((prob[currentStep] > randNum) && (cp.getWrappedPhase() < 0.5f)) {
+			gateOutput = 1;
+		} else {
+			gateOutput = 0;
+		}
 	}
 
 	void set_param(int param_id, float val) override {
+		if (param_id < Info::NumKnobs)
+			prob[param_id] = val;
 	}
 
 	void set_input(int input_id, float val) override {
+		switch (input_id) {
+			case Info::InputClock:
+				cp.updateClock(val);
+				break;
+			case Info::InputReset:
+				cp.updateReset(val);
+				break;
+		}
 	}
 
 	float get_output(int output_id) const override {
+		if (output_id == Info::OutputOut)
+			return gateOutput;
+
+		if (output_id == Info::OutputInv)
+			return 1 - gateOutput;
+
 		return 0.f;
 	}
 
@@ -36,4 +65,13 @@ public:
 	// clang-format on
 
 private:
+	float prob[8] = {1, 0, 0, 0, 0, 0, 0, 0};
+
+	int gateOutput;
+
+	int currentStep;
+	int lastStep;
+
+	float randNum = 0;
+	ClockPhase cp;
 };

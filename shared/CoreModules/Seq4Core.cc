@@ -1,6 +1,8 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/Seq4_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "processors/stepsequencer.h"
+#include "util/math.hh"
 
 class Seq4Core : public CoreProcessor {
 	using Info = Seq4Info;
@@ -10,15 +12,22 @@ public:
 	Seq4Core() = default;
 
 	void update() override {
+		seq.update();
 	}
 
 	void set_param(int param_id, float val) override {
+		if (param_id < Info::NumKnobs)
+			seq.setStep(param_id, val);
 	}
 
 	void set_input(int input_id, float val) override {
+		if (input_id == Info::InputClock)
+			seq.updateClock(val);
 	}
 
 	float get_output(int output_id) const override {
+		if (output_id == Info::OutputOut)
+			return seq.output;
 		return 0.f;
 	}
 
@@ -36,4 +45,5 @@ public:
 	// clang-format on
 
 private:
+	StepSequencer seq{4};
 };
