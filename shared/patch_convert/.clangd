@@ -2,9 +2,15 @@
 CompileFlags:
 	Add: [
 		"-std=c++20",
+
 		"-Irapidyaml/src",
 		"-Irapidyaml/ext/c4core/src",
 		"-I../../",
 		"-I../../etl/include",
+
+		"-Iryml/rapidyaml/src",
+		"-Iryml/rapidyaml/ext/c4core/src",
+		"-I../",
+		"-I../etl/include",
 	]
 	Remove: [-march=nocona]
