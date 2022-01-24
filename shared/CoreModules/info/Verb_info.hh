@@ -43,7 +43,7 @@ struct VerbInfo : ModuleInfoBase {
         {
             .id = KnobDamp,
             .x_mm = px_to_mm<72>(37.85f),
-            .y_mm = px_to_mm<72>(103.51f),
+            .y_mm = px_to_mm<72>(104.62f),
             .short_name = "Damp",
             .long_name = "Damp",
             .default_val = 0.25f,
@@ -53,7 +53,7 @@ struct VerbInfo : ModuleInfoBase {
         {
             .id = KnobAp_Ratio,
             .x_mm = px_to_mm<72>(106.4f),
-            .y_mm = px_to_mm<72>(103.51f),
+            .y_mm = px_to_mm<72>(104.62f),
             .short_name = "AP Ratio",
             .long_name = "AP Ratio",
             .default_val = 0.0f,
@@ -82,21 +82,32 @@ struct VerbInfo : ModuleInfoBase {
         },
     }};
 
-    static constexpr int NumInJacks = 6;
+    static constexpr int NumInJacks = 8;
     
     enum {
-        InputSize_Cv = 0,
-        InputTime_Cv = 1,
-        InputDamp_Cv = 2,
-        InputRatio_Cv = 3,
-        InputComb_Cv = 4,
-        InputMix_Cv = 5,
+        InputInput = 0,
+        InputSize_Cv = 1,
+        InputTime_Cv = 2,
+        InputDamp_Cv = 3,
+        InputRatio_Cv = 4,
+        InputComb_Cv = 5,
+        InputMix_Cv = 6,
+        InputHold_Gate = 7,
     };
 
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
-            .id = InputSize_Cv,
+            .id = InputInput,
             .x_mm = px_to_mm<72>(29.94f),
+            .y_mm = px_to_mm<72>(232.1f),
+            .short_name = "Input",
+            .long_name = "Input",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputSize_Cv,
+            .x_mm = px_to_mm<72>(72.13f),
             .y_mm = px_to_mm<72>(232.1f),
             .short_name = "Size CV",
             .long_name = "Size CV",
@@ -105,7 +116,7 @@ struct VerbInfo : ModuleInfoBase {
         },
         {
             .id = InputTime_Cv,
-            .x_mm = px_to_mm<72>(72.13f),
+            .x_mm = px_to_mm<72>(115.17f),
             .y_mm = px_to_mm<72>(232.1f),
             .short_name = "Time CV",
             .long_name = "Time CV",
@@ -114,8 +125,8 @@ struct VerbInfo : ModuleInfoBase {
         },
         {
             .id = InputDamp_Cv,
-            .x_mm = px_to_mm<72>(115.17f),
-            .y_mm = px_to_mm<72>(232.1f),
+            .x_mm = px_to_mm<72>(29.94f),
+            .y_mm = px_to_mm<72>(272.23f),
             .short_name = "Damp CV",
             .long_name = "Damp CV",
             .unpatched_val = 0.f,
@@ -123,7 +134,7 @@ struct VerbInfo : ModuleInfoBase {
         },
         {
             .id = InputRatio_Cv,
-            .x_mm = px_to_mm<72>(29.94f),
+            .x_mm = px_to_mm<72>(72.13f),
             .y_mm = px_to_mm<72>(272.23f),
             .short_name = "Ratio CV",
             .long_name = "Ratio CV",
@@ -132,7 +143,7 @@ struct VerbInfo : ModuleInfoBase {
         },
         {
             .id = InputComb_Cv,
-            .x_mm = px_to_mm<72>(72.13f),
+            .x_mm = px_to_mm<72>(115.17f),
             .y_mm = px_to_mm<72>(272.23f),
             .short_name = "Comb CV",
             .long_name = "Comb CV",
@@ -141,40 +152,31 @@ struct VerbInfo : ModuleInfoBase {
         },
         {
             .id = InputMix_Cv,
-            .x_mm = px_to_mm<72>(115.17f),
-            .y_mm = px_to_mm<72>(272.23f),
+            .x_mm = px_to_mm<72>(29.94f),
+            .y_mm = px_to_mm<72>(313.84f),
             .short_name = "Mix CV",
             .long_name = "Mix CV",
             .unpatched_val = 0.f,
             .signal_type = InJackDef::Analog,
         },
+        {
+            .id = InputHold_Gate,
+            .x_mm = px_to_mm<72>(72.13f),
+            .y_mm = px_to_mm<72>(313.84f),
+            .short_name = "Hold Gate",
+            .long_name = "Hold Gate",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
     }};
 
-    static constexpr int NumOutJacks = 3;
+    static constexpr int NumOutJacks = 1;
     
     enum {
-        OutputThru = 0,
-        OutputPreverb = 1,
-        OutputOut = 2,
+        OutputOut = 0,
     };
 
     static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
-        {
-            .id = OutputThru,
-            .x_mm = px_to_mm<72>(29.94f),
-            .y_mm = px_to_mm<72>(313.84f),
-            .short_name = "Thru",
-            .long_name = "Thru",
-            .signal_type = OutJackDef::Analog,
-        },
-        {
-            .id = OutputPreverb,
-            .x_mm = px_to_mm<72>(72.13f),
-            .y_mm = px_to_mm<72>(313.84f),
-            .short_name = "Preverb",
-            .long_name = "Preverb",
-            .signal_type = OutJackDef::Analog,
-        },
         {
             .id = OutputOut,
             .x_mm = px_to_mm<72>(115.17f),
