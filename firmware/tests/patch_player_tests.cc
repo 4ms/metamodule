@@ -3,54 +3,7 @@
 #include "patch_player.hh"
 #include <string>
 
-// The test data in these unit tests was generated using VCV rack to create a .mmpatch binary file.
-// This file is then converted to a raw C-array using:
-// xxd -i -c 8 patchfile.mmpatch > patchfile.hh
-// When generating a .mmpatch file, there's also a human-readable .txt file (actually is in YAML format)
-// The .txt file is useful for verifying the expected values
-
 #include "patch/Djembe2.hh"
-
-// This is tested in patch_convert/tests
-// TEST_CASE("Header loads ok") {
-// 	static const PatchHeader expected_header = {
-// 		.header_version = 1,
-// 		.patch_name = "Djembe-2",
-// 		.num_modules = 6,
-// 		.num_int_cables = 2,
-// 		.num_mapped_ins = 7,
-// 		.num_mapped_outs = 5,
-// 		.num_static_knobs = 23,
-// 		.num_mapped_knobs = 8,
-// 	};
-
-// 	auto *ph = reinterpret_cast<PatchHeader *>(Djembe2_yml);
-// 	CHECK(expected_header.header_version == ph->header_version);
-// 	CHECK(expected_header.patch_name == ph->patch_name);
-// 	CHECK(expected_header.num_modules == ph->num_modules);
-// 	CHECK(expected_header.num_int_cables == ph->num_int_cables);
-// 	CHECK(expected_header.num_mapped_ins == ph->num_mapped_ins);
-// 	CHECK(expected_header.num_mapped_outs == ph->num_mapped_outs);
-// 	CHECK(expected_header.num_static_knobs == ph->num_static_knobs);
-// 	CHECK(expected_header.num_mapped_knobs == ph->num_mapped_knobs);
-// }
-
-// This is tested in patch_convert/tests
-// TEST_CASE("Module list loads ok") {
-// 	auto *ph = reinterpret_cast<PatchHeader *>(Djembe2_yml);
-// 	REQUIRE(ph->num_modules == 6);
-
-// 	MetaModule::PatchPlayer player;
-// 	player.load_patch_from_header(ph);
-// 	CHECK(strcmp(player.get_module_name(0).data(), "PANEL_8") == 0);
-// 	CHECK(strcmp(player.get_module_name(1).data(), "LFOSINE") == 0);
-// 	CHECK(strcmp(player.get_module_name(2).data(), "MULTILFO") == 0);
-// 	CHECK(strcmp(player.get_module_name(3).data(), "REVERB") == 0);
-// 	CHECK(strcmp(player.get_module_name(4).data(), "KARPLUS") == 0);
-// 	CHECK(strcmp(player.get_module_name(5).data(), "COMPLEXENVELOPE") == 0);
-// }
-
-//#include "patches/unittest_outmap.hh"
 
 TEST_CASE("Simple output jack mapping") {
 	std::string patchyml{// clang-format off
@@ -162,8 +115,6 @@ PatchData:
 	int cable1_idx = -1;
 	int cable2_idx = -1;
 
-	Jack end_of_cable = Jack{-1, -1};
-
 	for (int net_i = 0; net_i < pd.int_cables.size(); net_i++) {
 		auto &cable = player.get_int_cable(net_i);
 
@@ -171,7 +122,7 @@ PatchData:
 		// {1,3} -> {2,0}
 		if (cable.out == Jack{1, 3}) {
 			if (cable.ins[0] == Jack{2, 0}) {
-				if (cable.ins[1] == end_of_cable) {
+				if (cable.ins.size() == 1) {
 					found_cable1 = true;
 					cable1_idx = net_i;
 				}
@@ -184,7 +135,7 @@ PatchData:
 			if ((cable.ins[0] == Jack{2, 1} && cable.ins[1] == Jack{2, 2}) ||
 				(cable.ins[0] == Jack{2, 2} && cable.ins[1] == Jack{2, 1}))
 			{
-				if (cable.ins[2] == end_of_cable) {
+				if (cable.ins.size() == 2) {
 					found_cable2 = true;
 					cable2_idx = net_i;
 				}
@@ -197,8 +148,8 @@ PatchData:
 		CHECK(found_cable2);
 
 		SUBCASE("Check cables have the correct number of input jacks") {
-			CHECK(player.num_int_cable_ins[cable1_idx] == 1);
-			CHECK(player.num_int_cable_ins[cable2_idx] == 2);
+			CHECK(player.get_num_int_cable_ins(cable1_idx) == 1);
+			CHECK(player.get_num_int_cable_ins(cable2_idx) == 2);
 		}
 	}
 
@@ -358,7 +309,7 @@ PatchData:
 
 		SUBCASE("Internal cable is still present") {
 			CHECK(player.get_int_cable(0).out == Jack{2, 0});
-			CHECK(player.num_int_cable_ins[0] == 1);
+			CHECK(player.get_num_int_cable_ins(0) == 1);
 			CHECK(player.get_int_cable(0).ins[0] == Jack{1, 0});
 		}
 	}

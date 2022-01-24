@@ -1,9 +1,9 @@
 ---
 CompileFlags:
 	Add: [
-		"-std=gnu++20",
+		"-std=c++20",
 		"-I..",
 		"-I../..",
 		"-Itests",
-		"-I../../firmware/lib/etl/include",
+		"-I../etl/include",
 	]

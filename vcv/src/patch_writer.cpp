@@ -24,7 +24,6 @@ void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules)
 
 	for (auto &mod : modules) {
 		if (mod.typeID.is_equal("PANEL_8") || mod.typeID.is_equal("PanelMedium")) {
-			// if (strcmp(mod.typeID.cstr(), "PANEL_8") == 0) {
 			pd.module_slugs[0] = mod.typeID;
 			vcv_mod_ids[0] = mod.id;
 		} else {
@@ -59,24 +58,11 @@ void PatchFileWriter::setJackList(std::vector<JackStatus> &jacks)
 			});
 
 			if (found != pd.int_cables.end()) {
-				// If int_cable entry exists, count number of in Jacks already in this entry
-				int num_ins = 0;
-				for (const auto &in : found->ins) {
-					if (in.jack_id == -1 || in.module_id == -1)
-						break;
-					num_ins++;
-				}
-				// If there's room, append this new entry, otherwise do nothing
-				if (num_ins < (MAX_CONNECTIONS_PER_NODE - 1)) {
-					found->ins[num_ins] = {
-						.module_id = static_cast<int16_t>(in_mod),
-						.jack_id = static_cast<int16_t>(in_jack),
-					};
-					if ((num_ins + 1) < (MAX_CONNECTIONS_PER_NODE - 1)) {
-						found->ins[num_ins + 1] = {-1, -1}; // terminator
-					}
-				}
-				// else log error: too many jacks stacked together
+				// If an int_cable entry exists for this output jack, add a new input jack to the ins vector
+				found->ins.push_back({
+					.module_id = static_cast<int16_t>(in_mod),
+					.jack_id = static_cast<int16_t>(in_jack),
+				});
 			} else {
 				// Make a new entry:
 				pd.int_cables.push_back({
@@ -86,7 +72,6 @@ void PatchFileWriter::setJackList(std::vector<JackStatus> &jacks)
 							.module_id = static_cast<int16_t>(in_mod),
 							.jack_id = static_cast<int16_t>(in_jack),
 						},
-						{-1, -1}, // terminator
 					}},
 				});
 			}
@@ -96,7 +81,6 @@ void PatchFileWriter::setJackList(std::vector<JackStatus> &jacks)
 
 void PatchFileWriter::setParamList(std::vector<ParamStatus> &params)
 {
-	// paramData = params;
 	pd.static_knobs.clear();
 	for (auto &param : params) {
 		pd.static_knobs.push_back({
@@ -134,24 +118,11 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 				});
 
 			if (found != pd.mapped_ins.end()) {
-				// Count number of entries in ins
-				int num_ins = 0;
-				for (const auto &in : found->ins) {
-					if (in.jack_id == -1 || in.module_id == -1)
-						break;
-					num_ins++;
-				}
-				// If there's room, append this new entry, otherwise do nothing
-				if (num_ins < (MAX_CONNECTIONS_PER_NODE - 1)) {
-					found->ins[num_ins] = {
-						.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
-						.jack_id = static_cast<int16_t>(m.dst.objID),
-					};
-					if ((num_ins + 1) < (MAX_CONNECTIONS_PER_NODE - 1)) {
-						found->ins[num_ins + 1] = {-1, -1}; // terminator
-					}
-				}
-				// else log error: too many jacks stacked together
+				// If we already have an entry for this panel jack, append a new module input jack to the ins vector
+				found->ins.push_back({
+					.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
+					.jack_id = static_cast<int16_t>(m.dst.objID),
+				});
 			} else {
 				// Make a new entry:
 				pd.mapped_ins.push_back({
@@ -161,7 +132,6 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 							.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
 							.jack_id = static_cast<int16_t>(m.dst.objID),
 						},
-						{-1, -1}, // terminator
 					}},
 				});
 			}

@@ -1,15 +1,10 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
 #include "util/static_string.hh"
-#include <array>
-//#include <vector>
+#include <vector>
 
 const int MAX_MODULES_IN_PATCH = 32;
 
-// maximum number of jacks involved in a stacked cable (4 means 1 output -> 3 inputs)
-const int MAX_CONNECTIONS_PER_NODE = 4;
-
-// maximum number of knob mapped to a single panel knob
 const int MAX_KNOBS_PER_MAPPING = 16;
 
 // 4 Bytes
@@ -48,20 +43,17 @@ struct MappedKnob {
 	}
 };
 
-// If number of ins exceeds MAX_CONNECTIONS_PER_NODE, then just add multiple InternalCable's
 // 16 Bytes
 struct InternalCable {
 	Jack out;
-	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
-	//std::vector<Jack> ins;
+	std::vector<Jack> ins;
 };
 
 // 16 Bytes
 struct MappedInputJack {
 	int32_t panel_jack_id;
-	std::array<Jack, MAX_CONNECTIONS_PER_NODE - 1> ins;
+	std::vector<Jack> ins;
 	AliasNameString alias_name;
-	//std::vector<Jack> ins;
 };
 
 // 8 Bytes

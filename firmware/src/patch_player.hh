@@ -43,8 +43,6 @@ public:
 	// knob_conns[]: A B C D a b c d, each element is a vector of knobs it's mapped to
 	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs> knob_conns;
 
-	std::vector<int> num_int_cable_ins;
-
 	bool is_loaded = false;
 
 private:
@@ -66,9 +64,6 @@ public:
 			unload_patch();
 
 		pd = patchdata;
-
-		num_int_cable_ins.reserve(pd->int_cables.size());
-		calc_int_cable_connections();
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
@@ -116,9 +111,11 @@ public:
 
 	// Runs the patch
 	void update_patch() {
-		if (pd->module_slugs.size() < 2)
-			return;
+		// if (pd->module_slugs.size() < 2)
+		// 	return;
 
+		//TODO: Can we optimize this? It's a branch in the inner loop...
+		// Maybe Audio:: can set a function var to be update_patch() or update_single_module_patch(), depending on num of modules
 		if (pd->module_slugs.size() == 2)
 			modules[1]->update();
 		else {
@@ -134,12 +131,9 @@ public:
 			mdrivlib::SMPThread::join();
 		}
 
-		for (auto [net_i, cable] : enumerate(pd->int_cables)) {
+		for (auto &cable : pd->int_cables) {
 			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
-			// TODO: test timing vs. using vector for InternalCable::ins
-			//for (auto &input_jack : cable.ins)
-			for (int jack_i = 0; jack_i < num_int_cable_ins[net_i]; jack_i++) {
-				auto const &input_jack = cable.ins[jack_i];
+			for (auto &input_jack : cable.ins) {
 				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
 			}
 		}
@@ -151,8 +145,6 @@ public:
 		for (int i = 0; i < pd->module_slugs.size(); i++) {
 			modules[i].reset(nullptr);
 		}
-
-		num_int_cable_ins.clear();
 
 		clear_cache();
 		BigAllocControl::reset();
@@ -193,6 +185,12 @@ public:
 
 	int get_num_int_cables() {
 		return is_loaded ? pd->int_cables.size() : 0;
+	}
+
+	unsigned get_num_int_cable_ins(unsigned int_cable_idx) {
+		if (int_cable_idx >= pd->int_cables.size())
+			return 0;
+		return pd->int_cables[int_cable_idx].ins.size();
 	}
 
 	int get_num_mapped_knobs() {
@@ -301,28 +299,13 @@ public:
 	// Returns the index in int_cables[] for a cable that has the given Jack as an input
 	// Return -1 if does not exist
 	int find_int_cable_input_jack(Jack in) {
-		// for (int net_i = 0; net_i < ph->num_int_cables; net_i++) {
-		// 	auto &cable = pd->int_cables[net_i];
 		for (auto [net_i, cable] : enumerate(pd->int_cables)) {
-			for (int jack_i = 0; jack_i < num_int_cable_ins[net_i]; jack_i++) {
-				auto &input_jack = cable.ins[jack_i];
+			for (auto &input_jack : cable.ins) {
 				if (in == input_jack)
 					return net_i;
 			}
 		}
 		return -1;
-	}
-
-	void calc_int_cable_connections() {
-		for (auto [net_i, cable] : enumerate(pd->int_cables)) {
-			num_int_cable_ins[net_i] = MAX_CONNECTIONS_PER_NODE - 1;
-			for (auto [jack_i, input_jack] : enumerate(cable.ins)) {
-				if (input_jack.module_id < 0) {
-					num_int_cable_ins[net_i] = jack_i;
-					break; //FIXME: we want a break here, right?
-				}
-			}
-		}
 	}
 
 	// Map all the panel jack connections into in_conns[] and out_conns[]
@@ -331,8 +314,11 @@ public:
 	void calc_panel_jack_connections() {
 		for (auto const &cable : pd->mapped_ins) {
 			auto panel_jack_id = cable.panel_jack_id;
+
+			// FIXME: propagate this error (return false?) to force unloading patch if patch data is malformed.
 			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingInJacks)
 				break;
+
 			for (auto const &input_jack : cable.ins) {
 				if (input_jack.module_id < 0 || input_jack.jack_id < 0)
 					break;
@@ -340,10 +326,11 @@ public:
 				if (dup_int_cable == -1)
 					in_conns[panel_jack_id].push_back(input_jack);
 				else {
-					// TODO: handle a mapped and patched input jack:
+					// error: Panel input jack is mapped to a jack containing a cable (to an output)
 					// - ? Create a module that outputs the sum of two inputs, and adjust int_cables and in_mappings?
 					// - ? Keep the mapping and remove the int_cable entry?
 					// - ? Keep it as-is (ignore the mapping and keep the int_cable)
+					// - ? Error out: don't load patch, it's malformed
 				}
 			}
 		}

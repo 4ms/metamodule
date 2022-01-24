@@ -38,16 +38,11 @@ bool read(ryml::NodeRef const &n, InternalCable *cable) {
 
 	n["out"] >> cable->out;
 
-	if (n["ins"].num_children() < 1)
+	auto num_ins = n["ins"].num_children();
+	if (num_ins < 1)
 		return false;
-
-	unsigned i = 0;
-	for (auto &in : n["ins"].children())
-		in >> cable->ins[i++];
-
-	// Terminate
-	if (i < (MAX_CONNECTIONS_PER_NODE - 1)) //1,2
-		cable->ins[i] = Jack{-1, -1};
+	cable->ins.reserve(num_ins);
+	n["ins"] >> cable->ins;
 
 	return true;
 }
@@ -64,13 +59,11 @@ bool read(ryml::NodeRef const &n, MappedInputJack *j) {
 
 	n["panel_jack_id"] >> j->panel_jack_id;
 
-	unsigned i = 0;
-	for (auto &in : n["ins"].children())
-		in >> j->ins[i++];
-
-	// Terminate
-	if (i < (MAX_CONNECTIONS_PER_NODE - 1))
-		j->ins[i] = Jack{-1, -1};
+	auto num_ins = n["ins"].num_children();
+	if (num_ins < 1)
+		return false;
+	j->ins.reserve(num_ins);
+	n["ins"] >> j->ins;
 
 	if (n.has_child("alias_name"))
 		n["alias_name"] >> j->alias_name;
