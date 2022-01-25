@@ -31,10 +31,10 @@ public:
 		if (module_it != moduleData.end())
 			moduleData.erase(module_it);
 
-		remove_and_erase(paramData, [=](const auto &p) { return (p.moduleID == mod.id); });
-		remove_and_erase(jackData,
-						 [&](const auto &j) { return j.receivedModuleId == mod.id || j.sendingModuleId == mod.id; });
-		remove_and_erase(maps, [&](const auto &m) { return m.dst.moduleID == mod.id || m.src.moduleID == mod.id; });
+		std::erase_if(paramData, [=](const auto &p) { return (p.moduleID == mod.id); });
+		std::erase_if(jackData,
+					  [&](const auto &j) { return j.receivedModuleId == mod.id || j.sendingModuleId == mod.id; });
+		std::erase_if(maps, [&](const auto &m) { return m.dst.moduleID == mod.id || m.src.moduleID == mod.id; });
 	}
 
 	unsigned int getNumModules()
@@ -219,14 +219,14 @@ public:
 	{
 		std::lock_guard mguard{mtx};
 
-		remove_and_erase(maps, [&](const auto &m) { return (m.dst == dest); });
+		std::erase_if(maps, [&](const auto &m) { return (m.dst == dest); });
 	}
 
 	void unregisterKnobMapsBySrcModule(int moduleId)
 	{
 		std::lock_guard mguard{mtx};
 
-		remove_and_erase(maps, [=](const auto &m) {
+		std::erase_if(maps, [=](const auto &m) {
 			return (m.src.objType == LabelButtonID::Types::Knob && m.src.moduleID == moduleId);
 		});
 	}
@@ -285,18 +285,4 @@ private:
 	Mapping _currentMap;
 
 	LabelButtonID lastTouchedJack{LabelButtonID::Types::None, -1, -1};
-
-	template<typename T, typename RT>
-	void remove_and_erase(T &vec, RT p)
-	{
-		vec.erase(std::remove_if(vec.begin(), vec.end(), p), vec.end());
-		// std::erase_if(vec, p);
-	}
 };
-
-// Todo for mappings:
-/*
-   Allow user to start a mapping by clicking on a dest (non-hub module)
-
-
- */
