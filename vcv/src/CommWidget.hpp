@@ -1,5 +1,6 @@
 #pragma once
 #include "CommModule.hpp"
+#include "MappableKnob.hpp"
 #include <rack.hpp>
 using namespace rack;
 
@@ -52,7 +53,7 @@ class MetaModuleTextBox : public LedDisplayTextField {
 	virtual void draw(const DrawArgs &args) override;
 };
 
-struct Davies1900hBlackKnob4ms : Davies1900hKnob {
+struct Davies1900hBlackKnob4ms : MappableKnob<Davies1900hKnob> {
 	Davies1900hBlackKnob4ms()
 	{
 		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Davies1900hBlack.svg")));
@@ -73,7 +74,7 @@ struct DaviesLarge4ms : Davies1900hKnob {
 	}
 };
 
-struct Small9mmKnob : RoundKnob {
+struct Small9mmKnob : MappableKnob<RoundKnob> {
 	Small9mmKnob()
 	{
 		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/9mm_knob.svg")));
