@@ -186,7 +186,9 @@ struct MetaModuleHubBase : public CommModule {
 				// auto knobToMap = m.src.objID;
 				// float min = m.range_min;
 				// float max = m.range_max;
+				printf("loadMappings calling centralData registerKnobParamHandle\n");
 				centralData->registerKnobParamHandle(m.src, m.dst);
+				printf("...loadMappings calling centralData registerKnobParamHandle done\n");
 				// auto [min, max] = centralData->getMapRange(m.src, m.dst);
 				// knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
 				// knobMaps[knobToMap].set_alias_name(m.alias_name);
