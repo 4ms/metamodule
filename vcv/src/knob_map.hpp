@@ -4,7 +4,7 @@
 #include <rack.hpp>
 #include <vector>
 
-class KnobMap {
+class DEPKnobMap {
 public:
 	int paramId{};
 	NVGcolor color;
@@ -17,15 +17,15 @@ public:
 	// Todo: vector might not be the best container, since we don't need it to be ordered and contigious.
 	std::vector<std::unique_ptr<MappingDest>> maps;
 
-	KnobMap()
+	DEPKnobMap()
 		: paramId{-1}
 	{}
 
-	KnobMap(int param_id)
+	DEPKnobMap(int param_id)
 		: paramId{param_id}
 	{}
 
-	~KnobMap()
+	~DEPKnobMap()
 	{
 		// Must remove all paramHandles from APP->engine before module is destructed
 		for (auto &map : maps) {
