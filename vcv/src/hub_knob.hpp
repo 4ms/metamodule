@@ -7,24 +7,24 @@
 
 class HubKnobMapButton : public HubMapButton {
 public:
-	KnobMap *knobmap;
+	// KnobMap *knobmap;
 
 	// Constructor for widget-only view:
 	HubKnobMapButton(CommModuleWidget &parent)
 		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
-		, knobmap{nullptr}
+	// , knobmap{nullptr}
 	{}
 
 	// Constructor for use as a module:
-	HubKnobMapButton(CommModuleWidget &parent, KnobMap &knobmap)
-		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
-		, knobmap(&knobmap)
-	{}
+	// HubKnobMapButton(CommModuleWidget &parent, KnobMap &knobmap)
+	// 	: HubMapButton{static_cast<CommModuleWidget &>(parent)}
+	// , knobmap(&knobmap)
+	// {}
 
 	void onDeselect(const event::Deselect &e) override
 	{
-		if (!knobmap)
-			return;
+		// if (!knobmap)
+		// 	return;
 
 		bool registerSuccess = false;
 
@@ -36,8 +36,6 @@ public:
 			APP->scene->rack->touchedParam = NULL;
 
 			registerSuccess = registerMapping(moduleId, objId);
-			if (registerSuccess)
-				knobmap->create(moduleId, objId, PaletteHub::color[id.objID]);
 		}
 
 		if (!registerSuccess) {
@@ -59,21 +57,18 @@ public:
 	{
 		BaseKnobT::draw(args);
 
-		KnobMap *knobmap = hubKnobMapBut.knobmap;
+		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubKnobMapBut.id), 16U);
 
-		if (knobmap) {
-			const float spacing = 8;
-			auto numMaps = std::min(knobmap->getNumMaps(), 16);
-			auto _box = this->box;
-			for (int i = 0; i < numMaps; i++) {
-				NVGcolor color = knobmap->get_color();
-				MapMark::markKnob(args.vg, _box, color);
-				if (i % 4 == 3) {
-					_box.size.x = this->box.size.x;
-					_box.size.y -= spacing;
-				} else
-					_box.size.x -= spacing;
-			}
+		const float spacing = 8;
+		const NVGcolor color = PaletteHub::color[hubKnobMapBut.id.objID];
+		auto _box = this->box;
+		for (unsigned i = 0; i < numMaps; i++) {
+			MapMark::markKnob(args.vg, _box, color);
+			if (i % 4 == 3) {
+				_box.size.x = this->box.size.x;
+				_box.size.y -= spacing;
+			} else
+				_box.size.x -= spacing;
 		}
 	}
 
@@ -114,35 +109,35 @@ public:
 				MenuSeparator *sep = new MenuSeparator;
 				menu->addChild(sep);
 
-				KnobMap *thisMap = hubKnobMapBut.knobmap;
+				// KnobMap *thisMap = hubKnobMapBut.knobmap;
 
-				// TODO: look at rack::app::ParamField in Rack/src/app/ParamWidget
-				auto aliasItem = new HubKnobAliasNameMenuField{thisMap};
-				aliasItem->box.size.x = 100;
-				menu->addChild(aliasItem);
+				// auto aliasItem = new HubKnobAliasNameMenuField{thisMap};
+				// aliasItem->box.size.x = 100;
+				// menu->addChild(aliasItem);
 
-				if (thisMap) {
-					for (auto &mapping : thisMap->maps) {
-						auto &ph = mapping->paramHandle;
-						bool knobMapped = ph.moduleId != -1;
-						if (knobMapped) {
-							MapFieldEntry *paramLabel2 = new MapFieldEntry;
-							paramLabel2->moduleName = ph.module->model->name;
-							paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
-							paramLabel2->moduleId = ph.moduleId;
-							paramLabel2->paramId = ph.paramId;
-							menu->addChild(paramLabel2);
+				// if (thisMap) {
+				// for (auto &mapping : thisMap->maps) {
+				// 	auto &ph = mapping->paramHandle;
+				for (auto const &ph : centralData->getParamHandlesFromSrc(hubKnobMapBut.id)) {
+					bool knobMapped = ph->moduleId != -1;
+					if (knobMapped) {
+						MapFieldEntry *paramLabel2 = new MapFieldEntry;
+						paramLabel2->moduleName = ph->module->model->name;
+						paramLabel2->paramName = ph->module->paramQuantities[ph->paramId]->getLabel();
+						paramLabel2->moduleId = ph->moduleId;
+						paramLabel2->paramId = ph->paramId;
+						menu->addChild(paramLabel2);
 
-							MinField *o = new MinField(mapping->range);
-							o->box.size.x = 100;
-							menu->addChild(o);
+						// MinField *o = new MinField(mapping->range);
+						// o->box.size.x = 100;
+						// menu->addChild(o);
 
-							MaxField *l = new MaxField(mapping->range);
-							l->box.size.x = 100;
-							menu->addChild(l);
-						}
+						// MaxField *l = new MaxField(mapping->range);
+						// l->box.size.x = 100;
+						// menu->addChild(l);
 					}
 				}
+				// }
 
 				engine::ParamHandle *paramHandle =
 					this->paramQuantity

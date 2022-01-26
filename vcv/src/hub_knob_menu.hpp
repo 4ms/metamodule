@@ -63,59 +63,67 @@ struct MapFieldEntry : ui::MenuLabel {
 	}
 };
 
-struct PercentQuantity : Quantity {
+enum class RangePart { Min, Max };
+template<RangePart MINMAX>
+struct MappedRangeQuantity : Quantity {
+private:
+	float _val{0.f};
+	std::string _label;
+	LabelButtonID const &_dst_id;
+
+public:
+	MappedRangeQuantity(std::string label, LabelButtonID const &modknob_id)
+		: _label{label}
+		, _dst_id{modknob_id}
+	{}
+	void setValue(float value) override
+	{
+		_val = MathTools::constrain(value, 0.0f, 1.0f);
+		if constexpr (MINMAX == RangePart::Min)
+			centralData->setMapRangeMin(_dst_id, _val);
+		else
+			centralData->setMapRangeMax(_dst_id, _val);
+	}
+	// clang-format off
+	float getValue() override { return _val; }
+	float getMinValue() override { return 0; }
+	float getMaxValue() override { return 1; }
+	float getDefaultValue() override { return 0.0; }
+	float getDisplayValue() override { return getValue() * 100.f; }
+	void setDisplayValue(float displayValue) override { setValue(displayValue / 100.f); }
+	std::string getLabel() override { return _label; }
+	std::string getUnit() override { return "%"; }
+	// clang-format on
+};
+
+struct PercentRefQuantity : Quantity {
 private:
 	float &_levelValue;
 	std::string _label;
 
 public:
-	PercentQuantity(float &inRange, std::string label)
+	PercentRefQuantity(float &inRange, std::string label)
 		: _levelValue{inRange}
 		, _label{label}
 	{}
-	void setValue(float value) override
-	{
-		_levelValue = MathTools::constrain(value, 0.0f, 1.0f);
-	}
-	float getValue() override
-	{
-		return _levelValue;
-	}
-	float getMinValue() override
-	{
-		return 0;
-	}
-	float getMaxValue() override
-	{
-		return 1;
-	}
-	float getDefaultValue() override
-	{
-		return 0.0;
-	}
-	float getDisplayValue() override
-	{
-		return getValue() * 100.f;
-	}
-	void setDisplayValue(float displayValue) override
-	{
-		setValue(displayValue / 100.f);
-	}
-	std::string getLabel() override
-	{
-		return _label;
-	}
-	std::string getUnit() override
-	{
-		return "%";
-	}
+	// clang-format off
+	void setValue(float value) override { _levelValue = MathTools::constrain(value, 0.0f, 1.0f); }
+	float getValue() override { return _levelValue; }
+	float getMinValue() override { return 0; }
+	float getMaxValue() override { return 1; }
+	float getDefaultValue() override { return 0.0; }
+	float getDisplayValue() override { return getValue() * 100.f; }
+	void setDisplayValue(float displayValue) override { setValue(displayValue / 100.f); }
+	std::string getLabel() override { return _label; }
+	std::string getUnit() override { return "%"; }
+	// clang-format on
 };
 
 struct MinField : ui::Slider {
 public:
 	MinField(std::pair<float, float> &inRange)
 	{
-		quantity = new PercentQuantity(inRange.first, "Minimum");
+		quantity = new PercentRefQuantity(inRange.first, "Minimum");
 	}
 	~MinField()
 	{
@@ -127,7 +135,7 @@ struct MaxField : ui::Slider {
 public:
 	MaxField(std::pair<float, float> &inRange)
 	{
-		quantity = new PercentQuantity(inRange.second, "Maximum");
+		quantity = new PercentRefQuantity(inRange.second, "Maximum");
 	}
 	~MaxField()
 	{

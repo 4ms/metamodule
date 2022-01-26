@@ -42,6 +42,20 @@ struct LabelButtonID {
 	}
 };
 
+namespace std
+{
+template<>
+struct hash<LabelButtonID> {
+	std::size_t operator()(const LabelButtonID &k) const
+	{
+		using std::hash;
+		return ((hash<int>()(k.objID) ^ (hash<int>()(k.moduleID) << 1)) >> 1) ^
+			   (hash<int>()(static_cast<int>(k.objType)) << 1);
+	}
+};
+
+} // namespace std
+
 struct Mapping {
 	LabelButtonID src;
 	LabelButtonID dst;

@@ -23,7 +23,7 @@ public:
 	LabelButtonID mappedToId{LabelButtonID::Types::None, -1, -1};
 
 private:
-	void _createMapping(LabelButtonID srcId);
+	// void _createMapping(LabelButtonID srcId);
 	void _updateState();
 	bool _hovered{false};
 	CommModuleWidget &_parent;

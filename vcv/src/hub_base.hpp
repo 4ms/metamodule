@@ -36,11 +36,13 @@ struct MetaModuleHubBase : public CommModule {
 	}
 	// ~MetaModuleHubBase() = default;
 
+	// This is called periodically on auto-save
+	// CentralData->maps is converted to json
 	json_t *dataToJson() override
 	{
 		json_t *rootJ = json_object();
 		json_t *mapsJ = json_array();
-		refreshMappings();
+		// refreshMappings();
 
 		for (auto &m : centralData->maps) {
 			json_t *thisMapJ = json_object();
@@ -63,6 +65,9 @@ struct MetaModuleHubBase : public CommModule {
 		return rootJ;
 	}
 
+	// This is called on startup, and on loading a new patch file
+	// json is converted to centralData->maps
+	// Then centralData->maps is converted to HubBase::knobMaps (via loadMappings())
 	void dataFromJson(json_t *rootJ) override
 	{
 		auto patchNameJ = json_object_get(rootJ, "PatchName");
@@ -132,9 +137,21 @@ struct MetaModuleHubBase : public CommModule {
 
 	void refreshMappings()
 	{
+		// TODO:
+		//  This is backwards. We should pull data from centralData
+		//  Or even better, don't keep a copy here (just keep knobMaps in centralData)
+		//  Make unmaps update centralData
+		//  Make min/max sliders update centralData
+		//  Make alias name changes update centralData
+
 		// user might have right-clicked a knob and selected Unmap
 		// Or user may have changed min/max sliders
 		// We don't get a notification of this, so we need to rebuild the knob maps
+	}
+
+	// Overwrites all centralData knob maps with this hub's ID as src
+	void updateCentralDataMappings()
+	{
 		centralData->unregisterKnobMapsBySrcModule(id);
 		for (auto &knobmap : knobMaps) {
 			for (auto &mapping : knobmap.maps) {
@@ -151,17 +168,14 @@ struct MetaModuleHubBase : public CommModule {
 					};
 					centralData->registerMapping(
 						src, dst, mapping->range.first, mapping->range.second, knobmap.alias_name);
-					// printf("refreshing knob mappings: centralData->registerMapping(src: m:%d knob:%d, dst: m:%d "
-					// 	   "knob:%d, )\n",
-					// 	   src.moduleID,
-					// 	   src.objID,
-					// 	   dst.moduleID,
-					// 	   dst.objID);
 				}
 			}
 		}
 	}
 
+	// Loads centralData->maps to HubBase::knobMaps[]
+	// FIXME: looks like this doesn't clear knobMaps that were removed in centralData?
+	// ..We might need to call cleanupMaps() on all knobMaps[i] that aren't in centralData->maps
 	void loadMappings()
 	{
 		for (auto &m : centralData->maps) {
@@ -313,11 +327,11 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	{
 		HubKnobMapButton *button;
 
-		if (hubModule) {
-			button = new HubKnobMapButton{*this, hubModule->knobMaps[knobId]};
-		} else {
-			button = new HubKnobMapButton{*this};
-		}
+		// if (hubModule) {
+		// 	button = new HubKnobMapButton{*this, hubModule->knobMaps[knobId]};
+		// } else {
+		button = new HubKnobMapButton{*this};
+		// }
 
 		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y - mm2px(kKnobSpacingY) / 2); // top-left
 		button->box.size.x = mm2px(kKnobSpacingX);

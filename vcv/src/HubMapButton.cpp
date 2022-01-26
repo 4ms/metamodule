@@ -2,12 +2,12 @@
 #include "paletteHub.hpp"
 #include <cstdio>
 
-void HubMapButton::_createMapping(LabelButtonID srcId)
-{
-	isMapped = true;
-	mappedToId = srcId;
-	centralData->registerMapDest(id);
-}
+// void HubMapButton::_createMapping(LabelButtonID srcId)
+// {
+// 	isMapped = true;
+// 	mappedToId = srcId;
+// 	centralData->registerMapDest(id);
+// }
 
 void HubMapButton::_updateState()
 {

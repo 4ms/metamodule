@@ -1,9 +1,12 @@
 #pragma once
 #include "CommData.hpp"
+#include "paletteHub.hpp"
 #include <algorithm>
 #include <iostream>
 #include <map>
 #include <mutex>
+#include <rack.hpp>
+#include <unordered_map>
 #include <vector>
 
 class CentralData {
@@ -141,14 +144,17 @@ public:
 		return _currentMap.src;
 	}
 
+	// Called by HubMapButton
 	void registerMapDest(LabelButtonID dest)
 	{
 		std::lock_guard mguard{mtx};
 
 		if (!_isMappingInProgress) {
-			printf("??? registerMapDest() called but we aren't mapping!\n");
+			printf("Error: registerMapDest() called but we aren't mapping!\n");
 			return;
 		}
+
+		printf("registerMapDest: dest: objID=%d, moduleID=%d\n", dest.objID, dest.moduleID);
 
 		_currentMap.dst = dest;
 
@@ -157,22 +163,60 @@ public:
 		for (auto &m : maps) {
 			if (m.dst == _currentMap.dst) {
 				found = true;
-				// printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
+				printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
 				m.src = _currentMap.src;
 				break;
 			}
 		}
 		if (!found) {
-			// printf("Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID,
-			// _currentMap.dst.objID);
+			printf("Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID, _currentMap.dst.objID);
 			maps.push_back(_currentMap);
 		}
 
-		_currentMap.clear();
+		if (dest.objType == LabelButtonID::Types::Knob) {
+			auto src = _currentMap.src;
 
+			printf("Type is knob, so handling ParamHandles\n");
+
+			// Clear from rack::Engine the paramHandles for this src knob that we've removed in the past
+			// TODO: does this come up?
+			auto &phvec = mappedParamHandles[src];
+			phvec.reserve(16);
+
+			for (auto &p : phvec) {
+				printf("Found a ph in phvec\n");
+				if (p->moduleId == -1) {
+					printf("Removing a paramHandle that had moduleId == -1. paramId=%d, text=%s\n",
+						   p->paramId,
+						   p->text.c_str());
+					APP->engine->removeParamHandle(p.get());
+				}
+			}
+
+			auto &ph = phvec.emplace_back(std::make_unique<rack::ParamHandle>());
+			ph->color = PaletteHub::color[_currentMap.src.objID];
+			ph->text = "Mapped to MetaModule knob# " + std::to_string(_currentMap.src.objID);
+
+			auto existingPh = APP->engine->getParamHandle(dest.moduleID, dest.objID);
+			if (existingPh) {
+				printf("Found an existing ParamHandle in engine with same dst module/param id. Clearing\n");
+				APP->engine->updateParamHandle(existingPh, -1, 0, true);
+				// Erase it from CentralData::maps
+				// TODO: we did this in KnobMaps, but do we need to do it here?
+				// Seems like we already checkd for dups
+				// unregisterMapByDest({LabelButtonID::Types::Knob, dest.objID, dest.moduleID});
+			}
+			printf("Adding to engine\n");
+			APP->engine->addParamHandle(ph.get());
+			printf("Updating the paramhandle with new info\n");
+			APP->engine->updateParamHandle(ph.get(), dest.moduleID, dest.objID, true);
+		}
+
+		_currentMap.clear();
 		_isMappingInProgress = false;
 	}
 
+	// TODO: Not used... remove?
 	bool registerMapping(LabelButtonID src, LabelButtonID dst, float rmin, float rmax, std::string alias)
 	{
 		std::lock_guard mguard{mtx};
@@ -190,6 +234,22 @@ public:
 		if (m == maps.end())
 			return;
 		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
+		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
+	}
+
+	void setMapRangeMin(LabelButtonID dst, float rmin)
+	{
+		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
+		if (m == maps.end())
+			return;
+		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
+	}
+
+	void setMapRangeMax(LabelButtonID dst, float rmax)
+	{
+		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
+		if (m == maps.end())
+			return;
 		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
 	}
 
@@ -261,6 +321,16 @@ public:
 		return {LabelButtonID::Types::None, -1, -1};
 	}
 
+	unsigned getNumMappingsFromSrc(LabelButtonID &src)
+	{
+		return std::count_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
+	}
+
+	std::vector<std::unique_ptr<rack::ParamHandle>> const &getParamHandlesFromSrc(LabelButtonID const &src)
+	{
+		return mappedParamHandles[src];
+	}
+
 	void registerTouchedJack(LabelButtonID touched)
 	{
 		lastTouchedJack = touched;
@@ -279,6 +349,12 @@ public:
 	std::vector<JackStatus> jackData;
 	std::vector<ParamStatus> paramData;
 	std::vector<Mapping> maps;
+
+	// [Hub ID, Knob ID] --> [vec of paramHandles mapped knobs]
+	// We use a vec of ptrs instead of a vec of objects because
+	// Rack::Engine stores raw ptrs, and needs their address to be fixed
+	// (When a vector re-allocates, the address of the contained objects changes.)
+	std::unordered_map<LabelButtonID, std::vector<std::unique_ptr<rack::ParamHandle>>> mappedParamHandles;
 
 private:
 	bool _isMappingInProgress = false;
