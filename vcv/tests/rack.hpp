@@ -26,7 +26,7 @@ namespace rack
 struct ParamHandle {
 	int moduleId = -1;
 	int paramId = 0;
-	// Module* module = NULL;
+	int *module = NULL;
 
 	std::string text;
 	NVGcolor color;

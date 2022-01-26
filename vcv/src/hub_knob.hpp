@@ -118,14 +118,14 @@ public:
 				// if (thisMap) {
 				// for (auto &mapping : thisMap->maps) {
 				// 	auto &ph = mapping->paramHandle;
-				for (auto const &ph : centralData->getParamHandlesFromSrc(hubKnobMapBut.id)) {
-					bool knobMapped = ph->moduleId != -1;
-					if (knobMapped) {
+				auto paramHandles = centralData->getParamHandlesFromSrc(hubKnobMapBut.id);
+				for (auto const &ph : paramHandles) {
+					if (ph.moduleId != -1) {
 						MapFieldEntry *paramLabel2 = new MapFieldEntry;
-						paramLabel2->moduleName = ph->module->model->name;
-						paramLabel2->paramName = ph->module->paramQuantities[ph->paramId]->getLabel();
-						paramLabel2->moduleId = ph->moduleId;
-						paramLabel2->paramId = ph->paramId;
+						paramLabel2->moduleName = ph.module->model->name;
+						paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
+						paramLabel2->moduleId = ph.moduleId;
+						paramLabel2->paramId = ph.paramId;
 						menu->addChild(paramLabel2);
 
 						// MinField *o = new MinField(mapping->range);

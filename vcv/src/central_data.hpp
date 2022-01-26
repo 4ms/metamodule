@@ -14,6 +14,20 @@ class CentralData {
 	static inline const std::array<ModuleTypeSlug, 2> ValidHubSlugs = {"PANEL_8", "PanelMedium"};
 
 public:
+	CentralData() = default;
+
+	~CentralData()
+	{
+		// Must remove all paramHandles from APP->engine before module is destructed
+		printf("~CentralData\n");
+		// for (auto &phvec : mappedParamHandles) {
+		// 	for (auto &ph : phvec.second) {
+		// 		printf("Removing paramHandle at %p\n", ph.get());
+		// 		ph->moduleId = -1;
+		// 		APP->engine->removeParamHandle(ph.get());
+		// 	}
+		// }
+	}
 	enum MessageType {
 		None,
 		RequestAllParamData,
@@ -174,59 +188,75 @@ public:
 		}
 
 		if (dest.objType == LabelButtonID::Types::Knob) {
-			auto src = _currentMap.src;
-
-			printf("Type is knob, so handling ParamHandles\n");
-
-			// Clear from rack::Engine the paramHandles for this src knob that we've removed in the past
-			// TODO: does this come up?
-			auto &phvec = mappedParamHandles[src];
-			phvec.reserve(16);
-
-			for (auto &p : phvec) {
-				printf("Found a ph in phvec\n");
-				if (p->moduleId == -1) {
-					printf("Removing a paramHandle that had moduleId == -1. paramId=%d, text=%s\n",
-						   p->paramId,
-						   p->text.c_str());
-					APP->engine->removeParamHandle(p.get());
-				}
-			}
-
-			auto &ph = phvec.emplace_back(std::make_unique<rack::ParamHandle>());
-			ph->color = PaletteHub::color[_currentMap.src.objID];
-			ph->text = "Mapped to MetaModule knob# " + std::to_string(_currentMap.src.objID);
-
-			auto existingPh = APP->engine->getParamHandle(dest.moduleID, dest.objID);
-			if (existingPh) {
-				printf("Found an existing ParamHandle in engine with same dst module/param id. Clearing\n");
-				APP->engine->updateParamHandle(existingPh, -1, 0, true);
-				// Erase it from CentralData::maps
-				// TODO: we did this in KnobMaps, but do we need to do it here?
-				// Seems like we already checkd for dups
-				// unregisterMapByDest({LabelButtonID::Types::Knob, dest.objID, dest.moduleID});
-			}
-			printf("Adding to engine\n");
-			APP->engine->addParamHandle(ph.get());
-			printf("Updating the paramhandle with new info\n");
-			APP->engine->updateParamHandle(ph.get(), dest.moduleID, dest.objID, true);
+			registerKnobParamHandle(_currentMap.src, dest);
 		}
-
 		_currentMap.clear();
 		_isMappingInProgress = false;
 	}
 
-	// TODO: Not used... remove?
-	bool registerMapping(LabelButtonID src, LabelButtonID dst, float rmin, float rmax, std::string alias)
+	void registerKnobParamHandle(LabelButtonID src, LabelButtonID dst)
 	{
-		std::lock_guard mguard{mtx};
+		printf("Type is knob, so handling ParamHandles\n");
 
-		if (!isLabelButtonDstMapped(dst)) {
-			maps.push_back({src, dst, rmin, rmax, alias});
-			return true;
+		// Clear from rack::Engine the paramHandles for this src knob that we've removed in the past
+		// TODO: does this come up? Maybe when we remove a module?
+		auto &phvec = mappedParamHandles[src];
+		phvec.reserve(16);
+
+		// for (auto &p : phvec) {
+		// 	printf("  Found a ph in phvec\n");
+		// 	if (p->moduleId == -1) {
+		// 		printf("    Removing a paramHandle that had moduleId == -1. paramId=%d, text=%s\n",
+		// 			   p->paramId,
+		// 			   p->text.c_str());
+		// 		APP->engine->removeParamHandle(p.get());
+		// 	}
+		// }
+
+		auto &ph = phvec.emplace_back(std::make_unique<rack::ParamHandle>());
+		printf("phvec.emplace_back: addr=%p\n", ph.get());
+		for (auto &p : phvec)
+			printf("\tphvec[] = addr=%p\n", p.get());
+
+		ph->color = PaletteHub::color[src.objID];
+		ph->text = "Mapped to MetaModule knob# " + std::to_string(src.objID);
+
+		auto existingPh = APP->engine->getParamHandle(dst.moduleID, dst.objID);
+		if (existingPh) {
+			printf("Found an existing ParamHandle (%p) in engine with same dst module/param id. Clearing\n",
+				   existingPh);
+			APP->engine->updateParamHandle(existingPh, -1, 0, true);
+			// printf("...Cleared\n");
+			// Erase it from CentralData::maps
+			// TODO: we did this in KnobMaps, but do we need to do it here?
+			// Seems like we already checkd for dups
+			// unregisterMapByDest({LabelButtonID::Types::Knob, dst.objID, dst.moduleID});
+			// std::erase_if(maps, [&](const auto &m) { return (m.dst == dst); });
 		}
-		return false;
+		printf("Adding to engine\n");
+		ph->moduleId = -1; // From Engine.cpp: "New ParamHandles must be blank"
+		APP->engine->addParamHandle(ph.get());
+		printf("Updating the paramhandle with new info: moduleId=%d, paramId=%d\n", dst.moduleID, dst.objID);
+		APP->engine->updateParamHandle(ph.get(), dst.moduleID, dst.objID, true);
+
+		rack::ParamHandle *p = APP->engine->getParamHandle(dst.moduleID, dst.objID);
+		printf("getParamHandle = %p\n", p);
+		printf("\n");
 	}
+
+	// // Registers the ParamHandle, and updates CentralData::maps with min/max/alias if an entry exists
+	// void registerKnobMapping(LabelButtonID src, LabelButtonID dst, float rmin, float rmax, std::string alias)
+	// {
+	// 	std::lock_guard mguard{mtx};
+
+	// 	registerKnobParamHandle(src, dst);
+	// 	auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
+	// 	if (m == maps.end())
+	// 		return;
+	// 	m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
+	// 	m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
+	// 	m->alias_name = alias;
+	// }
 
 	void setMapRange(LabelButtonID src, LabelButtonID dst, float rmin, float rmax)
 	{
@@ -289,6 +319,16 @@ public:
 		std::erase_if(maps, [=](const auto &m) {
 			return (m.src.objType == LabelButtonID::Types::Knob && m.src.moduleID == moduleId);
 		});
+
+		for (auto &phvec : mappedParamHandles) {
+			if (phvec.first.moduleID == moduleId) {
+				for (auto &ph : phvec.second) {
+					printf("Removing paramHandle at %p\n", ph.get());
+					ph->moduleId = -1;
+					APP->engine->removeParamHandle(ph.get());
+				}
+			}
+		}
 	}
 
 	bool isLabelButtonMapped(LabelButtonID &b)
@@ -326,9 +366,23 @@ public:
 		return std::count_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
 	}
 
-	std::vector<std::unique_ptr<rack::ParamHandle>> const &getParamHandlesFromSrc(LabelButtonID const &src)
+	// Returns a copy of the ParamHandles for the mappings on a given hub knob
+	// We use a copy to be more thread-safe
+	std::vector<rack::ParamHandle> getParamHandlesFromSrc(LabelButtonID const &src)
 	{
-		return mappedParamHandles[src];
+		std::lock_guard mguard{mtx};
+
+		std::vector<rack::ParamHandle> copied_phs;
+		for (auto &ph : mappedParamHandles[src]) {
+			rack::ParamHandle p;
+			p.moduleId = ph->moduleId;
+			p.paramId = ph->paramId;
+			p.module = ph->module;
+			p.text = ph->text;
+			p.color = ph->color;
+			copied_phs.push_back(p);
+		}
+		return copied_phs;
 	}
 
 	void registerTouchedJack(LabelButtonID touched)

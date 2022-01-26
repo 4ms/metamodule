@@ -19,7 +19,7 @@
 template<int NumKnobMaps>
 struct MetaModuleHubBase : public CommModule {
 
-	std::array<KnobMap, NumKnobMaps> knobMaps;
+	// std::array<KnobMap, NumKnobMaps> knobMaps;
 
 	std::function<void()> updatePatchName;
 	std::function<void()> redrawPatchName;
@@ -31,10 +31,14 @@ struct MetaModuleHubBase : public CommModule {
 
 	MetaModuleHubBase()
 	{
-		for (int i = 0; i < NumKnobMaps; i++)
-			knobMaps[i].paramId = i;
+		// for (int i = 0; i < NumKnobMaps; i++)
+		// 	knobMaps[i].paramId = i;
 	}
-	// ~MetaModuleHubBase() = default;
+
+	~MetaModuleHubBase()
+	{
+		centralData->unregisterKnobMapsBySrcModule(id);
+	}
 
 	// This is called periodically on auto-save
 	// CentralData->maps is converted to json
@@ -67,7 +71,6 @@ struct MetaModuleHubBase : public CommModule {
 
 	// This is called on startup, and on loading a new patch file
 	// json is converted to centralData->maps
-	// Then centralData->maps is converted to HubBase::knobMaps (via loadMappings())
 	void dataFromJson(json_t *rootJ) override
 	{
 		auto patchNameJ = json_object_get(rootJ, "PatchName");
@@ -152,25 +155,25 @@ struct MetaModuleHubBase : public CommModule {
 	// Overwrites all centralData knob maps with this hub's ID as src
 	void updateCentralDataMappings()
 	{
-		centralData->unregisterKnobMapsBySrcModule(id);
-		for (auto &knobmap : knobMaps) {
-			for (auto &mapping : knobmap.maps) {
-				if (mapping->paramHandle.moduleId > -1) {
-					LabelButtonID dst = {
-						LabelButtonID::Types::Knob,
-						mapping->paramHandle.paramId,
-						mapping->paramHandle.moduleId,
-					};
-					LabelButtonID src = {
-						LabelButtonID::Types::Knob,
-						knobmap.paramId,
-						id, // this module ID
-					};
-					centralData->registerMapping(
-						src, dst, mapping->range.first, mapping->range.second, knobmap.alias_name);
-				}
-			}
-		}
+		// centralData->unregisterKnobMapsBySrcModule(id);
+		// for (auto &knobmap : knobMaps) {
+		// 	for (auto &mapping : knobmap.maps) {
+		// 		if (mapping->paramHandle.moduleId > -1) {
+		// 			LabelButtonID dst = {
+		// 				LabelButtonID::Types::Knob,
+		// 				mapping->paramHandle.paramId,
+		// 				mapping->paramHandle.moduleId,
+		// 			};
+		// 			LabelButtonID src = {
+		// 				LabelButtonID::Types::Knob,
+		// 				knobmap.paramId,
+		// 				id, // this module ID
+		// 			};
+		// 			centralData->registerMapping(
+		// 				src, dst, mapping->range.first, mapping->range.second, knobmap.alias_name);
+		// 		}
+		// 	}
+		// }
 	}
 
 	// Loads centralData->maps to HubBase::knobMaps[]
@@ -180,12 +183,13 @@ struct MetaModuleHubBase : public CommModule {
 	{
 		for (auto &m : centralData->maps) {
 			if (m.src.objType == LabelButtonID::Types::Knob) {
-				auto knobToMap = m.src.objID;
-				float min = m.range_min;
-				float max = m.range_max;
+				// auto knobToMap = m.src.objID;
+				// float min = m.range_min;
+				// float max = m.range_max;
+				centralData->registerKnobParamHandle(m.src, m.dst);
 				// auto [min, max] = centralData->getMapRange(m.src, m.dst);
-				knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
-				knobMaps[knobToMap].set_alias_name(m.alias_name);
+				// knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
+				// knobMaps[knobToMap].set_alias_name(m.alias_name);
 			}
 		}
 	}
@@ -205,23 +209,24 @@ struct MetaModuleHubBase : public CommModule {
 	// Hub class needs to call this from its process
 	void processKnobMaps()
 	{
-		for (auto &knobmap : knobMaps) {
-			for (auto &mapping : knobmap.maps) {
-				bool isKnobMapped = (mapping->paramHandle.moduleId) != -1;
-				if (isKnobMapped) {
-					Module *module = mapping->paramHandle.module;
+		for (int i = 0; i < NumKnobMaps; i++) {
+			LabelButtonID src{LabelButtonID::Types::Knob, i, id};
+			auto phvec = centralData->getParamHandlesFromSrc(src);
+			for (auto &paramHandle : phvec) {
+				if (paramHandle.moduleId != -1) {
+					Module *module = paramHandle.module;
 					if (module) {
-						int paramId = mapping->paramHandle.paramId;
+						int paramId = paramHandle.paramId;
+						LabelButtonID dst{LabelButtonID::Types::Knob, paramId, paramHandle.moduleId};
+						auto [min, max] = centralData->getMapRange(src, dst);
+						auto newMappedVal = MathTools::map_value(params[i].getValue(), 0.0f, 1.0f, min, max);
 						ParamQuantity *paramQuantity = module->paramQuantities[paramId];
-						auto newMappedVal = MathTools::map_value(params[knobmap.paramId].getValue(),
-																 0.0f,
-																 1.0f,
-																 mapping->range.first,
-																 mapping->range.second);
 						paramQuantity->setValue(newMappedVal);
 					} else {
 						// disable the mapping because the module was deleted
-						mapping->paramHandle.moduleId = -1;
+						// paramHandle->moduleId = -1;
+						// FIXME: send a message to centralData that the module was deleted.
+						// Or better yet, make sure every module's destructor removes its mappings from centralData
 					}
 				}
 			}

@@ -52,6 +52,7 @@ public:
 				float max = 1.0f,
 				std::string alias_name = "")
 	{
+		printf("NOT SUPPOSED TO CALL THIS\n\n\n");
 		cleanupMaps();
 
 		auto &m = maps.emplace_back(std::make_unique<MappingDest>());
