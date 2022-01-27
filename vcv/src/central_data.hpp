@@ -2,6 +2,7 @@
 #include "CommData.hpp"
 #include "paletteHub.hpp"
 #include <algorithm>
+#include <deque>
 #include <iostream>
 #include <map>
 #include <mutex>
@@ -161,7 +162,7 @@ public:
 	// Called by HubMapButton
 	void registerMapDest(LabelButtonID dest)
 	{
-		std::lock_guard mguard{mtx};
+		// std::lock_guard mguard{mtx};
 
 		if (!_isMappingInProgress) {
 			printf("Error: registerMapDest() called but we aren't mapping!\n");
@@ -188,10 +189,28 @@ public:
 		}
 
 		if (dest.objType == LabelButtonID::Types::Knob) {
-			registerKnobParamHandle(_currentMap.src, dest);
+			queueRegisterKnobParamHandle(_currentMap.src, dest);
 		}
 		_currentMap.clear();
 		_isMappingInProgress = false;
+	}
+
+	std::deque<std::pair<LabelButtonID, LabelButtonID>> queue;
+	void queueRegisterKnobParamHandle(LabelButtonID src, LabelButtonID dst)
+	{
+		// Called by UI thread, spin on access
+		queue.push_back(std::make_pair(src, dst));
+	}
+
+	std::pair<LabelButtonID, LabelButtonID> popRegisterKnobParamHandle()
+	{
+		// Called by engine process thread, don't block
+		if (queue.size() == 0)
+			return std::make_pair<LabelButtonID, LabelButtonID>({LabelButtonID::Types::None, -1, -1},
+																{LabelButtonID::Types::None, -1, -1});
+		auto r = queue.front();
+		queue.pop_front();
+		return r;
 	}
 
 	void registerKnobParamHandle(LabelButtonID src, LabelButtonID dst)
@@ -201,17 +220,17 @@ public:
 		// Clear from rack::Engine the paramHandles for this src knob that we've removed in the past
 		// TODO: does this come up? Maybe when we remove a module?
 		auto &phvec = mappedParamHandles[src];
-		phvec.reserve(16);
+		// phvec.reserve(16);
 
-		// for (auto &p : phvec) {
-		// 	printf("  Found a ph in phvec\n");
-		// 	if (p->moduleId == -1) {
-		// 		printf("    Removing a paramHandle that had moduleId == -1. paramId=%d, text=%s\n",
-		// 			   p->paramId,
-		// 			   p->text.c_str());
-		// 		APP->engine->removeParamHandle(p.get());
-		// 	}
-		// }
+		for (auto &p : phvec) {
+			printf("  Found a ph in phvec\n");
+			if (p->moduleId == -1) {
+				printf("    Removing a paramHandle that had moduleId == -1. paramId=%d, text=%s\n",
+					   p->paramId,
+					   p->text.c_str());
+				APP->engine->removeParamHandle(p.get());
+			}
+		}
 
 		auto &ph = phvec.emplace_back(std::make_unique<rack::ParamHandle>());
 		printf("phvec.emplace_back: addr=%p\n", ph.get());
@@ -370,10 +389,10 @@ public:
 	// We use a copy to be more thread-safe
 	std::vector<rack::ParamHandle> getParamHandlesFromSrc(LabelButtonID const &src)
 	{
-		std::lock_guard mguard{mtx};
+		// std::lock_guard mguard{mtx};
 
 		std::vector<rack::ParamHandle> copied_phs;
-		for (auto &ph : mappedParamHandles[src]) {
+		for (auto const &ph : mappedParamHandles[src]) {
 			rack::ParamHandle p;
 			p.moduleId = ph->moduleId;
 			p.paramId = ph->paramId;
