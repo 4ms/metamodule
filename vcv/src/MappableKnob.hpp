@@ -65,13 +65,13 @@ public:
 			auto moduleid = getId().moduleID;
 			auto paramid = getId().objID;
 
-			if ((moduleid >= 0) && centralData->isLabelButtonDstMapped(getId())) {
-				// MapFieldEntry *paramLabel2 = new MapFieldEntry;
-				// paramLabel2->moduleName = this->paramQuantity->module->model->name;
-				// paramLabel2->paramName = this->paramQuantity->getLabel();
-				// paramLabel2->moduleId = this->paramQuantity->moduleId;
-				// paramLabel2->paramId = this->paramQuantity->paramId;
-				// menu->addChild(paramLabel2);
+			LabelButtonID dst = getId();
+			LabelButtonID src = centralData->getMappedSrcFromDst(dst);
+
+			if ((moduleid >= 0) && src.moduleID != -1) {
+				auto aliasItem = new HubKnobAliasNameMenuField{src};
+				aliasItem->box.size.x = 100;
+				menu->addChild(aliasItem);
 
 				MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, paramid, moduleid});
 				mn->box.size.x = 100;
