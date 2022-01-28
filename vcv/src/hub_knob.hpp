@@ -7,25 +7,12 @@
 
 class HubKnobMapButton : public HubMapButton {
 public:
-	// KnobMap *knobmap;
-
-	// Constructor for widget-only view:
 	HubKnobMapButton(CommModuleWidget &parent)
 		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
-	// , knobmap{nullptr}
 	{}
-
-	// Constructor for use as a module:
-	// HubKnobMapButton(CommModuleWidget &parent, KnobMap &knobmap)
-	// 	: HubMapButton{static_cast<CommModuleWidget &>(parent)}
-	// , knobmap(&knobmap)
-	// {}
 
 	void onDeselect(const event::Deselect &e) override
 	{
-		// if (!knobmap)
-		// 	return;
-
 		bool registerSuccess = false;
 
 		// Check if a ParamWidget was touched
@@ -109,15 +96,10 @@ public:
 				MenuSeparator *sep = new MenuSeparator;
 				menu->addChild(sep);
 
-				// KnobMap *thisMap = hubKnobMapBut.knobmap;
-
 				// auto aliasItem = new HubKnobAliasNameMenuField{thisMap};
 				// aliasItem->box.size.x = 100;
 				// menu->addChild(aliasItem);
 
-				// if (thisMap) {
-				// for (auto &mapping : thisMap->maps) {
-				// 	auto &ph = mapping->paramHandle;
 				auto paramHandles = centralData->getParamHandlesFromSrc(hubKnobMapBut.id);
 				for (auto const &ph : paramHandles) {
 					if (ph.moduleId != -1) {
@@ -128,16 +110,15 @@ public:
 						paramLabel2->paramId = ph.paramId;
 						menu->addChild(paramLabel2);
 
-						// MinField *o = new MinField(mapping->range);
-						// o->box.size.x = 100;
-						// menu->addChild(o);
+						MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+						mn->box.size.x = 100;
+						menu->addChild(mn);
 
-						// MaxField *l = new MaxField(mapping->range);
-						// l->box.size.x = 100;
-						// menu->addChild(l);
+						MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+						mx->box.size.x = 100;
+						menu->addChild(mx);
 					}
 				}
-				// }
 
 				engine::ParamHandle *paramHandle =
 					this->paramQuantity

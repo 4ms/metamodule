@@ -164,6 +164,10 @@ public:
 		return _currentMap.src;
 	}
 
+	//
+	// Registering/Unregistering Mappings
+	//
+
 	// Called by UI Thread: HubMapButton
 	void registerMapDest(LabelButtonID dest)
 	{
@@ -207,10 +211,10 @@ public:
 		}
 	}
 
+	// Called by UI thread so that the Engine thread does the actual registering with APP->enginer
+	// This prevents a dead-lock
 	void queueRegisterKnobParamHandle(LabelButtonID src, LabelButtonID dst)
 	{
-		// Called by UI thread
-		// Block if other thread is accessing queue
 		std::lock_guard mguard{paramHandleQmtx};
 		paramHandleQueue.push(std::make_pair(src, dst));
 	}
@@ -276,53 +280,6 @@ public:
 		printf("\n");
 	}
 
-	void setMapRange(LabelButtonID src, LabelButtonID dst, float rmin, float rmax)
-	{
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
-		if (m == maps.end())
-			return;
-		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
-		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
-	}
-
-	void setMapRangeMin(LabelButtonID dst, float rmin)
-	{
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
-		if (m == maps.end())
-			return;
-		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
-	}
-
-	void setMapRangeMax(LabelButtonID dst, float rmax)
-	{
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
-		if (m == maps.end())
-			return;
-		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
-	}
-
-	// void setMapAliasName(LabelButtonID src, LabelButtonID dst, std::string newname)
-	// {
-	// 	auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
-	// 	if (m == maps.end())
-	// 		return;
-	// 	m->alias_name = newname;
-	// }
-
-	std::pair<float, float> getMapRange(LabelButtonID src, LabelButtonID dst)
-	{
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
-		float min, max;
-		if (m == maps.end()) {
-			min = 0.f;
-			max = 0.f;
-		} else {
-			min = m->range_min;
-			max = m->range_max;
-		}
-		return {min, max};
-	}
-
 	// Can be called by UI Thread on "Unmap" menuitem
 	void unregisterMapByDest(LabelButtonID dest)
 	{
@@ -374,6 +331,77 @@ public:
 			printf("Erased %lu entries from mappedParamHandles\n", num_erased);
 		}
 	}
+
+	//
+	// Knob Mapping Range
+	//
+
+	void setMapRange(LabelButtonID src, LabelButtonID dst, float rmin, float rmax)
+	{
+		std::lock_guard mguard{mapsmtx};
+		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
+		if (m == maps.end())
+			return;
+		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
+		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
+	}
+
+	void setMapRangeMin(LabelButtonID dst, float rmin)
+	{
+		std::lock_guard mguard{mapsmtx};
+		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
+		if (m == maps.end())
+			return;
+		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
+	}
+
+	void setMapRangeMax(LabelButtonID dst, float rmax)
+	{
+		std::lock_guard mguard{mapsmtx};
+		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
+		if (m == maps.end())
+			return;
+		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
+	}
+
+	std::pair<float, float> getMapRange(LabelButtonID src, LabelButtonID dst)
+	{
+		std::lock_guard mguard{mapsmtx};
+		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
+		float min, max;
+		if (m == maps.end()) {
+			min = 0.f;
+			max = 1.f;
+		} else {
+			min = m->range_min;
+			max = m->range_max;
+		}
+		return {min, max};
+	}
+
+	std::pair<float, float> getMapRange(LabelButtonID dst)
+	{
+		std::lock_guard mguard{mapsmtx};
+		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == dst; });
+		float min, max;
+		if (m == maps.end()) {
+			min = 0.f;
+			max = 1.f;
+			printf("Not found\n");
+		} else {
+			min = m->range_min;
+			max = m->range_max;
+		}
+		return {min, max};
+	}
+
+	// void setMapAliasName(LabelButtonID src, LabelButtonID dst, std::string newname)
+	// {
+	// 	auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
+	// 	if (m == maps.end())
+	// 		return;
+	// 	m->alias_name = newname;
+	// }
 
 	bool isLabelButtonMapped(LabelButtonID &b)
 	{

@@ -69,12 +69,12 @@ struct MappedRangeQuantity : Quantity {
 private:
 	float _val{0.f};
 	std::string _label;
-	LabelButtonID const &_dst_id;
+	LabelButtonID const _dst_id;
 
 public:
-	MappedRangeQuantity(std::string label, LabelButtonID const &modknob_id)
+	MappedRangeQuantity(std::string label, LabelButtonID const knobLabelID)
 		: _label{label}
-		, _dst_id{modknob_id}
+		, _dst_id{knobLabelID}
 	{}
 	void setValue(float value) override
 	{
@@ -84,60 +84,45 @@ public:
 		else
 			centralData->setMapRangeMax(_dst_id, _val);
 	}
-	// clang-format off
-	float getValue() override { return _val; }
-	float getMinValue() override { return 0; }
-	float getMaxValue() override { return 1; }
-	float getDefaultValue() override { return 0.0; }
-	float getDisplayValue() override { return getValue() * 100.f; }
-	void setDisplayValue(float displayValue) override { setValue(displayValue / 100.f); }
-	std::string getLabel() override { return _label; }
-	std::string getUnit() override { return "%"; }
-	// clang-format on
-};
-
-struct PercentRefQuantity : Quantity {
-private:
-	float &_levelValue;
-	std::string _label;
-
-public:
-	PercentRefQuantity(float &inRange, std::string label)
-		: _levelValue{inRange}
-		, _label{label}
-	{}
-	// clang-format off
-	void setValue(float value) override { _levelValue = MathTools::constrain(value, 0.0f, 1.0f); }
-	float getValue() override { return _levelValue; }
-	float getMinValue() override { return 0; }
-	float getMaxValue() override { return 1; }
-	float getDefaultValue() override { return 0.0; }
-	float getDisplayValue() override { return getValue() * 100.f; }
-	void setDisplayValue(float displayValue) override { setValue(displayValue / 100.f); }
-	std::string getLabel() override { return _label; }
-	std::string getUnit() override { return "%"; }
-	// clang-format on
-};
-
-struct MinField : ui::Slider {
-public:
-	MinField(std::pair<float, float> &inRange)
+	float getValue() override
 	{
-		quantity = new PercentRefQuantity(inRange.first, "Minimum");
+		float val;
+		if constexpr (MINMAX == RangePart::Min)
+			val = centralData->getMapRange(_dst_id).first;
+		else
+			val = centralData->getMapRange(_dst_id).second;
+		return val;
 	}
-	~MinField()
+	// clang-format off
+	float getMinValue() override { return 0; }
+	float getMaxValue() override { return 1; }
+	float getDefaultValue() override { return 0.0; }
+	float getDisplayValue() override { return getValue() * 100.f; }
+	void setDisplayValue(float displayValue) override { setValue(displayValue / 100.f); }
+	std::string getLabel() override { return _label; }
+	std::string getUnit() override { return "%"; }
+	// clang-format on
+};
+
+struct MinSlider : ui::Slider {
+public:
+	MinSlider(LabelButtonID const knobLabelID)
+	{
+		quantity = new MappedRangeQuantity<RangePart::Min>{"Min: ", knobLabelID};
+	}
+	~MinSlider()
 	{
 		delete quantity;
 	}
 };
 
-struct MaxField : ui::Slider {
+struct MaxSlider : ui::Slider {
 public:
-	MaxField(std::pair<float, float> &inRange)
+	MaxSlider(LabelButtonID const knobLabelID)
 	{
-		quantity = new PercentRefQuantity(inRange.second, "Maximum");
+		quantity = new MappedRangeQuantity<RangePart::Max>{"Max: ", knobLabelID};
 	}
-	~MaxField()
+	~MaxSlider()
 	{
 		delete quantity;
 	}
