@@ -17,6 +17,8 @@ class CentralData {
 	static inline std::mutex mapsmtx;
 	static inline const std::array<ModuleTypeSlug, 2> ValidHubSlugs = {"PANEL_8", "PanelMedium"};
 
+	std::queue<std::pair<LabelButtonID, LabelButtonID>> paramHandleQueue;
+
 public:
 	CentralData() = default;
 
@@ -205,7 +207,6 @@ public:
 		}
 	}
 
-	std::queue<std::pair<LabelButtonID, LabelButtonID>> paramHandleQueue;
 	void queueRegisterKnobParamHandle(LabelButtonID src, LabelButtonID dst)
 	{
 		// Called by UI thread
@@ -231,14 +232,13 @@ public:
 	{
 		printf("registerKnobParamHandle m:%d p:%d -> m:%d p:%d\n", src.moduleID, src.objID, dst.moduleID, dst.objID);
 
-		// Clear from rack::Engine the paramHandles for this src knob that we've removed in the past
-		// TODO: does this come up? Maybe when we remove a module?
 		std::lock_guard mguard{mappedParamHandlemtx};
 
 		auto &phvec = mappedParamHandles[src];
 
+		// Clear from rack::Engine the paramHandles for this src knob that we've removed in the past
 		// for (auto &p : phvec) {
-		// 	printf("  Found a ph in phvec\n");
+		// 	printf("Found a ph in phvec\n");
 		// 	if (p->moduleId == -1) {
 		// 		printf("    Removing a paramHandle that had moduleId == -1. paramId=%d, text=%s\n",
 		// 			   p->paramId,
@@ -263,13 +263,6 @@ public:
 			printf("Found an existing ParamHandle (%p) in engine with same dst module/param id. Updating it to -1, 0\n",
 				   existingPh);
 			APP->engine->updateParamHandle(existingPh, -1, 0, true); // module=-1 means "paramHandle controls nothing"
-			// TODO: we did this in KnobMaps, but do we need to do it here?
-			// Seems like we already checkd for dups
-			// {
-			// 	std::lock_guard mguard{mapsmtx};
-			// 	std::erase_if(maps, [&](const auto &m) { return (m.dst == dst); });
-			// // unregisterMapByDest({LabelButtonID::Types::Knob, dst.objID, dst.moduleID});
-			// }
 		}
 		printf("Adding to engine\n");
 		ph->moduleId = -1; // From Engine.cpp: "New ParamHandles must be blank"
@@ -277,6 +270,7 @@ public:
 		printf("Updating the paramhandle with new info: moduleId=%d, paramId=%d\n", dst.moduleID, dst.objID);
 		APP->engine->updateParamHandle(ph.get(), dst.moduleID, dst.objID, true);
 
+		/// Debug:
 		rack::ParamHandle *p = APP->engine->getParamHandle(dst.moduleID, dst.objID);
 		printf("getParamHandle = %p\n", p);
 		printf("\n");
@@ -343,11 +337,27 @@ public:
 		return {min, max};
 	}
 
+	// Can be called by UI Thread on "Unmap" menuitem
 	void unregisterMapByDest(LabelButtonID dest)
 	{
-		std::lock_guard mguard{mapsmtx};
+		{
+			std::lock_guard mguard{mapsmtx};
+			std::erase_if(maps, [&](const auto &m) { return (m.dst == dest); });
+		}
 
-		std::erase_if(maps, [&](const auto &m) { return (m.dst == dest); });
+		{
+			std::lock_guard mguard{mappedParamHandlemtx};
+			//? remove from mappedParamHandle?
+		}
+
+		// TODO could this lock up?
+		auto existingPh = APP->engine->getParamHandle(dest.moduleID, dest.objID);
+		if (existingPh) {
+			printf("Found an existing ParamHandle (%p) in engine with same dst module/param id. Changing ph->moduleId "
+				   "to to -1\n",
+				   existingPh);
+			APP->engine->updateParamHandle(existingPh, -1, 0, true); // module=-1 means "paramHandle controls nothing"
+		}
 	}
 
 	void unregisterKnobMapsBySrcModule(int moduleId)
