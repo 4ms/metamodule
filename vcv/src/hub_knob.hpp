@@ -96,14 +96,14 @@ public:
 				MenuSeparator *sep = new MenuSeparator;
 				menu->addChild(sep);
 
-				// auto aliasItem = new HubKnobAliasNameMenuField{thisMap};
-				// aliasItem->box.size.x = 100;
-				// menu->addChild(aliasItem);
+				auto aliasItem = new HubKnobAliasNameMenuField{hubKnobMapBut.id};
+				aliasItem->box.size.x = 100;
+				menu->addChild(aliasItem);
 
 				auto paramHandles = centralData->getParamHandlesFromSrc(hubKnobMapBut.id);
 				for (auto const &ph : paramHandles) {
 					if (ph.moduleId != -1) {
-						MapFieldEntry *paramLabel2 = new MapFieldEntry;
+						MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
 						paramLabel2->moduleName = ph.module->model->name;
 						paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
 						paramLabel2->moduleId = ph.moduleId;

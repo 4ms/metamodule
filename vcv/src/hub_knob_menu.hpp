@@ -11,41 +11,39 @@ struct MapFieldLabel : ui::MenuLabel {
 	}
 };
 
-// struct HubKnobAliasNameMenuField : ui::TextField {
-// 	KnobMap *knobmap = nullptr;
+struct HubKnobAliasNameMenuField : ui::TextField {
+	LabelButtonID _src;
 
-// 	HubKnobAliasNameMenuField(KnobMap *km)
-// 		: knobmap{km}
-// 	{
-// 		text = knobmap->alias_name;
-// 	}
+	HubKnobAliasNameMenuField(LabelButtonID src)
+		: _src{src}
+	{
+		text = centralData->getMapAliasName(_src);
+	}
 
-// 	void step() override
-// 	{
-// 		// Keep selected
-// 		APP->event->setSelected(this);
-// 		TextField::step();
-// 	}
+	void step() override
+	{
+		// Keep selected
+		APP->event->setSelected(this);
+		TextField::step();
+	}
 
-// 	void onSelectKey(const event::SelectKey &e) override
-// 	{
-// 		if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-// 			if (knobmap) {
-// 				knobmap->set_alias_name(text);
-// 			}
+	void onSelectKey(const event::SelectKey &e) override
+	{
+		if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
+			centralData->setMapAliasName(_src, text);
 
-// 			// Close menu when user presses Enter:
-// 			ui::MenuOverlay *overlay = getAncestorOfType<ui::MenuOverlay>();
-// 			overlay->requestDelete();
-// 			e.consume(this);
-// 		}
+			// Close menu when user presses Enter:
+			ui::MenuOverlay *overlay = getAncestorOfType<ui::MenuOverlay>();
+			overlay->requestDelete();
+			e.consume(this);
+		}
 
-// 		if (!e.getTarget())
-// 			TextField::onSelectKey(e);
-// 	}
-// };
+		if (!e.getTarget())
+			TextField::onSelectKey(e);
+	}
+};
 
-struct MapFieldEntry : ui::MenuLabel {
+struct MappedKnobMenuLabel : ui::MenuLabel {
 	int moduleId;
 	int paramId;
 	std::string moduleName;
