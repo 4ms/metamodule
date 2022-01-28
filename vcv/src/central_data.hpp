@@ -217,7 +217,7 @@ public:
 
 	std::pair<LabelButtonID, LabelButtonID> popRegisterKnobParamHandle()
 	{
-		// Called by engine process thread. Skip is can't get the lock
+		// Called by engine process thread
 		std::lock_guard mguard{paramHandleQmtx};
 
 		if (paramHandleQueue.empty())
@@ -228,6 +228,8 @@ public:
 		return r;
 	}
 
+	// This is called in the Engine thread from HubBase::process() --> processKnobMaps()
+	//	[and also in loadmappings when we load a patch file]
 	void registerKnobParamHandle(LabelButtonID src, LabelButtonID dst)
 	{
 		printf("registerKnobParamHandle m:%d p:%d -> m:%d p:%d\n", src.moduleID, src.objID, dst.moduleID, dst.objID);
@@ -237,20 +239,18 @@ public:
 		auto &phvec = mappedParamHandles[src];
 
 		// Clear from rack::Engine the paramHandles for this src knob that we've removed in the past
-		// for (auto &p : phvec) {
-		// 	printf("Found a ph in phvec\n");
-		// 	if (p->moduleId == -1) {
-		// 		printf("    Removing a paramHandle that had moduleId == -1. paramId=%d, text=%s\n",
-		// 			   p->paramId,
-		// 			   p->text.c_str());
-		// 		APP->engine->removeParamHandle(p.get());
-		// 	}
-		// }
+		for (auto &p : phvec) {
+			if (p->moduleId == -1) {
+				printf("....Removing a paramHandle moduleId == -1. paramId=%d, text=%s\n", p->paramId, p->text.c_str());
+				APP->engine->removeParamHandle(p.get());
+			}
+		}
+		// Remove from mappedParamHandles[src]
+		std::erase_if(phvec, [&](auto &p) { return p->moduleId == -1; });
 
-		// FIXME: if we remap a knob to a different src knob, then the mappedParamHandles[originalsrc] vector still
-		// contains the original paramHandle (although it points to a PH with moduleId = -1) Should we remove it from
-		// mappedParamHandles[originalsrc]?
 		auto &ph = phvec.emplace_back(std::make_unique<rack::ParamHandle>());
+
+		// Debug:
 		printf("phvec.emplace_back: addr=%p\n", ph.get());
 		for (auto &p : phvec)
 			printf("\tphvec[] = addr=%p\n", p.get());
@@ -258,11 +258,11 @@ public:
 		ph->color = PaletteHub::color[src.objID];
 		ph->text = "Mapped to MetaModule knob# " + std::to_string(src.objID);
 
-		auto existingPh = APP->engine->getParamHandle(dst.moduleID, dst.objID);
-		if (existingPh) {
+		if (auto existingPh = APP->engine->getParamHandle(dst.moduleID, dst.objID); existingPh) {
 			printf("Found an existing ParamHandle (%p) in engine with same dst module/param id. Updating it to -1, 0\n",
 				   existingPh);
-			APP->engine->updateParamHandle(existingPh, -1, 0, true); // module=-1 means "paramHandle controls nothing"
+			APP->engine->updateParamHandle(existingPh, -1, 0, true);
+			// TODO: Why not just remove it here?
 		}
 		printf("Adding to engine\n");
 		ph->moduleId = -1; // From Engine.cpp: "New ParamHandles must be blank"
@@ -275,20 +275,6 @@ public:
 		printf("getParamHandle = %p\n", p);
 		printf("\n");
 	}
-
-	// // Registers the ParamHandle, and updates CentralData::maps with min/max/alias if an entry exists
-	// void registerKnobMapping(LabelButtonID src, LabelButtonID dst, float rmin, float rmax, std::string alias)
-	// {
-	// 	std::lock_guard mguard{mtx};
-
-	// 	registerKnobParamHandle(src, dst);
-	// 	auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
-	// 	if (m == maps.end())
-	// 		return;
-	// 	m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
-	// 	m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
-	// 	m->alias_name = alias;
-	// }
 
 	void setMapRange(LabelButtonID src, LabelButtonID dst, float rmin, float rmax)
 	{
@@ -340,21 +326,16 @@ public:
 	// Can be called by UI Thread on "Unmap" menuitem
 	void unregisterMapByDest(LabelButtonID dest)
 	{
+		// Remove from CD::maps
 		{
 			std::lock_guard mguard{mapsmtx};
 			std::erase_if(maps, [&](const auto &m) { return (m.dst == dest); });
 		}
 
-		{
-			std::lock_guard mguard{mappedParamHandlemtx};
-			//? remove from mappedParamHandle?
-		}
-
-		// TODO could this lock up?
-		auto existingPh = APP->engine->getParamHandle(dest.moduleID, dest.objID);
-		if (existingPh) {
-			printf("Found an existing ParamHandle (%p) in engine with same dst module/param id. Changing ph->moduleId "
-				   "to to -1\n",
+		if (auto existingPh = APP->engine->getParamHandle(dest.moduleID, dest.objID); existingPh) {
+			printf("APP->engine->getParamHandle(%d, %d) found %p. Updating to -1\n",
+				   dest.moduleID,
+				   dest.objID,
 				   existingPh);
 			APP->engine->updateParamHandle(existingPh, -1, 0, true); // module=-1 means "paramHandle controls nothing"
 		}
