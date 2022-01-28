@@ -14,7 +14,7 @@ struct LabelButtonID {
 		return (objType == rhs.objType) && (objID == rhs.objID) && (moduleID == rhs.moduleID);
 	}
 
-	const char *objTypeStr()
+	const char *objTypeStr() const
 	{
 		if (objType == Types::Knob)
 			return "Knob";

@@ -2,16 +2,19 @@
 #include "CommData.hpp"
 #include "paletteHub.hpp"
 #include <algorithm>
-#include <deque>
 #include <iostream>
 #include <map>
 #include <mutex>
+#include <queue>
 #include <rack.hpp>
 #include <unordered_map>
 #include <vector>
 
 class CentralData {
 	static inline std::mutex mtx;
+	static inline std::mutex paramHandleQmtx;
+	static inline std::mutex mappedParamHandlemtx;
+	static inline std::mutex mapsmtx;
 	static inline const std::array<ModuleTypeSlug, 2> ValidHubSlugs = {"PANEL_8", "PanelMedium"};
 
 public:
@@ -159,68 +162,80 @@ public:
 		return _currentMap.src;
 	}
 
-	// Called by HubMapButton
+	// Called by UI Thread: HubMapButton
 	void registerMapDest(LabelButtonID dest)
 	{
-		// std::lock_guard mguard{mtx};
-
-		if (!_isMappingInProgress) {
-			printf("Error: registerMapDest() called but we aren't mapping!\n");
-			return;
-		}
-
 		printf("registerMapDest: dest: objID=%d, moduleID=%d\n", dest.objID, dest.moduleID);
 
-		_currentMap.dst = dest;
+		LabelButtonID src;
 
-		// Look for an existing map to the dst knob
-		bool found = false;
-		for (auto &m : maps) {
-			if (m.dst == _currentMap.dst) {
-				found = true;
-				printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
-				m.src = _currentMap.src;
-				break;
+		{ // start mapsmtx lock
+			std::lock_guard mguard{mapsmtx};
+
+			if (!_isMappingInProgress) {
+				printf("Error: registerMapDest() called but we aren't mapping!\n");
+				return;
 			}
-		}
-		if (!found) {
-			printf("Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID, _currentMap.dst.objID);
-			maps.push_back(_currentMap);
-		}
+
+			_currentMap.dst = dest;
+
+			// Look for an existing map to the dst knob
+			bool found = false;
+			for (auto &m : maps) {
+				if (m.dst == _currentMap.dst) {
+					found = true;
+					printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
+					m.src = _currentMap.src;
+					break;
+				}
+			}
+			if (!found) {
+				printf(
+					"Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID, _currentMap.dst.objID);
+				maps.push_back(_currentMap);
+			}
+
+			src = _currentMap.src;
+			_currentMap.clear();
+			_isMappingInProgress = false;
+		} // end mapsmtx lock
 
 		if (dest.objType == LabelButtonID::Types::Knob) {
-			queueRegisterKnobParamHandle(_currentMap.src, dest);
+			queueRegisterKnobParamHandle(src, dest);
 		}
-		_currentMap.clear();
-		_isMappingInProgress = false;
 	}
 
-	std::deque<std::pair<LabelButtonID, LabelButtonID>> queue;
+	std::queue<std::pair<LabelButtonID, LabelButtonID>> paramHandleQueue;
 	void queueRegisterKnobParamHandle(LabelButtonID src, LabelButtonID dst)
 	{
-		// Called by UI thread, spin on access
-		queue.push_back(std::make_pair(src, dst));
+		// Called by UI thread
+		// Block if other thread is accessing queue
+		std::lock_guard mguard{paramHandleQmtx};
+		paramHandleQueue.push(std::make_pair(src, dst));
 	}
 
 	std::pair<LabelButtonID, LabelButtonID> popRegisterKnobParamHandle()
 	{
-		// Called by engine process thread, don't block
-		if (queue.size() == 0)
+		// Called by engine process thread. Skip is can't get the lock
+		std::lock_guard mguard{paramHandleQmtx};
+
+		if (paramHandleQueue.empty())
 			return std::make_pair<LabelButtonID, LabelButtonID>({LabelButtonID::Types::None, -1, -1},
 																{LabelButtonID::Types::None, -1, -1});
-		auto r = queue.front();
-		queue.pop_front();
+		auto r = paramHandleQueue.front();
+		paramHandleQueue.pop();
 		return r;
 	}
 
 	void registerKnobParamHandle(LabelButtonID src, LabelButtonID dst)
 	{
-		printf("Type is knob, so handling ParamHandles\n");
+		printf("registerKnobParamHandle m:%d p:%d -> m:%d p:%d\n", src.moduleID, src.objID, dst.moduleID, dst.objID);
 
 		// Clear from rack::Engine the paramHandles for this src knob that we've removed in the past
 		// TODO: does this come up? Maybe when we remove a module?
+		std::lock_guard mguard{mappedParamHandlemtx};
+
 		auto &phvec = mappedParamHandles[src];
-		// phvec.reserve(16);
 
 		for (auto &p : phvec) {
 			printf("  Found a ph in phvec\n");
@@ -232,6 +247,8 @@ public:
 			}
 		}
 
+		// FIXME: if we remap a knob to a different src knob, then move the ph to the new mappedPH[src] vector. Or just
+		// remove it from mappedPH[src] (delete the PH obj)
 		auto &ph = phvec.emplace_back(std::make_unique<rack::ParamHandle>());
 		printf("phvec.emplace_back: addr=%p\n", ph.get());
 		for (auto &p : phvec)
@@ -242,15 +259,16 @@ public:
 
 		auto existingPh = APP->engine->getParamHandle(dst.moduleID, dst.objID);
 		if (existingPh) {
-			printf("Found an existing ParamHandle (%p) in engine with same dst module/param id. Clearing\n",
+			printf("Found an existing ParamHandle (%p) in engine with same dst module/param id. Updating it to -1, 0\n",
 				   existingPh);
-			APP->engine->updateParamHandle(existingPh, -1, 0, true);
-			// printf("...Cleared\n");
-			// Erase it from CentralData::maps
+			APP->engine->updateParamHandle(existingPh, -1, 0, true); // module=-1 means "paramHandle controls nothing"
 			// TODO: we did this in KnobMaps, but do we need to do it here?
 			// Seems like we already checkd for dups
-			// unregisterMapByDest({LabelButtonID::Types::Knob, dst.objID, dst.moduleID});
-			// std::erase_if(maps, [&](const auto &m) { return (m.dst == dst); });
+			// {
+			// 	std::lock_guard mguard{mapsmtx};
+			// 	std::erase_if(maps, [&](const auto &m) { return (m.dst == dst); });
+			// // unregisterMapByDest({LabelButtonID::Types::Knob, dst.objID, dst.moduleID});
+			// }
 		}
 		printf("Adding to engine\n");
 		ph->moduleId = -1; // From Engine.cpp: "New ParamHandles must be blank"
@@ -326,13 +344,14 @@ public:
 
 	void unregisterMapByDest(LabelButtonID dest)
 	{
-		std::lock_guard mguard{mtx};
+		std::lock_guard mguard{mapsmtx};
 
 		std::erase_if(maps, [&](const auto &m) { return (m.dst == dest); });
 	}
 
 	void unregisterKnobMapsBySrcModule(int moduleId)
 	{
+		// FIXME: Also delete the map entry mappedParamHandles[src], where src = {Types::Knob, module_id, *}
 		std::lock_guard mguard{mtx};
 
 		std::erase_if(maps, [=](const auto &m) {
@@ -389,7 +408,7 @@ public:
 	// We use a copy to be more thread-safe
 	std::vector<rack::ParamHandle> getParamHandlesFromSrc(LabelButtonID const &src)
 	{
-		// std::lock_guard mguard{mtx};
+		std::lock_guard mguard{mappedParamHandlemtx};
 
 		std::vector<rack::ParamHandle> copied_phs;
 		for (auto const &ph : mappedParamHandles[src]) {
