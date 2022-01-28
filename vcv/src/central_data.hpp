@@ -237,18 +237,19 @@ public:
 
 		auto &phvec = mappedParamHandles[src];
 
-		for (auto &p : phvec) {
-			printf("  Found a ph in phvec\n");
-			if (p->moduleId == -1) {
-				printf("    Removing a paramHandle that had moduleId == -1. paramId=%d, text=%s\n",
-					   p->paramId,
-					   p->text.c_str());
-				APP->engine->removeParamHandle(p.get());
-			}
-		}
+		// for (auto &p : phvec) {
+		// 	printf("  Found a ph in phvec\n");
+		// 	if (p->moduleId == -1) {
+		// 		printf("    Removing a paramHandle that had moduleId == -1. paramId=%d, text=%s\n",
+		// 			   p->paramId,
+		// 			   p->text.c_str());
+		// 		APP->engine->removeParamHandle(p.get());
+		// 	}
+		// }
 
-		// FIXME: if we remap a knob to a different src knob, then move the ph to the new mappedPH[src] vector. Or just
-		// remove it from mappedPH[src] (delete the PH obj)
+		// FIXME: if we remap a knob to a different src knob, then the mappedParamHandles[originalsrc] vector still
+		// contains the original paramHandle (although it points to a PH with moduleId = -1) Should we remove it from
+		// mappedParamHandles[originalsrc]?
 		auto &ph = phvec.emplace_back(std::make_unique<rack::ParamHandle>());
 		printf("phvec.emplace_back: addr=%p\n", ph.get());
 		for (auto &p : phvec)
