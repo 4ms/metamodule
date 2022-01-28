@@ -341,23 +341,37 @@ public:
 		}
 	}
 
+	// This is called in HubBase destructor
+	// TODO: Which thread does this run in? UI or Engine or other?
 	void unregisterKnobMapsBySrcModule(int moduleId)
 	{
-		// FIXME: Also delete the map entry mappedParamHandles[src], where src = {Types::Knob, module_id, *}
-		std::lock_guard mguard{mtx};
+		// Remove CD::maps
+		{
+			std::lock_guard mguard{mtx};
+			std::erase_if(maps, [=](const auto &m) {
+				return (m.src.objType == LabelButtonID::Types::Knob && m.src.moduleID == moduleId);
+			});
+		}
 
-		std::erase_if(maps, [=](const auto &m) {
-			return (m.src.objType == LabelButtonID::Types::Knob && m.src.moduleID == moduleId);
-		});
-
-		for (auto &phvec : mappedParamHandles) {
-			if (phvec.first.moduleID == moduleId) {
-				for (auto &ph : phvec.second) {
-					printf("Removing paramHandle at %p\n", ph.get());
-					ph->moduleId = -1;
-					APP->engine->removeParamHandle(ph.get());
+		// Remove ParamHandles (from engine and CD)
+		{
+			std::lock_guard mguard{mappedParamHandlemtx};
+			printf("Getting rid of mappedParamHandles[] that match moduleId=%d\n", moduleId);
+			for (auto &[lbl, phvec] : mappedParamHandles) {
+				if (lbl.moduleID == moduleId && lbl.objType == LabelButtonID::Types::Knob) {
+					for (auto &ph : phvec) {
+						printf("Removing paramHandle at %p for objId=%d\n", ph.get(), lbl.objID);
+						APP->engine->removeParamHandle(ph.get());
+					}
+					printf("Clearing paramHandle vector\n");
+					phvec.clear();
 				}
 			}
+			auto num_erased = std::erase_if(mappedParamHandles, [&](const auto &item) {
+				auto &[key, val] = item;
+				return key.moduleID == moduleId && key.objType == LabelButtonID::Types::Knob;
+			});
+			printf("Erased %lu entries from mappedParamHandles\n", num_erased);
 		}
 	}
 
