@@ -191,7 +191,7 @@ public:
 	// Called by UI Thread: HubMapButton
 	void registerMapDest(LabelButtonID dest)
 	{
-		printf("registerMapDest: dest: objID=%d, moduleID=%d\n", dest.objID, dest.moduleID);
+		// printf("registerMapDest: dest: objID=%d, moduleID=%d\n", dest.objID, dest.moduleID);
 
 		LabelButtonID src;
 
@@ -210,14 +210,14 @@ public:
 			for (auto &m : maps) {
 				if (m.dst == _currentMap.dst) {
 					found = true;
-					printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
+					// printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
 					m.src = _currentMap.src;
 					break;
 				}
 			}
 			if (!found) {
-				printf(
-					"Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID, _currentMap.dst.objID);
+				// printf(
+				// 	"Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID, _currentMap.dst.objID);
 				maps.push_back(_currentMap);
 			}
 
