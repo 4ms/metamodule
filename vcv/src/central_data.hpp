@@ -13,19 +13,8 @@
 class CentralData {
 public:
 	CentralData() = default;
+	~CentralData() = default;
 
-	~CentralData()
-	{
-		// Must remove all paramHandles from APP->engine before module is destructed
-		printf("~CentralData\n");
-		// for (auto &phvec : mappedParamHandles) {
-		// 	for (auto &ph : phvec.second) {
-		// 		printf("Removing paramHandle at %p\n", ph.get());
-		// 		ph->moduleId = -1;
-		// 		APP->engine->removeParamHandle(ph.get());
-		// 	}
-		// }
-	}
 	enum MessageType {
 		None,
 		RequestAllParamData,
@@ -174,12 +163,11 @@ public:
 	// as the object we want to draw (multi-map).
 	bool isMappedPartnerHovered(const LabelButtonID obj_to_draw)
 	{
-		// if we're hovering a hub (src) object, then highlight all mapped objects on modules
+		// If we're hovering a hub (src) object, then highlight all mapped objects on modules
 		if (isSrcDstMapped(_cur_hover_obj, obj_to_draw))
 			return true;
 
-		// At this point, we know the hovered object is either not mapped, or is a dst of a mapping
-
+		// Check if we're hovering a mapped dst (module object that's mapped to a hub object)
 		LabelButtonID src = getMappedSrcFromDst(_cur_hover_obj);
 		// If the hovered object is not a dst of any mapping, return false
 		if (src.moduleID == -1)

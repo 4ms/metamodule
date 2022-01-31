@@ -29,11 +29,7 @@ struct MetaModuleHubBase : public CommModule {
 	long responseTimer = 0;
 	bool buttonAlreadyHandled = false;
 
-	MetaModuleHubBase()
-	{
-		// for (int i = 0; i < NumKnobMaps; i++)
-		// 	knobMaps[i].paramId = i;
-	}
+	MetaModuleHubBase() = default;
 
 	~MetaModuleHubBase()
 	{
