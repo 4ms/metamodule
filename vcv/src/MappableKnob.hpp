@@ -39,29 +39,18 @@ public:
 
 	void draw(const typename BaseKnobT::DrawArgs &args) override
 	{
-		if (centralData->isMappingInProgress()) {
-			auto src = centralData->getMappingSource();
-
-			nvgBeginPath(args.vg);
-			nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
-			NVGcolor color;
-			if (src.objType == getId().objType) {
+		auto id = getId();
+		bool isMappingNow = centralData->isMappingInProgress();
+		if (isMappingNow || centralData->isMappedPartnerHovered(id)) {
+			auto src = isMappingNow ? centralData->getMappingSource() : centralData->getMappedSrcFromDst(id);
+			if (src.objType == getId().objType && src.objID >= 0) {
+				nvgBeginPath(args.vg);
+				nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y * 0.75f);
 				float alphac = hovered ? 0.75 : 0.4;
-				color = rack::color::alpha(PaletteHub::color[src.objID], alphac);
-			} else {
-				color = rack::color::alpha(color::WHITE, 0.5f);
-				// dim out BaseJackT::draw()?
+				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alphac);
+				nvgFillColor(args.vg, color);
+				nvgFill(args.vg);
 			}
-			nvgFillColor(args.vg, color);
-			nvgFill(args.vg);
-		} else if (centralData->isMappedPartnerHovered(getId())) {
-			nvgBeginPath(args.vg);
-			nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
-			NVGcolor color;
-			auto src = centralData->getMappedSrcFromDst(getId());
-			color = rack::color::alpha(PaletteHub::color[src.objID], 0.75);
-			nvgFillColor(args.vg, color);
-			nvgFill(args.vg);
 		}
 
 		BaseKnobT::draw(args);
