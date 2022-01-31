@@ -19,6 +19,20 @@ struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 	HubMedium()
 	{
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		// configParam(int paramId, float minValue, float maxValue, float defaultValue, std::string label = "",
+		// std::string unit = "", float displayBase = 0.f, float displayMultiplier = 1.f, float displayOffset = 0.f);
+		configParam(0, 0.f, 1.f, 0.f, "Knob A");
+		configParam(1, 0.f, 1.f, 0.f, "Knob B");
+		configParam(2, 0.f, 1.f, 0.f, "Knob C");
+		configParam(3, 0.f, 1.f, 0.f, "Knob D");
+		configParam(4, 0.f, 1.f, 0.f, "Knob E");
+		configParam(5, 0.f, 1.f, 0.f, "Knob F");
+		configParam(6, 0.f, 1.f, 0.f, "Knob X");
+		configParam(7, 0.f, 1.f, 0.f, "Knob Y");
+		configParam(8, 0.f, 1.f, 0.f, "Knob Z");
+		configParam(9, 0.f, 1.f, 0.f, "Knob L");
+		configParam(10, 0.f, 1.f, 0.f, "Knob R");
+		configParam(11, 1.f, 1.f, 0.f, "Knob Q");
 		selfID.typeID = "PanelMedium";
 	}
 
