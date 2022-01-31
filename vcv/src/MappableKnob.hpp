@@ -23,20 +23,6 @@ public:
 		this->box = this->box.grow(Vec{Hmargin, Vmargin});
 	}
 
-	void onEnter(const event::Enter &e) override
-	{
-		hovered = true;
-		if (!centralData->isMappingInProgress())
-			centralData->notifyEnterHover(getId());
-	}
-
-	void onLeave(const event::Leave &e) override
-	{
-		hovered = false;
-		if (!centralData->isMappingInProgress())
-			centralData->notifyLeaveHover(getId());
-	}
-
 	void draw(const typename BaseKnobT::DrawArgs &args) override
 	{
 		auto id = getId();
@@ -115,6 +101,20 @@ public:
 	void onHover(const event::Hover &e) override
 	{
 		e.consume(this);
+	}
+
+	void onEnter(const event::Enter &e) override
+	{
+		hovered = true;
+		if (!centralData->isMappingInProgress())
+			centralData->notifyEnterHover(getId());
+	}
+
+	void onLeave(const event::Leave &e) override
+	{
+		hovered = false;
+		if (!centralData->isMappingInProgress())
+			centralData->notifyLeaveHover(getId());
 	}
 
 private:
