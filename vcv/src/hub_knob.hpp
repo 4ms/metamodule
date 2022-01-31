@@ -173,7 +173,15 @@ public:
 
 	void onHover(const event::Hover &e) override
 	{
-		// do nothing: act transparent
+		// If the knob is mapped, then we want to pass the hover down to the HubKnobMapButton object below
+		// so that the HubMapKnobButton can highlight even if we're hovering the knob itself.
+		// So, don't consume the hover and just do nothing.
+		// On the other hand, if the knob is not mapped, then consume the hover so that hovering the knob
+		// doesn't make the background highlight appear
+		if (centralData->isLabelButtonSrcMapped(hubKnobMapBut.id))
+			return;
+
+		e.consume(this);
 	}
 
 	struct ParamResetItem : ui::MenuItem {
