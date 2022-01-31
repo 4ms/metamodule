@@ -18,6 +18,63 @@ struct ParamUnmapItem : ui::MenuItem {
 	}
 };
 
+void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
+{
+	ui::Menu *menu = createMenu();
+
+	MapFieldLabel *paramLabel = new MapFieldLabel;
+	paramLabel->paramQty = paramQuantity;
+	menu->addChild(paramLabel);
+
+	MapField *paramField = new MapField;
+	paramField->box.size.x = 100;
+	paramField->setParamQuantity(paramQuantity);
+	menu->addChild(paramField);
+
+	// ParamResetItem *resetItem = new ParamResetItem;
+	// resetItem->text = "Initialize";
+	// resetItem->rightText = "Double-click";
+	// resetItem->paramWidget = this;
+	// menu->addChild(resetItem);
+
+	MenuSeparator *sep = new MenuSeparator;
+	menu->addChild(sep);
+
+	auto aliasItem = new HubKnobAliasNameMenuField{id};
+	aliasItem->box.size.x = 100;
+	menu->addChild(aliasItem);
+
+	auto paramHandles = centralData->getParamHandlesFromSrc(id);
+	for (auto const &ph : paramHandles) {
+		if (ph.moduleId != -1) {
+			MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
+			paramLabel2->moduleName = ph.module->model->name;
+			paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
+			paramLabel2->moduleId = ph.moduleId;
+			paramLabel2->paramId = ph.paramId;
+			menu->addChild(paramLabel2);
+
+			MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+			mn->box.size.x = 100;
+			menu->addChild(mn);
+
+			MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+			mx->box.size.x = 100;
+			menu->addChild(mx);
+		}
+	}
+
+	engine::ParamHandle *paramHandle =
+		paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId) : NULL;
+	if (paramHandle) {
+		ParamUnmapItem *unmapItem = new ParamUnmapItem;
+		unmapItem->text = "Unmap";
+		unmapItem->rightText = paramHandle->text;
+		unmapItem->paramQuantity = paramQuantity;
+		menu->addChild(unmapItem);
+	}
+}
+
 class HubKnobMapButton : public HubMapButton {
 	ParamQuantity *paramQuantity = nullptr;
 
@@ -55,60 +112,7 @@ public:
 		// Right click to open context menu
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
 			if (paramQuantity) {
-				ui::Menu *menu = createMenu();
-
-				MapFieldLabel *paramLabel = new MapFieldLabel;
-				paramLabel->paramQty = paramQuantity;
-				menu->addChild(paramLabel);
-
-				MapField *paramField = new MapField;
-				paramField->box.size.x = 100;
-				paramField->setParamQuantity(paramQuantity);
-				menu->addChild(paramField);
-
-				// ParamResetItem *resetItem = new ParamResetItem;
-				// resetItem->text = "Initialize";
-				// resetItem->rightText = "Double-click";
-				// resetItem->paramWidget = this;
-				// menu->addChild(resetItem);
-
-				MenuSeparator *sep = new MenuSeparator;
-				menu->addChild(sep);
-
-				auto aliasItem = new HubKnobAliasNameMenuField{id};
-				aliasItem->box.size.x = 100;
-				menu->addChild(aliasItem);
-
-				auto paramHandles = centralData->getParamHandlesFromSrc(id);
-				for (auto const &ph : paramHandles) {
-					if (ph.moduleId != -1) {
-						MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
-						paramLabel2->moduleName = ph.module->model->name;
-						paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
-						paramLabel2->moduleId = ph.moduleId;
-						paramLabel2->paramId = ph.paramId;
-						menu->addChild(paramLabel2);
-
-						MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
-						mn->box.size.x = 100;
-						menu->addChild(mn);
-
-						MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
-						mx->box.size.x = 100;
-						menu->addChild(mx);
-					}
-				}
-
-				engine::ParamHandle *paramHandle =
-					paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId)
-								  : nullptr;
-				if (paramHandle) {
-					ParamUnmapItem *unmapItem = new ParamUnmapItem;
-					unmapItem->text = "Unmap";
-					unmapItem->rightText = paramHandle->text;
-					unmapItem->paramQuantity = paramQuantity;
-					menu->addChild(unmapItem);
-				}
+				makeKnobMenu(paramQuantity, id);
 				e.consume(this);
 			}
 		} else {
@@ -161,61 +165,7 @@ public:
 
 			// Right click to open context menu
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-				ui::Menu *menu = createMenu();
-
-				MapFieldLabel *paramLabel = new MapFieldLabel;
-				paramLabel->paramQty = this->paramQuantity;
-				menu->addChild(paramLabel);
-
-				MapField *paramField = new MapField;
-				paramField->box.size.x = 100;
-				paramField->setParamQuantity(this->paramQuantity);
-				menu->addChild(paramField);
-
-				ParamResetItem *resetItem = new ParamResetItem;
-				resetItem->text = "Initialize";
-				resetItem->rightText = "Double-click";
-				resetItem->paramWidget = this;
-				menu->addChild(resetItem);
-
-				MenuSeparator *sep = new MenuSeparator;
-				menu->addChild(sep);
-
-				auto aliasItem = new HubKnobAliasNameMenuField{hubKnobMapBut.id};
-				aliasItem->box.size.x = 100;
-				menu->addChild(aliasItem);
-
-				auto paramHandles = centralData->getParamHandlesFromSrc(hubKnobMapBut.id);
-				for (auto const &ph : paramHandles) {
-					if (ph.moduleId != -1) {
-						MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
-						paramLabel2->moduleName = ph.module->model->name;
-						paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
-						paramLabel2->moduleId = ph.moduleId;
-						paramLabel2->paramId = ph.paramId;
-						menu->addChild(paramLabel2);
-
-						MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
-						mn->box.size.x = 100;
-						menu->addChild(mn);
-
-						MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
-						mx->box.size.x = 100;
-						menu->addChild(mx);
-					}
-				}
-
-				engine::ParamHandle *paramHandle =
-					this->paramQuantity
-						? APP->engine->getParamHandle(this->paramQuantity->module->id, this->paramQuantity->paramId)
-						: NULL;
-				if (paramHandle) {
-					ParamUnmapItem *unmapItem = new ParamUnmapItem;
-					unmapItem->text = "Unmap";
-					unmapItem->rightText = paramHandle->text;
-					unmapItem->paramQuantity = this->paramQuantity;
-					menu->addChild(unmapItem);
-				}
+				makeKnobMenu(this->paramQuantity, hubKnobMapBut.id);
 				e.consume(this);
 			}
 		}
@@ -223,7 +173,7 @@ public:
 
 	void onHover(const event::Hover &e) override
 	{
-		// pass onto child
+		// do nothing: act transparent
 	}
 
 	struct ParamResetItem : ui::MenuItem {
