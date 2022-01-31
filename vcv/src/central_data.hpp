@@ -11,14 +11,6 @@
 #include <vector>
 
 class CentralData {
-	static inline std::mutex mtx;
-	static inline std::mutex paramHandleQmtx;
-	static inline std::mutex mappedParamHandlemtx;
-	static inline std::mutex mapsmtx;
-	static inline const std::array<ModuleTypeSlug, 2> ValidHubSlugs = {"PANEL_8", "PanelMedium"};
-
-	std::queue<std::pair<LabelButtonID, LabelButtonID>> paramHandleQueue;
-
 public:
 	CentralData() = default;
 
@@ -162,6 +154,46 @@ public:
 	const LabelButtonID &getMappingSource()
 	{
 		return _currentMap.src;
+	}
+
+	void notifyEnterHover(LabelButtonID obj)
+	{
+		_cur_hover_obj = obj;
+	}
+
+	void notifyLeaveHover(LabelButtonID obj)
+	{
+		if (_cur_hover_obj == obj)
+			_cur_hover_obj = {LabelButtonID::Types::None, -1, -1};
+	}
+
+	// Given an object we want to draw,
+	// return true if it's mapped to the mouse-hovered object.
+	// This implies we should draw this object with a special highlight.
+	// Also return true if the mouse-hovered object is mapped to the same hub object
+	// as the object we want to draw (multi-map).
+	bool isMappedPartnerHovered(const LabelButtonID obj_to_draw)
+	{
+		// if we're hovering a hub (src) object, then highlight all mapped objects on modules
+		if (isSrcDstMapped(_cur_hover_obj, obj_to_draw))
+			return true;
+
+		// At this point, we know the hovered object is either not mapped, or is a dst of a mapping
+
+		LabelButtonID src = getMappedSrcFromDst(_cur_hover_obj);
+		// If the hovered object is not a dst of any mapping, return false
+		if (src.moduleID == -1)
+			return false;
+
+		// Highlight the src of the object we're hovering
+		if (src == obj_to_draw)
+			return true;
+
+		// Highlight all dst's of the src of the object we're hovering
+		if (isSrcDstMapped(src, obj_to_draw))
+			return true;
+
+		return false;
 	}
 
 	//
@@ -432,29 +464,42 @@ public:
 		return m->alias_name;
 	}
 
-	bool isLabelButtonMapped(LabelButtonID &b)
+	//
+	// State queries
+	//
+
+	bool isLabelButtonMapped(LabelButtonID const &b)
 	{
 		return maps.end() !=
 			   std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == b || m.dst == b); });
 	}
-	bool isLabelButtonSrcMapped(LabelButtonID &b)
+
+	bool isLabelButtonSrcMapped(LabelButtonID const &b)
 	{
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
 	}
-	bool isLabelButtonDstMapped(const LabelButtonID &b)
+
+	bool isLabelButtonDstMapped(LabelButtonID const &b)
 	{
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
 	}
 
-	LabelButtonID getMappedSrcFromDst(LabelButtonID &b)
+	LabelButtonID getMappedSrcFromDst(LabelButtonID const &b)
 	{
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
 		if (obj != maps.end())
 			return obj->src;
 		return {LabelButtonID::Types::None, -1, -1};
 	}
+
+	bool isSrcDstMapped(LabelButtonID const &src, LabelButtonID const &dst)
+	{
+		return maps.end() !=
+			   std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
+	}
+
 	// TODO: only allow this if type is not Knob (because it's not multi-map friendly)
-	LabelButtonID getMappedDstFromSrc(LabelButtonID &b)
+	LabelButtonID getMappedDstFromSrc(LabelButtonID const &b)
 	{
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
 		if (obj != maps.end())
@@ -462,11 +507,12 @@ public:
 		return {LabelButtonID::Types::None, -1, -1};
 	}
 
-	unsigned getNumMappingsFromSrc(LabelButtonID &src)
+	unsigned getNumMappingsFromSrc(LabelButtonID const &src)
 	{
 		return std::count_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
 	}
 
+	//
 	// Returns a copy of the ParamHandles for the mappings on a given hub knob
 	// We use a copy to be more thread-safe
 	std::vector<rack::ParamHandle> getParamHandlesFromSrc(LabelButtonID const &src)
@@ -485,6 +531,10 @@ public:
 		}
 		return copied_phs;
 	}
+
+	//
+	// Jack "touching", used to map jacks
+	//
 
 	void registerTouchedJack(LabelButtonID touched)
 	{
@@ -514,6 +564,15 @@ public:
 private:
 	bool _isMappingInProgress = false;
 	Mapping _currentMap;
+	LabelButtonID _cur_hover_obj;
 
 	LabelButtonID lastTouchedJack{LabelButtonID::Types::None, -1, -1};
+
+	std::queue<std::pair<LabelButtonID, LabelButtonID>> paramHandleQueue;
+
+	static inline std::mutex mtx;
+	static inline std::mutex paramHandleQmtx;
+	static inline std::mutex mappedParamHandlemtx;
+	static inline std::mutex mapsmtx;
+	static inline const std::array<ModuleTypeSlug, 2> ValidHubSlugs = {"PANEL_8", "PanelMedium"};
 };

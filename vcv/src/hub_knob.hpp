@@ -136,6 +136,11 @@ public:
 		}
 	}
 
+	void onHover(const event::Hover &e) override
+	{
+		// pass onto child
+	}
+
 	// This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
 	struct ParamUnmapItem : ui::MenuItem {
 		ParamWidget *paramWidget;

@@ -2,13 +2,6 @@
 #include "paletteHub.hpp"
 #include <cstdio>
 
-// void HubMapButton::_createMapping(LabelButtonID srcId)
-// {
-// 	isMapped = true;
-// 	mappedToId = srcId;
-// 	centralData->registerMapDest(id);
-// }
-
 void HubMapButton::_updateState()
 {
 	id.moduleID = _parent.module ? _parent.module->id : -1;
@@ -26,13 +19,12 @@ void HubMapButton::draw(const DrawArgs &args)
 	_updateState();
 
 	// Draw huge background rect to highlight a mapping has begun from this knob
-	if (isCurrentMapSrc || _hovered) {
-		float padding_x = 2;
-		auto knobNum = id.objID;
+	if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(id)) {
+		const float padding_x = 2;
 		nvgBeginPath(args.vg);
 		nvgRoundedRect(args.vg, padding_x, 0, box.size.x - padding_x * 2, box.size.y, 5.0);
-		float alpha = isCurrentMapSrc ? 0.75 : 0.4;
-		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color[knobNum], alpha));
+		const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
+		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color[id.objID], alpha));
 		nvgFill(args.vg);
 	}
 
@@ -76,12 +68,16 @@ void HubMapButton::onHover(const event::Hover &e)
 void HubMapButton::onLeave(const event::Leave &e)
 {
 	_hovered = false;
+	// if (!centralData->isMappingInProgress())
+	centralData->notifyLeaveHover(id);
 	e.consume(this);
 }
 
 void HubMapButton::onEnter(const event::Enter &e)
 {
 	_hovered = true;
+	// if (!centralData->isMappingInProgress())
+	centralData->notifyEnterHover(id);
 	e.consume(this);
 }
 

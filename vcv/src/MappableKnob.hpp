@@ -7,15 +7,34 @@
 #include <rack.hpp>
 
 template<typename BaseKnobT>
-requires(std::is_base_of<app::SvgKnob, BaseKnobT>() == true) class MappableKnob : public BaseKnobT {
+class MappableKnob : public BaseKnobT {
+	static_assert(std::is_base_of<app::SvgKnob, BaseKnobT>(), "Knob class must derive from SvgKnob");
 
 	static constexpr float Hmargin = 20;
 	static constexpr float Vmargin = 40;
+	bool hovered = false;
 
 public:
 	MappableKnob()
 	{
+		// this->sw->box = this->sw->box.grow(Vec{Hmargin, Vmargin});
+		// this->fb->box.pos = this->fb->box.pos.plus(Vec{margin / 2, margin / 2});
+		// this->shadow->box.pos = this->shadow->box.pos.plus(Vec{margin / 2, margin / 2});
 		this->box = this->box.grow(Vec{Hmargin, Vmargin});
+	}
+
+	void onEnter(const event::Enter &e) override
+	{
+		hovered = true;
+		if (!centralData->isMappingInProgress())
+			centralData->notifyEnterHover(getId());
+	}
+
+	void onLeave(const event::Leave &e) override
+	{
+		hovered = false;
+		if (!centralData->isMappingInProgress())
+			centralData->notifyLeaveHover(getId());
 	}
 
 	void draw(const typename BaseKnobT::DrawArgs &args) override
@@ -27,13 +46,20 @@ public:
 			nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
 			NVGcolor color;
 			if (src.objType == getId().objType) {
-				// float alphac = this->hovered ? 0.75 : 0.4;
-				float alphac = 0.75f;
+				float alphac = hovered ? 0.75 : 0.4;
 				color = rack::color::alpha(PaletteHub::color[src.objID], alphac);
 			} else {
 				color = rack::color::alpha(color::WHITE, 0.5f);
 				// dim out BaseJackT::draw()?
 			}
+			nvgFillColor(args.vg, color);
+			nvgFill(args.vg);
+		} else if (centralData->isMappedPartnerHovered(getId())) {
+			nvgBeginPath(args.vg);
+			nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
+			NVGcolor color;
+			auto src = centralData->getMappedSrcFromDst(getId());
+			color = rack::color::alpha(PaletteHub::color[src.objID], 0.75);
 			nvgFillColor(args.vg, color);
 			nvgFill(args.vg);
 		}
@@ -103,7 +129,7 @@ public:
 	}
 
 private:
-	LabelButtonID getId()
+	const LabelButtonID getId() const
 	{
 		int moduleId = -1;
 		int paramId = -1;

@@ -3,13 +3,11 @@
 #include "hub_knob_menu.hpp"
 #include "paletteHub.hpp"
 #include "plugin.hpp"
-// #include <concepts>
 #include <rack.hpp>
 
 enum class MappableJackType { Input, Output };
 
 template<MappableJackType InputOrOutput, typename BaseJackT>
-// requires(std::is_base_of<app::SvgPort, BaseJackT>() == true)
 class MappableJack : public BaseJackT {
 	static_assert(std::is_base_of<app::SvgPort, BaseJackT>(), "Jack class must derive from SvgPort");
 	static constexpr float margin = 10;
