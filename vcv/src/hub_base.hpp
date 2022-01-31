@@ -19,8 +19,6 @@
 template<int NumKnobMaps>
 struct MetaModuleHubBase : public CommModule {
 
-	// std::array<KnobMap, NumKnobMaps> knobMaps;
-
 	std::function<void()> updatePatchName;
 	std::function<void()> redrawPatchName;
 	std::string labelText = "";
@@ -122,72 +120,12 @@ struct MetaModuleHubBase : public CommModule {
 						mapping.alias_name = "";
 
 					centralData->maps.push_back(mapping);
-					// printf("Loaded mapping from json: type: %s src: m:%d knob:%d, dst: m:%d knob:%d\n",
-					// 	   mapping.src.objTypeStr(),
-					// 	   mapping.src.moduleID,
-					// 	   mapping.src.objID,
-					// 	   mapping.dst.moduleID,
-					// 	   mapping.dst.objID);
 				}
 			}
-			loadMappings();
-		}
-	}
-
-	void refreshMappings()
-	{
-		// TODO:
-		//  This is backwards. We should pull data from centralData
-		//  Or even better, don't keep a copy here (just keep knobMaps in centralData)
-		//  Make unmaps update centralData
-		//  Make min/max sliders update centralData
-		//  Make alias name changes update centralData
-
-		// user might have right-clicked a knob and selected Unmap
-		// Or user may have changed min/max sliders
-		// We don't get a notification of this, so we need to rebuild the knob maps
-	}
-
-	// Overwrites all centralData knob maps with this hub's ID as src
-	void updateCentralDataMappings()
-	{
-		// centralData->unregisterKnobMapsBySrcModule(id);
-		// for (auto &knobmap : knobMaps) {
-		// 	for (auto &mapping : knobmap.maps) {
-		// 		if (mapping->paramHandle.moduleId > -1) {
-		// 			LabelButtonID dst = {
-		// 				LabelButtonID::Types::Knob,
-		// 				mapping->paramHandle.paramId,
-		// 				mapping->paramHandle.moduleId,
-		// 			};
-		// 			LabelButtonID src = {
-		// 				LabelButtonID::Types::Knob,
-		// 				knobmap.paramId,
-		// 				id, // this module ID
-		// 			};
-		// 			centralData->registerMapping(
-		// 				src, dst, mapping->range.first, mapping->range.second, knobmap.alias_name);
-		// 		}
-		// 	}
-		// }
-	}
-
-	// Loads centralData->maps to HubBase::knobMaps[]
-	// FIXME: looks like this doesn't clear knobMaps that were removed in centralData?
-	// ..We might need to call cleanupMaps() on all knobMaps[i] that aren't in centralData->maps
-	void loadMappings()
-	{
-		for (auto &m : centralData->maps) {
-			if (m.src.objType == LabelButtonID::Types::Knob) {
-				// auto knobToMap = m.src.objID;
-				// float min = m.range_min;
-				// float max = m.range_max;
-				printf("loadMappings calling centralData registerKnobParamHandle\n");
-				centralData->registerKnobParamHandle(m.src, m.dst);
-				printf("...loadMappings calling centralData registerKnobParamHandle done\n");
-				// auto [min, max] = centralData->getMapRange(m.src, m.dst);
-				// knobMaps[knobToMap].create(m.dst.moduleID, m.dst.objID, PaletteHub::color[knobToMap], min, max);
-				// knobMaps[knobToMap].set_alias_name(m.alias_name);
+			for (auto &m : centralData->maps) {
+				if (m.src.objType == LabelButtonID::Types::Knob) {
+					centralData->registerKnobParamHandle(m.src, m.dst);
+				}
 			}
 		}
 	}
@@ -243,8 +181,6 @@ struct MetaModuleHubBase : public CommModule {
 	{
 		if (responseTimer) {
 			if (--responseTimer == 0) {
-				refreshMappings();
-
 				std::string patchName;
 				std::string patchDir;
 				if (patchNameText.substr(0, 5) == "test_")
