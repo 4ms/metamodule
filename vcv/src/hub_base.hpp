@@ -272,7 +272,6 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	void addLabeledKnobPx(const std::string labelText, int knobId, Vec posPx, float defaultValue = 0.f)
 	{
 		HubKnobMapButton *button = new HubKnobMapButton{*this};
-
 		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y - mm2px(kKnobSpacingY) / 2); // top-left
 		button->box.size.x = mm2px(kKnobSpacingX);
 		button->box.size.y = mm2px(kKnobSpacingY);
@@ -283,7 +282,6 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		auto *p = new HubKnob<KnobType>{*button};
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
-		// p->box = p->box.grow({10, 10});
 		if (module) {
 			p->paramQuantity = module->paramQuantities[knobId];
 			p->paramQuantity->defaultValue = defaultValue;

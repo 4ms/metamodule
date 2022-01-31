@@ -22,13 +22,11 @@ void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
 {
 	ui::Menu *menu = createMenu();
 
-	MapFieldLabel *paramLabel = new MapFieldLabel;
+	KnobNameMenuLabel *paramLabel = new KnobNameMenuLabel;
 	paramLabel->paramQty = paramQuantity;
 	menu->addChild(paramLabel);
 
-	MapField *paramField = new MapField;
-	paramField->box.size.x = 100;
-	paramField->setParamQuantity(paramQuantity);
+	KnobValueMenuItem *paramField = new KnobValueMenuItem{120, 0.4f, paramQuantity};
 	menu->addChild(paramField);
 
 	// ParamResetItem *resetItem = new ParamResetItem;
@@ -41,13 +39,15 @@ void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
 		MenuSeparator *sep = new MenuSeparator;
 		menu->addChild(sep);
 
-		auto aliasItem = new HubKnobAliasNameMenuField{id};
-		aliasItem->box.size.x = 100;
+		auto aliasItem = new KnobAliasMenuItem{id};
 		menu->addChild(aliasItem);
 
 		auto paramHandles = centralData->getParamHandlesFromSrc(id);
 		for (auto const &ph : paramHandles) {
 			if (ph.moduleId != -1) {
+				MenuSeparator *sep = new MenuSeparator;
+				menu->addChild(sep);
+
 				MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
 				paramLabel2->moduleName = ph.module->model->name;
 				paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();

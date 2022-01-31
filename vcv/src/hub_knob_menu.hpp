@@ -2,44 +2,47 @@
 #include "knob_map.hpp"
 #include "plugin.hpp"
 
-struct MapFieldLabel : ui::MenuLabel {
+struct KnobNameMenuLabel : ui::MenuLabel {
 	ParamQuantity *paramQty;
 	void step() override
 	{
-		text = paramQty->getString();
+		text = paramQty->getLabel();
 		MenuLabel::step();
 	}
 };
 
-struct HubKnobAliasNameMenuField : ui::TextField {
+struct KnobAliasTextBox : ui::TextField {
 	LabelButtonID _src;
+	KnobAliasTextBox(LabelButtonID src)
+		: _src{src}
+	{}
 
-	HubKnobAliasNameMenuField(LabelButtonID src)
+	void onChange(const event::Change &e) override
+	{
+		centralData->setMapAliasName(_src, text);
+	}
+};
+
+struct KnobAliasMenuItem : widget::Widget {
+	LabelButtonID _src;
+	KnobAliasTextBox *txt;
+
+	KnobAliasMenuItem(LabelButtonID src)
 		: _src{src}
 	{
-		text = centralData->getMapAliasName(_src);
+		box.pos = {0, 0};
+		box.size = {120, BND_WIDGET_HEIGHT};
+		txt = new KnobAliasTextBox{src};
+		txt->box.pos = {45, 0};
+		txt->box.size = {120 - txt->box.pos.x, BND_WIDGET_HEIGHT};
+		txt->text = centralData->getMapAliasName(_src);
+		addChild(txt);
 	}
 
-	void step() override
+	void draw(const DrawArgs &args) override
 	{
-		// Keep selected
-		APP->event->setSelected(this);
-		TextField::step();
-	}
-
-	void onSelectKey(const event::SelectKey &e) override
-	{
-		if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-			centralData->setMapAliasName(_src, text);
-
-			// Close menu when user presses Enter:
-			ui::MenuOverlay *overlay = getAncestorOfType<ui::MenuOverlay>();
-			overlay->requestDelete();
-			e.consume(this);
-		}
-
-		if (!e.getTarget())
-			TextField::onSelectKey(e);
+		bndMenuLabel(args.vg, 0.0, 0.0, box.size.x, box.size.y, -1, "Alias:");
+		Widget::draw(args);
 	}
 };
 
@@ -56,7 +59,7 @@ struct MappedKnobMenuLabel : ui::MenuLabel {
 		if (paramName.empty())
 			paramName = std::to_string(paramId);
 
-		text = moduleName + ": " + paramName;
+		text = "Mapped to: " + moduleName + " " + paramName;
 		MenuLabel::step();
 	}
 };
@@ -126,49 +129,52 @@ public:
 	}
 };
 
-struct MapField : ui::TextField {
+struct KnobValueTextBox : ui::TextField {
 	ParamQuantity *paramQuantity;
-
-	void step() override
+	KnobValueTextBox(ParamQuantity *paramQ)
+		: paramQuantity{paramQ}
 	{
-		// Keep selected
-		APP->event->setSelected(this);
-		TextField::step();
-	}
-
-	void setParamQuantity(ParamQuantity *paramQ)
-	{
-		paramQuantity = paramQ;
 		if (paramQuantity)
 			text = paramQuantity->getDisplayValueString();
 		selectAll();
 	}
 
-	void onSelectKey(const event::SelectKey &e) override
+	void onChange(const event::Change &e) override
 	{
-		if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-			if (paramQuantity) {
-				float oldValue = paramQuantity->getValue();
-				paramQuantity->setDisplayValueString(text);
-				float newValue = paramQuantity->getValue();
+		if (paramQuantity) {
+			float oldValue = paramQuantity->getValue();
+			paramQuantity->setDisplayValueString(text);
+			float newValue = paramQuantity->getValue();
 
-				if (oldValue != newValue) {
-					// Push ParamChange history action
-					history::ParamChange *h = new history::ParamChange;
-					h->moduleId = paramQuantity->module->id;
-					h->paramId = paramQuantity->paramId;
-					h->oldValue = oldValue;
-					h->newValue = newValue;
-					APP->history->push(h);
-				}
+			if (oldValue != newValue) {
+				// Push ParamChange history action
+				history::ParamChange *h = new history::ParamChange;
+				h->moduleId = paramQuantity->module->id;
+				h->paramId = paramQuantity->paramId;
+				h->oldValue = oldValue;
+				h->newValue = newValue;
+				APP->history->push(h);
 			}
-
-			ui::MenuOverlay *overlay = getAncestorOfType<ui::MenuOverlay>();
-			overlay->requestDelete();
-			e.consume(this);
 		}
+	}
+};
 
-		if (!e.getTarget())
-			TextField::onSelectKey(e);
+struct KnobValueMenuItem : widget::Widget {
+	KnobValueTextBox *txt;
+
+	KnobValueMenuItem(float width, float relative_width, ParamQuantity *paramQ)
+	{
+		box.pos = {0, 0};
+		box.size = {width, BND_WIDGET_HEIGHT};
+		txt = new KnobValueTextBox{paramQ};
+		txt->box.pos = {relative_width * width, 0};
+		txt->box.size = {(1.f - relative_width) * width, BND_WIDGET_HEIGHT};
+		addChild(txt);
+	}
+
+	void draw(const DrawArgs &args) override
+	{
+		bndMenuLabel(args.vg, 0.0, 0.0, box.size.x, box.size.y, -1, "Value:");
+		Widget::draw(args);
 	}
 };

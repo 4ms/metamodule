@@ -70,8 +70,8 @@ public:
 			LabelButtonID src = centralData->getMappedSrcFromDst(dst);
 
 			if ((moduleid >= 0) && src.moduleID != -1) {
-				auto aliasItem = new HubKnobAliasNameMenuField{src};
-				aliasItem->box.size.x = 100;
+				auto aliasItem = new KnobAliasMenuItem{src};
+				aliasItem->box.size.x = 120;
 				menu->addChild(aliasItem);
 
 				MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, paramid, moduleid});
@@ -89,7 +89,7 @@ public:
 			} else {
 				ui::MenuItem *label = new ui::MenuItem;
 				label->text = "Not mapped";
-				label->rightText = "Click under a MetaModule knob to begin mapping";
+				label->rightText = "Click next to a MetaModule knob to begin mapping";
 				menu->addChild(label);
 			}
 			e.consume(this);
