@@ -14,7 +14,6 @@ public:
 	void onHover(const event::Hover &e) override;
 	void onLeave(const event::Leave &e) override;
 	void onEnter(const event::Enter &e) override;
-	void onButton(const event::Button &e) override;
 
 	bool registerMapping(int moduleId, int objId);
 

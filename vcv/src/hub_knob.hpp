@@ -5,11 +5,31 @@
 #include "knob_map.hpp"
 #include "paletteHub.hpp"
 
+// This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
+
+struct ParamUnmapItem : ui::MenuItem {
+	ParamQuantity *paramQuantity;
+	void onAction(const event::Action &e) override
+	{
+		ParamHandle *paramHandle = APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId);
+		if (paramHandle) {
+			APP->engine->updateParamHandle(paramHandle, -1, 0);
+		}
+	}
+};
+
 class HubKnobMapButton : public HubMapButton {
+	ParamQuantity *paramQuantity = nullptr;
+
 public:
 	HubKnobMapButton(CommModuleWidget &parent)
 		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
 	{}
+
+	void setParamQuantity(ParamQuantity *paramQ)
+	{
+		paramQuantity = paramQ;
+	}
 
 	void onDeselect(const event::Deselect &e) override
 	{
@@ -30,6 +50,71 @@ public:
 		}
 	}
 
+	void onButton(const event::Button &e) override
+	{
+		// Right click to open context menu
+		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
+			if (paramQuantity) {
+				ui::Menu *menu = createMenu();
+
+				MapFieldLabel *paramLabel = new MapFieldLabel;
+				paramLabel->paramQty = paramQuantity;
+				menu->addChild(paramLabel);
+
+				MapField *paramField = new MapField;
+				paramField->box.size.x = 100;
+				paramField->setParamQuantity(paramQuantity);
+				menu->addChild(paramField);
+
+				// ParamResetItem *resetItem = new ParamResetItem;
+				// resetItem->text = "Initialize";
+				// resetItem->rightText = "Double-click";
+				// resetItem->paramWidget = this;
+				// menu->addChild(resetItem);
+
+				MenuSeparator *sep = new MenuSeparator;
+				menu->addChild(sep);
+
+				auto aliasItem = new HubKnobAliasNameMenuField{id};
+				aliasItem->box.size.x = 100;
+				menu->addChild(aliasItem);
+
+				auto paramHandles = centralData->getParamHandlesFromSrc(id);
+				for (auto const &ph : paramHandles) {
+					if (ph.moduleId != -1) {
+						MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
+						paramLabel2->moduleName = ph.module->model->name;
+						paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
+						paramLabel2->moduleId = ph.moduleId;
+						paramLabel2->paramId = ph.paramId;
+						menu->addChild(paramLabel2);
+
+						MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+						mn->box.size.x = 100;
+						menu->addChild(mn);
+
+						MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+						mx->box.size.x = 100;
+						menu->addChild(mx);
+					}
+				}
+
+				engine::ParamHandle *paramHandle =
+					paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId)
+								  : nullptr;
+				if (paramHandle) {
+					ParamUnmapItem *unmapItem = new ParamUnmapItem;
+					unmapItem->text = "Unmap";
+					unmapItem->rightText = paramHandle->text;
+					unmapItem->paramQuantity = paramQuantity;
+					menu->addChild(unmapItem);
+				}
+				e.consume(this);
+			}
+		} else {
+			Button::onButton(e);
+		}
+	}
 	// TODO: add right-click menu, same as in HubKnob
 };
 
@@ -79,12 +164,12 @@ public:
 				ui::Menu *menu = createMenu();
 
 				MapFieldLabel *paramLabel = new MapFieldLabel;
-				paramLabel->paramWidget = this;
+				paramLabel->paramQty = this->paramQuantity;
 				menu->addChild(paramLabel);
 
 				MapField *paramField = new MapField;
 				paramField->box.size.x = 100;
-				paramField->setParamWidget(this);
+				paramField->setParamQuantity(this->paramQuantity);
 				menu->addChild(paramField);
 
 				ParamResetItem *resetItem = new ParamResetItem;
@@ -128,7 +213,7 @@ public:
 					ParamUnmapItem *unmapItem = new ParamUnmapItem;
 					unmapItem->text = "Unmap";
 					unmapItem->rightText = paramHandle->text;
-					unmapItem->paramWidget = this;
+					unmapItem->paramQuantity = this->paramQuantity;
 					menu->addChild(unmapItem);
 				}
 				e.consume(this);
@@ -140,19 +225,6 @@ public:
 	{
 		// pass onto child
 	}
-
-	// This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
-	struct ParamUnmapItem : ui::MenuItem {
-		ParamWidget *paramWidget;
-		void onAction(const event::Action &e) override
-		{
-			ParamHandle *paramHandle = APP->engine->getParamHandle(paramWidget->paramQuantity->module->id,
-																   paramWidget->paramQuantity->paramId);
-			if (paramHandle) {
-				APP->engine->updateParamHandle(paramHandle, -1, 0);
-			}
-		}
-	};
 
 	struct ParamResetItem : ui::MenuItem {
 		ParamWidget *paramWidget;

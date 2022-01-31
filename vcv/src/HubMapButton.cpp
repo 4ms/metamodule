@@ -47,83 +47,13 @@ void HubMapButton::onDragStart(const event::DragStart &e)
 	if (centralData->isMappingInProgress()) {
 		currentSourceIsThisButton = (centralData->getMappingSource() == id);
 		centralData->abortMappingProcedure();
-		// TODO: centraData->sendMessage("Aborted mapping");
-		// valueLabel->text = "Aborted mapping";
 	}
 	if (!currentSourceIsThisButton) {
 		centralData->startMappingProcedure(id);
-		// TODO: centraData->sendMessage("Started mapping...");
-		// valueLabel->text = "Start Mapping from: " + std::to_string(static_cast<int>(button.id.objType)) + ", " +
-		// std::to_string(button.id.objID);
 	}
 
 	if (quantity)
 		quantity->setMax();
-}
-
-void HubMapButton::onButton(const event::Button &e)
-{
-	// Right click to open context menu
-	if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-		ui::Menu *menu = createMenu();
-
-		// MapFieldLabel *paramLabel = new MapFieldLabel;
-		// paramLabel->paramWidget = this;
-		// menu->addChild(paramLabel);
-
-		// MapField *paramField = new MapField;
-		// paramField->box.size.x = 100;
-		// paramField->setParamWidget(this);
-		// menu->addChild(paramField);
-
-		// ParamResetItem *resetItem = new ParamResetItem;
-		// resetItem->text = "Initialize";
-		// resetItem->rightText = "Double-click";
-		// resetItem->paramWidget = this;
-		// menu->addChild(resetItem);
-
-		MenuSeparator *sep = new MenuSeparator;
-		menu->addChild(sep);
-
-		auto aliasItem = new HubKnobAliasNameMenuField{id};
-		aliasItem->box.size.x = 100;
-		menu->addChild(aliasItem);
-
-		auto paramHandles = centralData->getParamHandlesFromSrc(id);
-		for (auto const &ph : paramHandles) {
-			if (ph.moduleId != -1) {
-				MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
-				paramLabel2->moduleName = ph.module->model->name;
-				paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
-				paramLabel2->moduleId = ph.moduleId;
-				paramLabel2->paramId = ph.paramId;
-				menu->addChild(paramLabel2);
-
-				MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
-				mn->box.size.x = 100;
-				menu->addChild(mn);
-
-				MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
-				mx->box.size.x = 100;
-				menu->addChild(mx);
-			}
-		}
-
-		// engine::ParamHandle *paramHandle =
-		// 	this->paramQuantity
-		// 		? APP->engine->getParamHandle(this->paramQuantity->module->id, this->paramQuantity->paramId)
-		// 		: NULL;
-		// if (paramHandle) {
-		// 	ParamUnmapItem *unmapItem = new ParamUnmapItem;
-		// 	unmapItem->text = "Unmap";
-		// 	unmapItem->rightText = paramHandle->text;
-		// 	unmapItem->paramWidget = this;
-		// 	menu->addChild(unmapItem);
-		// }
-		e.consume(this);
-	} else {
-		Button::onButton(e);
-	}
 }
 
 void HubMapButton::onHover(const event::Hover &e)

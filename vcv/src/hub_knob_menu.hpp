@@ -3,10 +3,10 @@
 #include "plugin.hpp"
 
 struct MapFieldLabel : ui::MenuLabel {
-	ParamWidget *paramWidget;
+	ParamQuantity *paramQty;
 	void step() override
 	{
-		text = paramWidget->paramQuantity->getString();
+		text = paramQty->getString();
 		MenuLabel::step();
 	}
 };
@@ -127,7 +127,7 @@ public:
 };
 
 struct MapField : ui::TextField {
-	ParamWidget *paramWidget;
+	ParamQuantity *paramQuantity;
 
 	void step() override
 	{
@@ -136,30 +136,31 @@ struct MapField : ui::TextField {
 		TextField::step();
 	}
 
-	void setParamWidget(ParamWidget *paramWidget)
+	void setParamQuantity(ParamQuantity *paramQ)
 	{
-		this->paramWidget = paramWidget;
-		if (paramWidget->paramQuantity)
-			text = paramWidget->paramQuantity->getDisplayValueString();
+		paramQuantity = paramQ;
+		if (paramQuantity)
+			text = paramQuantity->getDisplayValueString();
 		selectAll();
 	}
 
 	void onSelectKey(const event::SelectKey &e) override
 	{
 		if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-			float oldValue = paramWidget->paramQuantity->getValue();
-			if (paramWidget->paramQuantity)
-				paramWidget->paramQuantity->setDisplayValueString(text);
-			float newValue = paramWidget->paramQuantity->getValue();
+			if (paramQuantity) {
+				float oldValue = paramQuantity->getValue();
+				paramQuantity->setDisplayValueString(text);
+				float newValue = paramQuantity->getValue();
 
-			if (oldValue != newValue) {
-				// Push ParamChange history action
-				history::ParamChange *h = new history::ParamChange;
-				h->moduleId = paramWidget->paramQuantity->module->id;
-				h->paramId = paramWidget->paramQuantity->paramId;
-				h->oldValue = oldValue;
-				h->newValue = newValue;
-				APP->history->push(h);
+				if (oldValue != newValue) {
+					// Push ParamChange history action
+					history::ParamChange *h = new history::ParamChange;
+					h->moduleId = paramQuantity->module->id;
+					h->paramId = paramQuantity->paramId;
+					h->oldValue = oldValue;
+					h->newValue = newValue;
+					APP->history->push(h);
+				}
 			}
 
 			ui::MenuOverlay *overlay = getAncestorOfType<ui::MenuOverlay>();
