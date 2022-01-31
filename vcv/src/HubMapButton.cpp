@@ -20,9 +20,9 @@ void HubMapButton::draw(const DrawArgs &args)
 
 	// Draw huge background rect to highlight a mapping has begun from this knob
 	if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(id)) {
-		const float padding_x = 2;
+		// const float padding_x = 2;
 		nvgBeginPath(args.vg);
-		nvgRoundedRect(args.vg, padding_x, 0, box.size.x - padding_x * 2, box.size.y, 5.0);
+		nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y / 2);
 		const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
 		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color[id.objID], alpha));
 		nvgFill(args.vg);

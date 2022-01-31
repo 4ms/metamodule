@@ -24,27 +24,21 @@ public:
 	void draw(const typename BaseJackT::DrawArgs &args) override
 	{
 		BaseJackT::draw(args);
-		if (centralData->isMappingInProgress()) {
-			auto src = centralData->getMappingSource();
-			if (src.objType == getId().objType) {
-				auto srcId = src.objID;
+		auto id = getId();
+
+		bool isMappingNow = centralData->isMappingInProgress();
+		if (isMappingNow || centralData->isMappedPartnerHovered(id)) {
+			auto src = isMappingNow ? centralData->getMappingSource() : centralData->getMappedSrcFromDst(id);
+			if (src.objType == getId().objType && src.objID >= 0) {
 				nvgBeginPath(args.vg);
-				nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
+				nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y / 2);
 				float alpha = this->hovered ? 0.75 : 0.4;
-				NVGcolor color = rack::color::alpha(PaletteHub::color[srcId], alpha);
+				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alpha);
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
-			} else {
-				nvgBeginPath(args.vg);
-				nvgRect(args.vg, 0, 0, this->box.size.x, this->box.size.y);
-				NVGcolor color = rack::color::alpha(color::WHITE, 0.5f);
-				nvgFillColor(args.vg, color);
-				nvgFill(args.vg);
-				// dim out BaseJackT::draw()?
 			}
 		}
 
-		auto id = getId();
 		if ((id.moduleID >= 0) && centralData->isLabelButtonDstMapped(id)) {
 			int srcPortId = centralData->getMappedSrcFromDst(id).objID;
 			NVGcolor color = PaletteHub::color[srcPortId];
@@ -92,6 +86,18 @@ public:
 	void onHover(const event::Hover &e) override
 	{
 		e.consume(this);
+	}
+
+	void onEnter(const event::Enter &e) override
+	{
+		if (!centralData->isMappingInProgress())
+			centralData->notifyEnterHover(getId());
+	}
+
+	void onLeave(const event::Leave &e) override
+	{
+		if (!centralData->isMappingInProgress())
+			centralData->notifyLeaveHover(getId());
 	}
 
 private:
