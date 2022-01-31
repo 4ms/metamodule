@@ -37,41 +37,43 @@ void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
 	// resetItem->paramWidget = this;
 	// menu->addChild(resetItem);
 
-	MenuSeparator *sep = new MenuSeparator;
-	menu->addChild(sep);
+	if (centralData->getNumMappingsFromSrc(id) > 0) {
+		MenuSeparator *sep = new MenuSeparator;
+		menu->addChild(sep);
 
-	auto aliasItem = new HubKnobAliasNameMenuField{id};
-	aliasItem->box.size.x = 100;
-	menu->addChild(aliasItem);
+		auto aliasItem = new HubKnobAliasNameMenuField{id};
+		aliasItem->box.size.x = 100;
+		menu->addChild(aliasItem);
 
-	auto paramHandles = centralData->getParamHandlesFromSrc(id);
-	for (auto const &ph : paramHandles) {
-		if (ph.moduleId != -1) {
-			MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
-			paramLabel2->moduleName = ph.module->model->name;
-			paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
-			paramLabel2->moduleId = ph.moduleId;
-			paramLabel2->paramId = ph.paramId;
-			menu->addChild(paramLabel2);
+		auto paramHandles = centralData->getParamHandlesFromSrc(id);
+		for (auto const &ph : paramHandles) {
+			if (ph.moduleId != -1) {
+				MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
+				paramLabel2->moduleName = ph.module->model->name;
+				paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
+				paramLabel2->moduleId = ph.moduleId;
+				paramLabel2->paramId = ph.paramId;
+				menu->addChild(paramLabel2);
 
-			MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
-			mn->box.size.x = 100;
-			menu->addChild(mn);
+				MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+				mn->box.size.x = 100;
+				menu->addChild(mn);
 
-			MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
-			mx->box.size.x = 100;
-			menu->addChild(mx);
+				MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+				mx->box.size.x = 100;
+				menu->addChild(mx);
+			}
 		}
-	}
 
-	engine::ParamHandle *paramHandle =
-		paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId) : NULL;
-	if (paramHandle) {
-		ParamUnmapItem *unmapItem = new ParamUnmapItem;
-		unmapItem->text = "Unmap";
-		unmapItem->rightText = paramHandle->text;
-		unmapItem->paramQuantity = paramQuantity;
-		menu->addChild(unmapItem);
+		engine::ParamHandle *paramHandle =
+			paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId) : NULL;
+		if (paramHandle) {
+			ParamUnmapItem *unmapItem = new ParamUnmapItem;
+			unmapItem->text = "Unmap";
+			unmapItem->rightText = paramHandle->text;
+			unmapItem->paramQuantity = paramQuantity;
+			menu->addChild(unmapItem);
+		}
 	}
 }
 

@@ -49,7 +49,7 @@ public:
 	void onHover(const event::Hover &e) override
 	{
 		// If the jack is mapped, then we want to pass the hover down to the HubJackMapButton object below
-		// so that the HubMapJackButton can highlight even if we're hovering the knob itself.
+		// so that the HubMapJackButton can highlight even if we're hovering the jack itself.
 		// So, don't consume the hover and just do nothing.
 		// On the other hand, if the jack is not mapped, then consume the hover so that hovering the jack
 		// doesn't make the background highlight appear

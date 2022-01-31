@@ -29,14 +29,14 @@ struct Davies1900hBlackKnob4ms : MappableKnob<Davies1900hKnob> {
 	}
 };
 
-struct Davies1900hBlackKnobUnlined4ms : Davies1900hKnob {
+struct Davies1900hBlackKnobUnlined4ms : MappableKnob<Davies1900hKnob> {
 	Davies1900hBlackKnobUnlined4ms()
 	{
 		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Davies1900hBlack_no_pip.svg")));
 	}
 };
 
-struct DaviesLarge4ms : Davies1900hKnob {
+struct DaviesLarge4ms : MappableKnob<Davies1900hKnob> {
 	DaviesLarge4ms()
 	{
 		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Davies_large.svg")));
@@ -50,7 +50,7 @@ struct Small9mmKnob : MappableKnob<RoundKnob> {
 	}
 };
 
-struct Small9mmUnlinedKnob : RoundKnob {
+struct Small9mmUnlinedKnob : MappableKnob<RoundKnob> {
 	Small9mmUnlinedKnob()
 	{
 		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/9mm_knob_no_pip.svg")));

@@ -29,11 +29,13 @@ void HubMapButton::draw(const DrawArgs &args)
 	}
 
 	// Draw the label text
+	text = centralData->getMapAliasName(id);
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
-	nvgFontSize(args.vg, 8.0f);
-	nvgText(args.vg, box.size.x / 2.0f, box.size.y / 2.0f, text.c_str(), NULL);
+	nvgFontSize(args.vg, 9.0f);
+	// nvgFontFaceId(args.vg, fontid);
+	nvgText(args.vg, box.size.x / 2.0f, box.size.y + 10, text.c_str(), NULL);
 }
 
 void HubMapButton::onDragStart(const event::DragStart &e)
