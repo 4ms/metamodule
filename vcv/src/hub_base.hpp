@@ -275,7 +275,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y - mm2px(kKnobSpacingY) / 2); // top-left
 		button->box.size.x = mm2px(kKnobSpacingX);
-		button->box.size.y = mm2px(kKnobSpacingY + 4);
+		button->box.size.y = mm2px(kKnobSpacingY);
 		button->text = labelText;
 		button->id = {LabelButtonID::Types::Knob, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
