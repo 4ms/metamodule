@@ -41,25 +41,16 @@ struct GateInfo : ModuleInfoBase {
     static constexpr int NumInJacks = 3;
     
     enum {
-        InputInput = 0,
-        InputLength_Cv = 1,
-        InputDelay_Cv = 2,
+        InputLength_Cv = 0,
+        InputDelay_Cv = 1,
+        InputInput = 2,
     };
 
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
-            .id = InputInput,
-            .x_mm = px_to_mm<72>(28.92f),
-            .y_mm = px_to_mm<72>(168.85f),
-            .short_name = "Input",
-            .long_name = "Input",
-            .unpatched_val = 0.f,
-            .signal_type = InJackDef::Analog,
-        },
-        {
             .id = InputLength_Cv,
             .x_mm = px_to_mm<72>(28.92f),
-            .y_mm = px_to_mm<72>(214.97f),
+            .y_mm = px_to_mm<72>(168.85f),
             .short_name = "Length CV",
             .long_name = "Length CV",
             .unpatched_val = 0.f,
@@ -68,9 +59,18 @@ struct GateInfo : ModuleInfoBase {
         {
             .id = InputDelay_Cv,
             .x_mm = px_to_mm<72>(28.92f),
-            .y_mm = px_to_mm<72>(264.07f),
+            .y_mm = px_to_mm<72>(214.97f),
             .short_name = "Delay CV",
             .long_name = "Delay CV",
+            .unpatched_val = 0.f,
+            .signal_type = InJackDef::Analog,
+        },
+        {
+            .id = InputInput,
+            .x_mm = px_to_mm<72>(28.92f),
+            .y_mm = px_to_mm<72>(264.07f),
+            .short_name = "Input",
+            .long_name = "Input",
             .unpatched_val = 0.f,
             .signal_type = InJackDef::Analog,
         },

@@ -12,8 +12,8 @@ struct DetuneInfo : ModuleInfoBase {
     
     enum {
         KnobW_Speed = 0,
-        KnobW_Depth = 1,
-        KnobF_Speed = 2,
+        KnobF_Speed = 1,
+        KnobW_Depth = 2,
         KnobF_Depth = 3,
     };
 
@@ -29,21 +29,21 @@ struct DetuneInfo : ModuleInfoBase {
             .orientation = KnobDef::Round,
         },
         {
-            .id = KnobW_Depth,
+            .id = KnobF_Speed,
             .x_mm = px_to_mm<72>(83.49f),
             .y_mm = px_to_mm<72>(57.97f),
-            .short_name = "W Depth",
-            .long_name = "W Depth",
+            .short_name = "F Speed",
+            .long_name = "F Speed",
             .default_val = 0.0f,
             .knob_style = KnobDef::Medium,
             .orientation = KnobDef::Round,
         },
         {
-            .id = KnobF_Speed,
+            .id = KnobW_Depth,
             .x_mm = px_to_mm<72>(31.96f),
             .y_mm = px_to_mm<72>(119.21f),
-            .short_name = "F Speed",
-            .long_name = "F Speed",
+            .short_name = "W Depth",
+            .long_name = "W Depth",
             .default_val = 0.5f,
             .knob_style = KnobDef::Medium,
             .orientation = KnobDef::Round,

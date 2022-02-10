@@ -4,6 +4,22 @@
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(VCA_artwork_240);
+LV_IMG_DECLARE(Shift_artwork_240);
+LV_IMG_DECLARE(Send_artwork_240);
+LV_IMG_DECLARE(Mixer_artwork_240);
+LV_IMG_DECLARE(Logic_artwork_240);
+LV_IMG_DECLARE(LPG_artwork_240);
+LV_IMG_DECLARE(LFO_artwork_240);
+LV_IMG_DECLARE(Gate8_artwork_240);
+LV_IMG_DECLARE(Gate32_artwork_240);
+LV_IMG_DECLARE(Fade_artwork_240);
+LV_IMG_DECLARE(FadeDelay_artwork_240);
+LV_IMG_DECLARE(Comp_artwork_240);
+LV_IMG_DECLARE(CLKM_artwork_240);
+LV_IMG_DECLARE(CLKD_artwork_240);
+LV_IMG_DECLARE(Att_artwork_240);
+LV_IMG_DECLARE(AD_artwork_240);
 LV_IMG_DECLARE(Sequant_artwork_240);
 LV_IMG_DECLARE(Switch14_artwork_240);
 LV_IMG_DECLARE(Seq4_artwork_240);
@@ -44,6 +60,54 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "VCA")
+			return &VCA_artwork_240;
+
+		if (slug == "Shift")
+			return &Shift_artwork_240;
+
+		if (slug == "Send")
+			return &Send_artwork_240;
+
+		if (slug == "Mixer")
+			return &Mixer_artwork_240;
+
+		if (slug == "Logic")
+			return &Logic_artwork_240;
+
+		if (slug == "LPG")
+			return &LPG_artwork_240;
+
+		if (slug == "LFO")
+			return &LFO_artwork_240;
+
+		if (slug == "Gate8")
+			return &Gate8_artwork_240;
+
+		if (slug == "Gate32")
+			return &Gate32_artwork_240;
+
+		if (slug == "Fade")
+			return &Fade_artwork_240;
+
+		if (slug == "FadeDelay")
+			return &FadeDelay_artwork_240;
+
+		if (slug == "Comp")
+			return &Comp_artwork_240;
+
+		if (slug == "CLKM")
+			return &CLKM_artwork_240;
+
+		if (slug == "CLKD")
+			return &CLKD_artwork_240;
+
+		if (slug == "Att")
+			return &Att_artwork_240;
+
+		if (slug == "AD")
+			return &AD_artwork_240;
 
 		if (slug == "Sequant")
 			return &Sequant_artwork_240;
