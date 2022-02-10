@@ -45,6 +45,8 @@ NE10DIR = $(LIBDIR)/ne10/ne10
 
 OPTFLAG = -O3 
 LTOFLAG = -flto=auto
+# OPTFLAG = -O0
+# LTOFLAG = 
 
 SOURCES =
 SOURCES += system/libc_stub.c

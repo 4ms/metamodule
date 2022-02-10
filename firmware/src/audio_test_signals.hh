@@ -6,8 +6,21 @@
 namespace MetaModule
 {
 struct AudioTestSignal {
-	static void passthrough(AudioInBuffer &in, AudioOutBuffer &out, AuxStreamBlock &aux)
-	{
+	static void passthrough(AudioInBuffer &in, AudioOutBuffer &out) {
+
+		for (auto [i, o] : zip(in, out)) {
+			o.chan[0] = i.chan[0];
+			o.chan[1] = i.chan[1];
+			o.chan[2] = i.chan[2];
+			o.chan[3] = i.chan[3];
+			o.chan[4] = i.chan[4];
+			o.chan[5] = i.chan[5];
+			o.chan[6] = 0x00100000;
+			o.chan[7] = 0x00400000;
+		}
+	}
+
+	static void passthrough(AudioInBuffer &in, AudioOutBuffer &out, AuxStreamBlock &aux) {
 
 		for (auto [i, o, a] : zip(in, out, aux)) {
 			o.chan[0] = i.chan[0];
@@ -22,8 +35,7 @@ struct AudioTestSignal {
 		}
 	}
 
-	static void sines_out(AudioInBuffer &in, AudioOutBuffer &out)
-	{
+	static void sines_out(AudioInBuffer &in, AudioOutBuffer &out) {
 		static PhaseAccum<48000> phase0{80};
 		static PhaseAccum<48000> phase1{200};
 		static PhaseAccum<48000> phase2{250};
@@ -82,8 +94,7 @@ struct AudioTestSignal {
 	}
 
 	static void dual_passthrough(
-		AudioInBuffer &inA, AudioOutBuffer &outA, AudioInBuffer &inB, AudioOutBuffer &outB, AuxStreamBlock &aux)
-	{
+		AudioInBuffer &inA, AudioOutBuffer &outA, AudioInBuffer &inB, AudioOutBuffer &outB, AuxStreamBlock &aux) {
 
 		static PhaseAccum<48000> phase0{80};
 		static PhaseAccum<48000> phase1{200};
@@ -111,8 +122,7 @@ struct AudioTestSignal {
 		}
 	}
 
-	static void dual_sines_out(AudioOutBuffer &outA, AudioOutBuffer &outB)
-	{
+	static void dual_sines_out(AudioOutBuffer &outA, AudioOutBuffer &outB) {
 		static PhaseAccum<48000> phase0{80};
 		static PhaseAccum<48000> phase1{200};
 		static PhaseAccum<48000> phase2{250};

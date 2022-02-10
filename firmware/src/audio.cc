@@ -37,15 +37,40 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	: param_queue{queue}
 	, mbox{uiaudiomailbox}
 	, param_blocks{p}
-	, audio_blocks{{.in_codec = audio_in_block.codec[0], .out_codec = audio_out_block.codec[0]},
-				   {.in_codec = audio_in_block.codec[1], .out_codec = audio_out_block.codec[1]}}
+	, audio_blocks{{.in_codec = audio_in_block.codec[0],
+					.out_codec = audio_out_block.codec[0],
+					.in_ext_codec = audio_in_block.codec[0],
+					.out_ext_codec = audio_out_block.codec[0]},
+				   {.in_codec = audio_in_block.codec[1],
+					.out_codec = audio_out_block.codec[1],
+					.in_ext_codec = audio_in_block.codec[1],
+					.out_ext_codec = audio_out_block.codec[1]}}
 	, auxsigs{auxs}
 	, codec_{codec}
+	, codec_ext_{Hardware::codec_ext}
 	, sample_rate_{codec.get_samplerate()}
 	, player{patchplayer} {
 	codec_.init();
 	codec_.set_tx_buffers(audio_blocks[0].out_codec);
 	codec_.set_rx_buffers(audio_blocks[0].in_codec);
+
+	codec_ext_.init();
+	codec_ext_.set_tx_buffers(audio_blocks[0].out_ext_codec);
+	codec_ext_.set_rx_buffers(audio_blocks[0].in_ext_codec);
+
+	codec_ext_.set_callbacks(
+		[this] {
+		Debug::Pin2::low();
+		AudioTestSignal::passthrough(audio_blocks[1].in_ext_codec, audio_blocks[1].out_ext_codec);
+		// AudioTestSignal::sines_out(audio_blocks[1].in_ext_codec, audio_blocks[1].out_ext_codec);
+		Debug::Pin2::high();
+		},
+		[this] {
+		Debug::Pin3::low();
+		AudioTestSignal::passthrough(audio_blocks[0].in_ext_codec, audio_blocks[0].out_ext_codec);
+		// AudioTestSignal::sines_out(audio_blocks[0].in_ext_codec, audio_blocks[0].out_ext_codec);
+		Debug::Pin3::high();
+	});
 
 	codec_.set_callbacks(
 		[this]() {
@@ -192,6 +217,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, gate_out] : countzip(aux_.gate_out))
 			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
+
 	param_queue.write_sync(param_block.params[0], param_block.metaparams);
 	mdrivlib::SystemCache::clean_dcache_by_range(&param_queue, sizeof(ParamQueue));
 
@@ -200,6 +226,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 void AudioStream::start() {
 	codec_.start();
+	codec_ext_.start();
 }
 
 void AudioStream::propagate_sense_pins(Params &params) {

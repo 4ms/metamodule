@@ -52,6 +52,7 @@ private:
 	DoubleAuxStreamBlock &auxsigs;
 
 	CodecT &codec_;
+	CodecT &codec_ext_;
 	uint32_t sample_rate_;
 
 	Calibrator incal[NumAudioIn];

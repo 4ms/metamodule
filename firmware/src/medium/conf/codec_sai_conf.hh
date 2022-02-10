@@ -60,7 +60,7 @@ const SaiConfig codec_ext_sai_conf = {
 	.tx_block = SAI1_Block_A,
 	.rx_block = SAI1_Block_B,
 
-	.mode = SaiConfig::ExtSynced,
+	.mode = SaiConfig::TXMaster, //ExtSynced,
 
 	.dma_init_tx =
 		{
@@ -85,9 +85,9 @@ const SaiConfig codec_ext_sai_conf = {
 	.framesize = 256,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::E, 2, LL_GPIO_AF_6},	  // not used
-	.SCLK = {GPIO::E, 5, LL_GPIO_AF_6},	  //
-	.LRCLK = {GPIO::G, 15, LL_GPIO_AF_6}, //
+	.MCLK = {GPIO::E, 2, LL_GPIO_AF_6},	  //
+	.SCLK = {GPIO::E, 5, LL_GPIO_AF_6},	  // block A's SCK
+	.LRCLK = {GPIO::G, 15, LL_GPIO_AF_6}, // block A's FS
 	.SD_DAC = {GPIO::D, 6, LL_GPIO_AF_6}, // SD A
 	.SD_ADC = {GPIO::E, 3, LL_GPIO_AF_6}, // SD B
 

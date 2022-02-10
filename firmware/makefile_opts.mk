@@ -35,4 +35,6 @@
 #
 # $(BUILDDIR)/lib/lvgl/lvgl/src/lv_core/%.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/lvgl/lvgl/src/lv_draw/%.o: OPTFLAG = -O0
+#
+# $(BUILDDIR)/lib/lvgl/lvgl/src/lv_draw/%.o: OPTFLAG = -O0
 #-----------------------------------
