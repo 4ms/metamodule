@@ -64,6 +64,7 @@ private:
 	CycleCounter load_measure;
 	float load_lpf = 0.f;
 	uint32_t _mute_ctr = 0;
+	bool ext_audio_connected = false;
 
 	AudioConf::SampleT get_audio_output(int output_id);
 	uint32_t get_dac_output(int output_id);

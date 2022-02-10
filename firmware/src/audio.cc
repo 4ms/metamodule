@@ -53,11 +53,20 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, sample_rate_{Hardware::codec.get_samplerate()}
 	, player{patchplayer} {
 
-	codec_.init();
+	if (codec_.init() == CodecT::CODEC_NO_ERR)
+		mbox.append_message("Codec initialized\n\r");
+	else
+		mbox.append_message("ERROR: No codec detected\n\r");
 	codec_.set_tx_buffer_start(audio_out_block.codec[0]);
 	codec_.set_rx_buffer_start(audio_in_block.codec[0]);
 
-	codec_ext_.init();
+	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
+		ext_audio_connected = true;
+		mbox.append_message("Ext Audio codec detected\n\r");
+	} else {
+		ext_audio_connected = false;
+		mbox.append_message("No ext Audio codec detected\n\r");
+	}
 	codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec[0]);
 	codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec[0]);
 
@@ -154,7 +163,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	//	_mute_ctr = 10;
 	// }
 
-	AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
+	if (ext_audio_connected)
+		AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
 
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 

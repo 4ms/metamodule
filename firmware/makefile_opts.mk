@@ -19,7 +19,8 @@
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/sdram.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/system.o: OPTFLAG = -O0
-# $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_i2c.o: OPTFLAG = -O0
+# build/mp1corem4/medium/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c.o: OPTFLAG = -O0
+# build/mp1corea7/medium/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver_dma.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/pca9685_led_driver.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/i2c.o: OPTFLAG = -O0
