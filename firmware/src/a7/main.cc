@@ -35,7 +35,6 @@ void main() {
 	Ui ui{patch_player, param_queue, mbox};
 
 	AudioStream audio{patch_player,
-					  Hardware::codec,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
 					  param_queue,
@@ -72,4 +71,3 @@ void main() {
 void recover_from_task_fault() {
 	main();
 }
-

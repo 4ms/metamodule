@@ -26,8 +26,10 @@ constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;
 // static Convolver fftfx;
 
+static constexpr unsigned block_0 = mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5 ? 0 : 1;
+static constexpr unsigned block_1 = 1 - block_0;
+
 AudioStream::AudioStream(PatchPlayer &patchplayer,
-						 CodecT &codec,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
 						 ParamQueue &queue,
@@ -37,35 +39,50 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	: param_queue{queue}
 	, mbox{uiaudiomailbox}
 	, param_blocks{p}
-	, audio_blocks{{.in_codec = audio_in_block.codec[0], .out_codec = audio_out_block.codec[0]},
-				   {.in_codec = audio_in_block.codec[1], .out_codec = audio_out_block.codec[1]}}
+	, audio_blocks{{.in_codec = audio_in_block.codec[0],
+					.out_codec = audio_out_block.codec[0],
+					.in_ext_codec = audio_in_block.ext_codec[0],
+					.out_ext_codec = audio_out_block.ext_codec[0]},
+				   {.in_codec = audio_in_block.codec[1],
+					.out_codec = audio_out_block.codec[1],
+					.in_ext_codec = audio_in_block.ext_codec[1],
+					.out_ext_codec = audio_out_block.ext_codec[1]}}
 	, auxsigs{auxs}
-	, codec_{codec}
-	, sample_rate_{codec.get_samplerate()}
+	, codec_{Hardware::codec}
+	, codec_ext_{Hardware::codec_ext}
+	, sample_rate_{Hardware::codec.get_samplerate()}
 	, player{patchplayer} {
-	codec_.init();
-	codec_.set_tx_buffers(audio_blocks[0].out_codec);
-	codec_.set_rx_buffers(audio_blocks[0].in_codec);
+
+	if (codec_.init() == CodecT::CODEC_NO_ERR)
+		mbox.append_message("Codec initialized\n\r");
+	else
+		mbox.append_message("ERROR: No codec detected\n\r");
+	codec_.set_tx_buffer_start(audio_out_block.codec[0]);
+	codec_.set_rx_buffer_start(audio_in_block.codec[0]);
+
+	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
+		ext_audio_connected = true;
+		mbox.append_message("Ext Audio codec detected\n\r");
+	} else {
+		ext_audio_connected = false;
+		mbox.append_message("No ext Audio codec detected\n\r");
+	}
+	codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec[0]);
+	codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec[0]);
 
 	codec_.set_callbacks(
 		[this]() {
 		Debug::Pin0::high();
 		HWSemaphore<ParamsBuf1Lock>::lock();
 		HWSemaphore<ParamsBuf2Lock>::unlock();
-		if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-			process(audio_blocks[0], param_blocks[0], auxsigs[0]);
-		else
-			process(audio_blocks[1], param_blocks[0], auxsigs[0]);
+		process(audio_blocks[block_0], param_blocks[0], auxsigs[0]);
 		Debug::Pin0::low();
 		},
 		[this]() {
 		Debug::Pin0::high();
 		HWSemaphore<ParamsBuf2Lock>::lock();
 		HWSemaphore<ParamsBuf1Lock>::unlock();
-		if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-			process(audio_blocks[1], param_blocks[1], auxsigs[1]);
-		else
-			process(audio_blocks[0], param_blocks[1], auxsigs[1]);
+		process(audio_blocks[block_1], param_blocks[1], auxsigs[1]);
 		Debug::Pin0::low();
 	});
 
@@ -146,6 +163,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	//	_mute_ctr = 10;
 	// }
 
+	if (ext_audio_connected)
+		AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
+
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 
 		// Handle jacks being plugged/unplugged
@@ -192,6 +212,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, gate_out] : countzip(aux_.gate_out))
 			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
+
 	param_queue.write_sync(param_block.params[0], param_block.metaparams);
 	mdrivlib::SystemCache::clean_dcache_by_range(&param_queue, sizeof(ParamQueue));
 
@@ -200,6 +221,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 void AudioStream::start() {
 	codec_.start();
+	codec_ext_.start();
 }
 
 void AudioStream::propagate_sense_pins(Params &params) {

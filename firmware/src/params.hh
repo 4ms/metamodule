@@ -115,9 +115,9 @@ struct MetaParams {
 		}
 	}
 
-    // TODO: check if this is used, then remove it if it's not
+	// TODO: check if this is used, then remove it if it's not
 	void copy(const MetaParams &that) {
-        patchcv = that.patchcv;
+		patchcv = that.patchcv;
 		for (auto [but, thatbut] : zip(meta_buttons, that.meta_buttons))
 			but.copy_state(thatbut);
 		rotary_button.copy_state(that.rotary_button);
@@ -207,9 +207,9 @@ struct UiAudioMailbox {
 	bool loading_new_patch = true;
 	bool audio_is_muted = true;
 	uint32_t new_patch_index;
-	std::string message;
+	std::string message{""};
 
-	void set_message(const std::string m) {
+	void set_message(const std::string_view m) {
 		message = m;
 	}
 
@@ -217,8 +217,12 @@ struct UiAudioMailbox {
 		message = "";
 	}
 
-	std::string get_message() const {
+	[[nodiscard]] std::string_view get_message() const {
 		return message;
+	}
+
+	void append_message(const std::string_view m) {
+		message.append(m);
 	}
 };
 

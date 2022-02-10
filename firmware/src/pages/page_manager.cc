@@ -14,9 +14,9 @@ void PageManager::init() {
 	patch_list.set_cur_patch_index(0);
 	bool ok = player.load_patch(patch_list.get_cur_patch_data());
 	if (!ok)
-		mbox.set_message("Can't load patch");
+		mbox.append_message("Can't load patch\r\n");
 	else
-		mbox.clear_message();
+		mbox.append_message("PageManager initialized. Loaded patch\r\n");
 
 	mbox.loading_new_patch = false;
 
