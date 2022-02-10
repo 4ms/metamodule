@@ -113,8 +113,11 @@ void Controls::start() {
 	auxstream_updater.start();
 }
 
-Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &auxsignal_blocks_ref)
-	: param_blocks(param_blocks_ref)
+Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
+				   DoubleAuxStreamBlock &auxsignal_blocks_ref,
+				   GPIOExpander &gpioexpander)
+	: extaudio_jacksense_reader{gpioexpander}
+	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams)
 	, _buffer_full{false}
@@ -130,6 +133,12 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &
 	});
 
 	pot_adc.start();
+
+	Debug::Pin3::high();
+	auto err = extaudio_jacksense_reader.start();
+	if (err == GPIOExpander::Error::None)
+		Debug::Pin3::low();
+	Debug::Pin2::high();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
@@ -149,6 +158,8 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &
 		// 0.35us wide, every 20.83us = 1.68% load
 		auxstream.output_next();
 	});
+
+	Debug::Pin2::low();
 }
 
 uint32_t Controls::get_pot_reading(uint32_t pot_id) {
@@ -164,8 +175,13 @@ uint32_t Controls::get_patchcv_reading() {
 void Controls::store_jacksense_reading(uint16_t reading) {
 	latest_jacksense_reading = reading;
 }
+
 uint32_t Controls::get_jacksense_reading() {
 	return latest_jacksense_reading;
+}
+
+void Controls::collect_extaudio_jacksense_reading() {
+	latest_extaudio_jacksense_reading = extaudio_jacksense_reader.collect_last_reading();
 }
 
 } // namespace MetaModule

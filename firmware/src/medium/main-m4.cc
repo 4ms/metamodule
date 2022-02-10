@@ -1,6 +1,8 @@
 #include "auxsignal.hh"
+#include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
-#include "conf/screen_conf.hh"
+//#include "conf/screen_conf.hh"
+#include "conf/i2c_codec_conf.hh"
 #include "controls.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
@@ -47,7 +49,12 @@ void main() {
 	// - Probably need to compile a special FSBL that looks in NOR flash instead of SDMMC for the SSBL
 	//NorFlashLoader load{};
 
-	Controls controls{*param_block_base, *auxsignal_buffer};
+	SharedBus i2cbus{i2c_codec_conf};
+	mdrivlib::GPIOExpander ext_gpio_expander{i2cbus.i2c, extaudio_gpio_expander_conf};
+	// TODO: if (ext_gpio_expander.ping()) ... then use Controls ctro with ext_gpio_expander and use i2cqueue
+	// otherwise, don't
+	Controls controls{*param_block_base, *auxsignal_buffer, ext_gpio_expander};
+	SharedBusQueue i2cqueue{controls};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 	controls.start();
@@ -58,6 +65,12 @@ void main() {
 			HWSemaphore<M4_ready>::unlock();
 		if (ctr > 0)
 			ctr--;
+
+		if (SharedBus::i2c.is_ready()) {
+			Debug::Pin1::high();
+			i2cqueue.update();
+			Debug::Pin1::low();
+		}
 
 		__NOP();
 		// __WFI();

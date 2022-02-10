@@ -4,6 +4,7 @@
 #include "conf/control_conf.hh"
 #include "drivers/adc_builtin.hh"
 #include "drivers/debounced_switch.hh"
+#include "drivers/gpio_expander.hh"
 #include "drivers/i2c.hh"
 #include "drivers/pin.hh"
 #include "drivers/pin_change.hh"
@@ -17,16 +18,20 @@ namespace MetaModule
 {
 
 using mdrivlib::DebouncedPin;
+using mdrivlib::GPIOExpander;
 using mdrivlib::PinPolarity;
 
 struct Controls {
-	Controls(DoubleBufParamBlock &param_blocks_ref, DoubleAuxStreamBlock &auxsignal_blocks_ref);
+	Controls(DoubleBufParamBlock &param_blocks_ref,
+			 DoubleAuxStreamBlock &auxsignal_blocks_ref,
+			 GPIOExpander &gpioexpander);
 
 	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
 	std::array<uint16_t, NumPotAdcs> pot_vals;
 	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
 	MultiGPIOReader jacksense_reader;
+	GPIOExpander &extaudio_jacksense_reader;
 
 	mdrivlib::RotaryEncoder<mdrivlib::RotaryHalfStep> rotary = {
 		MMControlPins::rotA.gpio,
@@ -50,6 +55,9 @@ struct Controls {
 	uint32_t get_pot_reading(uint32_t pot_id);
 	uint32_t get_patchcv_reading();
 
+	void collect_extaudio_jacksense_reading();
+	uint32_t get_extaudio_jacksense_reading();
+
 private:
 	mdrivlib::Timekeeper read_controls_task;
 
@@ -64,6 +72,7 @@ private:
 	AuxStream auxstream;
 
 	uint16_t latest_jacksense_reading;
+	uint16_t latest_extaudio_jacksense_reading;
 
 	// Todo: calc this from AdcSampTime, PotAdcConf::oversampling_ratio, and ADC periph clock (PLL_Div2... rcc...)
 	// Tested with APB clock (rcc set to PER, but don't think that matters. clock_div set to APBClk_Div1):
