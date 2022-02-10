@@ -26,8 +26,10 @@ constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;
 // static Convolver fftfx;
 
+static constexpr unsigned block_0 = mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5 ? 0 : 1;
+static constexpr unsigned block_1 = 1 - block_0;
+
 AudioStream::AudioStream(PatchPlayer &patchplayer,
-						 CodecT &codec,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
 						 ParamQueue &queue,
@@ -39,58 +41,39 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, param_blocks{p}
 	, audio_blocks{{.in_codec = audio_in_block.codec[0],
 					.out_codec = audio_out_block.codec[0],
-					.in_ext_codec = audio_in_block.codec[0],
-					.out_ext_codec = audio_out_block.codec[0]},
+					.in_ext_codec = audio_in_block.ext_codec[0],
+					.out_ext_codec = audio_out_block.ext_codec[0]},
 				   {.in_codec = audio_in_block.codec[1],
 					.out_codec = audio_out_block.codec[1],
-					.in_ext_codec = audio_in_block.codec[1],
-					.out_ext_codec = audio_out_block.codec[1]}}
+					.in_ext_codec = audio_in_block.ext_codec[1],
+					.out_ext_codec = audio_out_block.ext_codec[1]}}
 	, auxsigs{auxs}
-	, codec_{codec}
+	, codec_{Hardware::codec}
 	, codec_ext_{Hardware::codec_ext}
-	, sample_rate_{codec.get_samplerate()}
+	, sample_rate_{Hardware::codec.get_samplerate()}
 	, player{patchplayer} {
+
 	codec_.init();
-	codec_.set_tx_buffers(audio_blocks[0].out_codec);
-	codec_.set_rx_buffers(audio_blocks[0].in_codec);
+	codec_.set_tx_buffer_start(audio_out_block.codec[0]);
+	codec_.set_rx_buffer_start(audio_in_block.codec[0]);
 
 	codec_ext_.init();
-	codec_ext_.set_tx_buffers(audio_blocks[0].out_ext_codec);
-	codec_ext_.set_rx_buffers(audio_blocks[0].in_ext_codec);
-
-	codec_ext_.set_callbacks(
-		[this] {
-		Debug::Pin2::low();
-		AudioTestSignal::passthrough(audio_blocks[1].in_ext_codec, audio_blocks[1].out_ext_codec);
-		// AudioTestSignal::sines_out(audio_blocks[1].in_ext_codec, audio_blocks[1].out_ext_codec);
-		Debug::Pin2::high();
-		},
-		[this] {
-		Debug::Pin3::low();
-		AudioTestSignal::passthrough(audio_blocks[0].in_ext_codec, audio_blocks[0].out_ext_codec);
-		// AudioTestSignal::sines_out(audio_blocks[0].in_ext_codec, audio_blocks[0].out_ext_codec);
-		Debug::Pin3::high();
-	});
+	codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec[0]);
+	codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec[0]);
 
 	codec_.set_callbacks(
 		[this]() {
 		Debug::Pin0::high();
 		HWSemaphore<ParamsBuf1Lock>::lock();
 		HWSemaphore<ParamsBuf2Lock>::unlock();
-		if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-			process(audio_blocks[0], param_blocks[0], auxsigs[0]);
-		else
-			process(audio_blocks[1], param_blocks[0], auxsigs[0]);
+		process(audio_blocks[block_0], param_blocks[0], auxsigs[0]);
 		Debug::Pin0::low();
 		},
 		[this]() {
 		Debug::Pin0::high();
 		HWSemaphore<ParamsBuf2Lock>::lock();
 		HWSemaphore<ParamsBuf1Lock>::unlock();
-		if constexpr (mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5)
-			process(audio_blocks[1], param_blocks[1], auxsigs[1]);
-		else
-			process(audio_blocks[0], param_blocks[1], auxsigs[1]);
+		process(audio_blocks[block_1], param_blocks[1], auxsigs[1]);
 		Debug::Pin0::low();
 	});
 
@@ -170,6 +153,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	//	mbox.audio_is_muted = false;
 	//	_mute_ctr = 10;
 	// }
+
+	AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
 
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 

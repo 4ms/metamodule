@@ -32,7 +32,6 @@ using CombinedAudioBlock = AudioConf::CombinedAudioBlock;
 class AudioStream {
 public:
 	AudioStream(PatchPlayer &patchplayer,
-				CodecT &codec,
 				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
 				ParamQueue &queue,
