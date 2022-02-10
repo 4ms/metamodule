@@ -50,6 +50,8 @@ void main() {
 	//NorFlashLoader load{};
 
 	SharedBus i2cbus{i2c_codec_conf};
+	i2cbus.i2c.enable_IT(i2c_codec_conf.priority1, i2c_codec_conf.priority2);
+
 	mdrivlib::GPIOExpander ext_gpio_expander{i2cbus.i2c, extaudio_gpio_expander_conf};
 	// TODO: if (ext_gpio_expander.ping()) ... then use Controls ctro with ext_gpio_expander and use i2cqueue
 	// otherwise, don't

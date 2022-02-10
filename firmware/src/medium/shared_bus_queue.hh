@@ -62,7 +62,7 @@ private:
 		PrepareReadGPIOExpander,
 		RequestReadGPIOExpander,
 		CollectReadGPIOExpander,
-	} cur_client = Pause;
+	} cur_client = PrepareReadGPIOExpander;
 };
 
 } // namespace MetaModule
