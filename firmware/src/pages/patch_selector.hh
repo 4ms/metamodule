@@ -210,12 +210,12 @@ struct PatchSelectorPage : PageBase {
 			patch_list.set_cur_patch_index(mbox.new_patch_index);
 			bool ok = patch_player.load_patch(patch_list.get_cur_patch_data());
 			if (!ok) {
-				mbox.set_message("Can't load patch");
+				mbox.append_message("Can't load patch\n\r");
 				printf("Can't load patch\n\r");
 				patch_player.unload_patch();
 				patch_player.load_patch(orig_patch_data);
 			} else
-				mbox.clear_message();
+				mbox.append_message("Patch loaded\n\r");
 
 			mbox.loading_new_patch = false;
 		}

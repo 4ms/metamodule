@@ -68,6 +68,12 @@ public:
 			}
 			page_update_tm.start();
 		}
+
+		auto msg = mbox.get_message();
+		if (!msg.empty()) {
+			printf("%s", msg.data());
+			mbox.clear_message();
+		}
 		// output_debug_info();
 	}
 
