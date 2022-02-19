@@ -82,6 +82,7 @@ extern "C" {
 
 /* User-created defines: (4ms/Dan Green) */
 #define HAL_LTDC_MODULE_ENABLED
+#define HAL_PCD_MODULE_ENABLED
 #define LL_DMA_MODULE_ENABLED
 // #define LL_BDMA_MODULE_ENABLED
 #define LL_TIM_MODULE_ENABLED
