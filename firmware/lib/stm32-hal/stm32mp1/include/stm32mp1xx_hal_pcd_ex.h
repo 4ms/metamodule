@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    stm32h7xx_hal_pcd_ex.h
+  * @file    stm32mp1xx_hal_pcd_ex.h
   * @author  MCD Application Team
   * @brief   Header file of PCD HAL Extension module.
   ******************************************************************************
@@ -25,9 +25,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32h7xx_hal_def.h"
+#include "stm32mp1xx_hal_def.h"
 
-#if defined (USB_OTG_FS) || defined (USB_OTG_HS)
+#if defined(USB_OTG_FS) || defined(USB_OTG_HS)
 /** @addtogroup STM32H7xx_HAL_Driver
   * @{
   */
@@ -46,15 +46,13 @@ extern "C" {
   * @{
   */
 
-#if defined (USB_OTG_FS) || defined (USB_OTG_HS)
+#if defined(USB_OTG_FS) || defined(USB_OTG_HS)
 HAL_StatusTypeDef HAL_PCDEx_SetTxFiFo(PCD_HandleTypeDef *hpcd, uint8_t fifo, uint16_t size);
 HAL_StatusTypeDef HAL_PCDEx_SetRxFiFo(PCD_HandleTypeDef *hpcd, uint16_t size);
 #endif /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */
 
-
 HAL_StatusTypeDef HAL_PCDEx_ActivateLPM(PCD_HandleTypeDef *hpcd);
 HAL_StatusTypeDef HAL_PCDEx_DeActivateLPM(PCD_HandleTypeDef *hpcd);
-
 
 HAL_StatusTypeDef HAL_PCDEx_ActivateBCD(PCD_HandleTypeDef *hpcd);
 HAL_StatusTypeDef HAL_PCDEx_DeActivateBCD(PCD_HandleTypeDef *hpcd);
@@ -83,6 +81,5 @@ void HAL_PCDEx_BCD_Callback(PCD_HandleTypeDef *hpcd, PCD_BCD_MsgTypeDef msg);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* STM32H7xx_HAL_PCD_EX_H */
