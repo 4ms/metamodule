@@ -23,7 +23,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr uint16_t priority2 = 3;
 		static constexpr PinNoInit SCLK = {GPIO::E, 12, LL_GPIO_AF_5};
 		static constexpr PinNoInit COPI = {GPIO::E, 6, LL_GPIO_AF_5};
-		static constexpr PinNoInit CIPO = {GPIO::A, 0};
+		static constexpr PinNoInit CIPO = {GPIO::Unused, 0};
 		static constexpr PinNoInit CS0 = {GPIO::E, 11, LL_GPIO_AF_5};
 		static constexpr bool use_hardware_ss = true;
 		static constexpr uint16_t clock_division = 2;
