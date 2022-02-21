@@ -63,8 +63,7 @@ GOSUB PINMUX_CONFIG
 ; Flash Controller Init
 Data.Set A:&QSPI_BASE+0x00  %Long 0x04000311    ; QUADSPI_CR, QUADSPI control register, enable clk and prescaler (/4), FIFO lvl = 3, Abort now and enable
 ;Data.Set A:&QSPI_BASE+0x04  %Long 0x00170100    ; QUADSPI_DCR, 0x00190100=flash size 2^26 (64MBytes) CS min time = 2 cycles.
-Data.Set A:&QSPI_BASE+0x04  %Long 0x00170100    ; QUADSPI_DCR, ##Changed: 16MBytes, CS min time = 2 cycles. Also tried 0x00170000 == CS min time = 1 cycle (matches known-working firmware)
-
+Data.Set A:&QSPI_BASE+0x04  %Long 0x00170000    ; QUADSPI_DCR, ##Changed: 0x00170100 = 16MBytes, CS min time = 2 cycles. Also tried 0x00170000 == CS min time = 1 cycle (matches known-working firmware)
 Data.Set A:&QSPI_BASE+0x0C  %Long 0xFF          ; QUADSPI_FCR, QUADSPI flag clear register
 
 //EXIT QUAD INPUT/OUTPUT MODE(QPI), to make the single spi mode
@@ -78,8 +77,8 @@ GOSUB READ_ID_TEST
 //switch QSPI to the memory mapped mode
 Data.Set  A:&QSPI_BASE      %Long  (Data.Long(A:&QSPI_BASE)&~0x1)  ;disable
 ; Data.Set  A:&QSPI_BASE+0x14 %Long  0x0D003513   ; FMODE, READ cmd(0x13), ADSize 32b and so on...
-// ##Changed: 32-bit => 24-bit. Fast Read command 0x13 => 0xEB
-Data.Set  A:&QSPI_BASE+0x14 %Long  0x0D0025EB   ; FMODE = mem mapped, Data/addr/instr on single line, no dummy cycles, no alt bits, FASTREAD cmd(0x0B), ADSize 24b
+// ##Changed: 32-bit => 24-bit. Fast Read command 0x13 => 0xEB and tried 0x0B
+Data.Set  A:&QSPI_BASE+0x14 %Long  0x0D00250B   ; FMODE = mem mapped, Data/addr/instr on single line, no dummy cycles, no alt bits, FASTREAD cmd(0x0B), ADSize 24b
 
 Data.Set  A:&QSPI_BASE      %Long  (Data.Long(A:&QSPI_BASE)|0x1)  ;enable
 
@@ -100,19 +99,17 @@ ENTRY &progflash
 IF &progflash
 (
   FLASH.ReProgram.ALL
-// ##Changed: file is binary. Also tried loading to 0x70000000, makes no difference.
 ;  Data.LOAD.auto *
 
 //Inserted as per email:
-SYStem.LOG.StopOnError OFF
-SYStem.LOG.RESet
-SYStem.LOG.OPEN ~~/sys.log 
-SYStem.LOG.List
-SYStem.LOG.StopOnError OFF
-Data.LOAD.Binary ~~/main.bin 0x70080000
+;SYStem.LOG.StopOnError OFF
+;SYStem.LOG.RESet
+;SYStem.LOG.OPEN ~~/sys.log 
+;SYStem.LOG.List
+;SYStem.LOG.StopOnError OFF
+Data.LOAD.Binary * 0x70000000
 FLASH.ReProgram OFF
 SYStem.LOG.CLOSE
-;  FLASH.ReProgram.off
 
   ; Reset device
   SYStem.Down
@@ -161,7 +158,7 @@ SCREEN.OFF
 Data.Set A:(&QSPI_BASE+0xC) %LE %Long 0x1F  ;clear status
 
 // ##Changed: tried both ways: 1 instruction line, and 4 instruction lines.
-;&ccr=(0x3<<8)|&wdata       ; imode with insturction  1byte instruction write (3: 4 instruction lines)
+; &ccr=(0x3<<8)|&wdata       ; imode with insturction  1byte instruction write (3: 4 instruction lines)
 &ccr=(0x1<<8)|&wdata       ; imode with instruction  1byte instruction write (1: 1 instruction lines)
 Data.Set A:(&QSPI_BASE+0x14) %LE %Long &ccr
 
@@ -179,9 +176,7 @@ FlashDeclaration:
 
   FLASH.RES
 
-// ##Changed: Tried different driver .bin files (also spi64_stm.bin, and snor3b_stm32mp157.bin). All fail with the same error message
-  &FlashDriver="snor_stm32mp157.bin"
-;  &FlashDriver="spi64_stmqspi.bin"
+  &FlashDriver="snor3b_stm32mp157.bin"
 // ##Changed: chip is 16MB
   &FlashSize=0x1000000       ;16Mbytes
   &FlashBaseAddr=0x70000000  ;SPI AHB base address
