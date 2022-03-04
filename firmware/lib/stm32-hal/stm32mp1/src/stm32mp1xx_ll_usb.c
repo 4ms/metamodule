@@ -442,6 +442,8 @@ HAL_StatusTypeDef USB_DevInit(USB_OTG_GlobalTypeDef *USBx, USB_OTG_CfgTypeDef cf
     USBx->GINTMSK |= (USB_OTG_GINTMSK_SRQIM | USB_OTG_GINTMSK_OTGINT);
   }
 
+  //Required according to Programming Model
+  USBx->GINTMSK |= (USB_OTG_GINTMSK_MMISM | USB_OTG_GINTMSK_OTGINT);
   return ret;
 }
 
