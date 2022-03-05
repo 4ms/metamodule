@@ -223,7 +223,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
 	 * multiple of 4 packet sizes. This is due to the fact that USB DMA does not
 	 * allow sending data from non word-aligned addresses. For this specific
 	 * application, it is advised to not enable this option unless required. */
-	hpcd.Init.dma_enable = 0;
+	hpcd.Init.dma_enable = 1;
 	hpcd.Init.low_power_enable = 0;
 	hpcd.Init.lpm_enable = 0;
 	hpcd.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
