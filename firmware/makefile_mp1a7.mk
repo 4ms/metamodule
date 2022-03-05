@@ -82,6 +82,7 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sai.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_ltdc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_tim.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_ll_rcc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd_ex.c

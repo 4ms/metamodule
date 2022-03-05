@@ -13,6 +13,10 @@
 #include "static_buffers.hh"
 #include "ui.hh"
 
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_msc_storage.h"
+
 namespace MetaModule
 {
 
@@ -20,6 +24,8 @@ struct SystemInit : AppStartup, Debug, Hardware {
 } _sysinit;
 
 } // namespace MetaModule
+
+extern PCD_HandleTypeDef hpcd;
 
 void main() {
 	using namespace MetaModule;
@@ -62,6 +68,22 @@ void main() {
 	param_queue.clear();
 	audio.start();
 	ui.start();
+
+	USBD_HandleTypeDef USBD_Device;
+	auto init_ok = USBD_Init(&USBD_Device, &MSC_Desc, 0);
+	if (init_ok != USBD_OK) {
+		printf("USB Device failed to initialize!\r\n");
+		printf("Error code: %d", static_cast<int>(init_ok));
+	}
+	USBD_RegisterClass(&USBD_Device, USBD_MSC_CLASS);
+	USBD_MSC_RegisterStorage(&USBD_Device, &USBD_MSC_fops);
+	USBD_Start(&USBD_Device);
+
+	InterruptManager::register_and_start_isr(OTG_IRQn, 1, 1, []{
+		Debug::Pin2::high();
+		HAL_PCD_IRQHandler(&hpcd);
+		Debug::Pin2::low();
+	});
 
 	while (true) {
 		ui.update();
