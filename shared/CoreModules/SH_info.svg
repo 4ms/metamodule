@@ -56,6 +56,6 @@
     <circle id="In_1" data-name="In 1" cx="29.28" cy="124.26" r="11.34" style="fill: lime"/>
     <circle id="Samp_1" data-name="Samp 1" cx="29.28" cy="78.14" r="11.34" style="fill: lime"/>
     <text id="slug" transform="translate(22.12 369.44)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro">SH</text>
-    <text id="modulename" transform="translate(29.28 369.44)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro">2 Ch. <tspan x="6.84" y="0" style="letter-spacing: 0.0032552083333333335em">S</tspan><tspan x="8.33" y="0" style="letter-spacing: -0.0003255208333333333em">ample and Hold</tspan></text>
+    <text id="modulename" transform="translate(29.28 369.44)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro">Two Ch. <tspan x="6.84" y="0" style="letter-spacing: 0.0032552083333333335em">S</tspan><tspan x="8.33" y="0" style="letter-spacing: -0.0003255208333333333em">ample And Hold</tspan></text>
   </g>
 </svg>
