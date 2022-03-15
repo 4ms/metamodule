@@ -57,20 +57,16 @@ Data.Set A:0x50000000+0xA28 %LE %Long (0x1<<1.)|(0x1<<5.)  ;GPIOB & GPIOF clk en
 
 ; ------------------------------------------------------------------------------
 ; Flash Pin Mux Configuration
-GOSUB PINMUX_CONFIG
+GOSUB PINMUX_CONFIG_QSPI
 
 ; ------------------------------------------------------------------------------
 ; Flash Controller Init
 Data.Set A:&QSPI_BASE+0x00  %Long 0x04000311    ; QUADSPI_CR, QUADSPI control register, enable clk and prescaler (/4), FIFO lvl = 3, Abort now and enable
-;Data.Set A:&QSPI_BASE+0x04  %Long 0x00170100    ; QUADSPI_DCR, 0x00190100=flash size 2^26 (64MBytes) CS min time = 2 cycles.
-Data.Set A:&QSPI_BASE+0x04  %Long 0x00170000    ; QUADSPI_DCR, ##Changed: 0x00170100 = 16MBytes, CS min time = 2 cycles. Also tried 0x00170000 == CS min time = 1 cycle (matches known-working firmware)
+Data.Set A:&QSPI_BASE+0x04  %Long 0x00170000    ; QUADSPI_DCR, ##Changed: 0x00170000 == 16MB, CS min time = 1 cycle (matches known-working firmware)
 Data.Set A:&QSPI_BASE+0x0C  %Long 0xFF          ; QUADSPI_FCR, QUADSPI flag clear register
 
 //EXIT QUAD INPUT/OUTPUT MODE(QPI), to make the single spi mode
 //0xF5 is for MACRONIX & MICRON SPI flash memories
-//0x38 is for S25FL128
-//Note: with or without this commented out, still cannot write to chip
-; GOSUB WRITEBYTE_QPI   0x38
 
 GOSUB READ_ID_TEST
 
@@ -78,9 +74,11 @@ GOSUB READ_ID_TEST
 Data.Set  A:&QSPI_BASE      %Long  (Data.Long(A:&QSPI_BASE)&~0x1)  ;disable
 ; Data.Set  A:&QSPI_BASE+0x14 %Long  0x0D003513   ; FMODE, READ cmd(0x13), ADSize 32b and so on...
 // ##Changed: 32-bit => 24-bit. Fast Read command 0x13 => 0xEB and tried 0x0B
-Data.Set  A:&QSPI_BASE+0x14 %Long  0x0D00250B   ; FMODE = mem mapped, Data/addr/instr on single line, no dummy cycles, no alt bits, FASTREAD cmd(0x0B), ADSize 24b
-
+Data.Set  A:&QSPI_BASE+0x14 %Long  0x0D002503   ; FMODE = mem mapped, Data/addr/instr on single line, no dummy cycles, no alt bits, READ cmd(0x03), ADSize 24b
 Data.Set  A:&QSPI_BASE      %Long  (Data.Long(A:&QSPI_BASE)|0x1)  ;enable
+
+;GOSUB WRITEBYTE_QPI   0x38
+;GOSUB PINMUX_CONFIG_QSPI
 
 ; ------------------------------------------------------------------------------
 ; Flash declaration
@@ -90,30 +88,35 @@ GOSUB FlashDeclaration "&param_dualport"
 IF &param_prepareonly
   ENDDO PREPAREDONE
 
-; -------------------------------------------------------------------------------
-; Flash programming example
 
-DIALOG.YESNO "Program flash memory?"
+DIALOG.YESNO "No=Read, Yes=Program sector 0 (FSBL1)"
 LOCAL &progflash
 ENTRY &progflash
 IF &progflash
 (
   FLASH.ReProgram.ALL
-;  Data.LOAD.auto *
+  Data.LOAD.Binary * 0x70000000
 
-//Inserted as per email:
-;SYStem.LOG.StopOnError OFF
-;SYStem.LOG.RESet
-;SYStem.LOG.OPEN ~~/sys.log 
-;SYStem.LOG.List
-;SYStem.LOG.StopOnError OFF
-Data.LOAD.Binary * 0x70000000
-FLASH.ReProgram OFF
-SYStem.LOG.CLOSE
-
-  ; Reset device
-  SYStem.Down
-  SYStem.Up
+  DIALOG.YESNO "Program sector 4 (FSBL2)?"
+  LOCAL &progflash4
+  ENTRY &progflash4
+  IF &progflash4
+  (
+    Data.LOAD.Binary * 0x70040000
+    DIALOG.YESNO "Program sector 8 (SSBL/APP)?"
+    LOCAL &progflash8
+    ENTRY &progflash8
+    IF &progflash8
+    (
+      Data.LOAD.Binary * 0x70080000
+    )
+  )
+  FLASH.ReProgram OFF
+)
+ELSE
+(
+  Data.Dump 0x70000000 /Byte /DIALOG
+;FLASH.ERASE 0x70000000--0x7000FFFF
 )
 
 ENDDO
@@ -135,9 +138,6 @@ Data.Set A:&QSPI_DLR  %Long 0x3  ; 4byte data read
 &ccr=&ccr|(0x1<<26.)   ; FMODE = 1 (indirect read mode)
 Data.Set A:&QSPI_CCR %LE %Long &ccr
 
-SYStem.LOG.RESet
-SYStem.LOG.OPEN ~~/sys.log 
-SYStem.LOG.List 
 &read_data=Data.Long(A:&QSPI_DR)  ;read little endian
 
 PRINT "1st 0x" &read_data&0xFF        " (Manufacture, Cypress = 0x01)"
@@ -193,7 +193,7 @@ FlashDeclaration:
   RETURN
 )
 
-PINMUX_CONFIG:
+PINMUX_CONFIG_QSPI:
 (
 
 //pin mux,  please refer the STM32MP1 alternate function mapping (Pinouts and pin description)
@@ -208,9 +208,33 @@ Data.Set A:0x50003000+0x00 %LE %Long (0x2<<12.) ;GPIOB_MODER, PB[6] alternate fu
 Data.Set A:0x50003000+0x20 %LE %Long (0xA<<24.) ;GPIOB[7:0],  PB[6] alt 10
 Data.Set A:0x50003000+0x24 %LE %Long 0x0        ;GPIOB[15:8]
 
-
+//QSPI MODE:
 Data.Set A:0x50007000+0x00 %LE %Long (0x2AA<<12.) ;GPIOF_MODER, PF[10:6] alternate function  mode
 Data.Set A:0x50007000+0x20 %LE %Long (0x99<<24.)  ;GPIOF[7:0],  PF[7:6] alt 9
+Data.Set A:0x50007000+0x24 %LE %Long (0x9AA)      ;GPIOF[15:8], PF[10]  alt 9, PF[9:8] alt 10
+
+)
+RETURN
+
+PINMUX_CONFIG_IO2:
+(
+
+//pin mux,  please refer the STM32MP1 alternate function mapping (Pinouts and pin description)
+;S# <-> GPIOB[6] en ALT 10,  (QUADSPI_BK1_NCS)
+;CLK <-> GPIOF[10] en ALT 9, (QUADSPI_CLK)
+;DQ0 <-> GPIOF[8] en ALT 10, (QUADSPI_BK1_IO0)
+;DQ1 <-> GPIOF[9] en ALT 10, (QUADSPI_BK1_IO1)
+;DQ2 <-> GPIOF[7] output high
+;DQ3 <-> GPIOF[6] output high
+
+Data.Set A:0x50003000+0x00 %LE %Long (0x2<<12.) ;GPIOB_MODER, PB[6] alternate function  mode
+Data.Set A:0x50003000+0x20 %LE %Long (0xA<<24.) ;GPIOB[7:0],  PB[6] alt 10
+Data.Set A:0x50003000+0x24 %LE %Long 0x0        ;GPIOB[15:8]
+
+//IO MODE:
+Data.Set A:0x50007000+0x00 %LE %Long (0x002A5000) ;GPIOF_MODER, PF10,9,8 AltMode; PF6,7 Out
+Data.Set A:0x50007000+0x14 %LE %Long (0x000000C0)  ;PF6,7 high (WP and RESET disabled)
+Data.Set A:0x50007000+0x20 %LE %Long (0x00000000)  ;PF[7:6] no alt
 Data.Set A:0x50007000+0x24 %LE %Long (0x9AA)      ;GPIOF[15:8], PF[10]  alt 9, PF[9:8] alt 10
 
 )
