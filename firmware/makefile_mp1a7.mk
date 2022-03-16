@@ -18,6 +18,7 @@ endif
 target_src := src/$(target_board)
 target_chip_src := src/$(target_board)/mp1
 core_src := src/a7
+usb_src := src/usb
 
 ifeq "$(target_board)" "pcmdev"
 main_source = src/pcmdev/main.cc
@@ -32,16 +33,17 @@ endif
 
 TAG := [MP1A7-$(target_board)]
 
-BUILDDIR = $(BUILDDIR_MP1A7)/$(target_board)
-LOADFILE = $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
-HALDIR = $(HALBASE)/stm32mp1
-DEVICEDIR = $(DEVICEBASE)/stm32mp157c
-TARGETDEVICEDIR = $(DRIVERLIB)/target/stm32mp1
+BUILDDIR 			= $(BUILDDIR_MP1A7)/$(target_board)
+LOADFILE 			= $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
+HALDIR 				= $(HALBASE)/stm32mp1
+USBLIBDIR 			= $(LIBDIR)/stm32-usb-device-lib
+DEVICEDIR 			= $(DEVICEBASE)/stm32mp157c
+TARGETDEVICEDIR 	= $(DRIVERLIB)/target/stm32mp1
 TARGETDEVICEDIR_CA7 = $(DRIVERLIB)/target/stm32mp1_ca7
-STARTUP_CA7	= $(TARGETDEVICEDIR_CA7)/boot/startup_ca7.s
-SHARED = src/shared
-ASM_SOURCES = $(STARTUP_CA7)
-NE10DIR = $(LIBDIR)/ne10/ne10
+STARTUP_CA7			= $(TARGETDEVICEDIR_CA7)/boot/startup_ca7.s
+SHARED 				= src/shared
+ASM_SOURCES 		= $(STARTUP_CA7)
+NE10DIR 			= $(LIBDIR)/ne10/ne10
 
 OPTFLAG = -O3 
 LTOFLAG = -flto=auto
@@ -71,12 +73,26 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 
 else
+SOURCES += $(usb_src)/usbd_conf.c
+SOURCES += $(usb_src)/usbd_desc.c
+SOURCES += $(usb_src)/usbd_msc_storage.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sai.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_ltdc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_tim.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_ll_rcc.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd_ex.c
+SOURCES += $(USBLIBDIR)/Class/MSC/Src/usbd_msc.c
+SOURCES += $(USBLIBDIR)/Class/MSC/Src/usbd_msc_bot.c
+SOURCES += $(USBLIBDIR)/Class/MSC/Src/usbd_msc_data.c
+SOURCES += $(USBLIBDIR)/Class/MSC/Src/usbd_msc_scsi.c
+SOURCES += $(USBLIBDIR)/Core/Src/usbd_core.c
+SOURCES += $(USBLIBDIR)/Core/Src/usbd_ctlreq.c
+SOURCES += $(USBLIBDIR)/Core/Src/usbd_ioreq.c
 SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES += $(DRIVERLIB)/drivers/tim.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc
@@ -176,6 +192,7 @@ INCLUDES +=		-Isrc
 INCLUDES +=		-I$(core_src)
 INCLUDES +=		-I$(target_src)
 INCLUDES +=		-I$(target_chip_src)
+INCLUDES +=		-I$(usb_src)
 INCLUDES +=		-I$(HALDIR)/include
 INCLUDES +=		-I$(CMSIS)/Core_A/Include
 INCLUDES +=		-I$(CMSIS)/Include
@@ -193,6 +210,8 @@ INCLUDES +=		-I$(SHARED)/patch
 INCLUDES +=		-I$(LIBDIR)/lvgl
 INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
 INCLUDES +=		-I$(LIBDIR)/printf
+INCLUDES +=		-I$(USBLIBDIR)/Class/MSC/Inc
+INCLUDES +=		-I$(USBLIBDIR)/Core/Inc
 INCLUDES += 	-I$(SHARED)/etl/include
 INCLUDES += 	-I$(SHARED)/patch_convert
 INCLUDES += 	-I$(SHARED)/patch_convert/ryml

@@ -22,10 +22,12 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32mp1xx_ll_rcc.h"
+#ifndef assert_param
 #ifdef  USE_FULL_ASSERT
 #include "stm32_assert.h"
 #else
 #define assert_param(expr) ((void)0U)
+#endif
 #endif
 
 /** @addtogroup STM32MP1xx_LL_Driver

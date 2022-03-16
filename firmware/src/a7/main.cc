@@ -12,6 +12,7 @@
 #include "shared_memory.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
+#include "usb_msc_device.hh"
 
 namespace MetaModule
 {
@@ -62,6 +63,9 @@ void main() {
 	param_queue.clear();
 	audio.start();
 	ui.start();
+
+	UsbDriveDevice usb_drive;
+	usb_drive.start();
 
 	while (true) {
 		ui.update();
