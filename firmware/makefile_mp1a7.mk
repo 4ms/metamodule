@@ -122,6 +122,12 @@ SOURCES += $(wildcard src/pages/images/components/*.c)
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+
+SOURCES += $(LIBDIR)/fatfs/source/diskio.c
+SOURCES += $(LIBDIR)/fatfs/source/ff.c
+SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
+SOURCES += src/fatfs/diskio.c
+
 # RYMLSOURCES += $(RYMLDIR)/src/c4/yml/common.cpp
 # RYMLSOURCES += $(RYMLDIR)/src/c4/yml/node.cpp
 # RYMLSOURCES += $(RYMLDIR)/src/c4/yml/parse.cpp
@@ -220,6 +226,8 @@ INCLUDES += 	-I$(SHARED)/patch_convert/ryml
 # INCLUDES +=		-I$(NE10DIR)/modules/dsp
 INCLUDES += 	-I$(RYMLDIR)/src
 INCLUDES += 	-I$(RYMLDIR)/ext/c4core/src
+INCLUDES += 	-I$(LIBDIR)/fatfs/source
+INCLUDES += 	-Isrc/fatfs
 
 #D-Cache L1: 32 KB, 128 Sets, 64 Bytes/Line, 4-Way
 EXTRA_CFLAGS = --param l1-cache-size=32 \
