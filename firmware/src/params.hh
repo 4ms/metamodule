@@ -155,7 +155,6 @@ struct MetaParams {
 // The users of this class should each have their own copy of Params and MetaParams.
 //
 // Todo: use HSEM to allow for multiple cores and inverted ISR priorities
-// Todo: "cache" isn't the best name for this, think of something better...
 struct ParamQueue {
 	Params p;
 	MetaParams m;
