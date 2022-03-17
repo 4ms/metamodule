@@ -123,10 +123,11 @@ RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
-SOURCES += $(LIBDIR)/fatfs/source/diskio.c
 SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
-SOURCES += src/fatfs/diskio.c
+SOURCES += src/fatfs/diskio.cc
+SOURCES += src/ramdisk.cc
+
 
 # RYMLSOURCES += $(RYMLDIR)/src/c4/yml/common.cpp
 # RYMLSOURCES += $(RYMLDIR)/src/c4/yml/node.cpp
