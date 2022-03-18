@@ -19,30 +19,39 @@ PatchList::PatchList()
 		  Djembe4_yml,
 	  } {
 
-	NorFlashFS norfs;
-	norfs.init();
-	if (norfs.startfs()) {
-		printf("NOR Flash mounted as virtual fs\r\n");
-	} else {
-		printf("NOR Flash failed to mount as FATFS, creating FS and default patch files...");
-		auto ok = norfs.make_fs();
-		if (!ok) {
-			printf("Failed to create fs\r\n");
+	// TODO: make this LoadPatchFSToRAMDIsk()
+	{
+		NorFlashFS norfs;
+		if (!norfs.init()) {
+			printf("NOR Flash returned wrong id\r\n");
 			return;
 		}
-		ok = norfs.create_file("djembe2.yml", {Djembe2_yml, Djembe2_yml_len});
-		if (!ok) {
-			printf("Failed to create file 1\r\n");
-			return;
-		}
-		ok = norfs.create_file("djembe4.yml", {Djembe4_yml, Djembe4_yml_len});
-		if (!ok) {
-			printf("Failed to create file 2\r\n");
-			return;
-		}
-		printf("Success.\r\n");
 
-		norfs.stopfs();
+		if (norfs.startfs()) {
+			printf("NOR Flash mounted as virtual fs\r\n");
+		} else {
+			printf("No Fatfs found on NOR Flash, creating FS and default patch files...\r\n");
+			auto ok = norfs.make_fs();
+			if (!ok) {
+				printf("Failed to create fs\r\n");
+				return;
+			}
+			ok = norfs.create_file("djembe2.yml", {Djembe2_yml, Djembe2_yml_len});
+			if (!ok) {
+				printf("Failed to create file 1\r\n");
+				return;
+			}
+			ok = norfs.create_file("djembe4.yml", {Djembe4_yml, Djembe4_yml_len});
+			if (!ok) {
+				printf("Failed to create file 2\r\n");
+				return;
+			}
+			printf("Success.\r\n");
+
+			printf("Writing back to NOR Flash.\r\n");
+
+			norfs.stopfs();
+		}
 	}
 
 	// TODO: read from filesystem like this:

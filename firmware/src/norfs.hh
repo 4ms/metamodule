@@ -7,7 +7,7 @@
 class NorFlashFS {
 public:
 	NorFlashFS();
-	void init();
+	bool init();
 
 	// Loads NOR flash contents into RAMDISK
 	bool startfs();

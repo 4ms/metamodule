@@ -9,9 +9,19 @@ NorFlashFS::NorFlashFS()
 	: flash{qspi_patchflash_conf} {
 }
 
-void NorFlashFS::init() {
-	uint32_t id;
-	flash.read_chip_id(&id);
+bool NorFlashFS::init() {
+	uint32_t timeout = 100;
+	uint32_t id = 0;
+
+	do {
+		HAL_Delay(1);
+		flash.read_chip_id(&id);
+		id &= 0x00FFFFFF;
+		if (id == 0x186001)
+			return true;
+	} while (timeout--);
+	printf("read %d\r\n", id);
+	return false;
 }
 
 bool NorFlashFS::startfs() {
@@ -41,7 +51,7 @@ void NorFlashFS::stopfs() {
 			ramptr += 4;
 		}
 		if (sector_modified) {
-			printf("Sector %d modified in RAM, writing to flash\r\n", sector_num);
+			//printf("Sector %d modified in RAM, writing to flash\r\n", sector_num);
 			auto ok = flash.erase(SectorSize, sector_start, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
 				printf("Erase failed.\r\n");
@@ -53,7 +63,7 @@ void NorFlashFS::stopfs() {
 				return;
 			}
 		} else {
-			printf("Sector %d not modified.\r\n", sector_num);
+			//	printf("Sector %d not modified.\r\n", sector_num);
 		}
 	}
 }
@@ -79,8 +89,8 @@ bool NorFlashFS::create_file(const char *filename, const unsigned char *data, un
 	FIL fil;
 	{
 		TCHAR fn[FF_LFN_BUF];
-		u8_to_tchar(filename, fn);
-		auto res = f_open(&fil, fn, FA_CREATE_ALWAYS | FA_WRITE);
+		// u8_to_tchar(filename, fn);
+		auto res = f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE);
 		if (res != FR_OK)
 			return false;
 	}
