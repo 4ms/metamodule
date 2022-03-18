@@ -31,8 +31,8 @@ private:
 	FATFS fs;
 
 	static void u8_to_tchar(const char *u8, TCHAR *uint) {
-		while (*u8) {
+		do {
 			*uint++ = *u8++;
-		}
+		} while (*u8 != '\0');
 	}
 };
