@@ -1,5 +1,5 @@
 #include "patchlist.hh"
-#include "cmsis_gcc.h"
+#include "norfs.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patchlist_ryml_tests.hh"
 #include "util/zip.hh"
@@ -15,39 +15,26 @@ namespace MetaModule
 {
 PatchList::PatchList()
 	: _raw_patch_yaml_files{
-		  Djembe2_yml, Djembe4_yml,
-
-		  // test_inputs_56g1g2_mmpatch,
-		  // test_14switchCore_clock_mmpatch,
-		  // test_14switchCore_cv_mmpatch,
-		  // test_adCore_mmpatch,
-		  // test_attCore_mmpatch,
-		  // test_bitcrushCore_mmpatch,
-		  // test_bpfCore_mmpatch,
-		  // test_clkdividerCore_mmpatch,
-		  // test_clkmultiplierCore_mmpatch,
-		  // test_comparatorCore_mmpatch,
-		  // test_crossfadeCore_mmpatch,
-		  // test_eightstepCore_mmpatch,
-		  // test_envelopefollowerCore_mmpatch,
-		  // test_fourstepCore_mmpatch,
-		  // test_gateCore_mmpatch,
-		  // test_karplusCore_mmpatch,
-		  // test_logicCore_mmpatch,
-		  // test_minmaxCore_mmpatch,
-		  // test_multilfoCore_mmpatch,
-		  // test_octaveCore_mmpatch,
-		  // test_pannerCore_mmpatch,
-		  // test_quantizerCore_mmpatch,
-		  // test_sampleholdCore_mmpatch,
-		  // test_sendCore_mmpatch,
-		  // test_sense_pins_CV_mmpatch,
-		  // test_sense_pins_audio_mmpatch,
-		  // test_sense_pins_gates_mmpatch,
-		  // test_stereomixerCore_mmpatch,
-		  // test_vcaCore_mmpatch,
-		  // MARK: Add patches below here:
+		  Djembe2_yml,
+		  Djembe4_yml,
 	  } {
+
+	NorFlashFS norfs;
+	norfs.init();
+	if (norfs.startfs()) {
+		// printf("NOR Flash mounted as virtual fs");
+	} else {
+		auto ok = norfs.make_default_fs();
+		if (!ok)
+			return;
+		// const std::span<unsigned char> d{Djembe2_yml, Djembe2_yml_len};
+		ok = norfs.create_file("djembe2.yml", Djembe2_yml, Djembe2_yml_len);
+		if (!ok)
+			return;
+		norfs.create_file("djembe4.yml", Djembe4_yml, Djembe4_yml_len);
+
+		// printf("NOR Flash failed to mount");
+	}
 
 	// TODO: read from filesystem like this:
 	// for (auto f : files_in_dir("patches/"){

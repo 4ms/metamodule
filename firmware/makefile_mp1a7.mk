@@ -69,8 +69,6 @@ SOURCES += src/uart_log.cc
 SOURCES += $(main_source)
 
 ifeq "$(target_board)" "norflash-loader"
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
-SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 
 else
 SOURCES += $(usb_src)/usbd_conf.c
@@ -127,6 +125,9 @@ SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
 SOURCES += src/fatfs/diskio.cc
 SOURCES += src/ramdisk.cc
+SOURCES += src/norfs.cc
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
+SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 
 
 # RYMLSOURCES += $(RYMLDIR)/src/c4/yml/common.cpp

@@ -13,7 +13,10 @@
 # $(BUILDDIR)/src/m4/controls.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/screen.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
+$(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
+$(BUILDDIR)/src/norfs.o: OPTFLAG = -O0
+$(BUILDDIR)/src/fatfs/diskio.o: OPTFLAG = -O0
+$(BUILDDIR)/lib/fatfs/source/ff.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
 # $(BUILDDIR)/$(PERIPH)/src/stm32h7xx_hal_qspi.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(DRIVERLIB)/drivers/qspi_flash_driver.o: OPTFLAG = -O0
