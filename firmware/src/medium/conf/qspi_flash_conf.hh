@@ -21,14 +21,16 @@ const mdrivlib::QSPIFlashConfig qspi_flash_conf = {
 
 	.chip_id = mdrivlib::QSPIFlashConfig::S25FLxxxL,
 
-	.io_mode = mdrivlib::QSPIFlashConfig::QPI,
+	.io_mode = mdrivlib::QSPIFlashConfig::QuadSPI,
+
+	.bank = mdrivlib::QSPIFlashConfig::Bank1,
 };
 
 constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
 	.io0 = {GPIO::H, 2, LL_GPIO_AF_9},
 	.io1 = {GPIO::H, 3, LL_GPIO_AF_9},
-	.io2 = {GPIO::Unused , 0},
-	.io3 = {GPIO::Unused , 0},
+	.io2 = {GPIO::Unused, 0},
+	.io3 = {GPIO::Unused, 0},
 	.clk = {GPIO::F, 10, LL_GPIO_AF_9},
 	.cs = {GPIO::C, 0, LL_GPIO_AF_10},
 
@@ -42,5 +44,7 @@ constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
 
 	.chip_id = mdrivlib::QSPIFlashConfig::S25FLxxxL,
 
-	.io_mode = mdrivlib::QSPIFlashConfig::SDR,
+	.io_mode = mdrivlib::QSPIFlashConfig::SingleSPI,
+
+	.bank = mdrivlib::QSPIFlashConfig::Bank2,
 };
