@@ -1,11 +1,11 @@
 #include "patchlist.hh"
+#include "Djembe2.hh"
+#include "Djembe4.hh"
 #include "norfs.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patchlist_ryml_tests.hh"
+#include "printf.h"
 #include "util/zip.hh"
-
-#include "Djembe2.hh"
-#include "Djembe4.hh"
 // #include "test6.hh"
 // #include "v2patch.hh"
 
@@ -22,18 +22,27 @@ PatchList::PatchList()
 	NorFlashFS norfs;
 	norfs.init();
 	if (norfs.startfs()) {
-		// printf("NOR Flash mounted as virtual fs");
+		printf("NOR Flash mounted as virtual fs\r\n");
 	} else {
-		auto ok = norfs.make_default_fs();
-		if (!ok)
+		printf("NOR Flash failed to mount as FATFS, creating FS and default patch files...");
+		auto ok = norfs.make_fs();
+		if (!ok) {
+			printf("Failed to create fs\r\n");
 			return;
-		// const std::span<unsigned char> d{Djembe2_yml, Djembe2_yml_len};
-		ok = norfs.create_file("djembe2.yml", Djembe2_yml, Djembe2_yml_len);
-		if (!ok)
+		}
+		ok = norfs.create_file("djembe2.yml", {Djembe2_yml, Djembe2_yml_len});
+		if (!ok) {
+			printf("Failed to create file 1\r\n");
 			return;
-		norfs.create_file("djembe4.yml", Djembe4_yml, Djembe4_yml_len);
+		}
+		ok = norfs.create_file("djembe4.yml", {Djembe4_yml, Djembe4_yml_len});
+		if (!ok) {
+			printf("Failed to create file 2\r\n");
+			return;
+		}
+		printf("Success.\r\n");
 
-		// printf("NOR Flash failed to mount");
+		norfs.stopfs();
 	}
 
 	// TODO: read from filesystem like this:

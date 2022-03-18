@@ -13,12 +13,13 @@ public:
 	bool startfs();
 
 	// Initializes the ramdisk with a fatfs and sample patch file
-	bool make_default_fs();
+	bool make_fs();
 
-	// bool create_file(const char* filename, const std::span<unsigned char> &data);
-	bool create_file(const char* filename, const unsigned char *data, unsigned sz);
+	// Creates and writes to a file. Overwrites if existing.
+	bool create_file(const char *filename, const std::span<const unsigned char> data);
+	bool create_file(const char *filename, const unsigned char *data, unsigned sz);
 
-	//write RAMDISK to NOR flash (modified sectors only)
+	// Write RAMDISK to NOR flash (modified sectors only)
 	void stopfs();
 
 	struct Fil {};

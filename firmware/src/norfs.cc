@@ -1,7 +1,9 @@
 #include "norfs.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "ff.h"
+#include "printf.h"
 #include "ramdisk.h"
+#include <cstdint>
 
 NorFlashFS::NorFlashFS()
 	: flash{qspi_patchflash_conf} {
@@ -18,7 +20,45 @@ bool NorFlashFS::startfs() {
 	return res == FR_OK;
 }
 
-bool NorFlashFS::make_default_fs() {
+void NorFlashFS::stopfs() {
+	constexpr uint32_t SectorSize = 4096;
+	constexpr uint32_t NumSectors = qspi_patchflash_conf.flash_size_bytes / SectorSize;
+	uint32_t sector[SectorSize / 4];
+	auto *sector8 = (uint8_t *)sector;
+
+	for (uint32_t sector_num = 0; sector_num < NumSectors; sector_num++) {
+		uint32_t sector_start = sector_num * SectorSize;
+		uint32_t ramptr = sector_start;
+
+		flash.Read(sector8, sector_num, SectorSize, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+
+		bool sector_modified = false;
+		for (auto word : sector) {
+			if (word != *(uint32_t *)(&virtdrive[ramptr])) {
+				sector_modified = true;
+				break;
+			}
+			ramptr += 4;
+		}
+		if (sector_modified) {
+			printf("Sector %d modified in RAM, writing to flash\r\n", sector_num);
+			auto ok = flash.Erase(SectorSize, sector_start, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+			if (!ok) {
+				printf("Erase failed.\r\n");
+				return;
+			}
+			ok = flash.Write(&virtdrive[sector_start], sector_start, SectorSize);
+			if (!ok) {
+				printf("Write failed.\r\n");
+				return;
+			}
+		} else {
+			printf("Sector %d not modified.\r\n", sector_num);
+		}
+	}
+}
+
+bool NorFlashFS::make_fs() {
 	BYTE work[FF_MAX_SS * 2];
 	auto res = f_mkfs(vol, nullptr, work, sizeof work);
 	if (res != FR_OK)
@@ -31,8 +71,11 @@ bool NorFlashFS::make_default_fs() {
 	return res == FR_OK;
 }
 
-bool NorFlashFS::create_file(const char* filename, const unsigned char *data, unsigned sz) {
-// bool NorFlashFS::create_file(const char* filename, const std::span<unsigned char> &data) {
+bool NorFlashFS::create_file(const char *filename, const std::span<const unsigned char> data) {
+	return create_file(filename, data.data(), data.size_bytes());
+}
+
+bool NorFlashFS::create_file(const char *filename, const unsigned char *data, unsigned sz) {
 	FIL fil;
 	{
 		TCHAR fn[FF_LFN_BUF];
@@ -52,6 +95,6 @@ bool NorFlashFS::create_file(const char* filename, const unsigned char *data, un
 		if (res != FR_OK)
 			return false;
 	}
-	
+
 	return true;
 }
