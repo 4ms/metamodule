@@ -28,7 +28,7 @@ public:
 private:
 	const TCHAR vol[2] = {'0', '\0'};
 	mdrivlib::QSpiFlash flash;
-	FATFS *fs;
+	FATFS fs;
 
 	static void u8_to_tchar(const char *u8, TCHAR *uint) {
 		while (*u8) {

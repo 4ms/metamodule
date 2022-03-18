@@ -14,7 +14,7 @@ void NorFlashFS::init() {
 
 bool NorFlashFS::startfs() {
 	flash.Read(virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
-	auto res = f_mount(fs, vol, 1);
+	auto res = f_mount(&fs, vol, 1);
 	return res == FR_OK;
 }
 
@@ -24,7 +24,7 @@ bool NorFlashFS::make_default_fs() {
 	if (res != FR_OK)
 		return false;
 
-	res = f_mount(fs, vol, 1);
+	res = f_mount(&fs, vol, 1);
 	if (res != FR_OK)
 		return false;
 
@@ -47,5 +47,11 @@ bool NorFlashFS::create_file(const char* filename, const unsigned char *data, un
 		if (res != FR_OK || bytes_written != sz)
 			return false;
 	}
+	{
+		auto res = f_close(&fil);
+		if (res != FR_OK)
+			return false;
+	}
+	
 	return true;
 }
