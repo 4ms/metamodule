@@ -70,7 +70,7 @@ DRESULT disk_read(BYTE pdrv,	/* Physical drive number to identify the drive */
 
 	switch (pdrv) {
 		case DEV_RAM:
-			std::memcpy(buff, &virtdrive[sector * RAMDISK_BLK_SIZ], count * RAMDISK_BLK_SIZ);
+			std::memcpy(buff, &virtdrive[sector * RamDisk_BlockSize], count * RamDisk_BlockSize);
 			return RES_OK;
 
 		case DEV_MMC:
@@ -101,7 +101,7 @@ DRESULT disk_write(BYTE pdrv,		 /* Physical drive nmuber to identify the drive *
 
 	switch (pdrv) {
 		case DEV_RAM:
-			std::memcpy(&virtdrive[sector * RAMDISK_BLK_SIZ], buff, count * RAMDISK_BLK_SIZ);
+			std::memcpy(&virtdrive[sector * RamDisk_BlockSize], buff, count * RamDisk_BlockSize);
 			return RES_OK;
 
 		case DEV_MMC:
@@ -133,13 +133,13 @@ DRESULT disk_ioctl(BYTE pdrv, /* Physical drive nmuber (0..) */
 		case DEV_RAM:
 			switch (cmd) {
 				case GET_SECTOR_SIZE: // Get R/W sector size (WORD)
-					*(WORD *)buff = RAMDISK_BLK_SIZ;
+					*(WORD *)buff = RamDisk_BlockSize;
 					break;
 				case GET_BLOCK_SIZE: // Get erase block size in unit of sector (DWORD)
 					*(DWORD *)buff = 4;
 					break;
 				case GET_SECTOR_COUNT:
-					*(DWORD *)buff = sizeof(virtdrive) / RAMDISK_BLK_SIZ;
+					*(DWORD *)buff = sizeof(virtdrive) / RamDisk_BlockSize;
 					break;
 				case CTRL_SYNC:
 					break;
