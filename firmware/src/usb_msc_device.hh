@@ -7,6 +7,11 @@
 #include "usbd_msc_storage.h"
 #include <functional>
 
+//TODO: move MSC_fops here
+//Use norfs interface (read/write/eject)
+//TODO: to support multiple USB device interfaces (CDC/MIDI + MSC device)
+//
+
 extern "C" PCD_HandleTypeDef hpcd;
 
 class UsbDriveDevice {
