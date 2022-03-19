@@ -71,9 +71,9 @@ SOURCES += $(main_source)
 ifeq "$(target_board)" "norflash-loader"
 
 else
-SOURCES += $(usb_src)/usbd_conf.c
+SOURCES += $(usb_src)/usbd_conf.cc
 SOURCES += $(usb_src)/usbd_desc.c
-SOURCES += $(usb_src)/usbd_msc_storage.c
+SOURCES += $(usb_src)/usbd_msc_storage.cc
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
@@ -325,7 +325,7 @@ clean_uboot:
 
 UBOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
-$(UIMG): $(BIN) #$(UBOOT_MKIMAGE)
+$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
 	$(UBOOT_MKIMAGE_CMD)
 
 %-uimg.h : %.uimg 
