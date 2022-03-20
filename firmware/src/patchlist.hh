@@ -1,4 +1,5 @@
 #pragma once
+#include "norfs.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 
@@ -10,6 +11,7 @@ struct PatchList {
 	static constexpr int32_t NumPatches = 2;
 
 	PatchList();
+	PatchList(NorFlashFS &norfs);
 
 	ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
 		if (patch_id >= NumPatches)

@@ -18,13 +18,16 @@
 
 /* Includes ------------------------------------------------------------------ */
 #include "drivers/stm32xx.h"
-extern "C" {
 #include "usbd_core.h"
 #include "usbd_msc.h"
-}
 #include "norfs.hh"
 
 PCD_HandleTypeDef hpcd;
+
+static NorFlashFS *_norflash = nullptr;
+void set_usbd_msc_norflash(NorFlashFS *norflash) {
+	_norflash = norflash;
+}
 
 /**
  * @brief  Initializes the PCD MSP.
@@ -185,6 +188,8 @@ void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum) {
  */
 void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd) {
 	USBD_LL_DevConnected((USBD_HandleTypeDef*)hpcd->pData);
+	if (_norflash)
+		_norflash->startfs();
 }
 
 /**
@@ -194,6 +199,8 @@ void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd) {
  */
 void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd) {
 	USBD_LL_DevDisconnected((USBD_HandleTypeDef*)hpcd->pData);
+	if (_norflash)
+		_norflash->stopfs();
 }
 
 /*******************************************************************************

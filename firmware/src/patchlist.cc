@@ -13,15 +13,20 @@
 
 namespace MetaModule
 {
-PatchList::PatchList()
+PatchList::PatchList(NorFlashFS &norfs)
 	: _raw_patch_yaml_files{
 		  Djembe2_yml,
 		  Djembe4_yml,
 	  } {
 
+	// And main/ui does the init and startfs
+	// and if startfs() returns false, it calls mkfs and
+	// norfs.create_file(PatchList::get_default_patch_name(), PatchList::get_default_patch());
+	// and then stopfs()
+	norfs.set_status(NorFlashFS::Status::InUse);
+
 	// TODO: make this LoadPatchFSToRAMDIsk()
 	{
-		NorFlashFS norfs;
 		if (!norfs.init()) {
 			printf("NOR Flash returned wrong id\r\n");
 			return;
@@ -60,6 +65,7 @@ PatchList::PatchList()
 	//		if (ok) ...
 	// 		yaml_string_to_patch(yamldata, patchheader, patchdata);
 	// }
+	norfs.set_status(NorFlashFS::Status::NotInUse);
 
 	for (auto [yamldata, patchdata] : zip(_raw_patch_yaml_files, _patch_data)) {
 		//Note: we use a std::string because it allocates the space that ryml needs to parse in place

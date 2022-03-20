@@ -5,8 +5,10 @@
 #include "ramdisk.h"
 #include <cstdint>
 
-NorFlashFS::NorFlashFS()
-	: flash{qspi_patchflash_conf} {
+NorFlashFS::NorFlashFS(std::string_view v)
+	: flash{qspi_patchflash_conf} 
+	, vol{v}
+{
 }
 
 bool NorFlashFS::init() {
@@ -26,7 +28,7 @@ bool NorFlashFS::init() {
 
 bool NorFlashFS::startfs() {
 	flash.read(virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
-	auto res = f_mount(&fs, vol, 1);
+	auto res = f_mount(&fs, vol.data(), 1);
 	return res == FR_OK;
 }
 
@@ -70,11 +72,11 @@ void NorFlashFS::stopfs() {
 
 bool NorFlashFS::make_fs() {
 	BYTE work[FF_MAX_SS * 2];
-	auto res = f_mkfs(vol, nullptr, work, sizeof work);
+	auto res = f_mkfs(vol.data(), nullptr, work, sizeof work);
 	if (res != FR_OK)
 		return false;
 
-	res = f_mount(&fs, vol, 1);
+	res = f_mount(&fs, vol.data(), 1);
 	if (res != FR_OK)
 		return false;
 
@@ -107,4 +109,10 @@ bool NorFlashFS::create_file(const char *filename, const unsigned char *data, un
 	}
 
 	return true;
+}
+
+static void u8_to_tchar(const char *u8, TCHAR *uint) {
+	do {
+		*uint++ = *u8++;
+	} while (*u8 != '\0');
 }

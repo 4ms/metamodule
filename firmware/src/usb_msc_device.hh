@@ -5,6 +5,7 @@
 #include "usbd_core.h"
 #include "usbd_desc.h"
 #include "usbd_msc_storage.h"
+#include "norfs.hh"
 #include <functional>
 
 //TODO: move MSC_fops here
@@ -12,6 +13,7 @@
 //TODO: to support multiple USB device interfaces (CDC/MIDI + MSC device)
 //
 
+void set_usbd_msc_norflash(NorFlashFS *norflash);
 extern "C" PCD_HandleTypeDef hpcd;
 
 class UsbDriveDevice {
@@ -30,6 +32,7 @@ public:
 		InterruptControl::set_irq_priority(OTG_IRQn, 1, 0);
 		InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_PCD_IRQHandler, &hpcd));
 		InterruptControl::enable_irq(OTG_IRQn, InterruptControl::LevelTriggered);
+
 		USBD_RegisterClass(&USBD_Device, USBD_MSC_CLASS);
 		USBD_MSC_RegisterStorage(&USBD_Device, &USBD_MSC_fops);
 		USBD_Start(&USBD_Device);

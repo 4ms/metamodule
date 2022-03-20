@@ -4,15 +4,17 @@
 #include <span>
 #include <string_view>
 
+
 class NorFlashFS {
 public:
-	enum class Status { NotInit, Connected, Disconnected };
+	enum class Status { NotInit, InUse, NotInUse };
 
-	NorFlashFS();
+	NorFlashFS(std::string_view vol);
 
 	bool init();
 
 	// Loads NOR flash contents into RAMDISK
+	// Does nothing is already loaded
 	bool startfs();
 
 	// Initializes the ramdisk with a fatfs
@@ -40,14 +42,12 @@ public:
 	// Fil next_ext_in_dir(std::string_view ext, std::string_view path);
 
 private:
-	const TCHAR vol[2] = {'0', '\0'};
 	mdrivlib::QSpiFlash flash;
 	FATFS fs;
 	Status _status = Status::NotInit;
+	const std::string_view vol;
 
-	static void u8_to_tchar(const char *u8, TCHAR *uint) {
-		do {
-			*uint++ = *u8++;
-		} while (*u8 != '\0');
-	}
+	//TODO: added a 16MB RamDisk member
+
 };
+

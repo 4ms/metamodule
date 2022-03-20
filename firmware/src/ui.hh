@@ -14,21 +14,21 @@ namespace MetaModule
 
 class Ui {
 private:
-	PageManager page_manager;
 	ParamQueue &param_queue;
+	PatchList &patch_list;
+	UiAudioMailbox &mbox;
 
+	PageManager page_manager;
 	Params params;
 	MetaParams metaparams;
-	PatchList patch_list;
-
-	UiAudioMailbox &mbox;
 
 	static inline LVGLDriver gui{
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
+	Ui(PatchPlayer &pp, PatchList &pl, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
 		: param_queue{pc}
+		, patch_list{pl}
 		, mbox{uiaudiomailbox}
 		, page_manager{patch_list, pp, params, metaparams, uiaudiomailbox} {
 	}

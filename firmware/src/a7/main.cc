@@ -8,6 +8,7 @@
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_player.hh"
+#include "patchlist.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
@@ -27,13 +28,16 @@ void main() {
 
 	StaticBuffers::init();
 
+	NorFlashFS norfs{"0"}; //Volume 0 = RamDisk. TODO: use string volume names
+
+	PatchList patch_list{norfs};
 	PatchPlayer patch_player;
 	ParamQueue param_queue;
 	UiAudioMailbox mbox;
 
 	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 
-	Ui ui{patch_player, param_queue, mbox};
+	Ui ui{patch_player, patch_list, param_queue, mbox};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
@@ -64,7 +68,10 @@ void main() {
 	audio.start();
 	ui.start();
 
+
+	norfs.init();
 	UsbDriveDevice usb_drive;
+	set_usbd_msc_norflash(&norfs); //TODO: usb_drive.set_fs_base(norfs);
 	usb_drive.start();
 
 	while (true) {
