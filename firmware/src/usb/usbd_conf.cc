@@ -20,14 +20,9 @@
 #include "drivers/stm32xx.h"
 #include "usbd_core.h"
 #include "usbd_msc.h"
-#include "norfs.hh"
+#include "usbd_msc_storage.h" //for MSC_fops
 
 PCD_HandleTypeDef hpcd;
-
-static NorFlashFS *_norflash = nullptr;
-void set_usbd_msc_norflash(NorFlashFS *norflash) {
-	_norflash = norflash;
-}
 
 /**
  * @brief  Initializes the PCD MSP.
@@ -188,8 +183,12 @@ void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum) {
  */
 void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd) {
 	USBD_LL_DevConnected((USBD_HandleTypeDef*)hpcd->pData);
-	if (_norflash)
-		_norflash->startfs();
+	// fops->Init is called already...?
+	// uint32_t num_lun = USBD_MSC_fops.GetMaxLun();
+	// while (num_lun >= 0) {
+	// 	USBD_MSC_fops.Init(num_lun);
+	// 	num_lun--;
+	// }
 }
 
 /**
@@ -199,8 +198,11 @@ void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd) {
  */
 void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd) {
 	USBD_LL_DevDisconnected((USBD_HandleTypeDef*)hpcd->pData);
-	if (_norflash)
-		_norflash->stopfs();
+	uint32_t num_lun = USBD_MSC_fops.GetMaxLun();
+	while (num_lun >= 0) {
+		USBD_MSC_fops.Eject(num_lun);
+		num_lun--;
+	}
 }
 
 /*******************************************************************************
