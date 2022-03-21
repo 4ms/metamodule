@@ -1,16 +1,14 @@
 
 #include "usbd_msc_storage.h"
-#include "ramdisk.h"
+#include "norfs.hh"
 #include <cstring>
 
-static int8_t RamDisk_Init(uint8_t lun);
-static int8_t RamDisk_GetCapacity(uint8_t lun, uint32_t *block_num, uint16_t *block_size);
-static int8_t RamDisk_IsReady(uint8_t lun);
-static int8_t RamDisk_IsWriteProtected(uint8_t lun);
-static int8_t RamDisk_Read(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len);
-static int8_t RamDisk_Write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len);
-static int8_t RamDisk_GetMaxLun();
-static int8_t RamDisk_Eject(uint8_t lun);
+static NorFlashFS *norfs = nullptr;
+void usbd_msc_register_norfs(NorFlashFS *nfs) {
+	norfs = nfs;
+}
+
+//TODO: Add SD Card as a second lun (or add each partition as a lun)
 
 struct InquiryData {
 	uint8_t a;
@@ -28,50 +26,35 @@ InquiryData RamDisk_Inquirydata = {
 	.b = 0x80,
 	.c = 0x02,
 	.d = 0x02,
-	.len = STANDARD_INQUIRY_DATA_LEN - 5,
-	.manuf = "4ms    ",
-	.product = "MetaModule     ",
-	.version = {'0', '.', '0', '1'},
-};
-
-// static uint8_t RamDisk_Inquirydata[] = /* 36 */
-// 	{
-// 		// clang-format off
-// 		/* LUN 0 */
-// 		0x00, 0x80, 0x02, 0x02,
-// 		(STANDARD_INQUIRY_DATA_LEN - 5), 0x00, 0x00, 0x00,
-// 		'4', 'm', 's', ' ', ' ', ' ', ' ', ' ', /* Manufacturer : 8 bytes */
-// 		'M', 'e', 't', 'a', 'M', 'o', 'd', 'u', /* Product      : 16 Bytes */
-// 		'l', 'e', ' ', ' ', ' ', ' ', ' ', ' ',
-// 		'0', '.', '0', '1', 					 /* Version      : 4 Bytes */
-// 		// clang-format on
-// };
-
-USBD_StorageTypeDef USBD_MSC_fops = {
-	RamDisk_Init,
-	RamDisk_GetCapacity,
-	RamDisk_IsReady,
-	RamDisk_IsWriteProtected,
-	RamDisk_Read,
-	RamDisk_Write,
-	RamDisk_GetMaxLun,
-	reinterpret_cast<int8_t*>(&RamDisk_Inquirydata),
-	RamDisk_Eject,
+	.len = sizeof(InquiryData) - 5,
+ 	.manuf = {'4', 'm', 's', ' ', ' ', ' ', ' ', ' '},
+ 	.product = {'M', 'e', 't', 'a', 'M', 'o', 'd', 'u', 'l', 'e', ' ', ' ', ' ', ' ', ' ', ' '},
+ 	.version = {'0', '.', '0', '1'},
+	// .manuf = "4ms",
+	// .product = "MetaModule",
+	// .version = {'0', '.', '0', '1'},
 };
 
 static int8_t RamDisk_Init(uint8_t lun) {
-	RamDisk_SetStatus(Connected);
+	if (lun == 0) {
+		norfs->set_status(NorFlashFS::Status::InUse);
+	}
 	return USBD_OK;
 }
 
 static int8_t RamDisk_Eject(uint8_t lun) {
-	RamDisk_SetStatus(Disconnected);
+	if (lun == 0) {
+		norfs->set_status(NorFlashFS::Status::NotInUse);
+		norfs->stopfs();
+	}
 	return USBD_OK;
 }
 
 static int8_t RamDisk_GetCapacity(uint8_t lun, uint32_t *block_num, uint16_t *block_size) {
-	*block_num = RamDisk_NumBlocks;
-	*block_size = RamDisk_BlockSize;
+	if (lun == 0) {
+		*block_num = norfs->RamDiskSizeBytes / norfs->RamDiskBlockSize;
+		*block_size = norfs->RamDiskBlockSize;
+	}
 	return (USBD_OK);
 }
 
@@ -84,19 +67,31 @@ static int8_t RamDisk_IsWriteProtected(uint8_t lun) {
 }
 
 static int8_t RamDisk_Read(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len) {
-	std::memcpy(buf, &virtdrive[blk_addr * RamDisk_BlockSize], blk_len * RamDisk_BlockSize);
-	// for (uint16_t i = 0; i < (blk_len * RamDisk_BlockSize); i++)
-	// 	buf[i] = virtdrive[blk_addr * RamDisk_BlockSize + i];
+	if (lun == 0) {
+		norfs->read_sectors(buf, blk_addr, blk_len);
+	}
 	return USBD_OK;
 }
 
 static int8_t RamDisk_Write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len) {
-	std::memcpy(&virtdrive[blk_addr * RamDisk_BlockSize], buf, blk_len * RamDisk_BlockSize);
-	// for (uint16_t i = 0; i < (blk_len * RamDisk_BlockSize); i++)
-	// 	virtdrive[blk_addr * RamDisk_BlockSize + i] = buf[i];
+	if (lun == 0) {
+		norfs->write_sectors(buf, blk_addr, blk_len);
+	}
 	return USBD_OK;
 }
 
 static int8_t RamDisk_GetMaxLun() {
 	return 0; //1 unit
 }
+
+USBD_StorageTypeDef USBD_MSC_fops = {
+	RamDisk_Init,
+	RamDisk_GetCapacity,
+	RamDisk_IsReady,
+	RamDisk_IsWriteProtected,
+	RamDisk_Read,
+	RamDisk_Write,
+	RamDisk_GetMaxLun,
+	reinterpret_cast<int8_t*>(&RamDisk_Inquirydata),
+	RamDisk_Eject,
+};
