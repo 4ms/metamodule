@@ -2,13 +2,19 @@
 #include "conf/qspi_flash_conf.hh"
 #include "ff.h"
 #include "printf.h"
-#include "ramdisk.h"
 #include <cstdint>
+#include <cstring>
+
+// Defined in diskio.cc
+void register_norfs(NorFlashFS *nfs, uint8_t drive_num);
 
 NorFlashFS::NorFlashFS(std::string_view v)
-	: flash{qspi_patchflash_conf} 
-	, vol{v}
-{
+	: flash{qspi_patchflash_conf}
+	, vol{v} {
+	if (vol[0] < '0' || vol[0] > '3')
+		register_norfs(this, vol[0] - '0');
+	else 
+		printf("Invalid volume number for NorFlashFS: %s", vol.data());
 }
 
 bool NorFlashFS::init() {
@@ -22,12 +28,12 @@ bool NorFlashFS::init() {
 		if (id == 0x186001)
 			return true;
 	} while (timeout--);
-	printf("read %d\r\n", id);
+	// printf("read %d\r\n", id);
 	return false;
 }
 
 bool NorFlashFS::startfs() {
-	flash.read(virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+	flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 	auto res = f_mount(&fs, vol.data(), 1);
 	return res == FR_OK;
 }
@@ -46,7 +52,7 @@ void NorFlashFS::stopfs() {
 
 		bool sector_modified = false;
 		for (auto word : sector) {
-			if (word != *(uint32_t *)(&virtdrive[ramptr])) {
+			if (word != *(uint32_t *)(&ramdisk.virtdrive[ramptr])) {
 				sector_modified = true;
 				break;
 			}
@@ -59,7 +65,7 @@ void NorFlashFS::stopfs() {
 				printf("Erase failed.\r\n");
 				return;
 			}
-			ok = flash.write(&virtdrive[sector_start], sector_start, SectorSize);
+			ok = flash.write(&ramdisk.virtdrive[sector_start], sector_start, SectorSize);
 			if (!ok) {
 				printf("Write failed.\r\n");
 				return;
@@ -81,6 +87,19 @@ bool NorFlashFS::make_fs() {
 		return false;
 
 	return res == FR_OK;
+}
+
+void NorFlashFS::read_bytes(uint8_t *data, uint32_t address, uint32_t bytes) {
+	std::memcpy(data, &ramdisk.virtdrive[address], bytes);
+}
+
+void NorFlashFS::read_sectors(uint8_t *data, uint32_t sector, uint32_t sector_count) {
+	read_bytes(data, sector * ramdisk.BlockSize, sector_count * ramdisk.BlockSize);
+}
+
+void NorFlashFS::write(const uint8_t *const data, uint32_t address, uint32_t bytes) {
+}
+void NorFlashFS::write_sectors(const uint8_t *const data, uint32_t sector, uint32_t sector_count) {
 }
 
 bool NorFlashFS::create_file(const char *filename, const std::span<const unsigned char> data) {

@@ -1,13 +1,14 @@
-#include "ramdisk.h"
+#include "ramdisk.hh"
 
-__attribute__((section(".virtdrive"))) uint8_t virtdrive[RamDisk_SizeBytes];
 
-static RamDiskStatus _status = NotInit;
+// __attribute__((section(".virtdrive"))) uint8_t virtdrive[RamDisk_SizeBytes];
 
-void RamDisk_SetStatus(enum RamDiskStatus status) {
-	_status = status;
-}
+// static RamDiskStatus _status = NotInit;
 
-enum RamDiskStatus RamDisk_GetStatus() {
-	return _status;
-}
+// void RamDisk_SetStatus(enum RamDiskStatus status) {
+// 	_status = status;
+// }
+
+// enum RamDiskStatus RamDisk_GetStatus() {
+// 	return _status;
+// }
