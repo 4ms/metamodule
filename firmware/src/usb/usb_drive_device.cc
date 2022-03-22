@@ -23,6 +23,7 @@ void UsbDriveDevice::start() {
 	InterruptControl::enable_irq(OTG_IRQn, InterruptControl::LevelTriggered);
 
 	//TODO: Add support for multiple usb interfaces (CDC/MIDI): "AddClass()" not RegisterClass
+	//Should also rename this class to UsbDeviceManager or something
 	USBD_RegisterClass(&pdev, USBD_MSC_CLASS);
 	USBD_MSC_RegisterStorage(&pdev, &ops);
 	USBD_Start(&pdev);

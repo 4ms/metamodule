@@ -8,8 +8,6 @@
 #include "usbd_msc.h"
 #include <functional>
 
-//TODO: to support multiple USB device interfaces (CDC/MIDI + MSC device)
-
 class UsbDriveDevice {
 
 public:
@@ -34,4 +32,3 @@ private:
 	//SDMMC, lun 1:
 	//TODO
 };
-
