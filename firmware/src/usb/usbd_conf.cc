@@ -20,7 +20,7 @@
 #include "drivers/stm32xx.h"
 #include "usbd_core.h"
 #include "usbd_msc.h"
-#include "usbd_msc_storage.h" //for MSC_fops
+#include "usb_drive_device.hh" 
 
 PCD_HandleTypeDef hpcd;
 
@@ -198,9 +198,9 @@ void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd) {
  */
 void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd) {
 	USBD_LL_DevDisconnected((USBD_HandleTypeDef*)hpcd->pData);
-	uint32_t num_lun = USBD_MSC_fops.GetMaxLun();
+	int8_t num_lun = UsbDriveDevice::ops.GetMaxLun();
 	while (num_lun >= 0) {
-		USBD_MSC_fops.Eject(num_lun);
+		UsbDriveDevice::ops.Eject(num_lun);
 		num_lun--;
 	}
 }
