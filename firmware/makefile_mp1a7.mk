@@ -264,9 +264,9 @@ MCU = -mcpu=cortex-a7 \
 	  -mno-unaligned-access \
 	  -mtune=cortex-a7 \
 	  -mvectorize-with-neon-quad \
+	  -funsafe-math-optimizations \
 	  # -ffast-math \
 	  # -mstrict-align \
-	  # -funsafe-math-optimizations \
 
 	  # -fopt-info-vec-missed=vec.miss 
 	  # -ftree-vectorizer-verbose=n -fdump-tree-vect
