@@ -3,7 +3,7 @@
 
 using mdrivlib::GPIO;
 
-const mdrivlib::QSPIFlashConfig qspi_flash_conf = {
+constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
 	.io0 = {GPIO::F, 8, LL_GPIO_AF_10},
 	.io1 = {GPIO::F, 9, LL_GPIO_AF_10},
 	.io2 = {GPIO::F, 7, LL_GPIO_AF_9},
@@ -26,7 +26,7 @@ const mdrivlib::QSPIFlashConfig qspi_flash_conf = {
 	.bank = mdrivlib::QSPIFlashConfig::Bank1,
 };
 
-constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
+constexpr mdrivlib::QSPIFlashConfig qspi_flash_conf = {
 	.io0 = {GPIO::H, 2, LL_GPIO_AF_9},
 	.io1 = {GPIO::H, 3, LL_GPIO_AF_9},
 	.io2 = {GPIO::Unused, 0},

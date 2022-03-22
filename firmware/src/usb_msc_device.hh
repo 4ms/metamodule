@@ -2,10 +2,10 @@
 
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
+#include "norfs.hh"
 #include "usbd_core.h"
 #include "usbd_desc.h"
 #include "usbd_msc_storage.h"
-#include "norfs.hh"
 #include <functional>
 
 //TODO: move MSC_fops here
@@ -13,7 +13,8 @@
 //TODO: to support multiple USB device interfaces (CDC/MIDI + MSC device)
 //
 
-void set_usbd_msc_norflash(NorFlashFS *norflash);
+void usbd_msc_register_norfs(NorFlashFS *nfs);
+
 extern "C" PCD_HandleTypeDef hpcd;
 
 class UsbDriveDevice {
@@ -21,7 +22,11 @@ class UsbDriveDevice {
 	using InterruptManager = mdrivlib::InterruptManager;
 
 public:
-	UsbDriveDevice() = default;
+	UsbDriveDevice(NorFlashFS *nfs)
+		: norfs{nfs} {
+		usbd_msc_register_norfs(norfs);
+	}
+
 	void start() {
 		auto init_ok = USBD_Init(&USBD_Device, &MSC_Desc, 0);
 		if (init_ok != USBD_OK) {
@@ -40,4 +45,5 @@ public:
 
 private:
 	USBD_HandleTypeDef USBD_Device;
+	NorFlashFS *norfs;
 };

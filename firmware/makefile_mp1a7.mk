@@ -257,15 +257,17 @@ ARCH_CFLAGS += -DUSE_HAL_DRIVER \
               # -DENABLE_NE10_FIR_SPARSE_FLOAT_NEON \
               # -DENABLE_NE10_IIR_LATTICE_FLOAT_NEON \
 
-MCU = -mcpu=cortex-a7 \
+MCU = -mcpu=cortex-a7+nosimd \
 	  -mlittle-endian \
-	  -mfpu=neon-vfpv4 \
+	  -mfpu=vfpv4 \
 	  -mfloat-abi=hard \
 	  -mthumb-interwork \
-	  -mtune=cortex-a7 \
 	  -mno-unaligned-access \
-	  -funsafe-math-optimizations \
-	  -mvectorize-with-neon-quad \
+	  # -mtune=cortex-a7 \
+	  # -mstrict-align \
+	  # -ffast-math \
+	  # -mvectorize-with-neon-quad \
+	  # -funsafe-math-optimizations \
 
 	  # -fopt-info-vec-missed=vec.miss 
 	  # -ftree-vectorizer-verbose=n -fdump-tree-vect

@@ -10,7 +10,7 @@ public:
 	static constexpr uint32_t RamDiskSizeBytes = 16 * 1024 * 1024;
 	static constexpr uint32_t RamDiskBlockSize = 512;
 
-	NorFlashFS(std::string_view vol);
+	NorFlashFS(std::string_view vol, RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &ramdisk);
 
 	// Gets hardware ready (QSPI bus)
 	bool init();
@@ -27,7 +27,7 @@ public:
 
 	void read_bytes(uint8_t *data, uint32_t address, uint32_t bytes);
 	void read_sectors(uint8_t *data, uint32_t sector, uint32_t sector_count);
-	void write(const uint8_t *const data, uint32_t address, uint32_t bytes);
+	void write_bytes(const uint8_t *const data, uint32_t address, uint32_t bytes);
 	void write_sectors(const uint8_t *const data, uint32_t sector, uint32_t sector_count);
 
 	enum class Status { NotInit, InUse, NotInUse };
@@ -52,5 +52,5 @@ private:
 	Status _status = Status::NotInit;
 	const std::string_view vol;
 
-	RamDisk<RamDiskSizeBytes, RamDiskBlockSize> ramdisk;
+	RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &ramdisk;
 };

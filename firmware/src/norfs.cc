@@ -8,13 +8,14 @@
 // Defined in diskio.cc
 void register_norfs(NorFlashFS *nfs, uint8_t drive_num);
 
-NorFlashFS::NorFlashFS(std::string_view v)
+NorFlashFS::NorFlashFS(std::string_view v, RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
 	: flash{qspi_patchflash_conf}
-	, vol{v} {
-	if (vol[0] < '0' || vol[0] > '3')
+	, vol{v}
+	, ramdisk{rmdisk} {
+	if (vol[0] >= '0' && vol[0] <= '3')
 		register_norfs(this, vol[0] - '0');
-	else 
-		printf("Invalid volume number for NorFlashFS: %s", vol.data());
+	else
+		printf("Invalid volume number for NorFlashFS: %s\r\n", vol.data());
 }
 
 bool NorFlashFS::init() {
@@ -28,7 +29,7 @@ bool NorFlashFS::init() {
 		if (id == 0x186001)
 			return true;
 	} while (timeout--);
-	// printf("read %d\r\n", id);
+	printf("NOR ID read %d\r\n", id);
 	return false;
 }
 
@@ -97,9 +98,12 @@ void NorFlashFS::read_sectors(uint8_t *data, uint32_t sector, uint32_t sector_co
 	read_bytes(data, sector * ramdisk.BlockSize, sector_count * ramdisk.BlockSize);
 }
 
-void NorFlashFS::write(const uint8_t *const data, uint32_t address, uint32_t bytes) {
+void NorFlashFS::write_bytes(const uint8_t *const data, uint32_t address, uint32_t bytes) {
+	std::memcpy(&ramdisk.virtdrive[address], data, bytes);
 }
+
 void NorFlashFS::write_sectors(const uint8_t *const data, uint32_t sector, uint32_t sector_count) {
+	write_bytes(data, sector * ramdisk.BlockSize, sector_count * ramdisk.BlockSize);
 }
 
 bool NorFlashFS::create_file(const char *filename, const std::span<const unsigned char> data) {
