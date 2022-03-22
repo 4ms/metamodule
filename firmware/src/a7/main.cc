@@ -28,7 +28,7 @@ void main() {
 
 	StaticBuffers::init();
 
-	NorFlashFS norfs{"0"}; //Volume 0 = RamDisk. TODO: use string volume names
+	NorFlashFS norfs{"0", StaticBuffers::virtdrive}; //Volume 0 = RamDisk. TODO: use string volume names
 
 	PatchList patch_list{norfs};
 	PatchPlayer patch_player;
@@ -68,10 +68,8 @@ void main() {
 	audio.start();
 	ui.start();
 
-
-	norfs.init();
-	UsbDriveDevice usb_drive;
-	set_usbd_msc_norflash(&norfs); //TODO: usb_drive.set_fs_base(norfs);
+	// norfs.init();
+	UsbDriveDevice usb_drive{&norfs};
 	usb_drive.start();
 
 	while (true) {

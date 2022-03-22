@@ -5,7 +5,7 @@
 # $(BUILDDIR)/src/pages/page_manager.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/pages/page_manager.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O1
+$(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/norflash-loader/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m7/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/timekeeper.o: OPTFLAG = -O0
@@ -14,7 +14,7 @@
 # $(BUILDDIR)/src/screen.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/norfs.o: OPTFLAG = -O0
+$(BUILDDIR)/src/norfs.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/fatfs/diskio.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/fatfs/source/ff.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
