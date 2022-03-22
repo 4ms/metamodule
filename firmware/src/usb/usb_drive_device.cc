@@ -1,6 +1,7 @@
 #include "usb_drive_device.hh"
 #include "norfs.hh"
 #include "usbd_msc.h"
+#include "printf.h"
 #include <cstring>
 
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
@@ -31,6 +32,7 @@ void UsbDriveDevice::start() {
 
 int8_t UsbDriveDevice::init(uint8_t lun) {
 	if (lun == 0) {
+		printf("USB connecte to host\r\n");
 		norfs->set_status(NorFlashFS::Status::InUse);
 	}
 	return USBD_OK;
@@ -38,8 +40,9 @@ int8_t UsbDriveDevice::init(uint8_t lun) {
 
 int8_t UsbDriveDevice::eject(uint8_t lun) {
 	if (lun == 0) {
-		norfs->set_status(NorFlashFS::Status::NotInUse);
-		norfs->stopfs();
+		printf("USB MSC device got Eject event from host\r\n");
+		norfs->set_status(NorFlashFS::Status::RequiresWriteBack);
+		// norfs->stopfs();
 	}
 	return USBD_OK;
 }
