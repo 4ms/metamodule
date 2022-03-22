@@ -13,7 +13,7 @@
 #include "shared_memory.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
-#include "usb_msc_device.hh"
+#include "usb/usb_drive_device.hh"
 
 namespace MetaModule
 {

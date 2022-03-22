@@ -1,0 +1,120 @@
+#include "usb_drive_device.hh"
+#include "norfs.hh"
+#include "usbd_msc.h"
+#include <cstring>
+
+//TODO: Add SD Card as a second lun (or add each partition as a lun)
+
+extern "C" PCD_HandleTypeDef hpcd;
+
+void UsbDriveDevice::start() {
+	using InterruptControl = mdrivlib::InterruptControl;
+	using InterruptManager = mdrivlib::InterruptManager;
+
+	auto init_ok = USBD_Init(&pdev, &MSC_Desc, 0);
+	if (init_ok != USBD_OK) {
+		printf("USB Device failed to initialize!\r\n");
+		printf("Error code: %d", static_cast<int>(init_ok));
+	}
+
+	InterruptControl::disable_irq(OTG_IRQn);
+	InterruptControl::set_irq_priority(OTG_IRQn, 1, 0);
+	InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_PCD_IRQHandler, &hpcd));
+	InterruptControl::enable_irq(OTG_IRQn, InterruptControl::LevelTriggered);
+
+	//TODO: Add support for multiple usb interfaces (CDC/MIDI): "AddClass()" not RegisterClass
+	//Should also rename this class to UsbDeviceManager or something
+	USBD_RegisterClass(&pdev, USBD_MSC_CLASS);
+	USBD_MSC_RegisterStorage(&pdev, &ops);
+	USBD_Start(&pdev);
+}
+
+int8_t UsbDriveDevice::init(uint8_t lun) {
+	if (lun == 0) {
+		norfs->set_status(NorFlashFS::Status::InUse);
+	}
+	return USBD_OK;
+}
+
+int8_t UsbDriveDevice::eject(uint8_t lun) {
+	if (lun == 0) {
+		norfs->set_status(NorFlashFS::Status::NotInUse);
+		norfs->stopfs();
+	}
+	return USBD_OK;
+}
+
+int8_t UsbDriveDevice::get_capacity(uint8_t lun, uint32_t *block_num, uint16_t *block_size) {
+	if (lun == 0) {
+		*block_num = norfs->RamDiskSizeBytes / norfs->RamDiskBlockSize;
+		*block_size = norfs->RamDiskBlockSize;
+	}
+	return (USBD_OK);
+}
+
+int8_t UsbDriveDevice::is_ready(uint8_t lun) {
+	return USBD_OK;
+}
+
+int8_t UsbDriveDevice::is_write_protected(uint8_t lun) {
+	return USBD_OK;
+}
+
+int8_t UsbDriveDevice::read(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len) {
+	if (lun == 0) {
+		norfs->read_sectors(buf, blk_addr, blk_len);
+	}
+	return USBD_OK;
+}
+
+int8_t UsbDriveDevice::write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len) {
+	if (lun == 0) {
+		norfs->write_sectors(buf, blk_addr, blk_len);
+	}
+	return USBD_OK;
+}
+
+int8_t UsbDriveDevice::get_max_lun() {
+	return 0; //1 unit
+}
+
+struct InquiryData {
+	uint8_t a;
+	uint8_t b;
+	uint8_t c;
+	uint8_t d;
+	uint32_t len;
+	char manuf[8];
+	char product[16];
+	char version[4];
+};
+
+static InquiryData inquiry_data = {
+	.a = 0,
+	.b = 0x80,
+	.c = 0x02,
+	.d = 0x02,
+	.len = sizeof(InquiryData) - 5,
+	.manuf = {'4', 'm', 's', ' ', ' ', ' ', ' ', ' '},
+	.product = {'M', 'e', 't', 'a', 'M', 'o', 'd', 'u', 'l', 'e', ' ', ' ', ' ', ' ', ' ', ' '},
+	.version = {'0', '.', '0', '1'},
+	// .manuf = "4ms",
+	// .product = "MetaModule",
+	// .version = {'0', '.', '0', '1'},
+};
+
+UsbDriveDevice::UsbDriveDevice(NorFlashFS *nfs) {
+	norfs = nfs;
+
+	ops = {
+		init,
+		get_capacity,
+		is_ready,
+		is_write_protected,
+		read,
+		write,
+		get_max_lun,
+		reinterpret_cast<int8_t *>(&inquiry_data),
+		eject,
+	};
+}

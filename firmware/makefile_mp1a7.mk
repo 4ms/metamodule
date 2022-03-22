@@ -73,7 +73,7 @@ ifeq "$(target_board)" "norflash-loader"
 else
 SOURCES += $(usb_src)/usbd_conf.cc
 SOURCES += $(usb_src)/usbd_desc.c
-SOURCES += $(usb_src)/usbd_msc_storage.cc
+SOURCES += $(usb_src)/usb_drive_device.cc
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
@@ -124,7 +124,6 @@ SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
 SOURCES += src/fatfs/diskio.cc
-SOURCES += src/ramdisk.cc
 SOURCES += src/norfs.cc
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
@@ -257,9 +256,9 @@ ARCH_CFLAGS += -DUSE_HAL_DRIVER \
               # -DENABLE_NE10_FIR_SPARSE_FLOAT_NEON \
               # -DENABLE_NE10_IIR_LATTICE_FLOAT_NEON \
 
-MCU = -mcpu=cortex-a7 \
+MCU = -mcpu=cortex-a7+nosimd \
 	  -mlittle-endian \
-	  -mfpu=neon-vfpv4 \
+	  -mfpu=vfpv4 \
 	  -mfloat-abi=hard \
 	  -mthumb-interwork \
 	  -mtune=cortex-a7 \
