@@ -39,17 +39,17 @@ bool NorFlashFS::startfs() {
 	return res == FR_OK;
 }
 
-void NorFlashFS::stopfs() {
-	constexpr uint32_t SectorSize = 4096;
+bool NorFlashFS::stopfs() {
+	constexpr uint32_t SectorSize = QSPI_SECTOR_SIZE;
 	constexpr uint32_t NumSectors = qspi_patchflash_conf.flash_size_bytes / SectorSize;
 	uint32_t sector[SectorSize / 4];
 	auto *sector8 = (uint8_t *)sector;
 
 	for (uint32_t sector_num = 0; sector_num < NumSectors; sector_num++) {
-		uint32_t sector_start = sector_num * SectorSize;
-		uint32_t ramptr = sector_start;
+		uint32_t sector_start_addr = sector_num * SectorSize;
+		uint32_t ramptr = sector_start_addr;
 
-		flash.read(sector8, sector_num, SectorSize, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+		flash.read(sector8, sector_start_addr, SectorSize, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 
 		bool sector_modified = false;
 		for (auto word : sector) {
@@ -60,21 +60,25 @@ void NorFlashFS::stopfs() {
 			ramptr += 4;
 		}
 		if (sector_modified) {
-			//printf("Sector %d modified in RAM, writing to flash\r\n", sector_num);
-			auto ok = flash.erase(SectorSize, sector_start, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+			printf("Sector %d modified in RAM, erasing...", sector_num);
+			auto ok = flash.erase(SectorSize, sector_start_addr, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
 				printf("Erase failed.\r\n");
-				return;
+				return false;
 			}
-			ok = flash.write(&ramdisk.virtdrive[sector_start], sector_start, SectorSize);
+			printf("Writing...");
+			ok = flash.write(&ramdisk.virtdrive[sector_start_addr], sector_start_addr, SectorSize);
 			if (!ok) {
 				printf("Write failed.\r\n");
-				return;
+				return false;
 			}
+			printf("Done\r\n");
 		} else {
 			//	printf("Sector %d not modified.\r\n", sector_num);
 		}
 	}
+	printf("Done writing back to flash\r\n");
+	return true;
 }
 
 bool NorFlashFS::make_fs() {

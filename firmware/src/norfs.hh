@@ -23,14 +23,14 @@ public:
 	bool startfs();
 
 	// Write RAMDISK to NOR flash (modified sectors only)
-	void stopfs();
+	bool stopfs();
 
 	void read_bytes(uint8_t *data, uint32_t address, uint32_t bytes);
 	void read_sectors(uint8_t *data, uint32_t sector, uint32_t sector_count);
 	void write_bytes(const uint8_t *const data, uint32_t address, uint32_t bytes);
 	void write_sectors(const uint8_t *const data, uint32_t sector, uint32_t sector_count);
 
-	enum class Status { NotInit, InUse, NotInUse };
+	enum class Status { NotInit, InUse, NotInUse, RequiresWriteBack };
 
 	void set_status(Status status) {
 		_status = status;

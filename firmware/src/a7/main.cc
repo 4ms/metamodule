@@ -74,6 +74,15 @@ void main() {
 
 	while (true) {
 		ui.update();
+		if (norfs.get_status() == NorFlashFS::Status::RequiresWriteBack) {
+			printf("NOR Flash writeback begun.\r\n");
+			if (norfs.stopfs()) {
+				printf("NOR Flash writeback done.\r\n");
+			} else {
+				printf("NOR Flash writeback failed!\r\n");
+			}
+			norfs.set_status(NorFlashFS::Status::NotInUse);
+		}
 	}
 }
 
