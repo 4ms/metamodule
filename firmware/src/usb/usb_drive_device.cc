@@ -32,7 +32,7 @@ void UsbDriveDevice::start() {
 
 int8_t UsbDriveDevice::init(uint8_t lun) {
 	if (lun == 0) {
-		printf("USB connecte to host\r\n");
+		printf("USB MSC connected to host\r\n");
 		norfs->set_status(NorFlashFS::Status::InUse);
 	}
 	return USBD_OK;
