@@ -65,13 +65,24 @@ PatchList::PatchList(NorFlashFS &norfs)
 	//		if (ok) ...
 	// 		yaml_string_to_patch(yamldata, patchheader, patchdata);
 	// }
+	std::array<uint8_t, 8192> filedata;
+	if (norfs.read_file("djembe4.yml", filedata)) {
+		std::string yamlstr{reinterpret_cast<char *>(filedata.data())}; //unsigned char -> char
+		yaml_string_to_patch(yamlstr, _patch_data[0]);
+	}
+
+	if (norfs.read_file("djembe2.yml", filedata)) {
+		std::string yamlstr{reinterpret_cast<char *>(filedata.data())}; //unsigned char -> char
+		yaml_string_to_patch(yamlstr, _patch_data[1]);
+	}
+
 	norfs.set_status(NorFlashFS::Status::NotInUse);
 
-	for (auto [yamldata, patchdata] : zip(_raw_patch_yaml_files, _patch_data)) {
-		//Note: we use a std::string because it allocates the space that ryml needs to parse in place
-		std::string yamlstr{reinterpret_cast<char *>(yamldata)}; //unsigned char -> char
-		yaml_string_to_patch(yamlstr, patchdata);
-	}
+	//for (auto [yamldata, patchdata] : zip(_raw_patch_yaml_files, _patch_data)) {
+	//	//Note: we use a std::string because it allocates the space that ryml needs to parse in place
+	//	std::string yamlstr{reinterpret_cast<char *>(yamldata)}; //unsigned char -> char
+	//	yaml_string_to_patch(yamlstr, patchdata);
+	//}
 
 	//FIXME: These hang when running on Cortex-A7, somewhere early in the first test, checking for "Module3"?
 	// __BKPT();

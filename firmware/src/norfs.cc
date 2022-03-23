@@ -117,7 +117,7 @@ bool NorFlashFS::create_file(const char *filename, const std::span<const unsigne
 bool NorFlashFS::create_file(const char *filename, const unsigned char *data, unsigned sz) {
 	FIL fil;
 	{
-		TCHAR fn[FF_LFN_BUF];
+		// TCHAR fn[FF_LFN_BUF];
 		// u8_to_tchar(filename, fn);
 		auto res = f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE);
 		if (res != FR_OK)
@@ -135,6 +135,33 @@ bool NorFlashFS::create_file(const char *filename, const unsigned char *data, un
 			return false;
 	}
 
+	return true;
+}
+
+bool NorFlashFS::read_file(std::string_view filename, std::span<uint8_t> data) {
+	FIL fil;
+	FILINFO fileinfo;
+	uint32_t bytes_to_read;
+	UINT bytes_read;
+	{
+		auto res = f_stat(filename.data(), &fileinfo);
+		bytes_to_read = std::min((uint32_t)fileinfo.fsize, (uint32_t)data.size_bytes());
+		if (res != FR_OK)
+			return false;
+	}
+	{
+		auto res = f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ);
+		if (res != FR_OK)
+			return false;
+	}
+	{
+		auto res = f_read(&fil, data.data(), bytes_to_read, &bytes_read);
+		if (res != FR_OK)
+			return false;
+	}
+	f_close(&fil);
+
+	data[bytes_read] = '\0';
 	return true;
 }
 

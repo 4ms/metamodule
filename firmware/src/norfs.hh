@@ -43,6 +43,9 @@ public:
 	// Creates and writes to a file. Overwrites if existing.
 	bool create_file(const char *filename, const std::span<const unsigned char> data);
 	bool create_file(const char *filename, const unsigned char *data, unsigned sz);
+
+	bool read_file(std::string_view filename, std::span<uint8_t> data);
+
 	// struct Fil {};
 	// Fil next_ext_in_dir(std::string_view ext, std::string_view path);
 
