@@ -51,6 +51,7 @@ void PatchList::refresh_patches_from_fs(NorFlashFS &norfs) {
 	FILINFO fileinfo;
 
 	_status = Status::Loading;
+	_patch_data.clear();
 	auto res = f_findfirst(&dj, &fileinfo, "", "*.yml");
 	while (res == FR_OK && fileinfo.fname[0]) {
 		printf("Found patch file: %s, Reading... ", fileinfo.fname);
