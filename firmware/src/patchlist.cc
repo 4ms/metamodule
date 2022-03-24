@@ -54,6 +54,9 @@ void PatchList::refresh_patches_from_fs(NorFlashFS &norfs) {
 	_patch_data.clear();
 	auto res = f_findfirst(&dj, &fileinfo, "", "*.yml");
 	while (res == FR_OK && fileinfo.fname[0]) {
+		// Skip dot files
+		if (fileinfo.fname[0] == '.')
+			continue;
 		printf("Found patch file: %s, Reading... ", fileinfo.fname);
 		filesize = norfs.read_file(fileinfo.fname, buf, MaxFileSize);
 
