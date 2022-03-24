@@ -49,7 +49,7 @@ struct PatchList {
 	uint32_t prev_patch_index() {
 		return _cur_patch_index == 0 ? (NumPatches - 1) : _cur_patch_index - 1;
 	}
-	void refresh_patches_from_fs();
+	void refresh_patches_from_fs(NorFlashFS &norfs);
 
 private:
 	// TODO: _raw_patch_yaml_files will get loaded from filesystem

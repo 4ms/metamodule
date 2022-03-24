@@ -77,7 +77,8 @@ void main() {
 		if (norfs.get_status() == NorFlashFS::Status::RequiresWriteBack) {
 			printf("NOR Flash writeback begun.\r\n");
 			if (norfs.stopfs()) {
-				printf("NOR Flash writeback done.\r\n");
+				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
+				patch_list.refresh_patches_from_fs(norfs);
 			} else {
 				printf("NOR Flash writeback failed!\r\n");
 			}

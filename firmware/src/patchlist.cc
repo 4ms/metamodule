@@ -54,39 +54,8 @@ PatchList::PatchList(NorFlashFS &norfs) {
 			norfs.stopfs();
 		}
 	}
-
-	constexpr size_t MaxFileSize = 32768;
-	char buf[MaxFileSize];
-	uint32_t filesize;
-
-	DIR dj;
-	FILINFO fileinfo;
-	auto res = f_findfirst(&dj, &fileinfo, "", "*.yml");
-	while (res == FR_OK && fileinfo.fname[0]) {
-		printf("Found file: %s\r\n", fileinfo.fname);
-		filesize = norfs.read_file(fileinfo.fname, buf, MaxFileSize);
-		printf("Read %d bytes.. parsing... ", filesize);
-		if (!filesize)
-			continue;
-
-		_patch_data.push_back({});
-		if (yaml_raw_to_patch({buf, filesize}, _patch_data.back())) {
-			printf("Converted\r\n");
-		} else {
-			printf("Failed\r\n");
-			_patch_data.pop_back();
-		}
-		res = f_findnext(&dj, &fileinfo);
-	}
-	NumPatches = _patch_data.size();
-
+	refresh_patches_from_fs(norfs);
 	norfs.set_status(NorFlashFS::Status::NotInUse);
-
-	//for (auto [yamldata, patchdata] : zip(_raw_patch_yaml_files, _patch_data)) {
-	//	//Note: we use a std::string because it allocates the space that ryml needs to parse in place
-	//	std::string yamlstr{reinterpret_cast<char *>(yamldata)}; //unsigned char -> char
-	//	yaml_string_to_patch(yamlstr, patchdata);
-	//}
 
 	//FIXME: These hang when running on Cortex-A7, somewhere early in the first test, checking for "Module3"?
 	// __BKPT();
@@ -96,6 +65,41 @@ PatchList::PatchList(NorFlashFS &norfs) {
 	//	while (true)
 	//		;
 	//}
+}
+
+void PatchList::refresh_patches_from_fs(NorFlashFS &norfs) {
+	//TODO: compare stack buffer vs dynamic buffer
+	constexpr size_t MaxFileSize = 32768;
+	char buf[MaxFileSize];
+	uint32_t filesize;
+	DIR dj;
+	FILINFO fileinfo;
+
+	auto res = f_findfirst(&dj, &fileinfo, "", "*.yml");
+	while (res == FR_OK && fileinfo.fname[0]) {
+		printf("Found file: %s, Reading... ", fileinfo.fname);
+		filesize = norfs.read_file(fileinfo.fname, buf, MaxFileSize);
+
+		if (filesize == MaxFileSize) {
+			printf("File exceeds %zu bytes, too big. Skipping\r\n", MaxFileSize);
+			continue;
+		}
+		if (!filesize) {
+			printf("File cannot be read. Skipping\r\n");
+			continue;
+		}
+		printf("Read %d bytes.. parsing... ", filesize);
+
+		_patch_data.push_back({});
+		if (yaml_raw_to_patch({buf, filesize}, _patch_data.back())) {
+			printf("Added Patch\r\n");
+		} else {
+			printf("Failed to parse\r\n");
+			_patch_data.pop_back();
+		}
+		res = f_findnext(&dj, &fileinfo);
+	}
+	NumPatches = _patch_data.size();
 }
 
 } // namespace MetaModule
