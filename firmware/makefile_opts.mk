@@ -13,9 +13,9 @@
 # $(BUILDDIR)/src/m4/controls.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/screen.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
-$(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
-$(BUILDDIR)/src/norfs.o: OPTFLAG = -O0
-$(BUILDDIR)/src/shared/patch_convert/yaml_to_patch.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/norfs.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/shared/patch_convert/yaml_to_patch.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/fatfs/diskio.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/fatfs/source/ff.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(PERIPH)/src/%.o: OPTFLAG = -O3
