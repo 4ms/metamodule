@@ -4,6 +4,7 @@
 #include "printf.h"
 #include <cstdint>
 #include <cstring>
+#include <string>
 
 // Defined in diskio.cc
 void register_norfs(NorFlashFS *nfs, uint8_t drive_num);
@@ -138,31 +139,30 @@ bool NorFlashFS::create_file(const char *filename, const unsigned char *data, un
 	return true;
 }
 
-bool NorFlashFS::read_file(std::string_view filename, std::span<uint8_t> data) {
+uint32_t NorFlashFS::read_file(std::string_view filename, char *data, uint32_t max_bytes) {
 	FIL fil;
 	FILINFO fileinfo;
 	uint32_t bytes_to_read;
 	UINT bytes_read;
 	{
 		auto res = f_stat(filename.data(), &fileinfo);
-		bytes_to_read = std::min((uint32_t)fileinfo.fsize, (uint32_t)data.size_bytes());
+		bytes_to_read = std::min((uint32_t)fileinfo.fsize, max_bytes);
 		if (res != FR_OK)
-			return false;
+			return 0;
 	}
 	{
 		auto res = f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ);
 		if (res != FR_OK)
-			return false;
+			return 0;
 	}
 	{
-		auto res = f_read(&fil, data.data(), bytes_to_read, &bytes_read);
+		auto res = f_read(&fil, data, bytes_to_read, &bytes_read);
 		if (res != FR_OK)
-			return false;
+			return 0;
 	}
 	f_close(&fil);
 
-	data[bytes_read] = '\0';
-	return true;
+	return bytes_read;
 }
 
 static void u8_to_tchar(const char *u8, TCHAR *uint) {

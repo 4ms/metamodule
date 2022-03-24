@@ -44,7 +44,8 @@ public:
 	bool create_file(const char *filename, const std::span<const unsigned char> data);
 	bool create_file(const char *filename, const unsigned char *data, unsigned sz);
 
-	bool read_file(std::string_view filename, std::span<uint8_t> data);
+	// std::string read_file(std::string_view filename, uint32_t max_bytes = 0xFFFFFFFF);
+	uint32_t read_file(std::string_view filename, char *data, uint32_t max_bytes);
 
 	// struct Fil {};
 	// Fil next_ext_in_dir(std::string_view ext, std::string_view path);

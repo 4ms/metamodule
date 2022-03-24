@@ -1,6 +1,7 @@
 #include "patchlist.hh"
 #include "Djembe2.hh"
 #include "Djembe4.hh"
+#include "ff.h"
 #include "norfs.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patchlist_ryml_tests.hh"
@@ -13,13 +14,8 @@
 
 namespace MetaModule
 {
-PatchList::PatchList(NorFlashFS &norfs)
-	: _raw_patch_yaml_files{
-		  Djembe2_yml,
-		  Djembe4_yml,
-	  } {
-
-	// And main/ui does the init and startfs
+PatchList::PatchList(NorFlashFS &norfs) {
+	// main/ui does the init and startfs
 	// and if startfs() returns false, it calls mkfs and
 	// norfs.create_file(PatchList::get_default_patch_name(), PatchList::get_default_patch());
 	// and then stopfs()
@@ -59,22 +55,30 @@ PatchList::PatchList(NorFlashFS &norfs)
 		}
 	}
 
-	// TODO: read from filesystem like this:
-	// for (auto f : files_in_dir("patches/"){
-	// 		std::string yamldata = read(f);
-	//		if (ok) ...
-	// 		yaml_string_to_patch(yamldata, patchheader, patchdata);
-	// }
-	std::array<uint8_t, 8192> filedata;
-	if (norfs.read_file("djembe4.yml", filedata)) {
-		std::string yamlstr{reinterpret_cast<char *>(filedata.data())}; //unsigned char -> char
-		yaml_string_to_patch(yamlstr, _patch_data[0]);
-	}
+	constexpr size_t MaxFileSize = 32768;
+	char buf[MaxFileSize];
+	uint32_t filesize;
 
-	if (norfs.read_file("djembe2.yml", filedata)) {
-		std::string yamlstr{reinterpret_cast<char *>(filedata.data())}; //unsigned char -> char
-		yaml_string_to_patch(yamlstr, _patch_data[1]);
+	DIR dj;
+	FILINFO fileinfo;
+	auto res = f_findfirst(&dj, &fileinfo, "", "*.yml");
+	while (res == FR_OK && fileinfo.fname[0]) {
+		printf("Found file: %s\r\n", fileinfo.fname);
+		filesize = norfs.read_file(fileinfo.fname, buf, MaxFileSize);
+		printf("Read %d bytes.. parsing... ", filesize);
+		if (!filesize)
+			continue;
+
+		_patch_data.push_back({});
+		if (yaml_raw_to_patch({buf, filesize}, _patch_data.back())) {
+			printf("Converted\r\n");
+		} else {
+			printf("Failed\r\n");
+			_patch_data.pop_back();
+		}
+		res = f_findnext(&dj, &fileinfo);
 	}
+	NumPatches = _patch_data.size();
 
 	norfs.set_status(NorFlashFS::Status::NotInUse);
 

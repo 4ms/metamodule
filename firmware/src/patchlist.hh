@@ -2,13 +2,13 @@
 #include "norfs.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
+#include <vector>
 
 namespace MetaModule
 {
 
 struct PatchList {
-	//Todo: NumPatches will be set by the number of valid patches loaded from the filesystem
-	static constexpr int32_t NumPatches = 2;
+	int32_t NumPatches = 2;
 
 	PatchList();
 	PatchList(NorFlashFS &norfs);
@@ -49,14 +49,13 @@ struct PatchList {
 	uint32_t prev_patch_index() {
 		return _cur_patch_index == 0 ? (NumPatches - 1) : _cur_patch_index - 1;
 	}
+	void refresh_patches_from_fs();
 
 private:
 	// TODO: _raw_patch_yaml_files will get loaded from filesystem
 	// one at a time, and loaded into _patch_headers/data. Not an array:
 	// char *_raw_patch_yaml_file_data;
-	std::array<void *, NumPatches> _raw_patch_yaml_files;
-
-	std::array<PatchData, NumPatches> _patch_data;
+	std::vector<PatchData> _patch_data;
 	uint32_t _cur_patch_index = 0;
 };
 } // namespace MetaModule
