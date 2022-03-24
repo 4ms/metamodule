@@ -97,7 +97,7 @@ void main() {
 	usb_drive.start();
 
 	while (true) {
-		ui.update();
+		// ui.update();
 		if (norfs.get_status() == NorFlashFS::Status::RequiresWriteBack) {
 			printf("NOR Flash writeback begun.\r\n");
 			if (norfs.stopfs()) {
@@ -109,6 +109,7 @@ void main() {
 			}
 			norfs.set_status(NorFlashFS::Status::NotInUse);
 		}
+		__WFI();
 	}
 }
 
