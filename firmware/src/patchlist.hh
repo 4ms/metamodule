@@ -13,24 +13,21 @@ struct PatchList {
 	PatchList();
 	PatchList(NorFlashFS &norfs);
 
+	// Returns the name of the patch at a given index (bounds-checked)
 	ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
 		if (patch_id >= NumPatches)
 			patch_id = 0;
 		return _patch_data[patch_id].patch_name;
 	}
 
-	PatchData *get_cur_patch_data() {
-		if (_cur_patch_index >= NumPatches)
-			_cur_patch_index = 0;
-		return &_patch_data[_cur_patch_index];
+	// Return a reference to the patch at the given index (bounds-checked)
+	PatchData &get_patch(uint32_t patch_id) {
+		if (patch_id >= NumPatches)
+			patch_id = 0;
+		return _patch_data[patch_id];
 	}
 
-	uint32_t cur_patch() {
-		if (_cur_patch_index >= NumPatches)
-			_cur_patch_index = 0;
-		return _cur_patch_index;
-	}
-
+	// Stores the given index, making sure its in bounds
 	void set_cur_patch_index(uint32_t new_idx) {
 		if (new_idx >= NumPatches)
 			_cur_patch_index = 0;
@@ -38,24 +35,23 @@ struct PatchList {
 			_cur_patch_index = new_idx;
 	}
 
+	// Retrieves the previously stored index
 	uint32_t cur_patch_index() {
 		return _cur_patch_index;
 	}
 
-	uint32_t next_patch_index() {
-		return _cur_patch_index >= (NumPatches - 1) ? 0 : _cur_patch_index + 1;
+	// Returns true if patch list is in a valid state
+	bool is_ready() {
+		return _status == Status::Ready;
 	}
 
-	uint32_t prev_patch_index() {
-		return _cur_patch_index == 0 ? (NumPatches - 1) : _cur_patch_index - 1;
-	}
+	// Reads and parses patches from the filesystem
+	// Patch List is in an invalid state while loading
 	void refresh_patches_from_fs(NorFlashFS &norfs);
 
 private:
-	// TODO: _raw_patch_yaml_files will get loaded from filesystem
-	// one at a time, and loaded into _patch_headers/data. Not an array:
-	// char *_raw_patch_yaml_file_data;
 	std::vector<PatchData> _patch_data;
 	uint32_t _cur_patch_index = 0;
+	enum class Status { NotLoaded, Loading, Ready } _status;
 };
 } // namespace MetaModule

@@ -59,18 +59,18 @@ public:
 		clear_cache();
 	}
 
-	void load_patch_header_data(PatchData *patchdata) {
+	void load_patch_header_data(PatchData &patchdata) {
 		if (is_loaded)
 			unload_patch();
 
-		pd = patchdata;
+		pd = &patchdata;
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
-	bool load_patch(PatchData *patchdata) {
+	bool load_patch(PatchData &patchdata) {
 		mdrivlib::SMPThread::init();
 
-		if (patchdata == nullptr)
+		if (patchdata.patch_name.length() == 0 || patchdata.module_slugs.size() == 0)
 			return false;
 
 		load_patch_header_data(patchdata);

@@ -14,7 +14,8 @@
 
 namespace MetaModule
 {
-PatchList::PatchList(NorFlashFS &norfs) {
+PatchList::PatchList(NorFlashFS &norfs)
+	: _status{Status::NotLoaded} {
 	// main/ui does the init and startfs
 	// and if startfs() returns false, it calls mkfs and
 	// norfs.create_file(PatchList::get_default_patch_name(), PatchList::get_default_patch());
@@ -75,6 +76,7 @@ void PatchList::refresh_patches_from_fs(NorFlashFS &norfs) {
 	DIR dj;
 	FILINFO fileinfo;
 
+	_status = Status::Loading;
 	auto res = f_findfirst(&dj, &fileinfo, "", "*.yml");
 	while (res == FR_OK && fileinfo.fname[0]) {
 		printf("Found file: %s, Reading... ", fileinfo.fname);
@@ -100,6 +102,7 @@ void PatchList::refresh_patches_from_fs(NorFlashFS &norfs) {
 		res = f_findnext(&dj, &fileinfo);
 	}
 	NumPatches = _patch_data.size();
+	_status = Status::Ready;
 }
 
 } // namespace MetaModule
