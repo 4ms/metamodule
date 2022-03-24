@@ -145,6 +145,12 @@ public:
 		for (int i = 0; i < pd.module_slugs.size(); i++) {
 			modules[i].reset(nullptr);
 		}
+		pd.int_cables.clear();
+		pd.mapped_ins.clear();
+		pd.mapped_knobs.clear();
+		pd.mapped_outs.clear();
+		pd.static_knobs.clear();
+		pd.module_slugs.clear();
 
 		clear_cache();
 		BigAllocControl::reset();
