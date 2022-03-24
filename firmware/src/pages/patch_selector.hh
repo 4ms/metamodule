@@ -139,6 +139,9 @@ struct PatchSelectorPage : PageBase {
 
 	void update() override {
 		handle_changing_patch();
+		if (mbox.patchlist_updated) {
+			mbox.patchlist_updated = false;
+		}
 	}
 
 	void blur() override {

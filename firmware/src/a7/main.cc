@@ -103,6 +103,7 @@ void main() {
 			if (norfs.stopfs()) {
 				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
 				patch_list.refresh_patches_from_fs(norfs);
+				mbox.patchlist_updated = true;
 			} else {
 				printf("NOR Flash writeback failed!\r\n");
 			}
