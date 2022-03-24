@@ -48,6 +48,8 @@ struct PatchList {
 	// Reads and parses patches from the filesystem
 	// Patch List is in an invalid state while loading
 	void refresh_patches_from_fs(NorFlashFS &norfs);
+	static ModuleTypeSlug get_default_patch_filename(uint32_t id);
+	static size_t get_default_patch_data(uint32_t id, const uint8_t *data);
 
 private:
 	std::vector<PatchData> _patch_data;

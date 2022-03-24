@@ -30,7 +30,31 @@ void main() {
 
 	NorFlashFS norfs{"0", StaticBuffers::virtdrive}; //Volume 0 = RamDisk. TODO: use string volume names
 
-	PatchList patch_list{norfs};
+	PatchList patch_list{};
+
+	if (!norfs.init()) {
+		printf("ERROR: NOR Flash returned wrong id\r\n");
+	}
+	if (norfs.startfs()) {
+		printf("NOR Flash mounted as virtual fs\r\n");
+	} else {
+		printf("No Fatfs found on NOR Flash, creating FS and default patch files...\r\n");
+		auto ok = norfs.make_fs();
+		uint8_t *default_patch;
+
+		uint32_t len = patch_list.get_default_patch_data(0, default_patch);
+		ok &= norfs.create_file(patch_list.get_default_patch_filename(0), {default_patch, len});
+
+		len = patch_list.get_default_patch_data(1, default_patch);
+		ok &= norfs.create_file(patch_list.get_default_patch_filename(1), {default_patch, len});
+
+		ok &= norfs.stopfs();
+		if (!ok)
+			printf("Failed to create filesystem and default patches\r\n");
+	}
+
+	patch_list.refresh_patches_from_fs(norfs);
+
 	PatchPlayer patch_player;
 	ParamQueue param_queue;
 	UiAudioMailbox mbox;

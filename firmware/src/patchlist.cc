@@ -14,49 +14,50 @@
 
 namespace MetaModule
 {
-PatchList::PatchList(NorFlashFS &norfs)
+PatchList::PatchList()
 	: _status{Status::NotLoaded} {
+	// TODO:
 	// main/ui does the init and startfs
 	// and if startfs() returns false, it calls mkfs and
 	// norfs.create_file(PatchList::get_default_patch_name(), PatchList::get_default_patch());
 	// and then stopfs()
-	norfs.set_status(NorFlashFS::Status::InUse);
+	// norfs.set_status(NorFlashFS::Status::InUse);
 
 	// TODO: make this LoadPatchFSToRAMDIsk()
-	{
-		if (!norfs.init()) {
-			printf("NOR Flash returned wrong id\r\n");
-			return;
-		}
+	// {
+	// if (!norfs.init()) {
+	// 	printf("NOR Flash returned wrong id\r\n");
+	// 	return;
+	// }
 
-		if (norfs.startfs()) {
-			printf("NOR Flash mounted as virtual fs\r\n");
-		} else {
-			printf("No Fatfs found on NOR Flash, creating FS and default patch files...\r\n");
-			auto ok = norfs.make_fs();
-			if (!ok) {
-				printf("Failed to create fs\r\n");
-				return;
-			}
-			ok = norfs.create_file("djembe2.yml", {Djembe2_yml, Djembe2_yml_len});
-			if (!ok) {
-				printf("Failed to create file 1\r\n");
-				return;
-			}
-			ok = norfs.create_file("djembe4.yml", {Djembe4_yml, Djembe4_yml_len});
-			if (!ok) {
-				printf("Failed to create file 2\r\n");
-				return;
-			}
-			printf("Success.\r\n");
+	// if (norfs.startfs()) {
+	// 	printf("NOR Flash mounted as virtual fs\r\n");
+	// } else {
+	// 	printf("No Fatfs found on NOR Flash, creating FS and default patch files...\r\n");
+	// 	auto ok = norfs.make_fs();
+	// 	if (!ok) {
+	// 		printf("Failed to create fs\r\n");
+	// 		return;
+	// 	}
+	// 	ok = norfs.create_file("djembe2.yml", {Djembe2_yml, Djembe2_yml_len});
+	// 	if (!ok) {
+	// 		printf("Failed to create file 1\r\n");
+	// 		return;
+	// 	}
+	// 	ok = norfs.create_file("djembe4.yml", {Djembe4_yml, Djembe4_yml_len});
+	// 	if (!ok) {
+	// 		printf("Failed to create file 2\r\n");
+	// 		return;
+	// 	}
+	// 	printf("Success.\r\n");
 
-			printf("Writing back to NOR Flash.\r\n");
+	// 	printf("Writing back to NOR Flash.\r\n");
 
-			norfs.stopfs();
-		}
-	}
-	refresh_patches_from_fs(norfs);
-	norfs.set_status(NorFlashFS::Status::NotInUse);
+	// 	norfs.stopfs();
+	// }
+	// }
+	// refresh_patches_from_fs(norfs);
+	// norfs.set_status(NorFlashFS::Status::NotInUse);
 
 	//FIXME: These hang when running on Cortex-A7, somewhere early in the first test, checking for "Module3"?
 	// __BKPT();
@@ -66,6 +67,27 @@ PatchList::PatchList(NorFlashFS &norfs)
 	//	while (true)
 	//		;
 	//}
+}
+
+ModuleTypeSlug PatchList::get_default_patch_filename(uint32_t id) {
+	if (id == 0)
+		return "djembe2.yml";
+	if (id == 1)
+		return "djembe4.yml";
+	return "";
+}
+
+size_t PatchList::get_default_patch_data(uint32_t id, const uint8_t *data) {
+	if (id == 0) {
+		data = Djembe2_yml;
+		return Djembe2_yml_len;
+	}
+	if (id == 1) {
+		data = Djembe4_yml;
+		return Djembe4_yml_len;
+	}
+	data = nullptr;
+	return 0;
 }
 
 void PatchList::refresh_patches_from_fs(NorFlashFS &norfs) {
