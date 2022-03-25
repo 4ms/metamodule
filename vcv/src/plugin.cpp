@@ -7,6 +7,111 @@ std::unique_ptr<CentralData> centralData;
 //////////////// Auto generated ///////////////////////
 // include and define models below here
 
+#include "CoreModules/info/VCA_info.hh"
+auto modelVCA = createModelFromInfo<VCAInfo>();
+
+#include "CoreModules/info/VCAM_info.hh"
+auto modelVCAM = createModelFromInfo<VCAMInfo>();
+
+#include "CoreModules/info/Tapo_info.hh"
+auto modelTapo = createModelFromInfo<TapoInfo>();
+
+#include "CoreModules/info/Shift_info.hh"
+auto modelShift = createModelFromInfo<ShiftInfo>();
+
+#include "CoreModules/info/Send_info.hh"
+auto modelSend = createModelFromInfo<SendInfo>();
+
+#include "CoreModules/info/SISM_info.hh"
+auto modelSISM = createModelFromInfo<SISMInfo>();
+
+#include "CoreModules/info/SH_info.hh"
+auto modelSH = createModelFromInfo<SHInfo>();
+
+#include "CoreModules/info/SCM_info.hh"
+auto modelSCM = createModelFromInfo<SCMInfo>();
+
+#include "CoreModules/info/SCMBO_info.hh"
+auto modelSCMBO = createModelFromInfo<SCMBOInfo>();
+
+#include "CoreModules/info/RCD_info.hh"
+auto modelRCD = createModelFromInfo<RCDInfo>();
+
+#include "CoreModules/info/RCDBO_info.hh"
+auto modelRCDBO = createModelFromInfo<RCDBOInfo>();
+
+#include "CoreModules/info/QPLFO_info.hh"
+auto modelQPLFO = createModelFromInfo<QPLFOInfo>();
+
+#include "CoreModules/info/QCD_info.hh"
+auto modelQCD = createModelFromInfo<QCDInfo>();
+
+#include "CoreModules/info/QCDEXP_info.hh"
+auto modelQCDEXP = createModelFromInfo<QCDEXPInfo>();
+
+#include "CoreModules/info/PI_info.hh"
+auto modelPI = createModelFromInfo<PIInfo>();
+
+#include "CoreModules/info/PIExp_info.hh"
+auto modelPIExp = createModelFromInfo<PIExpInfo>();
+
+#include "CoreModules/info/PEG_info.hh"
+auto modelPEG = createModelFromInfo<PEGInfo>();
+
+#include "CoreModules/info/Mixer_info.hh"
+auto modelMixer = createModelFromInfo<MixerInfo>();
+
+#include "CoreModules/info/Logic_info.hh"
+auto modelLogic = createModelFromInfo<LogicInfo>();
+
+#include "CoreModules/info/LPG_info.hh"
+auto modelLPG = createModelFromInfo<LPGInfo>();
+
+#include "CoreModules/info/LIO_info.hh"
+auto modelLIO = createModelFromInfo<LIOInfo>();
+
+#include "CoreModules/info/LFO_info.hh"
+auto modelLFO = createModelFromInfo<LFOInfo>();
+
+#include "CoreModules/info/L4_info.hh"
+auto modelL4 = createModelFromInfo<L4Info>();
+
+#include "CoreModules/info/L4Q_info.hh"
+auto modelL4Q = createModelFromInfo<L4QInfo>();
+
+#include "CoreModules/info/Gate8_info.hh"
+auto modelGate8 = createModelFromInfo<Gate8Info>();
+
+#include "CoreModules/info/Gate32_info.hh"
+auto modelGate32 = createModelFromInfo<Gate32Info>();
+
+#include "CoreModules/info/GRev_info.hh"
+auto modelGRev = createModelFromInfo<GRevInfo>();
+
+#include "CoreModules/info/Fade_info.hh"
+auto modelFade = createModelFromInfo<FadeInfo>();
+
+#include "CoreModules/info/FadeDelay_info.hh"
+auto modelFadeDelay = createModelFromInfo<FadeDelayInfo>();
+
+#include "CoreModules/info/DLD_info.hh"
+auto modelDLD = createModelFromInfo<DLDInfo>();
+
+#include "CoreModules/info/Comp_info.hh"
+auto modelComp = createModelFromInfo<CompInfo>();
+
+#include "CoreModules/info/CLKM_info.hh"
+auto modelCLKM = createModelFromInfo<CLKMInfo>();
+
+#include "CoreModules/info/CLKD_info.hh"
+auto modelCLKD = createModelFromInfo<CLKDInfo>();
+
+// #include "CoreModules/info/Att_info.hh"
+// auto modelAtt = createModelFromInfo<AttInfo>();
+
+#include "CoreModules/info/ADEnv_info.hh"
+auto modelADEnv = createModelFromInfo<ADEnvInfo>();
+
 #include "CoreModules/info/Sequant_info.hh"
 auto modelSequant = createModelFromInfo<SequantInfo>();
 
@@ -115,6 +220,37 @@ void init(Plugin *p)
 
 	//////////////// Auto generated ///////////////////////
 	// Add models below here
+	// p->addModel(modelVCA);
+	p->addModel(modelVCAM);
+	p->addModel(modelTapo);
+	p->addModel(modelShift);
+	p->addModel(modelSISM);
+	p->addModel(modelSH);
+	p->addModel(modelSCM);
+	p->addModel(modelSCMBO);
+	p->addModel(modelRCD);
+	p->addModel(modelRCDBO);
+	p->addModel(modelQPLFO);
+	p->addModel(modelQCD);
+	p->addModel(modelQCDEXP);
+	p->addModel(modelPI);
+	p->addModel(modelPIExp);
+	p->addModel(modelPEG);
+	p->addModel(modelMixer);
+	p->addModel(modelLPG);
+	p->addModel(modelLIO);
+	p->addModel(modelL4);
+	p->addModel(modelL4Q);
+	p->addModel(modelGate8);
+	p->addModel(modelGate32);
+	p->addModel(modelGRev);
+	p->addModel(modelFade);
+	p->addModel(modelDLD);
+	p->addModel(modelComp);
+	p->addModel(modelCLKM);
+	p->addModel(modelCLKD);
+	p->addModel(modelADEnv);
+
 	p->addModel(modelSequant);
 	p->addModel(modelVerb);
 	p->addModel(modelSwitch41);
@@ -149,56 +285,5 @@ void init(Plugin *p)
 	p->addModel(modelSlew);
 	p->addModel(modelSource);
 	p->addModel(modelStMix);
-
-	// p->addModel(modelInfosc01);
-	// p->addModel(modelDjembe);
-	// p->addModel(modelBipolarsource);
-	// p->addModel(modelMultilfo);
-	// p->addModel(modelEnvelopefollower);
-	// p->addModel(modelVoltagesource);
-	// p->addModel(modelNoise);
-	// p->addModel(modelSampleplayer);
-	// p->addModel(modelSlewlimiter);
-	// p->addModel(modelBandpassfilter);
-	// p->addModel(modelHighpassfilter);
-	// p->addModel(modelReverb);
-	// p->addModel(modelKarplus);
-	// p->addModel(modelGateseq16);
-	// p->addModel(modelGateseq8);
-	// p->addModel(modelMinmax);
-	// p->addModel(modelDrum);
-	// p->addModel(modelComplexenvelope);
-	// p->addModel(modelFmosc);
-	// p->addModel(modelStereomixer);
-	// p->addModel(modelPanner);
-	// p->addModel(modelGateconverter);
-	// p->addModel(modelDetune);
-	// p->addModel(modelPitchshift);
-	// p->addModel(modelSwitch4to1);
-	// p->addModel(modelSwitch1to4);
-	// p->addModel(modelEightstepprob);
-	// p->addModel(modelQuantizer);
-	// p->addModel(modelFourstep);
-	// p->addModel(modelEightstep);
-	// p->addModel(modelBitcrush);
-	// p->addModel(modelPhaser);
-	// p->addModel(modelFreqshift);
-	// p->addModel(modelLowpassfilter);
-	// p->addModel(modelLowpassgate);
-	// p->addModel(modelClkmultiplier);
-	// p->addModel(modelClkdivider);
-	// p->addModel(modelLFO);
-	// p->addModel(modelAD);
-	// p->addModel(modelCrossfade);
-	// p->addModel(modelMixer4);
-	// p->addModel(modelLogic);
-	// p->addModel(modelSampleHold);
-	// p->addModel(modelAtt);
-	// p->addModel(modelFadeDelay);
-	// p->addModel(modelVCA);
-	// p->addModel(modelComparator);
-	// p->addModel(modelSend);
-	// p->addModel(modelHubMini);
-	// p->addModel(modelInfosc64bphas);
 	///////////////////////////////////////////////////////
 }

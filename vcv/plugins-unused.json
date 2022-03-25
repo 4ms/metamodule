@@ -1,3 +1,118 @@
+    {
+      "slug": "VCA",
+      "name": "VCA",
+      "description": "VCA",
+      "tags": []
+    },
+    {
+      "slug": "VCAM",
+      "name": "VCAM",
+      "description": "VCAM",
+      "tags": []
+    },
+    {
+      "slug": "Tapo",
+      "name": "Tapo",
+      "description": "Tapo",
+      "tags": []
+    },
+    {
+      "slug": "Shift",
+      "name": "Shift",
+      "description": "Shift",
+      "tags": []
+    },
+    {
+      "slug": "Send",
+      "name": "Send",
+      "description": "Send",
+      "tags": []
+    },
+    {
+      "slug": "SISM",
+      "name": "SISM",
+      "description": "SISM",
+      "tags": []
+    },
+    {
+      "slug": "SH",
+      "name": "SH",
+      "description": "SH",
+      "tags": []
+    },
+    {
+      "slug": "SCM",
+      "name": "SCM",
+      "description": "SCM",
+      "tags": []
+    },
+    {
+      "slug": "SCMBO",
+      "name": "SCMBO",
+      "description": "SCMBO",
+      "tags": []
+    },
+    {
+      "slug": "RCD",
+      "name": "RCD",
+      "description": "RCD",
+      "tags": []
+    },
+    {
+      "slug": "RCDBO",
+      "name": "RCDBO",
+      "description": "RCDBO",
+      "tags": []
+    },
+    {
+      "slug": "QPLFO",
+      "name": "QPLFO",
+      "description": "QPLFO",
+      "tags": []
+    },
+    {
+      "slug": "QCD",
+      "name": "QCD",
+      "description": "QCD",
+      "tags": []
+    },
+    {
+      "slug": "QCDEXP",
+      "name": "QCDEXP",
+      "description": "QCDEXP",
+      "tags": []
+    },
+
+
+
+    {
+      "slug": "Logic",
+      "name": "Logic",
+      "description": "Logic",
+      "tags": []
+    },
+    {
+      "slug": "LFO",
+      "name": "LFO",
+      "description": "LFO",
+      "tags": []
+    },
+    {
+      "slug": "FadeDelay",
+      "name": "FadeDelay",
+      "description": "FadeDelay",
+      "tags": []
+    },
+
+    {
+      "slug": "Att",
+      "name": "Att",
+      "description": "Att",
+      "tags": []
+    },
+
+
+
 
     {
       "slug": "dual_opener",
