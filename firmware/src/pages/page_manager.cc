@@ -12,7 +12,7 @@ void PageManager::init() {
 	//Todo: page manager doesn't load patches, send a load_patch command via uiaudiomailbox
 	//Audio is more suited to load patches, or maybe a 3rd object (patch manager)
 	patch_list.set_cur_patch_index(0);
-	bool ok = player.load_patch(patch_list.get_cur_patch_data());
+	bool ok = player.load_patch(patch_list.get_patch(0));
 	if (!ok)
 		mbox.append_message("Can't load patch\r\n");
 	else

@@ -69,13 +69,11 @@ SOURCES += src/uart_log.cc
 SOURCES += $(main_source)
 
 ifeq "$(target_board)" "norflash-loader"
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
-SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 
 else
-SOURCES += $(usb_src)/usbd_conf.c
+SOURCES += $(usb_src)/usbd_conf.cc
 SOURCES += $(usb_src)/usbd_desc.c
-SOURCES += $(usb_src)/usbd_msc_storage.c
+SOURCES += $(usb_src)/usb_drive_device.cc
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
@@ -126,7 +124,9 @@ SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
 SOURCES += src/fatfs/diskio.cc
-SOURCES += src/ramdisk.cc
+SOURCES += src/norfs.cc
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
+SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 
 
 # RYMLSOURCES += $(RYMLDIR)/src/c4/yml/common.cpp
@@ -261,10 +261,12 @@ MCU = -mcpu=cortex-a7 \
 	  -mfpu=neon-vfpv4 \
 	  -mfloat-abi=hard \
 	  -mthumb-interwork \
-	  -mtune=cortex-a7 \
 	  -mno-unaligned-access \
-	  -funsafe-math-optimizations \
+	  -mtune=cortex-a7 \
 	  -mvectorize-with-neon-quad \
+	  -funsafe-math-optimizations \
+	  # -ffast-math \
+	  # -mstrict-align \
 
 	  # -fopt-info-vec-missed=vec.miss 
 	  # -ftree-vectorizer-verbose=n -fdump-tree-vect
@@ -324,7 +326,7 @@ clean_uboot:
 
 UBOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
-$(UIMG): $(BIN) #$(UBOOT_MKIMAGE)
+$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
 	$(UBOOT_MKIMAGE_CMD)
 
 %-uimg.h : %.uimg 

@@ -36,7 +36,7 @@ R"(PatchData:
 	CHECK(yaml_string_to_patch(patchyml, pd));
 
 	MetaModule::PatchPlayer player;
-	player.load_patch_header_data(&pd);
+	player.load_patch_header_data(pd);
 	player.calc_panel_jack_connections();
 
 	REQUIRE(pd.mapped_outs.size() == 3);
@@ -107,7 +107,7 @@ PatchData:
 	CHECK(pd.int_cables.size() == 2);
 
 	MetaModule::PatchPlayer player;
-	player.load_patch_header_data(&pd);
+	player.load_patch_header_data(pd);
 	player.calc_panel_jack_connections();
 
 	bool found_cable1 = false;
@@ -227,7 +227,7 @@ PatchData:
 
 	MetaModule::PatchPlayer player;
 	yaml_string_to_patch(patchyml, pd);
-	player.load_patch_header_data(&pd);
+	player.load_patch_header_data(pd);
 	player.calc_panel_jack_connections();
 
 	REQUIRE(pd.mapped_ins.size() == 6);
@@ -290,7 +290,7 @@ PatchData:
 
 	MetaModule::PatchPlayer player;
 	yaml_string_to_patch(patchyml, pd);
-	player.load_patch_header_data(&pd);
+	player.load_patch_header_data(pd);
 	player.calc_panel_jack_connections();
 
 	REQUIRE(pd.mapped_ins.size() == 1);
@@ -343,7 +343,7 @@ PatchData:
 
 		MetaModule::PatchPlayer player;
 		yaml_string_to_patch(patchyml, pd);
-		player.load_patch_header_data(&pd);
+		player.load_patch_header_data(pd);
 		player.calc_multiple_module_indicies();
 
 		REQUIRE(pd.module_slugs.size() == 8);

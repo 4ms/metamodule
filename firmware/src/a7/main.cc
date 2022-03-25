@@ -8,11 +8,12 @@
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_player.hh"
+#include "patchlist.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
-#include "usb_msc_device.hh"
+#include "usb/usb_drive_device.hh"
 
 namespace MetaModule
 {
@@ -27,13 +28,40 @@ void main() {
 
 	StaticBuffers::init();
 
+	NorFlashFS norfs{"0", StaticBuffers::virtdrive}; //Volume 0 = RamDisk. TODO: use string volume names
+
+	PatchList patch_list{};
+
+	if (!norfs.init()) {
+		printf("ERROR: NOR Flash returned wrong id\r\n");
+	}
+	if (norfs.startfs()) {
+		printf("NOR Flash mounted as virtual fs\r\n");
+	} else {
+		printf("No Fatfs found on NOR Flash, creating FS and default patch files...\r\n");
+		auto ok = norfs.make_fs();
+		uint8_t *default_patch;
+
+		uint32_t len = patch_list.get_default_patch_data(0, default_patch);
+		ok &= norfs.create_file(patch_list.get_default_patch_filename(0), {default_patch, len});
+
+		len = patch_list.get_default_patch_data(1, default_patch);
+		ok &= norfs.create_file(patch_list.get_default_patch_filename(1), {default_patch, len});
+
+		ok &= norfs.stopfs();
+		if (!ok)
+			printf("Failed to create filesystem and default patches\r\n");
+	}
+
+	patch_list.refresh_patches_from_fs(norfs);
+
 	PatchPlayer patch_player;
 	ParamQueue param_queue;
 	UiAudioMailbox mbox;
 
 	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 
-	Ui ui{patch_player, param_queue, mbox};
+	Ui ui{patch_player, patch_list, param_queue, mbox};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
@@ -64,11 +92,26 @@ void main() {
 	audio.start();
 	ui.start();
 
-	UsbDriveDevice usb_drive;
+	// norfs.init();
+	UsbDriveDevice usb_drive{&norfs};
 	usb_drive.start();
 
 	while (true) {
-		ui.update();
+		// ui.update();
+		if (norfs.get_status() == NorFlashFS::Status::RequiresWriteBack) {
+			mbox.patchlist_reloading = true;
+			printf("NOR Flash writeback begun.\r\n");
+			if (norfs.stopfs()) {
+				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
+				patch_list.refresh_patches_from_fs(norfs);
+				mbox.patchlist_updated = true;
+			} else {
+				printf("NOR Flash writeback failed!\r\n");
+			}
+			norfs.set_status(NorFlashFS::Status::NotInUse);
+			mbox.patchlist_reloading = false;
+		}
+		__WFI();
 	}
 }
 

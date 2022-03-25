@@ -14,21 +14,21 @@ namespace MetaModule
 
 class Ui {
 private:
-	PageManager page_manager;
 	ParamQueue &param_queue;
+	PatchList &patch_list;
+	UiAudioMailbox &mbox;
 
+	PageManager page_manager;
 	Params params;
 	MetaParams metaparams;
-	PatchList patch_list;
-
-	UiAudioMailbox &mbox;
 
 	static inline LVGLDriver gui{
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchPlayer &pp, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
+	Ui(PatchPlayer &pp, PatchList &pl, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
 		: param_queue{pc}
+		, patch_list{pl}
 		, mbox{uiaudiomailbox}
 		, page_manager{patch_list, pp, params, metaparams, uiaudiomailbox} {
 	}
@@ -47,12 +47,24 @@ public:
 				.priority1 = 1,
 				.priority2 = 2,
 			},
-			[&] { update_ui_task(); });
+			[&] { page_update_task(); });
 		page_update_tm.start();
+
+		ui_event_tm.init(
+			{
+				.TIMx = TIM16,
+				.period_ns = 1000000000 / 600, // =  600Hz
+				.priority1 = 3,
+				.priority2 = 3,
+			},
+			[&] { update(); });
+		ui_event_tm.start();
+
 		MMDisplay::start();
 	}
 
 	void update() {
+		Debug::Pin1::high();
 		if (MMDisplay::is_ready()) {
 			MMDisplay::clear_ready();
 			// lv_timer_handler(); //v8
@@ -75,9 +87,10 @@ public:
 			mbox.clear_message();
 		}
 		// output_debug_info();
+		Debug::Pin1::low();
 	}
 
-	void update_ui_task() {
+	void page_update_task() {
 		bool read_ok = param_queue.read_sync(&params, &metaparams);
 		if (read_ok) {
 			handle_rotary();
@@ -96,6 +109,7 @@ public:
 
 private:
 	mdrivlib::Timekeeper page_update_tm;
+	mdrivlib::Timekeeper ui_event_tm;
 
 	uint32_t last_dbg_output_tm = 0;
 	float pot_min[12]{9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999};
