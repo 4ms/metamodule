@@ -207,6 +207,7 @@ struct UiAudioMailbox {
 	bool audio_is_muted = true;
 	uint32_t new_patch_index;
 	bool patchlist_updated = false;
+	bool patchlist_reloading = false;
 	std::string message{""};
 
 	void set_message(const std::string_view m) {
