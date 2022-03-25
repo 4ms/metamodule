@@ -1,5 +1,6 @@
 from svgextract import panel_to_components
 from svgextract import format_for_display
+from svgextract import format_as_enum_item
 from svgextract import remove_trailing_dash_number
 
 import xml.etree.ElementTree
@@ -119,7 +120,9 @@ def test_format_for_display():
     CHECK_EQ(format_for_display(remove_trailing_dash_number("Cross_FM-2")), "Cross FM", "format for display and strip dash: Cross_FM-2 ==> Cross FM")
     CHECK_EQ(format_for_display("Other_Knob"), "Other Knob", "... underscore => space: Other_Knob => Other Knob")
     CHECK_EQ(format_for_display("other_knob_Cap"), "other knob Cap", "... Does not change capitalization")
-
+    CHECK_EQ(format_as_enum_item("On|Off"), "On_OR_Off", "... | => _OR_");
+    CHECK_EQ(format_as_enum_item("+Env"), "PEnv", "... + => P");
+    CHECK_EQ(format_as_enum_item("-Env"), "NEnv", "... - => N");
 
 
 if __name__ == "__main__":

@@ -61,7 +61,13 @@ def str_to_identifier(s):
         s = "_" + s
     # Capitalize first letter
     s = s.title()
-    # Replace special characters with underscore
+    # Replace + with P
+    s = re.sub(r'\+', 'P', s)
+    # Replace - with N
+    s = re.sub(r'\-', 'N', s)
+    # Replace | with OR 
+    s = re.sub(r'\|', '_OR_', s)
+    # Replace other special characters with underscore
     s = re.sub(r'\W', '_', s)
     return s
 
@@ -393,7 +399,7 @@ def panel_to_components(tree):
         elif color == '#ffff00':
             components['widgets'].append(c)
         else:
-            Log(f"Unknown color: {color} found at {cx},{cy}. Skipping.")
+            Log(f"Unknown color: {color} found at {c['cx']},{c['cy']}. Skipping.")
 
     # Sort components
     components['params'].reverse()
