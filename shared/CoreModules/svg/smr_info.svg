@@ -655,19 +655,19 @@
     <circle id="Morph" cx="294.11" cy="315.76" r="8.5" style="fill: red"/>
     <circle id="Res_Q_" data-name="Res (Q)" cx="79.66" cy="316.03" r="17.01" style="fill: red"/>
     <rect id="Scale_Rotation" data-name="Scale Rotation" x="16.32" y="310.89" width="11.34" height="17.01" style="fill: #ff8080"/>
-    <circle id="Spread_CV" data-name="Spread CV" cx="325.7" cy="283.22" r="11.34" style="fill: lime"/>
-    <circle id="Morph_CV" data-name="Morph CV" cx="267.54" cy="283.22" r="11.34" style="fill: lime"/>
-    <circle id="Rotate" cx="186.43" cy="284.99" r="19.84" style="fill: #c000c0"/>
-    <circle id="Res_Q_CV" data-name="Res (Q) CV" cx="105.72" cy="283.22" r="11.34" style="fill: lime"/>
-    <circle id="Scale_CV" data-name="Scale CV" cx="47.62" cy="283.22" r="11.34" style="fill: lime"/>
+    <circle id="Spread_Jack" data-name="Spread Jack" cx="325.7" cy="283.22" r="11.34" style="fill: lime"/>
+    <circle id="Morph_Jack" data-name="Morph Jack" cx="267.54" cy="283.22" r="11.34" style="fill: lime"/>
+    <circle id="Rotate" cx="186.43" cy="284.99" r="19.84" style="fill: red"/>
+    <circle id="Res_Q_Jack" data-name="Res (Q) Jack" cx="105.72" cy="283.22" r="11.34" style="fill: lime"/>
+    <circle id="Scale_Jack" data-name="Scale Jack" cx="47.62" cy="283.22" r="11.34" style="fill: lime"/>
     <circle id="evens" cx="344.06" cy="247.16" r="11.34" style="fill: blue"/>
     <circle id="odds" cx="302.39" cy="246.94" r="11.34" style="fill: blue"/>
-    <circle id="Rotate_Trig" data-name="Rotate Trig Down" cx="257" cy="244.85" r="11.34" style="fill: #80ff80"/>
+    <circle id="Rotate_Trig_R" data-name="Rotate Trig R" cx="257" cy="244.85" r="11.34" style="fill: #80ff80"/>
     <circle id="Rotate_CV_In" data-name="Rotate CV In" cx="186.72" cy="209.63" r="11.34" style="fill: lime"/>
-    <circle id="Rotate_Trig-2" data-name="Rotate Trig Up" cx="116.35" cy="243.84" r="11.34" style="fill: #80ff80"/>
-    <circle id="IN_evens" data-name="In Evens" cx="66.79" cy="247.28" r="11.34" style="fill: lime"/>
+    <circle id="Rotate_Trig_L" data-name="Rotate Trig L" cx="116.35" cy="243.84" r="11.34" style="fill: #80ff80"/>
+    <circle id="IN_evens" data-name="IN evens" cx="66.79" cy="247.28" r="11.34" style="fill: lime"/>
     <circle id="Input_Clip_RedWhite_" data-name="Input Clip (RedWhite)" cx="45.51" cy="230.23" r="4.96" style="fill: #f0f"/>
-    <circle id="IN_odds" data-name="In Odds" cx="25.44" cy="247.06" r="11.34" style="fill: lime"/>
+    <circle id="IN_odds" data-name="IN odds" cx="25.44" cy="247.06" r="11.34" style="fill: lime"/>
     <rect id="Fast_Slow" data-name="Fast | Slow" x="349.59" y="203.11" width="11.34" height="17.01" transform="translate(566.87 -143.65) rotate(90)" style="fill: #ffc080"/>
     <rect id="Post_Pre" data-name="Post Pre" x="349.59" y="178.74" width="11.34" height="17.01" transform="translate(542.5 -168.02) rotate(90)" style="fill: #ff8080"/>
     <circle id="Env._Out_6" data-name="Env. Out 6" cx="316.41" cy="206.48" r="11.34" style="fill: blue"/>
@@ -691,16 +691,16 @@
     <rect id="CV_Slew" data-name="CV Slew" x="15.31" y="178.48" width="11.34" height="17.01" transform="translate(207.96 166) rotate(90)" style="fill: #ff8080"/>
     <rect id="_6_246" data-name="6 246" x="345.22" y="145.42" width="11.34" height="17.01" transform="translate(504.81 -196.96) rotate(90)" style="fill: #ff8080"/>
     <rect id="_135_1" data-name="135 1" x="17.04" y="145.42" width="11.34" height="17.01" transform="translate(176.63 131.21) rotate(90)" style="fill: #ff8080"/>
-    <circle id="Lock_Evens_Gate_Trig" data-name="Lock Evens Gate/Trig" cx="350.89" cy="122.19" r="11.34" style="fill: #80ff80"/>
-    <circle id="Lock_Odds_Gate_Trig" data-name="Lock Odds Gate/Trig" cx="22.71" cy="122.19" r="11.34" style="fill: #80ff80"/>
-    <circle id="Freq_Evens_CV" data-name="Freq Evens CV" cx="350.89" cy="82.89" r="11.34" style="fill: lime"/>
+    <circle id="Lock_Evens_Jack" data-name="Lock Evens Jack" cx="350.89" cy="122.19" r="11.34" style="fill: #80ff80"/>
+    <circle id="Lock_Odds_Jack" data-name="Lock Odds Jack" cx="22.71" cy="122.19" r="11.34" style="fill: #80ff80"/>
+    <circle id="Freq_Evens_Jack" data-name="Freq Evens Jack" cx="350.89" cy="82.89" r="11.34" style="fill: lime"/>
     <rect id="Slider_6" data-name="Slider 6" x="300.79" y="62.31" width="5.67" height="76.54" style="fill: #ff0080"/>
     <rect id="Slider_5" data-name="Slider 5" x="253.99" y="62.31" width="5.67" height="76.54" style="fill: #ff0040"/>
     <rect id="Slider_4" data-name="Slider 4" x="207.19" y="62.31" width="5.67" height="76.54" style="fill: red"/>
     <rect id="Slider_3" data-name="Slider 3" x="160.39" y="62.31" width="5.67" height="76.54" style="fill: red"/>
     <rect id="Slider_2" data-name="Slider 2" x="113.52" y="62.31" width="5.67" height="76.54" style="fill: #ff0040"/>
     <rect id="Slider_1" data-name="Slider 1" x="66.89" y="62.31" width="5.67" height="76.54" style="fill: #ff0080"/>
-    <circle id="Freq_Odds_CV" data-name="Freq Odds CV" cx="22.71" cy="82.89" r="11.34" style="fill: lime"/>
+    <circle id="Freq_Odds_Jack" data-name="Freq Odds Jack" cx="22.71" cy="82.89" r="11.34" style="fill: lime"/>
     <circle id="Freq_Nudge_Evens" data-name="Freq Nudge Evens" cx="350.57" cy="43.03" r="8.5" style="fill: red"/>
     <circle id="Lock_Button_6" data-name="Lock Button 6" cx="310.67" cy="37.83" r="10.63" style="fill: #ffc000"/>
     <circle id="Lock_Button_5" data-name="Lock Button 5" cx="264.24" cy="37.83" r="10.63" style="fill: #ffc000"/>

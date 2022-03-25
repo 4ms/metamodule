@@ -4,6 +4,23 @@
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(VCAM_artwork_240);
+LV_IMG_DECLARE(Tapo_artwork_240);
+LV_IMG_DECLARE(SISM_artwork_240);
+LV_IMG_DECLARE(SCM_artwork_240);
+LV_IMG_DECLARE(SCMBO_artwork_240);
+LV_IMG_DECLARE(RCD_artwork_240);
+LV_IMG_DECLARE(RCDBO_artwork_240);
+LV_IMG_DECLARE(QPLFO_artwork_240);
+LV_IMG_DECLARE(QCD_artwork_240);
+LV_IMG_DECLARE(QCDEXP_artwork_240);
+LV_IMG_DECLARE(PI_artwork_240);
+LV_IMG_DECLARE(PIExp_artwork_240);
+LV_IMG_DECLARE(PEG_artwork_240);
+LV_IMG_DECLARE(LIO_artwork_240);
+LV_IMG_DECLARE(L4_artwork_240);
+LV_IMG_DECLARE(L4Q_artwork_240);
+LV_IMG_DECLARE(DLD_artwork_240);
 LV_IMG_DECLARE(SH_artwork_240);
 LV_IMG_DECLARE(GRev_artwork_240);
 LV_IMG_DECLARE(ADEnv_artwork_240);
@@ -63,6 +80,57 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "VCAM")
+			return &VCAM_artwork_240;
+
+		if (slug == "Tapo")
+			return &Tapo_artwork_240;
+
+		if (slug == "SISM")
+			return &SISM_artwork_240;
+
+		if (slug == "SCM")
+			return &SCM_artwork_240;
+
+		if (slug == "SCMBO")
+			return &SCMBO_artwork_240;
+
+		if (slug == "RCD")
+			return &RCD_artwork_240;
+
+		if (slug == "RCDBO")
+			return &RCDBO_artwork_240;
+
+		if (slug == "QPLFO")
+			return &QPLFO_artwork_240;
+
+		if (slug == "QCD")
+			return &QCD_artwork_240;
+
+		if (slug == "QCDEXP")
+			return &QCDEXP_artwork_240;
+
+		if (slug == "PI")
+			return &PI_artwork_240;
+
+		if (slug == "PIExp")
+			return &PIExp_artwork_240;
+
+		if (slug == "PEG")
+			return &PEG_artwork_240;
+
+		if (slug == "LIO")
+			return &LIO_artwork_240;
+
+		if (slug == "L4")
+			return &L4_artwork_240;
+
+		if (slug == "L4Q")
+			return &L4Q_artwork_240;
+
+		if (slug == "DLD")
+			return &DLD_artwork_240;
 
 		if (slug == "SH")
 			return &SH_artwork_240;
