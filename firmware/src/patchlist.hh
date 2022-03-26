@@ -11,7 +11,6 @@ struct PatchList {
 	int32_t NumPatches = 2;
 
 	PatchList();
-	PatchList(NorFlashFS &norfs);
 
 	// Returns the name of the patch at a given index (bounds-checked)
 	ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
