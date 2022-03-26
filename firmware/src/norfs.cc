@@ -20,18 +20,7 @@ NorFlashFS::NorFlashFS(std::string_view v, RamDisk<RamDiskSizeBytes, RamDiskBloc
 }
 
 bool NorFlashFS::init() {
-	uint32_t timeout = 100;
-	uint32_t id = 0;
-
-	do {
-		HAL_Delay(1);
-		flash.read_chip_id(&id);
-		id &= 0x00FFFFFF;
-		if (id == 0x186001)
-			return true;
-	} while (timeout--);
-	printf("NOR ID read %d\r\n", id);
-	return false;
+	return flash.check_chip_id(0x186001, 0x00FFFFFF);
 }
 
 bool NorFlashFS::startfs() {
