@@ -1,0 +1,111 @@
+#include "norflashramdisk_ops.hh"
+#include "conf/qspi_flash_conf.hh"
+#include "printf.h"
+#include <cstring>
+
+NorFlashRamDiskOps::NorFlashRamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
+	: flash{qspi_patchflash_conf}
+	, ramdisk{rmdisk} {
+}
+
+NorFlashRamDiskOps::~NorFlashRamDiskOps() = default;
+
+DSTATUS NorFlashRamDiskOps::get_status() {
+	//STA_NOINIT
+	//STA_NODISK
+	//STA_PROTECT
+	return (_status == Status::NotInit) ? STA_NOINIT : 0;
+}
+
+// Get the RamDisk ready for IO.
+// Makes sure QSPI chip is responding, then loads the NorFlash contents into the RamDisk
+//
+// FatFS calls this in f_mkfs(), and when it mounts the disk (in f_mount(_,_,1) or the first time FatFS attempts a read/write/stat if the disk is not yet mounted)
+DSTATUS NorFlashRamDiskOps::initialize() {
+	if (!flash.check_chip_id(0x186001, 0x00FFFFFF))
+		return STA_NOINIT;
+
+	flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+	return 0;
+}
+
+DRESULT NorFlashRamDiskOps::read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) {
+	const uint32_t address = sector_start * RamDiskBlockSize;
+	const uint32_t bytes = num_sectors * RamDiskBlockSize;
+	if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
+		return RES_ERROR;
+
+	std::memcpy(dst, &ramdisk.virtdrive[address], bytes);
+	return RES_OK;
+}
+
+DRESULT NorFlashRamDiskOps::write(const uint8_t *src, uint32_t sector_start, uint32_t num_sectors) {
+	const uint32_t address = sector_start * RamDiskBlockSize;
+	const uint32_t bytes = num_sectors * RamDiskBlockSize;
+	if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
+		return RES_ERROR;
+
+	std::memcpy(&ramdisk.virtdrive[address], src, bytes);
+	return RES_OK;
+}
+
+DRESULT NorFlashRamDiskOps::ioctl(uint8_t cmd, uint8_t *buff) {
+	switch (cmd) {
+		case GET_SECTOR_SIZE: // Get R/W sector size (WORD)
+			*(WORD *)buff = RamDiskBlockSize;
+			break;
+		case GET_BLOCK_SIZE: // Get erase block size in unit of sector (DWORD)
+			*(DWORD *)buff = 8;
+			break;
+		case GET_SECTOR_COUNT:
+			*(DWORD *)buff = RamDiskSizeBytes / RamDiskBlockSize;
+			break;
+		case CTRL_SYNC:
+			break;
+		case CTRL_TRIM:
+			break;
+	}
+	return RES_OK;
+}
+
+bool NorFlashRamDiskOps::unmount() {
+	constexpr uint32_t SectorSize = QSPI_SECTOR_SIZE;
+	constexpr uint32_t NumSectors = qspi_patchflash_conf.flash_size_bytes / SectorSize;
+	uint32_t sector[SectorSize / 4];
+	auto *sector8 = (uint8_t *)sector;
+
+	for (uint32_t sector_num = 0; sector_num < NumSectors; sector_num++) {
+		uint32_t sector_start_addr = sector_num * SectorSize;
+		uint32_t ramptr = sector_start_addr;
+
+		flash.read(sector8, sector_start_addr, SectorSize, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+
+		bool sector_modified = false;
+		for (auto word : sector) {
+			if (word != *(uint32_t *)(&ramdisk.virtdrive[ramptr])) {
+				sector_modified = true;
+				break;
+			}
+			ramptr += 4;
+		}
+		if (sector_modified) {
+			printf("Sector %d modified in RAM, erasing...", sector_num);
+			auto ok = flash.erase(SectorSize, sector_start_addr, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+			if (!ok) {
+				printf("Erase failed.\r\n");
+				return false;
+			}
+			printf("Writing...");
+			ok = flash.write(&ramdisk.virtdrive[sector_start_addr], sector_start_addr, SectorSize);
+			if (!ok) {
+				printf("Write failed.\r\n");
+				return false;
+			}
+			printf("Done\r\n");
+		} else {
+			//	printf("Sector %d not modified.\r\n", sector_num);
+		}
+	}
+	printf("Done writing back to flash\r\n");
+	return true;
+}
