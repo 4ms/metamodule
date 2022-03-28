@@ -43,7 +43,7 @@ struct PatchSelectorPage : PageBase {
 
 	void refresh_patchlist() {
 		lv_dropdown_clear_options(patch_selector_patchlist);
-		for (int i = 0; i < patch_list.NumPatches; i++)
+		for (int i = 0; i < patch_list.num_patches(); i++)
 			lv_dropdown_add_option(patch_selector_patchlist, patch_list.get_patch_name(i).data(), i);
 	}
 
