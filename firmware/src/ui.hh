@@ -43,7 +43,7 @@ public:
 		page_update_tm.init(
 			{
 				.TIMx = TIM17,
-				.period_ns = 1000000000 / 60, // =  60Hz
+				.period_ns = 1000000000 / 60, // =  60Hz = 16ms
 				.priority1 = 1,
 				.priority2 = 2,
 			},
@@ -53,7 +53,7 @@ public:
 		ui_event_tm.init(
 			{
 				.TIMx = TIM16,
-				.period_ns = 1000000000 / 600, // =  600Hz
+				.period_ns = 1000000000 / 600, // =  600Hz = 1.6ms
 				.priority1 = 3,
 				.priority2 = 3,
 			},
@@ -65,21 +65,18 @@ public:
 
 	void update() {
 		Debug::Pin1::high();
-		if (MMDisplay::is_ready()) {
-			MMDisplay::clear_ready();
-			// lv_timer_handler(); //v8
-			page_update_tm.stop();
-			lv_task_handler();
-			if (flag_prev_page) {
-				page_manager.prev_page();
-				flag_prev_page = false;
-			}
-			if (flag_next_page) {
-				page_manager.next_page();
-				flag_next_page = false;
-			}
-			page_update_tm.start();
+		// lv_timer_handler(); //v8
+		page_update_tm.stop();
+		lv_task_handler();
+		if (flag_prev_page) {
+			page_manager.prev_page();
+			flag_prev_page = false;
 		}
+		if (flag_next_page) {
+			page_manager.next_page();
+			flag_next_page = false;
+		}
+		page_update_tm.start();
 
 		auto msg = mbox.get_message();
 		if (!msg.empty()) {
@@ -90,7 +87,7 @@ public:
 		Debug::Pin1::low();
 	}
 
-	void page_update_task() {
+	void page_update_task() { //60Hz
 		bool read_ok = param_queue.read_sync(&params, &metaparams);
 		if (read_ok) {
 			handle_rotary();

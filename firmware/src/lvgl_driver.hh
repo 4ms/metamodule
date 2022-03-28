@@ -74,8 +74,6 @@ public:
 };
 
 class MMDisplay {
-	static inline mdrivlib::Timekeeper _run_lv_tasks_tmr;
-	static inline volatile bool _ready = false;
 	static inline lv_disp_drv_t *last_used_disp_drv;
 	static inline MetaParams *m;
 	static constexpr size_t BufferSize = ScreenBufferConf::viewWidth * ScreenBufferConf::viewHeight;
@@ -107,27 +105,9 @@ public:
 		// }
 		// for (auto &px : testbuf)
 		// 	px.full = (1 << 10);
-
-		_run_lv_tasks_tmr.init(
-			{
-				.TIMx = TIM5,
-				.period_ns = 1000000000 / 333, // =  333Hz = 3ms update lvgl tasks rate
-				.priority1 = 2,
-				.priority2 = 2,
-			},
-			[] { _ready = true; });
 	}
 
 	static void start() {
-		_run_lv_tasks_tmr.start();
-	}
-
-	static bool is_ready() {
-		return _ready;
-	}
-
-	static void clear_ready() {
-		_ready = false;
 	}
 
 	static void end_flush() {
