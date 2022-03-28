@@ -3,6 +3,8 @@
 #include "printf.h"
 #include <cstring>
 
+static constexpr auto Foreground = mdrivlib::QSpiFlash::EXECUTE_FOREGROUND;
+
 NorFlashRamDiskOps::NorFlashRamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
 	: flash{qspi_patchflash_conf}
 	, ramdisk{rmdisk} {
@@ -14,7 +16,7 @@ DSTATUS NorFlashRamDiskOps::status() {
 	//STA_NOINIT
 	//STA_NODISK
 	//STA_PROTECT
-	return (_status == Status::NotInit) ? STA_NOINIT : 0;
+	return (_status == Status::NotInit) ? (STA_NOINIT | STA_NODISK) : 0;
 }
 
 NorFlashRamDiskOps::Status NorFlashRamDiskOps::get_status() {
@@ -32,11 +34,14 @@ void NorFlashRamDiskOps::set_status(Status status) {
 DSTATUS NorFlashRamDiskOps::initialize() {
 	if (!flash.check_chip_id(0x186001, 0x00FFFFFF)) {
 		printf("ERROR: NOR Flash returned wrong id\r\n");
-		return STA_NOINIT;
+		return STA_NOINIT | STA_NODISK;
 	}
 
-	flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
-	return 0;
+	if (flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, Foreground)) {
+		set_status(Status::NotInUse);
+		return 0;
+	}
+	return STA_NOINIT;
 }
 
 DRESULT NorFlashRamDiskOps::read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) {
@@ -74,6 +79,9 @@ DRESULT NorFlashRamDiskOps::ioctl(uint8_t cmd, uint8_t *buff) {
 			break;
 		case CTRL_TRIM:
 			break;
+		case CTRL_EJECT:
+			return unmount() ? RES_OK : RES_ERROR;
+			break;
 	}
 	return RES_OK;
 }
@@ -88,7 +96,10 @@ bool NorFlashRamDiskOps::unmount() {
 		uint32_t sector_start_addr = sector_num * SectorSize;
 		uint32_t ramptr = sector_start_addr;
 
-		flash.read(sector8, sector_start_addr, SectorSize, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+		if (!flash.read(sector8, sector_start_addr, SectorSize, Foreground)) {
+			printf("Error reading sector %d\r\n", sector_num);
+			return false;
+		}
 
 		bool sector_modified = false;
 		for (auto word : sector) {
@@ -100,7 +111,7 @@ bool NorFlashRamDiskOps::unmount() {
 		}
 		if (sector_modified) {
 			printf("Sector %d modified in RAM, erasing...", sector_num);
-			auto ok = flash.erase(SectorSize, sector_start_addr, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
+			auto ok = flash.erase(SectorSize, sector_start_addr, Foreground);
 			if (!ok) {
 				printf("Erase failed.\r\n");
 				return false;
@@ -117,5 +128,6 @@ bool NorFlashRamDiskOps::unmount() {
 		}
 	}
 	printf("Done writing back to flash\r\n");
+	set_status(Status::NotInit);
 	return true;
 }

@@ -13,6 +13,7 @@ namespace FileIO
 
 bool register_disk(DiskOps *ops, Disk disk);
 bool mount_disk(Disk disk);
+bool unmount_disk(Disk disk);
 bool format_disk(Disk disk);
 bool create_default_files(Disk disk);
 

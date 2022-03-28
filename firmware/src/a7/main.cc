@@ -33,18 +33,11 @@ void main() {
 	PatchList patch_list{};
 
 	NorFlashRamDiskOps nordisk{StaticBuffers::virtdrive};
-
 	FileIO::register_disk(&nordisk, Disk::NORFlash);
 	if (!FileIO::mount_disk(Disk::NORFlash)) {
-		printf("No Fatfs found on NOR Flash, creating FS and default patch files...\r\n");
-		bool ok = FileIO::format_disk(Disk::NORFlash);
-		ok &= PatchFileIO::create_default_files(Disk::NORFlash);
-		if (!ok)
-			printf("Failed to create filesystem and default patches\r\n");
-		else
-			nordisk.unmount();
+		printf("No Fatfs found on NOR Flash, formatting and creating default patch files\r\n");
+		PatchFileIO::factory_reset(Disk::NORFlash);
 	}
-
 	PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
 
 	PatchPlayer patch_player;
@@ -89,7 +82,7 @@ void main() {
 		if (nordisk.get_status() == NorFlashRamDiskOps::Status::RequiresWriteBack) {
 			mbox.patchlist_reloading = true;
 			printf("NOR Flash writeback begun.\r\n");
-			if (nordisk.unmount()) {
+			if (FileIO::unmount_disk(Disk::NORFlash)) { //nordisk.unmount()) {
 				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
 				PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
 				mbox.patchlist_updated = true;

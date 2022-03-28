@@ -34,6 +34,11 @@ bool mount_disk(Disk disk) {
 	return false;
 }
 
+bool unmount_disk(Disk disk) {
+	auto disk_id = static_cast<uint8_t>(disk);
+	return (disk_ioctl(disk_id, CTRL_EJECT, nullptr) == RES_OK);
+}
+
 void vol_string(Disk disk, char vol[3]) {
 	auto disk_id = static_cast<uint8_t>(disk);
 	char disk_char = disk_id + '0';

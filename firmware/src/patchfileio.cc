@@ -23,6 +23,19 @@ bool create_default_files(Disk disk) {
 	return true;
 }
 
+bool factory_reset(Disk disk) {
+	bool ok = FileIO::format_disk(disk);
+	if (ok)
+		ok = PatchFileIO::create_default_files(disk);
+	if (ok)
+		ok = FileIO::unmount_disk(disk);
+	if (ok)
+		return true;
+
+	printf("Failed to create filesystem and default patches\r\n");
+	return false;
+}
+
 void load_patches_from_disk(Disk disk, PatchList &patch_list) {
 	//TODO: compare stack buffer vs dynamic buffer
 	constexpr size_t MaxFileSize = 32768;
