@@ -7,6 +7,9 @@ std::unique_ptr<CentralData> centralData;
 //////////////// Auto generated ///////////////////////
 // include and define models below here
 
+#include "CoreModules/info/STS_info.hh"
+auto modelSTS = createModelFromInfo<STSInfo>();
+
 #include "CoreModules/info/VCA_info.hh"
 auto modelVCA = createModelFromInfo<VCAInfo>();
 
@@ -220,6 +223,7 @@ void init(Plugin *p)
 
 	//////////////// Auto generated ///////////////////////
 	// Add models below here
+	p->addModel(modelSTS);
 	// p->addModel(modelVCA);
 	p->addModel(modelVCAM);
 	p->addModel(modelTapo);

@@ -13,6 +13,7 @@ extern Plugin *pluginInstance;
 // Declare each Model, defined in each module source file
 //////////////// Auto generated ///////////////////////
 // Add models below here
+extern Model *modelSTS;
 extern Model *modelVCA;
 extern Model *modelVCAM;
 extern Model *modelTapo;
