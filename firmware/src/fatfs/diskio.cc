@@ -29,7 +29,7 @@ extern "C" DSTATUS disk_status(BYTE pdrv) {
 	if (pdrv >= MaxNumDisks || !_diskops[pdrv])
 		return STA_NOINIT;
 
-	return _diskops[pdrv]->get_status();
+	return _diskops[pdrv]->status();
 }
 
 extern "C" DSTATUS disk_initialize(BYTE pdrv) {

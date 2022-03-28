@@ -10,15 +10,17 @@ public:
 	enum class Status { NotInit, InUse, NotInUse, RequiresWriteBack };
 
 	NorFlashRamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk);
-	~NorFlashRamDiskOps() override;
+	~NorFlashRamDiskOps();
 
-	DSTATUS get_status() override;
+	DSTATUS status() override;
 	DSTATUS initialize() override;
 	DRESULT read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) override;
 	DRESULT write(const uint8_t *src, uint32_t sector_start, uint32_t num_sectors) override;
 	DRESULT ioctl(uint8_t cmd, uint8_t *buff) override;
 
 	bool unmount() override;
+	void set_status(Status status);
+	Status get_status();
 
 private:
 	mdrivlib::QSpiFlash flash;

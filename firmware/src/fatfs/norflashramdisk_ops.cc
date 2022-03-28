@@ -10,11 +10,19 @@ NorFlashRamDiskOps::NorFlashRamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSiz
 
 NorFlashRamDiskOps::~NorFlashRamDiskOps() = default;
 
-DSTATUS NorFlashRamDiskOps::get_status() {
+DSTATUS NorFlashRamDiskOps::status() {
 	//STA_NOINIT
 	//STA_NODISK
 	//STA_PROTECT
 	return (_status == Status::NotInit) ? STA_NOINIT : 0;
+}
+
+NorFlashRamDiskOps::Status NorFlashRamDiskOps::get_status() {
+	return _status;
+}
+
+void NorFlashRamDiskOps::set_status(Status status) {
+	_status = status;
 }
 
 // Get the RamDisk ready for IO.
@@ -22,8 +30,10 @@ DSTATUS NorFlashRamDiskOps::get_status() {
 //
 // FatFS calls this in f_mkfs(), and when it mounts the disk (in f_mount(_,_,1) or the first time FatFS attempts a read/write/stat if the disk is not yet mounted)
 DSTATUS NorFlashRamDiskOps::initialize() {
-	if (!flash.check_chip_id(0x186001, 0x00FFFFFF))
+	if (!flash.check_chip_id(0x186001, 0x00FFFFFF)) {
+		printf("ERROR: NOR Flash returned wrong id\r\n");
 		return STA_NOINIT;
+	}
 
 	flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, mdrivlib::QSpiFlash::EXECUTE_FOREGROUND);
 	return 0;
