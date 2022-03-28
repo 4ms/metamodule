@@ -609,9 +609,9 @@
     <circle id="Div_1_Jack" data-name="Div 1 Jack" cx="27.7" cy="317.08" r="11.34" style="fill: lime"/>
     <circle id="_5V_Env_2" data-name="+5V Env 2" cx="260.81" cy="280.99" r="11.34" style="fill: blue"/>
     <circle id="Half_R" data-name="Half R" cx="219.06" cy="280.99" r="11.34" style="fill: #8080ff"/>
-    <circle id="EOF-2" data-name="EOF 2" cx="177.5" cy="281.13" r="11.34" style="fill: #8080ff"/>
+    <circle id="EOF_2" data-name="EOF 2" cx="177.5" cy="281.13" r="11.34" style="fill: #8080ff"/>
     <circle id="OR" cx="144.22" cy="299.87" r="11.34" style="fill: blue"/>
-    <circle id="EOF-1" data-name="EOF 1" cx="111.11" cy="281.13" r="11.34" style="fill: #8080ff"/>
+    <circle id="EOF_1" data-name="EOF 1" cx="111.11" cy="281.13" r="11.34" style="fill: #8080ff"/>
     <circle id="EOR" cx="69.36" cy="281.13" r="11.34" style="fill: #8080ff"/>
     <circle id="_5V_Env_1" data-name="+5V Env 1" cx="27.7" cy="281.13" r="11.34" style="fill: blue"/>
     <circle id="Env_2" data-name="Env 2" cx="239.76" cy="248.86" r="11.34" style="fill: blue"/>

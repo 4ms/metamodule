@@ -147,12 +147,12 @@
     <path d="M15.34,8.25a4.54,4.54,0,1,0,4.54-4.53A4.54,4.54,0,0,0,15.34,8.25Z"/>
   </g>
   <g id="components">
-    <rect id="Aito-Reset" x="23.35" y="268.62" width="11.34" height="17.01" transform="translate(306.14 248.1) rotate(90)" style="fill: #f27e80"/>
-    <rect id="Spread" x="23.35" y="228.89" width="11.34" height="17.01" transform="translate(266.42 208.37) rotate(90)" style="fill: #f27e80"/>
-    <rect id="Max_Div_2" data-name="Max Div 2" x="23.17" y="188.97" width="11.34" height="17.01" transform="translate(226.31 168.64) rotate(90)" style="fill: #f27e80"/>
-    <rect id="Max_Div_1" data-name="Max Div 1" x="23.17" y="149.25" width="11.34" height="17.01" transform="translate(186.59 128.92) rotate(90)" style="fill: #f27e80"/>
-    <rect id="Gate_Trig" data-name="Gate Trig" x="23.35" y="109.62" width="11.34" height="17.01" transform="translate(147.14 89.1) rotate(90)" style="fill: #f27e80"/>
-    <rect id="Counting" x="23.35" y="69.51" width="11.34" height="17.01" transform="translate(107.04 49) rotate(90)" style="fill: #f27e80"/>
+    <rect id="Aito-Reset" x="23.35" y="268.62" width="11.34" height="17.01" transform="translate(306.14 248.1) rotate(90)" style="fill: #ff8080"/>
+    <rect id="Spread" x="23.35" y="228.89" width="11.34" height="17.01" transform="translate(266.42 208.37) rotate(90)" style="fill: #ff8080"/>
+    <rect id="Max_Div_2" data-name="Max Div 2" x="23.17" y="188.97" width="11.34" height="17.01" transform="translate(226.31 168.64) rotate(90)" style="fill: #ff8080"/>
+    <rect id="Max_Div_1" data-name="Max Div 1" x="23.17" y="149.25" width="11.34" height="17.01" transform="translate(186.59 128.92) rotate(90)" style="fill: #ff8080"/>
+    <rect id="Gate_Trig" data-name="Gate Trig" x="23.35" y="109.62" width="11.34" height="17.01" transform="translate(147.14 89.1) rotate(90)" style="fill: #ff8080"/>
+    <rect id="Counting" x="23.35" y="69.51" width="11.34" height="17.01" transform="translate(107.04 49) rotate(90)" style="fill: #ff8080"/>
     <text id="slug" transform="translate(0.57 371.47)" style="font-size: 6px;font-family: MyriadPro-Regular, Myriad Pro"><tspan style="letter-spacing: 0.0030924479166666665em">R</tspan><tspan x="3.25" y="0">CDBO</tspan></text>
     <text id="modulename" transform="translate(23.03 371.47)" style="font-size: 6px;font-family: MyriadPro-Regular, Myriad Pro"><tspan style="letter-spacing: 0.0030924479166666665em">R</tspan><tspan x="3.25" y="0">CD B</tspan><tspan x="15.25" y="0" style="letter-spacing: -0.010091145833333334em">r</tspan><tspan x="17.15" y="0">eakout</tspan></text>
   </g>
