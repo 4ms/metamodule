@@ -47,17 +47,6 @@ norflash-loader: mp1-med
 u-boot:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk u-boot
 
-## Patches
-
-PATCH_FILES = $(wildcard $(SHARED)/patch/*.yml)
-PATCH_BINARIES += $(wildcard $(SHARED)/patch/integration_tests/*.yml)
-PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_FILES)))
-
-patches: $(PATCH_HEADERS)
-
-%.hh : %.yml 
-	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
-
 ## Module images
 
 MODULEIMG_SVGS = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
