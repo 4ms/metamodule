@@ -5,7 +5,7 @@
 #include "drivers/hsem.hh"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
-#include "fileio.hh"
+#include "fatfs/fileio.hh"
 #include "hsem_handler.hh"
 #include "norflashramdisk_ops.hh"
 #include "params.hh"

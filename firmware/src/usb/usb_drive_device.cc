@@ -1,8 +1,13 @@
 #include "usb_drive_device.hh"
+#include "drivers/interrupt.hh"
+#include "drivers/interrupt_control.hh"
 #include "norflashramdisk_ops.hh"
 #include "printf.h"
+#include "usbd_desc.h"
 #include "usbd_msc.h"
 #include <cstring>
+#include <functional>
+
 
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
 

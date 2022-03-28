@@ -1,13 +1,11 @@
 #pragma once
-
-#include "drivers/interrupt.hh"
-#include "drivers/interrupt_control.hh"
 #include "norflashramdisk_ops.hh"
 #include "usbd_core.h"
-#include "usbd_desc.h"
 #include "usbd_msc.h"
-#include <functional>
 
+// TODO: make this take any DiskOps *,
+// need to make a more generic set_status(Status::Ejected) or something
+// instead of Status::RequiresWriteBack
 class UsbDriveDevice {
 
 public:
