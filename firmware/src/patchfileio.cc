@@ -1,4 +1,5 @@
 #include "patchfileio.hh"
+#include "patches_default.hh"
 #include "patchlist.hh"
 #include "printf.h"
 
@@ -8,12 +9,12 @@ namespace MetaModule::PatchFileIO
 bool create_default_files(Disk disk) {
 	uint8_t *default_patch;
 
-	uint32_t len = PatchList::get_default_patch_data(0, default_patch);
-	if (!FileIO::create_file(PatchList::get_default_patch_filename(0), {default_patch, len}))
+	uint32_t len = DefaultPatches::get_default_patch_data(0, default_patch);
+	if (!FileIO::create_file(DefaultPatches::get_default_patch_filename(0), {default_patch, len}))
 		return false;
 
-	len = PatchList::get_default_patch_data(1, default_patch);
-	if (!FileIO::create_file(PatchList::get_default_patch_filename(1), {default_patch, len}))
+	len = DefaultPatches::get_default_patch_data(1, default_patch);
+	if (!FileIO::create_file(DefaultPatches::get_default_patch_filename(1), {default_patch, len}))
 		return false;
 
 	return true;

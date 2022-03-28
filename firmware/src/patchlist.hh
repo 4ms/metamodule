@@ -7,27 +7,31 @@ namespace MetaModule
 {
 
 struct PatchList {
-	int32_t NumPatches = 2;
+	enum class Status { NotLoaded, Loading, Ready };
 
 	PatchList();
 
 	// Returns the name of the patch at a given index (bounds-checked)
 	ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
-		if (patch_id >= NumPatches)
+		if (patch_id >= _num_patches)
 			patch_id = 0;
 		return _patch_data[patch_id].patch_name;
 	}
 
 	// Return a reference to the patch at the given index (bounds-checked)
 	PatchData &get_patch(uint32_t patch_id) {
-		if (patch_id >= NumPatches)
+		if (patch_id >= _num_patches)
 			patch_id = 0;
 		return _patch_data[patch_id];
 	}
 
-	// Stores the given index, making sure its in bounds
+	uint32_t num_patches() {
+		return _num_patches;
+	}
+
+	// Stores the given index, making sure it's in bounds
 	void set_cur_patch_index(uint32_t new_idx) {
-		if (new_idx >= NumPatches)
+		if (new_idx >= _num_patches)
 			_cur_patch_index = 0;
 		else
 			_cur_patch_index = new_idx;
@@ -43,15 +47,12 @@ struct PatchList {
 		return _status == Status::Ready;
 	}
 
-	static ModuleTypeSlug get_default_patch_filename(uint32_t id);
-	static size_t get_default_patch_data(uint32_t id, const uint8_t *data);
-
-	enum class Status { NotLoaded, Loading, Ready } _status;
 	void set_status(Status status) {
 		_status = status;
 	}
 
 	void clear_all_patches() {
+		_num_patches = 0;
 		_patch_data.clear();
 	}
 
@@ -59,6 +60,8 @@ struct PatchList {
 
 private:
 	std::vector<PatchData> _patch_data;
+	Status _status;
+	uint32_t _num_patches = 0;
 	uint32_t _cur_patch_index = 0;
 };
 } // namespace MetaModule
