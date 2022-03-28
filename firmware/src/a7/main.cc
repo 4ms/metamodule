@@ -5,9 +5,12 @@
 #include "drivers/hsem.hh"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
+#include "fileio.hh"
 #include "hsem_handler.hh"
+#include "norflashramdisk_ops.hh"
 #include "params.hh"
 #include "patch_player.hh"
+#include "patchfileio.hh"
 #include "patchlist.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
@@ -27,39 +30,26 @@ void main() {
 	using namespace MetaModule;
 
 	StaticBuffers::init();
-
-	NorFlashFS norfs{"0", StaticBuffers::virtdrive}; //Volume 0 = RamDisk. TODO: use string volume names
-
 	PatchList patch_list{};
 
-	if (!norfs.init()) {
-		printf("ERROR: NOR Flash returned wrong id\r\n");
-	}
-	if (norfs.startfs()) {
-		printf("NOR Flash mounted as virtual fs\r\n");
-	} else {
+	NorFlashRamDiskOps nordisk{StaticBuffers::virtdrive};
+
+	FileIO::register_disk(&nordisk, Disk::NORFlash);
+	if (!FileIO::mount_disk(Disk::NORFlash)) {
 		printf("No Fatfs found on NOR Flash, creating FS and default patch files...\r\n");
-		auto ok = norfs.make_fs();
-		uint8_t *default_patch;
-
-		uint32_t len = patch_list.get_default_patch_data(0, default_patch);
-		ok &= norfs.create_file(patch_list.get_default_patch_filename(0), {default_patch, len});
-
-		len = patch_list.get_default_patch_data(1, default_patch);
-		ok &= norfs.create_file(patch_list.get_default_patch_filename(1), {default_patch, len});
-
-		ok &= norfs.stopfs();
+		bool ok = FileIO::format_disk(Disk::NORFlash);
+		ok &= PatchFileIO::create_default_files(Disk::NORFlash);
 		if (!ok)
 			printf("Failed to create filesystem and default patches\r\n");
+		else
+			nordisk.unmount();
 	}
 
-	patch_list.refresh_patches_from_fs(norfs);
+	PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
 
 	PatchPlayer patch_player;
 	ParamQueue param_queue;
 	UiAudioMailbox mbox;
-
-	// LedFrame<LEDUpdateHz> leds{StaticBuffers::led_frame_buffer};
 
 	Ui ui{patch_player, patch_list, param_queue, mbox};
 
@@ -92,23 +82,21 @@ void main() {
 	audio.start();
 	ui.start();
 
-	// norfs.init();
-	UsbDriveDevice usb_drive{&norfs};
+	UsbDriveDevice usb_drive{nordisk};
 	usb_drive.start();
 
 	while (true) {
-		// ui.update();
-		if (norfs.get_status() == NorFlashFS::Status::RequiresWriteBack) {
+		if (nordisk.get_status() == NorFlashRamDiskOps::Status::RequiresWriteBack) {
 			mbox.patchlist_reloading = true;
 			printf("NOR Flash writeback begun.\r\n");
-			if (norfs.stopfs()) {
+			if (nordisk.unmount()) {
 				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
-				patch_list.refresh_patches_from_fs(norfs);
+				PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
 				mbox.patchlist_updated = true;
 			} else {
 				printf("NOR Flash writeback failed!\r\n");
 			}
-			norfs.set_status(NorFlashFS::Status::NotInUse);
+			nordisk.set_status(NorFlashRamDiskOps::Status::NotInUse);
 			mbox.patchlist_reloading = false;
 		}
 		__WFI();

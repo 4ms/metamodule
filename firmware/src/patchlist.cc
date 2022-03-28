@@ -2,7 +2,6 @@
 #include "Djembe2.hh"
 #include "Djembe4.hh"
 #include "ff.h"
-#include "norfs.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patchlist_ryml_tests.hh"
 #include "printf.h"
@@ -21,6 +20,7 @@ PatchList::PatchList()
 	//}
 }
 
+//TODO: move to default_patch_files.hh
 ModuleTypeSlug PatchList::get_default_patch_filename(uint32_t id) {
 	if (id == 0)
 		return "djembe2.yml";
@@ -42,45 +42,16 @@ size_t PatchList::get_default_patch_data(uint32_t id, const uint8_t *data) {
 	return 0;
 }
 
-void PatchList::refresh_patches_from_fs(NorFlashFS &norfs) {
-	//TODO: compare stack buffer vs dynamic buffer
-	constexpr size_t MaxFileSize = 32768;
-	char buf[MaxFileSize];
-	uint32_t filesize;
-	DIR dj;
-	FILINFO fileinfo;
-
-	_status = Status::Loading;
-	_patch_data.clear();
-	auto res = f_findfirst(&dj, &fileinfo, "", "*.yml");
-	while (res == FR_OK && fileinfo.fname[0]) {
-		// Skip dot files
-		if (fileinfo.fname[0] == '.')
-			continue;
-		printf("Found patch file: %s, Reading... ", fileinfo.fname);
-		filesize = norfs.read_file(fileinfo.fname, buf, MaxFileSize);
-
-		if (filesize == MaxFileSize) {
-			printf("File exceeds %zu bytes, too big. Skipping\r\n", MaxFileSize);
-			continue;
-		}
-		if (!filesize) {
-			printf("File cannot be read. Skipping\r\n");
-			continue;
-		}
-		printf("Read %d bytes.. parsing... ", filesize);
-
-		_patch_data.push_back({});
-		if (yaml_raw_to_patch({buf, filesize}, _patch_data.back())) {
-			printf("Added Patch\r\n");
-		} else {
-			printf("Failed to parse\r\n");
-			_patch_data.pop_back();
-		}
-		res = f_findnext(&dj, &fileinfo);
+void PatchList::add_patch_from_yaml(const std::span<char> data) {
+	_patch_data.push_back({});
+	NumPatches++;
+	if (yaml_raw_to_patch(data, _patch_data.back())) {
+		printf("Added Patch\r\n");
+	} else {
+		printf("Failed to parse\r\n");
+		_patch_data.pop_back();
+		NumPatches--;
 	}
-	NumPatches = _patch_data.size();
-	_status = Status::Ready;
 }
 
 } // namespace MetaModule

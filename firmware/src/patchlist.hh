@@ -1,5 +1,4 @@
 #pragma once
-#include "norfs.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include <vector>
@@ -44,15 +43,22 @@ struct PatchList {
 		return _status == Status::Ready;
 	}
 
-	// Reads and parses patches from the filesystem
-	// Patch List is in an invalid state while loading
-	void refresh_patches_from_fs(NorFlashFS &norfs);
 	static ModuleTypeSlug get_default_patch_filename(uint32_t id);
 	static size_t get_default_patch_data(uint32_t id, const uint8_t *data);
+
+	enum class Status { NotLoaded, Loading, Ready } _status;
+	void set_status(Status status) {
+		_status = status;
+	}
+
+	void clear_all_patches() {
+		_patch_data.clear();
+	}
+
+	void add_patch_from_yaml(const std::span<char> data);
 
 private:
 	std::vector<PatchData> _patch_data;
 	uint32_t _cur_patch_index = 0;
-	enum class Status { NotLoaded, Loading, Ready } _status;
 };
 } // namespace MetaModule

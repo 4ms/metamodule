@@ -2,7 +2,7 @@
 
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
-#include "norfs.hh"
+#include "norflashramdisk_ops.hh"
 #include "usbd_core.h"
 #include "usbd_desc.h"
 #include "usbd_msc.h"
@@ -11,15 +11,14 @@
 class UsbDriveDevice {
 
 public:
-	UsbDriveDevice(NorFlashFS *nfs);
+	UsbDriveDevice(NorFlashRamDiskOps &nfs);
 	void start();
 	static inline USBD_StorageTypeDef ops;
 
 private:
 	USBD_HandleTypeDef pdev;
 
-	//NorFlash, lun 0:
-	static inline NorFlashFS *norfs;
+	static inline NorFlashRamDiskOps *nordisk = nullptr;
 	static int8_t init(uint8_t lun);
 	static int8_t eject(uint8_t lun);
 	static int8_t get_capacity(uint8_t lun, uint32_t *block_num, uint16_t *block_size);

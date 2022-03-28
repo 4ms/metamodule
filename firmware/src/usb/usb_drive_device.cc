@@ -1,7 +1,7 @@
 #include "usb_drive_device.hh"
-#include "norfs.hh"
-#include "usbd_msc.h"
+#include "norflashramdisk_ops.hh"
 #include "printf.h"
+#include "usbd_msc.h"
 #include <cstring>
 
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
@@ -32,52 +32,67 @@ void UsbDriveDevice::start() {
 
 int8_t UsbDriveDevice::init(uint8_t lun) {
 	if (lun == 0) {
+		if (!nordisk)
+			return USBD_FAIL;
 		printf("USB MSC connected to host\r\n");
-		norfs->set_status(NorFlashFS::Status::InUse);
+		nordisk->set_status(NorFlashRamDiskOps::Status::InUse);
 	}
 	return USBD_OK;
 }
 
 int8_t UsbDriveDevice::eject(uint8_t lun) {
 	if (lun == 0) {
+		if (!nordisk)
+			return USBD_FAIL;
 		printf("USB MSC device got Eject event from host\r\n");
-		norfs->set_status(NorFlashFS::Status::RequiresWriteBack);
-		// norfs->stopfs();
+		nordisk->set_status(NorFlashRamDiskOps::Status::RequiresWriteBack);
 	}
 	return USBD_OK;
 }
 
 int8_t UsbDriveDevice::get_capacity(uint8_t lun, uint32_t *block_num, uint16_t *block_size) {
 	if (lun == 0) {
-		*block_num = norfs->RamDiskSizeBytes / norfs->RamDiskBlockSize;
-		*block_size = norfs->RamDiskBlockSize;
+		if (!nordisk)
+			return USBD_FAIL;
+		*block_num = nordisk->RamDiskSizeBytes / nordisk->RamDiskBlockSize;
+		*block_size = nordisk->RamDiskBlockSize;
 	}
 	return (USBD_OK);
 }
 
 int8_t UsbDriveDevice::is_ready(uint8_t lun) {
+	if (!nordisk)
+		return USBD_FAIL;
 	return USBD_OK;
 }
 
 int8_t UsbDriveDevice::is_write_protected(uint8_t lun) {
+	if (!nordisk)
+		return USBD_FAIL;
 	return USBD_OK;
 }
 
 int8_t UsbDriveDevice::read(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len) {
 	if (lun == 0) {
-		norfs->read_sectors(buf, blk_addr, blk_len);
+		if (!nordisk)
+			return USBD_FAIL;
+		return (nordisk->read(buf, blk_addr, blk_len) == RES_OK) ? USBD_OK : USBD_FAIL;
 	}
 	return USBD_OK;
 }
 
 int8_t UsbDriveDevice::write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len) {
 	if (lun == 0) {
-		norfs->write_sectors(buf, blk_addr, blk_len);
+		if (!nordisk)
+			return USBD_FAIL;
+		return (nordisk->write(buf, blk_addr, blk_len) == RES_OK) ? USBD_OK : USBD_FAIL;
 	}
 	return USBD_OK;
 }
 
 int8_t UsbDriveDevice::get_max_lun() {
+	if (!nordisk)
+		return USBD_FAIL;
 	return 0; //1 unit
 }
 
@@ -106,9 +121,8 @@ static InquiryData inquiry_data = {
 	// .version = {'0', '.', '0', '1'},
 };
 
-UsbDriveDevice::UsbDriveDevice(NorFlashFS *nfs) {
-	norfs = nfs;
-
+UsbDriveDevice::UsbDriveDevice(NorFlashRamDiskOps &nfs) {
+	nordisk = &nfs;
 	ops = {
 		init,
 		get_capacity,
