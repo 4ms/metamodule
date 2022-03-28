@@ -29,7 +29,7 @@ bool register_disk(DiskOps *ops, Disk disk) {
 bool mount_disk(Disk disk) {
 	char vol[3];
 	vol_string(disk, vol);
-	if (f_mount(&fs, vol, 1))
+	if (f_mount(&fs, vol, 1) == FR_OK)
 		return true;
 	return false;
 }
