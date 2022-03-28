@@ -1,8 +1,9 @@
 #include "diskio.h" /* Declarations of disk functions */
 #include "disk_ops.hh"
 #include "ff.h"
-#include "norfs.hh"
+#include <array>
 #include <cstring>
+
 
 constexpr size_t MaxNumDisks = 3;
 

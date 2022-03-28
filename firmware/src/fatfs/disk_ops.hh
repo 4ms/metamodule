@@ -3,8 +3,8 @@
 #include <cstdint>
 
 struct DiskOps {
-	DiskOps() {
-	}
+	DiskOps() = default;
+
 	//virtual ~DiskOps() = 0;
 	virtual DSTATUS status() = 0;
 	virtual DSTATUS initialize() = 0;
