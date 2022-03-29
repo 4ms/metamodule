@@ -8,7 +8,6 @@
 #include <cstring>
 #include <functional>
 
-
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
 
 extern "C" PCD_HandleTypeDef hpcd;
@@ -24,7 +23,7 @@ void UsbDriveDevice::start() {
 	}
 
 	InterruptControl::disable_irq(OTG_IRQn);
-	InterruptControl::set_irq_priority(OTG_IRQn, 1, 0);
+	InterruptControl::set_irq_priority(OTG_IRQn, 2, 0);
 	InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_PCD_IRQHandler, &hpcd));
 	InterruptControl::enable_irq(OTG_IRQn, InterruptControl::LevelTriggered);
 
