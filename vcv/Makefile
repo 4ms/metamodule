@@ -6,7 +6,7 @@ SHARED = $(SHARED_DIR)
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 
 INCLUDES = -Isrc
-INCLUDES += -I$(SHARED_DIR)/util
+INCLUDES += -I$(SHARED_DIR)/cpputil
 INCLUDES += -I$(SHARED_DIR)/processors
 INCLUDES += -I$(SHARED_DIR)/CoreModules
 INCLUDES += -I$(SHARED_DIR)/patch
@@ -31,7 +31,7 @@ LDFLAGS +=
 # Add source files to the build
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/*.cc)
-SOURCES += $(wildcard $(SHARED_DIR)/util/*.cc)
+SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
 SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
@@ -68,8 +68,8 @@ core_tests:
 	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile
 
 util_tests:
-	$(info ... Running shared/util tests ...)
-	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile
+	$(info ... Running shared/cpputil tests ...)
+	@cd $(SHARED)/cpputil && $(MAKE) --no-print-directory -f tests/Makefile
 
 vcv_tests:
 	$(info ... Running vcv plugin tests ...)

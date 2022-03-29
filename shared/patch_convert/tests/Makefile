@@ -28,6 +28,7 @@ CXXFLAGS = 	-Wall \
 			-Iryml \
 			-I.. \
 			-I../etl/include \
+			-I../cpputil \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
 			-I$(TEST_DIR) \

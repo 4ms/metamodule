@@ -4,8 +4,8 @@
 #include "CoreModules/info/module_info_base.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "MappableJack.hpp"
-#include "math.hh"
 #include "util/base_concepts.hh"
+#include "util/math.hh"
 
 template<Derived<ModuleInfoBase> Defs>
 struct GenericModule : CommModule {

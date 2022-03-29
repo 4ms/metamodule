@@ -26,6 +26,7 @@ CXXFLAGS = 	-Wall \
 			-I../src\
 			-Isrc\
 			-Isrc/shared \
+			-Isrc/shared/cpputil \
 			-Isrc/shared/patch_convert/ryml \
 			-Isrc/shared/etl/include \
 			-I$(TEST_DIR) \
