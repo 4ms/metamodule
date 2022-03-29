@@ -2,7 +2,7 @@
 
 #include "util/math.hh"
 #include "util/math_tables.hh"
-#include "util/parameter.h"
+#include "util/parameter.hh"
 #include <algorithm>
 #include <cmath>
 
@@ -14,8 +14,7 @@ public:
 	Parameter<float> q;
 	Parameter<float> sampleRate;
 
-	float update(float input)
-	{
+	float update(float input) {
 		float output = 0;
 
 		if (sampleRate.isChanged()) {
@@ -48,8 +47,7 @@ public:
 		return constrain(output, -1.0f, 1.0f);
 	}
 
-	MoogLadder()
-	{
+	MoogLadder() {
 		for (int l0 = 0; (l0 < 2); l0 = (l0 + 1)) {
 			fRec1[l0] = 0.0f;
 		}
@@ -77,21 +75,17 @@ private:
 	float fRec4[2];
 	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5, fSlow6, fSlow7, fSlow8;
 
-	static float mydsp_faustpower4_f(float value)
-	{
+	static float mydsp_faustpower4_f(float value) {
 		return (((value * value) * value) * value);
 	}
-	static float mydsp_faustpower2_f(float value)
-	{
+	static float mydsp_faustpower2_f(float value) {
 		return (value * value);
 	}
-	static float mydsp_faustpower3_f(float value)
-	{
+	static float mydsp_faustpower3_f(float value) {
 		return ((value * value) * value);
 	}
 
-	void calcFilterVariables()
-	{
+	void calcFilterVariables() {
 		fSlow0 = cutoff.getValue();
 		fSlow1 = std::tan((fConst0 * std::pow(10.0f, ((2.88000011f * fSlow0) + 1.0f))));
 		fSlow2 = (fSlow1 / (fSlow1 + 1.0f));

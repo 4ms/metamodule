@@ -31,6 +31,7 @@ CXXFLAGS = 	-Wall \
 			-Isrc/medium \
 			-I../src \
 			-I../shared \
+			-I../shared/cpputil \
 			-I../shared/etl/include \
 			-I../shared/patch_convert \
 			-I../shared/patch_convert/ryml \

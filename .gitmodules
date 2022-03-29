@@ -19,3 +19,6 @@
 [submodule "shared/patch_convert/ryml/rapidyaml"]
 	path = shared/patch_convert/ryml/rapidyaml
 	url = https://github.com/biojppm/rapidyaml.git
+[submodule "shared/cpputil"]
+	path = shared/cpputil
+	url = git@github.com:4ms/cpputil

@@ -2,7 +2,7 @@
 
 #include "util/math.hh"
 #include "util/math_tables.hh"
-#include "util/parameter.h"
+#include "util/parameter.hh"
 #include <algorithm>
 #include <cmath>
 
@@ -14,8 +14,7 @@ public:
 	Parameter<float> q;
 	Parameter<float> sampleRate;
 
-	float update(float input)
-	{
+	float update(float input) {
 		float output = 0;
 		if (sampleRate.isChanged()) {
 			auto tempSamplerate = constrain(sampleRate.getValue(), 1.0f, 192000.0f);
@@ -29,11 +28,10 @@ public:
 		output = float(((fSlow4 * fRec0[0]) + (fSlow8 * fRec0[2])));
 		fRec0[2] = fRec0[1];
 		fRec0[1] = fRec0[0];
-		return constrain(output,-1.0f,1.0f);
+		return constrain(output, -1.0f, 1.0f);
 	}
 
-	BandPassFilter()
-	{
+	BandPassFilter() {
 		for (int i = 0; i < 3; i++) {
 			fRec0[i] = 0.0f;
 		}
@@ -47,13 +45,11 @@ private:
 	float fSlow0, fSlow1, fSlow2, fSlow3, fSlow4, fSlow5, fSlow6, fSlow7, fSlow8;
 	float fConst0 = 1;
 
-	static float mydsp_faustpower2_f(float value)
-	{
+	static float mydsp_faustpower2_f(float value) {
 		return (value * value);
 	}
 
-	void calcFilterVariables()
-	{
+	void calcFilterVariables() {
 		fSlow0 = std::tan((fConst0 * float(cutoff.getValue())));
 		fSlow1 = (1.0f / float(q.getValue()));
 		fSlow2 = (1.0f / fSlow0);

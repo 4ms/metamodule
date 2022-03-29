@@ -44,9 +44,9 @@ SOURCES  += system/libc_stub.c
 SOURCES  += system/libcpp_stub.cc
 SOURCES  += system/new.cc
 SOURCES  += $(wildcard src/pages/*.cc)
-SOURCES  += $(wildcard $(SHARED)/util/*.c)
-SOURCES  += $(wildcard $(SHARED)/util/*.cc)
-SOURCES  += $(wildcard $(SHARED)/util/*.cpp)
+SOURCES  += $(wildcard $(SHARED)/cpputil/*.c)
+SOURCES  += $(wildcard $(SHARED)/cpputil/*.cc)
+SOURCES  += $(wildcard $(SHARED)/cpputil/*.cpp)
 SOURCES  += $(wildcard $(SHARED)/CoreModules/*.cpp)
 SOURCES  += $(LIBDIR)/printf/printf.c
 SOURCES  += $(MFSRC)
@@ -71,7 +71,7 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \
 			-I$(SHARED)/CoreModules \
-			-I$(SHARED)/util \
+			-I$(SHARED)/cpputil \
 			-I$(SHARED)/patch \
 			-I$(LIBDIR)/printf \
 			-I$(MFINC) \

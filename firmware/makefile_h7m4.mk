@@ -62,7 +62,7 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(SHARED) \
 			-I$(SHARED)/processors \
 			-I$(SHARED)/CoreModules \
-			-I$(SHARED)/util \
+			-I$(SHARED)/cpputil \
 			-I$(SHARED)/patch \
 
 EXTRA_CFLAGS = 

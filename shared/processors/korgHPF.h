@@ -2,7 +2,7 @@
 
 #include "util/math.hh"
 #include "util/math_tables.hh"
-#include "util/parameter.h"
+#include "util/parameter.hh"
 #include <algorithm>
 #include <cmath>
 
@@ -14,8 +14,7 @@ public:
 	Parameter<float> q;
 	Parameter<float> sampleRate;
 
-	float update(float input)
-	{
+	float update(float input) {
 		float output = 0;
 		if (sampleRate.isChanged()) {
 			auto tempSamplerate = constrain(sampleRate.getValue(), 1.0f, 192000.0f);
@@ -42,8 +41,7 @@ public:
 		return constrain(output, -1.0f, 1.0f);
 	}
 
-	KorgHPF()
-	{
+	KorgHPF() {
 		for (int l0 = 0; (l0 < 2); l0 = (l0 + 1)) {
 			fRec1[l0] = 0.0f;
 		}
@@ -67,13 +65,11 @@ private:
 
 	float fConst0 = 1;
 
-	static float mydsp_faustpower2_f(float value)
-	{
+	static float mydsp_faustpower2_f(float value) {
 		return (value * value);
 	}
 
-	void calcFilterVariables()
-	{
+	void calcFilterVariables() {
 		fSlow0 = std::tan((fConst0 * std::pow(10.0f, ((3.0f * float(cutoff)) + 1.0f))));
 		fSlow1 = (float(q) + -0.707000017f);
 		fSlow2 = (fSlow0 + 1.0f);

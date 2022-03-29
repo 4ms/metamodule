@@ -82,7 +82,7 @@ clean:
 	rm -f src/pcmdev/firmware_m4*.h
 	@$(MAKE) --no-print-directory -f tests/Makefile clean
 	@cd $(DRIVERLIB) && $(MAKE) --no-print-directory -f tests/Makefile clean
-	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(SHARED)/cpputil && $(MAKE) --no-print-directory -f tests/Makefile clean
 	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile clean
 
 
@@ -132,8 +132,8 @@ mdrivlib_tests:
 	@cd $(DRIVERLIB) && $(MAKE) --no-print-directory -f tests/Makefile
 
 util_tests:
-	$(info ... Running shared/util tests ...)
-	@cd $(SHARED)/util && $(MAKE) --no-print-directory -f tests/Makefile
+	$(info ... Running shared/cpputil tests ...)
+	@cd $(SHARED)/cpputil && $(MAKE) --no-print-directory -f tests/Makefile
 
 core_tests:
 	$(info ... Running CoreModule tests ...)
@@ -141,7 +141,7 @@ core_tests:
 
 ## Support files
 
-tables $(SHARED)/util/math_tables.cc: $(TABLEGEN)/main.cpp
+tables $(SHARED)/cpputil/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ -I../shared -std=c++17 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
 
