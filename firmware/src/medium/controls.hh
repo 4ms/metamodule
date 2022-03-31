@@ -24,13 +24,15 @@ using mdrivlib::PinPolarity;
 struct Controls {
 	Controls(DoubleBufParamBlock &param_blocks_ref,
 			 DoubleAuxStreamBlock &auxsignal_blocks_ref,
-			 GPIOExpander &gpioexpander);
+			 GPIOExpander &main_gpioexpander,
+			 GPIOExpander &ext_gpioexpander);
 
 	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
 	std::array<uint16_t, NumPotAdcs> pot_vals;
 	mdrivlib::AdcDmaPeriph<PotAdcConf> pot_adc{pot_vals, PotConfs};
 
-	MultiGPIOReader jacksense_reader;
+	// MultiGPIOReader jacksense_reader;
+	GPIOExpander &jacksense_reader;
 	GPIOExpander &extaudio_jacksense_reader;
 
 	mdrivlib::RotaryEncoder<mdrivlib::RotaryHalfStep> rotary = {

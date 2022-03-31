@@ -42,7 +42,7 @@ void Controls::update_params() {
 	if (_first_param) {
 		_first_param = false;
 
-		cur_params->jack_senses = jacksense_reader.read_sense_pins();
+		cur_params->jack_senses = 0; //jacksense_reader.read_sense_pins();
 		store_jacksense_reading(cur_params->jack_senses);
 
 		// PatchCV
@@ -115,8 +115,10 @@ void Controls::start() {
 
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 				   DoubleAuxStreamBlock &auxsignal_blocks_ref,
-				   GPIOExpander &gpioexpander)
-	: extaudio_jacksense_reader{gpioexpander}
+				   GPIOExpander &main_gpioexpander,
+				   GPIOExpander &ext_gpioexpander)
+	: jacksense_reader{main_gpioexpander}
+	, extaudio_jacksense_reader{ext_gpioexpander}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams)
