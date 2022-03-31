@@ -56,8 +56,8 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr auto periph_burst = Single;
 	};
 
-	using DCPin = FPin<GPIO::H, 5, PinMode::Output>;
-	static constexpr PinNoInit ResetPin{GPIO::E, 15};
+	using DCPin = FPin<GPIO::B, 7, PinMode::Output>;
+	static constexpr PinNoInit ResetPin{GPIO::B, 13}; //Hardware error: not connected on p7
 
 	static constexpr bool IsInverted = false;
 	static constexpr uint32_t rowstart = 0;

@@ -18,8 +18,8 @@ using GPIO = mdrivlib::GPIO;
 using PinMode = mdrivlib::PinMode;
 
 struct AuxStreamUpdateConf : mdrivlib::DefaultPinChangeConf {
-	static constexpr uint32_t pin = 4;
-	static constexpr GPIO port = GPIO::D; // PD4 = SAI3 LRCLK
+	static constexpr uint32_t pin = 12;
+	static constexpr GPIO port = GPIO::D; // PD12 = SAI3 LRCLK
 	static constexpr bool on_rising_edge = true;
 	static constexpr bool on_falling_edge = false;
 	static constexpr uint32_t priority1 = 0;
@@ -31,12 +31,12 @@ struct AuxStream {
 	static constexpr bool BoardHasDac = false;
 	static constexpr float DACscaling = 0.f;
 
-	mdrivlib::Pin ButtonLedBlue{GPIO::B, 7, PinMode::Alt, LL_GPIO_AF_2};  // TIM4_CH2
-	mdrivlib::Pin ButtonLedRed{GPIO::B, 8, PinMode::Alt, LL_GPIO_AF_2};	  // TIM4_CH3
-	mdrivlib::Pin ButtonLedGreen{GPIO::B, 9, PinMode::Alt, LL_GPIO_AF_2}; // TIM4_CH4
+	mdrivlib::Pin ButtonLedBlue{GPIO::A, 9, PinMode::Alt, LL_GPIO_AF_1};   // TIM1_CH2
+	mdrivlib::Pin ButtonLedRed{GPIO::B, 15, PinMode::Alt, LL_GPIO_AF_1};   // TIM1_CH3N
+	mdrivlib::Pin ButtonLedGreen{GPIO::E, 14, PinMode::Alt, LL_GPIO_AF_1}; // TIM1_CH4
 
-	using ClockOutPin1 = mdrivlib::FPin<GPIO::G, 2, PinMode::Output>;
-	using ClockOutPin2 = mdrivlib::FPin<GPIO::F, 15, PinMode::Output>;
+	using ClockOutPin1 = mdrivlib::FPin<GPIO::G, 14, PinMode::Output>;
+	using ClockOutPin2 = mdrivlib::FPin<GPIO::B, 12, PinMode::Output>;
 	using BufferType = CircularBuffer<uint8_t, StreamConf::Audio::BlockSize>;
 
 	mdrivlib::GPIOStream<ClockOutPin1, BufferType> gate_out_1;
@@ -60,22 +60,11 @@ struct AuxStream {
 		AuxStream::ClockOutPin2::high();
 		AuxStream::ClockOutPin1::low();
 		AuxStream::ClockOutPin2::low();
-		mdrivlib::FPin<GPIO::B, 7, PinMode::Output> blue;
-		blue.high();
-		mdrivlib::FPin<GPIO::B, 8, PinMode::Output> red;
-		red.high();
-		mdrivlib::FPin<GPIO::B, 9, PinMode::Output> green;
-		green.high();
-		//magenta
-		blue.low();
-		red.low();
-		//white
-		green.low();
-		//yellow
-		blue.high();
-		//cyan
-		red.high();
-		blue.low();
+		mdrivlib::FPin<GPIO::A, 15, PinMode::Output> led;
+		led.high();
+		led.low();
+		led.high();
+		led.low();
 	}
 };
 

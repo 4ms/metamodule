@@ -11,11 +11,23 @@ const RCC_OscInitTypeDef rcc_osc_conf = {
 			.PLLState = RCC_PLL_ON,
 			.PLLSource = RCC_PLL12SOURCE_HSE,
 			.PLLM = 3,
-			.PLLN = 81,
+			.PLLN = 100,
 			.PLLP = 1,
-			.PLLQ = 1,
+			.PLLQ = 2,
+			.PLLR = 2,
+			.PLLFRACV = 0,
+			.PLLMODE = RCC_PLL_INTEGER,
+		},
+	.PLL2 =
+		{
+			.PLLState = RCC_PLL_ON,
+			.PLLSource = RCC_PLL12SOURCE_HSE,
+			.PLLM = 3,
+			.PLLN = 66,
+			.PLLP = 2,
+			.PLLQ = 2,
 			.PLLR = 1,
-			.PLLFRACV = 2048,
+			.PLLFRACV = 4096,
 			.PLLMODE = RCC_PLL_FRACTIONAL,
 		},
 };
@@ -26,7 +38,7 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 	.MPUInit =
 		{
 			.MPU_Clock = RCC_MPUSOURCE_PLL1,
-			.MPU_Div = RCC_MPU_DIV2,
+			.MPU_Div = RCC_MPU_DIV_OFF,
 		},
 	.AXISSInit =
 		{
@@ -51,6 +63,20 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	//104: 63.883Hz
 	//105: 63.275Hz
 	//112: 59.32Hz
+	//TODO: setup PLL3?
+	.PLL3 =
+		{
+			.PLLState = RCC_PLL_ON,
+			.PLLSource = RCC_PLL4SOURCE_HSE,
+			.PLLM = 2,
+			.PLLN = 52,
+			.PLLP = 3,
+			.PLLQ = 6,
+			.PLLR = 2,
+			.PLLRGE = RCC_PLL4IFRANGE_1,
+			.PLLFRACV = 0,
+			.PLLMODE = RCC_PLL_INTEGER,
+		},
 	.PLL4 =
 		{
 			.PLLState = RCC_PLL_ON,
@@ -65,9 +91,10 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 			.PLLMODE = RCC_PLL_INTEGER,
 		},
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_HSI,
-	.Sai3ClockSelection = RCC_SAI3CLKSOURCE_PLL3_Q,
-	.Spi1ClockSelection = RCC_SPI1CLKSOURCE_PLL4,
-	.Spi23ClockSelection = RCC_SPI23CLKSOURCE_PLL4,
+	.I2c35ClockSelection = RCC_I2C35CLKSOURCE_HSI,
+	.I2c46ClockSelection = RCC_I2C46CLKSOURCE_HSI,
+	.Sai1ClockSelection = RCC_SAI1CLKSOURCE_PLL3_Q,
+	.Sai2ClockSelection = RCC_SAI2CLKSOURCE_PLL3_Q,
 	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK2,
 	.Sdmmc12ClockSelection =
 		RCC_SDMMC12CLKSOURCE_HSI, // See MP15x Errata: 2.3.5 Incorrect reset of glitch-free kernel clock switch

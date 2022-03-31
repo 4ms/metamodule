@@ -8,9 +8,9 @@ using mdrivlib::GPIO;
 using mdrivlib::SaiConfig;
 
 const SaiConfig codec_mainPCB_sai_conf = {
-	.sai = SAI3,
-	.tx_block = SAI3_Block_A,
-	.rx_block = SAI3_Block_B,
+	.sai = SAI2,
+	.tx_block = SAI2_Block_A,
+	.rx_block = SAI2_Block_B,
 
 	.mode = SaiConfig::TXMaster,
 
@@ -18,7 +18,7 @@ const SaiConfig codec_mainPCB_sai_conf = {
 		{
 			.DMAx = DMA2,
 			.stream = DMA2_Stream1,
-			.channel = DMA_REQUEST_SAI3_A,
+			.channel = DMA_REQUEST_SAI2_A,
 			.IRQn = DMA2_Stream1_IRQn,
 			.pri = 1,
 			.subpri = 1,
@@ -27,7 +27,7 @@ const SaiConfig codec_mainPCB_sai_conf = {
 		{
 			.DMAx = DMA2,
 			.stream = DMA2_Stream2,
-			.channel = DMA_REQUEST_SAI3_B,
+			.channel = DMA_REQUEST_SAI2_B,
 			.IRQn = DMA2_Stream2_IRQn,
 			.pri = 1,
 			.subpri = 1,
@@ -37,13 +37,13 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.framesize = 256,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::D, 15, LL_GPIO_AF_6},
-	.SCLK = {GPIO::D, 0, LL_GPIO_AF_6},
-	.LRCLK = {GPIO::D, 4, LL_GPIO_AF_6},
-	.SD_DAC = {GPIO::D, 1, LL_GPIO_AF_6}, // SD A
-	.SD_ADC = {GPIO::E, 1, LL_GPIO_AF_6}, // SD B
+	.MCLK = {GPIO::E, 0, LL_GPIO_AF_10},
+	.SCLK = {GPIO::D, 13, LL_GPIO_AF_10},
+	.LRCLK = {GPIO::D, 12, LL_GPIO_AF_10},
+	.SD_DAC = {GPIO::D, 11, LL_GPIO_AF_10}, // SD A
+	.SD_ADC = {GPIO::G, 10, LL_GPIO_AF_10}, // SD B
 
-	.reset_pin = {GPIO::F, 1, 0},
+	.reset_pin = {GPIO::E, 10, 0},
 
 	.bus_address = 0b00,
 
@@ -60,7 +60,7 @@ const SaiConfig codec_ext_sai_conf = {
 	.tx_block = SAI1_Block_A,
 	.rx_block = SAI1_Block_B,
 
-	.mode = SaiConfig::ExtSynced, //TXMaster,
+	.mode = SaiConfig::ExtSynced,
 
 	.dma_init_tx =
 		{
@@ -85,13 +85,13 @@ const SaiConfig codec_ext_sai_conf = {
 	.framesize = 256,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::Unused, 0, 0},		  //{GPIO::E, 2, LL_GPIO_AF_6},	  // not used -- MCLK taken from SAI3
-	.SCLK = {GPIO::E, 5, LL_GPIO_AF_6},	  // Block A SCK
-	.LRCLK = {GPIO::G, 15, LL_GPIO_AF_6}, // Block A FS
-	.SD_DAC = {GPIO::D, 6, LL_GPIO_AF_6}, // SD A
-	.SD_ADC = {GPIO::E, 3, LL_GPIO_AF_6}, // SD B
+	.MCLK = {GPIO::Unused, 0, 0},
+	.SCLK = {GPIO::Unused, 0, 0},
+	.LRCLK = {GPIO::Unused, 0, 0},
+	.SD_DAC = {GPIO::B, 2, LL_GPIO_AF_6}, // SD A
+	.SD_ADC = {GPIO::F, 6, LL_GPIO_AF_6}, // SD B
 
-	.reset_pin = {GPIO::D, 5},
+	.reset_pin = {GPIO::E, 8},
 
 	.bus_address = 0b01,
 
