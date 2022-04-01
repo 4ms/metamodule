@@ -29,9 +29,6 @@ struct SystemInit : AppStartup, Debug, Hardware {
 void main() {
 	using namespace MetaModule;
 
-	MemTest::check(0xC300'0000, 0xD000'0000);
-	MemTest::check(0xD000'0000, 0xE000'0000);
-
 	StaticBuffers::init();
 	PatchList patch_list{};
 
