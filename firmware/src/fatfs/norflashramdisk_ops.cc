@@ -32,16 +32,19 @@ void NorFlashRamDiskOps::set_status(Status status) {
 //
 // FatFS calls this in f_mkfs(), and when it mounts the disk (in f_mount(_,_,1) or the first time FatFS attempts a read/write/stat if the disk is not yet mounted)
 DSTATUS NorFlashRamDiskOps::initialize() {
-	if (!flash.check_chip_id(0x186001, 0x00FFFFFF)) {
-		printf("ERROR: NOR Flash returned wrong id\r\n");
-		return STA_NOINIT | STA_NODISK;
-	}
+	if (_status == Status::NotInit) {
+		if (!flash.check_chip_id(0x182001, 0x00FFBFFF)) { //182001 or 186001
+			printf("ERROR: NOR Flash returned wrong id\r\n");
+			return STA_NOINIT | STA_NODISK;
+		}
 
-	if (flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, Foreground)) {
-		set_status(Status::NotInUse);
-		return 0;
+		if (flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, Foreground)) {
+			set_status(Status::NotInUse);
+			return 0;
+		}
+		return STA_NOINIT;
 	}
-	return STA_NOINIT;
+	return 0;
 }
 
 DRESULT NorFlashRamDiskOps::read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) {
