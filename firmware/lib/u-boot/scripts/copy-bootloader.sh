@@ -12,12 +12,12 @@
 
 [ "$#" -eq 2 ] || [ "$#" -eq 1 ] || { 
 	echo ""
-	echo "Usage: scripts/copy-bootloader.sh /dev/XXX third-party/u-boot/build/" >&2; 
+	echo "Usage: scripts/copy-bootloader.sh /dev/XXX third-party/u-boot/build" >&2; 
 	echo ""
 	echo "Where /dev/XXX is the sd card device, e.g. /dev/sdc or /dev/disk3"
-	echo "And 'third-party/u-boot/build/' is the path to the dir containing the U-Boot image files, (make sure it ends in a '/')"
+	echo "And the last parameter is the path to the dir containing the U-Boot image files"
 	echo ""
-	echo "If you omit the last parameter, it defaults to third-party/u-boot/build/"
+	echo "If you omit the last parameter, it defaults to third-party/u-boot/build"
 	exit 1; 
 }
 
@@ -27,7 +27,7 @@ if [ ! -b $1 ]; then
 fi
 
 if [ "$#" -eq 1 ]; then
-	path="third-party/u-boot/build/"
+	path="third-party/u-boot/build"
 else
 	path=$2
 fi
