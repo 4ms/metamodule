@@ -3,7 +3,7 @@
 #include "moduleFactory.hh"
 
 struct DefaultPatches {
-	static ModuleTypeSlug get_default_patch_filename(uint32_t id) {
+	static ModuleTypeSlug get_filename(uint32_t id) {
 		if (id == 0)
 			return "djembe2.yml";
 		if (id == 1)
@@ -11,16 +11,27 @@ struct DefaultPatches {
 		return "";
 	}
 
-	static size_t get_default_patch_data(uint32_t id, const uint8_t *data) {
-		if (id == 0) {
-			data = Djembe2_yml;
+	static size_t get_len(uint32_t id) {
+		if (id == 0)
 			return Djembe2_yml_len;
-		}
-		if (id == 1) {
-			data = Djembe4_yml;
+		if (id == 1)
 			return Djembe4_yml_len;
-		}
-		data = nullptr;
 		return 0;
+	}
+
+	static uint8_t *get_data(uint32_t id) {
+		if (id == 0)
+			return Djembe2_yml;
+		if (id == 1)
+			return Djembe4_yml;
+		return nullptr;
+	}
+
+	static std::span<uint8_t> get_patch(uint32_t id) {
+		if (id == 0)
+			return Djembe2_yml;
+		if (id == 1)
+			return Djembe4_yml;
+		return {};
 	}
 };

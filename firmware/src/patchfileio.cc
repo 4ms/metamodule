@@ -7,14 +7,16 @@ namespace MetaModule::PatchFileIO
 {
 
 bool create_default_files(Disk disk) {
-	uint8_t *default_patch;
-
-	uint32_t len = DefaultPatches::get_default_patch_data(0, default_patch);
-	if (!FileIO::create_file(DefaultPatches::get_default_patch_filename(0), {default_patch, len}))
+	// uint8_t *default_patch = DefaultPatches::get_data(0);
+	// uint32_t len = DefaultPatches::get_len(0);
+	// if (!FileIO::create_file(DefaultPatches::get_filename(0), {default_patch, len}))
+	if (!FileIO::create_file(DefaultPatches::get_filename(0), DefaultPatches::get_patch(0)))
 		return false;
 
-	len = DefaultPatches::get_default_patch_data(1, default_patch);
-	if (!FileIO::create_file(DefaultPatches::get_default_patch_filename(1), {default_patch, len}))
+	// default_patch = DefaultPatches::get_data(1);
+	// len = DefaultPatches::get_len(1);
+	// if (!FileIO::create_file(DefaultPatches::get_filename(1), {default_patch, len}))
+	if (!FileIO::create_file(DefaultPatches::get_filename(1), DefaultPatches::get_patch(1)))
 		return false;
 
 	return true;
