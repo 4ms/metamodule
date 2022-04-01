@@ -42,6 +42,7 @@ CompileFlags:
 		"-Ilib/lvgl",
 		"-Ilib/lvgl/lvgl/src/lv_font",
 		"-Isrc/shared/etl/include",
+		"-Isrc/shared/cpputil",
 		"-Ilib/mdrivlib",
 		"-Ilib/mdrivlib/drivers",
 		"-Ilib/mdrivlib/target/stm32mp1",
