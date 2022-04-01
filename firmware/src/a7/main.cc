@@ -3,7 +3,6 @@
 #include "conf/board_codec_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
-#include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
 #include "fatfs/fileio.hh"
 #include "hsem_handler.hh"
