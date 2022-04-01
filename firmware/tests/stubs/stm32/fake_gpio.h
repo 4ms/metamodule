@@ -1,7 +1,13 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
 
-enum class FakeGPIO : uint8_t {
+// required to make sure pin.hh includes these GPIOs
+#define GPIOE_BASE static_cast<uint32_t>(FakeGPIO::E)
+#define GPIOF_BASE static_cast<uint32_t>(FakeGPIO::F)
+#define GPIOG_BASE static_cast<uint32_t>(FakeGPIO::G)
+#define GPIOH_BASE static_cast<uint32_t>(FakeGPIO::H)
+
+enum class FakeGPIO : uint32_t {
 	A,
 	B,
 	C,
@@ -12,7 +18,7 @@ enum class FakeGPIO : uint8_t {
 	H,
 	I,
 	J,
-	K
+	K,
 };
 bool read_fake_pin(FakeGPIO port, uint16_t pin_num);
 void set_fake_pin(FakeGPIO port, uint16_t pin_num, bool newstate);
