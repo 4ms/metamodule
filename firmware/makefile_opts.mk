@@ -6,7 +6,7 @@
 # $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/pages/page_manager.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/norflash-loader/main.o: OPTFLAG = -O0
-$(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
 $(BUILDDIR)/src/patchfileio.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/timekeeper.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/main.o: OPTFLAG = -O0
