@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
 
-if [ "$#" -ne 0 ]; then
+if [ "$#" -eq 0 ]; then
+	UDIR="third-party/u-boot/u-boot-stm32mp1-baremetal"
+	echo ""
+	echo "Using $UDIR for u-boot source"
+	echo ""
+fi
+
+if [ "$#" -eq 1 ]; then
+	UDIR=$1
+fi
+
+if [ "$#" -ge 2 ]; then
 	echo ""
 	echo "Usage: "
-	echo "scripts/build-u-boot.sh"
+	echo "scripts/build-u-boot.sh path/to/u-boot-stm32mp1-baremetal"
+	echo ""
+	echo "path defaults to third-party/u-boot/u-boot-stm32mp1-baremetal"
 	echo ""
 	exit 1
 fi
@@ -16,7 +29,8 @@ echo "3) STM32MP157D-DK1"
 echo "4) STM32MP157F-DK2"
 echo "5) OSD32MP1-BRK"
 echo "6) 4ms OSD32MP1-BRK clone"
-read -p "Enter a number 1-6: " boardnum
+echo "7) 4ms MM p7"
+read -p "Enter a number 1-7: " boardnum
 
 DT=""
 
@@ -39,22 +53,28 @@ case $boardnum in
 	"6")
 		DT="stm32mp157c-4ms-mp1-brk"
 		;;
+	"7")
+		DT="stm32mp153dad-metamodule-p7"
+		;;
 	*)
-		echo "Please enter a number 1-5"
+		echo "Please enter a number 1-7"
 		exit 0
 esac
 
-cd third-party/u-boot/u-boot-stm32mp1-baremetal
+CURDIR=$(pwd)
+
 
 echo ""
 echo "Building with these commands:"
+echo "cd $UDIR"
 echo "make O=../build DEVICE_TREE=$DT CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig"
 echo "make -j16 O=../build DEVICE_TREE=$DT CROSS_COMPILE=arm-none-eabi- all"
+echo "cd $CURDIR"
 echo ""
 
-rm -rf ../build
+#rm -rf ../build
+cd $UDIR
 make O=../build DEVICE_TREE=$DT CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig
 make -j16 O=../build DEVICE_TREE=$DT CROSS_COMPILE=arm-none-eabi- all
-
-cd ../..
+cd $CURDIR
 
