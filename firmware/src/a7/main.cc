@@ -16,6 +16,7 @@
 #include "static_buffers.hh"
 #include "ui.hh"
 #include "usb/usb_drive_device.hh"
+#include "util/mem_test.hh"
 
 namespace MetaModule
 {
@@ -28,6 +29,9 @@ struct SystemInit : AppStartup, Debug, Hardware {
 void main() {
 	using namespace MetaModule;
 
+	MemTest::check(0xC300'0000, 0xD000'0000);
+	MemTest::check(0xD000'0000, 0xE000'0000);
+
 	StaticBuffers::init();
 	PatchList patch_list{};
 
@@ -35,7 +39,6 @@ void main() {
 	FileIO::register_disk(&nordisk, Disk::NORFlash);
 	if (!FileIO::mount_disk(Disk::NORFlash)) {
 		printf("No Fatfs found on NOR Flash, formatting and creating default patch files\r\n");
-		//TODO: test factory_reset
 		PatchFileIO::factory_reset(Disk::NORFlash);
 	}
 	PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
@@ -65,7 +68,7 @@ void main() {
 	// Needed for LED refresh
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
-	// // Tell M4 we're done with init
+	// Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for M4 to be ready
