@@ -36,7 +36,6 @@ void main() {
 	FileIO::register_disk(&nordisk, Disk::NORFlash);
 	if (!FileIO::mount_disk(Disk::NORFlash)) {
 		printf("No Fatfs found on NOR Flash, formatting and creating default patch files\r\n");
-		//TODO: test factory_reset
 		PatchFileIO::factory_reset(Disk::NORFlash);
 	}
 	PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
@@ -99,4 +98,30 @@ void main() {
 
 void recover_from_task_fault() {
 	main();
+}
+
+bool check_ram(uint32_t *start, uint32_t *stop) {
+	size_t sz = stop - start;
+
+	constexpr size_t blksz = 1024;
+	uint32_t blk[blksz];
+
+	{
+		uint32_t seed = reinterpret_cast<uint32_t>(start) * 0xAAAA5555 + 0x5555AAAA;
+		for (uint32_t *wr; wr < stop; wr++) {
+			*wr++ = seed;
+			seed += 0x55555555;
+		}
+	}
+
+	{
+		uint32_t seed = reinterpret_cast<uint32_t>(start) * 0xAAAA5555 + 0x5555AAAA;
+		for (uint32_t *rd; rd < stop; rd++) {
+			if (*rd++ != seed)
+				return false;
+			seed += 0x55555555;
+		}
+	}
+
+	return true;
 }
