@@ -17,6 +17,7 @@
 #include "static_buffers.hh"
 #include "ui.hh"
 #include "usb/usb_drive_device.hh"
+#include "util/mem_test.hh"
 
 namespace MetaModule
 {
@@ -28,6 +29,9 @@ struct SystemInit : AppStartup, Debug, Hardware {
 
 void main() {
 	using namespace MetaModule;
+
+	MemTest::check(0xC300'0000, 0xD000'0000);
+	MemTest::check(0xD000'0000, 0xE000'0000);
 
 	StaticBuffers::init();
 	PatchList patch_list{};
@@ -65,7 +69,7 @@ void main() {
 	// Needed for LED refresh
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
-	// // Tell M4 we're done with init
+	// Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
 
 	// wait for M4 to be ready
@@ -98,30 +102,4 @@ void main() {
 
 void recover_from_task_fault() {
 	main();
-}
-
-bool check_ram(uint32_t *start, uint32_t *stop) {
-	size_t sz = stop - start;
-
-	constexpr size_t blksz = 1024;
-	uint32_t blk[blksz];
-
-	{
-		uint32_t seed = reinterpret_cast<uint32_t>(start) * 0xAAAA5555 + 0x5555AAAA;
-		for (uint32_t *wr; wr < stop; wr++) {
-			*wr++ = seed;
-			seed += 0x55555555;
-		}
-	}
-
-	{
-		uint32_t seed = reinterpret_cast<uint32_t>(start) * 0xAAAA5555 + 0x5555AAAA;
-		for (uint32_t *rd; rd < stop; rd++) {
-			if (*rd++ != seed)
-				return false;
-			seed += 0x55555555;
-		}
-	}
-
-	return true;
 }
