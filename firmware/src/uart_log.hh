@@ -4,7 +4,7 @@
 namespace MetaModule
 {
 struct UartLog {
-	static inline mdrivlib::Uart<UART4_BASE> log_uart;
+	static inline mdrivlib::Uart<USART6_BASE> log_uart;
 
 	static void putchar(char c);
 
