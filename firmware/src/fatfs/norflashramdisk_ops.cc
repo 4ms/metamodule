@@ -33,7 +33,7 @@ void NorFlashRamDiskOps::set_status(Status status) {
 // FatFS calls this in f_mkfs(), and when it mounts the disk (in f_mount(_,_,1) or the first time FatFS attempts a read/write/stat if the disk is not yet mounted)
 DSTATUS NorFlashRamDiskOps::initialize() {
 	if (_status == Status::NotInit) {
-		if (!flash.check_chip_id(0x182001, 0x00FFBFFF)) { //182001 or 186001
+		if (!flash.check_chip_id(0x182001, 0x00FFBFFF)) { //S25FL127S(p7):182001 or S25FL128L(p6):186001
 			printf("ERROR: NOR Flash returned wrong id\r\n");
 			return STA_NOINIT | STA_NODISK;
 		}
@@ -90,6 +90,9 @@ DRESULT NorFlashRamDiskOps::ioctl(uint8_t cmd, uint8_t *buff) {
 }
 
 bool NorFlashRamDiskOps::unmount() {
+	printf("NOR writeback disabled\r\n");
+	return true;
+
 	constexpr uint32_t SectorSize = QSPI_SECTOR_SIZE;
 	constexpr uint32_t NumSectors = qspi_patchflash_conf.flash_size_bytes / SectorSize;
 	uint32_t sector[SectorSize / 4];
