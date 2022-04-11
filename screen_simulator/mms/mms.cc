@@ -1,6 +1,8 @@
 #include "stubs/sys/alloc_buffer.hh"
 #include <cstdint>
 
+#include "patches_default.hh"
+
 #include "lvgl_driver.hh"
 #include "pages/page_manager.hh"
 #include "params.hh"
@@ -21,6 +23,9 @@ struct Simulator {
 	Simulator()
 		: pages{patch_list, patch_player, params, metaparams, mbox} {
 		MetaModule::MMDisplay::init(metaparams);
+
+		patch_list.add_patch_from_yaml({DefaultPatches::get_data(0), DefaultPatches::get_len(0)});
+		patch_list.add_patch_from_yaml({DefaultPatches::get_data(1), DefaultPatches::get_len(1)});
 	}
 
 	bool init() {

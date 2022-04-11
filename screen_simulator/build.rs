@@ -41,8 +41,16 @@ fn main() {
     src.push(String::from("../shared/cpputil/util/math_tables.cc"));
     src.push(String::from("../shared/axoloti-wrapper/axoloti_math.cpp"));
     add_glob_files("../shared/CoreModules/*.cc", &mut src);
+
+    // GUI
     add_glob_files("../firmware/src/pages/fonts/*.c", &mut src);
     add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut src);
+
+    // Patch convert
+    src.push(String::from("../shared/patch_convert/ryml/ryml_serial.cc"));
+    src.push(String::from("../shared/patch_convert/yaml_to_patch.cc"));
+    add_glob_files("../shared/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp", &mut src);
+    add_glob_files("../shared/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp", &mut src);
 
     println!("cargo:rerun-rustc-link-lib=lvgl");
     let mut builder = cc::Build::new();
@@ -57,6 +65,9 @@ fn main() {
         .include("../shared/cpputil")
         .include("../shared")
         .include("../shared/patch")
+        .include("../shared/patch_convert")
+        .include("../shared/patch_convert/ryml/rapidyaml/src")
+        .include("../shared/patch_convert/ryml/rapidyaml/ext/c4core/src")
         .include("../firmware/src")
         .include("../firmware/lib/lvgl")
         .include("../firmware/lib/lvgl/lvgl/src/lv_font")

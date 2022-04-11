@@ -16,6 +16,9 @@ PatchList::PatchList()
 	//}
 }
 
+void PatchList::add_patch_from_yaml(const std::span<uint8_t> data) {
+	add_patch_from_yaml({reinterpret_cast<char *>(data.data()), data.size()});
+}
 void PatchList::add_patch_from_yaml(const std::span<char> data) {
 	_patch_data.push_back({});
 	_num_patches++;

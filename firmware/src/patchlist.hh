@@ -57,6 +57,7 @@ struct PatchList {
 	}
 
 	void add_patch_from_yaml(const std::span<char> data);
+	void add_patch_from_yaml(const std::span<uint8_t> data);
 
 private:
 	std::vector<PatchData> _patch_data;

@@ -1,6 +1,6 @@
+#include "CoreModules/moduleFactory.hh"
 #include "Djembe2.hh"
 #include "Djembe4.hh"
-#include "moduleFactory.hh"
 
 struct DefaultPatches {
 	static ModuleTypeSlug get_filename(uint32_t id) {
