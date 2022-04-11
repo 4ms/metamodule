@@ -5,7 +5,7 @@
 //#include "drivers/screen_ltdc.hh"
 //#include "drivers/screen_ltdc_setup.hh"
 #include "lvgl/lvgl.h"
-#include "lvgl/src/lv_misc/lv_color.h"
+// #include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
 #include "screen_writer.hh"
 #include "timekeeper.hh"
@@ -18,15 +18,13 @@ class LVGLDriver {
 	static constexpr uint32_t ScreenWidth = ScreenBufferConf::viewWidth;
 	static constexpr uint32_t ScreenHeight = ScreenBufferConf::viewHeight;
 
-	// v8:
-	// lv_disp_draw_buf_t disp_buf;
-	lv_disp_buf_t disp_buf;
+	lv_disp_draw_buf_t disp_buf;
 	lv_indev_drv_t indev_drv;
 	lv_indev_t *indev;
 
 	// Callbacks
 	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
-	using indev_cb_t = bool(lv_indev_drv_t *indev, lv_indev_data_t *data);
+	using indev_cb_t = void(lv_indev_drv_t *indev, lv_indev_data_t *data);
 
 	// Display driver
 	lv_disp_drv_t disp_drv;
@@ -37,10 +35,9 @@ public:
 
 		lv_init();
 
-		lv_disp_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
+		lv_disp_draw_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
 		lv_disp_drv_init(&disp_drv);
-		// disp_drv.draw_buf = &disp_buf; //v8
-		disp_drv.buffer = &disp_buf;
+		disp_drv.draw_buf = &disp_buf;
 		disp_drv.flush_cb = flush_cb;
 		disp_drv.hor_res = ScreenWidth;
 		disp_drv.ver_res = ScreenHeight;
