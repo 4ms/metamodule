@@ -64,5 +64,5 @@ private:
 	float baseFrequency = 1.0;
 	float cvInput = 0;
 	float filterQ = 0;
-	float cvAmount = 0;
+	// float cvAmount = 0;
 };

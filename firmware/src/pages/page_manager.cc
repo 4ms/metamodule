@@ -36,7 +36,7 @@ void PageManager::next_page() {
 			break;
 		case PageId::Module:
 			cur_module_idx++;
-			if (cur_module_idx >= info.patch_player.get_num_modules()) {
+			if (cur_module_idx >= (unsigned)info.patch_player.get_num_modules()) {
 				cur_page = PageId::PatchSel;
 			} else {
 				page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
@@ -59,7 +59,7 @@ void PageManager::prev_page() {
 			break;
 		case PageId::Module:
 			cur_module_idx--;
-			if (cur_module_idx == 0 || cur_module_idx >= info.patch_player.get_num_modules()) {
+			if (cur_module_idx == 0 || cur_module_idx >= (unsigned)info.patch_player.get_num_modules()) {
 				cur_module_idx = 1;
 				cur_page = PageId::Knobs;
 			} else {

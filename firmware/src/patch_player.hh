@@ -360,12 +360,12 @@ public:
 	// This is used to create unique names for modules (e.g. LFO#1, LFO#2,...)
 	void calc_multiple_module_indicies() {
 		// Todo: this is a naive implementation, perhaps can be made more efficient
-		for (int i = 0; i < pd.module_slugs.size(); i++) {
+		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
 			auto &this_slug = pd.module_slugs[i];
 
 			unsigned found = 1;
 			unsigned this_index = 0;
-			for (int j = 0; j < pd.module_slugs.size(); j++) {
+			for (size_t j = 0; j < pd.module_slugs.size(); j++) {
 				if (i == j) {
 					this_index = found;
 					continue;

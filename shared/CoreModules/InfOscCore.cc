@@ -354,7 +354,7 @@ private:
 	int add, upd, rst; //,lng;
 
 	uint32_t P1, P2, ppitch;
-	int32_t FRQ, hp, wave, pwave, lp, r3, w3, LP; //,dclk,pprev,rprev;
+	int32_t /*FRQ,*/ hp, wave, /*pwave,*/ lp, /*r3,*/ w3, LP; //,dclk,pprev,rprev;
 	int32_t Ppitch, Prange;
 
 	int32_t tri(int32_t ps) {

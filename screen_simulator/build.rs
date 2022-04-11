@@ -38,7 +38,7 @@ fn main() {
     src.push(String::from("mms/stubs/hal_tick.c"));
     src.push(String::from("../firmware/src/patchlist.cc"));
     src.push(String::from("../firmware/src/pages/page_manager.cc"));
-    src.push(String::from("../shared/util/math_tables.cc"));
+    src.push(String::from("../shared/cpputil/util/math_tables.cc"));
     src.push(String::from("../shared/axoloti-wrapper/axoloti_math.cpp"));
     add_glob_files("../shared/CoreModules/*.cc", &mut src);
     add_glob_files("../firmware/src/pages/fonts/*.c", &mut src);
@@ -52,9 +52,10 @@ fn main() {
         .flag("--includestubs/sys/alloc_buffer.hh")
         .include("mms")
         .include("mms/stubs")
-        .include("../firmware/lib/etl/include")
+        .include("../shared/etl/include")
         .include("../shared")
-        .include("../shared/util")
+        .include("../shared/cpputil")
+        .include("../shared")
         .include("../shared/patch")
         .include("../firmware/src")
         .include("../firmware/lib/lvgl")
