@@ -57,7 +57,7 @@ struct ModuleViewPage : PageBase {
 		//Draw module image
 		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
 		auto width_px = img->header.w;
-		auto height_px = img->header.h; // assert == 240?
+		// auto height_px = img->header.h; // assert == 240?
 		lv_canvas_fill_bg(canvas, lv_color_make(0, 0, 0), LV_OPA_COVER);
 		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
 

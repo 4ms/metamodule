@@ -75,7 +75,7 @@ public:
 
 		load_patch_header_data(patchdata);
 
-		for (int i = 0; i < pd.module_slugs.size(); i++) {
+		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
 			//FIXME: Do we ever do anything with modules[0] ? Perhaps just UI displaying names, which we can get from a defs file
 			if (i == 0)
 				modules[i] = ModuleFactory::create(PanelDef::typeID);
@@ -123,7 +123,7 @@ public:
 			mdrivlib::SMPControl::write<SMPRegister::NumModules>(pd.module_slugs.size());
 			mdrivlib::SMPControl::write<SMPRegister::IndexIncrement>(2);
 			mdrivlib::SMPControl::notify<SMPCommand::UpdateListOfModules>();
-			for (int module_i = 1; module_i < pd.module_slugs.size(); module_i += 2) {
+			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += 2) {
 				// Debug::Pin2::high();
 				modules[module_i]->update();
 				// Debug::Pin2::low();
@@ -142,7 +142,7 @@ public:
 	void unload_patch() {
 		mdrivlib::SMPThread::join();
 		is_loaded = false;
-		for (int i = 0; i < pd.module_slugs.size(); i++) {
+		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
 			modules[i].reset(nullptr);
 		}
 		pd.int_cables.clear();
@@ -203,7 +203,7 @@ public:
 		return is_loaded ? pd.mapped_knobs.size() : 0;
 	}
 
-	const ModuleTypeSlug &get_module_name(int idx) {
+	const ModuleTypeSlug &get_module_name(unsigned idx) {
 		return (is_loaded && idx < pd.module_slugs.size()) ? pd.module_slugs[idx] : no_patch_loaded;
 	}
 
@@ -211,7 +211,7 @@ public:
 		return pd.mapped_knobs[param_id].alias_name;
 	}
 
-	InternalCable &get_int_cable(int idx) {
+	InternalCable &get_int_cable(unsigned idx) {
 		if (idx < pd.int_cables.size())
 			return pd.int_cables[idx];
 		else
