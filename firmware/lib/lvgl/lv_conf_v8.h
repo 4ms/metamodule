@@ -9,9 +9,9 @@
 
 #if 1 /*Set it to "1" to enable content*/
 
-	#ifndef LV_CONF_H
-		#define LV_CONF_H
-	/* clang-format off */
+#ifndef LV_CONF_H
+#define LV_CONF_H
+/* clang-format off */
 
 #include <stdint.h>
 
@@ -24,7 +24,7 @@
 #define LV_COLOR_DEPTH     16
 
 /*Swap the 2 bytes of RGB565 color. Useful if the display has a 8 bit interface (e.g. SPI)*/
-#define LV_COLOR_16_SWAP   1
+#define LV_COLOR_16_SWAP   0
 
 /*Enable more complex drawing routines to manage screens transparency.
  *Can be used if the UI is above another layer, e.g. an OSD menu or video player.
@@ -42,7 +42,7 @@
 #define LV_MEM_CUSTOM      0
 #if LV_MEM_CUSTOM == 0
 /*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
-#  define LV_MEM_SIZE    (32U * 1024U)          /*[bytes]*/
+#  define LV_MEM_SIZE    (512 * 1024U)          /*[bytes]*/
 
 /*Set an address for the memory pool instead of allocating it as a normal array. Can be in external SRAM too.*/
 #  define LV_MEM_ADR          0     /*0: unused*/
@@ -61,7 +61,7 @@
  *====================*/
 
 /*Default display refresh period. LVG will redraw changed ares with this period time*/
-#define LV_DISP_DEF_REFR_PERIOD     16      /*[ms]*/
+#define LV_DISP_DEF_REFR_PERIOD     33      /*[ms]*/
 
 /*Input device read period in milliseconds*/
 #define LV_INDEV_DEF_READ_PERIOD    30      /*[ms]*/
@@ -76,7 +76,7 @@
 
 /*Default Dot Per Inch. Used to initialize default sizes such as widgets sized, style paddings.
  *(Not so important, you can adjust it to modify default sizes and spaces)*/
-#define LV_DPI_DEF                  130     /*[px/inch]*/
+#define LV_DPI_DEF                  140     /*[px/inch]*/
 
 /*=======================
  * FEATURE CONFIGURATION
@@ -102,7 +102,7 @@
  *With complex image decoders (e.g. PNG or JPG) caching can save the continuous open/decode of images.
  *However the opened images might consume additional RAM.
  *0: to disable caching*/
-#define LV_IMG_CACHE_DEF_SIZE       0
+#define LV_IMG_CACHE_DEF_SIZE       (32U * 1024U)
 
 /*Maximum buffer size to allocate for rotation. Only used if software rotation is enabled in the display driver.*/
 #define LV_DISP_ROT_MAX_BUF         (10*1024)
