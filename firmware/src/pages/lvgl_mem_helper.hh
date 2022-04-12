@@ -1,5 +1,5 @@
 #pragma once
-#include "lvgl/src/lv_misc/lv_mem.h"
+#include "lvgl/src/misc/lv_mem.h"
 #include "printf.h"
 #include <string_view>
 

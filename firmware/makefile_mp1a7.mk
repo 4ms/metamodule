@@ -111,7 +111,8 @@ SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
 SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
 
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
-SOURCES += $(wildcard src/pages/gui-guider/*.c)
+#SOURCES += $(wildcard src/pages/gui-guider/*.c)
+# SOURCES += src/pages/gui-guider/setup_scr_Knob_view3.c
 SOURCES += $(wildcard src/pages/fonts/*.c)
 SOURCES += $(wildcard src/pages/images/*.c)
 SOURCES += $(wildcard src/pages/images/ui/*.c)

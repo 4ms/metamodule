@@ -4,7 +4,7 @@
 #include "conf/screen_buffer_conf.hh"
 #include "conf/stream_conf.hh"
 #include "leds.hh"
-#include "lvgl/src/lv_misc/lv_color.h"
+#include "lvgl/src/misc/lv_color.h" // for lv_color_t
 #include "params.hh"
 #include "ramdisk.hh"
 

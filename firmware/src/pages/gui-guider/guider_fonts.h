@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "lv_font.h"
+#include "lvgl/src/font/lv_font.h"
 
 LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_16)
 LV_FONT_DECLARE(lv_font_MuseoSansCondensed_700_13)
