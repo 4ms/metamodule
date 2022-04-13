@@ -49,7 +49,7 @@ struct PageBase {
 		group = lv_group_create();
 		screen = screen_ptr;
 		lv_obj_set_size(screen, 320, 240); //TODO: use Screen Conf, not hard-set values
-		lv_obj_set_style_local_bg_color(screen, lv_color_hex(0x000000), LV_PART_MAIN);
+		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_PART_INDICATOR | LV_STATE_FOCUSED);
 	}
 
 	virtual void focus(PageChangeDirection dir) {

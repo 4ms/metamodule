@@ -22,8 +22,8 @@ struct ModuleViewPage : PageBase {
 
 	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
 		: PageBase{info}
-		, base(lv_obj_create(nullptr, nullptr))
-		, canvas(lv_canvas_create(base, nullptr))
+		, base(lv_obj_create(nullptr))
+		, canvas(lv_canvas_create(base))
 		, slug(module_slug) {
 
 		_instance = this;
@@ -33,9 +33,9 @@ struct ModuleViewPage : PageBase {
 		lv_draw_img_dsc_init(&img_dsc);
 		img_dsc.opa = LV_OPA_COVER;
 
-		roller = lv_roller_create(base, nullptr);
+		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
-		lv_obj_set_event_cb(roller, roller_cb);
+		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, nullptr);
 
 		button.clear();
 	}
@@ -128,13 +128,12 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_set_pos(roller, width_px, 0);
 		lv_obj_set_size(roller, 320 - width_px, 240);
-		lv_obj_add_style(roller, LV_ROLLER_PART_BG, &roller_style);
-		lv_obj_add_style(roller, LV_ROLLER_PART_SELECTED, &roller_sel_style);
+		lv_obj_add_style(roller, &roller_style, LV_PART_MAIN);		   //LV_ROLLER_PART_BG
+		lv_obj_add_style(roller, &roller_sel_style, LV_PART_SELECTED); //LV_ROLLER_PART_SELECTED
 
-		lv_obj_set_style_local_text_font(roller, LV_ROLLER_PART_BG, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_700_12);
-		lv_obj_set_style_local_text_font(
-			roller, LV_ROLLER_PART_SELECTED, LV_STATE_DEFAULT, &lv_font_MuseoSansRounded_700_12);
-		lv_roller_set_align(roller, LV_ALIGN_CENTER);
+		lv_obj_set_style_text_font(roller, &lv_font_MuseoSansRounded_700_12, LV_PART_MAIN);
+		lv_obj_set_style_text_font(roller, &lv_font_MuseoSansRounded_700_12, LV_PART_SELECTED);
+		lv_obj_set_style_align(roller, LV_ALIGN_CENTER, LV_PART_MAIN); //lv_roller_set_align(roller, LV_ALIGN_CENTER);
 
 		// Add text list to roller options
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
@@ -143,7 +142,7 @@ struct ModuleViewPage : PageBase {
 		//Select first element
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 		cur_selected = 0;
-		lv_obj_add_style(button[cur_selected], LV_BTN_PART_MAIN, &style_highlight);
+		lv_obj_add_style(button[cur_selected], &style_highlight, LV_PART_MAIN); //LV_BTN_PART_MAIN
 	}
 
 	void update() override {
@@ -168,84 +167,85 @@ private:
 
 	std::string_view slug;
 
-	static void roller_cb(lv_obj_t *obj, lv_event_t event) {
-		if (obj != _instance->roller)
-			return;
+	static void roller_cb(lv_event_t *event) {
+		auto obj = _instance->roller;
 
-		if (event == LV_EVENT_KEY) {
-			auto &but = _instance->button;
+		auto &but = _instance->button;
 
-			// Turn off old button
-			if (_instance->cur_selected >= 0) {
-				lv_obj_remove_style(but[_instance->cur_selected], LV_BTN_PART_MAIN, &_instance->style_highlight);
-				lv_event_send_refresh(but[_instance->cur_selected]);
-			}
-
-			// Get the new button
-			_instance->cur_selected = lv_roller_get_selected(obj);
-			printf("moduleview: cur_selected: %d\r\n", _instance->cur_selected);
-
-			// Turn on new button
-			lv_obj_add_style(but[_instance->cur_selected], LV_BTN_PART_MAIN, &_instance->style_highlight);
-			lv_event_send_refresh(but[_instance->cur_selected]);
+		// Turn off old button
+		if (_instance->cur_selected >= 0) {
+			lv_obj_remove_style(but[_instance->cur_selected], &_instance->style_highlight, LV_PART_MAIN);
+			lv_event_send(but[_instance->cur_selected], LV_EVENT_REFRESH, nullptr);
 		}
+
+		// Get the new button
+		_instance->cur_selected = lv_roller_get_selected(obj);
+		printf("moduleview: cur_selected: %d\r\n", _instance->cur_selected);
+
+		// Turn on new button
+		lv_obj_add_style(but[_instance->cur_selected], &_instance->style_highlight, LV_PART_MAIN);
+		lv_event_send(but[_instance->cur_selected], LV_EVENT_REFRESH, nullptr);
 	}
 
 	void _add_button(int x, int y) {
 		auto &b = button.emplace_back();
-		b = lv_btn_create(base, nullptr);
-		lv_obj_add_style(b, LV_BTN_PART_MAIN, &button_style);
+		b = lv_btn_create(base);
+		lv_obj_add_style(b, &button_style, LV_PART_MAIN);
 		lv_obj_set_pos(b, x - 6, y - 6);
 		lv_obj_set_size(b, 12, 12);
 	}
 
 	void _init_styles() {
+
+		// lv_theme_t * lv_theme_default_init(lv_disp_t * disp, lv_color_t color_primary, lv_color_t color_secondary, bool dark, const lv_font_t * font);
 		// Style for invisible buttons over the components
 		lv_style_reset(&button_style);
-		lv_style_set_radius(&button_style, LV_STATE_DEFAULT, 50);
-		lv_style_set_bg_color(&button_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_bg_grad_color(&button_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_bg_grad_dir(&button_style, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
-		lv_style_set_bg_opa(&button_style, LV_STATE_DEFAULT, 0);
-		lv_style_set_border_color(&button_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_border_width(&button_style, LV_STATE_DEFAULT, 2);
-		lv_style_set_border_opa(&button_style, LV_STATE_DEFAULT, 0);
-		lv_style_set_outline_color(&button_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xd6, 0x00));
-		lv_style_set_outline_opa(&button_style, LV_STATE_DEFAULT, 0);
+		lv_style_set_radius(&button_style, 50);
+		lv_style_set_bg_color(&button_style, lv_color_make(0xff, 0xff, 0xff));
+		lv_style_set_bg_grad_color(&button_style, lv_color_make(0xff, 0xff, 0xff));
+		lv_style_set_bg_grad_dir(&button_style, LV_GRAD_DIR_VER);
+		lv_style_set_bg_opa(&button_style, 0);
+		lv_style_set_border_color(&button_style, lv_color_make(0xff, 0xff, 0xff));
+		lv_style_set_border_width(&button_style, 2);
+		lv_style_set_border_opa(&button_style, 0);
+		lv_style_set_outline_color(&button_style, lv_color_make(0xff, 0xd6, 0x00));
+		lv_style_set_outline_opa(&button_style, 0);
 
 		// Style for the component button when selected
 		lv_style_init(&style_highlight);
-		lv_style_set_radius(&style_highlight, LV_STATE_DEFAULT, 120);
-		lv_style_set_outline_color(&style_highlight, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-		lv_style_set_outline_width(&style_highlight, LV_STATE_DEFAULT, 4);
-		lv_style_set_outline_opa(&style_highlight, LV_STATE_DEFAULT, 255);
+		lv_style_set_radius(&style_highlight, 120);
+		lv_style_set_outline_color(&style_highlight, lv_color_make(0xff, 0xc3, 0x70));
+		lv_style_set_outline_width(&style_highlight, 4);
+		lv_style_set_outline_opa(&style_highlight, 255);
 
 		// Style for roller selection
 		lv_style_reset(&roller_sel_style);
-		lv_style_set_bg_color(&roller_sel_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-		lv_style_set_bg_grad_color(&roller_sel_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xc3, 0x70));
-		lv_style_set_bg_grad_dir(&roller_sel_style, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
-		lv_style_set_bg_opa(&roller_sel_style, LV_STATE_DEFAULT, 255);
-		lv_style_set_text_color(&roller_sel_style, LV_STATE_DEFAULT, lv_color_make(0x00, 0x00, 0x00));
-		lv_style_set_pad_hor(&roller_sel_style, LV_STATE_DEFAULT, 2);
-		lv_style_set_pad_ver(&roller_sel_style, LV_STATE_DEFAULT, 10);
-		lv_style_set_pad_inner(&roller_sel_style, LV_STATE_DEFAULT, 0);
-		lv_style_set_text_line_space(&roller_sel_style, LV_STATE_DEFAULT, 7);
+		lv_style_set_bg_color(&roller_sel_style, lv_color_make(0xff, 0xc3, 0x70));
+		lv_style_set_bg_grad_color(&roller_sel_style, lv_color_make(0xff, 0xc3, 0x70));
+		lv_style_set_bg_grad_dir(&roller_sel_style, LV_GRAD_DIR_VER);
+		lv_style_set_bg_opa(&roller_sel_style, 255);
+		lv_style_set_text_color(&roller_sel_style, lv_color_make(0x00, 0x00, 0x00));
+		lv_style_set_pad_hor(&roller_sel_style, 2);
+		lv_style_set_pad_ver(&roller_sel_style, 10);
+		//lv_style_set_pad_inner(&roller_sel_style, 0);
+		lv_style_set_pad_gap(&roller_sel_style, 0);
+		lv_style_set_text_line_space(&roller_sel_style, 7);
 
 		// Style for roller items
 		lv_style_reset(&roller_style);
-		lv_style_set_radius(&roller_style, LV_STATE_DEFAULT, 5);
-		lv_style_set_bg_color(&roller_style, LV_STATE_DEFAULT, lv_color_make(0x00, 0x00, 0x00));
-		lv_style_set_bg_grad_color(&roller_style, LV_STATE_DEFAULT, lv_color_make(0x00, 0x00, 0x00));
-		lv_style_set_bg_grad_dir(&roller_style, LV_STATE_DEFAULT, LV_GRAD_DIR_VER);
-		lv_style_set_bg_opa(&roller_style, LV_STATE_DEFAULT, 255);
-		lv_style_set_border_color(&roller_style, LV_STATE_DEFAULT, lv_color_make(0xdf, 0xe7, 0xed));
-		lv_style_set_border_width(&roller_style, LV_STATE_DEFAULT, 0);
-		lv_style_set_text_color(&roller_style, LV_STATE_DEFAULT, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_pad_hor(&roller_style, LV_STATE_DEFAULT, 2);
-		lv_style_set_pad_ver(&roller_style, LV_STATE_DEFAULT, 10);
-		lv_style_set_pad_inner(&roller_style, LV_STATE_DEFAULT, 0);
-		lv_style_set_text_line_space(&roller_style, LV_STATE_DEFAULT, 7);
+		lv_style_set_radius(&roller_style, 5);
+		lv_style_set_bg_color(&roller_style, lv_color_make(0x00, 0x00, 0x00));
+		lv_style_set_bg_grad_color(&roller_style, lv_color_make(0x00, 0x00, 0x00));
+		lv_style_set_bg_grad_dir(&roller_style, LV_GRAD_DIR_VER);
+		lv_style_set_bg_opa(&roller_style, 255);
+		lv_style_set_border_color(&roller_style, lv_color_make(0xdf, 0xe7, 0xed));
+		lv_style_set_border_width(&roller_style, 0);
+		lv_style_set_text_color(&roller_style, lv_color_make(0xff, 0xff, 0xff));
+		lv_style_set_pad_hor(&roller_style, 2);
+		lv_style_set_pad_ver(&roller_style, 10);
+		//lv_style_set_pad_inner(&roller_style, 0);
+		lv_style_set_pad_gap(&roller_sel_style, 0);
+		lv_style_set_text_line_space(&roller_style, 7);
 	}
 };
 
