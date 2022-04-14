@@ -105,12 +105,20 @@ SOURCES += $(core_src)/aux_core_main.cc
 SOURCES += src/patchlist.cc
 SOURCES += src/patchlist_ryml_tests.cc
 SOURCES += src/pages/page_manager.cc
-SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
+# SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
 SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
 
-SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
+include $(LIBDIR)/lvgl/lvgl/component.mk
+lvgldirs = $(foreach dir,$(COMPONENT_SRCDIRS),$(LIBDIR)/lvgl/lvgl/$(dir))
+SOURCES += $(foreach dir,$(lvgldirs),$(wildcard $(dir)/*.c))
+lvgl_includes =	$(COMPONENT_ADD_INCLUDEDIRS)
+
+# SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
+# SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/*/*.c)
+# SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/*/*.c)
+
 #SOURCES += $(wildcard src/pages/gui-guider/*.c)
 # SOURCES += src/pages/gui-guider/setup_scr_Knob_view3.c
 SOURCES += $(wildcard src/pages/fonts/*.c)

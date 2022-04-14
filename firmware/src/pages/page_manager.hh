@@ -7,7 +7,6 @@
 #include "pages/knob_view.hh"
 #include "pages/module_view.hh"
 #include "pages/patch_selector.hh"
-#include "pages/sketches_test_jq.hh"
 
 namespace MetaModule
 {

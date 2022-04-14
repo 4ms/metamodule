@@ -49,25 +49,25 @@ public:
 		indev = lv_indev_drv_register(&indev_drv); // NOLINT
 		lv_indev_enable(indev, true);
 
-#ifdef LV_USE_LOG
 		lv_log_register_print_cb(log_cb);
-#endif
 	}
 
-#ifdef LV_USE_LOG
-	static void log_cb(lv_log_level_t level, const char *file, uint32_t line, const char *fn_name, const char *dsc) {
-		if (level == LV_LOG_LEVEL_ERROR)
-			UartLog::log("ERROR: ");
-		if (level == LV_LOG_LEVEL_WARN)
-			UartLog::log("WARNING: ");
-		if (level == LV_LOG_LEVEL_INFO)
-			UartLog::log("INFO: ");
-		if (level == LV_LOG_LEVEL_TRACE)
-			UartLog::log("TRACE: ");
-
-		UartLog::log("File: %s #%d: %s: %s\n\r", file, line, fn_name, dsc);
+	static void log_cb(const char *buf) {
+		UartLog::log("%s", buf);
 	}
-#endif
+	// 	static void log_cb(lv_log_level_t level, const char *file, uint32_t line, const char *fn_name, const char *dsc) {
+	// 		if (level == LV_LOG_LEVEL_ERROR)
+	// 			UartLog::log("ERROR: ");
+	// 		if (level == LV_LOG_LEVEL_WARN)
+	// 			UartLog::log("WARNING: ");
+	// 		if (level == LV_LOG_LEVEL_INFO)
+	// 			UartLog::log("INFO: ");
+	// 		if (level == LV_LOG_LEVEL_TRACE)
+	// 			UartLog::log("TRACE: ");
+
+	// 		UartLog::log("File: %s #%d: %s: %s\n\r", file, line, fn_name, dsc);
+	// 	}
+	// #endif
 };
 
 class MMDisplay {
@@ -122,23 +122,22 @@ public:
 
 	static inline bool should_send_button_release = false;
 
-	static bool read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
+	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
+		data->continue_reading = false;
+
 		if (should_send_button_release) {
 			data->state = LV_INDEV_STATE_REL;
 			should_send_button_release = false;
-			return false;
+			return;
 		}
-
-		bool have_more_data_to_send = false;
 
 		data->enc_diff = m->rotary.use_motion();
 		auto just_released = m->rotary_button.is_just_released();
 		if (just_released) {
 			data->state = LV_INDEV_STATE_PR;
 			should_send_button_release = true;
-			have_more_data_to_send = true;
+			data->continue_reading = true;
 		}
-		return have_more_data_to_send;
 	}
 };
 } // namespace MetaModule

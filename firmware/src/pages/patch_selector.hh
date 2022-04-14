@@ -74,7 +74,7 @@ struct PatchSelectorPage : PageBase {
 		popup_playbut = lv_btn_create(popup_cont);
 		lv_obj_add_style(popup_playbut, &style_popup_buttons, LV_PART_MAIN);
 
-		lv_obj_style_set_bg_color(&style_popup_buttons, lv_color_make(0xff, 0xc3, 0x70)); //LV_STATE_FOCUSED,
+		// lv_obj_style_set_bg_color(&style_popup_buttons, lv_color_make(0xff, 0xc3, 0x70)); //LV_STATE_FOCUSED,
 		// lv_style_set_bg_color(&style_popup_buttons,  lv_color_make(0xf6, 0xdd, 0x53));//LV_STATE_PRESSED,
 		popup_playbut_label = lv_label_create(popup_playbut);
 		lv_label_set_text(popup_playbut_label, "Play");
@@ -379,13 +379,14 @@ private:
 		lv_style_set_text_color(&style_popup_buttons, lv_color_make(0x32, 0x32, 0x32));
 
 		lv_style_init(&style_popup_backbut);
-		lv_style_set_image_opa(&style_popup_backbut, 255);
-		lv_style_set_radius(&style_popup_backbut, LV_STATE_FOCUSED, 6);
-		lv_style_set_outline_color(&style_popup_backbut, LV_STATE_FOCUSED, lv_theme_get_color_secondary());
-		lv_style_set_outline_width(&style_popup_backbut, LV_STATE_FOCUSED, LV_DPX(2));
+		// lv_style_set_image_opa(&style_popup_backbut, 255);
+		//FOCUSED state:
+		lv_style_set_radius(&style_popup_backbut, 6);
+		lv_style_set_outline_color(&style_popup_backbut, lv_color_hex(0xabcdef));
+		lv_style_set_outline_width(&style_popup_backbut, LV_DPX(2));
 		lv_style_set_outline_opa(&style_popup_backbut, LV_OPA_0);
-		lv_style_set_outline_opa(&style_popup_backbut, LV_STATE_FOCUSED, LV_OPA_50);
-		lv_style_set_image_recolor(&style_popup_backbut, LV_STATE_FOCUSED, lv_color_hex(0x888888));
+		// lv_style_set_outline_opa(&style_popup_backbut, LV_STATE_FOCUSED, LV_OPA_50);
+		// lv_style_set_image_recolor(&style_popup_backbut, LV_STATE_FOCUSED, lv_color_hex(0x888888));
 		//lv_style_set_outline_pad(&style_popup_backbut, LV_STATE_FOCUSED, 4);
 		//lv_style_set_outline_blend_mode(&style_popup_backbut, LV_STATE_FOCUSED, LV_BLEND_MODE_NORMAL);
 
@@ -422,7 +423,7 @@ private:
 		lv_style_set_border_color(&style_wait_cont, lv_color_make(0xff, 0xc3, 0x70));
 		lv_style_set_border_width(&style_wait_cont, 1);
 		lv_style_set_border_opa(&style_wait_cont, 255);
-		lv_style_set_pad_inner(&style_wait_cont, 10);
+		lv_style_set_pad_gap(&style_wait_cont, 10);
 		lv_style_set_pad_all(&style_wait_cont, 10);
 	}
 };
