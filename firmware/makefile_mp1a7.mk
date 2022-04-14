@@ -110,25 +110,25 @@ SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
 SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
 
-include $(LIBDIR)/lvgl/lvgl/component.mk
-lvgldirs = $(foreach dir,$(COMPONENT_SRCDIRS),$(LIBDIR)/lvgl/lvgl/$(dir))
-SOURCES += $(foreach dir,$(lvgldirs),$(wildcard $(dir)/*.c))
-lvgl_includes =	$(COMPONENT_ADD_INCLUDEDIRS)
-
-# SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/*/*.c)
-# SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/*/*.c)
-# SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/*/*.c)
+## LVGL / Gui-Guider
+LVGL_DIR=$(LIBDIR)/lvgl
+LVGL_DIR_NAME=lvgl
+include $(LIBDIR)/lvgl/lvgl/lvgl.mk
+SOURCES += $(CSRCS)
 
 #SOURCES += $(wildcard src/pages/gui-guider/*.c)
-# SOURCES += src/pages/gui-guider/setup_scr_Knob_view3.c
 SOURCES += $(wildcard src/pages/fonts/*.c)
 SOURCES += $(wildcard src/pages/images/*.c)
 SOURCES += $(wildcard src/pages/images/ui/*.c)
 SOURCES += $(wildcard src/pages/images/components/*.c)
 
+## RapidYml
+
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+
+## FatFS, qspi flash
 
 SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
@@ -138,22 +138,6 @@ SOURCES += src/fatfs/norflashramdisk_ops.cc
 SOURCES += src/patchfileio.cc
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
-
-
-# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/common.cpp
-# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/node.cpp
-# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/parse.cpp
-# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/preprocess.cpp
-# RYMLSOURCES += $(RYMLDIR)/src/c4/yml/tree.cpp
-# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/base64.cpp
-# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/char_traits.cpp
-# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/error.cpp
-# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/format.cpp
-# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/language.cpp
-# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/memory_resource.cpp
-# RYMLSOURCES += $(RYMLDIR)/ext/c4core/src/c4/memory_util.cpp
-# SOURCES += $(RYMLSOURCES)
-
 
 
 # SOURCES += $(NE10DIR)/common/NE10_mask_table.c
@@ -226,7 +210,7 @@ INCLUDES +=		-I$(SHARED)/CoreModules
 INCLUDES +=		-I$(SHARED)/cpputil
 INCLUDES +=		-I$(SHARED)/patch
 INCLUDES +=		-I$(LIBDIR)/lvgl
-INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
+#INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
 INCLUDES +=		-I$(LIBDIR)/printf
 INCLUDES +=		-I$(USBLIBDIR)/Class/MSC/Inc
 INCLUDES +=		-I$(USBLIBDIR)/Core/Inc
