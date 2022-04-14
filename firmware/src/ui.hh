@@ -65,9 +65,8 @@ public:
 
 	void update() {
 		Debug::Pin1::high();
-		// lv_timer_handler(); //v8
 		page_update_tm.stop();
-		lv_task_handler();
+		lv_timer_handler();
 		if (flag_prev_page) {
 			page_manager.prev_page();
 			flag_prev_page = false;
