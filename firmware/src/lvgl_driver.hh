@@ -5,7 +5,6 @@
 //#include "drivers/screen_ltdc.hh"
 //#include "drivers/screen_ltdc_setup.hh"
 #include "lvgl/lvgl.h"
-// #include "lvgl/src/lv_misc/lv_color.h"
 #include "params.hh"
 #include "screen_writer.hh"
 #include "timekeeper.hh"
@@ -55,19 +54,6 @@ public:
 	static void log_cb(const char *buf) {
 		UartLog::log("%s", buf);
 	}
-	// 	static void log_cb(lv_log_level_t level, const char *file, uint32_t line, const char *fn_name, const char *dsc) {
-	// 		if (level == LV_LOG_LEVEL_ERROR)
-	// 			UartLog::log("ERROR: ");
-	// 		if (level == LV_LOG_LEVEL_WARN)
-	// 			UartLog::log("WARNING: ");
-	// 		if (level == LV_LOG_LEVEL_INFO)
-	// 			UartLog::log("INFO: ");
-	// 		if (level == LV_LOG_LEVEL_TRACE)
-	// 			UartLog::log("TRACE: ");
-
-	// 		UartLog::log("File: %s #%d: %s: %s\n\r", file, line, fn_name, dsc);
-	// 	}
-	// #endif
 };
 
 class MMDisplay {
