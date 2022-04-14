@@ -5,6 +5,7 @@ extern crate chrono;
 
 use minifb::{Key, ScaleMode, Window, WindowOptions};
 
+
 const WIDTH: usize = 320;
 const HEIGHT: usize = 240;
 
@@ -19,7 +20,7 @@ extern "C" {
     fn rotary_push_fwd() -> ();
     fn rotary_press() -> ();
     fn rotary_release() -> ();
-    fn lv_task_handler() -> ();
+    fn lv_timer_handler() -> ();
     fn fake_HAL_IncTick() -> ();
 }
 
@@ -39,6 +40,7 @@ struct KeyHandler<'a> {
 }
 
 fn main() {
+    println!("Starting...");
     let loaded_ok;
     unsafe {
         loaded_ok = init_screen();
@@ -105,7 +107,7 @@ fn main() {
     let lv_timer = timer::Timer::new();
     let _guard = lv_timer.schedule_repeating(chrono::Duration::milliseconds(3), move || {
         unsafe {
-            lv_task_handler();
+            lv_timer_handler();
         };
     });
 

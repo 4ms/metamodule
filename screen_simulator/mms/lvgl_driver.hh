@@ -14,29 +14,24 @@ class LVGLDriver {
 	lv_color_t buf_1[BufferSize];
 	lv_color_t buf_2[BufferSize];
 
-	// v8:
-	// lv_disp_draw_buf_t disp_buf;
-	lv_disp_buf_t disp_buf;
+	lv_disp_draw_buf_t disp_buf;
 	lv_indev_drv_t indev_drv;
 	lv_indev_t *indev;
 
 	//Callbacks
 	using flush_cb_t = void(lv_disp_drv_t *, const lv_area_t *, lv_color_t *);
-	using indev_cb_t = bool(lv_indev_drv_t *indev, lv_indev_data_t *data);
+	using indev_cb_t = void(lv_indev_drv_t *indev, lv_indev_data_t *data);
 
 	//Display driver
 	lv_disp_drv_t disp_drv;
 
 public:
-	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb)
-	{
+	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb) {
 		lv_init();
 
-		// lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
-		lv_disp_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
+		lv_disp_draw_buf_init(&disp_buf, buf_1, buf_2, BufferSize);
 		lv_disp_drv_init(&disp_drv);
-		// disp_drv.draw_buf = &disp_buf;
-		disp_drv.buffer = &disp_buf;
+		disp_drv.draw_buf = &disp_buf;
 		disp_drv.flush_cb = flush_cb;
 		disp_drv.hor_res = ScreenWidth;
 		disp_drv.ver_res = ScreenHeight;
@@ -53,18 +48,8 @@ public:
 
 		lv_log_register_print_cb(log_cb);
 	}
-	static void log_cb(lv_log_level_t level, const char *file, uint32_t line, const char *fn_name, const char *dsc)
-	{
-		if (level == LV_LOG_LEVEL_ERROR)
-			printf("ERROR: ");
-		if (level == LV_LOG_LEVEL_WARN)
-			printf("WARNING: ");
-		if (level == LV_LOG_LEVEL_INFO)
-			printf("INFO: ");
-		if (level == LV_LOG_LEVEL_TRACE)
-			printf("TRACE: ");
-
-		printf("File: %s:%d (in %s): %s\n\r", file, line, fn_name, dsc);
+	static void log_cb(const char *buf) {
+		printf("%s", buf);
 	}
 };
 
@@ -77,18 +62,17 @@ class MMDisplay {
 public:
 	static inline lv_color_t framebuffer[ScreenWidth][ScreenHeight];
 
-	static void init(MetaModule::MetaParams &metaparams)
-	{
+	static void init(MetaModule::MetaParams &metaparams) {
 		m = &metaparams;
 		for (auto &line : framebuffer)
 			for (auto &pixel : line)
 				pixel.full = 0xf800; //default to red
 	}
 
-	static void start() {}
+	static void start() {
+	}
 
-	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
-	{
+	static void flush_to_screen(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
 		for (int y = area->y1; y <= area->y2; y++) {
 			for (int x = area->x1; x <= area->x2; x++) {
 				framebuffer[x][y] = *color_p;
@@ -98,13 +82,10 @@ public:
 		lv_disp_flush_ready(disp_drv);
 	}
 
-	static bool read_input(lv_indev_drv_t *indev, lv_indev_data_t *data)
-	{
+	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
 		data->enc_diff = m->rotary.use_motion();
 		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
-
-		bool have_more_data_to_send = false;
-		return have_more_data_to_send;
+		data->continue_reading = false;
 	}
 
 private:

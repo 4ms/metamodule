@@ -19,6 +19,9 @@ fn main() {
     add_glob_files("../firmware/src/pages/images/ui/*.c", &mut lvgl_src);
     add_glob_files("../firmware/src/pages/images/components/*.c", &mut lvgl_src);
     lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
+    //lvgl_src.push(String::from("../firmware/src/pages/fonts/lv_font_MuseoSansRounded_700_14.c"));
+    add_glob_files("../firmware/src/pages/fonts/*.c", &mut lvgl_src);
+    add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut lvgl_src);
 
     let mut builder = cc::Build::new();
     let build = builder
@@ -27,7 +30,8 @@ fn main() {
         .include("mms/stubs")
         .include("../firmware/lib/lvgl")
         .include("../firmware/lib/lvgl/lvgl")
-        .flag("-Wno-deprecated-anon-enum-enum-conversion");
+        .flag("-Wno-deprecated-anon-enum-enum-conversion")
+        .flag("-Wno-unused-but-set-variable");
     build.compile("lvgl");
 
     //
@@ -42,9 +46,6 @@ fn main() {
     src.push(String::from("../shared/axoloti-wrapper/axoloti_math.cpp"));
     add_glob_files("../shared/CoreModules/*.cc", &mut src);
 
-    // GUI
-    add_glob_files("../firmware/src/pages/fonts/*.c", &mut src);
-    add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut src);
 
     // Patch convert
     src.push(String::from("../shared/patch_convert/ryml/ryml_serial.cc"));
@@ -73,7 +74,10 @@ fn main() {
         .include("../firmware/lib/lvgl/lvgl/src/lv_font")
         .flag("-DSIMULATOR")
         .flag("-std=c++2a")
-        .flag("-Wno-unused-parameter");
+        .flag("-Wno-unused-parameter")
+        .flag("-Wno-unused-but-set-variable")
+        .flag("-Wno-unused-const-variable")
+        .flag("-Wno-deprecated-anon-enum-enum-conversion");
     build.compile("metamodulescreen");
 
     // CXXFLAGS=-std=c++11 cargo build
