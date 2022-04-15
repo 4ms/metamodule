@@ -36,7 +36,6 @@ public:
 		UartLog::log("\n\rLVGLDriver started\n\r");
 
 		lv_init();
-
 		lv_disp_draw_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());
 		lv_disp_drv_init(&disp_drv);
 		disp_drv.draw_buf = &disp_buf;
