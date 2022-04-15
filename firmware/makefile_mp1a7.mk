@@ -113,9 +113,11 @@ SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
 ## LVGL / Gui-Guider
 LVGL_DIR=$(LIBDIR)/lvgl
 LVGL_DIR_NAME=lvgl
+CSRCS :=
 include $(LIBDIR)/lvgl/lvgl/lvgl.mk
 SOURCES += $(CSRCS)
-
+# clear the VPATH set by lvgl's makefiles or it will always rebuild lvgl sources
+VPATH := 
 #SOURCES += $(wildcard src/pages/gui-guider/*.c)
 SOURCES += $(wildcard src/pages/fonts/*.c)
 SOURCES += $(wildcard src/pages/images/*.c)
