@@ -4,7 +4,7 @@
 #include <cstring>
 
 static constexpr auto Foreground = mdrivlib::QSpiFlash::EXECUTE_FOREGROUND;
-// #define NO_FUNCTIONING_FLASHRAM
+//#define NO_FUNCTIONING_FLASHRAM
 
 NorFlashRamDiskOps::NorFlashRamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
 	: flash{qspi_patchflash_conf}
@@ -33,15 +33,18 @@ void NorFlashRamDiskOps::set_status(Status status) {
 //
 // FatFS calls this in f_mkfs(), and when it mounts the disk (in f_mount(_,_,1) or the first time FatFS attempts a read/write/stat if the disk is not yet mounted)
 DSTATUS NorFlashRamDiskOps::initialize() {
+	printf("NorFlashRamDiskOps initialize\n");
 	if (_status == Status::NotInit) {
-#ifdef NO_FUNCTIONING_FLASHRAM
-		set_status(Status::NotInUse);
-		return 0;
-#endif
 		if (!flash.check_chip_id(0x182001, 0x00FFBFFF)) { //S25FL127S(p7):182001 or S25FL128L(p6):186001
-			printf("ERROR: NOR Flash returned wrong id\r\n");
+			printf("ERROR: NOR Flash returned wrong id\n");
 			return STA_NOINIT | STA_NODISK;
 		}
+
+#ifdef NO_FUNCTIONING_FLASHRAM
+		set_status(Status::NotInUse);
+		printf("NorFlashRamDiskOps initialize skipped\n");
+		return 0;
+#endif
 
 		if (flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, Foreground)) {
 			set_status(Status::NotInUse);
@@ -49,10 +52,12 @@ DSTATUS NorFlashRamDiskOps::initialize() {
 		}
 		return STA_NOINIT;
 	}
+	printf("NorFlashRamDiskOps already init\n");
 	return 0;
 }
 
 DRESULT NorFlashRamDiskOps::read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) {
+	printf("reading...\n");
 	const uint32_t address = sector_start * RamDiskBlockSize;
 	const uint32_t bytes = num_sectors * RamDiskBlockSize;
 	if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
@@ -63,6 +68,7 @@ DRESULT NorFlashRamDiskOps::read(uint8_t *dst, uint32_t sector_start, uint32_t n
 }
 
 DRESULT NorFlashRamDiskOps::write(const uint8_t *src, uint32_t sector_start, uint32_t num_sectors) {
+	printf("writing...\n");
 	const uint32_t address = sector_start * RamDiskBlockSize;
 	const uint32_t bytes = num_sectors * RamDiskBlockSize;
 	if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
