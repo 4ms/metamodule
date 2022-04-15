@@ -47,8 +47,9 @@ public:
 		indev_drv.read_cb = indev_cb;
 		indev = lv_indev_drv_register(&indev_drv); // NOLINT
 		lv_indev_enable(indev, true);
-
+#if LV_USE_LOG == 1
 		lv_log_register_print_cb(log_cb);
+#endif
 	}
 
 	static void log_cb(const char *buf) {
