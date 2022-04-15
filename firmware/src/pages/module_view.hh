@@ -2,6 +2,7 @@
 #include "CoreModules/info/module_info_base.hh"
 #include "pages/base.hh"
 #include "pages/images/image_list.hh"
+#include "pages/styles.hh"
 #include <string>
 
 LV_IMG_DECLARE(jack_x);
@@ -35,12 +36,13 @@ struct ModuleViewPage : PageBase {
 
 		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
-		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, nullptr);
+		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
 
 		button.clear();
 
-		lv_obj_add_style(roller, &roller_style, LV_PART_MAIN);		   //LV_ROLLER_PART_BG
-		lv_obj_add_style(roller, &roller_sel_style, LV_PART_SELECTED); //LV_ROLLER_PART_SELECTED
+		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
+		lv_obj_add_style(roller, &Gui::plain_border_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
+		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
 	}
 
 	void load_module_page(std::string_view module_slug) {
@@ -146,7 +148,7 @@ struct ModuleViewPage : PageBase {
 		//Select first element
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 		cur_selected = 0;
-		lv_obj_add_style(button[cur_selected], &style_highlight, LV_PART_MAIN); //LV_BTN_PART_MAIN
+		lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN); //LV_BTN_PART_MAIN
 	}
 
 	void update() override {
@@ -154,14 +156,6 @@ struct ModuleViewPage : PageBase {
 
 private:
 	static inline ModuleViewPage *_instance;
-
-	static inline lv_style_t button_style;
-	static inline lv_style_t roller_style;
-	static inline lv_style_t roller_sel_style;
-	static inline lv_style_t style_highlight;
-
-	// static inline lv_color_t orange_highlight = lv_color_make(0xff, 0xd6, 0x00);
-	static inline lv_color_t orange_highlight = lv_color_make(0xff, 0xc3, 0x70);
 
 	std::string opts;
 	int32_t cur_selected = 0;
@@ -175,80 +169,41 @@ private:
 	std::string_view slug;
 
 	static void roller_cb(lv_event_t *event) {
-		auto obj = _instance->roller;
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
 
-		auto &but = _instance->button;
+		auto roller = page->roller;
+		auto &cur_sel = page->cur_selected;
+		auto &but = page->button;
 
 		// Turn off old button
 		if (_instance->cur_selected >= 0) {
-			lv_obj_remove_style(but[_instance->cur_selected], &_instance->style_highlight, LV_PART_MAIN);
-			lv_event_send(but[_instance->cur_selected], LV_EVENT_REFRESH, nullptr);
+			lv_obj_remove_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
+			lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
 		}
 
 		// Get the new button
-		_instance->cur_selected = lv_roller_get_selected(obj);
-		char buf[48];
-		lv_roller_get_selected_str(_instance->roller, buf, 48);
+		cur_sel = lv_roller_get_selected(roller);
+
+		// Debug printing
+		// char buf[48];
+		// lv_roller_get_selected_str(roller, buf, 48);
 		// printf("moduleview: cur_selected: %d = %s\r\n", _instance->cur_selected, buf);
 
 		// Turn on new button
-		lv_obj_add_style(but[_instance->cur_selected], &_instance->style_highlight, LV_PART_MAIN);
-		lv_event_send(but[_instance->cur_selected], LV_EVENT_REFRESH, nullptr);
+		lv_obj_add_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
+		lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
 	}
 
 	void _add_button(int x, int y) {
 		auto &b = button.emplace_back();
 		b = lv_btn_create(base);
-		lv_obj_add_style(b, &button_style, LV_PART_MAIN);
+		lv_obj_add_style(b, &Gui::button_style, LV_PART_MAIN);
 		lv_obj_set_pos(b, x - 6, y - 6);
 		lv_obj_set_size(b, 12, 12);
 	}
 
 	void _init_styles() {
-
-		// Style for invisible buttons over the components
-		lv_style_reset(&button_style);
-		lv_style_set_radius(&button_style, 50);
-		lv_style_set_bg_color(&button_style, lv_color_white());
-		lv_style_set_bg_grad_color(&button_style, lv_color_white());
-		lv_style_set_bg_grad_dir(&button_style, LV_GRAD_DIR_VER);
-		lv_style_set_bg_opa(&button_style, 0);
-		lv_style_set_border_color(&button_style, lv_color_white());
-		lv_style_set_border_width(&button_style, 2);
-		lv_style_set_border_opa(&button_style, 0);
-		lv_style_set_outline_color(&button_style, orange_highlight);
-		lv_style_set_outline_opa(&button_style, 0);
-
-		// Style for the component button when selected
-		lv_style_init(&style_highlight);
-		lv_style_set_radius(&style_highlight, 120);
-		lv_style_set_outline_color(&style_highlight, orange_highlight);
-		lv_style_set_outline_width(&style_highlight, 4);
-		lv_style_set_outline_opa(&style_highlight, 255);
-
-		// Style for roller items
-		lv_style_reset(&roller_style);
-		lv_style_set_radius(&roller_style, 0);
-		lv_style_set_bg_opa(&roller_style, LV_OPA_COVER);
-		lv_style_set_bg_color(&roller_style, lv_color_black());
-		lv_style_set_border_color(&roller_style, lv_color_black());
-		lv_style_set_border_width(&roller_style, 0);
-		lv_style_set_border_post(&roller_style, false);
-		lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_CENTER);
-		// lv_style_set_text_font(&roller_style, &lv_font_MuseoSansRounded_700_12);
-		lv_style_set_text_color(&roller_style, lv_palette_main(LV_PALETTE_GREY)); //lv_color_white());
-		lv_style_set_text_opa(&roller_style, LV_OPA_COVER);
-		lv_style_set_text_line_space(&roller_style, 5);
-		lv_style_set_pad_hor(&roller_style, 2);
-		lv_style_set_pad_ver(&roller_style, 1);
-		lv_style_set_pad_gap(&roller_style, 2);
-		lv_style_set_line_color(&roller_style, lv_palette_main(LV_PALETTE_GREY));
-		lv_style_set_line_width(&roller_style, 1);
-
-		// Style for roller selection
-		lv_style_reset(&roller_sel_style);
-		lv_style_set_bg_color(&roller_sel_style, lv_palette_main(LV_PALETTE_ORANGE));
-		lv_style_set_text_color(&roller_sel_style, lv_color_black());
+		Gui::init_lvgl_styles();
 	}
 };
 
