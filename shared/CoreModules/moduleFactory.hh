@@ -53,6 +53,8 @@ public:
 		return (m != infos.end());
 	}
 
+	static inline ModuleInfoView nullmodule{.width_hp = 0};
+
 private:
 	static constexpr int MAX_MODULE_TYPES = 512;
 	//Note: we can't use a string_view for the map key because the map is populated on initialization
@@ -60,6 +62,4 @@ private:
 	//Ideally, we'd use StaticString<31>, but there is some functionality missing in StaticString which map requires
 	static inline etl::unordered_map<etl::string<31>, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline etl::unordered_map<etl::string<31>, ModuleInfoView, MAX_MODULE_TYPES> infos;
-
-	static inline ModuleInfoView nullmodule{};
 };

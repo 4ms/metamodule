@@ -65,6 +65,9 @@ struct ModuleViewPage : PageBase {
 
 		opts.clear();
 		auto info = ModuleFactory::getModuleInfo(slug);
+		if (info.width_hp == 0)
+			return;
+
 		button.clear();
 		button.reserve(info.InJacks.size() + info.OutJacks.size() + info.Knobs.size() + info.Switches.size());
 
