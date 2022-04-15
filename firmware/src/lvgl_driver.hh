@@ -5,6 +5,7 @@
 //#include "drivers/screen_ltdc.hh"
 //#include "drivers/screen_ltdc_setup.hh"
 #include "lvgl/lvgl.h"
+#include "pages/gui-guider/guider_fonts.h"
 #include "params.hh"
 #include "screen_writer.hh"
 #include "timekeeper.hh"
@@ -27,6 +28,8 @@ class LVGLDriver {
 
 	// Display driver
 	lv_disp_drv_t disp_drv;
+	lv_disp_t *display;
+	// lv_theme_t *theme;
 
 public:
 	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb, std::span<lv_color_t> buffer1, std::span<lv_color_t> buffer2) {
@@ -40,7 +43,7 @@ public:
 		disp_drv.flush_cb = flush_cb;
 		disp_drv.hor_res = ScreenWidth;
 		disp_drv.ver_res = ScreenHeight;
-		lv_disp_drv_register(&disp_drv);
+		display = lv_disp_drv_register(&disp_drv); // NOLINT
 
 		lv_indev_drv_init(&indev_drv);
 		indev_drv.type = LV_INDEV_TYPE_ENCODER;
@@ -50,6 +53,12 @@ public:
 #if LV_USE_LOG == 1
 		lv_log_register_print_cb(log_cb);
 #endif
+		// theme = lv_theme_default_init(display, // NOLINT
+		// 							  lv_palette_main(LV_PALETTE_BLUE),
+		// 							  lv_palette_main(LV_PALETTE_GREY),
+		// 							  true,
+		// 							  &lv_font_MuseoSansRounded_700_12);
+		// lv_disp_set_theme(display, theme);
 	}
 
 	static void log_cb(const char *buf) {

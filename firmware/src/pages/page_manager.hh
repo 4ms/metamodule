@@ -25,7 +25,7 @@ class PageManager {
 	UiAudioMailbox &mbox;
 
 public:
-	PageId cur_page = PageId::PatchSel;
+	PageId cur_page = PageId::Module;
 	unsigned cur_module_idx = 1;
 
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, UiAudioMailbox &mbox)
