@@ -53,12 +53,6 @@ public:
 #if LV_USE_LOG == 1
 		lv_log_register_print_cb(log_cb);
 #endif
-		// theme = lv_theme_default_init(display, // NOLINT
-		// 							  lv_palette_main(LV_PALETTE_BLUE),
-		// 							  lv_palette_main(LV_PALETTE_GREY),
-		// 							  true,
-		// 							  &lv_font_MuseoSansRounded_700_12);
-		// lv_disp_set_theme(display, theme);
 	}
 
 	static void log_cb(const char *buf) {

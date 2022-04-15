@@ -27,8 +27,6 @@ struct ModuleViewPage : PageBase {
 		, canvas(lv_canvas_create(base))
 		, slug(module_slug) {
 
-		_instance = this;
-		_init_styles();
 		init_bg(base);
 		lv_canvas_set_buffer(canvas, buffer, 240, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
 		lv_draw_img_dsc_init(&img_dsc);
@@ -155,8 +153,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 private:
-	static inline ModuleViewPage *_instance;
-
 	std::string opts;
 	int32_t cur_selected = 0;
 	std::vector<lv_obj_t *> button;
@@ -170,13 +166,12 @@ private:
 
 	static void roller_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
-
 		auto roller = page->roller;
 		auto &cur_sel = page->cur_selected;
 		auto &but = page->button;
 
 		// Turn off old button
-		if (_instance->cur_selected >= 0) {
+		if (cur_sel >= 0) {
 			lv_obj_remove_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
 			lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
 		}
@@ -200,10 +195,6 @@ private:
 		lv_obj_add_style(b, &Gui::button_style, LV_PART_MAIN);
 		lv_obj_set_pos(b, x - 6, y - 6);
 		lv_obj_set_size(b, 12, 12);
-	}
-
-	void _init_styles() {
-		Gui::init_lvgl_styles();
 	}
 };
 

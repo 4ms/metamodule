@@ -3,6 +3,7 @@
 #include "drivers/timekeeper.hh"
 #include "lvgl_driver.hh"
 #include "pages/page_manager.hh"
+#include "pages/styles.hh"
 #include "params.hh"
 #include "patchlist.hh"
 #include "static_buffers.hh"
@@ -38,6 +39,7 @@ public:
 		metaparams.clear();
 
 		MMDisplay::init(metaparams, StaticBuffers::framebuf2);
+		Gui::init_lvgl_styles();
 		page_manager.init();
 
 		page_update_tm.init(
