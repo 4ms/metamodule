@@ -137,7 +137,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
  *-----------*/
 
 /*Enable the log module*/
-#define LV_USE_LOG      0
+#define LV_USE_LOG      1
 #if LV_USE_LOG
 
 /*How important log should be added:
@@ -297,10 +297,11 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 /*Optionally declare custom fonts here.
  *You can use these fonts as default font too and they will be available globally.
  *E.g. #define LV_FONT_CUSTOM_DECLARE   LV_FONT_DECLARE(my_font_1) LV_FONT_DECLARE(my_font_2)*/
-#define LV_FONT_CUSTOM_DECLARE
+#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_12) LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_14) 
 
 /*Always set a default font*/
-#define LV_FONT_DEFAULT &lv_font_montserrat_14
+// #define LV_FONT_DEFAULT &lv_font_montserrat_14
+#define LV_FONT_DEFAULT &lv_font_MuseoSansRounded_700_14
 
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
@@ -311,7 +312,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 #define LV_USE_FONT_COMPRESSED  0
 
 /*Enable subpixel rendering*/
-#define LV_USE_FONT_SUBPX       0
+#define LV_USE_FONT_SUBPX       1
 #if LV_USE_FONT_SUBPX
 /*Set the pixel order of the display. Physical order of RGB channels. Doesn't matter with "normal" fonts.*/
 #define LV_FONT_SUBPX_BGR       0  /*0: RGB; 1:BGR order*/
