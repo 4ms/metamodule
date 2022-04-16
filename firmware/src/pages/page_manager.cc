@@ -5,7 +5,7 @@ namespace MetaModule
 
 void PageManager::init() {
 	//54ms for a bunch of pages
-	page_knobs.init();
+	// page_knobs.init();
 	page_module.init();
 	page_patch.init();
 
@@ -27,9 +27,9 @@ void PageManager::next_page() {
 	_blur_page();
 	switch (cur_page) {
 		case PageId::PatchSel:
-			cur_page = PageId::Knobs;
-			break;
-		case PageId::Knobs:
+			// cur_page = PageId::Knobs;
+			// break;
+			// case PageId::Knobs:
 			cur_page = PageId::Module;
 			cur_module_idx = 1;
 			page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
@@ -54,14 +54,14 @@ void PageManager::prev_page() {
 			cur_module_idx = info.patch_player.get_num_modules() - 1;
 			page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
 			break;
-		case PageId::Knobs:
-			cur_page = PageId::PatchSel;
-			break;
+		// case PageId::Knobs:
+		// 	cur_page = PageId::PatchSel;
+		// 	break;
 		case PageId::Module:
 			cur_module_idx--;
 			if (cur_module_idx == 0 || cur_module_idx >= (unsigned)info.patch_player.get_num_modules()) {
 				cur_module_idx = 1;
-				cur_page = PageId::Knobs;
+				cur_page = PageId::PatchSel; //Knobs
 			} else {
 				page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
 			}
@@ -80,8 +80,8 @@ PageBase *PageManager::_get_cur_page() {
 	switch (cur_page) {
 		case PageId::PatchSel:
 			return &page_patch;
-		case PageId::Knobs:
-			return &page_knobs;
+		// case PageId::Knobs:
+		// 	return &page_knobs;
 		case PageId::Module:
 			return &page_module;
 		default:

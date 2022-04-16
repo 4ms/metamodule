@@ -4,7 +4,7 @@
 #include "patchlist.hh"
 
 // Pages:
-#include "pages/knob_view.hh"
+// #include "pages/knob_view.hh"
 #include "pages/module_view.hh"
 #include "pages/patch_selector.hh"
 
@@ -14,11 +14,11 @@ namespace MetaModule
 class PageManager {
 	PatchInfo info;
 
-	enum class PageId { PatchSel, Knobs, Module };
+	enum class PageId { PatchSel, Module };
 
 	ModuleViewPage page_module{info, "EnOsc"};
 	PatchSelectorPage page_patch{info};
-	KnobView3 page_knobs{info};
+	// KnobView3 page_knobs{info};
 
 	PatchList &patch_list;
 	PatchPlayer &player;
