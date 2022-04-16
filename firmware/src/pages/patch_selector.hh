@@ -3,53 +3,63 @@
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
 #include "pages/styles.hh"
+#include "printf.h"
 
+// LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_16);
 namespace MetaModule
 {
 
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info}
-		, base(lv_obj_create(nullptr)) {
+		, base(lv_obj_create(nullptr))
+		, roller(lv_roller_create(base)) {
 		init_bg(base);
-		_instance = this; //TODO get rid of
-		_init_styles();	  //TODO get rid of
+		lv_group_add_obj(group, roller);
+		lv_obj_add_event_cb(roller, patchlist_event_cb, LV_EVENT_VALUE_CHANGED, this);
+
+		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
+		lv_obj_add_style(roller, &Gui::plain_border_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
+		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
+
+		lv_obj_set_pos(roller, 0, 30);
+		lv_obj_set_size(roller, 320, 210);
 	}
 
 	lv_obj_t *header_text;
 
+	// static inline lv_style_t header_style;
+
 	void init() override {
-		LVGLMemory::print_mem_usage("PatchSel::init 0");
+		LVGLMemory::print_mem_usage("PatchSel::init in");
 
 		header_text = lv_label_create(base);
-		lv_obj_add_style(header_text, &Gui::roller_style, LV_PART_MAIN);
+		lv_label_set_text_static(header_text, "Select a Patch:");
+		lv_obj_add_style(header_text, &Gui::header_style, LV_PART_MAIN);
 		lv_obj_set_align(base, LV_ALIGN_TOP_MID);
 		lv_obj_set_pos(header_text, 0, 0);
 		lv_obj_set_width(header_text, 320);
 
-		roller = lv_roller_create(base);
-		lv_obj_set_style_max_height(roller, 240, LV_PART_MAIN);
-		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		lv_obj_add_style(roller, &Gui::plain_border_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
-		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
-		lv_obj_set_pos(roller, 20, 0);
-		lv_obj_set_width(roller, 320);
-
 		refresh_patchlist();
 
-		//Group
-		lv_group_add_obj(group, roller);
-
-		//Event callback
-		lv_obj_add_event_cb(roller, patchlist_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
-
-		setup_popup();
+		// setup_popup();
+		LVGLMemory::print_mem_usage("PatchSel::init out");
 	}
 
 	void refresh_patchlist() {
-		lv_dropdown_clear_options(roller);
-		for (unsigned i = 0; i < patch_list.num_patches(); i++)
-			lv_dropdown_add_option(roller, patch_list.get_patch_name(i).data(), i);
+		printf("refresh_patchlist\n");
+		std::string patchnames;
+		for (unsigned i = 0; i < patch_list.num_patches(); i++) {
+			patchnames += patch_list.get_patch_name(i).data();
+			patchnames += '\n';
+			printf("Adding patch %s\n", patch_list.get_patch_name(i).c_str());
+		}
+		if (patchnames.length() > 0)
+			patchnames.pop_back();
+
+		lv_roller_set_options(roller, patchnames.c_str(), LV_ROLLER_MODE_NORMAL);
+		lv_roller_set_visible_row_count(roller, 8);
+		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 	}
 
 	void setup_popup() {
@@ -121,9 +131,9 @@ struct PatchSelectorPage : PageBase {
 		lv_group_add_obj(popup_group, popup_explorebut);
 		lv_group_add_obj(popup_group, popup_backbut);
 
-		lv_obj_add_event_cb(popup_backbut, popup_back_event_cb, LV_EVENT_CLICKED, nullptr);
-		lv_obj_add_event_cb(popup_playbut, popup_play_event_cb, LV_EVENT_CLICKED, nullptr);
-		lv_obj_add_event_cb(popup_explorebut, popup_explore_event_cb, LV_EVENT_CLICKED, nullptr);
+		lv_obj_add_event_cb(popup_backbut, popup_back_event_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(popup_playbut, popup_play_event_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(popup_explorebut, popup_explore_event_cb, LV_EVENT_CLICKED, this);
 
 		hide_popup();
 
@@ -132,63 +142,64 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_add_style(wait_cont, &style_wait_cont, LV_PART_MAIN);
 		// lv_cont_set_layout(wait_cont, LV_LAYOUT_CENTER);
 		// lv_cont_set_fit(wait_cont, LV_FIT_TIGHT);
-		lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
 
 		wait_text = lv_label_create(wait_cont);
 		lv_obj_add_style(wait_text, &style_popup_patchname, LV_PART_MAIN);
 		lv_obj_set_align(wait_text, LV_ALIGN_CENTER);
 		lv_label_set_text(wait_text, "Refreshing Patches...");
 
+		lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+
 		wait_group = lv_group_create();
 	}
 
 	void show_popup() {
-		LVGLMemory::print_mem_usage("PatchSel::show_popup 0");
-		lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
-		lv_group_set_editing(popup_group, false);
-		lv_group_focus_obj(popup_backbut);
-		//Popup is a container:
-		lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-		// Popup is a screen:
-		//	lv_scr_load(popup_cont);
-		LVGLMemory::print_mem_usage("PatchSel::show_popup 1");
+		//LVGLMemory::print_mem_usage("PatchSel::show_popup 0");
+		//lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
+		//lv_group_set_editing(popup_group, false);
+		//lv_group_focus_obj(popup_backbut);
+		////Popup is a container:
+		//lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		//// Popup is a screen:
+		////	lv_scr_load(popup_cont);
+		//LVGLMemory::print_mem_usage("PatchSel::show_popup 1");
 	}
 
 	void hide_popup() {
-		LVGLMemory::print_mem_usage("PatchSel::hide_popup 0");
-		//Popup is a container:
-		lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
-		lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		lv_group_set_editing(group, true);
-		// Popup is a screen:
-		// focus(PageChangeDirection::Jump);
-		LVGLMemory::print_mem_usage("PatchSel::hide_popup 1");
+		//LVGLMemory::print_mem_usage("PatchSel::hide_popup 0");
+		////Popup is a container:
+		//lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
+		//lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		//lv_group_set_editing(group, true);
+		//// Popup is a screen:
+		//// focus(PageChangeDirection::Jump);
+		//LVGLMemory::print_mem_usage("PatchSel::hide_popup 1");
 	}
 
 	void update() override {
-		if (!patch_list.is_ready()) {
-			if (patchlist_ready) {
-				lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
-				lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-				patchlist_ready = false;
-			}
-			return;
-		}
+		// if (!patch_list.is_ready()) {
+		// 	if (patchlist_ready) {
+		// 		lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
+		// 		lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		// 		patchlist_ready = false;
+		// 	}
+		// 	return;
+		// }
 
-		if (!patchlist_ready) {
-			lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-			// Hide the popup as well:
-			lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
-			lv_indev_set_group(lv_indev_get_next(nullptr), group);
-			lv_group_set_editing(group, true);
-			patchlist_ready = true;
-		}
+		// if (!patchlist_ready) {
+		// 	lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		// 	// Hide the popup as well:
+		// 	lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
+		// 	lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		// 	lv_group_set_editing(group, true);
+		// 	patchlist_ready = true;
+		// }
 
-		handle_changing_patch();
-		if (mbox.patchlist_updated) {
-			refresh_patchlist();
-			mbox.patchlist_updated = false;
-		}
+		// handle_changing_patch();
+		// if (mbox.patchlist_updated) {
+		// 	refresh_patchlist();
+		// 	mbox.patchlist_updated = false;
+		// }
 	}
 
 	void blur() override {
@@ -196,30 +207,34 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	static void popup_play_event_cb(lv_event_t *event) {
-		printf("Clicked Play: playing patch# %d\n\r", selected_patch);
-		_instance->start_changing_patch(selected_patch);
+		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
+
+		printf("Clicked Play: playing patch# %d\n\r", _instance->selected_patch);
+		_instance->start_changing_patch(_instance->selected_patch);
 		_instance->hide_popup();
 	}
 
 	static void popup_back_event_cb(lv_event_t *event) {
+		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
 		printf("Clicked Back\n\r");
 		_instance->hide_popup();
 	}
 
 	static void popup_explore_event_cb(lv_event_t *event) {
+		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
 		printf("Clicked Explore\n\r");
 	}
 
 	static void patchlist_event_cb(lv_event_t *event) {
-		auto obj = _instance->roller;
-		selected_patch = lv_dropdown_get_selected(obj);
-		lv_label_set_text(_instance->popup_patchname, _instance->patch_list.get_patch_name(selected_patch));
-		lv_label_set_text(_instance->popup_desc, "TODO: Patch descriptions...");
-		// how to redraw?
-		// lv_obj_realign(_instance->popup_patchname);
-		// lv_obj_realign(_instance->popup_desc);
-		_instance->show_popup();
-		printf("Event obj is patch_selector_patchlist\n\r");
+
+		// auto obj = _instance->roller;
+		// selected_patch = lv_dropdown_get_selected(obj);
+		// lv_label_set_text(_instance->popup_patchname, _instance->patch_list.get_patch_name(selected_patch));
+		// lv_label_set_text(_instance->popup_desc, "TODO: Patch descriptions...");
+		// // how to redraw?
+		// // lv_obj_realign(_instance->popup_patchname);
+		// // lv_obj_realign(_instance->popup_desc);
+		// _instance->show_popup();
 	}
 
 	// static void patch_selector_event_cb(lv_obj_t *obj, lv_event_t event) {
@@ -300,8 +315,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 private:
-	static inline PatchSelectorPage *_instance;
-	static inline uint32_t selected_patch = 0;
+	uint32_t selected_patch = 0;
 	bool patchlist_ready = true;
 
 	lv_group_t *popup_group;
@@ -336,99 +350,99 @@ private:
 
 	void _init_styles() {
 		// Patch list styles
-		lv_style_init(&style_patchlist);
-		lv_style_set_radius(&style_patchlist, 3);
-		lv_style_set_bg_color(&style_patchlist, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_border_color(&style_patchlist, lv_color_make(0xe1, 0xe6, 0xee));
-		lv_style_set_border_width(&style_patchlist, 2);
-		lv_style_set_text_color(&style_patchlist, lv_color_make(0x0D, 0x30, 0x55));
-		lv_style_set_text_font(&style_patchlist, &lv_font_MuseoSansRounded_700_14);
-		lv_style_set_text_line_space(&style_patchlist, 20);
+		//lv_style_init(&style_patchlist);
+		//lv_style_set_radius(&style_patchlist, 3);
+		//lv_style_set_bg_color(&style_patchlist, lv_color_make(0xff, 0xff, 0xff));
+		//lv_style_set_border_color(&style_patchlist, lv_color_make(0xe1, 0xe6, 0xee));
+		//lv_style_set_border_width(&style_patchlist, 2);
+		//lv_style_set_text_color(&style_patchlist, lv_color_make(0x0D, 0x30, 0x55));
+		//lv_style_set_text_font(&style_patchlist, &lv_font_MuseoSansRounded_700_14);
+		//lv_style_set_text_line_space(&style_patchlist, 20);
 
-		lv_style_init(&style_patchlist_selected);
-		lv_style_set_radius(&style_patchlist_selected, 3);
-		lv_style_set_bg_color(&style_patchlist_selected, lv_color_make(0x00, 0xa1, 0xb5));
-		lv_style_set_border_color(&style_patchlist_selected, lv_color_make(0xe1, 0xe6, 0xee));
-		lv_style_set_border_width(&style_patchlist_selected, 1);
-		lv_style_set_text_color(&style_patchlist_selected, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_text_font(&style_patchlist_selected, &lv_font_MuseoSansRounded_700_14);
+		//lv_style_init(&style_patchlist_selected);
+		//lv_style_set_radius(&style_patchlist_selected, 3);
+		//lv_style_set_bg_color(&style_patchlist_selected, lv_color_make(0x00, 0xa1, 0xb5));
+		//lv_style_set_border_color(&style_patchlist_selected, lv_color_make(0xe1, 0xe6, 0xee));
+		//lv_style_set_border_width(&style_patchlist_selected, 1);
+		//lv_style_set_text_color(&style_patchlist_selected, lv_color_make(0xff, 0xff, 0xff));
+		//lv_style_set_text_font(&style_patchlist_selected, &lv_font_MuseoSansRounded_700_14);
 
-		lv_style_init(&style_patchlist_list);
-		lv_style_set_radius(&style_patchlist_list, 3);
-		lv_style_set_bg_color(&style_patchlist_list, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_border_color(&style_patchlist_list, lv_color_make(0xe1, 0xe6, 0xee));
-		lv_style_set_border_width(&style_patchlist_list, 1);
-		lv_style_set_text_color(&style_patchlist_list, lv_color_make(0x0D, 0x30, 0x55));
-		lv_style_set_text_font(&style_patchlist_list, &lv_font_MuseoSansRounded_700_14);
+		//lv_style_init(&style_patchlist_list);
+		//lv_style_set_radius(&style_patchlist_list, 3);
+		//lv_style_set_bg_color(&style_patchlist_list, lv_color_make(0xff, 0xff, 0xff));
+		//lv_style_set_border_color(&style_patchlist_list, lv_color_make(0xe1, 0xe6, 0xee));
+		//lv_style_set_border_width(&style_patchlist_list, 1);
+		//lv_style_set_text_color(&style_patchlist_list, lv_color_make(0x0D, 0x30, 0x55));
+		//lv_style_set_text_font(&style_patchlist_list, &lv_font_MuseoSansRounded_700_14);
 
-		// Popup styles:
-		lv_style_init(&style_popup_cont);
-		lv_style_set_radius(&style_popup_cont, 0);
-		lv_style_set_bg_color(&style_popup_cont, lv_color_make(0xe6, 0xe6, 0xe6));
-		lv_style_set_bg_opa(&style_popup_cont, 255);
-		//lv_style_set_border_color(&style_popup_cont, lv_color_make(0xff, 0xc3, 0x70));
-		lv_style_set_border_width(&style_popup_cont, 0);
-		lv_style_set_border_opa(&style_popup_cont, 0);
-		lv_style_set_pad_gap(&style_popup_cont, 10);
-		lv_style_set_pad_all(&style_popup_cont, 4);
+		//// Popup styles:
+		//lv_style_init(&style_popup_cont);
+		//lv_style_set_radius(&style_popup_cont, 0);
+		//lv_style_set_bg_color(&style_popup_cont, lv_color_make(0xe6, 0xe6, 0xe6));
+		//lv_style_set_bg_opa(&style_popup_cont, 255);
+		////lv_style_set_border_color(&style_popup_cont, lv_color_make(0xff, 0xc3, 0x70));
+		//lv_style_set_border_width(&style_popup_cont, 0);
+		//lv_style_set_border_opa(&style_popup_cont, 0);
+		//lv_style_set_pad_gap(&style_popup_cont, 10);
+		//lv_style_set_pad_all(&style_popup_cont, 4);
 
-		lv_style_init(&style_popup_buttons);
-		lv_style_set_radius(&style_popup_buttons, 8);
-		lv_style_set_bg_color(&style_popup_buttons, lv_color_make(0xff, 0xff, 0xff));
-		// lv_style_set_bg_color(&style_popup_buttons, lv_color_make(0xff, 0xc3, 0x70));//LV_STATE_FOCUSED,
-		// lv_style_set_bg_color(&style_popup_buttons,  lv_color_make(0xf6, 0xdd, 0x53));//LV_STATE_PRESSED,
-		lv_style_set_bg_opa(&style_popup_buttons, 255);
-		lv_style_set_border_color(&style_popup_buttons, lv_color_make(0x32, 0x32, 0x32));
-		lv_style_set_border_width(&style_popup_buttons, 2);
-		lv_style_set_text_color(&style_popup_buttons, lv_color_make(0x32, 0x32, 0x32));
+		//lv_style_init(&style_popup_buttons);
+		//lv_style_set_radius(&style_popup_buttons, 8);
+		//lv_style_set_bg_color(&style_popup_buttons, lv_color_make(0xff, 0xff, 0xff));
+		//// lv_style_set_bg_color(&style_popup_buttons, lv_color_make(0xff, 0xc3, 0x70));//LV_STATE_FOCUSED,
+		//// lv_style_set_bg_color(&style_popup_buttons,  lv_color_make(0xf6, 0xdd, 0x53));//LV_STATE_PRESSED,
+		//lv_style_set_bg_opa(&style_popup_buttons, 255);
+		//lv_style_set_border_color(&style_popup_buttons, lv_color_make(0x32, 0x32, 0x32));
+		//lv_style_set_border_width(&style_popup_buttons, 2);
+		//lv_style_set_text_color(&style_popup_buttons, lv_color_make(0x32, 0x32, 0x32));
 
-		lv_style_init(&style_popup_backbut);
-		// lv_style_set_image_opa(&style_popup_backbut, 255);
-		//FOCUSED state:
-		lv_style_set_radius(&style_popup_backbut, 6);
-		lv_style_set_outline_color(&style_popup_backbut, lv_color_hex(0xabcdef));
-		lv_style_set_outline_width(&style_popup_backbut, LV_DPX(2));
-		lv_style_set_outline_opa(&style_popup_backbut, LV_OPA_0);
-		// lv_style_set_outline_opa(&style_popup_backbut, LV_STATE_FOCUSED, LV_OPA_50);
-		// lv_style_set_image_recolor(&style_popup_backbut, LV_STATE_FOCUSED, lv_color_hex(0x888888));
-		//lv_style_set_outline_pad(&style_popup_backbut, LV_STATE_FOCUSED, 4);
-		//lv_style_set_outline_blend_mode(&style_popup_backbut, LV_STATE_FOCUSED, LV_BLEND_MODE_NORMAL);
+		//lv_style_init(&style_popup_backbut);
+		//// lv_style_set_image_opa(&style_popup_backbut, 255);
+		////FOCUSED state:
+		//lv_style_set_radius(&style_popup_backbut, 6);
+		//lv_style_set_outline_color(&style_popup_backbut, lv_color_hex(0xabcdef));
+		//lv_style_set_outline_width(&style_popup_backbut, LV_DPX(2));
+		//lv_style_set_outline_opa(&style_popup_backbut, LV_OPA_0);
+		//// lv_style_set_outline_opa(&style_popup_backbut, LV_STATE_FOCUSED, LV_OPA_50);
+		//// lv_style_set_image_recolor(&style_popup_backbut, LV_STATE_FOCUSED, lv_color_hex(0x888888));
+		////lv_style_set_outline_pad(&style_popup_backbut, LV_STATE_FOCUSED, 4);
+		////lv_style_set_outline_blend_mode(&style_popup_backbut, LV_STATE_FOCUSED, LV_BLEND_MODE_NORMAL);
 
-		lv_style_init(&style_popup_desc);
-		lv_style_set_radius(&style_popup_desc, 0);
-		// lv_style_set_bg_color(&style_popup_desc, lv_color_make(0xff, 0xff, 0xff));
-		lv_style_set_bg_opa(&style_popup_desc, 0);
-		lv_style_set_text_color(&style_popup_desc, lv_color_make(0x78, 0x78, 0x78));
-		lv_style_set_text_font(&style_popup_desc, &lv_font_MuseoSansRounded_500_16);
-		lv_style_set_text_letter_space(&style_popup_desc, 0);
-		lv_style_set_text_line_space(&style_popup_desc, 12);
-		lv_style_set_pad_left(&style_popup_desc, 4);
-		lv_style_set_pad_right(&style_popup_desc, 4);
-		lv_style_set_pad_top(&style_popup_desc, 3);
-		lv_style_set_pad_bottom(&style_popup_desc, 2);
+		//lv_style_init(&style_popup_desc);
+		//lv_style_set_radius(&style_popup_desc, 0);
+		//// lv_style_set_bg_color(&style_popup_desc, lv_color_make(0xff, 0xff, 0xff));
+		//lv_style_set_bg_opa(&style_popup_desc, 0);
+		//lv_style_set_text_color(&style_popup_desc, lv_color_make(0x78, 0x78, 0x78));
+		//lv_style_set_text_font(&style_popup_desc, &lv_font_MuseoSansRounded_500_16);
+		//lv_style_set_text_letter_space(&style_popup_desc, 0);
+		//lv_style_set_text_line_space(&style_popup_desc, 12);
+		//lv_style_set_pad_left(&style_popup_desc, 4);
+		//lv_style_set_pad_right(&style_popup_desc, 4);
+		//lv_style_set_pad_top(&style_popup_desc, 3);
+		//lv_style_set_pad_bottom(&style_popup_desc, 2);
 
-		lv_style_init(&style_popup_patchname);
-		// lv_style_set_radius(&style_popup_patchname, 0);
-		// lv_style_set_bg_color(&style_popup_patchname, lv_color_make(0xa0, 0xa0, 0xa0));
-		lv_style_set_bg_opa(&style_popup_patchname, 0);
-		lv_style_set_text_color(&style_popup_patchname, lv_color_make(0x1c, 0x1c, 0x1c));
-		lv_style_set_text_font(&style_popup_patchname, &lv_font_MuseoSansRounded_700_17);
-		lv_style_set_text_letter_space(&style_popup_patchname, 1);
-		lv_style_set_pad_left(&style_popup_patchname, 6);
-		lv_style_set_pad_right(&style_popup_patchname, 6);
-		lv_style_set_pad_top(&style_popup_patchname, 4);
-		lv_style_set_pad_bottom(&style_popup_patchname, 4);
+		//lv_style_init(&style_popup_patchname);
+		//// lv_style_set_radius(&style_popup_patchname, 0);
+		//// lv_style_set_bg_color(&style_popup_patchname, lv_color_make(0xa0, 0xa0, 0xa0));
+		//lv_style_set_bg_opa(&style_popup_patchname, 0);
+		//lv_style_set_text_color(&style_popup_patchname, lv_color_make(0x1c, 0x1c, 0x1c));
+		//lv_style_set_text_font(&style_popup_patchname, &lv_font_MuseoSansRounded_700_17);
+		//lv_style_set_text_letter_space(&style_popup_patchname, 1);
+		//lv_style_set_pad_left(&style_popup_patchname, 6);
+		//lv_style_set_pad_right(&style_popup_patchname, 6);
+		//lv_style_set_pad_top(&style_popup_patchname, 4);
+		//lv_style_set_pad_bottom(&style_popup_patchname, 4);
 
-		// Wait cont style
-		lv_style_init(&style_wait_cont);
-		lv_style_set_radius(&style_wait_cont, 2);
-		lv_style_set_bg_color(&style_wait_cont, lv_color_make(0xe6, 0xe6, 0xe6));
-		lv_style_set_bg_opa(&style_wait_cont, 255);
-		lv_style_set_border_color(&style_wait_cont, lv_color_make(0xff, 0xc3, 0x70));
-		lv_style_set_border_width(&style_wait_cont, 1);
-		lv_style_set_border_opa(&style_wait_cont, 255);
-		lv_style_set_pad_gap(&style_wait_cont, 10);
-		lv_style_set_pad_all(&style_wait_cont, 10);
+		//// Wait cont style
+		//lv_style_init(&style_wait_cont);
+		//lv_style_set_radius(&style_wait_cont, 2);
+		//lv_style_set_bg_color(&style_wait_cont, lv_color_make(0xe6, 0xe6, 0xe6));
+		//lv_style_set_bg_opa(&style_wait_cont, 255);
+		//lv_style_set_border_color(&style_wait_cont, lv_color_make(0xff, 0xc3, 0x70));
+		//lv_style_set_border_width(&style_wait_cont, 1);
+		//lv_style_set_border_opa(&style_wait_cont, 255);
+		//lv_style_set_pad_gap(&style_wait_cont, 10);
+		//lv_style_set_pad_all(&style_wait_cont, 10);
 	}
 };
 
