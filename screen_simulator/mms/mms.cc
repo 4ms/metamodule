@@ -1,6 +1,7 @@
 #include "stubs/sys/alloc_buffer.hh"
 #include <cstdint>
 
+#include "pages/styles.hh"
 #include "patches_default.hh"
 
 #include "lvgl_driver.hh"
@@ -30,7 +31,7 @@ struct Simulator {
 
 	bool init() {
 		MetaModule::MMDisplay::start();
-
+		MetaModule::Gui::init_lvgl_styles();
 		params.clear();
 		metaparams.clear();
 		pages.init();

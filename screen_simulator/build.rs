@@ -2,6 +2,8 @@ fn main() {
     println!("cargo:rerun-if-changed=../firmware/lib/lvgl/lv_conf.h");
     println!("cargo:rerun-if-changed=../firmware/src/pages/");
     println!("cargo:rerun-if-changed=../firmware/src/pages/images");
+    println!("cargo:rerun-if-chnaged=../firmware/src/pages/patch_selector.hh");
+    println!("cargo:rerun-if-chnaged=../firmware/src/pages/module_view.hh");
     println!("cargo:rerun-if-chnaged=../firmware/src/pages/page_manager.cc");
     println!("cargo:rerun-if-changed=../firmware/src/pages/gui-guider");
     println!("cargo:rerun-if-changed=../firmware/src/patchlist.cc");
@@ -18,10 +20,9 @@ fn main() {
     add_glob_files("../firmware/src/pages/images/*.c", &mut lvgl_src);
     add_glob_files("../firmware/src/pages/images/ui/*.c", &mut lvgl_src);
     add_glob_files("../firmware/src/pages/images/components/*.c", &mut lvgl_src);
-    lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
-    //lvgl_src.push(String::from("../firmware/src/pages/fonts/lv_font_MuseoSansRounded_700_14.c"));
     add_glob_files("../firmware/src/pages/fonts/*.c", &mut lvgl_src);
     add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut lvgl_src);
+    lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
 
     let mut builder = cc::Build::new();
     let build = builder
