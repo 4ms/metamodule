@@ -12,9 +12,11 @@ namespace MetaModule
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info}
-		, base(lv_obj_create(nullptr))
-		, roller(lv_roller_create(base)) {
+		, base(lv_obj_create(nullptr)) {
+
 		init_bg(base);
+
+		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
 		lv_obj_add_event_cb(roller, patchlist_event_cb, LV_EVENT_VALUE_CHANGED, this);
 
@@ -24,14 +26,6 @@ struct PatchSelectorPage : PageBase {
 
 		lv_obj_set_pos(roller, 0, 30);
 		lv_obj_set_size(roller, 320, 210);
-	}
-
-	lv_obj_t *header_text;
-
-	// static inline lv_style_t header_style;
-
-	void init() override {
-		LVGLMemory::print_mem_usage("PatchSel::init in");
 
 		header_text = lv_label_create(base);
 		lv_label_set_text_static(header_text, "Select a Patch:");
@@ -39,10 +33,14 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_set_align(base, LV_ALIGN_TOP_MID);
 		lv_obj_set_pos(header_text, 0, 0);
 		lv_obj_set_width(header_text, 320);
+	}
+
+	void init() override {
+		LVGLMemory::print_mem_usage("PatchSel::init in");
 
 		refresh_patchlist();
 
-		// setup_popup();
+		setup_popup();
 		LVGLMemory::print_mem_usage("PatchSel::init out");
 	}
 
@@ -52,58 +50,51 @@ struct PatchSelectorPage : PageBase {
 		for (unsigned i = 0; i < patch_list.num_patches(); i++) {
 			patchnames += patch_list.get_patch_name(i).data();
 			patchnames += '\n';
-			printf("Adding patch %s\n", patch_list.get_patch_name(i).c_str());
 		}
 		if (patchnames.length() > 0)
 			patchnames.pop_back();
 
 		lv_roller_set_options(roller, patchnames.c_str(), LV_ROLLER_MODE_NORMAL);
-		lv_roller_set_visible_row_count(roller, 8);
+		lv_roller_set_visible_row_count(roller, 9);
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 	}
 
 	void setup_popup() {
 		LVGLMemory::print_mem_usage("PatchSel::setup_popup 0");
-		// Container
-		// TODO: better to hide/show a full-screen container? Or use a separate screen?
-		// Separate screen:
-		// popup_cont = lv_obj_create(nullptr, nullptr);
-		// Full-screen container:
 		popup_cont = lv_obj_create(base);
-		lv_obj_add_style(popup_cont, &style_popup_cont, LV_PART_MAIN);
+		lv_obj_add_style(popup_cont, &Gui::popup_box_style, LV_PART_MAIN);
 		lv_obj_set_flex_flow(popup_cont, LV_FLEX_FLOW_ROW);
 
-		// lv_cont_set_layout(popup_cont, LV_LAYOUT_OFF);
-		// lv_cont_set_fit(popup_cont, LV_FIT_PARENT);
-
 		popup_patchname = lv_label_create(popup_cont);
-		lv_obj_add_style(popup_patchname, &style_popup_patchname, LV_PART_MAIN);
+		lv_obj_add_style(popup_patchname, &Gui::header_style, LV_PART_MAIN);
+		// lv_obj_set_pos(popup_patchname, 0, 0);
+		// lv_obj_set_align(popup_patchname, LV_ALIGN_TOP_MID);
+		// lv_obj_set_size(popup_patchname, 320, 30);
 
 		popup_desc = lv_label_create(popup_cont);
 		lv_label_set_long_mode(popup_desc, LV_LABEL_LONG_DOT);
-		//lv_label_set_align(popup_desc, LV_LABEL_ALIGN_LEFT);
-		lv_obj_add_style(popup_desc, &style_popup_desc, LV_PART_MAIN);
+		//lv_obj_add_style(popup_desc, &style_popup_desc, LV_PART_MAIN);
 
-		//Play button
-		popup_playbut = lv_btn_create(popup_cont);
-		lv_obj_add_style(popup_playbut, &style_popup_buttons, LV_PART_MAIN);
+		////Play button
+		//popup_playbut = lv_btn_create(popup_cont);
+		//lv_obj_add_style(popup_playbut, &style_popup_buttons, LV_PART_MAIN);
 
-		// lv_obj_style_set_bg_color(&style_popup_buttons, lv_color_make(0xff, 0xc3, 0x70)); //LV_STATE_FOCUSED,
-		// lv_style_set_bg_color(&style_popup_buttons,  lv_color_make(0xf6, 0xdd, 0x53));//LV_STATE_PRESSED,
-		popup_playbut_label = lv_label_create(popup_playbut);
-		lv_label_set_text(popup_playbut_label, "Play");
+		//// lv_obj_style_set_bg_color(&style_popup_buttons, lv_color_make(0xff, 0xc3, 0x70)); //LV_STATE_FOCUSED,
+		//// lv_style_set_bg_color(&style_popup_buttons,  lv_color_make(0xf6, 0xdd, 0x53));//LV_STATE_PRESSED,
+		//popup_playbut_label = lv_label_create(popup_playbut);
+		//lv_label_set_text(popup_playbut_label, "Play");
 
-		// Explore button
-		popup_explorebut = lv_btn_create(popup_cont);
-		lv_obj_add_style(popup_explorebut, &style_popup_buttons, LV_PART_MAIN);
-		popup_explorebut_label = lv_label_create(popup_explorebut);
-		lv_label_set_text(popup_explorebut_label, "Explore...");
+		//// Explore button
+		//popup_explorebut = lv_btn_create(popup_cont);
+		//lv_obj_add_style(popup_explorebut, &style_popup_buttons, LV_PART_MAIN);
+		//popup_explorebut_label = lv_label_create(popup_explorebut);
+		//lv_label_set_text(popup_explorebut_label, "Explore...");
 
-		//Back image button
-		popup_backbut = lv_btn_create(popup_cont);
-		lv_obj_add_style(popup_backbut, &style_popup_backbut, LV_PART_MAIN);
-		popup_backbut_label = lv_label_create(popup_backbut);
-		lv_label_set_text(popup_backbut_label, "Explore...");
+		////Back image button
+		//popup_backbut = lv_btn_create(popup_cont);
+		//lv_obj_add_style(popup_backbut, &style_popup_backbut, LV_PART_MAIN);
+		//popup_backbut_label = lv_label_create(popup_backbut);
+		//lv_label_set_text(popup_backbut_label, "Explore...");
 
 		// Layout
 
@@ -127,69 +118,66 @@ struct PatchSelectorPage : PageBase {
 		// Popup Group
 		popup_group = lv_group_create();
 		lv_group_set_wrap(popup_group, true);
-		lv_group_add_obj(popup_group, popup_playbut);
-		lv_group_add_obj(popup_group, popup_explorebut);
-		lv_group_add_obj(popup_group, popup_backbut);
+		// lv_group_add_obj(popup_group, popup_playbut);
+		// lv_group_add_obj(popup_group, popup_explorebut);
+		// lv_group_add_obj(popup_group, popup_backbut);
 
-		lv_obj_add_event_cb(popup_backbut, popup_back_event_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(popup_playbut, popup_play_event_cb, LV_EVENT_CLICKED, this);
-		lv_obj_add_event_cb(popup_explorebut, popup_explore_event_cb, LV_EVENT_CLICKED, this);
+		// lv_obj_add_event_cb(popup_backbut, popup_back_event_cb, LV_EVENT_CLICKED, this);
+		// lv_obj_add_event_cb(popup_playbut, popup_play_event_cb, LV_EVENT_CLICKED, this);
+		// lv_obj_add_event_cb(popup_explorebut, popup_explore_event_cb, LV_EVENT_CLICKED, this);
 
 		hide_popup();
 
-		wait_cont = lv_obj_create(base);
-		lv_obj_set_align(wait_cont, LV_ALIGN_CENTER);
-		lv_obj_add_style(wait_cont, &style_wait_cont, LV_PART_MAIN);
+		// wait_cont = lv_obj_create(base);
+		// lv_obj_set_align(wait_cont, LV_ALIGN_CENTER);
+		// lv_obj_add_style(wait_cont, &style_wait_cont, LV_PART_MAIN);
 		// lv_cont_set_layout(wait_cont, LV_LAYOUT_CENTER);
 		// lv_cont_set_fit(wait_cont, LV_FIT_TIGHT);
 
-		wait_text = lv_label_create(wait_cont);
-		lv_obj_add_style(wait_text, &style_popup_patchname, LV_PART_MAIN);
-		lv_obj_set_align(wait_text, LV_ALIGN_CENTER);
-		lv_label_set_text(wait_text, "Refreshing Patches...");
+		// wait_text = lv_label_create(wait_cont);
+		// lv_obj_add_style(wait_text, &style_popup_patchname, LV_PART_MAIN);
+		// lv_obj_set_align(wait_text, LV_ALIGN_CENTER);
+		// lv_label_set_text(wait_text, "Refreshing Patches...");
 
-		lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
 
-		wait_group = lv_group_create();
+		// wait_group = lv_group_create();
 	}
 
 	void show_popup() {
-		//LVGLMemory::print_mem_usage("PatchSel::show_popup 0");
-		//lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
-		//lv_group_set_editing(popup_group, false);
-		//lv_group_focus_obj(popup_backbut);
-		////Popup is a container:
-		//lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		LVGLMemory::print_mem_usage("PatchSel::show_popup 0");
+		lv_obj_clear_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
+		lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
+		lv_group_set_editing(popup_group, false);
+		lv_group_focus_obj(popup_backbut);
 		//// Popup is a screen:
 		////	lv_scr_load(popup_cont);
-		//LVGLMemory::print_mem_usage("PatchSel::show_popup 1");
+		LVGLMemory::print_mem_usage("PatchSel::show_popup 1");
 	}
 
 	void hide_popup() {
-		//LVGLMemory::print_mem_usage("PatchSel::hide_popup 0");
-		////Popup is a container:
-		//lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
-		//lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		//lv_group_set_editing(group, true);
+		LVGLMemory::print_mem_usage("PatchSel::hide_popup 0");
+		lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		lv_group_set_editing(group, true);
+		lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
 		//// Popup is a screen:
-		//// focus(PageChangeDirection::Jump);
-		//LVGLMemory::print_mem_usage("PatchSel::hide_popup 1");
+		// focus(PageChangeDirection::Jump);
+		LVGLMemory::print_mem_usage("PatchSel::hide_popup 1");
 	}
 
 	void update() override {
 		// if (!patch_list.is_ready()) {
 		// 	if (patchlist_ready) {
 		// 		lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
-		// 		lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		// 		// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
 		// 		patchlist_ready = false;
 		// 	}
 		// 	return;
 		// }
 
 		// if (!patchlist_ready) {
-		// 	lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-		// 	// Hide the popup as well:
-		// 	lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
+		// 	// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		// 	// lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
 		// 	lv_indev_set_group(lv_indev_get_next(nullptr), group);
 		// 	lv_group_set_editing(group, true);
 		// 	patchlist_ready = true;
@@ -221,20 +209,22 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	static void popup_explore_event_cb(lv_event_t *event) {
-		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
+		// auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
 		printf("Clicked Explore\n\r");
 	}
 
 	static void patchlist_event_cb(lv_event_t *event) {
+		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
+		auto obj = _instance->roller;
 
-		// auto obj = _instance->roller;
-		// selected_patch = lv_dropdown_get_selected(obj);
-		// lv_label_set_text(_instance->popup_patchname, _instance->patch_list.get_patch_name(selected_patch));
-		// lv_label_set_text(_instance->popup_desc, "TODO: Patch descriptions...");
+		auto &sel_patch = _instance->selected_patch;
+		sel_patch = lv_dropdown_get_selected(obj);
+		lv_label_set_text(_instance->popup_patchname, _instance->patch_list.get_patch_name(sel_patch));
+		lv_label_set_text(_instance->popup_desc, "TODO: Patch descriptions...");
 		// // how to redraw?
 		// // lv_obj_realign(_instance->popup_patchname);
 		// // lv_obj_realign(_instance->popup_desc);
-		// _instance->show_popup();
+		_instance->show_popup();
 	}
 
 	// static void patch_selector_event_cb(lv_obj_t *obj, lv_event_t event) {
@@ -321,8 +311,9 @@ private:
 	lv_group_t *popup_group;
 	lv_group_t *wait_group;
 
-	lv_obj_t *base;
 	lv_obj_t *roller;
+	lv_obj_t *header_text;
+	lv_obj_t *base;
 
 	lv_obj_t *popup_cont;
 	lv_obj_t *popup_patchname;
@@ -337,43 +328,18 @@ private:
 	lv_obj_t *wait_cont;
 	lv_obj_t *wait_text;
 
-	lv_style_t style_patchlist;
-	lv_style_t style_patchlist_selected;
-	lv_style_t style_patchlist_list;
-	lv_style_t style_popup_cont;
-	lv_style_t style_popup_buttons;
-	lv_style_t style_popup_backbut;
-	lv_style_t style_popup_desc;
-	lv_style_t style_popup_patchname;
+	// lv_style_t style_patchlist;
+	// lv_style_t style_patchlist_selected;
+	// lv_style_t style_patchlist_list;
+	// lv_style_t style_popup_cont;
+	// lv_style_t style_popup_buttons;
+	// lv_style_t style_popup_backbut;
+	// lv_style_t style_popup_desc;
+	// lv_style_t style_popup_patchname;
 
 	lv_style_t style_wait_cont;
 
 	void _init_styles() {
-		// Patch list styles
-		//lv_style_init(&style_patchlist);
-		//lv_style_set_radius(&style_patchlist, 3);
-		//lv_style_set_bg_color(&style_patchlist, lv_color_make(0xff, 0xff, 0xff));
-		//lv_style_set_border_color(&style_patchlist, lv_color_make(0xe1, 0xe6, 0xee));
-		//lv_style_set_border_width(&style_patchlist, 2);
-		//lv_style_set_text_color(&style_patchlist, lv_color_make(0x0D, 0x30, 0x55));
-		//lv_style_set_text_font(&style_patchlist, &lv_font_MuseoSansRounded_700_14);
-		//lv_style_set_text_line_space(&style_patchlist, 20);
-
-		//lv_style_init(&style_patchlist_selected);
-		//lv_style_set_radius(&style_patchlist_selected, 3);
-		//lv_style_set_bg_color(&style_patchlist_selected, lv_color_make(0x00, 0xa1, 0xb5));
-		//lv_style_set_border_color(&style_patchlist_selected, lv_color_make(0xe1, 0xe6, 0xee));
-		//lv_style_set_border_width(&style_patchlist_selected, 1);
-		//lv_style_set_text_color(&style_patchlist_selected, lv_color_make(0xff, 0xff, 0xff));
-		//lv_style_set_text_font(&style_patchlist_selected, &lv_font_MuseoSansRounded_700_14);
-
-		//lv_style_init(&style_patchlist_list);
-		//lv_style_set_radius(&style_patchlist_list, 3);
-		//lv_style_set_bg_color(&style_patchlist_list, lv_color_make(0xff, 0xff, 0xff));
-		//lv_style_set_border_color(&style_patchlist_list, lv_color_make(0xe1, 0xe6, 0xee));
-		//lv_style_set_border_width(&style_patchlist_list, 1);
-		//lv_style_set_text_color(&style_patchlist_list, lv_color_make(0x0D, 0x30, 0x55));
-		//lv_style_set_text_font(&style_patchlist_list, &lv_font_MuseoSansRounded_700_14);
 
 		//// Popup styles:
 		//lv_style_init(&style_popup_cont);
