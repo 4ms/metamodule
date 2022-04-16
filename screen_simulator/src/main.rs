@@ -20,6 +20,8 @@ extern "C" {
     fn rotary_push_fwd() -> ();
     fn rotary_press() -> ();
     fn rotary_release() -> ();
+    fn button_press() -> ();
+    fn button_release() -> ();
     fn lv_timer_handler() -> ();
     fn fake_HAL_IncTick() -> ();
 }
@@ -66,7 +68,7 @@ fn main() {
         panic!("{}", e);
     });
 
-    let mut keys: [KeyHandler; 6] = [
+    let mut keys: [KeyHandler; 8] = [
         KeyHandler {
             key: Key::Right,
             is_pressed: false,
@@ -96,6 +98,16 @@ fn main() {
             key: Key::Period,
             is_pressed: false,
             action: &|| unsafe { rotary_push_fwd() },
+        },
+        KeyHandler {
+            key: Key::Z,
+            is_pressed: false,
+            action: &|| unsafe { button_press() },
+        },
+        KeyHandler {
+            key: Key::A,
+            is_pressed: false,
+            action: &|| unsafe { button_release() },
         },
         // KeyHandler {
         //     key: Key::Semicolon,

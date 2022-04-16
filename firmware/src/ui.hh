@@ -69,14 +69,6 @@ public:
 		Debug::Pin1::high();
 		page_update_tm.stop();
 		lv_timer_handler();
-		if (flag_prev_page) {
-			page_manager.prev_page();
-			flag_prev_page = false;
-		}
-		if (flag_next_page) {
-			page_manager.next_page();
-			flag_next_page = false;
-		}
 		page_update_tm.start();
 
 		auto msg = mbox.get_message();
@@ -91,18 +83,8 @@ public:
 	void page_update_task() { //60Hz
 		bool read_ok = param_queue.read_sync(&params, &metaparams);
 		if (read_ok) {
-			handle_rotary();
 			page_manager.update_current_page();
 		}
-	}
-
-	void handle_rotary() {
-		auto rotary_pushed_turned = metaparams.rotary_pushed.use_motion();
-		//Queue the call to next/prev_page here because it can be slow, e.g. if the page has lots of images
-		if (rotary_pushed_turned < 0)
-			flag_prev_page = true;
-		if (rotary_pushed_turned > 0)
-			flag_next_page = true;
 	}
 
 private:

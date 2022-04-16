@@ -1,7 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
 #include "lvgl/lvgl.h"
-#include "pages/page_list.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
@@ -50,7 +49,7 @@ struct PageBase {
 		lv_obj_set_style_bg_color(screen, lv_color_black(), LV_PART_INDICATOR | LV_STATE_FOCUSED);
 	}
 
-	virtual void focus(PageChangeDirection dir) {
+	virtual void focus(PageChangeDirection dir = PageChangeDirection::Jump) {
 		if (group) {
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
 			lv_group_set_editing(group, true);
@@ -68,10 +67,6 @@ struct PageBase {
 	}
 
 	virtual void update() {
-	}
-
-	virtual std::optional<PageId> request_page_jump() {
-		return std::nullopt;
 	}
 };
 } // namespace MetaModule

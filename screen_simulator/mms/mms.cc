@@ -42,16 +42,7 @@ struct Simulator {
 	void update_ui() {
 		//Todo: enable this:
 		//param_queue.read_sync(&params, &metaparams);
-		handle_rotary();
 		pages.update_current_page();
-	}
-
-	void handle_rotary() {
-		auto rotary_pushed_turned = metaparams.rotary_pushed.use_motion();
-		if (rotary_pushed_turned < 0)
-			pages.prev_page();
-		if (rotary_pushed_turned > 0)
-			pages.next_page();
 	}
 
 	uint16_t get_pixel(uint16_t x, uint16_t y) {
@@ -60,6 +51,14 @@ struct Simulator {
 };
 
 static Simulator sim;
+
+extern "C" void button_press() {
+	sim.metaparams.meta_buttons[0].register_rising_edge();
+}
+
+extern "C" void button_release() {
+	sim.metaparams.meta_buttons[0].register_falling_edge();
+}
 
 extern "C" void rotary_fwd() {
 	sim.metaparams.rotary.motion++;

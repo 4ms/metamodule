@@ -17,7 +17,7 @@ class PageManager {
 	PatchInfo info;
 
 	ModuleViewPage page_module{info, "EnOsc"};
-	PatchSelectorPage page_patch{info};
+	PatchSelectorPage page_patchsel{info};
 	PatchViewPage page_patchview{info};
 	// KnobView3 page_knobs{info};
 
@@ -26,8 +26,7 @@ class PageManager {
 	UiAudioMailbox &mbox;
 
 public:
-	PageId cur_page = PageId::Module;
-	unsigned cur_module_idx = 1;
+	PageBase *cur_page = &page_patchsel;
 
 	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, UiAudioMailbox &mbox)
 		: info{pl, pp, p, m, mbox}
@@ -37,16 +36,9 @@ public:
 	}
 
 	void init();
-	void next_page();
-	void prev_page();
-	void jump_to_page(PageId page);
 	void update_current_page();
-	void set_message(std::string_view message);
 
 private:
-	void _focus_page(PageChangeDirection dir);
-	void _blur_page();
-	PageBase *_get_cur_page();
 };
 
 } // namespace MetaModule

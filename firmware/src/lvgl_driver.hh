@@ -121,6 +121,14 @@ public:
 		}
 
 		data->enc_diff = m->rotary.use_motion();
+
+		// Handle rotary button press/release while still allowing for rotary push+turn.
+		// LVGL does not support rotary push+turn, instead it interprets the release at the end
+		// of a push+turn event as a normal rotary release.
+		// Here we use is_just_released() which only is true if we had a push and a release
+		// without any turning. In this case, we send a press event immediately followed by
+		// a release event.
+		// Push+turn events are ignored by LVGL in this setup.
 		auto just_released = m->rotary_button.is_just_released();
 		if (just_released) {
 			data->state = LV_INDEV_STATE_PR;
