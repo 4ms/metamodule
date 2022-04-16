@@ -74,7 +74,7 @@ fn main() {
         .include("../firmware/lib/lvgl")
         .include("../firmware/lib/lvgl/lvgl/src/lv_font")
         .flag("-DSIMULATOR")
-        .flag("-std=c++2a")
+        .flag("-std=c++20")
         .flag("-Wno-unused-parameter")
         .flag("-Wno-unused-but-set-variable")
         .flag("-Wno-unused-const-variable")

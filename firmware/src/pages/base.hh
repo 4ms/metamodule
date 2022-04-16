@@ -6,6 +6,7 @@
 #include "patch_player.hh"
 #include "patchlist.hh"
 #include "util/geometry.hh"
+#include <optional>
 
 namespace MetaModule
 {
