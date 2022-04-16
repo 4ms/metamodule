@@ -2,50 +2,54 @@
 #include "pages/base.hh"
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
+#include "pages/styles.hh"
 
 namespace MetaModule
 {
 
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
-		: PageBase{info} {
-		_instance = this;
-		_init_styles();
+		: PageBase{info}
+		, base(lv_obj_create(nullptr)) {
+		init_bg(base);
+		_instance = this; //TODO get rid of
+		_init_styles();	  //TODO get rid of
 	}
+
+	lv_obj_t *header_text;
 
 	void init() override {
 		LVGLMemory::print_mem_usage("PatchSel::init 0");
 
-		patchsel_screen = lv_obj_create(nullptr);
+		header_text = lv_label_create(base);
+		lv_obj_add_style(header_text, &Gui::roller_style, LV_PART_MAIN);
+		lv_obj_set_align(base, LV_ALIGN_TOP_MID);
+		lv_obj_set_pos(header_text, 0, 0);
+		lv_obj_set_width(header_text, 320);
 
-		patch_selector_patchlist = lv_dropdown_create(patchsel_screen);
-		lv_dropdown_set_text(patch_selector_patchlist, "Select a Patch:");
+		roller = lv_roller_create(base);
+		lv_obj_set_style_max_height(roller, 240, LV_PART_MAIN);
+		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
+		lv_obj_add_style(roller, &Gui::plain_border_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
+		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
+		lv_obj_set_pos(roller, 20, 0);
+		lv_obj_set_width(roller, 320);
 
 		refresh_patchlist();
 
-		//lv_dropdown_set_max_height(patch_selector_patchlist, 200);
-		lv_obj_set_style_max_height(patch_selector_patchlist, 200, LV_PART_MAIN);
-		lv_obj_add_style(patch_selector_patchlist, &style_patchlist, LV_PART_MAIN);
-		lv_obj_add_style(patch_selector_patchlist, &style_patchlist_selected, LV_PART_SELECTED);
-		lv_obj_add_style(patch_selector_patchlist, &style_patchlist_list, LV_PART_ITEMS); //LV_DROPDOWN_PART_LIST,
-		lv_obj_set_pos(patch_selector_patchlist, 5, 20);
-		lv_obj_set_width(patch_selector_patchlist, 310);
-
-		init_bg(patchsel_screen);
-
 		//Group
-		lv_group_add_obj(group, patch_selector_patchlist);
+		lv_group_add_obj(group, roller);
 
 		//Event callback
-		lv_obj_add_event_cb(patch_selector_patchlist, patchlist_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
+		lv_obj_add_event_cb(roller, patchlist_event_cb, LV_EVENT_VALUE_CHANGED, nullptr);
 
 		setup_popup();
 	}
 
 	void refresh_patchlist() {
-		lv_dropdown_clear_options(patch_selector_patchlist);
+		lv_dropdown_clear_options(roller);
 		for (unsigned i = 0; i < patch_list.num_patches(); i++)
-			lv_dropdown_add_option(patch_selector_patchlist, patch_list.get_patch_name(i).data(), i);
+			lv_dropdown_add_option(roller, patch_list.get_patch_name(i).data(), i);
 	}
 
 	void setup_popup() {
@@ -55,7 +59,7 @@ struct PatchSelectorPage : PageBase {
 		// Separate screen:
 		// popup_cont = lv_obj_create(nullptr, nullptr);
 		// Full-screen container:
-		popup_cont = lv_obj_create(patchsel_screen);
+		popup_cont = lv_obj_create(base);
 		lv_obj_add_style(popup_cont, &style_popup_cont, LV_PART_MAIN);
 		lv_obj_set_flex_flow(popup_cont, LV_FLEX_FLOW_ROW);
 
@@ -123,7 +127,7 @@ struct PatchSelectorPage : PageBase {
 
 		hide_popup();
 
-		wait_cont = lv_obj_create(patchsel_screen);
+		wait_cont = lv_obj_create(base);
 		lv_obj_set_align(wait_cont, LV_ALIGN_CENTER);
 		lv_obj_add_style(wait_cont, &style_wait_cont, LV_PART_MAIN);
 		// lv_cont_set_layout(wait_cont, LV_LAYOUT_CENTER);
@@ -207,7 +211,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	static void patchlist_event_cb(lv_event_t *event) {
-		auto obj = _instance->patch_selector_patchlist;
+		auto obj = _instance->roller;
 		selected_patch = lv_dropdown_get_selected(obj);
 		lv_label_set_text(_instance->popup_patchname, _instance->patch_list.get_patch_name(selected_patch));
 		lv_label_set_text(_instance->popup_desc, "TODO: Patch descriptions...");
@@ -303,8 +307,8 @@ private:
 	lv_group_t *popup_group;
 	lv_group_t *wait_group;
 
-	lv_obj_t *patchsel_screen;
-	lv_obj_t *patch_selector_patchlist;
+	lv_obj_t *base;
+	lv_obj_t *roller;
 
 	lv_obj_t *popup_cont;
 	lv_obj_t *popup_patchname;
