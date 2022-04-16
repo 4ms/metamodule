@@ -192,7 +192,7 @@ private:
 	void _add_button(int x, int y) {
 		auto &b = button.emplace_back();
 		b = lv_btn_create(base);
-		lv_obj_add_style(b, &Gui::button_style, LV_PART_MAIN);
+		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
 		lv_obj_set_pos(b, x - 6, y - 6);
 		lv_obj_set_size(b, 12, 12);
 	}
