@@ -80,6 +80,8 @@ PageBase *PageManager::_get_cur_page() {
 	switch (cur_page) {
 		case PageId::PatchSel:
 			return &page_patch;
+		case PageId::PatchView:
+			return &page_patchview;
 		// case PageId::Knobs:
 		// 	return &page_knobs;
 		case PageId::Module:
@@ -100,8 +102,11 @@ void PageManager::_blur_page() {
 }
 
 void PageManager::update_current_page() {
-	if (auto p = _get_cur_page())
+	if (auto p = _get_cur_page()) {
 		p->update();
+		if (auto newpage = p->request_page_jump())
+			jump_to_page(newpage.value());
+	}
 }
 
 } // namespace MetaModule

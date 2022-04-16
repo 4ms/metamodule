@@ -28,6 +28,9 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_style(popup_patchname, &Gui::header_style, LV_PART_MAIN);
 		lv_label_set_long_mode(popup_desc, LV_LABEL_LONG_DOT);
 		lv_obj_set_size(popup_desc, 320, 30);
+
+		group = lv_group_create();
+		lv_group_set_wrap(group, true);
 	}
 
 private:

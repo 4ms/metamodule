@@ -5,7 +5,6 @@
 #include "pages/styles.hh"
 #include "printf.h"
 
-// LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_16);
 namespace MetaModule
 {
 
@@ -40,7 +39,6 @@ struct PatchSelectorPage : PageBase {
 
 		refresh_patchlist();
 
-		setup_popup();
 		LVGLMemory::print_mem_usage("PatchSel::init out");
 	}
 
@@ -60,19 +58,19 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void setup_popup() {
-		LVGLMemory::print_mem_usage("PatchSel::setup_popup 0");
-		popup_cont = lv_obj_create(base);
-		lv_obj_add_style(popup_cont, &Gui::popup_box_style, LV_PART_MAIN);
-		lv_obj_set_flex_flow(popup_cont, LV_FLEX_FLOW_ROW);
+		// LVGLMemory::print_mem_usage("PatchSel::setup_popup 0");
+		// popup_cont = lv_obj_create(base);
+		// lv_obj_add_style(popup_cont, &Gui::popup_box_style, LV_PART_MAIN);
+		// lv_obj_set_flex_flow(popup_cont, LV_FLEX_FLOW_ROW);
 
-		popup_patchname = lv_label_create(popup_cont);
-		lv_obj_add_style(popup_patchname, &Gui::header_style, LV_PART_MAIN);
-		// lv_obj_set_pos(popup_patchname, 0, 0);
-		// lv_obj_set_align(popup_patchname, LV_ALIGN_TOP_MID);
-		// lv_obj_set_size(popup_patchname, 320, 30);
+		// popup_patchname = lv_label_create(popup_cont);
+		// lv_obj_add_style(popup_patchname, &Gui::header_style, LV_PART_MAIN);
+		// // lv_obj_set_pos(popup_patchname, 0, 0);
+		// // lv_obj_set_align(popup_patchname, LV_ALIGN_TOP_MID);
+		// // lv_obj_set_size(popup_patchname, 320, 30);
 
-		popup_desc = lv_label_create(popup_cont);
-		lv_label_set_long_mode(popup_desc, LV_LABEL_LONG_DOT);
+		// popup_desc = lv_label_create(popup_cont);
+		// lv_label_set_long_mode(popup_desc, LV_LABEL_LONG_DOT);
 		//lv_obj_add_style(popup_desc, &style_popup_desc, LV_PART_MAIN);
 
 		////Play button
@@ -116,8 +114,8 @@ struct PatchSelectorPage : PageBase {
 		// lv_obj_align(popup_backbut, popup_playbut, LV_ALIGN_OUT_LEFT_TOP, -10, 0);
 
 		// Popup Group
-		popup_group = lv_group_create();
-		lv_group_set_wrap(popup_group, true);
+		// popup_group = lv_group_create();
+		// lv_group_set_wrap(popup_group, true);
 		// lv_group_add_obj(popup_group, popup_playbut);
 		// lv_group_add_obj(popup_group, popup_explorebut);
 		// lv_group_add_obj(popup_group, popup_backbut);
@@ -126,7 +124,7 @@ struct PatchSelectorPage : PageBase {
 		// lv_obj_add_event_cb(popup_playbut, popup_play_event_cb, LV_EVENT_CLICKED, this);
 		// lv_obj_add_event_cb(popup_explorebut, popup_explore_event_cb, LV_EVENT_CLICKED, this);
 
-		hide_popup();
+		// hide_popup();
 
 		// wait_cont = lv_obj_create(base);
 		// lv_obj_set_align(wait_cont, LV_ALIGN_CENTER);
@@ -144,26 +142,26 @@ struct PatchSelectorPage : PageBase {
 		// wait_group = lv_group_create();
 	}
 
-	void show_popup() {
-		LVGLMemory::print_mem_usage("PatchSel::show_popup 0");
-		lv_obj_clear_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
-		lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
-		lv_group_set_editing(popup_group, false);
-		lv_group_focus_obj(popup_backbut);
-		//// Popup is a screen:
-		////	lv_scr_load(popup_cont);
-		LVGLMemory::print_mem_usage("PatchSel::show_popup 1");
-	}
+	//void show_popup() {
+	//	LVGLMemory::print_mem_usage("PatchSel::show_popup 0");
+	//	lv_obj_clear_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
+	//	lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
+	//	lv_group_set_editing(popup_group, false);
+	//	lv_group_focus_obj(popup_backbut);
+	//	//// Popup is a screen:
+	//	////	lv_scr_load(popup_cont);
+	//	LVGLMemory::print_mem_usage("PatchSel::show_popup 1");
+	//}
 
-	void hide_popup() {
-		LVGLMemory::print_mem_usage("PatchSel::hide_popup 0");
-		lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		lv_group_set_editing(group, true);
-		lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
-		//// Popup is a screen:
-		// focus(PageChangeDirection::Jump);
-		LVGLMemory::print_mem_usage("PatchSel::hide_popup 1");
-	}
+	//void hide_popup() {
+	//	LVGLMemory::print_mem_usage("PatchSel::hide_popup 0");
+	//	lv_indev_set_group(lv_indev_get_next(nullptr), group);
+	//	lv_group_set_editing(group, true);
+	//	lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
+	//	//// Popup is a screen:
+	//	// focus(PageChangeDirection::Jump);
+	//	LVGLMemory::print_mem_usage("PatchSel::hide_popup 1");
+	//}
 
 	void update() override {
 		// if (!patch_list.is_ready()) {
@@ -191,41 +189,27 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void blur() override {
-		hide_popup();
+		// hide_popup();
 	}
 
-	static void popup_play_event_cb(lv_event_t *event) {
-		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
+	// static void popup_play_event_cb(lv_event_t *event) {
+	// 	auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
 
-		printf("Clicked Play: playing patch# %d\n\r", _instance->selected_patch);
-		_instance->start_changing_patch(_instance->selected_patch);
-		_instance->hide_popup();
-	}
+	// 	printf("Clicked Play: playing patch# %d\n\r", _instance->selected_patch);
+	// 	_instance->start_changing_patch(_instance->selected_patch);
+	// 	_instance->hide_popup();
+	// }
 
-	static void popup_back_event_cb(lv_event_t *event) {
-		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
-		printf("Clicked Back\n\r");
-		_instance->hide_popup();
-	}
+	// static void popup_back_event_cb(lv_event_t *event) {
+	// 	auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
+	// 	printf("Clicked Back\n\r");
+	// 	_instance->hide_popup();
+	// }
 
-	static void popup_explore_event_cb(lv_event_t *event) {
-		// auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
-		printf("Clicked Explore\n\r");
-	}
-
-	static void patchlist_event_cb(lv_event_t *event) {
-		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
-		auto obj = _instance->roller;
-
-		auto &sel_patch = _instance->selected_patch;
-		sel_patch = lv_dropdown_get_selected(obj);
-		lv_label_set_text(_instance->popup_patchname, _instance->patch_list.get_patch_name(sel_patch));
-		lv_label_set_text(_instance->popup_desc, "TODO: Patch descriptions...");
-		// // how to redraw?
-		// // lv_obj_realign(_instance->popup_patchname);
-		// // lv_obj_realign(_instance->popup_desc);
-		_instance->show_popup();
-	}
+	// static void popup_explore_event_cb(lv_event_t *event) {
+	// 	// auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
+	// 	printf("Clicked Explore\n\r");
+	// }
 
 	// static void patch_selector_event_cb(lv_obj_t *obj, lv_event_t event) {
 	// 	switch (event) {
@@ -277,6 +261,21 @@ struct PatchSelectorPage : PageBase {
 	// 	}
 	// }
 
+	static void patchlist_event_cb(lv_event_t *event) {
+		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
+		auto obj = _instance->roller;
+
+		auto &sel_patch = _instance->selected_patch;
+		sel_patch = lv_dropdown_get_selected(obj);
+		lv_label_set_text(_instance->popup_patchname, _instance->patch_list.get_patch_name(sel_patch));
+		lv_label_set_text(_instance->popup_desc, "TODO: Patch descriptions...");
+		// how to redraw?
+		// lv_obj_realign(_instance->popup_patchname);
+		// lv_obj_realign(_instance->popup_desc);
+		// _instance->show_popup();
+		_instance->should_show_patchview = true;
+	}
+
 	void start_changing_patch(int32_t new_patch_index) {
 		if (!mbox.loading_new_patch && (new_patch_index != (int32_t)patch_list.cur_patch_index())) {
 			mbox.new_patch_index = new_patch_index;
@@ -304,9 +303,17 @@ struct PatchSelectorPage : PageBase {
 		}
 	}
 
+	std::optional<PageId> request_page_jump() override {
+		if (should_show_patchview)
+			return {PageId::PatchView};
+		else
+			return std::nullopt;
+	}
+
 private:
 	uint32_t selected_patch = 0;
 	bool patchlist_ready = true;
+	bool should_show_patchview = false;
 
 	lv_group_t *popup_group;
 	lv_group_t *wait_group;

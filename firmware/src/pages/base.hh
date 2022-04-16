@@ -1,12 +1,11 @@
 #pragma once
 #include "conf/panel_conf.hh"
 #include "lvgl/lvgl.h"
+#include "pages/page_list.hh"
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
 #include "util/geometry.hh"
-//LVGL:
-// #include "pages/gui-guider/gui_guider.h"
 
 namespace MetaModule
 {
@@ -68,6 +67,10 @@ struct PageBase {
 	}
 
 	virtual void update() {
+	}
+
+	virtual std::optional<PageId> request_page_jump() {
+		return std::nullopt;
 	}
 };
 } // namespace MetaModule
