@@ -6,7 +6,7 @@
 #include "patchlist.hh"
 #include "util/geometry.hh"
 //LVGL:
-#include "pages/gui-guider/gui_guider.h"
+// #include "pages/gui-guider/gui_guider.h"
 
 namespace MetaModule
 {
@@ -28,8 +28,6 @@ struct PageBase {
 	MetaParams &metaparams;
 	UiAudioMailbox &mbox;
 
-	static inline lv_ui base_ui{};
-	static inline lv_ui *ui = &base_ui;
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;
 
