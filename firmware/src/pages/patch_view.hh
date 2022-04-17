@@ -13,6 +13,8 @@ struct PatchViewPage : PageBase {
 	PatchViewPage(PatchInfo info, uint32_t patch_id = 0)
 		: PageBase{info}
 		, base(lv_obj_create(nullptr)) {
+		PageList::register_page(this, PageId::PatchView);
+
 		init_bg(base);
 
 		popup_cont = lv_obj_create(base);
@@ -48,6 +50,11 @@ struct PatchViewPage : PageBase {
 				blur();
 			}
 		}
+	}
+
+	void focus(PageChangeDirection) override {
+		PageBase::focus();
+		set_patch_id(PageList::get_selected_patch_id());
 	}
 
 private:

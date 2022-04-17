@@ -14,7 +14,9 @@ struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info}
 		, base(lv_obj_create(nullptr))
-		, patch_view_page{info} {
+	// , patch_view_page{info}
+	{
+		PageList::register_page(this, PageId::PatchSel);
 
 		init_bg(base);
 
@@ -57,36 +59,19 @@ struct PatchSelectorPage : PageBase {
 
 		lv_roller_set_options(roller, patchnames.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_visible_row_count(roller, 9);
-		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
+		lv_roller_set_selected(roller, 1, LV_ANIM_OFF);
+		printf("Preselecting %d from %p\n", lv_roller_get_selected(roller), roller);
 	}
-
-	//void show_popup() {
-	//	LVGLMemory::print_mem_usage("PatchSel::show_popup 0");
-	//	lv_obj_clear_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
-	//	lv_indev_set_group(lv_indev_get_next(nullptr), popup_group);
-	//	lv_group_set_editing(popup_group, false);
-	//	lv_group_focus_obj(popup_backbut);
-	//	//// Popup is a screen:
-	//	////	lv_scr_load(popup_cont);
-	//	LVGLMemory::print_mem_usage("PatchSel::show_popup 1");
-	//}
-
-	//void hide_popup() {
-	//	LVGLMemory::print_mem_usage("PatchSel::hide_popup 0");
-	//	lv_indev_set_group(lv_indev_get_next(nullptr), group);
-	//	lv_group_set_editing(group, true);
-	//	lv_obj_add_flag(popup_cont, LV_OBJ_FLAG_HIDDEN);
-	//	//// Popup is a screen:
-	//	// focus(PageChangeDirection::Jump);
-	//	LVGLMemory::print_mem_usage("PatchSel::hide_popup 1");
-	//}
 
 	void update() override {
 		if (should_show_patchview) {
 			should_show_patchview = false;
-			patch_view_page.set_patch_id(selected_patch);
-			PageList::request_new_page(patch_view_page);
+			printf("Requesting new page: PatchView, patch id %d\n", selected_patch);
+			PageList::set_selected_patch_id(selected_patch);
+			PageList::request_new_page(PageId::PatchView);
+			blur();
 		}
+
 		// if (!patch_list.is_ready()) {
 		// 	if (patchlist_ready) {
 		// 		lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
@@ -111,9 +96,9 @@ struct PatchSelectorPage : PageBase {
 		// }
 	}
 
-	void blur() override {
-		// hide_popup();
-	}
+	// void blur() override {
+	// 	// hide_popup();
+	// }
 
 	// static void popup_play_event_cb(lv_event_t *event) {
 	// 	auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
@@ -186,17 +171,8 @@ struct PatchSelectorPage : PageBase {
 
 	static void patchlist_event_cb(lv_event_t *event) {
 		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
-		auto obj = _instance->roller;
-
-		auto &sel_patch = _instance->selected_patch;
-		sel_patch = lv_dropdown_get_selected(obj);
-
-		// lv_label_set_text(_instance->popup_patchname, _instance->patch_list.get_patch_name(sel_patch));
-		// lv_label_set_text(_instance->popup_desc, "TODO: Patch descriptions...");
-		// how to redraw?
-		// lv_obj_realign(_instance->popup_patchname);
-		// lv_obj_realign(_instance->popup_desc);
-
+		_instance->selected_patch = lv_dropdown_get_selected(_instance->roller);
+		printf("Selected %d from %p\n", _instance->selected_patch, _instance->roller);
 		_instance->should_show_patchview = true;
 	}
 
@@ -227,14 +203,6 @@ struct PatchSelectorPage : PageBase {
 		}
 	}
 
-	// std::optional<PageId> request_page_jump() override {
-	// 	// if (should_show_patchview) {
-	// 	// 	should_show_patchview = false;
-	// 	// 	return {PageId::PatchView};
-	// 	// } else
-	// 	return std::nullopt;
-	// }
-
 private:
 	uint32_t selected_patch = 0;
 	// bool patchlist_ready = true;
@@ -244,22 +212,7 @@ private:
 	lv_obj_t *header_text;
 	lv_obj_t *base;
 
-	PatchViewPage patch_view_page;
-
-	// lv_obj_t *popup_cont;
-	// lv_obj_t *popup_patchname;
-	// lv_obj_t *popup_desc;
-	// lv_obj_t *popup_backbut;
-	// lv_obj_t *popup_playbut;
-	// lv_obj_t *popup_explorebut;
-	// lv_obj_t *popup_playbut_label;
-	// lv_obj_t *popup_explorebut_label;
-	// lv_obj_t *popup_backbut_label;
-
-	// lv_obj_t *wait_cont;
-	// lv_obj_t *wait_text;
-
-	// lv_style_t style_wait_cont;
+	// PatchViewPage patch_view_page;
 };
 
 } // namespace MetaModule

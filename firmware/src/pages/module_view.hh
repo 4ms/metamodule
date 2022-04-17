@@ -2,6 +2,7 @@
 #include "CoreModules/info/module_info_base.hh"
 #include "pages/base.hh"
 #include "pages/images/image_list.hh"
+#include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include <string>
 
@@ -26,6 +27,7 @@ struct ModuleViewPage : PageBase {
 		, base(lv_obj_create(nullptr))
 		, canvas(lv_canvas_create(base))
 		, slug(module_slug) {
+		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
 		lv_canvas_set_buffer(canvas, buffer, 240, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
