@@ -171,8 +171,7 @@ struct PatchSelectorPage : PageBase {
 
 	static void patchlist_event_cb(lv_event_t *event) {
 		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
-		_instance->selected_patch = lv_dropdown_get_selected(_instance->roller);
-		printf("Selected %d from %p\n", _instance->selected_patch, _instance->roller);
+		_instance->selected_patch = lv_roller_get_selected(_instance->roller);
 		_instance->should_show_patchview = true;
 	}
 
