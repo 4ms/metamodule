@@ -8,7 +8,7 @@ using namespace MetaModule;
 
 namespace MetaModule
 {
-class PageBase {
+struct PageBase {
 public:
 	int x;
 };

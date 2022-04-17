@@ -24,8 +24,6 @@ void PageManager::init() {
 	PageList::request_new_page(page_patchsel);
 }
 
-// 	page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
-
 void PageManager::update_current_page() {
 	if (auto newpage = PageList::get_requested_page()) {
 		cur_page = newpage.value();

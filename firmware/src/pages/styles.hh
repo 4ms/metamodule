@@ -21,8 +21,9 @@ struct Gui {
 	// highlight a selected knob, jack, etc on a faceplate
 	static inline lv_style_t panel_highlight_style;
 
-	// text header
+	// text
 	static inline lv_style_t header_style;
+	static inline lv_style_t text_block_style;
 
 	// popup dialog box
 	static inline lv_style_t popup_box_style;
@@ -32,6 +33,14 @@ struct Gui {
 
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
+
+	// const lv_style_const_prop_t style1_props[] = {
+	// 	LV_STYLE_CONST_WIDTH(50),
+	// 	LV_STYLE_CONST_HEIGHT(50),
+	// 	LV_STYLE_PROP_INV,
+	// };
+
+	// LV_STYLE_CONST_INIT(style1, style1_props);
 
 	static void init_lvgl_styles() {
 		// invisible_style
@@ -48,7 +57,7 @@ struct Gui {
 		lv_style_set_outline_width(&panel_highlight_style, 4);
 		lv_style_set_outline_opa(&panel_highlight_style, 255);
 
-		// header_style
+		// header_style (text)
 		lv_style_init(&header_style);
 		lv_style_set_text_align(&header_style, LV_TEXT_ALIGN_CENTER);
 		lv_style_set_text_font(&header_style, &lv_font_MuseoSansRounded_700_16);
@@ -59,12 +68,23 @@ struct Gui {
 		lv_style_set_text_line_space(&header_style, 5);
 		lv_style_set_pad_all(&header_style, 6);
 
+		// text_block_style
+		lv_style_init(&text_block_style);
+		lv_style_set_text_align(&text_block_style, LV_TEXT_ALIGN_CENTER);
+		lv_style_set_text_font(&text_block_style, &lv_font_MuseoSansRounded_700_14);
+		lv_style_set_text_color(&text_block_style, lv_color_white());
+		lv_style_set_text_opa(&text_block_style, LV_OPA_COVER);
+		lv_style_set_bg_opa(&text_block_style, LV_OPA_COVER);
+		lv_style_set_bg_color(&text_block_style, lv_color_black());
+		lv_style_set_text_line_space(&text_block_style, 12);
+		lv_style_set_pad_all(&text_block_style, 6);
+
 		// roller_style
 		lv_style_reset(&roller_style);
 		lv_style_set_radius(&roller_style, 0);
 		lv_style_set_bg_opa(&roller_style, LV_OPA_COVER);
 		lv_style_set_bg_color(&roller_style, lv_color_black());
-		lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_CENTER);
+		lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_LEFT);
 		lv_style_set_text_font(&roller_style, &lv_font_MuseoSansRounded_700_14);
 		lv_style_set_text_color(&roller_style, lv_color_white());
 		lv_style_set_text_opa(&roller_style, LV_OPA_COVER);

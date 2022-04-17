@@ -52,8 +52,7 @@ struct PatchViewPage : PageBase {
 		}
 	}
 
-	void focus(PageChangeDirection) override {
-		PageBase::focus();
+	void prepare_focus() override {
 		set_patch_id(PageList::get_selected_patch_id());
 	}
 

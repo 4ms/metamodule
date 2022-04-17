@@ -3,7 +3,6 @@
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
 #include "pages/page_list.hh"
-#include "pages/patch_view.hh"
 #include "pages/styles.hh"
 #include "printf.h"
 
