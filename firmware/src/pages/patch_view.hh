@@ -1,5 +1,6 @@
 #pragma once
 #include "pages/base.hh"
+#include "pages/images/image_list.hh"
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
 #include "pages/page_list.hh"
@@ -17,31 +18,38 @@ struct PatchViewPage : PageBase {
 
 		init_bg(base);
 
-		popup_cont = lv_obj_create(base);
-		lv_obj_add_style(popup_cont, &Gui::popup_box_style, LV_PART_MAIN);
-		lv_obj_set_flex_flow(popup_cont, LV_FLEX_FLOW_ROW);
+		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
 
-		popup_patchname = lv_label_create(popup_cont);
-		lv_obj_add_style(popup_patchname, &Gui::header_style, LV_PART_MAIN);
-		// lv_obj_set_pos(popup_patchname, 0, 0);
-		// lv_obj_set_align(popup_patchname, LV_ALIGN_TOP_MID);
-		lv_obj_set_size(popup_patchname, 320, 30);
+		patchname = lv_label_create(base);
+		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
+		lv_obj_set_size(patchname, 320, 30);
 
-		popup_desc = lv_label_create(popup_cont);
-		lv_obj_add_style(popup_patchname, &Gui::header_style, LV_PART_MAIN);
-		lv_label_set_long_mode(popup_desc, LV_LABEL_LONG_DOT);
-		lv_obj_set_size(popup_desc, 320, 30);
+		description = lv_label_create(base);
+		lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
+		lv_label_set_long_mode(description, LV_LABEL_LONG_DOT);
+		lv_obj_set_size(description, 320, 70);
+
+		modules_cont = lv_obj_create(base);
+		lv_obj_set_size(modules_cont, 320, 120);
 
 		set_patch_id(patch_id);
-
-		// group = lv_group_create();
-		// lv_group_set_wrap(group, true);
 	}
 
 	void set_patch_id(uint32_t patch_id) {
 		_patch_id = patch_id;
-		lv_label_set_text(popup_patchname, patch_list.get_patch_name(_patch_id));
-		lv_label_set_text(popup_desc, "TODO: Patch descriptions...");
+		lv_label_set_text(patchname, patch_list.get_patch_name(_patch_id));
+		lv_label_set_text(description, "TODO: Patch descriptions...\nLorum ipsum\nIpsum Lorum\n");
+		for (auto &m : modules)
+			lv_obj_del(m);
+		modules.clear();
+
+		auto num_modules = patch_player.get_num_modules();
+		for (int i = 1; i < num_modules; i++) {
+			auto m = modules.emplace_back(lv_img_create(modules_cont));
+			auto slug = patch_player.get_module_name(i);
+			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
+			lv_img_set_src(m, img);
+		}
 	}
 
 	void update() override {
@@ -56,10 +64,14 @@ struct PatchViewPage : PageBase {
 		set_patch_id(PageList::get_selected_patch_id());
 	}
 
+	// 	page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
+
 private:
-	lv_obj_t *popup_desc;
-	lv_obj_t *popup_patchname;
-	lv_obj_t *popup_cont;
+	lv_obj_t *description;
+	lv_obj_t *patchname;
+	lv_obj_t *modules_cont;
+
+	std::vector<lv_obj_t *> modules;
 
 	lv_obj_t *base;
 	uint32_t _patch_id;
