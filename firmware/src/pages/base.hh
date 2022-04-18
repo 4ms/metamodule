@@ -50,6 +50,12 @@ struct PageBase {
 	}
 
 	void focus() {
+
+		for (auto &b : metaparams.meta_buttons)
+			b.reset();
+
+		metaparams.rotary_button.reset();
+
 		prepare_focus();
 		if (group) {
 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
