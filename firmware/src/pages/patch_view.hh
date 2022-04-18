@@ -1,5 +1,7 @@
 #pragma once
+#include "lvgl/lvgl.h"
 #include "pages/base.hh"
+#include "pages/draw_helpers.hh"
 #include "pages/images/image_list.hh"
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
@@ -32,12 +34,16 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_size(description, 320, 70);
 
 		modules_cont = lv_obj_create(base);
-		lv_obj_set_size(modules_cont, 320, 240);
+		lv_obj_set_size(modules_cont, 320, 120);
 		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW);
 		lv_obj_set_style_pad_gap(modules_cont, 0, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_all(modules_cont, 0, LV_STATE_DEFAULT);
 
 		lv_group_set_wrap(group, true);
 		lv_group_add_obj(group, modules_cont);
+
+		lv_draw_img_dsc_init(&draw_img_dsc);
+		draw_img_dsc.zoom = 128;
 
 		////Play button
 		//popup_playbut = lv_btn_create(popup_cont);
@@ -65,11 +71,35 @@ struct PatchViewPage : PageBase {
 		modules.clear();
 
 		auto patch = patch_list.get_patch(_patch_id);
+		modules.reserve(patch.module_slugs.size());
+		// buffers.reserve(patch.module_slugs.size());
+		int16_t xtot = 0;
+		int i = 0;
 		for (auto slug : patch.module_slugs) {
-			lv_obj_t *m = modules.emplace_back(lv_img_create(modules_cont));
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
-			lv_img_set_src(m, img);
-			lv_group_add_obj(group, m);
+			if (!img)
+				continue;
+			auto widthpx = img->header.w / 2;
+
+			lv_obj_t *canvas = modules.emplace_back(lv_canvas_create(modules_cont));
+			auto buf = &(buffer[3 * 120 * xtot]);
+			xtot += widthpx;
+			lv_obj_set_size(canvas, widthpx, 120);
+			lv_canvas_set_buffer(canvas, buf, widthpx, 120, LV_IMG_CF_TRUE_COLOR_ALPHA);
+			// lv_canvas_fill_bg(canvas, pal[i++], LV_OPA_COVER);
+			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
+
+			const auto info = ModuleFactory::getModuleInfo(slug);
+			DrawHelper::draw_module(canvas, info, 128);
+
+			// lv_img_set_zoom(m, 128);
+			// lv_img_set_src(m, img);
+			// lv_obj_set_style_border_width(m, 4, 0);
+			// lv_obj_set_style_border_opa(m, LV_OPA_50, 0);
+			// lv_obj_set_style_border_color(m, lv_color_make(0x45 * xtot, 0x99 * xtot, 0xFF * xtot), 0);
+			// lv_obj_set_pos(m, xtot, -60);
+			// xtot += img->header.w / 2;
+			// lv_group_add_obj(group, m);
 		}
 	}
 
@@ -100,6 +130,22 @@ private:
 	lv_obj_t *modules_cont;
 
 	std::vector<lv_obj_t *> modules;
+	// std::vector<lv_color_t *> buffers;
+	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 640)];
+	lv_draw_img_dsc_t draw_img_dsc;
+
+	static inline lv_color_t pal[10] = {
+		lv_color_white(),
+		lv_palette_main(LV_PALETTE_BLUE),
+		lv_palette_main(LV_PALETTE_CYAN),
+		lv_palette_main(LV_PALETTE_RED),
+		lv_palette_main(LV_PALETTE_GREEN),
+		lv_palette_main(LV_PALETTE_ORANGE),
+		lv_palette_main(LV_PALETTE_INDIGO),
+		lv_palette_main(LV_PALETTE_BROWN),
+		lv_palette_main(LV_PALETTE_YELLOW),
+		lv_palette_main(LV_PALETTE_GREY),
+	};
 
 	lv_obj_t *base;
 	uint32_t _patch_id;
