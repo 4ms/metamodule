@@ -72,7 +72,7 @@ void Controls::update_params() {
 		_rotary_moved_while_pressed |= pressed && (new_rotary_motion != 0);
 
 		// Meta button
-		cur_metaparams->meta_buttons[0].copy_state(button0);
+		cur_metaparams->meta_buttons[0].transfer_events(button0);
 
 	} else {
 		cur_params->jack_senses = get_jacksense_reading();
