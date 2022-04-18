@@ -13,10 +13,12 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	PatchViewPage(PatchInfo info, uint32_t patch_id = 0)
 		: PageBase{info}
-		, base(lv_obj_create(nullptr)) {
+		, base(lv_obj_create(nullptr))
+		, _patch_id{patch_id} {
 		PageList::register_page(this, PageId::PatchView);
 
 		init_bg(base);
+		lv_group_set_editing(group, false);
 
 		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
 
@@ -30,25 +32,44 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_size(description, 320, 70);
 
 		modules_cont = lv_obj_create(base);
-		lv_obj_set_size(modules_cont, 320, 120);
+		lv_obj_set_size(modules_cont, 320, 240);
+		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW);
+		lv_obj_set_style_pad_gap(modules_cont, 0, LV_STATE_DEFAULT);
 
-		set_patch_id(patch_id);
+		lv_group_set_wrap(group, true);
+		lv_group_add_obj(group, modules_cont);
+
+		////Play button
+		//popup_playbut = lv_btn_create(popup_cont);
+		//lv_obj_add_style(popup_playbut, &style_popup_buttons, LV_PART_MAIN);
+		//popup_playbut_label = lv_label_create(popup_playbut);
+		//lv_label_set_text(popup_playbut_label, "Play");
+		// // Play button, above Explore, up 10px
+		// lv_obj_align(popup_playbut, popup_explorebut, LV_ALIGN_OUT_TOP_MID, 0, -10);
+		// lv_group_add_obj(group, popup_playbut);
+		// lv_obj_add_event_cb(popup_playbut, popup_play_event_cb, LV_EVENT_CLICKED, this);
+
+		set_patch_id(_patch_id);
 	}
 
 	void set_patch_id(uint32_t patch_id) {
+		// LVGLMemory::print_mem_usage("PatchSel::setup_popup 0");
 		_patch_id = patch_id;
+		printf("patch id = %d\n", _patch_id);
 		lv_label_set_text(patchname, patch_list.get_patch_name(_patch_id));
-		lv_label_set_text(description, "TODO: Patch descriptions...\nLorum ipsum\nIpsum Lorum\n");
+		lv_label_set_text(description,
+						  "TODO: Patch descriptions...\nLorum ipsum\nADmnjf djknmd asjfkjdf a sd, sdhan di and uienad "
+						  "kjtkjcnmheujhne, hfjasdasdf-adf. LKfamfkm dkjlfkolea. Ipsum Lorum\n");
 		for (auto &m : modules)
 			lv_obj_del(m);
 		modules.clear();
 
-		auto num_modules = patch_player.get_num_modules();
-		for (int i = 1; i < num_modules; i++) {
-			auto m = modules.emplace_back(lv_img_create(modules_cont));
-			auto slug = patch_player.get_module_name(i);
+		auto patch = patch_list.get_patch(_patch_id);
+		for (auto slug : patch.module_slugs) {
+			lv_obj_t *m = modules.emplace_back(lv_img_create(modules_cont));
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
 			lv_img_set_src(m, img);
+			lv_group_add_obj(group, m);
 		}
 	}
 
@@ -58,13 +79,20 @@ struct PatchViewPage : PageBase {
 				blur();
 			}
 		}
+		// handle_changing_patch();
 	}
 
 	void prepare_focus() override {
 		set_patch_id(PageList::get_selected_patch_id());
 	}
 
-	// 	page_module.load_module_page(info.patch_player.get_module_name(cur_module_idx));
+	static void playbut_cb(lv_event_t *event) {
+		auto obj = event->current_target;
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+
+		printf("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
+		// 	page->start_changing_patch(page->patch_id);
+	}
 
 private:
 	lv_obj_t *description;
@@ -75,91 +103,36 @@ private:
 
 	lv_obj_t *base;
 	uint32_t _patch_id;
+
+	void start_changing_patch(int32_t new_patch_index) {
+		if (!mbox.loading_new_patch && (new_patch_index != (int32_t)patch_list.cur_patch_index())) {
+			mbox.new_patch_index = new_patch_index;
+			mbox.loading_new_patch = true;
+			printf("Loading patch %s\n\r", patch_list.get_patch_name(new_patch_index).data());
+		}
+	}
+
+	void handle_changing_patch() {
+		if (mbox.loading_new_patch && mbox.audio_is_muted) {
+			auto cur_patch_index = patch_list.cur_patch_index();
+			auto orig_patch_data = patch_list.get_patch(cur_patch_index);
+			patch_player.unload_patch();
+			patch_list.set_cur_patch_index(mbox.new_patch_index);
+			bool ok = patch_player.load_patch(patch_list.get_patch(mbox.new_patch_index));
+			if (!ok) {
+				mbox.append_message("Can't load patch\n\r");
+				printf("Can't load patch\n\r");
+				patch_player.unload_patch();
+				patch_player.load_patch(orig_patch_data);
+			} else
+				mbox.append_message("Patch loaded\n\r");
+
+			mbox.loading_new_patch = false;
+		}
+	}
 };
 } // namespace MetaModule
-  // void setup_popup() {
-  // LVGLMemory::print_mem_usage("PatchSel::setup_popup 0");
-  // popup_cont = lv_obj_create(base);
-  // lv_obj_add_style(popup_cont, &Gui::popup_box_style, LV_PART_MAIN);
-  // lv_obj_set_flex_flow(popup_cont, LV_FLEX_FLOW_ROW);
 
-// popup_patchname = lv_label_create(popup_cont);
-// lv_obj_add_style(popup_patchname, &Gui::header_style, LV_PART_MAIN);
-// // lv_obj_set_pos(popup_patchname, 0, 0);
-// // lv_obj_set_align(popup_patchname, LV_ALIGN_TOP_MID);
-// // lv_obj_set_size(popup_patchname, 320, 30);
-
-// popup_desc = lv_label_create(popup_cont);
-// lv_label_set_long_mode(popup_desc, LV_LABEL_LONG_DOT);
-//lv_obj_add_style(popup_desc, &style_popup_desc, LV_PART_MAIN);
-
-////Play button
-//popup_playbut = lv_btn_create(popup_cont);
-//lv_obj_add_style(popup_playbut, &style_popup_buttons, LV_PART_MAIN);
-
-//// lv_obj_style_set_bg_color(&style_popup_buttons, lv_color_make(0xff, 0xc3, 0x70)); //LV_STATE_FOCUSED,
-//// lv_style_set_bg_color(&style_popup_buttons,  lv_color_make(0xf6, 0xdd, 0x53));//LV_STATE_PRESSED,
-//popup_playbut_label = lv_label_create(popup_playbut);
-//lv_label_set_text(popup_playbut_label, "Play");
-
-//// Explore button
-//popup_explorebut = lv_btn_create(popup_cont);
-//lv_obj_add_style(popup_explorebut, &style_popup_buttons, LV_PART_MAIN);
-//popup_explorebut_label = lv_label_create(popup_explorebut);
-//lv_label_set_text(popup_explorebut_label, "Explore...");
-
-////Back image button
-//popup_backbut = lv_btn_create(popup_cont);
-//lv_obj_add_style(popup_backbut, &style_popup_backbut, LV_PART_MAIN);
-//popup_backbut_label = lv_label_create(popup_backbut);
-//lv_label_set_text(popup_backbut_label, "Explore...");
-
-// Layout
-
-// Patchname: center top
-// lv_obj_set_pos(popup_patchname, 0, 0);
-// lv_obj_align(popup_patchname, popup_cont, LV_ALIGN_IN_TOP_MID, 0, 0);
-// lv_obj_set_size(popup_patchname, 320, 10);
-
-// // Patch Desc: centered below patchname
-// lv_obj_align(popup_desc, popup_patchname, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
-// // lv_obj_set_pos(popup_desc, 0, 25);
-// lv_obj_set_size(popup_desc, 320, 10);
-
-// // Explore button: bottom center, up 10px
-// lv_obj_align(popup_explorebut, popup_cont, LV_ALIGN_IN_BOTTOM_MID, 0, -10);
-// // Play button, above Explore, up 10px
-// lv_obj_align(popup_playbut, popup_explorebut, LV_ALIGN_OUT_TOP_MID, 0, -10);
-// // Back button: to the left of Play, top-aligned, 10px spacing
-// lv_obj_align(popup_backbut, popup_playbut, LV_ALIGN_OUT_LEFT_TOP, -10, 0);
-
-// Popup Group
-// popup_group = lv_group_create();
-// lv_group_set_wrap(popup_group, true);
-// lv_group_add_obj(popup_group, popup_playbut);
-// lv_group_add_obj(popup_group, popup_explorebut);
-// lv_group_add_obj(popup_group, popup_backbut);
-
-// lv_obj_add_event_cb(popup_backbut, popup_back_event_cb, LV_EVENT_CLICKED, this);
-// lv_obj_add_event_cb(popup_playbut, popup_play_event_cb, LV_EVENT_CLICKED, this);
-// lv_obj_add_event_cb(popup_explorebut, popup_explore_event_cb, LV_EVENT_CLICKED, this);
-
-// hide_popup();
-
-// wait_cont = lv_obj_create(base);
-// lv_obj_set_align(wait_cont, LV_ALIGN_CENTER);
-// lv_obj_add_style(wait_cont, &style_wait_cont, LV_PART_MAIN);
-// lv_cont_set_layout(wait_cont, LV_LAYOUT_CENTER);
-// lv_cont_set_fit(wait_cont, LV_FIT_TIGHT);
-
-// wait_text = lv_label_create(wait_cont);
-// lv_obj_add_style(wait_text, &style_popup_patchname, LV_PART_MAIN);
-// lv_obj_set_align(wait_text, LV_ALIGN_CENTER);
-// lv_label_set_text(wait_text, "Refreshing Patches...");
-
-// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-
-// wait_group = lv_group_create();
 // }
 
 // void _init_styles() {
