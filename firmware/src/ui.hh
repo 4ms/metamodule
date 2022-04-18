@@ -46,8 +46,8 @@ public:
 			{
 				.TIMx = TIM17,
 				.period_ns = 1000000000 / 60, // =  60Hz = 16ms
-				.priority1 = 1,
-				.priority2 = 2,
+				.priority1 = 2,
+				.priority2 = 0,
 			},
 			[&] { page_update_task(); });
 		page_update_tm.start();
@@ -59,13 +59,14 @@ public:
 				.priority1 = 3,
 				.priority2 = 3,
 			},
-			[&] { update(); });
+			[&] { lvgl_update_task(); });
 		ui_event_tm.start();
 
 		MMDisplay::start();
 	}
 
-	void update() {
+private:
+	void lvgl_update_task() {
 		Debug::Pin1::high();
 		page_update_tm.stop();
 		lv_timer_handler();
@@ -81,13 +82,15 @@ public:
 	}
 
 	void page_update_task() { //60Hz
+		Debug::Pin2::high();
+		//This returns false when audio stops
 		bool read_ok = param_queue.read_sync(&params, &metaparams);
 		if (read_ok) {
 			page_manager.update_current_page();
 		}
+		Debug::Pin2::low();
 	}
 
-private:
 	mdrivlib::Timekeeper page_update_tm;
 	mdrivlib::Timekeeper ui_event_tm;
 
