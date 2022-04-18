@@ -310,7 +310,7 @@ endif
 include makefile_opts.mk
 include makefile_common.mk
 
-uimg: $(UIMG)
+uimg: #$(UIMG)
 
 $(UBOOT_MKIMAGE):
 	$(error Use `make u-boot` to build U-Boot and re-run this.)
@@ -324,7 +324,7 @@ u-boot:
 clean_uboot:
 	rm -rf $(UBOOTBUILDDIR)
 
-UBOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+BOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
 $(UIMG): $(BIN) $(UBOOT_MKIMAGE)
 	$(UBOOT_MKIMAGE_CMD)
