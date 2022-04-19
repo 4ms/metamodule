@@ -31,16 +31,18 @@ struct PatchViewPage : PageBase {
 		description = lv_label_create(base);
 		lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
 		lv_label_set_long_mode(description, LV_LABEL_LONG_DOT);
-		lv_obj_set_size(description, 320, 70);
+		lv_obj_set_size(description, 320, 60);
 
 		modules_cont = lv_obj_create(base);
-		lv_obj_set_size(modules_cont, 320, 120);
+		lv_obj_set_size(modules_cont, 320, 128);
 		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW);
 		lv_obj_set_style_pad_gap(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_all(modules_cont, 0, LV_STATE_DEFAULT);
+		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
+		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
 
-		lv_group_set_wrap(group, true);
-		lv_group_add_obj(group, modules_cont);
+		// lv_group_set_wrap(group, true);
+		// lv_group_add_obj(group, modules_cont);
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
 		draw_img_dsc.zoom = 128;
@@ -59,40 +61,60 @@ struct PatchViewPage : PageBase {
 	}
 
 	void set_patch_id(uint32_t patch_id) {
+		_patch_id = patch_id;
+		printf("patch id = %d\n", _patch_id);
 		auto patch = patch_list.get_patch(_patch_id);
 		if (patch.patch_name.length() == 0)
 			return;
 
 		// LVGLMemory::print_mem_usage("PatchSel::setup_popup 0");
-		_patch_id = patch_id;
-		printf("patch id = %d\n", _patch_id);
 		lv_label_set_text(patchname, patch_list.get_patch_name(_patch_id));
 		lv_label_set_text(description,
 						  "TODO: Patch descriptions...\nLorum ipsum\nADmnjf djknmd asjfkjdf a sd, sdhan di and uienad "
 						  "kjtkjcnmheujhne, hfjasdasdf-adf. LKfamfkm dkjlfkolea. Ipsum Lorum\n");
+
 		for (auto &m : modules)
 			lv_obj_del(m);
 		modules.clear();
-
 		modules.reserve(patch.module_slugs.size());
 		// buffers.reserve(patch.module_slugs.size());
-		int16_t xpos = 0;
+		lv_group_remove_all_objs(group);
+		lv_group_set_editing(group, false);
+
+		constexpr uint32_t pixel_size = LV_COLOR_SIZE / sizeof(buffer[0]);
+		uint32_t xpos = 0;
 		for (auto slug : patch.module_slugs) {
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
 			if (!img)
 				continue;
 			auto widthpx = img->header.w / 2;
 
-			lv_obj_t *canvas = modules.emplace_back(lv_canvas_create(modules_cont));
-			auto buf = &(buffer[3 * 120 * xpos]);
+			lv_obj_t *obj = modules.emplace_back(lv_btn_create(modules_cont));
+			lv_obj_add_style(obj, &Gui::plain_border_style, LV_STATE_DEFAULT);
+			lv_obj_add_style(obj, &Gui::plain_border_style, LV_STATE_EDITED | LV_STATE_CHECKED);
+			lv_obj_set_style_radius(obj, 0, LV_STATE_DEFAULT);
+			lv_obj_set_style_radius(obj, 10, 0x000F);
+			lv_obj_set_style_pad_all(obj, 0, LV_STATE_DEFAULT);
+			lv_obj_set_style_outline_color(obj, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
+			lv_obj_set_style_border_color(obj, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
+			lv_obj_set_style_outline_color(obj, lv_palette_main(LV_PALETTE_RED), 0x00FF);
+			lv_obj_set_style_border_color(obj, lv_palette_main(LV_PALETTE_RED), 0x00FF);
+
+			lv_obj_t *canvas = lv_canvas_create(obj);
+			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
+
+			auto buf = &(buffer[pixel_size * 120 * xpos]);
 			xpos += widthpx;
 			lv_obj_set_size(canvas, widthpx, 120);
-			lv_canvas_set_buffer(canvas, buf, widthpx, 120, LV_IMG_CF_TRUE_COLOR_ALPHA);
+			lv_canvas_set_buffer(canvas, buf, widthpx, 120, LV_IMG_CF_TRUE_COLOR);
 			// lv_canvas_fill_bg(canvas, pal[i++], LV_OPA_COVER);
 			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
 
 			const auto info = ModuleFactory::getModuleInfo(slug);
-			DrawHelper::draw_module(canvas, info, 128);
+			DrawHelper::draw_module_controls(canvas, info, 128);
+
+			lv_obj_add_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+			lv_group_add_obj(group, obj);
 
 			// lv_img_set_zoom(m, 128);
 			// lv_img_set_src(m, img);
@@ -133,7 +155,7 @@ private:
 
 	std::vector<lv_obj_t *> modules;
 	// std::vector<lv_color_t *> buffers;
-	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 640)];
+	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(240, 640)];
 	lv_draw_img_dsc_t draw_img_dsc;
 
 	// static inline lv_color_t pal[10] = {
