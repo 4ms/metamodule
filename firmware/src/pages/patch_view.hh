@@ -59,6 +59,10 @@ struct PatchViewPage : PageBase {
 	}
 
 	void set_patch_id(uint32_t patch_id) {
+		auto patch = patch_list.get_patch(_patch_id);
+		if (patch.patch_name.length() == 0)
+			return;
+
 		// LVGLMemory::print_mem_usage("PatchSel::setup_popup 0");
 		_patch_id = patch_id;
 		printf("patch id = %d\n", _patch_id);
@@ -70,11 +74,9 @@ struct PatchViewPage : PageBase {
 			lv_obj_del(m);
 		modules.clear();
 
-		auto patch = patch_list.get_patch(_patch_id);
 		modules.reserve(patch.module_slugs.size());
 		// buffers.reserve(patch.module_slugs.size());
-		int16_t xtot = 0;
-		int i = 0;
+		int16_t xpos = 0;
 		for (auto slug : patch.module_slugs) {
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
 			if (!img)
@@ -82,8 +84,8 @@ struct PatchViewPage : PageBase {
 			auto widthpx = img->header.w / 2;
 
 			lv_obj_t *canvas = modules.emplace_back(lv_canvas_create(modules_cont));
-			auto buf = &(buffer[3 * 120 * xtot]);
-			xtot += widthpx;
+			auto buf = &(buffer[3 * 120 * xpos]);
+			xpos += widthpx;
 			lv_obj_set_size(canvas, widthpx, 120);
 			lv_canvas_set_buffer(canvas, buf, widthpx, 120, LV_IMG_CF_TRUE_COLOR_ALPHA);
 			// lv_canvas_fill_bg(canvas, pal[i++], LV_OPA_COVER);
@@ -117,8 +119,8 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void playbut_cb(lv_event_t *event) {
-		auto obj = event->current_target;
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		// auto obj = event->current_target;
+		// auto page = static_cast<PatchViewPage *>(event->user_data);
 
 		printf("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
 		// 	page->start_changing_patch(page->patch_id);
@@ -134,18 +136,18 @@ private:
 	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 640)];
 	lv_draw_img_dsc_t draw_img_dsc;
 
-	static inline lv_color_t pal[10] = {
-		lv_color_white(),
-		lv_palette_main(LV_PALETTE_BLUE),
-		lv_palette_main(LV_PALETTE_CYAN),
-		lv_palette_main(LV_PALETTE_RED),
-		lv_palette_main(LV_PALETTE_GREEN),
-		lv_palette_main(LV_PALETTE_ORANGE),
-		lv_palette_main(LV_PALETTE_INDIGO),
-		lv_palette_main(LV_PALETTE_BROWN),
-		lv_palette_main(LV_PALETTE_YELLOW),
-		lv_palette_main(LV_PALETTE_GREY),
-	};
+	// static inline lv_color_t pal[10] = {
+	// 	lv_color_white(),
+	// 	lv_palette_main(LV_PALETTE_BLUE),
+	// 	lv_palette_main(LV_PALETTE_CYAN),
+	// 	lv_palette_main(LV_PALETTE_RED),
+	// 	lv_palette_main(LV_PALETTE_GREEN),
+	// 	lv_palette_main(LV_PALETTE_ORANGE),
+	// 	lv_palette_main(LV_PALETTE_INDIGO),
+	// 	lv_palette_main(LV_PALETTE_BROWN),
+	// 	lv_palette_main(LV_PALETTE_YELLOW),
+	// 	lv_palette_main(LV_PALETTE_GREY),
+	// };
 
 	lv_obj_t *base;
 	uint32_t _patch_id;
@@ -161,6 +163,7 @@ private:
 	void handle_changing_patch() {
 		if (mbox.loading_new_patch && mbox.audio_is_muted) {
 			auto cur_patch_index = patch_list.cur_patch_index();
+			//TODO check for nullpatch
 			auto orig_patch_data = patch_list.get_patch(cur_patch_index);
 			patch_player.unload_patch();
 			patch_list.set_cur_patch_index(mbox.new_patch_index);
