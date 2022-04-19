@@ -12,7 +12,7 @@ struct PatchList {
 	PatchList();
 
 	// Returns the name of the patch at a given index (bounds-checked)
-	ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
+	const ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
 		if (_patch_data.size() == 0)
 			return nullslug;
 
@@ -22,7 +22,7 @@ struct PatchList {
 	}
 
 	// Return a reference to the patch at the given index (bounds-checked)
-	PatchData &get_patch(uint32_t patch_id) {
+	const PatchData &get_patch(uint32_t patch_id) {
 		if (_patch_data.size() == 0)
 			return nullpatch;
 
@@ -69,7 +69,7 @@ private:
 	Status _status;
 	uint32_t _cur_patch_index = 0;
 
-	static inline PatchData nullpatch{};
-	static inline ModuleTypeSlug nullslug{""};
+	static inline const PatchData nullpatch{};
+	static inline const ModuleTypeSlug nullslug{""};
 };
 } // namespace MetaModule
