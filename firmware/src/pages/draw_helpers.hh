@@ -17,15 +17,15 @@ LV_IMG_DECLARE(switch_down);
 namespace MetaModule
 {
 struct DrawHelper {
-	static void draw_module(lv_obj_t *canvas, const ModuleInfoView &info, uint32_t zoom) {
+	static void draw_module_controls(lv_obj_t *canvas, const ModuleInfoView &info, uint32_t zoom) {
 		static lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
 		draw_img_dsc.zoom = zoom;
 		float adj = (float)(zoom) / 256.f;
 
 		auto scale_center = [adj](auto el, auto img_header) -> std::pair<int, int> {
-			auto x = static_cast<int>((ModuleInfoBase::mm_to_px<240>(el.x_mm) - img_header.w / 2) * adj);
-			auto y = static_cast<int>((ModuleInfoBase::mm_to_px<240>(el.y_mm) - img_header.h / 2) * adj);
+			auto x = static_cast<int>(0.5f + (ModuleInfoBase::mm_to_px<240>(el.x_mm) - img_header.w / 2) * adj);
+			auto y = static_cast<int>(0.5f + (ModuleInfoBase::mm_to_px<240>(el.y_mm) - img_header.h / 2) * adj);
 			return std::make_pair(x, y);
 		};
 
