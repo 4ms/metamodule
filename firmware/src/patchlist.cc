@@ -21,13 +21,11 @@ void PatchList::add_patch_from_yaml(const std::span<uint8_t> data) {
 }
 void PatchList::add_patch_from_yaml(const std::span<char> data) {
 	_patch_data.push_back({});
-	_num_patches++;
 	if (yaml_raw_to_patch(data, _patch_data.back())) {
 		printf("Added Patch\r\n");
 	} else {
 		printf("Failed to parse\r\n");
 		_patch_data.pop_back();
-		_num_patches--;
 	}
 }
 
