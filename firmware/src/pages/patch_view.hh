@@ -89,18 +89,18 @@ struct PatchViewPage : PageBase {
 				continue;
 			auto widthpx = img->header.w / 2;
 
-			lv_obj_t *obj = modules.emplace_back(lv_btn_create(modules_cont));
-			lv_obj_add_style(obj, &Gui::plain_border_style, LV_STATE_DEFAULT);
-			lv_obj_add_style(obj, &Gui::plain_border_style, LV_STATE_EDITED | LV_STATE_CHECKED);
-			lv_obj_set_style_radius(obj, 0, LV_STATE_DEFAULT);
-			lv_obj_set_style_radius(obj, 10, 0x000F);
-			lv_obj_set_style_pad_all(obj, 0, LV_STATE_DEFAULT);
-			lv_obj_set_style_outline_color(obj, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
-			lv_obj_set_style_border_color(obj, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
-			lv_obj_set_style_outline_color(obj, lv_palette_main(LV_PALETTE_RED), 0x00FF);
-			lv_obj_set_style_border_color(obj, lv_palette_main(LV_PALETTE_RED), 0x00FF);
+			lv_obj_t *btn = modules.emplace_back(lv_btn_create(modules_cont));
+			lv_obj_add_style(btn, &Gui::plain_border_style, LV_STATE_DEFAULT);
+			lv_obj_add_style(btn, &Gui::plain_border_style, LV_STATE_EDITED | LV_STATE_CHECKED);
+			lv_obj_set_style_radius(btn, 0, LV_STATE_DEFAULT);
+			lv_obj_set_style_radius(btn, 10, 0x000F);
+			lv_obj_set_style_pad_all(btn, 0, LV_STATE_DEFAULT);
+			lv_obj_set_style_outline_color(btn, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
+			lv_obj_set_style_border_color(btn, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
+			lv_obj_set_style_outline_color(btn, lv_palette_main(LV_PALETTE_RED), 0x00FF);
+			lv_obj_set_style_border_color(btn, lv_palette_main(LV_PALETTE_RED), 0x00FF);
 
-			lv_obj_t *canvas = lv_canvas_create(obj);
+			lv_obj_t *canvas = lv_canvas_create(btn);
 			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
 
 			auto buf = &(buffer[pixel_size * 120 * xpos]);
@@ -113,8 +113,8 @@ struct PatchViewPage : PageBase {
 			const auto info = ModuleFactory::getModuleInfo(slug);
 			DrawHelper::draw_module_controls(canvas, info, 128);
 
-			lv_obj_add_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
-			lv_group_add_obj(group, obj);
+			lv_obj_add_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
+			lv_group_add_obj(group, btn);
 
 			// lv_img_set_zoom(m, 128);
 			// lv_img_set_src(m, img);
