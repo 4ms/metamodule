@@ -1,5 +1,6 @@
 #pragma once
 #include "lvgl/lvgl.h"
+#include "lvgl/src/core/lv_obj.h"
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"
 #include "pages/images/image_list.hh"
@@ -35,9 +36,10 @@ struct PatchViewPage : PageBase {
 
 		modules_cont = lv_obj_create(base);
 		lv_obj_set_size(modules_cont, 320, 128);
+		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW);
-		lv_obj_set_style_pad_gap(modules_cont, 0, LV_STATE_DEFAULT);
-		lv_obj_set_style_pad_all(modules_cont, 0, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_gap(modules_cont, 2, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_all(modules_cont, 2, LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
 
@@ -71,7 +73,7 @@ struct PatchViewPage : PageBase {
 		lv_label_set_text(patchname, patch_list.get_patch_name(_patch_id));
 		lv_label_set_text(description,
 						  "TODO: Patch descriptions...\nLorum ipsum\nADmnjf djknmd asjfkjdf a sd, sdhan di and uienad "
-						  "kjtkjcnmheujhne, hfjasdasdf-adf. LKfamfkm dkjlfkolea. Ipsum Lorum\n");
+						  "kjtkjcnmheujhne, hfjasdasdf-adf. Lofamfkm dkjlfkolea. Ipsum Lorum\n");
 
 		for (auto &m : modules)
 			lv_obj_del(m);
@@ -89,41 +91,37 @@ struct PatchViewPage : PageBase {
 				continue;
 			auto widthpx = img->header.w / 2;
 
-			lv_obj_t *btn = modules.emplace_back(lv_btn_create(modules_cont));
-			lv_obj_add_style(btn, &Gui::plain_border_style, LV_STATE_DEFAULT);
-			lv_obj_add_style(btn, &Gui::plain_border_style, LV_STATE_EDITED | LV_STATE_CHECKED);
-			lv_obj_set_style_radius(btn, 0, LV_STATE_DEFAULT);
-			lv_obj_set_style_radius(btn, 10, 0x000F);
-			lv_obj_set_style_pad_all(btn, 0, LV_STATE_DEFAULT);
-			lv_obj_set_style_outline_color(btn, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
-			lv_obj_set_style_border_color(btn, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
-			lv_obj_set_style_outline_color(btn, lv_palette_main(LV_PALETTE_RED), 0x00FF);
-			lv_obj_set_style_border_color(btn, lv_palette_main(LV_PALETTE_RED), 0x00FF);
+			// lv_obj_t *btn = modules.emplace_back(lv_btn_create(modules_cont));
+			// lv_obj_add_style(btn, &Gui::plain_border_style, LV_STATE_DEFAULT);
+			// lv_obj_add_style(btn, &Gui::plain_border_style, LV_STATE_EDITED | LV_STATE_CHECKED);
+			// lv_obj_set_style_radius(btn, 0, LV_STATE_DEFAULT);
+			// lv_obj_set_style_radius(btn, 10, 0x000F);
+			// lv_obj_set_style_pad_all(btn, 0, LV_STATE_DEFAULT);
+			// lv_obj_set_style_outline_color(btn, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
+			// lv_obj_set_style_border_color(btn, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
+			// lv_obj_set_style_outline_color(btn, lv_palette_main(LV_PALETTE_RED), 0x00FF);
+			// lv_obj_set_style_border_color(btn, lv_palette_main(LV_PALETTE_RED), 0x00FF);
 
-			lv_obj_t *canvas = lv_canvas_create(btn);
+			lv_obj_t *canvas = lv_canvas_create(modules_cont);
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+			// lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE);
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+			lv_obj_set_style_border_color(canvas, lv_palette_main(LV_PALETTE_RED), LV_STATE_FOCUS_KEY);
+			lv_obj_set_style_border_width(canvas, 4, LV_STATE_FOCUS_KEY);
+			lv_obj_set_style_border_opa(canvas, LV_OPA_COVER, LV_STATE_FOCUS_KEY);
 			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
 
 			auto buf = &(buffer[pixel_size * 120 * xpos]);
 			xpos += widthpx;
 			lv_obj_set_size(canvas, widthpx, 120);
 			lv_canvas_set_buffer(canvas, buf, widthpx, 120, LV_IMG_CF_TRUE_COLOR);
+
 			// lv_canvas_fill_bg(canvas, pal[i++], LV_OPA_COVER);
 			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
-
 			const auto info = ModuleFactory::getModuleInfo(slug);
 			DrawHelper::draw_module_controls(canvas, info, 128);
 
-			lv_obj_add_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
-			lv_group_add_obj(group, btn);
-
-			// lv_img_set_zoom(m, 128);
-			// lv_img_set_src(m, img);
-			// lv_obj_set_style_border_width(m, 4, 0);
-			// lv_obj_set_style_border_opa(m, LV_OPA_50, 0);
-			// lv_obj_set_style_border_color(m, lv_color_make(0x45 * xtot, 0x99 * xtot, 0xFF * xtot), 0);
-			// lv_obj_set_pos(m, xtot, -60);
-			// xtot += img->header.w / 2;
-			// lv_group_add_obj(group, m);
+			lv_group_add_obj(group, canvas);
 		}
 	}
 
