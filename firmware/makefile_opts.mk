@@ -16,9 +16,11 @@
 # $(BUILDDIR)/$(SHARED)/CoreModules/multilfoCore.o: OPTFLAG = -O0
 # $(BUILDDIR)/$(SHARED)/patch_convert/ryml/ryml_serial.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/fatfs/source/ff.o: OPTFLAG = -O0
-# $(BUILDDIR)/lib/lvgl/lvgl/src/lv_core/%.o: OPTFLAG = -O0
-# $(BUILDDIR)/lib/lvgl/lvgl/src/lv_draw/%.o: OPTFLAG = -O0
-# $(BUILDDIR)/lib/lvgl/lvgl/src/lv_draw/%.o: OPTFLAG = -O0
+# $(BUILDDIR)/lib/lvgl/lvgl/src/core/%.o: OPTFLAG = -O0
+# $(BUILDDIR)/lib/lvgl/lvgl/src/core/lv_indev.o: OPTFLAG = -O0
+# $(BUILDDIR)/lib/lvgl/lvgl/src/core/lv_group.o: OPTFLAG = -O0
+# $(BUILDDIR)/lib/lvgl/lvgl/src/widgets/%.o: OPTFLAG = -O0
+# $(BUILDDIR)/lib/lvgl/lvgl/src/draw/%.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
@@ -28,7 +30,7 @@
 # $(BUILDDIR)/src/m4/controls.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/norflash-loader/main.o: OPTFLAG = -O0
-$(BUILDDIR)/src/pages/page_manager.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/pages/page_manager.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/patchfileio.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/patchfileio.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
