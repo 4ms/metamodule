@@ -316,7 +316,7 @@ endif
 include makefile_opts.mk
 include makefile_common.mk
 
-uimg: #$(UIMG)
+uimg: all #$(UIMG)
 
 $(UBOOT_MKIMAGE):
 	$(error Use `make u-boot` to build U-Boot and re-run this.)
@@ -338,7 +338,7 @@ $(UIMG): $(BIN) $(UBOOT_MKIMAGE)
 %-uimg.h : %.uimg 
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
-medium: uimg $(BUILDDIR_MP1A7)/medium/$(BINARYNAME)-uimg.h
+medium: uimg #$(BUILDDIR_MP1A7)/medium/$(BINARYNAME)-uimg.h
 
 mini: uimg
 
