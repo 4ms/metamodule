@@ -1,12 +1,13 @@
 #pragma once
+#include "conf/ramdisk_conf.hh"
 #include "disk_ops.hh"
 #include "qspi_flash_driver.hh"
 #include "ramdisk.hh"
 
 class NorFlashRamDiskOps : public DiskOps {
 public:
-	static constexpr uint32_t RamDiskSizeBytes = 16 * 1024 * 1024;
-	static constexpr uint32_t RamDiskBlockSize = 512;
+	static constexpr uint32_t SizeBytes = RamDiskSizeBytes;
+	static constexpr uint32_t BlockSize = RamDiskBlockSize;
 	enum class Status { NotInit, InUse, NotInUse, RequiresWriteBack };
 
 	NorFlashRamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk);
@@ -24,6 +25,7 @@ public:
 
 private:
 	mdrivlib::QSpiFlash flash;
+	const uint32_t flash_offset;
 	RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &ramdisk;
 	Status _status = Status::NotInit;
 };

@@ -4,11 +4,11 @@
 #include <cstring>
 
 static constexpr auto Foreground = mdrivlib::QSpiFlash::EXECUTE_FOREGROUND;
-//#define NO_FUNCTIONING_FLASHRAM
 
 NorFlashRamDiskOps::NorFlashRamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
 	: flash{qspi_patchflash_conf}
-	, ramdisk{rmdisk} {
+	, ramdisk{rmdisk}
+	, flash_offset{qspi_patchflash_conf.flash_size_bytes - RamDiskSizeBytes} {
 }
 
 NorFlashRamDiskOps::~NorFlashRamDiskOps() = default;
@@ -40,16 +40,12 @@ DSTATUS NorFlashRamDiskOps::initialize() {
 			return STA_NOINIT | STA_NODISK;
 		}
 
-#ifdef NO_FUNCTIONING_FLASHRAM
-		set_status(Status::NotInUse);
-		printf("NorFlashRamDiskOps initialize skipped\n");
-		return 0;
-#endif
-
-		if (flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, Foreground)) {
+		if (flash.read(ramdisk.virtdrive, flash_offset, RamDiskSizeBytes, Foreground)) {
+			// if (flash.read(ramdisk.virtdrive, 0, qspi_patchflash_conf.flash_size_bytes, Foreground)) {
 			set_status(Status::NotInUse);
 			return 0;
 		}
+		printf("NorFlashRamDiskOps read failed\n");
 		return STA_NOINIT;
 	}
 	printf("NorFlashRamDiskOps already init\n");
@@ -57,7 +53,7 @@ DSTATUS NorFlashRamDiskOps::initialize() {
 }
 
 DRESULT NorFlashRamDiskOps::read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) {
-	printf("reading...\n");
+	printf("reading at %d for %d sectors..\n", sector_start, num_sectors);
 	const uint32_t address = sector_start * RamDiskBlockSize;
 	const uint32_t bytes = num_sectors * RamDiskBlockSize;
 	if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
@@ -68,7 +64,7 @@ DRESULT NorFlashRamDiskOps::read(uint8_t *dst, uint32_t sector_start, uint32_t n
 }
 
 DRESULT NorFlashRamDiskOps::write(const uint8_t *src, uint32_t sector_start, uint32_t num_sectors) {
-	printf("writing...\n");
+	printf("writing at %d for %d sectors...\n", sector_start, num_sectors);
 	const uint32_t address = sector_start * RamDiskBlockSize;
 	const uint32_t bytes = num_sectors * RamDiskBlockSize;
 	if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
@@ -101,40 +97,41 @@ DRESULT NorFlashRamDiskOps::ioctl(uint8_t cmd, uint8_t *buff) {
 }
 
 bool NorFlashRamDiskOps::unmount() {
-	printf("NOR writeback disabled\r\n");
-	return true;
+	// printf("NOR writeback disabled\r\n");
+	// return true;
 
 	constexpr uint32_t SectorSize = QSPI_SECTOR_SIZE;
-	constexpr uint32_t NumSectors = qspi_patchflash_conf.flash_size_bytes / SectorSize;
+	constexpr uint32_t NumSectors = RamDiskSizeBytes / SectorSize;
 	uint32_t sector[SectorSize / 4];
-	auto *sector8 = (uint8_t *)sector;
+	auto *sector_u8 = (uint8_t *)sector;
 
 	for (uint32_t sector_num = 0; sector_num < NumSectors; sector_num++) {
-		uint32_t sector_start_addr = sector_num * SectorSize;
-		uint32_t ramptr = sector_start_addr;
+		const uint32_t flash_start_addr = sector_num * SectorSize + flash_offset;
+		const uint32_t ram_start_addr = sector_num * SectorSize;
 
-		if (!flash.read(sector8, sector_start_addr, SectorSize, Foreground)) {
+		if (!flash.read(sector_u8, flash_start_addr, SectorSize, Foreground)) {
 			printf("Error reading sector %d\r\n", sector_num);
 			return false;
 		}
 
 		bool sector_modified = false;
+		uint32_t cur_ram_addr = ram_start_addr;
 		for (auto word : sector) {
-			if (word != *(uint32_t *)(&ramdisk.virtdrive[ramptr])) {
+			if (word != *(uint32_t *)(&ramdisk.virtdrive[cur_ram_addr])) {
 				sector_modified = true;
 				break;
 			}
-			ramptr += 4;
+			cur_ram_addr += 4;
 		}
 		if (sector_modified) {
 			printf("Sector %d modified in RAM, erasing...", sector_num);
-			auto ok = flash.erase(SectorSize, sector_start_addr, Foreground);
+			auto ok = flash.erase(SectorSize, flash_start_addr, Foreground);
 			if (!ok) {
 				printf("Erase failed.\r\n");
 				return false;
 			}
 			printf("Writing...");
-			ok = flash.write(&ramdisk.virtdrive[sector_start_addr], sector_start_addr, SectorSize);
+			ok = flash.write(&ramdisk.virtdrive[ram_start_addr], flash_start_addr, SectorSize);
 			if (!ok) {
 				printf("Write failed.\r\n");
 				return false;

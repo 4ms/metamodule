@@ -58,8 +58,8 @@ int8_t UsbDriveDevice::get_capacity(uint8_t lun, uint32_t *block_num, uint16_t *
 	if (lun == 0) {
 		if (!nordisk)
 			return USBD_FAIL;
-		*block_num = nordisk->RamDiskSizeBytes / nordisk->RamDiskBlockSize;
-		*block_size = nordisk->RamDiskBlockSize;
+		*block_num = nordisk->SizeBytes / nordisk->BlockSize;
+		*block_size = nordisk->BlockSize;
 	}
 	return (USBD_OK);
 }
