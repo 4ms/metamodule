@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/info/module_info_base.hh"
+#include "lvgl/src/core/lv_obj_pos.h"
 #include "pages/base.hh"
 #include "pages/images/image_list.hh"
 #include "pages/page_list.hh"
@@ -25,14 +26,13 @@ struct ModuleViewPage : PageBase {
 	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
 		: PageBase{info}
 		, base(lv_obj_create(nullptr))
-		, canvas(lv_canvas_create(base))
 		, slug(module_slug) {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
-		lv_canvas_set_buffer(canvas, buffer, 240, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
+
+		canvas = lv_canvas_create(base);
 		lv_draw_img_dsc_init(&img_dsc);
-		img_dsc.opa = LV_OPA_COVER;
 
 		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
@@ -45,27 +45,27 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
 	}
 
-	void load_module_page(std::string_view module_slug) {
-		for (auto &b : button) {
-			lv_obj_del(b);
+	void prepare_focus() override {
+		if (!read_slug()) {
+			mbox.append_message("Module View page cannot read module slug.\n");
+			return;
 		}
-		button.clear();
-		opts.clear();
-		set_slug(module_slug);
-		init();
-	}
+		printf("ModuleViewPage module %s\n", slug.data());
 
-	void set_slug(std::string_view module_slug) {
-		slug = module_slug;
-	}
-
-	void init() override {
+		reset_module_page();
 
 		//Draw module image
 		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
+		if (!img) {
+			printf("Image not found\n");
+			return;
+		}
+
 		auto width_px = img->header.w;
 		// auto height_px = img->header.h; // assert == 240?
-		lv_canvas_fill_bg(canvas, lv_color_make(0, 0, 0), LV_OPA_COVER);
+		lv_obj_set_size(canvas, width_px, 240);
+		lv_canvas_set_buffer(canvas, buffer, width_px, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
 		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
 
 		//Create text list (roller options) and buttons over components
@@ -152,6 +152,11 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
+		if (metaparams.meta_buttons[0].is_just_released()) {
+			if (PageList::request_last_page()) {
+				blur();
+			}
+		}
 	}
 
 private:
@@ -159,12 +164,33 @@ private:
 	int32_t cur_selected = 0;
 	std::vector<lv_obj_t *> button;
 	lv_obj_t *roller = nullptr;
-	lv_obj_t *base = nullptr;
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_obj_t *canvas = nullptr;
+	lv_obj_t *base = nullptr;
 	lv_draw_img_dsc_t img_dsc;
 
 	std::string_view slug;
+
+	void reset_module_page() {
+		for (auto &b : button) {
+			lv_obj_del(b);
+		}
+		button.clear();
+		opts.clear();
+	}
+
+	bool read_slug() {
+		auto module_id = PageList::get_selected_module_id();
+		auto patch_id = PageList::get_selected_patch_id();
+		const PatchData &patch = patch_list.get_patch(patch_id);
+		if (patch.patch_name.length() == 0)
+			return false;
+		if (module_id >= patch.module_slugs.size())
+			return false;
+
+		slug = patch.module_slugs[module_id];
+		return true;
+	}
 
 	static void roller_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
