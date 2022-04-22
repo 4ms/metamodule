@@ -1,8 +1,13 @@
 #pragma once
-#include "gui-guider/guider_fonts.h"
+// #include "gui-guider/guider_fonts.h"
 #include "lvgl/lvgl.h"
 // LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_14);
 // LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_16);
+LV_FONT_DECLARE(MuseoSansRounded_500_12);
+LV_FONT_DECLARE(MuseoSansRounded_700_12);
+LV_FONT_DECLARE(MuseoSansRounded_700_14);
+LV_FONT_DECLARE(MuseoSansRounded_700_16);
+LV_FONT_DECLARE(MuseoSansRounded_700_18);
 
 namespace MetaModule
 {
@@ -60,7 +65,8 @@ struct Gui {
 		// header_style (text)
 		lv_style_init(&header_style);
 		lv_style_set_text_align(&header_style, LV_TEXT_ALIGN_CENTER);
-		lv_style_set_text_font(&header_style, &lv_font_MuseoSansRounded_700_16);
+		// lv_style_set_text_font(&header_style, &lv_font_montserrat_14);
+		lv_style_set_text_font(&header_style, &MuseoSansRounded_700_18);
 		lv_style_set_text_color(&header_style, lv_color_white());
 		lv_style_set_text_opa(&header_style, LV_OPA_COVER);
 		lv_style_set_bg_opa(&header_style, LV_OPA_COVER);
@@ -71,7 +77,8 @@ struct Gui {
 		// text_block_style
 		lv_style_init(&text_block_style);
 		lv_style_set_text_align(&text_block_style, LV_TEXT_ALIGN_LEFT);
-		lv_style_set_text_font(&text_block_style, &lv_font_MuseoSansRounded_500_12);
+		// lv_style_set_text_font(&text_block_style, &lv_font_montserrat_14);
+		lv_style_set_text_font(&text_block_style, &MuseoSansRounded_500_12);
 		lv_style_set_text_color(&text_block_style, lv_color_white());
 		lv_style_set_text_opa(&text_block_style, LV_OPA_COVER);
 		lv_style_set_bg_opa(&text_block_style, LV_OPA_COVER);
@@ -86,7 +93,8 @@ struct Gui {
 		lv_style_set_bg_opa(&roller_style, LV_OPA_COVER);
 		lv_style_set_bg_color(&roller_style, lv_color_black());
 		lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_LEFT);
-		lv_style_set_text_font(&roller_style, &lv_font_MuseoSansRounded_700_14);
+		lv_style_set_text_font(&roller_style, &MuseoSansRounded_700_14);
+		// lv_style_set_text_font(&roller_style, &lv_font_montserrat_14);
 		lv_style_set_text_color(&roller_style, lv_color_white());
 		lv_style_set_text_opa(&roller_style, LV_OPA_COVER);
 		lv_style_set_text_line_space(&roller_style, 5);
