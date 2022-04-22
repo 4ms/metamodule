@@ -6,9 +6,9 @@ namespace MetaModule
 void PageManager::init() {
 	//54ms for a bunch of pages
 	// page_knobs.init();
-	page_module.init();
+	// page_module.init();
 	page_patchsel.init();
-	page_patchview.init();
+	// page_patchview.init();
 
 	//Todo: page manager doesn't load patches, send a load_patch command via uiaudiomailbox
 	//Audio is more suited to load patches, or maybe a 3rd object (patch manager)

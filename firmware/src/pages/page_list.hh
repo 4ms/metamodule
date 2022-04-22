@@ -29,12 +29,12 @@ public:
 		selected_patch_id = id;
 	}
 
-	static void set_selected_module_id(uint32_t id) {
-		selected_module_id = id;
-	}
-
 	static uint32_t get_selected_patch_id() {
 		return selected_patch_id;
+	}
+
+	static void set_selected_module_id(uint32_t id) {
+		selected_module_id = id;
 	}
 
 	static uint32_t get_selected_module_id() {

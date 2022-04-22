@@ -24,6 +24,7 @@ struct PatchViewPage : PageBase {
 		lv_group_set_editing(group, false);
 
 		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
+		lv_obj_set_style_pad_gap(base, 4, LV_STATE_DEFAULT);
 
 		patchname = lv_label_create(base);
 		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
@@ -43,9 +44,6 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
 
-		// lv_group_set_wrap(group, true);
-		// lv_group_add_obj(group, modules_cont);
-
 		lv_draw_img_dsc_init(&draw_img_dsc);
 		draw_img_dsc.zoom = 128;
 
@@ -59,13 +57,13 @@ struct PatchViewPage : PageBase {
 		// lv_group_add_obj(group, popup_playbut);
 		// lv_obj_add_event_cb(popup_playbut, popup_play_event_cb, LV_EVENT_CLICKED, this);
 
-		set_patch_id(_patch_id);
+		// set_patch_id(_patch_id);
 	}
 
 	void set_patch_id(uint32_t patch_id) {
 		_patch_id = patch_id;
 		printf("patch id = %d\n", _patch_id);
-		auto patch = patch_list.get_patch(_patch_id);
+		const PatchData &patch = patch_list.get_patch(_patch_id);
 		if (patch.patch_name.length() == 0)
 			return;
 
@@ -79,37 +77,29 @@ struct PatchViewPage : PageBase {
 			lv_obj_del(m);
 		modules.clear();
 		modules.reserve(patch.module_slugs.size());
-		// buffers.reserve(patch.module_slugs.size());
+		module_ids.clear();
+		module_ids.reserve(patch.module_slugs.size());
+
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
 
 		constexpr uint32_t pixel_size = LV_COLOR_SIZE / sizeof(buffer[0]);
 		uint32_t xpos = 0;
-		for (auto slug : patch.module_slugs) {
+		for (auto [i, slug] : enumerate(patch.module_slugs)) {
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
 			if (!img)
 				continue;
 			auto widthpx = img->header.w / 2;
 
-			// lv_obj_t *btn = modules.emplace_back(lv_btn_create(modules_cont));
-			// lv_obj_add_style(btn, &Gui::plain_border_style, LV_STATE_DEFAULT);
-			// lv_obj_add_style(btn, &Gui::plain_border_style, LV_STATE_EDITED | LV_STATE_CHECKED);
-			// lv_obj_set_style_radius(btn, 0, LV_STATE_DEFAULT);
-			// lv_obj_set_style_radius(btn, 10, 0x000F);
-			// lv_obj_set_style_pad_all(btn, 0, LV_STATE_DEFAULT);
-			// lv_obj_set_style_outline_color(btn, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
-			// lv_obj_set_style_border_color(btn, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
-			// lv_obj_set_style_outline_color(btn, lv_palette_main(LV_PALETTE_RED), 0x00FF);
-			// lv_obj_set_style_border_color(btn, lv_palette_main(LV_PALETTE_RED), 0x00FF);
-
 			lv_obj_t *canvas = lv_canvas_create(modules_cont);
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
-			// lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE);
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-			lv_obj_set_style_border_color(canvas, lv_palette_main(LV_PALETTE_RED), LV_STATE_FOCUS_KEY);
-			lv_obj_set_style_border_width(canvas, 4, LV_STATE_FOCUS_KEY);
-			lv_obj_set_style_border_opa(canvas, LV_OPA_COVER, LV_STATE_FOCUS_KEY);
 			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE);
+			lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE); //inherited from parent?
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+
+			lv_obj_set_style_outline_color(canvas, lv_palette_main(LV_PALETTE_RED), LV_STATE_FOCUS_KEY);
+			lv_obj_set_style_outline_width(canvas, 4, LV_STATE_FOCUS_KEY);
+			lv_obj_set_style_outline_opa(canvas, LV_OPA_COVER, LV_STATE_FOCUS_KEY);
 
 			auto buf = &(buffer[pixel_size * 120 * xpos]);
 			xpos += widthpx;
@@ -121,6 +111,8 @@ struct PatchViewPage : PageBase {
 			const auto info = ModuleFactory::getModuleInfo(slug);
 			DrawHelper::draw_module_controls(canvas, info, 128);
 
+			module_ids.push_back(i);
+			lv_obj_add_event_cb(canvas, moduleimg_cb, LV_EVENT_PRESSED, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_group_add_obj(group, canvas);
 		}
 	}
@@ -138,10 +130,17 @@ struct PatchViewPage : PageBase {
 		set_patch_id(PageList::get_selected_patch_id());
 	}
 
+	static void moduleimg_cb(lv_event_t *event) {
+		auto obj = event->current_target;
+		uint32_t module_id = *(static_cast<uint32_t *>(event->user_data));
+		PageList::set_selected_module_id(module_id);
+		printf("Clicked Module %d\n", module_id);
+		PageList::request_new_page(PageId::ModuleView);
+	}
+
 	static void playbut_cb(lv_event_t *event) {
 		// auto obj = event->current_target;
 		// auto page = static_cast<PatchViewPage *>(event->user_data);
-
 		printf("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
 		// 	page->start_changing_patch(page->patch_id);
 	}
@@ -152,9 +151,11 @@ private:
 	lv_obj_t *modules_cont;
 
 	std::vector<lv_obj_t *> modules;
-	// std::vector<lv_color_t *> buffers;
+	std::vector<uint32_t> module_ids;
 	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(240, 640)];
 	lv_draw_img_dsc_t draw_img_dsc;
+
+	bool should_show_moduleview = false;
 
 	// static inline lv_color_t pal[10] = {
 	// 	lv_color_white(),
