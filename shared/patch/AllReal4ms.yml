@@ -5,12 +5,12 @@ PatchData:
     1: VCAM
     2: Tapo
     3: SISM
-    4: SCMBO
-    5: RCD
-    6: RCDBO
-    7: QPLFO
-    8: QCD
-    9: QCDEXP
+    4: RCD
+    5: RCDBO
+    6: QPLFO
+    7: QCD
+    8: QCDEXP
+    9: SCMBO
     10: PI
     11: PIExp
     12: PEG
