@@ -12,7 +12,7 @@
  */
 
 /* clang-format off */
-#if 0 /*Set it to "1" to enable content*/
+#if 1 /*Set it to "1" to enable content*/
 
 #ifndef LV_CONF_H
 #define LV_CONF_H
@@ -217,8 +217,8 @@
     #define LV_LOG_TRACE_DISP_REFR  0
     #define LV_LOG_TRACE_EVENT      1
     #define LV_LOG_TRACE_OBJ_CREATE 1
-    #define LV_LOG_TRACE_LAYOUT     1
-    #define LV_LOG_TRACE_ANIM       1
+    #define LV_LOG_TRACE_LAYOUT     0
+    #define LV_LOG_TRACE_ANIM       0
 
 #endif  /*LV_USE_LOG*/
 
@@ -243,14 +243,14 @@
  *-----------*/
 
 /*1: Show CPU usage and FPS count*/
-#define LV_USE_PERF_MONITOR 1
+#define LV_USE_PERF_MONITOR 0
 #if LV_USE_PERF_MONITOR
     #define LV_USE_PERF_MONITOR_POS LV_ALIGN_BOTTOM_RIGHT
 #endif
 
 /*1: Show the used memory and the memory fragmentation
  * Requires LV_MEM_CUSTOM = 0*/
-#define LV_USE_MEM_MONITOR 1
+#define LV_USE_MEM_MONITOR 0
 #if LV_USE_MEM_MONITOR
     #define LV_USE_MEM_MONITOR_POS LV_ALIGN_BOTTOM_LEFT
 #endif
@@ -360,11 +360,11 @@
 /*Optionally declare custom fonts here.
  *You can use these fonts as default font too and they will be available globally.
  *E.g. #define LV_FONT_CUSTOM_DECLARE   LV_FONT_DECLARE(my_font_1) LV_FONT_DECLARE(my_font_2)*/
-#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_12) LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_14) 
+#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(MuseoSansRounded_700_14) LV_FONT_DECLARE(MuseoSansRounded_700_16) 
 
 /*Always set a default font*/
 // #define LV_FONT_DEFAULT &lv_font_montserrat_14
-#define LV_FONT_DEFAULT &lv_font_MuseoSansRounded_700_14
+#define LV_FONT_DEFAULT &MuseoSansRounded_700_14
 
 /*Enable handling large font and/or fonts with a lot of characters.
  *The limit depends on the font size, font face and bpp.
