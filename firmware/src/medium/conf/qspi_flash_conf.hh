@@ -21,7 +21,7 @@ constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
 
 	.chip_id = mdrivlib::QSPIFlashConfig::S25FLxxxL,
 
-	.io_mode = mdrivlib::QSPIFlashConfig::QuadSPI,
+	.io_mode = mdrivlib::QSPIFlashConfig::SingleSPI,
 
 	.bank = mdrivlib::QSPIFlashConfig::Bank1,
 };
