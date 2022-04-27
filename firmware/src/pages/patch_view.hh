@@ -43,6 +43,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_style_pad_all(modules_cont, 2, LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
 		draw_img_dsc.zoom = 128;
@@ -83,13 +84,17 @@ struct PatchViewPage : PageBase {
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
 
-		constexpr uint32_t pixel_size = LV_COLOR_SIZE / sizeof(buffer[0]);
+		constexpr uint32_t pixel_size = (LV_COLOR_SIZE / 8) / sizeof(buffer[0]);
 		uint32_t xpos = 0;
 		for (auto [i, slug] : enumerate(patch.module_slugs)) {
+			printf("Drawing %s\n", slug.c_str());
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
-			if (!img)
+			if (!img) {
+				printf("Image not found for %s\n", slug.c_str());
 				continue;
+			}
 			auto widthpx = img->header.w / 2;
+			printf("Width is %d\n", widthpx);
 
 			lv_obj_t *canvas = modules.emplace_back(lv_canvas_create(modules_cont));
 			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
@@ -97,26 +102,29 @@ struct PatchViewPage : PageBase {
 			lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE); //inherited from parent?
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
-			lv_obj_set_style_outline_color(canvas, lv_palette_main(LV_PALETTE_RED), LV_STATE_FOCUS_KEY);
+			lv_obj_set_style_outline_color(canvas, lv_palette_lighten(LV_PALETTE_ORANGE, 1), LV_STATE_FOCUS_KEY);
 			lv_obj_set_style_outline_width(canvas, 4, LV_STATE_FOCUS_KEY);
-			lv_obj_set_style_outline_opa(canvas, LV_OPA_COVER, LV_STATE_FOCUS_KEY);
+			lv_obj_set_style_outline_opa(canvas, LV_OPA_70, LV_STATE_FOCUS_KEY);
 
 			auto buf = &(buffer[pixel_size * 120 * xpos]);
-			xpos += widthpx;
+			printf("Buf ptr is %p (+%zu) (buffer[%d * 120 * %d])\n", buf, buf - buffer, pixel_size, xpos);
 			lv_obj_set_size(canvas, widthpx, 120);
 			lv_canvas_set_buffer(canvas, buf, widthpx, 120, LV_IMG_CF_TRUE_COLOR);
 
-			// lv_canvas_fill_bg(canvas, pal[i++], LV_OPA_COVER);
-			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
-			const auto info = ModuleFactory::getModuleInfo(slug);
-			DrawHelper::draw_module_controls(canvas, info, 128);
+			lv_canvas_fill_bg(canvas, lv_palette_main(LV_PALETTE_AMBER) /*pal[i++]*/, LV_OPA_COVER);
+			// lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
+			// const auto info = ModuleFactory::getModuleInfo(slug);
+			// DrawHelper::draw_module_controls(canvas, info, 128);
 
 			module_ids.push_back(i);
 			lv_obj_add_event_cb(canvas, moduleimg_cb, LV_EVENT_PRESSED, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_group_add_obj(group, canvas);
 
-			if (xpos >= MaxBufferWidth)
+			xpos += widthpx;
+			if (xpos >= MaxBufferWidth) {
+				printf("Max size reached\n");
 				break;
+			}
 		}
 	}
 
