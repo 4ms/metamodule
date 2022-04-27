@@ -20,8 +20,8 @@ bool create_default_files(Disk disk);
 void vol_string(Disk disk, char vol[3]);
 
 // Creates and writes to a file. Overwrites if existing.
-bool create_file(const char *filename, const std::span<const unsigned char> data);
-bool create_file(const char *filename, const unsigned char *data, unsigned sz);
+bool create_file(const char *filename, const std::span<const char> data);
+bool create_file(const char *filename, const char *data, unsigned sz);
 
 uint32_t read_file(std::string_view filename, char *data, uint32_t max_bytes);
 

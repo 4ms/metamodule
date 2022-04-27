@@ -29,7 +29,7 @@ struct DefaultPatches {
 		return 0;
 	}
 
-	static uint8_t *get_data(uint32_t id) {
+	static char *get_data(uint32_t id) {
 		if (id == 0)
 			return Djembe2_yml;
 		if (id == 1)
@@ -39,7 +39,7 @@ struct DefaultPatches {
 		return nullptr;
 	}
 
-	static std::span<uint8_t> get_patch(uint32_t id) {
+	static std::span<char> get_patch(uint32_t id) {
 		if (id == 0)
 			return Djembe2_yml;
 		if (id == 1)
@@ -49,13 +49,12 @@ struct DefaultPatches {
 		return {};
 	}
 
-	static inline uint8_t SMR_patch[] =
+	static inline char SMR_patch[] =
 		R"( 
 PatchData:
-  patch_name: SMR Resonant Pings
+  patch_name: 'SMR Resonant Pings'
   module_slugs:
-    0: PanelMedium
-	1: SMR
+    0: Djembe
   int_cables:
     - out:
         module_id: 1
@@ -79,4 +78,5 @@ PatchData:
       param_id: 2
       value: 0.3
 )";
+	// clang-format on
 };

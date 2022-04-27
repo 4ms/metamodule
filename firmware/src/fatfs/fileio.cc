@@ -60,11 +60,11 @@ bool format_disk(Disk disk) {
 	return res == FR_OK;
 }
 
-bool create_file(const char *filename, const std::span<const unsigned char> data) {
+bool create_file(const char *filename, const std::span<const char> data) {
 	return create_file(filename, data.data(), data.size_bytes());
 }
 
-bool create_file(const char *filename, const unsigned char *data, unsigned sz) {
+bool create_file(const char *filename, const char *data, unsigned sz) {
 	FIL fil;
 	{
 		// TCHAR fn[FF_LFN_BUF];
