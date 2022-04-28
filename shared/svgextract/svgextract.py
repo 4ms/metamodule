@@ -658,14 +658,20 @@ def createlvimg(artworkSvgFilename, outputBaseName):
         return
 
 
-def appendImageList(slug, artwork_Carray, image_list_file):
-    newText = f'''LV_IMG_DECLARE({artwork_Carray});
+def appendImageList(artwork_array_prefix, image_list_file):
+    parts = artwork_array_prefix.split("_")
+    slug = parts[0]
+    artwork_prefix = parts[0] + "_" + parts[1]
+    artwork_Carray_240 = artwork_prefix + "_240"
+    artwork_Carray_120 = artwork_prefix + "_120"
+    newText = f'''LV_IMG_DECLARE({artwork_Carray_240});
+LV_IMG_DECLARE({artwork_Carray_120});
 '''
     appendToFileAfterMarker(image_list_file, "// DECLARE HERE\n", newText)
 
     newText = f'''
 \t\tif (slug == "{slug}")
-\t\t\treturn &{artwork_Carray};
+\t\t\treturn height == 240 ? &{artwork_Carray_240} : &{artwork_Carray_120};
 '''
     appendToFileAfterMarker(image_list_file, "// SLUG TO IMAGE HERE\n", newText)
 
@@ -771,12 +777,12 @@ createlvimg [input artwork SVG file name] [output C file name]
         inkscape            (INKSCAPE_BIN_PATH)
         convert             (IMAGEMAGICK_BIN_PATH)
 
-appendimglist [C array name] [image_list.hh filename]
-    C array name is the name of an image array (in c format, created by lv_img_conv).
+appendimglist [C array name] [path/to/image_list.hh]
+    C array name is the prefix for an image array in c format, created by lv_img_conv, without the _### size suffix. Example: EnOsc_artwork
+    (If the array name contains a size suffix, it will be removed and ignored.)
     The second argument is the path to the image_list.hh file that should be updated with this new array.
     Does not update the image_list.hh file if the exact string to be inserted is already found.
-    The slug is the first part of the C array name, up to the first underscore (EnOsc_artwork_240 => EnOsc)
-
+    Note that the slug is the first part of the C array name, up to the first underscore (EnOsc_artwork => EnOsc)
 """)
 
 
@@ -815,8 +821,7 @@ def parse_args(args):
         return
 
     if cmd == 'appendimglist':
-        slug = inputfile.split('_')[0]
-        appendImageList(slug, inputfile, output)
+        appendImageList(inputfile, output)
 
 if __name__ == "__main__":
     try:
