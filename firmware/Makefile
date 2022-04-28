@@ -68,6 +68,10 @@ $(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
 	$(info $*: Creating ModuleInfo header file [and coremodule stub if needed])
 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
+#Create component images half-sized (for 120px height modules):
+# assumes there are already 100% size pngs
+# convert -resize 50% -set filename:f '%d/%t' src/pages/images/components/*.png '%[filename:f]_120.png'
+# cd ../shared/svgextract/lv_img_conv/ && ./lv_img_conv.js -f -c CF_TRUE_COLOR_ALPHA ../../../firmware/src/pages/images/components/*120.png
 
 .SECONDARY: $(MODULEIMG_PNG240S) $(MODULEIMG_PNG120S)
 
