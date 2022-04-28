@@ -3,42 +3,57 @@
 #include "lvgl/lvgl.h"
 
 LV_IMG_DECLARE(jack_x);
+LV_IMG_DECLARE(jack_x_120);
 LV_IMG_DECLARE(knob9mm_x);
+LV_IMG_DECLARE(knob9mm_x_120);
 LV_IMG_DECLARE(knob_x);
+LV_IMG_DECLARE(knob_x_120);
 LV_IMG_DECLARE(button_x);
+LV_IMG_DECLARE(button_x_120);
 LV_IMG_DECLARE(knob_unlined_x);
+LV_IMG_DECLARE(knob_unlined_x_120);
 LV_IMG_DECLARE(knob_large_x);
+LV_IMG_DECLARE(knob_large_x_120);
 LV_IMG_DECLARE(slider_x);
+LV_IMG_DECLARE(slider_x_120);
 LV_IMG_DECLARE(switch_left);
+LV_IMG_DECLARE(switch_left_120);
 LV_IMG_DECLARE(switch_right);
+LV_IMG_DECLARE(switch_right_120);
 LV_IMG_DECLARE(switch_up);
+LV_IMG_DECLARE(switch_up_120);
 LV_IMG_DECLARE(switch_down);
+LV_IMG_DECLARE(switch_down_120);
 
 namespace MetaModule
 {
 struct DrawHelper {
-	static void draw_module_controls(lv_obj_t *canvas, const ModuleInfoView &info, uint32_t zoom) {
+	static void draw_module_controls(lv_obj_t *canvas, const ModuleInfoView &info, uint32_t module_height) {
 		static lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
-		draw_img_dsc.zoom = zoom;
-		float adj = (float)(zoom) / 256.f;
+		// draw_img_dsc.zoom = zoom;
+
+		const float adj = (float)(module_height) / 240.f;
+		const bool fullsize = module_height > 120;
 
 		auto scale_center = [adj](auto el, auto img_header) -> std::pair<int, int> {
-			auto x = static_cast<int>(0.5f + (ModuleInfoBase::mm_to_px<240>(el.x_mm) - img_header.w / 2) * adj);
-			auto y = static_cast<int>(0.5f + (ModuleInfoBase::mm_to_px<240>(el.y_mm) - img_header.h / 2) * adj);
+			auto x =
+				static_cast<int>((ModuleInfoBase::mm_to_px<240>(el.x_mm) * adj - (float)img_header.w / 2.f) + 0.5f);
+			auto y =
+				static_cast<int>((ModuleInfoBase::mm_to_px<240>(el.y_mm) * adj - (float)img_header.h / 2.f) + 0.5f);
 			return std::make_pair(x, y);
 		};
 
 		for (const auto el : info.Knobs) {
 			const lv_img_dsc_t *knob = nullptr;
 			if (el.knob_style == KnobDef::Small)
-				knob = &knob9mm_x;
+				knob = fullsize ? &knob9mm_x : &knob9mm_x_120;
 			else if (el.knob_style == KnobDef::Medium)
-				knob = &knob_x;
+				knob = fullsize ? &knob_x : &knob_x_120;
 			else if (el.knob_style == KnobDef::Large)
-				knob = &knob_large_x;
+				knob = fullsize ? &knob_large_x : &knob_large_x_120;
 			else if (el.knob_style == KnobDef::Slider25mm)
-				knob = &slider_x;
+				knob = fullsize ? &slider_x : &slider_x_120;
 			else
 				continue;
 
@@ -46,21 +61,23 @@ struct DrawHelper {
 			lv_canvas_draw_img(canvas, x, y, knob, &draw_img_dsc);
 		}
 		for (const auto el : info.InJacks) {
-			auto [x, y] = scale_center(el, jack_x.header);
-			lv_canvas_draw_img(canvas, x, y, &jack_x, &draw_img_dsc);
+			auto jack = fullsize ? &jack_x : &jack_x_120;
+			auto [x, y] = scale_center(el, jack->header);
+			lv_canvas_draw_img(canvas, x, y, jack, &draw_img_dsc);
 		}
 		for (const auto el : info.OutJacks) {
-			auto [x, y] = scale_center(el, jack_x.header);
-			lv_canvas_draw_img(canvas, x, y, &jack_x, &draw_img_dsc);
+			auto jack = fullsize ? &jack_x : &jack_x_120;
+			auto [x, y] = scale_center(el, jack->header);
+			lv_canvas_draw_img(canvas, x, y, jack, &draw_img_dsc);
 		}
 		for (const auto el : info.Switches) {
 			const lv_img_dsc_t *sw = nullptr;
 			if (el.switch_type == SwitchDef::Toggle2pos || el.switch_type == SwitchDef::Toggle3pos)
-				sw = &switch_left;
+				sw = fullsize ? &switch_left : &switch_left_120;
 			else if (el.switch_type == SwitchDef::Encoder)
-				sw = &knob_unlined_x;
+				sw = fullsize ? &knob_unlined_x : &knob_unlined_x_120;
 			else if (el.switch_type == SwitchDef::MomentaryButton || el.switch_type == SwitchDef::LatchingButton)
-				sw = &button_x;
+				sw = fullsize ? &button_x : &button_x_120;
 			else
 				continue;
 			auto [x, y] = scale_center(el, sw->header);
