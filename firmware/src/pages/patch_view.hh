@@ -14,6 +14,9 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
+	constexpr static uint16_t zoom = 256;
+	constexpr static uint16_t height = 240 / (zoom / 128);
+
 	PatchViewPage(PatchInfo info, uint32_t patch_id = 0)
 		: PageBase{info}
 		, base(lv_obj_create(nullptr))
@@ -46,7 +49,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
-		draw_img_dsc.zoom = 128;
+		draw_img_dsc.zoom = zoom;
 
 		////Play button
 		//popup_playbut = lv_btn_create(popup_cont);
@@ -93,7 +96,7 @@ struct PatchViewPage : PageBase {
 				printf("Image not found for %s\n", slug.c_str());
 				continue;
 			}
-			auto widthpx = img->header.w / 2;
+			auto widthpx = img->header.w / (256 / zoom);
 			printf("Width is %d\n", widthpx);
 
 			lv_obj_t *canvas = modules.emplace_back(lv_canvas_create(modules_cont));
@@ -106,15 +109,15 @@ struct PatchViewPage : PageBase {
 			lv_obj_set_style_outline_width(canvas, 4, LV_STATE_FOCUS_KEY);
 			lv_obj_set_style_outline_opa(canvas, LV_OPA_70, LV_STATE_FOCUS_KEY);
 
-			auto buf = &(buffer[pixel_size * 120 * xpos]);
-			printf("Buf ptr is %p (+%zu) (buffer[%d * 120 * %d])\n", buf, buf - buffer, pixel_size, xpos);
-			lv_obj_set_size(canvas, widthpx, 120);
-			lv_canvas_set_buffer(canvas, buf, widthpx, 120, LV_IMG_CF_TRUE_COLOR);
+			auto buf = &(buffer[pixel_size * height * xpos]);
+			printf("Buf ptr is %p (+%zu) (buffer[%d * height * %d])\n", buf, buf - buffer, pixel_size, xpos);
+			lv_obj_set_size(canvas, widthpx, height);
+			lv_canvas_set_buffer(canvas, buf, widthpx, height, LV_IMG_CF_TRUE_COLOR);
 
 			lv_canvas_fill_bg(canvas, lv_palette_main(LV_PALETTE_AMBER) /*pal[i++]*/, LV_OPA_COVER);
-			// lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
-			// const auto info = ModuleFactory::getModuleInfo(slug);
-			// DrawHelper::draw_module_controls(canvas, info, 128);
+			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
+			const auto info = ModuleFactory::getModuleInfo(slug);
+			DrawHelper::draw_module_controls(canvas, info, zoom);
 
 			module_ids.push_back(i);
 			lv_obj_add_event_cb(canvas, moduleimg_cb, LV_EVENT_PRESSED, (void *)(&module_ids[module_ids.size() - 1]));
@@ -164,7 +167,7 @@ private:
 	static constexpr uint32_t MaxBufferWidth = 1024;
 	std::vector<lv_obj_t *> modules;
 	std::vector<uint32_t> module_ids;
-	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(240, MaxBufferWidth)];
+	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(height, MaxBufferWidth)];
 	lv_draw_img_dsc_t draw_img_dsc;
 
 	bool should_show_moduleview = false;
