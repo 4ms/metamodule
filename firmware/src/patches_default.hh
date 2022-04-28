@@ -54,11 +54,10 @@ struct DefaultPatches {
 PatchData:
   patch_name: 'SMR Resonant Pings'
   module_slugs:
-    0: PanelMedium
-    1: Djembe
-    2: SMR
-    3: SMR
-    4: DLD
+    0: Djembe
+    1: PEG
+	2: QCD
+	3: SMR
   int_cables:
     - out:
         module_id: 1
