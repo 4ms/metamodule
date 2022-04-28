@@ -80,6 +80,13 @@ PatchData:
     - module_id: 1
       param_id: 2
       value: 0.3
+  mapped_knobs:
+    - module_id: 1
+      panel_knob_id: 3
+      param_id: 3
+      curve_type: 0
+      min: 0.0
+      max: 1.0
 )";
 	// clang-format on
 };
