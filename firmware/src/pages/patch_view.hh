@@ -14,8 +14,8 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
-	constexpr static uint16_t zoom = 256;
-	constexpr static uint16_t height = 240 / (zoom / 128);
+	constexpr static uint32_t height = 120;
+	static_assert(height == 120 || height == 240);
 
 	PatchViewPage(PatchInfo info, uint32_t patch_id = 0)
 		: PageBase{info}
@@ -32,14 +32,23 @@ struct PatchViewPage : PageBase {
 		patchname = lv_label_create(base);
 		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
 		lv_obj_set_size(patchname, 320, 30);
+		lv_obj_set_style_border_width(patchname, 0, 0);
+		// lv_obj_set_style_border_opa(patchname, LV_OPA_COVER, 0);
+		// lv_obj_set_style_border_color(patchname, lv_palette_main(LV_PALETTE_CYAN), 0);
 
 		description = lv_label_create(base);
 		lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
 		lv_label_set_long_mode(description, LV_LABEL_LONG_DOT);
-		lv_obj_set_size(description, 320, 60);
+		lv_obj_set_width(description, 270);
+
+		playbut = lv_btn_create(base);
+		// lv_obj_add_style(playbut, &style_popup_buttons, LV_PART_MAIN);
+		playbut_label = lv_label_create(playbut);
+		lv_label_set_text(playbut_label, "Play");
+		// lv_obj_set_size(playbut, 60, 20);
 
 		modules_cont = lv_obj_create(base);
-		lv_obj_set_size(modules_cont, 320, 128);
+		lv_obj_set_size(modules_cont, 320, height + 8);
 		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW);
 		lv_obj_set_style_pad_gap(modules_cont, 2, LV_STATE_DEFAULT);
@@ -49,7 +58,6 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
-		draw_img_dsc.zoom = zoom;
 
 		////Play button
 		//popup_playbut = lv_btn_create(popup_cont);
@@ -91,12 +99,12 @@ struct PatchViewPage : PageBase {
 		uint32_t xpos = 0;
 		for (auto [i, slug] : enumerate(patch.module_slugs)) {
 			printf("Drawing %s\n", slug.c_str());
-			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
+			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
 			if (!img) {
 				printf("Image not found for %s\n", slug.c_str());
 				continue;
 			}
-			auto widthpx = img->header.w / (256 / zoom);
+			auto widthpx = img->header.w;
 			printf("Width is %d\n", widthpx);
 
 			lv_obj_t *canvas = modules.emplace_back(lv_canvas_create(modules_cont));
@@ -114,10 +122,9 @@ struct PatchViewPage : PageBase {
 			lv_obj_set_size(canvas, widthpx, height);
 			lv_canvas_set_buffer(canvas, buf, widthpx, height, LV_IMG_CF_TRUE_COLOR);
 
-			lv_canvas_fill_bg(canvas, lv_palette_main(LV_PALETTE_AMBER) /*pal[i++]*/, LV_OPA_COVER);
 			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
 			const auto info = ModuleFactory::getModuleInfo(slug);
-			DrawHelper::draw_module_controls(canvas, info, zoom);
+			DrawHelper::draw_module_controls(canvas, info, height);
 
 			module_ids.push_back(i);
 			lv_obj_add_event_cb(canvas, moduleimg_cb, LV_EVENT_PRESSED, (void *)(&module_ids[module_ids.size() - 1]));
@@ -163,6 +170,8 @@ private:
 	lv_obj_t *description;
 	lv_obj_t *patchname;
 	lv_obj_t *modules_cont;
+	lv_obj_t *playbut_label;
+	lv_obj_t *playbut;
 
 	static constexpr uint32_t MaxBufferWidth = 1024;
 	std::vector<lv_obj_t *> modules;
