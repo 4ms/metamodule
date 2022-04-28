@@ -4,6 +4,8 @@
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(smr_artwork_240);
+LV_IMG_DECLARE(enosc_artwork_240);
 LV_IMG_DECLARE(STS_artwork_240);
 LV_IMG_DECLARE(VCAM_artwork_240);
 LV_IMG_DECLARE(Tapo_artwork_240);
@@ -81,6 +83,12 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "smr")
+			return &smr_artwork_240;
+
+		if (slug == "enosc")
+			return &enosc_artwork_240;
 
 		if (slug == "STS")
 			return &STS_artwork_240;
