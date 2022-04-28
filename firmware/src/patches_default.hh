@@ -56,8 +56,8 @@ PatchData:
   module_slugs:
     0: Djembe
     1: PEG
-	2: QCD
-	3: SMR
+    2: QCD
+    3: SMR
   int_cables:
     - out:
         module_id: 1
