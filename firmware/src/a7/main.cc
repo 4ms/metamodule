@@ -34,10 +34,10 @@ void main() {
 
 	NorFlashRamDiskOps nordisk{StaticBuffers::virtdrive};
 	FileIO::register_disk(&nordisk, Disk::NORFlash);
-	if (!FileIO::mount_disk(Disk::NORFlash)) {
-		printf("No Fatfs found on NOR Flash, formatting and creating default patch files\r\n");
-		PatchFileIO::factory_reset(Disk::NORFlash);
-	}
+	// if (!FileIO::mount_disk(Disk::NORFlash)) {
+	printf("No Fatfs found on NOR Flash, formatting and creating default patch files\r\n");
+	PatchFileIO::factory_reset(Disk::NORFlash);
+	// }
 	PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
 
 	PatchPlayer patch_player;
