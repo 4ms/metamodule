@@ -51,14 +51,17 @@ u-boot:
 
 MODULEIMG_SVGS = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
 MODULEIMG_PNG240S = $(addprefix src/pages/images/,$(addsuffix _240.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
+MODULEIMG_PNG120S = $(addprefix src/pages/images/,$(addsuffix _120.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
 MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
+MODULEIMG_C += $(MODULEIMG_PNG120S:.png=.c)
 INFO_FILES = $(addprefix $(SHARED)/CoreModules/info/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
 
 images: $(MODULEIMG_C) $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
 
-src/pages/images/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
-	$(info $*: Creating 240px-height lvgl img from full-sized svg artwork $<)
-	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< $(subst .c,.png,$@)
+#$(subst _artwork_240.c,,$(subst _artwork_120.c,,$*))
+src/pages/images/%_artwork_120.c src/pages/images/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
+	$(info $*: Creating 120px and 240px-height lvgl img $* from full-sized svg artwork $<)
+	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< src/pages/images/$*
 	$(info $*: Checking if it needs to be added to LVGL image_list.hh)
 	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork_240 src/pages/images/image_list.hh
 
@@ -67,7 +70,7 @@ $(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
 
-.SECONDARY: $(MODULEIMG_PNG240S)
+.SECONDARY: $(MODULEIMG_PNG240S) $(MODULEIMG_PNG120S)
 
 ## Cleaning
 

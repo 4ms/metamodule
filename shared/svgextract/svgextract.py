@@ -617,7 +617,9 @@ def extractArtworkLayer(svgFilename, artworkFilename = None, slug = None):
 #     return cmd
 
    
-def createlvimg(artworkSvgFilename, pngFilename):
+def createlvimg(artworkSvgFilename, outputBaseName):
+    png240Filename = outputBaseName +"_artwork_240.png"
+    png120Filename = outputBaseName +"_artwork_120.png"
     # Find programs needed
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
     if inkscapeBin is None:
@@ -631,9 +633,10 @@ def createlvimg(artworkSvgFilename, pngFilename):
         return
 
     # SVG ==> PNG
-    Log(f"converting {artworkSvgFilename} to {pngFilename} with inkscape and convert.")
+    Log(f"converting {artworkSvgFilename} to {png240Filename} and {png120Filename} with inkscape and convert.")
     try:
-        subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-id-only --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {pngFilename}', shell=True, check=True)
+        subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-id-only --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {png240Filename}', shell=True, check=True)
+        subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-id-only --export-filename=- {artworkSvgFilename} | {convertBin} -resize x120 - {png120Filename}', shell=True, check=True)
     except:
         Log(f"Failed running {inkscapeBin} and {convertBin}. Aborting")
         return
@@ -646,11 +649,13 @@ def createlvimg(artworkSvgFilename, pngFilename):
     # PNG ==> LVGL image (C file with array)
     lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/lv_img_conv/lv_img_conv.js"
     try:
-        subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', pngFilename], check=True)
+        subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', png240Filename], check=True)
+        Log(f"Created {png240Filename.strip('png')}.c file from {png240Filename}")
+        subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', png120Filename], check=True)
+        Log(f"Created {png120Filename.strip('png')}.c file from {png120Filename}")
     except subprocess.CalledProcessError:
         Log("lv_img_conv.js failed. Try 1) `git submodule update --init` and/or 2) `cd shared/svgextract/lv_img_conv && npm install`")
         return
-    Log(f"Created {pngFilename.strip('.png')}.c file from {pngFilename}")
 
 
 def appendImageList(slug, artwork_Carray, image_list_file):
