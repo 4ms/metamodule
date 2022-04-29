@@ -3,7 +3,7 @@ extern crate timer;
 
 extern crate chrono;
 
-use minifb::{Key, ScaleMode, Window, WindowOptions};
+use minifb::{Key, ScaleMode, Window, WindowOptions, KeyRepeat};
 
 
 const WIDTH: usize = 320;
@@ -35,12 +35,6 @@ fn get_ext_color(x: usize, y: usize) -> u32 {
     (r_ << 16) | (g_ << 8) | b_
 }
 
-struct KeyHandler<'a> {
-    key: Key,
-    is_pressed: bool,
-    action: &'a dyn Fn() -> (),
-}
-
 fn main() {
     println!("Starting...");
     let loaded_ok;
@@ -54,7 +48,7 @@ fn main() {
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
 
     let wo = WindowOptions {
-        borderless: true,
+        borderless: false,
         title: true,
         resize: true,
         scale: minifb::Scale::X1,
@@ -67,54 +61,6 @@ fn main() {
     let mut window = Window::new("MetaModule", WIDTH, HEIGHT, wo).unwrap_or_else(|e| {
         panic!("{}", e);
     });
-
-    let mut keys: [KeyHandler; 8] = [
-        KeyHandler {
-            key: Key::Right,
-            is_pressed: false,
-            action: &|| unsafe { rotary_fwd() },
-        },
-        KeyHandler {
-            key: Key::Left,
-            is_pressed: false,
-            action: &|| unsafe { rotary_back() },
-        },
-        KeyHandler {
-            key: Key::Down,
-            is_pressed: false,
-            action: &|| unsafe { rotary_press() },
-        },
-        KeyHandler {
-            key: Key::Up,
-            is_pressed: false,
-            action: &|| unsafe { rotary_release() },
-        },
-        KeyHandler {
-            key: Key::Comma,
-            is_pressed: false,
-            action: &|| unsafe { rotary_push_back() },
-        },
-        KeyHandler {
-            key: Key::Period,
-            is_pressed: false,
-            action: &|| unsafe { rotary_push_fwd() },
-        },
-        KeyHandler {
-            key: Key::Z,
-            is_pressed: false,
-            action: &|| unsafe { button_press() },
-        },
-        KeyHandler {
-            key: Key::A,
-            is_pressed: false,
-            action: &|| unsafe { button_release() },
-        },
-        // KeyHandler {
-        //     key: Key::Semicolon,
-        //     is_pressed: false,
-        //     action: &|| print!("semicolon\n"),
-        // },
-    ];
 
     let lv_timer = timer::Timer::new();
     let _guard = lv_timer.schedule_repeating(chrono::Duration::milliseconds(3), move || {
@@ -133,17 +79,38 @@ fn main() {
     //33Hz refresh rate (matches hardware)
     window.limit_update_rate(Some(std::time::Duration::from_micros(33300)));
 
-    while window.is_open() && !window.is_key_down(Key::Escape) {
-        for k in keys.iter_mut() {
-            if window.is_key_down(k.key) {
-                if !k.is_pressed {
-                    (k.action)();
+    while window.is_open() && !window.is_key_pressed(Key::Escape, KeyRepeat::No) {
+
+        window.get_keys_pressed(KeyRepeat::No).map(|keys| {
+            for t in keys {
+                match t {
+                    Key::L => unsafe { rotary_fwd(); }
+                    Key::H => unsafe { rotary_back(); }
+                    Key::J => unsafe { rotary_press(); }
+                    Key::K => unsafe { button_press(); }
+
+                    Key::Right => unsafe { rotary_fwd(); }
+                    Key::Left => unsafe { rotary_back(); }
+                    Key::Down => unsafe { rotary_press(); }
+
+                    Key::Comma => unsafe { rotary_push_back(); }
+                    Key::Period => unsafe { rotary_push_fwd(); }
+                    _ => (),
                 }
-                k.is_pressed = true;
-            } else {
-                k.is_pressed = false;
             }
-        }
+        });
+
+        window.get_keys_released().map(|keys| {
+            for t in keys {
+                match t {
+                    Key::J => unsafe { rotary_release(); }
+                    Key::K => unsafe { button_release(); }
+
+                    Key::Down => unsafe { rotary_release(); }
+                    _ => (),
+                }
+            }
+        });
 
         unsafe { update_ui() };
 
