@@ -2,6 +2,10 @@
 #include "lvgl/lvgl.h"
 #include <string_view>
 
+#if defined(USE_FEWER_MODULES) //&& USE_FEWER_MODULES == 1
+#include "image_list_short.hh"
+#else
+
 extern "C" {
 // DECLARE HERE
 LV_IMG_DECLARE(STS_artwork_240);
@@ -359,3 +363,5 @@ struct ModuleImages {
 		return nullptr;
 	}
 };
+
+#endif

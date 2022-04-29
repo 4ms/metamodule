@@ -1,9 +1,13 @@
 fn main() {
+
+    let use_fewer_modules = true;
+
     println!("cargo:rerun-if-changed=../firmware/lib/lvgl/lv_conf.h");
     println!("cargo:rerun-if-changed=../firmware/src/pages/");
     println!("cargo:rerun-if-changed=../firmware/src/pages/images");
     println!("cargo:rerun-if-chnaged=../firmware/src/pages/patch_selector.hh");
     println!("cargo:rerun-if-chnaged=../firmware/src/pages/module_view.hh");
+    println!("cargo:rerun-if-chnaged=../firmware/src/pages/patch_view.hh");
     println!("cargo:rerun-if-chnaged=../firmware/src/pages/page_manager.cc");
     println!("cargo:rerun-if-changed=../firmware/src/pages/gui-guider");
     println!("cargo:rerun-if-changed=../firmware/src/patchlist.cc");
@@ -17,12 +21,34 @@ fn main() {
     //
     let mut lvgl_src: Vec<String> = Vec::new();
     add_glob_files("../firmware/lib/lvgl/lvgl/src/**/*.c", &mut lvgl_src);
-    add_glob_files("../firmware/src/pages/images/*.c", &mut lvgl_src);
-    add_glob_files("../firmware/src/pages/images/ui/*.c", &mut lvgl_src);
     add_glob_files("../firmware/src/pages/images/components/*.c", &mut lvgl_src);
-    add_glob_files("../firmware/src/pages/fonts/*.c", &mut lvgl_src);
-    add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut lvgl_src);
+    // add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut lvgl_src);
     lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
+    // add_glob_files("../firmware/src/pages/fonts/*.c", &mut lvgl_src);
+    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_500_12.c"));
+    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_700_12.c"));
+    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_700_14.c"));
+    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_700_16.c"));
+    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_700_18.c"));
+
+    if use_fewer_modules {
+        lvgl_src.push(String::from("../firmware/src/pages/images/Djembe_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/Djembe_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/StMix_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/StMix_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/PEG_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/PEG_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/SMR_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/SMR_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/MultiLFO_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/MultiLFO_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/PitchShift_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/PitchShift_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/HPF_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/HPF_artwork_240.c"));
+    } else {
+        add_glob_files("../firmware/src/pages/images/*.c", &mut lvgl_src);
+    }
 
     let mut builder = cc::Build::new();
     let build = builder
@@ -45,8 +71,19 @@ fn main() {
     src.push(String::from("../firmware/src/pages/page_manager.cc"));
     src.push(String::from("../shared/cpputil/util/math_tables.cc"));
     src.push(String::from("../shared/axoloti-wrapper/axoloti_math.cpp"));
-    add_glob_files("../shared/CoreModules/*.cc", &mut src);
 
+    if use_fewer_modules {
+        src.push(String::from("../shared/CoreModules/DjembeCore.cc"));
+        src.push(String::from("../shared/CoreModules/StMixCore.cc"));
+        src.push(String::from("../shared/CoreModules/PEGCore.cc"));
+        src.push(String::from("../shared/CoreModules/SMRCore.cc"));
+        src.push(String::from("../shared/CoreModules/MultiLFOCore.cc"));
+        src.push(String::from("../shared/CoreModules/PitchShiftCore.cc"));
+        src.push(String::from("../shared/CoreModules/HPFCore.cc"));
+        src.push(String::from("../shared/CoreModules/panel_medium.cc"));
+    } else {
+        add_glob_files("../shared/CoreModules/*.cc", &mut src);
+    }
 
     // Patch convert
     src.push(String::from("../shared/patch_convert/ryml/ryml_serial.cc"));
@@ -56,7 +93,7 @@ fn main() {
 
     println!("cargo:rerun-rustc-link-lib=lvgl");
     let mut builder = cc::Build::new();
-    let build = builder
+    let mut build = builder
         .cpp(true)
         .files(src.iter())
         .flag("--includestubs/sys/alloc_buffer.hh")
@@ -79,6 +116,9 @@ fn main() {
         .flag("-Wno-unused-but-set-variable")
         .flag("-Wno-unused-const-variable")
         .flag("-Wno-deprecated-anon-enum-enum-conversion");
+    if use_fewer_modules  {
+        build = build.flag("-DUSE_FEWER_MODULES");
+    }
     build.compile("metamodulescreen");
 
     // CXXFLAGS=-std=c++11 cargo build

@@ -105,7 +105,18 @@ SOURCES += $(core_src)/aux_core_main.cc
 SOURCES += src/patchlist.cc
 SOURCES += src/patchlist_ryml_tests.cc
 SOURCES += src/pages/page_manager.cc
+ifeq "$(USE_FEWER_MODULES)" "1"
+SOURCES += $(SHARED)/CoreModules/DjembeCore.cc
+SOURCES += $(SHARED)/CoreModules/StMixCore.cc
+SOURCES += $(SHARED)/CoreModules/PEGCore.cc
+SOURCES += $(SHARED)/CoreModules/SMRCore.cc
+SOURCES += $(SHARED)/CoreModules/MultiLFOCore.cc
+SOURCES += $(SHARED)/CoreModules/PitchShiftCore.cc
+SOURCES += $(SHARED)/CoreModules/HPFCore.cc
+SOURCES += $(SHARED)/CoreModules/panel_medium.cc
+else
 SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
+endif
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
 SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
@@ -113,7 +124,7 @@ SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
 ## LVGL / Gui-Guider
 LVGL_DIR=$(LIBDIR)/lvgl
 LVGL_DIR_NAME=lvgl
-SOURCES += $(shell find -L $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/widgets/ -name \*.c)
+SOURCES += $(shell find -L $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/widgets -name \*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/flex/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/grid/*.c)
@@ -128,9 +139,33 @@ SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/misc/*.c)
 # SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/gpu/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/hal/*.c)
 #SOURCES += $(wildcard src/pages/gui-guider/*.c)
-SOURCES += $(wildcard src/pages/fonts/*.c)
+
+# SOURCES += $(wildcard src/pages/fonts/*.c)
+SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
+SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
+SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
+SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
+SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
+
+ifeq "$(USE_FEWER_MODULES)" "1"
+SOURCES += src/pages/images/Djembe_artwork_240.c
+SOURCES += src/pages/images/StMix_artwork_240.c
+SOURCES += src/pages/images/PEG_artwork_240.c
+SOURCES += src/pages/images/SMR_artwork_240.c
+SOURCES += src/pages/images/MultiLFO_artwork_240.c
+SOURCES += src/pages/images/PitchShift_artwork_240.c
+SOURCES += src/pages/images/HPF_artwork_240.c
+SOURCES += src/pages/images/Djembe_artwork_120.c
+SOURCES += src/pages/images/StMix_artwork_120.c
+SOURCES += src/pages/images/PEG_artwork_120.c
+SOURCES += src/pages/images/SMR_artwork_120.c
+SOURCES += src/pages/images/MultiLFO_artwork_120.c
+SOURCES += src/pages/images/PitchShift_artwork_120.c
+SOURCES += src/pages/images/HPF_artwork_120.c
+else
 SOURCES += $(wildcard src/pages/images/*.c)
-SOURCES += $(wildcard src/pages/images/ui/*.c)
+endif
+# SOURCES += $(wildcard src/pages/images/ui/*.c)
 SOURCES += $(wildcard src/pages/images/components/*.c)
 
 ## RapidYml
@@ -242,6 +277,10 @@ EXTRA_CFLAGS = --param l1-cache-size=32 \
 			   --param l2-cache-size=256 \
 				# -DNE10_ENABLE_DSP \
 				# $(NE10_CFLAGS) \
+
+ifeq "$(USE_FEWER_MODULES)" "1"
+	EXTRA_CFLAGS += -D'USE_FEWER_MODULES=1'
+endif
 
 EXTRA_CPPFLAGS = $(LTOFLAG)
 
