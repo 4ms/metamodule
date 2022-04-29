@@ -31,29 +31,23 @@ struct PatchViewPage : PageBase {
 
 		patchname = lv_label_create(base);
 		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
-		//lv_obj_set_size(patchname, 320, 30);
-		// lv_obj_set_size(patchname, 240, 30);
 		lv_obj_set_width(patchname, 252);
-		// DrawHelper::debug_outline(patchname);
 
 		playbut = lv_btn_create(base);
 		lv_obj_set_height(playbut, 25);
 		lv_obj_set_width(playbut, 60);
 		lv_obj_set_style_pad_ver(playbut, 3, LV_PART_MAIN);
-		// DrawHelper::debug_outline(playbut);
 
 		playbut_label = lv_label_create(playbut);
 		lv_obj_add_style(playbut_label, &Gui::button_label_style, LV_PART_MAIN);
 		lv_label_set_text(playbut_label, "Play");
 		lv_obj_set_align(playbut_label, LV_ALIGN_CENTER);
-		// DrawHelper::debug_outline(playbut_label);
 
 		description = lv_label_create(base);
 		lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
 		lv_label_set_long_mode(description, LV_LABEL_LONG_WRAP);
 		lv_obj_set_width(description, 320);
 		lv_obj_set_height(description, 68);
-		// DrawHelper::debug_outline(description);
 
 		modules_cont = lv_obj_create(base);
 		lv_obj_set_size(modules_cont, 320, height + 8);
@@ -68,18 +62,6 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
-
-		////Play button
-		//popup_playbut = lv_btn_create(popup_cont);
-		//lv_obj_add_style(popup_playbut, &style_popup_buttons, LV_PART_MAIN);
-		//popup_playbut_label = lv_label_create(popup_playbut);
-		//lv_label_set_text(popup_playbut_label, "Play");
-		// // Play button, above Explore, up 10px
-		// lv_obj_align(popup_playbut, popup_explorebut, LV_ALIGN_OUT_TOP_MID, 0, -10);
-		// lv_group_add_obj(group, popup_playbut);
-		// lv_obj_add_event_cb(popup_playbut, popup_play_event_cb, LV_EVENT_CLICKED, this);
-
-		// set_patch_id(_patch_id);
 	}
 
 	void set_patch_id(uint32_t patch_id) {
@@ -89,12 +71,8 @@ struct PatchViewPage : PageBase {
 		if (patch.patch_name.length() == 0)
 			return;
 
-		// LVGLMemory::print_mem_usage("PatchSel::setup_popup 0");
 		lv_label_set_text(patchname, patch_list.get_patch_name(_patch_id));
 		lv_label_set_text(description, patch_list.get_patch(_patch_id).description.c_str());
-		// lv_label_set_text(description,
-		// 				  "TODO: Patch descriptions...\nLorum ipsum\nADmnjf djknmd asjfkjdf a sd, sdhan di and uienad "
-		// 				  "kjtkjcnmheujhne, hfjasdasdf-adf. Lofamfkm dkjlfkolea.\nSul Sul!");
 
 		for (auto &m : modules)
 			lv_obj_del(m);
@@ -150,11 +128,6 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
-		if (metaparams.meta_buttons[0].is_just_pressed()) {
-			printf("patchname height = %d\n", lv_obj_get_height(patchname));
-			printf("playbut height = %d\n", lv_obj_get_height(playbut));
-			printf("playbutlAbel height = %d\n", lv_obj_get_height(playbut_label));
-		}
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (PageList::request_last_page()) {
 				blur();
