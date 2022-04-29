@@ -206,7 +206,7 @@ struct MetaModuleHubBase : public CommModule {
 					.replace_all("#", "")
 					.replace_all("!", "");
 				std::string patchFileName = patchDir + patchStructName.str;
-				writePatchFile(patchFileName, patchName);
+				writePatchFile(patchFileName, patchStructName.str, patchName);
 
 				labelText = "Wrote patch file: ";
 				labelText += patchStructName.str + ".yml";
@@ -229,7 +229,7 @@ private:
 		return false;
 	}
 
-	void writePatchFile(std::string fileName, std::string patchName)
+	void writePatchFile(std::string fileName, std::string patchStructName, std::string patchName)
 	{
 		labelText = "Creating patch..";
 		updateDisplay();
@@ -240,8 +240,9 @@ private:
 		pw.setParamList(centralData->paramData);
 		pw.addMaps(centralData->maps);
 
-		writeToFile(fileName + ".yml", pw.printPatchYAML());
-		writeBinaryFile(fileName + ".mmpatch", pw.printPatchBinary());
+		std::string yml = pw.printPatchYAML();
+		writeToFile(fileName + ".yml", yml);
+		writeAsHeader(fileName + ".hh", patchStructName + "_patch", yml);
 	}
 
 	void writeToFile(std::string fileName, std::string textToWrite)
@@ -249,6 +250,17 @@ private:
 		std::ofstream myfile;
 		myfile.open(fileName);
 		myfile << textToWrite;
+		myfile.close();
+	}
+
+	void writeAsHeader(std::string_view fileName, std::string_view structname, std::string_view textToWrite)
+	{
+		std::ofstream myfile;
+		myfile.open(fileName);
+		myfile << "static char " << structname << "[] = \n";
+		myfile << "R\"(\n";
+		myfile << textToWrite;
+		myfile << "\n)\";";
 		myfile.close();
 	}
 
