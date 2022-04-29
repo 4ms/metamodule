@@ -37,6 +37,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_height(playbut, 25);
 		lv_obj_set_width(playbut, 60);
 		lv_obj_set_style_pad_ver(playbut, 3, LV_PART_MAIN);
+		lv_obj_add_event_cb(playbut, playbut_cb, LV_EVENT_PRESSED, this);
 
 		playbut_label = lv_label_create(playbut);
 		lv_obj_add_style(playbut_label, &Gui::button_label_style, LV_PART_MAIN);
@@ -83,6 +84,8 @@ struct PatchViewPage : PageBase {
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
+
+		lv_group_add_obj(group, playbut);
 
 		constexpr uint32_t pixel_size = (LV_COLOR_SIZE / 8) / sizeof(buffer[0]);
 		uint32_t xpos = 0;
@@ -133,7 +136,7 @@ struct PatchViewPage : PageBase {
 				blur();
 			}
 		}
-		// handle_changing_patch();
+		handle_changing_patch();
 	}
 
 	void prepare_focus() override {
@@ -149,10 +152,9 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void playbut_cb(lv_event_t *event) {
-		// auto obj = event->current_target;
-		// auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto page = static_cast<PatchViewPage *>(event->user_data);
 		printf("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
-		// 	page->start_changing_patch(page->patch_id);
+		page->start_changing_patch();
 	}
 
 private:
@@ -171,11 +173,11 @@ private:
 	lv_obj_t *base;
 	uint32_t _patch_id;
 
-	void start_changing_patch(int32_t new_patch_index) {
-		if (!mbox.loading_new_patch && (new_patch_index != (int32_t)patch_list.cur_patch_index())) {
-			mbox.new_patch_index = new_patch_index;
+	void start_changing_patch() {
+		if (!mbox.loading_new_patch && (_patch_id != (int32_t)patch_list.cur_patch_index())) {
+			mbox.new_patch_index = _patch_id;
 			mbox.loading_new_patch = true;
-			printf("Loading patch %s\n\r", patch_list.get_patch_name(new_patch_index).data());
+			printf("Loading patch %s\n\r", patch_list.get_patch_name(_patch_id).data());
 		}
 	}
 
