@@ -33,6 +33,10 @@ struct ModuleViewPage : PageBase {
 
 		canvas = lv_canvas_create(base);
 		lv_draw_img_dsc_init(&img_dsc);
+		lv_draw_arc_dsc_init(&arc_dsc);
+		arc_dsc.width = 4;
+		arc_dsc.color = lv_palette_main(LV_PALETTE_ORANGE);
+		arc_dsc.opa = LV_OPA_30;
 
 		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
@@ -70,17 +74,21 @@ struct ModuleViewPage : PageBase {
 
 		//Create text list (roller options) and buttons over components
 
-		auto info = ModuleFactory::getModuleInfo(slug);
-		if (info.width_hp == 0) {
+		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
+		if (moduleinfo.width_hp == 0) {
 			mbox.append_message("Module View page got empty module slug.\r\n");
 			return;
 		}
 
-		size_t num_controls = info.InJacks.size() + info.OutJacks.size() + info.Knobs.size() + info.Switches.size();
+		auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
+		//patch.mapped_knobs
+
+		size_t num_controls = moduleinfo.InJacks.size() + moduleinfo.OutJacks.size() + moduleinfo.Knobs.size() +
+							  moduleinfo.Switches.size();
 		opts.reserve(num_controls * 12);
 		button.reserve(num_controls);
 
-		for (const auto el : info.Knobs) {
+		for (const auto el : moduleinfo.Knobs) {
 			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
 			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
 			_add_button(x, y);
@@ -99,8 +107,20 @@ struct ModuleViewPage : PageBase {
 			else
 				continue;
 			lv_canvas_draw_img(canvas, x - knob->header.w / 2, y - knob->header.h / 2, knob, &img_dsc);
+
+			for (auto &m : patch.mapped_knobs) {
+				if (m.module_id == PageList::get_selected_module_id() && m.param_id == el.id) {
+					arc_dsc.color = lv_palette_main((lv_palette_t)m.panel_knob_id);
+					//TODO: display this at top?
+					//patch_player.get_panel_knob_name(m.panel_knob_id);
+					int arcsz = params.knobs[m.panel_knob_id] * 300.f + 120.f;
+					arcsz = arcsz > 360.f ? arcsz - 360.f : arcsz;
+					lv_canvas_draw_arc(canvas, x, y, 20, 120, arcsz, &arc_dsc);
+				}
+			}
 		}
-		for (const auto el : info.InJacks) {
+
+		for (const auto el : moduleinfo.InJacks) {
 			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
 			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
 			_add_button(x, y);
@@ -108,7 +128,7 @@ struct ModuleViewPage : PageBase {
 			opts += "\n";
 			lv_canvas_draw_img(canvas, x - jack_x.header.w / 2, y - jack_x.header.h / 2, &jack_x, &img_dsc);
 		}
-		for (const auto el : info.OutJacks) {
+		for (const auto el : moduleinfo.OutJacks) {
 			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
 			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
 			_add_button(x, y);
@@ -116,7 +136,7 @@ struct ModuleViewPage : PageBase {
 			opts += "\n";
 			lv_canvas_draw_img(canvas, x - jack_x.header.w / 2, y - jack_x.header.h / 2, &jack_x, &img_dsc);
 		}
-		for (const auto el : info.Switches) {
+		for (const auto el : moduleinfo.Switches) {
 			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
 			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
 			_add_button(x, y);
@@ -157,6 +177,24 @@ struct ModuleViewPage : PageBase {
 				blur();
 			}
 		}
+
+		auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
+		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
+
+		for (const auto el : moduleinfo.Knobs) {
+			for (auto &m : patch.mapped_knobs) {
+				if (m.module_id == PageList::get_selected_module_id() && m.param_id == el.id) {
+					arc_dsc.color = lv_palette_main((lv_palette_t)m.panel_knob_id);
+					//TODO: display this at top?
+					//patch_player.get_panel_knob_name(m.panel_knob_id);
+					int arcsz = params.knobs[m.panel_knob_id] * 300.f + 120.f;
+					arcsz = arcsz > 360.f ? arcsz - 360.f : arcsz;
+					int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
+					int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+					lv_canvas_draw_arc(canvas, x, y, 20, 120, arcsz, &arc_dsc);
+				}
+			}
+		}
 	}
 
 private:
@@ -168,6 +206,7 @@ private:
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *base = nullptr;
 	lv_draw_img_dsc_t img_dsc;
+	lv_draw_arc_dsc_t arc_dsc;
 
 	std::string_view slug;
 
