@@ -18,7 +18,7 @@ INCLUDES += -I$(RYMLDIR)/src
 INCLUDES += -I$(RYMLDIR)/ext/c4core/src
 
 # FLAGS will be passed to both the C and C++ compiler
-FLAGS += -std=c++2a
+FLAGS += -std=c++2a 
 FLAGS += $(INCLUDES)
 
 CFLAGS +=
@@ -46,6 +46,8 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
+
+CXXFLAGS += -mmacosx-version-min=10.15 
 
 all: plugin res tests
 
