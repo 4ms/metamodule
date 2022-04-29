@@ -53,10 +53,14 @@ struct DefaultPatches {
 		R"( 
 PatchData:
   patch_name: 'SMR Resonant Pings'
+  description: "Lush resonant ping and plucks, in stereo.
+
+  Big knobs control pitch (quantized to Cmaj by default).
+  Gate 1 is the master clock, and small knobs control clock div/mult for each channel."
   module_slugs:
     0: Djembe
     1: PEG
-    2: QCD
+    2: StMix
     3: SMR
   int_cables:
     - out:
@@ -88,5 +92,4 @@ PatchData:
       min: 0.0
       max: 1.0
 )";
-	// clang-format on
 };

@@ -15,6 +15,9 @@ bool yaml_raw_to_patch(char *yaml, size_t size, PatchData &pd) {
 
 	data_root["patch_name"] >> pd.patch_name;
 
+	if (data_root.has_child("description"))
+		data_root["description"] >> pd.description;
+
 	data_root["module_slugs"] >> pd.module_slugs;
 	data_root["int_cables"] >> pd.int_cables;
 	data_root["mapped_ins"] >> pd.mapped_ins;
@@ -43,6 +46,9 @@ bool yaml_string_to_patch(std::string yaml, PatchData &pd) {
 		return false;
 
 	data_root["patch_name"] >> pd.patch_name;
+
+	if (data_root.has_child("description"))
+		data_root["description"] >> pd.description;
 
 	data_root["module_slugs"] >> pd.module_slugs;
 	data_root["int_cables"] >> pd.int_cables;

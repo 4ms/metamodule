@@ -9,6 +9,10 @@ TEST_CASE("Correct header and data produced from yaml") {
 R"(
 PatchData:
   patch_name: 'Test Patch 99'
+  description: "This is a patch
+  without a newline
+
+  and then with"
   module_slugs:
     0: PanelMedium
     1: Module1
@@ -110,6 +114,8 @@ PatchData:
 	CHECK(yaml_string_to_patch(yamlhdr, pd));
 
 	CHECK(pd.patch_name.is_equal("Test Patch 99"));
+
+	CHECK(pd.description.is_equal("This is a patch without a newline\nand then with"));
 
 	CHECK(pd.module_slugs.size() == 4);
 	CHECK(pd.module_slugs[0].is_equal("PanelMedium"));

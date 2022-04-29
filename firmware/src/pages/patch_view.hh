@@ -81,9 +81,10 @@ struct PatchViewPage : PageBase {
 
 		// LVGLMemory::print_mem_usage("PatchSel::setup_popup 0");
 		lv_label_set_text(patchname, patch_list.get_patch_name(_patch_id));
-		lv_label_set_text(description,
-						  "TODO: Patch descriptions...\nLorum ipsum\nADmnjf djknmd asjfkjdf a sd, sdhan di and uienad "
-						  "kjtkjcnmheujhne, hfjasdasdf-adf. Lofamfkm dkjlfkolea. Ipsum Lorum\n");
+		lv_label_set_text(description, patch_list.get_patch(_patch_id).description.c_str());
+		// lv_label_set_text(description,
+		// 				  "TODO: Patch descriptions...\nLorum ipsum\nADmnjf djknmd asjfkjdf a sd, sdhan di and uienad "
+		// 				  "kjtkjcnmheujhne, hfjasdasdf-adf. Lofamfkm dkjlfkolea.\nSul Sul!");
 
 		for (auto &m : modules)
 			lv_obj_del(m);
