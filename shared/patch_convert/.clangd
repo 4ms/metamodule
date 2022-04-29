@@ -11,6 +11,7 @@ CompileFlags:
 		"-Iryml/rapidyaml/src",
 		"-Iryml/rapidyaml/ext/c4core/src",
 		"-I../",
+		"-I../cpputil",
 		"-I../etl/include",
 	]
 	Remove: [-march=nocona]

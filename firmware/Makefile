@@ -19,10 +19,10 @@ export TABLEGEN 		= $(SHARED)/tableGen
 export VALID_BOARDS = mini medium max pcmdev norflash-loader
 
 
-.PHONY: all mp1-mini mp1-pcmdev mp1-med patches clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate norflash-loader u-boot
+.PHONY: all mp1-mini mp1-pcmdev mp1-med clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate norflash-loader u-boot
 
 
-all: patches images mp1-med tests #mp1-mini h7 
+all: images mp1-med tests #mp1-mini h7 
 
 # Binaries
 
@@ -90,6 +90,7 @@ clean:
 	@cd $(DRIVERLIB) && $(MAKE) --no-print-directory -f tests/Makefile clean
 	@cd $(SHARED)/cpputil && $(MAKE) --no-print-directory -f tests/Makefile clean
 	@cd $(SHARED)/CoreModules && $(MAKE) --no-print-directory -f tests/Makefile clean
+	@cd $(SHARED)/patch_convert && $(MAKE) --no-print-directory -f tests/Makefile clean
 
 
 clean_a7:
@@ -127,11 +128,15 @@ simulate:
 
 ## Tests
 
-tests: module_tests core_tests util_tests mdrivlib_tests #vcv_tests
+tests: patch_convert_tests module_tests core_tests util_tests mdrivlib_tests  #vcv_tests
 
 module_tests:
 	$(info ... Running firmware tests....)
 	@$(MAKE) --no-print-directory -f tests/Makefile
+
+patch_convert_tests:
+	$(info ... Running patch_convert tests....)
+	@cd $(SHARED)/patch_convert && $(MAKE) --no-print-directory -f tests/Makefile
 
 mdrivlib_tests:
 	$(info ... Running mdrivlib tests ...)

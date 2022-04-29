@@ -24,7 +24,7 @@ OBJECTS = $(addprefix $(BUILDDIR)/, $(subst ../,,$(addsuffix .o, $(basename $(SO
 DEPDIR := $(BUILDDIR)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$(subst ../,,$(basename $<).d)
 
-.PHONY: all tests clean
+.PHONY: all tests clean patch_convert
 
 all: patch_convert
 
