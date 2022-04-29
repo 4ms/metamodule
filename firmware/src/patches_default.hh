@@ -20,20 +20,19 @@ struct DefaultPatches {
 
 	static size_t get_len(uint32_t id) {
 		if (id == 0)
-			return Djembe2_yml_len;
+			return sizeof(Djembe2_patch) / sizeof(char);
 		if (id == 1)
-			return Djembe4_yml_len;
+			return sizeof(Djembe4_patch) / sizeof(char);
 		if (id == 2)
 			return sizeof(SMR_patch) / sizeof(char);
-		// return AllReal4ms_yml_len;
 		return 0;
 	}
 
 	static char *get_data(uint32_t id) {
 		if (id == 0)
-			return Djembe2_yml;
+			return Djembe2_patch;
 		if (id == 1)
-			return Djembe4_yml;
+			return Djembe4_patch;
 		if (id == 2)
 			return SMR_patch;
 		return nullptr;
@@ -41,9 +40,9 @@ struct DefaultPatches {
 
 	static std::span<char> get_patch(uint32_t id) {
 		if (id == 0)
-			return Djembe2_yml;
+			return Djembe2_patch;
 		if (id == 1)
-			return Djembe4_yml;
+			return Djembe4_patch;
 		if (id == 2)
 			return SMR_patch;
 		return {};

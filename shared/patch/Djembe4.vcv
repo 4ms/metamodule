@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.2db08f1",
+  "version": "1.1.6",
   "modules": [
     {
       "id": 14,
@@ -230,7 +230,7 @@
             "DstObjID": 1,
             "DstObjType": "OutputJack",
             "SrcModID": 22,
-            "SrcObjID": 9,
+            "SrcObjID": 7,
             "SrcObjType": "OutputJack",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
@@ -264,17 +264,6 @@
             "DstObjType": "OutputJack",
             "SrcModID": 22,
             "SrcObjID": 6,
-            "SrcObjType": "OutputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 29,
-            "DstObjID": 2,
-            "DstObjType": "OutputJack",
-            "SrcModID": 22,
-            "SrcObjID": 8,
             "SrcObjType": "OutputJack",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
@@ -732,22 +721,6 @@
       "inputModuleId": 16,
       "inputId": 1,
       "color": "#c9b70e"
-    },
-    {
-      "id": 58,
-      "outputModuleId": 26,
-      "outputId": 0,
-      "inputModuleId": 21,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
-      "id": 59,
-      "outputModuleId": 26,
-      "outputId": 1,
-      "inputModuleId": 20,
-      "inputId": 0,
-      "color": "#0986ad"
     },
     {
       "id": 49,

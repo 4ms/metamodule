@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.2db08f1",
+  "version": "1.1.6",
   "modules": [
     {
       "id": 14,
@@ -135,7 +135,7 @@
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 0.339000046
         },
         {
           "id": 9,
@@ -143,7 +143,7 @@
         },
         {
           "id": 10,
-          "value": 0.325499713
+          "value": 0.361499727
         },
         {
           "id": 11,
@@ -228,7 +228,7 @@
             "DstObjID": 1,
             "DstObjType": "OutputJack",
             "SrcModID": 22,
-            "SrcObjID": 9,
+            "SrcObjID": 7,
             "SrcObjType": "OutputJack",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
@@ -262,17 +262,6 @@
             "DstObjType": "OutputJack",
             "SrcModID": 22,
             "SrcObjID": 6,
-            "SrcObjType": "OutputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 29,
-            "DstObjID": 2,
-            "DstObjType": "OutputJack",
-            "SrcModID": 22,
-            "SrcObjID": 8,
             "SrcObjType": "OutputJack",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
@@ -365,6 +354,50 @@
             "RangeMin": 0.0,
             "RangeMax": 1.0,
             "AliasName": "Wndw"
+          },
+          {
+            "DstModID": 26,
+            "DstObjID": 4,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 8,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0250000022,
+            "RangeMax": 0.936000347,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 26,
+            "DstObjID": 6,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 8,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.910000026,
+            "RangeMax": 0.287999868,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 26,
+            "DstObjID": 5,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 10,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 26,
+            "DstObjID": 7,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 10,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.850000143,
+            "RangeMax": 0.168000102,
+            "AliasName": ""
           }
         ],
         "PatchName": "Djembe-2"
@@ -450,7 +483,7 @@
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.283500046
         },
         {
           "id": 3,
@@ -487,19 +520,19 @@
         },
         {
           "id": 4,
-          "value": 0.375499785
+          "value": 0.333829165
         },
         {
           "id": 5,
-          "value": 0.678499997
+          "value": 0.361499727
         },
         {
           "id": 6,
-          "value": 0.355999857
+          "value": 0.699141979
         },
         {
           "id": 7,
-          "value": 0.51700002
+          "value": 0.603457332
         }
       ],
       "rightModuleId": 22,

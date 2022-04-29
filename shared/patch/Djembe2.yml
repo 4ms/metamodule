@@ -71,7 +71,7 @@ PatchData:
       out:
         module_id: 5
         jack_id: 0
-    - panel_jack_id: 9
+    - panel_jack_id: 7
       out:
         module_id: 6
         jack_id: 1
@@ -79,10 +79,6 @@ PatchData:
       out:
         module_id: 6
         jack_id: 3
-    - panel_jack_id: 8
-      out:
-        module_id: 6
-        jack_id: 2
   static_knobs:
     - module_id: 1
       param_id: 0
@@ -116,7 +112,7 @@ PatchData:
       value: 0.3885
     - module_id: 3
       param_id: 2
-      value: 1
+      value: 0.2835
     - module_id: 3
       param_id: 3
       value: 0.4435
@@ -134,16 +130,16 @@ PatchData:
       value: 1
     - module_id: 4
       param_id: 4
-      value: 0.3755
+      value: 0.333829
     - module_id: 4
       param_id: 5
-      value: 0.6785
+      value: 0.3615
     - module_id: 4
       param_id: 6
-      value: 0.356
+      value: 0.699142
     - module_id: 4
       param_id: 7
-      value: 0.517
+      value: 0.603457
     - module_id: 5
       param_id: 0
       value: 0.519
@@ -214,3 +210,27 @@ PatchData:
       min: 0
       max: 1
       alias_name: Wndw
+    - panel_knob_id: 8
+      module_id: 4
+      param_id: 4
+      curve_type: 0
+      min: 0.025
+      max: 0.936
+    - panel_knob_id: 8
+      module_id: 4
+      param_id: 6
+      curve_type: 0
+      min: 0.91
+      max: 0.288
+    - panel_knob_id: 10
+      module_id: 4
+      param_id: 5
+      curve_type: 0
+      min: 0
+      max: 1
+    - panel_knob_id: 10
+      module_id: 4
+      param_id: 7
+      curve_type: 0
+      min: 0.85
+      max: 0.168

@@ -85,7 +85,7 @@ PatchData:
       out:
         module_id: 5
         jack_id: 0
-    - panel_jack_id: 9
+    - panel_jack_id: 7
       out:
         module_id: 6
         jack_id: 1
@@ -93,10 +93,6 @@ PatchData:
       out:
         module_id: 6
         jack_id: 3
-    - panel_jack_id: 8
-      out:
-        module_id: 6
-        jack_id: 2
   static_knobs:
     - module_id: 1
       param_id: 0
