@@ -2,9 +2,9 @@ static char Djembe4_patch[] =
 	R"(
 PatchData:
   patch_name: 'Djembe-4'
-  description: Four Djembes with stereo mix-down.
+  description: "Four Djembes with stereo mix-down.
 
-  Patch clocks into Gate In 1 and 2.
+  Patch clocks into Gate In 1 and 2."
   module_slugs:
     0: PanelMedium
     1: PitchShift

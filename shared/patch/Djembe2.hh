@@ -5,7 +5,7 @@ PatchData:
   description: "Dual Djembes, with FX. 
   Gate Ins trigger the djembes.
   Djembe #1 pans left, with PitchShifting.
-  Djembe #2 pans right, with HPF.
+  Djembe #2 pans right, with HPF."
   module_slugs:
     0: PanelMedium
     1: PitchShift
