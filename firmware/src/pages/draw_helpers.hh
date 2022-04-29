@@ -28,6 +28,13 @@ LV_IMG_DECLARE(switch_down_120);
 namespace MetaModule
 {
 struct DrawHelper {
+
+	static void debug_outline(lv_obj_t *obj) {
+		lv_obj_set_style_border_width(obj, 1, 0);
+		lv_obj_set_style_border_opa(obj, LV_OPA_50, 0);
+		lv_obj_set_style_border_color(obj, lv_palette_main(LV_PALETTE_CYAN), 0);
+	}
+
 	static void draw_module_controls(lv_obj_t *canvas, const ModuleInfoView &info, uint32_t module_height) {
 		static lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);

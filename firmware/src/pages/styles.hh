@@ -28,6 +28,7 @@ struct Gui {
 
 	// text
 	static inline lv_style_t header_style;
+	static inline lv_style_t button_label_style;
 	static inline lv_style_t text_block_style;
 
 	// popup dialog box
@@ -66,13 +67,14 @@ struct Gui {
 		lv_style_init(&header_style);
 		lv_style_set_text_align(&header_style, LV_TEXT_ALIGN_CENTER);
 		// lv_style_set_text_font(&header_style, &lv_font_montserrat_14);
-		lv_style_set_text_font(&header_style, &MuseoSansRounded_700_18);
+		lv_style_set_text_font(&header_style, &MuseoSansRounded_700_16);
 		lv_style_set_text_color(&header_style, lv_color_white());
 		lv_style_set_text_opa(&header_style, LV_OPA_COVER);
 		lv_style_set_bg_opa(&header_style, LV_OPA_COVER);
 		lv_style_set_bg_color(&header_style, lv_color_black());
 		lv_style_set_text_line_space(&header_style, 5);
-		lv_style_set_pad_all(&header_style, 6);
+		lv_style_set_pad_hor(&header_style, 6);
+		lv_style_set_pad_ver(&header_style, 2);
 
 		// text_block_style
 		lv_style_init(&text_block_style);
@@ -86,6 +88,14 @@ struct Gui {
 		lv_style_set_text_line_space(&text_block_style, 2);
 		lv_style_set_pad_hor(&text_block_style, 8);
 		lv_style_set_pad_ver(&text_block_style, 4);
+
+		// button_label_style
+		lv_style_init(&button_label_style);
+		// lv_style_set_text_align(&button_label_style, LV_TEXT_ALIGN_LEFT);
+		lv_style_set_text_font(&button_label_style, &MuseoSansRounded_700_14);
+		lv_style_set_text_color(&button_label_style, lv_color_white());
+		lv_style_set_text_opa(&button_label_style, LV_OPA_COVER);
+		lv_style_set_pad_ver(&button_label_style, 1);
 
 		// roller_style
 		lv_style_reset(&roller_style);

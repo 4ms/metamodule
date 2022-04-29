@@ -31,25 +31,35 @@ struct PatchViewPage : PageBase {
 
 		patchname = lv_label_create(base);
 		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
-		lv_obj_set_size(patchname, 320, 30);
-		lv_obj_set_style_border_width(patchname, 0, 0);
-		// lv_obj_set_style_border_opa(patchname, LV_OPA_COVER, 0);
-		// lv_obj_set_style_border_color(patchname, lv_palette_main(LV_PALETTE_CYAN), 0);
+		//lv_obj_set_size(patchname, 320, 30);
+		// lv_obj_set_size(patchname, 240, 30);
+		lv_obj_set_width(patchname, 252);
+		// DrawHelper::debug_outline(patchname);
+
+		playbut = lv_btn_create(base);
+		lv_obj_set_height(playbut, 25);
+		lv_obj_set_width(playbut, 60);
+		lv_obj_set_style_pad_ver(playbut, 3, LV_PART_MAIN);
+		// DrawHelper::debug_outline(playbut);
+
+		playbut_label = lv_label_create(playbut);
+		lv_obj_add_style(playbut_label, &Gui::button_label_style, LV_PART_MAIN);
+		lv_label_set_text(playbut_label, "Play");
+		lv_obj_set_align(playbut_label, LV_ALIGN_CENTER);
+		// DrawHelper::debug_outline(playbut_label);
 
 		description = lv_label_create(base);
 		lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
-		lv_label_set_long_mode(description, LV_LABEL_LONG_DOT);
-		lv_obj_set_width(description, 270);
-
-		playbut = lv_btn_create(base);
-		// lv_obj_add_style(playbut, &style_popup_buttons, LV_PART_MAIN);
-		playbut_label = lv_label_create(playbut);
-		lv_label_set_text(playbut_label, "Play");
-		// lv_obj_set_size(playbut, 60, 20);
+		lv_label_set_long_mode(description, LV_LABEL_LONG_WRAP);
+		lv_obj_set_width(description, 320);
+		lv_obj_set_height(description, 68);
+		// DrawHelper::debug_outline(description);
 
 		modules_cont = lv_obj_create(base);
 		lv_obj_set_size(modules_cont, 320, height + 8);
 		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
+		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
+		lv_obj_set_style_border_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW);
 		lv_obj_set_style_pad_gap(modules_cont, 2, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_all(modules_cont, 2, LV_STATE_DEFAULT);
@@ -140,6 +150,11 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
+		if (metaparams.meta_buttons[0].is_just_pressed()) {
+			printf("patchname height = %d\n", lv_obj_get_height(patchname));
+			printf("playbut height = %d\n", lv_obj_get_height(playbut));
+			printf("playbutlAbel height = %d\n", lv_obj_get_height(playbut_label));
+		}
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (PageList::request_last_page()) {
 				blur();
@@ -153,7 +168,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void moduleimg_cb(lv_event_t *event) {
-		auto obj = event->current_target;
+		// auto obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(event->user_data));
 		PageList::set_selected_module_id(module_id);
 		printf("Clicked Module %d\n", module_id);
@@ -179,8 +194,6 @@ private:
 	std::vector<uint32_t> module_ids;
 	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(height, MaxBufferWidth)];
 	lv_draw_img_dsc_t draw_img_dsc;
-
-	bool should_show_moduleview = false;
 
 	lv_obj_t *base;
 	uint32_t _patch_id;
