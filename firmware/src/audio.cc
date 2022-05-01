@@ -206,7 +206,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, outchan] : countzip(out_.chan))
 			outchan = get_audio_output(i);
 
-		for (int i = 0; i < PanelDef::NumDACOut; i++)
+		for (unsigned i = 0; i < PanelDef::NumDACOut; i++)
 			aux_.set_output(i, get_dac_output(i + PanelDef::NumAudioOut));
 
 		for (auto [i, gate_out] : countzip(aux_.gate_out))

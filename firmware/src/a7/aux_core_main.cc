@@ -40,7 +40,7 @@ extern "C" void aux_core_main() {
 			auto starting_idx = SMPControl::read<ModuleID>();
 			auto num_modules = SMPControl::read<NumModules>();
 			auto idx_increment = SMPControl::read<IndexIncrement>();
-			for (int i = starting_idx; i < num_modules; i += idx_increment)
+			for (unsigned i = starting_idx; i < num_modules; i += idx_increment)
 				patch_player->modules[i]->update();
 
 			SMPThread::signal_done();

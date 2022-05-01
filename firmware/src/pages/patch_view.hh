@@ -174,7 +174,7 @@ private:
 	uint32_t _patch_id;
 
 	void start_changing_patch() {
-		if (!mbox.loading_new_patch && (_patch_id != (int32_t)patch_list.cur_patch_index())) {
+		if (!mbox.loading_new_patch && (_patch_id != patch_list.cur_patch_index())) {
 			mbox.new_patch_index = _patch_id;
 			mbox.loading_new_patch = true;
 			printf("Loading patch %s\n\r", patch_list.get_patch_name(_patch_id).data());

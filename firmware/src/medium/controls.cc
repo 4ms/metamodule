@@ -30,13 +30,13 @@ void Controls::update_params() {
 
 	// Interpolate knob readings across the param block, since we capture them at a slower rate than audio process
 	if (_new_adc_data_ready) {
-		for (int i = 0; i < PanelDef::NumPot; i++) {
+		for (unsigned i = 0; i < PanelDef::NumPot; i++) {
 			_knobs[i].set_new_value(get_pot_reading(i) / 4095.0f);
 		}
 		_new_adc_data_ready = false;
 	}
 
-	for (int i = 0; i < PanelDef::NumPot; i++)
+	for (unsigned i = 0; i < PanelDef::NumPot; i++)
 		cur_params->knobs[i] = _knobs[i].next();
 
 	if (_first_param) {
