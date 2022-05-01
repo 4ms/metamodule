@@ -515,7 +515,7 @@ R"(PatchData:
 	// CHECK(pd.mapped_ins[1].ins[2] == (Jack{-1, -1}));
 	CHECK(pd.mapped_ins[2].panel_jack_id == 3);
 	CHECK(pd.mapped_ins[2].ins[0] == (Jack{77, 88}));
-	CHECK(pd.mapped_ins[2].ins[1] == (Jack{-1, -1}));
+	// CHECK(pd.mapped_ins[2].ins[1] == (Jack{-1, -1}));
 
 	CHECK(pd.mapped_outs.size() == 2);
 	CHECK(pd.mapped_outs[0].panel_jack_id == 4);
