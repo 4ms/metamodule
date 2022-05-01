@@ -34,6 +34,7 @@ CXXFLAGS = $(CFLAGS) \
 	-fno-unwind-tables \
 	-ffreestanding \
 	-fno-threadsafe-statics \
+	-Wsign-compare \
 	-Werror=return-type \
 	-Wdouble-promotion \
 	-Wno-register \
