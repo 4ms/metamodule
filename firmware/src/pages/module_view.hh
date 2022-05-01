@@ -33,10 +33,6 @@ struct ModuleViewPage : PageBase {
 
 		canvas = lv_canvas_create(base);
 		lv_draw_img_dsc_init(&img_dsc);
-		lv_draw_arc_dsc_init(&arc_dsc);
-		arc_dsc.width = 4;
-		arc_dsc.color = lv_palette_main(LV_PALETTE_ORANGE);
-		arc_dsc.opa = LV_OPA_30;
 
 		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
@@ -56,6 +52,12 @@ struct ModuleViewPage : PageBase {
 		}
 		printf("ModuleViewPage module %s\n", slug.data());
 
+		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
+		if (moduleinfo.width_hp == 0) {
+			mbox.append_message("Module View page got empty module slug.\r\n");
+			return;
+		}
+
 		reset_module_page();
 
 		//Draw module image
@@ -73,29 +75,20 @@ struct ModuleViewPage : PageBase {
 		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
 
 		//Create text list (roller options) and buttons over components
-
-		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-		if (moduleinfo.width_hp == 0) {
-			mbox.append_message("Module View page got empty module slug.\r\n");
-			return;
-		}
-
 		auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
-		//patch.mapped_knobs
 
 		size_t num_controls = moduleinfo.InJacks.size() + moduleinfo.OutJacks.size() + moduleinfo.Knobs.size() +
 							  moduleinfo.Switches.size();
 		opts.reserve(num_controls * 12);
 		button.reserve(num_controls);
+		mapped_knobs.reserve(num_controls);
 
 		for (const auto el : moduleinfo.Knobs) {
-			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-			int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-			_add_button(x, y);
-			opts += el.short_name;
-			opts += "\n";
+			int16_t x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
+			int16_t y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+			_add_button(x, y, 28);
 
-			const lv_img_dsc_t *knob = nullptr;
+			const lv_img_dsc_t *knob;
 			if (el.knob_style == KnobDef::Small)
 				knob = &knob9mm_x;
 			else if (el.knob_style == KnobDef::Medium)
@@ -106,19 +99,46 @@ struct ModuleViewPage : PageBase {
 				knob = &slider_x;
 			else
 				continue;
-			lv_canvas_draw_img(canvas, x - knob->header.w / 2, y - knob->header.h / 2, knob, &img_dsc);
 
+			int c_x = x - knob->header.w / 2;
+			int c_y = y - knob->header.h / 2;
+
+			std::optional<uint32_t> mapped_panel_knob;
 			for (auto &m : patch.mapped_knobs) {
 				if (m.module_id == PageList::get_selected_module_id() && m.param_id == el.id) {
-					arc_dsc.color = lv_palette_main((lv_palette_t)m.panel_knob_id);
-					//TODO: display this at top?
-					//patch_player.get_panel_knob_name(m.panel_knob_id);
-					int arcsz = params.knobs[m.panel_knob_id] * 300.f + 120.f;
-					arcsz = arcsz > 360.f ? arcsz - 360.f : arcsz;
-					lv_canvas_draw_arc(canvas, x, y, 20, 120, arcsz, &arc_dsc);
+					mapped_panel_knob = m.panel_knob_id;
+					break;
 				}
 			}
+
+			if (mapped_panel_knob.has_value()) {
+				opts += "[";
+				opts += PanelDef::KnobNames[mapped_panel_knob.value()];
+				opts += "] ";
+				opts += el.short_name;
+				opts += "\n";
+				lv_obj_t *obj = lv_img_create(base);
+				lv_img_set_src(obj, knob);
+				lv_obj_set_pos(obj, c_x, c_y);
+				mapped_knobs.push_back({
+					.obj = obj,
+					.mapped_panel_knob = mapped_panel_knob.value(),
+				});
+			} else {
+				opts += el.short_name;
+				opts += "\n";
+				img_dsc.pivot.x = knob->header.w / 2;
+				img_dsc.pivot.y = knob->header.h / 2;
+				auto static_knob = std::find_if(patch.static_knobs.begin(), patch.static_knobs.end(), [&](auto &p) {
+					return p.module_id == PageList::get_selected_module_id() && p.param_id == el.id;
+				});
+				img_dsc.angle =
+					(static_knob != patch.static_knobs.end()) ? static_knob->value * 3000.f - 1500.f : -1500;
+				lv_canvas_draw_img(canvas, c_x, c_y, knob, &img_dsc);
+			}
 		}
+
+		img_dsc.angle = 0;
 
 		for (const auto el : moduleinfo.InJacks) {
 			int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
@@ -178,21 +198,12 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
-		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-
-		for (const auto el : moduleinfo.Knobs) {
-			for (auto &m : patch.mapped_knobs) {
-				if (m.module_id == PageList::get_selected_module_id() && m.param_id == el.id) {
-					arc_dsc.color = lv_palette_main((lv_palette_t)m.panel_knob_id);
-					//TODO: display this at top?
-					//patch_player.get_panel_knob_name(m.panel_knob_id);
-					int arcsz = params.knobs[m.panel_knob_id] * 300.f + 120.f;
-					arcsz = arcsz > 360.f ? arcsz - 360.f : arcsz;
-					int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-					int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-					lv_canvas_draw_arc(canvas, x, y, 20, 120, arcsz, &arc_dsc);
-				}
+		for (auto &mk : mapped_knobs) {
+			float new_pot_val = params.knobs[mk.mapped_panel_knob];
+			if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
+				mk.last_pot_reading = new_pot_val;
+				int angle = params.knobs[0] * 3000.f - 1500.f;
+				lv_img_set_angle(mapped_knobs[0].obj, angle);
 			}
 		}
 	}
@@ -201,12 +212,19 @@ private:
 	std::string opts;
 	int32_t cur_selected = 0;
 	std::vector<lv_obj_t *> button;
+
+	struct MKnob {
+		lv_obj_t *obj;
+		uint32_t mapped_panel_knob;
+		float last_pot_reading = 0.5f;
+	};
+	std::vector<MKnob> mapped_knobs;
+
 	lv_obj_t *roller = nullptr;
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *base = nullptr;
 	lv_draw_img_dsc_t img_dsc;
-	lv_draw_arc_dsc_t arc_dsc;
 
 	std::string_view slug;
 
@@ -215,6 +233,10 @@ private:
 			lv_obj_del(b);
 		}
 		button.clear();
+		for (auto &k : mapped_knobs) {
+			lv_obj_del(k.obj);
+		}
+		mapped_knobs.clear();
 		opts.clear();
 	}
 
@@ -256,12 +278,12 @@ private:
 		lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
 	}
 
-	void _add_button(int x, int y) {
+	void _add_button(int x, int y, int size = 20) {
 		auto &b = button.emplace_back();
 		b = lv_btn_create(base);
 		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
-		lv_obj_set_pos(b, x - 6, y - 6);
-		lv_obj_set_size(b, 12, 12);
+		lv_obj_set_pos(b, x - size / 2, y - size / 2);
+		lv_obj_set_size(b, size, size);
 	}
 };
 
