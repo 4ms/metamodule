@@ -24,6 +24,7 @@ extern "C" {
     fn button_release() -> ();
     fn lv_timer_handler() -> ();
     fn fake_HAL_IncTick() -> ();
+    fn set_knob(knobid : u32, val: f32) -> ();
 }
 
 fn get_ext_color(x: usize, y: usize) -> u32 {
@@ -95,6 +96,10 @@ fn main() {
 
                     Key::Comma => unsafe { rotary_push_back(); }
                     Key::Period => unsafe { rotary_push_fwd(); }
+
+                    Key::Key1 => unsafe { println!("1"); set_knob(0, 0.1); }
+                    Key::Key2 => unsafe { set_knob(0, 0.5); }
+                    Key::Key3 => unsafe { set_knob(0, 0.9); }
                     _ => (),
                 }
             }

@@ -89,10 +89,6 @@ extern "C" void rotary_release() {
 	sim.metaparams.rotary_button.register_falling_edge();
 }
 
-extern "C" void jump_to_page(unsigned page_num) {
-	// sim.pages.jump_to_page(page_num);
-}
-
 extern "C" void init_screen() {
 	sim.init();
 }
@@ -101,10 +97,15 @@ extern "C" void update_ui() {
 	sim.update_ui();
 }
 
+extern "C" void set_knob(uint32_t knob_id, float val) {
+	if (knob_id < MetaModule::NumPot)
+		sim.params.knobs[knob_id] = val;
+}
+
 extern "C" uint16_t get_pixel(uint16_t x, uint16_t y) {
 	return sim.get_pixel(x, y);
 }
 
 size_t get_heap_size() {
-	return 0;
+	return 1;
 }
