@@ -59,9 +59,11 @@ struct Gui {
 		// panel_highlight_style
 		lv_style_init(&panel_highlight_style);
 		lv_style_set_radius(&panel_highlight_style, 120);
-		lv_style_set_outline_color(&panel_highlight_style, orange_highlight);
-		lv_style_set_outline_width(&panel_highlight_style, 4);
-		lv_style_set_outline_opa(&panel_highlight_style, 255);
+		lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
+		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_50);
+		// lv_style_set_outline_color(&panel_highlight_style, orange_highlight);
+		// lv_style_set_outline_width(&panel_highlight_style, 4);
+		// lv_style_set_outline_opa(&panel_highlight_style, 255);
 
 		// header_style (text)
 		lv_style_init(&header_style);
