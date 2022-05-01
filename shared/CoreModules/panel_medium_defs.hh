@@ -18,6 +18,8 @@ struct PanelDef {
 	static constexpr uint32_t NumMetaRgbButton = 1;
 
 	static constexpr int NumKnobs = NumPot;
+	static constexpr char KnobNames[NumPot][2] = {"A", "B", "C", "D", "E", "F", "u", "v", "w", "x", "y", "z"};
+
 	static constexpr int NumOutJacks = NumAudioIn + NumCVIn + NumGateIn;
 	static constexpr int NumInJacks = NumAudioOut + NumDACOut + NumGateOut;
 	// User-facing out jacks, like "Audio Out 3", is an input jack as seen by other virtual modules
