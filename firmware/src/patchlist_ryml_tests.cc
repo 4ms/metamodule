@@ -499,7 +499,7 @@ R"(PatchData:
 	CHECK(pd.int_cables[0].out == (Jack{1, 2}));
 	CHECK(pd.int_cables[0].ins[0] == (Jack{3, 4}));
 	CHECK(pd.int_cables[0].ins[1] == (Jack{5, 6}));
-	CHECK(pd.int_cables[0].ins[2] == (Jack{-1, -1}));
+	// CHECK(pd.int_cables[0].ins[2] == (Jack{-1, -1}));
 	CHECK(pd.int_cables[1].out == (Jack{11, 22}));
 	CHECK(pd.int_cables[1].ins[0] == (Jack{33, 44}));
 	CHECK(pd.int_cables[1].ins[1] == (Jack{55, 66}));
@@ -508,11 +508,11 @@ R"(PatchData:
 	CHECK(pd.mapped_ins.size() == 3);
 	CHECK(pd.mapped_ins[0].panel_jack_id == 1);
 	CHECK(pd.mapped_ins[0].ins[0] == (Jack{3, 4}));
-	CHECK(pd.mapped_ins[0].ins[1] == (Jack{-1, -1}));
+	// CHECK(pd.mapped_ins[0].ins[1] == (Jack{-1, -1}));
 	CHECK(pd.mapped_ins[1].panel_jack_id == 2);
 	CHECK(pd.mapped_ins[1].ins[0] == (Jack{5, 6}));
 	CHECK(pd.mapped_ins[1].ins[1] == (Jack{33, 44}));
-	CHECK(pd.mapped_ins[1].ins[2] == (Jack{-1, -1}));
+	// CHECK(pd.mapped_ins[1].ins[2] == (Jack{-1, -1}));
 	CHECK(pd.mapped_ins[2].panel_jack_id == 3);
 	CHECK(pd.mapped_ins[2].ins[0] == (Jack{77, 88}));
 	CHECK(pd.mapped_ins[2].ins[1] == (Jack{-1, -1}));
