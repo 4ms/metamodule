@@ -119,6 +119,8 @@ struct ModuleViewPage : PageBase {
 				lv_obj_t *obj = lv_img_create(base);
 				lv_img_set_src(obj, knob);
 				lv_obj_set_pos(obj, c_x, c_y);
+				lv_obj_set_style_img_recolor(obj, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
+				lv_obj_set_style_img_recolor_opa(obj, LV_OPA_70, LV_PART_MAIN);
 				mapped_knobs.push_back({
 					.obj = obj,
 					.mapped_panel_knob = mapped_panel_knob.value(),
@@ -136,7 +138,7 @@ struct ModuleViewPage : PageBase {
 				lv_canvas_draw_img(canvas, c_x, c_y, knob, &img_dsc);
 			}
 
-			_add_button(x, y, knob->header.w);
+			_add_button(x, y, knob->header.w * 1.2f);
 		}
 
 		img_dsc.angle = 0;
@@ -268,11 +270,6 @@ private:
 
 		// Get the new button
 		cur_sel = lv_roller_get_selected(roller);
-
-		// Debug printing
-		// char buf[48];
-		// lv_roller_get_selected_str(roller, buf, 48);
-		// printf("moduleview: cur_selected: %d = %s\r\n", _instance->cur_selected, buf);
 
 		// Turn on new button
 		lv_obj_add_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
