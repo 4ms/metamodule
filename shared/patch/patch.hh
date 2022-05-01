@@ -9,8 +9,8 @@ const int MAX_KNOBS_PER_MAPPING = 16;
 
 // 4 Bytes
 struct Jack {
-	int16_t module_id;
-	int16_t jack_id;
+	uint16_t module_id;
+	uint16_t jack_id;
 	bool operator==(const Jack &other) const {
 		return this->module_id == other.module_id && this->jack_id == other.jack_id;
 	}
@@ -18,8 +18,8 @@ struct Jack {
 
 // 8 Bytes
 struct StaticParam {
-	int16_t module_id;
-	int16_t param_id;
+	uint16_t module_id;
+	uint16_t param_id;
 	float value;
 };
 
@@ -27,10 +27,10 @@ using AliasNameString = StaticString<15>;
 
 // 16 Bytes
 struct MappedKnob {
-	int16_t panel_knob_id;
-	int16_t module_id;
-	int16_t param_id;
-	int16_t curve_type; // reserved for future use
+	uint16_t panel_knob_id;
+	uint16_t module_id;
+	uint16_t param_id;
+	uint16_t curve_type; // reserved for future use
 	float min;
 	float max;
 	AliasNameString alias_name;
@@ -51,14 +51,14 @@ struct InternalCable {
 
 // 16 Bytes
 struct MappedInputJack {
-	int32_t panel_jack_id;
+	uint32_t panel_jack_id;
 	std::vector<Jack> ins;
 	AliasNameString alias_name;
 };
 
 // 8 Bytes
 struct MappedOutputJack {
-	int32_t panel_jack_id;
+	uint32_t panel_jack_id;
 	Jack out;
 	AliasNameString alias_name;
 };
