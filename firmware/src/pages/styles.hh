@@ -50,7 +50,7 @@ struct Gui {
 
 	static void init_lvgl_styles() {
 		// invisible_style
-		lv_style_reset(&invisible_style);
+		lv_style_init(&invisible_style);
 		lv_style_set_bg_opa(&invisible_style, 0);
 		lv_style_set_border_width(&invisible_style, 0);
 		lv_style_set_outline_width(&invisible_style, 0);
@@ -100,7 +100,7 @@ struct Gui {
 		lv_style_set_pad_ver(&button_label_style, 1);
 
 		// roller_style
-		lv_style_reset(&roller_style);
+		lv_style_init(&roller_style);
 		lv_style_set_radius(&roller_style, 0);
 		lv_style_set_bg_opa(&roller_style, LV_OPA_COVER);
 		lv_style_set_bg_color(&roller_style, lv_color_black());
@@ -117,14 +117,14 @@ struct Gui {
 		lv_style_set_line_width(&roller_style, 12);
 
 		// roller_sel_style
-		lv_style_reset(&roller_sel_style);
+		lv_style_init(&roller_sel_style);
 		lv_style_set_bg_color(&roller_sel_style, lv_palette_main(LV_PALETTE_ORANGE));
 		lv_style_set_bg_opa(&roller_sel_style, LV_OPA_COVER);
 		lv_style_set_text_color(&roller_sel_style, lv_color_black());
 		lv_style_set_border_width(&roller_sel_style, 0);
 
 		// plain_border_style
-		lv_style_reset(&plain_border_style);
+		lv_style_init(&plain_border_style);
 		lv_style_set_border_width(&plain_border_style, 0);
 		lv_style_set_outline_width(&plain_border_style, 0);
 		lv_style_set_shadow_opa(&plain_border_style, LV_OPA_TRANSP);
