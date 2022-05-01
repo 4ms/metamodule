@@ -86,7 +86,6 @@ struct ModuleViewPage : PageBase {
 		for (const auto el : moduleinfo.Knobs) {
 			int16_t x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
 			int16_t y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-			_add_button(x, y, 28);
 
 			const lv_img_dsc_t *knob;
 			if (el.knob_style == KnobDef::Small)
@@ -136,6 +135,8 @@ struct ModuleViewPage : PageBase {
 					(static_knob != patch.static_knobs.end()) ? static_knob->value * 3000.f - 1500.f : -1500;
 				lv_canvas_draw_img(canvas, c_x, c_y, knob, &img_dsc);
 			}
+
+			_add_button(x, y, knob->header.w);
 		}
 
 		img_dsc.angle = 0;
