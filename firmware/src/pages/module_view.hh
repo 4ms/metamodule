@@ -97,7 +97,7 @@ struct ModuleViewPage : PageBase {
 
 			if (auto mappedknob = find_mapped_knob_in_patch(el.id, patch); mappedknob.has_value()) {
 				opts += "[";
-				opts += PanelDef::KnobNames[mappedknob.value()];
+				opts += PanelDef::KnobNames[mappedknob.value().panel_knob_id];
 				opts += "] ";
 				opts += el.short_name;
 				opts += "\n";
@@ -108,7 +108,7 @@ struct ModuleViewPage : PageBase {
 				lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
 				mapped_knobs.push_back({
 					.obj = obj,
-					.mapped_panel_knob = mappedknob.value(),
+					.mapped_knob = mappedknob.value(),
 				});
 				lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
 			} else {
@@ -188,10 +188,10 @@ struct ModuleViewPage : PageBase {
 		}
 
 		for (auto &mk : mapped_knobs) {
-			float new_pot_val = params.knobs[mk.mapped_panel_knob];
+			const float new_pot_val = mk.mapped_knob.get_mapped_val(params.knobs[mk.mapped_knob.panel_knob_id]);
 			if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
 				mk.last_pot_reading = new_pot_val;
-				int angle = params.knobs[mk.mapped_panel_knob] * 3000.f - 1500.f;
+				const int angle = new_pot_val * 3000.f - 1500.f;
 				lv_img_set_angle(mk.obj, angle);
 			}
 		}
@@ -200,27 +200,25 @@ struct ModuleViewPage : PageBase {
 private:
 	std::string opts;
 	int32_t cur_selected = 0;
-	std::vector<lv_obj_t *> button;
+	std::string_view slug;
 
 	struct MKnob {
 		lv_obj_t *obj;
-		uint32_t mapped_panel_knob;
+		MappedKnob mapped_knob;
 		float last_pot_reading = 0.5f;
 	};
 	std::vector<MKnob> mapped_knobs;
-
+	std::vector<lv_obj_t *> button;
 	lv_obj_t *roller = nullptr;
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *base = nullptr;
 	lv_draw_img_dsc_t img_dsc;
 
-	std::string_view slug;
-
-	static std::optional<uint32_t> find_mapped_knob_in_patch(uint32_t knobid, const PatchData &patch) {
+	static std::optional<MappedKnob> find_mapped_knob_in_patch(uint32_t knobid, const PatchData &patch) {
 		for (auto &m : patch.mapped_knobs) {
 			if (m.module_id == PageList::get_selected_module_id() && m.param_id == knobid)
-				return m.panel_knob_id;
+				return m;
 		}
 		return std::nullopt;
 	}
