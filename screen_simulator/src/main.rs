@@ -36,6 +36,36 @@ fn get_ext_color(x: usize, y: usize) -> u32 {
     (r_ << 16) | (g_ << 8) | b_
 }
 
+trait Control {
+    fn new() -> Self;
+    fn inc(&mut self) -> f32;
+    fn dec(&mut self) -> f32;
+}
+
+struct Knob {
+    val : f32,
+}
+
+impl Default for Knob {
+    fn default() -> Self {
+        Knob{val: 0.0}
+    }
+}
+
+impl Control for Knob {
+    fn new() -> Knob {
+        Knob{val: 0.5}
+    }
+    fn inc(&mut self) -> f32 {
+        self.val = self.val + 0.1;
+        self.val
+    }
+    fn dec(&mut self) -> f32 {
+        self.val = self.val - 0.1;
+        self.val
+    }
+}
+
 fn main() {
     println!("Starting...");
     let loaded_ok;
@@ -77,6 +107,9 @@ fn main() {
         };
     });
 
+
+    let mut knobs : [Knob; 12] = Default::default();
+
     //33Hz refresh rate (matches hardware)
     window.limit_update_rate(Some(std::time::Duration::from_micros(33300)));
 
@@ -97,9 +130,41 @@ fn main() {
                     Key::Comma => unsafe { rotary_push_back(); }
                     Key::Period => unsafe { rotary_push_fwd(); }
 
-                    Key::Key1 => unsafe { println!("1"); set_knob(0, 0.1); }
-                    Key::Key2 => unsafe { set_knob(0, 0.5); }
-                    Key::Key3 => unsafe { set_knob(0, 0.9); }
+                    Key::Key1 => unsafe { set_knob(0, knobs[0].dec());println!("{}", knobs[0].val); }
+                    Key::F1 => unsafe { set_knob(0, knobs[0].inc()); println!("{}", knobs[0].val); }
+
+                    Key::Key2 => unsafe { set_knob(1, knobs[1].dec()); }
+                    Key::F2 => unsafe { set_knob(1, knobs[1].inc()); }
+
+                    Key::Key3 => unsafe { set_knob(2, knobs[2].dec()); }
+                    Key::F3 => unsafe { set_knob(2, knobs[2].inc()); }
+
+                    Key::Key4 => unsafe { set_knob(3, knobs[3].dec()); }
+                    Key::F4 => unsafe { set_knob(3, knobs[3].inc()); }
+
+                    Key::Key5 => unsafe { set_knob(4, knobs[4].dec()); }
+                    Key::F5 => unsafe { set_knob(4, knobs[4].inc()); }
+
+                    Key::Key6 => unsafe { set_knob(5, knobs[5].dec()); }
+                    Key::F6 => unsafe { set_knob(5, knobs[5].inc()); }
+
+                    Key::Key7 => unsafe { set_knob(6, knobs[6].dec()); }
+                    Key::F7 => unsafe { set_knob(6, knobs[6].inc()); }
+
+                    Key::Key8 => unsafe { set_knob(7, knobs[7].dec()); }
+                    Key::F8 => unsafe { set_knob(7, knobs[7].inc()); }
+
+                    Key::Key9 => unsafe { set_knob(8, knobs[8].dec()); }
+                    Key::F9 => unsafe { set_knob(8, knobs[8].inc()); }
+
+                    Key::Key0 => unsafe { set_knob(9, knobs[9].dec()); }
+                    Key::F10 => unsafe { set_knob(9, knobs[9].inc()); }
+
+                    Key::Minus => unsafe { set_knob(10, knobs[10].dec()); }
+                    Key::F11 => unsafe { set_knob(10, knobs[10].inc()); }
+
+                    Key::Equal=> unsafe { set_knob(11, knobs[11].dec()); }
+                    Key::F12 => unsafe { set_knob(11, knobs[11].inc()); }
                     _ => (),
                 }
             }
