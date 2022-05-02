@@ -84,8 +84,8 @@ struct ModuleViewPage : PageBase {
 		mapped_knobs.reserve(num_controls);
 
 		for (const auto el : moduleinfo.Knobs) {
-			int16_t x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-			int16_t y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
+			int16_t x = std::round(ModuleInfoBase::mm_to_px<240>(el.x_mm));
+			int16_t y = std::round(ModuleInfoBase::mm_to_px<240>(el.y_mm));
 
 			const lv_img_dsc_t *knob;
 			if (el.knob_style == KnobDef::Small)
@@ -99,8 +99,10 @@ struct ModuleViewPage : PageBase {
 			else
 				continue;
 
-			int c_x = x - knob->header.w / 2;
-			int c_y = y - knob->header.h / 2;
+			int width = knob->header.w / 2;
+			int height = knob->header.h / 2;
+			int c_x = x - width;
+			int c_y = y - height;
 
 			std::optional<uint32_t> mapped_panel_knob;
 			for (auto &m : patch.mapped_knobs) {
@@ -119,8 +121,9 @@ struct ModuleViewPage : PageBase {
 				lv_obj_t *obj = lv_img_create(base);
 				lv_img_set_src(obj, knob);
 				lv_obj_set_pos(obj, c_x, c_y);
-				lv_obj_set_style_img_recolor(obj, lv_palette_lighten(LV_PALETTE_RED, 1), LV_PART_MAIN);
-				lv_obj_set_style_img_recolor_opa(obj, LV_OPA_70, LV_PART_MAIN);
+				lv_img_set_pivot(obj, width, height);
+				lv_obj_set_style_img_recolor(obj, lv_palette_lighten(LV_PALETTE_BLUE, 1), LV_PART_MAIN);
+				lv_obj_set_style_img_recolor_opa(obj, LV_OPA_50, LV_PART_MAIN);
 				mapped_knobs.push_back({
 					.obj = obj,
 					.mapped_panel_knob = mapped_panel_knob.value(),
