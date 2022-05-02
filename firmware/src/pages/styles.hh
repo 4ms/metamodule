@@ -26,6 +26,10 @@ struct Gui {
 	// highlight a selected knob, jack, etc on a faceplate
 	static inline lv_style_t panel_highlight_style;
 
+	// highlight of a mapped knob on a faceplate
+	static inline lv_style_t mapped_knob_style;
+	static inline lv_draw_arc_dsc_t mapped_knob_arcdsc;
+
 	// text
 	static inline lv_style_t header_style;
 	static inline lv_style_t button_label_style;
@@ -59,11 +63,28 @@ struct Gui {
 		// panel_highlight_style
 		lv_style_init(&panel_highlight_style);
 		lv_style_set_radius(&panel_highlight_style, 120);
-		// lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
-		// lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_50);
-		lv_style_set_outline_color(&panel_highlight_style, orange_highlight);
-		lv_style_set_outline_width(&panel_highlight_style, 4);
-		lv_style_set_outline_opa(&panel_highlight_style, 255);
+		lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
+		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_50);
+		// lv_style_set_outline_color(&panel_highlight_style, orange_highlight);
+		// lv_style_set_outline_width(&panel_highlight_style, 4);
+		// lv_style_set_outline_opa(&panel_highlight_style, 255);
+
+		// mapped_knob_style
+		lv_draw_arc_dsc_init(&mapped_knob_arcdsc);
+		mapped_knob_arcdsc.width = 4;
+		mapped_knob_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
+		mapped_knob_arcdsc.opa = LV_OPA_50;
+		lv_style_init(&mapped_knob_style);
+		// lv_style_set_img_recolor(&mapped_knob_style, lv_palette_lighten(LV_PALETTE_BLUE, 1));
+		// lv_style_set_img_recolor_opa(&mapped_knob_style, LV_OPA_50);
+		// lv_style_set_radius(&mapped_knob_style, 120);
+		// lv_style_set_pad_all(&mapped_knob_style, 0);
+		// lv_style_set_outline_color(&mapped_knob_style, lv_palette_lighten(LV_PALETTE_BLUE, 1));
+		// lv_style_set_outline_width(&mapped_knob_style, 2);
+		// lv_style_set_outline_opa(&mapped_knob_style, LV_OPA_50);
+		// lv_style_set_border_color(&mapped_knob_style, lv_palette_lighten(LV_PALETTE_RED, 1));
+		// lv_style_set_border_width(&mapped_knob_style, 2);
+		// lv_style_set_border_opa(&mapped_knob_style, LV_OPA_50);
 
 		// header_style (text)
 		lv_style_init(&header_style);

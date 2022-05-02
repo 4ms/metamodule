@@ -2,6 +2,7 @@
 #include "CoreModules/info/module_info_base.hh"
 #include "lvgl/src/core/lv_obj_pos.h"
 #include "pages/base.hh"
+#include "pages/draw_helpers.hh"
 #include "pages/images/image_list.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
@@ -66,16 +67,12 @@ struct ModuleViewPage : PageBase {
 			printf("Image not found\n");
 			return;
 		}
-
 		auto width_px = img->header.w;
-		// auto height_px = img->header.h; // assert == 240?
 		lv_obj_set_size(canvas, width_px, 240);
 		lv_canvas_set_buffer(canvas, buffer, width_px, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
-		lv_canvas_fill_bg(canvas, lv_color_black(), LV_OPA_COVER);
 		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
 
-		//Create text list (roller options) and buttons over components
-		auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
+		//Create text list (roller options) and circles over components
 
 		size_t num_controls = moduleinfo.InJacks.size() + moduleinfo.OutJacks.size() + moduleinfo.Knobs.size() +
 							  moduleinfo.Switches.size();
@@ -84,50 +81,36 @@ struct ModuleViewPage : PageBase {
 		mapped_knobs.reserve(num_controls);
 
 		for (const auto el : moduleinfo.Knobs) {
-			int16_t x = std::round(ModuleInfoBase::mm_to_px<240>(el.x_mm));
-			int16_t y = std::round(ModuleInfoBase::mm_to_px<240>(el.y_mm));
+			int16_t c_x = std::round(ModuleInfoBase::mm_to_px<240>(el.x_mm));
+			int16_t c_y = std::round(ModuleInfoBase::mm_to_px<240>(el.y_mm));
 
-			const lv_img_dsc_t *knob;
-			if (el.knob_style == KnobDef::Small)
-				knob = &knob9mm_x;
-			else if (el.knob_style == KnobDef::Medium)
-				knob = &knob_x;
-			else if (el.knob_style == KnobDef::Large)
-				knob = &knob_large_x;
-			else if (el.knob_style == KnobDef::Slider25mm)
-				knob = &slider_x;
-			else
+			const lv_img_dsc_t *knob = DrawHelper::get_knob_img_240(el.knob_style);
+			if (!knob)
 				continue;
 
-			int width = knob->header.w / 2;
-			int height = knob->header.h / 2;
-			int c_x = x - width;
-			int c_y = y - height;
+			int width = knob->header.w;
+			int height = knob->header.h;
+			int left = c_x - width / 2;
+			int top = c_y - height / 2;
 
-			std::optional<uint32_t> mapped_panel_knob;
-			for (auto &m : patch.mapped_knobs) {
-				if (m.module_id == PageList::get_selected_module_id() && m.param_id == el.id) {
-					mapped_panel_knob = m.panel_knob_id;
-					break;
-				}
-			}
+			const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
 
-			if (mapped_panel_knob.has_value()) {
+			if (auto mappedknob = find_mapped_knob_in_patch(el.id, patch); mappedknob.has_value()) {
 				opts += "[";
-				opts += PanelDef::KnobNames[mapped_panel_knob.value()];
+				opts += PanelDef::KnobNames[mappedknob.value()];
 				opts += "] ";
 				opts += el.short_name;
 				opts += "\n";
 				lv_obj_t *obj = lv_img_create(base);
 				lv_img_set_src(obj, knob);
-				lv_obj_set_pos(obj, c_x, c_y);
-				lv_img_set_pivot(obj, width, height);
-				lv_obj_set_style_img_recolor(obj, lv_palette_lighten(LV_PALETTE_BLUE, 1), LV_PART_MAIN);
-				lv_obj_set_style_img_recolor_opa(obj, LV_OPA_50, LV_PART_MAIN);
+				lv_obj_set_pos(obj, left, top);
+				lv_img_set_pivot(obj, width / 2, height / 2);
+				lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
 				mapped_knobs.push_back({
 					.obj = obj,
-					.mapped_panel_knob = mapped_panel_knob.value(),
+					.mapped_panel_knob = mappedknob.value(),
 				});
+				lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
 			} else {
 				opts += el.short_name;
 				opts += "\n";
@@ -138,10 +121,10 @@ struct ModuleViewPage : PageBase {
 				});
 				img_dsc.angle =
 					(static_knob != patch.static_knobs.end()) ? static_knob->value * 3000.f - 1500.f : -1500;
-				lv_canvas_draw_img(canvas, c_x, c_y, knob, &img_dsc);
+				lv_canvas_draw_img(canvas, left, top, knob, &img_dsc);
 			}
 
-			_add_button(x, y, knob->header.w * 1.2f);
+			_add_button(c_x, c_y, knob->header.w * 1.2f);
 		}
 
 		img_dsc.angle = 0;
@@ -194,7 +177,7 @@ struct ModuleViewPage : PageBase {
 		//Select first element
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 		cur_selected = 0;
-		lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN); //LV_BTN_PART_MAIN
+		lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
 	}
 
 	void update() override {
@@ -233,6 +216,14 @@ private:
 	lv_draw_img_dsc_t img_dsc;
 
 	std::string_view slug;
+
+	static std::optional<uint32_t> find_mapped_knob_in_patch(uint32_t knobid, const PatchData &patch) {
+		for (auto &m : patch.mapped_knobs) {
+			if (m.module_id == PageList::get_selected_module_id() && m.param_id == knobid)
+				return m.panel_knob_id;
+		}
+		return std::nullopt;
+	}
 
 	void reset_module_page() {
 		for (auto &b : button) {

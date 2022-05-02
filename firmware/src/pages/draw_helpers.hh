@@ -35,6 +35,43 @@ struct DrawHelper {
 		lv_obj_set_style_border_color(obj, lv_palette_main(LV_PALETTE_CYAN), 0);
 	}
 
+	static const lv_img_dsc_t *get_knob_img_240(KnobDef::Style knob_style) {
+		if (knob_style == KnobDef::Small)
+			return &knob9mm_x;
+		else if (knob_style == KnobDef::Medium)
+			return &knob_x;
+		else if (knob_style == KnobDef::Large)
+			return &knob_large_x;
+		else if (knob_style == KnobDef::Slider25mm)
+			return &slider_x;
+		else
+			return nullptr;
+	}
+
+	static const lv_img_dsc_t *get_knob_img_120(KnobDef::Style knob_style) {
+		if (knob_style == KnobDef::Small)
+			return &knob9mm_x_120;
+		else if (knob_style == KnobDef::Medium)
+			return &knob_x_120;
+		else if (knob_style == KnobDef::Large)
+			return &knob_large_x_120;
+		else if (knob_style == KnobDef::Slider25mm)
+			return &slider_x_120;
+		else
+			return nullptr;
+	}
+
+	// static const lv_img_dsc_t *get_switch_img_240(SwitchDef::Style switch_style) {
+	// 		if (switch_type == SwitchDef::Toggle2pos || el.switch_type == SwitchDef::Toggle3pos)
+	// 			sw = fullsize ? &switch_left : &switch_left_120;
+	// 		else if (el.switch_type == SwitchDef::Encoder)
+	// 			sw = fullsize ? &knob_unlined_x : &knob_unlined_x_120;
+	// 		else if (el.switch_type == SwitchDef::MomentaryButton || el.switch_type == SwitchDef::LatchingButton)
+	// 			sw = fullsize ? &button_x : &button_x_120;
+	// 		else
+	// 			continue;
+	// }
+
 	static void draw_module_controls(lv_obj_t *canvas, const ModuleInfoView &info, uint32_t module_height) {
 		static lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
@@ -52,16 +89,8 @@ struct DrawHelper {
 		};
 
 		for (const auto el : info.Knobs) {
-			const lv_img_dsc_t *knob = nullptr;
-			if (el.knob_style == KnobDef::Small)
-				knob = fullsize ? &knob9mm_x : &knob9mm_x_120;
-			else if (el.knob_style == KnobDef::Medium)
-				knob = fullsize ? &knob_x : &knob_x_120;
-			else if (el.knob_style == KnobDef::Large)
-				knob = fullsize ? &knob_large_x : &knob_large_x_120;
-			else if (el.knob_style == KnobDef::Slider25mm)
-				knob = fullsize ? &slider_x : &slider_x_120;
-			else
+			const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
+			if (!knob)
 				continue;
 
 			auto [x, y] = scale_center(el, knob->header);
