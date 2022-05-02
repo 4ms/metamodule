@@ -205,8 +205,8 @@ struct ModuleViewPage : PageBase {
 			float new_pot_val = params.knobs[mk.mapped_panel_knob];
 			if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
 				mk.last_pot_reading = new_pot_val;
-				int angle = params.knobs[0] * 3000.f - 1500.f;
-				lv_img_set_angle(mapped_knobs[0].obj, angle);
+				int angle = params.knobs[mk.mapped_panel_knob] * 3000.f - 1500.f;
+				lv_img_set_angle(mk.obj, angle);
 			}
 		}
 	}
