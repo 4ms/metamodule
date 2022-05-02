@@ -54,7 +54,7 @@ private:
 	CodecT &codec_ext_;
 	uint32_t sample_rate_;
 
-	Calibrator incal[NumAudioIn];
+	Calibrator incal[PanelDef::NumAudioIn];
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()

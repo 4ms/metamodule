@@ -31,10 +31,10 @@ struct RotaryMotion {
 };
 
 struct Params {
-	std::array<float, NumCVIn> cvjacks{};
-	std::array<Toggler, NumGateIn> gate_ins{};
-	std::array<Toggler, NumRgbButton> buttons{};
-	std::array<float, NumPot> knobs{};
+	std::array<float, PanelDef::NumCVIn> cvjacks{};
+	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
+	std::array<Toggler, PanelDef::NumRgbButton> buttons{};
+	std::array<float, PanelDef::NumPot> knobs{};
 	uint32_t jack_senses;
 
 	Params() {
@@ -54,13 +54,13 @@ struct Params {
 	}
 
 	void copy(const Params &that) {
-		for (unsigned i = 0; i < NumCVIn; i++)
+		for (unsigned i = 0; i < PanelDef::NumCVIn; i++)
 			cvjacks[i] = that.cvjacks[i];
-		for (unsigned i = 0; i < NumGateIn; i++)
+		for (unsigned i = 0; i < PanelDef::NumGateIn; i++)
 			gate_ins[i].copy_state(that.gate_ins[i]);
-		for (unsigned i = 0; i < NumRgbButton; i++)
+		for (unsigned i = 0; i < PanelDef::NumRgbButton; i++)
 			buttons[i].copy_state(that.buttons[i]);
-		for (unsigned i = 0; i < NumPot; i++)
+		for (unsigned i = 0; i < PanelDef::NumPot; i++)
 			knobs[i] = that.knobs[i];
 		jack_senses = that.jack_senses;
 	}
@@ -71,8 +71,8 @@ struct MetaParams {
 	Toggler rotary_button;
 	RotaryMotion rotary;
 	RotaryMotion rotary_pushed;
-	std::array<Toggler, NumMetaRgbButton> meta_buttons{};
-	std::array<AnalyzedSignal<1000>, NumAudioIn> ins;
+	std::array<Toggler, PanelDef::NumMetaRgbButton> meta_buttons{};
+	std::array<AnalyzedSignal<1000>, PanelDef::NumAudioIn> ins;
 
 	uint8_t audio_load = 0;
 

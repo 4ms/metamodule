@@ -46,7 +46,8 @@ void Controls::update_params() {
 		store_jacksense_reading(cur_params->jack_senses);
 
 		// PatchCV
-		cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
+		if constexpr (PanelDef::NumMetaCV > 0)
+			cur_metaparams->patchcv = get_patchcv_reading() / 4095.0f;
 
 		// Rotary button
 		if (rotary_button.is_just_pressed()) {
@@ -93,8 +94,10 @@ void Controls::start_param_block() {
 	_first_param = true;
 	_buffer_full = false;
 
-	for (auto &aux : auxstream_blocks[block_num])
-		auxstream.queue_data(aux);
+	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
+		for (auto &aux : auxstream_blocks[block_num])
+			auxstream.queue_data(aux);
+	}
 }
 
 void Controls::start() {
@@ -110,7 +113,9 @@ void Controls::start() {
 	HWSemaphore<ParamsBuf2Lock>::enable_channel_ISR();
 
 	read_controls_task.start();
-	auxstream_updater.start();
+	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
+		auxstream_updater.start();
+	}
 }
 
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
@@ -155,11 +160,13 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 		update_params();
 	});
 
-	auxstream.init();
-	auxstream_updater.init([&]() {
-		// 0.35us wide, every 20.83us = 1.68% load
-		auxstream.output_next();
-	});
+	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
+		auxstream.init();
+		auxstream_updater.init([&]() {
+			// 0.35us wide, every 20.83us = 1.68% load
+			auxstream.output_next();
+		});
+	}
 
 	Debug::Pin2::low();
 }
@@ -171,7 +178,7 @@ uint32_t Controls::get_pot_reading(uint32_t pot_id) {
 }
 
 uint32_t Controls::get_patchcv_reading() {
-	return pot_vals[PatchCV];
+	return 0;
 }
 
 void Controls::store_jacksense_reading(uint16_t reading) {

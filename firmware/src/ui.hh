@@ -82,13 +82,13 @@ private:
 	}
 
 	void page_update_task() { //60Hz
-		Debug::Pin2::high();
+		// Debug::Pin2::high();
 		//This returns false when audio stops
 		bool read_ok = param_queue.read_sync(&params, &metaparams);
 		if (read_ok) {
 			page_manager.update_current_page();
 		}
-		Debug::Pin2::low();
+		// Debug::Pin2::low();
 	}
 
 	mdrivlib::Timekeeper page_update_tm;

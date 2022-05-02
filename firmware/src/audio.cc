@@ -98,9 +98,6 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	//
 	// This converts float to volts
 	incal[3].calibrate_chan<2, 4, 10>(6352.f / 32768.f, 12603.f / 32768.f);
-
-	// if constexpr (DEBUG_NE10_FFT)
-	// 	fftfx.init();
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {

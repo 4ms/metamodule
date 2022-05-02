@@ -70,6 +70,7 @@ private:
 	bool _first_param = true;
 
 	DoubleAuxStreamBlock &auxstream_blocks;
+
 	mdrivlib::PinChangeInt<AuxStreamUpdateConf> auxstream_updater;
 	AuxStream auxstream;
 
