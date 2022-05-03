@@ -2,10 +2,11 @@
 #include "CoreModules/moduleFactory.hh"
 #include "Djembe2.hh"
 #include "Djembe4.hh"
+#include "Djembe4verb.hh"
 
 struct DefaultPatches {
 	static uint32_t num_patches() {
-		return 3;
+		return 4;
 	}
 
 	static ModuleTypeSlug get_filename(uint32_t id) {
@@ -15,6 +16,8 @@ struct DefaultPatches {
 			return "djembe4.yml";
 		if (id == 2)
 			return "smr_resonant_pings.yml";
+		if (id == 3)
+			return "Djembe4verb.yml";
 		return "";
 	}
 
@@ -25,6 +28,8 @@ struct DefaultPatches {
 			return sizeof(Djembe4_patch) / sizeof(char);
 		if (id == 2)
 			return sizeof(SMR_patch) / sizeof(char);
+		if (id == 3)
+			return sizeof(Djembe4verb_patch) / sizeof(char);
 		return 0;
 	}
 
@@ -35,6 +40,8 @@ struct DefaultPatches {
 			return Djembe4_patch;
 		if (id == 2)
 			return SMR_patch;
+		if (id == 3)
+			return Djembe4verb_patch;
 		return nullptr;
 	}
 
@@ -45,6 +52,8 @@ struct DefaultPatches {
 			return Djembe4_patch;
 		if (id == 2)
 			return SMR_patch;
+		if (id == 3)
+			return Djembe4verb_patch;
 		return {};
 	}
 

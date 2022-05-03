@@ -25,7 +25,7 @@ struct StaticParam {
 
 using AliasNameString = StaticString<15>;
 
-// 16 Bytes
+// 32 Bytes
 struct MappedKnob {
 	uint16_t panel_knob_id;
 	uint16_t module_id;
@@ -56,7 +56,7 @@ struct MappedInputJack {
 	AliasNameString alias_name;
 };
 
-// 8 Bytes
+// 24 Bytes
 struct MappedOutputJack {
 	uint32_t panel_jack_id;
 	Jack out;
