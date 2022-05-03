@@ -61,21 +61,31 @@ struct DrawHelper {
 			return nullptr;
 	}
 
-	// static const lv_img_dsc_t *get_switch_img_240(SwitchDef::Style switch_style) {
-	// 		if (switch_type == SwitchDef::Toggle2pos || el.switch_type == SwitchDef::Toggle3pos)
-	// 			sw = fullsize ? &switch_left : &switch_left_120;
-	// 		else if (el.switch_type == SwitchDef::Encoder)
-	// 			sw = fullsize ? &knob_unlined_x : &knob_unlined_x_120;
-	// 		else if (el.switch_type == SwitchDef::MomentaryButton || el.switch_type == SwitchDef::LatchingButton)
-	// 			sw = fullsize ? &button_x : &button_x_120;
-	// 		else
-	// 			continue;
-	// }
+	static const lv_img_dsc_t *get_switch_img_240(SwitchDef::Style switch_style) {
+		if (switch_style == SwitchDef::Toggle2pos || switch_style == SwitchDef::Toggle3pos)
+			return &switch_left;
+		else if (switch_style == SwitchDef::Encoder)
+			return &knob_unlined_x;
+		else if (switch_style == SwitchDef::MomentaryButton || switch_style == SwitchDef::LatchingButton)
+			return &button_x;
+		else
+			return nullptr;
+	}
+
+	static const lv_img_dsc_t *get_switch_img_120(SwitchDef::Style switch_style) {
+		if (switch_style == SwitchDef::Toggle2pos || switch_style == SwitchDef::Toggle3pos)
+			return &switch_left_120;
+		else if (switch_style == SwitchDef::Encoder)
+			return &knob_unlined_x_120;
+		else if (switch_style == SwitchDef::MomentaryButton || switch_style == SwitchDef::LatchingButton)
+			return &button_x_120;
+		else
+			return nullptr;
+	}
 
 	static void draw_module_controls(lv_obj_t *canvas, const ModuleInfoView &info, uint32_t module_height) {
 		static lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
-		// draw_img_dsc.zoom = zoom;
 
 		const float adj = (float)(module_height) / 240.f;
 		const bool fullsize = module_height > 120;
@@ -107,14 +117,8 @@ struct DrawHelper {
 			lv_canvas_draw_img(canvas, x, y, jack, &draw_img_dsc);
 		}
 		for (const auto el : info.Switches) {
-			const lv_img_dsc_t *sw = nullptr;
-			if (el.switch_type == SwitchDef::Toggle2pos || el.switch_type == SwitchDef::Toggle3pos)
-				sw = fullsize ? &switch_left : &switch_left_120;
-			else if (el.switch_type == SwitchDef::Encoder)
-				sw = fullsize ? &knob_unlined_x : &knob_unlined_x_120;
-			else if (el.switch_type == SwitchDef::MomentaryButton || el.switch_type == SwitchDef::LatchingButton)
-				sw = fullsize ? &button_x : &button_x_120;
-			else
+			const lv_img_dsc_t *sw = fullsize ? get_switch_img_240(el.switch_type) : get_switch_img_120(el.switch_type);
+			if (!sw)
 				continue;
 			auto [x, y] = scale_center(el, sw->header);
 			lv_canvas_draw_img(canvas, x, y, sw, &draw_img_dsc);
