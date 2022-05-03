@@ -14,4 +14,30 @@ struct PatchData {
 	std::vector<MappedOutputJack> mapped_outs; //8B
 	std::vector<StaticParam> static_knobs;	   //8B
 	std::vector<MappedKnob> mapped_knobs;	   //16B
+
+	const MappedKnob *find_mapped_knob(uint32_t module_id, uint32_t param_id) const {
+		for (auto &m : mapped_knobs) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				return &m;
+		}
+		return nullptr;
+	}
+
+	const MappedInputJack *find_mapped_injack(Jack jack) const {
+		for (auto &m : mapped_ins) {
+			for (auto &j : m.ins) {
+				if (j == jack)
+					return &m;
+			}
+		}
+		return nullptr;
+	}
+
+	const MappedOutputJack *find_mapped_outjack(Jack jack) const {
+		for (auto &m : mapped_outs) {
+			if (m.out == jack)
+				return &m;
+		}
+		return nullptr;
+	}
 };
