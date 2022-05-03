@@ -12,13 +12,13 @@ struct PanelDef {
 	static constexpr uint32_t NumPot = 12;
 	static constexpr uint32_t NumCVIn = 0;
 	static constexpr uint32_t NumGateIn = 2;
-	static constexpr uint32_t NumGateOut = 2;
-	static constexpr uint32_t NumMetaCV = 1;
+	static constexpr uint32_t NumGateOut = 0;
+	static constexpr uint32_t NumMetaCV = 0;
 	static constexpr uint32_t NumRgbButton = 0;
 	static constexpr uint32_t NumMetaRgbButton = 1;
 
 	static constexpr int NumKnobs = NumPot;
-	static constexpr char KnobNames[NumPot][2] = {"A", "B", "C", "D", "E", "F", "u", "v", "w", "x", "y", "z"};
+	static constexpr std::string_view KnobNames[NumPot] = {"A", "B", "C", "D", "E", "F", "u", "v", "w", "x", "y", "z"};
 
 	static constexpr int NumOutJacks = NumAudioIn + NumCVIn + NumGateIn;
 	static constexpr int NumInJacks = NumAudioOut + NumDACOut + NumGateOut;
@@ -28,24 +28,43 @@ struct PanelDef {
 	static constexpr int NumUserFacingInJacks = NumOutJacks;
 
 	static constexpr char NumJacks = NumInJacks + NumOutJacks + NumMetaCV;
-	static constexpr char ShortJackNames[NumJacks][5] = {"In1",
-														 "In2",
-														 "In3",
-														 "In4",
-														 "In5",
-														 "In6",
-														 "GI1",
-														 "GI2",
-														 "Out1",
-														 "Out2",
-														 "Out3",
-														 "Out4",
-														 "Out5",
-														 "Out6",
-														 "Out7",
-														 "Out8",
-														 "GO1",
-														 "GO2",
-														 "PCV"};
+	static constexpr char InJackNames[NumUserFacingInJacks][5] = {
+		"In1",
+		"In2",
+		"In3",
+		"In4",
+		"In5",
+		"In6",
+		"GIn1",
+		"GIn2",
+	};
+	static constexpr char OutJackNames[NumUserFacingOutJacks][5] = {
+		"Out1",
+		"Out2",
+		"Out3",
+		"Out4",
+		"Out5",
+		"Out6",
+		"Out7",
+		"Out8",
+	};
+	static constexpr char ShortJackNames[NumJacks][5] = {
+		"In1",
+		"In2",
+		"In3",
+		"In4",
+		"In5",
+		"In6",
+		"GIn1",
+		"GIn2",
+		"Out1",
+		"Out2",
+		"Out3",
+		"Out4",
+		"Out5",
+		"Out6",
+		"Out7",
+		"Out8",
+	};
 	static constexpr uint32_t audioin_order[NumAudioIn] = {3, 2, 1, 0, 5, 4};
 };
