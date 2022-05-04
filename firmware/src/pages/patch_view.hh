@@ -115,8 +115,9 @@ struct PatchViewPage : PageBase {
 			lv_canvas_set_buffer(canvas, buf, widthpx, height, LV_IMG_CF_TRUE_COLOR);
 
 			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
-			const auto info = ModuleFactory::getModuleInfo(slug);
-			DrawHelper::draw_module_controls(canvas, info, height);
+			const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
+			const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
+			DrawHelper::draw_module_controls(canvas, moduleinfo, patch, i, height);
 
 			module_ids.push_back(i);
 			lv_obj_add_event_cb(canvas, moduleimg_cb, LV_EVENT_PRESSED, (void *)(&module_ids[module_ids.size() - 1]));

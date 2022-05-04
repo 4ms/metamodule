@@ -1,6 +1,8 @@
 #pragma once
 #include "CoreModules/info/module_info_base.hh"
 #include "lvgl/lvgl.h"
+#include "pages/styles.hh"
+#include "patch/patch_data.hh"
 
 LV_IMG_DECLARE(jack_x);
 LV_IMG_DECLARE(jack_x_120);
@@ -83,18 +85,28 @@ struct DrawHelper {
 			return nullptr;
 	}
 
-	static void draw_module_controls(lv_obj_t *canvas, const ModuleInfoView &info, uint32_t module_height) {
+	static void draw_module_controls(lv_obj_t *canvas,
+									 const ModuleInfoView &info,
+									 const PatchData &patch,
+									 uint32_t module_id_in_patch,
+									 uint32_t module_height) {
 		static lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
 
 		const float adj = (float)(module_height) / 240.f;
 		const bool fullsize = module_height > 120;
 
-		auto scale_center = [adj](auto el, auto img_header) -> std::pair<int, int> {
+		auto scale_topleft = [adj](auto el, auto img_header) -> std::pair<int, int> {
 			auto x =
 				static_cast<int>((ModuleInfoBase::mm_to_px<240>(el.x_mm) * adj - (float)img_header.w / 2.f) + 0.5f);
 			auto y =
 				static_cast<int>((ModuleInfoBase::mm_to_px<240>(el.y_mm) * adj - (float)img_header.h / 2.f) + 0.5f);
+			return std::make_pair(x, y);
+		};
+
+		auto scale_center = [adj](auto el) -> std::pair<int, int> {
+			uint16_t x = std::round(ModuleInfoBase::mm_to_px<240>(el.x_mm) * adj);
+			uint16_t y = std::round(ModuleInfoBase::mm_to_px<240>(el.y_mm) * adj);
 			return std::make_pair(x, y);
 		};
 
@@ -103,24 +115,30 @@ struct DrawHelper {
 			if (!knob)
 				continue;
 
-			auto [x, y] = scale_center(el, knob->header);
-			lv_canvas_draw_img(canvas, x, y, knob, &draw_img_dsc);
+			auto [c_x, c_y] = scale_center(el);
+			auto left = c_x - knob->header.w / 2;
+			auto top = c_y - knob->header.h / 2;
+			lv_canvas_draw_img(canvas, c_x, c_y, knob, &draw_img_dsc);
+
+			if (patch.find_mapped_knob(module_id_in_patch, el.id)) {
+				lv_canvas_draw_arc(canvas, c_x, c_y, knob->header.w * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
+			}
 		}
 		for (const auto el : info.InJacks) {
 			auto jack = fullsize ? &jack_x : &jack_x_120;
-			auto [x, y] = scale_center(el, jack->header);
+			auto [x, y] = scale_topleft(el, jack->header);
 			lv_canvas_draw_img(canvas, x, y, jack, &draw_img_dsc);
 		}
 		for (const auto el : info.OutJacks) {
 			auto jack = fullsize ? &jack_x : &jack_x_120;
-			auto [x, y] = scale_center(el, jack->header);
+			auto [x, y] = scale_topleft(el, jack->header);
 			lv_canvas_draw_img(canvas, x, y, jack, &draw_img_dsc);
 		}
 		for (const auto el : info.Switches) {
 			const lv_img_dsc_t *sw = fullsize ? get_switch_img_240(el.switch_type) : get_switch_img_120(el.switch_type);
 			if (!sw)
 				continue;
-			auto [x, y] = scale_center(el, sw->header);
+			auto [x, y] = scale_topleft(el, sw->header);
 			lv_canvas_draw_img(canvas, x, y, sw, &draw_img_dsc);
 		}
 	}
