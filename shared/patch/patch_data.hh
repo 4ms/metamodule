@@ -23,6 +23,14 @@ struct PatchData {
 		return nullptr;
 	}
 
+	const StaticParam *find_static_knob(uint32_t module_id, uint32_t param_id) const {
+		for (auto &m : static_knobs) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				return &m;
+		}
+		return nullptr;
+	}
+
 	const MappedInputJack *find_mapped_injack(Jack jack) const {
 		for (auto &m : mapped_ins) {
 			for (auto &j : m.ins) {
