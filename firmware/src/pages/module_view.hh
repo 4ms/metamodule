@@ -171,6 +171,7 @@ private:
 			opts += "\n";
 			img_dsc.pivot.x = width / 2;
 			img_dsc.pivot.y = height / 2;
+			//TODO: make patch.find_static_knob()
 			auto static_knob = std::find_if(patch.static_knobs.begin(), patch.static_knobs.end(), [&](auto &p) {
 				return p.module_id == this_module_id && p.param_id == el.id;
 			});
