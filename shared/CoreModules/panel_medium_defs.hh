@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string_view>
 
 struct PanelDef {
 	static constexpr uint32_t PanelID = 1;
