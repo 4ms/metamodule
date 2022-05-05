@@ -44,6 +44,9 @@ h7:  #mini only
 norflash-loader: mp1-med
 	$(MAKE) --no-print-directory -f makefile_mp1a7.mk norflash-loader
 
+uimg:
+	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk uimg
+
 u-boot:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk u-boot
 

@@ -8,6 +8,9 @@ ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 target_board = $(word 1,$(MAKECMDGOALS))
 $(info --------------------)
 $(info Building for MP1 A7 core, target: $(target_board))
+else ifeq ($(MAKECMDGOALS),uimg)
+$(info Building uimg)
+target_board = medium
 else ifeq ($(MAKECMDGOALS),u-boot)
 $(info Building u-boot)
 else
@@ -355,7 +358,27 @@ endif
 include makefile_opts.mk
 include makefile_common.mk
 
-uimg: all #$(UIMG)
+
+UBOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+
+.PHONY: uimg
+uimg: $(UIMG)
+
+$(UIMG): $(UBOOT_MKIMAGE)
+	$(UBOOT_MKIMAGE_CMD)
+
+%-uimg.h : %.uimg 
+	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
+
+medium: all #$(BUILDDIR_MP1A7)/medium/$(BINARYNAME)-uimg.h
+
+mini: uimg
+
+max: uimg
+
+pcmdev: uimg
+
+norflash-loader: uimg
 
 $(UBOOT_MKIMAGE):
 	$(error Use `make u-boot` to build U-Boot and re-run this.)
@@ -368,24 +391,6 @@ u-boot:
 
 clean_uboot:
 	rm -rf $(UBOOTBUILDDIR)
-
-BOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
-
-$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
-	$(UBOOT_MKIMAGE_CMD)
-
-%-uimg.h : %.uimg 
-	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
-
-medium: uimg #$(BUILDDIR_MP1A7)/medium/$(BINARYNAME)-uimg.h
-
-mini: uimg
-
-max: uimg
-
-pcmdev: uimg
-
-norflash-loader: uimg
 
 # Todo: get this working:
 install-uboot:
