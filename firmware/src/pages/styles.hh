@@ -1,6 +1,7 @@
 #pragma once
 // #include "gui-guider/guider_fonts.h"
 #include "lvgl/lvgl.h"
+#include <array>
 // LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_14);
 // LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_16);
 LV_FONT_DECLARE(MuseoSansRounded_500_12);
@@ -50,6 +51,16 @@ struct Gui {
 	static inline lv_theme_t *theme;
 	static inline lv_disp_t *display;
 
+	static inline std::array<lv_color_t, 8> cable_palette{
+		lv_palette_lighten(LV_PALETTE_RED, 1),
+		lv_palette_lighten(LV_PALETTE_BLUE, 1),
+		lv_palette_lighten(LV_PALETTE_GREEN, 1),
+		lv_palette_lighten(LV_PALETTE_GREY, 1),
+		lv_palette_lighten(LV_PALETTE_YELLOW, 1),
+		lv_palette_lighten(LV_PALETTE_ORANGE, 1),
+		lv_palette_lighten(LV_PALETTE_PINK, 1),
+		lv_palette_lighten(LV_PALETTE_PURPLE, 1),
+	};
 	// const lv_style_const_prop_t style1_props[] = {
 	// 	LV_STYLE_CONST_WIDTH(50),
 	// 	LV_STYLE_CONST_HEIGHT(50),

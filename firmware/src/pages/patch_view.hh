@@ -66,6 +66,16 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
+
+		cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
+		lv_obj_set_size(cable_layer, 320, height);
+		lv_obj_set_align(cable_layer, LV_ALIGN_BOTTOM_MID);
+		lv_canvas_set_buffer(cable_layer, cable_buf, 320, height, LV_IMG_CF_TRUE_COLOR_ALPHA);
+
+		lv_draw_line_dsc_init(&cable_drawline_dsc);
+		cable_drawline_dsc.width = 4;
+		cable_drawline_dsc.opa = LV_OPA_60;
+		cable_drawline_dsc.blend_mode = LV_BLEND_MODE_NORMAL;
 	}
 
 	void prepare_focus() override {
@@ -83,9 +93,11 @@ struct PatchViewPage : PageBase {
 		for (auto &m : modules)
 			lv_obj_del(m);
 		modules.clear();
-		modules.reserve(patch.module_slugs.size());
 		module_ids.clear();
+		module_left_pos.clear();
+		modules.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
+		module_left_pos.reserve(patch.module_slugs.size());
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -95,6 +107,9 @@ struct PatchViewPage : PageBase {
 		constexpr uint32_t pixel_size = (LV_COLOR_SIZE / 8) / sizeof(buffer[0]);
 		uint32_t xpos = 0;
 		for (auto [i, slug] : enumerate(patch.module_slugs)) {
+			module_ids.push_back(i);
+			module_left_pos.push_back(xpos);
+
 			printf("Drawing %s\n", slug.c_str());
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
 			if (!img) {
@@ -121,11 +136,10 @@ struct PatchViewPage : PageBase {
 			const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 			DrawHelper::draw_module_controls(canvas, moduleinfo, patch, i, height);
 
-			module_ids.push_back(i);
-
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, moduleimg_cb, LV_EVENT_PRESSED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
+			lv_obj_add_event_cb(canvas, module_defocus_cb, LV_EVENT_DEFOCUSED, (void *)this);
 
 			lv_group_add_obj(group, canvas);
 
@@ -135,6 +149,10 @@ struct PatchViewPage : PageBase {
 				break;
 			}
 		}
+	}
+
+	void blur() override {
+		lv_canvas_fill_bg(cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	void update() override {
@@ -148,7 +166,6 @@ struct PatchViewPage : PageBase {
 
 	static void moduleimg_cb(lv_event_t *event) {
 		auto obj = event->current_target;
-		// uint32_t module_id = *(static_cast<uint32_t *>(event->user_data));
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
 		PageList::set_selected_module_id(module_id);
 		printf("Clicked Module %d\n", module_id);
@@ -156,21 +173,61 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void module_focus_cb(lv_event_t *event) {
-		int_cables.clear();
 		auto obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
 		printf("Focussed Module %d\n", module_id);
 
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		const auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
-		lv_label_set_text(page->module_name, patch.module_slugs[module_id].c_str());
 
+		const auto this_slug = patch.module_slugs[module_id];
+
+		const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
+		lv_label_set_text(page->module_name, this_slug.c_str());
+
+		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+
+		const int x_offset = 0;
+		const int y_offset = -6;
 		for (const auto &c : patch.int_cables) {
 			for (const auto &in : c.ins) {
-				if (in.module_id == module_id)
-					printf("[%d, %d] to [%d, %d]\n", c.out.module_id, c.out.jack_id, in.module_id, in.jack_id);
+				if (in.module_id == module_id) {
+					auto [in_x, in_y] = DrawHelper::scale_center(thismoduleinfo.InJacks[in.jack_id], height);
+					auto scroll_x = 0;
+
+					lv_area_t coords;
+					lv_obj_get_coords(obj, &coords);
+					int in_module_left = coords.x1;
+					in_x = in_x + in_module_left - scroll_x + x_offset;
+					in_y += y_offset;
+
+					int out_module_left = 0;
+					for (auto mod : page->modules) {
+						uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(mod)));
+						if (t_module_id == c.out.module_id) {
+							lv_area_t coords;
+							lv_obj_get_coords(mod, &coords);
+							out_module_left = coords.x1;
+							break;
+						}
+					}
+					const auto other_moduleinfo = ModuleFactory::getModuleInfo(patch.module_slugs[c.out.module_id]);
+					auto [out_x, out_y] = DrawHelper::scale_center(other_moduleinfo.OutJacks[c.out.jack_id], height);
+					out_x = out_x + out_module_left - scroll_x + x_offset;
+					out_y += y_offset;
+
+					lv_point_t points[2] = {{(int16_t)in_x, (int16_t)in_y}, {(int16_t)out_x, (int16_t)out_y}};
+					page->cable_drawline_dsc.color =
+						Gui::cable_palette[(c.out.jack_id + c.out.module_id) % Gui::cable_palette.size()];
+					lv_canvas_draw_line(page->cable_layer, points, 2, &page->cable_drawline_dsc);
+				}
 			}
 		}
+	}
+
+	static void module_defocus_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	static void playbut_cb(lv_event_t *event) {
@@ -186,14 +243,19 @@ private:
 	lv_obj_t *module_name;
 	lv_obj_t *playbut_label;
 	lv_obj_t *playbut;
+	lv_obj_t *cable_layer;
 
-	static constexpr uint32_t MaxBufferWidth = 1024;
 	std::vector<lv_obj_t *> modules;
 	std::vector<uint32_t> module_ids;
+	std::vector<uint32_t> module_left_pos;
+
+	static constexpr uint32_t MaxBufferWidth = 1024;
 	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(height, MaxBufferWidth)];
 	lv_draw_img_dsc_t draw_img_dsc;
 
-	static inline std::vector<lv_obj_t *> int_cables;
+	static inline uint8_t cable_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(height, 320)];
+	lv_draw_line_dsc_t cable_drawline_dsc;
+
 	static inline const PatchData *patch_instance;
 
 	struct focussed_context {
@@ -202,6 +264,9 @@ private:
 	};
 
 	lv_obj_t *base;
+
+	void draw_cable(Jack out, Jack in) {
+	}
 
 	void start_changing_patch() {
 		auto _patch_id = PageList::get_selected_patch_id();

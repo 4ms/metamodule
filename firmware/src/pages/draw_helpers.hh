@@ -85,6 +85,13 @@ struct DrawHelper {
 			return nullptr;
 	}
 
+	static std::pair<int, int> scale_center(auto el, float module_height) {
+		const float adj = (float)(module_height) / 240.f;
+		uint16_t x = std::round(ModuleInfoBase::mm_to_px<240>(el.x_mm) * adj);
+		uint16_t y = std::round(ModuleInfoBase::mm_to_px<240>(el.y_mm) * adj);
+		return std::make_pair(x, y);
+	}
+
 	static void draw_module_controls(lv_obj_t *canvas,
 									 const ModuleInfoView &info,
 									 const PatchData &patch,
