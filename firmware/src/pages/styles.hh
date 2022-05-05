@@ -26,10 +26,15 @@ struct Gui {
 	// highlight a selected knob, jack, etc on a faceplate
 	static inline lv_style_t panel_highlight_style;
 
-	// highlight of a mapped knob on a faceplate
+	// highlight of a mapped knob, jack, etc on a faceplate
 	static inline lv_style_t mapped_knob_style;
 	static inline lv_draw_arc_dsc_t mapped_knob_arcdsc;
 	static inline lv_draw_arc_dsc_t mapped_knob_small_arcdsc;
+	static inline lv_draw_arc_dsc_t mapped_injack_small_arcdsc;
+	static inline lv_draw_arc_dsc_t mapped_outjack_small_arcdsc;
+
+	// module selected in patch view
+	static inline lv_style_t selected_module_style;
 
 	// text
 	static inline lv_style_t header_style;
@@ -68,18 +73,36 @@ struct Gui {
 		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_50);
 
 		// mapped_knob_style
+		lv_style_init(&mapped_knob_style);
+
+		// Mapped arcs:
 		lv_draw_arc_dsc_init(&mapped_knob_arcdsc);
 		mapped_knob_arcdsc.width = 4;
 		mapped_knob_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
 		mapped_knob_arcdsc.opa = LV_OPA_50;
-		lv_style_init(&mapped_knob_style);
 
-		// mapped_knob_style
 		lv_draw_arc_dsc_init(&mapped_knob_small_arcdsc);
 		mapped_knob_small_arcdsc.width = 2;
 		mapped_knob_small_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
 		mapped_knob_small_arcdsc.opa = LV_OPA_50;
-		lv_style_init(&mapped_knob_style);
+
+		lv_draw_arc_dsc_init(&mapped_injack_small_arcdsc);
+		mapped_injack_small_arcdsc.width = 2;
+		mapped_injack_small_arcdsc.color = lv_palette_main(LV_PALETTE_RED);
+		mapped_injack_small_arcdsc.opa = LV_OPA_50;
+
+		lv_draw_arc_dsc_init(&mapped_outjack_small_arcdsc);
+		mapped_outjack_small_arcdsc.width = 2;
+		mapped_outjack_small_arcdsc.color = lv_palette_lighten(LV_PALETTE_ORANGE, 1);
+		mapped_outjack_small_arcdsc.opa = LV_OPA_50;
+
+		// selected_module_style
+
+		lv_style_init(&selected_module_style);
+		lv_style_set_outline_color(&selected_module_style, lv_palette_lighten(LV_PALETTE_ORANGE, 1));
+		lv_style_set_outline_width(&selected_module_style, 4);
+		lv_style_set_outline_opa(&selected_module_style, LV_OPA_70);
+		lv_style_set_radius(&selected_module_style, 6);
 
 		// header_style (text)
 		lv_style_init(&header_style);
@@ -97,7 +120,6 @@ struct Gui {
 		// text_block_style
 		lv_style_init(&text_block_style);
 		lv_style_set_text_align(&text_block_style, LV_TEXT_ALIGN_LEFT);
-		// lv_style_set_text_font(&text_block_style, &lv_font_montserrat_14);
 		lv_style_set_text_font(&text_block_style, &MuseoSansRounded_500_12);
 		lv_style_set_text_color(&text_block_style, lv_color_white());
 		lv_style_set_text_opa(&text_block_style, LV_OPA_COVER);
@@ -109,7 +131,6 @@ struct Gui {
 
 		// button_label_style
 		lv_style_init(&button_label_style);
-		// lv_style_set_text_align(&button_label_style, LV_TEXT_ALIGN_LEFT);
 		lv_style_set_text_font(&button_label_style, &MuseoSansRounded_700_14);
 		lv_style_set_text_color(&button_label_style, lv_color_white());
 		lv_style_set_text_opa(&button_label_style, LV_OPA_COVER);
@@ -122,7 +143,6 @@ struct Gui {
 		lv_style_set_bg_color(&roller_style, lv_color_black());
 		lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_LEFT);
 		lv_style_set_text_font(&roller_style, &MuseoSansRounded_700_14);
-		// lv_style_set_text_font(&roller_style, &lv_font_montserrat_14);
 		lv_style_set_text_color(&roller_style, lv_color_white());
 		lv_style_set_text_opa(&roller_style, LV_OPA_COVER);
 		lv_style_set_text_line_space(&roller_style, 5);
