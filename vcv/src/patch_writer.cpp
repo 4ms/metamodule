@@ -60,17 +60,17 @@ void PatchFileWriter::setJackList(std::vector<JackStatus> &jacks)
 			if (found != pd.int_cables.end()) {
 				// If an int_cable entry exists for this output jack, add a new input jack to the ins vector
 				found->ins.push_back({
-					.module_id = static_cast<int16_t>(in_mod),
-					.jack_id = static_cast<int16_t>(in_jack),
+					.module_id = static_cast<uint16_t>(in_mod),
+					.jack_id = static_cast<uint16_t>(in_jack),
 				});
 			} else {
 				// Make a new entry:
 				pd.int_cables.push_back({
-					.out = {static_cast<int16_t>(out_mod), static_cast<int16_t>(out_jack)},
+					.out = {static_cast<uint16_t>(out_mod), static_cast<uint16_t>(out_jack)},
 					.ins = {{
 						{
-							.module_id = static_cast<int16_t>(in_mod),
-							.jack_id = static_cast<int16_t>(in_jack),
+							.module_id = static_cast<uint16_t>(in_mod),
+							.jack_id = static_cast<uint16_t>(in_jack),
 						},
 					}},
 				});
@@ -84,8 +84,8 @@ void PatchFileWriter::setParamList(std::vector<ParamStatus> &params)
 	pd.static_knobs.clear();
 	for (auto &param : params) {
 		pd.static_knobs.push_back({
-			.module_id = static_cast<int16_t>(idMap[param.moduleID]),
-			.param_id = static_cast<int16_t>(param.paramID),
+			.module_id = static_cast<uint16_t>(idMap[param.moduleID]),
+			.param_id = static_cast<uint16_t>(param.paramID),
 			.value = param.value,
 		});
 	}
@@ -100,9 +100,9 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 	for (auto &m : maps) {
 		if (m.dst.objType == LabelButtonID::Types::Knob) {
 			pd.mapped_knobs.push_back({
-				.panel_knob_id = static_cast<int16_t>(m.src.objID),
-				.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
-				.param_id = static_cast<int16_t>(m.dst.objID),
+				.panel_knob_id = static_cast<uint16_t>(m.src.objID),
+				.module_id = static_cast<uint16_t>(idMap[m.dst.moduleID]),
+				.param_id = static_cast<uint16_t>(m.dst.objID),
 				.curve_type = 0,
 				.min = m.range_min,
 				.max = m.range_max,
@@ -112,25 +112,26 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 
 		if (m.dst.objType == LabelButtonID::Types::InputJack) {
 			// Look for an existing entry:
-			auto found =
-				std::find_if(pd.mapped_ins.begin(), pd.mapped_ins.end(), [panel_jack = m.src.objID](const auto &x) {
-					return x.panel_jack_id == panel_jack;
-				});
+			auto found = std::find_if(pd.mapped_ins.begin(),
+									  pd.mapped_ins.end(),
+									  [panel_jack = static_cast<uint32_t>(m.src.objID)](const auto &x) {
+										  return x.panel_jack_id == panel_jack;
+									  });
 
 			if (found != pd.mapped_ins.end()) {
 				// If we already have an entry for this panel jack, append a new module input jack to the ins vector
 				found->ins.push_back({
-					.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
-					.jack_id = static_cast<int16_t>(m.dst.objID),
+					.module_id = static_cast<uint16_t>(idMap[m.dst.moduleID]),
+					.jack_id = static_cast<uint16_t>(m.dst.objID),
 				});
 			} else {
 				// Make a new entry:
 				pd.mapped_ins.push_back({
-					.panel_jack_id = m.src.objID,
+					.panel_jack_id = static_cast<uint32_t>(m.src.objID),
 					.ins = {{
 						{
-							.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
-							.jack_id = static_cast<int16_t>(m.dst.objID),
+							.module_id = static_cast<uint16_t>(idMap[m.dst.moduleID]),
+							.jack_id = static_cast<uint16_t>(m.dst.objID),
 						},
 					}},
 				});
@@ -143,24 +144,25 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 			// otherwise push it to the vector
 
 			// Look for an existing entry:
-			auto found =
-				std::find_if(pd.mapped_outs.begin(), pd.mapped_outs.end(), [panel_jack = m.src.objID](const auto &x) {
-					return x.panel_jack_id == panel_jack;
-				});
+			auto found = std::find_if(pd.mapped_outs.begin(),
+									  pd.mapped_outs.end(),
+									  [panel_jack = static_cast<uint32_t>(m.src.objID)](const auto &x) {
+										  return x.panel_jack_id == panel_jack;
+									  });
 
 			if (found != pd.mapped_outs.end()) {
 				// Update:
-				found->out.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]);
-				found->out.jack_id = static_cast<int16_t>(m.dst.objID);
+				found->out.module_id = static_cast<uint16_t>(idMap[m.dst.moduleID]);
+				found->out.jack_id = static_cast<uint16_t>(m.dst.objID);
 				// Todo: Log error: multiple module outputs mapped to same panel output jack
 			} else {
 				// Make a new entry:
 				pd.mapped_outs.push_back({
-					.panel_jack_id = m.src.objID,
+					.panel_jack_id = static_cast<uint32_t>(m.src.objID),
 					.out =
 						{
-							.module_id = static_cast<int16_t>(idMap[m.dst.moduleID]),
-							.jack_id = static_cast<int16_t>(m.dst.objID),
+							.module_id = static_cast<uint16_t>(idMap[m.dst.moduleID]),
+							.jack_id = static_cast<uint16_t>(m.dst.objID),
 						},
 				});
 			}
