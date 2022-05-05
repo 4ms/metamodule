@@ -8,6 +8,8 @@
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(Freeverb_artwork_240);
+LV_IMG_DECLARE(Freeverb_artwork_120);
 LV_IMG_DECLARE(STS_artwork_240);
 LV_IMG_DECLARE(STS_artwork_120);
 LV_IMG_DECLARE(VCAM_artwork_240);
@@ -152,6 +154,9 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug, size_t height = 240) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "Freeverb")
+			return height == 240 ? &Freeverb_artwork_240 : &Freeverb_artwork_120;
 
 		if (slug == "STS")
 			return (height == 240) ? &STS_artwork_240 : &STS_artwork_120;
