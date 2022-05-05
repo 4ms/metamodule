@@ -41,3 +41,5 @@ vcv/res/modules/*-artwork.svg
 firmware/src/pages/images/*_artwork_240.c
 firmware/src/pages/images/*_artwork_240.png
 shared/CoreModules/info/*_info.hh
+
+firmware/src/pages/images/*_artwork_120.png
