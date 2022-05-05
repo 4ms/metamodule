@@ -14,7 +14,7 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
-	constexpr static uint32_t height = 120;
+	constexpr static uint32_t height = 240;
 	static_assert(height == 120 || height == 240);
 
 	PatchViewPage(PatchInfo info)
@@ -27,16 +27,22 @@ struct PatchViewPage : PageBase {
 
 		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
 		lv_obj_set_style_pad_gap(base, 4, LV_STATE_DEFAULT);
+		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLL_CHAIN);
 
 		patchname = lv_label_create(base);
 		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
 		lv_obj_set_width(patchname, 252);
+		lv_obj_set_height(patchname, 28);
 
 		playbut = lv_btn_create(base);
-		lv_obj_set_height(playbut, 25);
+		lv_obj_set_height(playbut, 21);
 		lv_obj_set_width(playbut, 60);
-		lv_obj_set_style_pad_ver(playbut, 3, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(playbut, 3, LV_PART_MAIN);
+		lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_event_cb(playbut, playbut_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(playbut, playbut_focussed_cb, LV_EVENT_FOCUSED, this);
 
 		playbut_label = lv_label_create(playbut);
 		lv_obj_add_style(playbut_label, &Gui::button_label_style, LV_PART_MAIN);
@@ -47,7 +53,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
 		lv_label_set_long_mode(description, LV_LABEL_LONG_WRAP);
 		lv_obj_set_width(description, 320);
-		lv_obj_set_height(description, 51); //68);
+		lv_obj_set_height(description, 51);
 
 		module_name = lv_label_create(base);
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
@@ -59,11 +65,12 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW);
-		lv_obj_set_style_pad_gap(modules_cont, 2, LV_STATE_DEFAULT);
+		lv_obj_set_style_pad_gap(modules_cont, 3, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_all(modules_cont, 2, LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_CHAIN);
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
 
@@ -94,10 +101,8 @@ struct PatchViewPage : PageBase {
 			lv_obj_del(m);
 		modules.clear();
 		module_ids.clear();
-		module_left_pos.clear();
 		modules.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
-		module_left_pos.reserve(patch.module_slugs.size());
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -108,7 +113,6 @@ struct PatchViewPage : PageBase {
 		uint32_t xpos = 0;
 		for (auto [i, slug] : enumerate(patch.module_slugs)) {
 			module_ids.push_back(i);
-			module_left_pos.push_back(xpos);
 
 			printf("Drawing %s\n", slug.c_str());
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
@@ -128,13 +132,18 @@ struct PatchViewPage : PageBase {
 			lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
 
 			auto buf = &(buffer[pixel_size * height * xpos]);
-			// printf("Buf ptr is %p (+%zu) (buffer[%d * height * %d])\n", buf, buf - buffer, pixel_size, xpos);
 			lv_obj_set_size(canvas, widthpx, height);
 			lv_canvas_set_buffer(canvas, buf, widthpx, height, LV_IMG_CF_TRUE_COLOR);
 
 			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
 			const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 			DrawHelper::draw_module_controls(canvas, moduleinfo, patch, i, height);
+			// for (const auto &el : moduleinfo.Knobs) {
+			// 	auto mknob = DrawHelper::draw_mapped_knob(canvas, canvas, el, patch, i, height);
+			// 	if (mknob.has_value()) {
+			// 		mapped_knob.push_back(mknob);
+			// 	}
+			// }
 
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, moduleimg_cb, LV_EVENT_PRESSED, (void *)this);
@@ -173,8 +182,8 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void module_focus_cb(lv_event_t *event) {
-		auto obj = event->current_target;
-		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
+		auto this_module_obj = event->current_target;
+		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
 		printf("Focussed Module %d\n", module_id);
 
 		auto page = static_cast<PatchViewPage *>(event->user_data);
@@ -185,41 +194,45 @@ struct PatchViewPage : PageBase {
 		const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
 		lv_label_set_text(page->module_name, this_slug.c_str());
 
-		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+		bool do_draw_cables = false;
+		if (do_draw_cables) {
+			lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
-		const int x_offset = 0;
-		const int y_offset = -6;
-		for (const auto &c : patch.int_cables) {
-			for (const auto &in : c.ins) {
-				if (in.module_id == module_id) {
-					auto [in_x, in_y] = DrawHelper::scale_center(thismoduleinfo.InJacks[in.jack_id], height);
-					auto scroll_x = 0;
+			const int x_offset = 0;
+			const int y_offset = height == 120 ? -6 : 6;
+			for (const auto &c : patch.int_cables) {
+				for (const auto &in : c.ins) {
+					if (in.module_id == module_id) {
+						auto [in_x, in_y] = DrawHelper::scale_center(thismoduleinfo.InJacks[in.jack_id], height);
+						auto scroll_x = 0;
 
-					lv_area_t coords;
-					lv_obj_get_coords(obj, &coords);
-					int in_module_left = coords.x1;
-					in_x = in_x + in_module_left - scroll_x + x_offset;
-					in_y += y_offset;
+						lv_area_t coords;
+						lv_obj_get_coords(this_module_obj, &coords);
+						int in_module_left = coords.x1;
+						in_x = in_x + in_module_left - scroll_x + x_offset;
+						in_y += y_offset;
 
-					int out_module_left = 0;
-					for (auto mod : page->modules) {
-						uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(mod)));
-						if (t_module_id == c.out.module_id) {
-							lv_area_t coords;
-							lv_obj_get_coords(mod, &coords);
-							out_module_left = coords.x1;
-							break;
+						int out_module_left = 0;
+						for (auto mod : page->modules) {
+							uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(mod)));
+							if (t_module_id == c.out.module_id) {
+								lv_area_t coords;
+								lv_obj_get_coords(mod, &coords);
+								out_module_left = coords.x1;
+								break;
+							}
 						}
-					}
-					const auto other_moduleinfo = ModuleFactory::getModuleInfo(patch.module_slugs[c.out.module_id]);
-					auto [out_x, out_y] = DrawHelper::scale_center(other_moduleinfo.OutJacks[c.out.jack_id], height);
-					out_x = out_x + out_module_left - scroll_x + x_offset;
-					out_y += y_offset;
+						const auto other_moduleinfo = ModuleFactory::getModuleInfo(patch.module_slugs[c.out.module_id]);
+						auto [out_x, out_y] =
+							DrawHelper::scale_center(other_moduleinfo.OutJacks[c.out.jack_id], height);
+						out_x = out_x + out_module_left - scroll_x + x_offset;
+						out_y += y_offset;
 
-					lv_point_t points[2] = {{(int16_t)in_x, (int16_t)in_y}, {(int16_t)out_x, (int16_t)out_y}};
-					page->cable_drawline_dsc.color =
-						Gui::cable_palette[(c.out.jack_id + c.out.module_id) % Gui::cable_palette.size()];
-					lv_canvas_draw_line(page->cable_layer, points, 2, &page->cable_drawline_dsc);
+						lv_point_t points[2] = {{(int16_t)in_x, (int16_t)in_y}, {(int16_t)out_x, (int16_t)out_y}};
+						page->cable_drawline_dsc.color =
+							Gui::cable_palette[(c.out.jack_id + c.out.module_id) % Gui::cable_palette.size()];
+						lv_canvas_draw_line(page->cable_layer, points, 2, &page->cable_drawline_dsc);
+					}
 				}
 			}
 		}
@@ -236,6 +249,12 @@ struct PatchViewPage : PageBase {
 		page->start_changing_patch();
 	}
 
+	static void playbut_focussed_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		lv_label_set_text(page->module_name, "Select a module:");
+		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
+	}
+
 private:
 	lv_obj_t *description;
 	lv_obj_t *patchname;
@@ -247,7 +266,6 @@ private:
 
 	std::vector<lv_obj_t *> modules;
 	std::vector<uint32_t> module_ids;
-	std::vector<uint32_t> module_left_pos;
 
 	static constexpr uint32_t MaxBufferWidth = 1024;
 	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(height, MaxBufferWidth)];
@@ -273,7 +291,7 @@ private:
 		if (!mbox.loading_new_patch && (_patch_id != patch_list.cur_patch_index())) {
 			mbox.new_patch_index = _patch_id;
 			mbox.loading_new_patch = true;
-			printf("Loading patch %s\n\r", patch_list.get_patch_name(_patch_id).data());
+			printf("Loading patch %s\n", patch_list.get_patch_name(_patch_id).data());
 		}
 	}
 
@@ -286,12 +304,12 @@ private:
 			patch_list.set_cur_patch_index(mbox.new_patch_index);
 			bool ok = patch_player.load_patch(patch_list.get_patch(mbox.new_patch_index));
 			if (!ok) {
-				mbox.append_message("Can't load patch\n\r");
-				printf("Can't load patch\n\r");
+				mbox.append_message("Can't load patch\n");
+				printf("Can't load patch\n");
 				patch_player.unload_patch();
 				patch_player.load_patch(orig_patch_data);
 			} else
-				mbox.append_message("Patch loaded\n\r");
+				mbox.append_message("Patch loaded\n");
 
 			mbox.loading_new_patch = false;
 		}
