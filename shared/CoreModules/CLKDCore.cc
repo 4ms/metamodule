@@ -1,6 +1,10 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/CLKD_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "processors/tools/clockPhase.h"
+#include "util/math.hh"
+
+using namespace MathTools;
 
 class CLKDCore : public CoreProcessor {
 	using Info = CLKDInfo;
@@ -10,16 +14,38 @@ public:
 	CLKDCore() = default;
 
 	void update() override {
+		float finalDivide = constrain(clockDivideOffset + clockDivideCV, 0.0f, 1.0f);
+		cp.setDivide(map_value(finalDivide, 0.0f, 1.0f, 1.0f, 16.99f));
+		cp.update();
+		if ((cp.getWrappedPhase() < pulseWidth) && clockInit) {
+			clockOutput = 1;
+		} else {
+			clockOutput = 0;
+		}
 	}
 
 	void set_param(int param_id, float val) override {
+		switch (param_id) {
+			case Info::KnobDivide:
+				clockDivideOffset = val;
+				break;
+		}
 	}
 
 	void set_input(int input_id, float val) override {
+		switch (input_id) {
+			case Info::InputClk_In:
+				cp.updateClock(val);
+				clockInit = true;
+				break;
+			case Info::InputCv:
+				clockDivideCV = val;
+				break;
+		}
 	}
 
 	float get_output(int output_id) const override {
-		return 0.f;
+		return clockOutput;
 	}
 
 	void set_samplerate(float sr) override {
@@ -36,4 +62,11 @@ public:
 	// clang-format on
 
 private:
+	float pulseWidth = 0.5f;
+	int clockOutput = 0;
+	bool clockInit = false;
+	float clockDivideOffset = 0;
+	float clockDivideCV = 0;
+
+	ClockPhase cp;
 };
