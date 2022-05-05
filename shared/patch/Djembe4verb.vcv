@@ -60,6 +60,7 @@
       "data": {
         "audio": {
           "driver": 5,
+          "deviceName": "Apple Inc.: iMac Speakers",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -105,7 +106,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.283499807
+          "value": 0.689999819
         },
         {
           "id": 1,
@@ -117,19 +118,19 @@
         },
         {
           "id": 3,
-          "value": 0.61800009
+          "value": 0.385500073
         },
         {
           "id": 4,
-          "value": 0.433500022
+          "value": 0.453000039
         },
         {
           "id": 5,
-          "value": 0.450000048
+          "value": 0.583500147
         },
         {
           "id": 6,
-          "value": 0.731500089
+          "value": 0.545999706
         },
         {
           "id": 7,
@@ -137,15 +138,15 @@
         },
         {
           "id": 8,
-          "value": 0.457500011
+          "value": 0.649500191
         },
         {
           "id": 9,
-          "value": 0.518999875
+          "value": 0.730000079
         },
         {
           "id": 10,
-          "value": 0.325499713
+          "value": 0.432000071
         },
         {
           "id": 11,
@@ -159,78 +160,12 @@
       "data": {
         "Mappings": [
           {
-            "DstModID": 24,
-            "DstObjID": 0,
-            "DstObjType": "OutputJack",
-            "SrcModID": 22,
-            "SrcObjID": 0,
-            "SrcObjType": "OutputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 25,
-            "DstObjID": 0,
-            "DstObjType": "OutputJack",
-            "SrcModID": 22,
-            "SrcObjID": 1,
-            "SrcObjType": "OutputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 23,
-            "DstObjID": 0,
-            "DstObjType": "OutputJack",
-            "SrcModID": 22,
-            "SrcObjID": 2,
-            "SrcObjType": "OutputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 26,
-            "DstObjID": 1,
-            "DstObjType": "OutputJack",
-            "SrcModID": 22,
-            "SrcObjID": 5,
-            "SrcObjType": "OutputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 28,
-            "DstObjID": 0,
-            "DstObjType": "OutputJack",
-            "SrcModID": 22,
-            "SrcObjID": 3,
-            "SrcObjType": "OutputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
             "DstModID": 29,
             "DstObjID": 1,
             "DstObjType": "OutputJack",
             "SrcModID": 22,
             "SrcObjID": 7,
             "SrcObjType": "OutputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 30,
-            "DstObjID": 4,
-            "DstObjType": "InputJack",
-            "SrcModID": 22,
-            "SrcObjID": 6,
-            "SrcObjType": "InputJack",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
             "AliasName": ""
@@ -251,7 +186,7 @@
             "DstObjID": 0,
             "DstObjType": "Knob",
             "SrcModID": 22,
-            "SrcObjID": 2,
+            "SrcObjID": 1,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
@@ -262,7 +197,7 @@
             "DstObjID": 0,
             "DstObjType": "Knob",
             "SrcModID": 22,
-            "SrcObjID": 4,
+            "SrcObjID": 2,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
@@ -273,44 +208,11 @@
             "DstObjID": 0,
             "DstObjType": "Knob",
             "SrcModID": 22,
-            "SrcObjID": 5,
+            "SrcObjID": 3,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
             "AliasName": "Pitch4"
-          },
-          {
-            "DstModID": 23,
-            "DstObjID": 0,
-            "DstObjType": "Knob",
-            "SrcModID": 22,
-            "SrcObjID": 6,
-            "SrcObjType": "Knob",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": "P-shift-1"
-          },
-          {
-            "DstModID": 23,
-            "DstObjID": 2,
-            "DstObjType": "Knob",
-            "SrcModID": 22,
-            "SrcObjID": 7,
-            "SrcObjType": "Knob",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 28,
-            "DstObjID": 0,
-            "DstObjType": "Knob",
-            "SrcModID": 22,
-            "SrcObjID": 9,
-            "SrcObjType": "Knob",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
           },
           {
             "DstModID": 29,
@@ -320,33 +222,22 @@
             "SrcObjID": 11,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
-            "RangeMax": 1.0,
+            "RangeMax": 0.458999962,
             "AliasName": ""
           },
           {
-            "DstModID": 32,
-            "DstObjID": 1,
-            "DstObjType": "InputJack",
+            "DstModID": 34,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
             "SrcModID": 22,
-            "SrcObjID": 7,
-            "SrcObjType": "InputJack",
+            "SrcObjID": 6,
+            "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
             "AliasName": ""
           },
           {
             "DstModID": 33,
-            "DstObjID": 1,
-            "DstObjType": "InputJack",
-            "SrcModID": 22,
-            "SrcObjID": 6,
-            "SrcObjType": "InputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 34,
             "DstObjID": 0,
             "DstObjType": "Knob",
             "SrcModID": 22,
@@ -357,39 +248,6 @@
             "AliasName": ""
           },
           {
-            "DstModID": 34,
-            "DstObjID": 0,
-            "DstObjType": "OutputJack",
-            "SrcModID": 22,
-            "SrcObjID": 6,
-            "SrcObjType": "OutputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 24,
-            "DstObjID": 4,
-            "DstObjType": "InputJack",
-            "SrcModID": 22,
-            "SrcObjID": 7,
-            "SrcObjType": "InputJack",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
-            "DstModID": 33,
-            "DstObjID": 0,
-            "DstObjType": "Knob",
-            "SrcModID": 22,
-            "SrcObjID": 10,
-            "SrcObjType": "Knob",
-            "RangeMin": 0.0,
-            "RangeMax": 1.0,
-            "AliasName": ""
-          },
-          {
             "DstModID": 32,
             "DstObjID": 0,
             "DstObjType": "Knob",
@@ -401,29 +259,62 @@
             "AliasName": ""
           },
           {
-            "DstModID": 36,
+            "DstModID": 37,
             "DstObjID": 0,
-            "DstObjType": "Knob",
+            "DstObjType": "OutputJack",
+            "SrcModID": 22,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 38,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
             "SrcModID": 22,
             "SrcObjID": 1,
-            "SrcObjType": "Knob",
+            "SrcObjType": "OutputJack",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
             "AliasName": ""
           },
           {
-            "DstModID": 36,
-            "DstObjID": 1,
+            "DstModID": 37,
+            "DstObjID": 3,
             "DstObjType": "Knob",
             "SrcModID": 22,
-            "SrcObjID": 3,
+            "SrcObjID": 9,
             "SrcObjType": "Knob",
             "RangeMin": 0.0,
             "RangeMax": 1.0,
             "AliasName": ""
           },
           {
-            "DstModID": 36,
+            "DstModID": 38,
+            "DstObjID": 3,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 9,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 24,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 22,
+            "SrcObjID": 3,
+            "SrcObjType": "OutputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 30,
             "DstObjID": 0,
             "DstObjType": "OutputJack",
             "SrcModID": 22,
@@ -432,42 +323,78 @@
             "RangeMin": 0.0,
             "RangeMax": 1.0,
             "AliasName": ""
+          },
+          {
+            "DstModID": 31,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 22,
+            "SrcObjID": 5,
+            "SrcObjType": "OutputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 37,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 4,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 38,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 5,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 38,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 10,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 37,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 22,
+            "SrcObjID": 10,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 29,
+            "DstObjID": 2,
+            "DstObjType": "InputJack",
+            "SrcModID": 22,
+            "SrcObjID": 0,
+            "SrcObjType": "InputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
           }
         ],
         "PatchName": "Djembe-4-verb"
       },
       "pos": [
-        96,
-        0
-      ]
-    },
-    {
-      "id": 23,
-      "plugin": "4msCompany",
-      "version": "1.0.0",
-      "model": "PitchShift",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.731500089
-        },
-        {
-          "id": 1,
-          "value": 0.5
-        },
-        {
-          "id": 2,
-          "value": 0.375
-        },
-        {
-          "id": 3,
-          "value": 1.0
-        }
-      ],
-      "leftModuleId": 25,
-      "rightModuleId": 24,
-      "pos": [
-        37,
+        105,
         0
       ]
     },
@@ -479,7 +406,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.443499893
+          "value": 0.388499856
         },
         {
           "id": 1,
@@ -494,8 +421,6 @@
           "value": 0.61800009
         }
       ],
-      "leftModuleId": 23,
-      "rightModuleId": 28,
       "pos": [
         44,
         0
@@ -509,7 +434,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.283499807
+          "value": 0.689999819
         },
         {
           "id": 1,
@@ -524,7 +449,6 @@
           "value": 0.388499856
         }
       ],
-      "rightModuleId": 23,
       "pos": [
         29,
         0
@@ -569,34 +493,9 @@
           "value": 0.611499786
         }
       ],
-      "rightModuleId": 36,
+      "rightModuleId": 37,
       "pos": [
         63,
-        0
-      ]
-    },
-    {
-      "id": 28,
-      "plugin": "4msCompany",
-      "version": "1.0.0",
-      "model": "HPF",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.518999875
-        },
-        {
-          "id": 1,
-          "value": 0.325499713
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 24,
-      "pos": [
-        52,
         0
       ]
     },
@@ -608,7 +507,7 @@
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 0.458999962
         },
         {
           "id": 1,
@@ -632,7 +531,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.433500022
+          "value": 0.443499893
         },
         {
           "id": 1,
@@ -661,7 +560,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.450000048
+          "value": 0.385500073
         },
         {
           "id": 1,
@@ -693,7 +592,6 @@
           "value": 0.375
         }
       ],
-      "leftModuleId": 33,
       "pos": [
         22,
         1
@@ -707,12 +605,11 @@
       "params": [
         {
           "id": 0,
-          "value": 0.325499713
+          "value": 0.649500191
         }
       ],
-      "rightModuleId": 32,
       "pos": [
-        18,
+        16,
         1
       ]
     },
@@ -724,12 +621,12 @@
       "params": [
         {
           "id": 0,
-          "value": 0.457500011
+          "value": 0.545999706
         }
       ],
       "pos": [
-        18,
-        0
+        10,
+        1
       ]
     },
     {
@@ -749,43 +646,61 @@
       ]
     },
     {
-      "id": 36,
+      "id": 37,
       "plugin": "4msCompany",
       "version": "1.0.0",
-      "model": "Verb",
+      "model": "Freeverb",
       "params": [
         {
           "id": 0,
-          "value": 0.388499856
+          "value": 0.453000039
         },
         {
           "id": 1,
-          "value": 0.61800009
+          "value": 0.432000071
         },
         {
           "id": 2,
-          "value": 0.150999978
+          "value": 0.25
         },
         {
           "id": 3,
-          "value": 0.078000024
-        },
-        {
-          "id": 4,
-          "value": 0.126000002
-        },
-        {
-          "id": 5,
-          "value": 0.872000158
-        },
-        {
-          "id": 6,
-          "value": 0.0
+          "value": 0.730000079
         }
       ],
       "leftModuleId": 26,
+      "rightModuleId": 38,
       "pos": [
         81,
+        0
+      ]
+    },
+    {
+      "id": 38,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "Freeverb",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.583500147
+        },
+        {
+          "id": 1,
+          "value": 0.432000071
+        },
+        {
+          "id": 2,
+          "value": 0.25
+        },
+        {
+          "id": 3,
+          "value": 0.730000079
+        }
+      ],
+      "leftModuleId": 37,
+      "pos": [
+        91,
         0
       ]
     }
@@ -816,43 +731,11 @@
       "color": "#c91847"
     },
     {
-      "id": 48,
-      "outputModuleId": 25,
-      "outputId": 0,
-      "inputModuleId": 23,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
-      "id": 52,
-      "outputModuleId": 24,
-      "outputId": 0,
-      "inputModuleId": 28,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
       "id": 57,
       "outputModuleId": 21,
       "outputId": 0,
       "inputModuleId": 16,
       "inputId": 1,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 49,
-      "outputModuleId": 23,
-      "outputId": 0,
-      "inputModuleId": 26,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 54,
-      "outputModuleId": 28,
-      "outputId": 0,
-      "inputModuleId": 26,
-      "inputId": 2,
       "color": "#c9b70e"
     },
     {
@@ -872,20 +755,60 @@
       "color": "#c9b70e"
     },
     {
-      "id": 61,
-      "outputModuleId": 32,
-      "outputId": 0,
-      "inputModuleId": 25,
-      "inputId": 4,
-      "color": "#c91847"
-    },
-    {
       "id": 62,
       "outputModuleId": 33,
       "outputId": 0,
       "inputModuleId": 31,
       "inputId": 4,
       "color": "#0c8e15"
+    },
+    {
+      "id": 65,
+      "outputModuleId": 26,
+      "outputId": 0,
+      "inputModuleId": 37,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 66,
+      "outputModuleId": 37,
+      "outputId": 0,
+      "inputModuleId": 21,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 68,
+      "outputModuleId": 26,
+      "outputId": 1,
+      "inputModuleId": 38,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 69,
+      "outputModuleId": 38,
+      "outputId": 0,
+      "inputModuleId": 20,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 67,
+      "outputModuleId": 34,
+      "outputId": 0,
+      "inputModuleId": 33,
+      "inputId": 1,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 70,
+      "outputModuleId": 34,
+      "outputId": 0,
+      "inputModuleId": 32,
+      "inputId": 1,
+      "color": "#c9b70e"
     },
     {
       "id": 63,
@@ -896,12 +819,36 @@
       "color": "#0c8e15"
     },
     {
-      "id": 64,
-      "outputModuleId": 26,
+      "id": 71,
+      "outputModuleId": 29,
+      "outputId": 1,
+      "inputModuleId": 25,
+      "inputId": 4,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 72,
+      "outputModuleId": 24,
       "outputId": 0,
-      "inputModuleId": 36,
+      "inputModuleId": 26,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 73,
+      "outputModuleId": 25,
+      "outputId": 0,
+      "inputModuleId": 26,
       "inputId": 0,
       "color": "#0c8e15"
+    },
+    {
+      "id": 74,
+      "outputModuleId": 32,
+      "outputId": 0,
+      "inputModuleId": 30,
+      "inputId": 4,
+      "color": "#c91847"
     }
   ]
 }
