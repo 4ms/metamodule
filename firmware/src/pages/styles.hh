@@ -111,9 +111,9 @@ struct Gui {
 
 		lv_style_init(&selected_module_style);
 		lv_style_set_outline_color(&selected_module_style, lv_palette_lighten(LV_PALETTE_ORANGE, 1));
-		lv_style_set_outline_width(&selected_module_style, 4);
-		lv_style_set_outline_opa(&selected_module_style, LV_OPA_70);
-		lv_style_set_radius(&selected_module_style, 6);
+		lv_style_set_outline_width(&selected_module_style, 3);
+		lv_style_set_outline_opa(&selected_module_style, LV_OPA_100);
+		lv_style_set_radius(&selected_module_style, 0);
 
 		// header_style (text)
 		lv_style_init(&header_style);
