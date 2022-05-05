@@ -7,6 +7,9 @@ std::unique_ptr<CentralData> centralData;
 //////////////// Auto generated ///////////////////////
 // include and define models below here
 
+#include "CoreModules/info/Freeverb_info.hh"
+auto modelFreeverb = createModelFromInfo<FreeverbInfo>();
+
 #include "CoreModules/info/STS_info.hh"
 auto modelSTS = createModelFromInfo<STSInfo>();
 
@@ -223,6 +226,7 @@ void init(Plugin *p)
 
 	//////////////// Auto generated ///////////////////////
 	// Add models below here
+	p->addModel(modelFreeverb);
 	p->addModel(modelSTS);
 	// p->addModel(modelVCA);
 	p->addModel(modelVCAM);

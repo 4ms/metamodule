@@ -14,6 +14,12 @@
   "changelogUrl": "",
   "modules": [
     {
+      "slug": "Freeverb",
+      "name": "Freeverb",
+      "description": "Freeverb",
+      "tags": []
+    },
+    {
       "slug": "STS",
       "name": "STS",
       "description": "STS",
