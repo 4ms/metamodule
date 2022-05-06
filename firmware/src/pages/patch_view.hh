@@ -14,8 +14,8 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
-	constexpr static uint32_t height = 240;
-	static_assert(height == 120 || height == 240);
+	static inline uint32_t height = 120;
+	// static_assert(height == 120 || height == 240);
 
 	PatchViewPage(PatchInfo info)
 		: PageBase{info}
@@ -74,10 +74,10 @@ struct PatchViewPage : PageBase {
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
 
-		cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
-		lv_obj_set_size(cable_layer, 320, height);
-		lv_obj_set_align(cable_layer, LV_ALIGN_BOTTOM_MID);
-		lv_canvas_set_buffer(cable_layer, cable_buf, 320, height, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		// cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
+		// lv_obj_set_size(cable_layer, 320, height);
+		// lv_obj_set_align(cable_layer, LV_ALIGN_BOTTOM_MID);
+		// lv_canvas_set_buffer(cable_layer, cable_buf, 320, height, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
 		lv_draw_line_dsc_init(&cable_drawline_dsc);
 		cable_drawline_dsc.width = 4;
@@ -97,10 +97,13 @@ struct PatchViewPage : PageBase {
 		lv_label_set_text(patchname, patch_list.get_patch_name(patch_id));
 		lv_label_set_text(description, patch_list.get_patch(patch_id).description.c_str());
 
+		// for (auto &k : mapped_knobs)
+		// 	lv_obj_del(k.obj);
 		for (auto &m : modules)
 			lv_obj_del(m);
 		modules.clear();
 		module_ids.clear();
+		mapped_knobs.clear();
 		modules.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
 
@@ -135,15 +138,18 @@ struct PatchViewPage : PageBase {
 			lv_obj_set_size(canvas, widthpx, height);
 			lv_canvas_set_buffer(canvas, buf, widthpx, height, LV_IMG_CF_TRUE_COLOR);
 
+			// Draw module artwork
 			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
+
+			// Draw module controls
 			const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-			DrawHelper::draw_module_controls(canvas, moduleinfo, patch, i, height);
-			// for (const auto &el : moduleinfo.Knobs) {
-			// 	auto mknob = DrawHelper::draw_mapped_knob(canvas, canvas, el, patch, i, height);
-			// 	if (mknob.has_value()) {
-			// 		mapped_knob.push_back(mknob);
-			// 	}
-			// }
+			DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
+			for (const auto &el : moduleinfo.Knobs) {
+				auto mknob = DrawHelper::draw_mapped_knob(canvas, canvas, el, patch, i, height);
+				if (mknob.has_value()) {
+					mapped_knobs.push_back(mknob.value());
+				}
+			}
 
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, moduleimg_cb, LV_EVENT_PRESSED, (void *)this);
@@ -158,10 +164,20 @@ struct PatchViewPage : PageBase {
 				break;
 			}
 		}
+		printf("have %d mapped knobs\n", mapped_knobs.size());
 	}
 
 	void blur() override {
-		lv_canvas_fill_bg(cable_layer, lv_color_white(), LV_OPA_0);
+		for (auto &m : modules) {
+			lv_obj_del(m);
+		}
+		// for (auto &k : mapped_knobs) {
+		// 	lv_obj_del(k.obj);
+		// }
+		modules.clear();
+		module_ids.clear();
+		mapped_knobs.clear();
+		// lv_canvas_fill_bg(cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	void update() override {
@@ -171,6 +187,15 @@ struct PatchViewPage : PageBase {
 			}
 		}
 		handle_changing_patch();
+
+		for (auto &mk : mapped_knobs) {
+			const float new_pot_val = mk.mapped_knob.get_mapped_val(params.knobs[mk.mapped_knob.panel_knob_id]);
+			if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
+				mk.last_pot_reading = new_pot_val;
+				const int angle = new_pot_val * 3000.f - 1500.f;
+				lv_img_set_angle(mk.obj, angle);
+			}
+		}
 	}
 
 	static void moduleimg_cb(lv_event_t *event) {
@@ -196,51 +221,51 @@ struct PatchViewPage : PageBase {
 
 		bool do_draw_cables = false;
 		if (do_draw_cables) {
-			lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+			// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
-			const int x_offset = 0;
-			const int y_offset = height == 120 ? -6 : 6;
-			for (const auto &c : patch.int_cables) {
-				for (const auto &in : c.ins) {
-					if (in.module_id == module_id) {
-						auto [in_x, in_y] = DrawHelper::scale_center(thismoduleinfo.InJacks[in.jack_id], height);
-						auto scroll_x = 0;
+			// const int x_offset = 0;
+			// const int y_offset = height == 120 ? -6 : 6;
+			// for (const auto &c : patch.int_cables) {
+			// 	for (const auto &in : c.ins) {
+			// 		if (in.module_id == module_id) {
+			// 			auto [in_x, in_y] = DrawHelper::scale_center(thismoduleinfo.InJacks[in.jack_id], height);
+			// 			auto scroll_x = 0;
 
-						lv_area_t coords;
-						lv_obj_get_coords(this_module_obj, &coords);
-						int in_module_left = coords.x1;
-						in_x = in_x + in_module_left - scroll_x + x_offset;
-						in_y += y_offset;
+			// 			lv_area_t coords;
+			// 			lv_obj_get_coords(this_module_obj, &coords);
+			// 			int in_module_left = coords.x1;
+			// 			in_x = in_x + in_module_left - scroll_x + x_offset;
+			// 			in_y += y_offset;
 
-						int out_module_left = 0;
-						for (auto mod : page->modules) {
-							uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(mod)));
-							if (t_module_id == c.out.module_id) {
-								lv_area_t coords;
-								lv_obj_get_coords(mod, &coords);
-								out_module_left = coords.x1;
-								break;
-							}
-						}
-						const auto other_moduleinfo = ModuleFactory::getModuleInfo(patch.module_slugs[c.out.module_id]);
-						auto [out_x, out_y] =
-							DrawHelper::scale_center(other_moduleinfo.OutJacks[c.out.jack_id], height);
-						out_x = out_x + out_module_left - scroll_x + x_offset;
-						out_y += y_offset;
+			// 			int out_module_left = 0;
+			// 			for (auto mod : page->modules) {
+			// 				uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(mod)));
+			// 				if (t_module_id == c.out.module_id) {
+			// 					lv_area_t coords;
+			// 					lv_obj_get_coords(mod, &coords);
+			// 					out_module_left = coords.x1;
+			// 					break;
+			// 				}
+			// 			}
+			// 			const auto other_moduleinfo = ModuleFactory::getModuleInfo(patch.module_slugs[c.out.module_id]);
+			// 			auto [out_x, out_y] =
+			// 				DrawHelper::scale_center(other_moduleinfo.OutJacks[c.out.jack_id], height);
+			// 			out_x = out_x + out_module_left - scroll_x + x_offset;
+			// 			out_y += y_offset;
 
-						lv_point_t points[2] = {{(int16_t)in_x, (int16_t)in_y}, {(int16_t)out_x, (int16_t)out_y}};
-						page->cable_drawline_dsc.color =
-							Gui::cable_palette[(c.out.jack_id + c.out.module_id) % Gui::cable_palette.size()];
-						lv_canvas_draw_line(page->cable_layer, points, 2, &page->cable_drawline_dsc);
-					}
-				}
-			}
+			// 			lv_point_t points[2] = {{(int16_t)in_x, (int16_t)in_y}, {(int16_t)out_x, (int16_t)out_y}};
+			// 			page->cable_drawline_dsc.color =
+			// 				Gui::cable_palette[(c.out.jack_id + c.out.module_id) % Gui::cable_palette.size()];
+			// 			lv_canvas_draw_line(page->cable_layer, points, 2, &page->cable_drawline_dsc);
+			// 		}
+			// 	}
+			// }
 		}
 	}
 
 	static void module_defocus_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	static void playbut_cb(lv_event_t *event) {
@@ -262,16 +287,17 @@ private:
 	lv_obj_t *module_name;
 	lv_obj_t *playbut_label;
 	lv_obj_t *playbut;
-	lv_obj_t *cable_layer;
+	// lv_obj_t *cable_layer;
 
 	std::vector<lv_obj_t *> modules;
 	std::vector<uint32_t> module_ids;
+	std::vector<DrawHelper::MKnob> mapped_knobs;
 
 	static constexpr uint32_t MaxBufferWidth = 1024;
-	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(height, MaxBufferWidth)];
+	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(240, MaxBufferWidth)];
 	lv_draw_img_dsc_t draw_img_dsc;
 
-	static inline uint8_t cable_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(height, 320)];
+	static inline uint8_t cable_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 320)];
 	lv_draw_line_dsc_t cable_drawline_dsc;
 
 	static inline const PatchData *patch_instance;

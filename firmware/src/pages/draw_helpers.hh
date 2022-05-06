@@ -151,11 +151,11 @@ struct DrawHelper {
 		}
 	}
 
-	static void draw_module_controls(lv_obj_t *canvas,
-									 const ModuleInfoView &info,
-									 const PatchData &patch,
-									 uint32_t module_id,
-									 uint32_t module_height) {
+	static void draw_module_jacks(lv_obj_t *canvas,
+								  const ModuleInfoView &info,
+								  const PatchData &patch,
+								  uint32_t module_id,
+								  uint32_t module_height) {
 
 		lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
@@ -165,18 +165,18 @@ struct DrawHelper {
 
 		auto calc_radius = [](auto img) { return (img->header.w + 6) / 2; };
 
-		for (const auto el : info.Knobs) {
-			const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
-			if (!knob)
-				continue;
-			auto [left, top] = scale_topleft(el, knob, adj);
-			lv_canvas_draw_img(canvas, left, top, knob, &draw_img_dsc);
+		// for (const auto el : info.Knobs) {
+		// 	const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
+		// 	if (!knob)
+		// 		continue;
+		// 	auto [left, top] = scale_topleft(el, knob, adj);
+		// 	lv_canvas_draw_img(canvas, left, top, knob, &draw_img_dsc);
 
-			if (patch.find_mapped_knob(module_id, el.id)) {
-				auto [c_x, c_y] = scale_center(el, module_height);
-				lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(knob), 0, 3600, &Gui::mapped_knob_small_arcdsc);
-			}
-		}
+		// 	if (patch.find_mapped_knob(module_id, el.id)) {
+		// 		auto [c_x, c_y] = scale_center(el, module_height);
+		// 		lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(knob), 0, 3600, &Gui::mapped_knob_small_arcdsc);
+		// 	}
+		// }
 		for (const auto el : info.InJacks) {
 			auto jack = fullsize ? &jack_x : &jack_x_120;
 			auto [left, top] = scale_topleft(el, jack, adj);
