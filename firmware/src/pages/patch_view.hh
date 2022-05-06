@@ -212,6 +212,12 @@ struct PatchViewPage : PageBase {
 		printf("Focussed Module %d\n", module_id);
 
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+
+		if (page->height == 120) {
+			page->height = 240;
+			// page->blur();
+			page->focus();
+		}
 		const auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
 
 		const auto this_slug = patch.module_slugs[module_id];
@@ -277,6 +283,13 @@ struct PatchViewPage : PageBase {
 	static void playbut_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_label_set_text(page->module_name, "Select a module:");
+
+		// if (page->height == 240) {
+		// 	page->height = 120;
+		// page->blur();
+		// page->focus();
+		// }
+
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 	}
 
