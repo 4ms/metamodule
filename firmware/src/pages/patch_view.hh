@@ -284,11 +284,11 @@ struct PatchViewPage : PageBase {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_label_set_text(page->module_name, "Select a module:");
 
-		// if (page->height == 240) {
-		// 	page->height = 120;
-		// page->blur();
-		// page->focus();
-		// }
+		if (page->height == 240) {
+			page->height = 120;
+			// page->blur();
+			page->focus();
+		}
 
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 	}

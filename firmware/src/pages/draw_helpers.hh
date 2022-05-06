@@ -114,7 +114,10 @@ struct DrawHelper {
 		int16_t c_x = std::round(ModuleInfoBase::mm_to_px<240>(el.x_mm));
 		int16_t c_y = std::round(ModuleInfoBase::mm_to_px<240>(el.y_mm));
 
-		const lv_img_dsc_t *knob = DrawHelper::get_knob_img_240(el.knob_style);
+		const bool fullsize = module_height > 120;
+
+		const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
+		// const lv_img_dsc_t *knob = DrawHelper::get_knob_img_240(el.knob_style);
 		if (!knob)
 			return std::nullopt;
 
