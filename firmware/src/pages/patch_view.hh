@@ -101,11 +101,14 @@ struct PatchViewPage : PageBase {
 		// 	lv_obj_del(k.obj);
 		for (auto &m : modules)
 			lv_obj_del(m);
+		printf("deleted obj\n");
 		modules.clear();
 		module_ids.clear();
 		mapped_knobs.clear();
 		modules.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
+
+		lv_obj_set_height(modules_cont, height + 8);
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -164,6 +167,7 @@ struct PatchViewPage : PageBase {
 				break;
 			}
 		}
+		lv_obj_refresh_self_size(modules_cont);
 		printf("have %d mapped knobs\n", mapped_knobs.size());
 	}
 
@@ -284,11 +288,11 @@ struct PatchViewPage : PageBase {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_label_set_text(page->module_name, "Select a module:");
 
-		if (page->height == 240) {
-			page->height = 120;
-			// page->blur();
-			page->focus();
-		}
+		// if (page->height == 240) {
+		// 	page->height = 120;
+		// page->blur();
+		// page->focus();
+		// }
 
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 	}

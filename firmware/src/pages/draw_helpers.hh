@@ -111,21 +111,21 @@ struct DrawHelper {
 												 const PatchData &patch,
 												 uint32_t module_id,
 												 uint32_t module_height) {
-		int16_t c_x = std::round(ModuleInfoBase::mm_to_px<240>(el.x_mm));
-		int16_t c_y = std::round(ModuleInfoBase::mm_to_px<240>(el.y_mm));
 
+		const float adj = (float)(module_height) / 240.f;
 		const bool fullsize = module_height > 120;
 
 		const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
-		// const lv_img_dsc_t *knob = DrawHelper::get_knob_img_240(el.knob_style);
 		if (!knob)
 			return std::nullopt;
 
+		auto [left, top] = scale_topleft(el, knob, adj);
 		int width = knob->header.w;
 		int height = knob->header.h;
-		int left = c_x - width / 2;
-		int top = c_y - height / 2;
 
+		lv_draw_arc_dsc_t arc_dsc;
+		lv_draw_arc_dsc_init(&arc_dsc);
+		arc_dsc.opa = LV_OPA_50;
 		if (auto mappedknob = patch.find_mapped_knob(module_id, el.id)) {
 			lv_obj_t *obj = lv_img_create(base);
 			lv_img_set_src(obj, knob);
@@ -134,7 +134,13 @@ struct DrawHelper {
 			lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
 
 			// Circle around mapped knobs
-			lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
+			auto [c_x, c_y] = scale_center(el, module_height);
+			arc_dsc.color = Gui::knob_palette[mappedknob->panel_knob_id % 6];
+			if (mappedknob->panel_knob_id >= 6)
+				arc_dsc.width = fullsize ? 2 : 2;
+			else
+				arc_dsc.width = fullsize ? 4 : 3;
+			lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.5f + 8, 0, 3600, &arc_dsc);
 			return MKnob{
 				.obj = obj,
 				.mapped_knob = *mappedknob,
@@ -168,18 +174,6 @@ struct DrawHelper {
 
 		auto calc_radius = [](auto img) { return (img->header.w + 6) / 2; };
 
-		// for (const auto el : info.Knobs) {
-		// 	const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
-		// 	if (!knob)
-		// 		continue;
-		// 	auto [left, top] = scale_topleft(el, knob, adj);
-		// 	lv_canvas_draw_img(canvas, left, top, knob, &draw_img_dsc);
-
-		// 	if (patch.find_mapped_knob(module_id, el.id)) {
-		// 		auto [c_x, c_y] = scale_center(el, module_height);
-		// 		lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(knob), 0, 3600, &Gui::mapped_knob_small_arcdsc);
-		// 	}
-		// }
 		for (const auto el : info.InJacks) {
 			auto jack = fullsize ? &jack_x : &jack_x_120;
 			auto [left, top] = scale_topleft(el, jack, adj);
