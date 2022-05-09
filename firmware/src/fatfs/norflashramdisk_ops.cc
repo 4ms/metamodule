@@ -33,14 +33,14 @@ void NorFlashRamDiskOps::set_status(Status status) {
 //
 // FatFS calls this in f_mkfs(), and when it mounts the disk (in f_mount(_,_,1) or the first time FatFS attempts a read/write/stat if the disk is not yet mounted)
 DSTATUS NorFlashRamDiskOps::initialize() {
-	printf("NorFlashRamDiskOps initialize\n");
+	// printf("NorFlashRamDiskOps initialize\n");
 	if (_status == Status::NotInit) {
 		if (!flash.check_chip_id(0x182001, 0x00FFBFFF)) { //S25FL127S(p7):182001 or S25FL128L(p6):186001
 			printf("ERROR: NOR Flash returned wrong id\n");
 			return STA_NOINIT | STA_NODISK;
 		}
 
-		printf("Reading Flash at %#010x to RAMDisk at 0, for %#010x bytes\n", flash_offset, RamDiskSizeBytes);
+		// printf("Reading Flash at %#010x to RAMDisk at 0, for %#010x bytes\n", flash_offset, RamDiskSizeBytes);
 		if (flash.read(ramdisk.virtdrive, flash_offset, RamDiskSizeBytes, Foreground)) {
 			set_status(Status::NotInUse);
 			return 0;
@@ -48,7 +48,7 @@ DSTATUS NorFlashRamDiskOps::initialize() {
 		printf("NorFlashRamDiskOps read failed\n");
 		return STA_NOINIT;
 	}
-	printf("NorFlashRamDiskOps already init\n");
+	// printf("NorFlashRamDiskOps already init\n");
 	return 0;
 }
 
@@ -58,7 +58,7 @@ DRESULT NorFlashRamDiskOps::read(uint8_t *dst, uint32_t block_start, uint32_t nu
 	if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
 		return RES_ERROR;
 
-	printf("Reading RAMDisk at %d (block %d) for %d blocks\n", address, block_start, num_blocks);
+	// printf("Reading RAMDisk at %d (block %d) for %d blocks\n", address, block_start, num_blocks);
 	std::memcpy(dst, &ramdisk.virtdrive[address], bytes);
 	return RES_OK;
 }
@@ -69,11 +69,11 @@ DRESULT NorFlashRamDiskOps::write(const uint8_t *src, uint32_t sector_start, uin
 	if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
 		return RES_ERROR;
 
-	printf("Writing RAMDisk at %p [%d] (block %d) for %d blocks\n",
-		   &ramdisk.virtdrive[address],
-		   address,
-		   sector_start,
-		   num_sectors);
+	// printf("Writing RAMDisk at %p [%d] (block %d) for %d blocks\n",
+	// 	   &ramdisk.virtdrive[address],
+	// 	   address,
+	// 	   sector_start,
+	// 	   num_sectors);
 	std::memcpy(&ramdisk.virtdrive[address], src, bytes);
 	return RES_OK;
 }
@@ -128,9 +128,9 @@ bool NorFlashRamDiskOps::unmount() {
 			cur_ram_addr += 4;
 		}
 		if (sector_modified) {
-			printf("Flash addr %#010x (pre-offset sector# %d) differs from RAMDisk, erasing...",
-				   flash_start_addr,
-				   sector_num);
+			// printf("Flash addr %#010x (pre-offset sector# %d) differs from RAMDisk, erasing...",
+				   // flash_start_addr,
+				   // sector_num);
 			auto ok = flash.erase(SectorSize, flash_start_addr, Foreground);
 			if (!ok) {
 				printf("Erase failed.\r\n");
@@ -139,7 +139,7 @@ bool NorFlashRamDiskOps::unmount() {
 			flash.read(sector_u8, flash_start_addr, SectorSize, Foreground);
 			//Verify erased block here
 
-			printf("Writing...");
+			// printf("Writing...");
 			ok = flash.write(&ramdisk.virtdrive[ram_start_addr], flash_start_addr, SectorSize);
 			if (!ok) {
 				printf("Write failed.\r\n");
@@ -163,12 +163,12 @@ bool NorFlashRamDiskOps::unmount() {
 				cur_ram_addr += 4;
 			}
 
-			printf("Done\r\n");
+			// printf("Done\r\n");
 		} else {
 			// printf("Pre-offset sector %d not modified.\r\n", sector_num);
 		}
 	}
-	printf("Done writing back to flash\r\n");
+	// printf("Done writing back to flash\r\n");
 	set_status(Status::NotInit);
 	return true;
 }
