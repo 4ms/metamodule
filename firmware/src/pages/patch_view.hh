@@ -28,6 +28,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
 		lv_obj_set_style_pad_gap(base, 4, LV_STATE_DEFAULT);
 		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_set_scroll_dir(base, LV_DIR_HOR);
 		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLL_CHAIN);
 
 		patchname = lv_label_create(base);
