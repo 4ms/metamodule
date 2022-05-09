@@ -15,6 +15,7 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 
 	//data.append_child() << ryml::key("patch_name") << pd.patch_name.c_str();
 	data["patch_name"] << pd.patch_name;
+	data["description"] << pd.description;
 
 	// TODO: Added write() for each type (MappedKnob, etc) so we can do:
 	// data["module_slugs"] << pd.module_slugs;

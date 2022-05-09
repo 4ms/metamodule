@@ -8,6 +8,7 @@ TEST_CASE("Correct yaml output produced") {
 		.module_slugs{"PanelMedium", "Module1", "Module2", "Module3"},
 	};
 	pd.patch_name = "test123";
+	pd.description = "This is the description of the patch.";
 
 	Jack out1{1, 2};
 	Jack out2{11, 22};
@@ -75,6 +76,7 @@ TEST_CASE("Correct yaml output produced") {
 		  // clang-format off
 R"(PatchData:
   patch_name: test123
+  description: This is the description of the patch.
   module_slugs:
     0: PanelMedium
     1: Module1
