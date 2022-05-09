@@ -1,4 +1,6 @@
 ---
 CompileFlags:
-	Add: [-std=c++2a]
+	Add: ["-std=c++2a", 
+		"-I../shared/cpputil",
+	] 
 	Remove: [-march=nocona]
