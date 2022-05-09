@@ -129,8 +129,8 @@ bool NorFlashRamDiskOps::unmount() {
 		}
 		if (sector_modified) {
 			// printf("Flash addr %#010x (pre-offset sector# %d) differs from RAMDisk, erasing...",
-				   // flash_start_addr,
-				   // sector_num);
+			// flash_start_addr,
+			// sector_num);
 			auto ok = flash.erase(SectorSize, flash_start_addr, Foreground);
 			if (!ok) {
 				printf("Erase failed.\r\n");

@@ -121,14 +121,14 @@ struct PatchViewPage : PageBase {
 		for (auto [i, slug] : enumerate(patch.module_slugs)) {
 			module_ids.push_back(i);
 
-			printf("Drawing %s\n", slug.c_str());
+			// printf("Drawing %s\n", slug.c_str());
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
 			if (!img) {
 				printf("Image not found for %s\n", slug.c_str());
 				continue;
 			}
 			auto widthpx = img->header.w;
-			printf("Width is %d\n", widthpx);
+			// printf("Width is %d\n", widthpx);
 
 			lv_obj_t *canvas = modules.emplace_back(lv_canvas_create(modules_cont));
 			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
@@ -169,7 +169,7 @@ struct PatchViewPage : PageBase {
 			}
 		}
 		lv_obj_refresh_self_size(modules_cont);
-		printf("have %d mapped knobs\n", mapped_knobs.size());
+		// printf("have %d mapped knobs\n", mapped_knobs.size());
 	}
 
 	void blur() override {
@@ -216,7 +216,7 @@ struct PatchViewPage : PageBase {
 	static void module_focus_cb(lv_event_t *event) {
 		auto this_module_obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
-		printf("Focussed Module %d\n", module_id);
+		// printf("Focussed Module %d\n", module_id);
 
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 
@@ -283,7 +283,7 @@ struct PatchViewPage : PageBase {
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		printf("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
+		// printf("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
 		page->start_changing_patch();
 	}
 
@@ -337,7 +337,7 @@ private:
 		if (!mbox.loading_new_patch && (_patch_id != patch_list.cur_patch_index())) {
 			mbox.new_patch_index = _patch_id;
 			mbox.loading_new_patch = true;
-			printf("Loading patch %s\n", patch_list.get_patch_name(_patch_id).data());
+			// printf("Loading patch %s\n", patch_list.get_patch_name(_patch_id).data());
 		}
 	}
 
