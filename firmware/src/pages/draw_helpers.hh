@@ -144,7 +144,7 @@ struct DrawHelper {
 				arc_dsc.width = fullsize ? 2 : 2;
 			else
 				arc_dsc.width = fullsize ? 4 : 3;
-			lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.5f + 8, 0, 3600, &arc_dsc);
+			lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.5f + 8 * adj, 0, 3600, &arc_dsc);
 			auto anim_method = el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
 			return MKnob{
 				.obj = obj,
