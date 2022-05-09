@@ -193,11 +193,13 @@ struct PatchViewPage : PageBase {
 		handle_changing_patch();
 
 		for (auto &mk : mapped_knobs) {
-			const float new_pot_val = mk.mapped_knob.get_mapped_val(params.knobs[mk.mapped_knob.panel_knob_id]);
-			if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
-				mk.last_pot_reading = new_pot_val;
-				const int angle = new_pot_val * 3000.f - 1500.f;
-				lv_img_set_angle(mk.obj, angle);
+			if (mk.anim_method == DrawHelper::RotaryPot) {
+				const float new_pot_val = mk.mapped_knob.get_mapped_val(params.knobs[mk.mapped_knob.panel_knob_id]);
+				if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
+					mk.last_pot_reading = new_pot_val;
+					const int angle = new_pot_val * 3000.f - 1500.f;
+					lv_img_set_angle(mk.obj, angle);
+				}
 			}
 		}
 	}

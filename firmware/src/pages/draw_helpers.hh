@@ -30,9 +30,12 @@ LV_IMG_DECLARE(switch_down_120);
 namespace MetaModule
 {
 struct DrawHelper {
+	enum KnobAnimMethods { RotaryPot, LinearSlider, RotaryEncoder };
+
 	struct MKnob {
 		lv_obj_t *obj;
 		const MappedKnob &mapped_knob;
+		KnobAnimMethods anim_method = RotaryPot;
 		float last_pot_reading = 0.5f;
 	};
 
@@ -126,6 +129,7 @@ struct DrawHelper {
 		lv_draw_arc_dsc_t arc_dsc;
 		lv_draw_arc_dsc_init(&arc_dsc);
 		arc_dsc.opa = LV_OPA_50;
+
 		if (auto mappedknob = patch.find_mapped_knob(module_id, el.id)) {
 			lv_obj_t *obj = lv_img_create(base);
 			lv_img_set_src(obj, knob);
@@ -141,20 +145,27 @@ struct DrawHelper {
 			else
 				arc_dsc.width = fullsize ? 4 : 3;
 			lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.5f + 8, 0, 3600, &arc_dsc);
+			auto anim_method = el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
 			return MKnob{
 				.obj = obj,
 				.mapped_knob = *mappedknob,
+				.anim_method = anim_method,
 			};
 		} else {
-			lv_draw_img_dsc_t img_dsc;
-			lv_draw_img_dsc_init(&img_dsc);
-			img_dsc.pivot.x = width / 2;
-			img_dsc.pivot.y = height / 2;
 			//TODO: make patch.find_static_knob()
 			auto static_knob = std::find_if(patch.static_knobs.begin(), patch.static_knobs.end(), [&](auto &p) {
 				return p.module_id == module_id && p.param_id == el.id;
 			});
-			img_dsc.angle = (static_knob != patch.static_knobs.end()) ? static_knob->value * 3000.f - 1500.f : -1500;
+			lv_draw_img_dsc_t img_dsc;
+			lv_draw_img_dsc_init(&img_dsc);
+			if (el.knob_style == KnobDef::Slider25mm)
+				img_dsc.angle = 0;
+			else {
+				img_dsc.pivot.x = width / 2;
+				img_dsc.pivot.y = height / 2;
+				img_dsc.angle =
+					(static_knob != patch.static_knobs.end()) ? static_knob->value * 3000.f - 1500.f : -1500;
+			}
 			lv_canvas_draw_img(canvas, left, top, knob, &img_dsc);
 			return std::nullopt;
 		}
