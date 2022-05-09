@@ -23,6 +23,7 @@ struct MetaModuleHubBase : public CommModule {
 	std::function<void()> redrawPatchName;
 	std::string labelText = "";
 	std::string patchNameText = "";
+	std::string patchDescText = "";
 
 	long responseTimer = 0;
 	bool buttonAlreadyHandled = false;
@@ -58,8 +59,12 @@ struct MetaModuleHubBase : public CommModule {
 			json_decref(thisMapJ);
 		}
 		json_object_set_new(rootJ, "Mappings", mapsJ);
+
 		json_t *patchNameJ = json_string(patchNameText.c_str());
 		json_object_set_new(rootJ, "PatchName", patchNameJ);
+
+		json_t *patchDescJ = json_string(patchDescText.c_str());
+		json_object_set_new(rootJ, "PatchDesc", patchDescJ);
 		return rootJ;
 	}
 
@@ -70,6 +75,12 @@ struct MetaModuleHubBase : public CommModule {
 		auto patchNameJ = json_object_get(rootJ, "PatchName");
 		if (json_is_string(patchNameJ)) {
 			patchNameText = json_string_value(patchNameJ);
+			redrawPatchName();
+		}
+
+		auto patchDescJ = json_object_get(rootJ, "PatchDesc");
+		if (json_is_string(patchDescJ)) {
+			patchDescText = json_string_value(patchDescJ);
 			redrawPatchName();
 		}
 
@@ -206,7 +217,8 @@ struct MetaModuleHubBase : public CommModule {
 					.replace_all("#", "")
 					.replace_all("!", "");
 				std::string patchFileName = patchDir + patchStructName.str;
-				writePatchFile(patchFileName, patchStructName.str, patchName);
+				// TODO:add patchDesc here:
+				writePatchFile(patchFileName, patchStructName.str, patchName, patchDescText);
 
 				labelText = "Wrote patch file: ";
 				labelText += patchStructName.str + ".yml";
@@ -229,13 +241,14 @@ private:
 		return false;
 	}
 
-	void writePatchFile(std::string fileName, std::string patchStructName, std::string patchName)
+	void writePatchFile(std::string fileName, std::string patchStructName, std::string patchName, std::string patchDesc)
 	{
 		labelText = "Creating patch..";
 		updateDisplay();
 
 		PatchFileWriter pw{centralData->moduleData};
 		pw.setPatchName(patchName);
+		pw.setPatchDesc(patchDesc);
 		pw.setJackList(centralData->jackData);
 		pw.setParamList(centralData->paramData);
 		pw.addMaps(centralData->maps);

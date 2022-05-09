@@ -27,12 +27,12 @@ struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 		configParam(3, 0.f, 1.f, 0.f, "Knob D");
 		configParam(4, 0.f, 1.f, 0.f, "Knob E");
 		configParam(5, 0.f, 1.f, 0.f, "Knob F");
-		configParam(6, 0.f, 1.f, 0.f, "Knob X");
-		configParam(7, 0.f, 1.f, 0.f, "Knob Y");
-		configParam(8, 0.f, 1.f, 0.f, "Knob Z");
-		configParam(9, 0.f, 1.f, 0.f, "Knob L");
-		configParam(10, 0.f, 1.f, 0.f, "Knob R");
-		configParam(11, 1.f, 1.f, 0.f, "Knob Q");
+		configParam(6, 0.f, 1.f, 0.f, "Knob U");
+		configParam(7, 0.f, 1.f, 0.f, "Knob V");
+		configParam(8, 0.f, 1.f, 0.f, "Knob W");
+		configParam(9, 0.f, 1.f, 0.f, "Knob X");
+		configParam(10, 0.f, 1.f, 0.f, "Knob Y");
+		configParam(11, 0.f, 1.f, 0.f, "Knob Z");
 		selfID.typeID = "PanelMedium";
 	}
 
@@ -48,10 +48,15 @@ struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 
 struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 	LedDisplayTextField *patchName;
+	LedDisplayTextField *patchDesc;
 
 	Vec fixDPI(Vec v)
 	{
 		return v.mult(75.f / 72.f);
+	}
+	Vec fixDPIKnob(Vec v)
+	{
+		return v.mult(75.f / 72.f).plus({0.6f, 0.2f});
 	}
 
 	HubMediumWidget(HubMedium *module)
@@ -61,11 +66,17 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 
 		if (hubModule != nullptr) {
 			hubModule->updateDisplay = [&]() { this->valueLabel->text = this->hubModule->labelText; };
-			hubModule->updatePatchName = [&]() { this->hubModule->patchNameText = this->patchName->text; };
-			hubModule->redrawPatchName = [&]() { this->patchName->text = this->hubModule->patchNameText; };
+			hubModule->updatePatchName = [&]() {
+				this->hubModule->patchNameText = this->patchName->text;
+				this->hubModule->patchDescText = this->patchDesc->text;
+			};
+			hubModule->redrawPatchName = [&]() {
+				this->patchName->text = this->hubModule->patchNameText;
+				this->patchDesc->text = this->hubModule->patchDescText;
+			};
 		}
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-medium.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-medium-p8.svg")));
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
@@ -83,27 +94,35 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 		else
 			patchName->text = "Enter Patch Name";
 		patchName->color = rack::color::WHITE;
-		patchName->box.size = {mm2px(Vec(57.7f, 43.3f))};
+		patchName->box.size = {mm2px(Vec(57.7f, 10.0f))};
 		patchName->cursor = 0;
-		patchName->selectAll(); // Doesn't work :(
 		addChild(patchName);
 
-		addParam(createParamCentered<BefacoPush>((Vec(22.31, 43.16)), module, HubMedium::WRITE_PATCH));
+		patchDesc = createWidget<MetaModuleTextBox>(mm2px(Vec(37, 24.7)));
+		if (hubModule != nullptr && hubModule->patchDescText.length() > 0)
+			patchDesc->text = this->hubModule->patchDescText;
+		else
+			patchDesc->text = "Patch Description";
+		patchDesc->color = rack::color::WHITE;
+		patchDesc->box.size = {mm2px(Vec(57.7f, 31.3f))};
+		patchDesc->cursor = 0;
+		addChild(patchDesc);
 
-		addLabeledKnobPx<RoundBlackKnob>("", 0, fixDPI({34.23, 166.3}));		// A
-		addLabeledKnobPx<RoundBlackKnob>("", 1, fixDPI({94.21, 193.61}));		// B
-		addLabeledKnobPx<RoundBlackKnob>("", 2, fixDPI({155.15, 213.81}));		// C
-		addLabeledKnobPx<RoundBlackKnob>("", 3, fixDPI({220.04, 214.26}));		// D
-		addLabeledKnobPx<RoundBlackKnob>("", 4, fixDPI({280.72, 193.68}));		// E
-		addLabeledKnobPx<RoundBlackKnob>("", 5, fixDPI({341.35, 166.41}));		// F
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 6, fixDPI({64.57, 53.24}));	// x
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 7, fixDPI({27.94, 88.42}));	// y
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 8, fixDPI({64.57, 120.56}));	// z
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 9, fixDPI({295.26, 117.58})); // l
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 10, fixDPI({343.34, 92.99})); // r
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 11, fixDPI({44.14, 226.16})); // q
+		addParam(createParamCentered<BefacoPush>(fixDPIKnob({298.90, 49.35}), module, HubMedium::WRITE_PATCH));
 
-		// addInput(createInputCentered<PJ301MPort>(fixDPI({36.34, 324.15}), module, 0));
+		addLabeledKnobPx<RoundBlackKnob>("", 0, fixDPIKnob({33.35, 213.10}));		 // A
+		addLabeledKnobPx<RoundBlackKnob>("", 1, fixDPIKnob({92.87, 201.66}));		 // B
+		addLabeledKnobPx<RoundBlackKnob>("", 2, fixDPIKnob({153.76, 213.10}));		 // C
+		addLabeledKnobPx<RoundBlackKnob>("", 3, fixDPIKnob({218.70, 213.10}));		 // D
+		addLabeledKnobPx<RoundBlackKnob>("", 4, fixDPIKnob({279.38, 201.66}));		 // E
+		addLabeledKnobPx<RoundBlackKnob>("", 5, fixDPIKnob({340.00, 213.10}));		 // F
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 6, fixDPIKnob({27.06, 73.20}));	 // u
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 7, fixDPIKnob({61.47, 115.71}));	 // v
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 8, fixDPIKnob({27.06, 157.79}));	 // w
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 9, fixDPIKnob({345.74, 91.39}));	 // x
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 10, fixDPIKnob({302.49, 123.24})); // y
+		addLabeledKnobPx<RoundSmallBlackKnob>("", 11, fixDPIKnob({345.77, 157.00})); // z
+
 		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({36.34, 324.15}), JackInOut::Input);
 		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({79.86, 324.15}), JackInOut::Input);
 		addLabeledJackPx<PJ301MPort>("", 2, fixDPI({122.6, 324.18}), JackInOut::Input);
@@ -121,8 +140,6 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 		addLabeledJackPx<PJ301MPort>("", 5, fixDPI({265.68, 282.79}), JackInOut::Output);
 		addLabeledJackPx<PJ301MPort>("", 6, fixDPI({308.9, 282.15}), JackInOut::Output);
 		addLabeledJackPx<PJ301MPort>("", 7, fixDPI({352.42, 282.15}), JackInOut::Output);
-		addLabeledJackPx<PJ301MPort>("", 8, fixDPI({316.22, 238.83}), JackInOut::Output);
-		addLabeledJackPx<PJ301MPort>("", 9, fixDPI({352.74, 219.83}), JackInOut::Output);
 	}
 };
 

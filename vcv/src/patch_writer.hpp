@@ -14,6 +14,7 @@ public:
 	PatchFileWriter(std::vector<ModuleID> modules);
 	void setModuleList(std::vector<ModuleID> &modules);
 	void setPatchName(std::string patchName);
+	void setPatchDesc(std::string patchDesc);
 	void setJackList(std::vector<JackStatus> &jacks);
 	void setParamList(std::vector<ParamStatus> &params);
 	void addMaps(std::vector<Mapping> maps);

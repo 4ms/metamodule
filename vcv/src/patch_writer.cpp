@@ -14,6 +14,11 @@ void PatchFileWriter::setPatchName(std::string patchName)
 	pd.patch_name = patchName.c_str();
 }
 
+void PatchFileWriter::setPatchDesc(std::string patchDesc)
+{
+	pd.description = patchDesc.c_str();
+}
+
 void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules)
 {
 	std::vector<int> vcv_mod_ids;
