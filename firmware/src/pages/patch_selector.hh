@@ -73,7 +73,8 @@ struct PatchSelectorPage : PageBase {
 
 		lv_roller_set_options(roller, patchnames.c_str(), LV_ROLLER_MODE_NORMAL);
 		// lv_roller_set_visible_row_count(roller, 9);
-		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
+		unsigned default_sel = std::min(patchnames.size(), 5U);
+		lv_roller_set_selected(roller, default_sel, LV_ANIM_OFF);
 		printf("Preselecting %d from %p\n", lv_roller_get_selected(roller), roller);
 	}
 
