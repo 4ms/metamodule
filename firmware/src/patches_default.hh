@@ -3,10 +3,11 @@
 #include "Djembe2.hh"
 #include "Djembe4.hh"
 #include "Djembe4verb.hh"
+#include "patch/SpectralPings.hh"
 
 struct DefaultPatches {
 	static uint32_t num_patches() {
-		return 4;
+		return 5;
 	}
 
 	static ModuleTypeSlug get_filename(uint32_t id) {
@@ -18,6 +19,8 @@ struct DefaultPatches {
 			return "smr_resonant_pings.yml";
 		if (id == 3)
 			return "Djembe4verb.yml";
+		if (id == 4)
+			return "SpectralPings.yml";
 		return "";
 	}
 
@@ -30,6 +33,8 @@ struct DefaultPatches {
 			return sizeof(SMR_patch) / sizeof(char);
 		if (id == 3)
 			return sizeof(Djembe4verb_patch) / sizeof(char);
+		if (id == 4)
+			return sizeof(SpectralPings_patch) / sizeof(char);
 		return 0;
 	}
 
@@ -42,6 +47,8 @@ struct DefaultPatches {
 			return SMR_patch;
 		if (id == 3)
 			return Djembe4verb_patch;
+		if (id == 4)
+			return SpectralPings_patch;
 		return nullptr;
 	}
 
@@ -54,6 +61,8 @@ struct DefaultPatches {
 			return SMR_patch;
 		if (id == 3)
 			return Djembe4verb_patch;
+		if (id == 4)
+			return SpectralPings_patch;
 		return {};
 	}
 
