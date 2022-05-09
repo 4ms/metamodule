@@ -771,28 +771,12 @@
       "color": "#c91847"
     },
     {
-      "id": 66,
-      "outputModuleId": 37,
-      "outputId": 0,
-      "inputModuleId": 21,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
       "id": 68,
       "outputModuleId": 26,
       "outputId": 1,
       "inputModuleId": 38,
       "inputId": 0,
       "color": "#c91847"
-    },
-    {
-      "id": 69,
-      "outputModuleId": 38,
-      "outputId": 0,
-      "inputModuleId": 20,
-      "inputId": 0,
-      "color": "#0986ad"
     },
     {
       "id": 67,

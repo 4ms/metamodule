@@ -1,7 +1,7 @@
 static char Djembe4_patch[] =
 	R"(
 PatchData:
-  patch_name: 'Djembe-4'
+  patch_name: 'Quad Djembe'
   description: "Four Djembes with stereo mix-down.
 
   Patch clocks into Gate In 1 and 2."

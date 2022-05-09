@@ -1,0 +1,495 @@
+{
+  "version": "1.dev.2db08f1",
+  "modules": [
+    {
+      "id": 47,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "KPLS",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 48,
+      "pos": [
+        40,
+        0
+      ]
+    },
+    {
+      "id": 48,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "KPLS",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 47,
+      "pos": [
+        36,
+        0
+      ]
+    },
+    {
+      "id": 49,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "PanelMedium",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 0.0
+        },
+        {
+          "id": 12,
+          "value": 0.0
+        }
+      ],
+      "data": {
+        "Mappings": [
+          {
+            "DstModID": 48,
+            "DstObjID": 1,
+            "DstObjType": "InputJack",
+            "SrcModID": 49,
+            "SrcObjID": 6,
+            "SrcObjType": "InputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 47,
+            "DstObjID": 1,
+            "DstObjType": "InputJack",
+            "SrcModID": 49,
+            "SrcObjID": 7,
+            "SrcObjType": "InputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 48,
+            "DstObjID": 0,
+            "DstObjType": "InputJack",
+            "SrcModID": 49,
+            "SrcObjID": 0,
+            "SrcObjType": "InputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 47,
+            "DstObjID": 0,
+            "DstObjType": "InputJack",
+            "SrcModID": 49,
+            "SrcObjID": 1,
+            "SrcObjType": "InputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 49,
+            "SrcObjID": 0,
+            "SrcObjType": "OutputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 52,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 49,
+            "SrcObjID": 1,
+            "SrcObjType": "OutputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 48,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 6,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 48,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 7,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 48,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 8,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 47,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 9,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 47,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 10,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 47,
+            "DstObjID": 2,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 11,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 53,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 49,
+            "SrcObjID": 2,
+            "SrcObjType": "OutputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 54,
+            "DstObjID": 0,
+            "DstObjType": "OutputJack",
+            "SrcModID": 49,
+            "SrcObjID": 3,
+            "SrcObjType": "OutputJack",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 0,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 51,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 1,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 52,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 2,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 52,
+            "DstObjID": 1,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 3,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 53,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 4,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          },
+          {
+            "DstModID": 54,
+            "DstObjID": 0,
+            "DstObjType": "Knob",
+            "SrcModID": 49,
+            "SrcObjID": 5,
+            "SrcObjType": "Knob",
+            "RangeMin": 0.0,
+            "RangeMax": 1.0,
+            "AliasName": ""
+          }
+        ],
+        "PatchName": "Karplus Stereo",
+        "PatchDesc": "Gate Ins trigger Karplus sounds. Left and right knobs control each osc. Big knobs control Reverb and pitch shift"
+      },
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 51,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "Freeverb",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.25
+        },
+        {
+          "id": 3,
+          "value": 0.875
+        }
+      ],
+      "rightModuleId": 52,
+      "pos": [
+        45,
+        0
+      ]
+    },
+    {
+      "id": 52,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "Freeverb",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.25
+        },
+        {
+          "id": 3,
+          "value": 0.875
+        }
+      ],
+      "leftModuleId": 51,
+      "pos": [
+        55,
+        0
+      ]
+    },
+    {
+      "id": 53,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "PitchShift",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.5
+        },
+        {
+          "id": 2,
+          "value": 0.367500007
+        },
+        {
+          "id": 3,
+          "value": 0.875
+        }
+      ],
+      "rightModuleId": 54,
+      "pos": [
+        69,
+        0
+      ]
+    },
+    {
+      "id": 54,
+      "plugin": "4msCompany",
+      "version": "1.0.0",
+      "model": "PitchShift",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.5
+        },
+        {
+          "id": 2,
+          "value": 0.351000011
+        },
+        {
+          "id": 3,
+          "value": 0.875
+        }
+      ],
+      "leftModuleId": 53,
+      "pos": [
+        76,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 83,
+      "outputModuleId": 48,
+      "outputId": 0,
+      "inputModuleId": 51,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 84,
+      "outputModuleId": 47,
+      "outputId": 0,
+      "inputModuleId": 52,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 85,
+      "outputModuleId": 52,
+      "outputId": 0,
+      "inputModuleId": 53,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 86,
+      "outputModuleId": 51,
+      "outputId": 0,
+      "inputModuleId": 54,
+      "inputId": 0,
+      "color": "#c91847"
+    }
+  ]
+}

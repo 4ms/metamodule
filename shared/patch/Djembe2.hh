@@ -1,7 +1,7 @@
 static char Djembe2_patch[] =
 	R"(
 PatchData:
-  patch_name: 'Djembe-2'
+  patch_name: 'Dual Djembe'
   description: "Dual Djembes, with FX. 
   Gate Ins trigger the djembes.
   Djembe #1 pans left, with PitchShifting.
