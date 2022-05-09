@@ -85,9 +85,22 @@ struct ModuleViewPage : PageBase {
 		const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
 
 		for (const auto el : moduleinfo.Knobs) {
-			draw_knob(el, patch);
-			img_dsc.angle = 0;
+			auto mk = DrawHelper::draw_mapped_knob(canvas, base, el, patch, this_module_id, 240);
+			if (mk.has_value()) {
+				mapped_knobs.push_back({mk.value()});
+				opts += "[";
+				opts += PanelDef::KnobNames[mk.value().mapped_knob.panel_knob_id];
+				opts += "] ";
+			}
+			opts += el.short_name;
+			opts += "\n";
+
+			auto knob = DrawHelper::get_knob_img_240(el.knob_style);
+			auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
+			add_button(c_x, c_y, knob->header.w * 1.2f);
 		}
+
+		// DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, this_module_id, 240);
 
 		for (const auto &el : moduleinfo.InJacks) {
 			draw_injack(el, patch);
@@ -136,55 +149,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 private:
-	void draw_knob(const KnobDef &el, const PatchData &patch) {
-		int16_t c_x = std::round(ModuleInfoBase::mm_to_px<240>(el.x_mm));
-		int16_t c_y = std::round(ModuleInfoBase::mm_to_px<240>(el.y_mm));
-
-		const lv_img_dsc_t *knob = DrawHelper::get_knob_img_240(el.knob_style);
-		if (!knob)
-			return;
-
-		int width = knob->header.w;
-		int height = knob->header.h;
-		int left = c_x - width / 2;
-		int top = c_y - height / 2;
-
-		if (auto mappedknob = patch.find_mapped_knob(this_module_id, el.id)) {
-			opts += "[";
-			opts += PanelDef::KnobNames[mappedknob->panel_knob_id];
-			opts += "] ";
-			opts += el.short_name;
-			opts += "\n";
-			lv_obj_t *obj = lv_img_create(base);
-			lv_img_set_src(obj, knob);
-			lv_obj_set_pos(obj, left, top);
-			lv_img_set_pivot(obj, width / 2, height / 2);
-			lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
-			mapped_knobs.push_back({
-				.obj = obj,
-				.mapped_knob = *mappedknob,
-			});
-			// Circle around mapped knobs
-			lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
-		} else {
-			opts += el.short_name;
-			opts += "\n";
-			img_dsc.pivot.x = width / 2;
-			img_dsc.pivot.y = height / 2;
-			//TODO: make patch.find_static_knob()
-			auto static_knob = std::find_if(patch.static_knobs.begin(), patch.static_knobs.end(), [&](auto &p) {
-				return p.module_id == this_module_id && p.param_id == el.id;
-			});
-			img_dsc.angle = (static_knob != patch.static_knobs.end()) ? static_knob->value * 3000.f - 1500.f : -1500;
-			lv_canvas_draw_img(canvas, left, top, knob, &img_dsc);
-		}
-
-		add_button(c_x, c_y, knob->header.w * 1.2f);
-	}
-
-	// void draw_mapped_knob(MappedKnob &mappedknob) { //width, height, c_x, c_y
-	// }
-
 	void draw_outjack(const OutJackDef &el, const PatchData &patch) {
 		int c_x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
 		int c_y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
@@ -288,12 +252,12 @@ private:
 	int32_t cur_selected = 0;
 	std::string_view slug;
 
-	struct MKnob {
-		lv_obj_t *obj;
-		const MappedKnob &mapped_knob;
-		float last_pot_reading = 0.5f;
-	};
-	std::vector<MKnob> mapped_knobs;
+	// struct MKnob {
+	// 	lv_obj_t *obj;
+	// 	const MappedKnob &mapped_knob;
+	// 	float last_pot_reading = 0.5f;
+	// };
+	std::vector<DrawHelper::MKnob> mapped_knobs;
 	std::vector<lv_obj_t *> button;
 	lv_obj_t *roller = nullptr;
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
