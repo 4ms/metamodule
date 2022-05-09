@@ -217,11 +217,11 @@ struct PatchViewPage : PageBase {
 
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 
-		if (page->height == 120) {
-			page->height = 240;
-			// page->blur();
-			page->focus();
-		}
+		// if (page->height == 120) {
+		// 	page->height = 240;
+		// 	// page->blur();
+		// 	page->focus();
+		// }
 		const auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
 
 		const auto this_slug = patch.module_slugs[module_id];
