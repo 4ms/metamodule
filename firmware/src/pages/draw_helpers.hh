@@ -219,5 +219,21 @@ struct DrawHelper {
 			}
 		}
 	}
+
+	struct Vec2 {
+		int32_t x;
+		int32_t y;
+	};
+
+	static Vec2 get_quadratic_bezier_pt(Vec2 start, Vec2 end, Vec2 control, float step) {
+		auto get_midpt = [](Vec2 n1, Vec2 n2, float step) -> Vec2 {
+			int32_t x = n1.x + ((n2.x - n1.x) * step);
+			int32_t y = n1.y + ((n2.y - n1.y) * step);
+			return {x, y};
+		};
+		Vec2 a = get_midpt(start, control, step);
+		Vec2 b = get_midpt(control, end, step);
+		return get_midpt(a, b, step);
+	}
 };
 } // namespace MetaModule
