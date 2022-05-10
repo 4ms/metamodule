@@ -75,10 +75,10 @@ struct PatchViewPage : PageBase {
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
 
-		// cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
-		// lv_obj_set_size(cable_layer, 320, height);
-		// lv_obj_set_align(cable_layer, LV_ALIGN_BOTTOM_MID);
-		// lv_canvas_set_buffer(cable_layer, cable_buf, 320, height, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
+		lv_obj_set_size(cable_layer, 320, height);
+		lv_obj_set_align(cable_layer, LV_ALIGN_BOTTOM_MID);
+		lv_canvas_set_buffer(cable_layer, cable_buf, 320, height, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
 		lv_draw_line_dsc_init(&cable_drawline_dsc);
 		cable_drawline_dsc.width = 4;
@@ -206,6 +206,9 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void moduleimg_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+
 		auto obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
 		PageList::set_selected_module_id(module_id);
@@ -229,56 +232,70 @@ struct PatchViewPage : PageBase {
 
 		const auto this_slug = patch.module_slugs[module_id];
 
-		// const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
 		lv_label_set_text(page->module_name, this_slug.c_str());
 
-		bool do_draw_cables = false;
+		bool do_draw_cables = true;
 		if (do_draw_cables) {
-			// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+			const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
+			lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
-			// const int x_offset = 0;
-			// const int y_offset = height == 120 ? -6 : 6;
-			// for (const auto &c : patch.int_cables) {
-			// 	for (const auto &in : c.ins) {
-			// 		if (in.module_id == module_id) {
-			// 			auto [in_x, in_y] = DrawHelper::scale_center(thismoduleinfo.InJacks[in.jack_id], height);
-			// 			auto scroll_x = 0;
+			const int x_offset = 0;
+			const int y_offset = height == 120 ? -6 : 6;
+			for (const auto &c : patch.int_cables) {
+				for (const auto &in : c.ins) {
+					if (in.module_id == module_id) {
+						//get_injack_xy(patch, this_module_obj, in, height);
+						auto [in_x, in_y] = DrawHelper::scale_center(thismoduleinfo.InJacks[in.jack_id], height);
+						lv_area_t coords;
+						lv_obj_get_coords(this_module_obj, &coords);
+						int in_module_left = coords.x1;
+						in_x += in_module_left + x_offset;
+						in_y += y_offset;
 
-			// 			lv_area_t coords;
-			// 			lv_obj_get_coords(this_module_obj, &coords);
-			// 			int in_module_left = coords.x1;
-			// 			in_x = in_x + in_module_left - scroll_x + x_offset;
-			// 			in_y += y_offset;
+						//get_outjack_xy(patch, out_module_obj, c.out, height);
+						int out_module_left = 0;
+						for (auto mod : page->modules) {
+							uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(mod)));
+							if (t_module_id == c.out.module_id) {
+								lv_area_t coords;
+								lv_obj_get_coords(mod, &coords);
+								out_module_left = coords.x1;
+								break;
+							}
+						}
+						const auto other_moduleinfo = ModuleFactory::getModuleInfo(patch.module_slugs[c.out.module_id]);
+						auto [out_x, out_y] =
+							DrawHelper::scale_center(other_moduleinfo.OutJacks[c.out.jack_id], height);
+						out_x = out_x + out_module_left + x_offset;
+						out_y += y_offset;
 
-			// 			int out_module_left = 0;
-			// 			for (auto mod : page->modules) {
-			// 				uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(mod)));
-			// 				if (t_module_id == c.out.module_id) {
-			// 					lv_area_t coords;
-			// 					lv_obj_get_coords(mod, &coords);
-			// 					out_module_left = coords.x1;
-			// 					break;
-			// 				}
-			// 			}
-			// 			const auto other_moduleinfo = ModuleFactory::getModuleInfo(patch.module_slugs[c.out.module_id]);
-			// 			auto [out_x, out_y] =
-			// 				DrawHelper::scale_center(other_moduleinfo.OutJacks[c.out.jack_id], height);
-			// 			out_x = out_x + out_module_left - scroll_x + x_offset;
-			// 			out_y += y_offset;
-
-			// 			lv_point_t points[2] = {{(int16_t)in_x, (int16_t)in_y}, {(int16_t)out_x, (int16_t)out_y}};
-			// 			page->cable_drawline_dsc.color =
-			// 				Gui::cable_palette[(c.out.jack_id + c.out.module_id) % Gui::cable_palette.size()];
-			// 			lv_canvas_draw_line(page->cable_layer, points, 2, &page->cable_drawline_dsc);
-			// 		}
-			// 	}
-			// }
+						page->cable_drawline_dsc.color =
+							Gui::cable_palette[(c.out.jack_id + c.out.module_id) % Gui::cable_palette.size()];
+						lv_point_t last{(int16_t)in_x, (int16_t)in_y};
+						DrawHelper::Vec2 start{in_x, in_y};
+						DrawHelper::Vec2 end{out_x, out_y};
+						float dist = std::abs(in_x - out_x);
+						DrawHelper::Vec2 control{(in_x + out_x) / 2, ((in_y + out_y) / 2) + (int32_t)dist};
+						printf("Cable: [%d, %d] to [%d, %d]\n", in_x, in_y, out_x, out_y);
+						constexpr float step_size = 0.2f;
+						for (float i = 0.f; i < 1.f; i += step_size) {
+							auto newpt = DrawHelper::get_quadratic_bezier_pt(start, end, control, i + step_size);
+							lv_point_t points[2] = {{(int16_t)last.x, (int16_t)last.y},
+													{(int16_t)newpt.x, (int16_t)newpt.y}};
+							printf("[%d, %d] -> [%d, %d]\n", last.x, last.y, newpt.x, newpt.y);
+							lv_canvas_draw_line(page->cable_layer, points, 2, &page->cable_drawline_dsc);
+							last.x = newpt.x;
+							last.y = newpt.y;
+						}
+					}
+				}
+			}
 		}
 	}
 
 	static void module_defocus_cb(lv_event_t *event) {
-		// auto page = static_cast<PatchViewPage *>(event->user_data);
-		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	static void playbut_cb(lv_event_t *event) {
@@ -307,7 +324,7 @@ private:
 	lv_obj_t *module_name;
 	lv_obj_t *playbut_label;
 	lv_obj_t *playbut;
-	// lv_obj_t *cable_layer;
+	lv_obj_t *cable_layer;
 
 	std::vector<lv_obj_t *> modules;
 	std::vector<uint32_t> module_ids;
