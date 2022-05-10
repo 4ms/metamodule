@@ -26,7 +26,7 @@ struct Simulator {
 		MetaModule::MMDisplay::init(metaparams);
 
 		for (uint32_t i = 0; i < DefaultPatches::num_patches(); i++) {
-			patch_list.add_patch_from_yaml({DefaultPatches::get_data(i), DefaultPatches::get_len(i)});
+			patch_list.add_patch_from_yaml(DefaultPatches::get_patch(i));
 		}
 	}
 

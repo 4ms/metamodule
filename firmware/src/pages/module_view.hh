@@ -26,8 +26,8 @@ struct ModuleViewPage : PageBase {
 
 	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
 		: PageBase{info}
-		, base(lv_obj_create(nullptr))
-		, slug(module_slug) {
+		, slug(module_slug)
+		, base(lv_obj_create(nullptr)) {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);

@@ -229,7 +229,7 @@ struct PatchViewPage : PageBase {
 
 		const auto this_slug = patch.module_slugs[module_id];
 
-		const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
+		// const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
 		lv_label_set_text(page->module_name, this_slug.c_str());
 
 		bool do_draw_cables = false;
@@ -277,7 +277,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void module_defocus_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
+		// auto page = static_cast<PatchViewPage *>(event->user_data);
 		// lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
