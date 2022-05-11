@@ -2,7 +2,7 @@ static char Djembe4verb_patch[] =
 	R"(
 PatchData:
   patch_name: 'Djembe-4-verb'
-  description: "Four djembes with stereo reverb"
+  description: Four Djembes with clock divders and multipliers, and stereo reverb
   module_slugs:
     0: PanelMedium
     1: Djembe
@@ -14,9 +14,8 @@ PatchData:
     7: CLKM
     8: CLKM
     9: CLKD
-    10: CLKM
+    10: Freeverb
     11: Freeverb
-    12: Freeverb
   int_cables:
     - out:
         module_id: 4
@@ -74,13 +73,13 @@ PatchData:
         module_id: 3
         jack_id: 0
       ins:
-        - module_id: 11
+        - module_id: 10
           jack_id: 0
     - out:
         module_id: 3
         jack_id: 1
       ins:
-        - module_id: 12
+        - module_id: 11
           jack_id: 0
   mapped_ins:
     - panel_jack_id: 0
@@ -94,11 +93,11 @@ PatchData:
         jack_id: 1
     - panel_jack_id: 0
       out:
-        module_id: 11
+        module_id: 10
         jack_id: 0
     - panel_jack_id: 1
       out:
-        module_id: 12
+        module_id: 11
         jack_id: 0
     - panel_jack_id: 3
       out:
@@ -205,29 +204,26 @@ PatchData:
       value: 0.546
     - module_id: 10
       param_id: 0
-      value: 0
-    - module_id: 11
-      param_id: 0
       value: 0.453
-    - module_id: 11
+    - module_id: 10
       param_id: 1
       value: 0.432
-    - module_id: 11
+    - module_id: 10
       param_id: 2
       value: 0.25
-    - module_id: 11
+    - module_id: 10
       param_id: 3
       value: 0.73
-    - module_id: 12
+    - module_id: 11
       param_id: 0
       value: 0.5835
-    - module_id: 12
+    - module_id: 11
       param_id: 1
       value: 0.432
-    - module_id: 12
+    - module_id: 11
       param_id: 2
       value: 0.25
-    - module_id: 12
+    - module_id: 11
       param_id: 3
       value: 0.73
   mapped_knobs:
@@ -284,37 +280,37 @@ PatchData:
       min: 0
       max: 1
     - panel_knob_id: 9
-      module_id: 11
+      module_id: 10
       param_id: 3
       curve_type: 0
       min: 0
       max: 1
     - panel_knob_id: 9
-      module_id: 12
+      module_id: 11
       param_id: 3
       curve_type: 0
       min: 0
       max: 1
     - panel_knob_id: 4
-      module_id: 11
+      module_id: 10
       param_id: 0
       curve_type: 0
       min: 0
       max: 1
     - panel_knob_id: 5
-      module_id: 12
+      module_id: 11
       param_id: 0
       curve_type: 0
       min: 0
       max: 1
     - panel_knob_id: 10
-      module_id: 12
+      module_id: 11
       param_id: 1
       curve_type: 0
       min: 0
       max: 1
     - panel_knob_id: 10
-      module_id: 11
+      module_id: 10
       param_id: 1
       curve_type: 0
       min: 0
