@@ -4,16 +4,12 @@ namespace MetaModule
 {
 
 void PageManager::init() {
-	//54ms for a bunch of pages
-	// page_knobs.init();
-	// page_module.init();
 	page_patchsel.init();
-	// page_patchview.init();
 
 	//Todo: page manager doesn't load patches, send a load_patch command via uiaudiomailbox
 	//Audio is more suited to load patches, or maybe a 3rd object (patch manager)
-	patch_list.set_cur_patch_index(0);
-	bool ok = player.load_patch(patch_list.get_patch(0));
+	patch_list.set_cur_patch_index(3);
+	bool ok = player.load_patch(patch_list.get_patch(3));
 	if (!ok)
 		mbox.append_message("Can't load patch\r\n");
 	else
