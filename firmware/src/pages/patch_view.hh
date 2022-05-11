@@ -28,8 +28,8 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
 		lv_obj_set_style_pad_gap(base, 4, LV_STATE_DEFAULT);
 		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_set_scroll_dir(base, LV_DIR_HOR);
-		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLL_CHAIN);
+		lv_obj_set_scroll_dir(base, LV_DIR_ALL);
+		// lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLL_CHAIN);
 
 		patchname = lv_label_create(base);
 		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
@@ -61,24 +61,25 @@ struct PatchViewPage : PageBase {
 		lv_label_set_text(module_name, "Select a module:");
 
 		modules_cont = lv_obj_create(base);
-		lv_obj_set_size(modules_cont, 320, height + 8);
+		lv_obj_set_size(modules_cont, 320, 2 * height + 8);
 		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
-		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW);
+		lv_obj_set_flex_flow(modules_cont, LV_FLEX_FLOW_ROW_WRAP);
 		lv_obj_set_style_pad_gap(modules_cont, 3, LV_STATE_DEFAULT);
 		lv_obj_set_style_pad_all(modules_cont, 2, LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
+		// lv_obj_set_scroll_dir(modules_cont, LV_DIR_VER);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_CHAIN);
+		// lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_CHAIN);
 
 		lv_draw_img_dsc_init(&draw_img_dsc);
 
 		cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
-		lv_obj_set_size(cable_layer, 320, height);
-		lv_obj_set_align(cable_layer, LV_ALIGN_BOTTOM_MID);
-		lv_canvas_set_buffer(cable_layer, cable_buf, 320, height, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		lv_obj_set_size(cable_layer, 320, 240);
+		lv_obj_set_align(cable_layer, LV_ALIGN_CENTER);
+		lv_canvas_set_buffer(cable_layer, cable_buf, 320, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
 		lv_draw_line_dsc_init(&cable_drawline_dsc);
 		cable_drawline_dsc.width = 4;
@@ -109,7 +110,7 @@ struct PatchViewPage : PageBase {
 		modules.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
 
-		lv_obj_set_height(modules_cont, height + 8);
+		lv_obj_set_height(modules_cont, 2 * height + 8);
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -121,14 +122,12 @@ struct PatchViewPage : PageBase {
 		for (auto [i, slug] : enumerate(patch.module_slugs)) {
 			module_ids.push_back(i);
 
-			// printf("Drawing %s\n", slug.c_str());
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
 			if (!img) {
 				printf("Image not found for %s\n", slug.c_str());
 				continue;
 			}
 			auto widthpx = img->header.w;
-			// printf("Width is %d\n", widthpx);
 
 			lv_obj_t *canvas = modules.emplace_back(lv_canvas_create(modules_cont));
 			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
@@ -156,7 +155,7 @@ struct PatchViewPage : PageBase {
 			}
 
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
-			lv_obj_add_event_cb(canvas, moduleimg_cb, LV_EVENT_PRESSED, (void *)this);
+			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_PRESSED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_defocus_cb, LV_EVENT_DEFOCUSED, (void *)this);
 
@@ -168,8 +167,7 @@ struct PatchViewPage : PageBase {
 				break;
 			}
 		}
-		lv_obj_refresh_self_size(modules_cont);
-		// printf("have %d mapped knobs\n", mapped_knobs.size());
+		// lv_obj_refresh_self_size(modules_cont);
 	}
 
 	void blur() override {
@@ -205,7 +203,7 @@ struct PatchViewPage : PageBase {
 		}
 	}
 
-	static void moduleimg_cb(lv_event_t *event) {
+	static void module_pressed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
@@ -219,73 +217,52 @@ struct PatchViewPage : PageBase {
 	static void module_focus_cb(lv_event_t *event) {
 		auto this_module_obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
-		// printf("Focussed Module %d\n", module_id);
-
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-
-		// if (page->height == 120) {
-		// 	page->height = 240;
-		// 	// page->blur();
-		// 	page->focus();
-		// }
 		const auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
-
 		const auto this_slug = patch.module_slugs[module_id];
-
 		lv_label_set_text(page->module_name, this_slug.c_str());
 
-		bool do_draw_cables = true;
-		if (do_draw_cables) {
-			const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
-			lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
+		const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
+		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
-			const int x_offset = 0;
-			const int y_offset = height == 120 ? -6 : 6;
-			for (const auto &c : patch.int_cables) {
+		// Draw all cables connected to this module
+		// TODO: gotta be a cleaner way to do this...
+		// 		push Jack{c.out}, this_module_obj, Jack{in}, outmodule_obj
+		// 		draw_cable(Jack out, Jack in, lv_obj_t *out_module, lv_obj_t *in_module);
+		for (const auto &c : patch.int_cables) {
+			// Draw cable(s) if out jack is on this module
+			if (c.out.module_id == module_id) {
+				auto end = DrawHelper::get_jack_xy(thismoduleinfo.OutJacks, this_module_obj, c.out, height);
+
+				// Draw a cable from this out jack to all in jacks it's connected to
 				for (const auto &in : c.ins) {
-					if (in.module_id == module_id) {
-						//get_injack_xy(patch, this_module_obj, in, height);
-						auto [in_x, in_y] = DrawHelper::scale_center(thismoduleinfo.InJacks[in.jack_id], height);
-						lv_area_t coords;
-						lv_obj_get_coords(this_module_obj, &coords);
-						int in_module_left = coords.x1;
-						in_x += in_module_left + x_offset;
-						in_y += y_offset;
-
-						//get_outjack_xy(patch, out_module_obj, c.out, height);
-						int out_module_left = 0;
-						for (auto mod : page->modules) {
-							uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(mod)));
-							if (t_module_id == c.out.module_id) {
-								lv_area_t coords;
-								lv_obj_get_coords(mod, &coords);
-								out_module_left = coords.x1;
-								break;
-							}
+					// Iterate through all modules to find the one with a matching id (TODO: better way to do this?)
+					for (auto inmodule_obj : page->modules) {
+						uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(inmodule_obj)));
+						if (t_module_id == in.module_id) {
+							const auto inmodule_info = ModuleFactory::getModuleInfo(patch.module_slugs[t_module_id]);
+							auto start = DrawHelper::get_jack_xy(inmodule_info.InJacks, inmodule_obj, in, height);
+							page->cable_drawline_dsc.color = DrawHelper::get_cable_color(in);
+							DrawHelper::draw_cable(start, end, page->cable_layer, &page->cable_drawline_dsc);
+							break;
 						}
-						const auto other_moduleinfo = ModuleFactory::getModuleInfo(patch.module_slugs[c.out.module_id]);
-						auto [out_x, out_y] =
-							DrawHelper::scale_center(other_moduleinfo.OutJacks[c.out.jack_id], height);
-						out_x = out_x + out_module_left + x_offset;
-						out_y += y_offset;
-
-						page->cable_drawline_dsc.color =
-							Gui::cable_palette[(c.out.jack_id + c.out.module_id) % Gui::cable_palette.size()];
-						lv_point_t last{(int16_t)in_x, (int16_t)in_y};
-						DrawHelper::Vec2 start{in_x, in_y};
-						DrawHelper::Vec2 end{out_x, out_y};
-						float dist = std::abs(in_x - out_x);
-						DrawHelper::Vec2 control{(in_x + out_x) / 2, ((in_y + out_y) / 2) + (int32_t)dist};
-						printf("Cable: [%d, %d] to [%d, %d]\n", in_x, in_y, out_x, out_y);
-						constexpr float step_size = 0.2f;
-						for (float i = 0.f; i < 1.f; i += step_size) {
-							auto newpt = DrawHelper::get_quadratic_bezier_pt(start, end, control, i + step_size);
-							lv_point_t points[2] = {{(int16_t)last.x, (int16_t)last.y},
-													{(int16_t)newpt.x, (int16_t)newpt.y}};
-							printf("[%d, %d] -> [%d, %d]\n", last.x, last.y, newpt.x, newpt.y);
-							lv_canvas_draw_line(page->cable_layer, points, 2, &page->cable_drawline_dsc);
-							last.x = newpt.x;
-							last.y = newpt.y;
+					}
+				}
+				continue; //We drew the output to all inputs, no need to check if any inputs are on this module
+			}
+			// Draw cable if in jack is on this module
+			for (const auto &in : c.ins) {
+				if (in.module_id == module_id) {
+					auto start = DrawHelper::get_jack_xy(thismoduleinfo.InJacks, this_module_obj, in, height);
+					//Find output jack on another module
+					for (auto outmodule_obj : page->modules) {
+						uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(outmodule_obj)));
+						if (t_module_id == c.out.module_id) {
+							auto outmodule_info = ModuleFactory::getModuleInfo(patch.module_slugs[t_module_id]);
+							auto end = DrawHelper::get_jack_xy(outmodule_info.OutJacks, outmodule_obj, c.out, height);
+							page->cable_drawline_dsc.color = DrawHelper::get_cable_color(in);
+							DrawHelper::draw_cable(start, end, page->cable_layer, &page->cable_drawline_dsc);
+							break;
 						}
 					}
 				}
@@ -334,7 +311,7 @@ private:
 	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(240, MaxBufferWidth)];
 	lv_draw_img_dsc_t draw_img_dsc;
 
-	static inline uint8_t cable_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 320)];
+	static inline uint8_t cable_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, 240)];
 	lv_draw_line_dsc_t cable_drawline_dsc;
 
 	static inline const PatchData *patch_instance;
@@ -345,9 +322,6 @@ private:
 	};
 
 	lv_obj_t *base;
-
-	void draw_cable(Jack out, Jack in) {
-	}
 
 	void start_changing_patch() {
 		auto _patch_id = PageList::get_selected_patch_id();
