@@ -219,5 +219,56 @@ struct DrawHelper {
 			}
 		}
 	}
+
+	struct Vec2 {
+		int32_t x;
+		int32_t y;
+	};
+
+	static void draw_cable(Vec2 start, Vec2 end, lv_obj_t *canvas, lv_draw_line_dsc_t *drawline_dsc) {
+		float dist = std::abs(start.x - end.x);
+		DrawHelper::Vec2 control{(start.x + end.x) / 2, ((start.y + end.y) / 2) + (int32_t)dist};
+		DrawHelper::draw_bezier<8>(start, end, control, canvas, drawline_dsc);
+		// printf("Cable: [%d, %d] to [%d, %d]\n", start.x, start.y, end.x, end.y);
+	}
+
+	static lv_color_t get_cable_color(Jack jack) {
+		return Gui::cable_palette[(jack.jack_id + jack.module_id) % Gui::cable_palette.size()];
+	}
+
+	template<size_t steps>
+	static void draw_bezier(Vec2 start, Vec2 end, Vec2 control, lv_obj_t *canvas, lv_draw_line_dsc_t *drawline_dsc) {
+		constexpr float step_size = 1.0f / steps;
+		lv_point_t points[steps + 1];
+		for (unsigned i = 0; i <= steps; i++) {
+			auto newpt = DrawHelper::get_quadratic_bezier_pt(start, end, control, (float)i * step_size);
+			points[i] = {(int16_t)newpt.x, (int16_t)newpt.y};
+		}
+		lv_canvas_draw_line(canvas, points, steps + 1, drawline_dsc);
+	}
+
+	static Vec2 get_quadratic_bezier_pt(Vec2 start, Vec2 end, Vec2 control, float step) {
+		auto get_midpt = [](Vec2 n1, Vec2 n2, float step) -> Vec2 {
+			int32_t x = n1.x + ((n2.x - n1.x) * step);
+			int32_t y = n1.y + ((n2.y - n1.y) * step);
+			return {x, y};
+		};
+		Vec2 a = get_midpt(start, control, step);
+		Vec2 b = get_midpt(control, end, step);
+		return get_midpt(a, b, step);
+	}
+
+	static Vec2 get_jack_xy(auto jacklist, lv_obj_t *module_obj, const Jack &in, uint32_t module_height) {
+		// const int y_adjust = module_height == 120 ? -6 : 6;
+		auto [x, y] = DrawHelper::scale_center(jacklist[in.jack_id], module_height);
+		lv_area_t coords;
+		lv_obj_get_coords(module_obj, &coords);
+		auto sn = lv_obj_get_scroll_snap_y((module_obj));
+		//FIXME: get coords after scroll is done
+		printf("module [%d, %d], [%d, %d], %d\n", coords.x1, coords.y1, coords.x2, coords.y2, sn);
+		x += coords.x1;
+		y += coords.y1; // + y_adjust;
+		return {x, y};
+	}
 };
 } // namespace MetaModule
