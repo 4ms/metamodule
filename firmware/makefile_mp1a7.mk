@@ -11,6 +11,9 @@ $(info Building for MP1 A7 core, target: $(target_board))
 else ifeq ($(MAKECMDGOALS),uimg)
 $(info Building uimg)
 target_board = medium
+else ifeq ($(MAKECMDGOALS),img)
+$(info Building img)
+target_board = medium
 else ifeq ($(MAKECMDGOALS),u-boot)
 $(info Building u-boot)
 else
@@ -337,6 +340,7 @@ AFLAGS = -mcpu=cortex-a7 \
 
 #### U-BOOT
 UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
+IMG  		= $(BUILDDIR)/$(BINARYNAME).img
 LOADADDR 	= 0xC2000040
 ENTRYPOINT 	= $(LOADADDR)
 UBOOTDIR 	= $(LIBDIR)/u-boot
@@ -359,14 +363,22 @@ include makefile_opts.mk
 include makefile_common.mk
 
 
-UBOOT_MKIMAGE_CMD = $(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
 .PHONY: uimg
 uimg: $(UIMG)
 
-$(UIMG): $(UBOOT_MKIMAGE)
-	$(UBOOT_MKIMAGE_CMD)
+$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
+	$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 
+.PHONY: img
+img: $(IMG)
+
+$(IMG): $(BIN) $(UBOOT_MKIMAGE)
+	$(UBOOT_MKIMAGE) -A arm -C none -T firmware -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+	$(info Copy image to sd card /dev/disk4 with:)
+	$(info sudo dd if=$(IMG) of=/dev/disk4s3)
+
+#Used by norflash loader
 %-uimg.h : %.uimg 
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
