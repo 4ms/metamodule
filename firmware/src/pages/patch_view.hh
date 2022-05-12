@@ -151,8 +151,8 @@ struct PatchViewPage : PageBase {
 			DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
 			for (const auto &el : moduleinfo.Knobs) {
 				auto mknob = DrawHelper::draw_mapped_knob(canvas, canvas, el, patch, i, height);
-				if (mknob.has_value()) {
-					mapped_knobs.push_back(mknob.value());
+				if (mknob) {
+					mapped_knobs.push_back(*mknob);
 				}
 			}
 
@@ -223,13 +223,19 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void module_focus_cb(lv_event_t *event) {
-		// auto this_module_obj = event->current_target;
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+		if (!page)
+			return;
 		auto this_module_obj = lv_group_get_focused(page->group);
+		if (this_module_obj == page->playbut)
+			return;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
 		const auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
 		const auto this_slug = patch.module_slugs[module_id];
 		lv_label_set_text(page->module_name, this_slug.c_str());
+
+		// if (lv_obj_get_scroll_y(page->base) == 0 && num_rows > 1)
+		// 	lv_obj_scroll_to_y(page->base, 119, LV_ANIM_ON);
 
 		const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
 		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
@@ -299,7 +305,6 @@ struct PatchViewPage : PageBase {
 		// page->blur();
 		// page->focus();
 		// }
-
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 	}
 
