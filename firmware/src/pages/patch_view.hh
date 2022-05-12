@@ -29,8 +29,8 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_flex_align(base, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START);
 		lv_obj_set_style_pad_gap(base, 4, LV_STATE_DEFAULT);
 		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLLABLE);
-		lv_obj_set_scroll_dir(base, LV_DIR_ALL);
-		// lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLL_CHAIN);
+		lv_obj_set_scroll_dir(base, LV_DIR_VER);
+		lv_obj_set_scrollbar_mode(base, LV_SCROLLBAR_MODE_ACTIVE);
 
 		patchname = lv_label_create(base);
 		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
