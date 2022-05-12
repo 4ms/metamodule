@@ -1,5 +1,6 @@
 #pragma once
 #include "lvgl/lvgl.h"
+#include "lvgl/src/core/lv_event.h"
 #include "lvgl/src/core/lv_obj.h"
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"
@@ -31,6 +32,8 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_set_scroll_dir(base, LV_DIR_VER);
 		lv_obj_set_scrollbar_mode(base, LV_SCROLLBAR_MODE_ACTIVE);
+
+		lv_obj_add_event_cb(base, base_scroll_cb, LV_EVENT_SCROLL, (void *)this);
 
 		patchname = lv_label_create(base);
 		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
@@ -101,11 +104,8 @@ struct PatchViewPage : PageBase {
 		lv_label_set_text(patchname, patch_list.get_patch_name(patch_id));
 		lv_label_set_text(description, patch_list.get_patch(patch_id).description.c_str());
 
-		// for (auto &k : mapped_knobs)
-		// 	lv_obj_del(k.obj);
 		for (auto &m : modules)
 			lv_obj_del(m);
-		printf("deleted obj\n");
 		modules.clear();
 		module_ids.clear();
 		mapped_knobs.clear();
@@ -205,6 +205,12 @@ struct PatchViewPage : PageBase {
 		}
 	}
 
+	static void base_scroll_cb(lv_event_t *event) {
+		lv_event_t e2;
+		e2.user_data = event->user_data;
+		module_focus_cb(&e2);
+	}
+
 	static void module_pressed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
@@ -217,9 +223,10 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void module_focus_cb(lv_event_t *event) {
-		auto this_module_obj = event->current_target;
-		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
+		// auto this_module_obj = event->current_target;
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+		auto this_module_obj = lv_group_get_focused(page->group);
+		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
 		const auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
 		const auto this_slug = patch.module_slugs[module_id];
 		lv_label_set_text(page->module_name, this_slug.c_str());

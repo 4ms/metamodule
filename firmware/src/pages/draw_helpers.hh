@@ -263,9 +263,8 @@ struct DrawHelper {
 		auto [x, y] = DrawHelper::scale_center(jacklist[in.jack_id], module_height);
 		lv_area_t coords;
 		lv_obj_get_coords(module_obj, &coords);
-		auto sn = lv_obj_get_scroll_snap_y((module_obj));
-		//FIXME: get coords after scroll is done
-		printf("module [%d, %d], [%d, %d], %d\n", coords.x1, coords.y1, coords.x2, coords.y2, sn);
+		// auto sn = lv_obj_get_scroll_y(lv_obj_get_parent(lv_obj_get_parent(module_obj)));
+		// printf("module [%d, %d], [%d, %d], %d\n", coords.x1, coords.y1, coords.x2, coords.y2, sn);
 		x += coords.x1;
 		y += coords.y1; // + y_adjust;
 		return {x, y};
