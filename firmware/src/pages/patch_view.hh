@@ -26,6 +26,7 @@ struct PatchViewPage : PageBase {
 		lv_group_set_editing(group, false);
 
 		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
+		lv_obj_set_flex_align(base, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START);
 		lv_obj_set_style_pad_gap(base, 4, LV_STATE_DEFAULT);
 		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_set_scroll_dir(base, LV_DIR_ALL);
@@ -33,13 +34,14 @@ struct PatchViewPage : PageBase {
 
 		patchname = lv_label_create(base);
 		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
-		lv_obj_set_width(patchname, 252);
+		lv_obj_set_width(patchname, 248);
 		lv_obj_set_height(patchname, 28);
 
 		playbut = lv_btn_create(base);
 		lv_obj_set_height(playbut, 21);
 		lv_obj_set_width(playbut, 60);
-		lv_obj_set_style_pad_all(playbut, 3, LV_PART_MAIN);
+		lv_obj_set_style_pad_ver(playbut, 3, LV_PART_MAIN);
+		lv_obj_set_style_pad_hor(playbut, 5, LV_PART_MAIN);
 		lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_event_cb(playbut, playbut_cb, LV_EVENT_PRESSED, this);
