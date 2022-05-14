@@ -13,12 +13,16 @@ class SCMCore : public CoreProcessor {
 public:
 	SCMCore() = default;
 
+	uint32_t convert_param(float rawval, uint32_t max) {
+		return MathTools::constrain<float>(rawval * max, 0.f, 255.f);
+	}
+
 	void update() override {
-		uint32_t rotate_adc = (pots[Info::KnobRotate] + ins[Info::InputRotate_Jack]) * 4.f;
-		uint32_t slippage_adc = (pots[Info::KnobSlip] + ins[Info::InputSlip_Jack]) * 127.5f;
-		uint32_t shuffle_adc = (pots[Info::KnobShuffle] + ins[Info::InputShuffle_Jack]) * 127.5f;
-		uint32_t skip_adc = (pots[Info::KnobSkip] + ins[Info::InputSkip_Jack]) * 127.5f;
-		uint32_t pw_adc = (pots[Info::KnobPw] + ins[Info::InputPw_Jack]) * 127.5f;
+		uint32_t rotate_adc = convert_param(pots[Info::KnobRotate] + ins[Info::InputRotate_Jack], 8);
+		uint32_t slippage_adc = convert_param(pots[Info::KnobSlip] + ins[Info::InputSlip_Jack], 255);
+		uint32_t shuffle_adc = convert_param(pots[Info::KnobShuffle] + ins[Info::InputShuffle_Jack], 255);
+		uint32_t skip_adc = convert_param(pots[Info::KnobSkip] + ins[Info::InputSkip_Jack], 255);
+		uint32_t pw_adc = convert_param(pots[Info::KnobPw] + ins[Info::InputPw_Jack], 255);
 
 		bool faster_switch_state = switches[Info::Switch_4X_Fast] > 0;
 		mute = switches[Info::Switch_4X_Fast] > 0;
@@ -41,14 +45,11 @@ public:
 			old_faster_switch_state = faster_switch_state;
 
 			for (auto [i, _d, _dd] : enumerate(d, dd)) {
-				_d = ((i + rotate_adc) & 7) + 1;
-				_dd = _d;
+				_dd = ((i + rotate_adc) & 7) + 1;
+				_d = faster_switch_state ? _dd << 2 : _dd;
 			}
-
-			if (faster_switch_state) { //*4
-				for (auto &_d : d)
-					_d <<= 2;
-			}
+			d[6] = d[7];
+			dd[6] = dd[7];
 
 			update_pulse_params = true;
 		}
@@ -105,10 +106,8 @@ public:
 
 		if (update_pulse_params) {
 			auto base_pw = calc_pw(pw_adc, period);
-
 			for (auto [_pw, _d] : zip(pw, d))
 				_pw = base_pw / _d;
-			//TODO: check d[6] == d[7];
 
 			uint32_t min_pw = MIN_PW + 1;
 			for (auto [_pw, _d, _per] : zip(pw, d, per)) {
@@ -122,12 +121,12 @@ public:
 					_slipamt = 0;
 			} else {
 				for (auto [_pw, _per, _slipamt] : zip(pw, per, slipamt)) {
-					_slipamt = static_cast<int32_t>((slippage_adc * (_per - (_pw + 1))) >> 8);
+					_slipamt = static_cast<int32_t>((slippage_adc * (_per - (_pw + MIN_PW))) >> 8);
 				}
 			}
 
 			if (update_slip_params) { // clock in received
-				for (auto [_slipamt, _slip] : zip(slip, slipamt))
+				for (auto [_slipamt, _slip] : zip(slipamt, slip))
 					_slip = _slipamt;
 			}
 
@@ -176,7 +175,7 @@ public:
 
 		if (is_running) {
 			constexpr std::array<uint32_t, 3> plain_jacks{0, 1, 7};
-			for (auto i : plain_jacks) {
+			for (const auto i : plain_jacks) {
 				if (tmr[i] > per[i]) {
 					tmr[i] = tmr[i] - per[i];
 					if (!mute)
@@ -185,7 +184,7 @@ public:
 			}
 
 			constexpr std::array complex_jacks{2, 3, 4, 5, 6};
-			for (auto i : complex_jacks) {
+			for (const auto i : complex_jacks) {
 				if (tmr[i] > (per[i] + slip[i])) {
 					tmr[i] = 0;
 
@@ -214,49 +213,13 @@ public:
 	}
 
 	uint32_t calc_pw(uint8_t pw_adc, uint32_t period) {
+		if (pw_adc < MIN_PW)
+			return MIN_PW;
+		if (pw_adc > 254)
+			return period - MIN_PW;
 
-		if (pw_adc < 4)
-			return (MIN_PW);
-		else if (pw_adc < 6)
-			return (period >> 5);
-		else if (pw_adc < 10)
-			return (period >> 4);
-		else if (pw_adc < 16)
-			return ((period >> 4) + (period >> 6));
-		else if (pw_adc < 22)
-			return ((period >> 4) + (period >> 5));
-		else if (pw_adc < 28)
-			return ((period >> 4) + (period >> 5) + (period >> 6));
-		else if (pw_adc < 32)
-			return (period >> 3);
-		else if (pw_adc < 64)
-			return ((period >> 3) + (period >> 5));
-		else if (pw_adc < 80)
-			return ((period >> 3) + (period >> 4));
-		else if (pw_adc < 96)
-			return ((period >> 3) + (period >> 4) + (period >> 5));
-		else if (pw_adc < 112)
-			return (period >> 2);
-		else if (pw_adc < 128)
-			return ((period >> 2) + (period >> 4));
-		else if (pw_adc < 142)
-			return ((period >> 2) + (period >> 3));
-		else if (pw_adc < 160)
-			return ((period >> 2) + (period >> 3) + (period >> 4));
-		else if (pw_adc < 178)
-			return (period >> 1);
-		else if (pw_adc < 180)
-			return ((period >> 1) + (period >> 4));
-		else if (pw_adc < 188)
-			return ((period >> 1) + (period >> 3));
-		else if (pw_adc < 196)
-			return ((period >> 1) + (period >> 2));
-		else if (pw_adc < 202)
-			return ((period * 3) >> 2);
-		else if (pw_adc < 206)
-			return ((period * 7) >> 3);
-		else
-			return ((period * 15) >> 4);
+		float pw = (float)pw_adc / 255.f * (float)period;
+		return static_cast<uint32_t>(pw);
 	}
 
 	void set_param(int param_id, float val) override {
