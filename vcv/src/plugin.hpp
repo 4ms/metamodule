@@ -23,7 +23,6 @@ extern Model *modelSend;
 extern Model *modelSISM;
 extern Model *modelSH;
 extern Model *modelSCM;
-extern Model *modelSCMBO;
 extern Model *modelRCD;
 extern Model *modelRCDBO;
 extern Model *modelQPLFO;

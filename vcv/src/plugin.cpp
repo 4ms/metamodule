@@ -37,9 +37,6 @@ auto modelSH = createModelFromInfo<SHInfo>();
 #include "CoreModules/info/SCM_info.hh"
 auto modelSCM = createModelFromInfo<SCMInfo>();
 
-#include "CoreModules/info/SCMBO_info.hh"
-auto modelSCMBO = createModelFromInfo<SCMBOInfo>();
-
 #include "CoreModules/info/RCD_info.hh"
 auto modelRCD = createModelFromInfo<RCDInfo>();
 
@@ -235,7 +232,6 @@ void init(Plugin *p)
 	p->addModel(modelSISM);
 	p->addModel(modelSH);
 	p->addModel(modelSCM);
-	p->addModel(modelSCMBO);
 	p->addModel(modelRCD);
 	p->addModel(modelRCDBO);
 	p->addModel(modelQPLFO);
