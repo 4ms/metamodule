@@ -35,7 +35,7 @@ void NorFlashRamDiskOps::set_status(Status status) {
 DSTATUS NorFlashRamDiskOps::initialize() {
 	// printf("NorFlashRamDiskOps initialize\n");
 	if (_status == Status::NotInit) {
-		if (!flash.check_chip_id(0x182001, 0x00FFBFFF)) { //S25FL127S(p7):182001 or S25FL128L(p6):186001
+		if (!flash.check_chip_id(0x180001, 0x00180001)) { //182001 or 186001 or 1840EF
 			printf("ERROR: NOR Flash returned wrong id\n");
 			return STA_NOINIT | STA_NODISK;
 		}
