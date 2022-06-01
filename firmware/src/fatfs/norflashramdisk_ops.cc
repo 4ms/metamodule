@@ -8,6 +8,16 @@ static constexpr auto Foreground = mdrivlib::QSpiFlash::EXECUTE_FOREGROUND;
 NorFlashRamDiskOps::NorFlashRamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
 	: flash{qspi_patchflash_conf}
 	, ramdisk{rmdisk} {
+	// if (!flash.test_sector(0))
+	// 	__BKPT();
+	// if (!flash.test_sector(1))
+	// 	__BKPT();
+	// if (!flash.test_sector(15))
+	// 	__BKPT();
+	// if (!flash.test_sector(16))
+	// 	__BKPT();
+	// if (!flash.test_sector(17))
+	// 	__BKPT();
 }
 
 NorFlashRamDiskOps::~NorFlashRamDiskOps() = default;
@@ -33,7 +43,7 @@ void NorFlashRamDiskOps::set_status(Status status) {
 // FatFS calls this in f_mkfs(), and when it mounts the disk (in f_mount(_,_,1) or the first time FatFS attempts a read/write/stat if the disk is not yet mounted)
 DSTATUS NorFlashRamDiskOps::initialize() {
 	if (_status == Status::NotInit) {
-		if (!flash.check_chip_id(0x182001, 0x00FFBFFF)) { //182001 or 186001
+		if (!flash.check_chip_id(0x180001, 0x00180001)) { //182001 or 186001 or 1840EF
 			printf("ERROR: NOR Flash returned wrong id\r\n");
 			return STA_NOINIT | STA_NODISK;
 		}
