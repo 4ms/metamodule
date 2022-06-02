@@ -375,7 +375,7 @@ img: $(IMG)
 
 $(IMG): $(BIN) $(UBOOT_MKIMAGE)
 	$(UBOOT_MKIMAGE) -A arm -C none -T firmware -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
-	$(info Copy image to sd card /dev/disk4 with:)
+	$(info Image created. Now copy image to sd card with this command (assumes /dev/disk4 is the sd card):)
 	$(info sudo dd if=$(IMG) of=/dev/disk4s3)
 
 #Used by norflash loader
