@@ -506,10 +506,11 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_IMG_ADENV_ARTWORK_120 uint8_t ADEnv_ar
 };
 
 const lv_img_dsc_t ADEnv_artwork_120 = {
+  .header.cf = LV_IMG_CF_TRUE_COLOR,
   .header.always_zero = 0,
+  .header.reserved = 0,
   .header.w = 38,
   .header.h = 120,
   .data_size = 4560 * LV_COLOR_SIZE / 8,
-  .header.cf = LV_IMG_CF_TRUE_COLOR,
   .data = ADEnv_artwork_120_map,
 };
