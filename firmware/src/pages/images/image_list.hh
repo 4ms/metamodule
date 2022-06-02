@@ -156,7 +156,7 @@ struct ModuleImages {
 		// SLUG TO IMAGE HERE
 
 		if (slug == "Freeverb")
-			return height == 240 ? &Freeverb_artwork_240 : &Freeverb_artwork_120;
+			return (height == 240) ? &Freeverb_artwork_240 : &Freeverb_artwork_120;
 
 		if (slug == "STS")
 			return (height == 240) ? &STS_artwork_240 : &STS_artwork_120;

@@ -671,7 +671,7 @@ LV_IMG_DECLARE({artwork_Carray_120});
 
     newText = f'''
 \t\tif (slug == "{slug}")
-\t\t\treturn height == 240 ? &{artwork_Carray_240} : &{artwork_Carray_120};
+\t\t\treturn (height == 240) ? &{artwork_Carray_240} : &{artwork_Carray_120};
 '''
     appendToFileAfterMarker(image_list_file, "// SLUG TO IMAGE HERE\n", newText)
 
