@@ -650,9 +650,9 @@ def createlvimg(artworkSvgFilename, outputBaseName):
     lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/lv_img_conv/lv_img_conv.js"
     try:
         subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', png240Filename], check=True)
-        Log(f"Created {png240Filename.strip('png')}.c file from {png240Filename}")
+        Log(f"Created {png240Filename.strip('.png')}.c file from {png240Filename} with {lv_img_conv} -c CF_TRUE_COLOR -t c --force {png240Filename}")
         subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', png120Filename], check=True)
-        Log(f"Created {png120Filename.strip('png')}.c file from {png120Filename}")
+        Log(f"Created {png120Filename.strip('.png')}.c file from {png120Filename}")
     except subprocess.CalledProcessError:
         Log("lv_img_conv.js failed. Try 1) `git submodule update --init` and/or 2) `cd shared/svgextract/lv_img_conv && npm install`")
         return
