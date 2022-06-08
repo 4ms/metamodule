@@ -5,7 +5,7 @@ using mdrivlib::GPIO;
 
 constexpr uint32_t LEDUpdateHz = 100;
 
-// Runs at 417kHz on A7:
+// I2C for main (internal) and aux (external/expander) codec, and internal GPIO Expander
 const mdrivlib::I2CConfig i2c_codec_conf = {
 	.I2Cx = I2C5,
 	.SCL = {GPIO::A, 11, LL_GPIO_AF_4},

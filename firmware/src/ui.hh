@@ -67,7 +67,7 @@ public:
 
 private:
 	void lvgl_update_task() {
-		Debug::Pin1::high();
+		// Debug::Pin1::high();
 		page_update_tm.stop();
 		lv_timer_handler();
 		page_update_tm.start();
@@ -78,7 +78,7 @@ private:
 			mbox.clear_message();
 		}
 		// output_debug_info();
-		Debug::Pin1::low();
+		// Debug::Pin1::low();
 	}
 
 	void page_update_task() { //60Hz

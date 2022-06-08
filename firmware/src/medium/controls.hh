@@ -35,13 +35,6 @@ struct Controls {
 	GPIOExpander &jacksense_reader;
 	GPIOExpander &extaudio_jacksense_reader;
 
-	// mdrivlib::RotaryEncoder<mdrivlib::RotaryHalfStep> rotary = {
-	// 	MMControlPins::rotA.gpio,
-	// 	MMControlPins::rotA.pin,
-	// 	MMControlPins::rotB.gpio,
-	// 	MMControlPins::rotB.pin,
-	// };
-
 	mdrivlib::RotaryEnc<mdrivlib::RotaryHalfStep, MMControlPins::rotA, MMControlPins::rotB> rotary;
 
 	DebouncedPin<MMControlPins::rotS.gpio, MMControlPins::rotS.pin, PinPolarity::Inverted> rotary_button;
@@ -54,13 +47,9 @@ struct Controls {
 	void start();
 	void update_params();
 
-	void store_jacksense_reading(uint16_t reading);
-	uint32_t get_jacksense_reading();
 	uint32_t get_pot_reading(uint32_t pot_id);
 	uint32_t get_patchcv_reading();
-
-	void collect_extaudio_jacksense_reading();
-	uint32_t get_extaudio_jacksense_reading();
+	uint32_t get_jacksense_reading();
 
 private:
 	mdrivlib::Timekeeper read_controls_task;

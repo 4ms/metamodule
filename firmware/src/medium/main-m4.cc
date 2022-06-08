@@ -59,15 +59,14 @@ void main() {
 	//NorFlashLoader load{};
 
 	SharedBus i2cbus{i2c_codec_conf};
-	I2CPeriph auxi2c{aux_i2c_conf};
+	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander
 	i2cbus.i2c.enable_IT(i2c_codec_conf.priority1, i2c_codec_conf.priority2);
 
-	mdrivlib::GPIOExpander ext_gpio_expander{auxi2c, extaudio_gpio_expander_conf};
+	mdrivlib::GPIOExpander ext_gpio_expander{i2cbus.i2c, extaudio_gpio_expander_conf};
 	mdrivlib::GPIOExpander main_gpio_expander{i2cbus.i2c, mainboard_gpio_expander_conf};
-	bool ext_audio_connected = ext_gpio_expander.is_present();
 
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander};
-	SharedBusQueue i2cqueue{controls};
+	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 	controls.start();
@@ -75,12 +74,10 @@ void main() {
 	while (true) {
 		signal_m4_ready_after_delay();
 
-		if (ext_audio_connected) {
-			if (SharedBus::i2c.is_ready()) {
-				Debug::Pin1::high();
-				i2cqueue.update();
-				Debug::Pin1::low();
-			}
+		if (SharedBus::i2c.is_ready()) {
+			Debug::Pin1::high();
+			i2cqueue.update();
+			Debug::Pin1::low();
 		}
 		__NOP();
 	}

@@ -10,15 +10,17 @@ namespace MetaModule
 
 class SharedBusQueue {
 public:
-	SharedBusQueue(Controls &controls)
-		: controls{controls} {
+	SharedBusQueue(GPIOExpander &main_gpioexpander, GPIOExpander &ext_gpioexpander)
+		: main_jacksense_reader(main_gpioexpander)
+		, ext_jacksense_reader(ext_gpioexpander)
+		, num_jacksense_readers{ext_gpioexpander.is_present() ? 2 : 1} {
 	}
 
 	void update() {
 		switch (cur_client) {
 
 			case PrepareReadGPIOExpander: {
-				auto err = controls.extaudio_jacksense_reader.prepare_read();
+				auto err = main_jacksense_reader.prepare_read();
 				if (err != GPIOExpander::Error::None)
 					__BKPT();
 				cur_client = RequestReadGPIOExpander;
@@ -26,7 +28,7 @@ public:
 			}
 
 			case RequestReadGPIOExpander: {
-				auto err = controls.extaudio_jacksense_reader.read_pins();
+				auto err = main_jacksense_reader.read_pins();
 				if (err != GPIOExpander::Error::None)
 					__BKPT();
 				cur_client = CollectReadGPIOExpander;
@@ -34,7 +36,34 @@ public:
 			}
 
 			case CollectReadGPIOExpander: {
-				controls.collect_extaudio_jacksense_reading();
+				main_jacksense_reader.collect_last_reading();
+				if (num_jacksense_readers == 1) {
+					tmr = HAL_GetTick();
+					cur_client = Pause;
+				} else {
+					cur_client = PrepareReadExtGPIOExpander;
+				}
+				break;
+			}
+
+			case PrepareReadExtGPIOExpander: {
+				auto err = ext_jacksense_reader.prepare_read();
+				if (err != GPIOExpander::Error::None)
+					__BKPT();
+				cur_client = RequestReadExtGPIOExpander;
+				break;
+			}
+
+			case RequestReadExtGPIOExpander: {
+				auto err = ext_jacksense_reader.read_pins();
+				if (err != GPIOExpander::Error::None)
+					__BKPT();
+				cur_client = CollectReadExtGPIOExpander;
+				break;
+			}
+
+			case CollectReadExtGPIOExpander: {
+				ext_jacksense_reader.collect_last_reading();
 				tmr = HAL_GetTick();
 				cur_client = Pause;
 				break;
@@ -54,14 +83,19 @@ public:
 	}
 
 private:
-	Controls &controls;
+	GPIOExpander &main_jacksense_reader;
+	GPIOExpander &ext_jacksense_reader;
 	uint32_t tmr{0};
+	int num_jacksense_readers;
 
 	enum States {
 		Pause,
 		PrepareReadGPIOExpander,
 		RequestReadGPIOExpander,
 		CollectReadGPIOExpander,
+		PrepareReadExtGPIOExpander,
+		RequestReadExtGPIOExpander,
+		CollectReadExtGPIOExpander,
 	} cur_client = PrepareReadGPIOExpander;
 };
 

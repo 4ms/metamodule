@@ -42,8 +42,9 @@ void Controls::update_params() {
 	if (_first_param) {
 		_first_param = false;
 
-		cur_params->jack_senses = 0; //jacksense_reader.read_sense_pins();
-		store_jacksense_reading(cur_params->jack_senses);
+		cur_params->jack_senses = get_jacksense_reading();
+		// cur_params->jack_senses = 0; //jacksense_reader.read_sense_pins();
+		// store_jacksense_reading(cur_params->jack_senses);
 
 		// PatchCV
 		if constexpr (PanelDef::NumMetaCV > 0)
@@ -75,8 +76,8 @@ void Controls::update_params() {
 		// Meta button
 		cur_metaparams->meta_buttons[0].transfer_events(button0);
 
-	} else {
-		cur_params->jack_senses = get_jacksense_reading();
+		// } else {
+		// 	cur_params->jack_senses = get_jacksense_reading();
 	}
 
 	cur_params++;
@@ -181,16 +182,8 @@ uint32_t Controls::get_patchcv_reading() {
 	return 0;
 }
 
-void Controls::store_jacksense_reading(uint16_t reading) {
-	latest_jacksense_reading = reading;
-}
-
 uint32_t Controls::get_jacksense_reading() {
-	return latest_jacksense_reading;
-}
-
-void Controls::collect_extaudio_jacksense_reading() {
-	latest_extaudio_jacksense_reading = extaudio_jacksense_reader.collect_last_reading();
+	return jacksense_reader.get_last_reading() | (extaudio_jacksense_reader.get_last_reading() << 16);
 }
 
 } // namespace MetaModule
