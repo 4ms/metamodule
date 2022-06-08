@@ -75,9 +75,7 @@ void main() {
 		signal_m4_ready_after_delay();
 
 		if (SharedBus::i2c.is_ready()) {
-			Debug::Pin1::high();
 			i2cqueue.update();
-			Debug::Pin1::low();
 		}
 		__NOP();
 	}
