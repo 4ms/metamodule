@@ -24,7 +24,7 @@ struct AppStartup {
 		HWSemaphore<MainCoreReady>::disable_channel_ISR();
 		HWSemaphore<MainCoreReady>::lock();
 
-		SystemStartup::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
+		SystemStartup::init_clocks({}, rcc_clk_conf, rcc_periph_clk_conf);
 
 		SecondaryCore::start();
 
