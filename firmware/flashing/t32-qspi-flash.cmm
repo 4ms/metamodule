@@ -34,6 +34,7 @@ PRIVATE &param_prepareonly &param_cpu &param_dualport
 &param_prepareonly=(STRing.SCAN(STRing.UPpeR("&parameters"),"PREPAREONLY",0)!=-1)
 &param_cpu=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"CPU=","")
 &param_dualport=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"DUALPORT=","0")
+&param_fsbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"FSBL=","*")
 
 ; ------------------------------------------------------------------------------
 ; Setup CPU
@@ -88,21 +89,20 @@ GOSUB FlashDeclaration "&param_dualport"
 IF &param_prepareonly
   ENDDO PREPAREDONE
 
-
 DIALOG.YESNO "No=Read, Yes=Program sector 0 (FSBL1)"
 LOCAL &progflash
 ENTRY &progflash
 IF &progflash
 (
   FLASH.ReProgram.ALL
-  Data.LOAD.Binary * 0x70000000
+  Data.LOAD.Binary &param_fsbl_file 0x70000000
 
-  DIALOG.YESNO "Program sector 4 (FSBL2)?"
-  LOCAL &progflash4
-  ENTRY &progflash4
-  IF &progflash4
-  (
-    Data.LOAD.Binary * 0x70040000
+;  DIALOG.YESNO "Program sector 4 (FSBL2)?"
+;  LOCAL &progflash4
+;  ENTRY &progflash4
+;  IF &progflash4
+;  (
+    Data.LOAD.Binary &param_fsbl_file 0x70040000
     DIALOG.YESNO "Program sector 8 (SSBL/APP)?"
     LOCAL &progflash8
     ENTRY &progflash8
@@ -110,7 +110,7 @@ IF &progflash
     (
       Data.LOAD.Binary * 0x70080000
     )
-  )
+;  )
   FLASH.ReProgram OFF
 )
 ELSE
