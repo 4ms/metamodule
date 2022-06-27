@@ -11,7 +11,7 @@ struct Debug {
 	// using Pin4 = mdrivlib::FPin<mdrivlib::GPIO::Z, 1, mdrivlib::PinMode::Output>; // Not exposed on p5
 	// using Pin5 = mdrivlib::FPin<mdrivlib::GPIO::Z, 2, mdrivlib::PinMode::Output>; // Not exposed on p5
 
-	using red_LED1 = mdrivlib::FPin<mdrivlib::GPIO::A, 15, mdrivlib::PinMode::Output>;
+	using red_LED1 = mdrivlib::FPin<mdrivlib::GPIO::A, 14, mdrivlib::PinMode::Output>;
 	// using blue_LED1 = mdrivlib::FPin<mdrivlib::GPIO::I, 8, mdrivlib::PinMode::Output>;
 	// using green_LED1 = mdrivlib::FPin<mdrivlib::GPIO::Z, 7, mdrivlib::PinMode::Output>;
 
