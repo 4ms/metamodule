@@ -89,7 +89,7 @@ GOSUB FlashDeclaration "&param_dualport"
 IF &param_prepareonly
   ENDDO PREPAREDONE
 
-DIALOG.YESNO "No=Read, Yes=Program sector 0 (FSBL1)"
+DIALOG.YESNO "No=Read, Yes=Program sector 0 and 4 (FSBL1/2)"
 LOCAL &progflash
 ENTRY &progflash
 IF &progflash
@@ -97,11 +97,6 @@ IF &progflash
   FLASH.ReProgram.ALL
   Data.LOAD.Binary &param_fsbl_file 0x70000000
 
-;  DIALOG.YESNO "Program sector 4 (FSBL2)?"
-;  LOCAL &progflash4
-;  ENTRY &progflash4
-;  IF &progflash4
-;  (
     Data.LOAD.Binary &param_fsbl_file 0x70040000
     DIALOG.YESNO "Program sector 8 (SSBL/APP)?"
     LOCAL &progflash8
@@ -110,7 +105,7 @@ IF &progflash
     (
       Data.LOAD.Binary * 0x70080000
     )
-;  )
+
   FLASH.ReProgram OFF
 )
 ELSE
