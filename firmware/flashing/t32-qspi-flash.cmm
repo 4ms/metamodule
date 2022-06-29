@@ -35,6 +35,7 @@ PRIVATE &param_prepareonly &param_cpu &param_dualport
 &param_cpu=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"CPU=","")
 &param_dualport=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"DUALPORT=","0")
 &param_fsbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"FSBL=","*")
+&param_ssbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"SSBL=","*")
 
 ; ------------------------------------------------------------------------------
 ; Setup CPU
@@ -97,14 +98,14 @@ IF &progflash
   FLASH.ReProgram.ALL
   Data.LOAD.Binary &param_fsbl_file 0x70000000
 
-    Data.LOAD.Binary &param_fsbl_file 0x70040000
-    DIALOG.YESNO "Program sector 8 (SSBL/APP)?"
-    LOCAL &progflash8
-    ENTRY &progflash8
-    IF &progflash8
-    (
-      Data.LOAD.Binary * 0x70080000
-    )
+  Data.LOAD.Binary &param_fsbl_file 0x70040000
+  DIALOG.YESNO "Program sector 8 (SSBL/APP)?"
+  LOCAL &progflash8
+  ENTRY &progflash8
+  IF &progflash8
+  (
+    Data.LOAD.Binary &param_ssbl_file 0x70080000
+  )
 
   FLASH.ReProgram OFF
 )
