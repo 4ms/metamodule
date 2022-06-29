@@ -1,7 +1,6 @@
 #include "auxsignal.hh"
 #include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
-//#include "conf/screen_conf.hh"
 #include "conf/i2c_codec_conf.hh"
 #include "controls.hh"
 #include "debug.hh"
@@ -15,8 +14,6 @@
 #include "shared_bus.hh"
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
-//
-//#include "u-boot-norflash/norflash-loader.hh"
 
 namespace MetaModule
 {
@@ -51,12 +48,6 @@ void main() {
 
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
-
-	//Todo: expand this to load the SSBL.
-	// - Need hardware with a bigger nor flash chip (128mbit)
-	// - Need to determine the address of the ssbl
-	// - Probably need to compile a special FSBL that looks in NOR flash instead of SDMMC for the SSBL
-	//NorFlashLoader load{};
 
 	SharedBus i2cbus{i2c_codec_conf};
 	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander

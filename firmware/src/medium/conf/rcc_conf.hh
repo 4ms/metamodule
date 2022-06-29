@@ -2,35 +2,7 @@
 
 #include "drivers/stm32xx.h"
 
-const RCC_ClkInitTypeDef rcc_clk_conf = {
-	.ClockType = RCC_CLOCKTYPE_MPU | RCC_CLOCKTYPE_ACLK | RCC_CLOCKTYPE_HCLK /* <-- MCU Clock */ | RCC_CLOCKTYPE_PCLK1 |
-				 RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_PCLK3 | RCC_CLOCKTYPE_PCLK4 | RCC_CLOCKTYPE_PCLK5,
-	.MPUInit =
-		{
-			.MPU_Clock = RCC_MPUSOURCE_PLL1,
-			.MPU_Div = RCC_MPU_DIV_OFF,
-		},
-	.AXISSInit =
-		{
-			.AXI_Clock = RCC_AXISSOURCE_PLL2,
-			.AXI_Div = RCC_AXI_DIV1,
-		},
-	.MCUInit =
-		{
-			.MCU_Clock = RCC_MCUSSOURCE_PLL3,
-			.MCU_Div = RCC_MCU_DIV1,
-		},
-	.APB4_Div = RCC_APB4_DIV2,
-	.APB5_Div = RCC_APB5_DIV4,
-	.APB1_Div = RCC_APB1_DIV2,
-	.APB2_Div = RCC_APB2_DIV2,
-	.APB3_Div = RCC_APB3_DIV2,
-};
-
-const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
-	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_I2C35 | RCC_PERIPHCLK_SAI2 | RCC_PERIPHCLK_SAI3 |
-							RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_USART6 | RCC_PERIPHCLK_SDMMC12 |
-							RCC_PERIPHCLK_ADC,
+const RCC_OscInitTypeDef rcc_osc_conf = {
 	.PLL3 =
 		{
 			.PLLState = RCC_PLL_ON,
@@ -57,6 +29,27 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 			.PLLFRACV = 0,
 			.PLLMODE = RCC_PLL_INTEGER,
 		},
+};
+
+const RCC_ClkInitTypeDef rcc_clk_conf = {
+	.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_PCLK3 |
+				 RCC_CLOCKTYPE_PCLK4 | RCC_CLOCKTYPE_PCLK5,
+	.MCUInit =
+		{
+			.MCU_Clock = RCC_MCUSSOURCE_PLL3,
+			.MCU_Div = RCC_MCU_DIV1,
+		},
+	.APB4_Div = RCC_APB4_DIV2,
+	.APB5_Div = RCC_APB5_DIV4,
+	.APB1_Div = RCC_APB1_DIV2,
+	.APB2_Div = RCC_APB2_DIV2,
+	.APB3_Div = RCC_APB3_DIV2,
+};
+
+const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
+	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_I2C35 | RCC_PERIPHCLK_SAI2 | RCC_PERIPHCLK_SAI3 |
+							RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_USART6 | RCC_PERIPHCLK_SDMMC12 |
+							RCC_PERIPHCLK_ADC,
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_PCLK1,
 	.I2c35ClockSelection = RCC_I2C35CLKSOURCE_PCLK1,
 	.Sai2ClockSelection = RCC_SAI2CLKSOURCE_PLL3_Q,
