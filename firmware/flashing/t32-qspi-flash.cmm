@@ -1,29 +1,5 @@
-; --------------------------------------------------------------------------------
-; @Title: Memory mapped Quad SPI Flash program Script for ST STM32MP157 
-; QSPI flash (MX25L512, MACRONIX)
-; 
-; @Description:
-;   Script arguments:
-;
-;    DO stm32mp157-qspi [PREPAREONLY] [CPU=<cpu>] [DUALPORT=0|1]
-;
-;      PREPAREONLY only declares flash but does not execute flash programming
-;
-;      CPU=<cpu> selects CPU derivative <cpu>
-;
-;      DUALPORT=0|1 default value is 0 (disabled).
-;
-;   Example:
-;
-;   DO ~~/demo/arm/flash/stm32mp157-qspi.cmm PREPAREONLY DUALPORT=1
-;
-; @Keywords: ARM, Cortex-A7
-; @Author: JIM
-; @Board: STM32MP15X-EVAL
-; @Chip: STM32MP157A-CA7
-; @Copyright: (C) 1989-2019 Lauterbach GmbH, licensed for use with TRACE32(R) only
-; --------------------------------------------------------------------------------
-; $Id: stm32mp157-qspi.cmm 9145 2021-02-02 10:29:17Z jjeong $
+;DO t32-qspi-flash [FSBL=filename] [SSBL=filename] [PREPAREONLY] [CPU=<cpu>] [DUALPORT=0|1]
+
 
 &QSPI_BASE=0x58003000
 
@@ -32,10 +8,9 @@ ENTRY %LINE &parameters
 
 PRIVATE &param_prepareonly &param_cpu &param_dualport
 &param_prepareonly=(STRing.SCAN(STRing.UPpeR("&parameters"),"PREPAREONLY",0)!=-1)
-&param_cpu=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"CPU=","")
 &param_dualport=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"DUALPORT=","0")
-&param_fsbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"FSBL=","*")
-&param_ssbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"SSBL=","*")
+&param_fsbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"FSBL=","")
+&param_ssbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"SSBL=","")
 
 ; ------------------------------------------------------------------------------
 ; Setup CPU
@@ -56,6 +31,7 @@ Data.Set A:0x50000000+0x19C %LE %Long (0x1<<14.)   ; RCC_AHB6RSTCLRR, Quad SPI m
 Data.Set A:0x50000000+0x198 %LE %Long data.long(A:(0x50000000+0x198))&~(0x1<<14.)  ; RCC_AHB6RSTSER, release Quad SPI memory controller reset
 Data.Set A:0x50000000+0x318 %LE %Long (0x1<<14.)   ; RCC_AHB6LPENSETR, QUADSPI memory controller clock enable during Sleep mode
 Data.Set A:0x50000000+0xA28 %LE %Long (0x1<<1.)|(0x1<<5.)  ;GPIOB & GPIOF clk enable
+Data.Set A:0x50000000+0x900 %LE %Long (0x00000000)   ; RCC_QSPICKSELR select ACLK
 
 ; ------------------------------------------------------------------------------
 ; Flash Pin Mux Configuration
@@ -63,7 +39,7 @@ GOSUB PINMUX_CONFIG_QSPI
 
 ; ------------------------------------------------------------------------------
 ; Flash Controller Init
-Data.Set A:&QSPI_BASE+0x00  %Long 0x04000311    ; QUADSPI_CR, QUADSPI control register, enable clk and prescaler (/4), FIFO lvl = 3, Abort now and enable
+Data.Set A:&QSPI_BASE+0x00  %Long 0x02000311    ; QUADSPI_CR, Prescaler = /3, FIFO lvl = 3, Abort now, Enable
 Data.Set A:&QSPI_BASE+0x04  %Long 0x00170000    ; QUADSPI_DCR, ##Changed: 0x00170000 == 16MB, CS min time = 1 cycle (matches known-working firmware)
 Data.Set A:&QSPI_BASE+0x0C  %Long 0xFF          ; QUADSPI_FCR, QUADSPI flag clear register
 
@@ -86,34 +62,30 @@ Data.Set  A:&QSPI_BASE      %Long  (Data.Long(A:&QSPI_BASE)|0x1)  ;enable
 ; Flash declaration
 GOSUB FlashDeclaration "&param_dualport"
 
-; Flash script ends here if called with parameter PREPAREONLY
 IF &param_prepareonly
-  ENDDO PREPAREDONE
-
-DIALOG.YESNO "No=Read, Yes=Program sector 0 and 4 (FSBL1/2)"
-LOCAL &progflash
-ENTRY &progflash
-IF &progflash
-(
-  FLASH.ReProgram.ALL
-  Data.LOAD.Binary &param_fsbl_file 0x70000000
-
-  Data.LOAD.Binary &param_fsbl_file 0x70040000
-  DIALOG.YESNO "Program sector 8 (SSBL/APP)?"
-  LOCAL &progflash8
-  ENTRY &progflash8
-  IF &progflash8
-  (
-    Data.LOAD.Binary &param_ssbl_file 0x70080000
-  )
-
-  FLASH.ReProgram OFF
-)
-ELSE
 (
   Data.Dump 0x70000000 /Byte /DIALOG
-;FLASH.ERASE 0x70000000--0x7000FFFF
+  ENDDO PREPAREDONE
 )
+
+;DIALOG.YESNO "No=Read, Yes=Program sector 0 and 4 (FSBL1/2)"
+;LOCAL &progflash
+;ENTRY &progflash
+
+FLASH.ReProgram.ALL
+
+IF "&param_fsbl_file"!=""
+(
+  Data.LOAD.Binary &param_fsbl_file 0x70000000
+  Data.LOAD.Binary &param_fsbl_file 0x70040000
+)
+
+IF "&param_ssbl_file"!=""
+(
+  Data.LOAD.Binary &param_ssbl_file 0x70080000
+)
+
+FLASH.ReProgram OFF
 
 ENDDO
 
@@ -184,7 +156,7 @@ FlashDeclaration:
   ELSE
     FLASH.TARGET2 0x30000000 E:0x30002000 0x4000 ~~/demo/arm/flash/byte/&FlashDriver /DualPort
 
-  FLASH.List
+  ;FLASH.List
 
   RETURN
 )
