@@ -13,7 +13,7 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 	.AXISSInit =
 		{
 			.AXI_Clock = RCC_AXISSOURCE_PLL2,
-			.AXI_Div = RCC_MPU_DIV_OFF,
+			.AXI_Div = RCC_AXI_DIV1,
 		},
 	.MCUInit =
 		{
@@ -28,9 +28,9 @@ const RCC_ClkInitTypeDef rcc_clk_conf = {
 };
 
 const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
-	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI3 | RCC_PERIPHCLK_SPI1 | RCC_PERIPHCLK_SPI23 |
-							RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_ADC | RCC_PERIPHCLK_SDMMC12 | RCC_PERIPHCLK_LTDC |
-							RCC_PERIPHCLK_USART6,
+	.PeriphClockSelection = RCC_PERIPHCLK_I2C12 | RCC_PERIPHCLK_SAI2 | RCC_PERIPHCLK_SAI3 | RCC_PERIPHCLK_SPI1 |
+							RCC_PERIPHCLK_SPI23 | RCC_PERIPHCLK_SPI45 | RCC_PERIPHCLK_ADC | RCC_PERIPHCLK_SDMMC12 |
+							RCC_PERIPHCLK_LTDC | RCC_PERIPHCLK_USART6,
 	//104: 63.883Hz
 	//105: 63.275Hz
 	//112: 59.32Hz
@@ -64,8 +64,8 @@ const RCC_PeriphCLKInitTypeDef rcc_periph_clk_conf = {
 	.I2c12ClockSelection = RCC_I2C12CLKSOURCE_HSI,
 	.I2c35ClockSelection = RCC_I2C35CLKSOURCE_HSI,
 	.I2c46ClockSelection = RCC_I2C46CLKSOURCE_HSI,
-	.Sai1ClockSelection = RCC_SAI1CLKSOURCE_PLL3_Q,
 	.Sai2ClockSelection = RCC_SAI2CLKSOURCE_PLL3_Q,
+	.Sai3ClockSelection = RCC_SAI3CLKSOURCE_PLL3_Q,
 	.Spi45ClockSelection = RCC_SPI45CLKSOURCE_PCLK2,
 	.Usart6ClockSelection = RCC_USART6CLKSOURCE_HSI,
 	.Sdmmc12ClockSelection =
