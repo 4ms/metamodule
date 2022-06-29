@@ -5,7 +5,7 @@ using mdrivlib::GPIO;
 
 constexpr uint32_t LEDUpdateHz = 100;
 
-// I2C for main (internal) and aux (external/expander) codec, and internal GPIO Expander
+// I2C for main (internal) and aux (external/expander) codec, and internal and aux (ext/exp) GPIO Expander
 const mdrivlib::I2CConfig i2c_codec_conf = {
 	.I2Cx = I2C5,
 	.SCL = {GPIO::A, 11, LL_GPIO_AF_4},
@@ -21,6 +21,7 @@ const mdrivlib::I2CConfig i2c_codec_conf = {
 	.priority2 = 1,
 };
 
+// I2C for Aux header (not audio expander header)
 const mdrivlib::I2CConfig aux_i2c_conf = {
 	.I2Cx = I2C2,
 	.SCL = {GPIO::B, 10, LL_GPIO_AF_4},
