@@ -33,13 +33,13 @@ struct NorFlashLoader {
 		for (int i = range_start; i < range_end; i++) {
 			Debug::red_LED1::low();
 			UartLog::log("Erasing Block#%d @ 0x%x\n\r", i, i * QSPI_64KBLOCK_SIZE);
-			bool ok = flash.Erase(QSpiFlash::BLOCK_64K, i * QSPI_64KBLOCK_SIZE, QSpiFlash::EXECUTE_FOREGROUND);
+			bool ok = flash.erase(QSpiFlash::BLOCK_64K, i * QSPI_64KBLOCK_SIZE, QSpiFlash::EXECUTE_FOREGROUND);
 			if (!ok) {
 				UartLog::log("Error erasing block #%d\n\r", i);
 				while (true) {
-					Debug::green_LED1::low();
+					// Debug::green_LED1::low();
 					HAL_Delay(250);
-					Debug::green_LED1::high();
+					// Debug::green_LED1::high();
 					HAL_Delay(250);
 				}
 			}
@@ -48,9 +48,9 @@ struct NorFlashLoader {
 	}
 
 	void write(uint8_t *data, uint32_t addr, uint32_t len) {
-		Debug::blue_LED1::low();
+		// Debug::blue_LED1::low();
 		UartLog::log("Writing %d bytes to 0x%x\n\r", len, addr);
-		bool ok = flash.Write(data, addr, len);
+		bool ok = flash.write(data, addr, len);
 		if (!ok) {
 			UartLog::log("Error writing\n\r");
 			while (true) {
@@ -60,7 +60,7 @@ struct NorFlashLoader {
 				HAL_Delay(250);
 			}
 		}
-		Debug::blue_LED1::high();
+		// Debug::blue_LED1::high();
 	}
 
 	void verify(uint8_t *data, uint32_t addr, uint32_t len) {
@@ -70,8 +70,8 @@ struct NorFlashLoader {
 		if (!ok) {
 			UartLog::log("Error reading\n\r");
 			while (true) {
-				Debug::blue_LED1::low();
-				Debug::blue_LED1::high();
+				// Debug::blue_LED1::low();
+				// Debug::blue_LED1::high();
 			}
 		}
 		for (int i = 0; i < len; i++) {
@@ -79,14 +79,14 @@ struct NorFlashLoader {
 				UartLog::log(
 					"Data read back does not match: [%d] read: 0x%x, wrote: 0x%x\n\r", i, read_data[i], data[i]);
 				while (true) {
-					Debug::blue_LED1::low();
-					Debug::red_LED1::low();
-					Debug::green_LED1::low();
-					HAL_Delay(250);
-					Debug::blue_LED1::high();
-					Debug::red_LED1::high();
-					Debug::green_LED1::high();
-					HAL_Delay(250);
+					// Debug::blue_LED1::low();
+					// Debug::red_LED1::low();
+					// Debug::green_LED1::low();
+					// HAL_Delay(250);
+					// Debug::blue_LED1::high();
+					// Debug::red_LED1::high();
+					// Debug::green_LED1::high();
+					// HAL_Delay(250);
 				}
 			}
 		}
@@ -97,21 +97,21 @@ struct NorFlashLoader {
 
 		UartLog::log("QSPI is initialized.\n\r");
 
-		Debug::red_LED1::high();
-		Debug::blue_LED1::high();
-		Debug::green_LED1::high();
+		// Debug::red_LED1::high();
+		// Debug::blue_LED1::high();
+		// Debug::green_LED1::high();
 
 		// Write FSBL1 @ first block: Success = red turns on
 		erase_write_and_verify(u_boot_spl_stm32, 0, u_boot_spl_stm32_len);
-		Debug::red_LED1::low();
+		// Debug::red_LED1::low();
 
 		// Write FSBL2 @ block 4 = 0x40000: Success =  blue turns on (magenta)
 		erase_write_and_verify(u_boot_spl_stm32, 4, u_boot_spl_stm32_len);
-		Debug::blue_LED1::low();
+		// Debug::blue_LED1::low();
 
 		// Write app data @ block 8 = 0x80000: Sucess = green turns on (white)
 		erase_write_and_verify(main_uimg, 8, main_uimg_len);
-		Debug::green_LED1::low();
+		// Debug::green_LED1::low();
 
 		UartLog::log("Successfully wrote SPL and application to QSPI Flash\r\n");
 	}
