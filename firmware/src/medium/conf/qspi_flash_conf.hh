@@ -11,7 +11,7 @@ constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
 	.clk = {GPIO::F, 10, LL_GPIO_AF_9},
 	.cs = {GPIO::B, 6, LL_GPIO_AF_10},
 
-	/* QSPI freq = QUADSPICLK /(1 + ClockPrescaler) = 240 MHz/(2+1) = 80 Mhz */
+	/* QSPI freq = QUADSPICLK /(1 + ClockPrescaler) = 266 MHz/(2+1) = 88 Mhz */
 	.clock_division = 3,
 	.IRQ_pri = 2,
 	.IRQ_subpri = 2,
