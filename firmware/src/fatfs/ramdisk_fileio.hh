@@ -8,7 +8,7 @@ namespace MetaModule
 {
 enum class Disk { NORFlash = 0 };
 
-namespace FileIO
+namespace RamDiskFileIO
 {
 
 bool register_disk(DiskOps *ops, Disk disk);
@@ -36,9 +36,6 @@ void for_each_file_regex(Disk disk, std::string_view regex, Action action) { //v
 	}
 }
 
-// struct Fil {};
-// Fil next_ext_in_dir(std::string_view ext, std::string_view path);
-
-}; // namespace FileIO
+}; // namespace RamDiskFileIO
 
 } // namespace MetaModule

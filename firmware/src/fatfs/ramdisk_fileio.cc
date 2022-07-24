@@ -1,11 +1,12 @@
-#include "fileio.hh"
+#include "ramdisk_fileio.hh"
 #include "ff.h"
 #include "printf.h"
 
 //defined in diskio.cc, but we don't have access to modify diskio.h
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
-namespace MetaModule::FileIO
+// TODO: can this work as a class? We could possibly need multiple FatFS instances
+namespace MetaModule::RamDiskFileIO
 {
 
 namespace
@@ -120,4 +121,4 @@ static void u8_to_tchar(const char *u8, TCHAR *uint) {
 	} while (*u8 != '\0');
 }
 
-} // namespace MetaModule::FileIO
+} // namespace MetaModule::RamDiskFileIO

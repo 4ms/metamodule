@@ -1,16 +1,18 @@
 #include "app_startup.hh"
 #include "audio.hh"
 #include "conf/board_codec_conf.hh"
+#include "conf/qspi_flash_conf.hh"
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/stm32xx.h"
-#include "fatfs/fileio.hh"
+#include "fatfs/ramdisk_fileio.hh"
 #include "hsem_handler.hh"
-#include "norflashramdisk_ops.hh"
 #include "params.hh"
 #include "patch_player.hh"
+#include "patchdisk.hh"
 #include "patchfileio.hh"
 #include "patchlist.hh"
+#include "ramdisk_ops.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
@@ -30,15 +32,15 @@ void main() {
 	using namespace MetaModule;
 
 	StaticBuffers::init();
-	PatchList patch_list{};
 
-	NorFlashRamDiskOps nordisk{StaticBuffers::virtdrive};
-	FileIO::register_disk(&nordisk, Disk::NORFlash);
-	// if (!FileIO::mount_disk(Disk::NORFlash)) {
-	printf("No Fatfs found on NOR Flash, formatting and creating default patch files\r\n");
-	PatchFileIO::factory_reset(Disk::NORFlash);
-	// }
-	PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
+	// Populate Patch List from Patch Storage:
+	PatchList patch_list{};
+	RamDiskOps ramdiskops{StaticBuffers::virtdrive};
+	RamDiskFileIO::register_disk(&ramdiskops, Disk::NORFlash);
+	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
+
+	PatchStorage patchdisk{flash, StaticBuffers::virtdrive};
+	patchdisk.fill_patchlist_from_norflash(patch_list);
 
 	PatchPlayer patch_player;
 	ParamQueue param_queue;
@@ -75,21 +77,22 @@ void main() {
 	audio.start();
 	ui.start();
 
-	UsbDriveDevice usb_drive{nordisk};
+	UsbDriveDevice usb_drive{ramdiskops};
 	usb_drive.start();
 
 	while (true) {
-		if (nordisk.get_status() == NorFlashRamDiskOps::Status::RequiresWriteBack) {
+		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
 			mbox.patchlist_reloading = true;
 			printf("NOR Flash writeback begun.\r\n");
-			if (FileIO::unmount_disk(Disk::NORFlash)) { //nordisk.unmount()) {
+			RamDiskFileIO::unmount_disk(Disk::NORFlash);
+			if (patchdisk.ramdisk_patches_to_norflash()) {
 				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
 				PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
 				mbox.patchlist_updated = true;
 			} else {
 				printf("NOR Flash writeback failed!\r\n");
 			}
-			nordisk.set_status(NorFlashRamDiskOps::Status::NotInUse);
+			ramdiskops.set_status(RamDiskOps::Status::NotInUse);
 			mbox.patchlist_reloading = false;
 		}
 		__WFI();

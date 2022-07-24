@@ -185,9 +185,11 @@ SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
 SOURCES += src/fatfs/diskio.cc
-SOURCES += src/fatfs/fileio.cc
-SOURCES += src/fatfs/norflashramdisk_ops.cc
+SOURCES += src/fatfs/ramdisk_fileio.cc
+SOURCES += src/patchdisk.cc
 SOURCES += src/patchfileio.cc
+SOURCES += $(LIBDIR)/littlefs/lfs.c
+SOURCES += $(LIBDIR)/littlefs/lfs_util.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 

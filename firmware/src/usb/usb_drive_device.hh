@@ -1,5 +1,5 @@
 #pragma once
-#include "norflashramdisk_ops.hh"
+#include "ramdisk_ops.hh"
 #include "usbd_core.h"
 #include "usbd_msc.h"
 
@@ -9,14 +9,14 @@
 class UsbDriveDevice {
 
 public:
-	UsbDriveDevice(NorFlashRamDiskOps &nfs);
+	UsbDriveDevice(RamDiskOps &nfs);
 	void start();
 	static inline USBD_StorageTypeDef ops;
 
 private:
 	USBD_HandleTypeDef pdev;
 
-	static inline NorFlashRamDiskOps *nordisk = nullptr;
+	static inline RamDiskOps *nordisk = nullptr;
 	static int8_t init(uint8_t lun);
 	static int8_t eject(uint8_t lun);
 	static int8_t get_capacity(uint8_t lun, uint32_t *block_num, uint16_t *block_size);

@@ -1,5 +1,5 @@
 #pragma once
-#include "fatfs/fileio.hh"
+#include "fatfs/ramdisk_fileio.hh"
 #include "patchlist.hh"
 
 namespace MetaModule::PatchFileIO

@@ -1,7 +1,6 @@
 #include "usb_drive_device.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
-#include "norflashramdisk_ops.hh"
 #include "printf.h"
 #include "usbd_desc.h"
 #include "usbd_msc.h"
@@ -39,7 +38,7 @@ int8_t UsbDriveDevice::init(uint8_t lun) {
 		if (!nordisk)
 			return USBD_FAIL;
 		printf("USB MSC connected to host\r\n");
-		nordisk->set_status(NorFlashRamDiskOps::Status::InUse);
+		nordisk->set_status(RamDiskOps::Status::InUse);
 	}
 	return USBD_OK;
 }
@@ -49,7 +48,7 @@ int8_t UsbDriveDevice::eject(uint8_t lun) {
 		if (!nordisk)
 			return USBD_FAIL;
 		printf("USB MSC device got Eject event from host\r\n");
-		nordisk->set_status(NorFlashRamDiskOps::Status::RequiresWriteBack);
+		nordisk->set_status(RamDiskOps::Status::RequiresWriteBack);
 	}
 	return USBD_OK;
 }
@@ -125,7 +124,7 @@ static InquiryData inquiry_data = {
 	// .version = {'0', '.', '0', '1'},
 };
 
-UsbDriveDevice::UsbDriveDevice(NorFlashRamDiskOps &nfs) {
+UsbDriveDevice::UsbDriveDevice(RamDiskOps &nfs) {
 	nordisk = &nfs;
 	ops = {
 		init,
