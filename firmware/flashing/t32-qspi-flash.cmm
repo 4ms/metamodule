@@ -1,13 +1,13 @@
-;DO t32-qspi-flash [FSBL=filename] [SSBL=filename] [PREPAREONLY] [CPU=<cpu>] [DUALPORT=0|1]
-
+;DO t32-qspi-flash [FSBL=filename] [SSBL=filename] [DUMPMEMORY] [DUALPORT=0|1]
+;    DO t32-qspi-flash SSBL='/Users/design/4ms/stm32/meta-module/firmware/build/mp1corea7/medium/main.img'
 
 &QSPI_BASE=0x58003000
 
 PRIVATE &parameters
 ENTRY %LINE &parameters
 
-PRIVATE &param_prepareonly &param_cpu &param_dualport
-&param_prepareonly=(STRing.SCAN(STRing.UPpeR("&parameters"),"PREPAREONLY",0)!=-1)
+PRIVATE &param_dumpmem &param_dualport
+&param_dumpmem=(STRing.SCAN(STRing.UPpeR("&parameters"),"DUMPMEMORY",0)!=-1)
 &param_dualport=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"DUALPORT=","0")
 &param_fsbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"FSBL=","")
 &param_ssbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"SSBL=","")
@@ -62,10 +62,10 @@ Data.Set  A:&QSPI_BASE      %Long  (Data.Long(A:&QSPI_BASE)|0x1)  ;enable
 ; Flash declaration
 GOSUB FlashDeclaration "&param_dualport"
 
-IF &param_prepareonly
+IF &param_dumpmem
 (
   Data.Dump 0x70000000 /Byte /DIALOG
-  ENDDO PREPAREDONE
+  ENDDO DUMPMEMDONE
 )
 
 ;DIALOG.YESNO "No=Read, Yes=Program sector 0 and 4 (FSBL1/2)"

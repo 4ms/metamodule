@@ -100,7 +100,7 @@ bool PatchStorage::create_default_patches_in_norflash() {
 		const auto patch = DefaultPatches::get_patch(i);
 		printf("Creating default patch file: %s\n", filename.c_str());
 		if (!lfs.create_file(filename, patch)) {
-			printf("Error: aborting creating default patches to flash\n");
+			printf("Error: aborted creating default patches to flash\n");
 			return false;
 		}
 	}

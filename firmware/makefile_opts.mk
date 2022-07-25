@@ -23,10 +23,13 @@
 # $(BUILDDIR)/lib/lvgl/lvgl/src/draw/%.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
+$(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
+$(BUILDDIR)/src/patchdisk.o: OPTFLAG = -O0
+$(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/fatfs/diskio.o: OPTFLAG = -O0
-# $(BUILDDIR)/src/fatfs/norflashramdisk_ops.o: OPTFLAG = -O0
+$(BUILDDIR)/src/fatfs/diskio.o: OPTFLAG = -O0
+$(BUILDDIR)/src/fatfs/ramdisk_fileio.o: OPTFLAG = -O0
+$(BUILDDIR)/lib/littlefs/lfs.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/controls.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/m4/main.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/norflash-loader/main.o: OPTFLAG = -O0
