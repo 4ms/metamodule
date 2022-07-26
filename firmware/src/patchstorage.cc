@@ -1,4 +1,4 @@
-#include "patchdisk.hh"
+#include "patchstorage.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "fatfs/ramdisk_fileio.hh"
 #include "patchlist.hh"
@@ -78,7 +78,7 @@ bool PatchStorage::ramdisk_patches_to_norflash() {
 	// 	".yml", [](const std::string_view filename, const std::span<const char> data) { lfs.delete_file(filename); });
 
 	RamDiskFileIO::for_each_file_regex(Disk::NORFlash, "*.yml", [this](const char *fname) {
-		std::array<char, 4096> buf;
+		std::array<char, 32768> buf;
 		uint32_t filesize = RamDiskFileIO::read_file(fname, buf.data(), buf.size());
 		if (filesize == buf.size()) {
 			printf("File exceeds %zu bytes, too big. Skipping\r\n", buf.size());
@@ -108,28 +108,15 @@ bool PatchStorage::create_default_patches_in_norflash() {
 }
 
 bool PatchStorage::fill_patchlist_from_norflash(PatchList &patch_list) {
-	std::array<char, 4096> buf;
-
 	patch_list.set_status(PatchList::Status::Loading);
 	patch_list.clear_all_patches();
 
-	bool ok = lfs.foreach_file_with_ext(".yml", [&](const std::string_view fname, const std::span<const char> data) {
+	bool ok = lfs.foreach_file_with_ext(".yml", [&](const std::string_view fname, const std::span<char> data) {
 		if (fname[0] == '.')
 			return;
 
-		printf("Found patch file: %s, Reading... ", fname);
-		uint32_t filesize = RamDiskFileIO::read_file(fname, buf.data(), buf.size());
-
-		if (filesize == buf.size()) {
-			printf("File exceeds %zu bytes, too big. Skipping\r\n", buf.size());
-			return;
-		}
-		if (!filesize) {
-			printf("File cannot be read. Skipping\r\n");
-			return;
-		}
-		printf("Read %d bytes.. parsing... ", filesize);
-		patch_list.add_patch_from_yaml({buf.data(), filesize});
+		printf("Found patch file: %s, Reading... ", fname.data());
+		patch_list.add_patch_from_yaml(data);
 	});
 
 	patch_list.set_status(PatchList::Status::Ready);

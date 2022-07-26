@@ -24,7 +24,7 @@
 # $(BUILDDIR)/lib/mcufont/decoder/mf_kerning.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/mdrivlib/drivers/rotary.o: OPTFLAG = -O0
 $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
-$(BUILDDIR)/src/patchdisk.o: OPTFLAG = -O0
+$(BUILDDIR)/src/patchstorage.o: OPTFLAG = -O0
 $(BUILDDIR)/src/patchlist.o: OPTFLAG = -O0
 # $(BUILDDIR)/src/audio.o: OPTFLAG = -O0
 $(BUILDDIR)/src/fatfs/diskio.o: OPTFLAG = -O0

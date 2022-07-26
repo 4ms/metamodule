@@ -9,9 +9,9 @@
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_player.hh"
-#include "patchdisk.hh"
 #include "patchfileio.hh"
 #include "patchlist.hh"
+#include "patchstorage.hh"
 #include "ramdisk_ops.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
@@ -87,7 +87,7 @@ void main() {
 			RamDiskFileIO::unmount_disk(Disk::NORFlash);
 			if (patchdisk.ramdisk_patches_to_norflash()) {
 				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
-				PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
+				// PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
 				mbox.patchlist_updated = true;
 			} else {
 				printf("NOR Flash writeback failed!\r\n");
