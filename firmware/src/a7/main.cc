@@ -80,8 +80,9 @@ void main() {
 	UsbDriveDevice usb_drive{ramdiskops};
 	usb_drive.start();
 
+	HAL_Delay(10);
 	I2CPeriph usbi2c{usb_i2c_conf};
-	uint8_t data[1] = {0xAA};
+	uint8_t data[4] = {0xAA};
 	constexpr uint8_t DevAddr = 0b01000100;
 	auto err = usbi2c.mem_read(0b01000100, 0x01, 1, data, 1);
 	if (err == mdrivlib::I2CPeriph::I2C_NO_ERR)
@@ -119,15 +120,15 @@ void main() {
 
 	while (true) {
 		if ((HAL_GetTick() - tm) > 200) {
-			// uint32_t data[2];
-			// if (usbi2c.mem_read(DevAddr, FUSBRegister::Status0A, 1, (uint8_t *)data, 8) ==
-			// 	mdrivlib::I2CPeriph::I2C_NO_ERR) {
-			// 	if (data[0] || data[1])
-			// 		printf_("%08x %08x\n", data[0], data[1]);
-			// } else {
-			// 	printf_("Error reading\n");
-			// 	__BKPT();
-			// }
+			usbi2c.mem_read(DevAddr, FUSBRegister::Status0, 1, &(data[0]), 1);
+			if (data[0] != data[1])
+				printf_("Status0: %x\n", data[0]);
+			data[1] = data[0];
+
+			usbi2c.mem_read(DevAddr, FUSBRegister::Interrupt, 1, &(data[2]), 1);
+			if (data[2] != data[3])
+				printf_("Interrupt: %x\n", data[2]);
+			data[3] = data[2];
 		}
 		if (fusb_int.is_on()) {
 			if (!usb_connected)
