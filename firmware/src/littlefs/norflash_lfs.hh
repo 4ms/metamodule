@@ -18,7 +18,12 @@ public:
 	}
 
 	Status initialize() {
-		const struct lfs_config cfg = {
+		if (!_flash.check_chip_id(0x180001, 0x00180001)) { //182001 or 186001 or 1840EF
+			printf_("ERROR: NOR Flash returned wrong id\n");
+			return Status::FlashError;
+		}
+
+		const static lfs_config cfg = {
 			.context = &_flash,
 			.read = NorFlashOps::read,
 			.prog = NorFlashOps::prog,
@@ -33,11 +38,6 @@ public:
 			.cache_size = 16,
 			.lookahead_size = 16,
 		};
-
-		if (!_flash.check_chip_id(0x180001, 0x00180001)) { //182001 or 186001 or 1840EF
-			printf("ERROR: NOR Flash returned wrong id\n");
-			return Status::FlashError;
-		}
 
 		auto err = lfs_mount(&lfs, &cfg);
 		if (err >= 0)
