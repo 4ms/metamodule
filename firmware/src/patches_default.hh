@@ -41,15 +41,27 @@ struct DefaultPatches {
 
 	static ModuleTypeSlug get_filename(uint32_t id) {
 		if (id == 0)
-			return "djembe2.yml";
+			return "Showcase.yml";
 		if (id == 1)
-			return "djembe4.yml";
+			return "djembe2.yml";
 		if (id == 2)
-			return "smr_resonant_pings.yml";
+			return "djembe4.yml";
 		if (id == 3)
-			return "Djembe4verb.yml";
+			return "djembe4verb.yml";
 		if (id == 4)
+			return "nonlinear.yml";
+		if (id == 5)
 			return "SpectralPings.yml";
+		if (id == 6)
+			return "OctoSampler.yml";
+		if (id == 7)
+			return "ClockRockinBeats.yml";
+		if (id == 8)
+			return "KarplusStereo.yml";
+		if (id == 9)
+			return "QuartetEnOsc.yml";
+		if (id == 10)
+			return "SeaOfEchoes.yml";
 		std::string t{std::to_string(id) + ".yml"};
 		return t.c_str();
 	}
