@@ -3,6 +3,8 @@
 #include "lib/littlefs/lfs.h"
 #include "norflash_ops.hh"
 #include "patches_default.hh"
+
+#include "printf.h"
 #include <string_view>
 
 class LittleNorFS {
@@ -54,36 +56,26 @@ public:
 
 	bool create_file(const std::string_view filename, const std::span<const char> data) {
 		lfs_file_t file;
-		if (lfs_file_open(&lfs, &file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY) < 0)
-			return false;
 
-		if (lfs_file_write(&lfs, &file, data.data(), data.size_bytes()) < 0)
+		printf_("Opening/creating file %s\n", filename.data());
+
+		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY);
+		if (err < 0) {
+			printf_("Open failed with err %d\n", err);
 			return false;
+		}
+
+		if (int err = lfs_file_write(&lfs, &file, data.data(), data.size_bytes()); err < 0) {
+			printf_("Write failed with err %d\n", err);
+			return false;
+		}
 
 		lfs_file_close(&lfs, &file);
 
 		return true;
 	}
 
-	// bool read_file(const std::string_view filename, std::span<char> data) {
-
-	// 	lfs_info info;
-	// 	if (lfs_stat(&lfs, filename.data(), &info) < 0)
-	// 		return false;
-
-	// 	lfs_file_t file;
-	// 	if (lfs_file_open(&lfs, &file, filename.data(), LFS_O_RDONLY) < 0)
-	// 		return false;
-
-	// 	if (lfs_file_read(&lfs, &file, data.data(), data.size_bytes()) < 0)
-	// 		return false;
-
-	// 	lfs_file_close(&lfs, &file);
-
-	// 	return true;
-	// }
-
-	using FileAction = std::function<void(const std::string_view filename, const std::span<const char> data)>;
+	using FileAction = std::function<void(const std::string_view filename, const std::span<char> data)>;
 
 	// Performs an action(file_name, file_data) on each file in LittleFS ending with the extension
 	bool foreach_file_with_ext(const std::string_view extension, FileAction action) {
