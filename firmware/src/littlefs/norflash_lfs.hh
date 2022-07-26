@@ -98,18 +98,19 @@ public:
 					continue;
 				}
 
-				std::array<char, 4096> _data;
+				std::array<char, 32768> _data;
 				auto bytes_read = lfs_file_read(&lfs, &file, &_data, _data.size());
 				if (bytes_read <= 0)
 					continue;
 				if (info.size > _data.size()) {
-					printf("Warning: File %s is %d bytes, exceeds max %d\n", info.name, info.size, _data.size());
+					printf(
+						"Warning: File %s is %d bytes, exceeds max %d. Skipping\n", info.name, info.size, _data.size());
 					continue;
 				}
 
 				lfs_file_close(&lfs, &file);
 
-				action(info.name, _data);
+				action(info.name, {_data.data(), info.size});
 			}
 		}
 
