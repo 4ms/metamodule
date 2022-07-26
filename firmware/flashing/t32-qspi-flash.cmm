@@ -1,6 +1,10 @@
 ;DO t32-qspi-flash [FSBL=filename] [SSBL=filename] [DUMPMEMORY] [DUALPORT=0|1]
 ;    DO t32-qspi-flash SSBL='/Users/design/4ms/stm32/meta-module/firmware/build/mp1corea7/medium/main.img'
 
+;Load minimal startup:
+;DO t32-qspi-flash FSBL='/Users/design/4ms/stm32/meta-module/firmware/images/fsbl.stm32' SSBL='/Users/design/4ms/stm32/meta-module/firmware/images/minimal-boot.uimg'
+
+
 &QSPI_BASE=0x58003000
 
 PRIVATE &parameters
