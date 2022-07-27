@@ -112,9 +112,6 @@ bool PatchStorage::fill_patchlist_from_norflash(PatchList &patch_list) {
 	patch_list.clear_all_patches();
 
 	bool ok = lfs.foreach_file_with_ext(".yml", [&](const std::string_view fname, const std::span<char> data) {
-		if (fname[0] == '.')
-			return;
-
 		printf("Found patch file: %s, Reading... ", fname.data());
 		patch_list.add_patch_from_yaml(data);
 	});

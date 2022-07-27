@@ -13,6 +13,7 @@ class LittleNorFS {
 
 public:
 	static constexpr uint32_t BlockSize = 4096;
+	static constexpr uint32_t MaxFileSize = 32768;
 	enum class Status { AlreadyFormatted, NewlyFormatted, FlashError, LFSError };
 
 	LittleNorFS(mdrivlib::QSpiFlash &flash)
@@ -35,15 +36,15 @@ public:
 			.read_size = 16,
 			.prog_size = 16,
 			.block_size = BlockSize,
-			.block_count = 128,
+			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps::FlashOffset) / BlockSize,
 			.block_cycles = 500,
-			.cache_size = 16,
-			.lookahead_size = 16,
+			.cache_size = 1024,
+			.lookahead_size = 64,
 		};
 
 		auto err = lfs_mount(&lfs, &cfg);
 		if (err >= 0)
-			return Status::AlreadyFormatted; // first mount successful, FS already exists
+			return Status::AlreadyFormatted;
 
 		// No FS on disk, format and re-mount
 		if (lfs_format(&lfs, &cfg) < 0)
@@ -98,7 +99,7 @@ public:
 					continue;
 				}
 
-				std::array<char, 32768> _data;
+				std::array<char, MaxFileSize> _data;
 				auto bytes_read = lfs_file_read(&lfs, &file, &_data, _data.size());
 				if (bytes_read <= 0)
 					continue;
