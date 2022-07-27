@@ -113,11 +113,8 @@ void main() {
 	data[0] = 0b00000101; //Enable SNK polling, (TOGGLE=1)
 	usbi2c.mem_write(DevAddr, FUSBRegister::Control2, 1, data, 1);
 
-	data[0] = 0b00001111; //Enable all power
-	usbi2c.mem_write(DevAddr, FUSBRegister::Power, 1, data, 1);
-
-	// data[0] = 0b00000000;
-	// usbi2c.mem_write(DevAddr, FUSBRegister::OCP, 1, data, 1);
+	// data[0] = 0b00001111; //Enable all power
+	// usbi2c.mem_write(DevAddr, FUSBRegister::Power, 1, data, 1);
 
 	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up};
 	bool usb_connected = false;
