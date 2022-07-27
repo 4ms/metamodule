@@ -80,14 +80,72 @@ void main() {
 	UsbDriveDevice usb_drive{ramdiskops};
 	usb_drive.start();
 
+	HAL_Delay(10);
+	I2CPeriph usbi2c{usb_i2c_conf};
+	uint8_t data[4] = {0xAA};
+	constexpr uint8_t DevAddr = 0b01000100;
+	auto err = usbi2c.mem_read(0b01000100, 0x01, 1, data, 1);
+	if (err == mdrivlib::I2CPeriph::I2C_NO_ERR)
+		printf_("ID Read %d\n", data[0]);
+	else {
+		printf_("Err: %d\n", err);
+		__BKPT();
+	}
+
+	enum FUSBRegister : uint8_t {
+		ID = 0x01,
+		Control2 = 0x08,
+		OCP = 0x0D,
+		Status0A = 0x3C,
+		Status1A = 0x3D,
+		InterruptA = 0x3E,
+		InterruptB = 0x3F,
+		Status0 = 0x40,
+		Status1 = 0x41,
+		Interrupt = 0x42,
+	};
+	data[0] = 0b00000011;
+	usbi2c.mem_write(DevAddr, FUSBRegister::Control2, 1, data, 1);
+	data[0] = 0xAA;
+	usbi2c.mem_read(DevAddr, FUSBRegister::Control2, 1, data, 1);
+	printf_("Control2 read %x\n", data[0]);
+
+	data[0] = 0b00000000;
+	usbi2c.mem_write(DevAddr, FUSBRegister::OCP, 1, data, 1);
+
+	Pin fusb_int{GPIO::A, 10, PinMode::Input};
+	bool usb_connected = false;
+
+	uint32_t tm = HAL_GetTick();
+
 	while (true) {
+		if ((HAL_GetTick() - tm) > 200) {
+			usbi2c.mem_read(DevAddr, FUSBRegister::Status0, 1, &(data[0]), 1);
+			if (data[0] != data[1])
+				printf_("Status0: %x\n", data[0]);
+			data[1] = data[0];
+
+			usbi2c.mem_read(DevAddr, FUSBRegister::Interrupt, 1, &(data[2]), 1);
+			if (data[2] != data[3])
+				printf_("Interrupt: %x\n", data[2]);
+			data[3] = data[2];
+		}
+		if (fusb_int.is_on()) {
+			if (!usb_connected)
+				printf_("USB Connnected\n");
+			usb_connected = true;
+		} else {
+			if (usb_connected)
+				printf_("USB Disconnnected\n");
+			usb_connected = false;
+		}
+
 		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
 			mbox.patchlist_reloading = true;
 			printf("NOR Flash writeback begun.\r\n");
 			RamDiskFileIO::unmount_disk(Disk::NORFlash);
 			if (patchdisk.ramdisk_patches_to_norflash()) {
 				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
-				// PatchFileIO::load_patches_from_disk(Disk::NORFlash, patch_list);
 				mbox.patchlist_updated = true;
 			} else {
 				printf("NOR Flash writeback failed!\r\n");
