@@ -94,7 +94,10 @@ void main() {
 
 	enum FUSBRegister : uint8_t {
 		ID = 0x01,
+		Control0 = 0x06,
+		Control1 = 0x07,
 		Control2 = 0x08,
+		Power = 0x0B,
 		OCP = 0x0D,
 		Status0A = 0x3C,
 		Status1A = 0x3D,
@@ -104,22 +107,26 @@ void main() {
 		Status1 = 0x41,
 		Interrupt = 0x42,
 	};
-	data[0] = 0b00000011;
+	data[0] = 0b00000100; //enable all Interrupts to host
+	usbi2c.mem_write(DevAddr, FUSBRegister::Control0, 1, data, 1);
+
+	data[0] = 0b00000101; //Enable SNK polling, (TOGGLE=1)
 	usbi2c.mem_write(DevAddr, FUSBRegister::Control2, 1, data, 1);
-	data[0] = 0xAA;
-	usbi2c.mem_read(DevAddr, FUSBRegister::Control2, 1, data, 1);
-	printf_("Control2 read %x\n", data[0]);
 
-	data[0] = 0b00000000;
-	usbi2c.mem_write(DevAddr, FUSBRegister::OCP, 1, data, 1);
+	data[0] = 0b00001111; //Enable all power
+	usbi2c.mem_write(DevAddr, FUSBRegister::Power, 1, data, 1);
 
-	Pin fusb_int{GPIO::A, 10, PinMode::Input};
+	// data[0] = 0b00000000;
+	// usbi2c.mem_write(DevAddr, FUSBRegister::OCP, 1, data, 1);
+
+	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up};
 	bool usb_connected = false;
 
 	uint32_t tm = HAL_GetTick();
 
 	while (true) {
 		if ((HAL_GetTick() - tm) > 200) {
+			tm = HAL_GetTick();
 			usbi2c.mem_read(DevAddr, FUSBRegister::Status0, 1, &(data[0]), 1);
 			if (data[0] != data[1])
 				printf_("Status0: %x\n", data[0]);
