@@ -4,6 +4,7 @@
 
 #include "gcem/include/gcem.hpp"
 #include "util/math.hh"
+#include "util/math_tables.hh"
 
 class DjembeCore : public CoreProcessor {
 	using Info = DjembeInfo;

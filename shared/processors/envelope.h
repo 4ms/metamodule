@@ -2,6 +2,7 @@
 
 #include "processors/tools/windowComparator.h"
 #include "util/math.hh"
+#include "util/math_tables.hh"
 
 class Envelope {
 private:
