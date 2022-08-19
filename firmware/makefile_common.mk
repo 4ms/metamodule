@@ -28,7 +28,7 @@ CFLAGS = -ggdb3 -fno-common \
 	$(EXTRA_CFLAGS)
 
 CXXFLAGS = $(CFLAGS) \
-	-std=c++2a \
+	-std=c++20 \
 	-fno-rtti \
 	-fno-exceptions \
 	-fno-unwind-tables \
