@@ -23,6 +23,9 @@ void __throw_logic_error(char const *) {
 void __throw_out_of_range_fmt(char const *, ...) {
 }
 
+void __throw_bad_array_new_length() {
+}
+
 //Needed to compile at -O0 when using std::string
 template<typename T>
 struct allocator {
