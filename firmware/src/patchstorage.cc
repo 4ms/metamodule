@@ -15,6 +15,20 @@ PatchStorage::PatchStorage(mdrivlib::QSpiFlash &flash, RamDisk<RamDiskSizeBytes,
 	init_norflash();
 }
 
+void PatchStorage::factory_clean() {
+	auto status = lfs.reformat();
+	if (status == LittleNorFS::Status::FlashError) {
+		printf("ERROR: NOR Flash did not init (returned wrong id)\n");
+	}
+	if (status == LittleNorFS::Status::LFSError) {
+		printf("ERROR: LFS could not format and mount flash drive\n");
+	}
+	if (status == LittleNorFS::Status::NewlyFormatted) {
+		printf("Formatted NOR Flash as LittleFs and now creating deFault patch files\n");
+		create_default_patches_in_norflash();
+	}
+}
+
 LittleNorFS::Status PatchStorage::init_norflash() {
 	auto status = lfs.initialize();
 
@@ -77,7 +91,7 @@ bool PatchStorage::ramdisk_patches_to_norflash() {
 	// bool ok = lfs.foreach_file_with_ext(
 	// 	".yml", [](const std::string_view filename, const std::span<const char> data) { lfs.delete_file(filename); });
 
-	RamDiskFileIO::for_each_file_regex(Disk::NORFlash, "*.yml", [this](const char *fname) {
+	RamDiskFileIO::for_each_file_regex(Disk::RamDisk, "*.yml", [this](const char *fname) {
 		std::array<char, 32768> buf;
 		uint32_t filesize = RamDiskFileIO::read_file(fname, buf.data(), buf.size());
 		if (filesize == buf.size()) {

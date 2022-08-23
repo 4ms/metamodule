@@ -6,7 +6,7 @@
 
 namespace MetaModule
 {
-enum class Disk { NORFlash = 0 };
+enum class Disk { RamDisk = 0 };
 
 namespace RamDiskFileIO
 {

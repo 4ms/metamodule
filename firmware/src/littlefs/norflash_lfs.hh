@@ -55,10 +55,34 @@ public:
 		return Status::NewlyFormatted;
 	}
 
+	Status reformat() {
+		const static lfs_config cfg = {
+			.context = &_flash,
+			.read = NorFlashOps::read,
+			.prog = NorFlashOps::prog,
+			.erase = NorFlashOps::erase,
+			.sync = NorFlashOps::sync,
+
+			.read_size = 16,
+			.prog_size = 16,
+			.block_size = BlockSize,
+			.block_count = (_flash.get_chip_size_bytes() - NorFlashOps::FlashOffset) / BlockSize,
+			.block_cycles = 500,
+			.cache_size = 1024,
+			.lookahead_size = 64,
+		};
+		if (lfs_format(&lfs, &cfg) < 0)
+			return Status::LFSError;
+		if (lfs_mount(&lfs, &cfg) < 0)
+			return Status::LFSError;
+
+		return Status::NewlyFormatted;
+	}
+
 	bool create_file(const std::string_view filename, const std::span<const char> data) {
 		lfs_file_t file;
 
-		printf_("Opening/creating file %s\n", filename.data());
+		printf_("Littlefs: creating file %s\n", filename.data());
 
 		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY);
 		if (err < 0) {

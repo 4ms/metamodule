@@ -15,7 +15,7 @@ FATFS fs;
 }
 
 bool register_disk(DiskOps *ops, Disk disk) {
-	if (disk == Disk::NORFlash) {
+	if (disk == Disk::RamDisk) {
 		if (!fatfs_register_disk(ops, 0)) {
 			printf("Failed to register NOR Flash RamDisk ops\r\n");
 			return false;

@@ -36,11 +36,14 @@ void main() {
 	// Populate Patch List from Patch Storage:
 	PatchList patch_list{};
 	RamDiskOps ramdiskops{StaticBuffers::virtdrive};
-	RamDiskFileIO::register_disk(&ramdiskops, Disk::NORFlash);
+	RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
+	RamDiskFileIO::format_disk(Disk::RamDisk);
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
 
 	PatchStorage patchdisk{flash, StaticBuffers::virtdrive};
+	patchdisk.factory_clean();
 	patchdisk.fill_patchlist_from_norflash(patch_list);
+	patchdisk.norflash_patches_to_ramdisk();
 
 	PatchPlayer patch_player;
 	ParamQueue param_queue;
@@ -130,9 +133,9 @@ void main() {
 			data[1] = data[0];
 
 			usbi2c.mem_read(DevAddr, FUSBRegister::Interrupt, 1, &(data[2]), 1);
-			if (data[2] != data[3])
-				printf_("Interrupt: %x\n", data[2]);
-			data[3] = data[2];
+			// if (data[2] != data[3])
+			// 	printf_("Interrupt: %x\n", data[2]);
+			// data[3] = data[2];
 		}
 		if (fusb_int.is_on()) {
 			if (!usb_connected)
@@ -147,7 +150,7 @@ void main() {
 		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
 			mbox.patchlist_reloading = true;
 			printf("NOR Flash writeback begun.\r\n");
-			RamDiskFileIO::unmount_disk(Disk::NORFlash);
+			RamDiskFileIO::unmount_disk(Disk::RamDisk);
 			if (patchdisk.ramdisk_patches_to_norflash()) {
 				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
 				mbox.patchlist_updated = true;

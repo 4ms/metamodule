@@ -12,6 +12,7 @@ class PatchStorage {
 public:
 	PatchStorage(mdrivlib::QSpiFlash &flash, RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk);
 
+	void factory_clean();
 	LittleNorFS::Status init_norflash();
 	bool ramdisk_patches_to_norflash();
 	bool norflash_patches_to_ramdisk();
