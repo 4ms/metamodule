@@ -6,6 +6,8 @@
 #include "util/static_string.hh"
 #include <array>
 
+//TODO: Get rid of dependency on etl by using our own map or unordered_map
+
 using ModuleTypeSlug = StaticString<31>;
 
 class ModuleFactory {
