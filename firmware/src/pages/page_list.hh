@@ -1,28 +1,28 @@
 #pragma once
+#include "util/circular_stack.hh"
 #include <array>
 #include <cstdint>
 #include <optional>
-#include <vector>
-
-#include <cstdio>
 
 namespace MetaModule
 {
 
 //forward declare
 struct PageBase;
-enum PageId : uint32_t { PatchSel, PatchView, ModuleView, ControlView, Settings };
+
+enum PageId : uint32_t { PatchSel, PatchView, ModuleView, ControlView, Settings, KnobEdit };
 
 class PageList {
 	static constexpr uint32_t MaxPages = 8;
 
 	static inline PageBase *_requested_page = nullptr;
 	static inline bool _new_page_requested = false;
-	static inline std::vector<PageBase *> _history;
+	static inline CircularStack<PageBase *, 16> _history;
 	static inline std::array<PageBase *, MaxPages> _pages;
 
 	static inline uint32_t selected_patch_id = 0;
 	static inline uint32_t selected_module_id = 0;
+	static inline uint32_t selected_control_id = 0;
 
 public:
 	static void set_selected_patch_id(uint32_t id) {
@@ -39,6 +39,14 @@ public:
 
 	static uint32_t get_selected_module_id() {
 		return selected_module_id;
+	}
+
+	static void set_selected_control_id(uint32_t id) {
+		selected_control_id = id;
+	}
+
+	static uint32_t get_selected_control_id() {
+		return selected_control_id;
 	}
 
 	// Associates a pointer to a Page with an id
@@ -103,12 +111,7 @@ public:
 private:
 	// Returns the last page in the history, or else nullopt if history is empty
 	static std::optional<PageBase *> _get_last_page() {
-		if (_history.empty())
-			return std::nullopt;
-
-		auto back = _history.back();
-		_history.pop_back();
-		return back;
+		return _history.pop_back();
 	}
 };
 } // namespace MetaModule
