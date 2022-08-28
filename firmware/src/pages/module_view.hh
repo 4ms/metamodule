@@ -4,6 +4,7 @@
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"
 #include "pages/images/image_list.hh"
+#include "pages/module_control.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include <string>
@@ -40,9 +41,10 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
 
 		button.clear();
+		controls.clear();
 
 		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		lv_obj_add_style(roller, &Gui::plain_border_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
+		lv_obj_add_style(roller, &Gui::plain_border_style, /*LV_PART_MAIN |*/ LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
 		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
 	}
 
@@ -78,9 +80,10 @@ struct ModuleViewPage : PageBase {
 
 		size_t num_controls = moduleinfo.InJacks.size() + moduleinfo.OutJacks.size() + moduleinfo.Knobs.size() +
 							  moduleinfo.Switches.size();
-		opts.reserve(num_controls * 12);
+		opts.reserve(num_controls * 12); //12 chars per roller item
 		button.reserve(num_controls);
 		mapped_knobs.reserve(num_controls);
+		controls.reserve(num_controls);
 
 		const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
 
@@ -98,6 +101,7 @@ struct ModuleViewPage : PageBase {
 			auto knob = DrawHelper::get_knob_img_240(el.knob_style);
 			auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
 			add_button(c_x, c_y, knob->header.w * 1.2f);
+			// controls.emplace_back({Knob, mk.
 		}
 
 		// DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, this_module_id, 240);
@@ -203,14 +207,15 @@ private:
 	}
 
 	void reset_module_page() {
-		for (auto &b : button) {
+		for (auto &b : button)
 			lv_obj_del(b);
-		}
 		button.clear();
-		for (auto &k : mapped_knobs) {
+
+		for (auto &k : mapped_knobs)
 			lv_obj_del(k.obj);
-		}
 		mapped_knobs.clear();
+
+		controls.clear();
 		opts.clear();
 	}
 
@@ -259,6 +264,7 @@ private:
 	// };
 	std::vector<DrawHelper::MKnob> mapped_knobs;
 	std::vector<lv_obj_t *> button;
+	std::vector<ModuleControl> controls;
 	lv_obj_t *roller = nullptr;
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_obj_t *canvas = nullptr;
