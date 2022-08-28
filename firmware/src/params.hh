@@ -6,7 +6,7 @@
 #include "util/debouncer.hh"
 #include "util/zip.hh"
 #include <array>
-// #include <string>
+#include <string>
 
 namespace MetaModule
 {
