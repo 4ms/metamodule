@@ -10,6 +10,8 @@
 #include "patchlist.hh"
 
 struct Simulator {
+	MetaModule::LVGLDriver gui{MetaModule::MMDisplay::flush_to_screen, MetaModule::MMDisplay::read_input};
+
 	MetaModule::PageManager pages;
 	MetaModule::ParamQueue param_queue;
 
@@ -18,8 +20,6 @@ struct Simulator {
 	MetaModule::PatchList patch_list;
 	MetaModule::PatchPlayer patch_player;
 	MetaModule::UiAudioMailbox mbox;
-
-	static inline MetaModule::LVGLDriver gui{MetaModule::MMDisplay::flush_to_screen, MetaModule::MMDisplay::read_input};
 
 	Simulator()
 		: pages{patch_list, patch_player, params, metaparams, mbox} {
@@ -51,6 +51,7 @@ struct Simulator {
 	}
 };
 
+// Global simulator ui object
 static Simulator sim;
 
 extern "C" void button_press() {
