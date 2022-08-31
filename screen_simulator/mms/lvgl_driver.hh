@@ -91,6 +91,6 @@ public:
 	}
 
 private:
-	static inline LVGLDriver gui{flush_to_screen, read_input};
+	// static inline LVGLDriver gui{flush_to_screen, read_input};
 };
 } // namespace MetaModule
