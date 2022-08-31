@@ -4,7 +4,7 @@
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"
 #include "pages/images/image_list.hh"
-#include "pages/module_control.hh"
+#include "pages/module_param.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include <string>
@@ -39,9 +39,10 @@ struct ModuleViewPage : PageBase {
 		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
 		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
+		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
 
 		button.clear();
-		controls.clear();
+		module_params.clear();
 
 		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
 		lv_obj_add_style(roller, &Gui::plain_border_style, /*LV_PART_MAIN |*/ LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
@@ -83,7 +84,7 @@ struct ModuleViewPage : PageBase {
 		opts.reserve(num_controls * 12); //12 chars per roller item
 		button.reserve(num_controls);
 		mapped_knobs.reserve(num_controls);
-		controls.reserve(num_controls);
+		module_params.reserve(num_controls);
 
 		const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
 
@@ -101,21 +102,24 @@ struct ModuleViewPage : PageBase {
 			auto knob = DrawHelper::get_knob_img_240(el.knob_style);
 			auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
 			add_button(c_x, c_y, knob->header.w * 1.2f);
-			// controls.emplace_back({Knob, mk.
+			module_params.push_back({ModuleParam::Type::Knob, el.id /*mk.value().mapped_knob.param_id*/});
 		}
 
 		// DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, this_module_id, 240);
 
 		for (const auto &el : moduleinfo.InJacks) {
 			draw_injack(el, patch);
+			module_params.push_back({ModuleParam::Type::InJack, el.id});
 		}
 
 		for (const auto el : moduleinfo.OutJacks) {
 			draw_outjack(el, patch);
+			module_params.push_back({ModuleParam::Type::OutJack, el.id});
 		}
 
 		for (const auto el : moduleinfo.Switches) {
 			draw_switch(el, patch);
+			module_params.push_back({ModuleParam::Type::Switch, el.id});
 		}
 
 		// remove final \n
@@ -215,7 +219,7 @@ private:
 			lv_obj_del(k.obj);
 		mapped_knobs.clear();
 
-		controls.clear();
+		module_params.clear();
 		opts.clear();
 	}
 
@@ -252,19 +256,26 @@ private:
 		lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
 	}
 
+	static void roller_click_cb(lv_event_t *event) {
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		// auto roller = page->roller;
+		auto &cur_sel = page->cur_selected;
+		// auto &but = page->button;
+		auto &module_params = page->module_params;
+
+		PageList::set_selected_control_id(module_params[cur_sel]);
+		PageList::request_new_page(PageId::KnobEdit);
+		page->blur();
+	}
+
 	std::string opts;
 	uint16_t this_module_id;
 	int32_t cur_selected = 0;
 	std::string_view slug;
 
-	// struct MKnob {
-	// 	lv_obj_t *obj;
-	// 	const MappedKnob &mapped_knob;
-	// 	float last_pot_reading = 0.5f;
-	// };
 	std::vector<DrawHelper::MKnob> mapped_knobs;
 	std::vector<lv_obj_t *> button;
-	std::vector<ModuleControl> controls;
+	std::vector<ModuleParam> module_params;
 	lv_obj_t *roller = nullptr;
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_obj_t *canvas = nullptr;

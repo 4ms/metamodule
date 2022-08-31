@@ -5,6 +5,7 @@
 
 // Pages:
 // #include "pages/knob_view.hh"
+#include "pages/knob_edit.hh"
 #include "pages/module_view.hh"
 #include "pages/page_list.hh"
 #include "pages/patch_selector.hh"
@@ -19,6 +20,7 @@ class PageManager {
 	ModuleViewPage page_module{info, "EnOsc"};
 	PatchSelectorPage page_patchsel{info};
 	PatchViewPage page_patchview{info};
+	KnobEditPage knob_edit_page{info};
 	// KnobView3 page_knobs{info};
 
 	PatchList &patch_list;

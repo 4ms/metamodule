@@ -1,4 +1,5 @@
 #pragma once
+#include "module_param.hh"
 #include "util/circular_stack.hh"
 #include <array>
 #include <cstdint>
@@ -22,7 +23,7 @@ class PageList {
 
 	static inline uint32_t selected_patch_id = 0;
 	static inline uint32_t selected_module_id = 0;
-	static inline uint32_t selected_control_id = 0;
+	static inline ModuleParam selected_param_id{};
 
 public:
 	static void set_selected_patch_id(uint32_t id) {
@@ -41,12 +42,12 @@ public:
 		return selected_module_id;
 	}
 
-	static void set_selected_control_id(uint32_t id) {
-		selected_control_id = id;
+	static void set_selected_control_id(ModuleParam id) {
+		selected_param_id = id;
 	}
 
-	static uint32_t get_selected_control_id() {
-		return selected_control_id;
+	static ModuleParam get_selected_control_id() {
+		return selected_param_id;
 	}
 
 	// Associates a pointer to a Page with an id

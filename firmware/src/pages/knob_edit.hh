@@ -14,111 +14,40 @@ namespace MetaModule
 {
 struct KnobEditPage : PageBase {
 
-	KnobEditPage(PatchInfo info, std::string_view module_slug = "EnOsc")
+	KnobEditPage(PatchInfo info)
 		: PageBase{info}
-		, slug(module_slug)
 		, base(lv_obj_create(nullptr)) {
-		PageList::register_page(this, PageId::ModuleView);
+		PageList::register_page(this, PageId::KnobEdit);
 
 		init_bg(base);
 
-		canvas = lv_canvas_create(base);
-		lv_draw_img_dsc_init(&img_dsc);
+		knob_name = lv_label_create(base);
+		lv_obj_add_style(knob_name, &Gui::header_style, LV_PART_MAIN);
+		lv_obj_set_width(knob_name, 248);
+		lv_obj_set_height(knob_name, 28);
 
-		roller = lv_roller_create(base);
-		lv_group_add_obj(group, roller);
-		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
-
-		button.clear();
-
-		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		lv_obj_add_style(roller, &Gui::plain_border_style, /*LV_PART_MAIN |*/ LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
-		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
+		// lv_group_add_obj(group, roller);
+		// lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
 	}
 
 	void prepare_focus() override {
 		this_module_id = PageList::get_selected_module_id();
 
 		if (!read_slug()) {
-			mbox.append_message("Module View page cannot read module slug.\n");
-			return;
-		}
-		printf("ModuleViewPage module %s\n", slug.data());
-
-		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-		if (moduleinfo.width_hp == 0) {
-			mbox.append_message("Module View page got empty module slug.\r\n");
+			mbox.append_message("Knob Edit page cannot read module slug.\n");
 			return;
 		}
 
-		reset_module_page();
+		lv_label_set_text(knob_name, "Test Knobs");
+		// printf("ModuleViewPage module %s\n", slug.data());
 
-		//Draw module image
-		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
-		if (!img) {
-			printf("Image not found\n");
-			return;
-		}
-		auto width_px = img->header.w;
-		lv_obj_set_size(canvas, width_px, 240);
-		lv_canvas_set_buffer(canvas, buffer, width_px, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
-		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
+		// auto moduleinfo = ModuleFactory::getModuleInfo(slug);
+		// if (moduleinfo.width_hp == 0) {
+		// 	mbox.append_message("Module View page got empty module slug.\r\n");
+		// 	return;
+		// }
 
-		//Create text list (roller options) and circles over components
-
-		size_t num_controls = moduleinfo.InJacks.size() + moduleinfo.OutJacks.size() + moduleinfo.Knobs.size() +
-							  moduleinfo.Switches.size();
-		opts.reserve(num_controls * 12);
-		button.reserve(num_controls);
-		mapped_knobs.reserve(num_controls);
-
-		const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
-
-		for (const auto el : moduleinfo.Knobs) {
-			auto mk = DrawHelper::draw_mapped_knob(canvas, base, el, patch, this_module_id, 240);
-			if (mk.has_value()) {
-				mapped_knobs.push_back({mk.value()});
-				opts += "[";
-				opts += PanelDef::KnobNames[mk.value().mapped_knob.panel_knob_id];
-				opts += "] ";
-			}
-			opts += el.short_name;
-			opts += "\n";
-
-			auto knob = DrawHelper::get_knob_img_240(el.knob_style);
-			auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
-			add_button(c_x, c_y, knob->header.w * 1.2f);
-		}
-
-		// DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, this_module_id, 240);
-
-		for (const auto &el : moduleinfo.InJacks) {
-			draw_injack(el, patch);
-		}
-
-		for (const auto el : moduleinfo.OutJacks) {
-			draw_outjack(el, patch);
-		}
-
-		for (const auto el : moduleinfo.Switches) {
-			draw_switch(el, patch);
-		}
-
-		// remove final \n
-		if (opts.length() > 0)
-			opts.pop_back();
-
-		lv_obj_set_pos(roller, width_px, 0);
-		lv_obj_set_size(roller, 320 - width_px, 240);
-
-		// Add text list to roller options
-		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
-		lv_roller_set_visible_row_count(roller, 11);
-
-		//Select first element
-		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
-		cur_selected = 0;
-		lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
+		// reset_module_page();
 	}
 
 	void update() override {
@@ -127,81 +56,10 @@ struct KnobEditPage : PageBase {
 				blur();
 			}
 		}
-
-		for (auto &mk : mapped_knobs) {
-			const float new_pot_val = mk.mapped_knob.get_mapped_val(params.knobs[mk.mapped_knob.panel_knob_id]);
-			if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
-				mk.last_pot_reading = new_pot_val;
-				const int angle = new_pot_val * 3000.f - 1500.f;
-				lv_img_set_angle(mk.obj, angle);
-			}
-		}
 	}
 
 private:
-	void draw_outjack(const OutJackDef &el, const PatchData &patch) {
-		int c_x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-		int c_y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-		add_button(c_x, c_y);
-		lv_canvas_draw_img(canvas, c_x - jack_x.header.w / 2, c_y - jack_x.header.h / 2, &jack_x, &img_dsc);
-
-		Jack jack{.module_id = this_module_id, .jack_id = (uint16_t)el.id};
-		if (auto mappedknob = patch.find_mapped_outjack(jack)) {
-			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
-			opts += "[";
-			opts += PanelDef::OutJackNames[mappedknob->panel_jack_id];
-			opts += "] ";
-		}
-		opts += el.short_name;
-		opts += "\n";
-	}
-
-	void draw_injack(const InJackDef &el, const PatchData &patch) {
-		int c_x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-		int c_y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-		add_button(c_x, c_y);
-		lv_canvas_draw_img(canvas, c_x - jack_x.header.w / 2, c_y - jack_x.header.h / 2, &jack_x, &img_dsc);
-
-		Jack jack{.module_id = this_module_id, .jack_id = (uint16_t)el.id};
-		if (auto mappedknob = patch.find_mapped_injack(jack)) {
-			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
-			opts += "[";
-			opts += PanelDef::InJackNames[mappedknob->panel_jack_id];
-			opts += "] ";
-		}
-		opts += el.short_name;
-		opts += "\n";
-	}
-
-	void draw_switch(const SwitchDef &el, const PatchData &patch) {
-		int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-		int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-		add_button(x, y);
-		opts += el.short_name;
-		opts += "\n";
-		const lv_img_dsc_t *sw = DrawHelper::get_switch_img_240(el.switch_type);
-		if (sw)
-			lv_canvas_draw_img(canvas, x - sw->header.w / 2, y - sw->header.h / 2, sw, &img_dsc);
-	}
-
-	void add_button(int x, int y, int size = 20) {
-		auto &b = button.emplace_back();
-		b = lv_btn_create(base);
-		lv_obj_add_style(b, &Gui::invisible_style, LV_PART_MAIN);
-		lv_obj_set_pos(b, x - size / 2, y - size / 2);
-		lv_obj_set_size(b, size, size);
-	}
-
-	void reset_module_page() {
-		for (auto &b : button) {
-			lv_obj_del(b);
-		}
-		button.clear();
-		for (auto &k : mapped_knobs) {
-			lv_obj_del(k.obj);
-		}
-		mapped_knobs.clear();
-		opts.clear();
+	void reset_page() {
 	}
 
 	bool read_slug() {
@@ -217,43 +75,12 @@ private:
 		return true;
 	}
 
-	static void roller_cb(lv_event_t *event) {
-		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto roller = page->roller;
-		auto &cur_sel = page->cur_selected;
-		auto &but = page->button;
-
-		// Turn off old button
-		if (cur_sel >= 0) {
-			lv_obj_remove_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
-			lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
-		}
-
-		// Get the new button
-		cur_sel = lv_roller_get_selected(roller);
-
-		// Turn on new button
-		lv_obj_add_style(but[cur_sel], &Gui::panel_highlight_style, LV_PART_MAIN);
-		lv_event_send(but[cur_sel], LV_EVENT_REFRESH, nullptr);
-	}
-
-	std::string opts;
 	uint16_t this_module_id;
-	int32_t cur_selected = 0;
-	std::string_view slug;
+	uint16_t this_param_id;
+	ModuleTypeSlug slug;
 
-	// struct MKnob {
-	// 	lv_obj_t *obj;
-	// 	const MappedKnob &mapped_knob;
-	// 	float last_pot_reading = 0.5f;
-	// };
-	std::vector<DrawHelper::MKnob> mapped_knobs;
-	std::vector<lv_obj_t *> button;
-	lv_obj_t *roller = nullptr;
-	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
-	lv_obj_t *canvas = nullptr;
 	lv_obj_t *base = nullptr;
-	lv_draw_img_dsc_t img_dsc;
+	lv_obj_t *knob_name;
 };
 
 } // namespace MetaModule
