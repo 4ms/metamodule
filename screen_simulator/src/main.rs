@@ -97,6 +97,7 @@ fn main() {
     let _guard = lv_timer.schedule_repeating(chrono::Duration::milliseconds(3), move || {
         unsafe {
             lv_timer_handler();
+            update_ui();
         };
     });
 
@@ -182,7 +183,7 @@ fn main() {
             }
         });
 
-        unsafe { update_ui() };
+        // unsafe { update_ui() };
 
         let mut x: usize = 0;
         let mut y: usize = 0;
