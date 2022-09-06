@@ -146,6 +146,7 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		// Update mapped knobs
 		for (auto &mk : mapped_knobs) {
 			const float new_pot_val = mk.mapped_knob.get_mapped_val(params.knobs[mk.mapped_knob.panel_knob_id]);
 			if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
@@ -258,14 +259,14 @@ private:
 
 	static void roller_click_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		// auto roller = page->roller;
 		auto &cur_sel = page->cur_selected;
-		// auto &but = page->button;
 		auto &module_params = page->module_params;
 
-		PageList::set_selected_control_id(module_params[cur_sel]);
-		PageList::request_new_page(PageId::KnobEdit);
-		page->blur();
+		if (cur_sel < module_params.size()) {
+			PageList::set_selected_param(module_params[cur_sel]);
+			PageList::request_new_page(PageId::KnobEdit);
+			page->blur();
+		}
 	}
 
 	std::string opts;

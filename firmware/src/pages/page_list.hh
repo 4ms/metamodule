@@ -42,11 +42,11 @@ public:
 		return selected_module_id;
 	}
 
-	static void set_selected_control_id(ModuleParam id) {
+	static void set_selected_param(ModuleParam id) {
 		selected_param_id = id;
 	}
 
-	static ModuleParam get_selected_control_id() {
+	static ModuleParam get_selected_param() {
 		return selected_param_id;
 	}
 
