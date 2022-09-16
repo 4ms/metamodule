@@ -2,8 +2,6 @@
 JFLASHEXE ?= /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
 ARM_NONE_EABI_PATH ?= arm-none-eabi-
 
-export BUILDDIR_H7M7 	= build/h7corem7
-export BUILDDIR_H7M4 	= build/h7corem4
 export BUILDDIR_MP1A7 	= build/mp1corea7
 export BUILDDIR_MP1M4 	= build/mp1corem4
 export BINARYNAME  		= main
@@ -16,19 +14,15 @@ export LINKSCRIPTDIR   	= system/linker
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
-export VALID_BOARDS = mini medium max pcmdev norflash-loader
+export VALID_BOARDS = medium pcmdev norflash-loader
 
 
-.PHONY: all mp1-mini mp1-pcmdev mp1-med clean install_a7 flash_h7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate norflash-loader u-boot
+.PHONY: all mp1-pcmdev mp1-med clean install_a7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate norflash-loader 
 
 
-all: images mp1-med tests #mp1-mini h7 
+all: images mp1-med tests
 
 # Binaries
-
-mp1-mini:
-	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk mini
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk mini
 
 mp1-med:
 	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk medium
@@ -36,10 +30,6 @@ mp1-med:
 
 mp1-pcmdev:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk pcmdev 
-
-h7:  #mini only
-	@$(MAKE) --no-print-directory -f makefile_h7m4.mk
-	@$(MAKE) --no-print-directory -f makefile_h7m7.mk
 
 norflash-loader: mp1-med
 	$(MAKE) --no-print-directory -f makefile_mp1a7.mk norflash-loader
@@ -49,9 +39,6 @@ uimg:
 
 img:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk img
-
-u-boot:
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk u-boot
 
 ## Module images
 
@@ -84,14 +71,9 @@ $(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
 ## Cleaning
 
 clean:
-	rm -rf $(BUILDDIR_H7M4)
-	rm -rf $(BUILDDIR_H7M7)
 	rm -rf $(BUILDDIR_MP1A7)
 	rm -rf $(BUILDDIR_MP1M4)
-	rm -f src/mini/firmware_m4*.h
 	rm -f src/medium/firmware_m4*.h
-	rm -f src/max/firmware_m4*.h
-	rm -f src/pcmdev/firmware_m4*.h
 	@$(MAKE) --no-print-directory -f tests/Makefile clean
 	@cd $(DRIVERLIB) && $(MAKE) --no-print-directory -f tests/Makefile clean
 	@cd $(SHARED)/cpputil && $(MAKE) --no-print-directory -f tests/Makefile clean
@@ -102,29 +84,8 @@ clean:
 clean_a7:
 	$(MAKE) --no-print-directory clean -f makefile_mp1a7.mk
 
-clean_uboot:
-	$(MAKE) --no-print-directory clean_uboot -f makefile_mp1a7.mk
-
-## Flashing
-
-# ifeq (,$(wildcard $(JFLASHEXE)))
-#     $(error JFlashExe program not found at $(JFLASHEXE). Please edit this Makefile and enter the correct path)
-# endif
-
-# install_a7:
-# 	$(info SD card must be mounted)
-# 	cp $(BUILDDIR_MP1A7)/$(BINARYNAME).uimg /Volumes/BAREAPP/a7-main.uimg
-# 	diskutil unmount /Volumes/BAREAPP
-
-# flash_mp1m4:
-# 	$(JFLASHEXE) -openprjflashing/metamodule-mp1-cm4.jflash -open$(BUILDDIR_MP1M4)/$(BINARYNAME).hex -auto -exit
-
-flash_h7: h7
-	$(JFLASHEXE) -openprjflashing/metamodule-h7-cm7.jflash -open$(BUILDDIR_H7M7)/main.hex -auto -open$(BUILDDIR_H7M4)/main.hex -auto -exit
-
 start_gdb:
 	JLinkGDBServer -select USB -device STM32MP15xx_M4_Bank1 -endian little -if SWD -speed 8000 -noir -nohalt
-
 
 ## Simulator
 
