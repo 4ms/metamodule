@@ -24,7 +24,7 @@ struct PatchSelectorPage : PageBase {
 		lv_obj_add_event_cb(roller, patchlist_event_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		lv_obj_add_style(roller, &Gui::plain_border_style, LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
+		lv_obj_add_style(roller, &Gui::plain_border_style, (int)LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
 		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
 
 		lv_obj_set_pos(roller, 0, 30);
