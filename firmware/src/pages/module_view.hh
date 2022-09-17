@@ -271,7 +271,7 @@ private:
 
 	std::string opts;
 	uint16_t this_module_id;
-	int32_t cur_selected = 0;
+	uint32_t cur_selected = 0;
 	std::string_view slug;
 
 	std::vector<DrawHelper::MKnob> mapped_knobs;
