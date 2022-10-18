@@ -23,8 +23,8 @@ using mdrivlib::PinPull;
 struct MMControlPins {
 	static constexpr PinNoInit rotA{GPIO::D, 5};
 	static constexpr PinNoInit rotB{GPIO::E, 13};
-	static constexpr PinNoInit rotS{GPIO::G, 11};
-	static constexpr PinNoInit but0{GPIO::E, 4};
+	static constexpr PinNoInit rotS{GPIO::E, 15};
+	static constexpr PinNoInit but0{GPIO::D, 8};
 	static constexpr PinNoInit gate_in_1{GPIO::F, 11};
 	static constexpr PinNoInit gate_in_2{GPIO::B, 8};
 };
