@@ -4,7 +4,7 @@
 
 struct Debug {
 
-	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::E, 2, mdrivlib::PinMode::Output>;
+	using Pin0 = mdrivlib::FPin<mdrivlib::GPIO::E, 4, mdrivlib::PinMode::Output>;
 	using Pin1 = mdrivlib::FPin<mdrivlib::GPIO::D, 3, mdrivlib::PinMode::Output>;
 	using Pin2 = mdrivlib::FPin<mdrivlib::GPIO::B, 14, mdrivlib::PinMode::Output>;
 	using Pin3 = mdrivlib::FPin<mdrivlib::GPIO::E, 1, mdrivlib::PinMode::Output>;
