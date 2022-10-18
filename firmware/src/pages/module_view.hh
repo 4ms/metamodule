@@ -259,7 +259,7 @@ private:
 
 	static void roller_click_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto &cur_sel = page->cur_selected;
+		auto cur_sel = page->cur_selected;
 		auto &module_params = page->module_params;
 
 		if (cur_sel < module_params.size()) {
