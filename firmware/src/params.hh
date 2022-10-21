@@ -6,7 +6,6 @@
 #include "util/debouncer.hh"
 #include "util/zip.hh"
 #include <array>
-#include <string>
 
 namespace MetaModule
 {
@@ -201,30 +200,5 @@ struct ParamBlock {
 };
 
 using DoubleBufParamBlock = std::array<ParamBlock, 2>;
-
-struct UiAudioMailbox {
-	bool loading_new_patch = true;
-	bool audio_is_muted = true;
-	uint32_t new_patch_index;
-	bool patchlist_updated = false;
-	bool patchlist_reloading = false;
-	std::string message{""};
-
-	void set_message(const std::string_view m) {
-		message = m;
-	}
-
-	void clear_message() {
-		message = "";
-	}
-
-	[[nodiscard]] std::string_view get_message() const {
-		return message;
-	}
-
-	void append_message(const std::string_view m) {
-		message.append(m);
-	}
-};
 
 } // namespace MetaModule
