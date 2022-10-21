@@ -7,7 +7,9 @@
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
+#include "patch_loader.hh"
 #include "patch_player.hh"
+#include "uart_log.hh"
 #include "util/calibrator.hh"
 #include "util/countzip.hh"
 #include "util/math_tables.hh"
@@ -17,6 +19,12 @@
 
 namespace MetaModule
 {
+void output_silence(AudioOutBuffer &out) {
+	for (auto &out_ : out) {
+		for (auto &outchan : out_.chan)
+			outchan = 0;
+	}
+}
 
 using namespace mdrivlib;
 
@@ -33,11 +41,11 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
 						 ParamQueue &queue,
-						 UiAudioMailbox &uiaudiomailbox,
+						 PatchLoader &patchloader,
 						 DoubleBufParamBlock &p,
 						 DoubleAuxStreamBlock &auxs)
 	: param_queue{queue}
-	, mbox{uiaudiomailbox}
+	, patch_loader{patchloader}
 	, param_blocks{p}
 	, audio_blocks{{.in_codec = audio_in_block.codec[0],
 					.out_codec = audio_out_block.codec[0],
@@ -54,18 +62,18 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, player{patchplayer} {
 
 	if (codec_.init() == CodecT::CODEC_NO_ERR)
-		mbox.append_message("Codec initialized\n\r");
+		UartLog::log("Codec initialized\n\r");
 	else
-		mbox.append_message("ERROR: No codec detected\n\r");
+		UartLog::log("ERROR: No codec detected\n\r");
 	codec_.set_tx_buffer_start(audio_out_block.codec[0]);
 	codec_.set_rx_buffer_start(audio_in_block.codec[0]);
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
 		ext_audio_connected = true;
-		mbox.append_message("Ext Audio codec detected\n\r");
+		UartLog::log("Ext Audio codec detected\n\r");
 	} else {
 		ext_audio_connected = false;
-		mbox.append_message("No ext Audio codec detected\n\r");
+		UartLog::log("No ext Audio codec detected\n\r");
 	}
 	codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec[0]);
 	codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec[0]);
@@ -122,10 +130,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	auto &in = audio_block.in_codec;
 	auto &out = audio_block.out_codec;
 
-	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
-	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
-	load_measure.start_measurement();
-
 	if constexpr (DEBUG_PASSTHRU_AUDIO) {
 		AudioTestSignal::passthrough(in, out, aux);
 		return;
@@ -134,14 +138,20 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		return;
 	}
 
-	// Setting audio_is_muted to true notifies UI that it's safe to load a new patch
 	// Todo: fade down before setting audio_is_muted to true
-	mbox.audio_is_muted = mbox.loading_new_patch ? true : false;
-	if (mbox.audio_is_muted) {
-		// FixMe:
-		// output_silence(out, aux);
+	if (patch_loader.is_loading_new_patch()) {
+		patch_loader.audio_is_muted();
+		output_silence(out);
+		//FIXME: why is this needed to not crash on startup?
+		param_queue.write_sync(param_block.params[0], param_block.metaparams);
+		mdrivlib::SystemCache::clean_dcache_by_range(&param_queue, sizeof(ParamQueue));
 		return;
 	}
+	patch_loader.audio_not_muted();
+
+	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
+	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
+	load_measure.start_measurement();
 
 	// if (mbox.loading_new_patch) {
 	//	Debug::Pin3::high();
@@ -169,7 +179,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		propagate_sense_pins(params_);
 
 		// Pass audio inputs to modules
-		Debug::Pin1::high();
 		for (auto [i, inchan] : countzip(in_.chan)) {
 			auto pin_bit = jacksense_pin_order[i];
 
@@ -183,7 +192,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			player.set_panel_input(PanelDef::audioin_order[i], scaled_input);
 			param_block.metaparams.ins[i].update(scaled_input);
 		}
-		Debug::Pin1::low();
 
 		// Pass CV values to modules
 		for (auto [i, cv] : countzip(params_.cvjacks))
@@ -238,13 +246,13 @@ void AudioStream::propagate_sense_pins(Params &params) {
 	}
 }
 
-void AudioStream::output_silence(AudioOutBuffer &out, AuxStreamBlock &aux) {
-	for (auto [out_, aux_] : zip(out, aux)) {
-		for (auto &outchan : out_.chan)
-			outchan = 0;
-		for (auto &gate : aux_.gate_out)
-			gate = 0;
-	}
-}
+// void AudioStream::output_silence(AudioOutBuffer &out, AuxStreamBlock &aux) {
+// 	for (auto [out_, aux_] : zip(out, aux)) {
+// 		for (auto &outchan : out_.chan)
+// 			outchan = 0;
+// 		for (auto &gate : aux_.gate_out)
+// 			gate = 0;
+// 	}
+// }
 
 } // namespace MetaModule

@@ -35,19 +35,6 @@ struct PatchList {
 		return _patch_data.size();
 	}
 
-	// Stores the given index, making sure it's in bounds
-	void set_cur_patch_index(uint32_t new_idx) {
-		if (new_idx >= _patch_data.size())
-			_cur_patch_index = 0;
-		else
-			_cur_patch_index = new_idx;
-	}
-
-	// Retrieves the previously stored index
-	uint32_t cur_patch_index() const {
-		return _cur_patch_index;
-	}
-
 	// Returns true if patch list is in a valid state
 	bool is_ready() const {
 		return _status == Status::Ready;
@@ -61,13 +48,39 @@ struct PatchList {
 		_patch_data.clear();
 	}
 
+	[[nodiscard]] bool is_modified() {
+		if (_has_been_updated) {
+			_has_been_updated = false;
+			return true;
+		}
+		return false;
+	}
+
+	void mark_modified() {
+		_has_been_updated = true;
+	}
+
+	//FIXME: use _status, not _locked
+	bool is_locked() {
+		return _locked;
+	}
+
+	void lock() {
+		_locked = true;
+	}
+
+	void unlock() {
+		_locked = false;
+	}
+
 	void add_patch_from_yaml(const std::span<char> data);
 	void add_patch_from_yaml(const std::span<uint8_t> data);
 
 private:
 	std::vector<PatchData> _patch_data;
 	Status _status;
-	uint32_t _cur_patch_index = 0;
+	bool _has_been_updated = false;
+	bool _locked = false;
 
 	static inline const PatchData nullpatch{};
 	static inline const ModuleTypeSlug nullslug{""};

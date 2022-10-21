@@ -2,9 +2,8 @@
 #include "params.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
+#include "ui_audio_mailbox.hh"
 
-// Pages:
-// #include "pages/knob_view.hh"
 #include "pages/knob_edit.hh"
 #include "pages/module_view.hh"
 #include "pages/page_list.hh"
@@ -24,16 +23,15 @@ class PageManager {
 	// KnobView3 page_knobs{info};
 
 	PatchList &patch_list;
-	PatchPlayer &player;
 	UiAudioMailbox &mbox;
 
 public:
 	PageBase *cur_page = &page_patchsel;
 
-	PageManager(PatchList &pl, PatchPlayer &pp, Params &p, MetaParams &m, UiAudioMailbox &mbox)
-		: info{pl, pp, p, m, mbox}
-		, patch_list{pl}
-		, player{pp}
+	PageManager(
+		PatchList &patchlist, PatchLoader &patch_loader, Params &params, MetaParams &metaparams, UiAudioMailbox &mbox)
+		: info{patchlist, patch_loader, params, metaparams, mbox}
+		, patch_list{patchlist}
 		, mbox{mbox} {
 	}
 

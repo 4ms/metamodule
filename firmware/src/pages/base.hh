@@ -2,8 +2,9 @@
 #include "conf/panel_conf.hh"
 #include "lvgl/lvgl.h"
 #include "params.hh"
-#include "patch_player.hh"
+#include "patch_loader.hh"
 #include "patchlist.hh"
+#include "ui_audio_mailbox.hh"
 #include "util/geometry.hh"
 #include <optional>
 
@@ -14,7 +15,7 @@ enum class PageChangeDirection { Back, Forward, Jump };
 
 struct PatchInfo {
 	PatchList &patch_list;
-	PatchPlayer &patch_player;
+	PatchLoader &patch_loader;
 	Params &params;
 	MetaParams &metaparams;
 	UiAudioMailbox &mbox;
@@ -22,7 +23,7 @@ struct PatchInfo {
 
 struct PageBase {
 	PatchList &patch_list;
-	PatchPlayer &patch_player;
+	PatchLoader &patch_loader;
 	Params &params;
 	MetaParams &metaparams;
 	UiAudioMailbox &mbox;
@@ -32,7 +33,7 @@ struct PageBase {
 
 	PageBase(PatchInfo info)
 		: patch_list{info.patch_list}
-		, patch_player{info.patch_player}
+		, patch_loader{info.patch_loader}
 		, params{info.params}
 		, metaparams{info.metaparams}
 		, mbox{info.mbox} {

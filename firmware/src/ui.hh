@@ -27,11 +27,11 @@ private:
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchPlayer &pp, PatchList &pl, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
+	Ui(PatchLoader &patch_loader, PatchList &patch_list, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
 		: param_queue{pc}
-		, patch_list{pl}
+		, patch_list{patch_list}
 		, mbox{uiaudiomailbox}
-		, page_manager{patch_list, pp, params, metaparams, uiaudiomailbox} {
+		, page_manager{patch_list, patch_loader, params, metaparams, uiaudiomailbox} {
 	}
 
 	void start() {

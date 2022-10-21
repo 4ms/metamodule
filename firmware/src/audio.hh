@@ -7,6 +7,7 @@
 #include "drivers/cycle_counter.hh"
 #include "drivers/stm32xx.h"
 #include "params.hh"
+#include "patch_loader.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
 #include "processors/tools/kneeCompress.h"
@@ -36,7 +37,7 @@ public:
 				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
 				ParamQueue &queue,
-				UiAudioMailbox &uiaudiomailbox,
+				PatchLoader &patchloader,
 				DoubleBufParamBlock &p,
 				DoubleAuxStreamBlock &auxs);
 
@@ -46,7 +47,7 @@ public:
 
 private:
 	ParamQueue &param_queue;
-	UiAudioMailbox &mbox;
+	PatchLoader &patch_loader;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
 	DoubleAuxStreamBlock &auxsigs;
@@ -75,7 +76,7 @@ private:
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
 
-	void output_silence(AudioOutBuffer &out, AuxStreamBlock &aux);
+	// void output_silence(AudioOutBuffer &out, AuxStreamBlock &aux);
 
 	static constexpr unsigned NumKnobs = PanelDef::NumPot;
 	static constexpr unsigned NumAudioInputs = PanelDef::NumAudioIn;

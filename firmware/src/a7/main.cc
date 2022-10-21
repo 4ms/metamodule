@@ -50,18 +50,18 @@ void main() {
 	patchdisk.norflash_patches_to_ramdisk();
 
 	PatchPlayer patch_player;
-	PatchLoader patchloader{patch_list, patch_player};
+	PatchLoader patch_loader{patch_list, patch_player};
 
 	ParamQueue param_queue;
 	UiAudioMailbox mbox;
 
-	Ui ui{patch_player, patch_list, param_queue, mbox};
+	Ui ui{patch_loader, patch_list, param_queue, mbox};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
 					  param_queue,
-					  mbox,
+					  patch_loader,
 					  StaticBuffers::param_blocks,
 					  StaticBuffers::auxsignal_block};
 
@@ -81,7 +81,7 @@ void main() {
 		;
 
 	param_queue.clear();
-	patchloader.load_initial_patch();
+	patch_loader.load_initial_patch();
 	audio.start();
 	ui.start();
 
@@ -153,17 +153,17 @@ void main() {
 		}
 
 		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
-			mbox.patchlist_reloading = true;
+			patch_list.lock();
 			printf("NOR Flash writeback begun.\r\n");
 			RamDiskFileIO::unmount_disk(Disk::RamDisk);
 			if (patchdisk.ramdisk_patches_to_norflash()) {
 				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
-				mbox.patchlist_updated = true;
+				patch_list.mark_modified();
 			} else {
 				printf("NOR Flash writeback failed!\r\n");
 			}
 			ramdiskops.set_status(RamDiskOps::Status::NotInUse);
-			mbox.patchlist_reloading = false;
+			patch_list.unlock();
 		}
 		__WFI();
 	}

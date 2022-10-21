@@ -104,9 +104,8 @@ struct PatchSelectorPage : PageBase {
 			patchlist_was_ready = true;
 		}
 
-		if (mbox.patchlist_updated) {
+		if (patch_list.is_modified()) {
 			refresh_patchlist();
-			mbox.patchlist_updated = false;
 		}
 	}
 

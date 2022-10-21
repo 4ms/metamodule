@@ -338,32 +338,14 @@ private:
 	lv_obj_t *base;
 
 	void start_changing_patch() {
-		auto _patch_id = PageList::get_selected_patch_id();
-		if (!mbox.loading_new_patch && (_patch_id != patch_list.cur_patch_index())) {
-			mbox.new_patch_index = _patch_id;
-			mbox.loading_new_patch = true;
-			// printf("Loading patch %s\n", patch_list.get_patch_name(_patch_id).data());
+		auto patch_id = PageList::get_selected_patch_id();
+		if (patch_id != patch_loader.cur_patch_index()) {
+			patch_loader.request_load_patch(patch_id);
 		}
 	}
 
 	void handle_changing_patch() {
-		if (mbox.loading_new_patch && mbox.audio_is_muted) {
-			auto cur_patch_index = patch_list.cur_patch_index();
-			//TODO check for nullpatch
-			auto orig_patch_data = patch_list.get_patch(cur_patch_index);
-			patch_player.unload_patch();
-			patch_list.set_cur_patch_index(mbox.new_patch_index);
-			bool ok = patch_player.load_patch(patch_list.get_patch(mbox.new_patch_index));
-			if (!ok) {
-				mbox.append_message("Can't load patch\n");
-				printf("Can't load patch\n");
-				patch_player.unload_patch();
-				patch_player.load_patch(orig_patch_data);
-			} else
-				mbox.append_message("Patch loaded\n");
-
-			mbox.loading_new_patch = false;
-		}
+		patch_loader.handle_sync_patch_loading();
 	}
 };
 } // namespace MetaModule
