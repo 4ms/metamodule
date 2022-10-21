@@ -36,11 +36,11 @@ extern "C" void aux_core_main() {
 			} break;
 
 			case SMPCommand::UpdateListOfModules: {
-				Debug::Pin3::high();
+				// Debug::Pin3::high();
 				for (unsigned i = starting_idx; i < num_modules; i += idx_increment) {
 					patch_player->modules[i]->update();
 				}
-				Debug::Pin3::low();
+				// Debug::Pin3::low();
 
 				SMPThread::signal_done();
 			} break;
