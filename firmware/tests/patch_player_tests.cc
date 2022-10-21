@@ -1,5 +1,8 @@
 #include "doctest.h"
 #include "patch_convert/yaml_to_patch.hh"
+
+#define printf_ printf
+
 #include "patch_player.hh"
 #include <string>
 
@@ -132,8 +135,8 @@ PatchData:
 		// Check for cable2: 1->2 cable
 		// {1,1} -> {2,1},{2,2}  or  {2,2},{2,1}
 		if (cable.out == Jack{1, 1}) {
-			if ((cable.ins[0] == Jack{2, 1} && cable.ins[1] == Jack{2, 2}) ||
-				(cable.ins[0] == Jack{2, 2} && cable.ins[1] == Jack{2, 1}))
+			if ((cable.ins[0] == Jack{2, 1} &&cable.ins[1] == Jack{2, 2}) ||
+				(cable.ins[0] == Jack{2, 2} &&cable.ins[1] == Jack{2, 1}))
 			{
 				if (cable.ins.size() == 2) {
 					found_cable2 = true;

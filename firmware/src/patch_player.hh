@@ -13,6 +13,7 @@
 #include "drivers/smp.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
+#include "printf.h"
 #include "smp_api.hh"
 #include "sys/alloc_buffer.hh"
 #include "util/countzip.hh"
@@ -83,10 +84,11 @@ public:
 				modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
-				printf("Module %s not found\n", pd.module_slugs[i].data());
+				printf_("Module %s not found\n", pd.module_slugs[i].data());
 				is_loaded = false;
 				return false;
 			}
+			printf_("Loaded module[%zu]: %s\n", i, pd.module_slugs[i].data());
 
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
