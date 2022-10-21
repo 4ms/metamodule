@@ -4,7 +4,7 @@
 namespace SMPCommand
 {
 static constexpr uint32_t UpdateModule = 1;		   // == SGI1_IRQn;
-static constexpr uint32_t SetParam = 2;			   // == SGI2_IRQn;
+static constexpr uint32_t NewModuleList = 2;	   // == SGI2_IRQn;
 static constexpr uint32_t CallFunction = 3;		   // == SGI3_IRQn;
 static constexpr uint32_t UpdateListOfModules = 4; // == SGI4_IRQn;
 } // namespace SMPCommand
@@ -17,8 +17,8 @@ enum : uint32_t {
 	ParamID,
 	ParamVal,
 	FunctionAddress,
-	NumModules,
-	IndexIncrement,
+	NumModulesInPatch,
+	UpdateModuleOffset,
 	Unused,
 };
 } // namespace SMPRegister

@@ -94,6 +94,12 @@ public:
 			modules[i]->mark_all_outputs_unpatched();
 		}
 
+		// Tell the other core about the patch
+		mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2);
+		mdrivlib::SMPControl::write<SMPRegister::NumModulesInPatch>(pd.module_slugs.size());
+		mdrivlib::SMPControl::write<SMPRegister::UpdateModuleOffset>(2);
+		mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
+
 		// Todo: if we need to improve patch loading time by a small amount,
 		// it's a little faster to combine these functions so we only do one loop over nets/jacks
 		// ...but it's harder to unit test.
@@ -122,24 +128,23 @@ public:
 		if (pd.module_slugs.size() == 2)
 			modules[1]->update();
 		else {
-			mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2);
-			mdrivlib::SMPControl::write<SMPRegister::NumModules>(pd.module_slugs.size());
-			mdrivlib::SMPControl::write<SMPRegister::IndexIncrement>(2);
 			mdrivlib::SMPControl::notify<SMPCommand::UpdateListOfModules>();
+			Debug::Pin2::high();
 			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += 2) {
-				// Debug::Pin2::high();
 				modules[module_i]->update();
-				// Debug::Pin2::low();
 			}
+			Debug::Pin2::low();
 			mdrivlib::SMPThread::join();
 		}
 
+		Debug::Pin1::high();
 		for (auto &cable : pd.int_cables) {
 			float out_val = modules[cable.out.module_id]->get_output(cable.out.jack_id);
 			for (auto &input_jack : cable.ins) {
 				modules[input_jack.module_id]->set_input(input_jack.jack_id, out_val);
 			}
 		}
+		Debug::Pin1::low();
 	}
 
 	void unload_patch() {

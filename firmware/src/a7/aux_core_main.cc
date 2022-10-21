@@ -15,6 +15,10 @@ extern "C" void aux_core_main() {
 
 	auto patch_player = SharedMemory::read_address_of<PatchPlayer *>(SharedMemory::PatchPlayerLocation);
 
+	uint32_t starting_idx;
+	uint32_t num_modules;
+	uint32_t idx_increment;
+
 	while (true) {
 		using namespace SMPRegister;
 
@@ -24,43 +28,36 @@ extern "C" void aux_core_main() {
 		GIC_EndInterrupt(irqnum);
 		uint32_t command = irqnum;
 
-		// Process a module command
-		if (command == SMPCommand::UpdateModule) {
-			// Debug::Pin3::high();
-			auto module_idx = SMPControl::read<ModuleID>();
-			patch_player->modules[module_idx]->update();
+		switch (command) {
+			case SMPCommand::UpdateModule: {
+				auto module_idx = SMPControl::read<ModuleID>();
+				patch_player->modules[module_idx]->update();
+				SMPThread::signal_done();
+			} break;
 
-			// signal we're done
-			SMPThread::signal_done();
-			// Debug::Pin3::low();
-		}
+			case SMPCommand::UpdateListOfModules: {
+				Debug::Pin3::high();
+				for (unsigned i = starting_idx; i < num_modules; i += idx_increment) {
+					patch_player->modules[i]->update();
+				}
+				Debug::Pin3::low();
 
-		if (command == SMPCommand::UpdateListOfModules) {
-			// Debug::Pin3::high();
-			auto starting_idx = SMPControl::read<ModuleID>();
-			auto num_modules = SMPControl::read<NumModules>();
-			auto idx_increment = SMPControl::read<IndexIncrement>();
-			for (unsigned i = starting_idx; i < num_modules; i += idx_increment)
-				patch_player->modules[i]->update();
+				SMPThread::signal_done();
+			} break;
 
-			SMPThread::signal_done();
-			// Debug::Pin3::low();
-		}
+			case SMPCommand::NewModuleList: {
+				starting_idx = SMPControl::read<ModuleID>();
+				num_modules = SMPControl::read<NumModulesInPatch>();
+				idx_increment = SMPControl::read<UpdateModuleOffset>();
+				SMPThread::signal_done();
+			} break;
 
-		// Update a param command
-		if (command == SMPCommand::SetParam) {
-			auto module_idx = SMPControl::read<ModuleID>();
-			auto param_id = SMPControl::read<ParamID>();
-			auto u32val = SMPControl::read<ParamVal>();
-			auto val = *(reinterpret_cast<float *>(&u32val));
-			patch_player->modules[module_idx]->set_param(param_id, val);
-			// signal we're done
-			SMPThread::signal_done();
-		}
+			case SMPThread::CallFunction:
+				SMPThread::execute();
+				break;
 
-		// Run a function
-		if (command == SMPThread::CallFunction) {
-			SMPThread::execute();
+			default:
+				break;
 		}
 	}
 }
