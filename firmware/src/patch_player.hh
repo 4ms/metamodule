@@ -83,6 +83,7 @@ public:
 				modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
+				printf("Module %s not found\n", pd.module_slugs[i].data());
 				is_loaded = false;
 				return false;
 			}

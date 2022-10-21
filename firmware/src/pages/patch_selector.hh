@@ -76,7 +76,7 @@ struct PatchSelectorPage : PageBase {
 		// unsigned default_sel = patchnames.size() > 9 ? 5U : 0;
 		unsigned default_sel = patchnames.size() > 10 ? 5 : patchnames.size() / 2;
 		lv_roller_set_selected(roller, default_sel, LV_ANIM_OFF);
-		printf("Preselecting %d from %p\n", lv_roller_get_selected(roller), roller);
+		printf("Patch Selector page preselecting %d from %p\n", lv_roller_get_selected(roller), roller);
 	}
 
 	void update() override {
