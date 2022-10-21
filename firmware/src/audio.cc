@@ -169,21 +169,21 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		propagate_sense_pins(params_);
 
 		// Pass audio inputs to modules
+		Debug::Pin1::high();
 		for (auto [i, inchan] : countzip(in_.chan)) {
 			auto pin_bit = jacksense_pin_order[i];
-			// Todo: send 0 on the first time the jack is detected as unpatched (and then don't call set_panel_input
-			// until patched)
 
-			auto scaled_input = AudioInFrame::scaleInput(inchan);
-			// If using adjust() to convert 24bit to a calibrated float, then replace above with:
-			// auto scaled_input = AudioInFrame::sign_extend(inchan);
-			scaled_input = incal[i].adjust(scaled_input);
+			plug_detect.update(params_.jack_senses & (1 << pin_bit));
+			if (plug_detect.staying_low())
+				continue;
 
-			auto val = (params_.jack_senses & (1 << pin_bit)) ? scaled_input : 0;
-			player.set_panel_input(PanelDef::audioin_order[i], val);
+			float scaled_input = plug_detect.is_high() ? incal[i].adjust(AudioInFrame::scaleInput(inchan)) : 0.f;
+			// TODO: bake the unsigned=>float conversion into Calibrate::adjust(), and then use sign_extend instead of scaleInput
 
+			player.set_panel_input(PanelDef::audioin_order[i], scaled_input);
 			param_block.metaparams.ins[i].update(scaled_input);
 		}
+		Debug::Pin1::low();
 
 		// Pass CV values to modules
 		for (auto [i, cv] : countzip(params_.cvjacks))

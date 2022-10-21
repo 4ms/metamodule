@@ -11,6 +11,7 @@
 #include "patchlist.hh"
 #include "processors/tools/kneeCompress.h"
 #include "util/calibrator.hh"
+#include "util/edge_detector.hh"
 #include "util/interp_param.hh"
 #include "util/math.hh"
 #include "util/oscs.hh"
@@ -55,6 +56,7 @@ private:
 	uint32_t sample_rate_;
 
 	Calibrator incal[PanelDef::NumAudioIn];
+	EdgeDetector plug_detect;
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()
