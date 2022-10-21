@@ -63,7 +63,7 @@ public:
 		if (is_loaded)
 			unload_patch();
 
-		pd = patchdata; //Copy
+		pd = patchdata; //Copy so that the currently playing PatchData is immune to edits of the saved version
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
