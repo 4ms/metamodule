@@ -8,6 +8,7 @@
 #include "fatfs/ramdisk_fileio.hh"
 #include "hsem_handler.hh"
 #include "params.hh"
+#include "patch_loader.hh"
 #include "patch_player.hh"
 #include "patchfileio.hh"
 #include "patchlist.hh"
@@ -33,19 +34,24 @@ void main() {
 
 	StaticBuffers::init();
 
-	// Populate Patch List from Patch Storage:
-	PatchList patch_list{};
+	// Setup RAM disk
 	RamDiskOps ramdiskops{StaticBuffers::virtdrive};
 	RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
 	RamDiskFileIO::format_disk(Disk::RamDisk);
-	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
 
+	// Setup Patch Storage (On QSPI flash)
+	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
 	PatchStorage patchdisk{flash, StaticBuffers::virtdrive};
-	patchdisk.factory_clean();
+
+	// Populate Patch List from Patch Storage
+	PatchList patch_list{};
+	patchdisk.factory_clean(); //Remove this when not testing!
 	patchdisk.fill_patchlist_from_norflash(patch_list);
 	patchdisk.norflash_patches_to_ramdisk();
 
 	PatchPlayer patch_player;
+	PatchLoader patchloader{patch_list, patch_player};
+
 	ParamQueue param_queue;
 	UiAudioMailbox mbox;
 
@@ -68,6 +74,7 @@ void main() {
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 
 	// Needed for LED refresh
+	// TODO: is this needed for medium?
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	// Tell M4 we're done with init
@@ -76,7 +83,9 @@ void main() {
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
+
 	param_queue.clear();
+	patchloader.load_initial_patch();
 	audio.start();
 	ui.start();
 
