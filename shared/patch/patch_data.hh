@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/moduleFactory.hh" //for ModuleTypeSlug
 #include "patch.hh"
 #include "util/static_string.hh"
 #include <vector>

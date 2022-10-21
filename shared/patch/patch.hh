@@ -1,5 +1,4 @@
 #pragma once
-#include "CoreModules/moduleFactory.hh"
 #include "util/static_string.hh"
 #include <vector>
 
