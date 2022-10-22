@@ -15,23 +15,23 @@ struct PatchLoader {
 	}
 
 	void load_initial_patch() {
-		load_patch(initial_patch);
+		if (load_patch(initial_patch)) {
+			UartLog::log("Loaded initial_patch\n");
+			loaded_patch_index_ = initial_patch;
+			loading_new_patch_ = false;
+		} else
+			UartLog::log("Failed to load initial patch\n");
 	}
 
 	bool load_patch(uint32_t patchid) {
 		auto patchname = patch_list_.get_patch_name(patchid);
 		UartLog::log("Attempting load patch #%d, %s\n", patchid, patchname.data());
 
-		bool ok = player_.load_patch(patch_list_.get_patch(patchid));
-		if (!ok) {
-			UartLog::log("Failed to load patch\n");
-			player_.load_patch(patch_list_.get_patch(loaded_patch_index_));
-			return false;
-		} else {
-			UartLog::log("Loaded patch\r\n");
+		if (player_.load_patch(patch_list_.get_patch(patchid))) {
 			loaded_patch_index_ = patchid;
 			return true;
 		}
+		return false;
 	}
 
 	uint32_t cur_patch_index() {
@@ -63,13 +63,13 @@ struct PatchLoader {
 
 	void handle_sync_patch_loading() {
 		if (loading_new_patch_ && audio_is_muted_) {
-			auto patchname = patch_list_.get_patch_name(new_patch_index_);
-			UartLog::log("Attempting load patch #%d, %s\n", new_patch_index_, patchname.data());
-
 			bool ok = load_patch(new_patch_index_);
 			if (!ok) {
-				UartLog::log("Can't load patch, reloading original\n");
-				load_patch(loaded_patch_index_);
+				UartLog::log("Can't load patch, reloading previous patch\n");
+				if (!load_patch(loaded_patch_index_)) {
+					UartLog::log("Failed to reload patch, something is wrong!\n");
+					//TODO: how to handle this, do we have a "no patch loaded" state?
+				}
 			} else {
 				UartLog::log("Patch loaded\n");
 				loaded_patch_index_ = new_patch_index_;
