@@ -141,6 +141,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	// Todo: fade down before setting audio_is_muted to true
 	if (patch_loader.is_loading_new_patch()) {
 		patch_loader.audio_is_muted();
+		//FIXME: why does output_silence cause a DMA Frame Error?
 		output_silence(out);
 		//FIXME: why is this needed to not crash on startup?
 		param_queue.write_sync(param_block.params[0], param_block.metaparams);
