@@ -29,7 +29,7 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr uint16_t clock_division = 2;
 		static constexpr uint16_t data_size = 8;
 		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
-		static constexpr uint8_t FifoThreshold = 1;
+		static constexpr uint8_t FifoThreshold = 16;
 		static constexpr bool LSBfirst = false;
 
 		static constexpr bool pulse_hardware_ss = true;
@@ -40,10 +40,11 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr auto StreamNum = 3;
 		static constexpr auto RequestNum = DMA_REQUEST_SPI4_TX;
 		static constexpr auto IRQn = DMA1_Stream3_IRQn;
-		static constexpr auto pri = 1;
-		static constexpr auto subpri = 1;
+		static constexpr auto pri = 0;
+		static constexpr auto subpri = 0;
 		static constexpr auto dir = Mem2Periph;
 		static constexpr auto circular = false;
+		static constexpr auto periph_flow = false;
 		static constexpr auto transfer_size_mem = HalfWord;
 		static constexpr auto transfer_size_periph = HalfWord;
 		static constexpr auto dma_priority = Low;

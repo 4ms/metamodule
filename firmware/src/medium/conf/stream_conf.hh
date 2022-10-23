@@ -27,7 +27,7 @@ struct StreamConfSingleCodec6x8 {
 
 		// Total memory allocated for audio stream input DMA buffers
 		// There are [2] blocks per codec, one for each half-transfer
-		struct AudioInBlock {
+		struct alignas(1024) AudioInBlock {
 			AudioInBuffer codec[2];
 			AudioInBuffer ext_codec[2];
 		};
@@ -40,7 +40,7 @@ struct StreamConfSingleCodec6x8 {
 
 		// Total memory allocated for audio stream output DMA buffers
 		// There are [2] blocks per codec, one for each half-transfer
-		struct AudioOutBlock {
+		struct alignas(1024) AudioOutBlock {
 			AudioOutBuffer codec[2];
 			AudioOutBuffer ext_codec[2];
 		};
