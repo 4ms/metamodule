@@ -148,52 +148,6 @@ struct MetaParams {
 	}
 };
 
-// ParamCache class
-// Stores a copy of Params and MetaParams and allows access from single core
-// where a higher-priority ISR does write_sync(), and a lower-priority ISR does read_sync()
-// The users of this class should each have their own copy of Params and MetaParams.
-//
-// Todo: use HSEM to allow for multiple cores and inverted ISR priorities
-struct ParamQueue {
-	Params p;
-	MetaParams m;
-
-	ParamQueue() {
-		clear();
-	}
-
-	void write_sync(Params &p_, MetaParams &m_) {
-		//FIXME: Use an atomic (STREX and LDREX) for new_data to prevent data race
-
-		_new_data = false; // protects against multiple write_syncs without a read_sync, and then one write_sync
-						   // interupting a read_sync in progress
-		p.copy(p_);
-		m.update_with(m_);
-		_new_data = true;
-	}
-
-	bool read_sync(Params *params, MetaParams *metaparams) {
-		if (!_new_data)
-			return false;
-		if (!_new_data)
-			return false;
-		params->copy(p);
-		metaparams->transfer(m);
-		_new_data = false;
-		return true;
-	}
-
-	void clear() {
-		_new_data = false;
-		p.clear();
-		m.clear();
-		_new_data = true;
-	}
-
-private:
-	volatile bool _new_data = true;
-};
-
 struct ParamBlock {
 	std::array<Params, StreamConf::Audio::BlockSize> params;
 	MetaParams metaparams;

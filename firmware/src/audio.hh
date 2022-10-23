@@ -6,6 +6,7 @@
 #include "drivers/codec_PCM3168.hh"
 #include "drivers/cycle_counter.hh"
 #include "drivers/stm32xx.h"
+#include "param_cache.hh"
 #include "params.hh"
 #include "patch_loader.hh"
 #include "patch_player.hh"

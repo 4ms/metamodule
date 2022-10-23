@@ -7,6 +7,7 @@
 #include "debug.hh"
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
+#include "param_cache.hh"
 #include "patch_loader.hh"
 #include "patch_player.hh"
 #include "uart_log.hh"

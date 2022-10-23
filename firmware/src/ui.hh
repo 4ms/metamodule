@@ -4,6 +4,7 @@
 #include "lvgl_driver.hh"
 #include "pages/page_manager.hh"
 #include "pages/styles.hh"
+#include "param_cache.hh"
 #include "params.hh"
 #include "patch_loader.hh"
 #include "patchlist.hh"
@@ -85,7 +86,6 @@ private:
 	}
 
 	void page_update_task() { //60Hz
-		// Debug::Pin2::high();
 		//This returns false when audio stops
 		bool read_ok = param_queue.read_sync(&params, &metaparams);
 		if (read_ok) {
@@ -93,9 +93,8 @@ private:
 		} else {
 			Debug::Pin1::high();
 		}
-			page_manager.update_current_page();
+		page_manager.update_current_page();
 		patch_loader.handle_sync_patch_loading();
-		// Debug::Pin2::low();
 	}
 
 	mdrivlib::Timekeeper page_update_tm;
