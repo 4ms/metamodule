@@ -10,7 +10,7 @@ enum SemaphoreLocks {
 	ScreenFrameBufLock,
 	ScreenFrameWriteLock,
 	M4_ready,
-	ParamCacheWritable,
+	ParamCacheLock,
 };
 
 } // namespace MetaModule

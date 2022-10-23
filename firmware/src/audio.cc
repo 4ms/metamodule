@@ -20,7 +20,11 @@
 
 namespace MetaModule
 {
-void output_silence(AudioOutBuffer &out) {
+
+//FIXME: Setting an opt level other than O0 here causes a DMA Fifo Error for DMA1Stream3 (SPI4 TX)
+//Sometimes/often while executing output_silence and it's compiled to use vstr d16/d17
+//But also sometimes when the DMA1Stream3 IRQ interrupts DMA2Stream? IRQ for the audio SAI (the DMA1Stream3 IRQ returns into the body of DMA2Stream? IRQhandler, not into audio:;process()
+__attribute__((optimize("O0"))) void output_silence(AudioOutBuffer &out) {
 	for (auto &out_ : out) {
 		for (auto &outchan : out_.chan)
 			outchan = 0;
@@ -35,17 +39,17 @@ constexpr bool DEBUG_NE10_FFT = false;
 // static FFTfx fftfx;
 // static Convolver fftfx;
 
-static constexpr unsigned block_0 = 1; //mdrivlib::TargetName == mdrivlib::Targets::stm32h7x5 ? 0 : 1;
+static constexpr unsigned block_0 = 1; //TargetName == Targets::stm32h7x5 ? 0 : 1;
 static constexpr unsigned block_1 = 1 - block_0;
 
 AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
-						 ParamQueue &queue,
+						 ParamCache &paramcache,
 						 PatchLoader &patchloader,
 						 DoubleBufParamBlock &p,
 						 DoubleAuxStreamBlock &auxs)
-	: param_queue{queue}
+	: param_cache{paramcache}
 	, patch_loader{patchloader}
 	, param_blocks{p}
 	, audio_blocks{{.in_codec = audio_in_block.codec[0],
@@ -139,16 +143,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		return;
 	}
 
-	// if (patch_loader.is_loading_new_patch()) {
-	// 	patch_loader.audio_is_muted();
-	// 	// output_silence(out);
-	// 	return;
-	// }
-	// patch_loader.audio_not_muted();
-
 	if (patch_loader.is_loading_new_patch()) {
-		// Debug::Pin3::high();
-		//This would be a fade down over 10 blocks:
 		if (mute_ctr > 0.f)
 			mute_ctr -= 0.1f;
 		else {
@@ -157,7 +152,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 				halves_muted++;
 				if (halves_muted == 2)
 					patch_loader.audio_is_muted();
-				// Debug::Pin3::low();
 			}
 			return;
 		}
@@ -219,8 +213,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
 
-	param_queue.write_sync(param_block.params[0], param_block.metaparams);
-	mdrivlib::SystemCache::clean_dcache_by_range(&param_queue, sizeof(ParamQueue));
+	param_cache.write_sync(param_block.params[0], param_block.metaparams);
+	mdrivlib::SystemCache::clean_dcache_by_range(&param_cache, sizeof(ParamCache));
 
 	load_measure.end_measurement();
 }

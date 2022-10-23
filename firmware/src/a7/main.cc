@@ -52,15 +52,15 @@ void main() {
 	PatchPlayer patch_player;
 	PatchLoader patch_loader{patch_list, patch_player};
 
-	ParamQueue param_queue;
+	ParamCache param_cache;
 	UiAudioMailbox mbox;
 
-	Ui ui{patch_loader, patch_list, param_queue, mbox};
+	Ui ui{patch_loader, patch_list, param_cache, mbox};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
-					  param_queue,
+					  param_cache,
 					  patch_loader,
 					  StaticBuffers::param_blocks,
 					  StaticBuffers::auxsignal_block};
@@ -80,7 +80,7 @@ void main() {
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
 
-	param_queue.clear();
+	param_cache.clear();
 	patch_loader.load_initial_patch();
 	audio.start();
 	ui.start();

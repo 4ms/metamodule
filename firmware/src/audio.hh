@@ -37,7 +37,7 @@ public:
 	AudioStream(PatchPlayer &patchplayer,
 				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
-				ParamQueue &queue,
+				ParamCache &paramcache,
 				PatchLoader &patchloader,
 				DoubleBufParamBlock &p,
 				DoubleAuxStreamBlock &auxs);
@@ -47,7 +47,7 @@ public:
 	void process(CombinedAudioBlock &audio, ParamBlock &param_block, AuxStreamBlock &aux);
 
 private:
-	ParamQueue &param_queue;
+	ParamCache &param_cache;
 	PatchLoader &patch_loader;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];

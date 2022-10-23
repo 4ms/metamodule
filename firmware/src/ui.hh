@@ -17,7 +17,7 @@ namespace MetaModule
 
 class Ui {
 private:
-	ParamQueue &param_queue;
+	ParamCache &param_cache;
 	PatchList &patch_list;
 	PatchLoader &patch_loader;
 	UiAudioMailbox &mbox;
@@ -30,8 +30,8 @@ private:
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchLoader &patch_loader, PatchList &patch_list, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
-		: param_queue{pc}
+	Ui(PatchLoader &patch_loader, PatchList &patch_list, ParamCache &pc, UiAudioMailbox &uiaudiomailbox)
+		: param_cache{pc}
 		, patch_list{patch_list}
 		, patch_loader{patch_loader}
 		, mbox{uiaudiomailbox}
@@ -87,7 +87,7 @@ private:
 
 	void page_update_task() { //60Hz
 		//This returns false when audio stops
-		bool read_ok = param_queue.read_sync(&params, &metaparams);
+		bool read_ok = param_cache.read_sync(&params, &metaparams);
 		if (read_ok) {
 			Debug::Pin1::low();
 		} else {
