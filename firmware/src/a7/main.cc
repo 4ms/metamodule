@@ -69,10 +69,6 @@ void main() {
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 
-	// Needed for LED refresh
-	// TODO: is this needed for medium?
-	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
-
 	// Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
 
@@ -100,6 +96,7 @@ void main() {
 		__BKPT();
 	}
 
+	// TODO: Get USB-C working totally and move to its own class/file
 	enum FUSBRegister : uint8_t {
 		ID = 0x01,
 		Control0 = 0x06,
