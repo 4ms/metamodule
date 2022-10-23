@@ -109,7 +109,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 }
 
 AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
-	auto raw_out = player.get_panel_output(output_id);
+	auto raw_out = player.get_panel_output(output_id) * mute_ctr;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
 	return scaled_out;
 	// return compressor.compress(scaled_out);
@@ -138,33 +138,33 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		return;
 	}
 
-	// Todo: fade down before setting audio_is_muted to true
-	if (patch_loader.is_loading_new_patch()) {
-		patch_loader.audio_is_muted();
-		output_silence(out);
-		// FIXME: why do we need to add a delay here to lower the chance of a FIFO Error on DMA1Stream3 (screen SPI TX DMA)?
-		// HAL_Delay(1);
-		// param_queue.write_sync(param_block.params[0], param_block.metaparams);
-		// mdrivlib::SystemCache::clean_dcache_by_range(&param_queue, sizeof(ParamQueue));
-		return;
-	}
-	patch_loader.audio_not_muted();
+	// if (patch_loader.is_loading_new_patch()) {
+	// 	patch_loader.audio_is_muted();
+	// 	// output_silence(out);
+	// 	return;
+	// }
+	// patch_loader.audio_not_muted();
 
-	//if (patch_loader.is_loading_new_patch()) {
-	//	Debug::Pin3::high();
-	//	//This would be a fade down over 10 blocks:
-	//	if (_mute_ctr)
-	//		_mute_ctr--;
-	//	else {
-	//		output_silence(out);
-	//		Debug::Pin3::low();
-	//		patch_loader.audio_is_muted();
-	//		return;
-	//	}
-	//} else {
-	//	patch_loader.audio_not_muted();
-	//	_mute_ctr = 10;
-	//}
+	if (patch_loader.is_loading_new_patch()) {
+		// Debug::Pin3::high();
+		//This would be a fade down over 10 blocks:
+		if (mute_ctr > 0.f)
+			mute_ctr -= 0.1f;
+		else {
+			if (!patch_loader.is_audio_muted()) {
+				output_silence(out);
+				halves_muted++;
+				if (halves_muted == 2)
+					patch_loader.audio_is_muted();
+				// Debug::Pin3::low();
+			}
+			return;
+		}
+	} else {
+		patch_loader.audio_not_muted();
+		mute_ctr = 1.f;
+		halves_muted = 0;
+	}
 
 	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
 	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);

@@ -66,7 +66,8 @@ private:
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
 	CycleCounter load_measure;
 	float load_lpf = 0.f;
-	uint32_t _mute_ctr = 0;
+	float mute_ctr = 1.f;
+	uint32_t halves_muted = 0;
 	bool ext_audio_connected = false;
 
 	AudioConf::SampleT get_audio_output(int output_id);
