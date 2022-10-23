@@ -71,7 +71,7 @@ void main() {
 
 	// Needed for LED refresh
 	// TODO: is this needed for medium?
-	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
+	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	// Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
