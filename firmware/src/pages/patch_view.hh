@@ -191,7 +191,7 @@ struct PatchViewPage : PageBase {
 				blur();
 			}
 		}
-		handle_changing_patch();
+		// handle_changing_patch();
 
 		for (auto &mk : mapped_knobs) {
 			if (mk.anim_method == DrawHelper::RotaryPot) {
@@ -344,8 +344,8 @@ private:
 		}
 	}
 
-	void handle_changing_patch() {
-		patch_loader.handle_sync_patch_loading();
-	}
+	// void handle_changing_patch() {
+	// 	patch_loader.handle_sync_patch_loading();
+	// }
 };
 } // namespace MetaModule

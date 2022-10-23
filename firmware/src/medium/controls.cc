@@ -142,11 +142,11 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 
 	pot_adc.start();
 
-	Debug::Pin3::high();
+	// Debug::Pin3::high();
 	auto err = extaudio_jacksense_reader.start();
-	if (err == GPIOExpander::Error::None)
-		Debug::Pin3::low();
-	Debug::Pin2::high();
+	// if (err == GPIOExpander::Error::None)
+	// Debug::Pin3::low();
+	// Debug::Pin2::high();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
@@ -169,7 +169,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 		});
 	}
 
-	Debug::Pin2::low();
+	// Debug::Pin2::low();
 }
 
 uint32_t Controls::get_pot_reading(uint32_t pot_id) {

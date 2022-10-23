@@ -5,6 +5,7 @@
 #include "pages/page_manager.hh"
 #include "pages/styles.hh"
 #include "params.hh"
+#include "patch_loader.hh"
 #include "patchlist.hh"
 #include "static_buffers.hh"
 #include "util/analyzed_signal.hh"
@@ -17,6 +18,7 @@ class Ui {
 private:
 	ParamQueue &param_queue;
 	PatchList &patch_list;
+	PatchLoader &patch_loader;
 	UiAudioMailbox &mbox;
 
 	PageManager page_manager;
@@ -30,6 +32,7 @@ public:
 	Ui(PatchLoader &patch_loader, PatchList &patch_list, ParamQueue &pc, UiAudioMailbox &uiaudiomailbox)
 		: param_queue{pc}
 		, patch_list{patch_list}
+		, patch_loader{patch_loader}
 		, mbox{uiaudiomailbox}
 		, page_manager{patch_list, patch_loader, params, metaparams, uiaudiomailbox} {
 	}
@@ -86,8 +89,12 @@ private:
 		//This returns false when audio stops
 		bool read_ok = param_queue.read_sync(&params, &metaparams);
 		if (read_ok) {
-			page_manager.update_current_page();
+			Debug::Pin1::low();
+		} else {
+			Debug::Pin1::high();
 		}
+			page_manager.update_current_page();
+		patch_loader.handle_sync_patch_loading();
 		// Debug::Pin2::low();
 	}
 
