@@ -21,6 +21,8 @@
 #include "usb/usb_drive_device.hh"
 #include "util/mem_test.hh"
 
+#include "fusb302.hh"
+
 namespace MetaModule
 {
 
@@ -85,59 +87,51 @@ void main() {
 	usb_drive.start();
 
 	HAL_Delay(10);
-	I2CPeriph usbi2c{usb_i2c_conf};
-	uint8_t data[4] = {0xAA};
-	constexpr uint8_t DevAddr = 0b01000100;
-	auto err = usbi2c.mem_read(0b01000100, 0x01, 1, data, 1);
-	if (err == mdrivlib::I2CPeriph::I2C_NO_ERR)
-		printf_("ID Read %d\n", data[0]);
-	else {
-		printf_("Err: %d\n", err);
-		__BKPT();
-	}
 
-	// TODO: Get USB-C working totally and move to its own class/file
-	enum FUSBRegister : uint8_t {
-		ID = 0x01,
-		Control0 = 0x06,
-		Control1 = 0x07,
-		Control2 = 0x08,
-		Power = 0x0B,
-		OCP = 0x0D,
-		Status0A = 0x3C,
-		Status1A = 0x3D,
-		InterruptA = 0x3E,
-		InterruptB = 0x3F,
-		Status0 = 0x40,
-		Status1 = 0x41,
-		Interrupt = 0x42,
-	};
-	data[0] = 0b00000100; //enable all Interrupts to host
-	usbi2c.mem_write(DevAddr, FUSBRegister::Control0, 1, data, 1);
+	I2CPeriph usbi2c{usb_i2c_conf};
+	constexpr uint8_t DevAddr = 0b01000100;
+	FUSB302::Device usbctl{usbi2c, DevAddr};
+	auto err = usbctl.init();
+
+	// data[0] = 0b00000100; //enable all Interrupts to host
+	// usbi2c.mem_write(DevAddr, FUSB302::Register::Control0, 1, data, 1);
+	FUSB302::Control0 c0{0};
+	c0.MaskAllInt = 0;
+	c0.HostCurrent = 0b01; //default 80uA on PullUp
+	usbctl.write(FUSB302::Register::Control0, c0);
+
+	FUSB302::Control2 c2{0};
+	c2.Toggle = 1;
 
 	data[0] = 0b00000101; //Enable SNK polling, (TOGGLE=1)
-	usbi2c.mem_write(DevAddr, FUSBRegister::Control2, 1, data, 1);
+	usbi2c.mem_write(DevAddr, FUSB302::Register::Control2, 1, data, 1);
 
 	// data[0] = 0b00001111; //Enable all power
 	// usbi2c.mem_write(DevAddr, FUSBRegister::Power, 1, data, 1);
 
-	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up};
+	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up, PinPolarity::Inverted};
 	bool usb_connected = false;
+
+	Pin usb_5v_src_enable{GPIO::A, PinNum::_15, PinMode::Output};
+
+	// __BKPT();
+	// usb_5v_src_enable.high();
+	// usb_5v_src_enable.low();
 
 	uint32_t tm = HAL_GetTick();
 
 	while (true) {
 		if ((HAL_GetTick() - tm) > 200) {
 			tm = HAL_GetTick();
-			usbi2c.mem_read(DevAddr, FUSBRegister::Status0, 1, &(data[0]), 1);
+			usbi2c.mem_read(DevAddr, FUSB302::Register::Status0, 1, &(data[0]), 1);
 			if (data[0] != data[1])
 				printf_("Status0: %x\n", data[0]);
 			data[1] = data[0];
 
-			usbi2c.mem_read(DevAddr, FUSBRegister::Interrupt, 1, &(data[2]), 1);
-			// if (data[2] != data[3])
-			// 	printf_("Interrupt: %x\n", data[2]);
-			// data[3] = data[2];
+			usbi2c.mem_read(DevAddr, FUSB302::Register::Interrupt, 1, &(data[2]), 1);
+			if (data[2] != data[3])
+				printf_("Interrupt: %x\n", data[2]);
+			data[3] = data[2];
 		}
 		if (fusb_int.is_on()) {
 			if (!usb_connected)
