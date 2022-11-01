@@ -92,55 +92,72 @@ void main() {
 	constexpr uint8_t DevAddr = 0b01000100;
 	FUSB302::Device usbctl{usbi2c, DevAddr};
 	auto err = usbctl.init();
+	{
+		using namespace FUSB302;
 
-	// data[0] = 0b00000100; //enable all Interrupts to host
-	// usbi2c.mem_write(DevAddr, FUSB302::Register::Control0, 1, data, 1);
-	FUSB302::Control0 c0{0};
-	c0.MaskAllInt = 0;
-	c0.HostCurrent = 0b01; //default 80uA on PullUp
-	usbctl.write(FUSB302::Register::Control0, c0);
+		Control0 c0{.HostCurrent = Control0::DefaultCurrent, .MaskAllInt = 0};
+		usbctl.write(Register::Control0, c0);
 
-	FUSB302::Control2 c2{0};
-	c2.Toggle = 1;
+		Control2 c2{.Toggle = 1, .PollingMode = Control2::PollSNK, .ToggleIgnoreRa = 1};
+		usbctl.write(Register::Control2, c2);
 
-	data[0] = 0b00000101; //Enable SNK polling, (TOGGLE=1)
-	usbi2c.mem_write(DevAddr, FUSB302::Register::Control2, 1, data, 1);
-
-	// data[0] = 0b00001111; //Enable all power
-	// usbi2c.mem_write(DevAddr, FUSBRegister::Power, 1, data, 1);
+		Power p{.BandGapAndWake = 1, .MeasureBlock = 1, .RXAndCurrentRefs = 1, .IntOsc = 1};
+		usbctl.write(Register::Power, p);
+	}
 
 	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up, PinPolarity::Inverted};
-	bool usb_connected = false;
 
 	Pin usb_5v_src_enable{GPIO::A, PinNum::_15, PinMode::Output};
-
-	// __BKPT();
-	// usb_5v_src_enable.high();
-	// usb_5v_src_enable.low();
+	usb_5v_src_enable.low();
 
 	uint32_t tm = HAL_GetTick();
 
+	uint8_t last_status0 = 0xFF;
+	uint8_t last_status0A = 0xFF;
+	uint8_t last_status1A = 0xFF;
+	bool int_asserted = false;
 	while (true) {
+
+		if (fusb_int.is_on()) {
+			if (!int_asserted)
+				printf_("INT pin asserted\n");
+			int_asserted = true;
+		} else {
+			if (int_asserted)
+				printf_("INT pin de-asserted\n");
+			int_asserted = false;
+		}
 		if ((HAL_GetTick() - tm) > 200) {
 			tm = HAL_GetTick();
-			usbi2c.mem_read(DevAddr, FUSB302::Register::Status0, 1, &(data[0]), 1);
-			if (data[0] != data[1])
-				printf_("Status0: %x\n", data[0]);
-			data[1] = data[0];
 
-			usbi2c.mem_read(DevAddr, FUSB302::Register::Interrupt, 1, &(data[2]), 1);
-			if (data[2] != data[3])
-				printf_("Interrupt: %x\n", data[2]);
-			data[3] = data[2];
-		}
-		if (fusb_int.is_on()) {
-			if (!usb_connected)
-				printf_("USB Connnected\n");
-			usb_connected = true;
-		} else {
-			if (usb_connected)
-				printf_("USB Disconnnected\n");
-			usb_connected = false;
+			{
+				auto status0 = usbctl.read(FUSB302::Register::Status0);
+				if (status0 != last_status0)
+					printf_("Status0: %x\n", status0);
+				last_status0 = status0;
+			}
+			{
+				auto status0A = usbctl.read(FUSB302::Register::Status0A);
+				if (last_status0A != status0A)
+					printf_("Status0A: %x\n", status0A);
+				last_status0A = status0A;
+			}
+			{
+				auto status1A = usbctl.read(FUSB302::Register::Status1A);
+				if (last_status1A != status1A)
+					printf_("Status1A: %x\n", status1A);
+				last_status1A = status1A;
+			}
+			{
+				auto interrupt = usbctl.read(FUSB302::Register::Interrupt);
+				if (interrupt)
+					printf_("INTERRUPT: %x\n", interrupt);
+			}
+			{
+				auto interruptA = usbctl.read(FUSB302::Register::InterruptA);
+				if (interruptA)
+					printf_("INTERRUPTA: %x\n", interruptA);
+			}
 		}
 
 		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
