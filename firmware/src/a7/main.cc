@@ -84,80 +84,67 @@ void main() {
 	ui.start();
 
 	UsbDriveDevice usb_drive{ramdiskops};
-	usb_drive.start();
+	usb_drive.init_usb_device();
 
 	HAL_Delay(10);
 
-	I2CPeriph usbi2c{usb_i2c_conf};
 	constexpr uint8_t DevAddr = 0b01000100;
+	I2CPeriph usbi2c{usb_i2c_conf};
 	FUSB302::Device usbctl{usbi2c, DevAddr};
 	auto err = usbctl.init();
-	{
-		using namespace FUSB302;
+	if (err)
+		printf_("Can't communicate with FUSB302\n");
+	else
+		printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
 
-		Control0 c0{.HostCurrent = Control0::DefaultCurrent, .MaskAllInt = 0};
-		usbctl.write(Register::Control0, c0);
-
-		Control2 c2{.Toggle = 1, .PollingMode = Control2::PollSNK, .ToggleIgnoreRa = 1};
-		usbctl.write(Register::Control2, c2);
-
-		Power p{.BandGapAndWake = 1, .MeasureBlock = 1, .RXAndCurrentRefs = 1, .IntOsc = 1};
-		usbctl.write(Register::Power, p);
-	}
+	usbctl.start_drp_polling();
 
 	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up, PinPolarity::Inverted};
-
 	Pin usb_5v_src_enable{GPIO::A, PinNum::_15, PinMode::Output};
 	usb_5v_src_enable.low();
 
 	uint32_t tm = HAL_GetTick();
-
-	uint8_t last_status0 = 0xFF;
-	uint8_t last_status0A = 0xFF;
-	uint8_t last_status1A = 0xFF;
 	bool int_asserted = false;
+	FUSB302::Device::ConnectedState state;
+
 	while (true) {
 
+		//TODO: use a pinchange interrupt
 		if (fusb_int.is_on()) {
-			if (!int_asserted)
+			if (!int_asserted) {
 				printf_("INT pin asserted\n");
-			int_asserted = true;
+				int_asserted = true;
+
+				usbctl.handle_interrupt();
+				auto newstate = usbctl.get_state();
+				if (newstate != state) {
+					state = newstate;
+
+					if (state == FUSB302::Device::ConnectedState::AsDevice) {
+						// usb_5v_src_enable.low();
+						printf_("Connected as a device\n");
+						usb_drive.start();
+					} else if (state == FUSB302::Device::ConnectedState::AsHost) {
+						// usb_5v_src_enable.high();
+						printf_("TODO: start host...\n");
+					} else if (state == FUSB302::Device::ConnectedState::None) {
+						printf_("Disconnected, resuming DRP polling\n");
+						// usb_5v_src_enable.low();
+						usbctl.start_drp_polling();
+					}
+				}
+			}
 		} else {
-			if (int_asserted)
+			if (int_asserted) {
 				printf_("INT pin de-asserted\n");
-			int_asserted = false;
+				int_asserted = false;
+			}
 		}
 		if ((HAL_GetTick() - tm) > 200) {
 			tm = HAL_GetTick();
-
-			{
-				auto status0 = usbctl.read(FUSB302::Register::Status0);
-				if (status0 != last_status0)
-					printf_("Status0: %x\n", status0);
-				last_status0 = status0;
-			}
-			{
-				auto status0A = usbctl.read(FUSB302::Register::Status0A);
-				if (last_status0A != status0A)
-					printf_("Status0A: %x\n", status0A);
-				last_status0A = status0A;
-			}
-			{
-				auto status1A = usbctl.read(FUSB302::Register::Status1A);
-				if (last_status1A != status1A)
-					printf_("Status1A: %x\n", status1A);
-				last_status1A = status1A;
-			}
-			{
-				auto interrupt = usbctl.read(FUSB302::Register::Interrupt);
-				if (interrupt)
-					printf_("INTERRUPT: %x\n", interrupt);
-			}
-			{
-				auto interruptA = usbctl.read(FUSB302::Register::InterruptA);
-				if (interruptA)
-					printf_("INTERRUPTA: %x\n", interruptA);
-			}
+			usbctl.reg_check<FUSB302::Register::Status0>("Status0");
+			usbctl.reg_check<FUSB302::Register::Status0A>("Status0A");
+			usbctl.reg_check<FUSB302::Register::Status1A>("Status1A");
 		}
 
 		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
