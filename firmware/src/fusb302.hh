@@ -46,6 +46,8 @@ struct Device {
 
 	void start_drp_polling() {
 		// Setup per datasheet p. 7 (Toggle Functionality)
+		// TODO: which registers need to be reset? It doesnt toggle the second time unless we do a SWReset
+		write(Register::Reset, Reset{.SWReset = 1});
 		write(Register::Control0, Control0{.HostCurrent = Control0::DefaultCurrent, .MaskAllInt = 0});
 		write(Register::Control2, Control2{.Toggle = 1, .PollingMode = Control2::PollDRP, .ToggleIgnoreRa = 1});
 		write(Register::Switches0, Switches0{.ConnectVConnCC1 = 0, .ConnectVConnCC2 = 0});
@@ -107,9 +109,9 @@ struct Device {
 
 			case ConnectedState::AsHost: {
 				Status0 status{read(Register::Status0)};
-				printf_("status0 0x%x\n", (uint8_t)status);
 				// Look for Unplug event:
 				// Comp==1, BC==3 means CC pin is read as > 1.23V, meaning no device Rd pull-down
+				//FIXME: why isn't Comp set at this point? it gets set a moment later...
 				if (/*status.Comp == 1 &&*/ status.BCLevel == 3)
 					state = ConnectedState::None;
 			} break;
