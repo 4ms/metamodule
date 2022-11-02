@@ -146,6 +146,10 @@ struct Device {
 	void reg_dump(std::string_view regname) {
 		auto val = read(Reg);
 		printf_("%s: 0x%x\n", regname.data(), val);
+		if constexpr (Reg == FUSB302::Register::Status0) {
+			Status0 s{val};
+			printf_("BCLevel=%d Wake=%d Comp=%d VBusOK=%d\n", s.BCLevel, s.Wake, s.Comp, s.VBusOK);
+		}
 	}
 };
 
