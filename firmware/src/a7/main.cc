@@ -22,6 +22,7 @@
 #include "util/mem_test.hh"
 
 #include "fusb302.hh"
+#include "usb/usb_host_manager.hh"
 
 namespace MetaModule
 {
@@ -86,6 +87,9 @@ void main() {
 	UsbDriveDevice usb_drive{ramdiskops};
 	usb_drive.init_usb_device();
 
+	UsbHostManager usb_host{{GPIO::A, 15}};
+	usb_host.init();
+
 	HAL_Delay(10);
 
 	constexpr uint8_t DevAddr = 0b01000100;
@@ -109,29 +113,31 @@ void main() {
 
 	while (true) {
 
-		//TODO: use a pinchange interrupt
+		//TODO: use a pinchange interrupt instead of polling and int_asserted
 		if (fusb_int.is_on()) {
 			if (!int_asserted) {
 				printf_("INT pin asserted\n");
 				int_asserted = true;
-
 				usbctl.handle_interrupt();
-				auto newstate = usbctl.get_state();
-				if (newstate != state) {
-					state = newstate;
 
-					if (state == FUSB302::Device::ConnectedState::AsDevice) {
-						// usb_5v_src_enable.low();
+				if (auto newstate = usbctl.get_state(); newstate != state) {
+					using enum FUSB302::Device::ConnectedState;
+
+					if (newstate == AsDevice) {
 						printf_("Connected as a device\n");
 						usb_drive.start();
-					} else if (state == FUSB302::Device::ConnectedState::AsHost) {
-						// usb_5v_src_enable.high();
-						printf_("TODO: start host...\n");
-					} else if (state == FUSB302::Device::ConnectedState::None) {
+					} else if (newstate == AsHost) {
+						printf_("Starting host\n");
+						usb_host.start();
+					} else if (newstate == None) {
+						if (state == AsHost)
+							usb_host.stop();
+						if (state == AsDevice)
+							usb_drive.stop();
 						printf_("Disconnected, resuming DRP polling\n");
-						// usb_5v_src_enable.low();
 						usbctl.start_drp_polling();
 					}
+					state = newstate;
 				}
 			}
 		} else {
@@ -140,6 +146,12 @@ void main() {
 				int_asserted = false;
 			}
 		}
+
+		if (state == FUSB302::Device::ConnectedState::AsHost) {
+			usb_host.process();
+		}
+
+		//DEBUG: poll the status registers
 		if ((HAL_GetTick() - tm) > 200) {
 			tm = HAL_GetTick();
 			usbctl.reg_check<FUSB302::Register::Status0>("Status0");
