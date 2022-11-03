@@ -27,8 +27,8 @@ struct Device {
 
 	bool init() {
 		uint8_t data;
-		auto err = i2c.mem_read(dev_addr, 0x01, 1, &data, 1);
-		if (err != mdrivlib::I2CPeriph::I2C_NO_ERR)
+		data = read(Register::ID);
+		if (!data)
 			return false;
 
 		device_id = data;
@@ -47,7 +47,8 @@ struct Device {
 	void start_drp_polling() {
 		// Setup per datasheet p. 7 (Toggle Functionality)
 		// TODO: which registers need to be reset? It doesnt toggle the second time unless we do a SWReset
-		write(Register::Reset, Reset{.SWReset = 1});
+		write(Register::Reset, Reset{.SWReset = 1, .PDReset = 1});
+		HAL_Delay(1);
 		write(Register::Control0, Control0{.HostCurrent = Control0::DefaultCurrent, .MaskAllInt = 0});
 		write(Register::Control2, Control2{.Toggle = 1, .PollingMode = Control2::PollDRP, .ToggleIgnoreRa = 1});
 		write(Register::Switches0, Switches0{.ConnectVConnCC1 = 0, .ConnectVConnCC2 = 0});
@@ -71,7 +72,7 @@ struct Device {
 					.OCPTempEvent = 1});				 //0xBF
 		write(Register::MaskA, MaskB{.GoodCRCSent = 1}); //0x01
 		write(Register::Power,
-			  Power{.BandGapAndWake = 1, .MeasureBlock = 1, .RXAndCurrentRefs = 1, .IntOsc = 1}); //0x01
+			  Power{.BandGapAndWake = 1, .MeasureBlock = 0, .RXAndCurrentRefs = 0, .IntOsc = 0}); //0x01
 
 		state = ConnectedState::TogglePolling;
 	}
@@ -131,7 +132,9 @@ struct Device {
 	//TODO: return std::expected<uint8_t> when compiler supports it
 	uint8_t read(Register reg) {
 		uint8_t data = 0;
-		auto ok = i2c.mem_read(dev_addr, static_cast<uint16_t>(reg), 1, &data, 1);
+		auto err = i2c.mem_read(dev_addr, static_cast<uint16_t>(reg), 1, &data, 1);
+		if (err != mdrivlib::I2CPeriph::I2C_NO_ERR)
+			printf_("Error reading Reg 0x%x: %d\n", static_cast<uint8_t>(reg), err);
 		return data;
 	}
 
