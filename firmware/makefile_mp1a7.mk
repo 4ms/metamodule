@@ -103,6 +103,7 @@ SOURCES += $(USBD_LIBDIR)/Core/Src/usbd_ioreq.c
 SOURCES += $(USBH_LIBDIR)/Class/HUB/Src/usbh_hub.c
 SOURCES += $(usb_src)/usbh_conf.c
 SOURCES += $(usb_src)/usbh_MIDI.c
+SOURCES += $(usb_src)/midi_host.cc
 SOURCES += $(USBH_LIBDIR)/Core/Src/usbh_core.c
 SOURCES += $(USBH_LIBDIR)/Core/Src/usbh_ctlreq.c
 SOURCES += $(USBH_LIBDIR)/Core/Src/usbh_ioreq.c

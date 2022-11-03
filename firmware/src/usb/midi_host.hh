@@ -10,6 +10,7 @@ class MidiHost {
 public:
 	MidiHost(USBH_HandleTypeDef &usbhandle)
 		: usbh_handle{usbhandle} {
+		_instance = this;
 	}
 
 	void start_rx() {
@@ -19,4 +20,6 @@ public:
 	Midi::MidiMessage get_rx_message() {
 		return Midi::MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 	}
+
+	static inline MidiHost *_instance;
 };

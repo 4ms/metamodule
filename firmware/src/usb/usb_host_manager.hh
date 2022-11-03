@@ -3,6 +3,9 @@
 #include "midi_host.hh"
 #include "printf.h"
 
+//hhcd defined in usbh_conf.c
+extern HCD_HandleTypeDef hhcd;
+
 class UsbHostManager {
 
 public:
@@ -13,19 +16,15 @@ public:
 	}
 
 	void init() {
-		//hhcd defined in usbh_conf.c
-		extern HCD_HandleTypeDef hhcd;
-
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
-		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
-
 		USBH_Init(&usbh_handle, USBH_StateChangeCallback, HOST_HS);
-		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
 	}
 
 	void start() {
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
 		mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
+		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
 		USBH_Start(&usbh_handle);
 		src_enable.high();
 	}
