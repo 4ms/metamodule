@@ -16,17 +16,22 @@ public:
 	}
 
 	void init() {
-		USBH_Init(&usbh_handle, USBH_StateChangeCallback, HOST_HS);
-	}
+		auto err = USBH_Init(&usbh_handle, USBH_StateChangeCallback, HOST_HS);
+		if (err != USBH_OK)
+			printf_("Error init USB Host: %d\n", err);
 
-	void start() {
+		//hhcd defined in usbh_conf.c
+		extern HCD_HandleTypeDef hhcd;
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
 		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
+	}
+
+	void start() {
+		src_enable.high();
 		mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
 		USBH_Start(&usbh_handle);
-		src_enable.high();
 	}
 	void stop() {
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);

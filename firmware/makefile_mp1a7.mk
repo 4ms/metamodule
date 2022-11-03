@@ -3,6 +3,8 @@
 #TODO: Once we have multiple a7 versions, build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
 #so don't build it twice for mini/max/etc
 
+USE_FEWER_MODULES ?= 1
+
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 target_board = $(word 1,$(MAKECMDGOALS))

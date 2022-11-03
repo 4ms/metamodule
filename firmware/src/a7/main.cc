@@ -104,8 +104,8 @@ void main() {
 	usbctl.start_drp_polling();
 
 	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up, PinPolarity::Inverted};
-	Pin usb_5v_src_enable{GPIO::A, PinNum::_15, PinMode::Output};
-	usb_5v_src_enable.low();
+	// Pin usb_5v_src_enable{GPIO::A, PinNum::_15, PinMode::Output};
+	// usb_5v_src_enable.low();
 
 	uint32_t tm = HAL_GetTick();
 	bool int_asserted = false;
@@ -124,9 +124,8 @@ void main() {
 					using enum FUSB302::Device::ConnectedState;
 
 					if (newstate == AsDevice) {
-						printf_("Connected as a device\n");
+						// printf_("Connected as a device\n");
 						// usb_drive.start();
-
 					} else if (newstate == AsHost) {
 						printf_("Starting host\n");
 						usb_host.start();
@@ -135,8 +134,7 @@ void main() {
 						if (state == AsHost)
 							usb_host.stop();
 						// if (state == AsDevice)
-						// usb_drive.stop();
-
+						// 	usb_drive.stop();
 						printf_("Disconnected, resuming DRP polling\n");
 						usbctl.start_drp_polling();
 					}
