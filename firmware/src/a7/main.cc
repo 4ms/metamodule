@@ -95,11 +95,11 @@ void main() {
 	constexpr uint8_t DevAddr = 0b01000100;
 	I2CPeriph usbi2c{usb_i2c_conf};
 	FUSB302::Device usbctl{usbi2c, DevAddr};
-	auto err = usbctl.init();
-	if (err)
-		printf_("Can't communicate with FUSB302\n");
-	else
+	auto ok = usbctl.init();
+	if (ok)
 		printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
+	else
+		printf_("Can't communicate with FUSB302\n");
 
 	usbctl.start_drp_polling();
 
