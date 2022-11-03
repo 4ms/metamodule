@@ -119,7 +119,7 @@ public:
 			if (std::string_view{info.name}.ends_with(extension)) {
 				lfs_file_t file;
 				if (lfs_file_open(&lfs, &file, info.name, LFS_O_RDONLY) < 0) {
-					printf("Warning: Can't open file %s\n", info.name);
+					printf_("Warning: Can't open file %s\n", info.name);
 					continue;
 				}
 
@@ -128,7 +128,7 @@ public:
 				if (bytes_read <= 0)
 					continue;
 				if (info.size > _data.size()) {
-					printf(
+					printf_(
 						"Warning: File %s is %d bytes, exceeds max %d. Skipping\n", info.name, info.size, _data.size());
 					continue;
 				}

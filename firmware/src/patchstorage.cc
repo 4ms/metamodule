@@ -18,13 +18,13 @@ PatchStorage::PatchStorage(mdrivlib::QSpiFlash &flash, RamDisk<RamDiskSizeBytes,
 void PatchStorage::factory_clean() {
 	auto status = lfs.reformat();
 	if (status == LittleNorFS::Status::FlashError) {
-		printf("ERROR: NOR Flash did not init (returned wrong id)\n");
+		printf_("ERROR: NOR Flash did not init (returned wrong id)\n");
 	}
 	if (status == LittleNorFS::Status::LFSError) {
-		printf("ERROR: LFS could not format and mount flash drive\n");
+		printf_("ERROR: LFS could not format and mount flash drive\n");
 	}
 	if (status == LittleNorFS::Status::NewlyFormatted) {
-		printf("Formatted NOR Flash as LittleFs and now creating deFault patch files\n");
+		printf_("Formatted NOR Flash as LittleFs and now creating deFault patch files\n");
 		create_default_patches_in_norflash();
 	}
 }
@@ -33,17 +33,17 @@ LittleNorFS::Status PatchStorage::init_norflash() {
 	auto status = lfs.initialize();
 
 	if (status == LittleNorFS::Status::FlashError) {
-		printf("ERROR: NOR Flash did not init (returned wrong id)\n");
+		printf_("ERROR: NOR Flash did not init (returned wrong id)\n");
 	}
 	if (status == LittleNorFS::Status::LFSError) {
-		printf("ERROR: LFS could not format and mount flash drive\n");
+		printf_("ERROR: LFS could not format and mount flash drive\n");
 	}
 	if (status == LittleNorFS::Status::NewlyFormatted) {
-		printf("NOR Flash did not have a LittleFS, formatted and created default patch files\n");
+		printf_("NOR Flash did not have a LittleFS, formatted and created default patch files\n");
 		create_default_patches_in_norflash();
 	}
 	if (status == LittleNorFS::Status::AlreadyFormatted) {
-		printf("Mounted existing LittleFS on NorFlash\n");
+		printf_("Mounted existing LittleFS on NorFlash\n");
 	}
 	return status;
 }
@@ -59,17 +59,17 @@ bool PatchStorage::norflash_patches_to_ramdisk() {
 		if (data.size() == 0)
 			return;
 
-		printf("Found patch file: %s, Reading... ", filename.data());
+		printf_("Found patch file: %s, Reading... ", filename.data());
 
 		//TODO: verify it's a patch file
 		//data.starts_with("PatchData: ");??? use PatchFileIO?
 
 		if (!RamDiskFileIO::create_file(filename.data(), data))
-			printf("Could not create file %s on ram disk\n", filename.data());
+			printf_("Could not create file %s on ram disk\n", filename.data());
 	});
 
 	if (!ok) {
-		printf("NorFlashRamDiskOps init failed to read patch dir\n");
+		printf_("NorFlashRamDiskOps init failed to read patch dir\n");
 		return false;
 	}
 	return true;
@@ -95,11 +95,11 @@ bool PatchStorage::ramdisk_patches_to_norflash() {
 		std::array<char, 32768> buf;
 		uint32_t filesize = RamDiskFileIO::read_file(fname, buf.data(), buf.size());
 		if (filesize == buf.size()) {
-			printf("File exceeds %zu bytes, too big. Skipping\r\n", buf.size());
+			printf_("File exceeds %zu bytes, too big. Skipping\r\n", buf.size());
 			return;
 		}
 		if (!filesize) {
-			printf("File cannot be read. Skipping\r\n");
+			printf_("File cannot be read. Skipping\r\n");
 			return;
 		}
 		lfs.create_file(fname, buf);
@@ -112,9 +112,9 @@ bool PatchStorage::create_default_patches_in_norflash() {
 	for (uint32_t i = 0; i < DefaultPatches::num_patches(); i++) {
 		const auto filename = DefaultPatches::get_filename(i);
 		const auto patch = DefaultPatches::get_patch(i);
-		printf("Creating default patch file: %s\n", filename.c_str());
+		printf_("Creating default patch file: %s\n", filename.c_str());
 		if (!lfs.create_file(filename, patch)) {
-			printf("Error: aborted creating default patches to flash\n");
+			printf_("Error: aborted creating default patches to flash\n");
 			return false;
 		}
 	}
@@ -126,7 +126,7 @@ bool PatchStorage::fill_patchlist_from_norflash(PatchList &patch_list) {
 	patch_list.clear_all_patches();
 
 	bool ok = lfs.foreach_file_with_ext(".yml", [&](const std::string_view fname, const std::span<char> data) {
-		printf("Found patch file: %s, Reading... ", fname.data());
+		printf_("Found patch file: %s, Reading... ", fname.data());
 		patch_list.add_patch_from_yaml(data);
 	});
 
