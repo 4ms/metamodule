@@ -84,8 +84,8 @@ void main() {
 	audio.start();
 	ui.start();
 
-	UsbDriveDevice usb_drive{ramdiskops};
-	usb_drive.init_usb_device();
+	// UsbDriveDevice usb_drive{ramdiskops};
+	// usb_drive.init_usb_device();
 
 	UsbHostManager usb_host{{GPIO::A, 15}};
 	usb_host.init();
@@ -125,15 +125,18 @@ void main() {
 
 					if (newstate == AsDevice) {
 						printf_("Connected as a device\n");
-						usb_drive.start();
+						// usb_drive.start();
+
 					} else if (newstate == AsHost) {
 						printf_("Starting host\n");
 						usb_host.start();
+
 					} else if (newstate == None) {
 						if (state == AsHost)
 							usb_host.stop();
-						if (state == AsDevice)
-							usb_drive.stop();
+						// if (state == AsDevice)
+						// usb_drive.stop();
+
 						printf_("Disconnected, resuming DRP polling\n");
 						usbctl.start_drp_polling();
 					}
