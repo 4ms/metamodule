@@ -14,6 +14,8 @@ extern "C" PCD_HandleTypeDef hpcd;
 using InterruptControl = mdrivlib::InterruptControl;
 using InterruptManager = mdrivlib::InterruptManager;
 
+//TODO: Add support for multiple usb interfaces (CDC/MIDI): "AddClass()" not RegisterClass
+//Should also rename this class to UsbDeviceManager or something
 void UsbDriveDevice::init_usb_device() {
 
 	auto init_ok = USBD_Init(&pdev, &MSC_Desc, 0);
@@ -23,17 +25,14 @@ void UsbDriveDevice::init_usb_device() {
 	}
 
 	InterruptControl::disable_irq(OTG_IRQn);
-	InterruptControl::set_irq_priority(OTG_IRQn, 2, 0);
-	InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_PCD_IRQHandler, &hpcd));
-
-	//TODO: Add support for multiple usb interfaces (CDC/MIDI): "AddClass()" not RegisterClass
-	//Should also rename this class to UsbDeviceManager or something
-	USBD_RegisterClass(&pdev, USBD_MSC_CLASS);
-	USBD_MSC_RegisterStorage(&pdev, &ops);
+	InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
 }
 
 void UsbDriveDevice::start() {
+	InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_PCD_IRQHandler, &hpcd));
 	InterruptControl::enable_irq(OTG_IRQn, InterruptControl::LevelTriggered);
+	USBD_RegisterClass(&pdev, USBD_MSC_CLASS);
+	USBD_MSC_RegisterStorage(&pdev, &ops);
 	USBD_Start(&pdev);
 }
 
