@@ -17,6 +17,7 @@
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
+#include "stm32mp1xx_hal.h"
 #include "ui.hh"
 #include "usb/usb_drive_device.hh"
 #include "util/mem_test.hh"
@@ -84,13 +85,13 @@ void main() {
 	audio.start();
 	ui.start();
 
-	// UsbDriveDevice usb_drive{ramdiskops};
-	// usb_drive.init_usb_device();
+	// TODO: UsbManager {
+
+	UsbDriveDevice usb_drive{ramdiskops};
+	usb_drive.init_usb_device();
 
 	UsbHostManager usb_host{{GPIO::A, 15}};
 	usb_host.init();
-
-	HAL_Delay(10);
 
 	constexpr uint8_t DevAddr = 0b01000100;
 	I2CPeriph usbi2c{usb_i2c_conf};
@@ -103,17 +104,15 @@ void main() {
 
 	usbctl.start_drp_polling();
 
-	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up, PinPolarity::Inverted};
-	// Pin usb_5v_src_enable{GPIO::A, PinNum::_15, PinMode::Output};
-	// usb_5v_src_enable.low();
-
 	uint32_t tm = HAL_GetTick();
+
 	bool int_asserted = false;
 	FUSB302::Device::ConnectedState state;
 
+	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up, PinPolarity::Inverted};
 	while (true) {
 
-		//TODO: use a pinchange interrupt instead of polling and int_asserted
+		//TODO: use a pinchange interrupt in UsbManager instead of polling and int_asserted
 		if (fusb_int.is_on()) {
 			if (!int_asserted) {
 				printf_("INT pin asserted\n");
@@ -124,8 +123,9 @@ void main() {
 					using enum FUSB302::Device::ConnectedState;
 
 					if (newstate == AsDevice) {
-						// printf_("Connected as a device\n");
-						// usb_drive.start();
+						printf_("Connected as a device\n");
+						usb_drive.start();
+
 					} else if (newstate == AsHost) {
 						printf_("Starting host\n");
 						usb_host.start();
@@ -133,8 +133,10 @@ void main() {
 					} else if (newstate == None) {
 						if (state == AsHost)
 							usb_host.stop();
-						// if (state == AsDevice)
-						// 	usb_drive.stop();
+
+						if (state == AsDevice)
+							usb_drive.stop();
+
 						printf_("Disconnected, resuming DRP polling\n");
 						usbctl.start_drp_polling();
 					}
@@ -148,27 +150,26 @@ void main() {
 			}
 		}
 
+		// UsbManager::process()
 		if (state == FUSB302::Device::ConnectedState::AsHost) {
 			usb_host.process();
 		}
 
 		//DEBUG: poll the status registers
-		if ((HAL_GetTick() - tm) > 200) {
+		if ((HAL_GetTick() - tm) > 400) {
 			tm = HAL_GetTick();
-			usbctl.reg_check<FUSB302::Register::Status0>("Status0");
-			usbctl.reg_check<FUSB302::Register::Status0A>("Status0A");
-			usbctl.reg_check<FUSB302::Register::Status1A>("Status1A");
+			usbctl.check_all_regs();
 		}
 
 		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
 			patch_list.lock();
-			printf("NOR Flash writeback begun.\r\n");
+			printf_("NOR Flash writeback begun.\r\n");
 			RamDiskFileIO::unmount_disk(Disk::RamDisk);
 			if (patchdisk.ramdisk_patches_to_norflash()) {
-				printf("NOR Flash writeback done. Refreshing patch list.\r\n");
+				printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
 				patch_list.mark_modified();
 			} else {
-				printf("NOR Flash writeback failed!\r\n");
+				printf_("NOR Flash writeback failed!\r\n");
 			}
 			ramdiskops.set_status(RamDiskOps::Status::NotInUse);
 			patch_list.unlock();
