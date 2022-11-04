@@ -102,12 +102,14 @@ struct Device {
 		switch (state) {
 			case ConnectedState::TogglePolling: {
 				printf_("State is currently Polling\n");
-				// Look for plug event:
+
 				Status1A status1a{read<Status1A>()};
 				if (status1a.ToggleOutcomeIsSink)
 					state = ConnectedState::AsDevice;
+
 				else if (status1a.ToggleOutcomeIsCC1 || status1a.ToggleOutcomeIsCC2)
 					state = ConnectedState::AsHost;
+
 				//could also check Status0: Comp == 0 && BCLevel < 3
 				//Comp == 0 means CC pin is read as less than reference, meaning device Rd pull-down was detected
 				//BC<3 means CC pin is read as < 1.23V, meaning a device Rd pull-down was detected
@@ -116,6 +118,7 @@ struct Device {
 			case ConnectedState::AsDevice: {
 				printf_("State is currently Device\n");
 				Status0 status0{read<Status0>()};
+
 				// Look for unplug event:
 				// VBusOK = 0 means no VBUS, BCLevel == 0 means CC detected as low (no host pull-up detected)
 				if (status0.VBusOK == 0 && status0.BCLevel == 0)

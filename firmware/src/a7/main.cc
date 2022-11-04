@@ -87,11 +87,11 @@ void main() {
 
 	// TODO: UsbManager {
 
-	UsbDriveDevice usb_drive{ramdiskops};
-	usb_drive.init_usb_device();
-
 	UsbHostManager usb_host{{GPIO::A, 15}};
 	usb_host.init();
+
+	UsbDriveDevice usb_drive{ramdiskops};
+	usb_drive.init_usb_device();
 
 	constexpr uint8_t DevAddr = 0b01000100;
 	I2CPeriph usbi2c{usb_i2c_conf};
