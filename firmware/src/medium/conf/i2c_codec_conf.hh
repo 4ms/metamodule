@@ -44,10 +44,10 @@ const mdrivlib::I2CConfig usb_i2c_conf = {
 	.SDA = {GPIO::D, 0, mdrivlib::PinAF::AltFunc2},
 	.timing =
 		{
-			.PRESC = 0x20,
+			.PRESC = 0x10, //0x20 is 100k
 			.SCLDEL_SDADEL = 0x50,
 			.SCLH = 0x58,
-			.SCLL = 0x74,
+			.SCLL = 0x58,
 		},
 	.priority1 = 2,
 	.priority2 = 2,
