@@ -4,7 +4,7 @@
 #include "printf.h"
 #include "usbd_desc.h"
 #include "usbd_msc.h"
-#include <cstring>
+// #include <cstring>
 #include <functional>
 
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
@@ -17,7 +17,10 @@ using InterruptManager = mdrivlib::InterruptManager;
 //TODO: Add support for multiple usb interfaces (CDC/MIDI): "AddClass()" not RegisterClass
 //Should also rename this class to UsbDeviceManager or something
 void UsbDriveDevice::init_usb_device() {
+	mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+}
 
+void UsbDriveDevice::start() {
 	auto init_ok = USBD_Init(&pdev, &MSC_Desc, 0);
 	if (init_ok != USBD_OK) {
 		printf_("USB Device failed to initialize!\r\n");
@@ -26,9 +29,6 @@ void UsbDriveDevice::init_usb_device() {
 
 	InterruptControl::disable_irq(OTG_IRQn);
 	InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
-}
-
-void UsbDriveDevice::start() {
 	InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_PCD_IRQHandler, &hpcd));
 	InterruptControl::enable_irq(OTG_IRQn, InterruptControl::LevelTriggered);
 	USBD_RegisterClass(&pdev, USBD_MSC_CLASS);
@@ -39,6 +39,7 @@ void UsbDriveDevice::start() {
 void UsbDriveDevice::stop() {
 	InterruptControl::disable_irq(OTG_IRQn);
 	USBD_Stop(&pdev);
+	USBD_DeInit(&pdev);
 }
 
 int8_t UsbDriveDevice::init(uint8_t lun) {

@@ -2,6 +2,7 @@
 #include "drivers/pin.hh"
 #include "midi_host.hh"
 #include "printf.h"
+#include <functional>
 
 //hhcd defined in usbh_conf.c
 extern HCD_HandleTypeDef hhcd;
@@ -13,29 +14,34 @@ public:
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
 		src_enable.low();
 		_midihost_instance = &midi_host;
+		_instance = this;
 	}
 
 	void init() {
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+	}
+
+	void start() {
 		auto err = USBH_Init(&usbh_handle, USBH_StateChangeCallback, HOST_HS);
 		if (err != USBH_OK)
 			printf_("Error init USB Host: %d\n", err);
 
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
-	}
-
-	void start() {
-		src_enable.high();
-		// mdrivlib::InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_HCD_IRQHandler, &hhcd));
-		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_HCD_IRQHandler, &hhcd));
+		// mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
 		mdrivlib::InterruptControl::enable_irq(OTG_IRQn, mdrivlib::InterruptControl::LevelTriggered);
+
 		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
+		//register HUB class
 		USBH_Start(&usbh_handle);
+		src_enable.high();
 	}
 	void stop() {
 		src_enable.low();
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		USBH_Stop(&usbh_handle);
+		USBH_DeInit(&usbh_handle);
 	}
 
 	void process() {
@@ -69,6 +75,8 @@ public:
 
 			case HOST_USER_DISCONNECTION:
 				state = APPLICATION_DISCONNECT;
+				// printf_("App disconnect\n");
+				// _instance->stop();
 				break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
@@ -85,5 +93,6 @@ private:
 	USBH_HandleTypeDef usbh_handle;
 	MidiHost midi_host{usbh_handle};
 	static inline MidiHost *_midihost_instance;
+	static inline UsbHostManager *_instance;
 	mdrivlib::Pin src_enable;
 };
