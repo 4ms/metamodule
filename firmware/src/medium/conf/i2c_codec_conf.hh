@@ -44,7 +44,7 @@ const mdrivlib::I2CConfig usb_i2c_conf = {
 	.SDA = {GPIO::D, 0, mdrivlib::PinAF::AltFunc2},
 	.timing =
 		{
-			.PRESC = 0x40,
+			.PRESC = 0x20,
 			.SCLDEL_SDADEL = 0x50,
 			.SCLH = 0x58,
 			.SCLL = 0x74,
