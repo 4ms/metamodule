@@ -51,4 +51,6 @@ const mdrivlib::I2CConfig usb_i2c_conf = {
 		},
 	.priority1 = 2,
 	.priority2 = 2,
+	.analog_filter = true,
+	.digital_filter = mdrivlib::I2CConfig::DigitalFilterLevel::Max,
 };
