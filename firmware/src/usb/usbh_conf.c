@@ -38,10 +38,15 @@ void HAL_HCD_MspInit(HCD_HandleTypeDef *hpcd) {
 		__HAL_RCC_USBPHY_FORCE_RESET();
 		__HAL_RCC_USBPHY_RELEASE_RESET();
 
-		__HAL_RCC_USBO_CLK_ENABLE();
-		__HAL_RCC_USBPHY_CLK_ENABLE();
-		// RCC->MP_APB4ENSETR = RCC_MP_APB4ENSETR_USBPHYEN;
-		// RCC->MP_APB4LPENSETR = RCC_MP_APB4LPENSETR_USBPHYLPEN;
+#if defined(CA7)
+		RCC->MP_APB4ENSETR = RCC_MP_APB4ENSETR_USBPHYEN;
+		RCC->MP_AHB2ENSETR = RCC_MP_AHB2ENSETR_USBOEN;
+#elif defined(CM4)
+		RCC->MC_APB4ENSETR = RCC_MC_APB4ENSETR_USBPHYEN;
+		RCC->MC_AHB2ENSETR = RCC_MC_AHB2ENSETR_USBOEN;
+#endif
+		// __HAL_RCC_USBO_CLK_ENABLE();
+		// __HAL_RCC_USBPHY_CLK_ENABLE();
 
 		/* STM32_USBPHYC_MISC bit fields */
 		/*	SWITHOST 0: Select OTG controller for 2nd PHY port */
@@ -77,7 +82,7 @@ void *USBH_malloc(size_t sz) {
 	return NULL;
 }
 
-void USBH_free(void *){
+void USBH_free(void *x){
 	// nothing, we're using static allocation
 };
 
