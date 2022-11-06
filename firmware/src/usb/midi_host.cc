@@ -1,4 +1,5 @@
 #include "midi_host.hh"
+#include "printf.h"
 
 extern "C" void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost) {
 	auto msg = MidiHost::_instance->get_rx_message();
