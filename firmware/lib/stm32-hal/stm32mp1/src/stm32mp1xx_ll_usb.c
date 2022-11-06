@@ -94,10 +94,6 @@ HAL_StatusTypeDef USB_HS_PHYCDeInit(void) {
 // Modification here: Function from hftrx
 HAL_StatusTypeDef USB_HS_PHYCInit(void) {
 	// Enable RCC for USBPHY
-	volatile int x = 1;
-	while (x)
-		;
-
 #if defined(CORE_CA7)
 	RCC->MP_APB4ENSETR = RCC_MP_APB4ENSETR_USBPHYEN;
 	RCC->MP_APB4LPENSETR = RCC_MP_APB4LPENSETR_USBPHYLPEN;
