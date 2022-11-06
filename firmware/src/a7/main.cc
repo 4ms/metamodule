@@ -18,7 +18,7 @@
 #include "shared_memory.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
-#include "usb/usb_manager.hh"
+// #include "usb/usb_manager.hh"
 #include "util/mem_test.hh"
 
 namespace MetaModule
