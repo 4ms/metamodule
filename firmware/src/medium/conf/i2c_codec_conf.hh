@@ -36,21 +36,3 @@ const mdrivlib::I2CConfig aux_i2c_conf = {
 	.priority1 = 0,
 	.priority2 = 1,
 };
-
-// I2C for usb-c chip
-const mdrivlib::I2CConfig usb_i2c_conf = {
-	.I2Cx = I2C6,
-	.SCL = {GPIO::D, 1, mdrivlib::PinAF::AltFunc2},
-	.SDA = {GPIO::D, 0, mdrivlib::PinAF::AltFunc2},
-	.timing =
-		{
-			.PRESC = 0x10, //0x20 is 100k
-			.SCLDEL_SDADEL = 0x50,
-			.SCLH = 0x58,
-			.SCLL = 0x58,
-		},
-	.priority1 = 2,
-	.priority2 = 2,
-	.analog_filter = true,
-	.digital_filter = mdrivlib::I2CConfig::DigitalFilterLevel::Max,
-};

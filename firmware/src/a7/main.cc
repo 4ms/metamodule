@@ -19,11 +19,8 @@
 #include "static_buffers.hh"
 #include "stm32mp1xx_hal.h"
 #include "ui.hh"
-#include "usb/usb_drive_device.hh"
+#include "usb/usb_manager.hh"
 #include "util/mem_test.hh"
-
-#include "fusb302.hh"
-#include "usb/usb_host_manager.hh"
 
 namespace MetaModule
 {
@@ -49,7 +46,7 @@ void main() {
 
 	// Populate Patch List from Patch Storage
 	PatchList patch_list{};
-	patchdisk.factory_clean(); //Remove this when not testing!
+	// patchdisk.factory_clean(); //Remove this when not testing!
 	patchdisk.fill_patchlist_from_norflash(patch_list);
 	patchdisk.norflash_patches_to_ramdisk();
 
@@ -85,82 +82,14 @@ void main() {
 	audio.start();
 	ui.start();
 
-	// TODO: UsbManager {
+	UsbManager usb{ramdiskops};
+	usb.start();
 
-	UsbHostManager usb_host{{GPIO::A, 15}};
-	usb_host.init();
-
-	UsbDriveDevice usb_drive{ramdiskops};
-	usb_drive.init_usb_device();
-
-	constexpr uint8_t DevAddr = 0b01000100;
-	I2CPeriph usbi2c{usb_i2c_conf};
-	FUSB302::Device usbctl{usbi2c, DevAddr};
-	auto ok = usbctl.init();
-	if (ok)
-		printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
-	else
-		printf_("Can't communicate with FUSB302\n");
-
-	usbctl.start_drp_polling();
-
-	uint32_t tm = HAL_GetTick();
-
-	bool int_asserted = false;
-	FUSB302::Device::ConnectedState state;
-
-	Pin fusb_int{GPIO::A, 10, PinMode::Input, 0, PinPull::Up, PinPolarity::Inverted};
 	while (true) {
+		usb.process();
 
-		//TODO: use a pinchange interrupt in UsbManager instead of polling and int_asserted
-		if (fusb_int.is_on()) {
-			if (!int_asserted) {
-				printf_("INT pin asserted\n");
-				int_asserted = true;
-				usbctl.handle_interrupt();
-
-				if (auto newstate = usbctl.get_state(); newstate != state) {
-					using enum FUSB302::Device::ConnectedState;
-
-					if (newstate == AsDevice) {
-						printf_("Connected as a device\n");
-						usb_drive.start();
-
-					} else if (newstate == AsHost) {
-						printf_("Starting host\n");
-						usb_host.start();
-
-					} else if (newstate == None) {
-						if (state == AsHost)
-							usb_host.stop();
-
-						if (state == AsDevice)
-							usb_drive.stop();
-
-						printf_("Disconnected, resuming DRP polling\n");
-						usbctl.start_drp_polling();
-					}
-					state = newstate;
-				}
-			}
-		} else {
-			if (int_asserted) {
-				printf_("INT pin de-asserted\n");
-				int_asserted = false;
-			}
-		}
-
-		// UsbManager::process()
-		if (state == FUSB302::Device::ConnectedState::AsHost) {
-			usb_host.process();
-		}
-
-		//DEBUG: poll the status registers
-		if ((HAL_GetTick() - tm) > 400) {
-			tm = HAL_GetTick();
-			usbctl.check_all_regs();
-		}
-
+		// TODO: if disk is unexpectedly disconnected, we should scan it
+		// TODO: can this be encapsulated? patch_list + RamDiskFileIO/ramdiskops + patch_storage
 		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
 			patch_list.lock();
 			printf_("NOR Flash writeback begun.\r\n");
