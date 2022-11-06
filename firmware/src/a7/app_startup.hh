@@ -21,6 +21,10 @@ struct AppStartup {
 
 		RCC_Enable::HSEM_::set();
 
+		// Enable non-secure R/W access for I2C6
+		// Fixes bug in early MP1-Boot version
+		TZPC->DECPROT0 = TZPC->DECPROT0 | (0b11 << 24);
+
 		HWSemaphore<MainCoreReady>::disable_channel_ISR();
 		HWSemaphore<MainCoreReady>::lock();
 
