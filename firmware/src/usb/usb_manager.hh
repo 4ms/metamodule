@@ -3,7 +3,7 @@
 #include "drivers/pin_change.hh"
 #include "fusb302.hh"
 // #include "usb/usb_drive_device.hh"
-// #include "usb/usb_host_manager.hh"
+#include "usb/usb_host_manager.hh"
 
 // #include "printf.h"
 #include "debug.hh"
@@ -12,7 +12,7 @@ namespace MetaModule
 {
 
 class UsbManager {
-	// UsbHostManager usb_host{Usb5VSrcEnablePin};
+	UsbHostManager usb_host{Usb5VSrcEnablePin};
 	// UsbDriveDevice usb_drive;
 	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
 
@@ -23,12 +23,10 @@ class UsbManager {
 	using PinMode = mdrivlib::PinMode;
 	mdrivlib::FPin<FUSBPinChangeConf::port, FUSBPinChangeConf::pin, PinMode::Input, PinPolarity::Inverted> fusb_int_pin;
 
-	// mdrivlib::PinChangeInt<FUSBPinChangeConf> fusb_pin_isr;
-
-	// For non-pinchangeISR:
-	// mdrivlib::Pin fusb_int{
-	// 	mdrivlib::GPIO::A, 10, mdrivlib::PinMode::Input, 0, mdrivlib::PinPull::Up, mdrivlib::PinPolarity::Inverted};
+	// For no pinchange ISR:
 	bool int_asserted = false;
+	// For pinchange ISR:
+	// mdrivlib::PinChangeInt<FUSBPinChangeConf> fusb_pin_isr;
 
 	// Debug: timer for dumping registers
 	uint32_t tm;
@@ -38,19 +36,22 @@ public:
 		: // usb_drive{ramdiskops},
 		fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		// usb_drive.init_usb_device();
-		// usb_host.init();
-		Debug::Pin1::low();
-		Debug::Pin1::high();
-		Debug::Pin1::low();
+		Debug::Pin3::low();
+		Debug::Pin3::high();
+		Debug::Pin3::low();
+		usb_host.init();
 		Debug::Pin2::low();
 		Debug::Pin2::high();
 		Debug::Pin2::low();
 
 		auto ok = usbctl.init();
-		if (ok)
-			Debug::Pin1::high();
-		else
-			Debug::Pin2::high();
+		if (ok) {
+			Debug::green_LED1::high();
+			Debug::Pin0::low();
+		} else {
+			Debug::red_LED1::high();
+			Debug::Pin0::high();
+		}
 
 		// if (ok)
 		// 	printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
@@ -59,7 +60,6 @@ public:
 	}
 
 	void start() {
-
 		// fusb_pin_isr.init([this]() { handle_fusb_int(); });
 		// fusb_pin_isr.start();
 
@@ -68,7 +68,7 @@ public:
 	}
 
 	void handle_fusb_int() {
-		Debug::Pin0::high();
+		Debug::Pin1::high();
 		// printf_("INT pin asserted\n");
 		usbctl.handle_interrupt();
 
@@ -76,16 +76,22 @@ public:
 			using enum FUSB302::Device::ConnectedState;
 
 			if (newstate == AsDevice) {
+				Debug::Pin2::high();
+				Debug::Pin3::low();
 				// printf_("Connected as a device\n");
 				// usb_drive.start();
 
 			} else if (newstate == AsHost) {
+				Debug::Pin2::low();
+				Debug::Pin3::high();
 				// printf_("Starting host\n");
-				// usb_host.start();
+				usb_host.start();
 
 			} else if (newstate == None) {
-				// if (state == AsHost)
-				// 	usb_host.stop();
+				Debug::Pin2::low();
+				Debug::Pin3::low();
+				if (state == AsHost)
+					usb_host.stop();
 
 				// if (state == AsDevice)
 				// 	usb_drive.stop();
@@ -95,7 +101,7 @@ public:
 			}
 			state = newstate;
 		}
-		Debug::Pin0::low();
+		Debug::Pin1::low();
 	}
 
 	void process() {
@@ -114,10 +120,17 @@ public:
 			// usb_host.process();
 		}
 
-		//DEBUG: poll the status registers
+		//DEBUG: toggle Pin0 when we're DRD polling
 		if ((HAL_GetTick() - tm) > 400) {
 			tm = HAL_GetTick();
-			usbctl.check_all_regs();
+			auto stat0 = usbctl.read<FUSB302::Status0>();
+			if (stat0.BCLevel == 3) {
+				if (stat0.Comp)
+					Debug::Pin0::high();
+				else
+					Debug::Pin0::low();
+			}
+			// usbctl.check_all_regs();
 		}
 	}
 };
