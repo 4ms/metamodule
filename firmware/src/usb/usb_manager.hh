@@ -2,17 +2,18 @@
 #include "conf/fusb30x_conf.hh"
 #include "drivers/pin_change.hh"
 #include "fusb302.hh"
-#include "usb/usb_drive_device.hh"
-#include "usb/usb_host_manager.hh"
+// #include "usb/usb_drive_device.hh"
+// #include "usb/usb_host_manager.hh"
 
-#include "printf.h"
+// #include "printf.h"
+#include "debug.hh"
 
 namespace MetaModule
 {
 
 class UsbManager {
-	UsbHostManager usb_host{Usb5VSrcEnablePin};
-	UsbDriveDevice usb_drive;
+	// UsbHostManager usb_host{Usb5VSrcEnablePin};
+	// UsbDriveDevice usb_drive;
 	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
 
 	FUSB302::Device usbctl{usbi2c, FUSBDevAddr};
@@ -33,17 +34,28 @@ class UsbManager {
 	uint32_t tm;
 
 public:
-	UsbManager(RamDiskOps ramdiskops)
-		: usb_drive{ramdiskops}
-		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
-		usb_drive.init_usb_device();
-		usb_host.init();
+	UsbManager(/*RamDiskOps ramdiskops*/)
+		: // usb_drive{ramdiskops},
+		fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
+		// usb_drive.init_usb_device();
+		// usb_host.init();
+		Debug::Pin1::low();
+		Debug::Pin1::high();
+		Debug::Pin1::low();
+		Debug::Pin2::low();
+		Debug::Pin2::high();
+		Debug::Pin2::low();
 
 		auto ok = usbctl.init();
 		if (ok)
-			printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
+			Debug::Pin1::high();
 		else
-			printf_("Can't communicate with FUSB302\n");
+			Debug::Pin2::high();
+
+		// if (ok)
+		// 	printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
+		// else
+		// 	printf_("Can't communicate with FUSB302\n");
 	}
 
 	void start() {
@@ -56,32 +68,34 @@ public:
 	}
 
 	void handle_fusb_int() {
-		printf_("INT pin asserted\n");
+		Debug::Pin0::high();
+		// printf_("INT pin asserted\n");
 		usbctl.handle_interrupt();
 
 		if (auto newstate = usbctl.get_state(); newstate != state) {
 			using enum FUSB302::Device::ConnectedState;
 
 			if (newstate == AsDevice) {
-				printf_("Connected as a device\n");
-				usb_drive.start();
+				// printf_("Connected as a device\n");
+				// usb_drive.start();
 
 			} else if (newstate == AsHost) {
-				printf_("Starting host\n");
-				usb_host.start();
+				// printf_("Starting host\n");
+				// usb_host.start();
 
 			} else if (newstate == None) {
-				if (state == AsHost)
-					usb_host.stop();
+				// if (state == AsHost)
+				// 	usb_host.stop();
 
-				if (state == AsDevice)
-					usb_drive.stop();
+				// if (state == AsDevice)
+				// 	usb_drive.stop();
 
-				printf_("Disconnected, resuming DRP polling\n");
+				// printf_("Disconnected, resuming DRP polling\n");
 				usbctl.start_drp_polling();
 			}
 			state = newstate;
 		}
+		Debug::Pin0::low();
 	}
 
 	void process() {
@@ -97,7 +111,7 @@ public:
 		}
 
 		if (state == FUSB302::Device::ConnectedState::AsHost) {
-			usb_host.process();
+			// usb_host.process();
 		}
 
 		//DEBUG: poll the status registers

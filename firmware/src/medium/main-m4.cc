@@ -14,6 +14,7 @@
 #include "shared_bus.hh"
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
+#include "usb/usb_manager.hh"
 
 namespace MetaModule
 {
@@ -56,6 +57,9 @@ void main() {
 	mdrivlib::GPIOExpander ext_gpio_expander{i2cbus.i2c, extaudio_gpio_expander_conf};
 	mdrivlib::GPIOExpander main_gpio_expander{i2cbus.i2c, mainboard_gpio_expander_conf};
 
+	UsbManager usb;
+	usb.start();
+
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
@@ -68,6 +72,8 @@ void main() {
 		if (SharedBus::i2c.is_ready()) {
 			i2cqueue.update();
 		}
+
+		usb.process();
 		__NOP();
 	}
 }

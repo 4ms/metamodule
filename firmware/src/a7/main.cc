@@ -82,11 +82,11 @@ void main() {
 	audio.start();
 	ui.start();
 
-	UsbManager usb{ramdiskops};
-	usb.start();
+	// UsbManager usb{ramdiskops};
+	// usb.start();
 
 	while (true) {
-		usb.process();
+		// usb.process();
 
 		// TODO: if disk is unexpectedly disconnected, we should scan it
 		// TODO: can this be encapsulated? patch_list + RamDiskFileIO/ramdiskops + patch_storage
