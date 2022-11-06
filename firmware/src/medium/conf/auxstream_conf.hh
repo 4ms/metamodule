@@ -34,9 +34,9 @@ struct AuxStream {
 
 	static constexpr float DACscaling = 0.f;
 
-	mdrivlib::Pin ButtonLedBlue{GPIO::A, 9, PinMode::Alt, LL_GPIO_AF_1};   // TIM1_CH2
-	mdrivlib::Pin ButtonLedRed{GPIO::B, 15, PinMode::Alt, LL_GPIO_AF_1};   // TIM1_CH3N
-	mdrivlib::Pin ButtonLedGreen{GPIO::E, 14, PinMode::Alt, LL_GPIO_AF_1}; // TIM1_CH4
+	// mdrivlib::Pin ButtonLedBlue{GPIO::A, 9, PinMode::Alt, LL_GPIO_AF_1};   // TIM1_CH2
+	// mdrivlib::Pin ButtonLedRed{GPIO::B, 15, PinMode::Alt, LL_GPIO_AF_1};   // TIM1_CH3N
+	// mdrivlib::Pin ButtonLedGreen{GPIO::E, 14, PinMode::Alt, LL_GPIO_AF_1}; // TIM1_CH4
 
 	// using ClockOutPin1 = mdrivlib::FPin<GPIO::G, 14, PinMode::Output>;
 	// using ClockOutPin2 = mdrivlib::FPin<GPIO::B, 12, PinMode::Output>;
@@ -63,12 +63,12 @@ struct AuxStream {
 		// AuxStream::ClockOutPin2::high();
 		// AuxStream::ClockOutPin1::low();
 		// AuxStream::ClockOutPin2::low();
-		ButtonLedBlue.high();
-		ButtonLedBlue.low();
-		ButtonLedGreen.high();
-		ButtonLedGreen.low();
-		ButtonLedRed.high();
-		ButtonLedRed.low();
+		// ButtonLedBlue.high();
+		// ButtonLedBlue.low();
+		// ButtonLedGreen.high();
+		// ButtonLedGreen.low();
+		// ButtonLedRed.high();
+		// ButtonLedRed.low();
 	}
 };
 

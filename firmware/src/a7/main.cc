@@ -17,7 +17,6 @@
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
-#include "stm32mp1xx_hal.h"
 #include "ui.hh"
 #include "usb/usb_manager.hh"
 #include "util/mem_test.hh"
@@ -69,6 +68,9 @@ void main() {
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
+
+	// Maybe only A7 has access to the PLL?
+	// USB_HS_PHYCInit();
 
 	// Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
