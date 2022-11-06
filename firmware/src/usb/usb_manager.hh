@@ -117,7 +117,7 @@ public:
 		}
 
 		if (state == FUSB302::Device::ConnectedState::AsHost) {
-			// usb_host.process();
+			usb_host.process();
 		}
 
 		//DEBUG: toggle Pin0 when we're DRD polling
