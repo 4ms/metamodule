@@ -97,7 +97,7 @@ struct PatchViewPage : PageBase {
 		const auto &patch = patch_list.get_patch(patch_id);
 		patch_instance = &patch;
 
-		printf("patch id = %d\n", patch_id);
+		printf_("patch id = %d\n", patch_id);
 		if (patch.patch_name.length() == 0)
 			return;
 
@@ -126,7 +126,7 @@ struct PatchViewPage : PageBase {
 
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
 			if (!img) {
-				printf("Image not found for %s\n", slug.c_str());
+				printf_("Image not found for %s\n", slug.c_str());
 				continue;
 			}
 			auto widthpx = img->header.w;
@@ -165,7 +165,7 @@ struct PatchViewPage : PageBase {
 
 			xpos += widthpx;
 			if (xpos >= MaxBufferWidth) {
-				printf("Max size reached\n");
+				printf_("Max size reached\n");
 				break;
 			}
 		}
@@ -218,7 +218,7 @@ struct PatchViewPage : PageBase {
 		auto obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
 		PageList::set_selected_module_id(module_id);
-		printf("Clicked Module %d\n", module_id);
+		printf_("Clicked Module %d\n", module_id);
 		PageList::request_new_page(PageId::ModuleView);
 	}
 
@@ -292,7 +292,7 @@ struct PatchViewPage : PageBase {
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		// printf("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
+		// printf_("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
 		page->start_changing_patch();
 	}
 

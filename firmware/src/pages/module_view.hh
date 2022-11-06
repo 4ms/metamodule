@@ -56,7 +56,7 @@ struct ModuleViewPage : PageBase {
 			mbox.append_message("Module View page cannot read module slug.\n");
 			return;
 		}
-		printf("ModuleViewPage module %s\n", slug.data());
+		printf_("ModuleViewPage module %s\n", slug.data());
 
 		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
@@ -69,7 +69,7 @@ struct ModuleViewPage : PageBase {
 		//Draw module image
 		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
 		if (!img) {
-			printf("Image not found\n");
+			printf_("Image not found\n");
 			return;
 		}
 		auto width_px = img->header.w;

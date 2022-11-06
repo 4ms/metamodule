@@ -78,7 +78,7 @@ private:
 
 		auto msg = mbox.get_message();
 		if (!msg.empty()) {
-			printf("%s", msg.data());
+			printf_("%s", msg.data());
 			mbox.clear_message();
 		}
 		// output_debug_info();
@@ -126,42 +126,42 @@ private:
 		readings++;
 
 		if ((HAL_GetTick() - last_dbg_output_tm) > 500) {
-			printf("\r\nnumber of readings: %d\r\n", readings);
+			printf_("\r\nnumber of readings: %d\r\n", readings);
 			readings = 0;
 
 			for (auto [i, pot] : enumerate(params.knobs)) {
-				printf("Pot %d: iir=%d min=%d max=%d range=%d\r\n",
-					   i,
-					   (int32_t)(4096.f * pot_iir[i]),
-					   (int32_t)(4096.f * pot_min[i]),
-					   (int32_t)(4096.f * pot_max[i]),
-					   (int32_t)(4096.f * (pot_max[i] - pot_min[i])));
+				printf_("Pot %d: iir=%d min=%d max=%d range=%d\r\n",
+						i,
+						(int32_t)(4096.f * pot_iir[i]),
+						(int32_t)(4096.f * pot_min[i]),
+						(int32_t)(4096.f * pot_max[i]),
+						(int32_t)(4096.f * (pot_max[i] - pot_min[i])));
 				pot_iir[i] = pot;
 				pot_min[i] = 4096.f;
 				pot_max[i] = 0.f;
 			}
 
-			printf("PatchCV: iir=%d min=%d max=%d range=%d\r\n",
-				   (int32_t)(patchcv.iir * 4096.f),
-				   (int32_t)(4096.f * patchcv.min),
-				   (int32_t)(4096.f * patchcv.max),
-				   (int32_t)(4096.f * (patchcv.max - patchcv.min)));
+			printf_("PatchCV: iir=%d min=%d max=%d range=%d\r\n",
+					(int32_t)(patchcv.iir * 4096.f),
+					(int32_t)(4096.f * patchcv.min),
+					(int32_t)(4096.f * patchcv.max),
+					(int32_t)(4096.f * (patchcv.max - patchcv.min)));
 			patchcv.reset_to(metaparams.patchcv);
 
-			printf("Button: %d GateIn1: %d GateIn2: %d\r\n",
-				   metaparams.meta_buttons[0].is_high() ? 1 : 0,
-				   params.gate_ins[0].is_high() ? 1 : 0,
-				   params.gate_ins[1].is_high() ? 1 : 0);
+			printf_("Button: %d GateIn1: %d GateIn2: %d\r\n",
+					metaparams.meta_buttons[0].is_high() ? 1 : 0,
+					params.gate_ins[0].is_high() ? 1 : 0,
+					params.gate_ins[1].is_high() ? 1 : 0);
 
-			printf("Jack senses: %08x\r\n", params.jack_senses);
+			printf_("Jack senses: %08x\r\n", params.jack_senses);
 
 			for (auto [i, ain] : enumerate(metaparams.ins)) {
-				printf("AIN %d: iir=%d min=%d max=%d range=%d\r\n",
-					   i,
-					   (int32_t)(ain.iir * 32768.f),
-					   (int32_t)(ain.min * 32768.f),
-					   (int32_t)(ain.max * 32768.f),
-					   (int32_t)((ain.max - ain.min) * 32768.f));
+				printf_("AIN %d: iir=%d min=%d max=%d range=%d\r\n",
+						i,
+						(int32_t)(ain.iir * 32768.f),
+						(int32_t)(ain.min * 32768.f),
+						(int32_t)(ain.max * 32768.f),
+						(int32_t)((ain.max - ain.min) * 32768.f));
 				ain.reset_to(ain.iir);
 			}
 

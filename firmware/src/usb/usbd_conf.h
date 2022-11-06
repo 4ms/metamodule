@@ -50,9 +50,10 @@ extern "C" {
 #define USBD_DEBUG_LEVEL 0U
 
 #if (USBD_DEBUG_LEVEL > 0U)
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "printf.h"
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
 #endif
 
 /* ECM, RNDIS, DFU Class Config */
@@ -142,8 +143,8 @@ extern "C" {
 #if (USBD_DEBUG_LEVEL > 0U)
 #define USBD_UsrLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf(__VA_ARGS__);                                                                                           \
-		printf("\n");                                                                                                  \
+		printf_(__VA_ARGS__);                                                                                          \
+		printf_("\n");                                                                                                 \
 	} while (0)
 #else
 #define USBD_UsrLog(...)                                                                                               \
@@ -155,9 +156,9 @@ extern "C" {
 
 #define USBD_ErrLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf("ERROR: ");                                                                                             \
-		printf(__VA_ARGS__);                                                                                           \
-		printf("\n");                                                                                                  \
+		printf_("ERROR: ");                                                                                            \
+		printf_(__VA_ARGS__);                                                                                          \
+		printf_("\n");                                                                                                 \
 	} while (0)
 #else
 #define USBD_ErrLog(...)                                                                                               \
@@ -168,9 +169,9 @@ extern "C" {
 #if (USBD_DEBUG_LEVEL > 2U)
 #define USBD_DbgLog(...)                                                                                               \
 	do {                                                                                                               \
-		printf("DEBUG : ");                                                                                            \
-		printf(__VA_ARGS__);                                                                                           \
-		printf("\n");                                                                                                  \
+		printf_("DEBUG : ");                                                                                           \
+		printf_(__VA_ARGS__);                                                                                          \
+		printf_("\n");                                                                                                 \
 	} while (0)
 #else
 #define USBD_DbgLog(...)                                                                                               \
