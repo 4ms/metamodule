@@ -1,12 +1,20 @@
 #include "midi_host.hh"
+#include "debug.hh"
 #include "printf.h"
 
+static bool led_state = false;
 extern "C" void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost) {
 	auto msg = MidiHost::_instance->get_rx_message();
-	printf_(".");
+
+	led_state = !led_state;
+	Debug::green_LED1::set(led_state);
+
+	// printf_(".");
 	if (msg.is_command<Midi::NoteOn>()) {
+		Debug::red_LED1::high();
 		printf_("Note: %d Vel: %d\n", msg.data.byte[0], msg.data.byte[1]);
 	} else if (msg.is_command<Midi::NoteOff>()) {
+		Debug::red_LED1::low();
 		printf_("Note: %d off\n", msg.data.byte[0]);
 	} else if (msg.is_command<Midi::PolyKeyPressue>()) {
 		printf_("Poly Key Pressure: %d %d\n", msg.data.byte[0], msg.data.byte[1]);

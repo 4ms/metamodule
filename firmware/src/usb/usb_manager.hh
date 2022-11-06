@@ -46,7 +46,6 @@ public:
 
 		auto ok = usbctl.init();
 		if (ok) {
-			Debug::green_LED1::high();
 			Debug::Pin0::low();
 		} else {
 			Debug::red_LED1::high();
@@ -84,12 +83,14 @@ public:
 			} else if (newstate == AsHost) {
 				Debug::Pin2::low();
 				Debug::Pin3::high();
+				Debug::blue_LED1::high();
 				// printf_("Starting host\n");
 				usb_host.start();
 
 			} else if (newstate == None) {
 				Debug::Pin2::low();
 				Debug::Pin3::low();
+				Debug::blue_LED1::low();
 				if (state == AsHost)
 					usb_host.stop();
 
