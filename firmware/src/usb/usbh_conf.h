@@ -24,10 +24,9 @@
 extern "C" {
 #endif
 
-#include "printf.h"
 #include "stm32mp1xx.h"
-#include <stdio.h>
-#include <stdlib.h>
+// #include <stdio.h>
+// #include <stdlib.h>
 #include <string.h>
 
 static inline void Error_Handler() {
@@ -41,7 +40,7 @@ static inline void Error_Handler() {
 #define USBH_MAX_NUM_SUPPORTED_CLASS 16U
 #define USBH_MAX_SIZE_CONFIGURATION 0x200U
 #define USBH_MAX_DATA_BUFFER 0x200U
-#define USBH_DEBUG_LEVEL 3U
+#define USBH_DEBUG_LEVEL 0U
 #define USBH_USE_OS 0U
 
 enum { HOST_HS = 0, HOST_FS = 1 };
@@ -54,6 +53,8 @@ void USBH_free(void *ptr);
 
 /* DEBUG macros */
 #if (USBH_DEBUG_LEVEL > 0U)
+#include "printf.h"
+
 #define USBH_UsrLog(...)                                                                                               \
 	do {                                                                                                               \
 		printf_(__VA_ARGS__);                                                                                          \

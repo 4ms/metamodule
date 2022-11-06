@@ -88,11 +88,11 @@ private:
 	void page_update_task() { //60Hz
 		//This returns false when audio stops
 		bool read_ok = param_cache.read_sync(&params, &metaparams);
-		if (read_ok) {
-			Debug::Pin1::low();
-		} else {
-			Debug::Pin1::high();
-		}
+		// if (read_ok) {
+		// 	Debug::Pin1::low();
+		// } else {
+		// 	Debug::Pin1::high();
+		// }
 		page_manager.update_current_page();
 		patch_loader.handle_sync_patch_loading();
 	}
