@@ -107,6 +107,15 @@ PatchData:
       curve_type: 4
       min: 0.4
       max: 0.65
+  midi_maps:
+    - alias_name: MMap
+      midi_cc: 120
+      midi_chan: 1
+      module_id: 3
+      param_id: 4
+      curve_type: 2
+      min: 0.2
+      max: 0.85
 )";
 	// clang-format on
 
@@ -196,4 +205,14 @@ PatchData:
 	CHECK(pd.mapped_knobs[3].curve_type == 4);
 	CHECK(pd.mapped_knobs[3].min == 0.4f);
 	CHECK(pd.mapped_knobs[3].max == 0.65f);
+
+	CHECK(pd.midi_maps.size() == 1);
+	CHECK(pd.midi_maps[0].midi_cc == 120);
+	CHECK(pd.midi_maps[0].midi_chan == 1);
+	CHECK(pd.midi_maps[0].alias_name.is_equal("MMap"));
+	CHECK(pd.midi_maps[0].module_id == 3);
+	CHECK(pd.midi_maps[0].param_id == 4);
+	CHECK(pd.midi_maps[0].curve_type == 2);
+	CHECK(pd.midi_maps[0].min == 0.2f);
+	CHECK(pd.midi_maps[0].max == 0.85f);
 }
