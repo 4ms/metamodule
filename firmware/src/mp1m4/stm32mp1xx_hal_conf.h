@@ -77,7 +77,7 @@ extern "C" {
 #define HAL_DMA_MODULE_ENABLED
 #define HAL_MDMA_MODULE_ENABLED //required by QSPI
 #define HAL_RCC_MODULE_ENABLED
-// #define HAL_PWR_MODULE_ENABLED
+#define HAL_PWR_MODULE_ENABLED
 #define HAL_CORTEX_MODULE_ENABLED
 
 /* User-created defines: (4ms/Dan Green) */

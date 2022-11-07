@@ -76,33 +76,16 @@ static HAL_StatusTypeDef USB_CoreReset(USB_OTG_GlobalTypeDef *USBx);
 
 // Modification here: Function from hftrx
 HAL_StatusTypeDef USB_HS_PHYCDeInit(void) {
-	// reset
-	RCC->APB4RSTSETR = RCC_APB4RSTSETR_USBPHYRST;
-	RCC->APB4RSTCLRR = RCC_APB4RSTCLRR_USBPHYRST;
-
-	// Disable RCC for USBPHY
-#if defined(CA7)
-	RCC->MP_APB4ENCLRR = RCC_MP_APB4ENCLRR_USBPHYEN;
-	RCC->MP_APB4LPENCLRR = RCC_MP_APB4LPENCLRR_USBPHYLPEN;
-#elif defined(CM4)
-	RCC->MC_APB4ENCLRR = RCC_MC_APB4ENCLRR_USBPHYEN;
-	RCC->MC_APB4LPENCLRR = RCC_MC_APB4LPENCLRR_USBPHYLPEN;
-#endif
+	__HAL_RCC_USBPHY_FORCE_RESET();
+	__HAL_RCC_USBPHY_RELEASE_RESET();
+	__HAL_RCC_USBPHY_CLK_DISABLE();
 	return HAL_OK;
 }
 
 // Modification here: Function from hftrx
 HAL_StatusTypeDef USB_HS_PHYCInit(void) {
 	// Enable RCC for USBPHY
-#if defined(CORE_CA7)
-	RCC->MP_APB4ENSETR = RCC_MP_APB4ENSETR_USBPHYEN;
-	RCC->MP_APB4LPENSETR = RCC_MP_APB4LPENSETR_USBPHYLPEN;
-#elif defined(CORE_CM4)
-	RCC->MC_APB4ENSETR = RCC_MC_APB4ENSETR_USBPHYEN;
-	RCC->MC_APB4LPENSETR = RCC_MC_APB4LPENSETR_USBPHYLPEN;
-#else
-#error Must define CORE_CA7 or CORE_CM4
-#endif
+	__HAL_RCC_USBPHY_CLK_ENABLE();
 
 	// https://github.com/Xilinx/u-boot-xlnx/blob/master/drivers/phy/phy-stm32-usbphyc.c
 	const uint_fast32_t USBPHYCPLLFREQUENCY = 1440000000uL; // 1.44 GHz

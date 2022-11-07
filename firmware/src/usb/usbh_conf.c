@@ -32,41 +32,16 @@ HCD_HandleTypeDef hhcd;
 
 void HAL_HCD_MspInit(HCD_HandleTypeDef *hpcd) {
 	if (hpcd->Instance == USB_OTG_HS) {
+		__HAL_RCC_USBO_CLK_ENABLE();
+		__HAL_RCC_USBPHY_CLK_ENABLE();
 
-		__HAL_RCC_USBO_FORCE_RESET();
-		__HAL_RCC_USBO_RELEASE_RESET();
-		__HAL_RCC_USBPHY_FORCE_RESET();
-		__HAL_RCC_USBPHY_RELEASE_RESET();
-
-#if defined(CORE_CA7)
-		RCC->MP_APB4ENSETR = RCC_MP_APB4ENSETR_USBPHYEN;
-		RCC->MP_AHB2ENSETR = RCC_MP_AHB2ENSETR_USBOEN;
-#elif defined(CORE_CM4)
-		RCC->MC_APB4ENSETR = RCC_MC_APB4ENSETR_USBPHYEN;
-		RCC->MC_AHB2ENSETR = RCC_MC_AHB2ENSETR_USBOEN;
-#else
-#error Must define CORE_CA7 or CORE_CM4
-#endif
-		// __HAL_RCC_USBO_CLK_ENABLE();
-		// __HAL_RCC_USBPHY_CLK_ENABLE();
-
-		/* STM32_USBPHYC_MISC bit fields */
-		/*	SWITHOST 0: Select OTG controller for 2nd PHY port */
-		/*	SWITHOST 1: Select Host controller for 2nd PHY port */
-		/*	EHCI controller hard wired to 1st PHY port */
+		//	SWITHOST 0: Select OTG controller for 2nd PHY port
+		//	SWITHOST 1: Select Host controller for 2nd PHY port
+		//	EHCI controller hard wired to 1st PHY port
 		USBPHYC->MISC = (USBPHYC->MISC & ~(USBPHYC_MISC_SWITHOST_Msk | USBPHYC_MISC_PPCKDIS_Msk)) |
 						(0 << USBPHYC_MISC_SWITHOST_Pos) | (0 << USBPHYC_MISC_PPCKDIS_Pos);
 
-		// Set 3.3 volt DETECTOR enable
-		PWR->CR3 |= PWR_CR3_USB33DEN_Msk;
-		while ((PWR->CR3 & PWR_CR3_USB33DEN_Msk) == 0)
-			;
-		// Wait 3.3 volt REGULATOR ready
-		while ((PWR->CR3 & PWR_CR3_USB33RDY_Msk) == 0)
-			;
-
-		// Do we need to do this here? It's called from USB_Core_Init();
-		USB_HS_PHYCInit();
+		HAL_PWREx_EnableUSBVoltageDetector();
 	}
 }
 
