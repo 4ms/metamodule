@@ -1,5 +1,5 @@
 # If you want to use `make flash`, set this to the path to your JFlash executable:
-JFLASHEXE ?= /Applications/SEGGER/JLink_V696/JFlash.app/Contents/MacOS/JFlashExe
+JFLASHEXE ?= /Applications/SEGGER/JLink_V720a/JFlash.app/Contents/MacOS/JFlashExe
 ARM_NONE_EABI_PATH ?= arm-none-eabi-
 
 export BUILDDIR_MP1A7 	= build/mp1corea7
@@ -14,10 +14,12 @@ export LINKSCRIPTDIR   	= system/linker
 export SHARED  			= ../shared
 export TABLEGEN 		= $(SHARED)/tableGen
 
-export VALID_BOARDS = medium pcmdev norflash-loader
+export VALID_BOARDS = medium norflash-loader
 
 
-.PHONY: all mp1-pcmdev mp1-med clean install_a7 tables tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests simulate norflash-loader 
+.PHONY: all mp1-med simulate tables norflash-loader clean
+
+.PHONY: tests hardware_tests core_tests util_tests proc_tests mdrivlib_tests 
 
 
 all: images mp1-med tests
@@ -27,9 +29,6 @@ all: images mp1-med tests
 mp1-med:
 	@$(MAKE) --no-print-directory -f makefile_mp1m4.mk medium
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk medium 
-
-mp1-pcmdev:
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk pcmdev 
 
 norflash-loader: mp1-med
 	$(MAKE) --no-print-directory -f makefile_mp1a7.mk norflash-loader
@@ -120,7 +119,7 @@ core_tests:
 ## Support files
 
 tables $(SHARED)/cpputil/math_tables.cc: $(TABLEGEN)/main.cpp
-	g++ -I../shared -std=c++17 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
+	g++ -I../shared/cpputil -std=c++20 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
 
 generate_compile_txt:
