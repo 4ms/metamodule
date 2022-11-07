@@ -121,6 +121,40 @@ bool read(ryml::NodeRef const &n, MappedKnob *k) {
 	return true;
 }
 
+bool read(ryml::NodeRef const &n, MidiMap *k) {
+	if (n.num_children() < 7)
+		return false;
+	if (!n.is_map())
+		return false;
+	if (!n.has_child("midi_cc"))
+		return false;
+	if (!n.has_child("midi_chan"))
+		return false;
+	if (!n.has_child("module_id"))
+		return false;
+	if (!n.has_child("param_id"))
+		return false;
+	if (!n.has_child("curve_type"))
+		return false;
+	if (!n.has_child("min"))
+		return false;
+	if (!n.has_child("max"))
+		return false;
+
+	n["midi_cc"] >> k->midi_cc;
+	n["midi_chan"] >> k->midi_chan;
+	n["module_id"] >> k->module_id;
+	n["param_id"] >> k->param_id;
+	n["curve_type"] >> k->curve_type;
+	n["min"] >> k->min;
+	n["max"] >> k->max;
+
+	if (n.has_child("alias_name"))
+		n["alias_name"] >> k->alias_name;
+
+	return true;
+}
+
 bool read(ryml::NodeRef const &n, StaticParam *k) {
 	if (n.num_children() < 3)
 		return false;

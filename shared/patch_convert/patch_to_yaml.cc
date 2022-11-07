@@ -24,6 +24,7 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 	// data["mapped_outs"] << pd.mapped_outs;
 	// data["static_knobs"] << pd.static_knobs;
 	// data["mapped_knobs"] << pd.mapped_knobs;
+	// data["midi_maps"] << pd.midi_maps;
 
 	ryml::NodeRef slugs = data["module_slugs"];
 	slugs |= ryml::MAP;
@@ -76,6 +77,21 @@ std::string patch_to_yaml_string(PatchData const &pd) {
 	for (auto &x : pd.mapped_knobs) {
 		ryml::NodeRef el = mapped_knobs.append_child({ryml::MAP});
 		el["panel_knob_id"] << x.panel_knob_id;
+		el["module_id"] << x.module_id;
+		el["param_id"] << x.param_id;
+		el["curve_type"] << x.curve_type;
+		el["min"] << x.min;
+		el["max"] << x.max;
+		if (x.alias_name.length())
+			el["alias_name"] << x.alias_name;
+	}
+
+	ryml::NodeRef midi_maps = data["midi_maps"];
+	midi_maps |= ryml::SEQ;
+	for (auto &x : pd.midi_maps) {
+		ryml::NodeRef el = midi_maps.append_child({ryml::MAP});
+		el["midi_cc"] << x.midi_cc;
+		el["midi_chan"] << x.midi_chan;
 		el["module_id"] << x.module_id;
 		el["param_id"] << x.param_id;
 		el["curve_type"] << x.curve_type;

@@ -4,20 +4,28 @@
 #include "util/static_string.hh"
 #include <vector>
 
-//72B = 6 vec * 12B ea (data, sz, cap) + patch_name + description
 struct PatchData {
 	static constexpr size_t DescSize = 255;
 	ModuleTypeSlug patch_name{""};
 	StaticString<DescSize> description;
-	std::vector<ModuleTypeSlug> module_slugs;  //32B
-	std::vector<InternalCable> int_cables;	   //16B
-	std::vector<MappedInputJack> mapped_ins;   //16B
-	std::vector<MappedOutputJack> mapped_outs; //8B
-	std::vector<StaticParam> static_knobs;	   //8B
-	std::vector<MappedKnob> mapped_knobs;	   //16B
+	std::vector<ModuleTypeSlug> module_slugs;
+	std::vector<InternalCable> int_cables;
+	std::vector<MappedInputJack> mapped_ins;
+	std::vector<MappedOutputJack> mapped_outs;
+	std::vector<StaticParam> static_knobs;
+	std::vector<MappedKnob> mapped_knobs;
+	std::vector<MidiMap> midi_maps;
 
 	const MappedKnob *find_mapped_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : mapped_knobs) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				return &m;
+		}
+		return nullptr;
+	}
+
+	const MidiMap *find_midimap(uint32_t module_id, uint32_t param_id) const {
+		for (auto &m : midi_maps) {
 			if (m.module_id == module_id && m.param_id == param_id)
 				return &m;
 		}
