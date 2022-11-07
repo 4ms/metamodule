@@ -18,7 +18,6 @@ public:
 	}
 
 	void init() {
-		// mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		auto err = USBH_Init(&usbh_handle, USBH_StateChangeCallback, HOST_HS);
 		if (err != USBH_OK) {
 			printf_("Error init USB Host: %d\n", err);
@@ -26,8 +25,10 @@ public:
 			while (x)
 				;
 		}
-
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+	}
+
+	void start() {
 		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
 		// mdrivlib::InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_HCD_IRQHandler, &hhcd));
 		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
@@ -36,16 +37,13 @@ public:
 		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
 		//TODO register HUB class
 		USBH_Start(&usbh_handle);
-	}
-
-	void start() {
 		src_enable.high();
 	}
 	void stop() {
 		src_enable.low();
-		// mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-		// USBH_Stop(&usbh_handle);
-		// USBH_DeInit(&usbh_handle);
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		USBH_Stop(&usbh_handle);
+		// USBH_DeInit(&usbh_handle); //sets hhcd to NULL
 	}
 
 	void process() {
