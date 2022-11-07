@@ -245,7 +245,7 @@ void buildFoldTables()
 void buildTrigTables()
 {
 	ofstream myfile;
-	myfile.open("../util/math_tables.cc");
+	myfile.open("../cpputil/util/math_tables.cc");
 
 	myfile << "#include"
 		   << "\""
