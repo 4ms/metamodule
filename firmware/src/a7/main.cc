@@ -35,9 +35,10 @@ void main() {
 	StaticBuffers::init();
 
 	// Setup RAM disk
-	RamDiskOps ramdiskops{StaticBuffers::virtdrive};
-	RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
-	RamDiskFileIO::format_disk(Disk::RamDisk);
+	// ==> m4:
+	// RamDiskOps ramdiskops{StaticBuffers::virtdrive};
+	// RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
+	// RamDiskFileIO::format_disk(Disk::RamDisk);
 
 	// Setup Patch Storage (On QSPI flash)
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
@@ -92,17 +93,20 @@ void main() {
 
 		// TODO: if disk is unexpectedly disconnected, we should scan it
 		// TODO: can this be encapsulated? patch_list + RamDiskFileIO/ramdiskops + patch_storage
-		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
+
+		// if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
+		if (false) { //HSEM<RamDiskAvailableToA7> unlocked
 			patch_list.lock();
 			printf_("NOR Flash writeback begun.\r\n");
-			RamDiskFileIO::unmount_disk(Disk::RamDisk);
+			//RamDiskFileIO::unmount_disk(Disk::RamDisk); // ==> M4 does this before unlocking HSEM [and it doesn't do anything anyways]
 			if (patchdisk.ramdisk_patches_to_norflash()) {
 				printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
 				patch_list.mark_modified();
 			} else {
 				printf_("NOR Flash writeback failed!\r\n");
 			}
-			ramdiskops.set_status(RamDiskOps::Status::NotInUse);
+			// ramdiskops.set_status(RamDiskOps::Status::NotInUse);
+			//unlock HSEM<RamDiskAvailableToM4>
 			patch_list.unlock();
 		}
 		__WFI();
