@@ -60,7 +60,7 @@ void main() {
 	UsbManager usb;
 	usb.start();
 
-	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander};
+	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);

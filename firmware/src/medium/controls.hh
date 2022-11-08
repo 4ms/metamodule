@@ -12,6 +12,8 @@
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 #include "params.hh"
+#include "usb/midi_host.hh"
+#include "util/circular_buffer.hh"
 #include "util/interp_param.hh"
 
 namespace MetaModule
@@ -25,7 +27,8 @@ struct Controls {
 	Controls(DoubleBufParamBlock &param_blocks_ref,
 			 DoubleAuxStreamBlock &auxsignal_blocks_ref,
 			 GPIOExpander &main_gpioexpander,
-			 GPIOExpander &ext_gpioexpander);
+			 GPIOExpander &ext_gpioexpander,
+			 MidiHost &midi_host);
 
 	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
 	std::array<uint16_t, NumPotAdcs> pot_vals;
@@ -81,13 +84,14 @@ private:
 	//  16.5MHz / 2clks / 13 channels / 1024 OS = 619.74Hz
 	//  48000 / 619.74 = 77.45.. we round up so it doesn't overshoot
 	static constexpr size_t NumParamUpdatesPerAdcReading = 78;
-
 	InterpParam<float, NumParamUpdatesPerAdcReading> _knobs[PanelDef::NumPot];
-	float f_knobs[PanelDef::NumPot];
+	bool _new_adc_data_ready = false;
+
+	MidiHost &_midi_host;
+	CircularBuffer<Midi::MidiMessage, 256> _midi_rx_buf;
+	void midi_rx_cb(Midi::MidiMessage msg);
 
 	bool _rotary_moved_while_pressed = false;
-
-	bool _new_adc_data_ready = false;
 
 	template<size_t block_num>
 	void start_param_block();

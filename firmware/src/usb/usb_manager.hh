@@ -134,5 +134,9 @@ public:
 			// usbctl.check_all_regs();
 		}
 	}
+
+	MidiHost &get_midi_host() {
+		return usb_host.get_midi_host();
+	}
 };
 } // namespace MetaModule

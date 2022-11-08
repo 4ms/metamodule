@@ -1,5 +1,9 @@
+#pragma once
+#include "drivers/callable.hh"
 #include "usb/midi_message.hh"
 #include "usbh_midi.h"
+
+void debug_midi_rx_callback(Midi::MidiMessage msg);
 
 class MidiHost {
 	USBH_HandleTypeDef &usbh_handle;
@@ -13,6 +17,10 @@ public:
 		_instance = this;
 	}
 
+	void register_rx_cb(Function<void(Midi::MidiMessage &)> &&cb) {
+		_rx_callback = std::move(cb);
+	}
+
 	void start_rx() {
 		USBH_MIDI_Receive(&usbh_handle, rxbuffer.data(), rxbuffer.size());
 	}
@@ -21,5 +29,9 @@ public:
 		return Midi::MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 	}
 
+	friend void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost, uint8_t *end_data);
+
+private:
 	static inline MidiHost *_instance;
+	Function<void(Midi::MidiMessage)> _rx_callback = debug_midi_rx_callback;
 };

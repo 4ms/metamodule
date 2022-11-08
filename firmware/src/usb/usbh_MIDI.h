@@ -169,6 +169,9 @@ typedef struct _MIDI_Process {
 	MIDI_DataStateTypeDef data_tx_state;
 	MIDI_DataStateTypeDef data_rx_state;
 	uint8_t Rx_Poll;
+	//TODO: MidiHost *pMidiHost;
+	//Somewhere set this to our MidiHost instance. Then access it from USBH_MIDI_ReceiveCallback()
+	//as phost->pActiveClass->pData->pMidiHost, rather than have a static MidiHost::Instance
 } MIDI_HandleTypeDef;
 
 /*---------------------------Exported_FunctionsPrototype-------------------------------------*/
@@ -183,7 +186,7 @@ USBH_StatusTypeDef USBH_MIDI_Stop(USBH_HandleTypeDef *phost);
 
 void USBH_MIDI_TransmitCallback(USBH_HandleTypeDef *phost);
 
-void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost);
+void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost, uint8_t *end_data);
 
 #ifdef __cplusplus
 }

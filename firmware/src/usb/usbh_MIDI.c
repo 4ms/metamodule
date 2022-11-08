@@ -416,13 +416,14 @@ static void MIDI_ProcessReception(USBH_HandleTypeDef *phost) {
 
 				length = USBH_LL_GetLastXferSize(phost, MIDI_Handle->InPipe);
 
+				//Error: uint16_t - uint16_t is always > 0
 				if (((MIDI_Handle->RxDataLength - length) > 0) && (length > MIDI_Handle->InEpSize)) {
 					MIDI_Handle->RxDataLength -= length;
 					MIDI_Handle->pRxData += length;
 					MIDI_Handle->data_rx_state = MIDI_RECEIVE_DATA;
 				} else {
 					MIDI_Handle->data_rx_state = MIDI_IDLE;
-					USBH_MIDI_ReceiveCallback(phost);
+					USBH_MIDI_ReceiveCallback(phost, MIDI_Handle->pRxData);
 				}
 #if (USBH_USE_OS == 1)
 				osMessagePut(phost->os_event, USBH_CLASS_EVENT, 0);
@@ -451,7 +452,7 @@ __weak void USBH_MIDI_TransmitCallback(USBH_HandleTypeDef *phost) {
  * @brief  The function informs user that data have been received.
  * @retval None
  */
-__weak void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost) {
+__weak void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost, uint8_t *end_data) {
 }
 
 /**************************END OF FILE*********************************************************/

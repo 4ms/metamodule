@@ -117,21 +117,36 @@ void Controls::start() {
 	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
 		auxstream_updater.start();
 	}
+
+	_midi_host.register_rx_cb([this](Midi::MidiMessage msg) {
+		if (msg.is_command<Midi::NoteOn>()) {
+			Debug::red_LED1::high();
+		} else if (msg.is_command<Midi::NoteOff>()) {
+			Debug::red_LED1::low();
+		}
+
+		_midi_rx_buf.put(msg);
+	});
 }
+
+// static void Controls::midi_rx_cb(Midi::MidiMessage msg) {
+// }
 
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 				   DoubleAuxStreamBlock &auxsignal_blocks_ref,
 				   GPIOExpander &main_gpioexpander,
-				   GPIOExpander &ext_gpioexpander)
+				   GPIOExpander &ext_gpioexpander,
+				   MidiHost &midi_host)
 	: jacksense_reader{main_gpioexpander}
 	, extaudio_jacksense_reader{ext_gpioexpander}
 	, param_blocks(param_blocks_ref)
 	, cur_params(param_blocks[0].params.begin())
 	, cur_metaparams(&param_blocks_ref[0].metaparams)
 	, _buffer_full{false}
-	, auxstream_blocks{auxsignal_blocks_ref} {
-
+	, auxstream_blocks{auxsignal_blocks_ref}
+	, _midi_host{midi_host} {
 	// TODO: get IRQn, ADC1 periph from PotAdcConf. Also use register_access<>
+	// TODO: _new_adc_data_ready is written from multiple threads, but is not thread-safe. Use atomic? Or accept dropped/duplicate ADC values?
 	InterruptManager::register_and_start_isr(ADC1_IRQn, 2, 2, [&] {
 		uint32_t tmp = ADC1->ISR;
 		if (tmp & ADC_ISR_EOS) {

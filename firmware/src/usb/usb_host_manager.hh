@@ -91,6 +91,10 @@ public:
 		}
 	}
 
+	MidiHost &get_midi_host() {
+		return midi_host;
+	}
+
 private:
 	USBH_HandleTypeDef usbh_handle;
 	MidiHost midi_host{usbh_handle};
