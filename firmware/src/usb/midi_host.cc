@@ -8,12 +8,20 @@
 extern "C" void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost, uint8_t *end_data) {
 	// led_state = !led_state;
 	// Debug::green_LED1::set(rled_state);
-	auto msg = MidiHost::_instance->get_rx_message();
-	MidiHost::_instance->_rx_callback(msg);
-	MidiHost::_instance->start_rx();
+
+	// swap read and write buffers, and start receiving
+	MidiHost::_instance->swap_rx_buffers();
+	MidiHost::_instance->start_rx(phost);
+	// call callback on rx buffer  (which pushes recd data to circular_buffer)
+	auto rxbuf = MidiHost::_instance->get_midi_data();
+	MidiHost::_instance->_rx_callback(rxbuf);
 }
 
-void debug_midi_rx_callback(Midi::MidiMessage &msg) {
+void debug_midi_rx_callback(std::span<uint8_t> rxbuffer) {
+	if (rxbuffer.size() < 4)
+		return;
+
+	auto msg = Midi::MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 	printf_(".");
 	if (msg.is_command<Midi::NoteOn>()) {
 		printf_("Note: %d Vel: %d\n", msg.data.byte[0], msg.data.byte[1]);

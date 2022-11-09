@@ -118,7 +118,11 @@ void Controls::start() {
 		auxstream_updater.start();
 	}
 
-	_midi_host.register_rx_cb([this](Midi::MidiMessage msg) {
+	_midi_host.register_rx_cb([this](std::span<uint8_t> rxbuffer) {
+		if (rxbuffer.size() < 4)
+			return;
+
+		auto msg = Midi::MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 		if (msg.is_command<Midi::NoteOn>()) {
 			Debug::red_LED1::high();
 		} else if (msg.is_command<Midi::NoteOff>()) {

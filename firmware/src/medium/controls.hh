@@ -89,7 +89,7 @@ private:
 
 	MidiHost &_midi_host;
 	CircularBuffer<Midi::MidiMessage, 256> _midi_rx_buf;
-	void midi_rx_cb(Midi::MidiMessage msg);
+	// void midi_rx_cb(std::span<uint8_t> rx_buffer);
 
 	bool _rotary_moved_while_pressed = false;
 

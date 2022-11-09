@@ -70,7 +70,7 @@ public:
 
 			case HOST_USER_CLASS_ACTIVE:
 				if (state == APPLICATION_START) {
-					_midihost_instance->start_rx();
+					_midihost_instance->start_rx(phost);
 					state = APPLICATION_READY;
 				}
 				break;
@@ -97,7 +97,7 @@ public:
 
 private:
 	USBH_HandleTypeDef usbh_handle;
-	MidiHost midi_host{usbh_handle};
+	MidiHost midi_host;
 	static inline MidiHost *_midihost_instance;
 	static inline UsbHostManager *_instance;
 	mdrivlib::Pin src_enable;
