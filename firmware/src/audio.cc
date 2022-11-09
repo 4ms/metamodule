@@ -184,6 +184,10 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 			float scaled_input = plug_detect.is_high() ? incal[i].adjust(AudioInFrame::scaleInput(inchan)) : 0.f;
 			// TODO: bake the unsigned=>float conversion into Calibrate::adjust(), and then use sign_extend instead of scaleInput
 
+			//HACK
+			if (i==0)
+				player.set_panel_input(0, params_.midi_note);
+			else
 			player.set_panel_input(PanelDef::audioin_order[i], scaled_input);
 			param_block.metaparams.ins[i].update(scaled_input);
 		}
