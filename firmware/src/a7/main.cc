@@ -5,7 +5,7 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/stm32xx.h"
-#include "fatfs/ramdisk_fileio.hh"
+// #include "fatfs/ramdisk_fileio.hh"
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_loader.hh"
@@ -18,8 +18,6 @@
 #include "shared_memory.hh"
 #include "static_buffers.hh"
 #include "ui.hh"
-// #include "usb/usb_manager.hh"
-#include "util/mem_test.hh"
 
 namespace MetaModule
 {
@@ -70,9 +68,6 @@ void main() {
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 
-	// Maybe only A7 has access to the PLL?
-	// USB_HS_PHYCInit();
-
 	// Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
 
@@ -84,9 +79,6 @@ void main() {
 	patch_loader.load_initial_patch();
 	audio.start();
 	ui.start();
-
-	// UsbManager usb{ramdiskops};
-	// usb.start();
 
 	while (true) {
 		// usb.process();
