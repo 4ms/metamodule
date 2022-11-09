@@ -34,6 +34,13 @@ struct Params {
 	std::array<Toggler, PanelDef::NumGateIn> gate_ins{};
 	std::array<Toggler, PanelDef::NumRgbButton> buttons{};
 	std::array<float, PanelDef::NumPot> knobs{};
+	//Note 0 => -1.0 => should become -5V or -5oct on modules
+	//Note 60 => 0
+	//Note 120 => 1.0 => should become 5V or +5oct on modules
+	//Note 121-127.. => ..?1.0?
+	//monophonic -1..1 => notes 0..127 => C-2..G8 => 4.0875Hz..6271.93Hz => -2V..~8.5V
+	float midi_note;
+	bool midi_gate; //monophonic on/off
 	uint32_t jack_senses;
 
 	Params() {
@@ -64,6 +71,9 @@ struct Params {
 		jack_senses = that.jack_senses;
 	}
 };
+
+constexpr inline auto sizeof_Toggler = sizeof(Toggler);
+constexpr inline auto sizeof_Params = sizeof(Params);
 
 struct MetaParams {
 	float patchcv = 0.f;
