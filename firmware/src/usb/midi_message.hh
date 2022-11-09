@@ -91,5 +91,13 @@ struct MidiMessage {
 	uint32_t raw_data() const {
 		return (status.raw << 16) | (data.byte[0] << 8) | data.byte[1];
 	}
+
+	uint8_t note() const {
+		return data.byte[0];
+	}
+
+	uint8_t velocity() const {
+		return data.byte[1];
+	}
 };
 } // namespace Midi
