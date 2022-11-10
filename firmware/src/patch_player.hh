@@ -9,6 +9,7 @@
 #include "../stubs/debug.hh"
 #endif
 #include "conf/hsem_conf.hh"
+#include "conf/midi_def.hh"
 #include "conf/panel_conf.hh"
 #include "drivers/smp.hh"
 #include "patch/patch.hh"
@@ -35,14 +36,14 @@ public:
 	//TODO: why not use a vector here?
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
-	// out_conns[]: OutL OutR CVOut1 CVOut2 ClockOut, each element is a Jack
+	// out_conns[]: Out1-Out8
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}};
 
-	// in_conns[]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn, each element is a vector of Jacks it's connected to
-	std::array<std::vector<Jack>, NumInConns> in_conns;
+	// in_conns[]: In1-In6, GateIn1, GateIn2, MidiMonoNoteJack, MidiMonoGateJack
+	std::array<std::vector<Jack>, NumInConns + NumMidiJacks> in_conns;
 
-	// knob_conns[]: A B C D a b c d, each element is a vector of knobs it's mapped to
-	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs> knob_conns;
+	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
+	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs + NumMidiParams> knob_conns;
 
 	bool is_loaded = false;
 
@@ -325,21 +326,37 @@ public:
 		for (auto const &cable : pd.mapped_ins) {
 			auto panel_jack_id = cable.panel_jack_id;
 
-			// FIXME: propagate this error (return false?) to force unloading patch if patch data is malformed.
-			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingInJacks)
-				break;
-
 			for (auto const &input_jack : cable.ins) {
 				if (input_jack.module_id < 0 || input_jack.jack_id < 0)
 					break;
 				int dup_int_cable = find_int_cable_input_jack(input_jack);
-				if (dup_int_cable == -1)
-					in_conns[panel_jack_id].push_back(input_jack);
-				else {
+				if (dup_int_cable == -1) {
+					if (cable.is_monophonic_note()) {
+						in_conns[MidiMonoNoteJack].push_back(input_jack);
+						printf_("Mapping midi monophonic note to jack: m=%d, p=%d\n",
+								input_jack.module_id,
+								input_jack.jack_id);
+						continue;
+					}
+					if (cable.is_monophonic_gate()) {
+						in_conns[MidiMonoGateJack].push_back(input_jack);
+						printf_("Mapping midi monophonic gate to jack: m=%d, p=%d\n",
+								input_jack.module_id,
+								input_jack.jack_id);
+						continue;
+					}
+					if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
+						in_conns[panel_jack_id].push_back(input_jack);
+						continue;
+					}
+					printf_("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
+				} else {
+					printf_("Outputs are connected: panel_jack_id=%d and int_cable=%d\n", panel_jack_id, dup_int_cable);
 					// error: Panel input jack is mapped to a jack containing a cable (to an output)
 					// - ? Create a module that outputs the sum of two inputs, and adjust int_cables and in_mappings?
 					// - ? Keep the mapping and remove the int_cable entry?
 					// - ? Keep it as-is (ignore the mapping and keep the int_cable)
+					// ->>>Create a normalized mapping: Use the int_cable when panel jack is unpatched
 					// - ? Error out: don't load patch, it's malformed
 				}
 			}
@@ -351,12 +368,30 @@ public:
 				break;
 			out_conns[panel_jack_id] = cable.out;
 		}
+
+		//MIDI mappings to input jacks:
+		// for (auto const &cable : pd.midi_maps) {
+		// 	if (cable.is_monophonic_note()) {
+		// 		in_conns[FirstMidiNoteInput].push_back(
+		// 	}
+		// 	else if (cable.is_monophonic_gate()) {
+
+		// 	}
+		// 	// auto panel_jack_id = cable.
+		// }
 	}
 
 	// Map all the panel knob mappings into knob_conns[] which is indexed by panel_knob_id.
 	void calc_panel_knob_connections() {
 		for (auto const &k : pd.mapped_knobs) {
-			knob_conns[k.panel_knob_id].push_back(k);
+			if (k.is_monophonic_note()) {
+				knob_conns[MidiMonoNoteParam].push_back(k);
+				printf_("Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+			} else if (k.is_monophonic_gate()) {
+				knob_conns[MidiMonoGateParam].push_back(k);
+				printf_("Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+			} else if (k.panel_knob_id < PanelDef::NumKnobs)
+				knob_conns[k.panel_knob_id].push_back(k);
 		}
 	}
 
