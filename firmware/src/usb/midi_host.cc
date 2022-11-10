@@ -1,20 +1,12 @@
 #include "midi_host.hh"
-#include "debug.hh"
 #include "printf.h"
 #include "util/circular_buffer.hh"
 
-// static bool led_state = false;
-
+//TODO: Rewrite usbh_MIDI.c in c++ and pass a lambda callback
 extern "C" void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost, uint8_t *end_data) {
-	// led_state = !led_state;
-	// Debug::green_LED1::set(rled_state);
-
-	// swap read and write buffers, and start receiving
 	MidiHost::_instance->swap_rx_buffers();
 	MidiHost::_instance->start_rx(phost);
-	// call callback on rx buffer  (which pushes recd data to circular_buffer)
-	auto rxbuf = MidiHost::_instance->get_midi_data();
-	MidiHost::_instance->_rx_callback(rxbuf);
+	MidiHost::_instance->_rx_callback(MidiHost::_instance->get_midi_data());
 }
 
 void debug_midi_rx_callback(std::span<uint8_t> rxbuffer) {

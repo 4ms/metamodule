@@ -9,10 +9,6 @@ void debug_midi_rx_callback(std::span<uint8_t> data);
 class MidiHost {
 	using CallbackFunc = Function<void(std::span<uint8_t>)>;
 
-	static constexpr uint32_t USB_HOST_RX_BUFF_SIZE = 256;
-	std::array<std::array<uint8_t, USB_HOST_RX_BUFF_SIZE>, 2> rxbuffers;
-	uint32_t write_buf_idx = 0;
-
 public:
 	MidiHost() {
 		_instance = this;
@@ -46,5 +42,12 @@ public:
 
 private:
 	static inline MidiHost *_instance;
+
+	static constexpr uint32_t RxBufferSize = 256;
+	std::array<std::array<uint8_t, RxBufferSize>, 2> rxbuffers;
+	uint32_t write_buf_idx = 0;
+
 	CallbackFunc _rx_callback = debug_midi_rx_callback;
+
+	bool _is_connected = false;
 };
