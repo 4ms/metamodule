@@ -41,7 +41,7 @@ void main() {
 
 	// Setup Patch Storage on QSPI flash and load patches to RamDisk
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
-	PatchStorage patchdisk{flash};
+	PatchStorage patchdisk{flash}; //TODO: add object for RamDiskFileIO
 
 	// Populate Patch List from Patch Storage
 	PatchList patch_list{};

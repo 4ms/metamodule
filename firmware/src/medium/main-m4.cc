@@ -10,6 +10,7 @@
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
 #include "drivers/system_startup.hh"
+#include "fatfs/ramdisk_ops.hh"
 #include "mp1m4/hsem_handler.hh"
 #include "params.hh"
 #include "ramdisk.hh"
@@ -61,7 +62,8 @@ void main() {
 	mdrivlib::GPIOExpander ext_gpio_expander{i2cbus.i2c, extaudio_gpio_expander_conf};
 	mdrivlib::GPIOExpander main_gpio_expander{i2cbus.i2c, mainboard_gpio_expander_conf};
 
-	UsbManager usb;
+	RamDiskOps ramdiskops{*virtdrive};
+	UsbManager usb{ramdiskops};
 	usb.start();
 
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};

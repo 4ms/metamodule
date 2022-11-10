@@ -1,8 +1,9 @@
 #pragma once
 #include "conf/fusb30x_conf.hh"
 #include "drivers/pin_change.hh"
+#include "fatfs/ramdisk_ops.hh"
 #include "fusb302.hh"
-// #include "usb/usb_drive_device.hh"
+#include "usb/usb_drive_device.hh"
 #include "usb/usb_host_manager.hh"
 
 // #include "printf.h"
@@ -13,24 +14,23 @@ namespace MetaModule
 
 class UsbManager {
 	UsbHostManager usb_host{Usb5VSrcEnablePin};
-	// UsbDriveDevice usb_drive;
-	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
 
+	UsbDriveDevice usb_drive;
+
+	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
 	FUSB302::Device usbctl{usbi2c, FUSBDevAddr};
 	FUSB302::Device::ConnectedState state;
-
 	using PinPolarity = mdrivlib::PinPolarity;
 	using PinMode = mdrivlib::PinMode;
 	mdrivlib::FPin<FUSBPinChangeConf::port, FUSBPinChangeConf::pin, PinMode::Input, PinPolarity::Inverted> fusb_int_pin;
-
 	bool int_asserted = false;
 
 	// Debug: timer for dumping registers
 	uint32_t tm;
 
 public:
-	UsbManager(/*RamDiskOps ramdiskops*/)
-		: // usb_drive{ramdiskops},
+	UsbManager(RamDiskOps ramdiskops)
+		:usb_drive{ramdiskops},
 		fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		// usb_drive.init_usb_device();
 		usb_host.init();
