@@ -23,7 +23,6 @@
 /* Private function prototypes -----------------------------------------------*/
 static USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status);
 
-HCD_HandleTypeDef hhcd;
 
 /*******************************************************************************
 					   LL Driver Callbacks (HCD -> USB Host Library)
@@ -128,35 +127,34 @@ void HAL_HCD_PortDisabled_Callback(HCD_HandleTypeDef *hhcd) {
 					   LL Driver Interface (USB Host Library --> HCD)
 *******************************************************************************/
 
+USBH_StatusTypeDef USBH_Link_HCD_USBH(USBH_HandleTypeDef *phost, HCD_HandleTypeDef *hhcd) {
+	hhcd->Instance = USB_OTG_HS;
+	hhcd->Init.Host_channels = 16;
+	hhcd->Init.speed = HCD_SPEED_HIGH;
+	hhcd->Init.dma_enable = DISABLE;
+	hhcd->Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
+	hhcd->Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
+	hhcd->Init.Sof_enable = DISABLE;
+
+	// Link The driver to the stack
+	hhcd->pData = phost;
+	phost->pData = hhcd;
+
+	if (HAL_HCD_Init(hhcd) != HAL_OK) {
+		return USBH_FAIL;
+	}
+
+	USBH_LL_SetTimer(phost, HAL_HCD_GetCurrentFrame(hhcd));
+
+	return USBH_OK;
+}
+
 /**
  * @brief  Initialize the low level portion of the host driver.
  * @param  phost: Host handle
  * @retval USBH status
  */
 USBH_StatusTypeDef USBH_LL_Init(USBH_HandleTypeDef *phost) {
-
-	hhcd.Instance = USB_OTG_HS;
-	hhcd.Init.Host_channels = 16;
-	hhcd.Init.speed = HCD_SPEED_HIGH;
-	hhcd.Init.dma_enable = DISABLE;
-	hhcd.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
-	hhcd.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
-	hhcd.Init.Sof_enable = DISABLE;
-
-	// Link The driver to the stack
-	hhcd.pData = phost;
-	phost->pData = &hhcd;
-
-	// Note: Library was altered here in usbd_conf.c:
-	// Force this to null, so ST USB library doesn't try to de-init it
-	// ((USBH_HandleTypeDef *)hhcd.pData)->pClassData = NULL;
-
-	if (HAL_HCD_Init(&hhcd) != HAL_OK) {
-		return USBH_FAIL;
-	}
-
-	USBH_LL_SetTimer(phost, HAL_HCD_GetCurrentFrame(&hhcd));
-
 	return USBH_OK;
 }
 

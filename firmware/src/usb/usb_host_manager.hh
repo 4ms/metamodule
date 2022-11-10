@@ -2,10 +2,8 @@
 #include "drivers/pin.hh"
 #include "midi_host.hh"
 #include "printf.h"
-// #include <functional>
 
-//hhcd defined in usbh_conf.c
-extern HCD_HandleTypeDef hhcd;
+extern "C" USBH_StatusTypeDef USBH_Link_HCD_USBH(USBH_HandleTypeDef *phost, HCD_HandleTypeDef *hhcd);
 
 class UsbHostManager {
 
@@ -25,13 +23,13 @@ public:
 			while (x)
 				;
 		}
+		USBH_Link_HCD_USBH(&usbh_handle, &hhcd);
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 	}
 
 	void start() {
 		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
-		// mdrivlib::InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_HCD_IRQHandler, &hhcd));
-		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] { HAL_HCD_IRQHandler(&hhcd); });
 		mdrivlib::InterruptControl::enable_irq(OTG_IRQn, mdrivlib::InterruptControl::LevelTriggered);
 
 		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
@@ -70,6 +68,7 @@ public:
 
 			case HOST_USER_CLASS_ACTIVE:
 				if (state == APPLICATION_START) {
+					//TODO: Check if its a MIDI device before starting RX?
 					_midihost_instance->start_rx(phost);
 					state = APPLICATION_READY;
 				}
@@ -96,6 +95,7 @@ public:
 	}
 
 private:
+	HCD_HandleTypeDef hhcd;
 	USBH_HandleTypeDef usbh_handle;
 	MidiHost midi_host;
 	static inline MidiHost *_midihost_instance;
