@@ -6,8 +6,8 @@
 #include "usb/usb_drive_device.hh"
 #include "usb/usb_host_manager.hh"
 
-#include "printf.h"
 #include "debug.hh"
+#include "printf.h"
 
 namespace MetaModule
 {
@@ -30,7 +30,7 @@ class UsbManager {
 	uint32_t tm;
 
 public:
-	UsbManager(RamDiskOps ramdiskops)
+	UsbManager(RamDiskOps &ramdiskops)
 		: usb_drive{ramdiskops}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		usb_drive.init_usb_device();
