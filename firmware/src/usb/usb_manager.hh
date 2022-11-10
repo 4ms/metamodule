@@ -73,6 +73,9 @@ public:
 				Debug::Pin3::high();
 				Debug::blue_LED1::high();
 				// printf_("Starting host\n");
+				// volatile int x = 1;
+				// while (x)
+				// 	;
 				usb_host.start();
 
 			} else if (newstate == None) {
