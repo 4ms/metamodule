@@ -4,17 +4,18 @@ _estack = 0x10040000;
 
 _Min_Heap_Size  = 0x1000;  /* required amount of heap  */
 _Min_Stack_Size = 0x400; /* required amount of stack */
-__SHARED_PTR_SIZE = 256;
+
+_SHARED_PTR_SIZE = 256;
 
 MEMORY
 {
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
 	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = 0x00040000
-	m_data	     (RW)	: ORIGIN = 0x10040000, LENGTH = (128K - __SHARED_PTR_SIZE) 
-	SHAREDMEM    (RW)   : ORIGIN = (0x10060000 - __SHARED_PTR_SIZE), LENGTH = __SHARED_PTR_SIZE
+	m_data	     (RW)	: ORIGIN = 0x10040000, LENGTH = (128K - _SHARED_PTR_SIZE) 
+	SHAREDMEMINDEX (RW) : ORIGIN = (0x10060000 - _SHARED_PTR_SIZE), LENGTH = _SHARED_PTR_SIZE
 }
 
-_params_ptr = ORIGIN(SHAREDMEM);
+_params_ptr = ORIGIN(SHAREDMEMINDEX);
 /* _params_ptr = ORIGIN(m_data) + LENGTH(m_data); */
 /* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
 
@@ -122,6 +123,14 @@ SECTIONS
     KEEP (*(.resource_table*))
     . = ALIGN(4);
   } > m_data
+
+	.sharedmemindex (NOLOAD) :
+	{
+		. = ALIGN(8);
+		*(.sharedmemindex)
+		*(.sharedmemindex*)
+		. = ALIGN(8);
+	} > SHAREDMEMINDEX
   
 
   /* Uninitialized data section into RAM memory */

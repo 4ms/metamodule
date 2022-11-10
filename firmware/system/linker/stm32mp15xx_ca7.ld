@@ -14,8 +14,8 @@ _HEAP_BASE = _VIRTDRIVE_END;
 _HEAP_END = _DMABUF_BASE;
 _HEAP_SIZE = _HEAP_END - _HEAP_BASE;
 
-
 _SHARED_PTR_SIZE = 256;
+_SHAREDIDX_START = (0x30060000 - _SHARED_PTR_SIZE);
 
 MEMORY
 {
@@ -24,7 +24,8 @@ MEMORY
 	HEAP (rw) 			: ORIGIN = _HEAP_BASE,		LENGTH = _HEAP_SIZE
 	VIRTDRIVE (rw) 		: ORIGIN = _VIRTDRIVE_BASE, LENGTH = _VIRTDRIVE_SIZE
 	DMABUF (rw) 		: ORIGIN = _DMABUF_BASE, 	LENGTH = _DMABUF_SIZE
-	SHAREDMEM (rw) 		: ORIGIN = 0x30040000, 		LENGTH = (128K - _SHARED_PTR_SIZE) /* shared with cm4 */
+	SHAREDMEM (rw) 		: ORIGIN = 0x30040000, 		LENGTH = (128K - _SHARED_PTR_SIZE)
+	SHAREDMEMINDEX (rw) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE
 	SYSRAM (rw) 		: ORIGIN = 0x2FFC0000, 		LENGTH = 192K
 	SYSDMARAM (rw) 		: ORIGIN = 0x2FFF0000, 		LENGTH = 64K
 	/* SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, 		LENGTH = 64K */
@@ -178,6 +179,14 @@ SECTIONS
 		*(.shared_memory*)
 		. = ALIGN(8);
 	} > SHAREDMEM
+
+	.sharedmemindex (NOLOAD) :
+	{
+		. = ALIGN(8);
+		*(.sharedmemindex)
+		*(.sharedmemindex*)
+		. = ALIGN(8);
+	} > SHAREDMEMINDEX
 	
 
   /* Remove information from the compiler libraries */
