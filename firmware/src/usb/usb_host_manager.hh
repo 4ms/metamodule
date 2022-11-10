@@ -23,13 +23,19 @@ public:
 			while (x)
 				;
 		}
-		USBH_Link_HCD_USBH(&usbh_handle, &hhcd);
+		err = USBH_Link_HCD_USBH(&usbh_handle, &hhcd);
+		if (err != USBH_OK) {
+			printf_("Error init USB Host: %d\n", err);
+			volatile int x = 1;
+			while (x)
+				;
+		}
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 	}
 
 	void start() {
 		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
-		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
 		mdrivlib::InterruptControl::enable_irq(OTG_IRQn, mdrivlib::InterruptControl::LevelTriggered);
 
 		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
@@ -95,7 +101,8 @@ public:
 	}
 
 private:
-	HCD_HandleTypeDef hhcd;
+	//TODO: why is this not working with a non-static hhcd? IRQ_Trampoline_98 never gets called
+	static inline HCD_HandleTypeDef hhcd;
 	USBH_HandleTypeDef usbh_handle;
 	MidiHost midi_host;
 	static inline MidiHost *_midihost_instance;
