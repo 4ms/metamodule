@@ -30,7 +30,7 @@ TARGETDEVICEDIR_CM4 = $(DRIVERLIB)/target/stm32mp1_cm4
 
 usb_src := src/usb
 usbhost_libdir = $(LIBDIR)/stm32-usb-host-lib
-usbdev_libdir = $(LIBDIR)/stm32-usb-dev-lib
+usbdev_libdir = $(LIBDIR)/stm32-usb-device-lib
 STARTUP = $(TARGETDEVICEDIR_CM4)/boot/startup_stm32mp157cxx_cm4.s
 SYSTEM = $(DEVICEBASE)/stm32mp157c/templates/system_stm32mp1xx.c
 
@@ -82,15 +82,16 @@ SOURCES += $(usbhost_libdir)/Core/Src/usbh_ioreq.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_pipes.c
 
 # USB Device:
-# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd.c
-# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd_ex.c
-# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc.c
-# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_bot.c
-# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_data.c
-# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_scsi.c
-# SOURCES += $(usbdev_libdir)/Core/Src/usbd_core.c
-# SOURCES += $(usbdev_libdir)/Core/Src/usbd_ctlreq.c
-# SOURCES += $(usbdev_libdir)/Core/Src/usbd_ioreq.c
+SOURCES += $(usb_src)/usb_drive_device.cc
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd_ex.c
+SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc.c
+SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_bot.c
+SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_data.c
+SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_scsi.c
+SOURCES += $(usbdev_libdir)/Core/Src/usbd_core.c
+SOURCES += $(usbdev_libdir)/Core/Src/usbd_ctlreq.c
+SOURCES += $(usbdev_libdir)/Core/Src/usbd_ioreq.c
 
 ifeq "$(target_board)" "mini"
 SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
@@ -118,12 +119,14 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(SHARED)/CoreModules \
 			-I$(SHARED)/cpputil \
 			-I$(SHARED)/patch \
+			-I$(LIBDIR)/fatfs/source \
+			-Isrc/fatfs \
 			-I$(usb_src) \
 			-I$(usbhost_libdir)/Core/Inc \
-			
-			# -I$(usbdev_libdir)/Class/MSC/Inc \
-			# -I$(usbdev_libdir)/Core/Inc \ 
-			# -I$(usbdev_libdir)/Class/HUB/Inc \
+			-I$(usbdev_libdir)/Class/MSC/Inc \
+			-I$(usbdev_libdir)/Core/Inc \
+			-I$(usbdev_libdir)/Class/HUB/Inc \
+
 
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 
