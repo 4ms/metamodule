@@ -34,9 +34,9 @@ void main() {
 
 	// Setup RAM disk
 	// ==> m4:
-	// RamDiskOps ramdiskops{StaticBuffers::virtdrive};
-	// RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
-	// RamDiskFileIO::format_disk(Disk::RamDisk);
+	RamDiskOps ramdiskops{StaticBuffers::virtdrive};
+	RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
+	RamDiskFileIO::format_disk(Disk::RamDisk);
 
 	// Setup Patch Storage (On QSPI flash)
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
@@ -44,7 +44,7 @@ void main() {
 
 	// Populate Patch List from Patch Storage
 	PatchList patch_list{};
-	// patchdisk.factory_clean(); //Remove this when not testing!
+	patchdisk.factory_clean(); //Remove this when not testing!
 	patchdisk.fill_patchlist_from_norflash(patch_list);
 	patchdisk.norflash_patches_to_ramdisk();
 
