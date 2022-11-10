@@ -18,11 +18,11 @@ FATFS fs;
 bool register_disk(DiskOps *ops, Disk disk) {
 	if (disk == Disk::RamDisk) {
 		if (!fatfs_register_disk(ops, 0)) {
-			printf("Failed to register NOR Flash RamDisk ops\r\n");
+			printf_("Failed to register NOR Flash RamDisk ops\r\n");
 			return false;
 		}
 	} else {
-		printf("Cannot register: unknown disk\r\n");
+		printf_("Cannot register: unknown disk\r\n");
 		return false;
 	}
 	return true;
@@ -59,7 +59,12 @@ bool format_disk(Disk disk) {
 		return false;
 
 	res = f_mount(&fs, vol, 1);
-	return res == FR_OK;
+	if (res != FR_OK) {
+		printf_("RamDisk not formatted, err %d\n", res);
+		return false;
+	}
+	printf_("RamDisk formatted\n");
+	return true;
 }
 
 bool create_file(const char *filename, const std::span<const char> data) {
