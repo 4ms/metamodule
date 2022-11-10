@@ -53,6 +53,7 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pwr_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_tim.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_cortex.c
 SOURCES += $(target_src)/controls.cc
 SOURCES += $(target_chip_src)/main-m4.cc
@@ -66,6 +67,8 @@ SOURCES += $(DRIVERLIB)/drivers/pin.cc
 SOURCES += $(DRIVERLIB)/drivers/rotary.cc
 SOURCES += $(DRIVERLIB)/drivers/tim.cc
 SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
+SOURCES += src/uart_log.cc
+SOURCES += lib/printf/printf.c
 
 # USB:
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb.c

@@ -70,6 +70,7 @@ public:
 
 			case HOST_USER_CONNECTION:
 				state = APPLICATION_START;
+				printf_("Host Connected\n");
 				break;
 
 			case HOST_USER_CLASS_ACTIVE:
@@ -78,13 +79,14 @@ public:
 					_midihost_instance->connect();
 					_midihost_instance->start_rx(phost);
 					state = APPLICATION_READY;
+					printf_("Host Class Active\n");
 				}
 				break;
 
 			case HOST_USER_DISCONNECTION:
 				state = APPLICATION_DISCONNECT;
 				_midihost_instance->disconnect();
-				printf_("App disconnect\n");
+				printf_("Host disconnected\n");
 				break;
 
 			case HOST_USER_UNRECOVERED_ERROR:

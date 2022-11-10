@@ -1,3 +1,4 @@
 #pragma once
-static inline void printf_(...) {
-}
+#include "../lib/printf/printf.h"
+// static inline void printf_(...) {
+// }

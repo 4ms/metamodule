@@ -6,7 +6,7 @@
 #include "usb/usb_drive_device.hh"
 #include "usb/usb_host_manager.hh"
 
-// #include "printf.h"
+#include "printf.h"
 #include "debug.hh"
 
 namespace MetaModule
@@ -25,6 +25,7 @@ class UsbManager {
 	mdrivlib::FPin<FUSBPinChangeConf::port, FUSBPinChangeConf::pin, PinMode::Input, PinPolarity::Inverted> fusb_int_pin;
 	bool int_asserted = false;
 
+	bool found_fusb = false;
 	// Debug: timer for dumping registers
 	uint32_t tm;
 
@@ -35,21 +36,20 @@ public:
 		// usb_drive.init_usb_device();
 		usb_host.init();
 
-		auto ok = usbctl.init();
-		if (ok) {
-			Debug::Pin0::low();
-		} else {
-			Debug::red_LED1::high();
-			Debug::Pin0::high();
-		}
-
-		// if (ok)
-		// 	printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
-		// else
-		// 	printf_("Can't communicate with FUSB302\n");
+		found_fusb = usbctl.init();
+		// if (ok) {
+		// 	Debug::Pin0::low();
+		// } else {
+		// 	Debug::red_LED1::high();
+		// 	Debug::Pin0::high();
+		// }
 	}
 
 	void start() {
+		if (found_fusb)
+			printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
+		else
+			printf_("Can't communicate with FUSB302\n");
 		tm = HAL_GetTick();
 		usbctl.start_drp_polling();
 	}
@@ -72,10 +72,7 @@ public:
 				Debug::Pin2::low();
 				Debug::Pin3::high();
 				Debug::blue_LED1::high();
-				// printf_("Starting host\n");
-				// volatile int x = 1;
-				// while (x)
-				// 	;
+				printf_("Starting host\n");
 				usb_host.start();
 
 			} else if (newstate == None) {
@@ -88,7 +85,7 @@ public:
 				// if (state == AsDevice)
 				// 	usb_drive.stop();
 
-				// printf_("Disconnected, resuming DRP polling\n");
+				printf_("Disconnected, resuming DRP polling\n");
 				usbctl.start_drp_polling();
 			}
 			state = newstate;
