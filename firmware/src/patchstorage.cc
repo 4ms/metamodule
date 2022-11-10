@@ -58,7 +58,7 @@ bool PatchStorage::norflash_patches_to_ramdisk() {
 		if (data.size() == 0)
 			return;
 
-		printf_("Found patch file: %s, Reading... ", filename.data());
+		printf_("Found patch file in LFS: %s, creating on RamDisk\n", filename.data());
 
 		//TODO: verify it's a patch file
 		//data.starts_with("PatchData: ");??? use PatchFileIO?
