@@ -35,13 +35,14 @@ public:
 	void start() {
 		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
 		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
-		mdrivlib::InterruptControl::enable_irq(OTG_IRQn, mdrivlib::InterruptControl::LevelTriggered);
 
 		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
 		// TODO: register HUB class
 		// USBH_RegisterClass(&usbh_handle, USBH_HUB_CLASS);
 		USBH_Start(&usbh_handle);
 		src_enable.high();
+		HAL_Delay(200);
+		mdrivlib::InterruptControl::enable_irq(OTG_IRQn, mdrivlib::InterruptControl::LevelTriggered);
 	}
 	void stop() {
 		src_enable.low();
@@ -63,6 +64,8 @@ public:
 	static inline ApplicationState state;
 
 	static void USBH_StateChangeCallback(USBH_HandleTypeDef *phost, uint8_t id) {
+		//gState: 6 = HOST_DEV_ATTACHED
+		//gState: 9 = HOST_ENUMERATION
 		USBH_DbgLog("USBH_StateChangeCallback: %d %d %d", phost->EnumState, phost->gState, id);
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:

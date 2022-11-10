@@ -453,7 +453,7 @@ USBH_StatusTypeDef USBH_LL_DriverVBUS(USBH_HandleTypeDef *phost, uint8_t state) 
 	} else {
 		// board_set_usbhostvbuson(0);
 	}
-	HAL_Delay(200);
+	// HAL_Delay(200);
 	return USBH_OK;
 }
 
