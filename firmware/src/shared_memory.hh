@@ -1,5 +1,7 @@
 #pragma once
+#include "conf/ramdisk_conf.hh"
 #include "drivers/cache.hh"
+#include "ramdisk.hh"
 #include <cstdint>
 
 // Defined in linker script
@@ -29,27 +31,62 @@ struct SharedMemory {
 		AuxSignalBlockLocation,
 		PatchPlayerLocation,
 	};
+};
 
-	//////////////// TODO: Test this alternative method:
-	// enum class Location : uint32_t {
-	// 	ParamsPtr = 0,
-	// 	RamDisk,
-	// 	AuxSignalBlock,
-	// 	PatchPlayer,
-	// };
+//////////////// TODO: Test this alternative method:
+// #include "auxsignal.hh"
+// #include "conf/ramdisk_conf.hh"
+// #include "params.hh"
+// #include "patch_player.hh"
+// #include "ramdisk.hh"
 
-	// static inline __attribute__((section(".sharedmemindex"))) uint32_t shared_memory_addrs[4];
+struct SharedMemorySafer {
+	enum class Location : uint32_t {
+		ParamsPtr = 0,
+		RamDiskPtr,
+		AuxSignalBlock,
+		PatchPlayer,
+	};
+
+	static inline __attribute__((section(".sharedmemindex"))) uint32_t shared_memory_addrs[4];
+
+	template<Location Loc, typename T>
+	static void register_address_of(T *object) {
+		auto index = static_cast<uint32_t>(Loc);
+		shared_memory_addrs[index] = reinterpret_cast<uint32_t>(object);
+		mdrivlib::SystemCache::clean_dcache_by_addr(&(shared_memory_addrs[index]));
+	}
 
 	// template<Location Loc, typename T>
-	// static void register_address_of(T *object) {
-	// 	auto index = static_cast<uint32_t>(Loc);
-	// 	shared_memory_addrs[index] = reinterpret_cast<uint32_t>(object);
-	// 	mdrivlib::SystemCache::clean_dcache_by_addr(&(shared_memory_addrs[index]));
+	// static T get_shared_obj_ptr();
+
+	// template<>
+	// auto *get_shared_obj_ptr<Location::ParamsPtr>() {
+	// 	auto index = static_cast<uint32_t>(Location::ParamsPtr);
+	// 	return reinterpret_cast<MetaModule::DoubleBufParamBlock *>(shared_memory_addrs[index]);
 	// }
 
-	// template<typename T>
-	// static T get_shared_obj_ptr(Location loc) {
-	// 	auto index = static_cast<uint32_t>(loc);
-	// 	return reinterpret_cast<T>(shared_memory_addrs[index]);
+	// template<>
+	// auto *get_shared_obj_ptr<Location::RamDiskPtr>() {
+	// 	auto index = static_cast<uint32_t>(Location::RamDiskPtr);
+	// 	return reinterpret_cast<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(shared_memory_addrs[index]);
 	// }
+
+	// template<>
+	// auto *get_shared_obj_ptr<Location::AuxSignalBlock>() {
+	// 	auto index = static_cast<uint32_t>(Location::AuxSignalBlock);
+	// 	return reinterpret_cast<MetaModule::DoubleAuxStreamBlock *>(shared_memory_addrs[index]);
+	// }
+
+	// template<>
+	// auto *get_shared_obj_ptr<Location::PatchPlayer>() {
+	// 	auto index = static_cast<uint32_t>(Location::PatchPlayer);
+	// 	return reinterpret_cast<MetaModule::PatchPlayer *>(shared_memory_addrs[index]);
+	// }
+
+	template<typename T>
+	static T get_shared_obj_ptr(Location loc) {
+		auto index = static_cast<uint32_t>(loc);
+		return reinterpret_cast<T>(shared_memory_addrs[index]);
+	}
 };
