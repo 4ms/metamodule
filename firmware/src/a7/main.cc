@@ -32,9 +32,8 @@ void main() {
 
 	StaticBuffers::init();
 
-	// Setup RAM disk
-	// faster to do this with a7 than m4? format_disk() is slow...
-	// OR do it concurrently (2nd core) on boot?
+	HAL_Delay(100);
+	// Setup RAM disk: ~300us on A7 for 4MB disk
 	RamDiskOps ramdiskops{StaticBuffers::virtdrive};
 	RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
 	RamDiskFileIO::format_disk(Disk::RamDisk);
@@ -69,6 +68,7 @@ void main() {
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 	SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
+	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 
 	param_cache.clear();
 	patch_loader.load_initial_patch();
