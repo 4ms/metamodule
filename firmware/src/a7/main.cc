@@ -70,6 +70,11 @@ void main() {
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 	SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
 
+	param_cache.clear();
+	patch_loader.load_initial_patch();
+
+	printf_("A7 initialized. Unlocking M4\n");
+
 	// Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
 
@@ -77,8 +82,6 @@ void main() {
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
 
-	param_cache.clear();
-	patch_loader.load_initial_patch();
 	audio.start();
 	ui.start();
 

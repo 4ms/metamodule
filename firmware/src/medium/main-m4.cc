@@ -37,8 +37,10 @@ static void app_startup() {
 
 static void signal_m4_ready_after_delay() {
 	static uint32_t ctr = 0x10000;
-	if (ctr == 1)
+	if (ctr == 1) {
+		printf_("M4 initialized\n");
 		HWSemaphore<MetaModule::M4_ready>::unlock();
+	}
 	if (ctr > 0)
 		ctr--;
 }
@@ -49,6 +51,8 @@ void main() {
 	using namespace MetaModule;
 
 	app_startup();
+
+	printf_("M4 starting\n");
 
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
