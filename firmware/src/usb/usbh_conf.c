@@ -23,7 +23,6 @@
 /* Private function prototypes -----------------------------------------------*/
 static USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status);
 
-
 /*******************************************************************************
 					   LL Driver Callbacks (HCD -> USB Host Library)
 *******************************************************************************/
@@ -128,13 +127,23 @@ void HAL_HCD_PortDisabled_Callback(HCD_HandleTypeDef *hhcd) {
 *******************************************************************************/
 
 USBH_StatusTypeDef USBH_Link_HCD_USBH(USBH_HandleTypeDef *phost, HCD_HandleTypeDef *hhcd) {
+	memset(phost, 0, sizeof(HCD_HandleTypeDef));
 	hhcd->Instance = USB_OTG_HS;
 	hhcd->Init.Host_channels = 16;
 	hhcd->Init.speed = HCD_SPEED_HIGH;
 	hhcd->Init.dma_enable = DISABLE;
 	hhcd->Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
-	hhcd->Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
 	hhcd->Init.Sof_enable = DISABLE;
+
+	hhcd->Init.battery_charging_enable = ENABLE;
+	hhcd->Init.lpm_enable = DISABLE;
+	hhcd->Init.use_external_vbus = ENABLE;	 //Might only be used for ULPI?
+	hhcd->Init.vbus_sensing_enable = ENABLE; //Doesn't seem to be used for hosts?
+	hhcd->Init.low_power_enable = ENABLE;	 //Doesn't seem to be used?
+
+	hhcd->Init.dev_endpoints = 0;	//Not used for hosts?
+	hhcd->Init.ep0_mps = EP_MPS_64; //Max packet size. Doesnt seem to be used?
+	hhcd->Init.use_dedicated_ep1 = DISABLE;
 
 	// Link The driver to the stack
 	hhcd->pData = phost;

@@ -175,6 +175,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 	auto err = extaudio_jacksense_reader.start();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
+	// HSEM_IT2_IRQn (125) and ADC1 (18) make it hard to debug, but they can't be frozen
 	__HAL_DBGMCU_FREEZE_TIM6();
 	__HAL_DBGMCU_FREEZE_TIM17();
 
