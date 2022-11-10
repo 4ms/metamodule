@@ -31,9 +31,9 @@ class UsbManager {
 
 public:
 	UsbManager(RamDiskOps ramdiskops)
-		:usb_drive{ramdiskops},
-		fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
-		// usb_drive.init_usb_device();
+		: usb_drive{ramdiskops}
+		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
+		usb_drive.init_usb_device();
 		usb_host.init();
 
 		found_fusb = usbctl.init();
@@ -65,8 +65,8 @@ public:
 			if (newstate == AsDevice) {
 				Debug::Pin2::high();
 				Debug::Pin3::low();
-				// printf_("Connected as a device\n");
-				// usb_drive.start();
+				printf_("Connected as a device\n");
+				usb_drive.start();
 
 			} else if (newstate == AsHost) {
 				Debug::Pin2::low();
@@ -82,8 +82,8 @@ public:
 				if (state == AsHost)
 					usb_host.stop();
 
-				// if (state == AsDevice)
-				// 	usb_drive.stop();
+				if (state == AsDevice)
+					usb_drive.stop();
 
 				printf_("Disconnected, resuming DRP polling\n");
 				usbctl.start_drp_polling();

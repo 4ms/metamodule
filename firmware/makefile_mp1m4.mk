@@ -86,6 +86,8 @@ SOURCES += $(usbhost_libdir)/Core/Src/usbh_pipes.c
 
 # USB Device:
 SOURCES += $(usb_src)/usb_drive_device.cc
+SOURCES += $(usb_src)/usbd_conf.c
+SOURCES += $(usb_src)/usbd_desc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd_ex.c
 SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc.c
