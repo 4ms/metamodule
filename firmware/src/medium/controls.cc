@@ -32,26 +32,10 @@ void Controls::update_params() {
 	for (unsigned i = 0; i < PanelDef::NumPot; i++)
 		cur_params->knobs[i] = _knobs[i].next();
 
-	// Monophonic MIDI CV/Gate
-	if (_midi_rx_buf.num_filled()) {
-		auto msg = _midi_rx_buf.get();
-		if (msg.is_command<Midi::NoteOn>()) {
-			if (msg.velocity()) {
-				int32_t note = msg.note();
-				midi_note = (note - 60) / 60.f;
-				midi_gate = true;
-			} else
-				midi_gate = false;
-		} else if (msg.is_command<Midi::NoteOff>()) {
-			midi_gate = false;
-		}
-	}
-	cur_params->midi_note = midi_note;
-	cur_params->midi_gate = midi_gate;
-
 	if (_first_param) {
 		_first_param = false;
 
+		cur_metaparams->midi_connected = _midi_host.is_connected();
 		cur_params->jack_senses = get_jacksense_reading();
 
 		// PatchCV
@@ -84,6 +68,35 @@ void Controls::update_params() {
 		// Meta button
 		cur_metaparams->meta_buttons[0].transfer_events(button0);
 	}
+
+	// Monophonic MIDI CV/Gate
+	if (_midi_rx_buf.num_filled()) {
+		auto msg = _midi_rx_buf.get();
+
+		if (msg.is_command<Midi::NoteOn>()) {
+			Debug::Pin1::high();
+			if (msg.velocity()) {
+				int32_t note = msg.note();
+				midi_note = (note - 60) / 60.f;
+				midi_gate = true;
+			} else {
+				midi_gate = false;
+			}
+			Debug::Pin1::low();
+		} else if (msg.is_command<Midi::NoteOff>()) {
+			midi_gate = false;
+		}
+	} else {
+		//if rx buffer is empty AND we've disconnected, turn off the midi gate
+		//so we don't end up with stuck notes
+		if (!cur_metaparams->midi_connected) {
+			midi_note = 0.f;
+			midi_gate = false;
+		}
+	}
+	cur_params->midi_note = midi_note;
+	cur_params->midi_gate = midi_gate;
+	Debug::red_LED1::set(midi_gate);
 
 	cur_params++;
 	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
