@@ -9,9 +9,8 @@
 namespace MetaModule
 {
 
-PatchStorage::PatchStorage(mdrivlib::QSpiFlash &flash, RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
-	: lfs{flash}
-	, ramdisk{rmdisk} {
+PatchStorage::PatchStorage(mdrivlib::QSpiFlash &flash)
+	: lfs{flash} {
 	init_norflash();
 }
 

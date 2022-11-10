@@ -39,13 +39,13 @@ void main() {
 	RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
 	RamDiskFileIO::format_disk(Disk::RamDisk);
 
-	// Setup Patch Storage (On QSPI flash)
+	// Setup Patch Storage on QSPI flash and load patches to RamDisk
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
-	PatchStorage patchdisk{flash, StaticBuffers::virtdrive};
+	PatchStorage patchdisk{flash};
 
 	// Populate Patch List from Patch Storage
 	PatchList patch_list{};
-	patchdisk.factory_clean(); //Remove this when not testing!
+	// patchdisk.factory_clean(); //Remove this when not testing!
 	patchdisk.fill_patchlist_from_norflash(patch_list);
 	patchdisk.norflash_patches_to_ramdisk();
 

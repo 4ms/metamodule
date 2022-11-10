@@ -5,7 +5,8 @@
 //defined in diskio.cc, but we don't have access to modify diskio.h
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
-// TODO: can this work as a class? We could possibly need multiple FatFS instances
+// TODO: Make this a class with non-static member funcs. FATFS can also be non-static
+// Then pass the object to the ctor of PatchStorage
 namespace MetaModule::RamDiskFileIO
 {
 

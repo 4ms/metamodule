@@ -10,7 +10,7 @@ namespace MetaModule
 // PatchStorage transfers patches between NorFlash (littleFS) and the RamDisk (FatFS) and PatchList
 class PatchStorage {
 public:
-	PatchStorage(mdrivlib::QSpiFlash &flash, RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk);
+	PatchStorage(mdrivlib::QSpiFlash &flash);
 
 	void factory_clean();
 	LittleNorFS::Status init_norflash();
@@ -23,6 +23,6 @@ public:
 
 private:
 	LittleNorFS lfs;
-	RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &ramdisk;
+	//TODO: RamDiskFileIO &ramdiskio;
 };
 } // namespace MetaModule
