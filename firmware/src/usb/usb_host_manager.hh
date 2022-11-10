@@ -12,7 +12,6 @@ public:
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
 		src_enable.low();
 		_midihost_instance = &midi_host;
-		_instance = this;
 	}
 
 	void init() {
@@ -33,7 +32,8 @@ public:
 		mdrivlib::InterruptControl::enable_irq(OTG_IRQn, mdrivlib::InterruptControl::LevelTriggered);
 
 		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
-		//TODO register HUB class
+		// TODO: register HUB class
+		// USBH_RegisterClass(&usbh_handle, USBH_HUB_CLASS);
 		USBH_Start(&usbh_handle);
 		src_enable.high();
 	}
@@ -69,6 +69,7 @@ public:
 			case HOST_USER_CLASS_ACTIVE:
 				if (state == APPLICATION_START) {
 					//TODO: Check if its a MIDI device before starting RX?
+					_midihost_instance->connect();
 					_midihost_instance->start_rx(phost);
 					state = APPLICATION_READY;
 				}
@@ -76,8 +77,8 @@ public:
 
 			case HOST_USER_DISCONNECTION:
 				state = APPLICATION_DISCONNECT;
-				// printf_("App disconnect\n");
-				// _instance->stop();
+				_midihost_instance->disconnect();
+				printf_("App disconnect\n");
 				break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
@@ -99,6 +100,5 @@ private:
 	USBH_HandleTypeDef usbh_handle;
 	MidiHost midi_host;
 	static inline MidiHost *_midihost_instance;
-	static inline UsbHostManager *_instance;
 	mdrivlib::Pin src_enable;
 };

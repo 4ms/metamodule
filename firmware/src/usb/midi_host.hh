@@ -34,8 +34,7 @@ public:
 	}
 
 	bool is_connected() {
-		//TODO:
-		return true;
+		return _is_connected;
 	}
 
 	void connect() {
