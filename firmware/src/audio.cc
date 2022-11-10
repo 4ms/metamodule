@@ -190,14 +190,22 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// Pass CV values to modules
 		for (auto [i, cv] : countzip(params_.cvjacks))
-			player.set_panel_input(i + NumAudioInputs, cv);
+			player.set_panel_input(i + FirstCVInput, cv);
 
 		for (auto [i, gatein] : countzip(params_.gate_ins))
-			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
+			player.set_panel_input(i + FirstGateInput, gatein.is_high() ? 1.f : 0.f);
 
 		// Pass Knob values to modules
 		for (auto [i, knob] : countzip(params_.knobs))
 			player.set_panel_param(i, knob);
+
+		if (param_block.metaparams.midi_connected) {
+			player.set_panel_param(MidiMonoNoteParam, params_.midi_note);
+			// player.set_panel_param(MidiMonoGateParam, params_.midi_gate);
+
+			// player.set_panel_input(FirstMidiNoteInput, params_.midi_note);
+			player.set_panel_input(MidiMonoGateJack, params_.midi_gate);
+		}
 
 		// Run each module
 		player.update_patch();

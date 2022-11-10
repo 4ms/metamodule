@@ -64,12 +64,8 @@ private:
 	bool _first_param = true;
 
 	DoubleAuxStreamBlock &auxstream_blocks;
-
 	mdrivlib::PinChangeInt<AuxStreamUpdateConf> auxstream_updater;
 	AuxStream auxstream;
-
-	uint16_t latest_jacksense_reading;
-	uint16_t latest_extaudio_jacksense_reading;
 
 	// Todo: calc this from AdcSampTime, PotAdcConf::oversampling_ratio, and ADC periph clock (PLL_Div2... rcc...)
 	// Tested with APB clock (rcc set to PER, but don't think that matters. clock_div set to APBClk_Div1):
@@ -89,7 +85,8 @@ private:
 
 	MidiHost &_midi_host;
 	CircularBuffer<Midi::MidiMessage, 256> _midi_rx_buf;
-	// void midi_rx_cb(std::span<uint8_t> rx_buffer);
+	float midi_note = 0.f;
+	bool midi_gate = false;
 
 	bool _rotary_moved_while_pressed = false;
 

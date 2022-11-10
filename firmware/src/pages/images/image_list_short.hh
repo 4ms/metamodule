@@ -18,6 +18,8 @@ LV_IMG_DECLARE(StMix_artwork_240);
 LV_IMG_DECLARE(StMix_artwork_120);
 LV_IMG_DECLARE(SMR_artwork_240);
 LV_IMG_DECLARE(SMR_artwork_120);
+LV_IMG_DECLARE(InfOsc_artwork_240);
+LV_IMG_DECLARE(InfOsc_artwork_120);
 }
 
 struct ModuleImages {
@@ -45,6 +47,9 @@ struct ModuleImages {
 
 		if (slug == "SMR")
 			return (height == 240) ? &SMR_artwork_240 : &SMR_artwork_120;
+
+		if (slug == "InfOsc")
+			return (height == 240) ? &InfOsc_artwork_240 : &InfOsc_artwork_120;
 
 		return nullptr;
 	}

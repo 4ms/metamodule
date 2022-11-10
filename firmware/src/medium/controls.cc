@@ -18,12 +18,6 @@ void Controls::update_debouncers() {
 	gate_in_2.update();
 }
 
-// Mini:
-// first param in block: 2.0-2.4us, @ 48kHz
-// second param in block: 1.3-1.5us @ 48kHz
-// load 6.8%
-// Medium:
-// to be measured... but it's 2.8us total for this + update_debouncers
 void Controls::update_params() {
 	cur_params->gate_ins[0].copy_state(gate_in_1);
 	cur_params->gate_ins[1].copy_state(gate_in_2);
@@ -35,16 +29,14 @@ void Controls::update_params() {
 		}
 		_new_adc_data_ready = false;
 	}
-
 	for (unsigned i = 0; i < PanelDef::NumPot; i++)
 		cur_params->knobs[i] = _knobs[i].next();
 
 	if (_first_param) {
 		_first_param = false;
 
+		cur_metaparams->midi_connected = _midi_host.is_connected();
 		cur_params->jack_senses = get_jacksense_reading();
-		// cur_params->jack_senses = 0; //jacksense_reader.read_sense_pins();
-		// store_jacksense_reading(cur_params->jack_senses);
 
 		// PatchCV
 		if constexpr (PanelDef::NumMetaCV > 0)
@@ -75,10 +67,36 @@ void Controls::update_params() {
 
 		// Meta button
 		cur_metaparams->meta_buttons[0].transfer_events(button0);
-
-		// } else {
-		// 	cur_params->jack_senses = get_jacksense_reading();
 	}
+
+	// Monophonic MIDI CV/Gate
+	if (_midi_rx_buf.num_filled()) {
+		auto msg = _midi_rx_buf.get();
+
+		if (msg.is_command<Midi::NoteOn>()) {
+			Debug::Pin1::high();
+			if (msg.velocity()) {
+				int32_t note = msg.note();
+				midi_note = (note - 60) / 60.f;
+				midi_gate = true;
+			} else {
+				midi_gate = false;
+			}
+			Debug::Pin1::low();
+		} else if (msg.is_command<Midi::NoteOff>()) {
+			midi_gate = false;
+		}
+	} else {
+		//if rx buffer is empty AND we've disconnected, turn off the midi gate
+		//so we don't end up with stuck notes
+		if (!cur_metaparams->midi_connected) {
+			midi_note = 0.f;
+			midi_gate = false;
+		}
+	}
+	cur_params->midi_note = midi_note;
+	cur_params->midi_gate = midi_gate;
+	Debug::red_LED1::set(midi_gate);
 
 	cur_params++;
 	if (cur_params == param_blocks[0].params.end() || cur_params == param_blocks[1].params.end())
@@ -119,22 +137,15 @@ void Controls::start() {
 	}
 
 	_midi_host.register_rx_cb([this](std::span<uint8_t> rxbuffer) {
+		//300ns on M4
 		if (rxbuffer.size() < 4)
 			return;
-
+		Debug::Pin0::high();
 		auto msg = Midi::MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
-		if (msg.is_command<Midi::NoteOn>()) {
-			Debug::red_LED1::high();
-		} else if (msg.is_command<Midi::NoteOff>()) {
-			Debug::red_LED1::low();
-		}
-
 		_midi_rx_buf.put(msg);
+		Debug::Pin0::low();
 	});
 }
-
-// static void Controls::midi_rx_cb(Midi::MidiMessage msg) {
-// }
 
 Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 				   DoubleAuxStreamBlock &auxsignal_blocks_ref,
@@ -161,11 +172,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 
 	pot_adc.start();
 
-	// Debug::Pin3::high();
 	auto err = extaudio_jacksense_reader.start();
-	// if (err == GPIOExpander::Error::None)
-	// Debug::Pin3::low();
-	// Debug::Pin2::high();
 
 	// Todo: use RCC_Enable or create DBGMCU_Control:
 	__HAL_DBGMCU_FREEZE_TIM6();
@@ -173,9 +180,8 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 
 	// mp1 m4: every ~20us + 60us gap every 64 pulses (1.3ms), width= 2.8us ... ~14% load
 	read_controls_task.init(control_read_tim_conf, [this]() {
-		if (_buffer_full) {
+		if (_buffer_full)
 			return;
-		}
 		update_debouncers();
 		update_params();
 	});

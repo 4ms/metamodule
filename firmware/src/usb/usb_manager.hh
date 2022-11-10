@@ -23,10 +23,7 @@ class UsbManager {
 	using PinMode = mdrivlib::PinMode;
 	mdrivlib::FPin<FUSBPinChangeConf::port, FUSBPinChangeConf::pin, PinMode::Input, PinPolarity::Inverted> fusb_int_pin;
 
-	// For no pinchange ISR:
 	bool int_asserted = false;
-	// For pinchange ISR:
-	// mdrivlib::PinChangeInt<FUSBPinChangeConf> fusb_pin_isr;
 
 	// Debug: timer for dumping registers
 	uint32_t tm;
@@ -36,13 +33,7 @@ public:
 		: // usb_drive{ramdiskops},
 		fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		// usb_drive.init_usb_device();
-		Debug::Pin3::low();
-		Debug::Pin3::high();
-		Debug::Pin3::low();
 		usb_host.init();
-		Debug::Pin2::low();
-		Debug::Pin2::high();
-		Debug::Pin2::low();
 
 		auto ok = usbctl.init();
 		if (ok) {
@@ -59,15 +50,12 @@ public:
 	}
 
 	void start() {
-		// fusb_pin_isr.init([this]() { handle_fusb_int(); });
-		// fusb_pin_isr.start();
-
 		tm = HAL_GetTick();
 		usbctl.start_drp_polling();
 	}
 
 	void handle_fusb_int() {
-		Debug::Pin1::high();
+		// Debug::Pin1::high();
 		// printf_("INT pin asserted\n");
 		usbctl.handle_interrupt();
 
@@ -102,7 +90,7 @@ public:
 			}
 			state = newstate;
 		}
-		Debug::Pin1::low();
+		// Debug::Pin1::low();
 	}
 
 	void process() {
@@ -125,13 +113,12 @@ public:
 		if ((HAL_GetTick() - tm) > 400) {
 			tm = HAL_GetTick();
 			auto stat0 = usbctl.read<FUSB302::Status0>();
-			if (stat0.BCLevel == 3) {
-				if (stat0.Comp)
-					Debug::Pin0::high();
-				else
-					Debug::Pin0::low();
-			}
-			// usbctl.check_all_regs();
+			// if (stat0.BCLevel == 3) {
+			// 	if (stat0.Comp)
+			// 		Debug::Pin0::high();
+			// 	else
+			// 		Debug::Pin0::low();
+			// }
 		}
 	}
 

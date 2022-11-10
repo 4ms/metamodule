@@ -87,5 +87,9 @@ private:
 	static constexpr unsigned NumGateOutputs = PanelDef::NumGateOut;
 	static constexpr unsigned NumAudioOutputs = PanelDef::NumAudioOut;
 	static constexpr unsigned NumCVOutputs = PanelDef::NumDACOut;
+
+	static constexpr unsigned FirstAudioInput = 0;
+	static constexpr unsigned FirstCVInput = NumAudioInputs;
+	static constexpr unsigned FirstGateInput = FirstCVInput + NumCVInputs;
 };
 } // namespace MetaModule

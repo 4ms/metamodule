@@ -37,6 +37,11 @@ public:
 		write_buf_idx = 1 - write_buf_idx;
 	}
 
+	bool is_connected() {
+		//TODO:
+		return true;
+	}
+
 	friend void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost, uint8_t *end_data);
 
 private:
