@@ -38,6 +38,14 @@ public:
 		return true;
 	}
 
+	void connect() {
+		_is_connected = true;
+	}
+
+	void disconnect() {
+		_is_connected = false;
+	}
+
 	friend void USBH_MIDI_ReceiveCallback(USBH_HandleTypeDef *phost, uint8_t *end_data);
 
 private:
