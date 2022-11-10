@@ -61,27 +61,27 @@ struct SharedMemorySafer {
 	// static T get_shared_obj_ptr();
 
 	// template<>
-	// auto *get_shared_obj_ptr<Location::ParamsPtr>() {
+	// auto get_shared_obj_ptr<Location::ParamsPtr>() {
 	// 	auto index = static_cast<uint32_t>(Location::ParamsPtr);
-	// 	return reinterpret_cast<MetaModule::DoubleBufParamBlock *>(shared_memory_addrs[index]);
+	// 	return *reinterpret_cast<MetaModule::DoubleBufParamBlock *>(shared_memory_addrs[index]);
 	// }
 
 	// template<>
-	// auto *get_shared_obj_ptr<Location::RamDiskPtr>() {
+	// auto get_shared_obj_ptr<Location::RamDiskPtr>() {
 	// 	auto index = static_cast<uint32_t>(Location::RamDiskPtr);
-	// 	return reinterpret_cast<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(shared_memory_addrs[index]);
+	// 	return *reinterpret_cast<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(shared_memory_addrs[index]);
 	// }
 
 	// template<>
-	// auto *get_shared_obj_ptr<Location::AuxSignalBlock>() {
+	// auto get_shared_obj_ptr<Location::AuxSignalBlock>() {
 	// 	auto index = static_cast<uint32_t>(Location::AuxSignalBlock);
-	// 	return reinterpret_cast<MetaModule::DoubleAuxStreamBlock *>(shared_memory_addrs[index]);
+	// 	return *reinterpret_cast<MetaModule::DoubleAuxStreamBlock *>(shared_memory_addrs[index]);
 	// }
 
 	// template<>
-	// auto *get_shared_obj_ptr<Location::PatchPlayer>() {
+	// auto get_shared_obj_ptr<Location::PatchPlayer>() {
 	// 	auto index = static_cast<uint32_t>(Location::PatchPlayer);
-	// 	return reinterpret_cast<MetaModule::PatchPlayer *>(shared_memory_addrs[index]);
+	// 	return *reinterpret_cast<MetaModule::PatchPlayer *>(shared_memory_addrs[index]);
 	// }
 
 	template<typename T>
