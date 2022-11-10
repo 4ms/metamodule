@@ -12,6 +12,7 @@
 #include "patch/SeaofEchoes.hh"
 #include "patch/Showcase.hh"
 #include "patch/SpectralPings.hh"
+#include "patch/twosimpleosc.hh"
 
 struct DefaultPatches {
 
@@ -27,6 +28,7 @@ struct DefaultPatches {
 		KarplusStereo_patch,
 		QuartetofEnsembles_patch,
 		SeaofEchoes_patch,
+		twosimpleosc_patch,
 	});
 
 	static constexpr uint32_t num_patches() {
@@ -62,6 +64,9 @@ struct DefaultPatches {
 			return "QuartetEnOsc.yml";
 		if (id == 10)
 			return "SeaOfEchoes.yml";
+		if (id == 11)
+			return "TwoSimpleOsc.yml";
+
 		std::string t{std::to_string(id) + ".yml"};
 		return t.c_str();
 	}
