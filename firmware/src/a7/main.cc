@@ -33,7 +33,8 @@ void main() {
 	StaticBuffers::init();
 
 	// Setup RAM disk
-	// ==> m4:
+	// faster to do this with a7 than m4? format_disk() is slow...
+	// OR do it concurrently (2nd core) on boot?
 	RamDiskOps ramdiskops{StaticBuffers::virtdrive};
 	RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
 	RamDiskFileIO::format_disk(Disk::RamDisk);
@@ -67,6 +68,7 @@ void main() {
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
+	SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
 
 	// Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();

@@ -2,6 +2,7 @@
 #include "conf/gpio_expander_conf.hh"
 #include "conf/hsem_conf.hh"
 #include "conf/i2c_codec_conf.hh"
+#include "conf/ramdisk_conf.hh"
 #include "controls.hh"
 #include "debug.hh"
 #include "drivers/arch.hh"
@@ -11,6 +12,7 @@
 #include "drivers/system_startup.hh"
 #include "mp1m4/hsem_handler.hh"
 #include "params.hh"
+#include "ramdisk.hh"
 #include "shared_bus.hh"
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
@@ -49,6 +51,8 @@ void main() {
 
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
+	auto virtdrive =
+		SharedMemory::read_address_of<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(SharedMemory::RamDiskLocation);
 
 	SharedBus i2cbus{i2c_codec_conf};
 	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander
