@@ -11,6 +11,8 @@ enum SemaphoreLocks {
 	ScreenFrameWriteLock,
 	M4_ready,
 	ParamCacheLock,
+	RamDiskLockOnA7Done,
+	RamDiskLockOnM4Using
 };
 
 } // namespace MetaModule

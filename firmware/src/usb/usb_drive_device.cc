@@ -42,6 +42,8 @@ void UsbDriveDevice::stop() {
 	USBD_DeInit(&pdev);
 }
 
+/// Ops:
+
 int8_t UsbDriveDevice::init(uint8_t lun) {
 	if (lun == 0) {
 		if (!nordisk)

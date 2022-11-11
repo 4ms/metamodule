@@ -66,6 +66,8 @@ void main() {
 	mdrivlib::GPIOExpander ext_gpio_expander{i2cbus.i2c, extaudio_gpio_expander_conf};
 	mdrivlib::GPIOExpander main_gpio_expander{i2cbus.i2c, mainboard_gpio_expander_conf};
 
+	HWSemaphore<RamDiskLockOnM4Using>::lock();
+
 	RamDiskOps ramdiskops{*virtdrive};
 	UsbManager usb{ramdiskops};
 	usb.start();
@@ -84,6 +86,23 @@ void main() {
 		}
 
 		usb.process();
+
+		// if (HWSemaphore<RamDiskLockOnM4Using>::is_locked() &&
+		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
+			//signal A7...
+			printf_("M4 reqlinquishing lock on RamDisk\n");
+			ramdiskops.set_status(RamDiskOps::Status::WritingBack);
+			HWSemaphore<RamDiskLockOnM4Using>::unlock();
+		}
+
+		if (HWSemaphore<RamDiskLockOnA7Done>::is_locked())
+		// && ramdiskops.get_status() == RamDiskOps::Status::WritingBack)
+		{
+			printf_("M4 grabbing lock on RamDisk\n");
+			ramdiskops.set_status(RamDiskOps::Status::NotInUse);
+			HWSemaphore<RamDiskLockOnM4Using>::lock();
+		}
+
 		__NOP();
 	}
 }

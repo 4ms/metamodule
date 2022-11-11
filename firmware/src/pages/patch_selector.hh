@@ -62,7 +62,6 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void refresh_patchlist() {
-		printf_("refresh_patchlist\n");
 		std::string patchnames;
 		for (unsigned i = 0; i < patch_list.num_patches(); i++) {
 			patchnames += patch_list.get_patch_name(i).data();
