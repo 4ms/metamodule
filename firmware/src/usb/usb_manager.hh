@@ -35,14 +35,7 @@ public:
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		usb_drive.init_usb_device();
 		usb_host.init();
-
 		found_fusb = usbctl.init();
-		// if (ok) {
-		// 	Debug::Pin0::low();
-		// } else {
-		// 	Debug::red_LED1::high();
-		// 	Debug::Pin0::high();
-		// }
 	}
 
 	void start() {

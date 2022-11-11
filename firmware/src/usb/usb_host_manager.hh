@@ -15,34 +15,29 @@ public:
 	}
 
 	void init() {
-		auto err = USBH_Init(&usbh_handle, USBH_StateChangeCallback, HOST_HS);
-		if (err != USBH_OK) {
-			printf_("Error init USB Host: %d\n", err);
-			volatile int x = 1;
-			while (x)
-				;
-		}
-		err = USBH_Link_HCD_USBH(&usbh_handle, &hhcd);
-		if (err != USBH_OK) {
-			printf_("Error init USB Host: %d\n", err);
-			volatile int x = 1;
-			while (x)
-				;
-		}
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 	}
 
 	void start() {
+		auto err = USBH_Init(&usbh_handle, USBH_StateChangeCallback, HOST_HS);
+		if (err != USBH_OK) {
+			printf_("Error init USB Host: %d\n", err);
+		}
+		err = USBH_Link_HCD_USBH(&usbh_handle, &hhcd);
+		if (err != USBH_OK) {
+			printf_("Error init USB Host: %d\n", err);
+		}
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
 		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptControl::enable_irq(OTG_IRQn, mdrivlib::InterruptControl::LevelTriggered);
 
 		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
-		// TODO: register HUB class
 		// USBH_RegisterClass(&usbh_handle, USBH_HUB_CLASS);
 		USBH_Start(&usbh_handle);
 		src_enable.high();
-		HAL_Delay(200);
-		mdrivlib::InterruptControl::enable_irq(OTG_IRQn, mdrivlib::InterruptControl::LevelTriggered);
+		printf_("Pausing...\n");
+		HAL_Delay(500);
 	}
 	void stop() {
 		src_enable.low();
