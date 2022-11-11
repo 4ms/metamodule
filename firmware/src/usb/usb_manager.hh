@@ -27,7 +27,7 @@ class UsbManager {
 
 	bool found_fusb = false;
 	// Debug: timer for dumping registers
-	uint32_t tm;
+	// uint32_t tm;
 
 public:
 	UsbManager(RamDiskOps &ramdiskops)
@@ -43,7 +43,7 @@ public:
 			printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
 		else
 			printf_("Can't communicate with FUSB302\n");
-		tm = HAL_GetTick();
+		// tm = HAL_GetTick();
 		usbctl.start_drp_polling();
 	}
 
@@ -103,16 +103,16 @@ public:
 		}
 
 		//DEBUG: toggle Pin0 when we're DRD polling
-		if ((HAL_GetTick() - tm) > 400) {
-			tm = HAL_GetTick();
-			auto stat0 = usbctl.read<FUSB302::Status0>();
-			// if (stat0.BCLevel == 3) {
-			// 	if (stat0.Comp)
-			// 		Debug::Pin0::high();
-			// 	else
-			// 		Debug::Pin0::low();
-			// }
-		}
+		// if ((HAL_GetTick() - tm) > 400) {
+		// 	tm = HAL_GetTick();
+		// 	auto stat0 = usbctl.read<FUSB302::Status0>();
+		// 	// if (stat0.BCLevel == 3) {
+		// 	// 	if (stat0.Comp)
+		// 	// 		Debug::Pin0::high();
+		// 	// 	else
+		// 	// 		Debug::Pin0::low();
+		// 	// }
+		// }
 	}
 
 	MidiHost &get_midi_host() {

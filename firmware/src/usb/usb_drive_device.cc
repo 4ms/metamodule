@@ -39,7 +39,7 @@ void UsbDriveDevice::start() {
 void UsbDriveDevice::stop() {
 	InterruptControl::disable_irq(OTG_IRQn);
 	USBD_Stop(&pdev);
-	USBD_DeInit(&pdev);
+	// USBD_DeInit(&pdev);
 }
 
 /// Ops:
