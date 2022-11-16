@@ -49,18 +49,6 @@ void HAL_HCD_MspDeInit(HCD_HandleTypeDef *hpcd) {
 	}
 }
 
-void *USBH_malloc(size_t sz) {
-	static MIDI_HandleTypeDef MIDIHandle;
-	if (sz == sizeof(MIDI_HandleTypeDef)) {
-		return &MIDIHandle;
-	}
-	return NULL;
-}
-
-void USBH_free(void *x){
-	// nothing, we're using static allocation
-};
-
 /**
  * @brief  SOF callback.
  * @param  hhcd: HCD handle
@@ -126,44 +114,16 @@ void HAL_HCD_PortDisabled_Callback(HCD_HandleTypeDef *hhcd) {
 					   LL Driver Interface (USB Host Library --> HCD)
 *******************************************************************************/
 
-USBH_StatusTypeDef USBH_Link_HCD_USBH(USBH_HandleTypeDef *phost, HCD_HandleTypeDef *hhcd) {
-	memset(phost, 0, sizeof(HCD_HandleTypeDef));
-	hhcd->Instance = USB_OTG_HS;
-	hhcd->Init.Host_channels = 16;
-	hhcd->Init.speed = HCD_SPEED_HIGH;
-	hhcd->Init.dma_enable = DISABLE;
-	hhcd->Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
-	hhcd->Init.Sof_enable = DISABLE;
-
-	hhcd->Init.battery_charging_enable = ENABLE;
-	hhcd->Init.lpm_enable = DISABLE;
-	hhcd->Init.use_external_vbus = ENABLE;	 //Might only be used for ULPI?
-	hhcd->Init.vbus_sensing_enable = ENABLE; //Doesn't seem to be used for hosts?
-	hhcd->Init.low_power_enable = ENABLE;	 //Doesn't seem to be used?
-
-	hhcd->Init.dev_endpoints = 0;	//Not used for hosts?
-	hhcd->Init.ep0_mps = EP_MPS_64; //Max packet size. Doesnt seem to be used?
-	hhcd->Init.use_dedicated_ep1 = DISABLE;
-
-	// Link The driver to the stack
-	hhcd->pData = phost;
-	phost->pData = hhcd;
-
-	if (HAL_HCD_Init(hhcd) != HAL_OK) {
-		return USBH_FAIL;
-	}
-
-	USBH_LL_SetTimer(phost, HAL_HCD_GetCurrentFrame(hhcd));
-
-	return USBH_OK;
-}
-
 /**
  * @brief  Initialize the low level portion of the host driver.
  * @param  phost: Host handle
  * @retval USBH status
  */
 USBH_StatusTypeDef USBH_LL_Init(USBH_HandleTypeDef *phost) {
+	if (HAL_HCD_Init((HCD_HandleTypeDef *)phost->pData) != HAL_OK) {
+		return USBH_FAIL;
+	}
+	USBH_LL_SetTimer(phost, HAL_HCD_GetCurrentFrame((HCD_HandleTypeDef *)phost->pData));
 	return USBH_OK;
 }
 

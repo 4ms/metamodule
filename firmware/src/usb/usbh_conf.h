@@ -27,7 +27,7 @@ extern "C" {
 #include "stm32mp1xx.h"
 // #include <stdio.h>
 // #include <stdlib.h>
-#include <string.h>
+// #include <string.h>
 
 static inline void Error_Handler() {
 	__BKPT();
@@ -43,10 +43,8 @@ static inline void Error_Handler() {
 #define USBH_DEBUG_LEVEL 3U
 #define USBH_USE_OS 0U
 
+enum { MidiStreamingBufferSize = 256 };
 enum { HOST_HS = 0, HOST_FS = 1 };
-
-void *USBH_malloc(size_t sz);
-void USBH_free(void *ptr);
 
 #define USBH_memset memset
 #define USBH_memcpy memcpy
