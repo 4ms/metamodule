@@ -17,7 +17,7 @@
  ******************************************************************************
  */
 
-#include "usbh_MIDI.h"
+// #include "usbh_midi.hh"
 #include "usbh_core.h"
 
 /* Private function prototypes -----------------------------------------------*/

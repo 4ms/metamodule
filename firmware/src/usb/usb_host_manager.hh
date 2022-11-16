@@ -2,10 +2,12 @@
 #include "drivers/pin.hh"
 #include "midi_host.hh"
 #include "printf.h"
-
-extern "C" USBH_StatusTypeDef USBH_Link_HCD_USBH(USBH_HandleTypeDef *phost, HCD_HandleTypeDef *hhcd);
+#include <cstring>
 
 class UsbHostManager {
+	USBH_HandleTypeDef usbhost;
+	HCD_HandleTypeDef hhcd;
+	MidiHost midi_host{usbhost};
 
 public:
 	UsbHostManager(mdrivlib::PinNoInit enable_5v)
@@ -16,85 +18,93 @@ public:
 
 	void init() {
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		init_hhcd();
+		auto status = USBH_Init(&usbhost, usbh_state_change_callback, 0);
+		if (status != USBH_OK) {
+			printf_("Error init USB Host: %d\n", status);
+			return;
+		}
+
+		midi_host.init();
+
+		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
+		mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 	}
 
 	void start() {
-		auto err = USBH_Init(&usbh_handle, USBH_StateChangeCallback, HOST_HS);
-		if (err != USBH_OK) {
-			printf_("Error init USB Host: %d\n", err);
-		}
-		err = USBH_Link_HCD_USBH(&usbh_handle, &hhcd);
-		if (err != USBH_OK) {
-			printf_("Error init USB Host: %d\n", err);
-		}
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
-		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [] { HAL_HCD_IRQHandler(&hhcd); });
-		mdrivlib::InterruptControl::enable_irq(OTG_IRQn, mdrivlib::InterruptControl::LevelTriggered);
-
-		USBH_RegisterClass(&usbh_handle, USBH_MIDI_CLASS);
-		// USBH_RegisterClass(&usbh_handle, USBH_HUB_CLASS);
-		USBH_Start(&usbh_handle);
+		USBH_Start(&usbhost);
 		src_enable.high();
 		printf_("Pausing...\n");
-		HAL_Delay(500);
+		// HAL_Delay(500);
 	}
 	void stop() {
 		src_enable.low();
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-		USBH_Stop(&usbh_handle);
+		USBH_Stop(&usbhost);
 		// USBH_DeInit(&usbh_handle); //sets hhcd to NULL
 	}
 
 	void process() {
-		USBH_Process(&usbh_handle);
+		USBH_Process(&usbhost);
 	}
 
-	enum ApplicationState {
-		APPLICATION_IDLE = 0,
-		APPLICATION_START,
-		APPLICATION_READY,
-		APPLICATION_DISCONNECT,
-	};
-	static inline ApplicationState state;
+	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {
+		USBHostHelper host{phost};
+		auto mshandle = host.get_class_handle<MidiStreamingHandle>();
+		if (!mshandle)
+			return;
 
-	static void USBH_StateChangeCallback(USBH_HandleTypeDef *phost, uint8_t id) {
-		//gState: 6 = HOST_DEV_ATTACHED
-		//gState: 9 = HOST_ENUMERATION
-		USBH_DbgLog("USBH_StateChangeCallback: %d %d %d", phost->EnumState, phost->gState, id);
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
+				printf("Select config\n");
 				break;
 
 			case HOST_USER_CONNECTION:
-				state = APPLICATION_START;
-				printf_("Host Connected\n");
+				printf("Connected\n");
+				break;
+
+			case HOST_USER_CLASS_SELECTED:
+				printf("Class selected\n");
 				break;
 
 			case HOST_USER_CLASS_ACTIVE:
-				if (state == APPLICATION_START) {
-					//TODO: Check if its a MIDI device before starting RX?
-					_midihost_instance->connect();
-					_midihost_instance->start_rx(phost);
-					state = APPLICATION_READY;
-					printf_("Host Class Active\n");
-				}
+				printf("Class active\n");
+				USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				break;
 
 			case HOST_USER_DISCONNECTION:
-				state = APPLICATION_DISCONNECT;
-				_midihost_instance->disconnect();
-				printf_("Host disconnected\n");
+				printf("Disconnected\n");
 				break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
-				state = APPLICATION_DISCONNECT;
-				printf_("USB Host error");
-				break;
-
-			default:
+				printf("Error\n");
 				break;
 		}
+	}
+
+	void init_hhcd() {
+		memset(&hhcd, 0, sizeof(HCD_HandleTypeDef));
+
+		hhcd.Instance = USB_OTG_HS;
+		hhcd.Init.Host_channels = 16;
+		hhcd.Init.speed = HCD_SPEED_HIGH;
+		hhcd.Init.dma_enable = DISABLE;
+		hhcd.Init.phy_itface = USB_OTG_HS_EMBEDDED_PHY;
+		hhcd.Init.Sof_enable = DISABLE;
+		hhcd.Init.battery_charging_enable = ENABLE;
+		hhcd.Init.lpm_enable = ENABLE;
+		hhcd.Init.use_external_vbus = ENABLE;	 // Might only be used for ULPI?
+		hhcd.Init.vbus_sensing_enable = DISABLE; // Doesn't seem to be used for hosts?
+		hhcd.Init.low_power_enable = DISABLE;	 // Doesn't seem to be used?
+		hhcd.Init.dev_endpoints = 0;			 // Not used for hosts?
+		hhcd.Init.ep0_mps = EP_MPS_64;			 // Max packet size. Doesnt seem to be used?
+		hhcd.Init.use_dedicated_ep1 = DISABLE;
+
+		// Link The driver to the stack
+		hhcd.pData = &usbhost;
+		usbhost.pData = &hhcd;
 	}
 
 	MidiHost &get_midi_host() {
@@ -102,10 +112,6 @@ public:
 	}
 
 private:
-	//TODO: why is this not working with a non-static hhcd? IRQ_Trampoline_98 never gets called
-	static inline HCD_HandleTypeDef hhcd;
-	USBH_HandleTypeDef usbh_handle;
-	MidiHost midi_host;
 	static inline MidiHost *_midihost_instance;
 	mdrivlib::Pin src_enable;
 };
