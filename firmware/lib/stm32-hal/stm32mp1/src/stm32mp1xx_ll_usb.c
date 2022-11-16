@@ -55,6 +55,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
+#if defined(USB_OTG_FS) || defined(USB_OTG_HS)
 static HAL_StatusTypeDef USB_CoreReset(USB_OTG_GlobalTypeDef *USBx);
 
 /* Exported functions --------------------------------------------------------*/
@@ -75,17 +76,23 @@ static HAL_StatusTypeDef USB_CoreReset(USB_OTG_GlobalTypeDef *USBx);
   */
 
 // Modification here: Function from hftrx
-HAL_StatusTypeDef USB_HS_PHYCDeInit(void) {
-	__HAL_RCC_USBPHY_FORCE_RESET();
-	__HAL_RCC_USBPHY_RELEASE_RESET();
-	__HAL_RCC_USBPHY_CLK_DISABLE();
+HAL_StatusTypeDef USB_HS_PHYCDeInit(void)
+{
+	/* reset */
+	RCC->APB4RSTSETR = RCC_APB4RSTSETR_USBPHYRST;
+	RCC->APB4RSTCLRR = RCC_APB4RSTCLRR_USBPHYRST;
+	/* turn clock off */
+	RCC->MP_APB4ENCLRR = RCC_MP_APB4ENCLRR_USBPHYEN;
+	RCC->MP_APB4LPENCLRR = RCC_MP_APB4LPENCLRR_USBPHYLPEN;
 	return HAL_OK;
 }
 
 // Modification here: Function from hftrx
-HAL_StatusTypeDef USB_HS_PHYCInit(void) {
-	// Enable RCC for USBPHY
-	__HAL_RCC_USBPHY_CLK_ENABLE();
+HAL_StatusTypeDef USB_HS_PHYCInit(void)
+{
+	// Enable USBPHY
+	RCC->MP_APB4ENSETR = RCC_MP_APB4ENSETR_USBPHYEN;
+	RCC->MP_APB4LPENSETR = RCC_MP_APB4LPENSETR_USBPHYLPEN;
 
 	// https://github.com/Xilinx/u-boot-xlnx/blob/master/drivers/phy/phy-stm32-usbphyc.c
 	const uint_fast32_t USBPHYCPLLFREQUENCY = 1440000000uL; // 1.44 GHz
@@ -1477,29 +1484,6 @@ HAL_StatusTypeDef USB_ResetPort(USB_OTG_GlobalTypeDef *USBx)
 }
 
 /**
- * @brief  USB_ResetPort2 : Reset Host Port without long delay
- * @param  USBx  Selected device
- * @retval HAL status
- * @note (1)The application must wait at least 10 ms
- *   before clearing the reset bit.
- */
-HAL_StatusTypeDef USB_ResetPort2(USB_OTG_GlobalTypeDef *USBx, uint8_t resetActiveState)
-{
-	uint32_t USBx_BASE = (uint32_t)USBx;
-
-	__IO uint32_t hprt0 = 0U;
-
-	hprt0 = USBx_HPRT0;
-
-	hprt0 &=
-		~(USB_OTG_HPRT_PENA | USB_OTG_HPRT_PCDET | USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG | USB_OTG_HPRT_PRST);
-
-	USBx_HPRT0 = (!!resetActiveState * USB_OTG_HPRT_PRST | hprt0);
-
-	return HAL_OK;
-}
-
-/**
  * @brief  USB_DriveVbus : activate or de-activate vbus
  * @param  state  VBUS state
  *          This parameter can be one of these values:
@@ -1991,6 +1975,7 @@ HAL_StatusTypeDef USB_DeActivateRemoteWakeup(USB_OTG_GlobalTypeDef *USBx)
 
 	return HAL_OK;
 }
+#endif /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */
 
 /**
  * @}
