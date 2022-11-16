@@ -74,10 +74,10 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost);
 static void USBH_ParseDevDesc(USBH_DevDescTypeDef *dev_desc,
                               uint8_t *buf, uint16_t length);
 
-static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost,
-                                            uint8_t *buf, uint16_t length);
+static void USBH_ParseCfgDesc(USBH_CfgDescTypeDef *cfg_desc,
+                              uint8_t *buf, uint16_t length);
 
-static USBH_StatusTypeDef USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDescTypeDef  *ep_descriptor, uint8_t *buf);
+static void USBH_ParseEPDesc(USBH_EpDescTypeDef  *ep_descriptor, uint8_t *buf);
 static void USBH_ParseStringDesc(uint8_t *psrc, uint8_t *pdest, uint16_t length);
 static void USBH_ParseInterfaceDesc(USBH_InterfaceDescTypeDef  *if_descriptor, uint8_t *buf);
 
@@ -104,12 +104,10 @@ USBH_StatusTypeDef USBH_Get_DevDesc(USBH_HandleTypeDef *phost, uint8_t length)
 {
   USBH_StatusTypeDef status;
 
-  status = USBH_GetDescriptor(phost,
-                              USB_REQ_RECIPIENT_DEVICE | USB_REQ_TYPE_STANDARD,
-                              USB_DESC_DEVICE, phost->device.Data,
-                              (uint16_t)length);
-
-  if (status == USBH_OK)
+  if ((status = USBH_GetDescriptor(phost,
+                                   USB_REQ_RECIPIENT_DEVICE | USB_REQ_TYPE_STANDARD,
+                                   USB_DESC_DEVICE, phost->device.Data,
+                                   (uint16_t)length)) == USBH_OK)
   {
     /* Commands successfully sent and Response Received */
     USBH_ParseDevDesc(&phost->device.DevDesc, phost->device.Data,
@@ -134,15 +132,13 @@ USBH_StatusTypeDef USBH_Get_CfgDesc(USBH_HandleTypeDef *phost,
 
 {
   USBH_StatusTypeDef status;
-  uint8_t *pData = phost->device.CfgDesc_Raw;
+  uint8_t *pData = phost->device.CfgDesc_Raw;;
 
-  status = USBH_GetDescriptor(phost, (USB_REQ_RECIPIENT_DEVICE | USB_REQ_TYPE_STANDARD),
-                              USB_DESC_CONFIGURATION, pData, length);
-
-  if (status == USBH_OK)
+  if ((status = USBH_GetDescriptor(phost, (USB_REQ_RECIPIENT_DEVICE | USB_REQ_TYPE_STANDARD),
+                                   USB_DESC_CONFIGURATION, pData, length)) == USBH_OK)
   {
     /* Commands successfully sent and Response Received  */
-    status = USBH_ParseCfgDesc(phost, pData, length);
+    USBH_ParseCfgDesc(&phost->device.CfgDesc, pData, length);
   }
 
   return status;
@@ -165,12 +161,10 @@ USBH_StatusTypeDef USBH_Get_StringDesc(USBH_HandleTypeDef *phost,
 {
   USBH_StatusTypeDef status;
 
-  status = USBH_GetDescriptor(phost,
-                              USB_REQ_RECIPIENT_DEVICE | USB_REQ_TYPE_STANDARD,
-                              USB_DESC_STRING | string_index,
-                              phost->device.Data, length);
-
-  if (status == USBH_OK)
+  if ((status = USBH_GetDescriptor(phost,
+                                   USB_REQ_RECIPIENT_DEVICE | USB_REQ_TYPE_STANDARD,
+                                   USB_DESC_STRING | string_index,
+                                   phost->device.Data, length)) == USBH_OK)
   {
     /* Commands successfully sent and Response Received  */
     USBH_ParseStringDesc(phost->device.Data, buff, length);
@@ -360,22 +354,6 @@ static void  USBH_ParseDevDesc(USBH_DevDescTypeDef *dev_desc, uint8_t *buf,
   dev_desc->bDeviceProtocol    = *(uint8_t *)(buf +  6);
   dev_desc->bMaxPacketSize     = *(uint8_t *)(buf +  7);
 
-  /* Make sure that the max packet size is either 8, 16, 32, 64 or force it to 64 */
-  switch (dev_desc->bMaxPacketSize)
-  {
-    case 8:
-    case 16:
-    case 32:
-    case 64:
-      //dev_desc->bMaxPacketSize = dev_desc->bMaxPacketSize;
-      break;
-
-    default:
-      /*set the size to 64 in case the device has answered with incorrect size */
-      dev_desc->bMaxPacketSize = 64U;
-      break;
-  }
-
   if (length > 8U)
   {
     /* For 1st time after device connection, Host may issue only 8 bytes for
@@ -399,123 +377,58 @@ static void  USBH_ParseDevDesc(USBH_DevDescTypeDef *dev_desc, uint8_t *buf,
   * @param  length: Length of the descriptor
   * @retval None
   */
-static USBH_StatusTypeDef USBH_ParseCfgDesc(USBH_HandleTypeDef *phost, uint8_t *buf, uint16_t length)
- {
-	USBH_CfgDescTypeDef *cfg_desc = &phost->device.CfgDesc;
-	USBH_StatusTypeDef status = USBH_OK;
-	USBH_InterfaceDescTypeDef *pif;
-	USBH_EpDescTypeDef *pep;
-	uint16_t ptr;
-	uint8_t ep_ix = 0U;
-	USBH_DescHeader_t *pdesc = (USBH_DescHeader_t*) buf;
+static void USBH_ParseCfgDesc(USBH_CfgDescTypeDef *cfg_desc, uint8_t *buf,
+                              uint16_t length)
+{
+  USBH_InterfaceDescTypeDef    *pif ;
+  USBH_EpDescTypeDef           *pep;
+  USBH_DescHeader_t            *pdesc = (USBH_DescHeader_t *)(void *)buf;
+  uint16_t                     ptr;
+  uint8_t                      if_ix = 0U;
+  uint8_t                      ep_ix = 0U;
 
-	uint_fast8_t iadmode = 0;
-	pdesc = (USBH_DescHeader_t*) buf;
+  pdesc   = (USBH_DescHeader_t *)(void *)buf;
 
-	/* Parse configuration descriptor */
-	cfg_desc->bLength = *(uint8_t*) (buf + 0);
-	cfg_desc->bDescriptorType = *(uint8_t*) (buf + 1);
-	cfg_desc->wTotalLength = LE16(buf + 2);
-	cfg_desc->bNumInterfaces = *(uint8_t*) (buf + 4);
-	cfg_desc->bConfigurationValue = *(uint8_t*) (buf + 5);
-	cfg_desc->iConfiguration = *(uint8_t*) (buf + 6);
-	cfg_desc->bmAttributes = *(uint8_t*) (buf + 7);
-	cfg_desc->bMaxPower = *(uint8_t*) (buf + 8);
+  /* Parse configuration descriptor */
+  cfg_desc->bLength             = *(uint8_t *)(buf + 0);
+  cfg_desc->bDescriptorType     = *(uint8_t *)(buf + 1);
+  cfg_desc->wTotalLength        = LE16(buf + 2);
+  cfg_desc->bNumInterfaces      = *(uint8_t *)(buf + 4);
+  cfg_desc->bConfigurationValue = *(uint8_t *)(buf + 5);
+  cfg_desc->iConfiguration      = *(uint8_t *)(buf + 6);
+  cfg_desc->bmAttributes        = *(uint8_t *)(buf + 7);
+  cfg_desc->bMaxPower           = *(uint8_t *)(buf + 8);
 
-	if (length > USB_CONFIGURATION_DESC_SIZE) {
-		uint16_t ptr;
-		int8_t if_ix = 0;
-		int8_t ep_ix = 0;
-		ptr = USB_LEN_CFG_DESC;
-		pif = (USBH_InterfaceDescTypeDef*) NULL;
+  if (length > USB_CONFIGURATION_DESC_SIZE)
+  {
+    ptr = USB_LEN_CFG_DESC;
+    pif = (USBH_InterfaceDescTypeDef *)0;
 
-		while ((if_ix < USBH_MAX_NUM_INTERFACES)
-				&& (ptr < cfg_desc->wTotalLength)) {
-			pdesc = USBH_GetNextDesc((uint8_t*) pdesc, &ptr);
+    while ((if_ix < USBH_MAX_NUM_INTERFACES) && (ptr < cfg_desc->wTotalLength))
+    {
+      pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
+      if (pdesc->bDescriptorType   == USB_DESC_TYPE_INTERFACE)
+      {
+        pif = &cfg_desc->Itf_Desc[if_ix];
+        USBH_ParseInterfaceDesc(pif, (uint8_t *)(void *)pdesc);
 
-			if (pdesc->bDescriptorType == USB_DESC_TYPE_ASSOC) {
-				iadmode = 1;
-				USBH_IfAssocDescTypeDef *piad = (USBH_IfAssocDescTypeDef*) pdesc;
-				USBH_DbgLog(
-						"USBH_ParseCfgDesc: USB_DESC_TYPE_ASSOC: 0x%02X/x%02X, nif=%d, firstIf=%d",
-						piad->bFunctionClass, piad->bFunctionSubClass,
-						piad->bInterfaceCount, piad->bFirstInterface);
-			} else if (/*iadmode == 0 && */pdesc->bDescriptorType
-					== USB_DESC_TYPE_INTERFACE) {
-				pif = &cfg_desc->Itf_Desc[if_ix];
-				USBH_ParseInterfaceDesc(pif, (uint8_t*) pdesc);
-
-				USBH_DbgLog(
-						"USBH_ParseCfgDesc: ifix=%d, alt=%d, 0x%02X/0x%02X/0x%02X, nEP=%d",
-						pif->bInterfaceNumber, pif->bAlternateSetting, pif->bInterfaceClass,
-						pif->bInterfaceSubClass, pif->bInterfaceProtocol,
-						pif->bNumEndpoints);
-				// 0x08/0x06/0x50: USB flash
-				// 0xFF/0x00/0x00: CP2102
-				// 0x03/0x01/0x02: USB-PS/2 Optical Mouse
-				//
-				// Composite device (Audio+2xCDC):
-				// 0x01/0x01/0x00, nEP=0
-				// 0x01/0x02/0x00, nEP=0
-				// 0x01/0x02/0x00, nEP=1
-				// 0x01/0x02/0x00, nEP=0
-				// 0x01/0x02/0x00, nEP=1
-				// 0x02/0x02/0x01, nEP=1
-				// 0x0A/0x00/0x00, nEP=2
-				// 0x02/0x02/0x01, nEP=1
-				// 0x0A/0x00/0x00, nEP=2
-				//
-				// Gigabit Ethernet
-				//	USB Device Reset Completed
-				//	VID/PID: 0BDA/8153
-				//	Address (#7) assigned.
-				//	DEBUG : USBH_ParseCfgDesc: ifix=0, 0xFF/0xFF/0x00, nEP=3
-				//	DEBUG : USBH_ParseCfgDesc: EPix=0, bEndpointAddress=81, wMaxPacketSize=512
-				//	DEBUG : USBH_ParseCfgDesc: EPix=1, bEndpointAddress=02, wMaxPacketSize=512
-				//	DEBUG : USBH_ParseCfgDesc: EPix=2, bEndpointAddress=83, wMaxPacketSize=2
-				//	EHCI_StopHost:
-				//	USB Device disconnected
-				//	USB Device Reset Completed
-				//	VID/PID: 0BDA/8151
-				//	Address (#7) assigned.
-				//	DEBUG : USBH_ParseCfgDesc: ifix=0, 0x08/0x06/0x50, nEP=2
-				//	DEBUG : USBH_ParseCfgDesc: EPix=0, bEndpointAddress=84, wMaxPacketSize=512
-				//	DEBUG : USBH_ParseCfgDesc: EPix=1, bEndpointAddress=05, wMaxPacketSize=512
-
-				ep_ix = 0;
-				pep = (USBH_EpDescTypeDef*) NULL;
-				while ((ep_ix < pif->bNumEndpoints)
-						&& (ptr < cfg_desc->wTotalLength)) {
-					pdesc = USBH_GetNextDesc((uint8_t*) pdesc, &ptr);
-					if (pdesc->bDescriptorType == USB_DESC_TYPE_ENDPOINT) {
-						pep = &cfg_desc->Itf_Desc[if_ix].Ep_Desc[ep_ix];
-						USBH_ParseEPDesc(phost, pep, (uint8_t*) pdesc);
-
-						static const char * const eptyp [4] = {
-								"Control",
-								"Iso",
-								"Bulk",
-								"Int",
-						};
-						USBH_DbgLog(
-								"USBH_ParseCfgDesc: EPix=%d, bEndpointAddress=%02X, attr=%02X %4s wMaxPacketSize=%-4u",
-								(int) ep_ix, (unsigned) pep->bEndpointAddress,
-								(unsigned) pep->bmAttributes, eptyp [0x03 & pep->bmAttributes],
-								(unsigned) pep->wMaxPacketSize);
-
-						ep_ix++;
-					}
-				}
-				if_ix++;
-			} else {
-				//USBH_DbgLog(PSTR("USBH_ParseCfgDesc: bDescriptorType=0x%02X\n"), pdesc->bDescriptorType);
-			}
-		}
-	}
-	(void) iadmode;
-	return USBH_OK;
+        ep_ix = 0U;
+        pep = (USBH_EpDescTypeDef *)0;
+        while ((ep_ix < pif->bNumEndpoints) && (ptr < cfg_desc->wTotalLength))
+        {
+          pdesc = USBH_GetNextDesc((uint8_t *)(void *)pdesc, &ptr);
+          if (pdesc->bDescriptorType   == USB_DESC_TYPE_ENDPOINT)
+          {
+            pep = &cfg_desc->Itf_Desc[if_ix].Ep_Desc[ep_ix];
+            USBH_ParseEPDesc(pep, (uint8_t *)(void *)pdesc);
+            ep_ix++;
+          }
+        }
+        if_ix++;
+      }
+    }
+  }
 }
-
 
 
 /**
@@ -543,82 +456,19 @@ static void  USBH_ParseInterfaceDesc(USBH_InterfaceDescTypeDef *if_descriptor,
 /**
   * @brief  USBH_ParseEPDesc
   *         This function Parses the endpoint descriptor
-  * @param  phost: USB Host handler
   * @param  ep_descriptor: Endpoint descriptor destination address
   * @param  buf: Buffer where the parsed descriptor stored
   * @retval None
   */
-static USBH_StatusTypeDef  USBH_ParseEPDesc(USBH_HandleTypeDef *phost, USBH_EpDescTypeDef  *ep_descriptor,
-                                            uint8_t *buf)
+static void  USBH_ParseEPDesc(USBH_EpDescTypeDef  *ep_descriptor,
+                              uint8_t *buf)
 {
-  USBH_StatusTypeDef status = USBH_OK;
   ep_descriptor->bLength          = *(uint8_t *)(buf + 0);
   ep_descriptor->bDescriptorType  = *(uint8_t *)(buf + 1);
   ep_descriptor->bEndpointAddress = *(uint8_t *)(buf + 2);
   ep_descriptor->bmAttributes     = *(uint8_t *)(buf + 3);
   ep_descriptor->wMaxPacketSize   = LE16(buf + 4);
   ep_descriptor->bInterval        = *(uint8_t *)(buf + 6);
-
-  /* Make sure that wMaxPacketSize is different from 0 */
-  if (ep_descriptor->wMaxPacketSize == 0x00U)
-  {
-    status = USBH_NOT_SUPPORTED;
-  }
-  else if (USBH_MAX_EP_PACKET_SIZE < (uint16_t)USBH_MAX_DATA_BUFFER)
-  {
-    /* Make sure that maximum packet size (bits 0..10) does not exceed the max endpoint packet size */
-    ep_descriptor->wMaxPacketSize &= ~0x7FFU;
-    ep_descriptor->wMaxPacketSize |=  MIN((uint16_t)(LE16(buf + 4) & 0x7FFU), (uint16_t)USBH_MAX_EP_PACKET_SIZE);
-
-  }
-  else if ((uint16_t)USBH_MAX_DATA_BUFFER < USBH_MAX_EP_PACKET_SIZE)
-  {
-    /* Make sure that maximum packet size (bits 0..10) does not exceed the total buffer length */
-    ep_descriptor->wMaxPacketSize &= ~0x7FFU;
-    ep_descriptor->wMaxPacketSize |= MIN((uint16_t)(LE16(buf + 4) & 0x7FFU), (uint16_t)USBH_MAX_DATA_BUFFER);
-  }
-  else
-  {
-    /* ... */
-  }
-
-  /* For high-speed interrupt/isochronous endpoints, bInterval can vary from 1 to 16 */
-  if (phost->currentTarget->speed == (uint8_t)USBH_SPEED_HIGH)
-  {
-    if (((ep_descriptor->bmAttributes & EP_TYPE_MSK) == EP_TYPE_ISOC) ||
-        ((ep_descriptor->bmAttributes & EP_TYPE_MSK) == EP_TYPE_INTR))
-    {
-      if ((ep_descriptor->bInterval == 0U) || (ep_descriptor->bInterval > 0x10U))
-      {
-        status = USBH_NOT_SUPPORTED;
-      }
-    }
-  }
-  else
-  {
-    /* For full-speed isochronous endpoints, the value of bInterval must be in the range from 1 to 16.*/
-    if ((ep_descriptor->bmAttributes & EP_TYPE_MSK) == EP_TYPE_ISOC)
-    {
-      if ((ep_descriptor->bInterval == 0U) || (ep_descriptor->bInterval > 0x10U))
-      {
-        status = USBH_NOT_SUPPORTED;
-      }
-    }
-    /* For full-/low-speed interrupt endpoints, the value of bInterval may be from 1 to 255.*/
-    else if ((ep_descriptor->bmAttributes & EP_TYPE_MSK) == EP_TYPE_INTR)
-    {
-      if (ep_descriptor->bInterval == 0U)
-      {
-        status = USBH_NOT_SUPPORTED;
-      }
-    }
-    else
-    {
-      /* ... */
-    }
-  }
-
-  return status;
 }
 
 

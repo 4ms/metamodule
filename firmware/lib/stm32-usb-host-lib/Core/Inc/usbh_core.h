@@ -36,8 +36,8 @@ extern "C" {
   */
 
 /** @addtogroup USBH_LIB_CORE
-  * @{
-  */
+* @{
+*/
 
 /** @defgroup USBH_CORE
   * @brief This file is the Header file for usbh_core.c
@@ -113,26 +113,24 @@ USBH_StatusTypeDef   USBH_LL_Init(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef   USBH_LL_DeInit(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef   USBH_LL_Start(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef   USBH_LL_Stop(USBH_HandleTypeDef *phost);
-USBH_StatusTypeDef   USBH_LL_StopHC(USBH_HandleTypeDef *phost, uint8_t chnum); // MORI
 
 USBH_StatusTypeDef   USBH_LL_Connect(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef   USBH_LL_Disconnect(USBH_HandleTypeDef *phost);
 USBH_SpeedTypeDef    USBH_LL_GetSpeed(USBH_HandleTypeDef *phost);
-uint_fast8_t    	 USBH_LL_GetSpeedReady(USBH_HandleTypeDef *phost);
 USBH_StatusTypeDef   USBH_LL_ResetPort(USBH_HandleTypeDef *phost);
-USBH_StatusTypeDef   USBH_LL_ResetPort2(USBH_HandleTypeDef *phost, unsigned resetIsActive);	/* Without delays */
 uint32_t             USBH_LL_GetLastXferSize(USBH_HandleTypeDef *phost,
                                              uint8_t pipe);
-uint32_t             USBH_LL_GetAdjXferSize(USBH_HandleTypeDef *phost,
-                                             uint8_t pipe, uint32_t size);
 
 USBH_StatusTypeDef   USBH_LL_DriverVBUS(USBH_HandleTypeDef *phost,
                                         uint8_t state);
 
-USBH_StatusTypeDef   USBH_LL_OpenPipe(USBH_HandleTypeDef *phost, uint8_t pipe_num, uint8_t epnum,
-								const USBH_TargetTypeDef * dev_target,
-								uint8_t ep_type,
-								uint16_t mps);
+USBH_StatusTypeDef   USBH_LL_OpenPipe(USBH_HandleTypeDef *phost,
+                                      uint8_t pipe,
+                                      uint8_t epnum,
+                                      uint8_t dev_address,
+                                      uint8_t speed,
+                                      uint8_t ep_type,
+                                      uint16_t mps);
 
 USBH_StatusTypeDef   USBH_LL_ClosePipe(USBH_HandleTypeDef *phost,
                                        uint8_t pipe);
@@ -143,15 +141,11 @@ USBH_StatusTypeDef   USBH_LL_SubmitURB(USBH_HandleTypeDef *phost,
                                        uint8_t ep_type,
                                        uint8_t token,
                                        uint8_t *pbuff,
-                                       uint32_t length,
+                                       uint16_t length,
                                        uint8_t do_ping);
 
 USBH_URBStateTypeDef USBH_LL_GetURBState(USBH_HandleTypeDef *phost,
                                          uint8_t pipe);
-
-
-USBH_SpeedTypeDef USBH_LL_GetPipeSpeed(USBH_HandleTypeDef *phost,
-		uint8_t pipe_num);
 
 #if (USBH_USE_OS == 1U)
 USBH_StatusTypeDef  USBH_LL_NotifyURBChange(USBH_HandleTypeDef *phost);
@@ -165,14 +159,11 @@ uint8_t USBH_LL_GetToggle(USBH_HandleTypeDef *phost, uint8_t pipe);
 void                 USBH_LL_PortDisabled(USBH_HandleTypeDef *phost);
 void                 USBH_LL_PortEnabled(USBH_HandleTypeDef *phost);
 
-uint8_t USBH_GetNextAddress(USBH_HandleTypeDef *phost, uint8_t modify);
 /* USBH Time base */
 void USBH_LL_SetTimer(USBH_HandleTypeDef *phost, uint32_t time);
 void USBH_LL_IncTimer(USBH_HandleTypeDef *phost);
 
 void USBH_Delay(uint32_t Delay);
-
-// extern USBH_HandleTypeDef hUsbHostHS;
 
 /**
   * @}
@@ -192,8 +183,8 @@ void USBH_Delay(uint32_t Delay);
   */
 
 /**
-  * @}
-  */
+* @}
+*/
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
