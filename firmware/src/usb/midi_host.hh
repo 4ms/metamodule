@@ -25,6 +25,7 @@ class MidiHost {
 		USBH_MIDI_SOFProcess,
 		&MSHandle,
 	};
+	bool _is_connected = false;
 
 public:
 	MidiHost(USBH_HandleTypeDef &usbhh)
@@ -57,6 +58,18 @@ public:
 	}
 	USBH_StatusTypeDef transmit(uint8_t *buff, uint32_t len) {
 		return USBH_MIDI_Transmit(&usbhost, buff, len);
+	}
+
+	bool is_connected() {
+		return _is_connected;
+	}
+
+	void connect() {
+		_is_connected = true;
+	}
+
+	void disconnect() {
+		_is_connected = false;
 	}
 };
 

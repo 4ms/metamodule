@@ -13,6 +13,7 @@
 #include "drivers/timekeeper.hh"
 #include "params.hh"
 #include "usb/midi_host.hh"
+#include "usb/midi_message.hh"
 #include "util/circular_buffer.hh"
 #include "util/interp_param.hh"
 
