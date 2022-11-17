@@ -136,14 +136,17 @@ void Controls::start() {
 		auxstream_updater.start();
 	}
 
-	_midi_host.register_rx_cb([this](std::span<uint8_t> rxbuffer) {
+	_midi_host.set_rx_callback([this](uint8_t *rxbuffer, uint32_t sz) {
 		//300ns on M4
-		if (rxbuffer.size() < 4)
+		if (sz < 4)
 			return;
+			// if (rxbuffer.size() < 4)
 		Debug::Pin0::high();
 		auto msg = Midi::MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 		_midi_rx_buf.put(msg);
 		Debug::Pin0::low();
+
+		_midi_host.receive();
 	});
 }
 
