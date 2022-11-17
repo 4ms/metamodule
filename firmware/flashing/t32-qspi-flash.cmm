@@ -3,6 +3,7 @@
 
 ;Load minimal startup:
 ;DO t32-qspi-flash FSBL='/Users/design/4ms/stm32/meta-module/firmware/images/fsbl.stm32' SSBL='/Users/design/4ms/stm32/meta-module/firmware/images/minimal-boot.uimg'
+;DO t32-qspi-flash SSBL='/Users/design/4ms/stm32/meta-module/firmware/build/mp1corea7/medium/main.uimg'
 
 
 &QSPI_BASE=0x58003000
