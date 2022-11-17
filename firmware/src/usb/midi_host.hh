@@ -40,6 +40,7 @@ public:
 	}
 
 	bool init() {
+		printf_("Registered MIDI Host\n");
 		USBH_RegisterClass(&usbhost, &midi_class_ops);
 		return true;
 	}

@@ -146,8 +146,10 @@ USBH_StatusTypeDef USBH_MIDI_Process(USBH_HandleTypeDef *phost)
 
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
-	if (!MSHandle)
+	if (!MSHandle) {
+		USBH_DbgLog("no mshandle");
 		return USBH_FAIL;
+	}
 
 	switch (MSHandle->state) {
 		case MidiStreamingState::Idle:
@@ -364,8 +366,10 @@ static void MIDI_ProcessReception(USBH_HandleTypeDef *phost)
 {
 	USBHostHelper host{phost};
 	auto MSHandle = host.get_class_handle<MidiStreamingHandle>();
-	if (!MSHandle)
+	if (!MSHandle) {
+		USBH_DbgLog("no mshandle");
 		return;
+	}
 
 	USBH_URBStateTypeDef URB_Status = USBH_URB_IDLE;
 	uint32_t length;
