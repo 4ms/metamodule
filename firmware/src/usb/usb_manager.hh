@@ -19,7 +19,7 @@ class UsbManager {
 
 	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
 	FUSB302::Device usbctl{usbi2c, FUSBDevAddr};
-	FUSB302::Device::ConnectedState state;
+	FUSB302::Device::ConnectedState state = FUSB302::Device::ConnectedState::None;
 	using PinPolarity = mdrivlib::PinPolarity;
 	using PinMode = mdrivlib::PinMode;
 	mdrivlib::FPin<FUSBPinChangeConf::port, FUSBPinChangeConf::pin, PinMode::Input, PinPolarity::Inverted> fusb_int_pin;
@@ -44,6 +44,7 @@ public:
 		else
 			printf_("Can't communicate with FUSB302\n");
 		// tm = HAL_GetTick();
+		Debug::blue_LED1::low();
 		usb_host.init();
 		usbctl.start_drp_polling();
 	}
