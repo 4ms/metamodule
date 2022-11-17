@@ -21,8 +21,9 @@
 
 #include "usb_host_helper.hh"
 #include "usbh_core.h"
-#include <functional>
-
+// #include <functional>
+#include "callable.hh"
+#include <span>
 
 constexpr uint8_t AudioClassCode = 0x01;
 constexpr uint8_t AudioControlSubclassCode = 0x01;
@@ -117,8 +118,11 @@ enum class MidiStreamingState {
 	Error,
 };
 
-using MidiStreamRxCallbackType = std::function<void(uint8_t *, uint32_t)>;
-using MidiStreamTxCallbackType = std::function<void()>;
+using MidiStreamRxCallbackType = Function<void(std::span<uint8_t>)>;
+// using MidiStreamRxCallbackType = Function<void(uint8_t *, uint32_t)>;
+using MidiStreamTxCallbackType = Callback;
+// using MidiStreamRxCallbackType = std::function<void(uint8_t *, uint32_t)>;
+// using MidiStreamTxCallbackType = std::function<void()>;
 
 struct MidiStreamingHandle {
 	AudioControlItf ControlItf;
@@ -131,8 +135,10 @@ struct MidiStreamingHandle {
 	MidiStreamingDataState data_tx_state;
 	MidiStreamingDataState data_rx_state;
 
-	static void _default_rx_cb(uint8_t *, uint32_t) {}
-	static void _default_tx_cb() {}
+	static void _default_rx_cb(std::span<uint8_t>) {
+	}
+	static void _default_tx_cb() {
+	}
 	MidiStreamRxCallbackType rx_callback = _default_rx_cb;
 	MidiStreamTxCallbackType tx_callback = _default_tx_cb;
 

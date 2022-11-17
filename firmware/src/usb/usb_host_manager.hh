@@ -28,9 +28,9 @@ public:
 	}
 
 	void start() {
-		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0,0, [this] { HAL_HCD_IRQHandler(&hhcd); });
+		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [this] { HAL_HCD_IRQHandler(&hhcd); });
 		auto err = USBH_Start(&usbhost);
-		if (err!=USBH_OK)
+		if (err != USBH_OK)
 			printf_("Error starting host\n");
 
 		src_enable.high();
@@ -50,11 +50,6 @@ public:
 
 	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {
 		USBHostHelper host{phost};
-		auto mshandle = host.get_class_handle<MidiStreamingHandle>();
-		if (!mshandle) {
-			printf_("Error, no MSHandle\n");
-			return;
-		 }
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
@@ -69,10 +64,15 @@ public:
 				printf_("Class selected\n");
 				break;
 
-			case HOST_USER_CLASS_ACTIVE:
+			case HOST_USER_CLASS_ACTIVE: {
 				printf_("Class active\n");
+				auto mshandle = host.get_class_handle<MidiStreamingHandle>();
+				if (!mshandle) {
+					printf_("Error, no MSHandle\n");
+					return;
+				}
 				USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
-				break;
+			} break;
 
 			case HOST_USER_DISCONNECTION:
 				printf_("Disconnected\n");

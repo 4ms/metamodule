@@ -82,9 +82,9 @@ void Controls::update_params() {
 			} else {
 				midi_gate = false;
 			}
-			Debug::Pin1::low();
 		} else if (msg.is_command<MidiCommand::NoteOff>()) {
 			midi_gate = false;
+			Debug::Pin1::low();
 		}
 	} else {
 		//if rx buffer is empty AND we've disconnected, turn off the midi gate
@@ -136,14 +136,13 @@ void Controls::start() {
 		auxstream_updater.start();
 	}
 
-	_midi_host.set_rx_callback([this](uint8_t *rxbuffer, uint32_t sz) {
-		//300ns on M4
-		if (sz < 4)
+	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
+		if (rxbuffer.size() < 4)
 			return;
-		// if (rxbuffer.size() < 4)
 		Debug::Pin0::high();
 		auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 		_midi_rx_buf.put(msg);
+		// msg.print();
 		Debug::Pin0::low();
 
 		_midi_host.receive();
