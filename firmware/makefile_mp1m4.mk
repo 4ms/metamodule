@@ -72,13 +72,14 @@ SOURCES += lib/printf/printf.c
 
 # USB:
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb_phy.c
 
 # USB Host:
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_hcd.c
-SOURCES += $(usb_src)/usbh_conf.c
+SOURCES += $(usb_src)/usbh_conf.cc
 SOURCES += $(usb_src)/usbh_midi.cc
 # SOURCES += $(usb_src)/midi_host.cc
-SOURCES += $(usbhost_libdir)/Class/HUB/Src/usbh_hub.c
+# SOURCES += $(usbhost_libdir)/Class/HUB/Src/usbh_hub.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_core.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_ctlreq.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_ioreq.c
