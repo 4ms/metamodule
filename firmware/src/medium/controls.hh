@@ -85,7 +85,7 @@ private:
 	bool _new_adc_data_ready = false;
 
 	MidiHost &_midi_host;
-	CircularBuffer<Midi::MidiMessage, 256> _midi_rx_buf;
+	CircularBuffer<MidiMessage, 256> _midi_rx_buf;
 	float midi_note = 0.f;
 	bool midi_gate = false;
 

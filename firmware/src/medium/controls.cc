@@ -73,7 +73,7 @@ void Controls::update_params() {
 	if (_midi_rx_buf.num_filled()) {
 		auto msg = _midi_rx_buf.get();
 
-		if (msg.is_command<Midi::NoteOn>()) {
+		if (msg.is_command<MidiCommand::NoteOn>()) {
 			Debug::Pin1::high();
 			if (msg.velocity()) {
 				int32_t note = msg.note();
@@ -83,7 +83,7 @@ void Controls::update_params() {
 				midi_gate = false;
 			}
 			Debug::Pin1::low();
-		} else if (msg.is_command<Midi::NoteOff>()) {
+		} else if (msg.is_command<MidiCommand::NoteOff>()) {
 			midi_gate = false;
 		}
 	} else {
@@ -140,9 +140,9 @@ void Controls::start() {
 		//300ns on M4
 		if (sz < 4)
 			return;
-			// if (rxbuffer.size() < 4)
+		// if (rxbuffer.size() < 4)
 		Debug::Pin0::high();
-		auto msg = Midi::MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
+		auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 		_midi_rx_buf.put(msg);
 		Debug::Pin0::low();
 
