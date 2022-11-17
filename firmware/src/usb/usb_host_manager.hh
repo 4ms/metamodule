@@ -6,7 +6,7 @@
 
 class UsbHostManager {
 	USBH_HandleTypeDef usbhost;
-	HCD_HandleTypeDef hhcd;
+	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
 
 public:
@@ -17,33 +17,31 @@ public:
 	}
 
 	void init() {
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		init_hhcd();
+
 		auto status = USBH_Init(&usbhost, usbh_state_change_callback, 0);
 		if (status != USBH_OK) {
 			printf_("Error init USB Host: %d\n", status);
 			return;
 		}
-
 		midi_host.init();
-
-		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
-		mdrivlib::InterruptManager::register_isr(OTG_IRQn, [this] { HAL_HCD_IRQHandler(&hhcd); });
-		mdrivlib::InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
-		mdrivlib::InterruptControl::enable_irq(OTG_IRQn);
 	}
 
 	void start() {
-		USBH_Start(&usbhost);
+		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0,0, [this] { HAL_HCD_IRQHandler(&hhcd); });
+		auto err = USBH_Start(&usbhost);
+		if (err!=USBH_OK)
+			printf_("Error starting host\n");
+
 		src_enable.high();
-		printf_("Pausing...\n");
+		printf_("VBus high, starting host\n");
 		// HAL_Delay(500);
 	}
 	void stop() {
 		src_enable.low();
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 		USBH_Stop(&usbhost);
-		// USBH_DeInit(&usbh_handle); //sets hhcd to NULL
+		//USBH_DeInit(&usbhost); //sets hhcd to NULL
 	}
 
 	void process() {
@@ -53,33 +51,35 @@ public:
 	static void usbh_state_change_callback(USBH_HandleTypeDef *phost, uint8_t id) {
 		USBHostHelper host{phost};
 		auto mshandle = host.get_class_handle<MidiStreamingHandle>();
-		if (!mshandle)
+		if (!mshandle) {
+			printf_("Error, no MSHandle\n");
 			return;
+		 }
 
 		switch (id) {
 			case HOST_USER_SELECT_CONFIGURATION:
-				printf("Select config\n");
+				printf_("Select config\n");
 				break;
 
 			case HOST_USER_CONNECTION:
-				printf("Connected\n");
+				printf_("Connected\n");
 				break;
 
 			case HOST_USER_CLASS_SELECTED:
-				printf("Class selected\n");
+				printf_("Class selected\n");
 				break;
 
 			case HOST_USER_CLASS_ACTIVE:
-				printf("Class active\n");
+				printf_("Class active\n");
 				USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				break;
 
 			case HOST_USER_DISCONNECTION:
-				printf("Disconnected\n");
+				printf_("Disconnected\n");
 				break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
-				printf("Error\n");
+				printf_("Error\n");
 				break;
 		}
 	}

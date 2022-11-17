@@ -33,8 +33,8 @@ public:
 	UsbManager(RamDiskOps &ramdiskops)
 		: usb_drive{ramdiskops}
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
-		usb_drive.init_usb_device();
-		usb_host.init();
+		// usb_drive.init_usb_device();
+		// usb_host.init();
 		found_fusb = usbctl.init();
 	}
 
@@ -44,6 +44,7 @@ public:
 		else
 			printf_("Can't communicate with FUSB302\n");
 		// tm = HAL_GetTick();
+		usb_host.init();
 		usbctl.start_drp_polling();
 	}
 
