@@ -17,6 +17,9 @@ public:
 	}
 
 	void init() {
+	}
+
+	void start() {
 		init_hhcd();
 
 		auto status = USBH_Init(&usbhost, usbh_state_change_callback, 0);
@@ -25,9 +28,7 @@ public:
 			return;
 		}
 		midi_host.init();
-	}
 
-	void start() {
 		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [this] { HAL_HCD_IRQHandler(&hhcd); });
 		auto err = USBH_Start(&usbhost);
 		if (err != USBH_OK)
@@ -39,9 +40,12 @@ public:
 	}
 	void stop() {
 		src_enable.low();
+		HAL_Delay(250);
 		mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
+		HAL_Delay(250);
 		USBH_Stop(&usbhost);
-		//USBH_DeInit(&usbhost); //sets hhcd to NULL
+		usbhost.pData = nullptr;
+		USBH_DeInit(&usbhost); //sets hhcd to NULL?
 	}
 
 	void process() {
