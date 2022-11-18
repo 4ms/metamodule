@@ -55,6 +55,7 @@ public:
 		USBH_Process(&usbhost);
 	}
 	USBH_StatusTypeDef receive() {
+		//TODO: if we use double-buffers, swap buffers here
 		return USBH_MIDI_Receive(&usbhost, MSHandle.rx_buffer, 128);
 	}
 	USBH_StatusTypeDef transmit(uint8_t *buff, uint32_t len) {
