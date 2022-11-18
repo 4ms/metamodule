@@ -43,9 +43,10 @@ public:
 			printf_("FUSB302 ID Read 0x%x\n", usbctl.get_chip_id());
 		else
 			printf_("Can't communicate with FUSB302\n");
+
 		// tm = HAL_GetTick();
 		Debug::blue_LED1::low();
-		// usb_host.init();
+		Debug::green_LED1::low();
 		printf_("Starting DRP polling\n");
 		usbctl.start_drp_polling();
 	}
@@ -59,12 +60,15 @@ public:
 			if (newstate == AsDevice) {
 				Debug::Pin2::high();
 				Debug::Pin3::low();
+				Debug::green_LED1::high();
+				Debug::blue_LED1::low();
 				printf_("Connected as a device\n");
 				usb_drive.start();
 
 			} else if (newstate == AsHost) {
 				Debug::Pin2::low();
 				Debug::Pin3::high();
+				Debug::green_LED1::low();
 				Debug::blue_LED1::high();
 				printf_("Starting host\n");
 				usb_host.start();
@@ -72,6 +76,7 @@ public:
 			} else if (newstate == None) {
 				Debug::Pin2::low();
 				Debug::Pin3::low();
+				Debug::green_LED1::low();
 				Debug::blue_LED1::low();
 				if (state == AsHost) {
 					state = None; //so that we don't do Host::Process()
