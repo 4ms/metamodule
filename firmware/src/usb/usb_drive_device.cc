@@ -4,8 +4,6 @@
 #include "printf.h"
 #include "usbd_desc.h"
 #include "usbd_msc.h"
-// #include <cstring>
-// #include <functional>
 
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
 
@@ -17,7 +15,6 @@ using InterruptManager = mdrivlib::InterruptManager;
 //TODO: Add support for multiple usb interfaces (CDC/MIDI): "AddClass()" not RegisterClass
 //Should also rename this class to UsbDeviceManager or something
 void UsbDriveDevice::init_usb_device() {
-	mdrivlib::InterruptControl::disable_irq(OTG_IRQn);
 }
 
 void UsbDriveDevice::start() {
