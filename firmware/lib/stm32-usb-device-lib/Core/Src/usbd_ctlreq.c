@@ -99,6 +99,7 @@ static uint8_t USBD_GetLen(uint8_t *buf);
   */
 USBD_StatusTypeDef USBD_StdDevReq(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
 {
+  USBD_UsrLog("sdr");
   USBD_StatusTypeDef ret = USBD_OK;
 
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
@@ -650,6 +651,7 @@ static USBD_StatusTypeDef USBD_SetConfig(USBD_HandleTypeDef *pdev, USBD_SetupReq
 
         if (ret != USBD_OK)
         {
+		  USBD_ErrLog("add: fail set class");
           USBD_CtlError(pdev, req);
         }
         else
@@ -684,6 +686,7 @@ static USBD_StatusTypeDef USBD_SetConfig(USBD_HandleTypeDef *pdev, USBD_SetupReq
 
         if (ret != USBD_OK)
         {
+		  USBD_ErrLog("conf: fail set class");
           USBD_CtlError(pdev, req);
           (void)USBD_ClrClassConfig(pdev, (uint8_t)pdev->dev_config);
           pdev->dev_state = USBD_STATE_ADDRESSED;

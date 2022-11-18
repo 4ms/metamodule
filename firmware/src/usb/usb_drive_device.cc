@@ -18,6 +18,7 @@ void UsbDriveDevice::init_usb_device() {
 }
 
 void UsbDriveDevice::start() {
+	init_fops();
 	auto init_ok = USBD_Init(&pdev, &MSC_Desc, 0);
 	if (init_ok != USBD_OK) {
 		printf_("USB Device failed to initialize!\r\n");
@@ -33,7 +34,7 @@ void UsbDriveDevice::start() {
 void UsbDriveDevice::stop() {
 	InterruptControl::disable_irq(OTG_IRQn);
 	USBD_Stop(&pdev);
-	// USBD_DeInit(&pdev);
+	USBD_DeInit(&pdev);
 }
 
 /// Ops:
@@ -129,8 +130,7 @@ static InquiryData inquiry_data = {
 	// .version = {'0', '.', '0', '1'},
 };
 
-UsbDriveDevice::UsbDriveDevice(RamDiskOps &nfs) {
-	nordisk = &nfs;
+void UsbDriveDevice::init_fops() {
 	ops = {
 		init,
 		get_capacity,
@@ -142,4 +142,9 @@ UsbDriveDevice::UsbDriveDevice(RamDiskOps &nfs) {
 		reinterpret_cast<int8_t *>(&inquiry_data),
 		eject,
 	};
+}
+
+UsbDriveDevice::UsbDriveDevice(RamDiskOps &nfs) {
+	nordisk = &nfs;
+	init_fops();
 }

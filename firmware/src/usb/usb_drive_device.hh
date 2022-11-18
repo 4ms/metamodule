@@ -16,6 +16,7 @@ public:
 	static inline USBD_StorageTypeDef ops;
 
 private:
+	void init_fops();
 	USBD_HandleTypeDef pdev;
 
 	static inline RamDiskOps *nordisk = nullptr;

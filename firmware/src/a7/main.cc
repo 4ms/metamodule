@@ -44,7 +44,7 @@ void main() {
 
 	// Populate Patch List from Patch Storage
 	PatchList patch_list{};
-	// patchdisk.factory_clean(); //Remove this when not testing!
+	patchdisk.factory_clean(); //Remove this when not testing!
 	patchdisk.fill_patchlist_from_norflash(patch_list);
 	patchdisk.norflash_patches_to_ramdisk();
 
