@@ -73,8 +73,10 @@ public:
 				Debug::Pin2::low();
 				Debug::Pin3::low();
 				Debug::blue_LED1::low();
-				if (state == AsHost)
+				if (state == AsHost) {
+					state = None; //so that we don't do Host::Process()
 					usb_host.stop();
+				}
 
 				if (state == AsDevice)
 					usb_drive.stop();
