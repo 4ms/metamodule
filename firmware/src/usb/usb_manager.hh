@@ -24,8 +24,8 @@ class UsbManager {
 	using PinMode = mdrivlib::PinMode;
 	mdrivlib::FPin<FUSBPinChangeConf::port, FUSBPinChangeConf::pin, PinMode::Input, PinPolarity::Inverted> fusb_int_pin;
 	bool int_asserted = false;
-
 	bool found_fusb = false;
+
 	// Debug: timer for dumping registers
 	// uint32_t tm;
 
@@ -51,8 +51,6 @@ public:
 	}
 
 	void handle_fusb_int() {
-		// Debug::Pin1::high();
-		// printf_("INT pin asserted\n");
 		usbctl.handle_interrupt();
 
 		if (auto newstate = usbctl.get_state(); newstate != state) {
@@ -86,7 +84,6 @@ public:
 			}
 			state = newstate;
 		}
-		// Debug::Pin1::low();
 	}
 
 	void process() {
@@ -109,12 +106,12 @@ public:
 		// if ((HAL_GetTick() - tm) > 400) {
 		// 	tm = HAL_GetTick();
 		// 	auto stat0 = usbctl.read<FUSB302::Status0>();
-		// 	// if (stat0.BCLevel == 3) {
-		// 	// 	if (stat0.Comp)
-		// 	// 		Debug::Pin0::high();
-		// 	// 	else
-		// 	// 		Debug::Pin0::low();
-		// 	// }
+		// if (stat0.BCLevel == 3) {
+		// 	if (stat0.Comp)
+		// 		Debug::Pin0::high();
+		// 	else
+		// 		Debug::Pin0::low();
+		// }
 		// }
 	}
 
