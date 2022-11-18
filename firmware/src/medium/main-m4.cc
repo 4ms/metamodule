@@ -95,8 +95,7 @@ void main() {
 			HWSemaphore<RamDiskLockOnM4Using>::unlock();
 		}
 
-		if (HWSemaphore<RamDiskLockOnA7Done>::is_locked())
-		// && ramdiskops.get_status() == RamDiskOps::Status::WritingBack)
+		if (HWSemaphore<RamDiskLockOnA7Done>::is_locked() && ramdiskops.get_status() == RamDiskOps::Status::WritingBack)
 		{
 			printf_("M4 grabbing lock on RamDisk\n");
 			ramdiskops.set_status(RamDiskOps::Status::NotInUse);
