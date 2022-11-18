@@ -5,7 +5,7 @@
 #include "usbd_desc.h"
 #include "usbd_msc.h"
 // #include <cstring>
-#include <functional>
+// #include <functional>
 
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
 
@@ -27,10 +27,7 @@ void UsbDriveDevice::start() {
 		printf_("Error code: %d", static_cast<int>(init_ok));
 	}
 
-	InterruptControl::disable_irq(OTG_IRQn);
-	InterruptControl::set_irq_priority(OTG_IRQn, 0, 0);
-	InterruptManager::register_isr(OTG_IRQn, std::bind_front(HAL_PCD_IRQHandler, &hpcd));
-	InterruptControl::enable_irq(OTG_IRQn, InterruptControl::LevelTriggered);
+	mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
 	USBD_RegisterClass(&pdev, USBD_MSC_CLASS);
 	USBD_MSC_RegisterStorage(&pdev, &ops);
 	USBD_Start(&pdev);
