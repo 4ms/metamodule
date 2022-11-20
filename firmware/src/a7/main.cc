@@ -14,6 +14,7 @@
 #include "patchlist.hh"
 #include "patchstorage.hh"
 #include "ramdisk_ops.hh"
+#include "semaphore_action.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
@@ -73,9 +74,29 @@ void main() {
 	param_cache.clear();
 	patch_loader.load_initial_patch();
 
-	printf_("A7 initialized. Unlocking M4\n");
-
 	HWSemaphore<RamDiskLockOnA7Done>::unlock();
+
+	// SemaphoreActionOnUnlock<RamDiskLockOnA7Done> ramdisk_readback([&] {
+	// 	if (HWSemaphore<RamDiskLockOnA7Done>::lock(1) == HWSemaphoreFlag::LockFailed) {
+	// 		printf("Error getting lock on RamDisk to read back\n");
+	// 		return;
+	// 	}
+	// 	patch_list.lock();
+	// 	printf_("NOR Flash writeback begun.\r\n");
+	// 	RamDiskFileIO::unmount_disk(Disk::RamDisk);
+	// 	if (patchdisk.ramdisk_patches_to_norflash()) {
+	// 		printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
+	// 		patch_list.mark_modified();
+	// 	} else {
+	// 		printf_("NOR Flash writeback failed!\r\n");
+	// 	}
+	// 	patch_list.unlock();
+	// 	printf("RamDisk Available to M4\n");
+	// 	HWSemaphore<RamDiskLockOnA7Done>::unlock_nonrecursive(1);
+	// });
+	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
+
+	printf_("A7 initialized. Unlocking M4\n");
 
 	// Tell M4 we're done with init
 	HWSemaphore<MainCoreReady>::unlock();
@@ -107,6 +128,7 @@ void main() {
 			printf("RamDisk Available to M4\n");
 			HWSemaphore<RamDiskLockOnA7Done>::lock();
 		}
+
 		if (HWSemaphore<RamDiskLockOnM4Using>::is_locked())
 			HWSemaphore<RamDiskLockOnA7Done>::unlock();
 

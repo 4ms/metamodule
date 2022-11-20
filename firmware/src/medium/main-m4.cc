@@ -92,6 +92,7 @@ void main() {
 			printf_("M4 reqlinquishing lock on RamDisk\n");
 			ramdiskops.set_status(RamDiskOps::Status::WritingBack);
 			HWSemaphore<RamDiskLockOnM4Using>::unlock();
+			// HWSemaphore<RamDiskLockOnM4Using>::unlock(3);
 		}
 
 		if (HWSemaphore<RamDiskLockOnA7Done>::is_locked() && ramdiskops.get_status() == RamDiskOps::Status::WritingBack)
