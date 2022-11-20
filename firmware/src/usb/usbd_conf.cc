@@ -46,10 +46,9 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd) {
 		// GPIO_InitStruct.Alternate = GPIO_AF10_OTG2_FS;
 		// HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-		// __HAL_RCC_USBO_FORCE_RESET();
-		// __HAL_RCC_USBO_RELEASE_RESET();
-		// __HAL_RCC_USBPHY_FORCE_RESET();
-		// __HAL_RCC_USBPHY_RELEASE_RESET();
+		// Reset the OTG peripheral to allow switching between host/device mode
+		__HAL_RCC_USBO_FORCE_RESET();
+		__HAL_RCC_USBO_RELEASE_RESET();
 
 		__HAL_RCC_USBO_CLK_ENABLE();
 		__HAL_RCC_USBPHY_CLK_ENABLE();
