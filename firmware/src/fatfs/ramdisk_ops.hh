@@ -8,7 +8,7 @@ class RamDiskOps : public DiskOps {
 public:
 	static constexpr uint32_t SizeBytes = RamDiskSizeBytes;
 	static constexpr uint32_t BlockSize = RamDiskBlockSize;
-	enum class Status { NotInit, InUse, NotInUse, RequiresWriteBack, WritingBack };
+	enum class Status { NotInit, InUse, NotInUse, NotMounted, WritingBack };
 
 	RamDiskOps(RamDisk<RamDiskSizeBytes, RamDiskBlockSize> &rmdisk)
 		: ramdisk{rmdisk} {

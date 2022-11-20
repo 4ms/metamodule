@@ -87,8 +87,7 @@ void main() {
 
 		usb.process();
 
-		// if (HWSemaphore<RamDiskLockOnM4Using>::is_locked() &&
-		if (ramdiskops.get_status() == RamDiskOps::Status::RequiresWriteBack) {
+		if (ramdiskops.get_status() == RamDiskOps::Status::NotMounted) {
 			//signal A7...
 			printf_("M4 reqlinquishing lock on RamDisk\n");
 			ramdiskops.set_status(RamDiskOps::Status::WritingBack);

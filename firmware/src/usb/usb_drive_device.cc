@@ -32,6 +32,7 @@ void UsbDriveDevice::start() {
 }
 
 void UsbDriveDevice::stop() {
+	nordisk->set_status(RamDiskOps::Status::NotMounted);
 	InterruptControl::disable_irq(OTG_IRQn);
 	USBD_Stop(&pdev);
 	USBD_DeInit(&pdev);
@@ -54,7 +55,7 @@ int8_t UsbDriveDevice::eject(uint8_t lun) {
 		if (!nordisk)
 			return USBD_FAIL;
 		printf_("USB MSC device got Eject event from host\r\n");
-		nordisk->set_status(RamDiskOps::Status::RequiresWriteBack);
+		nordisk->set_status(RamDiskOps::Status::NotMounted);
 	}
 	return USBD_OK;
 }
