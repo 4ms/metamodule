@@ -576,13 +576,11 @@ uint8_t USBD_MSC_RegisterStorage(USBD_HandleTypeDef *pdev, USBD_StorageTypeDef *
 {
   if (fops == NULL)
   {
-	USBD_ErrLog("MSC Ops ptr was null");
     return (uint8_t)USBD_FAIL;
   }
 
   pdev->pUserData = fops;
 
-  USBD_UsrLog("Registered MSC ops 0x%p to handle 0x%p", fops, pdev);
   return (uint8_t)USBD_OK;
 }
 

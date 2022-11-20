@@ -94,7 +94,9 @@ USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev,
   /* Check whether the USB Host handle is valid */
   if (pdev == NULL)
   {
+#if (USBD_DEBUG_LEVEL > 1U)
     USBD_ErrLog("Invalid Device handle");
+#endif
     return USBD_FAIL;
   }
 
@@ -166,10 +168,11 @@ USBD_StatusTypeDef USBD_RegisterClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeDe
 
   if (pclass == NULL)
   {
+#if (USBD_DEBUG_LEVEL > 1U)
     USBD_ErrLog("Invalid Class handle");
+#endif
     return USBD_FAIL;
   }
-  USBD_UsrLog("Registering Class handle %p", pclass);
 
   /* link the class to the USB Device handle */
   pdev->pClass = pclass;
@@ -253,8 +256,6 @@ USBD_StatusTypeDef USBD_SetClassConfig(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     /* Set configuration and Start the Class */
     ret = (USBD_StatusTypeDef)pdev->pClass->Init(pdev, cfgidx);
   }
-  else
-	  USBD_ErrLog("USBD_SetClassConfig: pdev->pClass is null");
 
   return ret;
 }
@@ -286,7 +287,6 @@ USBD_StatusTypeDef USBD_ClrClassConfig(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   */
 USBD_StatusTypeDef USBD_LL_SetupStage(USBD_HandleTypeDef *pdev, uint8_t *psetup)
 {
-  USBD_UsrLog("ll_ss");
   USBD_StatusTypeDef ret;
 
   USBD_ParseSetupRequest(&pdev->request, psetup);

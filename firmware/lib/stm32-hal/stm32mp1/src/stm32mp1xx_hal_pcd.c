@@ -56,7 +56,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32mp1xx_hal.h"
-#include "printf.h"
 
 /** @addtogroup STM32H7xx_HAL_Driver
  * @{
@@ -959,12 +958,6 @@ HAL_StatusTypeDef HAL_PCD_Stop(PCD_HandleTypeDef *hpcd) {
  * @param  hpcd PCD handle
  * @retval HAL status
  */
-//supposed to go
-// susp
-// rst
-// enumdne
-// oep   <<< after host, this is susp
-// but instead we just repeat, never getting oep
 void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
 	USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
 	uint32_t USBx_BASE = (uint32_t)USBx;
@@ -1014,7 +1007,6 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
 		}
 
 		if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_OEPINT)) {
-			printf_("oep\n");
 			epnum = 0U;
 
 			/* Read in the device interrupt bits */
@@ -1055,7 +1047,6 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
 		}
 
 		if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_IEPINT)) {
-			printf("iep\n");
 			/* Read in the device interrupt bits */
 			ep_intr = USB_ReadDevAllInEpInterrupt(hpcd->Instance);
 
@@ -1111,7 +1102,6 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
 
 		/* Handle Resume Interrupt */
 		if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_WKUINT)) {
-			printf("wku\n");
 			/* Clear the Remote Wake-up Signaling */
 			USBx_DEVICE->DCTL &= ~USB_OTG_DCTL_RWUSIG;
 
@@ -1136,7 +1126,6 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
 
 		/* Handle Suspend Interrupt */
 		if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_USBSUSP)) {
-			printf("susp\n");
 			if ((USBx_DEVICE->DSTS & USB_OTG_DSTS_SUSPSTS) == USB_OTG_DSTS_SUSPSTS) {
 #if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
 				hpcd->SuspendCallback(hpcd);
@@ -1171,7 +1160,6 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
 
 		/* Handle Reset Interrupt */
 		if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_USBRST)) {
-			printf("rst\n");
 			USBx_DEVICE->DCTL &= ~USB_OTG_DCTL_RWUSIG;
 			(void)USB_FlushTxFifo(hpcd->Instance, 0x10U);
 
@@ -1207,7 +1195,6 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
 
 		/* Handle Enumeration done Interrupt */
 		if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_ENUMDNE)) {
-			printf("enumdne\n");
 			(void)USB_ActivateSetup(hpcd->Instance);
 			hpcd->Init.speed = USB_GetDevSpeed(hpcd->Instance);
 
