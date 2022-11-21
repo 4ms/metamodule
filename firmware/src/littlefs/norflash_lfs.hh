@@ -1,9 +1,9 @@
 #pragma once
 #include "callable.hh"
+#include "fatfs/fattime.hh"
 #include "lib/littlefs/lfs.h"
 #include "norflash_ops.hh"
 #include "patches_default.hh"
-
 #include "printf.h"
 #include <string_view>
 
@@ -80,27 +80,31 @@ public:
 	}
 
 	bool create_file(const std::string_view filename, const std::span<const char> data) {
-		lfs_file_t file;
+		TimeFile file;
 
-		printf_("Littlefs: creating file %s\n", filename.data());
 
-		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY);
+		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY);
 		if (err < 0) {
 			printf_("Open failed with err %d\n", err);
 			return false;
 		}
 
-		if (int err = lfs_file_write(&lfs, &file, data.data(), data.size_bytes()); err < 0) {
+		file.timestamp = get_fattime();
+		// set_file_timestamp(file, get_fattime());
+
+		printf_("Littlefs: creating file %s, timestamp 0x%x\n", filename.data(), file.timestamp);
+		if (int err = lfs_file_write(&lfs, &file.file, data.data(), data.size_bytes()); err < 0) {
 			printf_("Write failed with err %d\n", err);
 			return false;
 		}
 
-		lfs_file_close(&lfs, &file);
+		lfs_file_close(&lfs, &file.file);
 
 		return true;
 	}
 
-	using FileAction = std::function<void(const std::string_view filename, const std::span<char> data)>;
+	using FileAction =
+		std::function<void(const std::string_view filename, uint32_t timestamp, const std::span<char> data)>;
 
 	// Performs an action(file_name, file_data) on each file in LittleFS ending with the extension
 	bool foreach_file_with_ext(const std::string_view extension, FileAction action) {
@@ -117,14 +121,14 @@ public:
 				return false;
 
 			if (std::string_view{info.name}.ends_with(extension)) {
-				lfs_file_t file;
-				if (lfs_file_open(&lfs, &file, info.name, LFS_O_RDONLY) < 0) {
+				TimeFile file;
+				if (time_file_open(&file, info.name, LFS_O_RDONLY) < 0) {
 					printf_("Warning: Can't open file %s\n", info.name);
 					continue;
 				}
 
 				std::array<char, MaxFileSize> _data;
-				auto bytes_read = lfs_file_read(&lfs, &file, &_data, _data.size());
+				auto bytes_read = lfs_file_read(&lfs, &file.file, &_data, _data.size());
 				if (bytes_read <= 0)
 					continue;
 				if (info.size > _data.size()) {
@@ -133,9 +137,9 @@ public:
 					continue;
 				}
 
-				lfs_file_close(&lfs, &file);
+				lfs_file_close(&lfs, &file.file);
 
-				action(info.name, {_data.data(), info.size});
+				action(info.name, file.timestamp, {_data.data(), info.size});
 			}
 		}
 
@@ -143,4 +147,40 @@ public:
 
 		return true; //if there's any error
 	}
+
+	enum { ATTR_TIMESTAMP = 0x74 };
+
+	struct TimeFile {
+		lfs_file_t file;
+		uint32_t timestamp;
+		lfs_attr attrs[1];
+		lfs_file_config cfg{.attrs = attrs, .attr_count = 1};
+	};
+
+	uint32_t get_file_timestamp(std::string_view filename) {
+		uint32_t ts;
+		auto res = lfs_getattr(&lfs, filename.data(), ATTR_TIMESTAMP, &ts, sizeof(TimeFile::timestamp));
+		if (res < 0)
+			return 0;
+		return ts;
+	}
+
+	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
+		auto res = lfs_setattr(&lfs, filename.data(), ATTR_TIMESTAMP, &timestamp, sizeof(TimeFile::timestamp));
+	}
+
+	int time_file_open(TimeFile *tfile, const char *path, int flags) {
+		// set up description of timestamp attribute
+		tfile->attrs[0].type = ATTR_TIMESTAMP;
+		tfile->attrs[0].buffer = &tfile->timestamp;
+		tfile->attrs[0].size = sizeof(TimeFile::timestamp);
+
+		// attributes will be automatically populated during open call
+		return lfs_file_opencfg(&lfs, &tfile->file, path, flags, &tfile->cfg);
+	}
+
+	// int time_file_write(TimeFile *tfile, const void *buffer, size_t size) {
+	// 	tfile->timestamp = get_fattime(); //make_timestamp(2018, 9, 19, 7, 30, 45);
+	// 	return lfs_file_write(&lfs, &tfile->file, buffer, size);
+	// }
 };

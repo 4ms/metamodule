@@ -95,6 +95,42 @@ bool create_file(const char *filename, const char *data, unsigned sz) {
 	return true;
 }
 
+void set_file_rawtimestamp(std::string_view filename, uint32_t timestamp) {
+	FILINFO fno;
+	auto res = f_stat(filename.data(), &fno);
+	if (res != FR_OK)
+		printf_("Could not read file %s\n", filename.data());
+	fno.fdate = timestamp >> 16;
+	fno.ftime = timestamp & 0xFFFF;
+	res = f_utime(filename.data(), &fno);
+	if (res != FR_OK)
+		printf_("Could not update timestamp of %s\n", filename.data());
+}
+
+uint32_t get_file_rawtimestamp(std::string_view filename) {
+	FILINFO fno;
+	if (f_stat(filename.data(), &fno) != FR_OK) {
+		printf_("Could not read file %s\n", filename.data());
+		return 0;
+	}
+	printf_("gfrts: %s sz: %d date: 0x%x time: 0x%x\n", fno.fname, fno.fsize, fno.fdate, fno.ftime);
+	return ((uint32_t)fno.fdate << 16) & (uint32_t)fno.ftime;
+}
+
+FileInfo get_file_info(std::string_view filename) {
+	FILINFO fno;
+	auto res = f_stat(filename.data(), &fno);
+	return FileInfo{
+		.size = static_cast<uint32_t>(fno.fsize),
+		.year = static_cast<uint8_t>(fno.fdate >> 9),			 //top 7 bits are year-1980 1980..2107
+		.month = static_cast<uint8_t>((fno.fdate >> 5) & 0x0F),	 //middle 4 bits are month 1..12
+		.day = static_cast<uint8_t>(fno.fdate & 0x1F),			 //bottom 5 bits are day 1..31
+		.hour = static_cast<uint8_t>(fno.ftime >> 11),			 //top 5 bits are hour 0..23
+		.minute = static_cast<uint8_t>((fno.ftime >> 5) & 0x3F), //middle 6 bits are minute 0..59
+		.second = static_cast<uint8_t>((fno.ftime & 0x1F) * 2)	 //bottom 5 bits are seconds/2 0..29
+	};
+}
+
 uint32_t read_file(std::string_view filename, char *data, uint32_t max_bytes) {
 	FIL fil;
 	FILINFO fileinfo;
@@ -102,6 +138,7 @@ uint32_t read_file(std::string_view filename, char *data, uint32_t max_bytes) {
 	UINT bytes_read;
 	{
 		auto res = f_stat(filename.data(), &fileinfo);
+		auto &fno = fileinfo;
 		bytes_to_read = std::min((uint32_t)fileinfo.fsize, max_bytes);
 		if (res != FR_OK)
 			return 0;
@@ -116,6 +153,8 @@ uint32_t read_file(std::string_view filename, char *data, uint32_t max_bytes) {
 		if (res != FR_OK)
 			return 0;
 	}
+	if (bytes_to_read != bytes_read)
+		printf_("Warning: Supposed to read %d, actually read %d\n", bytes_to_read, bytes_read);
 	f_close(&fil);
 
 	return bytes_read;
@@ -127,4 +166,14 @@ static void u8_to_tchar(const char *u8, TCHAR *uint) {
 	} while (*u8 != '\0');
 }
 
+void debug_print_fileinfo(FileInfo info) {
+	printf_("Sz: %zu, Tm: %04u/%02u/%02u, %02u:%02u:%02u\n",
+			info.size,
+			info.year + 1980,
+			info.month,
+			info.day,
+			info.hour,
+			info.minute,
+			info.second);
+}
 } // namespace MetaModule::RamDiskFileIO

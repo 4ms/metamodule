@@ -54,18 +54,27 @@ bool PatchStorage::norflash_patches_to_ramdisk() {
 
 	//TODO: Remove all RamDisk patches
 
-	bool ok = lfs.foreach_file_with_ext(".yml", [](const std::string_view filename, const std::span<const char> data) {
-		if (data.size() == 0)
-			return;
+	bool ok = lfs.foreach_file_with_ext(
+		".yml", [](const std::string_view filename, uint32_t timestamp, const std::span<const char> data) {
+			if (data.size() == 0)
+				return;
 
-		printf_("Found patch file in LFS: %s, creating on RamDisk\n", filename.data());
+			if (filename.starts_with("."))
+				return;
 
-		//TODO: verify it's a patch file
-		//data.starts_with("PatchData: ");??? use PatchFileIO?
+			printf_("Found patch file in LFS: %s, timestamp 0x%x, creating on RamDisk\n", filename.data(), timestamp);
 
-		if (!RamDiskFileIO::create_file(filename.data(), data))
-			printf_("Could not create file %s on ram disk\n", filename.data());
-	});
+			//TODO: verify it's a patch file
+			// data.starts_with("PatchData: ");??? use PatchFileIO?
+
+			if (!RamDiskFileIO::create_file(filename.data(), data))
+				printf_("Could not create file %s on ram disk\n", filename.data());
+
+			RamDiskFileIO::set_file_rawtimestamp(filename.data(), timestamp);
+
+			auto info = RamDiskFileIO::get_file_info(filename.data());
+			RamDiskFileIO::debug_print_fileinfo(info);
+		});
 
 	if (!ok) {
 		printf_("NorFlashRamDiskOps init failed to read patch dir\n");
@@ -91,7 +100,24 @@ bool PatchStorage::ramdisk_patches_to_norflash() {
 	// 	".yml", [](const std::string_view filename, const std::span<const char> data) { lfs.delete_file(filename); });
 
 	RamDiskFileIO::for_each_file_regex(Disk::RamDisk, "*.yml", [this](const char *fname) {
+		if (fname[0] == '.')
+			return;
+
 		std::array<char, 32768> buf;
+
+		// auto info = RamDiskFileIO::get_file_info(fname);
+		// RamDiskFileIO::debug_print_fileinfo(info);
+
+		//Compare to lfs file
+		auto lfs_tm = lfs.get_file_timestamp(fname);
+		auto fatfs_tm = RamDiskFileIO::get_file_rawtimestamp(fname);
+
+		if (lfs_tm == fatfs_tm) {
+			printf_("Timestamp not newer for %s: lfs: %x fatfs: %x\n", fname, lfs_tm, fatfs_tm);
+			return;
+		}
+		printf_("Timestamps differ for %s: lfs: %x fatfs: %x\n", fname, lfs_tm, fatfs_tm);
+
 		uint32_t filesize = RamDiskFileIO::read_file(fname, buf.data(), buf.size());
 		if (filesize == buf.size()) {
 			printf_("File exceeds %zu bytes, too big. Skipping\r\n", buf.size());
@@ -101,6 +127,7 @@ bool PatchStorage::ramdisk_patches_to_norflash() {
 			printf_("File cannot be read. Skipping\r\n");
 			return;
 		}
+
 		lfs.create_file(fname, buf);
 	});
 
@@ -124,10 +151,16 @@ bool PatchStorage::fill_patchlist_from_norflash(PatchList &patch_list) {
 	patch_list.set_status(PatchList::Status::Loading);
 	patch_list.clear_all_patches();
 
-	bool ok = lfs.foreach_file_with_ext(".yml", [&](const std::string_view fname, const std::span<char> data) {
-		printf_("Found patch file: %s, Reading... ", fname.data());
-		patch_list.add_patch_from_yaml(data);
-	});
+	bool ok = lfs.foreach_file_with_ext(
+		".yml", [&](const std::string_view fname, uint32_t timestamp, const std::span<char> data) {
+			if (data.size() == 0)
+				return;
+			if (fname.starts_with("."))
+				return;
+
+			printf_("Found patch file: %s, Timestamp: 0x%x, Reading... ", fname.data(), timestamp);
+			patch_list.add_patch_from_yaml(data);
+		});
 
 	patch_list.set_status(PatchList::Status::Ready);
 

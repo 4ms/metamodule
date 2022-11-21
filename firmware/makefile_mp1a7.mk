@@ -202,6 +202,7 @@ SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
 SOURCES += src/fatfs/diskio.cc
+SOURCES += src/fatfs/fattime.cc
 SOURCES += src/fatfs/ramdisk_fileio.cc
 SOURCES += src/patchstorage.cc
 # SOURCES += src/patchfileio.cc
