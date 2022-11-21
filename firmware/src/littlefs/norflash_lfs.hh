@@ -1,10 +1,11 @@
 #pragma once
 #include "callable.hh"
-#include "fatfs/fattime.hh"
+#include "ff.h"
 #include "lib/littlefs/lfs.h"
 #include "norflash_ops.hh"
 #include "patches_default.hh"
 #include "printf.h"
+#include "time_convert.hh"
 #include <string_view>
 
 class LittleNorFS {
@@ -81,7 +82,6 @@ public:
 
 	bool create_file(const std::string_view filename, const std::span<const char> data) {
 		TimeFile file;
-
 
 		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY);
 		if (err < 0) {
