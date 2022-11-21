@@ -47,9 +47,8 @@ LittleNorFS::Status PatchStorage::init_norflash() {
 	return status;
 }
 
-// Get the RamDisk ready for IO.
-// Initializes the LittleFS driver,
-// then loads *.yml files from LittleFS in NorFlash to FatFS in RAM
+// Get the RamDisk ready for USB IO
+// Loads *.yml files from LittleFS/NorFlash to FatFS/RAM
 bool PatchStorage::norflash_patches_to_ramdisk() {
 
 	//TODO: Remove all RamDisk patches
