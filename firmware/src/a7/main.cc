@@ -74,27 +74,28 @@ void main() {
 	param_cache.clear();
 	patch_loader.load_initial_patch();
 
-	HWSemaphore<RamDiskLockOnA7Done>::unlock();
+	HWSemaphore<RamDiskLock>::unlock();
 
-	// SemaphoreActionOnUnlock<RamDiskLockOnA7Done> ramdisk_readback([&] {
-	// 	if (HWSemaphore<RamDiskLockOnA7Done>::lock(1) == HWSemaphoreFlag::LockFailed) {
-	// 		printf("Error getting lock on RamDisk to read back\n");
-	// 		return;
-	// 	}
-	// 	patch_list.lock();
-	// 	printf_("NOR Flash writeback begun.\r\n");
-	// 	RamDiskFileIO::unmount_disk(Disk::RamDisk);
-	// 	if (patchdisk.ramdisk_patches_to_norflash()) {
-	// 		printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
-	// 		patch_list.mark_modified();
-	// 	} else {
-	// 		printf_("NOR Flash writeback failed!\r\n");
-	// 	}
-	// 	patch_list.unlock();
-	// 	printf("RamDisk Available to M4\n");
-	// 	HWSemaphore<RamDiskLockOnA7Done>::unlock_nonrecursive(1);
-	// });
-	// HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
+	SemaphoreActionOnUnlock<RamDiskLock> ramdisk_readback([&] {
+		if (HWSemaphore<RamDiskLock>::lock(1) == HWSemaphoreFlag::LockFailed) {
+			printf("Error getting lock on RamDisk to read back\n");
+			return;
+		}
+		patch_list.lock();
+		printf_("NOR Flash writeback begun.\r\n");
+		RamDiskFileIO::unmount_disk(Disk::RamDisk);
+		if (patchdisk.ramdisk_patches_to_norflash()) {
+			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
+			patch_list.mark_modified();
+		} else {
+			printf_("NOR Flash writeback failed!\r\n");
+		}
+		patch_list.unlock();
+		printf("RamDisk Available to M4\n");
+		HWSemaphore<RamDiskLock>::unlock_nonrecursive(1);
+	});
+
+	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
 	printf_("A7 initialized. Unlocking M4\n");
 
@@ -109,29 +110,6 @@ void main() {
 	ui.start();
 
 	while (true) {
-		// TODO: if disk is unexpectedly disconnected, we should scan it
-		// TODO: can this be encapsulated? patch_list + RamDiskFileIO/ramdiskops + patch_storage
-
-		if (HWSemaphore<RamDiskLockOnM4Using>::is_locked() == false &&
-			HWSemaphore<RamDiskLockOnA7Done>::is_locked() == false)
-		{
-			patch_list.lock();
-			printf_("NOR Flash writeback begun.\r\n");
-			RamDiskFileIO::unmount_disk(Disk::RamDisk);
-			if (patchdisk.ramdisk_patches_to_norflash()) {
-				printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
-				patch_list.mark_modified();
-			} else {
-				printf_("NOR Flash writeback failed!\r\n");
-			}
-			patch_list.unlock();
-			printf("RamDisk Available to M4\n");
-			HWSemaphore<RamDiskLockOnA7Done>::lock();
-		}
-
-		if (HWSemaphore<RamDiskLockOnM4Using>::is_locked())
-			HWSemaphore<RamDiskLockOnA7Done>::unlock();
-
 		__WFI();
 	}
 }

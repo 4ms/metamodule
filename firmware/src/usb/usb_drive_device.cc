@@ -1,16 +1,21 @@
 #include "usb_drive_device.hh"
+#include "conf/hsem_conf.hh"
 #include "drivers/interrupt.hh"
 #include "drivers/interrupt_control.hh"
+#include "hsem.hh"
 #include "printf.h"
 #include "usbd_desc.h"
 #include "usbd_msc.h"
 
 //TODO: Add SD Card as a second lun (or add each partition as a lun)
 
+//TODO make a device manager that owns hpcd, like UsbHostManager
 extern "C" PCD_HandleTypeDef hpcd;
 
-using InterruptControl = mdrivlib::InterruptControl;
-using InterruptManager = mdrivlib::InterruptManager;
+using mdrivlib::HWSemaphore;
+using mdrivlib::HWSemaphoreFlag;
+using mdrivlib::InterruptControl;
+using mdrivlib::InterruptManager;
 
 //TODO: Add support for multiple usb interfaces (CDC/MIDI): "AddClass()" not RegisterClass
 //Should also rename this class to UsbDeviceManager or something
@@ -18,11 +23,19 @@ void UsbDriveDevice::init_usb_device() {
 }
 
 void UsbDriveDevice::start() {
+	// TODO: try for 3 seconds before failing
+	if (HWSemaphore<MetaModule::RamDiskLock>::lock(3) == HWSemaphoreFlag::LockFailed) {
+		printf_("Cannot get lock on RamDisk, aborting usb device start\n");
+		return;
+	}
+	nordisk->set_status(RamDiskOps::Status::InUse);
+
 	init_fops();
 	auto init_ok = USBD_Init(&pdev, &MSC_Desc, 0);
 	if (init_ok != USBD_OK) {
 		printf_("USB Device failed to initialize!\r\n");
 		printf_("Error code: %d", static_cast<int>(init_ok));
+		return;
 	}
 
 	mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [] { HAL_PCD_IRQHandler(&hpcd); });
@@ -32,10 +45,14 @@ void UsbDriveDevice::start() {
 }
 
 void UsbDriveDevice::stop() {
-	nordisk->set_status(RamDiskOps::Status::NotMounted);
+	nordisk->set_status(RamDiskOps::Status::Unmounted);
 	InterruptControl::disable_irq(OTG_IRQn);
 	USBD_Stop(&pdev);
 	USBD_DeInit(&pdev);
+
+	printf_("M4 is unlocking RamDisk Lock\n");
+	HWSemaphore<MetaModule::RamDiskLock>::unlock(3);
+	nordisk->set_status(RamDiskOps::Status::WritingBack);
 }
 
 /// Ops:
@@ -45,7 +62,7 @@ int8_t UsbDriveDevice::init(uint8_t lun) {
 		if (!nordisk)
 			return USBD_FAIL;
 		printf_("USB MSC connected to host\r\n");
-		nordisk->set_status(RamDiskOps::Status::InUse);
+		nordisk->set_status(RamDiskOps::Status::Mounted);
 	}
 	return USBD_OK;
 }
@@ -55,7 +72,7 @@ int8_t UsbDriveDevice::eject(uint8_t lun) {
 		if (!nordisk)
 			return USBD_FAIL;
 		printf_("USB MSC device got Eject event from host\r\n");
-		nordisk->set_status(RamDiskOps::Status::NotMounted);
+		nordisk->set_status(RamDiskOps::Status::Unmounted);
 	}
 	return USBD_OK;
 }
