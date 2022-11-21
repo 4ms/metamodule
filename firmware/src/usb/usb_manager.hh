@@ -20,9 +20,7 @@ class UsbManager {
 	mdrivlib::I2CPeriph usbi2c{usb_i2c_conf};
 	FUSB302::Device usbctl{usbi2c, FUSBDevAddr};
 	FUSB302::Device::ConnectedState state = FUSB302::Device::ConnectedState::None;
-	using PinPolarity = mdrivlib::PinPolarity;
-	using PinMode = mdrivlib::PinMode;
-	mdrivlib::FPin<FUSBPinChangeConf::port, FUSBPinChangeConf::pin, PinMode::Input, PinPolarity::Inverted> fusb_int_pin;
+	FUSBIntPin fusb_int_pin;
 	bool int_asserted = false;
 	bool found_fusb = false;
 
@@ -86,7 +84,7 @@ public:
 				if (state == AsDevice)
 					usb_drive.stop();
 
-				printf_("Disconnected, resuming DRP polling\n");
+				//printf_("Disconnected, resuming DRP polling\n");
 				usbctl.start_drp_polling();
 			}
 			state = newstate;

@@ -33,6 +33,9 @@ struct FUSBPinChangeConf : mdrivlib::DefaultPinChangeConf {
 	static constexpr uint32_t core = 1;
 };
 
+using FUSBIntPin =
+	mdrivlib::FPin<mdrivlib::GPIO::A, mdrivlib::PinNum::_10, mdrivlib::PinMode::Input, mdrivlib::PinPolarity::Inverted>;
+
 constexpr inline uint8_t FUSBDevAddr = 0b01000100;
 
 constexpr inline mdrivlib::PinNoInit Usb5VSrcEnablePin{mdrivlib::GPIO::A, 15};
