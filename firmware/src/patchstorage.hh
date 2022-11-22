@@ -26,5 +26,7 @@ private:
 	//TODO: RamDiskFileIO &ramdiskio;
 	std::vector<size_t> found_files;
 	std::array<char, 65536> buf;
+
+	size_t filename_hash(const std::string_view fname);
 };
 } // namespace MetaModule
