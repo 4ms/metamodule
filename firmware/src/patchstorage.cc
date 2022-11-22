@@ -141,6 +141,7 @@ bool PatchStorage::ramdisk_patches_to_norflash() {
 		[this](const std::string_view filename, uint32_t timestamp, const std::span<const char> data) {
 		auto hsh = filename_hash(filename);
 		if (std::find(found_files.begin(), found_files.end(), hsh) == found_files.end()) {
+		if (std::ranges::find(found_files, hsh) == found_files.end()) {
 			printf_("File on LFS %s with filename hash 0x%08x not found on RamDisk, deleting\n", filename.data(), hsh);
 			// Think about this: dont delete, just move to RecentlyDeleted/ folder
 			auto ok = lfs.delete_file(filename);

@@ -16,6 +16,7 @@ public:
 	static constexpr uint32_t BlockSize = 4096;
 	static constexpr uint32_t MaxFileSize = 32768;
 	enum class Status { AlreadyFormatted, NewlyFormatted, FlashError, LFSError };
+	std::array<char, MaxFileSize> _data;
 
 	LittleNorFS(mdrivlib::QSpiFlash &flash)
 		: _flash{flash} {
@@ -111,7 +112,7 @@ public:
 	using FileAction =
 		std::function<void(const std::string_view filename, uint32_t timestamp, const std::span<char> data)>;
 
-	// Performs an action(file_name, file_data) on each file in LittleFS ending with the extension
+	// Performs an action(filename, timestamp, file_data) on each file in LittleFS ending with the extension
 	bool foreach_file_with_ext(const std::string_view extension, FileAction action) {
 		lfs_dir_t dir;
 		if (lfs_dir_open(&lfs, &dir, "/") < 0)
@@ -131,7 +132,6 @@ public:
 					continue;
 				}
 
-				std::array<char, MaxFileSize> _data;
 				auto bytes_read = lfs_file_read(&lfs, &file.file, &_data, _data.size());
 				if (bytes_read <= 0)
 					continue;
@@ -140,8 +140,6 @@ public:
 						"Warning: File %s is %d bytes, exceeds max %d. Skipping\n", info.name, info.size, _data.size());
 					continue;
 				}
-				printf_("File %s is %zu bytes\n", info.name, info.size);
-
 				lfs_file_close(&lfs, &file.file);
 
 				action(info.name, file.timestamp, {_data.data(), info.size});
