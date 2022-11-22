@@ -6,6 +6,42 @@
 #include "util/base_concepts.hh"
 #include <rack.hpp>
 
+class MappableKnobRing : public OpaqueWidget {
+public:
+	MappableKnobRing() { setSize({50, 50}); }
+	void draw(const DrawArgs &args) override
+	{
+		nvgBeginPath(args.vg);
+		nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y * 0.75f);
+		NVGcolor color = rack::color::alpha(PaletteHub::color[1], 0.2f);
+		nvgFillColor(args.vg, color);
+		nvgFill(args.vg);
+	}
+	void onHover(const event::Hover &e) override { e.consume(this); }
+	void onButton(const event::Button &e) override
+	{
+		printf("c\n");
+		e.consume(this);
+	}
+	void onEnter(const event::Enter &e) override
+	{
+		printf("in\n");
+		e.consume(this);
+	}
+	void onLeave(const event::Leave &e) override
+	{
+		printf("out\n");
+		e.consume(this);
+	}
+	void onDragStart(const event::DragStart &e) override
+	{
+		printf("d\n");
+		if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
+			return;
+		}
+	}
+};
+
 template<typename BaseKnobT>
 class MappableKnob : public BaseKnobT {
 	static_assert(std::is_base_of<app::SvgKnob, BaseKnobT>(), "Knob class must derive from SvgKnob");
@@ -21,6 +57,11 @@ public:
 		// this->fb->box.pos = this->fb->box.pos.plus(Vec{margin / 2, margin / 2});
 		// this->shadow->box.pos = this->shadow->box.pos.plus(Vec{margin / 2, margin / 2});
 		this->box = this->box.grow(Vec{Hmargin, Vmargin});
+
+		MappableKnobRing *ring = new MappableKnobRing;
+		ring->setPosition({0, 0});
+		this->addChild(ring);
+		this->setSize({100, 100});
 	}
 
 	void draw(const typename BaseKnobT::DrawArgs &args) override
@@ -98,10 +139,7 @@ public:
 		}
 	}
 
-	void onHover(const event::Hover &e) override
-	{
-		e.consume(this);
-	}
+	void onHover(const event::Hover &e) override { e.consume(this); }
 
 	void onEnter(const event::Enter &e) override
 	{
@@ -134,10 +172,7 @@ private:
 		KnobUnmapItem(LabelButtonID id)
 			: _id{id}
 		{}
-		void onAction(const event::Action &e) override
-		{
-			centralData->unregisterMapByDest(_id);
-		}
+		void onAction(const event::Action &e) override { centralData->unregisterMapByDest(_id); }
 	};
 
 	// ParamLabel: copied from Rack/src/app/ParamWidget.cpp (not exported)
