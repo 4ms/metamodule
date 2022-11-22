@@ -28,5 +28,6 @@ private:
 	std::array<char, 65536> buf;
 
 	size_t filename_hash(const std::string_view fname);
+	std::string_view trim_leading_newlines(auto s);
 };
 } // namespace MetaModule

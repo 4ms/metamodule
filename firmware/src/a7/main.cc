@@ -82,7 +82,7 @@ void main() {
 
 	SemaphoreActionOnUnlock<RamDiskLock> ramdisk_readback([&] {
 		if (HWSemaphore<RamDiskLock>::lock(1) == HWSemaphoreFlag::LockFailed) {
-			printf("Error getting lock on RamDisk to read back\n");
+			printf_("Error getting lock on RamDisk to read back\n");
 			return;
 		}
 		patch_list.lock();
@@ -95,7 +95,7 @@ void main() {
 			printf_("NOR Flash writeback failed!\r\n");
 		}
 		patch_list.unlock();
-		printf("RamDisk Available to M4\n");
+		printf_("RamDisk Available to M4\n");
 		HWSemaphore<RamDiskLock>::unlock_nonrecursive(1);
 	});
 

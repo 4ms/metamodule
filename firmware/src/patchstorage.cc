@@ -88,53 +88,53 @@ bool PatchStorage::ramdisk_patches_to_norflash() {
 		if (fname[0] == '.')
 			return;
 
-		auto hsh = filename_hash(std::string_view{fname});
-		found_files.push_back(hsh);
+		// Record hash of filename (used later to see what files are missing, so we can delete them from LFS)
+		found_files.push_back(filename_hash(std::string_view{fname}));
 
-		//Compare to lfs file
+		// Compare to lfs file
 		auto lfs_tm = lfs.get_file_timestamp(fname);
 		auto fatfs_tm = RamDiskFileIO::get_file_rawtimestamp(fname);
+		{
+			if (lfs_tm == 0) {
+				pr_log("File %s does not exist on LFS, creating\n", fname);
+			} else if (lfs_tm == fatfs_tm) {
+				pr_log("File %s timestamp (0x%x) not changed, skipping\n", fname, fatfs_tm);
+				return;
+			} else
+				pr_log("File %s timestamps differ. lfs: 0x%x fatfs: 0x%x\n", fname, lfs_tm, fatfs_tm);
+		}
 
-		if (lfs_tm == 0) {
-			pr_log("File %s does not exist on LFS, creating\n", fname);
-		} else if (lfs_tm == fatfs_tm) {
-			pr_log("File %s timestamp (0x%x) not changed, skipping\n", fname, fatfs_tm);
-			return;
-		} else
-			pr_log("File %s timestamps differ. lfs: 0x%x fatfs: 0x%x\n", fname, lfs_tm, fatfs_tm);
-
+		// Read file from FatFS
 		uint32_t filesize = RamDiskFileIO::read_file(fname, buf.data(), buf.size());
-		if (filesize == buf.size()) {
-			pr_err("File exceeds %zu bytes, too big. Skipping\r\n", buf.size());
-			return;
-		}
-		if (!filesize) {
-			pr_err("File cannot be read. Skipping\r\n");
-			return;
+		{
+			if (filesize == buf.size()) {
+				pr_err("File exceeds %zu bytes, too big. Skipping\r\n", buf.size());
+				return;
+			}
+			if (!filesize) {
+				pr_err("File cannot be read. Skipping\r\n");
+				return;
+			}
+			if (!trim_leading_newlines(buf).starts_with("PatchData:")) {
+				pr_log("File does not start with 'PatchData:', skipping\n");
+				return;
+			}
 		}
 
-		std::string_view data1{buf.data(), buf.size()};
-		data1.remove_prefix(std::min(data1.find_first_not_of("\n\r"), data1.size()));
-		if (!data1.starts_with("PatchData:")) {
-			pr_log("File does not start with 'PatchData:', skipping\n");
-			return;
-		}
-
+		// Write to LFS
 		lfs.update_or_create_file(fname, std::span<const char>{buf.data(), filesize}, fatfs_tm);
 	});
 
-	bool ok = lfs.foreach_file_with_ext(
-		".yml",
-		[this](const std::string_view filename, uint32_t timestamp, const std::span<const char> data) {
-		auto hsh = filename_hash(filename);
-		if (std::ranges::find(found_files, hsh) == found_files.end()) {
-			pr_log("File on LFS %s with filename hash 0x%08x not found on RamDisk, deleting\n", filename.data(), hsh);
+	// Delete any files on LFS whose filename hashes weren't found on FatFS
+	bool ok = lfs.foreach_file_with_ext(".yml", [this](std::string_view filename, uint32_t, std::span<const char>) {
+		if (std::ranges::find(found_files, filename_hash(filename)) == found_files.end()) {
+			pr_log("File on LFS %s not found on RamDisk, deleting\n", filename.data());
 			// Think about this: dont delete, just move to RecentlyDeleted/ folder
 			auto ok = lfs.delete_file(filename);
 			if (!ok)
 				pr_err("Deleting failed!\n");
 		}
-		});
+	});
 
 	return true;
 }
@@ -145,10 +145,11 @@ bool PatchStorage::create_default_patches_in_norflash() {
 		const auto patch = DefaultPatches::get_patch(i);
 
 		pr_log("Creating default patch file: %s\n", filename.c_str());
-		if (patch.back() == '\0') {
+
+		// Remove trailing null terminator that we get from storing default patches as strings
+		if (patch.back() == '\0')
 			patch.back() = '\n';
-			pr_dbg("Last char was \\0, set to \\n\n");
-		}
+
 		if (!lfs.update_or_create_file(filename, patch)) {
 			pr_err("Error: aborted creating default patches to flash\n");
 			return false;
@@ -171,10 +172,7 @@ bool PatchStorage::fill_patchlist_from_norflash(PatchList &patch_list) {
 
 		pr_log("Found patch file: %s, size %zu, Timestamp: 0x%x, Reading... ", fname.data(), data.size(), timestamp);
 
-		std::string_view data1{data.data(), data.size()};
-		data1.remove_prefix(std::min(data1.find_first_not_of("\n\r"), data1.size()));
-
-		if (!data1.starts_with("PatchData:")) {
+		if (!trim_leading_newlines(data).starts_with("PatchData:")) {
 			pr_log("File does not start with 'PatchData:', skipping\n");
 			return;
 		}
@@ -192,6 +190,12 @@ size_t PatchStorage::filename_hash(const std::string_view fname) {
 	for (auto &c : fname)
 		h = (h * 16777619) ^ c;
 	return h;
+}
+
+std::string_view PatchStorage::trim_leading_newlines(auto s) {
+	std::string_view v{s.data(), s.size()};
+	v.remove_prefix(std::min(v.find_first_not_of("\n\r"), v.size()));
+	return v;
 }
 
 } // namespace MetaModule
