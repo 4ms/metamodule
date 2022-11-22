@@ -80,7 +80,7 @@ public:
 		return Status::NewlyFormatted;
 	}
 
-	bool create_file(const std::string_view filename, const std::span<const char> data) {
+	bool update_or_create_file(const std::string_view filename, const std::span<const char> data) {
 		TimeFile file;
 
 		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY);
@@ -90,9 +90,8 @@ public:
 		}
 
 		file.timestamp = get_fattime();
-		// set_file_timestamp(file, get_fattime());
 
-		printf_("Littlefs: creating file %s, timestamp 0x%x\n", filename.data(), file.timestamp);
+		printf_("Littlefs: updating or creating file %s, timestamp 0x%x\n", filename.data(), file.timestamp);
 		if (int err = lfs_file_write(&lfs, &file.file, data.data(), data.size_bytes()); err < 0) {
 			printf_("Write failed with err %d\n", err);
 			return false;
@@ -103,13 +102,17 @@ public:
 		return true;
 	}
 
+	bool delete_file(const std::string_view filename) {
+		auto err = lfs_remove(&lfs, filename.data());
+		return (err >= 0);
+	}
+
 	using FileAction =
 		std::function<void(const std::string_view filename, uint32_t timestamp, const std::span<char> data)>;
 
 	// Performs an action(file_name, file_data) on each file in LittleFS ending with the extension
 	bool foreach_file_with_ext(const std::string_view extension, FileAction action) {
 		lfs_dir_t dir;
-
 		if (lfs_dir_open(&lfs, &dir, "/") < 0)
 			return false;
 
@@ -136,6 +139,7 @@ public:
 						"Warning: File %s is %d bytes, exceeds max %d. Skipping\n", info.name, info.size, _data.size());
 					continue;
 				}
+				printf_("File %s is %zu bytes\n", info.name, info.size);
 
 				lfs_file_close(&lfs, &file.file);
 
@@ -145,7 +149,7 @@ public:
 
 		lfs_dir_close(&lfs, &dir);
 
-		return true; //if there's any error
+		return true;
 	}
 
 	enum { ATTR_TIMESTAMP = 0x74 };

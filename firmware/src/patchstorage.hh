@@ -24,5 +24,6 @@ public:
 private:
 	LittleNorFS lfs;
 	//TODO: RamDiskFileIO &ramdiskio;
+	std::vector<size_t> found_files;
 };
 } // namespace MetaModule
