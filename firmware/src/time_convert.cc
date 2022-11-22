@@ -7,7 +7,7 @@
 // std::tm: (36 bytes) date and time, minimum 1970, resolution 1 second. Intermediate value
 // time_t: (8 bytes) seconds since 1970
 
-static std::tm poweron_tm = {
+static std::tm default_poweron_tm = {
 	.tm_sec = 0,
 	.tm_min = 0,
 	.tm_hour = 1,
@@ -16,22 +16,9 @@ static std::tm poweron_tm = {
 	.tm_year = 2000,
 	.tm_isdst = 0,
 };
-
-static time_t poweron_sec_since_epoch = mktime(&poweron_tm);
-
-void set_poweron_tm(std::tm &t) {
-	poweron_tm.tm_sec = t.tm_sec;
-	poweron_tm.tm_min = t.tm_min;
-	poweron_tm.tm_hour = t.tm_hour;
-	poweron_tm.tm_mday = t.tm_mday;
-	poweron_tm.tm_mon = t.tm_mon;
-	poweron_tm.tm_year = t.tm_year;
-	poweron_tm.tm_isdst = 0;
-	poweron_sec_since_epoch = mktime(&poweron_tm);
-}
+static time_t poweron_sec_since_epoch = mktime(&default_poweron_tm);
 
 void set_time_now(std::tm &now, uint32_t ticks_since_poweron) {
-	// ticks_since_poweron = (mktime(&now) - poweron_time) * 1000;
 	poweron_sec_since_epoch = mktime(&now) - (time_t)(ticks_since_poweron / 1000);
 }
 
