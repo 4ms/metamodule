@@ -113,7 +113,6 @@ uint32_t get_file_rawtimestamp(std::string_view filename) {
 		printf_("Could not read file %s\n", filename.data());
 		return 0;
 	}
-	printf_("gfrts: %s sz: %d date: 0x%x time: 0x%x\n", fno.fname, fno.fsize, fno.fdate, fno.ftime);
 	return ((uint32_t)fno.fdate << 16) | (uint32_t)fno.ftime;
 }
 
