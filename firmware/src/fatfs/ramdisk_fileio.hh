@@ -37,6 +37,8 @@ bool create_file(const char *filename, const char *data, unsigned sz);
 
 uint32_t read_file(std::string_view filename, char *data, uint32_t max_bytes);
 
+bool delete_file(const char *filename);
+
 FileInfo get_file_info(std::string_view filename);
 void debug_print_fileinfo(FileInfo info);
 

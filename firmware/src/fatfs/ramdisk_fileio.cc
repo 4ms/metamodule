@@ -159,6 +159,15 @@ uint32_t read_file(std::string_view filename, char *data, uint32_t max_bytes) {
 	return bytes_read;
 }
 
+bool delete_file(const char *filename) {
+	FIL fil;
+	auto res = f_unlink(filename);
+	if (res != FR_OK)
+		return false;
+
+	return true;
+}
+
 static void u8_to_tchar(const char *u8, TCHAR *uint) {
 	do {
 		*uint++ = *u8++;

@@ -52,8 +52,11 @@ LittleNorFS::Status PatchStorage::init_norflash() {
 // Loads *.yml files from LittleFS/NorFlash to FatFS/RAM
 bool PatchStorage::norflash_patches_to_ramdisk() {
 
-	//TODO: Remove all RamDisk patches
+	// Remove all RamDisk .yml files
+	RamDiskFileIO::for_each_file_regex(
+		Disk::RamDisk, "*.yml", [](const char *fname) { RamDiskFileIO::delete_file(fname); });
 
+	// Scan LFS for .yml files
 	bool ok = lfs.foreach_file_with_ext(
 		".yml", [](const std::string_view filename, uint32_t timestamp, const std::span<const char> data) {
 			if (data.size() == 0)
