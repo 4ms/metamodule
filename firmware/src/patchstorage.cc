@@ -116,7 +116,6 @@ bool PatchStorage::ramdisk_patches_to_norflash() {
 		} else
 			printf_("File %s timestamps differ. lfs: 0x%x fatfs: 0x%x\n", fname, lfs_tm, fatfs_tm);
 
-		std::array<char, 32768> buf; //static?
 		uint32_t filesize = RamDiskFileIO::read_file(fname, buf.data(), buf.size());
 		if (filesize == buf.size()) {
 			printf_("File exceeds %zu bytes, too big. Skipping\r\n", buf.size());
