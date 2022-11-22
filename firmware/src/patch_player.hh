@@ -351,7 +351,9 @@ public:
 					}
 					printf_("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
 				} else {
-					printf_("Outputs are connected: panel_jack_id=%d and int_cable=%d\n", panel_jack_id, dup_int_cable);
+					printf_("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
+							panel_jack_id,
+							dup_int_cable);
 					// error: Panel input jack is mapped to a jack containing a cable (to an output)
 					// - ? Create a module that outputs the sum of two inputs, and adjust int_cables and in_mappings?
 					// - ? Keep the mapping and remove the int_cable entry?
