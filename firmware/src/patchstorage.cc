@@ -124,25 +124,14 @@ bool PatchStorage::ramdisk_patches_to_norflash() {
 			return;
 		}
 
-		if (!std::string_view{buf.data(), 12}.starts_with("PatchData:") &&
-			!std::string_view{buf.data() + 1, 12}.starts_with("PatchData:"))
-		{
+		std::string_view data1{buf.data(), buf.size()};
+		data1.remove_prefix(std::min(data1.find_first_not_of("\n\r"), data1.size()));
+		if (!data1.starts_with("PatchData:")) {
 			printf_("File does not start with 'PatchData:', skipping\n");
-			printf_("%02x%02x%02x%02x %02x%02x%02x%02x %02x%02x\n",
-					buf[0],
-					buf[1],
-					buf[2],
-					buf[3],
-					buf[4],
-					buf[5],
-					buf[6],
-					buf[7],
-					buf[8],
-					buf[9]);
 			return;
 		}
 
-		lfs.update_or_create_file(fname, std::span<const char>{buf.data(), filesize});
+		lfs.update_or_create_file(fname, std::span<const char>{buf.data(), filesize}, fatfs_tm);
 	});
 
 	bool ok = lfs.foreach_file_with_ext(
@@ -166,18 +155,6 @@ bool PatchStorage::create_default_patches_in_norflash() {
 	for (uint32_t i = 0; i < DefaultPatches::num_patches(); i++) {
 		const auto filename = DefaultPatches::get_filename(i);
 		const auto patch = DefaultPatches::get_patch(i);
-
-		printf_("def: %02x%02x%02x%02x %02x%02x%02x%02x %02x%02x\n",
-				patch[0],
-				patch[1],
-				patch[2],
-				patch[3],
-				patch[4],
-				patch[5],
-				patch[6],
-				patch[7],
-				patch[8],
-				patch[9]);
 
 		printf_("Creating default patch file: %s\n", filename.c_str());
 		if (!lfs.update_or_create_file(filename, patch)) {

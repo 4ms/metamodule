@@ -80,7 +80,8 @@ public:
 		return Status::NewlyFormatted;
 	}
 
-	bool update_or_create_file(const std::string_view filename, const std::span<const char> data) {
+	bool
+	update_or_create_file(const std::string_view filename, const std::span<const char> data, uint32_t timestamp = 0) {
 		TimeFile file;
 
 		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY);
@@ -89,7 +90,7 @@ public:
 			return false;
 		}
 
-		file.timestamp = get_fattime();
+		file.timestamp = timestamp ? timestamp : get_fattime();
 
 		printf_("Littlefs: updating or creating file %s, timestamp 0x%x\n", filename.data(), file.timestamp);
 		if (int err = lfs_file_write(&lfs, &file.file, data.data(), data.size_bytes()); err < 0) {
