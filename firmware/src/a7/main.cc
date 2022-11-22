@@ -34,6 +34,10 @@ void main() {
 	StaticBuffers::init();
 
 	HAL_Delay(100);
+
+	auto now = ticks_to_fattime(HAL_GetTick());
+	printf_("%u/%u/%u %u:%02u:%02u\n", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
+
 	// Setup RAM disk: ~300us on A7 for 4MB disk
 	RamDiskOps ramdiskops{StaticBuffers::virtdrive};
 	RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
