@@ -33,7 +33,7 @@ void main() {
 
 	StaticBuffers::init();
 
-	HAL_Delay(100);
+	HAL_Delay(200);
 
 	auto now = ticks_to_fattime(HAL_GetTick());
 	printf_("%u/%u/%u %u:%02u:%02u\n", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
@@ -49,7 +49,7 @@ void main() {
 
 	// Populate Patch List from Patch Storage
 	PatchList patch_list{};
-	patchdisk.factory_clean(); //Remove this when not testing!
+	// patchdisk.factory_clean(); //Remove this when not testing!
 	patchdisk.fill_patchlist_from_norflash(patch_list);
 	patchdisk.norflash_patches_to_ramdisk();
 
@@ -88,6 +88,10 @@ void main() {
 		patch_list.lock();
 		printf_("NOR Flash writeback begun.\r\n");
 		RamDiskFileIO::unmount_disk(Disk::RamDisk);
+
+		// Must invalidate the cache because M4 wrote to it
+		// SystemCache::invalidate_dcache_by_range(StaticBuffers::virtdrive.virtdrive,
+		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
 		if (patchdisk.ramdisk_patches_to_norflash()) {
 			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
 			patch_list.mark_modified();
