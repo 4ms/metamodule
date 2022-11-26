@@ -7,64 +7,19 @@
 #include <rack.hpp>
 
 class MappableKnobRing : public OpaqueWidget {
+protected:
+	ParamWidget &_inner_knob;
+	bool _hovered = false;
+
 public:
-	MappableKnobRing() { setSize({50, 50}); }
+	MappableKnobRing(ParamWidget &inner_knob, float ring_thickness)
+		: _inner_knob{inner_knob}
+	{
+		box.pos = _inner_knob.box.pos.minus({ring_thickness, ring_thickness});
+		box.size = _inner_knob.box.size.plus({ring_thickness * 2, ring_thickness * 2});
+	}
+
 	void draw(const DrawArgs &args) override
-	{
-		nvgBeginPath(args.vg);
-		nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y * 0.75f);
-		NVGcolor color = rack::color::alpha(PaletteHub::color[1], 0.2f);
-		nvgFillColor(args.vg, color);
-		nvgFill(args.vg);
-	}
-	void onHover(const event::Hover &e) override { e.consume(this); }
-	void onButton(const event::Button &e) override
-	{
-		printf("c\n");
-		e.consume(this);
-	}
-	void onEnter(const event::Enter &e) override
-	{
-		printf("in\n");
-		e.consume(this);
-	}
-	void onLeave(const event::Leave &e) override
-	{
-		printf("out\n");
-		e.consume(this);
-	}
-	void onDragStart(const event::DragStart &e) override
-	{
-		printf("d\n");
-		if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
-			return;
-		}
-	}
-};
-
-template<typename BaseKnobT>
-class MappableKnob : public BaseKnobT {
-	static_assert(std::is_base_of<app::SvgKnob, BaseKnobT>(), "Knob class must derive from SvgKnob");
-
-	static constexpr float Hmargin = 20;
-	static constexpr float Vmargin = 40;
-	bool hovered = false;
-
-public:
-	MappableKnob()
-	{
-		// this->sw->box = this->sw->box.grow(Vec{Hmargin, Vmargin});
-		// this->fb->box.pos = this->fb->box.pos.plus(Vec{margin / 2, margin / 2});
-		// this->shadow->box.pos = this->shadow->box.pos.plus(Vec{margin / 2, margin / 2});
-		this->box = this->box.grow(Vec{Hmargin, Vmargin});
-
-		MappableKnobRing *ring = new MappableKnobRing;
-		ring->setPosition({0, 0});
-		this->addChild(ring);
-		this->setSize({100, 100});
-	}
-
-	void draw(const typename BaseKnobT::DrawArgs &args) override
 	{
 		auto id = getId();
 		bool isMappingNow = centralData->isMappingInProgress();
@@ -72,17 +27,76 @@ public:
 			auto src = isMappingNow ? centralData->getMappingSource() : centralData->getMappedSrcFromDst(id);
 			if (src.objType == getId().objType && src.objID >= 0) {
 				nvgBeginPath(args.vg);
-				nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y * 0.75f);
-				float alphac = hovered ? 0.75 : 0.4;
+				nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y * 0.5f);
+				float alphac = _hovered ? 0.75 : 0.4;
 				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alphac);
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
 			}
 		}
-
-		BaseKnobT::draw(args);
 	}
 
+	void onEnter(const event::Enter &e) override
+	{
+		_hovered = true;
+		if (!centralData->isMappingInProgress())
+			centralData->notifyEnterHover(getId());
+	}
+
+	void onLeave(const event::Leave &e) override
+	{
+		_hovered = false;
+		if (!centralData->isMappingInProgress())
+			centralData->notifyLeaveHover(getId());
+	}
+
+	void onButton(const event::Button &e) override { _inner_knob.onButton(e); }
+
+	const LabelButtonID getId() const
+	{
+		int moduleId = -1;
+		int paramId = -1;
+		if (_inner_knob.paramQuantity) {
+			moduleId = _inner_knob.paramQuantity->module ? _inner_knob.paramQuantity->module->id : -1;
+			paramId = _inner_knob.paramQuantity->paramId;
+		}
+		return {LabelButtonID::Types::Knob, paramId, moduleId};
+	}
+};
+
+class MappableSliderRing : public MappableKnobRing {
+public:
+	MappableSliderRing(ParamWidget &inner_knob, float ring_width, float ring_height)
+		: MappableKnobRing(inner_knob, 0)
+	{
+		box.pos = _inner_knob.box.pos.minus({ring_width / 2, ring_height / 2});
+		box.size = _inner_knob.box.size.plus({ring_width, ring_height});
+	}
+
+	void draw(const DrawArgs &args) override
+	{
+		auto id = getId();
+		bool isMappingNow = centralData->isMappingInProgress();
+		if (isMappingNow || centralData->isMappedPartnerHovered(id)) {
+			auto src = isMappingNow ? centralData->getMappingSource() : centralData->getMappedSrcFromDst(id);
+			if (src.objType == getId().objType && src.objID >= 0) {
+				nvgBeginPath(args.vg);
+				nvgRect(args.vg, 0, 0, box.size.x, box.size.y);
+				float alphac = _hovered ? 0.75 : 0.4;
+				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alphac);
+				nvgFillColor(args.vg, color);
+				nvgFill(args.vg);
+			}
+		}
+	}
+};
+
+template<typename BaseKnobT>
+class MappableKnob : public BaseKnobT {
+	// TODO: or is base of slider
+	// static_assert(std::is_base_of<app::SvgKnob, BaseKnobT>(), "Knob class must derive from SvgKnob");
+
+public:
 	// onButton is provided to customize the context menu for mappable knobs
 	void onButton(const event::Button &e) override
 	{
@@ -95,14 +109,6 @@ public:
 			ParamLabel *paramLabel = new ParamLabel;
 			paramLabel->paramWidget = this;
 			menu->addChild(paramLabel);
-
-			ParamField *paramField = new ParamField;
-			paramField->box.size.x = 100;
-			paramField->setParamWidget(this);
-			menu->addChild(paramField);
-
-			MenuSeparator *sep = new MenuSeparator;
-			menu->addChild(sep);
 
 			auto moduleid = getId().moduleID;
 			auto paramid = getId().objID;
@@ -128,6 +134,14 @@ public:
 				// unmapItem->rightText = .... TODO: name of metamodule jack
 				menu->addChild(unmapItem);
 			} else {
+				ParamField *paramField = new ParamField;
+				paramField->box.size.x = 100;
+				paramField->setParamWidget(this);
+				menu->addChild(paramField);
+
+				MenuSeparator *sep = new MenuSeparator;
+				menu->addChild(sep);
+
 				ui::MenuItem *label = new ui::MenuItem;
 				label->text = "Not mapped";
 				label->rightText = "Click next to a MetaModule knob to begin mapping";
@@ -139,20 +153,9 @@ public:
 		}
 	}
 
-	void onHover(const event::Hover &e) override { e.consume(this); }
-
-	void onEnter(const event::Enter &e) override
+	void onHover(const event::Hover &e) override
 	{
-		hovered = true;
-		if (!centralData->isMappingInProgress())
-			centralData->notifyEnterHover(getId());
-	}
-
-	void onLeave(const event::Leave &e) override
-	{
-		hovered = false;
-		if (!centralData->isMappingInProgress())
-			centralData->notifyLeaveHover(getId());
+		// override the e.consume(this) so that the ring will get passed the hover event
 	}
 
 private:
@@ -172,6 +175,7 @@ private:
 		KnobUnmapItem(LabelButtonID id)
 			: _id{id}
 		{}
+
 		void onAction(const event::Action &e) override { centralData->unregisterMapByDest(_id); }
 	};
 

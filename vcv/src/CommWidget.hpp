@@ -16,10 +16,7 @@ protected:
 };
 
 class MetaModuleTextBox : public LedDisplayTextField {
-	void draw(const DrawArgs &args) override
-	{
-		LedDisplayTextField::draw(args);
-	}
+	void draw(const DrawArgs &args) override { LedDisplayTextField::draw(args); }
 };
 
 struct Davies1900hBlackKnob4ms : MappableKnob<Davies1900hKnob> {
@@ -37,17 +34,11 @@ struct Davies1900hBlackKnobUnlined4ms : MappableKnob<Davies1900hKnob> {
 };
 
 struct DaviesLarge4ms : MappableKnob<Davies1900hKnob> {
-	DaviesLarge4ms()
-	{
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Davies_large.svg")));
-	}
+	DaviesLarge4ms() { setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Davies_large.svg"))); }
 };
 
 struct Small9mmKnob : MappableKnob<RoundKnob> {
-	Small9mmKnob()
-	{
-		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/9mm_knob.svg")));
-	}
+	Small9mmKnob() { setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/9mm_knob.svg"))); }
 };
 
 struct Small9mmUnlinedKnob : MappableKnob<RoundKnob> {
