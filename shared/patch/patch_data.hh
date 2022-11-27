@@ -14,18 +14,9 @@ struct PatchData {
 	std::vector<MappedOutputJack> mapped_outs;
 	std::vector<StaticParam> static_knobs;
 	std::vector<MappedKnob> mapped_knobs;
-	std::vector<MidiMap> midi_maps;
 
 	const MappedKnob *find_mapped_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : mapped_knobs) {
-			if (m.module_id == module_id && m.param_id == param_id)
-				return &m;
-		}
-		return nullptr;
-	}
-
-	const MidiMap *find_midimap(uint32_t module_id, uint32_t param_id) const {
-		for (auto &m : midi_maps) {
 			if (m.module_id == module_id && m.param_id == param_id)
 				return &m;
 		}

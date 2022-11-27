@@ -26,9 +26,6 @@ bool yaml_raw_to_patch(char *yaml, size_t size, PatchData &pd) {
 	data_root["static_knobs"] >> pd.static_knobs;
 	data_root["mapped_knobs"] >> pd.mapped_knobs;
 
-	if (data_root.has_child("midi_maps"))
-		data_root["midi_maps"] >> pd.midi_maps;
-
 	return true;
 }
 
@@ -62,9 +59,6 @@ bool yaml_string_to_patch(std::string yaml, PatchData &pd) {
 	data_root["mapped_outs"] >> pd.mapped_outs;
 	data_root["static_knobs"] >> pd.static_knobs;
 	data_root["mapped_knobs"] >> pd.mapped_knobs;
-
-	if (data_root.has_child("midi_maps"))
-		data_root["midi_maps"] >> pd.midi_maps;
 
 	return true;
 }
