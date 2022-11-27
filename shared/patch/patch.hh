@@ -87,22 +87,22 @@ struct MappedOutputJack {
 static_assert(sizeof(MappedOutputJack) == 24, "MappedOutputJack should be 24B");
 
 //TO BE REMOVED:
-struct MidiMap {
-	int8_t midi_cc;
-	uint8_t midi_chan;
+// struct MidiMap {
+// 	int8_t midi_cc;
+// 	uint8_t midi_chan;
 
-	uint16_t module_id;
-	uint16_t param_id;
-	uint16_t curve_type; // reserved for future use
-	float min;
-	float max;
-	AliasNameString alias_name;
+// 	uint16_t module_id;
+// 	uint16_t param_id;
+// 	uint16_t curve_type; // reserved for future use
+// 	float min;
+// 	float max;
+// 	AliasNameString alias_name;
 
-	bool is_monophonic_note() const {
-		return (midi_cc == -128) && (midi_chan & (1 << 7));
-	}
+// 	bool is_monophonic_note() const {
+// 		return (midi_cc == -128) && (midi_chan & (1 << 7));
+// 	}
 
-	bool is_monophonic_gate() const {
-		return (midi_cc == -128) && !(midi_chan & 0b10000000);
-	}
-};
+// 	bool is_monophonic_gate() const {
+// 		return (midi_cc == -128) && !(midi_chan & 0b10000000);
+// 	}
+// };
