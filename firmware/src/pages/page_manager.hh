@@ -1,5 +1,6 @@
 #pragma once
 #include "params.hh"
+#include "patch_mod_queue.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
 #include "ui_audio_mailbox.hh"
@@ -22,23 +23,20 @@ class PageManager {
 	KnobEditPage knob_edit_page{info};
 	// KnobView3 page_knobs{info};
 
-	PatchList &patch_list;
-	UiAudioMailbox &mbox;
-
 public:
 	PageBase *cur_page = &page_patchsel;
 
-	PageManager(
-		PatchList &patchlist, PatchLoader &patch_loader, Params &params, MetaParams &metaparams, UiAudioMailbox &mbox)
-		: info{patchlist, patch_loader, params, metaparams, mbox}
-		, patch_list{patchlist}
-		, mbox{mbox} {
+	PageManager(PatchList &patchlist,
+				PatchLoader &patch_loader,
+				Params &params,
+				MetaParams &metaparams,
+				MessageQueue &msg_queue,
+				PatchModQueue &patch_mod_queue)
+		: info{patchlist, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
 	void init();
 	void update_current_page();
-
-private:
 };
 
 } // namespace MetaModule

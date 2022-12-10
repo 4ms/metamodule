@@ -53,14 +53,14 @@ struct ModuleViewPage : PageBase {
 		this_module_id = PageList::get_selected_module_id();
 
 		if (!read_slug()) {
-			mbox.append_message("Module View page cannot read module slug.\n");
+			msg_queue.append_message("Module View page cannot read module slug.\n");
 			return;
 		}
 		printf_("ModuleViewPage module %s\n", slug.data());
 
 		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
-			mbox.append_message("Module View page got empty module slug.\r\n");
+			msg_queue.append_message("Module View page got empty module slug.\r\n");
 			return;
 		}
 

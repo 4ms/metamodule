@@ -7,6 +7,7 @@
 #include "param_cache.hh"
 #include "params.hh"
 #include "patch_loader.hh"
+#include "patch_mod_queue.hh"
 #include "patchlist.hh"
 #include "static_buffers.hh"
 #include "util/analyzed_signal.hh"
@@ -20,7 +21,7 @@ private:
 	ParamCache &param_cache;
 	PatchList &patch_list;
 	PatchLoader &patch_loader;
-	UiAudioMailbox &mbox;
+	MessageQueue &msg_queue;
 
 	PageManager page_manager;
 	Params params;
@@ -30,12 +31,16 @@ private:
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchLoader &patch_loader, PatchList &patch_list, ParamCache &pc, UiAudioMailbox &uiaudiomailbox)
+	Ui(PatchLoader &patch_loader,
+	   PatchList &patch_list,
+	   ParamCache &pc,
+	   MessageQueue &msg_queue,
+	   PatchModQueue &patch_mod_queue)
 		: param_cache{pc}
 		, patch_list{patch_list}
 		, patch_loader{patch_loader}
-		, mbox{uiaudiomailbox}
-		, page_manager{patch_list, patch_loader, params, metaparams, uiaudiomailbox} {
+		, msg_queue{msg_queue}
+		, page_manager{patch_list, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
 	void start() {
@@ -76,10 +81,10 @@ private:
 		lv_timer_handler();
 		page_update_tm.start();
 
-		auto msg = mbox.get_message();
+		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
 			printf_("%s", msg.data());
-			mbox.clear_message();
+			msg_queue.clear_message();
 		}
 		// output_debug_info();
 		// Debug::Pin1::low();

@@ -41,23 +41,23 @@ struct KnobEditPage : PageBase {
 		auto patch_id = PageList::get_selected_patch_id();
 		const auto &patch = patch_list.get_patch(patch_id);
 		if (patch.patch_name.length() == 0) {
-			mbox.append_message("Patch name empty\n");
+			msg_queue.append_message("Patch name empty\n");
 			return;
 		}
 		if (this_module_id >= patch.module_slugs.size()) {
-			mbox.append_message("Module has invalid ID\n");
+			msg_queue.append_message("Module has invalid ID\n");
 			return;
 		}
 		slug = patch.module_slugs[this_module_id];
 
 		if (!slug.length()) {
-			mbox.append_message("Module has invalid slug\n");
+			msg_queue.append_message("Module has invalid slug\n");
 			return;
 		}
 
 		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
-			mbox.append_message("Knob Edit page got empty module slug.\n");
+			msg_queue.append_message("Knob Edit page got empty module slug.\n");
 			return;
 		}
 

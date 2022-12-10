@@ -3,6 +3,7 @@
 #include "lvgl/lvgl.h"
 #include "params.hh"
 #include "patch_loader.hh"
+#include "patch_mod_queue.hh"
 #include "patchlist.hh"
 #include "ui_audio_mailbox.hh"
 #include "util/geometry.hh"
@@ -18,7 +19,8 @@ struct PatchInfo {
 	PatchLoader &patch_loader;
 	Params &params;
 	MetaParams &metaparams;
-	UiAudioMailbox &mbox;
+	MessageQueue &msg_queue;
+	PatchModQueue &patch_mod_queue;
 };
 
 struct PageBase {
@@ -26,7 +28,8 @@ struct PageBase {
 	PatchLoader &patch_loader;
 	Params &params;
 	MetaParams &metaparams;
-	UiAudioMailbox &mbox;
+	MessageQueue &msg_queue;
+	PatchModQueue &patch_mod_queue;
 
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;
@@ -36,7 +39,8 @@ struct PageBase {
 		, patch_loader{info.patch_loader}
 		, params{info.params}
 		, metaparams{info.metaparams}
-		, mbox{info.mbox} {
+		, msg_queue{info.msg_queue}
+		, patch_mod_queue{info.patch_mod_queue} {
 	}
 
 	virtual ~PageBase() = default;

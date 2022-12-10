@@ -96,7 +96,7 @@ public:
 		}
 
 		// Tell the other core about the patch
-		mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2);
+		mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2); //first module to process
 		mdrivlib::SMPControl::write<SMPRegister::NumModulesInPatch>(pd.module_slugs.size());
 		mdrivlib::SMPControl::write<SMPRegister::UpdateModuleOffset>(2);
 		mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
@@ -164,15 +164,13 @@ public:
 	// K-rate setters/getters:
 
 	void set_panel_param(int param_id, float val) {
-		auto &knob_conn = knob_conns[param_id];
-		for (auto const &k : knob_conn) {
+		for (auto const &k : knob_conns[param_id]) {
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
 
 	void set_panel_input(int jack_id, float val) {
-		auto &jacks = in_conns[jack_id];
-		for (auto const &jack : jacks)
+		for (auto const &jack : in_conns[jack_id])
 			modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
@@ -182,6 +180,10 @@ public:
 			return modules[jack.module_id]->get_output(jack.jack_id);
 		else
 			return 0.f;
+	}
+
+	void apply_static_param(const StaticParam &sparam) {
+		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
 	}
 
 	// General info getters:

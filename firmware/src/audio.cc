@@ -48,7 +48,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 ParamCache &paramcache,
 						 PatchLoader &patchloader,
 						 DoubleBufParamBlock &p,
-						 DoubleAuxStreamBlock &auxs)
+						 DoubleAuxStreamBlock &auxs,
+						 PatchModQueue &patch_mod_queue)
 	: param_cache{paramcache}
 	, patch_loader{patchloader}
 	, param_blocks{p}
@@ -64,7 +65,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, codec_{Hardware::codec}
 	, codec_ext_{Hardware::codec_ext}
 	, sample_rate_{Hardware::codec.get_samplerate()}
-	, player{patchplayer} {
+	, player{patchplayer}
+	, patch_mod_queue{patch_mod_queue} {
 
 	if (codec_.init() == CodecT::CODEC_NO_ERR)
 		UartLog::log("Codec initialized\n\r");
@@ -165,6 +167,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 	load_measure.start_measurement();
 
+	handle_patch_mods();
+
+	// TODO: handle second codec
 	if (ext_audio_connected)
 		AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
 
@@ -199,6 +204,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, knob] : countzip(params_.knobs))
 			player.set_panel_param(i, knob);
 
+		// TODO: add more MIDI mappings (duo/quad/octophonic, CC=>gate, CC=>param, CC=>jack)
 		if (param_block.metaparams.midi_connected) {
 			player.set_panel_param(MidiMonoNoteParam, params_.midi_note);
 			// player.set_panel_param(MidiMonoGateParam, params_.midi_gate);
@@ -232,6 +238,17 @@ void AudioStream::start() {
 	codec_ext_.start();
 }
 
+void AudioStream::handle_patch_mods() {
+	if (auto patch_mod = patch_mod_queue.get()) {
+		std::visit(overloaded{
+					   [this](SetStaticParam &mod) { player.apply_static_param(mod.param); },
+					   [](AddMapping &mod) {},
+					   [](ModifyMapping &mod) {},
+				   },
+				   patch_mod.value());
+	}
+}
+
 void AudioStream::propagate_sense_pins(Params &params) {
 	for (int i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
 		auto pin_bit = jacksense_pin_order[i];
@@ -248,14 +265,5 @@ void AudioStream::propagate_sense_pins(Params &params) {
 		}
 	}
 }
-
-// void AudioStream::output_silence(AudioOutBuffer &out, AuxStreamBlock &aux) {
-// 	for (auto [out_, aux_] : zip(out, aux)) {
-// 		for (auto &outchan : out_.chan)
-// 			outchan = 0;
-// 		for (auto &gate : aux_.gate_out)
-// 			gate = 0;
-// 	}
-// }
 
 } // namespace MetaModule

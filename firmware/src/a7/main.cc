@@ -5,10 +5,10 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/stm32xx.h"
-// #include "fatfs/ramdisk_fileio.hh"
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_loader.hh"
+#include "patch_mod_queue.hh"
 #include "patch_player.hh"
 #include "patchfileio.hh"
 #include "patchlist.hh"
@@ -56,10 +56,12 @@ void main() {
 	PatchPlayer patch_player;
 	PatchLoader patch_loader{patch_list, patch_player};
 
+	// "Thread"-shared data:
 	ParamCache param_cache;
-	UiAudioMailbox mbox;
+	MessageQueue mbox;
+	PatchModQueue patch_mod_queue;
 
-	Ui ui{patch_loader, patch_list, param_cache, mbox};
+	Ui ui{patch_loader, patch_list, param_cache, mbox, patch_mod_queue};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
@@ -67,7 +69,8 @@ void main() {
 					  param_cache,
 					  patch_loader,
 					  StaticBuffers::param_blocks,
-					  StaticBuffers::auxsignal_block};
+					  StaticBuffers::auxsignal_block,
+					  patch_mod_queue};
 
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);

@@ -9,6 +9,7 @@
 #include "param_cache.hh"
 #include "params.hh"
 #include "patch_loader.hh"
+#include "patch_mod_queue.hh"
 #include "patch_player.hh"
 #include "patchlist.hh"
 #include "processors/tools/kneeCompress.h"
@@ -40,7 +41,8 @@ public:
 				ParamCache &paramcache,
 				PatchLoader &patchloader,
 				DoubleBufParamBlock &p,
-				DoubleAuxStreamBlock &auxs);
+				DoubleAuxStreamBlock &auxs,
+				PatchModQueue &patch_mod_queue);
 
 	void start();
 
@@ -52,6 +54,7 @@ private:
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
 	DoubleAuxStreamBlock &auxsigs;
+	PatchModQueue &patch_mod_queue;
 
 	CodecT &codec_;
 	CodecT &codec_ext_;
@@ -77,6 +80,7 @@ private:
 	bool check_patch_change(int motion);
 	void send_zeros_to_patch();
 	void propagate_sense_pins(Params &params);
+	void handle_patch_mods();
 
 	// void output_silence(AudioOutBuffer &out, AuxStreamBlock &aux);
 
