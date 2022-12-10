@@ -106,12 +106,12 @@ public:
 		// ...but it's harder to unit test.
 		mark_patched_jacks();
 		calc_panel_jack_connections();
-		calc_panel_knob_connections();
 
-		// Set all initial knob values:
-		for (auto &k : pd.static_knobs) {
+		for (auto const &k : pd.mapped_knobs)
+			cache_knob_mapping(k);
+
+		for (auto &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
-		}
 
 		is_loaded = true;
 
@@ -372,31 +372,18 @@ public:
 				break;
 			out_conns[panel_jack_id] = cable.out;
 		}
-
-		//MIDI mappings to input jacks:
-		// for (auto const &cable : pd.midi_maps) {
-		// 	if (cable.is_monophonic_note()) {
-		// 		in_conns[FirstMidiNoteInput].push_back(
-		// 	}
-		// 	else if (cable.is_monophonic_gate()) {
-
-		// 	}
-		// 	// auto panel_jack_id = cable.
-		// }
 	}
 
-	// Map all the panel knob mappings into knob_conns[] which is indexed by panel_knob_id.
-	void calc_panel_knob_connections() {
-		for (auto const &k : pd.mapped_knobs) {
-			if (k.is_monophonic_note()) {
-				knob_conns[MidiMonoNoteParam].push_back(k);
-				printf_("Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
-			} else if (k.is_monophonic_gate()) {
-				knob_conns[MidiMonoGateParam].push_back(k);
-				printf_("Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
-			} else if (k.panel_knob_id < PanelDef::NumKnobs)
-				knob_conns[k.panel_knob_id].push_back(k);
-		}
+	// Cache a panel knob mapping into knob_conns[]
+	void cache_knob_mapping(const MappedKnob &k) {
+		if (k.is_monophonic_note()) {
+			knob_conns[MidiMonoNoteParam].push_back(k);
+			printf_("Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+		} else if (k.is_monophonic_gate()) {
+			knob_conns[MidiMonoGateParam].push_back(k);
+			printf_("Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+		} else if (k.panel_knob_id < PanelDef::NumKnobs)
+			knob_conns[k.panel_knob_id].push_back(k);
 	}
 
 	// Check for multiple instances of same module type, and cache the results
