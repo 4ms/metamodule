@@ -1,28 +1,30 @@
-#include "stubs/sys/alloc_buffer.hh"
-#include <cstdint>
-
-#include "pages/styles.hh"
-#include "patches_default.hh"
-
 #include "lvgl_driver.hh"
 #include "pages/page_manager.hh"
+#include "pages/styles.hh"
+#include "param_cache.hh"
 #include "params.hh"
+#include "patch_mod_queue.hh"
+#include "patches_default.hh"
 #include "patchlist.hh"
+#include "stubs/sys/alloc_buffer.hh"
+#include <cstdint>
 
 struct Simulator {
 	MetaModule::LVGLDriver gui{MetaModule::MMDisplay::flush_to_screen, MetaModule::MMDisplay::read_input};
 
 	MetaModule::PageManager pages;
-	MetaModule::ParamQueue param_queue;
+	MetaModule::ParamCache param_queue;
 
 	MetaModule::Params params;
 	MetaModule::MetaParams metaparams;
 	MetaModule::PatchList patch_list;
 	MetaModule::PatchPlayer patch_player;
-	MetaModule::UiAudioMailbox mbox;
+	MetaModule::PatchLoader patch_loader{patch_list, patch_player};
+	MetaModule::MessageQueue mbox;
+	MetaModule::PatchModQueue patch_mod_queue;
 
 	Simulator()
-		: pages{patch_list, patch_player, params, metaparams, mbox} {
+		: pages{patch_list, patch_loader, params, metaparams, mbox, patch_mod_queue} {
 		MetaModule::MMDisplay::init(metaparams);
 
 		for (uint32_t i = 0; i < DefaultPatches::num_patches(); i++) {
