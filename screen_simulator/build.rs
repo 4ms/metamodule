@@ -46,6 +46,8 @@ fn main() {
         lvgl_src.push(String::from("../firmware/src/pages/images/PitchShift_artwork_240.c"));
         lvgl_src.push(String::from("../firmware/src/pages/images/HPF_artwork_120.c"));
         lvgl_src.push(String::from("../firmware/src/pages/images/HPF_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/InfOsc_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/InfOsc_artwork_240.c"));
     } else {
         add_glob_files("../firmware/src/pages/images/*.c", &mut lvgl_src);
     }
