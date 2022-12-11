@@ -1,7 +1,8 @@
 #pragma once
 #include "patch_player.hh"
 #include "patchlist.hh"
-#include "uart_log.hh"
+// #include "uart_log.hh" //doesn't work with simulator because uart_log.hh exists in same dir as this file, so preprocessor picks ./uart_log.hh it instead of stubs/uart_log.hh
+#include "printf.h"
 
 namespace MetaModule
 {
@@ -16,16 +17,16 @@ struct PatchLoader {
 
 	void load_initial_patch() {
 		if (load_patch(initial_patch)) {
-			UartLog::log("Loaded initial_patch\n");
+			printf_("Loaded initial_patch\n");
 			loaded_patch_index_ = initial_patch;
 			loading_new_patch_ = false;
 		} else
-			UartLog::log("Failed to load initial patch\n");
+			printf_("Failed to load initial patch\n");
 	}
 
 	bool load_patch(uint32_t patchid) {
 		auto patchname = patch_list_.get_patch_name(patchid);
-		UartLog::log("Attempting load patch #%d, %s\n", patchid, patchname.data());
+		printf_("Attempting load patch #%d, %s\n", patchid, patchname.data());
 
 		if (player_.load_patch(patch_list_.get_patch(patchid))) {
 			loaded_patch_index_ = patchid;
@@ -65,13 +66,13 @@ struct PatchLoader {
 		if (loading_new_patch_ && audio_is_muted_) {
 			bool ok = load_patch(new_patch_index_);
 			if (!ok) {
-				UartLog::log("Can't load patch, reloading previous patch\n");
+				printf_("Can't load patch, reloading previous patch\n");
 				if (!load_patch(loaded_patch_index_)) {
-					UartLog::log("Failed to reload patch, something is wrong!\n");
+					printf_("Failed to reload patch, something is wrong!\n");
 					//TODO: how to handle this, do we have a "no patch loaded" state?
 				}
 			} else {
-				UartLog::log("Patch loaded\n");
+				printf_("Patch loaded\n");
 				loaded_patch_index_ = new_patch_index_;
 			}
 
