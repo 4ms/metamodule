@@ -18,7 +18,8 @@ struct KnobEditPage : PageBase {
 		: PageBase{info}
 		, base(lv_obj_create(nullptr))
 		, knob_name(lv_label_create(base))
-		, mapped_info(lv_label_create(base)) {
+		, mapped_info(lv_label_create(base))
+		, manual_knob(lv_arc_create(base)) {
 		PageList::register_page(this, PageId::KnobEdit);
 
 		init_bg(base);
@@ -32,6 +33,12 @@ struct KnobEditPage : PageBase {
 		lv_obj_add_style(mapped_info, &Gui::text_block_style, LV_PART_MAIN);
 		lv_obj_set_width(mapped_info, 320);
 		lv_obj_set_height(mapped_info, 20);
+
+		// lv_arc_set_adjustable(manual_knob, true);
+		lv_obj_set_size(manual_knob, 50, 50);
+		lv_arc_set_rotation(manual_knob, 135);
+		lv_arc_set_bg_angles(manual_knob, 0, 270);
+		lv_arc_set_value(manual_knob, 40);
 	}
 
 	void prepare_focus() override {
@@ -106,12 +113,13 @@ private:
 	}
 
 	uint16_t this_module_id;
-	uint16_t this_param_id;
+	// uint16_t this_param_id;
 	ModuleTypeSlug slug;
 
 	lv_obj_t *base = nullptr;
 	lv_obj_t *knob_name;
 	lv_obj_t *mapped_info;
+	lv_obj_t *manual_knob;
 };
 
 } // namespace MetaModule
