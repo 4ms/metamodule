@@ -15,7 +15,7 @@
 
 namespace MetaModule
 {
-
+// TODO: remove patch_list ctor parameter, and instead get it from patch_loader.get_patch_list();
 class Ui {
 private:
 	ParamCache &param_cache;

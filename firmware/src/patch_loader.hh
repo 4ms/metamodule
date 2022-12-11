@@ -80,6 +80,10 @@ struct PatchLoader {
 		}
 	}
 
+	PatchList &get_patch_list() {
+		return patch_list_;
+	}
+
 private:
 	PatchList &patch_list_;
 	PatchPlayer &player_;
