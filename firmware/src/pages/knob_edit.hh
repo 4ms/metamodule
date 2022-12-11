@@ -19,7 +19,8 @@ struct KnobEditPage : PageBase {
 		, base(lv_obj_create(nullptr))
 		, knob_name(lv_label_create(base))
 		, mapped_info(lv_label_create(base))
-		, manual_knob(lv_arc_create(base)) {
+		, manual_knob(lv_arc_create(base))
+		, this_param_id(PageList::get_selected_param().id) {
 		PageList::register_page(this, PageId::KnobEdit);
 
 		init_bg(base);
@@ -34,11 +35,10 @@ struct KnobEditPage : PageBase {
 		lv_obj_set_width(mapped_info, 320);
 		lv_obj_set_height(mapped_info, 20);
 
-		// lv_arc_set_adjustable(manual_knob, true);
 		lv_obj_set_size(manual_knob, 50, 50);
 		lv_arc_set_rotation(manual_knob, 135);
 		lv_arc_set_bg_angles(manual_knob, 0, 270);
-		lv_arc_set_value(manual_knob, 40);
+		lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void prepare_focus() override {
@@ -69,18 +69,17 @@ struct KnobEditPage : PageBase {
 		}
 
 		// Knob name label
-		auto this_param = PageList::get_selected_param();
 		std::string nm;
 		nm.reserve(40);
 		nm.append(slug.c_str());
 		nm.append(" knob: ");
-		nm.append(moduleinfo.Knobs[this_param.id].long_name);
+		nm.append(moduleinfo.Knobs[this_param_id].long_name);
 		lv_label_set_text(knob_name, nm.c_str());
 
 		nm.clear();
 
 		// Mapped/unmapped label
-		auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), this_param.id);
+		auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), this_param_id);
 		if (mappedknob && mappedknob->panel_knob_id < PanelDef::NumKnobs) {
 			nm.append("Mapped to Knob ");
 			nm.append(PanelDef::KnobNames[mappedknob->panel_knob_id]);
@@ -88,6 +87,7 @@ struct KnobEditPage : PageBase {
 			//edit button
 		} else {
 			nm.append("Not mapped");
+			lv_arc_set_value(manual_knob, 40);
 			//add mapping button
 		}
 		lv_label_set_text(mapped_info, nm.c_str());
@@ -113,7 +113,7 @@ private:
 	}
 
 	uint16_t this_module_id;
-	// uint16_t this_param_id;
+	uint16_t this_param_id;
 	ModuleTypeSlug slug;
 
 	lv_obj_t *base = nullptr;
