@@ -4,6 +4,9 @@
 #include "util/circular_buffer_opt.hh"
 #include <variant>
 
+namespace MetaModule
+{
+
 struct SetStaticParam {
 	StaticParam param;
 };
@@ -27,3 +30,5 @@ struct overloaded : Ts... {
 // Not needed in gcc 11, but needed for clangd 15
 template<class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
+
+} // namespace MetaModule
