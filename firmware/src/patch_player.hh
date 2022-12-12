@@ -257,6 +257,9 @@ public:
 		return PanelDef::NumOutJacks;
 	}
 
+	float get_param_val(int module_id, int param_id) {
+		return 0.5f;
+	}
 	// Jack patched/unpatched status
 
 	void mark_patched_jacks() {

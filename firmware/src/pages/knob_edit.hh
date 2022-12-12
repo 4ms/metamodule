@@ -67,7 +67,9 @@ struct KnobEditPage : PageBase {
 			return;
 		}
 
-		this_param_id = PageList::get_selected_param().id;
+		auto this_param_id = PageList::get_selected_param().id;
+
+		printf_("Knob Edit: param id %d module id %d\n", this_param_id, this_module_id);
 
 		// Knob name label
 		std::string nm;
@@ -89,8 +91,13 @@ struct KnobEditPage : PageBase {
 			//edit button
 		} else {
 			nm.append("Not mapped");
-			lv_obj_clear_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
-			lv_arc_set_value(manual_knob, 40);
+			if (is_this_patch_loaded()) {
+				lv_obj_clear_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
+				auto &player = patch_loader.get_patch_player();
+
+				lv_arc_set_value(manual_knob, 40);
+			} else
+				nm.append(". Map: ");
 			//add mapping button
 		}
 		lv_label_set_text(mapped_info, nm.c_str());
@@ -106,6 +113,10 @@ struct KnobEditPage : PageBase {
 		}
 	}
 
+	bool is_this_patch_loaded() {
+		return patch_loader.cur_patch_index() == PageList::get_selected_patch_id();
+	}
+
 private:
 	void reset_page() {
 	}
@@ -116,7 +127,6 @@ private:
 	}
 
 	uint16_t this_module_id;
-	uint16_t this_param_id;
 	ModuleTypeSlug slug;
 
 	lv_obj_t *base = nullptr;
