@@ -20,7 +20,7 @@ struct KnobEditPage : PageBase {
 		PageList::register_page(this, PageId::KnobEdit);
 
 		init_bg(base);
-		lv_group_set_editing(group, false);
+		lv_group_set_editing(group, true);
 
 		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
 		lv_obj_set_flex_align(base, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START);
@@ -115,10 +115,12 @@ struct KnobEditPage : PageBase {
 			//nm.append(" in Set __");
 			//edit button
 			lv_label_set_text(map_button_label, "Edit Map");
+			lv_obj_remove_event_cb(map_button, add_mapbut_cb);
 			lv_obj_add_event_cb(map_button, edit_mapbut_cb, LV_EVENT_PRESSED, this);
 		} else {
 			nm.append("Not mapped");
 			lv_label_set_text(map_button_label, "Add Map");
+			lv_obj_remove_event_cb(map_button, edit_mapbut_cb);
 			lv_obj_add_event_cb(map_button, add_mapbut_cb, LV_EVENT_PRESSED, this);
 			if (is_this_patch_loaded()) {
 				static_knob = patch.find_static_knob(this_module_id, this_param_id);
@@ -160,12 +162,12 @@ private:
 	}
 
 	static void add_mapbut_cb(lv_event_t *event) {
-		auto page = static_cast<KnobEditPage *>(event->user_data);
+		// auto page = static_cast<KnobEditPage *>(event->user_data);
 		printf_("Clicked Add Map\n");
 	}
 
 	static void edit_mapbut_cb(lv_event_t *event) {
-		auto page = static_cast<KnobEditPage *>(event->user_data);
+		// auto page = static_cast<KnobEditPage *>(event->user_data);
 		printf_("Clicked Edit Map\n");
 	}
 
