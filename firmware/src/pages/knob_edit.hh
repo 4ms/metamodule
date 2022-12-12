@@ -16,28 +16,49 @@ struct KnobEditPage : PageBase {
 
 	KnobEditPage(PatchInfo info)
 		: PageBase{info}
-		, base(lv_obj_create(nullptr))
-		, knob_name(lv_label_create(base))
-		, mapped_info(lv_label_create(base))
-		, manual_knob(lv_arc_create(base)) {
+		, base(lv_obj_create(nullptr)) {
 		PageList::register_page(this, PageId::KnobEdit);
 
 		init_bg(base);
+		lv_group_set_editing(group, false);
+
 		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
 		lv_obj_set_flex_align(base, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_START);
+		lv_obj_set_style_pad_gap(base, 4, LV_STATE_DEFAULT);
+		lv_obj_add_flag(base, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_set_scroll_dir(base, LV_DIR_VER);
+		lv_obj_set_scrollbar_mode(base, LV_SCROLLBAR_MODE_ACTIVE);
 
+		knob_name = lv_label_create(base);
 		lv_obj_add_style(knob_name, &Gui::header_style, LV_PART_MAIN);
 		lv_obj_set_width(knob_name, 320);
 		lv_obj_set_height(knob_name, 28);
 
+		mapped_info = lv_label_create(base);
 		lv_obj_add_style(mapped_info, &Gui::text_block_style, LV_PART_MAIN);
 		lv_obj_set_width(mapped_info, 320);
 		lv_obj_set_height(mapped_info, 20);
 
+		manual_knob = lv_arc_create(base);
+		lv_group_add_obj(group, manual_knob);
 		lv_obj_set_size(manual_knob, 50, 50);
+		lv_obj_set_style_pad_all(manual_knob, 5, LV_PART_MAIN);
 		lv_arc_set_rotation(manual_knob, 135);
 		lv_arc_set_bg_angles(manual_knob, 0, 270);
 		lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_CLICKABLE);
+		lv_obj_center(manual_knob);
+
+		map_button = lv_btn_create(base);
+		lv_obj_set_size(map_button, 80, 21);
+		lv_obj_set_style_pad_all(map_button, 5, LV_PART_MAIN);
+		lv_obj_add_flag(map_button, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+
+		map_button_label = lv_label_create(map_button);
+		lv_obj_add_style(map_button_label, &Gui::button_label_style, LV_PART_MAIN);
+		lv_label_set_text(map_button_label, "");
+		lv_obj_set_align(map_button_label, LV_ALIGN_CENTER);
+		lv_group_add_obj(group, map_button);
 	}
 
 	void prepare_focus() override {
@@ -45,7 +66,8 @@ struct KnobEditPage : PageBase {
 
 		this_module_id = PageList::get_selected_module_id();
 		auto patch_id = PageList::get_selected_patch_id();
-		const auto &patch = patch_list.get_patch(patch_id);
+		auto &patch = patch_list.get_patch(patch_id);
+
 		if (patch.patch_name.length() == 0) {
 			msg_queue.append_message("Patch name empty\n");
 			return;
@@ -81,6 +103,9 @@ struct KnobEditPage : PageBase {
 
 		nm.clear();
 
+		static_knob = nullptr;
+		// lv_group_remove_obj(manual_knob);
+
 		// Mapped/unmapped label
 		auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), this_param_id);
 		if (mappedknob && mappedknob->panel_knob_id < PanelDef::NumKnobs) {
@@ -89,15 +114,23 @@ struct KnobEditPage : PageBase {
 			nm.append(PanelDef::KnobNames[mappedknob->panel_knob_id]);
 			//nm.append(" in Set __");
 			//edit button
+			lv_label_set_text(map_button_label, "Edit Map");
+			lv_obj_add_event_cb(map_button, edit_mapbut_cb, LV_EVENT_PRESSED, this);
 		} else {
 			nm.append("Not mapped");
+			lv_label_set_text(map_button_label, "Add Map");
+			lv_obj_add_event_cb(map_button, add_mapbut_cb, LV_EVENT_PRESSED, this);
 			if (is_this_patch_loaded()) {
-				lv_obj_clear_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
-				auto &player = patch_loader.get_patch_player();
+				static_knob = patch.find_static_knob(this_module_id, this_param_id);
+				if (static_knob) {
+					lv_obj_clear_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
+					lv_arc_set_value(manual_knob, static_knob->value * 100);
+					printf_("Knob value set to %f\n", (double)(static_knob->value));
+				} else {
+					printf_("Error: static param %d in module %d not found\n", this_param_id, this_module_id);
+				}
+			}
 
-				lv_arc_set_value(manual_knob, 40);
-			} else
-				nm.append(". Map: ");
 			//add mapping button
 		}
 		lv_label_set_text(mapped_info, nm.c_str());
@@ -126,6 +159,16 @@ private:
 		return true;
 	}
 
+	static void add_mapbut_cb(lv_event_t *event) {
+		auto page = static_cast<KnobEditPage *>(event->user_data);
+		printf_("Clicked Add Map\n");
+	}
+
+	static void edit_mapbut_cb(lv_event_t *event) {
+		auto page = static_cast<KnobEditPage *>(event->user_data);
+		printf_("Clicked Edit Map\n");
+	}
+
 	uint16_t this_module_id;
 	ModuleTypeSlug slug;
 
@@ -133,6 +176,11 @@ private:
 	lv_obj_t *knob_name;
 	lv_obj_t *mapped_info;
 	lv_obj_t *manual_knob;
+
+	lv_obj_t *map_button;
+	lv_obj_t *map_button_label;
+
+	const StaticParam *static_knob;
 };
 
 } // namespace MetaModule
