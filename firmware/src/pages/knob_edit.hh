@@ -19,8 +19,7 @@ struct KnobEditPage : PageBase {
 		, base(lv_obj_create(nullptr))
 		, knob_name(lv_label_create(base))
 		, mapped_info(lv_label_create(base))
-		, manual_knob(lv_arc_create(base))
-		, this_param_id(PageList::get_selected_param().id) {
+		, manual_knob(lv_arc_create(base)) {
 		PageList::register_page(this, PageId::KnobEdit);
 
 		init_bg(base);
@@ -68,6 +67,8 @@ struct KnobEditPage : PageBase {
 			return;
 		}
 
+		this_param_id = PageList::get_selected_param().id;
+
 		// Knob name label
 		std::string nm;
 		nm.reserve(40);
@@ -81,12 +82,14 @@ struct KnobEditPage : PageBase {
 		// Mapped/unmapped label
 		auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), this_param_id);
 		if (mappedknob && mappedknob->panel_knob_id < PanelDef::NumKnobs) {
+			lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
 			nm.append("Mapped to Knob ");
 			nm.append(PanelDef::KnobNames[mappedknob->panel_knob_id]);
 			//nm.append(" in Set __");
 			//edit button
 		} else {
 			nm.append("Not mapped");
+			lv_obj_clear_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
 			lv_arc_set_value(manual_knob, 40);
 			//add mapping button
 		}
