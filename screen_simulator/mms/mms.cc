@@ -35,6 +35,7 @@ struct Simulator {
 	bool init() {
 		MetaModule::MMDisplay::start();
 		MetaModule::Gui::init_lvgl_styles();
+		patch_loader.load_patch(1);
 		params.clear();
 		metaparams.clear();
 		pages.init();
