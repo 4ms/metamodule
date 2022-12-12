@@ -262,6 +262,9 @@ private:
 		auto cur_sel = page->cur_selected;
 		auto &module_params = page->module_params;
 
+		// FIXME: only go to KnobEdit for Knobs and switches
+		// Go to JackEdit for others
+		// ...or make KnobEdit more general?
 		if (cur_sel < module_params.size()) {
 			PageList::set_selected_param(module_params[cur_sel]);
 			PageList::request_new_page(PageId::KnobEdit);
