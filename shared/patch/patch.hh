@@ -55,6 +55,10 @@ struct MappedKnob {
 	bool is_monophonic_gate() const {
 		return (panel_knob_id == static_cast<uint16_t>(MidiKnobAlias::MonoGate));
 	}
+
+	bool operator==(const MappedKnob &other) {
+		return (module_id == other.module_id) && (param_id == other.param_id);
+	}
 };
 
 static_assert(sizeof(MappedKnob) == 32, "MappedKnob should be 32B");
