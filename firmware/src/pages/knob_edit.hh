@@ -89,7 +89,7 @@ struct KnobEditPage : PageBase {
 			return;
 		}
 
-		auto this_param_id = PageList::get_selected_param().id;
+		this_param_id = PageList::get_selected_param().id;
 
 		printf_("Knob Edit: param id %d module id %d\n", this_param_id, this_module_id);
 
@@ -103,31 +103,35 @@ struct KnobEditPage : PageBase {
 
 		nm.clear();
 
-		static_knob = nullptr;
-		// lv_group_remove_obj(manual_knob);
+		lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
 
 		// Mapped/unmapped label
 		auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), this_param_id);
 		if (mappedknob && mappedknob->panel_knob_id < PanelDef::NumKnobs) {
-			lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
 			nm.append("Mapped to Knob ");
 			nm.append(PanelDef::KnobNames[mappedknob->panel_knob_id]);
 			//nm.append(" in Set __");
-			//edit button
+
+			// Edit Map button
 			lv_label_set_text(map_button_label, "Edit Map");
 			lv_obj_remove_event_cb(map_button, add_mapbut_cb);
 			lv_obj_add_event_cb(map_button, edit_mapbut_cb, LV_EVENT_PRESSED, this);
 		} else {
 			nm.append("Not mapped");
+
+			// Add Map button
 			lv_label_set_text(map_button_label, "Add Map");
 			lv_obj_remove_event_cb(map_button, edit_mapbut_cb);
 			lv_obj_add_event_cb(map_button, add_mapbut_cb, LV_EVENT_PRESSED, this);
+
+			// Manual knob
 			if (is_this_patch_loaded()) {
-				static_knob = patch.find_static_knob(this_module_id, this_param_id);
+				auto static_knob = patch.get_static_knob_value(this_module_id, this_param_id);
 				if (static_knob) {
 					lv_obj_clear_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
-					lv_arc_set_value(manual_knob, static_knob->value * 100);
-					printf_("Knob value set to %f\n", (double)(static_knob->value));
+					lv_arc_set_value(manual_knob, static_knob.value() * 100);
+					lv_obj_add_event_cb(manual_knob, manual_knob_adjust, LV_EVENT_VALUE_CHANGED, this);
+					printf_("Knob value set to %d\n", (double)static_knob.value() * 100);
 				} else {
 					printf_("Error: static param %d in module %d not found\n", this_param_id, this_module_id);
 				}
@@ -136,8 +140,6 @@ struct KnobEditPage : PageBase {
 			//add mapping button
 		}
 		lv_label_set_text(mapped_info, nm.c_str());
-
-		//patch.mapped_knobs[
 	}
 
 	void update() override {
@@ -149,16 +151,33 @@ struct KnobEditPage : PageBase {
 	}
 
 	bool is_this_patch_loaded() {
+		printf_("Patch loaded: %d, selected patch: %d \n",
+				patch_loader.cur_patch_index(),
+				PageList::get_selected_patch_id());
 		return patch_loader.cur_patch_index() == PageList::get_selected_patch_id();
 	}
 
 private:
-	void reset_page() {
-	}
+	// void reset_page() {
+	// }
 
-	bool read_slug() {
+	// bool read_slug() {
+	// 	return true;
+	// }
 
-		return true;
+	static void manual_knob_adjust(lv_event_t *event) {
+		auto page = static_cast<KnobEditPage *>(event->user_data);
+		lv_obj_t *arc = lv_event_get_target(event);
+		StaticParam sp{
+			.module_id = page->this_module_id,
+			.param_id = page->this_param_id,
+			.value = lv_arc_get_value(arc) / 100.f,
+		};
+		page->patch_mod_queue.put(SetStaticParam{.param = sp});
+
+		auto patch_id = PageList::get_selected_patch_id();
+		auto &patch = page->patch_list.get_patch(patch_id);
+		patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 	}
 
 	static void add_mapbut_cb(lv_event_t *event) {
@@ -172,6 +191,7 @@ private:
 	}
 
 	uint16_t this_module_id;
+	uint16_t this_param_id;
 	ModuleTypeSlug slug;
 
 	lv_obj_t *base = nullptr;
@@ -181,8 +201,6 @@ private:
 
 	lv_obj_t *map_button;
 	lv_obj_t *map_button_label;
-
-	const StaticParam *static_knob;
 };
 
 } // namespace MetaModule

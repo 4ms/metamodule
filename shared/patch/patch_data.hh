@@ -2,6 +2,7 @@
 #include "CoreModules/moduleFactory.hh" //for ModuleTypeSlug
 #include "patch.hh"
 #include "util/static_string.hh"
+#include <optional>
 #include <vector>
 
 struct PatchData {
@@ -26,9 +27,24 @@ struct PatchData {
 	const StaticParam *find_static_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : static_knobs) {
 			if (m.module_id == module_id && m.param_id == param_id)
-				return &m;
+				return const_cast<StaticParam *>(&m);
 		}
 		return nullptr;
+	}
+
+	std::optional<float> get_static_knob_value(uint16_t module_id, uint16_t param_id) const {
+		for (auto &m : static_knobs) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				return m.value;
+		}
+		return std::nullopt;
+	}
+
+	void set_static_knob_value(uint32_t module_id, uint32_t param_id, float val) {
+		for (auto &m : static_knobs) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				m.value = val;
+		}
 	}
 
 	const MappedInputJack *find_mapped_injack(Jack jack) const {
