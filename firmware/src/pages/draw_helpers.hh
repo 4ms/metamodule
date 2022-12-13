@@ -161,8 +161,6 @@ struct DrawHelper {
 				img_dsc.pivot.y = height / 2;
 				auto static_knob_val = patch.get_static_knob_value(module_id, el.id);
 				img_dsc.angle = static_knob_val.value_or(0) * 3000.f - 1500.f;
-				// auto static_knob = patch.find_static_knob(module_id, el.id);
-				// img_dsc.angle = static_knob ? static_knob->value * 3000.f - 1500.f : -1500;
 			}
 			lv_canvas_draw_img(canvas, left, top, knob, &img_dsc);
 			return std::nullopt;
