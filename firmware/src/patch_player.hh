@@ -394,16 +394,32 @@ public:
 		}
 	}
 
+	template<typename T>
+	void update_or_add(std::vector<T> &v, const T &d) {
+		//auto equality_op, auto copy_op
+		for (auto &el : v) {
+			if (el == d) { //if (equality_op(el, d)) {
+				el = d;	   //copy_op=(el, d);
+				return;
+			}
+		}
+		v.push_back(d);
+	}
+
 	// Cache a panel knob mapping into knob_conns[]
 	void cache_knob_mapping(const MappedKnob &k) {
 		if (k.is_monophonic_note()) {
-			knob_conns[MidiMonoNoteParam].push_back(k);
+			update_or_add(knob_conns[MidiMonoNoteParam], k);
+			// knob_conns[MidiMonoNoteParam].push_back(k);
 			printf_("DBG: Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 		} else if (k.is_monophonic_gate()) {
-			knob_conns[MidiMonoGateParam].push_back(k);
+			update_or_add(knob_conns[MidiMonoGateParam], k);
+			// knob_conns[MidiMonoGateParam].push_back(k);
 			printf_("DBG: Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
-		} else if (k.panel_knob_id < PanelDef::NumKnobs)
-			knob_conns[k.panel_knob_id].push_back(k);
+		} else if (k.panel_knob_id < PanelDef::NumKnobs) {
+			update_or_add(knob_conns[k.panel_knob_id], k);
+			// knob_conns[k.panel_knob_id].push_back(k);
+		}
 	}
 
 	// Check for multiple instances of same module type, and cache the results
