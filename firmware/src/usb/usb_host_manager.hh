@@ -73,6 +73,7 @@ public:
 
 			case HOST_USER_CLASS_ACTIVE: {
 				printf_("Class active\n");
+				_midihost_instance->connect();
 				auto mshandle = host.get_class_handle<MidiStreamingHandle>();
 				if (!mshandle) {
 					printf_("Error, no MSHandle\n");
@@ -83,6 +84,7 @@ public:
 
 			case HOST_USER_DISCONNECTION:
 				printf_("Disconnected\n");
+				_midihost_instance->disconnect();
 				break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
