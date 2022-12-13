@@ -65,7 +65,20 @@ public:
 		if (is_loaded)
 			unload_patch();
 
-		pd = patchdata; //Copy so that the currently playing PatchData is immune to edits of the saved version
+		//Copy so that the currently playing PatchData is immune to edits of the saved version
+		pd = patchdata;
+
+		//TODO: don't keep a local copy
+		//Instead, copy everything to a cache.
+		//If we edit the patch while playing it, update PatchPlayer caches and the PatchData in PatchList
+		//Save patch: store PatchList -> flash
+		//Revert patch: load flash->PatchList->PatchPlayer
+		//Not cached and used during playing:
+		// - module_slugs
+		// - int_cables
+		// - patch_name
+		// - mapped_knobs[].alias_name
+		// We could use a pointer (weak/const) to the patch data
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
@@ -182,10 +195,6 @@ public:
 			return 0.f;
 	}
 
-	void apply_static_param(const StaticParam &sparam) {
-		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
-	}
-
 	// General info getters:
 
 	const ModuleTypeSlug &get_patch_name() {
@@ -206,9 +215,17 @@ public:
 		return pd.int_cables[int_cable_idx].ins.size();
 	}
 
-	int get_num_mapped_knobs() {
-		return is_loaded ? pd.mapped_knobs.size() : 0;
+	void apply_static_param(const StaticParam &sparam) {
+		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
+		//Also set it in the patch?
 	}
+
+	void add_mapped_knob(const MappedKnob &map) {
+	}
+
+	// int get_num_mapped_knobs() {
+	// 	return is_loaded ? pd.mapped_knobs.size() : 0;
+	// }
 
 	const ModuleTypeSlug &get_module_name(unsigned idx) {
 		return (is_loaded && idx < pd.module_slugs.size()) ? pd.module_slugs[idx] : no_patch_loaded;
@@ -381,10 +398,10 @@ public:
 	void cache_knob_mapping(const MappedKnob &k) {
 		if (k.is_monophonic_note()) {
 			knob_conns[MidiMonoNoteParam].push_back(k);
-			printf_("Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+			printf_("DBG: Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 		} else if (k.is_monophonic_gate()) {
 			knob_conns[MidiMonoGateParam].push_back(k);
-			printf_("Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+			printf_("DBG: Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 		} else if (k.panel_knob_id < PanelDef::NumKnobs)
 			knob_conns[k.panel_knob_id].push_back(k);
 	}
