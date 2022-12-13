@@ -354,21 +354,24 @@ public:
 				int dup_int_cable = find_int_cable_input_jack(input_jack);
 				if (dup_int_cable == -1) {
 					if (cable.is_monophonic_note()) {
-						in_conns[MidiMonoNoteJack].push_back(input_jack);
+						// in_conns[MidiMonoNoteJack].push_back(input_jack);
+						update_or_add(in_conns[MidiMonoNoteJack], input_jack);
 						printf_("Mapping midi monophonic note to jack: m=%d, p=%d\n",
 								input_jack.module_id,
 								input_jack.jack_id);
 						continue;
 					}
 					if (cable.is_monophonic_gate()) {
-						in_conns[MidiMonoGateJack].push_back(input_jack);
+						// in_conns[MidiMonoGateJack].push_back(input_jack);
+						update_or_add(in_conns[MidiMonoGateJack], input_jack);
 						printf_("Mapping midi monophonic gate to jack: m=%d, p=%d\n",
 								input_jack.module_id,
 								input_jack.jack_id);
 						continue;
 					}
 					if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
-						in_conns[panel_jack_id].push_back(input_jack);
+						update_or_add(in_conns[panel_jack_id], input_jack);
+						// in_conns[panel_jack_id].push_back(input_jack);
 						continue;
 					}
 					printf_("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
@@ -399,7 +402,7 @@ public:
 		//auto equality_op, auto copy_op
 		for (auto &el : v) {
 			if (el == d) { //if (equality_op(el, d)) {
-				el = d;	   //copy_op=(el, d);
+				el = d;	   //copy_op(el, d);
 				return;
 			}
 		}
