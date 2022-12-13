@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/moduleFactory.hh" //for ModuleTypeSlug
+#include "CoreModules/module_type_slug.hh"
 #include "patch.hh"
 #include "util/static_string.hh"
 #include <optional>

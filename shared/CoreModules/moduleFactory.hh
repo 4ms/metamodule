@@ -3,12 +3,11 @@
 #include "CoreModules/info/module_info_base.hh"
 #include "etl/string.h"
 #include "etl/unordered_map.h"
+#include "module_type_slug.hh"
 #include "util/static_string.hh"
 #include <array>
 
 //TODO: Get rid of dependency on etl by using our own map or unordered_map
-
-using ModuleTypeSlug = StaticString<31>;
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
