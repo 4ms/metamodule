@@ -135,6 +135,8 @@ SOURCES += $(SHARED)/CoreModules/PitchShiftCore.cc
 SOURCES += $(SHARED)/CoreModules/HPFCore.cc
 SOURCES += $(SHARED)/CoreModules/panel_medium.cc
 SOURCES += $(SHARED)/CoreModules/InfOscCore.cc
+SOURCES += $(SHARED)/CoreModules/KPLSCore.cc
+SOURCES += $(SHARED)/CoreModules/FreeverbCore.cc
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
 endif
@@ -177,6 +179,8 @@ SOURCES += src/pages/images/MultiLFO_artwork_240.c
 SOURCES += src/pages/images/PitchShift_artwork_240.c
 SOURCES += src/pages/images/HPF_artwork_240.c
 SOURCES += src/pages/images/InfOsc_artwork_240.c
+SOURCES += src/pages/images/KPLS_artwork_240.c
+SOURCES += src/pages/images/Freeverb_artwork_240.c
 SOURCES += src/pages/images/Djembe_artwork_120.c
 SOURCES += src/pages/images/StMix_artwork_120.c
 SOURCES += src/pages/images/PEG_artwork_120.c
@@ -185,6 +189,8 @@ SOURCES += src/pages/images/SMR_artwork_120.c
 SOURCES += src/pages/images/PitchShift_artwork_120.c
 SOURCES += src/pages/images/HPF_artwork_120.c
 SOURCES += src/pages/images/InfOsc_artwork_120.c
+SOURCES += src/pages/images/KPLS_artwork_120.c
+SOURCES += src/pages/images/Freeverb_artwork_120.c
 else
 SOURCES += $(wildcard src/pages/images/*.c)
 endif
