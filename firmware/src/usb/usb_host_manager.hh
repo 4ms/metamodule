@@ -5,6 +5,9 @@
 #include <cstring>
 
 class UsbHostManager {
+private:
+	static inline MidiHost *_midihost_instance;
+	mdrivlib::Pin src_enable;
 	USBH_HandleTypeDef usbhost;
 	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
@@ -114,8 +117,4 @@ public:
 	MidiHost &get_midi_host() {
 		return midi_host;
 	}
-
-private:
-	static inline MidiHost *_midihost_instance;
-	mdrivlib::Pin src_enable;
 };
