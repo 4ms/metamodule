@@ -9,7 +9,8 @@
 #include "patch/NonlinearGateSequencer.hh"
 #include "patch/OctoSampler.hh"
 #include "patch/QuartetofEnsembles.hh"
-#include "patch/SeaofEchoes.hh"
+// #include "patch/SeaofEchoes.hh"
+#include "patch/Seq8.hh"
 #include "patch/Showcase.hh"
 #include "patch/SpectralPings.hh"
 #include "patch/twosimpleosc.hh"
@@ -27,7 +28,7 @@ struct DefaultPatches {
 		ClockRockinBeats_patch,
 		KarplusStereo_patch,
 		QuartetofEnsembles_patch,
-		SeaofEchoes_patch,
+		Seq8_patch,
 		twosimpleosc_patch,
 	});
 
@@ -63,7 +64,7 @@ struct DefaultPatches {
 		if (id == 9)
 			return "QuartetEnOsc.yml";
 		if (id == 10)
-			return "SeaOfEchoes.yml";
+			return "Seq8.yml";
 		if (id == 11)
 			return "TwoSimpleOsc.yml";
 

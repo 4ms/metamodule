@@ -1,8 +1,8 @@
 #pragma once
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
-#include <vector>
 #include <span>
+#include <vector>
 
 namespace MetaModule
 {

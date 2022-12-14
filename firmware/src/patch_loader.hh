@@ -8,7 +8,7 @@ namespace MetaModule
 {
 
 struct PatchLoader {
-	static inline uint32_t initial_patch = 7;
+	static inline uint32_t initial_patch = 8;
 
 	PatchLoader(PatchList &patchlist, PatchPlayer &patchplayer)
 		: patch_list_{patchlist}
