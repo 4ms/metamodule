@@ -10,14 +10,11 @@ ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 target_board = $(word 1,$(MAKECMDGOALS))
 $(info --------------------)
 $(info Building for MP1 A7 core, target: $(target_board))
-else ifeq ($(MAKECMDGOALS),uimg)
-$(info Building uimg)
-target_board = medium
-else ifeq ($(MAKECMDGOALS),img)
+
+else ifeq ($(MAKECMDGOALS),bootimg)
 $(info Building img)
 target_board = medium
-else ifeq ($(MAKECMDGOALS),u-boot)
-$(info Building u-boot)
+
 else
 $(error Board not supported)
 endif
@@ -371,43 +368,24 @@ AFLAGS = -mcpu=cortex-a7 \
 		 -mfpu=neon-vfpv4 \
 		 -mfloat-abi=hard \
 
-#### U-BOOT
-UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
-IMG  		= $(BUILDDIR)/$(BINARYNAME).img
-LOADADDR 	= 0xC2000040
-ENTRYPOINT 	= $(LOADADDR)
-UBOOTDIR 	= $(LIBDIR)/u-boot
-UBOOTSRCDIR = $(UBOOTDIR)/u-boot-stm32mp1-baremetal
-UBOOTBUILDDIR = $(UBOOTDIR)/build
-UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
-
-uboot_base_buildcmd := make O=../build CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig && \
-					   make -j16 O=../build DEVICE_TREE=stm32mp157c-metamodule-p6 CROSS_COMPILE=arm-none-eabi- u-boot-spl.stm32
-
-ifeq ($(shell uname -m),arm64)
-uboot_buildcmd = arch -x86_64 zsh -c "$(uboot_base_buildcmd)"
-else
-uboot_buildcmd = $(uboot_base_buildcmd)
-endif
-
 ## Build targets
 
 include makefile_opts.mk
 include makefile_common.mk
 
 
+#### BOOT IMAGE
+UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
+IMG  		= $(BUILDDIR)/$(BINARYNAME).img
+LOADADDR 	= 0xC2000040
+ENTRYPOINT 	= $(LOADADDR)
 
-.PHONY: uimg
-uimg: $(UIMG)
 
-$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
-	$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+.PHONY: bootimg
+bootimg: $(IMG)
 
-.PHONY: img
-img: $(IMG)
-
-$(IMG): $(BIN) $(UBOOT_MKIMAGE)
-	$(UBOOT_MKIMAGE) -A arm -C none -T firmware -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+$(IMG): $(BIN) $(MP1BOOT)
+	# $(UBOOT_MKIMAGE) -A arm -C none -T firmware -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 	$(info sudo dd if=$(IMG) of=/dev/disk4s3)
 	$(info Image created. Now copy image to sd card with this command (assumes /dev/disk4 is the sd card):)
 
@@ -415,31 +393,25 @@ $(IMG): $(BIN) $(UBOOT_MKIMAGE)
 %-uimg.h : %.uimg 
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
-medium: all #$(BUILDDIR_MP1A7)/medium/$(BINARYNAME)-uimg.h
+medium: all 
 
-mini: uimg
+norflash-loader: bootimg
 
-max: uimg
+# $(UBOOT_MKIMAGE):
+# 	$(error Use `make u-boot` to build U-Boot and re-run this.)
 
-pcmdev: uimg
+# u-boot:
+# 	cd $(UBOOTSRCDIR) && $(uboot_buildcmd)
+# 	$(info Creating .h file from u-boot-spl image)
+# 	cp $(UBOOTDIR)/build/u-boot-spl.stm32 src/norflash-loader/
+# 	cd src/norflash-loader && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
 
-norflash-loader: uimg
-
-$(UBOOT_MKIMAGE):
-	$(error Use `make u-boot` to build U-Boot and re-run this.)
-
-u-boot:
-	cd $(UBOOTSRCDIR) && $(uboot_buildcmd)
-	$(info Creating .h file from u-boot-spl image)
-	cp $(UBOOTDIR)/build/u-boot-spl.stm32 src/norflash-loader/
-	cd src/norflash-loader && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
-
-clean_uboot:
-	rm -rf $(UBOOTBUILDDIR)
+# clean_uboot:
+# 	rm -rf $(UBOOTBUILDDIR)
 
 # Todo: get this working:
-install-uboot:
-	$(info Please enter the sd card device node:)
+# install-uboot:
+# 	$(info Please enter the sd card device node:)
 	# ls -l /dev/disk*  #if macOS
 	# ls -l /dev/sd*    #if linux
 	# getinput(devXX)  #How to do this?
