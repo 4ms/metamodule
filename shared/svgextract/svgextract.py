@@ -654,7 +654,11 @@ def createlvimg(artworkSvgFilename, outputBaseName):
         subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', png120Filename], check=True)
         Log(f"Created {png120Filename.strip('.png')}.c file from {png120Filename}")
     except subprocess.CalledProcessError:
-        Log("lv_img_conv.js failed. Try 1) `git submodule update --init` and/or 2) `cd shared/svgextract/lv_img_conv && npm install`")
+        Log("lv_img_conv.js failed. Try "
+        " 1) `git submodule update --init` and/or "
+        " 2) `cd ../shared/svgextract/lv_img_conv && npm install`"
+        " 3) `cd ../shared/svgextract/lv_img_conv && docker build -t lv_img_conv` and then use the docker container (???)"
+        " 4) `sudo n 16` to use node v16 (required). Might have to install n with `npm i -g n` first")
         return
 
 
