@@ -74,7 +74,6 @@ void Controls::update_params() {
 		auto msg = _midi_rx_buf.get();
 
 		if (msg.is_command<MidiCommand::NoteOn>()) {
-			Debug::Pin1::high();
 			if (msg.velocity()) {
 				int32_t note = msg.note();
 				midi_note = (note - 60) / 60.f;
@@ -84,12 +83,11 @@ void Controls::update_params() {
 			}
 		} else if (msg.is_command<MidiCommand::NoteOff>()) {
 			midi_gate = false;
-			Debug::Pin1::low();
 		}
 	} else {
-		//if rx buffer is empty AND we've disconnected, turn off the midi gate
-		//so we don't end up with stuck notes
-		if (!cur_metaparams->midi_connected) {
+		if (!_midi_host.is_connected()) {
+			//if rx buffer is empty AND we've disconnected, turn off the midi gate
+			//so we don't end up with stuck notes
 			midi_note = 0.f;
 			midi_gate = false;
 		}

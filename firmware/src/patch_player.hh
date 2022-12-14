@@ -134,6 +134,8 @@ public:
 
 	// Runs the patch
 	void update_patch() {
+		if (!is_loaded)
+			return;
 		// if (pd.module_slugs.size() < 2)
 		// 	return;
 
