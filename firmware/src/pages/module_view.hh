@@ -38,8 +38,21 @@ struct ModuleViewPage : PageBase {
 
 		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
-		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
+
+		edit_pane = lv_obj_create(base);
+		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
+
+		manual_knob = lv_arc_create(edit_pane);
+		lv_group_add_obj(group, manual_knob);
+		lv_obj_set_size(manual_knob, 50, 50);
+		lv_obj_set_style_pad_all(manual_knob, 5, LV_PART_MAIN);
+		lv_arc_set_rotation(manual_knob, 135);
+		lv_arc_set_bg_angles(manual_knob, 0, 270);
+		// lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_CLICKABLE);
+		lv_obj_center(manual_knob);
+
+		lv_obj_add_event_cb(manual_knob, manual_knob_adjust, LV_EVENT_VALUE_CHANGED, this);
 
 		button.clear();
 		module_params.clear();
@@ -50,6 +63,8 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		mode = ViewMode::List;
+
 		this_module_id = PageList::get_selected_module_id();
 
 		if (!read_slug()) {
@@ -102,7 +117,7 @@ struct ModuleViewPage : PageBase {
 			auto knob = DrawHelper::get_knob_img_240(el.knob_style);
 			auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
 			add_button(c_x, c_y, knob->header.w * 1.2f);
-			module_params.push_back({ModuleParam::Type::Knob, el.id /*mk.value().mapped_knob.param_id*/});
+			module_params.push_back({ModuleParam::Type::Knob, el.id});
 		}
 
 		// DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, this_module_id, 240);
@@ -128,21 +143,37 @@ struct ModuleViewPage : PageBase {
 
 		lv_obj_set_pos(roller, width_px, 0);
 		lv_obj_set_size(roller, 320 - width_px, 240);
+		lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
 
 		// Add text list to roller options
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_visible_row_count(roller, 11);
+		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
+		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
 
 		//Select first element
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 		cur_selected = 0;
 		lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
+
+		lv_obj_set_pos(edit_pane, width_px, 0);
+		lv_obj_set_size(edit_pane, 320 - width_px, 240);
+		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void update() override {
+		// Back button: Knob -> List -> last_page
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (PageList::request_last_page()) {
-				blur();
+			if (mode == ViewMode::List) {
+				if (PageList::request_last_page()) {
+					blur();
+				}
+			} else {
+				mode = ViewMode::List;
+				lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
+				lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
+				lv_group_focus_obj(roller);
+				lv_group_set_editing(group, true);
 			}
 		}
 
@@ -155,6 +186,20 @@ struct ModuleViewPage : PageBase {
 				lv_img_set_angle(mk.obj, angle);
 			}
 		}
+
+		// Update static knobs
+		// const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
+
+		// for (auto &sp : patch.static_knobs) {
+		// 	if (sp.module_id != this_module_id)
+		// 		continue;
+
+		// 	if (std::abs(sp.value - mk.last_pot_reading) > 0.01f) {
+		// 		mk.last_pot_reading = sp.value;
+		// 		const int angle = sp.value * 3000.f - 1500.f;
+		// 		lv_img_set_angle(mk.obj, angle);
+		// 	}
+		// }
 	}
 
 private:
@@ -237,6 +282,10 @@ private:
 		return true;
 	}
 
+	bool is_this_patch_loaded() {
+		return patch_loader.cur_patch_index() == PageList::get_selected_patch_id();
+	}
+
 	static void roller_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		auto roller = page->roller;
@@ -262,13 +311,54 @@ private:
 		auto cur_sel = page->cur_selected;
 		auto &module_params = page->module_params;
 
-		// FIXME: only go to KnobEdit for Knobs and switches
-		// Go to JackEdit for others
-		// ...or make KnobEdit more general?
 		if (cur_sel < module_params.size()) {
 			PageList::set_selected_param(module_params[cur_sel]);
-			PageList::request_new_page(PageId::KnobEdit);
-			page->blur();
+
+			// Hide roller, show edit pane
+			page->mode = ViewMode::Knob;
+			lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_add_flag(page->roller, LV_OBJ_FLAG_HIDDEN);
+
+			// Show manual knob
+			auto patch_id = PageList::get_selected_patch_id();
+			auto &patch = page->patch_list.get_patch(patch_id);
+			auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), module_params[cur_sel].id);
+			if (!mappedknob) {
+				auto static_knob = patch.get_static_knob_value(page->this_module_id, module_params[cur_sel].id);
+				if (static_knob) {
+					lv_obj_clear_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
+					lv_arc_set_value(page->manual_knob, static_knob.value() * 100);
+					lv_group_focus_obj(page->manual_knob);
+					lv_group_set_editing(page->group, true);
+					printf_("Initial knob value set to %f\n", (double)static_knob.value() * 100);
+				}
+			} else {
+				lv_obj_add_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
+				printf_("Knob is mapped\n");
+			}
+
+			// PageList::request_new_page(PageId::KnobEdit);
+			// page->blur();
+		}
+	}
+
+	static void manual_knob_adjust(lv_event_t *event) {
+		auto page = static_cast<ModuleViewPage *>(event->user_data);
+		auto this_param_id = static_cast<uint16_t>(PageList::get_selected_param().id);
+		lv_obj_t *arc = lv_event_get_target(event);
+
+		StaticParam sp{
+			.module_id = page->this_module_id,
+			.param_id = this_param_id,
+			.value = lv_arc_get_value(arc) / 100.f,
+		};
+
+		if (page->is_this_patch_loaded()) {
+			page->patch_mod_queue.put(SetStaticParam{.param = sp});
+		} else {
+			auto patch_id = PageList::get_selected_patch_id();
+			auto &patch = page->patch_list.get_patch(patch_id);
+			patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 		}
 	}
 
@@ -280,11 +370,16 @@ private:
 	std::vector<DrawHelper::MKnob> mapped_knobs;
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_params;
+
+	lv_obj_t *edit_pane = nullptr;
 	lv_obj_t *roller = nullptr;
-	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *base = nullptr;
+	lv_obj_t *manual_knob = nullptr;
+	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_draw_img_dsc_t img_dsc;
+
+	enum class ViewMode { List, Knob } mode;
 };
 
 } // namespace MetaModule
