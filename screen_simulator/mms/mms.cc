@@ -102,7 +102,7 @@ extern "C" void update_ui() {
 }
 
 extern "C" void set_knob(uint32_t knob_id, float val) {
-	if (knob_id < MetaModule::NumPot)
+	if (knob_id < PanelDef::NumPot)
 		sim.params.knobs[knob_id] = val;
 }
 
