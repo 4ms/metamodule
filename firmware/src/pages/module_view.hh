@@ -99,17 +99,26 @@ struct ModuleViewPage : PageBase {
 		opts.reserve(num_controls * 12); //12 chars per roller item
 		button.reserve(num_controls);
 		mapped_knobs.reserve(num_controls);
+		static_knobs.reserve(num_controls);
 		module_params.reserve(num_controls);
 
 		const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
 
 		for (const auto el : moduleinfo.Knobs) {
-			auto mk = DrawHelper::draw_mapped_knob(canvas, base, el, patch, this_module_id, 240);
-			if (mk.has_value()) {
-				mapped_knobs.push_back({mk.value()});
-				opts += "[";
-				opts += PanelDef::KnobNames[mk.value().mapped_knob.panel_knob_id];
-				opts += "] ";
+
+			if (auto mapped_knob = patch.find_mapped_knob(this_module_id, el.id)) {
+				auto knob = DrawHelper::draw_mapped_knob(canvas, base, el, patch, mapped_knob, 240);
+				if (knob.has_value()) {
+					mapped_knobs.push_back({knob.value()});
+					opts += "[";
+					opts += PanelDef::KnobNames[knob.value().mapped_knob.panel_knob_id];
+					opts += "] ";
+				}
+			} else if (auto static_knob = patch.find_static_knob(this_module_id, el.id)) {
+				auto knob = DrawHelper::draw_static_knob(canvas, base, el, patch, static_knob, 240);
+				if (knob.has_value()) {
+					static_knobs.push_back({knob.value()});
+				}
 			}
 			opts += el.short_name;
 			opts += "\n";
@@ -178,12 +187,20 @@ struct ModuleViewPage : PageBase {
 		}
 
 		// Update mapped knobs
-		for (auto &mk : mapped_knobs) {
-			const float new_pot_val = mk.mapped_knob.get_mapped_val(params.knobs[mk.mapped_knob.panel_knob_id]);
-			if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
-				mk.last_pot_reading = new_pot_val;
+		for (auto &knob : mapped_knobs) {
+			const float new_pot_val = knob.mapped_knob.get_mapped_val(params.knobs[knob.mapped_knob.panel_knob_id]);
+			if (std::abs(new_pot_val - knob.last_pot_reading) > 0.01f) {
+				knob.last_pot_reading = new_pot_val;
 				const int angle = new_pot_val * 3000.f - 1500.f;
-				lv_img_set_angle(mk.obj, angle);
+				lv_img_set_angle(knob.obj, angle);
+			}
+		}
+
+		for (auto &knob : static_knobs) {
+			if (std::abs(knob.static_knob.value - knob.last_pot_reading) > 0.01f) {
+				knob.last_pot_reading = knob.static_knob.value;
+				const int angle = knob.static_knob.value * 3000.f - 1500.f;
+				lv_img_set_angle(knob.obj, angle);
 			}
 		}
 
@@ -210,10 +227,10 @@ private:
 		lv_canvas_draw_img(canvas, c_x - jack_x.header.w / 2, c_y - jack_x.header.h / 2, &jack_x, &img_dsc);
 
 		Jack jack{.module_id = this_module_id, .jack_id = (uint16_t)el.id};
-		if (auto mappedknob = patch.find_mapped_outjack(jack)) {
+		if (auto mappedjack = patch.find_mapped_outjack(jack)) {
 			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
 			opts += "[";
-			opts += PanelDef::OutJackNames[mappedknob->panel_jack_id];
+			opts += PanelDef::OutJackNames[mappedjack->panel_jack_id];
 			opts += "] ";
 		}
 		opts += el.short_name;
@@ -227,10 +244,10 @@ private:
 		lv_canvas_draw_img(canvas, c_x - jack_x.header.w / 2, c_y - jack_x.header.h / 2, &jack_x, &img_dsc);
 
 		Jack jack{.module_id = this_module_id, .jack_id = (uint16_t)el.id};
-		if (auto mappedknob = patch.find_mapped_injack(jack)) {
+		if (auto mappedjack = patch.find_mapped_injack(jack)) {
 			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
 			opts += "[";
-			opts += PanelDef::InJackNames[mappedknob->panel_jack_id];
+			opts += PanelDef::InJackNames[mappedjack->panel_jack_id];
 			opts += "] ";
 		}
 		opts += el.short_name;
@@ -264,6 +281,10 @@ private:
 		for (auto &k : mapped_knobs)
 			lv_obj_del(k.obj);
 		mapped_knobs.clear();
+
+		for (auto &k : static_knobs)
+			lv_obj_del(k.obj);
+		static_knobs.clear();
 
 		module_params.clear();
 		opts.clear();
@@ -368,6 +389,8 @@ private:
 	std::string_view slug;
 
 	std::vector<DrawHelper::MKnob> mapped_knobs;
+	std::vector<DrawHelper::SKnob> static_knobs;
+
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_params;
 

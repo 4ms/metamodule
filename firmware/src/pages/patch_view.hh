@@ -149,10 +149,16 @@ struct PatchViewPage : PageBase {
 			// Draw module controls
 			const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 			DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
+
 			for (const auto &el : moduleinfo.Knobs) {
-				auto mknob = DrawHelper::draw_mapped_knob(canvas, canvas, el, patch, i, height);
-				if (mknob) {
-					mapped_knobs.push_back(*mknob);
+				if (auto mapped_knob = patch.find_mapped_knob(i, el.id)) {
+					auto knob = DrawHelper::draw_mapped_knob(canvas, base, el, patch, mapped_knob, 120);
+					if (knob.has_value()) {
+						mapped_knobs.push_back(knob.value());
+					}
+				}
+				if (auto static_knob = patch.find_static_knob(i, el.id)) {
+					DrawHelper::draw_static_knob(canvas, base, el, patch, static_knob, 120);
 				}
 			}
 

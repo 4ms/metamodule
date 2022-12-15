@@ -3,6 +3,7 @@
 #include "lvgl/lvgl.h"
 #include "pages/styles.hh"
 #include "patch/patch_data.hh"
+#include <cmath>
 
 LV_IMG_DECLARE(jack_x);
 LV_IMG_DECLARE(jack_x_120);
@@ -35,6 +36,13 @@ struct DrawHelper {
 	struct MKnob {
 		lv_obj_t *obj;
 		const MappedKnob &mapped_knob;
+		KnobAnimMethods anim_method = RotaryPot;
+		float last_pot_reading = 0.5f;
+	};
+
+	struct SKnob {
+		lv_obj_t *obj;
+		const StaticParam &static_knob;
 		KnobAnimMethods anim_method = RotaryPot;
 		float last_pot_reading = 0.5f;
 	};
@@ -108,16 +116,44 @@ struct DrawHelper {
 		return std::make_pair(x, y);
 	};
 
+	static std::optional<SKnob> draw_static_knob(lv_obj_t *canvas,
+												 lv_obj_t *base,
+												 const KnobDef &el,
+												 const PatchData &patch,
+												 const StaticParam *static_knob,
+												 uint32_t module_height) {
+		const float adj = (float)module_height / 240.f;
+		const bool fullsize = module_height > 120;
+		const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
+		if (!knob)
+			return std::nullopt;
+
+		auto [left, top] = scale_topleft(el, knob, adj);
+		int width = knob->header.w;
+		int height = knob->header.h;
+
+		lv_obj_t *obj = lv_img_create(base);
+		lv_img_set_src(obj, knob);
+		lv_obj_set_pos(obj, left, top);
+		lv_img_set_pivot(obj, width / 2, height / 2);
+		lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
+
+		auto anim_method = el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
+		return SKnob{
+			.obj = obj,
+			.static_knob = *static_knob,
+			.anim_method = anim_method,
+		};
+	}
+
 	static std::optional<MKnob> draw_mapped_knob(lv_obj_t *canvas,
 												 lv_obj_t *base,
 												 const KnobDef &el,
 												 const PatchData &patch,
-												 uint32_t module_id,
+												 const MappedKnob *mappedknob,
 												 uint32_t module_height) {
-
-		const float adj = (float)(module_height) / 240.f;
+		const float adj = (float)module_height / 240.f;
 		const bool fullsize = module_height > 120;
-
 		const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
 		if (!knob)
 			return std::nullopt;
@@ -130,41 +166,29 @@ struct DrawHelper {
 		lv_draw_arc_dsc_init(&arc_dsc);
 		arc_dsc.opa = LV_OPA_50;
 
-		if (auto mappedknob = patch.find_mapped_knob(module_id, el.id)) {
-			lv_obj_t *obj = lv_img_create(base);
-			lv_img_set_src(obj, knob);
-			lv_obj_set_pos(obj, left, top);
-			lv_img_set_pivot(obj, width / 2, height / 2);
-			lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
+		lv_obj_t *obj = lv_img_create(base);
+		lv_img_set_src(obj, knob);
+		lv_obj_set_pos(obj, left, top);
+		lv_img_set_pivot(obj, width / 2, height / 2);
+		lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
 
-			// Circle around mapped knobs
-			auto [c_x, c_y] = scale_center(el, module_height);
-			arc_dsc.color = Gui::knob_palette[mappedknob->panel_knob_id % 6];
-			if (mappedknob->panel_knob_id >= 6)
-				arc_dsc.width = fullsize ? 2 : 2;
-			else
-				arc_dsc.width = fullsize ? 4 : 3;
-			lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.5f + 8 * adj, 0, 3600, &arc_dsc);
-			auto anim_method = el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
-			return MKnob{
-				.obj = obj,
-				.mapped_knob = *mappedknob,
-				.anim_method = anim_method,
-			};
-		} else {
-			lv_draw_img_dsc_t img_dsc;
-			lv_draw_img_dsc_init(&img_dsc);
-			if (el.knob_style == KnobDef::Slider25mm)
-				img_dsc.angle = 0;
-			else {
-				img_dsc.pivot.x = width / 2;
-				img_dsc.pivot.y = height / 2;
-				auto static_knob_val = patch.get_static_knob_value(module_id, el.id);
-				img_dsc.angle = static_knob_val.value_or(0) * 3000.f - 1500.f;
-			}
-			lv_canvas_draw_img(canvas, left, top, knob, &img_dsc);
-			return std::nullopt;
-		}
+		// Circle around mapped knobs
+		auto [c_x, c_y] = scale_center(el, module_height);
+		arc_dsc.color = Gui::knob_palette[mappedknob->panel_knob_id % 6];
+
+		// Thinner circle for uvwxyz small panel knobs
+		if (mappedknob->panel_knob_id >= 6)
+			arc_dsc.width = fullsize ? 2 : 2;
+		else
+			arc_dsc.width = fullsize ? 4 : 3;
+
+		lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.5f + 8 * adj, 0, 3600, &arc_dsc);
+		auto anim_method = el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
+		return MKnob{
+			.obj = obj,
+			.mapped_knob = *mappedknob,
+			.anim_method = anim_method,
+		};
 	}
 
 	static void draw_module_jacks(lv_obj_t *canvas,
