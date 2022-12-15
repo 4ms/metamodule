@@ -39,7 +39,7 @@ struct Controls {
 	GPIOExpander &jacksense_reader;
 	GPIOExpander &extaudio_jacksense_reader;
 
-	mdrivlib::RotaryEnc<mdrivlib::RotaryHalfStep, MMControlPins::rotA, MMControlPins::rotB> rotary;
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, MMControlPins::rotA, MMControlPins::rotB> rotary;
 
 	DebouncedPin<MMControlPins::rotS.gpio, MMControlPins::rotS.pin, PinPolarity::Inverted> rotary_button;
 	DebouncedPin<MMControlPins::but0.gpio, MMControlPins::but0.pin, PinPolarity::Inverted> button0;
