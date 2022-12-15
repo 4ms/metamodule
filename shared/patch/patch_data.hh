@@ -27,7 +27,7 @@ struct PatchData {
 	const StaticParam *find_static_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : static_knobs) {
 			if (m.module_id == module_id && m.param_id == param_id)
-				return const_cast<StaticParam *>(&m);
+				return &m;
 		}
 		return nullptr;
 	}
