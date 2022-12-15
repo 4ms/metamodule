@@ -20,8 +20,6 @@ LV_IMG_DECLARE(SISM_artwork_240);
 LV_IMG_DECLARE(SISM_artwork_120);
 LV_IMG_DECLARE(SCM_artwork_240);
 LV_IMG_DECLARE(SCM_artwork_120);
-LV_IMG_DECLARE(SCMBO_artwork_240);
-LV_IMG_DECLARE(SCMBO_artwork_120);
 LV_IMG_DECLARE(RCD_artwork_240);
 LV_IMG_DECLARE(RCD_artwork_120);
 LV_IMG_DECLARE(RCDBO_artwork_240);
@@ -172,9 +170,6 @@ struct ModuleImages {
 
 		if (slug == "SCM")
 			return (height == 240) ? &SCM_artwork_240 : &SCM_artwork_120;
-
-		if (slug == "SCMBO")
-			return (height == 240) ? &SCMBO_artwork_240 : &SCMBO_artwork_120;
 
 		if (slug == "RCD")
 			return (height == 240) ? &RCD_artwork_240 : &RCD_artwork_120;
