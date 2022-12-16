@@ -105,31 +105,9 @@ struct ModuleViewPage : PageBase {
 		const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
 
 		for (const auto el : moduleinfo.Knobs) {
-
-			if (auto mapped_knob = patch.find_mapped_knob(this_module_id, el.id)) {
-				auto knob = DrawHelper::draw_mapped_knob(canvas, base, el, patch, mapped_knob, 240);
-				if (knob.has_value()) {
-					mapped_knobs.push_back({knob.value()});
-					opts += "[";
-					opts += PanelDef::KnobNames[knob.value().mapped_knob.panel_knob_id];
-					opts += "] ";
-				}
-			} else if (auto static_knob = patch.find_static_knob(this_module_id, el.id)) {
-				auto knob = DrawHelper::draw_static_knob(canvas, base, el, patch, static_knob, 240);
-				if (knob.has_value()) {
-					static_knobs.push_back({knob.value()});
-				}
-			}
-			opts += el.short_name;
-			opts += "\n";
-
-			auto knob = DrawHelper::get_knob_img_240(el.knob_style);
-			auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
-			add_button(c_x, c_y, knob->header.w * 1.2f);
+			draw_knob(el, patch);
 			module_params.push_back({ModuleParam::Type::Knob, el.id});
 		}
-
-		// DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, this_module_id, 240);
 
 		for (const auto &el : moduleinfo.InJacks) {
 			draw_injack(el, patch);
@@ -186,7 +164,7 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		// Update mapped knobs
+		// Update mapped knobs rotation
 		for (auto &knob : mapped_knobs) {
 			const float new_pot_val = knob.mapped_knob.get_mapped_val(params.knobs[knob.mapped_knob.panel_knob_id]);
 			if (std::abs(new_pot_val - knob.last_pot_reading) > 0.01f) {
@@ -196,6 +174,7 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
+		// Update static knobs rotation
 		for (auto &knob : static_knobs) {
 			if (std::abs(knob.static_knob.value - knob.last_pot_reading) > 0.01f) {
 				knob.last_pot_reading = knob.static_knob.value;
@@ -203,20 +182,6 @@ struct ModuleViewPage : PageBase {
 				lv_img_set_angle(knob.obj, angle);
 			}
 		}
-
-		// Update static knobs
-		// const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
-
-		// for (auto &sp : patch.static_knobs) {
-		// 	if (sp.module_id != this_module_id)
-		// 		continue;
-
-		// 	if (std::abs(sp.value - mk.last_pot_reading) > 0.01f) {
-		// 		mk.last_pot_reading = sp.value;
-		// 		const int angle = sp.value * 3000.f - 1500.f;
-		// 		lv_img_set_angle(mk.obj, angle);
-		// 	}
-		// }
 	}
 
 private:
@@ -263,6 +228,29 @@ private:
 		const lv_img_dsc_t *sw = DrawHelper::get_switch_img_240(el.switch_type);
 		if (sw)
 			lv_canvas_draw_img(canvas, x - sw->header.w / 2, y - sw->header.h / 2, sw, &img_dsc);
+	}
+
+	void draw_knob(const KnobDef &el, const PatchData &patch) {
+		auto knob = DrawHelper::draw_knob(base, el, 240);
+		if (knob) {
+			lv_obj_t *knob_obj = knob.value();
+			auto anim_method = DrawHelper::get_knob_anim_method(el);
+			if (auto mapped_knob = patch.find_mapped_knob(this_module_id, el.id)) {
+				mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
+				opts += "[";
+				opts += PanelDef::KnobNames[mapped_knob->panel_knob_id];
+				opts += "] ";
+				DrawHelper::draw_knob_ring(canvas, el, mapped_knob->panel_knob_id, 240);
+			} else if (auto static_knob = patch.find_static_knob(this_module_id, el.id)) {
+				static_knobs.push_back({knob_obj, *static_knob, anim_method});
+			}
+		}
+		opts += el.short_name;
+		opts += "\n";
+
+		auto knob_img = DrawHelper::get_knob_img_240(el.knob_style);
+		auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
+		add_button(c_x, c_y, knob_img->header.w * 1.2f);
 	}
 
 	void add_button(int x, int y, int size = 20) {

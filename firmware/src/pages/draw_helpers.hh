@@ -116,12 +116,11 @@ struct DrawHelper {
 		return std::make_pair(x, y);
 	};
 
-	static std::optional<SKnob> draw_static_knob(lv_obj_t *canvas,
-												 lv_obj_t *base,
-												 const KnobDef &el,
-												 const PatchData &patch,
-												 const StaticParam *static_knob,
-												 uint32_t module_height) {
+	static KnobAnimMethods get_knob_anim_method(const KnobDef &el) {
+		return el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
+	}
+
+	static std::optional<lv_obj_t *> draw_knob(lv_obj_t *base, const KnobDef &el, uint32_t module_height) {
 		const float adj = (float)module_height / 240.f;
 		const bool fullsize = module_height > 120;
 		const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
@@ -137,58 +136,33 @@ struct DrawHelper {
 		lv_obj_set_pos(obj, left, top);
 		lv_img_set_pivot(obj, width / 2, height / 2);
 		lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
-
-		auto anim_method = el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
-		return SKnob{
-			.obj = obj,
-			.static_knob = *static_knob,
-			.anim_method = anim_method,
-		};
+		return obj;
 	}
 
-	static std::optional<MKnob> draw_mapped_knob(lv_obj_t *canvas,
-												 lv_obj_t *base,
-												 const KnobDef &el,
-												 const PatchData &patch,
-												 const MappedKnob *mappedknob,
-												 uint32_t module_height) {
-		const float adj = (float)module_height / 240.f;
-		const bool fullsize = module_height > 120;
-		const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
-		if (!knob)
-			return std::nullopt;
-
-		auto [left, top] = scale_topleft(el, knob, adj);
-		int width = knob->header.w;
-		int height = knob->header.h;
-
+	// Draw circle around mapped knobs
+	static void draw_knob_ring(lv_obj_t *canvas, const KnobDef &el, uint32_t panel_knob_id, uint32_t module_height) {
 		lv_draw_arc_dsc_t arc_dsc;
 		lv_draw_arc_dsc_init(&arc_dsc);
 		arc_dsc.opa = LV_OPA_50;
 
-		lv_obj_t *obj = lv_img_create(base);
-		lv_img_set_src(obj, knob);
-		lv_obj_set_pos(obj, left, top);
-		lv_img_set_pivot(obj, width / 2, height / 2);
-		lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
+		const float adj = (float)module_height / 240.f;
+		const bool fullsize = module_height > 120;
+		const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
+		if (!knob)
+			return;
+		auto width = knob->header.w;
 
-		// Circle around mapped knobs
 		auto [c_x, c_y] = scale_center(el, module_height);
-		arc_dsc.color = Gui::knob_palette[mappedknob->panel_knob_id % 6];
+		// FIXME: use faceplate colors
+		arc_dsc.color = Gui::knob_palette[panel_knob_id % 6];
 
 		// Thinner circle for uvwxyz small panel knobs
-		if (mappedknob->panel_knob_id >= 6)
+		if (panel_knob_id >= 6)
 			arc_dsc.width = fullsize ? 2 : 2;
 		else
 			arc_dsc.width = fullsize ? 4 : 3;
 
 		lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.5f + 8 * adj, 0, 3600, &arc_dsc);
-		auto anim_method = el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
-		return MKnob{
-			.obj = obj,
-			.mapped_knob = *mappedknob,
-			.anim_method = anim_method,
-		};
 	}
 
 	static void draw_module_jacks(lv_obj_t *canvas,

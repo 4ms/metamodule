@@ -151,14 +151,14 @@ struct PatchViewPage : PageBase {
 			DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
 
 			for (const auto &el : moduleinfo.Knobs) {
-				if (auto mapped_knob = patch.find_mapped_knob(i, el.id)) {
-					auto knob = DrawHelper::draw_mapped_knob(canvas, base, el, patch, mapped_knob, 120);
-					if (knob.has_value()) {
-						mapped_knobs.push_back(knob.value());
+				auto knob = DrawHelper::draw_knob(canvas, el, 120);
+				if (knob) {
+					lv_obj_t *knob_obj = knob.value();
+					auto anim_method = DrawHelper::get_knob_anim_method(el);
+					if (auto mapped_knob = patch.find_mapped_knob(i, el.id)) {
+						mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
+						DrawHelper::draw_knob_ring(canvas, el, mapped_knob->panel_knob_id, 120);
 					}
-				}
-				if (auto static_knob = patch.find_static_knob(i, el.id)) {
-					DrawHelper::draw_static_knob(canvas, base, el, patch, static_knob, 120);
 				}
 			}
 
@@ -180,15 +180,11 @@ struct PatchViewPage : PageBase {
 
 	void blur() override {
 		for (auto &m : modules) {
-			lv_obj_del(m);
+			lv_obj_del(m); //also deletes child objects: mapped and static knobs
 		}
-		// for (auto &k : mapped_knobs) {
-		// 	lv_obj_del(k.obj);
-		// }
+		mapped_knobs.clear();
 		modules.clear();
 		module_ids.clear();
-		mapped_knobs.clear();
-		// lv_canvas_fill_bg(cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	void update() override {
@@ -349,9 +345,5 @@ private:
 			patch_loader.request_load_patch(patch_id);
 		}
 	}
-
-	// void handle_changing_patch() {
-	// 	patch_loader.handle_sync_patch_loading();
-	// }
 };
 } // namespace MetaModule
