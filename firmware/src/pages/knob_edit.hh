@@ -131,7 +131,7 @@ struct KnobEditPage : PageBase {
 					lv_obj_clear_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
 					lv_arc_set_value(manual_knob, static_knob.value() * 100);
 					lv_obj_add_event_cb(manual_knob, manual_knob_adjust, LV_EVENT_VALUE_CHANGED, this);
-					printf_("Knob value set to %d\n", (double)static_knob.value() * 100);
+					printf_("Knob value set to %d\n", (int)(static_knob.value() * 100));
 				} else {
 					printf_("Error: static param %d in module %d not found\n", this_param_id, this_module_id);
 				}
