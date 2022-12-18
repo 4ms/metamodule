@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/info/module_info_base.hh"
+#include "knob_edit.hh"
 #include "lvgl/src/core/lv_obj_pos.h"
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"
@@ -28,38 +29,28 @@ struct ModuleViewPage : PageBase {
 	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
 		: PageBase{info}
 		, slug(module_slug)
-		, base(lv_obj_create(nullptr)) {
+		, base(lv_obj_create(nullptr))
+		, canvas(lv_canvas_create(base))
+		, roller(lv_roller_create(base))
+		, edit_pane(lv_obj_create(base))
+		, knob_edit_pane{info, edit_pane} {
 		PageList::register_page(this, PageId::ModuleView);
 
 		init_bg(base);
 
-		canvas = lv_canvas_create(base);
 		lv_draw_img_dsc_init(&img_dsc);
 
-		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
-
-		edit_pane = lv_obj_create(base);
-		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
-
-		manual_knob = lv_arc_create(edit_pane);
-		lv_group_add_obj(group, manual_knob);
-		lv_obj_set_size(manual_knob, 50, 50);
-		lv_obj_set_style_pad_all(manual_knob, 5, LV_PART_MAIN);
-		lv_arc_set_rotation(manual_knob, 135);
-		lv_arc_set_bg_angles(manual_knob, 0, 270);
-		// lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
-		lv_obj_add_flag(manual_knob, LV_OBJ_FLAG_CLICKABLE);
-		lv_obj_center(manual_knob);
-
-		lv_obj_add_event_cb(manual_knob, manual_knob_adjust, LV_EVENT_VALUE_CHANGED, this);
-
-		button.clear();
-		module_params.clear();
-
 		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
 		lv_obj_add_style(roller, &Gui::plain_border_style, /*LV_PART_MAIN |*/ LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
 		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
+
+		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
+		lv_obj_add_style(edit_pane, &Gui::plain_border_style, LV_PART_MAIN);
+		lv_obj_set_style_pad_all(edit_pane, 0, LV_STATE_DEFAULT);
+
+		button.clear();
+		module_params.clear();
 	}
 
 	void prepare_focus() override {
@@ -325,26 +316,28 @@ private:
 
 			// Hide roller, show edit pane
 			page->mode = ViewMode::Knob;
-			lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_add_flag(page->roller, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_clear_flag(page->edit_pane, LV_OBJ_FLAG_HIDDEN);
+			page->knob_edit_pane.prepare_focus();
+			page->knob_edit_pane.set_group(page->group);
 
 			// Show manual knob
-			auto patch_id = PageList::get_selected_patch_id();
-			auto &patch = page->patch_list.get_patch(patch_id);
-			auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), module_params[cur_sel].id);
-			if (!mappedknob) {
-				auto static_knob = patch.get_static_knob_value(page->this_module_id, module_params[cur_sel].id);
-				if (static_knob) {
-					lv_obj_clear_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
-					lv_arc_set_value(page->manual_knob, static_knob.value() * 100);
-					lv_group_focus_obj(page->manual_knob);
-					lv_group_set_editing(page->group, true);
-					printf_("Initial knob value set to %f\n", (double)static_knob.value() * 100);
-				}
-			} else {
-				lv_obj_add_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
-				printf_("Knob is mapped\n");
-			}
+			// auto patch_id = PageList::get_selected_patch_id();
+			// auto &patch = page->patch_list.get_patch(patch_id);
+			// auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), module_params[cur_sel].id);
+			// if (!mappedknob) {
+			// 	auto static_knob = patch.get_static_knob_value(page->this_module_id, module_params[cur_sel].id);
+			// 	if (static_knob) {
+			// 		lv_obj_clear_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
+			// 		lv_arc_set_value(page->manual_knob, static_knob.value() * 100);
+			// 		lv_group_focus_obj(page->manual_knob);
+			// 		lv_group_set_editing(page->group, true);
+			// 		printf_("Initial knob value set to %f\n", (double)static_knob.value() * 100);
+			// 	}
+			// } else {
+			// 	lv_obj_add_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
+			// 	printf_("Knob is mapped\n");
+			// }
 
 			// PageList::request_new_page(PageId::KnobEdit);
 			// page->blur();
@@ -382,11 +375,13 @@ private:
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_params;
 
-	lv_obj_t *edit_pane = nullptr;
-	lv_obj_t *roller = nullptr;
-	lv_obj_t *canvas = nullptr;
 	lv_obj_t *base = nullptr;
-	lv_obj_t *manual_knob = nullptr;
+	lv_obj_t *canvas = nullptr;
+	lv_obj_t *roller = nullptr;
+	lv_obj_t *edit_pane = nullptr;
+	// lv_obj_t *manual_knob = nullptr;
+	KnobEditPage knob_edit_pane;
+
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
 	lv_draw_img_dsc_t img_dsc;
 

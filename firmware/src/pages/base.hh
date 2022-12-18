@@ -76,7 +76,8 @@ struct PageBase {
 
 		prepare_focus();
 
-		lv_scr_load(screen);
+		if (screen)
+			lv_scr_load(screen);
 	}
 
 	virtual void prepare_focus() {

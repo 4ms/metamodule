@@ -14,12 +14,20 @@ namespace MetaModule
 {
 struct KnobEditPage : PageBase {
 
-	KnobEditPage(PatchInfo info)
+	KnobEditPage(PatchInfo info, lv_obj_t *parent = nullptr)
 		: PageBase{info}
-		, base(lv_obj_create(nullptr)) {
-		PageList::register_page(this, PageId::KnobEdit);
+		, base{lv_obj_create(parent)} {
 
-		init_bg(base);
+		if (parent == nullptr) {
+			PageList::register_page(this, PageId::KnobEdit);
+			init_bg(base);
+		} else {
+			lv_obj_set_size(base, lv_pct(100), lv_pct(100));
+			lv_obj_set_style_bg_color(base, lv_color_black(), LV_STATE_DEFAULT);
+			lv_obj_set_style_pad_all(base, 4, LV_STATE_DEFAULT);
+			lv_obj_add_style(base, &Gui::plain_border_style, LV_PART_MAIN);
+		}
+
 		lv_group_set_editing(group, true);
 
 		lv_obj_set_flex_flow(base, LV_FLEX_FLOW_ROW_WRAP);
@@ -61,8 +69,13 @@ struct KnobEditPage : PageBase {
 		lv_group_add_obj(group, map_button);
 	}
 
+	void set_group(lv_group_t *group) {
+		lv_group_add_obj(group, manual_knob);
+	}
+
 	void prepare_focus() override {
 		// Get relevant data: module, patch, param info:
+		lv_group_set_editing(group, true);
 
 		this_module_id = PageList::get_selected_module_id();
 		auto patch_id = PageList::get_selected_patch_id();
@@ -125,17 +138,17 @@ struct KnobEditPage : PageBase {
 			lv_obj_add_event_cb(map_button, add_mapbut_cb, LV_EVENT_PRESSED, this);
 
 			// Manual knob
-			if (is_this_patch_loaded()) {
-				auto static_knob = patch.get_static_knob_value(this_module_id, this_param_id);
-				if (static_knob) {
-					lv_obj_clear_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
-					lv_arc_set_value(manual_knob, static_knob.value() * 100);
-					lv_obj_add_event_cb(manual_knob, manual_knob_adjust, LV_EVENT_VALUE_CHANGED, this);
-					printf_("Knob value set to %d\n", (int)(static_knob.value() * 100));
-				} else {
-					printf_("Error: static param %d in module %d not found\n", this_param_id, this_module_id);
-				}
+			// if (is_this_patch_loaded()) {
+			auto static_knob = patch.get_static_knob_value(this_module_id, this_param_id);
+			if (static_knob) {
+				lv_obj_clear_flag(manual_knob, LV_OBJ_FLAG_HIDDEN);
+				lv_arc_set_value(manual_knob, static_knob.value() * 100);
+				lv_obj_add_event_cb(manual_knob, manual_knob_adjust, LV_EVENT_VALUE_CHANGED, this);
+				printf_("Knob value set to %d\n", (int)(static_knob.value() * 100));
+			} else {
+				printf_("Error: static param %d in module %d not found\n", this_param_id, this_module_id);
 			}
+			// }
 
 			//add mapping button
 		}
