@@ -38,7 +38,6 @@ shared/svgextract/test_circle_colors_data.xml
 shared/patch_convert/patch_convert
 *.d
 vcv/res/modules/*-artwork.svg
-firmware/src/pages/images/*_artwork_240.c
 firmware/src/pages/images/*_artwork_240.png
 firmware/src/pages/images/*_artwork_120.png
 shared/CoreModules/info/*_info.hh
