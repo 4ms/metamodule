@@ -48,7 +48,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 ParamCache &paramcache,
 						 PatchLoader &patchloader,
 						 DoubleBufParamBlock &p,
-						 DoubleAuxStreamBlock &auxs)
+						 DoubleAuxStreamBlock &auxs,
+						 PatchModQueue &patch_mod_queue)
 	: param_cache{paramcache}
 	, patch_loader{patchloader}
 	, param_blocks{p}
@@ -64,7 +65,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 	, codec_{Hardware::codec}
 	, codec_ext_{Hardware::codec_ext}
 	, sample_rate_{Hardware::codec.get_samplerate()}
-	, player{patchplayer} {
+	, player{patchplayer}
+	, patch_mod_queue{patch_mod_queue} {
 
 	if (codec_.init() == CodecT::CODEC_NO_ERR)
 		UartLog::log("Codec initialized\n\r");
@@ -85,18 +87,18 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	codec_.set_callbacks(
 		[this]() {
-		Debug::Pin0::high();
+		// Debug::Pin0::high();
 		HWSemaphore<ParamsBuf1Lock>::lock();
 		HWSemaphore<ParamsBuf2Lock>::unlock();
 		process(audio_blocks[block_0], param_blocks[0], auxsigs[0]);
-		Debug::Pin0::low();
+		// Debug::Pin0::low();
 		},
 		[this]() {
-		Debug::Pin0::high();
+		// Debug::Pin0::high();
 		HWSemaphore<ParamsBuf2Lock>::lock();
 		HWSemaphore<ParamsBuf1Lock>::unlock();
 		process(audio_blocks[block_1], param_blocks[1], auxsigs[1]);
-		Debug::Pin0::low();
+		// Debug::Pin0::low();
 	});
 
 	load_measure.init();
@@ -165,6 +167,9 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 	load_measure.start_measurement();
 
+	handle_patch_mods();
+
+	// TODO: handle second codec
 	if (ext_audio_connected)
 		AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
 
@@ -190,14 +195,23 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 		// Pass CV values to modules
 		for (auto [i, cv] : countzip(params_.cvjacks))
-			player.set_panel_input(i + NumAudioInputs, cv);
+			player.set_panel_input(i + FirstCVInput, cv);
 
 		for (auto [i, gatein] : countzip(params_.gate_ins))
-			player.set_panel_input(i + NumAudioInputs + NumCVInputs, gatein.is_high() ? 1.f : 0.f);
+			player.set_panel_input(i + FirstGateInput, gatein.is_high() ? 1.f : 0.f);
 
 		// Pass Knob values to modules
 		for (auto [i, knob] : countzip(params_.knobs))
 			player.set_panel_param(i, knob);
+
+		// TODO: add more MIDI mappings (duo/quad/octophonic, CC=>gate, CC=>param, CC=>jack)
+		if (param_block.metaparams.midi_connected) {
+			player.set_panel_param(MidiMonoNoteParam, params_.midi_note);
+			// player.set_panel_param(MidiMonoGateParam, params_.midi_gate);
+
+			// player.set_panel_input(FirstMidiNoteInput, params_.midi_note);
+			player.set_panel_input(MidiMonoGateJack, params_.midi_gate);
+		}
 
 		// Run each module
 		player.update_patch();
@@ -224,6 +238,17 @@ void AudioStream::start() {
 	codec_ext_.start();
 }
 
+void AudioStream::handle_patch_mods() {
+	if (auto patch_mod = patch_mod_queue.get()) {
+		std::visit(overloaded{
+					   [this](SetStaticParam &mod) { player.apply_static_param(mod.param); },
+					   [](AddMapping &mod) {},
+					   [](ModifyMapping &mod) {},
+				   },
+				   patch_mod.value());
+	}
+}
+
 void AudioStream::propagate_sense_pins(Params &params) {
 	for (int i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
 		auto pin_bit = jacksense_pin_order[i];
@@ -240,14 +265,5 @@ void AudioStream::propagate_sense_pins(Params &params) {
 		}
 	}
 }
-
-// void AudioStream::output_silence(AudioOutBuffer &out, AuxStreamBlock &aux) {
-// 	for (auto [out_, aux_] : zip(out, aux)) {
-// 		for (auto &outchan : out_.chan)
-// 			outchan = 0;
-// 		for (auto &gate : aux_.gate_out)
-// 			gate = 0;
-// 	}
-// }
 
 } // namespace MetaModule

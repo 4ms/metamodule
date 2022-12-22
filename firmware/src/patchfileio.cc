@@ -24,7 +24,7 @@ bool factory_reset(Disk disk) {
 	if (ok)
 		return true;
 
-	printf("Failed to create filesystem and default patches\r\n");
+	printf_("Failed to create filesystem and default patches\r\n");
 	return false;
 }
 
@@ -40,18 +40,18 @@ void load_patches_from_disk(Disk disk, PatchList &patch_list) {
 		if (fname[0] == '.')
 			return;
 
-		printf("Found patch file: %s, Reading... ", fname);
+		printf_("Found patch file: %s, Reading... ", fname);
 		uint32_t filesize = RamDiskFileIO::read_file(fname, buf, MaxFileSize);
 
 		if (filesize == MaxFileSize) {
-			printf("File exceeds %zu bytes, too big. Skipping\r\n", MaxFileSize);
+			printf_("File exceeds %zu bytes, too big. Skipping\r\n", MaxFileSize);
 			return;
 		}
 		if (!filesize) {
-			printf("File cannot be read. Skipping\r\n");
+			printf_("File cannot be read. Skipping\r\n");
 			return;
 		}
-		printf("Read %d bytes.. parsing... ", filesize);
+		printf_("Read %d bytes.. parsing... ", filesize);
 		patch_list.add_patch_from_yaml({buf, filesize});
 	});
 

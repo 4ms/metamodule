@@ -3,7 +3,6 @@
 #include <vector>
 
 const int MAX_MODULES_IN_PATCH = 32;
-
 const int MAX_KNOBS_PER_MAPPING = 16;
 
 // 4 Bytes
@@ -14,6 +13,7 @@ struct Jack {
 		return this->module_id == other.module_id && this->jack_id == other.jack_id;
 	}
 };
+static_assert(sizeof(Jack) == 4, "Jack should be 4B");
 
 // 8 Bytes
 struct StaticParam {
@@ -21,8 +21,15 @@ struct StaticParam {
 	uint16_t param_id;
 	float value;
 };
+static_assert(sizeof(StaticParam) == 8, "StaticParam should be 8B");
 
 using AliasNameString = StaticString<15>;
+static_assert(sizeof(AliasNameString) == 16, "AliasNameString should be 16B");
+
+enum class MidiKnobAlias : uint16_t {
+	MonoNote = 256,
+	MonoGate = 257,
+};
 
 // 32 Bytes
 struct MappedKnob {
@@ -40,19 +47,38 @@ struct MappedKnob {
 	float get_mapped_val(float panel_val) const {
 		return (max - min) * panel_val + min;
 	}
+
+	bool is_monophonic_note() const {
+		return (panel_knob_id == static_cast<uint16_t>(MidiKnobAlias::MonoNote));
+	}
+
+	bool is_monophonic_gate() const {
+		return (panel_knob_id == static_cast<uint16_t>(MidiKnobAlias::MonoGate));
+	}
+
+	bool operator==(const MappedKnob &other) {
+		return (module_id == other.module_id) && (param_id == other.param_id);
+	}
 };
 
-// 16 Bytes
+static_assert(sizeof(MappedKnob) == 32, "MappedKnob should be 32B");
+
 struct InternalCable {
 	Jack out;
 	std::vector<Jack> ins;
 };
 
-// 16 Bytes
 struct MappedInputJack {
 	uint32_t panel_jack_id;
 	std::vector<Jack> ins;
 	AliasNameString alias_name;
+	bool is_monophonic_note() const {
+		return (panel_jack_id == static_cast<uint16_t>(MidiKnobAlias::MonoNote));
+	}
+
+	bool is_monophonic_gate() const {
+		return (panel_jack_id == static_cast<uint16_t>(MidiKnobAlias::MonoGate));
+	}
 };
 
 // 24 Bytes
@@ -61,3 +87,5 @@ struct MappedOutputJack {
 	Jack out;
 	AliasNameString alias_name;
 };
+
+static_assert(sizeof(MappedOutputJack) == 24, "MappedOutputJack should be 24B");

@@ -22,7 +22,6 @@
 #include "usbd_core.h"
 #include "usbd_msc.h"
 
-
 PCD_HandleTypeDef hpcd;
 
 /**
@@ -47,13 +46,13 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd) {
 		// GPIO_InitStruct.Alternate = GPIO_AF10_OTG2_FS;
 		// HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+		// Reset the OTG peripheral to allow switching between host/device mode
 		__HAL_RCC_USBO_FORCE_RESET();
 		__HAL_RCC_USBO_RELEASE_RESET();
-		__HAL_RCC_USBPHY_FORCE_RESET();
-		__HAL_RCC_USBPHY_RELEASE_RESET();
 
 		__HAL_RCC_USBO_CLK_ENABLE();
 		__HAL_RCC_USBPHY_CLK_ENABLE();
+		HAL_PWREx_EnableUSBVoltageDetector();
 	}
 }
 

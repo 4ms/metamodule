@@ -46,6 +46,14 @@ fn main() {
         lvgl_src.push(String::from("../firmware/src/pages/images/PitchShift_artwork_240.c"));
         lvgl_src.push(String::from("../firmware/src/pages/images/HPF_artwork_120.c"));
         lvgl_src.push(String::from("../firmware/src/pages/images/HPF_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/InfOsc_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/InfOsc_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/Freeverb_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/Freeverb_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/KPLS_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/KPLS_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/Seq8_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/Seq8_artwork_240.c"));
     } else {
         add_glob_files("../firmware/src/pages/images/*.c", &mut lvgl_src);
     }
@@ -80,6 +88,10 @@ fn main() {
         src.push(String::from("../shared/CoreModules/MultiLFOCore.cc"));
         src.push(String::from("../shared/CoreModules/PitchShiftCore.cc"));
         src.push(String::from("../shared/CoreModules/HPFCore.cc"));
+        src.push(String::from("../shared/CoreModules/InfOscCore.cc"));
+        src.push(String::from("../shared/CoreModules/FreeverbCore.cc"));
+        src.push(String::from("../shared/CoreModules/KPLSCore.cc"));
+        src.push(String::from("../shared/CoreModules/Seq8Core.cc"));
         src.push(String::from("../shared/CoreModules/panel_medium.cc"));
     } else {
         add_glob_files("../shared/CoreModules/*.cc", &mut src);

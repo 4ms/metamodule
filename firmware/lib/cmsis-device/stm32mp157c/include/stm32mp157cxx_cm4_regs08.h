@@ -2252,6 +2252,233 @@
 #define USB_OTG_PCGCCTL_PHYSUSP_Msk              (0x1U << USB_OTG_PCGCCTL_PHYSUSP_Pos) /*!< 0x00000010 */
 #define USB_OTG_PCGCCTL_PHYSUSP                  USB_OTG_PCGCCTL_PHYSUSP_Msk   /*!<Bit 1 */
 
+/******************************************************************************/
+/*                                                                            */
+/*                   USBPHYC block description (USBPHYC)                    */
+/*                                                                            */
+/******************************************************************************/
+/*****************  Bit definition for USBPHYC_PLL register  *****************/
+#define USBPHYC_PLL_PLLNDIV_Pos          (0U)
+#define USBPHYC_PLL_PLLNDIV_Msk          (0x7FUL << USBPHYC_PLL_PLLNDIV_Pos)             /*!< 0x0000007F */
+#define USBPHYC_PLL_PLLNDIV              USBPHYC_PLL_PLLNDIV_Msk                        /*!< Loop division factor of PLL (integer part) */
+#define USBPHYC_PLL_PLLNDIV_0            (0x1UL << USBPHYC_PLL_PLLNDIV_Pos)              /*!< 0x00000001 */
+#define USBPHYC_PLL_PLLNDIV_1            (0x2UL << USBPHYC_PLL_PLLNDIV_Pos)              /*!< 0x00000002 */
+#define USBPHYC_PLL_PLLNDIV_2            (0x4UL << USBPHYC_PLL_PLLNDIV_Pos)              /*!< 0x00000004 */
+#define USBPHYC_PLL_PLLNDIV_3            (0x8UL << USBPHYC_PLL_PLLNDIV_Pos)              /*!< 0x00000008 */
+#define USBPHYC_PLL_PLLNDIV_4            (0x10UL << USBPHYC_PLL_PLLNDIV_Pos)             /*!< 0x00000010 */
+#define USBPHYC_PLL_PLLNDIV_5            (0x20UL << USBPHYC_PLL_PLLNDIV_Pos)             /*!< 0x00000020 */
+#define USBPHYC_PLL_PLLNDIV_6            (0x40UL << USBPHYC_PLL_PLLNDIV_Pos)             /*!< 0x00000040 */
+#define USBPHYC_PLL_PLLODF_Pos           (7U)
+#define USBPHYC_PLL_PLLODF_Msk           (0x7UL << USBPHYC_PLL_PLLODF_Pos)               /*!< 0x00000380 */
+#define USBPHYC_PLL_PLLODF               USBPHYC_PLL_PLLODF_Msk                         /*!< PLL output division factor */
+#define USBPHYC_PLL_PLLODF_0             (0x1UL << USBPHYC_PLL_PLLODF_Pos)              /*!< 0x00000080 */
+#define USBPHYC_PLL_PLLODF_1             (0x2UL << USBPHYC_PLL_PLLODF_Pos)             /*!< 0x00000100 */
+#define USBPHYC_PLL_PLLODF_2             (0x4UL << USBPHYC_PLL_PLLODF_Pos)             /*!< 0x00000200 */
+#define USBPHYC_PLL_PLLFRACIN_Pos        (10U)
+#define USBPHYC_PLL_PLLFRACIN_Msk        (0xFFFFUL << USBPHYC_PLL_PLLFRACIN_Pos)         /*!< 0x03FFFC00 */
+#define USBPHYC_PLL_PLLFRACIN            USBPHYC_PLL_PLLFRACIN_Msk                      /*!< PLL fractional input */
+#define USBPHYC_PLL_PLLFRACIN_0          (0x1UL << USBPHYC_PLL_PLLFRACIN_Pos)          /*!< 0x00000400 */
+#define USBPHYC_PLL_PLLFRACIN_1          (0x2UL << USBPHYC_PLL_PLLFRACIN_Pos)          /*!< 0x00000800 */
+#define USBPHYC_PLL_PLLFRACIN_2          (0x4UL << USBPHYC_PLL_PLLFRACIN_Pos)         /*!< 0x00001000 */
+#define USBPHYC_PLL_PLLFRACIN_3          (0x8UL << USBPHYC_PLL_PLLFRACIN_Pos)         /*!< 0x00002000 */
+#define USBPHYC_PLL_PLLFRACIN_4          (0x10UL << USBPHYC_PLL_PLLFRACIN_Pos)         /*!< 0x00004000 */
+#define USBPHYC_PLL_PLLFRACIN_5          (0x20UL << USBPHYC_PLL_PLLFRACIN_Pos)         /*!< 0x00008000 */
+#define USBPHYC_PLL_PLLFRACIN_6          (0x40UL << USBPHYC_PLL_PLLFRACIN_Pos)        /*!< 0x00010000 */
+#define USBPHYC_PLL_PLLFRACIN_7          (0x80UL << USBPHYC_PLL_PLLFRACIN_Pos)        /*!< 0x00020000 */
+#define USBPHYC_PLL_PLLFRACIN_8          (0x100UL << USBPHYC_PLL_PLLFRACIN_Pos)        /*!< 0x00040000 */
+#define USBPHYC_PLL_PLLFRACIN_9          (0x200UL << USBPHYC_PLL_PLLFRACIN_Pos)        /*!< 0x00080000 */
+#define USBPHYC_PLL_PLLFRACIN_10         (0x400UL << USBPHYC_PLL_PLLFRACIN_Pos)       /*!< 0x00100000 */
+#define USBPHYC_PLL_PLLFRACIN_11         (0x800UL << USBPHYC_PLL_PLLFRACIN_Pos)       /*!< 0x00200000 */
+#define USBPHYC_PLL_PLLFRACIN_12         (0x1000UL << USBPHYC_PLL_PLLFRACIN_Pos)       /*!< 0x00400000 */
+#define USBPHYC_PLL_PLLFRACIN_13         (0x2000UL << USBPHYC_PLL_PLLFRACIN_Pos)       /*!< 0x00800000 */
+#define USBPHYC_PLL_PLLFRACIN_14         (0x4000UL << USBPHYC_PLL_PLLFRACIN_Pos)      /*!< 0x01000000 */
+#define USBPHYC_PLL_PLLFRACIN_15         (0x8000UL << USBPHYC_PLL_PLLFRACIN_Pos)      /*!< 0x02000000 */
+#define USBPHYC_PLL_PLLEN_Pos            (26U)
+#define USBPHYC_PLL_PLLEN_Msk            (0x1UL << USBPHYC_PLL_PLLEN_Pos)                /*!< 0x04000000 */
+#define USBPHYC_PLL_PLLEN                USBPHYC_PLL_PLLEN_Msk                          /*!< PLL enable */
+#define USBPHYC_PLL_PLLSTRB_Pos          (27U)
+#define USBPHYC_PLL_PLLSTRB_Msk          (0x1UL << USBPHYC_PLL_PLLSTRB_Pos)              /*!< 0x08000000 */
+#define USBPHYC_PLL_PLLSTRB              USBPHYC_PLL_PLLSTRB_Msk                        /*!< PLL strobe */
+#define USBPHYC_PLL_PLLSTRBYP_Pos        (28U)
+#define USBPHYC_PLL_PLLSTRBYP_Msk        (0x1UL << USBPHYC_PLL_PLLSTRBYP_Pos)            /*!< 0x10000000 */
+#define USBPHYC_PLL_PLLSTRBYP            USBPHYC_PLL_PLLSTRBYP_Msk                      /*!< PLL strobe bypass */
+#define USBPHYC_PLL_PLLFRACCTL_Pos       (29U)
+#define USBPHYC_PLL_PLLFRACCTL_Msk       (0x1UL << USBPHYC_PLL_PLLFRACCTL_Pos)           /*!< 0x20000000 */
+#define USBPHYC_PLL_PLLFRACCTL           USBPHYC_PLL_PLLFRACCTL_Msk                     /*!< PLL fractional mode control */
+#define USBPHYC_PLL_PLLDITHEN0_Pos       (30U)
+#define USBPHYC_PLL_PLLDITHEN0_Msk       (0x1UL << USBPHYC_PLL_PLLDITHEN0_Pos)           /*!< 0x40000000 */
+#define USBPHYC_PLL_PLLDITHEN0           USBPHYC_PLL_PLLDITHEN0_Msk                     /*!< PLL dither 2 (triangular) */
+#define USBPHYC_PLL_PLLDITHEN1_Pos       (31U)
+#define USBPHYC_PLL_PLLDITHEN1_Msk       (0x1UL << USBPHYC_PLL_PLLDITHEN1_Pos)           /*!< 0x80000000 */
+#define USBPHYC_PLL_PLLDITHEN1           USBPHYC_PLL_PLLDITHEN1_Msk                     /*!< PLL dither 1 (rectangular) */
+
+/****************  Bit definition for USBPHYC_MISC register  *****************/
+#define USBPHYC_MISC_SWITHOST_Pos        (0U)
+#define USBPHYC_MISC_SWITHOST_Msk        (0x1UL << USBPHYC_MISC_SWITHOST_Pos)            /*!< 0x00000001 */
+#define USBPHYC_MISC_SWITHOST            USBPHYC_MISC_SWITHOST_Msk                      /*!< Switch host */
+#define USBPHYC_MISC_PPCKDIS_Pos         (1U)
+#define USBPHYC_MISC_PPCKDIS_Msk         (0x3UL << USBPHYC_MISC_PPCKDIS_Pos)             /*!< 0x00000006 */
+#define USBPHYC_MISC_PPCKDIS             USBPHYC_MISC_PPCKDIS_Msk                       /*!< Intelligent per HS PHY port clock gating control */
+#define USBPHYC_MISC_PPCKDIS_0           (0x1UL << USBPHYC_MISC_PPCKDIS_Pos)             /*!< 0x00000002 */
+#define USBPHYC_MISC_PPCKDIS_1           (0x2UL << USBPHYC_MISC_PPCKDIS_Pos)             /*!< 0x00000004 */
+
+/****************  Bit definition for USBPHYC_TUNE1 register  ****************/
+#define USBPHYC_TUNE1_INCURREN_Pos       (0U)
+#define USBPHYC_TUNE1_INCURREN_Msk       (0x1UL << USBPHYC_TUNE1_INCURREN_Pos)           /*!< 0x00000001 */
+#define USBPHYC_TUNE1_INCURREN           USBPHYC_TUNE1_INCURREN_Msk                     /*!< The bit enables the current boosting function. */
+#define USBPHYC_TUNE1_INCURRINT_Pos      (1U)
+#define USBPHYC_TUNE1_INCURRINT_Msk      (0x1UL << USBPHYC_TUNE1_INCURRINT_Pos)          /*!< 0x00000002 */
+#define USBPHYC_TUNE1_INCURRINT          USBPHYC_TUNE1_INCURRINT_Msk                    /*!< Current boosting value */
+#define USBPHYC_TUNE1_LFSCAPEN_Pos       (2U)
+#define USBPHYC_TUNE1_LFSCAPEN_Msk       (0x1UL << USBPHYC_TUNE1_LFSCAPEN_Pos)           /*!< 0x00000004 */
+#define USBPHYC_TUNE1_LFSCAPEN           USBPHYC_TUNE1_LFSCAPEN_Msk                     /*!< Low full speed enable */
+#define USBPHYC_TUNE1_HSDRVSLEW_Pos      (3U)
+#define USBPHYC_TUNE1_HSDRVSLEW_Msk      (0x1UL << USBPHYC_TUNE1_HSDRVSLEW_Pos)          /*!< 0x00000008 */
+#define USBPHYC_TUNE1_HSDRVSLEW          USBPHYC_TUNE1_HSDRVSLEW_Msk                    /*!< HS driver slew rate */
+#define USBPHYC_TUNE1_HSDRVDCCUR_Pos     (4U)
+#define USBPHYC_TUNE1_HSDRVDCCUR_Msk     (0x1UL << USBPHYC_TUNE1_HSDRVDCCUR_Pos)         /*!< 0x00000010 */
+#define USBPHYC_TUNE1_HSDRVDCCUR         USBPHYC_TUNE1_HSDRVDCCUR_Msk                   /*!< HS driver DC level */
+#define USBPHYC_TUNE1_HSDRVDCLEV_Pos     (5U)
+#define USBPHYC_TUNE1_HSDRVDCLEV_Msk     (0x1UL << USBPHYC_TUNE1_HSDRVDCLEV_Pos)         /*!< 0x00000020 */
+#define USBPHYC_TUNE1_HSDRVDCLEV         USBPHYC_TUNE1_HSDRVDCLEV_Msk                   /*!< HS driver DC level */
+#define USBPHYC_TUNE1_HSDRVCURINCR_Pos   (6U)
+#define USBPHYC_TUNE1_HSDRVCURINCR_Msk   (0x1UL << USBPHYC_TUNE1_HSDRVCURINCR_Pos)       /*!< 0x00000040 */
+#define USBPHYC_TUNE1_HSDRVCURINCR       USBPHYC_TUNE1_HSDRVCURINCR_Msk                 /*!< Enable the HS driver current increase feature */
+#define USBPHYC_TUNE1_FSDRVRFADJ_Pos     (7U)
+#define USBPHYC_TUNE1_FSDRVRFADJ_Msk     (0x1UL << USBPHYC_TUNE1_FSDRVRFADJ_Pos)         /*!< 0x00000080 */
+#define USBPHYC_TUNE1_FSDRVRFADJ         USBPHYC_TUNE1_FSDRVRFADJ_Msk                   /*!< Tuning pin to adjust the full speed rise/fall time */
+#define USBPHYC_TUNE1_HSDRVRFRED_Pos     (8U)
+#define USBPHYC_TUNE1_HSDRVRFRED_Msk     (0x1UL << USBPHYC_TUNE1_HSDRVRFRED_Pos)         /*!< 0x00000100 */
+#define USBPHYC_TUNE1_HSDRVRFRED         USBPHYC_TUNE1_HSDRVRFRED_Msk                   /*!< High-speed rise-fall reduction enable */
+#define USBPHYC_TUNE1_HSDRVCHKITRM_Pos   (9U)
+#define USBPHYC_TUNE1_HSDRVCHKITRM_Msk   (0xFUL << USBPHYC_TUNE1_HSDRVCHKITRM_Pos)       /*!< 0x00001E00 */
+#define USBPHYC_TUNE1_HSDRVCHKITRM       USBPHYC_TUNE1_HSDRVCHKITRM_Msk                 /*!< HS driver choke current trim */
+#define USBPHYC_TUNE1_HSDRVCHKITRM_0     (0x1UL << USBPHYC_TUNE1_HSDRVCHKITRM_Pos)     /*!< 0x00000200 */
+#define USBPHYC_TUNE1_HSDRVCHKITRM_1     (0x2UL << USBPHYC_TUNE1_HSDRVCHKITRM_Pos)     /*!< 0x00000400 */
+#define USBPHYC_TUNE1_HSDRVCHKITRM_2     (0x4UL << USBPHYC_TUNE1_HSDRVCHKITRM_Pos)     /*!< 0x00000800 */
+#define USBPHYC_TUNE1_HSDRVCHKITRM_3     (0x8UL << USBPHYC_TUNE1_HSDRVCHKITRM_Pos)    /*!< 0x00001000 */
+#define USBPHYC_TUNE1_HSDRVCHKZTRM_Pos   (13U)
+#define USBPHYC_TUNE1_HSDRVCHKZTRM_Msk   (0x3UL << USBPHYC_TUNE1_HSDRVCHKZTRM_Pos)       /*!< 0x00006000 */
+#define USBPHYC_TUNE1_HSDRVCHKZTRM       USBPHYC_TUNE1_HSDRVCHKZTRM_Msk                 /*!< HS driver choke impedance trim */
+#define USBPHYC_TUNE1_HSDRVCHKZTRM_0     (0x1UL << USBPHYC_TUNE1_HSDRVCHKZTRM_Pos)    /*!< 0x00002000 */
+#define USBPHYC_TUNE1_HSDRVCHKZTRM_1     (0x2UL << USBPHYC_TUNE1_HSDRVCHKZTRM_Pos)    /*!< 0x00004000 */
+#define USBPHYC_TUNE1_OTPCOMP_Pos        (15U)
+#define USBPHYC_TUNE1_OTPCOMP_Msk        (0x1FUL << USBPHYC_TUNE1_OTPCOMP_Pos)           /*!< 0x000F8000 */
+#define USBPHYC_TUNE1_OTPCOMP            USBPHYC_TUNE1_OTPCOMP_Msk                      /*!< OTP compensation code */
+#define USBPHYC_TUNE1_OTPCOMP_0          (0x1UL << USBPHYC_TUNE1_OTPCOMP_Pos)         /*!< 0x00008000 */
+#define USBPHYC_TUNE1_OTPCOMP_1          (0x2UL << USBPHYC_TUNE1_OTPCOMP_Pos)        /*!< 0x00010000 */
+#define USBPHYC_TUNE1_OTPCOMP_2          (0x4UL << USBPHYC_TUNE1_OTPCOMP_Pos)        /*!< 0x00020000 */
+#define USBPHYC_TUNE1_OTPCOMP_3          (0x8UL << USBPHYC_TUNE1_OTPCOMP_Pos)        /*!< 0x00040000 */
+#define USBPHYC_TUNE1_OTPCOMP_4          (0x10UL << USBPHYC_TUNE1_OTPCOMP_Pos)        /*!< 0x00080000 */
+#define USBPHYC_TUNE1_SQLCHCTL_Pos       (20U)
+#define USBPHYC_TUNE1_SQLCHCTL_Msk       (0x3UL << USBPHYC_TUNE1_SQLCHCTL_Pos)           /*!< 0x00300000 */
+#define USBPHYC_TUNE1_SQLCHCTL           USBPHYC_TUNE1_SQLCHCTL_Msk                     /*!< Squelch control */
+#define USBPHYC_TUNE1_SQLCHCTL_0         (0x1UL << USBPHYC_TUNE1_SQLCHCTL_Pos)      /*!< 0x00100000 */
+#define USBPHYC_TUNE1_SQLCHCTL_1         (0x2UL << USBPHYC_TUNE1_SQLCHCTL_Pos)      /*!< 0x00200000 */
+#define USBPHYC_TUNE1_HDRXGNEQEN_Pos     (22U)
+#define USBPHYC_TUNE1_HDRXGNEQEN_Msk     (0x1UL << USBPHYC_TUNE1_HDRXGNEQEN_Pos)         /*!< 0x00400000 */
+#define USBPHYC_TUNE1_HDRXGNEQEN         USBPHYC_TUNE1_HDRXGNEQEN_Msk                   /*!< Enable HS Rx gain equalizer */
+#define USBPHYC_TUNE1_HSRXOFF_Pos        (23U)
+#define USBPHYC_TUNE1_HSRXOFF_Msk        (0x3UL << USBPHYC_TUNE1_HSRXOFF_Pos)            /*!< 0x01800000 */
+#define USBPHYC_TUNE1_HSRXOFF            USBPHYC_TUNE1_HSRXOFF_Msk                      /*!< HS receiver offset adjustment */
+#define USBPHYC_TUNE1_HSRXOFF_0          (0x1UL << USBPHYC_TUNE1_HSRXOFF_Pos)       /*!< 0x00800000 */
+#define USBPHYC_TUNE1_HSRXOFF_1          (0x2UL << USBPHYC_TUNE1_HSRXOFF_Pos)      /*!< 0x01000000 */
+#define USBPHYC_TUNE1_HSFALLPREEM_Pos    (25U)
+#define USBPHYC_TUNE1_HSFALLPREEM_Msk    (0x1UL << USBPHYC_TUNE1_HSFALLPREEM_Pos)        /*!< 0x02000000 */
+#define USBPHYC_TUNE1_HSFALLPREEM        USBPHYC_TUNE1_HSFALLPREEM_Msk                  /*!< HS fall time pre-emphasis */
+#define USBPHYC_TUNE1_SHTCCTCTLPROT_Pos  (26U)
+#define USBPHYC_TUNE1_SHTCCTCTLPROT_Msk  (0x1UL << USBPHYC_TUNE1_SHTCCTCTLPROT_Pos)      /*!< 0x04000000 */
+#define USBPHYC_TUNE1_SHTCCTCTLPROT      USBPHYC_TUNE1_SHTCCTCTLPROT_Msk                /*!< Short circuit control protection */
+#define USBPHYC_TUNE1_STAGSEL_Pos        (27U)
+#define USBPHYC_TUNE1_STAGSEL_Msk        (0x1UL << USBPHYC_TUNE1_STAGSEL_Pos)            /*!< 0x08000000 */
+#define USBPHYC_TUNE1_STAGSEL            USBPHYC_TUNE1_STAGSEL_Msk                      /*!< Staggering selection */
+
+/****************  Bit definition for USBPHYC_TUNE2 register  ****************/
+#define USBPHYC_TUNE2_INCURREN_Pos       (0U)
+#define USBPHYC_TUNE2_INCURREN_Msk       (0x1UL << USBPHYC_TUNE2_INCURREN_Pos)           /*!< 0x00000001 */
+#define USBPHYC_TUNE2_INCURREN           USBPHYC_TUNE2_INCURREN_Msk                     /*!< The bit enables the current boosting function. */
+#define USBPHYC_TUNE2_INCURRINT_Pos      (1U)
+#define USBPHYC_TUNE2_INCURRINT_Msk      (0x1UL << USBPHYC_TUNE2_INCURRINT_Pos)          /*!< 0x00000002 */
+#define USBPHYC_TUNE2_INCURRINT          USBPHYC_TUNE2_INCURRINT_Msk                    /*!< Current boosting value */
+#define USBPHYC_TUNE2_LFSCAPEN_Pos       (2U)
+#define USBPHYC_TUNE2_LFSCAPEN_Msk       (0x1UL << USBPHYC_TUNE2_LFSCAPEN_Pos)           /*!< 0x00000004 */
+#define USBPHYC_TUNE2_LFSCAPEN           USBPHYC_TUNE2_LFSCAPEN_Msk                     /*!< Low full speed enable */
+#define USBPHYC_TUNE2_HSDRVSLEW_Pos      (3U)
+#define USBPHYC_TUNE2_HSDRVSLEW_Msk      (0x1UL << USBPHYC_TUNE2_HSDRVSLEW_Pos)          /*!< 0x00000008 */
+#define USBPHYC_TUNE2_HSDRVSLEW          USBPHYC_TUNE2_HSDRVSLEW_Msk                    /*!< HS driver slew rate */
+#define USBPHYC_TUNE2_HSDRVDCCUR_Pos     (4U)
+#define USBPHYC_TUNE2_HSDRVDCCUR_Msk     (0x1UL << USBPHYC_TUNE2_HSDRVDCCUR_Pos)         /*!< 0x00000010 */
+#define USBPHYC_TUNE2_HSDRVDCCUR         USBPHYC_TUNE2_HSDRVDCCUR_Msk                   /*!< HS driver DC level */
+#define USBPHYC_TUNE2_HSDRVDCLEV_Pos     (5U)
+#define USBPHYC_TUNE2_HSDRVDCLEV_Msk     (0x1UL << USBPHYC_TUNE2_HSDRVDCLEV_Pos)         /*!< 0x00000020 */
+#define USBPHYC_TUNE2_HSDRVDCLEV         USBPHYC_TUNE2_HSDRVDCLEV_Msk                   /*!< HS driver DC level */
+#define USBPHYC_TUNE2_HSDRVCURINCR_Pos   (6U)
+#define USBPHYC_TUNE2_HSDRVCURINCR_Msk   (0x1UL << USBPHYC_TUNE2_HSDRVCURINCR_Pos)       /*!< 0x00000040 */
+#define USBPHYC_TUNE2_HSDRVCURINCR       USBPHYC_TUNE2_HSDRVCURINCR_Msk                 /*!< Enable the HS driver current increase feature */
+#define USBPHYC_TUNE2_FSDRVRFADJ_Pos     (7U)
+#define USBPHYC_TUNE2_FSDRVRFADJ_Msk     (0x1UL << USBPHYC_TUNE2_FSDRVRFADJ_Pos)         /*!< 0x00000080 */
+#define USBPHYC_TUNE2_FSDRVRFADJ         USBPHYC_TUNE2_FSDRVRFADJ_Msk                   /*!< Tuning pin to adjust the full speed rise/fall time */
+#define USBPHYC_TUNE2_HSDRVRFRED_Pos     (8U)
+#define USBPHYC_TUNE2_HSDRVRFRED_Msk     (0x1UL << USBPHYC_TUNE2_HSDRVRFRED_Pos)         /*!< 0x00000100 */
+#define USBPHYC_TUNE2_HSDRVRFRED         USBPHYC_TUNE2_HSDRVRFRED_Msk                   /*!< High-speed rise-fall reduction enable */
+#define USBPHYC_TUNE2_HSDRVCHKITRM_Pos   (9U)
+#define USBPHYC_TUNE2_HSDRVCHKITRM_Msk   (0xFUL << USBPHYC_TUNE2_HSDRVCHKITRM_Pos)       /*!< 0x00001E00 */
+#define USBPHYC_TUNE2_HSDRVCHKITRM       USBPHYC_TUNE2_HSDRVCHKITRM_Msk                 /*!< HS driver choke current trim */
+#define USBPHYC_TUNE2_HSDRVCHKITRM_0     (0x1UL << USBPHYC_TUNE2_HSDRVCHKITRM_Pos)     /*!< 0x00000200 */
+#define USBPHYC_TUNE2_HSDRVCHKITRM_1     (0x2UL << USBPHYC_TUNE2_HSDRVCHKITRM_Pos)     /*!< 0x00000400 */
+#define USBPHYC_TUNE2_HSDRVCHKITRM_2     (0x4UL << USBPHYC_TUNE2_HSDRVCHKITRM_Pos)     /*!< 0x00000800 */
+#define USBPHYC_TUNE2_HSDRVCHKITRM_3     (0x8UL << USBPHYC_TUNE2_HSDRVCHKITRM_Pos)    /*!< 0x00001000 */
+#define USBPHYC_TUNE2_HSDRVCHKZTRM_Pos   (13U)
+#define USBPHYC_TUNE2_HSDRVCHKZTRM_Msk   (0x3UL << USBPHYC_TUNE2_HSDRVCHKZTRM_Pos)       /*!< 0x00006000 */
+#define USBPHYC_TUNE2_HSDRVCHKZTRM       USBPHYC_TUNE2_HSDRVCHKZTRM_Msk                 /*!< HS driver choke impedance trim */
+#define USBPHYC_TUNE2_HSDRVCHKZTRM_0     (0x1UL << USBPHYC_TUNE2_HSDRVCHKZTRM_Pos)    /*!< 0x00002000 */
+#define USBPHYC_TUNE2_HSDRVCHKZTRM_1     (0x2UL << USBPHYC_TUNE2_HSDRVCHKZTRM_Pos)    /*!< 0x00004000 */
+#define USBPHYC_TUNE2_OTPCOMP_Pos        (15U)
+#define USBPHYC_TUNE2_OTPCOMP_Msk        (0x1FUL << USBPHYC_TUNE2_OTPCOMP_Pos)           /*!< 0x000F8000 */
+#define USBPHYC_TUNE2_OTPCOMP            USBPHYC_TUNE2_OTPCOMP_Msk                      /*!< OTP compensation code */
+#define USBPHYC_TUNE2_OTPCOMP_0          (0x1UL << USBPHYC_TUNE2_OTPCOMP_Pos)         /*!< 0x00008000 */
+#define USBPHYC_TUNE2_OTPCOMP_1          (0x2UL << USBPHYC_TUNE2_OTPCOMP_Pos)        /*!< 0x00010000 */
+#define USBPHYC_TUNE2_OTPCOMP_2          (0x4UL << USBPHYC_TUNE2_OTPCOMP_Pos)        /*!< 0x00020000 */
+#define USBPHYC_TUNE2_OTPCOMP_3          (0x8UL << USBPHYC_TUNE2_OTPCOMP_Pos)        /*!< 0x00040000 */
+#define USBPHYC_TUNE2_OTPCOMP_4          (0x10UL << USBPHYC_TUNE2_OTPCOMP_Pos)        /*!< 0x00080000 */
+#define USBPHYC_TUNE2_SQLCHCTL_Pos       (20U)
+#define USBPHYC_TUNE2_SQLCHCTL_Msk       (0x3UL << USBPHYC_TUNE2_SQLCHCTL_Pos)           /*!< 0x00300000 */
+#define USBPHYC_TUNE2_SQLCHCTL           USBPHYC_TUNE2_SQLCHCTL_Msk                     /*!< Squelch control */
+#define USBPHYC_TUNE2_SQLCHCTL_0         (0x1UL << USBPHYC_TUNE2_SQLCHCTL_Pos)      /*!< 0x00100000 */
+#define USBPHYC_TUNE2_SQLCHCTL_1         (0x2UL << USBPHYC_TUNE2_SQLCHCTL_Pos)      /*!< 0x00200000 */
+#define USBPHYC_TUNE2_HDRXGNEQEN_Pos     (22U)
+#define USBPHYC_TUNE2_HDRXGNEQEN_Msk     (0x1UL << USBPHYC_TUNE2_HDRXGNEQEN_Pos)         /*!< 0x00400000 */
+#define USBPHYC_TUNE2_HDRXGNEQEN         USBPHYC_TUNE2_HDRXGNEQEN_Msk                   /*!< Enable HS Rx gain equalizer */
+#define USBPHYC_TUNE2_HSRXOFF_Pos        (23U)
+#define USBPHYC_TUNE2_HSRXOFF_Msk        (0x3UL << USBPHYC_TUNE2_HSRXOFF_Pos)            /*!< 0x01800000 */
+#define USBPHYC_TUNE2_HSRXOFF            USBPHYC_TUNE2_HSRXOFF_Msk                      /*!< HS receiver offset adjustment */
+#define USBPHYC_TUNE2_HSRXOFF_0          (0x1UL << USBPHYC_TUNE2_HSRXOFF_Pos)       /*!< 0x00800000 */
+#define USBPHYC_TUNE2_HSRXOFF_1          (0x2UL << USBPHYC_TUNE2_HSRXOFF_Pos)      /*!< 0x01000000 */
+#define USBPHYC_TUNE2_HSFALLPREEM_Pos    (25U)
+#define USBPHYC_TUNE2_HSFALLPREEM_Msk    (0x1UL << USBPHYC_TUNE2_HSFALLPREEM_Pos)        /*!< 0x02000000 */
+#define USBPHYC_TUNE2_HSFALLPREEM        USBPHYC_TUNE2_HSFALLPREEM_Msk                  /*!< HS fall time pre-emphasis */
+#define USBPHYC_TUNE2_SHTCCTCTLPROT_Pos  (26U)
+#define USBPHYC_TUNE2_SHTCCTCTLPROT_Msk  (0x1UL << USBPHYC_TUNE2_SHTCCTCTLPROT_Pos)      /*!< 0x04000000 */
+#define USBPHYC_TUNE2_SHTCCTCTLPROT      USBPHYC_TUNE2_SHTCCTCTLPROT_Msk                /*!< Short circuit control protection */
+#define USBPHYC_TUNE2_STAGSEL_Pos        (27U)
+#define USBPHYC_TUNE2_STAGSEL_Msk        (0x1UL << USBPHYC_TUNE2_STAGSEL_Pos)            /*!< 0x08000000 */
+#define USBPHYC_TUNE2_STAGSEL            USBPHYC_TUNE2_STAGSEL_Msk                      /*!< Staggering selection */
+
+/****************  Bit definition for USBPHYC_VERR register  *****************/
+#define USBPHYC_VERR_MINREV_Pos          (0U)
+#define USBPHYC_VERR_MINREV_Msk          (0xFUL << USBPHYC_VERR_MINREV_Pos)              /*!< 0x0000000F */
+#define USBPHYC_VERR_MINREV              USBPHYC_VERR_MINREV_Msk                        /*!< Minor revision */
+#define USBPHYC_VERR_MINREV_0            (0x1UL << USBPHYC_VERR_MINREV_Pos)              /*!< 0x00000001 */
+#define USBPHYC_VERR_MINREV_1            (0x2UL << USBPHYC_VERR_MINREV_Pos)              /*!< 0x00000002 */
+#define USBPHYC_VERR_MINREV_2            (0x4UL << USBPHYC_VERR_MINREV_Pos)              /*!< 0x00000004 */
+#define USBPHYC_VERR_MINREV_3            (0x8UL << USBPHYC_VERR_MINREV_Pos)              /*!< 0x00000008 */
+#define USBPHYC_VERR_MAJREV_Pos          (4U)
+#define USBPHYC_VERR_MAJREV_Msk          (0xFUL << USBPHYC_VERR_MAJREV_Pos)              /*!< 0x000000F0 */
+#define USBPHYC_VERR_MAJREV              USBPHYC_VERR_MAJREV_Msk                        /*!< Major revision */
+#define USBPHYC_VERR_MAJREV_0            (0x1UL << USBPHYC_VERR_MAJREV_Pos)             /*!< 0x00000010 */
+#define USBPHYC_VERR_MAJREV_1            (0x2UL << USBPHYC_VERR_MAJREV_Pos)             /*!< 0x00000020 */
+#define USBPHYC_VERR_MAJREV_2            (0x4UL << USBPHYC_VERR_MAJREV_Pos)             /*!< 0x00000040 */
+#define USBPHYC_VERR_MAJREV_3            (0x8UL << USBPHYC_VERR_MAJREV_Pos)             /*!< 0x00000080 */
 /**
   * @}
   */

@@ -9,6 +9,7 @@
 #include "../stubs/debug.hh"
 #endif
 #include "conf/hsem_conf.hh"
+#include "conf/midi_def.hh"
 #include "conf/panel_conf.hh"
 #include "drivers/smp.hh"
 #include "patch/patch.hh"
@@ -35,14 +36,14 @@ public:
 	//TODO: why not use a vector here?
 	std::array<std::unique_ptr<CoreProcessor>, MAX_MODULES_IN_PATCH> modules;
 
-	// out_conns[]: OutL OutR CVOut1 CVOut2 ClockOut, each element is a Jack
+	// out_conns[]: Out1-Out8
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}};
 
-	// in_conns[]: InL InR CVA CVB CVC CVD GateIn1 GateIn2 ClockIn, each element is a vector of Jacks it's connected to
-	std::array<std::vector<Jack>, NumInConns> in_conns;
+	// in_conns[]: In1-In6, GateIn1, GateIn2, MidiMonoNoteJack, MidiMonoGateJack
+	std::array<std::vector<Jack>, NumInConns + NumMidiJacks> in_conns;
 
-	// knob_conns[]: A B C D a b c d, each element is a vector of knobs it's mapped to
-	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs> knob_conns;
+	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
+	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs + NumMidiParams> knob_conns;
 
 	bool is_loaded = false;
 
@@ -64,7 +65,20 @@ public:
 		if (is_loaded)
 			unload_patch();
 
-		pd = patchdata; //Copy so that the currently playing PatchData is immune to edits of the saved version
+		//Copy so that the currently playing PatchData is immune to edits of the saved version
+		pd = patchdata;
+
+		//TODO: don't keep a local copy
+		//Instead, copy everything to a cache.
+		//If we edit the patch while playing it, update PatchPlayer caches and the PatchData in PatchList
+		//Save patch: store PatchList -> flash
+		//Revert patch: load flash->PatchList->PatchPlayer
+		//Not cached and used during playing:
+		// - module_slugs
+		// - int_cables
+		// - patch_name
+		// - mapped_knobs[].alias_name
+		// We could use a pointer (weak/const) to the patch data
 	}
 
 	// Loads the given patch as the active patch, and caches some pre-calculated values
@@ -95,7 +109,7 @@ public:
 		}
 
 		// Tell the other core about the patch
-		mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2);
+		mdrivlib::SMPControl::write<SMPRegister::ModuleID>(2); //first module to process
 		mdrivlib::SMPControl::write<SMPRegister::NumModulesInPatch>(pd.module_slugs.size());
 		mdrivlib::SMPControl::write<SMPRegister::UpdateModuleOffset>(2);
 		mdrivlib::SMPControl::notify<SMPCommand::NewModuleList>();
@@ -105,12 +119,12 @@ public:
 		// ...but it's harder to unit test.
 		mark_patched_jacks();
 		calc_panel_jack_connections();
-		calc_panel_knob_connections();
 
-		// Set all initial knob values:
-		for (auto &k : pd.static_knobs) {
+		for (auto const &k : pd.mapped_knobs)
+			cache_knob_mapping(k);
+
+		for (auto &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
-		}
 
 		is_loaded = true;
 
@@ -120,6 +134,8 @@ public:
 
 	// Runs the patch
 	void update_patch() {
+		if (!is_loaded)
+			return;
 		// if (pd.module_slugs.size() < 2)
 		// 	return;
 
@@ -163,15 +179,13 @@ public:
 	// K-rate setters/getters:
 
 	void set_panel_param(int param_id, float val) {
-		auto &knob_conn = knob_conns[param_id];
-		for (auto const &k : knob_conn) {
+		for (auto const &k : knob_conns[param_id]) {
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
 
 	void set_panel_input(int jack_id, float val) {
-		auto &jacks = in_conns[jack_id];
-		for (auto const &jack : jacks)
+		for (auto const &jack : in_conns[jack_id])
 			modules[jack.module_id]->set_input(jack.jack_id, val);
 	}
 
@@ -203,9 +217,17 @@ public:
 		return pd.int_cables[int_cable_idx].ins.size();
 	}
 
-	int get_num_mapped_knobs() {
-		return is_loaded ? pd.mapped_knobs.size() : 0;
+	void apply_static_param(const StaticParam &sparam) {
+		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
+		//Also set it in the patch?
 	}
+
+	void add_mapped_knob(const MappedKnob &map) {
+	}
+
+	// int get_num_mapped_knobs() {
+	// 	return is_loaded ? pd.mapped_knobs.size() : 0;
+	// }
 
 	const ModuleTypeSlug &get_module_name(unsigned idx) {
 		return (is_loaded && idx < pd.module_slugs.size()) ? pd.module_slugs[idx] : no_patch_loaded;
@@ -254,6 +276,9 @@ public:
 		return PanelDef::NumOutJacks;
 	}
 
+	// float get_param_val(int module_id, int param_id) {
+	// 	return 0.5f;
+	// }
 	// Jack patched/unpatched status
 
 	void mark_patched_jacks() {
@@ -325,21 +350,42 @@ public:
 		for (auto const &cable : pd.mapped_ins) {
 			auto panel_jack_id = cable.panel_jack_id;
 
-			// FIXME: propagate this error (return false?) to force unloading patch if patch data is malformed.
-			if (panel_jack_id < 0 || panel_jack_id >= PanelDef::NumUserFacingInJacks)
-				break;
-
 			for (auto const &input_jack : cable.ins) {
 				if (input_jack.module_id < 0 || input_jack.jack_id < 0)
 					break;
 				int dup_int_cable = find_int_cable_input_jack(input_jack);
-				if (dup_int_cable == -1)
-					in_conns[panel_jack_id].push_back(input_jack);
-				else {
+				if (dup_int_cable == -1) {
+					if (cable.is_monophonic_note()) {
+						// in_conns[MidiMonoNoteJack].push_back(input_jack);
+						update_or_add(in_conns[MidiMonoNoteJack], input_jack);
+						printf_("Mapping midi monophonic note to jack: m=%d, p=%d\n",
+								input_jack.module_id,
+								input_jack.jack_id);
+						continue;
+					}
+					if (cable.is_monophonic_gate()) {
+						// in_conns[MidiMonoGateJack].push_back(input_jack);
+						update_or_add(in_conns[MidiMonoGateJack], input_jack);
+						printf_("Mapping midi monophonic gate to jack: m=%d, p=%d\n",
+								input_jack.module_id,
+								input_jack.jack_id);
+						continue;
+					}
+					if (panel_jack_id >= 0 && panel_jack_id < PanelDef::NumUserFacingInJacks) {
+						update_or_add(in_conns[panel_jack_id], input_jack);
+						// in_conns[panel_jack_id].push_back(input_jack);
+						continue;
+					}
+					printf_("Bad panel jack mapping: panel_jack_id=%d\n", panel_jack_id);
+				} else {
+					printf_("Warning: Outputs are connected: panel_jack_id=%d and int_cable=%d\n",
+							panel_jack_id,
+							dup_int_cable);
 					// error: Panel input jack is mapped to a jack containing a cable (to an output)
 					// - ? Create a module that outputs the sum of two inputs, and adjust int_cables and in_mappings?
 					// - ? Keep the mapping and remove the int_cable entry?
 					// - ? Keep it as-is (ignore the mapping and keep the int_cable)
+					// ->>>Create a normalized mapping: Use the int_cable when panel jack is unpatched
 					// - ? Error out: don't load patch, it's malformed
 				}
 			}
@@ -353,10 +399,31 @@ public:
 		}
 	}
 
-	// Map all the panel knob mappings into knob_conns[] which is indexed by panel_knob_id.
-	void calc_panel_knob_connections() {
-		for (auto const &k : pd.mapped_knobs) {
-			knob_conns[k.panel_knob_id].push_back(k);
+	template<typename T>
+	void update_or_add(std::vector<T> &v, const T &d) {
+		//auto equality_op, auto copy_op
+		for (auto &el : v) {
+			if (el == d) { //if (equality_op(el, d)) {
+				el = d;	   //copy_op(el, d);
+				return;
+			}
+		}
+		v.push_back(d);
+	}
+
+	// Cache a panel knob mapping into knob_conns[]
+	void cache_knob_mapping(const MappedKnob &k) {
+		if (k.is_monophonic_note()) {
+			update_or_add(knob_conns[MidiMonoNoteParam], k);
+			// knob_conns[MidiMonoNoteParam].push_back(k);
+			printf_("DBG: Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+		} else if (k.is_monophonic_gate()) {
+			update_or_add(knob_conns[MidiMonoGateParam], k);
+			// knob_conns[MidiMonoGateParam].push_back(k);
+			printf_("DBG: Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+		} else if (k.panel_knob_id < PanelDef::NumKnobs) {
+			update_or_add(knob_conns[k.panel_knob_id], k);
+			// knob_conns[k.panel_knob_id].push_back(k);
 		}
 	}
 

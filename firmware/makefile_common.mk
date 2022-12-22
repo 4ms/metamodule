@@ -19,7 +19,10 @@ EXTRA_CFLAGS ?=
 EXTRA_CPPFLAGS ?=
 EXTRA_LFLAGS ?=
 
-CFLAGS = -ggdb3 -fno-common \
+DBGFLAG ?= -gdwarf-4 -g3
+
+CFLAGS = $(DBGFLAG) \
+	-fno-common \
 	$(ARCH_CFLAGS) $(MCU) \
 	$(INCLUDES) \
 	-fdata-sections -ffunction-sections \

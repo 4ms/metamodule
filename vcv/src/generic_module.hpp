@@ -63,25 +63,39 @@ struct GenericModuleWidget : CommModuleWidget {
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, Defs::svg_filename.data())));
 
 		for (auto knob : Defs::Knobs) {
+			auto ctr_pos = mm2px({knob.x_mm, knob.y_mm});
 			switch (knob.knob_style) {
-				case KnobDef::Small:
-					addParam(createParamCentered<Small9mmKnob>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
-					break;
-				case KnobDef::Medium:
-					addParam(
-						createParamCentered<Davies1900hBlackKnob4ms>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
-					break;
-				case KnobDef::Large:
-					addParam(createParamCentered<DaviesLarge4ms>(mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
-					break;
-				case KnobDef::Slider25mm:
-					if (knob.orientation == KnobDef::Vertical)
-						addParam(createParamCentered<LEDLightSlider<WhiteLight>>(
-							mm2px({knob.x_mm, knob.y_mm}), module, knob.id));
-					else
-						addParam(createParamCentered<LEDLightSlider<WhiteLight>>(
-							mm2px({knob.x_mm, knob.y_mm}), module, knob.id)); // TODO: Horizontal slider widget
-					break;
+				case KnobDef::Small: {
+					auto *kn = createParamCentered<Small9mmKnob>(ctr_pos, module, knob.id);
+					addChild(new MappableKnobRing{*kn, 10});
+					addParam(kn);
+				} break;
+
+				case KnobDef::Medium: {
+					auto *kn = createParamCentered<Davies1900hBlackKnob4ms>(ctr_pos, module, knob.id);
+					addChild(new MappableKnobRing{*kn, 10});
+					addParam(kn);
+				} break;
+
+				case KnobDef::Large: {
+					auto *kn = createParamCentered<DaviesLarge4ms>(ctr_pos, module, knob.id);
+					addChild(new MappableKnobRing{*kn, 20});
+					addParam(kn);
+				} break;
+
+				case KnobDef::Slider25mm: {
+					if (knob.orientation == KnobDef::Vertical) {
+						auto *kn =
+							createParamCentered<MappableKnob<LEDLightSlider<WhiteLight>>>(ctr_pos, module, knob.id);
+						addChild(new MappableSliderRing{*kn, 20, 40});
+						addParam(kn);
+					} else {
+						auto *kn = createParamCentered<MappableKnob<LEDLightSliderHorizontal<WhiteLight>>>(
+							ctr_pos, module, knob.id);
+						addChild(new MappableSliderRing{*kn, 40, 20});
+						addParam(kn);
+					}
+				} break;
 			}
 		}
 

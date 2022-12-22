@@ -17,6 +17,7 @@ TEST_SOURCES += ../shared/patch_convert/yaml_to_patch.cc
 TEST_SOURCES += ../shared/patch_convert/ryml/ryml_serial.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+TEST_SOURCES += src/time_convert.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++20 \
@@ -41,7 +42,7 @@ CXXFLAGS = 	-Wall \
 
 ### Boilerplate below here:
 
-CXX = clang++
+#CXX = clang++
 LDFLAGS = -lstdc++
 OBJECTS   = $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(basename $(TEST_SOURCES))))
 DEPDIR := $(BUILDDIR)
@@ -51,14 +52,6 @@ TMPFILE = $(BUILDDIR)/runtests.out
 .PHONY: all tests clean patches
 
 all: $(DOCTESTHEADER_DIR)/doctest.h patches tests
-
-PATCH_FILES = $(wildcard $(TEST_DIR)/patches/*.yml)
-PATCH_HEADERS = $(addsuffix .hh, $(basename $(PATCH_FILES)))
-
-patches: $(PATCH_HEADERS)
-
-%.hh : %.yml 
-	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)

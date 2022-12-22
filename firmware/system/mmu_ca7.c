@@ -62,8 +62,13 @@
 #define __DMABUF_END 0xE0000000
 #define __DMABUF_BASE (__DMABUF_END - __DMABUF_SIZE)
 
+/* VIRTDRIVE: 0xD0000000 - 0xD8000000 */
+#define _VIRTDRIVE_BASE 0xD0000000
+#define _VIRTDRIVE_SIZE 0x08000000
+#define _VIRTDRIVE_END 0xD8000000
+
 /* HEAP: 0xD0000000 - 0xDFF00000*/
-#define __HEAP_BASE 0xD0000000
+#define __HEAP_BASE 0xD8000000
 #define __HEAP_END __DMABUF_BASE
 #define __HEAP_SIZE (__HEAP_END - __HEAP_BASE)
 
@@ -109,8 +114,7 @@ static uint32_t Page_L1_64k = 0x0;	// generic
 static uint32_t Page_4k_Device_RW;	// Shared device, not executable, rw, domain 0
 static uint32_t Page_64k_Device_RW; // Shared device, not executable, rw, domain 0
 
-void MMU_CreateTranslationTable(void)
-{
+void MMU_CreateTranslationTable(void) {
 	mmu_region_attributes_Type region;
 
 	// Create 4GB of faulting entries
@@ -138,6 +142,9 @@ void MMU_CreateTranslationTable(void)
 	//.ddma: non-cacheable
 	// Note: section_so is quite a bit faster than section_normal_nc
 	MMU_TTSection(TTB_BASE, __DMABUF_BASE, __DMABUF_SIZE / 0x100000, Sect_StronglyOrdered);
+
+	//.virtdrive: non-cacheable
+	MMU_TTSection(TTB_BASE, _VIRTDRIVE_BASE, _VIRTDRIVE_SIZE / 0x100000, Sect_StronglyOrdered);
 
 	//.shared_memory and m4 codespace: 0x30000000, or 0x10000000 as seen by M4
 	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Device_RW); // 1MB (actually is only 384kB)

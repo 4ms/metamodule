@@ -3,12 +3,12 @@
 
 namespace MetaModule
 {
-struct UiAudioMailbox {
+struct MessageQueue {
 	std::string message{""};
 
 	static constexpr size_t MaxMessageSize = 1024;
 
-	UiAudioMailbox() {
+	MessageQueue() {
 		// Allocate once, and do not let message get bigger than Max
 		message.reserve(MaxMessageSize);
 	}

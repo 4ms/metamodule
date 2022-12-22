@@ -1,9 +1,10 @@
 #pragma once
 #include "drivers/hsem.hh"
+#include "drivers/callable.hh"
 
 template<unsigned SemID>
 class SemaphoreActionOnUnlock {
-	using CallbackT = std::function<void(void)>;
+	using CallbackT = Callback;
 
 public:
 	SemaphoreActionOnUnlock(CallbackT &&callback)

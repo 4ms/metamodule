@@ -34,6 +34,8 @@ bool yaml_raw_to_patch(std::span<char> yaml, PatchData &pd) {
 }
 
 bool yaml_string_to_patch(std::string yaml, PatchData &pd) {
+	//TODO: why can't we do:
+	//return yaml_raw_to_patch(yaml.data(), yaml.size_bytes(), pd);
 	RymlInit::init_once();
 
 	ryml::Tree tree = ryml::parse_in_place(ryml::substr(yaml.data(), yaml.size()));

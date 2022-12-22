@@ -1,6 +1,7 @@
 #pragma once
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
+#include <span>
 #include <vector>
 
 namespace MetaModule
@@ -22,7 +23,7 @@ struct PatchList {
 	}
 
 	// Return a reference to the patch at the given index (bounds-checked)
-	const PatchData &get_patch(uint32_t patch_id) {
+	PatchData &get_patch(uint32_t patch_id) {
 		if (_patch_data.size() == 0)
 			return nullpatch;
 
@@ -82,7 +83,7 @@ private:
 	bool _has_been_updated = false;
 	bool _locked = false;
 
-	static inline const PatchData nullpatch{};
+	static inline PatchData nullpatch{};
 	static inline const ModuleTypeSlug nullslug{""};
 };
 } // namespace MetaModule

@@ -2,7 +2,7 @@
 Diagnostics:
     ClangTidy:
         Add: [modernize*, cppcoreguidelines-prefer-member-initializer, readability-suspicious-call-argument]
-        Remove: [modernize-use-trailing-return-type, modernize-avoid-c-arrays]
+        Remove: [modernize-use-trailing-return-type, modernize-avoid-c-arrays,modernize-use-nodiscard]
         CheckOptions:
             readability-identifier-naming.VariableCase: CamelCase
 

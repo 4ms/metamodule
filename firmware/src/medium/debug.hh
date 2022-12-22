@@ -11,13 +11,14 @@ struct Debug {
 	// using Pin4 = mdrivlib::FPin<mdrivlib::GPIO::Z, 1, mdrivlib::PinMode::Output>; // Not exposed on p5
 	// using Pin5 = mdrivlib::FPin<mdrivlib::GPIO::Z, 2, mdrivlib::PinMode::Output>; // Not exposed on p5
 
-	using red_LED1 = mdrivlib::FPin<mdrivlib::GPIO::A, 14, mdrivlib::PinMode::Output>;
-	// using blue_LED1 = mdrivlib::FPin<mdrivlib::GPIO::I, 8, mdrivlib::PinMode::Output>;
-	// using green_LED1 = mdrivlib::FPin<mdrivlib::GPIO::Z, 7, mdrivlib::PinMode::Output>;
+	using red_LED1 = mdrivlib::FPin<mdrivlib::GPIO::B, 15, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted>;
+	using blue_LED1 = mdrivlib::FPin<mdrivlib::GPIO::A, 9, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted>;
+	using green_LED1 =
+		mdrivlib::FPin<mdrivlib::GPIO::E, 14, mdrivlib::PinMode::Output, mdrivlib::PinPolarity::Inverted>;
 
 	static inline red_LED1 red_LED1_init;
-	// static inline blue_LED1 blue_LED1_init;
-	// static inline green_LED1 green_LED1_init;
+	static inline blue_LED1 blue_LED1_init;
+	static inline green_LED1 green_LED1_init;
 
 	static inline Pin0 pin_0_init;
 	static inline Pin1 pin_1_init;

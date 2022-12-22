@@ -62,7 +62,6 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void refresh_patchlist() {
-		printf("refresh_patchlist\n");
 		std::string patchnames;
 		for (unsigned i = 0; i < patch_list.num_patches(); i++) {
 			patchnames += patch_list.get_patch_name(i).data();
@@ -76,13 +75,13 @@ struct PatchSelectorPage : PageBase {
 		// unsigned default_sel = patchnames.size() > 9 ? 5U : 0;
 		unsigned default_sel = patchnames.size() > 10 ? 5 : patchnames.size() / 2;
 		lv_roller_set_selected(roller, default_sel, LV_ANIM_OFF);
-		printf("Patch Selector page preselecting %d from %p\n", lv_roller_get_selected(roller), roller);
+		printf_("Patch Selector page preselecting %d from %p\n", lv_roller_get_selected(roller), roller);
 	}
 
 	void update() override {
 		if (should_show_patchview) {
 			should_show_patchview = false;
-			printf("Requesting new page: PatchView, patch id %d\n", selected_patch);
+			printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
 			PageList::set_selected_patch_id(selected_patch);
 			PageList::request_new_page(PageId::PatchView);
 			blur();

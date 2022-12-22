@@ -2,7 +2,7 @@ static char Djembe2_patch[] =
 R"(
 PatchData:
   patch_name: 'Djembe-2'
-  description: 'Dual Djembes with FX.  Outs 5 and 6 are te stereo mix. Outs 1-4 are Djembes and FX.'
+  description: 'Dual Djembes with FX.  Outs 5 and 6 are the stereo mix. Outs 1-4 are Djembes and FX.'
   module_slugs:
     0: PanelMedium
     1: PitchShift

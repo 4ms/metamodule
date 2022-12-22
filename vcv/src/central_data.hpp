@@ -10,6 +10,10 @@
 #include <unordered_map>
 #include <vector>
 
+// #define pr_dbg printf
+
+#define pr_dbg(...)
+
 class CentralData {
 public:
 	CentralData() = default;
@@ -130,25 +134,13 @@ public:
 		_currentMap.src = src;
 	}
 
-	void abortMappingProcedure()
-	{
-		_isMappingInProgress = false;
-	}
+	void abortMappingProcedure() { _isMappingInProgress = false; }
 
-	bool isMappingInProgress()
-	{
-		return _isMappingInProgress;
-	}
+	bool isMappingInProgress() { return _isMappingInProgress; }
 
-	const LabelButtonID &getMappingSource()
-	{
-		return _currentMap.src;
-	}
+	const LabelButtonID &getMappingSource() { return _currentMap.src; }
 
-	void notifyEnterHover(LabelButtonID obj)
-	{
-		_cur_hover_obj = obj;
-	}
+	void notifyEnterHover(LabelButtonID obj) { _cur_hover_obj = obj; }
 
 	void notifyLeaveHover(LabelButtonID obj)
 	{
@@ -191,7 +183,7 @@ public:
 	// Called by UI Thread: HubMapButton
 	void registerMapDest(LabelButtonID dest)
 	{
-		printf("registerMapDest: dest: objID=%d, moduleID=%d\n", dest.objID, dest.moduleID);
+		pr_dbg("registerMapDest: dest: objID=%d, moduleID=%d\n", dest.objID, dest.moduleID);
 
 		LabelButtonID src;
 
@@ -199,7 +191,7 @@ public:
 			std::lock_guard mguard{mapsmtx};
 
 			if (!_isMappingInProgress) {
-				printf("Error: registerMapDest() called but we aren't mapping!\n");
+				pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
 				return;
 			}
 
@@ -210,21 +202,22 @@ public:
 			for (auto &m : maps) {
 				if (m.dst == _currentMap.dst) {
 					found = true;
-					printf("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
+					pr_dbg("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
 					m.src = _currentMap.src;
 					break;
 				}
 			}
 			if (!found) {
-				printf(
+				pr_dbg(
 					"Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID, _currentMap.dst.objID);
 				// Rule: hub output jacks can only be mapped to one dst
 				if (_currentMap.src.objType == LabelButtonID::Types::OutputJack) {
 					auto num_erased = std::erase_if(maps, [&](auto const &m) { return m.src == _currentMap.src; });
-					printf("Removed %lu mappings from centralData, with src on hub: m=%d out-jack=%d\n",
+					pr_dbg("Removed %lu mappings from centralData, with src on hub: m=%d out-jack=%d\n",
 						   num_erased,
 						   _currentMap.src.moduleID,
 						   _currentMap.src.objID);
+					(void)num_erased;
 				}
 
 				maps.push_back(_currentMap);
@@ -265,7 +258,7 @@ public:
 	//	[and also in loadmappings when we load a patch file]
 	void registerKnobParamHandle(LabelButtonID src, LabelButtonID dst)
 	{
-		printf("registerKnobParamHandle m:%d p:%d -> m:%d p:%d\n", src.moduleID, src.objID, dst.moduleID, dst.objID);
+		pr_dbg("registerKnobParamHandle m:%d p:%d -> m:%d p:%d\n", src.moduleID, src.objID, dst.moduleID, dst.objID);
 
 		std::lock_guard mguard{mappedParamHandlemtx};
 
@@ -274,7 +267,7 @@ public:
 		// Clear from rack::Engine the paramHandles for this src knob that we've removed in the past
 		for (auto &p : phvec) {
 			if (p->moduleId == -1) {
-				printf("....Removing a paramHandle moduleId == -1. paramId=%d, text=%s\n", p->paramId, p->text.c_str());
+				pr_dbg("....Removing a paramHandle moduleId == -1. paramId=%d, text=%s\n", p->paramId, p->text.c_str());
 				APP->engine->removeParamHandle(p.get());
 			}
 		}
@@ -284,29 +277,29 @@ public:
 		auto &ph = phvec.emplace_back(std::make_unique<rack::ParamHandle>());
 
 		// Debug:
-		printf("phvec.emplace_back: addr=%p\n", ph.get());
-		for (auto &p : phvec)
-			printf("\tphvec[] = addr=%p\n", p.get());
+		// pr_dbg("phvec.emplace_back: addr=%p\n", ph.get());
+		// for (auto &p : phvec)
+		// 	pr_dbg("\tphvec[] = addr=%p\n", p.get());
 
 		ph->color = PaletteHub::color[src.objID];
 		ph->text = "Mapped to MetaModule knob# " + std::to_string(src.objID);
 
 		if (auto existingPh = APP->engine->getParamHandle(dst.moduleID, dst.objID); existingPh) {
-			printf("Found an existing ParamHandle (%p) in engine with same dst module/param id. Updating it to -1, 0\n",
+			pr_dbg("Found an existing ParamHandle (%p) in engine with same dst module/param id. Updating it to -1, 0\n",
 				   existingPh);
 			APP->engine->updateParamHandle(existingPh, -1, 0, true);
 			// TODO: Why not just remove it here?
 		}
-		printf("Adding to engine\n");
+		pr_dbg("Adding to engine\n");
 		ph->moduleId = -1; // From Engine.cpp: "New ParamHandles must be blank"
 		APP->engine->addParamHandle(ph.get());
-		printf("Updating the paramhandle with new info: moduleId=%d, paramId=%d\n", dst.moduleID, dst.objID);
+		pr_dbg("Updating the paramhandle with new info: moduleId=%d, paramId=%d\n", dst.moduleID, dst.objID);
 		APP->engine->updateParamHandle(ph.get(), dst.moduleID, dst.objID, true);
 
 		/// Debug:
-		rack::ParamHandle *p = APP->engine->getParamHandle(dst.moduleID, dst.objID);
-		printf("getParamHandle = %p\n", p);
-		printf("\n");
+		// rack::ParamHandle *p = APP->engine->getParamHandle(dst.moduleID, dst.objID);
+		// pr_dbg("getParamHandle = %p\n", p);
+		// pr_dbg("\n");
 	}
 
 	// Can be called by UI Thread on "Unmap" menuitem
@@ -319,7 +312,7 @@ public:
 		}
 
 		if (auto existingPh = APP->engine->getParamHandle(dest.moduleID, dest.objID); existingPh) {
-			printf("APP->engine->getParamHandle(%d, %d) found %p. Updating to -1\n",
+			pr_dbg("APP->engine->getParamHandle(%d, %d) found %p. Updating to -1\n",
 				   dest.moduleID,
 				   dest.objID,
 				   existingPh);
@@ -342,14 +335,14 @@ public:
 		// Remove ParamHandles (from engine and CD)
 		{
 			std::lock_guard mguard{mappedParamHandlemtx};
-			printf("Getting rid of mappedParamHandles[] that match moduleId=%d\n", moduleId);
+			pr_dbg("Getting rid of mappedParamHandles[] that match moduleId=%d\n", moduleId);
 			for (auto &[lbl, phvec] : mappedParamHandles) {
 				if (lbl.moduleID == moduleId && lbl.objType == LabelButtonID::Types::Knob) {
 					for (auto &ph : phvec) {
-						printf("Removing paramHandle at %p for objId=%d\n", ph.get(), lbl.objID);
+						pr_dbg("Removing paramHandle at %p for objId=%d\n", ph.get(), lbl.objID);
 						APP->engine->removeParamHandle(ph.get());
 					}
-					printf("Clearing paramHandle vector\n");
+					pr_dbg("Clearing paramHandle vector\n");
 					phvec.clear();
 				}
 			}
@@ -357,7 +350,8 @@ public:
 				auto &[key, val] = item;
 				return key.moduleID == moduleId && key.objType == LabelButtonID::Types::Knob;
 			});
-			printf("Erased %lu entries from mappedParamHandles\n", num_erased);
+			pr_dbg("Erased %lu entries from mappedParamHandles\n", num_erased);
+			(void)num_erased;
 		}
 	}
 
@@ -416,7 +410,7 @@ public:
 		if (m == maps.end()) {
 			min = 0.f;
 			max = 1.f;
-			printf("Not found\n");
+			pr_dbg("Not found\n");
 		} else {
 			min = m->range_min;
 			max = m->range_max;
@@ -533,10 +527,7 @@ public:
 	// Jack "touching", used to map jacks
 	//
 
-	void registerTouchedJack(LabelButtonID touched)
-	{
-		lastTouchedJack = touched;
-	}
+	void registerTouchedJack(LabelButtonID touched) { lastTouchedJack = touched; }
 
 	LabelButtonID getAndClearTouchedJack()
 	{

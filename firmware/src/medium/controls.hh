@@ -12,6 +12,9 @@
 #include "drivers/stm32xx.h"
 #include "drivers/timekeeper.hh"
 #include "params.hh"
+#include "usb/midi_host.hh"
+#include "usb/midi_message.hh"
+#include "util/circular_buffer.hh"
 #include "util/interp_param.hh"
 
 namespace MetaModule
@@ -25,7 +28,8 @@ struct Controls {
 	Controls(DoubleBufParamBlock &param_blocks_ref,
 			 DoubleAuxStreamBlock &auxsignal_blocks_ref,
 			 GPIOExpander &main_gpioexpander,
-			 GPIOExpander &ext_gpioexpander);
+			 GPIOExpander &ext_gpioexpander,
+			 MidiHost &midi_host);
 
 	static constexpr size_t NumPotAdcs = sizeof(PotConfs) / sizeof(AdcChannelConf);
 	std::array<uint16_t, NumPotAdcs> pot_vals;
@@ -35,7 +39,7 @@ struct Controls {
 	GPIOExpander &jacksense_reader;
 	GPIOExpander &extaudio_jacksense_reader;
 
-	mdrivlib::RotaryEnc<mdrivlib::RotaryHalfStep, MMControlPins::rotA, MMControlPins::rotB> rotary;
+	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, MMControlPins::rotA, MMControlPins::rotB> rotary;
 
 	DebouncedPin<MMControlPins::rotS.gpio, MMControlPins::rotS.pin, PinPolarity::Inverted> rotary_button;
 	DebouncedPin<MMControlPins::but0.gpio, MMControlPins::but0.pin, PinPolarity::Inverted> button0;
@@ -61,12 +65,8 @@ private:
 	bool _first_param = true;
 
 	DoubleAuxStreamBlock &auxstream_blocks;
-
 	mdrivlib::PinChangeInt<AuxStreamUpdateConf> auxstream_updater;
 	AuxStream auxstream;
-
-	uint16_t latest_jacksense_reading;
-	uint16_t latest_extaudio_jacksense_reading;
 
 	// Todo: calc this from AdcSampTime, PotAdcConf::oversampling_ratio, and ADC periph clock (PLL_Div2... rcc...)
 	// Tested with APB clock (rcc set to PER, but don't think that matters. clock_div set to APBClk_Div1):
@@ -81,13 +81,15 @@ private:
 	//  16.5MHz / 2clks / 13 channels / 1024 OS = 619.74Hz
 	//  48000 / 619.74 = 77.45.. we round up so it doesn't overshoot
 	static constexpr size_t NumParamUpdatesPerAdcReading = 78;
-
 	InterpParam<float, NumParamUpdatesPerAdcReading> _knobs[PanelDef::NumPot];
-	float f_knobs[PanelDef::NumPot];
+	bool _new_adc_data_ready = false;
+
+	MidiHost &_midi_host;
+	CircularBuffer<MidiMessage, 256> _midi_rx_buf;
+	float midi_note = 0.f;
+	bool midi_gate = false;
 
 	bool _rotary_moved_while_pressed = false;
-
-	bool _new_adc_data_ready = false;
 
 	template<size_t block_num>
 	void start_param_block();

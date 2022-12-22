@@ -97,7 +97,7 @@ struct PatchViewPage : PageBase {
 		const auto &patch = patch_list.get_patch(patch_id);
 		patch_instance = &patch;
 
-		printf("patch id = %d\n", patch_id);
+		printf_("patch id = %d\n", patch_id);
 		if (patch.patch_name.length() == 0)
 			return;
 
@@ -126,7 +126,7 @@ struct PatchViewPage : PageBase {
 
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
 			if (!img) {
-				printf("Image not found for %s\n", slug.c_str());
+				printf_("Image not found for %s\n", slug.c_str());
 				continue;
 			}
 			auto widthpx = img->header.w;
@@ -149,10 +149,16 @@ struct PatchViewPage : PageBase {
 			// Draw module controls
 			const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 			DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
+
 			for (const auto &el : moduleinfo.Knobs) {
-				auto mknob = DrawHelper::draw_mapped_knob(canvas, canvas, el, patch, i, height);
-				if (mknob) {
-					mapped_knobs.push_back(*mknob);
+				auto knob = DrawHelper::draw_knob(canvas, el, 120);
+				if (knob) {
+					lv_obj_t *knob_obj = knob.value();
+					auto anim_method = DrawHelper::get_knob_anim_method(el);
+					if (auto mapped_knob = patch.find_mapped_knob(i, el.id)) {
+						mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
+						DrawHelper::draw_knob_ring(canvas, el, mapped_knob->panel_knob_id, 120);
+					}
 				}
 			}
 
@@ -165,7 +171,7 @@ struct PatchViewPage : PageBase {
 
 			xpos += widthpx;
 			if (xpos >= MaxBufferWidth) {
-				printf("Max size reached\n");
+				printf_("Max size reached\n");
 				break;
 			}
 		}
@@ -174,15 +180,11 @@ struct PatchViewPage : PageBase {
 
 	void blur() override {
 		for (auto &m : modules) {
-			lv_obj_del(m);
+			lv_obj_del(m); //also deletes child objects: mapped and static knobs
 		}
-		// for (auto &k : mapped_knobs) {
-		// 	lv_obj_del(k.obj);
-		// }
+		mapped_knobs.clear();
 		modules.clear();
 		module_ids.clear();
-		mapped_knobs.clear();
-		// lv_canvas_fill_bg(cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	void update() override {
@@ -218,7 +220,7 @@ struct PatchViewPage : PageBase {
 		auto obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
 		PageList::set_selected_module_id(module_id);
-		printf("Clicked Module %d\n", module_id);
+		printf_("Clicked Module %d\n", module_id);
 		PageList::request_new_page(PageId::ModuleView);
 	}
 
@@ -292,7 +294,7 @@ struct PatchViewPage : PageBase {
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		// printf("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
+		// printf_("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
 		page->start_changing_patch();
 	}
 
@@ -343,9 +345,5 @@ private:
 			patch_loader.request_load_patch(patch_id);
 		}
 	}
-
-	// void handle_changing_patch() {
-	// 	patch_loader.handle_sync_patch_loading();
-	// }
 };
 } // namespace MetaModule

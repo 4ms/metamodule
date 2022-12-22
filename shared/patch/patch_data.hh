@@ -1,20 +1,20 @@
 #pragma once
-#include "CoreModules/moduleFactory.hh" //for ModuleTypeSlug
+#include "CoreModules/module_type_slug.hh"
 #include "patch.hh"
 #include "util/static_string.hh"
+#include <optional>
 #include <vector>
 
-//72B = 6 vec * 12B ea (data, sz, cap) + patch_name + description
 struct PatchData {
 	static constexpr size_t DescSize = 255;
 	ModuleTypeSlug patch_name{""};
 	StaticString<DescSize> description;
-	std::vector<ModuleTypeSlug> module_slugs;  //32B
-	std::vector<InternalCable> int_cables;	   //16B
-	std::vector<MappedInputJack> mapped_ins;   //16B
-	std::vector<MappedOutputJack> mapped_outs; //8B
-	std::vector<StaticParam> static_knobs;	   //8B
-	std::vector<MappedKnob> mapped_knobs;	   //16B
+	std::vector<ModuleTypeSlug> module_slugs;
+	std::vector<InternalCable> int_cables;
+	std::vector<MappedInputJack> mapped_ins;
+	std::vector<MappedOutputJack> mapped_outs;
+	std::vector<StaticParam> static_knobs;
+	std::vector<MappedKnob> mapped_knobs;
 
 	const MappedKnob *find_mapped_knob(uint32_t module_id, uint32_t param_id) const {
 		for (auto &m : mapped_knobs) {
@@ -30,6 +30,21 @@ struct PatchData {
 				return &m;
 		}
 		return nullptr;
+	}
+
+	std::optional<float> get_static_knob_value(uint16_t module_id, uint16_t param_id) const {
+		for (auto &m : static_knobs) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				return m.value;
+		}
+		return std::nullopt;
+	}
+
+	void set_static_knob_value(uint32_t module_id, uint32_t param_id, float val) {
+		for (auto &m : static_knobs) {
+			if (m.module_id == module_id && m.param_id == param_id)
+				m.value = val;
+		}
 	}
 
 	const MappedInputJack *find_mapped_injack(Jack jack) const {

@@ -3,19 +3,18 @@
 #TODO: Once we have multiple a7 versions, build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
 #so don't build it twice for mini/max/etc
 
+USE_FEWER_MODULES ?= 1
+
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 target_board = $(word 1,$(MAKECMDGOALS))
 $(info --------------------)
 $(info Building for MP1 A7 core, target: $(target_board))
-else ifeq ($(MAKECMDGOALS),uimg)
-$(info Building uimg)
-target_board = medium
-else ifeq ($(MAKECMDGOALS),img)
+
+else ifeq ($(MAKECMDGOALS),bootimg)
 $(info Building img)
 target_board = medium
-else ifeq ($(MAKECMDGOALS),u-boot)
-$(info Building u-boot)
+
 else
 $(error Board not supported)
 endif
@@ -42,7 +41,8 @@ TAG := [MP1A7-$(target_board)]
 BUILDDIR 			= $(BUILDDIR_MP1A7)/$(target_board)
 LOADFILE 			= $(LINKSCRIPTDIR)/stm32mp15xx_ca7.ld
 HALDIR 				= $(HALBASE)/stm32mp1
-USBLIBDIR 			= $(LIBDIR)/stm32-usb-device-lib
+usbdev_libdir 		= $(LIBDIR)/stm32-usb-device-lib
+usbhost_libdir 		= $(LIBDIR)/stm32-usb-host-lib
 DEVICEDIR 			= $(DEVICEBASE)/stm32mp157c
 TARGETDEVICEDIR 	= $(DRIVERLIB)/target/stm32mp1
 TARGETDEVICEDIR_CA7 = $(DRIVERLIB)/target/stm32mp1_ca7
@@ -77,9 +77,9 @@ SOURCES += $(main_source)
 ifeq "$(target_board)" "norflash-loader"
 
 else
-SOURCES += $(usb_src)/usbd_conf.cc
-SOURCES += $(usb_src)/usbd_desc.c
-SOURCES += $(usb_src)/usb_drive_device.cc
+# SOURCES += $(usb_src)/usbd_conf.cc
+# SOURCES += $(usb_src)/usbd_desc.c
+# SOURCES += $(usb_src)/usb_drive_device.cc
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
@@ -87,16 +87,27 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sai.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_ltdc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_tim.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_rcc.c
-SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb.c
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd.c
-SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd_ex.c
-SOURCES += $(USBLIBDIR)/Class/MSC/Src/usbd_msc.c
-SOURCES += $(USBLIBDIR)/Class/MSC/Src/usbd_msc_bot.c
-SOURCES += $(USBLIBDIR)/Class/MSC/Src/usbd_msc_data.c
-SOURCES += $(USBLIBDIR)/Class/MSC/Src/usbd_msc_scsi.c
-SOURCES += $(USBLIBDIR)/Core/Src/usbd_core.c
-SOURCES += $(USBLIBDIR)/Core/Src/usbd_ctlreq.c
-SOURCES += $(USBLIBDIR)/Core/Src/usbd_ioreq.c
+# SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb.c
+# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd.c
+# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd_ex.c
+# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_hcd.c
+# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc.c
+# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_bot.c
+# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_data.c
+# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_scsi.c
+# SOURCES += $(usbdev_libdir)/Core/Src/usbd_core.c
+# SOURCES += $(usbdev_libdir)/Core/Src/usbd_ctlreq.c
+# SOURCES += $(usbdev_libdir)/Core/Src/usbd_ioreq.c
+
+# SOURCES += $(usbhost_libdir)/Class/HUB/Src/usbh_hub.c
+# SOURCES += $(usb_src)/usbh_conf.c
+# SOURCES += $(usb_src)/usbh_MIDI.c
+# SOURCES += $(usb_src)/midi_host.cc
+# SOURCES += $(usbhost_libdir)/Core/Src/usbh_core.c
+# SOURCES += $(usbhost_libdir)/Core/Src/usbh_ctlreq.c
+# SOURCES += $(usbhost_libdir)/Core/Src/usbh_ioreq.c
+# SOURCES += $(usbhost_libdir)/Core/Src/usbh_pipes.c
+
 SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES += $(DRIVERLIB)/drivers/tim.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc
@@ -120,6 +131,10 @@ SOURCES += $(SHARED)/CoreModules/MultiLFOCore.cc
 SOURCES += $(SHARED)/CoreModules/PitchShiftCore.cc
 SOURCES += $(SHARED)/CoreModules/HPFCore.cc
 SOURCES += $(SHARED)/CoreModules/panel_medium.cc
+SOURCES += $(SHARED)/CoreModules/InfOscCore.cc
+SOURCES += $(SHARED)/CoreModules/KPLSCore.cc
+SOURCES += $(SHARED)/CoreModules/FreeverbCore.cc
+SOURCES += $(SHARED)/CoreModules/Seq8Core.cc
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
 endif
@@ -161,6 +176,11 @@ SOURCES += src/pages/images/SMR_artwork_240.c
 SOURCES += src/pages/images/MultiLFO_artwork_240.c
 SOURCES += src/pages/images/PitchShift_artwork_240.c
 SOURCES += src/pages/images/HPF_artwork_240.c
+SOURCES += src/pages/images/InfOsc_artwork_240.c
+SOURCES += src/pages/images/KPLS_artwork_240.c
+SOURCES += src/pages/images/Freeverb_artwork_240.c
+SOURCES += src/pages/images/Seq8_artwork_240.c
+
 SOURCES += src/pages/images/Djembe_artwork_120.c
 SOURCES += src/pages/images/StMix_artwork_120.c
 SOURCES += src/pages/images/PEG_artwork_120.c
@@ -168,6 +188,10 @@ SOURCES += src/pages/images/MultiLFO_artwork_120.c
 SOURCES += src/pages/images/SMR_artwork_120.c
 SOURCES += src/pages/images/PitchShift_artwork_120.c
 SOURCES += src/pages/images/HPF_artwork_120.c
+SOURCES += src/pages/images/InfOsc_artwork_120.c
+SOURCES += src/pages/images/KPLS_artwork_120.c
+SOURCES += src/pages/images/Freeverb_artwork_120.c
+SOURCES += src/pages/images/Seq8_artwork_120.c
 else
 SOURCES += $(wildcard src/pages/images/*.c)
 endif
@@ -185,8 +209,10 @@ SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
 SOURCES += src/fatfs/diskio.cc
+SOURCES += src/fatfs/fattime.cc
 SOURCES += src/fatfs/ramdisk_fileio.cc
 SOURCES += src/patchstorage.cc
+SOURCES += src/time_convert.cc
 # SOURCES += src/patchfileio.cc
 SOURCES += $(LIBDIR)/littlefs/lfs.c
 SOURCES += $(LIBDIR)/littlefs/lfs_util.c
@@ -248,7 +274,7 @@ INCLUDES +=		-Isrc
 INCLUDES +=		-I$(core_src)
 INCLUDES +=		-I$(target_src)
 INCLUDES +=		-I$(target_chip_src)
-INCLUDES +=		-I$(usb_src)
+# INCLUDES +=		-I$(usb_src)
 INCLUDES +=		-I$(HALDIR)/include
 INCLUDES +=		-I$(CMSIS)/Core_A/Include
 INCLUDES +=		-I$(CMSIS)/Include
@@ -266,8 +292,10 @@ INCLUDES +=		-I$(SHARED)/patch
 INCLUDES +=		-I$(LIBDIR)/lvgl
 #INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
 INCLUDES +=		-I$(LIBDIR)/printf
-INCLUDES +=		-I$(USBLIBDIR)/Class/MSC/Inc
-INCLUDES +=		-I$(USBLIBDIR)/Core/Inc
+# INCLUDES +=		-I$(usbdev_libdir)/Class/MSC/Inc
+# INCLUDES +=		-I$(usbdev_libdir)/Core/Inc
+# INCLUDES +=		-I$(usbdev_libdir)/Class/HUB/Inc
+# INCLUDES +=		-I$(usbhost_libdir)/Core/Inc
 INCLUDES += 	-I$(SHARED)/etl/include
 INCLUDES += 	-I$(SHARED)/patch_convert
 INCLUDES += 	-I$(SHARED)/patch_convert/ryml
@@ -340,43 +368,24 @@ AFLAGS = -mcpu=cortex-a7 \
 		 -mfpu=neon-vfpv4 \
 		 -mfloat-abi=hard \
 
-#### U-BOOT
-UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
-IMG  		= $(BUILDDIR)/$(BINARYNAME).img
-LOADADDR 	= 0xC2000040
-ENTRYPOINT 	= $(LOADADDR)
-UBOOTDIR 	= $(LIBDIR)/u-boot
-UBOOTSRCDIR = $(UBOOTDIR)/u-boot-stm32mp1-baremetal
-UBOOTBUILDDIR = $(UBOOTDIR)/build
-UBOOT_MKIMAGE = $(UBOOTBUILDDIR)/tools/mkimage
-
-uboot_base_buildcmd := make O=../build CROSS_COMPILE=arm-none-eabi- stm32mp15x_baremetal_defconfig && \
-					   make -j16 O=../build DEVICE_TREE=stm32mp157c-metamodule-p6 CROSS_COMPILE=arm-none-eabi- u-boot-spl.stm32
-
-ifeq ($(shell uname -m),arm64)
-uboot_buildcmd = arch -x86_64 zsh -c "$(uboot_base_buildcmd)"
-else
-uboot_buildcmd = $(uboot_base_buildcmd)
-endif
-
 ## Build targets
 
 include makefile_opts.mk
 include makefile_common.mk
 
 
+#### BOOT IMAGE
+UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
+IMG  		= $(BUILDDIR)/$(BINARYNAME).img
+LOADADDR 	= 0xC2000040
+ENTRYPOINT 	= $(LOADADDR)
 
-.PHONY: uimg
-uimg: $(UIMG)
 
-$(UIMG): $(BIN) $(UBOOT_MKIMAGE)
-	$(UBOOT_MKIMAGE) -A arm -C none -T kernel -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+.PHONY: bootimg
+bootimg: $(IMG)
 
-.PHONY: img
-img: $(IMG)
-
-$(IMG): $(BIN) $(UBOOT_MKIMAGE)
-	$(UBOOT_MKIMAGE) -A arm -C none -T firmware -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+$(IMG): $(BIN) $(MP1BOOT)
+	# $(UBOOT_MKIMAGE) -A arm -C none -T firmware -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
 	$(info sudo dd if=$(IMG) of=/dev/disk4s3)
 	$(info Image created. Now copy image to sd card with this command (assumes /dev/disk4 is the sd card):)
 
@@ -384,31 +393,25 @@ $(IMG): $(BIN) $(UBOOT_MKIMAGE)
 %-uimg.h : %.uimg 
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
-medium: all #$(BUILDDIR_MP1A7)/medium/$(BINARYNAME)-uimg.h
+medium: all 
 
-mini: uimg
+norflash-loader: bootimg
 
-max: uimg
+# $(UBOOT_MKIMAGE):
+# 	$(error Use `make u-boot` to build U-Boot and re-run this.)
 
-pcmdev: uimg
+# u-boot:
+# 	cd $(UBOOTSRCDIR) && $(uboot_buildcmd)
+# 	$(info Creating .h file from u-boot-spl image)
+# 	cp $(UBOOTDIR)/build/u-boot-spl.stm32 src/norflash-loader/
+# 	cd src/norflash-loader && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
 
-norflash-loader: uimg
-
-$(UBOOT_MKIMAGE):
-	$(error Use `make u-boot` to build U-Boot and re-run this.)
-
-u-boot:
-	cd $(UBOOTSRCDIR) && $(uboot_buildcmd)
-	$(info Creating .h file from u-boot-spl image)
-	cp $(UBOOTDIR)/build/u-boot-spl.stm32 src/norflash-loader/
-	cd src/norflash-loader && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
-
-clean_uboot:
-	rm -rf $(UBOOTBUILDDIR)
+# clean_uboot:
+# 	rm -rf $(UBOOTBUILDDIR)
 
 # Todo: get this working:
-install-uboot:
-	$(info Please enter the sd card device node:)
+# install-uboot:
+# 	$(info Please enter the sd card device node:)
 	# ls -l /dev/disk*  #if macOS
 	# ls -l /dev/sd*    #if linux
 	# getinput(devXX)  #How to do this?

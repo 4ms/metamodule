@@ -7,6 +7,7 @@
 #include "param_cache.hh"
 #include "params.hh"
 #include "patch_loader.hh"
+#include "patch_mod_queue.hh"
 #include "patchlist.hh"
 #include "static_buffers.hh"
 #include "util/analyzed_signal.hh"
@@ -14,13 +15,13 @@
 
 namespace MetaModule
 {
-
+// TODO: remove patch_list ctor parameter, and instead get it from patch_loader.get_patch_list();
 class Ui {
 private:
 	ParamCache &param_cache;
 	PatchList &patch_list;
 	PatchLoader &patch_loader;
-	UiAudioMailbox &mbox;
+	MessageQueue &msg_queue;
 
 	PageManager page_manager;
 	Params params;
@@ -30,12 +31,16 @@ private:
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchLoader &patch_loader, PatchList &patch_list, ParamCache &pc, UiAudioMailbox &uiaudiomailbox)
+	Ui(PatchLoader &patch_loader,
+	   PatchList &patch_list,
+	   ParamCache &pc,
+	   MessageQueue &msg_queue,
+	   PatchModQueue &patch_mod_queue)
 		: param_cache{pc}
 		, patch_list{patch_list}
 		, patch_loader{patch_loader}
-		, mbox{uiaudiomailbox}
-		, page_manager{patch_list, patch_loader, params, metaparams, uiaudiomailbox} {
+		, msg_queue{msg_queue}
+		, page_manager{patch_list, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
 	void start() {
@@ -76,10 +81,10 @@ private:
 		lv_timer_handler();
 		page_update_tm.start();
 
-		auto msg = mbox.get_message();
+		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {
-			printf("%s", msg.data());
-			mbox.clear_message();
+			printf_("%s", msg.data());
+			msg_queue.clear_message();
 		}
 		// output_debug_info();
 		// Debug::Pin1::low();
@@ -88,11 +93,11 @@ private:
 	void page_update_task() { //60Hz
 		//This returns false when audio stops
 		bool read_ok = param_cache.read_sync(&params, &metaparams);
-		if (read_ok) {
-			Debug::Pin1::low();
-		} else {
-			Debug::Pin1::high();
-		}
+		// if (read_ok) {
+		// 	Debug::Pin1::low();
+		// } else {
+		// 	Debug::Pin1::high();
+		// }
 		page_manager.update_current_page();
 		patch_loader.handle_sync_patch_loading();
 	}
@@ -126,42 +131,42 @@ private:
 		readings++;
 
 		if ((HAL_GetTick() - last_dbg_output_tm) > 500) {
-			printf("\r\nnumber of readings: %d\r\n", readings);
+			printf_("\r\nnumber of readings: %d\r\n", readings);
 			readings = 0;
 
 			for (auto [i, pot] : enumerate(params.knobs)) {
-				printf("Pot %d: iir=%d min=%d max=%d range=%d\r\n",
-					   i,
-					   (int32_t)(4096.f * pot_iir[i]),
-					   (int32_t)(4096.f * pot_min[i]),
-					   (int32_t)(4096.f * pot_max[i]),
-					   (int32_t)(4096.f * (pot_max[i] - pot_min[i])));
+				printf_("Pot %d: iir=%d min=%d max=%d range=%d\r\n",
+						i,
+						(int32_t)(4096.f * pot_iir[i]),
+						(int32_t)(4096.f * pot_min[i]),
+						(int32_t)(4096.f * pot_max[i]),
+						(int32_t)(4096.f * (pot_max[i] - pot_min[i])));
 				pot_iir[i] = pot;
 				pot_min[i] = 4096.f;
 				pot_max[i] = 0.f;
 			}
 
-			printf("PatchCV: iir=%d min=%d max=%d range=%d\r\n",
-				   (int32_t)(patchcv.iir * 4096.f),
-				   (int32_t)(4096.f * patchcv.min),
-				   (int32_t)(4096.f * patchcv.max),
-				   (int32_t)(4096.f * (patchcv.max - patchcv.min)));
+			printf_("PatchCV: iir=%d min=%d max=%d range=%d\r\n",
+					(int32_t)(patchcv.iir * 4096.f),
+					(int32_t)(4096.f * patchcv.min),
+					(int32_t)(4096.f * patchcv.max),
+					(int32_t)(4096.f * (patchcv.max - patchcv.min)));
 			patchcv.reset_to(metaparams.patchcv);
 
-			printf("Button: %d GateIn1: %d GateIn2: %d\r\n",
-				   metaparams.meta_buttons[0].is_high() ? 1 : 0,
-				   params.gate_ins[0].is_high() ? 1 : 0,
-				   params.gate_ins[1].is_high() ? 1 : 0);
+			printf_("Button: %d GateIn1: %d GateIn2: %d\r\n",
+					metaparams.meta_buttons[0].is_high() ? 1 : 0,
+					params.gate_ins[0].is_high() ? 1 : 0,
+					params.gate_ins[1].is_high() ? 1 : 0);
 
-			printf("Jack senses: %08x\r\n", params.jack_senses);
+			printf_("Jack senses: %08x\r\n", params.jack_senses);
 
 			for (auto [i, ain] : enumerate(metaparams.ins)) {
-				printf("AIN %d: iir=%d min=%d max=%d range=%d\r\n",
-					   i,
-					   (int32_t)(ain.iir * 32768.f),
-					   (int32_t)(ain.min * 32768.f),
-					   (int32_t)(ain.max * 32768.f),
-					   (int32_t)((ain.max - ain.min) * 32768.f));
+				printf_("AIN %d: iir=%d min=%d max=%d range=%d\r\n",
+						i,
+						(int32_t)(ain.iir * 32768.f),
+						(int32_t)(ain.min * 32768.f),
+						(int32_t)(ain.max * 32768.f),
+						(int32_t)((ain.max - ain.min) * 32768.f));
 				ain.reset_to(ain.iir);
 			}
 

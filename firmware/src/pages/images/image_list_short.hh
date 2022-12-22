@@ -1,5 +1,3 @@
-#pragma once
-#include "lvgl/lvgl.h"
 #include <string_view>
 
 extern "C" {
@@ -18,6 +16,14 @@ LV_IMG_DECLARE(StMix_artwork_240);
 LV_IMG_DECLARE(StMix_artwork_120);
 LV_IMG_DECLARE(SMR_artwork_240);
 LV_IMG_DECLARE(SMR_artwork_120);
+LV_IMG_DECLARE(InfOsc_artwork_120);
+LV_IMG_DECLARE(InfOsc_artwork_240);
+LV_IMG_DECLARE(KPLS_artwork_120);
+LV_IMG_DECLARE(KPLS_artwork_240);
+LV_IMG_DECLARE(Freeverb_artwork_240);
+LV_IMG_DECLARE(Freeverb_artwork_120);
+LV_IMG_DECLARE(Seq8_artwork_120);
+LV_IMG_DECLARE(Seq8_artwork_240);
 }
 
 struct ModuleImages {
@@ -45,6 +51,18 @@ struct ModuleImages {
 
 		if (slug == "SMR")
 			return (height == 240) ? &SMR_artwork_240 : &SMR_artwork_120;
+
+		if (slug == "InfOsc")
+			return (height == 240) ? &InfOsc_artwork_240 : &InfOsc_artwork_120;
+
+		if (slug == "KPLS")
+			return (height == 240) ? &KPLS_artwork_240 : &KPLS_artwork_120;
+
+		if (slug == "Freeverb")
+			return (height == 240) ? &Freeverb_artwork_240 : &Freeverb_artwork_120;
+
+		if (slug == "Seq8")
+			return (height == 240) ? &Seq8_artwork_240 : &Seq8_artwork_120;
 
 		return nullptr;
 	}

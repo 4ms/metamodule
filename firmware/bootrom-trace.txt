@@ -1,0 +1,46 @@
+< @ 00007507 | [INFO] - BOOTCORE_BootRomMaskVer ( 0x00000000 ) >
+< @ 00008803 | [INFO] - BOOTCORE_BootRomVer ( 0x00000102 ) >
+< @ 00009979 | [INFO] - BOOTCORE_FreezeIWDG12Clocks >
+< @ 00011338 | [INFO] - BOOTCORE_HwResetPOR >
+< @ 00023922 | [INFO] - BOOTCORE_ChipModeSecOpen >
+< @ 00026267 | [INFO] - BOOTCORE_LogicalResetSystem >
+< @ 00028025 | [INFO] - BOOTCORE_BootActionColdBootProcess >
+< @ 00086684 | [INFO] - BOOTCORE_BootCfgOtpWordValue ( 0x00000000, 0x00000000 ) >
+< @ 00088182 | [INFO] - BOOTCORE_BootPinsFirstSelQspiNor >
+< @ 00089237 | [INFO] - BOOTCORE_OtpPrimarySrcForceNothing >
+< @ 00090295 | [INFO] - BOOTCORE_OtpSecondarySrcForceNothing >
+< @ 00091400 | [INFO] - BOOTCORE_OtpBootSrcDisableMaskVal ( 0x00000000 ) >
+< @ 00092539 | [INFO] - BOOTCORE_OtpBootUartInstanceDisableMaskVal ( 0x00000000 ) >
+< @ 00093974 | [INFO] - BOOTCORE_eMmcUseSingle128KBytesBootPartition ( 0x00000000 ) >
+< @ 00096278 | [INFO] - BOOTCORE_BootCfgAfmuxOtpWord1Value ( 0x00000000 ) >
+< @ 00097630 | [INFO] - BOOTCORE_BootCfgAfmuxOtpWord2Value ( 0x00000000 ) >
+< @ 00099046 | [INFO] - BOOTCORE_BootCfgAfmuxOtpWord3Value ( 0x00000000 ) >
+< @ 00100573 | [INFO] - BOOTCORE_BootCfgHseValue ( 0x00000000 ) >
+< @ 00103596 | [INFO] - BOOTCORE_EnabledSrcMaskVal ( 0x00000644 ) >
+< @ 00104948 | [INFO] - BOOTCORE_BootModeCOLDBOOT >
+< @ 00640311 | [INFO] - BOOTCORE_StartupWaitTime ( 0x00002700 ) >
+< @ 00641875 | [INFO] - BOOTCORE_NoCpuPllOtpBitValue ( 0x00000000 ) >
+< @ 00644110 | [INFO] - BOOTCORE_Pll12StartNotDisabledByOtpBit >
+< @ 00646184 | [INFO] - BOOTCORE_Pll1Started >
+< @ 00650656 | [INFO] - BOOTCORE_Pll1Locked >
+< @ 00652028 | [INFO] - BOOTCORE_Pll2Started >
+< @ 00656817 | [INFO] - BOOTCORE_Pll2Locked >
+< @ 00658419 | [INFO] - BOOTCORE_CkMpuSsSwitchedOnPll1 >
+< @ 00659902 | [INFO] - BOOTCORE_CkAxiSsSwitchedOnPll2 >
+< @ 00660480 | [INFO] - BOOTCORE_Pll12StartReqStatusPllStarted >
+< @ 00662848 | [INFO] - QSPI_TryingSingleMode >
+< @ 00663761 | [INFO] - QSPI_FoundMagicAtDefaultLocation >
+< @ 00664147 | [INFO] - QSPI_UseOffsets ( 0x00000000, 0x00040000 ) >
+< @ 00664623 | [INFO] - QSPI_TryingSECBL1 ( 0x00000000 ) >
+< @ 01388437 | [INFO] - BOOTCORE_AuthHashAreaStartAdd ( 0x2FFC2448 ) >
+< @ 01388725 | [INFO] - BOOTCORE_AuthImageLength ( 0x000074A4 ) >
+< @ 01389017 | [INFO] - BOOTCORE_AuthImageSizeToHash ( 0x0000755C ) >
+< @ 01389323 | [INFO] - BOOTCORE_AuthImageEntryPoint ( 0x2FFC2500 ) >
+< @ 01389908 | [INFO] - BOOTCORE_AuthEccAlgoP256NIST >
+< @ 01390167 | [INFO] - BOOTCORE_AuthNoSigCheckValue ( 0x00000001 ) >
+< @ 01390560 | [INFO] - BOOTCORE_AuthIsAuthenticationMandatory ( 0x00000000 ) >
+< @ 01390845 | [INFO] - BOOTCORE_AuthIsAuthenticationSkipRequestedAndAllowed ( 0x00000001 ) >
+< @ 01633512 | [INFO] - BOOTCORE_AuthDecisionIsJumpToImage >
+< @ 01634537 | [INFO] - BOOTCORE_ReOpenDbgSwEnableAndHdp ( 0x0000041F ) >
+< @ 01635723 | [INFO] - BOOTCORE_ReOpenSecOnlyDebugValue ( 0x0000047F ) >
+< @ 01637445 | [INFO] - BOOTCORE_UnFreezeIWDG12Clocks >

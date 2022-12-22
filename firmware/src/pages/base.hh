@@ -3,10 +3,12 @@
 #include "lvgl/lvgl.h"
 #include "params.hh"
 #include "patch_loader.hh"
+#include "patch_mod_queue.hh"
 #include "patchlist.hh"
 #include "ui_audio_mailbox.hh"
-#include "util/geometry.hh"
-#include <optional>
+
+// Use for helpers:
+// #include "page_list.hh"
 
 namespace MetaModule
 {
@@ -18,7 +20,8 @@ struct PatchInfo {
 	PatchLoader &patch_loader;
 	Params &params;
 	MetaParams &metaparams;
-	UiAudioMailbox &mbox;
+	MessageQueue &msg_queue;
+	PatchModQueue &patch_mod_queue;
 };
 
 struct PageBase {
@@ -26,7 +29,8 @@ struct PageBase {
 	PatchLoader &patch_loader;
 	Params &params;
 	MetaParams &metaparams;
-	UiAudioMailbox &mbox;
+	MessageQueue &msg_queue;
+	PatchModQueue &patch_mod_queue;
 
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;
@@ -36,7 +40,8 @@ struct PageBase {
 		, patch_loader{info.patch_loader}
 		, params{info.params}
 		, metaparams{info.metaparams}
-		, mbox{info.mbox} {
+		, msg_queue{info.msg_queue}
+		, patch_mod_queue{info.patch_mod_queue} {
 	}
 
 	virtual ~PageBase() = default;
@@ -71,7 +76,8 @@ struct PageBase {
 
 		prepare_focus();
 
-		lv_scr_load(screen);
+		if (screen)
+			lv_scr_load(screen);
 	}
 
 	virtual void prepare_focus() {
@@ -82,5 +88,18 @@ struct PageBase {
 
 	virtual void update() {
 	}
+
+	//TODO: add helpers? or add to separate class/namespace?
+	// std::string_view read_slug() {
+	// 	auto module_id = PageList::get_selected_module_id();
+	// 	auto patch_id = PageList::get_selected_patch_id();
+	// 	const PatchData &patch = patch_list.get_patch(patch_id);
+	// 	if (patch.patch_name.length() == 0)
+	// 		return "";
+	// 	if (module_id >= patch.module_slugs.size())
+	// 		return "";
+
+	// 	return patch.module_slugs[module_id];
+	// }
 };
 } // namespace MetaModule

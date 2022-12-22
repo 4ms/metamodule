@@ -33,6 +33,7 @@ R"(PatchData:
         jack_id: 1
   static_knobs: 
   mapped_knobs: 
+  midi_maps:
 )"};
 						 // clang-format on
 	PatchData pd;
@@ -98,6 +99,7 @@ PatchData:
         jack_id: 1
   static_knobs: 
   mapped_knobs: 
+  midi_maps:
 	)"};
 	// clang-format on
 
@@ -223,6 +225,7 @@ PatchData:
   mapped_outs: 
   static_knobs: 
   mapped_knobs: 
+  midi_maps:
 	)"};
 	// clang-format on
 
@@ -286,6 +289,7 @@ PatchData:
   mapped_outs: 
   static_knobs: 
   mapped_knobs: 
+  midi_maps:
 	)"};
 	// clang-format on
 
@@ -339,6 +343,7 @@ PatchData:
   mapped_outs: 
   static_knobs: 
   mapped_knobs: 
+  midi_maps:
 	)"};
 		// clang-format on
 

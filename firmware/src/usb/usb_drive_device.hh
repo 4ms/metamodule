@@ -10,10 +10,13 @@ class UsbDriveDevice {
 
 public:
 	UsbDriveDevice(RamDiskOps &nfs);
+	void init_usb_device();
 	void start();
+	void stop();
 	static inline USBD_StorageTypeDef ops;
 
 private:
+	void init_fops();
 	USBD_HandleTypeDef pdev;
 
 	static inline RamDiskOps *nordisk = nullptr;

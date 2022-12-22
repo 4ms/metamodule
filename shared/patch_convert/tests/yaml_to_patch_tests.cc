@@ -81,7 +81,7 @@ PatchData:
       param_id: 6
       value: 0.7
   mapped_knobs:
-    - alias_name: Knob1
+    - alias_name: Knob1 #comment
       panel_knob_id: 1
       module_id: 2
       param_id: 3
