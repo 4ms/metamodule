@@ -2,14 +2,30 @@
 #include "CoreModules/info/EnOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
+#include "CoreModules/enosc/polyptic_oscillator.hh"
+#include "enosc/ui.hh"
+
 class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
 	using ThisCore = EnOscCore;
 
+	enum { kBlockSize = 1 };
+	enum { kUiUpdateRate = 120 };
+
 public:
 	EnOscCore() = default;
+	// : enosc{params} {
+	// }
 
 	void update() override {
+		// Low-priority thread:
+		enosc.Process();
+
+		// High-priority at SR/BR:
+		enosc.Poll();
+
+		Buffer<Frame, kBlockSize> block;
+		enosc.osc().process(block);
 	}
 
 	void set_param(int param_id, float val) override {
@@ -36,4 +52,7 @@ public:
 	// clang-format on
 
 private:
+	Ui<kUiUpdateRate, kBlockSize> enosc;
+	// Parameters params;
+	// PolypticOscillator<1> enosc;
 };
