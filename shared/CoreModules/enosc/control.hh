@@ -34,12 +34,12 @@ enum CalibrationStep { CALIBRATE_UNPATCHED, CALIBRATE_C2, CALIBRATE_C4 };
 
 template<int CHAN, class FILTER>
 class ExtCVConditioner {
-	SpiAdc &spi_adc_;
 	f &offset_;
 	f nominal_offset_;
 	f &slope_;
 	f nominal_slope_;
 	FILTER lp_;
+	SpiAdc &spi_adc_;
 
 	f reading_at_C2;
 	f reading_unpatched;
@@ -456,9 +456,9 @@ class Control : public EventSource<Event> {
 
 public:
 	Control(Parameters &params, PolypticOscillator<block_size> &osc)
-		: osc_(osc)
+		: pitch_pot_(adc_, params.alt.pitch_pot_state)
 		, params_(params)
-		, pitch_pot_(adc_, params.alt.pitch_pot_state) {
+		, osc_(osc) {
 	}
 
 	void ProcessSpiAdcInput() {
@@ -806,6 +806,8 @@ public:
 				calibration_state_ = CALIBRATING_ROOT_SLOPE;
 				root_cv_.start_calibration(CALIBRATE_C4);
 			} break;
+			case CALIBRATING_ROOT_SLOPE:
+				break;
 		}
 	}
 

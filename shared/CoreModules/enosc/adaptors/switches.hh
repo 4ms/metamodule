@@ -43,7 +43,17 @@ struct Switches : Nocopy {
 		}
 	};
 
-	ThreePosSwitch scale_, mod_, twist_, warp_;
+	struct Scale : ThreePosSwitch {
+	} scale_;
+
+	struct Mod : ThreePosSwitch {
+	} mod_;
+
+	struct Twist : ThreePosSwitch {
+	} twist_;
+
+	struct Warp : ThreePosSwitch {
+	} warp_;
 
 	void Debounce() {
 		scale_.Debounce();

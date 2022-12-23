@@ -225,6 +225,8 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 			case SwitchWarp: {
 				params_.warp.mode = e1.data == Switches::UP ? FOLD : e1.data == Switches::MID ? CHEBY : SEGMENT;
 			} break;
+			default:
+				break;
 		}
 
 		switch (mode_) {
@@ -278,6 +280,8 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 							control_.pitch_pot_alternate_function();
 						}
 					} break;
+					default:
+						break;
 				}
 			} break;
 
@@ -332,6 +336,8 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 					case AltParamChange: {
 						freeze_led_.flash(Colors::white);
 					} break;
+					default:
+						break;
 				}
 			} break;
 
@@ -388,7 +394,11 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 								freeze_led_.flash(Colors::black);
 						}
 					} break;
+					default:
+						break;
 				}
+				default:
+					break;
 			} break;
 
 			case MANUAL_LEARN: {
@@ -439,6 +449,8 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 							}
 							reset_leds();
 							mode_ = NORMAL;
+							break;
+						default:
 							break;
 					}
 				} else //wait for button press to advance to next step

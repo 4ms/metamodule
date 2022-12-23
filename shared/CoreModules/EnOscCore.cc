@@ -25,7 +25,7 @@ public:
 		enosc.Poll();
 
 		Buffer<Frame, kBlockSize> block;
-		enosc.osc().process(block);
+		enosc.osc().Process(block);
 	}
 
 	void set_param(int param_id, float val) override {

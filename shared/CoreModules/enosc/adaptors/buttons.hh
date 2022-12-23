@@ -34,12 +34,18 @@ struct Buttons : Nocopy {
 
 	struct Learn : public Debouncer<Learn> {
 		Learn();
-		bool get();
+		bool get() {
+			//TODO: return state as set by HW model
+			return false;
+		}
 	} learn_;
 
 	struct Freeze : Debouncer<Freeze> {
 		Freeze();
-		bool get();
+		bool get() {
+			//TODO: return state as set by HW model
+			return false;
+		}
 	} freeze_;
 
 	void Debounce() {

@@ -110,12 +110,12 @@ class Oscillators : Nocopy {
 	}
 
 	class FrequencyAccumulator {
+		Scale const &scale;
 		f root;
 		f pitch;
 		f spread;
 		f detune;
 		f detune_accum = 0_f;
-		Scale const &scale;
 
 	public:
 		FrequencyAccumulator(Scale const &g, f r, f p, f s, f d)
