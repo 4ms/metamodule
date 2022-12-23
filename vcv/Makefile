@@ -39,6 +39,10 @@ SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
+SOURCES += $(SHARED_DIR)/CoreModules/enosc/data.cc
+SOURCES += $(SHARED_DIR)/CoreModules/enosc/dynamic_data.cc
+SOURCES += $(SHARED_DIR)/CoreModules/enosc/easiglib/numtypes.cc
+
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
 DISTRIBUTABLES += res
