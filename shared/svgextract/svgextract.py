@@ -657,8 +657,8 @@ def createlvimg(artworkSvgFilename, outputBaseName):
         Log("lv_img_conv.js failed. Try "
         " 1) `git submodule update --init` and/or "
         " 2) `cd ../shared/svgextract/lv_img_conv && npm install`"
-        " 3) `cd ../shared/svgextract/lv_img_conv && docker build -t lv_img_conv` and then use the docker container (???)"
-        " 4) `sudo n 16` to use node v16 (required). Might have to install n with `npm i -g n` first")
+        " 3) `cd ../shared/svgextract/lv_img_conv && docker build -t lv_img_conv` and then use the docker container (or not -- docker container is broken???)"
+        " 4) `sudo n 16` to use node v16 (required) and then `cd ../shared/svgextract/lv_img_conv && npm install`. Might have to install n with `npm i -g n`, and do `brew unlink node` first")
         return
 
 
