@@ -1,7 +1,7 @@
 #pragma once
 
 #include "adaptors/buttons.hh"
-#include "adaptors/leds.hh"
+#include "adaptors/color.hh"
 #include "adaptors/switches.hh"
 #include "control.hh"
 #include "easiglib/bitfield.hh"
@@ -16,11 +16,12 @@ constexpr u1_7 kLedAdjustValidMax = kLedAdjustMax.succ();
 constexpr f kLedAdjustRange = (f)(kLedAdjustMax - kLedAdjustMin);
 constexpr f kLedAdjustOffset = (f)(kLedAdjustMin);
 
-template<int update_rate, class T>
-struct LedManager : T {
+template<int update_rate>
+struct LedManager {
 
-	LedManager(Color::Adjustment &color_cal)
-		: color_cal_(color_cal) {
+	LedManager(Color::Adjustment &color_cal, Color initial)
+		: color_cal_(color_cal)
+		, display_(initial) {
 	}
 
 	// flash_freq in Hz; max = update_rate
@@ -55,7 +56,10 @@ struct LedManager : T {
 		c = c.blend(glow_color_, u0_8::narrow(osc_.Process()));
 		c = c.blend(flash_color_, u0_8::narrow(flash_phase_));
 		c = c.adjust(color_cal_);
-		T::set(c);
+
+		//T::set(c);
+		display_ = c;
+
 		if (flash_phase_ > flash_freq_)
 			flash_phase_ -= flash_freq_;
 		else
@@ -68,6 +72,10 @@ struct LedManager : T {
 		color_cal_.b = u1_7(b);
 	}
 
+	Color get_color() const {
+		return display_;
+	}
+
 private:
 	TriangleOscillator osc_;
 	Color background_color_ = Colors::black;
@@ -77,6 +85,8 @@ private:
 	u0_16 flash_freq_ = 0.0014_u0_16;
 	u0_16 flash_phase_ = 0._u0_16;
 	Color::Adjustment &color_cal_;
+
+	Color display_;
 };
 
 struct ButtonsEventSource : EventSource<Event>, Buttons {
@@ -127,7 +137,6 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 	friend Base;
 
 	Parameters params_;
-	Leds leds_;
 	PolypticOscillator<block_size> osc_{params_};
 
 	Persistent<WearLevel<FlashBlock<1, Parameters::AltParameters>>> alt_params_{&params_.alt, params_.default_alt};
@@ -157,8 +166,8 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 	Persistent<WearLevel<FlashBlock<3, LedCalibrationData>>> led_calibration_data_storage_{
 		&led_calibration_data_, default_led_calibration_data_};
 
-	LedManager<update_rate, Leds::Learn> learn_led_{led_calibration_data_.led_learn_adjust};
-	LedManager<update_rate, Leds::Freeze> freeze_led_{led_calibration_data_.led_freeze_adjust};
+	LedManager<update_rate> learn_led_{led_calibration_data_.led_learn_adjust, Colors::yellow};
+	LedManager<update_rate> freeze_led_{led_calibration_data_.led_freeze_adjust, Colors::yellow};
 
 	typename Base::DelayedEventSource button_timeouts_[2];
 	typename Base::DelayedEventSource new_note_delay_;

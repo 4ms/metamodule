@@ -81,37 +81,3 @@ struct Colors {
 	static constexpr Color dark_magenta = magenta.blend(black);
 	static constexpr Color dark_cyan = cyan.blend(black);
 };
-
-struct Leds : Nocopy {
-	Leds();
-
-	template<class T>
-	struct ILed : crtp<T, ILed<T>> {
-		void set(u0_8 r, u0_8 g, u0_8 b) {
-			return (**this).set(r, g, b);
-		}
-		void set(Color c) {
-			set(c.red(), c.green(), c.blue());
-		}
-	};
-
-	struct Freeze : public ILed<Freeze> {
-		void set(u0_8 r, u0_8 g, u0_8 b) {
-			// FREEZE_LED_PWM_TIM->FREEZE_LED_PWM_CC_RED 	= r.repr();
-			// FREEZE_LED_PWM_TIM->FREEZE_LED_PWM_CC_GREEN = b.repr(); // WARNING: inverted
-			// FREEZE_LED_PWM_TIM->FREEZE_LED_PWM_CC_BLUE 	= g.repr();
-			//TODO: save the color, and return is as needed to VCV plugin
-		}
-	} freeze_;
-
-	struct Learn : public ILed<Learn> {
-		void set(u0_8 r, u0_8 g, u0_8 b) {
-			// LEARN_LED_PWM_TIM->LEARN_LED_PWM_CC_RED 	= r.repr();
-			// LEARN_LED_PWM_TIM->LEARN_LED_PWM_CC_GREEN = b.repr(); // WARNING: inverted
-			// LEARN_LED_PWM_TIM->LEARN_LED_PWM_CC_BLUE 	= g.repr();
-			//TODO: save the color, and return is as needed to VCV plugin
-		}
-	} learn_;
-
-private:
-};
