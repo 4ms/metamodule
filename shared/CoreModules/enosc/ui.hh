@@ -535,4 +535,27 @@ public:
 		learn_led_.Update();
 		freeze_led_.Update();
 	}
+
+	void set_potcv(AdcInput chan, float val) {
+		control_.set_potcv(chan, val);
+	}
+
+	void set_highres_cv(SpiAdcInput chan, float val) {
+		control_.set_highres_cv(chan, val);
+	}
+
+	auto &switches() {
+		return switches_;
+	}
+
+	auto &buttons() {
+		return buttons_;
+	}
+
+	Color get_freeze_led_color() const {
+		return freeze_led_.get_color();
+	}
+	Color get_learn_led_color() const {
+		return learn_led_.get_color();
+	}
 };

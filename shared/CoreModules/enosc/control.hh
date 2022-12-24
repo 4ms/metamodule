@@ -371,6 +371,7 @@ class Control : public EventSource<Event> {
 
 	Adc adc_;
 	SpiAdc spi_adc_;
+
 	Gates gates_;
 
 	struct CalibrationData {
@@ -818,5 +819,13 @@ public:
 
 	void SaveCalibration() {
 		calibration_data_storage_.Save();
+	}
+
+	void set_potcv(AdcInput chan, float val) {
+		adc_.set(chan, u0_16::inclusive(f(val)));
+	}
+
+	void set_highres_cv(SpiAdcInput chan, float val) {
+		spi_adc_.set(chan, u0_16::inclusive(f(val)));
 	}
 };
