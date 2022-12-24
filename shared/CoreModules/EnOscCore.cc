@@ -30,8 +30,9 @@ public:
 		}
 
 		enosc.Poll();
-		//process SpiAdc channel, freeze_led set color
+		//process SpiAdc channel,
 		//EventHandler::Poll: Polls each event source
+		//freeze_led set color
 
 		enosc.osc().Process(out_block_);
 	}
@@ -166,12 +167,4 @@ public:
 private:
 	Ui<kUiUpdateRate, kBlockSize> enosc;
 	Buffer<Frame, kBlockSize> out_block_;
-
-	// Parameters params_;
-	// Leds leds_;
-	// PolypticOscillator<1> enosc_{params_};
-	// Persistent<WearLevel<FlashBlock<1, Parameters::AltParameters>>> alt_params_{&params_.alt, params_.default_alt};
-	// ButtonsEventSource buttons_;
-	// SwitchesEventSource switches_;
-	// Control<kBlockSize> control_{params_, enosc_};
 };
