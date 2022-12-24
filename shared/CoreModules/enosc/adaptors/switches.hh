@@ -13,11 +13,13 @@ struct Switches : Nocopy {
 	enum State { UP = 1, DOWN = 2, MID = 3 };
 
 	struct ThreePosSwitch {
+		State next_state_ = MID;
 		State state_ = MID;
 		State last_state_ = MID;
 
 		void Debounce() {
 			last_state_ = state_;
+			state_ = next_state_;
 		}
 
 		// Always called after Switches::Debounce():
@@ -38,8 +40,7 @@ struct Switches : Nocopy {
 		}
 
 		void set(State s) {
-			last_state_ = state_;
-			state_ = s;
+			next_state_ = s;
 		}
 	};
 
