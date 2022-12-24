@@ -132,7 +132,9 @@ public:
 
 	float get_output(int output_id) const override {
 		s9_23 sample = output_id == 0 ? out_block_[0].l : out_block_[0].r;
-		return f::inclusive(sample).repr();
+		if (sample.repr() != 0)
+			std::cout << "ne 0" << std::endl;
+		return f::inclusive(sample).repr() * 10.f;
 	}
 
 	void set_samplerate(float sr) override {
