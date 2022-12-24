@@ -17,35 +17,33 @@ struct Buttons : Nocopy {
 
 	template<class T>
 	struct Debouncer : crtp<T, Debouncer<T>> {
-		uint8_t state_ = 0xFF;
+		uint8_t history_ = 0xFF;
+		bool state_ = false;
+
 		void Debounce() {
-			state_ = (state_ << 1) | (**this).get();
+			history_ = (history_ << 1) | (**this).get();
 		}
 		bool just_released() const {
-			return state_ == 0b01111111;
+			return history_ == 0b01111111;
 		}
 		bool just_pushed() const {
-			return state_ == 0b10000000;
+			return history_ == 0b10000000;
 		}
 		bool pushed() const {
-			return state_ == 0b00000000;
+			return history_ == 0b00000000;
+		}
+		bool get() const {
+			return state_;
+		}
+		void set(bool s) {
+			state_ = !s;
 		}
 	};
 
-	struct Learn : public Debouncer<Learn> {
-		Learn();
-		bool get() {
-			//TODO: return state as set by HW model
-			return false;
-		}
+	struct Learn : Debouncer<Learn> {
 	} learn_;
 
 	struct Freeze : Debouncer<Freeze> {
-		Freeze();
-		bool get() {
-			//TODO: return state as set by HW model
-			return false;
-		}
 	} freeze_;
 
 	void Debounce() {
