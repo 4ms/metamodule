@@ -4,11 +4,10 @@
 enum SpiAdcInput { CV_PITCH, CV_ROOT, NUM_SPI_ADC_CHANNELS };
 
 class SpiAdc : Nocopy {
-	static inline u0_16 values[NUM_SPI_ADC_CHANNELS];
+	u0_16 values[NUM_SPI_ADC_CHANNELS];
 
 public:
-	SpiAdc() {
-	}
+	SpiAdc() = default;
 
 	void switch_channel() {
 	}

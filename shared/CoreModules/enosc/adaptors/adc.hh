@@ -21,20 +21,18 @@ enum AdcInput {
 };
 
 class Adc : Nocopy {
-	static inline u0_16 values[ADC_INPUT_MAX];
+	u0_16 values[ADC_INPUT_MAX];
 
 public:
-	Adc() {
-	}
-	// void Start() {
-	// }
-	// void Wait() {
-	// }
+	Adc() = default;
 	void set(AdcInput i, u0_16 v) {
-		values[i] = v;
+		if (i < ADC_INPUT_MAX && i > 0)
+			values[i] = v;
 	}
 
 	u0_16 get(AdcInput i) {
+		if (i < ADC_INPUT_MAX && i > 0)
+			return 0._u0_16;
 		return values[i];
 	}
 };
