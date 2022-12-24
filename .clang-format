@@ -32,7 +32,7 @@ BraceWrapping:
   SplitEmptyNamespace: false
 BreakBeforeBraces: "Custom"
 BreakBeforeConceptDeclarations : true
-BreakBeforeTernaryOperators : true
+BreakBeforeTernaryOperators : false
 BreakConstructorInitializers : "BeforeComma"
 BreakInheritanceList : "AfterColon"
 ConstructorInitializerIndentWidth: 4
