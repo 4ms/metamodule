@@ -15,13 +15,12 @@ struct Buttons : Nocopy {
 		}
 	}
 
-	template<class T>
-	struct Debouncer : crtp<T, Debouncer<T>> {
+	struct PushButton {
 		uint8_t history_ = 0xFF;
-		bool state_ = false;
+		bool state_ = true;
 
 		void Debounce() {
-			history_ = (history_ << 1) | (**this).get();
+			history_ = (history_ << 1) | get();
 		}
 		bool just_released() const {
 			return history_ == 0b01111111;
@@ -38,13 +37,7 @@ struct Buttons : Nocopy {
 		void set(bool s) {
 			state_ = !s;
 		}
-	};
-
-	struct Learn : Debouncer<Learn> {
-	} learn_;
-
-	struct Freeze : Debouncer<Freeze> {
-	} freeze_;
+	} learn_, freeze_;
 
 	void Debounce() {
 		learn_.Debounce();
