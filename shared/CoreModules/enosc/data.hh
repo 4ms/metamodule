@@ -1,9 +1,7 @@
-#include "easiglib/buffer.hh"
-#include "easiglib/numtypes.hh"
-
 #pragma once
 
-using namespace std;
+#include "easiglib/buffer.hh"
+#include "easiglib/numtypes.hh"
 
 struct Data {
 	static const Buffer<s1_15, 257> sine;
