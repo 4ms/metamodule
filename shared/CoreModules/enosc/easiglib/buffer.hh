@@ -67,8 +67,11 @@ struct Buffer : std::array<T, SIZE> {
 
 	// No copy allowed
 	constexpr Buffer() = default;
-	Buffer(const Buffer &) = delete;
-	Buffer &operator=(const Buffer &) = delete;
+	// Buffer(const Buffer &) = delete;
+	// Buffer &operator=(const Buffer &) = delete;
+	Buffer(const Base &base)
+		: Base{base} {
+	}
 
 	iterator const begin() {
 		return iterator(Base::begin());

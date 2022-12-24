@@ -53,6 +53,9 @@ include $(RACK_DIR)/plugin.mk
 
 CXXFLAGS += -mmacosx-version-min=10.15 
 
+./build/src/shared/CoreModules/EnOscCore.cc.o: CXXFLAGS+=-Wno-missing-braces
+./build/src/shared/CoreModules/enosc/dynamic_data.cc.o: CXXFLAGS+=-Wno-unknown-pragmas
+
 all: plugin res tests
 
 plugin: $(TARGET)

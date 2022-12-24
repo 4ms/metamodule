@@ -90,7 +90,7 @@ private:
 };
 
 struct ButtonsEventSource : EventSource<Event>, Buttons {
-	void Poll(std::function<void(Event)> const &put) {
+	void Poll(std::function<void(Event)> const &put) override {
 		Buttons::Debounce();
 		if (Buttons::learn_.just_pushed())
 			put({ButtonPush, BUTTON_LEARN});

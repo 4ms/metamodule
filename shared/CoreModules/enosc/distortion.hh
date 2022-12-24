@@ -69,11 +69,11 @@ namespace Antialias
 {
 
 // simple linear piecewise function: 0->1, 0.25->1, 0.5->0
-static f freq(f freq, f fade) {
+static inline f freq(f freq, f fade) {
 	return fade * (1_f - 4_f * freq * freq).max(0_f);
 }
 
-static f modulation(f freq, f mod) {
+static inline f modulation(f freq, f mod) {
 	return mod * (1_f - 2_f * freq).max(0_f).square();
 }
 
@@ -83,17 +83,17 @@ template<WarpMode>
 f warp(f freq, f amount);
 
 template<>
-f twist<FEEDBACK>(f freq, f amount) {
+inline f twist<FEEDBACK>(f freq, f amount) {
 	return amount * (1_f - 2_f * freq).max(0_f).square();
 }
 
 template<>
-f twist<PULSAR>(f freq, f amount) {
+inline f twist<PULSAR>(f freq, f amount) {
 	return (amount - 1_f) * (1_f - 2_f * freq).max(0_f).square().square().square().square() + 1_f;
 }
 
 template<>
-f twist<CRUSH>(f freq, f amount) {
+inline f twist<CRUSH>(f freq, f amount) {
 	return amount; // no antialiasing here
 }
 
