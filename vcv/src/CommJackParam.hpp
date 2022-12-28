@@ -7,8 +7,7 @@ private:
 	float _value = 0;
 	Port &_inputPort;
 	int _jackID = 0;
-	int _moduleID = -1;
-	bool _just_unpatched = false;
+	bool _just_unpatched = true;
 	bool _just_patched = false;
 
 public:
@@ -18,9 +17,13 @@ public:
 	CommInputJack(Port &inputPort, int jackID)
 		: _inputPort{inputPort}
 		, _jackID{jackID}
-	{}
+		, inputJackStatus{.sendingJackId = jackID, .connected = false}
+	{
+		// initially mark jacks as connected, so when module is added it triggers an just_unpatched event
+		inputJackStatus.connected = true;
+	}
 
-	void setModuleID(int moduleID) { _moduleID = moduleID; }
+	void setModuleID(int moduleID) { inputJackStatus.sendingModuleId = moduleID; }
 
 	void updateInput()
 	{
@@ -33,10 +36,7 @@ public:
 
 	void updateWithCommData()
 	{
-		inputJackStatus.sendingJackId = _jackID;
-		inputJackStatus.sendingModuleId = _moduleID;
 		if (inputJackStatus.connected) {
-			_value = _inputPort.getPolyVoltage(0);
 			inputJackStatus.receivedJackId = _inputPort.getPolyVoltage(1);
 			inputJackStatus.receivedModuleId = _inputPort.getPolyVoltage(2);
 		}
