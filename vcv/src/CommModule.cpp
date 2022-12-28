@@ -5,12 +5,21 @@ CommModule::CommModule() {}
 
 void CommModule::handleCommunication()
 {
-	if (centralData->getMyMessage(selfID.id) == CentralData::RequestAllParamData) {
+	if (_comm_status == PropagateData2) {
 		for (auto &p : commParams)
 			centralData->updateParamStatus(p->paramStatus);
+	}
 
-		for (auto &ins : inputJacks)
+	if (_comm_status == PropagateData2) {
+		for (auto &ins : inputJacks) {
+			ins->updateWithCommData();
 			centralData->updateJackStatus(ins->inputJackStatus);
+		}
+	}
+
+	if (_comm_status != Normal) {
+		for (auto &out : outputJacks)
+			out->updateOutputWithCommData();
 	}
 }
 
@@ -25,26 +34,30 @@ void CommModule::updateCommIDs(int id)
 	for (auto &el : commParams) {
 		el->setModuleID(id);
 	}
-	centralData->registerModule(selfID);
 }
 
 void CommModule::onAdd()
 {
 	selfID.id = this->id;
 	updateCommIDs(selfID.id);
+	centralData->registerModule(selfID);
 }
 
-void CommModule::onRemove()
-{
-	centralData->unregisterModule(selfID);
-}
+void CommModule::onRemove() { centralData->unregisterModule(selfID); }
 
-void CommModule::onSampleRateChange()
-{
-  _sample_rate_changed = true;
-}
+void CommModule::onSampleRateChange() { _sample_rate_changed = true; }
+
 void CommModule::process(const ProcessArgs &args)
 {
+	if (centralData->getMyMessage(selfID.id) == CentralData::RequestAllParamData) {
+		_comm_status = StartSending;
+	} else if (_comm_status == StartSending)
+		_comm_status = PropagateData1;
+	else if (_comm_status == PropagateData1)
+		_comm_status = PropagateData2;
+	else if (_comm_status == PropagateData2)
+		_comm_status = Normal;
+
 	for (auto &element : commParams) {
 		element->updateValue();
 		core->set_param(element->getID(), element->getValue());
@@ -52,21 +65,27 @@ void CommModule::process(const ProcessArgs &args)
 
 	for (auto &element : inputJacks) {
 		element->updateInput();
-		auto scaledIn = element->scale(element->getValue());
-		core->set_input(element->getID(), scaledIn);
-		if (element->inputJackStatus.connected) {
+
+		if (element->isJustPatched())
 			core->mark_input_patched(element->getID());
-		} else {
+
+		if (element->isJustUnpatched()) {
+			core->set_input(element->getID(), 0); // unpatched value. TODO: allow for normalizations
 			core->mark_input_unpatched(element->getID());
+		}
+
+		if (element->inputJackStatus.connected) {
+			auto scaledIn = element->scale(element->getValue());
+			core->set_input(element->getID(), scaledIn);
 		}
 	}
 
 	core->update();
 
-  if (_sample_rate_changed) {
-	core->set_samplerate(args.sampleRate);
-    _sample_rate_changed = false;
-  }
+	if (_sample_rate_changed) {
+		core->set_samplerate(args.sampleRate);
+		_sample_rate_changed = false;
+	}
 
 	for (auto &out : outputJacks) {
 		out->setValue(out->scale(core->get_output(out->getID())));
