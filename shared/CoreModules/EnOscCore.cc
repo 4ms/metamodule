@@ -12,17 +12,7 @@ class EnOscCore : public CoreProcessor {
 
 	enum { kBlockSize = 8 };
 	enum { kUiUpdateRate = 60 };
-	enum { kSysTickRate = 200 };
-
-	float sample_rate_ = 48000.f;
-
-	unsigned ui_process_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
-	unsigned ui_process_ctr = ui_process_throttle;
-
-	unsigned ui_update_throttle = (unsigned)sample_rate_ / kSysTickRate;
-	unsigned ui_update_ctr = ui_update_throttle;
-
-	mutable unsigned block_ctr = kBlockSize;
+	enum { kUiProcessRate = 20 };
 
 public:
 	EnOscCore() = default;
@@ -40,14 +30,11 @@ public:
 			enosc.Update(); //LED update
 		}
 
-		// Should happen at SampleRate / BlockRate (6kHz for 48k)
-		if (block_ctr >= kBlockSize) {
-			enosc.Poll();
-			// process SpiAdc channel,
-			// EventHandler::Poll: Polls each event source
-			// freeze_led set color
-			enosc.osc().Process(out_block_);
+		// SampleRate / BlockRate (6kHz for 48k)
+		if (++block_ctr >= kBlockSize) {
 			block_ctr = 0;
+			enosc.Poll();
+			enosc.osc().Process(out_block_);
 		}
 	}
 
@@ -147,21 +134,14 @@ public:
 
 	float get_output(int output_id) const override {
 		s9_23 sample = output_id == 0 ? out_block_[block_ctr].l : out_block_[block_ctr].r;
-		if (output_id == 1) {
-			block_ctr++;
-			// if (block_ctr > kBlockSize) {
-			// 	block_ctr = kBlockSize;
-			// 	std::cout << "OVF!" << std::endl;
-			// }
-		}
 		return f::inclusive(sample).repr() * 2.f; //0..1 is mapped to 0-5V
 	}
 
 	void set_samplerate(float sr) override {
 		if (sample_rate_ != sr) {
 			sample_rate_ = sr;
-			ui_process_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
-			ui_update_throttle = (unsigned)sample_rate_ / kSysTickRate;
+			ui_process_throttle = (unsigned)sample_rate_ / kUiProcessRate;
+			ui_update_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
 			std::cout << "Freq = " << sr << std::endl;
 		}
 	}
@@ -192,4 +172,14 @@ private:
 	Buffer<Frame, kBlockSize> out_block_;
 	DynamicData dydata;
 	Math math;
+
+	float sample_rate_ = 48000.f;
+
+	unsigned ui_process_throttle = (unsigned)sample_rate_ / kUiProcessRate;
+	unsigned ui_process_ctr = ui_process_throttle;
+
+	unsigned ui_update_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
+	unsigned ui_update_ctr = ui_update_throttle;
+
+	unsigned block_ctr = kBlockSize;
 };
