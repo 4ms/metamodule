@@ -10,31 +10,45 @@ class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
 	using ThisCore = EnOscCore;
 
-	enum { kBlockSize = 1 };
-	enum { kUiUpdateRate = 120 };
+	enum { kBlockSize = 8 };
+	enum { kUiUpdateRate = 60 };
+	enum { kSysTickRate = 200 };
+
 	float sample_rate_ = 48000.f;
 
-	unsigned ui_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
-	unsigned ui_ctr = 0;
+	unsigned ui_process_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
+	unsigned ui_process_ctr = ui_process_throttle;
+
+	unsigned ui_update_throttle = (unsigned)sample_rate_ / kSysTickRate;
+	unsigned ui_update_ctr = ui_update_throttle;
+
+	mutable unsigned block_ctr = kBlockSize;
 
 public:
 	EnOscCore() = default;
 
 	void update() override {
-		// Low-priority thread:
-		if (ui_ctr++ > ui_throttle) {
-			ui_ctr = 0;
+		// Low-priority thread
+		// in while loop:
+		if (ui_process_ctr++ > ui_process_throttle) {
+			ui_process_ctr = 0;
 			enosc.Process(); //EventHandler::Process
+		}
 
+		if (ui_update_ctr++ > ui_update_throttle) {
+			ui_update_ctr = 0;
 			enosc.Update(); //LED update
 		}
 
-		enosc.Poll();
-		//process SpiAdc channel,
-		//EventHandler::Poll: Polls each event source
-		//freeze_led set color
-
-		enosc.osc().Process(out_block_);
+		// Should happen at SampleRate / BlockRate (6kHz for 48k)
+		if (block_ctr >= kBlockSize) {
+			enosc.Poll();
+			// process SpiAdc channel,
+			// EventHandler::Poll: Polls each event source
+			// freeze_led set color
+			enosc.osc().Process(out_block_);
+			block_ctr = 0;
+		}
 	}
 
 	Switches::State switchstate(float val) {
@@ -132,15 +146,24 @@ public:
 	}
 
 	float get_output(int output_id) const override {
-		s9_23 sample = output_id == 0 ? out_block_[0].l : out_block_[0].r;
-		if (sample.repr() != 0)
-			std::cout << "ne 0" << std::endl;
+		s9_23 sample = output_id == 0 ? out_block_[block_ctr].l : out_block_[block_ctr].r;
+		if (output_id == 1) {
+			block_ctr++;
+			// if (block_ctr > kBlockSize) {
+			// 	block_ctr = kBlockSize;
+			// 	std::cout << "OVF!" << std::endl;
+			// }
+		}
 		return f::inclusive(sample).repr() * 2.f; //0..1 is mapped to 0-5V
 	}
 
 	void set_samplerate(float sr) override {
-		sample_rate_ = sr;
-		ui_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
+		if (sample_rate_ != sr) {
+			sample_rate_ = sr;
+			ui_process_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
+			ui_update_throttle = (unsigned)sample_rate_ / kSysTickRate;
+			std::cout << "Freq = " << sr << std::endl;
+		}
 	}
 
 	float get_led_brightness(int led_id) const override {
@@ -168,4 +191,5 @@ private:
 	Ui<kUiUpdateRate, kBlockSize> enosc;
 	Buffer<Frame, kBlockSize> out_block_;
 	DynamicData dydata;
+	Math math;
 };
