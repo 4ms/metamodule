@@ -135,9 +135,6 @@ template<int block_size>
 class OscillatorPair : Nocopy {
 	Oscillator osc_[2];
 	FrequencyState freq_;
-	// OnePoleLp crossfade_lp_;
-	// Average<4, 4> crossfade_avg_;
-	SlewLimiter<f> crossfade_slewlim_{0.001_f, 0.001_f};
 
 public:
 	using processor_t = void (Oscillator::*)(f const freq,
@@ -165,21 +162,21 @@ public:
 		return tab[t][m];
 	}
 
-	f Process(TwistMode twist_mode,
-			  bool twist_needs_jump,
-			  WarpMode warp_mode,
-			  bool warp_needs_jump,
-			  FrequencyPair freq,
-			  bool frozen,
-			  f crossfade_factor,
-			  f twist,
-			  f warp,
-			  f modulation,
-			  bool modulation_needs_jump,
-			  f const amplitude,
-			  Buffer<u0_16, block_size> &mod_in,
-			  Buffer<u0_16, block_size> &mod_out,
-			  Buffer<f, block_size> &sum_output) {
+	void Process(TwistMode twist_mode,
+				 bool twist_needs_jump,
+				 WarpMode warp_mode,
+				 bool warp_needs_jump,
+				 FrequencyPair freq,
+				 bool frozen,
+				 f crossfade_factor,
+				 f twist,
+				 f warp,
+				 f modulation,
+				 bool modulation_needs_jump,
+				 f const amplitude,
+				 Buffer<u0_16, block_size> &mod_in,
+				 Buffer<u0_16, block_size> &mod_out,
+				 Buffer<f, block_size> &sum_output) {
 
 		// filter frequencies and amplitudes to avoid clicks when out of
 		// Freeze or when switching Scale
@@ -189,20 +186,7 @@ public:
 		processor_t process = pick_processor(twist_mode, warp_mode);
 
 		// shape crossfade so notes are easier to find
-		// f cf = f::inclusive(crossfade_avg_.Process(u0_16::inclusive(crossfade)));
-		// crossfade = Signal::crop(crossfade_factor, cf);
-
-		// u0_16 cf = u0_16::inclusive(Signal::crop(crossfade_factor, crossfade));
-		// crossfade = f::inclusive(crossfade_avg_.Process(cf));
-
-		// crossfade = crossfade_lp_.Process(0.01_f, Signal::crop(crossfade_factor, crossfade));
-
-		// 0 -> 0.05      1/100
-		// 0.375 -> 0.01  2.6/100
-		// 0.5 -> 1       2 / 100
-		f slew = crossfade_factor > 0.49_f ? 1_f : crossfade_factor > 0.3_f ? 0.001_f : 0.0005_f;
-
-		crossfade = crossfade_slewlim_.Process(Signal::crop(crossfade_factor, crossfade), slew, slew);
+		crossfade = Signal::crop(crossfade_factor, crossfade);
 
 		if (twist_needs_jump) {
 			osc_[0].twist_.jump(twist);
@@ -231,6 +215,5 @@ public:
 		mod_out.fill(0._u0_16);
 		(osc_[0].*process)(freq1, twist, warp, modulation, fade1, amplitude, mod_in, mod_out, sum_output);
 		(osc_[1].*process)(freq2, twist, warp, modulation, fade2, amplitude, mod_in, mod_out, sum_output);
-		return crossfade;
 	}
 };

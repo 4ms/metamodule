@@ -152,7 +152,8 @@ class Oscillators : Nocopy {
 	};
 
 public:
-	f Process(Parameters const &params, Scale const &scale, Buffer<f, block_size> &out1, Buffer<f, block_size> &out2) {
+	void
+	Process(Parameters const &params, Scale const &scale, Buffer<f, block_size> &out1, Buffer<f, block_size> &out2) {
 		out1.fill(0_f);
 		out2.fill(0_f);
 
@@ -192,7 +193,6 @@ public:
 			modulation_needs_jump = true;
 		}
 
-		f crossfade_osc0;
 		for (int i = 0; i < kMaxNumOsc; ++i) {
 			FrequencyPair p = frequency.next(); // 3%
 			f amp = amplitude.next();
@@ -200,10 +200,10 @@ public:
 			auto [mod_in, mod_out] = pick_modulation_blocks(modulation_mode, i, numOsc);
 			dummy_block_.fill(0._u0_16);
 			bool frozen = (pick_split(freeze_mode, i, numOsc) && frozen_) || temp_frozen_;
-			f cf = oscs_[i].Process(twist_mode,
-									twist_needs_jump,
-									warp_mode,
-									warp_needs_jump,
+			oscs_[i].Process(twist_mode,
+							 twist_needs_jump,
+							 warp_mode,
+							 warp_needs_jump,
 									p,
 									frozen,
 									crossfade_factor,
@@ -212,11 +212,9 @@ public:
 									modulation,
 									modulation_needs_jump,
 									amp,
-									mod_in,
-									mod_out,
-									out);
-			if (i == 0)
-				crossfade_osc0 = cf;
+							 mod_in,
+							 mod_out,
+							 out);
 		}
 
 		temp_frozen_ = false;
@@ -239,7 +237,6 @@ public:
 			o1 *= atten1;
 			o2 *= atten2;
 		}
-		return crossfade_osc0;
 	}
 
 	void set_freeze(bool frozen) {
@@ -337,10 +334,9 @@ public:
 		quantizer_.Save();
 	}
 
-	f Process(Buffer<Frame, block_size> &out) {
+	void Process(Buffer<Frame, block_size> &out) {
 		Buffer<f, block_size> out1;
 		Buffer<f, block_size> out2;
-		f crossfade_osc0;
 
 		if (pre_listen_) {
 			if (follow_new_note_)
@@ -352,7 +348,7 @@ public:
 				previous_scale_index = params_.scale.value;
 			}
 			current_scale_ = quantizer_.get_scale(params_.scale);
-			crossfade_osc0 = Oscillators<block_size>::Process(params_, *current_scale_, out1, out2);
+			Oscillators<block_size>::Process(params_, *current_scale_, out1, out2);
 		}
 
 		for (auto [o1, o2, o] : zip(out1, out2, out)) {
@@ -361,6 +357,5 @@ public:
 			o.l = s9_23::inclusive(o1.clip());
 			o.r = s9_23::inclusive(o2.clip());
 		}
-		return crossfade_osc0;
 	}
 };
