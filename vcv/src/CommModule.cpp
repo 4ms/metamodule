@@ -41,7 +41,7 @@ void CommModule::onRemove()
 
 void CommModule::onSampleRateChange()
 {
-	// core->set_samplerate(args.sampleRate);
+  _sample_rate_changed = true;
 }
 void CommModule::process(const ProcessArgs &args)
 {
@@ -62,7 +62,11 @@ void CommModule::process(const ProcessArgs &args)
 	}
 
 	core->update();
+
+  if (_sample_rate_changed) {
 	core->set_samplerate(args.sampleRate);
+    _sample_rate_changed = false;
+  }
 
 	for (auto &out : outputJacks) {
 		out->setValue(out->scale(core->get_output(out->getID())));
