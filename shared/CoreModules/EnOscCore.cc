@@ -135,7 +135,7 @@ public:
 		s9_23 sample = output_id == 0 ? out_block_[0].l : out_block_[0].r;
 		if (sample.repr() != 0)
 			std::cout << "ne 0" << std::endl;
-		return f::inclusive(sample).repr() * 10.f;
+		return f::inclusive(sample).repr() * 2.f; //0..1 is mapped to 0-5V
 	}
 
 	void set_samplerate(float sr) override {
@@ -167,4 +167,5 @@ public:
 private:
 	Ui<kUiUpdateRate, kBlockSize> enosc;
 	Buffer<Frame, kBlockSize> out_block_;
+	DynamicData dydata;
 };
