@@ -8,6 +8,8 @@ private:
 	Port &_inputPort;
 	int _jackID = 0;
 	int _moduleID = -1;
+	bool _just_unpatched = false;
+	bool _just_patched = false;
 
 public:
 	JackStatus inputJackStatus;
@@ -18,16 +20,19 @@ public:
 		, _jackID{jackID}
 	{}
 
-	void setModuleID(int moduleID)
-	{
-		_moduleID = moduleID;
-	}
+	void setModuleID(int moduleID) { _moduleID = moduleID; }
 
 	void updateInput()
 	{
+		_just_unpatched = (inputJackStatus.connected && !_inputPort.isConnected());
+		_just_patched = (!inputJackStatus.connected && _inputPort.isConnected());
+		inputJackStatus.connected = _inputPort.isConnected();
+	}
+
+	void updateWithCommData()
+	{
 		inputJackStatus.sendingJackId = _jackID;
 		inputJackStatus.sendingModuleId = _moduleID;
-		inputJackStatus.connected = _inputPort.isConnected();
 		if (inputJackStatus.connected) {
 			_value = _inputPort.getPolyVoltage(0);
 			inputJackStatus.receivedJackId = _inputPort.getPolyVoltage(1);
@@ -35,14 +40,26 @@ public:
 		}
 	}
 
-	float getValue()
+	float getValue() { return _value; }
+
+	int getID() { return _jackID; }
+
+	bool isJustPatched()
 	{
-		return _value;
+		if (_just_patched) {
+			_just_patched = false;
+			return true;
+		}
+		return false;
 	}
 
-	int getID()
+	bool isJustUnpatched()
 	{
-		return _jackID;
+		if (_just_unpatched) {
+			_just_unpatched = false;
+			return true;
+		}
+		return false;
 	}
 };
 
@@ -61,12 +78,15 @@ public:
 		, _jackID{jackID}
 	{}
 
-	void setModuleID(int moduleID)
-	{
-		_moduleID = moduleID;
-	}
+	void setModuleID(int moduleID) { _moduleID = moduleID; }
 
 	void updateOutput()
+	{
+		_outputPort.setChannels(1);
+		_outputPort.setVoltage(_value);
+	}
+
+	void updateOutputWithCommData()
 	{
 		_outputPort.setChannels(5);
 		_outputPort.setVoltage(_value, 0);
@@ -77,15 +97,9 @@ public:
 		_outputPort.setVoltage(-1 * _moduleID, 4);
 	}
 
-	void setValue(float in)
-	{
-		_value = in;
-	}
+	void setValue(float in) { _value = in; }
 
-	int getID()
-	{
-		return _jackID;
-	}
+	int getID() { return _jackID; }
 };
 
 class CommParam {
@@ -100,23 +114,11 @@ public:
 		paramStatus.paramID = paramID;
 	}
 
-	void setModuleID(int moduleID)
-	{
-		paramStatus.moduleID = moduleID;
-	}
+	void setModuleID(int moduleID) { paramStatus.moduleID = moduleID; }
 
-	void updateValue()
-	{
-		paramStatus.value = _inParam.getValue();
-	}
+	void updateValue() { paramStatus.value = _inParam.getValue(); }
 
-	float getValue()
-	{
-		return paramStatus.value;
-	}
+	float getValue() { return paramStatus.value; }
 
-	int getID()
-	{
-		return paramStatus.paramID;
-	}
+	int getID() { return paramStatus.paramID; }
 };
