@@ -27,6 +27,8 @@ public:
 		_just_unpatched = (inputJackStatus.connected && !_inputPort.isConnected());
 		_just_patched = (!inputJackStatus.connected && _inputPort.isConnected());
 		inputJackStatus.connected = _inputPort.isConnected();
+		if (inputJackStatus.connected)
+			_value = _inputPort.getPolyVoltage(0);
 	}
 
 	void updateWithCommData()
