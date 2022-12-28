@@ -405,13 +405,13 @@ class Control : public EventSource<Event> {
 		0.704_f,
 		-112.73_f, //pitch_offset, slope
 		0.704_f,
-		-112.73_f,	  //root_offset, slope
-		0.00302133_f, //warp_offset
-		0.00476089_f, //balance_offset
-		0.00177007_f, //twist_offset
-		0.00146489_f, //scale_offset
-		0.00265511_f, //modulation_offset
-		0.00326548_f, //spread_offset
+		-112.73_f, //root_offset, slope
+		0.00_f,	   //302133_f, //warp_offset
+		0.00_f,	   //476089_f, //balance_offset
+		0.00_f,	   //177007_f, //twist_offset
+		0.00_f,	   //146489_f, //scale_offset
+		0.00_f,	   //265511_f, //modulation_offset
+		0.00_f,	   //326548_f, //spread_offset
 	};
 
 	Persistent<WearLevel<FlashBlock<0, CalibrationData>>> calibration_data_storage_{&calibration_data_,
