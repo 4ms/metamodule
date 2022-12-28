@@ -19,6 +19,7 @@ protected:
 
 private:
 	int _numLights = 0;
+  bool _sample_rate_changed = true;
 
 protected:
 	CommModule();
