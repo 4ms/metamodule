@@ -63,6 +63,12 @@ void CommModule::process(const ProcessArgs &args)
 		core->set_param(element->getID(), element->getValue());
 	}
 
+	for (auto &element : altParams) {
+		if (element.is_updated)
+			core->set_alt_param(element.id, element.val);
+		element.is_updated = false;
+	}
+
 	for (auto &element : inputJacks) {
 		element->updateInput();
 

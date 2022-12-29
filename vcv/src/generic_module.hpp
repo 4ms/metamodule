@@ -47,6 +47,10 @@ struct GenericModule : CommModule {
 
 		for (auto output : Defs::OutJacks)
 			outputJacks[output.id]->scale = [](float f) { return f * 5.0f; }; //=>volts
+
+		for (auto &alt : Defs::AltParams) {
+			altParams.push_back({true, alt.id, alt.default_val});
+		}
 	}
 };
 
@@ -169,16 +173,27 @@ struct GenericModuleWidget : CommModuleWidget {
 
 		void setValue(float value) override
 		{
+			float prev_val = _val;
+
 			_val = std::clamp(value, _alt.min_val, _alt.max_val);
 			if (_alt.control_type == AltParamDef::Range::Integer)
 				_val = (int)(_val + 0.5f);
+
+			if (prev_val != _val) {
+				for (auto &ap : _module.altParams) {
+					if (ap.id == _alt.id) {
+						ap.is_updated = true;
+						ap.val = _val;
+						break;
+					}
+				}
+			}
 		}
 
 		std::string getDisplayValueString() override
 		{
 			if (_module.core)
 				return std::string{_module.core->get_alt_param_value(_alt.id, _val)};
-			// return std::string{Defs::get_alt_param_value(_alt.id, _val)};
 			return "";
 		}
 
@@ -207,8 +222,6 @@ struct GenericModuleWidget : CommModuleWidget {
 
 	void appendContextMenu(Menu *menu) override
 	{
-		// auto module = dynamic_cast<GenericModuleWidget *>(this->module);
-
 		menu->addChild(new MenuEntry);
 		for (auto &alt : Defs::AltParams) {
 			auto *item = new AltParamMenuItem{*mainModule, alt};
@@ -219,29 +232,6 @@ struct GenericModuleWidget : CommModuleWidget {
 			slider->box.size.x = 100;
 			menu->addChild(slider);
 		}
-
-		// ClockDivisionItem* clockDivisionItem = new ClockDivisionItem;
-		// clockDivisionItem->text = "CLK/N divider";
-		// clockDivisionItem->rightText = RIGHT_ARROW;
-		// clockDivisionItem->module = module;
-		// menu->addChild(clockDivisionItem);
-
-		// ChannelItem* channelItem = new ChannelItem;
-		// channelItem->text = "Polyphony channels";
-		// channelItem->rightText = string::f("%d", module->channels) + " " + RIGHT_ARROW;
-		// channelItem->module = module;
-		// menu->addChild(channelItem);
-
-		// PolyModeItem* polyModeItem = new PolyModeItem;
-		// polyModeItem->text = "Polyphony mode";
-		// polyModeItem->rightText = RIGHT_ARROW;
-		// polyModeItem->module = module;
-		// menu->addChild(polyModeItem);
-
-		// MIDI_CVPanicItem* panicItem = new MIDI_CVPanicItem;
-		// panicItem->text = "Panic";
-		// panicItem->module = module;
-		// menu->addChild(panicItem);
 	}
 };
 

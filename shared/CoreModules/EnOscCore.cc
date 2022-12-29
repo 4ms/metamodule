@@ -92,6 +92,11 @@ public:
 		}
 	}
 
+	void set_alt_param(const int alt_param_id, const float val) override {
+		//TODO
+		std::cout << "AltParam " << alt_param_id << "=" << val << std::endl;
+	}
+
 	void set_input(int input_id, float val) override {
 		//val: -5V..+5V converted to -1..1 by CommModule
 		val *= -0.5f; //-1..1 => 0.5..-0.5

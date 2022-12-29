@@ -6,9 +6,16 @@
 
 class CommModule : public Module {
 public:
+	struct AltParam {
+		bool is_updated = false;
+		unsigned id;
+		float val;
+	};
+
 	std::function<void(void)> updateDisplay;
 	std::string DEBUGSTR = "";
 	std::unique_ptr<CoreProcessor> core;
+	std::vector<AltParam> altParams;
 
 protected:
 	ModuleID selfID;
