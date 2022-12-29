@@ -29,8 +29,8 @@ public:
 	}
 	virtual void mark_output_patched(const int output_id) {
 	}
-	virtual std::string_view get_alt_param_value(unsigned alt_id, float val) {
-		return "";
+	virtual constexpr std::string_view get_alt_param_value(unsigned alt_id, float val) {
+		return "-";
 	}
 
 	virtual ~CoreProcessor() = default;

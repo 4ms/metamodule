@@ -177,8 +177,8 @@ struct GenericModuleWidget : CommModuleWidget {
 		std::string getDisplayValueString() override
 		{
 			if (_module.core)
-				// return std::string{Defs::get_alt_param_value(_alt.id, _val)};
 				return std::string{_module.core->get_alt_param_value(_alt.id, _val)};
+			// return std::string{Defs::get_alt_param_value(_alt.id, _val)};
 			return "";
 		}
 
