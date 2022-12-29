@@ -94,9 +94,9 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
-		//val: -1..1 => 0..1
-		val += 1.f;
-		val *= 0.5f;
+		//val: -5V..+5V converted to -1..1 by CommModule
+		val *= -0.5f; //-1..1 => 0.5..-0.5
+		val += 0.5f;  // => 1..0
 		//TODO: Pitch/Root have different scaling?
 		switch (input_id) {
 			case Info::InputBalance_Jack:
