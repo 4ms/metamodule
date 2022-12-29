@@ -1,6 +1,8 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/EnOsc_info.hh"
+// #include "CoreModules/info/EnOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "enosc/altparam_EnOsc_info.hh"
+
 #include "enosc/ui.hh"
 
 class EnOscCore : public CoreProcessor {
