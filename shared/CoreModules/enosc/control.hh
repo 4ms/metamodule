@@ -447,8 +447,6 @@ class Control : public EventSource<Event> {
 	ExtCVConditioner<CV_ROOT, Average<4, 2>> root_cv_{
 		calibration_data_.root_offset, calibration_data_.root_slope, spi_adc_};
 
-	// HysteresisFilter<1, 10> root_post_filter_;
-
 	Parameters &params_;
 	PolypticOscillator<block_size> &osc_;
 
@@ -824,7 +822,7 @@ public:
 	}
 
 	void set_potcv(AdcInput chan, float val) {
-		adc_.set(chan, u0_16::inclusive(f(val)));
+		adc_.set(chan, u0_16::inclusive(f(val).clip(0._f, 1._f)));
 	}
 
 	void set_highres_cv(SpiAdcInput chan, float val) {
