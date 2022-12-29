@@ -828,4 +828,11 @@ public:
 	void set_highres_cv(SpiAdcInput chan, float val) {
 		spi_adc_.set(chan, u0_16::inclusive(f(val)));
 	}
+
+	void set_gate(Gate gatenum, bool val) {
+		if (gatenum == GATE_FREEZE)
+			gates_.freeze_.set(val);
+		if (gatenum == GATE_LEARN)
+			gates_.learn_.set(val);
+	}
 };

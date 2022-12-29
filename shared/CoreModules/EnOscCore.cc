@@ -124,10 +124,10 @@ public:
 				enosc.set_potcv(AdcInput::CV_WARP, val);
 				break;
 			case Info::InputFreeze_Jack:
-				//TODO:
+				enosc.set_freeze_gate(val > 0.5f);
 				break;
 			case Info::InputLearn_Jack:
-				//TODO:
+				enosc.set_learn_gate(val > 0.5f);
 				break;
 		}
 	}

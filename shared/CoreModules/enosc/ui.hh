@@ -552,6 +552,14 @@ public:
 		return buttons_;
 	}
 
+	void set_freeze_gate(bool val) {
+		control_.set_gate(GATE_FREEZE, val);
+	}
+
+	void set_learn_gate(bool val) {
+		control_.set_gate(GATE_LEARN, val);
+	}
+
 	Color get_freeze_led_color() const {
 		return freeze_led_.get_color();
 	}
