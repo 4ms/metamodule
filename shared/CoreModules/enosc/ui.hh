@@ -540,16 +540,20 @@ public:
 		control_.set_potcv(chan, val);
 	}
 
-	void set_highres_cv(SpiAdcInput chan, float val) {
-		control_.set_highres_cv(chan, val);
+	void set_pitchroot_cv(SpiAdcInput chan, float val) {
+		control_.set_pitchroot_cv(chan, val);
 	}
 
 	auto &switches() {
 		return switches_;
 	}
 
-	auto &buttons() {
-		return buttons_;
+	void set_learn_button(bool val) {
+		buttons_.learn_.set(val);
+	}
+
+	void set_freeze_button(bool val) {
+		buttons_.freeze_.set(val);
 	}
 
 	void set_freeze_gate(bool val) {

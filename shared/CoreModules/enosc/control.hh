@@ -825,8 +825,8 @@ public:
 		adc_.set(chan, u0_16::inclusive(f(val).clip(0._f, 1._f)));
 	}
 
-	void set_highres_cv(SpiAdcInput chan, float val) {
-		spi_adc_.set(chan, u0_16::inclusive(f(val)));
+	void set_pitchroot_cv(SpiAdcInput chan, float val) {
+		spi_adc_.set(chan, u0_16::inclusive(f(val).clip(0._f, 1._f)));
 	}
 
 	void set_gate(Gate gatenum, bool val) {
