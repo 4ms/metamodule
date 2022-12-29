@@ -55,6 +55,7 @@ struct LedDef {
 
 struct AltParamDef {
 	uint32_t id;
+	std::string_view short_name;
 	float min_val;
 	float max_val;
 	float default_val;

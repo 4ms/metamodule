@@ -41,7 +41,7 @@ struct GenericModule : CommModule {
 			}
 		}
 
-		// TODO: let us set the in/out conversion functions somehow...
+		// TODO: let us set the in/out conversion functions in Defs...
 		for (auto input : Defs::InJacks)
 			inputJacks[input.id]->scale = [](float volts) { return volts / 5.0f; };
 
@@ -152,6 +152,47 @@ struct GenericModuleWidget : CommModuleWidget {
 			addChild(createLightCentered<MediumLight<RedLight>>(pos, module, light_id));
 			light_id++;
 		}
+	}
+
+	struct AltParamMenuItem : MenuItem {
+		GenericModuleWidget *module;
+		void onAction(const event::Action &e) override { std::cout << this->text << std::endl; }
+	};
+
+	void appendContextMenu(Menu *menu) override
+	{
+		auto module = dynamic_cast<GenericModuleWidget *>(this->module);
+
+		menu->addChild(new MenuEntry);
+		for (const auto &alt : Defs::AltParams) {
+			auto *item = new AltParamMenuItem;
+			item->text = std::string{alt.short_name};
+			item->module = module;
+			menu->addChild(item);
+		}
+
+		// ClockDivisionItem* clockDivisionItem = new ClockDivisionItem;
+		// clockDivisionItem->text = "CLK/N divider";
+		// clockDivisionItem->rightText = RIGHT_ARROW;
+		// clockDivisionItem->module = module;
+		// menu->addChild(clockDivisionItem);
+
+		// ChannelItem* channelItem = new ChannelItem;
+		// channelItem->text = "Polyphony channels";
+		// channelItem->rightText = string::f("%d", module->channels) + " " + RIGHT_ARROW;
+		// channelItem->module = module;
+		// menu->addChild(channelItem);
+
+		// PolyModeItem* polyModeItem = new PolyModeItem;
+		// polyModeItem->text = "Polyphony mode";
+		// polyModeItem->rightText = RIGHT_ARROW;
+		// polyModeItem->module = module;
+		// menu->addChild(polyModeItem);
+
+		// MIDI_CVPanicItem* panicItem = new MIDI_CVPanicItem;
+		// panicItem->text = "Panic";
+		// panicItem->module = module;
+		// menu->addChild(panicItem);
 	}
 };
 

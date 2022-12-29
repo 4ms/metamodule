@@ -9,10 +9,6 @@ protected:
 	static constexpr float kKnobSpacingY = 17;
 	static constexpr float kKnobSpacingX = 18;
 	static constexpr float kTextOffset = 5;
-	// static constexpr float kTopMargin = 13;
-	// static constexpr float kBottomMargin = 15;
-	// static constexpr float kGridSpacingX = 30;
-	// static constexpr float kModuleHeight = 128.5f;
 };
 
 class MetaModuleTextBox : public LedDisplayTextField {
