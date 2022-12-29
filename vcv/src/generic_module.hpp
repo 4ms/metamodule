@@ -169,17 +169,10 @@ struct GenericModuleWidget : CommModuleWidget {
 
 		void setValue(float value) override
 		{
-			if (_alt.control_type == AltParamDef::Range::Continuous)
-				_val = value;
-			else
-				_val = (int)(value + 0.5f);
+			_val = std::clamp(value, _alt.min_val, _alt.max_val);
+			if (_alt.control_type == AltParamDef::Range::Integer)
+				_val = (int)(_val + 0.5f);
 		}
-
-		float getValue() override { return _val; }
-
-		float getMinValue() override { return _alt.min_val; }
-		float getMaxValue() override { return _alt.max_val; }
-		float getDefaultValue() override { return _alt.default_val; }
 
 		std::string getDisplayValueString() override
 		{
@@ -188,6 +181,11 @@ struct GenericModuleWidget : CommModuleWidget {
 				return std::string{_module.core->get_alt_param_value(_alt.id, _val)};
 			return "";
 		}
+
+		float getValue() override { return _val; }
+		float getMinValue() override { return _alt.min_val; }
+		float getMaxValue() override { return _alt.max_val; }
+		float getDefaultValue() override { return _alt.default_val; }
 	};
 
 	struct AltParamSlider : ui::Slider {
