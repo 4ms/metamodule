@@ -56,9 +56,9 @@ struct GenericModuleWidget : CommModuleWidget {
 	CommModule *mainModule;
 
 	GenericModuleWidget(CommModule *module)
+		: mainModule{module}
 	{
 		setModule(static_cast<Module *>(module));
-		mainModule = module;
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, Defs::svg_filename.data())));
 
@@ -154,21 +154,72 @@ struct GenericModuleWidget : CommModuleWidget {
 		}
 	}
 
+	//////////////////// Alt Params
+
+	struct AltParamQty : Quantity {
+		const AltParamDef &_alt;
+		CommModule &_module;
+		float _val;
+
+		AltParamQty(CommModule &module, const AltParamDef &alt)
+			: _alt{alt}
+			, _module{module}
+			, _val{alt.default_val}
+		{}
+
+		void setValue(float value) override
+		{
+			if (_alt.control_type == AltParamDef::Range::Continuous)
+				_val = value;
+			else
+				_val = (int)(value + 0.5f);
+		}
+
+		float getValue() override { return _val; }
+
+		float getMinValue() override { return _alt.min_val; }
+		float getMaxValue() override { return _alt.max_val; }
+		float getDefaultValue() override { return _alt.default_val; }
+
+		std::string getDisplayValueString() override
+		{
+			if (_module.core)
+				// return std::string{Defs::get_alt_param_value(_alt.id, _val)};
+				return std::string{_module.core->get_alt_param_value(_alt.id, _val)};
+			return "";
+		}
+	};
+
+	struct AltParamSlider : ui::Slider {
+		AltParamSlider(CommModule &module, const AltParamDef &alt) { quantity = new AltParamQty{module, alt}; }
+		~AltParamSlider() { delete quantity; }
+	};
+
 	struct AltParamMenuItem : MenuItem {
-		GenericModuleWidget *module;
+		CommModule &module;
+		const AltParamDef &_alt;
+
+		AltParamMenuItem(CommModule &module, const AltParamDef &alt)
+			: module{module}
+			, _alt{alt}
+		{}
+
 		void onAction(const event::Action &e) override { std::cout << this->text << std::endl; }
 	};
 
 	void appendContextMenu(Menu *menu) override
 	{
-		auto module = dynamic_cast<GenericModuleWidget *>(this->module);
+		// auto module = dynamic_cast<GenericModuleWidget *>(this->module);
 
 		menu->addChild(new MenuEntry);
-		for (const auto &alt : Defs::AltParams) {
-			auto *item = new AltParamMenuItem;
+		for (auto &alt : Defs::AltParams) {
+			auto *item = new AltParamMenuItem{*mainModule, alt};
 			item->text = std::string{alt.short_name};
-			item->module = module;
 			menu->addChild(item);
+
+			auto slider = new AltParamSlider{*mainModule, alt};
+			slider->box.size.x = 100;
+			menu->addChild(slider);
 		}
 
 		// ClockDivisionItem* clockDivisionItem = new ClockDivisionItem;

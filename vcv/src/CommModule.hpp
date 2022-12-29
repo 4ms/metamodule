@@ -8,14 +8,13 @@ class CommModule : public Module {
 public:
 	std::function<void(void)> updateDisplay;
 	std::string DEBUGSTR = "";
+	std::unique_ptr<CoreProcessor> core;
 
 protected:
 	ModuleID selfID;
 	std::vector<std::unique_ptr<CommParam>> commParams;
 	std::vector<std::unique_ptr<CommOutputJack>> outputJacks;
 	std::vector<std::unique_ptr<CommInputJack>> inputJacks;
-
-	std::unique_ptr<CoreProcessor> core;
 
 private:
 	int _numLights = 0;
