@@ -6,7 +6,7 @@
 #include "enosc/ui.hh"
 
 class EnOscCore : public CoreProcessor {
-	using Info = EnOscInfo;
+	using Info = APEnOscInfo;
 	using ThisCore = EnOscCore;
 
 	enum { kBlockSize = 64 };

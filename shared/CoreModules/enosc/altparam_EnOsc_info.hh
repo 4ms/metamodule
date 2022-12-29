@@ -2,7 +2,7 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/module_info_base.hh"
 
-struct EnOscInfo : ModuleInfoBase {
+struct APEnOscInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"EnOsc"};
 	static constexpr std::string_view description{"Ensemble Oscillator"};
 	static constexpr uint32_t width_hp = 16;
@@ -333,9 +333,10 @@ struct EnOscInfo : ModuleInfoBase {
 		AltNum_Oscs = 2,
 	};
 
-	static constexpr std::array<AltParamDef, NumSwitches> AltParams{{
+	static constexpr std::array<AltParamDef, NumAltParams> AltParams{{
 		{
 			.id = AltCrossfade_Time,
+			.short_name = "Crossfade Time",
 			.min_val = 0.f,
 			.max_val = 1.f,
 			.default_val = 0.5f,
@@ -345,6 +346,7 @@ struct EnOscInfo : ModuleInfoBase {
 		},
 		{
 			.id = AltStereo_Split,
+			.short_name = "Stereo Split",
 			.min_val = 0.f,
 			.max_val = 2.f,
 			.default_val = 1.f,
@@ -354,6 +356,7 @@ struct EnOscInfo : ModuleInfoBase {
 		},
 		{
 			.id = AltNum_Oscs,
+			.short_name = "Num Oscillators",
 			.min_val = 0.f,
 			.max_val = 16.f,
 			.default_val = 16.f,
