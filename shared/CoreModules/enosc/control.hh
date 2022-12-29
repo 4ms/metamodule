@@ -388,10 +388,10 @@ class Control : public EventSource<Event> {
 
 		// on load, checks that calibration data are within bounds
 		bool validate() {
-			return (pitch_offset - 0.70_f).abs() <= kCalibrationSuccessToleranceOffset &&
-				   (pitch_slope / -112._f - 1_f).abs() <= kCalibrationSuccessTolerance && pitch_slope < 0.0_f &&
-				   (root_offset - 0.70_f).abs() <= kCalibrationSuccessToleranceOffset &&
-				   (root_slope / -112._f - 1_f).abs() <= kCalibrationSuccessTolerance && root_slope < 0.0_f &&
+			return (pitch_offset - 0.50_f).abs() <= kCalibrationSuccessToleranceOffset &&
+				   (pitch_slope / -120._f - 1_f).abs() <= kCalibrationSuccessTolerance && pitch_slope < 0.0_f &&
+				   (root_offset - 0.50_f).abs() <= kCalibrationSuccessToleranceOffset &&
+				   (root_slope / -120._f - 1_f).abs() <= kCalibrationSuccessTolerance && root_slope < 0.0_f &&
 				   warp_offset.abs() <= kCalibrationSuccessToleranceOffset &&
 				   balance_offset.abs() <= kCalibrationSuccessToleranceOffset &&
 				   twist_offset.abs() <= kCalibrationSuccessToleranceOffset &&
@@ -402,16 +402,16 @@ class Control : public EventSource<Event> {
 	};
 	CalibrationData calibration_data_;
 	CalibrationData default_calibration_data_ = {
-		0.704_f,
-		-112.73_f, //pitch_offset, slope
-		0.704_f,
-		-112.73_f, //root_offset, slope
-		0.00_f,	   //302133_f, //warp_offset
-		0.00_f,	   //476089_f, //balance_offset
-		0.00_f,	   //177007_f, //twist_offset
-		0.00_f,	   //146489_f, //scale_offset
-		0.00_f,	   //265511_f, //modulation_offset
-		0.00_f,	   //326548_f, //spread_offset
+		.pitch_offset = 0.5_f,
+		.pitch_slope = -120._f,
+		.root_offset = 0.5_f,
+		.root_slope = -120._f,
+		.warp_offset = 0._f,
+		.balance_offset = 0._f,
+		.twist_offset = 0._f,
+		.scale_offset = 0._f,
+		.modulation_offset = 0._f,
+		.spread_offset = 0._f,
 	};
 
 	Persistent<WearLevel<FlashBlock<0, CalibrationData>>> calibration_data_storage_{&calibration_data_,
@@ -444,6 +444,7 @@ class Control : public EventSource<Event> {
 
 	ExtCVConditioner<CV_PITCH, Average<4, 4>> pitch_cv_{
 		calibration_data_.pitch_offset, calibration_data_.pitch_slope, spi_adc_};
+
 	ExtCVConditioner<CV_ROOT, Average<4, 2>> root_cv_{
 		calibration_data_.root_offset, calibration_data_.root_slope, spi_adc_};
 
