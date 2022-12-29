@@ -73,10 +73,10 @@ public:
 				enosc.set_potcv(AdcInput::POT_WARP, val);
 				break;
 			case Info::SwitchLearn + Info::NumKnobs:
-				enosc.buttons().learn_.set(val > 0.5f);
+				enosc.set_learn_button(val > 0.5f);
 				break;
 			case Info::SwitchFreeze + Info::NumKnobs:
-				enosc.buttons().freeze_.set(val > 0.5f);
+				enosc.set_freeze_button(val > 0.5f);
 				break;
 			case Info::SwitchScale_Switch + Info::NumKnobs:
 				enosc.switches().scale_.set(switchstate(val));
@@ -94,10 +94,10 @@ public:
 	}
 
 	void set_input(int input_id, float val) override {
-		//val: -1..1 => 0..1
-		val += 1.f;
-		val *= 0.5f;
-		//TODO: Pitch/Root have different scaling?
+		//val: -5V..+5V converted to -1..1 by CommModule
+		val *= -0.5f; //-1..1 => 0.5..-0.5
+		val += 0.5f;  // => 1..0
+					  // Ui::set_potcv will clamp
 		switch (input_id) {
 			case Info::InputBalance_Jack:
 				enosc.set_potcv(AdcInput::CV_BALANCE, val);
@@ -106,10 +106,10 @@ public:
 				enosc.set_potcv(AdcInput::CV_MOD, val);
 				break;
 			case Info::InputPitch_Jack:
-				enosc.set_highres_cv(SpiAdcInput::CV_PITCH, val);
+				enosc.set_pitchroot_cv(SpiAdcInput::CV_PITCH, val);
 				break;
 			case Info::InputRoot_Jack:
-				enosc.set_highres_cv(SpiAdcInput::CV_ROOT, val);
+				enosc.set_pitchroot_cv(SpiAdcInput::CV_ROOT, val);
 				break;
 			case Info::InputScale_Jack:
 				enosc.set_potcv(AdcInput::CV_SCALE, val);
@@ -124,10 +124,10 @@ public:
 				enosc.set_potcv(AdcInput::CV_WARP, val);
 				break;
 			case Info::InputFreeze_Jack:
-				//TODO:
+				enosc.set_freeze_gate(val > 0.5f);
 				break;
 			case Info::InputLearn_Jack:
-				//TODO:
+				enosc.set_learn_gate(val > 0.5f);
 				break;
 		}
 	}

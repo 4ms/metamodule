@@ -333,8 +333,10 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 						}
 					} break;
 					case ButtonTimeout: {
-						if (e2.type == ButtonTimeout && e1.data != e2.data) {
-							// long-press on Learn and Freeze
+						// if (e2.type == ButtonTimeout && e1.data != e2.data) {
+						// long-press on Learn and Freeze
+						if (e2.type == ButtonPush && e1.data == BUTTON_FREEZE && e2.data == BUTTON_FREEZE) {
+							// long-press on Freeze
 							mode_ = CALIBRATE_CV;
 							learn_led_.set_background(Colors::black);
 							freeze_led_.set_background(Colors::black);
@@ -540,16 +542,28 @@ public:
 		control_.set_potcv(chan, val);
 	}
 
-	void set_highres_cv(SpiAdcInput chan, float val) {
-		control_.set_highres_cv(chan, val);
+	void set_pitchroot_cv(SpiAdcInput chan, float val) {
+		control_.set_pitchroot_cv(chan, val);
 	}
 
 	auto &switches() {
 		return switches_;
 	}
 
-	auto &buttons() {
-		return buttons_;
+	void set_learn_button(bool val) {
+		buttons_.learn_.set(val);
+	}
+
+	void set_freeze_button(bool val) {
+		buttons_.freeze_.set(val);
+	}
+
+	void set_freeze_gate(bool val) {
+		control_.set_gate(GATE_FREEZE, val);
+	}
+
+	void set_learn_gate(bool val) {
+		control_.set_gate(GATE_LEARN, val);
 	}
 
 	Color get_freeze_led_color() const {
