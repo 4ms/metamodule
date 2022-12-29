@@ -1,13 +1,6 @@
 #pragma once
-#include "util/static_string.hh"
-#include <array>
-#include <memory>
+#include <string_view>
 
-// TODO: after switching to ModuleInfo
-//  - remove Num*
-//  - remove *Names
-//  - remove *_name(idx)
-//
 class CoreProcessor {
 public:
 	CoreProcessor() = default;
@@ -21,8 +14,8 @@ public:
 		return 0;
 	}
 
-	static constexpr size_t NameChars = 15;
-	static constexpr size_t LongNameChars = 39;
+	static constexpr unsigned NameChars = 15;
+	static constexpr unsigned LongNameChars = 39;
 
 	virtual void mark_all_inputs_unpatched() {
 	}
@@ -35,6 +28,9 @@ public:
 	virtual void mark_output_unpatched(const int output_id) {
 	}
 	virtual void mark_output_patched(const int output_id) {
+	}
+	virtual std::string_view get_alt_param_value(unsigned alt_id, float val) {
+		return "";
 	}
 
 	virtual ~CoreProcessor() = default;

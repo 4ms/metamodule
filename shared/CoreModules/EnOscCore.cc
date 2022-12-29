@@ -160,6 +160,28 @@ public:
 		}
 	}
 
+	std::string_view get_alt_param_value(unsigned alt_id, float val) override {
+		static constexpr std::string_view NumString[16] = {
+			"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
+
+		switch (alt_id) {
+			case Info::AltStereo_Split:
+				return val < 0.5f ? "Even/Odd" : val < 1.5f ? "Low/High" : "Root/Others";
+				break;
+			case Info::AltNum_Oscs:
+				if (val < 1 || val > 16)
+					return "";
+				return NumString[(int)val];
+				break;
+			case Info::AltCrossfade_Time:
+				if (val < 0 || val > 1)
+					return "";
+				return NumString[(int)(val * 10.f)];
+				break;
+		}
+		return "";
+	}
+
 	void mark_all_inputs_unpatched() override {
 		for (unsigned i = 0; i < Info::NumInJacks; i++)
 			set_input(i, 0.f);
