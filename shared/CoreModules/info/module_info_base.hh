@@ -53,6 +53,16 @@ struct LedDef {
 	enum { Red, Blue, White, Green, RedWhite, RedBlue, BlueGreen, RedGreenBlue } led_color;
 };
 
+struct AltParamDef {
+	uint32_t id;
+	float min_val;
+	float max_val;
+	float default_val;
+	uint32_t attached_to_param_id;
+	enum class AttachedTo { Knob, Switch } attached_to;
+	enum class Range { Continuous, Integer } control_type;
+};
+
 // Base structure for a module's ModuleInfo
 // A module's ModuleInfo class should derive from this class
 // and override all non-empty data members with the actual values of the module
@@ -76,6 +86,9 @@ struct ModuleInfoBase {
 
 	static constexpr uint32_t NumDiscreteLeds = 0;
 	static constexpr std::array<LedDef, NumDiscreteLeds> Leds{};
+
+	static constexpr uint32_t NumAltParams = 0;
+	static constexpr std::array<AltParamDef, NumAltParams> AltParams{};
 
 	// Converts HP to px for a 240x320px screen
 	// TODO: make dimensions explicit
@@ -116,6 +129,7 @@ struct ModuleInfoView {
 	std::span<const OutJackDef> OutJacks;
 	std::span<const SwitchDef> Switches;
 	std::span<const LedDef> Leds;
+	std::span<const AltParamDef> AltParams;
 
 	template<Derived<ModuleInfoBase> T>
 	static constexpr ModuleInfoView makeView() {
@@ -127,6 +141,7 @@ struct ModuleInfoView {
 			.OutJacks = T::OutJacks,
 			.Switches = T::Switches,
 			.Leds = T::Leds,
+			.AltParams = T::AltParams,
 		};
 	}
 };
