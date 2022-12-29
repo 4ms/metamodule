@@ -333,8 +333,10 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 						}
 					} break;
 					case ButtonTimeout: {
-						if (e2.type == ButtonTimeout && e1.data != e2.data) {
-							// long-press on Learn and Freeze
+						// if (e2.type == ButtonTimeout && e1.data != e2.data) {
+						// long-press on Learn and Freeze
+						if (e2.type == ButtonPush && e1.data == BUTTON_FREEZE && e2.data == BUTTON_FREEZE) {
+							// long-press on Freeze
 							mode_ = CALIBRATE_CV;
 							learn_led_.set_background(Colors::black);
 							freeze_led_.set_background(Colors::black);
