@@ -160,6 +160,9 @@ struct GenericModuleWidget : CommModuleWidget {
 
 	//////////////////// Alt Params
 
+	// TODO: make a choose-one-of-two/three button array instead of slider
+	// Can use it when Range is Integer and max-min <= 3
+	// Can query names with get_alt_param_value(id, min|..|max);
 	struct AltParamQty : Quantity {
 		const AltParamDef &_alt;
 		CommModule &_module;
@@ -169,26 +172,33 @@ struct GenericModuleWidget : CommModuleWidget {
 			: _alt{alt}
 			, _module{module}
 			, _val{alt.default_val}
-		{}
+		{
+			for (auto &ap : _module.altParams) {
+				if (ap.id == _alt.id) {
+					_val = ap.val;
+					break;
+				}
+			}
+		}
 
 		void setValue(float value) override
 		{
 			float prev_val = _val;
-
 			_val = std::clamp(value, _alt.min_val, _alt.max_val);
 			if (_alt.control_type == AltParamDef::Range::Integer)
 				_val = (int)(_val + 0.5f);
 
-			if (prev_val != _val) {
-				for (auto &ap : _module.altParams) {
-					if (ap.id == _alt.id) {
-						ap.is_updated = true;
+			if (prev_val == _val)
+				return;
+
+			for (auto &ap : _module.altParams) {
+				if (ap.id == _alt.id) {
+					ap.is_updated = true;
 						ap.val = _val;
 						break;
 					}
 				}
 			}
-		}
 
 		std::string getDisplayValueString() override
 		{
