@@ -194,17 +194,17 @@ struct GenericModuleWidget : CommModuleWidget {
 			for (auto &ap : _module.altParams) {
 				if (ap.id == _alt.id) {
 					ap.is_updated = true;
-						ap.val = _val;
-						break;
-					}
+					ap.val = _val;
+					break;
 				}
 			}
+		}
 
 		std::string getDisplayValueString() override
 		{
 			if (_module.core)
 				return std::string{_module.core->get_alt_param_value(_alt.id, _val)};
-			return "";
+			return std::to_string(_val);
 		}
 
 		float getValue() override { return _val; }
@@ -218,23 +218,11 @@ struct GenericModuleWidget : CommModuleWidget {
 		~AltParamSlider() { delete quantity; }
 	};
 
-	struct AltParamMenuItem : MenuItem {
-		CommModule &module;
-		const AltParamDef &_alt;
-
-		AltParamMenuItem(CommModule &module, const AltParamDef &alt)
-			: module{module}
-			, _alt{alt}
-		{}
-
-		void onAction(const event::Action &e) override { std::cout << this->text << std::endl; }
-	};
-
 	void appendContextMenu(Menu *menu) override
 	{
 		menu->addChild(new MenuEntry);
 		for (auto &alt : Defs::AltParams) {
-			auto *item = new AltParamMenuItem{*mainModule, alt};
+			auto *item = new MenuItem;
 			item->text = std::string{alt.short_name};
 			menu->addChild(item);
 
