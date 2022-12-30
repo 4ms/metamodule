@@ -201,20 +201,6 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 		Event &e2 = stack.get(1);
 
 		switch (e1.type) {
-			// case StartCatchup: {
-			// 	active_catchups_ = active_catchups_.set(e1.data);
-			// 	freeze_led_.set_glow(Colors::grey, 2_f * f(active_catchups_.set_bits()));
-			// } break;
-			// case EndOfCatchup: {
-			// 	active_catchups_ = active_catchups_.reset(e1.data);
-			// 	freeze_led_.flash(Colors::green);
-			// 	freeze_led_.reset_glow();
-			// 	freeze_led_.set_glow(Colors::grey, 2_f * f(active_catchups_.set_bits()));
-			// 	if (e1.data == POT_PITCH) {
-			// 		params_.alt.pitch_pot_state = control_.pitch_pot_state();
-			// 		alt_params_.Save();
-			// 	}
-			// } break;
 			case ScaleChange: {
 				if (mode_ == NORMAL || mode_ == LEARN || mode_ == MANUAL_LEARN)
 					learn_led_.flash(Colors::white);
@@ -273,22 +259,6 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 						if (e1.data == BUTTON_LEARN)
 							control_.disable_all_alt_learn_pot_values();
 					} break;
-					// case PotMove: {
-					// 	if (e1.data == POT_ROOT && e2.type == ButtonPush && e2.data == BUTTON_LEARN) {
-					// 		// manually add a first note
-					// 		learn_led_.set_solid(Colors::dark_red);
-					// 		osc_.enable_learn();
-					// 		f cur_pitch = osc_.lowest_pitch();
-					// 		osc_.new_note(cur_pitch);
-					// 		learn_led_.flash(Colors::white);
-					// 		mode_ = MANUAL_LEARN;
-					// 		learn_led_.set_glow(Colors::red, 3_f);
-					// 		osc_.enable_pre_listen();
-					// 		osc_.enable_follow_new_note();
-					// 		control_.root_pot_alternate_function();
-					// 		control_.pitch_pot_alternate_function();
-					// 	}
-					// } break;
 					default:
 						break;
 				}
@@ -296,47 +266,17 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 
 			case SHIFT: {
 				switch (e1.type) {
-					// case PotMove: {
-					// 	if (e1.data == POT_SPREAD) {
-					// 		freeze_led_.set_solid(Colors::grey);
-					// 		control_.spread_pot_alternate_function();
-					// 	} else if (e1.data == POT_TWIST) {
-					// 		freeze_led_.set_solid(Colors::grey);
-					// 		control_.twist_pot_alternate_function();
-					// 	} else if (e1.data == POT_WARP) {
-					// 		freeze_led_.set_solid(Colors::grey);
-					// 		control_.warp_pot_alternate_function();
-					// 	} else if (e1.data == POT_BALANCE) {
-					// 		freeze_led_.set_solid(Colors::grey);
-					// 		control_.balance_pot_alternate_function();
-					// 	} else if (e1.data == POT_PITCH) {
-					// 		freeze_led_.set_solid(Colors::cyan);
-					// 		control_.pitch_pot_alternate_function();
-					// 	}
-					// } break;
 					case ButtonRelease: {
 						if (e1.data == BUTTON_FREEZE) {
-							// if (e2.type == ButtonPush && e2.data == BUTTON_FREEZE) {
-							// Freeze pressed
 							osc_.set_freeze(!osc_.frozen());
 							freeze_led_.set_solid(osc_.frozen() ? Colors::blue : Colors::black);
 							mode_ = NORMAL;
 							control_.all_main_function();
-							// } else {
-							// 	// Released after a change
-							// 	mode_ = NORMAL;
-							// 	control_.all_main_function();
-							// 	params_.alt.pitch_pot_state = control_.pitch_pot_state();
-							// 	alt_params_.Save();
-							// 	freeze_led_.set_solid(osc_.frozen() ? Colors::blue : Colors::black);
-							// }
 						}
 					} break;
 					case ButtonTimeout: {
-						// if (e2.type == ButtonTimeout && e1.data != e2.data) {
-						// long-press on Learn and Freeze
 						if (e2.type == ButtonPush && e1.data == BUTTON_FREEZE && e2.data == BUTTON_FREEZE) {
-							// long-press on Freeze
+							// long-press on Freeze = Calibrate
 							mode_ = CALIBRATE_CV;
 							learn_led_.set_background(Colors::black);
 							freeze_led_.set_background(Colors::black);
@@ -362,31 +302,6 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 						osc_.enable_pre_listen();
 						learn_led_.flash(success ? Colors::white : Colors::black);
 					} break;
-					// case PotMove: {
-					// 	if (e1.data == POT_ROOT && e2.type == ButtonPush && e2.data == BUTTON_LEARN) {
-					// 		// manually add notes
-					// 		if (osc_.empty_pre_scale()) {
-					// 			// if scale is empty, add note with current pitch
-					// 			f cur_pitch = osc_.lowest_pitch();
-					// 			osc_.new_note(cur_pitch);
-					// 		}
-					// 		if (osc_.new_note(0_f)) {
-					// 			learn_led_.flash(Colors::white);
-					// 			mode_ = MANUAL_LEARN;
-					// 			learn_led_.set_glow(Colors::red, 3_f);
-					// 			osc_.enable_pre_listen();
-					// 			osc_.enable_follow_new_note();
-					// 			control_.root_pot_alternate_function();
-					// 			control_.pitch_pot_reset_alternate_value();
-					// 		} else {
-					// 			learn_led_.flash(Colors::black);
-					// 		}
-					// 	} else if (e1.data == POT_PITCH && e2.type == ButtonPush && e2.data == BUTTON_LEARN) {
-					// 		mode_ = MANUAL_LEARN;
-					// 		control_.pitch_pot_alternate_function();
-					// 		osc_.enable_follow_new_note();
-					// 	}
-					// } break;
 					case ButtonRelease: {
 						if (e1.data == BUTTON_LEARN && e2.type == ButtonPush && e2.data == BUTTON_LEARN) {
 							// Learn pressed
@@ -417,9 +332,6 @@ class Ui : public EventHandler<Ui<update_rate, block_size>, Event> {
 					osc_.disable_follow_new_note();
 					mode_ = LEARN;
 				}
-				// if (e1.type == PotMove && e1.data == POT_PITCH) {
-				// 	control_.pitch_pot_alternate_function();
-				// }
 			} break;
 
 			case CALIBRATE_CV: {
