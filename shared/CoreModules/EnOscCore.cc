@@ -93,8 +93,6 @@ public:
 	}
 
 	void set_alt_param(const int alt_param_id, const float val) override {
-		//TODO
-		std::cout << "AltParam " << alt_param_id << "=" << val << std::endl;
 		switch (alt_param_id) {
 			case Info::AltStereo_Split:
 				enosc.set_stereo_mode(static_cast<SplitMode>(val));
@@ -104,6 +102,9 @@ public:
 				break;
 			case Info::AltCrossfade_Time:
 				enosc.set_crossfade(val);
+				break;
+			case Info::AltFreeze_Split:
+				enosc.set_freeze_mode(static_cast<SplitMode>(val));
 				break;
 		}
 	}
@@ -184,15 +185,21 @@ public:
 			case Info::AltStereo_Split:
 				return val < 0.5f ? "Even/Odd" : val < 1.5f ? "Low/High" : "Root/Others";
 				break;
+
 			case Info::AltNum_Oscs:
 				if (val < 1 || val > 16)
 					return "";
 				return NumString[((int)val) - 1];
 				break;
+
 			case Info::AltCrossfade_Time:
 				if (val < 0 || val > 1)
 					return "";
 				return NumString[(int)(val * 10.f)];
+				break;
+
+			case Info::AltFreeze_Split:
+				return val < 0.5f ? "Even/Odd" : val < 1.5f ? "Low/High" : "Root/Others";
 				break;
 		}
 		return "";

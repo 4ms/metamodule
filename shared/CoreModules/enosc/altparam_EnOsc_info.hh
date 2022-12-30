@@ -325,18 +325,19 @@ struct APEnOscInfo : ModuleInfoBase {
 
 	static constexpr int NumDiscreteLeds = 0;
 
-	static constexpr int NumAltParams = 3;
+	static constexpr int NumAltParams = 4;
 
 	enum {
 		AltCrossfade_Time = 0,
 		AltStereo_Split = 1,
 		AltNum_Oscs = 2,
+		AltFreeze_Split = 3,
 	};
 
 	static constexpr std::array<AltParamDef, NumAltParams> AltParams{{
 		{
 			.id = AltCrossfade_Time,
-			.short_name = "Crossfade Time",
+			.short_name = "Crossfade Smoothness",
 			.min_val = 0.f,
 			.max_val = 1.f,
 			.default_val = 0.5f,
@@ -361,6 +362,16 @@ struct APEnOscInfo : ModuleInfoBase {
 			.max_val = 16.f,
 			.default_val = 16.f,
 			.attached_to_param_id = KnobSpread,
+			.attached_to = AltParamDef::AttachedTo::Knob,
+			.control_type = AltParamDef::Range::Integer,
+		},
+		{
+			.id = AltFreeze_Split,
+			.short_name = "Freeze Split",
+			.min_val = 0.f,
+			.max_val = 2.f,
+			.default_val = 1.f,
+			.attached_to_param_id = KnobWarp,
 			.attached_to = AltParamDef::AttachedTo::Knob,
 			.control_type = AltParamDef::Range::Integer,
 		},
