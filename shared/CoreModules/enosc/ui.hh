@@ -538,38 +538,48 @@ public:
 		freeze_led_.Update();
 	}
 
+	// Hardware model getter/setters:
+
 	void set_potcv(AdcInput chan, float val) {
 		control_.set_potcv(chan, val);
 	}
-
 	void set_pitchroot_cv(SpiAdcInput chan, float val) {
 		control_.set_pitchroot_cv(chan, val);
 	}
-
 	auto &switches() {
 		return switches_;
 	}
-
 	void set_learn_button(bool val) {
 		buttons_.learn_.set(val);
 	}
-
 	void set_freeze_button(bool val) {
 		buttons_.freeze_.set(val);
 	}
-
 	void set_freeze_gate(bool val) {
 		control_.set_gate(GATE_FREEZE, val);
 	}
-
 	void set_learn_gate(bool val) {
 		control_.set_gate(GATE_LEARN, val);
 	}
-
 	Color get_freeze_led_color() const {
 		return freeze_led_.get_color();
 	}
 	Color get_learn_led_color() const {
 		return learn_led_.get_color();
+	}
+	void set_fine_tune(float val) {
+		control_.set_fine_tune(val);
+	}
+	void set_crossfade(float val) {
+		control_.set_crossfade(val);
+	}
+	void set_num_osc(int val) {
+		control_.set_num_osc(val);
+	}
+	void set_freeze_mode(SplitMode val) {
+		control_.set_freeze_mode(val);
+	}
+	void set_stereo_mode(SplitMode val) {
+		control_.set_stereo_mode(val);
 	}
 };

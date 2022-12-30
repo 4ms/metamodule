@@ -417,30 +417,52 @@ class Control : public EventSource<Event> {
 	Persistent<WearLevel<FlashBlock<0, CalibrationData>>> calibration_data_storage_{&calibration_data_,
 																					default_calibration_data_};
 
-	PotCVCombiner<PotConditioner<POT_DETUNE, Law::LINEAR, NoFilter>, NoCVInput, QuadraticOnePoleLp<1>> detune_{adc_};
-	PotCVCombiner<DualFunctionPotConditioner<POT_WARP, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
-				  CVConditioner<CV_WARP>,
-				  QuadraticOnePoleLp<1>>
-		warp_{adc_, calibration_data_.warp_offset};
-	PotCVCombiner<DualFunctionPotConditioner<POT_BALANCE, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
-				  CVConditioner<CV_BALANCE>,
-				  QuadraticOnePoleLp<2>>
-		balance_{adc_, calibration_data_.balance_offset};
-	PotCVCombiner<DualFunctionPotConditioner<POT_TWIST, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
-				  CVConditioner<CV_TWIST>,
-				  QuadraticOnePoleLp<1>>
-		twist_{adc_, calibration_data_.twist_offset};
-	PotCVCombiner<PotConditioner<POT_SCALE, Law::LINEAR, NoFilter>, CVConditioner<CV_SCALE>, QuadraticOnePoleLp<1>>
-		scale_{adc_, calibration_data_.twist_offset};
-	PotCVCombiner<PotConditioner<POT_MOD, Law::LINEAR, NoFilter>, CVConditioner<CV_MOD>, QuadraticOnePoleLp<1>>
-		modulation_{adc_, calibration_data_.modulation_offset};
-	PotCVCombiner<DualFunctionPotConditioner<POT_SPREAD, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
-				  CVConditioner<CV_SPREAD>,
-				  QuadraticOnePoleLp<1>>
-		spread_{adc_, calibration_data_.spread_offset};
+	template<AdcInput POT,
+			 AdcInput CV,
+			 typename PotLp = QuadraticOnePoleLp<1>,
+			 typename SumFilter = QuadraticOnePoleLp<1>>
+	using DefaultPotCV = PotCVCombiner<PotConditioner<POT, Law::LINEAR, PotLp>, CVConditioner<CV>, SumFilter>;
 
-	DualFunctionPotConditioner<POT_PITCH, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT> pitch_pot_;
-	DualFunctionPotConditioner<POT_ROOT, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT> root_pot_{adc_};
+	DefaultPotCV<POT_WARP, CV_WARP> warp_{adc_, calibration_data_.warp_offset};
+	DefaultPotCV<POT_BALANCE, CV_BALANCE, QuadraticOnePoleLp<1>, QuadraticOnePoleLp<2>> balance_{
+		adc_, calibration_data_.balance_offset};
+	DefaultPotCV<POT_TWIST, CV_TWIST> twist_{adc_, calibration_data_.twist_offset};
+	DefaultPotCV<POT_SCALE, CV_SCALE, NoFilter> scale_{adc_, calibration_data_.twist_offset};
+	DefaultPotCV<POT_MOD, CV_MOD, NoFilter> modulation_{adc_, calibration_data_.modulation_offset};
+	DefaultPotCV<POT_SPREAD, CV_SPREAD, NoFilter> spread_{adc_, calibration_data_.spread_offset};
+
+	PotConditioner<POT_PITCH, Law::LINEAR, QuadraticOnePoleLp<1>> pitch_pot_;
+	PotConditioner<POT_ROOT, Law::LINEAR, QuadraticOnePoleLp<1>> root_pot_{adc_};
+
+	PotCVCombiner<PotConditioner<POT_DETUNE, Law::LINEAR, NoFilter>, NoCVInput, QuadraticOnePoleLp<1>> detune_{adc_};
+
+	// PotCVCombiner<DualFunctionPotConditioner<POT_WARP, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
+	// 			  CVConditioner<CV_WARP>,
+	// 			  QuadraticOnePoleLp<1>>
+	// 	warp_{adc_, calibration_data_.warp_offset};
+
+	// PotCVCombiner<DualFunctionPotConditioner<POT_BALANCE, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
+	// 			  CVConditioner<CV_BALANCE>,
+	// 			  QuadraticOnePoleLp<2>>
+	// 	balance_{adc_, calibration_data_.balance_offset};
+
+	// PotCVCombiner<DualFunctionPotConditioner<POT_TWIST, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
+	// 			  CVConditioner<CV_TWIST>,
+	// 			  QuadraticOnePoleLp<1>>
+	// 	twist_{adc_, calibration_data_.twist_offset};
+
+	// PotCVCombiner<PotConditioner<POT_SCALE, Law::LINEAR, NoFilter>, CVConditioner<CV_SCALE>, QuadraticOnePoleLp<1>>
+	// 	scale_{adc_, calibration_data_.twist_offset};
+
+	// PotCVCombiner<PotConditioner<POT_MOD, Law::LINEAR, NoFilter>, CVConditioner<CV_MOD>, QuadraticOnePoleLp<1>>
+	// 	modulation_{adc_, calibration_data_.modulation_offset};
+	// PotCVCombiner<DualFunctionPotConditioner<POT_SPREAD, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT>,
+	// 			  CVConditioner<CV_SPREAD>,
+	// 			  QuadraticOnePoleLp<1>>
+	// 	spread_{adc_, calibration_data_.spread_offset};
+
+	// DualFunctionPotConditioner<POT_PITCH, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT> pitch_pot_;
+	// DualFunctionPotConditioner<POT_ROOT, Law::LINEAR, QuadraticOnePoleLp<1>, Takeover::SOFT> root_pot_{adc_};
 
 	ExtCVConditioner<CV_PITCH, Average<4, 4>> pitch_cv_{
 		calibration_data_.pitch_offset, calibration_data_.pitch_slope, spi_adc_};
@@ -457,7 +479,7 @@ class Control : public EventSource<Event> {
 
 public:
 	Control(Parameters &params, PolypticOscillator<block_size> &osc)
-		: pitch_pot_(adc_, params.alt.pitch_pot_state)
+		: pitch_pot_(adc_) //, params.alt.pitch_pot_state)
 		, params_(params)
 		, osc_(osc) {
 	}
@@ -500,7 +522,8 @@ public:
 
 		// BALANCE
 		{
-			auto [balance, crossfade] = balance_.ProcessDualFunction(put);
+			// auto [balance, crossfade] = balance_.ProcessDualFunction(put);
+			auto balance = balance_.Process(put);
 
 			balance = balance * 2_f - 1_f;		// -1..1
 			balance *= balance * balance;		// -1..1 cubic
@@ -508,6 +531,7 @@ public:
 			balance = Math::fast_exp2(balance); // 0.0625..16
 			params_.balance = balance;
 
+			auto crossfade = crossfade_raw;
 			if (crossfade > 0_f) {
 				crossfade *= crossfade;					  // 0..1
 				crossfade = 1_f - crossfade;			  // 0..1
@@ -518,7 +542,7 @@ public:
 
 		// TWIST
 		{
-			auto [twist, freeze_mode] = twist_.ProcessDualFunction(put);
+			auto twist = twist_.Process(put);
 
 			// avoids CV noise to produce harmonics near 0
 			twist = Signal::crop_down(0.01_f, twist);
@@ -535,18 +559,20 @@ public:
 			}
 			params_.twist.value = twist;
 
-			if (freeze_mode > 0_f) {
-				freeze_mode *= 3_f; // 3 split modes
-				SplitMode m = static_cast<SplitMode>(freeze_mode.floor());
-				if (m != params_.alt.freeze_mode)
-					put({AltParamChange, m});
-				params_.alt.freeze_mode = m;
-			}
+			params_.alt.freeze_mode = freeze_mode_raw;
+			// if (freeze_mode > 0_f) {
+			// 	freeze_mode *= 3_f; // 3 split modes
+			// 	SplitMode m = static_cast<SplitMode>(freeze_mode.floor());
+			// 	if (m != params_.alt.freeze_mode)
+			// 		put({AltParamChange, m});
+			// 	params_.alt.freeze_mode = m;
+			// }
 		}
 
 		// WARP
 		{
-			auto [warp, stereo_mode] = warp_.ProcessDualFunction(put);
+			// auto [warp, stereo_mode] = warp_.ProcessDualFunction(put);
+			auto warp = warp_.Process(put);
 
 			// avoids CV noise to produce harmonics near 0
 			warp = Signal::crop_down(0.01_f, warp);
@@ -562,13 +588,14 @@ public:
 			}
 			params_.warp.value = warp;
 
-			if (stereo_mode > 0_f) {
-				stereo_mode *= 3_f; // 3 split modes
-				SplitMode m = static_cast<SplitMode>(stereo_mode.floor());
-				if (m != params_.alt.stereo_mode)
-					put({AltParamChange, m});
-				params_.alt.stereo_mode = m;
-			}
+			params_.alt.stereo_mode = stereo_mode_raw;
+			// if (stereo_mode > 0_f) {
+			// 	stereo_mode *= 3_f; // 3 split modes
+			// 	SplitMode m = static_cast<SplitMode>(stereo_mode.floor());
+			// 	if (m != params_.alt.stereo_mode)
+			// 		put({AltParamChange, m});
+			// params_.alt.stereo_mode = m;
+			// }
 		}
 
 		// MODULATION
@@ -589,19 +616,20 @@ public:
 
 		// SPREAD
 		{
-			auto [spread, numOsc] = spread_.ProcessDualFunction(put);
+			auto spread = spread_.Process(put);
 
 			spread *= 10_f / f(kMaxNumOsc);
 			params_.spread = spread * kSpreadRange;
 
-			if (numOsc > 0_f) {
-				numOsc *= f(kMaxNumOsc - 1); // [0..max]
-				numOsc += 1.5_f;			 // [1.5..max+0.5]
-				int n = numOsc.floor();		 // [1..max]
-				if (n != params_.alt.numOsc)
-					put({AltParamChange, n});
-				params_.alt.numOsc = n;
-			}
+			params_.alt.numOsc = num_osc_raw;
+			// if (numOsc > 0_f) {
+			// 	numOsc *= f(kMaxNumOsc - 1); // [0..max]
+			// 	numOsc += 1.5_f;			 // [1.5..max+0.5]
+			// 	int n = numOsc.floor();		 // [1..max]
+			// 	if (n != params_.alt.numOsc)
+			// 		put({AltParamChange, n});
+			// 	params_.alt.numOsc = n;
+			// }
 		}
 
 		// SCALE
@@ -617,7 +645,8 @@ public:
 
 		// PITCH
 		{
-			auto [pitch, fine_tune] = pitch_pot_.Process(put);
+			auto pitch = pitch_pot_.Process(put);
+
 			pitch *= kPitchPotRange;		 // 0..range
 			pitch -= kPitchPotRange * 0.5_f; // -range/2..range/2
 			f pitch_cv = pitch_cv_.last();
@@ -632,16 +661,17 @@ public:
 			pitch_cv = pitch_cv_sampler_.Process(pitch_cv);
 			pitch += pitch_cv;
 
-			params_.fine_tune = fine_tune > 0_f ? (fine_tune - 0.5_f) * kFineTuneRange : 0_f;
-
+			params_.fine_tune = fine_tune_raw > 0_f ? (fine_tune_raw - 0.5_f) * kFineTuneRange : 0_f;
 			params_.pitch = pitch + params_.fine_tune;
 		}
 
 		// ROOT
 		{
-			auto [root, new_note] = root_pot_.Process(put);
+			auto root = root_pot_.Process(put);
+			f new_note = 0_f;
+			// TODO: handle manually dialing in notes?
+
 			root *= kRootPotRange;
-			// root += root_post_filter_.Process(root_cv_.last());
 			root += root_cv_.last();
 
 			if (root_cv_.calibration_busy()) {
@@ -676,60 +706,60 @@ public:
 	}
 
 	void spread_pot_alternate_function() {
-		spread_.pot_.alt();
+		// spread_.pot_.alt();
 	}
 	void spread_pot_main_function() {
-		spread_.pot_.main();
+		// spread_.pot_.main();
 	}
 	void root_pot_alternate_function() {
-		root_pot_.alt();
+		// root_pot_.alt();
 	}
 	void root_pot_main_function() {
-		root_pot_.main();
+		// root_pot_.main();
 	}
 	void pitch_pot_alternate_function() {
-		pitch_pot_.alt();
+		// pitch_pot_.alt();
 	}
 	void pitch_pot_main_function() {
-		pitch_pot_.main();
+		// pitch_pot_.main();
 	}
 	void pitch_pot_reset_alternate_value() {
-		pitch_pot_.reset_alt_value();
+		// pitch_pot_.reset_alt_value();
 	}
 	void twist_pot_alternate_function() {
-		twist_.pot_.alt();
+		// twist_.pot_.alt();
 	}
 	void twist_pot_main_function() {
-		twist_.pot_.main();
+		// twist_.pot_.main();
 	}
 	void warp_pot_alternate_function() {
-		warp_.pot_.alt();
+		// warp_.pot_.alt();
 	}
 	void warp_pot_main_function() {
-		warp_.pot_.main();
+		// warp_.pot_.main();
 	}
 	void balance_pot_alternate_function() {
-		balance_.pot_.alt();
+		// balance_.pot_.alt();
 	}
 	void balance_pot_main_function() {
-		balance_.pot_.main();
+		// balance_.pot_.main();
 	}
 
-	auto pitch_pot_state() {
-		return pitch_pot_.get_state();
-	}
+	// auto pitch_pot_state() {
+	// 	return pitch_pot_.get_state();
+	// }
 
 	void disable_all_alt_shift_pot_values() {
-		spread_.pot_.disable();
-		twist_.pot_.disable();
-		warp_.pot_.disable();
-		balance_.pot_.disable();
-		pitch_pot_.disable();
+		// spread_.pot_.disable();
+		// twist_.pot_.disable();
+		// warp_.pot_.disable();
+		// balance_.pot_.disable();
+		// pitch_pot_.disable();
 	}
 
 	void disable_all_alt_learn_pot_values() {
-		root_pot_.disable();
-		pitch_pot_.disable();
+		// root_pot_.disable();
+		// pitch_pot_.disable();
 	}
 
 	f scale_pot() {
@@ -822,6 +852,8 @@ public:
 		calibration_data_storage_.Save();
 	}
 
+	// Hardware model setters:
+
 	void set_potcv(AdcInput chan, float val) {
 		adc_.set(chan, u0_16::inclusive(f(val).clip(0._f, 1._f)));
 	}
@@ -835,5 +867,31 @@ public:
 			gates_.freeze_.set(val);
 		if (gatenum == GATE_LEARN)
 			gates_.learn_.set(val);
+	}
+
+	f fine_tune_raw = 0_f;
+	f crossfade_raw = 0.4_f;
+	int num_osc_raw = 16;
+	SplitMode freeze_mode_raw = SplitMode::ALTERNATE;
+	SplitMode stereo_mode_raw = SplitMode::ALTERNATE;
+
+	void set_fine_tune(float val) {
+		fine_tune_raw = f(val);
+	}
+
+	void set_crossfade(float val) {
+		crossfade_raw = f(val);
+	}
+
+	void set_num_osc(int val) {
+		num_osc_raw = val;
+	}
+
+	void set_freeze_mode(SplitMode val) {
+		freeze_mode_raw = val;
+	}
+
+	void set_stereo_mode(SplitMode val) {
+		stereo_mode_raw = val;
 	}
 };
