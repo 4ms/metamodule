@@ -95,6 +95,17 @@ public:
 	void set_alt_param(const int alt_param_id, const float val) override {
 		//TODO
 		std::cout << "AltParam " << alt_param_id << "=" << val << std::endl;
+		switch (alt_param_id) {
+			case Info::AltStereo_Split:
+				enosc.set_stereo_mode(static_cast<SplitMode>(val));
+				break;
+			case Info::AltNum_Oscs:
+				enosc.set_num_osc(val);
+				break;
+			case Info::AltCrossfade_Time:
+				enosc.set_crossfade(val);
+				break;
+		}
 	}
 
 	void set_input(int input_id, float val) override {
