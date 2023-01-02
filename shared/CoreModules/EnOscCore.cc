@@ -4,7 +4,7 @@
 
 #include "enosc/ui.hh"
 
-#include <iostream>
+// #include <iostream>
 
 class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
@@ -142,7 +142,7 @@ public:
 			sample_rate_ = sr;
 			ui_process_throttle = (unsigned)sample_rate_ / kUiProcessRate;
 			ui_update_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
-			std::cout << "Freq = " << sr << std::endl;
+			// std::cout << "Freq = " << sr << std::endl;
 		}
 	}
 
