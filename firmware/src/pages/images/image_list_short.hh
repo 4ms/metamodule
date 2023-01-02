@@ -24,6 +24,8 @@ LV_IMG_DECLARE(Freeverb_artwork_240);
 LV_IMG_DECLARE(Freeverb_artwork_120);
 LV_IMG_DECLARE(Seq8_artwork_120);
 LV_IMG_DECLARE(Seq8_artwork_240);
+LV_IMG_DECLARE(EnOsc_artwork_120);
+LV_IMG_DECLARE(EnOsc_artwork_240);
 }
 
 struct ModuleImages {
@@ -63,6 +65,9 @@ struct ModuleImages {
 
 		if (slug == "Seq8")
 			return (height == 240) ? &Seq8_artwork_240 : &Seq8_artwork_120;
+
+		if (slug == "EnOsc")
+			return (height == 240) ? &EnOsc_artwork_240 : &EnOsc_artwork_120;
 
 		return nullptr;
 	}
