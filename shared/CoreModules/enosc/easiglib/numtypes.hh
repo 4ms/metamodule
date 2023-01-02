@@ -6,9 +6,12 @@
 
 #include "util.hh"
 
-#ifdef __arm__
-  #include "hal.hh"
-#endif
+// FIXME: __arm__ does not distinguish between host-computer and target-device
+// #ifdef __arm__
+  // #include "hal.hh"
+// #define __PROGRAM_START
+// #include "arm_math.h"
+// #endif
 
 
 class Float;
@@ -71,33 +74,33 @@ public:
   constexpr T const abs() const { return T(val_ > 0 ? val_ : -val_); }
 
   T const sqrt() const {
-#ifdef __arm__
-    float y;
-      __asm("VSQRT.F32 %0,%1" : "=t"(y) : "t"(val_));
-    return T(y);
-#else
+// #ifdef __arm__
+//     float y;
+//     __asm("VSQRT.F32 %0,%1" : "=t"(y) : "t"(val_));
+//     return T(y);
+// #else
     return T(sqrtf(val_));
-#endif
+// #endif
   }
 
   T min(const T y) const {
-#ifdef __arm__
-    float res;
-    __ASM volatile ("VMINNM.F32 %0, %1, %2" : "=t" (res) : "t" (val_), "t" (y.repr()));
-    return T(res);
-#else
+// #ifdef __arm__
+//     float res;
+//     __ASM volatile ("VMINNM.F32 %0, %1, %2" : "=t" (res) : "t" (val_), "t" (y.repr()));
+//     return T(res);
+// #else
     return *this < y ? *this : y;
-#endif
+// #endif
   }
 
   T max(const T y) const {
-#ifdef __arm__
-    float res;
-    __ASM volatile ("VMAXNM.F32 %0, %1, %2" : "=t" (res) : "t" (val_), "t" (y.repr()));
-    return T(res);
-#else
+// #ifdef __arm__
+//     float res;
+//     __ASM volatile ("VMAXNM.F32 %0, %1, %2" : "=t" (res) : "t" (val_), "t" (y.repr()));
+//     return T(res);
+// #else
     return *this < y ? y : *this;
-#endif
+// #endif
   }
 
   T clip(const T x, const T y) const { return max(x).min(y); }
@@ -108,13 +111,13 @@ public:
   }
 
   T integral() const {
-#ifdef __arm__
-    float res;
-    __ASM volatile ("VRINTZ.F32 %0, %1" : "=t" (res) : "t" (val_));
-    return T(res);
-#else
+// #ifdef __arm__
+//     float res;
+//     __ASM volatile ("VRINTZ.F32 %0, %1" : "=t" (res) : "t" (val_));
+//     return T(res);
+// #else
     return T(static_cast<float>(floor()));
-#endif
+// #endif
   }
 
   T fractional() const {
@@ -152,18 +155,18 @@ constexpr Float operator "" _f(unsigned long long int f){ return Float(f); }
  * 16-bits Floating Point
  ***************/
 
-#ifdef __arm__
+// #ifdef __arm__
 
-struct Float16 {
-  Float16(Float x) : val_(x.repr()) { };
-  Float to_float() { return Float(val_); }
-private:
-  __fp16 val_;
-};
+// struct Float16 {
+//   Float16(Float x) : val_(x.repr()) { };
+//   Float to_float() { return Float(val_); }
+// private:
+//   __fp16 val_;
+// };
 
-using f16 = Float16;
+// using f16 = Float16;
 
-#endif
+// #endif
 
 /***************
  * Fixed-Point
@@ -204,20 +207,20 @@ class Fixed {
     }
   }
 
-#ifdef __arm__
-  template <int BITS>
-  T const saturate() const {
-    static_assert(BITS > 0 && BITS < WIDTH, "Invalid bit count");
-    if (SIGN==SIGNED) return T::of_repr(__SSAT(val_, BITS));
-    else return T::of_repr(__USAT(val_, BITS));
-  }
-#else
+// #ifdef __arm__
+//   template <int BITS>
+//   T const saturate() const {
+//     static_assert(BITS > 0 && BITS < WIDTH, "Invalid bit count");
+//     if (SIGN==SIGNED) return T::of_repr(__SSAT(val_, BITS));
+//     else return T::of_repr(__USAT(val_, BITS));
+//   }
+// #else
   template <int BITS>
   constexpr T const saturate() const {
     static_assert(BITS > 0 && BITS < WIDTH, "Invalid bit count");
     return T::of_repr(saturate_integer<Base, BITS>(val_));
   }
-#endif
+// #endif
   enum class dangerous { DANGER };
   explicit constexpr Fixed(dangerous, Base x) : val_(x) {}
 
@@ -491,45 +494,45 @@ public:
 
   // saturating add/sub
   constexpr T const add_sat(const T y) const {
-#ifdef __arm__
-    static_assert(!(WIDTH==32 && SIGN==UNSIGNED), "Unsigned saturating add unsupported");
-    if (WIDTH == 32) {
-      if (SIGN==SIGNED) return T::of_repr(__QADD(val_, y.val_));
-      else return T::of_repr(42); // unreachable: there is no UQADD instruction
-    } else if (WIDTH == 16) {
-      if (SIGN==SIGNED) return T::of_repr(__QADD16(val_, y.val_));
-      else return T::of_repr(__UQADD16(val_, y.val_));
-    } else if (WIDTH == 8) {
-      if (SIGN==SIGNED) return T::of_repr(__QADD8(val_, y.val_));
-      else return T::of_repr(__UQADD8(val_, y.val_));
-    }
-#else
+// #ifdef __arm__
+//     static_assert(!(WIDTH==32 && SIGN==UNSIGNED), "Unsigned saturating add unsupported");
+//     if (WIDTH == 32) {
+//       if (SIGN==SIGNED) return T::of_repr(__QADD(val_, y.val_));
+//       else return T::of_repr(42); // unreachable: there is no UQADD instruction
+//     } else if (WIDTH == 16) {
+//       if (SIGN==SIGNED) return T::of_repr(__QADD16(val_, y.val_));
+//       else return T::of_repr(__UQADD16(val_, y.val_));
+//     } else if (WIDTH == 8) {
+//       if (SIGN==SIGNED) return T::of_repr(__QADD8(val_, y.val_));
+//       else return T::of_repr(__UQADD8(val_, y.val_));
+//     }
+// #else
     using Wider = typename Basetype<WIDTH*2, SIGN>::T;
     Wider r = static_cast<Wider>(val_) + static_cast<Wider>(y.val_);
     r = saturate_integer<Wider, WIDTH>(r);
     return T::of_repr(r);
-#endif
+// #endif
   }
 
   constexpr T sub_sat(const T y) const {
-#ifdef __arm__
-    static_assert(!(WIDTH==32 && SIGN==UNSIGNED), "Unsigned saturating add unsupported");
-    if (WIDTH == 32) {
-      if (SIGN==SIGNED) return T::of_repr(__QSUB(val_, y.val_));
-      else return T::of_repr(42); // unreachable: there is no UQADD instruction
-    } else if (WIDTH == 16) {
-      if (SIGN==SIGNED) return T::of_repr(__QSUB16(val_, y.val_));
-      else return T::of_repr(__UQSUB16(val_, y.val_));
-    } else if (WIDTH == 8) {
-      if (SIGN==SIGNED) return T::of_repr(__QSUB8(val_, y.val_));
-      else return T::of_repr(__UQSUB8(val_, y.val_));
-    }
-#else
+// #ifdef __arm__
+//     static_assert(!(WIDTH==32 && SIGN==UNSIGNED), "Unsigned saturating add unsupported");
+//     if (WIDTH == 32) {
+//       if (SIGN==SIGNED) return T::of_repr(__QSUB(val_, y.val_));
+//       else return T::of_repr(42); // unreachable: there is no UQADD instruction
+//     } else if (WIDTH == 16) {
+//       if (SIGN==SIGNED) return T::of_repr(__QSUB16(val_, y.val_));
+//       else return T::of_repr(__UQSUB16(val_, y.val_));
+//     } else if (WIDTH == 8) {
+//       if (SIGN==SIGNED) return T::of_repr(__QSUB8(val_, y.val_));
+//       else return T::of_repr(__UQSUB8(val_, y.val_));
+//     }
+// #else
     using Wider = typename Basetype<WIDTH*2, SIGN>::T;
     Wider r = static_cast<Wider>(val_) - static_cast<Wider>(y.val_);
     r = saturate_integer<Wider, WIDTH>(r);
     return T::of_repr(r);
-#endif
+// #endif
   }
 
 };
