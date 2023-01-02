@@ -87,18 +87,18 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	codec_.set_callbacks(
 		[this]() {
-		// Debug::Pin0::high();
+		Debug::Pin0::high();
 		HWSemaphore<ParamsBuf1Lock>::lock();
 		HWSemaphore<ParamsBuf2Lock>::unlock();
 		process(audio_blocks[block_0], param_blocks[0], auxsigs[0]);
-		// Debug::Pin0::low();
+		Debug::Pin0::low();
 		},
 		[this]() {
-		// Debug::Pin0::high();
+		Debug::Pin0::high();
 		HWSemaphore<ParamsBuf2Lock>::lock();
 		HWSemaphore<ParamsBuf1Lock>::unlock();
 		process(audio_blocks[block_1], param_blocks[1], auxsigs[1]);
-		// Debug::Pin0::low();
+		Debug::Pin0::low();
 	});
 
 	load_measure.init();

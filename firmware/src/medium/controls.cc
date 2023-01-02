@@ -137,11 +137,11 @@ void Controls::start() {
 	_midi_host.set_rx_callback([this](std::span<uint8_t> rxbuffer) {
 		if (rxbuffer.size() < 4)
 			return;
-		Debug::Pin0::high();
+		// Debug::Pin0::high();
 		auto msg = MidiMessage{rxbuffer[1], rxbuffer[2], rxbuffer[3]};
 		_midi_rx_buf.put(msg);
 		// msg.print();
-		Debug::Pin0::low();
+		// Debug::Pin0::low();
 
 		_midi_host.receive();
 	});
