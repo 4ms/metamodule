@@ -10,7 +10,7 @@ class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
 	using ThisCore = EnOscCore;
 
-	enum { kBlockSize = 8 };
+	enum { kBlockSize = 64 };
 	enum { kUiUpdateRate = 60 };
 	enum { kUiProcessRate = 20 };
 
