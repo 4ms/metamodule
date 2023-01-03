@@ -56,9 +56,9 @@ public:
 	{
 		int moduleId = -1;
 		int paramId = -1;
-		if (_inner_knob.paramQuantity) {
-			moduleId = _inner_knob.paramQuantity->module ? _inner_knob.paramQuantity->module->id : -1;
-			paramId = _inner_knob.paramQuantity->paramId;
+		if (_inner_knob.getParamQuantity()) {
+			moduleId = _inner_knob.getParamQuantity()->module ? _inner_knob.getParamQuantity()->module->id : -1;
+			paramId = _inner_knob.getParamQuantity()->paramId;
 		}
 		return {LabelButtonID::Types::Knob, paramId, moduleId};
 	}
@@ -159,13 +159,13 @@ public:
 	}
 
 private:
-	const LabelButtonID getId() const
+	const LabelButtonID getId() // const
 	{
 		int moduleId = -1;
 		int paramId = -1;
-		if (this->paramQuantity) {
-			moduleId = this->paramQuantity->module ? this->paramQuantity->module->id : -1;
-			paramId = this->paramQuantity->paramId;
+		if (this->getParamQuantity()) {
+			moduleId = this->getParamQuantity()->module ? this->getParamQuantity()->module->id : -1;
+			paramId = this->getParamQuantity()->paramId;
 		}
 		return {LabelButtonID::Types::Knob, paramId, moduleId};
 	}
@@ -184,7 +184,7 @@ private:
 		ParamWidget *paramWidget;
 		void step() override
 		{
-			text = paramWidget->paramQuantity->getString();
+			text = paramWidget->getParamQuantity()->getString();
 			MenuLabel::step();
 		}
 	};
@@ -196,31 +196,31 @@ private:
 		void step() override
 		{
 			// Keep selected
-			APP->event->setSelected(this);
+			APP->event->setSelectedWidget(this);
 			TextField::step();
 		}
 
 		void setParamWidget(ParamWidget *paramWidget)
 		{
 			this->paramWidget = paramWidget;
-			if (paramWidget->paramQuantity)
-				text = paramWidget->paramQuantity->getDisplayValueString();
+			if (paramWidget->getParamQuantity())
+				text = paramWidget->getParamQuantity()->getDisplayValueString();
 			selectAll();
 		}
 
 		void onSelectKey(const event::SelectKey &e) override
 		{
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
-				float oldValue = paramWidget->paramQuantity->getValue();
-				if (paramWidget->paramQuantity)
-					paramWidget->paramQuantity->setDisplayValueString(text);
-				float newValue = paramWidget->paramQuantity->getValue();
+				float oldValue = paramWidget->getParamQuantity()->getValue();
+				if (paramWidget->getParamQuantity())
+					paramWidget->getParamQuantity()->setDisplayValueString(text);
+				float newValue = paramWidget->getParamQuantity()->getValue();
 
 				if (oldValue != newValue) {
 					// Push ParamChange history action
 					history::ParamChange *h = new history::ParamChange;
-					h->moduleId = paramWidget->paramQuantity->module->id;
-					h->paramId = paramWidget->paramQuantity->paramId;
+					h->moduleId = paramWidget->getParamQuantity()->module->id;
+					h->paramId = paramWidget->getParamQuantity()->paramId;
 					h->oldValue = oldValue;
 					h->newValue = newValue;
 					APP->history->push(h);
