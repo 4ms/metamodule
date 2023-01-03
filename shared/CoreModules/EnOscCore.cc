@@ -5,6 +5,7 @@
 #include "enosc/ui.hh"
 
 // #include <iostream>
+#include "debug.hh"
 
 class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
@@ -34,7 +35,9 @@ public:
 		if (++block_ctr >= kBlockSize) {
 			block_ctr = 0;
 			enosc.Poll();
+			Debug::Pin1::high();
 			enosc.osc().Process(out_block_);
+			Debug::Pin1::low();
 		}
 	}
 
@@ -133,8 +136,11 @@ public:
 	}
 
 	float get_output(int output_id) const override {
+		Debug::Pin2::high();
 		s9_23 sample = output_id == 0 ? out_block_[block_ctr].l : out_block_[block_ctr].r;
-		return f::inclusive(sample).repr() * 2.f; //0..1 is mapped to 0-5V
+		auto s = f::inclusive(sample).repr() * 2.f; //0..1 is mapped to 0-5V
+		Debug::Pin2::low();
+		return s;
 	}
 
 	void set_samplerate(float sr) override {
