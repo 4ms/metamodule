@@ -52,18 +52,18 @@ using mdrivlib::AdcChannelConf;
 enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotU, PotV, PotW, PotX, PotY, PotZ };
 constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_2Cycles;
 constexpr auto PotConfs = std::to_array({
-	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotA, AdcSampTime},
+	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 2}, mdrivlib::AdcChanNum::_14, PotB, AdcSampTime},
 	AdcChannelConf{{GPIO::B, 0}, mdrivlib::AdcChanNum::_9, PotC, AdcSampTime},
 	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotD, AdcSampTime},
-	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotE, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PotF, AdcSampTime},
-	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotU, AdcSampTime},
-	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotV, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 7}, mdrivlib::AdcChanNum::_7, PotW, AdcSampTime},
+	AdcChannelConf{{GPIO::C, 2}, mdrivlib::AdcChanNum::_12, PotE, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotF, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotU, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 7}, mdrivlib::AdcChanNum::_7, PotV, AdcSampTime},
+	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotW, AdcSampTime},
 	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotX, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotY, AdcSampTime},
-	AdcChannelConf{{GPIO::C, 2}, mdrivlib::AdcChanNum::_12, PotZ, AdcSampTime},
+	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotY, AdcSampTime},
+	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PotZ, AdcSampTime},
 });
 
 } // namespace MetaModule

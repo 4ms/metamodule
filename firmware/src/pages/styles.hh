@@ -63,11 +63,11 @@ struct Gui {
 	};
 	static inline std::array<lv_color_t, 6> knob_palette{
 		lv_palette_main(LV_PALETTE_RED),
+		lv_palette_main(LV_PALETTE_YELLOW),
+		lv_palette_main(LV_PALETTE_CYAN),
+		lv_palette_main(LV_PALETTE_PINK),
 		lv_palette_main(LV_PALETTE_ORANGE),
-		lv_palette_main(LV_PALETTE_GREEN),
-		lv_palette_main(LV_PALETTE_BLUE),
-		lv_palette_main(LV_PALETTE_PURPLE),
-		lv_palette_main(LV_PALETTE_GREY),
+		lv_palette_main(LV_PALETTE_LIGHT_GREEN),
 	};
 	// const lv_style_const_prop_t style1_props[] = {
 	// 	LV_STYLE_CONST_WIDTH(50),
