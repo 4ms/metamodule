@@ -8,8 +8,8 @@ namespace MetaModule
 // I2C for usb-c chip
 const mdrivlib::I2CConfig usb_i2c_conf = {
 	.I2Cx = I2C6,
-	.SCL = {mdrivlib::GPIO::D, 1, mdrivlib::PinAF::AltFunc2},
-	.SDA = {mdrivlib::GPIO::D, 0, mdrivlib::PinAF::AltFunc2},
+	.SCL = {mdrivlib::GPIO::D, mdrivlib::PinNum::_1, mdrivlib::PinAF::AltFunc2},
+	.SDA = {mdrivlib::GPIO::D, mdrivlib::PinNum::_0, mdrivlib::PinAF::AltFunc2},
 	.timing =
 		{
 			.PRESC = 0x10, //0x20 is 100k
@@ -38,6 +38,6 @@ using FUSBIntPin =
 
 constexpr inline uint8_t FUSBDevAddr = 0b01000100;
 
-constexpr inline mdrivlib::PinNoInit Usb5VSrcEnablePin{mdrivlib::GPIO::A, 15};
+constexpr inline mdrivlib::PinDef Usb5VSrcEnablePin{mdrivlib::GPIO::A, mdrivlib::PinNum::_15};
 
 } // namespace MetaModule

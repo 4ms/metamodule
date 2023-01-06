@@ -139,12 +139,10 @@ public:
 		// if (pd.module_slugs.size() < 2)
 		// 	return;
 
-		//TODO: Can we optimize this? It's a branch in the inner loop...
-		// Maybe Audio:: can set a function var to be update_patch() or update_single_module_patch(), depending on num of modules
 		if (pd.module_slugs.size() == 2)
 			modules[1]->update();
 		else {
-			mdrivlib::SMPControl::notify<SMPCommand::UpdateListOfModules>();
+			mdrivlib::SMPThread::split_with_command<SMPCommand::UpdateListOfModules>();
 			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += 2) {
 				modules[module_i]->update();
 			}

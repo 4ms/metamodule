@@ -5,6 +5,8 @@
 #include "drivers/stm32xx.h"
 
 using mdrivlib::GPIO;
+using mdrivlib::PinNum;
+using mdrivlib::PinAF;
 using mdrivlib::SaiConfig;
 
 const SaiConfig codec_mainPCB_sai_conf = {
@@ -37,13 +39,13 @@ const SaiConfig codec_mainPCB_sai_conf = {
 	.framesize = 256,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::E, 0, LL_GPIO_AF_10},
-	.SCLK = {GPIO::D, 13, LL_GPIO_AF_10},
-	.LRCLK = {GPIO::D, 12, LL_GPIO_AF_10},
-	.SD_DAC = {GPIO::D, 11, LL_GPIO_AF_10}, // SD A
-	.SD_ADC = {GPIO::G, 10, LL_GPIO_AF_10}, // SD B
+	.MCLK = {GPIO::E, PinNum::_0, PinAF::AltFunc10},
+	.SCLK = {GPIO::D, PinNum::_13, PinAF::AltFunc10},
+	.LRCLK = {GPIO::D, PinNum::_12, PinAF::AltFunc10},
+	.SD_DAC = {GPIO::D, PinNum::_11, PinAF::AltFunc10}, // SD A
+	.SD_ADC = {GPIO::G, PinNum::_10, PinAF::AltFunc10}, // SD B
 
-	.reset_pin = {GPIO::E, 10, 0},
+	.reset_pin = {GPIO::E, PinNum::_10, PinAF::AFNone},
 
 	.bus_address = 0b00,
 
@@ -85,13 +87,13 @@ const SaiConfig codec_ext_sai_conf = {
 	.framesize = 256,
 	.samplerate = 48000,
 
-	.MCLK = {GPIO::Unused, 0, 0},
-	.SCLK = {GPIO::Unused, 0, 0},
-	.LRCLK = {GPIO::Unused, 0, 0},
-	.SD_DAC = {GPIO::B, 2, LL_GPIO_AF_6}, // SD A
-	.SD_ADC = {GPIO::F, 6, LL_GPIO_AF_6}, // SD B
+	.MCLK = {GPIO::Unused, PinNum::_0, PinAF::AFNone},
+	.SCLK = {GPIO::Unused, PinNum::_0, PinAF::AFNone},
+	.LRCLK = {GPIO::Unused, PinNum::_0, PinAF::AFNone},
+	.SD_DAC = {GPIO::B, PinNum::_2, PinAF::AltFunc6}, // SD A
+	.SD_ADC = {GPIO::F, PinNum::_6, PinAF::AltFunc6}, // SD B
 
-	.reset_pin = {GPIO::E, 8},
+	.reset_pin = {GPIO::E, PinNum::_8},
 
 	.bus_address = 0b01,
 

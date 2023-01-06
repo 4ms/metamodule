@@ -2,14 +2,16 @@
 #include "drivers/i2c_config_struct.hh"
 
 using mdrivlib::GPIO;
+using mdrivlib::PinNum;
+using mdrivlib::PinAF;
 
 constexpr uint32_t LEDUpdateHz = 100;
 
 // I2C for main (internal) and aux (external/expander) codec, and internal and aux (ext/exp) GPIO Expander
 const mdrivlib::I2CConfig i2c_codec_conf = {
 	.I2Cx = I2C5,
-	.SCL = {GPIO::A, 11, LL_GPIO_AF_4},
-	.SDA = {GPIO::A, 12, LL_GPIO_AF_4},
+	.SCL = {GPIO::A, PinNum::_11, PinAF::AltFunc4},
+	.SDA = {GPIO::A, PinNum::_12, PinAF::AltFunc4},
 	.timing = //0x40505874. was 00901945
 	{
 		.PRESC = 0x40,
@@ -24,8 +26,8 @@ const mdrivlib::I2CConfig i2c_codec_conf = {
 // I2C for Aux header (not audio expander header)
 const mdrivlib::I2CConfig aux_i2c_conf = {
 	.I2Cx = I2C2,
-	.SCL = {GPIO::B, 10, LL_GPIO_AF_4},
-	.SDA = {GPIO::B, 11, LL_GPIO_AF_4},
+	.SCL = {GPIO::B, PinNum::_10, PinAF::AltFunc4},
+	.SDA = {GPIO::B, PinNum::_11, PinAF::AltFunc4},
 	.timing =
 		{
 			.PRESC = 0x40,

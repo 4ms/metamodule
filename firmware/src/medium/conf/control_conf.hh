@@ -1,6 +1,7 @@
 #pragma once
 #include "conf/panel_conf.hh"
 #include "drivers/adc_builtin_conf.hh"
+#include "drivers/adc_periph_nums.hh"
 #include "drivers/dma_config_struct.hh"
 #include "drivers/pin.hh"
 #include "drivers/stm32xx.h"
@@ -17,16 +18,18 @@ const mdrivlib::TimekeeperConfig control_read_tim_conf = {
 };
 
 using mdrivlib::GPIO;
-using mdrivlib::PinNoInit;
+using mdrivlib::PinNum;
+using mdrivlib::PinAF;
+using mdrivlib::PinDef;
 using mdrivlib::PinPull;
 
 struct MMControlPins {
-	static constexpr PinNoInit rotA{GPIO::D, 5};
-	static constexpr PinNoInit rotB{GPIO::E, 13};
-	static constexpr PinNoInit rotS{GPIO::E, 15};
-	static constexpr PinNoInit but0{GPIO::D, 8};
-	static constexpr PinNoInit gate_in_1{GPIO::F, 11};
-	static constexpr PinNoInit gate_in_2{GPIO::B, 8};
+	static constexpr PinDef rotA{GPIO::D, PinNum::_5};
+	static constexpr PinDef rotB{GPIO::E, PinNum::_13};
+	static constexpr PinDef rotS{GPIO::E, PinNum::_15};
+	static constexpr PinDef but0{GPIO::D, PinNum::_8};
+	static constexpr PinDef gate_in_1{GPIO::F, PinNum::_11};
+	static constexpr PinDef gate_in_2{GPIO::B, PinNum::_8};
 };
 
 struct PotAdcConf : mdrivlib::DefaultAdcPeriphConf {
@@ -52,18 +55,18 @@ using mdrivlib::AdcChannelConf;
 enum Pots : uint32_t { PotA, PotB, PotC, PotD, PotE, PotF, PotU, PotV, PotW, PotX, PotY, PotZ };
 constexpr auto AdcSampTime = mdrivlib::AdcSamplingTime::_2Cycles;
 constexpr auto PotConfs = std::to_array({
-	AdcChannelConf{{GPIO::B, 1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 2}, mdrivlib::AdcChanNum::_14, PotB, AdcSampTime},
-	AdcChannelConf{{GPIO::B, 0}, mdrivlib::AdcChanNum::_9, PotC, AdcSampTime},
-	AdcChannelConf{{GPIO::C, 1}, mdrivlib::AdcChanNum::_11, PotD, AdcSampTime},
-	AdcChannelConf{{GPIO::C, 2}, mdrivlib::AdcChanNum::_12, PotE, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 5}, mdrivlib::AdcChanNum::_19, PotF, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 6}, mdrivlib::AdcChanNum::_3, PotU, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 7}, mdrivlib::AdcChanNum::_7, PotV, AdcSampTime},
-	AdcChannelConf{{GPIO::C, 5}, mdrivlib::AdcChanNum::_8, PotW, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 3}, mdrivlib::AdcChanNum::_15, PotX, AdcSampTime},
-	AdcChannelConf{{GPIO::C, 3}, mdrivlib::AdcChanNum::_13, PotY, AdcSampTime},
-	AdcChannelConf{{GPIO::A, 4}, mdrivlib::AdcChanNum::_18, PotZ, AdcSampTime},
+	AdcChannelConf{{GPIO::B, PinNum::_1}, mdrivlib::AdcChanNum::_5, PotA, AdcSampTime},
+	AdcChannelConf{{GPIO::A, PinNum::_2}, mdrivlib::AdcChanNum::_14, PotB, AdcSampTime},
+	AdcChannelConf{{GPIO::B, PinNum::_0}, mdrivlib::AdcChanNum::_9, PotC, AdcSampTime},
+	AdcChannelConf{{GPIO::C, PinNum::_1}, mdrivlib::AdcChanNum::_11, PotD, AdcSampTime},
+	AdcChannelConf{{GPIO::C, PinNum::_2}, mdrivlib::AdcChanNum::_12, PotE, AdcSampTime},
+	AdcChannelConf{{GPIO::A, PinNum::_5}, mdrivlib::AdcChanNum::_19, PotF, AdcSampTime},
+	AdcChannelConf{{GPIO::A, PinNum::_6}, mdrivlib::AdcChanNum::_3, PotU, AdcSampTime},
+	AdcChannelConf{{GPIO::A, PinNum::_7}, mdrivlib::AdcChanNum::_7, PotV, AdcSampTime},
+	AdcChannelConf{{GPIO::C, PinNum::_5}, mdrivlib::AdcChanNum::_8, PotW, AdcSampTime},
+	AdcChannelConf{{GPIO::A, PinNum::_3}, mdrivlib::AdcChanNum::_15, PotX, AdcSampTime},
+	AdcChannelConf{{GPIO::C, PinNum::_3}, mdrivlib::AdcChanNum::_13, PotY, AdcSampTime},
+	AdcChannelConf{{GPIO::A, PinNum::_4}, mdrivlib::AdcChanNum::_18, PotZ, AdcSampTime},
 });
 
 } // namespace MetaModule

@@ -10,8 +10,10 @@ namespace MetaModule
 {
 using mdrivlib::FPin;
 using mdrivlib::GPIO;
+using mdrivlib::PinNum;
+using mdrivlib::PinAF;
 using mdrivlib::PinMode;
-using mdrivlib::PinNoInit;
+using mdrivlib::PinDef;
 using mdrivlib::SpiDataDir;
 
 struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
@@ -21,10 +23,10 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr IRQn_Type IRQn = SPI4_IRQn;
 		static constexpr uint16_t priority1 = 2;
 		static constexpr uint16_t priority2 = 3;
-		static constexpr PinNoInit SCLK = {GPIO::E, 12, LL_GPIO_AF_5};
-		static constexpr PinNoInit COPI = {GPIO::E, 6, LL_GPIO_AF_5};
-		static constexpr PinNoInit CIPO = {GPIO::Unused, 0};
-		static constexpr PinNoInit CS0 = {GPIO::E, 11, LL_GPIO_AF_5};
+		static constexpr PinDef SCLK = {GPIO::E, PinNum::_12, PinAF::AltFunc5};
+		static constexpr PinDef COPI = {GPIO::E, PinNum::_6, PinAF::AltFunc5};
+		static constexpr PinDef CIPO = {GPIO::Unused, PinNum::_0};
+		static constexpr PinDef CS0 = {GPIO::E, PinNum::_11, PinAF::AltFunc5};
 		static constexpr bool use_hardware_ss = true;
 		static constexpr uint16_t clock_division = 2;
 		static constexpr uint16_t data_size = 8;
@@ -57,8 +59,8 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr auto periph_burst = Single;
 	};
 
-	using DCPin = FPin<GPIO::B, 7, PinMode::Output>;
-	static constexpr PinNoInit ResetPin{GPIO::B, 13}; //Hardware error: not connected on p7
+	using DCPin = FPin<GPIO::B, PinNum::_7, PinMode::Output>;
+	static constexpr PinDef ResetPin{GPIO::B, PinNum::_13}; //Hardware error: not connected on p7
 
 	static constexpr bool IsInverted = false;
 	static constexpr uint32_t rowstart = 0;

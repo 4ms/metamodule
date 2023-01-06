@@ -2,14 +2,16 @@
 #include "drivers/qspi_flash_struct.hh"
 
 using mdrivlib::GPIO;
+using mdrivlib::PinNum;
+using mdrivlib::PinAF;
 
 constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
-	.io0 = {GPIO::F, 8, LL_GPIO_AF_10},
-	.io1 = {GPIO::F, 9, LL_GPIO_AF_10},
-	.io2 = {GPIO::F, 7, LL_GPIO_AF_9},
-	.io3 = {GPIO::A, 1, LL_GPIO_AF_9},
-	.clk = {GPIO::F, 10, LL_GPIO_AF_9},
-	.cs = {GPIO::B, 6, LL_GPIO_AF_10},
+	.io0 = {GPIO::F, PinNum::_8, PinAF::AltFunc10},
+	.io1 = {GPIO::F, PinNum::_9, PinAF::AltFunc10},
+	.io2 = {GPIO::F, PinNum::_7, PinAF::AltFunc9},
+	.io3 = {GPIO::A, PinNum::_1, PinAF::AltFunc9},
+	.clk = {GPIO::F, PinNum::_10, PinAF::AltFunc9},
+	.cs = {GPIO::B, PinNum::_6, PinAF::AltFunc10},
 
 	/* QSPI freq = QUADSPICLK /(1 + ClockPrescaler) = 266 MHz/(2+1) = 88 Mhz */
 	.clock_division = 3,
@@ -27,12 +29,12 @@ constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
 };
 
 // constexpr mdrivlib::QSPIFlashConfig qspi_flash_conf = {
-// 	.io0 = {GPIO::H, 2, LL_GPIO_AF_9},
-// 	.io1 = {GPIO::H, 3, LL_GPIO_AF_9},
-// 	.io2 = {GPIO::Unused, 0},
-// 	.io3 = {GPIO::Unused, 0},
-// 	.clk = {GPIO::F, 10, LL_GPIO_AF_9},
-// 	.cs = {GPIO::C, 0, LL_GPIO_AF_10},
+// 	.io0 = {GPIO::H, PinNum::_2, PinAF::AltFunc9},
+// 	.io1 = {GPIO::H, PinNum::_3, PinAF::AltFunc9},
+// 	.io2 = {GPIO::Unused, PinNum::_0},
+// 	.io3 = {GPIO::Unused, PinNum::_0},
+// 	.clk = {GPIO::F, PinNum::_10, PinAF::AltFunc9},
+// 	.cs = {GPIO::C, PinNum::_0, PinAF::AltFunc10},
 
 // 	/* QSPI freq = QUADSPICLK /(1 + ClockPrescaler) = 240 MHz/(2+1) = 80 Mhz */
 // 	.clock_division = 2,
