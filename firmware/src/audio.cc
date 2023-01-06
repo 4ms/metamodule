@@ -144,6 +144,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		AudioTestSignal::sines_out(in, out);
 		return;
 	}
+	if (!player.is_loaded)
+		return;
 
 	if (patch_loader.is_loading_new_patch()) {
 		if (mute_ctr > 0.f)
