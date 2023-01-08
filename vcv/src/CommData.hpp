@@ -6,8 +6,8 @@
 
 struct LabelButtonID {
 	enum class Types { None, Knob, InputJack, OutputJack, Toggle } objType;
-	int objID;
-	int moduleID;
+	int64_t objID;
+	int64_t moduleID;
 
 	bool operator==(const LabelButtonID &rhs) const
 	{
