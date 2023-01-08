@@ -308,9 +308,10 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
 		if (module) {
-			p->paramQuantity = module->paramQuantities[knobId];
-			p->paramQuantity->defaultValue = defaultValue;
-			button->setParamQuantity(p->paramQuantity);
+			auto pq = p->getParamQuantity();
+			pq = module->paramQuantities[knobId];
+			p->getParamQuantity()->defaultValue = defaultValue;
+			button->setParamQuantity(p->getParamQuantity());
 		}
 		addParam(p);
 	}

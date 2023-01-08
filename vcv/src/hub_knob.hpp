@@ -85,10 +85,7 @@ public:
 		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
 	{}
 
-	void setParamQuantity(ParamQuantity *paramQ)
-	{
-		paramQuantity = paramQ;
-	}
+	void setParamQuantity(ParamQuantity *paramQ) { paramQuantity = paramQ; }
 
 	void onDeselect(const event::Deselect &e) override
 	{
@@ -96,9 +93,9 @@ public:
 
 		// Check if a ParamWidget was touched
 		ParamWidget *touchedParam = APP->scene->rack->touchedParam;
-		if (touchedParam && touchedParam->paramQuantity) {
-			int moduleId = touchedParam->paramQuantity->module->id;
-			int objId = touchedParam->paramQuantity->paramId;
+		if (touchedParam && touchedParam->getParamQuantity()) {
+			int moduleId = touchedParam->getParamQuantity()->module->id;
+			int objId = touchedParam->getParamQuantity()->paramId;
 			APP->scene->rack->touchedParam = NULL;
 
 			registerSuccess = registerMapping(moduleId, objId);
@@ -159,7 +156,7 @@ public:
 
 			// Touch parameter
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
-				if (this->paramQuantity) {
+				if (this->getParamQuantity()) {
 					APP->scene->rack->touchedParam = this;
 				}
 				e.consume(this);
@@ -167,7 +164,7 @@ public:
 
 			// Right click to open context menu
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-				makeKnobMenu(this->paramQuantity, hubKnobMapBut.id);
+				makeKnobMenu(this->getParamQuantity(), hubKnobMapBut.id);
 				e.consume(this);
 			}
 		}
@@ -188,10 +185,7 @@ public:
 
 	struct ParamResetItem : ui::MenuItem {
 		ParamWidget *paramWidget;
-		void onAction(const event::Action &e) override
-		{
-			paramWidget->resetAction();
-		}
+		void onAction(const event::Action &e) override { paramWidget->resetAction(); }
 	};
 
 private:
