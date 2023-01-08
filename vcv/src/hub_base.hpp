@@ -30,10 +30,7 @@ struct MetaModuleHubBase : public CommModule {
 
 	MetaModuleHubBase() = default;
 
-	~MetaModuleHubBase()
-	{
-		centralData->unregisterKnobMapsBySrcModule(id);
-	}
+	~MetaModuleHubBase() { centralData->unregisterKnobMapsBySrcModule(id); }
 
 	// This is called periodically on auto-save
 	// CentralData->maps is converted to json
@@ -342,7 +339,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		jack->box.pos = posPx;
 		jack->box.pos = jack->box.pos.minus(jack->box.size.div(2));
 		jack->module = module;
-		jack->type = inout == JackInOut::Input ? app::PortWidget::INPUT : app::PortWidget::OUTPUT;
+		jack->type = inout == JackInOut::Input ? Port::INPUT : Port::OUTPUT;
 		jack->portId = jackId;
 		if (inout == JackInOut::Input)
 			addInput(jack);
