@@ -77,3 +77,8 @@ struct SubMiniToggleHoriz2pos : rack::app::SvgSwitch {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SubMiniToggleH_2.svg")));
 	}
 };
+
+template<typename TSwitch>
+struct LatchingSwitch : TSwitch {
+	LatchingSwitch() { this->momentary = false; }
+};
