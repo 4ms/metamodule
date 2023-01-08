@@ -80,10 +80,7 @@ struct ModuleID {
 	int id;
 	ModuleTypeSlug typeID;
 
-	bool operator==(const ModuleID &rhs) const
-	{
-		return (this->id == rhs.id) && (this->typeID == rhs.typeID);
-	}
+	bool operator==(const ModuleID &rhs) const { return (this->id == rhs.id) && (this->typeID == rhs.typeID); }
 };
 
 struct JackStatus {
@@ -104,8 +101,5 @@ struct ParamStatus {
 	int paramID = 0;
 	int moduleID = 0;
 
-	bool isSameParam(ParamStatus &other)
-	{
-		return (paramID == other.paramID) && (moduleID == other.moduleID);
-	}
+	bool isSameParam(ParamStatus &other) { return (paramID == other.paramID) && (moduleID == other.moduleID); }
 };
