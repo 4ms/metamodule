@@ -32,7 +32,7 @@ public:
 			if (src.objType == getId().objType && src.objID >= 0) {
 				nvgBeginPath(args.vg);
 				nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y / 2);
-				float alpha = this->hovered ? 0.75 : 0.4;
+				float alpha = hovered ? 0.75 : 0.4;
 				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alpha);
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
@@ -83,24 +83,25 @@ public:
 		}
 	}
 
-	void onHover(const event::Hover &e) override
-	{
-		e.consume(this);
-	}
+	void onHover(const event::Hover &e) override { e.consume(this); }
 
 	void onEnter(const event::Enter &e) override
 	{
+		hovered = true;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyEnterHover(getId());
 	}
 
 	void onLeave(const event::Leave &e) override
 	{
+		hovered = false;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyLeaveHover(getId());
 	}
 
 private:
+	bool hovered = false;
+
 	LabelButtonID getId()
 	{
 		int moduleId = this->module ? this->module->id : -1;
@@ -115,10 +116,7 @@ private:
 		JackUnmapItem(LabelButtonID id)
 			: _id{id}
 		{}
-		void onAction(const event::Action &e) override
-		{
-			centralData->unregisterMapByDest(_id);
-		}
+		void onAction(const event::Action &e) override { centralData->unregisterMapByDest(_id); }
 	};
 };
 
