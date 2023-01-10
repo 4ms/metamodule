@@ -67,6 +67,7 @@ struct PatchSelectorPage : PageBase {
 			patchnames += patch_list.get_patch_name(i).data();
 			patchnames += '\n';
 		}
+		// remove trailing \n
 		if (patchnames.length() > 0)
 			patchnames.pop_back();
 
@@ -75,7 +76,9 @@ struct PatchSelectorPage : PageBase {
 		// unsigned default_sel = patchnames.size() > 9 ? 5U : 0;
 		unsigned default_sel = patchnames.size() > 10 ? 5 : patchnames.size() / 2;
 		lv_roller_set_selected(roller, default_sel, LV_ANIM_OFF);
-		printf_("Patch Selector page preselecting %d from %p\n", lv_roller_get_selected(roller), roller);
+		printf_("Patch Selector page refreshed %d patches, preselecting %d\n",
+				patch_list.num_patches(),
+				lv_roller_get_selected(roller));
 	}
 
 	void update() override {

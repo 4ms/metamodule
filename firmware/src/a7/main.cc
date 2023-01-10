@@ -97,6 +97,7 @@ void main() {
 		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
 		if (patchdisk.ramdisk_patches_to_norflash()) {
 			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
+			patchdisk.fill_patchlist_from_norflash(patch_list);
 			patch_list.mark_modified();
 		} else {
 			printf_("NOR Flash writeback failed!\r\n");
