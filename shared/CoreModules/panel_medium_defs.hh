@@ -66,5 +66,8 @@ struct PanelDef {
 		"Out7",
 		"Out8",
 	};
+
+	//Array index is codec channel number 0-5
+	//Value is panel jack number (Audio In 0 - 5)
 	static constexpr uint32_t audioin_order[NumAudioIn] = {3, 2, 1, 0, 5, 4};
 };

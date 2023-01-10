@@ -1,4 +1,5 @@
 #pragma once
+#include "conf/jack_sense_conf.hh" // for debug out
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "lvgl_driver.hh"
@@ -86,7 +87,7 @@ private:
 			printf_("%s", msg.data());
 			msg_queue.clear_message();
 		}
-		// output_debug_info();
+		output_debug_info();
 		// Debug::Pin1::low();
 	}
 
@@ -146,23 +147,31 @@ private:
 				pot_max[i] = 0.f;
 			}
 
-			printf_("PatchCV: iir=%d min=%d max=%d range=%d\r\n",
-					(int32_t)(patchcv.iir * 4096.f),
-					(int32_t)(4096.f * patchcv.min),
-					(int32_t)(4096.f * patchcv.max),
-					(int32_t)(4096.f * (patchcv.max - patchcv.min)));
-			patchcv.reset_to(metaparams.patchcv);
+			// printf_("PatchCV: iir=%d min=%d max=%d range=%d\r\n",
+			// 		(int32_t)(patchcv.iir * 4096.f),
+			// 		(int32_t)(4096.f * patchcv.min),
+			// 		(int32_t)(4096.f * patchcv.max),
+			// 		(int32_t)(4096.f * (patchcv.max - patchcv.min)));
+			// patchcv.reset_to(metaparams.patchcv);
 
-			printf_("Button: %d GateIn1: %d GateIn2: %d\r\n",
+			auto b = [=](uint32_t bit) -> uint32_t { return (params.jack_senses >> (jacksense_pin_order[bit])) & 1; };
+
+			printf_("Outs patched: %d %d %d %d %d %d %d %d\n", b(8), b(9), b(10), b(11), b(12), b(13), b(14), b(15));
+
+			printf_("Button: %d GateIn1: %d [%d] GateIn2: %d [%d] \r\n",
 					metaparams.meta_buttons[0].is_high() ? 1 : 0,
 					params.gate_ins[0].is_high() ? 1 : 0,
-					params.gate_ins[1].is_high() ? 1 : 0);
+					b(6),
+					params.gate_ins[1].is_high() ? 1 : 0,
+					b(7));
 
-			printf_("Jack senses: %08x\r\n", params.jack_senses);
+			// printf_("Audio INs: %d %d %d %d %d %d\n", b(0), b(1), b(2), b(3), b(4), b(5));
+			// printf_("Gate INs: %d %d\n", b(6), b(7));
 
 			for (auto [i, ain] : enumerate(metaparams.ins)) {
-				printf_("AIN %d: iir=%d min=%d max=%d range=%d\r\n",
+				printf_("AIN %d: [%d] iir=%d min=%d max=%d range=%d\r\n",
 						i,
+						b(i),
 						(int32_t)(ain.iir * 32768.f),
 						(int32_t)(ain.min * 32768.f),
 						(int32_t)(ain.max * 32768.f),
