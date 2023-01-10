@@ -154,7 +154,9 @@ private:
 			// 		(int32_t)(4096.f * (patchcv.max - patchcv.min)));
 			// patchcv.reset_to(metaparams.patchcv);
 
-			auto b = [=](uint32_t bit) -> uint32_t { return (params.jack_senses >> (jacksense_pin_order[bit])) & 1; };
+			auto b = [j = params.jack_senses](uint32_t bit) -> uint32_t {
+				return (j >> (jacksense_pin_order[bit])) & 1;
+			};
 
 			printf_("Outs patched: %d %d %d %d %d %d %d %d\n", b(8), b(9), b(10), b(11), b(12), b(13), b(14), b(15));
 
