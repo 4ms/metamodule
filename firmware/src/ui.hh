@@ -87,7 +87,7 @@ private:
 			printf_("%s", msg.data());
 			msg_queue.clear_message();
 		}
-		output_debug_info();
+		// output_debug_info();
 		// Debug::Pin1::low();
 	}
 
