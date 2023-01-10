@@ -1,11 +1,7 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/EnOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
 #include "enosc/ui.hh"
-
-// #include <iostream>
-#include "debug.hh"
 
 class EnOscCore : public CoreProcessor {
 	using Info = EnOscInfo;
@@ -35,9 +31,7 @@ public:
 		if (++block_ctr >= kBlockSize) {
 			block_ctr = 0;
 			enosc.Poll();
-			Debug::Pin1::high();
 			enosc.osc().Process(out_block_);
-			Debug::Pin1::low();
 		}
 	}
 
@@ -136,10 +130,8 @@ public:
 	}
 
 	float get_output(int output_id) const override {
-		Debug::Pin2::high();
 		s9_23 sample = output_id == 0 ? out_block_[block_ctr].l : out_block_[block_ctr].r;
 		auto s = f::inclusive(sample).repr() * 2.f; //0..1 is mapped to 0-5V
-		Debug::Pin2::low();
 		return s;
 	}
 
@@ -148,7 +140,6 @@ public:
 			sample_rate_ = sr;
 			ui_process_throttle = (unsigned)sample_rate_ / kUiProcessRate;
 			ui_update_throttle = (unsigned)sample_rate_ / kUiUpdateRate;
-			// std::cout << "Freq = " << sr << std::endl;
 		}
 	}
 
@@ -165,6 +156,16 @@ public:
 			auto el = led_id == 3 ? c.red() : led_id == 4 ? c.green() : c.blue();
 			return f::inclusive(el).repr();
 		}
+	}
+
+	void mark_all_inputs_unpatched() override {
+		for (unsigned i = 0; i < Info::NumInJacks; i++)
+			set_input(i, 0.f);
+	}
+	void mark_input_unpatched(const int input_id) override {
+		set_input(input_id, 0.f);
+	}
+	void mark_input_patched(const int input_id) override {
 	}
 
 	// Boilerplate to auto-register in ModuleFactory
