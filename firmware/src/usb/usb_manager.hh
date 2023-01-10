@@ -56,24 +56,24 @@ public:
 			using enum FUSB302::Device::ConnectedState;
 
 			if (newstate == AsDevice) {
-				Debug::Pin2::high();
-				Debug::Pin3::low();
+				// Debug::Pin2::high();
+				// Debug::Pin3::low();
 				Debug::green_LED1::high();
 				Debug::blue_LED1::low();
 				printf_("Connected as a device\n");
 				usb_drive.start();
 
 			} else if (newstate == AsHost) {
-				Debug::Pin2::low();
-				Debug::Pin3::high();
+				// Debug::Pin2::low();
+				// Debug::Pin3::high();
 				Debug::green_LED1::low();
 				Debug::blue_LED1::high();
 				printf_("Starting host\n");
 				usb_host.start();
 
 			} else if (newstate == None) {
-				Debug::Pin2::low();
-				Debug::Pin3::low();
+				// Debug::Pin2::low();
+				// Debug::Pin3::low();
 				Debug::green_LED1::low();
 				Debug::blue_LED1::low();
 				if (state == AsHost) {

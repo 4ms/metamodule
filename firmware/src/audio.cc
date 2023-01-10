@@ -175,24 +175,24 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 	if (ext_audio_connected)
 		AudioTestSignal::passthrough(audio_block.in_ext_codec, audio_block.out_ext_codec);
 
+	// Handle jacks being plugged/unplugged
+	propagate_sense_pins(param_block.params[0]);
+	const auto jack_sense = param_block.params[0].jack_senses;
+
 	for (auto [in_, out_, aux_, params_] : zip(in, out, aux, param_block.params)) {
 
-		// Handle jacks being plugged/unplugged
-		propagate_sense_pins(params_);
-
 		// Pass audio inputs to modules
-		for (auto [i, inchan] : countzip(in_.chan)) {
-			auto pin_bit = jacksense_pin_order[i];
+		for (auto [codec_chan_i, inchan] : countzip(in_.chan)) {
+			auto panel_jack_i = PanelDef::audioin_order[codec_chan_i];
 
-			plug_detect.update(params_.jack_senses & (1 << pin_bit));
-			if (plug_detect.staying_low())
+			if (((jack_sense >> jacksense_pin_order[panel_jack_i]) & 1) == 0)
 				continue;
 
-			float scaled_input = plug_detect.is_high() ? incal[i].adjust(AudioInFrame::scaleInput(inchan)) : 0.f;
+			float scaled_input = incal[panel_jack_i].adjust(AudioInFrame::scaleInput(inchan));
 			// TODO: bake the unsigned=>float conversion into Calibrate::adjust(), and then use sign_extend instead of scaleInput
 
-			player.set_panel_input(PanelDef::audioin_order[i], scaled_input);
-			param_block.metaparams.ins[i].update(scaled_input);
+			player.set_panel_input(panel_jack_i, scaled_input);
+			param_block.metaparams.ins[panel_jack_i].update(scaled_input);
 		}
 
 		// Pass CV values to modules
@@ -255,15 +255,19 @@ void AudioStream::propagate_sense_pins(Params &params) {
 	for (int i = 0; i < PanelDef::NumUserFacingInJacks; i++) {
 		auto pin_bit = jacksense_pin_order[i];
 		bool sense = params.jack_senses & (1 << pin_bit);
-		player.set_input_jack_patched_status(i, sense);
+		plug_detects[i].update(sense);
+		if (plug_detects[i].changed())
+			player.set_input_jack_patched_status(i, sense);
 	}
 
-	// Note: p3 PCB has an error where out jack sense pins do not work
 	if constexpr (PanelDef::PanelID != 0) {
-		for (int i = 0; i < PanelDef::NumUserFacingOutJacks; i++) {
-			auto pin_bit = jacksense_pin_order[i + PanelDef::NumUserFacingInJacks];
+		for (int out_i = 0; out_i < PanelDef::NumUserFacingOutJacks; out_i++) {
+			auto jack_i = out_i + PanelDef::NumUserFacingInJacks;
+			auto pin_bit = jacksense_pin_order[jack_i];
 			bool sense = params.jack_senses & (1 << pin_bit);
-			player.set_output_jack_patched_status(i, sense);
+			plug_detects[jack_i].update(sense);
+			if (plug_detects[jack_i].changed())
+				player.set_output_jack_patched_status(out_i, sense);
 		}
 	}
 }

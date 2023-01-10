@@ -209,7 +209,7 @@ uint32_t Controls::get_patchcv_reading() {
 }
 
 uint32_t Controls::get_jacksense_reading() {
-	return jacksense_reader.get_last_reading() | (extaudio_jacksense_reader.get_last_reading() << 16);
+	return ~(jacksense_reader.get_last_reading() | (extaudio_jacksense_reader.get_last_reading() << 16));
 }
 
 } // namespace MetaModule
