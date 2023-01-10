@@ -61,7 +61,7 @@ private:
 	uint32_t sample_rate_;
 
 	Calibrator incal[PanelDef::NumAudioIn];
-	EdgeDetector plug_detect;
+	EdgeDetector plug_detects[PanelDef::NumJacks];
 
 	// Todo: this stuff is a different abstraction level than codec/samplerate/tx_buf/rx_buf etc
 	// Should we class this out? It's only connected to Audio at init and process()
