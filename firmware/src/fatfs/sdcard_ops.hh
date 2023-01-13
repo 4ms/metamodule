@@ -3,8 +3,12 @@
 #include "disk_ops.hh"
 #include "drivers/sdcard.hh"
 
+namespace MetaModule
+{
+
+template<mdrivlib::SDCardConfC ConfT>
 class SDCardOps : public DiskOps {
-	mdrivlib::SDCard<MetaModule::SDCardConf> sd;
+	mdrivlib::SDCard<ConfT> sd;
 
 public:
 	enum class Status { NotInit, InUse, NotInUse, Mounted, Unmounted };
@@ -81,3 +85,5 @@ public:
 private:
 	Status _status = Status::NotInit;
 };
+
+} // namespace MetaModule
