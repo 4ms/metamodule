@@ -218,7 +218,6 @@ SOURCES += src/fatfs/fattime.cc
 SOURCES += src/fatfs/ramdisk_fileio.cc
 SOURCES += src/patchstorage.cc
 SOURCES += src/time_convert.cc
-# SOURCES += src/patchfileio.cc
 SOURCES += $(LIBDIR)/littlefs/lfs.c
 SOURCES += $(LIBDIR)/littlefs/lfs_util.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
