@@ -1,9 +1,7 @@
 #include "patchstorage.hh"
 #include "conf/qspi_flash_conf.hh"
-#include "fatfs/ramdisk_fileio.hh"
 #include "patchlist.hh"
 #include "printf.h"
-
 #include <cstring>
 
 #define pr_dbg printf_
@@ -56,7 +54,7 @@ LittleNorFS::Status PatchStorage::init_norflash() {
 bool PatchStorage::norflash_patches_to_ramdisk() {
 	// Remove all RamDisk .yml files
 	RamDiskFileIO::for_each_file_regex(
-		Disk::RamDisk, "*.yml", [](const char *fname) { RamDiskFileIO::delete_file(fname); });
+		DiskID::RamDisk, "*.yml", [](const char *fname) { RamDiskFileIO::delete_file(fname); });
 
 	// Scan LFS for .yml files
 	bool ok = lfs.foreach_file_with_ext(
@@ -84,7 +82,7 @@ bool PatchStorage::norflash_patches_to_ramdisk() {
 bool PatchStorage::ramdisk_patches_to_norflash() {
 	found_files.clear();
 
-	RamDiskFileIO::for_each_file_regex(Disk::RamDisk, "*.yml", [this](const char *fname) {
+	RamDiskFileIO::for_each_file_regex(DiskID::RamDisk, "*.yml", [this](const char *fname) {
 		if (fname[0] == '.')
 			return;
 
