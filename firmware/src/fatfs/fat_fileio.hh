@@ -14,6 +14,7 @@ template<typename Ops, DiskID disk>
 class FatFileIO {
 	FATFS fs;
 	Ops ops;
+	char vol[3];
 
 public:
 	struct __attribute__((packed)) FileInfo {
@@ -30,6 +31,7 @@ public:
 		if (!fatfs_register_disk(ops, 0)) {
 			printf_("Failed to register FAT FS Disk %d\n", disk);
 		}
+		vol_string(vol);
 	}
 
 	FatFileIO(auto ops_params)
@@ -40,8 +42,6 @@ public:
 	}
 
 	bool mount_disk() {
-		char vol[3];
-		vol_string(disk, vol);
 		if (f_mount(&fs, vol, 1) == FR_OK)
 			return true;
 		return false;
@@ -61,9 +61,6 @@ public:
 	}
 
 	bool format_disk() {
-		char vol[3];
-		vol_string(disk, vol);
-
 		BYTE work[FF_MAX_SS * 2];
 		auto res = f_mkfs(vol, nullptr, work, sizeof(work));
 		if (res != FR_OK)
