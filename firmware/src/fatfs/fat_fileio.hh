@@ -224,7 +224,8 @@ public:
 			if (fno.fname[0] == '\0')
 				break;
 			if (std::string_view{fno.fname}.ends_with(extension)) {
-				action(fno.fname, fno.ftime);
+				uint32_t timestamp = get_file_rawtimestamp(fno.fname);
+				action(fno.fname, timestamp);
 			}
 		}
 

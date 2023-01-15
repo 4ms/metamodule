@@ -109,10 +109,25 @@ public:
 		return (err >= 0);
 	}
 
-	using FileAction =
-		std::function<void(const std::string_view filename, uint32_t timestamp, const std::span<char> data)>;
+	bool read_file(const std::string_view filename, std::span<std::byte> data) {
+		lfs_file_t file;
 
-	// Performs an action(filename, timestamp, file_data) on each file in LittleFS ending with the extension
+		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_RDONLY);
+		if (err < 0)
+			return false;
+
+		auto bytes_read = lfs_file_read(&lfs, &file, &data, data.size());
+		if (bytes_read <= 0)
+			return false;
+
+		lfs_file_close(&lfs, &file);
+		return true;
+	}
+
+	using FileAction = std::function<void(const std::string_view filename, uint32_t timestamp)>;
+
+	// Performs an action(filename, timestamp) on each file in LittleFS root dir ending with the extension
+	// TODO: Add parameter for dir to search
 	bool foreach_file_with_ext(const std::string_view extension, FileAction action) {
 		lfs_dir_t dir;
 		if (lfs_dir_open(&lfs, &dir, "/") < 0)
@@ -126,26 +141,9 @@ public:
 				return false;
 
 			if (std::string_view{info.name}.ends_with(extension)) {
-
-				//action(info.name);
-
-				TimeFile file;
-				if (time_file_open(&file, info.name, LFS_O_RDONLY) < 0) {
-					printf_("Warning: Can't open file %s\n", info.name);
-					continue;
-				}
-
-				auto bytes_read = lfs_file_read(&lfs, &file.file, &_data, _data.size());
-				if (bytes_read <= 0)
-					continue;
-				if (info.size > _data.size()) {
-					printf_(
-						"Warning: File %s is %d bytes, exceeds max %d. Skipping\n", info.name, info.size, _data.size());
-					continue;
-				}
-				lfs_file_close(&lfs, &file.file);
-
-				action(info.name, file.timestamp, {_data.data(), info.size});
+				auto timestamp = get_file_timestamp(info.name);
+				if (timestamp)
+					action(info.name, timestamp);
 			}
 		}
 
@@ -184,6 +182,11 @@ public:
 		// attributes will be automatically populated during open call
 		return lfs_file_opencfg(&lfs, &tfile->file, path, flags, &tfile->cfg);
 	}
+	// usage:
+	// TimeFile file;
+	// if (time_file_open(&file, info.name, LFS_O_RDONLY) < 0) {
+	// 	printf_("Warning: Can't open file %s\n", info.name);
+	// }
 
 	// int time_file_write(TimeFile *tfile, const void *buffer, size_t size) {
 	// 	tfile->timestamp = get_fattime(); //make_timestamp(2018, 9, 19, 7, 30, 45);
