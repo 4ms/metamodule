@@ -208,6 +208,25 @@ public:
 			res = f_findnext(&dj, &fileinfo);
 		}
 	}
+
+	template<typename Action>
+	void for_each_file_with_ext(const std::string_view extension, Action action) {
+		DIR dj;
+		FILINFO fno;
+		auto res = f_opendir(&dj, vol);
+		//rewind dir?
+		if (res != FR_OK)
+			return;
+		while (res == FR_OK && fno.fname[0]) {
+		}
+
+		do {
+			res = f_readdir(&dj, &fno);
+			if (res == FR_OK && std::string_view{fno.fname}.ends_with(extension)) {
+				action(fno.fname, fno.ftime);
+			}
+		} while (res == FR_OK && fno.fname[0]);
+	}
 };
 
 } // namespace MetaModule

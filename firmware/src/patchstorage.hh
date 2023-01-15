@@ -30,6 +30,7 @@ public:
 	static bool overwrite_patchlist(FileIoC auto fileio, PatchList &patch_list) {
 	}
 
+	// When going to ramdisk, we erase ramdisk first
 	static bool copy_patches_from_to(FileIoC auto from, FileIoC auto to) {
 		bool ok = from.foreach_file_with_ext(
 			".yml",
