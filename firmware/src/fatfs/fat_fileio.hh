@@ -214,18 +214,26 @@ public:
 		DIR dj;
 		FILINFO fno;
 		auto res = f_opendir(&dj, vol);
-		//rewind dir?
+
 		if (res != FR_OK)
 			return;
-		while (res == FR_OK && fno.fname[0]) {
-		}
 
-		do {
-			res = f_readdir(&dj, &fno);
-			if (res == FR_OK && std::string_view{fno.fname}.ends_with(extension)) {
+		//rewind dir?
+
+		while (f_readdir(&dj, &fno) == FR_OK) {
+			if (fno.fname[0] == '\0')
+				break;
+			if (std::string_view{fno.fname}.ends_with(extension)) {
 				action(fno.fname, fno.ftime);
 			}
-		} while (res == FR_OK && fno.fname[0]);
+		}
+
+		// do {
+		// 	res = f_readdir(&dj, &fno);
+		// 	if (res == FR_OK && std::string_view{fno.fname}.ends_with(extension)) {
+		// 		action(fno.fname, fno.ftime);
+		// 	}
+		// } while (res == FR_OK && fno.fname[0]);
 	}
 };
 

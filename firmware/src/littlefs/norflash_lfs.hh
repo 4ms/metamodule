@@ -126,6 +126,9 @@ public:
 				return false;
 
 			if (std::string_view{info.name}.ends_with(extension)) {
+
+				//action(info.name);
+
 				TimeFile file;
 				if (time_file_open(&file, info.name, LFS_O_RDONLY) < 0) {
 					printf_("Warning: Can't open file %s\n", info.name);
