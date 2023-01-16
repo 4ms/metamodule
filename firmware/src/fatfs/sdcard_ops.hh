@@ -9,9 +9,11 @@ namespace MetaModule
 template<mdrivlib::SDCardConfC ConfT>
 class SDCardOps : public DiskOps {
 	mdrivlib::SDCard<ConfT> sd;
+	constexpr static uint32_t SDBlockSize = 512;
 
 public:
-	enum class Status { NotInit, InUse, NotInUse, Mounted, Unmounted };
+	// enum class Status { NotInit, InUse, NotInUse, Mounted, Unmounted };
+	enum class Status { NotInit, Mounted };
 
 	SDCardOps() = default;
 
@@ -35,7 +37,7 @@ public:
 		if (_status == Status::NotInit) {
 			sd.init();
 		}
-		_status = Status::NotInUse;
+		_status = Status::Mounted;
 		return 0;
 	}
 
@@ -62,10 +64,16 @@ public:
 	}
 
 	DRESULT ioctl(uint8_t cmd, uint8_t *buff) override {
+		if (_status == Status::NotInit)
+			return RES_NOTRDY;
+
+		HAL_SD_CardInfoTypeDef card_info;
+
 		switch (cmd) {
 			case GET_SECTOR_SIZE: // Get R/W sector size (WORD)
 				*(WORD *)buff = sd.BlockSize;
 				break;
+
 			case GET_BLOCK_SIZE: // Get erase block size in unit of sector (DWORD)
 				*(DWORD *)buff = 1;
 				break;
@@ -77,11 +85,13 @@ public:
 			} break;
 			case CTRL_SYNC:
 				break;
+
 			case CTRL_TRIM:
 				break;
 			case CTRL_EJECT:
 				break;
 		}
+
 		return RES_OK;
 	}
 
