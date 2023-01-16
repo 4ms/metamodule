@@ -6,6 +6,12 @@
 namespace MetaModule
 {
 
+//State machine for CD with DAT2:
+//start: DAT3 no-pull, input, state=NotInit [hardware must not have 33k pull-up on DAT3]
+//init: init all pins except DAT3, HAL, etc. State = Unmounted
+//	Read DAT3: if high then card is detected -> init DAT3 as AltFunc. State = Mounted
+//   	       otherwise, State = NoCard
+//any IO: if card not responding, re-init DAT3 as no-pull input. State = NoCard
 template<mdrivlib::SDCardConfC ConfT>
 class SDCardOps : public DiskOps {
 	mdrivlib::SDCard<ConfT> sd;
@@ -13,7 +19,7 @@ class SDCardOps : public DiskOps {
 
 public:
 	// enum class Status { NotInit, InUse, NotInUse, Mounted, Unmounted };
-	enum class Status { NotInit, Mounted };
+	enum class Status { NotInit, NoCard, Mounted };
 
 	SDCardOps() = default;
 
@@ -21,13 +27,13 @@ public:
 		return (_status == Status::NotInit) ? (STA_NOINIT | STA_NODISK) : 0;
 	}
 
-	Status get_status() {
-		return _status;
-	}
+	// Status get_status() {
+	// 	return _status;
+	// }
 
-	void set_status(Status status) {
-		_status = status;
-	}
+	// void set_status(Status status) {
+	// 	_status = status;
+	// }
 
 	// FatFS calls this :
 	// - in f_mkfs(),
@@ -37,8 +43,12 @@ public:
 		if (_status == Status::NotInit) {
 			sd.init();
 		}
-		_status = Status::Mounted;
-		return 0;
+		if (sd.detect_card()) {
+			_status = Status::Mounted;
+			return 0;
+		}
+		_status = Status::NoCard;
+		return STA_NODISK;
 	}
 
 	DRESULT read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) override {
