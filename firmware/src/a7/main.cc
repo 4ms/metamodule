@@ -72,32 +72,12 @@ void main() {
 
 	HWSemaphore<RamDiskLock>::unlock();
 
-	SemaphoreActionOnUnlock<RamDiskLock> ramdisk_readback([&patch_list, &patch_storage] {
+	SemaphoreActionOnUnlock<RamDiskLock> ramdisk_readback([&patch_storage] {
 		if (HWSemaphore<RamDiskLock>::lock(1) == HWSemaphoreFlag::LockFailed) {
 			printf_("Error getting lock on RamDisk to read back\n");
 			return;
 		}
-		patch_list.lock();
-		printf_("NOR Flash writeback begun.\r\n");
-
-		auto &ramdisk = patch_storage.ramdisk;
-		auto &norflash = patch_storage.norflash;
-
-		ramdisk.unmount_disk();
-
-		// Must invalidate the cache because M4 wrote to it???
-		// SystemCache::invalidate_dcache_by_range(StaticBuffers::virtdrive.virtdrive,
-		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
-		PatchFileIO::delete_all_patches(ramdisk);
-		if (PatchFileIO::copy_patches_from_to(ramdisk, norflash)) {
-			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
-			PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
-			patch_list.mark_modified();
-		} else {
-			printf_("NOR Flash writeback failed!\r\n");
-		}
-		patch_list.unlock();
-		printf_("RamDisk Available to M4\n");
+		patch_storage.update_norflash_from_ramdisk();
 		HWSemaphore<RamDiskLock>::unlock_nonrecursive(1);
 	});
 

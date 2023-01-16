@@ -15,6 +15,7 @@ namespace MetaModule
 struct PatchStorage {
 	SDCardOps<SDCardConf> sdcard_ops;
 	FatFileIO sdcard{&sdcard_ops, DiskID::SDCard};
+	bool sdcard_valid = false;
 
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
 	LfsFileIO norflash{flash};
@@ -45,6 +46,27 @@ struct PatchStorage {
 		ramdisk.format_disk();
 		PatchFileIO::copy_patches_from_to(norflash, ramdisk);
 		PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
+	}
+
+	void update_norflash_from_ramdisk() {
+		patch_list.lock();
+		printf_("NOR Flash writeback begun.\r\n");
+
+		ramdisk.unmount_disk();
+
+		// Must invalidate the cache because M4 wrote to it???
+		// SystemCache::invalidate_dcache_by_range(StaticBuffers::virtdrive.virtdrive,
+		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
+		PatchFileIO::delete_all_patches(ramdisk);
+		if (PatchFileIO::copy_patches_from_to(ramdisk, norflash)) {
+			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
+			PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
+			patch_list.mark_modified();
+		} else {
+			printf_("NOR Flash writeback failed!\r\n");
+		}
+		patch_list.unlock();
+		printf_("RamDisk Available to M4\n");
 	}
 };
 
