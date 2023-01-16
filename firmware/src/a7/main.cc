@@ -41,7 +41,6 @@ void main() {
 
 	PatchList patch_list{};
 	PatchStorage patch_storage{patch_list};
-	constexpr auto x = sizeof(PatchList);
 
 	// // SD Card
 	// FatFileIO<SDCardOps<SDCardConf>, DiskID::SDCard> sdcard;
