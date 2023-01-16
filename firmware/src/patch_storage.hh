@@ -1,7 +1,7 @@
 #include "a7/static_buffers.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdcard_conf.hh"
-#include "fatfs/fat_fileio.hh"
+#include "fatfs/fat_file_io.hh"
 #include "fatfs/ramdisk_ops.hh"
 #include "fatfs/sdcard_ops.hh"
 #include "littlefs/norflash_lfs.hh"
@@ -13,10 +13,17 @@ namespace MetaModule
 
 // PatchStorage manages all patch filesystems <--> PatchList
 struct PatchStorage {
-	FatFileIO<SDCardOps<SDCardConf>, DiskID::SDCard> sdcard;
+	SDCardOps<SDCardConf> sdcard_ops;
+	FatFileIO sdcard{&sdcard_ops, DiskID::SDCard};
+	// FatFileIO<SDCardOps<SDCardConf>, DiskID::SDCard> sdcard;
+
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
 	LfsFileIO norflash{flash};
-	FatFileIO<RamDiskOps, DiskID::RamDisk> ramdisk{StaticBuffers::virtdrive};
+
+	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
+	FatFileIO ramdisk{&ramdisk_ops, DiskID::RamDisk};
+	// FatFileIO<RamDiskOps, DiskID::RamDisk> ramdisk{StaticBuffers::virtdrive};
+
 	PatchList &patch_list;
 
 	PatchStorage(PatchList &patch_list, bool reset_to_factory_patches = false)
