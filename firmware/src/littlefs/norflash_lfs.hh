@@ -8,7 +8,7 @@
 #include "time_convert.hh"
 #include <string_view>
 
-class LittleNorFS {
+class LfsFileIO {
 	lfs_t lfs;
 	mdrivlib::QSpiFlash &_flash;
 
@@ -18,7 +18,7 @@ public:
 	enum class Status { AlreadyFormatted, NewlyFormatted, FlashError, LFSError };
 	std::array<char, MaxFileSize> _data;
 
-	LittleNorFS(mdrivlib::QSpiFlash &flash)
+	LfsFileIO(mdrivlib::QSpiFlash &flash)
 		: _flash{flash} {
 	}
 
@@ -109,7 +109,7 @@ public:
 		return (err >= 0);
 	}
 
-	bool read_file(const std::string_view filename, std::span<std::byte> data) {
+	bool read_file(const std::string_view filename, std::span<char> data) {
 		lfs_file_t file;
 
 		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_RDONLY);
@@ -124,7 +124,7 @@ public:
 		return true;
 	}
 
-	using FileAction = std::function<void(const std::string_view filename, uint32_t timestamp)>;
+	using FileAction = std::function<void(const std::string_view filename, uint32_t timestamp, uint32_t filesize)>;
 
 	// Performs an action(filename, timestamp) on each file in LittleFS root dir ending with the extension
 	// TODO: Add parameter for dir to search
@@ -143,7 +143,7 @@ public:
 			if (std::string_view{info.name}.ends_with(extension)) {
 				auto timestamp = get_file_timestamp(info.name);
 				if (timestamp)
-					action(info.name, timestamp);
+					action(info.name, timestamp, info.size);
 			}
 		}
 
@@ -151,6 +151,8 @@ public:
 
 		return true;
 	}
+
+	////// Time Attribute:
 
 	enum { ATTR_TIMESTAMP = 0x74 };
 
@@ -182,14 +184,10 @@ public:
 		// attributes will be automatically populated during open call
 		return lfs_file_opencfg(&lfs, &tfile->file, path, flags, &tfile->cfg);
 	}
-	// usage:
-	// TimeFile file;
-	// if (time_file_open(&file, info.name, LFS_O_RDONLY) < 0) {
-	// 	printf_("Warning: Can't open file %s\n", info.name);
-	// }
 
-	// int time_file_write(TimeFile *tfile, const void *buffer, size_t size) {
-	// 	tfile->timestamp = get_fattime(); //make_timestamp(2018, 9, 19, 7, 30, 45);
-	// 	return lfs_file_write(&lfs, &tfile->file, buffer, size);
-	// }
+	// usage:
+	// TimeFile tfile;
+	// time_file_open(&tfile, info.name, LFS_O_RDONLY);
+	// if (tfile.attrs[0].type == ATTR_TIMESTAMP)
+	//     uint32_t timestamp = tfile.attrs[0].buffer;
 };

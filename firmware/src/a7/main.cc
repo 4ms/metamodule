@@ -1,22 +1,17 @@
 #include "app_startup.hh"
 #include "audio.hh"
-#include "conf/board_codec_conf.hh"
-#include "conf/qspi_flash_conf.hh"
+// #include "conf/board_codec_conf.hh"
 #include "debug.hh"
-#include "drivers/hsem.hh"
-#include "drivers/stm32xx.h"
-#include "fatfs/fat_fileio.hh"
-#include "fatfs/ramdisk_ops.hh"
-#include "fatfs/sdcard_ops.hh"
+// #include "drivers/hsem.hh"
+// #include "drivers/stm32xx.h"
 #include "hsem_handler.hh"
-#include "littlefs/norflash_lfs.hh"
 #include "params.hh"
+#include "patch_fileio.hh"
 #include "patch_loader.hh"
 #include "patch_mod_queue.hh"
 #include "patch_player.hh"
+#include "patch_storage.hh"
 #include "patchlist.hh"
-#include "patchstorage.hh"
-#include "qspi_flash_driver.hh"
 #include "semaphore_action.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
@@ -44,29 +39,28 @@ void main() {
 	auto now = ticks_to_fattime(HAL_GetTick());
 	printf_("%u/%u/%u %u:%02u:%02u\n", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
 
-	// SD Card
-	FatFileIO<SDCardOps<SDCardConf>, DiskID::SDCard> sdcard;
-
-	// NOR Flash -- just for testing our API (probably won't put patches there)
-	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
-	LittleNorFS norflash{flash};
-	auto status = norflash.initialize();
-	if (status == LittleNorFS::Status::AlreadyFormatted || reset_to_factory_patches) {
-		norflash.reformat();
-		PatchStorage::create_default_patches(norflash);
-	}
-
-	// RamDisk: format it and copy patches to it
-	// --Just for testing, really we should copy patches when USB MSC device starts
-	FatFileIO<RamDiskOps, DiskID::RamDisk> ramdisk{StaticBuffers::virtdrive};
-	ramdisk.format_disk();
-	PatchStorage::copy_patches_from_to(norflash, ramdisk);
-	PatchStorage::copy_patches_from_to(sdcard, ramdisk);
-
-	// Populate Patch List
 	PatchList patch_list{};
-	PatchStorage::overwrite_patchlist(norflash, patch_list);
-	PatchStorage::add_to_patchlist(sdcard, patch_list);
+	PatchStorage patch_storage{patch_list};
+	constexpr auto x = sizeof(PatchList);
+
+	// // SD Card
+	// FatFileIO<SDCardOps<SDCardConf>, DiskID::SDCard> sdcard;
+
+	// // NOR Flash -- just for testing our API (probably won't put patches there)
+	// mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
+	// LfsFileIO norflash{flash};
+	// auto status = norflash.initialize();
+	// if (status == LfsFileIO::Status::NewlyFormatted || reset_to_factory_patches) {
+	// 	norflash.reformat();
+	// 	PatchFileIO::create_default_patches(norflash);
+	// }
+
+	// // RamDisk: format it and copy patches to it
+	// // --Just for testing, really we should copy patches when USB MSC device starts
+	// FatFileIO<RamDiskOps, DiskID::RamDisk> ramdisk{StaticBuffers::virtdrive};
+	// ramdisk.format_disk();
+	// PatchFileIO::copy_patches_from_to(norflash, ramdisk);
+	// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
 
 	PatchPlayer patch_player;
 	PatchLoader patch_loader{patch_list, patch_player};
@@ -87,6 +81,7 @@ void main() {
 					  StaticBuffers::auxsignal_block,
 					  patch_mod_queue};
 
+	//TODO: create struct with fields for each address, and write addr of the struct
 	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
@@ -98,21 +93,26 @@ void main() {
 
 	HWSemaphore<RamDiskLock>::unlock();
 
-	SemaphoreActionOnUnlock<RamDiskLock> ramdisk_readback([&] {
+	SemaphoreActionOnUnlock<RamDiskLock> ramdisk_readback([&patch_list, &patch_storage] {
 		if (HWSemaphore<RamDiskLock>::lock(1) == HWSemaphoreFlag::LockFailed) {
 			printf_("Error getting lock on RamDisk to read back\n");
 			return;
 		}
 		patch_list.lock();
 		printf_("NOR Flash writeback begun.\r\n");
+
+		auto &ramdisk = patch_storage.ramdisk;
+		auto &norflash = patch_storage.norflash;
+
 		ramdisk.unmount_disk();
 
 		// Must invalidate the cache because M4 wrote to it???
 		// SystemCache::invalidate_dcache_by_range(StaticBuffers::virtdrive.virtdrive,
 		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
-		if (PatchStorage::copy_patches_from_to(ramdisk, norflash)) {
+		PatchFileIO::delete_all_patches(ramdisk);
+		if (PatchFileIO::copy_patches_from_to(ramdisk, norflash)) {
 			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
-			PatchStorage::overwrite_patchlist(ramdisk, patch_list);
+			PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
 			patch_list.mark_modified();
 		} else {
 			printf_("NOR Flash writeback failed!\r\n");

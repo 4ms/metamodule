@@ -41,7 +41,7 @@ struct DefaultPatches {
 	static std::span<char> get_patch(uint32_t id) {
 		if (id >= patch_raw_data.size())
 			return {};
-		return patch_raw_data[id];
+		return {patch_raw_data[id].data(), patch_raw_data[id].size_bytes()};
 	}
 
 	static ModuleTypeSlug get_filename(uint32_t id) {

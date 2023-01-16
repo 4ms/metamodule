@@ -2,8 +2,12 @@
 #include "disk_ops.hh"
 #include "printf.h"
 #include <cstdint>
+#include <functional>
 #include <span>
 #include <string_view>
+
+// defined in fatfs/diskio.cc:
+bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
 namespace MetaModule
 {
@@ -28,7 +32,7 @@ public:
 	};
 
 	FatFileIO() {
-		if (!fatfs_register_disk(ops, 0)) {
+		if (!fatfs_register_disk(&ops, static_cast<unsigned>(disk))) {
 			printf_("Failed to register FAT FS Disk %d\n", disk);
 		}
 		vol_string(vol);
@@ -36,7 +40,7 @@ public:
 
 	FatFileIO(auto ops_params)
 		: ops{ops_params} {
-		if (!fatfs_register_disk(ops, 0)) {
+		if (!fatfs_register_disk(&ops, static_cast<unsigned>(disk))) {
 			printf_("Failed to register FAT FS Disk %d\n", disk);
 		}
 	}
@@ -79,15 +83,9 @@ public:
 		return create_file(filename.data(), data.data(), data.size_bytes());
 	}
 
-	bool create_file(const char *filename, const std::span<const char> data) {
-		return create_file(filename, data.data(), data.size_bytes());
-	}
-
-	bool create_file(const char *filename, const char *data, unsigned sz) {
+	bool create_file(const char *filename, const char *const data, unsigned sz) {
 		FIL fil;
 		{
-			// TCHAR fn[FF_LFN_BUF];
-			// u8_to_tchar(filename, fn);
 			auto res = f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE);
 			if (res != FR_OK)
 				return false;
@@ -107,7 +105,7 @@ public:
 		return true;
 	}
 
-	void set_file_rawtimestamp(std::string_view filename, uint32_t timestamp) {
+	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
 		FILINFO fno;
 		auto res = f_stat(filename.data(), &fno);
 		if (res != FR_OK)
@@ -119,12 +117,16 @@ public:
 			printf_("Could not update timestamp of %s\n", filename.data());
 	}
 
-	uint32_t get_file_rawtimestamp(std::string_view filename) {
+	uint32_t get_file_timestamp(std::string_view filename) {
 		FILINFO fno;
 		if (f_stat(filename.data(), &fno) != FR_OK) {
-			printf_("Could not read file %s\n", filename.data());
+			// printf_("Could not read file %s\n", filename.data());
 			return 0;
 		}
+		return rawtimestamp(fno);
+	}
+
+	uint32_t rawtimestamp(FILINFO &fno) {
 		return ((uint32_t)fno.fdate << 16) | (uint32_t)fno.ftime;
 	}
 
@@ -142,9 +144,10 @@ public:
 		};
 	}
 
-	uint32_t read_file(std::string_view filename, char *data, uint32_t max_bytes) {
+	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
 		FIL fil;
 		FILINFO fileinfo;
+		uint32_t max_bytes = buffer.size_bytes();
 		uint32_t bytes_to_read;
 		UINT bytes_read;
 		{
@@ -160,7 +163,7 @@ public:
 				return 0;
 		}
 		{
-			auto res = f_read(&fil, data, bytes_to_read, &bytes_read);
+			auto res = f_read(&fil, buffer.data(), bytes_to_read, &bytes_read);
 			if (res != FR_OK)
 				return 0;
 		}
@@ -171,19 +174,13 @@ public:
 		return bytes_read;
 	}
 
-	bool delete_file(const char *filename) {
+	bool delete_file(std::string_view filename) {
 		FIL fil;
-		auto res = f_unlink(filename);
+		auto res = f_unlink(filename.data());
 		if (res != FR_OK)
 			return false;
 
 		return true;
-	}
-
-	static void u8_to_tchar(const char *u8, TCHAR *uint) {
-		do {
-			*uint++ = *u8++;
-		} while (*u8 != '\0');
 	}
 
 	void debug_print_fileinfo(FileInfo info) {
@@ -197,44 +194,24 @@ public:
 				info.second);
 	}
 
-	template<typename Action>
-	// requires(Action a, const char *chr) {a(chr);}
-	void for_each_file_regex(std::string_view regex, Action action) {
-		DIR dj;
-		FILINFO fileinfo;
-		auto res = f_findfirst(&dj, &fileinfo, "", regex.data());
-		while (res == FR_OK && fileinfo.fname[0]) {
-			action(fileinfo.fname);
-			res = f_findnext(&dj, &fileinfo);
-		}
-	}
-
-	template<typename Action>
-	void for_each_file_with_ext(const std::string_view extension, Action action) {
+	// Returns false if dir cannot be opened
+	bool foreach_file_with_ext(const std::string_view extension, auto action) {
 		DIR dj;
 		FILINFO fno;
 		auto res = f_opendir(&dj, vol);
 
 		if (res != FR_OK)
-			return;
-
-		//rewind dir?
+			return false;
 
 		while (f_readdir(&dj, &fno) == FR_OK) {
 			if (fno.fname[0] == '\0')
 				break;
 			if (std::string_view{fno.fname}.ends_with(extension)) {
-				uint32_t timestamp = get_file_rawtimestamp(fno.fname);
-				action(fno.fname, timestamp);
+				uint32_t timestamp = rawtimestamp(fno);
+				action(fno.fname, timestamp, fno.fsize);
 			}
 		}
-
-		// do {
-		// 	res = f_readdir(&dj, &fno);
-		// 	if (res == FR_OK && std::string_view{fno.fname}.ends_with(extension)) {
-		// 		action(fno.fname, fno.ftime);
-		// 	}
-		// } while (res == FR_OK && fno.fname[0]);
+		return true;
 	}
 };
 

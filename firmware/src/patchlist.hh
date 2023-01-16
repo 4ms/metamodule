@@ -74,6 +74,7 @@ struct PatchList {
 		_locked = false;
 	}
 
+	void add_patch_from_yaml(const std::span<std::byte> data);
 	void add_patch_from_yaml(const std::span<char> data);
 	void add_patch_from_yaml(const std::span<uint8_t> data);
 
