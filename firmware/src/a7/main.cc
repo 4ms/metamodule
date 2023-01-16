@@ -42,34 +42,14 @@ void main() {
 	PatchList patch_list{};
 	PatchStorage patch_storage{patch_list};
 
-	// // SD Card
-	// FatFileIO<SDCardOps<SDCardConf>, DiskID::SDCard> sdcard;
-
-	// // NOR Flash -- just for testing our API (probably won't put patches there)
-	// mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
-	// LfsFileIO norflash{flash};
-	// auto status = norflash.initialize();
-	// if (status == LfsFileIO::Status::NewlyFormatted || reset_to_factory_patches) {
-	// 	norflash.reformat();
-	// 	PatchFileIO::create_default_patches(norflash);
-	// }
-
-	// // RamDisk: format it and copy patches to it
-	// // --Just for testing, really we should copy patches when USB MSC device starts
-	// FatFileIO<RamDiskOps, DiskID::RamDisk> ramdisk{StaticBuffers::virtdrive};
-	// ramdisk.format_disk();
-	// PatchFileIO::copy_patches_from_to(norflash, ramdisk);
-	// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
-
 	PatchPlayer patch_player;
 	PatchLoader patch_loader{patch_list, patch_player};
 
 	// "Thread"-shared data:
 	ParamCache param_cache;
-	MessageQueue mbox;
 	PatchModQueue patch_mod_queue;
 
-	Ui ui{patch_loader, patch_list, param_cache, mbox, patch_mod_queue};
+	Ui ui{patch_loader, patch_list, param_cache, patch_mod_queue};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,

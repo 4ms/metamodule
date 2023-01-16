@@ -22,8 +22,8 @@ private:
 	ParamCache &param_cache;
 	PatchList &patch_list;
 	PatchLoader &patch_loader;
-	MessageQueue &msg_queue;
 
+	MessageQueue msg_queue;
 	PageManager page_manager;
 	Params params;
 	MetaParams metaparams;
@@ -32,15 +32,11 @@ private:
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchLoader &patch_loader,
-	   PatchList &patch_list,
-	   ParamCache &pc,
-	   MessageQueue &msg_queue,
-	   PatchModQueue &patch_mod_queue)
+	Ui(PatchLoader &patch_loader, PatchList &patch_list, ParamCache &pc, PatchModQueue &patch_mod_queue)
 		: param_cache{pc}
 		, patch_list{patch_list}
 		, patch_loader{patch_loader}
-		, msg_queue{msg_queue}
+		, msg_queue{1024}
 		, page_manager{patch_list, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
