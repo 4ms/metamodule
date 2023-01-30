@@ -152,7 +152,7 @@ public:
 	}
 
 private:
-	static std::vector<size_t> found_files;
+	// static std::vector<size_t> found_files;
 	static std::array<char, 65536> buf;
 
 	static size_t filename_hash(const std::string_view fname) {
