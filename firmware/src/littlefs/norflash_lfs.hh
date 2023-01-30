@@ -109,19 +109,19 @@ public:
 		return (err >= 0);
 	}
 
-	bool read_file(const std::string_view filename, std::span<char> data) {
+	uint32_t read_file(const std::string_view filename, std::span<char> data) {
 		lfs_file_t file;
 
 		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_RDONLY);
 		if (err < 0)
-			return false;
+			return 0;
 
 		auto bytes_read = lfs_file_read(&lfs, &file, &data, data.size());
 		if (bytes_read <= 0)
-			return false;
+			return 0;
 
 		lfs_file_close(&lfs, &file);
-		return true;
+		return bytes_read;
 	}
 
 	using FileAction = std::function<void(const std::string_view filename, uint32_t timestamp, uint32_t filesize)>;
