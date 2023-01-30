@@ -12,7 +12,7 @@ class PatchFileIO {
 public:
 	// void factory_clean();
 
-	static bool add_to_patchlist(FileIoC auto fileio, PatchList &patch_list) {
+	static bool add_to_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
 		patch_list.set_status(PatchList::Status::Loading);
 
 		bool ok = fileio.foreach_file_with_ext(
@@ -26,6 +26,7 @@ public:
 			if (!_read_patch_to_local_buffer(fileio, filename, filesize))
 				return;
 
+			// Ensure null termination
 			buf[buf.size() - 1] = '\0';
 
 			patch_list.add_patch_from_yaml(buf);
@@ -38,12 +39,12 @@ public:
 		return ok;
 	}
 
-	static bool overwrite_patchlist(FileIoC auto fileio, PatchList &patch_list) {
+	static bool overwrite_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
 		patch_list.clear_all_patches();
 		return add_to_patchlist(fileio, patch_list);
 	}
 
-	static bool delete_all_patches(FileIoC auto fileio) {
+	static bool delete_all_patches(FileIoC auto &fileio) {
 		return fileio.foreach_file_with_ext(
 			".yml", [&fileio](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
 				fileio.delete_file(filename);
@@ -53,7 +54,7 @@ public:
 	// NOTE/TODO: When going from NORFS to ramdisk, we need to erase ramdisk first
 	// Copies patch yml files from one FS to another.
 	// If a file with the same name exists, it is silently overwritten.
-	static bool copy_patches_from_to(FileIoC auto from, FileIoC auto to) {
+	static bool copy_patches_from_to(FileIoC auto &from, FileIoC auto &to) {
 		bool ok = from.foreach_file_with_ext(
 			".yml", [&from, &to](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
 				if (filesize < 12 || filename.starts_with("."))
@@ -84,7 +85,7 @@ public:
 
 	// Updates patch yml files from one FS to another.
 	// If a file with the same name exists, it is overwritten only if the timestamp differs (??is older??)
-	static bool copy_new_patches_from_to(FileIoC auto from, FileIoC auto to) {
+	static bool copy_new_patches_from_to(FileIoC auto &from, FileIoC auto &to) {
 		bool ok = from.foreach_file_with_ext(
 			".yml",
 			[&from, &to](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
@@ -122,7 +123,7 @@ public:
 	}
 
 	// Delete all patch files on a FS which are not present on a reference FS
-	static bool remove_patch_files_not_matching(FileIoC auto reference, FileIoC auto fileio) {
+	static bool remove_patch_files_not_matching(FileIoC auto &reference, FileIoC auto &fileio) {
 		bool ok = reference.foreach_file_with_ext(
 			".yml", [&reference, &fileio](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
 				//TODO: use get_file_info since timestamp might not be working on LFS since it's a custom attribute?
@@ -133,7 +134,7 @@ public:
 		return ok;
 	}
 
-	static bool create_default_patches(FileIoC auto fileio) {
+	static bool create_default_patches(FileIoC auto &fileio) {
 		for (uint32_t i = 0; i < DefaultPatches::num_patches(); i++) {
 			const auto filename = DefaultPatches::get_filename(i);
 			const auto patch = DefaultPatches::get_patch(i);
