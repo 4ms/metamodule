@@ -16,8 +16,10 @@ public:
 	static constexpr uint32_t BlockSize = 4096;
 	static constexpr uint32_t MaxFileSize = 32768;
 	enum class Status { AlreadyFormatted, NewlyFormatted, FlashError, LFSError };
-	//std::array<char, MaxFileSize> _data;
+
 	char _volname[10]{"LFS Flash"};
+
+	LfsFileIO(LfsFileIO &other) = delete;
 
 	LfsFileIO(mdrivlib::QSpiFlash &flash)
 		: _flash{flash} {

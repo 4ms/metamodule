@@ -15,6 +15,8 @@ public:
 	// enum class Status { NotInit, InUse, NotInUse, Mounted, Unmounted };
 	enum class Status { NotInit, NoCard, Mounted };
 
+	SDCardOps(SDCardOps &other) = delete;
+
 	SDCardOps() = default;
 
 	DSTATUS status() override {

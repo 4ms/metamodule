@@ -171,7 +171,7 @@ private:
 	}
 
 	// FIXME: uses static buffer, NOT THREAD OR ISR SAFE!!
-	static bool _read_patch_to_local_buffer(FileIoC auto fileio, const std::string_view filename, uint32_t filesize) {
+	static bool _read_patch_to_local_buffer(FileIoC auto &fileio, const std::string_view filename, uint32_t filesize) {
 
 		auto bytes_read = fileio.read_file(filename, buf);
 		if (bytes_read == 0) {
