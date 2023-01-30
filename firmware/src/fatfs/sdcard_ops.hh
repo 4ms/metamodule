@@ -40,7 +40,7 @@ public:
 
 	DRESULT read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) override {
 		if (!sd.detect_card()) {
-			_status = Status::Unmounted;
+			_status = Status::NoCard;
 			return RES_NOTRDY;
 		}
 
@@ -51,7 +51,7 @@ public:
 
 	DRESULT write(const uint8_t *src, uint32_t sector_start, uint32_t num_sectors) override {
 		if (!sd.detect_card()) {
-			_status = Status::Unmounted;
+			_status = Status::NoCard;
 			return RES_NOTRDY;
 		}
 
@@ -63,8 +63,6 @@ public:
 	DRESULT ioctl(uint8_t cmd, uint8_t *buff) override {
 		if (_status == Status::NotInit)
 			return RES_NOTRDY;
-
-		HAL_SD_CardInfoTypeDef card_info;
 
 		switch (cmd) {
 			case GET_SECTOR_SIZE: // Get R/W sector size (WORD)
