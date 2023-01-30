@@ -40,23 +40,25 @@ public:
 	}
 
 	DRESULT read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) override {
-		// const uint32_t address = sector_start * RamDiskBlockSize;
-		// const uint32_t bytes = num_sectors * RamDiskBlockSize;
-		// if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
-		// 	return RES_ERROR;
+		if (!sd.detect_card()) {
+			_status = Status::Unmounted;
+			return RES_NOTRDY;
+		}
 
-		// std::memcpy(dst, &ramdisk.virtdrive[address], bytes);
-		return RES_OK;
+		const uint32_t size_bytes = num_sectors * sd.BlockSize;
+		auto ok = sd.read({dst, size_bytes}, sector_start);
+		return ok ? RES_OK : RES_ERROR;
 	}
 
 	DRESULT write(const uint8_t *src, uint32_t sector_start, uint32_t num_sectors) override {
-		// const uint32_t address = sector_start * RamDiskBlockSize;
-		// const uint32_t bytes = num_sectors * RamDiskBlockSize;
-		// if (address >= RamDiskSizeBytes || (address + bytes) >= RamDiskSizeBytes)
-		// 	return RES_ERROR;
+		if (!sd.detect_card()) {
+			_status = Status::Unmounted;
+			return RES_NOTRDY;
+		}
 
-		// std::memcpy(&ramdisk.virtdrive[address], src, bytes);
-		return RES_OK;
+		const uint32_t size_bytes = num_sectors * sd.BlockSize;
+		auto ok = sd.write({src, size_bytes}, sector_start);
+		return ok ? RES_OK : RES_ERROR;
 	}
 
 	DRESULT ioctl(uint8_t cmd, uint8_t *buff) override {
