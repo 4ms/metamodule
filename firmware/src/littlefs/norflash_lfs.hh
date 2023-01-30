@@ -17,6 +17,7 @@ public:
 	static constexpr uint32_t MaxFileSize = 32768;
 	enum class Status { AlreadyFormatted, NewlyFormatted, FlashError, LFSError };
 	std::array<char, MaxFileSize> _data;
+	char _volname[10]{"LFS Flash"};
 
 	LfsFileIO(mdrivlib::QSpiFlash &flash)
 		: _flash{flash} {
@@ -55,6 +56,10 @@ public:
 			return Status::LFSError;
 
 		return Status::NewlyFormatted;
+	}
+
+	std::string_view volname() {
+		return _volname;
 	}
 
 	Status reformat() {

@@ -33,8 +33,9 @@ public:
 
 		patch_list.set_status(PatchList::Status::Ready);
 
+		if (!ok)
+			pr_log("Failed to read patches on %s\n", fileio.volname().data());
 		return ok;
-		return false; // TODO: implement
 	}
 
 	static bool overwrite_patchlist(FileIoC auto fileio, PatchList &patch_list) {
@@ -75,7 +76,7 @@ public:
 			});
 
 		if (!ok) {
-			pr_err("PatchStorage failed to copy patches.\n");
+			pr_err("PatchStorage failed to copy patches on %s.\n", from.volname().data());
 			return false;
 		}
 		return true;

@@ -22,4 +22,7 @@ concept FileIoC = requires(T t,
 						  } -> std::integral;
 					  t.delete_file(filename);
 					  t.set_file_timestamp(filename, tm);
+					  {
+						  t.volname()
+						  } -> std::convertible_to<std::string_view>;
 				  };
