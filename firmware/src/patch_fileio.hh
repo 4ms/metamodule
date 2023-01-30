@@ -164,8 +164,8 @@ private:
 		return h;
 	}
 
-	static std::string_view trim_leading_newlines(auto s) {
-		std::string_view v{s.data(), s.size()};
+	static std::string_view trim_buf_leading_newlines() {
+		std::string_view v{buf.data(), buf.size()};
 		v.remove_prefix(std::min(v.find_first_not_of("\n\r"), v.size()));
 		return v;
 	}
@@ -182,7 +182,7 @@ private:
 			pr_err("Error: File %s too large (%d, max is %d), skipped\n", filename.data(), filesize, sizeof(buf));
 			return false;
 		}
-		if (!trim_leading_newlines(buf).starts_with("PatchData:")) {
+		if (!trim_buf_leading_newlines().starts_with("PatchData:")) {
 			pr_log("File does not start with 'PatchData:', skipping\n");
 			return false;
 		}
