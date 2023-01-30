@@ -15,14 +15,12 @@ namespace MetaModule
 struct PatchStorage {
 	SDCardOps<SDCardConf> sdcard_ops;
 	FatFileIO sdcard{&sdcard_ops, DiskID::SDCard};
-	// FatFileIO<SDCardOps<SDCardConf>, DiskID::SDCard> sdcard;
 
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
 	LfsFileIO norflash{flash};
 
 	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	FatFileIO ramdisk{&ramdisk_ops, DiskID::RamDisk};
-	// FatFileIO<RamDiskOps, DiskID::RamDisk> ramdisk{StaticBuffers::virtdrive};
 
 	PatchList &patch_list;
 
@@ -37,15 +35,16 @@ struct PatchStorage {
 			PatchFileIO::create_default_patches(norflash);
 		}
 
+		// Populate Patch List
+		patch_list.clear_all_patches();
+		PatchFileIO::add_to_patchlist(norflash, patch_list);
+		PatchFileIO::add_to_patchlist(sdcard, patch_list);
+
 		// RamDisk: format it and copy patches to it
 		// --Just for testing, really we should copy patches when USB MSC device starts
 		ramdisk.format_disk();
 		PatchFileIO::copy_patches_from_to(norflash, ramdisk);
 		PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
-
-		// Populate Patch List
-		PatchFileIO::overwrite_patchlist(norflash, patch_list);
-		PatchFileIO::add_to_patchlist(sdcard, patch_list);
 	}
 };
 
