@@ -114,14 +114,14 @@ public:
 		return (err >= 0);
 	}
 
-	uint32_t read_file(const std::string_view filename, std::span<char> data) {
+	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
 		lfs_file_t file;
 
 		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_RDONLY);
 		if (err < 0)
 			return 0;
 
-		auto bytes_read = lfs_file_read(&lfs, &file, &data, data.size());
+		auto bytes_read = lfs_file_read(&lfs, &file, buffer.data(), buffer.size_bytes());
 		if (bytes_read <= 0)
 			return 0;
 
