@@ -177,7 +177,7 @@ private:
 			return false;
 		}
 		if (bytes_read < filesize) {
-			pr_err("File %s too large (%d, max is %d), skipped\n", filesize, sizeof(buf), filename.data());
+			pr_err("Error: File %s too large (%d, max is %d), skipped\n", filename.data(), filesize, sizeof(buf));
 			return false;
 		}
 		if (!trim_leading_newlines(buf).starts_with("PatchData:")) {
