@@ -43,9 +43,9 @@ struct PatchStorage {
 
 		// RamDisk: format it and copy patches to it
 		// --Just for testing, really we should copy patches when USB MSC device starts
-		ramdisk.format_disk();
-		PatchFileIO::copy_patches_from_to(norflash, ramdisk);
-		PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
+		// ramdisk.format_disk();
+		// PatchFileIO::copy_patches_from_to(norflash, ramdisk);
+		// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
 	}
 
 	void update_norflash_from_ramdisk() {
