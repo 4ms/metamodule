@@ -59,16 +59,19 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 		hubModule = module;
 
 		if (hubModule != nullptr) {
-			hubModule->updateDisplay = [&]() { this->valueLabel->text = this->hubModule->labelText; };
-			hubModule->updatePatchName = [&]() {
+			printf("HubModule is not null\n");
+			hubModule->updateDisplay = [this] { this->valueLabel->text = this->hubModule->labelText; };
+			hubModule->updatePatchName = [this] {
 				this->hubModule->patchNameText = this->patchName->text;
 				this->hubModule->patchDescText = this->patchDesc->text;
 			};
-			hubModule->redrawPatchName = [&]() {
+			hubModule->redrawPatchName = [this]() {
+				printf("Redrawing patch name: %s\n", this->hubModule->patchNameText.c_str());
 				this->patchName->text = this->hubModule->patchNameText;
 				this->patchDesc->text = this->hubModule->patchDescText;
 			};
-		}
+		} else
+			printf("HubModule is null\n");
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-medium-p8.svg")));
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
