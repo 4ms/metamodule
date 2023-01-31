@@ -304,11 +304,14 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		auto *p = new HubKnob<KnobType>{*button};
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
+		p->app::ParamWidget::module = hubModule;
+		p->app::ParamWidget::paramId = knobId;
+		p->initParamQuantity();
 		if (module) {
 			auto pq = p->getParamQuantity();
 			pq = module->paramQuantities[knobId];
-			p->getParamQuantity()->defaultValue = defaultValue;
-			button->setParamQuantity(p->getParamQuantity());
+			pq->defaultValue = defaultValue;
+			button->setParamQuantity(pq);
 		}
 		addParam(p);
 	}
