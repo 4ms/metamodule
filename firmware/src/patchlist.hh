@@ -79,6 +79,14 @@ struct PatchList {
 	void add_patch_from_yaml(const std::span<uint8_t> data);
 
 private:
+	struct PatchFile {
+		PatchData patch_data;
+		std::string filepath;
+	};
+
+	// FIXME: We could get fragmentation if patch list is changed frequently
+	// Use an arena or some separate memory area, which is wiped with every change
+	// We'd need to estimate the max size of all patches to do this.
 	std::vector<PatchData> _patch_data;
 	Status _status;
 	bool _has_been_updated = false;
