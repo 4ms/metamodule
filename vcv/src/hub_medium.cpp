@@ -9,6 +9,8 @@
 #include "patch_writer.hpp"
 #include "plugin.hpp"
 
+// Note: in v2, first the module is constructed, then dataFromJson is called, then the Widget is constructed
+
 struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 
 	enum ParamIds { ENUMS(KNOBS, PanelDef::NumPot), WRITE_PATCH, NUM_PARAMS };
@@ -64,11 +66,6 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 			hubModule->updatePatchName = [this] {
 				this->hubModule->patchNameText = this->patchName->text;
 				this->hubModule->patchDescText = this->patchDesc->text;
-			};
-			hubModule->redrawPatchName = [this]() {
-				printf("Redrawing patch name: %s\n", this->hubModule->patchNameText.c_str());
-				this->patchName->text = this->hubModule->patchNameText;
-				this->patchDesc->text = this->hubModule->patchDescText;
 			};
 		} else
 			printf("HubModule is null\n");

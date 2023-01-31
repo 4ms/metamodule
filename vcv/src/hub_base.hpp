@@ -20,7 +20,6 @@ template<int NumKnobMaps>
 struct MetaModuleHubBase : public CommModule {
 
 	std::function<void()> updatePatchName;
-	std::function<void()> redrawPatchName;
 	std::string labelText = "";
 	std::string patchNameText = "";
 	std::string patchDescText = "";
@@ -33,12 +32,11 @@ struct MetaModuleHubBase : public CommModule {
 	~MetaModuleHubBase() { centralData->unregisterKnobMapsBySrcModule(id); }
 
 	// This is called periodically on auto-save
-	// CentralData->maps is converted to json
+	// CentralData->maps and the patch name/description are converted to json
 	json_t *dataToJson() override
 	{
 		json_t *rootJ = json_object();
 		json_t *mapsJ = json_array();
-		// refreshMappings();
 
 		for (auto &m : centralData->maps) {
 			json_t *thisMapJ = json_object();
@@ -57,12 +55,15 @@ struct MetaModuleHubBase : public CommModule {
 		}
 		json_object_set_new(rootJ, "Mappings", mapsJ);
 
-		updatePatchName();
-		json_t *patchNameJ = json_string(patchNameText.c_str());
-		json_object_set_new(rootJ, "PatchName", patchNameJ);
+		if (updatePatchName) {
+			updatePatchName();
+			json_t *patchNameJ = json_string(patchNameText.c_str());
+			json_object_set_new(rootJ, "PatchName", patchNameJ);
 
-		json_t *patchDescJ = json_string(patchDescText.c_str());
-		json_object_set_new(rootJ, "PatchDesc", patchDescJ);
+			json_t *patchDescJ = json_string(patchDescText.c_str());
+			json_object_set_new(rootJ, "PatchDesc", patchDescJ);
+		} else
+			printf("Error: CommModuleWidget has not been constructed, but dataToJson is being called\n");
 		return rootJ;
 	}
 
@@ -73,23 +74,11 @@ struct MetaModuleHubBase : public CommModule {
 		auto patchNameJ = json_object_get(rootJ, "PatchName");
 		if (json_is_string(patchNameJ)) {
 			patchNameText = json_string_value(patchNameJ);
-
-			// redrawPatchName() never gets called in v2...redrawPatchName is never defined at this point.
-			// Perhaps because the module is constructed, then dataFromJson is called, then the Widget is constructed
-			// if (redrawPatchName)
-			// 	redrawPatchName();
-			// else
-			// 	printf("redrawPatchName not defined yet\n");
 		}
 
 		auto patchDescJ = json_object_get(rootJ, "PatchDesc");
 		if (json_is_string(patchDescJ)) {
 			patchDescText = json_string_value(patchDescJ);
-
-			// if (redrawPatchName)
-			// 	redrawPatchName();
-			// else
-			// 	printf("redrawPatchName not defined yet\n");
 		}
 
 		auto mapsJ = json_object_get(rootJ, "Mappings");
