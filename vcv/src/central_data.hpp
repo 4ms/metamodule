@@ -10,9 +10,9 @@
 #include <unordered_map>
 #include <vector>
 
-// #define pr_dbg printf
+#define pr_dbg printf
 
-#define pr_dbg(...)
+// #define pr_dbg(...)
 
 class CentralData {
 public:
@@ -230,29 +230,9 @@ public:
 		} // end mapsmtx lock
 
 		if (dest.objType == LabelButtonID::Types::Knob) {
-			queueRegisterKnobParamHandle(src, dest);
+			pr_dbg("Registering (no queue)\n");
+			registerKnobParamHandle(src, dest);
 		}
-	}
-
-	// Called by UI thread so that the Engine thread does the actual registering with APP->enginer
-	// This prevents a dead-lock
-	void queueRegisterKnobParamHandle(LabelButtonID src, LabelButtonID dst)
-	{
-		std::lock_guard mguard{paramHandleQmtx};
-		paramHandleQueue.push(std::make_pair(src, dst));
-	}
-
-	std::pair<LabelButtonID, LabelButtonID> popRegisterKnobParamHandle()
-	{
-		// Called by engine process thread
-		std::lock_guard mguard{paramHandleQmtx};
-
-		if (paramHandleQueue.empty())
-			return std::make_pair<LabelButtonID, LabelButtonID>({LabelButtonID::Types::None, -1, -1},
-																{LabelButtonID::Types::None, -1, -1});
-		auto r = paramHandleQueue.front();
-		paramHandleQueue.pop();
-		return r;
 	}
 
 	// This is called in the Engine thread from HubBase::process() --> processKnobMaps()
@@ -298,9 +278,10 @@ public:
 		pr_dbg("Adding to engine...\n");
 		ph->moduleId = -1; // From Engine.cpp: "New ParamHandles must be blank"
 		APP->engine->addParamHandle(ph.get());
-		pr_dbg("Updating the paramhandle with new info: moduleId=%d, paramId=%d\n", dst.moduleID, dst.objID);
+		pr_dbg("Added.\n");
 		pr_dbg("Updating the paramhandle with new info: moduleId=%lld, paramId=%lld\n", dst.moduleID, dst.objID);
 		APP->engine->updateParamHandle(ph.get(), dst.moduleID, dst.objID, true);
+		pr_dbg("updated.\n");
 
 		/// Debug:
 		// rack::ParamHandle *p = APP->engine->getParamHandle(dst.moduleID, dst.objID);
