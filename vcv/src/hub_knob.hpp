@@ -18,7 +18,7 @@ struct ParamUnmapItem : ui::MenuItem {
 	}
 };
 
-void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
+static void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
 {
 	ui::Menu *menu = createMenu();
 
@@ -92,17 +92,23 @@ public:
 		bool registerSuccess = false;
 
 		// Check if a ParamWidget was touched
-		ParamWidget *touchedParam = APP->scene->rack->touchedParam;
+		ParamWidget *touchedParam = APP->scene->rack->getTouchedParam();
+		printf("touchedParam: %p\n", touchedParam);
 		if (touchedParam && touchedParam->getParamQuantity()) {
-			int moduleId = touchedParam->getParamQuantity()->module->id;
+			printf("touchedParam->PQ: %p\n", touchedParam->getParamQuantity());
+			int moduleId = touchedParam->module->id;
+			printf("touchedParam->module->id: %lld\n", touchedParam->module->id);
 			int objId = touchedParam->getParamQuantity()->paramId;
-			APP->scene->rack->touchedParam = NULL;
+			printf("touchedParam->PQ->paramId: %d\n", touchedParam->getParamQuantity()->paramId);
+
+			APP->scene->rack->setTouchedParam(nullptr);
 
 			registerSuccess = registerMapping(moduleId, objId);
 		}
 
 		if (!registerSuccess) {
 			centralData->abortMappingProcedure();
+			printf("Failed mapping\n");
 		}
 	}
 
@@ -157,7 +163,7 @@ public:
 			// Touch parameter
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
 				if (this->getParamQuantity()) {
-					APP->scene->rack->touchedParam = this;
+					APP->scene->rack->setTouchedParam(this);
 				}
 				e.consume(this);
 			}
