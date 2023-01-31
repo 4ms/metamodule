@@ -53,7 +53,7 @@ public:
 		return sz;
 	}
 
-	bool isRegisteredHub(int moduleId)
+	bool isRegisteredHub(int64_t moduleId)
 	{
 		auto module_it = std::find_if(moduleData.begin(), moduleData.end(), [=](auto &m) {
 			if (m.id == moduleId) {
@@ -107,7 +107,7 @@ public:
 		}
 	}
 
-	MessageType getMyMessage(int module_id)
+	MessageType getMyMessage(int64_t module_id)
 	{
 		std::lock_guard mguard{mtx};
 
@@ -183,7 +183,7 @@ public:
 	// Called by UI Thread: HubMapButton
 	void registerMapDest(LabelButtonID dest)
 	{
-		pr_dbg("registerMapDest: dest: objID=%d, moduleID=%d\n", dest.objID, dest.moduleID);
+		pr_dbg("registerMapDest: dest: objID=%lld, moduleID=%lld\n", dest.objID, dest.moduleID);
 
 		LabelButtonID src;
 
@@ -202,18 +202,19 @@ public:
 			for (auto &m : maps) {
 				if (m.dst == _currentMap.dst) {
 					found = true;
-					pr_dbg("Found an existing map to m: %d, p: %d\n", m.dst.moduleID, m.dst.objID);
+					pr_dbg("Found an existing map to m: %lld, p: %lld\n", m.dst.moduleID, m.dst.objID);
 					m.src = _currentMap.src;
 					break;
 				}
 			}
 			if (!found) {
-				pr_dbg(
-					"Didn't found an existing map to m: %d, p: %d\n", _currentMap.dst.moduleID, _currentMap.dst.objID);
+				pr_dbg("Didn't found an existing map to m: %lld, p: %lld\n",
+					   _currentMap.dst.moduleID,
+					   _currentMap.dst.objID);
 				// Rule: hub output jacks can only be mapped to one dst
 				if (_currentMap.src.objType == LabelButtonID::Types::OutputJack) {
 					auto num_erased = std::erase_if(maps, [&](auto const &m) { return m.src == _currentMap.src; });
-					pr_dbg("Removed %lu mappings from centralData, with src on hub: m=%d out-jack=%d\n",
+					pr_dbg("Removed %lu mappings from centralData, with src on hub: m=%lld out-jack=%lld\n",
 						   num_erased,
 						   _currentMap.src.moduleID,
 						   _currentMap.src.objID);
@@ -258,7 +259,11 @@ public:
 	//	[and also in loadmappings when we load a patch file]
 	void registerKnobParamHandle(LabelButtonID src, LabelButtonID dst)
 	{
-		pr_dbg("registerKnobParamHandle m:%d p:%d -> m:%d p:%d\n", src.moduleID, src.objID, dst.moduleID, dst.objID);
+		pr_dbg("registerKnobParamHandle m:%lld p:%lld -> m:%lld p:%lld\n",
+			   src.moduleID,
+			   src.objID,
+			   dst.moduleID,
+			   dst.objID);
 
 		std::lock_guard mguard{mappedParamHandlemtx};
 
@@ -290,10 +295,11 @@ public:
 			APP->engine->updateParamHandle(existingPh, -1, 0, true);
 			// TODO: Why not just remove it here?
 		}
-		pr_dbg("Adding to engine\n");
+		pr_dbg("Adding to engine...\n");
 		ph->moduleId = -1; // From Engine.cpp: "New ParamHandles must be blank"
 		APP->engine->addParamHandle(ph.get());
 		pr_dbg("Updating the paramhandle with new info: moduleId=%d, paramId=%d\n", dst.moduleID, dst.objID);
+		pr_dbg("Updating the paramhandle with new info: moduleId=%lld, paramId=%lld\n", dst.moduleID, dst.objID);
 		APP->engine->updateParamHandle(ph.get(), dst.moduleID, dst.objID, true);
 
 		/// Debug:
@@ -312,7 +318,7 @@ public:
 		}
 
 		if (auto existingPh = APP->engine->getParamHandle(dest.moduleID, dest.objID); existingPh) {
-			pr_dbg("APP->engine->getParamHandle(%d, %d) found %p. Updating to -1\n",
+			pr_dbg("APP->engine->getParamHandle(%lld, %lld) found %p. Updating to -1\n",
 				   dest.moduleID,
 				   dest.objID,
 				   existingPh);
@@ -322,7 +328,7 @@ public:
 
 	// This is called in HubBase destructor
 	// TODO: Which thread does this run in? UI or Engine or other?
-	void unregisterKnobMapsBySrcModule(int moduleId)
+	void unregisterKnobMapsBySrcModule(int64_t moduleId)
 	{
 		// Remove CD::maps
 		{
@@ -335,11 +341,11 @@ public:
 		// Remove ParamHandles (from engine and CD)
 		{
 			std::lock_guard mguard{mappedParamHandlemtx};
-			pr_dbg("Getting rid of mappedParamHandles[] that match moduleId=%d\n", moduleId);
+			pr_dbg("Getting rid of mappedParamHandles[] that match moduleId=%lld\n", moduleId);
 			for (auto &[lbl, phvec] : mappedParamHandles) {
 				if (lbl.moduleID == moduleId && lbl.objType == LabelButtonID::Types::Knob) {
 					for (auto &ph : phvec) {
-						pr_dbg("Removing paramHandle at %p for objId=%d\n", ph.get(), lbl.objID);
+						pr_dbg("Removing paramHandle at %p for objId=%lld\n", ph.get(), lbl.objID);
 						APP->engine->removeParamHandle(ph.get());
 					}
 					pr_dbg("Clearing paramHandle vector\n");
@@ -537,7 +543,7 @@ public:
 	}
 
 	//		 private :
-	std::map<int, MessageType> messages;
+	std::map<int64_t, MessageType> messages;
 	std::vector<ModuleID> moduleData;
 	std::vector<JackStatus> jackData;
 	std::vector<ParamStatus> paramData;

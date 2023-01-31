@@ -116,7 +116,7 @@ public:
 		paramStatus.paramID = paramID;
 	}
 
-	void setModuleID(int moduleID) { paramStatus.moduleID = moduleID; }
+	void setModuleID(int64_t moduleID) { paramStatus.moduleID = moduleID; }
 
 	void updateValue() { paramStatus.value = _inParam.getValue(); }
 

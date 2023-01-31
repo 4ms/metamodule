@@ -49,7 +49,7 @@ struct hash<LabelButtonID> {
 	std::size_t operator()(const LabelButtonID &k) const
 	{
 		using std::hash;
-		return ((hash<int>()(k.objID) ^ (hash<int>()(k.moduleID) << 1)) >> 1) ^
+		return ((hash<int>()(k.objID) ^ (hash<int64_t>()(k.moduleID) << 1)) >> 1) ^
 			   (hash<int>()(static_cast<int>(k.objType)) << 1);
 	}
 };
@@ -77,7 +77,7 @@ struct Mapping {
 	}
 };
 struct ModuleID {
-	int id;
+	int64_t id;
 	ModuleTypeSlug typeID;
 
 	bool operator==(const ModuleID &rhs) const { return (this->id == rhs.id) && (this->typeID == rhs.typeID); }
@@ -86,8 +86,8 @@ struct ModuleID {
 struct JackStatus {
 	int sendingJackId = 0;
 	int receivedJackId = 0;
-	int sendingModuleId = 0;
-	int receivedModuleId = 0;
+	int64_t sendingModuleId = 0;
+	int64_t receivedModuleId = 0;
 	bool connected = false;
 
 	bool isSameJack(JackStatus &other)
@@ -99,7 +99,7 @@ struct JackStatus {
 struct ParamStatus {
 	float value = 0;
 	int paramID = 0;
-	int moduleID = 0;
+	int64_t moduleID = 0;
 
 	bool isSameParam(ParamStatus &other) { return (paramID == other.paramID) && (moduleID == other.moduleID); }
 };

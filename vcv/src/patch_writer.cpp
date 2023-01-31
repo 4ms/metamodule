@@ -4,20 +4,11 @@
 
 #include "patch_convert/ryml/ryml_serial.hh"
 
-PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules)
-{
-	setModuleList(modules);
-}
+PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules) { setModuleList(modules); }
 
-void PatchFileWriter::setPatchName(std::string patchName)
-{
-	pd.patch_name = patchName.c_str();
-}
+void PatchFileWriter::setPatchName(std::string patchName) { pd.patch_name = patchName.c_str(); }
 
-void PatchFileWriter::setPatchDesc(std::string patchDesc)
-{
-	pd.description = patchDesc.c_str();
-}
+void PatchFileWriter::setPatchDesc(std::string patchDesc) { pd.description = patchDesc.c_str(); }
 
 void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules)
 {
@@ -89,7 +80,7 @@ void PatchFileWriter::setParamList(std::vector<ParamStatus> &params)
 	pd.static_knobs.clear();
 	for (auto &param : params) {
 		pd.static_knobs.push_back({
-			.module_id = static_cast<uint16_t>(idMap[param.moduleID]),
+			.module_id = idMap[param.moduleID],
 			.param_id = static_cast<uint16_t>(param.paramID),
 			.value = param.value,
 		});
@@ -106,7 +97,7 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 		if (m.dst.objType == LabelButtonID::Types::Knob) {
 			pd.mapped_knobs.push_back({
 				.panel_knob_id = static_cast<uint16_t>(m.src.objID),
-				.module_id = static_cast<uint16_t>(idMap[m.dst.moduleID]),
+				.module_id = idMap[m.dst.moduleID],
 				.param_id = static_cast<uint16_t>(m.dst.objID),
 				.curve_type = 0,
 				.min = m.range_min,
@@ -175,42 +166,11 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 	}
 }
 
-ByteBlock::DataType PatchFileWriter::printPatchBinary()
+std::string PatchFileWriter::printPatchYAML() { return patch_to_yaml_string(pd); }
+
+std::map<int64_t, uint16_t> PatchFileWriter::squash_ids(std::vector<int> ids)
 {
-	ByteBlock v;
-
-	// auto *header = reinterpret_cast<unsigned char *>(&ph);
-	// v.printRaw(header, sizeof(ph));
-
-	// for (size_t i = 0; i < pd.module_slugs.size(); i++)
-	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.module_slugs[i]), sizeof(pd.module_slugs[i]));
-
-	// for (size_t i = 0; i < pd.int_cables.size(); i++)
-	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.int_cables[i]), sizeof(pd.int_cables[i]));
-
-	// for (size_t i = 0; i < pd.mapped_ins.size(); i++)
-	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_ins[i]), sizeof(pd.mapped_ins[i]));
-
-	// for (size_t i = 0; i < pd.mapped_outs.size(); i++)
-	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_outs[i]), sizeof(pd.mapped_outs[i]));
-
-	// for (size_t i = 0; i < pd.static_knobs.size(); i++)
-	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.static_knobs[i]), sizeof(pd.static_knobs[i]));
-
-	// for (size_t i = 0; i < pd.mapped_knobs.size(); i++)
-	// 	v.printRaw(reinterpret_cast<unsigned char *>(&pd.mapped_knobs[i]), sizeof(pd.mapped_knobs[i]));
-
-	return v.data;
-}
-
-std::string PatchFileWriter::printPatchYAML()
-{
-	return patch_to_yaml_string(pd);
-}
-
-std::map<int, int> PatchFileWriter::squash_ids(std::vector<int> ids)
-{
-	std::map<int, int> s;
+	std::map<int64_t, uint16_t> s;
 
 	int i = 0;
 	for (auto id : ids) {
@@ -219,7 +179,4 @@ std::map<int, int> PatchFileWriter::squash_ids(std::vector<int> ids)
 	return s;
 }
 
-PatchData &PatchFileWriter::get_data()
-{
-	return pd;
-}
+PatchData &PatchFileWriter::get_data() { return pd; }

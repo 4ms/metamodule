@@ -96,7 +96,7 @@ public:
 		printf("touchedParam: %p\n", touchedParam);
 		if (touchedParam && touchedParam->getParamQuantity()) {
 			printf("touchedParam->PQ: %p\n", touchedParam->getParamQuantity());
-			int moduleId = touchedParam->module->id;
+			int64_t moduleId = touchedParam->module->id;
 			printf("touchedParam->module->id: %lld\n", touchedParam->module->id);
 			int objId = touchedParam->getParamQuantity()->paramId;
 			printf("touchedParam->PQ->paramId: %d\n", touchedParam->getParamQuantity()->paramId);

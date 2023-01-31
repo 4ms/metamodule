@@ -58,10 +58,7 @@ void HubMapButton::onDragStart(const event::DragStart &e)
 		quantity->setMax();
 }
 
-void HubMapButton::onHover(const event::Hover &e)
-{
-	e.consume(this);
-}
+void HubMapButton::onHover(const event::Hover &e) { e.consume(this); }
 
 void HubMapButton::onLeave(const event::Leave &e)
 {
@@ -79,7 +76,7 @@ void HubMapButton::onEnter(const event::Enter &e)
 	e.consume(this);
 }
 
-bool HubMapButton::registerMapping(int moduleId, int objId)
+bool HubMapButton::registerMapping(int64_t moduleId, int objId)
 {
 	if (centralData->isMappingInProgress()) {
 		if (moduleId > -1) {
