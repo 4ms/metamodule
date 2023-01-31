@@ -116,6 +116,7 @@ public:
 		return (err >= 0);
 	}
 
+	// Reads into buffer, returns the bytes actually read
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
 		lfs_file_t file;
 
@@ -131,11 +132,9 @@ public:
 		return bytes_read;
 	}
 
-	using FileAction = std::function<void(const std::string_view filename, uint32_t timestamp, uint32_t filesize)>;
-
 	// Performs an action(filename, timestamp) on each file in LittleFS root dir ending with the extension
 	// TODO: Add parameter for dir to search
-	bool foreach_file_with_ext(const std::string_view extension, FileAction action) {
+	bool foreach_file_with_ext(const std::string_view extension, auto action) {
 		lfs_dir_t dir;
 		if (lfs_dir_open(&lfs, &dir, "/") < 0)
 			return false;
