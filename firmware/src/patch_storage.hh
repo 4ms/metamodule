@@ -8,6 +8,11 @@
 #include "patch_fileio.hh"
 #include "qspi_flash_driver.hh"
 
+//TODO: Figure out how to handle NOR FLash internal patches
+// - Ship with some patches on there
+// - In Patch View, user can click "Save" or "copy" and give the patch a name and destination
+// - In Patch List, patches show their location
+// - Don't use RAMDisk USB
 namespace MetaModule
 {
 
@@ -48,6 +53,22 @@ struct PatchStorage {
 		// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
 	}
 
+	void update_patchlist_from_sdcard() {
+		printf_("Updating patchlist from SD Card.\n");
+		patch_list.lock();
+		{
+
+			//TODO: clear just norflash patches
+			patch_list.clear_all_patches();
+			PatchFileIO::add_to_patchlist(norflash, patch_list);
+
+			PatchFileIO::add_to_patchlist(sdcard, patch_list);
+			patch_list.mark_modified();
+		}
+		patch_list.unlock();
+		printf_("Patchlist updated.\n");
+	}
+
 	void update_norflash_from_ramdisk() {
 		patch_list.lock();
 		printf_("NOR Flash writeback begun.\r\n");
@@ -57,8 +78,7 @@ struct PatchStorage {
 		// Must invalidate the cache because M4 wrote to it???
 		// SystemCache::invalidate_dcache_by_range(StaticBuffers::virtdrive.virtdrive,
 		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
-		PatchFileIO::delete_all_patches(ramdisk);
-		if (PatchFileIO::copy_patches_from_to(ramdisk, norflash)) {
+		if (PatchFileIO::copy_patches_from_to(ramdisk, norflash, PatchFileIO::FileFilter::NewerTimestamp)) {
 			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
 			PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
 			patch_list.mark_modified();
