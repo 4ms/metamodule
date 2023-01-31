@@ -18,18 +18,21 @@ public:
 		patch_list.set_status(PatchList::Status::Loading);
 
 		bool ok = fileio.foreach_file_with_ext(
-			".yml",
-			[&fileio, &patch_list](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
-			if (filesize < 12 || filename.starts_with("."))
-				return;
+			".yml", [&fileio, &patch_list](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
+				if (filesize < 12 || filename.starts_with("."))
+					return;
 
-			pr_log("Found patch file: %s (%zu B) Timestamp: 0x%x, Reading... ", filename.data(), filesize, timestamp);
+				pr_log("Found patch file on %s: %s (%zu B) Timestamp: 0x%x, Reading... ",
+					   fileio.volname(),
+					   filename.data(),
+					   filesize,
+					   timestamp);
 
-			auto contents = _read_patch_to_local_buffer(fileio, filename, filesize);
-			if (contents.size() == 0)
-				return;
+				auto contents = _read_patch_to_local_buffer(fileio, filename, filesize);
+				if (contents.size() == 0)
+					return;
 
-			patch_list.add_patch_from_yaml(contents);
+				patch_list.add_patch_from_yaml(contents);
 			});
 
 		patch_list.set_status(PatchList::Status::Ready);
@@ -62,10 +65,12 @@ public:
 			if (filesize < 12 || filename.starts_with("."))
 				return;
 
-			pr_log("Found patch file: %s, size: %d, timestamp 0x%x, creating on RamDisk\n",
+			pr_log("Found patch file on %s: %s, size: %d, timestamp 0x%x, copying to %s\n",
+				   from.volname(),
 				   filename.data(),
 				   filesize,
-				   timestamp);
+				   timestamp,
+				   to.volname());
 
 			if (filter == FileFilter::NewerTimestamp) {
 				auto to_file_tmstmp = to.get_file_timestamp(filename);
