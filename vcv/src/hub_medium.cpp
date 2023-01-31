@@ -50,14 +50,8 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 	LedDisplayTextField *patchName;
 	LedDisplayTextField *patchDesc;
 
-	Vec fixDPI(Vec v)
-	{
-		return v.mult(75.f / 72.f);
-	}
-	Vec fixDPIKnob(Vec v)
-	{
-		return v.mult(75.f / 72.f).plus({0.6f, 0.2f});
-	}
+	Vec fixDPI(Vec v) { return v.mult(75.f / 72.f); }
+	Vec fixDPIKnob(Vec v) { return v.mult(75.f / 72.f).plus({0.6f, 0.2f}); }
 
 	HubMediumWidget(HubMedium *module)
 	{
@@ -82,7 +76,7 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		valueLabel = createWidget<Label>(mm2px(Vec(0, 1)));
+		valueLabel = createWidget<Label>(mm2px(Vec(0, 4)));
 		valueLabel->color = rack::color::BLACK;
 		valueLabel->text = "";
 		valueLabel->fontSize = 10;
@@ -93,7 +87,7 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 			patchName->text = this->hubModule->patchNameText;
 		else
 			patchName->text = "Enter Patch Name";
-		patchName->color = rack::color::WHITE;
+		patchName->color = rack::color::BLACK;
 		patchName->box.size = {mm2px(Vec(57.7f, 10.0f))};
 		patchName->cursor = 0;
 		addChild(patchName);
@@ -103,7 +97,7 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 			patchDesc->text = this->hubModule->patchDescText;
 		else
 			patchDesc->text = "Patch Description";
-		patchDesc->color = rack::color::WHITE;
+		patchDesc->color = rack::color::BLACK;
 		patchDesc->box.size = {mm2px(Vec(57.7f, 31.3f))};
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
