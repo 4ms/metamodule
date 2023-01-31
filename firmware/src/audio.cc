@@ -162,11 +162,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		return;
 	}
 
-	if (!player.is_loaded) {
-		output_silence(out);
-		return;
-	}
-
 	if (patch_loader.is_loading_new_patch()) {
 		if (mute_ctr > 0.f)
 			mute_ctr -= 0.1f;
@@ -183,6 +178,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		patch_loader.audio_not_muted();
 		mute_ctr = 1.f;
 		halves_muted = 0;
+	}
+
+	// TODO: check with patch_loader, not patch_player
+	if (!player.is_loaded) {
+		output_silence(out);
+		return;
 	}
 
 	//TODO: RAII for load_measure wrapper class so we don't forget to end the measurement
