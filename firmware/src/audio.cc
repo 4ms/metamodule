@@ -133,7 +133,24 @@ uint32_t AudioStream::get_dac_output(int output_id) {
 }
 // Todo: integrate params.buttons[]
 
+struct ParamCacheSync {
+	ParamCache &param_cache;
+	ParamBlock &param_block;
+
+	ParamCacheSync(ParamCache &param_cache, ParamBlock &param_block)
+		: param_cache{param_cache}
+		, param_block{param_block} {
+	}
+
+	~ParamCacheSync() {
+		param_cache.write_sync(param_block.params[0], param_block.metaparams);
+		mdrivlib::SystemCache::clean_dcache_by_range(&param_cache, sizeof(ParamCache));
+	}
+};
+
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxStreamBlock &aux) {
+	ParamCacheSync sync{param_cache, param_block};
+
 	auto &in = audio_block.in_codec;
 	auto &out = audio_block.out_codec;
 
@@ -168,6 +185,7 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		halves_muted = 0;
 	}
 
+	//TODO: RAII for load_measure wrapper class so we don't forget to end the measurement
 	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
 	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
 	load_measure.start_measurement();
@@ -231,9 +249,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, gate_out] : countzip(aux_.gate_out))
 			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
-
-	param_cache.write_sync(param_block.params[0], param_block.metaparams);
-	mdrivlib::SystemCache::clean_dcache_by_range(&param_cache, sizeof(ParamCache));
 
 	load_measure.end_measurement();
 }
