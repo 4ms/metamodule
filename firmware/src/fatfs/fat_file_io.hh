@@ -79,27 +79,24 @@ public:
 
 	bool create_file(const char *filename, const char *const data, unsigned sz) {
 		FIL fil;
-		{
-			auto res = f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE);
-			if (res != FR_OK)
-				return false;
-		}
-		{
-			UINT bytes_written;
-			auto res = f_write(&fil, data, sz, &bytes_written);
-			if (res != FR_OK || bytes_written != sz)
-				return false;
-		}
-		{
-			auto res = f_close(&fil);
-			if (res != FR_OK)
-				return false;
-		}
+		if (f_chdrive(vol) != FR_OK)
+			return false;
 
+		if (f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
+			return false;
+
+		UINT bytes_written;
+		auto res = f_write(&fil, data, sz, &bytes_written);
+		if (res != FR_OK || bytes_written != sz)
+			return false;
+
+		f_close(&fil);
 		return true;
 	}
 
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
+		f_chdrive(vol);
+
 		FILINFO fno;
 		auto res = f_stat(filename.data(), &fno);
 		if (res != FR_OK)
@@ -112,6 +109,8 @@ public:
 	}
 
 	uint32_t get_file_timestamp(std::string_view filename) {
+		f_chdrive(vol);
+
 		FILINFO fno;
 		if (f_stat(filename.data(), &fno) != FR_OK) {
 			// printf_("Could not read file %s\n", filename.data());
@@ -125,6 +124,8 @@ public:
 	}
 
 	FileInfo get_file_info(std::string_view filename) {
+		f_chdrive(vol);
+
 		FILINFO fno;
 		auto res = f_stat(filename.data(), &fno);
 		return FileInfo{
@@ -140,36 +141,26 @@ public:
 
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
 		FIL fil;
-		FILINFO fileinfo;
-		uint32_t max_bytes = buffer.size_bytes();
-		uint32_t bytes_to_read;
 		UINT bytes_read;
-		{
-			auto res = f_stat(filename.data(), &fileinfo);
-			auto &fno = fileinfo;
-			bytes_to_read = std::min((uint32_t)fileinfo.fsize, max_bytes);
-			if (res != FR_OK)
-				return 0;
-		}
-		{
-			auto res = f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ);
-			if (res != FR_OK)
-				return 0;
-		}
-		{
-			auto res = f_read(&fil, buffer.data(), bytes_to_read, &bytes_read);
-			if (res != FR_OK)
-				return 0;
-		}
-		if (bytes_to_read != bytes_read)
-			printf_("Warning: Supposed to read %d, actually read %d\n", bytes_to_read, bytes_read);
-		f_close(&fil);
+		if (f_chdrive(vol) != FR_OK)
+			return 0;
 
+		if (f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK)
+			return 0;
+
+		if (f_read(&fil, buffer.data(), buffer.size_bytes(), &bytes_read) != FR_OK) {
+			f_close(&fil);
+			return 0;
+		}
+
+		f_close(&fil);
 		return bytes_read;
 	}
 
 	bool delete_file(std::string_view filename) {
 		FIL fil;
+
+		f_chdrive(vol);
 		auto res = f_unlink(filename.data());
 		if (res != FR_OK)
 			return false;
@@ -192,6 +183,7 @@ public:
 	bool foreach_file_with_ext(const std::string_view extension, auto action) {
 		DIR dj;
 		FILINFO fno;
+
 		auto res = f_opendir(&dj, vol);
 
 		if (res != FR_OK)
