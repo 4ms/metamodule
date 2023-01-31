@@ -9,7 +9,9 @@ namespace MetaModule
 
 // PatchFileIO are helpers to transfer patches between filesystems and PatchList
 class PatchFileIO {
+
 public:
+	enum class FileFilter { All, NewerTimestamp };
 	// void factory_clean();
 
 	static bool add_to_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
@@ -21,15 +23,13 @@ public:
 			if (filesize < 12 || filename.starts_with("."))
 				return;
 
-			pr_log("Found patch file: %s (%zuB) Timestamp: 0x%x, Reading... ", filename.data(), filesize, timestamp);
+			pr_log("Found patch file: %s (%zu B) Timestamp: 0x%x, Reading... ", filename.data(), filesize, timestamp);
 
-			if (!_read_patch_to_local_buffer(fileio, filename, filesize))
+			auto contents = _read_patch_to_local_buffer(fileio, filename, filesize);
+			if (contents.size() == 0)
 				return;
 
-			// Ensure null termination
-			buf[buf.size() - 1] = '\0';
-
-			patch_list.add_patch_from_yaml(buf);
+			patch_list.add_patch_from_yaml(contents);
 			});
 
 		patch_list.set_status(PatchList::Status::Ready);
@@ -51,48 +51,23 @@ public:
 			});
 	}
 
-	// NOTE/TODO: When going from NORFS to ramdisk, we need to erase ramdisk first
 	// Copies patch yml files from one FS to another.
-	// If a file with the same name exists, it is silently overwritten.
-	static bool copy_patches_from_to(FileIoC auto &from, FileIoC auto &to) {
-		bool ok = from.foreach_file_with_ext(
-			".yml", [&from, &to](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
-				if (filesize < 12 || filename.starts_with("."))
-					return;
-
-				pr_log("Found patch file: %s, size: %d, timestamp 0x%x, creating on RamDisk\n",
-					   filename.data(),
-					   filesize,
-					   timestamp);
-
-				if (!_read_patch_to_local_buffer(from, filename, filesize))
-					return;
-
-				if (to.update_or_create_file(filename, buf)) {
-					pr_err("Could not create file %s on ram disk\n", filename.data());
-					return;
-				}
-
-				to.set_file_timestamp(filename, timestamp);
-			});
-
-		if (!ok) {
-			pr_err("PatchStorage failed to copy patches on %s.\n", from.volname().data());
-			return false;
-		}
-		return true;
-	}
-
-	// Updates patch yml files from one FS to another.
-	// If a file with the same name exists, it is overwritten only if the timestamp differs (??is older??)
-	static bool copy_new_patches_from_to(FileIoC auto &from, FileIoC auto &to) {
+	// If a file with the same name exists:
+	// 		...when filter==All, it is silently overwritten.
+	// 		...when filter==NewerTimestamp, it is overwritten only if the timestamp differs
+	static bool copy_patches_from_to(FileIoC auto &from, FileIoC auto &to, FileFilter filter = FileFilter::All) {
 		bool ok = from.foreach_file_with_ext(
 			".yml",
-			[&from, &to](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
+			[&from, &to, filter](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
 			if (filesize < 12 || filename.starts_with("."))
 				return;
 
-			{
+			pr_log("Found patch file: %s, size: %d, timestamp 0x%x, creating on RamDisk\n",
+				   filename.data(),
+				   filesize,
+				   timestamp);
+
+			if (filter == FileFilter::NewerTimestamp) {
 				auto to_file_tmstmp = to.get_file_timestamp(filename);
 				if (to_file_tmstmp == 0) {
 					pr_log("File %s does not exist on dest FS, creating\n", filename.data());
@@ -104,10 +79,11 @@ public:
 						"File %s timestamps differ. from: 0x%x to: 0x%x\n", filename.data(), timestamp, to_file_tmstmp);
 			}
 
-			if (!_read_patch_to_local_buffer(from, filename, filesize))
+			auto contents = _read_patch_to_local_buffer(from, filename, filesize);
+			if (contents.size() == 0)
 				return;
 
-			if (to.update_or_create_file(filename, buf)) {
+			if (to.update_or_create_file(filename, contents) == false) {
 				pr_err("Could not create file %s on ram disk\n", filename.data());
 				return;
 			}
@@ -116,11 +92,56 @@ public:
 			});
 
 		if (!ok) {
-			pr_err("PatchStorage failed to copy patches.\n");
+			pr_err("PatchStorage failed to copy patches on %s.\n", from.volname().data());
 			return false;
 		}
 		return true;
 	}
+
+	// Updates patch yml files from one FS to another.
+	//static bool copy_new_patches_from_to(FileIoC auto &from, FileIoC auto &to) {
+	//	bool ok = from.foreach_file_with_ext(
+	//		".yml",
+	//		[&from, &to](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
+	//		if (filesize < 12 || filename.starts_with("."))
+	//			return;
+
+	//		pr_log("Found patch file: %s, size: %d, timestamp 0x%x, creating on RamDisk\n",
+	//			   filename.data(),
+	//			   filesize,
+	//			   timestamp);
+
+	//		//if (filter == Filter::OnlyNewerTimestampFiles)
+	//		{
+	//			auto to_file_tmstmp = to.get_file_timestamp(filename);
+	//			if (to_file_tmstmp == 0) {
+	//				pr_log("File %s does not exist on dest FS, creating\n", filename.data());
+	//			} else if (to_file_tmstmp == timestamp) {
+	//				pr_log("File %s timestamp (0x%x) not changed, skipping\n", filename.data(), timestamp);
+	//				return;
+	//			} else
+	//				pr_log(
+	//					"File %s timestamps differ. from: 0x%x to: 0x%x\n", filename.data(), timestamp, to_file_tmstmp);
+	//		}
+
+	//		auto contents = _read_patch_to_local_buffer(from, filename, filesize);
+	//		if (contents.size() == 0)
+	//			return;
+
+	//		if (to.update_or_create_file(filename, contents) == false) {
+	//			pr_err("Could not create file %s on ram disk\n", filename.data());
+	//			return;
+	//		}
+
+	//		to.set_file_timestamp(filename, timestamp);
+	//		});
+
+	//	if (!ok) {
+	//		pr_err("PatchStorage failed to copy patches.\n");
+	//		return false;
+	//	}
+	//	return true;
+	//}
 
 	// Delete all patch files on a FS which are not present on a reference FS
 	static bool remove_patch_files_not_matching(FileIoC auto &reference, FileIoC auto &fileio) {
@@ -154,9 +175,6 @@ public:
 	}
 
 private:
-	// static std::vector<size_t> found_files;
-	static std::array<char, 65536> buf;
-
 	static size_t filename_hash(const std::string_view fname) {
 		unsigned int h = 2166136261;
 		for (auto &c : fname)
@@ -164,29 +182,38 @@ private:
 		return h;
 	}
 
-	static std::string_view trim_buf_leading_newlines() {
-		std::string_view v{buf.data(), buf.size()};
+	static std::string_view trim_buf_leading_newlines(auto &_buf) {
+		std::string_view v{_buf.data(), _buf.size()};
 		v.remove_prefix(std::min(v.find_first_not_of("\n\r"), v.size()));
 		return v;
 	}
 
 	// FIXME: uses static buffer, NOT THREAD OR ISR SAFE!!
-	static bool _read_patch_to_local_buffer(FileIoC auto &fileio, const std::string_view filename, uint32_t filesize) {
+	static std::span<char>
+	_read_patch_to_local_buffer(FileIoC auto &fileio, const std::string_view filename, uint32_t filesize) {
+		static std::array<char, 65536> _buf;
 
-		auto bytes_read = fileio.read_file(filename, buf);
+		auto bytes_read = fileio.read_file(filename, _buf);
 		if (bytes_read == 0) {
 			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
-			return false;
+			return {_buf.data(), 0};
+		}
+		if (filesize >= sizeof(_buf)) {
+			pr_err("Error: File %s too large (%d, max is %d), skipped\n", filename.data(), filesize, sizeof(_buf));
+			return {_buf.data(), 0};
 		}
 		if (bytes_read < filesize) {
-			pr_err("Error: File %s too large (%d, max is %d), skipped\n", filename.data(), filesize, sizeof(buf));
-			return false;
+			pr_err("Error: Did not read entire file %s. Read %d of %d bytes. Skipped\n",
+				   filename.data(),
+				   bytes_read,
+				   filesize);
+			return {_buf.data(), 0};
 		}
-		if (!trim_buf_leading_newlines().starts_with("PatchData:")) {
+		if (!trim_buf_leading_newlines(_buf).starts_with("PatchData:")) {
 			pr_log("File does not start with 'PatchData:', skipping\n");
-			return false;
+			return {_buf.data(), 0};
 		}
-		return true;
+		return {_buf.data(), bytes_read};
 	}
 
 	static void pr_err(const char *s, auto... d) {
