@@ -19,7 +19,7 @@ struct PatchList {
 
 		if (patch_id >= _patch_data.size())
 			patch_id = 0;
-		return _patch_data[patch_id].patch_name;
+		return _patch_data[patch_id].patch_data.patch_name;
 	}
 
 	// Return a reference to the patch at the given index (bounds-checked)
@@ -29,7 +29,7 @@ struct PatchList {
 
 		if (patch_id >= _patch_data.size())
 			patch_id = 0;
-		return _patch_data[patch_id];
+		return _patch_data[patch_id].patch_data;
 	}
 
 	uint32_t num_patches() const {
@@ -77,17 +77,19 @@ struct PatchList {
 	void add_patch_from_yaml(const std::span<std::byte> data);
 	void add_patch_from_yaml(const std::span<char> data);
 	void add_patch_from_yaml(const std::span<uint8_t> data);
+	void add_patch_from_yaml(char filevolume, const std::string_view filename, const std::span<char> data);
 
 private:
 	struct PatchFile {
 		PatchData patch_data;
 		std::string filepath;
+		// char filepath[260]; //max filename + path ("1:") + padding
 	};
 
 	// FIXME: We could get fragmentation if patch list is changed frequently
 	// Use an arena or some separate memory area, which is wiped with every change
 	// We'd need to estimate the max size of all patches to do this.
-	std::vector<PatchData> _patch_data;
+	std::vector<PatchFile> _patch_data;
 	Status _status;
 	bool _has_been_updated = false;
 	bool _locked = false;

@@ -32,7 +32,8 @@ public:
 				if (contents.size() == 0)
 					return;
 
-				patch_list.add_patch_from_yaml(contents);
+				patch_list.add_patch_from_yaml(fileio.volname()[0], filename, contents);
+				// patch_list.add_patch_from_yaml(contents);
 			});
 
 		patch_list.set_status(PatchList::Status::Ready);
