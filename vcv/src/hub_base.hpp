@@ -65,78 +65,78 @@ struct MetaModuleHubBase : public CommModule {
 		return rootJ;
 	}
 
-	// This is called on startup, and on loading a new patch file
-	// json is converted to centralData->maps
-	void dataFromJson(json_t *rootJ) override
-	{
-		auto patchNameJ = json_object_get(rootJ, "PatchName");
-		if (json_is_string(patchNameJ)) {
-			patchNameText = json_string_value(patchNameJ);
-			redrawPatchName();
-		}
+	// // This is called on startup, and on loading a new patch file
+	// // json is converted to centralData->maps
+	// void dataFromJson(json_t *rootJ) override
+	// {
+	// 	auto patchNameJ = json_object_get(rootJ, "PatchName");
+	// 	if (json_is_string(patchNameJ)) {
+	// 		patchNameText = json_string_value(patchNameJ);
+	// 		redrawPatchName();
+	// 	}
 
-		auto patchDescJ = json_object_get(rootJ, "PatchDesc");
-		if (json_is_string(patchDescJ)) {
-			patchDescText = json_string_value(patchDescJ);
-			redrawPatchName();
-		}
+	// 	auto patchDescJ = json_object_get(rootJ, "PatchDesc");
+	// 	if (json_is_string(patchDescJ)) {
+	// 		patchDescText = json_string_value(patchDescJ);
+	// 		redrawPatchName();
+	// 	}
 
-		auto mapsJ = json_object_get(rootJ, "Mappings");
-		if (json_is_array(mapsJ)) {
-			centralData->maps.clear();
-			for (size_t i = 0; i < json_array_size(mapsJ); i++) {
-				auto mappingJ = json_array_get(mapsJ, i);
-				Mapping mapping;
+	// 	auto mapsJ = json_object_get(rootJ, "Mappings");
+	// 	if (json_is_array(mapsJ)) {
+	// 		centralData->maps.clear();
+	// 		for (size_t i = 0; i < json_array_size(mapsJ); i++) {
+	// 			auto mappingJ = json_array_get(mapsJ, i);
+	// 			Mapping mapping;
 
-				if (json_is_object(mappingJ)) {
-					json_t *val;
+	// 			if (json_is_object(mappingJ)) {
+	// 				json_t *val;
 
-					val = json_object_get(mappingJ, "DstModID");
-					mapping.dst.moduleID = json_is_integer(val) ? json_integer_value(val) : -1;
+	// 				val = json_object_get(mappingJ, "DstModID");
+	// 				mapping.dst.moduleID = json_is_integer(val) ? json_integer_value(val) : -1;
 
-					val = json_object_get(mappingJ, "DstObjID");
-					mapping.dst.objID = json_is_integer(val) ? json_integer_value(val) : -1;
+	// 				val = json_object_get(mappingJ, "DstObjID");
+	// 				mapping.dst.objID = json_is_integer(val) ? json_integer_value(val) : -1;
 
-					val = json_object_get(mappingJ, "DstObjType");
-					if (json_is_string(val))
-						mapping.dst.setObjTypeFromString(json_string_value(val));
-					else
-						mapping.dst.objType = LabelButtonID::Types::None;
+	// 				val = json_object_get(mappingJ, "DstObjType");
+	// 				if (json_is_string(val))
+	// 					mapping.dst.setObjTypeFromString(json_string_value(val));
+	// 				else
+	// 					mapping.dst.objType = LabelButtonID::Types::None;
 
-					val = json_object_get(mappingJ, "SrcModID");
-					mapping.src.moduleID = json_is_integer(val) ? json_integer_value(val) : -1;
+	// 				val = json_object_get(mappingJ, "SrcModID");
+	// 				mapping.src.moduleID = json_is_integer(val) ? json_integer_value(val) : -1;
 
-					val = json_object_get(mappingJ, "SrcObjID");
-					mapping.src.objID = json_is_integer(val) ? json_integer_value(val) : -1;
+	// 				val = json_object_get(mappingJ, "SrcObjID");
+	// 				mapping.src.objID = json_is_integer(val) ? json_integer_value(val) : -1;
 
-					val = json_object_get(mappingJ, "SrcObjType");
-					if (json_is_string(val))
-						mapping.src.setObjTypeFromString(json_string_value(val));
-					else
-						mapping.src.objType = LabelButtonID::Types::None;
+	// 				val = json_object_get(mappingJ, "SrcObjType");
+	// 				if (json_is_string(val))
+	// 					mapping.src.setObjTypeFromString(json_string_value(val));
+	// 				else
+	// 					mapping.src.objType = LabelButtonID::Types::None;
 
-					val = json_object_get(mappingJ, "RangeMin");
-					mapping.range_min = json_is_real(val) ? json_real_value(val) : 0.f;
+	// 				val = json_object_get(mappingJ, "RangeMin");
+	// 				mapping.range_min = json_is_real(val) ? json_real_value(val) : 0.f;
 
-					val = json_object_get(mappingJ, "RangeMax");
-					mapping.range_max = json_is_real(val) ? json_real_value(val) : 1.f;
+	// 				val = json_object_get(mappingJ, "RangeMax");
+	// 				mapping.range_max = json_is_real(val) ? json_real_value(val) : 1.f;
 
-					val = json_object_get(mappingJ, "AliasName");
-					if (json_is_string(val))
-						mapping.alias_name = json_string_value(val);
-					else
-						mapping.alias_name = "";
+	// 				val = json_object_get(mappingJ, "AliasName");
+	// 				if (json_is_string(val))
+	// 					mapping.alias_name = json_string_value(val);
+	// 				else
+	// 					mapping.alias_name = "";
 
-					centralData->maps.push_back(mapping);
-				}
-			}
-			for (auto &m : centralData->maps) {
-				if (m.src.objType == LabelButtonID::Types::Knob) {
-					centralData->registerKnobParamHandle(m.src, m.dst);
-				}
-			}
-		}
-	}
+	// 				centralData->maps.push_back(mapping);
+	// 			}
+	// 		}
+	// 		for (auto &m : centralData->maps) {
+	// 			if (m.src.objType == LabelButtonID::Types::Knob) {
+	// 				centralData->registerKnobParamHandle(m.src, m.dst);
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	// Hub class needs to call this from its process
 	void processPatchButton(float patchButtonState)
@@ -307,6 +307,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		p->app::ParamWidget::module = hubModule;
 		p->app::ParamWidget::paramId = knobId;
 		p->initParamQuantity();
+
 		if (module) {
 			auto pq = p->getParamQuantity();
 			pq = module->paramQuantities[knobId];
