@@ -93,8 +93,9 @@ public:
 
 template<typename BaseKnobT>
 class MappableKnob : public BaseKnobT {
-	// TODO: or is base of slider
-	// static_assert(std::is_base_of<app::SvgKnob, BaseKnobT>(), "Knob class must derive from SvgKnob");
+	// static_assert(std::is_base_of_v<app::SvgKnob, BaseKnobT>, "Knob class must derive from SvgKnob");
+	// ^^^ this fails for BaseKnobT = LEDLightSlider<WhiteLight>
+	// TODO: Make concept
 
 public:
 	// onButton is provided to customize the context menu for mappable knobs
@@ -149,6 +150,7 @@ public:
 			}
 			e.consume(this);
 		} else {
+			// printf("Touch %p, module id %lld\n", this, this->module->id);
 			ParamWidget::onButton(e);
 		}
 	}
@@ -161,7 +163,7 @@ public:
 private:
 	const LabelButtonID getId() // const
 	{
-		int moduleId = -1;
+		int64_t moduleId = -1;
 		int paramId = -1;
 		if (this->getParamQuantity()) {
 			moduleId = this->getParamQuantity()->module ? this->getParamQuantity()->module->id : -1;
