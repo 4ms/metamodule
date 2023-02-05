@@ -23,7 +23,7 @@ void CommModule::handleCommunication()
 	}
 }
 
-void CommModule::updateCommIDs(int id)
+void CommModule::setModuleId(int64_t id)
 {
 	for (auto &el : inputJacks) {
 		el->setModuleID(id);
@@ -39,7 +39,7 @@ void CommModule::updateCommIDs(int id)
 void CommModule::onAdd()
 {
 	selfID.id = this->id;
-	updateCommIDs(selfID.id);
+	setModuleId(selfID.id);
 	centralData->registerModule(selfID);
 }
 

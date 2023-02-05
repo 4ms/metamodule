@@ -35,7 +35,7 @@ struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 		configParam(9, 0.f, 1.f, 0.f, "Knob X");
 		configParam(10, 0.f, 1.f, 0.f, "Knob Y");
 		configParam(11, 0.f, 1.f, 0.f, "Knob Z");
-		selfID.typeID = "PanelMedium";
+		selfID.slug = "PanelMedium";
 	}
 
 	~HubMedium() = default;
@@ -61,14 +61,12 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 		hubModule = module;
 
 		if (hubModule != nullptr) {
-			printf("HubModule is not null\n");
 			hubModule->updateDisplay = [this] { this->valueLabel->text = this->hubModule->labelText; };
 			hubModule->updatePatchName = [this] {
 				this->hubModule->patchNameText = this->patchName->text;
 				this->hubModule->patchDescText = this->patchDesc->text;
 			};
-		} else
-			printf("HubModule is null\n");
+		}
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-medium-p8.svg")));
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
@@ -117,23 +115,23 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 10, fixDPIKnob({302.49, 123.24})); // y
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 11, fixDPIKnob({345.77, 157.00})); // z
 
-		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({36.34, 324.15}), JackInOut::Input);
-		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({79.86, 324.15}), JackInOut::Input);
-		addLabeledJackPx<PJ301MPort>("", 2, fixDPI({122.6, 324.18}), JackInOut::Input);
-		addLabeledJackPx<PJ301MPort>("", 3, fixDPI({166.12, 324.18}), JackInOut::Input);
-		addLabeledJackPx<PJ301MPort>("", 4, fixDPI({109.61, 282.75}), JackInOut::Input);
-		addLabeledJackPx<PJ301MPort>("", 5, fixDPI({153.13, 282.75}), JackInOut::Input);
-		addLabeledJackPx<PJ301MPort>("", 6, fixDPI({22.9, 274.7}), JackInOut::Input);
-		addLabeledJackPx<PJ301MPort>("", 7, fixDPI({66.42, 274.7}), JackInOut::Input);
+		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({36.34, 324.15}), JackDir::Input);
+		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({79.86, 324.15}), JackDir::Input);
+		addLabeledJackPx<PJ301MPort>("", 2, fixDPI({122.6, 324.18}), JackDir::Input);
+		addLabeledJackPx<PJ301MPort>("", 3, fixDPI({166.12, 324.18}), JackDir::Input);
+		addLabeledJackPx<PJ301MPort>("", 4, fixDPI({109.61, 282.75}), JackDir::Input);
+		addLabeledJackPx<PJ301MPort>("", 5, fixDPI({153.13, 282.75}), JackDir::Input);
+		addLabeledJackPx<PJ301MPort>("", 6, fixDPI({22.9, 274.7}), JackDir::Input);
+		addLabeledJackPx<PJ301MPort>("", 7, fixDPI({66.42, 274.7}), JackDir::Input);
 
-		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({209.28, 324.18}), JackInOut::Output);
-		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({252.8, 324.18}), JackInOut::Output);
-		addLabeledJackPx<PJ301MPort>("", 2, fixDPI({295.21, 324.2}), JackInOut::Output);
-		addLabeledJackPx<PJ301MPort>("", 3, fixDPI({338.73, 324.2}), JackInOut::Output);
-		addLabeledJackPx<PJ301MPort>("", 4, fixDPI({222.16, 282.79}), JackInOut::Output);
-		addLabeledJackPx<PJ301MPort>("", 5, fixDPI({265.68, 282.79}), JackInOut::Output);
-		addLabeledJackPx<PJ301MPort>("", 6, fixDPI({308.9, 282.15}), JackInOut::Output);
-		addLabeledJackPx<PJ301MPort>("", 7, fixDPI({352.42, 282.15}), JackInOut::Output);
+		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({209.28, 324.18}), JackDir::Output);
+		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({252.8, 324.18}), JackDir::Output);
+		addLabeledJackPx<PJ301MPort>("", 2, fixDPI({295.21, 324.2}), JackDir::Output);
+		addLabeledJackPx<PJ301MPort>("", 3, fixDPI({338.73, 324.2}), JackDir::Output);
+		addLabeledJackPx<PJ301MPort>("", 4, fixDPI({222.16, 282.79}), JackDir::Output);
+		addLabeledJackPx<PJ301MPort>("", 5, fixDPI({265.68, 282.79}), JackDir::Output);
+		addLabeledJackPx<PJ301MPort>("", 6, fixDPI({308.9, 282.15}), JackDir::Output);
+		addLabeledJackPx<PJ301MPort>("", 7, fixDPI({352.42, 282.15}), JackDir::Output);
 	}
 };
 

@@ -21,5 +21,5 @@ public:
 	std::string printPatchYAML();
 
 	PatchData &get_data();
-	static std::map<int64_t, uint16_t> squash_ids(std::vector<int> ids);
+	static std::map<int64_t, uint16_t> squash_ids(std::vector<int64_t> ids);
 };

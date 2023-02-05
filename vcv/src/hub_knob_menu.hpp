@@ -16,10 +16,7 @@ struct KnobAliasTextBox : ui::TextField {
 		: _src{src}
 	{}
 
-	void onChange(const event::Change &e) override
-	{
-		centralData->setMapAliasName(_src, text);
-	}
+	void onChange(const event::Change &e) override { centralData->setMapAliasName(_src, text); }
 };
 
 struct KnobAliasMenuItem : widget::Widget {
@@ -46,7 +43,7 @@ struct KnobAliasMenuItem : widget::Widget {
 };
 
 struct MappedKnobMenuLabel : ui::MenuLabel {
-	int moduleId;
+	int64_t moduleId;
 	int paramId;
 	std::string moduleName;
 	std::string paramName;
@@ -110,10 +107,7 @@ public:
 	{
 		quantity = new MappedRangeQuantity<RangePart::Min>{"Min: ", knobLabelID};
 	}
-	~MinSlider()
-	{
-		delete quantity;
-	}
+	~MinSlider() { delete quantity; }
 };
 
 struct MaxSlider : ui::Slider {
@@ -122,10 +116,7 @@ public:
 	{
 		quantity = new MappedRangeQuantity<RangePart::Max>{"Max: ", knobLabelID};
 	}
-	~MaxSlider()
-	{
-		delete quantity;
-	}
+	~MaxSlider() { delete quantity; }
 };
 
 struct KnobValueTextBox : ui::TextField {

@@ -78,9 +78,9 @@ struct Mapping {
 };
 struct ModuleID {
 	int64_t id;
-	ModuleTypeSlug typeID;
+	ModuleTypeSlug slug;
 
-	bool operator==(const ModuleID &rhs) const { return (this->id == rhs.id) && (this->typeID == rhs.typeID); }
+	bool operator==(const ModuleID &rhs) const { return (this->id == rhs.id) && (this->slug == rhs.slug); }
 };
 
 struct JackStatus {

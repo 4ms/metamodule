@@ -58,7 +58,7 @@ public:
 		auto module_it = std::find_if(moduleData.begin(), moduleData.end(), [=](auto &m) {
 			if (m.id == moduleId) {
 				for (auto &hubname : ValidHubSlugs) {
-					if (hubname == m.typeID)
+					if (hubname == m.slug)
 						return true;
 				}
 			}

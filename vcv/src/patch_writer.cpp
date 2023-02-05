@@ -12,18 +12,18 @@ void PatchFileWriter::setPatchDesc(std::string patchDesc) { pd.description = pat
 
 void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules)
 {
-	std::vector<int> vcv_mod_ids;
+	std::vector<int64_t> vcv_mod_ids;
 
 	// Reserved for PANEL
 	vcv_mod_ids.push_back(-1);
 	pd.module_slugs.push_back("");
 
 	for (auto &mod : modules) {
-		if (mod.typeID.is_equal("PANEL_8") || mod.typeID.is_equal("PanelMedium")) {
-			pd.module_slugs[0] = mod.typeID;
+		if (mod.slug.is_equal("PANEL_8") || mod.slug.is_equal("PanelMedium")) {
+			pd.module_slugs[0] = mod.slug;
 			vcv_mod_ids[0] = mod.id;
 		} else {
-			pd.module_slugs.push_back(mod.typeID);
+			pd.module_slugs.push_back(mod.slug);
 			vcv_mod_ids.push_back(mod.id);
 		}
 	}
@@ -168,7 +168,7 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 
 std::string PatchFileWriter::printPatchYAML() { return patch_to_yaml_string(pd); }
 
-std::map<int64_t, uint16_t> PatchFileWriter::squash_ids(std::vector<int> ids)
+std::map<int64_t, uint16_t> PatchFileWriter::squash_ids(std::vector<int64_t> ids)
 {
 	std::map<int64_t, uint16_t> s;
 

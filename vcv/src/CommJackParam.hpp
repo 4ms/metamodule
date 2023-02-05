@@ -23,7 +23,7 @@ public:
 		inputJackStatus.connected = true;
 	}
 
-	void setModuleID(int moduleID) { inputJackStatus.sendingModuleId = moduleID; }
+	void setModuleID(int64_t moduleID) { inputJackStatus.sendingModuleId = moduleID; }
 
 	void updateInput()
 	{
@@ -70,7 +70,7 @@ private:
 	float _value = 0;
 	Port &_outputPort;
 	int _jackID = -1;
-	int _moduleID = -1;
+	int64_t _moduleID = -1;
 
 public:
 	std::function<float(float)> scale = [](float f) { return f; };
@@ -80,7 +80,7 @@ public:
 		, _jackID{jackID}
 	{}
 
-	void setModuleID(int moduleID) { _moduleID = moduleID; }
+	void setModuleID(int64_t moduleID) { _moduleID = moduleID; }
 
 	void updateOutput()
 	{

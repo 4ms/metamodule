@@ -54,7 +54,7 @@ public:
 
 	const LabelButtonID getId() const
 	{
-		int moduleId = -1;
+		int64_t moduleId = -1;
 		int paramId = -1;
 		if (_inner_knob.getParamQuantity()) {
 			moduleId = _inner_knob.getParamQuantity()->module ? _inner_knob.getParamQuantity()->module->id : -1;

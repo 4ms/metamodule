@@ -316,10 +316,10 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		addLabeledKnobPx<KnobType>(labelText, knobId, posPx, defaultValue);
 	}
 
-	enum class JackInOut { Input, Output };
+	enum class JackDir { Input, Output };
 
 	template<typename JackType>
-	void addLabeledJackPx(const std::string labelText, int jackId, Vec posPx, JackInOut inout)
+	void addLabeledJackPx(const std::string labelText, int jackId, Vec posPx, JackDir inout)
 	{
 		auto mapButton = new HubJackMapButton{*this};
 
@@ -327,7 +327,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		mapButton->box.size.x = mm2px(kKnobSpacingX);
 		mapButton->box.size.y = mm2px(kKnobSpacingY);
 		mapButton->text = labelText;
-		auto type = inout == JackInOut::Input ? LabelButtonID::Types::InputJack : LabelButtonID::Types::OutputJack;
+		auto type = inout == JackDir::Input ? LabelButtonID::Types::InputJack : LabelButtonID::Types::OutputJack;
 		mapButton->id = {type, jackId, hubModule ? hubModule->id : -1};
 		addChild(mapButton);
 
@@ -335,9 +335,9 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		jack->box.pos = posPx;
 		jack->box.pos = jack->box.pos.minus(jack->box.size.div(2));
 		jack->module = module;
-		jack->type = inout == JackInOut::Input ? Port::INPUT : Port::OUTPUT;
+		jack->type = inout == JackDir::Input ? Port::INPUT : Port::OUTPUT;
 		jack->portId = jackId;
-		if (inout == JackInOut::Input)
+		if (inout == JackDir::Input)
 			addInput(jack);
 		else
 			addOutput(jack);

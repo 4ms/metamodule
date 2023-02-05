@@ -39,6 +39,6 @@ protected:
 	virtual void onSampleRateChange() override;
 
 private:
-	void updateCommIDs(int id);
+	void setModuleId(int64_t id);
 	void handleCommunication();
 };

@@ -106,7 +106,7 @@ private:
 
 	LabelButtonID getId()
 	{
-		int moduleId = this->module ? this->module->id : -1;
+		int64_t moduleId = this->module ? this->module->id : -1;
 		if constexpr (InputOrOutput == MappableJackType::Input)
 			return {LabelButtonID::Types::InputJack, this->portId, moduleId};
 		else

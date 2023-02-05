@@ -25,7 +25,7 @@ struct GenericModule : CommModule {
 		configComm(NumParams, Defs::NumInJacks, Defs::NumOutJacks, NumLEDElements);
 
 		core = ModuleFactory::create(Defs::slug);
-		selfID.typeID = Defs::slug;
+		selfID.slug = Defs::slug;
 
 		for (auto knob : Defs::Knobs)
 			configParam(knob.id, 0.f, 1.f, knob.default_val, knob.long_name.data());
