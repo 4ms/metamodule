@@ -90,6 +90,7 @@ public:
 		hovered = true;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyEnterHover(getId());
+		BaseJackT::onEnter(e);
 	}
 
 	void onLeave(const event::Leave &e) override
@@ -97,6 +98,7 @@ public:
 		hovered = false;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyLeaveHover(getId());
+		BaseJackT::onLeave(e);
 	}
 
 private:
