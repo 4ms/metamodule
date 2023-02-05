@@ -5,7 +5,6 @@
 #include "CoreModules/moduleFactory.hh"
 #include "hub_jack.hpp"
 #include "hub_knob.hpp"
-#include "knob_map.hpp"
 #include "localPath.hpp"
 #include "paletteHub.hpp"
 #include "patch_writer.hpp"

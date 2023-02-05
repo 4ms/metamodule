@@ -2,7 +2,6 @@
 #include "HubMapButton.hpp"
 #include "MapMarks.hpp"
 #include "hub_knob_menu.hpp"
-#include "knob_map.hpp"
 #include "paletteHub.hpp"
 
 // This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
