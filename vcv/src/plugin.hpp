@@ -13,6 +13,9 @@ extern Plugin *pluginInstance;
 // Declare each Model, defined in each module source file
 //////////////// Auto generated ///////////////////////
 // Add models below here
+extern Model *modelSHEV;
+extern Model *modelENVVCA;
+extern Model *modelDEV;
 extern Model *modelFreeverb;
 extern Model *modelSTS;
 extern Model *modelVCA;

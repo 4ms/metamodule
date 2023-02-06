@@ -7,6 +7,15 @@ std::unique_ptr<CentralData> centralData;
 //////////////// Auto generated ///////////////////////
 // include and define models below here
 
+#include "CoreModules/info/SHEV_info.hh"
+auto modelSHEV = createModelFromInfo<SHEVInfo>();
+
+#include "CoreModules/info/ENVVCA_info.hh"
+auto modelENVVCA = createModelFromInfo<ENVVCAInfo>();
+
+#include "CoreModules/info/DEV_info.hh"
+auto modelDEV = createModelFromInfo<DEVInfo>();
+
 #include "CoreModules/info/Att_info.hh"
 auto modelAtt = createModelFromInfo<AttInfo>();
 
@@ -226,6 +235,9 @@ void init(Plugin *p)
 
 	//////////////// Auto generated ///////////////////////
 	// Add models below here
+	p->addModel(modelSHEV);
+	p->addModel(modelENVVCA);
+	p->addModel(modelDEV);
 	p->addModel(modelSend);
 	p->addModel(modelLogic);
 	p->addModel(modelLFO);

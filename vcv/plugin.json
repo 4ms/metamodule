@@ -14,6 +14,24 @@
   "changelogUrl": "",
   "modules": [
     {
+      "slug": "SHEV",
+      "name": "SHEV",
+      "description": "SHEV",
+      "tags": []
+    },
+    {
+      "slug": "ENVVCA",
+      "name": "ENVVCA",
+      "description": "ENVVCA",
+      "tags": []
+    },
+    {
+      "slug": "DEV",
+      "name": "DEV",
+      "description": "DEV",
+      "tags": []
+    },
+    {
       "slug": "VCA",
       "name": "VCA",
       "description": "VCA",
