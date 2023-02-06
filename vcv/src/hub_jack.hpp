@@ -53,8 +53,10 @@ public:
 		// So, don't consume the hover and just do nothing.
 		// On the other hand, if the jack is not mapped, then consume the hover so that hovering the jack
 		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(hubJackLabel.id))
+		if (centralData->isLabelButtonSrcMapped(hubJackLabel.id)) {
+			PortWidget::onHover(e);
 			return;
+		}
 
 		e.consume(this);
 	}
