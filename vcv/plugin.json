@@ -14,6 +14,42 @@
   "changelogUrl": "",
   "modules": [
     {
+      "slug": "VCA",
+      "name": "VCA",
+      "description": "VCA",
+      "tags": []
+    },
+    {
+      "slug": "Send",
+      "name": "Send",
+      "description": "Send",
+      "tags": []
+    },
+    {
+      "slug": "Logic",
+      "name": "Logic",
+      "description": "Logic",
+      "tags": []
+    },
+    {
+      "slug": "LFO",
+      "name": "LFO",
+      "description": "LFO",
+      "tags": []
+    },
+    {
+      "slug": "FadeDelay",
+      "name": "FadeDelay",
+      "description": "FadeDelay",
+      "tags": []
+    },
+    {
+      "slug": "Att",
+      "name": "Att",
+      "description": "Att",
+      "tags": []
+    },
+    {
       "slug": "Freeverb",
       "name": "Freeverb",
       "description": "Freeverb",

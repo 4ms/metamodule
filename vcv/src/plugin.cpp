@@ -7,6 +7,9 @@ std::unique_ptr<CentralData> centralData;
 //////////////// Auto generated ///////////////////////
 // include and define models below here
 
+#include "CoreModules/info/Att_info.hh"
+auto modelAtt = createModelFromInfo<AttInfo>();
+
 #include "CoreModules/info/Freeverb_info.hh"
 auto modelFreeverb = createModelFromInfo<FreeverbInfo>();
 
@@ -223,9 +226,14 @@ void init(Plugin *p)
 
 	//////////////// Auto generated ///////////////////////
 	// Add models below here
+	p->addModel(modelSend);
+	p->addModel(modelLogic);
+	p->addModel(modelLFO);
+	p->addModel(modelFadeDelay);
+	p->addModel(modelAtt);
 	p->addModel(modelFreeverb);
 	p->addModel(modelSTS);
-	// p->addModel(modelVCA);
+	p->addModel(modelVCA);
 	p->addModel(modelVCAM);
 	p->addModel(modelTapo);
 	p->addModel(modelShift);
