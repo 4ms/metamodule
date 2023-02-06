@@ -321,6 +321,7 @@ def panel_to_components(tree):
         color_match = re.search(r'fill:\s*(.*)', style)
         color = ''
         color = color_match.group(1).lower() if color_match is not None else ''
+        color = color.strip(";")
         color = expand_color_synonyms(color)
         c['color'] = color
 
