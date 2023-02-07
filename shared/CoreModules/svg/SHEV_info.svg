@@ -32,7 +32,7 @@
      inkscape:window-x="53"
      inkscape:window-y="86"
      inkscape:window-maximized="0"
-     inkscape:current-layer="panel" />
+     inkscape:current-layer="svg1322" />
   <g
      id="faceplate">
     <g
@@ -42,7 +42,7 @@
          y=".63"
          width="287.15"
          height="364.26"
-         style="stroke: #000; stroke-width: 1.25px;"
+         style="stroke: #222; stroke-width: 1.25px; fill: #222"
          id="rect2" />
     </g>
     <g
