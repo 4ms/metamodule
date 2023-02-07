@@ -1,5 +1,5 @@
-#include "CenterLabel.hpp"
-#include "plugin.hpp"
+#include "CenterLabel.hh"
+#include "plugin.hh"
 
 void CenterLabel::draw(const DrawArgs &args)
 {

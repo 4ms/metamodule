@@ -1,13 +1,13 @@
-#include "CommData.hpp"
-#include "CommModule.hpp"
-#include "CommWidget.hpp"
+#include "CommData.hh"
+#include "CommModule.hh"
+#include "CommWidget.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/panel_medium_defs.hh"
-#include "hub_base.hpp"
-#include "hub_jack.hpp"
-#include "localPath.hpp"
-#include "patch_writer.hpp"
-#include "plugin.hpp"
+#include "hub_base.hh"
+#include "hub_jack.hh"
+#include "localPath.hh"
+#include "patch_writer.hh"
+#include "plugin.hh"
 
 // Note: in v2, first the module is constructed, then dataFromJson is called, then the Widget is constructed
 

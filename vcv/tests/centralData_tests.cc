@@ -1,13 +1,10 @@
-#include "central_data.hpp"
+#include "central_data.hh"
 #include "doctest.h"
 
 TEST_CASE("getNumModules() and register/unregistering modules")
 {
 	CentralData cd;
-	SUBCASE("Before any init, getNumModules() returns 0")
-	{
-		CHECK(cd.getNumModules() == 0);
-	}
+	SUBCASE("Before any init, getNumModules() returns 0") { CHECK(cd.getNumModules() == 0); }
 
 	SUBCASE("Registering a module increases the number of modules returned by getNumModules()")
 	{
@@ -58,10 +55,7 @@ TEST_CASE("getNumModules() and register/unregistering modules")
 TEST_CASE("ParamStatus adding and remove param data")
 {
 	CentralData cd;
-	SUBCASE("Before any init, paramData is size 0")
-	{
-		CHECK(cd.paramData.size() == 0);
-	}
+	SUBCASE("Before any init, paramData is size 0") { CHECK(cd.paramData.size() == 0); }
 	SUBCASE("updateParamStatus() with new module/param IDs adds it to paramData")
 	{
 		cd.registerModule({1, "MODULE"});
@@ -114,10 +108,7 @@ TEST_CASE("ParamStatus adding and remove param data")
 TEST_CASE("JackStatus adding and remove patched cable data")
 {
 	CentralData cd;
-	SUBCASE("Before any init, jackData is size 0")
-	{
-		CHECK(cd.jackData.size() == 0);
-	}
+	SUBCASE("Before any init, jackData is size 0") { CHECK(cd.jackData.size() == 0); }
 	SUBCASE("updateJackStatus() with new module/jack IDs adds it to jackData")
 	{
 		cd.registerModule({1, "MODULE"});

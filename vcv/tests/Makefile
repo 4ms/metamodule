@@ -15,7 +15,7 @@ TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cc)
 TEST_SOURCES += $(wildcard $(TEST_DIR)/test_*.cpp)
 TEST_SOURCES += src/shared/patch_convert/patch_to_yaml.cc
 TEST_SOURCES += src/shared/patch_convert/ryml/ryml_serial.cc
-TEST_SOURCES += src/patch_writer.cpp
+TEST_SOURCES += src/patch_writer.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 

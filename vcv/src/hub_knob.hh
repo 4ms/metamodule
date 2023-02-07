@@ -1,8 +1,8 @@
 #pragma once
-#include "HubMapButton.hpp"
-#include "MapMarks.hpp"
-#include "hub_knob_menu.hpp"
-#include "paletteHub.hpp"
+#include "hub_knob_menu.hh"
+#include "hub_map_button.hh"
+#include "map_marks.hh"
+#include "map_palette.hh"
 
 // This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
 

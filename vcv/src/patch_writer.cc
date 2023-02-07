@@ -1,4 +1,4 @@
-#include "patch_writer.hpp"
+#include "patch_writer.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include <algorithm>
 

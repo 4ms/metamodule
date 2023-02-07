@@ -30,6 +30,7 @@ LDFLAGS +=
 
 # Add source files to the build
 SOURCES += $(wildcard src/*.cpp)
+SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/*.cc)
 SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp

@@ -1,8 +1,8 @@
 #pragma once
-#include "MapMarks.hpp"
-#include "hub_knob_menu.hpp"
-#include "paletteHub.hpp"
-#include "plugin.hpp"
+#include "hub_knob_menu.hh"
+#include "map_marks.hh"
+#include "map_palette.hh"
+#include "plugin.hh"
 #include <rack.hpp>
 
 enum class MappableJackType { Input, Output };

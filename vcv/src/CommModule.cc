@@ -1,5 +1,5 @@
-#include "CommModule.hpp"
-#include "CommData.hpp"
+#include "CommModule.hh"
+#include "CommData.hh"
 
 CommModule::CommModule() {}
 

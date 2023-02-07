@@ -1,6 +1,6 @@
 #pragma once
-#include "CommData.hpp"
-#include "paletteHub.hpp"
+#include "CommData.hh"
+#include "map_palette.hh"
 #include <algorithm>
 #include <iostream>
 #include <map>

@@ -1,5 +1,5 @@
-#include "HubMapButton.hpp"
-#include "paletteHub.hpp"
+#include "hub_map_button.hh"
+#include "map_palette.hh"
 #include <cstdio>
 
 void HubMapButton::_updateState()

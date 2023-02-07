@@ -8,7 +8,6 @@ LOCAL
 .vscode/
 main.map
 .clangd/
-compile_commands.json
 .tags
 tags
 .tags_*
@@ -16,19 +15,14 @@ objs/
 localtests_tests
 .nvimrc
 .ccls-cache/
-tableGen/table
 compile_flags.txt
-tableGen/make_tables
-cubemx
-compile_commands.json.compdb
-shared/tests/doctest.h
-shared/CoreModules/tests/doctest.h
-vcv/tests/doctest.h
 shared/tableGen/make_tables
+cubemx
+compile_commands.json*
+doctest.h
 *.dat
 *.uimg
-local_board_rev.hh
-firmware/.gdb_history
+.gdb_history
 firmware_m4.h
 firmware_m4_vectors.h
 *.swo
@@ -37,6 +31,8 @@ firmware/vec.miss
 shared/svgextract/test_circle_colors_data.xml
 shared/patch_convert/patch_convert
 *.d
+
+# Generated Files (`make modules`)
 vcv/res/modules/*-artwork.svg
 firmware/src/pages/images/*_artwork_240.png
 firmware/src/pages/images/*_artwork_120.png

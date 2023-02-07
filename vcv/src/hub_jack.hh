@@ -1,7 +1,7 @@
 #pragma once
-#include "HubMapButton.hpp"
-#include "MapMarks.hpp"
-#include "paletteHub.hpp"
+#include "hub_map_button.hh"
+#include "map_marks.hh"
+#include "map_palette.hh"
 
 class HubJackMapButton : public HubMapButton {
 public:

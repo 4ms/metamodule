@@ -1,8 +1,8 @@
 #pragma once
-#include "CommData.hpp"
-#include "CommJackParam.hpp"
+#include "CommData.hh"
+#include "CommJackParam.hh"
 #include "CoreModules/coreProcessor.h"
-#include "plugin.hpp"
+#include "plugin.hh"
 
 class CommModule : public Module {
 public:

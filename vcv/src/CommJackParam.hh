@@ -1,6 +1,6 @@
 #pragma once
-#include "CommData.hpp"
-#include "plugin.hpp"
+#include "CommData.hh"
+#include "plugin.hh"
 
 struct CommInputJack {
 private:
