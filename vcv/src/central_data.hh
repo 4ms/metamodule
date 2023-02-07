@@ -1,5 +1,5 @@
 #pragma once
-#include "CommData.hh"
+#include "comm_data.hh"
 #include "map_palette.hh"
 #include <algorithm>
 #include <iostream>

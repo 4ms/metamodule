@@ -1,5 +1,5 @@
 #pragma once
-#include "CommModule.hh"
+#include "comm_module.hh"
 #include "mappable_knob.hh"
 #include <rack.hpp>
 using namespace rack;
