@@ -16,17 +16,11 @@ auto modelENVVCA = createModelFromInfo<ENVVCAInfo>();
 #include "CoreModules/info/DEV_info.hh"
 auto modelDEV = createModelFromInfo<DEVInfo>();
 
-#include "CoreModules/info/Att_info.hh"
-auto modelAtt = createModelFromInfo<AttInfo>();
-
 #include "CoreModules/info/Freeverb_info.hh"
 auto modelFreeverb = createModelFromInfo<FreeverbInfo>();
 
 #include "CoreModules/info/STS_info.hh"
 auto modelSTS = createModelFromInfo<STSInfo>();
-
-#include "CoreModules/info/VCA_info.hh"
-auto modelVCA = createModelFromInfo<VCAInfo>();
 
 #include "CoreModules/info/VCAM_info.hh"
 auto modelVCAM = createModelFromInfo<VCAMInfo>();
@@ -36,9 +30,6 @@ auto modelTapo = createModelFromInfo<TapoInfo>();
 
 #include "CoreModules/info/Shift_info.hh"
 auto modelShift = createModelFromInfo<ShiftInfo>();
-
-#include "CoreModules/info/Send_info.hh"
-auto modelSend = createModelFromInfo<SendInfo>();
 
 #include "CoreModules/info/SISM_info.hh"
 auto modelSISM = createModelFromInfo<SISMInfo>();
@@ -76,17 +67,11 @@ auto modelPEG = createModelFromInfo<PEGInfo>();
 #include "CoreModules/info/Mixer_info.hh"
 auto modelMixer = createModelFromInfo<MixerInfo>();
 
-#include "CoreModules/info/Logic_info.hh"
-auto modelLogic = createModelFromInfo<LogicInfo>();
-
 #include "CoreModules/info/LPG_info.hh"
 auto modelLPG = createModelFromInfo<LPGInfo>();
 
 #include "CoreModules/info/LIO_info.hh"
 auto modelLIO = createModelFromInfo<LIOInfo>();
-
-#include "CoreModules/info/LFO_info.hh"
-auto modelLFO = createModelFromInfo<LFOInfo>();
 
 #include "CoreModules/info/L4_info.hh"
 auto modelL4 = createModelFromInfo<L4Info>();
@@ -106,9 +91,6 @@ auto modelGRev = createModelFromInfo<GRevInfo>();
 #include "CoreModules/info/Fade_info.hh"
 auto modelFade = createModelFromInfo<FadeInfo>();
 
-#include "CoreModules/info/FadeDelay_info.hh"
-auto modelFadeDelay = createModelFromInfo<FadeDelayInfo>();
-
 #include "CoreModules/info/DLD_info.hh"
 auto modelDLD = createModelFromInfo<DLDInfo>();
 
@@ -120,9 +102,6 @@ auto modelCLKM = createModelFromInfo<CLKMInfo>();
 
 #include "CoreModules/info/CLKD_info.hh"
 auto modelCLKD = createModelFromInfo<CLKDInfo>();
-
-// #include "CoreModules/info/Att_info.hh"
-// auto modelAtt = createModelFromInfo<AttInfo>();
 
 #include "CoreModules/info/ADEnv_info.hh"
 auto modelADEnv = createModelFromInfo<ADEnvInfo>();
@@ -238,14 +217,8 @@ void init(Plugin *p)
 	p->addModel(modelSHEV);
 	p->addModel(modelENVVCA);
 	p->addModel(modelDEV);
-	p->addModel(modelSend);
-	p->addModel(modelLogic);
-	p->addModel(modelLFO);
-	p->addModel(modelFadeDelay);
-	p->addModel(modelAtt);
 	p->addModel(modelFreeverb);
 	p->addModel(modelSTS);
-	p->addModel(modelVCA);
 	p->addModel(modelVCAM);
 	p->addModel(modelTapo);
 	p->addModel(modelShift);
