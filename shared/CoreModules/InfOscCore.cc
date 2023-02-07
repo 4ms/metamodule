@@ -163,7 +163,7 @@ public:
 		} else if (!inlet_rst) {
 			rst = 0;
 		}
-		int s1 = 0, s2 = 0;
+		// int s1 = 0, s2 = 0;
 		int32_t Mix;
 		int32_t tpos = ((Ppitch + (1 << 27)) & ((1 << 28) - 1)) >> 1;
 		int tsel = __USAT(param_wave + (1 << 27), 28) >> 21;
@@ -211,8 +211,8 @@ public:
 						end += 1;
 					}
 					width = end - start;
-					s1 = sel[i];
-					s2 = sel[i + 1];
+					// s1 = sel[i];
+					// s2 = sel[i + 1];
 					break;
 				}
 			}
@@ -221,31 +221,31 @@ public:
 
 			// int32_t a, b;
 			if (upd) {
-				s1 = select;
+				// s1 = select;
 				Mix = 0;
 			}
-			s1 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
-			s2 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
+			// s1 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
+			// s2 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
 		} else if (tot[0] == 1) {
-			s1 = sel[0];
-			s2 = sel[0];
+			// s1 = sel[0];
+			// s2 = sel[0];
 			Mix = 0;
-			if (upd) {
-				s1 = select;
-			}
-			s1 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
-			s2 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
+			// if (upd) {
+			// s1 = select;
+			// }
+			// s1 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
+			// s2 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
 
 		} else {
-			s1 = 0;
-			s2 = 0;
-			if (upd) {
-				s1 = select;
-				s2 = select;
-			}
+			// s1 = 0;
+			// s2 = 0;
+			// if (upd) {
+			// 	s1 = select;
+			// 	s2 = select;
+			// }
 			Mix = 0;
-			s1 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
-			s2 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
+			// s1 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
+			// s2 <<= LENGTHPOW; //parent->instancewave_space_design_i.LENGTHPOW;
 		}
 
 		// END MARK: K-rate Code
