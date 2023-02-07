@@ -86,12 +86,6 @@
       "tags": []
     },
     {
-      "slug": "RCDBO",
-      "name": "RCDBO",
-      "description": "RCDBO",
-      "tags": []
-    },
-    {
       "slug": "QPLFO",
       "name": "QPLFO",
       "description": "QPLFO",
@@ -107,12 +101,6 @@
       "slug": "PI",
       "name": "PI",
       "description": "PI",
-      "tags": []
-    },
-    {
-      "slug": "PIExp",
-      "name": "PIExp",
-      "description": "PIExp",
       "tags": []
     },
     {

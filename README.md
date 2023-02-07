@@ -2,10 +2,10 @@
 
 ### Start
 
-After cloning this repo, update the submodules:
+After cloning this repo, init and update the submodules recursively:
 
 ```
-git submodule update --init
+git submodule update --init --recursive
 ```
 
 ### Building VCV Rack Plugin

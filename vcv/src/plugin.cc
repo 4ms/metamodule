@@ -43,9 +43,6 @@ auto modelSCM = createModelFromInfo<SCMInfo>();
 #include "CoreModules/info/RCD_info.hh"
 auto modelRCD = createModelFromInfo<RCDInfo>();
 
-#include "CoreModules/info/RCDBO_info.hh"
-auto modelRCDBO = createModelFromInfo<RCDBOInfo>();
-
 #include "CoreModules/info/QPLFO_info.hh"
 auto modelQPLFO = createModelFromInfo<QPLFOInfo>();
 
@@ -54,9 +51,6 @@ auto modelQCD = createModelFromInfo<QCDInfo>();
 
 #include "CoreModules/info/PI_info.hh"
 auto modelPI = createModelFromInfo<PIInfo>();
-
-#include "CoreModules/info/PIExp_info.hh"
-auto modelPIExp = createModelFromInfo<PIExpInfo>();
 
 #include "CoreModules/info/PEG_info.hh"
 auto modelPEG = createModelFromInfo<PEGInfo>();
@@ -223,11 +217,9 @@ void init(Plugin *p)
 	p->addModel(modelSH);
 	p->addModel(modelSCM);
 	p->addModel(modelRCD);
-	p->addModel(modelRCDBO);
 	p->addModel(modelQPLFO);
 	p->addModel(modelQCD);
 	p->addModel(modelPI);
-	p->addModel(modelPIExp);
 	p->addModel(modelPEG);
 	p->addModel(modelMixer);
 	p->addModel(modelLPG);
