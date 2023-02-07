@@ -46,3 +46,8 @@ make install
 This will create the plugin file and install it in the VCV Rack plugin directory. The next time you start VCV Rack, it will load the modified plugin.
 
 
+### Building Firmware
+
+To create the artwork files from the SVGs, you must have Inkscape and Imagemagick installed an on your PATH
+
+...
