@@ -65,6 +65,14 @@ struct GenericModuleWidget : CommModuleWidget {
 		setModule(static_cast<Module *>(module));
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, Defs::svg_filename.data())));
+		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		if (box.size.x > RACK_GRID_WIDTH * 7) // >7HP = 2 screws
+		{
+			addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+			addChild(
+				createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		}
 
 		for (auto knob : Defs::Knobs) {
 			auto ctr_pos = mm2px({knob.x_mm, knob.y_mm});
