@@ -650,9 +650,13 @@ def createlvimg(artworkSvgFilename, outputBaseName):
     # PNG ==> LVGL image (C file with array)
     lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/lv_img_conv/lv_img_conv.js"
     try:
-        subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', png240Filename], check=True)
-        Log(f"Created {png240Filename.strip('.png')}.c file from {png240Filename} with {lv_img_conv} -c CF_TRUE_COLOR -t c --force {png240Filename}")
-        subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', png120Filename], check=True)
+        c240Filename = os.path.realpath(os.path.splitext(png240Filename)[0]+".c")
+        subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', png240Filename, '-o', c240Filename], check=True)
+        Log(f"Created {png240Filename.strip('.png')}.c file from {png240Filename} with:\n"
+            f"    {lv_img_conv} -c CF_TRUE_COLOR -t c --force {png240Filename} -o {c240Filename}")
+
+        c120Filename = os.path.realpath(os.path.splitext(png120Filename)[0]+".c")
+        subprocess.run([lv_img_conv, '-c', 'CF_TRUE_COLOR', '-t', 'c', '--force', png120Filename, '-o', c120Filename], check=True)
         Log(f"Created {png120Filename.strip('.png')}.c file from {png120Filename}")
     except subprocess.CalledProcessError:
         Log("lv_img_conv.js failed. Try "
