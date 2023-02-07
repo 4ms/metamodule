@@ -2,12 +2,11 @@
 /dist
 /plugin.so
 /plugin.dylib
+/plugin-arm64.dylib
 /plugin.dll
 .DS_Store
-src/processors
-src/util
 .nvimrc
 .ccls-cache
 .cache
 .vscode
-src/localPath.h
+src/local_path.hh

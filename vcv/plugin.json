@@ -1,7 +1,7 @@
 {
   "slug": "4msCompany",
   "name": "4msCompany",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "license": "proprietary",
   "brand": "4msCompany",
   "author": "",
@@ -13,6 +13,24 @@
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [
+    {
+      "slug": "SHEV",
+      "name": "SHEV",
+      "description": "SHEV",
+      "tags": []
+    },
+    {
+      "slug": "ENVVCA",
+      "name": "ENVVCA",
+      "description": "ENVVCA",
+      "tags": []
+    },
+    {
+      "slug": "DEV",
+      "name": "DEV",
+      "description": "DEV",
+      "tags": []
+    },
     {
       "slug": "Freeverb",
       "name": "Freeverb",
@@ -83,12 +101,6 @@
       "slug": "QCD",
       "name": "QCD",
       "description": "QCD",
-      "tags": []
-    },
-    {
-      "slug": "QCDEXP",
-      "name": "QCDEXP",
-      "description": "QCDEXP",
       "tags": []
     },
     {

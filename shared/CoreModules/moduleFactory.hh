@@ -61,6 +61,10 @@ private:
 	//Note: we can't use a string_view for the map key because the map is populated on initialization
 	//and the char[] that the string_view points to might not be initialized yet -- resulting in an element with el.first.length() == 0
 	//Ideally, we'd use StaticString<31>, but there is some functionality missing in StaticString which map requires
+	// We could try using string_view and lazy init. Within the module Core.cpp: std::string_view get_slug() { static char _slug[] = "EnOsc"; return _slug; }
 	static inline etl::unordered_map<etl::string<31>, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline etl::unordered_map<etl::string<31>, ModuleInfoView, MAX_MODULE_TYPES> infos;
+	// static constexpr auto _sz_creation_funcs = sizeof(creation_funcs); //48k
+	// static constexpr auto _sz_infos = sizeof(infos);				   //112k
+	// static constexpr auto _sz_view = sizeof(ModuleInfoView); //136B
 };

@@ -109,7 +109,7 @@ public:
 			for (auto [_pw, _d] : zip(pw, d))
 				_pw = base_pw / _d;
 
-			uint32_t min_pw = MIN_PW + 1;
+			// uint32_t min_pw = MIN_PW + 1;
 			for (auto [_pw, _d, _per] : zip(pw, d, per)) {
 				if (_per >= MIN_PW && _pw < MIN_PW)
 					_pw = MIN_PW;
@@ -326,28 +326,28 @@ private:
 	std::array<int32_t, 8> slip;
 
 	// Alt structure: TODO
-	struct ClockOut {
-		bool is_shuffling;
-		uint32_t base_mult;
-		uint32_t d;		  //mult
-		uint32_t tmr;	  //phase
-		uint32_t per;	  //maxphase
-		uint32_t pw;	  //pw
-		uint32_t p;		  //pulse_ctr
-		uint32_t s;		  //?
-		uint32_t dd;	  //mult_prefast
-		uint32_t slip;	  //?
-		uint32_t slipamt; //?
-	};
+	// struct ClockOut {
+	// 	bool is_shuffling;
+	// 	uint32_t base_mult;
+	// 	uint32_t d;		  //mult
+	// 	uint32_t tmr;	  //phase
+	// 	uint32_t per;	  //maxphase
+	// 	uint32_t pw;	  //pw
+	// 	uint32_t p;		  //pulse_ctr
+	// 	uint32_t s;		  //?
+	// 	uint32_t dd;	  //mult_prefast
+	// 	uint32_t slip;	  //?
+	// 	uint32_t slipamt; //?
+	// };
 
-	std::array<ClockOut, 8> jacks{{
-		{.is_shuffling = false, .base_mult = 1},
-		{.is_shuffling = false, .base_mult = 2},
-		{.is_shuffling = true, .base_mult = 3},
-		{.is_shuffling = true, .base_mult = 4},
-		{.is_shuffling = true, .base_mult = 5},
-		{.is_shuffling = true, .base_mult = 6},
-		{.is_shuffling = true, .base_mult = 8},
-		{.is_shuffling = false, .base_mult = 8},
-	}};
+	// std::array<ClockOut, 8> jacks{{
+	// 	{.is_shuffling = false, .base_mult = 1},
+	// 	{.is_shuffling = false, .base_mult = 2},
+	// 	{.is_shuffling = true, .base_mult = 3},
+	// 	{.is_shuffling = true, .base_mult = 4},
+	// 	{.is_shuffling = true, .base_mult = 5},
+	// 	{.is_shuffling = true, .base_mult = 6},
+	// 	{.is_shuffling = true, .base_mult = 8},
+	// 	{.is_shuffling = false, .base_mult = 8},
+	// }};
 };
