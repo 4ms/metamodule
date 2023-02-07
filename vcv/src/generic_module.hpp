@@ -90,11 +90,11 @@ struct GenericModuleWidget : CommModuleWidget {
 				case KnobDef::Slider25mm: {
 					if (knob.orientation == KnobDef::Vertical) {
 						auto *kn =
-							createParamCentered<MappableKnob<LEDLightSlider<WhiteLight>>>(ctr_pos, module, knob.id);
+							createParamCentered<MappableKnob<FourmsLightSlider<WhiteLight>>>(ctr_pos, module, knob.id);
 						addChild(new MappableSliderRing{*kn, 20, 40});
 						addParam(kn);
 					} else {
-						auto *kn = createParamCentered<MappableKnob<LEDLightSliderHorizontal<WhiteLight>>>(
+						auto *kn = createParamCentered<MappableKnob<FourmsLightSliderHorizontal<WhiteLight>>>(
 							ctr_pos, module, knob.id);
 						addChild(new MappableSliderRing{*kn, 40, 20});
 						addParam(kn);
