@@ -4,9 +4,6 @@
 [submodule "firmware/lib/printf"]
 	path = firmware/lib/printf
 	url = git@github.com:mpaland/printf.git
-[submodule "firmware/lib/u-boot/u-boot-stm32mp1-baremetal"]
-	path = firmware/lib/u-boot/u-boot-stm32mp1-baremetal
-	url = git@github.com:4ms/u-boot-stm32mp1-baremetal.git
 [submodule "firmware/lib/lvgl/lvgl"]
 	path = firmware/lib/lvgl/lvgl
 	url = git@github.com:lvgl/lvgl.git
