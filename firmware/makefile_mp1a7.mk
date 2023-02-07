@@ -380,7 +380,6 @@ include makefile_common.mk
 
 
 #### BOOT IMAGE
-UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
 IMG  		= $(BUILDDIR)/$(BINARYNAME).img
 LOADADDR 	= 0xC2000040
 ENTRYPOINT 	= $(LOADADDR)
@@ -391,6 +390,7 @@ bootimg: $(IMG)
 
 $(IMG): $(BIN) $(MP1BOOT)
 	# $(UBOOT_MKIMAGE) -A arm -C none -T firmware -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
+	# TODO: use MP1-Boot script to convert bin to img
 	$(info sudo dd if=$(IMG) of=/dev/disk4s3)
 	$(info Image created. Now copy image to sd card with this command (assumes /dev/disk4 is the sd card):)
 
@@ -402,25 +402,3 @@ medium: all
 
 norflash-loader: bootimg
 
-# $(UBOOT_MKIMAGE):
-# 	$(error Use `make u-boot` to build U-Boot and re-run this.)
-
-# u-boot:
-# 	cd $(UBOOTSRCDIR) && $(uboot_buildcmd)
-# 	$(info Creating .h file from u-boot-spl image)
-# 	cp $(UBOOTDIR)/build/u-boot-spl.stm32 src/norflash-loader/
-# 	cd src/norflash-loader && xxd -i -c 8 u-boot-spl.stm32 u-boot-spl-stm32.h
-
-# clean_uboot:
-# 	rm -rf $(UBOOTBUILDDIR)
-
-# Todo: get this working:
-# install-uboot:
-# 	$(info Please enter the sd card device node:)
-	# ls -l /dev/disk*  #if macOS
-	# ls -l /dev/sd*    #if linux
-	# getinput(devXX)  #How to do this?
-	# scripts/format-sdcard.sh $(devXX)
-	# scripts/partition-sdcard.sh $(devXX)
-	# scripts/copy-bootloader.sh $(devXX) $(UBOOTBUILDDIR)/
-	# scripts/copy-app-to-sdcard.sh $(UIMG) $(devXX)
