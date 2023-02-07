@@ -5,6 +5,8 @@ LOCAL
 *.bin
 *.wav
 .DS_Store
+.nvimrc
+.vimrc
 .vscode/
 main.map
 .clangd/
@@ -13,7 +15,6 @@ tags
 .tags_*
 objs/
 localtests_tests
-.nvimrc
 .ccls-cache/
 compile_flags.txt
 shared/tableGen/make_tables
