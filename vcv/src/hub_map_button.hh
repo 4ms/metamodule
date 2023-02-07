@@ -1,5 +1,5 @@
 #pragma once
-#include "CommWidget.hh"
+#include "comm_widget.hh"
 #include <rack.hpp>
 using namespace rack;
 

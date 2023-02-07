@@ -1,4 +1,4 @@
-#include "CenterLabel.hh"
+#include "center_label.hh"
 #include "plugin.hh"
 
 void CenterLabel::draw(const DrawArgs &args)

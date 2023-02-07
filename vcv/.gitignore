@@ -9,4 +9,4 @@
 .ccls-cache
 .cache
 .vscode
-src/localPath.h
+src/local_path.hh

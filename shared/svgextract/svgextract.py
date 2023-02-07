@@ -714,30 +714,28 @@ def appendPluginFiles(slug, pluginDir = None, description=""):
         pluginDir = os.getenv('METAMODULE_VCV_DIR')
         if pluginDir is None:
             pluginDir = input_default("Metamodule/VCV dir", pathFromHere("../../vcv/"))
-    plugincpp = os.path.join(pluginDir, 'src/plugin.cpp')
-    pluginhpp = os.path.join(pluginDir, 'src/plugin.hpp')
+    plugincc = os.path.join(pluginDir, 'src/plugin.cc')
+    pluginhh = os.path.join(pluginDir, 'src/plugin.hh')
     pluginjson = os.path.join(pluginDir, 'plugin.json')
     if description=="":
         description = slug
     modelName = 'model' + slug
 
-    # Append to plugins.cpp file
+    # Append to plugin.cc file
     marker = '// Add models below here'
     newText = f'p->addModel({modelName});'
-    appendToFileAfterMarker(plugincpp, marker, "\n\t" + newText, newText)
-
-    # Append more to plugins.cpp
+    appendToFileAfterMarker(plugincc, marker, "\n\t" + newText, newText)
     marker = "// include and define models below here\n"
     newText = f'''
 #include "CoreModules/info/{slug}_info.hh"
 auto {modelName} = createModelFromInfo<{slug}Info>();
 '''
-    appendToFileAfterMarker(plugincpp, marker, newText)
+    appendToFileAfterMarker(plugincc, marker, newText)
 
-    # Append to plugins.hpp file
+    # Append to plugin.hh file
     marker = '// Add models below here\n'
     newText = f'extern Model *{modelName};\n'
-    appendToFileAfterMarker(pluginhpp, marker, newText)
+    appendToFileAfterMarker(pluginhh, marker, newText)
 
     # Append plugin.json
     # TODO: Use a json library because appendToFileAfterMarker gets confused easily (whitespace, trailing comma...)

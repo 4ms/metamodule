@@ -4,10 +4,7 @@
 
 using namespace rack;
 
-// extern CentralData *centralData;
 extern std::unique_ptr<CentralData> centralData;
-
-// Declare the Plugin, defined in plugin.cpp
 extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file
@@ -28,7 +25,6 @@ extern Model *modelRCD;
 extern Model *modelRCDBO;
 extern Model *modelQPLFO;
 extern Model *modelQCD;
-extern Model *modelQCDEXP;
 extern Model *modelPI;
 extern Model *modelPIExp;
 extern Model *modelPEG;

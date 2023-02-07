@@ -1,8 +1,8 @@
 #pragma once
-#include "CommModule.hh"
-#include "CommWidget.hh"
 #include "CoreModules/info/module_info_base.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "comm_module.hh"
+#include "comm_widget.hh"
 #include "mappable_jack.hh"
 #include "util/base_concepts.hh"
 #include "util/math.hh"

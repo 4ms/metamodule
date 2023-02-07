@@ -1,5 +1,5 @@
 #pragma once
-#include "CommData.hh"
+#include "comm_data.hh"
 #include "plugin.hh"
 
 struct CommInputJack {

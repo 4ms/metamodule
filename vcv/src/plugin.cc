@@ -52,9 +52,6 @@ auto modelQPLFO = createModelFromInfo<QPLFOInfo>();
 #include "CoreModules/info/QCD_info.hh"
 auto modelQCD = createModelFromInfo<QCDInfo>();
 
-#include "CoreModules/info/QCDEXP_info.hh"
-auto modelQCDEXP = createModelFromInfo<QCDEXPInfo>();
-
 #include "CoreModules/info/PI_info.hh"
 auto modelPI = createModelFromInfo<PIInfo>();
 
@@ -229,7 +226,6 @@ void init(Plugin *p)
 	p->addModel(modelRCDBO);
 	p->addModel(modelQPLFO);
 	p->addModel(modelQCD);
-	p->addModel(modelQCDEXP);
 	p->addModel(modelPI);
 	p->addModel(modelPIExp);
 	p->addModel(modelPEG);
