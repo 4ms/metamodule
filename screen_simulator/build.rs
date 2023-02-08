@@ -32,30 +32,32 @@ fn main() {
     lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_700_18.c"));
 
     if use_fewer_modules {
-        lvgl_src.push(String::from("../firmware/src/pages/images/Djembe_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/Djembe_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/StMix_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/StMix_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/PEG_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/PEG_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/SMR_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/SMR_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/MultiLFO_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/MultiLFO_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/PitchShift_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/PitchShift_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/HPF_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/HPF_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/InfOsc_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/InfOsc_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/Freeverb_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/Freeverb_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/KPLS_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/KPLS_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/Seq8_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/Seq8_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Djembe_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Djembe_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/EnOsc_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/EnOsc_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Freeverb_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Freeverb_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/HPF_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/HPF_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/InfOsc_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/InfOsc_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/KPLS_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/KPLS_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/MultiLFO_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/MultiLFO_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/PEG_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/PEG_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/PitchShift_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/PitchShift_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/SMR_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/SMR_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Seq8_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Seq8_artwork_240.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/StMix_artwork_120.c"));
+        lvgl_src.push(String::from("../firmware/src/pages/images/modules/StMix_artwork_240.c"));
     } else {
-        add_glob_files("../firmware/src/pages/images/*.c", &mut lvgl_src);
+        add_glob_files("../firmware/src/pages/images/modules/*.c", &mut lvgl_src);
     }
 
     let mut builder = cc::Build::new();
