@@ -33,9 +33,7 @@ shared/svgextract/test_circle_colors_data.xml
 shared/patch_convert/patch_convert
 *.d
 
-# Generated Files (`make modules`)
-vcv/res/modules/*-artwork.svg
-firmware/src/pages/images/*_artwork_240.png
-firmware/src/pages/images/*_artwork_120.png
+# Generated Intermediate Files 
+firmware/src/pages/images/*_artwork_*.png
 shared/CoreModules/info/*_info.hh
 
