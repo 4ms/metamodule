@@ -32,7 +32,6 @@ extern Model *modelMixer;
 extern Model *modelLPG;
 extern Model *modelLIO;
 extern Model *modelL4;
-extern Model *modelL4Q;
 extern Model *modelGate8;
 extern Model *modelGate32;
 extern Model *modelGRev;

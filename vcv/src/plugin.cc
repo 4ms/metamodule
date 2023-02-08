@@ -67,9 +67,6 @@ auto modelLIO = createModelFromInfo<LIOInfo>();
 #include "CoreModules/info/L4_info.hh"
 auto modelL4 = createModelFromInfo<L4Info>();
 
-#include "CoreModules/info/L4Q_info.hh"
-auto modelL4Q = createModelFromInfo<L4QInfo>();
-
 #include "CoreModules/info/Gate8_info.hh"
 auto modelGate8 = createModelFromInfo<Gate8Info>();
 
@@ -225,7 +222,6 @@ void init(Plugin *p)
 	p->addModel(modelLPG);
 	p->addModel(modelLIO);
 	p->addModel(modelL4);
-	p->addModel(modelL4Q);
 	p->addModel(modelGate8);
 	p->addModel(modelGate32);
 	p->addModel(modelGRev);
