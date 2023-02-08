@@ -5,6 +5,8 @@
 #include "debug.hh"
 #include "drivers/hsem.hh"
 #include "drivers/stm32xx.h"
+#include "fatfs/ramdisk_ops.hh"
+#include "fatfs/sdcard_ops.hh"
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_loader.hh"
@@ -13,7 +15,6 @@
 #include "patchfileio.hh"
 #include "patchlist.hh"
 #include "patchstorage.hh"
-#include "ramdisk_ops.hh"
 #include "semaphore_action.hh"
 #include "shared_bus.hh"
 #include "shared_memory.hh"
@@ -42,6 +43,10 @@ void main() {
 	RamDiskOps ramdiskops{StaticBuffers::virtdrive};
 	RamDiskFileIO::register_disk(&ramdiskops, Disk::RamDisk);
 	RamDiskFileIO::format_disk(Disk::RamDisk);
+
+	// SDCardOps sdcardops{sdcard_conf};
+	// FatFileIO sdcard{sdcardops, Disk::SDCard};
+	FatFileIO<SDCardOps, Disk::SDCard> sdcard;
 
 	// Setup Patch Storage on QSPI flash and load patches to RamDisk
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
