@@ -35,5 +35,4 @@ shared/patch_convert/patch_convert
 
 # Generated Intermediate Files 
 firmware/src/pages/images/*_artwork_*.png
-shared/CoreModules/info/*_info.hh
 
