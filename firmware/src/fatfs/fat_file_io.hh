@@ -19,7 +19,7 @@ class FatFileIO {
 	DiskOps *ops;
 	DiskID disk;
 	char vol[3];
-	char _volname[9];
+	char _volname[8];
 
 public:
 	struct __attribute__((packed)) FileInfo {
@@ -36,7 +36,7 @@ public:
 		: ops{diskops}
 		, disk{disk_id}
 		, vol{char(char(disk) + '0'), ':', '\0'}
-		, _volname{'F', 'A', 'T', 'F', 'S', ' ', char(char(disk) + '0'), ':', '\0'} {
+		, _volname{'F', 'A', 'T', 'F', 'S', ':', char(char(disk) + '0'), '\0'} {
 		if (!fatfs_register_disk(ops, static_cast<unsigned>(disk))) {
 			printf_("Failed to register FAT FS Disk %d\n", disk);
 		}

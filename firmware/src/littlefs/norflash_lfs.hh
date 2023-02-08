@@ -17,7 +17,7 @@ public:
 	static constexpr uint32_t MaxFileSize = 32768;
 	enum class Status { AlreadyFormatted, NewlyFormatted, FlashError, LFSError };
 
-	char _volname[10]{"LFS Flash"};
+	const std::string_view _volname{"LFS Flash"};
 
 	LfsFileIO(LfsFileIO &other) = delete;
 
@@ -60,7 +60,7 @@ public:
 		return Status::NewlyFormatted;
 	}
 
-	std::string_view volname() {
+	std::string_view volname() const {
 		return _volname;
 	}
 

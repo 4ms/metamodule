@@ -23,7 +23,7 @@ public:
 					return;
 
 				pr_log("Found patch file on %s: %s (%zu B) Timestamp: 0x%x, Reading... ",
-					   fileio.volname(),
+					   fileio.volname().data(),
 					   filename.data(),
 					   filesize,
 					   timestamp);
@@ -67,7 +67,7 @@ public:
 				return;
 
 			pr_log("Found patch file on %s: %s, size: %d, timestamp 0x%x, copying to %s\n",
-				   from.volname(),
+				   from.volname().data(),
 				   filename.data(),
 				   filesize,
 				   timestamp,
