@@ -42,30 +42,25 @@ img:
 ## Module images
 
 MODULEIMG_SVGS = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
-MODULEIMG_PNG240S = $(addprefix src/pages/images/,$(addsuffix _240.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
-MODULEIMG_PNG120S = $(addprefix src/pages/images/,$(addsuffix _120.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
+MODULEIMG_PNG240S = $(addprefix src/pages/images/modules/,$(addsuffix _240.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
+MODULEIMG_PNG120S = $(addprefix src/pages/images/modules/,$(addsuffix _120.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
 MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
 MODULEIMG_C += $(MODULEIMG_PNG120S:.png=.c)
 INFO_FILES = $(addprefix $(SHARED)/CoreModules/info/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
 
 images: $(MODULEIMG_C) $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
 
-src/pages/images/%_artwork_120.c src/pages/images/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
+src/pages/images/modules/%_artwork_120.c src/pages/images/modules/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
 	$(info)
 	$(info -------)
 	$(info $*: Creating 120px and 240px-height lvgl imgs for "$*" from full-sized svg artwork $<)
-	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< src/pages/images/$*
+	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< src/pages/images/modules/$*
 	$(info $*: Adding to LVGL image_list.hh if needed)
 	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork src/pages/images/image_list.hh
 
 $(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
 	$(info $*: Creating ModuleInfo header file [and coremodule stub if needed])
 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
-
-#Create component images half-sized (for 120px height modules):
-# assumes there are already 100% size pngs
-# convert -resize 50% -set filename:f '%d/%t' src/pages/images/components/*.png '%[filename:f]_120.png'
-# cd ../shared/svgextract/lv_img_conv/ && ./lv_img_conv.js -f -c CF_TRUE_COLOR_ALPHA ../../../firmware/src/pages/images/components/*120.png
 
 .SECONDARY: $(MODULEIMG_PNG240S) $(MODULEIMG_PNG120S)
 

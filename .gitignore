@@ -34,5 +34,5 @@ shared/patch_convert/patch_convert
 *.d
 
 # Generated Intermediate Files 
-firmware/src/pages/images/*_artwork_*.png
+firmware/src/pages/images/modules/*_artwork_*.png
 
