@@ -24,7 +24,7 @@ struct BuffMultInfo : ModuleInfoBase {
     static constexpr std::array<InJackDef, NumInJacks> InJacks{{
         {
             .id = InputInput_1,
-            .x_mm = px_to_mm<72>(21.37f),
+            .x_mm = px_to_mm<72>(21.71f),
             .y_mm = px_to_mm<72>(44.75f),
             .short_name = "Input 1",
             .long_name = "Input 1",
@@ -33,7 +33,7 @@ struct BuffMultInfo : ModuleInfoBase {
         },
         {
             .id = InputInput_2,
-            .x_mm = px_to_mm<72>(21.37f),
+            .x_mm = px_to_mm<72>(21.71f),
             .y_mm = px_to_mm<72>(182.98f),
             .short_name = "Input 2",
             .long_name = "Input 2",
@@ -56,7 +56,7 @@ struct BuffMultInfo : ModuleInfoBase {
     static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
         {
             .id = OutputOutput_A,
-            .x_mm = px_to_mm<72>(21.37f),
+            .x_mm = px_to_mm<72>(21.71f),
             .y_mm = px_to_mm<72>(79.31f),
             .short_name = "Output A",
             .long_name = "Output A",
@@ -64,7 +64,7 @@ struct BuffMultInfo : ModuleInfoBase {
         },
         {
             .id = OutputOutput_B,
-            .x_mm = px_to_mm<72>(21.37f),
+            .x_mm = px_to_mm<72>(21.71f),
             .y_mm = px_to_mm<72>(113.89f),
             .short_name = "Output B",
             .long_name = "Output B",
@@ -72,7 +72,7 @@ struct BuffMultInfo : ModuleInfoBase {
         },
         {
             .id = OutputOutput_C,
-            .x_mm = px_to_mm<72>(21.37f),
+            .x_mm = px_to_mm<72>(21.71f),
             .y_mm = px_to_mm<72>(148.42f),
             .short_name = "Output C",
             .long_name = "Output C",
@@ -80,7 +80,7 @@ struct BuffMultInfo : ModuleInfoBase {
         },
         {
             .id = OutputOutput_F,
-            .x_mm = px_to_mm<72>(21.37f),
+            .x_mm = px_to_mm<72>(21.71f),
             .y_mm = px_to_mm<72>(217.54f),
             .short_name = "Output F",
             .long_name = "Output F",
@@ -88,7 +88,7 @@ struct BuffMultInfo : ModuleInfoBase {
         },
         {
             .id = OutputOutput_E,
-            .x_mm = px_to_mm<72>(21.37f),
+            .x_mm = px_to_mm<72>(21.71f),
             .y_mm = px_to_mm<72>(252.1f),
             .short_name = "Output E",
             .long_name = "Output E",
@@ -96,7 +96,7 @@ struct BuffMultInfo : ModuleInfoBase {
         },
         {
             .id = OutputOutput_D,
-            .x_mm = px_to_mm<72>(21.37f),
+            .x_mm = px_to_mm<72>(21.71f),
             .y_mm = px_to_mm<72>(286.66f),
             .short_name = "Output D",
             .long_name = "Output D",
@@ -120,13 +120,13 @@ struct BuffMultInfo : ModuleInfoBase {
     static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{
         {
             .id = LedInput_1_Led,
-            .x_mm = px_to_mm<72>(36.15f),
+            .x_mm = px_to_mm<72>(36.49f),
             .y_mm = px_to_mm<72>(62.81f),
             .led_color = LedDef::Red,
         },
         {
             .id = LedInput_2_Led,
-            .x_mm = px_to_mm<72>(36.15f),
+            .x_mm = px_to_mm<72>(36.49f),
             .y_mm = px_to_mm<72>(201.01f),
             .led_color = LedDef::Red,
         },
