@@ -154,7 +154,8 @@ private:
 	}
 
 	static ModuleTypeSlug _read_patch_name(FileIoC auto &fileio, const std::string_view filename) {
-		std::array<char, 64> _buf;
+		constexpr uint32_t HEADER_SIZE = 64;
+		std::array<char, HEADER_SIZE> _buf;
 
 		auto bytes_read = fileio.read_file(filename, _buf);
 		if (bytes_read == 0) {
@@ -162,25 +163,31 @@ private:
 			return "";
 		}
 		_buf[63] = 0;
+
 		auto header = std::string_view{_buf.data(), _buf.size()};
-		auto pos = header.find("patch_name: ");
-		if (pos == header.npos) {
-			pr_log("File does not contain with 'patch_name: ' in the first 64 chars, ignoring\n");
+		const std::string_view name_tag{"patch_name: "};
+		auto startpos = header.find(name_tag);
+		if (startpos == header.npos) {
+			pr_log("File does not contain with '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
 			return "";
 		}
-		auto endpos = header.find("\n", pos);
+		startpos += name_tag.length();
+
+		auto endpos = header.find("\n", startpos);
 		if (endpos == header.npos)
-			endpos = header.find("\r", pos);
+			endpos = header.find("\r", startpos);
 		if (endpos == header.npos) {
-			pr_log("File does not contain a newline after 'patch_name: ' in the first 64 chars, ignoring\n");
+			pr_log("File does not contain a newline after '%s' in the first %d chars, ignoring\n",
+				   name_tag.data(),
+				   HEADER_SIZE);
 			return "";
 		}
-		if (endpos == pos) {
-			pr_log("File does not contain anything between 'patch_name: ' and the next newline, ignoring\n");
+		if (endpos == startpos) {
+			pr_log("File does not contain anything between '%s' and the next newline, ignoring\n", name_tag.data());
 			return "";
 		}
 
-		return ModuleTypeSlug{header.substr(pos, endpos)};
+		return ModuleTypeSlug{header.substr(startpos, endpos - startpos)};
 	}
 
 	// FIXME: uses static buffer, NOT THREAD OR ISR SAFE!!
