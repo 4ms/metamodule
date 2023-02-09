@@ -7,6 +7,8 @@
 namespace MetaModule
 {
 
+// PatchLoader handles loading of patches into PatchPlayer
+// TODO: Better name so its not confused with loading a patch from SD Card or USB?
 struct PatchLoader {
 	static inline uint32_t initial_patch = 8;
 
@@ -16,23 +18,12 @@ struct PatchLoader {
 	}
 
 	void load_initial_patch() {
-		if (load_patch(initial_patch)) {
+		if (_load_patch(initial_patch)) {
 			printf_("Loaded initial_patch\n");
 			loaded_patch_index_ = initial_patch;
 			loading_new_patch_ = false;
 		} else
 			printf_("Failed to load initial patch\n");
-	}
-
-	bool load_patch(uint32_t patchid) {
-		auto patchname = patch_list_.get_patch_name(patchid);
-		printf_("Attempting load patch #%d, %s\n", patchid, patchname.data());
-
-		if (player_.load_patch(patch_list_.get_patch(patchid))) {
-			loaded_patch_index_ = patchid;
-			return true;
-		}
-		return false;
 	}
 
 	uint32_t cur_patch_index() {
@@ -64,10 +55,10 @@ struct PatchLoader {
 
 	void handle_sync_patch_loading() {
 		if (loading_new_patch_ && audio_is_muted_) {
-			bool ok = load_patch(new_patch_index_);
+			bool ok = _load_patch(new_patch_index_);
 			if (!ok) {
 				printf_("Can't load patch, reloading previous patch\n");
-				if (!load_patch(loaded_patch_index_)) {
+				if (!_load_patch(loaded_patch_index_)) {
 					printf_("Failed to reload patch, something is wrong!\n");
 					//TODO: how to handle this, do we have a "no patch loaded" state?
 				}
@@ -80,13 +71,13 @@ struct PatchLoader {
 		}
 	}
 
-	PatchList &get_patch_list() {
-		return patch_list_;
-	}
+	// PatchList &get_patch_list() {
+	// 	return patch_list_;
+	// }
 
-	PatchPlayer &get_patch_player() {
-		return player_;
-	}
+	// PatchPlayer &get_patch_player() {
+	// 	return player_;
+	// }
 
 private:
 	PatchList &patch_list_;
@@ -97,5 +88,16 @@ private:
 
 	uint32_t loaded_patch_index_;
 	uint32_t new_patch_index_;
+
+	bool _load_patch(uint32_t patchid) {
+		auto patchname = patch_list_.get_patch_name(patchid);
+		printf_("Attempting load patch #%d, %s\n", patchid, patchname.data());
+
+		if (player_.load_patch(patch_list_.get_patch(patchid))) {
+			loaded_patch_index_ = patchid;
+			return true;
+		}
+		return false;
+	}
 };
 } // namespace MetaModule

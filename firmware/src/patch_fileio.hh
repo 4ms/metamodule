@@ -42,6 +42,11 @@ public:
 		return ok;
 	}
 
+	static bool load_patch_data(PatchData &p, FileIoC auto &fileio, std::string_view filename) {
+		auto b = _read_patch_to_local_buffer(fileio, filename);
+		return true;
+	}
+
 	// static bool overwrite_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
 	// 	patch_list.clear_all_patches();
 	// 	return add_all_to_patchlist(fileio, patch_list);
@@ -84,7 +89,7 @@ public:
 						"File %s timestamps differ. from: 0x%x to: 0x%x\n", filename.data(), timestamp, to_file_tmstmp);
 			}
 
-			auto contents = _read_patch_to_local_buffer(from, filename, filesize);
+			auto contents = _read_patch_to_local_buffer(from, filename);
 			if (contents.size() == 0)
 				return;
 
@@ -149,7 +154,7 @@ private:
 	}
 
 	static ModuleTypeSlug _read_patch_name(FileIoC auto &fileio, const std::string_view filename) {
-		std::array<char, 256> _buf;
+		std::array<char, 64> _buf;
 
 		auto bytes_read = fileio.read_file(filename, _buf);
 		if (bytes_read == 0) {
@@ -159,14 +164,14 @@ private:
 		auto header = trim_buf_leading_newlines(_buf);
 		auto pos = header.find("patch_data: ");
 		if (pos == header.npos) {
-			pr_log("File does not contain with 'patch_data: ' in the first 256B, ignoring\n");
+			pr_log("File does not contain with 'patch_data: ' in the first 64 chars, ignoring\n");
 			return "";
 		}
 		auto endpos = header.find("\n", pos);
 		if (endpos == header.npos)
 			endpos = header.find("\r", pos);
 		if (endpos == header.npos) {
-			pr_log("File does not contain a newline after 'patch_data: ' in the first 256B, ignoring\n");
+			pr_log("File does not contain a newline after 'patch_data: ' in the first 64 chars, ignoring\n");
 			return "";
 		}
 		if (endpos == pos) {
@@ -178,8 +183,7 @@ private:
 	}
 
 	// FIXME: uses static buffer, NOT THREAD OR ISR SAFE!!
-	static std::span<char>
-	_read_patch_to_local_buffer(FileIoC auto &fileio, const std::string_view filename, uint32_t filesize) {
+	static std::span<char> _read_patch_to_local_buffer(FileIoC auto &fileio, const std::string_view filename) {
 		static std::array<char, 65536> _buf;
 
 		auto bytes_read = fileio.read_file(filename, _buf);
@@ -187,17 +191,11 @@ private:
 			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
 			return {_buf.data(), 0};
 		}
-		if (filesize >= sizeof(_buf)) {
-			pr_err("Error: File %s too large (%d, max is %d), skipped\n", filename.data(), filesize, sizeof(_buf));
+		if (bytes_read == sizeof(_buf)) {
+			pr_err("Error: File %s too large (max is %d), skipped\n", filename.data(), sizeof(_buf));
 			return {_buf.data(), 0};
 		}
-		if (bytes_read < filesize) {
-			pr_err("Error: Did not read entire file %s. Read %d of %d bytes. Skipped\n",
-				   filename.data(),
-				   bytes_read,
-				   filesize);
-			return {_buf.data(), 0};
-		}
+
 		if (!trim_buf_leading_newlines(_buf).starts_with("PatchData:")) {
 			pr_log("File does not start with 'PatchData:', skipping\n");
 			return {_buf.data(), 0};

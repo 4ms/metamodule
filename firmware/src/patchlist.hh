@@ -8,6 +8,18 @@
 namespace MetaModule
 {
 
+//Structure idea:
+//PatchList keeps an index of all known patches (patchname, filename, volume, timestamp, size), indexed by patch_id [uint]
+//PatchLoader stores index of current loaded patch and requested new patch to load <<-- these will need to be invalidated/refreshed if PatchList index is refreshed
+//??Pages get a ref to PatchStorage and can use that to... query patch information (get_patch(id) -> PatchData&)
+//PatchSelectorPage works as-is
+//PageList::set/get_selected_patch_id() ==> patch_storage.load_view_patch(id) [loads PatchData into private patch_storage._viewing_patch], only gets called when opening a patch
+//  									    patch_storage.get_view_patch_id() -> uint32_t
+//patch_list.get_patch(PageList::get..)	==> patch_storage.get_view_patch() -> PatchData &  [most pages accessing patch_list are actually calling this]
+//
+//PatchLoader handles loading patches into PatchPlayer (and syncing loading with the audio stream)
+//
+
 struct PatchList {
 	enum class Status { NotLoaded, Loading, Ready };
 
@@ -23,10 +35,20 @@ struct PatchList {
 		return _patch_data[patch_id].patchname;
 	}
 
+	// Returns the volume of the patch at a given index (bounds-checked)
+	const Volume get_patch_vol(uint32_t patch_id) {
+		if (_patch_data.size() == 0)
+			return Volume{0};
+
+		if (patch_id >= _patch_data.size())
+			patch_id = 0;
+		return _patch_data[patch_id].volume;
+	}
+
 	// Return a reference to the patch at the given index (bounds-checked)
 	// how to do this? Change all callers of this to use PatchStorage::get_patch?
 	// IS the patch_id the best way? We could scan by patch name?
-	PatchData &get_patch(uint32_t patch_id) {
+	[[deprecated]] PatchData &get_patch(uint32_t patch_id) {
 		// if (_patch_data.size() == 0)
 		return nullpatch;
 
@@ -77,9 +99,9 @@ struct PatchList {
 		_locked = false;
 	}
 
-	void add_patch_from_yaml(const std::span<std::byte> data);
-	void add_patch_from_yaml(const std::span<char> data);
-	void add_patch_from_yaml(const std::span<uint8_t> data);
+	// void add_patch_from_yaml(const std::span<std::byte> data);
+	// void add_patch_from_yaml(const std::span<char> data);
+	// void add_patch_from_yaml(const std::span<uint8_t> data);
 
 	void add_patch_header(Volume volume,
 						  const std::string_view filename,
@@ -90,7 +112,6 @@ struct PatchList {
 		// _patch_data.emplace_back(volume, filename, 0, 0, "");
 	}
 
-private:
 	struct PatchFile {
 		Volume volume;
 		std::string filename;
@@ -99,6 +120,7 @@ private:
 		ModuleTypeSlug patchname;
 	};
 
+private:
 	// FIXME: We could get fragmentation if patch list is changed frequently
 	// Use an arena or some separate memory area, which is wiped when we refresh (re-insert SD card)
 	// We'd need to estimate the max size of all patches to do this.

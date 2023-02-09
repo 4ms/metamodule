@@ -14,6 +14,8 @@
 // - In Patch View, user can click "Save" or "copy" and give the patch a name and destination
 // - In Patch List, patches show their location
 // - Don't use RAMDisk USB
+// - Allow for USB-C thumb drive and SD Card
+//    -- on boot, read from all media and create patch index
 namespace MetaModule
 {
 
@@ -54,6 +56,36 @@ struct PatchStorage {
 		// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
 	}
 
+	void load_view_patch(uint32_t patch_id) {
+		bool ok = false;
+		switch (patch_list.get_patch_vol(patch_id)) {
+			case Volume::NorFlash:
+				ok = PatchFileIO::load_patch_data(_view_patch, norflash, patch_list.get_patch_name(patch_id));
+				break;
+			case Volume::SDCard:
+				ok = PatchFileIO::load_patch_data(_view_patch, sdcard, patch_list.get_patch_name(patch_id));
+				break;
+			case Volume::RamDisk:
+				ok = PatchFileIO::load_patch_data(_view_patch, ramdisk, patch_list.get_patch_name(patch_id));
+				break;
+		}
+
+		if (!ok) {
+			printf_("Could not load patch id %d\n", patch_id);
+			return;
+		}
+
+		_view_patch_id = patch_id;
+	}
+
+	uint32_t get_view_patch_id() {
+		return _view_patch_id;
+	}
+
+	PatchData &get_view_patch() {
+		return _view_patch;
+	}
+
 	void update_patchlist_from_sdcard() {
 		printf_("Updating patchlist from SD Card.\n");
 		patch_list.lock();
@@ -89,6 +121,10 @@ struct PatchStorage {
 		patch_list.unlock();
 		printf_("RamDisk Available to M4\n");
 	}
+
+private:
+	uint32_t _view_patch_id;
+	PatchData _view_patch;
 };
 
 } // namespace MetaModule
