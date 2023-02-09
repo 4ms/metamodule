@@ -78,8 +78,9 @@ struct KnobEditPage : PageBase {
 		lv_group_set_editing(group, true);
 
 		this_module_id = PageList::get_selected_module_id();
-		auto patch_id = PageList::get_selected_patch_id();
-		auto &patch = patch_list.get_patch(patch_id);
+		auto &patch = patch_storage.get_view_patch();
+		// auto patch_id = PageList::get_selected_patch_id();
+		// auto &patch = patch_list.get_patch(patch_id);
 
 		if (patch.patch_name.length() == 0) {
 			msg_queue.append_message("Patch name empty\n");
