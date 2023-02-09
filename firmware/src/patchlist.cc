@@ -5,16 +5,16 @@
 
 namespace MetaModule
 {
-PatchList::PatchList()
-	: _status{Status::NotLoaded} {
-	//FIXME: These hang when running on Cortex-A7, somewhere early in the first test, checking for "Module3"?
-	// __BKPT();
-	//if (!PatchListTargetTests::run_all_tests()) {
-	//	printf("FAILED yaml tests\r\n");
-	//	while (true)
-	//		;
-	//}
-}
+// PatchList::PatchList()
+// 	: _status{Status::NotLoaded} {
+//FIXME: These hang when running on Cortex-A7, somewhere early in the first test, checking for "Module3"?
+// __BKPT();
+//if (!PatchListTargetTests::run_all_tests()) {
+//	printf("FAILED yaml tests\r\n");
+//	while (true)
+//		;
+//}
+// }
 
 // void PatchList::add_patch_from_yaml(const std::span<char> data) {
 // 	_patch_data.push_back({});

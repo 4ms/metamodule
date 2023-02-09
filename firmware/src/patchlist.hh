@@ -23,7 +23,7 @@ namespace MetaModule
 struct PatchList {
 	enum class Status { NotLoaded, Loading, Ready };
 
-	PatchList();
+	PatchList() = default;
 
 	// Returns the name of the patch at a given index (bounds-checked)
 	const ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
@@ -46,8 +46,6 @@ struct PatchList {
 	}
 
 	// Return a reference to the patch at the given index (bounds-checked)
-	// how to do this? Change all callers of this to use PatchStorage::get_patch?
-	// IS the patch_id the best way? We could scan by patch name?
 	[[deprecated]] PatchData &get_patch(uint32_t patch_id) {
 		// if (_patch_data.size() == 0)
 		return nullpatch;
@@ -125,7 +123,7 @@ private:
 	// Use an arena or some separate memory area, which is wiped when we refresh (re-insert SD card)
 	// We'd need to estimate the max size of all patches to do this.
 	std::vector<PatchFile> _patch_data;
-	Status _status;
+	Status _status = Status::NotLoaded;
 	bool _has_been_updated = false;
 	bool _locked = false;
 
