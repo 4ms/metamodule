@@ -7,6 +7,7 @@
 #include "littlefs/norflash_lfs.hh"
 #include "patch_fileio.hh"
 #include "qspi_flash_driver.hh"
+#include "volumes.hh"
 
 //TODO: Figure out how to handle NOR FLash internal patches
 // - Ship with some patches on there
@@ -19,14 +20,14 @@ namespace MetaModule
 // PatchStorage manages all patch filesystems <--> PatchList
 struct PatchStorage {
 	SDCardOps<SDCardConf> sdcard_ops;
-	FatFileIO sdcard{&sdcard_ops, DiskID::SDCard};
+	FatFileIO sdcard{&sdcard_ops, Volume::SDCard};
 	bool sdcard_valid = false;
 
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
 	LfsFileIO norflash{flash};
 
 	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
-	FatFileIO ramdisk{&ramdisk_ops, DiskID::RamDisk};
+	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
 	PatchList &patch_list;
 
@@ -80,7 +81,7 @@ struct PatchStorage {
 		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
 		if (PatchFileIO::copy_patches_from_to(ramdisk, norflash, PatchFileIO::FileFilter::NewerTimestamp)) {
 			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
-			PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
+			// PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
 			patch_list.mark_modified();
 		} else {
 			printf_("NOR Flash writeback failed!\r\n");

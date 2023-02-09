@@ -6,7 +6,11 @@
 #include "patches_default.hh"
 #include "printf.h"
 #include "time_convert.hh"
+#include "volumes.hh"
 #include <string_view>
+
+namespace MetaModule
+{
 
 class LfsFileIO {
 	lfs_t lfs;
@@ -62,6 +66,10 @@ public:
 
 	std::string_view volname() const {
 		return _volname;
+	}
+
+	Volume vol_id() {
+		return Volume::NorFlash;
 	}
 
 	Status reformat() {
@@ -197,3 +205,4 @@ public:
 	// if (tfile.attrs[0].type == ATTR_TIMESTAMP)
 	//     uint32_t timestamp = tfile.attrs[0].buffer;
 };
+} // namespace MetaModule

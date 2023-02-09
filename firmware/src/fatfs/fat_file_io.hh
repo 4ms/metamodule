@@ -1,6 +1,7 @@
 #pragma once
 #include "disk_ops.hh"
 #include "printf.h"
+#include "volumes.hh"
 #include <cstdint>
 #include <functional>
 #include <span>
@@ -12,13 +13,11 @@ bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 namespace MetaModule
 {
 
-enum class DiskID { RamDisk = 0, SDCard = 1 };
-
 class FatFileIO {
 	FATFS fs;
 	DiskOps *ops;
-	DiskID disk;
-	char vol[3];
+	const Volume _vol;
+	char _fatvol[3];
 	char _volname[8];
 
 public:
@@ -32,25 +31,25 @@ public:
 		uint8_t second;
 	};
 
-	FatFileIO(DiskOps *diskops, DiskID disk_id)
+	FatFileIO(DiskOps *diskops, Volume vol_id)
 		: ops{diskops}
-		, disk{disk_id}
-		, vol{char(char(disk) + '0'), ':', '\0'}
-		, _volname{'F', 'A', 'T', 'F', 'S', ':', char(char(disk) + '0'), '\0'} {
-		if (!fatfs_register_disk(ops, static_cast<unsigned>(disk))) {
-			printf_("Failed to register FAT FS Disk %d\n", disk);
+		, _vol{vol_id}
+		, _fatvol{char(char(_vol) + '0'), ':', '\0'}
+		, _volname{'F', 'A', 'T', 'F', 'S', ':', char(char(_vol) + '0'), '\0'} {
+		if (!fatfs_register_disk(ops, static_cast<unsigned>(_vol))) {
+			printf_("Failed to register FAT FS Disk %d\n", _vol);
 		}
 		mount_disk();
 	}
 
 	bool mount_disk() {
-		if (f_mount(&fs, vol, 1) == FR_OK)
+		if (f_mount(&fs, _fatvol, 1) == FR_OK)
 			return true;
 		return false;
 	}
 
 	bool unmount_disk() {
-		auto disk_id = static_cast<uint8_t>(disk);
+		auto disk_id = static_cast<uint8_t>(_vol);
 		return (disk_ioctl(disk_id, CTRL_EJECT, nullptr) == RES_OK);
 	}
 
@@ -58,13 +57,17 @@ public:
 		return _volname;
 	}
 
+	Volume vol_id() {
+		return _vol;
+	}
+
 	bool format_disk() {
 		BYTE work[FF_MAX_SS * 2];
-		auto res = f_mkfs(vol, nullptr, work, sizeof(work));
+		auto res = f_mkfs(_fatvol, nullptr, work, sizeof(work));
 		if (res != FR_OK)
 			return false;
 
-		res = f_mount(&fs, vol, 1);
+		res = f_mount(&fs, _fatvol, 1);
 		if (res != FR_OK) {
 			printf_("RamDisk not formatted, err %d\n", res);
 			return false;
@@ -79,7 +82,7 @@ public:
 
 	bool create_file(const char *filename, const char *const data, unsigned sz) {
 		FIL fil;
-		if (f_chdrive(vol) != FR_OK)
+		if (f_chdrive(_fatvol) != FR_OK)
 			return false;
 
 		if (f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
@@ -95,7 +98,7 @@ public:
 	}
 
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
-		f_chdrive(vol);
+		f_chdrive(_fatvol);
 
 		FILINFO fno;
 		auto res = f_stat(filename.data(), &fno);
@@ -109,7 +112,7 @@ public:
 	}
 
 	uint32_t get_file_timestamp(std::string_view filename) {
-		f_chdrive(vol);
+		f_chdrive(_fatvol);
 
 		FILINFO fno;
 		if (f_stat(filename.data(), &fno) != FR_OK) {
@@ -124,7 +127,7 @@ public:
 	}
 
 	FileInfo get_file_info(std::string_view filename) {
-		f_chdrive(vol);
+		f_chdrive(_fatvol);
 
 		FILINFO fno;
 		auto res = f_stat(filename.data(), &fno);
@@ -142,7 +145,7 @@ public:
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
 		FIL fil;
 		UINT bytes_read;
-		if (f_chdrive(vol) != FR_OK)
+		if (f_chdrive(_fatvol) != FR_OK)
 			return 0;
 
 		if (f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK)
@@ -160,7 +163,7 @@ public:
 	bool delete_file(std::string_view filename) {
 		FIL fil;
 
-		f_chdrive(vol);
+		f_chdrive(_fatvol);
 		auto res = f_unlink(filename.data());
 		if (res != FR_OK)
 			return false;
@@ -184,7 +187,7 @@ public:
 		DIR dj;
 		FILINFO fno;
 
-		auto res = f_opendir(&dj, vol);
+		auto res = f_opendir(&dj, _fatvol);
 
 		if (res != FR_OK)
 			return false;
