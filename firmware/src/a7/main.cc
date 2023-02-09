@@ -37,7 +37,13 @@ void main() {
 	HAL_Delay(200);
 
 	auto now = ticks_to_fattime(HAL_GetTick());
-	printf_("%u/%u/%u %u:%02u:%02u\n", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
+	printf_("Current Time: %u/%u/%u %u:%02u:%02u\n",
+			now.year(),
+			now.month(),
+			now.day(),
+			now.hour(),
+			now.minute(),
+			now.second());
 
 	PatchList patch_list{};
 	PatchStorage patch_storage{patch_list};
