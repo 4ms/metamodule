@@ -15,28 +15,15 @@ PatchList::PatchList()
 	//		;
 	//}
 }
-void PatchList::add_patch_from_yaml(char filevolume, const std::string_view filename, const std::span<char> data) {
-	_patch_data.push_back({});
-	auto &p = _patch_data.back();
-	if (yaml_raw_to_patch(data, p.patch_data)) {
-		p.filepath = filevolume;
-		p.filepath.append(":");
-		p.filepath.append(filename);
-		printf_("Added Patch\r\n");
-	} else {
-		printf_("Failed to parse\r\n");
-		_patch_data.pop_back();
-	}
-}
 
 void PatchList::add_patch_from_yaml(const std::span<char> data) {
-	_patch_data.push_back({});
-	if (yaml_raw_to_patch(data, _patch_data.back().patch_data)) {
-		printf_("Added Patch\r\n");
-	} else {
-		printf_("Failed to parse\r\n");
-		_patch_data.pop_back();
-	}
+	// _patch_data.push_back({});
+	// if (yaml_raw_to_patch(data, _patch_data.back().patch_data)) {
+	// 	printf_("Added Patch\r\n");
+	// } else {
+	// 	printf_("Failed to parse\r\n");
+	// 	_patch_data.pop_back();
+	// }
 }
 
 void PatchList::add_patch_from_yaml(const std::span<uint8_t> data) {
