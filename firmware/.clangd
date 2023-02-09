@@ -25,7 +25,8 @@ CompileFlags:
 		"-D__FPU_PRESENT=1",
 		"-flto=*",
 		"-mvectorize-with-neon-*",
-		"-mthumb-interwork"
+		"-mthumb-interwork",
+		"-ffold-simple-inlines"
 	]
 	Add: [
 		"--target=arm-none-eabi", 

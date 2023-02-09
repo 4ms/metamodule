@@ -22,7 +22,7 @@ public:
 				if (filesize < 12 || filename.starts_with("."))
 					return;
 
-				pr_log("Found patch file on %s: %s (%zu B) Timestamp: 0x%x, Reading... ",
+				pr_log("Found patch file on %s: %s (%zu B) Timestamp: 0x%x, Reading... \n",
 					   fileio.volname().data(),
 					   filename.data(),
 					   filesize,
@@ -161,21 +161,22 @@ private:
 			pr_err("Error reading file %s, or file is 0 bytes\n", filename.data());
 			return "";
 		}
-		auto header = trim_buf_leading_newlines(_buf);
-		auto pos = header.find("patch_data: ");
+		_buf[63] = 0;
+		auto header = std::string_view{_buf.data(), _buf.size()};
+		auto pos = header.find("patch_name: ");
 		if (pos == header.npos) {
-			pr_log("File does not contain with 'patch_data: ' in the first 64 chars, ignoring\n");
+			pr_log("File does not contain with 'patch_name: ' in the first 64 chars, ignoring\n");
 			return "";
 		}
 		auto endpos = header.find("\n", pos);
 		if (endpos == header.npos)
 			endpos = header.find("\r", pos);
 		if (endpos == header.npos) {
-			pr_log("File does not contain a newline after 'patch_data: ' in the first 64 chars, ignoring\n");
+			pr_log("File does not contain a newline after 'patch_name: ' in the first 64 chars, ignoring\n");
 			return "";
 		}
 		if (endpos == pos) {
-			pr_log("File does not contain anything between 'patch_data: ' and the next newline, ignoring\n");
+			pr_log("File does not contain anything between 'patch_name: ' and the next newline, ignoring\n");
 			return "";
 		}
 

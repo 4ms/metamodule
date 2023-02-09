@@ -46,8 +46,10 @@ struct PatchStorage {
 
 		// Populate Patch List
 		patch_list.clear_all_patches();
-		PatchFileIO::add_all_to_patchlist(norflash, patch_list);
+		// PatchFileIO::add_all_to_patchlist(norflash, patch_list);
+		Debug::Pin1::high();
 		PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
+		Debug::Pin1::low();
 
 		// RamDisk: format it and copy patches to it
 		// --Just for testing, really we should copy patches when USB MSC device starts
