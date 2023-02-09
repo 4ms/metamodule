@@ -14,7 +14,7 @@ public:
 	enum class FileFilter { All, NewerTimestamp };
 	// void factory_clean();
 
-	static bool add_to_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
+	static bool add_all_to_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
 		patch_list.set_status(PatchList::Status::Loading);
 
 		bool ok = fileio.foreach_file_with_ext(
@@ -45,7 +45,7 @@ public:
 
 	static bool overwrite_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
 		patch_list.clear_all_patches();
-		return add_to_patchlist(fileio, patch_list);
+		return add_all_to_patchlist(fileio, patch_list);
 	}
 
 	static bool delete_all_patches(FileIoC auto &fileio) {
