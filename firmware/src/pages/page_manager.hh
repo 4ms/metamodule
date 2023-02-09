@@ -2,7 +2,7 @@
 #include "params.hh"
 #include "patch_mod_queue.hh"
 #include "patch_player.hh"
-#include "patchlist.hh"
+#include "patch_storage.hh"
 #include "ui_audio_mailbox.hh"
 
 #include "pages/knob_edit.hh"
@@ -26,13 +26,13 @@ class PageManager {
 public:
 	PageBase *cur_page = &page_patchsel;
 
-	PageManager(PatchList &patchlist,
+	PageManager(PatchStorage &patch_storage,
 				PatchLoader &patch_loader,
 				Params &params,
 				MetaParams &metaparams,
 				MessageQueue &msg_queue,
 				PatchModQueue &patch_mod_queue)
-		: info{patchlist, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
+		: info{patch_storage, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
 	void init();

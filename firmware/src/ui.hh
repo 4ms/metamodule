@@ -20,7 +20,7 @@ namespace MetaModule
 class Ui {
 private:
 	ParamCache &param_cache;
-	PatchList &patch_list;
+	PatchStorage &patch_storage;
 	PatchLoader &patch_loader;
 
 	MessageQueue msg_queue;
@@ -32,12 +32,12 @@ private:
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchLoader &patch_loader, PatchList &patch_list, ParamCache &pc, PatchModQueue &patch_mod_queue)
+	Ui(PatchLoader &patch_loader, PatchStorage &patch_storage, ParamCache &pc, PatchModQueue &patch_mod_queue)
 		: param_cache{pc}
-		, patch_list{patch_list}
+		, patch_storage{patch_storage}
 		, patch_loader{patch_loader}
 		, msg_queue{1024}
-		, page_manager{patch_list, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
+		, page_manager{patch_storage, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
 	void start() {

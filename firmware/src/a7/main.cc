@@ -55,7 +55,7 @@ void main() {
 	ParamCache param_cache;
 	PatchModQueue patch_mod_queue;
 
-	Ui ui{patch_loader, patch_list, param_cache, patch_mod_queue};
+	Ui ui{patch_loader, patch_storage, param_cache, patch_mod_queue};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,

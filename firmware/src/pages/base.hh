@@ -4,11 +4,10 @@
 #include "params.hh"
 #include "patch_loader.hh"
 #include "patch_mod_queue.hh"
-#include "patchlist.hh"
+#include "patch_storage.hh"
 #include "ui_audio_mailbox.hh"
 
 // Use for helpers:
-// #include "page_list.hh"
 
 namespace MetaModule
 {
@@ -16,7 +15,7 @@ namespace MetaModule
 enum class PageChangeDirection { Back, Forward, Jump };
 
 struct PatchInfo {
-	PatchList &patch_list;
+	PatchStorage &patch_storage;
 	PatchLoader &patch_loader;
 	Params &params;
 	MetaParams &metaparams;
@@ -25,7 +24,7 @@ struct PatchInfo {
 };
 
 struct PageBase {
-	PatchList &patch_list;
+	PatchStorage &patch_storage;
 	PatchLoader &patch_loader;
 	Params &params;
 	MetaParams &metaparams;
@@ -36,7 +35,7 @@ struct PageBase {
 	lv_obj_t *screen = nullptr;
 
 	PageBase(PatchInfo info)
-		: patch_list{info.patch_list}
+		: patch_storage{info.patch_storage}
 		, patch_loader{info.patch_loader}
 		, params{info.params}
 		, metaparams{info.metaparams}

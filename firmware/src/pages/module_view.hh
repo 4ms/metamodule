@@ -358,8 +358,12 @@ private:
 		if (page->is_this_patch_loaded()) {
 			page->patch_mod_queue.put(SetStaticParam{.param = sp});
 		} else {
-			auto patch_id = PageList::get_selected_patch_id();
-			auto &patch = page->patch_list.get_patch(patch_id);
+			// auto patch_id = PageList::get_selected_patch_id();
+			// auto &patch = page->patch_list.get_patch(patch_id);
+			//FIXME: this just modifies PatchStoage::_view_patch which will get
+			// overwritten if we select a new patch in PatchSelector
+			//
+			auto &patch = page->patch_storage.get_view_patch();
 			patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 		}
 	}
