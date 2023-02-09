@@ -1,3 +1,5 @@
+#pragma once
+
 #include "a7/static_buffers.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdcard_conf.hh"
@@ -47,9 +49,9 @@ struct PatchStorage {
 		// Populate Patch List
 		patch_list.clear_all_patches();
 		// PatchFileIO::add_all_to_patchlist(norflash, patch_list);
-		Debug::Pin1::high();
+		// Debug::Pin1::high();
 		PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
-		Debug::Pin1::low();
+		// Debug::Pin1::low();
 
 		// RamDisk: format it and copy patches to it
 		// --Just for testing, really we should copy patches when USB MSC device starts
