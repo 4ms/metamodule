@@ -60,17 +60,28 @@ struct PatchStorage {
 		// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
 	}
 
+	// FIXME: PatchStorage and managing the ViewedPatch are orthagonal: make them different classes
 	void load_view_patch(uint32_t patch_id) {
 		bool ok = false;
+		auto filename = patch_list.get_patch_filename(patch_id);
+		printf("load_view_patch %d %.31s\n", patch_id, filename.data());
+
+		auto load_patch_data = [&](auto &fileio) -> bool {
+			return PatchFileIO::load_patch_data(_view_patch, fileio, filename);
+		};
+
 		switch (patch_list.get_patch_vol(patch_id)) {
 			case Volume::NorFlash:
-				ok = PatchFileIO::load_patch_data(_view_patch, norflash, patch_list.get_patch_name(patch_id));
+				printf_("vol = norflash\n");
+				ok = load_patch_data(norflash);
 				break;
 			case Volume::SDCard:
-				ok = PatchFileIO::load_patch_data(_view_patch, sdcard, patch_list.get_patch_name(patch_id));
+				printf_("vol = sdcard\n");
+				ok = load_patch_data(sdcard);
 				break;
 			case Volume::RamDisk:
-				ok = PatchFileIO::load_patch_data(_view_patch, ramdisk, patch_list.get_patch_name(patch_id));
+				printf_("vol = ramdisk\n");
+				ok = load_patch_data(ramdisk);
 				break;
 		}
 
@@ -89,6 +100,8 @@ struct PatchStorage {
 	PatchData &get_view_patch() {
 		return _view_patch;
 	}
+
+	//// FIXME: these are more patch transfering than patch storage or view patch
 
 	void update_patchlist_from_sdcard() {
 		printf_("Updating patchlist from SD Card.\n");
