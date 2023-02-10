@@ -166,9 +166,9 @@ struct KnobEditPage : PageBase {
 
 	bool is_this_patch_loaded() {
 		printf_("Patch loaded: %d, selected patch: %d \n",
-				patch_loader.cur_patch_index(),
+				patch_playloader.cur_patch_index(),
 				PageList::get_selected_patch_id());
-		return patch_loader.cur_patch_index() == PageList::get_selected_patch_id();
+		return patch_playloader.cur_patch_index() == PageList::get_selected_patch_id();
 	}
 
 private:
@@ -189,8 +189,7 @@ private:
 		};
 		page->patch_mod_queue.put(SetStaticParam{.param = sp});
 
-		auto patch_id = PageList::get_selected_patch_id();
-		auto &patch = page->patch_list.get_patch(patch_id);
+		auto &patch = page->patch_storage.get_view_patch();
 		patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "fileio_t.hh"
+#include "patch_convert/yaml_to_patch.hh"
 #include "patches_default.hh"
 #include "patchlist.hh"
 #include "printf.h"
@@ -43,8 +44,11 @@ public:
 	}
 
 	static bool load_patch_data(PatchData &p, FileIoC auto &fileio, std::string_view filename) {
-		auto b = _read_patch_to_local_buffer(fileio, filename);
-		return true;
+		auto contents = _read_patch_to_local_buffer(fileio, filename);
+		if (contents.size() == 0)
+			return false;
+		pr_log("Read patch file %s.\n", filename.data());
+		return yaml_raw_to_patch(contents, p);
 	}
 
 	// static bool overwrite_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
@@ -171,23 +175,22 @@ private:
 			pr_log("File does not contain with '%s' in the first %d chars, ignoring\n", name_tag.data(), HEADER_SIZE);
 			return "";
 		}
-		startpos += name_tag.length();
 
-		auto endpos = header.find("\n", startpos);
-		if (endpos == header.npos)
-			endpos = header.find("\r", startpos);
+		//move to the patch name
+		header.remove_prefix(startpos + name_tag.length());
+
+		//Remove leading quotes
+		header.remove_prefix(std::min(header.find_first_not_of("'\""), header.size()));
+
+		auto endpos = header.find_first_of("'\"\n\r");
 		if (endpos == header.npos) {
-			pr_log("File does not contain a newline after '%s' in the first %d chars, ignoring\n",
+			pr_log("File does not contain a quote or newline after '%s' in the first %d chars, ignoring\n",
 				   name_tag.data(),
 				   HEADER_SIZE);
 			return "";
 		}
-		if (endpos == startpos) {
-			pr_log("File does not contain anything between '%s' and the next newline, ignoring\n", name_tag.data());
-			return "";
-		}
-
-		return ModuleTypeSlug{header.substr(startpos, endpos - startpos)};
+		header.remove_suffix(header.size() - endpos);
+		return ModuleTypeSlug{header};
 	}
 
 	// FIXME: uses static buffer, NOT THREAD OR ISR SAFE!!

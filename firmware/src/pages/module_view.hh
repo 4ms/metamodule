@@ -285,7 +285,7 @@ private:
 	}
 
 	bool is_this_patch_loaded() {
-		return patch_loader.cur_patch_index() == PageList::get_selected_patch_id();
+		return patch_playloader.cur_patch_index() == PageList::get_selected_patch_id();
 	}
 
 	static void roller_cb(lv_event_t *event) {

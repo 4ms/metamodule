@@ -27,12 +27,12 @@ public:
 	PageBase *cur_page = &page_patchsel;
 
 	PageManager(PatchStorage &patch_storage,
-				PatchLoader &patch_loader,
+				PatchPlayLoader &patch_playloader,
 				Params &params,
 				MetaParams &metaparams,
 				MessageQueue &msg_queue,
 				PatchModQueue &patch_mod_queue)
-		: info{patch_storage, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
+		: info{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
 	void init();

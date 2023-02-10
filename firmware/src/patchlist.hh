@@ -45,6 +45,15 @@ struct PatchList {
 		return _patch_data[patch_id].volume;
 	}
 
+	const std::string_view get_patch_filename(uint32_t patch_id) {
+		if (_patch_data.size() == 0)
+			return nullslug;
+
+		if (patch_id >= _patch_data.size())
+			patch_id = 0;
+		return _patch_data[patch_id].filename;
+	}
+
 	// Return a reference to the patch at the given index (bounds-checked)
 	[[deprecated]] PatchData &get_patch(uint32_t patch_id) {
 		// if (_patch_data.size() == 0)

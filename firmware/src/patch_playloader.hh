@@ -1,5 +1,6 @@
 #pragma once
 #include "patch_player.hh"
+#include "patch_storage.hh"
 #include "patchlist.hh"
 // #include "uart_log.hh" //doesn't work with simulator because uart_log.hh exists in same dir as this file, so preprocessor picks ./uart_log.hh it instead of stubs/uart_log.hh
 #include "printf.h"
@@ -9,12 +10,14 @@ namespace MetaModule
 
 // PatchLoader handles loading of patches into PatchPlayer
 // TODO: Better name so its not confused with loading a patch from SD Card or USB?
-struct PatchLoader {
+// => PatchPlayLoader
+struct PatchPlayLoader {
 	static inline uint32_t initial_patch = 8;
 
-	PatchLoader(PatchList &patchlist, PatchPlayer &patchplayer)
+	PatchPlayLoader(PatchList &patchlist, PatchPlayer &patchplayer, PatchStorage &patchstorage)
 		: patch_list_{patchlist}
-		, player_{patchplayer} {
+		, player_{patchplayer}
+		, storage_{patchstorage} {
 	}
 
 	void load_initial_patch() {
@@ -82,6 +85,7 @@ struct PatchLoader {
 private:
 	PatchList &patch_list_;
 	PatchPlayer &player_;
+	PatchStorage &storage_;
 
 	bool loading_new_patch_ = false;
 	bool audio_is_muted_ = false;
@@ -90,10 +94,12 @@ private:
 	uint32_t new_patch_index_;
 
 	bool _load_patch(uint32_t patchid) {
-		auto patchname = patch_list_.get_patch_name(patchid);
-		printf_("Attempting load patch #%d, %s\n", patchid, patchname.data());
+		storage_.load_view_patch(patchid);
+		auto &patch = storage_.get_view_patch();
+		auto patchname = patch.patch_name;
+		printf_("Attempting play patch #%d, %s\n", patchid, patchname.data());
 
-		if (player_.load_patch(patch_list_.get_patch(patchid))) {
+		if (player_.load_patch(patch)) {
 			loaded_patch_index_ = patchid;
 			return true;
 		}

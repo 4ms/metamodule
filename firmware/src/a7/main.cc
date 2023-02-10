@@ -1,15 +1,12 @@
 #include "app_startup.hh"
 #include "audio.hh"
-// #include "conf/board_codec_conf.hh"
 #include "debug.hh"
-// #include "drivers/hsem.hh"
-// #include "drivers/stm32xx.h"
 #include "hsem_handler.hh"
 #include "params.hh"
 #include "patch_fileio.hh"
-#include "patch_loader.hh"
 #include "patch_mod_queue.hh"
 #include "patch_player.hh"
+#include "patch_playloader.hh"
 #include "patch_storage.hh"
 #include "patchlist.hh"
 #include "semaphore_action.hh"
@@ -49,19 +46,19 @@ void main() {
 	PatchStorage patch_storage{patch_list};
 
 	PatchPlayer patch_player;
-	PatchLoader patch_loader{patch_list, patch_player};
+	PatchPlayLoader patch_playloader{patch_list, patch_player, patch_storage};
 
 	// "Thread"-shared data:
 	ParamCache param_cache;
 	PatchModQueue patch_mod_queue;
 
-	Ui ui{patch_loader, patch_storage, param_cache, patch_mod_queue};
+	Ui ui{patch_playloader, patch_storage, param_cache, patch_mod_queue};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
 					  param_cache,
-					  patch_loader,
+					  patch_playloader,
 					  StaticBuffers::param_blocks,
 					  StaticBuffers::auxsignal_block,
 					  patch_mod_queue};
@@ -74,7 +71,7 @@ void main() {
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 
 	param_cache.clear();
-	patch_loader.load_initial_patch();
+	patch_playloader.load_initial_patch();
 
 	HWSemaphore<RamDiskLock>::unlock();
 

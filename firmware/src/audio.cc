@@ -8,8 +8,8 @@
 #include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "param_cache.hh"
-#include "patch_loader.hh"
 #include "patch_player.hh"
+#include "patch_playloader.hh"
 #include "uart_log.hh"
 #include "util/calibrator.hh"
 #include "util/countzip.hh"
@@ -46,7 +46,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 						 AudioInBlock &audio_in_block,
 						 AudioOutBlock &audio_out_block,
 						 ParamCache &paramcache,
-						 PatchLoader &patchloader,
+						 PatchPlayLoader &patchloader,
 						 DoubleBufParamBlock &p,
 						 DoubleAuxStreamBlock &auxs,
 						 PatchModQueue &patch_mod_queue)
