@@ -14,13 +14,14 @@
 #include "mp1m4/hsem_handler.hh"
 #include "params.hh"
 #include "ramdisk.hh"
-#include "shared_bus.hh"
 #include "shared_bus_queue.hh"
 #include "shared_memory.hh"
 #include "usb/usb_manager.hh"
 
 namespace MetaModule
 {
+
+using namespace mdrivlib;
 
 static void app_startup() {
 	core_m4::RCC_Enable::HSEM_::set();
@@ -59,12 +60,12 @@ void main() {
 	auto virtdrive =
 		SharedMemory::read_address_of<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(SharedMemory::RamDiskLocation);
 
-	SharedBus i2cbus{i2c_codec_conf};
+	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
 	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander
-	i2cbus.i2c.enable_IT(i2c_codec_conf.priority1, i2c_codec_conf.priority2);
+	i2c.enable_IT(a7m4_shared_i2c_codec_conf.priority1, a7m4_shared_i2c_codec_conf.priority2);
 
-	mdrivlib::GPIOExpander ext_gpio_expander{i2cbus.i2c, extaudio_gpio_expander_conf};
-	mdrivlib::GPIOExpander main_gpio_expander{i2cbus.i2c, mainboard_gpio_expander_conf};
+	mdrivlib::GPIOExpander ext_gpio_expander{i2c, extaudio_gpio_expander_conf};
+	mdrivlib::GPIOExpander main_gpio_expander{i2c, mainboard_gpio_expander_conf};
 
 	RamDiskOps ramdiskops{*virtdrive};
 	UsbManager usb{ramdiskops};
@@ -79,7 +80,7 @@ void main() {
 	while (true) {
 		signal_m4_ready_after_delay();
 
-		if (i2cbus.i2c.is_ready()) {
+		if (i2c.is_ready()) {
 			i2cqueue.update();
 		}
 

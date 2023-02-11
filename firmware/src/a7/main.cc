@@ -10,7 +10,6 @@
 #include "patch_storage.hh"
 #include "patchlist.hh"
 #include "semaphore_action.hh"
-#include "shared_bus.hh"
 #include "shared_memory.hh"
 #include "static_buffers.hh"
 #include "time_convert.hh"
