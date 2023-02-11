@@ -79,7 +79,7 @@ void main() {
 	while (true) {
 		signal_m4_ready_after_delay();
 
-		if (SharedBus::i2c.is_ready()) {
+		if (i2cbus.i2c.is_ready()) {
 			i2cqueue.update();
 		}
 
