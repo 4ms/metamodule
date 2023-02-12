@@ -3,7 +3,6 @@
 #include "printf.h"
 #include "volumes.hh"
 #include <cstdint>
-#include <functional>
 #include <span>
 #include <string_view>
 
