@@ -70,6 +70,16 @@ SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES += src/uart_log.cc
 SOURCES += lib/printf/printf.c
 
+# SD Card (FATFS):
+SOURCES += $(HALDIR)/src/stm32mp1xx_ll_sdmmc.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd_ex.c
+SOURCES += $(LIBDIR)/fatfs/source/ff.c
+SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
+SOURCES += src/fatfs/diskio.cc
+SOURCES += src/fatfs/fattime.cc
+SOURCES += src/time_convert.cc
+
 # USB:
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb_phy.c
