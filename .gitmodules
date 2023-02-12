@@ -19,3 +19,6 @@
 [submodule "shared/cpputil"]
 	path = shared/cpputil
 	url = git@github.com:4ms/cpputil
+[submodule "firmware/bootloader/mp1-boot"]
+	path = firmware/bootloader/mp1-boot
+	url = git@github.com:4ms/mp1-boot.git
