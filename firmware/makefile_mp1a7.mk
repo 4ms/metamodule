@@ -11,8 +11,8 @@ target_board = $(word 1,$(MAKECMDGOALS))
 $(info --------------------)
 $(info Building for MP1 A7 core, target: $(target_board))
 
-else ifeq ($(MAKECMDGOALS),bootimg)
-$(info Building img)
+else ifeq ($(MAKECMDGOALS),uimg)
+$(info Building uimg)
 target_board = medium
 
 else
@@ -383,25 +383,19 @@ include makefile_common.mk
 
 
 #### BOOT IMAGE
-IMG  		= $(BUILDDIR)/$(BINARYNAME).img
-LOADADDR 	= 0xC2000040
-ENTRYPOINT 	= $(LOADADDR)
+UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
 
+.PHONY: uimg
+uimg: $(UIMG)
 
-.PHONY: bootimg
-bootimg: $(IMG)
-
-$(IMG): $(BIN) $(MP1BOOT)
-	# $(UBOOT_MKIMAGE) -A arm -C none -T firmware -a $(LOADADDR) -e $(ENTRYPOINT) -d $(BIN) $@
-	# TODO: use MP1-Boot script to convert bin to img
-	$(info sudo dd if=$(IMG) of=/dev/disk4s3)
-	$(info Image created. Now copy image to sd card with this command (assumes /dev/disk4 is the sd card):)
+$(UIMG): $(BIN)
+	python3 flashing/uimg_header.py $< $@
 
 #Used by norflash loader
 %-uimg.h : %.uimg 
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) $(notdir $@)
 
-medium: all 
+medium: all uimg
 
-norflash-loader: bootimg
+norflash-loader: uimg
 

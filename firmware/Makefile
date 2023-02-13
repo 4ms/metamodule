@@ -36,9 +36,6 @@ norflash-loader: mp1-med
 uimg:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk uimg
 
-img:
-	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk img
-
 ## Module images
 
 MODULEIMG_SVGS = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)

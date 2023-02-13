@@ -5,7 +5,6 @@
 ;DO t32-qspi-flash FSBL="/Users/dann/4ms/stm32/meta-module/firmware/bootloader/mp1-boot/build/fsbl.stm32" SSBL="/Users/dann/4ms/stm32/meta-module/firmware/debug-img/minimal-boot.uimg"
 ;DO t32-qspi-flash SSBL="/Users/dann/4ms/stm32/meta-module/firmware/build/mp1corea7/medium/main.uimg"
 
-
 &QSPI_BASE=0x58003000
 
 PRIVATE &parameters
