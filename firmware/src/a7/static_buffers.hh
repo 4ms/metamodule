@@ -21,7 +21,7 @@ namespace StaticBuffers
 static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioInBlock audio_in_dma_block;
 static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlock audio_out_dma_block;
 
-using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 10>;
+using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1;
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
 

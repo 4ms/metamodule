@@ -10,10 +10,10 @@ namespace MetaModule
 {
 using mdrivlib::FPin;
 using mdrivlib::GPIO;
-using mdrivlib::PinNum;
 using mdrivlib::PinAF;
-using mdrivlib::PinMode;
 using mdrivlib::PinDef;
+using mdrivlib::PinMode;
+using mdrivlib::PinNum;
 using mdrivlib::SpiDataDir;
 
 struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
@@ -28,10 +28,10 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr PinDef CIPO = {GPIO::Unused, PinNum::_0};
 		static constexpr PinDef CS0 = {GPIO::E, PinNum::_11, PinAF::AltFunc5};
 		static constexpr bool use_hardware_ss = true;
-		static constexpr uint16_t clock_division = 2;
+		static constexpr uint16_t clock_division = 0;
 		static constexpr uint16_t data_size = 8;
 		static constexpr SpiDataDir data_dir = SpiDataDir::TXOnly;
-		static constexpr uint8_t FifoThreshold = 16;
+		static constexpr uint8_t FifoThreshold = 2;
 		static constexpr bool LSBfirst = false;
 
 		static constexpr bool pulse_hardware_ss = true;
@@ -54,13 +54,13 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr auto periph_inc = false;
 		static constexpr auto half_transfer_interrupt_enable = false;
 		static constexpr auto enable_fifo = true;
-		static constexpr auto fifo_threshold = FifoHalfFull;
+		static constexpr auto fifo_threshold = Fifo1QuarterFull;
 		static constexpr auto mem_burst = Single;
 		static constexpr auto periph_burst = Single;
 	};
 
 	using DCPin = FPin<GPIO::B, PinNum::_7, PinMode::Output>;
-	static constexpr PinDef ResetPin{GPIO::B, PinNum::_13}; //Hardware error: not connected on p7
+	static constexpr PinDef ResetPin{GPIO::B, PinNum::_13};
 
 	static constexpr bool IsInverted = false;
 	static constexpr uint32_t rowstart = 0;
