@@ -1,7 +1,7 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/Quant_info.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "scaling_config.hh"
+#include "scalingConfig.hh"
 #include "util/math.hh"
 
 //FIXME:
