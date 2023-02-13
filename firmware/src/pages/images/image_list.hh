@@ -28,26 +28,18 @@ LV_IMG_DECLARE(SCM_artwork_240);
 LV_IMG_DECLARE(SCM_artwork_120);
 LV_IMG_DECLARE(RCD_artwork_240);
 LV_IMG_DECLARE(RCD_artwork_120);
-LV_IMG_DECLARE(RCDBO_artwork_240);
-LV_IMG_DECLARE(RCDBO_artwork_120);
 LV_IMG_DECLARE(QPLFO_artwork_240);
 LV_IMG_DECLARE(QPLFO_artwork_120);
 LV_IMG_DECLARE(QCD_artwork_240);
 LV_IMG_DECLARE(QCD_artwork_120);
-LV_IMG_DECLARE(QCDEXP_artwork_240);
-LV_IMG_DECLARE(QCDEXP_artwork_120);
 LV_IMG_DECLARE(PI_artwork_240);
 LV_IMG_DECLARE(PI_artwork_120);
-LV_IMG_DECLARE(PIExp_artwork_240);
-LV_IMG_DECLARE(PIExp_artwork_120);
 LV_IMG_DECLARE(PEG_artwork_240);
 LV_IMG_DECLARE(PEG_artwork_120);
 LV_IMG_DECLARE(LIO_artwork_240);
 LV_IMG_DECLARE(LIO_artwork_120);
 LV_IMG_DECLARE(L4_artwork_240);
 LV_IMG_DECLARE(L4_artwork_120);
-LV_IMG_DECLARE(L4Q_artwork_240);
-LV_IMG_DECLARE(L4Q_artwork_120);
 LV_IMG_DECLARE(DLD_artwork_240);
 LV_IMG_DECLARE(DLD_artwork_120);
 LV_IMG_DECLARE(SH_artwork_240);
@@ -56,36 +48,24 @@ LV_IMG_DECLARE(GRev_artwork_240);
 LV_IMG_DECLARE(GRev_artwork_120);
 LV_IMG_DECLARE(ADEnv_artwork_240);
 LV_IMG_DECLARE(ADEnv_artwork_120);
-LV_IMG_DECLARE(VCA_artwork_240);
-LV_IMG_DECLARE(VCA_artwork_120);
 LV_IMG_DECLARE(Shift_artwork_240);
 LV_IMG_DECLARE(Shift_artwork_120);
-LV_IMG_DECLARE(Send_artwork_240);
-LV_IMG_DECLARE(Send_artwork_120);
 LV_IMG_DECLARE(Mixer_artwork_240);
 LV_IMG_DECLARE(Mixer_artwork_120);
-LV_IMG_DECLARE(Logic_artwork_240);
-LV_IMG_DECLARE(Logic_artwork_120);
 LV_IMG_DECLARE(LPG_artwork_240);
 LV_IMG_DECLARE(LPG_artwork_120);
-LV_IMG_DECLARE(LFO_artwork_240);
-LV_IMG_DECLARE(LFO_artwork_120);
 LV_IMG_DECLARE(Gate8_artwork_240);
 LV_IMG_DECLARE(Gate8_artwork_120);
 LV_IMG_DECLARE(Gate32_artwork_240);
 LV_IMG_DECLARE(Gate32_artwork_120);
 LV_IMG_DECLARE(Fade_artwork_240);
 LV_IMG_DECLARE(Fade_artwork_120);
-LV_IMG_DECLARE(FadeDelay_artwork_240);
-LV_IMG_DECLARE(FadeDelay_artwork_120);
 LV_IMG_DECLARE(Comp_artwork_240);
 LV_IMG_DECLARE(Comp_artwork_120);
 LV_IMG_DECLARE(CLKM_artwork_240);
 LV_IMG_DECLARE(CLKM_artwork_120);
 LV_IMG_DECLARE(CLKD_artwork_240);
 LV_IMG_DECLARE(CLKD_artwork_120);
-LV_IMG_DECLARE(Att_artwork_240);
-LV_IMG_DECLARE(Att_artwork_120);
 LV_IMG_DECLARE(Sequant_artwork_240);
 LV_IMG_DECLARE(Sequant_artwork_120);
 LV_IMG_DECLARE(Switch14_artwork_240);
@@ -189,23 +169,14 @@ struct ModuleImages {
 		if (slug == "RCD")
 			return (height == 240) ? &RCD_artwork_240 : &RCD_artwork_120;
 
-		if (slug == "RCDBO")
-			return (height == 240) ? &RCDBO_artwork_240 : &RCDBO_artwork_120;
-
 		if (slug == "QPLFO")
 			return (height == 240) ? &QPLFO_artwork_240 : &QPLFO_artwork_120;
 
 		if (slug == "QCD")
 			return (height == 240) ? &QCD_artwork_240 : &QCD_artwork_120;
 
-		if (slug == "QCDEXP")
-			return (height == 240) ? &QCDEXP_artwork_240 : &QCDEXP_artwork_120;
-
 		if (slug == "PI")
 			return (height == 240) ? &PI_artwork_240 : &PI_artwork_120;
-
-		if (slug == "PIExp")
-			return (height == 240) ? &PIExp_artwork_240 : &PIExp_artwork_120;
 
 		if (slug == "PEG")
 			return (height == 240) ? &PEG_artwork_240 : &PEG_artwork_120;
@@ -215,9 +186,6 @@ struct ModuleImages {
 
 		if (slug == "L4")
 			return (height == 240) ? &L4_artwork_240 : &L4_artwork_120;
-
-		if (slug == "L4Q")
-			return (height == 240) ? &L4Q_artwork_240 : &L4Q_artwork_120;
 
 		if (slug == "DLD")
 			return (height == 240) ? &DLD_artwork_240 : &DLD_artwork_120;
@@ -231,26 +199,11 @@ struct ModuleImages {
 		if (slug == "ADEnv")
 			return (height == 240) ? &ADEnv_artwork_240 : &ADEnv_artwork_120;
 
-		if (slug == "VCA")
-			return (height == 240) ? &VCA_artwork_240 : &VCA_artwork_120;
-
 		if (slug == "Shift")
 			return (height == 240) ? &Shift_artwork_240 : &Shift_artwork_120;
 
-		if (slug == "Send")
-			return (height == 240) ? &Send_artwork_240 : &Send_artwork_120;
-
-		if (slug == "Mixer")
-			return (height == 240) ? &Mixer_artwork_240 : &Mixer_artwork_120;
-
-		if (slug == "Logic")
-			return (height == 240) ? &Logic_artwork_240 : &Logic_artwork_120;
-
 		if (slug == "LPG")
 			return (height == 240) ? &LPG_artwork_240 : &LPG_artwork_120;
-
-		if (slug == "LFO")
-			return (height == 240) ? &LFO_artwork_240 : &LFO_artwork_120;
 
 		if (slug == "Gate8")
 			return (height == 240) ? &Gate8_artwork_240 : &Gate8_artwork_120;
@@ -261,9 +214,6 @@ struct ModuleImages {
 		if (slug == "Fade")
 			return (height == 240) ? &Fade_artwork_240 : &Fade_artwork_120;
 
-		if (slug == "FadeDelay")
-			return (height == 240) ? &FadeDelay_artwork_240 : &FadeDelay_artwork_120;
-
 		if (slug == "Comp")
 			return (height == 240) ? &Comp_artwork_240 : &Comp_artwork_120;
 
@@ -272,9 +222,6 @@ struct ModuleImages {
 
 		if (slug == "CLKD")
 			return (height == 240) ? &CLKD_artwork_240 : &CLKD_artwork_120;
-
-		if (slug == "Att")
-			return (height == 240) ? &Att_artwork_240 : &Att_artwork_120;
 
 		if (slug == "Sequant")
 			return (height == 240) ? &Sequant_artwork_240 : &Sequant_artwork_120;

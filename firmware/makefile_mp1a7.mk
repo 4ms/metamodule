@@ -143,6 +143,8 @@ SOURCES += $(SHARED)/CoreModules/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/enosc/dynamic_data.cc
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/*.cc)
+SOURCES += $(SHARED)/CoreModules/enosc/data.cc
+SOURCES += $(SHARED)/CoreModules/enosc/dynamic_data.cc
 endif
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
