@@ -42,11 +42,9 @@ void main() {
 			now.minute(),
 			now.second());
 
-	PatchList patch_list{};
-	PatchStorage patch_storage{patch_list};
-
+	PatchStorage patch_storage;
 	PatchPlayer patch_player;
-	PatchPlayLoader patch_playloader{patch_list, patch_player, patch_storage};
+	PatchPlayLoader patch_playloader{patch_player, patch_storage};
 
 	// "Thread"-shared data:
 	ParamCache param_cache;

@@ -33,10 +33,9 @@ struct PatchStorage {
 	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
-	PatchList &patch_list;
+	PatchList patch_list;
 
-	PatchStorage(PatchList &patch_list, bool reset_to_factory_patches = false)
-		: patch_list{patch_list} {
+	PatchStorage(bool reset_to_factory_patches = false) {
 
 		// NOR Flash: if it's unformatted, put default patches there
 		//-- just for testing our API (probably won't put patches there)
