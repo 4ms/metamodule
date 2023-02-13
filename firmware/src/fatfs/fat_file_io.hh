@@ -38,7 +38,9 @@ public:
 		if (!fatfs_register_disk(ops, static_cast<unsigned>(_vol))) {
 			printf_("Failed to register FAT FS Disk %d\n", _vol);
 		}
-		mount_disk();
+		if (!mount_disk()) {
+			printf_("Failed to mount FAT FS Disk %d\n", _vol);
+		}
 	}
 
 	bool mount_disk() {
@@ -68,10 +70,10 @@ public:
 
 		res = f_mount(&fs, _fatvol, 1);
 		if (res != FR_OK) {
-			printf_("RamDisk not formatted, err %d\n", res);
+			printf_("Disk not formatted, err %d\n", res);
 			return false;
 		}
-		printf_("RamDisk formatted\n");
+		printf_("Disk formatted\n");
 		return true;
 	}
 
