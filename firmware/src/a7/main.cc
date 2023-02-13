@@ -71,7 +71,7 @@ void main() {
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 
 	param_cache.clear();
-	patch_playloader.load_initial_patch();
+	patch_playloader.load_initial_patch("enosc");
 
 	HWSemaphore<RamDiskLock>::unlock();
 

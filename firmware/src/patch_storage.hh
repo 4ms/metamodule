@@ -61,6 +61,15 @@ struct PatchStorage {
 	}
 
 	// FIXME: PatchStorage and managing the ViewedPatch are orthagonal: make them different classes
+	void load_view_patch(std::string_view &patchname) {
+		if (auto id = patch_list.find_by_name(patchname))
+			load_view_patch(id.value());
+	}
+
+	std::optional<uint32_t> find_by_name(std::string_view &patchname) {
+		return patch_list.find_by_name(patchname);
+	}
+
 	void load_view_patch(uint32_t patch_id) {
 		bool ok = false;
 		auto filename = patch_list.get_patch_filename(patch_id);

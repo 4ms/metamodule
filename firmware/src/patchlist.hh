@@ -54,6 +54,15 @@ struct PatchList {
 		return _patch_data[patch_id].filename;
 	}
 
+	std::optional<uint32_t> find_by_name(std::string_view &patchname) {
+		for (uint32_t i = 0; auto &x : _patch_data) {
+			if (x.patchname == patchname)
+				return {i};
+			i++;
+		}
+		return std::nullopt;
+	}
+
 	// Return a reference to the patch at the given index (bounds-checked)
 	[[deprecated]] PatchData &get_patch(uint32_t patch_id) {
 		// if (_patch_data.size() == 0)

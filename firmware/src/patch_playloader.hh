@@ -20,13 +20,21 @@ struct PatchPlayLoader {
 		, storage_{patchstorage} {
 	}
 
-	void load_initial_patch() {
+	void load_initial_patch(std::string_view patchname) {
+		auto id = storage_.find_by_name(patchname);
+		auto initial_patch = id.value_or(0);
+
+		if (id.has_value())
+			printf_("Loading initial_patch id: %d, name: %s...\n", initial_patch, patchname.data());
+		else
+			printf("Loading initial_patch 0, given name %s not found\n", patchname.data());
+
 		if (_load_patch(initial_patch)) {
-			printf_("Loaded initial_patch\n");
+			printf_("Success\n");
 			loaded_patch_index_ = initial_patch;
 			loading_new_patch_ = false;
 		} else
-			printf_("Failed to load initial patch\n");
+			printf_("FAILED to load initial patch.\n");
 	}
 
 	uint32_t cur_patch_index() {
