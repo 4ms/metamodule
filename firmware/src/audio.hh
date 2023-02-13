@@ -8,9 +8,9 @@
 #include "drivers/stm32xx.h"
 #include "param_cache.hh"
 #include "params.hh"
-#include "patch_loader.hh"
 #include "patch_mod_queue.hh"
 #include "patch_player.hh"
+#include "patch_playloader.hh"
 #include "patchlist.hh"
 #include "processors/tools/kneeCompress.h"
 #include "util/calibrator.hh"
@@ -39,7 +39,7 @@ public:
 				AudioInBlock &audio_in_block,
 				AudioOutBlock &audio_out_block,
 				ParamCache &paramcache,
-				PatchLoader &patchloader,
+				PatchPlayLoader &patchloader,
 				DoubleBufParamBlock &p,
 				DoubleAuxStreamBlock &auxs,
 				PatchModQueue &patch_mod_queue);
@@ -50,7 +50,7 @@ public:
 
 private:
 	ParamCache &param_cache;
-	PatchLoader &patch_loader;
+	PatchPlayLoader &patch_loader;
 	DoubleBufParamBlock &param_blocks;
 	CombinedAudioBlock audio_blocks[2];
 	DoubleAuxStreamBlock &auxsigs;

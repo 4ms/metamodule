@@ -7,8 +7,8 @@
 #include "pages/styles.hh"
 #include "param_cache.hh"
 #include "params.hh"
-#include "patch_loader.hh"
 #include "patch_mod_queue.hh"
+#include "patch_playloader.hh"
 #include "patchlist.hh"
 #include "static_buffers.hh"
 #include "util/analyzed_signal.hh"
@@ -20,10 +20,10 @@ namespace MetaModule
 class Ui {
 private:
 	ParamCache &param_cache;
-	PatchList &patch_list;
-	PatchLoader &patch_loader;
-	MessageQueue &msg_queue;
+	PatchStorage &patch_storage;
+	PatchPlayLoader &patch_playloader;
 
+	MessageQueue msg_queue;
 	PageManager page_manager;
 	Params params;
 	MetaParams metaparams;
@@ -32,16 +32,12 @@ private:
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchLoader &patch_loader,
-	   PatchList &patch_list,
-	   ParamCache &pc,
-	   MessageQueue &msg_queue,
-	   PatchModQueue &patch_mod_queue)
+	Ui(PatchPlayLoader &patch_playloader, PatchStorage &patch_storage, ParamCache &pc, PatchModQueue &patch_mod_queue)
 		: param_cache{pc}
-		, patch_list{patch_list}
-		, patch_loader{patch_loader}
-		, msg_queue{msg_queue}
-		, page_manager{patch_list, patch_loader, params, metaparams, msg_queue, patch_mod_queue} {
+		, patch_storage{patch_storage}
+		, patch_playloader{patch_playloader}
+		, msg_queue{1024}
+		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
 	void start() {
@@ -100,7 +96,7 @@ private:
 		// 	Debug::Pin1::high();
 		// }
 		page_manager.update_current_page();
-		patch_loader.handle_sync_patch_loading();
+		patch_playloader.handle_sync_patch_loading();
 	}
 
 	mdrivlib::Timekeeper page_update_tm;

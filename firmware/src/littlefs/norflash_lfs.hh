@@ -6,9 +6,13 @@
 #include "patches_default.hh"
 #include "printf.h"
 #include "time_convert.hh"
+#include "volumes.hh"
 #include <string_view>
 
-class LittleNorFS {
+namespace MetaModule
+{
+
+class LfsFileIO {
 	lfs_t lfs;
 	mdrivlib::QSpiFlash &_flash;
 
@@ -16,9 +20,12 @@ public:
 	static constexpr uint32_t BlockSize = 4096;
 	static constexpr uint32_t MaxFileSize = 32768;
 	enum class Status { AlreadyFormatted, NewlyFormatted, FlashError, LFSError };
-	std::array<char, MaxFileSize> _data;
 
-	LittleNorFS(mdrivlib::QSpiFlash &flash)
+	const std::string_view _volname{"LFS Flash"};
+
+	LfsFileIO(LfsFileIO &other) = delete;
+
+	LfsFileIO(mdrivlib::QSpiFlash &flash)
 		: _flash{flash} {
 	}
 
@@ -55,6 +62,14 @@ public:
 			return Status::LFSError;
 
 		return Status::NewlyFormatted;
+	}
+
+	std::string_view volname() const {
+		return _volname;
+	}
+
+	Volume vol_id() {
+		return Volume::NorFlash;
 	}
 
 	Status reformat() {
@@ -109,11 +124,25 @@ public:
 		return (err >= 0);
 	}
 
-	using FileAction =
-		std::function<void(const std::string_view filename, uint32_t timestamp, const std::span<char> data)>;
+	// Reads into buffer, returns the bytes actually read
+	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
+		lfs_file_t file;
 
-	// Performs an action(filename, timestamp, file_data) on each file in LittleFS ending with the extension
-	bool foreach_file_with_ext(const std::string_view extension, FileAction action) {
+		auto err = lfs_file_open(&lfs, &file, filename.data(), LFS_O_RDONLY);
+		if (err < 0)
+			return 0;
+
+		auto bytes_read = lfs_file_read(&lfs, &file, buffer.data(), buffer.size_bytes());
+		if (bytes_read <= 0)
+			return 0;
+
+		lfs_file_close(&lfs, &file);
+		return bytes_read;
+	}
+
+	// Performs an action(filename, timestamp) on each file in LittleFS root dir ending with the extension
+	// TODO: Add parameter for dir to search
+	bool foreach_file_with_ext(const std::string_view extension, auto action) {
 		lfs_dir_t dir;
 		if (lfs_dir_open(&lfs, &dir, "/") < 0)
 			return false;
@@ -126,23 +155,9 @@ public:
 				return false;
 
 			if (std::string_view{info.name}.ends_with(extension)) {
-				TimeFile file;
-				if (time_file_open(&file, info.name, LFS_O_RDONLY) < 0) {
-					printf_("Warning: Can't open file %s\n", info.name);
-					continue;
-				}
-
-				auto bytes_read = lfs_file_read(&lfs, &file.file, &_data, _data.size());
-				if (bytes_read <= 0)
-					continue;
-				if (info.size > _data.size()) {
-					printf_(
-						"Warning: File %s is %d bytes, exceeds max %d. Skipping\n", info.name, info.size, _data.size());
-					continue;
-				}
-				lfs_file_close(&lfs, &file.file);
-
-				action(info.name, file.timestamp, {_data.data(), info.size});
+				auto timestamp = get_file_timestamp(info.name);
+				if (timestamp)
+					action(info.name, timestamp, info.size);
 			}
 		}
 
@@ -150,6 +165,8 @@ public:
 
 		return true;
 	}
+
+	////// Time Attribute:
 
 	enum { ATTR_TIMESTAMP = 0x74 };
 
@@ -182,8 +199,10 @@ public:
 		return lfs_file_opencfg(&lfs, &tfile->file, path, flags, &tfile->cfg);
 	}
 
-	// int time_file_write(TimeFile *tfile, const void *buffer, size_t size) {
-	// 	tfile->timestamp = get_fattime(); //make_timestamp(2018, 9, 19, 7, 30, 45);
-	// 	return lfs_file_write(&lfs, &tfile->file, buffer, size);
-	// }
+	// usage:
+	// TimeFile tfile;
+	// time_file_open(&tfile, info.name, LFS_O_RDONLY);
+	// if (tfile.attrs[0].type == ATTR_TIMESTAMP)
+	//     uint32_t timestamp = tfile.attrs[0].buffer;
 };
+} // namespace MetaModule

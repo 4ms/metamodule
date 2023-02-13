@@ -93,7 +93,8 @@ struct ModuleViewPage : PageBase {
 		static_knobs.reserve(num_controls);
 		module_params.reserve(num_controls);
 
-		const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
+		// const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
+		const auto &patch = patch_storage.get_view_patch();
 
 		for (const auto el : moduleinfo.Knobs) {
 			draw_knob(el, patch);
@@ -271,8 +272,9 @@ private:
 
 	bool read_slug() {
 		auto module_id = PageList::get_selected_module_id();
-		auto patch_id = PageList::get_selected_patch_id();
-		const PatchData &patch = patch_list.get_patch(patch_id);
+		const auto &patch = patch_storage.get_view_patch();
+		// auto patch_id = PageList::get_selected_patch_id();
+		// const PatchData &patch = patch_list.get_patch(patch_id);
 		if (patch.patch_name.length() == 0)
 			return false;
 		if (module_id >= patch.module_slugs.size())
@@ -283,7 +285,7 @@ private:
 	}
 
 	bool is_this_patch_loaded() {
-		return patch_loader.cur_patch_index() == PageList::get_selected_patch_id();
+		return patch_playloader.cur_patch_index() == PageList::get_selected_patch_id();
 	}
 
 	static void roller_cb(lv_event_t *event) {
@@ -358,8 +360,12 @@ private:
 		if (page->is_this_patch_loaded()) {
 			page->patch_mod_queue.put(SetStaticParam{.param = sp});
 		} else {
-			auto patch_id = PageList::get_selected_patch_id();
-			auto &patch = page->patch_list.get_patch(patch_id);
+
+			//FIXME: this just modifies PatchStoage::_view_patch which will get
+			// overwritten if we select a new patch in PatchSelector
+			//
+			// auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
+			auto &patch = page->patch_storage.get_view_patch();
 			patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 		}
 	}

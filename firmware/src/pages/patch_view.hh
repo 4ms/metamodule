@@ -93,16 +93,15 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		auto patch_id = PageList::get_selected_patch_id();
-		const auto &patch = patch_list.get_patch(patch_id);
+		const auto &patch = patch_storage.get_view_patch();
 		patch_instance = &patch;
 
-		printf_("patch id = %d\n", patch_id);
+		printf_("patch id = %d\n", patch_storage.get_view_patch_id());
 		if (patch.patch_name.length() == 0)
 			return;
 
-		lv_label_set_text(patchname, patch_list.get_patch_name(patch_id));
-		lv_label_set_text(description, patch_list.get_patch(patch_id).description.c_str());
+		lv_label_set_text(patchname, patch.patch_name.c_str());
+		lv_label_set_text(description, patch.description.c_str());
 
 		for (auto &m : modules)
 			lv_obj_del(m);
@@ -232,7 +231,7 @@ struct PatchViewPage : PageBase {
 		if (this_module_obj == page->playbut)
 			return;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
-		const auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
+		const auto &patch = page->patch_storage.get_view_patch();
 		const auto this_slug = patch.module_slugs[module_id];
 		lv_label_set_text(page->module_name, this_slug.c_str());
 
@@ -341,8 +340,8 @@ private:
 
 	void start_changing_patch() {
 		auto patch_id = PageList::get_selected_patch_id();
-		if (patch_id != patch_loader.cur_patch_index()) {
-			patch_loader.request_load_patch(patch_id);
+		if (patch_id != patch_playloader.cur_patch_index()) {
+			patch_playloader.request_load_patch(patch_id);
 		}
 	}
 };
