@@ -23,6 +23,8 @@ namespace MetaModule
 
 // PatchStorage manages all patch filesystems <--> PatchList
 struct PatchStorage {
+	PatchList patch_list;
+
 	SDCardOps<SDCardConf> sdcard_ops;
 	FatFileIO sdcard{&sdcard_ops, Volume::SDCard};
 	bool sdcard_valid = false;
@@ -32,8 +34,6 @@ struct PatchStorage {
 
 	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
-
-	PatchList patch_list;
 
 	PatchStorage(bool reset_to_factory_patches = false) {
 
@@ -48,9 +48,9 @@ struct PatchStorage {
 		// Populate Patch List
 		patch_list.clear_all_patches();
 		// PatchFileIO::add_all_to_patchlist(norflash, patch_list);
-		// Debug::Pin1::high();
+
+		// sdcard_ops.detect_card();
 		PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
-		// Debug::Pin1::low();
 
 		// RamDisk: format it and copy patches to it
 		// --Just for testing, really we should copy patches when USB MSC device starts
@@ -59,7 +59,11 @@ struct PatchStorage {
 		// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
 	}
 
-	// FIXME: PatchStorage and managing the ViewedPatch are orthagonal: make them different classes
+	void poll_media_change() {
+		// sdcard.
+	}
+
+	// FIXME: PatchStorage and managing the ViewedPatch are orthagonal: make them different classes or rename class
 	void load_view_patch(std::string_view &patchname) {
 		if (auto id = patch_list.find_by_name(patchname))
 			load_view_patch(id.value());
@@ -80,15 +84,12 @@ struct PatchStorage {
 
 		switch (patch_list.get_patch_vol(patch_id)) {
 			case Volume::NorFlash:
-				printf_("vol = norflash\n");
 				ok = load_patch_data(norflash);
 				break;
 			case Volume::SDCard:
-				printf_("vol = sdcard\n");
 				ok = load_patch_data(sdcard);
 				break;
 			case Volume::RamDisk:
-				printf_("vol = ramdisk\n");
 				ok = load_patch_data(ramdisk);
 				break;
 		}
