@@ -27,7 +27,8 @@ struct PatchStorage {
 
 	SDCardOps<SDCardConf> sdcard_ops;
 	FatFileIO sdcard{&sdcard_ops, Volume::SDCard};
-	bool sdcard_valid = false;
+	bool sdcard_mounted = false;
+	bool sdcard_needs_rescan = true;
 
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
 	LfsFileIO norflash{flash};
@@ -49,18 +50,34 @@ struct PatchStorage {
 		patch_list.clear_all_patches();
 		// PatchFileIO::add_all_to_patchlist(norflash, patch_list);
 
-		// sdcard_ops.detect_card();
-		PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
+		poll_media_change();
+		if (sdcard_mounted)
+			PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
+		sdcard_needs_rescan = false;
 
 		// RamDisk: format it and copy patches to it
 		// --Just for testing, really we should copy patches when USB MSC device starts
-		// ramdisk.format_disk();
+		ramdisk.format_disk();
 		// PatchFileIO::copy_patches_from_to(norflash, ramdisk);
 		// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
 	}
 
 	void poll_media_change() {
-		// sdcard.
+		bool sdcard_was_mounted = sdcard_mounted;
+		uint8_t card_detected;
+		auto err = sdcard_ops.ioctl(MMC_GET_SDSTAT, &card_detected);
+		if (err || !card_detected)
+			sdcard_mounted = false;
+		else
+			sdcard_mounted = true;
+		if (sdcard_was_mounted == false && sdcard_mounted == true) {
+			sdcard_needs_rescan = true;
+		}
+	}
+
+	void rescan_sdcard() {
+
+		sdcard_needs_rescan = false;
 	}
 
 	// FIXME: PatchStorage and managing the ViewedPatch are orthagonal: make them different classes or rename class

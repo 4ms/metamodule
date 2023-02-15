@@ -52,7 +52,11 @@ public:
 				.priority2 = 0,
 			},
 			[&] {
-			patch_storage.poll_media_change();
+			static uint32_t poll_tmr = 0;
+			if (poll_tmr++ >= 100) { //1.6sec
+				poll_tmr = 0;
+				patch_storage.poll_media_change();
+			}
 			page_update_task();
 			});
 		page_update_tm.start();
