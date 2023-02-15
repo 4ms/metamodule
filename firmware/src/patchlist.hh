@@ -90,6 +90,10 @@ struct PatchList {
 		_patch_data.clear();
 	}
 
+	void clear_patches_from(Volume vol) {
+		std::erase_if(_patch_data, [&](auto &pf) { return (pf.volume == vol); });
+	}
+
 	[[nodiscard]] bool is_modified() {
 		if (_has_been_updated) {
 			_has_been_updated = false;
@@ -100,19 +104,6 @@ struct PatchList {
 
 	void mark_modified() {
 		_has_been_updated = true;
-	}
-
-	//FIXME: use _status, not _locked
-	bool is_locked() {
-		return _locked;
-	}
-
-	void lock() {
-		_locked = true;
-	}
-
-	void unlock() {
-		_locked = false;
 	}
 
 	// void add_patch_from_yaml(const std::span<std::byte> data);

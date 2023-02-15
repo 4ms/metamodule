@@ -75,7 +75,13 @@ struct PatchStorage {
 	}
 
 	void rescan_sdcard() {
-
+		if (sdcard_needs_rescan) {
+			printf_("Updating patchlist from SD Card.\n");
+			patch_list.clear_patches_from(Volume::SDCard);
+			PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
+			patch_list.mark_modified();
+			printf_("Patchlist updated.\n");
+		}
 		sdcard_needs_rescan = false;
 	}
 
@@ -124,24 +130,6 @@ struct PatchStorage {
 
 	PatchData &get_view_patch() {
 		return _view_patch;
-	}
-
-	//// FIXME: these are more patch transfering than patch storage or view patch
-
-	void update_patchlist_from_sdcard() {
-		printf_("Updating patchlist from SD Card.\n");
-		patch_list.lock();
-		{
-
-			//TODO: clear just norflash patches
-			patch_list.clear_all_patches();
-			PatchFileIO::add_all_to_patchlist(norflash, patch_list);
-
-			PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
-			patch_list.mark_modified();
-		}
-		patch_list.unlock();
-		printf_("Patchlist updated.\n");
 	}
 
 	void update_norflash_from_ramdisk() {
