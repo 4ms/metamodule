@@ -39,7 +39,6 @@ struct PatchStorage {
 	PatchStorage(bool reset_to_factory_patches = false) {
 
 		// NOR Flash: if it's unformatted, put default patches there
-		//-- just for testing our API (probably won't put patches there)
 		auto status = norflash.initialize();
 		if (status == LfsFileIO::Status::NewlyFormatted || reset_to_factory_patches) {
 			norflash.reformat();
@@ -48,7 +47,7 @@ struct PatchStorage {
 
 		// Populate Patch List
 		patch_list.clear_all_patches();
-		// PatchFileIO::add_all_to_patchlist(norflash, patch_list);
+		PatchFileIO::add_all_to_patchlist(norflash, patch_list);
 
 		poll_media_change();
 		if (sdcard_mounted)
@@ -146,7 +145,7 @@ struct PatchStorage {
 	}
 
 	void update_norflash_from_ramdisk() {
-		patch_list.lock();
+		// patch_list.lock();
 		printf_("NOR Flash writeback begun.\r\n");
 
 		ramdisk.unmount_disk();
@@ -161,7 +160,7 @@ struct PatchStorage {
 		} else {
 			printf_("NOR Flash writeback failed!\r\n");
 		}
-		patch_list.unlock();
+		// patch_list.unlock();
 		printf_("RamDisk Available to M4\n");
 	}
 
