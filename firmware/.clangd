@@ -42,6 +42,8 @@ CompileFlags:
 		"-Ilib/cmsis-device/stm32mp157c/include",
 		"-Ilib/lvgl",
 		"-Ilib/lvgl/lvgl/src/lv_font",
+        "-Isrc/fatfs",
+        "-Ilib/fatfs/source",
 		"-Isrc/shared/etl/include",
 		"-Isrc/shared/cpputil",
 		"-Ilib/mdrivlib",
