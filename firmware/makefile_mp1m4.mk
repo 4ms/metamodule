@@ -94,6 +94,9 @@ SOURCES += $(usbhost_libdir)/Core/Src/usbh_core.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_ctlreq.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_ioreq.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_pipes.c
+SOURCES += $(usbhost_libdir)/Class/MSC/Src/usbh_msc.c
+SOURCES += $(usbhost_libdir)/Class/MSC/Src/usbh_msc_bot.c
+SOURCES += $(usbhost_libdir)/Class/MSC/Src/usbh_msc_scsi.c
 
 # USB Device:
 SOURCES += $(usb_src)/usb_drive_device.cc
@@ -139,9 +142,9 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-Isrc/fatfs \
 			-I$(usb_src) \
 			-I$(usbhost_libdir)/Core/Inc \
-			-I$(usbdev_libdir)/Class/MSC/Inc \
+			-I$(usbhost_libdir)/Class/MSC/Inc \
 			-I$(usbdev_libdir)/Core/Inc \
-			-I$(usbdev_libdir)/Class/HUB/Inc \
+			-I$(usbdev_libdir)/Class/MSC/Inc \
 
 
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
