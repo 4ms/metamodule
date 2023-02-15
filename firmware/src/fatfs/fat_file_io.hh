@@ -62,6 +62,13 @@ public:
 		return _vol;
 	}
 
+	bool is_mounted() {
+		auto disk_id = static_cast<uint8_t>(_vol);
+		uint8_t mounted = 0;
+		auto err = disk_ioctl(disk_id, MMC_GET_SDSTAT, &mounted);
+		return (err == RES_OK) && mounted;
+	}
+
 	bool format_disk() {
 		BYTE work[FF_MAX_SS * 2];
 		auto res = f_mkfs(_fatvol, nullptr, work, sizeof(work));

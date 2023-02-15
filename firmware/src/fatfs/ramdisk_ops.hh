@@ -77,6 +77,13 @@ public:
 				// Set a flag that norflashramdisk can see, so it can xfer patches
 				// return unmount() ? RES_OK : RES_ERROR;
 				break;
+
+			case MMC_GET_SDSTAT:
+				*(uint8_t *)buff = 1;
+				break;
+
+			default:
+				return RES_PARERR;
 		}
 		return RES_OK;
 	}

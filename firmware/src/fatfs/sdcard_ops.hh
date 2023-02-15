@@ -82,9 +82,13 @@ public:
 				*(DWORD *)buff = num_blocks;
 			} break;
 
-			case MMC_GET_SDSTAT:
-				sd.detect_card();
-				break;
+			case MMC_GET_SDSTAT: {
+				uint8_t mounted = sd.detect_card();
+				*(uint8_t *)buff = mounted;
+			} break;
+
+			default:
+				return RES_PARERR;
 		}
 
 		return RES_OK;

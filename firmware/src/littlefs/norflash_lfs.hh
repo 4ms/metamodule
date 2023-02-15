@@ -72,6 +72,12 @@ public:
 		return Volume::NorFlash;
 	}
 
+	bool is_mounted() {
+		//TODO: check if fs is ok, maybe like this?
+		//return lfs_stat(&lfs, "/", &info) >= 0;
+		return true;
+	}
+
 	Status reformat() {
 		const static lfs_config cfg = {
 			.context = &_flash,
