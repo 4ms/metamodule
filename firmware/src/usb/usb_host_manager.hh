@@ -1,6 +1,7 @@
 #include "drivers/interrupt.hh"
 #include "drivers/pin.hh"
 #include "midi_host.hh"
+#include "msc_host.hh"
 #include "printf.h"
 #include <cstring>
 
@@ -11,6 +12,7 @@ private:
 	USBH_HandleTypeDef usbhost;
 	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
+	MSCHost msc_host{usbhost};
 
 public:
 	UsbHostManager(mdrivlib::PinNoInit enable_5v)
@@ -31,6 +33,7 @@ public:
 			return;
 		}
 		midi_host.init();
+		msc_host.init();
 
 		mdrivlib::InterruptManager::register_and_start_isr(OTG_IRQn, 0, 0, [this] { HAL_HCD_IRQHandler(&hhcd); });
 		auto err = USBH_Start(&usbhost);
@@ -72,14 +75,21 @@ public:
 				break;
 
 			case HOST_USER_CLASS_ACTIVE: {
-				printf_("Class active\n");
-				_midihost_instance->connect();
-				auto mshandle = host.get_class_handle<MidiStreamingHandle>();
-				if (!mshandle) {
-					printf_("Error, no MSHandle\n");
-					return;
+				uint8_t classcode = host.get_active_class_code();
+				const char *classname = host.get_active_class_name();
+				printf_("Class active: %.8s code %d\n", classname, classcode);
+				if (classcode == AudioClassCode && !strcmp(classname, "MIDI")) {
+					_midihost_instance->connect();
+					auto mshandle = host.get_class_handle<MidiStreamingHandle>();
+					if (!mshandle) {
+						printf_("Error, no MSHandle\n");
+						return;
+					}
+					USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
 				}
-				USBH_MIDI_Receive(phost, mshandle->rx_buffer, MidiStreamingBufferSize);
+				if (classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
+					printf_("MSC connected\n");
+				}
 			} break;
 
 			case HOST_USER_DISCONNECTION:
