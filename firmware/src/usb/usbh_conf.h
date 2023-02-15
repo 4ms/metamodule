@@ -27,7 +27,7 @@ extern "C" {
 #include "stm32mp1xx.h"
 // #include <stdio.h>
 // #include <stdlib.h>
-// #include <string.h>
+#include <string.h> //for memset/memcpy
 
 static inline void Error_Handler() {
 	__BKPT();
@@ -46,6 +46,10 @@ static inline void Error_Handler() {
 enum { MidiStreamingBufferSize = 256 };
 enum { HOST_HS = 0, HOST_FS = 1 };
 
+void *msc_malloc(size_t);
+void msc_free(void *);
+#define USBH_malloc msc_malloc
+#define USBH_free msc_free
 #define USBH_memset memset
 #define USBH_memcpy memcpy
 

@@ -18,6 +18,7 @@
  */
 
 #include "usbh_core.h"
+#include "usbh_msc.h"
 
 /*******************************************************************************
 					   HCD BSP Routines
@@ -328,7 +329,7 @@ USBH_StatusTypeDef USBH_LL_DriverVBUS(USBH_HandleTypeDef *phost, uint8_t state) 
  * @retval USBH Status
  */
 USBH_StatusTypeDef USBH_LL_SetToggle(USBH_HandleTypeDef *phost, uint8_t pipe, uint8_t toggle) {
-	HCD_HandleTypeDef *p_hhcd = (HCD_HandleTypeDef *)phost->pData;
+	auto p_hhcd = (HCD_HandleTypeDef *)phost->pData;
 	if (p_hhcd->hc[pipe].ep_is_in) {
 		p_hhcd->hc[pipe].toggle_in = toggle;
 	} else {
@@ -344,7 +345,7 @@ USBH_StatusTypeDef USBH_LL_SetToggle(USBH_HandleTypeDef *phost, uint8_t pipe, ui
  * @retval toggle (0/1)
  */
 uint8_t USBH_LL_GetToggle(USBH_HandleTypeDef *phost, uint8_t pipe) {
-	HCD_HandleTypeDef *p_hhcd = (HCD_HandleTypeDef *)phost->pData;
+	auto p_hhcd = (HCD_HandleTypeDef *)phost->pData;
 	uint8_t toggle = 0;
 
 	if (p_hhcd->hc[pipe].ep_is_in) {
@@ -362,4 +363,15 @@ uint8_t USBH_LL_GetToggle(USBH_HandleTypeDef *phost, uint8_t pipe) {
  */
 void USBH_Delay(uint32_t Delay) {
 	HAL_Delay(Delay);
+}
+
+void *msc_malloc(size_t sz) {
+	static MSC_HandleTypeDef hmsc;
+	if (sz == sizeof(MSC_HandleTypeDef))
+		return &hmsc;
+	else
+		return nullptr;
+}
+
+void msc_free(void *) {
 }
