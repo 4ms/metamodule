@@ -88,6 +88,12 @@ void main() {
 
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
+	auto *testpd = new PatchData;
+	auto patchraw = DefaultPatches::get_patch(0);
+	Debug::Pin2::high();
+	yaml_raw_to_patch(patchraw,  *testpd);
+	Debug::Pin2::low();
+
 	printf_("A7 initialized. Unlocking M4\n");
 
 	// Tell M4 we're done with init
@@ -99,9 +105,13 @@ void main() {
 
 	//Test m4's ability to convert a patch
 	auto pd = SharedMemory::read_address_of<PatchData *>(SharedMemory::PatchDataLocation);
-	printf("A7: pd ptr = %p\n", pd);
-	// printf("A7: patch name: %.31s\n", pd->patch_name.c_str());
-	// printf("A7: Num Modules: %d, Num static knobs: %d", pd->module_slugs.size(), pd->static_knobs.size());
+	printf_("A7: pd ptr = %p\n", pd);
+	printf_("A7: patch name: %.31s\n", pd->patch_name.c_str());
+	printf_("A7: Num Modules: %d, Num static knobs: %d\n", pd->module_slugs.size(), pd->static_knobs.size());
+	for (auto &n : pd->module_slugs)
+		printf_("   [%s]\n", n.c_str());
+	for (auto &n : pd->static_knobs)
+		printf_("   Knob: %d %d %f\n", n.module_id, n.param_id, (double)n.value);
 	//////////////
 
 	audio.start();
