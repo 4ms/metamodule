@@ -149,9 +149,9 @@ void init_once() {
 		already_init = true;
 		callbacks.m_error = [](const char *msg, size_t /*msg_len*/, c4::yml::Location loc, void * /*user_data*/) {
 			if (loc.name.empty())
-				printf("[ryml] %s\r\n", msg);
+				printf("[ryml] %s\n", msg);
 			else
-				printf("[ryml] %s in %s %zu:%zu)\r\n", msg, loc.name.data(), loc.line, loc.col);
+				printf("[ryml] %s in %s %zu:%zu)\n", msg, loc.name.data(), loc.line, loc.col);
 		};
 		c4::yml::set_callbacks(callbacks);
 	}
