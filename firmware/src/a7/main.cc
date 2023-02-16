@@ -99,8 +99,9 @@ void main() {
 
 	//Test m4's ability to convert a patch
 	auto pd = SharedMemory::read_address_of<PatchData *>(SharedMemory::PatchDataLocation);
-	printf("A7: converted patch %.31s, &pd=%p\n", pd->patch_name.c_str(), pd);
-	printf("A7: Num Modules: %d, Num static knobs: %d", pd->module_slugs.size(), pd->static_knobs.size());
+	printf("A7: pd ptr = %p\n", pd);
+	// printf("A7: patch name: %.31s\n", pd->patch_name.c_str());
+	// printf("A7: Num Modules: %d, Num static knobs: %d", pd->module_slugs.size(), pd->static_knobs.size());
 	//////////////
 
 	audio.start();

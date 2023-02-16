@@ -65,12 +65,13 @@ void main() {
 		SharedMemory::read_address_of<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(SharedMemory::RamDiskLocation);
 
 	//Test
-	PatchData pd;
-	auto patchraw = DefaultPatches::get_patch(0);
-	yaml_raw_to_patch(patchraw, pd);
-	printf("M4: converted patch %.31s, &pd=%p\n", pd.patch_name.c_str(), &pd);
-	printf("M4: Num Modules: %d, Num static knobs: %d", pd.module_slugs.size(), pd.static_knobs.size());
-	SharedMemory::write_address_of(&pd, SharedMemory::PatchDataLocation);
+	auto *pd = new PatchData;
+	// auto patchraw = DefaultPatches::get_patch(0);
+	// yaml_raw_to_patch(patchraw, pd);
+	// printf("M4: converted patch %.31s, &pd=%p\n", pd.patch_name.c_str(), &pd);
+	// printf("M4: Num Modules: %d, Num static knobs: %d", pd.module_slugs.size(), pd.static_knobs.size());
+	SharedMemory::write_address_of(pd, SharedMemory::PatchDataLocation);
+	printf_("M4: &pd = %p\n", pd);
 	/////////////
 
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
