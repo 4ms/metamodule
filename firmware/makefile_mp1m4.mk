@@ -34,6 +34,8 @@ usbdev_libdir = $(LIBDIR)/stm32-usb-device-lib
 STARTUP = $(TARGETDEVICEDIR_CM4)/boot/startup_stm32mp157cxx_cm4.s
 SYSTEM = $(DEVICEBASE)/stm32mp157c/templates/system_stm32mp1xx.c
 
+SHARED = src/shared
+
 OPTFLAG = -O3
 include makefile_opts.mk
 
@@ -109,40 +111,49 @@ SOURCES += $(usbdev_libdir)/Core/Src/usbd_core.c
 SOURCES += $(usbdev_libdir)/Core/Src/usbd_ctlreq.c
 SOURCES += $(usbdev_libdir)/Core/Src/usbd_ioreq.c
 
-ifeq "$(target_board)" "mini"
-SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
-endif
+# yaml
+SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
+SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
+RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
+SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
+SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
-INCLUDES = -I$(DEVICEDIR)/include \
-			-I$(CMSIS)/Include \
-			-I$(HALDIR)/include \
-			-I$(DRIVERLIB) \
-			-I$(DRIVERLIB)/drivers \
-			-I$(TARGETDEVICEDIR) \
-			-I$(TARGETDEVICEDIR)/drivers \
-			-I$(TARGETDEVICEDIR_CM4) \
-			-I$(TARGETDEVICEDIR_CM4)/drivers \
-			-I$(LIBDIR)/easiglib \
-			-I. \
-			-Isrc \
-			-I$(target_src) \
-			-I$(target_chip_src) \
-			-I$(core_src) \
-			-I$(hal_conf_inc) \
-			-Isystem \
-			-I$(SHARED) \
-			-I$(SHARED)/processors \
-			-I$(SHARED)/CoreModules \
-			-I$(SHARED)/cpputil \
-			-I$(SHARED)/patch \
-			-I$(LIBDIR)/fatfs/source \
-			-Isrc/fatfs \
-			-I$(usb_src) \
-			-I$(usbhost_libdir)/Core/Inc \
-			-I$(usbdev_libdir)/Class/MSC/Inc \
-			-I$(usbdev_libdir)/Core/Inc \
-			-I$(usbdev_libdir)/Class/HUB/Inc \
 
+INCLUDES =
+INCLUDES += -I$(DEVICEDIR)/include 
+INCLUDES += -I$(CMSIS)/Include 
+INCLUDES += -I$(HALDIR)/include 
+INCLUDES += -I$(DRIVERLIB) 
+INCLUDES += -I$(DRIVERLIB)/drivers 
+INCLUDES += -I$(TARGETDEVICEDIR) 
+INCLUDES += -I$(TARGETDEVICEDIR)/drivers 
+INCLUDES += -I$(TARGETDEVICEDIR_CM4) 
+INCLUDES += -I$(TARGETDEVICEDIR_CM4)/drivers 
+INCLUDES += -I$(LIBDIR)/easiglib 
+INCLUDES += -I. 
+INCLUDES += -Isrc 
+INCLUDES += -I$(target_src) 
+INCLUDES += -I$(target_chip_src) 
+INCLUDES += -I$(core_src) 
+INCLUDES += -I$(hal_conf_inc) 
+INCLUDES += -Isystem 
+INCLUDES += -I$(SHARED) 
+INCLUDES += -I$(SHARED)/processors 
+INCLUDES += -I$(SHARED)/CoreModules 
+INCLUDES += -I$(SHARED)/cpputil 
+INCLUDES += -I$(SHARED)/patch 
+INCLUDES += -I$(LIBDIR)/fatfs/source 
+INCLUDES += -Isrc/fatfs 
+INCLUDES += -I$(usb_src) 
+INCLUDES += -I$(usbhost_libdir)/Core/Inc 
+INCLUDES += -I$(usbdev_libdir)/Class/MSC/Inc 
+INCLUDES += -I$(usbdev_libdir)/Core/Inc 
+INCLUDES += -I$(usbdev_libdir)/Class/HUB/Inc 
+INCLUDES +=	-I$(SHARED)/patch_convert
+INCLUDES +=	-I$(SHARED)/patch_convert/ryml
+INCLUDES += -I$(RYMLDIR)/src
+INCLUDES += -I$(RYMLDIR)/ext/c4core/src
+INCLUDES += -I$(SHARED)/etl/include
 
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 
@@ -152,6 +163,7 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 			  -DSTM32MP1 \
 			  -DCORE_CM4 \
 			  -DARM_MATH_CM4 \
+			  -D__ARM_ARCH_7M__
 
 include makefile_common.mk
 

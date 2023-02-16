@@ -11,19 +11,31 @@
 #include "qspi_flash_driver.hh"
 #include "volumes.hh"
 
-//TODO: Figure out how to handle NOR FLash internal patches
-// - Ship with some patches on there
-// - In Patch View, user can click "Save" or "copy" and give the patch a name and destination
-// - In Patch List, patches show their location
+// - Ship with some patches on NORFlash
+// - Scan for patches on USB-C thumb drive and SD Card
 // - Don't use RAMDisk USB
-// - Allow for USB-C thumb drive and SD Card
-//    -- on boot, read from all media and create patch index
+// - In Patch View, user can click "Save" or "copy" and give the patch a name and destination (including NORFlash)
+// - In Patch List, patches show their location
+
+// TODO: we currently do all SD Card accesses in the UI thread... would be better to do it in main thread?
+// UI could send a request (patch_storage.request_load_view_patch(id)) then poll (patch_list.is_view_patch_ready())
+
+// PatchStorage could live 100% on M4? Not ViewPatch, just PatchList and FileIOs
+// -- use array, not vector for patch_list (replace clear() and push_back()) -- instead of erase_if(), use a separate array for each Volume
+// -- points of contact to A7 would be:
+// 		-- PatchSelPage scans patch_list: requests a lock, then scan the patch_list, releases lock
+//		-- UI thread calls poll_media_change() periodically
+//		-- UI thread calls rescan_sdcard/USBdevice() when needed
+//      -- on boot --> playloader calls patch_list.find_by_name() [could busy wait, or scan list itself]
+//      -- on boot and on select new patch --> PatchFileIO::load_patch_data() should be passed a raw buffer, not PatchData&. Then A7 will convert to yaml
+// We'd need a PatchStorage proxy to live on A7 and communicate with M4
+
+// OR UI thread could spawn PatchStorage::rescan_sdcard() onto Core 2, and that's all the heavy lifting needed
 namespace MetaModule
 {
 
 // PatchStorage manages all patch filesystems <--> PatchList
-struct PatchStorage {
-	PatchList patch_list;
+class PatchStorage {
 
 	SDCardOps<SDCardConf> sdcard_ops;
 	FatFileIO sdcard{&sdcard_ops, Volume::SDCard};
@@ -35,6 +47,9 @@ struct PatchStorage {
 
 	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
+
+public:
+	PatchList patch_list;
 
 	PatchStorage(bool reset_to_factory_patches = false) {
 
@@ -53,12 +68,6 @@ struct PatchStorage {
 		if (sdcard_mounted)
 			PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
 		sdcard_needs_rescan = false;
-
-		// RamDisk: format it and copy patches to it
-		// --Just for testing, really we should copy patches when USB MSC device starts
-		ramdisk.format_disk();
-		// PatchFileIO::copy_patches_from_to(norflash, ramdisk);
-		// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
 	}
 
 	void poll_media_change() {

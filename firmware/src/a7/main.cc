@@ -97,6 +97,12 @@ void main() {
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
 
+	//Test m4's ability to convert a patch
+	auto pd = SharedMemory::read_address_of<PatchData *>(SharedMemory::PatchDataLocation);
+	printf("A7: converted patch %.31s, &pd=%p\n", pd->patch_name.c_str(), pd);
+	printf("A7: Num Modules: %d, Num static knobs: %d", pd->module_slugs.size(), pd->static_knobs.size());
+	//////////////
+
 	audio.start();
 	ui.start(); //=>M4
 	//Probably need some sort of PatchPlayLoader queue checker (to check for new patch load requests)
