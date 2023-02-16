@@ -35,9 +35,6 @@ public:
 		if (!fatfs_register_disk(diskops, static_cast<unsigned>(_vol))) {
 			printf_("Failed to register FAT FS Disk %d\n", _vol);
 		}
-		// if (!mount_disk()) {
-		// 	printf_("Failed to mount FAT FS Disk %d\n", _vol);
-		// }
 	}
 
 	bool mount_disk() {
