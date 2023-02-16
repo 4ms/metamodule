@@ -49,6 +49,7 @@ struct PatchStorage {
 		patch_list.clear_all_patches();
 		// PatchFileIO::add_all_to_patchlist(norflash, patch_list);
 		// Debug::Pin1::high();
+		sdcard.mount_disk();
 		PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
 		// Debug::Pin1::low();
 
