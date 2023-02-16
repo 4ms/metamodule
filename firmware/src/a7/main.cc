@@ -41,15 +41,19 @@ void main() {
 			now.minute(),
 			now.second());
 
-	PatchStorage patch_storage;
-	PatchPlayer patch_player;
-	PatchPlayLoader patch_playloader{patch_player, patch_storage};
+	PatchStorage patch_storage; //on M4
+	PatchPlayer patch_player;	//on A7
+	PatchPlayLoader patch_playloader{patch_player,
+									 patch_storage}; //patch_storage => message queue for loading raw patch file data
+	//PatchPlayLoader is on A7? It gets raw data from PatchStorage on M4, runs yaml_to_patch, and loads that into PatchPlayer
 
 	// "Thread"-shared data:
-	ParamCache param_cache;
-	PatchModQueue patch_mod_queue;
+	ParamCache param_cache;		   //needed, same, right? syncs M4-gui and A7-audio?
+	PatchModQueue patch_mod_queue; //queue lives on A7 but is now filled from M4 (gui)
 
-	Ui ui{patch_playloader, patch_storage, param_cache, patch_mod_queue};
+	Ui ui{patch_playloader, patch_storage, param_cache, patch_mod_queue}; //on M4.
+	//PatchPlayerLoader(A7) => a way to know what the currently playing patch is, and to request loading a new patch
+	//Gui uses PatchPlayLoader for cur_patch_index()->int and request_load_patch(id)
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
@@ -70,6 +74,7 @@ void main() {
 	param_cache.clear();
 	patch_playloader.load_initial_patch("enosc");
 
+	// RamDisk goes away
 	HWSemaphore<RamDiskLock>::unlock();
 
 	SemaphoreActionOnUnlock<RamDiskLock> ramdisk_readback([&patch_storage] {
@@ -93,7 +98,8 @@ void main() {
 		;
 
 	audio.start();
-	ui.start();
+	ui.start(); //=>M4
+	//Probably need some sort of PatchPlayLoader queue checker (to check for new patch load requests)
 
 	while (true) {
 		__WFI();
