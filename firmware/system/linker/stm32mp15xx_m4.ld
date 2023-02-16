@@ -1,20 +1,21 @@
 ENTRY(Reset_Handler)
 
-_estack = 0x10040000;
-
-_Min_Heap_Size  = 0x1000;  /* required amount of heap  */
-_Min_Stack_Size = 0x400; /* required amount of stack */
 
 _SHARED_PTR_SIZE = 256;
 _SHAREDIDX_START = (0x10060000 - _SHARED_PTR_SIZE);
 
+_estack = _SHAREDIDX_START;
+
 MEMORY
 {
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
-	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = (0x00060000 - _SHARED_PTR_SIZE)
+	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = 0x00050000 /*320kB for code*/
+
+    /* Stack: 0x10050000 to 0x1005FF00 == >63kB stack*/
 
 	SHAREDMEMINDEX (RW) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE
 
+	/* m_data is for .data (ro) and .bss: all global vars: hopefully all UI assets, default patches */
 	m_data	     (RW)	: ORIGIN = 0xC0200000, LENGTH = 30M  /* END = 0xC200'0000 */
 	HEAP         (RW)   : ORIGIN = 0xC5000000, LENGTH = 128M /* END = 0xCD00'0000 */
 }
@@ -120,12 +121,12 @@ SECTIONS
   text_end = ORIGIN(m_text) + LENGTH(m_text);
   ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
 
-  .resource_table :
-  {
-    . = ALIGN(4);
-    KEEP (*(.resource_table*))
-    . = ALIGN(4);
-  } > m_data
+  /* .resource_table : */
+  /* { */
+  /*   . = ALIGN(4); */
+  /*   KEEP (*(.resource_table*)) */
+  /*   . = ALIGN(4); */
+  /* } > m_data */
 
 	.sharedmemindex (NOLOAD) :
 	{
