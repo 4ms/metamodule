@@ -45,8 +45,8 @@ class PatchStorage {
 	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
 	LfsFileIO norflash{flash};
 
-	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
-	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
+	// RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
+	// FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
 public:
 	PatchList patch_list;
@@ -121,7 +121,7 @@ public:
 				ok = load_patch_data(sdcard);
 				break;
 			case Volume::RamDisk:
-				ok = load_patch_data(ramdisk);
+				// ok = load_patch_data(ramdisk);
 				break;
 		}
 
@@ -145,19 +145,19 @@ public:
 		// patch_list.lock();
 		printf_("NOR Flash writeback begun.\r\n");
 
-		ramdisk.unmount_disk();
+		// ramdisk.unmount_disk();
 
 		// Must invalidate the cache because M4 wrote to it???
 		// SystemCache::invalidate_dcache_by_range(StaticBuffers::virtdrive.virtdrive,
 		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
-		if (PatchFileIO::copy_patches_from_to(ramdisk, norflash, PatchFileIO::FileFilter::NewerTimestamp)) {
-			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
-			// PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
-			patch_list.mark_modified();
-		} else {
-			printf_("NOR Flash writeback failed!\r\n");
-		}
-		// patch_list.unlock();
+		// if (PatchFileIO::copy_patches_from_to(ramdisk, norflash, PatchFileIO::FileFilter::NewerTimestamp)) {
+		// 	printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
+		// 	// PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
+		// 	patch_list.mark_modified();
+		// } else {
+		// 	printf_("NOR Flash writeback failed!\r\n");
+		// }
+		// // patch_list.unlock();
 		printf_("RamDisk Available to M4\n");
 	}
 
