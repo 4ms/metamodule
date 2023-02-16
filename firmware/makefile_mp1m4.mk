@@ -114,9 +114,9 @@ SOURCES += $(usbdev_libdir)/Core/Src/usbd_ioreq.c
 # yaml
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
 SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
-RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
-SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
-SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+rymldir = $(SHARED)/patch_convert/ryml/rapidyaml
+SOURCES += $(wildcard $(rymldir)/src/c4/yml/*.cpp)
+SOURCES += $(wildcard $(rymldir)/ext/c4core/src/c4/*.cpp)
 
 
 INCLUDES =
@@ -151,8 +151,8 @@ INCLUDES += -I$(usbdev_libdir)/Core/Inc
 INCLUDES += -I$(usbdev_libdir)/Class/HUB/Inc 
 INCLUDES +=	-I$(SHARED)/patch_convert
 INCLUDES +=	-I$(SHARED)/patch_convert/ryml
-INCLUDES += -I$(RYMLDIR)/src
-INCLUDES += -I$(RYMLDIR)/ext/c4core/src
+INCLUDES += -I$(rymldir)/src
+INCLUDES += -I$(rymldir)/ext/c4core/src
 INCLUDES += -I$(SHARED)/etl/include
 
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
