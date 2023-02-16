@@ -61,7 +61,7 @@ public:
 		clear_cache();
 	}
 
-	void load_patch_header_data(const PatchData &patchdata) {
+	void copy_patch_data(const PatchData &patchdata) {
 		if (is_loaded)
 			unload_patch();
 
@@ -88,7 +88,7 @@ public:
 		if (patchdata.patch_name.length() == 0 || patchdata.module_slugs.size() == 0)
 			return false;
 
-		load_patch_header_data(patchdata);
+		copy_patch_data(patchdata);
 
 		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
 			//FIXME: Do we ever do anything with modules[0] ? Perhaps just UI displaying names, which we can get from a defs file

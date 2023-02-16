@@ -41,17 +41,18 @@ void main() {
 			now.minute(),
 			now.second());
 
-	PatchStorage patch_storage; //on M4
-	PatchPlayer patch_player;	//on A7
-	PatchPlayLoader patch_playloader{patch_player,
-									 patch_storage}; //patch_storage => message queue for loading raw patch file data
-	//PatchPlayLoader is on A7? It gets raw data from PatchStorage on M4, runs yaml_to_patch, and loads that into PatchPlayer
+	PatchPlayer patch_player; //on A7
+	PatchPlayLoader patch_playloader{patch_player};
+	//add a message queue for loading raw patch file data or complete yml data from M4
+	//Can use an HSEM and shared ptr to PatchData on the heap:
+	//M4 locks->writes->unlocks triggers A7 ISR to lock->load PatchData into player-> unlock
+	//M4 would ignore, try again if it can't lock
 
 	// "Thread"-shared data:
 	ParamCache param_cache;		   //needed, same, right? syncs M4-gui and A7-audio?
 	PatchModQueue patch_mod_queue; //queue lives on A7 but is now filled from M4 (gui)
 
-	Ui ui{patch_playloader, patch_storage, param_cache, patch_mod_queue}; //on M4.
+	Ui ui{patch_playloader, param_cache, patch_mod_queue}; //on M4.
 	//PatchPlayerLoader(A7) => a way to know what the currently playing patch is, and to request loading a new patch
 	//Gui uses PatchPlayLoader for cur_patch_index()->int and request_load_patch(id)
 
@@ -74,24 +75,12 @@ void main() {
 	param_cache.clear();
 	patch_playloader.load_initial_patch("enosc");
 
-	// RamDisk goes away
-	HWSemaphore<RamDiskLock>::unlock();
-
-	SemaphoreActionOnUnlock<RamDiskLock> ramdisk_readback([&patch_storage] {
-		if (HWSemaphore<RamDiskLock>::lock(1) == HWSemaphoreFlag::LockFailed) {
-			printf_("Error getting lock on RamDisk to read back\n");
-			return;
-		}
-		patch_storage.update_norflash_from_ramdisk();
-		HWSemaphore<RamDiskLock>::unlock_nonrecursive(1);
-	});
-
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
 	auto *testpd = new PatchData;
 	auto patchraw = DefaultPatches::get_patch(0);
 	Debug::Pin2::high();
-	yaml_raw_to_patch(patchraw,  *testpd);
+	yaml_raw_to_patch(patchraw, *testpd);
 	Debug::Pin2::low();
 
 	printf_("A7 initialized. Unlocking M4\n");
@@ -102,17 +91,6 @@ void main() {
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
-
-	//Test m4's ability to convert a patch
-	auto pd = SharedMemory::read_address_of<PatchData *>(SharedMemory::PatchDataLocation);
-	printf_("A7: pd ptr = %p\n", pd);
-	printf_("A7: patch name: %.31s\n", pd->patch_name.c_str());
-	printf_("A7: Num Modules: %d, Num static knobs: %d\n", pd->module_slugs.size(), pd->static_knobs.size());
-	for (auto &n : pd->module_slugs)
-		printf_("   [%s]\n", n.c_str());
-	for (auto &n : pd->static_knobs)
-		printf_("   Knob: %d %d %f\n", n.module_id, n.param_id, (double)n.value);
-	//////////////
 
 	audio.start();
 	ui.start(); //=>M4

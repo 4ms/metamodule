@@ -18,9 +18,7 @@
 #include "shared_memory.hh"
 #include "usb/usb_manager.hh"
 
-#include "patch_convert/yaml_to_patch.hh"
-#include "patch_data.hh"
-#include "patches_default.hh"
+#include "patch_storage.hh"
 
 namespace MetaModule
 {
@@ -64,19 +62,7 @@ void main() {
 	auto virtdrive =
 		SharedMemory::read_address_of<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(SharedMemory::RamDiskLocation);
 
-	//Test converting yml to PatchData
-	//Time trial: yaml_raw_to_patch 15ms on M4, 2ms on A7 (small, simple patch, 153 lines)
-	//   With raw patch data (ryml's workspace) in SYSRAM, and PatchData in DDR
-	auto *pd = new PatchData;
-	auto patchraw = DefaultPatches::get_patch(0);
-	Debug::Pin2::high();
-	yaml_raw_to_patch(patchraw,  *pd);
-	Debug::Pin2::low();
-	SharedMemory::write_address_of(pd, SharedMemory::PatchDataLocation);
-	printf_("M4: converted patch: %.31s\n", pd->patch_name.c_str());
-	printf_("M4: &pd = %p\n", pd);
-	printf_("M4: Num Modules: %d, Num static knobs: %d\n", pd->module_slugs.size(), pd->static_knobs.size());
-	/////////////
+	PatchStorage patch_storage;
 
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
 	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander

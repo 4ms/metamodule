@@ -93,8 +93,7 @@ struct ModuleViewPage : PageBase {
 		static_knobs.reserve(num_controls);
 		module_params.reserve(num_controls);
 
-		// const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
-		const auto &patch = patch_storage.get_view_patch();
+		const auto &patch = view_patch;
 
 		for (const auto el : moduleinfo.Knobs) {
 			draw_knob(el, patch);
@@ -272,9 +271,8 @@ private:
 
 	bool read_slug() {
 		auto module_id = PageList::get_selected_module_id();
-		const auto &patch = patch_storage.get_view_patch();
-		// auto patch_id = PageList::get_selected_patch_id();
-		// const PatchData &patch = patch_list.get_patch(patch_id);
+		const auto &patch = view_patch;
+
 		if (patch.patch_name.length() == 0)
 			return false;
 		if (module_id >= patch.module_slugs.size())
@@ -365,7 +363,7 @@ private:
 			// overwritten if we select a new patch in PatchSelector
 			//
 			// auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
-			auto &patch = page->patch_storage.get_view_patch();
+			auto &patch = page->view_patch;
 			patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 		}
 	}

@@ -4,25 +4,29 @@
 // #include "uart_log.hh" //doesn't work with simulator because uart_log.hh exists in same dir as this file, so preprocessor picks ./uart_log.hh it instead of stubs/uart_log.hh
 #include "printf.h"
 
+//FIXME: temp use patches_default instead of patch_storage
+#include "patches_default.hh"
+
 namespace MetaModule
 {
 
 // PatchLoader handles loading of patches from storage into PatchPlayer
 struct PatchPlayLoader {
-	PatchPlayLoader(PatchPlayer &patchplayer, PatchStorage &patchstorage)
+	PatchPlayLoader(PatchPlayer &patchplayer)
 		: player_{patchplayer}
-		, storage_{patchstorage} {
+	{	
 	}
 
 	void load_initial_patch(std::string_view patchname) {
-		auto id = storage_.find_by_name(patchname);
-		auto initial_patch = id.value_or(0);
+		// auto id = storage_.find_by_name(patchname);
+		// auto initial_patch = id.value_or(0);
 
-		if (id.has_value())
-			printf_("Loading initial_patch id: %d, name: %s...\n", initial_patch, patchname.data());
-		else
-			printf("Loading initial_patch 0, given name %s not found\n", patchname.data());
+		// if (id.has_value())
+		// 	printf_("Loading initial_patch id: %d, name: %s...\n", initial_patch, patchname.data());
+		// else
+		// 	printf("Loading initial_patch 0, given name %s not found\n", patchname.data());
 
+		auto initial_patch = 11;
 		if (_load_patch(initial_patch)) {
 			printf_("Success\n");
 			loaded_patch_index_ = initial_patch;
@@ -76,13 +80,8 @@ struct PatchPlayLoader {
 		}
 	}
 
-	// PatchPlayer &get_patch_player() {
-	// 	return player_;
-	// }
-
 private:
 	PatchPlayer &player_;
-	PatchStorage &storage_;
 
 	bool loading_new_patch_ = false;
 	bool audio_is_muted_ = false;
@@ -91,8 +90,16 @@ private:
 	uint32_t new_patch_index_;
 
 	bool _load_patch(uint32_t patchid) {
-		storage_.load_view_patch(patchid);
-		auto &patch = storage_.get_view_patch();
+		if (patchid >= DefaultPatches::num_patches())
+			patchid = 0;
+
+		// storage_.load_view_patch(patchid);
+		// auto &patch = storage_.get_view_patch();
+
+		auto rawpatch = DefaultPatches::get_patch(patchid);
+
+		PatchData patch;
+		yaml_raw_to_patch(rawpatch, patch);
 		auto patchname = patch.patch_name;
 		printf_("Attempting play patch #%d, %s\n", patchid, patchname.data());
 

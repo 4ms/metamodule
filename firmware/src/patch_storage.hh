@@ -1,6 +1,5 @@
 #pragma once
 
-#include "a7/static_buffers.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdcard_conf.hh"
 #include "fatfs/fat_file_io.hh"
