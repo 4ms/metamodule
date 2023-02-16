@@ -46,12 +46,18 @@
 #include "stm32mp157cxx_ca7.h"
 
 // Todo: use values from the linker script, don't redefine here
-#define __ROM_BASE 0xC2000000
-#define __ROM_SIZE 0x00100000 /* 1M */
+#define __M4DATA_BASE 0xC0200000
+#define __M4DATA_SIZE 0x01E00000
 
-/* RAM: 0xC0200000 - 0xC2000000 */
-#define __RAM_BASE 0xC0200000
-#define __RAM_SIZE (0xC2000000 - __RAM_BASE)
+#define __M4HEAP_BASE 0xC5000000
+#define __M4HEAP_SIZE 0x08000000
+
+#define __ROM_BASE 0xC2000000
+#define __ROM_SIZE 0x01000000 /* 16M */
+
+/* RAM: 0xC3000000 - 0xC5000000 */
+#define __RAM_BASE 0xC3000000
+#define __RAM_SIZE 0x02000000 /* 32M */
 
 /* RAM2: 0xC2100000 - 0xD0000000 */
 #define __RAM2_BASE 0xC2100000
@@ -62,13 +68,13 @@
 #define __DMABUF_END 0xE0000000
 #define __DMABUF_BASE (__DMABUF_END - __DMABUF_SIZE)
 
-/* VIRTDRIVE: 0xD0000000 - 0xD8000000 */
-#define _VIRTDRIVE_BASE 0xD0000000
+/* VIRTDRIVE: 0xCD000000 - 0xD5000000 */
+#define _VIRTDRIVE_BASE 0xCD000000
 #define _VIRTDRIVE_SIZE 0x08000000
-#define _VIRTDRIVE_END 0xD8000000
+#define _VIRTDRIVE_END 0xD5000000
 
-/* HEAP: 0xD0000000 - 0xDFF00000*/
-#define __HEAP_BASE 0xD8000000
+/* HEAP: 0xD5000000 - 0xDFF00000*/
+#define __HEAP_BASE 0xD5000000
 #define __HEAP_END __DMABUF_BASE
 #define __HEAP_SIZE (__HEAP_END - __HEAP_BASE)
 
@@ -145,6 +151,10 @@ void MMU_CreateTranslationTable(void) {
 
 	//.virtdrive: non-cacheable
 	MMU_TTSection(TTB_BASE, _VIRTDRIVE_BASE, _VIRTDRIVE_SIZE / 0x100000, Sect_StronglyOrdered);
+
+	//M4 heap/data
+	MMU_TTSection(TTB_BASE, __M4DATA_BASE, __M4DATA_SIZE / 0x100000, Sect_StronglyOrdered);
+	MMU_TTSection(TTB_BASE, __M4HEAP_BASE, __M4HEAP_SIZE / 0x100000, Sect_StronglyOrdered);
 
 	//.shared_memory and m4 codespace: 0x30000000, or 0x10000000 as seen by M4
 	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Device_RW); // 1MB (actually is only 384kB)

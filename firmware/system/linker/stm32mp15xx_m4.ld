@@ -6,19 +6,20 @@ _Min_Heap_Size  = 0x1000;  /* required amount of heap  */
 _Min_Stack_Size = 0x400; /* required amount of stack */
 
 _SHARED_PTR_SIZE = 256;
+_SHAREDIDX_START = (0x10060000 - _SHARED_PTR_SIZE);
 
 MEMORY
 {
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
 	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = (0x00060000 - _SHARED_PTR_SIZE)
-	SHAREDMEMINDEX (RW) : ORIGIN = (0x10060000 - _SHARED_PTR_SIZE), LENGTH = _SHARED_PTR_SIZE
 
-	m_data	     (RW)	: ORIGIN = 0xC0000000, LENGTH = 32M
-	heap         (RW)   : ORIGIN = 0xC5000000, LENGTH = 128M /*TODO*/
+	SHAREDMEMINDEX (RW) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE
+
+	m_data	     (RW)	: ORIGIN = 0xC0200000, LENGTH = 30M  /* END = 0xC200'0000 */
+	HEAP         (RW)   : ORIGIN = 0xC5000000, LENGTH = 128M /* END = 0xCD00'0000 */
 }
 
 _params_ptr = ORIGIN(SHAREDMEMINDEX);
-/* _params_ptr = ORIGIN(m_data) + LENGTH(m_data); */
 /* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
 
 SECTIONS
@@ -152,17 +153,25 @@ SECTIONS
   } > m_data
 
   /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack :
+  /* ._user_heap_stack : */
+  /* { */
+  /*   . = ALIGN(8); */
+  /*   PROVIDE ( end = . ); */
+  /*   PROVIDE ( _end = . ); */
+	/* _sheap = .; */
+  /*   . = . + _Min_Heap_Size; */
+	/* _eheap = .; */
+  /*   . = . + _Min_Stack_Size; */
+  /*   . = ALIGN(8); */
+  /* } > m_data */
+
+  .heap (NOLOAD):
   {
-    . = ALIGN(8);
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
+	. = ALIGN(8);
 	_sheap = .;
-    . = . + _Min_Heap_Size;
+	. += LENGTH(HEAP);
 	_eheap = .;
-    . = . + _Min_Stack_Size;
-    . = ALIGN(8);
-  } > m_data
+  } > HEAP
 
   
 

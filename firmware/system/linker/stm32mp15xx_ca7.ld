@@ -16,26 +16,26 @@ _HEAP_SIZE = _HEAP_END - _HEAP_BASE;
 
 _SHARED_PTR_SIZE = 256;
 _SHAREDIDX_START = (0x30060000 - _SHARED_PTR_SIZE);
+_params_ptr = _SHAREDIDX_START;
+/* 0x3005FF00: 256 Bytes of shared memory addresses = 64 pointers */
 
 MEMORY
 {
 	/* 0xC0000000 - 0xC200'0000 is for M4 RAM = 32MB??? */
-    ROM (rx) 			: ORIGIN = 0xC2000040, 		LENGTH = (16M - 0x40) /* 0xC3000000 */
-    RAM (rw) 			: ORIGIN = 0xC3000000, 		LENGTH = 32M /* C5000000 */
+    ROM (rx) 			: ORIGIN = 0xC2000040, 		LENGTH = (16M - 0x40) /* END = 0xC300'0000 */
+    RAM (rw) 			: ORIGIN = 0xC3000000, 		LENGTH = 32M 		  /* END = 0xC500'0000 */
 	/* 0xC5000000 - 0xCD000000 is for M4 HEAP = 128MB*/
 	VIRTDRIVE (rw) 		: ORIGIN = _VIRTDRIVE_BASE, LENGTH = _VIRTDRIVE_SIZE /* 128MB RamDisk */
 	HEAP (rw) 			: ORIGIN = _HEAP_BASE,		LENGTH = _HEAP_SIZE /* 176MB audio heap */
 	DMABUF (rw) 		: ORIGIN = _DMABUF_BASE, 	LENGTH = _DMABUF_SIZE /* 1MB */
 
-	SHAREDMEM (rw) 		: ORIGIN = 0x30040000, 		LENGTH = (128K - _SHARED_PTR_SIZE)
+	/* SHAREDMEM (rw) 		: ORIGIN = 0x30040000, 		LENGTH = (128K - _SHARED_PTR_SIZE) */
 	SHAREDMEMINDEX (rw) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE
 	SYSRAM (rw) 		: ORIGIN = 0x2FFC0000, 		LENGTH = 192K
 	SYSDMARAM (rw) 		: ORIGIN = 0x2FFF0000, 		LENGTH = 64K
 	/* SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, 		LENGTH = 64K */
 }
 
-_params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM);
-/* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
 
 SECTIONS
 {
@@ -175,13 +175,13 @@ SECTIONS
     _auxcore_user_stack_end = _auxcore_user_stack_start + 0x1000;
 
 
-	.shared_memory (NOLOAD) :
-	{
-		. = ALIGN(8);
-		*(.shared_memory)
-		*(.shared_memory*)
-		. = ALIGN(8);
-	} > SHAREDMEM
+	/* .shared_memory (NOLOAD) : */
+	/* { */
+	/* 	. = ALIGN(8); */
+	/* 	*(.shared_memory) */
+	/* 	*(.shared_memory*) */
+	/* 	. = ALIGN(8); */
+	/* } > SHAREDMEM */
 
 	.sharedmemindex (NOLOAD) :
 	{
