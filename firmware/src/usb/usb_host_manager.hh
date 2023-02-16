@@ -8,17 +8,19 @@
 class UsbHostManager {
 private:
 	static inline MidiHost *_midihost_instance;
+	static inline MSCHost *_mschost_instance;
 	mdrivlib::Pin src_enable;
 	USBH_HandleTypeDef usbhost;
 	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
-	MSCHost msc_host{usbhost};
+	MSCHost msc_host{usbhost, MetaModule::Volume::USB};
 
 public:
 	UsbHostManager(mdrivlib::PinNoInit enable_5v)
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
 		src_enable.low();
 		_midihost_instance = &midi_host;
+		_mschost_instance = &msc_host;
 	}
 
 	void init() {
@@ -89,6 +91,7 @@ public:
 				}
 				if (classcode == USB_MSC_CLASS && !strcmp(classname, "MSC")) {
 					printf_("MSC connected\n");
+					_mschost_instance->connect();
 				}
 			} break;
 
