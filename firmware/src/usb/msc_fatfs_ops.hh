@@ -21,28 +21,11 @@ public:
 		return USBH_MSC_IsReady(&usbh) ? 0 : STA_NODISK;
 	}
 
-	// FatFS calls this :
-	// - in f_mkfs(),
-	// - and when it mouts the disk in f_mount(_,_,1)
-	// - and the first time FatFS attempts a read/write/stat if the disk is not yet mounted
 	DSTATUS initialize() override {
-		printf_("msc: init\n");
 		return 0;
 	}
 
 	DRESULT read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) override {
-		// if (!sd.detect_card()) {
-		// 	_status = Status::NoCard;
-		// 	return RES_NOTRDY;
-		// }
-
-		// const uint32_t size_bytes = num_sectors * sd.BlockSize;
-		// auto ok = sd.read({dst, size_bytes}, sector_start);
-		// return ok ? RES_OK : RES_ERROR;
-
-		// return RES_OK;
-		printf_("msc: read %p, %d, %d\n", dst, sector_start, num_sectors);
-
 		DRESULT res = RES_ERROR;
 		MSC_LUNTypeDef info;
 		USBH_StatusTypeDef status = USBH_OK;
@@ -85,18 +68,6 @@ public:
 	}
 
 	DRESULT write(const uint8_t *src, uint32_t sector_start, uint32_t num_sectors) override {
-		// if (!sd.detect_card()) {
-		// 	_status = Status::NoCard;
-		// 	return RES_NOTRDY;
-		// }
-
-		// const uint32_t size_bytes = num_sectors * sd.BlockSize;
-		// auto ok = sd.write({src, size_bytes}, sector_start);
-		// return ok ? RES_OK : RES_ERROR;
-
-		// return RES_OK;
-		printf_("msc: write %p, %d, %d\n", src, sector_start, num_sectors);
-
 		DRESULT res = RES_ERROR;
 		MSC_LUNTypeDef info;
 		USBH_StatusTypeDef status = USBH_OK;
@@ -144,33 +115,26 @@ public:
 	}
 
 	DRESULT ioctl(uint8_t cmd, uint8_t *buff) override {
-		// if (_status == Status::NotInit)
-		// 	return RES_NOTRDY;
-		printf_("msc: ioctl %d\n", cmd);
-
 		MSC_LUNTypeDef info;
 		uint8_t lun = 0; //????
 
 		switch (cmd) {
 			case GET_SECTOR_SIZE: // Get R/W sector size (WORD)
-				if (USBH_MSC_GetLUNInfo(&usbh, lun, &info) == USBH_OK)
-					*(DWORD *)buff = info.capacity.block_size;
-				else
+				if (USBH_MSC_GetLUNInfo(&usbh, lun, &info) != USBH_OK)
 					return RES_ERROR;
+				*(DWORD *)buff = info.capacity.block_size;
 				break;
 
 			case GET_BLOCK_SIZE: // Get erase block size in unit of sector (DWORD)
-				if (USBH_MSC_GetLUNInfo(&usbh, lun, &info) == USBH_OK)
-					*(DWORD *)buff = info.capacity.block_size / 512;
-				else
+				if (USBH_MSC_GetLUNInfo(&usbh, lun, &info) != USBH_OK)
 					return RES_ERROR;
+				*(DWORD *)buff = info.capacity.block_size / 512;
 				break;
 
 			case GET_SECTOR_COUNT:
-				if (USBH_MSC_GetLUNInfo(&usbh, lun, &info) == USBH_OK)
-					*(DWORD *)buff = info.capacity.block_nbr;
-				else
+				if (USBH_MSC_GetLUNInfo(&usbh, lun, &info) != USBH_OK)
 					return RES_ERROR;
+				*(DWORD *)buff = info.capacity.block_nbr;
 				break;
 
 			case CTRL_SYNC:
@@ -178,6 +142,7 @@ public:
 			case CTRL_TRIM:
 				break;
 			case CTRL_EJECT:
+				//TODO: eject?
 				break;
 
 			default:
