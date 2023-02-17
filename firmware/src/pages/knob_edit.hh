@@ -78,7 +78,7 @@ struct KnobEditPage : PageBase {
 		lv_group_set_editing(group, true);
 
 		this_module_id = PageList::get_selected_module_id();
-		auto &patch = view_patch;
+		auto &patch = patch_storage.get_view_patch();
 		// auto patch_id = PageList::get_selected_patch_id();
 		// auto &patch = patch_list.get_patch(patch_id);
 
@@ -189,7 +189,7 @@ private:
 		};
 		page->patch_mod_queue.put(SetStaticParam{.param = sp});
 
-		auto &patch = page->view_patch;
+		auto &patch = page->patch_storage.get_view_patch();
 		patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 	}
 

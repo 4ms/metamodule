@@ -77,12 +77,6 @@ void main() {
 
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
-	auto *testpd = new PatchData;
-	auto patchraw = DefaultPatches::get_patch(0);
-	Debug::Pin2::high();
-	yaml_raw_to_patch(patchraw, *testpd);
-	Debug::Pin2::low();
-
 	printf_("A7 initialized. Unlocking M4\n");
 
 	// Tell M4 we're done with init

@@ -14,9 +14,9 @@ namespace MetaModule
 class Ui {
 private:
 	ParamCache &param_cache;
+	PatchStorage &patch_storage;
 	PatchPlayLoader &patch_playloader;
 
-	PatchData view_patch;
 	MessageQueue msg_queue;
 	PageManager page_manager;
 	Params params;
@@ -28,15 +28,12 @@ private:
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchPlayLoader &patch_playloader, ParamCache &pc, PatchModQueue &patch_mod_queue)
-		: param_cache{pc} // , patch_storage{patch_storage}
+	Ui(PatchPlayLoader &patch_playloader, PatchStorage &patch_storage, ParamCache &pc, PatchModQueue &patch_mod_queue)
+		: param_cache{pc}
+		, patch_storage{patch_storage}
 		, patch_playloader{patch_playloader}
 		, msg_queue{1024}
-		, page_manager{view_patch, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
-		if (yaml_raw_to_patch(DefaultPatches::get_patch(2), view_patch))
-			printf_("Loaded view patch\n");
-		else
-			printf_("FAILED to load view patch\n");
+		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
 	void start() {

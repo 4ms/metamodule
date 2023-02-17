@@ -63,8 +63,8 @@ struct PatchSelectorPage : PageBase {
 
 	void refresh_patchlist() {
 		std::string patchnames;
-		for (unsigned i = 0; i < DefaultPatches::num_patches(); i++) {
-			patchnames += DefaultPatches::get_filename(i).data();
+		for (unsigned i = 0; i < patch_storage.patch_list.num_patches(); i++) {
+			patchnames += patch_storage.patch_list.get_patch_name(i).data();
 			patchnames += '\n';
 		}
 		// remove trailing \n
@@ -77,7 +77,7 @@ struct PatchSelectorPage : PageBase {
 		unsigned default_sel = patchnames.size() > 10 ? 5 : patchnames.size() / 2;
 		lv_roller_set_selected(roller, default_sel, LV_ANIM_OFF);
 		printf_("Patch Selector page refreshed %d patches, preselecting %d\n",
-				DefaultPatches::num_patches(),
+				patch_storage.patch_list.num_patches(),
 				lv_roller_get_selected(roller));
 	}
 
@@ -85,22 +85,20 @@ struct PatchSelectorPage : PageBase {
 		if (should_show_patchview) {
 			should_show_patchview = false;
 			printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
-
-			// patch_storage.load_view_patch(selected_patch);
-
+			patch_storage.load_view_patch(selected_patch);
 			PageList::set_selected_patch_id(selected_patch);
 			PageList::request_new_page(PageId::PatchView);
 			blur();
 		}
 
-		// if (!patch_storage.patch_list.is_ready()) {
-		// 	if (patchlist_was_ready) {
-		// 		// lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
-		// 		// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-		// 		patchlist_was_ready = false;
-		// 	}
-		// 	return;
-		// }
+		if (!patch_storage.patch_list.is_ready()) {
+			if (patchlist_was_ready) {
+				// lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
+				// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+				patchlist_was_ready = false;
+			}
+			return;
+		}
 
 		if (!patchlist_was_ready) {
 			// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
@@ -109,9 +107,9 @@ struct PatchSelectorPage : PageBase {
 			patchlist_was_ready = true;
 		}
 
-		// if (patch_storage.patch_list.is_modified()) {
-		// 	refresh_patchlist();
-		// }
+		if (patch_storage.patch_list.is_modified()) {
+			refresh_patchlist();
+		}
 	}
 
 	void blur() override {

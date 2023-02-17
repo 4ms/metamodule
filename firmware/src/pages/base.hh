@@ -15,7 +15,7 @@ namespace MetaModule
 enum class PageChangeDirection { Back, Forward, Jump };
 
 struct PatchInfo {
-	PatchData &view_patch;
+	PatchStorage &patch_storage;
 	PatchPlayLoader &patch_playloader;
 	Params &params;
 	MetaParams &metaparams;
@@ -24,7 +24,7 @@ struct PatchInfo {
 };
 
 struct PageBase {
-	PatchData &view_patch;
+	PatchStorage &patch_storage;
 	PatchPlayLoader &patch_playloader;
 	Params &params;
 	MetaParams &metaparams;
@@ -35,7 +35,7 @@ struct PageBase {
 	lv_obj_t *screen = nullptr;
 
 	PageBase(PatchInfo info)
-		: view_patch{info.view_patch}
+		: patch_storage{info.patch_storage}
 		, patch_playloader{info.patch_playloader}
 		, params{info.params}
 		, metaparams{info.metaparams}
