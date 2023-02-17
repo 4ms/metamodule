@@ -127,6 +127,31 @@ rymldir = $(SHARED)/patch_convert/ryml/rapidyaml
 SOURCES += $(wildcard $(rymldir)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(rymldir)/ext/c4core/src/c4/*.cpp)
 
+## LVGL / Gui-Guider
+LVGL_DIR=$(LIBDIR)/lvgl
+LVGL_DIR_NAME=lvgl
+SOURCES += $(shell find -L $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/widgets -name \*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/flex/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/grid/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/others/gridnav/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/themes/default/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/core/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/sw/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/widgets/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/font/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/misc/*.c)
+SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/hal/*.c)
+
+# SOURCES += $(wildcard src/pages/fonts/*.c)
+SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
+SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
+SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
+SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
+SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
+
+SOURCES += src/pages/page_manager.cc
 
 INCLUDES =
 INCLUDES += -I$(DEVICEDIR)/include 
@@ -163,6 +188,7 @@ INCLUDES +=	-I$(SHARED)/patch_convert/ryml
 INCLUDES += -I$(rymldir)/src
 INCLUDES += -I$(rymldir)/ext/c4core/src
 INCLUDES += -I$(SHARED)/etl/include
+INCLUDES +=	-I$(LIBDIR)/lvgl
 
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 

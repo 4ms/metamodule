@@ -52,7 +52,7 @@ void main() {
 	ParamCache param_cache;		   //needed, same, right? syncs M4-gui and A7-audio?
 	PatchModQueue patch_mod_queue; //queue lives on A7 but is now filled from M4 (gui)
 
-	Ui ui{patch_playloader, param_cache, patch_mod_queue}; //on M4.
+	// Ui ui{patch_playloader, param_cache, patch_mod_queue}; //on M4.
 	//PatchPlayerLoader(A7) => a way to know what the currently playing patch is, and to request loading a new patch
 	//Gui uses PatchPlayLoader for cur_patch_index()->int and request_load_patch(id)
 
@@ -87,7 +87,6 @@ void main() {
 		;
 
 	audio.start();
-	ui.start(); //=>M4
 	//Probably need some sort of PatchPlayLoader queue checker (to check for new patch load requests)
 
 	while (true) {

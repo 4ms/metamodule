@@ -10,6 +10,7 @@
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include "printf.h"
+#include "util/countzip.hh"
 
 namespace MetaModule
 {
