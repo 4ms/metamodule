@@ -9,14 +9,15 @@ _estack = _SHAREDIDX_START;
 MEMORY
 {
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
-	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = 0x00050000 /*320kB for code*/
+	m_text 		 (RX)  	: ORIGIN = 0x10000000, LENGTH = 0x00050000 /*320kB for code*/
+	m_text_ddr   (RX)  	: ORIGIN = 0xC0200000, LENGTH = 16M /*320kB for code*/
 
     /* Stack: 0x10050000 to 0x1005FF00 == >63kB stack*/
 
 	SHAREDMEMINDEX (RW) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE
 
 	/* m_data is for .data (ro) and .bss: all global vars: hopefully all UI assets, default patches */
-	m_data	     (RW)	: ORIGIN = 0xC0200000, LENGTH = 30M  /* END = 0xC200'0000 */
+	m_data	     (RW)	: ORIGIN = ORIGIN(m_text_ddr) + LENGTH(m_text_ddr), LENGTH = 14M  /* END = 0xC200'0000 */
 	HEAP         (RW)   : ORIGIN = 0xC5000000, LENGTH = 128M /* END = 0xCD00'0000 */
 }
 
@@ -32,6 +33,11 @@ SECTIONS
     . = ALIGN(4);
   } > m_interrupts
  
+  .textddr :
+  {
+	*(.text.lv_*)
+	*(.text.*c43yml*)
+  } > m_text_ddr
 
   .text :
   {
@@ -49,6 +55,7 @@ SECTIONS
     _etext = .;        /* define a global symbols at end of code */
   } > m_text
 
+
   /* Constant data into ROM memory*/
   .rodata :
   {
@@ -56,7 +63,7 @@ SECTIONS
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(4);
-  } > m_text
+  } > m_data
 
   .ARM.extab   : { 
   	. = ALIGN(4);
@@ -118,7 +125,7 @@ SECTIONS
   } > m_data
 
   __DATA_END = __DATA_ROM + (_edata - _sdata);
-  text_end = ORIGIN(m_text) + LENGTH(m_text);
+  text_end = ORIGIN(m_text_ddr) + LENGTH(m_text_ddr);
   ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
 
   /* .resource_table : */

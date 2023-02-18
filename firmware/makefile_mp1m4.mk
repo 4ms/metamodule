@@ -1,5 +1,7 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
+USE_FEWER_MODULES ?= 0
+
 $(info --------------------)
 
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
@@ -144,6 +146,7 @@ SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/font/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/misc/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/hal/*.c)
 
+SOURCES += src/pages/page_manager.cc
 # SOURCES += $(wildcard src/pages/fonts/*.c)
 SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
@@ -151,7 +154,38 @@ SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
 
-SOURCES += src/pages/page_manager.cc
+ifeq "$(USE_FEWER_MODULES)" "1"
+SOURCES += src/pages/images/modules/Djembe_artwork_240.c
+SOURCES += src/pages/images/modules/StMix_artwork_240.c
+SOURCES += src/pages/images/modules/PEG_artwork_240.c
+SOURCES += src/pages/images/modules/SMR_artwork_240.c
+SOURCES += src/pages/images/modules/MultiLFO_artwork_240.c
+SOURCES += src/pages/images/modules/PitchShift_artwork_240.c
+SOURCES += src/pages/images/modules/HPF_artwork_240.c
+SOURCES += src/pages/images/modules/InfOsc_artwork_240.c
+SOURCES += src/pages/images/modules/KPLS_artwork_240.c
+SOURCES += src/pages/images/modules/Freeverb_artwork_240.c
+SOURCES += src/pages/images/modules/Seq8_artwork_240.c
+SOURCES += src/pages/images/modules/EnOsc_artwork_240.c
+
+SOURCES += src/pages/images/modules/Djembe_artwork_120.c
+SOURCES += src/pages/images/modules/StMix_artwork_120.c
+SOURCES += src/pages/images/modules/PEG_artwork_120.c
+SOURCES += src/pages/images/modules/MultiLFO_artwork_120.c
+SOURCES += src/pages/images/modules/SMR_artwork_120.c
+SOURCES += src/pages/images/modules/PitchShift_artwork_120.c
+SOURCES += src/pages/images/modules/HPF_artwork_120.c
+SOURCES += src/pages/images/modules/InfOsc_artwork_120.c
+SOURCES += src/pages/images/modules/KPLS_artwork_120.c
+SOURCES += src/pages/images/modules/Freeverb_artwork_120.c
+SOURCES += src/pages/images/modules/Seq8_artwork_120.c
+SOURCES += src/pages/images/modules/EnOsc_artwork_120.c
+else
+SOURCES += $(wildcard src/pages/images/modules/*.c)
+endif
+# SOURCES += $(wildcard src/pages/images/ui/*.c)
+SOURCES += $(wildcard src/pages/images/components/*.c)
+
 
 INCLUDES =
 INCLUDES += -I$(DEVICEDIR)/include 
