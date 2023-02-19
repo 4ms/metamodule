@@ -52,6 +52,7 @@ SECTIONS
     _etext = .;        /* define a global symbols at end of code */
   } > m_text
 
+
   /* Constant data into ROM memory*/
   .rodata :
   {
@@ -59,7 +60,7 @@ SECTIONS
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(4);
-  } > m_text
+  } > m_data
 
   .ARM.extab   : { 
   	. = ALIGN(4);
@@ -121,7 +122,7 @@ SECTIONS
   } > m_data
 
   __DATA_END = __DATA_ROM + (_edata - _sdata);
-  text_end = ORIGIN(m_text) + LENGTH(m_text);
+  text_end = ORIGIN(m_text_ddr) + LENGTH(m_text_ddr);
   ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
 
   /* .resource_table : */

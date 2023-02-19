@@ -1,7 +1,7 @@
 #pragma once
 #include "params.hh"
 #include "patch_mod_queue.hh"
-#include "patch_player.hh"
+#include "patch_playloader_proxy.hh"
 #include "patch_storage.hh"
 #include "ui_audio_mailbox.hh"
 
@@ -26,13 +26,13 @@ class PageManager {
 public:
 	PageBase *cur_page = &page_patchsel;
 
-	PageManager(PatchData &view_patch,
-				PatchPlayLoader &patch_playloader,
+	PageManager(PatchStorage &patch_storage,
+				PatchPlayLoaderProxy &patch_playloader,
 				Params &params,
 				MetaParams &metaparams,
 				MessageQueue &msg_queue,
 				PatchModQueue &patch_mod_queue)
-		: info{view_patch, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
+		: info{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
 
 	void init();

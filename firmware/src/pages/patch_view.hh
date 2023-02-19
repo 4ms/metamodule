@@ -10,6 +10,7 @@
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include "printf.h"
+#include "util/countzip.hh"
 
 namespace MetaModule
 {
@@ -93,11 +94,10 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		// const auto &patch = patch_storage.get_view_patch();
-		const auto &patch = view_patch;
+		const auto &patch = patch_storage.get_view_patch();
 		patch_instance = &patch;
 
-		// printf_("patch id = %d\n", patch_storage.get_view_patch_id());
+		printf_("patch id = %d\n", patch_storage.get_view_patch_id());
 		if (patch.patch_name.length() == 0)
 			return;
 
@@ -232,7 +232,7 @@ struct PatchViewPage : PageBase {
 		if (this_module_obj == page->playbut)
 			return;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
-		const auto &patch = page->view_patch;
+		const auto &patch = page->patch_storage.get_view_patch();
 		const auto this_slug = patch.module_slugs[module_id];
 		lv_label_set_text(page->module_name, this_slug.c_str());
 

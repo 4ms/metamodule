@@ -3,7 +3,7 @@
 #include "lvgl/lvgl.h"
 #include "params.hh"
 #include "patch_mod_queue.hh"
-#include "patch_playloader.hh"
+#include "patch_playloader_proxy.hh"
 #include "patch_storage.hh"
 #include "ui_audio_mailbox.hh"
 
@@ -15,8 +15,8 @@ namespace MetaModule
 enum class PageChangeDirection { Back, Forward, Jump };
 
 struct PatchInfo {
-	PatchData &view_patch;
-	PatchPlayLoader &patch_playloader;
+	PatchStorage &patch_storage;
+	PatchPlayLoaderProxy &patch_playloader;
 	Params &params;
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
@@ -24,8 +24,8 @@ struct PatchInfo {
 };
 
 struct PageBase {
-	PatchData &view_patch;
-	PatchPlayLoader &patch_playloader;
+	PatchStorage &patch_storage;
+	PatchPlayLoaderProxy &patch_playloader;
 	Params &params;
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
@@ -35,7 +35,7 @@ struct PageBase {
 	lv_obj_t *screen = nullptr;
 
 	PageBase(PatchInfo info)
-		: view_patch{info.view_patch}
+		: patch_storage{info.patch_storage}
 		, patch_playloader{info.patch_playloader}
 		, params{info.params}
 		, metaparams{info.metaparams}
