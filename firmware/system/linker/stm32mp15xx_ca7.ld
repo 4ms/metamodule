@@ -4,8 +4,6 @@ ENTRY(_Reset)
 
 INCLUDE system/linker/memory.ld
 
-/* TARGET(binary) */
-/* INPUT(build/mp1corem4/medium/ddr_code.bin) */
 
 MEMORY
 {
@@ -18,7 +16,7 @@ MEMORY
 	SHAREDMEMINDEX (rw) : ORIGIN = _A7_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
 	SYSRAM (rw)			: ORIGIN = 0x2FFC0000,		LENGTH = 256K
 
-	/* M4_EXTCODE (RW)   	: ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ */
+	M4_EXCODE (rwx)   	: ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ
 }
 
 /* A7 stacks are at end of RAM */
@@ -139,9 +137,9 @@ SECTIONS
 		*(.virtdrive)
 	} > VIRTDRIVE
 
-	/* .m4_extcode : { */
-		/* build/mp1corem4/medium/ddr_code.bin */
-	/* } > M4_EXTCODE */
+	.m4_extcode : {
+		INCLUDE m4_ddr_code.ld
+	} > M4_EXCODE
 
 
 	/* User Stack: 0x2FFF0000 - 0x2FFFFD00 */

@@ -328,7 +328,8 @@ endif
 
 EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines
 
-EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG)
+EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG) \
+				-L$(BUILDDIR_MP1M4)/$(target_board)
 
 EXTDEF ?= METAMODULE_NORMAL_MODE
 
