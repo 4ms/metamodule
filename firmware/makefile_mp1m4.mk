@@ -32,7 +32,7 @@ usb_src := src/usb
 usbhost_libdir = $(LIBDIR)/stm32-usb-host-lib
 usbdev_libdir = $(LIBDIR)/stm32-usb-device-lib
 STARTUP = $(TARGETDEVICEDIR_CM4)/boot/startup_stm32mp157cxx_cm4.s
-SYSTEM = $(DEVICEBASE)/stm32mp157c/templates/system_stm32mp1xx.c
+SYSTEM = $(core_src)/system_stm32mp1xx.c
 
 SHARED = src/shared
 
@@ -175,12 +175,15 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 
 include makefile_common.mk
 
-all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h
+all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h $(target_src)/firmware_m4_ddr_code.h
 
 $(target_src)/firmware_m4.h: $(BUILDDIR)/firmware.bin
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) ../../../$@
 
 $(target_src)/firmware_m4_vectors.h: $(BUILDDIR)/vectors.bin
+	cd $(dir $<) && xxd -i -c 8 $(notdir $<) ../../../$@
+
+$(target_src)/firmware_m4_ddr_code.h: $(BUILDDIR)/ddr_code.bin
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) ../../../$@
 
 $(BUILDDIR)/vectors.bin: $(BUILDDIR)/$(BINARYNAME).elf
@@ -195,6 +198,11 @@ $(BUILDDIR)/firmware.bin: $(BUILDDIR)/$(BINARYNAME).elf
 		-j .rodata \
 		-j .init_array \
 		-j .data \
+		$< $@
+
+$(BUILDDIR)/ddr_code.bin: $(BUILDDIR)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy -O binary \
+		-j .ddr_code \
 		$< $@
 
 mini: all
