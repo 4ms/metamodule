@@ -1,27 +1,25 @@
 ENTRY(Reset_Handler)
 
+INCLUDE system/linker/memory.ld
 
-_SHARED_PTR_SIZE = 256;
-_SHAREDIDX_START = (0x10060000 - _SHARED_PTR_SIZE);
-
-_estack = _SHAREDIDX_START;
 
 MEMORY
 {
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
-	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = 0x00050000 /*320kB for code*/
-
-    /* Stack: 0x10050000 to 0x1005FF00 == >63kB stack*/
+	m_text       (RX)  	: ORIGIN = _M4_CODE, LENGTH = _M4_CODE_SZ
 
 	SHAREDMEMINDEX (RW) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE
 
 	/* m_data is for .data (ro) and .bss: all global vars: hopefully all UI assets, default patches */
-	m_data	     (RW)	: ORIGIN = 0xC0200000, LENGTH = 30M  /* END = 0xC200'0000 */
-	HEAP         (RW)   : ORIGIN = 0xC5000000, LENGTH = 128M /* END = 0xCD00'0000 */
+	/* startup.s copies from somewhre in the middle of .text (probably .rodata) to m_data */
+
+	m_data	     (RW)	: ORIGIN = _M4_EXTDATA, LENGTH = _M4_EXTDATA_SZ
+	ddr_code     (RX)   : ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ
+	HEAP         (RW)   : ORIGIN = _M4_HEAP, 	LENGTH = _M4_HEAP_SZ
 }
 
-_params_ptr = ORIGIN(SHAREDMEMINDEX);
-/* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
+_estack = _M4_STACK_END;
+_shared_list = _M4_SHARED_LIST;
 
 SECTIONS
 {
@@ -31,7 +29,12 @@ SECTIONS
     KEEP(*(.isr_vector))
     . = ALIGN(4);
   } > m_interrupts
- 
+
+  .ddr_code :
+  {
+	*lfs.o(.text.lfs_*)
+	*lfs_*.o(.text.lfs_*)
+  } > ddr_code
 
   .text :
   {

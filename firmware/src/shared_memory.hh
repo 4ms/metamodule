@@ -5,23 +5,23 @@
 #include <cstdint>
 
 // Defined in linker script
-extern uint32_t *_params_ptr;
+extern uint32_t _shared_list[];
 
 struct SharedMemory {
 	SharedMemory() = delete;
 
 	template<typename T>
 	static void write_address_of(T *object, uint32_t offset) {
-		auto *loc_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
+		auto *loc_ptr = reinterpret_cast<uint32_t *>(_shared_list);
 		*(loc_ptr + offset) = reinterpret_cast<uint32_t>(object);
 
-		auto addr = &_params_ptr + offset * 4;
+		auto addr = _shared_list + offset * 4;
 		mdrivlib::SystemCache::clean_dcache_by_addr(addr);
 	}
 
 	template<typename T>
 	static T read_address_of(uint32_t offset) {
-		auto *loc_ptr = reinterpret_cast<uint32_t *>(&_params_ptr);
+		auto *loc_ptr = reinterpret_cast<uint32_t *>(_shared_list);
 		return reinterpret_cast<T>(*(loc_ptr + offset));
 	}
 

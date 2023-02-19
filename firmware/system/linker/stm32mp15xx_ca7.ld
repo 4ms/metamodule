@@ -2,40 +2,28 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(_Reset)
 
-_DMABUF_SIZE = 1024 * 1024; /* 1MB */
-_DMABUF_END = 0xE0000000;
-_DMABUF_BASE = (_DMABUF_END - _DMABUF_SIZE);
+INCLUDE system/linker/memory.ld
 
-_VIRTDRIVE_BASE = 0xCD000000;
-_VIRTDRIVE_SIZE = 0x08000000;
-_VIRTDRIVE_END =  0xD5000000;
-
-_HEAP_BASE = _VIRTDRIVE_END;
-_HEAP_END = _DMABUF_BASE;
-_HEAP_SIZE = _HEAP_END - _HEAP_BASE;
-
-_SHARED_PTR_SIZE = 256;
-_SHAREDIDX_START = (0x30060000 - _SHARED_PTR_SIZE);
-_params_ptr = _SHAREDIDX_START;
-/* 0x3005FF00: 256 Bytes of shared memory addresses = 64 pointers */
+/* TARGET(binary) */
+/* INPUT(build/mp1corem4/medium/ddr_code.bin) */
 
 MEMORY
 {
-	/* 0xC0000000 - 0xC200'0000 is for M4 RAM = 32MB??? */
-    ROM (rx) 			: ORIGIN = 0xC2000040, 		LENGTH = (16M - 0x40) /* END = 0xC300'0000 */
-    RAM (rw) 			: ORIGIN = 0xC3000000, 		LENGTH = 32M 		  /* END = 0xC500'0000 */
-	/* 0xC5000000 - 0xCD000000 is for M4 HEAP = 128MB*/
-	VIRTDRIVE (rw) 		: ORIGIN = _VIRTDRIVE_BASE, LENGTH = _VIRTDRIVE_SIZE /* 128MB RamDisk */
-	HEAP (rw) 			: ORIGIN = _HEAP_BASE,		LENGTH = _HEAP_SIZE /* 176MB audio heap */
-	DMABUF (rw) 		: ORIGIN = _DMABUF_BASE, 	LENGTH = _DMABUF_SIZE /* 1MB */
+    ROM (rx)			: ORIGIN = _A7_CODE,		LENGTH = _A7_CODE_SZ
+    RAM (rw)			: ORIGIN = _A7_RAM,			LENGTH = _A7_RAM_SZ
+	VIRTDRIVE (rw)		: ORIGIN = _VIRTDRIVE,		LENGTH = _VIRTDRIVE_SZ 
+	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
+	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
 
-	/* SHAREDMEM (rw) 		: ORIGIN = 0x30040000, 		LENGTH = (128K - _SHARED_PTR_SIZE) */
-	SHAREDMEMINDEX (rw) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE
-	SYSRAM (rw) 		: ORIGIN = 0x2FFC0000, 		LENGTH = 192K
-	SYSDMARAM (rw) 		: ORIGIN = 0x2FFF0000, 		LENGTH = 64K
-	/* SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, 		LENGTH = 64K */
+	SHAREDMEMINDEX (rw) : ORIGIN = _A7_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
+	SYSRAM (rw)			: ORIGIN = 0x2FFC0000,		LENGTH = 256K
+
+	/* M4_EXTCODE (RW)   	: ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ */
 }
 
+/* A7 stacks are at end of RAM */
+
+_shared_list = _A7_SHARED_LIST;
 
 SECTIONS
 {
@@ -127,7 +115,7 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		_sheap = .;
-		. += _HEAP_SIZE;
+		. += _A7_HEAP_SZ;
 		_eheap = .;
 	} > HEAP
 
@@ -136,12 +124,6 @@ SECTIONS
 		. = ALIGN(8);
         *(.ddma)
 	} > DMABUF
-
-	.sys_dma (NOLOAD):
-	{
-		. = ALIGN(8);
-        *(.sys_dma)
-	} > SYSDMARAM
 
 	.sysram (NOLOAD):
 	{
@@ -156,6 +138,11 @@ SECTIONS
 	{
 		*(.virtdrive)
 	} > VIRTDRIVE
+
+	/* .m4_extcode : { */
+		/* build/mp1corem4/medium/ddr_code.bin */
+	/* } > M4_EXTCODE */
+
 
 	/* User Stack: 0x2FFF0000 - 0x2FFFFD00 */
     /* _user_stack_start = ORIGIN(SYSRAM_STACK); */
@@ -177,10 +164,10 @@ SECTIONS
 
 	/* .shared_memory (NOLOAD) : */
 	/* { */
-	/* 	. = ALIGN(8); */
-	/* 	*(.shared_memory) */
-	/* 	*(.shared_memory*) */
-	/* 	. = ALIGN(8); */
+	/*	. = ALIGN(8); */
+	/*	*(.shared_memory) */
+	/*	*(.shared_memory*) */
+	/*	. = ALIGN(8); */
 	/* } > SHAREDMEM */
 
 	.sharedmemindex (NOLOAD) :
