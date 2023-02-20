@@ -44,20 +44,13 @@ void main() {
 
 	PatchPlayer patch_player;
 	PatchPlayLoader patch_playloader{patch_player};
-	//add a message queue for loading raw patch file data or complete yml data from M4
-	//Can use an HSEM and shared ptr to PatchData on the heap:
-	//M4 locks->writes->unlocks triggers A7 ISR to lock->load PatchData into player-> unlock
-	//M4 would ignore, try again if it can't lock
 
-	// "Thread"-shared data:
-	ParamCache param_cache;		   //needed, same, right? syncs M4-gui and A7-audio?
-	PatchModQueue patch_mod_queue; //queue lives on A7 but is now filled from M4 (gui)
+	ParamCache param_cache;
+	PatchModQueue patch_mod_queue;
 
 	PatchStorageProxy patch_storage_proxy;
 
-	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue}; //on M4.
-	//PatchPlayerLoader(A7) => a way to know what the currently playing patch is, and to request loading a new patch
-	//Gui uses PatchPlayLoader for cur_patch_index()->int and request_load_patch(id)
+	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,

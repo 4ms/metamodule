@@ -12,9 +12,7 @@ namespace MetaModule
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info}
-		, base(lv_obj_create(nullptr))
-	// , patch_view_page{info}
-	{
+		, base(lv_obj_create(nullptr)) {
 		PageList::register_page(this, PageId::PatchSel);
 
 		init_bg(base);
@@ -56,15 +54,15 @@ struct PatchSelectorPage : PageBase {
 	void init() override {
 		LVGLMemory::print_mem_usage("PatchSel::init in");
 
-		refresh_patchlist();
+		state = State::TryingToRequestPatchList;
 
 		LVGLMemory::print_mem_usage("PatchSel::init out");
 	}
 
-	void refresh_patchlist() {
+	void refresh_patchlist(PatchFileList &patchfiles) {
 		std::string patchnames;
-		for (unsigned i = 0; i < patch_storage.patch_list.num_patches(); i++) {
-			patchnames += patch_storage.patch_list.get_patch_name(i).data();
+		for (auto &p : patchfiles) {
+			patchnames += p.patchname.c_str();
 			patchnames += '\n';
 		}
 		// remove trailing \n
@@ -77,11 +75,37 @@ struct PatchSelectorPage : PageBase {
 		unsigned default_sel = patchnames.size() > 10 ? 5 : patchnames.size() / 2;
 		lv_roller_set_selected(roller, default_sel, LV_ANIM_OFF);
 		printf_("Patch Selector page refreshed %d patches, preselecting %d\n",
-				patch_storage.patch_list.num_patches(),
+				patchfiles.size(),
 				lv_roller_get_selected(roller));
 	}
 
 	void update() override {
+		// Check if M4 sent us a message:
+		patch_storage.read_messages();
+		if (patch_storage.does_patchlist_require_refresh())
+			state = State::TryingToRequestPatchList;
+
+		switch (state) {
+			case State::TryingToRequestPatchList:
+				if (patch_storage.request_patchlist())
+					state = State::RequestedPatchList;
+				break;
+
+			case State::RequestedPatchList:
+				if (patch_storage.is_patchlist_refreshed())
+					state = State::LoadingPatchList;
+				break;
+
+			case State::LoadingPatchList:
+				refresh_patchlist(patch_storage.get_patch_list());
+				state = State::PatchListLoaded;
+				break;
+
+			case State::PatchListLoaded:
+				break;
+		}
+		//TODO: Display state: "Refreshing...", "Loading..."
+
 		if (should_show_patchview) {
 			should_show_patchview = false;
 			printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
@@ -91,25 +115,15 @@ struct PatchSelectorPage : PageBase {
 			blur();
 		}
 
-		if (!patch_storage.patch_list.is_ready()) {
-			if (patchlist_was_ready) {
-				// lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
-				// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-				patchlist_was_ready = false;
-			}
-			return;
-		}
+		// lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
+		// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
 
-		if (!patchlist_was_ready) {
-			// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-			lv_indev_set_group(lv_indev_get_next(nullptr), group);
-			lv_group_set_editing(group, true);
-			patchlist_was_ready = true;
-		}
-
-		if (patch_storage.patch_list.is_modified()) {
-			refresh_patchlist();
-		}
+		// 		if (!patchlist_was_ready) {
+		// 			// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		// 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		// 			lv_group_set_editing(group, true);
+		// 			patchlist_was_ready = true;
+		// 		}
 	}
 
 	void blur() override {
@@ -131,7 +145,7 @@ private:
 	lv_obj_t *header_text;
 	lv_obj_t *base;
 
-	// PatchViewPage patch_view_page;
+	enum class State { PatchListLoaded, TryingToRequestPatchList, RequestedPatchList, LoadingPatchList } state;
 };
 
 } // namespace MetaModule

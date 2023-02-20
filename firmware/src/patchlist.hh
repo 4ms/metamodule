@@ -127,6 +127,10 @@ struct PatchList {
 		ModuleTypeSlug patchname;
 	};
 
+	std::vector<PatchFile> &get_patchfile_list() {
+		return _patch_data;
+	}
+
 private:
 	// FIXME: We could get fragmentation if patch list is changed frequently
 	// Use an arena or some separate memory area, which is wiped when we refresh (re-insert SD card)

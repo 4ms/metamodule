@@ -5,9 +5,11 @@
 #include "fatfs/fat_file_io.hh"
 #include "fatfs/ramdisk_ops.hh"
 #include "fatfs/sdcard_ops.hh"
+#include "inter_core_comm.hh"
 #include "littlefs/norflash_lfs.hh"
 #include "patch_fileio.hh"
 #include "qspi_flash_driver.hh"
+#include "shared_memory.hh"
 #include "volumes.hh"
 
 // - Ship with some patches on NORFlash
@@ -47,6 +49,8 @@ class PatchStorage {
 	// RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	// FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
+	InterCoreComm<ICCNum::Core2> comm;
+
 public:
 	PatchList patch_list;
 
@@ -67,6 +71,18 @@ public:
 		if (sdcard_mounted)
 			PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
 		sdcard_needs_rescan = false;
+
+		auto filelist = patch_list.get_patchfile_list();
+		SharedMemory::write_address_of(&filelist, SharedMemory::PatchListLocation);
+	}
+
+	void handle_messages() {
+		auto message = comm.get_last_message();
+		if (message == InterCoreComm::RequestRefreshPatchList) {
+			//start the process of refreshing
+			//when done:
+			comm.send_message(InterCoreComm::PatchListRefreshed);
+		}
 	}
 
 	void poll_media_change() {

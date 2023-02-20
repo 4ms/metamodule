@@ -25,12 +25,26 @@ struct SharedMemory {
 		return reinterpret_cast<T>(*(loc_ptr + offset));
 	}
 
+	static void write_value(uint32_t val, uint32_t offset) {
+		auto *loc_ptr = reinterpret_cast<uint32_t *>(_shared_list);
+		*(loc_ptr + offset) = val;
+
+		auto addr = _shared_list + offset * 4;
+		mdrivlib::SystemCache::clean_dcache_by_addr(addr);
+	}
+
+	static uint32_t read_value(uint32_t offset) {
+		auto *loc_ptr = reinterpret_cast<uint32_t *>(_shared_list);
+		return *(loc_ptr + offset);
+	}
+
 	enum : uint32_t {
 		ParamsPtrLocation = 0,
 		RamDiskLocation,
 		AuxSignalBlockLocation,
 		PatchPlayerLocation,
-		ParamCacheLocation,
+		InterCoreCommReqLocation,
+		PatchListLocation,
 	};
 };
 
