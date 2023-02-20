@@ -33,7 +33,7 @@ TARGETDEVICEDIR_CM4 = $(DRIVERLIB)/target/stm32mp1_cm4
 usb_src := src/usb
 usbhost_libdir = $(LIBDIR)/stm32-usb-host-lib
 usbdev_libdir = $(LIBDIR)/stm32-usb-device-lib
-STARTUP = $(TARGETDEVICEDIR_CM4)/boot/startup_stm32mp157cxx_cm4.s
+STARTUP = system/startup_stm32mp157cxx_cm4.s
 SYSTEM = $(core_src)/system_stm32mp1xx.c
 
 SHARED = src/shared
@@ -235,7 +235,7 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 
 include makefile_common.mk
 
-all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h $(BUILDDIR)/m4_ddr_code.ld
+all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h $(BUILDDIR)/m4_ddr_code.ld $(BUILDDIR)/m4_data.ld
 
 $(target_src)/firmware_m4.h: $(BUILDDIR)/firmware.bin
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) ../../../$@
@@ -252,16 +252,18 @@ $(BUILDDIR)/firmware.bin: $(BUILDDIR)/$(BINARYNAME).elf
 	arm-none-eabi-objcopy -O binary \
 		-j .text \
 		-j .startup_copro_fw.Reset_Handler \
-		-j .rodata \
 		-j .init_array \
-		-j .data \
 		$< $@
 
 $(BUILDDIR)/m4_ddr_code.bin: $(BUILDDIR)/$(BINARYNAME).elf
-	arm-none-eabi-objcopy -O binary \
-		-j .ddr_code \
-		$< $@
+	arm-none-eabi-objcopy -O binary -j .ddr_code $< $@
 
+$(BUILDDIR)/m4_data.bin: $(BUILDDIR)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy -O binary \
+		-j .rodata \
+		-j .data \
+		$< $@
+			
 $(BUILDDIR)/%.ld: $(BUILDDIR)/%.bin
 	cat $< | hexdump -v -e '"BYTE(0x" 1/1 "%02X" ")\n"' > $@
 

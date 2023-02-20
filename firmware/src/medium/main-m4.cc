@@ -66,6 +66,9 @@ void main() {
 	auto virtdrive =
 		SharedMemory::read_address_of<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(SharedMemory::RamDiskLocation);
 
+	volatile int x = 1;
+	while (x)
+		;
 	PatchStorage patch_storage;
 	ParamCache param_cache;		   //TODO: share underlying data with A7
 	PatchModQueue patch_mod_queue; //TODO: share with A7

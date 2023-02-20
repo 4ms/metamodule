@@ -50,7 +50,7 @@ defined in linker script */
   .type Reset_Handler, %function
 Reset_Handler:
   ldr   sp, =_estack
-
+  b .
   movs  r1, #0
   b  LoopCopyDataInit
 

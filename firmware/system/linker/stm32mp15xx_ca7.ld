@@ -16,7 +16,8 @@ MEMORY
 	SHAREDMEMINDEX (rw) : ORIGIN = _A7_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
 	SYSRAM (rw)			: ORIGIN = 0x2FFC0000,		LENGTH = 256K
 
-	M4_EXCODE (rwx)   	: ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ
+	M4_EXTCODE (rwx)   	: ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ
+	M4_DATA  (rw)   	: ORIGIN = _M4_EXTDATA, LENGTH = _M4_EXTDATA_SZ
 }
 
 /* A7 stacks are at end of RAM */
@@ -139,7 +140,11 @@ SECTIONS
 
 	.m4_extcode : {
 		INCLUDE m4_ddr_code.ld
-	} > M4_EXCODE
+	} > M4_EXTCODE
+
+	.m4_extdata : {
+		INCLUDE m4_data.ld
+	} > M4_DATA
 
 
 	/* User Stack: 0x2FFF0000 - 0x2FFFFD00 */

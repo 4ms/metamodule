@@ -33,6 +33,9 @@ public:
 				if (patchname.data()[0] == 0)
 					return;
 
+				volatile int x = 1;
+				while (x)
+					;
 				patch_list.add_patch_header(fileio.vol_id(), filename, filesize, timestamp, patchname);
 			});
 

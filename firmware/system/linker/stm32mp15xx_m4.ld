@@ -8,10 +8,11 @@ MEMORY
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
 	m_text       (RX)  	: ORIGIN = _M4_CODE, LENGTH = _M4_CODE_SZ
 
-	SHAREDMEMINDEX (RW) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE
+	/* SHAREDMEMINDEX (RW) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE */
 
-	/* m_data is for .data (ro) and .bss: all global vars: hopefully all UI assets, default patches */
+	/* m_data is for .data (ro and rw) and .bss: all global vars: hopefully all UI assets, default patches */
 	/* startup.s copies from somewhre in the middle of .text (probably .rodata) to m_data */
+	/* TODO: no need for startup to copy them, just link them to the right place */
 
 	m_data	     (RW)	: ORIGIN = _M4_EXTDATA, LENGTH = _M4_EXTDATA_SZ
 	ddr_code     (RX)   : ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ
@@ -34,6 +35,8 @@ SECTIONS
   {
 	*lfs.o(.text.lfs_*)
 	*lfs_*.o(.text.lfs_*)
+	*(.text.lv_*) 
+	*(.text.*c43yml*)
   } > ddr_code
 
   .text :
@@ -52,15 +55,6 @@ SECTIONS
     _etext = .;        /* define a global symbols at end of code */
   } > m_text
 
-
-  /* Constant data into ROM memory*/
-  .rodata :
-  {
-    . = ALIGN(4);
-    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
-    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
-    . = ALIGN(4);
-  } > m_data
 
   .ARM.extab   : { 
   	. = ALIGN(4);
@@ -105,6 +99,15 @@ SECTIONS
     . = ALIGN(4);
   } > m_text
 
+  /* Constant data */
+  .rodata :
+  {
+    . = ALIGN(4);
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+    . = ALIGN(4);
+  } > m_data
+
   /* Used by the startup to initialize data */
   __DATA_ROM = .;
   _sidata = LOADADDR(.data);
@@ -121,24 +124,17 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } > m_data
 
-  __DATA_END = __DATA_ROM + (_edata - _sdata);
-  text_end = ORIGIN(m_text_ddr) + LENGTH(m_text_ddr);
-  ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
+  /* __DATA_END = __DATA_ROM + (_edata - _sdata); */
+  /* text_end = ORIGIN(m_text) + LENGTH(m_text); */
+  /* ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data") */
 
-  /* .resource_table : */
-  /* { */
-  /*   . = ALIGN(4); */
-  /*   KEEP (*(.resource_table*)) */
-  /*   . = ALIGN(4); */
-  /* } > m_data */
-
-	.sharedmemindex (NOLOAD) :
-	{
-		. = ALIGN(8);
-		*(.sharedmemindex)
-		*(.sharedmemindex*)
-		. = ALIGN(8);
-	} > SHAREDMEMINDEX
+	/* .sharedmemindex (NOLOAD) : */
+	/* { */
+	/* 	. = ALIGN(8); */
+	/* 	*(.sharedmemindex) */
+	/* 	*(.sharedmemindex*) */
+	/* 	. = ALIGN(8); */
+	/* } > SHAREDMEMINDEX */
   
 
   /* Uninitialized data section into RAM memory */
