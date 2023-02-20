@@ -30,7 +30,7 @@ struct SharedMemory {
 		RamDiskLocation,
 		AuxSignalBlockLocation,
 		PatchPlayerLocation,
-		PatchDataLocation,
+		ParamCacheLocation,
 	};
 };
 
