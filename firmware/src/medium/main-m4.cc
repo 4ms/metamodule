@@ -18,11 +18,8 @@
 #include "shared_memory.hh"
 #include "usb/usb_manager.hh"
 
-#include "param_cache.hh"
 #include "patch_mod_queue.hh"
-#include "patch_playloader_proxy.hh"
 #include "patch_storage.hh"
-#include "ui.hh"
 
 namespace MetaModule
 {
@@ -65,12 +62,9 @@ void main() {
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
 	auto virtdrive =
 		SharedMemory::read_address_of<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(SharedMemory::RamDiskLocation);
-	auto param_cache = SharedMemory::read_address_of<ParamCache *>(SharedMemory::ParamCacheLocation);
 
 	PatchStorage patch_storage;
 	PatchModQueue patch_mod_queue; //TODO: share with A7
-	PatchPlayLoaderProxy patch_playloader;
-	Ui ui{patch_playloader, patch_storage, *param_cache, patch_mod_queue}; //on M4.
 
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
 	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander
@@ -89,7 +83,6 @@ void main() {
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
 
 	controls.start();
-	ui.start();
 
 	while (true) {
 		signal_m4_ready_after_delay();

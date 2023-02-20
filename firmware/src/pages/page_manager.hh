@@ -1,8 +1,8 @@
 #pragma once
 #include "params.hh"
 #include "patch_mod_queue.hh"
-#include "patch_playloader_proxy.hh"
-#include "patch_storage.hh"
+#include "patch_playloader.hh"
+#include "patch_storage_proxy.hh"
 #include "ui_audio_mailbox.hh"
 
 #include "pages/knob_edit.hh"
@@ -26,8 +26,8 @@ class PageManager {
 public:
 	PageBase *cur_page = &page_patchsel;
 
-	PageManager(PatchStorage &patch_storage,
-				PatchPlayLoaderProxy &patch_playloader,
+	PageManager(PatchStorageProxy &patch_storage,
+				PatchPlayLoader &patch_playloader,
 				Params &params,
 				MetaParams &metaparams,
 				MessageQueue &msg_queue,

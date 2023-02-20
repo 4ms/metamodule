@@ -166,11 +166,9 @@ SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/sw/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/widgets/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/font/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/misc/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/gpu/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/hal/*.c)
 #SOURCES += $(wildcard src/pages/gui-guider/*.c)
 
-# SOURCES += $(wildcard src/pages/fonts/*.c)
 SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
@@ -206,7 +204,6 @@ SOURCES += src/pages/images/modules/EnOsc_artwork_120.c
 else
 SOURCES += $(wildcard src/pages/images/modules/*.c)
 endif
-# SOURCES += $(wildcard src/pages/images/ui/*.c)
 SOURCES += $(wildcard src/pages/images/components/*.c)
 
 ## RapidYml

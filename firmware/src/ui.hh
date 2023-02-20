@@ -1,4 +1,5 @@
 #pragma once
+#include "a7/static_buffers.hh"
 #include "debug.hh"
 #include "drivers/timekeeper.hh"
 #include "lvgl_driver.hh"
@@ -6,7 +7,8 @@
 #include "param_cache.hh"
 #include "params.hh"
 #include "params_dbg_print.hh"
-#include "patch_playloader_proxy.hh"
+#include "patch_playloader.hh"
+#include "patch_storage_proxy.hh"
 #include "patchlist.hh"
 
 namespace MetaModule
@@ -14,8 +16,8 @@ namespace MetaModule
 class Ui {
 private:
 	ParamCache &param_cache;
-	PatchStorage &patch_storage;
-	PatchPlayLoaderProxy &patch_playloader;
+	PatchStorageProxy &patch_storage;
+	PatchPlayLoader &patch_playloader;
 
 	MessageQueue msg_queue;
 	PageManager page_manager;
@@ -25,14 +27,15 @@ private:
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
 	using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
-	static inline FrameBufferT framebuf1;
-	static inline FrameBufferT framebuf2;
+	// static inline FrameBufferT framebuf1;
+	// static inline FrameBufferT framebuf2;
 
-	static inline LVGLDriver gui{MMDisplay::flush_to_screen, MMDisplay::read_input, framebuf1, framebuf2};
+	static inline LVGLDriver gui{
+		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 
 public:
-	Ui(PatchPlayLoaderProxy &patch_playloader,
-	   PatchStorage &patch_storage,
+	Ui(PatchPlayLoader &patch_playloader,
+	   PatchStorageProxy &patch_storage,
 	   ParamCache &pc,
 	   PatchModQueue &patch_mod_queue)
 		: param_cache{pc}
@@ -46,7 +49,7 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		MMDisplay::init(metaparams, framebuf2);
+		MMDisplay::init(metaparams, StaticBuffers::framebuf2);
 		Gui::init_lvgl_styles();
 		page_manager.init();
 

@@ -8,6 +8,7 @@
 #include "patch_player.hh"
 #include "patch_playloader.hh"
 #include "patch_storage.hh"
+#include "patch_storage_proxy.hh"
 #include "patchlist.hh"
 #include "semaphore_action.hh"
 #include "shared_memory.hh"
@@ -41,7 +42,7 @@ void main() {
 			now.minute(),
 			now.second());
 
-	PatchPlayer patch_player; //on A7
+	PatchPlayer patch_player;
 	PatchPlayLoader patch_playloader{patch_player};
 	//add a message queue for loading raw patch file data or complete yml data from M4
 	//Can use an HSEM and shared ptr to PatchData on the heap:
@@ -52,7 +53,9 @@ void main() {
 	ParamCache param_cache;		   //needed, same, right? syncs M4-gui and A7-audio?
 	PatchModQueue patch_mod_queue; //queue lives on A7 but is now filled from M4 (gui)
 
-	// Ui ui{patch_playloader, param_cache, patch_mod_queue}; //on M4.
+	PatchStorageProxy patch_storage_proxy;
+
+	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue}; //on M4.
 	//PatchPlayerLoader(A7) => a way to know what the currently playing patch is, and to request loading a new patch
 	//Gui uses PatchPlayLoader for cur_patch_index()->int and request_load_patch(id)
 
@@ -70,7 +73,6 @@ void main() {
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 	SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
-	SharedMemory::write_address_of(&param_cache, SharedMemory::ParamCacheLocation);
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 
 	param_cache.clear();
@@ -87,8 +89,8 @@ void main() {
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
 
+	ui.start();
 	audio.start();
-	//Probably need some sort of PatchPlayLoader queue checker (to check for new patch load requests)
 
 	while (true) {
 		__WFI();
