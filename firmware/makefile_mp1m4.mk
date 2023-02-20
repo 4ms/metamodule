@@ -123,11 +123,11 @@ SOURCES += $(usbdev_libdir)/Core/Src/usbd_ctlreq.c
 SOURCES += $(usbdev_libdir)/Core/Src/usbd_ioreq.c
 
 # yaml
-SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
-SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
-rymldir = $(SHARED)/patch_convert/ryml/rapidyaml
-SOURCES += $(wildcard $(rymldir)/src/c4/yml/*.cpp)
-SOURCES += $(wildcard $(rymldir)/ext/c4core/src/c4/*.cpp)
+# SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
+# SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
+# rymldir = $(SHARED)/patch_convert/ryml/rapidyaml
+# SOURCES += $(wildcard $(rymldir)/src/c4/yml/*.cpp)
+# SOURCES += $(wildcard $(rymldir)/ext/c4core/src/c4/*.cpp)
 
 ## LVGL / Gui-Guider
 # LVGL_DIR=$(LIBDIR)/lvgl
@@ -216,10 +216,10 @@ INCLUDES += -I$(usbhost_libdir)/Core/Inc
 INCLUDES += -I$(usbdev_libdir)/Class/MSC/Inc 
 INCLUDES += -I$(usbdev_libdir)/Core/Inc 
 INCLUDES += -I$(usbdev_libdir)/Class/HUB/Inc 
-INCLUDES +=	-I$(SHARED)/patch_convert
-INCLUDES +=	-I$(SHARED)/patch_convert/ryml
-INCLUDES += -I$(rymldir)/src
-INCLUDES += -I$(rymldir)/ext/c4core/src
+# INCLUDES +=	-I$(SHARED)/patch_convert
+# INCLUDES +=	-I$(SHARED)/patch_convert/ryml
+# INCLUDES += -I$(rymldir)/src
+# INCLUDES += -I$(rymldir)/ext/c4core/src
 INCLUDES += -I$(SHARED)/etl/include
 # INCLUDES +=	-I$(LIBDIR)/lvgl
 

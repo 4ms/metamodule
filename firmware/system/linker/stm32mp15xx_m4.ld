@@ -8,7 +8,7 @@ MEMORY
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
 	m_text       (RX)  	: ORIGIN = _M4_CODE, LENGTH = _M4_CODE_SZ
 
-	/* SHAREDMEMINDEX (RW) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE */
+	SHAREDMEMINDEX (RW) : ORIGIN = _M4_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
 
 	/* m_data is for .data (ro and rw) and .bss: all global vars: hopefully all UI assets, default patches */
 	/* startup.s copies from somewhre in the middle of .text (probably .rodata) to m_data */
@@ -33,10 +33,10 @@ SECTIONS
 
   .ddr_code :
   {
-	*lfs.o(.text.lfs_*)
-	*lfs_*.o(.text.lfs_*)
-	*(.text.lv_*) 
-	*(.text.*c43yml*)
+	/* *lfs.o(.text.lfs_*) */
+	/* *lfs_*.o(.text.lfs_*) */
+	/* *(.text.lv_*) */ 
+	/* *(.text.*c43yml*) */
   } > ddr_code
 
   .text :
@@ -113,7 +113,7 @@ SECTIONS
   _sidata = LOADADDR(.data);
 
   /* Initialized data sections */
-  .data :  AT(__DATA_ROM)
+  .data :  /*AT(__DATA_ROM)*/
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
@@ -122,26 +122,21 @@ SECTIONS
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
-  } > m_data
+  } > m_text
 
-  /* __DATA_END = __DATA_ROM + (_edata - _sdata); */
-  /* text_end = ORIGIN(m_text) + LENGTH(m_text); */
-  /* ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data") */
-
-	/* .sharedmemindex (NOLOAD) : */
-	/* { */
-	/* 	. = ALIGN(8); */
-	/* 	*(.sharedmemindex) */
-	/* 	*(.sharedmemindex*) */
-	/* 	. = ALIGN(8); */
-	/* } > SHAREDMEMINDEX */
+  .sharedmemindex (NOLOAD) :
+  {
+	. = ALIGN(8);
+	*(.sharedmemindex)
+	*(.sharedmemindex*)
+	. = ALIGN(8);
+  } > SHAREDMEMINDEX
   
 
-  /* Uninitialized data section into RAM memory */
+  /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
   {
-    /* This is used by the startup in order to initialize the .bss secion */
     _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
     *(.bss)
