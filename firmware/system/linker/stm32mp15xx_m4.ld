@@ -108,12 +108,13 @@ SECTIONS
     . = ALIGN(4);
   } > m_data
 
-  /* Used by the startup to initialize data */
-  __DATA_ROM = .;
-  _sidata = LOADADDR(.data);
+/*  Uncommenting this allows startup to initialize data */
+/*  By copying from _sidata to _sdata */
+/*  __DATA_ROM = .; */
+/*  _sidata = LOADADDR(.data); */
+/*  .data : AT(__DATA_ROM)*/
 
-  /* Initialized data sections */
-  .data :  /*AT(__DATA_ROM)*/
+  .data :
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
@@ -123,6 +124,9 @@ SECTIONS
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
   } > m_text
+
+  /* Uncommenting this, prevents any data init */
+  _sidata = _sdata;
 
   .sharedmemindex (NOLOAD) :
   {

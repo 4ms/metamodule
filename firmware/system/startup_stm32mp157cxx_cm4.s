@@ -51,8 +51,13 @@ defined in linker script */
 Reset_Handler:
   ldr   sp, =_estack
   movs  r1, #0
-  b  LoopCopyDataInit
 
+  ldr  r0, =_sdata  /*Skip initializing data section if it's empty */
+  ldr  r3, =_sidata
+  cmp  r0, r3
+  beq  StartFillZerobss
+
+  b  LoopCopyDataInit
 CopyDataInit:
   ldr  r3, =_sidata
   ldr  r3, [r3, r1]
@@ -65,6 +70,8 @@ LoopCopyDataInit:
   adds  r2, r0, r1
   cmp  r2, r3
   bcc  CopyDataInit
+
+StartFillZerobss:
   ldr  r2, =_sbss
   b  LoopFillZerobss
   
