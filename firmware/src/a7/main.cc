@@ -63,7 +63,7 @@ void main() {
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 	SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
 	SharedMemory::write_address_of(&StaticBuffers::raw_patch_data, SharedMemory::PatchDataLocation);
-	SharedMemory::write_address_of(&StaticBuffers::icc_params, SharedMemory::InterCoreCommParamsLocation);
+	SharedMemory::write_address_of(&StaticBuffers::icc_message, SharedMemory::InterCoreCommParamsLocation);
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 
@@ -79,7 +79,7 @@ void main() {
 		;
 
 	auto remote_patch_files = SharedMemory::read_address_of<std::vector<PatchFile> *>(SharedMemory::PatchListLocation);
-	PatchStorageProxy patch_storage_proxy{remote_patch_files, StaticBuffers::icc_params};
+	PatchStorageProxy patch_storage_proxy{remote_patch_files, StaticBuffers::icc_message};
 	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue};
 
 	param_cache.clear();

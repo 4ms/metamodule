@@ -13,11 +13,11 @@ class PatchStorageProxy {
 	using InterCoreComm1 = InterCoreComm<ICCNum::Core1>;
 
 public:
-	using enum InterCoreCommParams::Message;
+	using enum InterCoreCommMessage::MessageType;
 
-	PatchStorageProxy(std::vector<PatchFile> *remote_patch_files, InterCoreCommParams &icc_params)
+	PatchStorageProxy(std::vector<PatchFile> *remote_patch_files, InterCoreCommMessage &icc_params)
 		: remote_patch_files_{remote_patch_files}
-		, icc_params{icc_params} {
+		, comm_{icc_params} {
 	}
 
 	bool load_view_patch(uint32_t patch_id) {
@@ -32,14 +32,14 @@ public:
 		return 0;
 	}
 
-	InterCoreCommParams::Message get_message() {
-		return icc_params.message;
+	InterCoreCommMessage get_message() {
+		return comm_.get_new_message();
 	}
 
 	[[nodiscard]] bool request_patchlist() {
 		//send IPCC event
-		icc_params.message = RequestRefreshPatchList;
-		if (!comm_.send_message())
+		icc_params.message_type = RequestRefreshPatchList;
+		if (!comm_.send_message(icc_params))
 			return false;
 		return true;
 	}
@@ -53,7 +53,7 @@ private:
 	std::vector<PatchFile> *remote_patch_files_;
 	PatchFileList patch_files_;
 	InterCoreComm1 comm_;
-	InterCoreCommParams &icc_params;
+	InterCoreCommMessage icc_params;
 
 	PatchData view_patch_;
 	uint32_t view_patch_id_;

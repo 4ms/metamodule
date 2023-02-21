@@ -50,21 +50,21 @@ class PatchStorage {
 	// FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
 	using InterCoreComm2 = InterCoreComm<ICCNum::Core2>;
-	using enum InterCoreCommParams::Message;
+	using enum InterCoreCommMessage::MessageType;
 	InterCoreComm2 comm_;
-	InterCoreCommParams::Message pending_send_message = None;
+	InterCoreCommMessage pending_send_message{.message_type = None};
 
 	PatchList patch_list_;
 
 	const std::span<char> &raw_patch_buffer;
-	InterCoreCommParams &icc_params;
+	InterCoreCommMessage icc_params;
 
 public:
 	PatchStorage(std::span<char> &raw_patch_buffer,
-				 InterCoreCommParams &icc_params,
+				 InterCoreCommMessage &icc_params,
 				 bool reset_to_factory_patches = false)
 		: raw_patch_buffer{raw_patch_buffer}
-		, icc_params{icc_params} {
+		, comm_{icc_params} {
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
@@ -87,25 +87,23 @@ public:
 	}
 
 	void handle_messages() {
-		if (pending_send_message != None) {
+		if (pending_send_message.message_type != None) {
 			// Keep trying to send message until suceeds
 			// TODO: why would this fail? The answer informs us how to handle this situation
-			icc_params.message = pending_send_message;
-			if (comm_.send_message())
-				pending_send_message = None;
+			if (comm_.send_message(pending_send_message))
+				pending_send_message.message_type = None;
 		}
 
-		if (comm_.got_message()) {
-			if (icc_params.message == RequestRefreshPatchList) {
-				pending_send_message = PatchListUnchanged;
-				if (sdcard_needs_rescan_) {
-					poll_media_change();
-					rescan_sdcard();
-					sdcard_needs_rescan_ = false;
-					pending_send_message = PatchListChanged;
-				}
-				// if (usb_needs_rescan_) ...
+		icc_params = comm_.get_new_message();
+		if (icc_params.message_type == RequestRefreshPatchList) {
+			pending_send_message.message_type = PatchListUnchanged;
+			if (sdcard_needs_rescan_) {
+				poll_media_change();
+				rescan_sdcard();
+				sdcard_needs_rescan_ = false;
+				pending_send_message.message_type = PatchListChanged;
 			}
+			// if (usb_needs_rescan_) ...
 		}
 
 		uint32_t now = HAL_GetTick();

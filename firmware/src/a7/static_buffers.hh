@@ -26,7 +26,7 @@ using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBuff
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1;
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
 static inline __attribute__((section(".ddma"))) std::aligned_storage<65536, 4> raw_patch_data;
-static inline __attribute__((section(".ddma"))) InterCoreCommParams icc_params;
+static inline __attribute__((section(".ddma"))) InterCoreCommMessage icc_message;
 
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
 static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block;
