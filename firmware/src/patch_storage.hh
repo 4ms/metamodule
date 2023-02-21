@@ -49,7 +49,7 @@ class PatchStorage {
 	// RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	// FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
-	using InterCoreComm2 = InterCoreComm<ICCNum::Core2>;
+	using InterCoreComm2 = InterCoreComm<ICCCoreType::Responder>;
 	using enum InterCoreCommMessage::MessageType;
 	InterCoreComm2 comm_;
 	InterCoreCommMessage pending_send_message{.message_type = None};
@@ -61,10 +61,10 @@ class PatchStorage {
 
 public:
 	PatchStorage(std::span<char> &raw_patch_buffer,
-				 InterCoreCommMessage &icc_params,
+				 volatile InterCoreCommMessage &shared_message,
 				 bool reset_to_factory_patches = false)
 		: raw_patch_buffer{raw_patch_buffer}
-		, comm_{icc_params} {
+		, comm_{shared_message} {
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
@@ -103,6 +103,7 @@ public:
 				sdcard_needs_rescan_ = false;
 				pending_send_message.message_type = PatchListChanged;
 			}
+			printf_("M4 sending response: %d\n", pending_send_message.message_type);
 			// if (usb_needs_rescan_) ...
 		}
 

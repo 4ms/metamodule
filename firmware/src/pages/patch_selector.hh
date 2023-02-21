@@ -101,15 +101,14 @@ struct PatchSelectorPage : PageBase {
 				state = State::PatchListLoaded;
 				break;
 
-			case State::PatchListLoaded:
-				break;
-		}
-
-		//periodically check if patchlist needs updating:
-		uint32_t now = HAL_GetTick();
-		if (now - last_refresh_check_tm > 1000) { //poll media once per second
-			last_refresh_check_tm = now;
-			state = State::TryingToRequestPatchList;
+			case State::PatchListLoaded: {
+				//periodically check if patchlist needs updating:
+				uint32_t now = HAL_GetTick();
+				if (now - last_refresh_check_tm > 1000) { //poll media once per second
+					last_refresh_check_tm = now;
+					state = State::TryingToRequestPatchList;
+				}
+			} break;
 		}
 
 		//TODO: Display state: "Refreshing...", "Loading..."

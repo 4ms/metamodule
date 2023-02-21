@@ -10,14 +10,14 @@ using PatchFileList = std::span<PatchFile>;
 // using PatchFileList = std::vector<PatchList::PatchFile>;
 
 class PatchStorageProxy {
-	using InterCoreComm1 = InterCoreComm<ICCNum::Core1>;
+	using InterCoreComm1 = InterCoreComm<ICCCoreType::Initiator>;
 
 public:
 	using enum InterCoreCommMessage::MessageType;
 
-	PatchStorageProxy(std::vector<PatchFile> *remote_patch_files, InterCoreCommMessage &icc_params)
+	PatchStorageProxy(std::vector<PatchFile> *remote_patch_files, volatile InterCoreCommMessage &shared_message)
 		: remote_patch_files_{remote_patch_files}
-		, comm_{icc_params} {
+		, comm_{shared_message} {
 	}
 
 	bool load_view_patch(uint32_t patch_id) {

@@ -37,6 +37,7 @@ static void app_startup() {
 		;
 
 	SystemClocks init_system_clocks{};
+	core_m4::RCC_Enable::IPCC_::set();
 };
 
 static void signal_m4_ready_after_delay() {
@@ -62,7 +63,8 @@ void main() {
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
 	auto virtdrive = SharedMemory::read_address_of<RamDrive *>(SharedMemory::RamDiskLocation);
 	auto raw_patch_data = SharedMemory::read_address_of<std::span<char> *>(SharedMemory::PatchDataLocation);
-	auto icc_params = SharedMemory::read_address_of<InterCoreCommMessage *>(SharedMemory::InterCoreCommParamsLocation);
+	auto icc_params =
+		SharedMemory::read_address_of<InterCoreCommMessage volatile *>(SharedMemory::InterCoreCommParamsLocation);
 
 	PatchStorage patch_storage{*raw_patch_data, *icc_params};
 
