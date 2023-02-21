@@ -6,18 +6,7 @@
 namespace MetaModule
 {
 
-enum class ICCNum { Core1, Core2 };
-
-template<ICCNum core>
-class InterCoreComm {
-public:
-	InterCoreComm() {
-		//A7 set up ISR for TXFree
-		//M4 set up ISR for RXOccupied
-		//ctor parameter? if constexpr? do it in parent code?
-
-		auto recv_req = [this] { read_message(); };
-	}
+struct InterCoreCommParams {
 	enum Message : uint32_t {
 		None,
 		RequestRefreshPatchList,
@@ -30,37 +19,44 @@ public:
 
 		NumRequests,
 	};
+	Message message;
+	uint32_t bytes_read;
+	uint32_t patch_id;
+};
 
-	[[nodiscard]] bool send_message(Message req) {
+enum class ICCNum { Core1, Core2 };
+
+template<ICCNum core>
+class InterCoreComm {
+	bool got_message_ = false;
+
+public:
+	InterCoreComm() {
+		//A7 set up ISR for TXFree
+		//M4 set up ISR for RXOccupied
+		auto recv_req = [this] {
+			got_message_ = true;
+			;
+		};
+	}
+
+	[[nodiscard]] bool send_message(InterCoreCommParams msg) {
 		// Different checks for each core:
 		// TODO: check CHnF flag is TXclear/RXset, return false if not
-		SharedMemory::write_value(static_cast<uint32_t>(req), SharedMemory::InterCoreCommReqLocation);
 		// TODO: TXset/RXclear CHnF bit with CHnS
+		// if...
+		// return false;
+		// else
 		return true;
 	}
 
-	Message get_last_message() {
-		auto t = last_message_;
-		last_message_ = None;
-		return t;
+	[[nodiscard]] bool got_message() {
+		if (got_message_) {
+			got_message_ = false;
+			return true;
+		}
+		return false;
 	}
-
-private:
-	Message last_message_ = None;
-
-	void read_message() {
-		auto reqptr = SharedMemory::read_value(SharedMemory::InterCoreCommReqLocation);
-		if (reqptr < NumRequests)
-			last_message_ = static_cast<Message>(reqptr);
-		else
-			last_message_ = None;
-	}
-};
-
-struct InterCoreCommParams {
-
-	uint32_t bytes_read;
-	uint32_t patch_id;
 };
 
 } // namespace MetaModule

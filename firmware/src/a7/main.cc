@@ -79,7 +79,7 @@ void main() {
 		;
 
 	auto remote_patch_files = SharedMemory::read_address_of<std::vector<PatchFile> *>(SharedMemory::PatchListLocation);
-	PatchStorageProxy patch_storage_proxy{remote_patch_files};
+	PatchStorageProxy patch_storage_proxy{remote_patch_files, StaticBuffers::icc_params};
 	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue};
 
 	param_cache.clear();

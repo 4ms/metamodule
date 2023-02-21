@@ -50,9 +50,9 @@ class PatchStorage {
 	// FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
 	using InterCoreComm2 = InterCoreComm<ICCNum::Core2>;
-	using enum InterCoreComm2::Message;
+	using enum InterCoreCommParams::Message;
 	InterCoreComm2 comm_;
-	InterCoreComm2::Message pending_send_message = None;
+	InterCoreCommParams::Message pending_send_message = None;
 
 	PatchList patch_list_;
 
@@ -90,20 +90,22 @@ public:
 		if (pending_send_message != None) {
 			// Keep trying to send message until suceeds
 			// TODO: why would this fail? The answer informs us how to handle this situation
-			if (comm_.send_message(pending_send_message))
+			icc_params.message = pending_send_message;
+			if (comm_.send_message())
 				pending_send_message = None;
 		}
 
-		auto message = comm_.get_last_message();
-		if (message == RequestRefreshPatchList) {
-			pending_send_message = PatchListUnchanged;
-			if (sdcard_needs_rescan_) {
-				poll_media_change();
-				rescan_sdcard();
-				sdcard_needs_rescan_ = false;
-				pending_send_message = PatchListChanged;
+		if (comm_.got_message()) {
+			if (icc_params.message == RequestRefreshPatchList) {
+				pending_send_message = PatchListUnchanged;
+				if (sdcard_needs_rescan_) {
+					poll_media_change();
+					rescan_sdcard();
+					sdcard_needs_rescan_ = false;
+					pending_send_message = PatchListChanged;
+				}
+				// if (usb_needs_rescan_) ...
 			}
-			// if (usb_needs_rescan_) ...
 		}
 
 		uint32_t now = HAL_GetTick();
