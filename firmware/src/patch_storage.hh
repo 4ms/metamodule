@@ -133,7 +133,6 @@ public:
 		printf_("Patchlist updated.\n");
 	}
 
-	// FIXME: PatchStorage and managing the ViewedPatch are orthagonal: make them different classes or rename class
 	void load_view_patch(std::string_view &patchname) {
 		if (auto id = patch_list_.find_by_name(patchname))
 			load_view_patch(id.value());

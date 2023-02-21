@@ -81,7 +81,7 @@ struct PatchSelectorPage : PageBase {
 
 	void update() override {
 		// Check if M4 sent us a message:
-		patch_storage.read_messages();
+		auto message = patch_storage.get_message();
 
 		switch (state) {
 			case State::TryingToRequestPatchList:
@@ -90,8 +90,10 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::RequestedPatchList:
-				if (patch_storage.is_patchlist_changed())
+				if (message == PatchStorageProxy::PatchListChanged)
 					state = State::LoadingPatchList;
+				else if (message == PatchStorageProxy::PatchListUnchanged)
+					state = State::PatchListLoaded;
 				break;
 
 			case State::LoadingPatchList:

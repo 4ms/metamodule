@@ -10,10 +10,10 @@ using PatchFileList = std::span<PatchList::PatchFile>;
 
 class PatchStorageProxy {
 	using InterCoreComm1 = InterCoreComm<ICCNum::Core1>;
-	using enum InterCoreComm1::Message;
 	// using PatchFileList = std::vector<PatchList::PatchFile>;
 
 public:
+	using enum InterCoreComm1::Message;
 	PatchStorageProxy() = default;
 
 	bool load_view_patch(uint32_t patch_id) {
@@ -28,11 +28,7 @@ public:
 		return 0;
 	}
 
-	void read_messages() {
-		last_message_ = comm_.get_last_message();
-	}
-
-	[[nodiscard]] InterCoreComm1::Message get_message() {
+	InterCoreComm1::Message get_message() {
 		return comm_.get_last_message();
 	}
 
@@ -41,17 +37,6 @@ public:
 		if (!comm_.send_message(RequestRefreshPatchList))
 			return false;
 		return true;
-	}
-
-	[[nodiscard]] bool is_patchlist_changed() {
-		if (last_message_ == PatchListChanged) {
-			last_message_ = None;
-			return true;
-		}
-		if (last_message_ == PatchListUnchanged) {
-			last_message_ = None;
-		}
-		return false;
 	}
 
 	PatchFileList &get_patch_list() {
@@ -64,6 +49,5 @@ private:
 	PatchData view_patch_;
 	PatchFileList patch_files_;
 	InterCoreComm1 comm_;
-	InterCoreComm1::Message last_message_ = None;
 };
 } // namespace MetaModule
