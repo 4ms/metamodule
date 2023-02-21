@@ -251,16 +251,17 @@ $(BUILDDIR)/firmware.bin: $(BUILDDIR)/$(BINARYNAME).elf
 		-j .text \
 		-j .startup_copro_fw.Reset_Handler \
 		-j .init_array \
+		-j .data \
 		$< $@
-
-$(BUILDDIR)/m4_ddr_code.bin: $(BUILDDIR)/$(BINARYNAME).elf
-	arm-none-eabi-objcopy -O binary -j .ddr_code $< $@
 
 $(BUILDDIR)/m4_rodata.bin: $(BUILDDIR)/$(BINARYNAME).elf
 	arm-none-eabi-objcopy -O binary -j .rodata $< $@
 
-$(BUILDDIR)/m4_data.bin: $(BUILDDIR)/$(BINARYNAME).elf
-	arm-none-eabi-objcopy -O binary -j .data $< $@
+# $(BUILDDIR)/m4_ddr_code.bin: $(BUILDDIR)/$(BINARYNAME).elf
+# 	arm-none-eabi-objcopy -O binary -j .ddr_code $< $@
+
+# $(BUILDDIR)/m4_data.bin: $(BUILDDIR)/$(BINARYNAME).elf
+# 	arm-none-eabi-objcopy -O binary -j .data $< $@
 			
 $(BUILDDIR)/%.ld: $(BUILDDIR)/%.bin
 	cat $< | hexdump -v -e '"BYTE(0x" 1/1 "%02X" ")\n"' > $@
