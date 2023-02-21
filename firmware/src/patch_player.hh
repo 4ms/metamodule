@@ -16,7 +16,6 @@
 #include "patch/patch_data.hh"
 #include "printf.h"
 #include "smp_api.hh"
-#include "sys/alloc_buffer.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include <array>
@@ -166,7 +165,7 @@ public:
 		pd.module_slugs.clear();
 
 		clear_cache();
-		BigAllocControl::reset();
+		// BigAllocControl::reset();
 	}
 
 	// K-rate setters/getters:

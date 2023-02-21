@@ -3,6 +3,7 @@
 #include "conf/ramdisk_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "conf/stream_conf.hh"
+#include "inter_core_comm.hh"
 #include "leds.hh"
 #include "lvgl/src/misc/lv_color.h" // for lv_color_t
 #include "params.hh"
@@ -24,6 +25,8 @@ static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlo
 using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1;
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
+static inline __attribute__((section(".ddma"))) std::aligned_storage<65536, 4> raw_patch_data;
+static inline __attribute__((section(".ddma"))) InterCoreCommParams icc_params;
 
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
 static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block;

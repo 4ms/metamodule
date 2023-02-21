@@ -60,10 +60,15 @@ void main() {
 
 	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
-	auto virtdrive =
-		SharedMemory::read_address_of<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(SharedMemory::RamDiskLocation);
+	auto virtdrive = SharedMemory::read_address_of<RamDrive *>(SharedMemory::RamDiskLocation);
+	auto raw_patch_data = SharedMemory::read_address_of<std::span<char> *>(SharedMemory::PatchDataLocation);
+	auto icc_params = SharedMemory::read_address_of<InterCoreCommParams *>(SharedMemory::InterCoreCommParamsLocation);
 
-	PatchStorage patch_storage;
+	PatchStorage patch_storage{*raw_patch_data, *icc_params};
+
+	auto filelist = patch_storage.get_patchfile_list();
+	SharedMemory::write_address_of(&filelist, SharedMemory::PatchListLocation);
+
 	PatchModQueue patch_mod_queue; //TODO: share with A7
 
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};

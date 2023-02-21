@@ -1,6 +1,7 @@
 #pragma once
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
+#include "patch_file.hh"
 #include "volumes.hh"
 #include <span>
 #include <vector>
@@ -118,14 +119,6 @@ struct PatchList {
 		_patch_data.push_back({volume, std::string{filename}, filesize, timestamp, patchname});
 		// _patch_data.emplace_back(volume, filename, 0, 0, "");
 	}
-
-	struct PatchFile {
-		Volume volume;
-		std::string filename;
-		uint32_t filesize;
-		uint32_t timestamp;
-		ModuleTypeSlug patchname;
-	};
 
 	std::vector<PatchFile> &get_patchfile_list() {
 		return _patch_data;

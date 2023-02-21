@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 // #include "drivers/ipcc.hh"
 #include "shared_memory.hh"
 
@@ -22,6 +23,11 @@ public:
 		RequestRefreshPatchList,
 		PatchListChanged,
 		PatchListUnchanged,
+
+		RequestPatchData,
+		PatchDataLoadFail,
+		PatchDataLoaded,
+
 		NumRequests,
 	};
 
@@ -50,4 +56,11 @@ private:
 			last_message_ = None;
 	}
 };
+
+struct InterCoreCommParams {
+
+	uint32_t bytes_read;
+	uint32_t patch_id;
+};
+
 } // namespace MetaModule

@@ -9,7 +9,6 @@
 #include "littlefs/norflash_lfs.hh"
 #include "patch_fileio.hh"
 #include "qspi_flash_driver.hh"
-#include "shared_memory.hh"
 #include "volumes.hh"
 
 // - Ship with some patches on NORFlash
@@ -55,13 +54,18 @@ class PatchStorage {
 	InterCoreComm2 comm_;
 	InterCoreComm2::Message pending_send_message = None;
 
-	uint32_t view_patch_id_;
-	PatchData view_patch_;
-
 	PatchList patch_list_;
 
+	const std::span<char> &raw_patch_buffer;
+	InterCoreCommParams &icc_params;
+
 public:
-	PatchStorage(bool reset_to_factory_patches = false) {
+	PatchStorage(std::span<char> &raw_patch_buffer,
+				 InterCoreCommParams &icc_params,
+				 bool reset_to_factory_patches = false)
+		: raw_patch_buffer{raw_patch_buffer}
+		, icc_params{icc_params} {
+
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
 		if (status == LfsFileIO::Status::NewlyFormatted || reset_to_factory_patches) {
@@ -80,9 +84,6 @@ public:
 
 		//if (usb_drive_mounted)
 		//	PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
-
-		auto filelist = patch_list_.get_patchfile_list();
-		SharedMemory::write_address_of(&filelist, SharedMemory::PatchListLocation);
 	}
 
 	void handle_messages() {
@@ -133,22 +134,23 @@ public:
 		printf_("Patchlist updated.\n");
 	}
 
-	void load_view_patch(std::string_view &patchname) {
-		if (auto id = patch_list_.find_by_name(patchname))
-			load_view_patch(id.value());
-	}
+	// void load_view_patch(std::string_view &patchname) {
+	// 	if (auto id = patch_list_.find_by_name(patchname))
+	// 		load_view_patch(id.value());
+	// }
 
 	std::optional<uint32_t> find_by_name(std::string_view &patchname) {
 		return patch_list_.find_by_name(patchname);
 	}
 
-	void load_view_patch(uint32_t patch_id) {
+	void load_patch_file(uint32_t patch_id) {
 		bool ok = false;
 		auto filename = patch_list_.get_patch_filename(patch_id);
 		printf("load_view_patch %d %.31s\n", patch_id, filename.data());
+		std::span<char> raw_patch = raw_patch_buffer;
 
 		auto load_patch_data = [&](auto &fileio) -> bool {
-			return PatchFileIO::load_patch_data(view_patch_, fileio, filename);
+			return PatchFileIO::read_file(raw_patch, fileio, filename);
 		};
 
 		switch (patch_list_.get_patch_vol(patch_id)) {
@@ -167,36 +169,10 @@ public:
 			printf_("Could not load patch id %d\n", patch_id);
 			return;
 		}
-
-		view_patch_id_ = patch_id;
 	}
 
-	uint32_t get_view_patch_id() {
-		return view_patch_id_;
-	}
-
-	PatchData &get_view_patch() {
-		return view_patch_;
-	}
-
-	void update_norflash_from_ramdisk() {
-		// patch_list.lock();
-		printf_("NOR Flash writeback begun.\r\n");
-
-		// ramdisk.unmount_disk();
-
-		// Must invalidate the cache because M4 wrote to it???
-		// SystemCache::invalidate_dcache_by_range(StaticBuffers::virtdrive.virtdrive,
-		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
-		// if (PatchFileIO::copy_patches_from_to(ramdisk, norflash, PatchFileIO::FileFilter::NewerTimestamp)) {
-		// 	printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
-		// 	// PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
-		// 	patch_list.mark_modified();
-		// } else {
-		// 	printf_("NOR Flash writeback failed!\r\n");
-		// }
-		// // patch_list.unlock();
-		printf_("RamDisk Available to M4\n");
+	auto &get_patchfile_list() {
+		return patch_list_.get_patchfile_list();
 	}
 };
 

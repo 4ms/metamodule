@@ -48,10 +48,6 @@ void main() {
 	ParamCache param_cache;
 	PatchModQueue patch_mod_queue;
 
-	PatchStorageProxy patch_storage_proxy;
-
-	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue};
-
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
 					  StaticBuffers::audio_out_dma_block,
@@ -66,10 +62,10 @@ void main() {
 	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
 	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
 	SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
-	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
+	SharedMemory::write_address_of(&StaticBuffers::raw_patch_data, SharedMemory::PatchDataLocation);
+	SharedMemory::write_address_of(&StaticBuffers::icc_params, SharedMemory::InterCoreCommParamsLocation);
 
-	param_cache.clear();
-	patch_playloader.load_initial_patch("enosc");
+	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
@@ -81,6 +77,13 @@ void main() {
 	// wait for M4 to be ready
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
+
+	auto remote_patch_files = SharedMemory::read_address_of<std::vector<PatchFile> *>(SharedMemory::PatchListLocation);
+	PatchStorageProxy patch_storage_proxy{remote_patch_files};
+	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue};
+
+	param_cache.clear();
+	patch_playloader.load_initial_patch("enosc");
 
 	ui.start();
 	audio.start();

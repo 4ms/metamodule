@@ -1,12 +1,12 @@
 #pragma once
 #include "inter_core_comm.hh"
 #include "patch_data.hh"
+#include "patch_file.hh"
 #include "patchlist.hh"
-#include "shared_memory.hh"
 
 namespace MetaModule
 {
-using PatchFileList = std::span<PatchList::PatchFile>;
+using PatchFileList = std::span<PatchFile>;
 
 class PatchStorageProxy {
 	using InterCoreComm1 = InterCoreComm<ICCNum::Core1>;
@@ -14,7 +14,9 @@ class PatchStorageProxy {
 
 public:
 	using enum InterCoreComm1::Message;
-	PatchStorageProxy() = default;
+	PatchStorageProxy(std::vector<PatchFile> *remote_patch_files)
+		: remote_patch_files_{remote_patch_files} {
+	}
 
 	bool load_view_patch(uint32_t patch_id) {
 		return true;
@@ -40,14 +42,16 @@ public:
 	}
 
 	PatchFileList &get_patch_list() {
-		auto pfs = SharedMemory::read_address_of<std::vector<PatchList::PatchFile> *>(SharedMemory::PatchListLocation);
-		patch_files_ = *pfs; //vector* -> span
+		patch_files_ = *remote_patch_files_; //vector* -> span
 		return patch_files_;
 	}
 
 private:
-	PatchData view_patch_;
+	std::vector<PatchFile> *remote_patch_files_;
 	PatchFileList patch_files_;
 	InterCoreComm1 comm_;
+
+	PatchData view_patch_;
+	uint32_t view_patch_id_;
 };
 } // namespace MetaModule

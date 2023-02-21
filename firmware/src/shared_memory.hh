@@ -1,7 +1,8 @@
 #pragma once
-#include "conf/ramdisk_conf.hh"
+// #include "auxsignal.hh"
+// #include "conf/ramdisk_conf.hh"
 #include "drivers/cache.hh"
-#include "ramdisk.hh"
+// #include "ramdisk.hh"
 #include <cstdint>
 
 // Defined in linker script
@@ -44,16 +45,50 @@ struct SharedMemory {
 		AuxSignalBlockLocation,
 		PatchPlayerLocation,
 		InterCoreCommReqLocation,
+		InterCoreCommParamsLocation,
 		PatchListLocation,
+		PatchDataLocation,
 	};
 };
 
 //////////////// TODO: Test this alternative method:
 // #include "auxsignal.hh"
 // #include "conf/ramdisk_conf.hh"
+// #include "inter_core_comm.hh"
 // #include "params.hh"
+// #include "patch_file.hh"
 // #include "patch_player.hh"
-// #include "ramdisk.hh"
+
+//TODO: Safer yet:
+// #include <span>
+// #include <tuple>
+// #include <vector>
+namespace MetaModule
+{
+
+//can't fwd declare unless we force #include "shared_memory.hh" to come before
+//every #include which defines the fwd-declared classes
+// class PatchPlayer;
+// class InterCoreCommParams;
+// class DoubleBufParamBlock;
+// class DoubleAuxStreamBlock;
+// class PatchFile;
+// class RamDrive;
+
+// using shared_data_t = std::tuple<DoubleBufParamBlock *,	   //ParamsPtrLocation
+// 								 RamDrive *,			   //RamDiskLocation
+// 								 DoubleAuxStreamBlock *,   //AuxSignalBlockLocation
+// 								 PatchPlayer *,			   //PatchPlayer
+// 								 uint32_t,				   //InterCoreCommReqLocation
+// 								 InterCoreCommParams *,	   //InterCoreCommParamsLocation
+// 								 std::vector<PatchFile> *, //PatchListLocation
+// 								 std::span<char> *>;	   //PatchDataLocation
+
+// template<size_t ParamID>
+// static auto read_address_of() {
+// 	auto *loc_ptr = reinterpret_cast<uint32_t *>(_shared_list);
+// 	return reinterpret_cast<std::tuple_element<ParamID, shared_data_t>>(*(loc_ptr + ParamID));
+// }
 
 struct SharedMemorySafer {
 	enum class Location : uint32_t {
@@ -105,3 +140,4 @@ struct SharedMemorySafer {
 		return reinterpret_cast<T>(shared_memory_addrs[index]);
 	}
 };
+} // namespace MetaModule
