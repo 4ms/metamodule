@@ -234,7 +234,7 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 
 include makefile_common.mk
 
-all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h $(BUILDDIR)/m4_ddr_code.ld $(BUILDDIR)/m4_data.ld
+all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h $(BUILDDIR)/m4_rodata.ld $(BUILDDIR)/m4_data.ld
 
 $(target_src)/firmware_m4.h: $(BUILDDIR)/firmware.bin
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) ../../../$@
@@ -257,11 +257,11 @@ $(BUILDDIR)/firmware.bin: $(BUILDDIR)/$(BINARYNAME).elf
 $(BUILDDIR)/m4_ddr_code.bin: $(BUILDDIR)/$(BINARYNAME).elf
 	arm-none-eabi-objcopy -O binary -j .ddr_code $< $@
 
+$(BUILDDIR)/m4_rodata.bin: $(BUILDDIR)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy -O binary -j .rodata $< $@
+
 $(BUILDDIR)/m4_data.bin: $(BUILDDIR)/$(BINARYNAME).elf
-	arm-none-eabi-objcopy -O binary \
-		-j .rodata \
-		-j .data \
-		$< $@
+	arm-none-eabi-objcopy -O binary -j .data $< $@
 			
 $(BUILDDIR)/%.ld: $(BUILDDIR)/%.bin
 	cat $< | hexdump -v -e '"BYTE(0x" 1/1 "%02X" ")\n"' > $@
