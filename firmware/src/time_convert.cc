@@ -16,10 +16,15 @@ static std::tm default_poweron_tm = {
 	.tm_year = 2000,
 	.tm_isdst = 0,
 };
-static time_t poweron_sec_since_epoch = mktime(&default_poweron_tm);
+
+static inline time_t mktime_(std::tm *t) {
+	return mktime(t);
+}
+
+static time_t poweron_sec_since_epoch = mktime_(&default_poweron_tm);
 
 void set_time_now(std::tm &now, uint32_t ticks_since_poweron) {
-	poweron_sec_since_epoch = mktime(&now) - (time_t)(ticks_since_poweron / 1000);
+	poweron_sec_since_epoch = mktime_(&now) - (time_t)(ticks_since_poweron / 1000);
 }
 
 time_t get_poweron_time() {
@@ -58,7 +63,7 @@ std::tm fattime_to_tm(FatTime fattime) {
 //Convert FatTime to ticks since power-on
 uint64_t fattime_to_ticks(FatTime fattime) {
 	std::tm t = fattime_to_tm(fattime);
-	time_t secs = mktime(&t);
+	time_t secs = mktime_(&t);
 	if (secs <= poweron_sec_since_epoch)
 		return 0; //Negative ticks?
 
