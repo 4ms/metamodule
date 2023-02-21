@@ -1,4 +1,5 @@
 #pragma once
+#include "inter_core_comm.hh"
 #include "patch_data.hh"
 #include "patchlist.hh"
 #include "shared_memory.hh"
@@ -6,9 +7,11 @@
 namespace MetaModule
 {
 
-using PatchFileList = std::span<PatchList::PatchFile>;
-// using PatchFileList = std::vector<PatchList::PatchFile>;
 class PatchStorageProxy {
+	using InterCoreComm1 = InterCoreComm<ICCNum::Core1>;
+	using enum InterCoreComm1::Message;
+	using PatchFileList = std::span<PatchList::PatchFile>;
+	// using PatchFileList = std::vector<PatchList::PatchFile>;
 
 public:
 	PatchStorageProxy() = default;
@@ -29,28 +32,28 @@ public:
 		last_message_ = comm_.get_last_message();
 	}
 
-	[[nodiscard]] InterCoreComm::Message get_message() {
+	[[nodiscard]] InterCoreComm1::Message get_message() {
 		return comm_.get_last_message();
 	}
 
 	[[nodiscard]] bool request_patchlist() {
 		//send IPCC event
-		if (!comm_.send_message(InterCoreComm::Message::RequestRefreshPatchList))
+		if (!comm_.send_message(RequestRefreshPatchList))
 			return false;
 		return true;
 	}
 
 	[[nodiscard]] bool does_patchlist_require_refresh() {
-		if (last_message_ == InterCoreComm::PatchListMediaChanged) {
-			last_message_ = InterCoreComm::None;
+		if (last_message_ == PatchListMediaChanged) {
+			last_message_ = None;
 			return true;
 		}
 		return false;
 	}
 
 	[[nodiscard]] bool is_patchlist_refreshed() {
-		if (last_message_ == InterCoreComm::PatchListRefreshed) {
-			last_message_ = InterCoreComm::None;
+		if (last_message_ == PatchListRefreshed) {
+			last_message_ = None;
 			auto pfs =
 				SharedMemory::read_address_of<std::vector<PatchList::PatchFile> *>(SharedMemory::PatchListLocation);
 			patch_files_ = *pfs; //vector -> span
@@ -66,7 +69,7 @@ public:
 private:
 	PatchData view_patch_;
 	PatchFileList patch_files_;
-	InterCoreComm comm_;
-	InterCoreComm::Message last_message_ = InterCoreComm::None;
+	InterCoreComm1 comm_;
+	InterCoreComm1::Message last_message_ = None;
 };
 } // namespace MetaModule

@@ -49,7 +49,9 @@ class PatchStorage {
 	// RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	// FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
-	InterCoreComm<ICCNum::Core2> comm;
+	using InterCoreComm2 = InterCoreComm<ICCNum::Core2>;
+	using enum InterCoreComm2::Message;
+	InterCoreComm2 comm;
 
 public:
 	PatchList patch_list;
@@ -78,10 +80,10 @@ public:
 
 	void handle_messages() {
 		auto message = comm.get_last_message();
-		if (message == InterCoreComm::RequestRefreshPatchList) {
+		if (message == RequestRefreshPatchList) {
 			//start the process of refreshing
 			//when done:
-			comm.send_message(InterCoreComm::PatchListRefreshed);
+			comm.send_message(PatchListRefreshed);
 		}
 	}
 
