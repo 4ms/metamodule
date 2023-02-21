@@ -101,7 +101,6 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb_phy.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_hcd.c
 SOURCES += $(usb_src)/usbh_conf.cc
 SOURCES += $(usb_src)/usbh_midi.cc
-# SOURCES += $(usb_src)/midi_host.cc
 # SOURCES += $(usbhost_libdir)/Class/HUB/Src/usbh_hub.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_core.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_ctlreq.c
@@ -234,7 +233,7 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 
 include makefile_common.mk
 
-all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h $(BUILDDIR)/m4_rodata.ld $(BUILDDIR)/m4_data.ld
+all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h $(BUILDDIR)/m4_rodata.ld 
 
 $(target_src)/firmware_m4.h: $(BUILDDIR)/firmware.bin
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) ../../../$@
