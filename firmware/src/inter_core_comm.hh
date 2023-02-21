@@ -1,3 +1,5 @@
+#pragma once
+// #include "drivers/ipcc.hh"
 #include "shared_memory.hh"
 
 namespace MetaModule
@@ -18,12 +20,12 @@ public:
 	enum Message : uint32_t {
 		None,
 		RequestRefreshPatchList,
-		PatchListRefreshed,
-		PatchListMediaChanged,
+		PatchListChanged,
+		PatchListUnchanged,
 		NumRequests,
 	};
 
-	bool send_message(Message req) {
+	[[nodiscard]] bool send_message(Message req) {
 		// Different checks for each core:
 		// TODO: check CHnF flag is TXclear/RXset, return false if not
 		SharedMemory::write_value(static_cast<uint32_t>(req), SharedMemory::InterCoreCommReqLocation);

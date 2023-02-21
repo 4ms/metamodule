@@ -6,11 +6,11 @@
 
 namespace MetaModule
 {
+using PatchFileList = std::span<PatchList::PatchFile>;
 
 class PatchStorageProxy {
 	using InterCoreComm1 = InterCoreComm<ICCNum::Core1>;
 	using enum InterCoreComm1::Message;
-	using PatchFileList = std::span<PatchList::PatchFile>;
 	// using PatchFileList = std::vector<PatchList::PatchFile>;
 
 public:
@@ -43,26 +43,20 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool does_patchlist_require_refresh() {
-		if (last_message_ == PatchListMediaChanged) {
+	[[nodiscard]] bool is_patchlist_changed() {
+		if (last_message_ == PatchListChanged) {
 			last_message_ = None;
 			return true;
 		}
-		return false;
-	}
-
-	[[nodiscard]] bool is_patchlist_refreshed() {
-		if (last_message_ == PatchListRefreshed) {
+		if (last_message_ == PatchListUnchanged) {
 			last_message_ = None;
-			auto pfs =
-				SharedMemory::read_address_of<std::vector<PatchList::PatchFile> *>(SharedMemory::PatchListLocation);
-			patch_files_ = *pfs; //vector -> span
-			return true;
 		}
 		return false;
 	}
 
 	PatchFileList &get_patch_list() {
+		auto pfs = SharedMemory::read_address_of<std::vector<PatchList::PatchFile> *>(SharedMemory::PatchListLocation);
+		patch_files_ = *pfs; //vector* -> span
 		return patch_files_;
 	}
 

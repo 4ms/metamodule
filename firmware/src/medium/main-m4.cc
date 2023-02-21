@@ -92,6 +92,7 @@ void main() {
 		}
 
 		usb.process();
+		patch_storage.handle_messages();
 
 		__NOP();
 	}

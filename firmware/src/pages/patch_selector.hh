@@ -82,8 +82,6 @@ struct PatchSelectorPage : PageBase {
 	void update() override {
 		// Check if M4 sent us a message:
 		patch_storage.read_messages();
-		if (patch_storage.does_patchlist_require_refresh())
-			state = State::TryingToRequestPatchList;
 
 		switch (state) {
 			case State::TryingToRequestPatchList:
@@ -92,7 +90,7 @@ struct PatchSelectorPage : PageBase {
 				break;
 
 			case State::RequestedPatchList:
-				if (patch_storage.is_patchlist_refreshed())
+				if (patch_storage.is_patchlist_changed())
 					state = State::LoadingPatchList;
 				break;
 
@@ -104,6 +102,14 @@ struct PatchSelectorPage : PageBase {
 			case State::PatchListLoaded:
 				break;
 		}
+
+		//periodically check if patchlist needs updating:
+		uint32_t now = HAL_GetTick();
+		if (now - last_refresh_check_tm > 1000) { //poll media once per second
+			last_refresh_check_tm = now;
+			state = State::TryingToRequestPatchList;
+		}
+
 		//TODO: Display state: "Refreshing...", "Loading..."
 
 		if (should_show_patchview) {
@@ -146,6 +152,8 @@ private:
 	lv_obj_t *base;
 
 	enum class State { PatchListLoaded, TryingToRequestPatchList, RequestedPatchList, LoadingPatchList } state;
+
+	uint32_t last_refresh_check_tm = 0;
 };
 
 } // namespace MetaModule

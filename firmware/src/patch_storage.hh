@@ -38,101 +38,123 @@ namespace MetaModule
 // PatchStorage manages all patch filesystems <--> PatchList
 class PatchStorage {
 
-	SDCardOps<SDCardConf> sdcard_ops;
-	FatFileIO sdcard{&sdcard_ops, Volume::SDCard};
-	bool sdcard_mounted = false;
-	bool sdcard_needs_rescan = true;
+	SDCardOps<SDCardConf> sdcard_ops_;
+	FatFileIO sdcard{&sdcard_ops_, Volume::SDCard};
+	bool sdcard_mounted_ = false;
+	bool sdcard_needs_rescan_ = true;
+	uint32_t last_poll_tm_;
 
-	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
-	LfsFileIO norflash{flash};
+	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
+	LfsFileIO norflash_{flash_};
 
 	// RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	// FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
 	using InterCoreComm2 = InterCoreComm<ICCNum::Core2>;
 	using enum InterCoreComm2::Message;
-	InterCoreComm2 comm;
+	InterCoreComm2 comm_;
+	InterCoreComm2::Message pending_send_message = None;
+
+	uint32_t view_patch_id_;
+	PatchData view_patch_;
+
+	PatchList patch_list_;
 
 public:
-	PatchList patch_list;
-
 	PatchStorage(bool reset_to_factory_patches = false) {
-
 		// NOR Flash: if it's unformatted, put default patches there
-		auto status = norflash.initialize();
+		auto status = norflash_.initialize();
 		if (status == LfsFileIO::Status::NewlyFormatted || reset_to_factory_patches) {
-			norflash.reformat();
-			PatchFileIO::create_default_patches(norflash);
+			norflash_.reformat();
+			PatchFileIO::create_default_patches(norflash_);
 		}
 
-		// Populate Patch List
-		patch_list.clear_all_patches();
-		PatchFileIO::add_all_to_patchlist(norflash, patch_list);
+		// Populate Patch List from all media present
+		patch_list_.clear_all_patches();
+		PatchFileIO::add_all_to_patchlist(norflash_, patch_list_);
 
 		poll_media_change();
-		if (sdcard_mounted)
-			PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
-		sdcard_needs_rescan = false;
+		if (sdcard_mounted_)
+			PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
+		sdcard_needs_rescan_ = false;
 
-		auto filelist = patch_list.get_patchfile_list();
+		//if (usb_drive_mounted)
+		//	PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
+
+		auto filelist = patch_list_.get_patchfile_list();
 		SharedMemory::write_address_of(&filelist, SharedMemory::PatchListLocation);
 	}
 
 	void handle_messages() {
-		auto message = comm.get_last_message();
+		if (pending_send_message != None) {
+			// Keep trying to send message until suceeds
+			// TODO: why would this fail? The answer informs us how to handle this situation
+			if (comm_.send_message(pending_send_message))
+				pending_send_message = None;
+		}
+
+		auto message = comm_.get_last_message();
 		if (message == RequestRefreshPatchList) {
-			//start the process of refreshing
-			//when done:
-			comm.send_message(PatchListRefreshed);
+			pending_send_message = PatchListUnchanged;
+			if (sdcard_needs_rescan_) {
+				poll_media_change();
+				rescan_sdcard();
+				sdcard_needs_rescan_ = false;
+				pending_send_message = PatchListChanged;
+			}
+			// if (usb_needs_rescan_) ...
+		}
+
+		uint32_t now = HAL_GetTick();
+		if (now - last_poll_tm_ > 1000) { //poll media once per second
+			last_poll_tm_ = now;
+			poll_media_change();
 		}
 	}
 
 	void poll_media_change() {
-		bool sdcard_was_mounted = sdcard_mounted;
+		bool was_sdcard_mounted = sdcard_mounted_;
 		uint8_t card_detected;
-		auto err = sdcard_ops.ioctl(MMC_GET_SDSTAT, &card_detected);
+		auto err = sdcard_ops_.ioctl(MMC_GET_SDSTAT, &card_detected);
 		if (err || !card_detected)
-			sdcard_mounted = false;
+			sdcard_mounted_ = false;
 		else
-			sdcard_mounted = true;
-		if (sdcard_was_mounted == false && sdcard_mounted == true) {
-			sdcard_needs_rescan = true;
+			sdcard_mounted_ = true;
+		if (was_sdcard_mounted == false && sdcard_mounted_ == true) {
+			sdcard_needs_rescan_ = true;
 		}
 	}
 
 	void rescan_sdcard() {
-		if (sdcard_needs_rescan) {
-			printf_("Updating patchlist from SD Card.\n");
-			patch_list.clear_patches_from(Volume::SDCard);
-			PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
-			patch_list.mark_modified();
-			printf_("Patchlist updated.\n");
-		}
-		sdcard_needs_rescan = false;
+		printf_("Updating patchlist from SD Card.\n");
+		patch_list_.clear_patches_from(Volume::SDCard);
+		PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
+		patch_list_.mark_modified();
+		printf_("Patchlist updated.\n");
 	}
 
 	// FIXME: PatchStorage and managing the ViewedPatch are orthagonal: make them different classes or rename class
 	void load_view_patch(std::string_view &patchname) {
-		if (auto id = patch_list.find_by_name(patchname))
+		if (auto id = patch_list_.find_by_name(patchname))
 			load_view_patch(id.value());
 	}
 
 	std::optional<uint32_t> find_by_name(std::string_view &patchname) {
-		return patch_list.find_by_name(patchname);
+		return patch_list_.find_by_name(patchname);
 	}
 
 	void load_view_patch(uint32_t patch_id) {
 		bool ok = false;
-		auto filename = patch_list.get_patch_filename(patch_id);
+		auto filename = patch_list_.get_patch_filename(patch_id);
 		printf("load_view_patch %d %.31s\n", patch_id, filename.data());
 
 		auto load_patch_data = [&](auto &fileio) -> bool {
-			return PatchFileIO::load_patch_data(_view_patch, fileio, filename);
+			return PatchFileIO::load_patch_data(view_patch_, fileio, filename);
 		};
 
-		switch (patch_list.get_patch_vol(patch_id)) {
+		switch (patch_list_.get_patch_vol(patch_id)) {
 			case Volume::NorFlash:
-				ok = load_patch_data(norflash);
+				ok = load_patch_data(norflash_);
 				break;
 			case Volume::SDCard:
 				ok = load_patch_data(sdcard);
@@ -147,15 +169,15 @@ public:
 			return;
 		}
 
-		_view_patch_id = patch_id;
+		view_patch_id_ = patch_id;
 	}
 
 	uint32_t get_view_patch_id() {
-		return _view_patch_id;
+		return view_patch_id_;
 	}
 
 	PatchData &get_view_patch() {
-		return _view_patch;
+		return view_patch_;
 	}
 
 	void update_norflash_from_ramdisk() {
@@ -177,10 +199,6 @@ public:
 		// // patch_list.unlock();
 		printf_("RamDisk Available to M4\n");
 	}
-
-private:
-	uint32_t _view_patch_id;
-	PatchData _view_patch;
 };
 
 } // namespace MetaModule
