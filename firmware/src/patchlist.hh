@@ -37,7 +37,7 @@ struct PatchList {
 	}
 
 	// Returns the volume of the patch at a given index (bounds-checked)
-	const Volume get_patch_vol(uint32_t patch_id) {
+	const Volume get_patch_vol(uint32_t patch_id) const {
 		if (_patch_data.size() == 0)
 			return Volume{0};
 
@@ -55,7 +55,7 @@ struct PatchList {
 		return _patch_data[patch_id].filename;
 	}
 
-	std::optional<uint32_t> find_by_name(std::string_view &patchname) {
+	std::optional<uint32_t> find_by_name(std::string_view &patchname) const {
 		for (uint32_t i = 0; auto &x : _patch_data) {
 			if (x.patchname == patchname)
 				return {i};

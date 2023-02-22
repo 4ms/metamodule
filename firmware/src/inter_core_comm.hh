@@ -38,9 +38,13 @@ class InterCoreComm {
 
 	using IPCCHalfDuplex = typename IPCCCore::template HalfDuplexMode<Chan>;
 
-	bool got_message_ = false;
+	//This can change by another core, so it volatile
+	//Access is protected via IPCC, so it does not need to be atomic
 	volatile InterCoreCommMessage &shared_message_;
-	InterCoreCommMessage last_message_;
+
+	//These change in an ISR on this core, so are volatile
+	volatile bool got_message_ = false;
+	volatile InterCoreCommMessage last_message_;
 
 public:
 	InterCoreComm(volatile InterCoreCommMessage &shared_message)
