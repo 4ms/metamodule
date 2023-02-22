@@ -64,7 +64,7 @@ public:
 			if constexpr (Core == ICCCoreType::Initiator)
 				Debug::Pin1::high();
 			else
-				Debug::Pin2::high();
+				Debug::Pin3::high();
 
 			got_message_ = true;
 			last_message_.message_type = shared_message_.message_type;
@@ -73,11 +73,18 @@ public:
 			if constexpr (Core == ICCCoreType::Initiator)
 				Debug::Pin1::low();
 			else
-				Debug::Pin2::low();
+				Debug::Pin3::low();
+
+			printf_("[%d] %d: GOT msg %d\n", HAL_GetTick(), Core, last_message_.message_type);
 		});
 	}
 
 	[[nodiscard]] bool send_message(const InterCoreCommMessage &msg) {
+		if constexpr (Core == ICCCoreType::Initiator)
+			Debug::Pin0::high();
+		else
+			Debug::Pin2::high();
+
 		if (!IPCCHalfDuplex::is_my_turn()) {
 			// printf_("%d: send: not my turn\n", Core);
 			return false;
@@ -88,19 +95,35 @@ public:
 		shared_message_.patch_id = msg.patch_id;
 
 		__DMB();
-		printf_("%d: sending %d\n", Core, msg.message_type);
+		printf_("[%d] %d: sending %d\n", HAL_GetTick(), Core, msg.message_type);
 		IPCCHalfDuplex::notify_other();
+		IPCCHalfDuplex::enable_chan_isr();
+
+		if constexpr (Core == ICCCoreType::Initiator)
+			Debug::Pin0::low();
+		else
+			Debug::Pin2::low();
 		return true;
 	}
 
+	// struct ScopedISRMask {
+	// 	ScopedISRMask() {
+	// 		IPCCHalfDuplex::disable_chan_isr();
+	// 	}
+	// 	~ScopedISRMask() {
+	// 		IPCCHalfDuplex::enable_chan_isr();
+	// 	}
+	// };
+
 	[[nodiscard]] InterCoreCommMessage get_new_message() {
-		//scoped disable IRQ
+		// ScopedISRMask disable_chan;
+
 		if (!got_message_) {
 			last_message_.message_type = InterCoreCommMessage::None;
 		} else
-			printf_("%d: got msg %d\n", Core, last_message_.message_type);
+			printf_("[%d] %d: got msg %d\n", HAL_GetTick(), Core, last_message_.message_type);
 		got_message_ = false;
-		return last_message_;
+		return {last_message_.message_type, last_message_.bytes_read, last_message_.patch_id};
 	}
 };
 

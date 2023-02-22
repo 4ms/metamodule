@@ -70,9 +70,6 @@ void main() {
 
 	PatchStorage patch_storage{*raw_patch_data, *shared_message, *shared_patch_file_list};
 
-	// auto filelist = patch_storage.get_patchfile_list();
-	// SharedMemory::write_address_of(&filelist, SharedMemory::PatchListLocation);
-
 	PatchModQueue patch_mod_queue; //TODO: share with A7
 
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
