@@ -61,14 +61,14 @@ public:
 				.priority2 = 0,
 			},
 			[&] {
-			Debug::Pin1::high();
+			// Debug::Pin1::high();
 			// static uint32_t poll_tmr = 0;
 			// if (poll_tmr++ >= 100) { //1.6sec
 			// 	poll_tmr = 0;
 			// 	patch_storage.poll_media_change();
 			// }
 			page_update_task();
-			Debug::Pin1::low();
+			// Debug::Pin1::low();
 			});
 		page_update_tm.start();
 
@@ -80,9 +80,9 @@ public:
 				.priority2 = 3,
 			},
 			[&] {
-			Debug::Pin2::high();
+			// Debug::Pin2::high();
 			lvgl_update_task();
-			Debug::Pin2::low();
+			// Debug::Pin2::low();
 			});
 		ui_event_tm.start();
 
