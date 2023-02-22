@@ -60,7 +60,10 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void refresh_patchlist(PatchFileList &patchfiles) {
+		//TODO: try using pmr::string with monotonic stack buffer
 		std::string patchnames;
+		patchnames.reserve((sizeof(PatchFileList::value_type::patchname) + 1) * patchfiles.size());
+
 		for (auto &p : patchfiles) {
 			patchnames += p.patchname.c_str();
 			patchnames += '\n';
@@ -81,7 +84,6 @@ struct PatchSelectorPage : PageBase {
 
 	void update() override {
 		// Check if M4 sent us a message:
-		auto message = patch_storage.get_message().message_type;
 
 		switch (state) {
 			case State::TryingToRequestPatchList:
@@ -89,24 +91,38 @@ struct PatchSelectorPage : PageBase {
 					state = State::RequestedPatchList;
 				break;
 
-			case State::RequestedPatchList:
-				if (message == PatchStorageProxy::PatchListChanged)
-					state = State::LoadingPatchList;
-				else if (message == PatchStorageProxy::PatchListUnchanged)
-					state = State::PatchListLoaded;
-				break;
+			case State::RequestedPatchList: {
+				auto message = patch_storage.get_message().message_type;
+				if (message == PatchStorageProxy::PatchListChanged) {
+					refresh_patchlist(patch_storage.get_patch_list());
+					state = State::Idle;
+				} else if (message == PatchStorageProxy::PatchListUnchanged)
+					state = State::Idle;
+				//else other messages ==> error? repeat request? idle?
+			} break;
 
-			case State::LoadingPatchList:
-				refresh_patchlist(patch_storage.get_patch_list());
-				state = State::PatchListLoaded;
-				break;
-
-			case State::PatchListLoaded: {
+			case State::Idle: {
 				//periodically check if patchlist needs updating:
 				uint32_t now = HAL_GetTick();
 				if (now - last_refresh_check_tm > 1000) { //poll media once per second
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;
+				}
+			} break;
+
+			case State::TryingToRequestPatchData:
+				if (patch_storage.request_viewpatch(selected_patch))
+					state = State::RequestedPatchData;
+				break;
+
+			case State::RequestedPatchData: {
+				auto message = patch_storage.get_message();
+				if (message.message_type == PatchStorageProxy::PatchDataLoaded) {
+					refresh_patchlist(patch_storage.get_patch_list());
+					state = State::Idle;
+				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
+					state = State::Idle;
+					//TODO: handle error... try reloading patch list?
 				}
 			} break;
 		}
@@ -140,7 +156,7 @@ struct PatchSelectorPage : PageBase {
 	static void patchlist_event_cb(lv_event_t *event) {
 		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
 		_instance->selected_patch = lv_roller_get_selected(_instance->roller);
-		_instance->should_show_patchview = true;
+		_instance->state = State::TryingToRequestPatchData;
 	}
 
 private:
@@ -152,7 +168,15 @@ private:
 	lv_obj_t *header_text;
 	lv_obj_t *base;
 
-	enum class State { PatchListLoaded, TryingToRequestPatchList, RequestedPatchList, LoadingPatchList } state;
+	enum class State {
+		Idle,
+
+		TryingToRequestPatchList,
+		RequestedPatchList,
+
+		TryingToRequestPatchData,
+		RequestedPatchData,
+	} state;
 
 	uint32_t last_refresh_check_tm = 0;
 };

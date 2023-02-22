@@ -63,13 +63,15 @@ void main() {
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
 	auto virtdrive = SharedMemory::read_address_of<RamDrive *>(SharedMemory::RamDiskLocation);
 	auto raw_patch_data = SharedMemory::read_address_of<std::span<char> *>(SharedMemory::PatchDataLocation);
-	auto shared_params =
+	auto shared_message =
 		SharedMemory::read_address_of<InterCoreCommMessage volatile *>(SharedMemory::InterCoreCommParamsLocation);
+	auto shared_patch_file_list =
+		SharedMemory::read_address_of<std::span<PatchFile> *>(SharedMemory::PatchListLocation);
 
-	PatchStorage patch_storage{*raw_patch_data, *shared_params};
+	PatchStorage patch_storage{*raw_patch_data, *shared_message, *shared_patch_file_list};
 
-	auto filelist = patch_storage.get_patchfile_list();
-	SharedMemory::write_address_of(&filelist, SharedMemory::PatchListLocation);
+	// auto filelist = patch_storage.get_patchfile_list();
+	// SharedMemory::write_address_of(&filelist, SharedMemory::PatchListLocation);
 
 	PatchModQueue patch_mod_queue; //TODO: share with A7
 

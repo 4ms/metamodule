@@ -57,14 +57,17 @@ class PatchStorage {
 	PatchList patch_list_;
 
 	const std::span<char> &raw_patch_buffer;
+	const std::span<PatchFile> &filelist;
 	InterCoreCommMessage icc_params;
 
 public:
 	PatchStorage(std::span<char> &raw_patch_buffer,
 				 volatile InterCoreCommMessage &shared_message,
+				 std::span<PatchFile> &filelist,
 				 bool reset_to_factory_patches = false)
 		: raw_patch_buffer{raw_patch_buffer}
-		, comm_{shared_message} {
+		, comm_{shared_message}
+		, filelist{filelist} {
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();

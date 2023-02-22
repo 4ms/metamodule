@@ -7,7 +7,9 @@
 #include "leds.hh"
 #include "lvgl/src/misc/lv_color.h" // for lv_color_t
 #include "params.hh"
+#include "patch_file.hh"
 #include "ramdisk.hh"
+#include <span>
 
 namespace MetaModule
 {
@@ -25,8 +27,10 @@ static inline __attribute__((section(".sysram"))) StreamConf::Audio::AudioOutBlo
 using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf1;
 static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
-static inline __attribute__((section(".ddma"))) std::aligned_storage<65536, 4> raw_patch_data;
+static inline __attribute__((section(".ddma"))) std::array<char, 65536> raw_patch_data;
 static inline volatile __attribute__((section(".ddma"))) InterCoreCommMessage icc_shared_message;
+static inline __attribute__((section(".ddma"))) std::span<PatchFile> shared_patch_file_list;
+//^^^ shared_patch_file_list is just a span (ptr and size)
 
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2
 static inline __attribute__((section(".sysram"))) DoubleAuxStreamBlock auxsignal_block;
