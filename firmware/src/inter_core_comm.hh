@@ -85,7 +85,7 @@ public:
 		else
 			Debug::Pin2::high();
 
-		if (!IPCCHalfDuplex::is_my_turn()) {
+		if (got_message_ || !IPCCHalfDuplex::is_my_turn()) {
 			// printf_("%d: send: not my turn\n", Core);
 			return false;
 		}
