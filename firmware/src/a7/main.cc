@@ -82,7 +82,7 @@ void main() {
 		;
 
 	PatchStorageProxy patch_storage_proxy{
-		StaticBuffers::shared_patch_file_list, StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message};
+		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
 	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue};
 
 	param_cache.clear();

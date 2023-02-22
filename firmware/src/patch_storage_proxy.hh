@@ -14,9 +14,9 @@ class PatchStorageProxy {
 public:
 	using enum InterCoreCommMessage::MessageType;
 
-	PatchStorageProxy(std::span<PatchFile> &remote_patch_list,
-					  std::span<char> raw_patch_data,
-					  volatile InterCoreCommMessage &shared_message)
+	PatchStorageProxy(std::span<char> raw_patch_data,
+					  volatile InterCoreCommMessage &shared_message,
+					  std::span<PatchFile> &remote_patch_list)
 		: remote_patch_list_{remote_patch_list}
 		, comm_{shared_message} {
 	}

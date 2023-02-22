@@ -118,7 +118,7 @@ struct PatchSelectorPage : PageBase {
 			case State::RequestedPatchData: {
 				auto message = patch_storage.get_message();
 				if (message.message_type == PatchStorageProxy::PatchDataLoaded) {
-					refresh_patchlist(patch_storage.get_patch_list());
+
 					state = State::Idle;
 				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
 					state = State::Idle;
@@ -129,14 +129,14 @@ struct PatchSelectorPage : PageBase {
 
 		//TODO: Display state: "Refreshing...", "Loading..."
 
-		if (should_show_patchview) {
-			should_show_patchview = false;
-			printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
-			patch_storage.load_view_patch(selected_patch);
-			PageList::set_selected_patch_id(selected_patch);
-			PageList::request_new_page(PageId::PatchView);
-			blur();
-		}
+		// if (should_show_patchview) {
+		// 	should_show_patchview = false;
+		// 	printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
+		// 	patch_storage.load_view_patch(selected_patch);
+		// 	PageList::set_selected_patch_id(selected_patch);
+		// 	PageList::request_new_page(PageId::PatchView);
+		// 	blur();
+		// }
 
 		// lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
 		// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
