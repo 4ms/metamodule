@@ -120,8 +120,8 @@ struct PatchList {
 		// _patch_data.emplace_back(volume, filename, 0, 0, "");
 	}
 
-	std::vector<PatchFile> &get_patchfile_list() {
-		return _patch_data;
+	auto get_patchfile_list() {
+		return std::span<PatchFile>(_patch_data);
 	}
 
 private:
