@@ -80,7 +80,7 @@ public:
 		poll_media_change();
 		if (sdcard_mounted_)
 			PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
-		sdcard_needs_rescan_ = false;
+		sdcard_needs_rescan_ = true;
 
 		//if (usb_drive_mounted)
 		//	PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
@@ -172,7 +172,7 @@ public:
 		}
 	}
 
-	auto &get_patchfile_list() {
+	auto get_patchfile_list() {
 		return patch_list_.get_patchfile_list();
 	}
 };

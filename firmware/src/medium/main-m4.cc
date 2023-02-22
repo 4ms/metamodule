@@ -63,10 +63,10 @@ void main() {
 	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
 	auto virtdrive = SharedMemory::read_address_of<RamDrive *>(SharedMemory::RamDiskLocation);
 	auto raw_patch_data = SharedMemory::read_address_of<std::span<char> *>(SharedMemory::PatchDataLocation);
-	auto icc_params =
+	auto shared_params =
 		SharedMemory::read_address_of<InterCoreCommMessage volatile *>(SharedMemory::InterCoreCommParamsLocation);
 
-	PatchStorage patch_storage{*raw_patch_data, *icc_params};
+	PatchStorage patch_storage{*raw_patch_data, *shared_params};
 
 	auto filelist = patch_storage.get_patchfile_list();
 	SharedMemory::write_address_of(&filelist, SharedMemory::PatchListLocation);

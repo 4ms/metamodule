@@ -51,8 +51,6 @@ public:
 
 		IPCCHalfDuplex::enable_chan_isr(isr_pri, isr_subpri, [this] {
 			// Verify flag has not been changed by other core since ISR fired
-			// if (IPCCHalfDuplex::is_my_turn()) {
-
 			// irqmask = ~(currentInstance->MR) & IPCC_ALL_RX_BUF or TX_BUF;
 			// irqmask = irqmask & otherInstance->SR;
 			// for each bit set in irqmask:
@@ -63,6 +61,7 @@ public:
 				Debug::Pin1::high();
 			else
 				Debug::Pin2::high();
+
 			got_message_ = true;
 			last_message_.message_type = shared_message_.message_type;
 			last_message_.bytes_read = shared_message_.bytes_read;
@@ -71,7 +70,6 @@ public:
 				Debug::Pin1::low();
 			else
 				Debug::Pin2::low();
-			// }
 		});
 	}
 
