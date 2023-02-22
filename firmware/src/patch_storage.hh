@@ -57,8 +57,7 @@ class PatchStorage {
 	PatchList patch_list_;
 
 	const std::span<char> &raw_patch_buffer;
-	const std::span<PatchFile> &filelist;
-	InterCoreCommMessage icc_params;
+	std::span<PatchFile> &filelist;
 
 public:
 	PatchStorage(std::span<char> &raw_patch_buffer,
@@ -83,6 +82,7 @@ public:
 		poll_media_change();
 		if (sdcard_mounted_)
 			PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
+		filelist = patch_list_.get_patchfile_list();
 		sdcard_needs_rescan_ = true;
 
 		//if (usb_drive_mounted)
@@ -97,11 +97,11 @@ public:
 				pending_send_message.message_type = None;
 		}
 
-		icc_params = comm_.get_new_message();
+		auto icc_params = comm_.get_new_message();
 		if (icc_params.message_type == RequestRefreshPatchList) {
 			pending_send_message.message_type = PatchListUnchanged;
 			if (sdcard_needs_rescan_) {
-				poll_media_change();
+				// poll_media_change();
 				rescan_sdcard();
 				sdcard_needs_rescan_ = false;
 				pending_send_message.message_type = PatchListChanged;
@@ -111,7 +111,7 @@ public:
 		}
 
 		uint32_t now = HAL_GetTick();
-		if (now - last_poll_tm_ > 1000) { //poll media once per second
+		if (now - last_poll_tm_ > 2000) { //poll media once per second
 			last_poll_tm_ = now;
 			poll_media_change();
 		}
@@ -134,8 +134,8 @@ public:
 		printf_("Updating patchlist from SD Card.\n");
 		patch_list_.clear_patches_from(Volume::SDCard);
 		PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
-		patch_list_.mark_modified();
-		printf_("Patchlist updated.\n");
+		filelist = patch_list_.get_patchfile_list();
+		printf_("Patchlist updated. filelist data: %p, size: %d.\n", filelist.data(), filelist.size());
 	}
 
 	// void load_view_patch(std::string_view &patchname) {
@@ -143,7 +143,7 @@ public:
 	// 		load_view_patch(id.value());
 	// }
 
-	std::optional<uint32_t> find_by_name(std::string_view &patchname) {
+	std::optional<uint32_t> find_by_name(std::string_view &patchname) const {
 		return patch_list_.find_by_name(patchname);
 	}
 
@@ -173,10 +173,6 @@ public:
 			printf_("Could not load patch id %d\n", patch_id);
 			return;
 		}
-	}
-
-	auto get_patchfile_list() {
-		return patch_list_.get_patchfile_list();
 	}
 };
 
