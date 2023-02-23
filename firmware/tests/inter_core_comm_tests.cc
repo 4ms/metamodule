@@ -41,12 +41,13 @@ TEST_CASE("ICC") {
 		CHECK_FALSE(ok);
 	}
 
-	SUBCASE("Tx sends, RX receives it, sends back, TX receives it") {
+	SUBCASE("Tx sends, RX receives it, sends back, TX receives it, repeat") {
 		mdrivlib::IPCC_<1>::reset();
 		mdrivlib::IPCC_<2>::reset();
 
 		InterCoreCommMessage msg;
 
+		// First round:
 		msg.message_type = InterCoreCommMessage::RequestRefreshPatchList;
 		bool ok = tx.send_message(msg);
 		CHECK(ok);
@@ -58,7 +59,74 @@ TEST_CASE("ICC") {
 		ok = rx.send_message(msg);
 		CHECK(ok);
 
-		rxmsg = tx.get_new_message();
-		CHECK(rxmsg.message_type == InterCoreCommMessage::PatchListChanged);
+		auto txmsg = tx.get_new_message();
+		CHECK(txmsg.message_type == InterCoreCommMessage::PatchListChanged);
+
+		// Second round:
+		msg.message_type = InterCoreCommMessage::RequestPatchData;
+		ok = tx.send_message(msg);
+		CHECK(ok);
+
+		rxmsg = rx.get_new_message();
+		CHECK(rxmsg.message_type == InterCoreCommMessage::RequestPatchData);
+
+		msg.message_type = InterCoreCommMessage::PatchDataLoaded;
+		ok = rx.send_message(msg);
+		CHECK(ok);
+
+		txmsg = tx.get_new_message();
+		CHECK(txmsg.message_type == InterCoreCommMessage::PatchDataLoaded);
+	}
+
+	SUBCASE("Checking get_new_message repeatedly doesn't break anything") {
+		mdrivlib::IPCC_<1>::reset();
+		mdrivlib::IPCC_<2>::reset();
+
+		InterCoreCommMessage msg;
+
+		// First round:
+		CHECK(tx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(rx.get_new_message().message_type == InterCoreCommMessage::None);
+
+		msg.message_type = InterCoreCommMessage::RequestRefreshPatchList;
+		bool ok = tx.send_message(msg);
+		CHECK(ok);
+
+		CHECK(tx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(tx.get_new_message().message_type == InterCoreCommMessage::None);
+
+		auto rxmsg = rx.get_new_message();
+		CHECK(rxmsg.message_type == InterCoreCommMessage::RequestRefreshPatchList);
+
+		CHECK(tx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(rx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(tx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(rx.get_new_message().message_type == InterCoreCommMessage::None);
+
+		msg.message_type = InterCoreCommMessage::PatchListChanged;
+		ok = rx.send_message(msg);
+		CHECK(ok);
+
+		CHECK(rx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(rx.get_new_message().message_type == InterCoreCommMessage::None);
+
+		auto txmsg = tx.get_new_message();
+		CHECK(txmsg.message_type == InterCoreCommMessage::PatchListChanged);
+
+		CHECK(tx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(rx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(tx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(rx.get_new_message().message_type == InterCoreCommMessage::None);
+
+		// Second round:
+		msg.message_type = InterCoreCommMessage::RequestPatchData;
+		ok = tx.send_message(msg);
+		CHECK(ok);
+
+		CHECK(tx.get_new_message().message_type == InterCoreCommMessage::None);
+		CHECK(tx.get_new_message().message_type == InterCoreCommMessage::None);
+
+		rxmsg = rx.get_new_message();
+		CHECK(rxmsg.message_type == InterCoreCommMessage::RequestPatchData);
 	}
 }

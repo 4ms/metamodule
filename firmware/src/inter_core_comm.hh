@@ -52,8 +52,7 @@ class InterCoreComm {
 	//Access is protected via IPCC hardware Flag, so it does not need to be atomic
 	volatile InterCoreCommMessage &shared_message_;
 
-	// Only the "Initiator" core can begin by sending a message
-	bool already_got_message_ = Core == ICCCoreType::Initiator ? false : false;
+	bool was_my_turn = false;
 
 public:
 	InterCoreComm(volatile InterCoreCommMessage &shared_message)
@@ -67,15 +66,6 @@ public:
 		else
 			Debug::Pin2::high();
 
-		//Prevent sending while a message has been received in the ISR
-		//but not yet processed in get_new_message(). Otherwise,
-		//there's a chance the response will happen before we can
-		//process the previous message, which will get clobbered by the new one
-		if (already_got_message_) {
-			printf_("%d: send aborted: already_got_message\n", Core);
-			return false;
-		}
-		//Prevent sending while waiting for a response
 		if (!IPCCHalfDuplex::is_my_turn()) {
 			printf_("%d: send aborted: not my turn\n", Core);
 			return false;
@@ -84,6 +74,7 @@ public:
 		shared_message_.message_type = msg.message_type;
 		shared_message_.bytes_read = msg.bytes_read;
 		shared_message_.patch_id = msg.patch_id;
+		was_my_turn = false;
 
 		__DMB();
 		printf_("[%d] %d: sending %d\n", HAL_GetTick(), Core, msg.message_type);
@@ -98,34 +89,33 @@ public:
 
 	[[nodiscard]] InterCoreCommMessage get_new_message() {
 		// Process messages once
-		if (already_got_message_) {
-			printf_("%d: get_new_message: Already got a message, nothing new\n", Core);
-			return {.message_type = InterCoreCommMessage::None};
-		}
+		auto is_my_turn = IPCCHalfDuplex::is_my_turn();
 
-		// Only have access to shared_message_ when IPCC Flag says its our turn
-		if (!IPCCHalfDuplex::is_my_turn()) {
+		InterCoreCommMessage msg{.message_type = InterCoreCommMessage::None};
+
+		if (is_my_turn && !was_my_turn) {
+			if constexpr (Core == ICCCoreType::Initiator)
+				Debug::Pin1::high();
+			else
+				Debug::Pin3::high();
+
+			//TODO: volatile copy constructor
+			// msg = shared_message_;
+			msg = {shared_message_.message_type, shared_message_.bytes_read, shared_message_.patch_id};
+
+			printf_("[%d] %d: got msg %d\n", HAL_GetTick(), Core, msg.message_type);
+			shared_message_.message_type = InterCoreCommMessage::None;
+
+			if constexpr (Core == ICCCoreType::Initiator)
+				Debug::Pin1::low();
+			else
+				Debug::Pin3::low();
+		} else if (!is_my_turn) {
 			printf_("%d: get_new_message: not my turn\n", Core);
-			return {.message_type = InterCoreCommMessage::None};
+		} else if (was_my_turn) {
+			// printf_("%d: get_new_message: already got message\n", Core);
 		}
-
-		if constexpr (Core == ICCCoreType::Initiator)
-			Debug::Pin1::high();
-		else
-			Debug::Pin3::high();
-
-		already_got_message_ = true;
-
-		//TODO: volatile copy constructor
-		InterCoreCommMessage msg{shared_message_.message_type, shared_message_.bytes_read, shared_message_.patch_id};
-
-		printf_("[%d] %d: got msg %d\n", HAL_GetTick(), Core, msg.message_type);
-		shared_message_.message_type = InterCoreCommMessage::None;
-
-		if constexpr (Core == ICCCoreType::Initiator)
-			Debug::Pin1::low();
-		else
-			Debug::Pin3::low();
+		was_my_turn = is_my_turn;
 
 		return msg;
 	}

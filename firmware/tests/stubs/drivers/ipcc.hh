@@ -17,7 +17,7 @@ struct IPCC_ {
 	static inline bool global_rxisr_enabled = false;
 
 	static void reset() {
-		printf("Reset Core %d\n", N);
+		// printf("Reset Core %d\n", N);
 		for (auto &f : flags)
 			f = false;
 		for (auto &m : tx_isr_masks)
@@ -29,17 +29,33 @@ struct IPCC_ {
 	}
 
 	// Set/Clear the IPCC Flag:
-	template<uint32_t C>
-	static void clear_flag() {
-		// IPCCRegs::Core<N>::template Chan<C>::ChangeFlag::clear();
-		printf("Core %d cleared flag %d\n", N, C);
-		flags[C] = false;
-	}
+	// Note: Clearing acts upon the other core's flag
+	// and reading the rx occupied flag requires reading the other Core's flags
 	template<uint32_t C>
 	static void set_flag() {
-		// IPCCRegs::Core<N>::template Chan<C>::ChangeFlag::set();
-		printf("Core %d set flag %d\n", N, C);
-		IPCC_<N>::flags[C] = true;
+		// printf("Core %d set flag %d\n", N, C);
+		flags[C] = true;
+	}
+	template<uint32_t C>
+	static void clear_flag() {
+		// printf("Core %d cleared flag %d\n", N, C);
+		// Note: Clearing acts upon the other core's flag
+		IPCC_<3 - N>::flags[C] = false;
+	}
+	template<uint32_t C>
+	static bool is_tx_free() {
+		// printf("Core %d read flag %d as %d\n", N, C, flags[C]);
+		return flags[C] == false;
+	}
+	template<uint32_t C>
+	static bool is_rx_occupied() {
+		// printf("Core %d read flag %d as %d\n", N, C, flags[C]);
+		return IPCC_<3 - N>::flags[C] == true;
+	}
+	template<uint32_t C>
+	static bool is_other_rx_occupied() {
+		// printf("Core %d read Core %d flag %d as %d\n", N, 3 - N, C, IPCC_<3 - N>::flags[C]);
+		return flags[C] == true;
 	}
 
 	// TXFree:
@@ -64,12 +80,6 @@ struct IPCC_ {
 		// IPCCRegs::Core<N>::TXFreeISREnable::clear();
 		global_txisr_enabled = false;
 	}
-	template<uint32_t C>
-	static bool is_tx_free() {
-		printf("Core %d read flag %d as %d\n", N, C, flags[C]);
-		return flags[C] == false;
-		// return IPCCRegs::Core<N>::template Chan<C>::FlagStatus::read() == 0;
-	}
 
 	// RXOccupied:
 	template<uint32_t C>
@@ -93,18 +103,6 @@ struct IPCC_ {
 		// IPCCRegs::Core<N>::RXOccISREnable::clear(); //disable = clear an enable bit
 		global_rxisr_enabled = false;
 	}
-	template<uint32_t C>
-	static bool is_rx_occupied() {
-		printf("Core %d read flag %d as %d\n", N, C, flags[C]);
-		return flags[C] == true;
-		// return IPCCRegs::Core<N>::template Chan<C>::FlagStatus::read() != 0;
-	}
-	template<uint32_t C>
-	static bool is_other_rx_occupied() {
-		printf("Core %d read Core %d flag %d as %d\n", N, 3 - N, C, IPCC_<3 - N>::flags[C]);
-		return IPCC_<3 - N>::flags[C] == true;
-		// return IPCCRegs::Core<3 - N>::template Chan<C>::FlagStatus::read() != 0;
-	}
 
 	//Half Duplex mode:
 	template<uint32_t C>
@@ -113,8 +111,7 @@ struct IPCC_ {
 			if constexpr (N == 1)
 				return is_tx_free<C>();
 			else
-				// Core<1>'s flag holds the state of the halfduplex communication
-				return is_other_rx_occupied<C>();
+				return is_rx_occupied<C>();
 		}
 
 		static void enable_chan_isr(uint32_t pri, uint32_t subpri, auto &&callback) {
