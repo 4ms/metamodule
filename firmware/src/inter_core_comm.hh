@@ -27,6 +27,14 @@ struct InterCoreCommMessage {
 	MessageType message_type;
 	uint32_t bytes_read;
 	uint32_t patch_id;
+
+	// InterCoreCommMessage(InterCoreCommMessage &other) = default;
+
+	// InterCoreCommMessage(volatile InterCoreCommMessage &other)
+	// 	: message_type(other.message_type)
+	// 	, bytes_read{other.bytes_read}
+	// 	, patch_id{other.patch_id} {
+	// }
 };
 
 enum class ICCCoreType { Initiator = 1, Responder = 2 };
@@ -85,8 +93,17 @@ public:
 		else
 			Debug::Pin2::high();
 
-		if (got_message_ || !IPCCHalfDuplex::is_my_turn()) {
-			// printf_("%d: send: not my turn\n", Core);
+		//Prevent sending while a message has been received in the ISR
+		//but not yet processed in get_new_message(). Otherwise,
+		//there's a chance the response will happen before we can
+		//process the previous message, which will get clobbered by the new one
+		if (got_message_) {
+			printf_("%d: send aborted: got_message\n", Core);
+			return false;
+		}
+		//Prevent sending while waiting for a response
+		if (!IPCCHalfDuplex::is_my_turn()) {
+			printf_("%d: send aborted: not my turn\n", Core);
 			return false;
 		}
 
@@ -116,14 +133,23 @@ public:
 	// };
 
 	[[nodiscard]] InterCoreCommMessage get_new_message() {
-		// ScopedISRMask disable_chan;
-
+		// ISR might be enabled at this point, if we sent a message and are waiting to hear back
+		// But we just check true/false on got_message. If we read it as false and the ISR fires,
+		// we'll take the false branch and then take the true branch next time (no harm done)
 		if (!got_message_) {
-			last_message_.message_type = InterCoreCommMessage::None;
-		} else
-			printf_("[%d] %d: got msg %d\n", HAL_GetTick(), Core, last_message_.message_type);
+			return {.message_type = InterCoreCommMessage::None};
+		}
+		// If we get to this point, then got_message_ == true, which can only be set
+		// in the ISR, after the ISR is masked (disabled).
+		// Therefore ISR must be masked and the ISR can't interrupt the following:
+
+		printf_("[%d] %d: got msg %d\n", HAL_GetTick(), Core, last_message_.message_type);
+
 		got_message_ = false;
-		return {last_message_.message_type, last_message_.bytes_read, last_message_.patch_id};
+		InterCoreCommMessage msg = {last_message_.message_type, last_message_.bytes_read, last_message_.patch_id};
+		last_message_.message_type = InterCoreCommMessage::None;
+
+		return msg;
 	}
 };
 
