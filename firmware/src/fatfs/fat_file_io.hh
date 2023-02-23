@@ -153,11 +153,22 @@ public:
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
 		FIL fil;
 		UINT bytes_read;
-		if (f_chdrive(_fatvol) != FR_OK)
-			return 0;
 
-		if (f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK)
-			return 0;
+		if (f_chdrive(_fatvol) != FR_OK) {
+			if (!mount_disk())
+				return 0;
+
+			if (f_chdrive(_fatvol) != FR_OK)
+				return 0;
+		}
+
+		if (f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK) {
+			if (!mount_disk())
+				return 0;
+
+			if (f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK)
+				return 0;
+		}
 
 		if (f_read(&fil, buffer.data(), buffer.size_bytes(), &bytes_read) != FR_OK) {
 			f_close(&fil);
@@ -195,10 +206,12 @@ public:
 		DIR dj;
 		FILINFO fno;
 
-		auto res = f_opendir(&dj, _fatvol);
-
-		if (res != FR_OK)
-			return false;
+		if (f_opendir(&dj, _fatvol) != FR_OK) {
+			if (!mount_disk())
+				return false;
+			if (f_opendir(&dj, _fatvol) != FR_OK)
+				return false;
+		}
 
 		while (f_readdir(&dj, &fno) == FR_OK) {
 			if (fno.fname[0] == '\0')
