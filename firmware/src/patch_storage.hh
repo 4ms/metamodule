@@ -31,6 +31,8 @@ class PatchStorage {
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
 	LfsFileIO norflash_{flash_};
 
+	FatFileIO &usbdrive;
+
 	// RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
 	// FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
 
@@ -48,9 +50,11 @@ public:
 	PatchStorage(std::span<char> &raw_patch_buffer,
 				 volatile InterCoreCommMessage &shared_message,
 				 std::span<PatchFile> &filelist,
+				 FatFileIO &usb_fileio,
 				 bool reset_to_factory_patches = false)
-		: raw_patch_buffer_{raw_patch_buffer}
+		: usbdrive{usb_fileio}
 		, comm_{shared_message}
+		, raw_patch_buffer_{raw_patch_buffer}
 		, filelist_{filelist} {
 
 		// NOR Flash: if it's unformatted, put default patches there
@@ -71,7 +75,7 @@ public:
 		sdcard_needs_rescan_ = true;
 
 		//if (usb_drive_mounted)
-		//	PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
+		PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
 	}
 
 	void handle_messages() {
