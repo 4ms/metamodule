@@ -97,7 +97,7 @@ struct PatchViewPage : PageBase {
 		const auto &patch = patch_storage.get_view_patch();
 		patch_instance = &patch;
 
-		printf_("patch id = %d\n", patch_storage.get_view_patch_id());
+		// printf_("patch id = %d\n", patch_storage.get_view_patch_id());
 		if (patch.patch_name.length() == 0)
 			return;
 

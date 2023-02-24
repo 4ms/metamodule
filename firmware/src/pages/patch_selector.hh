@@ -115,14 +115,27 @@ struct PatchSelectorPage : PageBase {
 
 			case State::RequestedPatchData: {
 				auto message = patch_storage.get_message();
-				if (message.message_type == PatchStorageProxy::PatchDataLoaded) {
 
-					state = State::Idle;
+				if (message.message_type == PatchStorageProxy::PatchDataLoaded) {
+					// Try to parse the patch and open the PatchView page
+					if (patch_storage.parse_view_patch(message.bytes_read)) {
+						auto view_patch = patch_storage.get_view_patch();
+						printf_("Parsed patch: %s\n", view_patch.patch_name);
+						PageList::set_selected_patch_id(selected_patch);
+						PageList::request_new_page(PageId::PatchView);
+						state = State::Closing;
+					} else {
+						printf_("Error loading patch id %d, bytes_read = %d\n", selected_patch, message.bytes_read);
+						state = State::Idle;
+					}
 				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
 					state = State::Idle;
 					//TODO: handle error... try reloading patch list?
 				}
 			} break;
+
+			case State::Closing:
+				break;
 		}
 
 		//TODO: Display state: "Refreshing...", "Loading..."
@@ -131,8 +144,6 @@ struct PatchSelectorPage : PageBase {
 		// 	should_show_patchview = false;
 		// 	printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
 		// 	patch_storage.load_view_patch(selected_patch);
-		// 	PageList::set_selected_patch_id(selected_patch);
-		// 	PageList::request_new_page(PageId::PatchView);
 		// 	blur();
 		// }
 
@@ -174,6 +185,8 @@ private:
 
 		TryingToRequestPatchData,
 		RequestedPatchData,
+
+		Closing,
 	} state;
 
 	uint32_t last_refresh_check_tm = 0;

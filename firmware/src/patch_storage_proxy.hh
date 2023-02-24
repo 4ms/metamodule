@@ -1,5 +1,6 @@
 #pragma once
 #include "inter_core_comm.hh"
+#include "patch_convert/yaml_to_patch.hh"
 #include "patch_data.hh"
 #include "patch_file.hh"
 #include "patchlist.hh"
@@ -18,7 +19,8 @@ public:
 					  volatile InterCoreCommMessage &shared_message,
 					  std::span<PatchFile> &remote_patch_list)
 		: remote_patch_list_{remote_patch_list}
-		, comm_{shared_message} {
+		, comm_{shared_message}
+		, raw_patch_data_{raw_patch_data} {
 	}
 
 	[[nodiscard]] bool request_viewpatch(uint32_t patch_id) {
@@ -31,16 +33,13 @@ public:
 		return true;
 	}
 
-	bool load_view_patch(uint32_t patch_id) {
-		return true;
+	bool parse_view_patch(uint32_t bytes_read) {
+		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
+		return yaml_raw_to_patch(file_data, view_patch_);
 	}
 
 	PatchData &get_view_patch() {
 		return view_patch_;
-	}
-
-	uint32_t get_view_patch_id() {
-		return 0;
 	}
 
 	InterCoreCommMessage get_message() {
@@ -66,6 +65,7 @@ private:
 	std::span<PatchFile> &remote_patch_list_;
 	InterCoreComm1 comm_;
 
+	std::span<char> raw_patch_data_;
 	PatchData view_patch_;
 	uint32_t view_patch_id_;
 };
