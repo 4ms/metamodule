@@ -97,10 +97,14 @@ public:
 				}
 			} break;
 
-			case HOST_USER_DISCONNECTION:
-				printf_("Disconnected\n");
-				_midihost_instance->disconnect();
-				break;
+			case HOST_USER_DISCONNECTION: {
+				uint8_t classcode = host.get_active_class_code();
+				printf_("Disconnected class code %d\n", classcode);
+				if (classcode == AudioClassCode)
+					_midihost_instance->disconnect();
+				if (classcode == USB_MSC_CLASS)
+					_mschost_instance->disconnect();
+			} break;
 
 			case HOST_USER_UNRECOVERED_ERROR:
 				printf_("Error\n");
