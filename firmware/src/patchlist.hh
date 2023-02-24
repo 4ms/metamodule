@@ -64,16 +64,6 @@ struct PatchList {
 		return std::nullopt;
 	}
 
-	// Return a reference to the patch at the given index (bounds-checked)
-	[[deprecated]] PatchData &get_patch(uint32_t patch_id) {
-		// if (_patch_data.size() == 0)
-		return nullpatch;
-
-		// if (patch_id >= _patch_data.size())
-		// 	patch_id = 0;
-		// return _patch_data[patch_id].patch_data;
-	}
-
 	uint32_t num_patches() const {
 		return _patch_data.size();
 	}
@@ -107,10 +97,6 @@ struct PatchList {
 		_has_been_updated = true;
 	}
 
-	// void add_patch_from_yaml(const std::span<std::byte> data);
-	// void add_patch_from_yaml(const std::span<char> data);
-	// void add_patch_from_yaml(const std::span<uint8_t> data);
-
 	void add_patch_header(Volume volume,
 						  const std::string_view filename,
 						  uint32_t filesize,
@@ -126,14 +112,17 @@ struct PatchList {
 
 private:
 	// FIXME: We could get fragmentation if patch list is changed frequently
-	// Use an arena or some separate memory area, which is wiped when we refresh (re-insert SD card)
-	// We'd need to estimate the max size of all patches to do this.
+	// Use std::pmr::vector<PatchFile> (with std::pmr::string inside PatchFile)
+	// and a monotonic buffer resource.
+	// Reserve the size of the resource after wiping, to avoid re-allocations on push_back.
+	// Reset the buffer resource when we refresh/rescan the media.
+	// Thie means we need a separate patch_data vector for each file system (unless we always
+	// rescan all filesystems at the same time)
 	std::vector<PatchFile> _patch_data;
 	Status _status = Status::NotLoaded;
 	bool _has_been_updated = false;
 	bool _locked = false;
 
-	static inline PatchData nullpatch{};
 	static inline const ModuleTypeSlug nullslug{""};
 };
 } // namespace MetaModule
