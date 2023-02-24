@@ -10,7 +10,6 @@ namespace MetaModule
 using PatchFileList = std::span<PatchFile>;
 
 class PatchStorageProxy {
-	using InterCoreComm1 = InterCoreComm<ICCCoreType::Initiator>;
 
 public:
 	using enum InterCoreCommMessage::MessageType;
@@ -30,16 +29,26 @@ public:
 		};
 		if (!comm_.send_message(message))
 			return false;
+
+		requested_view_patch_id_ = patch_id;
 		return true;
 	}
 
 	bool parse_view_patch(uint32_t bytes_read) {
 		std::span<char> file_data = raw_patch_data_.subspan(0, bytes_read);
-		return yaml_raw_to_patch(file_data, view_patch_);
+		if (!yaml_raw_to_patch(file_data, view_patch_))
+			return false;
+
+		view_patch_id_ = requested_view_patch_id_;
+		return true;
 	}
 
 	PatchData &get_view_patch() {
 		return view_patch_;
+	}
+
+	uint32_t get_view_patch_id() {
+		return view_patch_id_;
 	}
 
 	InterCoreCommMessage get_message() {
@@ -63,10 +72,11 @@ public:
 
 private:
 	std::span<PatchFile> &remote_patch_list_;
-	InterCoreComm1 comm_;
+	InterCoreComm<ICCCoreType::Initiator> comm_;
 
 	std::span<char> raw_patch_data_;
 	PatchData view_patch_;
-	uint32_t view_patch_id_;
+	uint32_t requested_view_patch_id_ = 0;
+	uint32_t view_patch_id_ = 0;
 };
 } // namespace MetaModule

@@ -43,7 +43,9 @@ void main() {
 			now.second());
 
 	PatchPlayer patch_player;
-	PatchPlayLoader patch_playloader{patch_player};
+	PatchStorageProxy patch_storage_proxy{
+		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
+	PatchPlayLoader patch_playloader{patch_storage_proxy, patch_player};
 
 	ParamCache param_cache;
 	PatchModQueue patch_mod_queue;
@@ -69,7 +71,6 @@ void main() {
 	SharedMemory::write_address_of(&StaticBuffers::shared_patch_file_list, SharedMemory::PatchListLocation);
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
-
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
 	printf_("A7 initialized. Unlocking M4\n");
@@ -81,12 +82,11 @@ void main() {
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
 
-	PatchStorageProxy patch_storage_proxy{
-		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
 	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue};
-
 	param_cache.clear();
-	patch_playloader.load_initial_patch("enosc");
+	//TODO: load the initial patch by getting patch_storage_proxy to make requests
+	//to patch_storage...
+	patch_playloader.load_initial_patch();
 
 	ui.start();
 	audio.start();

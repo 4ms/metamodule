@@ -340,10 +340,7 @@ private:
 	lv_obj_t *base;
 
 	void start_changing_patch() {
-		auto patch_id = PageList::get_selected_patch_id();
-		if (patch_id != patch_playloader.cur_patch_index()) {
-			patch_playloader.request_load_patch(patch_id);
-		}
+		patch_playloader.request_load_view_patch();
 	}
 };
 } // namespace MetaModule
