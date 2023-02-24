@@ -11,50 +11,64 @@ extern uint32_t _TTB[];
 extern uint32_t _TTB_SZ[];
 extern uint32_t _TTB_END[];
 
+//not used
 extern uint32_t _M4_EXTCODE[];
 extern uint32_t _M4_EXTCODE_SZ[];
 extern uint32_t _M4_EXTCODE_END[];
 
+//SO
 extern uint32_t _M4_EXTDATA[];
 extern uint32_t _M4_EXTDATA_SZ[];
 extern uint32_t _M4_EXTDATA_END[];
 
+//N
 extern uint32_t _A7_CODE[];
 extern uint32_t _A7_CODE_SZ[];
 extern uint32_t _A7_CODE_END[];
 
+//N-RW
 extern uint32_t _A7_RAM[];
 extern uint32_t _A7_RAM_SZ[];
 extern uint32_t _A7_RAM_END[];
 
+//SO
 extern uint32_t _M4_HEAP[];
 extern uint32_t _M4_HEAP_SZ[];
 extern uint32_t _M4_HEAP_END[];
 
+//SO
 extern uint32_t _VIRTDRIVE[];
 extern uint32_t _VIRTDRIVE_SZ[];
 extern uint32_t _VIRTDRIVE_END[];
 
+//N-RW
 extern uint32_t _A7_HEAP[];
 extern uint32_t _A7_HEAP_SZ[];
 extern uint32_t _A7_HEAP_END[];
 
+//SO
 extern uint32_t _DMABUF[];
 extern uint32_t _DMABUF_SZ[];
 extern uint32_t _DMABUF_END[];
 
+//SRAM1-3: Device-RW
 extern uint32_t _M4_CODE[];
 extern uint32_t _M4_CODE_SZ[];
 extern uint32_t _M4_CODE_END[];
 
+//SRAM4: Device-RW
 extern uint32_t _M4_STACK[];
 extern uint32_t _M4_STACK_SZ[];
 extern uint32_t _M4_STACK_END[];
 
+//SRAM4: Device-RW
 extern uint32_t _M4_SHARED_LIST[];
 extern uint32_t _A7_SHARED_LIST[];
 extern uint32_t _SHARED_LIST_SZ[];
 extern uint32_t _M4_SHARED_LIST_END[];
+
+//Not listed:
+//SYSRAM is SO
 
 //// as uint32_t's:
 
