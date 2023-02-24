@@ -17,23 +17,8 @@
 // - In Patch View, user can click "Save" or "copy" and give the patch a name and destination (including NORFlash)
 // - In Patch List, patches show their location
 
-// TODO: we currently do all SD Card accesses in the UI thread... would be better to do it in main thread?
-// UI could send a request (patch_storage.request_load_view_patch(id)) then poll (patch_list.is_view_patch_ready())
-
-// PatchStorage could live 100% on M4? Not ViewPatch, just PatchList and FileIOs
-// -- use array, not vector for patch_list (replace clear() and push_back()) -- instead of erase_if(), use a separate array for each Volume
-// -- points of contact to A7 would be:
-// 		-- PatchSelPage scans patch_list: requests a lock, then scan the patch_list, releases lock
-//		-- UI thread calls poll_media_change() periodically
-//		-- UI thread calls rescan_sdcard/USBdevice() when needed
-//      -- on boot --> playloader calls patch_list.find_by_name() [could busy wait, or scan list itself]
-//      -- on boot and on select new patch --> PatchFileIO::load_patch_data() should be passed a raw buffer, not PatchData&. Then A7 will convert to yaml
-// We'd need a PatchStorage proxy to live on A7 and communicate with M4
-
-// OR UI thread could spawn PatchStorage::rescan_sdcard() onto Core 2, and that's all the heavy lifting needed
 namespace MetaModule
 {
-
 // PatchStorage manages all patch filesystems <--> PatchList
 class PatchStorage {
 
@@ -56,17 +41,17 @@ class PatchStorage {
 
 	PatchList patch_list_;
 
-	const std::span<char> &raw_patch_buffer;
-	std::span<PatchFile> &filelist;
+	const std::span<char> &raw_patch_buffer_;
+	std::span<PatchFile> &filelist_;
 
 public:
 	PatchStorage(std::span<char> &raw_patch_buffer,
 				 volatile InterCoreCommMessage &shared_message,
 				 std::span<PatchFile> &filelist,
 				 bool reset_to_factory_patches = false)
-		: raw_patch_buffer{raw_patch_buffer}
+		: raw_patch_buffer_{raw_patch_buffer}
 		, comm_{shared_message}
-		, filelist{filelist} {
+		, filelist_{filelist} {
 
 		// NOR Flash: if it's unformatted, put default patches there
 		auto status = norflash_.initialize();
@@ -97,17 +82,35 @@ public:
 				pending_send_message.message_type = None;
 		}
 
-		auto icc_params = comm_.get_new_message();
-		if (icc_params.message_type == RequestRefreshPatchList) {
+		auto message = comm_.get_new_message();
+
+		if (message.message_type == RequestRefreshPatchList) {
 			pending_send_message.message_type = PatchListUnchanged;
 			if (sdcard_needs_rescan_) {
-				// poll_media_change();
-				rescan_sdcard();
+				poll_media_change();
+				if (sdcard_mounted_)
+					rescan_sdcard();
+				else
+					printf_("SD Card not mounted, can't rescan\n");
 				sdcard_needs_rescan_ = false;
 				pending_send_message.message_type = PatchListChanged;
 			}
 			printf_("M4 sending response: %d\n", pending_send_message.message_type);
 			// if (usb_needs_rescan_) ...
+		}
+
+		if (message.message_type == RequestPatchData) {
+			pending_send_message.message_type = PatchDataLoadFail;
+			pending_send_message.patch_id = message.patch_id;
+			pending_send_message.bytes_read = 0;
+
+			if (message.patch_id < patch_list_.num_patches()) {
+				auto bytes_read = load_patch_file(message.patch_id);
+				if (bytes_read) {
+					pending_send_message.message_type = PatchDataLoaded;
+					pending_send_message.bytes_read = bytes_read;
+				}
+			}
 		}
 
 		uint32_t now = HAL_GetTick();
@@ -117,6 +120,7 @@ public:
 		}
 	}
 
+private:
 	void poll_media_change() {
 		bool was_sdcard_mounted = sdcard_mounted_;
 		uint8_t card_detected;
@@ -134,8 +138,8 @@ public:
 		printf_("Updating patchlist from SD Card.\n");
 		patch_list_.clear_patches_from(Volume::SDCard);
 		PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
-		filelist = patch_list_.get_patchfile_list();
-		printf_("Patchlist updated. filelist data: %p, size: %d.\n", filelist.data(), filelist.size());
+		filelist_ = patch_list_.get_patchfile_list();
+		printf_("Patchlist updated. filelist data: %p, size: %d.\n", filelist_.data(), filelist_.size());
 	}
 
 	// void load_view_patch(std::string_view &patchname) {
@@ -147,11 +151,11 @@ public:
 		return patch_list_.find_by_name(patchname);
 	}
 
-	void load_patch_file(uint32_t patch_id) {
+	uint32_t load_patch_file(uint32_t patch_id) {
 		bool ok = false;
 		auto filename = patch_list_.get_patch_filename(patch_id);
 		printf("load_view_patch %d %.31s\n", patch_id, filename.data());
-		std::span<char> raw_patch = raw_patch_buffer;
+		std::span<char> raw_patch = raw_patch_buffer_;
 
 		auto load_patch_data = [&](auto &fileio) -> bool {
 			return PatchFileIO::read_file(raw_patch, fileio, filename);
@@ -171,8 +175,11 @@ public:
 
 		if (!ok) {
 			printf_("Could not load patch id %d\n", patch_id);
-			return;
+			return 0;
 		}
+
+		printf_("Read patch id %d, %d bytes\n", patch_id, raw_patch.size_bytes());
+		return raw_patch.size_bytes();
 	}
 };
 

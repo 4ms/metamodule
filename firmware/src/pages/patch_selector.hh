@@ -125,10 +125,11 @@ struct PatchSelectorPage : PageBase {
 						PageList::request_new_page(PageId::PatchView);
 						state = State::Closing;
 					} else {
-						printf_("Error loading patch id %d, bytes_read = %d\n", selected_patch, message.bytes_read);
+						printf_("Error parsing patch id %d, bytes_read = %d\n", selected_patch, message.bytes_read);
 						state = State::Idle;
 					}
 				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
+					printf_("Error loading patch id %d\n", selected_patch);
 					state = State::Idle;
 					//TODO: handle error... try reloading patch list?
 				}
