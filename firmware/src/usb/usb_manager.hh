@@ -33,7 +33,7 @@ public:
 		, fusb_int_pin{mdrivlib::PinPull::Up, mdrivlib::PinSpeed::Low, mdrivlib::PinOType::OpenDrain} {
 		usb_drive.init_usb_device();
 		usb_host.init();
-		found_fusb = usbctl.init();
+		found_fusb = usbctl.init(); //NOLINT
 	}
 
 	void start() {
@@ -122,6 +122,10 @@ public:
 
 	MidiHost &get_midi_host() {
 		return usb_host.get_midi_host();
+	}
+
+	FatFileIO &get_msc_fileio() {
+		return usb_host.get_msc_fileio();
 	}
 };
 } // namespace MetaModule

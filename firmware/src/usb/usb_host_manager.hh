@@ -7,13 +7,15 @@
 
 class UsbHostManager {
 private:
-	static inline MidiHost *_midihost_instance;
-	static inline MSCHost *_mschost_instance;
 	mdrivlib::Pin src_enable;
 	USBH_HandleTypeDef usbhost;
 	static inline HCD_HandleTypeDef hhcd;
 	MidiHost midi_host{usbhost};
 	MSCHost msc_host{usbhost, MetaModule::Volume::USB};
+
+	// For access in C-style callback:
+	static inline MidiHost *_midihost_instance;
+	static inline MSCHost *_mschost_instance;
 
 public:
 	UsbHostManager(mdrivlib::PinNoInit enable_5v)
@@ -131,5 +133,9 @@ public:
 
 	MidiHost &get_midi_host() {
 		return midi_host;
+	}
+
+	FatFileIO &get_msc_fileio() {
+		return msc_host.get_fileio();
 	}
 };

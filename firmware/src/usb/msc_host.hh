@@ -48,4 +48,8 @@ public:
 	void disconnect() {
 		_is_connected = false;
 	}
+
+	FatFileIO &get_fileio() {
+		return msc;
+	}
 };
