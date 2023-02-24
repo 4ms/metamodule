@@ -106,6 +106,9 @@ SOURCES += $(usbhost_libdir)/Core/Src/usbh_core.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_ctlreq.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_ioreq.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_pipes.c
+SOURCES += $(usbhost_libdir)/Class/MSC/Src/usbh_msc.c
+SOURCES += $(usbhost_libdir)/Class/MSC/Src/usbh_msc_bot.c
+SOURCES += $(usbhost_libdir)/Class/MSC/Src/usbh_msc_scsi.c
 
 # USB Device:
 SOURCES += $(usb_src)/usb_drive_device.cc
@@ -121,106 +124,38 @@ SOURCES += $(usbdev_libdir)/Core/Src/usbd_core.c
 SOURCES += $(usbdev_libdir)/Core/Src/usbd_ctlreq.c
 SOURCES += $(usbdev_libdir)/Core/Src/usbd_ioreq.c
 
-# yaml
-# SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
-# SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
-# rymldir = $(SHARED)/patch_convert/ryml/rapidyaml
-# SOURCES += $(wildcard $(rymldir)/src/c4/yml/*.cpp)
-# SOURCES += $(wildcard $(rymldir)/ext/c4core/src/c4/*.cpp)
 
-## LVGL / Gui-Guider
-# LVGL_DIR=$(LIBDIR)/lvgl
-# LVGL_DIR_NAME=lvgl
-# SOURCES += $(shell find -L $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/widgets -name \*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/flex/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/grid/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/others/gridnav/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/themes/default/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/core/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/sw/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/widgets/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/font/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/misc/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/hal/*.c)
-
-# SOURCES += src/pages/page_manager.cc
-# SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
-# SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
-# SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
-# SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
-# SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
-
-# ifeq "$(USE_FEWER_MODULES)" "1"
-# SOURCES += src/pages/images/modules/Djembe_artwork_240.c
-# SOURCES += src/pages/images/modules/StMix_artwork_240.c
-# SOURCES += src/pages/images/modules/PEG_artwork_240.c
-# SOURCES += src/pages/images/modules/SMR_artwork_240.c
-# SOURCES += src/pages/images/modules/MultiLFO_artwork_240.c
-# SOURCES += src/pages/images/modules/PitchShift_artwork_240.c
-# SOURCES += src/pages/images/modules/HPF_artwork_240.c
-# SOURCES += src/pages/images/modules/InfOsc_artwork_240.c
-# SOURCES += src/pages/images/modules/KPLS_artwork_240.c
-# SOURCES += src/pages/images/modules/Freeverb_artwork_240.c
-# SOURCES += src/pages/images/modules/Seq8_artwork_240.c
-# SOURCES += src/pages/images/modules/EnOsc_artwork_240.c
-
-# SOURCES += src/pages/images/modules/Djembe_artwork_120.c
-# SOURCES += src/pages/images/modules/StMix_artwork_120.c
-# SOURCES += src/pages/images/modules/PEG_artwork_120.c
-# SOURCES += src/pages/images/modules/MultiLFO_artwork_120.c
-# SOURCES += src/pages/images/modules/SMR_artwork_120.c
-# SOURCES += src/pages/images/modules/PitchShift_artwork_120.c
-# SOURCES += src/pages/images/modules/HPF_artwork_120.c
-# SOURCES += src/pages/images/modules/InfOsc_artwork_120.c
-# SOURCES += src/pages/images/modules/KPLS_artwork_120.c
-# SOURCES += src/pages/images/modules/Freeverb_artwork_120.c
-# SOURCES += src/pages/images/modules/Seq8_artwork_120.c
-# SOURCES += src/pages/images/modules/EnOsc_artwork_120.c
-# else
-# SOURCES += $(wildcard src/pages/images/modules/*.c)
-# endif
-# # SOURCES += $(wildcard src/pages/images/ui/*.c)
-# SOURCES += $(wildcard src/pages/images/components/*.c)
-
-
-INCLUDES =
-INCLUDES += -I$(DEVICEDIR)/include 
-INCLUDES += -I$(CMSIS)/Include 
-INCLUDES += -I$(HALDIR)/include 
-INCLUDES += -I$(DRIVERLIB) 
-INCLUDES += -I$(DRIVERLIB)/drivers 
-INCLUDES += -I$(TARGETDEVICEDIR) 
-INCLUDES += -I$(TARGETDEVICEDIR)/drivers 
-INCLUDES += -I$(TARGETDEVICEDIR_CM4) 
-INCLUDES += -I$(TARGETDEVICEDIR_CM4)/drivers 
-INCLUDES += -I$(LIBDIR)/easiglib 
-INCLUDES += -I. 
-INCLUDES += -Isrc 
-INCLUDES += -I$(target_src) 
-INCLUDES += -I$(target_chip_src) 
-INCLUDES += -I$(core_src) 
-INCLUDES += -I$(hal_conf_inc) 
-INCLUDES += -Isystem 
-INCLUDES += -I$(SHARED) 
-INCLUDES += -I$(SHARED)/processors 
-INCLUDES += -I$(SHARED)/CoreModules 
-INCLUDES += -I$(SHARED)/cpputil 
-INCLUDES += -I$(SHARED)/patch 
-INCLUDES += -I$(LIBDIR)/fatfs/source 
-INCLUDES += -Isrc/fatfs 
-INCLUDES += -I$(usb_src) 
-INCLUDES += -I$(usbhost_libdir)/Core/Inc 
-INCLUDES += -I$(usbdev_libdir)/Class/MSC/Inc 
-INCLUDES += -I$(usbdev_libdir)/Core/Inc 
-INCLUDES += -I$(usbdev_libdir)/Class/HUB/Inc 
-# INCLUDES +=	-I$(SHARED)/patch_convert
-# INCLUDES +=	-I$(SHARED)/patch_convert/ryml
-# INCLUDES += -I$(rymldir)/src
-# INCLUDES += -I$(rymldir)/ext/c4core/src
-INCLUDES += -I$(SHARED)/etl/include
-# INCLUDES +=	-I$(LIBDIR)/lvgl
+INCLUDES = -I$(DEVICEDIR)/include \
+			-I$(CMSIS)/Include \
+			-I$(HALDIR)/include \
+			-I$(DRIVERLIB) \
+			-I$(DRIVERLIB)/drivers \
+			-I$(TARGETDEVICEDIR) \
+			-I$(TARGETDEVICEDIR)/drivers \
+			-I$(TARGETDEVICEDIR_CM4) \
+			-I$(TARGETDEVICEDIR_CM4)/drivers \
+			-I$(LIBDIR)/easiglib \
+			-I. \
+			-Isrc \
+			-I$(target_src) \
+			-I$(target_chip_src) \
+			-I$(core_src) \
+			-I$(hal_conf_inc) \
+			-Isystem \
+			-I$(SHARED) \
+			-I$(SHARED)/processors \
+			-I$(SHARED)/CoreModules \
+			-I$(SHARED)/cpputil \
+			-I$(SHARED)/patch \
+			-I$(LIBDIR)/fatfs/source \
+			-Isrc/fatfs \
+			-I$(usb_src) \
+			-I$(usbhost_libdir)/Core/Inc \
+			-I$(usbhost_libdir)/Class/MSC/Inc \
+			-I$(usbdev_libdir)/Core/Inc \
+			-I$(usbdev_libdir)/Class/MSC/Inc \
+			
+# 			-I$(SHARED)/etl/include
 
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 

@@ -9,12 +9,10 @@
 // defined in fatfs/diskio.cc:
 bool fatfs_register_disk(DiskOps *ops, uint8_t disk_id);
 
-namespace MetaModule
-{
-
 class FatFileIO {
+	using Volume = MetaModule::Volume;
+
 	FATFS fs;
-	DiskOps *ops;
 	const Volume _vol;
 	char _fatvol[3];
 	char _volname[8];
@@ -31,21 +29,19 @@ public:
 	};
 
 	FatFileIO(DiskOps *diskops, Volume vol_id)
-		: ops{diskops}
-		, _vol{vol_id}
+		: _vol{vol_id}
 		, _fatvol{char(char(_vol) + '0'), ':', '\0'}
 		, _volname{'F', 'A', 'T', 'F', 'S', ':', char(char(_vol) + '0'), '\0'} {
-		if (!fatfs_register_disk(ops, static_cast<unsigned>(_vol))) {
+		if (!fatfs_register_disk(diskops, static_cast<unsigned>(_vol))) {
 			printf_("Failed to register FAT FS Disk %d\n", _vol);
-		}
-		if (!mount_disk()) {
-			printf_("Failed to mount FAT FS Disk %d\n", _vol);
 		}
 	}
 
 	bool mount_disk() {
-		if (f_mount(&fs, _fatvol, 1) == FR_OK)
+		uint8_t err;
+		if (err = f_mount(&fs, _fatvol, 1); err == FR_OK)
 			return true;
+		printf_("f_mount->%d\n", err);
 		return false;
 	}
 
@@ -234,5 +230,3 @@ public:
 		return true;
 	}
 };
-
-} // namespace MetaModule

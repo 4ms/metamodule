@@ -30,15 +30,14 @@ public:
 	USBH_HandleTypeDef *phost;
 
 	USBHostHelper(USBH_HandleTypeDef *phost)
-		: phost{phost}
-	{}
+		: phost{phost} {
+	}
 
 	// Returns the user data of the active class, cast to whatever type you're expecting.
 	// Checks all the pointers before dereferencing them.
 	// Returns nullptr if it fails
 	template<typename HandleType>
-	HandleType *get_class_handle()
-	{
+	HandleType *get_class_handle() {
 		if (phost) {
 			if (phost->pActiveClass) {
 				if (phost->pActiveClass->pData) {
@@ -49,26 +48,42 @@ public:
 		return nullptr;
 	}
 
+	// Returns 0xFF == Invalid if no phost or active class
+	uint8_t get_active_class_code() {
+		if (phost) {
+			if (phost->pActiveClass)
+				return phost->pActiveClass->ClassCode;
+		}
+		return 0xff; //invalid
+	}
+	// Returns 0xFF == Invalid if no phost or active class
+	const char *get_active_class_name() {
+		if (phost) {
+			if (phost->pActiveClass)
+				return phost->pActiveClass->Name;
+		}
+		return "";
+	}
+
 	// Returns true if the endpoint specified by the interface index and endpoint index is an IN EP
-	bool is_in_ep(uint8_t interface, uint8_t ep_index)
-	{
+	bool is_in_ep(uint8_t interface, uint8_t ep_index) {
 		auto addr = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[ep_index].bEndpointAddress;
 		return (addr & 0x80U);
 	}
 
 	// Returns true if the endpoint specified by the interface index and endpoint index is an OUT EP
-	bool is_out_ep(uint8_t interface, uint8_t ep_index) { return !is_in_ep(interface, ep_index); }
+	bool is_out_ep(uint8_t interface, uint8_t ep_index) {
+		return !is_in_ep(interface, ep_index);
+	}
 
-	void link_endpoint_pipe(EndPoint &ep, uint8_t interface, uint8_t ep_index)
-	{
+	void link_endpoint_pipe(EndPoint &ep, uint8_t interface, uint8_t ep_index) {
 		auto ep_desc = phost->device.CfgDesc.Itf_Desc[interface].Ep_Desc[ep_index];
 		ep.addr = ep_desc.bEndpointAddress;
 		ep.size = ep_desc.wMaxPacketSize;
 		ep.pipe = USBH_AllocPipe(phost, ep.addr);
 	}
 
-	USBH_StatusTypeDef open_pipe(const EndPoint &ep, EndPointType ep_type)
-	{
+	USBH_StatusTypeDef open_pipe(const EndPoint &ep, EndPointType ep_type) {
 		return USBH_OpenPipe(phost,
 							 ep.pipe,
 							 ep.addr,
@@ -78,10 +93,11 @@ public:
 							 ep.size);
 	}
 
-	void set_toggle(const EndPoint &ep, uint8_t toggle_val) { USBH_LL_SetToggle(phost, ep.pipe, toggle_val); }
+	void set_toggle(const EndPoint &ep, uint8_t toggle_val) {
+		USBH_LL_SetToggle(phost, ep.pipe, toggle_val);
+	}
 
-	void close_and_free_pipe(EndPoint &ep)
-	{
+	void close_and_free_pipe(EndPoint &ep) {
 		if (ep.pipe) {
 			USBH_ClosePipe(phost, ep.pipe);
 			USBH_FreePipe(phost, ep.pipe);

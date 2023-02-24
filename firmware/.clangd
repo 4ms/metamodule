@@ -8,19 +8,6 @@ Diagnostics:
 
 CompileFlags:
 	Remove: [
-		"-DSTM32H7x5",
-		"-DSTM32H7x5xx",
-		"-DSTM32H745xx",
-		"-DSTM32H755xx",
-		"-DSTM32H7",
-		"-Ilib/cmsis-device/stm32h7x5/include",
-		"-Ilib/stm32-hal/stm32h7x5/include",
-		"-Ilib/mdrivlib/target/stm32h7x5",
-		"-Ilib/mdrivlib/target/stm32h7x5/drivers",
-		"-Isrc/m4",
-		"-Isrc/m7",
-		"-DARM_MATH_CM7",
-		"-DCORE_CM7",
 		"-DCORE_CM4",
 		"-D__FPU_PRESENT=1",
 		"-flto=*",
@@ -80,45 +67,4 @@ CompileFlags:
 		"-DCORE_CA7",
 		"-Ilib/mdrivlib/target/stm32mp1_ca7",
 		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
-	]
----
-If:
-	PathMatch: [".*stm32h7.*", ".*m4.*", ".*m7.*"]
-	PathExclude: [".*a7.*", ".*mp1.*", ".*medium.*"]
-CompileFlags:
-	Add: [
-		"-DSTM32H7x5",
-		"-DSTM32H7x5xx",
-		"-DSTM32H745xx",
-		"-DSTM32H755xx",
-		"-DSTM32H7",
-		"-Ilib/cmsis-device/stm32h7x5/include",
-		"-Ilib/stm32-hal/stm32h7x5/include",
-		"-Ilib/mdrivlib/target/stm32h7x5",
-		"-Ilib/mdrivlib/target/stm32h7x5/drivers",
-		"-Ilib/mdrivlib/target/stm32h7x5_m7",
-		"-Ilib/mdrivlib/target/stm32h7x5_m7/drivers",
-		"-Ilib/mdrivlib/target/stm32h7x5_m4",
-		"-Ilib/mdrivlib/target/stm32h7x5_m4/drivers",
-		"-Isrc/m7",
-		"-DARM_MATH_CM7",
-		"-DCORE_CM7",
-		"-D__FPU_PRESENT=1",
-	]
-	Remove: [
-		"-DCORE_CA7", 
-		"-DSTM32MP1",
-		"-DSTM32MP157Cxx",
-		"-Isrc/a7",
-		"-Isrc/a7/conf",
-		"-Ilib/stm32-hal/stm32mp1/include",
-		"-Ilib/cmsis/Core_A/Include",
-		"-Ilib/cmsis-device/stm32mp157c/include",
-		"-Ilib/mdrivlib/target/stm32mp1",
-		"-Ilib/mdrivlib/target/stm32mp1/drivers",
-		"-Ilib/mdrivlib/target/stm32mp1_ca7",
-		"-Ilib/mdrivlib/target/stm32mp1_ca7/drivers",
-		"-Ilib/mdrivlib/target/stm32mp1_cm4",
-		"-Ilib/mdrivlib/target/stm32mp1_cm4/drivers",
-		"-DCORE_CM4"
 	]
