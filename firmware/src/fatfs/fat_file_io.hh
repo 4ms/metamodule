@@ -93,8 +93,12 @@ public:
 		if (f_chdrive(_fatvol) != FR_OK)
 			return false;
 
-		if (f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
-			return false;
+		if (f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) {
+			if (!mount_disk())
+				return false;
+			if (f_open(&fil, filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
+				return false;
+		}
 
 		UINT bytes_written;
 		auto res = f_write(&fil, data, sz, &bytes_written);
@@ -106,27 +110,25 @@ public:
 	}
 
 	void set_file_timestamp(std::string_view filename, uint32_t timestamp) {
-		f_chdrive(_fatvol);
-
 		FILINFO fno;
-		auto res = f_stat(filename.data(), &fno);
-		if (res != FR_OK)
+
+		if (!get_fat_filinfo(filename, fno)) {
 			printf_("Could not read file %s\n", filename.data());
+			return;
+		}
+
 		fno.fdate = timestamp >> 16;
 		fno.ftime = timestamp & 0xFFFF;
-		res = f_utime(filename.data(), &fno);
-		if (res != FR_OK)
+
+		if (f_utime(filename.data(), &fno) != FR_OK)
 			printf_("Could not update timestamp of %s\n", filename.data());
 	}
 
 	uint32_t get_file_timestamp(std::string_view filename) {
-		f_chdrive(_fatvol);
-
 		FILINFO fno;
-		if (f_stat(filename.data(), &fno) != FR_OK) {
-			// printf_("Could not read file %s\n", filename.data());
+		if (!get_fat_filinfo(filename, fno))
 			return 0;
-		}
+
 		return rawtimestamp(fno);
 	}
 
@@ -135,10 +137,10 @@ public:
 	}
 
 	FileInfo get_file_info(std::string_view filename) {
-		f_chdrive(_fatvol);
-
 		FILINFO fno;
-		auto res = f_stat(filename.data(), &fno);
+		if (!get_fat_filinfo(filename, fno))
+			return {.size = 0};
+
 		return FileInfo{
 			.size = static_cast<uint32_t>(fno.fsize),
 			.year = static_cast<uint8_t>(fno.fdate >> 9),			 //top 7 bits are year-1980 1980..2107
@@ -150,17 +152,25 @@ public:
 		};
 	}
 
+	bool get_fat_filinfo(std::string_view filename, FILINFO &fno) {
+		f_chdrive(_fatvol);
+
+		auto res = f_stat(filename.data(), &fno);
+		if (res != FR_OK) {
+			if (!mount_disk())
+				return false;
+
+			if (f_stat(filename.data(), &fno))
+				return false;
+		}
+		return true;
+	}
+
 	uint32_t read_file(const std::string_view filename, std::span<char> buffer) {
 		FIL fil;
 		UINT bytes_read;
 
-		if (f_chdrive(_fatvol) != FR_OK) {
-			if (!mount_disk())
-				return 0;
-
-			if (f_chdrive(_fatvol) != FR_OK)
-				return 0;
-		}
+		f_chdrive(_fatvol);
 
 		if (f_open(&fil, filename.data(), FA_OPEN_EXISTING | FA_READ) != FR_OK) {
 			if (!mount_disk())
