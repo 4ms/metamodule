@@ -9,6 +9,7 @@
 #include "littlefs/norflash_lfs.hh"
 #include "patch_fileio.hh"
 #include "qspi_flash_driver.hh"
+#include "util/edge_detector.hh"
 #include "volumes.hh"
 
 // - Ship with some patches on NORFlash
@@ -24,17 +25,18 @@ class PatchStorage {
 
 	SDCardOps<SDCardConf> sdcard_ops_;
 	FatFileIO sdcard{&sdcard_ops_, Volume::SDCard};
-	bool sdcard_mounted_ = false;
+	EdgeDetector sdcard_mounted_;
 	bool sdcard_needs_rescan_ = true;
+	// bool sdcard_mounted_ = false;
+
 	uint32_t last_poll_tm_;
 
 	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
 	LfsFileIO norflash_{flash_};
 
 	FatFileIO &usbdrive;
-
-	// RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
-	// FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
+	EdgeDetector usbdrive_mounted_;
+	bool usbdrive_needs_rescan_ = true;
 
 	using InterCoreComm2 = InterCoreComm<ICCCoreType::Responder>;
 	using enum InterCoreCommMessage::MessageType;
@@ -69,7 +71,7 @@ public:
 		PatchFileIO::add_all_to_patchlist(norflash_, patch_list_);
 
 		poll_media_change();
-		if (sdcard_mounted_)
+		if (sdcard_mounted_.went_high())
 			PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
 		filelist = patch_list_.get_patchfile_list();
 		sdcard_needs_rescan_ = true;
@@ -91,12 +93,20 @@ public:
 		if (message.message_type == RequestRefreshPatchList) {
 			pending_send_message.message_type = PatchListUnchanged;
 			if (sdcard_needs_rescan_) {
-				poll_media_change();
-				if (sdcard_mounted_)
+				// poll_media_change();
+				// if (sdcard_mounted_.is_high())
+				if (sdcard.is_mounted())
 					rescan_sdcard();
 				else
 					printf_("SD Card not mounted, can't rescan\n");
 				sdcard_needs_rescan_ = false;
+
+				if (usbdrive.is_mounted())
+					rescan_usbdrive();
+				else
+					printf_("USB drive not mounted, can't rescan\n");
+				usbdrive_needs_rescan_ = false;
+
 				pending_send_message.message_type = PatchListChanged;
 			}
 			printf_("M4 sending response: %d\n", pending_send_message.message_type);
@@ -126,16 +136,24 @@ public:
 
 private:
 	void poll_media_change() {
-		bool was_sdcard_mounted = sdcard_mounted_;
-		uint8_t card_detected;
-		auto err = sdcard_ops_.ioctl(MMC_GET_SDSTAT, &card_detected);
-		if (err || !card_detected)
-			sdcard_mounted_ = false;
-		else
-			sdcard_mounted_ = true;
-		if (was_sdcard_mounted == false && sdcard_mounted_ == true) {
-			sdcard_needs_rescan_ = true;
-		}
+		sdcard_mounted_.update(sdcard.is_mounted());
+		sdcard_needs_rescan_ = sdcard_mounted_.went_high();
+
+		usbdrive_mounted_.update(usbdrive.is_mounted());
+		usbdrive_needs_rescan_ = usbdrive_mounted_.went_high();
+
+		// bool was_sdcard_mounted = sdcard_mounted_;
+
+		// uint8_t card_detected;
+		// auto err = sdcard_ops_.ioctl(MMC_GET_SDSTAT, &card_detected);
+		// if (err || !card_detected)
+		// 	sdcard_mounted_ = false;
+		// else
+		// 	sdcard_mounted_ = true;
+		// sdcard_mounted_ = sdcard.is_mounted();
+		// if (was_sdcard_mounted == false && sdcard_mounted_ == true) {
+		// 	sdcard_needs_rescan_ = true;
+		// }
 	}
 
 	void rescan_sdcard() {
@@ -146,10 +164,13 @@ private:
 		printf_("Patchlist updated. filelist data: %p, size: %d.\n", filelist_.data(), filelist_.size());
 	}
 
-	// void load_view_patch(std::string_view &patchname) {
-	// 	if (auto id = patch_list_.find_by_name(patchname))
-	// 		load_view_patch(id.value());
-	// }
+	void rescan_usbdrive() {
+		printf_("Updating patchlist from USB Drive.\n");
+		patch_list_.clear_patches_from(Volume::USB);
+		PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
+		filelist_ = patch_list_.get_patchfile_list();
+		printf_("Patchlist updated. filelist data: %p, size: %d.\n", filelist_.data(), filelist_.size());
+	}
 
 	std::optional<uint32_t> find_by_name(std::string_view &patchname) const {
 		return patch_list_.find_by_name(patchname);
