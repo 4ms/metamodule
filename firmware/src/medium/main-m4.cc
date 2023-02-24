@@ -59,14 +59,21 @@ void main() {
 
 	printf_("M4 starting\n");
 
-	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
-	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
-	auto virtdrive = SharedMemory::read_address_of<RamDrive *>(SharedMemory::RamDiskLocation);
-	auto raw_patch_data = SharedMemory::read_address_of<std::span<char> *>(SharedMemory::PatchDataLocation);
-	auto shared_message =
-		SharedMemory::read_address_of<InterCoreCommMessage volatile *>(SharedMemory::InterCoreCommParamsLocation);
-	auto shared_patch_file_list =
-		SharedMemory::read_address_of<std::span<PatchFile> *>(SharedMemory::PatchListLocation);
+	// auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
+	// auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
+	// auto virtdrive = SharedMemory::read_address_of<RamDrive *>(SharedMemory::RamDiskLocation);
+	// auto raw_patch_data = SharedMemory::read_address_of<std::span<char> *>(SharedMemory::PatchDataLocation);
+	// auto shared_message =
+	// 	SharedMemory::read_address_of<InterCoreCommMessage volatile *>(SharedMemory::InterCoreCommParamsLocation);
+	// auto shared_patch_file_list =
+	// 	SharedMemory::read_address_of<std::span<PatchFile> *>(SharedMemory::PatchListLocation);
+
+	auto param_block_base = SharedMemoryS::ptrs.param_block;
+	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
+	auto virtdrive = SharedMemoryS::ptrs.ramdrive;
+	auto raw_patch_span = SharedMemoryS::ptrs.raw_patch_span;
+	auto shared_message = SharedMemoryS::ptrs.icc_message;
+	auto shared_patch_file_list = SharedMemoryS::ptrs.patch_file_list;
 
 	PatchModQueue patch_mod_queue; //TODO: share with A7
 
@@ -81,7 +88,7 @@ void main() {
 	UsbManager usb{ramdiskops};
 
 	auto usb_fileio = usb.get_msc_fileio();
-	PatchStorage patch_storage{*raw_patch_data, *shared_message, *shared_patch_file_list, usb_fileio};
+	PatchStorage patch_storage{*raw_patch_span, *shared_message, *shared_patch_file_list, usb_fileio};
 
 	usb.start();
 

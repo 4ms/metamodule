@@ -59,16 +59,23 @@ void main() {
 					  StaticBuffers::auxsignal_block,
 					  patch_mod_queue};
 
-	//TODO: create struct with fields for each address, and write addr of the struct
-	//Or just write the address of each element
-	//reading could "know" the type and perform the cast automatically
-	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
-	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
-	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
-	SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
-	SharedMemory::write_address_of(&StaticBuffers::raw_patch_data, SharedMemory::PatchDataLocation);
-	SharedMemory::write_address_of(&StaticBuffers::icc_shared_message, SharedMemory::InterCoreCommParamsLocation);
-	SharedMemory::write_address_of(&StaticBuffers::shared_patch_file_list, SharedMemory::PatchListLocation);
+	// SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
+	// SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
+	// SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
+	// SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
+	// SharedMemory::write_address_of(&StaticBuffers::raw_patch_span, SharedMemory::PatchDataLocation);
+	// SharedMemory::write_address_of(&StaticBuffers::icc_shared_message, SharedMemory::InterCoreCommParamsLocation);
+	// SharedMemory::write_address_of(&StaticBuffers::shared_patch_file_list, SharedMemory::PatchListLocation);
+
+	SharedMemoryS::ptrs = {
+		&StaticBuffers::param_blocks,
+		&StaticBuffers::auxsignal_block,
+		&StaticBuffers::virtdrive,
+		&patch_player,
+		&StaticBuffers::icc_shared_message,
+		&StaticBuffers::shared_patch_file_list,
+		&StaticBuffers::raw_patch_span,
+	};
 
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);

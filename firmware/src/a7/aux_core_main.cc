@@ -13,7 +13,7 @@ extern "C" void aux_core_main() {
 	while (HWSemaphore<MainCoreReady>::is_locked())
 		;
 
-	auto patch_player = SharedMemory::read_address_of<PatchPlayer *>(SharedMemory::PatchPlayerLocation);
+	auto patch_player = SharedMemoryS::ptrs.patch_player;
 
 	uint32_t starting_idx;
 	uint32_t num_modules;
