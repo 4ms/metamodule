@@ -28,9 +28,9 @@ public:
 		return true;
 	}
 
-	bool is_connected() {
-		return _is_connected;
-	}
+	// bool is_connected() {
+	// 	return _is_connected;
+	// }
 
 	void connect() {
 		if (msc.mount_disk()) {
@@ -40,13 +40,14 @@ public:
 					return;
 				printf_("%.255s\t\t0x%x\t\t%d B\n", fname.data(), timestamp, fsize);
 			});
-			_is_connected = true;
+			// _is_connected = true;
 		} else
 			printf_("Failed to mount MSC drive\n");
 	}
 
 	void disconnect() {
-		_is_connected = false;
+		msc.unmount_disk();
+		// _is_connected = false;
 	}
 
 	FatFileIO &get_fileio() {

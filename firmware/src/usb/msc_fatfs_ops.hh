@@ -6,6 +6,7 @@
 class MSCOps : public DiskOps {
 	USBH_HandleTypeDef &usbh;
 	uint32_t scratch[FF_MAX_SS / 4];
+	bool is_mounted_ = false;
 
 public:
 	enum class Status { NotInit, NotMounted, Mounted };
@@ -137,12 +138,19 @@ public:
 				*(DWORD *)buff = info.capacity.block_nbr;
 				break;
 
+			case MMC_GET_SDSTAT: {
+				uint8_t mounted = USBH_MSC_IsReady(&usbh);
+				if (mounted)
+					is_mounted_ = true;
+				*(uint8_t *)buff = mounted;
+			} break;
+
 			case CTRL_SYNC:
 				break;
 			case CTRL_TRIM:
 				break;
 			case CTRL_EJECT:
-				//TODO: eject?
+				is_mounted_ = false;
 				break;
 
 			default:
