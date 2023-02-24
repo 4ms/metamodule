@@ -1,6 +1,6 @@
 #pragma once
-
-#include "CoreModules/moduleFactory.hh"
+#include "module_type_slug.hh"
+#include <span>
 
 ///
 #include "patch/ClockRockinBeats.hh"
@@ -47,27 +47,27 @@ struct DefaultPatches {
 	static ModuleTypeSlug get_filename(uint32_t id) {
 		if (id == 0)
 			return "Showcase.yml";
-			if (id == 1)
+		if (id == 1)
 			return "djembe2.yml";
-			if (id == 2)
+		if (id == 2)
 			return "djembe4.yml";
-			if (id == 3)
+		if (id == 3)
 			return "djembe4verb.yml";
-			if (id == 4)
+		if (id == 4)
 			return "nonlinear.yml";
-			if (id == 5)
+		if (id == 5)
 			return "SpectralPings.yml";
-			if (id == 6)
+		if (id == 6)
 			return "OctoSampler.yml";
-			if (id == 7)
+		if (id == 7)
 			return "ClockRockinBeats.yml";
-			if (id == 8)
+		if (id == 8)
 			return "KarplusStereo.yml";
-			if (id == 9)
+		if (id == 9)
 			return "QuartetEnOsc.yml";
-			if (id == 10)
+		if (id == 10)
 			return "Seq8.yml";
-			if (id == 11)
+		if (id == 11)
 			return "TwoSimpleOsc.yml";
 
 		std::string t{std::to_string(id) + ".yml"};
