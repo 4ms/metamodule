@@ -10,9 +10,9 @@
 #include <unordered_map>
 #include <vector>
 
-// #define pr_dbg printf
+#define pr_dbg printf
 
-#define pr_dbg(...)
+// #define pr_dbg(...)
 
 class CentralData {
 public:
@@ -230,9 +230,32 @@ public:
 		} // end mapsmtx lock
 
 		if (dest.objType == LabelButtonID::Types::Knob) {
-			pr_dbg("Registering (no queue)\n");
-			registerKnobParamHandle(src, dest);
+			// pr_dbg("Registering (no queue)\n");
+			// registerKnobParamHandle(src, dest);
+			pr_dbg("Queuing...\n");
+			queueRegisterKnobParamHandle(src, dest);
 		}
+	}
+
+	// Called by UI thread so that the Engine thread does the actual registering with APP->engine
+	// This prevents a dead-lock
+	void queueRegisterKnobParamHandle(LabelButtonID src, LabelButtonID dst)
+	{
+		std::lock_guard mguard{paramHandleQmtx};
+		paramHandleQueue.push(std::make_pair(src, dst));
+	}
+
+	std::pair<LabelButtonID, LabelButtonID> popRegisterKnobParamHandle()
+	{
+		// Called by engine process thread
+		std::lock_guard mguard{paramHandleQmtx};
+
+		if (paramHandleQueue.empty())
+			return std::make_pair<LabelButtonID, LabelButtonID>({LabelButtonID::Types::None, -1, -1},
+																{LabelButtonID::Types::None, -1, -1});
+		auto r = paramHandleQueue.front();
+		paramHandleQueue.pop();
+		return r;
 	}
 
 	// This is called in the Engine thread from HubBase::process() --> processKnobMaps()
@@ -535,6 +558,7 @@ public:
 	// Rack::Engine stores raw ptrs, and needs their address to be fixed
 	// (When a vector re-allocates, the address of the contained objects changes.)
 	std::unordered_map<LabelButtonID, std::vector<std::unique_ptr<rack::ParamHandle>>> mappedParamHandles;
+	// std::array<rack::ParamHandle, NumKnobs * MaxMapsPerKnob> phs;
 
 private:
 	bool _isMappingInProgress = false;

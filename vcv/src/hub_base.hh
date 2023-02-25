@@ -152,6 +152,13 @@ struct MetaModuleHubBase : public CommModule {
 	// Hub class needs to call this from its process
 	void processKnobMaps()
 	{
+		do {
+			auto [src, dst] = centralData->popRegisterKnobParamHandle();
+			if (src.moduleID < 0 || dst.moduleID < 0)
+				break;
+			centralData->registerKnobParamHandle(src, dst);
+		} while (true);
+
 		for (int i = 0; i < NumKnobMaps; i++) {
 			LabelButtonID src{LabelButtonID::Types::Knob, i, id};
 			auto phvec = centralData->getParamHandlesFromSrc(src);
