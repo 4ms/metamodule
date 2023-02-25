@@ -95,14 +95,17 @@ public:
 		printf("touchedParam: %p\n", touchedParam);
 		if (touchedParam && touchedParam->getParamQuantity()) {
 			printf("touchedParam->PQ: %p\n", touchedParam->getParamQuantity());
+
 			int64_t moduleId = touchedParam->module->id;
 			printf("touchedParam->module->id: %lld\n", touchedParam->module->id);
+
 			int objId = touchedParam->getParamQuantity()->paramId;
 			printf("touchedParam->PQ->paramId: %d\n", touchedParam->getParamQuantity()->paramId);
 
 			APP->scene->rack->setTouchedParam(nullptr);
 
-			registerSuccess = registerMapping(moduleId, objId);
+			registerSuccess =
+				registerMapping({.objType = LabelButtonID::Types::Knob, .objID = objId, .moduleID = moduleId});
 		}
 
 		if (!registerSuccess) {

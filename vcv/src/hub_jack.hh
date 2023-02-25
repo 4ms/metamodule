@@ -16,7 +16,7 @@ public:
 		auto touchedJack = centralData->getAndClearTouchedJack();
 		printf("Touched %lld %lld %d\n", touchedJack.moduleID, touchedJack.objID, touchedJack.objType);
 		if (touchedJack.objType == id.objType) {
-			registerSuccess = registerMapping(touchedJack.moduleID, touchedJack.objID);
+			registerSuccess = registerMapping(touchedJack);
 		}
 
 		if (!registerSuccess) {

@@ -15,7 +15,7 @@ public:
 	void onLeave(const event::Leave &e) override;
 	void onEnter(const event::Enter &e) override;
 
-	bool registerMapping(int64_t moduleId, int objId);
+	bool registerMapping(LabelButtonID src);
 
 	LabelButtonID id;
 	bool isMapped = false;

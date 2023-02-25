@@ -76,13 +76,13 @@ void HubMapButton::onEnter(const event::Enter &e)
 	e.consume(this);
 }
 
-bool HubMapButton::registerMapping(int64_t moduleId, int objId)
+bool HubMapButton::registerMapping(LabelButtonID src)
 {
 	if (centralData->isMappingInProgress()) {
-		if (moduleId > -1) {
-			if (id.moduleID != moduleId) {
-				if (!centralData->isRegisteredHub(moduleId)) {
-					centralData->registerMapDest({id.objType, objId, moduleId});
+		if (src.moduleID > -1) {
+			if (id.moduleID != src.moduleID) {
+				if (!centralData->isRegisteredHub(src.moduleID)) {
+					centralData->registerMapDest(src);
 					return true;
 				}
 			}
