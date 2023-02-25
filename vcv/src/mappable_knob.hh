@@ -25,7 +25,7 @@ public:
 		bool isMappingNow = centralData->isMappingInProgress();
 		if (isMappingNow || centralData->isMappedPartnerHovered(id)) {
 			auto src = isMappingNow ? centralData->getMappingSource() : centralData->getMappedSrcFromDst(id);
-			if (src.objType == getId().objType && src.objID >= 0) {
+			if (src.mappable_to(getId().objType) && src.objID >= 0) {
 				nvgBeginPath(args.vg);
 				nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y * 0.5f);
 				float alphac = _hovered ? 0.75 : 0.4;
