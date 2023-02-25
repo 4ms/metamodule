@@ -5,13 +5,19 @@
 #include <vector>
 
 struct LabelButtonID {
-	enum class Types { None, Knob, InputJack, OutputJack, Toggle } objType;
+	enum class Types { None, Knob, InputJack, OutputJack, Toggle, MidiNote, MidiGate } objType;
 	int64_t objID;
 	int64_t moduleID;
 
 	bool operator==(const LabelButtonID &rhs) const
 	{
 		return (objType == rhs.objType) && (objID == rhs.objID) && (moduleID == rhs.moduleID);
+	}
+
+	bool mappable_to(const Types otherType) const
+	{
+		return (objType == otherType) || (objType == Types::Knob && otherType == Types::MidiNote) ||
+			   (objType == Types::MidiNote && otherType == Types::Knob);
 	}
 
 	const char *objTypeStr() const
@@ -24,6 +30,10 @@ struct LabelButtonID {
 			return "OutputJack";
 		if (objType == Types::Toggle)
 			return "Toggle";
+		if (objType == Types::MidiNote)
+			return "MidiValue";
+		if (objType == Types::MidiGate)
+			return "MidiGate";
 		return "None";
 	}
 
@@ -37,6 +47,10 @@ struct LabelButtonID {
 			objType = Types::OutputJack;
 		else if (std::strcmp(str, "Toggle") == 0)
 			objType = Types::Toggle;
+		else if (std::strcmp(str, "MidiValue") == 0)
+			objType = Types::MidiNote;
+		else if (std::strcmp(str, "MidiGate") == 0)
+			objType = Types::MidiGate;
 		else
 			objType = Types::None;
 	}
