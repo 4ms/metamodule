@@ -61,6 +61,7 @@ SOURCES += system/libc_stub.c
 SOURCES += system/libcpp_stub.cc
 SOURCES += system/new.cc
 SOURCES += system/mmu_ca7.c
+SOURCES += src/shared_memory.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/system_ca7.c
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/irq_ctrl.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal.c

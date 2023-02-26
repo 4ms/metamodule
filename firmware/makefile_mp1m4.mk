@@ -59,6 +59,7 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_cortex.c
+SOURCES += src/shared_memory.cc
 SOURCES += $(target_src)/controls.cc
 SOURCES += $(target_chip_src)/main-m4.cc
 SOURCES += system/libc_stub.c
