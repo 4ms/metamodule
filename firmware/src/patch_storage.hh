@@ -70,14 +70,20 @@ public:
 		patch_list_.clear_all_patches();
 		PatchFileIO::add_all_to_patchlist(norflash_, patch_list_);
 
-		poll_media_change();
-		if (sdcard_mounted_.went_high())
+		sdcard.mount_disk();
+		if (sdcard.is_mounted()) {
 			PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
-		filelist = patch_list_.get_patchfile_list();
-		sdcard_needs_rescan_ = true;
+			sdcard_needs_rescan_ = true;
+		}
 
-		//if (usb_drive_mounted)
-		PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
+		usbdrive.mount_disk();
+		if (usbdrive.is_mounted()) {
+			PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
+			usbdrive_needs_rescan_ = true;
+		}
+
+		filelist_ = patch_list_.get_patchfile_list();
+		poll_media_change();
 	}
 
 	void handle_messages() {
@@ -137,10 +143,16 @@ public:
 private:
 	void poll_media_change() {
 		sdcard_mounted_.update(sdcard.is_mounted());
-		sdcard_needs_rescan_ = sdcard_mounted_.went_high();
+		if (sdcard_mounted_.went_high())
+			sdcard_needs_rescan_ = true;
+		else if (sdcard_mounted_.went_low())
+			sdcard_needs_rescan_ = false;
 
 		usbdrive_mounted_.update(usbdrive.is_mounted());
-		usbdrive_needs_rescan_ = usbdrive_mounted_.went_high();
+		if (usbdrive_mounted_.went_high())
+			usbdrive_needs_rescan_ = true;
+		else if (usbdrive_mounted_.went_low())
+			usbdrive_needs_rescan_ = false;
 
 		// bool was_sdcard_mounted = sdcard_mounted_;
 
@@ -179,14 +191,15 @@ private:
 	uint32_t load_patch_file(uint32_t patch_id) {
 		bool ok = false;
 		auto filename = patch_list_.get_patch_filename(patch_id);
-		printf("load_view_patch %d %.31s\n", patch_id, filename.data());
+		auto vol = patch_list_.get_patch_vol(patch_id);
+		printf("load_patch_file(%d) vol=%d name=%.31s\n", patch_id, vol, filename.data());
 		std::span<char> raw_patch = raw_patch_buffer_;
 
 		auto load_patch_data = [&](auto &fileio) -> bool {
 			return PatchFileIO::read_file(raw_patch, fileio, filename);
 		};
 
-		switch (patch_list_.get_patch_vol(patch_id)) {
+		switch (vol) {
 			case Volume::NorFlash:
 				ok = load_patch_data(norflash_);
 				break;
@@ -195,6 +208,9 @@ private:
 				break;
 			case Volume::RamDisk:
 				// ok = load_patch_data(ramdisk);
+				break;
+			case Volume::USB:
+				ok = load_patch_data(usbdrive);
 				break;
 		}
 
