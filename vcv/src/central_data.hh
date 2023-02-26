@@ -245,17 +245,27 @@ public:
 		paramHandleQueue.push(std::make_pair(src, dst));
 	}
 
-	std::pair<LabelButtonID, LabelButtonID> popRegisterKnobParamHandle()
-	{
-		// Called by engine process thread
-		std::lock_guard mguard{paramHandleQmtx};
+	// std::pair<LabelButtonID, LabelButtonID> popRegisterKnobParamHandle()
+	// {
 
-		if (paramHandleQueue.empty())
-			return std::make_pair<LabelButtonID, LabelButtonID>({LabelButtonID::Types::None, -1, -1},
-																{LabelButtonID::Types::None, -1, -1});
-		auto r = paramHandleQueue.front();
-		paramHandleQueue.pop();
-		return r;
+	// 	std::lock_guard mguard{paramHandleQmtx};
+
+	// 	if (paramHandleQueue.empty())
+	// 		return std::make_pair<LabelButtonID, LabelButtonID>({LabelButtonID::Types::None, -1, -1},
+	// 															{LabelButtonID::Types::None, -1, -1});
+	// 	auto r = paramHandleQueue.front();
+	// 	paramHandleQueue.pop();
+	// 	return r;
+	// }
+
+	void processKnobParamHandleQueue()
+	{
+		// std::lock_guard mguard{paramHandleQmtx};
+		while (!paramHandleQueue.empty()) {
+			auto r = paramHandleQueue.front();
+			registerKnobParamHandle(r.first, r.second);
+			paramHandleQueue.pop();
+		}
 	}
 
 	// This is called in the Engine thread from HubBase::process() --> processKnobMaps()
@@ -276,7 +286,7 @@ public:
 		for (auto &p : phvec) {
 			if (p->moduleId == -1) {
 				pr_dbg("....Removing a paramHandle moduleId == -1. paramId=%d, text=%s\n", p->paramId, p->text.c_str());
-				APP->engine->removeParamHandle(p.get());
+				APP->engine->removeParamHandle_NoLock(p.get());
 			}
 		}
 		// Remove from mappedParamHandles[src]
@@ -295,7 +305,7 @@ public:
 		if (auto existingPh = APP->engine->getParamHandle(dst.moduleID, dst.objID); existingPh) {
 			pr_dbg("Found an existing ParamHandle (%p) in engine with same dst module/param id. Updating it to -1, 0\n",
 				   existingPh);
-			APP->engine->updateParamHandle(existingPh, -1, 0, true);
+			APP->engine->updateParamHandle_NoLock(existingPh, -1, 0, true);
 			// TODO: Why not just remove it here?
 		}
 		pr_dbg("Adding to engine...\n");
@@ -303,7 +313,7 @@ public:
 		APP->engine->addParamHandle(ph.get());
 		pr_dbg("Added.\n");
 		pr_dbg("Updating the paramhandle with new info: moduleId=%lld, paramId=%lld\n", dst.moduleID, dst.objID);
-		APP->engine->updateParamHandle(ph.get(), dst.moduleID, dst.objID, true);
+		APP->engine->updateParamHandle_NoLock(ph.get(), dst.moduleID, dst.objID, true);
 		pr_dbg("updated.\n");
 
 		/// Debug:
@@ -332,6 +342,7 @@ public:
 
 	// This is called in HubBase destructor
 	// TODO: Which thread does this run in? UI or Engine or other?
+	// DO we need to call the _NoLock version??
 	void unregisterKnobMapsBySrcModule(int64_t moduleId)
 	{
 		// Remove CD::maps

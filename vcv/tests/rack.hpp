@@ -16,10 +16,7 @@ struct NVGcolor {
 typedef struct NVGcolor NVGcolor;
 
 static NVGcolor dummyColor;
-inline NVGcolor nvgRGB(unsigned char r, unsigned char g, unsigned char b)
-{
-	return dummyColor;
-}
+inline NVGcolor nvgRGB(unsigned char r, unsigned char g, unsigned char b) { return dummyColor; }
 
 namespace rack
 {
@@ -36,11 +33,10 @@ struct ParamHandle {
 
 struct _Engine {
 	void removeParamHandle(rack::ParamHandle *) {}
-	rack::ParamHandle *getParamHandle(int, int)
-	{
-		return {};
-	}
+	void removeParamHandle_NoLock(rack::ParamHandle *) {}
+	rack::ParamHandle *getParamHandle(int, int) { return {}; }
 	void updateParamHandle(rack::ParamHandle *, int, int, bool) {}
+	void updateParamHandle_NoLock(rack::ParamHandle *, int, int, bool) {}
 	void addParamHandle(rack::ParamHandle *) {}
 };
 
