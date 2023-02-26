@@ -98,22 +98,27 @@ public:
 
 		if (message.message_type == RequestRefreshPatchList) {
 			pending_send_message.message_type = PatchListUnchanged;
+			bool rescanned_something = sdcard_needs_rescan_ | usbdrive_needs_rescan_;
 			if (sdcard_needs_rescan_) {
-				// poll_media_change();
-				// if (sdcard_mounted_.is_high())
+				patch_list_.clear_patches_from(Volume::SDCard);
 				if (sdcard.is_mounted())
 					rescan_sdcard();
 				else
 					printf_("SD Card not mounted, can't rescan\n");
 				sdcard_needs_rescan_ = false;
-
+			}
+			if (usbdrive_needs_rescan_) {
+				patch_list_.clear_patches_from(Volume::USB);
 				if (usbdrive.is_mounted())
 					rescan_usbdrive();
 				else
 					printf_("USB drive not mounted, can't rescan\n");
 				usbdrive_needs_rescan_ = false;
+			}
 
+			if (rescanned_something) {
 				pending_send_message.message_type = PatchListChanged;
+				filelist_ = patch_list_.get_patchfile_list();
 			}
 			printf_("M4 sending response: %d\n", pending_send_message.message_type);
 			// if (usb_needs_rescan_) ...
@@ -137,6 +142,8 @@ public:
 		if (now - last_poll_tm_ > 2000) { //poll media once per second
 			last_poll_tm_ = now;
 			poll_media_change();
+			printf_("SD Card mounted: %d\n", sdcard.is_mounted());
+			printf_("USB Drive mounted: %d\n", usbdrive.is_mounted());
 		}
 	}
 
@@ -146,41 +153,24 @@ private:
 		if (sdcard_mounted_.went_high())
 			sdcard_needs_rescan_ = true;
 		else if (sdcard_mounted_.went_low())
-			sdcard_needs_rescan_ = false;
+			sdcard_needs_rescan_ = true;
 
 		usbdrive_mounted_.update(usbdrive.is_mounted());
 		if (usbdrive_mounted_.went_high())
 			usbdrive_needs_rescan_ = true;
 		else if (usbdrive_mounted_.went_low())
-			usbdrive_needs_rescan_ = false;
-
-		// bool was_sdcard_mounted = sdcard_mounted_;
-
-		// uint8_t card_detected;
-		// auto err = sdcard_ops_.ioctl(MMC_GET_SDSTAT, &card_detected);
-		// if (err || !card_detected)
-		// 	sdcard_mounted_ = false;
-		// else
-		// 	sdcard_mounted_ = true;
-		// sdcard_mounted_ = sdcard.is_mounted();
-		// if (was_sdcard_mounted == false && sdcard_mounted_ == true) {
-		// 	sdcard_needs_rescan_ = true;
-		// }
+			usbdrive_needs_rescan_ = true;
 	}
 
 	void rescan_sdcard() {
 		printf_("Updating patchlist from SD Card.\n");
-		patch_list_.clear_patches_from(Volume::SDCard);
 		PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
-		filelist_ = patch_list_.get_patchfile_list();
 		printf_("Patchlist updated. filelist data: %p, size: %d.\n", filelist_.data(), filelist_.size());
 	}
 
 	void rescan_usbdrive() {
 		printf_("Updating patchlist from USB Drive.\n");
-		patch_list_.clear_patches_from(Volume::USB);
 		PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
-		filelist_ = patch_list_.get_patchfile_list();
 		printf_("Patchlist updated. filelist data: %p, size: %d.\n", filelist_.data(), filelist_.size());
 	}
 

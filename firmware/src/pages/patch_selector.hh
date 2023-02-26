@@ -52,9 +52,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void init() override {
-		// LVGLMemory::print_mem_usage("PatchSel::init in");
 		state = State::TryingToRequestPatchList;
-		// LVGLMemory::print_mem_usage("PatchSel::init out");
 	}
 
 	void prepare_focus() override {
