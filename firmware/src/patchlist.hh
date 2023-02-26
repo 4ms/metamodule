@@ -24,7 +24,9 @@ namespace MetaModule
 struct PatchList {
 	enum class Status { NotLoaded, Loading, Ready };
 
-	PatchList() = default;
+	PatchList() {
+		_patch_data.reserve(50);
+	}
 
 	// Returns the name of the patch at a given index (bounds-checked)
 	const ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
