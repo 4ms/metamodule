@@ -97,31 +97,24 @@ public:
 		auto message = comm_.get_new_message();
 
 		if (message.message_type == RequestRefreshPatchList) {
-			pending_send_message.message_type = PatchListUnchanged;
-			bool rescanned_something = sdcard_needs_rescan_ | usbdrive_needs_rescan_;
 			if (sdcard_needs_rescan_) {
 				patch_list_.clear_patches_from(Volume::SDCard);
 				if (sdcard.is_mounted())
 					rescan_sdcard();
-				else
-					printf_("SD Card not mounted, can't rescan\n");
-				sdcard_needs_rescan_ = false;
 			}
 			if (usbdrive_needs_rescan_) {
 				patch_list_.clear_patches_from(Volume::USB);
 				if (usbdrive.is_mounted())
 					rescan_usbdrive();
-				else
-					printf_("USB drive not mounted, can't rescan\n");
-				usbdrive_needs_rescan_ = false;
 			}
 
-			if (rescanned_something) {
-				pending_send_message.message_type = PatchListChanged;
+			if (sdcard_needs_rescan_ | usbdrive_needs_rescan_) {
+				sdcard_needs_rescan_ = false;
+				usbdrive_needs_rescan_ = false;
 				filelist_ = patch_list_.get_patchfile_list();
-			}
-			printf_("M4 sending response: %d\n", pending_send_message.message_type);
-			// if (usb_needs_rescan_) ...
+				pending_send_message.message_type = PatchListChanged;
+			} else
+				pending_send_message.message_type = PatchListUnchanged;
 		}
 
 		if (message.message_type == RequestPatchData) {
@@ -150,15 +143,11 @@ public:
 private:
 	void poll_media_change() {
 		sdcard_mounted_.update(sdcard.is_mounted());
-		if (sdcard_mounted_.went_high())
-			sdcard_needs_rescan_ = true;
-		else if (sdcard_mounted_.went_low())
+		if (sdcard_mounted_.changed())
 			sdcard_needs_rescan_ = true;
 
 		usbdrive_mounted_.update(usbdrive.is_mounted());
-		if (usbdrive_mounted_.went_high())
-			usbdrive_needs_rescan_ = true;
-		else if (usbdrive_mounted_.went_low())
+		if (usbdrive_mounted_.changed())
 			usbdrive_needs_rescan_ = true;
 	}
 
