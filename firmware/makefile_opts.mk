@@ -41,5 +41,5 @@
 # $(BUILDDIR)/src/timekeeper.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c.o: OPTFLAG = -O0
 # $(BUILDDIR)/lib/stm32-hal/stm32mp1/src/stm32mp1xx_hal_i2c.o: OPTFLAG = -O0
-$(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
-$(BUILDDIR)/src/medium/main-m4.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/a7/main.o: OPTFLAG = -O0
+# $(BUILDDIR)/src/medium/main-m4.o: OPTFLAG = -O0

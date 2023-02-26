@@ -1,12 +1,6 @@
 #define printf_ printf
 #define __DMB()
 
-static inline unsigned HAL_GetTick() {
-	static unsigned tm = 0;
-	tm++;
-	return tm;
-}
-
 #include "../src/inter_core_comm.hh"
 #include "doctest.h"
 

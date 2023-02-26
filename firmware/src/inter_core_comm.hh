@@ -5,7 +5,7 @@
 #include <optional>
 
 #include "debug.hh"
-#include "printf.h"
+// #include "printf.h"
 
 namespace MetaModule
 {
@@ -45,6 +45,7 @@ enum class ICCCoreType { Initiator = 1, Responder = 2 };
 
 template<ICCCoreType Core>
 class InterCoreComm {
+	static constexpr auto CoreN = static_cast<uint32_t>(Core); //1 or 2
 	static constexpr uint32_t Chan = 1;
 	using IPCCHalfDuplex = typename mdrivlib::IPCC_<(uint32_t)Core>::template HalfDuplexMode<Chan>;
 
@@ -61,13 +62,10 @@ public:
 	}
 
 	[[nodiscard]] bool send_message(const InterCoreCommMessage &msg) {
-		if constexpr (Core == ICCCoreType::Initiator)
-			Debug::Pin0::high();
-		else
-			Debug::Pin2::high();
+		DebugN<CoreN + 1>::Pin::high();
 
 		if (!IPCCHalfDuplex::is_my_turn()) {
-			printf_("%d: send aborted: not my turn\n", Core);
+			// printf_("%d: send aborted: not my turn\n", Core);
 			return false;
 		}
 
@@ -77,13 +75,10 @@ public:
 		was_my_turn = false;
 
 		__DMB();
-		printf_("[%d] %d: sending %d\n", HAL_GetTick(), Core, msg.message_type);
+		// printf_("[%d] %d: sending %d\n", HAL_GetTick(), Core, msg.message_type);
 		IPCCHalfDuplex::notify_other();
 
-		if constexpr (Core == ICCCoreType::Initiator)
-			Debug::Pin0::low();
-		else
-			Debug::Pin2::low();
+		DebugN<CoreN + 1>::Pin::low();
 		return true;
 	}
 
@@ -94,30 +89,26 @@ public:
 		InterCoreCommMessage msg{.message_type = InterCoreCommMessage::None};
 
 		if (is_my_turn && !was_my_turn) {
-			if constexpr (Core == ICCCoreType::Initiator)
-				Debug::Pin1::high();
-			else
-				Debug::Pin3::high();
+			DebugN<CoreN - 1>::Pin::high();
 
-			//TODO: volatile copy constructor
-			// msg = shared_message_;
+			//TODO: volatile copy constructor: msg = shared_message_;
 			msg = {shared_message_.message_type, shared_message_.bytes_read, shared_message_.patch_id};
 
-			printf_("[%d] %d: got msg %d\n", HAL_GetTick(), Core, msg.message_type);
+			// printf_("[%d] %d: got msg %d\n", HAL_GetTick(), Core, msg.message_type);
 			shared_message_.message_type = InterCoreCommMessage::None;
 
-			if constexpr (Core == ICCCoreType::Initiator)
-				Debug::Pin1::low();
-			else
-				Debug::Pin3::low();
+			DebugN<CoreN - 1>::Pin::low();
 		} else if (!is_my_turn) {
-			// printf_("%d: get_new_message: not my turn\n", Core);
+			pr_dbg("%d: get_new_message: not my turn\n", Core);
 		} else if (was_my_turn) {
 			// printf_("%d: get_new_message: already got message\n", Core);
 		}
 		was_my_turn = is_my_turn;
 
 		return msg;
+	}
+
+	static void pr_dbg(...) {
 	}
 };
 

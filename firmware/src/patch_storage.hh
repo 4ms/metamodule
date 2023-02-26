@@ -142,8 +142,8 @@ public:
 		if (now - last_poll_tm_ > 2000) { //poll media once per second
 			last_poll_tm_ = now;
 			poll_media_change();
-			printf_("SD Card mounted: %d\n", sdcard.is_mounted());
-			printf_("USB Drive mounted: %d\n", usbdrive.is_mounted());
+			// printf_("SD Card mounted: %d\n", sdcard.is_mounted());
+			// printf_("USB Drive mounted: %d\n", usbdrive.is_mounted());
 		}
 	}
 
