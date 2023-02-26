@@ -41,7 +41,7 @@ public:
 		uint8_t err;
 		if (err = f_mount(&fs, _fatvol, 1); err == FR_OK)
 			return true;
-		printf_("f_mount->%d\n", err);
+		printf_("Could not mount volume %s. err:%d\n", _volname, err);
 		return false;
 	}
 
