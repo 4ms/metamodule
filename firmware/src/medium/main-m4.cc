@@ -59,15 +59,6 @@ void main() {
 
 	printf_("M4 starting\n");
 
-	// auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
-	// auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
-	// auto virtdrive = SharedMemory::read_address_of<RamDrive *>(SharedMemory::RamDiskLocation);
-	// auto raw_patch_data = SharedMemory::read_address_of<std::span<char> *>(SharedMemory::PatchDataLocation);
-	// auto shared_message =
-	// 	SharedMemory::read_address_of<InterCoreCommMessage volatile *>(SharedMemory::InterCoreCommParamsLocation);
-	// auto shared_patch_file_list =
-	// 	SharedMemory::read_address_of<std::span<PatchFile> *>(SharedMemory::PatchListLocation);
-
 	auto param_block_base = SharedMemoryS::ptrs.param_block;
 	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
 	auto virtdrive = SharedMemoryS::ptrs.ramdrive;
@@ -85,12 +76,12 @@ void main() {
 	mdrivlib::GPIOExpander main_gpio_expander{i2c, mainboard_gpio_expander_conf};
 
 	RamDiskOps ramdiskops{*virtdrive};
+
 	UsbManager usb{ramdiskops};
+	usb.start();
 
 	auto usb_fileio = usb.get_msc_fileio();
 	PatchStorage patch_storage{*raw_patch_span, *shared_message, *shared_patch_file_list, usb_fileio};
-
-	usb.start();
 
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};

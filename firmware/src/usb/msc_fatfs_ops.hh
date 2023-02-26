@@ -19,11 +19,11 @@ public:
 	}
 
 	DSTATUS status() override {
-		return USBH_MSC_IsReady(&usbh) ? 0 : STA_NODISK;
+		return (is_mounted_ && USBH_MSC_IsReady(&usbh)) ? 0 : STA_NODISK;
 	}
 
 	DSTATUS initialize() override {
-		return 0;
+		return (is_mounted_ && USBH_MSC_IsReady(&usbh)) ? 0 : STA_NODISK | STA_NOINIT;
 	}
 
 	DRESULT read(uint8_t *dst, uint32_t sector_start, uint32_t num_sectors) override {

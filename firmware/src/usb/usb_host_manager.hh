@@ -26,6 +26,7 @@ public:
 	}
 
 	void init() {
+		init_hhcd();
 	}
 
 	void start() {
