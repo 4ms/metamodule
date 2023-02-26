@@ -111,7 +111,7 @@ public:
 			else
 				Debug::Pin3::low();
 		} else if (!is_my_turn) {
-			printf_("%d: get_new_message: not my turn\n", Core);
+			// printf_("%d: get_new_message: not my turn\n", Core);
 		} else if (was_my_turn) {
 			// printf_("%d: get_new_message: already got message\n", Core);
 		}
