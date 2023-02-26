@@ -59,14 +59,7 @@ void main() {
 					  StaticBuffers::auxsignal_block,
 					  patch_mod_queue};
 
-	// SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
-	// SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
-	// SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
-	// SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
-	// SharedMemory::write_address_of(&StaticBuffers::raw_patch_span, SharedMemory::PatchDataLocation);
-	// SharedMemory::write_address_of(&StaticBuffers::icc_shared_message, SharedMemory::InterCoreCommParamsLocation);
-	// SharedMemory::write_address_of(&StaticBuffers::shared_patch_file_list, SharedMemory::PatchListLocation);
-
+	StaticBuffers::raw_patch_span = {StaticBuffers::raw_patch_data.data(), StaticBuffers::raw_patch_data.size()};
 	SharedMemoryS::ptrs = {
 		&StaticBuffers::param_blocks,
 		&StaticBuffers::auxsignal_block,
