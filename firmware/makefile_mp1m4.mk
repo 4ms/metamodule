@@ -1,5 +1,7 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
+USE_FEWER_MODULES ?= 0
+
 $(info --------------------)
 
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
@@ -31,8 +33,10 @@ TARGETDEVICEDIR_CM4 = $(DRIVERLIB)/target/stm32mp1_cm4
 usb_src := src/usb
 usbhost_libdir = $(LIBDIR)/stm32-usb-host-lib
 usbdev_libdir = $(LIBDIR)/stm32-usb-device-lib
-STARTUP = $(TARGETDEVICEDIR_CM4)/boot/startup_stm32mp157cxx_cm4.s
-SYSTEM = $(DEVICEBASE)/stm32mp157c/templates/system_stm32mp1xx.c
+STARTUP = system/startup_stm32mp157cxx_cm4.s
+SYSTEM = $(core_src)/system_stm32mp1xx.c
+
+SHARED = src/shared
 
 OPTFLAG = -O3
 include makefile_opts.mk
@@ -55,6 +59,7 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_cortex.c
+SOURCES += src/shared_memory.cc
 SOURCES += $(target_src)/controls.cc
 SOURCES += $(target_chip_src)/main-m4.cc
 SOURCES += system/libc_stub.c
@@ -80,6 +85,15 @@ SOURCES += src/fatfs/diskio.cc
 SOURCES += src/fatfs/fattime.cc
 SOURCES += src/time_convert.cc
 
+SOURCES += src/patch_fileio.cc
+
+# Nor flash/LFS
+SOURCES += $(LIBDIR)/littlefs/lfs.c
+SOURCES += $(LIBDIR)/littlefs/lfs_util.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
+SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
+
+
 # USB:
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb_phy.c
@@ -88,12 +102,14 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb_phy.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_hcd.c
 SOURCES += $(usb_src)/usbh_conf.cc
 SOURCES += $(usb_src)/usbh_midi.cc
-# SOURCES += $(usb_src)/midi_host.cc
 # SOURCES += $(usbhost_libdir)/Class/HUB/Src/usbh_hub.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_core.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_ctlreq.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_ioreq.c
 SOURCES += $(usbhost_libdir)/Core/Src/usbh_pipes.c
+SOURCES += $(usbhost_libdir)/Class/MSC/Src/usbh_msc.c
+SOURCES += $(usbhost_libdir)/Class/MSC/Src/usbh_msc_bot.c
+SOURCES += $(usbhost_libdir)/Class/MSC/Src/usbh_msc_scsi.c
 
 # USB Device:
 SOURCES += $(usb_src)/usb_drive_device.cc
@@ -109,9 +125,6 @@ SOURCES += $(usbdev_libdir)/Core/Src/usbd_core.c
 SOURCES += $(usbdev_libdir)/Core/Src/usbd_ctlreq.c
 SOURCES += $(usbdev_libdir)/Core/Src/usbd_ioreq.c
 
-ifeq "$(target_board)" "mini"
-SOURCES  += $(DRIVERLIB)/drivers/pca9685_led_driver.cc
-endif
 
 INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(CMSIS)/Include \
@@ -139,10 +152,11 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-Isrc/fatfs \
 			-I$(usb_src) \
 			-I$(usbhost_libdir)/Core/Inc \
-			-I$(usbdev_libdir)/Class/MSC/Inc \
+			-I$(usbhost_libdir)/Class/MSC/Inc \
 			-I$(usbdev_libdir)/Core/Inc \
-			-I$(usbdev_libdir)/Class/HUB/Inc \
-
+			-I$(usbdev_libdir)/Class/MSC/Inc \
+			
+# 			-I$(SHARED)/etl/include
 
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 
@@ -151,11 +165,11 @@ ARCH_CFLAGS = -DUSE_HAL_DRIVER \
 			  -DSTM32MP157Cxx \
 			  -DSTM32MP1 \
 			  -DCORE_CM4 \
-			  -DARM_MATH_CM4 \
+			  -DARM_MATH_CM4
 
 include makefile_common.mk
 
-all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h
+all: $(target_src)/firmware_m4.h $(target_src)/firmware_m4_vectors.h $(BUILDDIR)/m4_rodata.ld 
 
 $(target_src)/firmware_m4.h: $(BUILDDIR)/firmware.bin
 	cd $(dir $<) && xxd -i -c 8 $(notdir $<) ../../../$@
@@ -172,10 +186,22 @@ $(BUILDDIR)/firmware.bin: $(BUILDDIR)/$(BINARYNAME).elf
 	arm-none-eabi-objcopy -O binary \
 		-j .text \
 		-j .startup_copro_fw.Reset_Handler \
-		-j .rodata \
 		-j .init_array \
 		-j .data \
 		$< $@
+
+$(BUILDDIR)/m4_rodata.bin: $(BUILDDIR)/$(BINARYNAME).elf
+	arm-none-eabi-objcopy -O binary -j .rodata $< $@
+
+# $(BUILDDIR)/m4_ddr_code.bin: $(BUILDDIR)/$(BINARYNAME).elf
+# 	arm-none-eabi-objcopy -O binary -j .ddr_code $< $@
+
+# $(BUILDDIR)/m4_data.bin: $(BUILDDIR)/$(BINARYNAME).elf
+# 	arm-none-eabi-objcopy -O binary -j .data $< $@
+			
+$(BUILDDIR)/%.ld: $(BUILDDIR)/%.bin
+	cat $< | hexdump -v -e '"BYTE(0x" 1/1 "%02X" ")\n"' > $@
+
 
 mini: all
 

@@ -1,23 +1,26 @@
 ENTRY(Reset_Handler)
 
-_estack = 0x10040000;
+INCLUDE system/linker/memory.ld
 
-_Min_Heap_Size  = 0x1000;  /* required amount of heap  */
-_Min_Stack_Size = 0x400; /* required amount of stack */
-
-_SHARED_PTR_SIZE = 256;
 
 MEMORY
 {
 	m_interrupts (RX)  	: ORIGIN = 0x00000000, LENGTH = 0x00000440
-	m_text       (RX)  	: ORIGIN = 0x10000000, LENGTH = 0x00040000
-	m_data	     (RW)	: ORIGIN = 0x10040000, LENGTH = (128K - _SHARED_PTR_SIZE) 
-	SHAREDMEMINDEX (RW) : ORIGIN = (0x10060000 - _SHARED_PTR_SIZE), LENGTH = _SHARED_PTR_SIZE
+	m_text       (RX)  	: ORIGIN = _M4_CODE, LENGTH = _M4_CODE_SZ
+
+	SHAREDMEMINDEX (RW) : ORIGIN = _M4_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
+
+	/* m_data is for .data (ro and rw) and .bss: all global vars: hopefully all UI assets, default patches */
+	/* startup.s copies from somewhre in the middle of .text (probably .rodata) to m_data */
+	/* TODO: no need for startup to copy them, just link them to the right place */
+
+	m_data	     (RW)	: ORIGIN = _M4_EXTDATA, LENGTH = _M4_EXTDATA_SZ
+	ddr_code     (RX)   : ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ
+	HEAP         (RW)   : ORIGIN = _M4_HEAP, 	LENGTH = _M4_HEAP_SZ
 }
 
-_params_ptr = ORIGIN(SHAREDMEMINDEX);
-/* _params_ptr = ORIGIN(m_data) + LENGTH(m_data); */
-/* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
+_estack = _M4_STACK_END;
+_shared_list = _M4_SHARED_LIST;
 
 SECTIONS
 {
@@ -27,7 +30,14 @@ SECTIONS
     KEEP(*(.isr_vector))
     . = ALIGN(4);
   } > m_interrupts
- 
+
+  .ddr_code :
+  {
+	/* *lfs.o(.text.lfs_*) */
+	/* *lfs_*.o(.text.lfs_*) */
+	/* *(.text.lv_*) */ 
+	/* *(.text.*c43yml*) */
+  } > ddr_code
 
   .text :
   {
@@ -45,14 +55,6 @@ SECTIONS
     _etext = .;        /* define a global symbols at end of code */
   } > m_text
 
-  /* Constant data into ROM memory*/
-  .rodata :
-  {
-    . = ALIGN(4);
-    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
-    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
-    . = ALIGN(4);
-  } > m_text
 
   .ARM.extab   : { 
   	. = ALIGN(4);
@@ -97,12 +99,22 @@ SECTIONS
     . = ALIGN(4);
   } > m_text
 
-  /* Used by the startup to initialize data */
-  __DATA_ROM = .;
-  _sidata = LOADADDR(.data);
+  /* Constant data */
+  .rodata :
+  {
+    . = ALIGN(4);
+    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+    . = ALIGN(4);
+  } > m_data
 
-  /* Initialized data sections */
-  .data :  AT(__DATA_ROM)
+/*  Uncommenting this allows startup to initialize data */
+/*  By copying from _sidata to _sdata */
+/*  __DATA_ROM = .; */
+/*  _sidata = LOADADDR(.data); */
+/*  .data : AT(__DATA_ROM)*/
+
+  .data :
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
@@ -111,33 +123,24 @@ SECTIONS
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
-  } > m_data
+  } > m_text
 
-  __DATA_END = __DATA_ROM + (_edata - _sdata);
-  text_end = ORIGIN(m_text) + LENGTH(m_text);
-  ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
+  /* Uncommenting this, prevents any data init */
+  _sidata = _sdata;
 
-  .resource_table :
+  .sharedmemindex (NOLOAD) :
   {
-    . = ALIGN(4);
-    KEEP (*(.resource_table*))
-    . = ALIGN(4);
-  } > m_data
-
-	.sharedmemindex (NOLOAD) :
-	{
-		. = ALIGN(8);
-		*(.sharedmemindex)
-		*(.sharedmemindex*)
-		. = ALIGN(8);
-	} > SHAREDMEMINDEX
+	. = ALIGN(8);
+	*(.sharedmemindex)
+	*(.sharedmemindex*)
+	. = ALIGN(8);
+  } > SHAREDMEMINDEX
   
 
-  /* Uninitialized data section into RAM memory */
+  /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
   {
-    /* This is used by the startup in order to initialize the .bss secion */
     _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
     *(.bss)
@@ -150,17 +153,25 @@ SECTIONS
   } > m_data
 
   /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack :
+  /* ._user_heap_stack : */
+  /* { */
+  /*   . = ALIGN(8); */
+  /*   PROVIDE ( end = . ); */
+  /*   PROVIDE ( _end = . ); */
+	/* _sheap = .; */
+  /*   . = . + _Min_Heap_Size; */
+	/* _eheap = .; */
+  /*   . = . + _Min_Stack_Size; */
+  /*   . = ALIGN(8); */
+  /* } > m_data */
+
+  .heap (NOLOAD):
   {
-    . = ALIGN(8);
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
+	. = ALIGN(8);
 	_sheap = .;
-    . = . + _Min_Heap_Size;
+	. += LENGTH(HEAP);
 	_eheap = .;
-    . = . + _Min_Stack_Size;
-    . = ALIGN(8);
-  } > m_data
+  } > HEAP
 
   
 

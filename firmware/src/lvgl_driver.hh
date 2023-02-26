@@ -33,7 +33,7 @@ class LVGLDriver {
 
 public:
 	LVGLDriver(flush_cb_t flush_cb, indev_cb_t indev_cb, std::span<lv_color_t> buffer1, std::span<lv_color_t> buffer2) {
-		UartLog::log("\nLVGLDriver started\n");
+		UartLog::log("\n\nLVGLDriver started\n");
 
 		lv_init();
 		lv_disp_draw_buf_init(&disp_buf, buffer1.data(), buffer2.data(), buffer1.size());

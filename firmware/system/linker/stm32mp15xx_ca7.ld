@@ -2,37 +2,27 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(_Reset)
 
-_DMABUF_SIZE = 1024 * 1024;
-_DMABUF_END = 0xE0000000;
-_DMABUF_BASE = (_DMABUF_END - _DMABUF_SIZE);
+INCLUDE system/linker/memory.ld
 
-_VIRTDRIVE_BASE = 0xD0000000;
-_VIRTDRIVE_SIZE = 0x08000000;
-_VIRTDRIVE_END =  0xD8000000;
-
-_HEAP_BASE = _VIRTDRIVE_END;
-_HEAP_END = _DMABUF_BASE;
-_HEAP_SIZE = _HEAP_END - _HEAP_BASE;
-
-_SHARED_PTR_SIZE = 256;
-_SHAREDIDX_START = (0x30060000 - _SHARED_PTR_SIZE);
 
 MEMORY
 {
-    ROM (rx) 			: ORIGIN = 0xC2000040, 		LENGTH = (16M - 0x40)
-    RAM (rw) 			: ORIGIN = 0xC0200000, 		LENGTH = 30M
-	HEAP (rw) 			: ORIGIN = _HEAP_BASE,		LENGTH = _HEAP_SIZE
-	VIRTDRIVE (rw) 		: ORIGIN = _VIRTDRIVE_BASE, LENGTH = _VIRTDRIVE_SIZE
-	DMABUF (rw) 		: ORIGIN = _DMABUF_BASE, 	LENGTH = _DMABUF_SIZE
-	SHAREDMEM (rw) 		: ORIGIN = 0x30040000, 		LENGTH = (128K - _SHARED_PTR_SIZE)
-	SHAREDMEMINDEX (rw) : ORIGIN = _SHAREDIDX_START, LENGTH = _SHARED_PTR_SIZE
-	SYSRAM (rw) 		: ORIGIN = 0x2FFC0000, 		LENGTH = 192K
-	SYSDMARAM (rw) 		: ORIGIN = 0x2FFF0000, 		LENGTH = 64K
-	/* SYSRAM_STACK (rw) 	: ORIGIN = 0x2FFF0000, 		LENGTH = 64K */
+    ROM (rx)			: ORIGIN = _A7_CODE,		LENGTH = _A7_CODE_SZ
+    RAM (rw)			: ORIGIN = _A7_RAM,			LENGTH = _A7_RAM_SZ
+	VIRTDRIVE (rw)		: ORIGIN = _VIRTDRIVE,		LENGTH = _VIRTDRIVE_SZ 
+	HEAP (rw)			: ORIGIN = _A7_HEAP,		LENGTH = _A7_HEAP_SZ
+	DMABUF (rw)			: ORIGIN = _DMABUF,			LENGTH = _DMABUF_SZ 
+
+	SHAREDMEMINDEX (rw) : ORIGIN = _A7_SHARED_LIST, LENGTH = _SHARED_LIST_SZ
+	SYSRAM (rw)			: ORIGIN = 0x2FFC0000,		LENGTH = 256K
+
+	M4_EXTCODE (rwx)   	: ORIGIN = _M4_EXTCODE, LENGTH = _M4_EXTCODE_SZ
+	M4_EXTDATA  (rw)   	: ORIGIN = _M4_EXTDATA, LENGTH = _M4_EXTDATA_SZ
 }
 
-_params_ptr = ORIGIN(SHAREDMEM) + LENGTH(SHAREDMEM);
-/* 0x1005FF00: 256 Bytes of shared memory addresses = 64 pointers */
+/* A7 stacks are at end of RAM */
+
+_shared_list = _A7_SHARED_LIST;
 
 SECTIONS
 {
@@ -56,16 +46,12 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		*(.rodata)         /* .rodata sections (constants, strings, etc.) */
-		*(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+		*(.rodata*) 
 		. = ALIGN(8);
 	} > ROM
 
 	.ARM.extab	 : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >ROM
-	.ARM : {
-		__exidx_start = .;
-		*(.ARM.exidx*)
-		__exidx_end = .;
-	} >ROM
+	.ARM : { __exidx_start = .; *(.ARM.exidx*) __exidx_end = .; } >ROM
 
 	.preinit_array :
 	{
@@ -124,7 +110,7 @@ SECTIONS
 	{
 		. = ALIGN(8);
 		_sheap = .;
-		. += _HEAP_SIZE;
+		. += _A7_HEAP_SZ;
 		_eheap = .;
 	} > HEAP
 
@@ -133,12 +119,6 @@ SECTIONS
 		. = ALIGN(8);
         *(.ddma)
 	} > DMABUF
-
-	.sys_dma (NOLOAD):
-	{
-		. = ALIGN(8);
-        *(.sys_dma)
-	} > SYSDMARAM
 
 	.sysram (NOLOAD):
 	{
@@ -154,13 +134,25 @@ SECTIONS
 		*(.virtdrive)
 	} > VIRTDRIVE
 
-	/* User Stack: 0x2FFF0000 - 0x2FFFFD00 */
-    /* _user_stack_start = ORIGIN(SYSRAM_STACK); */
+	/* These are disabled until/unless putting m4 code/ddr */
+	/* .m4_extcode : { */
+	/* 	INCLUDE m4_ddr_code.ld */
+	/* } > M4_EXTCODE */
+
+	/* .m4_extdata : { */
+	/* 	INCLUDE m4_data.ld */
+	/* } > M4_EXTDATA */
+
+	.m4_extrodata : {
+		INCLUDE m4_rodata.ld
+	} > M4_EXTDATA
+
+
     _user_stack_start = _ram_aligned_end;
-    _user_stack_end = _user_stack_start + 0x6000 - 0x200; /* 32k - 768B  */
+    _user_stack_end = _user_stack_start + 0x6000; /* 24k */
 
     _svc_stack_start = _user_stack_end;
-    _svc_stack_end = _svc_stack_start + 0x6000; /* 32k for ISRs*/
+    _svc_stack_end = _svc_stack_start + 0x6000; /* 24k for ISRs*/
 
     _irq_stack_start = _svc_stack_end;
     _irq_stack_end = _irq_stack_start + 0x100; 
@@ -171,14 +163,6 @@ SECTIONS
     _auxcore_user_stack_start = _fiq_stack_end;
     _auxcore_user_stack_end = _auxcore_user_stack_start + 0x1000;
 
-
-	.shared_memory (NOLOAD) :
-	{
-		. = ALIGN(8);
-		*(.shared_memory)
-		*(.shared_memory*)
-		. = ALIGN(8);
-	} > SHAREDMEM
 
 	.sharedmemindex (NOLOAD) :
 	{

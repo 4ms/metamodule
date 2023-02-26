@@ -74,19 +74,21 @@ public:
 			case GET_BLOCK_SIZE: // Get erase block size in unit of sector (DWORD)
 				*(DWORD *)buff = 1;
 				break;
+
 			case GET_SECTOR_COUNT: {
 				uint32_t num_blocks = sd.get_card_num_blocks();
 				if (!num_blocks)
 					return RES_NOTRDY;
 				*(DWORD *)buff = num_blocks;
 			} break;
-			case CTRL_SYNC:
-				break;
 
-			case CTRL_TRIM:
-				break;
-			case CTRL_EJECT:
-				break;
+			case MMC_GET_SDSTAT: {
+				uint8_t mounted = sd.detect_card();
+				*(uint8_t *)buff = mounted;
+			} break;
+
+			default:
+				return RES_PARERR;
 		}
 
 		return RES_OK;

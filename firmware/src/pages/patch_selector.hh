@@ -12,9 +12,7 @@ namespace MetaModule
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info}
-		, base(lv_obj_create(nullptr))
-	// , patch_view_page{info}
-	{
+		, base(lv_obj_create(nullptr)) {
 		PageList::register_page(this, PageId::PatchSel);
 
 		init_bg(base);
@@ -54,17 +52,20 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void init() override {
-		LVGLMemory::print_mem_usage("PatchSel::init in");
-
-		refresh_patchlist();
-
-		LVGLMemory::print_mem_usage("PatchSel::init out");
+		state = State::TryingToRequestPatchList;
 	}
 
-	void refresh_patchlist() {
+	void prepare_focus() override {
+		state = State::TryingToRequestPatchList;
+	}
+
+	void refresh_patchlist(PatchFileList &patchfiles) {
+		//TODO: try using pmr::string with monotonic stack buffer
 		std::string patchnames;
-		for (unsigned i = 0; i < patch_storage.patch_list.num_patches(); i++) {
-			patchnames += patch_storage.patch_list.get_patch_name(i).data();
+		patchnames.reserve((sizeof(PatchFileList::value_type::patchname) + 1) * patchfiles.size());
+
+		for (auto &p : patchfiles) {
+			patchnames += p.patchname.c_str();
 			patchnames += '\n';
 		}
 		// remove trailing \n
@@ -76,40 +77,86 @@ struct PatchSelectorPage : PageBase {
 		// unsigned default_sel = patchnames.size() > 9 ? 5U : 0;
 		unsigned default_sel = patchnames.size() > 10 ? 5 : patchnames.size() / 2;
 		lv_roller_set_selected(roller, default_sel, LV_ANIM_OFF);
-		printf_("Patch Selector page refreshed %d patches, preselecting %d\n",
-				patch_storage.patch_list.num_patches(),
-				lv_roller_get_selected(roller));
+		printf_("Patch Selector page refreshed %d patches from %p\n", patchfiles.size(), patchfiles.data());
 	}
 
 	void update() override {
-		if (should_show_patchview) {
-			should_show_patchview = false;
-			printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
-			patch_storage.load_view_patch(selected_patch);
-			PageList::set_selected_patch_id(selected_patch);
-			PageList::request_new_page(PageId::PatchView);
-			blur();
+		// Check if M4 sent us a message:
+
+		switch (state) {
+			case State::TryingToRequestPatchList:
+				if (patch_storage.request_patchlist())
+					state = State::RequestedPatchList;
+				break;
+
+			case State::RequestedPatchList: {
+				auto message = patch_storage.get_message().message_type;
+				if (message == PatchStorageProxy::PatchListChanged) {
+					refresh_patchlist(patch_storage.get_patch_list());
+					state = State::Idle;
+				} else if (message == PatchStorageProxy::PatchListUnchanged)
+					state = State::Idle;
+				//else other messages ==> error? repeat request? idle?
+			} break;
+
+			case State::Idle: {
+				//periodically check if patchlist needs updating:
+				uint32_t now = HAL_GetTick();
+				if (now - last_refresh_check_tm > 1000) { //poll media once per second
+					last_refresh_check_tm = now;
+					state = State::TryingToRequestPatchList;
+				}
+			} break;
+
+			case State::TryingToRequestPatchData:
+				if (patch_storage.request_viewpatch(selected_patch))
+					state = State::RequestedPatchData;
+				break;
+
+			case State::RequestedPatchData: {
+				auto message = patch_storage.get_message();
+
+				if (message.message_type == PatchStorageProxy::PatchDataLoaded) {
+					// Try to parse the patch and open the PatchView page
+					if (patch_storage.parse_view_patch(message.bytes_read)) {
+						auto view_patch = patch_storage.get_view_patch();
+						printf_("Parsed patch: %.31s\n", view_patch.patch_name.data());
+						PageList::set_selected_patch_id(selected_patch);
+						PageList::request_new_page(PageId::PatchView);
+						state = State::Closing;
+					} else {
+						printf_("Error parsing patch id %d, bytes_read = %d\n", selected_patch, message.bytes_read);
+						state = State::Idle;
+					}
+				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
+					printf_("Error loading patch id %d\n", selected_patch);
+					state = State::Idle;
+					//TODO: handle error... try reloading patch list?
+				}
+			} break;
+
+			case State::Closing:
+				break;
 		}
 
-		if (!patch_storage.patch_list.is_ready()) {
-			if (patchlist_was_ready) {
-				// lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
-				// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-				patchlist_was_ready = false;
-			}
-			return;
-		}
+		//TODO: Display state: "Refreshing...", "Loading..."
 
-		if (!patchlist_was_ready) {
-			// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-			lv_indev_set_group(lv_indev_get_next(nullptr), group);
-			lv_group_set_editing(group, true);
-			patchlist_was_ready = true;
-		}
+		// if (should_show_patchview) {
+		// 	should_show_patchview = false;
+		// 	printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
+		// 	patch_storage.load_view_patch(selected_patch);
+		// 	blur();
+		// }
 
-		if (patch_storage.patch_list.is_modified()) {
-			refresh_patchlist();
-		}
+		// lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
+		// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+
+		// 		if (!patchlist_was_ready) {
+		// 			// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		// 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
+		// 			lv_group_set_editing(group, true);
+		// 			patchlist_was_ready = true;
+		// 		}
 	}
 
 	void blur() override {
@@ -119,7 +166,7 @@ struct PatchSelectorPage : PageBase {
 	static void patchlist_event_cb(lv_event_t *event) {
 		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
 		_instance->selected_patch = lv_roller_get_selected(_instance->roller);
-		_instance->should_show_patchview = true;
+		_instance->state = State::TryingToRequestPatchData;
 	}
 
 private:
@@ -131,7 +178,19 @@ private:
 	lv_obj_t *header_text;
 	lv_obj_t *base;
 
-	// PatchViewPage patch_view_page;
+	enum class State {
+		Idle,
+
+		TryingToRequestPatchList,
+		RequestedPatchList,
+
+		TryingToRequestPatchData,
+		RequestedPatchData,
+
+		Closing,
+	} state;
+
+	uint32_t last_refresh_check_tm = 0;
 };
 
 } // namespace MetaModule

@@ -18,6 +18,9 @@
 #include "shared_memory.hh"
 #include "usb/usb_manager.hh"
 
+#include "patch_mod_queue.hh"
+#include "patch_storage.hh"
+
 namespace MetaModule
 {
 
@@ -34,6 +37,7 @@ static void app_startup() {
 		;
 
 	SystemClocks init_system_clocks{};
+	core_m4::RCC_Enable::IPCC_::set();
 };
 
 static void signal_m4_ready_after_delay() {
@@ -55,10 +59,14 @@ void main() {
 
 	printf_("M4 starting\n");
 
-	auto param_block_base = SharedMemory::read_address_of<DoubleBufParamBlock *>(SharedMemory::ParamsPtrLocation);
-	auto auxsignal_buffer = SharedMemory::read_address_of<DoubleAuxStreamBlock *>(SharedMemory::AuxSignalBlockLocation);
-	auto virtdrive =
-		SharedMemory::read_address_of<RamDisk<RamDiskSizeBytes, RamDiskBlockSize> *>(SharedMemory::RamDiskLocation);
+	auto param_block_base = SharedMemoryS::ptrs.param_block;
+	auto auxsignal_buffer = SharedMemoryS::ptrs.auxsignal_block;
+	auto virtdrive = SharedMemoryS::ptrs.ramdrive;
+	auto raw_patch_span = SharedMemoryS::ptrs.raw_patch_span;
+	auto shared_message = SharedMemoryS::ptrs.icc_message;
+	auto shared_patch_file_list = SharedMemoryS::ptrs.patch_file_list;
+
+	PatchModQueue patch_mod_queue; //TODO: share with A7
 
 	I2CPeriph i2c{a7m4_shared_i2c_codec_conf};
 	// I2CPeriph auxi2c{aux_i2c_conf}; //This is the Aux header for button/pot expander
@@ -68,13 +76,18 @@ void main() {
 	mdrivlib::GPIOExpander main_gpio_expander{i2c, mainboard_gpio_expander_conf};
 
 	RamDiskOps ramdiskops{*virtdrive};
+
 	UsbManager usb{ramdiskops};
 	usb.start();
+
+	auto usb_fileio = usb.get_msc_fileio();
+	PatchStorage patch_storage{*raw_patch_span, *shared_message, *shared_patch_file_list, usb_fileio};
 
 	Controls controls{*param_block_base, *auxsignal_buffer, main_gpio_expander, ext_gpio_expander, usb.get_midi_host()};
 	SharedBusQueue i2cqueue{main_gpio_expander, ext_gpio_expander};
 
 	HWSemaphoreCoreHandler::enable_global_ISR(2, 1);
+
 	controls.start();
 
 	while (true) {
@@ -85,6 +98,7 @@ void main() {
 		}
 
 		usb.process();
+		patch_storage.handle_messages();
 
 		__NOP();
 	}

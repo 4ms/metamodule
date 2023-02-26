@@ -61,6 +61,7 @@ SOURCES += system/libc_stub.c
 SOURCES += system/libcpp_stub.cc
 SOURCES += system/new.cc
 SOURCES += system/mmu_ca7.c
+SOURCES += src/shared_memory.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/system_ca7.c
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/irq_ctrl.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal.c
@@ -125,6 +126,7 @@ SOURCES += $(core_src)/aux_core_main.cc
 SOURCES += src/patchlist.cc
 SOURCES += src/patchlist_ryml_tests.cc
 SOURCES += src/pages/page_manager.cc
+
 ifeq "$(USE_FEWER_MODULES)" "1"
 SOURCES += $(SHARED)/CoreModules/DjembeCore.cc
 SOURCES += $(SHARED)/CoreModules/StMixCore.cc
@@ -165,11 +167,9 @@ SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/sw/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/widgets/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/font/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/misc/*.c)
-# SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/gpu/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/hal/*.c)
 #SOURCES += $(wildcard src/pages/gui-guider/*.c)
 
-# SOURCES += $(wildcard src/pages/fonts/*.c)
 SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
@@ -205,7 +205,6 @@ SOURCES += src/pages/images/modules/EnOsc_artwork_120.c
 else
 SOURCES += $(wildcard src/pages/images/modules/*.c)
 endif
-# SOURCES += $(wildcard src/pages/images/ui/*.c)
 SOURCES += $(wildcard src/pages/images/components/*.c)
 
 ## RapidYml
@@ -328,7 +327,8 @@ endif
 
 EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines
 
-EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG)
+EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG) \
+				-L$(BUILDDIR_MP1M4)/$(target_board)
 
 EXTDEF ?= METAMODULE_NORMAL_MODE
 

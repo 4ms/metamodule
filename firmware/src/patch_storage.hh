@@ -1,155 +1,206 @@
 #pragma once
 
-#include "a7/static_buffers.hh"
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdcard_conf.hh"
 #include "fatfs/fat_file_io.hh"
 #include "fatfs/ramdisk_ops.hh"
 #include "fatfs/sdcard_ops.hh"
+#include "inter_core_comm.hh"
 #include "littlefs/norflash_lfs.hh"
 #include "patch_fileio.hh"
 #include "qspi_flash_driver.hh"
+#include "util/edge_detector.hh"
 #include "volumes.hh"
 
-//TODO: Figure out how to handle NOR FLash internal patches
-// - Ship with some patches on there
-// - In Patch View, user can click "Save" or "copy" and give the patch a name and destination
-// - In Patch List, patches show their location
+// - Ship with some patches on NORFlash
+// - Scan for patches on USB-C thumb drive and SD Card
 // - Don't use RAMDisk USB
-// - Allow for USB-C thumb drive and SD Card
-//    -- on boot, read from all media and create patch index
+// - In Patch View, user can click "Save" or "copy" and give the patch a name and destination (including NORFlash)
+// - In Patch List, patches show their location
+
 namespace MetaModule
 {
-
 // PatchStorage manages all patch filesystems <--> PatchList
-struct PatchStorage {
-	SDCardOps<SDCardConf> sdcard_ops;
-	FatFileIO sdcard{&sdcard_ops, Volume::SDCard};
-	bool sdcard_valid = false;
+class PatchStorage {
 
-	mdrivlib::QSpiFlash flash{qspi_patchflash_conf};
-	LfsFileIO norflash{flash};
+	SDCardOps<SDCardConf> sdcard_ops_;
+	FatFileIO sdcard{&sdcard_ops_, Volume::SDCard};
+	EdgeDetector sdcard_mounted_;
+	bool sdcard_needs_rescan_ = true;
+	// bool sdcard_mounted_ = false;
 
-	RamDiskOps ramdisk_ops{StaticBuffers::virtdrive};
-	FatFileIO ramdisk{&ramdisk_ops, Volume::RamDisk};
+	uint32_t last_poll_tm_;
 
-	PatchList patch_list;
+	mdrivlib::QSpiFlash flash_{qspi_patchflash_conf};
+	LfsFileIO norflash_{flash_};
 
-	PatchStorage(bool reset_to_factory_patches = false) {
+	FatFileIO &usbdrive;
+	EdgeDetector usbdrive_mounted_;
+	bool usbdrive_needs_rescan_ = true;
+
+	using InterCoreComm2 = InterCoreComm<ICCCoreType::Responder>;
+	using enum InterCoreCommMessage::MessageType;
+	InterCoreComm2 comm_;
+	InterCoreCommMessage pending_send_message{.message_type = None};
+
+	PatchList patch_list_;
+
+	const std::span<char> &raw_patch_buffer_;
+	std::span<PatchFile> &filelist_;
+
+public:
+	PatchStorage(std::span<char> &raw_patch_buffer,
+				 volatile InterCoreCommMessage &shared_message,
+				 std::span<PatchFile> &filelist,
+				 FatFileIO &usb_fileio,
+				 bool reset_to_factory_patches = false)
+		: usbdrive{usb_fileio}
+		, comm_{shared_message}
+		, raw_patch_buffer_{raw_patch_buffer}
+		, filelist_{filelist} {
 
 		// NOR Flash: if it's unformatted, put default patches there
-		//-- just for testing our API (probably won't put patches there)
-		auto status = norflash.initialize();
+		auto status = norflash_.initialize();
 		if (status == LfsFileIO::Status::NewlyFormatted || reset_to_factory_patches) {
-			norflash.reformat();
-			PatchFileIO::create_default_patches(norflash);
+			norflash_.reformat();
+			PatchFileIO::create_default_patches(norflash_);
 		}
 
-		// Populate Patch List
-		patch_list.clear_all_patches();
-		// PatchFileIO::add_all_to_patchlist(norflash, patch_list);
-		// Debug::Pin1::high();
-		PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
-		// Debug::Pin1::low();
+		// Populate Patch List from all media present
+		patch_list_.clear_all_patches();
+		PatchFileIO::add_all_to_patchlist(norflash_, patch_list_);
 
-		// RamDisk: format it and copy patches to it
-		// --Just for testing, really we should copy patches when USB MSC device starts
-		// ramdisk.format_disk();
-		// PatchFileIO::copy_patches_from_to(norflash, ramdisk);
-		// PatchFileIO::copy_patches_from_to(sdcard, ramdisk);
+		sdcard.mount_disk();
+		if (sdcard.is_mounted()) {
+			PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
+			sdcard_needs_rescan_ = true;
+		}
+
+		usbdrive.mount_disk();
+		if (usbdrive.is_mounted()) {
+			PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
+			usbdrive_needs_rescan_ = true;
+		}
+
+		filelist_ = patch_list_.get_patchfile_list();
+		poll_media_change();
 	}
 
-	// FIXME: PatchStorage and managing the ViewedPatch are orthagonal: make them different classes
-	void load_view_patch(std::string_view &patchname) {
-		if (auto id = patch_list.find_by_name(patchname))
-			load_view_patch(id.value());
+	void handle_messages() {
+		if (pending_send_message.message_type != None) {
+			// Keep trying to send message until suceeds
+			// TODO: why would this fail? The answer informs us how to handle this situation
+			if (comm_.send_message(pending_send_message))
+				pending_send_message.message_type = None;
+		}
+
+		auto message = comm_.get_new_message();
+
+		if (message.message_type == RequestRefreshPatchList) {
+			if (sdcard_needs_rescan_) {
+				patch_list_.clear_patches_from(Volume::SDCard);
+				if (sdcard.is_mounted())
+					rescan_sdcard();
+			}
+			if (usbdrive_needs_rescan_) {
+				patch_list_.clear_patches_from(Volume::USB);
+				if (usbdrive.is_mounted())
+					rescan_usbdrive();
+			}
+
+			if (sdcard_needs_rescan_ | usbdrive_needs_rescan_) {
+				sdcard_needs_rescan_ = false;
+				usbdrive_needs_rescan_ = false;
+				filelist_ = patch_list_.get_patchfile_list();
+				pending_send_message.message_type = PatchListChanged;
+			} else
+				pending_send_message.message_type = PatchListUnchanged;
+		}
+
+		if (message.message_type == RequestPatchData) {
+			pending_send_message.message_type = PatchDataLoadFail;
+			pending_send_message.patch_id = message.patch_id;
+			pending_send_message.bytes_read = 0;
+
+			if (message.patch_id < patch_list_.num_patches()) {
+				auto bytes_read = load_patch_file(message.patch_id);
+				if (bytes_read) {
+					pending_send_message.message_type = PatchDataLoaded;
+					pending_send_message.bytes_read = bytes_read;
+				}
+			}
+		}
+
+		uint32_t now = HAL_GetTick();
+		if (now - last_poll_tm_ > 2000) { //poll media once per second
+			last_poll_tm_ = now;
+			poll_media_change();
+			// printf_("SD Card mounted: %d\n", sdcard.is_mounted());
+			// printf_("USB Drive mounted: %d\n", usbdrive.is_mounted());
+		}
 	}
 
-	std::optional<uint32_t> find_by_name(std::string_view &patchname) {
-		return patch_list.find_by_name(patchname);
+private:
+	void poll_media_change() {
+		sdcard_mounted_.update(sdcard.is_mounted());
+		if (sdcard_mounted_.changed())
+			sdcard_needs_rescan_ = true;
+
+		usbdrive_mounted_.update(usbdrive.is_mounted());
+		if (usbdrive_mounted_.changed())
+			usbdrive_needs_rescan_ = true;
 	}
 
-	void load_view_patch(uint32_t patch_id) {
+	void rescan_sdcard() {
+		printf_("Updating patchlist from SD Card.\n");
+		PatchFileIO::add_all_to_patchlist(sdcard, patch_list_);
+		printf_("Patchlist updated. filelist data: %p, size: %d.\n", filelist_.data(), filelist_.size());
+	}
+
+	void rescan_usbdrive() {
+		printf_("Updating patchlist from USB Drive.\n");
+		PatchFileIO::add_all_to_patchlist(usbdrive, patch_list_);
+		printf_("Patchlist updated. filelist data: %p, size: %d.\n", filelist_.data(), filelist_.size());
+	}
+
+	std::optional<uint32_t> find_by_name(std::string_view &patchname) const {
+		return patch_list_.find_by_name(patchname);
+	}
+
+	uint32_t load_patch_file(uint32_t patch_id) {
 		bool ok = false;
-		auto filename = patch_list.get_patch_filename(patch_id);
-		printf("load_view_patch %d %.31s\n", patch_id, filename.data());
+		auto filename = patch_list_.get_patch_filename(patch_id);
+		auto vol = patch_list_.get_patch_vol(patch_id);
+		printf("load_patch_file(%d) vol=%d name=%.31s\n", patch_id, vol, filename.data());
+		std::span<char> raw_patch = raw_patch_buffer_;
 
 		auto load_patch_data = [&](auto &fileio) -> bool {
-			return PatchFileIO::load_patch_data(_view_patch, fileio, filename);
+			return PatchFileIO::read_file(raw_patch, fileio, filename);
 		};
 
-		switch (patch_list.get_patch_vol(patch_id)) {
+		switch (vol) {
 			case Volume::NorFlash:
-				printf_("vol = norflash\n");
-				ok = load_patch_data(norflash);
+				ok = load_patch_data(norflash_);
 				break;
 			case Volume::SDCard:
-				printf_("vol = sdcard\n");
 				ok = load_patch_data(sdcard);
 				break;
 			case Volume::RamDisk:
-				printf_("vol = ramdisk\n");
-				ok = load_patch_data(ramdisk);
+				// ok = load_patch_data(ramdisk);
+				break;
+			case Volume::USB:
+				ok = load_patch_data(usbdrive);
 				break;
 		}
 
 		if (!ok) {
 			printf_("Could not load patch id %d\n", patch_id);
-			return;
+			return 0;
 		}
 
-		_view_patch_id = patch_id;
+		printf_("Read patch id %d, %d bytes\n", patch_id, raw_patch.size_bytes());
+		return raw_patch.size_bytes();
 	}
-
-	uint32_t get_view_patch_id() {
-		return _view_patch_id;
-	}
-
-	PatchData &get_view_patch() {
-		return _view_patch;
-	}
-
-	//// FIXME: these are more patch transfering than patch storage or view patch
-
-	void update_patchlist_from_sdcard() {
-		printf_("Updating patchlist from SD Card.\n");
-		patch_list.lock();
-		{
-
-			//TODO: clear just norflash patches
-			patch_list.clear_all_patches();
-			PatchFileIO::add_all_to_patchlist(norflash, patch_list);
-
-			PatchFileIO::add_all_to_patchlist(sdcard, patch_list);
-			patch_list.mark_modified();
-		}
-		patch_list.unlock();
-		printf_("Patchlist updated.\n");
-	}
-
-	void update_norflash_from_ramdisk() {
-		patch_list.lock();
-		printf_("NOR Flash writeback begun.\r\n");
-
-		ramdisk.unmount_disk();
-
-		// Must invalidate the cache because M4 wrote to it???
-		// SystemCache::invalidate_dcache_by_range(StaticBuffers::virtdrive.virtdrive,
-		// 										sizeof(StaticBuffers::virtdrive.virtdrive));
-		if (PatchFileIO::copy_patches_from_to(ramdisk, norflash, PatchFileIO::FileFilter::NewerTimestamp)) {
-			printf_("NOR Flash writeback done. Refreshing patch list.\r\n");
-			// PatchFileIO::overwrite_patchlist(ramdisk, patch_list);
-			patch_list.mark_modified();
-		} else {
-			printf_("NOR Flash writeback failed!\r\n");
-		}
-		patch_list.unlock();
-		printf_("RamDisk Available to M4\n");
-	}
-
-private:
-	uint32_t _view_patch_id;
-	PatchData _view_patch;
 };
 
 } // namespace MetaModule

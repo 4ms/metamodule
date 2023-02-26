@@ -1,6 +1,6 @@
 #pragma once
-
-#include "CoreModules/moduleFactory.hh"
+#include "module_type_slug.hh"
+#include <span>
 
 ///
 #include "patch/ClockRockinBeats.hh"
@@ -11,11 +11,11 @@
 #include "patch/NonlinearGateSequencer.hh"
 #include "patch/OctoSampler.hh"
 #include "patch/QuartetofEnsembles.hh"
-// #include "patch/SeaofEchoes.hh"
 #include "patch/Seq8.hh"
 #include "patch/Showcase.hh"
 #include "patch/SpectralPings.hh"
 #include "patch/twosimpleosc.hh"
+// #include "patch/SeaofEchoes.hh"
 
 struct DefaultPatches {
 

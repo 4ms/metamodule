@@ -68,7 +68,7 @@ private:
 
 	PatchPlayer &player;
 	KneeCompressor<int32_t> compressor{AudioConf::SampleBits, 0.75};
-	CycleCounter load_measure;
+	mdrivlib::CycleCounter load_measure;
 	float load_lpf = 0.f;
 	float mute_ctr = 1.f;
 	uint32_t halves_muted = 0;

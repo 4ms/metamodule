@@ -8,6 +8,7 @@
 #include "patch_player.hh"
 #include "patch_playloader.hh"
 #include "patch_storage.hh"
+#include "patch_storage_proxy.hh"
 #include "patchlist.hh"
 #include "semaphore_action.hh"
 #include "shared_memory.hh"
@@ -41,15 +42,13 @@ void main() {
 			now.minute(),
 			now.second());
 
-	PatchStorage patch_storage;
 	PatchPlayer patch_player;
-	PatchPlayLoader patch_playloader{patch_player, patch_storage};
+	PatchStorageProxy patch_storage_proxy{
+		StaticBuffers::raw_patch_data, StaticBuffers::icc_shared_message, StaticBuffers::shared_patch_file_list};
+	PatchPlayLoader patch_playloader{patch_storage_proxy, patch_player};
 
-	// "Thread"-shared data:
 	ParamCache param_cache;
 	PatchModQueue patch_mod_queue;
-
-	Ui ui{patch_playloader, patch_storage, param_cache, patch_mod_queue};
 
 	AudioStream audio{patch_player,
 					  StaticBuffers::audio_in_dma_block,
@@ -60,27 +59,18 @@ void main() {
 					  StaticBuffers::auxsignal_block,
 					  patch_mod_queue};
 
-	//TODO: create struct with fields for each address, and write addr of the struct
-	SharedMemory::write_address_of(&StaticBuffers::param_blocks, SharedMemory::ParamsPtrLocation);
-	SharedMemory::write_address_of(&StaticBuffers::auxsignal_block, SharedMemory::AuxSignalBlockLocation);
-	SharedMemory::write_address_of(&patch_player, SharedMemory::PatchPlayerLocation);
-	SharedMemory::write_address_of(&StaticBuffers::virtdrive, SharedMemory::RamDiskLocation);
+	StaticBuffers::raw_patch_span = {StaticBuffers::raw_patch_data.data(), StaticBuffers::raw_patch_data.size()};
+	SharedMemoryS::ptrs = {
+		&StaticBuffers::param_blocks,
+		&StaticBuffers::auxsignal_block,
+		&StaticBuffers::virtdrive,
+		&patch_player,
+		&StaticBuffers::icc_shared_message,
+		&StaticBuffers::shared_patch_file_list,
+		&StaticBuffers::raw_patch_span,
+	};
+
 	mdrivlib::SystemCache::clean_dcache_by_range(&StaticBuffers::virtdrive, sizeof(StaticBuffers::virtdrive));
-
-	param_cache.clear();
-	patch_playloader.load_initial_patch("enosc");
-
-	HWSemaphore<RamDiskLock>::unlock();
-
-	SemaphoreActionOnUnlock<RamDiskLock> ramdisk_readback([&patch_storage] {
-		if (HWSemaphore<RamDiskLock>::lock(1) == HWSemaphoreFlag::LockFailed) {
-			printf_("Error getting lock on RamDisk to read back\n");
-			return;
-		}
-		patch_storage.update_norflash_from_ramdisk();
-		HWSemaphore<RamDiskLock>::unlock_nonrecursive(1);
-	});
-
 	HWSemaphoreCoreHandler::enable_global_ISR(3, 3);
 
 	printf_("A7 initialized. Unlocking M4\n");
@@ -92,8 +82,14 @@ void main() {
 	while (HWSemaphore<M4_ready>::is_locked())
 		;
 
-	audio.start();
+	Ui ui{patch_playloader, patch_storage_proxy, param_cache, patch_mod_queue};
+	param_cache.clear();
+	//TODO: load the initial patch by getting patch_storage_proxy to make requests
+	//to patch_storage...
+	patch_playloader.load_initial_patch();
+
 	ui.start();
+	audio.start();
 
 	while (true) {
 		__WFI();

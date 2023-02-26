@@ -1,7 +1,9 @@
 #pragma once
 struct PinStub {
-	static void high() {}
-	static void low() {}
+	static void high() {
+	}
+	static void low() {
+	}
 };
 
 struct Debug {
@@ -16,3 +18,9 @@ struct Debug {
 	using green_LED1 = PinStub;
 	using green_LED2 = PinStub;
 };
+
+template<unsigned PinN>
+struct DebugN {
+	using Pin = PinStub;
+};
+

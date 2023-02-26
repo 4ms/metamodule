@@ -10,6 +10,7 @@
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include "printf.h"
+#include "util/countzip.hh"
 
 namespace MetaModule
 {
@@ -96,7 +97,7 @@ struct PatchViewPage : PageBase {
 		const auto &patch = patch_storage.get_view_patch();
 		patch_instance = &patch;
 
-		printf_("patch id = %d\n", patch_storage.get_view_patch_id());
+		// printf_("patch id = %d\n", patch_storage.get_view_patch_id());
 		if (patch.patch_name.length() == 0)
 			return;
 
@@ -339,10 +340,7 @@ private:
 	lv_obj_t *base;
 
 	void start_changing_patch() {
-		auto patch_id = PageList::get_selected_patch_id();
-		if (patch_id != patch_playloader.cur_patch_index()) {
-			patch_playloader.request_load_patch(patch_id);
-		}
+		patch_playloader.request_load_view_patch();
 	}
 };
 } // namespace MetaModule

@@ -1,6 +1,7 @@
 #pragma once
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
+#include "patch_file.hh"
 #include "volumes.hh"
 #include <span>
 #include <vector>
@@ -23,7 +24,9 @@ namespace MetaModule
 struct PatchList {
 	enum class Status { NotLoaded, Loading, Ready };
 
-	PatchList() = default;
+	PatchList() {
+		_patch_data.reserve(50);
+	}
 
 	// Returns the name of the patch at a given index (bounds-checked)
 	const ModuleTypeSlug &get_patch_name(uint32_t patch_id) {
@@ -36,7 +39,7 @@ struct PatchList {
 	}
 
 	// Returns the volume of the patch at a given index (bounds-checked)
-	const Volume get_patch_vol(uint32_t patch_id) {
+	const Volume get_patch_vol(uint32_t patch_id) const {
 		if (_patch_data.size() == 0)
 			return Volume{0};
 
@@ -54,23 +57,13 @@ struct PatchList {
 		return _patch_data[patch_id].filename;
 	}
 
-	std::optional<uint32_t> find_by_name(std::string_view &patchname) {
+	std::optional<uint32_t> find_by_name(std::string_view &patchname) const {
 		for (uint32_t i = 0; auto &x : _patch_data) {
 			if (x.patchname == patchname)
 				return {i};
 			i++;
 		}
 		return std::nullopt;
-	}
-
-	// Return a reference to the patch at the given index (bounds-checked)
-	[[deprecated]] PatchData &get_patch(uint32_t patch_id) {
-		// if (_patch_data.size() == 0)
-		return nullpatch;
-
-		// if (patch_id >= _patch_data.size())
-		// 	patch_id = 0;
-		// return _patch_data[patch_id].patch_data;
 	}
 
 	uint32_t num_patches() const {
@@ -90,6 +83,10 @@ struct PatchList {
 		_patch_data.clear();
 	}
 
+	void clear_patches_from(Volume vol) {
+		std::erase_if(_patch_data, [&](auto &pf) { return (pf.volume == vol); });
+	}
+
 	[[nodiscard]] bool is_modified() {
 		if (_has_been_updated) {
 			_has_been_updated = false;
@@ -102,23 +99,6 @@ struct PatchList {
 		_has_been_updated = true;
 	}
 
-	//FIXME: use _status, not _locked
-	bool is_locked() {
-		return _locked;
-	}
-
-	void lock() {
-		_locked = true;
-	}
-
-	void unlock() {
-		_locked = false;
-	}
-
-	// void add_patch_from_yaml(const std::span<std::byte> data);
-	// void add_patch_from_yaml(const std::span<char> data);
-	// void add_patch_from_yaml(const std::span<uint8_t> data);
-
 	void add_patch_header(Volume volume,
 						  const std::string_view filename,
 						  uint32_t filesize,
@@ -128,24 +108,23 @@ struct PatchList {
 		// _patch_data.emplace_back(volume, filename, 0, 0, "");
 	}
 
-	struct PatchFile {
-		Volume volume;
-		std::string filename;
-		uint32_t filesize;
-		uint32_t timestamp;
-		ModuleTypeSlug patchname;
-	};
+	auto get_patchfile_list() {
+		return std::span<PatchFile>(_patch_data);
+	}
 
 private:
 	// FIXME: We could get fragmentation if patch list is changed frequently
-	// Use an arena or some separate memory area, which is wiped when we refresh (re-insert SD card)
-	// We'd need to estimate the max size of all patches to do this.
+	// Use std::pmr::vector<PatchFile> (with std::pmr::string inside PatchFile)
+	// and a monotonic buffer resource.
+	// Reserve the size of the resource after wiping, to avoid re-allocations on push_back.
+	// Reset the buffer resource when we refresh/rescan the media.
+	// Thie means we need a separate patch_data vector for each file system (unless we always
+	// rescan all filesystems at the same time)
 	std::vector<PatchFile> _patch_data;
 	Status _status = Status::NotLoaded;
 	bool _has_been_updated = false;
 	bool _locked = false;
 
-	static inline PatchData nullpatch{};
 	static inline const ModuleTypeSlug nullslug{""};
 };
 } // namespace MetaModule

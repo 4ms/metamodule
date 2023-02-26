@@ -20,9 +20,13 @@ concept FileIoC = requires(T t,
 					  {
 						  t.read_file(filename, read_buffer)
 						  } -> std::integral;
-					  t.delete_file(filename);
-					  t.set_file_timestamp(filename, tm);
 					  {
 						  t.volname()
 						  } -> std::convertible_to<std::string_view>;
+					  {
+						  t.is_mounted()
+						  } -> std::same_as<bool>;
+
+					  t.delete_file(filename);
+					  t.set_file_timestamp(filename, tm);
 				  };

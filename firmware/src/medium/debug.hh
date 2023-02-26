@@ -28,4 +28,24 @@ struct Debug {
 	// static inline Pin5 pin_5_init;
 };
 
+template<unsigned PinN>
+struct DebugN;
+
+template<>
+struct DebugN<0> {
+	using Pin = Debug::Pin0;
+};
+template<>
+struct DebugN<1> {
+	using Pin = Debug::Pin1;
+};
+template<>
+struct DebugN<2> {
+	using Pin = Debug::Pin2;
+};
+template<>
+struct DebugN<3> {
+	using Pin = Debug::Pin3;
+};
+
 #define GCC_OPTIMIZE_OFF __attribute__((optimize("-O0")))

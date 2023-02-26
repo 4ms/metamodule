@@ -43,39 +43,45 @@
 // Domain 0 is always the Client domain
 // Descriptors should place all memory in domain 0
 
+#include "ld.h"
 #include "stm32mp157cxx_ca7.h"
 
-// Todo: use values from the linker script, don't redefine here
-#define __ROM_BASE 0xC2000000
-#define __ROM_SIZE 0x00100000 /* 1M */
+// #define _M4_EXTDATA 0xC0200000
+// #define _M4_EXTDATA_SZ 0x01E00000
 
-/* RAM: 0xC0200000 - 0xC2000000 */
-#define __RAM_BASE 0xC0200000
-#define __RAM_SIZE (0xC2000000 - __RAM_BASE)
+// #define _M4_HEAP 0xC6000000
+// #define _M4_HEAP_SZ 0x07000000
 
-/* RAM2: 0xC2100000 - 0xD0000000 */
-#define __RAM2_BASE 0xC2100000
-#define __RAM2_SIZE (0xD0000000 - __RAM2_BASE)
+// #define __ROM_BASE 0xC2000000
+// #define __ROM_SZ 0x01000000 /* 16M */
 
-/* DMA BUF: 0xDFF00000 - 0xE0000000 */
-#define __DMABUF_SIZE (1024 * 1024)
-#define __DMABUF_END 0xE0000000
-#define __DMABUF_BASE (__DMABUF_END - __DMABUF_SIZE)
+// /* RAM: 0xC3000000 - 0xC5000000 */
+// #define __RAM_BASE 0xC3000000
+// #define __RAM_SZ 0x02000000 /* 32M */
 
-/* VIRTDRIVE: 0xD0000000 - 0xD8000000 */
-#define _VIRTDRIVE_BASE 0xD0000000
-#define _VIRTDRIVE_SIZE 0x08000000
-#define _VIRTDRIVE_END 0xD8000000
+// /* RAM2: 0xC2100000 - 0xD0000000 */
+// #define __RAM2_BASE 0xC2100000
+// #define __RAM2_SZ (0xD0000000 - __RAM2_BASE)
 
-/* HEAP: 0xD0000000 - 0xDFF00000*/
-#define __HEAP_BASE 0xD8000000
-#define __HEAP_END __DMABUF_BASE
-#define __HEAP_SIZE (__HEAP_END - __HEAP_BASE)
+// /* DMA BUF: 0xDFF00000 - 0xE0000000 */
+// #define __DMABUF_SZ (1024 * 1024)
+// #define __DMABUF_END 0xE0000000
+// #define __DMABUF_BASE (__DMABUF_END - __DMABUF_SZ)
+
+// /* VIRTDRIVE: 0xCD000000 - 0xD5000000 */
+// #define _VIRTDRIVE_BASE 0xCD000000
+// #define _VIRTDRIVE_SZ 0x08000000
+// #define _VIRTDRIVE_END 0xD5000000
+
+// /* HEAP: 0xD5000000 - 0xDFF00000*/
+// #define __HEAP_BASE 0xD5000000
+// #define __HEAP_END __DMABUF_BASE
+// #define __HEAP_SZ (__HEAP_END - __HEAP_BASE)
 
 #define __TTB_BASE 0xC0100000
 
 #define A7_SYSRAM_BASE 0x2FFC0000
-#define A7_SYSRAM_SIZE 0x00040000 /* 256kB */
+#define A7_SYSRAM_SZ 0x00040000 /* 256kB */
 #define A7_SYSRAM_1MB_SECTION_BASE 0x2FF00000
 
 #define A7_SRAM1_BASE (0x30000000UL)
@@ -133,18 +139,22 @@ void MMU_CreateTranslationTable(void) {
 
 	// ROM should be Cod (RO), but that seems to interfere with debugger loading an elf file, so setting it to Normal:
 	// Todo: Investigate this
-	MMU_TTSection(TTB_BASE, __ROM_BASE, __ROM_SIZE / 0x100000, Sect_Normal);
+	MMU_TTSection(TTB_BASE, A7_CODE, A7_CODE_SZ / 0x100000, Sect_Normal);
 
-	MMU_TTSection(TTB_BASE, __RAM_BASE, __RAM_SIZE / 0x100000, Sect_Normal_RW);
-	MMU_TTSection(TTB_BASE, __RAM2_BASE, __RAM2_SIZE / 0x100000, Sect_Normal_RW);
-	MMU_TTSection(TTB_BASE, __HEAP_BASE, __HEAP_SIZE / 0x100000, Sect_Normal_RW);
+	MMU_TTSection(TTB_BASE, A7_RAM, A7_RAM_SZ / 0x100000, Sect_Normal_RW);
+	// MMU_TTSection(TTB_BASE, __RAM2_BASE, __RAM2_SZ / 0x100000, Sect_Normal_RW);
+	MMU_TTSection(TTB_BASE, A7_HEAP, A7_HEAP_SZ / 0x100000, Sect_Normal_RW);
 
 	//.ddma: non-cacheable
 	// Note: section_so is quite a bit faster than section_normal_nc
-	MMU_TTSection(TTB_BASE, __DMABUF_BASE, __DMABUF_SIZE / 0x100000, Sect_StronglyOrdered);
+	MMU_TTSection(TTB_BASE, DMABUF, DMABUF_SZ / 0x100000, Sect_StronglyOrdered);
 
 	//.virtdrive: non-cacheable
-	MMU_TTSection(TTB_BASE, _VIRTDRIVE_BASE, _VIRTDRIVE_SIZE / 0x100000, Sect_StronglyOrdered);
+	MMU_TTSection(TTB_BASE, VIRTDRIVE, VIRTDRIVE_SZ / 0x100000, Sect_StronglyOrdered);
+
+	//M4 heap/data
+	MMU_TTSection(TTB_BASE, M4_EXTDATA, M4_EXTDATA_SZ / 0x100000, Sect_StronglyOrdered);
+	MMU_TTSection(TTB_BASE, M4_HEAP, M4_HEAP_SZ / 0x100000, Sect_StronglyOrdered);
 
 	//.shared_memory and m4 codespace: 0x30000000, or 0x10000000 as seen by M4
 	MMU_TTSection(TTB_BASE, A7_SRAM1_BASE, 1, Sect_Device_RW); // 1MB (actually is only 384kB)

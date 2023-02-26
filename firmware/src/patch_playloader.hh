@@ -1,98 +1,119 @@
 #pragma once
 #include "patch_player.hh"
-#include "patch_storage.hh"
-// #include "uart_log.hh" //doesn't work with simulator because uart_log.hh exists in same dir as this file, so preprocessor picks ./uart_log.hh it instead of stubs/uart_log.hh
+#include "patch_storage_proxy.hh"
 #include "printf.h"
+
+// #include "uart_log.hh" //doesn't work with simulator because uart_log.hh exists in same dir as this file, so preprocessor picks ./uart_log.hh it instead of stubs/uart_log.hh
+
+//FIXME: temp use patches_default instead of patch_storage
+#include "patches_default.hh"
 
 namespace MetaModule
 {
 
 // PatchLoader handles loading of patches from storage into PatchPlayer
 struct PatchPlayLoader {
-	PatchPlayLoader(PatchPlayer &patchplayer, PatchStorage &patchstorage)
+	PatchPlayLoader(PatchStorageProxy &patch_storage, PatchPlayer &patchplayer)
 		: player_{patchplayer}
-		, storage_{patchstorage} {
+		, storage_{patch_storage} {
 	}
 
-	void load_initial_patch(std::string_view patchname) {
-		auto id = storage_.find_by_name(patchname);
-		auto initial_patch = id.value_or(0);
+	void load_initial_patch() {
+		auto initial_patch = 11;
+		// TODO: Test the below.. do we need an escape hatch
+		// to avoid infinite loop?
 
-		if (id.has_value())
-			printf_("Loading initial_patch id: %d, name: %s...\n", initial_patch, patchname.data());
-		else
-			printf("Loading initial_patch 0, given name %s not found\n", patchname.data());
-
-		if (_load_patch(initial_patch)) {
+		// while (!storage_.request_viewpatch(initial_patch))
+		// 	;
+		// InterCoreCommMessage msg;
+		// while (msg = storage_.get_message(); msg.message_type != InterCoreCommMessage::None)
+		// ;
+		// if (msg.message_type == InterCoreCommMessage::PatchFailedLoad)
+		// .... try another patch?
+		//
+		// if (_load_patch()) {
+		if (_load_default_patch(initial_patch)) {
 			printf_("Success\n");
-			loaded_patch_index_ = initial_patch;
 			loading_new_patch_ = false;
 		} else
 			printf_("FAILED to load initial patch.\n");
 	}
 
-	uint32_t cur_patch_index() {
-		return loaded_patch_index_;
+	// loading_new_patch_:
+	// UI thread WRITE
+	// Audio thread READ
+	void request_load_view_patch() {
+		loading_new_patch_ = true;
 	}
-
-	void request_load_patch(uint32_t patch_id) {
-		if (patch_id != new_patch_index_) {
-			new_patch_index_ = patch_id;
-			loading_new_patch_ = true;
-		}
-	}
-
 	bool is_loading_new_patch() {
 		return loading_new_patch_;
 	}
 
+	// loaded_patch_index_:
+	// UI thread READ (KnobEditPage, ModuleViewPage)
+	// UI thread WRITE (via handle_sync_patch_loading() => _load_patch())
+	uint32_t cur_patch_index() {
+		return loaded_patch_index_;
+	}
+
+	// audio_is_muted_:
+	// Audio thread WRITE
+	// Audio thread READ
+	// UI thread READ (via handle_sync_patch_loading())
 	void audio_is_muted() {
 		audio_is_muted_ = true;
 	}
-
 	void audio_not_muted() {
 		audio_is_muted_ = false;
 	}
-
 	bool is_audio_muted() {
 		return audio_is_muted_;
 	}
 
+	// Concurrency: Called from UI thread
 	void handle_sync_patch_loading() {
-		if (loading_new_patch_ && audio_is_muted_) {
-			bool ok = _load_patch(new_patch_index_);
-			if (!ok) {
-				printf_("Can't load patch, reloading previous patch\n");
-				if (!_load_patch(loaded_patch_index_)) {
-					printf_("Failed to reload patch, something is wrong!\n");
-					//TODO: how to handle this, do we have a "no patch loaded" state?
-				}
-			} else {
+		if (is_loading_new_patch() && is_audio_muted()) {
+			if (_load_patch())
 				printf_("Patch loaded\n");
-				loaded_patch_index_ = new_patch_index_;
-			}
+			else
+				printf_("Failed to load patch!\n");
 
 			loading_new_patch_ = false;
 		}
 	}
 
-	// PatchPlayer &get_patch_player() {
-	// 	return player_;
-	// }
-
 private:
 	PatchPlayer &player_;
-	PatchStorage &storage_;
+	PatchStorageProxy &storage_;
 
 	bool loading_new_patch_ = false;
 	bool audio_is_muted_ = false;
 
 	uint32_t loaded_patch_index_;
-	uint32_t new_patch_index_;
 
-	bool _load_patch(uint32_t patchid) {
-		storage_.load_view_patch(patchid);
-		auto &patch = storage_.get_view_patch();
+	bool _load_patch() {
+		PatchData &patch = storage_.get_view_patch();
+		auto patchid = storage_.get_view_patch_id();
+
+		printf_("Attempting play patch #%d, %.31s\n", patchid, patch.patch_name.data());
+
+		if (patch.module_slugs.size() > 1) {
+			if (player_.load_patch(patch)) {
+				loaded_patch_index_ = patchid;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool _load_default_patch(uint32_t patchid) {
+		if (patchid >= DefaultPatches::num_patches())
+			patchid = 0;
+
+		auto rawpatch = DefaultPatches::get_patch(patchid);
+
+		PatchData patch;
+		yaml_raw_to_patch(rawpatch, patch);
 		auto patchname = patch.patch_name;
 		printf_("Attempting play patch #%d, %s\n", patchid, patchname.data());
 

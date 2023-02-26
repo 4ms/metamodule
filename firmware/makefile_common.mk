@@ -62,7 +62,7 @@ DEPS   	  = $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(basename $(SOURCES))))
 OBJECTS   += $(addprefix $(BUILDDIR)/, $(addsuffix .o, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
 DEPS      += $(addprefix $(BUILDDIR)/, $(addsuffix .d, $(addsuffix _s, $(basename $(ASM_SOURCES)))))
 
-all: Makefile $(BIN) $(HEX)
+all: Makefile $(HEX)
 
 $(BIN): $(ELF)
 	@$(OBJCPY) -O binary $< $@
