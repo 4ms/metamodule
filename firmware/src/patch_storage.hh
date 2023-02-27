@@ -13,11 +13,8 @@
 #include "util/edge_detector.hh"
 #include "volumes.hh"
 
-// - Ship with some patches on NORFlash
-// - Scan for patches on USB-C thumb drive and SD Card
-// - Don't use RAMDisk USB
+// TODO:
 // - In Patch View, user can click "Save" or "copy" and give the patch a name and destination (including NORFlash)
-// - In Patch List, patches show their location
 
 namespace MetaModule
 {
@@ -39,10 +36,10 @@ class PatchStorage {
 	EdgeDetector usbdrive_mounted_;
 	bool usbdrive_needs_rescan_ = true;
 
-	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, InterCoreCommMessage>;
-	using enum InterCoreCommMessage::MessageType;
+	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, PatchICCMessage>;
+	using enum PatchICCMessage::MessageType;
 	InterCoreComm2 comm_;
-	InterCoreCommMessage pending_send_message{.message_type = None};
+	PatchICCMessage pending_send_message{.message_type = None};
 
 	PatchList patch_list_;
 
@@ -52,7 +49,7 @@ class PatchStorage {
 
 public:
 	PatchStorage(std::span<char> &raw_patch_buffer,
-				 volatile InterCoreCommMessage &shared_message,
+				 volatile PatchICCMessage &shared_message,
 				 PatchFileList &filelist,
 				 FatFileIO &usb_fileio,
 				 bool reset_to_factory_patches = false)

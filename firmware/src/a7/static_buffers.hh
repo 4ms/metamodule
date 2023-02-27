@@ -3,7 +3,7 @@
 #include "conf/ramdisk_conf.hh"
 #include "conf/screen_buffer_conf.hh"
 #include "conf/stream_conf.hh"
-#include "inter_core_comm.hh"
+#include "inter_core_comm_msg.hh"
 #include "leds.hh"
 #include "lvgl/src/misc/lv_color.h" // for lv_color_t
 #include "params.hh"
@@ -30,7 +30,7 @@ static inline __attribute__((section(".ddma"))) FrameBufferT framebuf2;
 static inline __attribute__((section(".ddma"))) std::array<char, 65536> raw_patch_data;
 static inline __attribute__((section(".ddma"))) std::span<char> raw_patch_span;
 
-static inline volatile __attribute__((section(".ddma"))) InterCoreCommMessage icc_shared_message;
+static inline volatile __attribute__((section(".ddma"))) PatchICCMessage icc_shared_message;
 static inline __attribute__((section(".ddma"))) PatchFileList shared_patch_file_list;
 //^^^ shared_patch_file_list is just a span (ptr and size)
 

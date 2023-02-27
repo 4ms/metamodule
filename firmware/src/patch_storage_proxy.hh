@@ -12,10 +12,10 @@ namespace MetaModule
 class PatchStorageProxy {
 
 public:
-	using enum InterCoreCommMessage::MessageType;
+	using enum PatchICCMessage::MessageType;
 
 	PatchStorageProxy(std::span<char> raw_patch_data,
-					  volatile InterCoreCommMessage &shared_message,
+					  volatile PatchICCMessage &shared_message,
 					  PatchFileList &remote_patch_list)
 		: remote_patch_list_{remote_patch_list}
 		, comm_{shared_message}
@@ -23,7 +23,7 @@ public:
 	}
 
 	[[nodiscard]] bool request_viewpatch(Volume vol, uint32_t patch_id) {
-		InterCoreCommMessage message{
+		PatchICCMessage message{
 			.message_type = RequestPatchData,
 			.patch_id = patch_id,
 			.vol_id = vol,
@@ -58,12 +58,12 @@ public:
 		return view_patch_vol_;
 	}
 
-	InterCoreCommMessage get_message() {
+	PatchICCMessage get_message() {
 		return comm_.get_new_message();
 	}
 
 	[[nodiscard]] bool request_patchlist() {
-		InterCoreCommMessage message{.message_type = RequestRefreshPatchList};
+		PatchICCMessage message{.message_type = RequestRefreshPatchList};
 		if (!comm_.send_message(message))
 			return false;
 		return true;
@@ -79,7 +79,7 @@ public:
 
 private:
 	PatchFileList &remote_patch_list_;
-	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, InterCoreCommMessage> comm_;
+	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, PatchICCMessage> comm_;
 
 	std::span<char> raw_patch_data_;
 	PatchData view_patch_;

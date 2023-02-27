@@ -10,6 +10,9 @@
 namespace MetaModule
 {
 
+//TODO: keep our place in the list when changing media (if possible)
+//Keep track of hovered_patch_id/vol
+//And restore that after a refresh:
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
 		: PageBase{info}
@@ -62,53 +65,6 @@ struct PatchSelectorPage : PageBase {
 		state = State::TryingToRequestPatchList;
 	}
 
-	//void refresh_patchlist_list(PatchFileList &patchfiles) {
-	//	//TODO: try using pmr::vector with monotonic stack buffer
-	//	lv_obj_del(roller);
-	//	roller = lv_list_create(base);
-	//	lv_group_add_obj(group, roller);
-	//	lv_obj_add_event_cb(roller, patchlist_event_cb, LV_EVENT_VALUE_CHANGED, this);
-	//	lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-	//	lv_obj_add_style(roller, &Gui::plain_border_style, (int)LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
-	//	lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
-	//	lv_obj_set_pos(roller, 0, 30);
-	//	lv_obj_set_size(roller, 320, 210);
-
-	//	std::vector<PatchFile> usb;
-	//	std::vector<PatchFile> sdcard;
-	//	std::vector<PatchFile> norflash;
-	//	usb.reserve(patchfiles.size());
-	//	sdcard.reserve(patchfiles.size());
-	//	norflash.reserve(patchfiles.size());
-
-	//	for (auto &p : patchfiles) {
-	//		if (p.volume == Volume::USB)
-	//			usb.push_back(p);
-	//		if (p.volume == Volume::SDCard)
-	//			sdcard.push_back(p);
-	//		if (p.volume == Volume::NorFlash)
-	//			norflash.push_back(p);
-	//	}
-	//	if (usb.size()) {
-	//		lv_list_add_text(roller, "USB Drive");
-	//		for (auto &p : usb) {
-	//			lv_list_add_btn(roller, nullptr /*LV_SYMBOL_USB*/, p.patchname.c_str());
-	//		}
-	//	}
-	//	if (sdcard.size()) {
-	//		lv_list_add_text(roller, "SD Card");
-	//		for (auto &p : sdcard) {
-	//			lv_list_add_btn(roller, nullptr /*LV_SYMBOL_SD_CARD*/, p.patchname.c_str());
-	//		}
-	//	}
-	//	if (norflash.size()) {
-	//		lv_list_add_text(roller, "Internal");
-	//		for (auto &p : norflash) {
-	//			lv_list_add_btn(roller, nullptr /*LV_SYMBOL_DRIVE*/, p.patchname.c_str());
-	//		}
-	//	}
-	//}
-
 	void refresh_patchlist(PatchFileList &patchfiles) {
 		num_usb = patchfiles.usb.size();
 		num_sdcard = patchfiles.sdcard.size();
@@ -120,7 +76,9 @@ struct PatchSelectorPage : PageBase {
 
 		if (num_usb) {
 			patchnames += "USB Drive\n";
+			// lv_list_add_text(roller, "USB Drive");
 			for (auto &p : patchfiles.usb) {
+				// lv_list_add_btn(roller, nullptr /*LV_SYMBOL_USB*/, p.patchname.c_str());
 				patchnames += leader;
 				patchnames += std::string_view{p.patchname};
 				patchnames += '\n';

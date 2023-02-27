@@ -26,6 +26,7 @@ struct PatchICCMessage {
 
 	// Note: return type is void because gcc gives a warning for `volatile T&operator=(const T&){...}`
 	// warning: implicit dereference will not access object of type 'volatile T' in statement
+	// This is because the dereference in `*this` causes a read of memory, but the read value is ignored.
 	void operator=(const PatchICCMessage &msg) volatile { //NOLINT
 		message_type = msg.message_type;
 		bytes_read = msg.bytes_read;
