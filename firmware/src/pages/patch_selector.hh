@@ -5,6 +5,7 @@
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include "printf.h"
+#include "stm32xx.h"
 
 namespace MetaModule
 {
@@ -151,14 +152,14 @@ struct PatchSelectorPage : PageBase {
 		unsigned default_sel = patchnames.size() > 10 ? 5 : patchnames.size() / 2;
 		lv_roller_set_selected(roller, default_sel, LV_ANIM_OFF);
 
-		printf_(
-			"Patch Selector refreshed:\nUSB: %d patches from %p\nSD : %d patches from %p\nNOR: %d patches from %p\n",
-			patchfiles.usb.size(),
-			patchfiles.usb.data(),
-			patchfiles.sdcard.size(),
-			patchfiles.sdcard.data(),
-			patchfiles.norflash.size(),
-			patchfiles.norflash.data());
+		printf_("Patch Selector refreshed:\nUSB: %ld patches from %p\nSD : %ld patches from %p\nNOR: %ld patches "
+				"from %p\n",
+				patchfiles.usb.size(),
+				patchfiles.usb.data(),
+				patchfiles.sdcard.size(),
+				patchfiles.sdcard.data(),
+				patchfiles.norflash.size(),
+				patchfiles.norflash.data());
 	}
 
 	void update() override {
@@ -299,9 +300,6 @@ private:
 	uint32_t selected_patch = 0;
 	Volume selected_patch_vol = Volume::NorFlash;
 	uint32_t last_idx = 0;
-
-	bool patchlist_was_ready = true;
-	bool should_show_patchview = false;
 
 	lv_obj_t *roller;
 	lv_obj_t *header_text;
