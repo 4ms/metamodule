@@ -259,7 +259,7 @@ private:
 	lv_obj_t *roller;
 	lv_obj_t *header_text;
 	lv_obj_t *base;
-	const std::string_view leader = "  ";
+	const std::string_view leader = " - ";
 	uint32_t num_usb;
 	uint32_t num_sdcard;
 	uint32_t num_norflash;
