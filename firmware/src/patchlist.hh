@@ -83,7 +83,7 @@ struct PatchList {
 			_patch_data_nor.push_back({std::string{filename}, filesize, timestamp, patchname});
 	}
 
-	const auto get_patchfile_list(Volume vol) const {
+	auto get_patchfile_list(Volume vol) const {
 		return std::span<const PatchFile>(_get_list(vol));
 	}
 
@@ -97,9 +97,6 @@ private:
 	std::vector<PatchFile> _patch_data_usb;
 	std::vector<PatchFile> _patch_data_sd;
 	std::vector<PatchFile> _patch_data_nor;
-
-	bool _has_been_updated = false;
-	bool _locked = false;
 
 	static inline const ModuleTypeSlug nullslug{""};
 };
