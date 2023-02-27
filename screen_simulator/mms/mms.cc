@@ -4,41 +4,44 @@
 #include "param_cache.hh"
 #include "params.hh"
 #include "patch_mod_queue.hh"
+#include "patch_playloader.hh"
 #include "patches_default.hh"
 #include "patchlist.hh"
-#include "stubs/sys/alloc_buffer.hh"
+#include "stubs/patch_storage_proxy.hh"
+
 #include <cstdint>
 
 struct Simulator {
 	MetaModule::LVGLDriver gui{MetaModule::MMDisplay::flush_to_screen, MetaModule::MMDisplay::read_input};
+	MetaModule::PatchPlayer patch_player;
 
-	MetaModule::PageManager pages;
-	MetaModule::ParamCache param_queue;
+	MetaModule::ParamCache param_cache;
+	MetaModule::PatchStorageProxy patch_storage;
+	MetaModule::PatchPlayLoader patch_playloader{patch_storage, patch_player};
 
+	MetaModule::MessageQueue msg_queue{1024};
+	MetaModule::PageManager page_manager;
 	MetaModule::Params params;
 	MetaModule::MetaParams metaparams;
-	MetaModule::PatchList patch_list;
-	MetaModule::PatchPlayer patch_player;
-	MetaModule::PatchLoader patch_loader{patch_list, patch_player};
-	MetaModule::MessageQueue mbox;
+
 	MetaModule::PatchModQueue patch_mod_queue;
 
 	Simulator()
-		: pages{patch_list, patch_loader, params, metaparams, mbox, patch_mod_queue} {
+		: page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
 		MetaModule::MMDisplay::init(metaparams);
 
 		for (uint32_t i = 0; i < DefaultPatches::num_patches(); i++) {
-			patch_list.add_patch_from_yaml(DefaultPatches::get_patch(i));
+			// patch_list.add_patch_from_yaml(DefaultPatches::get_patch(i));
 		}
 	}
 
 	bool init() {
 		MetaModule::MMDisplay::start();
 		MetaModule::Gui::init_lvgl_styles();
-		patch_loader.load_patch(1);
+		// patch_loader.load_patch(1);
 		params.clear();
 		metaparams.clear();
-		pages.init();
+		page_manager.init();
 
 		return true;
 	}
@@ -46,7 +49,7 @@ struct Simulator {
 	void update_ui() {
 		//Todo: enable this:
 		//param_queue.read_sync(&params, &metaparams);
-		pages.update_current_page();
+		page_manager.update_current_page();
 	}
 
 	uint16_t get_pixel(uint16_t x, uint16_t y) {

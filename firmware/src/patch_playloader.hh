@@ -1,9 +1,13 @@
 #pragma once
 #include "patch_player.hh"
-#include "patch_storage_proxy.hh"
 #include "printf.h"
 
+#ifdef SIMULATOR
 // #include "uart_log.hh" //doesn't work with simulator because uart_log.hh exists in same dir as this file, so preprocessor picks ./uart_log.hh it instead of stubs/uart_log.hh
+#include "stubs/patch_storage_proxy.hh"
+#else
+#include "patch_storage_proxy.hh"
+#endif
 
 //FIXME: temp use patches_default instead of patch_storage
 #include "patches_default.hh"

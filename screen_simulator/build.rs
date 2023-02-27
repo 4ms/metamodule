@@ -1,5 +1,4 @@
 fn main() {
-
     let use_fewer_modules = true;
 
     println!("cargo:rerun-if-changed=../firmware/lib/lvgl/lv_conf.h");
@@ -25,37 +24,95 @@ fn main() {
     // add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut lvgl_src);
     lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
     // add_glob_files("../firmware/src/pages/fonts/*.c", &mut lvgl_src);
-    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_500_12.c"));
-    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_700_12.c"));
-    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_700_14.c"));
-    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_700_16.c"));
-    lvgl_src.push(String::from("../firmware/src/pages/fonts/MuseoSansRounded_700_18.c"));
+    lvgl_src.push(String::from(
+        "../firmware/src/pages/fonts/MuseoSansRounded_500_12.c",
+    ));
+    lvgl_src.push(String::from(
+        "../firmware/src/pages/fonts/MuseoSansRounded_700_12.c",
+    ));
+    lvgl_src.push(String::from(
+        "../firmware/src/pages/fonts/MuseoSansRounded_700_14.c",
+    ));
+    lvgl_src.push(String::from(
+        "../firmware/src/pages/fonts/MuseoSansRounded_700_16.c",
+    ));
+    lvgl_src.push(String::from(
+        "../firmware/src/pages/fonts/MuseoSansRounded_700_18.c",
+    ));
 
     if use_fewer_modules {
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Djembe_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Djembe_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/EnOsc_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/EnOsc_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Freeverb_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Freeverb_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/HPF_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/HPF_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/InfOsc_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/InfOsc_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/KPLS_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/KPLS_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/MultiLFO_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/MultiLFO_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/PEG_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/PEG_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/PitchShift_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/PitchShift_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/SMR_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/SMR_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Seq8_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/Seq8_artwork_240.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/StMix_artwork_120.c"));
-        lvgl_src.push(String::from("../firmware/src/pages/images/modules/StMix_artwork_240.c"));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/Djembe_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/Djembe_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/EnOsc_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/EnOsc_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/Freeverb_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/Freeverb_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/HPF_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/HPF_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/InfOsc_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/InfOsc_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/KPLS_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/KPLS_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/MultiLFO_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/MultiLFO_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/PEG_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/PEG_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/PitchShift_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/PitchShift_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/SMR_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/SMR_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/Seq8_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/Seq8_artwork_240.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/StMix_artwork_120.c",
+        ));
+        lvgl_src.push(String::from(
+            "../firmware/src/pages/images/modules/StMix_artwork_240.c",
+        ));
     } else {
         add_glob_files("../firmware/src/pages/images/modules/*.c", &mut lvgl_src);
     }
@@ -102,8 +159,14 @@ fn main() {
     // Patch convert
     src.push(String::from("../shared/patch_convert/ryml/ryml_serial.cc"));
     src.push(String::from("../shared/patch_convert/yaml_to_patch.cc"));
-    add_glob_files("../shared/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp", &mut src);
-    add_glob_files("../shared/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp", &mut src);
+    add_glob_files(
+        "../shared/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp",
+        &mut src,
+    );
+    add_glob_files(
+        "../shared/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp",
+        &mut src,
+    );
 
     println!("cargo:rerun-rustc-link-lib=lvgl");
     let mut builder = cc::Build::new();
@@ -121,6 +184,7 @@ fn main() {
         .include("../shared/patch_convert")
         .include("../shared/patch_convert/ryml/rapidyaml/src")
         .include("../shared/patch_convert/ryml/rapidyaml/ext/c4core/src")
+        .include("../shared/CoreModules")
         .include("../firmware/src")
         .include("../firmware/lib/lvgl")
         .include("../firmware/lib/lvgl/lvgl/src/lv_font")
@@ -130,7 +194,7 @@ fn main() {
         .flag("-Wno-unused-but-set-variable")
         .flag("-Wno-unused-const-variable")
         .flag("-Wno-deprecated-anon-enum-enum-conversion");
-    if use_fewer_modules  {
+    if use_fewer_modules {
         build = build.flag("-DUSE_FEWER_MODULES");
     }
     build.compile("metamodulescreen");
