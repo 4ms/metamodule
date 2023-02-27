@@ -72,8 +72,9 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		UartLog::log("Codec initialized\n\r");
 	else
 		UartLog::log("ERROR: No codec detected\n\r");
-	codec_.set_tx_buffer_start(audio_out_block.codec[0]);
-	codec_.set_rx_buffer_start(audio_in_block.codec[0]);
+
+	codec_.set_tx_buffer_start(audio_out_block.codec);
+	codec_.set_rx_buffer_start(audio_in_block.codec);
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
 		ext_audio_connected = true;
@@ -82,8 +83,8 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 		ext_audio_connected = false;
 		UartLog::log("No ext Audio codec detected\n\r");
 	}
-	codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec[0]);
-	codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec[0]);
+	codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec);
+	codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec);
 
 	codec_.set_callbacks(
 		[this]() {
