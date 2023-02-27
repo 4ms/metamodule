@@ -41,11 +41,11 @@ struct Controls {
 
 	mdrivlib::RotaryEnc<mdrivlib::RotaryFullStep, MMControlPins::rotA, MMControlPins::rotB> rotary;
 
-	DebouncedPin<MMControlPins::rotS.gpio, MMControlPins::rotS.pin, PinPolarity::Inverted> rotary_button;
-	DebouncedPin<MMControlPins::but0.gpio, MMControlPins::but0.pin, PinPolarity::Inverted> button0;
+	DebouncedPin<MMControlPins::rotS, PinPolarity::Inverted> rotary_button;
+	DebouncedPin<MMControlPins::but0, PinPolarity::Inverted> button0;
 
-	DebouncedPin<MMControlPins::gate_in_1.gpio, MMControlPins::gate_in_1.pin, PinPolarity::Normal> gate_in_1;
-	DebouncedPin<MMControlPins::gate_in_2.gpio, MMControlPins::gate_in_2.pin, PinPolarity::Normal> gate_in_2;
+	DebouncedPin<MMControlPins::gate_in_1, PinPolarity::Normal> gate_in_1;
+	DebouncedPin<MMControlPins::gate_in_2, PinPolarity::Normal> gate_in_2;
 
 	void update_debouncers();
 	void start();

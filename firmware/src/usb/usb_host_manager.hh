@@ -18,7 +18,7 @@ private:
 	static inline MSCHost *_mschost_instance;
 
 public:
-	UsbHostManager(mdrivlib::PinNoInit enable_5v)
+	UsbHostManager(mdrivlib::PinDef enable_5v)
 		: src_enable{enable_5v.gpio, enable_5v.pin, mdrivlib::PinMode::Output} {
 		src_enable.low();
 		_midihost_instance = &midi_host;

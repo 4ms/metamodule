@@ -8,44 +8,46 @@ namespace MetaModule
 {
 
 using mdrivlib::GPIO;
-using mdrivlib::PinNoInit;
+using mdrivlib::PinAF;
+using mdrivlib::PinDef;
+using mdrivlib::PinNum;
 
 struct ScreenConf : mdrivlib::LTDCScreenConf {
-	static constexpr PinNoInit r[8]{
+	static constexpr PinDef r[8]{
 		{GPIO::Unused},
 		{GPIO::Unused},
-		{GPIO::H, 8, LL_GPIO_AF_14},  // LTDC_R2
-		{GPIO::H, 9, LL_GPIO_AF_14},  // LTDC_R3
-		{GPIO::H, 10, LL_GPIO_AF_14}, // LTDC_R4
-		{GPIO::A, 9, LL_GPIO_AF_14},  // LTDC_R5
-		{GPIO::A, 8, LL_GPIO_AF_14},  // LTDC_R6
-		{GPIO::G, 6, LL_GPIO_AF_14},  // LTDC_R7
+		{GPIO::H, PinNum::_8, PinAF::AltFunc14},  // LTDC_R2
+		{GPIO::H, PinNum::_9, PinAF::AltFunc14},  // LTDC_R3
+		{GPIO::H, PinNum::_10, PinAF::AltFunc14}, // LTDC_R4
+		{GPIO::A, PinNum::_9, PinAF::AltFunc14},  // LTDC_R5
+		{GPIO::A, PinNum::_8, PinAF::AltFunc14},  // LTDC_R6
+		{GPIO::G, PinNum::_6, PinAF::AltFunc14},  // LTDC_R7
 	};
-	static constexpr PinNoInit g[8]{
+	static constexpr PinDef g[8]{
 		{GPIO::Unused},
 		{GPIO::Unused},
-		{GPIO::H, 13, LL_GPIO_AF_14}, // LTDC_G2
-		{GPIO::H, 14, LL_GPIO_AF_14}, // LTDC_G3
-		{GPIO::H, 15, LL_GPIO_AF_14}, // LTDC_G4
-		{GPIO::H, 4, LL_GPIO_AF_9},	  // LTDC_G5
-		{GPIO::C, 7, LL_GPIO_AF_14},  // LTDC_G6
-		{GPIO::D, 3, LL_GPIO_AF_14},  // LTDC_G7
+		{GPIO::H, PinNum::_13, PinAF::AltFunc14}, // LTDC_G2
+		{GPIO::H, PinNum::_14, PinAF::AltFunc14}, // LTDC_G3
+		{GPIO::H, PinNum::_15, PinAF::AltFunc14}, // LTDC_G4
+		{GPIO::H, PinNum::_4, PinAF::AltFunc9},	  // LTDC_G5
+		{GPIO::C, PinNum::_7, PinAF::AltFunc14},  // LTDC_G6
+		{GPIO::D, PinNum::_3, PinAF::AltFunc14},  // LTDC_G7
 
 	};
-	static constexpr PinNoInit b[8]{
+	static constexpr PinDef b[8]{
 		{GPIO::Unused},
 		{GPIO::Unused},
-		{GPIO::G, 10, LL_GPIO_AF_14}, // LTDC_B2
-		{GPIO::D, 10, LL_GPIO_AF_14}, // LTDC_B3
-		{GPIO::I, 4, LL_GPIO_AF_14},  // LTDC_B4
-		{GPIO::I, 5, LL_GPIO_AF_14},  // LTDC_B5
-		{GPIO::I, 6, LL_GPIO_AF_14},  // LTDC_B6
-		{GPIO::I, 7, LL_GPIO_AF_14},  // LTDC_B7
+		{GPIO::G, PinNum::_10, PinAF::AltFunc14}, // LTDC_B2
+		{GPIO::D, PinNum::_10, PinAF::AltFunc14}, // LTDC_B3
+		{GPIO::I, PinNum::_4, PinAF::AltFunc14},  // LTDC_B4
+		{GPIO::I, PinNum::_5, PinAF::AltFunc14},  // LTDC_B5
+		{GPIO::I, PinNum::_6, PinAF::AltFunc14},  // LTDC_B6
+		{GPIO::I, PinNum::_7, PinAF::AltFunc14},  // LTDC_B7
 	};
-	static constexpr PinNoInit de{GPIO::E, 13, LL_GPIO_AF_14};
-	static constexpr PinNoInit clk{GPIO::E, 14, LL_GPIO_AF_14};
-	static constexpr PinNoInit vsync{GPIO::I, 9, LL_GPIO_AF_14};
-	static constexpr PinNoInit hsync{GPIO::C, 6, LL_GPIO_AF_14};
+	static constexpr PinDef de{GPIO::E, PinNum::_13, PinAF::AltFunc14};
+	static constexpr PinDef clk{GPIO::E, PinNum::_14, PinAF::AltFunc14};
+	static constexpr PinDef vsync{GPIO::I, PinNum::_9, PinAF::AltFunc14};
+	static constexpr PinDef hsync{GPIO::C, PinNum::_6, PinAF::AltFunc14};
 
 	static constexpr uint32_t width = ScreenBufferConf::width;
 	static constexpr uint32_t height = ScreenBufferConf::height;
@@ -78,7 +80,7 @@ struct ScreenConf : mdrivlib::LTDCScreenConf {
 
 struct ScreenControlConf : mdrivlib::ParallelWriterConf {
 	static constexpr size_t BusWidth = 8;
-	static constexpr std::array<PinNoInit, BusWidth> data{{
+	static constexpr std::array<PinDef, BusWidth> data{{
 		{ScreenConf::b[2].gpio, ScreenConf::b[2].pin}, //comment out for p5
 		{ScreenConf::b[3].gpio, ScreenConf::b[3].pin},
 		{ScreenConf::b[4].gpio, ScreenConf::b[4].pin},
@@ -89,10 +91,10 @@ struct ScreenControlConf : mdrivlib::ParallelWriterConf {
 		{ScreenConf::g[3].gpio, ScreenConf::g[3].pin},
 		// {ScreenConf::g[4].gpio, ScreenConf::g[4].pin}, //uncomment for p6, comment for p6
 	}};
-	static constexpr PinNoInit chip_sel{GPIO::E, 11};	 //pin 38: "CSX"
-	static constexpr PinNoInit write_latch{GPIO::H, 5};	 //pin 36: "DC" on p5 schematic, "WRX" in ST7789V datasheet
-	static constexpr PinNoInit datacmd_sel{GPIO::E, 12}; //pin 37: "SCK" on p5 schematic, "DCX" in ST7789V datasheet
-	static constexpr PinNoInit reset{GPIO::E, 15};
+	static constexpr PinDef chip_sel{GPIO::E, 11};	  //pin 38: "CSX"
+	static constexpr PinDef write_latch{GPIO::H, 5};  //pin 36: "DC" on p5 schematic, "WRX" in ST7789V datasheet
+	static constexpr PinDef datacmd_sel{GPIO::E, 12}; //pin 37: "SCK" on p5 schematic, "DCX" in ST7789V datasheet
+	static constexpr PinDef reset{GPIO::E, 15};
 
 	static constexpr uint32_t DataSetupTime = 3;		//ST7789V datasheet: Sec 7.4.1. T(DST) = 10ns
 	static constexpr uint32_t WriteLatchAfterDelay = 3; //ST7789V datasheet: Sec 7.4.1. T(AHT) = 10ns
