@@ -94,16 +94,19 @@ private:
 	bool audio_is_muted_ = false;
 
 	uint32_t loaded_patch_index_;
+	Volume loaded_patch_vol_;
 
 	bool _load_patch() {
 		PatchData &patch = storage_.get_view_patch();
 		auto patchid = storage_.get_view_patch_id();
+		auto vol = storage_.get_view_patch_vol();
 
-		printf_("Attempting play patch #%d, %.31s\n", patchid, patch.patch_name.data());
+		printf_("Attempting play patch #%d from vol %d, %.31s\n", patchid, (uint32_t)vol, patch.patch_name.data());
 
 		if (patch.module_slugs.size() > 1) {
 			if (player_.load_patch(patch)) {
 				loaded_patch_index_ = patchid;
+				loaded_patch_vol_ = vol;
 				return true;
 			}
 		}

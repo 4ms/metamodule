@@ -2,10 +2,11 @@
 
 #include "conf/qspi_flash_conf.hh"
 #include "conf/sdcard_conf.hh"
+#include "drivers/inter_core_comm.hh"
 #include "fatfs/fat_file_io.hh"
 #include "fatfs/ramdisk_ops.hh"
 #include "fatfs/sdcard_ops.hh"
-#include "inter_core_comm.hh"
+#include "inter_core_comm_msg.hh"
 #include "littlefs/norflash_lfs.hh"
 #include "patch_fileio.hh"
 #include "qspi_flash_driver.hh"
@@ -38,7 +39,7 @@ class PatchStorage {
 	EdgeDetector usbdrive_mounted_;
 	bool usbdrive_needs_rescan_ = true;
 
-	using InterCoreComm2 = InterCoreComm<ICCCoreType::Responder>;
+	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, InterCoreCommMessage>;
 	using enum InterCoreCommMessage::MessageType;
 	InterCoreComm2 comm_;
 	InterCoreCommMessage pending_send_message{.message_type = None};
@@ -129,8 +130,11 @@ public:
 			pending_send_message.vol_id = message.vol_id;
 			pending_send_message.bytes_read = 0;
 
-			if (message.patch_id < patch_list_.num_patches() && message.vol_id < (uint32_t)Volume::MaxVolumes) {
-				auto bytes_read = load_patch_file((Volume)message.vol_id, message.patch_id);
+			if (message.patch_id != 1 && message.patch_id < patch_list_.num_patches() &&
+				(uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes)
+			// if (message.patch_id < patch_list_.num_patches() && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes)
+			{
+				auto bytes_read = load_patch_file(message.vol_id, message.patch_id);
 				if (bytes_read) {
 					pending_send_message.message_type = PatchDataLoaded;
 					pending_send_message.bytes_read = bytes_read;
@@ -177,7 +181,7 @@ private:
 
 	uint32_t load_patch_file(Volume vol, uint32_t patch_id) {
 		auto filename = patch_list_.get_patch_filename(vol, patch_id);
-		printf("load_patch_file() patch_id=%d vol=%d name=%.31s\n", patch_id, vol, filename.data());
+		printf("load_patch_file() patch_id=%d vol=%d name=%.31s\n", patch_id, (uint32_t)vol, filename.data());
 
 		bool ok = false;
 		std::span<char> raw_patch = raw_patch_buffer_;

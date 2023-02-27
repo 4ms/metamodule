@@ -1,5 +1,6 @@
 #pragma once
-#include "inter_core_comm.hh"
+#include "drivers/inter_core_comm.hh"
+#include "inter_core_comm_msg.hh"
 #include "patch_convert/yaml_to_patch.hh"
 #include "patch_data.hh"
 #include "patch_file.hh"
@@ -25,12 +26,13 @@ public:
 		InterCoreCommMessage message{
 			.message_type = RequestPatchData,
 			.patch_id = patch_id,
-			.vol_id = (uint32_t)vol,
+			.vol_id = vol,
 		};
 		if (!comm_.send_message(message))
 			return false;
 
 		requested_view_patch_id_ = patch_id;
+		requested_view_patch_vol_ = vol;
 		return true;
 	}
 
@@ -40,6 +42,7 @@ public:
 			return false;
 
 		view_patch_id_ = requested_view_patch_id_;
+		view_patch_vol_ = requested_view_patch_vol_;
 		return true;
 	}
 
@@ -49,6 +52,10 @@ public:
 
 	uint32_t get_view_patch_id() {
 		return view_patch_id_;
+	}
+
+	Volume get_view_patch_vol() {
+		return view_patch_vol_;
 	}
 
 	InterCoreCommMessage get_message() {
@@ -72,11 +79,13 @@ public:
 
 private:
 	PatchFileList &remote_patch_list_;
-	InterCoreComm<ICCCoreType::Initiator> comm_;
+	mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Initiator, InterCoreCommMessage> comm_;
 
 	std::span<char> raw_patch_data_;
 	PatchData view_patch_;
 	uint32_t requested_view_patch_id_ = 0;
+	Volume requested_view_patch_vol_ = Volume::NorFlash;
 	uint32_t view_patch_id_ = 0;
+	Volume view_patch_vol_ = Volume::NorFlash;
 };
 } // namespace MetaModule

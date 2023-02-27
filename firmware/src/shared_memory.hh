@@ -1,7 +1,7 @@
 #pragma once
 #include "auxsignal.hh"
 #include "conf/ramdisk_conf.hh"
-#include "inter_core_comm.hh"
+#include "inter_core_comm_msg.hh"
 #include "params.hh"
 #include "patch_file.hh"
 // #include "patch_player.hh"

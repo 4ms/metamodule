@@ -248,10 +248,12 @@ struct PatchSelectorPage : PageBase {
 	static void patchlist_scroll_cb(lv_event_t *event) {
 		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
 		auto idx = lv_roller_get_selected(_instance->roller);
-		printf_("Scrolled to %d from %d\n", idx, _instance->last_idx);
-
 		auto usb_hdr = 0;
-		auto sd_hdr = _instance->num_sdcard ? (_instance->num_usb ? _instance->num_usb + 1 : 0) : 0;
+		auto sd_hdr = 0;
+		if (_instance->num_sdcard) {
+			if (_instance->num_usb)
+				sd_hdr += 1 + _instance->num_usb;
+		}
 		uint32_t nor_hdr = 0;
 		if (_instance->num_norflash) {
 			if (_instance->num_usb)
@@ -259,11 +261,7 @@ struct PatchSelectorPage : PageBase {
 			if (_instance->num_sdcard)
 				nor_hdr += 1 + _instance->num_sdcard;
 		}
-		// auto nor_hdr = _instance->num_norflash ? (_instance->num_usb ? 1 + _instance->num_usb + _instance->num_sdcard) : 0;
-		printf_("usbh %d, sdh %d, nor %d\n", usb_hdr, sd_hdr, nor_hdr);
-
 		if (idx == usb_hdr || idx == sd_hdr || idx == nor_hdr) {
-			printf_("Scrolled to header\n");
 			if (idx == 0)
 				lv_roller_set_selected(_instance->roller, 1, LV_ANIM_OFF);
 			else if (idx > _instance->last_idx)
@@ -284,16 +282,15 @@ struct PatchSelectorPage : PageBase {
 		if (idx < _instance->num_usb) {
 			_instance->selected_patch_vol = Volume::USB;
 			_instance->selected_patch = idx - 1;
-			printf_("Selected USB: %d => %d\n", idx, _instance->selected_patch);
 		} else if (idx < (_instance->num_sdcard + _instance->num_usb + 1)) {
 			_instance->selected_patch_vol = Volume::SDCard;
 			_instance->selected_patch = idx - _instance->num_usb - 1;
-			printf_("Selected SD: %d => %d\n", idx, _instance->selected_patch);
 		} else {
 			_instance->selected_patch_vol = Volume::NorFlash;
 			_instance->selected_patch = idx - _instance->num_usb - _instance->num_sdcard - 2;
-			printf_("Selected NOR: %d => %d\n", idx, _instance->selected_patch);
 		}
+		printf_("Selected vol %d, patch %d\n", (uint32_t)_instance->selected_patch_vol, _instance->selected_patch);
+		_instance->state = State::TryingToRequestPatchData;
 	}
 
 private:
