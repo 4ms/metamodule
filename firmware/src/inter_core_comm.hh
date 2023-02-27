@@ -27,6 +27,7 @@ struct InterCoreCommMessage {
 	MessageType message_type;
 	uint32_t bytes_read;
 	uint32_t patch_id;
+	uint32_t vol_id;
 
 	// InterCoreCommMessage() = default;
 	// InterCoreCommMessage(const InterCoreCommMessage &other) = default;

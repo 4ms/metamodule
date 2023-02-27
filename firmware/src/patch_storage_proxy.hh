@@ -7,7 +7,6 @@
 
 namespace MetaModule
 {
-using PatchFileList = std::span<PatchFile>;
 
 class PatchStorageProxy {
 
@@ -16,16 +15,17 @@ public:
 
 	PatchStorageProxy(std::span<char> raw_patch_data,
 					  volatile InterCoreCommMessage &shared_message,
-					  std::span<PatchFile> &remote_patch_list)
+					  PatchFileList &remote_patch_list)
 		: remote_patch_list_{remote_patch_list}
 		, comm_{shared_message}
 		, raw_patch_data_{raw_patch_data} {
 	}
 
-	[[nodiscard]] bool request_viewpatch(uint32_t patch_id) {
+	[[nodiscard]] bool request_viewpatch(Volume vol, uint32_t patch_id) {
 		InterCoreCommMessage message{
 			.message_type = RequestPatchData,
 			.patch_id = patch_id,
+			.vol_id = (uint32_t)vol,
 		};
 		if (!comm_.send_message(message))
 			return false;
@@ -71,7 +71,7 @@ public:
 	}
 
 private:
-	std::span<PatchFile> &remote_patch_list_;
+	PatchFileList &remote_patch_list_;
 	InterCoreComm<ICCCoreType::Initiator> comm_;
 
 	std::span<char> raw_patch_data_;

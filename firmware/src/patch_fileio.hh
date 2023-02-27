@@ -37,7 +37,7 @@ public:
 	}
 
 	static bool add_all_to_patchlist(FileIoC auto &fileio, PatchList &patch_list) {
-		patch_list.set_status(PatchList::Status::Loading);
+		// patch_list.set_status(PatchList::Status::Loading);
 
 		bool ok = fileio.foreach_file_with_ext(
 			".yml", [&fileio, &patch_list](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
@@ -57,7 +57,7 @@ public:
 				patch_list.add_patch_header(fileio.vol_id(), filename, filesize, timestamp, patchname);
 			});
 
-		patch_list.set_status(PatchList::Status::Ready);
+		// patch_list.set_status(PatchList::Status::Ready);
 
 		if (!ok)
 			pr_log("Failed to read patches on %s\n", fileio.volname().data());

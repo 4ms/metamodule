@@ -31,7 +31,7 @@ static inline __attribute__((section(".ddma"))) std::array<char, 65536> raw_patc
 static inline __attribute__((section(".ddma"))) std::span<char> raw_patch_span;
 
 static inline volatile __attribute__((section(".ddma"))) InterCoreCommMessage icc_shared_message;
-static inline __attribute__((section(".ddma"))) std::span<PatchFile> shared_patch_file_list;
+static inline __attribute__((section(".ddma"))) PatchFileList shared_patch_file_list;
 //^^^ shared_patch_file_list is just a span (ptr and size)
 
 static inline __attribute__((section(".sysram"))) DoubleBufParamBlock param_blocks; // 4380 * 2

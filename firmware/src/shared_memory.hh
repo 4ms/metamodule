@@ -16,13 +16,13 @@ class PatchPlayer;
 //TODO: Move this structure to static_buffers.hh and declar static inline ptrs there too
 struct SharedMemoryS {
 	struct Ptrs {
-		DoubleBufParamBlock *param_block;			//ParamsPtrLocation
-		DoubleAuxStreamBlock *auxsignal_block;		//AuxSignalBlockLocation
-		RamDrive *ramdrive;							//RamDiskLocation
-		PatchPlayer *patch_player;					//PatchPlayer
-		volatile InterCoreCommMessage *icc_message; //InterCoreCommParamsLocation
-		std::span<PatchFile> *patch_file_list;		//PatchListLocation
-		std::span<char> *raw_patch_span;			//PatchDataLocation
+		DoubleBufParamBlock *param_block;
+		DoubleAuxStreamBlock *auxsignal_block;
+		RamDrive *ramdrive;
+		PatchPlayer *patch_player;
+		volatile InterCoreCommMessage *icc_message;
+		PatchFileList *patch_file_list;
+		std::span<char> *raw_patch_span;
 	};
 
 	static Ptrs ptrs;
