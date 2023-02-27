@@ -162,6 +162,7 @@ struct Gui {
 		lv_style_set_bg_color(&roller_style, lv_color_black());
 		lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_LEFT);
 		lv_style_set_text_font(&roller_style, &MuseoSansRounded_700_14);
+		// lv_style_set_text_font(&roller_style, &lv_font_montserrat_14);
 		lv_style_set_text_color(&roller_style, lv_color_white());
 		lv_style_set_text_opa(&roller_style, LV_OPA_COVER);
 		lv_style_set_text_line_space(&roller_style, 5);
