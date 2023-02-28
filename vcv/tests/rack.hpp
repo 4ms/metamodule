@@ -20,10 +20,14 @@ inline NVGcolor nvgRGB(unsigned char r, unsigned char g, unsigned char b) { retu
 
 namespace rack
 {
+struct Module {
+	long dummy;
+};
+
 struct ParamHandle {
-	int moduleId = -1;
+	int64_t moduleId = -1;
 	int paramId = 0;
-	int *module = NULL;
+	Module *module = NULL;
 
 	std::string text;
 	NVGcolor color;

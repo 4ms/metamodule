@@ -8,13 +8,17 @@ TEST_CASE("getNumModules() and register/unregistering modules")
 
 	SUBCASE("Registering a module increases the number of modules returned by getNumModules()")
 	{
-		cd.registerModule({1, "TESTMODULE"});
+		rack::Module m1;
+		rack::Module m2;
+		rack::Module m3;
+
+		cd.registerModule({1, "TESTMODULE"}, &m1);
 		CHECK(cd.getNumModules() == 1);
 
-		cd.registerModule({1, "TESTMODULE"}); // duplicate entry
+		cd.registerModule({1, "TESTMODULE"}, &m2); // duplicate entry
 		CHECK(cd.getNumModules() == 2);
 
-		cd.registerModule({2, "SOME_OTHER_MOD"});
+		cd.registerModule({2, "SOME_OTHER_MOD"}, &m3);
 		CHECK(cd.getNumModules() == 3);
 
 		SUBCASE("Removing a module decreases getNumModules() by 1, even if the module exists twice")
@@ -58,7 +62,9 @@ TEST_CASE("ParamStatus adding and remove param data")
 	SUBCASE("Before any init, paramData is size 0") { CHECK(cd.paramData.size() == 0); }
 	SUBCASE("updateParamStatus() with new module/param IDs adds it to paramData")
 	{
-		cd.registerModule({1, "MODULE"});
+		rack::Module m1;
+
+		cd.registerModule({1, "MODULE"}, &m1);
 		ParamStatus p;
 		p.value = 0.5;
 		p.moduleID = 1;
@@ -93,7 +99,8 @@ TEST_CASE("ParamStatus adding and remove param data")
 
 	SUBCASE("Removing a module also removes its params")
 	{
-		cd.registerModule({1, "MODULE"});
+		rack::Module m1;
+		cd.registerModule({1, "MODULE"}, &m1);
 		ParamStatus p;
 		p.value = 0.5;
 		p.moduleID = 1;
@@ -111,8 +118,10 @@ TEST_CASE("JackStatus adding and remove patched cable data")
 	SUBCASE("Before any init, jackData is size 0") { CHECK(cd.jackData.size() == 0); }
 	SUBCASE("updateJackStatus() with new module/jack IDs adds it to jackData")
 	{
-		cd.registerModule({1, "MODULE"});
-		cd.registerModule({2, "MODULE2"});
+		rack::Module m1;
+		rack::Module m2;
+		cd.registerModule({1, "MODULE"}, &m1);
+		cd.registerModule({2, "MODULE2"}, &m2);
 		JackStatus j;
 		j.connected = true;
 		j.receivedJackId = 101;
@@ -168,8 +177,10 @@ TEST_CASE("JackStatus adding and remove patched cable data")
 
 	SUBCASE("Removing a module also removes its jack info")
 	{
-		cd.registerModule({1, "MODULE"});
-		cd.registerModule({999, "MODULE999"});
+		rack::Module m1;
+		rack::Module m2;
+		cd.registerModule({1, "MODULE"}, &m1);
+		cd.registerModule({999, "MODULE999"}, &m2);
 		JackStatus j2;
 		j2.connected = true;
 		j2.receivedJackId = 999;
@@ -193,8 +204,10 @@ TEST_CASE("JackStatus adding and remove patched cable data")
 TEST_CASE("messages system")
 {
 	CentralData cd;
-	cd.registerModule({1, "MODULE1"});
-	cd.registerModule({2, "MODULE2"});
+	rack::Module m1;
+	rack::Module m2;
+	cd.registerModule({1, "MODULE1"}, &m1);
+	cd.registerModule({2, "MODULE2"}, &m2);
 
 	SUBCASE("No messages initially")
 	{
@@ -227,13 +240,15 @@ TEST_CASE("mappings")
 
 	SUBCASE("Creating a mapping, then checking if the src and dst are mapped")
 	{
-		cd.registerModule({1, "MODULE1"});
+		rack::Module m1;
+		cd.registerModule({1, "MODULE1"}, &m1);
 		LabelButtonID src;
 		src.moduleID = 1;
 		src.objID = 2;
 		src.objType = LabelButtonID::Types::Knob;
 
-		cd.registerModule({100, "MODULE100"});
+		rack::Module m2;
+		cd.registerModule({100, "MODULE100"}, &m2);
 		LabelButtonID dst;
 		dst.moduleID = 100;
 		dst.objID = 200;

@@ -153,6 +153,8 @@ struct MetaModuleHubBase : public CommModule {
 	void processKnobMaps()
 	{
 		for (int i = 0; i < NumKnobMaps; i++) {
+			// TODO:
+			//  LabelButtonID src{mapSrcType[i], i, id};
 			LabelButtonID src{LabelButtonID::Types::Knob, i, id};
 			auto phvec = centralData->getParamHandlesFromSrc(src);
 			for (auto &paramHandle : phvec) {
@@ -235,7 +237,12 @@ private:
 		labelText = "Creating patch..";
 		updateDisplay();
 
-		PatchFileWriter pw{centralData->moduleData};
+		std::vector<ModuleID> moduleData;
+		moduleData.reserve(centralData->moduleData.size());
+		for (auto &m : centralData->moduleData)
+			moduleData.push_back({m.id, m.slug});
+
+		PatchFileWriter pw{moduleData};
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
 		pw.setJackList(centralData->jackData);

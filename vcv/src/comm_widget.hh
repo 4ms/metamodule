@@ -5,11 +5,6 @@
 using namespace rack;
 
 class CommModuleWidget : public app::ModuleWidget {
-	void onHover(const HoverEvent &e) override
-	{
-		ModuleWidget::onHover(e);
-		centralData->processKnobParamHandleQueue();
-	}
 
 protected:
 	static constexpr float kKnobSpacingY = 17;

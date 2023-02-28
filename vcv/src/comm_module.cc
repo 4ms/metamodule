@@ -40,7 +40,7 @@ void CommModule::onAdd()
 {
 	selfID.id = this->id;
 	setModuleId(selfID.id);
-	centralData->registerModule(selfID);
+	centralData->registerModule(selfID, this);
 }
 
 void CommModule::onRemove() { centralData->unregisterModule(selfID); }
