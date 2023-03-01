@@ -29,6 +29,7 @@ public:
 	{
 		std::lock_guard mguard{mtx};
 		moduleData.push_back({mod.id, mod.slug, module});
+		printf("Registered module id %lld (%.31s) %p\n", mod.id, mod.slug.c_str(), module);
 	}
 
 	void unregisterModule(ModuleID mod)
@@ -53,6 +54,16 @@ public:
 
 		auto sz = moduleData.size();
 		return sz;
+	}
+
+	rack::Module *getRegisteredModulePtr(int64_t moduleID)
+	{
+		auto module_it =
+			std::find_if(moduleData.begin(), moduleData.end(), [&moduleID](auto &m) { return m.id == moduleID; });
+
+		if (module_it != moduleData.end())
+			return module_it->module;
+		return nullptr;
 	}
 
 	bool isRegisteredHub(int64_t moduleId)
@@ -187,8 +198,6 @@ public:
 	{
 		pr_dbg("registerMapDest: dest: objID=%lld, moduleID=%lld\n", dest.objID, dest.moduleID);
 
-		LabelButtonID src;
-
 		{ // start mapsmtx lock
 			std::lock_guard mguard{mapsmtx};
 
@@ -198,8 +207,13 @@ public:
 			}
 
 			_currentMap.dst = dest;
+			_currentMap.dst_module = getRegisteredModulePtr(dest.moduleID);
+			if (!_currentMap.dst_module) {
+				printf("Dest module ptr is null (not registered?). Aborting mapping.\n");
+				return;
+			}
 
-			// Look for an existing map to the dst knob
+			// Look for an existing map to the dst
 			bool found = false;
 			for (auto &m : maps) {
 				if (m.dst == _currentMap.dst) {
@@ -222,77 +236,74 @@ public:
 						   _currentMap.src.objID);
 					(void)num_erased;
 				}
-
 				maps.push_back(_currentMap);
 			}
 
-			src = _currentMap.src;
 			_currentMap.clear();
 			_isMappingInProgress = false;
 		} // end mapsmtx lock
 
-		if (dest.objType == LabelButtonID::Types::Knob) {
-			pr_dbg("Registering (no queue)\n");
-			registerKnobParamHandle(src, dest);
-		}
+		// if (dest.objType == LabelButtonID::Types::Knob) {
+		// 	pr_dbg("Registering (no queue)\n");
+		// 	registerKnobParamHandle(src, dest);
+		// }
 	}
 
-	void registerKnobParamHandle(LabelButtonID src, LabelButtonID dst)
-	{
-		pr_dbg("registerKnobParamHandle t:%d m:%lld p:%lld -> t:%d m:%lld p:%lld\n",
-			   src.objType,
-			   src.moduleID,
-			   src.objID,
-			   dst.objType,
-			   dst.moduleID,
-			   dst.objID);
+	// void registerKnobParamHandle(LabelButtonID src, LabelButtonID dst)
+	// {
+	// pr_dbg("registerKnobParamHandle t:%d m:%lld p:%lld -> t:%d m:%lld p:%lld\n",
+	// 	   src.objType,
+	// 	   src.moduleID,
+	// 	   src.objID,
+	// 	   dst.objType,
+	// 	   dst.moduleID,
+	// 	   dst.objID);
 
-		std::lock_guard mguard{mappedParamHandlemtx};
+	// std::lock_guard mguard{mappedParamHandlemtx};
 
-		auto &phvec = mappedParamHandles[src];
+	// auto &phvec = mappedParamHandles[src];
 
-		// Remove unused paramHandles from mappedParamHandles[src]
-		auto num_erased = std::erase_if(phvec, [&](auto &p) { return p.moduleId == -1; });
-		if (num_erased)
-			pr_dbg("Erased %lu entries with moduleId==-1 from phvec\n", num_erased);
+	// for (auto &[src, pv] : mappedParamHandles) {
+	// 	// pr_dbg("Checking src: m=%lld p=%lld\n", src.moduleID, src.objID);
+	// 	// for (auto &p : pv)
+	// 	// 	pr_dbg("\tpv[] = m=%lld p=%d addr=%p\n", p.moduleId, p.paramId, &p);
 
-		// Debug:
-		// pr_dbg("phvec.emplace_back: addr=%p\n", ph.get());
-		for (auto &[src, pv] : mappedParamHandles) {
-			pr_dbg("Checking src: m=%lld p=%lld\n", src.moduleID, src.objID);
-			for (auto &p : pv)
-				pr_dbg("\tpv[] = m=%lld p=%d addr=%p\n", p.moduleId, p.paramId, &p);
+	// 	if (auto existingPh =
+	// 			std::find_if(pv.begin(),
+	// 						 pv.end(),
+	// 						 [=](auto &p) { return p.moduleId == dst.moduleID && p.paramId == dst.objID; });
+	// 		existingPh != pv.end())
+	// 	{
+	// 		pr_dbg("Found an existing ParamHandle with same dst module/param id. Setting it to "
+	// 			   "-1,nullptr.\n");
+	// 		existingPh->moduleId = -1;
+	// 		existingPh->module = nullptr;
+	// 	}
+	// }
 
-			if (auto existingPh =
-					std::find_if(pv.begin(),
-								 pv.end(),
-								 [=](auto &p) { return p.moduleId == dst.moduleID && p.paramId == dst.objID; });
-				existingPh != pv.end())
-			{
-				pr_dbg("Found an existing ParamHandle with same dst module/param id. Setting it to "
-					   "-1,nullptr.\n");
-				existingPh->moduleId = -1;
-				existingPh->module = nullptr;
-			}
-		}
+	// // Remove unused paramHandles from mappedParamHandles[src]
+	// auto num_erased = std::erase_if(phvec, [&](auto &p) { return p.moduleId == -1; });
+	// if (num_erased)
+	// 	pr_dbg("Erased %lu entries with moduleId==-1 from phvec\n", num_erased);
 
-		auto found_module =
-			std::find_if(moduleData.begin(), moduleData.end(), [=](auto &m) { return m.id == dst.moduleID; });
-		if (found_module != moduleData.end()) {
-			auto &ph = phvec.emplace_back();
-			ph.moduleId = dst.moduleID;
-			ph.paramId = dst.objID;
-			ph.module = found_module->module;
-			ph.color = PaletteHub::color[src.objID];
-			ph.text = "Mapped to MetaModule knob# " + std::to_string(src.objID);
-			pr_dbg("Added paramHandle to centralData. moduleId %lld, paramId %d, module %p\n",
-				   ph.moduleId,
-				   ph.paramId,
-				   ph.module);
-		} else {
-			pr_dbg("Couldn't find a registered module with id=%lld\n", dst.moduleID);
-		}
-	}
+	// // Add a new paramHandle
+	// auto found_module =
+	// 	std::find_if(moduleData.begin(), moduleData.end(), [=](auto &m) { return m.id == dst.moduleID; });
+	// if (found_module != moduleData.end()) {
+	// 	auto &ph = phvec.emplace_back();
+	// 	ph.moduleId = dst.moduleID;
+	// 	ph.paramId = dst.objID;
+	// 	ph.module = found_module->module;
+	// 	ph.color = PaletteHub::color[src.objID];
+	// 	ph.text = "Mapped to MetaModule knob# " + std::to_string(src.objID);
+	// 	pr_dbg("Added paramHandle to centralData. moduleId %lld, paramId %d, module %p\n",
+	// 		   ph.moduleId,
+	// 		   ph.paramId,
+	// 		   ph.module);
+	// } else {
+	// 	pr_dbg("Couldn't find a registered module with id=%lld\n", dst.moduleID);
+	// }
+	// }
 
 	// Can be called by UI Thread on "Unmap" menuitem
 	void unregisterMapByDest(LabelButtonID dest)
@@ -303,26 +314,24 @@ public:
 			std::erase_if(maps, [&](const auto &m) { return (m.dst == dest); });
 		}
 
-		for (auto &[src, phvec] : mappedParamHandles) {
-			if (auto existingPh =
-					std::find_if(phvec.begin(),
-								 phvec.end(),
-								 [&](auto &p) { return p.moduleId == dest.moduleID && p.paramId == dest.objID; });
-				existingPh != phvec.end())
-			{
-				pr_dbg("Found ParamHandle (%p) in mappedParamHandles with dst module/param id. Setting it to "
-					   "-1,nullptr.\n",
-					   &existingPh);
+		// for (auto &[src, phvec] : mappedParamHandles) {
+		// 	if (auto existingPh =
+		// 			std::find_if(phvec.begin(),
+		// 						 phvec.end(),
+		// 						 [&](auto &p) { return p.moduleId == dest.moduleID && p.paramId == dest.objID; });
+		// 		existingPh != phvec.end())
+		// 	{
+		// 		pr_dbg("Found ParamHandle (%p) in mappedParamHandles with dst module/param id. Setting it to "
+		// 			   "-1,nullptr.\n",
+		// 			   &existingPh);
 
-				existingPh->moduleId = -1;
-				existingPh->module = nullptr;
-			}
-		}
+		// 		existingPh->moduleId = -1;
+		// 		existingPh->module = nullptr;
+		// 	}
+		// }
 	}
 
 	// This is called in HubBase destructor
-	// TODO: Which thread does this run in? UI or Engine or other?
-	// DO we need to call the _NoLock version??
 	void unregisterKnobMapsBySrcModule(int64_t moduleId)
 	{
 		// Remove CD::maps
@@ -334,22 +343,22 @@ public:
 		}
 
 		// Remove ParamHandles (from engine and CD)
-		{
-			std::lock_guard mguard{mappedParamHandlemtx};
-			pr_dbg("Getting rid of mappedParamHandles[] that match moduleId=%lld\n", moduleId);
-			for (auto &[lbl, phvec] : mappedParamHandles) {
-				if (lbl.moduleID == moduleId && lbl.objType == LabelButtonID::Types::Knob) {
-					pr_dbg("Clearing paramHandle vector\n");
-					phvec.clear();
-				}
-			}
-			auto num_erased = std::erase_if(mappedParamHandles, [&](const auto &item) {
-				auto &[key, val] = item;
-				return key.moduleID == moduleId && key.objType == LabelButtonID::Types::Knob;
-			});
-			pr_dbg("Erased %lu entries from mappedParamHandles\n", num_erased);
-			(void)num_erased;
-		}
+		// {
+		// 	std::lock_guard mguard{mappedParamHandlemtx};
+		// 	pr_dbg("Getting rid of mappedParamHandles[] that match moduleId=%lld\n", moduleId);
+		// 	for (auto &[lbl, phvec] : mappedParamHandles) {
+		// 		if (lbl.moduleID == moduleId && lbl.objType == LabelButtonID::Types::Knob) {
+		// 			pr_dbg("Clearing paramHandle vector\n");
+		// 			phvec.clear();
+		// 		}
+		// 	}
+		// 	auto num_erased = std::erase_if(mappedParamHandles, [&](const auto &item) {
+		// 		auto &[key, val] = item;
+		// 		return key.moduleID == moduleId && key.objType == LabelButtonID::Types::Knob;
+		// 	});
+		// 	pr_dbg("Erased %lu entries from mappedParamHandles\n", num_erased);
+		// 	(void)num_erased;
+		// }
 	}
 
 	//
@@ -503,21 +512,33 @@ public:
 	//
 	// Returns a copy of the ParamHandles for the mappings on a given hub knob
 	// We use a copy to be more thread-safe
-	std::vector<rack::ParamHandle> getParamHandlesFromSrc(LabelButtonID const &src)
-	{
-		std::lock_guard mguard{mappedParamHandlemtx};
+	// std::vector<rack::ParamHandle> getParamHandlesFromSrc(LabelButtonID const &src)
+	// {
+	// 	std::lock_guard mguard{mappedParamHandlemtx};
 
-		std::vector<rack::ParamHandle> copied_phs;
-		for (auto const &ph : mappedParamHandles[src]) {
-			rack::ParamHandle p;
-			p.moduleId = ph.moduleId;
-			p.paramId = ph.paramId;
-			p.module = ph.module;
-			p.text = ph.text;
-			p.color = ph.color;
-			copied_phs.push_back(p);
+	// 	std::vector<rack::ParamHandle> copied_phs;
+	// 	for (auto const &ph : mappedParamHandles[src]) {
+	// 		rack::ParamHandle p;
+	// 		p.moduleId = ph.moduleId;
+	// 		p.paramId = ph.paramId;
+	// 		p.module = ph.module;
+	// 		p.text = ph.text;
+	// 		p.color = ph.color;
+	// 		copied_phs.push_back(p);
+	// 	}
+	// 	return copied_phs;
+	// }
+
+	auto getMappingsFromSrc(LabelButtonID const &src)
+	{
+		std::vector<MappingExt> copied_maps;
+		std::lock_guard mguard{mtx};
+		for (auto &m : maps) {
+			if (m.src == src) {
+				copied_maps.push_back(m);
+			}
 		}
-		return copied_phs;
+		return copied_maps;
 	}
 
 	//
@@ -539,21 +560,23 @@ public:
 		ModuleTypeSlug slug;
 		rack::Module *module;
 	};
+	struct MappingExt : Mapping {
+		// LabelButtonID src;
+		// LabelButtonID dst;
+		// float range_min = 0.f;
+		// float range_max = 1.f;
+		// std::string alias_name{""};
+		rack::Module *dst_module;
+	};
 	std::map<int64_t, MessageType> messages;
 	std::vector<RegisteredModule> moduleData;
 	std::vector<JackStatus> jackData;
 	std::vector<ParamStatus> paramData;
-	std::vector<Mapping> maps;
-
-	// [Hub ID, Knob ID] --> [vec of paramHandles mapped knobs]
-	// We use a vec of ptrs instead of a vec of objects because
-	// Rack::Engine stores raw ptrs, and needs their address to be fixed
-	// (When a vector re-allocates, the address of the contained objects changes.)
-	std::unordered_map<LabelButtonID, std::vector<rack::ParamHandle>> mappedParamHandles;
+	std::vector<MappingExt> maps;
 
 private:
 	bool _isMappingInProgress = false;
-	Mapping _currentMap;
+	MappingExt _currentMap;
 	LabelButtonID _cur_hover_obj;
 
 	LabelButtonID lastTouchedJack{LabelButtonID::Types::None, -1, -1};

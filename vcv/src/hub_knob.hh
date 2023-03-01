@@ -41,24 +41,24 @@ static void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
 		auto aliasItem = new KnobAliasMenuItem{id};
 		menu->addChild(aliasItem);
 
-		auto paramHandles = centralData->getParamHandlesFromSrc(id);
-		for (auto const &ph : paramHandles) {
-			if (ph.moduleId != -1) {
+		auto maps = centralData->getMappingsFromSrc(id);
+		for (auto const &m : maps) {
+			if (m.dst.moduleID != -1) {
 				MenuSeparator *sep = new MenuSeparator;
 				menu->addChild(sep);
 
 				MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
-				paramLabel2->moduleName = ph.module->model->name;
-				paramLabel2->paramName = ph.module->paramQuantities[ph.paramId]->getLabel();
-				paramLabel2->moduleId = ph.moduleId;
-				paramLabel2->paramId = ph.paramId;
+				paramLabel2->moduleName = m.dst_module->model->name;
+				paramLabel2->paramName = m.dst_module->paramQuantities[m.dst.objID]->getLabel();
+				paramLabel2->moduleId = m.dst.moduleID;
+				paramLabel2->paramId = m.dst.objID;
 				menu->addChild(paramLabel2);
 
-				MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+				MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, m.dst.objID, m.dst.moduleID});
 				mn->box.size.x = 100;
 				menu->addChild(mn);
 
-				MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, ph.paramId, ph.moduleId});
+				MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, m.dst.objID, m.dst.moduleID});
 				mx->box.size.x = 100;
 				menu->addChild(mx);
 			}
