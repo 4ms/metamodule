@@ -7,6 +7,12 @@
 #include "printf.h"
 #include "stm32xx.h"
 
+//exported:
+#include "ui.h"
+extern "C" void ui_PatchSelector_screen_init();
+LV_FONT_DECLARE(lv_font_montserrat_10);
+LV_FONT_DECLARE(lv_font_montserrat_16);
+
 namespace MetaModule
 {
 
@@ -15,32 +21,37 @@ namespace MetaModule
 //And restore that after a refresh:
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
-		: PageBase{info}
-		, base(lv_obj_create(nullptr)) {
+		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchSel);
 
+		ui_PatchSelector_screen_init();
+
+		base = ui_PatchSelector;
+		// base = lv_obj_create(nullptr);
 		init_bg(base);
 
-		roller = lv_roller_create(base);
+		roller = ui_patchlist;
+		// roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
 
 		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(roller, patchlist_scroll_cb, LV_EVENT_KEY, this);
 
-		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		lv_obj_add_style(roller, &Gui::plain_border_style, (int)LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
-		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
+		// lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
+		// lv_obj_add_style(roller, &Gui::plain_border_style, (int)LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
+		// lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
 
-		lv_obj_set_pos(roller, 0, 30);
-		lv_obj_set_size(roller, 320, 210);
+		// lv_obj_set_pos(roller, 0, 30);
+		// lv_obj_set_size(roller, 320, 210);
 
-		header_text = lv_label_create(base);
-		lv_label_set_text_static(header_text, "Select a Patch:");
-		lv_obj_add_style(header_text, &Gui::header_style, LV_PART_MAIN);
-		lv_obj_set_align(base, LV_ALIGN_TOP_MID);
-		lv_obj_set_pos(header_text, 0, 0);
-		lv_obj_set_width(header_text, 320);
+		// header_text = lv_label_create(base);
+		// lv_label_set_text_static(header_text, "Select a Patch:");
+		// lv_obj_add_style(header_text, &Gui::header_style, LV_PART_MAIN);
+		// lv_obj_set_align(base, LV_ALIGN_TOP_MID);
+		// lv_obj_set_pos(header_text, 0, 0);
+		// lv_obj_set_width(header_text, 320);
 
+		//TODO wait cont /spinner
 		// wait_cont = lv_obj_create(base);
 		// lv_obj_set_align(wait_cont, LV_ALIGN_CENTER);
 		// lv_obj_add_style(wait_cont, &style_wait_cont, LV_PART_MAIN);
@@ -257,7 +268,7 @@ private:
 	uint32_t last_idx = 0;
 
 	lv_obj_t *roller;
-	lv_obj_t *header_text;
+	// lv_obj_t *header_text;
 	lv_obj_t *base;
 	const std::string_view leader = " - ";
 	uint32_t num_usb;
