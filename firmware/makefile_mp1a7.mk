@@ -56,6 +56,7 @@ LTOFLAG = -flto=auto
 # OPTFLAG = -O0
 # LTOFLAG = 
 
+INCLUDES = 
 SOURCES =
 SOURCES += system/libc_stub.c
 SOURCES += system/libcpp_stub.cc
@@ -78,9 +79,6 @@ SOURCES += $(main_source)
 ifeq "$(target_board)" "norflash-loader"
 
 else
-# SOURCES += $(usb_src)/usbd_conf.cc
-# SOURCES += $(usb_src)/usbd_desc.c
-# SOURCES += $(usb_src)/usb_drive_device.cc
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
@@ -91,26 +89,6 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_ll_rcc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_sdmmc.c
-# SOURCES += $(HALDIR)/src/stm32mp1xx_ll_usb.c
-# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd.c
-# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_pcd_ex.c
-# SOURCES += $(HALDIR)/src/stm32mp1xx_hal_hcd.c
-# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc.c
-# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_bot.c
-# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_data.c
-# SOURCES += $(usbdev_libdir)/Class/MSC/Src/usbd_msc_scsi.c
-# SOURCES += $(usbdev_libdir)/Core/Src/usbd_core.c
-# SOURCES += $(usbdev_libdir)/Core/Src/usbd_ctlreq.c
-# SOURCES += $(usbdev_libdir)/Core/Src/usbd_ioreq.c
-
-# SOURCES += $(usbhost_libdir)/Class/HUB/Src/usbh_hub.c
-# SOURCES += $(usb_src)/usbh_conf.c
-# SOURCES += $(usb_src)/usbh_MIDI.c
-# SOURCES += $(usb_src)/midi_host.cc
-# SOURCES += $(usbhost_libdir)/Core/Src/usbh_core.c
-# SOURCES += $(usbhost_libdir)/Core/Src/usbh_ctlreq.c
-# SOURCES += $(usbhost_libdir)/Core/Src/usbh_ioreq.c
-# SOURCES += $(usbhost_libdir)/Core/Src/usbh_pipes.c
 
 SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES += $(DRIVERLIB)/drivers/tim.cc
@@ -168,13 +146,18 @@ SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/widgets/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/font/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/misc/*.c)
 SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/hal/*.c)
-#SOURCES += $(wildcard src/pages/gui-guider/*.c)
+INCLUDES +=		-I$(LIBDIR)/lvgl
 
 SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
+# Generateod:
+SOURCES += ../gui-guider-project/export/ui.c
+SOURCES += ../gui-guider-project/export/ui_helpers.c
+INCLUDES += -I../gui-guider-project/export
+INCLUDES +=	-I$(LVGL_DIR)/$(LVGL_DIR_NAME)
 
 ifeq "$(USE_FEWER_MODULES)" "1"
 SOURCES += src/pages/images/modules/Djembe_artwork_240.c
@@ -227,61 +210,13 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 
 
-# SOURCES += $(NE10DIR)/common/NE10_mask_table.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_float32.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.cpp
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_rfft_float32.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_int32.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_int16.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fir.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fir_init.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_iir.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_iir_init.c
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_float32.neonintrinsic.cpp
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_fft_generic_int32.neonintrinsic.cpp
-# SOURCES += $(NE10DIR)/modules/dsp/NE10_init_dsp.c
-
-# NE10_ASM_OPTIMIZATION = 1
-
-# ifneq ($(NE10_ASM_OPTIMIZATION),)
-# SOURCES += \
-# 		  $(NE10DIR)/modules/dsp/NE10_fft_float32.neon.c \
-# 		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.c \
-# 		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.c \
-
-# ASM_SOURCES += \
-# 		  $(NE10DIR)/modules/dsp/NE10_fft_float32.neon.s \
-# 		  $(NE10DIR)/modules/dsp/NE10_fft_int32.neon.s \
-# 		  $(NE10DIR)/modules/dsp/NE10_fft_int16.neon.s \
-
-# NE10_CFLAGS = -DNE10_UNROLL_LEVEL=0
-# else
-# SOURCES += \
-# 	$(NE10DIR)/modules/dsp/NE10_fft_float32.neonintrinsic.c \
-# 	$(NE10DIR)/modules/dsp/NE10_fft_int32.neonintrinsic.c \
-# 	$(NE10DIR)/modules/dsp/NE10_fft_int16.neonintrinsic.c \
-# 	$(NE10DIR)/modules/dsp/NE10_rfft_float32.neonintrinsic.c \
-
-# NE10_CFLAGS = -DNE10_UNROLL_LEVEL=1
-# endif
-
-# ASM_SOURCES += \
-# 		  $(NE10DIR)/modules/dsp/NE10_fir.neon.s \
-# 		  $(NE10DIR)/modules/dsp/NE10_iir.neon.s \
-# 		  $(NE10DIR)/common/NE10header.s \
-# 		  $(NE10DIR)/common/versionheader.s \
-
 endif # ifneq "$(target_board)" "norflash-loader"
 
-INCLUDES = 
 INCLUDES += 	-I.
 INCLUDES +=		-Isrc
 INCLUDES +=		-I$(core_src)
 INCLUDES +=		-I$(target_src)
 INCLUDES +=		-I$(target_chip_src)
-# INCLUDES +=		-I$(usb_src)
 INCLUDES +=		-I$(HALDIR)/include
 INCLUDES +=		-I$(CMSIS)/Core_A/Include
 INCLUDES +=		-I$(CMSIS)/Include
@@ -296,19 +231,10 @@ INCLUDES +=		-I$(SHARED)
 INCLUDES +=		-I$(SHARED)/CoreModules
 INCLUDES +=		-I$(SHARED)/cpputil
 INCLUDES +=		-I$(SHARED)/patch
-INCLUDES +=		-I$(LIBDIR)/lvgl
-#INCLUDES +=		-I$(LIBDIR)/lvgl/lvgl/src/lv_font
 INCLUDES +=		-I$(LIBDIR)/printf
-# INCLUDES +=		-I$(usbdev_libdir)/Class/MSC/Inc
-# INCLUDES +=		-I$(usbdev_libdir)/Core/Inc
-# INCLUDES +=		-I$(usbdev_libdir)/Class/HUB/Inc
-# INCLUDES +=		-I$(usbhost_libdir)/Core/Inc
 INCLUDES += 	-I$(SHARED)/etl/include
 INCLUDES += 	-I$(SHARED)/patch_convert
 INCLUDES += 	-I$(SHARED)/patch_convert/ryml
-# INCLUDES +=		-I$(NE10DIR)/inc
-# INCLUDES +=		-I$(NE10DIR)/common
-# INCLUDES +=		-I$(NE10DIR)/modules/dsp
 INCLUDES += 	-I$(RYMLDIR)/src
 INCLUDES += 	-I$(RYMLDIR)/ext/c4core/src
 INCLUDES += 	-I$(LIBDIR)/fatfs/source
