@@ -10,18 +10,13 @@
 extern "C" {
 #endif
 
-    #include "lvgl.h"
+#include "lvgl/lvgl.h"
 
-extern lv_obj_t *ui_Screen1;
-void ui_event_media( lv_event_t * e);
-extern lv_obj_t *ui_media;
-extern lv_obj_t *ui_Label2;
+extern lv_obj_t *ui_PatchSelector;
+extern lv_obj_t *ui_Title;
 extern lv_obj_t *ui_patchlist;
-
-
-
-
-
+void ui_event_media(lv_event_t *e);
+extern lv_obj_t *ui_media;
 
 void ui_init(void);
 

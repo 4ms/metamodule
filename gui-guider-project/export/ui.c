@@ -7,18 +7,18 @@
 #include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
-lv_obj_t *ui_Screen1;
+lv_obj_t *ui_PatchSelector;
+lv_obj_t *ui_Title;
+lv_obj_t *ui_patchlist;
 void ui_event_media(lv_event_t *e);
 lv_obj_t *ui_media;
-lv_obj_t *ui_Label2;
-lv_obj_t *ui_patchlist;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
 #error "LV_COLOR_DEPTH should be 16bit to match SquareLine Studio's settings"
 #endif
-#if LV_COLOR_16_SWAP != 1
-#error "LV_COLOR_16_SWAP should be 1 to match SquareLine Studio's settings"
+#if LV_COLOR_16_SWAP != 0
+#error "LV_COLOR_16_SWAP should be 0 to match SquareLine Studio's settings"
 #endif
 
 ///////////////////// ANIMATIONS ////////////////////
@@ -33,14 +33,44 @@ void ui_event_media(lv_event_t *e) {
 }
 
 ///////////////////// SCREENS ////////////////////
-void ui_Screen1_screen_init(void) {
-	ui_Screen1 = lv_obj_create(NULL);
-	lv_obj_clear_flag(ui_Screen1, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+void ui_PatchSelector_screen_init(void) {
+	ui_PatchSelector = lv_obj_create(NULL);
+	lv_obj_clear_flag(ui_PatchSelector, LV_OBJ_FLAG_SCROLLABLE); /// Flags
+	lv_obj_set_flex_flow(ui_PatchSelector, LV_FLEX_FLOW_ROW_WRAP);
+	lv_obj_set_flex_align(ui_PatchSelector, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_END);
+	lv_obj_set_style_pad_left(ui_PatchSelector, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_right(ui_PatchSelector, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_top(ui_PatchSelector, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_pad_bottom(ui_PatchSelector, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-	ui_media = lv_roller_create(ui_Screen1);
+	ui_Title = lv_label_create(ui_PatchSelector);
+	lv_obj_set_width(ui_Title, LV_SIZE_CONTENT);  /// 1
+	lv_obj_set_height(ui_Title, LV_SIZE_CONTENT); /// 1
+	lv_obj_set_x(ui_Title, 92);
+	lv_obj_set_y(ui_Title, 8);
+	lv_obj_set_flex_flow(ui_Title, LV_FLEX_FLOW_ROW_WRAP);
+	lv_obj_set_flex_align(ui_Title, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_SPACE_BETWEEN);
+	lv_label_set_text(ui_Title, "Select a Patch:");
+	lv_obj_set_style_text_font(ui_Title, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	ui_patchlist = lv_roller_create(ui_PatchSelector);
+	lv_roller_set_options(ui_patchlist,
+						  "patch 1\npatch 2\nreally long patch name 3\nanother patch\n4 Sea of Echoes\nAll Real "
+						  "4ms\nEnosc Hex\nDjembe 2\n\n5\n",
+						  LV_ROLLER_MODE_NORMAL);
+	lv_obj_set_height(ui_patchlist, 200);
+	lv_obj_set_width(ui_patchlist, LV_SIZE_CONTENT); /// 2
+	lv_obj_set_x(ui_patchlist, -4);
+	lv_obj_set_y(ui_patchlist, -4);
+	lv_obj_set_align(ui_patchlist, LV_ALIGN_BOTTOM_RIGHT);
+	lv_obj_set_flex_flow(ui_patchlist, LV_FLEX_FLOW_ROW);
+	lv_obj_set_flex_align(ui_patchlist, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+	lv_obj_set_style_text_align(ui_patchlist, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+	ui_media = lv_roller_create(ui_PatchSelector);
 	lv_roller_set_options(ui_media, "USB Drive\nSD Card\nInternal", LV_ROLLER_MODE_NORMAL);
-	lv_obj_set_height(ui_media, 69);
-	lv_obj_set_width(ui_media, LV_SIZE_CONTENT); /// 1
+	lv_obj_set_width(ui_media, LV_SIZE_CONTENT);  /// 1
+	lv_obj_set_height(ui_media, LV_SIZE_CONTENT); /// 69
 	lv_obj_set_x(ui_media, 4);
 	lv_obj_set_y(ui_media, -4);
 	lv_obj_set_align(ui_media, LV_ALIGN_BOTTOM_LEFT);
@@ -51,29 +81,6 @@ void ui_Screen1_screen_init(void) {
 	lv_obj_set_style_text_align(ui_media, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
 	lv_obj_set_style_text_font(ui_media, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-	ui_Label2 = lv_label_create(ui_Screen1);
-	lv_obj_set_width(ui_Label2, LV_SIZE_CONTENT);  /// 1
-	lv_obj_set_height(ui_Label2, LV_SIZE_CONTENT); /// 1
-	lv_obj_set_x(ui_Label2, 92);
-	lv_obj_set_y(ui_Label2, 8);
-	lv_obj_set_flex_flow(ui_Label2, LV_FLEX_FLOW_ROW);
-	lv_obj_set_flex_align(ui_Label2, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-	lv_label_set_text(ui_Label2, "Select a Patch:");
-	lv_obj_set_style_text_font(ui_Label2, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-	ui_patchlist = lv_roller_create(ui_Screen1);
-	lv_roller_set_options(ui_patchlist,
-						  "patch 1\npatch 2\nreally long patch name 3\nanother patch\n4 Sea of Echoes\nAll Real "
-						  "4ms\nEnosc Hex\nDjembe 2\n\n5\n",
-						  LV_ROLLER_MODE_NORMAL);
-	lv_obj_set_width(ui_patchlist, 224);
-	lv_obj_set_height(ui_patchlist, 200);
-	lv_obj_set_x(ui_patchlist, -4);
-	lv_obj_set_y(ui_patchlist, -4);
-	lv_obj_set_align(ui_patchlist, LV_ALIGN_BOTTOM_RIGHT);
-	lv_obj_set_flex_flow(ui_patchlist, LV_FLEX_FLOW_ROW);
-	lv_obj_set_flex_align(ui_patchlist, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-
 	lv_obj_add_event_cb(ui_media, ui_event_media, LV_EVENT_ALL, NULL);
 }
 
@@ -82,6 +89,6 @@ void ui_init(void) {
 	lv_theme_t *theme = lv_theme_default_init(
 		dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), true, LV_FONT_DEFAULT);
 	lv_disp_set_theme(dispp, theme);
-	ui_Screen1_screen_init();
-	lv_disp_load_scr(ui_Screen1);
+	ui_PatchSelector_screen_init();
+	lv_disp_load_scr(ui_PatchSelector);
 }
