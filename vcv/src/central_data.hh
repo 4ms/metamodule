@@ -30,6 +30,13 @@ public:
 		std::lock_guard mguard{mtx};
 		moduleData.push_back({mod.id, mod.slug, module});
 		printf("Registered module id %lld (%.31s) %p\n", mod.id, mod.slug.c_str(), module);
+
+		// Check if any maps exist with this module id (happens if we load a patch file)
+		for (auto &map : maps) {
+			if (map.dst.moduleID == mod.id && map.dst_module == nullptr) {
+				map.dst_module = module;
+			}
+		}
 	}
 
 	void unregisterModule(ModuleID mod)

@@ -158,7 +158,7 @@ struct MetaModuleHubBase : public CommModule {
 			// TODO:
 			//  LabelButtonID src{mapSrcType[i], i, id};
 			LabelButtonID src{LabelButtonID::Types::Knob, i, id};
-			auto maps = centralData->getMappingsFromSrc(id);
+			auto maps = centralData->getMappingsFromSrc(src);
 			for (auto &m : maps) {
 				if (m.dst.moduleID != -1) {
 					Module *module = m.dst_module;
@@ -252,7 +252,7 @@ private:
 		std::vector<Mapping> maps;
 		maps.reserve(centralData->maps.size());
 		for (auto &m : centralData->maps)
-			maps.push_back({m.src, m.dst});
+			maps.push_back({m.src, m.dst, m.range_max, m.range_min, m.alias_name});
 		pw.addMaps(maps);
 
 		std::string yml = pw.printPatchYAML();
