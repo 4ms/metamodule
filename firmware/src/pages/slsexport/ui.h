@@ -14,8 +14,13 @@ extern "C" {
 
 extern lv_obj_t *ui_PatchSelector;
 extern lv_obj_t *ui_Title;
-void ui_event_media( lv_event_t * e);
-extern lv_obj_t *ui_media;
+extern lv_obj_t *ui_mediapanel;
+extern lv_obj_t *ui_USBbut;
+extern lv_obj_t *ui_USBlabel;
+extern lv_obj_t *ui_SDbut;
+extern lv_obj_t *ui_SDlabel;
+extern lv_obj_t *ui_Flashbut;
+extern lv_obj_t *ui_Flashlabel;
 extern lv_obj_t *ui_patchlist;
 
 
