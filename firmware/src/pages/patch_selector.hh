@@ -35,51 +35,18 @@ struct PatchSelectorPage : PageBase {
 		PageList::register_page(this, PageId::PatchSel);
 
 		ui_PatchSelector_screen_init();
-
 		base = ui_PatchSelector;
-		// base = lv_obj_create(nullptr);
+		roller = ui_patchlist;
+		nor_but = ui_Flashbut;
+		usb_but = ui_USBbut;
+		sd_but = ui_SDbut;
+		spinner = ui_waitspinner;
+
 		init_bg(base);
 
-		roller = ui_patchlist;
-		// roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
-
 		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(roller, patchlist_scroll_cb, LV_EVENT_KEY, this);
-
-		vol_buts[(int)Volume::NorFlash] = ui_Flashbut;
-		vol_buts[(int)Volume::USB] = ui_USBbut;
-		vol_buts[(int)Volume::SDCard] = ui_SDbut;
-
-		// lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		// lv_obj_add_style(roller, &Gui::plain_border_style, (int)LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
-		// lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
-
-		// lv_obj_set_pos(roller, 0, 30);
-		// lv_obj_set_size(roller, 320, 210);
-
-		// header_text = lv_label_create(base);
-		// lv_label_set_text_static(header_text, "Select a Patch:");
-		// lv_obj_add_style(header_text, &Gui::header_style, LV_PART_MAIN);
-		// lv_obj_set_align(base, LV_ALIGN_TOP_MID);
-		// lv_obj_set_pos(header_text, 0, 0);
-		// lv_obj_set_width(header_text, 320);
-
-		//TODO wait cont /spinner
-		// wait_cont = lv_obj_create(base);
-		// lv_obj_set_align(wait_cont, LV_ALIGN_CENTER);
-		// lv_obj_add_style(wait_cont, &style_wait_cont, LV_PART_MAIN);
-		// lv_cont_set_layout(wait_cont, LV_LAYOUT_CENTER);
-		// lv_cont_set_fit(wait_cont, LV_FIT_TIGHT);
-
-		// wait_text = lv_label_create(wait_cont);
-		// lv_obj_add_style(wait_text, &style_popup_patchname, LV_PART_MAIN);
-		// lv_obj_set_align(wait_text, LV_ALIGN_CENTER);
-		// lv_label_set_text(wait_text, "Refreshing Patches...");
-
-		// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-
-		// wait_group = lv_group_create();
 	}
 
 	void init() override {
@@ -152,26 +119,34 @@ struct PatchSelectorPage : PageBase {
 
 	void refresh_volumes() {
 		if (num_usb)
-			lv_obj_clear_state(vol_buts[(int)Volume::USB], LV_STATE_DISABLED);
+			lv_obj_clear_state(usb_but, LV_STATE_DISABLED);
 		else
-			lv_obj_add_state(vol_buts[(int)Volume::USB], LV_STATE_DISABLED);
+			lv_obj_add_state(usb_but, LV_STATE_DISABLED);
 
 		if (num_sdcard)
-			lv_obj_clear_state(vol_buts[(int)Volume::SDCard], LV_STATE_DISABLED);
+			lv_obj_clear_state(sd_but, LV_STATE_DISABLED);
 		else
-			lv_obj_add_state(vol_buts[(int)Volume::SDCard], LV_STATE_DISABLED);
+			lv_obj_add_state(sd_but, LV_STATE_DISABLED);
 
 		if (num_norflash)
-			lv_obj_clear_state(vol_buts[(int)Volume::NorFlash], LV_STATE_DISABLED);
+			lv_obj_clear_state(nor_but, LV_STATE_DISABLED);
 		else
-			lv_obj_add_state(vol_buts[(int)Volume::NorFlash], LV_STATE_DISABLED);
+			lv_obj_add_state(nor_but, LV_STATE_DISABLED);
 
-		for (unsigned i = 0; i < vol_buts.size(); i++) {
-			if (i == (unsigned)highlighted_vol)
-				lv_obj_add_state(vol_buts[(int)highlighted_vol], LV_STATE_CHECKED);
-			else
-				lv_obj_clear_state(vol_buts[i], LV_STATE_CHECKED);
-		}
+		if (highlighted_vol == Volume::USB)
+			lv_obj_add_state(usb_but, LV_STATE_CHECKED);
+		else
+			lv_obj_clear_state(usb_but, LV_STATE_CHECKED);
+
+		if (highlighted_vol == Volume::SDCard)
+			lv_obj_add_state(sd_but, LV_STATE_CHECKED);
+		else
+			lv_obj_clear_state(sd_but, LV_STATE_CHECKED);
+
+		if (highlighted_vol == Volume::NorFlash)
+			lv_obj_add_state(nor_but, LV_STATE_CHECKED);
+		else
+			lv_obj_clear_state(nor_but, LV_STATE_CHECKED);
 	}
 
 	void update() override {
@@ -186,11 +161,15 @@ struct PatchSelectorPage : PageBase {
 			case State::RequestedPatchList: {
 				auto message = patch_storage.get_message().message_type;
 				if (message == PatchStorageProxy::PatchListChanged) {
+					show_spinner();
 					refresh_patchlist(patch_storage.get_patch_list());
 					refresh_volumes();
+					hide_spinner();
 					state = State::Idle;
-				} else if (message == PatchStorageProxy::PatchListUnchanged)
+				} else if (message == PatchStorageProxy::PatchListUnchanged) {
+					hide_spinner();
 					state = State::Idle;
+				}
 				//else other messages ==> error? repeat request? idle?
 			} break;
 
@@ -204,8 +183,10 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::TryingToRequestPatchData:
-				if (patch_storage.request_viewpatch(selected_patch_vol, selected_patch))
+				if (patch_storage.request_viewpatch(selected_patch_vol, selected_patch)) {
 					state = State::RequestedPatchData;
+					show_spinner();
+				}
 				break;
 
 			case State::RequestedPatchData: {
@@ -219,13 +200,16 @@ struct PatchSelectorPage : PageBase {
 						PageList::set_selected_patch_id(selected_patch);
 						PageList::request_new_page(PageId::PatchView);
 						state = State::Closing;
+						hide_spinner();
 					} else {
 						printf_("Error parsing patch id %d, bytes_read = %d\n", selected_patch, message.bytes_read);
 						state = State::Idle;
+						hide_spinner();
 					}
 				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
 					printf_("Error loading patch id %d\n", selected_patch);
 					state = State::Idle;
+					hide_spinner();
 					//TODO: handle error... try reloading patch list?
 				}
 			} break;
@@ -233,29 +217,18 @@ struct PatchSelectorPage : PageBase {
 			case State::Closing:
 				break;
 		}
-
-		//TODO: Display state: "Refreshing...", "Loading..."
-
-		// if (should_show_patchview) {
-		// 	should_show_patchview = false;
-		// 	printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
-		// 	patch_storage.load_view_patch(selected_patch);
-		// 	blur();
-		// }
-
-		// lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
-		// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-
-		// 		if (!patchlist_was_ready) {
-		// 			// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-		// 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		// 			lv_group_set_editing(group, true);
-		// 			patchlist_was_ready = true;
-		// 		}
 	}
 
 	void blur() override {
-		// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		hide_spinner();
+	}
+
+	void show_spinner() {
+		lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+	}
+
+	void hide_spinner() {
+		lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
@@ -322,7 +295,10 @@ private:
 	lv_obj_t *roller;
 	// lv_obj_t *header_text;
 	lv_obj_t *base;
-	std::array<lv_obj_t *, 3> vol_buts;
+	lv_obj_t *usb_but;
+	lv_obj_t *sd_but;
+	lv_obj_t *nor_but;
+	lv_obj_t *spinner;
 
 	const std::string_view leader = "   ";
 	uint32_t num_usb;

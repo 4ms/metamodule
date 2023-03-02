@@ -22,6 +22,7 @@ extern lv_obj_t *ui_SDlabel;
 extern lv_obj_t *ui_Flashbut;
 extern lv_obj_t *ui_Flashlabel;
 extern lv_obj_t *ui_patchlist;
+extern lv_obj_t *ui_waitspinner;
 
 
 
