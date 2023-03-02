@@ -154,9 +154,10 @@ SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
 # Generateod:
-SOURCES += ../gui-guider-project/export/ui.c
-SOURCES += ../gui-guider-project/export/ui_helpers.c
-INCLUDES += -I../gui-guider-project/export
+SOURCES += src/pages/slsexport/ui.c
+SOURCES += src/pages/slsexport/ui_helpers.c
+SOURCES += $(wildcard src/pages/slsexport/ui_font_*.c)
+INCLUDES += -Isrc/pages/slsexport
 INCLUDES +=	-I$(LVGL_DIR)/$(LVGL_DIR_NAME)
 
 ifeq "$(USE_FEWER_MODULES)" "1"

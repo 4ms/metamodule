@@ -8,7 +8,7 @@
 #include "stm32xx.h"
 
 //exported:
-#include "ui.h"
+#include "slsexport/ui.h"
 extern "C" void ui_PatchSelector_screen_init();
 LV_FONT_DECLARE(lv_font_montserrat_10);
 LV_FONT_DECLARE(lv_font_montserrat_16);
@@ -36,6 +36,8 @@ struct PatchSelectorPage : PageBase {
 
 		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(roller, patchlist_scroll_cb, LV_EVENT_KEY, this);
+
+		media_roller = ui_media;
 
 		// lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
 		// lv_obj_add_style(roller, &Gui::plain_border_style, (int)LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
@@ -91,6 +93,7 @@ struct PatchSelectorPage : PageBase {
 			for (auto &p : patchfiles.usb) {
 				// lv_list_add_btn(roller, nullptr /*LV_SYMBOL_USB*/, p.patchname.c_str());
 				patchnames += leader;
+				// patchnames += LV_SYMBOL_USB;
 				patchnames += std::string_view{p.patchname};
 				patchnames += '\n';
 			}
@@ -219,6 +222,7 @@ struct PatchSelectorPage : PageBase {
 		auto idx = lv_roller_get_selected(_instance->roller);
 		auto usb_hdr = 0;
 		auto sd_hdr = 0;
+		Volume sel_vol = Volume::USB;
 		if (_instance->num_sdcard) {
 			if (_instance->num_usb)
 				sd_hdr += 1 + _instance->num_usb;
@@ -239,6 +243,12 @@ struct PatchSelectorPage : PageBase {
 				lv_roller_set_selected(_instance->roller, idx - 1, LV_ANIM_OFF);
 		}
 		_instance->last_idx = lv_roller_get_selected(_instance->roller);
+
+		if (idx > sd_hdr)
+			sel_vol = Volume::SDCard;
+		if (idx > nor_hdr)
+			sel_vol = Volume::NorFlash;
+		lv_roller_set_selected(_instance->media_roller, (uint32_t)sel_vol, LV_ANIM_ON);
 	}
 
 	static void patchlist_select_cb(lv_event_t *event) {
@@ -270,7 +280,8 @@ private:
 	lv_obj_t *roller;
 	// lv_obj_t *header_text;
 	lv_obj_t *base;
-	const std::string_view leader = " - ";
+	lv_obj_t *media_roller;
+	const std::string_view leader = "   ";
 	uint32_t num_usb;
 	uint32_t num_sdcard;
 	uint32_t num_norflash;

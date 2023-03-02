@@ -21,6 +21,7 @@ extern lv_obj_t *ui_patchlist;
 
 
 
+LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
 
 
 void ui_init(void);

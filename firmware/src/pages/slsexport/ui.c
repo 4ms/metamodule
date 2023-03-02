@@ -42,6 +42,7 @@ lv_obj_set_style_pad_left(ui_PatchSelector, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_right(ui_PatchSelector, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_top(ui_PatchSelector, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_bottom(ui_PatchSelector, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_PatchSelector, &lv_font_montserrat_14, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_Title = lv_label_create(ui_PatchSelector);
 lv_obj_set_width( ui_Title, LV_SIZE_CONTENT);  /// 1
@@ -73,7 +74,10 @@ lv_obj_set_flex_grow( ui_patchlist, 1);
 lv_obj_set_x( ui_patchlist, -4 );
 lv_obj_set_y( ui_patchlist, -4 );
 lv_obj_set_align( ui_patchlist, LV_ALIGN_BOTTOM_RIGHT );
+lv_obj_set_style_text_letter_space(ui_patchlist, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_line_space(ui_patchlist, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_patchlist, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_patchlist, &ui_font_MuseoSansRounded70014, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_add_event_cb(ui_media, ui_event_media, LV_EVENT_ALL, NULL);
 
