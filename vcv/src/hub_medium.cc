@@ -36,6 +36,8 @@ struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 		configParam(10, 0.f, 1.f, 0.f, "Knob Y");
 		configParam(11, 0.f, 1.f, 0.f, "Knob Z");
 		selfID.slug = "PanelMedium";
+
+		configParam(12, 0.f, 1.f, 0.f, "MidiNote");
 	}
 
 	~HubMedium() = default;
@@ -114,6 +116,10 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 9, fixDPIKnob({345.74, 91.39}));	 // x
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 10, fixDPIKnob({302.49, 123.24})); // y
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 11, fixDPIKnob({345.77, 157.00})); // z
+
+		///
+		addMidiValueMapPt("MidiNote", 12, fixDPIKnob({80, 40}));
+		///
 
 		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({36.34, 324.15}), JackDir::Input);
 		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({79.86, 324.15}), JackDir::Input);

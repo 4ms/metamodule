@@ -5,6 +5,7 @@
 #include "comm_widget.hh"
 #include "hub_jack.hh"
 #include "hub_knob.hh"
+#include "hub_midi.hh"
 #include "local_path.hh"
 #include "map_palette.hh"
 #include "patch_writer.hh"
@@ -366,5 +367,31 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 			addInput(jack);
 		else
 			addOutput(jack);
+	}
+
+	void addMidiValueMapPt(const std::string labelText, int knobId, Vec posPx, float defaultValue = 0.f)
+	{
+		auto *button = new HubMidiMapButton{*this};
+		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y - mm2px(kKnobSpacingY) / 2); // top-left
+		button->box.size.x = mm2px(10);
+		button->box.size.y = mm2px(10);
+		button->text = labelText;
+		button->id = {LabelButtonID::Types::MidiNote, knobId, hubModule ? hubModule->id : -1};
+		addChild(button);
+
+		auto *p = new HubMidiParam{*button};
+		p->box.pos = posPx;
+		p->box.pos = p->box.pos.minus(p->box.size.div(2));
+		p->app::ParamWidget::module = hubModule;
+		p->app::ParamWidget::paramId = knobId;
+		p->initParamQuantity();
+
+		if (module) {
+			auto pq = p->getParamQuantity();
+			pq = module->paramQuantities[knobId];
+			pq->defaultValue = defaultValue;
+			button->setParamQuantity(pq);
+		}
+		addParam(p);
 	}
 };
