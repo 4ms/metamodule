@@ -5,13 +5,12 @@ TabWidth : 4
 IndentWidth : 4
 ColumnLimit : 120
 AccessModifierOffset : -4
-AlignAfterOpenBracket: "Align"
+AlignAfterOpenBracket : "Align"
+AllowAllArgumentsOnNextLine : "true"
+AllowShortBlocksOnASingleLine : "true"
 AllowShortFunctionsOnASingleLine: "All"
 AllowShortIfStatementsOnASingleLine : "Never"
-AllowShortBlocksOnASingleLine : "true"
 AlwaysBreakTemplateDeclarations : "true"
-AllowAllArgumentsOnNextLine : "true"
-AlignAfterOpenBracket : "Align"
 BinPackArguments: false
 BinPackParameters: false
 BreakConstructorInitializers : "BeforeComma"
