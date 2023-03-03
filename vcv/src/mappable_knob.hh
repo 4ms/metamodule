@@ -98,6 +98,16 @@ class MappableKnob : public BaseKnobT {
 	// TODO: Make concept
 
 public:
+	void draw(const typename BaseKnobT::DrawArgs &args) override
+	{
+		auto src = centralData->getMappedSrcFromDst(getId());
+		if (src.moduleID > 0) {
+			const NVGcolor color = PaletteHub::color[src.objID];
+			MapMark::markKnob(args.vg, this->box, color);
+		}
+		BaseKnobT::draw(args);
+	}
+
 	// onButton is provided to customize the context menu for mappable knobs
 	void onButton(const event::Button &e) override
 	{

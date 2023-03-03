@@ -85,7 +85,7 @@ struct MetaModuleHubBase : public CommModule {
 			centralData->maps.clear();
 			for (size_t i = 0; i < json_array_size(mapsJ); i++) {
 				auto mappingJ = json_array_get(mapsJ, i);
-				Mapping mapping;
+				CentralData::MappingExt mapping;
 
 				if (json_is_object(mappingJ)) {
 					json_t *val;
@@ -126,14 +126,16 @@ struct MetaModuleHubBase : public CommModule {
 					else
 						mapping.alias_name = "";
 
+					mapping.dst_module = centralData->getRegisteredModulePtr(mapping.dst.moduleID);
+
 					centralData->maps.push_back(mapping);
 				}
 			}
-			for (auto &m : centralData->maps) {
-				if (m.src.objType == LabelButtonID::Types::Knob) {
-					centralData->registerKnobParamHandle(m.src, m.dst);
-				}
-			}
+			// for (auto &m : centralData->maps) {
+			// 	if (m.src.objType == LabelButtonID::Types::Knob) {
+			// 		centralData->registerKnobParamHandle(m.src, m.dst);
+			// 	}
+			// }
 		}
 	}
 
@@ -153,14 +155,16 @@ struct MetaModuleHubBase : public CommModule {
 	void processKnobMaps()
 	{
 		for (int i = 0; i < NumKnobMaps; i++) {
+			// TODO:
+			//  LabelButtonID src{mapSrcType[i], i, id};
 			LabelButtonID src{LabelButtonID::Types::Knob, i, id};
-			auto phvec = centralData->getParamHandlesFromSrc(src);
-			for (auto &paramHandle : phvec) {
-				if (paramHandle.moduleId != -1) {
-					Module *module = paramHandle.module;
+			auto maps = centralData->getMappingsFromSrc(src);
+			for (auto &m : maps) {
+				if (m.dst.moduleID != -1) {
+					Module *module = m.dst_module;
 					if (module) {
-						int paramId = paramHandle.paramId;
-						LabelButtonID dst{LabelButtonID::Types::Knob, paramId, paramHandle.moduleId};
+						int paramId = m.dst.objID;
+						LabelButtonID dst{LabelButtonID::Types::Knob, paramId, m.dst.moduleID};
 						auto [min, max] = centralData->getMapRange(src, dst);
 						auto newMappedVal = MathTools::map_value(params[i].getValue(), 0.0f, 1.0f, min, max);
 						ParamQuantity *paramQuantity = module->paramQuantities[paramId];
@@ -235,12 +239,21 @@ private:
 		labelText = "Creating patch..";
 		updateDisplay();
 
-		PatchFileWriter pw{centralData->moduleData};
+		std::vector<ModuleID> moduleData;
+		moduleData.reserve(centralData->moduleData.size());
+		for (auto &m : centralData->moduleData)
+			moduleData.push_back({m.id, m.slug});
+
+		PatchFileWriter pw{moduleData};
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
 		pw.setJackList(centralData->jackData);
 		pw.setParamList(centralData->paramData);
-		pw.addMaps(centralData->maps);
+		std::vector<Mapping> maps;
+		maps.reserve(centralData->maps.size());
+		for (auto &m : centralData->maps)
+			maps.push_back({m.src, m.dst, m.range_max, m.range_min, m.alias_name});
+		pw.addMaps(maps);
 
 		std::string yml = pw.printPatchYAML();
 		writeToFile(fileName + ".yml", yml);
@@ -281,6 +294,18 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	MetaModuleHubBase<NumKnobMaps> *hubModule;
 
 	MetaModuleHubBaseWidget() = default;
+
+	// void onHover(const HoverEvent &e) override
+	// {
+	// 	CommModuleWidget::onHover(e);
+	// 	centralData->processKnobParamHandleQueue();
+	// do {
+	// 	auto [src, dst] = centralData->popRegisterKnobParamHandle();
+	// 	if (src.moduleID < 0 || dst.moduleID < 0)
+	// 		break;
+	// 	centralData->registerKnobParamHandle(src, dst);
+	// } while (true);
+	// }
 
 	template<typename KnobType>
 	void addLabeledKnobPx(const std::string labelText, int knobId, Vec posPx, float defaultValue = 0.f)

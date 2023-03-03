@@ -20,6 +20,7 @@ INCLUDES += -I$(RYMLDIR)/ext/c4core/src
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS += -std=c++2a 
 FLAGS += $(INCLUDES)
+FLAGS += -g2
 
 CFLAGS +=
 CXXFLAGS += 
