@@ -18,7 +18,7 @@ void HubMapButton::draw(const DrawArgs &args)
 {
 	_updateState();
 
-	// Draw huge background rect to highlight a mapping has begun from this knob
+	// Draw a large background circle to highlight a mapping has begun from this knob
 	if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(id)) {
 		// const float padding_x = 2;
 		nvgBeginPath(args.vg);

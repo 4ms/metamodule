@@ -9,7 +9,7 @@ public:
 		: HubKnobMapButton{static_cast<CommModuleWidget &>(parent)}
 	{}
 
-	void draw(const DrawArgs &args) override { HubKnobMapButton::draw(args); }
+	// void draw(const DrawArgs &args) override { HubKnobMapButton::draw(args); }
 
 	// void setParamQuantity(ParamQuantity *paramQ) { paramQuantity = paramQ; }
 
@@ -72,12 +72,12 @@ public:
 		nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 		nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
 		nvgFontSize(args.vg, 9.0f);
-		nvgText(args.vg, box.size.x / 2.f, box.size.y / 2.f, "Midi" /*this->text.c_str()*/, NULL);
+		nvgText(args.vg, box.size.x / 2.f, box.size.y / 2.f, hubmidi_mapbut.text.c_str(), NULL);
 
 		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubmidi_mapbut.id), 16U);
 
 		const float spacing = 8;
-		const NVGcolor color = PaletteHub::color[hubmidi_mapbut.id.objID];
+		const NVGcolor color = PaletteHub::color(hubmidi_mapbut.id.objID);
 		auto _box = this->box;
 		for (unsigned i = 0; i < numMaps; i++) {
 			MapMark::markKnob(args.vg, _box, color);
