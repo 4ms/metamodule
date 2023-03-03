@@ -2,12 +2,9 @@
 #include "comm_data.hh"
 #include "map_palette.hh"
 #include <algorithm>
-#include <iostream>
 #include <map>
 #include <mutex>
-#include <queue>
 #include <rack.hpp>
-#include <unordered_map>
 #include <vector>
 
 #define pr_dbg printf
@@ -473,8 +470,6 @@ private:
 	LabelButtonID _cur_hover_obj;
 
 	LabelButtonID lastTouchedJack{LabelButtonID::Types::None, -1, -1};
-
-	std::queue<std::pair<LabelButtonID, LabelButtonID>> paramHandleQueue;
 
 	static inline std::mutex mtx;
 	static inline std::mutex paramHandleQmtx;
