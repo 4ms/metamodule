@@ -140,7 +140,7 @@ public:
 		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubKnobMapBut.id), 16U);
 
 		const float spacing = 8;
-		const NVGcolor color = PaletteHub::color[hubKnobMapBut.id.objID];
+		const NVGcolor color = PaletteHub::color(hubKnobMapBut.id.objID);
 		auto _box = this->box;
 		for (unsigned i = 0; i < numMaps; i++) {
 			MapMark::markKnob(args.vg, _box, color);

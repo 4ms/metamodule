@@ -24,7 +24,7 @@ void HubMapButton::draw(const DrawArgs &args)
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y / 2);
 		const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
-		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color[id.objID], alpha));
+		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color(id.objID), alpha));
 		nvgFill(args.vg);
 	}
 

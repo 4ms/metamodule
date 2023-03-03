@@ -33,7 +33,7 @@ public:
 				nvgBeginPath(args.vg);
 				nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y / 2);
 				float alpha = hovered ? 0.75 : 0.4;
-				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alpha);
+				NVGcolor color = rack::color::alpha(PaletteHub::color(src.objID), alpha);
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
 			}
@@ -41,7 +41,7 @@ public:
 
 		if ((id.moduleID >= 0) && centralData->isLabelButtonDstMapped(id)) {
 			int srcPortId = centralData->getMappedSrcFromDst(id).objID;
-			NVGcolor color = PaletteHub::color[srcPortId];
+			NVGcolor color = PaletteHub::color(srcPortId);
 			Rect box = this->box.grow(Vec{-margin / 2, -margin / 2});
 			if constexpr (InputOrOutput == MappableJackType::Output)
 				MapMark::markOutputJack(args.vg, box, color);

@@ -29,7 +29,7 @@ public:
 				nvgBeginPath(args.vg);
 				nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y * 0.5f);
 				float alphac = _hovered ? 0.75 : 0.4;
-				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alphac);
+				NVGcolor color = rack::color::alpha(PaletteHub::color(src.objID), alphac);
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
 			}
@@ -83,7 +83,7 @@ public:
 				nvgBeginPath(args.vg);
 				nvgRect(args.vg, 0, 0, box.size.x, box.size.y);
 				float alphac = _hovered ? 0.75 : 0.4;
-				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alphac);
+				NVGcolor color = rack::color::alpha(PaletteHub::color(src.objID), alphac);
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
 			}
@@ -102,7 +102,7 @@ public:
 	{
 		auto src = centralData->getMappedSrcFromDst(getId());
 		if (src.moduleID > 0) {
-			const NVGcolor color = PaletteHub::color[src.objID];
+			const NVGcolor color = PaletteHub::color(src.objID);
 			MapMark::markKnob(args.vg, this->box, color);
 		}
 		BaseKnobT::draw(args);
