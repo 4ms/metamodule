@@ -102,11 +102,14 @@ struct PatchSelectorPage : PageBase {
 		lv_roller_set_options(roller, patchnames.c_str(), LV_ROLLER_MODE_NORMAL);
 
 		//refresh header positions
+		usb_hdr = 0;
+		sd_hdr = 0;
 		if (num_sdcard) {
 			if (num_usb)
 				sd_hdr += 1 + num_usb;
 		}
 
+		nor_hdr = 0;
 		if (num_norflash) {
 			if (num_usb)
 				nor_hdr += 1 + num_usb;
