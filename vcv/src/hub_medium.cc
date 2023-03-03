@@ -10,9 +10,6 @@
 #include "plugin.hh"
 
 // Note: in v2, first the module is constructed, then dataFromJson is called, then the Widget is constructed
-constexpr static unsigned NumMidiSrcs = 2;
-constexpr static unsigned NumMappings = PanelDef::NumKnobs + NumMidiSrcs;
-
 struct HubMediumMappings {
 	constexpr static unsigned NumMidiSrcs = 2;
 	constexpr static unsigned NumMappings = PanelDef::NumKnobs + NumMidiSrcs;
@@ -144,7 +141,7 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 11, fixDPIKnob({345.77, 157.00})); // z
 
 		addMidiValueMapPt("MidiNote", HubMedium::MIDI_MONO_NOTE, fixDPIKnob({60, 40}), LabelButtonID::Types::MidiNote);
-		addMidiValueMapPt("MidiGate", HubMedium::MIDI_MONO_GATE, fixDPIKnob({60, 60}), LabelButtonID::Types::MidiGate);
+		addMidiValueMapPt("MidiGate", HubMedium::MIDI_MONO_GATE, fixDPIKnob({60, 70}), LabelButtonID::Types::MidiGate);
 
 		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({36.34, 324.15}), JackDir::Input);
 		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({79.86, 324.15}), JackDir::Input);

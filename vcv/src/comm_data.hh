@@ -17,7 +17,9 @@ struct LabelButtonID {
 	bool mappable_to(const Types otherType) const
 	{
 		return (objType == otherType) || (objType == Types::Knob && otherType == Types::MidiNote) ||
-			   (objType == Types::MidiNote && otherType == Types::Knob);
+			   (objType == Types::MidiNote && otherType == Types::Knob) ||
+			   (objType == Types::MidiGate && otherType == Types::Knob) ||
+			   (objType == Types::Knob && otherType == Types::MidiGate);
 	}
 
 	const char *objTypeStr() const

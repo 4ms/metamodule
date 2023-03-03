@@ -155,7 +155,7 @@ struct MetaModuleHubBase : public CommModule {
 	// Hub class needs to call this from its process
 	void processKnobMaps()
 	{
-		for (int i = 0; i < MappingConf::NumMappings; i++) {
+		for (unsigned i = 0; i < MappingConf::NumMappings; i++) {
 			LabelButtonID src{MappingConf::mapping_srcs[i], i, id};
 			auto maps = centralData->getMappingsFromSrc(src);
 			for (auto &m : maps) {
@@ -370,9 +370,10 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	void addMidiValueMapPt(const std::string labelText, int knobId, Vec posPx, LabelButtonID::Types type)
 	{
 		auto *button = new HubMidiMapButton{*this};
-		button->box.pos = Vec(posPx.x - mm2px(10) / 2, posPx.y - mm2px(10) / 2); // top-left
-		button->box.size.x = mm2px(10);
+		button->box.size.x = mm2px(12);
 		button->box.size.y = mm2px(10);
+		button->box.pos = posPx; // Vec(posPx.x - mm2px(12) / 2, posPx.y - mm2px(10) / 2); // top-left
+		button->box.pos = button->box.pos.minus(button->box.size.div(2));
 		button->text = labelText;
 		button->id = {type, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);

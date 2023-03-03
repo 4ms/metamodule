@@ -40,6 +40,7 @@ void HubMapButton::draw(const DrawArgs &args)
 
 void HubMapButton::onDragStart(const event::DragStart &e)
 {
+	printf("HubMapButton::onDragStart\n");
 	if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
 		return;
 	}
@@ -51,6 +52,7 @@ void HubMapButton::onDragStart(const event::DragStart &e)
 		centralData->abortMappingProcedure();
 	}
 	if (!currentSourceIsThisButton) {
+		printf("Starting mapping: src m:%lld, p:%lld, t:%d\n", id.moduleID, id.objID, id.objType);
 		centralData->startMappingProcedure(id);
 	}
 

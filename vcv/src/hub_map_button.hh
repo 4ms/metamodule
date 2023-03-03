@@ -22,9 +22,11 @@ public:
 	bool isCurrentMapSrc = false;
 	LabelButtonID mappedToId{LabelButtonID::Types::None, -1, -1};
 
-private:
 	// void _createMapping(LabelButtonID srcId);
+protected:
 	void _updateState();
 	bool _hovered{false};
+
+private:
 	CommModuleWidget &_parent;
 };

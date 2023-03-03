@@ -2,57 +2,28 @@
 #include "hub_knob.hh"
 
 class HubMidiMapButton : public HubKnobMapButton {
-	// ParamQuantity *paramQuantity = nullptr;
 
 public:
 	HubMidiMapButton(CommModuleWidget &parent)
 		: HubKnobMapButton{static_cast<CommModuleWidget &>(parent)}
 	{}
 
-	// void draw(const DrawArgs &args) override { HubKnobMapButton::draw(args); }
+	void draw(const DrawArgs &args) override
+	{
+		HubMapButton::_updateState();
 
-	// void setParamQuantity(ParamQuantity *paramQ) { paramQuantity = paramQ; }
+		// Same as HubMapButton::draw except use a rounded rect, and don't draw alias below
 
-	// void onDeselect(const event::Deselect &e) override
-	// {
-	// 	bool registerSuccess = false;
-
-	// 	// Check if a ParamWidget was touched
-	// 	ParamWidget *touchedParam = APP->scene->rack->getTouchedParam();
-	// 	printf("touchedParam: %p\n", touchedParam);
-	// 	if (touchedParam && touchedParam->getParamQuantity()) {
-	// 		printf("touchedParam->PQ: %p\n", touchedParam->getParamQuantity());
-
-	// 		int64_t moduleId = touchedParam->module->id;
-	// 		printf("touchedParam->module->id: %lld\n", touchedParam->module->id);
-
-	// 		int objId = touchedParam->getParamQuantity()->paramId;
-	// 		printf("touchedParam->PQ->paramId: %d\n", touchedParam->getParamQuantity()->paramId);
-
-	// 		APP->scene->rack->setTouchedParam(nullptr);
-
-	// 		registerSuccess = registerMapping(moduleId, objId);
-	// 	}
-
-	// 	if (!registerSuccess) {
-	// 		centralData->abortMappingProcedure();
-	// 		printf("Failed mapping\n");
-	// 	}
-	// }
-
-	// void onButton(const event::Button &e) override
-	// {
-	// 	// Right click to open context menu
-	// 	if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-	// 		if (paramQuantity) {
-	// 			makeKnobMenu(paramQuantity, id);
-	// 			e.consume(this);
-	// 		}
-	// 	} else {
-	// 		Button::onButton(e);
-	// 	}
-	// }
-	// TODO: add right-click menu, same as in HubKnob
+		// Draw a large background rounded rect to highlight a mapping has begun from this knob
+		if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(id)) {
+			// const float padding_x = 2;
+			nvgBeginPath(args.vg);
+			nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 4);
+			const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
+			nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color(id.objID), alpha));
+			nvgFill(args.vg);
+		}
+	}
 };
 
 class HubMidiParam : public ParamWidget {
@@ -114,16 +85,21 @@ public:
 
 	void onHover(const event::Hover &e) override
 	{
-		// If the knob is mapped, then we want to pass the hover down to the HubKnobMapButton object below
-		// so that the HubMapKnobButton can highlight even if we're hovering the knob itself.
-		// So, don't consume the hover and just do nothing.
-		// On the other hand, if the knob is not mapped, then consume the hover so that hovering the knob
-		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(hubmidi_mapbut.id))
-			return;
-
-		e.consume(this);
+		// For MidiMap, always show the highlight. Returning allows HubMidiMapButton to handle onHover
+		return;
 	}
+
+	// onDeselect and onDragStart are passed to the HubMidiMapButton
+	// In order to make the HubMidiParam seem "invisible"
+	// but still will accept onButton events so it can be mapped
+	// to VCV's MidiMaps module
+	void onDeselect(const event::Deselect &e) override
+	{
+		ParamWidget::onDeselect(e);
+		hubmidi_mapbut.onDeselect(e);
+	}
+
+	void onDragStart(const event::DragStart &e) override { hubmidi_mapbut.onDragStart(e); }
 
 	struct ParamResetItem : ui::MenuItem {
 		ParamWidget *paramWidget;
