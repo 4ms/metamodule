@@ -16,7 +16,7 @@
 #include <functional>
 #include <string.h>
 
-template<int NumKnobMaps>
+template<typename MappingConf>
 struct MetaModuleHubBase : public CommModule {
 
 	std::function<void()> updatePatchName;
@@ -155,10 +155,8 @@ struct MetaModuleHubBase : public CommModule {
 	// Hub class needs to call this from its process
 	void processKnobMaps()
 	{
-		for (int i = 0; i < NumKnobMaps; i++) {
-			// TODO:
-			//  LabelButtonID src{mapSrcType[i], i, id};
-			LabelButtonID src{LabelButtonID::Types::Knob, i, id};
+		for (int i = 0; i < MappingConf::NumMappings; i++) {
+			LabelButtonID src{MappingConf::mapping_srcs[i], i, id};
 			auto maps = centralData->getMappingsFromSrc(src);
 			for (auto &m : maps) {
 				if (m.dst.moduleID != -1) {
@@ -288,11 +286,11 @@ private:
 	}
 };
 
-template<size_t NumKnobMaps>
+template<typename MappingConf>
 struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 	Label *valueLabel;
-	MetaModuleHubBase<NumKnobMaps> *hubModule;
+	MetaModuleHubBase<MappingConf> *hubModule;
 
 	MetaModuleHubBaseWidget() = default;
 
@@ -369,17 +367,18 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 			addOutput(jack);
 	}
 
-	void addMidiValueMapPt(const std::string labelText, int knobId, Vec posPx, float defaultValue = 0.f)
+	void addMidiValueMapPt(const std::string labelText, int knobId, Vec posPx, LabelButtonID::Types type)
 	{
 		auto *button = new HubMidiMapButton{*this};
-		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y - mm2px(kKnobSpacingY) / 2); // top-left
+		button->box.pos = Vec(posPx.x - mm2px(10) / 2, posPx.y - mm2px(10) / 2); // top-left
 		button->box.size.x = mm2px(10);
 		button->box.size.y = mm2px(10);
 		button->text = labelText;
-		button->id = {LabelButtonID::Types::MidiNote, knobId, hubModule ? hubModule->id : -1};
+		button->id = {type, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
 
 		auto *p = new HubMidiParam{*button};
+		p->setSize(mm2px({8, 4}));
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
 		p->app::ParamWidget::module = hubModule;
@@ -389,7 +388,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		if (module) {
 			auto pq = p->getParamQuantity();
 			pq = module->paramQuantities[knobId];
-			pq->defaultValue = defaultValue;
+			pq->defaultValue = 0.f;
 			button->setParamQuantity(pq);
 		}
 		addParam(p);

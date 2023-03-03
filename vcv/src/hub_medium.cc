@@ -10,10 +10,33 @@
 #include "plugin.hh"
 
 // Note: in v2, first the module is constructed, then dataFromJson is called, then the Widget is constructed
+constexpr static unsigned NumMidiSrcs = 2;
+constexpr static unsigned NumMappings = PanelDef::NumKnobs + NumMidiSrcs;
 
-struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
+struct HubMediumMappings {
+	constexpr static unsigned NumMidiSrcs = 2;
+	constexpr static unsigned NumMappings = PanelDef::NumKnobs + NumMidiSrcs;
+	constexpr static std::array<LabelButtonID::Types, NumMappings> mapping_srcs{
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::Knob,
+		LabelButtonID::Types::MidiNote,
+		LabelButtonID::Types::MidiGate,
+	};
+};
 
-	enum ParamIds { ENUMS(KNOBS, PanelDef::NumPot), WRITE_PATCH, NUM_PARAMS };
+struct HubMedium : MetaModuleHubBase<HubMediumMappings> {
+
+	enum ParamIds { ENUMS(KNOBS, PanelDef::NumPot), MIDI_MONO_NOTE, MIDI_MONO_GATE, WRITE_PATCH, NUM_PARAMS };
 	enum InputIds { NUM_INPUTS = PanelDef::NumInJacks };
 	enum OutputIds { NUM_OUTPUTS = PanelDef::NumOutJacks };
 	enum LightIds { NUM_LIGHTS = 0 };
@@ -35,9 +58,12 @@ struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 		configParam(9, 0.f, 1.f, 0.f, "Knob X");
 		configParam(10, 0.f, 1.f, 0.f, "Knob Y");
 		configParam(11, 0.f, 1.f, 0.f, "Knob Z");
-		selfID.slug = "PanelMedium";
 
-		configParam(12, 0.f, 1.f, 0.f, "MidiNote");
+		configParam(MIDI_MONO_NOTE, 0.f, 1.f, 0.f, "MidiNote");
+		configParam(MIDI_MONO_GATE, 0.f, 1.f, 0.f, "MidiGate");
+
+		configParam(WRITE_PATCH, 0.f, 1.f, 0.f, "Export patch file");
+		selfID.slug = "PanelMedium";
 	}
 
 	~HubMedium() = default;
@@ -50,7 +76,7 @@ struct HubMedium : MetaModuleHubBase<PanelDef::NumKnobs> {
 	}
 };
 
-struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
+struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 	LedDisplayTextField *patchName;
 	LedDisplayTextField *patchDesc;
 
@@ -117,9 +143,8 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<PanelDef::NumKnobs> {
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 10, fixDPIKnob({302.49, 123.24})); // y
 		addLabeledKnobPx<RoundSmallBlackKnob>("", 11, fixDPIKnob({345.77, 157.00})); // z
 
-		///
-		addMidiValueMapPt("MidiNote", 12, fixDPIKnob({80, 40}));
-		///
+		addMidiValueMapPt("MidiNote", HubMedium::MIDI_MONO_NOTE, fixDPIKnob({60, 40}), LabelButtonID::Types::MidiNote);
+		addMidiValueMapPt("MidiGate", HubMedium::MIDI_MONO_GATE, fixDPIKnob({60, 60}), LabelButtonID::Types::MidiGate);
 
 		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({36.34, 324.15}), JackDir::Input);
 		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({79.86, 324.15}), JackDir::Input);
