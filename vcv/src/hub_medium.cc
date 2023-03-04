@@ -1,5 +1,5 @@
+#include "CoreModules/meta-module-hub/panel_medium_defs.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "CoreModules/panel_medium_defs.hh"
 #include "comm_data.hh"
 #include "comm_module.hh"
 #include "comm_widget.hh"
