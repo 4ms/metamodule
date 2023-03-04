@@ -1,6 +1,7 @@
 #pragma once
 #include "comm_data.hh"
 #include "map_palette.hh"
+#include "patch/midi_def.hh"
 #include <algorithm>
 #include <map>
 #include <mutex>
@@ -203,37 +204,47 @@ public:
 	// Called by UI Thread: HubMapButton
 	void registerMapDest(LabelButtonID dest)
 	{
-		pr_dbg("registerMapDest: dest: objID=%lld, moduleID=%lld\n", dest.objID, dest.moduleID);
+		pr_dbg("registerMapDest: dest: objID=%lld, moduleID=%lld t:%d\n", dest.objID, dest.moduleID, dest.objType);
+		pr_dbg("current src: objID=%lld, moduleID=%lld t:%d\n",
+			   _currentMap.src.objID,
+			   _currentMap.src.moduleID,
+			   _currentMap.src.objType);
+
+		if (!_isMappingInProgress) {
+			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
+			return;
+		}
+
+		_currentMap.dst = dest;
+		_currentMap.dst_module = getRegisteredModulePtr(dest.moduleID);
+		if (!_currentMap.dst_module) {
+			printf("Dest module ptr is null (not registered?). Aborting mapping.\n");
+			return;
+		}
 
 		{ // start mapsmtx lock
 			std::lock_guard mguard{mapsmtx};
 
-			if (!_isMappingInProgress) {
-				pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
-				return;
+			if (_currentMap.src.objType == LabelButtonID::Types::MidiNote){
+			// TODO:
 			}
-
-			_currentMap.dst = dest;
-			_currentMap.dst_module = getRegisteredModulePtr(dest.moduleID);
-			if (!_currentMap.dst_module) {
-				printf("Dest module ptr is null (not registered?). Aborting mapping.\n");
-				return;
-			}
-
+			
 			// Look for an existing map to the dst
 			bool found = false;
 			for (auto &m : maps) {
 				if (m.dst == _currentMap.dst) {
 					found = true;
-					pr_dbg("Found an existing map to m: %lld, p: %lld\n", m.dst.moduleID, m.dst.objID);
+					pr_dbg("Found an existing map to dst (src was m:%lld p:%lld t:%d\n",
+						   m.src.moduleID,
+						   m.src.objID,
+						   m.src.objType);
 					m.src = _currentMap.src;
 					break;
 				}
 			}
 			if (!found) {
-				pr_dbg("Didn't found an existing map to m: %lld, p: %lld\n",
-					   _currentMap.dst.moduleID,
-					   _currentMap.dst.objID);
+				pr_dbg("Didn't found an existing map to dst, adding it to centralData.\n");
+
 				// Rule: hub output jacks can only be mapped to one dst
 				if (_currentMap.src.objType == LabelButtonID::Types::OutputJack) {
 					auto num_erased = std::erase_if(maps, [&](auto const &m) { return m.src == _currentMap.src; });
@@ -244,6 +255,7 @@ public:
 						   _currentMap.src.objID);
 					(void)num_erased;
 				}
+
 				maps.push_back(_currentMap);
 			}
 
