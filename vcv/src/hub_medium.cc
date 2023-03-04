@@ -1,3 +1,4 @@
+#include "CoreModules/meta-module-hub/MetaModule_info.hh"
 #include "CoreModules/meta-module-hub/panel_medium_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "comm_data.hh"
@@ -86,26 +87,20 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 		hubModule = module;
 
 		if (hubModule != nullptr) {
-			hubModule->updateDisplay = [this] { this->valueLabel->text = this->hubModule->labelText; };
+			hubModule->updateDisplay = [this] { this->statusText->text = this->hubModule->labelText; };
 			hubModule->updatePatchName = [this] {
 				this->hubModule->patchNameText = this->patchName->text;
 				this->hubModule->patchDescText = this->patchDesc->text;
 			};
 		}
 
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/meta-module-medium-p8.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/modules/metamodule_p10-artwork.svg")));
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		valueLabel = createWidget<Label>(mm2px(Vec(0, 4)));
-		valueLabel->color = rack::color::BLACK;
-		valueLabel->text = "";
-		valueLabel->fontSize = 10;
-		addChild(valueLabel);
-
-		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(37, 12.7)));
+		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(36.1, 10.5)));
 		if (hubModule != nullptr && hubModule->patchNameText.length() > 0)
 			patchName->text = this->hubModule->patchNameText;
 		else
@@ -115,7 +110,13 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 		patchName->cursor = 0;
 		addChild(patchName);
 
-		patchDesc = createWidget<MetaModuleTextBox>(mm2px(Vec(37, 24.7)));
+		statusText = createWidget<Label>(mm2px(Vec(34.1, 17.8)));
+		statusText->color = rack::color::WHITE;
+		statusText->text = "";
+		statusText->fontSize = 10;
+		addChild(statusText);
+
+		patchDesc = createWidget<MetaModuleTextBox>(mm2px(Vec(36, 22.98)));
 		if (hubModule != nullptr && hubModule->patchDescText.length() > 0)
 			patchDesc->text = this->hubModule->patchDescText;
 		else
@@ -125,41 +126,40 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
 
-		addParam(createParamCentered<BefacoPush>(fixDPIKnob({298.90, 49.35}), module, HubMedium::WRITE_PATCH));
+		for (auto knob : MetaModuleInfo::Knobs) {
+			auto ctr_pos = mm2px({knob.x_mm, knob.y_mm});
+			if (knob.knob_style == KnobDef::Small)
+				addLabeledKnobPx<Small9mmKnob>(knob.short_name, knob.id, ctr_pos, 14.f);
+			if (knob.knob_style == KnobDef::Medium)
+				addLabeledKnobPx<Davies1900hBlackKnob4ms>(knob.short_name, knob.id, ctr_pos, 21.f);
+		}
 
-		addLabeledKnobPx<RoundBlackKnob>("", 0, fixDPIKnob({33.35, 213.10}));		 // A
-		addLabeledKnobPx<RoundBlackKnob>("", 1, fixDPIKnob({92.87, 201.66}));		 // B
-		addLabeledKnobPx<RoundBlackKnob>("", 2, fixDPIKnob({153.76, 213.10}));		 // C
-		addLabeledKnobPx<RoundBlackKnob>("", 3, fixDPIKnob({218.70, 213.10}));		 // D
-		addLabeledKnobPx<RoundBlackKnob>("", 4, fixDPIKnob({279.38, 201.66}));		 // E
-		addLabeledKnobPx<RoundBlackKnob>("", 5, fixDPIKnob({340.00, 213.10}));		 // F
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 6, fixDPIKnob({27.06, 73.20}));	 // u
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 7, fixDPIKnob({61.47, 115.71}));	 // v
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 8, fixDPIKnob({27.06, 157.79}));	 // w
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 9, fixDPIKnob({345.74, 91.39}));	 // x
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 10, fixDPIKnob({302.49, 123.24})); // y
-		addLabeledKnobPx<RoundSmallBlackKnob>("", 11, fixDPIKnob({345.77, 157.00})); // z
+		for (auto jack : MetaModuleInfo::InJacks)
+			addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, mm2px({jack.x_mm, jack.y_mm}), JackDir::Input);
 
-		addMidiValueMapPt("MidiNote", HubMedium::MIDI_MONO_NOTE, fixDPIKnob({60, 40}), LabelButtonID::Types::MidiNote);
-		addMidiValueMapPt("MidiGate", HubMedium::MIDI_MONO_GATE, fixDPIKnob({60, 70}), LabelButtonID::Types::MidiGate);
+		for (auto jack : MetaModuleInfo::OutJacks)
+			addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, mm2px({jack.x_mm, jack.y_mm}), JackDir::Output);
 
-		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({36.34, 324.15}), JackDir::Input);
-		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({79.86, 324.15}), JackDir::Input);
-		addLabeledJackPx<PJ301MPort>("", 2, fixDPI({122.6, 324.18}), JackDir::Input);
-		addLabeledJackPx<PJ301MPort>("", 3, fixDPI({166.12, 324.18}), JackDir::Input);
-		addLabeledJackPx<PJ301MPort>("", 4, fixDPI({109.61, 282.75}), JackDir::Input);
-		addLabeledJackPx<PJ301MPort>("", 5, fixDPI({153.13, 282.75}), JackDir::Input);
-		addLabeledJackPx<PJ301MPort>("", 6, fixDPI({22.9, 274.7}), JackDir::Input);
-		addLabeledJackPx<PJ301MPort>("", 7, fixDPI({66.42, 274.7}), JackDir::Input);
+		auto &savebut = MetaModuleInfo::Switches[MetaModuleInfo::SwitchSave];
+		addParam(createParamCentered<BefacoPush>(mm2px({savebut.x_mm, savebut.y_mm}), module, HubMedium::WRITE_PATCH));
 
-		addLabeledJackPx<PJ301MPort>("", 0, fixDPI({209.28, 324.18}), JackDir::Output);
-		addLabeledJackPx<PJ301MPort>("", 1, fixDPI({252.8, 324.18}), JackDir::Output);
-		addLabeledJackPx<PJ301MPort>("", 2, fixDPI({295.21, 324.2}), JackDir::Output);
-		addLabeledJackPx<PJ301MPort>("", 3, fixDPI({338.73, 324.2}), JackDir::Output);
-		addLabeledJackPx<PJ301MPort>("", 4, fixDPI({222.16, 282.79}), JackDir::Output);
-		addLabeledJackPx<PJ301MPort>("", 5, fixDPI({265.68, 282.79}), JackDir::Output);
-		addLabeledJackPx<PJ301MPort>("", 6, fixDPI({308.9, 282.15}), JackDir::Output);
-		addLabeledJackPx<PJ301MPort>("", 7, fixDPI({352.42, 282.15}), JackDir::Output);
+		auto &midinote = MetaModuleInfo::Switches[MetaModuleInfo::SwitchNote];
+		addMidiValueMapSrc("MidiNote",
+						   HubMedium::MIDI_MONO_NOTE,
+						   mm2px({midinote.x_mm, midinote.y_mm}),
+						   LabelButtonID::Types::MidiNote);
+
+		auto &midigate = MetaModuleInfo::Switches[MetaModuleInfo::SwitchGate];
+		addMidiValueMapSrc("MidiGate",
+						   HubMedium::MIDI_MONO_GATE,
+						   mm2px({midigate.x_mm, midigate.y_mm}),
+						   LabelButtonID::Types::MidiGate);
+
+		// auto &midicc = MetaModuleInfo::Switches[MetaModuleInfo::SwitchCc];
+		// addMidiValueMapPt("MidiCC",
+		// 				  HubMedium::MIDI_CC,
+		// 				  mm2px({midigate.x_mm, midigate.y_mm}),
+		// 				  LabelButtonID::Types::MidiCC);
 	}
 };
 

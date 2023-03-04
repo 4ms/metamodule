@@ -289,7 +289,7 @@ private:
 template<typename MappingConf>
 struct MetaModuleHubBaseWidget : CommModuleWidget {
 
-	Label *valueLabel;
+	Label *statusText;
 	MetaModuleHubBase<MappingConf> *hubModule;
 
 	MetaModuleHubBaseWidget() = default;
@@ -307,12 +307,13 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 	// }
 
 	template<typename KnobType>
-	void addLabeledKnobPx(const std::string labelText, int knobId, Vec posPx, float defaultValue = 0.f)
+	void addLabeledKnobPx(
+		std::string_view labelText, int knobId, Vec posPx, float sz_mm = kKnobSpacingX, float defaultValue = 0.f)
 	{
 		HubKnobMapButton *button = new HubKnobMapButton{*this};
-		button->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y - mm2px(kKnobSpacingY) / 2); // top-left
-		button->box.size.x = mm2px(kKnobSpacingX);
-		button->box.size.y = mm2px(kKnobSpacingY);
+		button->box.pos = Vec(posPx.x - mm2px(sz_mm) / 2, posPx.y - mm2px(sz_mm) / 2); // top-left
+		button->box.size.x = mm2px(sz_mm);
+		button->box.size.y = mm2px(sz_mm);
 		button->text = labelText;
 		button->id = {LabelButtonID::Types::Knob, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
@@ -333,17 +334,10 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		addParam(p);
 	}
 
-	template<typename KnobType>
-	void addLabeledKnobMM(const std::string labelText, int knobId, Vec posMM, float defaultValue = 0.f)
-	{
-		Vec posPx = mm2px(posMM);
-		addLabeledKnobPx<KnobType>(labelText, knobId, posPx, defaultValue);
-	}
-
 	enum class JackDir { Input, Output };
 
 	template<typename JackType>
-	void addLabeledJackPx(const std::string labelText, int jackId, Vec posPx, JackDir inout)
+	void addLabeledJackPx(std::string_view labelText, int jackId, Vec posPx, JackDir inout)
 	{
 		auto mapButton = new HubJackMapButton{*this};
 
@@ -367,19 +361,19 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 			addOutput(jack);
 	}
 
-	void addMidiValueMapPt(const std::string labelText, int knobId, Vec posPx, LabelButtonID::Types type)
+	void addMidiValueMapSrc(const std::string labelText, int knobId, Vec posPx, LabelButtonID::Types type)
 	{
 		auto *button = new HubMidiMapButton{*this};
-		button->box.size.x = mm2px(12);
-		button->box.size.y = mm2px(10);
-		button->box.pos = posPx; // Vec(posPx.x - mm2px(12) / 2, posPx.y - mm2px(10) / 2); // top-left
+		button->box.size.x = mm2px(13.5);
+		button->box.size.y = mm2px(5.6);
+		button->box.pos = posPx;
 		button->box.pos = button->box.pos.minus(button->box.size.div(2));
 		button->text = labelText;
 		button->id = {type, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
 
 		auto *p = new HubMidiParam{*button};
-		p->setSize(mm2px({8, 4}));
+		p->setSize(mm2px({12, 4}));
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
 		p->app::ParamWidget::module = hubModule;
