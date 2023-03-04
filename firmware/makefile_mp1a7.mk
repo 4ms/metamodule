@@ -105,6 +105,7 @@ SOURCES += src/patchlist.cc
 SOURCES += src/patchlist_ryml_tests.cc
 SOURCES += src/pages/page_manager.cc
 
+SOURCES += $(SHARED)/CoreModules/meta-module-hub/panel_medium.cc
 ifeq "$(USE_FEWER_MODULES)" "1"
 SOURCES += $(SHARED)/CoreModules/DjembeCore.cc
 SOURCES += $(SHARED)/CoreModules/StMixCore.cc
@@ -113,7 +114,6 @@ SOURCES += $(SHARED)/CoreModules/SMRCore.cc
 SOURCES += $(SHARED)/CoreModules/MultiLFOCore.cc
 SOURCES += $(SHARED)/CoreModules/PitchShiftCore.cc
 SOURCES += $(SHARED)/CoreModules/HPFCore.cc
-SOURCES += $(SHARED)/CoreModules/panel_medium.cc
 SOURCES += $(SHARED)/CoreModules/InfOscCore.cc
 SOURCES += $(SHARED)/CoreModules/KPLSCore.cc
 SOURCES += $(SHARED)/CoreModules/FreeverbCore.cc
