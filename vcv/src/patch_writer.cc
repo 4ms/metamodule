@@ -87,13 +87,30 @@ void PatchFileWriter::setParamList(std::vector<ParamStatus> &params)
 	}
 }
 
-void PatchFileWriter::addMaps(std::vector<Mapping> maps)
+// void rectify_midi_maps(std::vector<Mapping> &maps)
+//{
+//	int num_midinote_mappings = std::count_if(
+//		maps.begin(), maps.end(), [](auto &m) { return m.src.objType == LabelButtonID::Types::MidiNote; });
+//	int num_midigate_mappings = std::count_if(
+//		maps.begin(), maps.end(), [](auto &m) { return m.src.objType == LabelButtonID::Types::MidiGate; });
+
+//	int num_midi_mappings = std::max(num_midinote_mappings, num_midigate_mappings);
+//	//polyphony number
+
+//	uint16_t note_src_id = 256;//first MidiNote
+//	for(auto &m :maps) {
+//		if (m.src.objType == LabelButtonID::Types::MidiNote)
+//			m.src.objID = note_src_id;
+//	}
+//}
+
+void PatchFileWriter::addMaps(std::vector<Mapping> &maps)
 {
 	pd.mapped_knobs.clear();
 	pd.mapped_ins.clear();
 	pd.mapped_outs.clear();
 
-	for (auto &m : maps) {
+	for (const auto &m : maps) {
 		if (m.dst.objType == LabelButtonID::Types::Knob) {
 			pd.mapped_knobs.push_back({
 				.panel_knob_id = static_cast<uint16_t>(m.src.objID),

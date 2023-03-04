@@ -17,7 +17,7 @@ public:
 	void setPatchDesc(std::string patchDesc);
 	void setJackList(std::vector<JackStatus> &jacks);
 	void setParamList(std::vector<ParamStatus> &params);
-	void addMaps(std::vector<Mapping> maps);
+	void addMaps(std::vector<Mapping> &maps);
 	std::string printPatchYAML();
 
 	PatchData &get_data();
