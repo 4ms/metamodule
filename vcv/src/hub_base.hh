@@ -251,7 +251,7 @@ private:
 		std::vector<Mapping> maps;
 		maps.reserve(centralData->maps.size());
 		for (auto &m : centralData->maps)
-			maps.push_back({m.src, m.dst, m.range_max, m.range_min, m.alias_name});
+			maps.push_back({m.src, m.dst, m.range_min, m.range_max, m.alias_name});
 		pw.addMaps(maps);
 
 		std::string yml = pw.printPatchYAML();
