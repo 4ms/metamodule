@@ -34,19 +34,9 @@ public:
 
 	void draw(const DrawArgs &args) override
 	{
-		// nvgBeginPath(args.vg);
-		// nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 10);
-		// nvgStrokeColor(args.vg, rack::color::BLACK);
-		// nvgStroke(args.vg);
-
-		// nvgBeginPath(args.vg);
-		// nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
-		// nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
-		// nvgFontSize(args.vg, 9.0f);
-		// nvgText(args.vg, box.size.x / 2.f, box.size.y / 2.f, hubmidi_mapbut.text.c_str(), NULL);
-
 		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubmidi_mapbut.id), 16U);
 
+		// TODO: different color for each one
 		const float spacing = 8;
 		const NVGcolor color = PaletteHub::color(hubmidi_mapbut.id.objID);
 		auto _box = this->box;
