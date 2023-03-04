@@ -297,7 +297,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		button->box.size.x = mm2px(sz_mm);
 		button->box.size.y = mm2px(sz_mm);
 		button->text = labelText;
-		button->id = {MappableObj::Type::Knob, knobId, hubModule ? hubModule->id : -1};
+		button->mapObj = {MappableObj::Type::Knob, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
 
 		auto *p = new HubKnob<KnobType>{*button};
@@ -328,7 +328,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		mapButton->box.size.y = mm2px(kKnobSpacingY);
 		mapButton->text = labelText;
 		auto type = inout == JackDir::Input ? MappableObj::Type::InputJack : MappableObj::Type::OutputJack;
-		mapButton->id = {type, jackId, hubModule ? hubModule->id : -1};
+		mapButton->mapObj = {type, jackId, hubModule ? hubModule->id : -1};
 		addChild(mapButton);
 
 		auto *jack = new HubJack<JackType>(*mapButton);
@@ -351,7 +351,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		button->box.pos = posPx;
 		button->box.pos = button->box.pos.minus(button->box.size.div(2));
 		button->text = labelText;
-		button->id = {type, knobId, hubModule ? hubModule->id : -1};
+		button->mapObj = {type, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
 
 		auto *p = new HubMidiParam{*button};

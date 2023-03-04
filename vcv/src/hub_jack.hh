@@ -15,7 +15,7 @@ public:
 		bool registerSuccess = false;
 		auto touchedJack = centralData->getAndClearTouchedJack();
 		// printf("Touched %lld %lld %d\n", touchedJack.moduleID, touchedJack.objID, touchedJack.objType);
-		if (touchedJack.objType == id.objType) {
+		if (touchedJack.objType == mapObj.objType) {
 			registerSuccess = registerMapping(touchedJack);
 		}
 
@@ -38,8 +38,8 @@ public:
 
 		// Draw mapped circle
 		if (hubJackLabel.isMapped) {
-			NVGcolor color = PaletteHub::color(hubJackLabel.id.objID);
-			if (hubJackLabel.id.objType == MappableObj::Type::InputJack)
+			NVGcolor color = PaletteHub::color(hubJackLabel.mapObj.objID);
+			if (hubJackLabel.mapObj.objType == MappableObj::Type::InputJack)
 				MapMark::markInputJack(args.vg, this->box, color);
 			else
 				MapMark::markOutputJack(args.vg, this->box, color);
@@ -53,7 +53,7 @@ public:
 		// So, don't consume the hover and just do nothing.
 		// On the other hand, if the jack is not mapped, then consume the hover so that hovering the jack
 		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(hubJackLabel.id)) {
+		if (centralData->isLabelButtonSrcMapped(hubJackLabel.mapObj)) {
 			PortWidget::onHover(e);
 			return;
 		}

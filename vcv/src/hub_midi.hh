@@ -15,15 +15,23 @@ public:
 		// Same as HubMapButton::draw except use a rounded rect, and don't draw alias below
 
 		// Draw a large background rounded rect to highlight a mapping has begun from this knob
-		if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(id)) {
+		if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(mapObj)) {
 			// const float padding_x = 2;
 			nvgBeginPath(args.vg);
 			nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 4);
 			const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
-			nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color(id.objID), alpha));
+			nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color(mapObj.objID), alpha));
 			nvgFill(args.vg);
 		}
 	}
+
+	//TODO:
+	// 
+	// void onDragStart(const event::DragStart &e) override
+	// {
+	// 	if (id.objType == MappableObj::Type::MidiNote) {
+	// 	}
+	// }
 };
 
 class HubMidiParam : public ParamWidget {
@@ -34,11 +42,11 @@ public:
 
 	void draw(const DrawArgs &args) override
 	{
-		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubmidi_mapbut.id), 16U);
+		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubmidi_mapbut.mapObj), 16U);
 
 		// TODO: different color for each one
 		const float spacing = 8;
-		const NVGcolor color = PaletteHub::color(hubmidi_mapbut.id.objID);
+		const NVGcolor color = PaletteHub::color(hubmidi_mapbut.mapObj.objID);
 		auto _box = this->box;
 		for (unsigned i = 0; i < numMaps; i++) {
 			MapMark::markKnob(args.vg, _box, color);
@@ -67,7 +75,7 @@ public:
 
 			// Right click to open context menu
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-				makeKnobMenu(this->getParamQuantity(), hubmidi_mapbut.id);
+				makeKnobMenu(this->getParamQuantity(), hubmidi_mapbut.mapObj);
 				e.consume(this);
 			}
 		}

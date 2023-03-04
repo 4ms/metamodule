@@ -17,7 +17,7 @@ public:
 
 	bool registerMapping(MappableObj src);
 
-	MappableObj id;
+	MappableObj mapObj;
 	bool isMapped = false;
 	bool isCurrentMapSrc = false;
 	MappableObj mappedToId{MappableObj::Type::None, -1, -1};

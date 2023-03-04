@@ -112,7 +112,7 @@ public:
 		// Right click to open context menu
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
 			if (paramQuantity) {
-				makeKnobMenu(paramQuantity, id);
+				makeKnobMenu(paramQuantity, mapObj);
 				e.consume(this);
 			}
 		} else {
@@ -133,10 +133,10 @@ public:
 	{
 		BaseKnobT::draw(args);
 
-		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubKnobMapBut.id), 16U);
+		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubKnobMapBut.mapObj), 16U);
 
 		const float spacing = 8;
-		const NVGcolor color = PaletteHub::color(hubKnobMapBut.id.objID);
+		const NVGcolor color = PaletteHub::color(hubKnobMapBut.mapObj.objID);
 		auto _box = this->box;
 		for (unsigned i = 0; i < numMaps; i++) {
 			MapMark::markKnob(args.vg, _box, color);
@@ -165,7 +165,7 @@ public:
 
 			// Right click to open context menu
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-				makeKnobMenu(this->getParamQuantity(), hubKnobMapBut.id);
+				makeKnobMenu(this->getParamQuantity(), hubKnobMapBut.mapObj);
 				e.consume(this);
 			}
 		}
@@ -178,7 +178,7 @@ public:
 		// So, don't consume the hover and just do nothing.
 		// On the other hand, if the knob is not mapped, then consume the hover so that hovering the knob
 		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(hubKnobMapBut.id))
+		if (centralData->isLabelButtonSrcMapped(hubKnobMapBut.mapObj))
 			return;
 
 		e.consume(this);
