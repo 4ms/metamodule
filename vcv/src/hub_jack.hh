@@ -11,10 +11,10 @@ public:
 
 	void onDeselect(const event::Deselect &e) override
 	{
-		printf("Deselect hub jack %lld %lld %d\n", id.moduleID, id.objID, id.objType);
+		// printf("Deselect hub jack %lld %lld %d\n", id.moduleID, id.objID, id.objType);
 		bool registerSuccess = false;
 		auto touchedJack = centralData->getAndClearTouchedJack();
-		printf("Touched %lld %lld %d\n", touchedJack.moduleID, touchedJack.objID, touchedJack.objType);
+		// printf("Touched %lld %lld %d\n", touchedJack.moduleID, touchedJack.objID, touchedJack.objType);
 		if (touchedJack.objType == id.objType) {
 			registerSuccess = registerMapping(touchedJack);
 		}
