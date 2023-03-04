@@ -15,12 +15,12 @@ public:
 	void onLeave(const event::Leave &e) override;
 	void onEnter(const event::Enter &e) override;
 
-	bool registerMapping(LabelButtonID src);
+	bool registerMapping(MappableObj src);
 
-	LabelButtonID id;
+	MappableObj id;
 	bool isMapped = false;
 	bool isCurrentMapSrc = false;
-	LabelButtonID mappedToId{LabelButtonID::Types::None, -1, -1};
+	MappableObj mappedToId{MappableObj::Type::None, -1, -1};
 
 	// void _createMapping(LabelButtonID srcId);
 protected:

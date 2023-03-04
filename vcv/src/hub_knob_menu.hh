@@ -11,8 +11,8 @@ struct KnobNameMenuLabel : ui::MenuLabel {
 };
 
 struct KnobAliasTextBox : ui::TextField {
-	LabelButtonID _src;
-	KnobAliasTextBox(LabelButtonID src)
+	MappableObj _src;
+	KnobAliasTextBox(MappableObj src)
 		: _src{src}
 	{}
 
@@ -20,10 +20,10 @@ struct KnobAliasTextBox : ui::TextField {
 };
 
 struct KnobAliasMenuItem : widget::Widget {
-	LabelButtonID _src;
+	MappableObj _src;
 	KnobAliasTextBox *txt;
 
-	KnobAliasMenuItem(LabelButtonID src)
+	KnobAliasMenuItem(MappableObj src)
 		: _src{src}
 	{
 		box.pos = {0, 0};
@@ -66,10 +66,10 @@ struct MappedRangeQuantity : Quantity {
 private:
 	float _val{0.f};
 	std::string _label;
-	LabelButtonID const _dst_id;
+	MappableObj const _dst_id;
 
 public:
-	MappedRangeQuantity(std::string label, LabelButtonID const knobLabelID)
+	MappedRangeQuantity(std::string label, MappableObj const knobLabelID)
 		: _label{label}
 		, _dst_id{knobLabelID}
 	{}
@@ -103,7 +103,7 @@ public:
 
 struct MinSlider : ui::Slider {
 public:
-	MinSlider(LabelButtonID const knobLabelID)
+	MinSlider(MappableObj const knobLabelID)
 	{
 		quantity = new MappedRangeQuantity<RangePart::Min>{"Min: ", knobLabelID};
 	}
@@ -112,7 +112,7 @@ public:
 
 struct MaxSlider : ui::Slider {
 public:
-	MaxSlider(LabelButtonID const knobLabelID)
+	MaxSlider(MappableObj const knobLabelID)
 	{
 		quantity = new MappedRangeQuantity<RangePart::Max>{"Max: ", knobLabelID};
 	}

@@ -104,18 +104,18 @@ public:
 private:
 	bool hovered = false;
 
-	LabelButtonID getId()
+	MappableObj getId()
 	{
 		int64_t moduleId = this->module ? this->module->id : -1;
 		if constexpr (InputOrOutput == MappableJackType::Input)
-			return {LabelButtonID::Types::InputJack, this->portId, moduleId};
+			return {MappableObj::Type::InputJack, this->portId, moduleId};
 		else
-			return {LabelButtonID::Types::OutputJack, this->portId, moduleId};
+			return {MappableObj::Type::OutputJack, this->portId, moduleId};
 	}
 
 	struct JackUnmapItem : ui::MenuItem {
-		const LabelButtonID _id;
-		JackUnmapItem(LabelButtonID id)
+		const MappableObj _id;
+		JackUnmapItem(MappableObj id)
 			: _id{id}
 		{}
 		void onAction(const event::Action &e) override { centralData->unregisterMapByDest(_id); }

@@ -11,7 +11,7 @@ void HubMapButton::_updateState()
 		isCurrentMapSrc = true;
 	}
 	mappedToId = centralData->getMappedDstFromSrc(id);
-	isMapped = mappedToId.objType != LabelButtonID::Types::None;
+	isMapped = mappedToId.objType != MappableObj::Type::None;
 }
 
 void HubMapButton::draw(const DrawArgs &args)
@@ -78,7 +78,7 @@ void HubMapButton::onEnter(const event::Enter &e)
 	e.consume(this);
 }
 
-bool HubMapButton::registerMapping(LabelButtonID src)
+bool HubMapButton::registerMapping(MappableObj src)
 {
 	if (centralData->isMappingInProgress()) {
 		if (src.moduleID > -1) {

@@ -14,21 +14,21 @@
 struct HubMediumMappings {
 	constexpr static unsigned NumMidiSrcs = 2;
 	constexpr static unsigned NumMappings = PanelDef::NumKnobs + NumMidiSrcs;
-	constexpr static std::array<LabelButtonID::Types, NumMappings> mapping_srcs{
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::Knob,
-		LabelButtonID::Types::MidiNote,
-		LabelButtonID::Types::MidiGate,
+	constexpr static std::array<MappableObj::Type, NumMappings> mapping_srcs{
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::Knob,
+		MappableObj::Type::MidiNote,
+		MappableObj::Type::MidiGate,
 	};
 };
 
@@ -144,16 +144,12 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 		addParam(createParamCentered<BefacoPush>(mm2px({savebut.x_mm, savebut.y_mm}), module, HubMedium::WRITE_PATCH));
 
 		auto &midinote = MetaModuleInfo::Switches[MetaModuleInfo::SwitchNote];
-		addMidiValueMapSrc("MidiNote",
-						   HubMedium::MIDI_MONO_NOTE,
-						   mm2px({midinote.x_mm, midinote.y_mm}),
-						   LabelButtonID::Types::MidiNote);
+		addMidiValueMapSrc(
+			"MidiNote", HubMedium::MIDI_MONO_NOTE, mm2px({midinote.x_mm, midinote.y_mm}), MappableObj::Type::MidiNote);
 
 		auto &midigate = MetaModuleInfo::Switches[MetaModuleInfo::SwitchGate];
-		addMidiValueMapSrc("MidiGate",
-						   HubMedium::MIDI_MONO_GATE,
-						   mm2px({midigate.x_mm, midigate.y_mm}),
-						   LabelButtonID::Types::MidiGate);
+		addMidiValueMapSrc(
+			"MidiGate", HubMedium::MIDI_MONO_GATE, mm2px({midigate.x_mm, midigate.y_mm}), MappableObj::Type::MidiGate);
 
 		// auto &midicc = MetaModuleInfo::Switches[MetaModuleInfo::SwitchCc];
 		// addMidiValueMapPt("MidiCC",

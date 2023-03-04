@@ -147,7 +147,7 @@ public:
 		}
 	}
 
-	void startMappingProcedure(LabelButtonID src)
+	void startMappingProcedure(MappableObj src)
 	{
 		_isMappingInProgress = true;
 		_currentMap.src = src;
@@ -157,14 +157,14 @@ public:
 
 	bool isMappingInProgress() { return _isMappingInProgress; }
 
-	const LabelButtonID &getMappingSource() { return _currentMap.src; }
+	const MappableObj &getMappingSource() { return _currentMap.src; }
 
-	void notifyEnterHover(LabelButtonID obj) { _cur_hover_obj = obj; }
+	void notifyEnterHover(MappableObj obj) { _cur_hover_obj = obj; }
 
-	void notifyLeaveHover(LabelButtonID obj)
+	void notifyLeaveHover(MappableObj obj)
 	{
 		if (_cur_hover_obj == obj)
-			_cur_hover_obj = {LabelButtonID::Types::None, -1, -1};
+			_cur_hover_obj = {MappableObj::Type::None, -1, -1};
 	}
 
 	// Given an object we want to draw,
@@ -172,7 +172,7 @@ public:
 	// so that we can draw this object with a special highlight.
 	// Also return true if the mouse-hovered object is mapped to the same hub
 	// object as the object we want to draw (multi-map).
-	bool isMappedPartnerHovered(const LabelButtonID obj_to_draw)
+	bool isMappedPartnerHovered(const MappableObj obj_to_draw)
 	{
 		// If we're hovering a hub (src) object, then highlight all mapped objects
 		// on modules
@@ -181,7 +181,7 @@ public:
 
 		// Check if we're hovering a mapped dst (module object that's mapped to a
 		// hub object)
-		LabelButtonID src = getMappedSrcFromDst(_cur_hover_obj);
+		MappableObj src = getMappedSrcFromDst(_cur_hover_obj);
 		// If the hovered object is not a dst of any mapping, return false
 		if (src.moduleID == -1)
 			return false;
@@ -202,7 +202,7 @@ public:
 	//
 
 	// Called by UI Thread: HubMapButton
-	void registerMapDest(LabelButtonID dest)
+	void registerMapDest(MappableObj dest)
 	{
 		pr_dbg("registerMapDest: dest: objID=%lld, moduleID=%lld t:%d\n", dest.objID, dest.moduleID, dest.objType);
 		pr_dbg("current src: objID=%lld, moduleID=%lld t:%d\n",
@@ -225,10 +225,6 @@ public:
 		{ // start mapsmtx lock
 			std::lock_guard mguard{mapsmtx};
 
-			if (_currentMap.src.objType == LabelButtonID::Types::MidiNote){
-			// TODO:
-			}
-			
 			// Look for an existing map to the dst
 			bool found = false;
 			for (auto &m : maps) {
@@ -246,7 +242,7 @@ public:
 				pr_dbg("Didn't found an existing map to dst, adding it to centralData.\n");
 
 				// Rule: hub output jacks can only be mapped to one dst
-				if (_currentMap.src.objType == LabelButtonID::Types::OutputJack) {
+				if (_currentMap.src.objType == MappableObj::Type::OutputJack) {
 					auto num_erased = std::erase_if(maps, [&](auto const &m) { return m.src == _currentMap.src; });
 					pr_dbg("Removed %lu mappings from centralData, with src on hub: "
 						   "m=%lld out-jack=%lld\n",
@@ -265,7 +261,7 @@ public:
 	}
 
 	// Can be called by UI Thread on "Unmap" menuitem
-	void unregisterMapByDest(LabelButtonID dest)
+	void unregisterMapByDest(MappableObj dest)
 	{
 		// Remove from CD::maps
 		{
@@ -281,7 +277,7 @@ public:
 		{
 			std::lock_guard mguard{mtx};
 			std::erase_if(maps, [=](const auto &m) {
-				return (m.src.objType == LabelButtonID::Types::Knob && m.src.moduleID == moduleId);
+				return (m.src.objType == MappableObj::Type::Knob && m.src.moduleID == moduleId);
 			});
 		}
 	}
@@ -290,7 +286,7 @@ public:
 	// Knob Mapping Range
 	//
 
-	void setMapRange(LabelButtonID src, LabelButtonID dst, float rmin, float rmax)
+	void setMapRange(MappableObj src, MappableObj dst, float rmin, float rmax)
 	{
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
@@ -300,7 +296,7 @@ public:
 		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
 	}
 
-	void setMapRangeMin(LabelButtonID dst, float rmin)
+	void setMapRangeMin(MappableObj dst, float rmin)
 	{
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
@@ -309,7 +305,7 @@ public:
 		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
 	}
 
-	void setMapRangeMax(LabelButtonID dst, float rmax)
+	void setMapRangeMax(MappableObj dst, float rmax)
 	{
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
@@ -318,7 +314,7 @@ public:
 		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
 	}
 
-	std::pair<float, float> getMapRange(LabelButtonID src, LabelButtonID dst)
+	std::pair<float, float> getMapRange(MappableObj src, MappableObj dst)
 	{
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
@@ -333,7 +329,7 @@ public:
 		return {min, max};
 	}
 
-	std::pair<float, float> getMapRange(LabelButtonID dst)
+	std::pair<float, float> getMapRange(MappableObj dst)
 	{
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == dst; });
@@ -349,7 +345,7 @@ public:
 		return {min, max};
 	}
 
-	void setMapAliasName(LabelButtonID src, std::string newname)
+	void setMapAliasName(MappableObj src, std::string newname)
 	{
 		std::lock_guard mguard{mapsmtx};
 		// TODO: update all maps with matching src
@@ -359,7 +355,7 @@ public:
 		m->alias_name = newname;
 	}
 
-	std::string getMapAliasName(LabelButtonID src)
+	std::string getMapAliasName(MappableObj src)
 	{
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
@@ -368,7 +364,7 @@ public:
 		return m->alias_name;
 	}
 
-	void setMapAliasName(LabelButtonID src, LabelButtonID dst, std::string newname)
+	void setMapAliasName(MappableObj src, MappableObj dst, std::string newname)
 	{
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
@@ -377,7 +373,7 @@ public:
 		m->alias_name = newname;
 	}
 
-	std::string getMapAliasName(LabelButtonID src, LabelButtonID dst)
+	std::string getMapAliasName(MappableObj src, MappableObj dst)
 	{
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
@@ -390,31 +386,31 @@ public:
 	// State queries
 	//
 
-	bool isLabelButtonMapped(LabelButtonID const &b)
+	bool isLabelButtonMapped(MappableObj const &b)
 	{
 		return maps.end() !=
 			   std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == b || m.dst == b); });
 	}
 
-	bool isLabelButtonSrcMapped(LabelButtonID const &b)
+	bool isLabelButtonSrcMapped(MappableObj const &b)
 	{
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
 	}
 
-	bool isLabelButtonDstMapped(LabelButtonID const &b)
+	bool isLabelButtonDstMapped(MappableObj const &b)
 	{
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
 	}
 
-	LabelButtonID getMappedSrcFromDst(LabelButtonID const &b)
+	MappableObj getMappedSrcFromDst(MappableObj const &b)
 	{
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
 		if (obj != maps.end())
 			return obj->src;
-		return {LabelButtonID::Types::None, -1, -1};
+		return {MappableObj::Type::None, -1, -1};
 	}
 
-	bool isSrcDstMapped(LabelButtonID const &src, LabelButtonID const &dst)
+	bool isSrcDstMapped(MappableObj const &src, MappableObj const &dst)
 	{
 		return maps.end() !=
 			   std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
@@ -422,20 +418,20 @@ public:
 
 	// TODO: only allow this if type is not Knob (because it's not multi-map
 	// friendly)
-	LabelButtonID getMappedDstFromSrc(LabelButtonID const &b)
+	MappableObj getMappedDstFromSrc(MappableObj const &b)
 	{
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
 		if (obj != maps.end())
 			return obj->dst;
-		return {LabelButtonID::Types::None, -1, -1};
+		return {MappableObj::Type::None, -1, -1};
 	}
 
-	unsigned getNumMappingsFromSrc(LabelButtonID const &src)
+	unsigned getNumMappingsFromSrc(MappableObj const &src)
 	{
 		return std::count_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
 	}
 
-	auto getMappingsFromSrc(LabelButtonID const &src)
+	auto getMappingsFromSrc(MappableObj const &src)
 	{
 		std::vector<MappingExt> copied_maps;
 		std::lock_guard mguard{mtx};
@@ -451,12 +447,12 @@ public:
 	// Jack "touching", used to map jacks
 	//
 
-	void registerTouchedJack(LabelButtonID touched) { lastTouchedJack = touched; }
+	void registerTouchedJack(MappableObj touched) { lastTouchedJack = touched; }
 
-	LabelButtonID getAndClearTouchedJack()
+	MappableObj getAndClearTouchedJack()
 	{
 		auto tmp = lastTouchedJack;
-		lastTouchedJack = {LabelButtonID::Types::None, -1, -1};
+		lastTouchedJack = {MappableObj::Type::None, -1, -1};
 		return tmp;
 	}
 
@@ -479,9 +475,9 @@ public:
 private:
 	bool _isMappingInProgress = false;
 	MappingExt _currentMap;
-	LabelButtonID _cur_hover_obj;
+	MappableObj _cur_hover_obj;
 
-	LabelButtonID lastTouchedJack{LabelButtonID::Types::None, -1, -1};
+	MappableObj lastTouchedJack{MappableObj::Type::None, -1, -1};
 
 	static inline std::mutex mtx;
 	static inline std::mutex paramHandleQmtx;

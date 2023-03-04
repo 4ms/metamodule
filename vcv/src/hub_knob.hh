@@ -17,7 +17,7 @@ struct ParamUnmapItem : ui::MenuItem {
 	}
 };
 
-static void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
+static void makeKnobMenu(ParamQuantity *paramQuantity, MappableObj id)
 {
 	ui::Menu *menu = createMenu();
 
@@ -54,11 +54,11 @@ static void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
 				paramLabel2->paramId = m.dst.objID;
 				menu->addChild(paramLabel2);
 
-				MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, m.dst.objID, m.dst.moduleID});
+				MinSlider *mn = new MinSlider({MappableObj::Type::Knob, m.dst.objID, m.dst.moduleID});
 				mn->box.size.x = 100;
 				menu->addChild(mn);
 
-				MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, m.dst.objID, m.dst.moduleID});
+				MaxSlider *mx = new MaxSlider({MappableObj::Type::Knob, m.dst.objID, m.dst.moduleID});
 				mx->box.size.x = 100;
 				menu->addChild(mx);
 			}
@@ -98,7 +98,7 @@ public:
 			APP->scene->rack->setTouchedParam(nullptr);
 
 			registerSuccess =
-				registerMapping({.objType = LabelButtonID::Types::Knob, .objID = objId, .moduleID = moduleId});
+				registerMapping({.objType = MappableObj::Type::Knob, .objID = objId, .moduleID = moduleId});
 		}
 
 		if (!registerSuccess) {

@@ -111,7 +111,7 @@ void PatchFileWriter::addMaps(std::vector<Mapping> &maps)
 	pd.mapped_outs.clear();
 
 	for (const auto &m : maps) {
-		if (m.dst.objType == LabelButtonID::Types::Knob) {
+		if (m.dst.objType == MappableObj::Type::Knob) {
 			pd.mapped_knobs.push_back({
 				.panel_knob_id = static_cast<uint16_t>(m.src.objID),
 				.module_id = idMap[m.dst.moduleID],
@@ -123,7 +123,7 @@ void PatchFileWriter::addMaps(std::vector<Mapping> &maps)
 			});
 		}
 
-		if (m.dst.objType == LabelButtonID::Types::InputJack) {
+		if (m.dst.objType == MappableObj::Type::InputJack) {
 			// Look for an existing entry:
 			auto found = std::find_if(pd.mapped_ins.begin(),
 									  pd.mapped_ins.end(),
@@ -151,7 +151,7 @@ void PatchFileWriter::addMaps(std::vector<Mapping> &maps)
 			}
 		}
 
-		if (m.dst.objType == LabelButtonID::Types::OutputJack) {
+		if (m.dst.objType == MappableObj::Type::OutputJack) {
 			// Update the mapped_outs entry if there already is one with the same panel_jack_id (Note that this is
 			// an error, since we can't have multiple outs assigned to a net, but we're going to roll with it).
 			// otherwise push it to the vector

@@ -39,7 +39,7 @@ public:
 		// Draw mapped circle
 		if (hubJackLabel.isMapped) {
 			NVGcolor color = PaletteHub::color(hubJackLabel.id.objID);
-			if (hubJackLabel.id.objType == LabelButtonID::Types::InputJack)
+			if (hubJackLabel.id.objType == MappableObj::Type::InputJack)
 				MapMark::markInputJack(args.vg, this->box, color);
 			else
 				MapMark::markOutputJack(args.vg, this->box, color);

@@ -3,7 +3,7 @@
 
 void CenterLabel::draw(const DrawArgs &args)
 {
-	if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == LabelButtonID::Types::Knob)) {
+	if (centralData->isMappingInProgress() && (centralData->getMappingSource().objType == MappableObj::Type::Knob)) {
 		nvgFillColor(args.vg, rack::color::alpha(rack::color::YELLOW, 0.8f));
 	}
 	nvgBeginPath(args.vg);

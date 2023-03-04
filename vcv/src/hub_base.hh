@@ -101,7 +101,7 @@ struct MetaModuleHubBase : public CommModule {
 					if (json_is_string(val))
 						mapping.dst.setObjTypeFromString(json_string_value(val));
 					else
-						mapping.dst.objType = LabelButtonID::Types::None;
+						mapping.dst.objType = MappableObj::Type::None;
 
 					val = json_object_get(mappingJ, "SrcModID");
 					mapping.src.moduleID = json_is_integer(val) ? json_integer_value(val) : -1;
@@ -113,7 +113,7 @@ struct MetaModuleHubBase : public CommModule {
 					if (json_is_string(val))
 						mapping.src.setObjTypeFromString(json_string_value(val));
 					else
-						mapping.src.objType = LabelButtonID::Types::None;
+						mapping.src.objType = MappableObj::Type::None;
 
 					val = json_object_get(mappingJ, "RangeMin");
 					mapping.range_min = json_is_real(val) ? json_real_value(val) : 0.f;
@@ -132,11 +132,6 @@ struct MetaModuleHubBase : public CommModule {
 					centralData->maps.push_back(mapping);
 				}
 			}
-			// for (auto &m : centralData->maps) {
-			// 	if (m.src.objType == LabelButtonID::Types::Knob) {
-			// 		centralData->registerKnobParamHandle(m.src, m.dst);
-			// 	}
-			// }
 		}
 	}
 
@@ -156,21 +151,20 @@ struct MetaModuleHubBase : public CommModule {
 	void processKnobMaps()
 	{
 		for (unsigned i = 0; i < MappingConf::NumMappings; i++) {
-			LabelButtonID src{MappingConf::mapping_srcs[i], i, id};
+			MappableObj src{MappingConf::mapping_srcs[i], i, id};
 			auto maps = centralData->getMappingsFromSrc(src);
 			for (auto &m : maps) {
 				if (m.dst.moduleID != -1) {
 					Module *module = m.dst_module;
 					if (module) {
 						int paramId = m.dst.objID;
-						LabelButtonID dst{LabelButtonID::Types::Knob, paramId, m.dst.moduleID};
+						MappableObj dst{MappableObj::Type::Knob, paramId, m.dst.moduleID};
 						auto [min, max] = centralData->getMapRange(src, dst);
 						auto newMappedVal = MathTools::map_value(params[i].getValue(), 0.0f, 1.0f, min, max);
 						ParamQuantity *paramQuantity = module->paramQuantities[paramId];
 						paramQuantity->setValue(newMappedVal);
 					} else {
 						// disable the mapping because the module was deleted
-						// paramHandle->moduleId = -1;
 						// FIXME: send a message to centralData that the module was deleted.
 						// Or better yet, make sure every module's destructor removes its mappings from centralData
 					}
@@ -294,18 +288,6 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 
 	MetaModuleHubBaseWidget() = default;
 
-	// void onHover(const HoverEvent &e) override
-	// {
-	// 	CommModuleWidget::onHover(e);
-	// 	centralData->processKnobParamHandleQueue();
-	// do {
-	// 	auto [src, dst] = centralData->popRegisterKnobParamHandle();
-	// 	if (src.moduleID < 0 || dst.moduleID < 0)
-	// 		break;
-	// 	centralData->registerKnobParamHandle(src, dst);
-	// } while (true);
-	// }
-
 	template<typename KnobType>
 	void addLabeledKnobPx(
 		std::string_view labelText, int knobId, Vec posPx, float sz_mm = kKnobSpacingX, float defaultValue = 0.f)
@@ -315,7 +297,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		button->box.size.x = mm2px(sz_mm);
 		button->box.size.y = mm2px(sz_mm);
 		button->text = labelText;
-		button->id = {LabelButtonID::Types::Knob, knobId, hubModule ? hubModule->id : -1};
+		button->id = {MappableObj::Type::Knob, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
 
 		auto *p = new HubKnob<KnobType>{*button};
@@ -345,7 +327,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 		mapButton->box.size.x = mm2px(kKnobSpacingX);
 		mapButton->box.size.y = mm2px(kKnobSpacingY);
 		mapButton->text = labelText;
-		auto type = inout == JackDir::Input ? LabelButtonID::Types::InputJack : LabelButtonID::Types::OutputJack;
+		auto type = inout == JackDir::Input ? MappableObj::Type::InputJack : MappableObj::Type::OutputJack;
 		mapButton->id = {type, jackId, hubModule ? hubModule->id : -1};
 		addChild(mapButton);
 
@@ -361,7 +343,7 @@ struct MetaModuleHubBaseWidget : CommModuleWidget {
 			addOutput(jack);
 	}
 
-	void addMidiValueMapSrc(const std::string labelText, int knobId, Vec posPx, LabelButtonID::Types type)
+	void addMidiValueMapSrc(const std::string labelText, int knobId, Vec posPx, MappableObj::Type type)
 	{
 		auto *button = new HubMidiMapButton{*this};
 		button->box.size.x = mm2px(13.5);
