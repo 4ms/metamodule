@@ -145,24 +145,30 @@ struct DrawHelper {
 		lv_draw_arc_dsc_init(&arc_dsc);
 		arc_dsc.opa = LV_OPA_50;
 
-		const float adj = (float)module_height / 240.f;
 		const bool fullsize = module_height > 120;
-		const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
-		if (!knob)
-			return;
-		auto width = knob->header.w;
+
+		float radius;
+		{
+			// Get width of knob image
+			const lv_img_dsc_t *knob = fullsize ? get_knob_img_240(el.knob_style) : get_knob_img_120(el.knob_style);
+			if (!knob)
+				return;
+			auto width = knob->header.w;
+
+			const float concentric_offset = 8.f * (float)module_height / 240.f;
+			radius = width * 0.5f + concentric_offset;
+		}
 
 		auto [c_x, c_y] = scale_center(el, module_height);
-		// FIXME: use faceplate colors
 		arc_dsc.color = Gui::knob_palette[panel_knob_id % 6];
 
 		// Thinner circle for uvwxyz small panel knobs
 		if (panel_knob_id >= 6)
-			arc_dsc.width = fullsize ? 2 : 2;
+			arc_dsc.width = fullsize ? 4 : 2;
 		else
-			arc_dsc.width = fullsize ? 4 : 3;
+			arc_dsc.width = fullsize ? 10 : 5;
 
-		lv_canvas_draw_arc(canvas, c_x, c_y, width * 0.5f + 8 * adj, 0, 3600, &arc_dsc);
+		lv_canvas_draw_arc(canvas, c_x, c_y, radius, 0, 3600, &arc_dsc);
 	}
 
 	static void draw_module_jacks(lv_obj_t *canvas,
@@ -186,7 +192,8 @@ struct DrawHelper {
 
 			if (patch.find_mapped_injack(Jack{uint16_t(module_id), uint16_t(el.id)})) {
 				auto [c_x, c_y] = scale_center(el, module_height);
-				lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(jack), 0, 3600, &Gui::mapped_injack_small_arcdsc);
+				Gui::mapped_jack_small_arcdsc.color = Gui::palette_main[el.id % 8];
+				lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(jack), 0, 3600, &Gui::mapped_jack_small_arcdsc);
 			}
 		}
 		for (const auto el : info.OutJacks) {
@@ -195,8 +202,9 @@ struct DrawHelper {
 			lv_canvas_draw_img(canvas, left, top, jack, &draw_img_dsc);
 
 			if (patch.find_mapped_outjack(Jack{uint16_t(module_id), uint16_t(el.id)})) {
+				Gui::mapped_jack_small_arcdsc.color = Gui::palette_main[el.id % 8];
 				auto [c_x, c_y] = scale_center(el, module_height);
-				lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(jack), 0, 3600, &Gui::mapped_outjack_small_arcdsc);
+				lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(jack), 0, 3600, &Gui::mapped_jack_small_arcdsc);
 			}
 		}
 		for (const auto el : info.Switches) {
@@ -207,10 +215,10 @@ struct DrawHelper {
 			auto [left, top] = scale_topleft(el, sw, adj);
 			lv_canvas_draw_img(canvas, left, top, sw, &draw_img_dsc);
 
-			if (patch.find_mapped_knob(module_id, el.id)) {
-				auto [c_x, c_y] = scale_center(el, module_height);
-				lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(sw), 0, 3600, &Gui::mapped_knob_small_arcdsc);
-			}
+			// if (patch.find_mapped_knob(module_id, el.id)) {
+			// 	auto [c_x, c_y] = scale_center(el, module_height);
+			// 	lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(sw), 0, 3600, &Gui::mapped_knob_small_arcdsc);
+			// }
 		}
 	}
 

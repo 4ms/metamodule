@@ -185,7 +185,8 @@ private:
 
 		Jack jack{.module_id = this_module_id, .jack_id = (uint16_t)el.id};
 		if (auto mappedjack = patch.find_mapped_outjack(jack)) {
-			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
+			Gui::mapped_jack_arcdsc.color = Gui::palette_main[el.id % 8];
+			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_jack_arcdsc);
 			opts += "[";
 			opts += PanelDef::OutJackNames[mappedjack->panel_jack_id];
 			opts += "] ";
@@ -202,7 +203,8 @@ private:
 
 		Jack jack{.module_id = this_module_id, .jack_id = (uint16_t)el.id};
 		if (auto mappedjack = patch.find_mapped_injack(jack)) {
-			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_knob_arcdsc);
+			Gui::mapped_jack_arcdsc.color = Gui::palette_main[el.id % 8];
+			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_jack_arcdsc);
 			opts += "[";
 			opts += PanelDef::InJackNames[mappedjack->panel_jack_id];
 			opts += "] ";
