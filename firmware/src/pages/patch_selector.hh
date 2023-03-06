@@ -176,16 +176,20 @@ struct PatchSelectorPage : PageBase {
 				auto message = patch_storage.get_message().message_type;
 				if (message == PatchStorageProxy::PatchListChanged) {
 					show_spinner();
-					refresh_patchlist(patch_storage.get_patch_list());
-					refresh_volume_labels();
-					hide_spinner();
-					state = State::Idle;
+					state = State::ReloadingPatchList;
 				} else if (message == PatchStorageProxy::PatchListUnchanged) {
 					hide_spinner();
 					state = State::Idle;
 				}
 				//else other messages ==> error? repeat request? idle?
 			} break;
+
+			case State::ReloadingPatchList:
+				refresh_patchlist(patch_storage.get_patch_list());
+				refresh_volume_labels();
+				hide_spinner();
+				state = State::Idle;
+				break;
 
 			case State::Idle: {
 				//periodically check if patchlist needs updating:
@@ -317,6 +321,7 @@ private:
 
 		TryingToRequestPatchList,
 		RequestedPatchList,
+		ReloadingPatchList,
 
 		TryingToRequestPatchData,
 		RequestedPatchData,
