@@ -50,7 +50,7 @@ struct ModuleViewPage : PageBase {
 		lv_obj_set_style_pad_all(edit_pane, 0, LV_STATE_DEFAULT);
 
 		button.clear();
-		module_params.clear();
+		module_controls.clear();
 	}
 
 	void prepare_focus() override {
@@ -64,7 +64,7 @@ struct ModuleViewPage : PageBase {
 		}
 		printf_("ModuleViewPage module %s\n", slug.data());
 
-		auto moduleinfo = ModuleFactory::getModuleInfo(slug);
+		moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
 			msg_queue.append_message("Module View page got empty module slug.\r\n");
 			return;
@@ -91,29 +91,29 @@ struct ModuleViewPage : PageBase {
 		button.reserve(num_controls);
 		mapped_knobs.reserve(num_controls);
 		static_knobs.reserve(num_controls);
-		module_params.reserve(num_controls);
+		module_controls.reserve(num_controls);
 
 		// const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
 		const auto &patch = patch_storage.get_view_patch();
 
 		for (const auto el : moduleinfo.Knobs) {
 			draw_knob(el, patch);
-			module_params.push_back({ModuleParam::Type::Knob, el.id});
+			module_controls.push_back({ModuleParam::Type::Knob, el.id});
 		}
 
 		for (const auto &el : moduleinfo.InJacks) {
 			draw_injack(el, patch);
-			module_params.push_back({ModuleParam::Type::InJack, el.id});
+			module_controls.push_back({ModuleParam::Type::InJack, el.id});
 		}
 
 		for (const auto el : moduleinfo.OutJacks) {
 			draw_outjack(el, patch);
-			module_params.push_back({ModuleParam::Type::OutJack, el.id});
+			module_controls.push_back({ModuleParam::Type::OutJack, el.id});
 		}
 
 		for (const auto el : moduleinfo.Switches) {
 			draw_switch(el, patch);
-			module_params.push_back({ModuleParam::Type::Switch, el.id});
+			module_controls.push_back({ModuleParam::Type::Switch, el.id});
 		}
 
 		// remove final \n
@@ -158,19 +158,18 @@ struct ModuleViewPage : PageBase {
 
 		// Update mapped knobs rotation
 		for (auto &knob : mapped_knobs) {
-			const float new_pot_val = knob.mapped_knob.get_mapped_val(params.knobs[knob.mapped_knob.panel_knob_id]);
+			const float new_pot_val = knob.patchconf.get_mapped_val(params.knobs[knob.patchconf.panel_knob_id]);
 			if (std::abs(new_pot_val - knob.last_pot_reading) > 0.01f) {
 				knob.last_pot_reading = new_pot_val;
-				const int angle = new_pot_val * 3000.f - 1500.f;
-				lv_img_set_angle(knob.obj, angle);
+				DrawHelper::animate_control(knob, moduleinfo);
 			}
 		}
 
 		// Update static knobs rotation
 		for (auto &knob : static_knobs) {
-			if (std::abs(knob.static_knob.value - knob.last_pot_reading) > 0.01f) {
-				knob.last_pot_reading = knob.static_knob.value;
-				DrawHelper::animate_static_param(knob);
+			if (std::abs(knob.patchconf.value - knob.last_pot_reading) > 0.01f) {
+				knob.last_pot_reading = knob.patchconf.value;
+				DrawHelper::animate_control(knob, moduleinfo);
 			}
 		}
 	}
@@ -212,55 +211,38 @@ private:
 		opts += "\n";
 	}
 
-	//TODO: draw_switch and draw_knob are exactly the same if we have SwitchDef &el overloads for:
-	//DrawHelper::draw_element()
-	//DrawHelper::get_knob_img_240()
-	//DrawHelper::draw_knob_ring()
 	void draw_switch(const SwitchDef &el, const PatchData &patch) {
-		auto switch_ = DrawHelper::draw_switch(base, el, 240);
-		if (switch_) {
-			lv_obj_t *switch_obj = switch_.value();
-			auto anim_method = DrawHelper::get_anim_method(el);
-			if (auto mapped_switch = patch.find_mapped_knob(this_module_id, el.id)) {
-				mapped_knobs.push_back({switch_obj, *mapped_switch, anim_method});
-				opts += "[";
-				opts += PanelDef::KnobNames[mapped_switch->panel_knob_id];
-				opts += "] ";
-				//TODO:
-				// DrawHelper::draw_knob_ring(canvas, el, mapped_switch->panel_knob_id, 240);
-			} else if (auto static_switch = patch.find_static_knob(this_module_id, el.id)) {
-				static_knobs.push_back({switch_obj, *static_switch, anim_method});
-			}
-		}
-		opts += el.short_name;
-		opts += "\n";
-
-		// auto knob_img = DrawHelper::get_knob_img_240(el.knob_style);
-		auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
-		add_button(c_x, c_y);
+		draw_control(el, patch, moduleinfo.Knobs.size());
 	}
 
 	void draw_knob(const KnobDef &el, const PatchData &patch) {
-		auto knob = DrawHelper::draw_knob(base, el, 240);
-		if (knob) {
-			lv_obj_t *knob_obj = knob.value();
+		draw_control(el, patch, 0);
+	}
+
+	void draw_control(const auto /*ControlC*/ &el, const PatchData &patch, uint32_t id_offset = 0) {
+		auto id = id_offset + el.id;
+		auto static_ctrl = patch.find_static_knob(this_module_id, id);
+		float value = static_ctrl ? static_ctrl->value : 0.f;
+		auto ctrl_opt = DrawHelper::draw_control(base, el, 240, value);
+		if (ctrl_opt) {
+			lv_obj_t *ctrl_obj = ctrl_opt.value();
 			auto anim_method = DrawHelper::get_anim_method(el);
-			if (auto mapped_knob = patch.find_mapped_knob(this_module_id, el.id)) {
-				mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
+			if (auto mapped_knob = patch.find_mapped_knob(this_module_id, id)) {
+				mapped_knobs.push_back({ctrl_obj, *mapped_knob, anim_method});
 				opts += "[";
 				opts += PanelDef::KnobNames[mapped_knob->panel_knob_id];
 				opts += "] ";
-				DrawHelper::draw_knob_ring(canvas, el, mapped_knob->panel_knob_id, 240);
-			} else if (auto static_knob = patch.find_static_knob(this_module_id, el.id)) {
-				static_knobs.push_back({knob_obj, *static_knob, anim_method});
+				DrawHelper::draw_control_ring(canvas, el, mapped_knob->panel_knob_id, 240);
+			} else if (static_ctrl) {
+				static_knobs.push_back({ctrl_obj, *static_ctrl, anim_method});
 			}
 		}
 		opts += el.short_name;
 		opts += "\n";
 
-		auto knob_img = DrawHelper::get_knob_img_240(el.knob_style);
+		auto img = DrawHelper::get_control_img(el, 240, value);
 		auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
-		add_button(c_x, c_y, knob_img->header.w * 1.2f);
+		add_button(c_x, c_y, img->header.w * 1.2f);
 	}
 
 	void add_button(int x, int y, int size = 20) {
@@ -284,15 +266,13 @@ private:
 			lv_obj_del(k.obj);
 		static_knobs.clear();
 
-		module_params.clear();
+		module_controls.clear();
 		opts.clear();
 	}
 
 	bool read_slug() {
 		auto module_id = PageList::get_selected_module_id();
 		const auto &patch = patch_storage.get_view_patch();
-		// auto patch_id = PageList::get_selected_patch_id();
-		// const PatchData &patch = patch_list.get_patch(patch_id);
 		if (patch.patch_name.length() == 0)
 			return false;
 		if (module_id >= patch.module_slugs.size())
@@ -329,10 +309,10 @@ private:
 	static void roller_click_cb(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
 		auto cur_sel = page->cur_selected;
-		auto &module_params = page->module_params;
+		auto &module_controls = page->module_controls;
 
-		if (cur_sel < module_params.size()) {
-			PageList::set_selected_param(module_params[cur_sel]);
+		if (cur_sel < module_controls.size()) {
+			PageList::set_selected_control(module_controls[cur_sel]);
 
 			// Hide roller, show edit pane
 			page->mode = ViewMode::Knob;
@@ -344,9 +324,9 @@ private:
 			// Show manual knob
 			// auto patch_id = PageList::get_selected_patch_id();
 			// auto &patch = page->patch_list.get_patch(patch_id);
-			// auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), module_params[cur_sel].id);
+			// auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), module_controls[cur_sel].id);
 			// if (!mappedknob) {
-			// 	auto static_knob = patch.get_static_knob_value(page->this_module_id, module_params[cur_sel].id);
+			// 	auto static_knob = patch.get_static_knob_value(page->this_module_id, module_controls[cur_sel].id);
 			// 	if (static_knob) {
 			// 		lv_obj_clear_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
 			// 		lv_arc_set_value(page->manual_knob, static_knob.value() * 100);
@@ -366,12 +346,12 @@ private:
 
 	static void manual_knob_adjust(lv_event_t *event) {
 		auto page = static_cast<ModuleViewPage *>(event->user_data);
-		auto this_param_id = static_cast<uint16_t>(PageList::get_selected_param().id);
+		auto this_control_id = static_cast<uint16_t>(PageList::get_selected_control().id);
 		lv_obj_t *arc = lv_event_get_target(event);
 
 		StaticParam sp{
 			.module_id = page->this_module_id,
-			.param_id = this_param_id,
+			.param_id = this_control_id,
 			.value = lv_arc_get_value(arc) / 100.f,
 		};
 
@@ -388,6 +368,8 @@ private:
 		}
 	}
 
+	ModuleInfoView moduleinfo;
+
 	std::string opts;
 	uint16_t this_module_id;
 	uint32_t cur_selected = 0;
@@ -397,7 +379,7 @@ private:
 	std::vector<DrawHelper::SKnob> static_knobs;
 
 	std::vector<lv_obj_t *> button;
-	std::vector<ModuleParam> module_params;
+	std::vector<ModuleParam> module_controls;
 
 	lv_obj_t *base = nullptr;
 	lv_obj_t *canvas = nullptr;
