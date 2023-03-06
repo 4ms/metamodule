@@ -27,6 +27,8 @@ LV_IMG_DECLARE(switch_up);
 LV_IMG_DECLARE(switch_up_120);
 LV_IMG_DECLARE(switch_down);
 LV_IMG_DECLARE(switch_down_120);
+LV_IMG_DECLARE(switch_center);
+LV_IMG_DECLARE(switch_center_120);
 
 namespace MetaModule
 {
