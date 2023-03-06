@@ -213,15 +213,32 @@ private:
 		opts += "\n";
 	}
 
+	//TODO: draw_switch and draw_knob are exactly the same if we have SwitchDef &el overloads for:
+	//DrawHelper::draw_element()
+	//DrawHelper::get_knob_img_240()
+	//DrawHelper::draw_knob_ring()
 	void draw_switch(const SwitchDef &el, const PatchData &patch) {
-		int x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-		int y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-		add_button(x, y);
+		auto switch_ = DrawHelper::draw_switch(base, el, 240);
+		if (switch_) {
+			lv_obj_t *switch_obj = switch_.value();
+			auto anim_method = DrawHelper::get_anim_method(el);
+			if (auto mapped_switch = patch.find_mapped_knob(this_module_id, el.id)) {
+				mapped_knobs.push_back({switch_obj, *mapped_switch, anim_method});
+				opts += "[";
+				opts += PanelDef::KnobNames[mapped_switch->panel_knob_id];
+				opts += "] ";
+				//TODO:
+				// DrawHelper::draw_knob_ring(canvas, el, mapped_switch->panel_knob_id, 240);
+			} else if (auto static_switch = patch.find_static_knob(this_module_id, el.id)) {
+				static_knobs.push_back({switch_obj, *static_switch, anim_method});
+			}
+		}
 		opts += el.short_name;
 		opts += "\n";
-		const lv_img_dsc_t *sw = DrawHelper::get_switch_img_240(el.switch_type);
-		if (sw)
-			lv_canvas_draw_img(canvas, x - sw->header.w / 2, y - sw->header.h / 2, sw, &img_dsc);
+
+		// auto knob_img = DrawHelper::get_knob_img_240(el.knob_style);
+		auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
+		add_button(c_x, c_y);
 	}
 
 	void draw_knob(const KnobDef &el, const PatchData &patch) {

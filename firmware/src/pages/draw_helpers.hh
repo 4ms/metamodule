@@ -154,6 +154,33 @@ struct DrawHelper {
 		return obj;
 	}
 
+	static std::optional<lv_obj_t *> draw_switch(lv_obj_t *base, const SwitchDef &el, uint32_t module_height) {
+		const float adj = (float)module_height / 240.f;
+		const bool fullsize = module_height > 120;
+		const lv_img_dsc_t *switch_img_dsc =
+			fullsize ? get_switch_img_240(el.switch_type) : get_switch_img_120(el.switch_type);
+		if (!switch_img_dsc)
+			return std::nullopt;
+
+		auto [left, top] = scale_topleft(el, switch_img_dsc, adj);
+		int width = switch_img_dsc->header.w;
+		int height = switch_img_dsc->header.h;
+
+		lv_obj_t *obj = lv_img_create(base);
+		lv_img_set_src(obj, switch_img_dsc);
+		lv_obj_set_pos(obj, left, top);
+		lv_img_set_pivot(obj, width / 2, height / 2);
+		lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
+		return obj;
+	}
+
+	static std::optional<lv_obj_t *> draw_param(lv_obj_t *base, const KnobDef &el, uint32_t module_height) {
+		return draw_knob(base, el, module_height);
+	}
+	static std::optional<lv_obj_t *> draw_param(lv_obj_t *base, const SwitchDef &el, uint32_t module_height) {
+		return draw_switch(base, el, module_height);
+	}
+
 	// Draw circle around mapped knobs
 	static void draw_knob_ring(lv_obj_t *canvas, const KnobDef &el, uint32_t panel_knob_id, uint32_t module_height) {
 		lv_draw_arc_dsc_t arc_dsc;
@@ -222,19 +249,20 @@ struct DrawHelper {
 				lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(jack), 0, 3600, &Gui::mapped_jack_small_arcdsc);
 			}
 		}
-		for (const auto el : info.Switches) {
-			const lv_img_dsc_t *sw = fullsize ? get_switch_img_240(el.switch_type) : get_switch_img_120(el.switch_type);
-			if (!sw)
-				continue;
 
-			auto [left, top] = scale_topleft(el, sw, adj);
-			lv_canvas_draw_img(canvas, left, top, sw, &draw_img_dsc);
+		// for (const auto el : info.Switches) {
+		// 	const lv_img_dsc_t *sw = fullsize ? get_switch_img_240(el.switch_type) : get_switch_img_120(el.switch_type);
+		// 	if (!sw)
+		// 		continue;
 
-			// if (patch.find_mapped_knob(module_id, el.id)) {
-			// 	auto [c_x, c_y] = scale_center(el, module_height);
-			// 	lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(sw), 0, 3600, &Gui::mapped_knob_small_arcdsc);
-			// }
-		}
+		// 	auto [left, top] = scale_topleft(el, sw, adj);
+		// 	lv_canvas_draw_img(canvas, left, top, sw, &draw_img_dsc);
+
+		// 	// if (patch.find_mapped_knob(module_id, el.id)) {
+		// 	// 	auto [c_x, c_y] = scale_center(el, module_height);
+		// 	// 	lv_canvas_draw_arc(canvas, c_x, c_y, calc_radius(sw), 0, 3600, &Gui::mapped_knob_small_arcdsc);
+		// 	// }
+		// }
 	}
 
 	struct Vec2 {
