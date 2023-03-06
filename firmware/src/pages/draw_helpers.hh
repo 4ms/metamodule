@@ -213,6 +213,20 @@ struct DrawHelper {
 		lv_canvas_draw_arc(canvas, c_x, c_y, radius, 0, 3600, &arc_dsc);
 	}
 
+	static void animate_static_param(SKnob &sparam) {
+		switch (sparam.anim_method) {
+			case DrawHelper::RotaryPot: {
+				const int angle = sparam.static_knob.value * 3000.f - 1500.f;
+				lv_img_set_angle(sparam.obj, angle);
+			} break;
+			case DrawHelper::Toggle3pos: {
+				const int frame = sparam.static_knob.value > 0.75f ? 2 : sparam.static_knob.value > 0.25f ? 1 : 0;
+			} break;
+			default:
+				break;
+		}
+	}
+
 	static void draw_module_jacks(lv_obj_t *canvas,
 								  const ModuleInfoView &info,
 								  const PatchData &patch,

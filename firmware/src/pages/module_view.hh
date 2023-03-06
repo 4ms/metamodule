@@ -170,8 +170,7 @@ struct ModuleViewPage : PageBase {
 		for (auto &knob : static_knobs) {
 			if (std::abs(knob.static_knob.value - knob.last_pot_reading) > 0.01f) {
 				knob.last_pot_reading = knob.static_knob.value;
-				const int angle = knob.static_knob.value * 3000.f - 1500.f;
-				lv_img_set_angle(knob.obj, angle);
+				DrawHelper::animate_static_param(knob);
 			}
 		}
 	}
