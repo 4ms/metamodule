@@ -223,6 +223,7 @@ struct PatchSelectorPage : PageBase {
 				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
 					printf_("Error loading patch id %d\n", selected_patch);
 					state = State::Idle;
+					lv_group_set_editing(group, true);
 					hide_spinner();
 					//TODO: handle error... try reloading patch list?
 				}
