@@ -113,7 +113,7 @@ struct ModuleViewPage : PageBase {
 
 		for (const auto el : moduleinfo.Switches) {
 			draw_switch(el, patch);
-			module_controls.push_back({ModuleParam::Type::Switch, el.id});
+			module_controls.push_back({ModuleParam::Type::Switch, el.id + moduleinfo.Knobs.size()});
 		}
 
 		// remove final \n
