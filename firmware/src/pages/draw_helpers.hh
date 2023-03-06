@@ -31,19 +31,20 @@ LV_IMG_DECLARE(switch_down_120);
 namespace MetaModule
 {
 struct DrawHelper {
-	enum KnobAnimMethods { RotaryPot, LinearSlider, RotaryEncoder };
+	enum ParamAnimMethods { RotaryPot, LinearSlider, MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, Encoder };
 
+	//TODO: Knob or Switch ==> rename to MParam?
 	struct MKnob {
 		lv_obj_t *obj;
 		const MappedKnob &mapped_knob;
-		KnobAnimMethods anim_method = RotaryPot;
+		ParamAnimMethods anim_method = RotaryPot;
 		float last_pot_reading = 0.5f;
 	};
 
 	struct SKnob {
 		lv_obj_t *obj;
 		const StaticParam &static_knob;
-		KnobAnimMethods anim_method = RotaryPot;
+		ParamAnimMethods anim_method = RotaryPot;
 		float last_pot_reading = 0.5f;
 	};
 
@@ -116,8 +117,22 @@ struct DrawHelper {
 		return std::make_pair(x, y);
 	};
 
-	static KnobAnimMethods get_knob_anim_method(const KnobDef &el) {
+	// static ParamAnimMethods get_knob_anim_method(const KnobDef &el) {
+	// 	return el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
+	// }
+
+	static ParamAnimMethods get_anim_method(const KnobDef &el) {
 		return el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
+	}
+
+	static ParamAnimMethods get_anim_method(const SwitchDef &el) {
+		return el.switch_type == SwitchDef::MomentaryButton ? MomentaryButton :
+			   el.switch_type == SwitchDef::LatchingButton	? LatchingButton :
+			   el.switch_type == SwitchDef::Toggle2pos		? Toggle2pos :
+			   el.switch_type == SwitchDef::Toggle3pos		? Toggle3pos :
+			   el.switch_type == SwitchDef::Encoder			? Encoder :
+															  MomentaryButton;
+		;
 	}
 
 	static std::optional<lv_obj_t *> draw_knob(lv_obj_t *base, const KnobDef &el, uint32_t module_height) {

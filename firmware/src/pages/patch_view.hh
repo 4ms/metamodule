@@ -154,7 +154,7 @@ struct PatchViewPage : PageBase {
 				auto knob = DrawHelper::draw_knob(canvas, el, 120);
 				if (knob) {
 					lv_obj_t *knob_obj = knob.value();
-					auto anim_method = DrawHelper::get_knob_anim_method(el);
+					auto anim_method = DrawHelper::get_anim_method(el);
 					if (auto mapped_knob = patch.find_mapped_knob(i, el.id)) {
 						mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
 						DrawHelper::draw_knob_ring(canvas, el, mapped_knob->panel_knob_id, 120);

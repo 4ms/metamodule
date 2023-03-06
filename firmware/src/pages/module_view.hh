@@ -228,7 +228,7 @@ private:
 		auto knob = DrawHelper::draw_knob(base, el, 240);
 		if (knob) {
 			lv_obj_t *knob_obj = knob.value();
-			auto anim_method = DrawHelper::get_knob_anim_method(el);
+			auto anim_method = DrawHelper::get_anim_method(el);
 			if (auto mapped_knob = patch.find_mapped_knob(this_module_id, el.id)) {
 				mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
 				opts += "[";
