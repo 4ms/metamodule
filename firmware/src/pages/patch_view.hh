@@ -154,10 +154,10 @@ struct PatchViewPage : PageBase {
 				auto knob = DrawHelper::draw_knob(canvas, el, 120);
 				if (knob) {
 					lv_obj_t *knob_obj = knob.value();
-					auto anim_method = DrawHelper::get_knob_anim_method(el);
+					auto anim_method = DrawHelper::get_anim_method(el);
 					if (auto mapped_knob = patch.find_mapped_knob(i, el.id)) {
 						mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
-						DrawHelper::draw_knob_ring(canvas, el, mapped_knob->panel_knob_id, 120);
+						DrawHelper::draw_control_ring(canvas, el, mapped_knob->panel_knob_id, 120);
 					}
 				}
 			}
@@ -197,7 +197,7 @@ struct PatchViewPage : PageBase {
 
 		for (auto &mk : mapped_knobs) {
 			if (mk.anim_method == DrawHelper::RotaryPot) {
-				const float new_pot_val = mk.mapped_knob.get_mapped_val(params.knobs[mk.mapped_knob.panel_knob_id]);
+				const float new_pot_val = mk.patchconf.get_mapped_val(params.knobs[mk.patchconf.panel_knob_id]);
 				if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
 					mk.last_pot_reading = new_pot_val;
 					const int angle = new_pot_val * 3000.f - 1500.f;

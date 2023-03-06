@@ -103,7 +103,7 @@ struct KnobEditPage : PageBase {
 			return;
 		}
 
-		this_param_id = PageList::get_selected_param().id;
+		this_param_id = PageList::get_selected_control().id;
 
 		printf_("Knob Edit: param id %d module id %d\n", this_param_id, this_module_id);
 

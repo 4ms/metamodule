@@ -35,8 +35,8 @@ struct GenericModule : CommModule {
 				configParam(Defs::NumKnobs + sw.id, -INFINITY, INFINITY, 0.0f, sw.long_name.data());
 			} else {
 				float max = 1.f;
-				if (sw.switch_type == SwitchDef::Toggle3pos)
-					max = 2.f;
+				// if (sw.switch_type == SwitchDef::Toggle3pos)
+				// 	max = 2.f;
 				configParam(Defs::NumKnobs + sw.id, 0.f, max, 0.f, sw.long_name.data());
 			}
 		}

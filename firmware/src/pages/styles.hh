@@ -1,14 +1,17 @@
 #pragma once
-// #include "gui-guider/guider_fonts.h"
 #include "lvgl/lvgl.h"
 #include <array>
-// LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_14);
-// LV_FONT_DECLARE(lv_font_MuseoSansRounded_700_16);
+
 LV_FONT_DECLARE(MuseoSansRounded_500_12);
 LV_FONT_DECLARE(MuseoSansRounded_700_12);
 LV_FONT_DECLARE(MuseoSansRounded_700_14);
 LV_FONT_DECLARE(MuseoSansRounded_700_16);
 LV_FONT_DECLARE(MuseoSansRounded_700_18);
+
+//constexpr helper
+static constexpr lv_color16_t lv_color_make_rgb565(uint8_t r8, uint8_t g8, uint8_t b8) {
+	return {(uint8_t)((b8 >> 3) & 0x1FU), (uint8_t)((g8 >> 2) & 0x3FU), (uint8_t)((r8 >> 3) & 0x1FU)};
+}
 
 namespace MetaModule
 {
@@ -31,8 +34,8 @@ struct Gui {
 	static inline lv_style_t mapped_knob_style;
 	static inline lv_draw_arc_dsc_t mapped_knob_arcdsc;
 	static inline lv_draw_arc_dsc_t mapped_knob_small_arcdsc;
-	static inline lv_draw_arc_dsc_t mapped_injack_small_arcdsc;
-	static inline lv_draw_arc_dsc_t mapped_outjack_small_arcdsc;
+	static inline lv_draw_arc_dsc_t mapped_jack_arcdsc;
+	static inline lv_draw_arc_dsc_t mapped_jack_small_arcdsc;
 
 	// module selected in patch view
 	static inline lv_style_t selected_module_style;
@@ -61,13 +64,35 @@ struct Gui {
 		lv_palette_lighten(LV_PALETTE_PINK, 1),
 		lv_palette_lighten(LV_PALETTE_PURPLE, 1),
 	};
-	static inline std::array<lv_color_t, 6> knob_palette{
-		lv_palette_main(LV_PALETTE_RED),
-		lv_palette_main(LV_PALETTE_YELLOW),
-		lv_palette_main(LV_PALETTE_CYAN),
-		lv_palette_main(LV_PALETTE_PINK),
-		lv_palette_main(LV_PALETTE_ORANGE),
-		lv_palette_main(LV_PALETTE_LIGHT_GREEN),
+	static constexpr std::array<lv_color_t, 19> palette_main = {lv_color_make_rgb565(0xF4, 0x00, 0x00),	 // RED
+																lv_color_make_rgb565(0xE9, 0x3E, 0x83),	 // PINK,
+																lv_color_make_rgb565(0x9C, 0x27, 0xB0),	 // PURPLE,
+																lv_color_make_rgb565(0x67, 0x3A, 0xB7),	 // DEEP_PURPLE,
+																lv_color_make_rgb565(0x3F, 0x51, 0xB5),	 // INDIGO,
+																lv_color_make_rgb565(0x21, 0x96, 0xF3),	 // BLUE,
+																lv_color_make_rgb565(0x03, 0xA9, 0xF4),	 // LIGHT_BLUE,
+																lv_color_make_rgb565(0x00, 0xBC, 0xD4),	 // CYAN,
+																lv_color_make_rgb565(0x00, 0x96, 0x88),	 // TEAL,
+																lv_color_make_rgb565(0x4C, 0xAF, 0x50),	 // GREEN,
+																lv_color_make_rgb565(0x8B, 0xC3, 0x4A),	 // LIGHT_GREEN,
+																lv_color_make_rgb565(0xCD, 0xDC, 0x39),	 // LIME,
+																lv_color_make_rgb565(0xFF, 0xEB, 0x3B),	 // YELLOW,
+																lv_color_make_rgb565(0xFF, 0xC1, 0x07),	 // AMBER,
+																lv_color_make_rgb565(0xFF, 0x98, 0x00),	 // ORANGE,
+																lv_color_make_rgb565(0xFF, 0x57, 0x22),	 // DEEP_ORANGE,
+																lv_color_make_rgb565(0x79, 0x55, 0x48),	 // BROWN,
+																lv_color_make_rgb565(0x60, 0x7D, 0x8B),	 // BLUE_GREY,
+																lv_color_make_rgb565(0x9E, 0x9E, 0x9E)}; // GREY,
+
+	static inline std::array<lv_color_t, 8> knob_palette{
+		palette_main[LV_PALETTE_RED],
+		palette_main[LV_PALETTE_YELLOW],
+		palette_main[LV_PALETTE_CYAN],
+		palette_main[LV_PALETTE_PINK],
+		palette_main[LV_PALETTE_ORANGE],
+		palette_main[LV_PALETTE_GREEN],
+		palette_main[LV_PALETTE_GREY],		//?
+		palette_main[LV_PALETTE_BLUE_GREY], //?
 	};
 	// const lv_style_const_prop_t style1_props[] = {
 	// 	LV_STYLE_CONST_WIDTH(50),
@@ -105,15 +130,15 @@ struct Gui {
 		mapped_knob_small_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
 		mapped_knob_small_arcdsc.opa = LV_OPA_50;
 
-		lv_draw_arc_dsc_init(&mapped_injack_small_arcdsc);
-		mapped_injack_small_arcdsc.width = 2;
-		mapped_injack_small_arcdsc.color = lv_palette_main(LV_PALETTE_RED);
-		mapped_injack_small_arcdsc.opa = LV_OPA_50;
+		lv_draw_arc_dsc_init(&mapped_jack_arcdsc);
+		mapped_jack_arcdsc.width = 2;
+		mapped_jack_arcdsc.color = palette_main[LV_PALETTE_RED];
+		mapped_jack_arcdsc.opa = LV_OPA_50;
 
-		lv_draw_arc_dsc_init(&mapped_outjack_small_arcdsc);
-		mapped_outjack_small_arcdsc.width = 2;
-		mapped_outjack_small_arcdsc.color = lv_palette_lighten(LV_PALETTE_ORANGE, 1);
-		mapped_outjack_small_arcdsc.opa = LV_OPA_50;
+		lv_draw_arc_dsc_init(&mapped_jack_small_arcdsc);
+		mapped_jack_small_arcdsc.width = 2;
+		mapped_jack_small_arcdsc.color = lv_palette_main(LV_PALETTE_RED);
+		mapped_jack_small_arcdsc.opa = LV_OPA_50;
 
 		// selected_module_style
 

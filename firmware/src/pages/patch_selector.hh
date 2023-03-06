@@ -7,6 +7,22 @@
 #include "printf.h"
 #include "stm32xx.h"
 
+//exported:
+#include "slsexport/ui.h"
+// extern lv_obj_t *ui_PatchSelector;
+// extern lv_obj_t *ui_Title;
+// extern lv_obj_t *ui_mediapanel;
+// extern lv_obj_t *ui_USBbut;
+// extern lv_obj_t *ui_USBlabel;
+// extern lv_obj_t *ui_SDbut;
+// extern lv_obj_t *ui_SDlabel;
+// extern lv_obj_t *ui_Flashbut;
+// extern lv_obj_t *ui_Flashlabel;
+// extern lv_obj_t *ui_patchlist;
+extern "C" void ui_PatchSelector_screen_init();
+LV_FONT_DECLARE(lv_font_montserrat_10);
+LV_FONT_DECLARE(lv_font_montserrat_16);
+
 namespace MetaModule
 {
 
@@ -15,46 +31,22 @@ namespace MetaModule
 //And restore that after a refresh:
 struct PatchSelectorPage : PageBase {
 	PatchSelectorPage(PatchInfo info)
-		: PageBase{info}
-		, base(lv_obj_create(nullptr)) {
+		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchSel);
+
+		ui_PatchSelector_screen_init();
+		base = ui_PatchSelector;  //NOLINT
+		roller = ui_patchlist;	  //NOLINT
+		nor_but = ui_Flashbut;	  //NOLINT
+		usb_but = ui_USBbut;	  //NOLINT
+		sd_but = ui_SDbut;		  //NOLINT
+		spinner = ui_waitspinner; //NOLINT
 
 		init_bg(base);
 
-		roller = lv_roller_create(base);
 		lv_group_add_obj(group, roller);
-
 		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(roller, patchlist_scroll_cb, LV_EVENT_KEY, this);
-
-		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		lv_obj_add_style(roller, &Gui::plain_border_style, (int)LV_PART_MAIN | LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
-		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
-
-		lv_obj_set_pos(roller, 0, 30);
-		lv_obj_set_size(roller, 320, 210);
-
-		header_text = lv_label_create(base);
-		lv_label_set_text_static(header_text, "Select a Patch:");
-		lv_obj_add_style(header_text, &Gui::header_style, LV_PART_MAIN);
-		lv_obj_set_align(base, LV_ALIGN_TOP_MID);
-		lv_obj_set_pos(header_text, 0, 0);
-		lv_obj_set_width(header_text, 320);
-
-		// wait_cont = lv_obj_create(base);
-		// lv_obj_set_align(wait_cont, LV_ALIGN_CENTER);
-		// lv_obj_add_style(wait_cont, &style_wait_cont, LV_PART_MAIN);
-		// lv_cont_set_layout(wait_cont, LV_LAYOUT_CENTER);
-		// lv_cont_set_fit(wait_cont, LV_FIT_TIGHT);
-
-		// wait_text = lv_label_create(wait_cont);
-		// lv_obj_add_style(wait_text, &style_popup_patchname, LV_PART_MAIN);
-		// lv_obj_set_align(wait_text, LV_ALIGN_CENTER);
-		// lv_label_set_text(wait_text, "Refreshing Patches...");
-
-		// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-
-		// wait_group = lv_group_create();
 	}
 
 	void init() override {
@@ -66,19 +58,21 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void refresh_patchlist(PatchFileList &patchfiles) {
+		Volume first_vol;
 		num_usb = patchfiles.usb.size();
 		num_sdcard = patchfiles.sdcard.size();
 		num_norflash = patchfiles.norflash.size();
 
 		//TODO: try using pmr::string with monotonic stack buffer
 		std::string patchnames;
-		patchnames.reserve((sizeof(PatchFile::patchname) + 1) * (num_usb + num_norflash + num_sdcard) + 128);
+		patchnames.reserve((sizeof(PatchFile::patchname) + sizeof(leader) + 1 /*newline*/) *
+							   (num_usb + num_norflash + num_sdcard + 3 /*headers*/) +
+						   32 /*just in case*/);
 
 		if (num_usb) {
 			patchnames += "USB Drive\n";
-			// lv_list_add_text(roller, "USB Drive");
+			// patchnames += LV_SYMBOL_USB;
 			for (auto &p : patchfiles.usb) {
-				// lv_list_add_btn(roller, nullptr /*LV_SYMBOL_USB*/, p.patchname.c_str());
 				patchnames += leader;
 				patchnames += std::string_view{p.patchname};
 				patchnames += '\n';
@@ -93,7 +87,7 @@ struct PatchSelectorPage : PageBase {
 			}
 		}
 		if (num_norflash) {
-			patchnames += "Norflash\n";
+			patchnames += "Internal\n";
 			for (auto &p : patchfiles.norflash) {
 				patchnames += leader;
 				patchnames += std::string_view{p.patchname};
@@ -107,17 +101,66 @@ struct PatchSelectorPage : PageBase {
 
 		lv_roller_set_options(roller, patchnames.c_str(), LV_ROLLER_MODE_NORMAL);
 
-		unsigned default_sel = patchnames.size() > 10 ? 5 : patchnames.size() / 2;
-		lv_roller_set_selected(roller, default_sel, LV_ANIM_OFF);
+		//refresh header positions
+		usb_hdr = 0;
+		sd_hdr = 0;
+		if (num_sdcard) {
+			if (num_usb)
+				sd_hdr += 1 + num_usb;
+		}
 
-		printf_("Patch Selector refreshed:\nUSB: %ld patches from %p\nSD : %ld patches from %p\nNOR: %ld patches "
-				"from %p\n",
+		nor_hdr = 0;
+		if (num_norflash) {
+			if (num_usb)
+				nor_hdr += 1 + num_usb;
+			if (num_sdcard)
+				nor_hdr += 1 + num_sdcard;
+		}
+
+		//TODO: check if the patch we were on exists (same name, and volume is mounted), and select it instead
+		// For now, we just select the first patch of the first volume
+		highlighted_idx = 1;
+		highlighted_vol = num_usb ? Volume::USB : num_sdcard ? Volume::SDCard : Volume::NorFlash;
+		lv_roller_set_selected(roller, highlighted_idx, LV_ANIM_ON);
+
+		printf_("Patch Selector refreshed:\nUSB: %ld patches\nSD: %ld patches\nNOR: %ld patches\n",
 				patchfiles.usb.size(),
-				patchfiles.usb.data(),
 				patchfiles.sdcard.size(),
-				patchfiles.sdcard.data(),
-				patchfiles.norflash.size(),
-				patchfiles.norflash.data());
+				patchfiles.norflash.size());
+	}
+
+	void refresh_volume_labels() {
+		//Disable unmounted media:
+		if (num_usb)
+			lv_obj_clear_state(usb_but, LV_STATE_DISABLED);
+		else
+			lv_obj_add_state(usb_but, LV_STATE_DISABLED);
+
+		if (num_sdcard)
+			lv_obj_clear_state(sd_but, LV_STATE_DISABLED);
+		else
+			lv_obj_add_state(sd_but, LV_STATE_DISABLED);
+
+		if (num_norflash)
+			lv_obj_clear_state(nor_but, LV_STATE_DISABLED);
+		else
+			lv_obj_add_state(nor_but, LV_STATE_DISABLED);
+
+		// Highlight (CHECKED) the selected volume
+		if (highlighted_vol == Volume::USB)
+			lv_obj_add_state(usb_but, LV_STATE_CHECKED);
+		else
+			lv_obj_clear_state(usb_but, LV_STATE_CHECKED);
+
+		if (highlighted_vol == Volume::SDCard)
+			lv_obj_add_state(sd_but, LV_STATE_CHECKED);
+		else
+			lv_obj_clear_state(sd_but, LV_STATE_CHECKED);
+
+		if (highlighted_vol == Volume::NorFlash)
+			lv_obj_add_state(nor_but, LV_STATE_CHECKED);
+		else
+			lv_obj_clear_state(nor_but, LV_STATE_CHECKED);
 	}
 
 	void update() override {
@@ -132,12 +175,21 @@ struct PatchSelectorPage : PageBase {
 			case State::RequestedPatchList: {
 				auto message = patch_storage.get_message().message_type;
 				if (message == PatchStorageProxy::PatchListChanged) {
-					refresh_patchlist(patch_storage.get_patch_list());
+					show_spinner();
+					state = State::ReloadingPatchList;
+				} else if (message == PatchStorageProxy::PatchListUnchanged) {
+					hide_spinner();
 					state = State::Idle;
-				} else if (message == PatchStorageProxy::PatchListUnchanged)
-					state = State::Idle;
+				}
 				//else other messages ==> error? repeat request? idle?
 			} break;
+
+			case State::ReloadingPatchList:
+				refresh_patchlist(patch_storage.get_patch_list());
+				refresh_volume_labels();
+				hide_spinner();
+				state = State::Idle;
+				break;
 
 			case State::Idle: {
 				//periodically check if patchlist needs updating:
@@ -149,8 +201,10 @@ struct PatchSelectorPage : PageBase {
 			} break;
 
 			case State::TryingToRequestPatchData:
-				if (patch_storage.request_viewpatch(selected_patch_vol, selected_patch))
+				if (patch_storage.request_viewpatch(selected_patch_vol, selected_patch)) {
 					state = State::RequestedPatchData;
+					show_spinner();
+				}
 				break;
 
 			case State::RequestedPatchData: {
@@ -164,13 +218,17 @@ struct PatchSelectorPage : PageBase {
 						PageList::set_selected_patch_id(selected_patch);
 						PageList::request_new_page(PageId::PatchView);
 						state = State::Closing;
+						hide_spinner();
 					} else {
 						printf_("Error parsing patch id %d, bytes_read = %d\n", selected_patch, message.bytes_read);
 						state = State::Idle;
+						hide_spinner();
 					}
 				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
 					printf_("Error loading patch id %d\n", selected_patch);
 					state = State::Idle;
+					lv_group_set_editing(group, true);
+					hide_spinner();
 					//TODO: handle error... try reloading patch list?
 				}
 			} break;
@@ -178,97 +236,92 @@ struct PatchSelectorPage : PageBase {
 			case State::Closing:
 				break;
 		}
-
-		//TODO: Display state: "Refreshing...", "Loading..."
-
-		// if (should_show_patchview) {
-		// 	should_show_patchview = false;
-		// 	printf_("Requesting new page: PatchView, patch id %d\n", selected_patch);
-		// 	patch_storage.load_view_patch(selected_patch);
-		// 	blur();
-		// }
-
-		// lv_indev_set_group(lv_indev_get_next(nullptr), wait_group);
-		// lv_obj_clear_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-
-		// 		if (!patchlist_was_ready) {
-		// 			// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
-		// 			lv_indev_set_group(lv_indev_get_next(nullptr), group);
-		// 			lv_group_set_editing(group, true);
-		// 			patchlist_was_ready = true;
-		// 		}
 	}
 
 	void blur() override {
-		// lv_obj_add_flag(wait_cont, LV_OBJ_FLAG_HIDDEN);
+		hide_spinner();
+	}
+
+	void show_spinner() {
+		lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+	}
+
+	void hide_spinner() {
+		lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
 		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
 		auto idx = lv_roller_get_selected(_instance->roller);
-		auto usb_hdr = 0;
-		auto sd_hdr = 0;
-		if (_instance->num_sdcard) {
-			if (_instance->num_usb)
-				sd_hdr += 1 + _instance->num_usb;
-		}
-		uint32_t nor_hdr = 0;
-		if (_instance->num_norflash) {
-			if (_instance->num_usb)
-				nor_hdr += 1 + _instance->num_usb;
-			if (_instance->num_sdcard)
-				nor_hdr += 1 + _instance->num_sdcard;
-		}
-		if (idx == usb_hdr || idx == sd_hdr || idx == nor_hdr) {
+
+		if (idx == _instance->usb_hdr || idx == _instance->sd_hdr || idx == _instance->nor_hdr) {
 			if (idx == 0)
 				lv_roller_set_selected(_instance->roller, 1, LV_ANIM_OFF);
-			else if (idx > _instance->last_idx)
+			else if (idx > _instance->highlighted_idx)
 				lv_roller_set_selected(_instance->roller, idx + 1, LV_ANIM_OFF);
-			else if (idx < _instance->last_idx)
+			else if (idx < _instance->highlighted_idx)
 				lv_roller_set_selected(_instance->roller, idx - 1, LV_ANIM_OFF);
+			idx = lv_roller_get_selected(_instance->roller);
 		}
-		_instance->last_idx = lv_roller_get_selected(_instance->roller);
+
+		auto [_, vol] = _instance->calc_patch_id_vol(idx);
+		_instance->highlighted_vol = vol;
+		_instance->highlighted_idx = idx;
+		_instance->refresh_volume_labels();
 	}
 
 	static void patchlist_select_cb(lv_event_t *event) {
 		auto _instance = static_cast<PatchSelectorPage *>(event->user_data);
-		auto idx = lv_roller_get_selected(_instance->roller);
-		if (!idx || idx == _instance->num_usb || idx == (_instance->num_usb + _instance->num_sdcard + 1)) {
-			printf_("Selected a header: %d\n", idx);
-			return;
-		}
-		if (idx < _instance->num_usb) {
-			_instance->selected_patch_vol = Volume::USB;
-			_instance->selected_patch = idx - 1;
-		} else if (idx < (_instance->num_sdcard + _instance->num_usb + 1)) {
-			_instance->selected_patch_vol = Volume::SDCard;
-			_instance->selected_patch = idx - _instance->num_usb - 1;
-		} else {
-			_instance->selected_patch_vol = Volume::NorFlash;
-			_instance->selected_patch = idx - _instance->num_usb - _instance->num_sdcard - 2;
-		}
-		printf_("Selected vol %d, patch %d\n", (uint32_t)_instance->selected_patch_vol, _instance->selected_patch);
+		patchlist_scroll_cb(event);
+
+		auto [patch_id, vol] = _instance->calc_patch_id_vol(_instance->highlighted_idx);
+		_instance->selected_patch_vol = vol;
+		_instance->selected_patch = patch_id;
 		_instance->state = State::TryingToRequestPatchData;
+
+		printf_("Selected vol %d, patch %d\n", (uint32_t)_instance->selected_patch_vol, _instance->selected_patch);
+	}
+
+	std::pair<uint32_t, Volume> calc_patch_id_vol(uint32_t roller_idx) {
+		auto vol = (roller_idx > nor_hdr) ? Volume::NorFlash : (roller_idx > sd_hdr) ? Volume::SDCard : Volume::USB;
+		if (vol == Volume::USB)
+			return {roller_idx - 1 - usb_hdr, vol};
+		if (vol == Volume::SDCard)
+			return {roller_idx - 1 - sd_hdr, vol};
+		if (vol == Volume::NorFlash)
+			return {roller_idx - 1 - nor_hdr, vol};
+		return {0, Volume::NorFlash};
 	}
 
 private:
 	uint32_t selected_patch = 0;
 	Volume selected_patch_vol = Volume::NorFlash;
-	uint32_t last_idx = 0;
+	uint32_t highlighted_idx = 0;
+	Volume highlighted_vol = Volume::NorFlash;
 
 	lv_obj_t *roller;
-	lv_obj_t *header_text;
+	// lv_obj_t *header_text;
 	lv_obj_t *base;
-	const std::string_view leader = " - ";
+	lv_obj_t *usb_but;
+	lv_obj_t *sd_but;
+	lv_obj_t *nor_but;
+	lv_obj_t *spinner;
+
+	const std::string_view leader = "   ";
 	uint32_t num_usb;
 	uint32_t num_sdcard;
 	uint32_t num_norflash;
+
+	unsigned usb_hdr = 0;
+	unsigned sd_hdr = 0;
+	unsigned nor_hdr = 0;
 
 	enum class State {
 		Idle,
 
 		TryingToRequestPatchList,
 		RequestedPatchList,
+		ReloadingPatchList,
 
 		TryingToRequestPatchData,
 		RequestedPatchData,

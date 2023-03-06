@@ -23,7 +23,7 @@ class PageList {
 
 	static inline uint32_t selected_patch_id = 0;
 	static inline uint32_t selected_module_id = 0;
-	static inline ModuleParam selected_param_id{};
+	static inline ModuleParam selected_control_id{};
 
 public:
 	static void set_selected_patch_id(uint32_t id) {
@@ -42,12 +42,12 @@ public:
 		return selected_module_id;
 	}
 
-	static void set_selected_param(ModuleParam id) {
-		selected_param_id = id;
+	static void set_selected_control(ModuleParam id) {
+		selected_control_id = id;
 	}
 
-	static ModuleParam get_selected_param() {
-		return selected_param_id;
+	static ModuleParam get_selected_control() {
+		return selected_control_id;
 	}
 
 	// Associates a pointer to a Page with an id

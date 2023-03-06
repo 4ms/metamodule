@@ -24,11 +24,11 @@ struct AppStartup {
 		HWSemaphore<MainCoreReady>::disable_channel_ISR();
 		HWSemaphore<MainCoreReady>::lock();
 
+		Copro::reset();
 		SystemStartup::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
 
 		SecondaryCore::start();
 
-		Copro::reset();
 		Copro::load_vector_data(vectors_bin, vectors_bin_len);
 		Copro::load_firmware_data(firmware_bin, firmware_bin_len);
 		L1C_CleanDCacheAll();

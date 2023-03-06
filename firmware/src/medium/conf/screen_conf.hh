@@ -49,12 +49,12 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 		static constexpr auto periph_flow = false;
 		static constexpr auto transfer_size_mem = HalfWord;
 		static constexpr auto transfer_size_periph = HalfWord;
-		static constexpr auto dma_priority = Low;
+		static constexpr auto dma_priority = High;
 		static constexpr auto mem_inc = true;
 		static constexpr auto periph_inc = false;
 		static constexpr auto half_transfer_interrupt_enable = false;
 		static constexpr auto enable_fifo = true;
-		static constexpr auto fifo_threshold = Fifo1QuarterFull;
+		static constexpr auto fifo_threshold = FifoHalfFull;
 		static constexpr auto mem_burst = Single;
 		static constexpr auto periph_burst = Single;
 	};
