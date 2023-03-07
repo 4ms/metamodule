@@ -81,7 +81,7 @@ void CommModule::process(const ProcessArgs &args)
 		}
 
 		if (element->inputJackStatus.connected) {
-			auto scaledIn = element->scale(element->getValue());
+			auto scaledIn = injack->getValue() * injack->scaleFactor;
 			core->set_input(element->getID(), scaledIn);
 		}
 	}
@@ -94,7 +94,7 @@ void CommModule::process(const ProcessArgs &args)
 	}
 
 	for (auto &out : outputJacks) {
-		out->setValue(out->scale(core->get_output(out->getID())));
+		out->setValue(core->get_output(out->getID()) * out->scaleFactor);
 		out->updateOutput();
 	}
 

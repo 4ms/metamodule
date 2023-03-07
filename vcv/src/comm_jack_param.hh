@@ -12,7 +12,7 @@ private:
 
 public:
 	JackStatus inputJackStatus;
-	std::function<float(float)> scale = [](float f) { return f; };
+	float scaleFactor = 1.f / 5.f; //-5V to +5V in VCV => -1..+1 in CoreModule
 
 	CommInputJack(Port &inputPort, int jackID)
 		: _inputPort{inputPort}
@@ -73,7 +73,7 @@ private:
 	int64_t _moduleID = -1;
 
 public:
-	std::function<float(float)> scale = [](float f) { return f; };
+	float scaleFactor = 5.f; // CoreModule ouput of -1 to +1 => -5V to +5V in VCV
 
 	CommOutputJack(Port &outputPort, int jackID)
 		: _outputPort{outputPort}
