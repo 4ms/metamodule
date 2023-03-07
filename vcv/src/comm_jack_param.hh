@@ -109,6 +109,7 @@ class CommParam {
 
 public:
 	ParamStatus paramStatus;
+	float scaleFactor = 1.0f;
 
 	CommParam(Param &inParam, int paramID)
 		: _inParam{inParam}
@@ -118,8 +119,10 @@ public:
 
 	void setModuleID(int64_t moduleID) { paramStatus.moduleID = moduleID; }
 
-	void updateValue() { paramStatus.value = _inParam.getValue(); }
+	// paramStatus.value is sent to CentralData (to be written with patch)
+	void updateValue() { paramStatus.value = _inParam.getValue() * scaleFactor; }
 
+	// result of getValue() is sent to the CoreModule
 	float getValue() { return paramStatus.value; }
 
 	int getID() { return paramStatus.paramID; }
