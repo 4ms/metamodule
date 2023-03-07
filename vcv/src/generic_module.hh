@@ -44,13 +44,6 @@ struct GenericModule : CommModule {
 			}
 		}
 
-		// TODO: let us set the in/out conversion functions in Defs...
-		for (auto input : Defs::InJacks)
-			inputJacks[input.id]->scale = [](float volts) { return volts / 5.0f; };
-
-		for (auto output : Defs::OutJacks)
-			outputJacks[output.id]->scale = [](float f) { return f * 5.0f; }; //=>volts
-
 		for (auto &alt : Defs::AltParams) {
 			altParams.push_back({true, alt.id, alt.default_val});
 		}
