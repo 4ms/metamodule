@@ -58,31 +58,31 @@ void CommModule::process(const ProcessArgs &args)
 	else if (_comm_status == PropagateData2)
 		_comm_status = Normal;
 
-	for (auto &element : commParams) {
-		element->updateValue();
-		core->set_param(element->getID(), element->getValue());
+	for (auto &param : commParams) {
+		param->updateValue();
+		core->set_param(param->getID(), param->getValue());
 	}
 
-	for (auto &element : altParams) {
-		if (element.is_updated)
-			core->set_alt_param(element.id, element.val);
-		element.is_updated = false;
+	for (auto &alt : altParams) {
+		if (alt.is_updated)
+			core->set_alt_param(alt.id, alt.val);
+		alt.is_updated = false;
 	}
 
-	for (auto &element : inputJacks) {
-		element->updateInput();
+	for (auto &injack : inputJacks) {
+		injack->updateInput();
 
-		if (element->isJustPatched())
-			core->mark_input_patched(element->getID());
+		if (injack->isJustPatched())
+			core->mark_input_patched(injack->getID());
 
-		if (element->isJustUnpatched()) {
-			core->set_input(element->getID(), 0); // unpatched value. TODO: allow for normalizations
-			core->mark_input_unpatched(element->getID());
+		if (injack->isJustUnpatched()) {
+			core->set_input(injack->getID(), 0); // 0 = unpatched value. TODO: allow for normalizations
+			core->mark_input_unpatched(injack->getID());
 		}
 
-		if (element->inputJackStatus.connected) {
+		if (injack->inputJackStatus.connected) {
 			auto scaledIn = injack->getValue() * injack->scaleFactor;
-			core->set_input(element->getID(), scaledIn);
+			core->set_input(injack->getID(), scaledIn);
 		}
 	}
 
