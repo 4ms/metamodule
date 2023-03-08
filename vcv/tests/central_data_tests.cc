@@ -242,17 +242,17 @@ TEST_CASE("mappings")
 	{
 		rack::Module m1;
 		cd.registerModule({1, "MODULE1"}, &m1);
-		LabelButtonID src;
+		MappableObj src;
 		src.moduleID = 1;
 		src.objID = 2;
-		src.objType = LabelButtonID::Types::Knob;
+		src.objType = MappableObj::Type::Knob;
 
 		rack::Module m2;
 		cd.registerModule({100, "MODULE100"}, &m2);
-		LabelButtonID dst;
+		MappableObj dst;
 		dst.moduleID = 100;
 		dst.objID = 200;
-		dst.objType = LabelButtonID::Types::Knob;
+		dst.objType = MappableObj::Type::Knob;
 
 		cd.startMappingProcedure(src);
 		cd.registerMapDest(dst);
@@ -268,22 +268,22 @@ TEST_CASE("mappings")
 
 		SUBCASE("Other objects are not mapped")
 		{
-			LabelButtonID unmappedknob;
+			MappableObj unmappedknob;
 			unmappedknob.moduleID = 999;
 			unmappedknob.objID = 222;
-			unmappedknob.objType = LabelButtonID::Types::Knob;
+			unmappedknob.objType = MappableObj::Type::Knob;
 			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
 			unmappedknob.moduleID = 1;
 			unmappedknob.objID = 222;
-			unmappedknob.objType = LabelButtonID::Types::Knob;
+			unmappedknob.objType = MappableObj::Type::Knob;
 			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
 			unmappedknob.moduleID = 111;
 			unmappedknob.objID = 2;
-			unmappedknob.objType = LabelButtonID::Types::Knob;
+			unmappedknob.objType = MappableObj::Type::Knob;
 			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
 			unmappedknob.moduleID = 1;
 			unmappedknob.objID = 2;
-			unmappedknob.objType = LabelButtonID::Types::InputJack;
+			unmappedknob.objType = MappableObj::Type::InputJack;
 			CHECK(cd.isLabelButtonMapped(unmappedknob) == false);
 		}
 

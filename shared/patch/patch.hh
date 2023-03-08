@@ -1,4 +1,5 @@
 #pragma once
+#include "midi_def.hh"
 #include "util/static_string.hh"
 #include <vector>
 
@@ -26,11 +27,6 @@ static_assert(sizeof(StaticParam) == 8, "StaticParam should be 8B");
 using AliasNameString = StaticString<15>;
 static_assert(sizeof(AliasNameString) == 16, "AliasNameString should be 16B");
 
-enum class MidiKnobAlias : uint16_t {
-	MonoNote = 256,
-	MonoGate = 257,
-};
-
 // 32 Bytes
 struct MappedKnob {
 	uint16_t panel_knob_id;
@@ -49,11 +45,11 @@ struct MappedKnob {
 	}
 
 	bool is_monophonic_note() const {
-		return (panel_knob_id == static_cast<uint16_t>(MidiKnobAlias::MonoNote));
+		return (panel_knob_id == static_cast<uint16_t>(MidiMonoNoteParam));
 	}
 
 	bool is_monophonic_gate() const {
-		return (panel_knob_id == static_cast<uint16_t>(MidiKnobAlias::MonoGate));
+		return (panel_knob_id == static_cast<uint16_t>(MidiMonoGateParam));
 	}
 
 	bool operator==(const MappedKnob &other) {
@@ -73,11 +69,11 @@ struct MappedInputJack {
 	std::vector<Jack> ins;
 	AliasNameString alias_name;
 	bool is_monophonic_note() const {
-		return (panel_jack_id == static_cast<uint16_t>(MidiKnobAlias::MonoNote));
+		return (panel_jack_id == static_cast<uint16_t>(MidiMonoNoteJack));
 	}
 
 	bool is_monophonic_gate() const {
-		return (panel_jack_id == static_cast<uint16_t>(MidiKnobAlias::MonoGate));
+		return (panel_jack_id == static_cast<uint16_t>(MidiMonoGateJack));
 	}
 };
 

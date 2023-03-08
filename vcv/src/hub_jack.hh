@@ -11,12 +11,12 @@ public:
 
 	void onDeselect(const event::Deselect &e) override
 	{
-		printf("Deselect hub jack %lld %lld %d\n", id.moduleID, id.objID, id.objType);
+		// printf("Deselect hub jack %lld %lld %d\n", id.moduleID, id.objID, id.objType);
 		bool registerSuccess = false;
 		auto touchedJack = centralData->getAndClearTouchedJack();
-		printf("Touched %lld %lld %d\n", touchedJack.moduleID, touchedJack.objID, touchedJack.objType);
-		if (touchedJack.objType == id.objType) {
-			registerSuccess = registerMapping(touchedJack.moduleID, touchedJack.objID);
+		// printf("Touched %lld %lld %d\n", touchedJack.moduleID, touchedJack.objID, touchedJack.objType);
+		if (touchedJack.objType == mapObj.objType) {
+			registerSuccess = registerMapping(touchedJack);
 		}
 
 		if (!registerSuccess) {
@@ -38,8 +38,8 @@ public:
 
 		// Draw mapped circle
 		if (hubJackLabel.isMapped) {
-			NVGcolor color = PaletteHub::color[hubJackLabel.id.objID];
-			if (hubJackLabel.id.objType == LabelButtonID::Types::InputJack)
+			NVGcolor color = PaletteHub::color(hubJackLabel.mapObj.objID);
+			if (hubJackLabel.mapObj.objType == MappableObj::Type::InputJack)
 				MapMark::markInputJack(args.vg, this->box, color);
 			else
 				MapMark::markOutputJack(args.vg, this->box, color);
@@ -53,7 +53,7 @@ public:
 		// So, don't consume the hover and just do nothing.
 		// On the other hand, if the jack is not mapped, then consume the hover so that hovering the jack
 		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(hubJackLabel.id)) {
+		if (centralData->isLabelButtonSrcMapped(hubJackLabel.mapObj)) {
 			PortWidget::onHover(e);
 			return;
 		}

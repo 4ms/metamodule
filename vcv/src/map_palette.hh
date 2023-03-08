@@ -4,7 +4,6 @@
 struct PaletteHub {
 	static inline const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
 	static inline const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
-
 	static inline const NVGcolor BLACK = nvgRGB(0x00, 0x00, 0x00);
 	static inline const NVGcolor RED = nvgRGB(0xff, 0x00, 0x00);
 	static inline const NVGcolor PURPLE = nvgRGB(0x80, 0x00, 0x40);
@@ -18,20 +17,8 @@ struct PaletteHub {
 	static inline const NVGcolor GRAY75 = nvgRGB(0xc0, 0xc0, 0xc0);
 	static inline const NVGcolor WHITE = nvgRGB(0xff, 0xff, 0xff);
 
-	static inline const NVGcolor color[24] = {
-		RED,
-		ORANGE,
-		YELLOW,
-		GREEN,
-		CYAN,
-		BLUE,
-		PURPLE,
-		MAGENTA,
-		BROWN,
-		GRAY25,
-		GRAY50,
-		GRAY75,
-		// repeat
+private:
+	static inline const std::array<NVGcolor, 12> _color = {
 		RED,
 		ORANGE,
 		YELLOW,
@@ -45,4 +32,7 @@ struct PaletteHub {
 		GRAY50,
 		GRAY75,
 	};
+
+public:
+	static NVGcolor color(unsigned idx) { return _color[idx % _color.size()]; }
 };

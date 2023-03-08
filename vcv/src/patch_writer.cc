@@ -87,14 +87,31 @@ void PatchFileWriter::setParamList(std::vector<ParamStatus> &params)
 	}
 }
 
-void PatchFileWriter::addMaps(std::vector<Mapping> maps)
+// void rectify_midi_maps(std::vector<Mapping> &maps)
+//{
+//	int num_midinote_mappings = std::count_if(
+//		maps.begin(), maps.end(), [](auto &m) { return m.src.objType == LabelButtonID::Types::MidiNote; });
+//	int num_midigate_mappings = std::count_if(
+//		maps.begin(), maps.end(), [](auto &m) { return m.src.objType == LabelButtonID::Types::MidiGate; });
+
+//	int num_midi_mappings = std::max(num_midinote_mappings, num_midigate_mappings);
+//	//polyphony number
+
+//	uint16_t note_src_id = 256;//first MidiNote
+//	for(auto &m :maps) {
+//		if (m.src.objType == LabelButtonID::Types::MidiNote)
+//			m.src.objID = note_src_id;
+//	}
+//}
+
+void PatchFileWriter::addMaps(std::vector<Mapping> &maps)
 {
 	pd.mapped_knobs.clear();
 	pd.mapped_ins.clear();
 	pd.mapped_outs.clear();
 
-	for (auto &m : maps) {
-		if (m.dst.objType == LabelButtonID::Types::Knob) {
+	for (const auto &m : maps) {
+		if (m.dst.objType == MappableObj::Type::Knob) {
 			pd.mapped_knobs.push_back({
 				.panel_knob_id = static_cast<uint16_t>(m.src.objID),
 				.module_id = idMap[m.dst.moduleID],
@@ -106,7 +123,7 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 			});
 		}
 
-		if (m.dst.objType == LabelButtonID::Types::InputJack) {
+		if (m.dst.objType == MappableObj::Type::InputJack) {
 			// Look for an existing entry:
 			auto found = std::find_if(pd.mapped_ins.begin(),
 									  pd.mapped_ins.end(),
@@ -134,7 +151,7 @@ void PatchFileWriter::addMaps(std::vector<Mapping> maps)
 			}
 		}
 
-		if (m.dst.objType == LabelButtonID::Types::OutputJack) {
+		if (m.dst.objType == MappableObj::Type::OutputJack) {
 			// Update the mapped_outs entry if there already is one with the same panel_jack_id (Note that this is
 			// an error, since we can't have multiple outs assigned to a net, but we're going to roll with it).
 			// otherwise push it to the vector

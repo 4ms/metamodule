@@ -33,7 +33,7 @@ public:
 				nvgBeginPath(args.vg);
 				nvgCircle(args.vg, this->box.size.x / 2, this->box.size.y / 2, this->box.size.y / 2);
 				float alpha = hovered ? 0.75 : 0.4;
-				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alpha);
+				NVGcolor color = rack::color::alpha(PaletteHub::color(src.objID), alpha);
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
 			}
@@ -41,7 +41,7 @@ public:
 
 		if ((id.moduleID >= 0) && centralData->isLabelButtonDstMapped(id)) {
 			int srcPortId = centralData->getMappedSrcFromDst(id).objID;
-			NVGcolor color = PaletteHub::color[srcPortId];
+			NVGcolor color = PaletteHub::color(srcPortId);
 			Rect box = this->box.grow(Vec{-margin / 2, -margin / 2});
 			if constexpr (InputOrOutput == MappableJackType::Output)
 				MapMark::markOutputJack(args.vg, box, color);
@@ -104,18 +104,18 @@ public:
 private:
 	bool hovered = false;
 
-	LabelButtonID getId()
+	MappableObj getId()
 	{
 		int64_t moduleId = this->module ? this->module->id : -1;
 		if constexpr (InputOrOutput == MappableJackType::Input)
-			return {LabelButtonID::Types::InputJack, this->portId, moduleId};
+			return {MappableObj::Type::InputJack, this->portId, moduleId};
 		else
-			return {LabelButtonID::Types::OutputJack, this->portId, moduleId};
+			return {MappableObj::Type::OutputJack, this->portId, moduleId};
 	}
 
 	struct JackUnmapItem : ui::MenuItem {
-		const LabelButtonID _id;
-		JackUnmapItem(LabelButtonID id)
+		const MappableObj _id;
+		JackUnmapItem(MappableObj id)
 			: _id{id}
 		{}
 		void onAction(const event::Action &e) override { centralData->unregisterMapByDest(_id); }

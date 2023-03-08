@@ -4,49 +4,65 @@
 #include <string>
 #include <vector>
 
-struct LabelButtonID {
-	enum class Types { None, Knob, InputJack, OutputJack, Toggle } objType;
+struct MappableObj {
+	enum class Type { None, Knob, InputJack, OutputJack, Toggle, MidiNote, MidiGate } objType;
 	int64_t objID;
 	int64_t moduleID;
 
-	bool operator==(const LabelButtonID &rhs) const
+	bool operator==(const MappableObj &rhs) const
 	{
 		return (objType == rhs.objType) && (objID == rhs.objID) && (moduleID == rhs.moduleID);
 	}
 
+	bool mappable_to(const Type otherType) const
+	{
+		return (objType == otherType) || (objType == Type::Knob && otherType == Type::MidiNote) ||
+			   (objType == Type::MidiNote && otherType == Type::Knob) ||
+			   (objType == Type::MidiGate && otherType == Type::Knob) ||
+			   (objType == Type::Knob && otherType == Type::MidiGate);
+	}
+
 	const char *objTypeStr() const
 	{
-		if (objType == Types::Knob)
+		if (objType == Type::Knob)
 			return "Knob";
-		if (objType == Types::InputJack)
+		if (objType == Type::InputJack)
 			return "InputJack";
-		if (objType == Types::OutputJack)
+		if (objType == Type::OutputJack)
 			return "OutputJack";
-		if (objType == Types::Toggle)
+		if (objType == Type::Toggle)
 			return "Toggle";
+		if (objType == Type::MidiNote)
+			return "MidiValue";
+		if (objType == Type::MidiGate)
+			return "MidiGate";
 		return "None";
 	}
 
 	void setObjTypeFromString(const char *str)
 	{
 		if (std::strcmp(str, "Knob") == 0)
-			objType = Types::Knob;
+			objType = Type::Knob;
 		else if (std::strcmp(str, "InputJack") == 0)
-			objType = Types::InputJack;
+			objType = Type::InputJack;
 		else if (std::strcmp(str, "OutputJack") == 0)
-			objType = Types::OutputJack;
+			objType = Type::OutputJack;
 		else if (std::strcmp(str, "Toggle") == 0)
-			objType = Types::Toggle;
+			objType = Type::Toggle;
+		else if (std::strcmp(str, "MidiValue") == 0)
+			objType = Type::MidiNote;
+		else if (std::strcmp(str, "MidiGate") == 0)
+			objType = Type::MidiGate;
 		else
-			objType = Types::None;
+			objType = Type::None;
 	}
 };
 
 namespace std
 {
 template<>
-struct hash<LabelButtonID> {
-	std::size_t operator()(const LabelButtonID &k) const
+struct hash<MappableObj> {
+	std::size_t operator()(const MappableObj &k) const
 	{
 		using std::hash;
 		return ((hash<int>()(k.objID) ^ (hash<int64_t>()(k.moduleID) << 1)) >> 1) ^
@@ -57,8 +73,8 @@ struct hash<LabelButtonID> {
 } // namespace std
 
 struct Mapping {
-	LabelButtonID src;
-	LabelButtonID dst;
+	MappableObj src;
+	MappableObj dst;
 	float range_min = 0.f;
 	float range_max = 1.f;
 	std::string alias_name{""};
@@ -69,13 +85,14 @@ struct Mapping {
 		src.moduleID = -1;
 		dst.objID = -1;
 		src.objID = -1;
-		dst.objType = LabelButtonID::Types::None;
-		src.objType = LabelButtonID::Types::None;
+		dst.objType = MappableObj::Type::None;
+		src.objType = MappableObj::Type::None;
 		range_min = 0.f;
 		range_max = 1.f;
 		alias_name = "";
 	}
 };
+
 struct ModuleID {
 	int64_t id;
 	ModuleTypeSlug slug;

@@ -18,7 +18,7 @@ PatchData:
       ins:
         - module_id: 1
           jack_id: 8
-    - panel_jack_id: 257
+    - panel_jack_id: 9 #MidiMonoGateJack
       ins:
         - module_id: 3
           jack_id: 4 #Trigger
@@ -152,7 +152,7 @@ PatchData:
       curve_type: 0
       min: 0
       max: 1
-    - panel_knob_id: 256
+    - panel_knob_id: 12 #MidiMonoNoteParam
       module_id: 3
       param_id: 0    #Pitch
       curve_type: 0

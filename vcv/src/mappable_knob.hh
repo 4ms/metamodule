@@ -25,11 +25,11 @@ public:
 		bool isMappingNow = centralData->isMappingInProgress();
 		if (isMappingNow || centralData->isMappedPartnerHovered(id)) {
 			auto src = isMappingNow ? centralData->getMappingSource() : centralData->getMappedSrcFromDst(id);
-			if (src.objType == getId().objType && src.objID >= 0) {
+			if (src.mappable_to(getId().objType) && src.objID >= 0) {
 				nvgBeginPath(args.vg);
 				nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y * 0.5f);
 				float alphac = _hovered ? 0.75 : 0.4;
-				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alphac);
+				NVGcolor color = rack::color::alpha(PaletteHub::color(src.objID), alphac);
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
 			}
@@ -52,7 +52,7 @@ public:
 
 	void onButton(const event::Button &e) override { _inner_knob.onButton(e); }
 
-	const LabelButtonID getId() const
+	const MappableObj getId() const
 	{
 		int64_t moduleId = -1;
 		int paramId = -1;
@@ -60,7 +60,7 @@ public:
 			moduleId = _inner_knob.getParamQuantity()->module ? _inner_knob.getParamQuantity()->module->id : -1;
 			paramId = _inner_knob.getParamQuantity()->paramId;
 		}
-		return {LabelButtonID::Types::Knob, paramId, moduleId};
+		return {MappableObj::Type::Knob, paramId, moduleId};
 	}
 };
 
@@ -83,7 +83,7 @@ public:
 				nvgBeginPath(args.vg);
 				nvgRect(args.vg, 0, 0, box.size.x, box.size.y);
 				float alphac = _hovered ? 0.75 : 0.4;
-				NVGcolor color = rack::color::alpha(PaletteHub::color[src.objID], alphac);
+				NVGcolor color = rack::color::alpha(PaletteHub::color(src.objID), alphac);
 				nvgFillColor(args.vg, color);
 				nvgFill(args.vg);
 			}
@@ -102,7 +102,7 @@ public:
 	{
 		auto src = centralData->getMappedSrcFromDst(getId());
 		if (src.moduleID > 0) {
-			const NVGcolor color = PaletteHub::color[src.objID];
+			const NVGcolor color = PaletteHub::color(src.objID);
 			MapMark::markKnob(args.vg, this->box, color);
 		}
 		BaseKnobT::draw(args);
@@ -124,19 +124,19 @@ public:
 			auto moduleid = getId().moduleID;
 			auto paramid = getId().objID;
 
-			LabelButtonID dst = getId();
-			LabelButtonID src = centralData->getMappedSrcFromDst(dst);
+			MappableObj dst = getId();
+			MappableObj src = centralData->getMappedSrcFromDst(dst);
 
 			if ((moduleid >= 0) && src.moduleID != -1) {
 				auto aliasItem = new KnobAliasMenuItem{src};
 				aliasItem->box.size.x = 120;
 				menu->addChild(aliasItem);
 
-				MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, paramid, moduleid});
+				MinSlider *mn = new MinSlider({MappableObj::Type::Knob, paramid, moduleid});
 				mn->box.size.x = 100;
 				menu->addChild(mn);
 
-				MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, paramid, moduleid});
+				MaxSlider *mx = new MaxSlider({MappableObj::Type::Knob, paramid, moduleid});
 				mx->box.size.x = 100;
 				menu->addChild(mx);
 
@@ -171,7 +171,7 @@ public:
 	}
 
 private:
-	const LabelButtonID getId() // const
+	const MappableObj getId() // const
 	{
 		int64_t moduleId = -1;
 		int paramId = -1;
@@ -179,12 +179,12 @@ private:
 			moduleId = this->getParamQuantity()->module ? this->getParamQuantity()->module->id : -1;
 			paramId = this->getParamQuantity()->paramId;
 		}
-		return {LabelButtonID::Types::Knob, paramId, moduleId};
+		return {MappableObj::Type::Knob, paramId, moduleId};
 	}
 
 	struct KnobUnmapItem : ui::MenuItem {
-		const LabelButtonID _id;
-		KnobUnmapItem(LabelButtonID id)
+		const MappableObj _id;
+		KnobUnmapItem(MappableObj id)
 			: _id{id}
 		{}
 

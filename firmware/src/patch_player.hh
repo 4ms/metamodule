@@ -9,9 +9,9 @@
 #include "../stubs/debug.hh"
 #endif
 #include "conf/hsem_conf.hh"
-#include "conf/midi_def.hh"
 #include "conf/panel_conf.hh"
 #include "drivers/smp.hh"
+#include "patch/midi_def.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
 #include "printf.h"

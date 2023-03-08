@@ -17,7 +17,7 @@ struct ParamUnmapItem : ui::MenuItem {
 	}
 };
 
-static void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
+static void makeKnobMenu(ParamQuantity *paramQuantity, MappableObj id)
 {
 	ui::Menu *menu = createMenu();
 
@@ -54,11 +54,11 @@ static void makeKnobMenu(ParamQuantity *paramQuantity, LabelButtonID id)
 				paramLabel2->paramId = m.dst.objID;
 				menu->addChild(paramLabel2);
 
-				MinSlider *mn = new MinSlider({LabelButtonID::Types::Knob, m.dst.objID, m.dst.moduleID});
+				MinSlider *mn = new MinSlider({MappableObj::Type::Knob, m.dst.objID, m.dst.moduleID});
 				mn->box.size.x = 100;
 				menu->addChild(mn);
 
-				MaxSlider *mx = new MaxSlider({LabelButtonID::Types::Knob, m.dst.objID, m.dst.moduleID});
+				MaxSlider *mx = new MaxSlider({MappableObj::Type::Knob, m.dst.objID, m.dst.moduleID});
 				mx->box.size.x = 100;
 				menu->addChild(mx);
 			}
@@ -92,17 +92,13 @@ public:
 
 		// Check if a ParamWidget was touched
 		ParamWidget *touchedParam = APP->scene->rack->getTouchedParam();
-		printf("touchedParam: %p\n", touchedParam);
 		if (touchedParam && touchedParam->getParamQuantity()) {
-			printf("touchedParam->PQ: %p\n", touchedParam->getParamQuantity());
 			int64_t moduleId = touchedParam->module->id;
-			printf("touchedParam->module->id: %lld\n", touchedParam->module->id);
 			int objId = touchedParam->getParamQuantity()->paramId;
-			printf("touchedParam->PQ->paramId: %d\n", touchedParam->getParamQuantity()->paramId);
-
 			APP->scene->rack->setTouchedParam(nullptr);
 
-			registerSuccess = registerMapping(moduleId, objId);
+			registerSuccess =
+				registerMapping({.objType = MappableObj::Type::Knob, .objID = objId, .moduleID = moduleId});
 		}
 
 		if (!registerSuccess) {
@@ -116,7 +112,7 @@ public:
 		// Right click to open context menu
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
 			if (paramQuantity) {
-				makeKnobMenu(paramQuantity, id);
+				makeKnobMenu(paramQuantity, mapObj);
 				e.consume(this);
 			}
 		} else {
@@ -137,10 +133,10 @@ public:
 	{
 		BaseKnobT::draw(args);
 
-		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubKnobMapBut.id), 16U);
+		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubKnobMapBut.mapObj), 16U);
 
 		const float spacing = 8;
-		const NVGcolor color = PaletteHub::color[hubKnobMapBut.id.objID];
+		const NVGcolor color = PaletteHub::color(hubKnobMapBut.mapObj.objID);
 		auto _box = this->box;
 		for (unsigned i = 0; i < numMaps; i++) {
 			MapMark::markKnob(args.vg, _box, color);
@@ -169,7 +165,7 @@ public:
 
 			// Right click to open context menu
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-				makeKnobMenu(this->getParamQuantity(), hubKnobMapBut.id);
+				makeKnobMenu(this->getParamQuantity(), hubKnobMapBut.mapObj);
 				e.consume(this);
 			}
 		}
@@ -182,7 +178,7 @@ public:
 		// So, don't consume the hover and just do nothing.
 		// On the other hand, if the knob is not mapped, then consume the hover so that hovering the knob
 		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(hubKnobMapBut.id))
+		if (centralData->isLabelButtonSrcMapped(hubKnobMapBut.mapObj))
 			return;
 
 		e.consume(this);

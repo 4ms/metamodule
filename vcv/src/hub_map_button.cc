@@ -4,32 +4,32 @@
 
 void HubMapButton::_updateState()
 {
-	id.moduleID = _parent.module ? _parent.module->id : -1;
+	mapObj.moduleID = _parent.module ? _parent.module->id : -1;
 
 	isCurrentMapSrc = false;
-	if (centralData->isMappingInProgress() && (centralData->getMappingSource() == id)) {
+	if (centralData->isMappingInProgress() && (centralData->getMappingSource() == mapObj)) {
 		isCurrentMapSrc = true;
 	}
-	mappedToId = centralData->getMappedDstFromSrc(id);
-	isMapped = mappedToId.objType != LabelButtonID::Types::None;
+	mappedToId = centralData->getMappedDstFromSrc(mapObj);
+	isMapped = mappedToId.objType != MappableObj::Type::None;
 }
 
 void HubMapButton::draw(const DrawArgs &args)
 {
 	_updateState();
 
-	// Draw huge background rect to highlight a mapping has begun from this knob
-	if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(id)) {
+	// Draw a large background circle to highlight a mapping has begun from this knob
+	if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(mapObj)) {
 		// const float padding_x = 2;
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y / 2);
 		const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
-		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color[id.objID], alpha));
+		nvgFillColor(args.vg, rack::color::alpha(PaletteHub::color(mapObj.objID), alpha));
 		nvgFill(args.vg);
 	}
 
 	// Draw the label text
-	text = centralData->getMapAliasName(id);
+	text = centralData->getMapAliasName(mapObj);
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
@@ -44,14 +44,16 @@ void HubMapButton::onDragStart(const event::DragStart &e)
 		return;
 	}
 
+	// Start a mapping unless one is in progress from this object (in which case, abort it)
 	bool currentSourceIsThisButton = false;
 
 	if (centralData->isMappingInProgress()) {
-		currentSourceIsThisButton = (centralData->getMappingSource() == id);
+		currentSourceIsThisButton = (centralData->getMappingSource() == mapObj);
 		centralData->abortMappingProcedure();
 	}
 	if (!currentSourceIsThisButton) {
-		centralData->startMappingProcedure(id);
+		printf("Starting mapping: src m:%lld, p:%lld, t:%d\n", mapObj.moduleID, mapObj.objID, mapObj.objType);
+		centralData->startMappingProcedure(mapObj);
 	}
 
 	if (quantity)
@@ -64,7 +66,7 @@ void HubMapButton::onLeave(const event::Leave &e)
 {
 	_hovered = false;
 	// if (!centralData->isMappingInProgress())
-	centralData->notifyLeaveHover(id);
+	centralData->notifyLeaveHover(mapObj);
 	e.consume(this);
 }
 
@@ -72,17 +74,17 @@ void HubMapButton::onEnter(const event::Enter &e)
 {
 	_hovered = true;
 	// if (!centralData->isMappingInProgress())
-	centralData->notifyEnterHover(id);
+	centralData->notifyEnterHover(mapObj);
 	e.consume(this);
 }
 
-bool HubMapButton::registerMapping(int64_t moduleId, int objId)
+bool HubMapButton::registerMapping(MappableObj src)
 {
 	if (centralData->isMappingInProgress()) {
-		if (moduleId > -1) {
-			if (id.moduleID != moduleId) {
-				if (!centralData->isRegisteredHub(moduleId)) {
-					centralData->registerMapDest({id.objType, objId, moduleId});
+		if (src.moduleID > -1) {
+			if (mapObj.moduleID != src.moduleID) {
+				if (!centralData->isRegisteredHub(src.moduleID)) {
+					centralData->registerMapDest(src);
 					return true;
 				}
 			}
