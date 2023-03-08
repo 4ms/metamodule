@@ -320,7 +320,7 @@ public:
   // remaps MIN..MAX to MIN..MAX (e.g. -1..1 --> 0..1)
   constexpr Fixed<UNSIGNED, INT-1, FRAC+1> const to_unsigned_scale() const {
     static_assert(SIGN==SIGNED, "Only unsigned-to-signed conversion supported");
-    return Fixed<UNSIGNED, INT-1, FRAC+1>::of_repr((unsigned)(val_ + (1 << (WIDTH-1))));
+    return Fixed<UNSIGNED, INT-1, FRAC+1>::of_repr((unsigned)(val_) + (1 << (WIDTH-1)));
   }
 
   template <int SHIFT>
