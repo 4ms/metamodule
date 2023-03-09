@@ -30,6 +30,7 @@ private:
 	// static inline FrameBufferT framebuf1;
 	// static inline FrameBufferT framebuf2;
 
+	static inline UartLog init_uart;
 	static inline LVGLDriver gui{
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
 

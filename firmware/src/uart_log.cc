@@ -2,6 +2,10 @@
 
 namespace MetaModule
 {
+void UartLog::init() {
+	log_uart.init();
+}
+
 void UartLog::putchar(char c) {
 	log_uart.putchar(c);
 }
