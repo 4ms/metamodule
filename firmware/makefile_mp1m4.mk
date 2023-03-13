@@ -58,6 +58,7 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_ll_tim.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_usart.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_cortex.c
 SOURCES += src/shared_memory.cc
 SOURCES += $(target_src)/controls.cc

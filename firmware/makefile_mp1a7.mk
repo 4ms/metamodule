@@ -69,6 +69,7 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
+SOURCES += $(HALDIR)/src/stm32mp1xx_hal_usart.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
 SOURCES += $(DRIVERLIB)/drivers/pin.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
