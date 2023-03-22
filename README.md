@@ -43,6 +43,12 @@ Next, create/update the module artwork and info headers:
 make modules
 ```
 
+To run the unit tests (recommended before building for the first time):
+
+```
+make tests
+```
+
 To build the plugin, run:
 
 ```
