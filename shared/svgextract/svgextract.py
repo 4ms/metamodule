@@ -699,7 +699,7 @@ def createCoreModule(slug, coreModuleDir = None):
     if coreModuleDir == None:
         coreModuleDir = os.getenv('METAMODULE_COREMODULE_DIR')
         if coreModuleDir is None:
-            coreModuleDir = input_default("CoreModule dir", pathFromHere("../../shared/CoreModules/"))
+            coreModuleDir = input_default("CoreModule dir", pathFromHere("../../shared/CoreModules/modules/"))
 
     newCoreFileName = slug + 'Core.cc'
     if not os.path.exists(os.path.join(coreModuleDir, newCoreFileName)):
