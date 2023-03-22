@@ -1,6 +1,3 @@
-#pragma GCC push_options
-#pragma GCC optimize ("Os")
-
 #include "dynamic_data.hh"
 
 /* triangles */
@@ -81,5 +78,3 @@ DynamicData::DynamicData() {
         triangles[i][j] = (f)(triangles_12ths[i][j])/12.0_f;
   }
 }
-
-#pragma GCC pop_options

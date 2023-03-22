@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/module_info_base.hh"
+#include "CoreModules/module_info_base.hh"
 #include "etl/string.h"
 #include "etl/unordered_map.h"
 #include "module_type_slug.hh"

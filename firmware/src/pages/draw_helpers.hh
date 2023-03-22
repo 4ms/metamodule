@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/info/module_info_base.hh"
+#include "CoreModules/module_info_base.hh"
 #include "lvgl/lvgl.h"
 #include "pages/styles.hh"
 #include "patch/patch_data.hh"

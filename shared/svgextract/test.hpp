@@ -1,7 +1,7 @@
 
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/module_info_base.hh"
+#include "CoreModules/module_info_base.hh"
 
 struct EnOscInfo : ModuleInfoBase {
     static constexpr auto NameChars = CoreProcessor::NameChars;

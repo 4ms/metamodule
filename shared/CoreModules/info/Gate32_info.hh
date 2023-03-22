@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/module_info_base.hh"
+#include "CoreModules/module_info_base.hh"
 
 struct Gate32Info : ModuleInfoBase {
     static constexpr std::string_view slug{"Gate32"};

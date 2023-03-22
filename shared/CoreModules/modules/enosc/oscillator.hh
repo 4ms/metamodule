@@ -149,15 +149,15 @@ public:
 
 	static processor_t pick_processor(TwistMode t, WarpMode m) {
 		static processor_t tab[3][3] = {
-			&Oscillator::Process<FEEDBACK, FOLD, block_size>,
+			{&Oscillator::Process<FEEDBACK, FOLD, block_size>,
 			&Oscillator::Process<FEEDBACK, CHEBY, block_size>,
-			&Oscillator::Process<FEEDBACK, SEGMENT, block_size>,
-			&Oscillator::Process<PULSAR, FOLD, block_size>,
+			&Oscillator::Process<FEEDBACK, SEGMENT, block_size>,},
+			{&Oscillator::Process<PULSAR, FOLD, block_size>,
 			&Oscillator::Process<PULSAR, CHEBY, block_size>,
-			&Oscillator::Process<PULSAR, SEGMENT, block_size>,
-			&Oscillator::Process<CRUSH, FOLD, block_size>,
+			&Oscillator::Process<PULSAR, SEGMENT, block_size>,},
+			{&Oscillator::Process<CRUSH, FOLD, block_size>,
 			&Oscillator::Process<CRUSH, CHEBY, block_size>,
-			&Oscillator::Process<CRUSH, SEGMENT, block_size>,
+			&Oscillator::Process<CRUSH, SEGMENT, block_size>,},
 		};
 		return tab[t][m];
 	}

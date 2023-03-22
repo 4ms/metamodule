@@ -9,6 +9,7 @@ INCLUDES = -Isrc
 INCLUDES += -I$(SHARED_DIR)/cpputil
 INCLUDES += -I$(SHARED_DIR)/processors
 INCLUDES += -I$(SHARED_DIR)/CoreModules
+INCLUDES += -I$(SHARED_DIR)/CoreModules/modules
 INCLUDES += -I$(SHARED_DIR)/patch
 INCLUDES += -I$(SHARED_DIR)/patch_convert/ryml
 INCLUDES += -I$(SHARED_DIR)
@@ -32,7 +33,7 @@ LDFLAGS +=
 # Add source files to the build
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
-SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/*.cc)
+SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/modules/*.cc)
 SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
@@ -41,9 +42,9 @@ SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
-SOURCES += $(SHARED_DIR)/CoreModules/enosc/data.cc
-SOURCES += $(SHARED_DIR)/CoreModules/enosc/dynamic_data.cc
-SOURCES += $(SHARED_DIR)/CoreModules/enosc/easiglib/numtypes.cc
+SOURCES += $(SHARED_DIR)/CoreModules/modules/enosc/data.cc
+SOURCES += $(SHARED_DIR)/CoreModules/modules/enosc/dynamic_data.cc
+SOURCES += $(SHARED_DIR)/CoreModules/modules/enosc/easiglib/numtypes.cc
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.

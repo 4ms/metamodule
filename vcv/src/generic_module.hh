@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/info/module_info_base.hh"
+#include "CoreModules/module_info_base.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "comm_module.hh"
 #include "comm_widget.hh"

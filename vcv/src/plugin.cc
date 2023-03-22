@@ -187,7 +187,7 @@ auto modelAtvert2 = createModelFromInfo<Atvert2Info>();
 #include "CoreModules/info/SMR_info.hh"
 auto modelSMR = createModelFromInfo<SMRInfo>();
 
-#include "CoreModules/enosc/altparam_EnOsc_info.hh"
+#include "CoreModules/modules/enosc/altparam_EnOsc_info.hh"
 auto modelEnOsc = createModelFromInfo<APEnOscInfo>();
 
 #include "CoreModules/info/BuffMult_info.hh"

@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/info/module_info_base.hh"
+#include "CoreModules/module_info_base.hh"
 #include "lvgl/src/core/lv_obj_pos.h"
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"

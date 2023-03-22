@@ -446,7 +446,7 @@ def components_to_infofile(components):
     #TODO: embed knob long name vs short name in svg
     source = f"""#pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/module_info_base.hh"
+#include "CoreModules/module_info_base.hh"
 
 struct {slug}Info : ModuleInfoBase {{
     static constexpr std::string_view slug{{"{slug}"}};
