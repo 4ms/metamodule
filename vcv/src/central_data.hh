@@ -8,9 +8,9 @@
 #include <rack.hpp>
 #include <vector>
 
-#define pr_dbg printf
+// #define pr_dbg printf
 
-// #define pr_dbg(...)
+#define pr_dbg(...)
 
 class CentralData {
 public:
@@ -27,7 +27,7 @@ public:
 	{
 		std::lock_guard mguard{mtx};
 		moduleData.push_back({mod.id, mod.slug, module});
-		printf("Registered module id %lld (%.31s) %p\n", mod.id, mod.slug.c_str(), module);
+		pr_dbg("Registered module id %lld (%.31s) %p\n", mod.id, mod.slug.c_str(), module);
 
 		// Check if any maps exist with this module id (happens if we load a patch
 		// file)
@@ -218,7 +218,7 @@ public:
 		_currentMap.dst = dest;
 		_currentMap.dst_module = getRegisteredModulePtr(dest.moduleID);
 		if (!_currentMap.dst_module) {
-			printf("Dest module ptr is null (not registered?). Aborting mapping.\n");
+			pr_dbg("Dest module ptr is null (not registered?). Aborting mapping.\n");
 			return;
 		}
 
