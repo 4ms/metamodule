@@ -88,17 +88,17 @@ TEST_CASE("Math tests")
 	//TODO: more robust SMMLA
 	SUBCASE("SMMLA")
 	{
-		int32_t x = 12345;
-		int32_t y = 67890;
-		int32_t z = 9876543;
+		int32_t x = 23'129'345;
+		int32_t y = 971'671'890;
+		int32_t z = 98765432;
 
 		double fx = x;
 		double fy = y;
 		double fz = z;
 		double ans = fx * fy / (double)(UINT32_MAX);
 		ans += fz;
-		int32_t int_ans = fz;
-
+		int32_t int_ans = ans;
+		
 		CHECK(___SMMLA(x, y, z) == int_ans);
 	}
 
