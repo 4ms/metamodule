@@ -732,7 +732,7 @@ def appendPluginFiles(slug, pluginDir = None, description=""):
     marker = "// include and define models below here\n"
     newText = f'''
 #include "CoreModules/info/{slug}_info.hh"
-auto {modelName} = createModelFromInfo<{slug}Info>();
+Model* {modelName} = createModelFromInfo<{slug}Info>();
 '''
     appendToFileAfterMarker(plugincc, marker, newText)
 
