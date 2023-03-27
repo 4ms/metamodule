@@ -43,6 +43,7 @@ def appendToFileAfterMarker(filename, marker, newText, matchText=None):
 
 
 def input_default(prompt, default=""):
+    return default
     str = input(f"{prompt} [{default}]: ")
     if str == "":
         return default
