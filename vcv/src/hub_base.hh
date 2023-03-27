@@ -14,7 +14,7 @@
 #include "util/string_util.hh"
 #include <fstream>
 #include <functional>
-#include <string.h>
+#include <string>
 
 template<typename MappingConf>
 struct MetaModuleHubBase : public CommModule {
