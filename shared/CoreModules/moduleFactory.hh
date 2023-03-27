@@ -54,7 +54,7 @@ public:
 		return (m != infos.end());
 	}
 
-	static inline ModuleInfoView nullmodule{.width_hp = 0};
+	static inline ModuleInfoView nullmodule{};
 
 private:
 	static constexpr int MAX_MODULE_TYPES = 512;

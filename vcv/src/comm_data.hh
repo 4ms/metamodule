@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
 #include "util/math.hh"
-#include <string>
+#include <cstring>
 #include <vector>
 
 struct MappableObj {

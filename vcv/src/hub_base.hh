@@ -14,7 +14,7 @@
 #include "util/string_util.hh"
 #include <fstream>
 #include <functional>
-#include <string.h>
+#include <string>
 
 template<typename MappingConf>
 struct MetaModuleHubBase : public CommModule {
@@ -253,7 +253,7 @@ private:
 		writeAsHeader(fileName + ".hh", patchStructName + "_patch", yml);
 	}
 
-	void writeToFile(std::string fileName, std::string textToWrite)
+	void writeToFile(const std::string& fileName, std::string textToWrite)
 	{
 		std::ofstream myfile;
 		myfile.open(fileName);
@@ -261,7 +261,7 @@ private:
 		myfile.close();
 	}
 
-	void writeAsHeader(std::string_view fileName, std::string_view structname, std::string_view textToWrite)
+	void writeAsHeader(const std::string& fileName, std::string_view structname, std::string_view textToWrite)
 	{
 		std::ofstream myfile;
 		myfile.open(fileName);
@@ -272,7 +272,7 @@ private:
 		myfile.close();
 	}
 
-	void writeBinaryFile(std::string fileName, const std::vector<unsigned char> data)
+	void writeBinaryFile(const std::string& fileName, const std::vector<unsigned char> data)
 	{
 		std::ofstream myfile{fileName, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
 		myfile.write(reinterpret_cast<const char *>(data.data()), data.size());
