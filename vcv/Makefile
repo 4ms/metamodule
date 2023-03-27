@@ -54,7 +54,11 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 # Include the Rack plugin Makefile framework
 include $(RACK_DIR)/plugin.mk
 
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin)
 CXXFLAGS += -mmacosx-version-min=10.15 
+endif
 
 ./build/src/shared/CoreModules/EnOscCore.cc.o: CXXFLAGS+=-Wno-missing-braces
 ./build/src/shared/CoreModules/enosc/dynamic_data.cc.o: CXXFLAGS+=-Wno-unknown-pragmas
