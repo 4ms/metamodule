@@ -2,8 +2,8 @@
 #include "drivers/qspi_flash_struct.hh"
 
 using mdrivlib::GPIO;
-using mdrivlib::PinNum;
 using mdrivlib::PinAF;
+using mdrivlib::PinNum;
 
 constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
 	.io0 = {GPIO::F, PinNum::_8, PinAF::AltFunc10},
@@ -21,9 +21,9 @@ constexpr mdrivlib::QSPIFlashConfig qspi_patchflash_conf = {
 	.flash_size_bytes = 0x0100'0000,
 	.flash_size_address_bits = mdrivlib::QSPIFlashConfig::AddrBits24,
 
-	.chip_id = mdrivlib::QSPIFlashConfig::W25Q128JV, //was S25FL
+	.chip_id = mdrivlib::QSPIFlashConfig::W25Q128JV,
 
-	.io_mode = mdrivlib::QSPIFlashConfig::SingleSPI,
+	.io_mode = mdrivlib::QSPIFlashConfig::IOMode::SingleSPI,
 
 	.bank = mdrivlib::QSPIFlashConfig::Bank1,
 };
