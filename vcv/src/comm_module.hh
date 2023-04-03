@@ -26,7 +26,7 @@ protected:
 private:
 	int _numLights = 0;
 	bool _sample_rate_changed = true;
-	enum CommStatus { Normal = 0, StartSending, PropagateData1, PropagateData2 } _comm_status;
+	enum CommStatus { Normal = 0, StartSending, PropagateData1, PropagateData2 } _comm_status{Normal};
 
 protected:
 	CommModule();
