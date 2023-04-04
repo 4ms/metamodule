@@ -150,13 +150,15 @@ public:
 		timeStepInS = 1.0f / sr;
 	}
 
-	float get_led_brightness(int led_id) const override {
+	float get_led_brightness(int led_id) const override
+	{
 		switch (led_id)
 		{
-			case ENVVCAInfo::LedRise_Led: return 0;
-			case ENVVCAInfo::LedFall_Led: return 0;
-			case ENVVCAInfo::LedEor_Led:  return eorOut;
-			default:                      return 0;
+			case ENVVCAInfo::LedRise_Led:         return 0;
+			case ENVVCAInfo::LedFall_Led:         return 0;
+			case ENVVCAInfo::LedEor_Led:          return eorOut;
+			case ENVVCAInfo::NumDiscreteLeds + 0: return cycleOnButton;
+			default:                              return 0.0f;
 		}
 	}
 
