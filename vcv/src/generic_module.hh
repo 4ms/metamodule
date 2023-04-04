@@ -118,6 +118,13 @@ struct GenericModuleWidget : CommModuleWidget {
 		}
 
 		int light_id = 0;
+
+		for (auto led : Defs::Leds) {
+			auto pos = mm2px({led.x_mm, led.y_mm});
+			addChild(createLightCentered<MediumLight<RedLight>>(pos, module, light_id));
+			light_id++;
+		}
+
 		for (auto sw : Defs::Switches) {
 			auto param_id = sw.id + Defs::NumKnobs;
 			auto pos = mm2px({sw.x_mm, sw.y_mm});
@@ -153,12 +160,6 @@ struct GenericModuleWidget : CommModuleWidget {
 				else if (sw.encoder_knob_style == SwitchDef::Medium)
 					addParam(createParamCentered<Davies1900hBlackKnobUnlined4ms>(pos, module, param_id));
 			}
-		}
-
-		for (auto led : Defs::Leds) {
-			auto pos = mm2px({led.x_mm, led.y_mm});
-			addChild(createLightCentered<MediumLight<RedLight>>(pos, module, light_id));
-			light_id++;
 		}
 	}
 
