@@ -5,6 +5,15 @@
 ;DO t32-qspi-flash FSBL="/Users/dann/4ms/stm32/meta-module/firmware/bootloader/mp1-boot/build/fsbl.stm32" SSBL="/Users/dann/4ms/stm32/meta-module/firmware/debug-img/minimal-boot.uimg"
 ;DO t32-qspi-flash SSBL="/Users/dann/4ms/stm32/meta-module/firmware/build/mp1corea7/medium/main.uimg"
 
+;FSBL:
+;DO ~/4ms/stm32/meta-module/firmware/flashing/t32-qspi-flash.cmm FSBL=~/4ms/stm32/mp1-brainboard-demo/bootloader/mp1-boot/build/fsbl.stm32
+
+;Sampler app
+;DO ~/4ms/stm32/meta-module/firmware/flashing/t32-qspi-flash.cmm APP=~/4ms/stm32/sampler-kit/build/mp153/RelWithDebInfo/mp153.uimg
+
+;SSBL USB-DFU
+;DO ~/4ms/stm32/meta-module/firmware/flashing/t32-qspi-flash.cmm FSBL=~/4ms/stm32/stm32mp1-baremetal/examples/usb_dfu_device/build/a7-main.uimg
+
 &QSPI_BASE=0x58003000
 
 PRIVATE &parameters
@@ -15,6 +24,7 @@ PRIVATE &param_dumpmem &param_dualport
 &param_dualport=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"DUALPORT=","0")
 &param_fsbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"FSBL=","")
 &param_ssbl_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"SSBL=","")
+&param_app_file=STRing.SCANAndExtract(STRing.UPpeR("&parameters"),"APP=","")
 
 ; ------------------------------------------------------------------------------
 ; Setup CPU
@@ -86,8 +96,14 @@ IF "&param_fsbl_file"!=""
 
 IF "&param_ssbl_file"!=""
 (
-  Data.LOAD.Binary &param_ssbl_file 0x70080000
+  Data.LOAD.Binary &param_ssbl_file 0x70050000
 )
+
+IF "&param_app_file"!=""
+(
+  Data.LOAD.Binary &param_app_file 0x70080000
+)
+
 
 FLASH.ReProgram OFF
 
