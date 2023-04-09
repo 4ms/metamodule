@@ -3,7 +3,7 @@
 #TODO: Once we have multiple a7 versions, build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
 #so don't build it twice for mini/max/etc
 
-USE_FEWER_MODULES ?= 1
+USE_FEWER_MODULES ?= 0
 
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
@@ -318,7 +318,7 @@ UIMG  		= $(BUILDDIR)/$(BINARYNAME).uimg
 uimg: $(UIMG)
 
 $(UIMG): $(BIN)
-	python3 flashing/uimg_header.py $< $@
+	python3 flashing/uimg_header.py $< $@ 0xC1FBFFC0 0xC2000040
 
 #Used by norflash loader
 %-uimg.h : %.uimg 
