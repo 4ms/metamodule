@@ -283,7 +283,9 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	std::pair<uint32_t, Volume> calc_patch_id_vol(uint32_t roller_idx) {
-		auto vol = (roller_idx > nor_hdr) ? Volume::NorFlash : (roller_idx > sd_hdr) ? Volume::SDCard : Volume::USB;
+		auto vol = (num_norflash && roller_idx > nor_hdr) ? Volume::NorFlash :
+				   (num_sdcard && roller_idx > sd_hdr)	  ? Volume::SDCard :
+															Volume::USB;
 		if (vol == Volume::USB)
 			return {roller_idx - 1 - usb_hdr, vol};
 		if (vol == Volume::SDCard)
