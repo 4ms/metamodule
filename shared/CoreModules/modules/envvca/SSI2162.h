@@ -11,7 +11,13 @@ public:
 
     void setScaling(float gainInV)
     {
-        scalingFactor = std::pow(10.0f, -33e-3 * gainInV / 20.0f);
+        auto gainIndB = gainInV / -33e-3f;
+
+        gainIndB = std::clamp(gainIndB, -100.0f, 20.0f);
+
+        scalingFactor = std::pow(10.0f, gainIndB / 20.0f);
+
+        // printf("Gain %.2fV -> %.2f dB -> scaling %.4f\n", gainInV, gainIndB, scalingFactor);
     }
 
     float process(float input) const

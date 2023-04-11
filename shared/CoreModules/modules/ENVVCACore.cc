@@ -36,6 +36,7 @@ inline auto InvertingAmpWithBias = [](float in, float r_in, float r_feedback, fl
 };
 
 
+
 class ENVVCACore : public CoreProcessor {
 	using Info = ENVVCAInfo;
 	using ThisCore = ENVVCACore;
@@ -47,30 +48,34 @@ public:
 
 		auto [riseCV, fallCV] = getRiseAndFallCV();
 
-		// Convert voltage to time without dealing with integrator details
-
-		// TODO: add follow here?
+		// Convert voltage to time without dealing with details of transistor core
 		auto VoltageToTime = [](float voltage) -> float
 		{
-			constexpr float CurrentGain = 200.0f;
-			constexpr float IntegratorCapacitanceInF = 6.8e-9f;
-			constexpr float TransistorUBEInV = 0.7f;
+			// two points in the V->f curve
+			constexpr float V_1 = 0.4f;
+			constexpr float f_1 = 0.09f;
+			constexpr float V_2 = 0.06f;
+			constexpr float f_2 = 1000.0f;
 
-			constexpr float TempCompVoltage = -12.0f * VoltageDivider(500.0f, 47e3f);
+			// std::pow is not required to be constexpr by the standard
+			// so this might not work in clang
+			constexpr float b = std::pow(2.0f, std::log2(f_1 / f_2)/(V_1 - V_2));
+			constexpr float a = f_1 / std::pow(b, V_1);
 
-			auto current = ((12.0f - (TransistorUBEInV + voltage)) / 8.2e3f) / (CurrentGain + 1) * CurrentGain;
+			// interpolate
+			auto frequency = std::pow(b, voltage) * a;
 
-			// printf("Current: %.3fuA\n", current * 1e6f);
+			// limit to valid frequency range
+			frequency = std::clamp(frequency, 1.0f/(60 * 3), 20e3f);
 
-			auto voltageSlope = current / IntegratorCapacitanceInF;
-			auto time = 12.0f / voltageSlope;
-
-			return time;
+			// convert to period length
+			return 1.0f / frequency;
 		};		
-
 		
 		auto riseTimeInS = VoltageToTime(riseCV);
 		auto fallTimeInS = VoltageToTime(fallCV);
+
+		// printf("%.4f %.4f\n", riseTimeInS, fallTimeInS);
 
 		osc.setRiseTimeInS(riseTimeInS);
 		osc.setFallTimeInS(fallTimeInS);
@@ -87,11 +92,13 @@ public:
 
 	void runAudioPath(float triangleWave)
 	{
-		// TODO: Is this correct together with the trimmer?
-		const float MinGainInV = 1.98f;
-		const float MaxGainInV = 47e3f / (47e3f + 1e6f) * 5.f;		
+		triangleWave = InvertingAmpWithBias(triangleWave, 100e3f, 100e3f, 1.98f);
 
-		triangleWave = std::min(triangleWave + MinGainInV, MaxGainInV);
+		constexpr float SchottkyForwardVoltage = 0.8f;
+		constexpr float MaxGainInV = 5.0f + SchottkyForwardVoltage;
+		constexpr float MinGainInV = VoltageDivider(47e3f, 1e6f) * 5.0f - SchottkyForwardVoltage;
+
+		triangleWave = std::clamp(triangleWave, MinGainInV, MaxGainInV);
 
 		vca.setScaling(triangleWave);
 		signalOut = vca.process(signalIn);
@@ -143,39 +150,30 @@ public:
 
 			auto bias = BiasFromRange(range);
 
-			// printf("Range %u -> Bias %.2f\n", range, bias);
-
 			return InvertingAmpWithBias(offset, 100e3f, 100e3f, bias);
 		};
 
+		// scale down cv input
 		const auto scaledTimeCV = timeCVIn * -100e3f / 137e3f;
 
+		// apply attenuverter knobs
 		rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, riseCVKnob * scaledTimeCV);
 		fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, fallCVKnob * scaledTimeCV);
 
-		static volatile uint32_t tmp=0;
-		if (tmp == 0)
-		{
-			printf("TimeCV %.2f, rscale %.2f\n", timeCVIn, rScaleLEDs);
-			tmp = 10000;
-		}
-		else{
-			tmp--;
-		}
+		// sum with static value from fader + range switch
+		auto riseCV = -rScaleLEDs - ProcessCVOffset(riseSlider, riseTimeSwitch);
+		auto fallCV = -fScaleLEDs - ProcessCVOffset(fallSlider, fallTimeSwitch);
 
-		const auto riseCVOffset = ProcessCVOffset(riseSlider, riseTimeSwitch);
-		const auto fallCVOffset = ProcessCVOffset(fallSlider, fallTimeSwitch);
+		// TODO: low pass filter
 
-		auto riseCV = rScaleLEDs + riseCVOffset;
-		auto fallCV = fScaleLEDs + fallCVOffset;
-
-		//TODO: low pass filter riseCV and fall CV
-
-		constexpr float DiodeDrop = 1.0f;
-
+		// apply rise time limit and scale down
+		constexpr float DiodeDropInV = 1.0f;
+		const float ClippingVoltage = 5.0f * VoltageDivider(100e3f, 2e3f) + DiodeDropInV;
 		riseCV = riseCV * VoltageDivider(2.2e3f + 33e3f, 16.9e3f);
-		riseCV = std::min(riseCV, 5.0f * VoltageDivider(100e3f, 2e3f) + DiodeDrop);
+		riseCV = std::min(riseCV, ClippingVoltage);
+		riseCV = riseCV * VoltageDivider(2.2e3f, 33e3f);
 
+		// scale down falling CV without additional limiting
 		fallCV = fallCV * VoltageDivider(2.2e3f, 10e3f + 40.2e3f);
 
 		return {riseCV, fallCV};
@@ -224,16 +222,16 @@ public:
 				timeCVIn = val * 5.0f;
 				break;
 			case ENVVCAInfo::InputTrigger:
-				triggerIn = val;
+				triggerIn = val * 5.0f;
 				break;
 			case ENVVCAInfo::InputCycle:
 				cycleIn = CVToBool(val);
 				break;
 			case ENVVCAInfo::InputFollow:
-				followIn = val;
+				followIn = val * 5.0f;
 				break;
 			case ENVVCAInfo::InputIn:
-				signalIn = val;
+				signalIn = val * 5.0f;
 				break;
 			default: break;
 		}
@@ -243,9 +241,9 @@ public:
 
 		switch (output_id)
 		{
-			case ENVVCAInfo::OutputOut: return signalOut;
-			case ENVVCAInfo::OutputEnv: return envelopeOut;
-			case ENVVCAInfo::OutputEor: return eorOut;
+			case ENVVCAInfo::OutputOut: return signalOut / 5.0f;
+			case ENVVCAInfo::OutputEnv: return envelopeOut / 5.0f;
+			case ENVVCAInfo::OutputEor: return eorOut / 5.0f;
 			default:                    return 0.0f;
 		}
 	}
