@@ -5,12 +5,11 @@
 class TriangleOscillator
 {
 public:
-    enum State_t {RISING, FALLING};
+    enum State_t {RISING, FALLING, IDLE};
 
 public:
-    TriangleOscillator() : outputInV(0.0f), state(State_t::RISING), running(false), cycling(false)
+    TriangleOscillator() : outputInV(0.0f), state(State_t::IDLE), cycling(false)
     {
-        running = true;
     }
 
     void setRiseTimeInS(float val)
@@ -25,39 +24,50 @@ public:
 
     void proceed(float timeInS)
     {
-        if (running)
+        if (state == State_t::IDLE and cycling)
         {
-            auto slope = state == State_t::RISING ? slopeRising : slopeFalling;
-            auto increment = slope * timeInS;
+            state = State_t::RISING;
+        }
 
-            outputInV += increment;
-
-            // wrap as long as needed
-            // realistically only a single wrap will occur though
-            while (true)
+        auto getSlope = [this](auto val)
+        {
+            switch (val)
             {
-                if (state == State_t::RISING and outputInV > MaxValInV)
+                case State_t::RISING: return slopeRising;
+                case State_t::FALLING: return slopeFalling;
+                case State_t::IDLE: return 0.0f;
+                default: return 0.0f;
+            }
+        };
+        
+        outputInV += getSlope(state) * timeInS;
+
+        // wrap as long as needed
+        // realistically only a single wrap will occur though
+        while (true)
+        {
+            if (state == State_t::RISING and outputInV > MaxValInV)
+            {
+                outputInV = MaxValInV - (outputInV - MaxValInV);
+                state = State_t::FALLING;
+            }
+            else if (state == State_t::FALLING and outputInV < MinValInV)
+            {
+                if (cycling)
                 {
-                    outputInV = MaxValInV - (outputInV - MaxValInV);
-                    state = State_t::FALLING;
-                }
-                else if (state == State_t::FALLING and outputInV < MinValInV)
-                {
-                    if (cycling)
-                    {
-                        outputInV = MinValInV + (MinValInV - outputInV);
-                        state = State_t::RISING;
-                    }
-                    else
-                    {
-                        outputInV = MinValInV;
-                        break;
-                    }
+                    outputInV = MinValInV + (MinValInV - outputInV);
+                    state = State_t::RISING;
                 }
                 else
                 {
+                    outputInV = MinValInV;
+                    state = State_t::IDLE;
                     break;
                 }
+            }
+            else
+            {
+                break;
             }
         }
     }
@@ -65,11 +75,6 @@ public:
     State_t getState() const
     {
         return state;
-    }
-
-    bool isRunning() const
-    {
-        return running;
     }
 
     void setCycling(bool val)
@@ -85,7 +90,6 @@ public:
 private:
     float outputInV;
     State_t state;
-    bool running;
     bool cycling;
 
     float slopeFalling;
