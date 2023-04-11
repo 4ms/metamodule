@@ -24,40 +24,33 @@ public:
 
     void doRetrigger()
     {
-        printf("Trigger\n");
         retriggerPending = true;
     }
 
     void proceed(float timeInS)
     {
-        if (state == State_t::IDLE and cycling)
+        if (state == State_t::IDLE)
         {
-            state = State_t::RISING;
-        }
-
-        auto getSlope = [this](auto val)
-        {
-            switch (val)
+            if (cycling)
             {
-                case State_t::RISING: return slopeRising;
-                case State_t::FALLING: return slopeFalling;
-                case State_t::IDLE: return 0.0f;
-                default: return 0.0f;
+                state = State_t::RISING;
             }
-        };
-        
-        outputInV += getSlope(state) * timeInS;
-
-        // wrap as long as needed
-        // realistically only a single wrap will occur though
-        while (true)
+        }
+        else if (state == State_t::RISING)
         {
-            if (state == State_t::RISING and outputInV > MaxValInV)
+            outputInV += slopeRising * timeInS;
+
+            if (outputInV > MaxValInV)
             {
                 outputInV = MaxValInV - (outputInV - MaxValInV);
                 state = State_t::FALLING;
             }
-            else if (state == State_t::FALLING and outputInV < MinValInV)
+        }
+        else
+        {
+            outputInV += slopeFalling * timeInS;
+
+            if (outputInV < MinValInV)
             {
                 if (cycling)
                 {
@@ -68,12 +61,12 @@ public:
                 {
                     outputInV = MinValInV;
                     state = State_t::IDLE;
-                    break;
                 }
             }
-            else
+            else if (retriggerPending)
             {
-                break;
+                state = State_t::RISING;
+                retriggerPending = false;
             }
         }
     }
