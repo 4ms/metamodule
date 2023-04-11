@@ -324,7 +324,7 @@ public:
 			case ENVVCAInfo::LedRise_Led:         return rScaleLEDs;
 			case ENVVCAInfo::LedFall_Led:         return fScaleLEDs;
 			case ENVVCAInfo::LedEor_Led:          return eorOut;
-			case ENVVCAInfo::NumDiscreteLeds + 0: return cycleOnButton;
+			case ENVVCAInfo::NumDiscreteLeds + 0: return cycleOnButton ^ cycleIn;
 			default:                              return 0.0f;
 		}
 	}
