@@ -93,5 +93,5 @@ private:
 
     //TODO: make configurable
     static constexpr float MaxValInV = 5.0f;
-    static constexpr float MinValInV = -5.0f;
+    static constexpr float MinValInV = 0.0f;
 };
