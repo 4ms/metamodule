@@ -4,10 +4,13 @@
 
 #include "CoreModules/modules/envvca/SSI2162.h"
 #include "CoreModules/modules/envvca/TriangleOscillator.h"
+#include "CoreModules/modules/helpers/circuit_elements.h"
+#include "CoreModules/modules/helpers/FlipFlop.h"
+#include "CoreModules/modules/helpers/EdgeDetector.h"
 
 inline auto CVToBool = [](float val) -> bool
 {
-	return val >= 0.5f;
+	return val >= 1.0f;
 };
 
 inline auto ButtonToBool = [](float val) -> bool
@@ -19,66 +22,6 @@ inline auto ThreeWayToInt = [](float val) -> uint32_t
 {
 	return val * 2.0f;
 };
-
-inline auto VoltageDivider = [](float bottom, float top) -> float
-{
-	return bottom / (bottom + top);
-};
-
-inline auto ParallelCircuit = [](float a, float b) -> float
-{
-	return (a * b) / (a + b);
-};
-
-inline auto InvertingAmpWithBias = [](float in, float r_in, float r_feedback, float bias) -> float
-{
-	return bias - r_feedback / r_in * (in - bias);
-};
-
-class TriggerDetector
-{
-public:
-	TriggerDetector(float min_, float max_) : currentState(false), min(min_), max(max_) {}
-
-	bool operator()(float val)
-	{
-		if (val >= max)
-		{
-			currentState = true;
-		}
-		else if (val <= min)
-		{
-			currentState = false;
-		}
-		else
-		{
-			// no change
-		}
-		return currentState;
-	}
-
-private:
-	bool currentState;
-	const float min;
-	const float max;
-};
-
-class EdgeDetector
-{
-public:
-	EdgeDetector() : val(false) {}
-
-	bool operator()(bool in)
-	{
-		auto result = not val and in;
-		val = in;
-		return result;
-	}
-
-private:
-	bool val;
-};
-
 
 
 class ENVVCACore : public CoreProcessor {
@@ -116,23 +59,16 @@ public:
 			// convert to period length
 			return 1.0f / frequency;
 		};		
-		
-		auto riseTimeInS = VoltageToTime(riseCV);
-		auto fallTimeInS = VoltageToTime(fallCV);
 
-		// printf("%.4f %.4f\n", riseTimeInS, fallTimeInS);
-
-		osc.setRiseTimeInS(riseTimeInS);
-		osc.setFallTimeInS(fallTimeInS);
+		osc.setRiseTimeInS(VoltageToTime(riseCV));
+		osc.setFallTimeInS(VoltageToTime(fallCV));
 
 		runOscillator();
 
 		displayOscillatorState(osc.getState());
 
-		auto triangleOut = osc.getOutput();
-
-		displayEnvelope(triangleOut);
-		runAudioPath(triangleOut);
+		displayEnvelope(osc.getOutput());
+		runAudioPath(osc.getOutput());
 	}
 
 	void runAudioPath(float triangleWave)
@@ -276,37 +212,47 @@ public:
 		}
 	}
 
-	void set_input(int input_id, float val) override {
+	void set_input(int input_id, float val) override
+	{
+		// map back to actual voltages
+		val *= 5.0f;
+
 		switch (input_id)
 		{
 			case ENVVCAInfo::InputTime_Cv: 
-				timeCVIn = val * 5.0f;
+				timeCVIn = val;
 				break;
 			case ENVVCAInfo::InputTrigger:
-				triggerIn = triggerDetector(val * 5.0f);
+				triggerIn = triggerDetector(val);
 				break;
 			case ENVVCAInfo::InputCycle:
 				cycleIn = CVToBool(val);
 				break;
 			case ENVVCAInfo::InputFollow:
-				followIn = val * 5.0f;
+				followIn = val;
 				break;
 			case ENVVCAInfo::InputIn:
-				signalIn = val * 5.0f;
+				signalIn = val;
 				break;
 			default: break;
 		}
 	}
 
-	float get_output(int output_id) const override {
-
-		switch (output_id)
+	float get_output(int output_id) const override
+	{
+		auto getRawOutput = [this](auto id)
 		{
-			case ENVVCAInfo::OutputOut: return signalOut / 5.0f;
-			case ENVVCAInfo::OutputEnv: return envelopeOut / 5.0f;
-			case ENVVCAInfo::OutputEor: return eorOut / 5.0f;
-			default:                    return 0.0f;
-		}
+			switch (id)
+			{
+				case ENVVCAInfo::OutputOut: return signalOut;
+				case ENVVCAInfo::OutputEnv: return envelopeOut;
+				case ENVVCAInfo::OutputEor: return eorOut;
+				default:                    return 0.0f;
+			}
+		};
+
+		// convert voltage to normaized value required for mapping layer
+		return getRawOutput(output_id) / 5.0f;
 	}
 
 	void set_samplerate(float sr) override
@@ -358,7 +304,7 @@ private:
 	float rScaleLEDs;
 	float fScaleLEDs;
 
-	TriggerDetector triggerDetector;
+	FlipFlop triggerDetector;
 	EdgeDetector triggerEdgeDetector;
 
 private:
