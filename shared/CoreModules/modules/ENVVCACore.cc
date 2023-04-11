@@ -93,9 +93,14 @@ public:
 
 	void runAudioPath(float triangleWave)
 	{
-		triangleWave = InvertingAmpWithBias(triangleWave, 100e3f, 100e3f, 1.98f);
+		triangleWave = InvertingAmpWithBias(triangleWave, 100e3f, 100e3f, 1.94f);
 
-		constexpr float SchottkyForwardVoltage = 0.8f;
+		constexpr float VCAInputImpendance = 5e3f;
+		triangleWave = triangleWave * VoltageDivider(VCAInputImpendance, 2.7e3f);
+
+		// This value influences the maximum gain a lot
+		// Tweaked manually to achieve approximately max 0dB
+		constexpr float SchottkyForwardVoltage = 0.22f;
 		constexpr float MaxGainInV = 5.0f + SchottkyForwardVoltage;
 		constexpr float MinGainInV = VoltageDivider(47e3f, 1e6f) * 5.0f - SchottkyForwardVoltage;
 
