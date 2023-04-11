@@ -8,7 +8,7 @@ public:
     enum State_t {RISING, FALLING, IDLE};
 
 public:
-    TriangleOscillator() : outputInV(0.0f), state(State_t::IDLE), cycling(false)
+    TriangleOscillator() : outputInV(0.0f), state(State_t::IDLE), cycling(false), retriggerPending(false)
     {
     }
 
@@ -20,6 +20,12 @@ public:
     void setFallTimeInS(float val)
     {
         slopeFalling = (MinValInV - MaxValInV) / val;
+    }
+
+    void doRetrigger()
+    {
+        printf("Trigger\n");
+        retriggerPending = true;
     }
 
     void proceed(float timeInS)
@@ -91,6 +97,7 @@ private:
     float outputInV;
     State_t state;
     bool cycling;
+    bool retriggerPending;
 
     float slopeFalling;
     float slopeRising;

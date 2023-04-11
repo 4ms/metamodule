@@ -35,6 +35,50 @@ inline auto InvertingAmpWithBias = [](float in, float r_in, float r_feedback, fl
 	return bias - r_feedback / r_in * (in - bias);
 };
 
+class TriggerDetector
+{
+public:
+	TriggerDetector(float min_, float max_) : currentState(false), min(min_), max(max_) {}
+
+	bool operator()(float val)
+	{
+		if (val >= max)
+		{
+			currentState = true;
+		}
+		else if (val <= min)
+		{
+			currentState = false;
+		}
+		else
+		{
+			// no change
+		}
+		return currentState;
+	}
+
+private:
+	bool currentState;
+	const float min;
+	const float max;
+};
+
+class EdgeDetector
+{
+public:
+	EdgeDetector() : val(false) {}
+
+	bool operator()(bool in)
+	{
+		auto result = not val and in;
+		val = in;
+		return result;
+	}
+
+private:
+	bool val;
+};
+
 
 
 class ENVVCACore : public CoreProcessor {
@@ -42,7 +86,8 @@ class ENVVCACore : public CoreProcessor {
 	using ThisCore = ENVVCACore;
 
 public:
-	ENVVCACore() = default;
+	ENVVCACore() : triggerDetector(1.0f, 2.0f)
+	{}
 
 	void update() override {
 
@@ -80,6 +125,11 @@ public:
 		osc.setRiseTimeInS(riseTimeInS);
 		osc.setFallTimeInS(fallTimeInS);
 		osc.setCycling(cycleOnButton ^ cycleIn);
+
+		if (triggerEdgeDetector(triggerIn))
+		{
+			osc.doRetrigger();
+		}
 
 		runOscillator();
 
@@ -234,7 +284,7 @@ public:
 				timeCVIn = val * 5.0f;
 				break;
 			case ENVVCAInfo::InputTrigger:
-				triggerIn = val * 5.0f;
+				triggerIn = triggerDetector(val * 5.0f);
 				break;
 			case ENVVCAInfo::InputCycle:
 				cycleIn = CVToBool(val);
@@ -299,7 +349,7 @@ private:
 	float signalIn;
 	float followIn;
 	bool cycleIn;
-	float triggerIn;
+	bool triggerIn;
 	float timeCVIn;
 
 	float signalOut;
@@ -308,6 +358,9 @@ private:
 
 	float rScaleLEDs;
 	float fScaleLEDs;
+
+	TriggerDetector triggerDetector;
+	EdgeDetector triggerEdgeDetector;
 
 private:
 	SSI2162 vca;
