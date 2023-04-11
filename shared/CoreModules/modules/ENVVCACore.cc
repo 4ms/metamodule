@@ -124,12 +124,6 @@ public:
 
 		osc.setRiseTimeInS(riseTimeInS);
 		osc.setFallTimeInS(fallTimeInS);
-		osc.setCycling(cycleOnButton ^ cycleIn);
-
-		if (triggerEdgeDetector(triggerIn))
-		{
-			osc.doRetrigger();
-		}
 
 		runOscillator();
 
@@ -179,9 +173,14 @@ public:
 
 	void runOscillator()
 	{
-		//TODO: handle cycle
-		//TODO: handle trigger
-		//TODO: handle follow
+		osc.setCycling(cycleOnButton ^ cycleIn);
+		osc.setTargetVoltage(followIn);
+
+		if (triggerEdgeDetector(triggerIn))
+		{
+			osc.doRetrigger();
+		}
+		
 		osc.proceed(timeStepInS);
 	}
 

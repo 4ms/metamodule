@@ -5,10 +5,10 @@
 class TriangleOscillator
 {
 public:
-    enum State_t {RISING, FALLING, IDLE};
+    enum State_t {RISING, FALLING, FOLLOW};
 
 public:
-    TriangleOscillator() : outputInV(0.0f), state(State_t::IDLE), cycling(false), retriggerPending(false)
+    TriangleOscillator() : outputInV(0.0f), state(State_t::FOLLOW), cycling(false), retriggerPending(false), targetVoltage(0.0f)
     {
     }
 
@@ -27,13 +27,31 @@ public:
         retriggerPending = true;
     }
 
+    void setTargetVoltage(float val)
+    {
+        targetVoltage = val;
+    }
+
     void proceed(float timeInS)
     {
-        if (state == State_t::IDLE)
+        if (state == State_t::FOLLOW)
         {
             if (cycling)
             {
                 state = State_t::RISING;
+            }
+            else
+            {
+                if (outputInV < targetVoltage)
+                {
+                    outputInV += slopeRising * timeInS;
+                    outputInV = std::min(targetVoltage, outputInV);
+                }
+                else
+                {
+                    outputInV += slopeFalling * timeInS;
+                    outputInV = std::max(targetVoltage, outputInV);
+                }
             }
         }
         else if (state == State_t::RISING)
@@ -60,7 +78,7 @@ public:
                 else
                 {
                     outputInV = MinValInV;
-                    state = State_t::IDLE;
+                    state = State_t::FOLLOW;
                 }
             }
             else if (retriggerPending)
@@ -91,11 +109,11 @@ private:
     State_t state;
     bool cycling;
     bool retriggerPending;
+    float targetVoltage;
 
     float slopeFalling;
     float slopeRising;
 
-    //TODO: make configurable
     static constexpr float MaxValInV = 5.0f;
     static constexpr float MinValInV = 0.0f;
 };
