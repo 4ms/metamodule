@@ -112,6 +112,7 @@ public:
 
 	void displayEnvelope(float val)
 	{
+		val = val / VoltageDivider(100e3f, 100e3f);
 		envelopeOut = val * envLevelSlider;
 		//TODO: set all three slider LEDs
 	}
