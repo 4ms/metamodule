@@ -8,7 +8,7 @@ public:
     enum State_t {RISING, FALLING};
 
 public:
-    TriangleOscillator() : outputInV(0.0f), state(State_t::RISING), running(false)
+    TriangleOscillator() : outputInV(0.0f), state(State_t::RISING), running(false), cycling(false)
     {
         running = true;
     }
@@ -43,8 +43,16 @@ public:
                 }
                 else if (state == State_t::FALLING and outputInV < MinValInV)
                 {
-                    outputInV = MinValInV + (MinValInV - outputInV);
-                    state = State_t::RISING;
+                    if (cycling)
+                    {
+                        outputInV = MinValInV + (MinValInV - outputInV);
+                        state = State_t::RISING;
+                    }
+                    else
+                    {
+                        outputInV = MinValInV;
+                        break;
+                    }
                 }
                 else
                 {
@@ -64,6 +72,11 @@ public:
         return running;
     }
 
+    void setCycling(bool val)
+    {
+        cycling = val;
+    }
+
     float getOutput() const
     {
         return outputInV;
@@ -73,6 +86,7 @@ private:
     float outputInV;
     State_t state;
     bool running;
+    bool cycling;
 
     float slopeFalling;
     float slopeRising;

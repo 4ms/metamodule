@@ -79,6 +79,7 @@ public:
 
 		osc.setRiseTimeInS(riseTimeInS);
 		osc.setFallTimeInS(fallTimeInS);
+		osc.setCycling(cycleOnButton ^ cycleIn);
 
 		runOscillator();
 
@@ -101,7 +102,12 @@ public:
 		triangleWave = std::clamp(triangleWave, MinGainInV, MaxGainInV);
 
 		vca.setScaling(triangleWave);
+
+		// Ignoring input impedance and inverting 400kHz lowpass
+
 		signalOut = vca.process(signalIn);
+
+		// Ignoring output impedance and inverting 400kHz lowpass
 	}
 
 	void displayEnvelope(float val)
