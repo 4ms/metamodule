@@ -204,7 +204,7 @@ private:
 			Gui::mapped_jack_arcdsc.color = Gui::palette_main[el.id % 8];
 			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_jack_arcdsc);
 			opts += "[";
-			opts += PanelDef::InJackNames[mappedjack->panel_jack_id];
+			opts += PanelDef::get_map_injack_name(mappedjack->panel_jack_id);
 			opts += "] ";
 		}
 		opts += el.short_name;
@@ -230,7 +230,7 @@ private:
 			if (auto mapped_knob = patch.find_mapped_knob(this_module_id, id)) {
 				mapped_knobs.push_back({ctrl_obj, *mapped_knob, anim_method});
 				opts += "[";
-				opts += PanelDef::KnobNames[mapped_knob->panel_knob_id];
+				opts += PanelDef::get_map_param_name(mapped_knob->panel_knob_id);
 				opts += "] ";
 				DrawHelper::draw_control_ring(canvas, el, mapped_knob->panel_knob_id, 240);
 			} else if (static_ctrl) {

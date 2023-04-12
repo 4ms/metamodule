@@ -18,7 +18,20 @@ struct PanelDef {
 	static constexpr uint32_t NumMetaRgbButton = 1;
 
 	static constexpr int NumKnobs = NumPot;
-	static constexpr std::string_view KnobNames[NumPot] = {"A", "B", "C", "D", "E", "F", "u", "v", "w", "x", "y", "z"};
+	static constexpr std::string_view KnobNames[NumKnobs] = {
+		"A", "B", "C", "D", "E", "F", "u", "v", "w", "x", "y", "z"};
+
+	static constexpr uint32_t NumMidiParams = 2;
+	static constexpr std::string_view MidiParamNames[NumKnobs] = {"MidiNote", "MidiGate"};
+
+	static constexpr std::string_view get_map_param_name(uint32_t id) {
+		if (id < NumKnobs)
+			return KnobNames[id];
+		id -= NumKnobs;
+		if (id < NumMidiParams)
+			return MidiParamNames[id];
+		return "?";
+	}
 
 	static constexpr int NumOutJacks = NumAudioIn + NumCVIn + NumGateIn;
 	static constexpr int NumInJacks = NumAudioOut + NumDACOut + NumGateOut;
@@ -28,6 +41,7 @@ struct PanelDef {
 	static constexpr int NumUserFacingInJacks = NumOutJacks;
 
 	static constexpr char NumJacks = NumInJacks + NumOutJacks + NumMetaCV;
+
 	static constexpr char InJackNames[NumUserFacingInJacks][5] = {
 		"In1",
 		"In2",
@@ -38,6 +52,19 @@ struct PanelDef {
 		"GIn1",
 		"GIn2",
 	};
+
+	static constexpr int NumMidiJackMaps = 2;
+	static constexpr std::string_view MidiJackMapNames[NumMidiJackMaps] = {"MIDIGate", "MIDINote"};
+
+	static constexpr std::string_view get_map_injack_name(uint32_t id) {
+		if (id < NumUserFacingInJacks)
+			return InJackNames[id];
+		id -= NumUserFacingInJacks;
+		if (id < NumMidiJackMaps)
+			return MidiJackMapNames[id];
+		return "?";
+	}
+
 	static constexpr char OutJackNames[NumUserFacingOutJacks][5] = {
 		"Out1",
 		"Out2",
