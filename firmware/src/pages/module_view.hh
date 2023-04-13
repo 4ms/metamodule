@@ -186,7 +186,7 @@ private:
 			Gui::mapped_jack_arcdsc.color = Gui::palette_main[el.id % 8];
 			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_jack_arcdsc);
 			opts += "[";
-			opts += PanelDef::OutJackNames[mappedjack->panel_jack_id];
+			opts += PanelDef::get_map_outjack_name(mappedjack->panel_jack_id);
 			opts += "] ";
 		}
 		opts += el.short_name;
