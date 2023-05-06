@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/panel_medium_defs.hh"
+#include "CoreModules/meta-module-hub/panel_medium_defs.hh"
 namespace MetaModule
 {
 //Do we need to do this, or can't we just access PanelDef from whatever includes this file?

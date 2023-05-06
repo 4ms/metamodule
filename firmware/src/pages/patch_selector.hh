@@ -59,7 +59,6 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void refresh_patchlist(PatchFileList &patchfiles) {
-		Volume first_vol;
 		num_usb = patchfiles.usb.size();
 		num_sdcard = patchfiles.sdcard.size();
 		num_norflash = patchfiles.norflash.size();

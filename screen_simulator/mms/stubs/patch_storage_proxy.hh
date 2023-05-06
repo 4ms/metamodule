@@ -9,6 +9,7 @@
 
 namespace MetaModule
 {
+
 struct InterCoreCommMessage {
 	enum MessageType : uint32_t {
 		None,
@@ -59,6 +60,10 @@ public:
 		return view_patch_id_;
 	}
 
+	Volume get_view_patch_vol() {
+		return view_patch_vol_;
+	}
+
 	InterCoreCommMessage get_message() {
 		return {};
 	}
@@ -86,5 +91,6 @@ private:
 	uint32_t requested_view_patch_id_ = 0;
 	uint32_t requested_view_patch_vol_ = 0;
 	uint32_t view_patch_id_ = 0;
+	Volume view_patch_vol_ = Volume::NorFlash;
 };
 } // namespace MetaModule
