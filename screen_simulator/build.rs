@@ -24,6 +24,7 @@ fn main() {
     // add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut lvgl_src);
     lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
     // add_glob_files("../firmware/src/pages/fonts/*.c", &mut lvgl_src);
+    lvgl_src.push(String::from("../firmware/src/pages/slsexport/ui.c"));
     lvgl_src.push(String::from(
         "../firmware/src/pages/fonts/MuseoSansRounded_500_12.c",
     ));
