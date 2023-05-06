@@ -12,6 +12,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../firmware/src/patchlist.cc");
     println!("cargo:rerun-if-changed=mms/lvgl_driver.hh");
     println!("cargo:rerun-if-changed=mms/mms.cc");
+    println!("cargo:rerun-if-changed=mms/stubs/patch_storage_proxy.hh");
     //println!("cargo:rustc-env=RANLIB=ranlib"); //doesn't work, the idea is to suppress ranlib
     //warnings by setting ranlib to be a script that runs `ranlib -no_warning_for_no_symbols`
 

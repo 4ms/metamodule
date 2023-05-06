@@ -5,7 +5,13 @@ CompileFlags:
 	"-I../../firmware/src/medium",
 	"-I../../firmware/lib/mdrivlib",
 	"-I../../shared",
-	"-I../../firmware/lib/lvgl",
+	"-I../../shared/cpputil",
+	"-I../../../shared",
+	"-I../../../shared/cpputil",
+	"-I../../../firmware/src",
+	"-I../../../firmware/src/medium",
+	"-I../../../firmware/lib/mdrivlib",
+	"-I../../../firmware/lib/lvgl",
 	"-DSIMULATOR",
 	"-std=c++2a"
 	]
