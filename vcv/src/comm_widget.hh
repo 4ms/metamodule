@@ -1,6 +1,6 @@
 #pragma once
 #include "comm_module.hh"
-#include "mappable_knob.hh"
+#include "hub/mappable_knob.hh"
 #include <rack.hpp>
 using namespace rack;
 

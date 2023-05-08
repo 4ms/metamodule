@@ -1,5 +1,5 @@
 #pragma once
-#include "central_data.hh"
+#include "hub/central_data.hh"
 #include <rack.hpp>
 
 using namespace rack;

@@ -3,7 +3,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "comm_module.hh"
 #include "comm_widget.hh"
-#include "mappable_jack.hh"
+#include "hub/mappable_jack.hh"
 #include "util/base_concepts.hh"
 #include "util/math.hh"
 

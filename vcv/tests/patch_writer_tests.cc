@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "patch_writer.hh"
+#include "hub/patch_writer.hh"
 #include <iostream>
 
 TEST_CASE("squash_ids() works")
