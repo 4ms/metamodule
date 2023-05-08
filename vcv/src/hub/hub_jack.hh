@@ -5,11 +5,11 @@
 
 class HubJackMapButton : public HubMapButton {
 public:
-	HubJackMapButton(app::ModuleWidget &parent)
-		: HubMapButton{static_cast<app::ModuleWidget &>(parent)}
+	HubJackMapButton(rack::app::ModuleWidget &parent)
+		: HubMapButton{static_cast<rack::app::ModuleWidget &>(parent)}
 	{}
 
-	void onDeselect(const event::Deselect &e) override
+	void onDeselect(const rack::event::Deselect &e) override
 	{
 		// printf("Deselect hub jack %lld %lld %d\n", id.moduleID, id.objID, id.objType);
 		bool registerSuccess = false;
@@ -46,7 +46,7 @@ public:
 		}
 	}
 
-	void onHover(const event::Hover &e) override
+	void onHover(const rack::event::Hover &e) override
 	{
 		// If the jack is mapped, then we want to pass the hover down to the HubJackMapButton object below
 		// so that the HubMapJackButton can highlight even if we're hovering the jack itself.
@@ -54,7 +54,7 @@ public:
 		// On the other hand, if the jack is not mapped, then consume the hover so that hovering the jack
 		// doesn't make the background highlight appear
 		if (centralData->isLabelButtonSrcMapped(hubJackLabel.mapObj)) {
-			PortWidget::onHover(e);
+			rack::PortWidget::onHover(e);
 			return;
 		}
 

@@ -3,19 +3,18 @@
 #include "../mapping/Mapping.h"
 
 #include <rack.hpp>
-using namespace rack;
 
-class HubMapButton : public Button {
+class HubMapButton : public rack::Button {
 
 public:
-	HubMapButton(app::ModuleWidget &parent)
+	HubMapButton(rack::app::ModuleWidget &parent)
 		: _parent{parent}
 	{}
 	void draw(const DrawArgs &args) override;
-	void onDragStart(const event::DragStart &e) override;
-	void onHover(const event::Hover &e) override;
-	void onLeave(const event::Leave &e) override;
-	void onEnter(const event::Enter &e) override;
+	void onDragStart(const rack::event::DragStart &e) override;
+	void onHover(const rack::event::Hover &e) override;
+	void onLeave(const rack::event::Leave &e) override;
+	void onEnter(const rack::event::Enter &e) override;
 
 	bool registerMapping(MappableObj src);
 
@@ -30,5 +29,5 @@ protected:
 	bool _hovered{false};
 
 private:
-	app::ModuleWidget &_parent;
+	rack::app::ModuleWidget &_parent;
 };

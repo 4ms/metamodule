@@ -7,7 +7,7 @@
 #include "comm_jack_output.hh"
 #include "comm_param.hh"
 
-class CommModule : public Module {
+class CommModule : public rack::Module {
 public:
 	struct AltParam {
 		bool is_updated = false;

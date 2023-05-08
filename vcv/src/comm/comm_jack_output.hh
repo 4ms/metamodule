@@ -1,19 +1,18 @@
 #pragma once
 
 #include <rack.hpp>
-using namespace rack;
 
 struct CommOutputJack {
 private:
 	float _value = 0;
-	Port &_outputPort;
+	rack::Port &_outputPort;
 	int _jackID = -1;
 	int64_t _moduleID = -1;
 
 public:
 	float scaleFactor = 5.f; // CoreModule ouput of -1 to +1 => -5V to +5V in VCV
 
-	CommOutputJack(Port &outputPort, int jackID)
+	CommOutputJack(rack::Port &outputPort, int jackID)
 		: _outputPort{outputPort}
 		, _jackID{jackID}
 	{}

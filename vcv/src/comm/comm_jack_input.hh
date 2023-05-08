@@ -3,12 +3,11 @@
 #include "../mapping/JackStatus.h"
 
 #include <rack.hpp>
-using namespace rack;
 
 struct CommInputJack {
 private:
 	float _value = 0;
-	Port &_inputPort;
+	rack::Port &_inputPort;
 	int _jackID = 0;
 	bool _just_unpatched = true;
 	bool _just_patched = false;
@@ -17,7 +16,7 @@ public:
 	JackStatus inputJackStatus;
 	float scaleFactor = 1.f / 5.f; //-5V to +5V in VCV => -1..+1 in CoreModule
 
-	CommInputJack(Port &inputPort, int jackID)
+	CommInputJack(rack::Port &inputPort, int jackID)
 		: _inputPort{inputPort}
 		, _jackID{jackID}
 		, inputJackStatus{.sendingJackId = jackID, .connected = false}

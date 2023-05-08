@@ -3,7 +3,7 @@
 #include <array>
 
 #include <rack.hpp>
-using namespace rack;
+
 
 struct PaletteHub {
 	static inline const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);

@@ -8,16 +8,16 @@ enum class MappableJackType { Input, Output };
 
 template<MappableJackType InputOrOutput, typename BaseJackT>
 class MappableJack : public BaseJackT {
-	static_assert(std::is_base_of<app::SvgPort, BaseJackT>(), "Jack class must derive from SvgPort");
+	static_assert(std::is_base_of<rack::app::SvgPort, BaseJackT>(), "Jack class must derive from SvgPort");
 	static constexpr float margin = 10;
 
 public:
 	MappableJack()
 	{
-		this->sw->box.pos = this->sw->box.pos.plus(Vec{margin / 2, margin / 2});
-		this->fb->box.pos = this->fb->box.pos.plus(Vec{margin / 2, margin / 2});
-		this->shadow->box.pos = this->shadow->box.pos.plus(Vec{margin / 2, margin / 2});
-		this->box = this->box.grow(Vec{margin, margin});
+		this->sw->box.pos = this->sw->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
+		this->fb->box.pos = this->fb->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
+		this->shadow->box.pos = this->shadow->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
+		this->box = this->box.grow(rack::math::Vec{margin, margin});
 	}
 
 	void draw(const typename BaseJackT::DrawArgs &args) override
@@ -41,7 +41,7 @@ public:
 		if ((id.moduleID >= 0) && centralData->isLabelButtonDstMapped(id)) {
 			int srcPortId = centralData->getMappedSrcFromDst(id).objID;
 			NVGcolor color = PaletteHub::color(srcPortId);
-			Rect box = this->box.grow(Vec{-margin / 2, -margin / 2});
+			rack::math::Rect box = this->box.grow(rack::math::Vec{-margin / 2, -margin / 2});
 			if constexpr (InputOrOutput == MappableJackType::Output)
 				MapMark::markOutputJack(args.vg, box, color);
 			else
@@ -49,23 +49,23 @@ public:
 		}
 	}
 
-	void onDragStart(const event::DragStart &e) override
+	void onDragStart(const rack::event::DragStart &e) override
 	{
 		if (!(centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType))) {
-			PortWidget::onDragStart(e);
+			rack::PortWidget::onDragStart(e);
 		} else {
 			centralData->registerTouchedJack(getId());
 			e.consume(this);
 		}
 	}
 
-	void onButton(const event::Button &e) override
+	void onButton(const rack::event::Button &e) override
 	{
-		OpaqueWidget::onButton(e);
+		rack::OpaqueWidget::onButton(e);
 
 		// Right click to open context menu
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-			ui::Menu *menu = createMenu();
+			rack::ui::Menu *menu = rack::createMenu();
 
 			if ((getId().moduleID >= 0) && centralData->isLabelButtonDstMapped(getId())) {
 				JackUnmapItem *unmapItem = new JackUnmapItem{getId()};
@@ -73,7 +73,7 @@ public:
 				// unmapItem->rightText = .... TODO: name of metamodule jack
 				menu->addChild(unmapItem);
 			} else {
-				ui::MenuItem *label = new ui::MenuItem;
+				rack::ui::MenuItem *label = new rack::ui::MenuItem;
 				label->text = "Not mapped";
 				label->rightText = "Click a MetaModule jack to begin mapping";
 				menu->addChild(label);
@@ -82,9 +82,9 @@ public:
 		}
 	}
 
-	void onHover(const event::Hover &e) override { e.consume(this); }
+	void onHover(const rack::event::Hover &e) override { e.consume(this); }
 
-	void onEnter(const event::Enter &e) override
+	void onEnter(const rack::event::Enter &e) override
 	{
 		hovered = true;
 		if (!centralData->isMappingInProgress())
@@ -92,7 +92,7 @@ public:
 		BaseJackT::onEnter(e);
 	}
 
-	void onLeave(const event::Leave &e) override
+	void onLeave(const rack::event::Leave &e) override
 	{
 		hovered = false;
 		if (!centralData->isMappingInProgress())
@@ -112,12 +112,12 @@ private:
 			return {MappableObj::Type::OutputJack, this->portId, moduleId};
 	}
 
-	struct JackUnmapItem : ui::MenuItem {
+	struct JackUnmapItem : rack::ui::MenuItem {
 		const MappableObj _id;
 		JackUnmapItem(MappableObj id)
 			: _id{id}
 		{}
-		void onAction(const event::Action &e) override { centralData->unregisterMapByDest(_id); }
+		void onAction(const rack::event::Action &e) override { centralData->unregisterMapByDest(_id); }
 	};
 };
 

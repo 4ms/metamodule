@@ -6,12 +6,14 @@
 #include "mapping/mappable_jack.hh"
 #include "util/base_concepts.hh"
 
+using namespace rack;
+
 template<Derived<ModuleInfoBase> Defs>
 struct GenericModule
 {
-	static Model* create()
+	static rack::Model* create()
 	{
-		return createModel<Module, Widget>(Defs::slug.data());
+		return rack::createModel<Module, Widget>(Defs::slug.data());
 	}
 
 	struct Module : CommModule
@@ -56,7 +58,7 @@ struct GenericModule
 		}
 	};
 
-	struct Widget : app::ModuleWidget
+	struct Widget : rack::app::ModuleWidget
 	{
 		CommModule *mainModule;
 
@@ -66,32 +68,32 @@ struct GenericModule
 			setModule(static_cast<Module *>(module));
 
 			setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, Defs::svg_filename.data())));
-			addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-			addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+			addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, 0)));
+			addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 			if (box.size.x > RACK_GRID_WIDTH * 7) // >7HP = 2 screws
 			{
-				addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+				addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 				addChild(
-					createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+					createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 			}
 
 			for (auto knob : Defs::Knobs) {
-				auto ctr_pos = mm2px({knob.x_mm, knob.y_mm});
+				auto ctr_pos = rack::mm2px({knob.x_mm, knob.y_mm});
 				switch (knob.knob_style) {
 					case KnobDef::Small: {
-						auto *kn = createParamCentered<Small9mmKnob>(ctr_pos, module, knob.id);
+						auto *kn = rack::createParamCentered<Small9mmKnob>(ctr_pos, module, knob.id);
 						addChild(new MappableKnobRing{*kn, 10});
 						addParam(kn);
 					} break;
 
 					case KnobDef::Medium: {
-						auto *kn = createParamCentered<Davies1900hBlackKnob4ms>(ctr_pos, module, knob.id);
+						auto *kn = rack::createParamCentered<Davies1900hBlackKnob4ms>(ctr_pos, module, knob.id);
 						addChild(new MappableKnobRing{*kn, 10});
 						addParam(kn);
 					} break;
 
 					case KnobDef::Large: {
-						auto *kn = createParamCentered<DaviesLarge4ms>(ctr_pos, module, knob.id);
+						auto *kn = rack::createParamCentered<DaviesLarge4ms>(ctr_pos, module, knob.id);
 						addChild(new MappableKnobRing{*kn, 20});
 						addParam(kn);
 					} break;
@@ -99,11 +101,11 @@ struct GenericModule
 					case KnobDef::Slider25mm: {
 						if (knob.orientation == KnobDef::Vertical) {
 							auto *kn =
-								createParamCentered<MappableKnob<FourmsLightSlider<WhiteLight>>>(ctr_pos, module, knob.id);
+								rack::createParamCentered<MappableKnob<FourmsLightSlider<rack::WhiteLight>>>(ctr_pos, module, knob.id);
 							addChild(new MappableSliderRing{*kn, 20, 40});
 							addParam(kn);
 						} else {
-							auto *kn = createParamCentered<MappableKnob<FourmsLightSliderHorizontal<WhiteLight>>>(
+							auto *kn = rack::createParamCentered<MappableKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>>(
 								ctr_pos, module, knob.id);
 							addChild(new MappableSliderRing{*kn, 40, 20});
 							addParam(kn);
@@ -114,56 +116,56 @@ struct GenericModule
 
 			for (auto jack : Defs::InJacks) {
 				addInput(
-					createInputCentered<MappableInputJack<PJ301MPort>>(mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
+					createInputCentered<MappableInputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
 			}
 
 			for (auto jack : Defs::OutJacks) {
 				addOutput(
-					createOutputCentered<MappableOutputJack<PJ301MPort>>(mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
+					createOutputCentered<MappableOutputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
 			}
 
 			int light_id = 0;
 
 			for (auto led : Defs::Leds) {
-				auto pos = mm2px({led.x_mm, led.y_mm});
+				auto pos = rack::mm2px({led.x_mm, led.y_mm});
 				addChild(createLightCentered<MediumLight<RedLight>>(pos, module, light_id));
 				light_id++;
 			}
 
 			for (auto sw : Defs::Switches) {
 				auto param_id = sw.id + Defs::NumKnobs;
-				auto pos = mm2px({sw.x_mm, sw.y_mm});
+				auto pos = rack::mm2px({sw.x_mm, sw.y_mm});
 
 				if (sw.switch_type == SwitchDef::LatchingButton) {
 					// These use a single white LED
-					addParam(createParamCentered<LatchingSwitch<LEDBezel>>(pos, module, param_id));
+					addParam(rack::createParamCentered<LatchingSwitch<LEDBezel>>(pos, module, param_id));
 					addChild(createLightCentered<LEDBezelLight<WhiteLight>>(pos, module, light_id));
 					light_id++;
 
 				} else if (sw.switch_type == SwitchDef::MomentaryButton) {
 					// These use an RGB LED (3 elements)
-					addParam(createParamCentered<MomentarySwitch<LEDBezel>>(pos, module, param_id));
+					addParam(rack::createParamCentered<MomentarySwitch<LEDBezel>>(pos, module, param_id));
 					addChild(createLightCentered<LEDBezelLight<RedGreenBlueLight>>(pos, module, light_id));
 					light_id += 3;
 
 				} else if (sw.switch_type == SwitchDef::Toggle2pos) {
 					if (sw.orientation == SwitchDef::Vertical)
-						addParam(createParamCentered<SubMiniToggle2pos>(pos, module, param_id));
+						addParam(rack::createParamCentered<SubMiniToggle2pos>(pos, module, param_id));
 					else
-						addParam(createParamCentered<SubMiniToggleHoriz2pos>(pos, module, param_id));
+						addParam(rack::createParamCentered<SubMiniToggleHoriz2pos>(pos, module, param_id));
 
 				} else if (sw.switch_type == SwitchDef::Toggle3pos) {
 					if (sw.orientation == SwitchDef::Vertical)
-						addParam(createParamCentered<SubMiniToggle3pos>(pos, module, param_id));
+						addParam(rack::createParamCentered<SubMiniToggle3pos>(pos, module, param_id));
 					else
-						addParam(createParamCentered<SubMiniToggleHoriz3pos>(pos, module, param_id));
+						addParam(rack::createParamCentered<SubMiniToggleHoriz3pos>(pos, module, param_id));
 
 				} else if (sw.switch_type == SwitchDef::Encoder) {
 					// TODO: add un-lined knobs
 					if (sw.encoder_knob_style == SwitchDef::Small)
-						addParam(createParamCentered<Small9mmUnlinedKnob>(pos, module, param_id));
+						addParam(rack::createParamCentered<Small9mmUnlinedKnob>(pos, module, param_id));
 					else if (sw.encoder_knob_style == SwitchDef::Medium)
-						addParam(createParamCentered<Davies1900hBlackKnobUnlined4ms>(pos, module, param_id));
+						addParam(rack::createParamCentered<Davies1900hBlackKnobUnlined4ms>(pos, module, param_id));
 				}
 			}
 		}
@@ -173,7 +175,7 @@ struct GenericModule
 		// TODO: make a choose-one-of-two/three button array instead of slider
 		// Can use it when Range is Integer and max-min <= 3
 		// Can query names with get_alt_param_value(id, min|..|max);
-		struct AltParamQty : Quantity
+		struct AltParamQty : rack::Quantity
 		{
 			const AltParamDef &_alt;
 			CommModule &_module;
@@ -224,17 +226,17 @@ struct GenericModule
 			float getDefaultValue() override { return _alt.default_val; }
 		};
 
-		struct AltParamSlider : ui::Slider
+		struct AltParamSlider : rack::ui::Slider
 		{
 			AltParamSlider(CommModule &module, const AltParamDef &alt) { quantity = new AltParamQty{module, alt}; }
 			~AltParamSlider() { delete quantity; }
 		};
 
-		void appendContextMenu(Menu *menu) override
+		void appendContextMenu(rack::ui::Menu *menu) override
 		{
-			menu->addChild(new MenuEntry);
+			menu->addChild(new rack::ui::MenuEntry);
 			for (auto &alt : Defs::AltParams) {
-				auto *item = new MenuItem;
+				auto *item = new rack::ui::MenuItem;
 				item->text = std::string{alt.short_name};
 				menu->addChild(item);
 

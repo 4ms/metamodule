@@ -5,13 +5,13 @@
 #include "util/base_concepts.hh"
 #include <rack.hpp>
 
-class MappableKnobRing : public OpaqueWidget {
+class MappableKnobRing : public rack::OpaqueWidget {
 protected:
-	ParamWidget &_inner_knob;
+	rack::ParamWidget &_inner_knob;
 	bool _hovered = false;
 
 public:
-	MappableKnobRing(ParamWidget &inner_knob, float ring_thickness)
+	MappableKnobRing(rack::ParamWidget &inner_knob, float ring_thickness)
 		: _inner_knob{inner_knob}
 	{
 		box.pos = _inner_knob.box.pos.minus({ring_thickness, ring_thickness});
@@ -35,21 +35,21 @@ public:
 		}
 	}
 
-	void onEnter(const event::Enter &e) override
+	void onEnter(const rack::event::Enter &e) override
 	{
 		_hovered = true;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyEnterHover(getId());
 	}
 
-	void onLeave(const event::Leave &e) override
+	void onLeave(const rack::event::Leave &e) override
 	{
 		_hovered = false;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyLeaveHover(getId());
 	}
 
-	void onButton(const event::Button &e) override { _inner_knob.onButton(e); }
+	void onButton(const rack::event::Button &e) override { _inner_knob.onButton(e); }
 
 	const MappableObj getId() const
 	{
@@ -65,7 +65,7 @@ public:
 
 class MappableSliderRing : public MappableKnobRing {
 public:
-	MappableSliderRing(ParamWidget &inner_knob, float ring_width, float ring_height)
+	MappableSliderRing(rack::ParamWidget &inner_knob, float ring_width, float ring_height)
 		: MappableKnobRing(inner_knob, 0)
 	{
 		box.pos = _inner_knob.box.pos.minus({ring_width / 2, ring_height / 2});
@@ -90,17 +90,17 @@ public:
 	}
 };
 
-struct KnobAliasTextBox : ui::TextField {
+struct KnobAliasTextBox : rack::ui::TextField {
 	MappableObj _src;
 	KnobAliasTextBox(MappableObj src)
 		: _src{src}
 	{}
 
-	void onChange(const event::Change &e) override { centralData->setMapAliasName(_src, text); }
+	void onChange(const rack::event::Change &e) override { centralData->setMapAliasName(_src, text); }
 };
 
 
-struct KnobAliasMenuItem : widget::Widget {
+struct KnobAliasMenuItem : rack::widget::Widget {
 	MappableObj _src;
 	KnobAliasTextBox *txt;
 
@@ -125,7 +125,7 @@ struct KnobAliasMenuItem : widget::Widget {
 
 enum class RangePart { Min, Max };
 template<RangePart MINMAX>
-struct MappedRangeQuantity : Quantity {
+struct MappedRangeQuantity : rack::Quantity {
 private:
 	float _val{0.f};
 	std::string _label;
@@ -165,7 +165,7 @@ public:
 };
 
 
-struct MinSlider : ui::Slider {
+struct MinSlider : rack::ui::Slider {
 public:
 	MinSlider(MappableObj const knobLabelID)
 	{
@@ -174,7 +174,7 @@ public:
 	~MinSlider() { delete quantity; }
 };
 
-struct MaxSlider : ui::Slider {
+struct MaxSlider : rack::ui::Slider {
 public:
 	MaxSlider(MappableObj const knobLabelID)
 	{
@@ -182,7 +182,6 @@ public:
 	}
 	~MaxSlider() { delete quantity; }
 };
-
 
 template<typename BaseKnobT>
 class MappableKnob : public BaseKnobT {
@@ -202,13 +201,13 @@ public:
 	}
 
 	// onButton is provided to customize the context menu for mappable knobs
-	void onButton(const event::Button &e) override
+	void onButton(const rack::event::Button &e) override
 	{
-		OpaqueWidget::onButton(e);
+		rack::OpaqueWidget::onButton(e);
 
 		// Right click to open context menu
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-			ui::Menu *menu = createMenu();
+			rack::ui::Menu *menu = rack::createMenu();
 
 			ParamLabel *paramLabel = new ParamLabel;
 			paramLabel->paramWidget = this;
@@ -243,10 +242,10 @@ public:
 				paramField->setParamWidget(this);
 				menu->addChild(paramField);
 
-				MenuSeparator *sep = new MenuSeparator;
+				rack::MenuSeparator *sep = new rack::MenuSeparator;
 				menu->addChild(sep);
 
-				ui::MenuItem *label = new ui::MenuItem;
+				rack::ui::MenuItem *label = new rack::ui::MenuItem;
 				label->text = "Not mapped";
 				label->rightText = "Click next to a MetaModule knob to begin mapping";
 				menu->addChild(label);
@@ -254,11 +253,11 @@ public:
 			e.consume(this);
 		} else {
 			// printf("Touch %p, module id %lld\n", this, this->module->id);
-			ParamWidget::onButton(e);
+			rack::ParamWidget::onButton(e);
 		}
 	}
 
-	void onHover(const event::Hover &e) override
+	void onHover(const rack::event::Hover &e) override
 	{
 		// override the e.consume(this) so that the ring will get passed the hover event
 	}
@@ -275,18 +274,18 @@ private:
 		return {MappableObj::Type::Knob, paramId, moduleId};
 	}
 
-	struct KnobUnmapItem : ui::MenuItem {
+	struct KnobUnmapItem : rack::ui::MenuItem {
 		const MappableObj _id;
 		KnobUnmapItem(MappableObj id)
 			: _id{id}
 		{}
 
-		void onAction(const event::Action &e) override { centralData->unregisterMapByDest(_id); }
+		void onAction(const rack::event::Action &e) override { centralData->unregisterMapByDest(_id); }
 	};
 
 	// ParamLabel: copied from Rack/src/app/ParamWidget.cpp (not exported)
-	struct ParamLabel : ui::MenuLabel {
-		ParamWidget *paramWidget;
+	struct ParamLabel : rack::ui::MenuLabel {
+		rack::ParamWidget *paramWidget;
 		void step() override
 		{
 			text = paramWidget->getParamQuantity()->getString();
@@ -295,8 +294,8 @@ private:
 	};
 
 	// ParamField: copied from Rack/src/app/ParamWidget.cpp (not exported)
-	struct ParamField : ui::TextField {
-		ParamWidget *paramWidget;
+	struct ParamField : rack::ui::TextField {
+		rack::ParamWidget *paramWidget;
 
 		void step() override
 		{
@@ -305,7 +304,7 @@ private:
 			TextField::step();
 		}
 
-		void setParamWidget(ParamWidget *paramWidget)
+		void setParamWidget(rack::ParamWidget *paramWidget)
 		{
 			this->paramWidget = paramWidget;
 			if (paramWidget->getParamQuantity())
@@ -313,7 +312,7 @@ private:
 			selectAll();
 		}
 
-		void onSelectKey(const event::SelectKey &e) override
+		void onSelectKey(const rack::event::SelectKey &e) override
 		{
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
 				float oldValue = paramWidget->getParamQuantity()->getValue();
@@ -323,7 +322,7 @@ private:
 
 				if (oldValue != newValue) {
 					// Push ParamChange history action
-					history::ParamChange *h = new history::ParamChange;
+					rack::history::ParamChange *h = new rack::history::ParamChange;
 					h->moduleId = paramWidget->getParamQuantity()->module->id;
 					h->paramId = paramWidget->getParamQuantity()->paramId;
 					h->oldValue = oldValue;
@@ -331,7 +330,7 @@ private:
 					APP->history->push(h);
 				}
 
-				ui::MenuOverlay *overlay = getAncestorOfType<ui::MenuOverlay>();
+				rack::ui::MenuOverlay *overlay = getAncestorOfType<rack::ui::MenuOverlay>();
 				overlay->requestDelete();
 				e.consume(this);
 			}
@@ -341,3 +340,4 @@ private:
 		}
 	};
 };
+

@@ -7,20 +7,20 @@
 
 // This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
 
-struct ParamUnmapItem : ui::MenuItem {
-	ParamQuantity *paramQuantity;
-	void onAction(const event::Action &e) override
+struct ParamUnmapItem : rack::ui::MenuItem {
+	rack::ParamQuantity *paramQuantity;
+	void onAction(const rack::event::Action &e) override
 	{
-		ParamHandle *paramHandle = APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId);
+		rack::ParamHandle *paramHandle = APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId);
 		if (paramHandle) {
 			APP->engine->updateParamHandle(paramHandle, -1, 0);
 		}
 	}
 };
 
-static void makeKnobMenu(ParamQuantity *paramQuantity, MappableObj id)
+static void makeKnobMenu(rack::ParamQuantity *paramQuantity, MappableObj id)
 {
-	ui::Menu *menu = createMenu();
+	rack::ui::Menu *menu = rack::createMenu();
 
 	KnobNameMenuLabel *paramLabel = new KnobNameMenuLabel;
 	paramLabel->paramQty = paramQuantity;
@@ -36,7 +36,7 @@ static void makeKnobMenu(ParamQuantity *paramQuantity, MappableObj id)
 	// menu->addChild(resetItem);
 
 	if (centralData->getNumMappingsFromSrc(id) > 0) {
-		MenuSeparator *sep = new MenuSeparator;
+		auto *sep = new rack::MenuSeparator;
 		menu->addChild(sep);
 
 		auto aliasItem = new KnobAliasMenuItem{id};
@@ -45,7 +45,7 @@ static void makeKnobMenu(ParamQuantity *paramQuantity, MappableObj id)
 		auto maps = centralData->getMappingsFromSrc(id);
 		for (auto const &m : maps) {
 			if (m.dst.moduleID != -1) {
-				MenuSeparator *sep = new MenuSeparator;
+				auto *sep = new rack::MenuSeparator;
 				menu->addChild(sep);
 
 				MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
@@ -65,7 +65,7 @@ static void makeKnobMenu(ParamQuantity *paramQuantity, MappableObj id)
 			}
 		}
 
-		engine::ParamHandle *paramHandle =
+		rack::engine::ParamHandle *paramHandle =
 			paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId) : NULL;
 		if (paramHandle) {
 			ParamUnmapItem *unmapItem = new ParamUnmapItem;
@@ -78,21 +78,21 @@ static void makeKnobMenu(ParamQuantity *paramQuantity, MappableObj id)
 }
 
 class HubKnobMapButton : public HubMapButton {
-	ParamQuantity *paramQuantity = nullptr;
+	rack::ParamQuantity *paramQuantity = nullptr;
 
 public:
-	HubKnobMapButton(app::ModuleWidget &parent)
-		: HubMapButton{static_cast<app::ModuleWidget &>(parent)}
+	HubKnobMapButton(rack::app::ModuleWidget &parent)
+		: HubMapButton{static_cast<rack::app::ModuleWidget &>(parent)}
 	{}
 
-	void setParamQuantity(ParamQuantity *paramQ) { paramQuantity = paramQ; }
+	void setParamQuantity(rack::ParamQuantity *paramQ) { paramQuantity = paramQ; }
 
-	void onDeselect(const event::Deselect &e) override
+	void onDeselect(const rack::event::Deselect &e) override
 	{
 		bool registerSuccess = false;
 
 		// Check if a ParamWidget was touched
-		ParamWidget *touchedParam = APP->scene->rack->getTouchedParam();
+		auto touchedParam = APP->scene->rack->getTouchedParam();
 		if (touchedParam && touchedParam->getParamQuantity()) {
 			int64_t moduleId = touchedParam->module->id;
 			int objId = touchedParam->getParamQuantity()->paramId;
@@ -108,7 +108,7 @@ public:
 		}
 	}
 
-	void onButton(const event::Button &e) override
+	void onButton(const rack::event::Button &e) override
 	{
 		// Right click to open context menu
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
@@ -149,12 +149,12 @@ public:
 		}
 	}
 
-	void onButton(const event::Button &e) override
+	void onButton(const rack::event::Button &e) override
 	{
-		math::Vec c = this->box.size.div(2);
+		rack::math::Vec c = this->box.size.div(2);
 		float dist = e.pos.minus(c).norm();
 		if (dist <= c.x) {
-			OpaqueWidget::onButton(e);
+			rack::OpaqueWidget::onButton(e);
 
 			// Touch parameter
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
@@ -172,7 +172,7 @@ public:
 		}
 	}
 
-	void onHover(const event::Hover &e) override
+	void onHover(const rack::event::Hover &e) override
 	{
 		// If the knob is mapped, then we want to pass the hover down to the HubKnobMapButton object below
 		// so that the HubMapKnobButton can highlight even if we're hovering the knob itself.
@@ -185,11 +185,12 @@ public:
 		e.consume(this);
 	}
 
-	struct ParamResetItem : ui::MenuItem {
-		ParamWidget *paramWidget;
-		void onAction(const event::Action &e) override { paramWidget->resetAction(); }
+	struct ParamResetItem : rack::ui::MenuItem {
+		rack::ParamWidget *paramWidget;
+		void onAction(const rack::event::Action &e) override { paramWidget->resetAction(); }
 	};
 
 private:
 	HubKnobMapButton &hubKnobMapBut;
 };
+

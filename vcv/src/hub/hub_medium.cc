@@ -9,6 +9,8 @@
 #include "local_path.hh"
 #include "../mapping/patch_writer.hh"
 
+using namespace rack;
+
 // Note: in v2, first the module is constructed, then dataFromJson is called, then the Widget is constructed
 struct HubMediumMappings {
 	constexpr static unsigned NumMidiSrcs = 2;
@@ -94,39 +96,39 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 		}
 
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/modules/metamodule_p10-artwork.svg")));
-		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		patchName = createWidget<MetaModuleTextBox>(mm2px(Vec(36.1, 10.5)));
+		patchName = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.1, 10.5)));
 		if (hubModule != nullptr && hubModule->patchNameText.length() > 0)
 			patchName->text = this->hubModule->patchNameText;
 		else
 			patchName->text = "Enter Patch Name";
 		patchName->color = rack::color::BLACK;
-		patchName->box.size = {mm2px(Vec(57.7f, 10.0f))};
+		patchName->box.size = {rack::mm2px(rack::math::Vec(57.7f, 10.0f))};
 		patchName->cursor = 0;
 		addChild(patchName);
 
-		statusText = createWidget<Label>(mm2px(Vec(34.1, 17.8)));
+		statusText = createWidget<Label>(rack::mm2px(rack::math::Vec(34.1, 17.8)));
 		statusText->color = rack::color::WHITE;
 		statusText->text = "";
 		statusText->fontSize = 10;
 		addChild(statusText);
 
-		patchDesc = createWidget<MetaModuleTextBox>(mm2px(Vec(36, 22.98)));
+		patchDesc = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36, 22.98)));
 		if (hubModule != nullptr && hubModule->patchDescText.length() > 0)
 			patchDesc->text = this->hubModule->patchDescText;
 		else
 			patchDesc->text = "Patch Description";
 		patchDesc->color = rack::color::BLACK;
-		patchDesc->box.size = {mm2px(Vec(57.7f, 31.3f))};
+		patchDesc->box.size = {rack::mm2px(rack::math::Vec(57.7f, 31.3f))};
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
 
 		for (auto knob : MetaModuleInfo::Knobs) {
-			auto ctr_pos = mm2px({knob.x_mm, knob.y_mm});
+			auto ctr_pos = rack::mm2px({knob.x_mm, knob.y_mm});
 			if (knob.knob_style == KnobDef::Small)
 				addLabeledKnobPx<Small9mmKnob>(knob.short_name, knob.id, ctr_pos, 14.f);
 			if (knob.knob_style == KnobDef::Medium)
@@ -134,28 +136,28 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 		}
 
 		for (auto jack : MetaModuleInfo::InJacks)
-			addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, mm2px({jack.x_mm, jack.y_mm}), JackDir::Input);
+			addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, rack::mm2px({jack.x_mm, jack.y_mm}), JackDir::Input);
 
 		for (auto jack : MetaModuleInfo::OutJacks)
-			addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, mm2px({jack.x_mm, jack.y_mm}), JackDir::Output);
+			addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, rack::mm2px({jack.x_mm, jack.y_mm}), JackDir::Output);
 
 		auto &savebut = MetaModuleInfo::Switches[MetaModuleInfo::SwitchSave];
-		addParam(createParamCentered<BefacoPush>(mm2px({savebut.x_mm, savebut.y_mm}), module, HubMedium::WRITE_PATCH));
+		addParam(rack::createParamCentered<BefacoPush>(rack::mm2px({savebut.x_mm, savebut.y_mm}), module, HubMedium::WRITE_PATCH));
 
 		auto &midinote = MetaModuleInfo::Switches[MetaModuleInfo::SwitchNote];
 		addMidiValueMapSrc(
-			"MidiNote", HubMedium::MIDI_MONO_NOTE, mm2px({midinote.x_mm, midinote.y_mm}), MappableObj::Type::MidiNote);
+			"MidiNote", HubMedium::MIDI_MONO_NOTE, rack::mm2px({midinote.x_mm, midinote.y_mm}), MappableObj::Type::MidiNote);
 
 		auto &midigate = MetaModuleInfo::Switches[MetaModuleInfo::SwitchGate];
 		addMidiValueMapSrc(
-			"MidiGate", HubMedium::MIDI_MONO_GATE, mm2px({midigate.x_mm, midigate.y_mm}), MappableObj::Type::MidiGate);
+			"MidiGate", HubMedium::MIDI_MONO_GATE, rack::mm2px({midigate.x_mm, midigate.y_mm}), MappableObj::Type::MidiGate);
 
 		// auto &midicc = MetaModuleInfo::Switches[MetaModuleInfo::SwitchCc];
 		// addMidiValueMapPt("MidiCC",
 		// 				  HubMedium::MIDI_CC,
-		// 				  mm2px({midigate.x_mm, midigate.y_mm}),
+		// 				  rack::mm2px({midigate.x_mm, midigate.y_mm}),
 		// 				  LabelButtonID::Types::MidiCC);
 	}
 };
 
-Model *modelHubMedium = createModel<HubMedium, HubMediumWidget>("PanelMedium");
+rack::Model *modelHubMedium = rack::createModel<HubMedium, HubMediumWidget>("PanelMedium");

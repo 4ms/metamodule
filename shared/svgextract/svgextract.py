@@ -739,7 +739,7 @@ Model* {modelName} = GenericModule<{slug}Info>::create();
 
     # Append to plugin.hh file
     marker = '// Add models below here\n'
-    newText = f'extern Model *{modelName};\n'
+    newText = f'extern rack::Model *{modelName};\n'
     appendToFileAfterMarker(pluginhh, marker, newText)
 
     # Append plugin.json

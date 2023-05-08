@@ -3,16 +3,16 @@
 #include "../mapping/ParamStatus.h"
 
 #include <rack.hpp>
-using namespace rack;
+
 
 class CommParam {
-	Param &_inParam;
+	rack::Param &_inParam;
 
 public:
 	ParamStatus paramStatus;
 	float scaleFactor = 1.0f;
 
-	CommParam(Param &inParam, int paramID)
+	CommParam(rack::Param &inParam, int paramID)
 		: _inParam{inParam}
 	{
 		paramStatus.paramID = paramID;

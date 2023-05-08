@@ -1,17 +1,17 @@
 #pragma once
 #include "../mapping/central_data.hh"
 
-struct KnobNameMenuLabel : ui::MenuLabel {
-	ParamQuantity *paramQty;
+struct KnobNameMenuLabel : rack::ui::MenuLabel {
+	rack::ParamQuantity *paramQty;
 	void step() override
 	{
 		text = paramQty->getLabel();
-		MenuLabel::step();
+		rack::ui::MenuLabel::step();
 	}
 };
 
 
-struct MappedKnobMenuLabel : ui::MenuLabel {
+struct MappedKnobMenuLabel : rack::ui::MenuLabel {
 	int64_t moduleId;
 	int paramId;
 	std::string moduleName;
@@ -25,16 +25,16 @@ struct MappedKnobMenuLabel : ui::MenuLabel {
 			paramName = std::to_string(paramId);
 
 		text = "Mapped to: " + moduleName + " " + paramName;
-		MenuLabel::step();
+		rack::ui::MenuLabel::step();
 	}
 };
 
 
 
 
-struct KnobValueTextBox : ui::TextField {
-	ParamQuantity *paramQuantity;
-	KnobValueTextBox(ParamQuantity *paramQ)
+struct KnobValueTextBox : rack::ui::TextField {
+	rack::ParamQuantity *paramQuantity;
+	KnobValueTextBox(rack::ParamQuantity *paramQ)
 		: paramQuantity{paramQ}
 	{
 		if (paramQuantity)
@@ -42,7 +42,7 @@ struct KnobValueTextBox : ui::TextField {
 		selectAll();
 	}
 
-	void onChange(const event::Change &e) override
+	void onChange(const rack::event::Change &e) override
 	{
 		if (paramQuantity) {
 			float oldValue = paramQuantity->getValue();
@@ -51,7 +51,7 @@ struct KnobValueTextBox : ui::TextField {
 
 			if (oldValue != newValue) {
 				// Push ParamChange history action
-				history::ParamChange *h = new history::ParamChange;
+				rack::history::ParamChange *h = new rack::history::ParamChange;
 				h->moduleId = paramQuantity->module->id;
 				h->paramId = paramQuantity->paramId;
 				h->oldValue = oldValue;
@@ -62,10 +62,10 @@ struct KnobValueTextBox : ui::TextField {
 	}
 };
 
-struct KnobValueMenuItem : widget::Widget {
+struct KnobValueMenuItem : rack::widget::Widget {
 	KnobValueTextBox *txt;
 
-	KnobValueMenuItem(float width, float relative_width, ParamQuantity *paramQ)
+	KnobValueMenuItem(float width, float relative_width, rack::ParamQuantity *paramQ)
 	{
 		box.pos = {0, 0};
 		box.size = {width, BND_WIDGET_HEIGHT};
@@ -78,6 +78,6 @@ struct KnobValueMenuItem : widget::Widget {
 	void draw(const DrawArgs &args) override
 	{
 		bndMenuLabel(args.vg, 0.0, 0.0, box.size.x, box.size.y, -1, "Value:");
-		Widget::draw(args);
+		rack::widget::Widget::draw(args);
 	}
 };

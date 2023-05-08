@@ -161,7 +161,7 @@ struct MetaModuleHubBase : public CommModule {
 						MappableObj dst{MappableObj::Type::Knob, paramId, m.dst.moduleID};
 						auto [min, max] = centralData->getMapRange(src, dst);
 						auto newMappedVal = MathTools::map_value(params[i].getValue(), 0.0f, 1.0f, min, max);
-						ParamQuantity *paramQuantity = module->paramQuantities[paramId];
+						auto paramQuantity = module->paramQuantities[paramId];
 						paramQuantity->setValue(newMappedVal);
 					} else {
 						// disable the mapping because the module was deleted
@@ -281,9 +281,9 @@ private:
 };
 
 template<typename MappingConf>
-struct MetaModuleHubBaseWidget : app::ModuleWidget {
+struct MetaModuleHubBaseWidget : rack::app::ModuleWidget {
 
-	Label *statusText;
+	rack::Label *statusText;
 	MetaModuleHubBase<MappingConf> *hubModule;
 
 	MetaModuleHubBaseWidget() = default;
@@ -294,12 +294,12 @@ struct MetaModuleHubBaseWidget : app::ModuleWidget {
 
 	template<typename KnobType>
 	void addLabeledKnobPx(
-		std::string_view labelText, int knobId, Vec posPx, float sz_mm = kKnobSpacingX, float defaultValue = 0.f)
+		std::string_view labelText, int knobId, rack::math::Vec posPx, float sz_mm = kKnobSpacingX, float defaultValue = 0.f)
 	{
 		HubKnobMapButton *button = new HubKnobMapButton{*this};
-		button->box.pos = Vec(posPx.x - mm2px(sz_mm) / 2, posPx.y - mm2px(sz_mm) / 2); // top-left
-		button->box.size.x = mm2px(sz_mm);
-		button->box.size.y = mm2px(sz_mm);
+		button->box.pos = rack::math::Vec(posPx.x - rack::mm2px(sz_mm) / 2, posPx.y - rack::mm2px(sz_mm) / 2); // top-left
+		button->box.size.x = rack::mm2px(sz_mm);
+		button->box.size.y = rack::mm2px(sz_mm);
 		button->text = labelText;
 		button->mapObj = {MappableObj::Type::Knob, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
@@ -307,8 +307,8 @@ struct MetaModuleHubBaseWidget : app::ModuleWidget {
 		auto *p = new HubKnob<KnobType>{*button};
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
-		p->app::ParamWidget::module = hubModule;
-		p->app::ParamWidget::paramId = knobId;
+		p->rack::app::ParamWidget::module = hubModule;
+		p->rack::app::ParamWidget::paramId = knobId;
 		p->initParamQuantity();
 
 		if (module) {
@@ -323,13 +323,13 @@ struct MetaModuleHubBaseWidget : app::ModuleWidget {
 	enum class JackDir { Input, Output };
 
 	template<typename JackType>
-	void addLabeledJackPx(std::string_view labelText, int jackId, Vec posPx, JackDir inout)
+	void addLabeledJackPx(std::string_view labelText, int jackId, rack::math::Vec posPx, JackDir inout)
 	{
 		auto mapButton = new HubJackMapButton{*this};
 
-		mapButton->box.pos = Vec(posPx.x - mm2px(kKnobSpacingX) / 2, posPx.y - mm2px(kKnobSpacingY) / 2); // top-left
-		mapButton->box.size.x = mm2px(kKnobSpacingX);
-		mapButton->box.size.y = mm2px(kKnobSpacingY);
+		mapButton->box.pos = rack::math::Vec(posPx.x - rack::mm2px(kKnobSpacingX) / 2, posPx.y - rack::mm2px(kKnobSpacingY) / 2); // top-left
+		mapButton->box.size.x = rack::mm2px(kKnobSpacingX);
+		mapButton->box.size.y = rack::mm2px(kKnobSpacingY);
 		mapButton->text = labelText;
 		auto type = inout == JackDir::Input ? MappableObj::Type::InputJack : MappableObj::Type::OutputJack;
 		mapButton->mapObj = {type, jackId, hubModule ? hubModule->id : -1};
@@ -339,7 +339,7 @@ struct MetaModuleHubBaseWidget : app::ModuleWidget {
 		jack->box.pos = posPx;
 		jack->box.pos = jack->box.pos.minus(jack->box.size.div(2));
 		jack->module = module;
-		jack->type = inout == JackDir::Input ? Port::INPUT : Port::OUTPUT;
+		jack->type = inout == JackDir::Input ? rack::Port::INPUT : rack::Port::OUTPUT;
 		jack->portId = jackId;
 		if (inout == JackDir::Input)
 			addInput(jack);
@@ -347,11 +347,11 @@ struct MetaModuleHubBaseWidget : app::ModuleWidget {
 			addOutput(jack);
 	}
 
-	void addMidiValueMapSrc(const std::string labelText, int knobId, Vec posPx, MappableObj::Type type)
+	void addMidiValueMapSrc(const std::string labelText, int knobId, rack::math::Vec posPx, MappableObj::Type type)
 	{
 		auto *button = new HubMidiMapButton{*this};
-		button->box.size.x = mm2px(13.5);
-		button->box.size.y = mm2px(5.6);
+		button->box.size.x = rack::mm2px(13.5);
+		button->box.size.y = rack::mm2px(5.6);
 		button->box.pos = posPx;
 		button->box.pos = button->box.pos.minus(button->box.size.div(2));
 		button->text = labelText;
@@ -359,11 +359,11 @@ struct MetaModuleHubBaseWidget : app::ModuleWidget {
 		addChild(button);
 
 		auto *p = new HubMidiParam{*button};
-		p->setSize(mm2px({12, 4}));
+		p->setSize(rack::mm2px({12, 4}));
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
-		p->app::ParamWidget::module = hubModule;
-		p->app::ParamWidget::paramId = knobId;
+		p->rack::app::ParamWidget::module = hubModule;
+		p->rack::app::ParamWidget::paramId = knobId;
 		p->initParamQuantity();
 
 		if (module) {
