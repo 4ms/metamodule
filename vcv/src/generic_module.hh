@@ -20,39 +20,63 @@ struct GenericModule
 	{
 		Module()
 		{
-			constexpr auto NumParams = Defs::NumKnobs + Defs::NumSwitches;
-
 			// Calculate number of LED elements
-			constexpr auto NumRGBLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw) {
+			constexpr auto NumRGBLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw)
+			{
 				return sw.switch_type == SwitchDef::MomentaryButton;
 			});
-			constexpr auto NumMonoLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw) {
+			constexpr auto NumMonoLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw)
+			{
 				return sw.switch_type == SwitchDef::LatchingButton;
 			});
 			constexpr auto NumLEDElements = Defs::NumDiscreteLeds + NumRGBLEDButtons * 3 + NumMonoLEDButtons;
+
+			// Calculate number of parameters
+			constexpr auto NumParams = Defs::NumKnobs + Defs::NumSwitches;
+
+			// create the given number of elements of each type
 			configComm(NumParams, Defs::NumInJacks, Defs::NumOutJacks, NumLEDElements);
 
+			// create processing core
 			core = ModuleFactory::create(Defs::slug);
+
+			// remember slug (why again?)
 			selfID.slug = Defs::slug;
 
-			for (auto knob : Defs::Knobs)
-				configParam(knob.id, 0.f, 1.f, knob.default_val, knob.long_name.data());
+			// Setup all the parameters (knobs and switches)
+			int parameterCounter = 0;
 
-			for (auto sw : Defs::Switches) {
-				if (sw.switch_type == SwitchDef::Encoder) {
-					configParam(Defs::NumKnobs + sw.id, -INFINITY, INFINITY, 0.0f, sw.long_name.data());
-				} else {
+			for (auto knob : Defs::Knobs)
+			{
+				configParam(parameterCounter++, 0.f, 1.f, knob.default_val, knob.long_name.data());
+			}
+
+			for (auto sw : Defs::Switches)
+			{
+				auto thisParamterID = parameterCounter++;
+
+				if (sw.switch_type == SwitchDef::Encoder)
+				{
+					configParam(thisParamterID, -INFINITY, INFINITY, 0.0f, sw.long_name.data());
+				}
+				else
+				{
 					float max = 1.f;
 					if (sw.switch_type == SwitchDef::Toggle3pos)
+					{
 						max = 2.f;
-					configParam(Defs::NumKnobs + sw.id, 0.f, max, 0.f, sw.long_name.data());
+					}
+
+					configParam(thisParamterID, 0.f, max, 0.f, sw.long_name.data());
+
 					// Special-case: 3pos switches have values 0, 1, 2 in VCV
 					// but have values 0, 0.5, 1 in Metamodule/CoreModule
-					commParams[Defs::NumKnobs + sw.id]->scaleFactor = 1.f / max;
+					commParams[thisParamterID]->scaleFactor = 1.f / max;
 				}
 			}
 
-			for (auto &alt : Defs::AltParams) {
+			for (auto &alt : Defs::AltParams)
+			{
 				altParams.push_back({true, alt.id, alt.default_val});
 			}
 		}
@@ -65,46 +89,58 @@ struct GenericModule
 		Widget(CommModule *module)
 			: mainModule{module}
 		{
+			// link this widget to given module
 			setModule(static_cast<Module *>(module));
 
+			// use svg file as panel
 			setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, Defs::svg_filename.data())));
+			
+			// draw screws
 			addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, 0)));
 			addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 			if (box.size.x > RACK_GRID_WIDTH * 7) // >7HP = 2 screws
 			{
 				addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-				addChild(
-					createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+				addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 			}
 
-			for (auto knob : Defs::Knobs) {
+			for (auto knob : Defs::Knobs)
+			{
 				auto ctr_pos = rack::mm2px({knob.x_mm, knob.y_mm});
-				switch (knob.knob_style) {
-					case KnobDef::Small: {
+				switch (knob.knob_style)
+				{
+					case KnobDef::Small:
+					{
 						auto *kn = rack::createParamCentered<Small9mmKnob>(ctr_pos, module, knob.id);
 						addChild(new MappableKnobRing{*kn, 10});
 						addParam(kn);
 					} break;
 
-					case KnobDef::Medium: {
+					case KnobDef::Medium:
+					{
 						auto *kn = rack::createParamCentered<Davies1900hBlackKnob4ms>(ctr_pos, module, knob.id);
 						addChild(new MappableKnobRing{*kn, 10});
 						addParam(kn);
 					} break;
 
-					case KnobDef::Large: {
+					case KnobDef::Large: 
+					{
 						auto *kn = rack::createParamCentered<DaviesLarge4ms>(ctr_pos, module, knob.id);
 						addChild(new MappableKnobRing{*kn, 20});
 						addParam(kn);
 					} break;
 
-					case KnobDef::Slider25mm: {
-						if (knob.orientation == KnobDef::Vertical) {
+					case KnobDef::Slider25mm:
+					{
+						if (knob.orientation == KnobDef::Vertical)
+						{
 							auto *kn =
 								rack::createParamCentered<MappableKnob<FourmsLightSlider<rack::WhiteLight>>>(ctr_pos, module, knob.id);
 							addChild(new MappableSliderRing{*kn, 20, 40});
 							addParam(kn);
-						} else {
+						}
+						else
+						{
 							auto *kn = rack::createParamCentered<MappableKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>>(
 								ctr_pos, module, knob.id);
 							addChild(new MappableSliderRing{*kn, 40, 20});
@@ -114,53 +150,66 @@ struct GenericModule
 				}
 			}
 
-			for (auto jack : Defs::InJacks) {
+			for (auto jack : Defs::InJacks)
+			{
 				addInput(
 					createInputCentered<MappableInputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
 			}
 
-			for (auto jack : Defs::OutJacks) {
+			for (auto jack : Defs::OutJacks)
+			{
 				addOutput(
 					createOutputCentered<MappableOutputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
 			}
 
 			int light_id = 0;
 
-			for (auto led : Defs::Leds) {
+			for (auto led : Defs::Leds)
+			{
 				auto pos = rack::mm2px({led.x_mm, led.y_mm});
 				addChild(createLightCentered<MediumLight<RedLight>>(pos, module, light_id));
 				light_id++;
 			}
 
-			for (auto sw : Defs::Switches) {
+			for (auto sw : Defs::Switches)
+			{
 				auto param_id = sw.id + Defs::NumKnobs;
 				auto pos = rack::mm2px({sw.x_mm, sw.y_mm});
 
-				if (sw.switch_type == SwitchDef::LatchingButton) {
+				if (sw.switch_type == SwitchDef::LatchingButton)
+				{
 					// These use a single white LED
 					addParam(rack::createParamCentered<LatchingSwitch<LEDBezel>>(pos, module, param_id));
 					addChild(createLightCentered<LEDBezelLight<WhiteLight>>(pos, module, light_id));
 					light_id++;
 
-				} else if (sw.switch_type == SwitchDef::MomentaryButton) {
+				}
+				else if (sw.switch_type == SwitchDef::MomentaryButton)
+				{
 					// These use an RGB LED (3 elements)
 					addParam(rack::createParamCentered<MomentarySwitch<LEDBezel>>(pos, module, param_id));
 					addChild(createLightCentered<LEDBezelLight<RedGreenBlueLight>>(pos, module, light_id));
 					light_id += 3;
 
-				} else if (sw.switch_type == SwitchDef::Toggle2pos) {
+				}
+				else if (sw.switch_type == SwitchDef::Toggle2pos)
+				{
 					if (sw.orientation == SwitchDef::Vertical)
 						addParam(rack::createParamCentered<SubMiniToggle2pos>(pos, module, param_id));
 					else
 						addParam(rack::createParamCentered<SubMiniToggleHoriz2pos>(pos, module, param_id));
 
-				} else if (sw.switch_type == SwitchDef::Toggle3pos) {
+				}
+				else if (sw.switch_type == SwitchDef::Toggle3pos)
+				{
 					if (sw.orientation == SwitchDef::Vertical)
 						addParam(rack::createParamCentered<SubMiniToggle3pos>(pos, module, param_id));
 					else
 						addParam(rack::createParamCentered<SubMiniToggleHoriz3pos>(pos, module, param_id));
 
-				} else if (sw.switch_type == SwitchDef::Encoder) {
+				}
+				else if (sw.switch_type == SwitchDef::Encoder)
+				{
 					// TODO: add un-lined knobs
 					if (sw.encoder_knob_style == SwitchDef::Small)
 						addParam(rack::createParamCentered<Small9mmUnlinedKnob>(pos, module, param_id));
@@ -186,7 +235,8 @@ struct GenericModule
 				, _module{module}
 				, _val{alt.default_val}
 			{
-				for (auto &ap : _module.altParams) {
+				for (auto &ap : _module.altParams)
+				{
 					if (ap.id == _alt.id) {
 						_val = ap.val;
 						break;
@@ -235,7 +285,8 @@ struct GenericModule
 		void appendContextMenu(rack::ui::Menu *menu) override
 		{
 			menu->addChild(new rack::ui::MenuEntry);
-			for (auto &alt : Defs::AltParams) {
+			for (auto &alt : Defs::AltParams)
+			{
 				auto *item = new rack::ui::MenuItem;
 				item->text = std::string{alt.short_name};
 				menu->addChild(item);
