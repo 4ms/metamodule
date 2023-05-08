@@ -1,6 +1,6 @@
 #pragma once
-#include "comm_widget.hh"
-#include "comm_data.hh"
+#include "../comm/comm_widget.hh"
+#include "../comm/comm_data.hh"
 #include <rack.hpp>
 using namespace rack;
 

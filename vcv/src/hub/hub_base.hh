@@ -1,8 +1,8 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
-#include "comm_data.hh"
-#include "comm_module.hh"
-#include "comm_widget.hh"
+#include "../comm/comm_data.hh"
+#include "../comm/comm_module.hh"
+#include "../comm/comm_widget.hh"
 #include "hub_jack.hh"
 #include "hub_knob.hh"
 #include "hub_midi.hh"

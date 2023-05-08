@@ -1,8 +1,8 @@
 #pragma once
-#include "comm_data.hh"
 #include "patch/patch.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include "util/byte_block.hh"
+#include "../comm/comm_data.hh"
 #include <map>
 #include <vector>
 
