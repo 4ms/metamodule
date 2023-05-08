@@ -61,23 +61,18 @@ struct GenericModule
 				}
 				else
 				{
-					float max = 1.f;
-					if (sw.switch_type == SwitchDef::Toggle3pos)
-					{
-						max = 2.f;
-					}
+					auto max = sw.switch_type == SwitchDef::Toggle3pos ? 2.f : 1.f;					
 
 					configParam(thisParamterID, 0.f, max, 0.f, sw.long_name.data());
 
-					// Special-case: 3pos switches have values 0, 1, 2 in VCV
-					// but have values 0, 0.5, 1 in Metamodule/CoreModule
 					commParams[thisParamterID]->scaleFactor = 1.f / max;
 				}
 			}
 
+			int altID = 0;
 			for (auto &alt : Defs::AltParams)
 			{
-				altParams.push_back({true, alt.id, alt.default_val});
+				altParams.push_back({true, altID++, alt.default_val});
 			}
 		}
 	};
@@ -104,64 +99,8 @@ struct GenericModule
 				addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 			}
 
-			for (auto knob : Defs::Knobs)
-			{
-				auto ctr_pos = rack::mm2px({knob.x_mm, knob.y_mm});
-				switch (knob.knob_style)
-				{
-					case KnobDef::Small:
-					{
-						auto *kn = rack::createParamCentered<Small9mmKnob>(ctr_pos, module, knob.id);
-						addChild(new MappableKnobRing{*kn, 10});
-						addParam(kn);
-					} break;
 
-					case KnobDef::Medium:
-					{
-						auto *kn = rack::createParamCentered<Davies1900hBlackKnob4ms>(ctr_pos, module, knob.id);
-						addChild(new MappableKnobRing{*kn, 10});
-						addParam(kn);
-					} break;
-
-					case KnobDef::Large: 
-					{
-						auto *kn = rack::createParamCentered<DaviesLarge4ms>(ctr_pos, module, knob.id);
-						addChild(new MappableKnobRing{*kn, 20});
-						addParam(kn);
-					} break;
-
-					case KnobDef::Slider25mm:
-					{
-						if (knob.orientation == KnobDef::Vertical)
-						{
-							auto *kn =
-								rack::createParamCentered<MappableKnob<FourmsLightSlider<rack::WhiteLight>>>(ctr_pos, module, knob.id);
-							addChild(new MappableSliderRing{*kn, 20, 40});
-							addParam(kn);
-						}
-						else
-						{
-							auto *kn = rack::createParamCentered<MappableKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>>(
-								ctr_pos, module, knob.id);
-							addChild(new MappableSliderRing{*kn, 40, 20});
-							addParam(kn);
-						}
-					} break;
-				}
-			}
-
-			for (auto jack : Defs::InJacks)
-			{
-				addInput(
-					createInputCentered<MappableInputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
-			}
-
-			for (auto jack : Defs::OutJacks)
-			{
-				addOutput(
-					createOutputCentered<MappableOutputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
-			}
-
+			// Add lights
 			int light_id = 0;
 
 			for (auto led : Defs::Leds)
@@ -171,15 +110,67 @@ struct GenericModule
 				light_id++;
 			}
 
+
+			// Add parameters
+			int parameterID = 0;
+
+			for (auto knob : Defs::Knobs)
+			{
+				auto ctr_pos = rack::mm2px({knob.x_mm, knob.y_mm});
+				auto thisParamerID = parameterID++;
+
+				switch (knob.knob_style)
+				{
+					case KnobDef::Small:
+					{
+						auto *kn = rack::createParamCentered<Small9mmKnob>(ctr_pos, module, thisParamerID);
+						addChild(new MappableKnobRing{*kn, 10});
+						addParam(kn);
+					} break;
+
+					case KnobDef::Medium:
+					{
+						auto *kn = rack::createParamCentered<Davies1900hBlackKnob4ms>(ctr_pos, module, thisParamerID);
+						addChild(new MappableKnobRing{*kn, 10});
+						addParam(kn);
+					} break;
+
+					case KnobDef::Large: 
+					{
+						auto *kn = rack::createParamCentered<DaviesLarge4ms>(ctr_pos, module, thisParamerID);
+						addChild(new MappableKnobRing{*kn, 20});
+						addParam(kn);
+					} break;
+
+					case KnobDef::Slider25mm:
+					{
+						if (knob.orientation == KnobDef::Vertical)
+						{
+							auto *kn =
+								rack::createParamCentered<MappableKnob<FourmsLightSlider<rack::WhiteLight>>>(ctr_pos, module, thisParamerID);
+							addChild(new MappableSliderRing{*kn, 20, 40});
+							addParam(kn);
+						}
+						else
+						{
+							auto *kn = rack::createParamCentered<MappableKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>>(
+								ctr_pos, module, thisParamerID);
+							addChild(new MappableSliderRing{*kn, 40, 20});
+							addParam(kn);
+						}
+					} break;
+				}
+			}
+
 			for (auto sw : Defs::Switches)
 			{
-				auto param_id = sw.id + Defs::NumKnobs;
+				auto thisParamerID = parameterID++;
 				auto pos = rack::mm2px({sw.x_mm, sw.y_mm});
 
 				if (sw.switch_type == SwitchDef::LatchingButton)
 				{
 					// These use a single white LED
-					addParam(rack::createParamCentered<LatchingSwitch<LEDBezel>>(pos, module, param_id));
+					addParam(rack::createParamCentered<LatchingSwitch<LEDBezel>>(pos, module, thisParamerID));
 					addChild(createLightCentered<LEDBezelLight<WhiteLight>>(pos, module, light_id));
 					light_id++;
 
@@ -187,7 +178,7 @@ struct GenericModule
 				else if (sw.switch_type == SwitchDef::MomentaryButton)
 				{
 					// These use an RGB LED (3 elements)
-					addParam(rack::createParamCentered<MomentarySwitch<LEDBezel>>(pos, module, param_id));
+					addParam(rack::createParamCentered<MomentarySwitch<LEDBezel>>(pos, module, thisParamerID));
 					addChild(createLightCentered<LEDBezelLight<RedGreenBlueLight>>(pos, module, light_id));
 					light_id += 3;
 
@@ -195,27 +186,41 @@ struct GenericModule
 				else if (sw.switch_type == SwitchDef::Toggle2pos)
 				{
 					if (sw.orientation == SwitchDef::Vertical)
-						addParam(rack::createParamCentered<SubMiniToggle2pos>(pos, module, param_id));
+						addParam(rack::createParamCentered<SubMiniToggle2pos>(pos, module, thisParamerID));
 					else
-						addParam(rack::createParamCentered<SubMiniToggleHoriz2pos>(pos, module, param_id));
+						addParam(rack::createParamCentered<SubMiniToggleHoriz2pos>(pos, module, thisParamerID));
 
 				}
 				else if (sw.switch_type == SwitchDef::Toggle3pos)
 				{
 					if (sw.orientation == SwitchDef::Vertical)
-						addParam(rack::createParamCentered<SubMiniToggle3pos>(pos, module, param_id));
+						addParam(rack::createParamCentered<SubMiniToggle3pos>(pos, module, thisParamerID));
 					else
-						addParam(rack::createParamCentered<SubMiniToggleHoriz3pos>(pos, module, param_id));
+						addParam(rack::createParamCentered<SubMiniToggleHoriz3pos>(pos, module, thisParamerID));
 
 				}
 				else if (sw.switch_type == SwitchDef::Encoder)
 				{
 					// TODO: add un-lined knobs
 					if (sw.encoder_knob_style == SwitchDef::Small)
-						addParam(rack::createParamCentered<Small9mmUnlinedKnob>(pos, module, param_id));
+						addParam(rack::createParamCentered<Small9mmUnlinedKnob>(pos, module, thisParamerID));
 					else if (sw.encoder_knob_style == SwitchDef::Medium)
-						addParam(rack::createParamCentered<Davies1900hBlackKnobUnlined4ms>(pos, module, param_id));
+						addParam(rack::createParamCentered<Davies1900hBlackKnobUnlined4ms>(pos, module, thisParamerID));
 				}
+			}
+
+			int inJackID = 0;
+			for (auto jack : Defs::InJacks)
+			{
+				addInput(
+					createInputCentered<MappableInputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, inJackID++));
+			}
+
+			int outJackID = 0;
+			for (auto jack : Defs::OutJacks)
+			{
+				addOutput(
+					createOutputCentered<MappableOutputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, outJackID++));
 			}
 		}
 
