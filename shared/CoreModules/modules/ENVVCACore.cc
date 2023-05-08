@@ -196,15 +196,15 @@ public:
 				fallCVKnob = val;
 				break;
 
-			case ENVVCAInfo::NumKnobs + ENVVCAInfo::SwitchSlow_Med_Fast_Rise:
+			case ENVVCAInfo::Knobs.size() + ENVVCAInfo::SwitchSlow_Med_Fast_Rise:
 				riseTimeSwitch = ThreeWayToInt(val);
 				break;
 
-			case ENVVCAInfo::NumKnobs + ENVVCAInfo::SwitchSlow_Med_Fast_Fall:
+			case ENVVCAInfo::Knobs.size() + ENVVCAInfo::SwitchSlow_Med_Fast_Fall:
 				fallTimeSwitch = ThreeWayToInt(val);
 				break;
 
-			case ENVVCAInfo::NumKnobs + ENVVCAInfo::SwitchCycle:
+			case ENVVCAInfo::Knobs.size() + ENVVCAInfo::SwitchCycle:
 				cycleOnButton = ButtonToBool(val);
 				break;
 
@@ -269,7 +269,7 @@ public:
 			case ENVVCAInfo::LedRise_Led:         return rScaleLEDs;
 			case ENVVCAInfo::LedFall_Led:         return fScaleLEDs;
 			case ENVVCAInfo::LedEor_Led:          return eorOut;
-			case ENVVCAInfo::NumDiscreteLeds + 0: return cycleOnButton ^ cycleIn;
+			case ENVVCAInfo::Leds.size() + 0: return cycleOnButton ^ cycleIn;
 			default:                              return 0.0f;
 		}
 	}

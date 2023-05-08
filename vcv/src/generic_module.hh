@@ -29,13 +29,13 @@ struct GenericModule
 			{
 				return sw.switch_type == SwitchDef::LatchingButton;
 			});
-			constexpr auto NumLEDElements = Defs::NumDiscreteLeds + NumRGBLEDButtons * 3 + NumMonoLEDButtons;
+			constexpr auto NumLEDElements = Defs::Leds.size() + NumRGBLEDButtons * 3 + NumMonoLEDButtons;
 
 			// Calculate number of parameters
-			constexpr auto NumParams = Defs::NumKnobs + Defs::NumSwitches;
+			constexpr auto NumParams = Defs::Knobs.size() + Defs::Switches.size();
 
 			// create the given number of elements of each type
-			configComm(NumParams, Defs::NumInJacks, Defs::NumOutJacks, NumLEDElements);
+			configComm(NumParams, Defs::InJacks.size(), Defs::OutJacks.size(), NumLEDElements);
 
 			// create processing core
 			core = ModuleFactory::create(Defs::slug);

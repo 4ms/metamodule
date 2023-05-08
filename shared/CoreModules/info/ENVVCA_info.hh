@@ -8,8 +8,6 @@ struct ENVVCAInfo : ModuleInfoBase {
     static constexpr uint32_t width_hp = 8;
     static constexpr std::string_view svg_filename{"res/modules/ENVVCA-artwork.svg"};
 
-    static constexpr int NumKnobs = 5;
-    
     enum {
         KnobRise_Slider = 0,
         KnobFall_Slider = 1,
@@ -18,7 +16,7 @@ struct ENVVCAInfo : ModuleInfoBase {
         KnobFall_Cv = 4,
     };
 
-    static constexpr std::array<KnobDef, NumKnobs> Knobs{{
+    static constexpr std::array<KnobDef, 5> Knobs{{
         {
             .id = KnobRise_Slider,
             .x_mm = px_to_mm<72>(23.185f),
@@ -71,8 +69,6 @@ struct ENVVCAInfo : ModuleInfoBase {
         },
     }};
 
-    static constexpr int NumInJacks = 5;
-    
     enum {
         InputTime_Cv = 0,
         InputTrigger = 1,
@@ -81,7 +77,7 @@ struct ENVVCAInfo : ModuleInfoBase {
         InputIn = 4,
     };
 
-    static constexpr std::array<InJackDef, NumInJacks> InJacks{{
+    static constexpr std::array<InJackDef, 5> InJacks{{
         {
             .id = InputTime_Cv,
             .x_mm = px_to_mm<72>(57.25f),
@@ -129,15 +125,13 @@ struct ENVVCAInfo : ModuleInfoBase {
         },
     }};
 
-    static constexpr int NumOutJacks = 3;
-    
     enum {
         OutputEnv = 0,
         OutputEor = 1,
         OutputOut = 2,
     };
 
-    static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
+    static constexpr std::array<OutJackDef, 3> OutJacks{{
         {
             .id = OutputEnv,
             .x_mm = px_to_mm<72>(92.03f),
@@ -164,7 +158,6 @@ struct ENVVCAInfo : ModuleInfoBase {
         },
     }};
 
-    static constexpr int NumSwitches = 3;
     
     enum {
         SwitchSlow_Med_Fast_Rise = 0,
@@ -172,7 +165,7 @@ struct ENVVCAInfo : ModuleInfoBase {
         SwitchCycle = 2,
     };
 
-    static constexpr std::array<SwitchDef, NumSwitches> Switches{{
+    static constexpr std::array<SwitchDef, 3> Switches{{
         {
             .id = SwitchSlow_Med_Fast_Rise,
             .x_mm = px_to_mm<72>(23.19f),
@@ -205,15 +198,13 @@ struct ENVVCAInfo : ModuleInfoBase {
         },
     }};
 
-    static constexpr int NumDiscreteLeds = 3;
-    
     enum {
         LedRise_Led = 0,
         LedFall_Led = 1,
         LedEor_Led = 2,
     };
 
-    static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{
+    static constexpr std::array<LedDef, 3> Leds{{
         {
             .id = LedRise_Led,
             .x_mm = px_to_mm<72>(45.11f),
