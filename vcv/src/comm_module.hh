@@ -1,7 +1,9 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
+#include "comm_jack_input.hh"
+#include "comm_jack_output.hh"
+#include "comm_param.hh"
 #include "comm_data.hh"
-#include "comm_jack_param.hh"
 
 
 class CommModule : public Module {

@@ -1,5 +1,5 @@
 #include "comm_module.hh"
-#include "comm_data.hh"
+#include "hub/central_data.hh"
 
 CommModule::CommModule() {}
 
