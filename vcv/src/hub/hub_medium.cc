@@ -1,13 +1,13 @@
 #include "CoreModules/meta-module-hub/MetaModule_info.hh"
 #include "CoreModules/meta-module-hub/panel_medium_defs.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "../comm/comm_data.hh"
+#include "../mapping/Mapping.h"
 #include "../comm/comm_module.hh"
 #include "components.h"
 #include "hub_base.hh"
 #include "hub_jack.hh"
 #include "local_path.hh"
-#include "patch_writer.hh"
+#include "../mapping/patch_writer.hh"
 
 // Note: in v2, first the module is constructed, then dataFromJson is called, then the Widget is constructed
 struct HubMediumMappings {

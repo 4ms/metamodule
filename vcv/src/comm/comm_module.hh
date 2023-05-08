@@ -1,6 +1,8 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 
+#include "../mapping/ModuleID.h"
+
 #include "comm_jack_input.hh"
 #include "comm_jack_output.hh"
 #include "comm_param.hh"

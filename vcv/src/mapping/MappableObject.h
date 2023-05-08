@@ -1,7 +1,9 @@
 #pragma once
-#include "CoreModules/moduleFactory.hh"
+
+#include <cstdint>
+#include <map>
+#include <string>
 #include <cstring>
-#include <vector>
 
 struct MappableObj {
 	enum class Type { None, Knob, InputJack, OutputJack, Toggle, MidiNote, MidiGate } objType;
@@ -70,52 +72,3 @@ struct hash<MappableObj> {
 };
 
 } // namespace std
-
-struct Mapping {
-	MappableObj src;
-	MappableObj dst;
-	float range_min = 0.f;
-	float range_max = 1.f;
-	std::string alias_name{""};
-
-	void clear()
-	{
-		dst.moduleID = -1;
-		src.moduleID = -1;
-		dst.objID = -1;
-		src.objID = -1;
-		dst.objType = MappableObj::Type::None;
-		src.objType = MappableObj::Type::None;
-		range_min = 0.f;
-		range_max = 1.f;
-		alias_name = "";
-	}
-};
-
-struct ModuleID {
-	int64_t id;
-	ModuleTypeSlug slug;
-
-	bool operator==(const ModuleID &rhs) const { return (this->id == rhs.id) && (this->slug == rhs.slug); }
-};
-
-struct JackStatus {
-	int sendingJackId = 0;
-	int receivedJackId = 0;
-	int64_t sendingModuleId = 0;
-	int64_t receivedModuleId = 0;
-	bool connected = false;
-
-	bool isSameJack(JackStatus &other)
-	{
-		return (sendingJackId == other.sendingJackId) && (sendingModuleId == other.sendingModuleId);
-	}
-};
-
-struct ParamStatus {
-	float value = 0;
-	int paramID = 0;
-	int64_t moduleID = 0;
-
-	bool isSameParam(ParamStatus &other) { return (paramID == other.paramID) && (moduleID == other.moduleID); }
-};

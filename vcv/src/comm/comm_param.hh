@@ -1,6 +1,6 @@
 #pragma once
 
-#include "comm_data.hh"
+#include "../mapping/ParamStatus.h"
 
 #include <rack.hpp>
 using namespace rack;

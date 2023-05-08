@@ -1,5 +1,7 @@
 #pragma once
-#include "../comm/comm_data.hh"
+
+#include "../mapping/Mapping.h"
+
 #include <rack.hpp>
 using namespace rack;
 

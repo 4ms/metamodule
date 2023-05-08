@@ -1,13 +1,20 @@
 #pragma once
-#include "../comm/comm_data.hh"
+
+#include "Mapping.h"
+#include "ModuleID.h"
+#include "JackStatus.h"
+#include "ParamStatus.h"
 #include "map_palette.hh"
+
 #include "util/math.hh"
 #include "patch/midi_def.hh"
+
 #include <algorithm>
 #include <map>
 #include <mutex>
 #include <rack.hpp>
 #include <vector>
+#include <memory>
 
 // #define pr_dbg printf
 
@@ -488,5 +495,4 @@ private:
 };
 
 extern std::unique_ptr<CentralData> centralData;
-
 void initializeCentralData();
