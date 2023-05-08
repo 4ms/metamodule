@@ -1,5 +1,4 @@
 #pragma once
-#include "../comm/comm_widget.hh"
 #include "../comm/comm_data.hh"
 #include <rack.hpp>
 using namespace rack;
@@ -7,7 +6,7 @@ using namespace rack;
 class HubMapButton : public Button {
 
 public:
-	HubMapButton(CommModuleWidget &parent)
+	HubMapButton(app::ModuleWidget &parent)
 		: _parent{parent}
 	{}
 	void draw(const DrawArgs &args) override;
@@ -29,5 +28,5 @@ protected:
 	bool _hovered{false};
 
 private:
-	CommModuleWidget &_parent;
+	app::ModuleWidget &_parent;
 };

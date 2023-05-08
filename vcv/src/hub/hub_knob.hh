@@ -80,8 +80,8 @@ class HubKnobMapButton : public HubMapButton {
 	ParamQuantity *paramQuantity = nullptr;
 
 public:
-	HubKnobMapButton(CommModuleWidget &parent)
-		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
+	HubKnobMapButton(app::ModuleWidget &parent)
+		: HubMapButton{static_cast<app::ModuleWidget &>(parent)}
 	{}
 
 	void setParamQuantity(ParamQuantity *paramQ) { paramQuantity = paramQ; }

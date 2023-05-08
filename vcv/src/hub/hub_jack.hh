@@ -5,8 +5,8 @@
 
 class HubJackMapButton : public HubMapButton {
 public:
-	HubJackMapButton(CommModuleWidget &parent)
-		: HubMapButton{static_cast<CommModuleWidget &>(parent)}
+	HubJackMapButton(app::ModuleWidget &parent)
+		: HubMapButton{static_cast<app::ModuleWidget &>(parent)}
 	{}
 
 	void onDeselect(const event::Deselect &e) override

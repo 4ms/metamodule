@@ -3,7 +3,6 @@
 #include "CoreModules/moduleFactory.hh"
 #include "../comm/comm_data.hh"
 #include "../comm/comm_module.hh"
-#include "../comm/comm_widget.hh"
 #include "components.h"
 #include "hub_base.hh"
 #include "hub_jack.hh"

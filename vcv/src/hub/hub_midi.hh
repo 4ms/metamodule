@@ -4,8 +4,8 @@
 class HubMidiMapButton : public HubKnobMapButton {
 
 public:
-	HubMidiMapButton(CommModuleWidget &parent)
-		: HubKnobMapButton{static_cast<CommModuleWidget &>(parent)}
+	HubMidiMapButton(app::ModuleWidget &parent)
+		: HubKnobMapButton{static_cast<app::ModuleWidget &>(parent)}
 	{}
 
 	void draw(const DrawArgs &args) override

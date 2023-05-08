@@ -2,11 +2,9 @@
 #include "CoreModules/module_info_base.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "comm/comm_module.hh"
-#include "comm/comm_widget.hh"
 #include "components.h"
 #include "hub/mappable_jack.hh"
 #include "util/base_concepts.hh"
-#include "util/math.hh"
 
 template<Derived<ModuleInfoBase> Defs>
 struct GenericModule
@@ -58,7 +56,7 @@ struct GenericModule
 		}
 	};
 
-	struct Widget : CommModuleWidget
+	struct Widget : app::ModuleWidget
 	{
 		CommModule *mainModule;
 

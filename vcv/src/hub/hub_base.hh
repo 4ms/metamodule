@@ -2,7 +2,6 @@
 #include "CoreModules/moduleFactory.hh"
 #include "../comm/comm_data.hh"
 #include "../comm/comm_module.hh"
-#include "../comm/comm_widget.hh"
 #include "hub_jack.hh"
 #include "hub_knob.hh"
 #include "hub_midi.hh"
@@ -63,7 +62,7 @@ struct MetaModuleHubBase : public CommModule {
 			json_t *patchDescJ = json_string(patchDescText.c_str());
 			json_object_set_new(rootJ, "PatchDesc", patchDescJ);
 		} else
-			printf("Error: CommModuleWidget has not been constructed, but dataToJson is being called\n");
+			printf("Error: Widget has not been constructed, but dataToJson is being called\n");
 		return rootJ;
 	}
 
@@ -281,12 +280,16 @@ private:
 };
 
 template<typename MappingConf>
-struct MetaModuleHubBaseWidget : CommModuleWidget {
+struct MetaModuleHubBaseWidget : app::ModuleWidget {
 
 	Label *statusText;
 	MetaModuleHubBase<MappingConf> *hubModule;
 
 	MetaModuleHubBaseWidget() = default;
+
+	static constexpr float kKnobSpacingY = 17;
+	static constexpr float kKnobSpacingX = 18;
+	static constexpr float kTextOffset = 5;
 
 	template<typename KnobType>
 	void addLabeledKnobPx(
