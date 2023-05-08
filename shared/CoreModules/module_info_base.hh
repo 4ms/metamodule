@@ -73,23 +73,12 @@ struct ModuleInfoBase {
 	static constexpr uint32_t width_hp = 0;
 	static constexpr std::string_view svg_filename{""};
 
-	static constexpr uint32_t NumKnobs = 0;
-	static constexpr std::array<KnobDef, NumKnobs> Knobs{};
-
-	static constexpr uint32_t NumInJacks = 0;
-	static constexpr std::array<KnobDef, NumInJacks> InJacks{};
-
-	static constexpr uint32_t NumOutJacks = 0;
-	static constexpr std::array<KnobDef, NumOutJacks> OutJacks{};
-
-	static constexpr uint32_t NumSwitches = 0;
-	static constexpr std::array<KnobDef, NumSwitches> Switches{};
-
-	static constexpr uint32_t NumDiscreteLeds = 0;
-	static constexpr std::array<LedDef, NumDiscreteLeds> Leds{};
-
-	static constexpr uint32_t NumAltParams = 0;
-	static constexpr std::array<AltParamDef, NumAltParams> AltParams{};
+	static constexpr std::array<KnobDef, 0> Knobs{};
+	static constexpr std::array<KnobDef, 0> InJacks{};
+	static constexpr std::array<KnobDef, 0> OutJacks{};
+	static constexpr std::array<KnobDef, 0> Switches{};
+	static constexpr std::array<LedDef, 0> Leds{};
+	static constexpr std::array<AltParamDef, 0> AltParams{};
 
 	// Converts HP to px for a 240x320px screen
 	// TODO: make dimensions explicit
