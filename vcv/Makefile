@@ -35,6 +35,7 @@ SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard src/hub/*.cc)
 SOURCES += $(wildcard src/comm/*.cc)
+SOURCES += $(wildcard src/mapping/*.cc)
 SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/modules/*.cc)
 SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp

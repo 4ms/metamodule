@@ -26,6 +26,7 @@ CXXFLAGS = 	-Wall \
 			-I../src\
 			-Isrc\
 			-Isrc/hub\
+			-Isrc/mapping\
 			-Isrc/shared \
 			-Isrc/shared/cpputil \
 			-Isrc/shared/patch_convert/ryml \

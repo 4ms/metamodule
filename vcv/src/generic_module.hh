@@ -3,7 +3,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "comm/comm_module.hh"
 #include "components.h"
-#include "hub/mappable_jack.hh"
+#include "mapping/mappable_jack.hh"
 #include "util/base_concepts.hh"
 
 template<Derived<ModuleInfoBase> Defs>

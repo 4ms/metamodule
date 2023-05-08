@@ -1,6 +1,7 @@
 #pragma once
 #include "../comm/comm_data.hh"
 #include "map_palette.hh"
+#include "util/math.hh"
 #include "patch/midi_def.hh"
 #include <algorithm>
 #include <map>

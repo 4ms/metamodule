@@ -6,9 +6,9 @@
 #include "hub_knob.hh"
 #include "hub_midi.hh"
 #include "local_path.hh"
-#include "map_palette.hh"
+#include "../mapping/map_palette.hh"
 #include "patch_writer.hh"
-#include "central_data.hh"
+#include "../mapping/central_data.hh"
 #include "util/math.hh"
 #include "util/string_util.hh"
 #include <fstream>

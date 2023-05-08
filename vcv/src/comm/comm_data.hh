@@ -1,6 +1,5 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
-#include "util/math.hh"
 #include <cstring>
 #include <vector>
 

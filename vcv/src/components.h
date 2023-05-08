@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hub/mappable_knob.hh"
+#include "mapping/mappable_knob.hh"
 #include "plugin.hh"
 
 class MetaModuleTextBox : public LedDisplayTextField {

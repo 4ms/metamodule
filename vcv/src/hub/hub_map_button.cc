@@ -1,6 +1,6 @@
 #include "hub_map_button.hh"
-#include "map_palette.hh"
-#include "central_data.hh"
+#include "../mapping/map_palette.hh"
+#include "../mapping/central_data.hh"
 #include <cstdio>
 
 void HubMapButton::_updateState()
