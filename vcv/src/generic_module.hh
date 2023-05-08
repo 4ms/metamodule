@@ -249,10 +249,3 @@ struct GenericModule
 
 };
 
-// Helper function
-// TODO: directly call GenericModule static method and replace in python scripts
-template<typename T>
-Model *createModelFromInfo()
-{
-	return GenericModule<T>::create();
-}

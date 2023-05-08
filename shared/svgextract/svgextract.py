@@ -733,7 +733,7 @@ def appendPluginFiles(slug, pluginDir = None, description=""):
     marker = "// include and define models below here\n"
     newText = f'''
 #include "CoreModules/info/{slug}_info.hh"
-Model* {modelName} = createModelFromInfo<{slug}Info>();
+Model* {modelName} = GenericModule<{slug}Info>::create();
 '''
     appendToFileAfterMarker(plugincc, marker, newText)
 

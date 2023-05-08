@@ -8,190 +8,190 @@ Plugin *pluginInstance;
 // include and define models below here
 
 #include "CoreModules/info/SHEV_info.hh"
-Model* modelSHEV = createModelFromInfo<SHEVInfo>();
+Model* modelSHEV = GenericModule<SHEVInfo>::create();
 
 #include "CoreModules/info/ENVVCA_info.hh"
-Model* modelENVVCA = createModelFromInfo<ENVVCAInfo>();
+Model* modelENVVCA = GenericModule<ENVVCAInfo>::create();
 
 #include "CoreModules/info/DEV_info.hh"
-Model* modelDEV = createModelFromInfo<DEVInfo>();
+Model* modelDEV = GenericModule<DEVInfo>::create();
 
 #include "CoreModules/info/Freeverb_info.hh"
-Model* modelFreeverb = createModelFromInfo<FreeverbInfo>();
+Model* modelFreeverb = GenericModule<FreeverbInfo>::create();
 
 #include "CoreModules/info/STS_info.hh"
-Model* modelSTS = createModelFromInfo<STSInfo>();
+Model* modelSTS = GenericModule<STSInfo>::create();
 
 #include "CoreModules/info/VCAM_info.hh"
-Model* modelVCAM = createModelFromInfo<VCAMInfo>();
+Model* modelVCAM = GenericModule<VCAMInfo>::create();
 
 #include "CoreModules/info/Tapo_info.hh"
-Model* modelTapo = createModelFromInfo<TapoInfo>();
+Model* modelTapo = GenericModule<TapoInfo>::create();
 
 #include "CoreModules/info/Shift_info.hh"
-Model* modelShift = createModelFromInfo<ShiftInfo>();
+Model* modelShift = GenericModule<ShiftInfo>::create();
 
 #include "CoreModules/info/SISM_info.hh"
-Model* modelSISM = createModelFromInfo<SISMInfo>();
+Model* modelSISM = GenericModule<SISMInfo>::create();
 
 #include "CoreModules/info/SH_info.hh"
-Model* modelSH = createModelFromInfo<SHInfo>();
+Model* modelSH = GenericModule<SHInfo>::create();
 
 #include "CoreModules/info/SCM_info.hh"
-Model* modelSCM = createModelFromInfo<SCMInfo>();
+Model* modelSCM = GenericModule<SCMInfo>::create();
 
 #include "CoreModules/info/RCD_info.hh"
-Model* modelRCD = createModelFromInfo<RCDInfo>();
+Model* modelRCD = GenericModule<RCDInfo>::create();
 
 #include "CoreModules/info/QPLFO_info.hh"
-Model* modelQPLFO = createModelFromInfo<QPLFOInfo>();
+Model* modelQPLFO = GenericModule<QPLFOInfo>::create();
 
 #include "CoreModules/info/QCD_info.hh"
-Model* modelQCD = createModelFromInfo<QCDInfo>();
+Model* modelQCD = GenericModule<QCDInfo>::create();
 
 #include "CoreModules/info/PI_info.hh"
-Model* modelPI = createModelFromInfo<PIInfo>();
+Model* modelPI = GenericModule<PIInfo>::create();
 
 #include "CoreModules/info/PEG_info.hh"
-Model* modelPEG = createModelFromInfo<PEGInfo>();
+Model* modelPEG = GenericModule<PEGInfo>::create();
 
 #include "CoreModules/info/Mixer_info.hh"
-Model* modelMixer = createModelFromInfo<MixerInfo>();
+Model* modelMixer = GenericModule<MixerInfo>::create();
 
 #include "CoreModules/info/LPG_info.hh"
-Model* modelLPG = createModelFromInfo<LPGInfo>();
+Model* modelLPG = GenericModule<LPGInfo>::create();
 
 #include "CoreModules/info/LIO_info.hh"
-Model* modelLIO = createModelFromInfo<LIOInfo>();
+Model* modelLIO = GenericModule<LIOInfo>::create();
 
 #include "CoreModules/info/L4_info.hh"
-Model* modelL4 = createModelFromInfo<L4Info>();
+Model* modelL4 = GenericModule<L4Info>::create();
 
 #include "CoreModules/info/Gate8_info.hh"
-Model* modelGate8 = createModelFromInfo<Gate8Info>();
+Model* modelGate8 = GenericModule<Gate8Info>::create();
 
 #include "CoreModules/info/Gate32_info.hh"
-Model* modelGate32 = createModelFromInfo<Gate32Info>();
+Model* modelGate32 = GenericModule<Gate32Info>::create();
 
 #include "CoreModules/info/GRev_info.hh"
-Model* modelGRev = createModelFromInfo<GRevInfo>();
+Model* modelGRev = GenericModule<GRevInfo>::create();
 
 #include "CoreModules/info/Fade_info.hh"
-Model* modelFade = createModelFromInfo<FadeInfo>();
+Model* modelFade = GenericModule<FadeInfo>::create();
 
 #include "CoreModules/info/DLD_info.hh"
-Model* modelDLD = createModelFromInfo<DLDInfo>();
+Model* modelDLD = GenericModule<DLDInfo>::create();
 
 #include "CoreModules/info/Comp_info.hh"
-Model* modelComp = createModelFromInfo<CompInfo>();
+Model* modelComp = GenericModule<CompInfo>::create();
 
 #include "CoreModules/info/CLKM_info.hh"
-Model* modelCLKM = createModelFromInfo<CLKMInfo>();
+Model* modelCLKM = GenericModule<CLKMInfo>::create();
 
 #include "CoreModules/info/CLKD_info.hh"
-Model* modelCLKD = createModelFromInfo<CLKDInfo>();
+Model* modelCLKD = GenericModule<CLKDInfo>::create();
 
 #include "CoreModules/info/ADEnv_info.hh"
-Model* modelADEnv = createModelFromInfo<ADEnvInfo>();
+Model* modelADEnv = GenericModule<ADEnvInfo>::create();
 
 #include "CoreModules/info/Sequant_info.hh"
-Model* modelSequant = createModelFromInfo<SequantInfo>();
+Model* modelSequant = GenericModule<SequantInfo>::create();
 
 #include "CoreModules/info/Verb_info.hh"
-Model* modelVerb = createModelFromInfo<VerbInfo>();
+Model* modelVerb = GenericModule<VerbInfo>::create();
 
 #include "CoreModules/info/Switch41_info.hh"
-Model* modelSwitch41 = createModelFromInfo<Switch41Info>();
+Model* modelSwitch41 = GenericModule<Switch41Info>::create();
 
 #include "CoreModules/info/Switch14_info.hh"
-Model* modelSwitch14 = createModelFromInfo<Switch14Info>();
+Model* modelSwitch14 = GenericModule<Switch14Info>::create();
 
 #include "CoreModules/info/Seq8_info.hh"
-Model* modelSeq8 = createModelFromInfo<Seq8Info>();
+Model* modelSeq8 = GenericModule<Seq8Info>::create();
 
 #include "CoreModules/info/Seq4_info.hh"
-Model* modelSeq4 = createModelFromInfo<Seq4Info>();
+Model* modelSeq4 = GenericModule<Seq4Info>::create();
 
 #include "CoreModules/info/Quant_info.hh"
-Model* modelQuant = createModelFromInfo<QuantInfo>();
+Model* modelQuant = GenericModule<QuantInfo>::create();
 
 #include "CoreModules/info/Prob8_info.hh"
-Model* modelProb8 = createModelFromInfo<Prob8Info>();
+Model* modelProb8 = GenericModule<Prob8Info>::create();
 
 #include "CoreModules/info/Octave_info.hh"
-Model* modelOctave = createModelFromInfo<OctaveInfo>();
+Model* modelOctave = GenericModule<OctaveInfo>::create();
 
 #include "CoreModules/info/MNMX_info.hh"
-Model* modelMNMX = createModelFromInfo<MNMXInfo>();
+Model* modelMNMX = GenericModule<MNMXInfo>::create();
 
 #include "CoreModules/info/LPF_info.hh"
-Model* modelLPF = createModelFromInfo<LPFInfo>();
+Model* modelLPF = GenericModule<LPFInfo>::create();
 
 #include "CoreModules/info/StMix_info.hh"
-Model* modelStMix = createModelFromInfo<StMixInfo>();
+Model* modelStMix = GenericModule<StMixInfo>::create();
 
 #include "CoreModules/info/Source_info.hh"
-Model* modelSource = createModelFromInfo<SourceInfo>();
+Model* modelSource = GenericModule<SourceInfo>::create();
 
 #include "CoreModules/info/Slew_info.hh"
-Model* modelSlew = createModelFromInfo<SlewInfo>();
+Model* modelSlew = GenericModule<SlewInfo>::create();
 
 #include "CoreModules/info/PitchShift_info.hh"
-Model* modelPitchShift = createModelFromInfo<PitchShiftInfo>();
+Model* modelPitchShift = GenericModule<PitchShiftInfo>::create();
 
 #include "CoreModules/info/Pan_info.hh"
-Model* modelPan = createModelFromInfo<PanInfo>();
+Model* modelPan = GenericModule<PanInfo>::create();
 
 #include "CoreModules/info/Noise_info.hh"
-Model* modelNoise = createModelFromInfo<NoiseInfo>();
+Model* modelNoise = GenericModule<NoiseInfo>::create();
 
 #include "CoreModules/info/MultiLFO_info.hh"
-Model* modelMultiLFO = createModelFromInfo<MultiLFOInfo>();
+Model* modelMultiLFO = GenericModule<MultiLFOInfo>::create();
 
 #include "CoreModules/info/KPLS_info.hh"
-Model* modelKPLS = createModelFromInfo<KPLSInfo>();
+Model* modelKPLS = GenericModule<KPLSInfo>::create();
 
 #include "CoreModules/info/InfOsc_info.hh"
-Model* modelInfOsc = createModelFromInfo<InfOscInfo>();
+Model* modelInfOsc = GenericModule<InfOscInfo>::create();
 
 #include "CoreModules/info/HPF_info.hh"
-Model* modelHPF = createModelFromInfo<HPFInfo>();
+Model* modelHPF = GenericModule<HPFInfo>::create();
 
 #include "CoreModules/info/Gate_info.hh"
-Model* modelGate = createModelFromInfo<GateInfo>();
+Model* modelGate = GenericModule<GateInfo>::create();
 
 #include "CoreModules/info/Follow_info.hh"
-Model* modelFollow = createModelFromInfo<FollowInfo>();
+Model* modelFollow = GenericModule<FollowInfo>::create();
 
 #include "CoreModules/info/FM_info.hh"
-Model* modelFM = createModelFromInfo<FMInfo>();
+Model* modelFM = GenericModule<FMInfo>::create();
 
 #include "CoreModules/info/Drum_info.hh"
-Model* modelDrum = createModelFromInfo<DrumInfo>();
+Model* modelDrum = GenericModule<DrumInfo>::create();
 
 #include "CoreModules/info/Djembe_info.hh"
-Model* modelDjembe = createModelFromInfo<DjembeInfo>();
+Model* modelDjembe = GenericModule<DjembeInfo>::create();
 
 #include "CoreModules/info/Detune_info.hh"
-Model* modelDetune = createModelFromInfo<DetuneInfo>();
+Model* modelDetune = GenericModule<DetuneInfo>::create();
 
 #include "CoreModules/info/ComplexEG_info.hh"
-Model* modelComplexEG = createModelFromInfo<ComplexEGInfo>();
+Model* modelComplexEG = GenericModule<ComplexEGInfo>::create();
 
 #include "CoreModules/info/BPF_info.hh"
-Model* modelBPF = createModelFromInfo<BPFInfo>();
+Model* modelBPF = GenericModule<BPFInfo>::create();
 
 #include "CoreModules/info/Atvert2_info.hh"
-Model* modelAtvert2 = createModelFromInfo<Atvert2Info>();
+Model* modelAtvert2 = GenericModule<Atvert2Info>::create();
 
 #include "CoreModules/info/SMR_info.hh"
-Model* modelSMR = createModelFromInfo<SMRInfo>();
+Model* modelSMR = GenericModule<SMRInfo>::create();
 
 #include "CoreModules/modules/enosc/altparam_EnOsc_info.hh"
-Model* modelEnOsc = createModelFromInfo<APEnOscInfo>();
+Model* modelEnOsc = GenericModule<APEnOscInfo>::create();
 
 #include "CoreModules/info/BuffMult_info.hh"
-Model* modelBuffMult = createModelFromInfo<BuffMultInfo>();
+Model* modelBuffMult = GenericModule<BuffMultInfo>::create();
 ///////////////////////////////////////////////////////
 
 void init(Plugin *p)
