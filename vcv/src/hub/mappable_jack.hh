@@ -2,7 +2,7 @@
 #include "hub_knob_menu.hh"
 #include "map_marks.hh"
 #include "map_palette.hh"
-#include "plugin.hh"
+#include "central_data.hh"
 #include <rack.hpp>
 
 enum class MappableJackType { Input, Output };

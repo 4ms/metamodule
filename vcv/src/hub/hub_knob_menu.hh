@@ -1,5 +1,5 @@
 #pragma once
-#include "plugin.hh"
+#include "central_data.hh"
 
 struct KnobNameMenuLabel : ui::MenuLabel {
 	ParamQuantity *paramQty;

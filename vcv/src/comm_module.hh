@@ -2,7 +2,7 @@
 #include "CoreModules/coreProcessor.h"
 #include "comm_data.hh"
 #include "comm_jack_param.hh"
-#include "plugin.hh"
+
 
 class CommModule : public Module {
 public:

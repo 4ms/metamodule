@@ -1,8 +1,8 @@
 #include "plugin.hh"
 #include "generic_module.hh"
+#include "hub/central_data.hh"
 
 Plugin *pluginInstance;
-std::unique_ptr<CentralData> centralData;
 
 //////////////// Auto generated ///////////////////////
 // include and define models below here
@@ -196,7 +196,7 @@ Model* modelBuffMult = createModelFromInfo<BuffMultInfo>();
 
 void init(Plugin *p)
 {
-	centralData = std::make_unique<CentralData>();
+	initializeCentralData();
 
 	pluginInstance = p;
 

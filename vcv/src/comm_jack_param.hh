@@ -1,6 +1,9 @@
 #pragma once
 #include "comm_data.hh"
-#include "plugin.hh"
+#include "hub/central_data.hh"
+
+#include <rack.hpp>
+using namespace rack;
 
 struct CommInputJack {
 private:

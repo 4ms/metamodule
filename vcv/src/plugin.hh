@@ -1,10 +1,8 @@
 #pragma once
-#include "hub/central_data.hh"
 #include <rack.hpp>
 
 using namespace rack;
 
-extern std::unique_ptr<CentralData> centralData;
 extern Plugin *pluginInstance;
 
 // Declare each Model, defined in each module source file

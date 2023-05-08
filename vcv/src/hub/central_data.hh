@@ -485,3 +485,7 @@ private:
 	static inline std::mutex mapsmtx;
 	static inline const std::array<ModuleTypeSlug, 2> ValidHubSlugs = {"PANEL_8", "PanelMedium"};
 };
+
+extern std::unique_ptr<CentralData> centralData;
+
+void initializeCentralData();
