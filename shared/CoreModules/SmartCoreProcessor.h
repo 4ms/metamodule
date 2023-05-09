@@ -1,6 +1,7 @@
 #pragma once
 #include "coreProcessor.h"
 #include <array>
+#include <optional>
 
 
 template <typename INFO>
@@ -10,6 +11,32 @@ public:
 	SmartCoreProcessor()
 	{
 	}	
+
+protected:
+	void setOutput(int i, float val)
+	{
+		outputValues[i] = val;
+	}
+
+	void setLED(int i, float val)
+	{
+		ledValues[i] = val;
+	}
+
+	float getInput(int i)
+	{
+		return inputValues[i];
+	}
+
+	float getKnob(int i)
+	{
+		return knobValues[i];
+	}
+
+	float getSwitch(int i)
+	{
+		return switchValues[i];
+	}
 
 protected:
 
@@ -54,7 +81,8 @@ protected:
 		}
 	}
 
-protected:
+private:
+
 	std::array<float,INFO::Knobs.size()> knobValues;
 	std::array<float,INFO::InJacks.size()> inputValues;
 	std::array<float,INFO::OutJacks.size()> outputValues;

@@ -91,8 +91,10 @@ public:
 
 		// Ignoring input impedance and inverting 400kHz lowpass
 
-		outputValues[ENVVCAInfo::OutputOut] = vca.process(inputValues[ENVVCAInfo::InputIn]);
-		ledValues[ENVVCAInfo::LedEor_Led] = outputValues[ENVVCAInfo::OutputOut];
+		auto output = vca.process(getInput(ENVVCAInfo::InputIn));
+		setLED(ENVVCAInfo::LedEor_Led, output);
+
+		setOutput(ENVVCAInfo::OutputOut, output);
 
 		// Ignoring output impedance and inverting 400kHz lowpass
 	}
@@ -100,25 +102,25 @@ public:
 	void displayEnvelope(float val)
 	{
 		val = val / VoltageDivider(100e3f, 100e3f);
-		outputValues[ENVVCAInfo::OutputEnv] = val * knobValues[ENVVCAInfo::KnobEnv_Level_Slider];
+		setOutput(ENVVCAInfo::OutputEnv, val * getKnob(ENVVCAInfo::KnobEnv_Level_Slider));
 		//TODO: set all three slider LEDs
 	}
 
 	void displayOscillatorState(TriangleOscillator::State_t state)
 	{
-		outputValues[ENVVCAInfo::OutputEor] = state == TriangleOscillator::State_t::FALLING;
+		setOutput(ENVVCAInfo::OutputEor, state == TriangleOscillator::State_t::FALLING);
 	}
 
 	void runOscillator()
 	{
-		bool isCycling = ButtonToBool(switchValues[ENVVCAInfo::SwitchCycle]) ^ CVToBool(inputValues[ENVVCAInfo::InputCycle]);
+		bool isCycling = ButtonToBool(getSwitch(ENVVCAInfo::SwitchCycle)) ^ CVToBool(getInput(ENVVCAInfo::InputCycle));
 
 		osc.setCycling(isCycling);
 		cycleLED = isCycling;
 
-		osc.setTargetVoltage(inputValues[ENVVCAInfo::InputFollow]);
+		osc.setTargetVoltage(getInput(ENVVCAInfo::InputFollow));
 
-		if (triggerEdgeDetector(triggerDetector(inputValues[ENVVCAInfo::InputTrigger])))
+		if (triggerEdgeDetector(triggerDetector(getInput(ENVVCAInfo::InputTrigger))))
 		{
 			osc.doRetrigger();
 		}
@@ -157,18 +159,18 @@ public:
 		};
 
 		// scale down cv input
-		const auto scaledTimeCV = inputValues[ENVVCAInfo::InputTime_Cv] * -100e3f / 137e3f;
+		const auto scaledTimeCV = getInput(ENVVCAInfo::InputTime_Cv) * -100e3f / 137e3f;
 
 		// apply attenuverter knobs
-		auto rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, knobValues[ENVVCAInfo::KnobRise_Cv] * scaledTimeCV);
-		auto fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, knobValues[ENVVCAInfo::KnobFall_Cv] * scaledTimeCV);
+		auto rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobRise_Cv) * scaledTimeCV);
+		auto fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobFall_Cv) * scaledTimeCV);
 
 		// sum with static value from fader + range switch
-		auto riseCV = -rScaleLEDs - ProcessCVOffset(knobValues[ENVVCAInfo::KnobRise_Slider], ThreeWayToInt(switchValues[ENVVCAInfo::SwitchSlow_Med_Fast_Rise]));
-		auto fallCV = -fScaleLEDs - ProcessCVOffset(knobValues[ENVVCAInfo::KnobFall_Slider], ThreeWayToInt(switchValues[ENVVCAInfo::SwitchSlow_Med_Fast_Fall]));
+		auto riseCV = -rScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobRise_Slider), ThreeWayToInt(getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Rise)));
+		auto fallCV = -fScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobFall_Slider), ThreeWayToInt(getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Fall)));
 
-		ledValues[ENVVCAInfo::LedRise_Led] = rScaleLEDs;
-		ledValues[ENVVCAInfo::LedFall_Led] = fScaleLEDs;
+		setLED(ENVVCAInfo::LedRise_Led, rScaleLEDs);
+		setLED(ENVVCAInfo::LedFall_Led, fScaleLEDs);
 
 		// TODO: low pass filter
 
