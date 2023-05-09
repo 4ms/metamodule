@@ -1,5 +1,6 @@
 #include "plugin.hh"
 #include "generic_module.hh"
+#include "generic_module_new.hh"
 #include "mapping/central_data.hh"
 
 rack::Plugin *pluginInstance;
@@ -11,7 +12,7 @@ rack::Plugin *pluginInstance;
 rack::Model* modelSHEV = GenericModule<SHEVInfo>::create();
 
 #include "CoreModules/info/ENVVCA_info.hh"
-rack::Model* modelENVVCA = GenericModule<ENVVCAInfo>::create();
+rack::Model* modelENVVCA = GenericModuleNew<ENVVCAInfo>::create();
 
 #include "CoreModules/info/DEV_info.hh"
 rack::Model* modelDEV = GenericModule<DEVInfo>::create();
