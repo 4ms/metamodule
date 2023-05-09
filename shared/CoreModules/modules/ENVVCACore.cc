@@ -1,4 +1,4 @@
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/SmartCoreProcessor.h"
 #include "CoreModules/info/ENVVCA_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
@@ -24,7 +24,8 @@ inline auto ThreeWayToInt = [](float val) -> uint32_t
 };
 
 
-class ENVVCACore : public CoreProcessor {
+class ENVVCACore : public SmartCoreProcessor<ENVVCAInfo>
+{
 	using Info = ENVVCAInfo;
 	using ThisCore = ENVVCACore;
 
@@ -32,8 +33,8 @@ public:
 	ENVVCACore() : triggerDetector(1.0f, 2.0f)
 	{}
 
-	void update() override {
-
+	void update() override
+	{
 		auto [riseCV, fallCV] = getRiseAndFallCV();
 
 		// Convert voltage to time without dealing with details of transistor core
@@ -58,7 +59,7 @@ public:
 
 			// convert to period length
 			return 1.0f / frequency;
-		};		
+		};
 
 		osc.setRiseTimeInS(VoltageToTime(riseCV));
 		osc.setFallTimeInS(VoltageToTime(fallCV));
@@ -90,7 +91,8 @@ public:
 
 		// Ignoring input impedance and inverting 400kHz lowpass
 
-		signalOut = vca.process(signalIn);
+		outputValues[ENVVCAInfo::OutputOut] = vca.process(inputValues[ENVVCAInfo::InputIn]);
+		ledValues[ENVVCAInfo::LedEor_Led] = outputValues[ENVVCAInfo::OutputOut];
 
 		// Ignoring output impedance and inverting 400kHz lowpass
 	}
@@ -98,21 +100,25 @@ public:
 	void displayEnvelope(float val)
 	{
 		val = val / VoltageDivider(100e3f, 100e3f);
-		envelopeOut = val * envLevelSlider;
+		outputValues[ENVVCAInfo::OutputEnv] = val * knobValues[ENVVCAInfo::KnobEnv_Level_Slider];
 		//TODO: set all three slider LEDs
 	}
 
 	void displayOscillatorState(TriangleOscillator::State_t state)
 	{
-		eorOut = state == TriangleOscillator::State_t::FALLING;
+		outputValues[ENVVCAInfo::OutputEor] = state == TriangleOscillator::State_t::FALLING;
 	}
 
 	void runOscillator()
 	{
-		osc.setCycling(cycleOnButton ^ cycleIn);
-		osc.setTargetVoltage(followIn);
+		bool isCycling = ButtonToBool(switchValues[ENVVCAInfo::SwitchCycle]) ^ CVToBool(inputValues[ENVVCAInfo::InputCycle]);
 
-		if (triggerEdgeDetector(triggerIn))
+		osc.setCycling(isCycling);
+		cycleLED = isCycling;
+
+		osc.setTargetVoltage(inputValues[ENVVCAInfo::InputFollow]);
+
+		if (triggerEdgeDetector(triggerDetector(inputValues[ENVVCAInfo::InputTrigger])))
 		{
 			osc.doRetrigger();
 		}
@@ -151,15 +157,18 @@ public:
 		};
 
 		// scale down cv input
-		const auto scaledTimeCV = timeCVIn * -100e3f / 137e3f;
+		const auto scaledTimeCV = inputValues[ENVVCAInfo::InputTime_Cv] * -100e3f / 137e3f;
 
 		// apply attenuverter knobs
-		rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, riseCVKnob * scaledTimeCV);
-		fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, fallCVKnob * scaledTimeCV);
+		auto rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, knobValues[ENVVCAInfo::KnobRise_Cv] * scaledTimeCV);
+		auto fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, knobValues[ENVVCAInfo::KnobFall_Cv] * scaledTimeCV);
 
 		// sum with static value from fader + range switch
-		auto riseCV = -rScaleLEDs - ProcessCVOffset(riseSlider, riseTimeSwitch);
-		auto fallCV = -fScaleLEDs - ProcessCVOffset(fallSlider, fallTimeSwitch);
+		auto riseCV = -rScaleLEDs - ProcessCVOffset(knobValues[ENVVCAInfo::KnobRise_Slider], ThreeWayToInt(switchValues[ENVVCAInfo::SwitchSlow_Med_Fast_Rise]));
+		auto fallCV = -fScaleLEDs - ProcessCVOffset(knobValues[ENVVCAInfo::KnobFall_Slider], ThreeWayToInt(switchValues[ENVVCAInfo::SwitchSlow_Med_Fast_Fall]));
+
+		ledValues[ENVVCAInfo::LedRise_Led] = rScaleLEDs;
+		ledValues[ENVVCAInfo::LedFall_Led] = fScaleLEDs;
 
 		// TODO: low pass filter
 
@@ -176,103 +185,15 @@ public:
 		return {riseCV, fallCV};
 	}
 
-	void set_param(int param_id, float val) override {
-
-		switch (param_id)
-		{
-			case ENVVCAInfo::KnobRise_Slider: 
-				riseSlider = val;
-				break;
-			case ENVVCAInfo::KnobFall_Slider:
-				fallSlider = val;
-				break;
-			case ENVVCAInfo::KnobEnv_Level_Slider:
-				envLevelSlider = val;
-				break;
-			case ENVVCAInfo::KnobRise_Cv:
-				riseCVKnob = val;
-				break;
-			case ENVVCAInfo::KnobFall_Cv:
-				fallCVKnob = val;
-				break;
-
-			case ENVVCAInfo::Knobs.size() + ENVVCAInfo::SwitchSlow_Med_Fast_Rise:
-				riseTimeSwitch = ThreeWayToInt(val);
-				break;
-
-			case ENVVCAInfo::Knobs.size() + ENVVCAInfo::SwitchSlow_Med_Fast_Fall:
-				fallTimeSwitch = ThreeWayToInt(val);
-				break;
-
-			case ENVVCAInfo::Knobs.size() + ENVVCAInfo::SwitchCycle:
-				cycleOnButton = ButtonToBool(val);
-				break;
-
-			default: break;
-		}
-	}
-
-	void set_input(int input_id, float val) override
-	{
-		// map back to actual voltages
-		val *= 5.0f;
-
-		switch (input_id)
-		{
-			case ENVVCAInfo::InputTime_Cv: 
-				timeCVIn = val;
-				break;
-			case ENVVCAInfo::InputTrigger:
-				triggerIn = triggerDetector(val);
-				break;
-			case ENVVCAInfo::InputCycle:
-				cycleIn = CVToBool(val);
-				break;
-			case ENVVCAInfo::InputFollow:
-				followIn = val;
-				break;
-			case ENVVCAInfo::InputIn:
-				signalIn = val;
-				break;
-			default: break;
-		}
-	}
-
-	float get_output(int output_id) const override
-	{
-		auto getRawOutput = [this](auto id)
-		{
-			switch (id)
-			{
-				case ENVVCAInfo::OutputOut: return signalOut;
-				case ENVVCAInfo::OutputEnv: return envelopeOut;
-				case ENVVCAInfo::OutputEor: return eorOut;
-				default:                    return 0.0f;
-			}
-		};
-
-		// convert voltage to normaized value required for mapping layer
-		return getRawOutput(output_id) / 5.0f;
-	}
 
 	void set_samplerate(float sr) override
 	{
 		timeStepInS = 1.0f / sr;
 	}
 
-	float get_led_brightness(int led_id) const override
-	{
-		// TODO: Here we could also set slider LEDs once they are defined
-		// TODO: Rise and Fall LEDs are actually biploar but defined as single color
-		switch (led_id)
-		{
-			case ENVVCAInfo::LedRise_Led:         return rScaleLEDs;
-			case ENVVCAInfo::LedFall_Led:         return fScaleLEDs;
-			case ENVVCAInfo::LedEor_Led:          return eorOut;
-			case ENVVCAInfo::Leds.size() + 0: return cycleOnButton ^ cycleIn;
-			default:                              return 0.0f;
-		}
-	}
+	// TODO: Here we could also set slider LEDs once they are defined
+	// TODO: Rise and Fall LEDs are actually biploar but defined as single color
+
 
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
@@ -281,28 +202,8 @@ public:
 	// clang-format on
 
 private:
-	uint32_t riseTimeSwitch;
-	uint32_t fallTimeSwitch;
-	bool cycleOnButton;
-
-	float riseSlider;
-	float fallSlider;
-	float envLevelSlider;
-	float riseCVKnob;
-	float fallCVKnob;
-
-	float signalIn;
-	float followIn;
-	bool cycleIn;
-	bool triggerIn;
-	float timeCVIn;
-
-	float signalOut;
-	float envelopeOut;
-	float eorOut;
-
-	float rScaleLEDs;
-	float fScaleLEDs;
+	// TODO required until switches with light are supported
+	float cycleLED;
 
 	FlipFlop triggerDetector;
 	EdgeDetector triggerEdgeDetector;
