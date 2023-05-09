@@ -69,7 +69,7 @@ struct GenericModuleNew
 				}
 			}
 
-			int altID = 0;
+			uint32_t altID = 0;
 			for (auto &alt : Defs::AltParams)
 			{
 				altParams.push_back({true, altID++, alt.default_val});
