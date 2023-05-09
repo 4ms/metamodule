@@ -91,10 +91,17 @@ public:
 
 		// Ignoring input impedance and inverting 400kHz lowpass
 
-		auto output = vca.process(getInput(ENVVCAInfo::InputIn));
-		setLED(ENVVCAInfo::LedEor_Led, output);
-
-		setOutput(ENVVCAInfo::OutputOut, output);
+		if (auto input = getInput(ENVVCAInfo::InputIn); input)
+		{
+			auto output = vca.process(*input);
+			setOutput(ENVVCAInfo::OutputOut, output);
+			setLED(ENVVCAInfo::LedEor_Led, output);			
+		}
+		else
+		{
+			setLED(ENVVCAInfo::LedEor_Led, 0.f);
+			setOutput(ENVVCAInfo::OutputOut, 0.f);
+		}
 
 		// Ignoring output impedance and inverting 400kHz lowpass
 	}
@@ -113,16 +120,22 @@ public:
 
 	void runOscillator()
 	{
-		bool isCycling = ButtonToBool(getSwitch(ENVVCAInfo::SwitchCycle)) ^ CVToBool(getInput(ENVVCAInfo::InputCycle));
+		bool isCycling = ButtonToBool(getSwitch(ENVVCAInfo::SwitchCycle)) ^ CVToBool(getInput(ENVVCAInfo::InputCycle).value_or(0.0f));
 
 		osc.setCycling(isCycling);
 		cycleLED = isCycling;
 
-		osc.setTargetVoltage(getInput(ENVVCAInfo::InputFollow));
-
-		if (triggerEdgeDetector(triggerDetector(getInput(ENVVCAInfo::InputTrigger))))
+		if (auto inputFollowValue = getInput(ENVVCAInfo::InputFollow); inputFollowValue)
 		{
-			osc.doRetrigger();
+			osc.setTargetVoltage(*inputFollowValue);
+		}
+
+		if (auto triggerInputValue = getInput(ENVVCAInfo::InputTrigger); triggerInputValue)
+		{
+			if (triggerEdgeDetector(triggerDetector(*triggerInputValue)))
+			{
+				osc.doRetrigger();
+			}
 		}
 		
 		osc.proceed(timeStepInS);
@@ -158,31 +171,34 @@ public:
 			return InvertingAmpWithBias(offset, 100e3f, 100e3f, bias);
 		};
 
-		// scale down cv input
-		const auto scaledTimeCV = getInput(ENVVCAInfo::InputTime_Cv) * -100e3f / 137e3f;
+		if (auto timeCVValue = getInput(ENVVCAInfo::InputTime_Cv); timeCVValue)
+		{
+			// scale down cv input
+			const auto scaledTimeCV = *timeCVValue * -100e3f / 137e3f;
 
-		// apply attenuverter knobs
-		auto rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobRise_Cv) * scaledTimeCV);
-		auto fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobFall_Cv) * scaledTimeCV);
+			// apply attenuverter knobs
+			auto rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobRise_Cv) * scaledTimeCV);
+			auto fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobFall_Cv) * scaledTimeCV);
 
-		// sum with static value from fader + range switch
-		auto riseCV = -rScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobRise_Slider), ThreeWayToInt(getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Rise)));
-		auto fallCV = -fScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobFall_Slider), ThreeWayToInt(getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Fall)));
+			// sum with static value from fader + range switch
+			riseCV = -rScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobRise_Slider), ThreeWayToInt(getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Rise)));
+			fallCV = -fScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobFall_Slider), ThreeWayToInt(getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Fall)));
 
-		setLED(ENVVCAInfo::LedRise_Led, rScaleLEDs);
-		setLED(ENVVCAInfo::LedFall_Led, fScaleLEDs);
+			setLED(ENVVCAInfo::LedRise_Led, rScaleLEDs);
+			setLED(ENVVCAInfo::LedFall_Led, fScaleLEDs);
 
-		// TODO: low pass filter
+			// TODO: low pass filter
 
-		// apply rise time limit and scale down
-		constexpr float DiodeDropInV = 1.0f;
-		const float ClippingVoltage = 5.0f * VoltageDivider(100e3f, 2e3f) + DiodeDropInV;
-		riseCV = riseCV * VoltageDivider(2.2e3f + 33e3f, 16.9e3f);
-		riseCV = std::min(riseCV, ClippingVoltage);
-		riseCV = riseCV * VoltageDivider(2.2e3f, 33e3f);
+			// apply rise time limit and scale down
+			constexpr float DiodeDropInV = 1.0f;
+			const float ClippingVoltage = 5.0f * VoltageDivider(100e3f, 2e3f) + DiodeDropInV;
+			riseCV = riseCV * VoltageDivider(2.2e3f + 33e3f, 16.9e3f);
+			riseCV = std::min(riseCV, ClippingVoltage);
+			riseCV = riseCV * VoltageDivider(2.2e3f, 33e3f);
 
-		// scale down falling CV without additional limiting
-		fallCV = fallCV * VoltageDivider(2.2e3f, 10e3f + 40.2e3f);
+			// scale down falling CV without additional limiting
+			fallCV = fallCV * VoltageDivider(2.2e3f, 10e3f + 40.2e3f);
+		}
 
 		return {riseCV, fallCV};
 	}
@@ -206,6 +222,10 @@ public:
 private:
 	// TODO required until switches with light are supported
 	float cycleLED;
+
+	// temporary results that are buffered
+	float riseCV;
+	float fallCV;
 
 	FlipFlop triggerDetector;
 	EdgeDetector triggerEdgeDetector;

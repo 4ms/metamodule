@@ -23,9 +23,11 @@ protected:
 		ledValues[i] = val;
 	}
 
-	float getInput(int i)
+	std::optional<float> getInput(int i)
 	{
-		return inputValues[i];
+		auto result = inputValues[i];
+		inputValues[i].reset();
+		return result;
 	}
 
 	float getKnob(int i)
@@ -84,7 +86,7 @@ protected:
 private:
 
 	std::array<float,INFO::Knobs.size()> knobValues;
-	std::array<float,INFO::InJacks.size()> inputValues;
+	std::array<std::optional<float>,INFO::InJacks.size()> inputValues;
 	std::array<float,INFO::OutJacks.size()> outputValues;
 	std::array<float,INFO::Switches.size()> switchValues;
 
