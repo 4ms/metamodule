@@ -35,8 +35,8 @@ struct HubMediumMappings {
 struct HubMedium : MetaModuleHubBase<HubMediumMappings> {
 
 	enum ParamIds { ENUMS(KNOBS, PanelDef::NumPot), MIDI_MONO_NOTE, MIDI_MONO_GATE, WRITE_PATCH, NUM_PARAMS };
-	enum InputIds { NUM_INPUTS = PanelDef::NumInJacks };
-	enum OutputIds { NUM_OUTPUTS = PanelDef::NumOutJacks };
+	enum InputIds { NUM_INPUTS = PanelDef::NumUserFacingInJacks };
+	enum OutputIds { NUM_OUTPUTS = PanelDef::NumUserFacingOutJacks };
 	enum LightIds { NUM_LIGHTS = 0 };
 
 	HubMedium()

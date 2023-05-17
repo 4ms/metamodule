@@ -240,6 +240,16 @@ private:
 		PatchFileWriter pw{moduleData};
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
+		centralData->scanAllJacks();
+		for (auto &jack : centralData->jackData) {
+			if (jack.connected) {
+				printf("m: %llu j: %d -> m: %llu j: %d\n",
+					   jack.sendingModuleId,
+					   jack.sendingJackId,
+					   jack.receivedModuleId,
+					   jack.receivedJackId);
+			}
+		}
 		pw.setJackList(centralData->jackData);
 		pw.setParamList(centralData->paramData);
 		std::vector<Mapping> maps;
@@ -253,7 +263,7 @@ private:
 		writeAsHeader(fileName + ".hh", patchStructName + "_patch", yml);
 	}
 
-	void writeToFile(const std::string& fileName, std::string textToWrite)
+	void writeToFile(const std::string &fileName, std::string textToWrite)
 	{
 		std::ofstream myfile;
 		myfile.open(fileName);
@@ -261,7 +271,7 @@ private:
 		myfile.close();
 	}
 
-	void writeAsHeader(const std::string& fileName, std::string_view structname, std::string_view textToWrite)
+	void writeAsHeader(const std::string &fileName, std::string_view structname, std::string_view textToWrite)
 	{
 		std::ofstream myfile;
 		myfile.open(fileName);
@@ -272,7 +282,7 @@ private:
 		myfile.close();
 	}
 
-	void writeBinaryFile(const std::string& fileName, const std::vector<unsigned char> data)
+	void writeBinaryFile(const std::string &fileName, const std::vector<unsigned char> data)
 	{
 		std::ofstream myfile{fileName, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
 		myfile.write(reinterpret_cast<const char *>(data.data()), data.size());
