@@ -10,27 +10,27 @@ PatchData:
     3: PitchShift
   int_cables: []
   mapped_ins:
-    - panel_jack_id: 2
+    - panel_jack_id: 0
       ins:
         - module_id: 1
           jack_id: 0
-    - panel_jack_id: 3
+    - panel_jack_id: 1
       ins:
         - module_id: 2
           jack_id: 0
-    - panel_jack_id: 4
+    - panel_jack_id: 2
       ins:
         - module_id: 3
           jack_id: 0
-    - panel_jack_id: 5
+    - panel_jack_id: 3
       ins:
         - module_id: 1
           jack_id: 1
-    - panel_jack_id: 6
+    - panel_jack_id: 4
       ins:
         - module_id: 2
           jack_id: 1
-    - panel_jack_id: 7
+    - panel_jack_id: 5
       ins:
         - module_id: 3
           jack_id: 1
