@@ -24,7 +24,7 @@ struct MetaModuleHubBase : public CommModule {
 	std::string patchNameText = "";
 	std::string patchDescText = "";
 
-	long responseTimer = 0;
+	bool shouldWritePatch = false;
 	bool buttonAlreadyHandled = false;
 
 	MetaModuleHubBase() = default;
@@ -139,9 +139,7 @@ struct MetaModuleHubBase : public CommModule {
 	void processPatchButton(float patchButtonState)
 	{
 		if (buttonJustPressed(patchButtonState)) {
-			responseTimer = 48000 / 4; // TODO: set this to the sampleRate
-			centralData->requestAllParamDataAllModules();
-			labelText = "Requesting all modules send their data";
+			shouldWritePatch = true;
 			updatePatchName();
 			updateDisplay();
 		}
@@ -176,40 +174,39 @@ struct MetaModuleHubBase : public CommModule {
 	// Hub class needs to call this from its process
 	void processCreatePatchFile()
 	{
-		if (responseTimer) {
-			if (--responseTimer == 0) {
-				std::string patchName;
-				std::string patchDir;
-				if (patchNameText.substr(0, 5) == "test_")
-					patchDir = testPatchDir;
-				else
-					patchDir = examplePatchDir;
-				if (patchNameText != "" && patchNameText != "Enter Patch Name") {
-					patchName = patchNameText.c_str();
-				} else {
-					std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
-					patchName = randomname.c_str();
-				}
-				ReplaceString patchStructName{patchName};
-				patchStructName.replace_all(" ", "")
-					.replace_all("-", "")
-					.replace_all(",", "")
-					.replace_all("/", "")
-					.replace_all("\\", "")
-					.replace_all("\"", "")
-					.replace_all("'", "")
-					.replace_all(".", "")
-					.replace_all("?", "")
-					.replace_all("#", "")
-					.replace_all("!", "");
-				std::string patchFileName = patchDir + patchStructName.str;
-				// TODO:add patchDesc here:
-				writePatchFile(patchFileName, patchStructName.str, patchName, patchDescText);
+		if (shouldWritePatch) {
+			shouldWritePatch = false;
 
-				labelText = "Wrote patch file: ";
-				labelText += patchStructName.str + ".yml";
-				updateDisplay();
+			std::string patchName;
+			std::string patchDir;
+			if (patchNameText.substr(0, 5) == "test_")
+				patchDir = testPatchDir;
+			else
+				patchDir = examplePatchDir;
+			if (patchNameText != "" && patchNameText != "Enter Patch Name") {
+				patchName = patchNameText.c_str();
+			} else {
+				std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
+				patchName = randomname.c_str();
 			}
+			ReplaceString patchStructName{patchName};
+			patchStructName.replace_all(" ", "")
+				.replace_all("-", "")
+				.replace_all(",", "")
+				.replace_all("/", "")
+				.replace_all("\\", "")
+				.replace_all("\"", "")
+				.replace_all("'", "")
+				.replace_all(".", "")
+				.replace_all("?", "")
+				.replace_all("#", "")
+				.replace_all("!", "");
+			std::string patchFileName = patchDir + patchStructName.str;
+			writePatchFile(patchFileName, patchStructName.str, patchName, patchDescText);
+
+			labelText = "Wrote patch file: ";
+			labelText += patchStructName.str + ".yml";
+			updateDisplay();
 		}
 	}
 
@@ -227,41 +224,26 @@ private:
 		return false;
 	}
 
-	bool isInPlugin(Module *module)
-	{
-		bool is_in_plugin = module->model->plugin->slug == "4msCompany";
-		return is_in_plugin;
-	}
-
-	bool isNotHub(Module *module)
-	{
-		bool is_hub = module->model->slug == "PanelMedium";
-		return !is_hub;
-	}
-
 	void writePatchFile(std::string fileName, std::string patchStructName, std::string patchName, std::string patchDesc)
 	{
 		labelText = "Creating patch...";
 		updateDisplay();
 
-		std::vector<ModuleID> moduleData;
-		std::vector<ParamStatus> paramData;
-
 		auto context = rack::contextGet();
 		auto engine = context->engine;
+
+		std::vector<ModuleID> moduleData;
+		std::vector<ParamStatus> paramData;
 		for (auto moduleID : engine->getModuleIds()) {
 			auto *module = engine->getModule(moduleID);
-			if (isInPlugin(module)) {
+			if (centralData->isInPlugin(module)) {
 				moduleData.push_back({moduleID, module->model->slug.c_str()});
-				// printf("Module %.*s, id=%llu\n", (int)module->model->slug.size(), module->model->slug.c_str(),
-				// moduleID);
 				if (module->model->slug.size() > 31)
 					printf("Warning: module slug truncated to 31 chars\n");
 
-				if (isNotHub(module)) {
+				if (!centralData->isHub(module)) {
 					for (int i = 0; auto &p : module->params) {
 						paramData.push_back({.value = p.value, .paramID = i, .moduleID = moduleID});
-						// printf("    Param[%d] = %f\n", i, p.getValue());
 						i++;
 					}
 				}
@@ -274,19 +256,12 @@ private:
 			auto source = cable->outputModule;
 			auto dest = cable->inputModule;
 
-			if (isInPlugin(source) && isInPlugin(dest) && isNotHub(source) && isNotHub(dest)) {
+			if (centralData->isModuleInPlugin(source) && centralData->isModuleInPlugin(dest)) {
 				jackData.push_back({.sendingJackId = cable->outputId,
 									.receivedJackId = cable->inputId,
 									.sendingModuleId = source->getId(),
 									.receivedModuleId = dest->getId(),
 									.connected = true});
-				// printf("Cable between %llu (%s) jack %d -> %llu (%s) jack %d\n",
-				// 	   source->getId(),
-				// 	   source->getModel()->slug.c_str(),
-				// 	   cable->outputId,
-				// 	   dest->getId(),
-				// 	   dest->getModel()->slug.c_str(),
-				// 	   cable->inputId);
 			}
 		}
 

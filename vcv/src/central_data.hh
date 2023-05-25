@@ -17,20 +17,35 @@ public:
 	CentralData() = default;
 	~CentralData() = default;
 
-	enum MessageType {
-		None,
-		RequestAllParamData,
-	};
+	// True if module is regular module or hub in 4msCompany plugin
+	bool isInPlugin(rack::Module *module)
+	{
+		if (!module)
+			return false;
+		if (!module->model)
+			return false;
+		if (!module->model->plugin)
+			return false;
+		return module->model->plugin->slug == "4msCompany";
+	}
+
+	bool isHub(rack::Module *module)
+	{
+		if (!module)
+			return false;
+		if (!module->model)
+			return false;
+		return module->model->slug == "PanelMedium";
+	}
+	bool isModuleInPlugin(rack::Module *module) { return isInPlugin(module) && !isHub(module); }
 
 	// Modules
 	void registerModule(ModuleID mod, rack::Module *module)
 	{
 		std::lock_guard mguard{mtx};
-		moduleData.push_back({mod.id, mod.slug, module});
-		pr_dbg("Registered module id %lld (%.31s) %p\n", mod.id, mod.slug.c_str(), module);
 
 		// Check if any maps exist with this module id (happens if we load a patch
-		// file)
+		// file), and set the module ptr.
 		for (auto &map : maps) {
 			if (map.dst.moduleID == mod.id && map.dst_module == nullptr) {
 				map.dst_module = module;
@@ -41,110 +56,26 @@ public:
 	void unregisterModule(ModuleID mod)
 	{
 		std::lock_guard mguard{mtx};
-
-		// TODO: use std::erase_if()
-		auto module_it = std::find_if(
-			moduleData.begin(), moduleData.end(), [&mod](auto &m) { return m.id == mod.id && m.slug == mod.slug; });
-		if (module_it != moduleData.end())
-			moduleData.erase(module_it);
-
-		std::erase_if(paramData, [=](const auto &p) { return (p.moduleID == mod.id); });
-		std::erase_if(jackData,
-					  [&](const auto &j) { return j.receivedModuleId == mod.id || j.sendingModuleId == mod.id; });
 		std::erase_if(maps, [&](const auto &m) { return m.dst.moduleID == mod.id || m.src.moduleID == mod.id; });
-	}
-
-	unsigned int getNumModules()
-	{
-		std::lock_guard mguard{mtx};
-
-		auto sz = moduleData.size();
-		return sz;
 	}
 
 	rack::Module *getRegisteredModulePtr(int64_t moduleID)
 	{
-		auto module_it =
-			std::find_if(moduleData.begin(), moduleData.end(), [&moduleID](auto &m) { return m.id == moduleID; });
-
-		if (module_it != moduleData.end())
-			return module_it->module;
+		auto context = rack::contextGet();
+		auto engine = context->engine;
+		auto *module = engine->getModule(moduleID);
+		if (isModuleInPlugin(module)) {
+			return module;
+		}
 		return nullptr;
 	}
 
-	bool isRegisteredHub(int64_t moduleId)
+	bool isRegisteredHub(int64_t moduleID)
 	{
-		auto module_it = std::find_if(moduleData.begin(), moduleData.end(), [=](auto &m) {
-			if (m.id == moduleId) {
-				for (auto &hubname : ValidHubSlugs) {
-					if (hubname == m.slug)
-						return true;
-				}
-			}
-			return false;
-		});
-		bool moduleFoundAndIsHub = (module_it != moduleData.end());
-		return moduleFoundAndIsHub;
-	}
-
-	void updateParamStatus(ParamStatus updatedParam)
-	{
-		std::lock_guard mguard{mtx};
-
-		bool found = false;
-		for (auto &p : paramData) {
-			if (p.isSameParam(updatedParam)) {
-				p.value = updatedParam.value;
-				found = true;
-			}
-		}
-		if (!found) {
-			paramData.push_back(updatedParam);
-		}
-	}
-
-	void updateJackStatus(JackStatus updatedJack)
-	{
-		std::lock_guard mguard{mtx};
-
-		bool found = false;
-		for (auto &j : jackData) {
-			if (j.isSameJack(updatedJack)) {
-				j.connected = updatedJack.connected;
-				if (j.connected) {
-					j.receivedJackId = updatedJack.receivedJackId;
-					j.receivedModuleId = updatedJack.receivedModuleId;
-				} else {
-					j.receivedJackId = -1;
-					j.receivedModuleId = -1;
-				}
-				found = true;
-			}
-		}
-		if (!found) {
-			jackData.push_back(updatedJack);
-		}
-	}
-
-	MessageType getMyMessage(int64_t module_id)
-	{
-		std::lock_guard mguard{mtx};
-
-		auto m = messages.find(module_id);
-		if (m == messages.end())
-			return MessageType::None;
-		auto msg = messages[module_id];
-		messages[module_id] = MessageType::None;
-		return msg;
-	}
-
-	void requestAllParamDataAllModules()
-	{
-		std::lock_guard mguard{mtx};
-
-		for (auto &m : moduleData) {
-			messages[m.id] = MessageType::RequestAllParamData;
-		}
+		auto context = rack::contextGet();
+		auto engine = context->engine;
+		auto *module = engine->getModule(moduleID);
+		return isHub(module);
 	}
 
 	void startMappingProcedure(MappableObj src)
@@ -239,7 +170,7 @@ public:
 				}
 			}
 			if (!found) {
-				pr_dbg("Didn't found an existing map to dst, adding it to centralData.\n");
+				pr_dbg("Didn't find an existing map to dst, adding it to centralData.\n");
 
 				// Rule: hub output jacks can only be mapped to one dst
 				if (_currentMap.src.objType == MappableObj::Type::OutputJack) {
@@ -252,6 +183,15 @@ public:
 					(void)num_erased;
 				}
 
+				pr_dbg("Added: dest: objID=%lld, moduleID=%lld (ptr->id=%lld) t=%d. src: objID=%lld, moduleID=%lld , "
+					   "t=%d\n",
+					   _currentMap.dst.objID,
+					   _currentMap.dst.moduleID,
+					   _currentMap.dst_module->id,
+					   _currentMap.dst.objType,
+					   _currentMap.src.objID,
+					   _currentMap.src.moduleID,
+					   _currentMap.src.objType);
 				maps.push_back(_currentMap);
 			}
 
@@ -466,10 +406,6 @@ public:
 	};
 
 	// private:
-	std::map<int64_t, MessageType> messages;
-	std::vector<RegisteredModule> moduleData;
-	std::vector<JackStatus> jackData;
-	std::vector<ParamStatus> paramData;
 	std::vector<MappingExt> maps;
 
 private:
