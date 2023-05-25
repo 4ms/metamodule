@@ -227,31 +227,75 @@ private:
 		return false;
 	}
 
+	bool isInPlugin(Module *module)
+	{
+		bool is_in_plugin = module->model->plugin->slug == "4msCompany";
+		return is_in_plugin;
+	}
+
+	bool isNotHub(Module *module)
+	{
+		bool is_hub = module->model->slug == "PanelMedium";
+		return !is_hub;
+	}
+
 	void writePatchFile(std::string fileName, std::string patchStructName, std::string patchName, std::string patchDesc)
 	{
-		labelText = "Creating patch..";
+		labelText = "Creating patch...";
 		updateDisplay();
 
 		std::vector<ModuleID> moduleData;
-		moduleData.reserve(centralData->moduleData.size());
-		for (auto &m : centralData->moduleData)
-			moduleData.push_back({m.id, m.slug});
+		std::vector<ParamStatus> paramData;
+
+		auto context = rack::contextGet();
+		auto engine = context->engine;
+		for (auto moduleID : engine->getModuleIds()) {
+			auto *module = engine->getModule(moduleID);
+			if (isInPlugin(module)) {
+				moduleData.push_back({moduleID, module->model->slug.c_str()});
+				// printf("Module %.*s, id=%llu\n", (int)module->model->slug.size(), module->model->slug.c_str(),
+				// moduleID);
+				if (module->model->slug.size() > 31)
+					printf("Warning: module slug truncated to 31 chars\n");
+
+				if (isNotHub(module)) {
+					for (int i = 0; auto &p : module->params) {
+						paramData.push_back({.value = p.value, .paramID = i, .moduleID = moduleID});
+						// printf("    Param[%d] = %f\n", i, p.getValue());
+						i++;
+					}
+				}
+			}
+		}
+
+		std::vector<JackStatus> jackData;
+		for (auto cableID : engine->getCableIds()) {
+			auto cable = engine->getCable(cableID);
+			auto source = cable->outputModule;
+			auto dest = cable->inputModule;
+
+			if (isInPlugin(source) && isInPlugin(dest) && isNotHub(source) && isNotHub(dest)) {
+				jackData.push_back({.sendingJackId = cable->outputId,
+									.receivedJackId = cable->inputId,
+									.sendingModuleId = source->getId(),
+									.receivedModuleId = dest->getId(),
+									.connected = true});
+				// printf("Cable between %llu (%s) jack %d -> %llu (%s) jack %d\n",
+				// 	   source->getId(),
+				// 	   source->getModel()->slug.c_str(),
+				// 	   cable->outputId,
+				// 	   dest->getId(),
+				// 	   dest->getModel()->slug.c_str(),
+				// 	   cable->inputId);
+			}
+		}
 
 		PatchFileWriter pw{moduleData};
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
-		centralData->scanAllJacks();
-		for (auto &jack : centralData->jackData) {
-			if (jack.connected) {
-				printf("m: %llu j: %d -> m: %llu j: %d\n",
-					   jack.sendingModuleId,
-					   jack.sendingJackId,
-					   jack.receivedModuleId,
-					   jack.receivedJackId);
-			}
-		}
-		pw.setJackList(centralData->jackData);
-		pw.setParamList(centralData->paramData);
+		pw.setJackList(jackData);
+		pw.setParamList(paramData);
+
 		std::vector<Mapping> maps;
 		maps.reserve(centralData->maps.size());
 		for (auto &m : centralData->maps)

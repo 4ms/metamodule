@@ -103,29 +103,6 @@ public:
 		}
 	}
 
-	void scanAllJacks()
-	{
-#ifndef TESTPROJECT
-		auto context = rack::contextGet();
-		auto engine = context->engine;
-		for (auto cableID : engine->getCableIds()) {
-			auto cable = engine->getCable(cableID);
-			auto source = cable->outputModule;
-			auto destination = cable->inputModule;
-			printf("Cable between %llu (%s) jack %d -> %llu (%s) jack %d\n",
-				   source->getId(),
-				   source->getModel()->slug.c_str(),
-				   cable->outputId,
-				   destination->getId(),
-				   destination->getModel()->slug.c_str(),
-				   cable->inputId);
-			if (getRegisteredModulePtr(source->id) && getRegisteredModulePtr(destination->id)) {
-				printf("is MetaModule\n");
-			}
-		}
-#endif
-	}
-
 	void updateJackStatus(JackStatus updatedJack)
 	{
 		std::lock_guard mguard{mtx};
