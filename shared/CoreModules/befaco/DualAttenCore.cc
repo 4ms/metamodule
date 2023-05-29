@@ -1,7 +1,7 @@
 #include "DualAttenCore.hh"
 
-void DualAtenuverterCore::process(const ProcessArgs &args) override {
-	using simd::float_4;
+void DualAtenuverterCore::process(const ProcessArgs &args) {
+	// using simd::float_4;
 
 	float_4 out1[4] = {};
 	float_4 out2[4] = {};
