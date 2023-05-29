@@ -1,0 +1,45 @@
+#pragma once
+#include "VCV-adaptor/light.hh"
+#include "VCV-adaptor/math.hpp"
+#include "VCV-adaptor/param.hh"
+#include "VCV-adaptor/port.hh"
+#include "coreProcessor.h"
+#include <array>
+
+template<typename InfoT>
+struct VCVCoreProcessor : CoreProcessor {
+	struct ProcessArgs {
+		float sampleRate;
+		float sampleTime;
+		int64_t frame;
+	};
+
+	virtual void process(const ProcessArgs &) = 0;
+
+	void update() override {
+		args.frame++;
+		process(args);
+	}
+
+	void set_samplerate(float rate) override {
+		args.sampleRate = rate;
+		args.sampleTime = 1.f / rate;
+	}
+
+	void set_param(int id, float val) override {
+		params[id].setValue(val);
+	}
+	void set_input(const int input_id, const float val) override {
+		inputs[input_id].setVoltage(val);
+	}
+	float get_output(const int output_id) const override {
+		return outputs[output_id].getVoltage();
+	}
+
+	std::array<Param, InfoT::knobs.size()> params;
+	std::array<Port, InfoT::injacks.size()> inputs;
+	std::array<Port, InfoT::outjacks.size()> outputs;
+	std::array<Light, InfoT::lights.size()> lights;
+
+	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
+};

@@ -8,7 +8,7 @@ using rack::simd::float_4;
 
 #else
 
-#include "VCVCoreProcessor.hh"
+#include "VCV-adaptor/VCVCoreProcessor.hh"
 template<typename InfoT>
 struct PlatformModule : VCVCoreProcessor<InfoT> {};
 
