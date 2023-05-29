@@ -1,6 +1,7 @@
 #include "DualAttenCore.hh"
 
 void DualAtenuverterCore::process(const ProcessArgs &args) {
+	using namespace rack::math;
 	// using simd::float_4;
 
 	float_4 out1[4] = {};
