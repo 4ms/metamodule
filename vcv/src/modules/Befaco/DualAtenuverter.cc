@@ -23,7 +23,7 @@ struct DualAtenuverterWidget : ModuleWidget {
 	DualAtenuverterWidget(DualAtenuverter *module)
 	{
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/panels/DualAtenuverter.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/modules/Befaco/DualAtenuverter.svg")));
 
 		addChild(createWidget<Knurlie>(Vec(15, 0)));
 		addChild(createWidget<Knurlie>(Vec(15, 365)));
