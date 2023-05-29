@@ -1,3 +1,4 @@
+#pragma once
 #include "info/DualAtten_info.hh"
 #include "platform_module.hh"
 

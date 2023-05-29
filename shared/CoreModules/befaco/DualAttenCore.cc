@@ -1,4 +1,3 @@
-#pragma once
 #include "DualAttenCore.hh"
 
 void DualAtenuverterCore::process(const ProcessArgs &args) override {
