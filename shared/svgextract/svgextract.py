@@ -619,7 +619,7 @@ def extractArtworkLayer(svgFilename, artworkFilename = None, slug = None):
 #     return cmd
 
    
-def createlvimg(artworkSvgFilename, outputBaseName):
+def createlvimg(artworkSvgFilename, outputBaseName, export_faceplate_layer = True):
     png240Filename = outputBaseName +"_artwork_240.png"
     png120Filename = outputBaseName +"_artwork_120.png"
     # Find programs needed
@@ -636,17 +636,13 @@ def createlvimg(artworkSvgFilename, outputBaseName):
 
     # SVG ==> PNG
     Log(f"converting {artworkSvgFilename} to {png240Filename} and {png120Filename} with inkscape and convert.")
+    export_layer = "--export-id=\"faceplate\" --export-id-only" if export_faceplate_layer else ""
     try:
-        subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-id-only --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {png240Filename}', shell=True, check=True)
-        subprocess.run(f'{inkscapeBin} --export-type="png" --export-id="faceplate" --export-id-only --export-filename=- {artworkSvgFilename} | {convertBin} -resize x120 - {png120Filename}', shell=True, check=True)
+        subprocess.run(f'{inkscapeBin} --export-type="png" {export_layer} --export-filename=- {artworkSvgFilename} | {convertBin} -resize x240 - {png240Filename}', shell=True, check=True)
+        subprocess.run(f'{inkscapeBin} --export-type="png" {export_layer} --export-filename=- {artworkSvgFilename} | {convertBin} -resize x120 - {png120Filename}', shell=True, check=True)
     except:
         Log(f"Failed running {inkscapeBin} and {convertBin}. Aborting")
         return
-
-    # cmd = createComponentImageCompositeCmd(artworkSvgFilename, pngFilename)
-    # Log("Going to run "+ cmd)
-    # subprocess.run(f'{convertBin} {cmd}', shell=True, check=True)
-    # Log(f"Created {pngFilename} from {artworkSvgFilename}")
 
     # PNG ==> LVGL image (C file with array)
     lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/lv_img_conv/lv_img_conv.js"
