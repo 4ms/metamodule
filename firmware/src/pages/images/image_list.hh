@@ -132,6 +132,8 @@ LV_IMG_DECLARE(EnOsc_artwork_240);
 LV_IMG_DECLARE(EnOsc_artwork_120);
 LV_IMG_DECLARE(BuffMult_artwork_240);
 LV_IMG_DECLARE(BuffMult_artwork_120);
+LV_IMG_DECLARE(DualAtenuverter_artwork_120);
+LV_IMG_DECLARE(DualAtenuverter_artwork_240);
 }
 
 struct ModuleImages {
@@ -321,6 +323,9 @@ struct ModuleImages {
 
 		if (slug == "BuffMult")
 			return (height == 240) ? &BuffMult_artwork_240 : &BuffMult_artwork_120;
+
+		if (slug == "DualAtenuverter")
+			return (height == 240) ? &DualAtenuverter_artwork_240 : &DualAtenuverter_artwork_120;
 
 		return nullptr;
 	}

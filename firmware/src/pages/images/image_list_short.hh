@@ -2,30 +2,32 @@
 
 extern "C" {
 // DECLARE HERE
-LV_IMG_DECLARE(Djembe_artwork_120);
-LV_IMG_DECLARE(Djembe_artwork_240);
-LV_IMG_DECLARE(EnOsc_artwork_120);
-LV_IMG_DECLARE(EnOsc_artwork_240);
-LV_IMG_DECLARE(Freeverb_artwork_120);
-LV_IMG_DECLARE(Freeverb_artwork_240);
-LV_IMG_DECLARE(HPF_artwork_120);
+LV_IMG_DECLARE(PEG_artwork_240);
+LV_IMG_DECLARE(PEG_artwork_120);
+LV_IMG_DECLARE(PitchShift_artwork_240);
+LV_IMG_DECLARE(PitchShift_artwork_120);
 LV_IMG_DECLARE(HPF_artwork_240);
+LV_IMG_DECLARE(HPF_artwork_120);
+LV_IMG_DECLARE(MultiLFO_artwork_240);
+LV_IMG_DECLARE(MultiLFO_artwork_120);
+LV_IMG_DECLARE(Djembe_artwork_240);
+LV_IMG_DECLARE(Djembe_artwork_120);
+LV_IMG_DECLARE(StMix_artwork_240);
+LV_IMG_DECLARE(StMix_artwork_120);
+LV_IMG_DECLARE(SMR_artwork_240);
+LV_IMG_DECLARE(SMR_artwork_120);
 LV_IMG_DECLARE(InfOsc_artwork_120);
 LV_IMG_DECLARE(InfOsc_artwork_240);
 LV_IMG_DECLARE(KPLS_artwork_120);
 LV_IMG_DECLARE(KPLS_artwork_240);
-LV_IMG_DECLARE(MultiLFO_artwork_120);
-LV_IMG_DECLARE(MultiLFO_artwork_240);
-LV_IMG_DECLARE(PEG_artwork_120);
-LV_IMG_DECLARE(PEG_artwork_240);
-LV_IMG_DECLARE(PitchShift_artwork_120);
-LV_IMG_DECLARE(PitchShift_artwork_240);
-LV_IMG_DECLARE(SMR_artwork_120);
-LV_IMG_DECLARE(SMR_artwork_240);
+LV_IMG_DECLARE(Freeverb_artwork_240);
+LV_IMG_DECLARE(Freeverb_artwork_120);
 LV_IMG_DECLARE(Seq8_artwork_120);
 LV_IMG_DECLARE(Seq8_artwork_240);
-LV_IMG_DECLARE(StMix_artwork_120);
-LV_IMG_DECLARE(StMix_artwork_240);
+LV_IMG_DECLARE(EnOsc_artwork_120);
+LV_IMG_DECLARE(EnOsc_artwork_240);
+LV_IMG_DECLARE(DualAtenuverter_artwork_120);
+LV_IMG_DECLARE(DualAtenuverter_artwork_240);
 }
 
 struct ModuleImages {
@@ -68,6 +70,9 @@ struct ModuleImages {
 
 		if (slug == "EnOsc")
 			return (height == 240) ? &EnOsc_artwork_240 : &EnOsc_artwork_120;
+
+		if (slug == "DualAtenuverter")
+			return (height == 240) ? &DualAtenuverter_artwork_240 : &DualAtenuverter_artwork_120;
 
 		return nullptr;
 	}

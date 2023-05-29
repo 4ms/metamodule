@@ -162,6 +162,7 @@ INCLUDES += -Isrc/pages/slsexport
 INCLUDES +=	-I$(LVGL_DIR)/$(LVGL_DIR_NAME)
 
 ifeq "$(USE_FEWER_MODULES)" "1"
+SOURCES += src/pages/images/modules/DualAtenuverter_artwork_240.c
 SOURCES += src/pages/images/modules/Djembe_artwork_240.c
 SOURCES += src/pages/images/modules/StMix_artwork_240.c
 SOURCES += src/pages/images/modules/PEG_artwork_240.c
@@ -175,6 +176,7 @@ SOURCES += src/pages/images/modules/Freeverb_artwork_240.c
 SOURCES += src/pages/images/modules/Seq8_artwork_240.c
 SOURCES += src/pages/images/modules/EnOsc_artwork_240.c
 
+SOURCES += src/pages/images/modules/DualAtenuverter_artwork_120.c
 SOURCES += src/pages/images/modules/Djembe_artwork_120.c
 SOURCES += src/pages/images/modules/StMix_artwork_120.c
 SOURCES += src/pages/images/modules/PEG_artwork_120.c
