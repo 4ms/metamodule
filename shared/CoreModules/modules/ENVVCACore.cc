@@ -48,8 +48,8 @@ public:
 
 			// std::pow is not required to be constexpr by the standard
 			// so this might not work in clang
-			constexpr float b = std::pow(2.0f, std::log2(f_1 / f_2)/(V_1 - V_2));
-			constexpr float a = f_1 / std::pow(b, V_1);
+			const float b = std::pow(2.0f, std::log2(f_1 / f_2) / (V_1 - V_2));
+			const float a = f_1 / std::pow(b, V_1);
 
 			// interpolate
 			auto frequency = std::pow(b, voltage) * a;
