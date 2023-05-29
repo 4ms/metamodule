@@ -19,14 +19,14 @@ enum LightIds {
 namespace MetaModule
 {
 
-struct BefacoDualAttenInfo {
+struct DualAtenuverterInfo {
 	// Module info: written by hand
-	static constexpr std::string_view slug{"BEFACOATTEN"};
-	static constexpr std::string_view description{"Dual Attenuator"};
-	static constexpr uint32_t width_hp = 8; //FIXME: CHECK THIS
+	static constexpr std::string_view slug{"DualAtenuverter"};
+	static constexpr std::string_view description{"Befaco Dual Attenuvertor"};
+	static constexpr uint32_t width_hp = 4;
 	static constexpr std::string_view svg_filename{"res/modules/befaco/DualAtenuverter.svg"};
 
-	// Convert addParam(...) or addInput/Output() to *Elements:
+	// Regex to convert addParam(...) or addInput/Output() to *Elements:
 	// s/add\w\+(create\w\+<\(.*\)>(Vec(\(\d\+\), \(\d\+\)), .*::\(.*\)_\(\w\+\).*/\t\t\1{\2, \3, "\4", "", \4_\5},/
 	// Then manually add the names from Module::configParam()
 	// and manually split into arrays for each type of element

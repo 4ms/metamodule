@@ -1,4 +1,4 @@
-#include "DualAttenCore.hh"
+#include "DualAtenuverterCore.hh"
 
 void DualAtenuverterCore::process(const ProcessArgs &args) {
 	using namespace rack::math;

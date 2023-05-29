@@ -120,7 +120,7 @@ SOURCES += $(SHARED)/CoreModules/modules/KPLSCore.cc
 SOURCES += $(SHARED)/CoreModules/modules/FreeverbCore.cc
 SOURCES += $(SHARED)/CoreModules/modules/Seq8Core.cc
 SOURCES += $(SHARED)/CoreModules/modules/EnOscCore.cc
-SOURCES += $(SHARED)/CoreModules/Befaco/DualAttenCore.cc
+SOURCES += $(SHARED)/CoreModules/Befaco/DualAtenuverterCore.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
 else
