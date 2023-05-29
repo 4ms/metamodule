@@ -31,6 +31,8 @@ CXXFLAGS += -DVCVRACK
 LDFLAGS +=
 
 # Add source files to the build
+SOURCES += src/modules/Befaco/DualAtenuverter.cc
+SOURCES += $(SHARED_DIR)/CoreModules/Befaco/DualAttenCore.cc
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard src/hub/*.cc)
