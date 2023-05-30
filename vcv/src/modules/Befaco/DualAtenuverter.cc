@@ -1,6 +1,6 @@
 #include "plugin.hh"
 //
-#include "CoreModules/Befaco/DualAttenCore.hh"
+#include "CoreModules/Befaco/DualAtenuverterCore.hh"
 #include "modules/Befaco/widgets.hh"
 
 using namespace rack;
