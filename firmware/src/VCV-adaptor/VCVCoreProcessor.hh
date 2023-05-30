@@ -1,12 +1,14 @@
 #pragma once
+#include "CoreModules/moduleFactory.hh"
 #include "VCV-adaptor/light.hh"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/param.hh"
 #include "VCV-adaptor/port.hh"
 #include "coreProcessor.h"
 #include <array>
+#include <memory>
 
-template<typename Info>
+template<typename Info, typename Core>
 struct VCVCoreProcessor : CoreProcessor {
 	struct ProcessArgs {
 		float sampleRate;
@@ -42,4 +44,10 @@ struct VCVCoreProcessor : CoreProcessor {
 	std::array<Light, Info::Leds.size()> lights;
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
+
+	// Boilerplate to auto-register in ModuleFactory
+	// clang-format off
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<Core>(); }
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, MetaModule::ElementInfoView::makeView<Info>());
+	// clang-format on
 };
