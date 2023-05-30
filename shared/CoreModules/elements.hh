@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <string_view>
 #include <variant>
 
@@ -90,42 +91,11 @@ struct BefacoOutputPort : BaseElement {};
 using BananutBlack = BefacoInputPort;
 using BananutRed = BefacoOutputPort;
 
-// combine all known elements into variant
-using Element = std::variant<MomentaryButton,
-							 LatchingButton,
-							 Toggle2pos,
-							 Toggle3pos,
-							 LEDEncoder,
-							 DaviesLargeKnob,
-							 Davies1900hRedKnob,
-							 Davies1900hBlackKnob,
-							 Davies1900hWhiteKnob,
-							 Small9mmKnob,
-							 BefacoTinyKnob,
-							 BefacoSliderPot,
-							 BefacoTinyKnobWhite,
-							 BefacoTinyKnobRed,
-							 BefacoTinyKnobDarkGrey,
-							 BefacoTinyKnobLightGrey,
-							 BefacoTinyKnobBlack,
-							 Davies1900hLargeGreyKnob,
-							 Davies1900hLightGreyKnob,
-							 Davies1900hDarkGreyKnob,
-							 CKSSNarrow,
-							 Crossfader,
-							 BefacoSwitchHorizontal,
-							 CKSSHoriz2,
-							 CKSSVert7,
-							 CKSSHoriz4,
-							 CKSSNarrow3,
-							 Davies1900hLargeLightGreyKnob,
-							 BefacoSlidePotSmall,
-							 JackInput,
-							 JackOutput,
-							 BefacoInputPort,
-							 BefacoOutputPort,
-							 MediumRgbLed,
-							 MediumLight<RedGreenBlueLight>>;
+// AltParams
+struct AltParamToggle2 : BaseElement {};
+struct AltParamToggle3 : BaseElement {};
+
+// Element groups (variants):
 
 using SwitchElement = std::variant<MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, LEDEncoder>;
 
@@ -155,13 +125,24 @@ using KnobElement = std::variant<DaviesLargeKnob,
 								 BefacoSlidePotSmall>;
 
 using InJackElement = std::variant<JackInput, BefacoInputPort>;
+
 using OutJackElement = std::variant<JackOutput, BefacoOutputPort>;
 
 using LightElement = std::variant<MediumRgbLed, MediumLight<RedGreenBlueLight>>;
 
-// For use with converted VCV modules that access elements via index
-// #ifndef ENUMS
-// #define ENUMS(name, count) name, name##_LAST = name + (count)-1
-// #endif
+using AltParamElement = std::variant<AltParamToggle2, AltParamToggle3>;
+
+struct ElementInfoBase {
+	static constexpr std::string_view slug{""};
+	static constexpr std::string_view description{""};
+	static constexpr uint32_t width_hp = 0;
+	static constexpr std::string_view svg_filename{""};
+	static constexpr std::array<KnobElement, 0> Knobs{};
+	static constexpr std::array<InJackElement, 0> InJacks{};
+	static constexpr std::array<OutJackElement, 0> OutJacks{};
+	static constexpr std::array<SwitchElement, 0> Switches{};
+	static constexpr std::array<LightElement, 0> Leds{};
+	static constexpr std::array<AltParamElement, 0> AltParams{};
+};
 
 } // namespace MetaModule

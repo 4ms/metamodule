@@ -6,7 +6,7 @@
 #include "coreProcessor.h"
 #include <array>
 
-template<typename InfoT>
+template<typename Info>
 struct VCVCoreProcessor : CoreProcessor {
 	struct ProcessArgs {
 		float sampleRate;
@@ -36,10 +36,10 @@ struct VCVCoreProcessor : CoreProcessor {
 		return outputs[output_id].getVoltage();
 	}
 
-	std::array<Param, InfoT::knobs.size()> params;
-	std::array<Port, InfoT::injacks.size()> inputs;
-	std::array<Port, InfoT::outjacks.size()> outputs;
-	std::array<Light, InfoT::lights.size()> lights;
+	std::array<Param, Info::Knobs.size()> params;
+	std::array<Port, Info::InJacks.size()> inputs;
+	std::array<Port, Info::OutJacks.size()> outputs;
+	std::array<Light, Info::Leds.size()> lights;
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
 };

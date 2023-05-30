@@ -19,7 +19,7 @@ enum LightIds {
 namespace MetaModule
 {
 
-struct DualAtenuverterInfo {
+struct DualAtenuverterInfo : ElementInfoBase {
 	// Module info: written by hand
 	static constexpr std::string_view slug{"DualAtenuverter"};
 	static constexpr std::string_view description{"Befaco Dual Attenuvertor"};
@@ -30,26 +30,24 @@ struct DualAtenuverterInfo {
 	// s/add\w\+(create\w\+<\(.*\)>(Vec(\(\d\+\), \(\d\+\)), .*::\(.*\)_\(\w\+\).*/\t\t\1{\2, \3, "\4", "", \4_\5},/
 	// Then manually add the names from Module::configParam()
 	// and manually split into arrays for each type of element
-	static constexpr std::array<KnobElement, 4> knobs{{
+	static constexpr std::array<KnobElement, 4> Knobs{{
 		Davies1900hWhiteKnob{20, 33, "Ch 1 gain", "", ATEN1_PARAM},
 		Davies1900hRedKnob{20, 91, "Ch 1 offset", "", OFFSET1_PARAM},
 		Davies1900hWhiteKnob{20, 201, "Ch 2 gain", "", ATEN2_PARAM},
 		Davies1900hRedKnob{20, 260, "Ch 2 offset", "", OFFSET2_PARAM},
 	}};
 
-	static constexpr std::array<KnobElement, 0> switches{};
-
-	static constexpr std::array<InJackElement, 2> injacks{{
+	static constexpr std::array<InJackElement, 2> InJacks{{
 		BefacoInputPort{7, 152, "IN1", "", IN1_INPUT},
 		BefacoInputPort{7, 319, "IN2", "", IN2_INPUT},
 	}};
 
-	static constexpr std::array<OutJackElement, 2> outjacks{{
+	static constexpr std::array<OutJackElement, 2> OutJacks{{
 		BefacoOutputPort{43, 152, "OUT1", "", OUT1_OUTPUT},
 		BefacoOutputPort{43, 319, "OUT2", "", OUT2_OUTPUT},
 	}};
 
-	static constexpr std::array<LightElement, 2> lights{{
+	static constexpr std::array<LightElement, 2> Leds{{
 		MediumLight<RedGreenBlueLight>{33, 143, "OUT1", "", OUT1_LIGHT},
 		MediumLight<RedGreenBlueLight>{33, 311, "OUT2", "", OUT2_LIGHT},
 	}};

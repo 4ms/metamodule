@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements.hh"
 #include "util/base_concepts.hh"
 #include "util/static_string.hh"
 #include <array>
@@ -74,9 +75,9 @@ struct ModuleInfoBase {
 	static constexpr std::string_view svg_filename{""};
 
 	static constexpr std::array<KnobDef, 0> Knobs{};
-	static constexpr std::array<KnobDef, 0> InJacks{};
-	static constexpr std::array<KnobDef, 0> OutJacks{};
-	static constexpr std::array<KnobDef, 0> Switches{};
+	static constexpr std::array<InJackDef, 0> InJacks{};
+	static constexpr std::array<OutJackDef, 0> OutJacks{};
+	static constexpr std::array<SwitchDef, 0> Switches{};
 	static constexpr std::array<LedDef, 0> Leds{};
 	static constexpr std::array<AltParamDef, 0> AltParams{};
 
@@ -135,3 +136,32 @@ struct ModuleInfoView {
 		};
 	}
 };
+
+namespace MetaModule
+{
+struct ElementInfoView {
+	uint32_t width_hp = 0;
+	std::string_view svg_filename{""};
+	std::string_view module_name{""};
+	std::span<const KnobElement> Knobs;
+	std::span<const InJackElement> InJacks;
+	std::span<const OutJackElement> OutJacks;
+	std::span<const SwitchElement> Switches;
+	std::span<const LightElement> Leds;
+	std::span<const AltParamElement> AltParams;
+
+	template<Derived<ElementInfoBase> T>
+	static constexpr ElementInfoView makeView() {
+		return {
+			.width_hp = T::width_hp,
+			.svg_filename = T::svg_filename,
+			.Knobs = T::Knobs,
+			.InJacks = T::InJacks,
+			.OutJacks = T::OutJacks,
+			.Switches = T::Switches,
+			.Leds = T::Leds,
+			.AltParams = T::AltParams,
+		};
+	}
+};
+} // namespace MetaModule
