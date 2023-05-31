@@ -95,7 +95,7 @@ public:
 			if (i == 0)
 				modules[i] = ModuleFactory::create(PanelDef::typeID);
 #if !defined(TESTPROJECT)
-			else if (pd.module_slugs[i].is_equal("MultiLFO")) {
+			else if (pd.module_slugs[i].is_equal("DualAtenuverter")) {
 				printf("Registering DualAtenuverter\n");
 				modules[i] = DualAtenuverterCore::create();
 				printf("OK\n");
