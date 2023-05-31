@@ -4,6 +4,7 @@
 #include "lvgl/src/core/lv_obj.h"
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"
+#include "pages/element_helpers.hh"
 #include "pages/images/image_list.hh"
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
@@ -148,19 +149,25 @@ struct PatchViewPage : PageBase {
 
 			// Draw module controls
 			const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-			DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
-
-			for (const auto &el : moduleinfo.Knobs) {
-				auto knob = DrawHelper::draw_knob(canvas, el, 120);
-				if (knob) {
-					lv_obj_t *knob_obj = knob.value();
-					auto anim_method = DrawHelper::get_anim_method(el);
-					if (auto mapped_knob = patch.find_mapped_knob(i, el.id)) {
-						mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
-						DrawHelper::draw_control_ring(canvas, el, mapped_knob->panel_knob_id, 120);
-					}
-				}
+			if (moduleinfo.width_hp) {
+				DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
+				DrawHelper::draw_module_knobs(canvas, moduleinfo, patch, mapped_knobs, i, height);
+			} else {
+				const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
+				// DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
+				ElementDrawHelper::draw_module_knobs(canvas, moduleinfo, patch, mapped_knobs, i, height);
 			}
+			// for (const auto &el : moduleinfo.Knobs) {
+			// 	auto knob = DrawHelper::draw_knob(canvas, el, 120);
+			// 	if (knob) {
+			// 		lv_obj_t *knob_obj = knob.value();
+			// 		auto anim_method = DrawHelper::get_anim_method(el);
+			// 		if (auto mapped_knob = patch.find_mapped_knob(i, el.id)) {
+			// 			mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
+			// 			DrawHelper::draw_control_ring(canvas, el, mapped_knob->panel_knob_id, 120);
+			// 		}
+			// 	}
+			// }
 
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_PRESSED, (void *)this);

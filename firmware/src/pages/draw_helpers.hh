@@ -332,6 +332,25 @@ struct DrawHelper {
 		// }
 	}
 
+	static void draw_module_knobs(lv_obj_t *canvas,
+								  const ModuleInfoView &info,
+								  const PatchData &patch,
+								  std::vector<DrawHelper::MKnob> &mapped_knobs,
+								  uint32_t module_id,
+								  uint32_t module_height) {
+		for (const auto &el : info.Knobs) {
+			auto knob = DrawHelper::draw_knob(canvas, el, 120);
+			if (knob) {
+				lv_obj_t *knob_obj = knob.value();
+				auto anim_method = DrawHelper::get_anim_method(el);
+				if (auto mapped_knob = patch.find_mapped_knob(module_id, el.id)) {
+					mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
+					DrawHelper::draw_control_ring(canvas, el, mapped_knob->panel_knob_id, module_height);
+				}
+			}
+		}
+	}
+
 	struct Vec2 {
 		int32_t x;
 		int32_t y;
