@@ -7,8 +7,8 @@ namespace MetaModule
 {
 
 struct BaseElement {
-	float posx = 0;
-	float posy = 0;
+	float x_mm = 0; //mm is used because module height is fixed at 128.5mm
+	float y_mm = 0;
 	std::string_view short_name;
 	std::string_view long_name;
 	unsigned idx = 0;
