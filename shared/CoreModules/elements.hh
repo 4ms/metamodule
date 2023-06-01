@@ -98,14 +98,14 @@ struct DaviesLargeKnob : BaseElement {};
 struct Davies1900hBlackKnob : BaseElement {};
 struct Davies1900hWhiteKnob : BaseElement {};
 struct Davies1900hRedKnob : BaseElement {};
-struct Small9mmKnob : BaseElement {};
+struct Knob9mm : BaseElement {};
 struct Slider25mmVert : BaseElement {};
 struct Slider25mmHoriz : BaseElement {};
 
 using KnobElement = std::variant<
 	//4ms
 	Davies1900hBlackKnob,
-	Small9mmKnob,
+	Knob9mm,
 	DaviesLargeKnob,
 	Slider25mmVert,
 	Slider25mmHoriz,

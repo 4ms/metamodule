@@ -23,54 +23,54 @@ struct ENVVCAInfo : ElementInfoBase {
 		KnobFall_Cv = 4,
 	};
 
-	static constexpr std::array<KnobElement, 0> Knobs{{
-		// Slider25mmVert{
-		// 	px_to_mm<72>(23.185f),
-		// 	px_to_mm<72>(108.81f),
-		// 	"Rise Slider",
-		// 	"Rise Slider",
-		// 	KnobRise_Slider,
-		// 	0.5f,
-		// },
-		// Slider25mmVert{
-		// 	px_to_mm<72>(57.325f),
-		// 	px_to_mm<72>(109.02f),
-		// 	"Fall Slider",
-		// 	"Fall Slider",
-		// 	KnobFall_Slider,
-		// 	0.5f,
-		// },
-		// Slider25mmVert{
-		// 	px_to_mm<72>(91.505f),
-		// 	px_to_mm<72>(108.81f),
-		// 	"Env Level Slider",
-		// 	"Env Level Slider",
-		// 	KnobEnv_Level_Slider,
-		// 	1.0f,
-		// },
-		// Small9mmKnob{
-		// 	px_to_mm<72>(21.69f),
-		// 	px_to_mm<72>(178.25f),
-		// 	"Rise CV",
-		// 	"Rise CV",
-		// 	KnobRise_Cv,
-		// 	1.0f,
-		// },
-		// Small9mmKnob{
-		// 	px_to_mm<72>(92.85f),
-		// 	px_to_mm<72>(178.25f),
-		// 	"Fall CV",
-		// 	"Fall CV",
-		// 	KnobFall_Cv,
-		// 	1.0f,
-		// },
+	static constexpr std::array<KnobElement, 5> Knobs{{
+		Slider25mmVert{
+			px_to_mm<72>(23.185f),
+			px_to_mm<72>(108.81f),
+			"Rise Slider",
+			"Rise Slider",
+			KnobRise_Slider,
+			0.5f,
+		},
+		Slider25mmVert{
+			px_to_mm<72>(57.325f),
+			px_to_mm<72>(109.02f),
+			"Fall Slider",
+			"Fall Slider",
+			KnobFall_Slider,
+			0.5f,
+		},
+		Slider25mmVert{
+			px_to_mm<72>(91.505f),
+			px_to_mm<72>(108.81f),
+			"Env Level Slider",
+			"Env Level Slider",
+			KnobEnv_Level_Slider,
+			1.0f,
+		},
+		Knob9mm{
+			px_to_mm<72>(21.69f),
+			px_to_mm<72>(178.25f),
+			"Rise CV",
+			"Rise CV",
+			KnobRise_Cv,
+			1.0f,
+		},
+		Knob9mm{
+			px_to_mm<72>(92.85f),
+			px_to_mm<72>(178.25f),
+			"Fall CV",
+			"Fall CV",
+			KnobFall_Cv,
+			1.0f,
+		},
 	}};
 
-	// static constexpr auto Rise_Slider = get<Slider25mmVert>(Knobs[0]);
-	// static constexpr auto Fall_Slider = get<Slider25mmVert>(Knobs[1]);
-	// static constexpr auto Level_Slider = get<Slider25mmVert>(Knobs[2]);
-	// static constexpr auto Rise_Cv = get<Small9mmKnob>(Knobs[3]);
-	// static constexpr auto Fall_Cv = get<Small9mmKnob>(Knobs[4]);
+	static constexpr auto Rise_Slider = get<Slider25mmVert>(Knobs[0]);
+	static constexpr auto Fall_Slider = get<Slider25mmVert>(Knobs[1]);
+	static constexpr auto Level_Slider = get<Slider25mmVert>(Knobs[2]);
+	static constexpr auto Rise_Cv = get<Knob9mm>(Knobs[3]);
+	static constexpr auto Fall_Cv = get<Knob9mm>(Knobs[4]);
 
 	enum {
 		InputTime_Cv = 0,
