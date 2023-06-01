@@ -176,7 +176,7 @@ struct DrawHelper {
 	// static std::optional<lv_obj_t *> draw_knob(lv_obj_t *base, const auto &el, uint32_t module_height) {
 	static std::optional<lv_obj_t *> draw_knob(lv_obj_t *base, const KnobDef &el, uint32_t module_height) {
 		const float adj = (float)module_height / 240.f;
-		const bool fullsize = module_height > 120;
+		// const bool fullsize = module_height > 120;
 		const lv_img_dsc_t *img_dsc = get_control_img(el, module_height);
 		if (!img_dsc)
 			return std::nullopt;
@@ -196,7 +196,7 @@ struct DrawHelper {
 	static std::optional<lv_obj_t *>
 	draw_switch(lv_obj_t *base, const SwitchDef &el, uint32_t module_height, float value) {
 		const float adj = (float)module_height / 240.f;
-		const bool fullsize = module_height > 120;
+		// const bool fullsize = module_height > 120;
 		const lv_img_dsc_t *img_dsc = get_control_img(el, module_height, value);
 		if (!img_dsc)
 			return std::nullopt;

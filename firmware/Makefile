@@ -36,6 +36,10 @@ norflash-loader: mp1-med
 uimg:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk uimg
 
+.PHONY: bootloader
+bootloader:
+	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp10_conf.hh
+
 ## Module images
 
 MODULEIMG_SVGS = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)

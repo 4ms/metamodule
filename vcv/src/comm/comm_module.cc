@@ -3,26 +3,6 @@
 
 CommModule::CommModule() {}
 
-void CommModule::handleCommunication()
-{
-	if (_comm_status == PropagateData2) {
-		for (auto &p : commParams)
-			centralData->updateParamStatus(p->paramStatus);
-	}
-
-	if (_comm_status == PropagateData2) {
-		for (auto &ins : inputJacks) {
-			ins->updateWithCommData();
-			centralData->updateJackStatus(ins->inputJackStatus);
-		}
-	}
-
-	if (_comm_status != Normal) {
-		for (auto &out : outputJacks)
-			out->updateOutputWithCommData();
-	}
-}
-
 void CommModule::setModuleId(int64_t id)
 {
 	for (auto &el : inputJacks) {
@@ -49,15 +29,6 @@ void CommModule::onSampleRateChange() { _sample_rate_changed = true; }
 
 void CommModule::process(const ProcessArgs &args)
 {
-	if (centralData->getMyMessage(selfID.id) == CentralData::RequestAllParamData) {
-		_comm_status = StartSending;
-	} else if (_comm_status == StartSending)
-		_comm_status = PropagateData1;
-	else if (_comm_status == PropagateData1)
-		_comm_status = PropagateData2;
-	else if (_comm_status == PropagateData2)
-		_comm_status = Normal;
-
 	for (auto &param : commParams) {
 		param->updateValue();
 		core->set_param(param->getID(), param->getValue());
@@ -101,8 +72,6 @@ void CommModule::process(const ProcessArgs &args)
 	for (int i = 0; i < _numLights; i++) {
 		lights[i].setBrightness(core->get_led_brightness(i));
 	}
-
-	handleCommunication();
 }
 
 void CommModule::configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int NUM_LIGHTS)

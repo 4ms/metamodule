@@ -2,13 +2,11 @@
 #include "CoreModules/meta-module-hub/panel_medium_defs.hh"
 
 enum {
-	MidiMonoNoteJack = PanelDef::NumInJacks,
+	MidiMonoNoteJack = PanelDef::NumUserFacingInJacks,
 	MidiMonoGateJack,
 
 	LastMidiJack
 };
-
-inline constexpr unsigned NumMidiJacks = LastMidiJack - PanelDef::NumInJacks;
 
 enum {
 	MidiMonoNoteParam = PanelDef::NumKnobs,
@@ -47,5 +45,3 @@ enum {
 
 	LastMidiParam,
 };
-
-inline constexpr unsigned NumMidiParams = LastMidiParam - PanelDef::NumKnobs;

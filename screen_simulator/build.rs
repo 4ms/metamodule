@@ -12,6 +12,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../firmware/src/patchlist.cc");
     println!("cargo:rerun-if-changed=mms/lvgl_driver.hh");
     println!("cargo:rerun-if-changed=mms/mms.cc");
+    println!("cargo:rerun-if-changed=mms/stubs/patch_storage_proxy.hh");
     //println!("cargo:rustc-env=RANLIB=ranlib"); //doesn't work, the idea is to suppress ranlib
     //warnings by setting ranlib to be a script that runs `ranlib -no_warning_for_no_symbols`
 
@@ -24,6 +25,7 @@ fn main() {
     // add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut lvgl_src);
     lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
     // add_glob_files("../firmware/src/pages/fonts/*.c", &mut lvgl_src);
+    lvgl_src.push(String::from("../firmware/src/pages/slsexport/ui.c"));
     lvgl_src.push(String::from(
         "../firmware/src/pages/fonts/MuseoSansRounded_500_12.c",
     ));
@@ -140,18 +142,26 @@ fn main() {
     src.push(String::from("../shared/axoloti-wrapper/axoloti_math.cpp"));
 
     if use_fewer_modules {
-        src.push(String::from("../shared/CoreModules/DjembeCore.cc"));
-        src.push(String::from("../shared/CoreModules/StMixCore.cc"));
-        src.push(String::from("../shared/CoreModules/PEGCore.cc"));
-        src.push(String::from("../shared/CoreModules/SMRCore.cc"));
-        src.push(String::from("../shared/CoreModules/MultiLFOCore.cc"));
-        src.push(String::from("../shared/CoreModules/PitchShiftCore.cc"));
-        src.push(String::from("../shared/CoreModules/HPFCore.cc"));
-        src.push(String::from("../shared/CoreModules/InfOscCore.cc"));
-        src.push(String::from("../shared/CoreModules/FreeverbCore.cc"));
-        src.push(String::from("../shared/CoreModules/KPLSCore.cc"));
-        src.push(String::from("../shared/CoreModules/Seq8Core.cc"));
-        src.push(String::from("../shared/CoreModules/panel_medium.cc"));
+        src.push(String::from("../shared/CoreModules/modules/DjembeCore.cc"));
+        src.push(String::from("../shared/CoreModules/modules/StMixCore.cc"));
+        src.push(String::from("../shared/CoreModules/modules/PEGCore.cc"));
+        src.push(String::from("../shared/CoreModules/modules/SMRCore.cc"));
+        src.push(String::from(
+            "../shared/CoreModules/modules/MultiLFOCore.cc",
+        ));
+        src.push(String::from(
+            "../shared/CoreModules/modules/PitchShiftCore.cc",
+        ));
+        src.push(String::from("../shared/CoreModules/modules/HPFCore.cc"));
+        src.push(String::from("../shared/CoreModules/modules/InfOscCore.cc"));
+        src.push(String::from(
+            "../shared/CoreModules/modules/FreeverbCore.cc",
+        ));
+        src.push(String::from("../shared/CoreModules/modules/KPLSCore.cc"));
+        src.push(String::from("../shared/CoreModules/modules/Seq8Core.cc"));
+        src.push(String::from(
+            "../shared/CoreModules/meta-module-hub/panel_medium.cc",
+        ));
     } else {
         add_glob_files("../shared/CoreModules/*.cc", &mut src);
     }

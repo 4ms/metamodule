@@ -24,7 +24,7 @@ struct MetaModuleHubBase : public CommModule {
 	std::string patchNameText = "";
 	std::string patchDescText = "";
 
-	long responseTimer = 0;
+	bool shouldWritePatch = false;
 	bool buttonAlreadyHandled = false;
 
 	MetaModuleHubBase() = default;
@@ -139,9 +139,7 @@ struct MetaModuleHubBase : public CommModule {
 	void processPatchButton(float patchButtonState)
 	{
 		if (buttonJustPressed(patchButtonState)) {
-			responseTimer = 48000 / 4; // TODO: set this to the sampleRate
-			centralData->requestAllParamDataAllModules();
-			labelText = "Requesting all modules send their data";
+			shouldWritePatch = true;
 			updatePatchName();
 			updateDisplay();
 		}
@@ -176,40 +174,39 @@ struct MetaModuleHubBase : public CommModule {
 	// Hub class needs to call this from its process
 	void processCreatePatchFile()
 	{
-		if (responseTimer) {
-			if (--responseTimer == 0) {
-				std::string patchName;
-				std::string patchDir;
-				if (patchNameText.substr(0, 5) == "test_")
-					patchDir = testPatchDir;
-				else
-					patchDir = examplePatchDir;
-				if (patchNameText != "" && patchNameText != "Enter Patch Name") {
-					patchName = patchNameText.c_str();
-				} else {
-					std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
-					patchName = randomname.c_str();
-				}
-				ReplaceString patchStructName{patchName};
-				patchStructName.replace_all(" ", "")
-					.replace_all("-", "")
-					.replace_all(",", "")
-					.replace_all("/", "")
-					.replace_all("\\", "")
-					.replace_all("\"", "")
-					.replace_all("'", "")
-					.replace_all(".", "")
-					.replace_all("?", "")
-					.replace_all("#", "")
-					.replace_all("!", "");
-				std::string patchFileName = patchDir + patchStructName.str;
-				// TODO:add patchDesc here:
-				writePatchFile(patchFileName, patchStructName.str, patchName, patchDescText);
+		if (shouldWritePatch) {
+			shouldWritePatch = false;
 
-				labelText = "Wrote patch file: ";
-				labelText += patchStructName.str + ".yml";
-				updateDisplay();
+			std::string patchName;
+			std::string patchDir;
+			if (patchNameText.substr(0, 5) == "test_")
+				patchDir = testPatchDir;
+			else
+				patchDir = examplePatchDir;
+			if (patchNameText != "" && patchNameText != "Enter Patch Name") {
+				patchName = patchNameText.c_str();
+			} else {
+				std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
+				patchName = randomname.c_str();
 			}
+			ReplaceString patchStructName{patchName};
+			patchStructName.replace_all(" ", "")
+				.replace_all("-", "")
+				.replace_all(",", "")
+				.replace_all("/", "")
+				.replace_all("\\", "")
+				.replace_all("\"", "")
+				.replace_all("'", "")
+				.replace_all(".", "")
+				.replace_all("?", "")
+				.replace_all("#", "")
+				.replace_all("!", "");
+			std::string patchFileName = patchDir + patchStructName.str;
+			writePatchFile(patchFileName, patchStructName.str, patchName, patchDescText);
+
+			labelText = "Wrote patch file: ";
+			labelText += patchStructName.str + ".yml";
+			updateDisplay();
 		}
 	}
 
@@ -229,19 +226,51 @@ private:
 
 	void writePatchFile(std::string fileName, std::string patchStructName, std::string patchName, std::string patchDesc)
 	{
-		labelText = "Creating patch..";
+		labelText = "Creating patch...";
 		updateDisplay();
 
+		auto context = rack::contextGet();
+		auto engine = context->engine;
+
 		std::vector<ModuleID> moduleData;
-		moduleData.reserve(centralData->moduleData.size());
-		for (auto &m : centralData->moduleData)
-			moduleData.push_back({m.id, m.slug});
+		std::vector<ParamStatus> paramData;
+		for (auto moduleID : engine->getModuleIds()) {
+			auto *module = engine->getModule(moduleID);
+			if (centralData->isInPlugin(module)) {
+				moduleData.push_back({moduleID, module->model->slug.c_str()});
+				if (module->model->slug.size() > 31)
+					printf("Warning: module slug truncated to 31 chars\n");
+
+				if (!centralData->isHub(module)) {
+					for (int i = 0; auto &p : module->params) {
+						paramData.push_back({.value = p.value, .paramID = i, .moduleID = moduleID});
+						i++;
+					}
+				}
+			}
+		}
+
+		std::vector<JackStatus> jackData;
+		for (auto cableID : engine->getCableIds()) {
+			auto cable = engine->getCable(cableID);
+			auto source = cable->outputModule;
+			auto dest = cable->inputModule;
+
+			if (centralData->isModuleInPlugin(source) && centralData->isModuleInPlugin(dest)) {
+				jackData.push_back({.sendingJackId = cable->outputId,
+									.receivedJackId = cable->inputId,
+									.sendingModuleId = source->getId(),
+									.receivedModuleId = dest->getId(),
+									.connected = true});
+			}
+		}
 
 		PatchFileWriter pw{moduleData};
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
-		pw.setJackList(centralData->jackData);
-		pw.setParamList(centralData->paramData);
+		pw.setJackList(jackData);
+		pw.setParamList(paramData);
+
 		std::vector<Mapping> maps;
 		maps.reserve(centralData->maps.size());
 		for (auto &m : centralData->maps)
@@ -253,7 +282,7 @@ private:
 		writeAsHeader(fileName + ".hh", patchStructName + "_patch", yml);
 	}
 
-	void writeToFile(const std::string& fileName, std::string textToWrite)
+	void writeToFile(const std::string &fileName, std::string textToWrite)
 	{
 		std::ofstream myfile;
 		myfile.open(fileName);
@@ -261,7 +290,7 @@ private:
 		myfile.close();
 	}
 
-	void writeAsHeader(const std::string& fileName, std::string_view structname, std::string_view textToWrite)
+	void writeAsHeader(const std::string &fileName, std::string_view structname, std::string_view textToWrite)
 	{
 		std::ofstream myfile;
 		myfile.open(fileName);
@@ -272,7 +301,7 @@ private:
 		myfile.close();
 	}
 
-	void writeBinaryFile(const std::string& fileName, const std::vector<unsigned char> data)
+	void writeBinaryFile(const std::string &fileName, const std::vector<unsigned char> data)
 	{
 		std::ofstream myfile{fileName, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
 		myfile.write(reinterpret_cast<const char *>(data.data()), data.size());

@@ -28,8 +28,8 @@ namespace MetaModule
 
 class PatchPlayer {
 	enum {
-		NumInConns = PanelDef::NumOutJacks,
-		NumOutConns = PanelDef::NumInJacks,
+		NumInConns = PanelDef::NumUserFacingInJacks,
+		NumOutConns = PanelDef::NumUserFacingOutJacks,
 	};
 
 public:
@@ -40,10 +40,10 @@ public:
 	Jack out_conns[NumOutConns] __attribute__((aligned(4))) = {{0, 0}};
 
 	// in_conns[]: In1-In6, GateIn1, GateIn2, MidiMonoNoteJack, MidiMonoGateJack
-	std::array<std::vector<Jack>, NumInConns + NumMidiJacks> in_conns;
+	std::array<std::vector<Jack>, NumInConns + PanelDef::NumMidiJackMaps> in_conns;
 
 	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
-	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs + NumMidiParams> knob_conns;
+	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs + PanelDef::NumMidiParams> knob_conns;
 
 	bool is_loaded = false;
 
@@ -54,7 +54,7 @@ private:
 	uint8_t dup_module_index[MAX_MODULES_IN_PATCH] = {0};
 
 	PatchData pd;
-	static const inline ModuleTypeSlug no_patch_loaded = "(Not Loaded)";
+	static inline ModuleTypeSlug no_patch_loaded{"(Not Loaded)"};
 
 public:
 	PatchPlayer() {
@@ -203,7 +203,7 @@ public:
 		return is_loaded ? pd.patch_name : no_patch_loaded;
 	}
 
-	int get_num_modules() {
+	unsigned get_num_modules() {
 		return is_loaded ? pd.module_slugs.size() : 0;
 	}
 
@@ -270,10 +270,10 @@ public:
 		return PanelDef::NumKnobs;
 	}
 	static constexpr unsigned get_num_panel_inputs() {
-		return PanelDef::NumInJacks;
+		return PanelDef::NumUserFacingOutJacks;
 	}
 	static constexpr unsigned get_num_panel_outputs() {
-		return PanelDef::NumOutJacks;
+		return PanelDef::NumUserFacingInJacks;
 	}
 
 	// float get_param_val(int module_id, int param_id) {
@@ -415,15 +415,12 @@ public:
 	void cache_knob_mapping(const MappedKnob &k) {
 		if (k.is_monophonic_note()) {
 			update_or_add(knob_conns[MidiMonoNoteParam], k);
-			// knob_conns[MidiMonoNoteParam].push_back(k);
 			printf_("DBG: Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 		} else if (k.is_monophonic_gate()) {
 			update_or_add(knob_conns[MidiMonoGateParam], k);
-			// knob_conns[MidiMonoGateParam].push_back(k);
 			printf_("DBG: Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 		} else if (k.panel_knob_id < PanelDef::NumKnobs) {
 			update_or_add(knob_conns[k.panel_knob_id], k);
-			// knob_conns[k.panel_knob_id].push_back(k);
 		}
 	}
 

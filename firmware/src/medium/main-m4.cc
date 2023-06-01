@@ -9,7 +9,7 @@
 #include "drivers/hsem.hh"
 #include "drivers/pin.hh"
 #include "drivers/register_access.hh"
-#include "drivers/system_startup.hh"
+#include "drivers/system_clocks.hh"
 #include "fatfs/ramdisk_ops.hh"
 #include "mp1m4/hsem_handler.hh"
 #include "params.hh"

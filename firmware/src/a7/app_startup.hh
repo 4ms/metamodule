@@ -6,7 +6,7 @@
 #include "drivers/rcc.hh"
 #include "drivers/secondary_core_control.hh"
 #include "drivers/stm32xx.h"
-#include "drivers/system_startup.hh"
+#include "drivers/system_clocks.hh"
 
 #include "drivers/copro_control.hh"
 #include "firmware_m4.h"
@@ -25,7 +25,7 @@ struct AppStartup {
 		HWSemaphore<MainCoreReady>::lock();
 
 		Copro::reset();
-		SystemStartup::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
+		SystemClocks::init_clocks(rcc_osc_conf, rcc_clk_conf, rcc_periph_clk_conf);
 
 		SecondaryCore::start();
 

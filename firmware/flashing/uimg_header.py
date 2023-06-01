@@ -30,16 +30,24 @@ compress_none = 0        # MP1-Boot only supports uncompressed kernels, for now
 with open(sys.argv[1], "rb") as bin_file:
     payload = bin_file.read();
 
-#TODO: these should be cmdline args:
-loadaddr = 0xC2000040
-entryaddr = 0xC2000040
+if len(sys.argv) > 3:
+    loadaddr = int(sys.argv[3], 16)
+else:
+    loadaddr = 0xC2000040
+
+if len(sys.argv) > 4:
+    entryaddr = int(sys.argv[4], 16)
+else:
+    entryaddr = loadaddr
+
 os = os_linux
 image_type = image_type_kernel
 compress = compress_none
 image_name = bytes("stm32mp1-baremetal image", "ascii")
 
 # Calculate some header entries:
-datalen = len(payload)
+header_size = 64
+datalen = len(payload) + header_size
 tmstamp = int(time.time())
 data_crc = zlib.crc32(payload) & 0xffffffff
 

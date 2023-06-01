@@ -1,5 +1,8 @@
 #pragma once
+#include <array>
 #include <string>
+#include <vector>
+
 namespace rack::app
 {
 struct PortWidget {};
@@ -20,8 +23,17 @@ inline NVGcolor nvgRGB(unsigned char r, unsigned char g, unsigned char b) { retu
 
 namespace rack
 {
+struct Plugin {
+	std::string slug;
+};
+struct Model {
+	std::string slug;
+	Plugin *plugin;
+};
 struct Module {
 	long dummy;
+	Model *model;
+	uint64_t id;
 };
 
 struct ParamHandle {
@@ -33,8 +45,6 @@ struct ParamHandle {
 	NVGcolor color;
 };
 
-} // namespace rack
-
 struct _Engine {
 	void removeParamHandle(rack::ParamHandle *) {}
 	void removeParamHandle_NoLock(rack::ParamHandle *) {}
@@ -42,10 +52,32 @@ struct _Engine {
 	void updateParamHandle(rack::ParamHandle *, int, int, bool) {}
 	void updateParamHandle_NoLock(rack::ParamHandle *, int, int, bool) {}
 	void addParamHandle(rack::ParamHandle *) {}
+
+	std::array<int64_t, 4> getModuleIds()
+	{
+		std::array<int64_t, 4> x{1, 2, 3, 4};
+		return x;
+	}
+
+	Module modules[4];
+	Module *getModule(int64_t id) { return &modules[id % 4]; }
 };
 
+struct Context {
+	static inline _Engine _engine;
+	_Engine *engine = &_engine;
+};
+
+Context *contextGet()
+{
+	static Context _context;
+	return &_context;
+}
+
+} // namespace rack
+
 struct _APP {
-	_Engine *engine;
+	rack::_Engine *engine;
 };
 
 static _APP oAPP;

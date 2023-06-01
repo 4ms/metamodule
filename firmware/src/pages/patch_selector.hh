@@ -55,10 +55,10 @@ struct PatchSelectorPage : PageBase {
 
 	void prepare_focus() override {
 		state = State::TryingToRequestPatchList;
+		lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void refresh_patchlist(PatchFileList &patchfiles) {
-		Volume first_vol;
 		num_usb = patchfiles.usb.size();
 		num_sdcard = patchfiles.sdcard.size();
 		num_norflash = patchfiles.norflash.size();
@@ -243,11 +243,11 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void show_spinner() {
-		lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+		// lv_obj_clear_flag(spinner, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void hide_spinner() {
-		lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
+		// lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	static void patchlist_scroll_cb(lv_event_t *event) {
@@ -283,7 +283,9 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	std::pair<uint32_t, Volume> calc_patch_id_vol(uint32_t roller_idx) {
-		auto vol = (roller_idx > nor_hdr) ? Volume::NorFlash : (roller_idx > sd_hdr) ? Volume::SDCard : Volume::USB;
+		auto vol = (num_norflash && roller_idx > nor_hdr) ? Volume::NorFlash :
+				   (num_sdcard && roller_idx > sd_hdr)	  ? Volume::SDCard :
+															Volume::USB;
 		if (vol == Volume::USB)
 			return {roller_idx - 1 - usb_hdr, vol};
 		if (vol == Volume::SDCard)
