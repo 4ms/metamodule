@@ -16,8 +16,36 @@ struct BaseElement {
 	unsigned idx = 0;
 	float default_val = 0.f;
 	float min_val = 0.f;
-	float max_val = 0.f;
+	float max_val = 1.f;
 };
+
+// Lights
+
+struct MonoLight : BaseElement {};
+struct RedLight : MonoLight {};
+struct OrangeLight : MonoLight {};
+struct GreenLight : MonoLight {};
+struct BlueLight : MonoLight {};
+struct WhiteLight : MonoLight {};
+
+struct DualLight : BaseElement {};
+struct RedBlueLight : DualLight {
+	enum Color { RED, BLUE };
+};
+
+struct RgbLed : BaseElement {
+	enum Color { RED, BLUE, GREEN };
+};
+using RedGreenBlueLight = RgbLed;
+
+template<typename LedT>
+struct MediumLight : BaseElement {};
+
+template<>
+struct MediumLight<RedGreenBlueLight> : RedGreenBlueLight {};
+
+using LightElement = std::
+	variant<MediumLight<RedGreenBlueLight>, RedLight, OrangeLight, GreenLight, BlueLight, WhiteLight, RedBlueLight>;
 
 // Switches/Buttons
 
@@ -32,27 +60,14 @@ struct LatchingButton : BaseElement {
 struct Toggle2pos : BaseElement {};
 struct Toggle3pos : BaseElement {};
 
-// Lights
-
-struct RgbLed : BaseElement {
-	enum Color { RED, BLUE, GREEN };
-};
-using RedGreenBlueLight = RgbLed;
-
-template<typename LedT>
-struct MediumLight : BaseElement {};
-
-template<>
-struct MediumLight<RedGreenBlueLight> : RedGreenBlueLight {};
-
-struct MediumRgbLed : RgbLed {};
-
 // Encoders
 struct Encoder : BaseElement {};
 struct LEDEncoder : BaseElement {
 	Encoder encoder;
 	RgbLed rgb_led;
 };
+
+using SwitchElement = std::variant<MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, LEDEncoder>;
 
 // Befaco Pots
 struct BefacoTinyKnob : BaseElement {};
@@ -84,54 +99,59 @@ struct Davies1900hBlackKnob : BaseElement {};
 struct Davies1900hWhiteKnob : BaseElement {};
 struct Davies1900hRedKnob : BaseElement {};
 struct Small9mmKnob : BaseElement {};
+struct Slider25mmVert : BaseElement {};
+struct Slider25mmHoriz : BaseElement {};
 
-// Jacks
-struct JackInput : BaseElement {};
-struct JackOutput : BaseElement {};
+using KnobElement = std::variant<
+	//4ms
+	Davies1900hBlackKnob,
+	Small9mmKnob,
+	DaviesLargeKnob,
+	Slider25mmVert,
+	Slider25mmHoriz,
+	// Befaco
+	Davies1900hRedKnob,
+	Davies1900hWhiteKnob,
+	BefacoTinyKnob,
+	BefacoSliderPot,
+	BefacoTinyKnobWhite,
+	BefacoTinyKnobRed,
+	BefacoTinyKnobDarkGrey,
+	BefacoTinyKnobLightGrey,
+	BefacoTinyKnobBlack,
+	Davies1900hLargeGreyKnob,
+	Davies1900hLightGreyKnob,
+	Davies1900hDarkGreyKnob,
+	CKSSNarrow,
+	Crossfader,
+	BefacoSwitchHorizontal,
+	CKSSHoriz2,
+	CKSSVert7,
+	CKSSHoriz4,
+	CKSSNarrow3,
+	Davies1900hLargeLightGreyKnob,
+	BefacoSlidePotSmall>;
+
+// Input Jacks
+struct JackHexNut : BaseElement {};
+struct JackInput : JackHexNut {};
+struct GateJackInput : JackInput {};
+struct AnalogJackInput : JackInput {};
 struct BefacoInputPort : BaseElement {};
-struct BefacoOutputPort : BaseElement {};
 using BananutBlack = BefacoInputPort;
+using InJackElement = std::variant<GateJackInput, AnalogJackInput, BefacoInputPort>;
+
+// Output jacks
+struct JackOutput : JackHexNut {};
+struct GateJackOutput : JackOutput {};
+struct AnalogJackOutput : JackOutput {};
+struct BefacoOutputPort : BaseElement {};
 using BananutRed = BefacoOutputPort;
+using OutJackElement = std::variant<GateJackOutput, AnalogJackOutput, BefacoOutputPort>;
 
 // AltParams
 struct AltParamToggle2 : BaseElement {};
 struct AltParamToggle3 : BaseElement {};
-
-// Element groups (variants):
-
-using SwitchElement = std::variant<MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, LEDEncoder>;
-
-using KnobElement = std::variant<DaviesLargeKnob,
-								 Davies1900hRedKnob,
-								 Davies1900hBlackKnob,
-								 Davies1900hWhiteKnob,
-								 Small9mmKnob,
-								 BefacoTinyKnob,
-								 BefacoSliderPot,
-								 BefacoTinyKnobWhite,
-								 BefacoTinyKnobRed,
-								 BefacoTinyKnobDarkGrey,
-								 BefacoTinyKnobLightGrey,
-								 BefacoTinyKnobBlack,
-								 Davies1900hLargeGreyKnob,
-								 Davies1900hLightGreyKnob,
-								 Davies1900hDarkGreyKnob,
-								 CKSSNarrow,
-								 Crossfader,
-								 BefacoSwitchHorizontal,
-								 CKSSHoriz2,
-								 CKSSVert7,
-								 CKSSHoriz4,
-								 CKSSNarrow3,
-								 Davies1900hLargeLightGreyKnob,
-								 BefacoSlidePotSmall>;
-
-using InJackElement = std::variant<JackInput, BefacoInputPort>;
-
-using OutJackElement = std::variant<JackOutput, BefacoOutputPort>;
-
-using LightElement = std::variant<MediumRgbLed, MediumLight<RedGreenBlueLight>>;
-
 using AltParamElement = std::variant<AltParamToggle2, AltParamToggle3>;
 
 struct ElementInfoBase {
@@ -145,6 +165,14 @@ struct ElementInfoBase {
 	static constexpr std::array<SwitchElement, 0> Switches{};
 	static constexpr std::array<LightElement, 0> Leds{};
 	static constexpr std::array<AltParamElement, 0> AltParams{};
+
+	template<size_t DPI>
+	static constexpr float px_to_mm(float px) {
+		constexpr float pix_per_inch = DPI;
+		constexpr float mm_per_inch = 25.4f;
+		float inches = px / pix_per_inch;
+		return inches * mm_per_inch;
+	}
 };
 
 } // namespace MetaModule
