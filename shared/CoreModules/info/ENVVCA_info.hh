@@ -23,7 +23,7 @@ struct ENVVCAInfo : ElementInfoBase {
 		KnobFall_Cv = 4,
 	};
 
-	static constexpr std::array<KnobElement, 5> Knobs{{
+	static constexpr std::array<Element, 5> Knobs{{
 		Slider25mmVert{
 			px_to_mm<72>(23.185f),
 			px_to_mm<72>(108.81f),
@@ -213,10 +213,10 @@ struct ENVVCAInfo : ElementInfoBase {
 	static constexpr auto Fall_Led = get<RedBlueLight>(Leds[1]);
 	static constexpr auto Eor_Led = get<OrangeLight>(Leds[2]);
 
-	// static constexpr std::array<BaseElement, 19> elements{{
-	// 	Rise_Slider,		Fall_Slider, Level_Slider, Rise_Cv,	 Fall_Cv, Time_Cv, Trigger,
-	// 	CycleJack,			Follow,		 In,		   Env,		 Eor,	  Out,	   Slow_Med_Fast_Rise,
-	// 	Slow_Med_Fast_Fall, CycleSwitch, Rise_Led,	   Fall_Led, Eor_Led,
-	// }};
+	static constexpr std::array<Element, 10> Elements{{
+		Rise_Slider, Fall_Slider, Level_Slider, Rise_Cv, Fall_Cv, Time_Cv, Trigger, CycleJack, Follow, In,
+		//		   Env,		 Eor,	  Out,	   Slow_Med_Fast_Rise,
+		// Slow_Med_Fast_Fall, CycleSwitch, Rise_Led,	   Fall_Led, Eor_Led,
+	}};
 };
 } // namespace MetaModule
