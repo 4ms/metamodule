@@ -1,5 +1,5 @@
 #include "widget_creator.hh"
-#include "components.h"
+#include "elements/4ms_widgets.hh"
 #include "elements/befaco_widgets.hh"
 #include "mapping/mappable_jack.hh"
 #include "mapping/mappable_knob.hh"

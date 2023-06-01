@@ -4,7 +4,7 @@
 #include "CoreModules/meta-module-hub/MetaModule_info.hh"
 #include "CoreModules/meta-module-hub/panel_medium_defs.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "components.h"
+#include "elements/4ms_widgets.hh"
 #include "hub_base.hh"
 #include "hub_jack.hh"
 #include "local_path.hh"

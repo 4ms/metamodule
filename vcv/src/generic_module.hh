@@ -2,7 +2,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
 #include "comm/comm_module.hh"
-#include "components.h"
+#include "elements/4ms_widgets.hh"
 #include "mapping/mappable_jack.hh"
 #include "util/base_concepts.hh"
 

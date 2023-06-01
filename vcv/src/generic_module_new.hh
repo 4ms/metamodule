@@ -2,7 +2,6 @@
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
 #include "comm/comm_module.hh"
-#include "components.h"
 #include "elements/vcv_module_creator.hh"
 #include "elements/widget_creator.hh"
 #include "mapping/mappable_jack.hh"
