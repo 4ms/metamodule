@@ -146,7 +146,7 @@ struct ENVVCAInfo : ElementInfoBase {
 			"Slow Med Fast Fall",
 			SwitchSlow_Med_Fast_Fall,
 		},
-		LatchingButton{
+		LatchingButtonMonoLight{
 			px_to_mm<72>(92.17f),
 			px_to_mm<72>(41.65f),
 			"Cycle",
