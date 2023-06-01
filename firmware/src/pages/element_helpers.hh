@@ -72,7 +72,7 @@ struct ElementImage {
 	const lv_img_dsc_t *get_img(const DaviesLargeKnob &) {
 		return scale_px == 240 ? &knob_large_x : &knob_large_x_120;
 	}
-	const lv_img_dsc_t *get_img(const Small9mmKnob &) {
+	const lv_img_dsc_t *get_img(const Knob9mm &) {
 		return scale_px == 240 ? &knob9mm_x : &knob9mm_x_120;
 	}
 
