@@ -33,6 +33,17 @@ LDFLAGS +=
 # Add source files to the build
 SOURCES += src/modules/Befaco/DualAtenuverter.cc
 SOURCES += $(SHARED_DIR)/CoreModules/Befaco/DualAtenuverterCore.cc
+
+SOURCES += src/modules/AudibleInstruments/Braids.cpp
+# SOURCES += $(SHARED_DIR)/CoreModules/modules/BraidsCore.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/modules/stmlib/utils/random.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/modules/stmlib/dsp/atan.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/modules/stmlib/dsp/units.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/analog_oscillator.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/digital_oscillator.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/macro_oscillator.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/resources.cc
+
 SOURCES += src/elements/widget_creator.cc
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)

@@ -397,6 +397,12 @@
       "name": "DualAtenuverter",
       "description": "Dual Attenuverter",
       "tags": []
+	},
+	{
+      "slug": "Braids",
+      "name": "Braids",
+      "description": "Braids",
+      "tags": []
 	}
   ]
 }
