@@ -1,4 +1,5 @@
 #pragma once
+#include "components.h"
 #include "elements.hh"
 #include "rack.hpp"
 
@@ -18,16 +19,10 @@ struct VCVWidgetCreator {
 	};
 
 	template<>
-	void createWidget<Knob9mm>(Knob9mm element)
-	{
-		printf("Knob9mm\n");
-		// using WidgetT = Small9mmKnob;
-		// auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
+	void createWidget<Slider25mmVert>(Slider25mmVert element);
 
-		// auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
-		// module_widget->addChild(new MappableKnobRing{*kn, 10});
-		// module_widget->addParam(kn);
-	}
+	template<>
+	void createWidget<Knob9mm>(Knob9mm element);
 
 private:
 	[[maybe_unused]] rack::Module *module;

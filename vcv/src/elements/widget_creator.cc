@@ -19,17 +19,17 @@ void VCVWidgetCreator::createWidget<BaseElement>(BaseElement element)
 	printf("BaseElement\n");
 }
 
-// template<>
-// void VCVWidgetCreator::createWidget<Knob9mm>(Knob9mm element)
-// {
-// 	printf("Knob9mm\n");
-// 	using WidgetT = Small9mmKnob;
-// 	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
+template<>
+void VCVWidgetCreator::createWidget<Knob9mm>(Knob9mm element)
+{
+	printf("Knob9mm\n");
+	using WidgetT = Small9mmKnob;
+	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
 
-// 	auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
-// 	module_widget->addChild(new MappableKnobRing{*kn, 10});
-// 	module_widget->addParam(kn);
-// }
+	auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
+	module_widget->addChild(new MappableKnobRing{*kn, 10});
+	module_widget->addParam(kn);
+}
 
 template<>
 void VCVWidgetCreator::createWidget<Slider25mmVert>(Slider25mmVert element)
