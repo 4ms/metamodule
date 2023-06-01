@@ -1,16 +1,17 @@
 #ifdef VCVRACK
 
+#include "mapping/central_data.hh"
 #include "moduleFactory.hh"
 #include "rack.hpp"
 
 template<typename Info, typename Core>
 struct PlatformModule : rack::Module {
-	// Auto-register in ModuleFactory
-	static std::unique_ptr<CoreProcessor> create() {
-		return std::make_unique<Core>();
+	void onAdd() override {
+		ModuleID selfID;
+		selfID.id = id;
+		selfID.slug = Info::slug;
+		centralData->registerModule(selfID, this);
 	}
-	static inline bool s_registered =
-		ModuleFactory::registerModuleType(Info::slug, create, MetaModule::ElementInfoView::makeView<Info>());
 };
 
 using rack::simd::float_4;
