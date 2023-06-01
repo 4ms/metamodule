@@ -10,71 +10,37 @@
 using namespace rack;
 
 template<Derived<ModuleInfoBase> Defs>
-struct GenericModuleNew
-{
-	static rack::Model* create()
-	{
+struct GenericModuleNew {
+	static rack::Model *create() {
 		return rack::createModel<Module, Widget>(Defs::slug.data());
 	}
 
-	struct Module : CommModule
-	{
-		Module()
-		{
-			// Calculate number of LED elements
-			constexpr auto NumRGBLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw)
-			{
-				return sw.switch_type == SwitchDef::MomentaryButton;
-			});
-			constexpr auto NumMonoLEDButtons = std::count_if(Defs::Switches.begin(), Defs::Switches.end(), [](auto &sw)
-			{
-				return sw.switch_type == SwitchDef::LatchingButton;
-			});
-			constexpr auto NumLEDElements = Defs::Leds.size() + NumRGBLEDButtons * 3 + NumMonoLEDButtons;
-
-			// Calculate number of parameters
-			constexpr auto NumParams = Defs::Knobs.size() + Defs::Switches.size();
-
-			// create the given number of elements of each type
-			configComm(NumParams, Defs::InJacks.size(), Defs::OutJacks.size(), NumLEDElements);
-
+	struct Module : CommModule {
+		Module() {
 			// create processing core
 			core = ModuleFactory::create(Defs::slug);
-
-			// remember slug (why again?)
 			selfID.slug = Defs::slug;
 
-			// Setup all the parameters (knobs and switches)
-			int parameterCounter = 0;
+			MetaModule::VCVModuleParamCreator creator{this};
 
-			for (auto knob : Defs::Knobs)
-			{
-				configParam(parameterCounter++, 0.f, 1.f, knob.default_val, knob.long_name.data());
+			//Count the elements of each type
+			for (auto &element : Defs::elements) {
+				std::visit([&creator](auto el) { creator.count_element(el); }, element);
 			}
 
-			for (auto sw : Defs::Switches)
-			{
-				auto thisParamterID = parameterCounter++;
+			// Register with VCV the number of elements of each type
+			configComm(creator.num_params, creator.num_inputs, creator.num_outputs, creator.num_lights);
 
-				if (sw.switch_type == SwitchDef::Encoder)
-				{
-					configParam(thisParamterID, -INFINITY, INFINITY, 0.0f, sw.long_name.data());
-				}
-				else
-				{
-					auto max = sw.switch_type == SwitchDef::Toggle3pos ? 2.f : 1.f;					
-
-					configParam(thisParamterID, 0.f, max, 0.f, sw.long_name.data());
-
-					commParams[thisParamterID]->scaleFactor = 1.f / max;
-				}
+			// Configure elements with VCV
+			for (auto &element : Defs::elements) {
+				std::visit([&creator](auto el) { creator.config_element(el); }, element);
 			}
 
-			uint32_t altID = 0;
-			for (auto &alt : Defs::AltParams)
-			{
-				altParams.push_back({true, altID++, alt.default_val});
-			}
+			// TODO: alt params
+			// uint32_t altID = 0;
+			// for (auto &alt : Defs::AltParams) {
+			// 	altParams.push_back({true, altID++, alt.default_val});
+			// }
 		}
 	};
 
@@ -83,8 +49,7 @@ struct GenericModuleNew
 		CommModule *mainModule;
 
 		Widget(CommModule *module)
-			: mainModule{module}
-		{
+			: mainModule{module} {
 			// link this widget to given module
 			setModule(static_cast<Module *>(module));
 
@@ -100,10 +65,8 @@ struct GenericModuleNew
 				addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 			}
 
-			// setup a fresh instance
-			MetaModule::VCVCreator creator{this, module};
-
-			// create widgets from all elements through the creator class
+			// create widgets from all elements
+			MetaModule::VCVWidgetCreator creator{this, module};
 			for (auto &element : Defs::elements) {
 				std::visit([&creator](auto el) { creator.createWidget(el); }, element);
 			}
@@ -223,8 +186,7 @@ struct GenericModuleNew
 			AltParamQty(CommModule &module, const AltParamDef &alt)
 				: _alt{alt}
 				, _module{module}
-				, _val{alt.default_val}
-			{
+				, _val{alt.default_val} {
 				for (auto &ap : _module.altParams) {
 					if (ap.id == _alt.id) {
 						_val = ap.val;
@@ -233,8 +195,7 @@ struct GenericModuleNew
 				}
 			}
 
-			void setValue(float value) override
-			{
+			void setValue(float value) override {
 				float prev_val = _val;
 				_val = std::clamp(value, _alt.min_val, _alt.max_val);
 				if (_alt.control_type == AltParamDef::Range::Integer)
@@ -252,26 +213,36 @@ struct GenericModuleNew
 				}
 			}
 
-			std::string getDisplayValueString() override
-			{
+			std::string getDisplayValueString() override {
 				if (_module.core)
 					return std::string{_module.core->get_alt_param_value(_alt.id, _val)};
 				return std::to_string(_val);
 			}
 
-			float getValue() override { return _val; }
-			float getMinValue() override { return _alt.min_val; }
-			float getMaxValue() override { return _alt.max_val; }
-			float getDefaultValue() override { return _alt.default_val; }
+			float getValue() override {
+				return _val;
+			}
+			float getMinValue() override {
+				return _alt.min_val;
+			}
+			float getMaxValue() override {
+				return _alt.max_val;
+			}
+			float getDefaultValue() override {
+				return _alt.default_val;
+			}
 		};
 
 		struct AltParamSlider : rack::ui::Slider {
-			AltParamSlider(CommModule &module, const AltParamDef &alt) { quantity = new AltParamQty{module, alt}; }
-			~AltParamSlider() { delete quantity; }
+			AltParamSlider(CommModule &module, const AltParamDef &alt) {
+				quantity = new AltParamQty{module, alt};
+			}
+			~AltParamSlider() {
+				delete quantity;
+			}
 		};
 
-		void appendContextMenu(rack::ui::Menu *menu) override
-		{
+		void appendContextMenu(rack::ui::Menu *menu) override {
 			menu->addChild(new rack::ui::MenuEntry);
 			for (auto &alt : Defs::AltParams) {
 				auto *item = new rack::ui::MenuItem;

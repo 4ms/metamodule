@@ -6,205 +6,151 @@
 namespace MetaModule
 {
 
-// template<>
-// void VCVCreator::createWidget<MomentaryButton>(MomentaryButton element)
-// {
-// 	module_widget->addParam(
-// 		rack::createParam<rack::MomentaryButton>(rack::Vec(element.posx, element.posy), module, element.idx));
-// 	num_params++;
-// }
+// TODO: Add Mappable wrappers
 
 template<>
-void VCVCreator::createWidget<Davies1900hWhiteKnob>(Davies1900hWhiteKnob element)
-{
+void VCVWidgetCreator::createWidget<Davies1900hWhiteKnob>(Davies1900hWhiteKnob element) {
 	module_widget->addParam(
 		rack::createParam<rack::Davies1900hWhiteKnob>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<Davies1900hBlackKnob>(Davies1900hBlackKnob element)
-{
+void VCVWidgetCreator::createWidget<Davies1900hBlackKnob>(Davies1900hBlackKnob element) {
 	module_widget->addParam(
 		rack::createParam<rack::Davies1900hBlackKnob>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<Davies1900hRedKnob>(Davies1900hRedKnob element)
-{
+void VCVWidgetCreator::createWidget<Davies1900hRedKnob>(Davies1900hRedKnob element) {
 	module_widget->addParam(
 		rack::createParam<rack::Davies1900hRedKnob>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<BefacoInputPort>(BefacoInputPort element)
-{
+void VCVWidgetCreator::createWidget<BefacoInputPort>(BefacoInputPort element) {
 	module_widget->addInput(
 		rack::createParam<Befaco::BefacoInputPort>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<BefacoOutputPort>(BefacoOutputPort element)
-{
+void VCVWidgetCreator::createWidget<BefacoOutputPort>(BefacoOutputPort element) {
 	module_widget->addOutput(
 		rack::createParam<Befaco::BefacoOutputPort>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<BefacoTinyKnobWhite>(BefacoTinyKnobWhite element)
-{
+void VCVWidgetCreator::createWidget<BefacoTinyKnobWhite>(BefacoTinyKnobWhite element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::BefacoTinyKnobWhite>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<BefacoTinyKnobRed>(BefacoTinyKnobRed element)
-{
+void VCVWidgetCreator::createWidget<BefacoTinyKnobRed>(BefacoTinyKnobRed element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::BefacoTinyKnobRed>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<BefacoTinyKnobDarkGrey>(BefacoTinyKnobDarkGrey element)
-{
+void VCVWidgetCreator::createWidget<BefacoTinyKnobDarkGrey>(BefacoTinyKnobDarkGrey element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::BefacoTinyKnobDarkGrey>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<BefacoTinyKnobLightGrey>(BefacoTinyKnobLightGrey element)
-{
+void VCVWidgetCreator::createWidget<BefacoTinyKnobLightGrey>(BefacoTinyKnobLightGrey element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::BefacoTinyKnobLightGrey>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<BefacoTinyKnobBlack>(BefacoTinyKnobBlack element)
-{
+void VCVWidgetCreator::createWidget<BefacoTinyKnobBlack>(BefacoTinyKnobBlack element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::BefacoTinyKnobBlack>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<Davies1900hLargeGreyKnob>(Davies1900hLargeGreyKnob element)
-{
+void VCVWidgetCreator::createWidget<Davies1900hLargeGreyKnob>(Davies1900hLargeGreyKnob element) {
 	module_widget->addParam(rack::createParam<Befaco::Davies1900hLargeGreyKnob>(
 		rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<Davies1900hLightGreyKnob>(Davies1900hLightGreyKnob element)
-{
+void VCVWidgetCreator::createWidget<Davies1900hLightGreyKnob>(Davies1900hLightGreyKnob element) {
 	module_widget->addParam(rack::createParam<Befaco::Davies1900hLightGreyKnob>(
 		rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<Davies1900hDarkGreyKnob>(Davies1900hDarkGreyKnob element)
-{
+void VCVWidgetCreator::createWidget<Davies1900hDarkGreyKnob>(Davies1900hDarkGreyKnob element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::Davies1900hDarkGreyKnob>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<CKSSNarrow>(CKSSNarrow element)
-{
+void VCVWidgetCreator::createWidget<CKSSNarrow>(CKSSNarrow element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::CKSSNarrow>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<Crossfader>(Crossfader element)
-{
+void VCVWidgetCreator::createWidget<Crossfader>(Crossfader element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::Crossfader>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<BefacoSwitchHorizontal>(BefacoSwitchHorizontal element)
-{
+void VCVWidgetCreator::createWidget<BefacoSwitchHorizontal>(BefacoSwitchHorizontal element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::BefacoSwitchHorizontal>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<CKSSHoriz2>(CKSSHoriz2 element)
-{
+void VCVWidgetCreator::createWidget<CKSSHoriz2>(CKSSHoriz2 element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::CKSSHoriz2>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<CKSSVert7>(CKSSVert7 element)
-{
+void VCVWidgetCreator::createWidget<CKSSVert7>(CKSSVert7 element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::CKSSVert7>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<CKSSHoriz4>(CKSSHoriz4 element)
-{
+void VCVWidgetCreator::createWidget<CKSSHoriz4>(CKSSHoriz4 element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::CKSSHoriz4>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<CKSSNarrow3>(CKSSNarrow3 element)
-{
+void VCVWidgetCreator::createWidget<CKSSNarrow3>(CKSSNarrow3 element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::CKSSNarrow3>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<Davies1900hLargeLightGreyKnob>(Davies1900hLargeLightGreyKnob element)
-{
+void VCVWidgetCreator::createWidget<Davies1900hLargeLightGreyKnob>(Davies1900hLargeLightGreyKnob element) {
 	module_widget->addParam(rack::createParam<Befaco::Davies1900hLargeLightGreyKnob>(
 		rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 template<>
-void VCVCreator::createWidget<BefacoSlidePotSmall>(BefacoSlidePotSmall element)
-{
+void VCVWidgetCreator::createWidget<BefacoSlidePotSmall>(BefacoSlidePotSmall element) {
 	module_widget->addParam(
 		rack::createParam<Befaco::BefacoSlidePotSmall>(rack::Vec(element.posx, element.posy), module, element.idx));
-	num_params++;
 }
 
 // TODO: mm2px? and how to indicate if posx, posy are center or corner?
 template<>
-void VCVCreator::createWidget<JackOutput>(JackOutput element)
-{
+void VCVWidgetCreator::createWidget<JackOutput>(JackOutput element) {
 	module_widget->addOutput(rack::createParam<MappableOutputJack<rack::PJ301MPort>>(
 		rack::Vec(element.posx, element.posy), module, element.idx));
-	num_outputs++;
 }
 
 template<>
-void VCVCreator::createWidget<JackInput>(JackInput element)
-{
+void VCVWidgetCreator::createWidget<JackInput>(JackInput element) {
 	module_widget->addInput(rack::createParam<MappableInputJack<rack::PJ301MPort>>(
 		rack::Vec(element.posx, element.posy), module, element.idx));
-	num_inputs++;
 }
 
 } // namespace MetaModule
