@@ -1,23 +1,27 @@
 #pragma once
+#include "central_data.hh"
 #include "map_marks.hh"
 #include "map_palette.hh"
-#include "central_data.hh"
 #include <rack.hpp>
 
 enum class MappableJackType { Input, Output };
+enum class CoordinateType { Center, TopLeft };
 
-template<MappableJackType InputOrOutput, typename BaseJackT>
+template<MappableJackType InputOrOutput, typename BaseJackT, CoordinateType Coords = CoordinateType::Center>
 class MappableJack : public BaseJackT {
 	static_assert(std::is_base_of<rack::app::SvgPort, BaseJackT>(), "Jack class must derive from SvgPort");
 	static constexpr float margin = 10;
 
 public:
-	MappableJack()
-	{
+	MappableJack() {
+		if constexpr (Coords == CoordinateType::Center) {
 		this->sw->box.pos = this->sw->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
 		this->fb->box.pos = this->fb->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
 		this->shadow->box.pos = this->shadow->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
 		this->box = this->box.grow(rack::math::Vec{margin, margin});
+		} else {
+			this->box = this->box.grow(rack::math::Vec{margin, margin});
+	}
 	}
 
 	void draw(const typename BaseJackT::DrawArgs &args) override
@@ -122,7 +126,13 @@ private:
 };
 
 template<typename BaseJackT>
-using MappableInputJack = MappableJack<MappableJackType::Input, BaseJackT>;
+using MappableInputCentered = MappableJack<MappableJackType::Input, BaseJackT, CoordinateType::Center>;
 
 template<typename BaseJackT>
-using MappableOutputJack = MappableJack<MappableJackType::Output, BaseJackT>;
+using MappableOutputCentered = MappableJack<MappableJackType::Output, BaseJackT, CoordinateType::Center>;
+
+template<typename BaseJackT>
+using MappableInput = MappableJack<MappableJackType::Input, BaseJackT, CoordinateType::TopLeft>;
+
+template<typename BaseJackT>
+using MappableOutput = MappableJack<MappableJackType::Output, BaseJackT, CoordinateType::TopLeft>;

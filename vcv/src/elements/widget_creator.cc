@@ -179,16 +179,15 @@ void VCVWidgetCreator::createWidget<Davies1900hRedKnob>(Davies1900hRedKnob eleme
 // 		rack::createParam<Befaco::BefacoSlidePotSmall>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
 // }
 
-// // TODO: mm2px? and how to indicate if x_mm, y_mm are center or corner?
 template<>
 void VCVWidgetCreator::createWidget<JackOutput>(JackOutput element) {
-	module_widget->addOutput(rack::createOutputCentered<MappableOutputJack<rack::PJ301MPort>>(
+	module_widget->addOutput(rack::createOutputCentered<MappableOutputCentered<rack::PJ301MPort>>(
 		rack::Vec(element.x_mm, element.y_mm), module, element.idx));
 }
 
 template<>
 void VCVWidgetCreator::createWidget<JackInput>(JackInput element) {
-	module_widget->addInput(rack::createInput<MappableInputJack<rack::PJ301MPort>>(
+	module_widget->addInput(rack::createInput<MappableInputCentered<rack::PJ301MPort>>(
 		rack::Vec(element.x_mm, element.y_mm), module, element.idx));
 }
 
@@ -196,13 +195,13 @@ static const auto BefacoJackOffsetFix = rack::Vec{-10, -10};
 
 template<>
 void VCVWidgetCreator::createWidget<BefacoInputPort>(BefacoInputPort element) {
-	module_widget->addInput(rack::createInput<MappableInputJack<Befaco::BananutBlack>>(
+	module_widget->addInput(rack::createInput<MappableInputCentered<Befaco::BananutBlack>>(
 		rack::Vec(element.x_mm, element.y_mm).plus(BefacoJackOffsetFix), module, element.idx));
 }
 
 template<>
 void VCVWidgetCreator::createWidget<BefacoOutputPort>(BefacoOutputPort element) {
-	module_widget->addOutput(rack::createOutput<MappableOutputJack<Befaco::BananutRed>>(
+	module_widget->addOutput(rack::createOutput<MappableOutputCentered<Befaco::BananutRed>>(
 		rack::Vec(element.x_mm, element.y_mm).plus(BefacoJackOffsetFix), module, element.idx));
 }
 

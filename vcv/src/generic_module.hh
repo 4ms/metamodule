@@ -210,16 +210,16 @@ struct GenericModule
 			}
 
 			int inJackID = 0;
-			for (auto jack : Defs::InJacks)
-			{
-				addInput(
+			for (auto jack : Defs::InJacks) {
+				addInput(createInputCentered<MappableInputCentered<PJ301MPort>>(
+					rack::mm2px({jack.x_mm, jack.y_mm}), module, inJackID++));
 					createInputCentered<MappableInputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, inJackID++));
 			}
 
 			int outJackID = 0;
-			for (auto jack : Defs::OutJacks)
-			{
-				addOutput(
+			for (auto jack : Defs::OutJacks) {
+				addOutput(createOutputCentered<MappableOutputCentered<PJ301MPort>>(
+					rack::mm2px({jack.x_mm, jack.y_mm}), module, outJackID++));
 					createOutputCentered<MappableOutputJack<PJ301MPort>>(rack::mm2px({jack.x_mm, jack.y_mm}), module, outJackID++));
 			}
 		}
