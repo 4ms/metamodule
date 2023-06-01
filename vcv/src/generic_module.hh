@@ -147,13 +147,13 @@ struct GenericModule
 						if (knob.orientation == KnobDef::Vertical)
 						{
 							auto *kn =
-								rack::createParamCentered<MappableKnob<FourmsLightSlider<rack::WhiteLight>>>(ctr_pos, module, thisParamerID);
+								rack::createParamCentered<MappableInnerKnob<FourmsLightSlider<rack::WhiteLight>>>(
+									ctr_pos, module, thisParamerID);
 							addChild(new MappableSliderRing{*kn, 20, 40});
 							addParam(kn);
-						}
-						else
-						{
-							auto *kn = rack::createParamCentered<MappableKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>>(
+						} else {
+							auto *kn = rack::createParamCentered<
+								MappableInnerKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>>(
 								ctr_pos, module, thisParamerID);
 							addChild(new MappableSliderRing{*kn, 40, 20});
 							addParam(kn);

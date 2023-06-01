@@ -7,29 +7,29 @@ class MetaModuleTextBox : public rack::LedDisplayTextField {
 	void draw(const DrawArgs &args) override { rack::LedDisplayTextField::draw(args); }
 };
 
-struct Davies1900hBlackKnob4ms : MappableKnob<rack::Davies1900hKnob> {
+struct Davies1900hBlackKnob4ms : MappableInnerKnob<rack::Davies1900hKnob> {
 	Davies1900hBlackKnob4ms()
 	{
 		setSvg(APP->window->loadSvg(rack::asset::plugin(pluginInstance, "res/components/Davies1900hBlack.svg")));
 	}
 };
 
-struct Davies1900hBlackKnobUnlined4ms : MappableKnob<rack::Davies1900hKnob> {
+struct Davies1900hBlackKnobUnlined4ms : MappableInnerKnob<rack::Davies1900hKnob> {
 	Davies1900hBlackKnobUnlined4ms()
 	{
 		setSvg(APP->window->loadSvg(rack::asset::plugin(pluginInstance, "res/components/Davies1900hBlack_no_pip.svg")));
 	}
 };
 
-struct DaviesLarge4ms : MappableKnob<rack::Davies1900hKnob> {
+struct DaviesLarge4ms : MappableInnerKnob<rack::Davies1900hKnob> {
 	DaviesLarge4ms() { setSvg(APP->window->loadSvg(rack::asset::plugin(pluginInstance, "res/components/Davies_large.svg"))); }
 };
 
-struct Small9mmKnob : MappableKnob<rack::RoundKnob> {
+struct Small9mmKnob : MappableInnerKnob<rack::RoundKnob> {
 	Small9mmKnob() { setSvg(APP->window->loadSvg(rack::asset::plugin(pluginInstance, "res/components/9mm_knob.svg"))); }
 };
 
-struct Small9mmUnlinedKnob : MappableKnob<rack::RoundKnob> {
+struct Small9mmUnlinedKnob : MappableInnerKnob<rack::RoundKnob> {
 	Small9mmUnlinedKnob()
 	{
 		setSvg(APP->window->loadSvg(rack::asset::plugin(pluginInstance, "res/components/9mm_knob_no_pip.svg")));

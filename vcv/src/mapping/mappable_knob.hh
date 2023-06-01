@@ -184,7 +184,7 @@ public:
 };
 
 template<typename BaseKnobT>
-class MappableKnob : public BaseKnobT {
+class MappableInnerKnob : public BaseKnobT {
 	// static_assert(std::is_base_of_v<app::SvgKnob, BaseKnobT>, "Knob class must derive from SvgKnob");
 	// ^^^ this fails for BaseKnobT = LEDLightSlider<WhiteLight>
 	// TODO: Make concept
@@ -341,3 +341,11 @@ private:
 	};
 };
 
+template<typename BaseKnobT>
+class MappableKnob : public MappableInnerKnob<BaseKnobT> {
+
+public:
+	MappableKnob() {
+		this->addChild(new MappableKnobRing{*this, 10});
+	}
+};

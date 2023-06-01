@@ -25,7 +25,7 @@ void VCVWidgetCreator::createWidget<Knob9mm>(Knob9mm element) {
 
 template<>
 void VCVWidgetCreator::createWidget<Slider25mmVert>(Slider25mmVert element) {
-	using WidgetT = MappableKnob<FourmsLightSlider<rack::WhiteLight>>;
+	using WidgetT = MappableInnerKnob<FourmsLightSlider<rack::WhiteLight>>;
 	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
 
 	auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
@@ -35,7 +35,7 @@ void VCVWidgetCreator::createWidget<Slider25mmVert>(Slider25mmVert element) {
 
 template<>
 void VCVWidgetCreator::createWidget<Slider25mmHoriz>(Slider25mmHoriz element) {
-	using WidgetT = MappableKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>;
+	using WidgetT = MappableInnerKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>;
 	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
 
 	auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
