@@ -92,6 +92,10 @@ struct BefacoTinyKnobRed : Knob {};
 struct BefacoTinyKnobDarkGrey : Knob {};
 struct BefacoTinyKnobLightGrey : Knob {};
 struct BefacoTinyKnobBlack : Knob {};
+struct Rogan2SGray : Knob {};
+struct Rogan2PSWhite : Knob {};
+struct Rogan2PSGreen : Knob {};
+struct Rogan2PSRed : Knob {};
 
 struct BefacoSliderPot : Slider { // TODO: is using this enum better than two types (Hor/Ver)?
 	enum Orientation { Vertical, Horizontal };
@@ -154,6 +158,12 @@ struct BefacoOutputPort : JackOutput {};
 using BananutRed = BefacoOutputPort;
 using OutJackElement = std::variant<GateJackOutput, AnalogJackOutput, BefacoOutputPort>;
 
+struct PJ301MPort : BaseElement {};
+
+// Displays
+struct Display : BaseElement {};
+struct BraidsDisplay148x56 : Display {};
+
 // AltParams
 struct AltParam : BaseElement {};
 struct AltParamToggle2 : AltParam {};
@@ -189,6 +199,10 @@ using Element = std::variant<MediumLight<RedGreenBlueLight>,
 							 Davies1900hLargeGreyKnob,
 							 Davies1900hLightGreyKnob,
 							 Davies1900hDarkGreyKnob,
+							 Rogan2SGray,
+							 Rogan2PSWhite,
+							 Rogan2PSGreen,
+							 Rogan2PSRed,
 							 CKSSNarrow,
 							 Crossfader,
 							 BefacoSwitchHorizontal,
@@ -204,6 +218,8 @@ using Element = std::variant<MediumLight<RedGreenBlueLight>,
 							 GateJackOutput,
 							 AnalogJackOutput,
 							 BefacoOutputPort,
+							 PJ301MPort,
+							 BraidsDisplay148x56,
 							 AltParamToggle2,
 							 AltParamToggle3>;
 
