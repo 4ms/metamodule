@@ -32,7 +32,7 @@ struct VCVCoreProcessor : CoreProcessor {
 		params[id].setValue(val);
 	}
 	void set_input(const int input_id, const float val) override {
-		inputs[input_id].setVoltage(val) * 5.f;
+		inputs[input_id].setVoltage(val * 5.f);
 	}
 	float get_output(const int output_id) const override {
 		return outputs[output_id].getVoltage() / 5.f;

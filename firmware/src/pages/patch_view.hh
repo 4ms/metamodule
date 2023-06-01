@@ -155,7 +155,7 @@ struct PatchViewPage : PageBase {
 			} else {
 				const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
 				// DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
-				ElementDrawHelper::draw_module_knobs(canvas, moduleinfo, patch, mapped_knobs, i, height);
+				ElementDrawHelper::draw_module_knobs(canvas, moduleinfo.Knobs, patch, mapped_knobs, i, height);
 			}
 			// for (const auto &el : moduleinfo.Knobs) {
 			// 	auto knob = DrawHelper::draw_knob(canvas, el, 120);
