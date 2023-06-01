@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <span>
 #include <string_view>
 #include <variant>
 
@@ -21,138 +22,143 @@ struct BaseElement {
 
 // Lights
 
-struct MonoLight : BaseElement {};
+struct Light : BaseElement {};
+struct MonoLight : Light {};
 struct RedLight : MonoLight {};
 struct OrangeLight : MonoLight {};
 struct GreenLight : MonoLight {};
 struct BlueLight : MonoLight {};
 struct WhiteLight : MonoLight {};
 
-struct DualLight : BaseElement {};
+struct DualLight : Light {};
 struct RedBlueLight : DualLight {
 	enum Color { RED, BLUE };
 };
 
-struct RgbLed : BaseElement {
+struct RgbLed : Light {
 	enum Color { RED, BLUE, GREEN };
 };
 using RedGreenBlueLight = RgbLed;
 
 template<typename LedT>
-struct MediumLight : BaseElement {};
-
+struct MediumLight : Light {};
 template<>
 struct MediumLight<RedGreenBlueLight> : RedGreenBlueLight {};
 
-using LightElement = std::
-	variant<MediumLight<RedGreenBlueLight>, RedLight, OrangeLight, GreenLight, BlueLight, WhiteLight, RedBlueLight>;
+// using LightElement = std::
+// 	variant<MediumLight<RedGreenBlueLight>, RedLight, OrangeLight, GreenLight, BlueLight, WhiteLight, RedBlueLight>;
 
 // Switches/Buttons
 
-struct MomentaryButton : BaseElement {
+struct Switch : BaseElement {};
+struct MomentaryButtonRGB : Switch {
 	enum State { PRESSED, RELEASED };
 	enum Color { RED, BLUE, GREEN };
 };
-struct LatchingButton : BaseElement {
+struct LatchingButtonMonoLight : Switch {
 	enum State { PRESSED, RELEASED };
 	enum Color { RED, BLUE, GREEN };
 };
-struct Toggle2pos : BaseElement {};
-struct Toggle3pos : BaseElement {};
+struct Toggle2pos : Switch {};
+struct Toggle3pos : Switch {};
+struct BefacoSwitchHorizontal : Switch {};
 
 // Encoders
-struct Encoder : BaseElement {};
-struct LEDEncoder : BaseElement {
+struct Encoder : Switch {};
+struct LEDEncoder : Switch {
 	Encoder encoder;
 	RgbLed rgb_led;
 };
 
-using SwitchElement = std::variant<MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, LEDEncoder>;
+// using SwitchElement = std::variant<MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, LEDEncoder>;
 
-// Befaco Pots
-struct BefacoTinyKnob : BaseElement {};
-struct BefacoSliderPot : BaseElement {
+// Pots (Knobs, Sliders)
+struct Pot : BaseElement {};
+struct Knob : Pot {};
+struct Slider : Pot {};
+
+struct BefacoTinyKnob : Knob {};
+struct DaviesLargeKnob : Knob {};
+struct Davies1900hBlackKnob : Knob {};
+struct Davies1900hWhiteKnob : Knob {};
+struct Davies1900hRedKnob : Knob {};
+struct Davies1900hLargeGreyKnob : Knob {};
+struct Davies1900hLightGreyKnob : Knob {};
+struct Davies1900hDarkGreyKnob : Knob {};
+struct Davies1900hLargeLightGreyKnob : Knob {};
+struct Knob9mm : Knob {};
+struct BefacoTinyKnobWhite : Knob {};
+struct BefacoTinyKnobRed : Knob {};
+struct BefacoTinyKnobDarkGrey : Knob {};
+struct BefacoTinyKnobLightGrey : Knob {};
+struct BefacoTinyKnobBlack : Knob {};
+
+struct BefacoSliderPot : Slider { // TODO: is using this enum better than two types (Hor/Ver)?
 	enum Orientation { Vertical, Horizontal };
 	Orientation orientation = Orientation::Vertical;
 };
-struct BefacoTinyKnobWhite : BaseElement {};
-struct BefacoTinyKnobRed : BaseElement {};
-struct BefacoTinyKnobDarkGrey : BaseElement {};
-struct BefacoTinyKnobLightGrey : BaseElement {};
-struct BefacoTinyKnobBlack : BaseElement {};
-struct Davies1900hLargeGreyKnob : BaseElement {};
-struct Davies1900hLightGreyKnob : BaseElement {};
-struct Davies1900hDarkGreyKnob : BaseElement {};
-struct CKSSNarrow : BaseElement {};
-struct Crossfader : BaseElement {};
-struct BefacoSwitchHorizontal : BaseElement {};
-struct CKSSHoriz2 : BaseElement {};
-struct CKSSVert7 : BaseElement {};
-struct CKSSHoriz4 : BaseElement {};
-struct CKSSNarrow3 : BaseElement {};
-struct Davies1900hLargeLightGreyKnob : BaseElement {};
-struct BefacoSlidePotSmall : BaseElement {};
+struct CKSSNarrow : Slider {};
+struct Crossfader : Slider {};
+struct CKSSHoriz2 : Slider {};
+struct CKSSVert7 : Slider {};
+struct CKSSHoriz4 : Slider {};
+struct CKSSNarrow3 : Slider {};
+struct BefacoSlidePotSmall : Slider {};
 
-// 4ms Pots
-struct DaviesLargeKnob : BaseElement {};
-struct Davies1900hBlackKnob : BaseElement {};
-struct Davies1900hWhiteKnob : BaseElement {};
-struct Davies1900hRedKnob : BaseElement {};
-struct Knob9mm : BaseElement {};
-struct Slider25mmVert : BaseElement {};
-struct Slider25mmHoriz : BaseElement {};
+struct Slider25mmVert : Slider {};
+struct Slider25mmHoriz : Slider {};
 
-using KnobElement = std::variant<
-	//4ms
-	Davies1900hBlackKnob,
-	Knob9mm,
-	DaviesLargeKnob,
-	Slider25mmVert,
-	Slider25mmHoriz,
-	// Befaco
-	Davies1900hRedKnob,
-	Davies1900hWhiteKnob,
-	BefacoTinyKnob,
-	BefacoSliderPot,
-	BefacoTinyKnobWhite,
-	BefacoTinyKnobRed,
-	BefacoTinyKnobDarkGrey,
-	BefacoTinyKnobLightGrey,
-	BefacoTinyKnobBlack,
-	Davies1900hLargeGreyKnob,
-	Davies1900hLightGreyKnob,
-	Davies1900hDarkGreyKnob,
-	CKSSNarrow,
-	Crossfader,
-	BefacoSwitchHorizontal,
-	CKSSHoriz2,
-	CKSSVert7,
-	CKSSHoriz4,
-	CKSSNarrow3,
-	Davies1900hLargeLightGreyKnob,
-	BefacoSlidePotSmall>;
+//using KnobElement = std::variant<
+//	//4ms
+//	Davies1900hBlackKnob,
+//	Knob9mm,
+//	DaviesLargeKnob,
+//	Slider25mmVert,
+//	Slider25mmHoriz,
+//	// Befaco
+//	Davies1900hRedKnob,
+//	Davies1900hWhiteKnob,
+//	BefacoTinyKnob,
+//	BefacoSliderPot,
+//	BefacoTinyKnobWhite,
+//	BefacoTinyKnobRed,
+//	BefacoTinyKnobDarkGrey,
+//	BefacoTinyKnobLightGrey,
+//	BefacoTinyKnobBlack,
+//	Davies1900hLargeGreyKnob,
+//	Davies1900hLightGreyKnob,
+//	Davies1900hDarkGreyKnob,
+//	CKSSNarrow,
+//	Crossfader,
+//	BefacoSwitchHorizontal,
+//	CKSSHoriz2,
+//	CKSSVert7,
+//	CKSSHoriz4,
+//	CKSSNarrow3,
+//	Davies1900hLargeLightGreyKnob,
+//	BefacoSlidePotSmall>;
 
 // Input Jacks
-struct JackHexNut : BaseElement {};
-struct JackInput : JackHexNut {};
+struct JackInput : BaseElement {};
 struct GateJackInput : JackInput {};
 struct AnalogJackInput : JackInput {};
-struct BefacoInputPort : BaseElement {};
+struct BefacoInputPort : JackInput {};
 using BananutBlack = BefacoInputPort;
 using InJackElement = std::variant<GateJackInput, AnalogJackInput, BefacoInputPort>;
 
 // Output jacks
-struct JackOutput : JackHexNut {};
+struct JackOutput : BaseElement {};
 struct GateJackOutput : JackOutput {};
 struct AnalogJackOutput : JackOutput {};
-struct BefacoOutputPort : BaseElement {};
+struct BefacoOutputPort : JackOutput {};
 using BananutRed = BefacoOutputPort;
 using OutJackElement = std::variant<GateJackOutput, AnalogJackOutput, BefacoOutputPort>;
 
 // AltParams
-struct AltParamToggle2 : BaseElement {};
-struct AltParamToggle3 : BaseElement {};
-using AltParamElement = std::variant<AltParamToggle2, AltParamToggle3>;
+struct AltParam : BaseElement {};
+struct AltParamToggle2 : AltParam {};
+struct AltParamToggle3 : AltParam {};
+// using AltParamElement = std::variant<AltParamToggle2, AltParamToggle3>;
 
 using Element = std::variant<MediumLight<RedGreenBlueLight>,
 							 RedLight,
@@ -161,8 +167,8 @@ using Element = std::variant<MediumLight<RedGreenBlueLight>,
 							 BlueLight,
 							 WhiteLight,
 							 RedBlueLight,
-							 MomentaryButton,
-							 LatchingButton,
+							 MomentaryButtonRGB,
+							 LatchingButtonMonoLight,
 							 Toggle2pos,
 							 Toggle3pos,
 							 LEDEncoder,
@@ -206,12 +212,12 @@ struct ElementInfoBase {
 	static constexpr std::string_view description{""};
 	static constexpr uint32_t width_hp = 0;
 	static constexpr std::string_view svg_filename{""};
-	static constexpr std::array<KnobElement, 0> Knobs{};
-	static constexpr std::array<InJackElement, 0> InJacks{};
-	static constexpr std::array<OutJackElement, 0> OutJacks{};
-	static constexpr std::array<SwitchElement, 0> Switches{};
-	static constexpr std::array<LightElement, 0> Leds{};
-	static constexpr std::array<AltParamElement, 0> AltParams{};
+	static constexpr std::span<Element> Knobs{};
+	static constexpr std::span<Element> InJacks{};
+	static constexpr std::span<Element> OutJacks{};
+	static constexpr std::span<Element> Switches{};
+	static constexpr std::span<Element> Leds{};
+	static constexpr std::span<Element> AltParams{};
 
 	template<size_t DPI>
 	static constexpr float px_to_mm(float px) {
