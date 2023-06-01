@@ -14,15 +14,7 @@ namespace MetaModule
 // 4ms widgets
 
 template<>
-void VCVWidgetCreator::createWidget<BaseElement>(BaseElement element)
-{
-	printf("BaseElement\n");
-}
-
-template<>
-void VCVWidgetCreator::createWidget<Knob9mm>(Knob9mm element)
-{
-	printf("Knob9mm\n");
+void VCVWidgetCreator::createWidget<Knob9mm>(Knob9mm element) {
 	using WidgetT = Small9mmKnob;
 	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
 
@@ -32,9 +24,7 @@ void VCVWidgetCreator::createWidget<Knob9mm>(Knob9mm element)
 }
 
 template<>
-void VCVWidgetCreator::createWidget<Slider25mmVert>(Slider25mmVert element)
-{
-	printf("Slider25mmVert\n");
+void VCVWidgetCreator::createWidget<Slider25mmVert>(Slider25mmVert element) {
 	using WidgetT = MappableKnob<FourmsLightSlider<rack::WhiteLight>>;
 	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
 
@@ -44,9 +34,7 @@ void VCVWidgetCreator::createWidget<Slider25mmVert>(Slider25mmVert element)
 }
 
 template<>
-void VCVWidgetCreator::createWidget<Slider25mmHoriz>(Slider25mmHoriz element)
-{
-	printf("Slider25mmHoriz\n");
+void VCVWidgetCreator::createWidget<Slider25mmHoriz>(Slider25mmHoriz element) {
 	using WidgetT = MappableKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>;
 	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
 
@@ -56,26 +44,21 @@ void VCVWidgetCreator::createWidget<Slider25mmHoriz>(Slider25mmHoriz element)
 }
 
 // Befaco widgets
-// template<>
-// void VCVWidgetCreator::createWidget<Davies1900hWhiteKnob>(Davies1900hWhiteKnob element)
-// {
-// 	module_widget->addParam(
-// 		rack::createParam<rack::Davies1900hWhiteKnob>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
-// }
+template<>
+void VCVWidgetCreator::createWidget<Davies1900hWhiteKnob>(Davies1900hWhiteKnob element) {
+	module_widget->addParam(
+		rack::createParam<rack::Davies1900hWhiteKnob>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
+}
 
-// template<>
-// void VCVWidgetCreator::createWidget<Davies1900hBlackKnob>(Davies1900hBlackKnob element)
-// {
-// 	module_widget->addParam(
-// 		rack::createParam<rack::Davies1900hBlackKnob>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
-// }
+template<>
+void VCVWidgetCreator::createWidget<MediumLight<RedGreenBlueLight>>(MediumLight<RedGreenBlueLight> element) {
+}
 
-// template<>
-// void VCVWidgetCreator::createWidget<Davies1900hRedKnob>(Davies1900hRedKnob element)
-// {
-// 	module_widget->addParam(
-// 		rack::createParam<rack::Davies1900hRedKnob>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
-// }
+template<>
+void VCVWidgetCreator::createWidget<Davies1900hRedKnob>(Davies1900hRedKnob element) {
+	module_widget->addParam(
+		rack::createParam<rack::Davies1900hRedKnob>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
+}
 
 // template<>
 // void VCVWidgetCreator::createWidget<BefacoTinyKnobWhite>(BefacoTinyKnobWhite element)
@@ -197,32 +180,30 @@ void VCVWidgetCreator::createWidget<Slider25mmHoriz>(Slider25mmHoriz element)
 // }
 
 // // TODO: mm2px? and how to indicate if x_mm, y_mm are center or corner?
-// template<>
-// void VCVWidgetCreator::createWidget<JackOutput>(JackOutput element)
-// {
-// 	module_widget->addOutput(rack::createOutputCentered<MappableOutputJack<rack::PJ301MPort>>(
-// 		rack::Vec(element.x_mm, element.y_mm), module, element.idx));
-// }
+template<>
+void VCVWidgetCreator::createWidget<JackOutput>(JackOutput element) {
+	module_widget->addOutput(rack::createOutputCentered<MappableOutputJack<rack::PJ301MPort>>(
+		rack::Vec(element.x_mm, element.y_mm), module, element.idx));
+}
 
-// template<>
-// void VCVWidgetCreator::createWidget<JackInput>(JackInput element)
-// {
-// 	module_widget->addInput(rack::createInputCentered<MappableInputJack<rack::PJ301MPort>>(
-// 		rack::Vec(element.x_mm, element.y_mm), module, element.idx));
-// }
+template<>
+void VCVWidgetCreator::createWidget<JackInput>(JackInput element) {
+	module_widget->addInput(rack::createInput<MappableInputJack<rack::PJ301MPort>>(
+		rack::Vec(element.x_mm, element.y_mm), module, element.idx));
+}
 
-// template<>
-// void VCVWidgetCreator::createWidget<BefacoInputPort>(BefacoInputPort element)
-// {
-// 	module_widget->addInput(
-// 		rack::createInput<Befaco::BefacoInputPort>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
-// }
+static const auto BefacoJackOffsetFix = rack::Vec{-10, -10};
 
-// template<>
-// void VCVWidgetCreator::createWidget<BefacoOutputPort>(BefacoOutputPort element)
-// {
-// 	module_widget->addOutput(
-// 		rack::createOutput<Befaco::BefacoOutputPort>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
-// }
+template<>
+void VCVWidgetCreator::createWidget<BefacoInputPort>(BefacoInputPort element) {
+	module_widget->addInput(rack::createInput<MappableInputJack<Befaco::BananutBlack>>(
+		rack::Vec(element.x_mm, element.y_mm).plus(BefacoJackOffsetFix), module, element.idx));
+}
+
+template<>
+void VCVWidgetCreator::createWidget<BefacoOutputPort>(BefacoOutputPort element) {
+	module_widget->addOutput(rack::createOutput<MappableOutputJack<Befaco::BananutRed>>(
+		rack::Vec(element.x_mm, element.y_mm).plus(BefacoJackOffsetFix), module, element.idx));
+}
 
 } // namespace MetaModule
