@@ -158,7 +158,11 @@ struct MetaModuleHubBase : public CommModule {
 						int paramId = m.dst.objID;
 						MappableObj dst{MappableObj::Type::Knob, paramId, m.dst.moduleID};
 						auto [min, max] = centralData->getMapRange(src, dst);
-						auto newMappedVal = MathTools::map_value(params[i].getValue(), 0.0f, 1.0f, min, max);
+						auto knob_min = module->paramQuantities[paramId]->minValue;
+						auto knob_max = module->paramQuantities[paramId]->maxValue;
+						min = MathTools::map_value(min, 0.f, 1.f, knob_min, knob_max);
+						max = MathTools::map_value(max, 0.f, 1.f, knob_min, knob_max);
+						auto newMappedVal = MathTools::map_value(params[i].getValue(), 0.f, 1.f, min, max);
 						auto paramQuantity = module->paramQuantities[paramId];
 						paramQuantity->setValue(newMappedVal);
 					} else {
