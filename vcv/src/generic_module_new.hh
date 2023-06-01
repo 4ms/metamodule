@@ -24,7 +24,7 @@ struct GenericModuleNew {
 			MetaModule::VCVModuleParamCreator creator{this};
 
 			// Count the elements of each type
-			for (auto &element : Defs::Knobs) {
+			for (auto &element : Defs::Elements) {
 				std::visit([&creator](auto el) { creator.count_element(el); }, element);
 			}
 
@@ -32,7 +32,7 @@ struct GenericModuleNew {
 			configComm(creator.num_params, creator.num_inputs, creator.num_outputs, creator.num_lights);
 
 			// Configure elements with VCV
-			for (auto &element : Defs::Knobs) {
+			for (auto &element : Defs::Elements) {
 				std::visit([&creator](auto el) { creator.config_element(el); }, element);
 			}
 
@@ -68,7 +68,7 @@ struct GenericModuleNew {
 
 			// create widgets from all elements
 			MetaModule::VCVWidgetCreator creator{this, module};
-			for (auto &element : Defs::Knobs) {
+			for (auto &element : Defs::Elements) {
 				std::visit([&creator](auto el) { creator.createWidget(el); }, element);
 			}
 
