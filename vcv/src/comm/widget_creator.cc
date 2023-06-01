@@ -1,13 +1,38 @@
 #include "widget_creator.hh"
+#include "components.h"
 #include "elements/befaco_widgets.hh"
 #include "mapping/mappable_jack.hh"
+#include "mapping/mappable_knob.hh"
 #include "rack.hpp"
 
 namespace MetaModule
 {
 
 // TODO: Add Mappable wrappers
+// 4ms widgets
+template<>
+void VCVWidgetCreator::createWidget<Slider25mmVert>(Slider25mmVert element)
+{
+	using WidgetT = MappableKnob<FourmsLightSlider<rack::WhiteLight>>;
+	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
 
+	auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
+	module_widget->addChild(new MappableSliderRing{*kn, 20, 40});
+	module_widget->addParam(kn);
+}
+
+template<>
+void VCVWidgetCreator::createWidget<Slider25mmHoriz>(Slider25mmHoriz element)
+{
+	using WidgetT = MappableKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>;
+	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
+
+	auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
+	module_widget->addChild(new MappableSliderRing{*kn, 40, 20});
+	module_widget->addParam(kn);
+}
+
+// Befaco widgets
 template<>
 void VCVWidgetCreator::createWidget<Davies1900hWhiteKnob>(Davies1900hWhiteKnob element)
 {
