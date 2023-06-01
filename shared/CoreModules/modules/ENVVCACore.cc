@@ -23,10 +23,9 @@ inline auto ThreeWayToInt = [](float val) -> uint32_t
 	return val * 2.0f;
 };
 
-
-class ENVVCACore : public SmartCoreProcessor<ENVVCAInfo>
-{
-	using Info = ENVVCAInfo;
+class ENVVCACore : public SmartCoreProcessor<MetaModule::ENVVCAInfo> {
+	using ENVVCAInfo = MetaModule::ENVVCAInfo;
+	using Info = MetaModule::ENVVCAInfo;
 	using ThisCore = ENVVCACore;
 
 public:

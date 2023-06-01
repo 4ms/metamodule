@@ -12,7 +12,7 @@ rack::Plugin *pluginInstance;
 rack::Model* modelSHEV = GenericModule<SHEVInfo>::create();
 
 #include "CoreModules/info/ENVVCA_info.hh"
-rack::Model* modelENVVCA = GenericModuleNew<ENVVCAInfo>::create();
+rack::Model *modelENVVCA = GenericModuleNew<MetaModule::ENVVCAInfo>::create();
 
 #include "CoreModules/info/DEV_info.hh"
 rack::Model* modelDEV = GenericModule<DEVInfo>::create();
