@@ -3,6 +3,7 @@
 #include "CoreModules/module_info_base.hh"
 #include "comm/comm_module.hh"
 #include "components.h"
+#include "elements/vcv_module_creator.hh"
 #include "elements/widget_creator.hh"
 #include "mapping/mappable_jack.hh"
 #include "util/base_concepts.hh"
@@ -21,11 +22,11 @@ struct GenericModuleNew {
 			core = ModuleFactory::create(Defs::slug);
 			selfID.slug = Defs::slug;
 
-			MetaModule::VCVModuleParamCreator creator{this};
+			VCVModuleParamCreator creator{this};
 
 			// Count the elements of each type
 			for (auto &element : Defs::Elements) {
-				std::visit([&creator](auto el) { creator.count_element(el); }, element);
+				std::visit([&creator](auto &el) { creator.count_element(el); }, element);
 			}
 
 			// Register with VCV the number of elements of each type
@@ -33,7 +34,7 @@ struct GenericModuleNew {
 
 			// Configure elements with VCV
 			for (auto &element : Defs::Elements) {
-				std::visit([&creator](auto el) { creator.config_element(el); }, element);
+				std::visit([&creator](auto &el) { creator.config_element(el); }, element);
 			}
 
 			// TODO: alt params
@@ -67,14 +68,9 @@ struct GenericModuleNew {
 			}
 
 			// create widgets from all elements
-			MetaModule::VCVWidgetCreator creator{this, module};
+			VCVWidgetCreator creator{this, module};
 			for (auto &element : Defs::Elements) {
-				std::visit(
-					[&creator](auto &el) {
-						printf("el %d\n", el.idx);
-						creator.createWidget(el);
-					},
-					element);
+				std::visit([&creator](auto &el) { creator.createWidget(el); }, element);
 			}
 
 			// // Add lights
