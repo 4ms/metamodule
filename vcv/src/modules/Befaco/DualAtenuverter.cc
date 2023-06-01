@@ -1,4 +1,5 @@
 #include "mapping/mappable_jack.hh"
+#include "mapping/mappable_knob.hh"
 #include "plugin.hh"
 //
 #include "CoreModules/Befaco/DualAtenuverterCore.hh"
@@ -27,16 +28,16 @@ struct DualAtenuverterWidget : ModuleWidget {
 		addChild(createWidget<Knurlie>(Vec(15, 0)));
 		addChild(createWidget<Knurlie>(Vec(15, 365)));
 
-		addParam(createParam<Davies1900hWhiteKnob>(Vec(20, 33), module, ATEN1_PARAM));
-		addParam(createParam<Davies1900hRedKnob>(Vec(20, 91), module, OFFSET1_PARAM));
-		addParam(createParam<Davies1900hWhiteKnob>(Vec(20, 201), module, ATEN2_PARAM));
-		addParam(createParam<Davies1900hRedKnob>(Vec(20, 260), module, OFFSET2_PARAM));
+		addParam(createParam<MappableKnob<Davies1900hWhiteKnob>>(Vec(20, 33), module, ATEN1_PARAM));
+		addParam(createParam<MappableKnob<Davies1900hRedKnob>>(Vec(20, 91), module, OFFSET1_PARAM));
+		addParam(createParam<MappableKnob<Davies1900hWhiteKnob>>(Vec(20, 201), module, ATEN2_PARAM));
+		addParam(createParam<MappableKnob<Davies1900hRedKnob>>(Vec(20, 260), module, OFFSET2_PARAM));
 
-		addInput(createInput<MappableInputJack<BefacoInputPort>>(Vec(7, 152), module, IN1_INPUT));
-		addOutput(createOutput<MappableOutputJack<BefacoOutputPort>>(Vec(43, 152), module, OUT1_OUTPUT));
+		addInput(createInput<MappableInput<BefacoInputPort>>(Vec(7, 152), module, IN1_INPUT));
+		addOutput(createOutput<MappableOutput<BefacoOutputPort>>(Vec(43, 152), module, OUT1_OUTPUT));
 
-		addInput(createInput<MappableInputJack<BefacoInputPort>>(Vec(7, 319), module, IN2_INPUT));
-		addOutput(createOutput<MappableOutputJack<BefacoOutputPort>>(Vec(43, 319), module, OUT2_OUTPUT));
+		addInput(createInput<MappableInput<BefacoInputPort>>(Vec(7, 319), module, IN2_INPUT));
+		addOutput(createOutput<MappableOutput<BefacoOutputPort>>(Vec(43, 319), module, OUT2_OUTPUT));
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(33, 143), module, OUT1_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(33, 311), module, OUT2_LIGHT));
