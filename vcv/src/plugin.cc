@@ -193,6 +193,9 @@ rack::Model* modelEnOsc = GenericModule<APEnOscInfo>::create();
 
 #include "CoreModules/info/BuffMult_info.hh"
 rack::Model* modelBuffMult = GenericModule<BuffMultInfo>::create();
+
+#include "CoreModules/info/DualAtenuverter_info.hh"
+rack::Model *modelDualAtenuverter = GenericModuleNew<MetaModule::DualAtenuverterInfo>::create();
 ///////////////////////////////////////////////////////
 
 void init(rack::Plugin *p)
