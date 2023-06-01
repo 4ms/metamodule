@@ -5,6 +5,8 @@
 #include "mapping/mappable_knob.hh"
 #include "rack.hpp"
 
+#include <cstdio>
+
 namespace MetaModule
 {
 
@@ -12,19 +14,27 @@ namespace MetaModule
 // 4ms widgets
 
 template<>
-void VCVWidgetCreator::createWidget<Knob9mm>(Knob9mm element)
+void VCVWidgetCreator::createWidget<BaseElement>(BaseElement element)
 {
-	using WidgetT = Small9mmKnob;
-	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
-
-	auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
-	module_widget->addChild(new MappableKnobRing{*kn, 10});
-	module_widget->addParam(kn);
+	printf("BaseElement\n");
 }
+
+// template<>
+// void VCVWidgetCreator::createWidget<Knob9mm>(Knob9mm element)
+// {
+// 	printf("Knob9mm\n");
+// 	using WidgetT = Small9mmKnob;
+// 	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
+
+// 	auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
+// 	module_widget->addChild(new MappableKnobRing{*kn, 10});
+// 	module_widget->addParam(kn);
+// }
 
 template<>
 void VCVWidgetCreator::createWidget<Slider25mmVert>(Slider25mmVert element)
 {
+	printf("Slider25mmVert\n");
 	using WidgetT = MappableKnob<FourmsLightSlider<rack::WhiteLight>>;
 	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
 
@@ -36,6 +46,7 @@ void VCVWidgetCreator::createWidget<Slider25mmVert>(Slider25mmVert element)
 template<>
 void VCVWidgetCreator::createWidget<Slider25mmHoriz>(Slider25mmHoriz element)
 {
+	printf("Slider25mmHoriz\n");
 	using WidgetT = MappableKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>;
 	auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
 

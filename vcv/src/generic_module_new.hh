@@ -2,8 +2,8 @@
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
 #include "comm/comm_module.hh"
-#include "comm/widget_creator.hh"
 #include "components.h"
+#include "elements/widget_creator.hh"
 #include "mapping/mappable_jack.hh"
 #include "util/base_concepts.hh"
 

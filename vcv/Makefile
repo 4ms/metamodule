@@ -33,6 +33,7 @@ LDFLAGS +=
 # Add source files to the build
 SOURCES += src/modules/Befaco/DualAtenuverter.cc
 SOURCES += $(SHARED_DIR)/CoreModules/Befaco/DualAtenuverterCore.cc
+SOURCES += src/elements/widget_creator.cc
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard src/hub/*.cc)

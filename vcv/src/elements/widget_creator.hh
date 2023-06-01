@@ -12,7 +12,22 @@ struct VCVWidgetCreator {
 	{}
 
 	template<typename T>
-	void createWidget(const T element){};
+	void createWidget(T element)
+	{
+		printf("unknown\n");
+	};
+
+	template<>
+	void createWidget<Knob9mm>(Knob9mm element)
+	{
+		printf("Knob9mm\n");
+		// using WidgetT = Small9mmKnob;
+		// auto ctr_pos = rack::Vec(element.x_mm, element.y_mm);
+
+		// auto *kn = rack::createParamCentered<WidgetT>(ctr_pos, module, element.idx);
+		// module_widget->addChild(new MappableKnobRing{*kn, 10});
+		// module_widget->addParam(kn);
+	}
 
 private:
 	[[maybe_unused]] rack::Module *module;
