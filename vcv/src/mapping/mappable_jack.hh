@@ -15,17 +15,16 @@ class MappableJack : public BaseJackT {
 public:
 	MappableJack() {
 		if constexpr (Coords == CoordinateType::Center) {
-		this->sw->box.pos = this->sw->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
-		this->fb->box.pos = this->fb->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
-		this->shadow->box.pos = this->shadow->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
-		this->box = this->box.grow(rack::math::Vec{margin, margin});
+			this->sw->box.pos = this->sw->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
+			this->fb->box.pos = this->fb->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
+			this->shadow->box.pos = this->shadow->box.pos.plus(rack::math::Vec{margin / 2, margin / 2});
+			this->box = this->box.grow(rack::math::Vec{margin, margin});
 		} else {
 			this->box = this->box.grow(rack::math::Vec{margin, margin});
-	}
+		}
 	}
 
-	void draw(const typename BaseJackT::DrawArgs &args) override
-	{
+	void draw(const typename BaseJackT::DrawArgs &args) override {
 		BaseJackT::draw(args);
 		auto id = getId();
 
@@ -53,8 +52,7 @@ public:
 		}
 	}
 
-	void onDragStart(const rack::event::DragStart &e) override
-	{
+	void onDragStart(const rack::event::DragStart &e) override {
 		if (!(centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType))) {
 			rack::PortWidget::onDragStart(e);
 		} else {
@@ -63,8 +61,7 @@ public:
 		}
 	}
 
-	void onButton(const rack::event::Button &e) override
-	{
+	void onButton(const rack::event::Button &e) override {
 		rack::OpaqueWidget::onButton(e);
 
 		// Right click to open context menu
@@ -86,18 +83,18 @@ public:
 		}
 	}
 
-	void onHover(const rack::event::Hover &e) override { e.consume(this); }
+	void onHover(const rack::event::Hover &e) override {
+		e.consume(this);
+	}
 
-	void onEnter(const rack::event::Enter &e) override
-	{
+	void onEnter(const rack::event::Enter &e) override {
 		hovered = true;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyEnterHover(getId());
 		BaseJackT::onEnter(e);
 	}
 
-	void onLeave(const rack::event::Leave &e) override
-	{
+	void onLeave(const rack::event::Leave &e) override {
 		hovered = false;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyLeaveHover(getId());
@@ -107,8 +104,7 @@ public:
 private:
 	bool hovered = false;
 
-	MappableObj getId()
-	{
+	MappableObj getId() {
 		int64_t moduleId = this->module ? this->module->id : -1;
 		if constexpr (InputOrOutput == MappableJackType::Input)
 			return {MappableObj::Type::InputJack, this->portId, moduleId};
@@ -119,9 +115,11 @@ private:
 	struct JackUnmapItem : rack::ui::MenuItem {
 		const MappableObj _id;
 		JackUnmapItem(MappableObj id)
-			: _id{id}
-		{}
-		void onAction(const rack::event::Action &e) override { centralData->unregisterMapByDest(_id); }
+			: _id{id} {
+		}
+		void onAction(const rack::event::Action &e) override {
+			centralData->unregisterMapByDest(_id);
+		}
 	};
 };
 

@@ -4,7 +4,6 @@
 
 #include <rack.hpp>
 
-
 struct PaletteHub {
 	static inline const NVGcolor ORANGE = nvgRGB(0xff, 0x80, 0x00);
 	static inline const NVGcolor BROWN = nvgRGB(0x80, 0x40, 0x00);
@@ -38,5 +37,7 @@ private:
 	};
 
 public:
-	static NVGcolor color(unsigned idx) { return _color[idx % _color.size()]; }
+	static NVGcolor color(unsigned idx) {
+		return _color[idx % _color.size()];
+	}
 };

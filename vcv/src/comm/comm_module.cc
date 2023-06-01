@@ -1,10 +1,10 @@
 #include "comm_module.hh"
 #include "../mapping/central_data.hh"
 
-CommModule::CommModule() {}
+CommModule::CommModule() {
+}
 
-void CommModule::setModuleId(int64_t id)
-{
+void CommModule::setModuleId(int64_t id) {
 	for (auto &el : inputJacks) {
 		el->setModuleID(id);
 	}
@@ -16,19 +16,21 @@ void CommModule::setModuleId(int64_t id)
 	}
 }
 
-void CommModule::onAdd()
-{
+void CommModule::onAdd() {
 	selfID.id = this->id;
 	setModuleId(selfID.id);
 	centralData->registerModule(selfID, this);
 }
 
-void CommModule::onRemove() { centralData->unregisterModule(selfID); }
+void CommModule::onRemove() {
+	centralData->unregisterModule(selfID);
+}
 
-void CommModule::onSampleRateChange() { _sample_rate_changed = true; }
+void CommModule::onSampleRateChange() {
+	_sample_rate_changed = true;
+}
 
-void CommModule::process(const ProcessArgs &args)
-{
+void CommModule::process(const ProcessArgs &args) {
 	for (auto &param : commParams) {
 		param->updateValue();
 		core->set_param(param->getID(), param->getValue());
@@ -74,8 +76,7 @@ void CommModule::process(const ProcessArgs &args)
 	}
 }
 
-void CommModule::configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int NUM_LIGHTS)
-{
+void CommModule::configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int NUM_LIGHTS) {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	_numLights = NUM_LIGHTS;
 

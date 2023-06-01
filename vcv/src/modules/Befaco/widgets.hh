@@ -4,24 +4,25 @@
 extern rack::Plugin *pluginInstance;
 
 struct Knurlie : rack::SvgScrew {
-	Knurlie() { setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Knurlie.svg"))); }
+	Knurlie() {
+		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Knurlie.svg")));
+	}
 };
 
 struct BefacoTinyKnobWhite : rack::BefacoTinyKnob {
-	BefacoTinyKnobWhite() {}
+	BefacoTinyKnobWhite() {
+	}
 };
 
 struct BefacoTinyKnobRed : rack::BefacoTinyKnob {
-	BefacoTinyKnobRed()
-	{
+	BefacoTinyKnobRed() {
 		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoTinyPointWhite.svg")));
 		bg->setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoTinyKnobRed_bg.svg")));
 	}
 };
 
 struct BefacoTinyKnobDarkGrey : rack::BefacoTinyKnob {
-	BefacoTinyKnobDarkGrey()
-	{
+	BefacoTinyKnobDarkGrey() {
 		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoTinyPointWhite.svg")));
 		bg->setSvg(
 			rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoTinyKnobDarkGrey_bg.svg")));
@@ -29,40 +30,35 @@ struct BefacoTinyKnobDarkGrey : rack::BefacoTinyKnob {
 };
 
 struct BefacoTinyKnobLightGrey : rack::BefacoTinyKnob {
-	BefacoTinyKnobLightGrey()
-	{
+	BefacoTinyKnobLightGrey() {
 		bg->setSvg(
 			rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoTinyKnobLightGrey_bg.svg")));
 	}
 };
 
 struct BefacoTinyKnobBlack : rack::BefacoTinyKnob {
-	BefacoTinyKnobBlack()
-	{
+	BefacoTinyKnobBlack() {
 		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoTinyPointWhite.svg")));
 		bg->setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoTinyKnobBlack_bg.svg")));
 	}
 };
 
 struct Davies1900hLargeGreyKnob : rack::Davies1900hKnob {
-	Davies1900hLargeGreyKnob()
-	{
+	Davies1900hLargeGreyKnob() {
 		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Davies1900hLargeGrey.svg")));
 		bg->setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Davies1900hLargeGrey_bg.svg")));
 	}
 };
 
 struct Davies1900hLightGreyKnob : rack::Davies1900hKnob {
-	Davies1900hLightGreyKnob()
-	{
+	Davies1900hLightGreyKnob() {
 		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Davies1900hLightGrey.svg")));
 		bg->setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Davies1900hLightGrey_bg.svg")));
 	}
 };
 
 struct Davies1900hDarkGreyKnob : rack::Davies1900hKnob {
-	Davies1900hDarkGreyKnob()
-	{
+	Davies1900hDarkGreyKnob() {
 		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Davies1900hDarkGrey.svg")));
 		bg->setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Davies1900hDarkGrey_bg.svg")));
 	}
@@ -72,28 +68,30 @@ struct Davies1900hDarkGreyKnob : rack::Davies1900hKnob {
 using Davies1900hDarkBlackAlt = rack::Davies1900hBlackKnob;
 
 struct BananutRed : rack::app::SvgPort {
-	BananutRed() { setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BananutRed.svg"))); }
+	BananutRed() {
+		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BananutRed.svg")));
+	}
 };
 /** Deprecated alias */
 using BefacoOutputPort = BananutRed;
 
 struct BananutBlack : rack::app::SvgPort {
-	BananutBlack() { setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BananutBlack.svg"))); }
+	BananutBlack() {
+		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BananutBlack.svg")));
+	}
 };
 /** Deprecated alias */
 using BefacoInputPort = BananutBlack;
 
 struct CKSSNarrow : rack::app::SvgSwitch {
-	CKSSNarrow()
-	{
+	CKSSNarrow() {
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/SwitchNarrow_0.svg")));
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/SwitchNarrow_2.svg")));
 	}
 };
 
 struct Crossfader : rack::app::SvgSlider {
-	Crossfader()
-	{
+	Crossfader() {
 		setBackgroundSvg(
 			rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/CrossfaderBackground.svg")));
 		setHandleSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/CrossfaderHandle.svg")));
@@ -107,8 +105,7 @@ struct Crossfader : rack::app::SvgSlider {
 };
 
 struct BefacoSwitchHorizontal : rack::app::SvgSwitch {
-	BefacoSwitchHorizontal()
-	{
+	BefacoSwitchHorizontal() {
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoSwitchHoriz_0.svg")));
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoSwitchHoriz_1.svg")));
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/BefacoSwitchHoriz_2.svg")));
@@ -116,16 +113,14 @@ struct BefacoSwitchHorizontal : rack::app::SvgSwitch {
 };
 
 struct CKSSHoriz2 : rack::app::SvgSwitch {
-	CKSSHoriz2()
-	{
+	CKSSHoriz2() {
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/SwitchNarrowHoriz_0.svg")));
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/SwitchNarrowHoriz_1.svg")));
 	}
 };
 
 struct CKSSVert7 : rack::app::SvgSlider {
-	CKSSVert7()
-	{
+	CKSSVert7() {
 		rack::Vec margin = rack::Vec(3.5, 3.5);
 		maxHandlePos = rack::Vec(1, 1).plus(margin);
 		minHandlePos = rack::Vec(1, 45).plus(margin);
@@ -136,11 +131,11 @@ struct CKSSVert7 : rack::app::SvgSlider {
 	}
 
 	// disable double click as this messes with click to advance
-	void onDoubleClick(const rack::event::DoubleClick &e) override {}
+	void onDoubleClick(const rack::event::DoubleClick &e) override {
+	}
 
 	// cycle through the values (with reset) on click only (not drag)
-	void onAction(const ActionEvent &e) override
-	{
+	void onAction(const ActionEvent &e) override {
 		rack::ParamQuantity *paramQuantity = getParamQuantity();
 		float range = paramQuantity->maxValue - paramQuantity->minValue;
 		float newValue = paramQuantity->getValue() + 1.f;
@@ -152,8 +147,7 @@ struct CKSSVert7 : rack::app::SvgSlider {
 };
 
 struct CKSSHoriz4 : rack::app::SvgSlider {
-	CKSSHoriz4()
-	{
+	CKSSHoriz4() {
 		setBackgroundSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/SwitchWideHoriz_bg.svg")));
 		setHandleSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/SwitchWideHoriz_fg.svg")));
 		minHandlePos = rack::mm2px(rack::Vec(0.3f, 0.3f));
@@ -165,11 +159,11 @@ struct CKSSHoriz4 : rack::app::SvgSlider {
 	}
 
 	// disable double click as this messes with click to advance
-	void onDoubleClick(const rack::event::DoubleClick &e) override {}
+	void onDoubleClick(const rack::event::DoubleClick &e) override {
+	}
 
 	// cycle through the values (with reset) on click only (not drag)
-	void onAction(const ActionEvent &e) override
-	{
+	void onAction(const ActionEvent &e) override {
 		rack::ParamQuantity *paramQuantity = getParamQuantity();
 		float range = paramQuantity->maxValue - paramQuantity->minValue;
 		float newValue = paramQuantity->getValue() + 1.f;
@@ -181,8 +175,7 @@ struct CKSSHoriz4 : rack::app::SvgSlider {
 };
 
 struct CKSSNarrow3 : rack::app::SvgSwitch {
-	CKSSNarrow3()
-	{
+	CKSSNarrow3() {
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/SwitchNarrow_0.svg")));
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/SwitchNarrow_1.svg")));
 		addFrame(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/SwitchNarrow_2.svg")));
@@ -190,8 +183,7 @@ struct CKSSNarrow3 : rack::app::SvgSwitch {
 };
 
 struct Davies1900hLargeLightGreyKnob : rack::Davies1900hKnob {
-	Davies1900hLargeLightGreyKnob()
-	{
+	Davies1900hLargeLightGreyKnob() {
 		setSvg(rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Davies1900hLargeLightGrey.svg")));
 		bg->setSvg(
 			rack::Svg::load(rack::asset::plugin(pluginInstance, "res/components/Davies1900hLargeLightGrey_bg.svg")));
@@ -199,8 +191,7 @@ struct Davies1900hLargeLightGreyKnob : rack::Davies1900hKnob {
 };
 
 struct BefacoSlidePotSmall : rack::app::SvgSlider {
-	BefacoSlidePotSmall()
-	{
+	BefacoSlidePotSmall() {
 		rack::Vec margin = rack::Vec(3.5, 3.5);
 		maxHandlePos = rack::Vec(-2, -2).plus(margin);
 		minHandlePos = rack::Vec(-2, 60).plus(margin);

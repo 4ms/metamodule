@@ -5,11 +5,10 @@ class HubMidiMapButton : public HubKnobMapButton {
 
 public:
 	HubMidiMapButton(rack::app::ModuleWidget &parent)
-		: HubKnobMapButton{static_cast<rack::app::ModuleWidget &>(parent)}
-	{}
+		: HubKnobMapButton{static_cast<rack::app::ModuleWidget &>(parent)} {
+	}
 
-	void draw(const DrawArgs &args) override
-	{
+	void draw(const DrawArgs &args) override {
 		HubMapButton::_updateState();
 
 		// Same as HubMapButton::draw except use a rounded rect, and don't draw alias below
@@ -26,7 +25,7 @@ public:
 	}
 
 	//TODO:
-	// 
+	//
 	// void onDragStart(const rack::event::DragStart &e) override
 	// {
 	// 	if (id.objType == MappableObj::Type::MidiNote) {
@@ -37,11 +36,10 @@ public:
 class HubMidiParam : public rack::ParamWidget {
 public:
 	HubMidiParam(HubMidiMapButton &hubmidi_mapbut)
-		: hubmidi_mapbut{hubmidi_mapbut}
-	{}
+		: hubmidi_mapbut{hubmidi_mapbut} {
+	}
 
-	void draw(const DrawArgs &args) override
-	{
+	void draw(const DrawArgs &args) override {
 		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubmidi_mapbut.mapObj), 16U);
 
 		// TODO: different color for each one
@@ -58,8 +56,7 @@ public:
 		}
 	}
 
-	void onButton(const rack::event::Button &e) override
-	{
+	void onButton(const rack::event::Button &e) override {
 		rack::math::Vec c = this->box.size.div(2);
 		float dist = e.pos.minus(c).norm();
 		if (dist <= c.x) {
@@ -81,8 +78,7 @@ public:
 		}
 	}
 
-	void onHover(const rack::event::Hover &e) override
-	{
+	void onHover(const rack::event::Hover &e) override {
 		// For MidiMap, always show the highlight. Returning allows HubMidiMapButton to handle onHover
 		return;
 	}
@@ -91,17 +87,20 @@ public:
 	// In order to make the HubMidiParam seem "invisible"
 	// but still will accept onButton events so it can be mapped
 	// to VCV's MidiMaps module
-	void onDeselect(const rack::event::Deselect &e) override
-	{
+	void onDeselect(const rack::event::Deselect &e) override {
 		rack::ParamWidget::onDeselect(e);
 		hubmidi_mapbut.onDeselect(e);
 	}
 
-	void onDragStart(const rack::event::DragStart &e) override { hubmidi_mapbut.onDragStart(e); }
+	void onDragStart(const rack::event::DragStart &e) override {
+		hubmidi_mapbut.onDragStart(e);
+	}
 
 	struct ParamResetItem : rack::ui::MenuItem {
 		rack::ParamWidget *paramWidget;
-		void onAction(const rack::event::Action &e) override { paramWidget->resetAction(); }
+		void onAction(const rack::event::Action &e) override {
+			paramWidget->resetAction();
+		}
 	};
 
 private:

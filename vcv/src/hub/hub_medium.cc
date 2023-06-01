@@ -1,13 +1,13 @@
+#include "../comm/comm_module.hh"
+#include "../mapping/Mapping.h"
+#include "../mapping/patch_writer.hh"
 #include "CoreModules/meta-module-hub/MetaModule_info.hh"
 #include "CoreModules/meta-module-hub/panel_medium_defs.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "../mapping/Mapping.h"
-#include "../comm/comm_module.hh"
 #include "components.h"
 #include "hub_base.hh"
 #include "hub_jack.hh"
 #include "local_path.hh"
-#include "../mapping/patch_writer.hh"
 
 using namespace rack;
 
@@ -40,8 +40,7 @@ struct HubMedium : MetaModuleHubBase<HubMediumMappings> {
 	enum OutputIds { NUM_OUTPUTS = PanelDef::NumUserFacingOutJacks };
 	enum LightIds { NUM_LIGHTS = 0 };
 
-	HubMedium()
-	{
+	HubMedium() {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		// configParam(int paramId, float minValue, float maxValue, float defaultValue, std::string label = "",
 		// std::string unit = "", float displayBase = 0.f, float displayMultiplier = 1.f, float displayOffset = 0.f);
@@ -67,8 +66,7 @@ struct HubMedium : MetaModuleHubBase<HubMediumMappings> {
 
 	~HubMedium() = default;
 
-	void process(const ProcessArgs &args) override
-	{
+	void process(const ProcessArgs &args) override {
 		processPatchButton(params[WRITE_PATCH].getValue());
 		processKnobMaps();
 		processCreatePatchFile();
@@ -79,11 +77,14 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 	LedDisplayTextField *patchName;
 	LedDisplayTextField *patchDesc;
 
-	Vec fixDPI(Vec v) { return v.mult(75.f / 72.f); }
-	Vec fixDPIKnob(Vec v) { return v.mult(75.f / 72.f).plus({0.6f, 0.2f}); }
+	Vec fixDPI(Vec v) {
+		return v.mult(75.f / 72.f);
+	}
+	Vec fixDPIKnob(Vec v) {
+		return v.mult(75.f / 72.f).plus({0.6f, 0.2f});
+	}
 
-	HubMediumWidget(HubMedium *module)
-	{
+	HubMediumWidget(HubMedium *module) {
 		setModule(module);
 		hubModule = module;
 
@@ -99,7 +100,8 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 		addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewBlack>(rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewBlack>(
+			rack::math::Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		patchName = createWidget<MetaModuleTextBox>(rack::mm2px(rack::math::Vec(36.1, 10.5)));
 		if (hubModule != nullptr && hubModule->patchNameText.length() > 0)
@@ -139,18 +141,24 @@ struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
 			addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, rack::mm2px({jack.x_mm, jack.y_mm}), JackDir::Input);
 
 		for (auto jack : MetaModuleInfo::OutJacks)
-			addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, rack::mm2px({jack.x_mm, jack.y_mm}), JackDir::Output);
+			addLabeledJackPx<PJ301MPort>(
+				jack.short_name, jack.id, rack::mm2px({jack.x_mm, jack.y_mm}), JackDir::Output);
 
 		auto &savebut = MetaModuleInfo::Switches[MetaModuleInfo::SwitchSave];
-		addParam(rack::createParamCentered<BefacoPush>(rack::mm2px({savebut.x_mm, savebut.y_mm}), module, HubMedium::WRITE_PATCH));
+		addParam(rack::createParamCentered<BefacoPush>(
+			rack::mm2px({savebut.x_mm, savebut.y_mm}), module, HubMedium::WRITE_PATCH));
 
 		auto &midinote = MetaModuleInfo::Switches[MetaModuleInfo::SwitchNote];
-		addMidiValueMapSrc(
-			"MidiNote", HubMedium::MIDI_MONO_NOTE, rack::mm2px({midinote.x_mm, midinote.y_mm}), MappableObj::Type::MidiNote);
+		addMidiValueMapSrc("MidiNote",
+						   HubMedium::MIDI_MONO_NOTE,
+						   rack::mm2px({midinote.x_mm, midinote.y_mm}),
+						   MappableObj::Type::MidiNote);
 
 		auto &midigate = MetaModuleInfo::Switches[MetaModuleInfo::SwitchGate];
-		addMidiValueMapSrc(
-			"MidiGate", HubMedium::MIDI_MONO_GATE, rack::mm2px({midigate.x_mm, midigate.y_mm}), MappableObj::Type::MidiGate);
+		addMidiValueMapSrc("MidiGate",
+						   HubMedium::MIDI_MONO_GATE,
+						   rack::mm2px({midigate.x_mm, midigate.y_mm}),
+						   MappableObj::Type::MidiGate);
 
 		// auto &midicc = MetaModuleInfo::Switches[MetaModuleInfo::SwitchCc];
 		// addMidiValueMapPt("MidiCC",

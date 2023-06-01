@@ -7,5 +7,7 @@ struct ParamStatus {
 	int paramID = 0;
 	int64_t moduleID = 0;
 
-	bool isSameParam(ParamStatus &other) { return (paramID == other.paramID) && (moduleID == other.moduleID); }
+	bool isSameParam(ParamStatus &other) {
+		return (paramID == other.paramID) && (moduleID == other.moduleID);
+	}
 };

@@ -4,8 +4,7 @@
 struct MapMark {
 	MapMark() = delete;
 
-	static void markInputJack(NVGcontext *vg, rack::math::Rect box, NVGcolor color)
-	{
+	static void markInputJack(NVGcontext *vg, rack::math::Rect box, NVGcolor color) {
 		const float base_size = 4.f;
 		const float extraHeight = 3.f;
 		const float widthRatio = 0.80f;
@@ -22,8 +21,7 @@ struct MapMark {
 		nvgStroke(vg);
 	}
 
-	static void markOutputJack(NVGcontext *vg, rack::math::Rect box, NVGcolor color)
-	{
+	static void markOutputJack(NVGcontext *vg, rack::math::Rect box, NVGcolor color) {
 		const float radius = 4.f;
 		nvgBeginPath(vg);
 		nvgCircle(vg, box.size.x - radius, box.size.y - radius, radius);
@@ -34,8 +32,7 @@ struct MapMark {
 		nvgStroke(vg);
 	}
 
-	static void markKnob(NVGcontext *vg, rack::math::Rect box, NVGcolor color)
-	{
+	static void markKnob(NVGcontext *vg, rack::math::Rect box, NVGcolor color) {
 		const float radius = 6.f;
 		nvgBeginPath(vg);
 		nvgRect(vg, box.size.x - radius, box.size.y - radius, radius, radius);

@@ -9,8 +9,7 @@ struct Mapping {
 	float range_max = 1.f;
 	std::string alias_name{""};
 
-	void clear()
-	{
+	void clear() {
 		dst.moduleID = -1;
 		src.moduleID = -1;
 		dst.objID = -1;

@@ -1,20 +1,20 @@
 #pragma once
 
+#include "JackStatus.h"
 #include "Mapping.h"
 #include "ModuleID.h"
-#include "JackStatus.h"
 #include "ParamStatus.h"
 #include "map_palette.hh"
 
-#include "util/math.hh"
 #include "patch/midi_def.hh"
+#include "util/math.hh"
 
 #include <algorithm>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <rack.hpp>
 #include <vector>
-#include <memory>
 
 // #define pr_dbg printf
 
@@ -26,8 +26,7 @@ public:
 	~CentralData() = default;
 
 	// True if module is regular module or hub in 4msCompany plugin
-	bool isInPlugin(rack::Module *module)
-	{
+	bool isInPlugin(rack::Module *module) {
 		if (!module)
 			return false;
 		if (!module->model)
@@ -37,19 +36,19 @@ public:
 		return module->model->plugin->slug == "4msCompany";
 	}
 
-	bool isHub(rack::Module *module)
-	{
+	bool isHub(rack::Module *module) {
 		if (!module)
 			return false;
 		if (!module->model)
 			return false;
 		return module->model->slug == "PanelMedium";
 	}
-	bool isModuleInPlugin(rack::Module *module) { return isInPlugin(module) && !isHub(module); }
+	bool isModuleInPlugin(rack::Module *module) {
+		return isInPlugin(module) && !isHub(module);
+	}
 
 	// Modules
-	void registerModule(ModuleID mod, rack::Module *module)
-	{
+	void registerModule(ModuleID mod, rack::Module *module) {
 		std::lock_guard mguard{mtx};
 
 		// Check if any maps exist with this module id (happens if we load a patch
@@ -61,14 +60,12 @@ public:
 		}
 	}
 
-	void unregisterModule(ModuleID mod)
-	{
+	void unregisterModule(ModuleID mod) {
 		std::lock_guard mguard{mtx};
 		std::erase_if(maps, [&](const auto &m) { return m.dst.moduleID == mod.id || m.src.moduleID == mod.id; });
 	}
 
-	rack::Module *getRegisteredModulePtr(int64_t moduleID)
-	{
+	rack::Module *getRegisteredModulePtr(int64_t moduleID) {
 		auto context = rack::contextGet();
 		auto engine = context->engine;
 		auto *module = engine->getModule(moduleID);
@@ -78,30 +75,35 @@ public:
 		return nullptr;
 	}
 
-	bool isRegisteredHub(int64_t moduleID)
-	{
+	bool isRegisteredHub(int64_t moduleID) {
 		auto context = rack::contextGet();
 		auto engine = context->engine;
 		auto *module = engine->getModule(moduleID);
 		return isHub(module);
 	}
 
-	void startMappingProcedure(MappableObj src)
-	{
+	void startMappingProcedure(MappableObj src) {
 		_isMappingInProgress = true;
 		_currentMap.src = src;
 	}
 
-	void abortMappingProcedure() { _isMappingInProgress = false; }
+	void abortMappingProcedure() {
+		_isMappingInProgress = false;
+	}
 
-	bool isMappingInProgress() { return _isMappingInProgress; }
+	bool isMappingInProgress() {
+		return _isMappingInProgress;
+	}
 
-	const MappableObj &getMappingSource() { return _currentMap.src; }
+	const MappableObj &getMappingSource() {
+		return _currentMap.src;
+	}
 
-	void notifyEnterHover(MappableObj obj) { _cur_hover_obj = obj; }
+	void notifyEnterHover(MappableObj obj) {
+		_cur_hover_obj = obj;
+	}
 
-	void notifyLeaveHover(MappableObj obj)
-	{
+	void notifyLeaveHover(MappableObj obj) {
 		if (_cur_hover_obj == obj)
 			_cur_hover_obj = {MappableObj::Type::None, -1, -1};
 	}
@@ -111,8 +113,7 @@ public:
 	// so that we can draw this object with a special highlight.
 	// Also return true if the mouse-hovered object is mapped to the same hub
 	// object as the object we want to draw (multi-map).
-	bool isMappedPartnerHovered(const MappableObj obj_to_draw)
-	{
+	bool isMappedPartnerHovered(const MappableObj obj_to_draw) {
 		// If we're hovering a hub (src) object, then highlight all mapped objects
 		// on modules
 		if (isSrcDstMapped(_cur_hover_obj, obj_to_draw))
@@ -141,8 +142,7 @@ public:
 	//
 
 	// Called by UI Thread: HubMapButton
-	void registerMapDest(MappableObj dest)
-	{
+	void registerMapDest(MappableObj dest) {
 		pr_dbg("registerMapDest: dest: objID=%lld, moduleID=%lld t:%d\n", dest.objID, dest.moduleID, dest.objType);
 		pr_dbg("current src: objID=%lld, moduleID=%lld t:%d\n",
 			   _currentMap.src.objID,
@@ -209,8 +209,7 @@ public:
 	}
 
 	// Can be called by UI Thread on "Unmap" menuitem
-	void unregisterMapByDest(MappableObj dest)
-	{
+	void unregisterMapByDest(MappableObj dest) {
 		// Remove from CD::maps
 		{
 			std::lock_guard mguard{mapsmtx};
@@ -219,8 +218,7 @@ public:
 	}
 
 	// This is called in HubBase destructor
-	void unregisterKnobMapsBySrcModule(int64_t moduleId)
-	{
+	void unregisterKnobMapsBySrcModule(int64_t moduleId) {
 		// Remove CD::maps
 		{
 			std::lock_guard mguard{mtx};
@@ -234,8 +232,7 @@ public:
 	// Knob Mapping Range
 	//
 
-	void setMapRange(MappableObj src, MappableObj dst, float rmin, float rmax)
-	{
+	void setMapRange(MappableObj src, MappableObj dst, float rmin, float rmax) {
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
 		if (m == maps.end())
@@ -244,8 +241,7 @@ public:
 		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
 	}
 
-	void setMapRangeMin(MappableObj dst, float rmin)
-	{
+	void setMapRangeMin(MappableObj dst, float rmin) {
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
 		if (m == maps.end())
@@ -253,8 +249,7 @@ public:
 		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
 	}
 
-	void setMapRangeMax(MappableObj dst, float rmax)
-	{
+	void setMapRangeMax(MappableObj dst, float rmax) {
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
 		if (m == maps.end())
@@ -262,8 +257,7 @@ public:
 		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
 	}
 
-	std::pair<float, float> getMapRange(MappableObj src, MappableObj dst)
-	{
+	std::pair<float, float> getMapRange(MappableObj src, MappableObj dst) {
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
 		float min, max;
@@ -277,8 +271,7 @@ public:
 		return {min, max};
 	}
 
-	std::pair<float, float> getMapRange(MappableObj dst)
-	{
+	std::pair<float, float> getMapRange(MappableObj dst) {
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == dst; });
 		float min, max;
@@ -293,8 +286,7 @@ public:
 		return {min, max};
 	}
 
-	void setMapAliasName(MappableObj src, std::string newname)
-	{
+	void setMapAliasName(MappableObj src, std::string newname) {
 		std::lock_guard mguard{mapsmtx};
 		// TODO: update all maps with matching src
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
@@ -303,8 +295,7 @@ public:
 		m->alias_name = newname;
 	}
 
-	std::string getMapAliasName(MappableObj src)
-	{
+	std::string getMapAliasName(MappableObj src) {
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
 		if (m == maps.end())
@@ -312,8 +303,7 @@ public:
 		return m->alias_name;
 	}
 
-	void setMapAliasName(MappableObj src, MappableObj dst, std::string newname)
-	{
+	void setMapAliasName(MappableObj src, MappableObj dst, std::string newname) {
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
 		if (m == maps.end())
@@ -321,8 +311,7 @@ public:
 		m->alias_name = newname;
 	}
 
-	std::string getMapAliasName(MappableObj src, MappableObj dst)
-	{
+	std::string getMapAliasName(MappableObj src, MappableObj dst) {
 		std::lock_guard mguard{mapsmtx};
 		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
 		if (m == maps.end())
@@ -334,53 +323,45 @@ public:
 	// State queries
 	//
 
-	bool isLabelButtonMapped(MappableObj const &b)
-	{
+	bool isLabelButtonMapped(MappableObj const &b) {
 		return maps.end() !=
 			   std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == b || m.dst == b); });
 	}
 
-	bool isLabelButtonSrcMapped(MappableObj const &b)
-	{
+	bool isLabelButtonSrcMapped(MappableObj const &b) {
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
 	}
 
-	bool isLabelButtonDstMapped(MappableObj const &b)
-	{
+	bool isLabelButtonDstMapped(MappableObj const &b) {
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
 	}
 
-	MappableObj getMappedSrcFromDst(MappableObj const &b)
-	{
+	MappableObj getMappedSrcFromDst(MappableObj const &b) {
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == b; });
 		if (obj != maps.end())
 			return obj->src;
 		return {MappableObj::Type::None, -1, -1};
 	}
 
-	bool isSrcDstMapped(MappableObj const &src, MappableObj const &dst)
-	{
+	bool isSrcDstMapped(MappableObj const &src, MappableObj const &dst) {
 		return maps.end() !=
 			   std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
 	}
 
 	// TODO: only allow this if type is not Knob (because it's not multi-map
 	// friendly)
-	MappableObj getMappedDstFromSrc(MappableObj const &b)
-	{
+	MappableObj getMappedDstFromSrc(MappableObj const &b) {
 		auto obj = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
 		if (obj != maps.end())
 			return obj->dst;
 		return {MappableObj::Type::None, -1, -1};
 	}
 
-	unsigned getNumMappingsFromSrc(MappableObj const &src)
-	{
+	unsigned getNumMappingsFromSrc(MappableObj const &src) {
 		return std::count_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
 	}
 
-	auto getMappingsFromSrc(MappableObj const &src)
-	{
+	auto getMappingsFromSrc(MappableObj const &src) {
 		std::vector<MappingExt> copied_maps;
 		std::lock_guard mguard{mtx};
 		for (auto &m : maps) {
@@ -395,10 +376,11 @@ public:
 	// Jack "touching", used to map jacks
 	//
 
-	void registerTouchedJack(MappableObj touched) { lastTouchedJack = touched; }
+	void registerTouchedJack(MappableObj touched) {
+		lastTouchedJack = touched;
+	}
 
-	MappableObj getAndClearTouchedJack()
-	{
+	MappableObj getAndClearTouchedJack() {
 		auto tmp = lastTouchedJack;
 		lastTouchedJack = {MappableObj::Type::None, -1, -1};
 		return tmp;

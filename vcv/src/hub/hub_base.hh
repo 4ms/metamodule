@@ -1,15 +1,15 @@
 #pragma once
-#include "CoreModules/moduleFactory.hh"
+#include "../comm/comm_module.hh"
 #include "../mapping/Mapping.h"
 #include "../mapping/ModuleID.h"
-#include "../comm/comm_module.hh"
+#include "../mapping/central_data.hh"
+#include "../mapping/map_palette.hh"
+#include "../mapping/patch_writer.hh"
+#include "CoreModules/moduleFactory.hh"
 #include "hub_jack.hh"
 #include "hub_knob.hh"
 #include "hub_midi.hh"
 #include "local_path.hh"
-#include "../mapping/map_palette.hh"
-#include "../mapping/patch_writer.hh"
-#include "../mapping/central_data.hh"
 #include "util/math.hh"
 #include "util/string_util.hh"
 #include <fstream>
@@ -29,12 +29,13 @@ struct MetaModuleHubBase : public CommModule {
 
 	MetaModuleHubBase() = default;
 
-	~MetaModuleHubBase() { centralData->unregisterKnobMapsBySrcModule(id); }
+	~MetaModuleHubBase() {
+		centralData->unregisterKnobMapsBySrcModule(id);
+	}
 
 	// This is called periodically on auto-save
 	// CentralData->maps and the patch name/description are converted to json
-	json_t *dataToJson() override
-	{
+	json_t *dataToJson() override {
 		json_t *rootJ = json_object();
 		json_t *mapsJ = json_array();
 
@@ -69,8 +70,7 @@ struct MetaModuleHubBase : public CommModule {
 
 	// This is called on startup, and on loading a new patch file
 	// json is converted to centralData->maps
-	void dataFromJson(json_t *rootJ) override
-	{
+	void dataFromJson(json_t *rootJ) override {
 		auto patchNameJ = json_object_get(rootJ, "PatchName");
 		if (json_is_string(patchNameJ)) {
 			patchNameText = json_string_value(patchNameJ);
@@ -136,8 +136,7 @@ struct MetaModuleHubBase : public CommModule {
 	}
 
 	// Hub class needs to call this from its process
-	void processPatchButton(float patchButtonState)
-	{
+	void processPatchButton(float patchButtonState) {
 		if (buttonJustPressed(patchButtonState)) {
 			shouldWritePatch = true;
 			updatePatchName();
@@ -146,8 +145,7 @@ struct MetaModuleHubBase : public CommModule {
 	}
 
 	// Hub class needs to call this from its process
-	void processKnobMaps()
-	{
+	void processKnobMaps() {
 		for (unsigned i = 0; i < MappingConf::NumMappings; i++) {
 			MappableObj src{MappingConf::mapping_srcs[i], i, id};
 			auto maps = centralData->getMappingsFromSrc(src);
@@ -176,8 +174,7 @@ struct MetaModuleHubBase : public CommModule {
 	}
 
 	// Hub class needs to call this from its process
-	void processCreatePatchFile()
-	{
+	void processCreatePatchFile() {
 		if (shouldWritePatch) {
 			shouldWritePatch = false;
 
@@ -215,8 +212,7 @@ struct MetaModuleHubBase : public CommModule {
 	}
 
 private:
-	bool buttonJustPressed(bool button_value)
-	{
+	bool buttonJustPressed(bool button_value) {
 		if (button_value > 0.f) {
 			if (!buttonAlreadyHandled) {
 				buttonAlreadyHandled = true;
@@ -228,8 +224,8 @@ private:
 		return false;
 	}
 
-	void writePatchFile(std::string fileName, std::string patchStructName, std::string patchName, std::string patchDesc)
-	{
+	void
+	writePatchFile(std::string fileName, std::string patchStructName, std::string patchName, std::string patchDesc) {
 		labelText = "Creating patch...";
 		updateDisplay();
 
@@ -286,16 +282,14 @@ private:
 		writeAsHeader(fileName + ".hh", patchStructName + "_patch", yml);
 	}
 
-	void writeToFile(const std::string &fileName, std::string textToWrite)
-	{
+	void writeToFile(const std::string &fileName, std::string textToWrite) {
 		std::ofstream myfile;
 		myfile.open(fileName);
 		myfile << textToWrite;
 		myfile.close();
 	}
 
-	void writeAsHeader(const std::string &fileName, std::string_view structname, std::string_view textToWrite)
-	{
+	void writeAsHeader(const std::string &fileName, std::string_view structname, std::string_view textToWrite) {
 		std::ofstream myfile;
 		myfile.open(fileName);
 		myfile << "static char " << structname << "[] = \n";
@@ -305,8 +299,7 @@ private:
 		myfile.close();
 	}
 
-	void writeBinaryFile(const std::string &fileName, const std::vector<unsigned char> data)
-	{
+	void writeBinaryFile(const std::string &fileName, const std::vector<unsigned char> data) {
 		std::ofstream myfile{fileName, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
 		myfile.write(reinterpret_cast<const char *>(data.data()), data.size());
 		myfile.close();
@@ -326,11 +319,14 @@ struct MetaModuleHubBaseWidget : rack::app::ModuleWidget {
 	static constexpr float kTextOffset = 5;
 
 	template<typename KnobType>
-	void addLabeledKnobPx(
-		std::string_view labelText, int knobId, rack::math::Vec posPx, float sz_mm = kKnobSpacingX, float defaultValue = 0.f)
-	{
+	void addLabeledKnobPx(std::string_view labelText,
+						  int knobId,
+						  rack::math::Vec posPx,
+						  float sz_mm = kKnobSpacingX,
+						  float defaultValue = 0.f) {
 		HubKnobMapButton *button = new HubKnobMapButton{*this};
-		button->box.pos = rack::math::Vec(posPx.x - rack::mm2px(sz_mm) / 2, posPx.y - rack::mm2px(sz_mm) / 2); // top-left
+		button->box.pos =
+			rack::math::Vec(posPx.x - rack::mm2px(sz_mm) / 2, posPx.y - rack::mm2px(sz_mm) / 2); // top-left
 		button->box.size.x = rack::mm2px(sz_mm);
 		button->box.size.y = rack::mm2px(sz_mm);
 		button->text = labelText;
@@ -356,11 +352,11 @@ struct MetaModuleHubBaseWidget : rack::app::ModuleWidget {
 	enum class JackDir { Input, Output };
 
 	template<typename JackType>
-	void addLabeledJackPx(std::string_view labelText, int jackId, rack::math::Vec posPx, JackDir inout)
-	{
+	void addLabeledJackPx(std::string_view labelText, int jackId, rack::math::Vec posPx, JackDir inout) {
 		auto mapButton = new HubJackMapButton{*this};
 
-		mapButton->box.pos = rack::math::Vec(posPx.x - rack::mm2px(kKnobSpacingX) / 2, posPx.y - rack::mm2px(kKnobSpacingY) / 2); // top-left
+		mapButton->box.pos = rack::math::Vec(posPx.x - rack::mm2px(kKnobSpacingX) / 2,
+											 posPx.y - rack::mm2px(kKnobSpacingY) / 2); // top-left
 		mapButton->box.size.x = rack::mm2px(kKnobSpacingX);
 		mapButton->box.size.y = rack::mm2px(kKnobSpacingY);
 		mapButton->text = labelText;
@@ -380,8 +376,7 @@ struct MetaModuleHubBaseWidget : rack::app::ModuleWidget {
 			addOutput(jack);
 	}
 
-	void addMidiValueMapSrc(const std::string labelText, int knobId, rack::math::Vec posPx, MappableObj::Type type)
-	{
+	void addMidiValueMapSrc(const std::string labelText, int knobId, rack::math::Vec posPx, MappableObj::Type type) {
 		auto *button = new HubMidiMapButton{*this};
 		button->box.size.x = rack::mm2px(13.5);
 		button->box.size.y = rack::mm2px(5.6);

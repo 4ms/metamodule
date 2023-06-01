@@ -1,16 +1,15 @@
 #pragma once
-#include "hub_map_button.hh"
 #include "../mapping/map_marks.hh"
 #include "../mapping/map_palette.hh"
+#include "hub_map_button.hh"
 
 class HubJackMapButton : public HubMapButton {
 public:
 	HubJackMapButton(rack::app::ModuleWidget &parent)
-		: HubMapButton{static_cast<rack::app::ModuleWidget &>(parent)}
-	{}
+		: HubMapButton{static_cast<rack::app::ModuleWidget &>(parent)} {
+	}
 
-	void onDeselect(const rack::event::Deselect &e) override
-	{
+	void onDeselect(const rack::event::Deselect &e) override {
 		// printf("Deselect hub jack %lld %lld %d\n", id.moduleID, id.objID, id.objType);
 		bool registerSuccess = false;
 		auto touchedJack = centralData->getAndClearTouchedJack();
@@ -29,11 +28,10 @@ template<typename BaseJackT>
 class HubJack : public BaseJackT {
 public:
 	HubJack(HubJackMapButton &_hubJackLabel)
-		: hubJackLabel{_hubJackLabel}
-	{}
+		: hubJackLabel{_hubJackLabel} {
+	}
 
-	void draw(const typename BaseJackT::DrawArgs &args) override
-	{
+	void draw(const typename BaseJackT::DrawArgs &args) override {
 		BaseJackT::draw(args);
 
 		// Draw mapped circle
@@ -46,8 +44,7 @@ public:
 		}
 	}
 
-	void onHover(const rack::event::Hover &e) override
-	{
+	void onHover(const rack::event::Hover &e) override {
 		// If the jack is mapped, then we want to pass the hover down to the HubJackMapButton object below
 		// so that the HubMapJackButton can highlight even if we're hovering the jack itself.
 		// So, don't consume the hover and just do nothing.

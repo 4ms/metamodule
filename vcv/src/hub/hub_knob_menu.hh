@@ -3,13 +3,11 @@
 
 struct KnobNameMenuLabel : rack::ui::MenuLabel {
 	rack::ParamQuantity *paramQty;
-	void step() override
-	{
+	void step() override {
 		text = paramQty->getLabel();
 		rack::ui::MenuLabel::step();
 	}
 };
-
 
 struct MappedKnobMenuLabel : rack::ui::MenuLabel {
 	int64_t moduleId;
@@ -17,8 +15,7 @@ struct MappedKnobMenuLabel : rack::ui::MenuLabel {
 	std::string moduleName;
 	std::string paramName;
 
-	void step() override
-	{
+	void step() override {
 		if (moduleName.empty())
 			moduleName = std::to_string(moduleId);
 		if (paramName.empty())
@@ -29,21 +26,16 @@ struct MappedKnobMenuLabel : rack::ui::MenuLabel {
 	}
 };
 
-
-
-
 struct KnobValueTextBox : rack::ui::TextField {
 	rack::ParamQuantity *paramQuantity;
 	KnobValueTextBox(rack::ParamQuantity *paramQ)
-		: paramQuantity{paramQ}
-	{
+		: paramQuantity{paramQ} {
 		if (paramQuantity)
 			text = paramQuantity->getDisplayValueString();
 		selectAll();
 	}
 
-	void onChange(const rack::event::Change &e) override
-	{
+	void onChange(const rack::event::Change &e) override {
 		if (paramQuantity) {
 			float oldValue = paramQuantity->getValue();
 			paramQuantity->setDisplayValueString(text);
@@ -65,8 +57,7 @@ struct KnobValueTextBox : rack::ui::TextField {
 struct KnobValueMenuItem : rack::widget::Widget {
 	KnobValueTextBox *txt;
 
-	KnobValueMenuItem(float width, float relative_width, rack::ParamQuantity *paramQ)
-	{
+	KnobValueMenuItem(float width, float relative_width, rack::ParamQuantity *paramQ) {
 		box.pos = {0, 0};
 		box.size = {width, BND_WIDGET_HEIGHT};
 		txt = new KnobValueTextBox{paramQ};
@@ -75,8 +66,7 @@ struct KnobValueMenuItem : rack::widget::Widget {
 		addChild(txt);
 	}
 
-	void draw(const DrawArgs &args) override
-	{
+	void draw(const DrawArgs &args) override {
 		bndMenuLabel(args.vg, 0.0, 0.0, box.size.x, box.size.y, -1, "Value:");
 		rack::widget::Widget::draw(args);
 	}

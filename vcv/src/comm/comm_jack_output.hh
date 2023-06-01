@@ -14,19 +14,19 @@ public:
 
 	CommOutputJack(rack::Port &outputPort, int jackID)
 		: _outputPort{outputPort}
-		, _jackID{jackID}
-	{}
+		, _jackID{jackID} {
+	}
 
-	void setModuleID(int64_t moduleID) { _moduleID = moduleID; }
+	void setModuleID(int64_t moduleID) {
+		_moduleID = moduleID;
+	}
 
-	void updateOutput()
-	{
+	void updateOutput() {
 		_outputPort.setChannels(1);
 		_outputPort.setVoltage(_value);
 	}
 
-	void updateOutputWithCommData()
-	{
+	void updateOutputWithCommData() {
 		_outputPort.setChannels(5);
 		_outputPort.setVoltage(_value, 0);
 		_outputPort.setVoltage(_jackID, 1);
@@ -36,8 +36,11 @@ public:
 		_outputPort.setVoltage(-1 * _moduleID, 4);
 	}
 
-	void setValue(float in) { _value = in; }
+	void setValue(float in) {
+		_value = in;
+	}
 
-	int getID() { return _jackID; }
+	int getID() {
+		return _jackID;
+	}
 };
-

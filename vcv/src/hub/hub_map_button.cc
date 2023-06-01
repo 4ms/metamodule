@@ -1,10 +1,9 @@
 #include "hub_map_button.hh"
-#include "../mapping/map_palette.hh"
 #include "../mapping/central_data.hh"
+#include "../mapping/map_palette.hh"
 #include <cstdio>
 
-void HubMapButton::_updateState()
-{
+void HubMapButton::_updateState() {
 	mapObj.moduleID = _parent.module ? _parent.module->id : -1;
 
 	isCurrentMapSrc = false;
@@ -15,8 +14,7 @@ void HubMapButton::_updateState()
 	isMapped = mappedToId.objType != MappableObj::Type::None;
 }
 
-void HubMapButton::draw(const DrawArgs &args)
-{
+void HubMapButton::draw(const DrawArgs &args) {
 	_updateState();
 
 	// Draw a large background circle to highlight a mapping has begun from this knob
@@ -39,8 +37,7 @@ void HubMapButton::draw(const DrawArgs &args)
 	nvgText(args.vg, box.size.x / 2.0f, box.size.y + 10, text.c_str(), NULL);
 }
 
-void HubMapButton::onDragStart(const rack::event::DragStart &e)
-{
+void HubMapButton::onDragStart(const rack::event::DragStart &e) {
 	if (e.button != GLFW_MOUSE_BUTTON_LEFT) {
 		return;
 	}
@@ -61,26 +58,25 @@ void HubMapButton::onDragStart(const rack::event::DragStart &e)
 		quantity->setMax();
 }
 
-void HubMapButton::onHover(const rack::event::Hover &e) { e.consume(this); }
+void HubMapButton::onHover(const rack::event::Hover &e) {
+	e.consume(this);
+}
 
-void HubMapButton::onLeave(const rack::event::Leave &e)
-{
+void HubMapButton::onLeave(const rack::event::Leave &e) {
 	_hovered = false;
 	// if (!centralData->isMappingInProgress())
 	centralData->notifyLeaveHover(mapObj);
 	e.consume(this);
 }
 
-void HubMapButton::onEnter(const rack::event::Enter &e)
-{
+void HubMapButton::onEnter(const rack::event::Enter &e) {
 	_hovered = true;
 	// if (!centralData->isMappingInProgress())
 	centralData->notifyEnterHover(mapObj);
 	e.consume(this);
 }
 
-bool HubMapButton::registerMapping(MappableObj src)
-{
+bool HubMapButton::registerMapping(MappableObj src) {
 	if (centralData->isMappingInProgress()) {
 		if (src.moduleID > -1) {
 			if (mapObj.moduleID != src.moduleID) {

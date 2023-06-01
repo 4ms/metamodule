@@ -8,8 +8,8 @@ class HubMapButton : public rack::Button {
 
 public:
 	HubMapButton(rack::app::ModuleWidget &parent)
-		: _parent{parent}
-	{}
+		: _parent{parent} {
+	}
 	void draw(const DrawArgs &args) override;
 	void onDragStart(const rack::event::DragStart &e) override;
 	void onHover(const rack::event::Hover &e) override;

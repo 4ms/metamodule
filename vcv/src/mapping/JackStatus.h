@@ -9,8 +9,7 @@ struct JackStatus {
 	int64_t receivedModuleId = 0;
 	bool connected = false;
 
-	bool isSameJack(JackStatus &other)
-	{
+	bool isSameJack(JackStatus &other) {
 		return (sendingJackId == other.sendingJackId) && (sendingModuleId == other.sendingModuleId);
 	}
 };

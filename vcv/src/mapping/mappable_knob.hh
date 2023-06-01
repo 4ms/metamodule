@@ -1,7 +1,7 @@
 #pragma once
+#include "central_data.hh"
 #include "map_marks.hh"
 #include "map_palette.hh"
-#include "central_data.hh"
 #include "util/base_concepts.hh"
 #include <rack.hpp>
 
@@ -12,14 +12,12 @@ protected:
 
 public:
 	MappableKnobRing(rack::ParamWidget &inner_knob, float ring_thickness)
-		: _inner_knob{inner_knob}
-	{
+		: _inner_knob{inner_knob} {
 		box.pos = _inner_knob.box.pos.minus({ring_thickness, ring_thickness});
 		box.size = _inner_knob.box.size.plus({ring_thickness * 2, ring_thickness * 2});
 	}
 
-	void draw(const DrawArgs &args) override
-	{
+	void draw(const DrawArgs &args) override {
 		auto id = getId();
 		bool isMappingNow = centralData->isMappingInProgress();
 		if (isMappingNow || centralData->isMappedPartnerHovered(id)) {
@@ -35,24 +33,23 @@ public:
 		}
 	}
 
-	void onEnter(const rack::event::Enter &e) override
-	{
+	void onEnter(const rack::event::Enter &e) override {
 		_hovered = true;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyEnterHover(getId());
 	}
 
-	void onLeave(const rack::event::Leave &e) override
-	{
+	void onLeave(const rack::event::Leave &e) override {
 		_hovered = false;
 		if (!centralData->isMappingInProgress())
 			centralData->notifyLeaveHover(getId());
 	}
 
-	void onButton(const rack::event::Button &e) override { _inner_knob.onButton(e); }
+	void onButton(const rack::event::Button &e) override {
+		_inner_knob.onButton(e);
+	}
 
-	const MappableObj getId() const
-	{
+	const MappableObj getId() const {
 		int64_t moduleId = -1;
 		int paramId = -1;
 		if (_inner_knob.getParamQuantity()) {
@@ -66,14 +63,12 @@ public:
 class MappableSliderRing : public MappableKnobRing {
 public:
 	MappableSliderRing(rack::ParamWidget &inner_knob, float ring_width, float ring_height)
-		: MappableKnobRing(inner_knob, 0)
-	{
+		: MappableKnobRing(inner_knob, 0) {
 		box.pos = _inner_knob.box.pos.minus({ring_width / 2, ring_height / 2});
 		box.size = _inner_knob.box.size.plus({ring_width, ring_height});
 	}
 
-	void draw(const DrawArgs &args) override
-	{
+	void draw(const DrawArgs &args) override {
 		auto id = getId();
 		bool isMappingNow = centralData->isMappingInProgress();
 		if (isMappingNow || centralData->isMappedPartnerHovered(id)) {
@@ -93,20 +88,20 @@ public:
 struct KnobAliasTextBox : rack::ui::TextField {
 	MappableObj _src;
 	KnobAliasTextBox(MappableObj src)
-		: _src{src}
-	{}
+		: _src{src} {
+	}
 
-	void onChange(const rack::event::Change &e) override { centralData->setMapAliasName(_src, text); }
+	void onChange(const rack::event::Change &e) override {
+		centralData->setMapAliasName(_src, text);
+	}
 };
-
 
 struct KnobAliasMenuItem : rack::widget::Widget {
 	MappableObj _src;
 	KnobAliasTextBox *txt;
 
 	KnobAliasMenuItem(MappableObj src)
-		: _src{src}
-	{
+		: _src{src} {
 		box.pos = {0, 0};
 		box.size = {120, BND_WIDGET_HEIGHT};
 		txt = new KnobAliasTextBox{src};
@@ -116,8 +111,7 @@ struct KnobAliasMenuItem : rack::widget::Widget {
 		addChild(txt);
 	}
 
-	void draw(const DrawArgs &args) override
-	{
+	void draw(const DrawArgs &args) override {
 		bndMenuLabel(args.vg, 0.0, 0.0, box.size.x, box.size.y, -1, "Alias:");
 		Widget::draw(args);
 	}
@@ -134,18 +128,16 @@ private:
 public:
 	MappedRangeQuantity(std::string label, MappableObj const knobLabelID)
 		: _label{label}
-		, _dst_id{knobLabelID}
-	{}
-	void setValue(float value) override
-	{
+		, _dst_id{knobLabelID} {
+	}
+	void setValue(float value) override {
 		_val = MathTools::constrain(value, 0.0f, 1.0f);
 		if constexpr (MINMAX == RangePart::Min)
 			centralData->setMapRangeMin(_dst_id, _val);
 		else
 			centralData->setMapRangeMax(_dst_id, _val);
 	}
-	float getValue() override
-	{
+	float getValue() override {
 		float val;
 		if constexpr (MINMAX == RangePart::Min)
 			val = centralData->getMapRange(_dst_id).first;
@@ -164,23 +156,24 @@ public:
 	// clang-format on
 };
 
-
 struct MinSlider : rack::ui::Slider {
 public:
-	MinSlider(MappableObj const knobLabelID)
-	{
+	MinSlider(MappableObj const knobLabelID) {
 		quantity = new MappedRangeQuantity<RangePart::Min>{"Min: ", knobLabelID};
 	}
-	~MinSlider() { delete quantity; }
+	~MinSlider() {
+		delete quantity;
+	}
 };
 
 struct MaxSlider : rack::ui::Slider {
 public:
-	MaxSlider(MappableObj const knobLabelID)
-	{
+	MaxSlider(MappableObj const knobLabelID) {
 		quantity = new MappedRangeQuantity<RangePart::Max>{"Max: ", knobLabelID};
 	}
-	~MaxSlider() { delete quantity; }
+	~MaxSlider() {
+		delete quantity;
+	}
 };
 
 template<typename BaseKnobT>
@@ -190,8 +183,7 @@ class MappableInnerKnob : public BaseKnobT {
 	// TODO: Make concept
 
 public:
-	void draw(const typename BaseKnobT::DrawArgs &args) override
-	{
+	void draw(const typename BaseKnobT::DrawArgs &args) override {
 		auto src = centralData->getMappedSrcFromDst(getId());
 		if (src.moduleID > 0) {
 			const NVGcolor color = PaletteHub::color(src.objID);
@@ -201,8 +193,7 @@ public:
 	}
 
 	// onButton is provided to customize the context menu for mappable knobs
-	void onButton(const rack::event::Button &e) override
-	{
+	void onButton(const rack::event::Button &e) override {
 		rack::OpaqueWidget::onButton(e);
 
 		// Right click to open context menu
@@ -257,8 +248,7 @@ public:
 		}
 	}
 
-	void onHover(const rack::event::Hover &e) override
-	{
+	void onHover(const rack::event::Hover &e) override {
 		// override the e.consume(this) so that the ring will get passed the hover event
 	}
 
@@ -277,17 +267,18 @@ private:
 	struct KnobUnmapItem : rack::ui::MenuItem {
 		const MappableObj _id;
 		KnobUnmapItem(MappableObj id)
-			: _id{id}
-		{}
+			: _id{id} {
+		}
 
-		void onAction(const rack::event::Action &e) override { centralData->unregisterMapByDest(_id); }
+		void onAction(const rack::event::Action &e) override {
+			centralData->unregisterMapByDest(_id);
+		}
 	};
 
 	// ParamLabel: copied from Rack/src/app/ParamWidget.cpp (not exported)
 	struct ParamLabel : rack::ui::MenuLabel {
 		rack::ParamWidget *paramWidget;
-		void step() override
-		{
+		void step() override {
 			text = paramWidget->getParamQuantity()->getString();
 			MenuLabel::step();
 		}
@@ -297,23 +288,20 @@ private:
 	struct ParamField : rack::ui::TextField {
 		rack::ParamWidget *paramWidget;
 
-		void step() override
-		{
+		void step() override {
 			// Keep selected
 			APP->event->setSelectedWidget(this);
 			TextField::step();
 		}
 
-		void setParamWidget(rack::ParamWidget *paramWidget)
-		{
+		void setParamWidget(rack::ParamWidget *paramWidget) {
 			this->paramWidget = paramWidget;
 			if (paramWidget->getParamQuantity())
 				text = paramWidget->getParamQuantity()->getDisplayValueString();
 			selectAll();
 		}
 
-		void onSelectKey(const rack::event::SelectKey &e) override
-		{
+		void onSelectKey(const rack::event::SelectKey &e) override {
 			if (e.action == GLFW_PRESS && (e.key == GLFW_KEY_ENTER || e.key == GLFW_KEY_KP_ENTER)) {
 				float oldValue = paramWidget->getParamQuantity()->getValue();
 				if (paramWidget->getParamQuantity())

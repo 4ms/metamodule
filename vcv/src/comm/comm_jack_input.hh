@@ -19,16 +19,16 @@ public:
 	CommInputJack(rack::Port &inputPort, int jackID)
 		: _inputPort{inputPort}
 		, _jackID{jackID}
-		, inputJackStatus{.sendingJackId = jackID, .connected = false}
-	{
+		, inputJackStatus{.sendingJackId = jackID, .connected = false} {
 		// initially mark jacks as connected, so when module is added it triggers an just_unpatched event
 		inputJackStatus.connected = true;
 	}
 
-	void setModuleID(int64_t moduleID) { inputJackStatus.sendingModuleId = moduleID; }
+	void setModuleID(int64_t moduleID) {
+		inputJackStatus.sendingModuleId = moduleID;
+	}
 
-	void updateInput()
-	{
+	void updateInput() {
 		_just_unpatched = (inputJackStatus.connected && !_inputPort.isConnected());
 		_just_patched = (!inputJackStatus.connected && _inputPort.isConnected());
 		inputJackStatus.connected = _inputPort.isConnected();
@@ -36,20 +36,22 @@ public:
 			_value = _inputPort.getPolyVoltage(0);
 	}
 
-	void updateWithCommData()
-	{
+	void updateWithCommData() {
 		if (inputJackStatus.connected) {
 			inputJackStatus.receivedJackId = _inputPort.getPolyVoltage(1);
 			inputJackStatus.receivedModuleId = _inputPort.getPolyVoltage(2);
 		}
 	}
 
-	float getValue() { return _value; }
+	float getValue() {
+		return _value;
+	}
 
-	int getID() { return _jackID; }
+	int getID() {
+		return _jackID;
+	}
 
-	bool isJustPatched()
-	{
+	bool isJustPatched() {
 		if (_just_patched) {
 			_just_patched = false;
 			return true;
@@ -57,8 +59,7 @@ public:
 		return false;
 	}
 
-	bool isJustUnpatched()
-	{
+	bool isJustUnpatched() {
 		if (_just_unpatched) {
 			_just_unpatched = false;
 			return true;

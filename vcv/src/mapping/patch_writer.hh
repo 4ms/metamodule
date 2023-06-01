@@ -1,11 +1,11 @@
 #pragma once
+#include "JackStatus.h"
+#include "Mapping.h"
+#include "ModuleID.h"
+#include "ParamStatus.h"
 #include "patch/patch.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include "util/byte_block.hh"
-#include "Mapping.h"
-#include "ModuleID.h"
-#include "JackStatus.h"
-#include "ParamStatus.h"
 #include <map>
 #include <vector>
 

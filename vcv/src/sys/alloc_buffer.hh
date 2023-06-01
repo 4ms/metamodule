@@ -4,4 +4,3 @@ template<typename T>
 using BigAlloc = T;
 
 struct BigHeapAllocation {};
-

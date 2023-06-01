@@ -8,5 +8,7 @@ struct ModuleID {
 	int64_t id;
 	ModuleTypeSlug slug;
 
-	bool operator==(const ModuleID &rhs) const { return (this->id == rhs.id) && (this->slug == rhs.slug); }
+	bool operator==(const ModuleID &rhs) const {
+		return (this->id == rhs.id) && (this->slug == rhs.slug);
+	}
 };
