@@ -211,11 +211,10 @@ public:
 	// TODO: Here we could also set slider LEDs once they are defined
 	// TODO: Rise and Fall LEDs are actually biploar but defined as single color
 
-
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
-	// static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
-	// static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, MetaModule::ElementInfoView::makeView<Info>());
 	// clang-format on
 
 private:

@@ -143,12 +143,12 @@ struct ElementInfoView {
 	uint32_t width_hp = 0;
 	std::string_view svg_filename{""};
 	std::string_view module_name{""};
-	std::span<const KnobElement> Knobs;
-	std::span<const InJackElement> InJacks;
-	std::span<const OutJackElement> OutJacks;
-	std::span<const SwitchElement> Switches;
-	std::span<const LightElement> Leds;
-	std::span<const AltParamElement> AltParams;
+	std::span<const Element> Knobs;
+	std::span<const Element> InJacks;
+	std::span<const Element> OutJacks;
+	std::span<const Element> Switches;
+	std::span<const Element> Leds;
+	std::span<const Element> AltParams;
 
 	template<Derived<ElementInfoBase> T>
 	static constexpr ElementInfoView makeView() {
