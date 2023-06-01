@@ -152,14 +152,14 @@ void VCVWidgetCreator::createWidget<BefacoSlidePotSmall>(BefacoSlidePotSmall ele
 template<>
 void VCVWidgetCreator::createWidget<JackOutput>(JackOutput element)
 {
-	module_widget->addOutput(rack::createParam<MappableOutputJack<rack::PJ301MPort>>(
+	module_widget->addOutput(rack::createOutputCentered<MappableOutputJack<rack::PJ301MPort>>(
 		rack::Vec(element.x_mm, element.y_mm), module, element.idx));
 }
 
 template<>
 void VCVWidgetCreator::createWidget<JackInput>(JackInput element)
 {
-	module_widget->addInput(rack::createParam<MappableInputJack<rack::PJ301MPort>>(
+	module_widget->addInput(rack::createInputCentered<MappableInputJack<rack::PJ301MPort>>(
 		rack::Vec(element.x_mm, element.y_mm), module, element.idx));
 }
 
@@ -167,14 +167,14 @@ template<>
 void VCVWidgetCreator::createWidget<BefacoInputPort>(BefacoInputPort element)
 {
 	module_widget->addInput(
-		rack::createParam<Befaco::BefacoInputPort>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
+		rack::createInput<Befaco::BefacoInputPort>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
 }
 
 template<>
 void VCVWidgetCreator::createWidget<BefacoOutputPort>(BefacoOutputPort element)
 {
 	module_widget->addOutput(
-		rack::createParam<Befaco::BefacoOutputPort>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
+		rack::createOutput<Befaco::BefacoOutputPort>(rack::Vec(element.x_mm, element.y_mm), module, element.idx));
 }
 
 } // namespace MetaModule
