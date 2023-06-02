@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements.hh"
 #include "CoreModules/module_info_base.hh"
 #include "draw_helpers.hh" //for std::vector<DrawHelper::MKnob> mapped_knobs,
 #include "lvgl/lvgl.h"
@@ -36,6 +37,7 @@ LV_IMG_DECLARE(MediumLight);
 
 namespace MetaModule
 {
+
 static std::pair<int, int> scale_center(auto el, float module_height) {
 	const float adj = (float)(module_height) / 240.f;
 	uint16_t x = std::round(ModuleInfoBase::mm_to_px<240>(el.x_mm) * adj);
@@ -58,7 +60,7 @@ struct ElementImage {
 	}
 
 	const lv_img_dsc_t *get_img(const Element &) {
-		return &knob_x; //default knob
+		return nullptr;
 	}
 	const lv_img_dsc_t *get_img(const Davies1900hWhiteKnob &) {
 		return scale_px == 240 ? &Davies1900hWhite : &Davies1900hWhite; //FIXME: _120
@@ -82,9 +84,10 @@ struct ElementImage {
 	const lv_img_dsc_t *get_img(const JackInput &) {
 		return scale_px == 240 ? &jack_x : &jack_x_120;
 	}
-	// const lv_img_dsc_t *get_img(const BefacoInputPort &) {
-	// 	return scale_px == 240 ? &BananaBlack : &BananaBlack; //FIXME: _120px
-	// }
+	const lv_img_dsc_t *get_img(const BefacoInputPort &) {
+		// return scale_px == 240 ? &BananaBlack : &jack_x_120; //FIXME: _120px
+		return scale_px == 240 ? &jack_x : &jack_x_120; //FIXME: _120px
+	}
 
 	const lv_img_dsc_t *get_img(const OutJackElement &) {
 		return scale_px == 240 ? &jack_x : &jack_x_120;
@@ -92,37 +95,59 @@ struct ElementImage {
 	const lv_img_dsc_t *get_img(const JackOutput &) {
 		return scale_px == 240 ? &jack_x : &jack_x_120;
 	}
-	// const lv_img_dsc_t *get_img(const BefacoOutputPort &) {
-	// 	return scale_px == 240 ? &BananaRed : &BananaRed; //FIXME: _120px
-	// }
+	const lv_img_dsc_t *get_img(const BefacoOutputPort &) {
+		// 	return scale_px == 240 ? &BananaRed : &BananaRed; //FIXME: _120px
+		return scale_px == 240 ? &jack_x : &jack_x_120;
+	}
 
-	// void draw(lv_obj_t *obj, uint32_t scale, Davies1900hRedKnob knob) {
-	// }
-	// void draw(lv_obj_t *obj, uint32_t scale, Davies1900hBlackKnob knob) {
-	// }
+	struct Rect {
+		uint32_t left, top, width, height;
+	};
+
+	std::pair<uint32_t, uint32_t> get_left_top(const BaseElement &el, float width, float height) {
+		auto left = static_cast<uint32_t>(std::round(ElementInfoBase::mm_to_px(el.x_mm, scale_px) - width / 2.f));
+		auto top = static_cast<uint32_t>(std::round(ElementInfoBase::mm_to_px(el.y_mm, scale_px) - height / 2.f));
+		return {left, top};
+	}
+};
+
+struct ElementAnimMethod {
+	// clang-format off
+	auto operator()(const BaseElement) { return DrawHelper::ParamAnimMethods::None; }
+	auto operator()(const Knob) { return DrawHelper::ParamAnimMethods::RotaryPot; }
+	auto operator()(const Slider) { return DrawHelper::ParamAnimMethods::LinearSlider; }
+	auto operator()(const Toggle2pos) { return DrawHelper::ParamAnimMethods::Toggle2pos; }
+	auto operator()(const Toggle3pos) { return DrawHelper::ParamAnimMethods::Toggle3pos; }
+	auto operator()(const Encoder) { return DrawHelper::ParamAnimMethods::Encoder; }
+	auto operator()(const MomentaryButton) { return DrawHelper::ParamAnimMethods::MomentaryButton; }
+	auto operator()(const LatchingButton) { return DrawHelper::ParamAnimMethods::LatchingButton; }
+	// clang-format on
 };
 
 struct ElementDrawHelper {
 
-	static void draw_module_knobs(lv_obj_t *canvas,
-								  const std::span<const Element> knobs,
-								  const PatchData &patch,
-								  std::vector<DrawHelper::MKnob> &mapped_knobs,
-								  uint32_t module_id,
-								  uint32_t scale_px) {
-		for (const auto &knob : knobs) {
-			auto img = std::visit([&](auto &el) { return ElementImage{scale_px}.get_img(el); }, knob);
+	static std::pair<lv_obj_t *, uint32_t>
+	draw_module_element(lv_obj_t *base, const Element &element, uint32_t module_height) {
+		ElementImage image_helper{module_height};
 
-			// auto knob = DrawHelper::draw_knob(canvas, el, 120);
-			// if (knob) {
-			// 	lv_obj_t *knob_obj = knob.value();
-			// 	auto anim_method = DrawHelper::get_anim_method(el);
-			// 	if (auto mapped_knob = patch.find_mapped_knob(module_id, el.id)) {
-			// 		mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
-			// 		DrawHelper::draw_control_ring(canvas, el, mapped_knob->panel_knob_id, module_height);
-			// 	}
-			// }
-		}
+		auto img = std::visit([&](auto &el) { return image_helper.get_img(el); }, element);
+		if (!img)
+			return {nullptr, 0};
+
+		auto el = std::visit([&](auto &el) { return static_cast<BaseElement>(el); }, element);
+
+		uint32_t width = img->header.w;
+		uint32_t height = img->header.h;
+		uint32_t left = std::round(ElementInfoBase::mm_to_px(el.x_mm, module_height) - width / 2.f);
+		uint32_t top = std::round(ElementInfoBase::mm_to_px(el.y_mm, module_height) - height / 2.f);
+
+		lv_obj_t *obj = lv_img_create(base);
+		lv_img_set_src(obj, img);
+		lv_obj_set_pos(obj, left, top);
+		lv_img_set_pivot(obj, width / 2, height / 2);
+		lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
+
+		return {obj, el.idx};
 	}
 };
 } // namespace MetaModule
