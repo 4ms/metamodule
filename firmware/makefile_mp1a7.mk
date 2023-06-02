@@ -125,12 +125,21 @@ SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/modules/*.cc)
+SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/*.cc)
 SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
 endif
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
 SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
+
+SOURCES += $(SHARED)/CoreModules/modules/stmlib/utils/random.cc
+SOURCES += $(SHARED)/CoreModules/modules/stmlib/dsp/atan.cc
+SOURCES += $(SHARED)/CoreModules/modules/stmlib/dsp/units.cc
+SOURCES += $(SHARED)/CoreModules/modules/braids/analog_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/modules/braids/digital_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/modules/braids/macro_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/modules/braids/resources.cc
 
 ## LVGL / Gui-Guider
 LVGL_DIR=$(LIBDIR)/lvgl
