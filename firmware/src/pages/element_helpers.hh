@@ -57,7 +57,7 @@ struct ElementImage {
 		: scale_px{module_height} {
 	}
 
-	const lv_img_dsc_t *get_img(const KnobElement &) {
+	const lv_img_dsc_t *get_img(const Element &) {
 		return &knob_x; //default knob
 	}
 	const lv_img_dsc_t *get_img(const Davies1900hWhiteKnob &) {
@@ -105,7 +105,7 @@ struct ElementImage {
 struct ElementDrawHelper {
 
 	static void draw_module_knobs(lv_obj_t *canvas,
-								  const std::span<const KnobElement> knobs,
+								  const std::span<const Element> knobs,
 								  const PatchData &patch,
 								  std::vector<DrawHelper::MKnob> &mapped_knobs,
 								  uint32_t module_id,
