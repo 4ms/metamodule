@@ -51,21 +51,29 @@ struct MediumLight<RedGreenBlueLight> : RedGreenBlueLight {};
 // Switches/Buttons
 
 struct Switch : BaseElement {};
-struct MomentaryButtonRGB : Switch {
+struct MomentaryButton : Switch {
 	enum State { PRESSED, RELEASED };
+};
+struct MomentaryButtonRGB : MomentaryButton {
 	enum Color { RED, BLUE, GREEN };
 };
-struct LatchingButtonMonoLight : Switch {
-	enum State { PRESSED, RELEASED };
+struct LatchingButton : Switch {
+	enum State { DOWN, UP };
+};
+struct LatchingButtonMonoLight : LatchingButton {
 	enum Color { RED, BLUE, GREEN };
 };
-struct Toggle2pos : Switch {};
-struct Toggle3pos : Switch {};
+struct Toggle2pos : Switch {
+	enum State { DOWN, UP };
+};
+struct Toggle3pos : Switch {
+	enum State { DOWN, CENTER, UP };
+};
 struct BefacoSwitchHorizontal : Switch {};
 
 // Encoders
 struct Encoder : Switch {};
-struct LEDEncoder : Switch {
+struct LEDEncoder : Encoder {
 	Encoder encoder;
 	RgbLed rgb_led;
 };
@@ -241,6 +249,13 @@ struct ElementInfoBase {
 		constexpr float mm_per_inch = 25.4f;
 		float inches = px / pix_per_inch;
 		return inches * mm_per_inch;
+	}
+
+	// PixelsPer3U is the module height in pixels
+	static constexpr float mm_to_px(float mm, size_t pixels_per_3U) {
+		constexpr float MMper3U = 128.5f;
+		float pixels_per_mm = pixels_per_3U / MMper3U;
+		return mm * pixels_per_mm;
 	}
 };
 
