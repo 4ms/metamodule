@@ -82,9 +82,9 @@ struct ElementImage {
 	const lv_img_dsc_t *get_img(const JackInput &) {
 		return scale_px == 240 ? &jack_x : &jack_x_120;
 	}
-	const lv_img_dsc_t *get_img(const BefacoInputPort &) {
-		return scale_px == 240 ? &BananaBlack : &BananaBlack; //FIXME: _120px
-	}
+	// const lv_img_dsc_t *get_img(const BefacoInputPort &) {
+	// 	return scale_px == 240 ? &BananaBlack : &BananaBlack; //FIXME: _120px
+	// }
 
 	const lv_img_dsc_t *get_img(const OutJackElement &) {
 		return scale_px == 240 ? &jack_x : &jack_x_120;
@@ -92,9 +92,9 @@ struct ElementImage {
 	const lv_img_dsc_t *get_img(const JackOutput &) {
 		return scale_px == 240 ? &jack_x : &jack_x_120;
 	}
-	const lv_img_dsc_t *get_img(const BefacoOutputPort &) {
-		return scale_px == 240 ? &BananaRed : &BananaRed; //FIXME: _120px
-	}
+	// const lv_img_dsc_t *get_img(const BefacoOutputPort &) {
+	// 	return scale_px == 240 ? &BananaRed : &BananaRed; //FIXME: _120px
+	// }
 
 	// void draw(lv_obj_t *obj, uint32_t scale, Davies1900hRedKnob knob) {
 	// }
