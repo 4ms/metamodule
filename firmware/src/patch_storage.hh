@@ -23,7 +23,7 @@ class PatchStorage {
 
 	SDCardOps<SDCardConf> sdcard_ops_;
 	FatFileIO sdcard_{&sdcard_ops_, Volume::SDCard};
-	EdgeDetector sdcard_mounted_;
+	EdgeStateDetector sdcard_mounted_;
 	bool sdcard_needs_rescan_ = true;
 	// bool sdcard_mounted_ = false;
 
@@ -33,7 +33,7 @@ class PatchStorage {
 	LfsFileIO norflash_{flash_};
 
 	FatFileIO &usbdrive_;
-	EdgeDetector usbdrive_mounted_;
+	EdgeStateDetector usbdrive_mounted_;
 	bool usbdrive_needs_rescan_ = true;
 
 	using InterCoreComm2 = mdrivlib::InterCoreComm<mdrivlib::ICCCoreType::Responder, PatchICCMessage>;
