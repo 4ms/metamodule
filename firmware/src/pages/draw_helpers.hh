@@ -29,11 +29,25 @@ LV_IMG_DECLARE(switch_down);
 LV_IMG_DECLARE(switch_down_120);
 LV_IMG_DECLARE(switch_center);
 LV_IMG_DECLARE(switch_center_120);
+LV_IMG_DECLARE(BananaBlack);
+LV_IMG_DECLARE(BananaRed);
+LV_IMG_DECLARE(Davies1900hRed);
+LV_IMG_DECLARE(Davies1900hWhite);
+LV_IMG_DECLARE(MediumLight);
 
 namespace MetaModule
 {
 struct DrawHelper {
-	enum ParamAnimMethods { RotaryPot, LinearSlider, MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, Encoder };
+	enum ParamAnimMethods {
+		None,
+		RotaryPot,
+		LinearSlider,
+		MomentaryButton,
+		LatchingButton,
+		Toggle2pos,
+		Toggle3pos,
+		Encoder
+	};
 
 	//TODO: Knob or Switch ==> rename to MParam?
 	struct MKnob {
