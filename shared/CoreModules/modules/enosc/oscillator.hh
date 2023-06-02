@@ -5,7 +5,7 @@
 #include "easiglib/dsp.hh"
 
 class Phasor {
-	u0_32 phase_ = u0_32::of_repr(Random::Word());
+	u0_32 phase_ = u0_32::of_repr(easiglib::Random::Word());
 
 public:
 	u0_32 Process(u0_32 freq) {

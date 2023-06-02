@@ -77,7 +77,7 @@ struct LedManager {
 	}
 
 private:
-	TriangleOscillator osc_;
+	easiglib::TriangleOscillator osc_;
 	Color background_color_ = Colors::black;
 	Color solid_color_ = Colors::black;
 	Color flash_color_ = Colors::white;

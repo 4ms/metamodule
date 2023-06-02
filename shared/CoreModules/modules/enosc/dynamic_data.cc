@@ -22,7 +22,7 @@ Buffer<Buffer<f, 9>, 8> DynamicData::triangles;
 DynamicData::DynamicData() {
 
   // sine + difference
-  { MagicSine magic(1_f / f(sine_size-1));
+  { easiglib::MagicSine magic(1_f / f(sine_size-1));
     s1_15 previous = s1_15::inclusive(magic.Process());
     for (auto& [v, d] : sine) {
       v = previous;

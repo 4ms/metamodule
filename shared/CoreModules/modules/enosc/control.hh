@@ -473,7 +473,7 @@ class Control : public EventSource<Event> {
 	Parameters &params_;
 	PolypticOscillator<block_size> &osc_;
 
-	Sampler<f> pitch_cv_sampler_;
+	easiglib::Sampler<f> pitch_cv_sampler_;
 
 	uint8_t ext_cv_chan;
 

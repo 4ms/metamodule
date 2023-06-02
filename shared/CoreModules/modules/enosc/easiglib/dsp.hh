@@ -4,6 +4,9 @@
 #include "numtypes.hh"
 #include "units.hh"
 
+namespace easiglib
+{
+
 struct Random {
 	static uint32_t state() {
 		return state_;
@@ -247,3 +250,4 @@ private:
 	u0_32 phase_ = 0._u0_32;
 	u0_32 freq_;
 };
+} // namespace easiglib
