@@ -4,43 +4,18 @@
 #include "etl/string.h"
 #include "etl/unordered_map.h"
 #include "module_type_slug.hh"
+#include "util/flat_map.hh"
 #include "util/static_string.hh"
 #include <array>
 #include <optional>
 
+#ifdef TESTPROJECT
+#define printf_ printf
+#else
+#include "printf.h"
+#endif
+
 //TODO: Get rid of dependency on etl by using our own map or unordered_map
-
-template<typename KeyT, typename ValT, size_t Size>
-struct FlatMap {
-	std::array<KeyT, Size> keys;
-	std::array<ValT, Size> vals;
-	size_t idx = 0;
-
-	bool insert(KeyT key, ValT val) {
-		if (idx >= Size)
-			return false;
-		keys[idx] = key;
-		vals[idx] = val;
-		idx++;
-		return true;
-	}
-
-	ValT *get(KeyT key) {
-		for (size_t i = 0; auto &k : keys) {
-			if (k == key)
-				return &vals[i];
-		}
-		return nullptr;
-	}
-
-	bool key_exists(KeyT key) {
-		for (auto &k : keys) {
-			if (k == key)
-				return true;
-		}
-		return false;
-	}
-};
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
@@ -98,9 +73,11 @@ public:
 	}
 
 	static ElementInfoView &getModuleInfo2(ModuleTypeSlug typeslug) {
-		if (auto d = infos2.get(typeslug))
+		printf_("getModuleInfo2(%s)->", typeslug.c_str());
+		if (auto d = infos2.get(typeslug)) {
+			printf_("width_hp=%d, El#=%lu\n", d->width_hp, d->Elements.size());
 			return *d;
-		else
+		} else
 			return nullinfo2;
 	}
 
