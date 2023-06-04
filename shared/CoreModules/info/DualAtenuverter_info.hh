@@ -43,5 +43,11 @@ struct DualAtenuverterInfo : ElementInfoBase {
 		MediumLight<RedGreenBlueLight>{33, 143, "OUT1", "", OUT1_LIGHT},
 		MediumLight<RedGreenBlueLight>{33, 311, "OUT2", "", OUT2_LIGHT},
 	}};
+
+	static constexpr std::span<const Element> Knobs{&Elements[0], 4};
+	static constexpr std::span<const Element> InJacks{&Elements[4], 2};
+	static constexpr std::span<const Element> OutJacks{&Elements[6], 2};
+	static constexpr std::span<const Element> Switches{};
+	static constexpr std::span<const Element> Leds{&Elements[8], 2};
 };
 } // namespace MetaModule

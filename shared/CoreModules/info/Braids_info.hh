@@ -15,6 +15,7 @@ enum ParamIds {
 };
 enum InputIds { TRIG_INPUT, PITCH_INPUT, FM_INPUT, TIMBRE_INPUT, COLOR_INPUT, NUM_INPUTS };
 enum OutputIds { OUT_OUTPUT, NUM_OUTPUTS };
+enum LightIds { NUM_LIGHTS };
 
 namespace MetaModule
 {
@@ -45,6 +46,12 @@ struct BraidsInfo : ElementInfoBase {
 		PJ301MPort{160, 316, "Color", "", COLOR_INPUT},
 		PJ301MPort{205, 316, "Out", "", OUT_OUTPUT},
 		BraidsDisplay148x56{14, 53, "", ""},
-	}}; // namespace MetaModule
+	}};
+
+	static constexpr std::span<const Element> Knobs{&Elements[0], 7};
+	static constexpr std::span<const Element> InJacks{&Elements[7], 5};
+	static constexpr std::span<const Element> OutJacks{&Elements[12], 1};
+	static constexpr std::span<const Element> Switches{};
+	static constexpr std::span<const Element> Leds{};
 };
 } // namespace MetaModule
