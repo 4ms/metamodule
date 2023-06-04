@@ -5,6 +5,8 @@
 #include "lvgl/lvgl.h"
 #include "patch/patch_data.hh"
 
+#include "printf.h"
+
 LV_IMG_DECLARE(jack_x);
 LV_IMG_DECLARE(jack_x_120);
 LV_IMG_DECLARE(knob9mm_x);
@@ -37,7 +39,8 @@ LV_IMG_DECLARE(Davies1900hRed);
 LV_IMG_DECLARE(Davies1900hRed_120);
 LV_IMG_DECLARE(Davies1900hWhite);
 LV_IMG_DECLARE(Davies1900hWhite_120);
-LV_IMG_DECLARE(MediumLight);
+LV_IMG_DECLARE(MediumLight_240);
+LV_IMG_DECLARE(MediumLight_120);
 
 namespace MetaModule
 {
@@ -50,42 +53,48 @@ struct ElementImage {
 	}
 
 	const lv_img_dsc_t *get_img(const Element &) {
+		// printf_("get_img->unknown\n");
 		return nullptr;
 	}
 	const lv_img_dsc_t *get_img(const Davies1900hWhiteKnob &) {
-		return scale_px == 240 ? &Davies1900hWhite : &Davies1900hWhite; //FIXME: _120
+		// printf_("get_img->Davies1900hWhiteKnob\n");
+		return scale_px == 240 ? &Davies1900hWhite : &Davies1900hWhite_120;
 	}
 	const lv_img_dsc_t *get_img(const Davies1900hRedKnob &) {
-		return scale_px == 240 ? &Davies1900hRed : &Davies1900hRed; //FIXME: _120
+		// printf_("get_img->Davies1900hRedKnob\n");
+		return scale_px == 240 ? &Davies1900hRed : &Davies1900hRed_120;
 	}
 	const lv_img_dsc_t *get_img(const Davies1900hBlackKnob &) {
+		// printf_("get_img->Davies1900hBlackKno\n");
 		return scale_px == 240 ? &knob_x : &knob_x_120;
 	}
 	const lv_img_dsc_t *get_img(const DaviesLargeKnob &) {
+		// printf_("get_img->DaviesLargeKnob\n");
 		return scale_px == 240 ? &knob_large_x : &knob_large_x_120;
 	}
 	const lv_img_dsc_t *get_img(const Knob9mm &) {
+		// printf_("get_img->Knob9mm\n");
 		return scale_px == 240 ? &knob9mm_x : &knob9mm_x_120;
 	}
-	const lv_img_dsc_t *get_img(const InJackElement &) {
-		return scale_px == 240 ? &jack_x : &jack_x_120;
-	}
 	const lv_img_dsc_t *get_img(const JackInput &) {
+		// printf_("get_img->JackInput\n");
 		return scale_px == 240 ? &jack_x : &jack_x_120;
 	}
 	const lv_img_dsc_t *get_img(const BefacoInputPort &) {
-		// return scale_px == 240 ? &BananaBlack : &jack_x_120; //FIXME: _120px
-		return scale_px == 240 ? &jack_x : &jack_x_120; //FIXME: _120px
-	}
-	const lv_img_dsc_t *get_img(const OutJackElement &) {
-		return scale_px == 240 ? &jack_x : &jack_x_120;
+		// printf_("get_img->BananaRed\n");
+		return scale_px == 240 ? &BananaBlack : &BananaBlack_120;
 	}
 	const lv_img_dsc_t *get_img(const JackOutput &) {
+		// printf_("get_img->JackOutput\n");
 		return scale_px == 240 ? &jack_x : &jack_x_120;
 	}
 	const lv_img_dsc_t *get_img(const BefacoOutputPort &) {
-		// 	return scale_px == 240 ? &BananaRed : &BananaRed; //FIXME: _120px
-		return scale_px == 240 ? &jack_x : &jack_x_120;
+		printf_("get_img->BananaRed\n");
+		return scale_px == 240 ? &BananaRed : &BananaRed_120;
+	}
+	const lv_img_dsc_t *get_img(const MediumLight<RedGreenBlueLight> &) {
+		// printf_("get_img->MediumLight<RedGreenBlueLight>\n");
+		return scale_px == 240 ? &MediumLight_240 : &MediumLight_120;
 	}
 };
 
