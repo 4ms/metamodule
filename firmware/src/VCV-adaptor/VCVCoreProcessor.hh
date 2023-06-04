@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/moduleFactory.hh"
+#include "VCV-adaptor/dsp.hh"
 #include "VCV-adaptor/light.hh"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/param.hh"
