@@ -127,7 +127,6 @@ public:
 			pending_send_message.vol_id = message.vol_id;
 			pending_send_message.bytes_read = 0;
 
-			// if (message.patch_id != 1 && message.patch_id < patch_list_.num_patches() && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes)
 			if (message.patch_id < patch_list_.num_patches() && (uint32_t)message.vol_id < (uint32_t)Volume::MaxVolumes)
 			{
 				auto bytes_read = load_patch_file(message.vol_id, message.patch_id);
@@ -135,9 +134,6 @@ public:
 					pending_send_message.message_type = PatchDataLoaded;
 					pending_send_message.bytes_read = bytes_read;
 				}
-				///FAKE Broken patch file/media:
-				if (message.patch_id == 1)
-					pending_send_message.message_type = PatchDataLoadFail;
 			}
 		}
 
