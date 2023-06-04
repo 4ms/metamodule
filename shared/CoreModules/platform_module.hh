@@ -12,6 +12,7 @@ struct PlatformModule : rack::Module {
 		selfID.slug = Info::slug;
 		centralData->registerModule(selfID, this);
 	}
+	static inline bool s_registered = true;
 };
 
 using rack::simd::float_4;
@@ -19,6 +20,7 @@ using rack::simd::float_4;
 #else
 
 #include "VCV-adaptor/VCVCoreProcessor.hh"
+
 template<typename Info, typename Core>
 struct PlatformModule : VCVCoreProcessor<Info, Core> {};
 

@@ -1,6 +1,5 @@
 #pragma once
 #include "info/Braids_info.hh"
-// #define VCVRACK
 #include "platform_module.hh"
 
 //
@@ -10,6 +9,8 @@
 #include "braids/vco_jitter_source.h"
 
 struct BraidsCore : PlatformModule<MetaModule::BraidsInfo, BraidsCore> {
+	static inline bool register_module = PlatformModule::s_registered;
+
 	braids::MacroOscillator osc;
 	braids::SettingsData settings;
 	braids::VcoJitterSource jitter_source;
