@@ -6,8 +6,41 @@
 #include "module_type_slug.hh"
 #include "util/static_string.hh"
 #include <array>
+#include <optional>
 
 //TODO: Get rid of dependency on etl by using our own map or unordered_map
+
+template<typename KeyT, typename ValT, size_t Size>
+struct FlatMap {
+	std::array<KeyT, Size> keys;
+	std::array<ValT, Size> vals;
+	size_t idx = 0;
+
+	bool insert(KeyT key, ValT val) {
+		if (idx >= Size)
+			return false;
+		keys[idx] = key;
+		vals[idx] = val;
+		idx++;
+		return true;
+	}
+
+	ValT *get(KeyT key) {
+		for (size_t i = 0; auto &k : keys) {
+			if (k == key)
+				return &vals[i];
+		}
+		return nullptr;
+	}
+
+	bool key_exists(KeyT key) {
+		for (auto &k : keys) {
+			if (k == key)
+				return true;
+		}
+		return false;
+	}
+};
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
@@ -24,11 +57,14 @@ public:
 		creation_funcs[typeslug.c_str()] = funcCreate;
 		return already_exists;
 	}
+
 	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate, ElementInfoView info) {
 		auto m = creation_funcs.find(typeslug.c_str());
 		bool already_exists = !(m == creation_funcs.end());
 
-		infos2[typeslug.c_str()] = info;
+		// infos2[typeslug.c_str()] = info;
+		infos2.insert(typeslug, info);
+
 		creation_funcs[typeslug.c_str()] = funcCreate;
 		return already_exists;
 	}
@@ -46,9 +82,9 @@ public:
 		if (m != infos.end())
 			return m->second.module_name;
 		else {
-			auto m = infos2.find(typeslug.c_str());
-			if (m != infos2.end())
-				return m->second.module_name;
+			if (auto d = infos2.get(typeslug))
+				return d->description;
+
 			return "Not found.";
 		}
 	}
@@ -62,9 +98,8 @@ public:
 	}
 
 	static ElementInfoView &getModuleInfo2(ModuleTypeSlug typeslug) {
-		auto m = infos2.find(typeslug.c_str());
-		if (m != infos2.end())
-			return m->second;
+		if (auto d = infos2.get(typeslug))
+			return *d;
 		else
 			return nullinfo2;
 	}
@@ -72,8 +107,8 @@ public:
 	// Returns true if slug is valid and registered.
 	static bool isValidSlug(ModuleTypeSlug typeslug) {
 		auto m = infos.find(typeslug.c_str());
-		auto m2 = infos2.find(typeslug.c_str());
-		return (m != infos.end()) || (m2 != infos2.end());
+		auto m2 = infos2.key_exists(typeslug);
+		return (m != infos.end()) || m2;
 	}
 
 	static inline ModuleInfoView nullinfo{};
@@ -89,7 +124,8 @@ private:
 
 	static inline etl::unordered_map<etl::string<31>, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline etl::unordered_map<etl::string<31>, ModuleInfoView, MAX_MODULE_TYPES> infos;
-	static inline etl::unordered_map<etl::string<31>, ElementInfoView, 64> infos2;
+	// static inline etl::unordered_map<etl::string<31>, ElementInfoView, 64> infos2;
+	static inline FlatMap<ModuleTypeSlug, ElementInfoView, 64> infos2;
 
 	// static constexpr auto _sz_creation_funcs = sizeof(creation_funcs); //48k
 	// static constexpr auto _sz_infos = sizeof(infos);				   //112k
