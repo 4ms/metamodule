@@ -155,15 +155,15 @@ struct PatchViewPage : PageBase {
 			} else {
 				const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
 				for (const auto &element : moduleinfo.Elements) {
-					auto img = std::visit(
-						[canvas, module_idx, patch, this](auto &el) {
+					auto [obj, img] = std::visit(
+						[canvas](auto &el) {
 						auto img = ElementImage{height}.get_img(el);
-						ElementDrawer{height, canvas}.draw_element(el, img);
-						return img;
+						auto obj = ElementDrawer{height, canvas}.draw_element(el, img);
+						return std::make_pair(obj, img);
 						},
 						element);
 
-					std::visit(MappedElement{height, module_idx, obj, patch, mappings}, element);
+					std::visit(MappedElement{height, module_idx, obj, canvas, img, patch, mappings}, element);
 				}
 			}
 

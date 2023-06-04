@@ -4,7 +4,6 @@
 #include "draw_helpers.hh" //for std::vector<DrawHelper::MKnob> mapped_knobs,
 #include "lvgl/lvgl.h"
 #include "patch/patch_data.hh"
-#include <stdint.h>
 
 LV_IMG_DECLARE(jack_x);
 LV_IMG_DECLARE(jack_x_120);
@@ -121,7 +120,7 @@ struct ElementDrawer {
 		lv_draw_img_dsc_init(&draw_img_dsc);
 		lv_canvas_draw_img(canvas, left, top, img, &draw_img_dsc);
 
-		return static_cast<const lv_obj_t *>(img);
+		return nullptr;
 	}
 };
 
@@ -131,7 +130,7 @@ struct MapRingDrawer {
 
 	// Control Ring
 
-	void draw_control_ring(const Knob &el, lv_img_dsc_t *img, uint32_t panel_knob_id) {
+	void draw_control_ring(const Knob &el, const lv_img_dsc_t *img, uint32_t panel_knob_id) {
 		// Parameters for ring size
 		constexpr float ring_offset = 8.f;
 		// Thinner circle for uvwxyz small panel knobs
@@ -155,7 +154,7 @@ struct MapRingDrawer {
 		lv_canvas_draw_arc(canvas, c_x, c_y, radius, 0, 3600, &ring);
 	}
 
-	void draw_control_ring(const Slider &el, lv_img_dsc_t *img, uint32_t panel_knob_id) {
+	void draw_control_ring(const Slider &el, const lv_img_dsc_t *img, uint32_t panel_knob_id) {
 		// Parameters for ring size
 		constexpr float ring_offset = 8.f;
 		// Thinner circle for uvwxyz small panel knobs
@@ -179,13 +178,12 @@ struct MapRingDrawer {
 		lv_canvas_draw_rect(canvas, x, y, w, h, &ring);
 	}
 
-	void draw_jack_ring(const JackElement &el, lv_obj_t *jack_obj, uint32_t mapped_id) {
+	void draw_jack_ring(const JackElement &el, const lv_img_dsc_t *img, uint32_t panel_jack_id) {
 		uint16_t c_x = std::round(ElementInfoBase::mm_to_px(el.x_mm, module_height));
 		uint16_t c_y = std::round(ElementInfoBase::mm_to_px(el.y_mm, module_height));
 
-		Gui::mapped_jack_small_arcdsc.color = Gui::palette_main[el.idx % 8];
-		auto jack_img = static_cast<const lv_img_dsc_t *>(lv_img_get_src(jack_obj));
-		uint16_t radius = (jack_img->header.w + 6) / 2;
+		Gui::mapped_jack_small_arcdsc.color = Gui::palette_main[panel_jack_id % 8];
+		uint16_t radius = (img->header.w + 6) / 2;
 		lv_canvas_draw_arc(canvas, c_x, c_y, radius, 0, 3600, &Gui::mapped_jack_small_arcdsc);
 	}
 };
@@ -198,6 +196,8 @@ struct MappedElement {
 	uint32_t module_height;
 	uint32_t module_idx;
 	lv_obj_t *element_obj;
+	lv_obj_t *canvas;
+	const lv_img_dsc_t *element_img;
 	const PatchData &patch;
 	Mappings &mappings;
 
@@ -210,8 +210,7 @@ struct MappedElement {
 		if (auto mapped_knob = patch.find_mapped_knob(module_idx, el.idx)) {
 			mappings.knobs.push_back({element_obj, *mapped_knob, DrawHelper::RotaryPot});
 
-			auto canvas = element_obj->parent;
-			MapRingDrawer{module_height, canvas}.draw_control_ring(el, element_obj, mapped_knob->panel_knob_id);
+			MapRingDrawer{module_height, canvas}.draw_control_ring(el, element_img, mapped_knob->panel_knob_id);
 		}
 	}
 	//TODO: this is the same as Knob&, how to not repeat?
@@ -221,17 +220,13 @@ struct MappedElement {
 		if (auto mapped_knob = patch.find_mapped_knob(module_idx, el.idx)) {
 			mappings.knobs.push_back({element_obj, *mapped_knob, DrawHelper::LinearSlider});
 
-			auto canvas = element_obj->parent;
-			MapRingDrawer{module_height, canvas}.draw_control_ring(el, element_obj, mapped_knob->panel_knob_id);
+			MapRingDrawer{module_height, canvas}.draw_control_ring(el, element_img, mapped_knob->panel_knob_id);
 		}
 	}
 
 	void operator()(const JackInput &el) {
-		if (!element_obj)
-			return;
 		if (auto mapped_jack = patch.find_mapped_injack(Jack{(uint16_t)module_idx, (uint16_t)el.idx})) {
-			auto canvas = element_obj->parent;
-			MapRingDrawer{module_height, canvas}.draw_jack_ring(el, element_obj, mapped_jack->panel_jack_id);
+			MapRingDrawer{module_height, canvas}.draw_jack_ring(el, element_img, mapped_jack->panel_jack_id);
 		}
 	}
 };
