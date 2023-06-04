@@ -108,6 +108,8 @@ struct ElementDrawer {
 
 	// Pot -- create lvgl image object so it can be animated later
 	lv_obj_t *draw_element(const Pot &el, const lv_img_dsc_t *img) {
+		if (!img)
+			return nullptr;
 		uint32_t width = img->header.w;
 		uint32_t height = img->header.h;
 		uint32_t left = std::round(ElementInfoBase::mm_to_px(el.x_mm, module_height) - width / 2.f);
@@ -124,6 +126,8 @@ struct ElementDrawer {
 
 	// Jack -- draw knob on canvas
 	lv_obj_t *draw_element(const JackElement &el, const lv_img_dsc_t *img) {
+		if (!img)
+			return nullptr;
 		uint32_t width = img->header.w;
 		uint32_t height = img->header.h;
 		uint32_t left = std::round(ElementInfoBase::mm_to_px(el.x_mm, module_height) - width / 2.f);
@@ -218,7 +222,7 @@ struct MappedElement {
 	}
 
 	void operator()(const Knob &el) {
-		if (!element_obj)
+		if (!element_obj || !element_img)
 			return;
 		if (auto mapped_knob = patch.find_mapped_knob(module_idx, el.idx)) {
 			mappings.knobs.push_back({element_obj, *mapped_knob, DrawHelper::RotaryPot});
@@ -228,7 +232,7 @@ struct MappedElement {
 	}
 	//TODO: this is the same as Knob&, how to not repeat?
 	void operator()(const Slider &el) {
-		if (!element_obj)
+		if (!element_obj || !element_img)
 			return;
 		if (auto mapped_knob = patch.find_mapped_knob(module_idx, el.idx)) {
 			mappings.knobs.push_back({element_obj, *mapped_knob, DrawHelper::LinearSlider});
@@ -238,6 +242,8 @@ struct MappedElement {
 	}
 
 	void operator()(const JackInput &el) {
+		if (!element_img)
+			return;
 		if (auto mapped_jack = patch.find_mapped_injack(Jack{(uint16_t)module_idx, (uint16_t)el.idx})) {
 			MapRingDrawer{module_height, canvas}.draw_jack_ring(el, element_img, mapped_jack->panel_jack_id);
 		}
