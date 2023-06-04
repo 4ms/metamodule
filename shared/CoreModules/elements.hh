@@ -167,7 +167,7 @@ struct BefacoOutputPort : JackOutput {};
 using BananutRed = BefacoOutputPort;
 using OutJackElement = std::variant<GateJackOutput, AnalogJackOutput, BefacoOutputPort>;
 
-struct PJ301MPort : BaseElement {};
+struct PJ301MPort : JackElement {};
 
 // Displays
 struct Display : BaseElement {};
