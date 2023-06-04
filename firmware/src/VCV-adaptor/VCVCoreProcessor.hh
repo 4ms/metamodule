@@ -60,10 +60,10 @@ struct VCVCoreProcessor : CoreProcessor {
 		outputs[output_id].connected = true;
 	}
 	// These are defined in the info header (FIXME: calculate them by iterating Info::Elements)
-	std::array<Param, NUM_PARAMS> params;
-	std::array<Port, NUM_INPUTS> inputs;
-	std::array<Port, NUM_OUTPUTS> outputs;
-	std::array<Light, NUM_LIGHTS> lights;
+	std::array<Param, Info::Knobs.size()> params;
+	std::array<Port, Info::InJacks.size()> inputs;
+	std::array<Port, Info::OutJacks.size()> outputs;
+	std::array<Light, Info::Lights.size()> lights;
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
 

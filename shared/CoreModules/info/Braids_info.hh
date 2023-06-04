@@ -22,7 +22,7 @@ namespace MetaModule
 
 struct BraidsInfo : ElementInfoBase {
 	// Module info: written by hand
-	static constexpr std::string_view slug{"Brainds"};
+	static constexpr std::string_view slug{"Braids"};
 	static constexpr std::string_view description{"Macro Oscillator"};
 	static constexpr uint32_t width_hp = 16; //CHECK!
 	static constexpr std::string_view svg_filename{"res/modules/AudibleInstruments/Braids.svg"};
@@ -52,6 +52,6 @@ struct BraidsInfo : ElementInfoBase {
 	static constexpr std::span<const Element> InJacks{&Elements[7], 5};
 	static constexpr std::span<const Element> OutJacks{&Elements[12], 1};
 	static constexpr std::span<const Element> Switches{};
-	static constexpr std::span<const Element> Leds{};
+	static constexpr std::span<const Element> Lights{};
 };
 } // namespace MetaModule

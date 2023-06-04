@@ -48,6 +48,6 @@ struct DualAtenuverterInfo : ElementInfoBase {
 	static constexpr std::span<const Element> InJacks{&Elements[4], 2};
 	static constexpr std::span<const Element> OutJacks{&Elements[6], 2};
 	static constexpr std::span<const Element> Switches{};
-	static constexpr std::span<const Element> Leds{&Elements[8], 2};
+	static constexpr std::span<const Element> Lights{&Elements[8], 2};
 };
 } // namespace MetaModule
