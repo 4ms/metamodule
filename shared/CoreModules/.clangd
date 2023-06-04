@@ -8,4 +8,9 @@ CompileFlags:
 		"-I../..",
 		"-Itests",
 		"-I../etl/include",
+		"-I../../etl/include",
+        "-I../firmware/src",
+        "-I../../firmware/src",
+        "-I../../../firmware/src",
+        "-I../../../shared/CoreModules/modules",
 	]
