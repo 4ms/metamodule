@@ -109,7 +109,7 @@ struct PatchViewPage : PageBase {
 			lv_obj_del(m);
 		modules.clear();
 		module_ids.clear();
-		mapped_knobs.clear();
+		mappings.knobs.clear();
 		modules.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
 
@@ -122,8 +122,8 @@ struct PatchViewPage : PageBase {
 
 		constexpr uint32_t pixel_size = (LV_COLOR_SIZE / 8) / sizeof(buffer[0]);
 		uint32_t xpos = 0;
-		for (auto [i, slug] : enumerate(patch.module_slugs)) {
-			module_ids.push_back(i);
+		for (auto [module_idx, slug] : enumerate(patch.module_slugs)) {
+			module_ids.push_back(module_idx);
 
 			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
 			if (!img) {
@@ -150,33 +150,22 @@ struct PatchViewPage : PageBase {
 			// Draw module controls
 			const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 			if (moduleinfo.width_hp) {
-				DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
-				DrawHelper::draw_module_knobs(canvas, moduleinfo, patch, mapped_knobs, i, height);
+				DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, module_idx, height);
+				DrawHelper::draw_module_knobs(canvas, moduleinfo, patch, mappings.knobs, module_idx, height);
 			} else {
 				const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
-				// DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, i, height);
-				for (auto &element : moduleinfo.Elements) {
-					if (auto [obj, idx] = ElementDrawHelper::draw_module_element(canvas, element, height); obj) {
-						if (auto mapped_knob = patch.find_mapped_knob(i, idx)) {
-							if (auto anim_method = std::visit(ElementAnimMethod{}, element)) {
-								mapped_knobs.push_back({obj, *mapped_knob, anim_method});
-								// DrawHelper::draw_control_ring(base, el, mapped_knob->panel_knob_id, module_height);
-							}
-						}
-					}
+				for (const auto &element : moduleinfo.Elements) {
+					auto img = std::visit(
+						[canvas, module_idx, patch, this](auto &el) {
+						auto img = ElementImage{height}.get_img(el);
+						ElementDrawer{height, canvas}.draw_element(el, img);
+						return img;
+						},
+						element);
+
+					std::visit(MappedElement{height, module_idx, obj, patch, mappings}, element);
 				}
 			}
-			// for (const auto &el : moduleinfo.Knobs) {
-			// 	auto knob = DrawHelper::draw_knob(canvas, el, 120);
-			// 	if (knob) {
-			// 		lv_obj_t *knob_obj = knob.value();
-			// 		auto anim_method = DrawHelper::get_anim_method(el);
-			// 		if (auto mapped_knob = patch.find_mapped_knob(i, el.id)) {
-			// 			mapped_knobs.push_back({knob_obj, *mapped_knob, anim_method});
-			// 			DrawHelper::draw_control_ring(canvas, el, mapped_knob->panel_knob_id, 120);
-			// 		}
-			// 	}
-			// }
 
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_PRESSED, (void *)this);
@@ -198,7 +187,7 @@ struct PatchViewPage : PageBase {
 		for (auto &m : modules) {
 			lv_obj_del(m); //also deletes child objects: mapped and static knobs
 		}
-		mapped_knobs.clear();
+		mappings.knobs.clear();
 		modules.clear();
 		module_ids.clear();
 	}
@@ -209,9 +198,8 @@ struct PatchViewPage : PageBase {
 				blur();
 			}
 		}
-		// handle_changing_patch();
 
-		for (auto &mk : mapped_knobs) {
+		for (auto &mk : mappings.knobs) {
 			if (mk.anim_method == DrawHelper::RotaryPot) {
 				const float new_pot_val = mk.patchconf.get_mapped_val(params.knobs[mk.patchconf.panel_knob_id]);
 				if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
@@ -337,7 +325,8 @@ private:
 
 	std::vector<lv_obj_t *> modules;
 	std::vector<uint32_t> module_ids;
-	std::vector<DrawHelper::MKnob> mapped_knobs;
+
+	Mappings mappings;
 
 	static constexpr uint32_t MaxBufferWidth = 1024;
 	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(240, MaxBufferWidth)];

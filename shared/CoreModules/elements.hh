@@ -151,7 +151,8 @@ struct Slider25mmHoriz : Slider {};
 //	BefacoSlidePotSmall>;
 
 // Input Jacks
-struct JackInput : BaseElement {};
+struct JackElement : BaseElement {};
+struct JackInput : JackElement {};
 struct GateJackInput : JackInput {};
 struct AnalogJackInput : JackInput {};
 struct BefacoInputPort : JackInput {};
@@ -159,7 +160,7 @@ using BananutBlack = BefacoInputPort;
 using InJackElement = std::variant<GateJackInput, AnalogJackInput, BefacoInputPort>;
 
 // Output jacks
-struct JackOutput : BaseElement {};
+struct JackOutput : JackElement {};
 struct GateJackOutput : JackOutput {};
 struct AnalogJackOutput : JackOutput {};
 struct BefacoOutputPort : JackOutput {};
@@ -251,10 +252,11 @@ struct ElementInfoBase {
 		return inches * mm_per_inch;
 	}
 
-	// PixelsPer3U is the module height in pixels
-	static constexpr float mm_to_px(float mm, size_t pixels_per_3U) {
-		constexpr float MMper3U = 128.5f;
-		float pixels_per_mm = pixels_per_3U / MMper3U;
+	// mm: length or position in mm
+	// pixels_per_3U: the module height in pixels
+	static constexpr float mm_to_px(float mm, uint32_t pixels_per_3U) {
+		constexpr float mm_per_3U = 128.5f; //standard Eurorack size
+		float pixels_per_mm = pixels_per_3U / mm_per_3U;
 		return mm * pixels_per_mm;
 	}
 };
