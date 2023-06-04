@@ -134,6 +134,8 @@ LV_IMG_DECLARE(BuffMult_artwork_240);
 LV_IMG_DECLARE(BuffMult_artwork_120);
 LV_IMG_DECLARE(DualAtenuverter_artwork_120);
 LV_IMG_DECLARE(DualAtenuverter_artwork_240);
+LV_IMG_DECLARE(Braids_artwork_120);
+LV_IMG_DECLARE(Braids_artwork_240);
 }
 
 struct ModuleImages {
@@ -326,6 +328,9 @@ struct ModuleImages {
 
 		if (slug == "DualAtenuverter")
 			return (height == 240) ? &DualAtenuverter_artwork_240 : &DualAtenuverter_artwork_120;
+
+		if (slug == "Brains")
+			return (height == 240) ? &Braids_artwork_240 : &DualAtenuverter_artwork_120;
 
 		return nullptr;
 	}

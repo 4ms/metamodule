@@ -3,7 +3,7 @@
 #TODO: Once we have multiple a7 versions, build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
 #so don't build it twice for mini/max/etc
 
-USE_FEWER_MODULES ?= 0
+USE_FEWER_MODULES ?= 1
 
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
@@ -121,6 +121,7 @@ SOURCES += $(SHARED)/CoreModules/modules/FreeverbCore.cc
 SOURCES += $(SHARED)/CoreModules/modules/Seq8Core.cc
 SOURCES += $(SHARED)/CoreModules/modules/EnOscCore.cc
 SOURCES += $(SHARED)/CoreModules/Befaco/DualAtenuverterCore.cc
+SOURCES += $(SHARED)/CoreModules/modules/BraidsCore.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
 else
@@ -172,6 +173,7 @@ INCLUDES += -Isrc/pages/slsexport
 INCLUDES +=	-I$(LVGL_DIR)/$(LVGL_DIR_NAME)
 
 ifeq "$(USE_FEWER_MODULES)" "1"
+SOURCES += src/pages/images/modules/Braids_artwork_240.c
 SOURCES += src/pages/images/modules/DualAtenuverter_artwork_240.c
 SOURCES += src/pages/images/modules/Djembe_artwork_240.c
 SOURCES += src/pages/images/modules/StMix_artwork_240.c
@@ -186,6 +188,7 @@ SOURCES += src/pages/images/modules/Freeverb_artwork_240.c
 SOURCES += src/pages/images/modules/Seq8_artwork_240.c
 SOURCES += src/pages/images/modules/EnOsc_artwork_240.c
 
+SOURCES += src/pages/images/modules/Braids_artwork_120.c
 SOURCES += src/pages/images/modules/DualAtenuverter_artwork_120.c
 SOURCES += src/pages/images/modules/Djembe_artwork_120.c
 SOURCES += src/pages/images/modules/StMix_artwork_120.c
