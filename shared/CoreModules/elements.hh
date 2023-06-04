@@ -237,12 +237,7 @@ struct ElementInfoBase {
 	static constexpr std::string_view description{""};
 	static constexpr uint32_t width_hp = 0;
 	static constexpr std::string_view svg_filename{""};
-	static constexpr std::span<Element> Knobs{};
-	static constexpr std::span<Element> InJacks{};
-	static constexpr std::span<Element> OutJacks{};
-	static constexpr std::span<Element> Switches{};
-	static constexpr std::span<Element> Leds{};
-	static constexpr std::span<Element> AltParams{};
+	static constexpr std::array<Element, 0> Elements{};
 
 	template<size_t DPI>
 	static constexpr float px_to_mm(float px) {
