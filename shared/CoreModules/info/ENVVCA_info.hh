@@ -68,6 +68,12 @@ struct ENVVCAInfo : ElementInfoBase {
 		OrangeLight{px_to_mm<72>(106.41f), px_to_mm<72>(256.6f), "EOR", "EOR", LedEor_Led},
 	}};
 
+	static constexpr std::span<const Element> Knobs{&Elements[0], 5};
+	static constexpr std::span<const Element> InJacks{&Elements[5], 5};
+	static constexpr std::span<const Element> OutJacks{&Elements[10], 3};
+	static constexpr std::span<const Element> Switches{&Elements[13], 3};
+	static constexpr std::span<const Element> Leds{&Elements[16], 3};
+
 	// static constexpr auto Rise_Slider = get<Slider25mmVert>(Knobs[0]);
 	// static constexpr auto Fall_Slider = get<Slider25mmVert>(Knobs[1]);
 	// static constexpr auto Level_Slider = get<Slider25mmVert>(Knobs[2]);
