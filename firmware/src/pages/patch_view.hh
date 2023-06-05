@@ -17,7 +17,7 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
-	static inline uint32_t height = 120;
+	static inline uint32_t height = 240;
 	// static_assert(height == 120 || height == 240);
 
 	PatchViewPage(PatchInfo info)
