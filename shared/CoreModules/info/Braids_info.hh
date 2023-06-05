@@ -32,20 +32,20 @@ struct BraidsInfo : ElementInfoBase {
 	// Then manually add the names from Module::configParam()
 
 	static constexpr std::array<Element, 14> Elements{{
-		Rogan2SGray{176, 59, "Model", "", SHAPE_PARAM},
-		Rogan2PSWhite{19, 138, "Fine", "Fine Freq", FINE_PARAM},
-		Rogan2PSWhite{97, 138, "Coarse", "Coarse Freq", COARSE_PARAM},
-		Rogan2PSWhite{176, 138, "FM", "", FM_PARAM},
-		Rogan2PSGreen{19, 217, "Timbre", "", TIMBRE_PARAM},
-		Rogan2PSGreen{97, 217, "Modulation", "", MODULATION_PARAM},
-		Rogan2PSRed{176, 217, "Color", "", COLOR_PARAM},
-		PJ301MPort{10, 316, "Trigger", "", TRIG_INPUT},
-		PJ301MPort{47, 316, "Pitch", "Pitch (1V/oct)", PITCH_INPUT},
-		PJ301MPort{84, 316, "FM", "", FM_INPUT},
-		PJ301MPort{122, 316, "Timbre", "", TIMBRE_INPUT},
-		PJ301MPort{160, 316, "Color", "", COLOR_INPUT},
-		PJ301MPort{205, 316, "Out", "", OUT_OUTPUT},
-		BraidsDisplay148x56{14, 53, "", ""},
+		Rogan2SGray{to_mm(176), to_mm(59), "Model", "", SHAPE_PARAM},
+		Rogan2PSWhite{to_mm(19), to_mm(138), "Fine", "Fine Freq", FINE_PARAM},
+		Rogan2PSWhite{to_mm(97), to_mm(138), "Coarse", "Coarse Freq", COARSE_PARAM},
+		Rogan2PSWhite{to_mm(176), to_mm(138), "FM", "", FM_PARAM},
+		Rogan2PSGreen{to_mm(19), to_mm(217), "Timbre", "", TIMBRE_PARAM},
+		Rogan2PSGreen{to_mm(97), to_mm(217), "Modulation", "", MODULATION_PARAM},
+		Rogan2PSRed{to_mm(176), to_mm(217), "Color", "", COLOR_PARAM},
+		PJ301MPort{to_mm(10), to_mm(316), "Trigger", "", TRIG_INPUT},
+		PJ301MPort{to_mm(47), to_mm(316), "Pitch", "Pitch (1V/oct)", PITCH_INPUT},
+		PJ301MPort{to_mm(84), to_mm(316), "FM", "", FM_INPUT},
+		PJ301MPort{to_mm(122), to_mm(316), "Timbre", "", TIMBRE_INPUT},
+		PJ301MPort{to_mm(160), to_mm(316), "Color", "", COLOR_INPUT},
+		PJ301MPort{to_mm(205), to_mm(316), "Out", "", OUT_OUTPUT},
+		BraidsDisplay148x56{to_mm(14), to_mm(53), "", ""},
 	}};
 
 	static constexpr std::span<const Element> Knobs{&Elements[0], 7};

@@ -254,6 +254,13 @@ struct ElementInfoBase {
 		float pixels_per_mm = pixels_per_3U / mm_per_3U;
 		return mm * pixels_per_mm;
 	}
+
+	static constexpr float to_mm(float vcv_px) {
+		constexpr float mm_per_3U = 128.5f;
+		constexpr float vcvpx_per_3U = 378.5f; //377..380
+		float mm_per_px = mm_per_3U / vcvpx_per_3U;
+		return vcv_px * mm_per_px;
+	}
 };
 
 } // namespace MetaModule

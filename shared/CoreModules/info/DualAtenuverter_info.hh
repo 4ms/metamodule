@@ -32,16 +32,16 @@ struct DualAtenuverterInfo : ElementInfoBase {
 	// and manually split into arrays for each type of element
 
 	static constexpr std::array<Element, 10> Elements{{
-		Davies1900hWhiteKnob{20, 33, "Ch 1 gain", "", ATEN1_PARAM},
-		Davies1900hRedKnob{20, 91, "Ch 1 offset", "", OFFSET1_PARAM},
-		Davies1900hWhiteKnob{20, 201, "Ch 2 gain", "", ATEN2_PARAM},
-		Davies1900hRedKnob{20, 260, "Ch 2 offset", "", OFFSET2_PARAM},
-		BefacoInputPort{7, 152, "IN1", "", IN1_INPUT},
-		BefacoInputPort{7, 319, "IN2", "", IN2_INPUT},
-		BefacoOutputPort{43, 152, "OUT1", "", OUT1_OUTPUT},
-		BefacoOutputPort{43, 319, "OUT2", "", OUT2_OUTPUT},
-		MediumLight<RedGreenBlueLight>{33, 143, "OUT1", "", OUT1_LIGHT},
-		MediumLight<RedGreenBlueLight>{33, 311, "OUT2", "", OUT2_LIGHT},
+		Davies1900hWhiteKnob{to_mm(20), to_mm(33), "Ch 1 gain", "", ATEN1_PARAM},
+		Davies1900hRedKnob{to_mm(20), to_mm(91), "Ch 1 offset", "", OFFSET1_PARAM},
+		Davies1900hWhiteKnob{to_mm(20), to_mm(201), "Ch 2 gain", "", ATEN2_PARAM},
+		Davies1900hRedKnob{to_mm(20), to_mm(260), "Ch 2 offset", "", OFFSET2_PARAM},
+		BefacoInputPort{to_mm(7), to_mm(152), "IN1", "", IN1_INPUT},
+		BefacoInputPort{to_mm(7), to_mm(319), "IN2", "", IN2_INPUT},
+		BefacoOutputPort{to_mm(43), to_mm(152), "OUT1", "", OUT1_OUTPUT},
+		BefacoOutputPort{to_mm(43), to_mm(319), "OUT2", "", OUT2_OUTPUT},
+		MediumLight<RedGreenBlueLight>{to_mm(33), to_mm(143), "OUT1", "", OUT1_LIGHT},
+		MediumLight<RedGreenBlueLight>{to_mm(33), to_mm(311), "OUT2", "", OUT2_LIGHT},
 	}};
 
 	static constexpr std::span<const Element> Knobs{&Elements[0], 4};
