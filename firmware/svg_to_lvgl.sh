@@ -18,6 +18,6 @@ C=$OUTPATH/$IMGNAME.c
 mkdir -p $OUTPATH
 inkscape --export-type="png" --export-filename=- $1  | convert -resize $3 - $PNG
 cd ../shared/svgextract/lv_img_conv
-./lv_img_conv.js -c CF_TRUE_COLOR --force -t c $PNG -o $C
+./lv_img_conv.js -c CF_TRUE_COLOR_ALPHA --force -t c $PNG -o $C
 cd ../../../firmware
 ls -l $C
