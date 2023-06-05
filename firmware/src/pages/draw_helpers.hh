@@ -348,7 +348,7 @@ struct DrawHelper {
 								  uint32_t module_id,
 								  uint32_t module_height) {
 		for (const auto &el : info.Knobs) {
-			auto knob = DrawHelper::draw_knob(canvas, el, 120);
+			auto knob = DrawHelper::draw_knob(canvas, el, module_height);
 			if (knob) {
 				lv_obj_t *knob_obj = knob.value();
 				auto anim_method = DrawHelper::get_anim_method(el);
