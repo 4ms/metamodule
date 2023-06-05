@@ -31,19 +31,34 @@ LV_IMG_DECLARE(switch_down);
 LV_IMG_DECLARE(switch_down_120);
 LV_IMG_DECLARE(switch_center);
 LV_IMG_DECLARE(switch_center_120);
-LV_IMG_DECLARE(BananaBlack);
+LV_IMG_DECLARE(BananaBlack_240);
 LV_IMG_DECLARE(BananaBlack_120);
-LV_IMG_DECLARE(BananaRed);
+LV_IMG_DECLARE(BananaRed_240);
 LV_IMG_DECLARE(BananaRed_120);
-LV_IMG_DECLARE(Davies1900hRed);
+LV_IMG_DECLARE(Davies1900hRed_240);
 LV_IMG_DECLARE(Davies1900hRed_120);
-LV_IMG_DECLARE(Davies1900hWhite);
+LV_IMG_DECLARE(Davies1900hWhite_240);
 LV_IMG_DECLARE(Davies1900hWhite_120);
 LV_IMG_DECLARE(MediumLight_240);
 LV_IMG_DECLARE(MediumLight_120);
+LV_IMG_DECLARE(Rogan2SGray_240);
+LV_IMG_DECLARE(Rogan2SGray_120);
+LV_IMG_DECLARE(Rogan2PSWhite_240);
+LV_IMG_DECLARE(Rogan2PSWhite_120);
+LV_IMG_DECLARE(Rogan2PSGreen_240);
+LV_IMG_DECLARE(Rogan2PSGreen_120);
+LV_IMG_DECLARE(Rogan2PSRed_240);
+LV_IMG_DECLARE(Rogan2PSRed_120);
 
 namespace MetaModule
 {
+namespace
+{
+template<typename... Ts>
+static void pr_dbg(Ts... args) {
+	printf_(args...);
+}
+} // namespace
 
 struct ElementImage {
 	uint32_t scale_px;
@@ -53,47 +68,72 @@ struct ElementImage {
 	}
 
 	const lv_img_dsc_t *get_img(const Element &) {
-		// printf_("get_img->unknown\n");
+		pr_dbg("get_img->unknown\n");
 		return nullptr;
 	}
+	const lv_img_dsc_t *get_img(const Pot &) {
+		pr_dbg("get_img->Pot\n");
+		return scale_px == 240 ? &knob_x : &knob_x_120;
+	}
 	const lv_img_dsc_t *get_img(const Davies1900hWhiteKnob &) {
-		// printf_("get_img->Davies1900hWhiteKnob\n");
-		return scale_px == 240 ? &Davies1900hWhite : &Davies1900hWhite_120;
+		pr_dbg("get_img->Davies1900hWhiteKnob\n");
+		return scale_px == 240 ? &Davies1900hWhite_240 : &Davies1900hWhite_120;
 	}
 	const lv_img_dsc_t *get_img(const Davies1900hRedKnob &) {
-		// printf_("get_img->Davies1900hRedKnob\n");
-		return scale_px == 240 ? &Davies1900hRed : &Davies1900hRed_120;
+		pr_dbg("get_img->Davies1900hRedKnob\n");
+		return scale_px == 240 ? &Davies1900hRed_240 : &Davies1900hRed_120;
 	}
 	const lv_img_dsc_t *get_img(const Davies1900hBlackKnob &) {
-		// printf_("get_img->Davies1900hBlackKno\n");
+		pr_dbg("get_img->Davies1900hBlackKno\n");
 		return scale_px == 240 ? &knob_x : &knob_x_120;
 	}
 	const lv_img_dsc_t *get_img(const DaviesLargeKnob &) {
-		// printf_("get_img->DaviesLargeKnob\n");
+		pr_dbg("get_img->DaviesLargeKnob\n");
 		return scale_px == 240 ? &knob_large_x : &knob_large_x_120;
 	}
 	const lv_img_dsc_t *get_img(const Knob9mm &) {
-		// printf_("get_img->Knob9mm\n");
+		pr_dbg("get_img->Knob9mm\n");
 		return scale_px == 240 ? &knob9mm_x : &knob9mm_x_120;
 	}
+	const lv_img_dsc_t *get_img(const Rogan2SGray &) {
+		pr_dbg("get_img->Rogan2SGray\n");
+		return scale_px == 240 ? &Rogan2SGray_240 : &Rogan2SGray_120;
+	}
+	const lv_img_dsc_t *get_img(const Rogan2PSWhite &) {
+		pr_dbg("get_img->Rogan2PSWhite\n");
+		return scale_px == 240 ? &Rogan2PSWhite_240 : &Rogan2PSWhite_120;
+	}
+	const lv_img_dsc_t *get_img(const Rogan2PSRed &) {
+		pr_dbg("get_img->Rogan2PSRed\n");
+		return scale_px == 240 ? &Rogan2PSRed_240 : &Rogan2PSRed_120;
+	}
+	const lv_img_dsc_t *get_img(const Rogan2PSGreen &) {
+		pr_dbg("get_img->Rogan2PSGreen\n");
+		return scale_px == 240 ? &Rogan2PSGreen_240 : &Rogan2PSGreen_120;
+	}
+
 	const lv_img_dsc_t *get_img(const JackInput &) {
-		// printf_("get_img->JackInput\n");
+		pr_dbg("get_img->JackInput\n");
+		return scale_px == 240 ? &jack_x : &jack_x_120;
+	}
+	const lv_img_dsc_t *get_img(const PJ301MPort &) {
+		pr_dbg("get_img->PJ301MPort\n");
 		return scale_px == 240 ? &jack_x : &jack_x_120;
 	}
 	const lv_img_dsc_t *get_img(const BefacoInputPort &) {
-		// printf_("get_img->BananaRed\n");
-		return scale_px == 240 ? &BananaBlack : &BananaBlack_120;
+		pr_dbg("get_img->BananaRed\n");
+		return scale_px == 240 ? &BananaBlack_240 : &BananaBlack_120;
 	}
 	const lv_img_dsc_t *get_img(const JackOutput &) {
-		// printf_("get_img->JackOutput\n");
+		pr_dbg("get_img->JackOutput\n");
 		return scale_px == 240 ? &jack_x : &jack_x_120;
 	}
 	const lv_img_dsc_t *get_img(const BefacoOutputPort &) {
-		printf_("get_img->BananaRed\n");
-		return scale_px == 240 ? &BananaRed : &BananaRed_120;
+		pr_dbg("get_img->BananaRed\n");
+		return scale_px == 240 ? &BananaRed_240 : &BananaRed_120;
 	}
 	const lv_img_dsc_t *get_img(const MediumLight<RedGreenBlueLight> &) {
-		// printf_("get_img->MediumLight<RedGreenBlueLight>\n");
+		pr_dbg("get_img->MediumLight<RedGreenBlueLight>\n");
 		return scale_px == 240 ? &MediumLight_240 : &MediumLight_120;
 	}
 };
