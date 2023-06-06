@@ -19,7 +19,6 @@ void HubMapButton::draw(const DrawArgs &args) {
 
 	// Draw a large background circle to highlight a mapping has begun from this knob
 	if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(mapObj)) {
-		// const float padding_x = 2;
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y / 2);
 		const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
@@ -33,7 +32,6 @@ void HubMapButton::draw(const DrawArgs &args) {
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
 	nvgFontSize(args.vg, 9.0f);
-	// nvgFontFaceId(args.vg, fontid);
 	nvgText(args.vg, box.size.x / 2.0f, box.size.y + 10, text.c_str(), NULL);
 }
 
@@ -64,28 +62,12 @@ void HubMapButton::onHover(const rack::event::Hover &e) {
 
 void HubMapButton::onLeave(const rack::event::Leave &e) {
 	_hovered = false;
-	// if (!centralData->isMappingInProgress())
 	centralData->notifyLeaveHover(mapObj);
 	e.consume(this);
 }
 
 void HubMapButton::onEnter(const rack::event::Enter &e) {
 	_hovered = true;
-	// if (!centralData->isMappingInProgress())
 	centralData->notifyEnterHover(mapObj);
 	e.consume(this);
-}
-
-bool HubMapButton::registerMapping(MappableObj src) {
-	if (centralData->isMappingInProgress()) {
-		if (src.moduleID > -1) {
-			if (mapObj.moduleID != src.moduleID) {
-				if (!centralData->isRegisteredHub(src.moduleID)) {
-					centralData->registerMapDest(src);
-					return true;
-				}
-			}
-		}
-	}
-	return false;
 }

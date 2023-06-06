@@ -93,12 +93,11 @@ public:
 		// Check if a ParamWidget was touched
 		auto touchedParam = APP->scene->rack->getTouchedParam();
 		if (touchedParam && touchedParam->getParamQuantity()) {
-			int64_t moduleId = touchedParam->module->id;
 			int objId = touchedParam->getParamQuantity()->paramId;
 			APP->scene->rack->setTouchedParam(nullptr);
 
-			registerSuccess =
-				registerMapping({.objType = MappableObj::Type::Knob, .objID = objId, .moduleID = moduleId});
+			registerSuccess = centralData->registerMapDest(touchedParam->module, objId);
+			// registerMapping({.objType = MappableObj::Type::Knob, .objID = objId, .moduleID = moduleId});
 		}
 
 		if (!registerSuccess) {
