@@ -11,16 +11,16 @@ public:
 
 	void onDeselect(const rack::event::Deselect &e) override {
 		// printf("Deselect hub jack %lld %lld %d\n", id.moduleID, id.objID, id.objType);
-		bool registerSuccess = false;
-		auto touchedJack = centralData->getAndClearTouchedJack();
-		// printf("Touched %lld %lld %d\n", touchedJack.moduleID, touchedJack.objID, touchedJack.objType);
-		if (touchedJack.objType == mapObj.objType) {
-			registerSuccess = registerMapping(touchedJack);
-		}
+		// bool registerSuccess = false;
+		// auto touchedJack = centralData->getAndClearTouchedJack();
+		// // printf("Touched %lld %lld %d\n", touchedJack.moduleID, touchedJack.objID, touchedJack.objType);
+		// if (touchedJack.objType == mapObj.objType) {
+		// 	registerSuccess = registerMapping(touchedJack);
+		// }
 
-		if (!registerSuccess) {
-			centralData->abortMappingProcedure();
-		}
+		// if (!registerSuccess) {
+		// 	centralData->abortMappingProcedure();
+		// }
 	}
 };
 
