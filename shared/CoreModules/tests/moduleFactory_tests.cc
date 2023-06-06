@@ -182,38 +182,3 @@ TEST_CASE("ModuleInfoView::makeView<T>() matches T:: fields") {
 	// 													   .Switches = EnOscInfo::Switches,
 	// 													   .Leds = EnOscInfo::Leds,
 }
-
-etl::string_view get_str() {
-	return "module4";
-}
-TEST_CASE("ETL::map tests") {
-	SUBCASE("string -> string") {
-		etl::unordered_map<etl::string<3>, std::string, 4> m;
-		m["ABC"] = "DEF";
-		CHECK(m["ABC"] == "DEF");
-	}
-
-	SUBCASE("string -> struct") {
-		etl::unordered_map<etl::string<10>, ModuleInfoView, 4> m;
-		ModuleInfoView info{.width_hp = 4};
-		m["module4"] = info;
-		CHECK(m["module4"].width_hp == 4);
-	}
-
-	SUBCASE("string_view -> struct") {
-		using KeyT = etl::string_view;
-		etl::unordered_map<KeyT, ModuleInfoView, 4> m;
-		ModuleInfoView info{.width_hp = 4};
-		KeyT slug{"module4"};
-		m[slug] = info;
-		CHECK(m[slug].width_hp == 4);
-		CHECK(m["module4"].width_hp == 4);
-		CHECK(m[get_str()].width_hp == 4);
-		KeyT otherslug = slug;
-		CHECK(m[otherslug].width_hp == 4);
-
-		//Static string converts
-		StaticString<31> ss{"module4"};
-		CHECK(m[ss.c_str()].width_hp == 4);
-	}
-}
