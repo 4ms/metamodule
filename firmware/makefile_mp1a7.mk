@@ -250,7 +250,6 @@ INCLUDES +=		-I$(SHARED)/CoreModules/modules
 INCLUDES +=		-I$(SHARED)/cpputil
 INCLUDES +=		-I$(SHARED)/patch
 INCLUDES +=		-I$(LIBDIR)/printf
-INCLUDES += 	-I$(SHARED)/etl/include
 INCLUDES += 	-I$(SHARED)/patch_convert
 INCLUDES += 	-I$(SHARED)/patch_convert/ryml
 INCLUDES += 	-I$(RYMLDIR)/src
