@@ -35,7 +35,6 @@ struct MetaModuleHubBase : public CommModule {
 			for (auto &map : pot) {
 				map.paramHandle.color = color;
 				APP->engine->addParamHandle(&map.paramHandle);
-				printf("%d, %p\n", i, &map.paramHandle);
 			}
 		}
 	}
@@ -76,7 +75,6 @@ struct MetaModuleHubBase : public CommModule {
 		}
 
 		auto *map = next_free_map(hubParamId);
-		printf("next free map: %p\n", &map->paramHandle);
 
 		APP->engine->updateParamHandle(&map->paramHandle, module->id, moduleParamId, true);
 		map->panelParamId = hubParamId;
