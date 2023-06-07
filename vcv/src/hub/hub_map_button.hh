@@ -16,8 +16,6 @@ public:
 	void onLeave(const rack::event::Leave &e) override;
 	void onEnter(const rack::event::Enter &e) override;
 
-	bool registerMapping(MappableObj src);
-
 	MappableObj mapObj;
 	bool isMapped = false;
 	bool isCurrentMapSrc = false;

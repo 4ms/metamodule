@@ -142,24 +142,31 @@ public:
 	//
 
 	// Called by UI Thread: HubMapButton
-	void registerMapDest(MappableObj dest) {
+	bool registerMapDest(rack::Module *module, int64_t param_id) {
+		if (!_isMappingInProgress) {
+			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
+			return false;
+		}
+
+		if (!module) {
+			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
+			return false;
+		}
+
+		if (isRegisteredHub(module->id)) {
+			pr_dbg("Dest module is a hub. Aborting mapping.\n");
+			return false;
+		}
+
+		_currentMap.dst = {
+			.objType = MappableObj::Type::Knob, .objID = param_id, .moduleID = static_cast<int64_t>(module->id)};
+		_currentMap.dst_module = module;
+
 		pr_dbg("registerMapDest: dest: objID=%lld, moduleID=%lld t:%d\n", dest.objID, dest.moduleID, dest.objType);
 		pr_dbg("current src: objID=%lld, moduleID=%lld t:%d\n",
 			   _currentMap.src.objID,
 			   _currentMap.src.moduleID,
 			   _currentMap.src.objType);
-
-		if (!_isMappingInProgress) {
-			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
-			return;
-		}
-
-		_currentMap.dst = dest;
-		_currentMap.dst_module = getRegisteredModulePtr(dest.moduleID);
-		if (!_currentMap.dst_module) {
-			pr_dbg("Dest module ptr is null (not registered?). Aborting mapping.\n");
-			return;
-		}
 
 		{ // start mapsmtx lock
 			std::lock_guard mguard{mapsmtx};
@@ -206,6 +213,8 @@ public:
 			_currentMap.clear();
 			_isMappingInProgress = false;
 		} // end mapsmtx lock
+
+		return true;
 	}
 
 	// Can be called by UI Thread on "Unmap" menuitem

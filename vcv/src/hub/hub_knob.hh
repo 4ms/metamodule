@@ -4,6 +4,7 @@
 #include "../mapping/mappable_knob.hh"
 #include "hub_knob_menu.hh"
 #include "hub_map_button.hh"
+#include "hub_module.hh"
 
 // This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
 
@@ -77,10 +78,15 @@ static void makeKnobMenu(rack::ParamQuantity *paramQuantity, MappableObj id) {
 
 class HubKnobMapButton : public HubMapButton {
 	rack::ParamQuantity *paramQuantity = nullptr;
+	MetaModuleHubBase *hub = nullptr;
 
 public:
 	HubKnobMapButton(rack::app::ModuleWidget &parent)
 		: HubMapButton{static_cast<rack::app::ModuleWidget &>(parent)} {
+	}
+
+	void setHubModule(MetaModuleHubBase *hubModule) {
+		hub = hubModule;
 	}
 
 	void setParamQuantity(rack::ParamQuantity *paramQ) {
@@ -88,17 +94,18 @@ public:
 	}
 
 	void onDeselect(const rack::event::Deselect &e) override {
+		if (!hub)
+			return;
 		bool registerSuccess = false;
 
 		// Check if a ParamWidget was touched
 		auto touchedParam = APP->scene->rack->getTouchedParam();
 		if (touchedParam && touchedParam->getParamQuantity()) {
-			int64_t moduleId = touchedParam->module->id;
 			int objId = touchedParam->getParamQuantity()->paramId;
 			APP->scene->rack->setTouchedParam(nullptr);
 
-			registerSuccess =
-				registerMapping({.objType = MappableObj::Type::Knob, .objID = objId, .moduleID = moduleId});
+			registerSuccess = hub->registerMapDest(touchedParam->module, objId);
+			// registerMapping({.objType = MappableObj::Type::Knob, .objID = objId, .moduleID = moduleId});
 		}
 
 		if (!registerSuccess) {
@@ -118,6 +125,25 @@ public:
 			Button::onButton(e);
 		}
 	}
+
+	bool registerMapDest(rack::Module *module, int64_t param_id) {
+		if (!centralData->isMappingInProgress()) {
+			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
+			return false;
+		}
+
+		if (!module) {
+			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
+			return false;
+		}
+
+		if (centralData->isRegisteredHub(module->id)) {
+			pr_dbg("Dest module is a hub. Aborting mapping.\n");
+			return false;
+		}
+		return true;
+	}
+
 	// TODO: add right-click menu, same as in HubKnob
 };
 
