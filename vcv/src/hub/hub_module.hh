@@ -1,6 +1,7 @@
 #pragma once
 #include "../comm/comm_module.hh"
 #include "local_path.hh"
+#include "mapping/Mapping2.h"
 #include "mapping/central_data.hh"
 #include "mapping/patch_writer.hh"
 #include "util/string_util.hh"
@@ -21,7 +22,8 @@ struct MetaModuleHubBase : public CommModule {
 	std::span<MappableObj::Type> mappingSrcs;
 
 	static constexpr uint32_t MaxMapsPerPot = 8;
-	using KnobParamHandles = std::array<rack::ParamHandle, MaxMapsPerPot>;
+
+	using KnobParamHandles = std::array<Mapping2, MaxMapsPerPot>;
 	std::array<KnobParamHandles, PanelDef::NumPot> paramHandles;
 
 	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
@@ -30,9 +32,9 @@ struct MetaModuleHubBase : public CommModule {
 
 		for (unsigned i = 0; auto &pot : paramHandles) {
 			auto color = PaletteHub::color(i++);
-			for (auto &p_handle : pot) {
-				p_handle.color = color;
-				APP->engine->addParamHandle(&p_handle);
+			for (auto &map : pot) {
+				map.paramHandle.color = color;
+				APP->engine->addParamHandle(&map.paramHandle);
 			}
 		}
 	}
@@ -40,37 +42,67 @@ struct MetaModuleHubBase : public CommModule {
 	~MetaModuleHubBase() {
 		centralData->unregisterKnobMapsBySrcModule(id);
 		for (auto &pot : paramHandles) {
-			for (auto &p_handle : pot)
-				APP->engine->removeParamHandle(&p_handle);
+			for (auto &map : pot)
+				APP->engine->removeParamHandle(&map.paramHandle);
 		}
 	}
 
-	void processKnobMaps() {
-		//TODO: range for
-		for (unsigned i = 0; i < numMappings; i++) {
-			MappableObj src{mappingSrcs[i], i, id};
-			auto maps = centralData->getMappingsFromSrc(src);
-			for (auto &m : maps) {
-				if (m.dst.moduleID != -1) {
-					Module *module = m.dst_module;
-					if (module) {
-						int paramId = m.dst.objID;
-						MappableObj dst{MappableObj::Type::Knob, paramId, m.dst.moduleID};
-						auto [min, max] = centralData->getMapRange(src, dst);
-						auto knob_min = module->paramQuantities[paramId]->minValue;
-						auto knob_max = module->paramQuantities[paramId]->maxValue;
-						min = MathTools::map_value(min, 0.f, 1.f, knob_min, knob_max);
-						max = MathTools::map_value(max, 0.f, 1.f, knob_min, knob_max);
-						auto newMappedVal = MathTools::map_value(params[i].getValue(), 0.f, 1.f, min, max);
-						auto paramQuantity = module->paramQuantities[paramId];
-						paramQuantity->setValue(newMappedVal);
-					} else {
-						// disable the mapping because the module was deleted
-						// FIXME: send a message to centralData that the module was deleted.
-						// Or better yet, make sure every module's destructor removes its mappings from centralData
-					}
-				}
+	Mapping2 &next_free_map(unsigned hubParamId) {
+		// Find first unused paramHandle
+		for (auto &p : paramHandles[hubParamId]) {
+			if (p.paramHandle.moduleId < 0) {
+				return p;
 			}
+		}
+		// If all are used, then overwrite the last one
+		return paramHandles[hubParamId][MaxMapsPerPot - 1];
+	}
+
+	bool registerMapDest(int hubParamId, rack::Module *module, int64_t moduleParamId) {
+		if (!centralData->isMappingInProgress()) {
+			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
+			return false;
+		}
+
+		if (!module) {
+			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
+			return false;
+		}
+
+		if (centralData->isRegisteredHub(module->id)) {
+			pr_dbg("Dest module is a hub. Aborting mapping.\n");
+			return false;
+		}
+
+		auto map = next_free_map(hubParamId);
+		APP->engine->updateParamHandle(&map.paramHandle, module->id, moduleParamId, true);
+		map.panelParamId = hubParamId;
+		map.range_max = 1.f;
+		map.range_min = 0.f;
+		map.alias_name = "";
+
+		return true;
+	}
+
+	void processKnobMaps() {
+		for (int hubParamId = 0; auto &knobs : paramHandles) {
+			for (auto &map : knobs) {
+
+				auto module = map.paramHandle.module;
+				if (!module)
+					continue;
+
+				int paramId = map.paramHandle.paramId;
+				rack::ParamQuantity *paramQuantity = module->paramQuantities[paramId];
+				if (!paramQuantity)
+					continue;
+				if (!paramQuantity->isBounded())
+					continue;
+
+				auto val = MathTools::map_value(params[hubParamId].getValue(), 0.f, 1.f, map.range_min, map.range_max);
+				paramQuantity->setScaledValue(val);
+			}
+			hubParamId++;
 		}
 	}
 
@@ -117,29 +149,6 @@ struct MetaModuleHubBase : public CommModule {
 			labelText += patchStructName.str + ".yml";
 			updateDisplay();
 		}
-	}
-
-	bool registerMapDest(int hubParamId, rack::Module *module, int64_t moduleParamId) {
-		if (!centralData->isMappingInProgress()) {
-			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
-			return false;
-		}
-
-		if (!module) {
-			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
-			return false;
-		}
-
-		if (centralData->isRegisteredHub(module->id)) {
-			pr_dbg("Dest module is a hub. Aborting mapping.\n");
-			return false;
-		}
-
-		APP->engine->updateParamHandle(&paramHandles[hubParamId][0], module->id, moduleParamId, true);
-		centralData->registerMapDest(module, moduleParamId);
-
-		//{.objType = MappableObj::Type::Knob, .objID = param_id, .moduleID = module->id}
-		return true;
 	}
 
 	// This is called periodically on auto-save
@@ -243,7 +252,6 @@ struct MetaModuleHubBase : public CommModule {
 			}
 		}
 	}
-
 
 private:
 	bool buttonJustPressed(bool button_value) {
