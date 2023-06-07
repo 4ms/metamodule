@@ -20,7 +20,7 @@ struct MetaModuleHubBase : public CommModule {
 	size_t numMappings;
 	std::span<MappableObj::Type> mappingSrcs;
 
-	MetaModuleHubBase(std::span<MappableObj::Type> mappingSrcs)
+	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
 		: numMappings{mappingSrcs.size()}
 		, mappingSrcs{mappingSrcs} {
 	}

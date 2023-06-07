@@ -15,7 +15,7 @@ using namespace rack;
 struct HubMediumMappings {
 	constexpr static unsigned NumMidiSrcs = 2;
 	constexpr static unsigned NumMappings = PanelDef::NumKnobs + NumMidiSrcs;
-	constexpr static std::array<MappableObj::Type, NumMappings> mapping_srcs{
+	static inline std::array<MappableObj::Type, NumMappings> mapping_srcs{
 		MappableObj::Type::Knob,
 		MappableObj::Type::Knob,
 		MappableObj::Type::Knob,
@@ -33,7 +33,7 @@ struct HubMediumMappings {
 	};
 };
 
-struct HubMedium : MetaModuleHub {
+struct HubMedium : MetaModuleHubBase {
 
 	enum ParamIds { ENUMS(KNOBS, PanelDef::NumPot), MIDI_MONO_NOTE, MIDI_MONO_GATE, WRITE_PATCH, NUM_PARAMS };
 	enum InputIds { NUM_INPUTS = PanelDef::NumUserFacingInJacks };
@@ -44,7 +44,8 @@ struct HubMedium : MetaModuleHub {
 	using KnobParamHandles = std::array<ParamHandle, MaxMapsPerPot>;
 	std::array<KnobParamHandles, PanelDef::NumPot> paramHandles;
 
-	HubMedium() {
+	HubMedium()
+		: MetaModuleHubBase{HubMediumMappings::mapping_srcs} {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		// configParam(int paramId, float minValue, float maxValue, float defaultValue, std::string label = "",
 		// std::string unit = "", float displayBase = 0.f, float displayMultiplier = 1.f, float displayOffset = 0.f);
@@ -90,7 +91,7 @@ struct HubMedium : MetaModuleHub {
 	}
 };
 
-struct HubMediumWidget : MetaModuleHubBaseWidget<HubMediumMappings> {
+struct HubMediumWidget : MetaModuleHubBaseWidget {
 	LedDisplayTextField *patchName;
 	LedDisplayTextField *patchDesc;
 
