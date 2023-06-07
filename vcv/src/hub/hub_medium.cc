@@ -65,7 +65,7 @@ struct HubMedium : MetaModuleHubBase {
 
 	void process(const ProcessArgs &args) override {
 		processPatchButton(params[WRITE_PATCH].getValue());
-		processKnobMaps();
+		processMaps();
 		processCreatePatchFile();
 	}
 };

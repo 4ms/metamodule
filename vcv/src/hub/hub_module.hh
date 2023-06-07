@@ -47,18 +47,7 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	Mapping2 *next_free_map(unsigned hubParamId) {
-		// Find first unused paramHandle
-		for (auto &p : paramHandles[hubParamId]) {
-			if (p.paramHandle.moduleId < 0) {
-				return &p;
-			}
-		}
-		// If all are used, then overwrite the last one
-		return &paramHandles[hubParamId][MaxMapsPerPot - 1];
-	}
-
-	bool registerMapDest(int hubParamId, rack::Module *module, int64_t moduleParamId) {
+	bool registerMap(int hubParamId, rack::Module *module, int64_t moduleParamId) {
 		if (!centralData->isMappingInProgress()) {
 			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
 			return false;
@@ -74,10 +63,8 @@ struct MetaModuleHubBase : public CommModule {
 			return false;
 		}
 
-		auto *map = next_free_map(hubParamId);
-
+		auto *map = nextFreeMap(hubParamId);
 		APP->engine->updateParamHandle(&map->paramHandle, module->id, moduleParamId, true);
-		map->panelParamId = hubParamId;
 		map->range_max = 1.f;
 		map->range_min = 0.f;
 		map->alias_name = "";
@@ -85,7 +72,20 @@ struct MetaModuleHubBase : public CommModule {
 		return true;
 	}
 
-	void processKnobMaps() {
+	int getNumMappings(int hubParamId) {
+		unsigned num = 0;
+		for (auto &p : paramHandles[hubParamId]) {
+			if (p.paramHandle.module && p.paramHandle.moduleId >= 0)
+				num++;
+		}
+		return num;
+	}
+
+	KnobParamHandles &getMappings(int hubParamId) {
+		return paramHandles[hubParamId];
+	}
+
+	void processMaps() {
 		for (int hubParamId = 0; auto &knobs : paramHandles) {
 			for (auto &map : knobs) {
 
@@ -265,6 +265,17 @@ private:
 			buttonAlreadyHandled = false;
 		}
 		return false;
+	}
+
+	Mapping2 *nextFreeMap(unsigned hubParamId) {
+		// Find first unused paramHandle
+		for (auto &p : paramHandles[hubParamId]) {
+			if (p.paramHandle.moduleId < 0) {
+				return &p;
+			}
+		}
+		// If all are used, then overwrite the last one
+		return &paramHandles[hubParamId][MaxMapsPerPot - 1];
 	}
 
 	void

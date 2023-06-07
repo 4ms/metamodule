@@ -72,7 +72,7 @@ public:
 
 			// Right click to open context menu
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-				makeKnobMenu(this->getParamQuantity(), hubmidi_mapbut.mapObj);
+				hubmidi_mapbut.makeKnobMenu(); //this->getParamQuantity(), hubmidi_mapbut.mapObj);
 				e.consume(this);
 			}
 		}
