@@ -35,6 +35,7 @@ struct MetaModuleHubBase : public CommModule {
 			for (auto &map : pot) {
 				map.paramHandle.color = color;
 				APP->engine->addParamHandle(&map.paramHandle);
+				printf("%d, %p\n", i, &map.paramHandle);
 			}
 		}
 	}
@@ -47,15 +48,15 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	Mapping2 &next_free_map(unsigned hubParamId) {
+	Mapping2 *next_free_map(unsigned hubParamId) {
 		// Find first unused paramHandle
 		for (auto &p : paramHandles[hubParamId]) {
 			if (p.paramHandle.moduleId < 0) {
-				return p;
+				return &p;
 			}
 		}
 		// If all are used, then overwrite the last one
-		return paramHandles[hubParamId][MaxMapsPerPot - 1];
+		return &paramHandles[hubParamId][MaxMapsPerPot - 1];
 	}
 
 	bool registerMapDest(int hubParamId, rack::Module *module, int64_t moduleParamId) {
@@ -74,12 +75,14 @@ struct MetaModuleHubBase : public CommModule {
 			return false;
 		}
 
-		auto map = next_free_map(hubParamId);
-		APP->engine->updateParamHandle(&map.paramHandle, module->id, moduleParamId, true);
-		map.panelParamId = hubParamId;
-		map.range_max = 1.f;
-		map.range_min = 0.f;
-		map.alias_name = "";
+		auto *map = next_free_map(hubParamId);
+		printf("next free map: %p\n", &map->paramHandle);
+
+		APP->engine->updateParamHandle(&map->paramHandle, module->id, moduleParamId, true);
+		map->panelParamId = hubParamId;
+		map->range_max = 1.f;
+		map->range_min = 0.f;
+		map->alias_name = "";
 
 		return true;
 	}
@@ -88,11 +91,11 @@ struct MetaModuleHubBase : public CommModule {
 		for (int hubParamId = 0; auto &knobs : paramHandles) {
 			for (auto &map : knobs) {
 
+				int paramId = map.paramHandle.paramId;
 				auto module = map.paramHandle.module;
 				if (!module)
 					continue;
 
-				int paramId = map.paramHandle.paramId;
 				rack::ParamQuantity *paramQuantity = module->paramQuantities[paramId];
 				if (!paramQuantity)
 					continue;
