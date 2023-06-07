@@ -96,17 +96,18 @@ public:
 	void onDeselect(const rack::event::Deselect &e) override {
 		if (!hub)
 			return;
+
 		bool registerSuccess = false;
 
 		// Check if a ParamWidget was touched
 		auto touchedParam = APP->scene->rack->getTouchedParam();
 		if (touchedParam && touchedParam->getParamQuantity()) {
-			int objId = touchedParam->getParamQuantity()->paramId;
+			int param_id = touchedParam->getParamQuantity()->paramId;
 			APP->scene->rack->setTouchedParam(nullptr);
 
-			registerSuccess = hub->registerMapDest(touchedParam->module, objId);
-			// registerMapping({.objType = MappableObj::Type::Knob, .objID = objId, .moduleID = moduleId});
-		}
+			registerSuccess = hub->registerMapDest(mapObj.objID, touchedParam->module, param_id);
+		} else
+			printf("No touchedParam\n");
 
 		if (!registerSuccess) {
 			centralData->abortMappingProcedure();
@@ -124,24 +125,6 @@ public:
 		} else {
 			Button::onButton(e);
 		}
-	}
-
-	bool registerMapDest(rack::Module *module, int64_t param_id) {
-		if (!centralData->isMappingInProgress()) {
-			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
-			return false;
-		}
-
-		if (!module) {
-			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
-			return false;
-		}
-
-		if (centralData->isRegisteredHub(module->id)) {
-			pr_dbg("Dest module is a hub. Aborting mapping.\n");
-			return false;
-		}
-		return true;
 	}
 
 	// TODO: add right-click menu, same as in HubKnob

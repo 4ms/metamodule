@@ -20,13 +20,29 @@ struct MetaModuleHubBase : public CommModule {
 	size_t numMappings;
 	std::span<MappableObj::Type> mappingSrcs;
 
+	static constexpr uint32_t MaxMapsPerPot = 8;
+	using KnobParamHandles = std::array<rack::ParamHandle, MaxMapsPerPot>;
+	std::array<KnobParamHandles, PanelDef::NumPot> paramHandles;
+
 	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
 		: numMappings{mappingSrcs.size()}
 		, mappingSrcs{mappingSrcs} {
+
+		for (unsigned i = 0; auto &pot : paramHandles) {
+			auto color = PaletteHub::color(i++);
+			for (auto &p_handle : pot) {
+				p_handle.color = color;
+				APP->engine->addParamHandle(&p_handle);
+			}
+		}
 	}
 
 	~MetaModuleHubBase() {
 		centralData->unregisterKnobMapsBySrcModule(id);
+		for (auto &pot : paramHandles) {
+			for (auto &p_handle : pot)
+				APP->engine->removeParamHandle(&p_handle);
+		}
 	}
 
 	// This is called periodically on auto-save
@@ -131,7 +147,6 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	// Hub class needs to call this from its process
 	void processKnobMaps() {
 		//TODO: range for
 		for (unsigned i = 0; i < numMappings; i++) {
@@ -161,7 +176,6 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	// Hub class needs to call this from its process
 	void processPatchButton(float patchButtonState) {
 		if (buttonJustPressed(patchButtonState)) {
 			shouldWritePatch = true;
@@ -170,7 +184,6 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	// Hub class needs to call this from its process
 	void processCreatePatchFile() {
 		if (shouldWritePatch) {
 			shouldWritePatch = false;
@@ -208,8 +221,27 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	bool registerMapDest(rack::Module *module, int64_t paramId) {
-		return false;
+	bool registerMapDest(int hubParamId, rack::Module *module, int64_t moduleParamId) {
+		if (!centralData->isMappingInProgress()) {
+			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
+			return false;
+		}
+
+		if (!module) {
+			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
+			return false;
+		}
+
+		if (centralData->isRegisteredHub(module->id)) {
+			pr_dbg("Dest module is a hub. Aborting mapping.\n");
+			return false;
+		}
+
+		APP->engine->updateParamHandle(&paramHandles[hubParamId][0], module->id, moduleParamId, true);
+		centralData->registerMapDest(module, moduleParamId);
+
+		//{.objType = MappableObj::Type::Knob, .objID = param_id, .moduleID = module->id}
+		return true;
 	}
 
 private:

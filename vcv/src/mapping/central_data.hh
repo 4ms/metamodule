@@ -141,23 +141,7 @@ public:
 	// Registering/Unregistering Mappings
 	//
 
-	// Called by UI Thread: HubMapButton
 	bool registerMapDest(rack::Module *module, int64_t param_id) {
-		if (!_isMappingInProgress) {
-			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
-			return false;
-		}
-
-		if (!module) {
-			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
-			return false;
-		}
-
-		if (isRegisteredHub(module->id)) {
-			pr_dbg("Dest module is a hub. Aborting mapping.\n");
-			return false;
-		}
-
 		_currentMap.dst = {
 			.objType = MappableObj::Type::Knob, .objID = param_id, .moduleID = static_cast<int64_t>(module->id)};
 		_currentMap.dst_module = module;

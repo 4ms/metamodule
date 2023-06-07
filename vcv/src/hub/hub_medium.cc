@@ -40,15 +40,9 @@ struct HubMedium : MetaModuleHubBase {
 	enum OutputIds { NUM_OUTPUTS = PanelDef::NumUserFacingInJacks };
 	enum LightIds { NUM_LIGHTS = 0 };
 
-	static constexpr uint32_t MaxMapsPerPot = 8;
-	using KnobParamHandles = std::array<ParamHandle, MaxMapsPerPot>;
-	std::array<KnobParamHandles, PanelDef::NumPot> paramHandles;
-
 	HubMedium()
 		: MetaModuleHubBase{HubMediumMappings::mapping_srcs} {
 		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		// configParam(int paramId, float minValue, float maxValue, float defaultValue, std::string label = "",
-		// std::string unit = "", float displayBase = 0.f, float displayMultiplier = 1.f, float displayOffset = 0.f);
 		configParam(0, 0.f, 1.f, 0.f, "Knob A");
 		configParam(1, 0.f, 1.f, 0.f, "Knob B");
 		configParam(2, 0.f, 1.f, 0.f, "Knob C");
@@ -67,21 +61,6 @@ struct HubMedium : MetaModuleHubBase {
 
 		configParam(WRITE_PATCH, 0.f, 1.f, 0.f, "Export patch file");
 		selfID.slug = "PanelMedium";
-
-		for (unsigned i = 0; auto &pot : paramHandles) {
-			auto color = PaletteHub::color(i++);
-			for (auto &p_handle : pot) {
-				p_handle.color = color;
-				APP->engine->addParamHandle(&p_handle);
-			}
-		}
-	}
-
-	~HubMedium() {
-		for (auto &pot : paramHandles) {
-			for (auto &p_handle : pot)
-				APP->engine->removeParamHandle(&p_handle);
-		}
 	}
 
 	void process(const ProcessArgs &args) override {

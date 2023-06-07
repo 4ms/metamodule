@@ -40,6 +40,7 @@ struct MetaModuleHubBaseWidget : rack::app::ModuleWidget {
 		button->box.size.y = rack::mm2px(sz_mm);
 		button->text = labelText;
 		button->mapObj = {MappableObj::Type::Knob, knobId, hubModule ? hubModule->id : -1};
+		button->setHubModule(hubModule);
 		addChild(button);
 
 		auto *p = new HubKnob<KnobType>{*button};
