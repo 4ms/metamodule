@@ -45,8 +45,105 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
+	void processKnobMaps() {
+		//TODO: range for
+		for (unsigned i = 0; i < numMappings; i++) {
+			MappableObj src{mappingSrcs[i], i, id};
+			auto maps = centralData->getMappingsFromSrc(src);
+			for (auto &m : maps) {
+				if (m.dst.moduleID != -1) {
+					Module *module = m.dst_module;
+					if (module) {
+						int paramId = m.dst.objID;
+						MappableObj dst{MappableObj::Type::Knob, paramId, m.dst.moduleID};
+						auto [min, max] = centralData->getMapRange(src, dst);
+						auto knob_min = module->paramQuantities[paramId]->minValue;
+						auto knob_max = module->paramQuantities[paramId]->maxValue;
+						min = MathTools::map_value(min, 0.f, 1.f, knob_min, knob_max);
+						max = MathTools::map_value(max, 0.f, 1.f, knob_min, knob_max);
+						auto newMappedVal = MathTools::map_value(params[i].getValue(), 0.f, 1.f, min, max);
+						auto paramQuantity = module->paramQuantities[paramId];
+						paramQuantity->setValue(newMappedVal);
+					} else {
+						// disable the mapping because the module was deleted
+						// FIXME: send a message to centralData that the module was deleted.
+						// Or better yet, make sure every module's destructor removes its mappings from centralData
+					}
+				}
+			}
+		}
+	}
+
+	void processPatchButton(float patchButtonState) {
+		if (buttonJustPressed(patchButtonState)) {
+			shouldWritePatch = true;
+			updatePatchName();
+			updateDisplay();
+		}
+	}
+
+	void processCreatePatchFile() {
+		if (shouldWritePatch) {
+			shouldWritePatch = false;
+
+			std::string patchName;
+			std::string patchDir;
+			if (patchNameText.substr(0, 5) == "test_")
+				patchDir = testPatchDir;
+			else
+				patchDir = examplePatchDir;
+			if (patchNameText != "" && patchNameText != "Enter Patch Name") {
+				patchName = patchNameText.c_str();
+			} else {
+				std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
+				patchName = randomname.c_str();
+			}
+			ReplaceString patchStructName{patchName};
+			patchStructName.replace_all(" ", "")
+				.replace_all("-", "")
+				.replace_all(",", "")
+				.replace_all("/", "")
+				.replace_all("\\", "")
+				.replace_all("\"", "")
+				.replace_all("'", "")
+				.replace_all(".", "")
+				.replace_all("?", "")
+				.replace_all("#", "")
+				.replace_all("!", "");
+			std::string patchFileName = patchDir + patchStructName.str;
+			writePatchFile(patchFileName, patchStructName.str, patchName, patchDescText);
+
+			labelText = "Wrote patch file: ";
+			labelText += patchStructName.str + ".yml";
+			updateDisplay();
+		}
+	}
+
+	bool registerMapDest(int hubParamId, rack::Module *module, int64_t moduleParamId) {
+		if (!centralData->isMappingInProgress()) {
+			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
+			return false;
+		}
+
+		if (!module) {
+			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
+			return false;
+		}
+
+		if (centralData->isRegisteredHub(module->id)) {
+			pr_dbg("Dest module is a hub. Aborting mapping.\n");
+			return false;
+		}
+
+		APP->engine->updateParamHandle(&paramHandles[hubParamId][0], module->id, moduleParamId, true);
+		centralData->registerMapDest(module, moduleParamId);
+
+		//{.objType = MappableObj::Type::Knob, .objID = param_id, .moduleID = module->id}
+		return true;
+	}
+
 	// This is called periodically on auto-save
-	// CentralData->maps and the patch name/description are converted to json
+	// maps and the patch name/description are converted to json
 	json_t *dataToJson() override {
 		json_t *rootJ = json_object();
 		json_t *mapsJ = json_array();
@@ -147,102 +244,6 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	void processKnobMaps() {
-		//TODO: range for
-		for (unsigned i = 0; i < numMappings; i++) {
-			MappableObj src{mappingSrcs[i], i, id};
-			auto maps = centralData->getMappingsFromSrc(src);
-			for (auto &m : maps) {
-				if (m.dst.moduleID != -1) {
-					Module *module = m.dst_module;
-					if (module) {
-						int paramId = m.dst.objID;
-						MappableObj dst{MappableObj::Type::Knob, paramId, m.dst.moduleID};
-						auto [min, max] = centralData->getMapRange(src, dst);
-						auto knob_min = module->paramQuantities[paramId]->minValue;
-						auto knob_max = module->paramQuantities[paramId]->maxValue;
-						min = MathTools::map_value(min, 0.f, 1.f, knob_min, knob_max);
-						max = MathTools::map_value(max, 0.f, 1.f, knob_min, knob_max);
-						auto newMappedVal = MathTools::map_value(params[i].getValue(), 0.f, 1.f, min, max);
-						auto paramQuantity = module->paramQuantities[paramId];
-						paramQuantity->setValue(newMappedVal);
-					} else {
-						// disable the mapping because the module was deleted
-						// FIXME: send a message to centralData that the module was deleted.
-						// Or better yet, make sure every module's destructor removes its mappings from centralData
-					}
-				}
-			}
-		}
-	}
-
-	void processPatchButton(float patchButtonState) {
-		if (buttonJustPressed(patchButtonState)) {
-			shouldWritePatch = true;
-			updatePatchName();
-			updateDisplay();
-		}
-	}
-
-	void processCreatePatchFile() {
-		if (shouldWritePatch) {
-			shouldWritePatch = false;
-
-			std::string patchName;
-			std::string patchDir;
-			if (patchNameText.substr(0, 5) == "test_")
-				patchDir = testPatchDir;
-			else
-				patchDir = examplePatchDir;
-			if (patchNameText != "" && patchNameText != "Enter Patch Name") {
-				patchName = patchNameText.c_str();
-			} else {
-				std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
-				patchName = randomname.c_str();
-			}
-			ReplaceString patchStructName{patchName};
-			patchStructName.replace_all(" ", "")
-				.replace_all("-", "")
-				.replace_all(",", "")
-				.replace_all("/", "")
-				.replace_all("\\", "")
-				.replace_all("\"", "")
-				.replace_all("'", "")
-				.replace_all(".", "")
-				.replace_all("?", "")
-				.replace_all("#", "")
-				.replace_all("!", "");
-			std::string patchFileName = patchDir + patchStructName.str;
-			writePatchFile(patchFileName, patchStructName.str, patchName, patchDescText);
-
-			labelText = "Wrote patch file: ";
-			labelText += patchStructName.str + ".yml";
-			updateDisplay();
-		}
-	}
-
-	bool registerMapDest(int hubParamId, rack::Module *module, int64_t moduleParamId) {
-		if (!centralData->isMappingInProgress()) {
-			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
-			return false;
-		}
-
-		if (!module) {
-			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
-			return false;
-		}
-
-		if (centralData->isRegisteredHub(module->id)) {
-			pr_dbg("Dest module is a hub. Aborting mapping.\n");
-			return false;
-		}
-
-		APP->engine->updateParamHandle(&paramHandles[hubParamId][0], module->id, moduleParamId, true);
-		centralData->registerMapDest(module, moduleParamId);
-
-		//{.objType = MappableObj::Type::Knob, .objID = param_id, .moduleID = module->id}
-		return true;
-	}
 
 private:
 	bool buttonJustPressed(bool button_value) {
