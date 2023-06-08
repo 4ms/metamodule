@@ -141,66 +141,6 @@ public:
 	// Registering/Unregistering Mappings
 	//
 
-	bool registerMapDest(rack::Module *module, int64_t param_id) {
-		_currentMap.dst = {
-			.objType = MappableObj::Type::Knob, .objID = param_id, .moduleID = static_cast<int64_t>(module->id)};
-		_currentMap.dst_module = module;
-
-		pr_dbg("registerMapDest: dest: objID=%lld, moduleID=%lld t:%d\n", dest.objID, dest.moduleID, dest.objType);
-		pr_dbg("current src: objID=%lld, moduleID=%lld t:%d\n",
-			   _currentMap.src.objID,
-			   _currentMap.src.moduleID,
-			   _currentMap.src.objType);
-
-		{ // start mapsmtx lock
-			std::lock_guard mguard{mapsmtx};
-
-			// Look for an existing map to the dst
-			bool found = false;
-			for (auto &m : maps) {
-				if (m.dst == _currentMap.dst) {
-					found = true;
-					pr_dbg("Found an existing map to dst (src was m:%lld p:%lld t:%d\n",
-						   m.src.moduleID,
-						   m.src.objID,
-						   m.src.objType);
-					m.src = _currentMap.src;
-					break;
-				}
-			}
-			if (!found) {
-				pr_dbg("Didn't find an existing map to dst, adding it to centralData.\n");
-
-				// Rule: hub output jacks can only be mapped to one dst
-				if (_currentMap.src.objType == MappableObj::Type::OutputJack) {
-					auto num_erased = std::erase_if(maps, [&](auto const &m) { return m.src == _currentMap.src; });
-					pr_dbg("Removed %lu mappings from centralData, with src on hub: "
-						   "m=%lld out-jack=%lld\n",
-						   num_erased,
-						   _currentMap.src.moduleID,
-						   _currentMap.src.objID);
-					(void)num_erased;
-				}
-
-				pr_dbg("Added: dest: objID=%lld, moduleID=%lld (ptr->id=%lld) t=%d. src: objID=%lld, moduleID=%lld , "
-					   "t=%d\n",
-					   _currentMap.dst.objID,
-					   _currentMap.dst.moduleID,
-					   _currentMap.dst_module->id,
-					   _currentMap.dst.objType,
-					   _currentMap.src.objID,
-					   _currentMap.src.moduleID,
-					   _currentMap.src.objType);
-				maps.push_back(_currentMap);
-			}
-
-			_currentMap.clear();
-			_isMappingInProgress = false;
-		} // end mapsmtx lock
-
-		return true;
-	}
-
 	// Can be called by UI Thread on "Unmap" menuitem
 	void unregisterMapByDest(MappableObj dest) {
 		// Remove from CD::maps
@@ -219,64 +159,6 @@ public:
 				return (m.src.objType == MappableObj::Type::Knob && m.src.moduleID == moduleId);
 			});
 		}
-	}
-
-	//
-	// Knob Mapping Range
-	//
-
-	void setMapRange(MappableObj src, MappableObj dst, float rmin, float rmax) {
-		std::lock_guard mguard{mapsmtx};
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
-		if (m == maps.end())
-			return;
-		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
-		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
-	}
-
-	void setMapRangeMin(MappableObj dst, float rmin) {
-		std::lock_guard mguard{mapsmtx};
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
-		if (m == maps.end())
-			return;
-		m->range_min = MathTools::constrain(rmin, 0.f, 1.f);
-	}
-
-	void setMapRangeMax(MappableObj dst, float rmax) {
-		std::lock_guard mguard{mapsmtx};
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.dst == dst); });
-		if (m == maps.end())
-			return;
-		m->range_max = MathTools::constrain(rmax, 0.f, 1.f);
-	}
-
-	std::pair<float, float> getMapRange(MappableObj src, MappableObj dst) {
-		std::lock_guard mguard{mapsmtx};
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
-		float min, max;
-		if (m == maps.end()) {
-			min = 0.f;
-			max = 1.f;
-		} else {
-			min = m->range_min;
-			max = m->range_max;
-		}
-		return {min, max};
-	}
-
-	std::pair<float, float> getMapRange(MappableObj dst) {
-		std::lock_guard mguard{mapsmtx};
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.dst == dst; });
-		float min, max;
-		if (m == maps.end()) {
-			min = 0.f;
-			max = 1.f;
-			pr_dbg("Not found\n");
-		} else {
-			min = m->range_min;
-			max = m->range_max;
-		}
-		return {min, max};
 	}
 
 	void setMapAliasName(MappableObj src, std::string newname) {

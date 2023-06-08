@@ -1,7 +1,7 @@
 #pragma once
 #include "../comm/comm_module.hh"
+#include "hub_mappings.hh"
 #include "local_path.hh"
-#include "mapping/Mapping2.h"
 #include "mapping/central_data.hh"
 #include "mapping/patch_writer.hh"
 #include "util/string_util.hh"
@@ -22,17 +22,15 @@ struct MetaModuleHubBase : public CommModule {
 	std::span<MappableObj::Type> mappingSrcs;
 
 	static constexpr uint32_t MaxMapsPerPot = 8;
-
-	using KnobParamHandles = std::array<Mapping2, MaxMapsPerPot>;
-	std::array<KnobParamHandles, PanelDef::NumPot> paramHandles;
+	HubKnobMappings<PanelDef::NumPot, MaxMapsPerPot> mappings;
 
 	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
 		: numMappings{mappingSrcs.size()}
 		, mappingSrcs{mappingSrcs} {
 
-		for (unsigned i = 0; auto &pot : paramHandles) {
+		for (unsigned i = 0; auto &knob : mappings) {
 			auto color = PaletteHub::color(i++);
-			for (auto &map : pot) {
+			for (auto &map : knob) {
 				map.paramHandle.color = color;
 				APP->engine->addParamHandle(&map.paramHandle);
 			}
@@ -41,7 +39,7 @@ struct MetaModuleHubBase : public CommModule {
 
 	~MetaModuleHubBase() {
 		centralData->unregisterKnobMapsBySrcModule(id);
-		for (auto &pot : paramHandles) {
+		for (auto &pot : mappings) {
 			for (auto &map : pot)
 				APP->engine->removeParamHandle(&map.paramHandle);
 		}
@@ -74,19 +72,19 @@ struct MetaModuleHubBase : public CommModule {
 
 	int getNumMappings(int hubParamId) {
 		unsigned num = 0;
-		for (auto &p : paramHandles[hubParamId]) {
+		for (auto &p : mappings[hubParamId]) {
 			if (p.paramHandle.module && p.paramHandle.moduleId >= 0)
 				num++;
 		}
 		return num;
 	}
 
-	KnobParamHandles &getMappings(int hubParamId) {
-		return paramHandles[hubParamId];
+	auto &getMappings(int hubParamId) {
+		return mappings[hubParamId];
 	}
 
 	void processMaps() {
-		for (int hubParamId = 0; auto &knobs : paramHandles) {
+		for (int hubParamId = 0; auto &knobs : mappings) {
 			for (auto &map : knobs) {
 
 				int paramId = map.paramHandle.paramId;
@@ -269,13 +267,13 @@ private:
 
 	Mapping2 *nextFreeMap(unsigned hubParamId) {
 		// Find first unused paramHandle
-		for (auto &p : paramHandles[hubParamId]) {
+		for (auto &p : mappings[hubParamId]) {
 			if (p.paramHandle.moduleId < 0) {
 				return &p;
 			}
 		}
 		// If all are used, then overwrite the last one
-		return &paramHandles[hubParamId][MaxMapsPerPot - 1];
+		return &mappings[hubParamId][MaxMapsPerPot - 1];
 	}
 
 	void
