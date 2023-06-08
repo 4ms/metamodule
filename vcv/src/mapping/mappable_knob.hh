@@ -94,7 +94,9 @@ struct KnobAliasTextBox : rack::ui::TextField {
 	}
 
 	void onChange(const rack::event::Change &e) override {
-		centralData->setMapAliasName(_src, text);
+		// centralData->setMapAliasName(_src, text);
+		//TODO:
+		//hub->mappings.setMapAliasName(_src, text);
 	}
 };
 
@@ -109,7 +111,10 @@ struct KnobAliasMenuItem : rack::widget::Widget {
 		txt = new KnobAliasTextBox{src};
 		txt->box.pos = {45, 0};
 		txt->box.size = {120 - txt->box.pos.x, BND_WIDGET_HEIGHT};
-		txt->text = centralData->getMapAliasName(_src);
+		txt->text = "";
+		// txt->text = centralData->getMapAliasName(_src);
+		//TODO:
+		//txt->text = hub->mappings.getMapAliasName(_src);
 		addChild(txt);
 	}
 

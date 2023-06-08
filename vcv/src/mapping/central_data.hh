@@ -161,38 +161,22 @@ public:
 		}
 	}
 
-	void setMapAliasName(MappableObj src, std::string newname) {
-		std::lock_guard mguard{mapsmtx};
-		// TODO: update all maps with matching src
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
-		if (m == maps.end())
-			return;
-		m->alias_name = newname;
-	}
+	// void setMapAliasName(MappableObj src, std::string newname) {
+	// 	std::lock_guard mguard{mapsmtx};
+	// 	// TODO: update all maps with matching src
+	// 	auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
+	// 	if (m == maps.end())
+	// 		return;
+	// 	m->alias_name = newname;
+	// }
 
-	std::string getMapAliasName(MappableObj src) {
-		std::lock_guard mguard{mapsmtx};
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
-		if (m == maps.end())
-			return "";
-		return m->alias_name;
-	}
-
-	void setMapAliasName(MappableObj src, MappableObj dst, std::string newname) {
-		std::lock_guard mguard{mapsmtx};
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
-		if (m == maps.end())
-			return;
-		m->alias_name = newname;
-	}
-
-	std::string getMapAliasName(MappableObj src, MappableObj dst) {
-		std::lock_guard mguard{mapsmtx};
-		auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == src && m.dst == dst); });
-		if (m == maps.end())
-			return "";
-		return m->alias_name;
-	}
+	// std::string getMapAliasName(MappableObj src) {
+	// 	std::lock_guard mguard{mapsmtx};
+	// 	auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
+	// 	if (m == maps.end())
+	// 		return "";
+	// 	return m->alias_name;
+	// }
 
 	//
 	// State queries

@@ -1,13 +1,15 @@
 #pragma once
 
+#include "hub/hub_module.hh"
 #include "mapping/Mapping.h"
 #include <rack.hpp>
 
 class HubMapButton : public rack::Button {
 
 public:
-	HubMapButton(rack::app::ModuleWidget &parent)
-		: _parent{parent} {
+	HubMapButton(MetaModuleHubBase &hub, rack::app::ModuleWidget &parent)
+		: parent{parent}
+		, hub{hub} {
 	}
 	void draw(const DrawArgs &args) override;
 	void onDragStart(const rack::event::DragStart &e) override;
@@ -22,9 +24,8 @@ public:
 
 	// void _createMapping(LabelButtonID srcId);
 protected:
-	void _updateState();
-	bool _hovered{false};
-
-private:
-	rack::app::ModuleWidget &_parent;
+	void updateState();
+	bool hovered{false};
+	rack::app::ModuleWidget &parent;
+	MetaModuleHubBase &hub;
 };

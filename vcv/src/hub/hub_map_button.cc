@@ -3,8 +3,8 @@
 #include "../mapping/map_palette.hh"
 #include <cstdio>
 
-void HubMapButton::_updateState() {
-	hubParamObj.moduleID = _parent.module ? _parent.module->id : -1;
+void HubMapButton::updateState() {
+	hubParamObj.moduleID = parent.module ? parent.module->id : -1;
 
 	isCurrentMapSrc = false;
 	if (centralData->isMappingInProgress() && (centralData->getMappingSource() == hubParamObj)) {
@@ -15,10 +15,10 @@ void HubMapButton::_updateState() {
 }
 
 void HubMapButton::draw(const DrawArgs &args) {
-	_updateState();
+	updateState();
 
 	// Draw a large background circle to highlight a mapping has begun from this knob
-	if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(hubParamObj)) {
+	if (isCurrentMapSrc || hovered || centralData->isMappedPartnerHovered(hubParamObj)) {
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y / 2);
 		const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
@@ -27,7 +27,7 @@ void HubMapButton::draw(const DrawArgs &args) {
 	}
 
 	// Draw the label text
-	text = centralData->getMapAliasName(hubParamObj);
+	text = hub.mappings.getMapAliasName(hubParamObj);
 	nvgBeginPath(args.vg);
 	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
 	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
@@ -64,13 +64,13 @@ void HubMapButton::onHover(const rack::event::Hover &e) {
 }
 
 void HubMapButton::onLeave(const rack::event::Leave &e) {
-	_hovered = false;
+	hovered = false;
 	centralData->notifyLeaveHover(hubParamObj);
 	e.consume(this);
 }
 
 void HubMapButton::onEnter(const rack::event::Enter &e) {
-	_hovered = true;
+	hovered = true;
 	centralData->notifyEnterHover(hubParamObj);
 	e.consume(this);
 }

@@ -10,15 +10,12 @@
 
 class HubKnobMapButton : public HubMapButton {
 	rack::ParamQuantity *paramQuantity = nullptr;
-	MetaModuleHubBase *hub = nullptr;
+	MetaModuleHubBase &hub;
 
 public:
-	HubKnobMapButton(rack::app::ModuleWidget &parent)
-		: HubMapButton{static_cast<rack::app::ModuleWidget &>(parent)} {
-	}
-
-	void setHubModule(MetaModuleHubBase *hubModule) {
-		hub = hubModule;
+	HubKnobMapButton(MetaModuleHubBase &hub, rack::app::ModuleWidget &parent)
+		: HubMapButton{hub, parent}
+		, hub{hub} {
 	}
 
 	void setParamQuantity(rack::ParamQuantity *paramQ) {
@@ -26,9 +23,6 @@ public:
 	}
 
 	void onDeselect(const rack::event::Deselect &e) override {
-		if (!hub)
-			return;
-
 		bool registerSuccess = false;
 
 		// Check if a ParamWidget was touched
@@ -37,7 +31,7 @@ public:
 			int param_id = touchedParam->getParamQuantity()->paramId;
 			APP->scene->rack->setTouchedParam(nullptr);
 
-			registerSuccess = hub->registerMap(hubParamObj.objID, touchedParam->module, param_id);
+			registerSuccess = hub.registerMap(hubParamObj.objID, touchedParam->module, param_id);
 		} else
 			printf("No touchedParam\n");
 
@@ -69,14 +63,14 @@ public:
 		KnobValueMenuItem *paramField = new KnobValueMenuItem{120, 0.4f, paramQuantity};
 		menu->addChild(paramField);
 
-		if (hub->mappings.getNumMappings(hubParamObj.objID) > 0) {
+		if (hub.mappings.getNumMappings(hubParamObj.objID) > 0) {
 			auto *sep = new rack::MenuSeparator;
 			menu->addChild(sep);
 
 			auto aliasItem = new KnobAliasMenuItem{hubParamObj};
 			menu->addChild(aliasItem);
 
-			auto maps = hub->mappings.getMappings(hubParamObj.objID);
+			auto maps = hub.mappings.getMappings(hubParamObj.objID);
 			for (auto const &m : maps) {
 				if (!m.paramHandle.module)
 					continue;

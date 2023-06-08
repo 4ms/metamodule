@@ -4,17 +4,17 @@
 class HubMidiMapButton : public HubKnobMapButton {
 
 public:
-	HubMidiMapButton(rack::app::ModuleWidget &parent)
-		: HubKnobMapButton{static_cast<rack::app::ModuleWidget &>(parent)} {
+	HubMidiMapButton(MetaModuleHubBase &hub, rack::app::ModuleWidget &parent)
+		: HubKnobMapButton{hub, parent} {
 	}
 
 	void draw(const DrawArgs &args) override {
-		HubMapButton::_updateState();
+		HubMapButton::updateState();
 
 		// Same as HubMapButton::draw except use a rounded rect, and don't draw alias below
 
 		// Draw a large background rounded rect to highlight a mapping has begun from this knob
-		if (isCurrentMapSrc || _hovered || centralData->isMappedPartnerHovered(hubParamObj)) {
+		if (isCurrentMapSrc || hovered || centralData->isMappedPartnerHovered(hubParamObj)) {
 			// const float padding_x = 2;
 			nvgBeginPath(args.vg);
 			nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 4);
