@@ -1,6 +1,6 @@
 #pragma once
 #include "../comm/comm_module.hh"
-#include "hub_mappings.hh"
+#include "hub_knob_mappings.hh"
 #include "local_path.hh"
 #include "mapping/central_data.hh"
 #include "mapping/patch_writer.hh"
@@ -68,19 +68,6 @@ struct MetaModuleHubBase : public CommModule {
 		map->alias_name = "";
 
 		return true;
-	}
-
-	int getNumMappings(int hubParamId) {
-		unsigned num = 0;
-		for (auto &p : mappings[hubParamId]) {
-			if (p.paramHandle.module && p.paramHandle.moduleId >= 0)
-				num++;
-		}
-		return num;
-	}
-
-	auto &getMappings(int hubParamId) {
-		return mappings[hubParamId];
 	}
 
 	void processMaps() {

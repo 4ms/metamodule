@@ -43,6 +43,19 @@ struct HubKnobMappings {
 		return {0, 1}; //not found --> default value
 	}
 
+	int getNumMappings(int hubParamId) {
+		unsigned num = 0;
+		for (auto &p : mappings[hubParamId]) {
+			if (p.paramHandle.module && p.paramHandle.moduleId >= 0)
+				num++;
+		}
+		return num;
+	}
+
+	auto &getMappings(int hubParamId) {
+		return mappings[hubParamId];
+	}
+
 	// Helpers
 
 	auto begin() {

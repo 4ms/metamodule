@@ -16,7 +16,7 @@ public:
 	void onLeave(const rack::event::Leave &e) override;
 	void onEnter(const rack::event::Enter &e) override;
 
-	MappableObj mapObj;
+	MappableObj hubParamObj;
 	bool isMapped = false;
 	bool isCurrentMapSrc = false;
 	MappableObj mappedToId{MappableObj::Type::None, -1, -1};

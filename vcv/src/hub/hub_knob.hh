@@ -37,7 +37,7 @@ public:
 			int param_id = touchedParam->getParamQuantity()->paramId;
 			APP->scene->rack->setTouchedParam(nullptr);
 
-			registerSuccess = hub->registerMap(mapObj.objID, touchedParam->module, param_id);
+			registerSuccess = hub->registerMap(hubParamObj.objID, touchedParam->module, param_id);
 		} else
 			printf("No touchedParam\n");
 
@@ -69,14 +69,14 @@ public:
 		KnobValueMenuItem *paramField = new KnobValueMenuItem{120, 0.4f, paramQuantity};
 		menu->addChild(paramField);
 
-		if (hub->getNumMappings(mapObj.objID) > 0) {
+		if (hub->mappings.getNumMappings(hubParamObj.objID) > 0) {
 			auto *sep = new rack::MenuSeparator;
 			menu->addChild(sep);
 
-			auto aliasItem = new KnobAliasMenuItem{mapObj};
+			auto aliasItem = new KnobAliasMenuItem{hubParamObj};
 			menu->addChild(aliasItem);
 
-			auto maps = hub->getMappings(mapObj.objID);
+			auto maps = hub->mappings.getMappings(hubParamObj.objID);
 			for (auto const &m : maps) {
 				if (!m.paramHandle.module)
 					continue;
@@ -100,6 +100,7 @@ public:
 				menu->addChild(paramLabel2);
 
 				MappableObj paramObj{MappableObj::Type::Knob, paramId, moduleId};
+
 				auto mn = new RangeSlider<RangePart::Min>(hub, paramObj);
 				mn->box.size.x = 100;
 				menu->addChild(mn);
@@ -145,10 +146,10 @@ public:
 	void draw(const typename BaseKnobT::DrawArgs &args) override {
 		BaseKnobT::draw(args);
 
-		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubKnobMapBut.mapObj), 16U);
+		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubKnobMapBut.hubParamObj), 16U);
 
 		const float spacing = 8;
-		const NVGcolor color = PaletteHub::color(hubKnobMapBut.mapObj.objID);
+		const NVGcolor color = PaletteHub::color(hubKnobMapBut.hubParamObj.objID);
 		auto _box = this->box;
 		for (unsigned i = 0; i < numMaps; i++) {
 			MapMark::markKnob(args.vg, _box, color);
@@ -188,7 +189,7 @@ public:
 		// So, don't consume the hover and just do nothing.
 		// On the other hand, if the knob is not mapped, then consume the hover so that hovering the knob
 		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(hubKnobMapBut.mapObj))
+		if (centralData->isLabelButtonSrcMapped(hubKnobMapBut.hubParamObj))
 			return;
 
 		e.consume(this);
