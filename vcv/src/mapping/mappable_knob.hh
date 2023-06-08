@@ -1,7 +1,9 @@
 #pragma once
 #include "central_data.hh"
+#include "hub/hub_module.hh"
 #include "map_marks.hh"
 #include "map_palette.hh"
+#include "mapping/range_slider.hh"
 #include "util/base_concepts.hh"
 #include <rack.hpp>
 
@@ -117,65 +119,6 @@ struct KnobAliasMenuItem : rack::widget::Widget {
 	}
 };
 
-enum class RangePart { Min, Max };
-template<RangePart MINMAX>
-struct MappedRangeQuantity : rack::Quantity {
-private:
-	float _val{0.f};
-	std::string _label;
-	MappableObj const _dst_id;
-
-public:
-	MappedRangeQuantity(std::string label, MappableObj const knobLabelID)
-		: _label{label}
-		, _dst_id{knobLabelID} {
-	}
-	void setValue(float value) override {
-		_val = MathTools::constrain(value, 0.0f, 1.0f);
-		if constexpr (MINMAX == RangePart::Min)
-			centralData->setMapRangeMin(_dst_id, _val);
-		else
-			centralData->setMapRangeMax(_dst_id, _val);
-	}
-	float getValue() override {
-		float val;
-		if constexpr (MINMAX == RangePart::Min)
-			val = centralData->getMapRange(_dst_id).first;
-		else
-			val = centralData->getMapRange(_dst_id).second;
-		return val;
-	}
-	// clang-format off
-	float getMinValue() override { return 0; }
-	float getMaxValue() override { return 1; }
-	float getDefaultValue() override { return 0.0; }
-	float getDisplayValue() override { return getValue() * 100.f; }
-	void setDisplayValue(float displayValue) override { setValue(displayValue / 100.f); }
-	std::string getLabel() override { return _label; }
-	std::string getUnit() override { return "%"; }
-	// clang-format on
-};
-
-struct MinSlider : rack::ui::Slider {
-public:
-	MinSlider(MappableObj const knobLabelID) {
-		quantity = new MappedRangeQuantity<RangePart::Min>{"Min: ", knobLabelID};
-	}
-	~MinSlider() {
-		delete quantity;
-	}
-};
-
-struct MaxSlider : rack::ui::Slider {
-public:
-	MaxSlider(MappableObj const knobLabelID) {
-		quantity = new MappedRangeQuantity<RangePart::Max>{"Max: ", knobLabelID};
-	}
-	~MaxSlider() {
-		delete quantity;
-	}
-};
-
 template<typename BaseKnobT>
 class MappableInnerKnob : public BaseKnobT {
 	// static_assert(std::is_base_of_v<app::SvgKnob, BaseKnobT>, "Knob class must derive from SvgKnob");
@@ -205,7 +148,7 @@ public:
 			menu->addChild(paramLabel);
 
 			auto moduleid = getId().moduleID;
-			auto paramid = getId().objID;
+			// auto paramid = getId().objID;
 
 			MappableObj dst = getId();
 			MappableObj src = centralData->getMappedSrcFromDst(dst);
@@ -215,13 +158,14 @@ public:
 				aliasItem->box.size.x = 120;
 				menu->addChild(aliasItem);
 
-				MinSlider *mn = new MinSlider({MappableObj::Type::Knob, paramid, moduleid});
-				mn->box.size.x = 100;
-				menu->addChild(mn);
+				// TODO: need to find a suitable MetaModuleHubBase *hub
+				// auto mn = new RangeSlider<RangePart::Min>(hub, {MappableObj::Type::Knob, paramid, moduleid});
+				// mn->box.size.x = 100;
+				// menu->addChild(mn);
 
-				MaxSlider *mx = new MaxSlider({MappableObj::Type::Knob, paramid, moduleid});
-				mx->box.size.x = 100;
-				menu->addChild(mx);
+				// auto mx = new RangeSlider<RangePart::Max>(hub, {MappableObj::Type::Knob, paramid, moduleid});
+				// mx->box.size.x = 100;
+				// menu->addChild(mx);
 
 				KnobUnmapItem *unmapItem = new KnobUnmapItem{getId()};
 				unmapItem->text = "Unmap";

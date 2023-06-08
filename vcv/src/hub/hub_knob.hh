@@ -8,16 +8,6 @@
 
 // This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
 
-struct ParamUnmapItem : rack::ui::MenuItem {
-	rack::ParamQuantity *paramQuantity;
-	void onAction(const rack::event::Action &e) override {
-		rack::ParamHandle *paramHandle = APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId);
-		if (paramHandle) {
-			APP->engine->updateParamHandle(paramHandle, -1, 0);
-		}
-	}
-};
-
 class HubKnobMapButton : public HubMapButton {
 	rack::ParamQuantity *paramQuantity = nullptr;
 	MetaModuleHubBase *hub = nullptr;
@@ -60,7 +50,6 @@ public:
 	void onButton(const rack::event::Button &e) override {
 		// Right click to open context menu
 		if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-			printf("HubKnobMapButton::onButton\n");
 			if (paramQuantity) {
 				makeKnobMenu();
 				e.consume(this);
@@ -71,7 +60,6 @@ public:
 	}
 
 	void makeKnobMenu() {
-		printf("HubKnobMapButton::makeKnobMenu\n");
 		rack::ui::Menu *menu = rack::createMenu();
 
 		KnobNameMenuLabel *paramLabel = new KnobNameMenuLabel;
@@ -111,17 +99,19 @@ public:
 				paramLabel2->paramId = paramId;
 				menu->addChild(paramLabel2);
 
-				MinSlider *mn = new MinSlider({MappableObj::Type::Knob, paramId, moduleId});
+				MappableObj paramObj{MappableObj::Type::Knob, paramId, moduleId};
+				auto mn = new RangeSlider<RangePart::Min>(hub, paramObj);
 				mn->box.size.x = 100;
 				menu->addChild(mn);
 
-				MaxSlider *mx = new MaxSlider({MappableObj::Type::Knob, paramId, moduleId});
+				auto mx = new RangeSlider<RangePart::Max>(hub, paramObj);
 				mx->box.size.x = 100;
 				menu->addChild(mx);
 			}
 
-			rack::engine::ParamHandle *paramHandle =
-				paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId) : NULL;
+			rack::ParamHandle *paramHandle =
+				paramQuantity ? APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId) :
+								nullptr;
 			if (paramHandle) {
 				ParamUnmapItem *unmapItem = new ParamUnmapItem;
 				unmapItem->text = "Unmap";
@@ -131,6 +121,18 @@ public:
 			}
 		}
 	}
+
+	struct ParamUnmapItem : rack::ui::MenuItem {
+		rack::ParamQuantity *paramQuantity;
+
+		void onAction(const rack::event::Action &e) override {
+			rack::ParamHandle *paramHandle =
+				APP->engine->getParamHandle(paramQuantity->module->id, paramQuantity->paramId);
+			if (paramHandle) {
+				APP->engine->updateParamHandle(paramHandle, -1, 0);
+			}
+		}
+	};
 };
 
 template<typename BaseKnobT>
