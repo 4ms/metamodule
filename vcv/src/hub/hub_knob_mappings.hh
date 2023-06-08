@@ -31,6 +31,7 @@ struct HubKnobMappings {
 			}
 		}
 	}
+
 	std::pair<float, float> getRange(const MappableObj paramObj) {
 		for (auto &knob : mappings) {
 			for (auto &map : knob) {
@@ -46,7 +47,7 @@ struct HubKnobMappings {
 	unsigned getNumMappings(int hubParamId) {
 		unsigned num = 0;
 
-		if (hubParamId >= NumKnobs)
+		if (hubParamId >= (int)NumKnobs)
 			return 0;
 
 		for (auto &p : mappings[hubParamId]) {
@@ -57,10 +58,33 @@ struct HubKnobMappings {
 	}
 
 	auto &getMappings(int hubParamId) {
-		if (hubParamId >= NumKnobs)
+		if (hubParamId >= (int)NumKnobs)
 			return nullmap;
 
 		return mappings[hubParamId];
+	}
+
+	void setMapAliasName(MappableObj paramObj, std::string newname) {
+		for (auto &knob : mappings) {
+			for (auto &map : knob) {
+				if (!map.paramHandle.module || map.paramHandle.moduleId < 0)
+					continue;
+				if (paramObj.moduleID == map.paramHandle.moduleId && paramObj.objID == map.paramHandle.paramId)
+					map.alias_name = newname;
+			}
+		}
+	}
+
+	std::string getMapAliasName(MappableObj paramObj) {
+		for (auto &knob : mappings) {
+			for (auto &map : knob) {
+				if (!map.paramHandle.module || map.paramHandle.moduleId < 0)
+					continue;
+				if (paramObj.moduleID == map.paramHandle.moduleId && paramObj.objID == map.paramHandle.paramId)
+					return map.alias_name;
+			}
+		}
+		return "";
 	}
 
 	// Helpers
