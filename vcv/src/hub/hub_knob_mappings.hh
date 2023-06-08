@@ -45,6 +45,10 @@ struct HubKnobMappings {
 
 	unsigned getNumMappings(int hubParamId) {
 		unsigned num = 0;
+
+		if (hubParamId >= NumKnobs)
+			return 0;
+
 		for (auto &p : mappings[hubParamId]) {
 			if (p.paramHandle.module && p.paramHandle.moduleId >= 0)
 				num++;
@@ -53,6 +57,9 @@ struct HubKnobMappings {
 	}
 
 	auto &getMappings(int hubParamId) {
+		if (hubParamId >= NumKnobs)
+			return nullmap;
+
 		return mappings[hubParamId];
 	}
 
@@ -65,9 +72,11 @@ struct HubKnobMappings {
 		return mappings.end();
 	}
 	auto &operator[](size_t n) {
-		return mappings[n];
+		return mappings[std::min(n, NumKnobs - 1)];
 	}
 	auto &operator[](size_t n) const {
-		return mappings[n];
+		return mappings[std::min(n, NumKnobs - 1)];
 	}
+
+	KnobParamHandles nullmap{};
 };
