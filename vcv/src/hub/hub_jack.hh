@@ -31,32 +31,32 @@ public:
 		: hubJackLabel{_hubJackLabel} {
 	}
 
-	void draw(const typename BaseJackT::DrawArgs &args) override {
-		BaseJackT::draw(args);
+	// void draw(const typename BaseJackT::DrawArgs &args) override {
+	// 	BaseJackT::draw(args);
 
-		// Draw mapped circle
-		if (hubJackLabel.isMapped) {
-			NVGcolor color = PaletteHub::color(hubJackLabel.mapObj.objID);
-			if (hubJackLabel.mapObj.objType == MappableObj::Type::InputJack)
-				MapMark::markInputJack(args.vg, this->box, color);
-			else
-				MapMark::markOutputJack(args.vg, this->box, color);
-		}
-	}
+	// 	// Draw mapped circle
+	// 	if (hubJackLabel.isMapped) {
+	// 		NVGcolor color = PaletteHub::color(hubJackLabel.hubParamObj.objID);
+	// 		if (hubJackLabel.hubParamObj.objType == MappableObj::Type::InputJack)
+	// 			MapMark::markInputJack(args.vg, this->box, color);
+	// 		else
+	// 			MapMark::markOutputJack(args.vg, this->box, color);
+	// 	}
+	// }
 
-	void onHover(const rack::event::Hover &e) override {
-		// If the jack is mapped, then we want to pass the hover down to the HubJackMapButton object below
-		// so that the HubMapJackButton can highlight even if we're hovering the jack itself.
-		// So, don't consume the hover and just do nothing.
-		// On the other hand, if the jack is not mapped, then consume the hover so that hovering the jack
-		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(hubJackLabel.mapObj)) {
-			rack::PortWidget::onHover(e);
-			return;
-		}
+	// void onHover(const rack::event::Hover &e) override {
+	// 	// If the jack is mapped, then we want to pass the hover down to the HubJackMapButton object below
+	// 	// so that the HubMapJackButton can highlight even if we're hovering the jack itself.
+	// 	// So, don't consume the hover and just do nothing.
+	// 	// On the other hand, if the jack is not mapped, then consume the hover so that hovering the jack
+	// 	// doesn't make the background highlight appear
+	// 	if (centralData->isLabelButtonSrcMapped(hubJackLabel.mapObj)) {
+	// 		rack::PortWidget::onHover(e);
+	// 		return;
+	// 	}
 
-		e.consume(this);
-	}
+	// 	e.consume(this);
+	// }
 
 private:
 	HubJackMapButton &hubJackLabel;

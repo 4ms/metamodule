@@ -139,17 +139,18 @@ public:
 template<typename BaseKnobT>
 class HubKnob : public BaseKnobT {
 public:
-	HubKnob(HubKnobMapButton &hubknob_mapbut)
-		: hubKnobMapBut{hubknob_mapbut} {
+	HubKnob(MetaModuleHubBase &hub, HubKnobMapButton &hubknob_mapbut)
+		: hub{hub}
+		, mapBut{hubknob_mapbut} {
 	}
 
 	void draw(const typename BaseKnobT::DrawArgs &args) override {
 		BaseKnobT::draw(args);
 
-		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubKnobMapBut.hubParamObj), 16U);
+		auto numMaps = std::min(hub.mappings.getNumMappings(mapBut.hubParamObj.objID), 16U);
 
 		const float spacing = 8;
-		const NVGcolor color = PaletteHub::color(hubKnobMapBut.hubParamObj.objID);
+		const NVGcolor color = PaletteHub::color(mapBut.hubParamObj.objID);
 		auto _box = this->box;
 		for (unsigned i = 0; i < numMaps; i++) {
 			MapMark::markKnob(args.vg, _box, color);
@@ -177,7 +178,7 @@ public:
 
 			// Right click to open context menu
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-				hubKnobMapBut.makeKnobMenu(); //this->getParamQuantity(), hubKnobMapBut.mapObj);
+				mapBut.makeKnobMenu();
 				e.consume(this);
 			}
 		}
@@ -189,7 +190,7 @@ public:
 		// So, don't consume the hover and just do nothing.
 		// On the other hand, if the knob is not mapped, then consume the hover so that hovering the knob
 		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(hubKnobMapBut.hubParamObj))
+		if (centralData->isLabelButtonSrcMapped(mapBut.hubParamObj))
 			return;
 
 		e.consume(this);
@@ -203,5 +204,6 @@ public:
 	};
 
 private:
-	HubKnobMapButton &hubKnobMapBut;
+	MetaModuleHubBase &hub;
+	HubKnobMapButton &mapBut;
 };
