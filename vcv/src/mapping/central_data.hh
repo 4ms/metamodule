@@ -161,31 +161,9 @@ public:
 		}
 	}
 
-	// void setMapAliasName(MappableObj src, std::string newname) {
-	// 	std::lock_guard mguard{mapsmtx};
-	// 	// TODO: update all maps with matching src
-	// 	auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
-	// 	if (m == maps.end())
-	// 		return;
-	// 	m->alias_name = newname;
-	// }
-
-	// std::string getMapAliasName(MappableObj src) {
-	// 	std::lock_guard mguard{mapsmtx};
-	// 	auto m = std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == src; });
-	// 	if (m == maps.end())
-	// 		return "";
-	// 	return m->alias_name;
-	// }
-
 	//
 	// State queries
 	//
-
-	bool isLabelButtonMapped(MappableObj const &b) {
-		return maps.end() !=
-			   std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return (m.src == b || m.dst == b); });
-	}
 
 	bool isLabelButtonSrcMapped(MappableObj const &b) {
 		return maps.end() != std::find_if(maps.begin(), maps.end(), [&](const auto &m) { return m.src == b; });
