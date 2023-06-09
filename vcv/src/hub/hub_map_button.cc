@@ -27,12 +27,15 @@ void HubMapButton::draw(const DrawArgs &args) {
 	}
 
 	// Draw the label text
-	text = hub.mappings.getMapAliasName(hubParamObj);
-	nvgBeginPath(args.vg);
-	nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
-	nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
-	nvgFontSize(args.vg, 9.0f);
-	nvgText(args.vg, box.size.x / 2.0f, box.size.y + 10, text.c_str(), NULL);
+	// CRASHES
+	if (hub) {
+		text = hub->mappings.getMapAliasName(hubParamObj);
+		nvgBeginPath(args.vg);
+		nvgTextAlign(args.vg, NVGalign::NVG_ALIGN_CENTER | NVGalign::NVG_ALIGN_MIDDLE);
+		nvgFillColor(args.vg, nvgRGBA(0, 0, 0, 255));
+		nvgFontSize(args.vg, 9.0f);
+		nvgText(args.vg, box.size.x / 2.0f, box.size.y + 10, text.c_str(), NULL);
+	}
 }
 
 void HubMapButton::onDragStart(const rack::event::DragStart &e) {

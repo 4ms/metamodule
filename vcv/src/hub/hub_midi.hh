@@ -4,7 +4,7 @@
 class HubMidiMapButton : public HubKnobMapButton {
 
 public:
-	HubMidiMapButton(MetaModuleHubBase &hub, rack::app::ModuleWidget &parent)
+	HubMidiMapButton(MetaModuleHubBase *hub, rack::app::ModuleWidget &parent)
 		: HubKnobMapButton{hub, parent} {
 	}
 

@@ -10,10 +10,10 @@
 
 class HubKnobMapButton : public HubMapButton {
 	rack::ParamQuantity *paramQuantity = nullptr;
-	MetaModuleHubBase &hub;
+	MetaModuleHubBase *hub;
 
 public:
-	HubKnobMapButton(MetaModuleHubBase &hub, rack::app::ModuleWidget &parent)
+	HubKnobMapButton(MetaModuleHubBase *hub, rack::app::ModuleWidget &parent)
 		: HubMapButton{hub, parent}
 		, hub{hub} {
 	}
@@ -23,6 +23,9 @@ public:
 	}
 
 	void onDeselect(const rack::event::Deselect &e) override {
+		if (!hub)
+			return;
+
 		bool registerSuccess = false;
 
 		// Check if a ParamWidget was touched
@@ -31,7 +34,7 @@ public:
 			int param_id = touchedParam->getParamQuantity()->paramId;
 			APP->scene->rack->setTouchedParam(nullptr);
 
-			registerSuccess = hub.registerMap(hubParamObj.objID, touchedParam->module, param_id);
+			registerSuccess = hub->registerMap(hubParamObj.objID, touchedParam->module, param_id);
 		} else
 			printf("No touchedParam\n");
 
@@ -63,14 +66,17 @@ public:
 		KnobValueMenuItem *paramField = new KnobValueMenuItem{120, 0.4f, paramQuantity};
 		menu->addChild(paramField);
 
-		if (hub.mappings.getNumMappings(hubParamObj.objID) > 0) {
+		if (!hub)
+			return;
+
+		if (hub->mappings.getNumMappings(hubParamObj.objID) > 0) {
 			auto *sep = new rack::MenuSeparator;
 			menu->addChild(sep);
 
 			auto aliasItem = new KnobAliasMenuItem{hubParamObj};
 			menu->addChild(aliasItem);
 
-			auto maps = hub.mappings.getMappings(hubParamObj.objID);
+			auto maps = hub->mappings.getMappings(hubParamObj.objID);
 			for (auto const &m : maps) {
 				if (!m.paramHandle.module)
 					continue;
@@ -133,7 +139,7 @@ public:
 template<typename BaseKnobT>
 class HubKnob : public BaseKnobT {
 public:
-	HubKnob(MetaModuleHubBase &hub, HubKnobMapButton &hubknob_mapbut)
+	HubKnob(MetaModuleHubBase *hub, HubKnobMapButton &hubknob_mapbut)
 		: hub{hub}
 		, mapBut{hubknob_mapbut} {
 	}
@@ -141,7 +147,10 @@ public:
 	void draw(const typename BaseKnobT::DrawArgs &args) override {
 		BaseKnobT::draw(args);
 
-		auto numMaps = std::min(hub.mappings.getNumMappings(mapBut.hubParamObj.objID), 16U);
+		if (!hub)
+			return;
+
+		auto numMaps = std::min(hub->mappings.getNumMappings(mapBut.hubParamObj.objID), 16U);
 
 		const float spacing = 8;
 		const NVGcolor color = PaletteHub::color(mapBut.hubParamObj.objID);
@@ -198,6 +207,6 @@ public:
 	};
 
 private:
-	MetaModuleHubBase &hub;
+	MetaModuleHubBase *hub;
 	HubKnobMapButton &mapBut;
 };

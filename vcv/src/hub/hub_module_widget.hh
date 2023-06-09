@@ -33,7 +33,7 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 						  rack::math::Vec posPx,
 						  float sz_mm = kKnobSpacingX,
 						  float defaultValue = 0.f) {
-		auto button = new HubKnobMapButton{*hubModule, *this};
+		auto button = new HubKnobMapButton{hubModule, *this};
 		button->box.pos =
 			rack::math::Vec(posPx.x - rack::mm2px(sz_mm) / 2, posPx.y - rack::mm2px(sz_mm) / 2); // top-left
 		button->box.size.x = rack::mm2px(sz_mm);
@@ -42,7 +42,7 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 		button->hubParamObj = {MappableObj::Type::Knob, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
 
-		auto *p = new HubKnob<KnobType>{*hubModule, *button};
+		auto *p = new HubKnob<KnobType>{hubModule, *button};
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));
 		p->rack::app::ParamWidget::module = hubModule;

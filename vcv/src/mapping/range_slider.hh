@@ -10,11 +10,11 @@ struct MappedRangeQuantity : rack::Quantity {
 private:
 	float _val{0.f};
 	std::string _paramObj;
-	MetaModuleHubBase &hub;
+	MetaModuleHubBase *hub;
 	const MappableObj _dst_id;
 
 public:
-	MappedRangeQuantity(MetaModuleHubBase &hub, MappableObj paramObj)
+	MappedRangeQuantity(MetaModuleHubBase *hub, MappableObj paramObj)
 		: _paramObj{MINMAX == RangePart::Min ? "Min: " : "Max"}
 		, hub{hub}
 		, _dst_id{paramObj} {
@@ -23,16 +23,16 @@ public:
 	void setValue(float value) override {
 		_val = MathTools::constrain(value, 0.0f, 1.0f);
 		if constexpr (MINMAX == RangePart::Min)
-			hub.mappings.setRangeMin(_dst_id, _val);
+			hub->mappings.setRangeMin(_dst_id, _val);
 		else
-			hub.mappings.setRangeMax(_dst_id, _val);
+			hub->mappings.setRangeMax(_dst_id, _val);
 	}
 
 	float getValue() override {
 		if constexpr (MINMAX == RangePart::Min)
-			return hub.mappings.getRange(_dst_id).first;
+			return hub->mappings.getRange(_dst_id).first;
 		else
-			return hub.mappings.getRange(_dst_id).second;
+			return hub->mappings.getRange(_dst_id).second;
 	}
 
 	// clang-format off
@@ -50,7 +50,7 @@ template<RangePart MINMAX>
 struct RangeSlider : rack::ui::Slider {
 
 public:
-	RangeSlider(MetaModuleHubBase &hub, MappableObj paramObj) {
+	RangeSlider(MetaModuleHubBase *hub, MappableObj paramObj) {
 		quantity = new MappedRangeQuantity<MINMAX>{hub, paramObj};
 	}
 	~RangeSlider() {

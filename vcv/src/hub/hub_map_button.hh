@@ -7,7 +7,7 @@
 class HubMapButton : public rack::Button {
 
 public:
-	HubMapButton(MetaModuleHubBase &hub, rack::app::ModuleWidget &parent)
+	HubMapButton(MetaModuleHubBase *hub, rack::app::ModuleWidget &parent)
 		: parent{parent}
 		, hub{hub} {
 	}
@@ -27,5 +27,5 @@ protected:
 	void updateState();
 	bool hovered{false};
 	rack::app::ModuleWidget &parent;
-	MetaModuleHubBase &hub;
+	MetaModuleHubBase *hub;
 };
