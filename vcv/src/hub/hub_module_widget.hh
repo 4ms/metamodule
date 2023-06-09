@@ -58,35 +58,8 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 		addParam(p);
 	}
 
-	enum class JackDir { Input, Output };
-
-	template<typename JackType>
-	void addLabeledJackPx(std::string_view labelText, int jackId, rack::math::Vec posPx, JackDir inout) {
-		auto mapButton = new HubJackMapButton{*hubModule, *this};
-
-		mapButton->box.pos = rack::math::Vec(posPx.x - rack::mm2px(kKnobSpacingX) / 2,
-											 posPx.y - rack::mm2px(kKnobSpacingY) / 2); // top-left
-		mapButton->box.size.x = rack::mm2px(kKnobSpacingX);
-		mapButton->box.size.y = rack::mm2px(kKnobSpacingY);
-		mapButton->text = labelText;
-		auto type = inout == JackDir::Input ? MappableObj::Type::InputJack : MappableObj::Type::OutputJack;
-		mapButton->hubParamObj = {type, jackId, hubModule ? hubModule->id : -1};
-		addChild(mapButton);
-
-		auto *jack = new HubJack<JackType>(*mapButton);
-		jack->box.pos = posPx;
-		jack->box.pos = jack->box.pos.minus(jack->box.size.div(2));
-		jack->module = module;
-		jack->type = inout == JackDir::Input ? rack::Port::INPUT : rack::Port::OUTPUT;
-		jack->portId = jackId;
-		if (inout == JackDir::Input)
-			addInput(jack);
-		else
-			addOutput(jack);
-	}
-
 	void addMidiValueMapSrc(const std::string labelText, int knobId, rack::math::Vec posPx, MappableObj::Type type) {
-		auto *button = new HubMidiMapButton{*hubModule, *this};
+		auto *button = new HubMidiMapButton{hubModule, *this};
 		button->box.size.x = rack::mm2px(13.5);
 		button->box.size.y = rack::mm2px(5.6);
 		button->box.pos = posPx;
