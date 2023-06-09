@@ -60,6 +60,13 @@ struct HubMedium : MetaModuleHubBase {
 		configParam(MIDI_MONO_GATE, 0.f, 1.f, 0.f, "MidiGate");
 
 		configParam(WRITE_PATCH, 0.f, 1.f, 0.f, "Export patch file");
+
+		for (auto jack : MetaModuleInfo::InJacks)
+			configInput((int)jack.id, std::string{jack.short_name});
+
+		for (auto jack : MetaModuleInfo::OutJacks)
+			configOutput((int)jack.id, std::string{jack.short_name});
+
 		selfID.slug = "PanelMedium";
 	}
 
