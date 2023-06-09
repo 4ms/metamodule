@@ -22,7 +22,7 @@ struct MetaModuleHubBase : public CommModule {
 	std::span<MappableObj::Type> mappingSrcs;
 
 	static constexpr uint32_t MaxMapsPerPot = 8;
-	HubKnobMappings<PanelDef::NumPot, MaxMapsPerPot> mappings;
+	HubKnobMappings<PanelDef::NumPot, MaxMapsPerPot> mappings{id};
 
 	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
 		: numMappings{mappingSrcs.size()}
@@ -61,7 +61,7 @@ struct MetaModuleHubBase : public CommModule {
 			return false;
 		}
 
-		auto *map = nextFreeMap(hubParamId);
+		auto *map = mappings.nextFreeMap(hubParamId);
 		APP->engine->updateParamHandle(&map->paramHandle, module->id, moduleParamId, true);
 		map->range_max = 1.f;
 		map->range_min = 0.f;
@@ -140,25 +140,7 @@ struct MetaModuleHubBase : public CommModule {
 	// This is called periodically on auto-save
 	// maps and the patch name/description are converted to json
 	json_t *dataToJson() override {
-		json_t *rootJ = json_object();
-		json_t *mapsJ = json_array();
-
-		for (auto &m : centralData->maps) {
-			json_t *thisMapJ = json_object();
-			json_object_set_new(thisMapJ, "DstModID", json_integer(m.dst.moduleID));
-			json_object_set_new(thisMapJ, "DstObjID", json_integer(m.dst.objID));
-			json_object_set_new(thisMapJ, "DstObjType", json_string(m.dst.objTypeStr()));
-			json_object_set_new(thisMapJ, "SrcModID", json_integer(m.src.moduleID));
-			json_object_set_new(thisMapJ, "SrcObjID", json_integer(m.src.objID));
-			json_object_set_new(thisMapJ, "SrcObjType", json_string(m.src.objTypeStr()));
-			json_object_set_new(thisMapJ, "RangeMin", json_real(m.range_min));
-			json_object_set_new(thisMapJ, "RangeMax", json_real(m.range_max));
-			json_object_set_new(thisMapJ, "AliasName", json_string(m.alias_name.c_str()));
-
-			json_array_append(mapsJ, thisMapJ);
-			json_decref(thisMapJ);
-		}
-		json_object_set_new(rootJ, "Mappings", mapsJ);
+		json_t *rootJ = mappings.encodeJson();
 
 		if (updatePatchName) {
 			updatePatchName();
@@ -185,58 +167,7 @@ struct MetaModuleHubBase : public CommModule {
 			patchDescText = json_string_value(patchDescJ);
 		}
 
-		auto mapsJ = json_object_get(rootJ, "Mappings");
-		if (json_is_array(mapsJ)) {
-			centralData->maps.clear();
-			for (size_t i = 0; i < json_array_size(mapsJ); i++) {
-				auto mappingJ = json_array_get(mapsJ, i);
-				CentralData::MappingExt mapping;
-
-				if (json_is_object(mappingJ)) {
-					json_t *val;
-
-					val = json_object_get(mappingJ, "DstModID");
-					mapping.dst.moduleID = json_is_integer(val) ? json_integer_value(val) : -1;
-
-					val = json_object_get(mappingJ, "DstObjID");
-					mapping.dst.objID = json_is_integer(val) ? json_integer_value(val) : -1;
-
-					val = json_object_get(mappingJ, "DstObjType");
-					if (json_is_string(val))
-						mapping.dst.setObjTypeFromString(json_string_value(val));
-					else
-						mapping.dst.objType = MappableObj::Type::None;
-
-					val = json_object_get(mappingJ, "SrcModID");
-					mapping.src.moduleID = json_is_integer(val) ? json_integer_value(val) : -1;
-
-					val = json_object_get(mappingJ, "SrcObjID");
-					mapping.src.objID = json_is_integer(val) ? json_integer_value(val) : -1;
-
-					val = json_object_get(mappingJ, "SrcObjType");
-					if (json_is_string(val))
-						mapping.src.setObjTypeFromString(json_string_value(val));
-					else
-						mapping.src.objType = MappableObj::Type::None;
-
-					val = json_object_get(mappingJ, "RangeMin");
-					mapping.range_min = json_is_real(val) ? json_real_value(val) : 0.f;
-
-					val = json_object_get(mappingJ, "RangeMax");
-					mapping.range_max = json_is_real(val) ? json_real_value(val) : 1.f;
-
-					val = json_object_get(mappingJ, "AliasName");
-					if (json_is_string(val))
-						mapping.alias_name = json_string_value(val);
-					else
-						mapping.alias_name = "";
-
-					mapping.dst_module = centralData->getRegisteredModulePtr(mapping.dst.moduleID);
-
-					centralData->maps.push_back(mapping);
-				}
-			}
-		}
+		mappings.decodeJson(rootJ);
 	}
 
 private:
@@ -250,17 +181,6 @@ private:
 			buttonAlreadyHandled = false;
 		}
 		return false;
-	}
-
-	Mapping2 *nextFreeMap(unsigned hubParamId) {
-		// Find first unused paramHandle
-		for (auto &p : mappings[hubParamId]) {
-			if (p.paramHandle.moduleId < 0) {
-				return &p;
-			}
-		}
-		// If all are used, then overwrite the last one
-		return &mappings[hubParamId][MaxMapsPerPot - 1];
 	}
 
 	void
