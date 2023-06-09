@@ -27,22 +27,10 @@ struct MetaModuleHubBase : public CommModule {
 	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
 		: numMappings{mappingSrcs.size()}
 		, mappingSrcs{mappingSrcs} {
-
-		for (unsigned i = 0; auto &knob : mappings) {
-			auto color = PaletteHub::color(i++);
-			for (auto &map : knob) {
-				map.paramHandle.color = color;
-				APP->engine->addParamHandle(&map.paramHandle);
-			}
-		}
 	}
 
 	~MetaModuleHubBase() {
-		centralData->unregisterKnobMapsBySrcModule(id);
-		for (auto &pot : mappings) {
-			for (auto &map : pot)
-				APP->engine->removeParamHandle(&map.paramHandle);
-		}
+		// centralData->unregisterKnobMapsBySrcModule(id);
 	}
 
 	bool registerMap(int hubParamId, rack::Module *module, int64_t moduleParamId) {
@@ -61,8 +49,7 @@ struct MetaModuleHubBase : public CommModule {
 			return false;
 		}
 
-		auto *map = mappings.nextFreeMap(hubParamId);
-		APP->engine->updateParamHandle(&map->paramHandle, module->id, moduleParamId, true);
+		auto *map = mappings.addMap(hubParamId, module->id, moduleParamId);
 		map->range_max = 1.f;
 		map->range_min = 0.f;
 		map->alias_name = "";

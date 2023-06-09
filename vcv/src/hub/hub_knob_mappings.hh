@@ -1,6 +1,7 @@
 #pragma once
 #include "mapping/MappableObject.h"
 #include "mapping/Mapping2.h"
+#include "mapping/map_palette.hh"
 
 template<size_t NumKnobs, size_t MaxMapsPerPot>
 struct HubKnobMappings {
@@ -12,6 +13,20 @@ struct HubKnobMappings {
 
 	HubKnobMappings(int64_t hubModuleId)
 		: hubModuleId{hubModuleId} {
+		for (unsigned i = 0; auto &knob : mappings) {
+			auto color = PaletteHub::color(i++);
+			for (auto &map : knob) {
+				map.paramHandle.color = color;
+				APP->engine->addParamHandle(&map.paramHandle);
+			}
+		}
+	}
+
+	~HubKnobMappings() {
+		for (auto &pot : mappings) {
+			for (auto &map : pot)
+				APP->engine->removeParamHandle(&map.paramHandle);
+		}
 	}
 
 	void setRangeMin(const MappableObj paramObj, float val) {
@@ -102,6 +117,12 @@ struct HubKnobMappings {
 		return &mappings[hubParamId][MaxMapsPerPot - 1];
 	}
 
+	Mapping2 *addMap(unsigned hubParamId, int64_t destModuleId, int destParamId) {
+		auto *map = nextFreeMap(hubParamId);
+		APP->engine->updateParamHandle(&map->paramHandle, destModuleId, destParamId, true);
+		return map;
+	}
+
 	json_t *encodeJson() {
 		json_t *rootJ = json_object();
 		json_t *mapsJ = json_array();
@@ -155,10 +176,12 @@ struct HubKnobMappings {
 					auto *map = nextFreeMap(hubParamId);
 
 					val = json_object_get(mappingJ, "DstModID");
-					map->paramHandle.moduleId = json_is_integer(val) ? json_integer_value(val) : -1;
+					auto destModuleId = json_is_integer(val) ? json_integer_value(val) : -1;
 
 					val = json_object_get(mappingJ, "DstObjID");
-					map->paramHandle.paramId = json_is_integer(val) ? json_integer_value(val) : -1;
+					auto destModuleParamId = json_is_integer(val) ? json_integer_value(val) : -1;
+
+					APP->engine->updateParamHandle(&map->paramHandle, destModuleId, destModuleParamId, true);
 
 					val = json_object_get(mappingJ, "RangeMin");
 					map->range_min = json_is_real(val) ? json_real_value(val) : 0.f;
@@ -174,14 +197,14 @@ struct HubKnobMappings {
 	}
 
 	bool is_valid(Mapping2 map) {
-		return (map.paramHandle.module && map.paramHandle.moduleId >= 0);
+		return map.paramHandle.module && map.paramHandle.moduleId >= 0;
 	}
 
 	void clear_all() {
 		// invalidate all maps
 		for (auto &knob : mappings) {
 			for (auto &map : knob) {
-				// TODO: Do we need to unregister the paramHandle with engine?
+				APP->engine->updateParamHandle(&map.paramHandle, -1, 0, true);
 				map.paramHandle.module = nullptr;
 				map.paramHandle.moduleId = -1;
 			}
