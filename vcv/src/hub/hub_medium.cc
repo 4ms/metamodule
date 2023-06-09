@@ -135,11 +135,12 @@ struct HubMediumWidget : MetaModuleHubBaseWidget {
 		}
 
 		for (auto jack : MetaModuleInfo::InJacks)
-			addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, rack::mm2px({jack.x_mm, jack.y_mm}), JackDir::Input);
+			addInput(createInputCentered<PJ301MPort>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
+		// addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, rack::mm2px({jack.x_mm, jack.y_mm}), JackDir::Input);
 
 		for (auto jack : MetaModuleInfo::OutJacks)
-			addLabeledJackPx<PJ301MPort>(
-				jack.short_name, jack.id, rack::mm2px({jack.x_mm, jack.y_mm}), JackDir::Output);
+			addOutput(createOutputCentered<PJ301MPort>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
+		// addLabeledJackPx<PJ301MPort>(jack.short_name, jack.id, rack::mm2px({jack.x_mm, jack.y_mm}), JackDir::Output);
 
 		auto &savebut = MetaModuleInfo::Switches[MetaModuleInfo::SwitchSave];
 		addParam(rack::createParamCentered<BefacoPush>(
