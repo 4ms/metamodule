@@ -5,8 +5,8 @@
 #include "CoreModules/meta-module-hub/panel_medium_defs.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "elements/4ms_widgets.hh"
-#include "hub_base.hh"
 #include "hub_jack.hh"
+#include "hub_module_widget.hh"
 #include "local_path.hh"
 
 using namespace rack;
@@ -70,7 +70,7 @@ struct HubMedium : MetaModuleHubBase {
 	}
 };
 
-struct HubMediumWidget : MetaModuleHubBaseWidget {
+struct HubMediumWidget : MetaModuleHubWidget {
 	LedDisplayTextField *patchName;
 	LedDisplayTextField *patchDesc;
 

@@ -16,12 +16,12 @@
 #include <functional>
 #include <string>
 
-struct MetaModuleHubBaseWidget : rack::app::ModuleWidget {
+struct MetaModuleHubWidget : rack::app::ModuleWidget {
 
 	rack::Label *statusText;
 	MetaModuleHubBase *hubModule;
 
-	MetaModuleHubBaseWidget() = default;
+	MetaModuleHubWidget() = default;
 
 	static constexpr float kKnobSpacingY = 17;
 	static constexpr float kKnobSpacingX = 18;
