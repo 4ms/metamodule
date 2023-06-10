@@ -50,15 +50,34 @@ void HubMapButton::onDragStart(const rack::event::DragStart &e) {
 }
 
 void HubMapButton::onHover(const rack::event::Hover &e) {
+	if (hub) {
+		auto &maps = hub->mappings.getMappings(hubParamObj.objID);
+		for (auto &map : maps) {
+			unsigned idx = std::rand();
+			map.paramHandle.color = PaletteHub::color(idx);
+		}
+	}
 	e.consume(this);
 }
 
 void HubMapButton::onLeave(const rack::event::Leave &e) {
 	hovered = false;
+	if (hub) {
+		auto &maps = hub->mappings.getMappings(hubParamObj.objID);
+		for (auto &map : maps) {
+			map.paramHandle.color = PaletteHub::color(hubParamObj.objID);
+		}
+	}
 	e.consume(this);
 }
 
 void HubMapButton::onEnter(const rack::event::Enter &e) {
 	hovered = true;
+	if (hub) {
+		auto &maps = hub->mappings.getMappings(hubParamObj.objID);
+		for (auto &map : maps) {
+			map.paramHandle.color = PaletteHub::WHITE;
+		}
+	}
 	e.consume(this);
 }
