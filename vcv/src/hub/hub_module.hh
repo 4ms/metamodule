@@ -105,13 +105,13 @@ struct MetaModuleHubBase : public CommModule {
 			}
 			ReplaceString patchStructName{patchName};
 			patchStructName.replace_all(" ", "")
-				.replace_all("-", "")
-				.replace_all(",", "")
+				.replace_all("-", "_")
+				.replace_all(",", "_")
 				.replace_all("/", "")
 				.replace_all("\\", "")
 				.replace_all("\"", "")
 				.replace_all("'", "")
-				.replace_all(".", "")
+				.replace_all(".", "_")
 				.replace_all("?", "")
 				.replace_all("#", "")
 				.replace_all("!", "");
