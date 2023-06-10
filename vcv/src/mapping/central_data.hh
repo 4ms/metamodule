@@ -209,20 +209,6 @@ public:
 		return copied_maps;
 	}
 
-	//
-	// Jack "touching", used to map jacks
-	//
-
-	void registerTouchedJack(MappableObj touched) {
-		lastTouchedJack = touched;
-	}
-
-	MappableObj getAndClearTouchedJack() {
-		auto tmp = lastTouchedJack;
-		lastTouchedJack = {MappableObj::Type::None, -1, -1};
-		return tmp;
-	}
-
 	struct RegisteredModule {
 		int64_t id;
 		ModuleTypeSlug slug;
@@ -239,8 +225,6 @@ private:
 	bool _isMappingInProgress = false;
 	MappingExt _currentMap;
 	MappableObj _cur_hover_obj;
-
-	MappableObj lastTouchedJack{MappableObj::Type::None, -1, -1};
 
 	static inline std::mutex mtx;
 	static inline std::mutex paramHandleQmtx;

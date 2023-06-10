@@ -56,7 +56,7 @@ public:
 		if (!(centralData->isMappingInProgress() && (centralData->getMappingSource().objType == getId().objType))) {
 			rack::PortWidget::onDragStart(e);
 		} else {
-			centralData->registerTouchedJack(getId());
+			// centralData->registerTouchedJack(getId());
 			e.consume(this);
 		}
 	}
