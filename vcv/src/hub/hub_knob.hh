@@ -1,7 +1,8 @@
 #pragma once
-#include "../mapping/map_marks.hh"
-#include "../mapping/map_palette.hh"
-#include "../mapping/mappable_knob.hh"
+#include "mapping/map_marks.hh"
+#include "mapping/map_palette.hh"
+#include "mapping/knob_alias_menu.hh"
+#include "mapping/range_slider.hh"
 #include "hub_knob_menu.hh"
 #include "hub_map_button.hh"
 #include "hub_module.hh"

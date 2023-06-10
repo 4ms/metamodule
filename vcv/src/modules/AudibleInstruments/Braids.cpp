@@ -1,6 +1,4 @@
 #include "CoreModules/modules/BraidsCore.hh"
-#include "mapping/mappable_jack.hh"
-#include "mapping/mappable_knob.hh"
 #include "plugin.hh"
 
 using namespace rack;
@@ -172,22 +170,22 @@ struct BraidsWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(15, 365)));
 		addChild(createWidget<ScrewSilver>(Vec(210, 365)));
 
-		addParam(createParam<MappableKnob<Rogan2SGray>>(Vec(176, 59), module, SHAPE_PARAM));
+		addParam(createParam<Rogan2SGray>(Vec(176, 59), module, SHAPE_PARAM));
 
-		addParam(createParam<MappableKnob<Rogan2PSWhite>>(Vec(19, 138), module, FINE_PARAM));
-		addParam(createParam<MappableKnob<Rogan2PSWhite>>(Vec(97, 138), module, COARSE_PARAM));
-		addParam(createParam<MappableKnob<Rogan2PSWhite>>(Vec(176, 138), module, FM_PARAM));
+		addParam(createParam<Rogan2PSWhite>(Vec(19, 138), module, FINE_PARAM));
+		addParam(createParam<Rogan2PSWhite>(Vec(97, 138), module, COARSE_PARAM));
+		addParam(createParam<Rogan2PSWhite>(Vec(176, 138), module, FM_PARAM));
 
-		addParam(createParam<MappableKnob<Rogan2PSGreen>>(Vec(19, 217), module, TIMBRE_PARAM));
-		addParam(createParam<MappableKnob<Rogan2PSGreen>>(Vec(97, 217), module, MODULATION_PARAM));
-		addParam(createParam<MappableKnob<Rogan2PSRed>>(Vec(176, 217), module, COLOR_PARAM));
+		addParam(createParam<Rogan2PSGreen>(Vec(19, 217), module, TIMBRE_PARAM));
+		addParam(createParam<Rogan2PSGreen>(Vec(97, 217), module, MODULATION_PARAM));
+		addParam(createParam<Rogan2PSRed>(Vec(176, 217), module, COLOR_PARAM));
 
-		addInput(createInput<MappableInput<PJ301MPort>>(Vec(10, 316), module, TRIG_INPUT));
-		addInput(createInput<MappableInput<PJ301MPort>>(Vec(47, 316), module, PITCH_INPUT));
-		addInput(createInput<MappableInput<PJ301MPort>>(Vec(84, 316), module, FM_INPUT));
-		addInput(createInput<MappableInput<PJ301MPort>>(Vec(122, 316), module, TIMBRE_INPUT));
-		addInput(createInput<MappableInput<PJ301MPort>>(Vec(160, 316), module, COLOR_INPUT));
-		addOutput(createOutput<MappableOutput<PJ301MPort>>(Vec(205, 316), module, OUT_OUTPUT));
+		addInput(createInput<PJ301MPort>(Vec(10, 316), module, TRIG_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(47, 316), module, PITCH_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(84, 316), module, FM_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(122, 316), module, TIMBRE_INPUT));
+		addInput(createInput<PJ301MPort>(Vec(160, 316), module, COLOR_INPUT));
+		addOutput(createOutput<PJ301MPort>(Vec(205, 316), module, OUT_OUTPUT));
 
 		BraidsDisplay *display = new BraidsDisplay();
 		display->box.pos = Vec(14, 53);

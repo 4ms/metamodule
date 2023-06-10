@@ -3,7 +3,6 @@
 #include "CoreModules/module_info_base.hh"
 #include "comm/comm_module.hh"
 #include "elements/4ms_widgets.hh"
-#include "mapping/mappable_jack.hh"
 #include "util/base_concepts.hh"
 
 using namespace rack;
@@ -106,34 +105,27 @@ struct GenericModule {
 				switch (knob.knob_style) {
 					case KnobDef::Small: {
 						auto *kn = rack::createParamCentered<Small9mmKnob>(ctr_pos, module, thisParamerID);
-						addChild(new MappableKnobRing{*kn, 10});
 						addParam(kn);
 					} break;
 
 					case KnobDef::Medium: {
 						auto *kn = rack::createParamCentered<Davies1900hBlackKnob4ms>(ctr_pos, module, thisParamerID);
-						addChild(new MappableKnobRing{*kn, 10});
 						addParam(kn);
 					} break;
 
 					case KnobDef::Large: {
 						auto *kn = rack::createParamCentered<DaviesLarge4ms>(ctr_pos, module, thisParamerID);
-						addChild(new MappableKnobRing{*kn, 20});
 						addParam(kn);
 					} break;
 
 					case KnobDef::Slider25mm: {
 						if (knob.orientation == KnobDef::Vertical) {
 							auto *kn =
-								rack::createParamCentered<MappableInnerKnob<FourmsLightSlider<rack::WhiteLight>>>(
-									ctr_pos, module, thisParamerID);
-							addChild(new MappableSliderRing{*kn, 20, 40});
+								rack::createParamCentered<FourmsLightSlider<rack::WhiteLight>>(ctr_pos, module, thisParamerID);
 							addParam(kn);
 						} else {
-							auto *kn = rack::createParamCentered<
-								MappableInnerKnob<FourmsLightSliderHorizontal<rack::WhiteLight>>>(
+							auto *kn = rack::createParamCentered<FourmsLightSliderHorizontal<rack::WhiteLight>>(
 								ctr_pos, module, thisParamerID);
-							addChild(new MappableSliderRing{*kn, 40, 20});
 							addParam(kn);
 						}
 					} break;
@@ -179,14 +171,12 @@ struct GenericModule {
 
 			int inJackID = 0;
 			for (auto jack : Defs::InJacks) {
-				addInput(createInputCentered<MappableInputCentered<PJ301MPort>>(
-					rack::mm2px({jack.x_mm, jack.y_mm}), module, inJackID++));
+				addInput(createInputCentered<PJ301MPort>(rack::mm2px({jack.x_mm, jack.y_mm}), module, inJackID++));
 			}
 
 			int outJackID = 0;
 			for (auto jack : Defs::OutJacks) {
-				addOutput(createOutputCentered<MappableOutputCentered<PJ301MPort>>(
-					rack::mm2px({jack.x_mm, jack.y_mm}), module, outJackID++));
+				addOutput(createOutputCentered<PJ301MPort>(rack::mm2px({jack.x_mm, jack.y_mm}), module, outJackID++));
 			}
 		}
 

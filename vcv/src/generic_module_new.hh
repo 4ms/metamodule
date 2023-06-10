@@ -4,7 +4,6 @@
 #include "comm/comm_module.hh"
 #include "elements/vcv_module_creator.hh"
 #include "elements/widget_creator.hh"
-#include "mapping/mappable_jack.hh"
 #include "util/base_concepts.hh"
 
 using namespace rack;
