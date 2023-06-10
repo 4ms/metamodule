@@ -53,7 +53,7 @@ struct MetaModuleHubBase : public CommModule {
 
 	bool registerMap(int hubParamId, rack::Module *module, int64_t moduleParamId) {
 		if (!isMappingInProgress()) {
-			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
+			pr_dbg("Error: registerMap() called but we aren't mapping!\n");
 			return false;
 		}
 

@@ -27,21 +27,13 @@ public:
 		if (!hub)
 			return;
 
-		bool registerSuccess = false;
-
 		// Check if a ParamWidget was touched
 		auto touchedParam = APP->scene->rack->getTouchedParam();
 		if (touchedParam && touchedParam->getParamQuantity()) {
 			int param_id = touchedParam->getParamQuantity()->paramId;
 			APP->scene->rack->setTouchedParam(nullptr);
 
-			registerSuccess = hub->registerMap(hubParamObj.objID, touchedParam->module, param_id);
-		} else
-			printf("No touchedParam\n");
-
-		if (!registerSuccess) {
-			centralData->abortMappingProcedure();
-			printf("Failed mapping\n");
+			hub->registerMap(hubParamObj.objID, touchedParam->module, param_id);
 		}
 	}
 
