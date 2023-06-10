@@ -1,13 +1,11 @@
 #pragma once
-#include "mapping/map_marks.hh"
-#include "mapping/map_palette.hh"
-#include "mapping/knob_alias_menu.hh"
-#include "mapping/range_slider.hh"
 #include "hub_knob_menu.hh"
 #include "hub_map_button.hh"
 #include "hub_module.hh"
-
-// This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
+#include "mapping/knob_alias_menu.hh"
+#include "mapping/map_marks.hh"
+#include "mapping/map_palette.hh"
+#include "mapping/range_slider.hh"
 
 class HubKnobMapButton : public HubMapButton {
 	rack::ParamQuantity *paramQuantity = nullptr;
@@ -165,6 +163,7 @@ public:
 			rack::OpaqueWidget::onButton(e);
 
 			// Touch parameter
+			// This is needed in case someone maps a Hub Knobs to their MIDI CC module or something else
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_LEFT && (e.mods & RACK_MOD_MASK) == 0) {
 				if (this->getParamQuantity()) {
 					APP->scene->rack->setTouchedParam(this);
@@ -186,8 +185,10 @@ public:
 		// So, don't consume the hover and just do nothing.
 		// On the other hand, if the knob is not mapped, then consume the hover so that hovering the knob
 		// doesn't make the background highlight appear
-		if (centralData->isLabelButtonSrcMapped(mapBut.hubParamObj))
-			return;
+		// if (hub) {
+		// 	if (hub->mappings.getNumMappings(mapBut.hubParamObj.objID) > 0)
+		// 		return;
+		// }
 
 		e.consume(this);
 	}
