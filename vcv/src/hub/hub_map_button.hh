@@ -19,12 +19,10 @@ public:
 
 	MappableObj hubParamObj;
 	bool isMapped = false;
-	bool isCurrentMapSrc = false;
 	MappableObj mappedToId{MappableObj::Type::None, -1, -1};
 
 	// void _createMapping(LabelButtonID srcId);
 protected:
-	void updateState();
 	bool hovered{false};
 	rack::app::ModuleWidget &parent;
 	MetaModuleHubBase *hub;

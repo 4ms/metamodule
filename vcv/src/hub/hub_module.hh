@@ -19,6 +19,8 @@ struct MetaModuleHubBase : public CommModule {
 	bool buttonAlreadyHandled = false;
 
 	size_t numMappings;
+	std::optional<int> inProgressMapParamId{};
+
 	std::span<MappableObj::Type> mappingSrcs;
 
 	static constexpr uint32_t MaxMapsPerPot = 8;
@@ -33,19 +35,37 @@ struct MetaModuleHubBase : public CommModule {
 		// centralData->unregisterKnobMapsBySrcModule(id);
 	}
 
+	void startMappingFrom(int hubParamId) {
+		inProgressMapParamId = hubParamId;
+	}
+
+	void endMapping() {
+		inProgressMapParamId = {};
+	}
+
+	std::optional<int> getMappingSource() {
+		return inProgressMapParamId;
+	}
+
+	bool isMappingInProgress() {
+		return inProgressMapParamId.has_value();
+	}
+
 	bool registerMap(int hubParamId, rack::Module *module, int64_t moduleParamId) {
-		if (!centralData->isMappingInProgress()) {
+		if (!isMappingInProgress()) {
 			pr_dbg("Error: registerMapDest() called but we aren't mapping!\n");
 			return false;
 		}
 
 		if (!module) {
 			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
+			endMapping();
 			return false;
 		}
 
 		if (centralData->isRegisteredHub(module->id)) {
 			pr_dbg("Dest module is a hub. Aborting mapping.\n");
+			endMapping();
 			return false;
 		}
 
@@ -53,6 +73,7 @@ struct MetaModuleHubBase : public CommModule {
 		map->range_max = 1.f;
 		map->range_min = 0.f;
 		map->alias_name = "";
+		endMapping();
 
 		return true;
 	}

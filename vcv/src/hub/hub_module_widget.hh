@@ -68,7 +68,7 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 		button->hubParamObj = {type, knobId, hubModule ? hubModule->id : -1};
 		addChild(button);
 
-		auto *p = new HubMidiParam{*button};
+		auto *p = new HubMidiParam{hubModule, *button};
 		p->setSize(rack::mm2px({12, 4}));
 		p->box.pos = posPx;
 		p->box.pos = p->box.pos.minus(p->box.size.div(2));

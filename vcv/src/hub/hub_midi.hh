@@ -2,20 +2,23 @@
 #include "hub_knob.hh"
 
 class HubMidiMapButton : public HubKnobMapButton {
+	MetaModuleHubBase *hub;
 
 public:
 	HubMidiMapButton(MetaModuleHubBase *hub, rack::app::ModuleWidget &parent)
-		: HubKnobMapButton{hub, parent} {
+		: HubKnobMapButton{hub, parent}
+		, hub{hub} {
 	}
 
 	void draw(const DrawArgs &args) override {
-		HubMapButton::updateState();
+		if (!hub)
+			return;
 
-		// Same as HubMapButton::draw except use a rounded rect, and don't draw alias below
+		bool isCurrentMapSrc = (hub->getMappingSource() == hubParamObj.objID);
 
 		// Draw a large background rounded rect to highlight a mapping has begun from this knob
-		if (isCurrentMapSrc || hovered || centralData->isMappedPartnerHovered(hubParamObj)) {
-			// const float padding_x = 2;
+		// Same as HubMapButton::draw except use a rounded rect, and don't draw alias below
+		if (isCurrentMapSrc || hovered) {
 			nvgBeginPath(args.vg);
 			nvgRoundedRect(args.vg, 0, 0, box.size.x, box.size.y, 4);
 			const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
@@ -35,16 +38,20 @@ public:
 
 class HubMidiParam : public rack::ParamWidget {
 public:
-	HubMidiParam(HubMidiMapButton &hubmidi_mapbut)
-		: hubmidi_mapbut{hubmidi_mapbut} {
+	HubMidiParam(MetaModuleHubBase *hub, HubMidiMapButton &mapbut)
+		: hub{hub}
+		, mapBut{mapbut} {
 	}
 
 	void draw(const DrawArgs &args) override {
-		auto numMaps = std::min(centralData->getNumMappingsFromSrc(hubmidi_mapbut.hubParamObj), 16U);
+		if (!hub)
+			return;
+
+		auto numMaps = std::min(hub->mappings.getNumMappings(mapBut.hubParamObj.objID), 16U);
 
 		// TODO: different color for each one
 		const float spacing = 8;
-		const NVGcolor color = PaletteHub::color(hubmidi_mapbut.hubParamObj.objID);
+		const NVGcolor color = PaletteHub::color(mapBut.hubParamObj.objID);
 		auto _box = this->box;
 		for (unsigned i = 0; i < numMaps; i++) {
 			MapMark::markKnob(args.vg, _box, color);
@@ -72,7 +79,7 @@ public:
 
 			// Right click to open context menu
 			if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT && (e.mods & RACK_MOD_MASK) == 0) {
-				hubmidi_mapbut.makeKnobMenu(); //this->getParamQuantity(), hubmidi_mapbut.mapObj);
+				mapBut.makeKnobMenu(); //this->getParamQuantity(), hubmidi_mapbut.mapObj);
 				e.consume(this);
 			}
 		}
@@ -89,11 +96,11 @@ public:
 	// to VCV's MidiMaps module
 	void onDeselect(const rack::event::Deselect &e) override {
 		rack::ParamWidget::onDeselect(e);
-		hubmidi_mapbut.onDeselect(e);
+		mapBut.onDeselect(e);
 	}
 
 	void onDragStart(const rack::event::DragStart &e) override {
-		hubmidi_mapbut.onDragStart(e);
+		mapBut.onDragStart(e);
 	}
 
 	struct ParamResetItem : rack::ui::MenuItem {
@@ -104,5 +111,6 @@ public:
 	};
 
 private:
-	HubKnobMapButton &hubmidi_mapbut;
+	MetaModuleHubBase *hub;
+	HubKnobMapButton &mapBut;
 };
