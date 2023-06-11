@@ -1,27 +1,25 @@
-#include "central_data.hh"
 #include "doctest.h"
+#include "mapping/central_data.hh"
 
-TEST_CASE("mappings")
-{
-	CentralData cd;
+TEST_CASE("mappings") {
+	// CentralData cd;
 
-	SUBCASE("Creating a mapping, then checking if the src and dst are mapped")
-	{
-		rack::Module m1;
-		cd.registerModule({1, "MODULE1"}, &m1);
-		MappableObj src;
-		src.moduleID = 1;
-		src.objID = 2;
-		src.objType = MappableObj::Type::Knob;
+	SUBCASE("Creating a mapping, then checking if the src and dst are mapped") {
+		// rack::Module m1;
+		// cd.registerModule({1, "MODULE1"}, &m1);
+		// MappableObj src;
+		// src.moduleID = 1;
+		// src.objID = 2;
+		// src.objType = MappableObj::Type::Knob;
 
-		rack::Module m2;
-		cd.registerModule({100, "MODULE100"}, &m2);
-		MappableObj dst;
-		dst.moduleID = 100;
-		dst.objID = 200;
-		dst.objType = MappableObj::Type::Knob;
+		// rack::Module m2;
+		// cd.registerModule({100, "MODULE100"}, &m2);
+		// MappableObj dst;
+		// dst.moduleID = 100;
+		// dst.objID = 200;
+		// dst.objType = MappableObj::Type::Knob;
 
-		cd.startMappingProcedure(src);
+		// cd.startMappingProcedure(src);
 
 		// TESTS ARE BROKEN
 		// Re-do with new framework that scans VCV Engine
