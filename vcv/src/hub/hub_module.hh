@@ -4,9 +4,13 @@
 #include "local_path.hh"
 #include "mapping/central_data.hh"
 #include "mapping/patch_writer.hh"
+#include "util/math.hh"
 #include "util/string_util.hh"
 #include <fstream>
 #include <span>
+
+#define pr_dbg printf
+// #define pr_dbg()
 
 struct MetaModuleHubBase : public CommModule {
 
@@ -238,11 +242,12 @@ private:
 		pw.setJackList(jackData);
 		pw.setParamList(paramData);
 
-		std::vector<Mapping> maps;
-		maps.reserve(centralData->maps.size());
-		for (auto &m : centralData->maps)
-			maps.push_back({m.src, m.dst, m.range_min, m.range_max, m.alias_name});
-		pw.addMaps(maps);
+		// TODO: Maps
+		// std::vector<Mapping> maps;
+		// maps.reserve(centralData->maps.size());
+		// for (auto &m : centralData->maps)
+		// 	maps.push_back({m.src, m.dst, m.range_min, m.range_max, m.alias_name});
+		// pw.addMaps(maps);
 
 		std::string yml = pw.printPatchYAML();
 		writeToFile(fileName + ".yml", yml);
