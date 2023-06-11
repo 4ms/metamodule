@@ -39,7 +39,7 @@ void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
 	idMap = squash_ids(vcv_mod_ids);
 }
 
-void PatchFileWriter::setJackList(std::vector<JackStatus> &jacks) {
+void PatchFileWriter::setJackList(std::vector<JackMap> &jacks) {
 	auto validJackId = [](int jackid) { return (jackid >= 0) /*&& (jackid < MAX_JACKS_PER_MODULE)*/; };
 	pd.int_cables.clear();
 
@@ -79,7 +79,7 @@ void PatchFileWriter::setJackList(std::vector<JackStatus> &jacks) {
 	}
 }
 
-void PatchFileWriter::setParamList(std::vector<ParamStatus> &params) {
+void PatchFileWriter::setParamList(std::vector<ParamMap> &params) {
 	pd.static_knobs.clear();
 	for (auto &param : params) {
 		pd.static_knobs.push_back({

@@ -204,7 +204,7 @@ private:
 		auto engine = context->engine;
 
 		std::vector<ModuleID> moduleData;
-		std::vector<ParamStatus> paramData;
+		std::vector<ParamMap> paramData;
 		for (auto moduleID : engine->getModuleIds()) {
 			auto *module = engine->getModule(moduleID);
 			if (centralData->isInPlugin(module)) {
@@ -221,7 +221,7 @@ private:
 			}
 		}
 
-		std::vector<JackStatus> jackData;
+		std::vector<JackMap> jackData;
 		for (auto cableID : engine->getCableIds()) {
 			auto cable = engine->getCable(cableID);
 			auto source = cable->outputModule;

@@ -2,10 +2,8 @@
 #include "mapping/patch_writer.hh"
 #include <iostream>
 
-TEST_CASE("squash_ids() works")
-{
-	SUBCASE("y = id[x]  transforms to squashed[y] = x")
-	{
+TEST_CASE("squash_ids() works") {
+	SUBCASE("y = id[x]  transforms to squashed[y] = x") {
 		std::vector<int64_t> ids = {1, 6, 25, 30, 9, 0, 2};
 		auto sq = PatchFileWriter::squash_ids(ids);
 		CHECK(sq[1] == 0);
@@ -17,8 +15,7 @@ TEST_CASE("squash_ids() works")
 		CHECK(sq[2] == 6);
 	}
 
-	SUBCASE("y = id[x]  transforms to squashed[y] = x (just another test of the same thing)")
-	{
+	SUBCASE("y = id[x]  transforms to squashed[y] = x (just another test of the same thing)") {
 		std::vector<int64_t> ids = {30, 11, 6, 0, 1};
 		auto sq = PatchFileWriter::squash_ids(ids);
 		CHECK(sq[30] == 0);
@@ -29,8 +26,7 @@ TEST_CASE("squash_ids() works")
 	}
 }
 
-TEST_CASE("ids are re-arranged properly")
-{
+TEST_CASE("ids are re-arranged properly") {
 
 	std::vector<ModuleID> modules;
 	modules.push_back({11, "A"});
@@ -41,8 +37,7 @@ TEST_CASE("ids are re-arranged properly")
 
 	PatchFileWriter pw{modules};
 
-	SUBCASE("modules_used starts with PANEL, but otherwise is in order")
-	{
+	SUBCASE("modules_used starts with PANEL, but otherwise is in order") {
 		CHECK(pw.get_data().module_slugs[0].c_str()[0] == 'P');
 		CHECK(pw.get_data().module_slugs[1].c_str()[0] == 'A');
 		CHECK(pw.get_data().module_slugs[2].c_str()[0] == 'B');
@@ -50,9 +45,8 @@ TEST_CASE("ids are re-arranged properly")
 		CHECK(pw.get_data().module_slugs[4].c_str()[0] == 'E');
 	}
 
-	SUBCASE("Static Knob List is in order")
-	{
-		std::vector<ParamStatus> params;
+	SUBCASE("Static Knob List is in order") {
+		std::vector<ParamMap> params;
 		params.push_back({.value = 0.1f, .paramID = 1, .moduleID = 11});  // module A
 		params.push_back({.value = 0.2f, .paramID = 2, .moduleID = 11});  // module A
 		params.push_back({.value = 0.3f, .paramID = 3, .moduleID = 1});	  // module E

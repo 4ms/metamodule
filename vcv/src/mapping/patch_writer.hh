@@ -1,8 +1,8 @@
 #pragma once
-#include "JackStatus.h"
+#include "JackMap.hh"
 #include "Mapping.h"
 #include "ModuleID.h"
-#include "ParamStatus.h"
+#include "ParamMap.hh"
 #include "patch/patch.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include "util/byte_block.hh"
@@ -18,8 +18,8 @@ public:
 	void setModuleList(std::vector<ModuleID> &modules);
 	void setPatchName(std::string patchName);
 	void setPatchDesc(std::string patchDesc);
-	void setJackList(std::vector<JackStatus> &jacks);
-	void setParamList(std::vector<ParamStatus> &params);
+	void setJackList(std::vector<JackMap> &jacks);
+	void setParamList(std::vector<ParamMap> &params);
 	void addMaps(std::vector<Mapping> &maps);
 	std::string printPatchYAML();
 

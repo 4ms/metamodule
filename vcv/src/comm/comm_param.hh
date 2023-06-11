@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../mapping/ParamStatus.h"
+#include "mapping/ParamMap.hh"
 
 #include <rack.hpp>
 
@@ -8,7 +8,7 @@ class CommParam {
 	rack::Param &_inParam;
 
 public:
-	ParamStatus paramStatus;
+	ParamMap paramStatus;
 	float scaleFactor = 1.0f;
 
 	CommParam(rack::Param &inParam, int paramID)
