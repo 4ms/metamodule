@@ -230,12 +230,16 @@ private:
 			auto source = cable->outputModule;
 			auto dest = cable->inputModule;
 
-			if (centralData->isModuleInPlugin(source) && centralData->isModuleInPlugin(dest)) {
-				jackData.push_back({.sendingJackId = cable->outputId,
-									.receivedJackId = cable->inputId,
-									.sendingModuleId = source->getId(),
-									.receivedModuleId = dest->getId(),
-									.connected = true});
+			if (centralData->isInPlugin(source) && centralData->isInPlugin(dest)) {
+				// Skip corner-case: hub jack patched to hub jack
+				if (centralData->isHub(source) && centralData->isHub(dest))
+					continue;
+				jackData.push_back({
+					.sendingJackId = cable->outputId,
+					.receivedJackId = cable->inputId,
+					.sendingModuleId = source->getId(),
+					.receivedModuleId = dest->getId(),
+				});
 			}
 		}
 
