@@ -1,12 +1,13 @@
 #pragma once
 #include "JackMap.hh"
-#include "Mapping.h"
 #include "ModuleID.h"
 #include "ParamMap.hh"
+#include "mapping/Mapping2.h"
 #include "patch/patch.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include "util/byte_block.hh"
 #include <map>
+#include <span>
 #include <vector>
 
 class PatchFileWriter {
@@ -20,9 +21,23 @@ public:
 	void setPatchDesc(std::string patchDesc);
 	void setJackList(std::vector<JackMap> &jacks);
 	void setParamList(std::vector<ParamMap> &params);
-	void addMaps(std::vector<Mapping> &maps);
+
+	void addKnobMaps(unsigned panelKnobId, std::span<Mapping2> maps);
+
+	template<size_t N>
+	void addAllKnobMaps(std::array<std::span<Mapping2>, N> maps) {
+		for (unsigned panelKnobId = 0; auto &knobmaps : maps) {
+			addKnobMaps(panelKnobId, knobmaps);
+			panelKnobId++;
+		}
+	}
+
 	std::string printPatchYAML();
 
 	PatchData &get_data();
 	static std::map<int64_t, uint16_t> squash_ids(std::vector<int64_t> ids);
+
+private:
+	void mapInputJack(const JackMap &map);
+	void mapOutputJack(const JackMap &map);
 };
