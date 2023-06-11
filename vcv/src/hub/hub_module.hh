@@ -203,6 +203,9 @@ private:
 		auto context = rack::contextGet();
 		auto engine = context->engine;
 
+		// Find all compatible modules in this patch
+		// TODO: only add modules that are mapped to this hub
+		// Find all knobs on those modules (static knobs)
 		std::vector<ModuleID> moduleData;
 		std::vector<ParamMap> paramData;
 		for (auto moduleID : engine->getModuleIds()) {
@@ -242,7 +245,11 @@ private:
 		pw.setJackList(jackData);
 		pw.setParamList(paramData);
 
-		// TODO: Maps
+		for (unsigned hubParamId = 0; auto &knob : mappings) {
+			pw.addKnobMaps(hubParamId, knob);
+			hubParamId++;
+		}
+
 		// std::vector<Mapping> maps;
 		// maps.reserve(centralData->maps.size());
 		// for (auto &m : centralData->maps)

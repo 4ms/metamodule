@@ -5,8 +5,8 @@
 #include "mapping/Mapping2.h"
 #include "patch/patch.hh"
 #include "patch_convert/patch_to_yaml.hh"
-#include "util/byte_block.hh"
 #include <map>
+#include <rack.hpp>
 #include <span>
 #include <vector>
 
@@ -22,15 +22,7 @@ public:
 	void setJackList(std::vector<JackMap> &jacks);
 	void setParamList(std::vector<ParamMap> &params);
 
-	void addKnobMaps(unsigned panelKnobId, std::span<Mapping2> maps);
-
-	template<size_t N>
-	void addAllKnobMaps(std::array<std::span<Mapping2>, N> maps) {
-		for (unsigned panelKnobId = 0; auto &knobmaps : maps) {
-			addKnobMaps(panelKnobId, knobmaps);
-			panelKnobId++;
-		}
-	}
+	void addKnobMaps(unsigned panelKnobId, const std::span<const Mapping2> maps);
 
 	std::string printPatchYAML();
 

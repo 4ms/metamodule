@@ -110,7 +110,7 @@ void PatchFileWriter::setParamList(std::vector<ParamMap> &params) {
 //	}
 //}
 
-void PatchFileWriter::addKnobMaps(unsigned panelKnobId, std::span<Mapping2> maps) {
+void PatchFileWriter::addKnobMaps(unsigned panelKnobId, const std::span<const Mapping2> maps) {
 	for (const auto &m : maps) {
 		pd.mapped_knobs.push_back({
 			.panel_knob_id = static_cast<uint16_t>(panelKnobId),
@@ -134,7 +134,7 @@ void PatchFileWriter::mapInputJack(const JackMap &map) {
 
 	// Look for an existing entry to this panel input jack
 	auto found = std::find_if(pd.mapped_ins.begin(), pd.mapped_ins.end(), [=](const auto &x) {
-		return x.panel_jack_id == map.sendingJackId;
+		return x.panel_jack_id == (uint32_t)map.sendingJackId;
 	});
 
 	if (found != pd.mapped_ins.end()) {
@@ -170,7 +170,7 @@ void PatchFileWriter::mapOutputJack(const JackMap &map) {
 
 	// Look for an existing entry:
 	auto found = std::find_if(pd.mapped_outs.begin(), pd.mapped_outs.end(), [=](const auto &x) {
-		return x.panel_jack_id == map.receivedJackId;
+		return x.panel_jack_id == (uint32_t)map.receivedJackId;
 	});
 
 	if (found != pd.mapped_outs.end()) {
