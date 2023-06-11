@@ -1,3 +1,5 @@
+// TO BE DEPRECATED: See generic_module_new.hh
+
 #pragma once
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
@@ -120,8 +122,8 @@ struct GenericModule {
 
 					case KnobDef::Slider25mm: {
 						if (knob.orientation == KnobDef::Vertical) {
-							auto *kn =
-								rack::createParamCentered<FourmsLightSlider<rack::WhiteLight>>(ctr_pos, module, thisParamerID);
+							auto *kn = rack::createParamCentered<FourmsLightSlider<rack::WhiteLight>>(
+								ctr_pos, module, thisParamerID);
 							addParam(kn);
 						} else {
 							auto *kn = rack::createParamCentered<FourmsLightSliderHorizontal<rack::WhiteLight>>(
