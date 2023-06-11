@@ -50,12 +50,18 @@ void HubMapButton::onDragStart(const rack::event::DragStart &e) {
 }
 
 void HubMapButton::onHover(const rack::event::Hover &e) {
+	// static unsigned flash = 0;
 	if (hub) {
 		auto &maps = hub->mappings.getMappings(hubParamObj.objID);
 		for (auto &map : maps) {
+			// if (!flash) {
 			unsigned idx = std::rand();
 			map.paramHandle.color = PaletteHub::color(idx);
+			// flash = 480;
+			// }
 		}
+		// if (flash)
+		// 	flash--;
 	}
 	e.consume(this);
 }
