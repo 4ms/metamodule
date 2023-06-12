@@ -53,15 +53,18 @@ void PatchFileWriter::setCableList(std::vector<JackMap> &jacks) {
 		auto in_mod = idMap[cable.sendingModuleId];
 		auto out_jack = cable.receivedJackId;
 		auto in_jack = cable.sendingJackId;
+		printf("Cable: %d %d -> %d %d\n", in_mod, in_jack, out_mod, out_jack);
 		if (out_jack < 0 || in_jack < 0)
 			continue;
 
-		if (in_mod == hubModuleId) {
+		if (cable.sendingModuleId == hubModuleId) {
+			printf("Mapped hub input\n");
 			mapInputJack(cable);
 			continue;
 		}
-		if (out_mod == hubModuleId) {
-			mapInputJack(cable);
+		if (cable.receivedModuleId == hubModuleId) {
+			printf("Mapped hub output\n");
+			mapOutputJack(cable);
 			continue;
 		}
 
@@ -121,6 +124,8 @@ void PatchFileWriter::setParamList(std::vector<ParamMap> &params) {
 
 void PatchFileWriter::addKnobMaps(unsigned panelKnobId, const std::span<const Mapping2> maps) {
 	for (const auto &m : maps) {
+		if (!idMap.contains(m.paramHandle.moduleId))
+			continue;
 		pd.mapped_knobs.push_back({
 			.panel_knob_id = static_cast<uint16_t>(panelKnobId),
 			.module_id = idMap[m.paramHandle.moduleId],
@@ -183,6 +188,7 @@ void PatchFileWriter::mapOutputJack(const JackMap &map) {
 		// Todo: Log error: multiple module outputs mapped to same panel output jack
 	} else {
 		// Make a new entry:
+		printf("New entry for mapped output jack:\n");
 		pd.mapped_outs.push_back({
 			.panel_jack_id = static_cast<uint32_t>(map.receivedJackId),
 			.out =

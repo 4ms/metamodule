@@ -211,17 +211,24 @@ private:
 		for (auto moduleID : engine->getModuleIds()) {
 			auto *module = engine->getModule(moduleID);
 			if (centralData->isInPlugin(module)) {
+
 				moduleData.push_back({moduleID, module->model->slug.c_str()});
 				if (module->model->slug.size() > 31)
 					printf("Warning: module slug truncated to 31 chars\n");
 
 				if (!centralData->isHub(module)) {
+					printf("Module in plugin, not a hub, has %zu params: %.32s (%lld)\n",
+						   module->params.size(),
+						   module->model->slug.c_str(),
+						   module->getId());
 					for (int i = 0; auto &p : module->params) {
 						paramData.push_back({.value = p.value, .paramID = i, .moduleID = moduleID});
 						i++;
 					}
-				}
-			}
+				} else
+					printf("Module is a hub: %.32s (%lld)\n", module->model->slug.c_str(), module->getId());
+			} else
+				printf("Module not in plugin: %.32s (%lld)\n", module->model->slug.c_str(), module->getId());
 		}
 
 		std::vector<JackMap> jackData;
