@@ -230,10 +230,18 @@ private:
 			auto source = cable->outputModule;
 			auto dest = cable->inputModule;
 
+			// Both modules on a cable must be in the plugin
 			if (centralData->isInPlugin(source) && centralData->isInPlugin(dest)) {
-				// Skip corner-case: hub jack patched to hub jack
+
+				// Ignore cables that are connected to a different hub
+				if (centralData->isHub(source) && source->getId() != id)
+					return;
+				if (centralData->isHub(dest) && dest->getId() != id)
+					return;
+				// Ignore two hub jacks patched together
 				if (centralData->isHub(source) && centralData->isHub(dest))
 					continue;
+
 				jackData.push_back({
 					.sendingJackId = cable->outputId,
 					.receivedJackId = cable->inputId,
@@ -243,7 +251,7 @@ private:
 			}
 		}
 
-		PatchFileWriter pw{moduleData};
+		PatchFileWriter pw{moduleData, id};
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
 		pw.setJackList(jackData);
@@ -253,12 +261,6 @@ private:
 			pw.addKnobMaps(hubParamId, knob);
 			hubParamId++;
 		}
-
-		// std::vector<Mapping> maps;
-		// maps.reserve(centralData->maps.size());
-		// for (auto &m : centralData->maps)
-		// 	maps.push_back({m.src, m.dst, m.range_min, m.range_max, m.alias_name});
-		// pw.addMaps(maps);
 
 		std::string yml = pw.printPatchYAML();
 		writeToFile(fileName + ".yml", yml);

@@ -4,7 +4,8 @@
 
 #include "patch_convert/ryml/ryml_serial.hh"
 
-PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules) {
+PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId)
+	: hubModuleId{hubModuleId} {
 	setModuleList(modules);
 	pd.mapped_knobs.clear();
 	pd.mapped_ins.clear();
