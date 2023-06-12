@@ -15,7 +15,8 @@ public:
 			return false;
 		if (!module->model->plugin)
 			return false;
-		return module->model->plugin->slug == "4msCompany";
+		return (module->model->plugin->slug == "4msCompany") || (module->model->plugin->slug == "Befaco") ||
+			   (module->model->plugin->slug == "Audible Instruments");
 	}
 
 	bool isHub(rack::Module *module) {
@@ -25,6 +26,7 @@ public:
 			return false;
 		return module->model->slug == "PanelMedium";
 	}
+
 	bool isModuleInPlugin(rack::Module *module) {
 		return isInPlugin(module) && !isHub(module);
 	}

@@ -227,26 +227,26 @@ private:
 		std::vector<JackMap> jackData;
 		for (auto cableID : engine->getCableIds()) {
 			auto cable = engine->getCable(cableID);
-			auto source = cable->outputModule;
-			auto dest = cable->inputModule;
+			auto out = cable->outputModule;
+			auto in = cable->inputModule;
 
 			// Both modules on a cable must be in the plugin
-			if (centralData->isInPlugin(source) && centralData->isInPlugin(dest)) {
+			if (centralData->isInPlugin(out) && centralData->isInPlugin(in)) {
 
 				// Ignore cables that are connected to a different hub
-				if (centralData->isHub(source) && source->getId() != id)
+				if (centralData->isHub(out) && (out->getId() != id))
 					return;
-				if (centralData->isHub(dest) && dest->getId() != id)
+				if (centralData->isHub(in) && (in->getId() != id))
 					return;
 				// Ignore two hub jacks patched together
-				if (centralData->isHub(source) && centralData->isHub(dest))
+				if (centralData->isHub(out) && centralData->isHub(in))
 					continue;
 
 				jackData.push_back({
 					.sendingJackId = cable->outputId,
 					.receivedJackId = cable->inputId,
-					.sendingModuleId = source->getId(),
-					.receivedModuleId = dest->getId(),
+					.sendingModuleId = out->getId(),
+					.receivedModuleId = in->getId(),
 				});
 			}
 		}
@@ -254,11 +254,22 @@ private:
 		PatchFileWriter pw{moduleData, id};
 		pw.setPatchName(patchName);
 		pw.setPatchDesc(patchDesc);
-		pw.setJackList(jackData);
+		pw.setCableList(jackData);
 		pw.setParamList(paramData);
 
-		for (unsigned hubParamId = 0; auto &knob : mappings) {
-			pw.addKnobMaps(hubParamId, knob);
+		for (unsigned hubParamId = 0; auto &knob_maps : mappings) {
+			std::vector<Mapping2> active_maps;
+			active_maps.reserve(8);
+
+			for (auto &m : knob_maps) {
+				if (m.paramHandle.module && m.paramHandle.moduleId > 0)
+					active_maps.push_back(m);
+			}
+
+			if (active_maps.size()) {
+				printf("hubParamId %d, #maps: %zu\n", hubParamId, active_maps.size());
+				pw.addKnobMaps(hubParamId, active_maps);
+			}
 			hubParamId++;
 		}
 

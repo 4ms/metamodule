@@ -19,7 +19,7 @@ public:
 	PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId);
 	void setPatchName(std::string patchName);
 	void setPatchDesc(std::string patchDesc);
-	void setJackList(std::vector<JackMap> &jacks);
+	void setCableList(std::vector<JackMap> &jacks);
 	void setParamList(std::vector<ParamMap> &params);
 
 	void addKnobMaps(unsigned panelKnobId, const std::span<const Mapping2> maps);

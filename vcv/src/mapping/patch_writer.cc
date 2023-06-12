@@ -43,42 +43,50 @@ void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
 	idMap = squash_ids(vcv_mod_ids);
 }
 
-void PatchFileWriter::setJackList(std::vector<JackMap> &jacks) {
-	auto validJackId = [](int jackid) { return (jackid >= 0) /*&& (jackid < MAX_JACKS_PER_MODULE)*/; };
+void PatchFileWriter::setCableList(std::vector<JackMap> &jacks) {
 	pd.int_cables.clear();
 
 	for (auto &cable : jacks) {
-		if (cable.connected && validJackId(cable.receivedJackId) && validJackId(cable.sendingJackId) &&
-			cable.receivedModuleId >= 0 && cable.sendingModuleId >= 0)
-		{
-			auto out_mod = idMap[cable.receivedModuleId];
-			auto out_jack = cable.receivedJackId;
-			auto in_mod = idMap[cable.sendingModuleId];
-			auto in_jack = cable.sendingJackId;
+		if (!idMap.contains(cable.receivedModuleId) || !idMap.contains(cable.sendingModuleId))
+			continue;
+		auto out_mod = idMap[cable.receivedModuleId];
+		auto in_mod = idMap[cable.sendingModuleId];
+		auto out_jack = cable.receivedJackId;
+		auto in_jack = cable.sendingJackId;
+		if (out_jack < 0 || in_jack < 0)
+			continue;
 
-			// Look for an existing entry:
-			auto found = std::find_if(pd.int_cables.begin(), pd.int_cables.end(), [=](const auto &x) {
-				return x.out.jack_id == out_jack && x.out.module_id == out_mod;
+		if (in_mod == hubModuleId) {
+			mapInputJack(cable);
+			continue;
+		}
+		if (out_mod == hubModuleId) {
+			mapInputJack(cable);
+			continue;
+		}
+
+		// Look for an existing entry:
+		auto found = std::find_if(pd.int_cables.begin(), pd.int_cables.end(), [=](const auto &x) {
+			return x.out.jack_id == out_jack && x.out.module_id == out_mod;
+		});
+
+		if (found != pd.int_cables.end()) {
+			// If an int_cable entry exists for this output jack, add a new input jack to the ins vector
+			found->ins.push_back({
+				.module_id = static_cast<uint16_t>(in_mod),
+				.jack_id = static_cast<uint16_t>(in_jack),
 			});
-
-			if (found != pd.int_cables.end()) {
-				// If an int_cable entry exists for this output jack, add a new input jack to the ins vector
-				found->ins.push_back({
-					.module_id = static_cast<uint16_t>(in_mod),
-					.jack_id = static_cast<uint16_t>(in_jack),
-				});
-			} else {
-				// Make a new entry:
-				pd.int_cables.push_back({
-					.out = {static_cast<uint16_t>(out_mod), static_cast<uint16_t>(out_jack)},
-					.ins = {{
-						{
-							.module_id = static_cast<uint16_t>(in_mod),
-							.jack_id = static_cast<uint16_t>(in_jack),
-						},
-					}},
-				});
-			}
+		} else {
+			// Make a new entry:
+			pd.int_cables.push_back({
+				.out = {static_cast<uint16_t>(out_mod), static_cast<uint16_t>(out_jack)},
+				.ins = {{
+					{
+						.module_id = static_cast<uint16_t>(in_mod),
+						.jack_id = static_cast<uint16_t>(in_jack),
+					},
+				}},
+			});
 		}
 	}
 }
@@ -125,13 +133,10 @@ void PatchFileWriter::addKnobMaps(unsigned panelKnobId, const std::span<const Ma
 	}
 }
 
-// Given a map that's already been verifed the sending module is the hub (send = hub jack labeled "in" = output jack widget in VCV)
+// Presumes the map has already been verified that the sendingModuleId is the hub we're using
+// And the jack ids are valid
+// and the receivedModuleId is in our module list
 void PatchFileWriter::mapInputJack(const JackMap &map) {
-	// TODO: if (map.sendingModuleId != id of hub that's writing the patch) return;
-	if (map.sendingJackId < 0 || map.receivedJackId < 0)
-		return;
-	if (!idMap.contains(map.sendingModuleId) || !idMap.contains(map.receivedModuleId))
-		return;
 
 	// Look for an existing entry to this panel input jack
 	auto found = std::find_if(pd.mapped_ins.begin(), pd.mapped_ins.end(), [=](const auto &x) {
@@ -158,12 +163,10 @@ void PatchFileWriter::mapInputJack(const JackMap &map) {
 	}
 }
 
+// Presumes the map has already been verified that the sendingModuleId is the hub we're using
+// And the jack ids are valid
+// and the receivedModuleId is in our module list
 void PatchFileWriter::mapOutputJack(const JackMap &map) {
-	// TODO: if (map.receivedModuleId != id of hub that's writing the patch) return;
-	if (map.sendingJackId < 0 || map.receivedJackId < 0)
-		return;
-	if (!idMap.contains(map.sendingModuleId) || !idMap.contains(map.receivedModuleId))
-		return;
 
 	// Update the mapped_outs entry if there already is one with the same panel_jack_id (Note that this is
 	// an error, since we can't have multiple outs assigned to a net, but we're going to roll with it).
