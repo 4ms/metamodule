@@ -188,13 +188,12 @@ void PatchFileWriter::mapOutputJack(const JackMap &map) {
 		// Todo: Log error: multiple module outputs mapped to same panel output jack
 	} else {
 		// Make a new entry:
-		printf("New entry for mapped output jack:\n");
 		pd.mapped_outs.push_back({
 			.panel_jack_id = static_cast<uint32_t>(map.receivedJackId),
 			.out =
 				{
-					.module_id = static_cast<uint16_t>(idMap[map.sendingJackId]),
-					.jack_id = static_cast<uint16_t>(map.sendingModuleId),
+					.module_id = static_cast<uint16_t>(idMap[map.sendingModuleId]),
+					.jack_id = static_cast<uint16_t>(map.sendingJackId),
 				},
 		});
 	}

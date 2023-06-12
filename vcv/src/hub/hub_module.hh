@@ -238,24 +238,25 @@ private:
 			auto in = cable->inputModule;
 
 			// Both modules on a cable must be in the plugin
-			if (centralData->isInPlugin(out) && centralData->isInPlugin(in)) {
+			if (!centralData->isInPlugin(out) || centralData->isInPlugin(in))
+				continue;
 
-				// Ignore cables that are connected to a different hub
-				if (centralData->isHub(out) && (out->getId() != id))
-					return;
-				if (centralData->isHub(in) && (in->getId() != id))
-					return;
-				// Ignore two hub jacks patched together
-				if (centralData->isHub(out) && centralData->isHub(in))
-					continue;
+			// Ignore cables that are connected to a different hub
+			if (centralData->isHub(out) && (out->getId() != id))
+				continue;
+			if (centralData->isHub(in) && (in->getId() != id))
+				continue;
 
-				jackData.push_back({
-					.sendingJackId = cable->outputId,
-					.receivedJackId = cable->inputId,
-					.sendingModuleId = out->getId(),
-					.receivedModuleId = in->getId(),
-				});
-			}
+			// Ignore two hub jacks patched together
+			if (centralData->isHub(out) && centralData->isHub(in))
+				continue;
+
+			jackData.push_back({
+				.sendingJackId = cable->outputId,
+				.receivedJackId = cable->inputId,
+				.sendingModuleId = out->getId(),
+				.receivedModuleId = in->getId(),
+			});
 		}
 
 		PatchFileWriter pw{moduleData, id};
