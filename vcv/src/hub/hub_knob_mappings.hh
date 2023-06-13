@@ -1,13 +1,13 @@
 #pragma once
 #include "mapping/MappableObject.h"
-#include "mapping/Mapping2.h"
 #include "mapping/map_palette.hh"
+#include "mapping/mapping.hh"
 #include "util/static_string.hh"
 
 template<size_t NumKnobs, size_t MaxMapsPerPot>
 struct HubKnobMappings {
 
-	using KnobParamHandles = std::array<Mapping2, MaxMapsPerPot>;
+	using KnobParamHandles = std::array<Mapping, MaxMapsPerPot>;
 
 	std::array<KnobParamHandles, NumKnobs> mappings;
 	std::array<StaticString<31>, NumKnobs> aliases;
@@ -99,7 +99,7 @@ struct HubKnobMappings {
 		return mappings[hubParamId];
 	}
 
-	Mapping2 *nextFreeMap(unsigned hubParamId) {
+	Mapping *nextFreeMap(unsigned hubParamId) {
 		// Find first unused paramHandle
 		for (auto &p : mappings[hubParamId]) {
 			if (p.paramHandle.moduleId < 0) {
@@ -110,7 +110,7 @@ struct HubKnobMappings {
 		return &mappings[hubParamId][MaxMapsPerPot - 1];
 	}
 
-	Mapping2 *addMap(unsigned hubParamId, int64_t destModuleId, int destParamId) {
+	Mapping *addMap(unsigned hubParamId, int64_t destModuleId, int destParamId) {
 		auto *map = nextFreeMap(hubParamId);
 		APP->engine->updateParamHandle(&map->paramHandle, destModuleId, destParamId, true);
 		return map;
@@ -189,7 +189,7 @@ struct HubKnobMappings {
 		}
 	}
 
-	bool is_valid(Mapping2 map) {
+	bool is_valid(Mapping map) {
 		return map.paramHandle.module && map.paramHandle.moduleId >= 0;
 	}
 

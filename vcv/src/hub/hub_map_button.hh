@@ -1,7 +1,5 @@
 #pragma once
-
 #include "hub/hub_module.hh"
-#include "mapping/Mapping.h"
 #include <rack.hpp>
 
 class HubMapButton : public rack::Button {

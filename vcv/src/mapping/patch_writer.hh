@@ -2,7 +2,7 @@
 #include "JackMap.hh"
 #include "ModuleID.h"
 #include "ParamMap.hh"
-#include "mapping/Mapping2.h"
+#include "mapping/mapping.hh"
 #include "patch/patch.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include <map>
@@ -22,7 +22,7 @@ public:
 	void setCableList(std::vector<JackMap> &jacks);
 	void setParamList(std::vector<ParamMap> &params);
 
-	void addKnobMaps(unsigned panelKnobId, const std::span<const Mapping2> maps);
+	void addKnobMaps(unsigned panelKnobId, const std::span<const Mapping> maps);
 
 	std::string printPatchYAML();
 

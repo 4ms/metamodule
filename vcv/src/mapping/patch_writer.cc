@@ -120,7 +120,7 @@ void PatchFileWriter::setParamList(std::vector<ParamMap> &params) {
 //	}
 //}
 
-void PatchFileWriter::addKnobMaps(unsigned panelKnobId, const std::span<const Mapping2> maps) {
+void PatchFileWriter::addKnobMaps(unsigned panelKnobId, const std::span<const Mapping> maps) {
 	for (const auto &m : maps) {
 		if (!idMap.contains(m.paramHandle.moduleId))
 			continue;

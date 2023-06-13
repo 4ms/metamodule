@@ -73,7 +73,7 @@ struct VCVPatchFileWriter {
 		pw.setParamList(paramData);
 
 		for (unsigned hubParamId = 0; auto &knob_maps : mappings) {
-			std::vector<Mapping2> active_maps;
+			std::vector<Mapping> active_maps;
 			active_maps.reserve(8);
 
 			for (auto &m : knob_maps) {

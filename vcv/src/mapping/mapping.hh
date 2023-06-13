@@ -1,7 +1,7 @@
 #pragma once
 #include <rack.hpp>
 
-struct Mapping2 {
+struct Mapping {
 	rack::ParamHandle paramHandle;
 	float range_min = 0.f;
 	float range_max = 1.f;
