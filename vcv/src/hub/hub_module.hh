@@ -1,12 +1,11 @@
 #pragma once
-#include "../comm/comm_module.hh"
+#include "comm/comm_module.hh"
 #include "hub_knob_mappings.hh"
 #include "local_path.hh"
 #include "mapping/central_data.hh"
-#include "mapping/patch_writer.hh"
+#include "mapping/vcv_patch_file_writer.hh"
 #include "util/math.hh"
 #include "util/string_util.hh"
-#include <fstream>
 #include <span>
 
 #define pr_dbg printf
@@ -28,7 +27,10 @@ struct MetaModuleHubBase : public CommModule {
 	std::span<MappableObj::Type> mappingSrcs;
 
 	static constexpr uint32_t MaxMapsPerPot = 8;
-	HubKnobMappings<PanelDef::NumPot, MaxMapsPerPot> mappings{id};
+	// FIXME: NumPots should be a template parameter
+	// We then need a common base class widgets can point to
+	static constexpr uint32_t NumPots = 12;
+	HubKnobMappings<NumPots, MaxMapsPerPot> mappings{id};
 
 	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
 		: numMappings{mappingSrcs.size()}
@@ -67,7 +69,7 @@ struct MetaModuleHubBase : public CommModule {
 			return false;
 		}
 
-		if (centralData->isRegisteredHub(module->id)) {
+		if (centralData->isHub(module)) {
 			pr_dbg("Dest module is a hub. Aborting mapping.\n");
 			endMapping();
 			return false;
@@ -141,7 +143,11 @@ struct MetaModuleHubBase : public CommModule {
 				.replace_all("#", "")
 				.replace_all("!", "");
 			std::string patchFileName = patchDir + patchStructName.str;
-			writePatchFile(patchFileName, patchStructName.str, patchName, patchDescText);
+
+			labelText = "Creating patch...";
+			updateDisplay();
+
+			VCVPatchFileWriter::writePatchFile(id, mappings.mappings, patchFileName, patchName, patchDescText);
 
 			labelText = "Wrote patch file: ";
 			labelText += patchStructName.str + ".yml";
@@ -149,8 +155,7 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
-	// This is called periodically on auto-save
-	// maps and the patch name/description are converted to json
+	// VCV Rack calls this periodically on auto-save
 	json_t *dataToJson() override {
 		json_t *rootJ = mappings.encodeJson();
 
@@ -166,8 +171,7 @@ struct MetaModuleHubBase : public CommModule {
 		return rootJ;
 	}
 
-	// This is called on startup, and on loading a new patch file
-	// json is converted to centralData->maps
+	// VCV Rack calls this on startup, and on loading a new patch file
 	void dataFromJson(json_t *rootJ) override {
 		auto patchNameJ = json_object_get(rootJ, "PatchName");
 		if (json_is_string(patchNameJ)) {
@@ -193,119 +197,5 @@ private:
 			buttonAlreadyHandled = false;
 		}
 		return false;
-	}
-
-	void
-	writePatchFile(std::string fileName, std::string patchStructName, std::string patchName, std::string patchDesc) {
-		labelText = "Creating patch...";
-		updateDisplay();
-
-		auto context = rack::contextGet();
-		auto engine = context->engine;
-
-		// Find all compatible modules in this patch
-		// TODO: only add modules that are mapped to this hub
-		// Find all knobs on those modules (static knobs)
-		std::vector<ModuleID> moduleData;
-		std::vector<ParamMap> paramData;
-		for (auto moduleID : engine->getModuleIds()) {
-			auto *module = engine->getModule(moduleID);
-			if (centralData->isInPlugin(module)) {
-
-				moduleData.push_back({moduleID, module->model->slug.c_str()});
-				if (module->model->slug.size() > 31)
-					printf("Warning: module slug truncated to 31 chars\n");
-
-				if (!centralData->isHub(module)) {
-					printf("Module in plugin, not a hub, has %zu params: %.32s (%lld)\n",
-						   module->params.size(),
-						   module->model->slug.c_str(),
-						   module->getId());
-					for (int i = 0; auto &p : module->params) {
-						paramData.push_back({.value = p.value, .paramID = i, .moduleID = moduleID});
-						i++;
-					}
-				} else
-					printf("Module is a hub: %.32s (%lld)\n", module->model->slug.c_str(), module->getId());
-			} else
-				printf("Module not in plugin: %.32s (%lld)\n", module->model->slug.c_str(), module->getId());
-		}
-
-		std::vector<JackMap> jackData;
-		for (auto cableID : engine->getCableIds()) {
-			auto cable = engine->getCable(cableID);
-			auto out = cable->outputModule;
-			auto in = cable->inputModule;
-
-			// Both modules on a cable must be in the plugin
-			if (!centralData->isInPlugin(out) || centralData->isInPlugin(in))
-				continue;
-
-			// Ignore cables that are connected to a different hub
-			if (centralData->isHub(out) && (out->getId() != id))
-				continue;
-			if (centralData->isHub(in) && (in->getId() != id))
-				continue;
-
-			// Ignore two hub jacks patched together
-			if (centralData->isHub(out) && centralData->isHub(in))
-				continue;
-
-			jackData.push_back({
-				.sendingJackId = cable->outputId,
-				.receivedJackId = cable->inputId,
-				.sendingModuleId = out->getId(),
-				.receivedModuleId = in->getId(),
-			});
-		}
-
-		PatchFileWriter pw{moduleData, id};
-		pw.setPatchName(patchName);
-		pw.setPatchDesc(patchDesc);
-		pw.setCableList(jackData);
-		pw.setParamList(paramData);
-
-		for (unsigned hubParamId = 0; auto &knob_maps : mappings) {
-			std::vector<Mapping2> active_maps;
-			active_maps.reserve(8);
-
-			for (auto &m : knob_maps) {
-				if (m.paramHandle.module && m.paramHandle.moduleId > 0)
-					active_maps.push_back(m);
-			}
-
-			if (active_maps.size()) {
-				printf("hubParamId %d, #maps: %zu\n", hubParamId, active_maps.size());
-				pw.addKnobMaps(hubParamId, active_maps);
-			}
-			hubParamId++;
-		}
-
-		std::string yml = pw.printPatchYAML();
-		writeToFile(fileName + ".yml", yml);
-		writeAsHeader(fileName + ".hh", patchStructName + "_patch", yml);
-	}
-
-	void writeToFile(const std::string &fileName, std::string textToWrite) {
-		std::ofstream myfile;
-		myfile.open(fileName);
-		myfile << textToWrite;
-		myfile.close();
-	}
-
-	void writeAsHeader(const std::string &fileName, std::string_view structname, std::string_view textToWrite) {
-		std::ofstream myfile;
-		myfile.open(fileName);
-		myfile << "static char " << structname << "[] = \n";
-		myfile << "R\"(\n";
-		myfile << textToWrite;
-		myfile << "\n)\";";
-		myfile.close();
-	}
-
-	void writeBinaryFile(const std::string &fileName, const std::vector<unsigned char> data) {
-		std::ofstream myfile{fileName, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
-		myfile.write(reinterpret_cast<const char *>(data.data()), data.size());
-		myfile.close();
 	}
 };
