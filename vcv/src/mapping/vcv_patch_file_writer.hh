@@ -38,7 +38,7 @@ struct VCVPatchFileWriter {
 			}
 		}
 
-		std::vector<JackMap> cableData;
+		std::vector<CableMap> cableData;
 		for (auto cableID : engine->getCableIds()) {
 			auto cable = engine->getCable(cableID);
 			auto out = cable->outputModule;

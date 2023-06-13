@@ -19,7 +19,7 @@ public:
 	PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId);
 	void setPatchName(std::string patchName);
 	void setPatchDesc(std::string patchDesc);
-	void setCableList(std::vector<JackMap> &jacks);
+	void setCableList(std::vector<CableMap> &jacks);
 	void setParamList(std::vector<ParamMap> &params);
 
 	void addKnobMaps(unsigned panelKnobId, const std::span<const Mapping> maps);
@@ -30,7 +30,7 @@ public:
 	static std::map<int64_t, uint16_t> squash_ids(std::vector<int64_t> ids);
 
 private:
-	void mapInputJack(const JackMap &map);
-	void mapOutputJack(const JackMap &map);
+	void mapInputJack(const CableMap &map);
+	void mapOutputJack(const CableMap &map);
 	void setModuleList(std::vector<ModuleID> &modules);
 };

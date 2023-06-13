@@ -13,7 +13,7 @@ private:
 	bool _just_patched = false;
 
 public:
-	JackMap inputJackStatus;
+	CableMap inputJackStatus;
 	float scaleFactor = 1.f / 5.f; //-5V to +5V in VCV => -1..+1 in CoreModule
 
 	CommInputJack(rack::Port &inputPort, int jackID)

@@ -42,7 +42,7 @@ void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
 	idMap = squash_ids(vcv_mod_ids);
 }
 
-void PatchFileWriter::setCableList(std::vector<JackMap> &jacks) {
+void PatchFileWriter::setCableList(std::vector<CableMap> &jacks) {
 	pd.int_cables.clear();
 
 	for (auto &cable : jacks) {
@@ -139,7 +139,7 @@ void PatchFileWriter::addKnobMaps(unsigned panelKnobId, const std::span<const Ma
 // Presumes the map has already been verified that the sendingModuleId is the hub we're using
 // And the jack ids are valid
 // and the receivedModuleId is in our module list
-void PatchFileWriter::mapInputJack(const JackMap &map) {
+void PatchFileWriter::mapInputJack(const CableMap &map) {
 
 	// Look for an existing entry to this panel input jack
 	auto found = std::find_if(pd.mapped_ins.begin(), pd.mapped_ins.end(), [=](const auto &x) {
@@ -169,7 +169,7 @@ void PatchFileWriter::mapInputJack(const JackMap &map) {
 // Presumes the map has already been verified that the sendingModuleId is the hub we're using
 // And the jack ids are valid
 // and the receivedModuleId is in our module list
-void PatchFileWriter::mapOutputJack(const JackMap &map) {
+void PatchFileWriter::mapOutputJack(const CableMap &map) {
 
 	// Update the mapped_outs entry if there already is one with the same panel_jack_id (Note that this is
 	// an error, since we can't have multiple outs assigned to a net, but we're going to roll with it).
