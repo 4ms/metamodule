@@ -64,7 +64,7 @@ public:
 			auto *sep = new rack::MenuSeparator;
 			menu->addChild(sep);
 
-			auto aliasItem = new KnobAliasMenuItem{hubParamObj};
+			auto aliasItem = new KnobAliasMenuItem{hub, hubParamObj};
 			menu->addChild(aliasItem);
 
 			auto maps = hub->mappings.getMappings(hubParamObj.objID);

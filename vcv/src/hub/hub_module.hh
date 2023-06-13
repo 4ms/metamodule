@@ -38,7 +38,6 @@ struct MetaModuleHubBase : public CommModule {
 	}
 
 	~MetaModuleHubBase() {
-		// centralData->unregisterKnobMapsBySrcModule(id);
 	}
 
 	void startMappingFrom(int hubParamId) {
@@ -78,7 +77,6 @@ struct MetaModuleHubBase : public CommModule {
 		auto *map = mappings.addMap(hubParamId, module->id, moduleParamId);
 		map->range_max = 1.f;
 		map->range_min = 0.f;
-		map->alias_name = "";
 		endMapping();
 
 		return true;

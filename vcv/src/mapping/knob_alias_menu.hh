@@ -1,38 +1,36 @@
 #pragma once
 #include "hub/hub_module.hh"
-// #include "map_marks.hh"
-// #include "map_palette.hh"
-// #include "mapping/range_slider.hh"
 #include <rack.hpp>
 
 struct KnobAliasTextBox : rack::ui::TextField {
-	MappableObj _src;
-	KnobAliasTextBox(MappableObj src)
-		: _src{src} {
+	MappableObj src;
+	MetaModuleHubBase *hub;
+
+	KnobAliasTextBox(MetaModuleHubBase *hub, MappableObj src)
+		: src{src}
+		, hub{hub} {
 	}
 
 	void onChange(const rack::event::Change &e) override {
-		// centralData->setMapAliasName(_src, text);
-		//TODO:
-		//hub->mappings.setMapAliasName(_src, text);
+		hub->mappings.setMapAliasName(src, text);
 	}
 };
 
 struct KnobAliasMenuItem : rack::widget::Widget {
-	MappableObj _src;
+	MappableObj src;
+	MetaModuleHubBase *hub;
 	KnobAliasTextBox *txt;
 
-	KnobAliasMenuItem(MappableObj src)
-		: _src{src} {
+	KnobAliasMenuItem(MetaModuleHubBase *hub, MappableObj src)
+		: src{src}
+		, hub{hub} {
 		box.pos = {0, 0};
 		box.size = {120, BND_WIDGET_HEIGHT};
-		txt = new KnobAliasTextBox{src};
+		txt = new KnobAliasTextBox{hub, src};
 		txt->box.pos = {45, 0};
 		txt->box.size = {120 - txt->box.pos.x, BND_WIDGET_HEIGHT};
 		txt->text = "";
-		// txt->text = centralData->getMapAliasName(_src);
-		//TODO:
-		//txt->text = hub->mappings.getMapAliasName(_src);
+		txt->text = hub->mappings.getMapAliasName(src);
 		addChild(txt);
 	}
 

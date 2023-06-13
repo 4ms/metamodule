@@ -2,6 +2,7 @@
 #include "mapping/MappableObject.h"
 #include "mapping/Mapping2.h"
 #include "mapping/map_palette.hh"
+#include "util/static_string.hh"
 
 template<size_t NumKnobs, size_t MaxMapsPerPot>
 struct HubKnobMappings {
@@ -9,6 +10,8 @@ struct HubKnobMappings {
 	using KnobParamHandles = std::array<Mapping2, MaxMapsPerPot>;
 
 	std::array<KnobParamHandles, NumKnobs> mappings;
+	std::array<StaticString<31>, NumKnobs> aliases;
+
 	int64_t hubModuleId = -1;
 
 	HubKnobMappings(int64_t hubModuleId)
@@ -64,24 +67,14 @@ struct HubKnobMappings {
 	}
 
 	void setMapAliasName(MappableObj paramObj, std::string newname) {
-		for (auto &knob : mappings) {
-			for (auto &map : knob) {
-				if (!is_valid(map))
-					continue;
-				if (paramObj.moduleID == map.paramHandle.moduleId && paramObj.objID == map.paramHandle.paramId)
-					map.alias_name = newname;
-			}
+		if (paramObj.objID < (int)NumKnobs) {
+			aliases[paramObj.objID].copy(newname);
 		}
 	}
 
 	std::string getMapAliasName(MappableObj paramObj) {
-		for (auto &knob : mappings) {
-			for (auto &map : knob) {
-				if (!is_valid(map))
-					continue;
-				if (paramObj.moduleID == map.paramHandle.moduleId && paramObj.objID == map.paramHandle.paramId)
-					return map.alias_name;
-			}
+		if (paramObj.objID < (int)NumKnobs) {
+			return std::string{aliases[paramObj.objID]};
 		}
 		return "";
 	}
@@ -139,7 +132,7 @@ struct HubKnobMappings {
 				json_object_set_new(thisMapJ, "SrcObjID", json_integer(hubParamId));
 				json_object_set_new(thisMapJ, "RangeMin", json_real(map.range_min));
 				json_object_set_new(thisMapJ, "RangeMax", json_real(map.range_max));
-				json_object_set_new(thisMapJ, "AliasName", json_string(map.alias_name.c_str()));
+				json_object_set_new(thisMapJ, "AliasName", json_string(aliases[hubParamId].c_str()));
 
 				json_array_append(mapsJ, thisMapJ);
 				json_decref(thisMapJ);
@@ -190,7 +183,7 @@ struct HubKnobMappings {
 					map->range_max = json_is_real(val) ? json_real_value(val) : 1.f;
 
 					val = json_object_get(mappingJ, "AliasName");
-					map->alias_name = json_is_string(val) ? json_string_value(val) : "";
+					aliases[hubParamId] = json_is_string(val) ? json_string_value(val) : "";
 				}
 			}
 		}

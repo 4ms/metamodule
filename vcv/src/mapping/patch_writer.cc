@@ -1,8 +1,7 @@
 #include "patch_writer.hh"
 #include "patch_convert/patch_to_yaml.hh"
-#include <algorithm>
-
 #include "patch_convert/ryml/ryml_serial.hh"
+#include <algorithm>
 
 PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId)
 	: hubModuleId{hubModuleId} {
@@ -132,7 +131,7 @@ void PatchFileWriter::addKnobMaps(unsigned panelKnobId, const std::span<const Ma
 			.curve_type = 0,
 			.min = m.range_min,
 			.max = m.range_max,
-			.alias_name = m.alias_name.c_str(),
+			.alias_name = "", //TODO
 		});
 	}
 }
