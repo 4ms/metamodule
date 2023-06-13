@@ -11,7 +11,8 @@ void HubMapButton::draw(const DrawArgs &args) {
 	bool isCurrentMapSrc = (hub->getMappingSource() == hubParamObj.objID);
 
 	// Draw a large background circle to highlight a mapping has begun from this knob
-	if (isCurrentMapSrc || hovered) { // || centralData->isMappedPartnerHovered(hubParamObj)) {
+	// Todo: Figure out a way to also draw the ring when hovering the knob it was mapped to.
+	if (isCurrentMapSrc || hovered) {
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, box.size.x / 2, box.size.y / 2, box.size.y / 2);
 		const float alpha = isCurrentMapSrc ? 0.75f : 0.4f;
@@ -50,18 +51,14 @@ void HubMapButton::onDragStart(const rack::event::DragStart &e) {
 }
 
 void HubMapButton::onHover(const rack::event::Hover &e) {
-	// static unsigned flash = 0;
+	static unsigned flash = 0;
+	constexpr unsigned flash_rate = 6;
 	if (hub) {
 		auto &maps = hub->mappings.getMappings(hubParamObj.objID);
 		for (auto &map : maps) {
-			// if (!flash) {
-			unsigned idx = std::rand();
-			map.paramHandle.color = PaletteHub::color(idx);
-			// flash = 480;
-			// }
+			map.paramHandle.color = (flash < flash_rate / 2) ? PaletteHub::color(hubParamObj.objID) : PaletteHub::WHITE;
 		}
-		// if (flash)
-		// 	flash--;
+		flash = flash ? flash - 1 : flash_rate;
 	}
 	e.consume(this);
 }
