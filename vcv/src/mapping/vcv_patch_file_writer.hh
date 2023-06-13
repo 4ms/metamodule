@@ -23,13 +23,13 @@ struct VCVPatchFileWriter {
 		std::vector<ParamMap> paramData;
 		for (auto moduleID : engine->getModuleIds()) {
 			auto *module = engine->getModule(moduleID);
-			if (centralData->isInPlugin(module)) {
+			if (ModuleDirectory::isInPlugin(module)) {
 
 				moduleData.push_back({moduleID, module->model->slug.c_str()});
 				if (module->model->slug.size() > 31)
 					printf("Warning: module slug truncated to 31 chars\n");
 
-				if (!centralData->isHub(module)) {
+				if (!ModuleDirectory::isHub(module)) {
 					for (int i = 0; auto &p : module->params) {
 						paramData.push_back({.value = p.value, .paramID = i, .moduleID = moduleID});
 						i++;
@@ -45,17 +45,17 @@ struct VCVPatchFileWriter {
 			auto in = cable->inputModule;
 
 			// Both modules on a cable must be in the plugin
-			if (!centralData->isInPlugin(out) || !centralData->isInPlugin(in))
+			if (!ModuleDirectory::isInPlugin(out) || !ModuleDirectory::isInPlugin(in))
 				continue;
 
 			// Ignore cables that are connected to a different hub
-			if (centralData->isHub(out) && (out->getId() != hubModuleId))
+			if (ModuleDirectory::isHub(out) && (out->getId() != hubModuleId))
 				continue;
-			if (centralData->isHub(in) && (in->getId() != hubModuleId))
+			if (ModuleDirectory::isHub(in) && (in->getId() != hubModuleId))
 				continue;
 
 			// Ignore two hub jacks patched together
-			if (centralData->isHub(out) && centralData->isHub(in))
+			if (ModuleDirectory::isHub(out) && ModuleDirectory::isHub(in))
 				continue;
 
 			cableData.push_back({

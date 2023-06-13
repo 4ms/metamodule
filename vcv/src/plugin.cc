@@ -196,8 +196,6 @@ rack::Model *modelBuffMult = GenericModule<BuffMultInfo>::create();
 ///////////////////////////////////////////////////////
 
 void init(rack::Plugin *p) {
-	initializeCentralData();
-
 	pluginInstance = p;
 
 	//////////////// Auto generated ///////////////////////

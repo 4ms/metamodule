@@ -68,7 +68,7 @@ struct MetaModuleHubBase : public rack::Module {
 			return false;
 		}
 
-		if (centralData->isHub(module)) {
+		if (ModuleDirectory::isHub(module)) {
 			pr_dbg("Dest module is a hub. Aborting mapping.\n");
 			endMapping();
 			return false;
