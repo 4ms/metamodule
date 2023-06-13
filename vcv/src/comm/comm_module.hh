@@ -1,9 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "comm_jack_input.hh"
-#include "comm_jack_output.hh"
-#include "comm_param.hh"
-#include "mapping/ModuleID.h"
+#include "comm/comm_jack.hh"
 
 class CommModule : public rack::Module {
 public:
@@ -13,33 +10,19 @@ public:
 		float val;
 	};
 
-	std::function<void(void)> updateDisplay;
-	std::string DEBUGSTR = "";
 	std::unique_ptr<CoreProcessor> core;
 	std::vector<AltParam> altParams;
-
-protected:
-	ModuleID selfID;
-	std::vector<std::unique_ptr<CommParam>> commParams;
-	std::vector<std::unique_ptr<CommOutputJack>> outputJacks;
-	std::vector<std::unique_ptr<CommInputJack>> inputJacks;
+	std::vector<CommInputJack> inJacks;
+	std::vector<CommOutputJack> outJacks;
 
 private:
-	int _numLights = 0;
-	bool _sample_rate_changed = true;
-	enum CommStatus { Normal = 0, StartSending, PropagateData1, PropagateData2 } _comm_status{Normal};
+	bool sampleRateChanged = true;
 
 protected:
-	CommModule();
+	CommModule() = default;
 	~CommModule() = default;
 
-	void configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int NUM_LIGHTS);
-	virtual void process(const ProcessArgs &args) override;
-	virtual void onAdd() override;
-	virtual void onRemove() override;
-	virtual void onSampleRateChange() override;
-
-private:
-	void setModuleId(int64_t id);
-	void handleCommunication();
+	void configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned NUM_OUTPUTS, unsigned NUM_LIGHTS);
+	void process(const ProcessArgs &args) override;
+	void onSampleRateChange() override;
 };

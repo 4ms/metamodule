@@ -65,14 +65,11 @@ struct HubMedium : MetaModuleHubBase {
 
 		for (auto jack : MetaModuleInfo::OutJacks)
 			configOutput((int)jack.id, std::string{jack.short_name});
-
-		selfID.slug = "PanelMedium";
 	}
 
 	void process(const ProcessArgs &args) override {
 		processPatchButton(params[WRITE_PATCH].getValue());
 		processMaps();
-		processCreatePatchFile();
 	}
 };
 

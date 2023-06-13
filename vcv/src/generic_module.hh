@@ -36,9 +36,6 @@ struct GenericModule {
 			// create processing core
 			core = ModuleFactory::create(Defs::slug);
 
-			// remember slug (why again?)
-			selfID.slug = Defs::slug;
-
 			// Setup all the parameters (knobs and switches)
 			int parameterCounter = 0;
 
@@ -55,8 +52,7 @@ struct GenericModule {
 					auto max = sw.switch_type == SwitchDef::Toggle3pos ? 2.f : 1.f;
 
 					configParam(thisParamterID, 0.f, max, 0.f, sw.long_name.data());
-
-					commParams[thisParamterID]->scaleFactor = 1.f / max;
+					// commParams[thisParamterID]->scaleFactor = 1.f / max;
 				}
 			}
 

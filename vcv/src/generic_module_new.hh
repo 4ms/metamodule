@@ -19,7 +19,6 @@ struct GenericModuleNew {
 		Module() {
 			// create processing core
 			core = ModuleFactory::create(Defs::slug);
-			selfID.slug = Defs::slug;
 
 			VCVModuleParamCreator creator{this};
 

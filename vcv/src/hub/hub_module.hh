@@ -4,6 +4,7 @@
 #include "local_path.hh"
 #include "mapping/central_data.hh"
 #include "mapping/vcv_patch_file_writer.hh"
+#include "util/edge_detector.hh"
 #include "util/math.hh"
 #include "util/string_util.hh"
 #include <span>
@@ -17,28 +18,27 @@ struct MetaModuleHubBase : public CommModule {
 	std::string labelText = "";
 	std::string patchNameText = "";
 	std::string patchDescText = "";
+	std::function<void(void)> updateDisplay;
 
-	bool shouldWritePatch = false;
-	bool buttonAlreadyHandled = false;
+	EdgeStateDetector patchWriteButton;
 
-	size_t numMappings;
 	std::optional<int> inProgressMapParamId{};
 
 	std::span<MappableObj::Type> mappingSrcs;
 
-	static constexpr uint32_t MaxMapsPerPot = 8;
 	// FIXME: NumPots should be a template parameter
 	// We then need a common base class widgets can point to
 	static constexpr uint32_t NumPots = 12;
+	static constexpr uint32_t MaxMapsPerPot = 8;
 	HubKnobMappings<NumPots, MaxMapsPerPot> mappings{id};
 
 	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
-		: numMappings{mappingSrcs.size()}
-		, mappingSrcs{mappingSrcs} {
+		: mappingSrcs{mappingSrcs} {
 	}
 
-	~MetaModuleHubBase() {
-	}
+	~MetaModuleHubBase() = default;
+
+	// Mapping State/Progress
 
 	void startMappingFrom(int hubParamId) {
 		inProgressMapParamId = hubParamId;
@@ -82,6 +82,8 @@ struct MetaModuleHubBase : public CommModule {
 		return true;
 	}
 
+	// Runtime applying maps
+
 	void processMaps() {
 		for (int hubParamId = 0; auto &knobs : mappings) {
 			for (auto &map : knobs) {
@@ -104,52 +106,14 @@ struct MetaModuleHubBase : public CommModule {
 		}
 	}
 
+	// Handle writing patches
+
 	void processPatchButton(float patchButtonState) {
-		if (buttonJustPressed(patchButtonState)) {
-			shouldWritePatch = true;
+		patchWriteButton.update(patchButtonState > 0.5f);
+		if (patchWriteButton.went_high()) {
 			updatePatchName();
 			updateDisplay();
-		}
-	}
-
-	void processCreatePatchFile() {
-		if (shouldWritePatch) {
-			shouldWritePatch = false;
-
-			std::string patchName;
-			std::string patchDir;
-			if (patchNameText.substr(0, 5) == "test_")
-				patchDir = testPatchDir;
-			else
-				patchDir = examplePatchDir;
-			if (patchNameText != "" && patchNameText != "Enter Patch Name") {
-				patchName = patchNameText.c_str();
-			} else {
-				std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
-				patchName = randomname.c_str();
-			}
-			ReplaceString patchStructName{patchName};
-			patchStructName.replace_all(" ", "")
-				.replace_all("-", "_")
-				.replace_all(",", "_")
-				.replace_all("/", "")
-				.replace_all("\\", "")
-				.replace_all("\"", "")
-				.replace_all("'", "")
-				.replace_all(".", "_")
-				.replace_all("?", "")
-				.replace_all("#", "")
-				.replace_all("!", "");
-			std::string patchFileName = patchDir + patchStructName.str;
-
-			labelText = "Creating patch...";
-			updateDisplay();
-
-			VCVPatchFileWriter::writePatchFile(id, mappings.mappings, patchFileName, patchName, patchDescText);
-
-			labelText = "Wrote patch file: ";
-			labelText += patchStructName.str + ".yml";
-			updateDisplay();
+			writePatchFile();
 		}
 	}
 
@@ -185,15 +149,40 @@ struct MetaModuleHubBase : public CommModule {
 	}
 
 private:
-	bool buttonJustPressed(bool button_value) {
-		if (button_value > 0.f) {
-			if (!buttonAlreadyHandled) {
-				buttonAlreadyHandled = true;
-				return true;
-			}
+	void writePatchFile() {
+		std::string patchName;
+		std::string patchDir;
+		if (patchNameText.substr(0, 5) == "test_")
+			patchDir = testPatchDir;
+		else
+			patchDir = examplePatchDir;
+		if (patchNameText != "" && patchNameText != "Enter Patch Name") {
+			patchName = patchNameText.c_str();
 		} else {
-			buttonAlreadyHandled = false;
+			std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
+			patchName = randomname.c_str();
 		}
-		return false;
+		ReplaceString patchStructName{patchName};
+		patchStructName.replace_all(" ", "")
+			.replace_all("-", "_")
+			.replace_all(",", "_")
+			.replace_all("/", "")
+			.replace_all("\\", "")
+			.replace_all("\"", "")
+			.replace_all("'", "")
+			.replace_all(".", "_")
+			.replace_all("?", "")
+			.replace_all("#", "")
+			.replace_all("!", "");
+		std::string patchFileName = patchDir + patchStructName.str;
+
+		labelText = "Creating patch...";
+		updateDisplay();
+
+		VCVPatchFileWriter::writePatchFile(id, mappings.mappings, patchFileName, patchName, patchDescText);
+
+		labelText = "Wrote patch file: ";
+		labelText += patchStructName.str + ".yml";
+		updateDisplay();
 	}
 };

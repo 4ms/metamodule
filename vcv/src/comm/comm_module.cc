@@ -1,39 +1,13 @@
 #include "comm_module.hh"
-#include "../mapping/central_data.hh"
-
-CommModule::CommModule() {
-}
-
-void CommModule::setModuleId(int64_t id) {
-	for (auto &el : inputJacks) {
-		el->setModuleID(id);
-	}
-	for (auto &el : outputJacks) {
-		el->setModuleID(id);
-	}
-	for (auto &el : commParams) {
-		el->setModuleID(id);
-	}
-}
-
-void CommModule::onAdd() {
-	selfID.id = this->id;
-	setModuleId(selfID.id);
-	centralData->registerModule(selfID, this);
-}
-
-void CommModule::onRemove() {
-	centralData->unregisterModule(selfID);
-}
 
 void CommModule::onSampleRateChange() {
-	_sample_rate_changed = true;
+	sampleRateChanged = true;
 }
 
 void CommModule::process(const ProcessArgs &args) {
-	for (auto &param : commParams) {
-		param->updateValue();
-		core->set_param(param->getID(), param->getValue());
+	for (unsigned i = 0; auto &p : params) {
+		core->set_param(i, p.getValue());
+		i++;
 	}
 
 	for (auto &alt : altParams) {
@@ -42,51 +16,49 @@ void CommModule::process(const ProcessArgs &args) {
 		alt.is_updated = false;
 	}
 
-	for (auto &injack : inputJacks) {
-		injack->updateInput();
+	for (auto &injack : inJacks) {
+		auto id = injack.getId();
+		injack.updateInput();
 
-		if (injack->isJustPatched())
-			core->mark_input_patched(injack->getID());
+		if (injack.isJustPatched())
+			core->mark_input_patched(id);
 
-		if (injack->isJustUnpatched()) {
-			core->set_input(injack->getID(), 0); // 0 = unpatched value. TODO: allow for normalizations
-			core->mark_input_unpatched(injack->getID());
+		if (injack.isJustUnpatched()) {
+			core->set_input(id, 0); // 0 = unpatched value. TODO: allow for normalizations
+			core->mark_input_unpatched(id);
 		}
 
-		if (injack->inputJackStatus.connected) {
-			auto scaledIn = injack->getValue() * injack->scaleFactor;
-			core->set_input(injack->getID(), scaledIn);
+		if (injack.isConnected()) {
+			auto scaledIn = injack.getValue() / 5.f; // TODO: allow customizing scale factor
+			core->set_input(id, scaledIn);
 		}
+	}
+
+	if (sampleRateChanged) {
+		sampleRateChanged = false;
+		core->set_samplerate(args.sampleRate);
 	}
 
 	core->update();
 
-	if (_sample_rate_changed) {
-		core->set_samplerate(args.sampleRate);
-		_sample_rate_changed = false;
+	for (auto &out : outJacks) {
+		auto raw_value = core->get_output(out.getId());
+		out.setValue(raw_value * 5.f);
 	}
 
-	for (auto &out : outputJacks) {
-		out->setValue(core->get_output(out->getID()) * out->scaleFactor);
-		out->updateOutput();
-	}
-
-	for (int i = 0; i < _numLights; i++) {
-		lights[i].setBrightness(core->get_led_brightness(i));
+	for (unsigned i = 0; auto &light : lights) {
+		light.setBrightness(core->get_led_brightness(i));
+		i++;
 	}
 }
 
-void CommModule::configComm(int NUM_PARAMS, int NUM_INPUTS, int NUM_OUTPUTS, int NUM_LIGHTS) {
+void CommModule::configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned NUM_OUTPUTS, unsigned NUM_LIGHTS) {
 	config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-	_numLights = NUM_LIGHTS;
 
-	for (int i = 0; i < NUM_INPUTS; i++) {
-		inputJacks.push_back(std::make_unique<CommInputJack>(inputs[i], i));
+	for (unsigned i = 0; i < NUM_INPUTS; i++) {
+		inJacks.push_back({inputs[i], i});
 	}
-	for (int i = 0; i < NUM_OUTPUTS; i++) {
-		outputJacks.push_back(std::make_unique<CommOutputJack>(outputs[i], i));
-	}
-	for (int i = 0; i < NUM_PARAMS; i++) {
-		commParams.push_back(std::make_unique<CommParam>(params[i], i));
+	for (unsigned i = 0; i < NUM_OUTPUTS; i++) {
+		outJacks.push_back({outputs[i], i});
 	}
 }
