@@ -12,7 +12,7 @@
 #define pr_dbg printf
 // #define pr_dbg()
 
-struct MetaModuleHubBase : public CommModule {
+struct MetaModuleHubBase : public rack::Module {
 
 	std::function<void()> updatePatchName;
 	std::string labelText = "";

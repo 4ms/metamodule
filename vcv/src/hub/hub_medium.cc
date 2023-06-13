@@ -41,7 +41,7 @@ struct HubMedium : MetaModuleHubBase {
 
 	HubMedium()
 		: MetaModuleHubBase{HubMediumMappings::mapping_srcs} {
-		configComm(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(0, 0.f, 1.f, 0.f, "Knob A");
 		configParam(1, 0.f, 1.f, 0.f, "Knob B");
 		configParam(2, 0.f, 1.f, 0.f, "Knob C");
