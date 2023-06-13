@@ -2,6 +2,8 @@
 #include "CoreModules/coreProcessor.h"
 #include "comm/comm_jack.hh"
 
+// CommModule wraps CoreProcessors for use in VCV Rack
+
 class CommModule : public rack::Module {
 public:
 	struct AltParam {
