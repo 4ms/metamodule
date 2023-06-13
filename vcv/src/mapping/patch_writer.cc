@@ -49,21 +49,20 @@ void PatchFileWriter::setCableList(std::vector<JackMap> &jacks) {
 	for (auto &cable : jacks) {
 		if (!idMap.contains(cable.receivedModuleId) || !idMap.contains(cable.sendingModuleId))
 			continue;
-		auto out_mod = idMap[cable.receivedModuleId];
-		auto in_mod = idMap[cable.sendingModuleId];
-		auto out_jack = cable.receivedJackId;
-		auto in_jack = cable.sendingJackId;
-		printf("Cable: %d %d -> %d %d\n", in_mod, in_jack, out_mod, out_jack);
+
+		auto in_mod = idMap[cable.receivedModuleId];
+		auto out_mod = idMap[cable.sendingModuleId];
+		auto in_jack = cable.receivedJackId;
+		auto out_jack = cable.sendingJackId;
+
 		if (out_jack < 0 || in_jack < 0)
 			continue;
 
 		if (cable.sendingModuleId == hubModuleId) {
-			printf("Mapped hub input\n");
 			mapInputJack(cable);
 			continue;
 		}
 		if (cable.receivedModuleId == hubModuleId) {
-			printf("Mapped hub output\n");
 			mapOutputJack(cable);
 			continue;
 		}
