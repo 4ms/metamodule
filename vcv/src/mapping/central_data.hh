@@ -2,12 +2,13 @@
 #include "mapping/ModuleID.h"
 #include <rack.hpp>
 
+//TODO: Rename this WhiteList
 class CentralData {
 public:
 	CentralData() = default;
 	~CentralData() = default;
 
-	// True if module is regular module or hub in 4msCompany plugin
+	// True if module is in the 4ms or MetaModule compatible plugin
 	bool isInPlugin(rack::Module *module) {
 		if (!module)
 			return false;
@@ -35,23 +36,6 @@ public:
 	}
 
 	void unregisterModule(ModuleID mod) {
-	}
-
-	rack::Module *getRegisteredModulePtr(int64_t moduleID) {
-		auto context = rack::contextGet();
-		auto engine = context->engine;
-		auto *module = engine->getModule(moduleID);
-		if (isModuleInPlugin(module)) {
-			return module;
-		}
-		return nullptr;
-	}
-
-	bool isRegisteredHub(int64_t moduleID) {
-		auto context = rack::contextGet();
-		auto engine = context->engine;
-		auto *module = engine->getModule(moduleID);
-		return isHub(module);
 	}
 
 	struct RegisteredModule {
