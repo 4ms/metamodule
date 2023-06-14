@@ -1,0 +1,49 @@
+#pragma once
+#include "CoreModules/elements.hh"
+#include "util/base_concepts.hh"
+#include <array>
+#include <span>
+#include <string_view>
+
+namespace MetaModule
+{
+
+struct ElementInfoBase {
+	static constexpr std::string_view slug{""};
+	static constexpr std::string_view description{""};
+	static constexpr uint32_t width_hp = 0;
+	static constexpr std::string_view svg_filename{""};
+	static constexpr std::array<Element, 0> Elements{};
+
+	template<size_t DPI>
+	static constexpr float px_to_mm(float px) {
+		constexpr float pix_per_inch = DPI;
+		constexpr float mm_per_inch = 25.4f;
+		float inches = px / pix_per_inch;
+		return inches * mm_per_inch;
+	}
+
+	// mm: length or position in mm
+	// pixels_per_3U: the module height in pixels
+	static constexpr float mm_to_px(float mm, uint32_t pixels_per_3U) {
+		constexpr float mm_per_3U = 128.5f; //standard Eurorack size
+		float pixels_per_mm = pixels_per_3U / mm_per_3U;
+		return mm * pixels_per_mm;
+	}
+
+	static constexpr float to_mm(float vcv_px) {
+		constexpr float svg_dpi = 75.f; // As found in common SVG files in Rack repo
+		constexpr float mm_per_px = 25.4f / svg_dpi;
+
+		return vcv_px * mm_per_px;
+	}
+};
+
+// Hack to allow us to copy/paste enum list from VCV Module files
+#ifndef VCVRACK
+#ifndef ENUMS
+#define ENUMS(name, count) name, name##_LAST = name + (count)-1
+#endif
+#endif
+
+} // namespace MetaModule

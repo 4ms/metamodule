@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/elements.hh"
+#include "CoreModules/element_info.hh"
 #include <array>
 
 // Enums copied from VCV Module:
