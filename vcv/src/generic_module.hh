@@ -7,8 +7,6 @@
 #include "elements/4ms_widgets.hh"
 #include "util/base_concepts.hh"
 
-using namespace rack;
-
 template<Derived<ModuleInfoBase> Defs>
 struct GenericModule {
 	static rack::Model *create() {
@@ -68,6 +66,8 @@ struct GenericModule {
 
 		Widget(CommModule *module)
 			: mainModule{module} {
+			using namespace rack;
+
 			// link this widget to given module
 			setModule(static_cast<Module *>(module));
 
