@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements.hh"
+#include <array>
 
 template<typename Info>
 struct ElementCount {
@@ -8,6 +9,8 @@ struct ElementCount {
 	struct Overload : Ts... {
 		using Ts::operator()...;
 	};
+	template<class... Ts>
+	Overload(Ts...) -> Overload<Ts...>;
 
 	struct Counts {
 		size_t num_params = 0;
@@ -21,7 +24,6 @@ struct ElementCount {
 
 		auto CountParams = Overload{
 			[](MetaModule::BaseElement) {}, //default: ignore
-
 			[&c](MetaModule::Pot) { c.num_params++; },
 			[&c](MetaModule::Switch) { c.num_params++; },
 			[&c](MetaModule::Light) { c.num_lights++; },
@@ -33,9 +35,33 @@ struct ElementCount {
 			},
 		};
 
-		for (auto e : Info::Elements)
-			std::visit(CountParams, e);
+		for (auto el : Info::Elements)
+			std::visit(CountParams, el);
 
 		return {c.num_params, c.num_inputs, c.num_outputs, c.num_lights};
+	}
+
+	struct ParamScale {
+		float range;
+		float offset;
+	};
+
+	static constexpr auto get_param_scales() {
+		std::array<ParamScale, count().num_params> scales;
+
+		auto CalcParamScales = Overload{
+			[](MetaModule::BaseElement) {}, //default: ignore
+			[&scales](MetaModule::Pot el) {
+			if (el.idx < scales.size()) {
+				scales[el.idx].range = el.max_val - el.min_val;
+				scales[el.idx].offset = el.min_val;
+			}
+			},
+		};
+
+		for (auto el : Info::Elements)
+			std::visit(CalcParamScales, el);
+
+		return scales;
 	}
 };

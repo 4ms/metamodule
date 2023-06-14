@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleFactory.hh"
 #include "VCV-adaptor/dsp.hh"
 #include "VCV-adaptor/element_counter.hh"
@@ -6,7 +7,6 @@
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/param.hh"
 #include "VCV-adaptor/port.hh"
-#include "coreProcessor.h"
 #include <array>
 #include <memory>
 
@@ -31,11 +31,15 @@ struct VCVCoreProcessor : CoreProcessor {
 	}
 
 	void set_param(int id, float val) override {
+		val *= param_scales[id].range;
+		val += param_scales[id].offset;
 		params[id].setValue(val);
 	}
+
 	void set_input(const int input_id, const float val) override {
 		inputs[input_id].setVoltage(val * 5.f);
 	}
+
 	float get_output(const int output_id) const override {
 		return outputs[output_id].getVoltage() / 5.f;
 	}
@@ -44,19 +48,24 @@ struct VCVCoreProcessor : CoreProcessor {
 		for (auto &in : inputs)
 			in.connected = false;
 	}
+
 	void mark_input_unpatched(const int input_id) override {
 		inputs[input_id].connected = false;
 	}
+
 	void mark_input_patched(const int input_id) override {
 		inputs[input_id].connected = true;
 	}
+
 	void mark_all_outputs_unpatched() override {
 		for (auto &out : outputs)
 			out.connected = false;
 	}
+
 	void mark_output_unpatched(const int output_id) override {
 		outputs[output_id].connected = false;
 	}
+
 	void mark_output_patched(const int output_id) override {
 		outputs[output_id].connected = true;
 	}
@@ -65,6 +74,9 @@ struct VCVCoreProcessor : CoreProcessor {
 	constinit static inline std::array<Port, ElementCount<Info>::count().num_inputs> inputs;
 	constinit static inline std::array<Port, ElementCount<Info>::count().num_outputs> outputs;
 	constinit static inline std::array<Light, ElementCount<Info>::count().num_lights> lights;
+
+	using ParamScale = typename ElementCount<Info>::ParamScale;
+	constexpr static inline std::array<ParamScale, params.size()> param_scales = ElementCount<Info>::get_param_scales();
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
 
