@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/elements.hh"
+#include "CoreModules/element_info.hh"
 #include <array>
 
 // TODO: get these out of global namespace
@@ -21,15 +21,10 @@ namespace MetaModule
 {
 
 struct BraidsInfo : ElementInfoBase {
-	// Module info: written by hand
 	static constexpr std::string_view slug{"Braids"};
 	static constexpr std::string_view description{"Macro Oscillator"};
-	static constexpr uint32_t width_hp = 16; //CHECK!
+	static constexpr uint32_t width_hp = 16;
 	static constexpr std::string_view svg_filename{"res/modules/AudibleInstruments/Braids.svg"};
-
-	// Regex to convert addParam(...) or addInput/Output() to Elements:
-	// s/add\w\+(create\w\+<\(.*\)>(Vec(\(\d\+\), \(\d\+\)), .*::\(.*\)_\(\w\+\).*/\t\t\1{\2, \3, "\4", "", \4_\5},/
-	// Then manually add the names from Module::configParam()
 
 	static constexpr std::array<Element, 14> Elements{{
 		Rogan2SGray{to_mm(176), to_mm(59), "Model", "", SHAPE_PARAM},
@@ -47,11 +42,5 @@ struct BraidsInfo : ElementInfoBase {
 		PJ301MPort{to_mm(205), to_mm(316), "Out", "", OUT_OUTPUT},
 		BraidsDisplay148x56{to_mm(14), to_mm(53), "", ""},
 	}};
-
-	static constexpr std::span<const Element> Knobs{&Elements[0], 7};
-	static constexpr std::span<const Element> InJacks{&Elements[7], 5};
-	static constexpr std::span<const Element> OutJacks{&Elements[12], 1};
-	static constexpr std::span<const Element> Switches{};
-	static constexpr std::span<const Element> Lights{};
 };
 } // namespace MetaModule
