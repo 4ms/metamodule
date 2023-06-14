@@ -2,7 +2,6 @@
 #include "CoreModules/element_info.hh"
 #include <array>
 
-// TODO: get these out of global namespace
 enum ParamIds {
 	FINE_PARAM,
 	COARSE_PARAM,
@@ -27,13 +26,13 @@ struct BraidsInfo : ElementInfoBase {
 	static constexpr std::string_view svg_filename{"res/modules/AudibleInstruments/Braids.svg"};
 
 	static constexpr std::array<Element, 14> Elements{{
-		Rogan2SGray{to_mm(176), to_mm(59), "Model", "", SHAPE_PARAM},
-		Rogan2PSWhite{to_mm(19), to_mm(138), "Fine", "Fine Freq", FINE_PARAM},
-		Rogan2PSWhite{to_mm(97), to_mm(138), "Coarse", "Coarse Freq", COARSE_PARAM},
-		Rogan2PSWhite{to_mm(176), to_mm(138), "FM", "", FM_PARAM},
-		Rogan2PSGreen{to_mm(19), to_mm(217), "Timbre", "", TIMBRE_PARAM},
-		Rogan2PSGreen{to_mm(97), to_mm(217), "Modulation", "", MODULATION_PARAM},
-		Rogan2PSRed{to_mm(176), to_mm(217), "Color", "", COLOR_PARAM},
+		Rogan2SGray{to_mm(176), to_mm(59), "Model", "", SHAPE_PARAM, 0.f, 1.f, 0.f},
+		Rogan2PSWhite{to_mm(19), to_mm(138), "Fine", "Fine Freq", FINE_PARAM, -1.f, 1.f, 0.f},
+		Rogan2PSWhite{to_mm(97), to_mm(138), "Coarse", "Coarse Freq", COARSE_PARAM, -5.f, 3.f, -1.f},
+		Rogan2PSWhite{to_mm(176), to_mm(138), "FM", "", FM_PARAM, -1.f, 1.f, 0.f},
+		Rogan2PSGreen{to_mm(19), to_mm(217), "Timbre", "", TIMBRE_PARAM, 0.f, 1.f, 0.5f},
+		Rogan2PSGreen{to_mm(97), to_mm(217), "Modulation", "", MODULATION_PARAM, -1.f, 1.f, 0.f},
+		Rogan2PSRed{to_mm(176), to_mm(217), "Color", "", COLOR_PARAM, 0.f, 1.f, 0.5f},
 		PJ301MPort{to_mm(10), to_mm(316), "Trigger", "", TRIG_INPUT},
 		PJ301MPort{to_mm(47), to_mm(316), "Pitch", "Pitch (1V/oct)", PITCH_INPUT},
 		PJ301MPort{to_mm(84), to_mm(316), "FM", "", FM_INPUT},
