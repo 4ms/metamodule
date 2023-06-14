@@ -34,6 +34,12 @@ public:
 
     void proceed(float timeInS)
     {
+		if (retriggerPending)
+		{
+			state = State_t::RISING;
+			retriggerPending = false;
+		}
+
         if (state == State_t::FOLLOW)
         {
             if (cycling)
@@ -80,11 +86,6 @@ public:
                     outputInV = MinValInV;
                     state = State_t::FOLLOW;
                 }
-            }
-            else if (retriggerPending)
-            {
-                state = State_t::RISING;
-                retriggerPending = false;
             }
         }
     }
