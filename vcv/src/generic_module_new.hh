@@ -67,7 +67,7 @@ struct GenericModuleNew {
 			// create widgets from all elements
 			VCVWidgetCreator creator{this, module};
 			for (auto &element : Defs::Elements) {
-				std::visit([&creator](auto &el) { creator.createWidget(el); }, element);
+				std::visit([&creator](auto &el) { creator.create(el); }, element);
 			}
 		}
 

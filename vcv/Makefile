@@ -43,7 +43,6 @@ SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/digital_oscillator.cc
 SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/macro_oscillator.cc
 SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/resources.cc
 
-SOURCES += src/elements/widget_creator.cc
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard src/hub/*.cc)
