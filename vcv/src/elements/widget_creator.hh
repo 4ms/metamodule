@@ -120,7 +120,7 @@ struct VCVWidgetCreator {
 		// FIXME: create our own Red/Blue light, VCV only has Red/Green
 		module_widget->addChild(
 			rack::createLightCentered<rack::LEDBezelLight<rack::GreenRedLight>>(ctr_pos, module, num_lights));
-		num_lights += 1;
+		num_lights += 2;
 	}
 
 	void create(OrangeLight el) {
