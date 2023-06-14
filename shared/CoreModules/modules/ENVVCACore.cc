@@ -122,7 +122,11 @@ public:
 		bool isCycling = ButtonToBool(getSwitch(ENVVCAInfo::SwitchCycle)) ^ CVToBool(getInput(ENVVCAInfo::InputCycle).value_or(0.0f));
 
 		osc.setCycling(isCycling);
+		if (cycleLED != isCycling){
 		cycleLED = isCycling;
+			setLED(ENVVCAInfo::LedCycle_Led, cycleLED);
+		}
+
 
 		if (auto inputFollowValue = getInput(ENVVCAInfo::InputFollow); inputFollowValue)
 		{
