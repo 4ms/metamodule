@@ -226,4 +226,10 @@ struct ElementInfoBase {
 	}
 };
 
+#ifndef VCVRACK
+#ifndef ENUMS
+#define ENUMS(name, count) name, name##_LAST = name + (count)-1
+#endif
+#endif
+
 } // namespace MetaModule
