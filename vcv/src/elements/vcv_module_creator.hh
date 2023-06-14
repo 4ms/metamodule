@@ -11,38 +11,6 @@ struct VCVModuleParamCreator {
 		: module{module} {
 	}
 
-	void count_element(BaseElement){};
-	void count_element(JackInput) {
-		num_inputs++;
-	};
-	void count_element(JackOutput) {
-		num_outputs++;
-	};
-	void count_element(Pot) {
-		num_params++;
-	};
-	void count_element(Switch) {
-		num_params++;
-	};
-	void count_element(Light) {
-		num_lights++;
-	};
-	void count_element(MediumLight<RedGreenBlueLight>) {
-		num_lights += 3;
-	};
-	void count_element(MomentaryButtonRGB element) {
-		num_lights += 3;
-		num_params++;
-	}
-	void count_element(LatchingButtonMonoLight element) {
-		num_params++;
-		num_lights++;
-	}
-	void count_element(LEDEncoder element) {
-		num_lights += 3;
-		num_params++;
-	};
-
 	void config_element(BaseElement){};
 	void config_element(JackInput el) {
 		module->configInput(el.idx, el.short_name.data());
@@ -74,11 +42,6 @@ struct VCVModuleParamCreator {
 		module->configParam(element.idx, -INFINITY, INFINITY, 0.0f, element.short_name.data());
 		// TODO: LED?
 	};
-
-	unsigned num_params = 0;
-	unsigned num_inputs = 0;
-	unsigned num_outputs = 0;
-	unsigned num_lights = 0;
 
 private:
 	rack::Module *module;
