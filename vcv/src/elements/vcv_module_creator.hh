@@ -22,7 +22,7 @@ struct VCVModuleParamCreator {
 		module->configOutput(el.idx, el.short_name.data());
 	};
 	void config_element(Pot el) {
-		module->configParam(el.idx, 0.f, 1.f, el.default_val, el.short_name.data());
+		module->configParam(el.idx, el.min_val, el.max_val, el.default_val, el.short_name.data());
 	};
 	void config_element(Light el) {
 		module->configLight(lights++, el.short_name.data());
