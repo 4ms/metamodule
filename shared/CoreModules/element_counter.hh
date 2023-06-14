@@ -22,24 +22,30 @@ struct ElementCount {
 	};
 
 	static constexpr Counts count() {
+		using namespace MetaModule;
+
 		Counts c;
 
 		// clang-format off
 		auto CountParams = Overload{
-			[](MetaModule::BaseElement) {}, //default: ignore
-			[&c](MetaModule::Pot) { c.num_params++; c.num_pots++;},
-			[&c](MetaModule::Switch) { c.num_params++; c.num_switches++;},
-			[&c](MetaModule::Light) { c.num_lights++; },
-			[&c](MetaModule::JackInput) { c.num_inputs++; },
-			[&c](MetaModule::JackOutput) { c.num_outputs++; },
-			[&c](MetaModule::LEDEncoder) { c.num_lights += 3; c.num_params++; },
+			[](BaseElement) {}, //default: ignore
+			[&c](Pot) { c.num_params++; c.num_pots++;},
+			[&c](Switch) { c.num_params++; c.num_switches++;},
+			[&c](Light) { c.num_lights++; },
+			[&c](JackInput) { c.num_inputs++; },
+			[&c](JackOutput) { c.num_outputs++; },
+			[&c](LEDEncoder) { c.num_lights += 3; c.num_params++; },
+			[&c](LatchingButtonMonoLight) { c.num_lights++; c.num_params++; c.num_switches++; },
+			[&c](MomentaryButtonRGB) { c.num_lights+=3; c.num_params++; c.num_switches++;},
+			[&c](MediumLight<RedGreenBlueLight>) { c.num_lights+=3; },
 		};
 		// clang-format on
 
-		for (auto el : Info::Elements)
+		for (auto el : Info::Elements) {
 			std::visit(CountParams, el);
+		}
 
-		return {c.num_params, c.num_inputs, c.num_outputs, c.num_lights};
+		return c;
 	}
 
 	struct ParamScale {
