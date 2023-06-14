@@ -123,7 +123,7 @@ public:
 
 		osc.setCycling(isCycling);
 		if (cycleLED != isCycling){
-		cycleLED = isCycling;
+			cycleLED = isCycling;
 			setLED(ENVVCAInfo::LedCycle_Led, cycleLED);
 		}
 
@@ -180,28 +180,35 @@ public:
 			const auto scaledTimeCV = *timeCVValue * -100e3f / 137e3f;
 
 			// apply attenuverter knobs
-			auto rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobRise_Cv) * scaledTimeCV);
-			auto fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobFall_Cv) * scaledTimeCV);
-
-			// sum with static value from fader + range switch
-			riseCV = -rScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobRise_Slider), ThreeWayToInt(getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Rise)));
-			fallCV = -fScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobFall_Slider), ThreeWayToInt(getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Fall)));
-
-			setLED(ENVVCAInfo::LedRise_Led, rScaleLEDs);
-			setLED(ENVVCAInfo::LedFall_Led, fScaleLEDs);
-
-			// TODO: low pass filter
-
-			// apply rise time limit and scale down
-			constexpr float DiodeDropInV = 1.0f;
-			const float ClippingVoltage = 5.0f * VoltageDivider(100e3f, 2e3f) + DiodeDropInV;
-			riseCV = riseCV * VoltageDivider(2.2e3f + 33e3f, 16.9e3f);
-			riseCV = std::min(riseCV, ClippingVoltage);
-			riseCV = riseCV * VoltageDivider(2.2e3f, 33e3f);
-
-			// scale down falling CV without additional limiting
-			fallCV = fallCV * VoltageDivider(2.2e3f, 10e3f + 40.2e3f);
+			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobRise_Cv) * scaledTimeCV);
+			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getKnob(ENVVCAInfo::KnobFall_Cv) * scaledTimeCV);
 		}
+
+		// sum with static value from fader + range switch
+		riseCV = -rScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobRise_Slider), (getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Rise)));
+		fallCV = -fScaleLEDs - ProcessCVOffset(getKnob(ENVVCAInfo::KnobFall_Slider), (getSwitch(ENVVCAInfo::SwitchSlow_Med_Fast_Fall)));
+
+		auto rise_positive = std::max(rScaleLEDs/10.f, 0.f);
+		auto rise_negative = -std::min(rScaleLEDs/10.f, 0.f);
+		setLED(ENVVCAInfo::LedRiseBlue_Led, rise_negative);
+		setLED(ENVVCAInfo::LedRiseRed_Led, rise_positive);
+
+		auto fall_positive = std::max(fScaleLEDs/10.f, 0.f);
+		auto fall_negative = -std::min(fScaleLEDs/10.f, 0.f);
+		setLED(ENVVCAInfo::LedFallBlue_Led, fall_negative);
+		setLED(ENVVCAInfo::LedFallRed_Led, fall_positive);
+
+		// TODO: low pass filter
+
+		// apply rise time limit and scale down
+		constexpr float DiodeDropInV = 1.0f;
+		const float ClippingVoltage = 5.0f * VoltageDivider(100e3f, 2e3f) + DiodeDropInV;
+		riseCV = riseCV * VoltageDivider(2.2e3f + 33e3f, 16.9e3f);
+		riseCV = std::min(riseCV, ClippingVoltage);
+		riseCV = riseCV * VoltageDivider(2.2e3f, 33e3f);
+
+		// scale down falling CV without additional limiting
+		fallCV = fallCV * VoltageDivider(2.2e3f, 10e3f + 40.2e3f);
 
 		return {riseCV, fallCV};
 	}
@@ -228,6 +235,8 @@ private:
 	// temporary results that are buffered
 	float riseCV;
 	float fallCV;
+	float rScaleLEDs;
+	float fScaleLEDs;
 
 	FlipFlop triggerDetector;
 	EdgeDetector triggerEdgeDetector;
