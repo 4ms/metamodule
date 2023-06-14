@@ -1,8 +1,8 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
+#include "CoreModules/element_counter.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "VCV-adaptor/dsp.hh"
-#include "VCV-adaptor/element_counter.hh"
 #include "VCV-adaptor/light.hh"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/param.hh"
