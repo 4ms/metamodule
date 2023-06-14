@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/element_counter.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
 #include "comm/comm_module.hh"
@@ -6,32 +7,24 @@
 #include "elements/widget_creator.hh"
 #include "util/base_concepts.hh"
 
-using namespace rack;
-using namespace MetaModule;
-
-template<Derived<ElementInfoBase> Defs>
+template<Derived<MetaModule::ElementInfoBase> INFO>
 struct GenericModuleNew {
 	static rack::Model *create() {
-		return rack::createModel<Module, Widget>(Defs::slug.data());
+		return rack::createModel<Module, Widget>(INFO::slug.data());
 	}
 
 	struct Module : CommModule {
 		Module() {
-			// create processing core
-			core = ModuleFactory::create(Defs::slug);
-
-			VCVModuleParamCreator creator{this};
-
-			// Count the elements of each type
-			for (auto &element : Defs::Elements) {
-				std::visit([&creator](auto &el) { creator.count_element(el); }, element);
-			}
+			// Create processing core
+			core = ModuleFactory::create(INFO::slug);
 
 			// Register with VCV the number of elements of each type
-			configComm(creator.num_params, creator.num_inputs, creator.num_outputs, creator.num_lights);
+			auto cnt = ElementCount<INFO>::count();
+			configComm(cnt.num_params, cnt.num_inputs, cnt.num_outputs, cnt.num_lights);
 
 			// Configure elements with VCV
-			for (auto &element : Defs::Elements) {
+			MetaModule::VCVModuleParamCreator creator{this};
+			for (auto &element : INFO::Elements) {
 				std::visit([&creator](auto &el) { creator.config_element(el); }, element);
 			}
 
@@ -48,11 +41,13 @@ struct GenericModuleNew {
 
 		Widget(CommModule *module)
 			: mainModule{module} {
+			using namespace rack;
+
 			// link this widget to given module
 			setModule(static_cast<Module *>(module));
 
 			// use svg file as panel
-			setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, Defs::svg_filename.data())));
+			setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, INFO::svg_filename.data())));
 
 			// draw screws
 			addChild(createWidget<ScrewBlack>(rack::math::Vec(RACK_GRID_WIDTH, 0)));
@@ -65,8 +60,8 @@ struct GenericModuleNew {
 			}
 
 			// create widgets from all elements
-			VCVWidgetCreator creator{this, module};
-			for (auto &element : Defs::Elements) {
+			MetaModule::VCVWidgetCreator creator{this, module};
+			for (auto &element : INFO::Elements) {
 				std::visit([&creator](auto &el) { creator.create(el); }, element);
 			}
 		}
