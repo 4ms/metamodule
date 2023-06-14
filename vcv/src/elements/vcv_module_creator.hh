@@ -7,11 +7,14 @@ namespace MetaModule
 
 struct VCVModuleParamCreator {
 
+	unsigned lights = 0;
+
 	VCVModuleParamCreator(rack::Module *module)
 		: module{module} {
 	}
 
 	void config_element(BaseElement){};
+
 	void config_element(JackInput el) {
 		module->configInput(el.idx, el.short_name.data());
 	};
@@ -22,25 +25,25 @@ struct VCVModuleParamCreator {
 		module->configParam(el.idx, 0.f, 1.f, el.default_val, el.short_name.data());
 	};
 	void config_element(Light el) {
-		module->configLight(el.idx, el.short_name.data());
+		module->configLight(lights++, el.short_name.data());
 	};
-	void config_element(MomentaryButtonRGB element) {
-		module->configParam(element.idx, 0.f, 1.f, element.default_val, element.short_name.data());
-		//TODO: LED?
+	void config_element(MomentaryButtonRGB el) {
+		module->configParam(el.idx, 0.f, 1.f, el.default_val, el.short_name.data());
+		module->configLight(lights, el.short_name.data());
+		lights += 3;
 	}
-	void config_element(LatchingButtonMonoLight element) {
-		module->configParam(element.idx, 0.f, 1.f, element.default_val, element.short_name.data());
-		//TODO: LED?
+	void config_element(LatchingButtonMonoLight el) {
+		module->configParam(el.idx, 0.f, 1.f, el.default_val, el.short_name.data());
+		module->configLight(lights++, el.short_name.data());
 	}
-	void config_element(Switch element) {
-		module->configParam(element.idx, 0.f, 1.f, 0.f, element.short_name.data());
+	void config_element(Switch el) {
+		module->configParam(el.idx, 0.f, 1.f, 0.f, el.short_name.data());
 	};
-	void config_element(Toggle3pos element) {
-		module->configParam(element.idx, 0.f, 2.f, 0.f, element.short_name.data());
+	void config_element(Toggle3pos el) {
+		module->configParam(el.idx, 0.f, 2.f, 0.f, el.short_name.data());
 	};
-	void config_element(LEDEncoder element) {
-		module->configParam(element.idx, -INFINITY, INFINITY, 0.0f, element.short_name.data());
-		// TODO: LED?
+	void config_element(LEDEncoder el) {
+		module->configParam(el.idx, -INFINITY, INFINITY, 0.0f, el.short_name.data());
 	};
 
 private:
