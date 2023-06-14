@@ -15,8 +15,8 @@ struct ElementInfoBase {
 	static constexpr std::string_view svg_filename{""};
 	static constexpr std::array<Element, 0> Elements{};
 
-	template<size_t DPI>
-	static constexpr float px_to_mm(float px) {
+	template<size_t DPI = 75>
+	static constexpr float to_mm(float px) {
 		constexpr float pix_per_inch = DPI;
 		constexpr float mm_per_inch = 25.4f;
 		float inches = px / pix_per_inch;
@@ -29,15 +29,6 @@ struct ElementInfoBase {
 		constexpr float mm_per_3U = 128.5f; //standard Eurorack size
 		float pixels_per_mm = pixels_per_3U / mm_per_3U;
 		return mm * pixels_per_mm;
-	}
-
-	// Shortcut used for VCV-converted modules
-	static constexpr float to_mm(float vcv_px) {
-		return px_to_mm<75>(vcv_px);
-		// constexpr float svg_dpi = 75.f; // As found in common SVG files in Rack repo
-		// constexpr float mm_per_inch = 25.4f;
-		// constexpr float mm_per_px = mm_per_inch / svg_dpi;
-		// return vcv_px * mm_per_px;
 	}
 };
 
