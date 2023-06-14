@@ -31,11 +31,13 @@ struct ElementInfoBase {
 		return mm * pixels_per_mm;
 	}
 
+	// Shortcut used for VCV-converted modules
 	static constexpr float to_mm(float vcv_px) {
-		constexpr float svg_dpi = 75.f; // As found in common SVG files in Rack repo
-		constexpr float mm_per_px = 25.4f / svg_dpi;
-
-		return vcv_px * mm_per_px;
+		return px_to_mm<75>(vcv_px);
+		// constexpr float svg_dpi = 75.f; // As found in common SVG files in Rack repo
+		// constexpr float mm_per_inch = 25.4f;
+		// constexpr float mm_per_px = mm_per_inch / svg_dpi;
+		// return vcv_px * mm_per_px;
 	}
 };
 
