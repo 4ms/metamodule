@@ -24,8 +24,12 @@ struct VCVModuleParamCreator {
 	void config_element(Pot el) {
 		module->configParam(el.idx, el.min_val, el.max_val, el.default_val, el.short_name.data());
 	};
-	void config_element(Light el) {
+	void config_element(MonoLight el) {
 		module->configLight(lights++, el.short_name.data());
+	};
+	void config_element(DualLight el) {
+		module->configLight(lights, el.short_name.data());
+		lights+=2;
 	};
 	void config_element(MomentaryButtonRGB el) {
 		module->configParam(el.idx, 0.f, 1.f, el.default_val, el.short_name.data());

@@ -31,12 +31,13 @@ struct ElementCount {
 			[](BaseElement) {}, //default: ignore
 			[&c](Pot) { c.num_params++; c.num_pots++;},
 			[&c](Switch) { c.num_params++; c.num_switches++;},
-			[&c](Light) { c.num_lights++; },
+			[&c](MonoLight) { c.num_lights++; },
 			[&c](JackInput) { c.num_inputs++; },
 			[&c](JackOutput) { c.num_outputs++; },
 			[&c](LEDEncoder) { c.num_lights += 3; c.num_params++; },
 			[&c](LatchingButtonMonoLight) { c.num_lights++; c.num_params++; c.num_switches++; },
 			[&c](MomentaryButtonRGB) { c.num_lights+=3; c.num_params++; c.num_switches++;},
+			[&c](DualLight) { c.num_lights+=2; },
 			[&c](MediumLight<RedGreenBlueLight>) { c.num_lights+=3; },
 		};
 		// clang-format on
