@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "VCV-adaptor/dsp.hh"
 #include "VCV-adaptor/light.hh"
@@ -59,8 +60,27 @@ struct VCVCoreProcessor : CoreProcessor {
 	void mark_output_patched(const int output_id) override {
 		outputs[output_id].connected = true;
 	}
+
+	template<typename... Ts>
+	struct Overload : Ts... {
+		using Ts::operator()...;
+	};
+
+	static constexpr size_t count_params() {
+		size_t num_params = 0;
+		auto CountParams = Overload{
+			[](MetaModule::BaseElement) {},
+			[&num_params](MetaModule::Pot) { num_params++; },
+			[&num_params](MetaModule::Switch) { num_params++; },
+		};
+		for (auto e : Info::Elements)
+			std::visit(CountParams, e);
+
+		return num_params;
+	}
+
 	// These are defined in the info header (FIXME: calculate them by iterating Info::Elements)
-	std::array<Param, Info::Knobs.size()> params;
+	std::array<Param, count_params()> params;
 	std::array<Port, Info::InJacks.size()> inputs;
 	std::array<Port, Info::OutJacks.size()> outputs;
 	std::array<Light, Info::Lights.size()> lights;

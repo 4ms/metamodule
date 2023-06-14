@@ -10,14 +10,13 @@ namespace MetaModule
 struct BaseElement {
 	float x_mm = 0;
 	float y_mm = 0;
-	// module size is fixed at 128.5mm high x 5.08mm per HP wide
 
 	std::string_view short_name;
 	std::string_view long_name;
 	unsigned idx = 0;
-	float default_val = 0.f;
 	float min_val = 0.f;
 	float max_val = 1.f;
+	float default_val = 0.f;
 };
 
 // Lights
@@ -44,9 +43,6 @@ template<typename LedT>
 struct MediumLight : Light {};
 template<>
 struct MediumLight<RedGreenBlueLight> : RedGreenBlueLight {};
-
-// using LightElement = std::
-// 	variant<MediumLight<RedGreenBlueLight>, RedLight, OrangeLight, GreenLight, BlueLight, WhiteLight, RedBlueLight>;
 
 // Switches/Buttons
 
@@ -77,8 +73,6 @@ struct LEDEncoder : Encoder {
 	Encoder encoder;
 	RgbLed rgb_led;
 };
-
-// using SwitchElement = std::variant<MomentaryButton, LatchingButton, Toggle2pos, Toggle3pos, LEDEncoder>;
 
 // Pots (Knobs, Sliders)
 struct Pot : BaseElement {};
@@ -120,36 +114,6 @@ struct BefacoSlidePotSmall : Slider {};
 struct Slider25mmVert : Slider {};
 struct Slider25mmHoriz : Slider {};
 
-//using KnobElement = std::variant<
-//	//4ms
-//	Davies1900hBlackKnob,
-//	Knob9mm,
-//	DaviesLargeKnob,
-//	Slider25mmVert,
-//	Slider25mmHoriz,
-//	// Befaco
-//	Davies1900hRedKnob,
-//	Davies1900hWhiteKnob,
-//	BefacoTinyKnob,
-//	BefacoSliderPot,
-//	BefacoTinyKnobWhite,
-//	BefacoTinyKnobRed,
-//	BefacoTinyKnobDarkGrey,
-//	BefacoTinyKnobLightGrey,
-//	BefacoTinyKnobBlack,
-//	Davies1900hLargeGreyKnob,
-//	Davies1900hLightGreyKnob,
-//	Davies1900hDarkGreyKnob,
-//	CKSSNarrow,
-//	Crossfader,
-//	BefacoSwitchHorizontal,
-//	CKSSHoriz2,
-//	CKSSVert7,
-//	CKSSHoriz4,
-//	CKSSNarrow3,
-//	Davies1900hLargeLightGreyKnob,
-//	BefacoSlidePotSmall>;
-
 // Input Jacks
 struct JackElement : BaseElement {};
 struct JackInput : JackElement {};
@@ -177,7 +141,6 @@ struct BraidsDisplay148x56 : Display {};
 struct AltParam : BaseElement {};
 struct AltParamToggle2 : AltParam {};
 struct AltParamToggle3 : AltParam {};
-// using AltParamElement = std::variant<AltParamToggle2, AltParamToggle3>;
 
 using Element = std::variant<MediumLight<RedGreenBlueLight>,
 							 RedLight,
@@ -256,9 +219,9 @@ struct ElementInfoBase {
 	}
 
 	static constexpr float to_mm(float vcv_px) {
-		constexpr float mm_per_3U = 128.5f;
-		constexpr float vcvpx_per_3U = 378.5f; //377..380
-		float mm_per_px = mm_per_3U / vcvpx_per_3U;
+		constexpr float svg_dpi = 75.f; // As found in common SVG files in Rack repo
+		constexpr float mm_per_px = 25.4f / svg_dpi;
+
 		return vcv_px * mm_per_px;
 	}
 };
