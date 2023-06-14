@@ -28,11 +28,7 @@ struct GenericModuleNew {
 				std::visit([&creator](auto &el) { creator.config_element(el); }, element);
 			}
 
-			// TODO: alt params
-			// uint32_t altID = 0;
-			// for (auto &alt : Defs::AltParams) {
-			// 	altParams.push_back({true, altID++, alt.default_val});
-			// }
+			// TODO: register alt params
 		}
 	};
 
@@ -66,75 +62,8 @@ struct GenericModuleNew {
 			}
 		}
 
-		//////////////////// Alt Params
-
-		// TODO: make a choose-one-of-two/three button array instead of slider
-		// Can use it when Range is Integer and max-min <= 3
-		// Can query names with get_alt_param_value(id, min|..|max);
-		struct AltParamQty : rack::Quantity {
-			const AltParamDef &_alt;
-			CommModule &_module;
-			float _val;
-
-			AltParamQty(CommModule &module, const AltParamDef &alt)
-				: _alt{alt}
-				, _module{module}
-				, _val{alt.default_val} {
-				for (auto &ap : _module.altParams) {
-					if (ap.id == _alt.id) {
-						_val = ap.val;
-						break;
-					}
-				}
-			}
-
-			void setValue(float value) override {
-				float prev_val = _val;
-				_val = std::clamp(value, _alt.min_val, _alt.max_val);
-				if (_alt.control_type == AltParamDef::Range::Integer)
-					_val = (int)(_val + 0.5f);
-
-				if (prev_val == _val)
-					return;
-
-				for (auto &ap : _module.altParams) {
-					if (ap.id == _alt.id) {
-						ap.is_updated = true;
-						ap.val = _val;
-						break;
-					}
-				}
-			}
-
-			std::string getDisplayValueString() override {
-				if (_module.core)
-					return std::string{_module.core->get_alt_param_value(_alt.id, _val)};
-				return std::to_string(_val);
-			}
-
-			float getValue() override {
-				return _val;
-			}
-			float getMinValue() override {
-				return _alt.min_val;
-			}
-			float getMaxValue() override {
-				return _alt.max_val;
-			}
-			float getDefaultValue() override {
-				return _alt.default_val;
-			}
-		};
-
-		struct AltParamSlider : rack::ui::Slider {
-			AltParamSlider(CommModule &module, const AltParamDef &alt) {
-				quantity = new AltParamQty{module, alt};
-			}
-			~AltParamSlider() {
-				delete quantity;
-			}
-		};
-
+		// TODO: context menu for alt params:
+		//
 		// void appendContextMenu(rack::ui::Menu *menu) override
 		// {
 		// 	menu->addChild(new rack::ui::MenuEntry);
