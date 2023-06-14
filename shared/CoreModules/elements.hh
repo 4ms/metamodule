@@ -69,10 +69,7 @@ struct BefacoSwitchHorizontal : Switch {};
 
 // Encoders
 struct Encoder : Switch {};
-struct LEDEncoder : Encoder {
-	Encoder encoder;
-	RgbLed rgb_led;
-};
+struct LEDEncoder : Encoder {};
 
 // Pots (Knobs, Sliders)
 struct Pot : BaseElement {};
