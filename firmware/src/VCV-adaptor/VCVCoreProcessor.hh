@@ -1,7 +1,7 @@
 #pragma once
-#include "CoreModules/elements.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "VCV-adaptor/dsp.hh"
+#include "VCV-adaptor/element_counter.hh"
 #include "VCV-adaptor/light.hh"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/param.hh"
@@ -61,29 +61,10 @@ struct VCVCoreProcessor : CoreProcessor {
 		outputs[output_id].connected = true;
 	}
 
-	template<typename... Ts>
-	struct Overload : Ts... {
-		using Ts::operator()...;
-	};
-
-	static constexpr size_t count_params() {
-		size_t num_params = 0;
-		auto CountParams = Overload{
-			[](MetaModule::BaseElement) {},
-			[&num_params](MetaModule::Pot) { num_params++; },
-			[&num_params](MetaModule::Switch) { num_params++; },
-		};
-		for (auto e : Info::Elements)
-			std::visit(CountParams, e);
-
-		return num_params;
-	}
-
-	// These are defined in the info header (FIXME: calculate them by iterating Info::Elements)
-	std::array<Param, count_params()> params;
-	std::array<Port, Info::InJacks.size()> inputs;
-	std::array<Port, Info::OutJacks.size()> outputs;
-	std::array<Light, Info::Lights.size()> lights;
+	constinit static inline std::array<Param, ElementCount<Info>::count().num_params> params;
+	constinit static inline std::array<Port, ElementCount<Info>::count().num_inputs> inputs;
+	constinit static inline std::array<Port, ElementCount<Info>::count().num_outputs> outputs;
+	constinit static inline std::array<Light, ElementCount<Info>::count().num_lights> lights;
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
 
