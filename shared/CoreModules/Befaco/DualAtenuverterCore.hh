@@ -1,6 +1,6 @@
 #pragma once
+#include "CoreModules/platform_module.hh"
 // Note: platform_module.hh must be declared first because of the ENUMS macro
-#include "platform_module.hh"
 
 #include "info/DualAtenuverter_info.hh"
 

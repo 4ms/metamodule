@@ -1,17 +1,9 @@
 #ifdef VCVRACK
 
-#include "mapping/central_data.hh"
-#include "moduleFactory.hh"
 #include "rack.hpp"
 
 template<typename Info, typename Core>
 struct PlatformModule : rack::Module {
-	// void onAdd() override {
-	// 	ModuleID selfID;
-	// 	selfID.id = id;
-	// 	selfID.slug = Info::slug;
-	// 	centralData->registerModule(selfID, this);
-	// }
 	static inline bool s_registered = true;
 };
 
