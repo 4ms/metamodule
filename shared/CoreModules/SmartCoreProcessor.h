@@ -1,5 +1,6 @@
 #pragma once
-#include "coreProcessor.h"
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/element_counter.hh"
 #include <array>
 #include <optional>
 
@@ -76,11 +77,13 @@ protected:
 	}
 
 private:
-	std::array<float, INFO::Knobs.size()> knobValues;
-	std::array<std::optional<float>, INFO::InJacks.size()> inputValues;
-	std::array<float, INFO::OutJacks.size()> outputValues;
-	std::array<float, INFO::Switches.size()> switchValues;
+	constexpr static typename ElementCount<INFO>::Counts counts = ElementCount<INFO>::count();
+
+	std::array<float, counts.num_pots> knobValues;
+	std::array<std::optional<float>, counts.num_inputs> inputValues;
+	std::array<float, counts.num_outputs> outputValues;
+	std::array<float, counts.num_switches> switchValues;
 
 	// ignores switches with light for now
-	std::array<float, INFO::Leds.size()> ledValues;
+	std::array<float, counts.num_lights> ledValues;
 };

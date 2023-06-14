@@ -70,13 +70,16 @@ struct VCVCoreProcessor : CoreProcessor {
 		outputs[output_id].connected = true;
 	}
 
-	constinit static inline std::array<Param, ElementCount<Info>::count().num_params> params;
-	constinit static inline std::array<Port, ElementCount<Info>::count().num_inputs> inputs;
-	constinit static inline std::array<Port, ElementCount<Info>::count().num_outputs> outputs;
-	constinit static inline std::array<Light, ElementCount<Info>::count().num_lights> lights;
+	constexpr static ElementCount<Info>::Counts counts = ElementCount<Info>::count();
+
+	std::array<Param, counts.num_params> params;
+	std::array<Port, counts.num_inputs> inputs;
+	std::array<Port, counts.num_outputs> outputs;
+	std::array<Light, counts.num_lights> lights;
 
 	using ParamScale = typename ElementCount<Info>::ParamScale;
-	constexpr static inline std::array<ParamScale, params.size()> param_scales = ElementCount<Info>::get_param_scales();
+
+	constexpr static std::array<ParamScale, counts.num_params> param_scales = ElementCount<Info>::param_scales();
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
 

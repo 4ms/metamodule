@@ -14,6 +14,8 @@ struct ElementCount {
 
 	struct Counts {
 		size_t num_params = 0;
+		size_t num_pots = 0;
+		size_t num_switches = 0;
 		size_t num_inputs = 0;
 		size_t num_outputs = 0;
 		size_t num_lights = 0;
@@ -22,18 +24,17 @@ struct ElementCount {
 	static constexpr Counts count() {
 		Counts c;
 
+		// clang-format off
 		auto CountParams = Overload{
 			[](MetaModule::BaseElement) {}, //default: ignore
-			[&c](MetaModule::Pot) { c.num_params++; },
-			[&c](MetaModule::Switch) { c.num_params++; },
+			[&c](MetaModule::Pot) { c.num_params++; c.num_pots++;},
+			[&c](MetaModule::Switch) { c.num_params++; c.num_switches++;},
 			[&c](MetaModule::Light) { c.num_lights++; },
 			[&c](MetaModule::JackInput) { c.num_inputs++; },
 			[&c](MetaModule::JackOutput) { c.num_outputs++; },
-			[&c](MetaModule::LEDEncoder) {
-			c.num_lights += 3;
-			c.num_params++;
-			},
+			[&c](MetaModule::LEDEncoder) { c.num_lights += 3; c.num_params++; },
 		};
+		// clang-format on
 
 		for (auto el : Info::Elements)
 			std::visit(CountParams, el);
@@ -46,7 +47,7 @@ struct ElementCount {
 		float offset;
 	};
 
-	static constexpr auto get_param_scales() {
+	static constexpr auto param_scales() {
 		std::array<ParamScale, count().num_params> scales;
 
 		auto CalcParamScales = Overload{
