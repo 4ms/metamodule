@@ -1,9 +1,6 @@
 #pragma once
-#include "CoreModules/elements.hh"
+#include "CoreModules/element_info.hh"
 #include <array>
-
-//TODO: Try getting rid of id field (need to manually check VCV-converted modules)
-// TODO: Add spans for types that firmware wants to access quickly (Knobs, switches, jacks)
 
 namespace MetaModule
 {
@@ -13,6 +10,7 @@ struct ENVVCAInfo : ElementInfoBase {
 	static constexpr uint32_t width_hp = 8;
 	static constexpr std::string_view svg_filename{"res/modules/ENVVCA-artwork.svg"};
 
+	// Todo: get rid of these enums, set all Elements to idx=0?
 	enum {
 		KnobRise_Slider = 0,
 		KnobFall_Slider = 1,
@@ -68,34 +66,35 @@ struct ENVVCAInfo : ElementInfoBase {
 		OrangeLight{px_to_mm<72>(106.41f), px_to_mm<72>(256.6f), "EOR", "EOR", LedEor_Led},
 	}};
 
-	static constexpr std::span<const Element> Knobs{&Elements[0], 5};
-	static constexpr std::span<const Element> InJacks{&Elements[5], 5};
-	static constexpr std::span<const Element> OutJacks{&Elements[10], 3};
-	static constexpr std::span<const Element> Switches{&Elements[13], 3};
-	static constexpr std::span<const Element> Leds{&Elements[16], 3};
+	// Where are these used?
+	// static constexpr std::span<const Element> Knobs{&Elements[0], 5};
+	// static constexpr std::span<const Element> InJacks{&Elements[5], 5};
+	// static constexpr std::span<const Element> OutJacks{&Elements[10], 3};
+	// static constexpr std::span<const Element> Switches{&Elements[13], 3};
+	// static constexpr std::span<const Element> Leds{&Elements[16], 3};
 
-	// static constexpr auto Rise_Slider = get<Slider25mmVert>(Knobs[0]);
-	// static constexpr auto Fall_Slider = get<Slider25mmVert>(Knobs[1]);
-	// static constexpr auto Level_Slider = get<Slider25mmVert>(Knobs[2]);
-	// static constexpr auto Rise_Cv = get<Knob9mm>(Knobs[3]);
-	// static constexpr auto Fall_Cv = get<Knob9mm>(Knobs[4]);
+	static constexpr auto Rise_Slider = get<Slider25mmVert>(Elements[0]);
+	static constexpr auto Fall_Slider = get<Slider25mmVert>(Elements[1]);
+	static constexpr auto Level_Slider = get<Slider25mmVert>(Elements[2]);
+	static constexpr auto Rise_Cv = get<Knob9mm>(Elements[3]);
+	static constexpr auto Fall_Cv = get<Knob9mm>(Elements[4]);
 
-	// static constexpr auto Time_Cv = get<AnalogJackInput>(InJacks[0]);
-	// static constexpr auto Trigger = get<GateJackInput>(InJacks[1]);
-	// static constexpr auto CycleJack = get<GateJackInput>(InJacks[2]);
-	// static constexpr auto Follow = get<AnalogJackInput>(InJacks[3]);
-	// static constexpr auto In = get<AnalogJackInput>(InJacks[4]);
+	static constexpr auto Time_Cv = get<AnalogJackInput>(Elements[5]);
+	static constexpr auto Trigger = get<GateJackInput>(Elements[6]);
+	static constexpr auto CycleJack = get<GateJackInput>(Elements[7]);
+	static constexpr auto Follow = get<AnalogJackInput>(Elements[8]);
+	static constexpr auto In = get<AnalogJackInput>(Elements[9]);
 
-	// static constexpr auto Env = get<AnalogJackOutput>(OutJacks[0]);
-	// static constexpr auto Eor = get<GateJackOutput>(OutJacks[1]);
-	// static constexpr auto Out = get<AnalogJackOutput>(OutJacks[2]);
+	static constexpr auto Env = get<AnalogJackOutput>(Elements[10]);
+	static constexpr auto Eor = get<GateJackOutput>(Elements[11]);
+	static constexpr auto Out = get<AnalogJackOutput>(Elements[12]);
 
-	// static constexpr auto Slow_Med_Fast_Rise = get<Toggle3pos>(Switches[0]);
-	// static constexpr auto Slow_Med_Fast_Fall = get<Toggle3pos>(Switches[1]);
-	// static constexpr auto CycleSwitch = get<LatchingButton>(Switches[2]);
+	static constexpr auto Slow_Med_Fast_Rise = get<Toggle3pos>(Elements[13]);
+	static constexpr auto Slow_Med_Fast_Fall = get<Toggle3pos>(Elements[14]);
+	static constexpr auto CycleSwitch = get<LatchingButtonMonoLight>(Elements[15]);
 
-	// static constexpr auto Rise_Led = get<RedBlueLight>(Leds[0]);
-	// static constexpr auto Fall_Led = get<RedBlueLight>(Leds[1]);
-	// static constexpr auto Eor_Led = get<OrangeLight>(Leds[2]);
+	static constexpr auto Rise_Led = get<RedBlueLight>(Elements[16]);
+	static constexpr auto Fall_Led = get<RedBlueLight>(Elements[17]);
+	static constexpr auto Eor_Led = get<OrangeLight>(Elements[18]);
 };
 } // namespace MetaModule
