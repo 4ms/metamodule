@@ -45,18 +45,19 @@ protected:
 protected:
 	float get_output(int output_id) const override {
 		if (output_id < (int)outputValues.size())
-			return outputValues[output_id] / 5.f;
+			return outputValues[output_id] / 5.f; // Note: this undoes what CommModule does
 		return 0.f;
 	}
 
 	void set_input(int input_id, float val) override {
 		if (input_id < (int)inputValues.size())
-			inputValues[input_id] = val * 5.f;
+			inputValues[input_id] = val * 5.f;// Note: this undoes what CommModule does
 	}
 
 	void set_param(int param_id, float val) override {
-		if (param_id < (int)paramValues.size())
+		if (param_id < (int)paramValues.size()) {
 			paramValues[param_id] = val;
+		}
 	}
 
 	float get_led_brightness(int led_id) const override {
@@ -70,6 +71,7 @@ protected:
 
 private:
 	constexpr static typename ElementCount<INFO>::Counts counts = ElementCount<INFO>::count();
+
 
 	std::array<float, counts.num_params> paramValues;
 	std::array<std::optional<float>, counts.num_inputs> inputValues;
