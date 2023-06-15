@@ -70,7 +70,7 @@ struct VCVCoreProcessor : CoreProcessor {
 		outputs[output_id].connected = true;
 	}
 
-	constexpr static ElementCount<Info>::Counts counts = ElementCount<Info>::count();
+	constexpr static typename ElementCount<Info>::Counts counts = ElementCount<Info>::count();
 
 	std::array<Param, counts.num_params> params;
 	std::array<Port, counts.num_inputs> inputs;
