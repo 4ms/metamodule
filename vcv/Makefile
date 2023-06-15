@@ -30,18 +30,22 @@ CXXFLAGS += -DVCVRACK
 # Static libraries are fine, but they should be added to this plugin's build system.
 LDFLAGS +=
 
-# Add source files to the build
+# Befaco
+INCLUDES += -I$(SHARED_DIR)/CoreModules/BefacO
 SOURCES += src/modules/Befaco/DualAtenuverter.cc
 SOURCES += $(SHARED_DIR)/CoreModules/Befaco/DualAtenuverterCore.cc
 
+# AudibleInstruments
+INCLUDES += -I$(SHARED_DIR)/CoreModules/AudibleInstruments
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/BraidsCore.cc
 SOURCES += src/modules/AudibleInstruments/Braids.cpp
-SOURCES += $(SHARED_DIR)/CoreModules/modules/stmlib/utils/random.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/stmlib/dsp/atan.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/stmlib/dsp/units.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/analog_oscillator.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/digital_oscillator.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/macro_oscillator.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/braids/resources.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/stmlib/utils/random.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/stmlib/dsp/atan.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/stmlib/dsp/units.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/analog_oscillator.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/digital_oscillator.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/resources.cc
 
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)

@@ -3,7 +3,7 @@
 #TODO: Once we have multiple a7 versions, build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
 #so don't build it twice for mini/max/etc
 
-USE_FEWER_MODULES ?= 1
+USE_FEWER_MODULES ?= 0
 
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
@@ -121,26 +121,29 @@ SOURCES += $(SHARED)/CoreModules/modules/FreeverbCore.cc
 SOURCES += $(SHARED)/CoreModules/modules/Seq8Core.cc
 SOURCES += $(SHARED)/CoreModules/modules/EnOscCore.cc
 SOURCES += $(SHARED)/CoreModules/Befaco/DualAtenuverterCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/BraidsCore.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/BraidsCore.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/modules/*.cc)
 SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/*.cc)
+SOURCES += $(wildcard $(SHARED)/CoreModules/AudibleInstruments/*.cc)
 SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
 endif
+INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
+
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
 SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
 
-SOURCES += $(SHARED)/CoreModules/modules/stmlib/utils/random.cc
-SOURCES += $(SHARED)/CoreModules/modules/stmlib/dsp/atan.cc
-SOURCES += $(SHARED)/CoreModules/modules/stmlib/dsp/units.cc
-SOURCES += $(SHARED)/CoreModules/modules/braids/analog_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/modules/braids/digital_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/modules/braids/macro_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/modules/braids/resources.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/utils/random.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/dsp/atan.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/dsp/units.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/analog_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/digital_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/resources.cc
 
 ## LVGL / Gui-Guider
 LVGL_DIR=$(LIBDIR)/lvgl
