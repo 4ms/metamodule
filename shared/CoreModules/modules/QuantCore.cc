@@ -3,6 +3,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "scaling_config.hh"
 #include "util/math.hh"
+#include <cmath>
 
 //FIXME:
 // The code below is for a module with 12 on/off buttons that set the scale

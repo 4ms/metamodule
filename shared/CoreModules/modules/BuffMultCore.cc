@@ -1,6 +1,7 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/info/BuffMult_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include <algorithm>
 
 class BuffMultCore : public CoreProcessor {
 	using Info = BuffMultInfo;
