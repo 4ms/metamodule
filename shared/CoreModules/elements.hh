@@ -118,7 +118,6 @@ struct GateJackInput : JackInput {};
 struct AnalogJackInput : JackInput {};
 struct BefacoInputPort : JackInput {};
 using BananutBlack = BefacoInputPort;
-using InJackElement = std::variant<GateJackInput, AnalogJackInput, BefacoInputPort>;
 
 // Output jacks
 struct JackOutput : JackElement {};
@@ -126,7 +125,6 @@ struct GateJackOutput : JackOutput {};
 struct AnalogJackOutput : JackOutput {};
 struct BefacoOutputPort : JackOutput {};
 using BananutRed = BefacoOutputPort;
-using OutJackElement = std::variant<GateJackOutput, AnalogJackOutput, BefacoOutputPort>;
 
 struct PJ301MPort : JackElement {};
 
