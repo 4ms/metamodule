@@ -1,8 +1,8 @@
 #pragma once
-#include "elements.hh"
-#include "elements/4ms_widgets.hh"
-#include "elements/befaco_widgets.hh"
+#include "CoreModules/elements/elements.hh"
 #include "rack.hpp"
+#include "widgets/4ms_widgets.hh"
+#include "widgets/befaco_widgets.hh"
 
 namespace MetaModule
 {

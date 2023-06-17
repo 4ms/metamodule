@@ -1,5 +1,5 @@
 #pragma once
-#include "elements.hh"
+#include "CoreModules/elements/elements.hh"
 #include "rack.hpp"
 
 namespace MetaModule
@@ -29,7 +29,7 @@ struct VCVModuleParamCreator {
 	};
 	void config_element(DualLight el) {
 		module->configLight(lights, el.short_name.data());
-		lights+=2;
+		lights += 2;
 	};
 	void config_element(MomentaryButtonRGB el) {
 		module->configParam(el.idx, 0.f, 1.f, el.default_val, el.short_name.data());

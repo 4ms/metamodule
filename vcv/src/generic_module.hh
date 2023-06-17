@@ -4,8 +4,8 @@
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
 #include "comm/comm_module.hh"
-#include "elements/4ms_widgets.hh"
 #include "util/base_concepts.hh"
+#include "widgets/4ms_widgets.hh"
 
 template<Derived<ModuleInfoBase> Defs>
 struct GenericModule {

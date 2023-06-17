@@ -3,9 +3,9 @@
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
 #include "comm/comm_module.hh"
-#include "elements/vcv_module_creator.hh"
-#include "elements/widget_creator.hh"
 #include "util/base_concepts.hh"
+#include "widgets/vcv_module_creator.hh"
+#include "widgets/widget_creator.hh"
 
 template<Derived<MetaModule::ElementInfoBase> INFO>
 struct GenericModuleNew {
