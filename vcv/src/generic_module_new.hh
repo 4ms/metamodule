@@ -5,7 +5,7 @@
 #include "comm/comm_module.hh"
 #include "util/base_concepts.hh"
 #include "widgets/vcv_module_creator.hh"
-#include "widgets/widget_creator.hh"
+#include "widgets/vcv_widget_creator.hh"
 
 template<Derived<MetaModule::ElementInfoBase> INFO>
 struct GenericModuleNew {
