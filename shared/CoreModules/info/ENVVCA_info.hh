@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/element_info.hh"
+#include "CoreModules/elements/element_info.hh"
 #include <array>
 
 namespace MetaModule
@@ -38,16 +38,25 @@ struct ENVVCAInfo : ElementInfoBase {
 	enum {
 		LedCycle_Led = 0,
 		LedRiseBlue_Led = 1,
-		LedRiseRed_Led = 2, 
+		LedRiseRed_Led = 2,
 		LedFallBlue_Led = 3,
 		LedFallRed_Led = 4,
 		LedEor_Led = 5,
 	};
 
 	static constexpr std::array<Element, 19> Elements{{
-		Slider25mmVert{to_mm<72>(23.185f), to_mm<72>(108.81f), "Rise Slider", "Rise Slider", KnobRise_Slider, 0.f, 1.f, 0.25f},
-		Slider25mmVert{to_mm<72>(57.325f), to_mm<72>(109.02f), "Fall Slider", "Fall Slider", KnobFall_Slider, 0.f, 1.f, 0.25f},
-		Slider25mmVert{to_mm<72>(91.505f), to_mm<72>(108.81f), "Env Level Slider", "Env Level Slider", KnobEnv_Level_Slider, 0.f, 1.f, 1.f},
+		Slider25mmVert{
+			to_mm<72>(23.185f), to_mm<72>(108.81f), "Rise Slider", "Rise Slider", KnobRise_Slider, 0.f, 1.f, 0.25f},
+		Slider25mmVert{
+			to_mm<72>(57.325f), to_mm<72>(109.02f), "Fall Slider", "Fall Slider", KnobFall_Slider, 0.f, 1.f, 0.25f},
+		Slider25mmVert{to_mm<72>(91.505f),
+					   to_mm<72>(108.81f),
+					   "Env Level Slider",
+					   "Env Level Slider",
+					   KnobEnv_Level_Slider,
+					   0.f,
+					   1.f,
+					   1.f},
 		Knob9mm{to_mm<72>(21.69f), to_mm<72>(178.25f), "Rise CV", "Rise CV", KnobRise_Cv, 0.f, 1.f, 0.f},
 		Knob9mm{to_mm<72>(92.85f), to_mm<72>(178.25f), "Fall CV", "Fall CV", KnobFall_Cv, 0.f, 1.f, 0.f},
 

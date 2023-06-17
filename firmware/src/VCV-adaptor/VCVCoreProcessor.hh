@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/element_counter.hh"
+#include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "VCV-adaptor/dsp.hh"
 #include "VCV-adaptor/light.hh"

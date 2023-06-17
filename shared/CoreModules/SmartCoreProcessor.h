@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/element_counter.hh"
+#include "CoreModules/elements/element_counter.hh"
 #include <array>
 #include <optional>
 
@@ -51,7 +51,7 @@ protected:
 
 	void set_input(int input_id, float val) override {
 		if (input_id < (int)inputValues.size())
-			inputValues[input_id] = val * 5.f;// Note: this undoes what CommModule does
+			inputValues[input_id] = val * 5.f; // Note: this undoes what CommModule does
 	}
 
 	void set_param(int param_id, float val) override {
@@ -71,7 +71,6 @@ protected:
 
 private:
 	constexpr static typename ElementCount<INFO>::Counts counts = ElementCount<INFO>::count();
-
 
 	std::array<float, counts.num_params> paramValues;
 	std::array<std::optional<float>, counts.num_inputs> inputValues;

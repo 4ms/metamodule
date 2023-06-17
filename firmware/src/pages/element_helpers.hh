@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/elements.hh"
+#include "CoreModules/elements/elements.hh"
 #include "CoreModules/module_info_base.hh"
 #include "draw_helpers.hh" //for std::vector<DrawHelper::MKnob> mapped_knobs,
 #include "lvgl/lvgl.h"

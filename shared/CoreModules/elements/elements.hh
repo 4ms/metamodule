@@ -12,6 +12,7 @@ struct BaseElement {
 	std::string_view short_name;
 	std::string_view long_name;
 	unsigned idx = 0;
+
 	float min_val = 0.f;
 	float max_val = 1.f;
 	float default_val = 0.f;
@@ -42,9 +43,12 @@ struct MediumLight : Light {};
 template<>
 struct MediumLight<RedGreenBlueLight> : RedGreenBlueLight {};
 
+// ParamElement: base class for pot, encoder, switch, button, etc.
+struct ParamElement : BaseElement {};
+
 // Switches/Buttons
 
-struct Switch : BaseElement {};
+struct Switch : ParamElement {};
 struct MomentaryButton : Switch {
 	enum State { PRESSED, RELEASED };
 };
@@ -66,13 +70,13 @@ struct Toggle3pos : Switch {
 struct BefacoSwitchHorizontal : Switch {};
 
 // Encoders
-struct Encoder : Switch {};
+struct Encoder : ParamElement {};
 struct LEDEncoder : Encoder {};
 struct SmallEncoder : Encoder {};
 struct SmallLEDEncoder : Encoder {};
 
 // Pots (Knobs, Sliders)
-struct Pot : BaseElement {};
+struct Pot : ParamElement {};
 struct Knob : Pot {};
 struct Slider : Pot {};
 
