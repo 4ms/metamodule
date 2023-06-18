@@ -21,100 +21,50 @@ fn main() {
     //
     let mut lvgl_src: Vec<String> = Vec::new();
     add_glob_files("../firmware/lib/lvgl/lvgl/src/**/*.c", &mut lvgl_src);
-    add_glob_files("../firmware/src/pages/images/components/*.c", &mut lvgl_src);
-    // add_glob_files("../firmware/src/pages/gui-guider/*.c", &mut lvgl_src);
     lvgl_src.push(String::from("mms/stubs/hal_tick.c"));
-    // add_glob_files("../firmware/src/pages/fonts/*.c", &mut lvgl_src);
     lvgl_src.push(String::from("../firmware/src/pages/slsexport/ui.c"));
-    lvgl_src.push(String::from(
-        "../firmware/src/pages/fonts/MuseoSansRounded_500_12.c",
-    ));
-    lvgl_src.push(String::from(
-        "../firmware/src/pages/fonts/MuseoSansRounded_700_12.c",
-    ));
-    lvgl_src.push(String::from(
-        "../firmware/src/pages/fonts/MuseoSansRounded_700_14.c",
-    ));
-    lvgl_src.push(String::from(
-        "../firmware/src/pages/fonts/MuseoSansRounded_700_16.c",
-    ));
-    lvgl_src.push(String::from(
-        "../firmware/src/pages/fonts/MuseoSansRounded_700_18.c",
-    ));
+    lvgl_src.push(String::from("../firmware/src/pages/slsexport/ui_helpers.c"));
+    add_glob_files("../firmware/src/pages/slsexport/ui_font_*.c", &mut lvgl_src);
+
+    let fontdir: String = "../firmware/src/pages/fonts".to_owned();
+    lvgl_src.push(format!("{}{}", fontdir, "/MuseoSansRounded_500_12.c",));
+    lvgl_src.push(format!("{}{}", fontdir, "/MuseoSansRounded_700_12.c"));
+    lvgl_src.push(format!("{}{}", fontdir, "/MuseoSansRounded_700_14.c"));
+    lvgl_src.push(format!("{}{}", fontdir, "/MuseoSansRounded_700_16.c"));
+    lvgl_src.push(format!("{}{}", fontdir, "/MuseoSansRounded_700_18.c"));
+
+    add_glob_files("../firmware/src/pages/images/components/*.c", &mut lvgl_src);
 
     if use_fewer_modules {
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/Djembe_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/Djembe_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/EnOsc_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/EnOsc_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/Freeverb_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/Freeverb_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/HPF_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/HPF_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/InfOsc_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/InfOsc_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/KPLS_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/KPLS_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/MultiLFO_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/MultiLFO_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/PEG_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/PEG_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/PitchShift_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/PitchShift_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/SMR_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/SMR_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/Seq8_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/Seq8_artwork_240.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/StMix_artwork_120.c",
-        ));
-        lvgl_src.push(String::from(
-            "../firmware/src/pages/images/modules/StMix_artwork_240.c",
-        ));
+        let artdir: String = "../firmware/src/pages/images/modules".to_owned();
+        lvgl_src.push(format!("{}{}", artdir, "/Djembe_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/Djembe_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/EnOsc_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/EnOsc_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/Freeverb_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/Freeverb_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/HPF_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/HPF_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/InfOsc_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/InfOsc_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/KPLS_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/KPLS_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/MultiLFO_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/MultiLFO_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/PEG_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/PEG_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/PitchShift_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/PitchShift_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/SMR_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/SMR_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/Seq8_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/Seq8_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/StMix_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/StMix_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/DualAtenuverter_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/DualAtenuverter_artwork_240.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/Braids_artwork_120.c"));
+        lvgl_src.push(format!("{}{}", artdir, "/Braids_artwork_240.c"));
     } else {
         add_glob_files("../firmware/src/pages/images/modules/*.c", &mut lvgl_src);
     }
@@ -126,6 +76,7 @@ fn main() {
         .include("mms/stubs")
         .include("../firmware/lib/lvgl")
         .include("../firmware/lib/lvgl/lvgl")
+        .include("../src/pages/slsexport")
         .flag("-Wno-deprecated-anon-enum-enum-conversion")
         .flag("-Wno-unused-but-set-variable");
     build.compile("lvgl");
@@ -159,12 +110,48 @@ fn main() {
         ));
         src.push(String::from("../shared/CoreModules/modules/KPLSCore.cc"));
         src.push(String::from("../shared/CoreModules/modules/Seq8Core.cc"));
+        src.push(String::from("../shared/CoreModules/modules/EnOscCore.cc"));
+        src.push(String::from(
+            "../shared/CoreModules/Befaco/DualAtenuverterCore.cc",
+        ));
+        src.push(String::from(
+            "../shared/CoreModules/AudibleInstruments/BraidsCore.cc",
+        ));
         src.push(String::from(
             "../shared/CoreModules/meta-module-hub/panel_medium.cc",
         ));
     } else {
         add_glob_files("../shared/CoreModules/*.cc", &mut src);
     }
+    add_glob_files("../shared/CoreModules/modules/*.cc", &mut src);
+    add_glob_files("../shared/CoreModules/Befaco/*.cc", &mut src);
+    add_glob_files("../shared/CoreModules/AudibleInstruments/*.cc", &mut src);
+    src.push(String::from(
+        "../shared/CoreModules/AudibleInstruments/stmlib/utils/random.cc",
+    ));
+    src.push(String::from(
+        "../shared/CoreModules/AudibleInstruments/stmlib/dsp/atan.cc",
+    ));
+    src.push(String::from(
+        "../shared/CoreModules/AudibleInstruments/stmlib/dsp/units.cc",
+    ));
+    src.push(String::from(
+        "../shared/CoreModules/AudibleInstruments/braids/analog_oscillator.cc",
+    ));
+    src.push(String::from(
+        "../shared/CoreModules/AudibleInstruments/braids/digital_oscillator.cc",
+    ));
+    src.push(String::from(
+        "../shared/CoreModules/AudibleInstruments/braids/macro_oscillator.cc",
+    ));
+    src.push(String::from(
+        "../shared/CoreModules/AudibleInstruments/braids/resources.cc",
+    ));
+
+    src.push(String::from("../shared/CoreModules/modules/enosc/data.cc"));
+    src.push(String::from(
+        "../shared/CoreModules/modules/enosc/dynamic_data.cc",
+    ));
 
     // Patch convert
     src.push(String::from("../shared/patch_convert/ryml/ryml_serial.cc"));
@@ -186,7 +173,6 @@ fn main() {
         .flag("--includestubs/sys/alloc_buffer.hh")
         .include("mms")
         .include("mms/stubs")
-        .include("../shared/etl/include")
         .include("../shared")
         .include("../shared/cpputil")
         .include("../shared")
@@ -195,6 +181,9 @@ fn main() {
         .include("../shared/patch_convert/ryml/rapidyaml/src")
         .include("../shared/patch_convert/ryml/rapidyaml/ext/c4core/src")
         .include("../shared/CoreModules")
+        .include("../shared/CoreModules/modules")
+        .include("../shared/CoreModules/AudibleInstruments")
+        .include("../shared/CoreModules/Befaco")
         .include("../firmware/src")
         .include("../firmware/lib/lvgl")
         .include("../firmware/lib/lvgl/lvgl/src/lv_font")
