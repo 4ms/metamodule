@@ -224,7 +224,6 @@ struct MapRingDrawer {
 
 	void draw_control_ring(const Slider &el, const lv_img_dsc_t *img, uint32_t panel_knob_id) {
 		// Parameters for ring size
-		constexpr float ring_offset = 8.f;
 		// Thinner circle for uvwxyz small panel knobs
 		const float ring_thickness = (panel_knob_id >= 6) ? 4.f : 10.f;
 

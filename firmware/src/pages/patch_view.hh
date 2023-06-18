@@ -163,7 +163,7 @@ struct PatchViewPage : PageBase {
 						},
 						element);
 
-					std::visit(MappedElement{height, module_idx, obj, canvas, img, patch, mappings}, element);
+					std::visit(MappedElement{height, (uint32_t)module_idx, obj, canvas, img, patch, mappings}, element);
 				}
 			}
 
