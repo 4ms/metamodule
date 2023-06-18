@@ -4,7 +4,7 @@
 #include "drivers/arch.hh"
 #include "drivers/cache.hh"
 #if !defined(TESTPROJECT) && !defined(SIMULATOR)
-#include "CoreModules/Befaco/DualAtenuverterCore.hh"
+// #include "CoreModules/Befaco/DualAtenuverterCore.hh"
 #include "debug.hh"
 #else
 #include "../stubs/debug.hh"
@@ -94,13 +94,13 @@ public:
 			//FIXME: Do we ever do anything with modules[0] ? Perhaps just UI displaying names, which we can get from a defs file
 			if (i == 0)
 				modules[i] = ModuleFactory::create(PanelDef::typeID);
-#if !defined(TESTPROJECT)
-			else if (pd.module_slugs[i].is_equal("DualAtenuverter")) {
-				printf("Registering DualAtenuverter\n");
-				modules[i] = DualAtenuverterCore::create();
-				printf("OK\n");
-			}
-#endif
+			// #if !defined(TESTPROJECT)
+			// 			else if (pd.module_slugs[i].is_equal("DualAtenuverter")) {
+			// 				printf("Registering DualAtenuverter\n");
+			// 				modules[i] = DualAtenuverterCore::create();
+			// 				printf("OK\n");
+			// 			}
+			// #endif
 			else
 				modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
