@@ -36,9 +36,29 @@ norflash-loader: mp1-med
 uimg:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk uimg
 
-.PHONY: bootloader
+.PHONY: bootloader format-sd flash-bootloader-sd 
+SD_DISK_DEV ?= /dev/disk4
+
 bootloader:
 	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp10_conf.hh
+
+format-sd:
+	@read -p "What is the disk device to format (Enter for $(SD_DISK_DEV)): " DISK && \
+	DISK=$${DISK:-$(SD_DISK_DEV)} && \
+	echo "Formatting $${DISK}" && \
+	echo "./flashing/format-partition-sdcard.sh $${DISK}" && \
+	./flashing/format-partition-sdcard.sh $${DISK}
+
+flash-bootloader-sd: 
+	cd bootloader/mp1-boot && make load
+
+flash-app-sd: uimg
+	@read -p "What is the disk device and partition to flash to (Enter for $(SD_DISK_DEV)s4): " DISK && \
+	DISK=$${DISK:-$(SD_DISK_DEV)s4} && \
+	echo "Copying app to $${DISK}" && \
+	echo "sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}" && \
+	sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}
+
 
 ## Module images
 
