@@ -4,6 +4,7 @@
 #include <array>
 #include <span>
 #include <string_view>
+#include <cstdint>
 
 namespace MetaModule
 {
