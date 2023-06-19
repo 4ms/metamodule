@@ -6,7 +6,7 @@
 #include "local_path.hh"
 #include "mapping/Mapping.h"
 #include "mapping/patch_writer.hh"
-#include "widgets/4ms_widgets.hh"
+#include "widgets/4ms/4ms_widgets.hh"
 
 using namespace rack;
 

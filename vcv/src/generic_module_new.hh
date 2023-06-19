@@ -56,7 +56,7 @@ struct GenericModuleNew {
 			}
 
 			// create widgets from all elements
-			MetaModule::VCVWidgetCreator creator{this, module};
+			MetaModule::VCVWidgetCreator creator(this, module);
 			for (auto &element : INFO::Elements) {
 				std::visit([&creator](auto &el) { creator.create(el); }, element);
 			}
