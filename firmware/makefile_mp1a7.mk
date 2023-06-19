@@ -1,6 +1,6 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
-USE_FEWER_MODULES ?= 0
+USE_FEWER_MODULES ?= 1
 
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
@@ -74,9 +74,6 @@ SOURCES += $(LIBDIR)/printf/printf.c
 SOURCES += src/uart_log.cc
 SOURCES += $(main_source)
 
-ifeq "$(target_board)" "norflash-loader"
-
-else
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
@@ -102,39 +99,35 @@ SOURCES += $(core_src)/aux_core_main.cc
 SOURCES += src/patchlist.cc
 SOURCES += src/patchlist_ryml_tests.cc
 SOURCES += src/pages/page_manager.cc
-
+SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
+SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
 SOURCES += $(SHARED)/CoreModules/meta-module-hub/panel_medium.cc
+
+# Modules
 ifeq "$(USE_FEWER_MODULES)" "1"
-SOURCES += $(SHARED)/CoreModules/modules/DjembeCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/StMixCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/PEGCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/SMRCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/MultiLFOCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/PitchShiftCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/HPFCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/InfOscCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/KPLSCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/FreeverbCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/Seq8Core.cc
-SOURCES += $(SHARED)/CoreModules/modules/EnOscCore.cc
-SOURCES += $(SHARED)/CoreModules/Befaco/DualAtenuverterCore.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/BraidsCore.cc
+modules := AudibleInstruments/Braids 
+modules += Befaco/DualAtenuverter Befaco/EvenVCO 
+modules += modules/Djembe modules/StMix modules/PEG modules/SMR modules/MultiLFO modules/PitchShift 
+modules += modules/HPF modules/InfOsc modules/KPLS modules/Freeverb modules/Seq8 modules/EnOsc 
+SOURCES += $(foreach module,$(modules),$(SHARED)/CoreModules/$(module)Core.cc)
+SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_240.c)
+SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_120.c)
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/modules/*.cc)
 SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/*.cc)
 SOURCES += $(wildcard $(SHARED)/CoreModules/AudibleInstruments/*.cc)
+SOURCES += $(wildcard src/pages/images/modules/*.c)
+SOURCES += $(wildcard src/pages/images/Befaco/*.c)
+SOURCES += $(wildcard src/pages/images/AudibleInstruments/*.c)
 endif
-SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
 INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
 
+# Module support files: Enosc
+SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
+SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
-SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
-SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
-
-SOURCES += ./src/VCV-adaptor/dsp/minblep.cpp
-SOURCES += ./src/VCV-adaptor/pffft/pffft.c
-
+SOURCES += src/VCV-adaptor/dsp/minblep.cpp
+SOURCES += src/VCV-adaptor/pffft/pffft.c
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/utils/random.cc
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/dsp/atan.cc
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/dsp/units.cc
@@ -143,70 +136,36 @@ SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/digital_oscillator.cc
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/resources.cc
 
-## LVGL / Gui-Guider
-LVGL_DIR=$(LIBDIR)/lvgl
-LVGL_DIR_NAME=lvgl
-SOURCES += $(shell find -L $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/widgets -name \*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/flex/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/grid/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/others/gridnav/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/themes/default/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/core/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/sw/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/widgets/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/font/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/misc/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/hal/*.c)
-INCLUDES +=		-I$(LIBDIR)/lvgl
 
+## LVGL / Gui-Guider
+SOURCES += $(shell find -L $(LIBDIR)/lvgl/lvgl/src/extra/widgets -name \*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/flex/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/grid/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/others/gridnav/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/themes/default/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/core/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/draw/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/draw/sw/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/widgets/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/font/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/misc/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/hal/*.c)
+SOURCES += $(wildcard src/pages/images/components/*.c)
 SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
-# Generateod:
+
+# Generated:
 SOURCES += src/pages/slsexport/ui.c
 SOURCES += src/pages/slsexport/ui_helpers.c
 SOURCES += $(wildcard src/pages/slsexport/ui_font_*.c)
+
 INCLUDES += -Isrc/pages/slsexport
-INCLUDES +=	-I$(LVGL_DIR)/$(LVGL_DIR_NAME)
-
-ifeq "$(USE_FEWER_MODULES)" "1"
-SOURCES += src/pages/images/modules/Braids_artwork_240.c
-SOURCES += src/pages/images/modules/DualAtenuverter_artwork_240.c
-SOURCES += src/pages/images/modules/Djembe_artwork_240.c
-SOURCES += src/pages/images/modules/StMix_artwork_240.c
-SOURCES += src/pages/images/modules/PEG_artwork_240.c
-SOURCES += src/pages/images/modules/SMR_artwork_240.c
-SOURCES += src/pages/images/modules/MultiLFO_artwork_240.c
-SOURCES += src/pages/images/modules/PitchShift_artwork_240.c
-SOURCES += src/pages/images/modules/HPF_artwork_240.c
-SOURCES += src/pages/images/modules/InfOsc_artwork_240.c
-SOURCES += src/pages/images/modules/KPLS_artwork_240.c
-SOURCES += src/pages/images/modules/Freeverb_artwork_240.c
-SOURCES += src/pages/images/modules/Seq8_artwork_240.c
-SOURCES += src/pages/images/modules/EnOsc_artwork_240.c
-
-SOURCES += src/pages/images/modules/Braids_artwork_120.c
-SOURCES += src/pages/images/modules/DualAtenuverter_artwork_120.c
-SOURCES += src/pages/images/modules/Djembe_artwork_120.c
-SOURCES += src/pages/images/modules/StMix_artwork_120.c
-SOURCES += src/pages/images/modules/PEG_artwork_120.c
-SOURCES += src/pages/images/modules/MultiLFO_artwork_120.c
-SOURCES += src/pages/images/modules/SMR_artwork_120.c
-SOURCES += src/pages/images/modules/PitchShift_artwork_120.c
-SOURCES += src/pages/images/modules/HPF_artwork_120.c
-SOURCES += src/pages/images/modules/InfOsc_artwork_120.c
-SOURCES += src/pages/images/modules/KPLS_artwork_120.c
-SOURCES += src/pages/images/modules/Freeverb_artwork_120.c
-SOURCES += src/pages/images/modules/Seq8_artwork_120.c
-SOURCES += src/pages/images/modules/EnOsc_artwork_120.c
-else
-SOURCES += $(wildcard src/pages/images/modules/*.c)
-endif
-SOURCES += $(wildcard src/pages/images/components/*.c)
+INCLUDES +=	-I$(LIBDIR)/lvgl
+INCLUDES +=	-I$(LIBDIR)/lvgl/lvgl
 
 ## RapidYml
 
@@ -227,8 +186,6 @@ SOURCES += $(LIBDIR)/littlefs/lfs_util.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 
-
-endif # ifneq "$(target_board)" "norflash-loader"
 
 INCLUDES += 	-I.
 INCLUDES +=		-Isrc
@@ -262,6 +219,7 @@ INCLUDES += 	-Isrc/fatfs
 EXTRA_CFLAGS = --param l1-cache-size=32 \
 	 		   --param l1-cache-line-size=64 \
 			   --param l2-cache-size=256 \
+
 				# -DNE10_ENABLE_DSP \
 				# $(NE10_CFLAGS) \
 
