@@ -1,10 +1,5 @@
 #pragma once
 #include "VCV-adaptor/VCVCoreProcessor.hh"
-//
-
-#include "VCV-adaptor/dsp/minblep.hpp"
-#include "VCV-adaptor/simd/Vector.hpp"
-#include "VCV-adaptor/simd/functions.hpp"
 #include "info/befaco/EvenVCO_info.hh"
 
 struct EvenVCOCore : VCVCoreProcessor<MetaModule::EvenVCOInfo, EvenVCOCore> {
