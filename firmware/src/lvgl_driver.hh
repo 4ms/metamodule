@@ -77,6 +77,7 @@ public:
 
 		_spi_driver.init();
 		_spi_driver.register_partial_frame_cb(end_flush);
+		_spi_driver.clear_overrun_on_interrupt();
 
 		// LTDC mode:
 		// _screen_configure.setup_driver_chip(mdrivlib::ST77XX::ST7789InitLTDC<ScreenConf>::cmds);
