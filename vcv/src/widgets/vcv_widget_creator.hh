@@ -18,7 +18,7 @@ namespace MetaModule
 struct VCVWidgetCreator {
 
 	VCVWidgetCreator(rack::ModuleWidget *module_widget, rack::Module *module)
-		: context(module_widget, module)
+		: context{module_widget, module} {
 	}
 
 	template<typename T>
