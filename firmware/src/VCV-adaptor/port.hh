@@ -3,26 +3,36 @@
 struct Port {
 	float voltage = 0.f;
 	bool connected = false;
-	float getVoltage() const {
+
+	float getVoltage(int chan = 0) const {
 		return voltage;
 	}
-	float getVoltage(int) const {
-		return getVoltage();
-	}
+
 	template<typename T>
-	T getVoltageSimd(int firstChannel) const {
-		return getVoltage();
+	T getPolyVoltageSimd(int firstChannel) {
+		return T(voltage); // return vector with all elements set to voltage
 	}
+
+	template<typename T>
+	T getVoltageSimd(int firstChannel) {
+		return T(voltage); // return vector with all elements set to voltage
+	}
+
 	float getVoltageSum() const {
 		return getVoltage();
 	}
 
-	void setVoltage(float voltage, int channel = 0) {
-		this->voltage = voltage;
+	void setVoltage(float v, int chan = 0) {
+		voltage = v;
 	}
+
 	template<typename T>
-	void setVoltageSimd(T voltage, int firstChannel) {
-		setVoltage(voltage, 0);
+	void setVoltageSimd(T v, int firstChannel) {
+		voltage = v[0];
+	}
+
+	void setVoltageSimd(float v, int firstChannel) {
+		voltage = v;
 	}
 
 	bool isConnected() const {
