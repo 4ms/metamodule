@@ -2,6 +2,7 @@
 
 void EvenVCOCore::process(const ProcessArgs &args) {
 	using namespace rack::simd;
+	using namespace rack;
 
 	int channels_pitch1 = inputs[PITCH1_INPUT].getChannels();
 	int channels_pitch2 = inputs[PITCH2_INPUT].getChannels();
@@ -64,8 +65,8 @@ void EvenVCOCore::process(const ProcessArgs &args) {
 	const int channelsRoundedUpNearestFour = (1 + (channels - 1) / 4) * 4;
 	for (int c = 0; c < channelsRoundedUpNearestFour; c++) {
 
-		if (oldPhase[c / 4].s[c % 4] < 0.5 && phase[c / 4].s[c % 4] >= 0.5) {
-			float crossing = -(phase[c / 4].s[c % 4] - 0.5) / deltaPhase[c / 4].s[c % 4];
+		if (oldPhase[c / 4].s[c % 4] < 0.5f && phase[c / 4].s[c % 4] >= 0.5f) {
+			float crossing = -(phase[c / 4].s[c % 4] - 0.5f) / deltaPhase[c / 4].s[c % 4];
 			triSquareMinBlep[c].insertDiscontinuity(crossing, 2.f);
 			doubleSawMinBlep[c].insertDiscontinuity(crossing, -2.f);
 		}
@@ -158,5 +159,4 @@ void EvenVCOCore::process(const ProcessArgs &args) {
 	outputs[EVEN_OUTPUT].setChannels(channels);
 	outputs[SAW_OUTPUT].setChannels(channels);
 	outputs[SQUARE_OUTPUT].setChannels(channels);
-}
 }
