@@ -1,11 +1,14 @@
 #pragma once
 #include "VCV-adaptor/VCVCoreProcessor.hh"
 //
+
 #include "VCV-adaptor/dsp/minblep.hpp"
+#include "VCV-adaptor/simd/Vector.hpp"
+#include "VCV-adaptor/simd/functions.hpp"
 #include "info/befaco/EvenVCO_info.hh"
 
 struct EvenVCOCore : VCVCoreProcessor<MetaModule::EvenVCOInfo, EvenVCOCore> {
-	using float_4 = float;
+	using float_4 = rack::simd::float_4;
 	static constexpr size_t PORT_MAX_CHANNELS = 1;
 
 	static inline bool register_module = VCVCoreProcessor::s_registered;

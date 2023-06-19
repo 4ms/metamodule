@@ -1,6 +1,7 @@
 #include "EvenVCOCore.hh"
 
 void EvenVCOCore::process(const ProcessArgs &args) {
+	using namespace rack::simd;
 
 	int channels_pitch1 = inputs[PITCH1_INPUT].getChannels();
 	int channels_pitch2 = inputs[PITCH2_INPUT].getChannels();
