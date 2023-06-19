@@ -7,3 +7,9 @@ struct WidgetContext_t
 	rack::Module* module;
 	unsigned num_lights = 0;
 };
+
+struct ModuleContext_t
+{
+	rack::Module* module;
+	unsigned lights = 0;
+};

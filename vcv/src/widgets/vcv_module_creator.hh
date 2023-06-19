@@ -1,57 +1,36 @@
 #pragma once
-#include "CoreModules/elements/elements.hh"
-#include "rack.hpp"
+#include "vcv_creation_context.hh"
+#include "base_modules_implemenation.hh"
+
+namespace MetaModule::VCVImplementation::Module
+{
+	void do_config_element(BaseElement el, ModuleContext_t& context)
+	{
+		// Do nothing by default
+		// FIXME: This should probably be replaced with more specific fallbacks
+	};
+}
 
 namespace MetaModule
 {
 
 struct VCVModuleParamCreator {
 
-	unsigned lights = 0;
-
 	VCVModuleParamCreator(rack::Module *module)
-		: module{module} {
+		: context{module} {
 	}
 
-	void config_element(BaseElement){};
-
-	void config_element(JackInput el) {
-		module->configInput(el.idx, el.short_name.data());
-	};
-	void config_element(JackOutput el) {
-		module->configOutput(el.idx, el.short_name.data());
-	};
-	void config_element(Pot el) {
-		module->configParam(el.idx, el.min_val, el.max_val, el.default_val, el.short_name.data());
-	};
-	void config_element(MonoLight el) {
-		module->configLight(lights++, el.short_name.data());
-	};
-	void config_element(DualLight el) {
-		module->configLight(lights, el.short_name.data());
-		lights += 2;
-	};
-	void config_element(MomentaryButtonRGB el) {
-		module->configParam(el.idx, 0.f, 1.f, el.default_val, el.short_name.data());
-		module->configLight(lights, el.short_name.data());
-		lights += 3;
+	template <typename ELEMENT>
+	void config_element(ELEMENT element)
+	{
+		// forward to implementation togeher with current context
+		// FIXME: do not allow implementation to freely alter the context but only change the context here
+		VCVImplementation::Module::do_config_element(element, context);
 	}
-	void config_element(LatchingButtonMonoLight el) {
-		module->configParam(el.idx, 0.f, 1.f, el.default_val, el.short_name.data());
-		module->configLight(lights++, el.short_name.data());
-	}
-	void config_element(Switch el) {
-		module->configParam(el.idx, 0.f, 1.f, 0.f, el.short_name.data());
-	};
-	void config_element(Toggle3pos el) {
-		module->configParam(el.idx, 0.f, 2.f, 0.f, el.short_name.data());
-	};
-	void config_element(LEDEncoder el) {
-		module->configParam(el.idx, -INFINITY, INFINITY, 0.0f, el.short_name.data());
-	};
 
+	
 private:
-	rack::Module *module;
+	ModuleContext_t context;
 };
 
 } // namespace MetaModule
