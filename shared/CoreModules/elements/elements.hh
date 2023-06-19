@@ -81,6 +81,7 @@ struct Knob : Pot {};
 struct Slider : Pot {};
 
 struct BefacoTinyKnob : Knob {};
+struct BefacoBigKnob : Knob {};
 struct DaviesLargeKnob : Knob {};
 struct Davies1900hBlackKnob : Knob {};
 struct Davies1900hWhiteKnob : Knob {};
@@ -160,6 +161,7 @@ using Element = std::variant<MediumLight<RedGreenBlueLight>,
 							 Slider25mmHoriz,
 							 Davies1900hRedKnob,
 							 Davies1900hWhiteKnob,
+							 BefacoBigKnob,
 							 BefacoTinyKnob,
 							 BefacoSliderPot,
 							 BefacoTinyKnobWhite,

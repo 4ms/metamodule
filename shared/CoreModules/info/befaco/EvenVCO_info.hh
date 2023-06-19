@@ -1,6 +1,7 @@
-#pramga once
+#pragma once
 #include "CoreModules/elements/element_info.hh"
 #include <array>
+#include <string_view>
 
 enum ParamIds { OCTAVE_PARAM, TUNE_PARAM, PWM_PARAM, NUM_PARAMS };
 enum InputIds { PITCH1_INPUT, PITCH2_INPUT, FM_INPUT, SYNC_INPUT, PWM_INPUT, NUM_INPUTS };
@@ -15,7 +16,7 @@ struct EvenVCOInfo : ElementInfoBase {
 	static constexpr uint32_t width_hp = 8;
 	static constexpr std::string_view svg_filename{"res/modules/Befaco/EvenVCO.svg"};
 
-	static constexpr std::array<Element, 10> Elements{{
+	static constexpr std::array<Element, 13> Elements{{
 		BefacoBigKnob{to_mm(22), to_mm(32), "Octave", "", OCTAVE_PARAM, -5, 4}, //snap enabled
 		BefacoTinyKnob{to_mm(73), to_mm(131), "Tune", "", TUNE_PARAM, -7, 7},
 		Davies1900hRedKnob{to_mm(16), to_mm(230), "Pulse Width", "", PWM_PARAM, -1, 1},
@@ -32,7 +33,6 @@ struct EvenVCOInfo : ElementInfoBase {
 		BefacoOutputPort{to_mm(48), to_mm(306), "Even", "", EVEN_OUTPUT},
 		BefacoOutputPort{to_mm(10), to_mm(327), "Sawtooth", "", SAW_OUTPUT},
 		BefacoOutputPort{to_mm(87), to_mm(327), "Square", "", SQUARE_OUTPUT},
-
 	}};
 };
 }; // namespace MetaModule
