@@ -329,7 +329,7 @@ struct ModuleImages {
 		if (slug == "DualAtenuverter")
 			return (height == 240) ? &DualAtenuverter_artwork_240 : &DualAtenuverter_artwork_120;
 
-		if (slug == "Brains")
+		if (slug == "Braids")
 			return (height == 240) ? &Braids_artwork_240 : &DualAtenuverter_artwork_120;
 
 		return nullptr;

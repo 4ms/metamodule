@@ -33,12 +33,12 @@ struct BraidsInfo : ElementInfoBase {
 		Rogan2PSGreen{to_mm(19), to_mm(217), "Timbre", "", TIMBRE_PARAM, 0.f, 1.f, 0.5f},
 		Rogan2PSGreen{to_mm(97), to_mm(217), "Modulation", "", MODULATION_PARAM, -1.f, 1.f, 0.f},
 		Rogan2PSRed{to_mm(176), to_mm(217), "Color", "", COLOR_PARAM, 0.f, 1.f, 0.5f},
-		PJ301MPort{to_mm(10), to_mm(316), "Trigger", "", TRIG_INPUT},
-		PJ301MPort{to_mm(47), to_mm(316), "Pitch", "Pitch (1V/oct)", PITCH_INPUT},
-		PJ301MPort{to_mm(84), to_mm(316), "FM", "", FM_INPUT},
-		PJ301MPort{to_mm(122), to_mm(316), "Timbre", "", TIMBRE_INPUT},
-		PJ301MPort{to_mm(160), to_mm(316), "Color", "", COLOR_INPUT},
-		PJ301MPort{to_mm(205), to_mm(316), "Out", "", OUT_OUTPUT},
+		PJ301MPortIn{to_mm(10), to_mm(316), "Trigger", "", TRIG_INPUT},
+		PJ301MPortIn{to_mm(47), to_mm(316), "Pitch", "Pitch (1V/oct)", PITCH_INPUT},
+		PJ301MPortIn{to_mm(84), to_mm(316), "FM", "", FM_INPUT},
+		PJ301MPortIn{to_mm(122), to_mm(316), "Timbre", "", TIMBRE_INPUT},
+		PJ301MPortIn{to_mm(160), to_mm(316), "Color", "", COLOR_INPUT},
+		PJ301MPortOut{to_mm(205), to_mm(316), "Out", "", OUT_OUTPUT},
 		BraidsDisplay148x56{to_mm(14), to_mm(53), "", ""},
 	}};
 };

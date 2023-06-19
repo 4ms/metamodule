@@ -130,10 +130,11 @@ struct AnalogJackOutput : JackOutput {};
 struct BefacoOutputPort : JackOutput {};
 using BananutRed = BefacoOutputPort;
 
-struct PJ301MPort : JackElement {};
+struct PJ301MPortIn : JackInput {};
+struct PJ301MPortOut : JackOutput {};
 
 // Displays
-struct Display : BaseElement {};
+struct Display : MonoLight {}; //TODO: does this need its own category?
 struct BraidsDisplay148x56 : Display {};
 
 // AltParams
@@ -189,7 +190,8 @@ using Element = std::variant<MediumLight<RedGreenBlueLight>,
 							 GateJackOutput,
 							 AnalogJackOutput,
 							 BefacoOutputPort,
-							 PJ301MPort,
+							 PJ301MPortIn,
+							 PJ301MPortOut,
 							 BraidsDisplay148x56,
 							 AltParamToggle2,
 							 AltParamToggle3>;

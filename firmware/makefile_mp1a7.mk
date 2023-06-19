@@ -1,8 +1,5 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
-#TODO: Once we have multiple a7 versions, build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
-#so don't build it twice for mini/max/etc
-
 USE_FEWER_MODULES ?= 0
 
 # First target of the make command is the board we should build for. Check if it's valid.
