@@ -119,20 +119,21 @@ SOURCES += $(SHARED)/CoreModules/modules/Seq8Core.cc
 SOURCES += $(SHARED)/CoreModules/modules/EnOscCore.cc
 SOURCES += $(SHARED)/CoreModules/Befaco/DualAtenuverterCore.cc
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/BraidsCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/modules/*.cc)
 SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/*.cc)
 SOURCES += $(wildcard $(SHARED)/CoreModules/AudibleInstruments/*.cc)
+endif
 SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
-endif
 INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
 
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
 SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
+
+SOURCES += ./src/VCV-adaptor/dsp/minblep.cpp
+SOURCES += ./src/VCV-adaptor/pffft/pffft.c
 
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/utils/random.cc
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/dsp/atan.cc

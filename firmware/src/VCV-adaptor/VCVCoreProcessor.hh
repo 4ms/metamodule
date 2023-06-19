@@ -2,11 +2,16 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "VCV-adaptor/dsp.hh"
+#include "VCV-adaptor/dsp/common.hpp"
+#include "VCV-adaptor/dsp/minblep.hpp"
+#include "VCV-adaptor/dsp/resampler.hpp"
+#include "VCV-adaptor/dsp/ringbuffer.hpp"
 #include "VCV-adaptor/light.hh"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/param.hh"
 #include "VCV-adaptor/port.hh"
+#include "VCV-adaptor/simd/Vector.hpp"
+#include "VCV-adaptor/simd/functions.hpp"
 #include <array>
 #include <memory>
 
