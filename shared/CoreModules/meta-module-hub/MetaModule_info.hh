@@ -151,33 +151,17 @@ struct MetaModuleInfo : ModuleInfoBase {
 	static constexpr int NumOutJacks = 8;
 
 	enum {
-		InputGatein1 = 0,
-		InputGatein2 = 1,
-		InputIn1 = 2,
-		InputIn2 = 3,
-		InputIn3 = 4,
-		InputIn4 = 5,
-		InputIn5 = 6,
-		InputIn6 = 7,
+		InputIn1 = 0,
+		InputIn2 = 1,
+		InputIn3 = 2,
+		InputIn4 = 3,
+		InputIn5 = 4,
+		InputIn6 = 5,
+		InputGatein1 = 6,
+		InputGatein2 = 7,
 	};
 
 	static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
-		{
-			.id = InputGatein1,
-			.x_mm = px_to_mm<72>(21.74f),
-			.y_mm = px_to_mm<72>(274.18f),
-			.short_name = "gatein1",
-			.long_name = "gatein1",
-			.signal_type = OutJackDef::Analog,
-		},
-		{
-			.id = InputGatein2,
-			.x_mm = px_to_mm<72>(65.25f),
-			.y_mm = px_to_mm<72>(274.2f),
-			.short_name = "gatein2",
-			.long_name = "gatein2",
-			.signal_type = OutJackDef::Analog,
-		},
 		{
 			.id = InputIn1,
 			.x_mm = px_to_mm<72>(35.03f),
@@ -225,6 +209,22 @@ struct MetaModuleInfo : ModuleInfoBase {
 			.short_name = "in6",
 			.long_name = "in6",
 			.signal_type = OutJackDef::Analog,
+		},
+		{
+			.id = InputGatein1,
+			.x_mm = px_to_mm<72>(21.74f),
+			.y_mm = px_to_mm<72>(274.18f),
+			.short_name = "gatein1",
+			.long_name = "gatein1",
+			.signal_type = OutJackDef::Gate,
+		},
+		{
+			.id = InputGatein2,
+			.x_mm = px_to_mm<72>(65.25f),
+			.y_mm = px_to_mm<72>(274.2f),
+			.short_name = "gatein2",
+			.long_name = "gatein2",
+			.signal_type = OutJackDef::Gate,
 		},
 	}};
 
