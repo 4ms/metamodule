@@ -61,16 +61,7 @@ public:
 				.priority1 = 2,
 				.priority2 = 0,
 			},
-			[&] {
-			// Debug::Pin1::high();
-			// static uint32_t poll_tmr = 0;
-			// if (poll_tmr++ >= 100) { //1.6sec
-			// 	poll_tmr = 0;
-			// 	patch_storage.poll_media_change();
-			// }
-			page_update_task();
-			// Debug::Pin1::low();
-			});
+			[&] { page_update_task(); });
 		page_update_tm.start();
 
 		ui_event_tm.init(
@@ -80,11 +71,7 @@ public:
 				.priority1 = 3,
 				.priority2 = 3,
 			},
-			[&] {
-			// Debug::Pin2::high();
-			lvgl_update_task();
-			// Debug::Pin2::low();
-			});
+			[&] { lvgl_update_task(); });
 		ui_event_tm.start();
 
 		MMDisplay::start();
@@ -109,11 +96,6 @@ private:
 	void page_update_task() { //60Hz
 		//This returns false when audio stops
 		bool read_ok = param_cache.read_sync(&params, &metaparams);
-		// if (read_ok) {
-		// 	Debug::Pin1::low();
-		// } else {
-		// 	Debug::Pin1::high();
-		// }
 		page_manager.update_current_page();
 		patch_playloader.handle_sync_patch_loading();
 	}

@@ -9,16 +9,6 @@
 
 //exported:
 #include "slsexport/ui.h"
-// extern lv_obj_t *ui_PatchSelector;
-// extern lv_obj_t *ui_Title;
-// extern lv_obj_t *ui_mediapanel;
-// extern lv_obj_t *ui_USBbut;
-// extern lv_obj_t *ui_USBlabel;
-// extern lv_obj_t *ui_SDbut;
-// extern lv_obj_t *ui_SDlabel;
-// extern lv_obj_t *ui_Flashbut;
-// extern lv_obj_t *ui_Flashlabel;
-// extern lv_obj_t *ui_patchlist;
 extern "C" void ui_PatchSelector_screen_init();
 LV_FONT_DECLARE(lv_font_montserrat_10);
 LV_FONT_DECLARE(lv_font_montserrat_16);
