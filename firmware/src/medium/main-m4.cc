@@ -104,7 +104,7 @@ void main() {
 	}
 }
 
-void recover_from_task_fault() {
-	while (true)
-		;
-}
+// void recover_from_task_fault() {
+// 	while (true)
+// 		;
+// }

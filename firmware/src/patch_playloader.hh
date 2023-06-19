@@ -37,7 +37,7 @@ struct PatchPlayLoader {
 		//
 		// if (_load_patch()) {
 		if (_load_default_patch(initial_patch)) {
-			printf_("Success\n");
+			printf_("Loaded default patch\n");
 			loading_new_patch_ = false;
 		} else
 			printf_("FAILED to load initial patch.\n");
