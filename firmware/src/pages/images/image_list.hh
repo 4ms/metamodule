@@ -132,10 +132,12 @@ LV_IMG_DECLARE(EnOsc_artwork_240);
 LV_IMG_DECLARE(EnOsc_artwork_120);
 LV_IMG_DECLARE(BuffMult_artwork_240);
 LV_IMG_DECLARE(BuffMult_artwork_120);
-LV_IMG_DECLARE(DualAtenuverter_artwork_120);
 LV_IMG_DECLARE(DualAtenuverter_artwork_240);
-LV_IMG_DECLARE(Braids_artwork_120);
+LV_IMG_DECLARE(DualAtenuverter_artwork_120);
 LV_IMG_DECLARE(Braids_artwork_240);
+LV_IMG_DECLARE(Braids_artwork_120);
+LV_IMG_DECLARE(EvenVCO_artwork_240);
+LV_IMG_DECLARE(EvenVCO_artwork_120);
 }
 
 struct ModuleImages {
@@ -330,7 +332,10 @@ struct ModuleImages {
 			return (height == 240) ? &DualAtenuverter_artwork_240 : &DualAtenuverter_artwork_120;
 
 		if (slug == "Braids")
-			return (height == 240) ? &Braids_artwork_240 : &DualAtenuverter_artwork_120;
+			return (height == 240) ? &Braids_artwork_240 : &Braids_artwork_120;
+
+		if (slug == "EvenVCO")
+			return (height == 240) ? &EvenVCO_artwork_240 : &EvenVCO_artwork_120;
 
 		return nullptr;
 	}

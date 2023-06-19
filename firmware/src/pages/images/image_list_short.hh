@@ -30,6 +30,8 @@ LV_IMG_DECLARE(DualAtenuverter_artwork_120);
 LV_IMG_DECLARE(DualAtenuverter_artwork_240);
 LV_IMG_DECLARE(Braids_artwork_120);
 LV_IMG_DECLARE(Braids_artwork_240);
+LV_IMG_DECLARE(EvenVCO_artwork_120);
+LV_IMG_DECLARE(EvenVCO_artwork_240);
 }
 
 struct ModuleImages {
@@ -78,6 +80,9 @@ struct ModuleImages {
 
 		if (slug == "Braids")
 			return (height == 240) ? &Braids_artwork_240 : &Braids_artwork_120;
+
+		if (slug == "EvenVCO")
+			return (height == 240) ? &EvenVCO_artwork_240 : &EvenVCO_artwork_120;
 
 		return nullptr;
 	}
