@@ -29,9 +29,9 @@ int main(int argc, char *argv[]) {
 
 	unsigned i = 0;
 	printf("#pragma once\n");
-	printf("#include \"<array>\"\n");
+	printf("#include <array>\n");
 	printf("\n");
-	printf("constexpr float MinBlep_%d_%d[%zu] = {\n", ZeroXings, Oversample, output.size());
+	printf("constexpr std::array<float, %zu> MinBlep_%d_%d = {\n", output.size(), ZeroXings, Oversample);
 	for (auto x : output) {
 		printf("%f, ", x);
 		if (i++ == 15) {
