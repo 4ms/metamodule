@@ -120,6 +120,10 @@ tables $(SHARED)/cpputil/math_tables.cc: $(TABLEGEN)/main.cpp
 	g++ -I../shared/cpputil -std=c++20 $(TABLEGEN)/main.cpp -o $(TABLEGEN)/make_tables
 	cd $(TABLEGEN) && ./make_tables
 
+gen_minblep:
+	make -C ../shared/gen_minblep
+	../shared/gen_minblep/gen_minblep 16 32 > ./src/VCV-adaptor/dsp/minblep_16_32.h
+
 generate_compile_txt:
 	arm-none-eabi-gcc -E -x c++ - -v < /dev/null 2>&1 | \
     awk '/End of search list./ { show=0 } { if (show) printf "-I%s\n",$1 }; /#include <...> search starts here:/ { show=1; }' > compile_flags.txt
