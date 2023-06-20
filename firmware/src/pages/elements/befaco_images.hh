@@ -13,6 +13,8 @@ LV_IMG_DECLARE(Davies1900hWhite_240);
 LV_IMG_DECLARE(Davies1900hWhite_120);
 LV_IMG_DECLARE(MediumLight_240);
 LV_IMG_DECLARE(MediumLight_120);
+LV_IMG_DECLARE(BefacoBigKnob_240);
+LV_IMG_DECLARE(BefacoBigKnob_120);
 
 namespace MetaModule::ElementImageImpl
 {
@@ -25,6 +27,11 @@ inline const lv_img_dsc_t *get_img(const Davies1900hWhiteKnob &, uint32_t scale_
 inline const lv_img_dsc_t *get_img(const Davies1900hRedKnob &, uint32_t scale_px) {
 	pr_dbg("get_img->Davies1900hRedKnob\n");
 	return scale_px == 240 ? &Davies1900hRed_240 : &Davies1900hRed_120;
+}
+
+inline const lv_img_dsc_t *get_img(const BefacoBigKnob &, uint32_t scale_px) {
+	pr_dbg("get_img->Davies1900hWhiteKnob\n");
+	return scale_px == 240 ? &BefacoBigKnob_240 : &BefacoBigKnob_120;
 }
 
 inline const lv_img_dsc_t *get_img(const BefacoInputPort &, uint32_t scale_px) {
