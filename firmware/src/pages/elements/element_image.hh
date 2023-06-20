@@ -3,10 +3,15 @@
 #include "lvgl/lvgl.h"
 #include "pr_dbg.hh"
 
+#include "4ms_images.hh"
+#include "audible_images.hh"
+#include "befaco_images.hh"
+
 namespace MetaModule::ElementImageImpl
 {
 
 inline const lv_img_dsc_t *get_img(const BaseElement &element, uint32_t scale_px) {
+	pr_dbg("Element image not found\n");
 	return nullptr;
 }
 

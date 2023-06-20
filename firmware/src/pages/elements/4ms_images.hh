@@ -1,3 +1,4 @@
+#pragma once
 #include "CoreModules/elements/elements.hh"
 #include "lvgl/lvgl.h"
 #include "pr_dbg.hh"
@@ -30,32 +31,32 @@ LV_IMG_DECLARE(switch_center_120);
 namespace MetaModule::ElementImageImpl
 {
 
-const lv_img_dsc_t *get_img(const Pot &, uint32_t scale_px) {
+inline const lv_img_dsc_t *get_img(const Pot &, uint32_t scale_px) {
 	pr_dbg("get_img->Pot\n");
 	return scale_px == 240 ? &knob_x : &knob_x_120;
 }
 
-const lv_img_dsc_t *get_img(const Davies1900hBlackKnob &, uint32_t scale_px) {
+inline const lv_img_dsc_t *get_img(const Davies1900hBlackKnob &, uint32_t scale_px) {
 	pr_dbg("get_img->Davies1900hBlackKno\n");
 	return scale_px == 240 ? &knob_x : &knob_x_120;
 }
 
-const lv_img_dsc_t *get_img(const DaviesLargeKnob &, uint32_t scale_px) {
+inline const lv_img_dsc_t *get_img(const DaviesLargeKnob &, uint32_t scale_px) {
 	pr_dbg("get_img->DaviesLargeKnob\n");
 	return scale_px == 240 ? &knob_large_x : &knob_large_x_120;
 }
 
-const lv_img_dsc_t *get_img(const Knob9mm &, uint32_t scale_px) {
+inline const lv_img_dsc_t *get_img(const Knob9mm &, uint32_t scale_px) {
 	pr_dbg("get_img->Knob9mm\n");
 	return scale_px == 240 ? &knob9mm_x : &knob9mm_x_120;
 }
 
-const lv_img_dsc_t *get_img(const JackInput &, uint32_t scale_px) {
+inline const lv_img_dsc_t *get_img(const JackInput &, uint32_t scale_px) {
 	pr_dbg("get_img->JackInput\n");
 	return scale_px == 240 ? &jack_x : &jack_x_120;
 }
 
-const lv_img_dsc_t *get_img(const JackOutput &, uint32_t scale_px) {
+inline const lv_img_dsc_t *get_img(const JackOutput &, uint32_t scale_px) {
 	pr_dbg("get_img->JackOutput\n");
 	return scale_px == 240 ? &jack_x : &jack_x_120;
 }
