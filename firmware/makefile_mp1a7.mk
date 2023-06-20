@@ -55,11 +55,32 @@ LTOFLAG = -flto=auto
 
 INCLUDES = 
 SOURCES =
+
 SOURCES += system/libc_stub.c
 SOURCES += system/libcpp_stub.cc
 SOURCES += system/new.cc
 SOURCES += system/mmu_ca7.c
 SOURCES += src/shared_memory.cc
+SOURCES += src/uart_log.cc
+SOURCES += $(main_source)
+SOURCES += $(audio_source)
+SOURCES += $(core_src)/aux_core_main.cc
+SOURCES += src/patchlist.cc
+SOURCES += src/patchlist_ryml_tests.cc
+INCLUDES += -I.
+INCLUDES += -Isrc
+INCLUDES += -I$(core_src)
+INCLUDES += -I$(target_src)
+INCLUDES += -I$(target_chip_src)
+INCLUDES += -I$(SHARED)
+INCLUDES += -I$(SHARED)/patch
+
+
+# Printf
+SOURCES += $(LIBDIR)/printf/printf.c
+INCLUDES += -I$(LIBDIR)/printf
+
+# HAL
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/system_ca7.c
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/irq_ctrl.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal.c
@@ -68,12 +89,6 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_usart.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
-SOURCES += $(DRIVERLIB)/drivers/pin.cc
-SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
-SOURCES += $(LIBDIR)/printf/printf.c
-SOURCES += src/uart_log.cc
-SOURCES += $(main_source)
-
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
@@ -84,7 +99,14 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_ll_rcc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_sdmmc.c
+INCLUDES += -I$(HALDIR)/include
+INCLUDES += -I$(CMSIS)/Core_A/Include
+INCLUDES += -I$(CMSIS)/Include
+INCLUDES += -I$(DEVICEDIR)/include
 
+# mdrivlib
+SOURCES += $(DRIVERLIB)/drivers/pin.cc
+SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
 SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES += $(DRIVERLIB)/drivers/tim.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc
@@ -93,18 +115,23 @@ SOURCES += $(DRIVERLIB)/drivers/i2c.cc
 SOURCES += $(TARGETDEVICEDIR)/drivers/sai_tdm.cc
 SOURCES += $(DRIVERLIB)/drivers/codec_PCM3168.cc
 SOURCES += $(DRIVERLIB)/drivers/codec_WM8731.cc
+INCLUDES += -I$(DRIVERLIB)
+INCLUDES += -I$(DRIVERLIB)/drivers
+INCLUDES += -I$(TARGETDEVICEDIR)
+INCLUDES += -I$(TARGETDEVICEDIR)/drivers
+INCLUDES += -I$(TARGETDEVICEDIR_CA7)
+INCLUDES += -I$(TARGETDEVICEDIR_CA7)/drivers
+
+# Util
 SOURCES += $(SHARED)/cpputil/util/math_tables.cc
-SOURCES += $(audio_source)
-SOURCES += $(core_src)/aux_core_main.cc
-SOURCES += src/patchlist.cc
-SOURCES += src/patchlist_ryml_tests.cc
-SOURCES += src/pages/page_manager.cc
+INCLUDES += -I$(SHARED)/cpputil
+
+# GUI
 SOURCES += $(wildcard src/pages/elements/*.cc)
-SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
-SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
+SOURCES += src/pages/page_manager.cc
 SOURCES += $(SHARED)/CoreModules/meta-module-hub/panel_medium.cc
 
-# Modules
+# Modules: CoreModules and faceplate artwork 
 ifeq "$(USE_FEWER_MODULES)" "1"
 modules := AudibleInstruments/Braids 
 modules += Befaco/DualAtenuverter Befaco/EvenVCO 
@@ -122,7 +149,15 @@ SOURCES += $(wildcard src/pages/images/modules/*.c)
 SOURCES += $(wildcard src/pages/images/Befaco/*.c)
 SOURCES += $(wildcard src/pages/images/AudibleInstruments/*.c)
 endif
+INCLUDES += -I$(SHARED)/CoreModules
+INCLUDES += -I$(SHARED)/CoreModules/modules
 INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
+INCLUDES += -I$(SHARED)/CoreModules/Befaco
+
+# Component images
+SOURCES += $(wildcard src/pages/images/Befaco/components/*.c)
+SOURCES += $(wildcard src/pages/images/AudibleInstruments/components/*.c)
+SOURCES += $(wildcard src/pages/images/components/*.c)
 
 # Module support files: Enosc
 SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
@@ -135,7 +170,6 @@ SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/analog_oscillator.cc
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/digital_oscillator.cc
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
 SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/resources.cc
-
 
 ## LVGL / Gui-Guider
 SOURCES += $(shell find -L $(LIBDIR)/lvgl/lvgl/src/extra/widgets -name \*.c)
@@ -151,7 +185,10 @@ SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/widgets/*.c)
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/font/*.c)
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/misc/*.c)
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/hal/*.c)
-SOURCES += $(wildcard src/pages/images/components/*.c)
+INCLUDES +=	-I$(LIBDIR)/lvgl
+INCLUDES +=	-I$(LIBDIR)/lvgl/lvgl
+
+# Fonts
 SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
@@ -162,16 +199,19 @@ SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
 SOURCES += src/pages/slsexport/ui.c
 SOURCES += src/pages/slsexport/ui_helpers.c
 SOURCES += $(wildcard src/pages/slsexport/ui_font_*.c)
-
 INCLUDES += -Isrc/pages/slsexport
-INCLUDES +=	-I$(LIBDIR)/lvgl
-INCLUDES +=	-I$(LIBDIR)/lvgl/lvgl
 
+# Patch convert
+SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
+SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
+INCLUDES += -I$(SHARED)/patch_convert
+INCLUDES += -I$(SHARED)/patch_convert/ryml
 ## RapidYml
-
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+INCLUDES += -I$(RYMLDIR)/src
+INCLUDES += -I$(RYMLDIR)/ext/c4core/src
 
 ## FatFS, qspi flash
 
@@ -185,35 +225,9 @@ SOURCES += $(LIBDIR)/littlefs/lfs.c
 SOURCES += $(LIBDIR)/littlefs/lfs_util.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
+INCLUDES += -I$(LIBDIR)/fatfs/source
+INCLUDES += -Isrc/fatfs
 
-
-INCLUDES += 	-I.
-INCLUDES +=		-Isrc
-INCLUDES +=		-I$(core_src)
-INCLUDES +=		-I$(target_src)
-INCLUDES +=		-I$(target_chip_src)
-INCLUDES +=		-I$(HALDIR)/include
-INCLUDES +=		-I$(CMSIS)/Core_A/Include
-INCLUDES +=		-I$(CMSIS)/Include
-INCLUDES +=		-I$(DEVICEDIR)/include
-INCLUDES +=		-I$(DRIVERLIB)
-INCLUDES +=		-I$(DRIVERLIB)/drivers
-INCLUDES +=		-I$(TARGETDEVICEDIR)
-INCLUDES +=		-I$(TARGETDEVICEDIR)/drivers
-INCLUDES +=		-I$(TARGETDEVICEDIR_CA7)
-INCLUDES +=		-I$(TARGETDEVICEDIR_CA7)/drivers
-INCLUDES +=		-I$(SHARED)
-INCLUDES +=		-I$(SHARED)/CoreModules
-INCLUDES +=		-I$(SHARED)/CoreModules/modules
-INCLUDES +=		-I$(SHARED)/cpputil
-INCLUDES +=		-I$(SHARED)/patch
-INCLUDES +=		-I$(LIBDIR)/printf
-INCLUDES += 	-I$(SHARED)/patch_convert
-INCLUDES += 	-I$(SHARED)/patch_convert/ryml
-INCLUDES += 	-I$(RYMLDIR)/src
-INCLUDES += 	-I$(RYMLDIR)/ext/c4core/src
-INCLUDES += 	-I$(LIBDIR)/fatfs/source
-INCLUDES += 	-Isrc/fatfs
 
 #D-Cache L1: 32 KB, 128 Sets, 64 Bytes/Line, 4-Way
 EXTRA_CFLAGS = --param l1-cache-size=32 \
@@ -240,6 +254,7 @@ ARCH_CFLAGS += -DUSE_HAL_DRIVER \
 			  -DSTM32MP1 \
 			  -DCORE_CA7 \
 			  -D$(EXTDEF)
+
               # -DENABLE_NE10_FIR_FLOAT_NEON \
               # -DENABLE_NE10_FIR_DECIMATE_FLOAT_NEON \
               # -DENABLE_NE10_FIR_INTERPOLATE_FLOAT_NEON \
