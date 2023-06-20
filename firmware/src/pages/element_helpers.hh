@@ -1,9 +1,10 @@
 #pragma once
+#include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 #include "CoreModules/module_info_base.hh"
 #include "draw_helpers.hh" //for std::vector<DrawHelper::MKnob> mapped_knobs,
-#include "element_image.hh"
 #include "lvgl/lvgl.h"
+#include "pages/elements/element_image.hh"
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 
