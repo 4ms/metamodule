@@ -5,6 +5,7 @@
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"
 #include "pages/element_helpers.hh"
+#include "pages/elements//element_drawer.hh"
 #include "pages/images/image_list.hh"
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
