@@ -2,6 +2,18 @@
 #include <string_view>
 #include <variant>
 
+// Heirarchy:
+//                                                         BaseElement
+//                     |---------------------------------------'------------|---------------------------|
+//              ParamElement                                          JackElement                  LightElement
+//     |--------------'----------------|------------------|         |------'-----|          |---------|-'------|---------|
+//    Pot                           Switch             Encoder    JackInput    JackOutput   MonoLight DualLight RGBLight Display
+//  |--'---|                 |--------'|----------|        |
+// Knob Slider             MomBut LatchingBut Toggle       |
+//  |       |                 |       |                    |
+// ...    ...,SliderLED     *MonoLight/RGB          EncoderRGB
+//
+
 namespace MetaModule
 {
 
@@ -13,73 +25,33 @@ struct BaseElement {
 	std::string_view long_name;
 	unsigned idx = 0;
 
+	static constexpr size_t NumParams = 0;
+	static constexpr size_t NumLights = 0;
+	static constexpr size_t NumInputs = 0;
+	static constexpr size_t NumOutputs = 0;
+};
+
+//
+// ParamElement: base class for pot, encoder, switch/button
+//
+
+struct ParamElement : BaseElement {
+	static constexpr size_t NumParams = 1;
+};
+
+//
+// Pots (Knobs, Sliders)
+//
+struct Pot : ParamElement {
 	float min_val = 0.f;
 	float max_val = 1.f;
 	float default_val = 0.f;
 };
 
-// Lights
-
-struct Light : BaseElement {};
-struct MonoLight : Light {};
-struct RedLight : MonoLight {};
-struct OrangeLight : MonoLight {};
-struct GreenLight : MonoLight {};
-struct BlueLight : MonoLight {};
-struct WhiteLight : MonoLight {};
-
-struct DualLight : Light {};
-struct RedBlueLight : DualLight {
-	enum Color { RED, BLUE };
-};
-
-struct RgbLed : Light {
-	enum Color { RED, BLUE, GREEN };
-};
-using RedGreenBlueLight = RgbLed;
-
-template<typename LedT>
-struct MediumLight : Light {};
-template<>
-struct MediumLight<RedGreenBlueLight> : RedGreenBlueLight {};
-
-// ParamElement: base class for pot, encoder, switch, button, etc.
-struct ParamElement : BaseElement {};
-
-// Switches/Buttons
-
-struct Switch : ParamElement {};
-struct MomentaryButton : Switch {
-	enum State { PRESSED, RELEASED };
-};
-struct MomentaryButtonRGB : MomentaryButton {
-	enum Color { RED, BLUE, GREEN };
-};
-struct LatchingButton : Switch {
-	enum State { DOWN, UP };
-};
-struct LatchingButtonMonoLight : LatchingButton {
-	enum Color { RED, BLUE, GREEN };
-};
-struct Toggle2pos : Switch {
-	enum State { DOWN, UP };
-};
-struct Toggle3pos : Switch {
-	enum State { DOWN, CENTER, UP };
-};
-struct BefacoSwitchHorizontal : Switch {};
-
-// Encoders
-struct Encoder : ParamElement {};
-struct LEDEncoder : Encoder {};
-struct SmallEncoder : Encoder {};
-struct SmallLEDEncoder : Encoder {};
-
-// Pots (Knobs, Sliders)
-struct Pot : ParamElement {};
 struct Knob : Pot {};
 struct Slider : Pot {};
 
+// Knobs
 struct BefacoTinyKnob : Knob {};
 struct BefacoBigKnob : Knob {};
 struct DaviesLargeKnob : Knob {};
@@ -101,10 +73,16 @@ struct Rogan2PSWhite : Knob {};
 struct Rogan2PSGreen : Knob {};
 struct Rogan2PSRed : Knob {};
 
+// Sliders
+struct SliderMonoLight : Slider {
+	static constexpr size_t NumLights = 1;
+};
+
 struct BefacoSliderPot : Slider { // TODO: is using this enum better than two types (Hor/Ver)?
 	enum Orientation { Vertical, Horizontal };
-	Orientation orientation = Orientation::Vertical;
+	static constexpr Orientation orientation = Orientation::Vertical;
 };
+
 struct CKSSNarrow : Slider {};
 struct Crossfader : Slider {};
 struct CKSSHoriz2 : Slider {};
@@ -112,90 +90,199 @@ struct CKSSVert7 : Slider {};
 struct CKSSHoriz4 : Slider {};
 struct CKSSNarrow3 : Slider {};
 struct BefacoSlidePotSmall : Slider {};
-
 struct Slider25mmVert : Slider {};
 struct Slider25mmHoriz : Slider {};
+struct Slider25mmHorizLED : SliderMonoLight {};
+struct Slider25mmVertLED : SliderMonoLight {};
+
+//
+// Switches/Buttons
+//
+struct Switch : ParamElement {};
+
+struct MomentaryButton : Switch {
+	enum State { PRESSED, RELEASED };
+};
+struct MomentaryButtonRGB : MomentaryButton {
+	static constexpr size_t NumLights = 3;
+	enum Color { RED, BLUE, GREEN };
+};
+
+struct LatchingButton : Switch {
+	enum State { DOWN, UP };
+};
+struct LatchingButtonMonoLight : LatchingButton {
+	static constexpr size_t NumLights = 1;
+	enum Color { RED, BLUE, GREEN };
+};
+
+struct Toggle2pos : Switch {
+	enum State { DOWN, UP };
+};
+struct Toggle3pos : Switch {
+	enum State { DOWN, CENTER, UP };
+};
+
+struct BefacoSwitchHorizontal : Toggle2pos {};
+
+//
+// Encoders
+//
+struct Encoder : ParamElement {};
+struct EncoderMonoLight : Encoder {
+	static constexpr size_t NumLights = 1;
+};
+
+struct EncoderRGB : Encoder {
+	static constexpr size_t NumLights = 3;
+};
+
+struct EncoderWhiteLight : EncoderMonoLight {};
+struct SmallEncoder : Encoder {};
+struct SmallLEDEncoder : EncoderMonoLight {};
+
+//
+// Jacks
+//
+struct JackElement : BaseElement {};
+
+struct JackInput : JackElement {
+	static constexpr size_t NumInputs = 1;
+};
+struct JackOutput : JackElement {
+	static constexpr size_t NumOutputs = 1;
+};
 
 // Input Jacks
-struct JackElement : BaseElement {};
-struct JackInput : JackElement {};
 struct GateJackInput : JackInput {};
 struct AnalogJackInput : JackInput {};
 struct BefacoInputPort : JackInput {};
 using BananutBlack = BefacoInputPort;
+struct GateJackInput4ms : JackInput {};
+struct AnalogJackInput4ms : JackInput {};
 
 // Output jacks
-struct JackOutput : JackElement {};
 struct GateJackOutput : JackOutput {};
 struct AnalogJackOutput : JackOutput {};
 struct BefacoOutputPort : JackOutput {};
 using BananutRed = BefacoOutputPort;
-
+struct GateJackOutput4ms : GateJackOutput {};
+struct AnalogJackOutput4ms : AnalogJackOutput {};
 struct PJ301MPortIn : JackInput {};
 struct PJ301MPortOut : JackOutput {};
 
+//
+// Lights (non-composite)
+//
+
+struct LightElement : BaseElement {
+	static constexpr size_t NumLights = 1;
+};
+struct MonoLight : LightElement {};
+struct DualLight : LightElement {
+	static constexpr size_t NumLights = 2;
+};
+struct RgbLed : LightElement {
+	static constexpr size_t NumLights = 3;
+};
+
+struct RedLight : MonoLight {};
+struct OrangeLight : MonoLight {};
+struct GreenLight : MonoLight {};
+struct BlueLight : MonoLight {};
+struct WhiteLight : MonoLight {};
+struct RedBlueLight : DualLight {};
+struct RedGreenBlueLight : RgbLed {};
+template<typename LedT>
+struct MediumLight : LedT {};
+
+//
 // Displays
-struct Display : MonoLight {}; //TODO: does this need its own category?
+//
+struct Display : LightElement {}; //TODO: does this need its own category?
 struct BraidsDisplay148x56 : Display {};
 
-// AltParams
+//
+// AltParams: TODO
+//
 struct AltParam : BaseElement {};
 struct AltParamToggle2 : AltParam {};
 struct AltParamToggle3 : AltParam {};
 
-using Element = std::variant<MediumLight<RedGreenBlueLight>,
-							 RedLight,
-							 OrangeLight,
-							 GreenLight,
-							 BlueLight,
-							 WhiteLight,
-							 RedBlueLight,
-							 MomentaryButtonRGB,
-							 LatchingButtonMonoLight,
-							 Toggle2pos,
-							 Toggle3pos,
-							 LEDEncoder,
-							 Davies1900hBlackKnob,
-							 Knob9mm,
-							 DaviesLargeKnob,
-							 Slider25mmVert,
-							 Slider25mmHoriz,
-							 Davies1900hRedKnob,
-							 Davies1900hWhiteKnob,
-							 BefacoBigKnob,
-							 BefacoTinyKnob,
-							 BefacoSliderPot,
-							 BefacoTinyKnobWhite,
-							 BefacoTinyKnobRed,
-							 BefacoTinyKnobDarkGrey,
-							 BefacoTinyKnobLightGrey,
-							 BefacoTinyKnobBlack,
-							 Davies1900hLargeGreyKnob,
-							 Davies1900hLightGreyKnob,
-							 Davies1900hDarkGreyKnob,
-							 Rogan2SGray,
-							 Rogan2PSWhite,
-							 Rogan2PSGreen,
-							 Rogan2PSRed,
-							 CKSSNarrow,
-							 Crossfader,
-							 BefacoSwitchHorizontal,
-							 CKSSHoriz2,
-							 CKSSVert7,
-							 CKSSHoriz4,
-							 CKSSNarrow3,
-							 Davies1900hLargeLightGreyKnob,
-							 BefacoSlidePotSmall,
-							 GateJackInput,
-							 AnalogJackInput,
-							 BefacoInputPort,
-							 GateJackOutput,
-							 AnalogJackOutput,
-							 BefacoOutputPort,
-							 PJ301MPortIn,
-							 PJ301MPortOut,
-							 BraidsDisplay148x56,
-							 AltParamToggle2,
-							 AltParamToggle3>;
+//
+// All Concrete Elements
+//
+using Element = std::variant<
+	// Knobs
+	Davies1900hBlackKnob,
+	Knob9mm,
+	DaviesLargeKnob,
+	Davies1900hRedKnob,
+	Davies1900hWhiteKnob,
+	BefacoBigKnob,
+	BefacoTinyKnob,
+	BefacoTinyKnobWhite,
+	BefacoTinyKnobRed,
+	BefacoTinyKnobDarkGrey,
+	BefacoTinyKnobLightGrey,
+	BefacoTinyKnobBlack,
+	Davies1900hLargeLightGreyKnob,
+	Davies1900hLargeGreyKnob,
+	Davies1900hLightGreyKnob,
+	Davies1900hDarkGreyKnob,
+	Rogan2SGray,
+	Rogan2PSWhite,
+	Rogan2PSGreen,
+	Rogan2PSRed,
+
+	// Sliders
+	Slider25mmVert,
+	Slider25mmHoriz,
+	BefacoSliderPot,
+	BefacoSlidePotSmall,
+	CKSSNarrow,
+	Crossfader,
+	CKSSHoriz2,
+	CKSSVert7,
+	CKSSHoriz4,
+	CKSSNarrow3,
+
+	// Switches/Buttons
+	MomentaryButtonRGB,
+	LatchingButtonMonoLight,
+	Toggle2pos,
+	Toggle3pos,
+	BefacoSwitchHorizontal,
+
+	//Encoders
+	Encoder,
+	EncoderMonoLight,
+	EncoderRGB,
+
+	// Jacks
+	GateJackInput4ms,
+	AnalogJackInput4ms,
+	BefacoInputPort,
+	GateJackOutput4ms,
+	AnalogJackOutput4ms,
+	BefacoOutputPort,
+	PJ301MPortIn,
+	PJ301MPortOut,
+
+	//	Lights
+	MediumLight<RedGreenBlueLight>,
+	RedLight,
+	OrangeLight,
+	GreenLight,
+	BlueLight,
+	WhiteLight,
+	RedBlueLight,
+
+	// Displays
+	BraidsDisplay148x56,
+
+	// Alt Params
+	AltParamToggle2,
+	AltParamToggle3>;
 
 } // namespace MetaModule
