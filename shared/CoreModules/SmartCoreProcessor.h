@@ -22,29 +22,23 @@ protected:
 	}
 
 	void setOutput(MetaModule::JackOutput el, float val) {
-		if (ElementCount::count(el).num_outputs) {
-			if (auto idx = ElementCount::get_indices<INFO>(el)) {
-				outputValues[idx->output_idx] = val;
-			}
+		if (auto idx = ElementCount::get_indices<INFO>(el)) {
+			outputValues[idx->output_idx] = val;
 		}
 	}
 
 	std::optional<float> getInput(MetaModule::JackInput el) {
-		if (ElementCount::count(el).num_inputs) {
-			if (auto idx = ElementCount::get_indices<INFO>(el)) {
-				auto result = inputValues[idx->input_idx];
-				inputValues[idx->input_idx].reset();
-				return result;
-			}
+		if (auto idx = ElementCount::get_indices<INFO>(el)) {
+			auto result = inputValues[idx->input_idx];
+			inputValues[idx->input_idx].reset();
+			return result;
 		}
 		return {};
 	}
 
 	float getParam(MetaModule::ParamElement el) {
-		if (ElementCount::count(el).num_params) {
-			if (auto idx = ElementCount::get_indices<INFO>(el)) {
-				return paramValues[idx->param_idx];
-			}
+		if (auto idx = ElementCount::get_indices<INFO>(el)) {
+			return paramValues[idx->param_idx];
 		}
 		return 0.f;
 	}
