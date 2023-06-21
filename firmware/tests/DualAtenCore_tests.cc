@@ -12,8 +12,8 @@ static_assert(counts.num_inputs == 2);
 static_assert(counts.num_outputs == 2);
 static_assert(counts.num_lights == 6); //6 = RGB * 2
 
-using ParamScale = typename PotElementHelper<Info>::ParamScale;
-constexpr static std::array<ParamScale, counts.num_params> param_scales = PotElementHelper<Info>::param_scales();
+constexpr static std::array<PotElementHelper::ParamScale, counts.num_params> param_scales =
+	PotElementHelper::param_scales<Info>();
 
 static_assert(param_scales.size() == 4);
 static_assert(param_scales[0].range == 2.f);

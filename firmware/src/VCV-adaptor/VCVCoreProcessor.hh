@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/elements/element_counter.hh"
+#include "CoreModules/elements/param_scales.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "VCV-adaptor/dsp/common.hpp"
 #include "VCV-adaptor/dsp/minblep.hpp"
@@ -15,6 +16,7 @@
 #include <array>
 #include <memory>
 
+// This wrapper lets ported VCV modules run on hardware.
 template<typename Info, typename Core>
 struct VCVCoreProcessor : CoreProcessor {
 	struct ProcessArgs {
@@ -75,16 +77,15 @@ struct VCVCoreProcessor : CoreProcessor {
 		outputs[output_id].connected = true;
 	}
 
-	constexpr static typename ElementCount<Info>::Counts counts = ElementCount<Info>::count();
+	constexpr static typename ElementCount::Counts counts = ElementCount::count<Info>();
 
 	std::array<Param, counts.num_params> params;
 	std::array<Port, counts.num_inputs> inputs;
 	std::array<Port, counts.num_outputs> outputs;
 	std::array<Light, counts.num_lights> lights;
 
-	using ParamScale = typename ElementCount<Info>::ParamScale;
-
-	constexpr static std::array<ParamScale, counts.num_params> param_scales = ElementCount<Info>::param_scales();
+	constexpr static std::array<PotElementHelper::ParamScale, counts.num_params> param_scales =
+		PotElementHelper::param_scales<Info>();
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
 
