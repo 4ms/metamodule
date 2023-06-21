@@ -34,3 +34,26 @@ struct ElementCount {
 		return c;
 	}
 };
+
+template<typename Info>
+struct ElementId {
+
+	static constexpr size_t get_element_id(MetaModule::BaseElement element) {
+
+		for (unsigned i = 0; auto el : Info::Elements) {
+			// We assume all elements have distinct coordinates and/or name
+			bool is_same = std::visit(
+				[element](auto e) {
+				return element.x_mm == e.x_mm && element.y_mm == e.y_mm && element.short_name == e.short_name &&
+					   element.long_name == e.long_name;
+				},
+				el);
+
+			if (is_same)
+				return i;
+
+			i++;
+		}
+		return 0;
+	}
+};
