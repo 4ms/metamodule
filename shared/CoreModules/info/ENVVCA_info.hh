@@ -10,69 +10,34 @@ struct ENVVCAInfo : ElementInfoBase {
 	static constexpr uint32_t width_hp = 8;
 	static constexpr std::string_view svg_filename{"res/modules/ENVVCA-artwork.svg"};
 
-	// Todo: get rid of these enums, set all Elements to idx=0?
-	enum {
-		KnobRise_Slider = 0,
-		KnobFall_Slider = 1,
-		KnobEnv_Level_Slider = 2,
-		KnobRise_Cv = 3,
-		KnobFall_Cv = 4,
-		SwitchSlow_Med_Fast_Rise = 5,
-		SwitchSlow_Med_Fast_Fall = 6,
-		SwitchCycle = 7,
-	};
-	enum {
-		InputTime_Cv = 0,
-		InputTrigger = 1,
-		InputCycle = 2,
-		InputFollow = 3,
-		InputIn = 4,
-	};
-	enum {
-		OutputEnv = 0,
-		OutputEor = 1,
-		OutputOut = 2,
-	};
-
-	// FIXME: Led Idx must be manually set, and it's not intuituve; Use named-elements instead?
-	enum {
-		LedCycle_Led = 0,
-		LedRiseBlue_Led = 1,
-		LedRiseRed_Led = 2,
-		LedFallBlue_Led = 3,
-		LedFallRed_Led = 4,
-		LedEor_Led = 5,
-	};
-
 	static constexpr std::array<Element, 19> Elements{{
-		Slider25mmVert{{{{to_mm<72>(23.185f), to_mm<72>(108.81f), "Rise Time", "", KnobRise_Slider}, 0.f, 1.f, 0.25f}}},
-		Slider25mmVert{{{{to_mm<72>(57.325f), to_mm<72>(109.02f), "Fall Time", "", KnobFall_Slider}, 0.f, 1.f, 0.25f}}},
-		Slider25mmVert{
-			{{{to_mm<72>(91.505f), to_mm<72>(108.81f), "Env Level", "", KnobEnv_Level_Slider}, 0.f, 1.f, 1.f}}},
-		Knob9mm{{{{to_mm<72>(21.69f), to_mm<72>(178.25f), "Rise CV", "Rise CV", KnobRise_Cv}, 0.f, 1.f, 0.f}}},
-		Knob9mm{{{{to_mm<72>(92.85f), to_mm<72>(178.25f), "Fall CV", "Fall CV", KnobFall_Cv}, 0.f, 1.f, 0.f}}},
+		Slider25mmVertLED{{{{{to_mm<72>(23.185f), to_mm<72>(108.81f), "Rise Time", "", 0}, 0.f, 1.f, 0.25f}}}},
+		Slider25mmVertLED{{{{{to_mm<72>(57.325f), to_mm<72>(109.02f), "Fall Time", "", 0}, 0.f, 1.f}}}},
+		Slider25mmVertLED{{{{{to_mm<72>(91.505f), to_mm<72>(108.81f), "Env Level", "", 0}, 0.f, 1.f, 1.f}}}},
+		Knob9mm{{{{to_mm<72>(21.69f), to_mm<72>(178.25f), "Rise CV", "Rise CV", 0}, 0.f, 1.f, 0.f}}},
+		Knob9mm{{{{to_mm<72>(92.85f), to_mm<72>(178.25f), "Fall CV", "Fall CV", 0}, 0.f, 1.f, 0.f}}},
 
-		AnalogJackInput4ms{to_mm<72>(57.25f), to_mm<72>(203.53f), "Time CV", "Time CV", InputTime_Cv},
-		GateJackInput4ms{to_mm<72>(22.3f), to_mm<72>(227.06f), "Trigger", "Trigger", InputTrigger},
-		GateJackInput4ms{to_mm<72>(57.25f), to_mm<72>(254.25f), "Cycle", "Cycle", InputCycle},
-		AnalogJackInput4ms{to_mm<72>(22.3f), to_mm<72>(278.73f), "Follow", "Follow", InputFollow},
-		AnalogJackInput4ms{to_mm<72>(35.87f), to_mm<72>(322.47f), "In", "In", InputIn},
-		AnalogJackOutput4ms{to_mm<72>(92.03f), to_mm<72>(227.06f), "Env", "Env", OutputEnv},
-		GateJackOutput4ms{to_mm<72>(92.03f), to_mm<72>(278.73f), "EOR", "EOR", OutputEor},
-		AnalogJackOutput4ms{to_mm<72>(78.57f), to_mm<72>(322.5f), "Out", "Out", OutputOut},
+		AnalogJackInput4ms{to_mm<72>(57.25f), to_mm<72>(203.53f), "Time CV", "Time CV", 0},
+		GateJackInput4ms{to_mm<72>(22.3f), to_mm<72>(227.06f), "Trigger", "Trigger", 0},
+		GateJackInput4ms{to_mm<72>(57.25f), to_mm<72>(254.25f), "Cycle", "Cycle", 0},
+		AnalogJackInput4ms{to_mm<72>(22.3f), to_mm<72>(278.73f), "Follow", "Follow", 0},
+		AnalogJackInput4ms{to_mm<72>(35.87f), to_mm<72>(322.47f), "In", "In", 0},
+		AnalogJackOutput4ms{to_mm<72>(92.03f), to_mm<72>(227.06f), "Env", "Env", 0},
+		GateJackOutput4ms{to_mm<72>(92.03f), to_mm<72>(278.73f), "EOR", "EOR", 0},
+		AnalogJackOutput4ms{to_mm<72>(78.57f), to_mm<72>(322.5f), "Out", "Out", 0},
 
-		Toggle3pos{to_mm<72>(23.19f), to_mm<72>(43.305f), "Rise", "Rise", SwitchSlow_Med_Fast_Rise},  //, 0, 2, 1},
-		Toggle3pos{to_mm<72>(57.33f), to_mm<72>(43.305f), "Fall", "Fall", SwitchSlow_Med_Fast_Fall},  //, 0, 2, 1},
-		LatchingButtonMonoLight{to_mm<72>(92.17f), to_mm<72>(41.65f), "Cycle", "Cycle", SwitchCycle}, //, 0, 1, 0},
+		Toggle3pos{to_mm<72>(23.19f), to_mm<72>(43.305f), "Rise", "Rise", 0},
+		Toggle3pos{to_mm<72>(57.33f), to_mm<72>(43.305f), "Fall", "Fall", 0},
+		LatchingButtonMonoLight{to_mm<72>(92.17f), to_mm<72>(41.65f), "Cycle", "Cycle", 0},
 
-		RedBlueLight{to_mm<72>(45.11f), to_mm<72>(174.84f), "Rise CV", "Rise CV", LedRiseBlue_Led},
-		RedBlueLight{to_mm<72>(69.34f), to_mm<72>(174.84f), "Fall CV", "Fall CV", LedFallBlue_Led},
-		OrangeLight{to_mm<72>(106.41f), to_mm<72>(256.6f), "EOR", "EOR", LedEor_Led},
+		RedBlueLight{to_mm<72>(45.11f), to_mm<72>(174.84f), "Rise CV", "Rise CV", 0},
+		RedBlueLight{to_mm<72>(69.34f), to_mm<72>(174.84f), "Fall CV", "Fall CV", 0},
+		OrangeLight{to_mm<72>(106.41f), to_mm<72>(256.6f), "EOR", "EOR", 0},
 	}};
 
-	static constexpr auto RiseSlider = get<Slider25mmVert>(Elements[0]);
-	static constexpr auto FallSlider = get<Slider25mmVert>(Elements[1]);
-	static constexpr auto LevelSlider = get<Slider25mmVert>(Elements[2]);
+	static constexpr auto RiseSlider = get<Slider25mmVertLED>(Elements[0]);
+	static constexpr auto FallSlider = get<Slider25mmVertLED>(Elements[1]);
+	static constexpr auto LevelSlider = get<Slider25mmVertLED>(Elements[2]);
 	static constexpr auto RiseCvAtten = get<Knob9mm>(Elements[3]);
 	static constexpr auto FallCvAtten = get<Knob9mm>(Elements[4]);
 
