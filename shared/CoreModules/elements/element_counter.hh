@@ -3,83 +3,79 @@
 #include <numeric>
 #include <optional>
 
-template<typename Info>
-struct ElementCount {
+namespace ElementCount
+{
 
-	struct Counts {
-		size_t num_params = 0;
-		size_t num_lights = 0;
-		size_t num_inputs = 0;
-		size_t num_outputs = 0;
-	};
+struct Counts {
+	size_t num_params = 0;
+	size_t num_lights = 0;
+	size_t num_inputs = 0;
+	size_t num_outputs = 0;
 
-	static constexpr Counts count() {
-		Counts c;
-
-		c.num_params = std::accumulate(Info::Elements.begin(), Info::Elements.end(), 0, [](auto left, auto right) {
-			return left + std::visit([](auto el) { return el.NumParams; }, right);
-		});
-
-		c.num_lights = std::accumulate(Info::Elements.begin(), Info::Elements.end(), 0, [](auto left, auto right) {
-			return left + std::visit([](auto el) { return el.NumLights; }, right);
-		});
-
-		c.num_inputs = std::accumulate(Info::Elements.begin(), Info::Elements.end(), 0, [](auto left, auto right) {
-			return left + std::visit([](auto el) { return el.NumInputs; }, right);
-		});
-
-		c.num_outputs = std::accumulate(Info::Elements.begin(), Info::Elements.end(), 0, [](auto left, auto right) {
-			return left + std::visit([](auto el) { return el.NumOutputs; }, right);
-		});
-
-		return c;
+	constexpr Counts operator+(const Counts rhs) {
+		return {num_params + rhs.num_params,
+				num_lights + rhs.num_lights,
+				num_inputs + rhs.num_inputs,
+				num_outputs + rhs.num_outputs};
 	}
 };
 
-template<typename Info>
-struct ElementId {
-
-	static constexpr size_t get_element_id(MetaModule::BaseElement element) {
-
-		for (unsigned i = 0; auto el : Info::Elements) {
-			// We assume all elements have distinct coordinates and/or name
-			bool is_same = std::visit(
-				[element](auto e) {
-				return element.x_mm == e.x_mm && element.y_mm == e.y_mm && element.short_name == e.short_name &&
-					   element.long_name == e.long_name;
-				},
-				el);
-
-			if (is_same)
-				return i;
-
-			i++;
-		}
-		return 0;
-	}
-};
-
-template<typename Info>
-static constexpr std::optional<typename ElementCount<Info>::Counts> get_param_id(MetaModule::BaseElement element) {
+struct Indices {
+	size_t param_idx = 0;
 	size_t light_idx = 0;
-	for (size_t param_idx = 0; auto el : Info::Elements) {
-		bool is_same = std::visit(
-			[element](auto e) {
-			return element.x_mm == e.x_mm && element.y_mm == e.y_mm && element.short_name == e.short_name &&
-				   element.long_name == e.long_name;
-			},
-			el);
+	size_t input_idx = 0;
+	size_t output_idx = 0;
+};
 
-		auto num_params = std::visit([](auto e) { return e.NumParams; }, el);
+constexpr bool operator==(MetaModule::BaseElement a, MetaModule::BaseElement b) {
+	// We assume all elements have distinct coordinates and/or names
+	// FIXME: This will fail if two elements have different type but identical elements
+	return a.x_mm == b.x_mm && a.y_mm == b.y_mm && a.short_name == b.short_name && a.long_name == b.long_name;
+}
 
-		if (is_same) {
-			if (num_params)
-				return {{param_idx, light_idx}};
-			else
-				return {};
+constexpr Counts count(auto e) {
+	return Counts{e.NumParams, e.NumLights, e.NumInputs, e.NumOutputs};
+}
+
+constexpr Counts count(MetaModule::Element element) {
+	return std::visit([](auto e) { return count(e); }, element);
+}
+
+template<typename Info>
+constexpr Counts count() {
+	return std::accumulate(Info::Elements.begin(), Info::Elements.end(), Counts{}, [](auto total, auto element) {
+		return total + count(element);
+	});
+}
+
+template<typename Info>
+static constexpr std::optional<Indices> get_indices(MetaModule::BaseElement element) {
+	Indices idx{};
+
+	for (auto el : Info::Elements) {
+		Counts el_cnt = count(el);
+
+		if (element == std::visit([](auto e) { return MetaModule::BaseElement{e}; }, el)) {
+			return {{idx.param_idx, idx.light_idx, idx.input_idx, idx.output_idx}};
 		}
 
-		param_idx += num_params;
+		idx.param_idx += el_cnt.num_params;
+		idx.light_idx += el_cnt.num_lights;
+		idx.input_idx += el_cnt.num_inputs;
+		idx.output_idx += el_cnt.num_outputs;
 	}
 	return {};
 }
+
+// This isn't used (yet?) TODO: Remove when done with refactoring if still not used
+template<typename Info>
+static constexpr std::optional<size_t> get_element_id(MetaModule::BaseElement element) {
+	for (unsigned i = 0; auto el : Info::Elements) {
+		if (element == std::visit([](auto e) { return MetaModule::BaseElement{e}; }, el))
+			return i;
+		i++;
+	}
+	return {}; //element not found
+}
+
+}; // namespace ElementCount

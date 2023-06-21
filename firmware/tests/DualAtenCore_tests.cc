@@ -4,12 +4,13 @@
 
 namespace
 {
+
 using Info = MetaModule::DualAtenuverterInfo;
-constexpr static typename ElementCount<Info>::Counts counts = ElementCount<Info>::count();
+constexpr static typename ElementCount::Counts counts = ElementCount::count<Info>();
 static_assert(counts.num_params == 4);
 static_assert(counts.num_inputs == 2);
 static_assert(counts.num_outputs == 2);
-static_assert(counts.num_lights == 6); //6 = 3*Sliders + RiseCV + FallCV + CycleButton
+static_assert(counts.num_lights == 6); //6 = RGB * 2
 
 using ParamScale = typename PotElementHelper<Info>::ParamScale;
 constexpr static std::array<ParamScale, counts.num_params> param_scales = PotElementHelper<Info>::param_scales();
@@ -23,4 +24,5 @@ static_assert(param_scales[2].range == 2.f);
 static_assert(param_scales[2].offset == -1.f);
 static_assert(param_scales[3].range == 20.f);
 static_assert(param_scales[3].offset == -10.f);
+
 } // namespace

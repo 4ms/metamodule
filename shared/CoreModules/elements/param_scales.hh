@@ -21,7 +21,7 @@ struct PotElementHelper {
 	};
 
 	static constexpr auto param_scales() {
-		std::array<ParamScale, ElementCount<Info>::count().num_params> scales;
+		std::array<ParamScale, ElementCount::count<Info>().num_params> scales;
 
 		auto CalcParamScales = Overload{
 			[](MetaModule::BaseElement) {}, //Ignore everything but pots

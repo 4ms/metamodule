@@ -238,6 +238,8 @@ using Element = std::variant<
 	// Sliders
 	Slider25mmVert,
 	Slider25mmHoriz,
+	Slider25mmVertLED,
+	Slider25mmHorizLED,
 	BefacoSliderPot,
 	BefacoSlidePotSmall,
 	CKSSNarrow,
