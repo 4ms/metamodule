@@ -17,6 +17,7 @@
 namespace MetaModule
 {
 
+// TODO: get rid of idx field once VCV rack modules work without it
 struct BaseElement {
 	float x_mm = 0;
 	float y_mm = 0;

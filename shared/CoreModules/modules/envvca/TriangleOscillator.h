@@ -5,6 +5,7 @@
 class TriangleOscillator
 {
 public:
+	// FIXME: FOLLOW state is orthagonal to [RISE or FALL] state
     enum State_t {RISING, FALLING, FOLLOW};
 
 public:
