@@ -26,16 +26,18 @@ constexpr auto param_scales() {
 
 	auto CalcParamScales = Overload{
 		[](MetaModule::BaseElement) {}, //Ignore everything but pots
+
 		[&scales](MetaModule::Pot el) {
-		if (el.idx < scales.size()) {
-			scales[el.idx].range = el.max_val - el.min_val;
-			scales[el.idx].offset = el.min_val;
+		if (auto c = ElementCount::get_indices<Info>(el)) {
+			scales[c->param_idx].range = el.max_val - el.min_val;
+			scales[c->param_idx].offset = el.min_val;
 		}
 		},
 	};
 
-	for (auto el : Info::Elements)
+	for (auto el : Info::Elements) {
 		std::visit(CalcParamScales, el);
+	}
 
 	return scales;
 }
