@@ -27,6 +27,13 @@ struct ParamDbgPrint {
 	bool flag_next_page = false;
 	bool flag_prev_page = false;
 
+	void output_load(uint32_t now_ticks) {
+		if ((now_ticks - last_dbg_output_tm) > 2000) {
+			last_dbg_output_tm = now_ticks;
+			printf_("Load = %d\%\n", metaparams.audio_load);
+		}
+	}
+
 	void output_debug_info(uint32_t now_ticks) {
 		for (auto [i, pot] : enumerate(params.knobs)) {
 			if (pot < pot_min[i])

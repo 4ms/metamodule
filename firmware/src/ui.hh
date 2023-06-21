@@ -91,6 +91,7 @@ private:
 
 		// Uncomment to enable:
 		// print_dbg_params.output_debug_info(HAL_GetTick());
+		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
 	void page_update_task() { //60Hz
