@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include <numeric>
+#include <optional>
 
 template<typename Info>
 struct ElementCount {
@@ -57,3 +58,28 @@ struct ElementId {
 		return 0;
 	}
 };
+
+template<typename Info>
+static constexpr std::optional<typename ElementCount<Info>::Counts> get_param_id(MetaModule::BaseElement element) {
+	size_t light_idx = 0;
+	for (size_t param_idx = 0; auto el : Info::Elements) {
+		bool is_same = std::visit(
+			[element](auto e) {
+			return element.x_mm == e.x_mm && element.y_mm == e.y_mm && element.short_name == e.short_name &&
+				   element.long_name == e.long_name;
+			},
+			el);
+
+		auto num_params = std::visit([](auto e) { return e.NumParams; }, el);
+
+		if (is_same) {
+			if (num_params)
+				return {{param_idx, light_idx}};
+			else
+				return {};
+		}
+
+		param_idx += num_params;
+	}
+	return {};
+}
