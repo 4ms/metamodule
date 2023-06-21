@@ -11,34 +11,41 @@ public:
 	}
 
 protected:
-	void setOutput(int i, float val) {
-		if (i < (int)outputValues.size())
-			outputValues[i] = val;
+	void setLED(auto el, float val, size_t color_idx = 0) {
+		if (ElementCount::count(el).num_lights) {
+			if (auto idx = ElementCount::get_indices<INFO>(el)) {
+				auto led_idx = idx->light_idx + color_idx;
+				if (led_idx < ledValues.size())
+					ledValues[led_idx] = val;
+			}
+		}
 	}
 
-	void setLED(int i, float val) {
-		if (i < (int)ledValues.size())
-			ledValues[i] = val;
+	void setOutput(MetaModule::JackOutput el, float val) {
+		if (ElementCount::count(el).num_outputs) {
+			if (auto idx = ElementCount::get_indices<INFO>(el)) {
+				outputValues[idx->output_idx] = val;
+			}
+		}
 	}
 
-	std::optional<float> getInput(int i) {
-		if (i < (int)inputValues.size()) {
-			auto result = inputValues[i];
-			inputValues[i].reset();
-			return result;
+	std::optional<float> getInput(MetaModule::JackInput el) {
+		if (ElementCount::count(el).num_inputs) {
+			if (auto idx = ElementCount::get_indices<INFO>(el)) {
+				auto result = inputValues[idx->input_idx];
+				inputValues[idx->input_idx].reset();
+				return result;
+			}
 		}
 		return {};
 	}
 
-	float getKnob(int i) {
-		if (i < (int)paramValues.size())
-			return paramValues[i];
-		return 0.f;
-	}
-
-	float getSwitch(int i) {
-		if (i < (int)paramValues.size())
-			return paramValues[i];
+	float getParam(MetaModule::ParamElement el) {
+		if (ElementCount::count(el).num_params) {
+			if (auto idx = ElementCount::get_indices<INFO>(el)) {
+				return paramValues[idx->param_idx];
+			}
+		}
 		return 0.f;
 	}
 
@@ -61,7 +68,6 @@ protected:
 	}
 
 	float get_led_brightness(int led_id) const override {
-		// ignores switches with light for now
 		if (led_id < (int)ledValues.size()) {
 			return ledValues[led_id];
 		} else {
@@ -75,7 +81,5 @@ private:
 	std::array<float, counts.num_params> paramValues;
 	std::array<std::optional<float>, counts.num_inputs> inputValues;
 	std::array<float, counts.num_outputs> outputValues;
-
-	// ignores switches with light for now
 	std::array<float, counts.num_lights> ledValues;
 };
