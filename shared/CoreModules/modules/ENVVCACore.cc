@@ -67,7 +67,7 @@ public:
 
 		displayOscillatorState(osc.getState());
 
-		displayEnvelope(osc.getOutput());
+		displayEnvelope(osc.getOutput(), osc.getState());
 		runAudioPath(osc.getOutput());
 	}
 
@@ -100,17 +100,27 @@ public:
 		// Ignoring output impedance and inverting 400kHz lowpass
 	}
 
-	void displayEnvelope(float val)
+	void displayEnvelope(float val, TriangleOscillator::State_t state)
 	{
 		val = val / VoltageDivider(100e3f, 100e3f);
-		setOutput(Info::EnvOut, val * getParam(Info::LevelSlider));
-		//TODO: set all three slider LEDs
+		val *= getParam(Info::LevelSlider);
+		setOutput(Info::EnvOut, val);
+		setLED(Info::LevelSlider, val / 8.f);
+		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
+		// even during State_t::FOLLOW
+		setLED(Info::RiseSlider, state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
+		setLED(Info::FallSlider, state == TriangleOscillator::State_t::FALLING ? val / 8.f : 0);
 	}
 
 	void displayOscillatorState(TriangleOscillator::State_t state)
 	{
-		setOutput(Info::Eor, state == TriangleOscillator::State_t::FALLING ? 8.f : 0.f);
-		setLED(Info::EorLed, state == TriangleOscillator::State_t::FALLING);
+		if (state == TriangleOscillator::State_t::FALLING) {
+			setOutput(Info::Eor, 8.f);
+			setLED(Info::EorLed, 1);
+		} else {
+			setOutput(Info::Eor, 0);
+			setLED(Info::EorLed, 0);
+		}
 	}
 
 	void runOscillator() {
