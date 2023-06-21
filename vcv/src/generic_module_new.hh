@@ -23,7 +23,7 @@ struct GenericModuleNew {
 			configComm(cnt.num_params, cnt.num_inputs, cnt.num_outputs, cnt.num_lights);
 
 			// Configure elements with VCV
-			MetaModule::VCVModuleParamCreator creator{this};
+			MetaModule::VCVModuleParamCreator<INFO> creator{this};
 			for (auto &element : INFO::Elements) {
 				std::visit([&creator](auto &el) { creator.config_element(el); }, element);
 			}
@@ -56,7 +56,7 @@ struct GenericModuleNew {
 			}
 
 			// create widgets from all elements
-			MetaModule::VCVWidgetCreator creator(this, module);
+			MetaModule::VCVWidgetCreator<INFO> creator(this, module);
 			for (auto &element : INFO::Elements) {
 				std::visit([&creator](auto &el) { creator.create(el); }, element);
 			}
