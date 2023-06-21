@@ -1,4 +1,5 @@
 #include "CoreModules/elements/element_counter.hh"
+#include "CoreModules/elements/param_scales.hh"
 #include "info/DualAtenuverter_info.hh"
 
 namespace
@@ -8,10 +9,10 @@ constexpr static typename ElementCount<Info>::Counts counts = ElementCount<Info>
 static_assert(counts.num_params == 4);
 static_assert(counts.num_inputs == 2);
 static_assert(counts.num_outputs == 2);
-static_assert(counts.num_lights == 6); //why 6?
+static_assert(counts.num_lights == 6); //6 = 3*Sliders + RiseCV + FallCV + CycleButton
 
-using ParamScale = typename ElementCount<Info>::ParamScale;
-constexpr static std::array<ParamScale, counts.num_params> param_scales = ElementCount<Info>::param_scales();
+using ParamScale = typename PotElementHelper<Info>::ParamScale;
+constexpr static std::array<ParamScale, counts.num_params> param_scales = PotElementHelper<Info>::param_scales();
 
 static_assert(param_scales.size() == 4);
 static_assert(param_scales[0].range == 2.f);

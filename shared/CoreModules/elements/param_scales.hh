@@ -20,7 +20,7 @@ struct PotElementHelper {
 		float offset;
 	};
 
-	static constexpr auto get_pot_ranges() {
+	static constexpr auto param_scales() {
 		std::array<ParamScale, ElementCount<Info>::count().num_params> scales;
 
 		auto CalcParamScales = Overload{

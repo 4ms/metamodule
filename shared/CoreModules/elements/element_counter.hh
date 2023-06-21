@@ -15,19 +15,19 @@ struct ElementCount {
 	static constexpr Counts count() {
 		Counts c;
 
-		c.num_params = std::accumulate(Info::elements.begin(), Info::elements.end(), 0, [](auto left, auto right) {
+		c.num_params = std::accumulate(Info::Elements.begin(), Info::Elements.end(), 0, [](auto left, auto right) {
 			return left + std::visit([](auto el) { return el.NumParams; }, right);
 		});
 
-		c.num_lights = std::accumulate(Info::elements.begin(), Info::elements.end(), 0, [](auto left, auto right) {
+		c.num_lights = std::accumulate(Info::Elements.begin(), Info::Elements.end(), 0, [](auto left, auto right) {
 			return left + std::visit([](auto el) { return el.NumLights; }, right);
 		});
 
-		c.num_inputs = std::accumulate(Info::elements.begin(), Info::elements.end(), 0, [](auto left, auto right) {
+		c.num_inputs = std::accumulate(Info::Elements.begin(), Info::Elements.end(), 0, [](auto left, auto right) {
 			return left + std::visit([](auto el) { return el.NumInputs; }, right);
 		});
 
-		c.num_outputs = std::accumulate(Info::elements.begin(), Info::elements.end(), 0, [](auto left, auto right) {
+		c.num_outputs = std::accumulate(Info::Elements.begin(), Info::Elements.end(), 0, [](auto left, auto right) {
 			return left + std::visit([](auto el) { return el.NumOutputs; }, right);
 		});
 

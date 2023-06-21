@@ -51,46 +51,46 @@ struct ENVVCAInfo : ElementInfoBase {
 		Knob9mm{to_mm<72>(21.69f), to_mm<72>(178.25f), "Rise CV", "Rise CV", KnobRise_Cv, 0.f, 1.f, 0.f},
 		Knob9mm{to_mm<72>(92.85f), to_mm<72>(178.25f), "Fall CV", "Fall CV", KnobFall_Cv, 0.f, 1.f, 0.f},
 
-		AnalogJackInput{to_mm<72>(57.25f), to_mm<72>(203.53f), "Time CV", "Time CV", InputTime_Cv},
-		GateJackInput{to_mm<72>(22.3f), to_mm<72>(227.06f), "Trigger", "Trigger", InputTrigger},
-		GateJackInput{to_mm<72>(57.25f), to_mm<72>(254.25f), "Cycle", "Cycle", InputCycle},
-		AnalogJackInput{to_mm<72>(22.3f), to_mm<72>(278.73f), "Follow", "Follow", InputFollow},
-		AnalogJackInput{to_mm<72>(35.87f), to_mm<72>(322.47f), "In", "In", InputIn},
-		AnalogJackOutput{to_mm<72>(92.03f), to_mm<72>(227.06f), "Env", "Env", OutputEnv},
-		GateJackOutput{to_mm<72>(92.03f), to_mm<72>(278.73f), "EOR", "EOR", OutputEor},
-		AnalogJackOutput{to_mm<72>(78.57f), to_mm<72>(322.5f), "Out", "Out", OutputOut},
+		AnalogJackInput4ms{to_mm<72>(57.25f), to_mm<72>(203.53f), "Time CV", "Time CV", InputTime_Cv},
+		GateJackInput4ms{to_mm<72>(22.3f), to_mm<72>(227.06f), "Trigger", "Trigger", InputTrigger},
+		GateJackInput4ms{to_mm<72>(57.25f), to_mm<72>(254.25f), "Cycle", "Cycle", InputCycle},
+		AnalogJackInput4ms{to_mm<72>(22.3f), to_mm<72>(278.73f), "Follow", "Follow", InputFollow},
+		AnalogJackInput4ms{to_mm<72>(35.87f), to_mm<72>(322.47f), "In", "In", InputIn},
+		AnalogJackOutput4ms{to_mm<72>(92.03f), to_mm<72>(227.06f), "Env", "Env", OutputEnv},
+		GateJackOutput4ms{to_mm<72>(92.03f), to_mm<72>(278.73f), "EOR", "EOR", OutputEor},
+		AnalogJackOutput4ms{to_mm<72>(78.57f), to_mm<72>(322.5f), "Out", "Out", OutputOut},
 
-		Toggle3pos{to_mm<72>(23.19f), to_mm<72>(43.305f), "Rise", "Rise", SwitchSlow_Med_Fast_Rise, 0, 2, 1},
-		Toggle3pos{to_mm<72>(57.33f), to_mm<72>(43.305f), "Fall", "Fall", SwitchSlow_Med_Fast_Fall, 0, 2, 1},
-		LatchingButtonMonoLight{to_mm<72>(92.17f), to_mm<72>(41.65f), "Cycle", "Cycle", SwitchCycle, 0, 1, 0},
+		Toggle3pos{to_mm<72>(23.19f), to_mm<72>(43.305f), "Rise", "Rise", SwitchSlow_Med_Fast_Rise},  //, 0, 2, 1},
+		Toggle3pos{to_mm<72>(57.33f), to_mm<72>(43.305f), "Fall", "Fall", SwitchSlow_Med_Fast_Fall},  //, 0, 2, 1},
+		LatchingButtonMonoLight{to_mm<72>(92.17f), to_mm<72>(41.65f), "Cycle", "Cycle", SwitchCycle}, //, 0, 1, 0},
 
 		RedBlueLight{to_mm<72>(45.11f), to_mm<72>(174.84f), "Rise CV", "Rise CV", LedRiseBlue_Led},
 		RedBlueLight{to_mm<72>(69.34f), to_mm<72>(174.84f), "Fall CV", "Fall CV", LedFallBlue_Led},
 		OrangeLight{to_mm<72>(106.41f), to_mm<72>(256.6f), "EOR", "EOR", LedEor_Led},
 	}};
 
-	static constexpr auto Rise_Slider = get<Slider25mmVert>(Elements[0]);
-	static constexpr auto Fall_Slider = get<Slider25mmVert>(Elements[1]);
-	static constexpr auto Level_Slider = get<Slider25mmVert>(Elements[2]);
-	static constexpr auto Rise_Cv = get<Knob9mm>(Elements[3]);
-	static constexpr auto Fall_Cv = get<Knob9mm>(Elements[4]);
+	static constexpr auto RiseSlider = get<Slider25mmVert>(Elements[0]);
+	static constexpr auto FallSlider = get<Slider25mmVert>(Elements[1]);
+	static constexpr auto LevelSlider = get<Slider25mmVert>(Elements[2]);
+	static constexpr auto RiseCvAtten = get<Knob9mm>(Elements[3]);
+	static constexpr auto FallCvAtten = get<Knob9mm>(Elements[4]);
 
-	static constexpr auto Time_Cv = get<AnalogJackInput>(Elements[5]);
-	static constexpr auto Trigger = get<GateJackInput>(Elements[6]);
-	static constexpr auto CycleJack = get<GateJackInput>(Elements[7]);
-	static constexpr auto Follow = get<AnalogJackInput>(Elements[8]);
-	static constexpr auto In = get<AnalogJackInput>(Elements[9]);
+	static constexpr auto TimeCv = get<AnalogJackInput4ms>(Elements[5]);
+	static constexpr auto Trigger = get<GateJackInput4ms>(Elements[6]);
+	static constexpr auto CycleJack = get<GateJackInput4ms>(Elements[7]);
+	static constexpr auto Follow = get<AnalogJackInput4ms>(Elements[8]);
+	static constexpr auto AudioIn = get<AnalogJackInput4ms>(Elements[9]);
 
-	static constexpr auto Env = get<AnalogJackOutput>(Elements[10]);
-	static constexpr auto Eor = get<GateJackOutput>(Elements[11]);
-	static constexpr auto Out = get<AnalogJackOutput>(Elements[12]);
+	static constexpr auto EnvOut = get<AnalogJackOutput4ms>(Elements[10]);
+	static constexpr auto Eor = get<GateJackOutput4ms>(Elements[11]);
+	static constexpr auto AudioOut = get<AnalogJackOutput4ms>(Elements[12]);
 
-	static constexpr auto Slow_Med_Fast_Rise = get<Toggle3pos>(Elements[13]);
-	static constexpr auto Slow_Med_Fast_Fall = get<Toggle3pos>(Elements[14]);
-	static constexpr auto CycleSwitch = get<LatchingButtonMonoLight>(Elements[15]);
+	static constexpr auto RiseSwitch = get<Toggle3pos>(Elements[13]);
+	static constexpr auto FallSwitch = get<Toggle3pos>(Elements[14]);
+	static constexpr auto CycleButton = get<LatchingButtonMonoLight>(Elements[15]);
 
-	static constexpr auto Rise_Led = get<RedBlueLight>(Elements[16]);
-	static constexpr auto Fall_Led = get<RedBlueLight>(Elements[17]);
-	static constexpr auto Eor_Led = get<OrangeLight>(Elements[18]);
+	static constexpr auto RiseCvLed = get<RedBlueLight>(Elements[16]);
+	static constexpr auto FallCvLed = get<RedBlueLight>(Elements[17]);
+	static constexpr auto EorLed = get<OrangeLight>(Elements[18]);
 };
 } // namespace MetaModule

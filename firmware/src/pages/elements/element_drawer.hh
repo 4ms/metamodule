@@ -16,7 +16,7 @@ inline lv_obj_t *draw_element(const BaseElement &, const lv_img_dsc_t *, lv_obj_
 }
 
 // Pot -- create lvgl image object so it can be animated later
-inline lv_obj_t *draw_element(const Pot &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+inline lv_obj_t *draw_element(const Knob &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	if (!img) {
 		pr_dbg("draw_element(Pot), image not found\n");
 		return nullptr;
