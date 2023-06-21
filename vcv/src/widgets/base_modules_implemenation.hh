@@ -35,7 +35,10 @@ void do_config_element(Switch el, ModuleContext_t& context) {
 void do_config_element(Toggle3pos el, ModuleContext_t& context) {
 	context.module->configParam(el.idx, 0.f, 2.f, 0.f, el.short_name.data());
 };
-void do_config_element(LEDEncoder el, ModuleContext_t& context) {
+inline void do_config_element(EncoderRGB el, ModuleContext_t &context) {
+	context.module->configParam(el.idx, -INFINITY, INFINITY, 0.0f, el.short_name.data());
+};
+inline void do_config_element(EncoderWhiteLight el, ModuleContext_t &context) {
 	context.module->configParam(el.idx, -INFINITY, INFINITY, 0.0f, el.short_name.data());
 };
 

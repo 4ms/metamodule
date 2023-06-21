@@ -258,7 +258,7 @@ using Element = std::variant<
 
 	//Encoders
 	Encoder,
-	EncoderMonoLight,
+	EncoderWhiteLight,
 	EncoderRGB,
 
 	// Jacks

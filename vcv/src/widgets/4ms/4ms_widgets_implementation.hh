@@ -74,8 +74,8 @@ void do_create(SmallEncoder el, WidgetContext_t &context) {
 	context.module_widget->addParam(rack::createParamCentered<Small9mmUnlinedKnob>(ctr_pos, context.module, el.idx));
 }
 
-// TODO: does this look OK?
-void do_create(LEDEncoder el, WidgetContext_t &context) {
+// TODO: does this look OK when rendered?
+inline void do_create(EncoderRGB el, WidgetContext_t &context) {
 	auto ctr_pos = rack::Vec(el.x_mm, el.y_mm).mult(Fix4msScaling);
 	context.module_widget->addParam(
 		rack::createParamCentered<Davies1900hBlackKnobUnlined4ms>(ctr_pos, context.module, el.idx));
