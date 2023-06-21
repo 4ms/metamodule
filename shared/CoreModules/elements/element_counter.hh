@@ -25,6 +25,14 @@ struct Indices {
 	size_t light_idx = 0;
 	size_t input_idx = 0;
 	size_t output_idx = 0;
+
+	// Indices + Counts -> Indices
+	constexpr Indices operator+(const Counts rhs) {
+		return {param_idx + rhs.num_params,
+				light_idx + rhs.num_lights,
+				input_idx + rhs.num_inputs,
+				output_idx + rhs.num_outputs};
+	}
 };
 
 constexpr bool operator==(MetaModule::BaseElement a, MetaModule::BaseElement b) {
@@ -59,10 +67,7 @@ static constexpr std::optional<Indices> get_indices(MetaModule::BaseElement elem
 			return {{idx.param_idx, idx.light_idx, idx.input_idx, idx.output_idx}};
 		}
 
-		idx.param_idx += el_cnt.num_params;
-		idx.light_idx += el_cnt.num_lights;
-		idx.input_idx += el_cnt.num_inputs;
-		idx.output_idx += el_cnt.num_outputs;
+		idx = idx + el_cnt;
 	}
 	return {};
 }
