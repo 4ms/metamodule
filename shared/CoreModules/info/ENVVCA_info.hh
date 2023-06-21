@@ -45,11 +45,12 @@ struct ENVVCAInfo : ElementInfoBase {
 	};
 
 	static constexpr std::array<Element, 19> Elements{{
-		Slider25mmVert{to_mm<72>(23.185f), to_mm<72>(108.81f), "Rise Slider", "", KnobRise_Slider, 0.f, 1.f, 0.25f},
-		Slider25mmVert{to_mm<72>(57.325f), to_mm<72>(109.02f), "Fall Slider", "", KnobFall_Slider, 0.f, 1.f, 0.25f},
-		Slider25mmVert{to_mm<72>(91.505f), to_mm<72>(108.81f), "Env Level", "", KnobEnv_Level_Slider, 0.f, 1.f, 1.f},
-		Knob9mm{to_mm<72>(21.69f), to_mm<72>(178.25f), "Rise CV", "Rise CV", KnobRise_Cv, 0.f, 1.f, 0.f},
-		Knob9mm{to_mm<72>(92.85f), to_mm<72>(178.25f), "Fall CV", "Fall CV", KnobFall_Cv, 0.f, 1.f, 0.f},
+		Slider25mmVert{{{{to_mm<72>(23.185f), to_mm<72>(108.81f), "Rise Time", "", KnobRise_Slider}, 0.f, 1.f, 0.25f}}},
+		Slider25mmVert{{{{to_mm<72>(57.325f), to_mm<72>(109.02f), "Fall Time", "", KnobFall_Slider}, 0.f, 1.f, 0.25f}}},
+		Slider25mmVert{
+			{{{to_mm<72>(91.505f), to_mm<72>(108.81f), "Env Level", "", KnobEnv_Level_Slider}, 0.f, 1.f, 1.f}}},
+		Knob9mm{{{{to_mm<72>(21.69f), to_mm<72>(178.25f), "Rise CV", "Rise CV", KnobRise_Cv}, 0.f, 1.f, 0.f}}},
+		Knob9mm{{{{to_mm<72>(92.85f), to_mm<72>(178.25f), "Fall CV", "Fall CV", KnobFall_Cv}, 0.f, 1.f, 0.f}}},
 
 		AnalogJackInput4ms{to_mm<72>(57.25f), to_mm<72>(203.53f), "Time CV", "Time CV", InputTime_Cv},
 		GateJackInput4ms{to_mm<72>(22.3f), to_mm<72>(227.06f), "Trigger", "Trigger", InputTrigger},
