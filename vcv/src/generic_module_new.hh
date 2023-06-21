@@ -19,7 +19,7 @@ struct GenericModuleNew {
 			core = ModuleFactory::create(INFO::slug);
 
 			// Register with VCV the number of elements of each type
-			auto cnt = ElementCount<INFO>::count();
+			auto cnt = ElementCount::count<INFO>();
 			configComm(cnt.num_params, cnt.num_inputs, cnt.num_outputs, cnt.num_lights);
 
 			// Configure elements with VCV

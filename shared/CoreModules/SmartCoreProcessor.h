@@ -70,7 +70,7 @@ protected:
 	}
 
 private:
-	constexpr static typename ElementCount<INFO>::Counts counts = ElementCount<INFO>::count();
+	constexpr static ElementCount::Counts counts = ElementCount::count<INFO>();
 
 	std::array<float, counts.num_params> paramValues;
 	std::array<std::optional<float>, counts.num_inputs> inputValues;
