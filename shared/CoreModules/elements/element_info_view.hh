@@ -4,14 +4,14 @@
 namespace MetaModule
 {
 
-struct ElementInfoView {
+struct ModuleInfoView2 {
 	std::string_view description{""};
 	uint32_t width_hp = 0;
 	std::string_view svg_filename{""};
 	std::span<const Element> Elements;
 
 	template<Derived<ElementInfoBase> T>
-	static constexpr ElementInfoView makeView() {
+	static constexpr ModuleInfoView2 makeView() {
 		return {
 			.description = T::description,
 			.width_hp = T::width_hp,

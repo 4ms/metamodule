@@ -10,7 +10,7 @@
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
-	using ElementInfoView = MetaModule::ElementInfoView;
+	using ElementInfoView = MetaModule::ModuleInfoView2;
 
 public:
 	ModuleFactory() = delete;

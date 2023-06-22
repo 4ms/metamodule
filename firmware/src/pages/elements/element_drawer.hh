@@ -2,7 +2,7 @@
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 #include "lvgl/lvgl.h"
-#include "pages/elements/element_image.hh"
+#include "pages/elements/base_image.hh"
 #include "pages/styles.hh"
 #include "pr_dbg.hh"
 #include <cmath>

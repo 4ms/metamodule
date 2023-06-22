@@ -375,7 +375,7 @@ private:
 	uint32_t cur_selected = 0;
 	std::string_view slug;
 
-	std::vector<DrawHelper::MKnob> mapped_knobs;
+	std::vector<AnimatedParam> mapped_knobs;
 	std::vector<DrawHelper::SKnob> static_knobs;
 
 	std::vector<lv_obj_t *> button;
