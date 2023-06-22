@@ -99,7 +99,7 @@ struct MappedElement {
 			MapRingDrawer{module_height, canvas}.draw_control_ring(el, element_img, mapped_knob->panel_knob_id);
 		}
 	}
-	//TODO: this is the same as Knob&, how to not repeat?
+	//TODO: this is the same as Knob& except for the DrawHelper::RotaryPot/LinearSlider, how to not repeat?
 	void operator()(const Slider &el) {
 		if (!element_obj || !element_img)
 			return;
