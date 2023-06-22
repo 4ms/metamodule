@@ -11,7 +11,7 @@ namespace MetaModule::ElementImageImpl
 {
 
 inline const lv_img_dsc_t *get_img(const BaseElement &element, uint32_t scale_px) {
-	pr_dbg("Element image not found\n");
+	pr_dbg("Element image not found: %.*s\n", (int)element.short_name.size(), element.short_name.data());
 	return nullptr;
 }
 

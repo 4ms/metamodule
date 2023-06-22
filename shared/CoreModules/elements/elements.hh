@@ -159,16 +159,16 @@ struct GateJackInput : JackInput {};
 struct AnalogJackInput : JackInput {};
 struct BefacoInputPort : JackInput {};
 using BananutBlack = BefacoInputPort;
-struct GateJackInput4ms : JackInput {};
-struct AnalogJackInput4ms : JackInput {};
+struct JackInput4ms : JackInput {};
+struct GateJackInput4ms : JackInput4ms {};
+struct AnalogJackInput4ms : JackInput4ms {};
 
 // Output jacks
-struct GateJackOutput : JackOutput {};
-struct AnalogJackOutput : JackOutput {};
 struct BefacoOutputPort : JackOutput {};
 using BananutRed = BefacoOutputPort;
-struct GateJackOutput4ms : GateJackOutput {};
-struct AnalogJackOutput4ms : AnalogJackOutput {};
+struct JackOutput4ms : JackOutput {};
+struct GateJackOutput4ms : JackOutput4ms {};
+struct AnalogJackOutput4ms : JackOutput4ms {};
 struct PJ301MPortIn : JackInput {};
 struct PJ301MPortOut : JackOutput {};
 
