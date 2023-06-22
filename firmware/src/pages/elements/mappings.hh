@@ -2,9 +2,10 @@
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 #include "CoreModules/module_info_base.hh"
-#include "draw_helpers.hh" //for std::vector<DrawHelper::MKnob> mapped_knobs,
 #include "lvgl/lvgl.h"
+#include "pages/animated_knob.hh"
 #include "pages/elements/element_image.hh"
+#include "pages/styles.hh"
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 
@@ -75,7 +76,7 @@ struct MapRingDrawer {
 };
 
 struct Mappings {
-	std::vector<DrawHelper::MKnob> knobs;
+	std::vector<AnimatedParam> knobs;
 };
 
 struct MappedElement {
@@ -94,7 +95,7 @@ struct MappedElement {
 		if (!element_obj || !element_img)
 			return;
 		if (auto mapped_knob = patch.find_mapped_knob(module_idx, el.idx)) {
-			mappings.knobs.push_back({element_obj, *mapped_knob, DrawHelper::RotaryPot});
+			mappings.knobs.push_back({element_obj, *mapped_knob, ParamAnimMethod::RotaryPot});
 
 			MapRingDrawer{module_height, canvas}.draw_control_ring(el, element_img, mapped_knob->panel_knob_id);
 		}
@@ -104,7 +105,7 @@ struct MappedElement {
 		if (!element_obj || !element_img)
 			return;
 		if (auto mapped_knob = patch.find_mapped_knob(module_idx, el.idx)) {
-			mappings.knobs.push_back({element_obj, *mapped_knob, DrawHelper::LinearSlider});
+			mappings.knobs.push_back({element_obj, *mapped_knob, ParamAnimMethod::LinearSlider});
 
 			MapRingDrawer{module_height, canvas}.draw_control_ring(el, element_img, mapped_knob->panel_knob_id);
 		}

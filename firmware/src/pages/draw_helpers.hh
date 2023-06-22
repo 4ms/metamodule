@@ -1,5 +1,10 @@
+//////////////
+//DEPRECATE THIS ==>> use elements/* instead
+//////////////
+
 #pragma once
 #include "CoreModules/module_info_base.hh"
+#include "animated_knob.hh"
 #include "lvgl/lvgl.h"
 #include "pages/styles.hh"
 #include "patch/patch_data.hh"
@@ -33,29 +38,11 @@ LV_IMG_DECLARE(switch_center_120);
 namespace MetaModule
 {
 struct DrawHelper {
-	enum ParamAnimMethods {
-		None,
-		RotaryPot,
-		LinearSlider,
-		MomentaryButton,
-		LatchingButton,
-		Toggle2pos,
-		Toggle3pos,
-		Encoder
-	};
-
-	//TODO: Knob or Switch ==> rename to MParam?
-	struct MKnob {
-		lv_obj_t *obj;
-		const MappedKnob &patchconf;
-		ParamAnimMethods anim_method = RotaryPot;
-		float last_pot_reading = 0.5f;
-	};
 
 	struct SKnob {
 		lv_obj_t *obj;
 		const StaticParam &patchconf;
-		ParamAnimMethods anim_method = RotaryPot;
+		ParamAnimMethod anim_method = ParamAnimMethod::RotaryPot;
 		float last_pot_reading = 0.5f;
 	};
 
@@ -168,11 +155,13 @@ struct DrawHelper {
 	// 	return el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
 	// }
 
-	static ParamAnimMethods get_anim_method(const KnobDef &el) {
+	static ParamAnimMethod get_anim_method(const KnobDef &el) {
+		using enum ParamAnimMethod;
 		return el.knob_style == KnobDef::Slider25mm ? LinearSlider : RotaryPot;
 	}
 
-	static ParamAnimMethods get_anim_method(const SwitchDef &el) {
+	static ParamAnimMethod get_anim_method(const SwitchDef &el) {
+		using enum ParamAnimMethod;
 		return el.switch_type == SwitchDef::MomentaryButton ? MomentaryButton :
 			   el.switch_type == SwitchDef::LatchingButton	? LatchingButton :
 			   el.switch_type == SwitchDef::Toggle2pos		? Toggle2pos :
@@ -274,7 +263,9 @@ struct DrawHelper {
 	}
 
 	static void animate_control(
-		ParamAnimMethods anim_method, lv_obj_t *obj, unsigned el_id, float value, ModuleInfoView &moduleinfo) {
+		ParamAnimMethod anim_method, lv_obj_t *obj, unsigned el_id, float value, ModuleInfoView &moduleinfo) {
+		using enum ParamAnimMethod;
+
 		if (anim_method == Toggle3pos || anim_method == Toggle2pos) {
 			unsigned switch_id = el_id - moduleinfo.Knobs.size();
 			if (switch_id >= moduleinfo.Switches.size())
@@ -344,7 +335,7 @@ struct DrawHelper {
 	static void draw_module_knobs(lv_obj_t *canvas,
 								  const ModuleInfoView &info,
 								  const PatchData &patch,
-								  std::vector<DrawHelper::MKnob> &mapped_knobs,
+								  std::vector<AnimatedParam> &mapped_knobs,
 								  uint32_t module_id,
 								  uint32_t module_height) {
 		for (const auto &el : info.Knobs) {
