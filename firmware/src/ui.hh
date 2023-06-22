@@ -26,10 +26,6 @@ private:
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
 
-	using FrameBufferT = std::array<lv_color_t, ScreenBufferConf::width * ScreenBufferConf::height / 8>;
-	// static inline FrameBufferT framebuf1;
-	// static inline FrameBufferT framebuf2;
-
 	static inline UartLog init_uart;
 	static inline LVGLDriver gui{
 		MMDisplay::flush_to_screen, MMDisplay::read_input, StaticBuffers::framebuf1, StaticBuffers::framebuf2};
