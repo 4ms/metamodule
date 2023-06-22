@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
+#include <array>
 #include <numeric>
 #include <optional>
 
@@ -21,17 +22,17 @@ struct Counts {
 };
 
 struct Indices {
-	size_t param_idx = 0;
-	size_t light_idx = 0;
-	size_t input_idx = 0;
-	size_t output_idx = 0;
+	uint8_t param_idx = 0;
+	uint8_t light_idx = 0;
+	uint8_t input_idx = 0;
+	uint8_t output_idx = 0;
 
 	// Indices + Counts -> Indices
 	constexpr Indices operator+(const Counts rhs) {
-		return {param_idx + rhs.num_params,
-				light_idx + rhs.num_lights,
-				input_idx + rhs.num_inputs,
-				output_idx + rhs.num_outputs};
+		return {static_cast<uint8_t>(param_idx + rhs.num_params),
+				static_cast<uint8_t>(light_idx + rhs.num_lights),
+				static_cast<uint8_t>(input_idx + rhs.num_inputs),
+				static_cast<uint8_t>(output_idx + rhs.num_outputs)};
 	}
 };
 
@@ -70,6 +71,21 @@ static constexpr std::optional<Indices> get_indices(MetaModule::BaseElement elem
 		idx = idx + el_cnt;
 	}
 	return {};
+}
+
+// Returns an array of Indices, where element [i] is the indices for Info::Elements[i]
+template<typename Info>
+static constexpr auto get_indices() {
+	std::array<Indices, Info::Elements.size()> indices{};
+	Indices running_total{};
+
+	for (unsigned i = 0; auto el : Info::Elements) {
+		indices[i++] = running_total;
+		Counts el_cnt = count(el);
+		running_total = running_total + el_cnt;
+	}
+
+	return indices;
 }
 
 // This isn't used (yet?) TODO: Remove when done with refactoring if still not used

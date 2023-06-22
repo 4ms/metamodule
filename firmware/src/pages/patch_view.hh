@@ -201,7 +201,7 @@ struct PatchViewPage : PageBase {
 		}
 
 		for (auto &mk : mappings.knobs) {
-			if (mk.anim_method == DrawHelper::RotaryPot) {
+			if (mk.anim_method == ParamAnimMethod::RotaryPot) {
 				const float new_pot_val = mk.patchconf.get_mapped_val(params.knobs[mk.patchconf.panel_knob_id]);
 				if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
 					mk.last_pot_reading = new_pot_val;
