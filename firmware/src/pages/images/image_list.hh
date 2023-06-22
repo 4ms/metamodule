@@ -337,6 +337,9 @@ struct ModuleImages {
 		if (slug == "EvenVCO")
 			return (height == 240) ? &EvenVCO_artwork_240 : &EvenVCO_artwork_120;
 
+		if (slug == "ENVVCA")
+			return (height == 240) ? &ENVVCA_artwork_240 : &ENVVCA_artwork_120;
+
 		return nullptr;
 	}
 };
