@@ -251,6 +251,7 @@ struct PatchViewPage : PageBase {
 		// TODO: gotta be a cleaner way to do this...
 		// 		push Jack{c.out}, this_module_obj, Jack{in}, outmodule_obj
 		// 		draw_cable(Jack out, Jack in, lv_obj_t *out_module, lv_obj_t *in_module);
+		if (thismoduleinfo.width_hp > 0) {
 		for (const auto &c : patch.int_cables) {
 			// Draw cable(s) if out jack is on this module
 			if (c.out.module_id == module_id) {
@@ -285,6 +286,7 @@ struct PatchViewPage : PageBase {
 							page->cable_drawline_dsc.color = DrawHelper::get_cable_color(in);
 							DrawHelper::draw_cable(start, end, page->cable_layer, &page->cable_drawline_dsc);
 							break;
+							}
 						}
 					}
 				}
