@@ -78,16 +78,16 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
 		ext_audio_connected = true;
+		codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec);
+		codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec);
 		UartLog::log("Ext Audio codec detected\n\r");
 	} else {
 		ext_audio_connected = false;
 		UartLog::log("No ext Audio codec detected\n\r");
 	}
-	codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec);
-	codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec);
 
 	auto audio_callback = [this]<unsigned block>() {
-		Debug::Pin0::high();
+		// Debug::Pin0::high();
 
 		ParamCacheSync sync{param_cache, param_blocks[block]};
 
@@ -101,7 +101,7 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 		load_measure.end_measurement();
 
-		Debug::Pin0::low();
+		// Debug::Pin0::low();
 	};
 
 	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
@@ -124,7 +124,6 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	auto raw_out = player.get_panel_output(output_id) * mute_ctr;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
 	return scaled_out;
-	// return compressor.compress(scaled_out);
 }
 
 // Todo: the scaling and offset shouold be part of the AuxStream, so we can support different types of DACs
@@ -236,7 +235,8 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 
 void AudioStream::start() {
 	codec_.start();
-	codec_ext_.start();
+	if (ext_audio_connected)
+		codec_ext_.start();
 }
 
 void AudioStream::handle_patch_mods() {
@@ -259,15 +259,13 @@ void AudioStream::propagate_sense_pins(Params &params) {
 			player.set_input_jack_patched_status(i, sense);
 	}
 
-	if constexpr (PanelDef::PanelID != 0) {
-		for (int out_i = 0; out_i < PanelDef::NumUserFacingOutJacks; out_i++) {
-			auto jack_i = out_i + PanelDef::NumUserFacingInJacks;
-			auto pin_bit = jacksense_pin_order[jack_i];
-			bool sense = params.jack_senses & (1 << pin_bit);
-			plug_detects[jack_i].update(sense);
-			if (plug_detects[jack_i].changed())
-				player.set_output_jack_patched_status(out_i, sense);
-		}
+	for (int out_i = 0; out_i < PanelDef::NumUserFacingOutJacks; out_i++) {
+		auto jack_i = out_i + PanelDef::NumUserFacingInJacks;
+		auto pin_bit = jacksense_pin_order[jack_i];
+		bool sense = params.jack_senses & (1 << pin_bit);
+		plug_detects[jack_i].update(sense);
+		if (plug_detects[jack_i].changed())
+			player.set_output_jack_patched_status(out_i, sense);
 	}
 }
 
