@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
@@ -41,5 +42,8 @@ struct BraidsInfo : ElementInfoBase {
 		PJ301MPortOut{to_mm(205), to_mm(316), "Out", "", OUT_OUTPUT},
 		BraidsDisplay148x56{to_mm(14), to_mm(53), "", ""},
 	}};
+
+	// FAILS:
+	// static_assert(ElementCount::get_indices<BraidsInfo>(std::get<Rogan2SGray>(Elements[0])).value().param_idx == SHAPE_PARAM);
 };
 } // namespace MetaModule
