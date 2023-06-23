@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/element_counter.hh"
 #include "lvgl/lvgl.h"
 #include "lvgl/src/core/lv_event.h"
 #include "lvgl/src/core/lv_obj.h"
@@ -155,6 +156,7 @@ struct PatchViewPage : PageBase {
 				DrawHelper::draw_module_knobs(canvas, moduleinfo, patch, mappings.knobs, module_idx, height);
 			} else {
 				const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
+				ElementCount::Indices indices;
 				for (const auto &element : moduleinfo.Elements) {
 					auto [obj, img] = std::visit(
 						[canvas](auto &el) {
@@ -164,7 +166,10 @@ struct PatchViewPage : PageBase {
 						},
 						element);
 
-					std::visit(MappedElement{height, (uint32_t)module_idx, obj, canvas, img, patch, mappings}, element);
+					auto el_cnt = ElementCount::count(element);
+					std::visit(MappedElement{height, (uint32_t)module_idx, obj, canvas, img, patch, mappings, indices},
+							   element);
+					indices = indices + el_cnt;
 				}
 			}
 

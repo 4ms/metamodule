@@ -58,7 +58,7 @@ constexpr Counts count() {
 }
 
 template<typename Info>
-static constexpr std::optional<Indices> get_indices(MetaModule::BaseElement element) {
+constexpr std::optional<Indices> get_indices(MetaModule::BaseElement element) {
 	Indices idx{};
 
 	for (auto el : Info::Elements) {
@@ -75,7 +75,7 @@ static constexpr std::optional<Indices> get_indices(MetaModule::BaseElement elem
 
 // Returns an array of Indices, where element [i] is the indices for Info::Elements[i]
 template<typename Info>
-static constexpr auto get_indices() {
+constexpr auto get_indices() {
 	std::array<Indices, Info::Elements.size()> indices{};
 	Indices running_total{};
 
@@ -90,7 +90,7 @@ static constexpr auto get_indices() {
 
 // This isn't used (yet?) TODO: Remove when done with refactoring if still not used
 template<typename Info>
-static constexpr std::optional<size_t> get_element_id(MetaModule::BaseElement element) {
+constexpr std::optional<size_t> get_element_id(MetaModule::BaseElement element) {
 	for (unsigned i = 0; auto el : Info::Elements) {
 		if (element == std::visit([](auto e) { return MetaModule::BaseElement{e}; }, el))
 			return i;

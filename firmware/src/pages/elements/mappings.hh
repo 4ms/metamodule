@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 #include "CoreModules/module_info_base.hh"
@@ -87,6 +88,7 @@ struct MappedElement {
 	const lv_img_dsc_t *element_img;
 	const PatchData &patch;
 	Mappings &mappings;
+	ElementCount::Indices indices;
 
 	void operator()(const BaseElement &) {
 	}
@@ -94,7 +96,7 @@ struct MappedElement {
 	void operator()(const Knob &el) {
 		if (!element_obj || !element_img)
 			return;
-		if (auto mapped_knob = patch.find_mapped_knob(module_idx, el.idx)) {
+		if (auto mapped_knob = patch.find_mapped_knob(module_idx, indices.param_idx)) {
 			mappings.knobs.push_back({element_obj, *mapped_knob, ParamAnimMethod::RotaryPot});
 
 			MapRingDrawer{module_height, canvas}.draw_control_ring(el, element_img, mapped_knob->panel_knob_id);
@@ -104,7 +106,7 @@ struct MappedElement {
 	void operator()(const Slider &el) {
 		if (!element_obj || !element_img)
 			return;
-		if (auto mapped_knob = patch.find_mapped_knob(module_idx, el.idx)) {
+		if (auto mapped_knob = patch.find_mapped_knob(module_idx, indices.param_idx)) {
 			mappings.knobs.push_back({element_obj, *mapped_knob, ParamAnimMethod::LinearSlider});
 
 			MapRingDrawer{module_height, canvas}.draw_control_ring(el, element_img, mapped_knob->panel_knob_id);
@@ -114,7 +116,7 @@ struct MappedElement {
 	void operator()(const JackInput &el) {
 		if (!element_img)
 			return;
-		if (auto mapped_jack = patch.find_mapped_injack(Jack{(uint16_t)module_idx, (uint16_t)el.idx})) {
+		if (auto mapped_jack = patch.find_mapped_injack(Jack{(uint16_t)module_idx, indices.input_idx})) {
 			MapRingDrawer{module_height, canvas}.draw_jack_ring(el, element_img, mapped_jack->panel_jack_id);
 		}
 	}
@@ -122,7 +124,7 @@ struct MappedElement {
 	void operator()(const JackOutput &el) {
 		if (!element_img)
 			return;
-		if (auto mapped_jack = patch.find_mapped_outjack(Jack{(uint16_t)module_idx, (uint16_t)el.idx})) {
+		if (auto mapped_jack = patch.find_mapped_outjack(Jack{(uint16_t)module_idx, indices.output_idx})) {
 			MapRingDrawer{module_height, canvas}.draw_jack_ring(el, element_img, mapped_jack->panel_jack_id);
 		}
 	}
