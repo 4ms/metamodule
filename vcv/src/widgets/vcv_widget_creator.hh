@@ -27,9 +27,9 @@ struct VCVWidgetCreator {
 	}
 
 	template<typename T>
-	void create(const T element) {
+	void create(const T& element) {
 		// forward to implementation together with current context
-		if (auto indices = ElementCount::get_indices<INFO>(element)) {
+		if (auto indices = ElementCount::get_indices<INFO>(element); indices) {			
 			VCVImplementation::Widget::do_create(element, indices.value(), context);
 		}
 	}

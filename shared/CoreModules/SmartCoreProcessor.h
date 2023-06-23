@@ -11,7 +11,7 @@ public:
 	}
 
 protected:
-	void setLED(auto el, float val, size_t color_idx = 0) {
+	void setLED(const auto& el, float val, size_t color_idx = 0) {
 		if (ElementCount::count(el).num_lights) {
 			if (auto idx = ElementCount::get_indices<INFO>(el)) {
 				auto led_idx = idx->light_idx + color_idx;
@@ -21,13 +21,13 @@ protected:
 		}
 	}
 
-	void setOutput(MetaModule::JackOutput el, float val) {
+	void setOutput(const MetaModule::JackOutput& el, float val) {
 		if (auto idx = ElementCount::get_indices<INFO>(el)) {
 			outputValues[idx->output_idx] = val;
 		}
 	}
 
-	std::optional<float> getInput(MetaModule::JackInput el) {
+	std::optional<float> getInput(const MetaModule::JackInput& el) {
 		if (auto idx = ElementCount::get_indices<INFO>(el)) {
 			auto result = inputValues[idx->input_idx];
 			inputValues[idx->input_idx].reset();
@@ -36,7 +36,7 @@ protected:
 		return {};
 	}
 
-	float getParam(MetaModule::ParamElement el) {
+	float getParam(const MetaModule::ParamElement& el) {
 		if (auto idx = ElementCount::get_indices<INFO>(el)) {
 			return paramValues[idx->param_idx];
 		}

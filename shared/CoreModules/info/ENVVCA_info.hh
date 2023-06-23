@@ -35,28 +35,28 @@ struct ENVVCAInfo : ElementInfoBase {
 		OrangeLight{to_mm<72>(106.41f), to_mm<72>(256.6f), "EOR", "EOR", 0},
 	}};
 
-	static constexpr auto RiseSlider = get<Slider25mmVertLED>(Elements[0]);
-	static constexpr auto FallSlider = get<Slider25mmVertLED>(Elements[1]);
-	static constexpr auto LevelSlider = get<Slider25mmVertLED>(Elements[2]);
-	static constexpr auto RiseCvAtten = get<Knob9mm>(Elements[3]);
-	static constexpr auto FallCvAtten = get<Knob9mm>(Elements[4]);
+	static constexpr auto& RiseSlider = get<Slider25mmVertLED>(Elements[0]);
+	static constexpr auto& FallSlider = get<Slider25mmVertLED>(Elements[1]);
+	static constexpr auto& LevelSlider = get<Slider25mmVertLED>(Elements[2]);
+	static constexpr auto& RiseCvAtten = get<Knob9mm>(Elements[3]);
+	static constexpr auto& FallCvAtten = get<Knob9mm>(Elements[4]);
 
-	static constexpr auto TimeCv = get<AnalogJackInput4ms>(Elements[5]);
-	static constexpr auto Trigger = get<GateJackInput4ms>(Elements[6]);
-	static constexpr auto CycleJack = get<GateJackInput4ms>(Elements[7]);
-	static constexpr auto Follow = get<AnalogJackInput4ms>(Elements[8]);
-	static constexpr auto AudioIn = get<AnalogJackInput4ms>(Elements[9]);
+	static constexpr auto& TimeCv = get<AnalogJackInput4ms>(Elements[5]);
+	static constexpr auto& Trigger = get<GateJackInput4ms>(Elements[6]);
+	static constexpr auto& CycleJack = get<GateJackInput4ms>(Elements[7]);
+	static constexpr auto& Follow = get<AnalogJackInput4ms>(Elements[8]);
+	static constexpr auto& AudioIn = get<AnalogJackInput4ms>(Elements[9]);
 
-	static constexpr auto EnvOut = get<AnalogJackOutput4ms>(Elements[10]);
-	static constexpr auto Eor = get<GateJackOutput4ms>(Elements[11]);
-	static constexpr auto AudioOut = get<AnalogJackOutput4ms>(Elements[12]);
+	static constexpr auto& EnvOut = get<AnalogJackOutput4ms>(Elements[10]);
+	static constexpr auto& Eor = get<GateJackOutput4ms>(Elements[11]);
+	static constexpr auto& AudioOut = get<AnalogJackOutput4ms>(Elements[12]);
 
-	static constexpr auto RiseSwitch = get<Toggle3pos>(Elements[13]);
-	static constexpr auto FallSwitch = get<Toggle3pos>(Elements[14]);
-	static constexpr auto CycleButton = get<LatchingButtonMonoLight>(Elements[15]);
+	static constexpr auto& RiseSwitch = get<Toggle3pos>(Elements[13]);
+	static constexpr auto& FallSwitch = get<Toggle3pos>(Elements[14]);
+	static constexpr auto& CycleButton = get<LatchingButtonMonoLight>(Elements[15]);
 
-	static constexpr auto RiseCvLed = get<RedBlueLight>(Elements[16]);
-	static constexpr auto FallCvLed = get<RedBlueLight>(Elements[17]);
-	static constexpr auto EorLed = get<OrangeLight>(Elements[18]);
+	static constexpr auto& RiseCvLed = get<RedBlueLight>(Elements[16]);
+	static constexpr auto& FallCvLed = get<RedBlueLight>(Elements[17]);
+	static constexpr auto& EorLed = get<OrangeLight>(Elements[18]);
 };
 } // namespace MetaModule

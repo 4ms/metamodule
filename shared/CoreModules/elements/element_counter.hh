@@ -4,6 +4,7 @@
 #include <numeric>
 #include <optional>
 #include <cstdint>
+#include <algorithm>
 
 namespace ElementCount
 {
@@ -59,30 +60,50 @@ constexpr Counts count() {
 }
 
 template<typename Info>
-constexpr std::optional<Indices> get_indices(MetaModule::BaseElement element) {
-	Indices idx{};
+constexpr std::optional<size_t> get_element_id(const MetaModule::BaseElement& element) {
 
-	for (auto el : Info::Elements) {
-		Counts el_cnt = count(el);
+	// find iterator into the elements array that matches the given element reference
+	auto match = std::find_if(Info::Elements.begin(), Info::Elements.end(),
+		[&element](const auto& candidate)
+		{
+			// cast refernce to reference of base class
+			const auto& candidate_base = std::visit([](auto& c)
+			{
+				return static_cast<const MetaModule::BaseElement&>(c);
+			} , candidate);
 
-		if (element == std::visit([](auto e) { return MetaModule::BaseElement{e}; }, el)) {
-			return {{idx.param_idx, idx.light_idx, idx.input_idx, idx.output_idx}};
-		}
+			return candidate_base == element;
+		});
 
-		idx = idx + el_cnt;
+	if (match != Info::Elements.end())
+	{
+		return std::distance(Info::Elements.begin(), match);
 	}
-	return {};
+	else
+	{
+		return std::nullopt;
+	}
 }
 
-// This isn't used (yet?) TODO: Remove when done with refactoring if still not used
 template<typename Info>
-constexpr std::optional<size_t> get_element_id(MetaModule::BaseElement element) {
-	for (unsigned i = 0; auto el : Info::Elements) {
-		if (element == std::visit([](auto e) { return MetaModule::BaseElement{e}; }, el))
-			return i;
-		i++;
+constexpr std::optional<Indices> get_indices(const MetaModule::BaseElement& element) {
+
+	// try to get an id for the given element	
+	if (auto this_element_id = get_element_id<Info>(element); this_element_id)
+	{
+		auto this_start_iterator = Info::Elements.begin();
+		auto this_end_iterator   = this_start_iterator + *this_element_id;
+
+		// sum up indices up to the given element
+		auto idx = std::accumulate(this_start_iterator, this_end_iterator, Indices(), [](auto sum, auto el)
+		{
+			return sum + count(el);
+		});
+
+		return idx;
 	}
-	return {}; //element not found
+	return std::nullopt;
 }
+
 
 }; // namespace ElementCount
