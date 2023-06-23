@@ -99,12 +99,12 @@ static const inline auto BefacoJackOffsetFix = rack::Vec{-10, -10};
 
 inline void do_create(BefacoInputPort el, const Indices &indices, const WidgetContext_t &context) {
 	context.module_widget->addInput(rack::createInput<Befaco::BananutBlack>(
-		rack::Vec(el.x_mm, el.y_mm).plus(BefacoJackOffsetFix), context.module, el.idx));
+		rack::Vec(el.x_mm, el.y_mm).plus(BefacoJackOffsetFix), context.module, indices.input_idx));
 }
 
 inline void do_create(BefacoOutputPort el, const Indices &indices, const WidgetContext_t &context) {
 	context.module_widget->addOutput(rack::createOutput<Befaco::BananutRed>(
-		rack::Vec(el.x_mm, el.y_mm).plus(BefacoJackOffsetFix), context.module, el.idx));
+		rack::Vec(el.x_mm, el.y_mm).plus(BefacoJackOffsetFix), context.module, indices.output_idx));
 }
 
 } // namespace MetaModule::VCVImplementation::Widget
