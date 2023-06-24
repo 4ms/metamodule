@@ -1,15 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleFactory.hh"
-#include "drivers/arch.hh"
-#include "drivers/cache.hh"
-#if !defined(TESTPROJECT) && !defined(SIMULATOR)
-// #include "CoreModules/Befaco/DualAtenuverterCore.hh"
-#include "debug.hh"
-#else
-#include "../stubs/debug.hh"
-#endif
-#include "conf/hsem_conf.hh"
 #include "conf/panel_conf.hh"
 #include "drivers/smp.hh"
 #include "patch/midi_def.hh"
