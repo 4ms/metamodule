@@ -1,6 +1,8 @@
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
 #include "lvgl.h"
+
+#define printf_ printf
 #include "ui.hh"
 
 #include <cstdio>

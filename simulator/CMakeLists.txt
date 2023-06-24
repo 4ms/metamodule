@@ -36,6 +36,7 @@ target_include_directories(
           ${LVDRV_DIR}
           ${SDL2_INCLUDE_DIRS}
           src
+          stubs
           ${MM_ROOT}/firmware/src
           ${MM_ROOT}/firmware/src/medium
           ${MM_ROOT}/shared
