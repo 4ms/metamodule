@@ -248,6 +248,6 @@ private:
 	TriangleOscillator osc;
 
 private:
-	float timeStepInS;
+	float timeStepInS = 1.f/48000.f;
 
 };
