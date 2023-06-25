@@ -113,6 +113,7 @@ public:
 
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
+			modules[i]->set_samplerate(48000.f); //Fixed SR for now
 		}
 
 		// Tell the other core about the patch
@@ -130,6 +131,7 @@ public:
 		for (auto const &k : pd.mapped_knobs)
 			cache_knob_mapping(k);
 
+		// Set static (non-mapped) knobs
 		for (auto &k : pd.static_knobs)
 			modules[k.module_id]->set_param(k.param_id, k.value);
 
