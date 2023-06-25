@@ -13,6 +13,7 @@ public:
 
 protected:
 	void setLED(Elem el, float val, size_t color_idx = 0) {
+		//TODO: if (count(el).num_lights > 0)
 		auto idx = index(el);
 		auto led_idx = idx.light_idx + color_idx;
 		if (led_idx < ledValues.size())
@@ -20,11 +21,13 @@ protected:
 	}
 
 	void setOutput(Elem el, float val) {
+		//TODO: if (count(el).num_outputs > 0)
 		auto idx = index(el);
 		outputValues[idx.output_idx] = val;
 	}
 
 	std::optional<float> getInput(Elem el) {
+		//TODO: if (count(el).num_inputs > 0)
 		auto idx = index(el);
 		auto result = inputValues[idx.input_idx];
 		inputValues[idx.input_idx].reset();
@@ -32,6 +35,7 @@ protected:
 	}
 
 	float getParam(Elem el) {
+		//TODO: if (count(el).num_params > 0)
 		auto idx = index(el);
 		return paramValues[idx.param_idx];
 	}
@@ -62,8 +66,8 @@ protected:
 		}
 	}
 
-private:
-	auto index(Elem el) {
+//private:
+	constexpr static auto index(Elem el) {
 		auto element_idx = static_cast<std::underlying_type_t<Elem>>(el);
 		return indices[element_idx];
 	}
