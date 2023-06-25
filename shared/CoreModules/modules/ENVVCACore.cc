@@ -237,8 +237,8 @@ private:
 	float cycleLED;
 	float riseCV;
 	float fallCV;
-	float rScaleLEDs;
-	float fScaleLEDs;
+	float rScaleLEDs = 0.f;
+	float fScaleLEDs = 0.f;
 
 	FlipFlop triggerDetector;
 	EdgeDetector triggerEdgeDetector;
