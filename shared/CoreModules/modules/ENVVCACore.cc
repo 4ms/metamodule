@@ -11,17 +11,20 @@
 
 inline auto CVToBool = [](float val) -> bool
 {
-	return val >= 1.0f;
+	return val >= 0.5f;
 };
 
 inline auto ButtonToBool = [](float val) -> bool
 {
-	return val > 0;
+	return val >= 0.5f;
 };
 
 inline auto ThreeWayToInt = [](float val) -> uint32_t
 {
-	return val * 2.0f;
+	return std::round(val * 2.f); 
+	// [0.00, 0.25) -> 0
+	// [0.25, 0.75) -> 1
+	// [0.75, 1.00] -> 2
 };
 
 class ENVVCACore : public SmartCoreProcessor<MetaModule::ENVVCAInfo> {
@@ -187,8 +190,10 @@ public:
 		}
 
 		// sum with static value from fader + range switch
-		riseCV = -rScaleLEDs - ProcessCVOffset(getParam(RiseSlider), (getParam(RiseSwitch)));
-		fallCV = -fScaleLEDs - ProcessCVOffset(getParam(FallSlider), (getParam(FallSwitch)));
+		auto riseRange = ThreeWayToInt(getParam(RiseSwitch));
+		auto fallRange = ThreeWayToInt(getParam(FallSwitch));
+		riseCV = -rScaleLEDs - ProcessCVOffset(getParam(RiseSlider), riseRange);
+		fallCV = -fScaleLEDs - ProcessCVOffset(getParam(FallSlider), fallRange);
 
 		// TODO: LEDs only need to be updated ~60Hz instead of 48kHz
 		// FIXME: Safer way to select the sub-element of a multi-color LED?
