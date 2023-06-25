@@ -1,4 +1,7 @@
 #pragma once
+#define printf_ printf
+///
+
 #include "pages/page_manager.hh"
 #include "params.hh"
 #include "params_dbg_print.hh"
@@ -11,7 +14,6 @@ namespace MetaModule
 {
 class Ui {
 private:
-	PatchStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
 
 	MessageQueue msg_queue;
@@ -23,8 +25,7 @@ private:
 
 public:
 	Ui(PatchPlayLoader &patch_playloader, PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
-		: patch_storage{patch_storage}
-		, patch_playloader{patch_playloader}
+		: patch_playloader{patch_playloader}
 		, msg_queue{1024}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
 	}
@@ -37,27 +38,25 @@ public:
 		Gui::init_lvgl_styles();
 		page_manager.init();
 
-		// page_update_tm.init(
-		// 	{
-		// 		.TIMx = TIM17,
-		// 		.period_ns = 1000000000 / 60, // =  60Hz = 16ms
-		// 		.priority1 = 2,
-		// 		.priority2 = 0,
-		// 	},
-		// 	[&] { page_update_task(); });
-		// page_update_tm.start();
-
-		// ui_event_tm.init(
-		// 	{
-		// 		.TIMx = TIM16,
-		// 		.period_ns = 1000000000 / 600, // =  600Hz = 1.6ms
-		// 		.priority1 = 3,
-		// 		.priority2 = 3,
-		// 	},
-		// 	[&] { lvgl_update_task(); });
-		// ui_event_tm.start();
-
 		// MMDisplay::start();
+	}
+
+	// Polling "Scheduler" for UI tasks
+	void update() {
+		static uint32_t last_lvgl_task_tm = 0;
+		static uint32_t last_page_task_tm = 0;
+
+		auto tm = lv_tick_get();
+		if (tm - last_lvgl_task_tm >= 1) {
+			lvgl_update_task();
+			last_lvgl_task_tm = tm;
+		}
+
+		tm = lv_tick_get();
+		if (tm - last_page_task_tm >= 16) {
+			page_update_task();
+			last_page_task_tm = tm;
+		}
 	}
 
 private:
