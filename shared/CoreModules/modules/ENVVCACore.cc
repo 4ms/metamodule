@@ -5,8 +5,9 @@
 #include "CoreModules/modules/envvca/SSI2162.h"
 #include "CoreModules/modules/envvca/TriangleOscillator.h"
 #include "CoreModules/modules/helpers/circuit_elements.h"
-#include "CoreModules/modules/helpers/FlipFlop.h"
+#include "gcem/include/gcem.hpp"
 #include "CoreModules/modules/helpers/EdgeDetector.h"
+#include "helpers/FlipFlop.h"
 
 inline auto CVToBool = [](float val) -> bool
 {
@@ -48,11 +49,11 @@ public:
 
 			// std::pow is not required to be constexpr by the standard
 			// so this might not work in clang
-			const float b = std::pow(2.0f, std::log2(f_1 / f_2) / (V_1 - V_2));
-			const float a = f_1 / std::pow(b, V_1);
+			constexpr float b = gcem::pow(2.0f, gcem::log2(f_1 / f_2) / (V_1 - V_2));
+			constexpr float a = f_1 / gcem::pow(b, V_1);
 
 			// interpolate
-			auto frequency = std::pow(b, voltage) * a;
+			auto frequency = gcem::pow(b, voltage) * a;
 
 			// limit to valid frequency range
 			frequency = std::clamp(frequency, 1.0f/(60 * 3), 20e3f);
