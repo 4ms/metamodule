@@ -6,41 +6,34 @@
 
 template<typename INFO>
 class SmartCoreProcessor : public CoreProcessor {
+	using Elem = typename INFO::Elem;
+
 public:
-	SmartCoreProcessor() {
-	}
+	SmartCoreProcessor() = default;
 
 protected:
-	void setLED(auto el, float val, size_t color_idx = 0) {
-		if (ElementCount::count(el).num_lights) {
-			if (auto idx = ElementCount::get_indices<INFO>(el)) {
-				auto led_idx = idx->light_idx + color_idx;
-				if (led_idx < ledValues.size())
-					ledValues[led_idx] = val;
-			}
-		}
+	void setLED(Elem el, float val, size_t color_idx = 0) {
+		auto idx = index(el);
+		auto led_idx = idx.light_idx + color_idx;
+		if (led_idx < ledValues.size())
+			ledValues[led_idx] = val;
 	}
 
-	void setOutput(MetaModule::JackOutput el, float val) {
-		if (auto idx = ElementCount::get_indices<INFO>(el)) {
-			outputValues[idx->output_idx] = val;
-		}
+	void setOutput(Elem el, float val) {
+		auto idx = index(el);
+		outputValues[idx.output_idx] = val;
 	}
 
-	std::optional<float> getInput(MetaModule::JackInput el) {
-		if (auto idx = ElementCount::get_indices<INFO>(el)) {
-			auto result = inputValues[idx->input_idx];
-			inputValues[idx->input_idx].reset();
-			return result;
-		}
-		return {};
+	std::optional<float> getInput(Elem el) {
+		auto idx = index(el);
+		auto result = inputValues[idx.input_idx];
+		inputValues[idx.input_idx].reset();
+		return result;
 	}
 
-	float getParam(MetaModule::ParamElement el) {
-		if (auto idx = ElementCount::get_indices<INFO>(el)) {
-			return paramValues[idx->param_idx];
-		}
-		return 0.f;
+	float getParam(Elem el) {
+		auto idx = index(el);
+		return paramValues[idx.param_idx];
 	}
 
 protected:
@@ -70,7 +63,13 @@ protected:
 	}
 
 private:
-	constexpr static ElementCount::Counts counts = ElementCount::count<INFO>();
+	auto index(Elem el) {
+		auto element_idx = static_cast<std::underlying_type_t<Elem>>(el);
+		return indices[element_idx];
+	}
+
+	constexpr static auto counts = ElementCount::count<INFO>();
+	constexpr static auto indices = ElementCount::get_indices<INFO>();
 
 	std::array<float, counts.num_params> paramValues;
 	std::array<std::optional<float>, counts.num_inputs> inputValues;

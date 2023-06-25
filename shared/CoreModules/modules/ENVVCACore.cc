@@ -27,6 +27,7 @@ class ENVVCACore : public SmartCoreProcessor<MetaModule::ENVVCAInfo> {
 	using ENVVCAInfo = MetaModule::ENVVCAInfo;
 	using Info = MetaModule::ENVVCAInfo;
 	using ThisCore = ENVVCACore;
+	using enum Info::Elem;
 
 public:
 	ENVVCACore() : triggerDetector(1.0f, 2.0f)
@@ -90,11 +91,11 @@ public:
 
 		// Ignoring input impedance and inverting 400kHz lowpass
 
-		if (auto input = getInput(Info::AudioIn); input) {
+		if (auto input = getInput(AudioIn); input) {
 			auto output = vca.process(*input);
-			setOutput(Info::AudioOut, output);
+			setOutput(AudioOut, output);
 		} else {
-			setOutput(Info::AudioOut, 0.f);
+			setOutput(AudioOut, 0.f);
 		}
 
 		// Ignoring output impedance and inverting 400kHz lowpass
@@ -103,40 +104,40 @@ public:
 	void displayEnvelope(float val, TriangleOscillator::State_t state)
 	{
 		val = val / VoltageDivider(100e3f, 100e3f);
-		val *= getParam(Info::LevelSlider);
-		setOutput(Info::EnvOut, val);
-		setLED(Info::LevelSlider, val / 8.f);
+		val *= getParam(LevelSlider);
+		setOutput(EnvOut, val);
+		setLED(LevelSlider, val / 8.f);
 		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
 		// even during State_t::FOLLOW
-		setLED(Info::RiseSlider, state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
-		setLED(Info::FallSlider, state == TriangleOscillator::State_t::FALLING ? val / 8.f : 0);
+		setLED(RiseSlider, state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
+		setLED(FallSlider, state == TriangleOscillator::State_t::FALLING ? val / 8.f : 0);
 	}
 
 	void displayOscillatorState(TriangleOscillator::State_t state)
 	{
 		if (state == TriangleOscillator::State_t::FALLING) {
-			setOutput(Info::Eor, 8.f);
-			setLED(Info::EorLed, 1);
+			setOutput(Eor, 8.f);
+			setLED(EorLed, 1);
 		} else {
-			setOutput(Info::Eor, 0);
-			setLED(Info::EorLed, 0);
+			setOutput(Eor, 0);
+			setLED(EorLed, 0);
 		}
 	}
 
 	void runOscillator() {
-		bool isCycling = ButtonToBool(getParam(Info::CycleButton)) ^ CVToBool(getInput(Info::CycleJack).value_or(0.0f));
+		bool isCycling = ButtonToBool(getParam(CycleButton)) ^ CVToBool(getInput(CycleJack).value_or(0.0f));
 
 		osc.setCycling(isCycling);
 		if (cycleLED != isCycling){
 			cycleLED = isCycling;
-			setLED(Info::CycleButton, cycleLED);
+			setLED(CycleButton, cycleLED);
 		}
 
-		if (auto inputFollowValue = getInput(Info::Follow); inputFollowValue) {
+		if (auto inputFollowValue = getInput(Follow); inputFollowValue) {
 			osc.setTargetVoltage(*inputFollowValue);
 		}
 
-		if (auto triggerInputValue = getInput(Info::Trigger); triggerInputValue) {
+		if (auto triggerInputValue = getInput(Trigger); triggerInputValue) {
 			if (triggerEdgeDetector(triggerDetector(*triggerInputValue))) {
 				osc.doRetrigger();
 			}
@@ -175,30 +176,30 @@ public:
 			return InvertingAmpWithBias(offset, 100e3f, 100e3f, bias);
 		};
 
-		if (auto timeCVValue = getInput(Info::TimeCv); timeCVValue) {
+		if (auto timeCVValue = getInput(TimeCv); timeCVValue) {
 			// scale down cv input
 			const auto scaledTimeCV = *timeCVValue * -100e3f / 137e3f;
 
 			// apply attenuverter knobs
-			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getParam(Info::RiseCvAtten) * scaledTimeCV);
-			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getParam(Info::FallCvAtten) * scaledTimeCV);
+			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getParam(RiseCvAtten) * scaledTimeCV);
+			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getParam(FallCvAtten) * scaledTimeCV);
 		}
 
 		// sum with static value from fader + range switch
-		riseCV = -rScaleLEDs - ProcessCVOffset(getParam(Info::RiseSlider), (getParam(Info::RiseSwitch)));
-		fallCV = -fScaleLEDs - ProcessCVOffset(getParam(Info::FallSlider), (getParam(Info::FallSwitch)));
+		riseCV = -rScaleLEDs - ProcessCVOffset(getParam(RiseSlider), (getParam(RiseSwitch)));
+		fallCV = -fScaleLEDs - ProcessCVOffset(getParam(FallSlider), (getParam(FallSwitch)));
 
 		// TODO: LEDs only need to be updated ~60Hz instead of 48kHz
 		// FIXME: Safer way to select the sub-element of a multi-color LED?
 		auto rise_positive = std::max(rScaleLEDs / 10.f, 0.f);
 		auto rise_negative = -std::min(rScaleLEDs / 10.f, 0.f);
-		setLED(Info::RiseCvLed, rise_negative, 0);
-		setLED(Info::RiseCvLed, rise_positive, 1);
+		setLED(RiseCvLed, rise_negative, 0);
+		setLED(RiseCvLed, rise_positive, 1);
 
 		auto fall_positive = std::max(fScaleLEDs / 10.f, 0.f);
 		auto fall_negative = -std::min(fScaleLEDs / 10.f, 0.f);
-		setLED(Info::FallCvLed, fall_negative, 0);
-		setLED(Info::FallCvLed, fall_positive, 1);
+		setLED(FallCvLed, fall_negative, 0);
+		setLED(FallCvLed, fall_positive, 1);
 
 		// TODO: low pass filter
 
