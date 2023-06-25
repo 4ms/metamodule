@@ -106,15 +106,15 @@ public:
         return outputInV;
     }
 
-private:
+// private:
     float outputInV;
     State_t state;
     bool cycling;
     bool retriggerPending;
     float targetVoltage;
 
-    float slopeFalling;
-    float slopeRising;
+    float slopeFalling = 0.5f;
+    float slopeRising = 0.5f;
 
     static constexpr float MaxValInV = 5.0f;
     static constexpr float MinValInV = 0.0f;
