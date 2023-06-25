@@ -75,7 +75,7 @@ constexpr std::optional<Indices> get_indices(MetaModule::BaseElement element) {
 
 // Returns an array of Indices, where element [i] is the indices for Info::Elements[i]
 template<typename Info>
-constexpr auto get_indices() {
+consteval auto get_indices() {
 	std::array<Indices, Info::Elements.size()> indices{};
 	Indices running_total{};
 

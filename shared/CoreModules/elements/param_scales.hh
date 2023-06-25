@@ -21,7 +21,7 @@ struct ParamScale {
 };
 
 template<typename Info>
-constexpr auto param_scales() {
+consteval auto param_scales() {
 	std::array<ParamScale, ElementCount::count<Info>().num_params> scales;
 
 	auto CalcParamScales = Overload{
