@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/elements/element_counter.hh"
+#include "CoreModules/elements/param_scales.hh"
 #include <array>
 #include <optional>
 
@@ -62,6 +63,14 @@ protected:
 		}
 	}
 
+	void set_and_scale_param(int param_id, float val) override {
+		if (param_id < (int)paramValues.size()) {
+			val *= param_scales[param_id].range;
+			val += param_scales[param_id].offset;
+			paramValues[param_id] = val;
+		}
+	}
+
 	float get_led_brightness(int led_id) const override {
 		if (led_id < (int)ledValues.size()) {
 			return ledValues[led_id];
@@ -87,6 +96,7 @@ private:
 
 	constexpr static auto counts = ElementCount::count<INFO>();
 	constexpr static auto indices = ElementCount::get_indices<INFO>();
+	constexpr static auto param_scales = PotElementHelper::param_scales<INFO>();
 
 	std::array<float, counts.num_params> paramValues;
 	std::array<std::optional<float>, counts.num_inputs> inputValues;

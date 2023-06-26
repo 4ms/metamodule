@@ -94,13 +94,6 @@ public:
 			//FIXME: Do we ever do anything with modules[0] ? Perhaps just UI displaying names, which we can get from a defs file
 			if (i == 0)
 				modules[i] = ModuleFactory::create(PanelDef::typeID);
-			// #if !defined(TESTPROJECT)
-			// 			else if (pd.module_slugs[i].is_equal("DualAtenuverter")) {
-			// 				printf("Registering DualAtenuverter\n");
-			// 				modules[i] = DualAtenuverterCore::create();
-			// 				printf("OK\n");
-			// 			}
-			// #endif
 			else
 				modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
@@ -133,7 +126,7 @@ public:
 
 		// Set static (non-mapped) knobs
 		for (auto &k : pd.static_knobs)
-			modules[k.module_id]->set_param(k.param_id, k.value);
+			modules[k.module_id]->set_and_scale_param(k.param_id, k.value);
 
 		is_loaded = true;
 
@@ -182,7 +175,7 @@ public:
 
 	void set_panel_param(int param_id, float val) {
 		for (auto const &k : knob_conns[param_id]) {
-			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
+			modules[k.module_id]->set_and_scale_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
 
@@ -220,7 +213,7 @@ public:
 	}
 
 	void apply_static_param(const StaticParam &sparam) {
-		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
+		modules[sparam.module_id]->set_and_scale_param(sparam.param_id, sparam.value);
 		//Also set it in the patch?
 	}
 
@@ -403,10 +396,9 @@ public:
 
 	template<typename T>
 	void update_or_add(std::vector<T> &v, const T &d) {
-		//auto equality_op, auto copy_op
 		for (auto &el : v) {
-			if (el == d) { //if (equality_op(el, d)) {
-				el = d;	   //copy_op(el, d);
+			if (el == d) { //if (T::operator==(el, d)) {
+				el = d;
 				return;
 			}
 		}
@@ -418,9 +410,11 @@ public:
 		if (k.is_monophonic_note()) {
 			update_or_add(knob_conns[MidiMonoNoteParam], k);
 			printf_("DBG: Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+
 		} else if (k.is_monophonic_gate()) {
 			update_or_add(knob_conns[MidiMonoGateParam], k);
 			printf_("DBG: Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+
 		} else if (k.panel_knob_id < PanelDef::NumKnobs) {
 			update_or_add(knob_conns[k.panel_knob_id], k);
 		}

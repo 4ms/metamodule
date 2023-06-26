@@ -38,6 +38,10 @@ struct VCVCoreProcessor : CoreProcessor {
 	}
 
 	void set_param(int id, float val) override {
+		params[id].setValue(val);
+	}
+
+	void set_and_scale_param(int id, float val) override {
 		val *= param_scales[id].range;
 		val += param_scales[id].offset;
 		params[id].setValue(val);
