@@ -73,7 +73,7 @@ target_include_directories(
           ${MM_ROOT}/shared/cpputil
           ${MM_ROOT}/shared/patch)
 
-target_compile_options(simulator PRIVATE -Wall -O2)
+target_compile_options(simulator PRIVATE -Wall -O0 -Og -g2)
 target_compile_options(simulator PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
                                          ${SDL2_CFLAGS_OTHER})
 
