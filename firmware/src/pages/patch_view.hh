@@ -338,11 +338,8 @@ private:
 
 	Mappings mappings;
 
-	static constexpr uint32_t MaxBufferWidth = 1024;
-	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(240, MaxBufferWidth)];
 	lv_draw_img_dsc_t draw_img_dsc;
 
-	static inline uint8_t cable_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, 240)];
 	lv_draw_line_dsc_t cable_drawline_dsc;
 
 	static inline const PatchData *patch_instance;

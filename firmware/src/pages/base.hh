@@ -5,6 +5,7 @@
 #include "patch_mod_queue.hh"
 #include "patch_playloader.hh"
 #include "patch_storage_proxy.hh"
+#include "static_buffers.hh"
 #include "ui_audio_mailbox.hh"
 
 // Use for helpers:
@@ -30,6 +31,13 @@ struct PageBase {
 	MetaParams &metaparams;
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
+
+	static constexpr uint32_t MaxBufferWidth = 1024;
+	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(240, MaxBufferWidth)];
+	static inline uint8_t cable_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, 240)];
+	// Why doesn't this work?
+	// uint8_t *buffer = StaticBuffers::gui_scratch_buffer;
+	// uint8_t *cable_buf = StaticBuffers::gui_scratch_screen;
 
 	lv_group_t *group = nullptr;
 	lv_obj_t *screen = nullptr;
