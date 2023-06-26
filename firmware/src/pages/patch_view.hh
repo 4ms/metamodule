@@ -3,13 +3,15 @@
 #include "lvgl/lvgl.h"
 #include "lvgl/src/core/lv_event.h"
 #include "lvgl/src/core/lv_obj.h"
+#include "pages/animated_knob.hh"
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"
 #include "pages/elements/element_drawer.hh"
-#include "pages/elements/mappings.hh"
+#include "pages/elements/map_ring_drawer.hh"
 #include "pages/images/image_list.hh"
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
+#include "pages/map_register.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include "printf.h"
@@ -156,20 +158,27 @@ struct PatchViewPage : PageBase {
 				DrawHelper::draw_module_knobs(canvas, moduleinfo, patch, mappings.knobs, module_idx, height);
 			} else {
 				const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
-				ElementCount::Indices indices;
-				for (const auto &element : moduleinfo.Elements) {
-					auto [obj, img] = std::visit(
-						[canvas](auto &el) {
-						auto img = ElementImage{height}.get_img(el);
-						auto obj = ElementDrawer{height, canvas}.draw_element(el, img);
-						return std::make_pair(obj, img);
+				auto center_coords = moduleinfo.uses_center_coords;
+				ElementImage images{height};
+				ElementDrawer el_drawer{height, canvas, center_coords};
+				MapRegister mapper{module_idx, patch, mappings};
+				MapRingDrawer ring_drawer{height, canvas, center_coords};
+
+				for (const auto &element : moduleinfo.elements) {
+					std::visit(
+						[&ring_drawer, &images, &el_drawer, &mapper](auto &el) {
+						auto img = images.get_img(el);
+						auto obj = el_drawer.draw_element(el, img);
+						if (!obj)
+							return;
+
+						if (auto panel_param_id = mapper.register_mapping(el, obj)) {
+							ring_drawer.draw_mapped_ring(el, obj, img, *panel_param_id);
+						}
+
+						mapper.count(el);
 						},
 						element);
-
-					auto el_cnt = ElementCount::count(element);
-					std::visit(MappedElement{height, (uint32_t)module_idx, obj, canvas, img, patch, mappings, indices},
-							   element);
-					indices = indices + el_cnt;
 				}
 			}
 

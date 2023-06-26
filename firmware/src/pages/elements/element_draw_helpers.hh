@@ -24,12 +24,12 @@ mm_to_center_px(uint32_t x_mm, uint32_t y_mm, const lv_img_dsc_t *img, uint32_t 
 	return {left, top};
 }
 
-// constexpr std::pair<uint32_t, uint32_t>
-// mm_to_center_px(uint32_t x_mm, uint32_t y_mm, uint32_t width, uint32_t height, uint32_t module_height) {
-// 	uint32_t left = std::round(ElementInfoBase::mm_to_px(x_mm, module_height) - width / 2.f);
-// 	uint32_t top = std::round(ElementInfoBase::mm_to_px(y_mm, module_height) - height / 2.f);
-// 	return {left, top};
-// }
+constexpr std::pair<uint32_t, uint32_t>
+mm_to_center_px(uint32_t x_mm, uint32_t y_mm, uint32_t width, uint32_t height, uint32_t module_height) {
+	uint32_t left = std::round(ElementInfoBase::mm_to_px(x_mm, module_height) - width / 2.f);
+	uint32_t top = std::round(ElementInfoBase::mm_to_px(y_mm, module_height) - height / 2.f);
+	return {left, top};
+}
 
 //
 // Knob Helpers
@@ -58,13 +58,13 @@ draw_param_topleft(const ParamElement &el, const lv_img_dsc_t *img, lv_obj_t *ca
 	return obj;
 }
 
-inline lv_obj_t *
-draw_param_center(const ParamElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
-	auto [left, top] = mm_to_center_px(el.x_mm, el.y_mm, img, module_height);
-	lv_obj_t *obj = lv_img_create(canvas);
-	draw_param(left, top, img, obj);
-	return obj;
-}
+// inline lv_obj_t *
+// draw_param_center(const ParamElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+// 	auto [left, top] = mm_to_center_px(el.x_mm, el.y_mm, img, module_height);
+// 	lv_obj_t *obj = lv_img_create(canvas);
+// 	draw_param(left, top, img, obj);
+// 	return obj;
+// }
 
 //
 // Jack Helpers
@@ -82,18 +82,18 @@ inline void draw_jack(uint32_t left, uint32_t top, const lv_img_dsc_t *img, lv_o
 	pr_dbg("Draw jack at %d, %d\n", left, top);
 }
 
-inline lv_obj_t *
-draw_jack_centered(const JackElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
-	auto [left, top] = mm_to_center_px(el.x_mm, el.y_mm, img, module_height);
-	draw_jack(left, top, img, canvas);
-	return nullptr;
-}
+// inline lv_obj_t *
+// draw_jack_centered(const JackElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+// 	auto [left, top] = mm_to_center_px(el.x_mm, el.y_mm, img, module_height);
+// 	draw_jack(left, top, img, canvas);
+// 	return nullptr;
+// }
 
 inline lv_obj_t *
 draw_jack_topleft(const JackElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	auto [left, top] = mm_to_topleft_px(el.x_mm, el.y_mm, module_height);
 	draw_jack(left, top, img, canvas);
-	return nullptr;
+	return canvas;
 }
 
 } // namespace MetaModule::ElementDrawerImpl

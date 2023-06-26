@@ -2,6 +2,7 @@
 #include "lvgl/lvgl.h"
 #include "pages/styles.hh"
 #include "patch/patch_data.hh"
+#include <vector>
 
 namespace MetaModule
 {
@@ -23,6 +24,10 @@ struct AnimatedParam {
 	const MappedKnob &patchconf;
 	ParamAnimMethod anim_method = ParamAnimMethod::RotaryPot;
 	float last_pot_reading = 0.5f;
+};
+
+struct Mappings {
+	std::vector<AnimatedParam> knobs;
 };
 
 } // namespace MetaModule
