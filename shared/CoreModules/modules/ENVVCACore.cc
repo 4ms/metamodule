@@ -21,10 +21,7 @@ inline auto ButtonToBool = [](float val) -> bool
 
 inline auto ThreeWayToInt = [](float val) -> uint32_t
 {
-	return std::round(val * 2.f); 
-	// [0.00, 0.25) -> 0
-	// [0.25, 0.75) -> 1
-	// [0.75, 1.00] -> 2
+	return std::round(val);
 };
 
 class ENVVCACore : public SmartCoreProcessor<MetaModule::ENVVCAInfo> {
@@ -154,7 +151,7 @@ public:
 
 	std::pair<float,float> getRiseAndFallCV()
 	{
-		auto ProcessCVOffset = [](auto slider, auto range) -> float
+		auto ProcessCVOffset = [](auto slider, uint32_t range) -> float
 		{	
 			// Slider plus resistor in parallel to tweak curve
 			const float SliderImpedance = 100e3f;
@@ -163,7 +160,7 @@ public:
 			// Select one of three bias voltages
 			auto BiasFromRange = [](auto range) -> float
 			{
-				if (range == 2)
+				if (range == 0)
 				{
 					return -12.0f * VoltageDivider(1e3f, 10e3f);
 				}
@@ -171,9 +168,14 @@ public:
 				{
 					return 0.0f;
 				}
-				else
+				else if (range == 2)
 				{
 					return 12.0f * VoltageDivider(1e3f, 8.2e3f);
+				}
+				else
+				{
+					// how to handle error here?
+					return 0.0f;
 				}
 			};
 
