@@ -52,11 +52,13 @@ public:
 
 			// std::pow is not required to be constexpr by the standard
 			// so this might not work in clang
-			constexpr float b = gcem::pow(2.0f, gcem::log2(f_1 / f_2) / (V_1 - V_2));
-			constexpr float a = f_1 / gcem::pow(b, V_1);
+			constexpr double ArgScalingFactor = 10.0f;
+			constexpr double arg = gcem::log2(f_1 / f_2) / (V_1 - V_2);
+			constexpr double b = gcem::pow(2.0f, arg / ArgScalingFactor);
+			constexpr double a = f_1 / gcem::pow(gcem::pow(2.0f, arg), V_1);
 
 			// interpolate
-			auto frequency = gcem::pow(b, voltage) * a;
+			auto frequency = float(gcem::pow(b, voltage * ArgScalingFactor) * a);
 
 			// limit to valid frequency range
 			frequency = std::clamp(frequency, 1.0f/(60 * 3), 20e3f);
