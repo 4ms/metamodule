@@ -3,9 +3,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(mm_sim LANGUAGES C CXX)
 
-find_package(PkgConfig)
-pkg_check_modules(SDL2 REQUIRED sdl2)
-
 set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
 set(SIM_ROOT ${PROJECT_SOURCE_DIR})
 set(LVGL_DIR ${MM_ROOT}/firmware/lib/lvgl)
