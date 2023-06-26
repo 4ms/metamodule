@@ -3,6 +3,7 @@
 #include <array>
 #include <numeric>
 #include <optional>
+#include <cstdint>
 
 namespace ElementCount
 {
