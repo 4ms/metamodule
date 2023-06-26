@@ -21,7 +21,7 @@ inline auto ButtonToBool = [](float val) -> bool
 
 inline auto ThreeWayToInt = [](float val) -> uint32_t
 {
-	return std::round(val);
+	return uint32_t(val + 0.5f);
 };
 
 class ENVVCACore : public SmartCoreProcessor<MetaModule::ENVVCAInfo> {
