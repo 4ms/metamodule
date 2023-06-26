@@ -10,7 +10,7 @@
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
-	using ElementInfoView = MetaModule::ModuleInfoView2;
+	using ModuleInfoView2 = MetaModule::ModuleInfoView2;
 
 public:
 	ModuleFactory() = delete;
@@ -22,7 +22,7 @@ public:
 		return already_exists;
 	}
 
-	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate, ElementInfoView info) {
+	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate, ModuleInfoView2 info) {
 		bool already_exists = creation_funcs.key_exists(typeslug);
 		infos2.insert(typeslug, info);
 		creation_funcs.insert(typeslug, funcCreate);
@@ -51,7 +51,7 @@ public:
 			return nullinfo;
 	}
 
-	static ElementInfoView &getModuleInfo2(ModuleTypeSlug typeslug) {
+	static ModuleInfoView2 &getModuleInfo2(ModuleTypeSlug typeslug) {
 		if (auto d = infos2.get(typeslug))
 			return *d;
 		else
@@ -68,14 +68,14 @@ public:
 	}
 
 	static inline ModuleInfoView nullinfo{};
-	static inline ElementInfoView nullinfo2{};
+	static inline ModuleInfoView2 nullinfo2{};
 
 private:
 	static constexpr int MAX_MODULE_TYPES = 512;
 
 	static inline SeqMap<ModuleTypeSlug, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> infos;
-	static inline SeqMap<ModuleTypeSlug, ElementInfoView, 64> infos2;
+	static inline SeqMap<ModuleTypeSlug, ModuleInfoView2, 64> infos2;
 
 	// static constexpr auto _sz_creation_funcs = sizeof(creation_funcs); //48k
 	// static constexpr auto _sz_infos = sizeof(infos);				   //112k
