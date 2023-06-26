@@ -79,33 +79,29 @@ public:
 		}
 		if (msg_state_ == MsgState::PatchListRequested) {
 			msg_state_ = MsgState::Idle;
-			return {PatchListChanged, 0, 0, 0};
+			if (patch_files_nor_.size() == 0) {
+				for (uint32_t i = 0; i < DefaultPatches::num_patches(); i++) {
+					auto p = DefaultPatches::get_patch(i);
+					auto fn = DefaultPatches::get_filename(i);
+					patch_files_nor_.push_back({fn, (uint32_t)p.size_bytes(), 1, fn});
+				}
+				remote_patch_list_.norflash = patch_files_nor_;
+				return {PatchListChanged, 0, 0, 0};
+			}
+			return {PatchListUnchanged, 0, 0, 0};
 		}
 
 		return {};
 	}
 
 	[[nodiscard]] bool request_patchlist() {
-		// InterCoreCommMessage message{.message_type = RequestRefreshPatchList};
-		// if (!comm_.send_message(message))
-		// 	return false;
 		msg_state_ = MsgState::PatchListRequested;
 		printf("Patchlist requested\n");
-		for (uint32_t i = 0; i < DefaultPatches::num_patches(); i++) {
-			auto p = DefaultPatches::get_patch(i);
-			auto fn = DefaultPatches::get_filename(i);
-			patch_files_nor_.push_back({fn, (uint32_t)p.size_bytes(), 1, fn});
-		}
-		remote_patch_list_.norflash = patch_files_nor_;
 		return true;
 	}
 
 	PatchFileList &get_patch_list() {
 		printf("Patchlist got\n");
-		//FIXME: How can we insure this is only called when
-		//we have access to the shared data?
-		//Maybe transform get_message() into s.t. that returns
-		//remote_patch_list if message is PatchListChanged?
 		return remote_patch_list_;
 	}
 
