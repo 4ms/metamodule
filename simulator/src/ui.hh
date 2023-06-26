@@ -34,11 +34,8 @@ public:
 		params.clear();
 		metaparams.clear();
 
-		// MMDisplay::init(metaparams, StaticBuffers::framebuf2);
 		Gui::init_lvgl_styles();
 		page_manager.init();
-
-		// MMDisplay::start();
 	}
 
 	// Polling "Scheduler" for UI tasks
@@ -46,7 +43,7 @@ public:
 		static uint32_t last_lvgl_task_tm = 0;
 		static uint32_t last_page_task_tm = 0;
 
-		auto tm = lv_tick_get();
+		auto tm = lv_tick_get(); //milliseconds
 		if (tm - last_lvgl_task_tm >= 1) {
 			lvgl_update_task();
 			last_lvgl_task_tm = tm;
@@ -61,9 +58,7 @@ public:
 
 private:
 	void lvgl_update_task() {
-		// page_update_tm.stop();
 		lv_timer_handler();
-		// page_update_tm.start();
 
 		auto msg = msg_queue.get_message();
 		if (!msg.empty()) {

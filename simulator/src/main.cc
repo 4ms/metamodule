@@ -20,12 +20,16 @@ int main(void) {
 
 	lv_log("Starting LVGL\n");
 
-	// Create page
-	create_test_page();
-	//////
+	MetaModule::PatchPlayer patch_player;
+	MetaModule::PatchStorageProxy patch_storage;
+	MetaModule::PatchPlayLoader patch_playloader{patch_storage, patch_player};
+	MetaModule::PatchModQueue patch_mod_queue;
+
+	MetaModule::Ui ui{patch_playloader, patch_storage, patch_mod_queue};
+	ui.start();
 
 	while (lv_get_quit() == LV_QUIT_NONE) {
-		lv_task_handler();
+		ui.update();
 	}
 
 	lv_port_disp_deinit();

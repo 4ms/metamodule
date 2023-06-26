@@ -6,47 +6,82 @@ project(mm_sim LANGUAGES C CXX)
 find_package(PkgConfig)
 pkg_check_modules(SDL2 REQUIRED sdl2)
 
-set(LVDRV_DIR "${PROJECT_SOURCE_DIR}/lvgl_drv")
-set(LVGL_DIR "${PROJECT_SOURCE_DIR}/../firmware/lib/lvgl")
-set(LV_CONF_PATH
-    ${PROJECT_SOURCE_DIR}/lv_conf.h
-    CACHE STRING "" FORCE)
-
-# TODO: create lvgl_drv/CMakeLists.txt:
-add_library(lvglsdl ${LVDRV_DIR}/lv_sdl_disp.c ${LVDRV_DIR}/lv_port_indev.c)
-
-target_compile_definitions(lvglsdl PRIVATE -DLV_LVGL_H_INCLUDE_SIMPLE)
-target_compile_definitions(lvglsdl PRIVATE -DLV_CONF_PATH=${LV_CONF_PATH})
-target_compile_options(lvglsdl PUBLIC -I /opt/homebrew/include -arch arm64
-                                      -Wall -O2)
-target_link_options(lvglsdl PUBLIC -L /opt/homebrew/lib)
-target_include_directories(lvglsdl PRIVATE ${SDL2_INCLUDE_DIRS})
-target_include_directories(lvglsdl PRIVATE ${LVGL_DIR})
-target_include_directories(lvglsdl PRIVATE ${LVGL_DIR}/lvgl)
-# ##############################################################################
-
-add_executable(simulator src/main.cc)
-target_compile_options(simulator PRIVATE -Wall -O2)
-
 set(MM_ROOT ${PROJECT_SOURCE_DIR}/..)
+set(SIM_ROOT ${PROJECT_SOURCE_DIR})
+set(LVGL_DIR ${MM_ROOT}/firmware/lib/lvgl)
+
+# #################### LVGL Simulator Driver #################################
+
+add_subdirectory(lvgl_drv)
+
+# #################### Gui Assets ############################################
+file(
+  GLOB
+  GUI_IMAGES
+  ${MM_ROOT}/firmware/src/pages/images/modules/*.c
+  ${MM_ROOT}/firmware/src/pages/images/components/*.c
+  ${MM_ROOT}/firmware/src/pages/images/ui/*.c
+  ${MM_ROOT}/firmware/src/pages/images/Befaco/*.c
+  ${MM_ROOT}/firmware/src/pages/images/Befaco/components/*.c
+  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/*.c
+  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/components/*.c
+  ${MM_ROOT}/firmware/src/pages/fonts/MuseoSansRounded_*.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/ui_font_*.c)
+
+add_library(gui_assets ${GUI_IMAGES})
+
+target_compile_options(gui_assets PRIVATE -Wall -O2)
+target_include_directories(gui_assets PRIVATE ${LVGL_DIR} ${LVGL_DIR}/lvgl)
+
+# #################### RYML + Patch Convert ##################################
+
+file(GLOB RYML_SOURCES
+     ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp
+     ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/ext/c4core/src/c4/*.cpp)
+
+add_library(
+  ryml ${MM_ROOT}/shared/patch_convert/ryml/ryml_serial.cc
+       ${MM_ROOT}/shared/patch_convert/yaml_to_patch.cc ${RYML_SOURCES})
+
+target_include_directories(
+  ryml
+  PRIVATE ${MM_ROOT}/shared/patch_convert
+          ${MM_ROOT}/shared/patch_convert/ryml
+          ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/src
+          ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/ext/c4core/src
+          ${MM_ROOT}/shared/cpputil
+          ${MM_ROOT}/shared)
+
+target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
+
+# #################### Application ############################################
+
+add_executable(
+  simulator
+  src/main.cc ${MM_ROOT}/firmware/src/pages/slsexport/ui.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/ui_helpers.c
+  ${MM_ROOT}/firmware/src/pages/page_manager.cc)
+
 target_include_directories(
   simulator
-  PRIVATE ${LVGL_DIR}
-          ${LVGL_DIR}/lvgl
-          ${LVDRV_DIR}
-          ${SDL2_INCLUDE_DIRS}
-          src
+  PRIVATE src
           stubs
+          lvgl_drv
+          ${LVGL_DIR}
+          ${LVGL_DIR}/lvgl
+          ${SDL2_INCLUDE_DIRS}
           ${MM_ROOT}/firmware/src
           ${MM_ROOT}/firmware/src/medium
           ${MM_ROOT}/shared
-          ${MM_ROOT}/shared/cpputil)
+          ${MM_ROOT}/shared/cpputil
+          ${MM_ROOT}/shared/patch)
 
+target_compile_options(simulator PRIVATE -Wall -O2)
 target_compile_options(simulator PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
                                          ${SDL2_CFLAGS_OTHER})
 
 target_compile_definitions(simulator PRIVATE SIMULATOR)
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        SDL2)
+                                        gui_assets ryml SDL2)
 
 include(${LVGL_DIR}/lvgl/CMakeLists.txt)
