@@ -8,6 +8,7 @@ struct ENVVCAInfo : ElementInfoBase {
 	static constexpr std::string_view slug{"ENVVCA"};
 	static constexpr std::string_view description{"Envelope VCA"};
 	static constexpr uint32_t width_hp = 8;
+	static constexpr bool uses_center_coords = true;
 	static constexpr std::string_view svg_filename{"res/modules/ENVVCA-artwork.svg"};
 
 	static constexpr std::array<Element, 19> Elements{{

@@ -1,10 +1,8 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
-#include "util/base_concepts.hh"
 #include <array>
-#include <span>
-#include <string_view>
 #include <cstdint>
+#include <string_view>
 
 namespace MetaModule
 {
@@ -12,8 +10,9 @@ namespace MetaModule
 struct ElementInfoBase {
 	static constexpr std::string_view slug{""};
 	static constexpr std::string_view description{""};
-	static constexpr uint32_t width_hp = 0;
 	static constexpr std::string_view svg_filename{""};
+	static constexpr uint32_t width_hp = 0;
+	static constexpr bool uses_center_coords = false;
 	static constexpr std::array<Element, 0> Elements{};
 
 	template<size_t DPI = 75>
@@ -21,6 +20,12 @@ struct ElementInfoBase {
 		constexpr float pix_per_inch = DPI;
 		constexpr float mm_per_inch = 25.4f;
 		float inches = px / pix_per_inch;
+		return inches * mm_per_inch;
+	}
+
+	static constexpr float to_mm(float px, float DPI) {
+		constexpr float mm_per_inch = 25.4f;
+		float inches = px / DPI;
 		return inches * mm_per_inch;
 	}
 
