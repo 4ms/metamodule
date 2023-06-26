@@ -21,10 +21,7 @@ inline auto ButtonToBool = [](float val) -> bool
 
 inline auto ThreeWayToInt = [](float val) -> uint32_t
 {
-	return std::round(val * 2.f); 
-	// [0.00, 0.25) -> 0
-	// [0.25, 0.75) -> 1
-	// [0.75, 1.00] -> 2
+	return std::round(val);
 };
 
 class ENVVCACore : public SmartCoreProcessor<MetaModule::ENVVCAInfo> {
@@ -52,11 +49,13 @@ public:
 
 			// std::pow is not required to be constexpr by the standard
 			// so this might not work in clang
-			constexpr float b = gcem::pow(2.0f, gcem::log2(f_1 / f_2) / (V_1 - V_2));
-			constexpr float a = f_1 / gcem::pow(b, V_1);
+			constexpr double ArgScalingFactor = 10.0f;
+			constexpr double arg = gcem::log2(f_1 / f_2) / (V_1 - V_2);
+			constexpr double b = gcem::pow(2.0f, arg / ArgScalingFactor);
+			constexpr double a = f_1 / gcem::pow(gcem::pow(2.0f, arg), V_1);
 
 			// interpolate
-			auto frequency = gcem::pow(b, voltage) * a;
+			auto frequency = float(gcem::pow(b, voltage * ArgScalingFactor) * a);
 
 			// limit to valid frequency range
 			frequency = std::clamp(frequency, 1.0f/(60 * 3), 20e3f);
@@ -152,7 +151,7 @@ public:
 
 	std::pair<float,float> getRiseAndFallCV()
 	{
-		auto ProcessCVOffset = [](auto slider, auto range) -> float
+		auto ProcessCVOffset = [](auto slider, uint32_t range) -> float
 		{	
 			// Slider plus resistor in parallel to tweak curve
 			const float SliderImpedance = 100e3f;
@@ -165,13 +164,14 @@ public:
 				{
 					return -12.0f * VoltageDivider(1e3f, 10e3f);
 				}
-				else if (range == 1)
+				else if (range == 0)
 				{
-					return 0.0f;
+					return 12.0f * VoltageDivider(1e3f, 8.2e3f);
 				}
 				else
 				{
-					return 12.0f * VoltageDivider(1e3f, 8.2e3f);
+					// middle position, and fail-safe default
+					return 0.0f;
 				}
 			};
 
