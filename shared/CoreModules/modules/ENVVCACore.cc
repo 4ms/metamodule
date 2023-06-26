@@ -160,21 +160,17 @@ public:
 			// Select one of three bias voltages
 			auto BiasFromRange = [](auto range) -> float
 			{
-				if (range == 0)
+				if (range == 2)
 				{
 					return -12.0f * VoltageDivider(1e3f, 10e3f);
 				}
-				else if (range == 1)
-				{
-					return 0.0f;
-				}
-				else if (range == 2)
+				else if (range == 0)
 				{
 					return 12.0f * VoltageDivider(1e3f, 8.2e3f);
 				}
 				else
 				{
-					// how to handle error here?
+					// middle position, and fail-safe default
 					return 0.0f;
 				}
 			};
