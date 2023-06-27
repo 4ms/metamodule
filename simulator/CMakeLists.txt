@@ -105,7 +105,16 @@ target_compile_options(simulator PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
                                          ${SDL2_CFLAGS_OTHER})
 
 target_compile_definitions(simulator PRIVATE SIMULATOR)
-target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        gui_assets ryml SDL2)
+target_link_libraries(
+  simulator
+  PRIVATE ${SDL2_LIBRARIES}
+          lvglsdl
+          lvgl::lvgl
+          gui_assets
+          core_modules
+          ryml
+          SDL2)
+
+target_link_options(simulator PUBLIC LINKER:-map,simulator.map)
 
 include(${LVGL_DIR}/lvgl/CMakeLists.txt)
