@@ -73,7 +73,7 @@ struct PatchViewPage : PageBase {
 		lv_label_set_text(module_name, "Select a module:");
 
 		modules_cont = lv_obj_create(base);
-		lv_obj_set_size(modules_cont, 320, 2 * height + 8);
+		lv_obj_set_size(modules_cont, 320, 4 * height + 8);
 		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
@@ -82,14 +82,14 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_style_pad_all(modules_cont, 2, LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
-		// lv_obj_set_scroll_dir(modules_cont, LV_DIR_VER);
+		// lv_obj_set_scroll_dir(modules_cont, LV_DIR_ALL); //FIXME: why no horiz scrolling?
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		// lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_CHAIN);
+		// lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_CHAIN); //FIXME: has no effect?
 
 		cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
 		lv_obj_set_size(cable_layer, 320, 240);
 		lv_obj_set_align(cable_layer, LV_ALIGN_CENTER);
-		lv_canvas_set_buffer(cable_layer, cable_buf, 320, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
+		lv_canvas_set_buffer(cable_layer, cable_buf.data(), 320, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
 
 		lv_draw_line_dsc_init(&cable_drawline_dsc);
 		cable_drawline_dsc.width = 4;
@@ -116,42 +116,52 @@ struct PatchViewPage : PageBase {
 		modules.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
 
-		lv_obj_set_height(modules_cont, 2 * height + 8);
+		//lv_obj_set_height(modules_cont, 2 * height + 8);
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
 
 		lv_group_add_obj(group, playbut);
 
-		auto module_drawer = ModuleDrawer{modules_cont, patch, height};
+		auto module_drawer = ModuleDrawer{modules_cont, height};
 
-		constexpr uint32_t pixel_size = (LV_COLOR_SIZE / 8) / sizeof(buffer[0]);
-		uint32_t xpos = 0;
+		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
+
 		for (auto [module_idx, slug] : enumerate(patch.module_slugs)) {
 			module_ids.push_back(module_idx);
 
-			auto canvas_buf = &(buffer[pixel_size * height * xpos]);
-
-			auto canvas = module_drawer.draw_with_mappings(module_idx, canvas_buf, mappings);
+			//FIXME: why can't we get the width from the canvas object?
+			auto [width, canvas] = module_drawer.draw(slug, canvas_buf);
 			if (!canvas)
 				continue;
+
+			//TODO: if (settings.draw_mappings)
+			module_drawer.draw_mappings(patch, module_idx, canvas, mappings);
+
+			// Increment the buffer
+			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * width * height);
 
 			modules.push_back(canvas);
 
 			lv_group_add_obj(group, canvas);
+
+			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
+			lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+			lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
+			// lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLL_CHAIN); //FIXME: has no effect?
+			// lv_obj_set_scroll_dir(canvas, LV_DIR_ALL);		   //FIXME:has no effect?
 
 			// give the callback access to the module_idx
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_PRESSED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_defocus_cb, LV_EVENT_DEFOCUSED, (void *)this);
-
-			xpos += lv_obj_get_width(canvas);
-			if (xpos >= MaxBufferWidth) {
-				printf_("Max image size reached\n");
-				break;
-			}
 		}
+
+		//auto cable_drawer = CableDrawer{cable_cont, modules, patch, height};
+		//cable_drawer.draw_all();
+
 		// lv_obj_refresh_self_size(modules_cont);
 	}
 
@@ -215,13 +225,13 @@ struct PatchViewPage : PageBase {
 		// if (lv_obj_get_scroll_y(page->base) == 0 && num_rows > 1)
 		// 	lv_obj_scroll_to_y(page->base, 119, LV_ANIM_ON);
 
-		const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
 		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
 		// Draw all cables connected to this module
 		// TODO: gotta be a cleaner way to do this...
 		// 		push Jack{c.out}, this_module_obj, Jack{in}, outmodule_obj
 		// 		draw_cable(Jack out, Jack in, lv_obj_t *out_module, lv_obj_t *in_module);
+		const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
 		if (thismoduleinfo.width_hp > 0) {
 			for (const auto &c : patch.int_cables) {
 				// Draw cable(s) if out jack is on this module

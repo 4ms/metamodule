@@ -32,9 +32,11 @@ struct PageBase {
 	MessageQueue &msg_queue;
 	PatchModQueue &patch_mod_queue;
 
-	static constexpr uint32_t MaxBufferWidth = 1024;
-	static inline uint8_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR(240, MaxBufferWidth)];
-	static inline uint8_t cable_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, 240)];
+	static constexpr uint32_t MaxBufferWidth = 320 * 4;
+	static constexpr uint32_t MaxBufferHeight = 240 * 4;
+	static inline std::array<lv_color_t, MaxBufferHeight * MaxBufferWidth> page_pixel_buffer;
+
+	static inline std::array<uint8_t, LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(320, 240)> cable_buf;
 	// Why doesn't this work?
 	// uint8_t *buffer = StaticBuffers::gui_scratch_buffer;
 	// uint8_t *cable_buf = StaticBuffers::gui_scratch_screen;
