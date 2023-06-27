@@ -9,45 +9,11 @@ from xml_helper import register_all_namespaces
 from shutil import which
 import subprocess
 
+from .helpers import *
+from .vcv import *
+
 # Version check
 f"Python 3.6+ is required"
-
-def Log(x):
-    TAG = "    svgextract: "
-    print(TAG+x)
-
-ns = {
-    "svg": "http://www.w3.org/2000/svg",
-    "inkscape": "http://www.inkscape.org/namespaces/inkscape",
-}
-
-class UserException(Exception):
-    pass
-
-
-def appendToFileAfterMarker(filename, marker, newText, matchText=None):
-    if matchText == None:
-        matchText = newText
-
-    with open(filename, 'r') as file :
-      filedata = file.read()
-
-    prettyNewText = newText.replace('\n',' ').replace('\t', ' ')
-    if filedata.find(matchText) == -1:
-        filedata = filedata.replace(marker, marker + newText)
-        Log(f"Updated {filename} with {prettyNewText}")
-        with open(filename, 'w') as file:
-            file.write(filedata)
-    else:
-        Log(f"Didn't update {filename} with {prettyNewText}, already exists in file")
-
-
-def input_default(prompt, default=""):
-    return default
-    str = input(f"{prompt} [{default}]: ")
-    if str == "":
-        return default
-    return str
 
 
 def is_valid_slug(slug):
@@ -158,71 +124,6 @@ def get_dim_inches(dimString):
         dimInches /= 25.4
     return dimInches
 
-def get_components_group(root):
-    groups = root.findall(".//svg:g[@inkscape:label='components']", ns)
-    # Illustrator uses `id` for the group name.
-    if len(groups) < 1:
-        groups = root.findall(".//svg:g[@id='components']", ns)
-    if len(groups) < 1:
-        raise UserException("ERROR: Could not find \"components\" layer on panel")
-    return groups[0]
-
-
-def find_slug_and_modulename(components_group):
-    texts = components_group.findall(".//svg:text", ns)
-    slug = "Unnamed"
-    moduleName = "Unnamed"
-    for t in texts:
-        name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
-        if name is None:
-            name = t.get('id')
-        if name is None:
-            name = t.get('data-name')
-        if name is None:
-            continue
-
-        if name == "slug":
-            slug = ""
-            for m in t.itertext():
-                slug += m
-
-        if name == "modulename":
-            moduleName = ""
-            for m in t.itertext():
-                moduleName += m
-
-    subgroups = components_group.findall(".//svg:g", ns)
-    if slug == "Unnamed":
-        for t in subgroups:
-            name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
-            if name is None:
-                name = t.get('id')
-            if name is None:
-                name = t.get('data-name')
-            if name is None:
-                continue
-            if name == "slug":
-                slug = ""
-                for m in t.itertext():
-                    slug += m
-                slug = re.sub(r'\W+', '', slug).strip()
-
-    if moduleName == "Unnamed":
-        for t in subgroups:
-            name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
-            if name is None:
-                name = t.get('id')
-            if name is None:
-                name = t.get('data-name')
-            if name is None:
-                continue
-            if name == "modulename":
-                moduleName = ""
-                for m in t.itertext():
-                    moduleName += m
-                moduleName = re.sub(r'[\W]+', ' ', moduleName).strip()
-
-    return slug, moduleName
 
 
 def panel_to_components(tree):
@@ -548,9 +449,6 @@ struct {slug}Info : ModuleInfoBase {{
     return source
 
 
-def pathFromHere(path):
-    return os.path.join(os.path.dirname(os.path.realpath(__file__)),path)
-
 
 def createInfoFile(svgFilename, infoFilePath = None):
     if infoFilePath == None:
@@ -577,28 +475,6 @@ def createInfoFile(svgFilename, infoFilePath = None):
         createCoreModule(components['slug'])
     return components['slug']
 
-
-def extractArtworkLayer(svgFilename, artworkFilename = None, slug = None):
-    if artworkFilename == None:
-        outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
-        if outputpath is None:
-            outputpath = input_default("Directory to save SVG artwork file", pathFromHere("../../vcv/res/modules"))
-        artworkFilename = os.path.join(outputpath, slug + "-artwork.svg")
-
-    Log(f"reading from {svgFilename}, writing to {artworkFilename}")
-    register_all_namespaces(svgFilename)
-
-    tree = xml.etree.ElementTree.parse(svgFilename)
-    root = tree.getroot()
-    components_group = get_components_group(root)
-
-    slug, _ = find_slug_and_modulename(components_group)
-    appendPluginFiles(slug)
-
-    components_group.clear()
-    Log("Removed components layer")
-    tree.write(artworkFilename)
-    Log(f"Wrote artwork svg file for vcv: {artworkFilename}")
 
 
 # def createComponentImageCompositeCmd(svgFilename, pngFilename):
@@ -689,7 +565,7 @@ def processSvg(svgFilename):
         Log("No slug found, aborting")
         return
 
-    extractArtworkLayer(svgFilename, None, slug)
+    extractForVcv(svgFilename, None, slug)
     
 
 def createCoreModule(slug, coreModuleDir = None):
@@ -710,47 +586,6 @@ def createCoreModule(slug, coreModuleDir = None):
             Log(f"Created new file {newCoreFileName} in {coreModuleDir} because it didn't exist")
 
 
-def appendPluginFiles(slug, pluginDir = None, description=""):
-    if pluginDir == None:
-        pluginDir = os.getenv('METAMODULE_VCV_DIR')
-        if pluginDir is None:
-            pluginDir = input_default("Metamodule/VCV dir", pathFromHere("../../vcv/"))
-    plugincc = os.path.join(pluginDir, 'src/plugin.cc')
-    pluginhh = os.path.join(pluginDir, 'src/plugin.hh')
-    pluginjson = os.path.join(pluginDir, 'plugin.json')
-    if description=="":
-        description = slug
-    modelName = 'model' + slug
-
-    # Append to plugin.cc file
-    marker = '// Add models below here'
-    newText = f'p->addModel({modelName});'
-    appendToFileAfterMarker(plugincc, marker, "\n\t" + newText, newText)
-    marker = "// include and define models below here\n"
-    newText = f'''
-#include "CoreModules/info/{slug}_info.hh"
-Model* {modelName} = GenericModule<{slug}Info>::create();
-'''
-    appendToFileAfterMarker(plugincc, marker, newText)
-
-    # Append to plugin.hh file
-    marker = '// Add models below here\n'
-    newText = f'extern rack::Model *{modelName};\n'
-    appendToFileAfterMarker(pluginhh, marker, newText)
-
-    # Append plugin.json
-    # TODO: Use a json library because appendToFileAfterMarker gets confused easily (whitespace, trailing comma...)
-    newText=f'''
-    {{
-      "slug": "{slug}",
-      "name": "{slug}",
-      "description": "{description}",
-      "tags": []
-    }},'''
-    matchText = f'"slug": "{slug}",'
-    marker = '"modules": ['
-    appendToFileAfterMarker(pluginjson, marker, newText, matchText)
-
 
 def usage(script):
     print(f"""MetaModule SVG Helper Utility
@@ -759,7 +594,7 @@ Usage: {script} <command> ...
 Commands:
 
 processsvg [input svg file name]
-    Runs createinfo, extractforvcv, and createcorefiles on the given file.
+    Runs createinfo and extractforvcv on the given file.
     Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR, METAMODULE_COREMODULE_DIR if found,
     otherwise prompts user for the values
 
@@ -817,7 +652,7 @@ def parse_args(args):
     output = args.pop(0)
 
     if cmd == 'extractforvcv':
-        extractArtworkLayer(inputfile, output)
+        extractForVcv(inputfile, output)
         return
 
     if cmd == 'createlvimg':
