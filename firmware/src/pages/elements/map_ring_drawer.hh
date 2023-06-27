@@ -86,12 +86,12 @@ struct MapRingDrawer {
 	lv_obj_t *canvas;
 	bool center_coords;
 
-	void draw_mapped_ring(auto element, lv_obj_t *element_obj, const lv_img_dsc_t *element_img, uint32_t panel_el_id) {
-		if (!element_img || !element_obj)
+	void draw_mapped_ring(auto element, lv_obj_t *element_obj, lv_img_header_t element_img_hdr, uint32_t panel_el_id) {
+		if (!element_obj)
 			return;
 
-		uint16_t w = element_img->header.w;
-		uint16_t h = element_img->header.h;
+		uint16_t w = element_img_hdr.w;
+		uint16_t h = element_img_hdr.h;
 		auto [x, y] = center_coords ?
 						  ElementDrawerImpl::mm_to_center_px(element.x_mm, element.y_mm, w, h, module_height) :
 						  ElementDrawerImpl::mm_to_topleft_px(element.x_mm, element.y_mm, module_height);

@@ -18,7 +18,6 @@ enum class ParamAnimMethod {
 	Encoder
 };
 
-//TODO: Knob or Switch ==> rename to MParam?
 struct AnimatedParam {
 	lv_obj_t *obj;
 	const MappedKnob &patchconf;
@@ -26,8 +25,24 @@ struct AnimatedParam {
 	float last_pot_reading = 0.5f;
 };
 
+struct AnimatedInJack {
+	const MappedInputJack &patchconf;
+};
+
+struct AnimatedOutJack {
+	const MappedOutputJack &patchconf;
+};
+
+struct AnimatedLight {
+	lv_obj_t *obj;
+	uint16_t element_id;
+};
+
 struct Mappings {
 	std::vector<AnimatedParam> knobs;
+	std::vector<AnimatedLight> lights;
+	std::vector<AnimatedInJack> injacks;
+	std::vector<AnimatedOutJack> outjacks;
 };
 
 } // namespace MetaModule

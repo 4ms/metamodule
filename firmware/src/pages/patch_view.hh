@@ -131,12 +131,12 @@ struct PatchViewPage : PageBase {
 			module_ids.push_back(module_idx);
 
 			//FIXME: why can't we get the width from the canvas object?
-			auto [width, canvas] = module_drawer.draw(slug, canvas_buf);
+			auto [width, canvas] = module_drawer.draw_faceplate(slug, canvas_buf);
 			if (!canvas)
 				continue;
 
 			//TODO: if (settings.draw_mappings)
-			module_drawer.draw_mappings(patch, module_idx, canvas, mappings);
+			module_drawer.draw_mapped_elements(patch, module_idx, canvas, mappings);
 
 			// Increment the buffer
 			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * width * height);

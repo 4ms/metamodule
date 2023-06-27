@@ -5,6 +5,7 @@
 #include "pages/base.hh"
 #include "pages/draw_helpers.hh"
 #include "pages/images/image_list.hh"
+#include "pages/module_drawer.hh"
 #include "pages/module_param.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
@@ -30,7 +31,6 @@ struct ModuleViewPage : PageBase {
 		: PageBase{info}
 		, slug(module_slug)
 		, base(lv_obj_create(nullptr))
-		, canvas(lv_canvas_create(base))
 		, roller(lv_roller_create(base))
 		, edit_pane(lv_obj_create(base))
 		, knob_edit_pane{info, edit_pane} {
@@ -64,80 +64,78 @@ struct ModuleViewPage : PageBase {
 		}
 		printf_("ModuleViewPage module %s\n", slug.data());
 
-		moduleinfo = ModuleFactory::getModuleInfo(slug);
+		moduleinfo = ModuleFactory::getModuleInfo2(slug);
 		if (moduleinfo.width_hp == 0) {
-			msg_queue.append_message("Module View page got empty module slug.\r\n");
+			msg_queue.append_message("Module View page got empty module info.\r\n");
 			return;
 		}
 
 		reset_module_page();
 
+		auto module_drawer = ModuleDrawer{base, 240};
+		auto [width, obj] = module_drawer.draw_faceplate(slug, buffer);
+		canvas = obj;
+
 		//Draw module image
-		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
-		if (!img) {
-			printf_("Image not found\n");
-			return;
-		}
-		auto width_px = img->header.w;
-		lv_obj_set_size(canvas, width_px, 240);
-		lv_canvas_set_buffer(canvas, buffer, width_px, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
-		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
 
-		//Create text list (roller options) and circles over components
+		////Create text list (roller options) and circles over components
 
-		size_t num_controls = moduleinfo.InJacks.size() + moduleinfo.OutJacks.size() + moduleinfo.Knobs.size() +
-							  moduleinfo.Switches.size();
-		opts.reserve(num_controls * 12); //12 chars per roller item
-		button.reserve(num_controls);
-		mapped_knobs.reserve(num_controls);
-		static_knobs.reserve(num_controls);
-		module_controls.reserve(num_controls);
+		size_t num_elements = moduleinfo.elements.size();
+		opts.reserve(num_elements * 12); //12 chars per roller item
+		button.reserve(num_elements);
+		mapped_knobs.reserve(num_elements);
+		static_knobs.reserve(num_elements);
+		module_controls.reserve(num_elements);
 
-		// const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
 		const auto &patch = patch_storage.get_view_patch();
 
-		for (const auto el : moduleinfo.Knobs) {
-			draw_knob(el, patch);
-			module_controls.push_back({ModuleParam::Type::Knob, el.id});
-		}
+		auto drawn_elements = module_drawer.draw_elements(slug, canvas);
 
-		for (const auto &el : moduleinfo.InJacks) {
-			draw_injack(el, patch);
-			module_controls.push_back({ModuleParam::Type::InJack, el.id});
-		}
+		Mappings mappings;
+		module_drawer.draw_mappings(patch, this_module_id, canvas, drawn_elements, mappings);
 
-		for (const auto el : moduleinfo.OutJacks) {
-			draw_outjack(el, patch);
-			module_controls.push_back({ModuleParam::Type::OutJack, el.id});
-		}
+		//for (const auto el : moduleinfo.Knobs) {
+		//	draw_knob(el, patch);
+		//	module_controls.push_back({ModuleParam::Type::Knob, el.id});
+		//}
 
-		for (const auto el : moduleinfo.Switches) {
-			draw_switch(el, patch);
-			module_controls.push_back({ModuleParam::Type::Switch, el.id + (uint32_t)moduleinfo.Knobs.size()});
-		}
+		//for (const auto &el : moduleinfo.InJacks) {
+		//	draw_injack(el, patch);
+		//	module_controls.push_back({ModuleParam::Type::InJack, el.id});
+		//}
+
+		//for (const auto el : moduleinfo.OutJacks) {
+		//	draw_outjack(el, patch);
+		//	module_controls.push_back({ModuleParam::Type::OutJack, el.id});
+		//}
+
+		//for (const auto el : moduleinfo.Switches) {
+		//	draw_switch(el, patch);
+		//	module_controls.push_back({ModuleParam::Type::Switch, el.id + (uint32_t)moduleinfo.Knobs.size()});
+		//}
 
 		// remove final \n
-		if (opts.length() > 0)
-			opts.pop_back();
+		//if (opts.length() > 0)
+		//	opts.pop_back();
 
-		lv_obj_set_pos(roller, width_px, 0);
-		lv_obj_set_size(roller, 320 - width_px, 240);
-		lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
+		//lv_obj_set_pos(roller, width_px, 0);
+		//lv_obj_set_size(roller, 320 - width_px, 240);
+		//lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
 
-		// Add text list to roller options
-		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
-		lv_roller_set_visible_row_count(roller, 11);
-		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
+		//// Add text list to roller options
+		//lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
+		//lv_roller_set_visible_row_count(roller, 11);
+		//lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
+		//lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
 
-		//Select first element
-		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
-		cur_selected = 0;
-		lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
+		////Select first element
+		//lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
+		//cur_selected = 0;
+		//lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
 
-		lv_obj_set_pos(edit_pane, width_px, 0);
-		lv_obj_set_size(edit_pane, 320 - width_px, 240);
-		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
+		//lv_obj_set_pos(edit_pane, width_px, 0);
+		//lv_obj_set_size(edit_pane, 320 - width_px, 240);
+		//lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void update() override {
@@ -161,7 +159,7 @@ struct ModuleViewPage : PageBase {
 			const float new_pot_val = knob.patchconf.get_mapped_val(params.knobs[knob.patchconf.panel_knob_id]);
 			if (std::abs(new_pot_val - knob.last_pot_reading) > 0.01f) {
 				knob.last_pot_reading = new_pot_val;
-				DrawHelper::animate_control(knob, moduleinfo);
+				// DrawHelper::animate_control(knob, moduleinfo);
 			}
 		}
 
@@ -169,7 +167,7 @@ struct ModuleViewPage : PageBase {
 		for (auto &knob : static_knobs) {
 			if (std::abs(knob.patchconf.value - knob.last_pot_reading) > 0.01f) {
 				knob.last_pot_reading = knob.patchconf.value;
-				DrawHelper::animate_control(knob, moduleinfo);
+				// DrawHelper::animate_control(knob, moduleinfo);
 			}
 		}
 	}
@@ -212,7 +210,7 @@ private:
 	}
 
 	void draw_switch(const SwitchDef &el, const PatchData &patch) {
-		draw_control(el, patch, moduleinfo.Knobs.size());
+		// draw_control(el, patch, moduleinfo.Knobs.size());
 	}
 
 	void draw_knob(const KnobDef &el, const PatchData &patch) {
@@ -368,7 +366,7 @@ private:
 		}
 	}
 
-	ModuleInfoView moduleinfo;
+	ModuleInfoView2 moduleinfo;
 
 	std::string opts;
 	uint16_t this_module_id;
