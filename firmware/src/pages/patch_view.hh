@@ -12,6 +12,7 @@
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
 #include "pages/map_register.hh"
+#include "pages/module_drawer.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include "printf.h"
@@ -85,8 +86,6 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		// lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_CHAIN);
 
-		lv_draw_img_dsc_init(&draw_img_dsc);
-
 		cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
 		lv_obj_set_size(cable_layer, 320, 240);
 		lv_obj_set_align(cable_layer, LV_ALIGN_CENTER);
@@ -124,74 +123,32 @@ struct PatchViewPage : PageBase {
 
 		lv_group_add_obj(group, playbut);
 
+		auto module_drawer = ModuleDrawer{modules_cont, patch, height};
+
 		constexpr uint32_t pixel_size = (LV_COLOR_SIZE / 8) / sizeof(buffer[0]);
 		uint32_t xpos = 0;
 		for (auto [module_idx, slug] : enumerate(patch.module_slugs)) {
 			module_ids.push_back(module_idx);
 
-			const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
-			if (!img) {
-				printf_("Image not found for %s\n", slug.c_str());
+			auto canvas_buf = &(buffer[pixel_size * height * xpos]);
+
+			auto canvas = module_drawer.draw_with_mappings(module_idx, canvas_buf, mappings);
+			if (!canvas)
 				continue;
-			}
-			auto widthpx = img->header.w;
 
-			lv_obj_t *canvas = modules.emplace_back(lv_canvas_create(modules_cont));
-			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE);
-			lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE); //inherited from parent?
-			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+			modules.push_back(canvas);
 
-			lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
+			lv_group_add_obj(group, canvas);
 
-			auto buf = &(buffer[pixel_size * height * xpos]);
-			lv_obj_set_size(canvas, widthpx, height);
-			lv_canvas_set_buffer(canvas, buf, widthpx, height, LV_IMG_CF_TRUE_COLOR);
-
-			// Draw module artwork
-			lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
-
-			// Draw module controls
-			const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-			if (moduleinfo.width_hp) {
-				DrawHelper::draw_module_jacks(canvas, moduleinfo, patch, module_idx, height);
-				DrawHelper::draw_module_knobs(canvas, moduleinfo, patch, mappings.knobs, module_idx, height);
-			} else {
-				const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
-				auto center_coords = moduleinfo.uses_center_coords;
-				ElementImage images{height};
-				ElementDrawer el_drawer{height, canvas, center_coords};
-				MapRegister mapper{module_idx, patch, mappings};
-				MapRingDrawer ring_drawer{height, canvas, center_coords};
-
-				for (const auto &element : moduleinfo.elements) {
-					std::visit(
-						[&ring_drawer, &images, &el_drawer, &mapper](auto &el) {
-						auto img = images.get_img(el);
-						auto obj = el_drawer.draw_element(el, img);
-						if (!obj)
-							return;
-
-						if (auto panel_param_id = mapper.register_mapping(el, obj)) {
-							ring_drawer.draw_mapped_ring(el, obj, img, *panel_param_id);
-						}
-
-						mapper.count(el);
-						},
-						element);
-				}
-			}
-
+			// give the callback access to the module_idx
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_PRESSED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_defocus_cb, LV_EVENT_DEFOCUSED, (void *)this);
 
-			lv_group_add_obj(group, canvas);
-
-			xpos += widthpx;
+			xpos += lv_obj_get_width(canvas);
 			if (xpos >= MaxBufferWidth) {
-				printf_("Max size reached\n");
+				printf_("Max image size reached\n");
 				break;
 			}
 		}
@@ -346,8 +303,6 @@ private:
 	std::vector<uint32_t> module_ids;
 
 	Mappings mappings;
-
-	lv_draw_img_dsc_t draw_img_dsc;
 
 	lv_draw_line_dsc_t cable_drawline_dsc;
 
