@@ -30,7 +30,34 @@ add_library(gui_assets ${GUI_IMAGES})
 target_compile_options(gui_assets PRIVATE -Wall -O2)
 target_include_directories(gui_assets PRIVATE ${LVGL_DIR} ${LVGL_DIR}/lvgl)
 
+# #################### CoreModules ##################################
+file(
+  GLOB
+  CORE_MODULES
+  ${MM_ROOT}/shared/CoreModules/modules/*Core.cc
+  ${MM_ROOT}/shared/CoreModules/Befaco/*Core.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/*Core.cc
+  ${MM_ROOT}/shared/CoreModules/modules/enosc/dynamic_data.cc
+  ${MM_ROOT}/shared/CoreModules/modules/enosc/data.cc)
+
+add_library(core_modules ${CORE_MODULES})
+
+target_compile_options(core_modules PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
+                                            -std=c++20> -Wall -O2)
+target_include_directories(
+  core_modules
+  PRIVATE ${MM_ROOT}/shared/
+          ${MM_ROOT}/shared/CoreModules
+          ${MM_ROOT}/shared/CoreModules/info
+          ${MM_ROOT}/firmware/src
+          ${MM_ROOT}/shared/cpputil
+          ${MM_ROOT}/vcv/src # For sys/alloc_buffer.h
+          ${MM_ROOT}/shared/CoreModules/AudibleInstruments)
+
 # #################### RYML + Patch Convert ##################################
+
+target_compile_options(gui_assets PRIVATE -Wall -O2)
+target_include_directories(gui_assets PRIVATE ${LVGL_DIR} ${LVGL_DIR}/lvgl)
 
 file(GLOB RYML_SOURCES
      ${MM_ROOT}/shared/patch_convert/ryml/rapidyaml/src/c4/yml/*.cpp
