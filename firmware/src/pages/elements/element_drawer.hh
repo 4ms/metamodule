@@ -5,7 +5,6 @@
 #include "pages/elements/base_image.hh"
 #include "pages/elements/element_draw_helpers.hh"
 #include "pages/styles.hh"
-#include "pr_dbg.hh"
 #include <cmath>
 
 namespace MetaModule::ElementDrawerImpl

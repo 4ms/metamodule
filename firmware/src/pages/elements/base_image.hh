@@ -1,11 +1,11 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include "lvgl/lvgl.h"
-#include "pr_dbg.hh"
 
 #include "4ms_images.hh"
 #include "audible_images.hh"
 #include "befaco_images.hh"
+#include "pr_dbg.hh"
 
 namespace MetaModule::ElementImageImpl
 {
