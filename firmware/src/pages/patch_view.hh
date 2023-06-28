@@ -129,14 +129,15 @@ struct PatchViewPage : PageBase {
 			module_ids.push_back(module_idx);
 
 			//FIXME: get the width from the canvas object, but we have to call lv_obj_refresh_size
-			auto [width, canvas] = module_drawer.draw_faceplate(slug, canvas_buf);
+			auto canvas = module_drawer.draw_faceplate(slug, canvas_buf);
 			if (!canvas)
 				continue;
 
-			module_drawer.draw_mapped_elements(patch, module_idx, canvas, drawn_elements);
+			module_drawer.draw_mapped_elements(patch, module_idx, canvas, drawn_elements, is_patch_playing);
 
 			// Increment the buffer
-			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * width * height);
+			lv_obj_refr_size(canvas);
+			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) * height);
 
 			module_canvases.push_back(canvas);
 

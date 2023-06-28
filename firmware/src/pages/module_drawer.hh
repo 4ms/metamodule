@@ -21,21 +21,21 @@ struct ModuleDrawer {
 	uint32_t height;
 
 	// Draws the module from patch, into container, using the provided buffer.
-	std::pair<uint32_t, lv_obj_t *> draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
+	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
 		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
 		if (!img) {
 			printf_("Image not found for %s\n", slug.c_str());
-			return {0, nullptr};
+			return nullptr;
 		}
 		auto widthpx = img->header.w;
 		if ((widthpx * height) > canvas_buffer.size()) {
 			printf_("Buffer not big enough for %dpx, not drawing\n", widthpx);
-			return {0, nullptr};
+			return nullptr;
 		}
 
 		lv_obj_t *canvas = lv_canvas_create(container);
 		if (!canvas)
-			return {0, nullptr};
+			return nullptr;
 
 		lv_obj_set_size(canvas, widthpx, height);
 		lv_canvas_set_buffer(canvas, canvas_buffer.data(), widthpx, height, LV_IMG_CF_TRUE_COLOR);
@@ -45,7 +45,7 @@ struct ModuleDrawer {
 		lv_draw_img_dsc_init(&draw_img_dsc);
 		lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
 
-		return {widthpx, canvas};
+		return canvas;
 	}
 
 	// Draws the mapping rings for module_idx with in patch, onto the canvas object

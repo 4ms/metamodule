@@ -85,16 +85,16 @@ struct ModuleViewPage : PageBase {
 		module_controls.reserve(num_elements);
 
 		auto module_drawer = ModuleDrawer{base, 240};
-		auto [width_px, obj] = module_drawer.draw_faceplate(slug, buffer);
-		canvas = obj;
+		canvas = module_drawer.draw_faceplate(slug, buffer);
 
-		module_drawer.draw_mapped_elements(patch, this_module_id, canvas, drawn_elements);
+		lv_obj_refr_size(canvas);
+		auto width_px = lv_obj_get_width(canvas);
+
+		module_drawer.draw_mapped_elements(patch, this_module_id, canvas, drawn_elements, is_patch_playing);
 
 		lv_obj_update_layout(canvas);
 
 		for (const auto &drawn_element : drawn_elements) {
-			// TODO: sort these?
-
 			std::visit(
 				[this, drawn = drawn_element.drawn](auto &el) {
 					if (!drawn.obj)
@@ -301,7 +301,7 @@ private:
 	uint16_t this_module_id;
 	uint32_t cur_selected = 0;
 	std::string_view slug;
-	bool is_patch_playing;
+	bool is_patch_playing = false;
 	PatchData &patch;
 
 	std::vector<lv_obj_t *> button;
