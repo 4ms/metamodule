@@ -62,7 +62,8 @@ struct Mappings {
 
 struct GuiElement {
 	lv_obj_t *obj;
-	uint32_t idx; //param_idx, light_idx, etc
+	uint16_t module_id;
+	uint16_t idx; //param_idx, light_idx, etc
 	std::optional<uint16_t> mapped_panel_element_id;
 };
 

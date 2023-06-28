@@ -98,8 +98,11 @@ struct ModuleViewPage : PageBase {
 			std::visit(
 				[this, drawn = drawn_element.drawn](auto &el) -> void {
 					opts += el.short_name;
-					if (drawn.mapped_panel_element_id)
+					if (drawn.mapped_panel_element_id) {
+						opts = " [";
 						opts += get_panel_name<PanelDef>(el, *(drawn.mapped_panel_element_id));
+						opts += "]";
+					}
 					opts += "\n";
 
 					add_button(drawn.obj);
