@@ -40,9 +40,8 @@ update_element(const Knob &element, const Params &params, const PatchData &patch
 			angle += 3600;
 		int32_t cur_angle = lv_img_get_angle(drawn.obj);
 
-		if (std::abs(angle - cur_angle) > 10) {
+		if (std::abs(angle - cur_angle) > 10)
 			lv_img_set_angle(drawn.obj, angle);
-		}
 	}
 }
 
@@ -58,17 +57,41 @@ update_element(const Slider &element, const Params &params, const PatchData &pat
 		auto width = lv_obj_get_width(drawn.obj);
 
 		if (height > width) {
+
+			// Vertical Slider
 			auto handle_height = lv_obj_get_height(handle);
 			int32_t pos = (1.f - val.value()) * (height - handle_height);
 			int32_t cur_pos = lv_obj_get_y(handle);
 
-			if (std::abs(pos - cur_pos) >= 2) {
+			if (pos != cur_pos)
 				lv_obj_set_y(handle, pos);
-				printf_("s%d: %d=>%d\n", drawn.idx, cur_pos, pos);
-			}
+
 		} else {
-			//Horizontal slider
+
+			// Horizontal Slider
+			auto handle_width = lv_obj_get_width(handle);
+			int32_t pos = (1.f - val.value()) * (width - handle_width);
+			int32_t cur_pos = lv_obj_get_x(handle);
+
+			if (pos != cur_pos)
+				lv_obj_set_x(handle, pos);
 		}
+	}
+}
+
+inline void
+update_element(const Toggle3pos &element, const Params &params, const PatchData &patch, const ElementContext &drawn) {
+	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
+		//angle 0 => up
+		//angle 1800 => down
+	}
+}
+
+inline void
+update_element(const Toggle2pos &element, const Params &params, const PatchData &patch, const ElementContext &drawn) {
+	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
+		//angle 0 => up
+		//angle 1800 => down
 	}
 }
 
