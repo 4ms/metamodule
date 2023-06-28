@@ -60,22 +60,22 @@ struct Mappings {
 ////////////////////////////
 ////////////////////////////
 
-struct DrawnElement {
+struct Drawn {
 	lv_obj_t *obj;
-	//const Element &element;
-	uint32_t element_idx;
 	uint32_t idx; //param_idx, light_idx, etc
-
 	std::optional<uint32_t> mapped_panel_element_id;
 
-	float last_value = 0.5f;
-
+	// float last_value = 0.5f;
 	// Get these from visting info.elements[element_idx], when matching ParamElement
 	// float min = 0.f;
 	// float max = 1.f;
 	// float get_mapped_val(float val) const {
 	// 	return (max - min) * val + min;
 	// }
+};
+struct DrawnElement {
+	Drawn drawn;
+	Element &element;
 };
 
 using Mappings2 = std::vector<DrawnElement>;

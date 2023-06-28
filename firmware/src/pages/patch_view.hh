@@ -8,6 +8,7 @@
 #include "pages/draw_helpers.hh"
 #include "pages/elements/element_drawer.hh"
 #include "pages/elements/map_ring_drawer.hh"
+#include "pages/elements/update.hh"
 #include "pages/images/image_list.hh"
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
@@ -183,18 +184,28 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
-		for (auto &mk : mappings.knobs) {
-			if (!mk.patchconf)
-				continue;
-			if (mk.anim_method == ParamAnimMethod::RotaryPot) {
-				const float new_pot_val = mk.patchconf->get_mapped_val(params.knobs[mk.patchconf->panel_knob_id]);
-				if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
-					mk.last_pot_reading = new_pot_val;
-					const int angle = new_pot_val * 3000.f - 1500.f;
-					lv_img_set_angle(mk.obj, angle);
-				}
-			}
+		const auto &patch = patch_storage.get_view_patch();
+		for (auto &drawn_el : drawn_elements) {
+			std::visit(
+				[this, patch, drawn = drawn_el.drawn](auto &el) {
+				update_element(el, this->params, patch, drawn);
+				//
+				},
+				drawn_el.element);
 		}
+
+		// for (auto &mk : mappings.knobs) {
+		// 	if (!mk.patchconf)
+		// 		continue;
+		// 	if (mk.anim_method == ParamAnimMethod::RotaryPot) {
+		// 		const float new_pot_val = mk.patchconf->get_mapped_val(params.knobs[mk.patchconf->panel_knob_id]);
+		// 		if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
+		// 			mk.last_pot_reading = new_pot_val;
+		// 			const int angle = new_pot_val * 3000.f - 1500.f;
+		// 			lv_img_set_angle(mk.obj, angle);
+		// 		}
+		// 	}
+		// }
 	}
 
 	static void base_scroll_cb(lv_event_t *event) {
@@ -317,6 +328,7 @@ private:
 	std::vector<uint32_t> module_ids;
 
 	Mappings mappings;
+	Mappings2 drawn_elements;
 
 	lv_draw_line_dsc_t cable_drawline_dsc;
 
