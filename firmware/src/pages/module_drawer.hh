@@ -3,8 +3,8 @@
 #include "CoreModules/module_info_base.hh"
 #include "images/image_list.hh"
 #include "lvgl/lvgl.h"
-#include "pages/animated_knob.hh"
 #include "pages/elements/base_image.hh"
+#include "pages/elements/context.hh"
 #include "pages/elements/element_draw_helpers.hh"
 #include "pages/elements/element_drawer.hh"
 #include "pages/elements/map_ring_drawer.hh"
@@ -47,85 +47,56 @@ struct ModuleDrawer {
 		return {widthpx, canvas};
 	}
 
-	std::vector<lv_obj_t *> draw_elements(ModuleTypeSlug slug, lv_obj_t *canvas) {
-		// Draw elements:
+	// Draws the mapping rings for module_idx with in patch, onto the canvas object
+	// Also appends the DrawnElement info to the given vector
+	void draw_mapped_elements(const PatchData &patch,
+							  uint32_t module_idx,
+							  lv_obj_t *canvas,
+							  std::vector<DrawnElement> &drawn_elements,
+							  bool draw_rings = true) {
+
+		auto slug = patch.module_slugs[module_idx];
+
+		// Draw module controls
 		const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
 		auto center_coords = moduleinfo.uses_center_coords;
-		ElementImage images{height};
-		ElementDrawer el_drawer{height, canvas, center_coords};
+		auto images = ElementImage{height};
+		auto el_drawer = ElementDrawer{height, canvas, center_coords};
+		auto ctx_helper = ElementContextHelper(module_idx, patch);
+		auto ring_drawer = MapRingDrawer{height, canvas, center_coords};
 
-		std::vector<lv_obj_t *> drawn_elements;
+		//Reserve enough for what we will append
+		drawn_elements.reserve(drawn_elements.size() + moduleinfo.elements.size());
 
 		for (const auto &element : moduleinfo.elements) {
-			auto drawn = std::visit(
-				[&images, &el_drawer](auto &el) -> auto {
+			auto element_ctx = std::visit(
+				[&ring_drawer, &images, &el_drawer, &ctx_helper, draw_rings](auto &el) -> ElementContext {
 					auto img = images.get_img(el);
 					auto obj = el_drawer.draw_element(el, img);
-					return obj;
+					auto element_ctx = ctx_helper.get_context(el, obj);
+					if (draw_rings && element_ctx.mapped_panel_id)
+						ring_drawer.draw_mapped_ring(el, obj, *element_ctx.mapped_panel_id);
+					return element_ctx;
 				},
 				element);
-			drawn_elements.push_back(drawn);
-		}
-
-		return drawn_elements;
-	}
-
-	// Draws the mapping rings for module_idx with in patch, onto the canvas object
-	// Appends the mapping info to the Mappings vector
-	void draw_mappings(const PatchData &patch,
-					   uint32_t module_idx,
-					   lv_obj_t *canvas,
-					   const std::vector<lv_obj_t *> &objs,
-					   Mappings &mappings) {
-		auto slug = patch.module_slugs[module_idx];
-
-		// Draw module controls
-		const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
-		auto center_coords = moduleinfo.uses_center_coords;
-		MapRegister mapper{module_idx, patch, mappings};
-		MapRingDrawer ring_drawer{height, canvas, center_coords};
-
-		unsigned i = 0;
-		for (const auto &element : moduleinfo.elements) {
-			std::visit(
-				[&ring_drawer, &mapper, &objs, &i](auto &el) {
-				auto obj = objs[i];
-				if (!obj)
-					return;
-				if (auto panel_param_id = mapper.register_mapping(el, obj))
-					ring_drawer.draw_mapped_ring(el, obj, *panel_param_id);
-				},
-				element);
-			i++;
+			drawn_elements.push_back({element_ctx, element});
 		}
 	}
 
-	// Draws the mapping rings for module_idx with in patch, onto the canvas object
-	// Also appends the mapping info to the Mappings vector
-	void draw_mapped_elements(const PatchData &patch, uint32_t module_idx, lv_obj_t *canvas, Mappings &mappings) {
-		auto slug = patch.module_slugs[module_idx];
+	// ??? Test this?
+	void draw_map_rings(const std::vector<DrawnElement> &drawn_elements, lv_obj_t *canvas, bool center_coords) {
+		auto ring_drawer = MapRingDrawer{height, canvas, center_coords};
 
-		// Draw module controls
-		const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
-		auto center_coords = moduleinfo.uses_center_coords;
-		ElementImage images{height};
-		ElementDrawer el_drawer{height, canvas, center_coords};
-		MapRegister mapper{module_idx, patch, mappings};
-		MapRingDrawer ring_drawer{height, canvas, center_coords};
-
-		unsigned element_idx = 0;
-		for (const auto &element : moduleinfo.elements) {
-			std::visit(
-				[&ring_drawer, &images, &el_drawer, &mapper, &element_idx](auto &el) {
-				auto img = images.get_img(el);
-				auto obj = el_drawer.draw_element(el, img);
-				if (obj) {
-					if (auto panel_param_id = mapper.register_mapping(el, obj))
-						ring_drawer.draw_mapped_ring(el, obj, *panel_param_id);
-				}
-				// auto de = DrawnElement{obj, element_idx++, 0/*param_idx?*/, panel_param_id};
-				},
-				element);
+		for (auto &drawn_element : drawn_elements) {
+			if (drawn_element.drawn.mapped_panel_id) {
+				std::visit(
+					[&ring_drawer, obj = drawn_element.drawn.obj, panel_id = *drawn_element.drawn.mapped_panel_id](
+						auto &el) {
+					//
+					ring_drawer.draw_mapped_ring(el, obj, panel_id);
+					},
+					drawn_element.element);
+			}
 		}
 	}
 };

@@ -2,36 +2,40 @@
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 #include "lvgl/lvgl.h"
-#include "pages/elements/base_image.hh"
 #include "pages/elements/element_draw_helpers.hh"
-#include "pages/styles.hh"
-#include <cmath>
-
-namespace MetaModule::ElementDrawerImpl
-{
-
-// // Default (BaseElement): print debug message if element drawer impl. not found
-// inline lv_obj_t *draw_element(const BaseElement &el, const lv_img_dsc_t *, lv_obj_t *, uint32_t) {
-// 	pr_dbg("draw_element(BaseElement), not found: %.*s\n", (int)el.short_name.size(), el.short_name.data());
-// 	return nullptr;
-// }
-
-// // Default for Params
-// inline lv_obj_t *
-// draw_element(const ParamElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
-// 	return draw_param_topleft(el, img, canvas, module_height);
-// }
-
-// // Default for Jacks
-// inline lv_obj_t *
-// draw_element(const JackElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
-// 	return draw_jack_topleft(el, img, canvas, module_height);
-// }
-
-} // namespace MetaModule::ElementDrawerImpl
+#include <cstdint>
 
 namespace MetaModule
 {
+
+namespace ElementDrawerImpl
+{
+
+inline void draw_element(uint32_t left, uint32_t top, const lv_img_dsc_t *img, lv_obj_t *obj) {
+	if (!img) {
+		pr_dbg("draw_knob: image not found\n");
+		return;
+	}
+	uint32_t width = img->header.w;
+	uint32_t height = img->header.h;
+
+	lv_img_set_src(obj, img);
+	lv_obj_set_pos(obj, left, top);
+	lv_img_set_pivot(obj, width / 2, height / 2);
+	// lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
+
+	// pr_dbg("Draw element at %d, %d (w:%d h:%d)\n", left, top, width, height);
+}
+
+inline lv_obj_t *
+draw_element_topleft(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+	auto [left, top] = mm_to_topleft_px(el.x_mm, el.y_mm, module_height);
+	lv_obj_t *obj = lv_img_create(canvas);
+	draw_element(left, top, img, obj);
+	return obj;
+}
+
+} // namespace ElementDrawerImpl
 
 struct ElementDrawer {
 	uint32_t module_height;
@@ -49,7 +53,6 @@ struct ElementDrawer {
 		}
 
 		return ElementDrawerImpl::draw_element_topleft(element, img, canvas, module_height);
-		// return ElementDrawerImpl::draw_element(element, img, canvas, module_height);
 	}
 };
 

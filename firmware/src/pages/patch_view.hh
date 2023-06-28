@@ -109,12 +109,9 @@ struct PatchViewPage : PageBase {
 		lv_label_set_text(patchname, patch.patch_name.c_str());
 		lv_label_set_text(description, patch.description.c_str());
 
-		for (auto &m : modules)
-			lv_obj_del(m);
-		modules.clear();
-		module_ids.clear();
-		mappings.knobs.clear();
-		modules.reserve(patch.module_slugs.size());
+		blur();
+
+		module_canvases.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
 
 		//lv_obj_set_height(modules_cont, 2 * height + 8);
@@ -131,18 +128,17 @@ struct PatchViewPage : PageBase {
 		for (auto [module_idx, slug] : enumerate(patch.module_slugs)) {
 			module_ids.push_back(module_idx);
 
-			//FIXME: why can't we get the width from the canvas object?
+			//FIXME: get the width from the canvas object, but we have to call lv_obj_refresh_size
 			auto [width, canvas] = module_drawer.draw_faceplate(slug, canvas_buf);
 			if (!canvas)
 				continue;
 
-			//TODO: if (settings.draw_mappings)
-			module_drawer.draw_mapped_elements(patch, module_idx, canvas, mappings);
+			module_drawer.draw_mapped_elements(patch, module_idx, canvas, drawn_elements);
 
 			// Increment the buffer
 			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * width * height);
 
-			modules.push_back(canvas);
+			module_canvases.push_back(canvas);
 
 			lv_group_add_obj(group, canvas);
 
@@ -151,7 +147,7 @@ struct PatchViewPage : PageBase {
 			lv_obj_add_flag(canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 			lv_obj_clear_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
 
-			// give the callback access to the module_idx
+			// Give the callback access to the module_idx:
 			lv_obj_set_user_data(canvas, (void *)(&module_ids[module_ids.size() - 1]));
 			lv_obj_add_event_cb(canvas, module_pressed_cb, LV_EVENT_PRESSED, (void *)this);
 			lv_obj_add_event_cb(canvas, module_focus_cb, LV_EVENT_FOCUSED, (void *)this);
@@ -165,15 +161,12 @@ struct PatchViewPage : PageBase {
 	}
 
 	void blur() override {
-		for (auto &m : modules) {
-			lv_obj_del(m); //also deletes child objects: mapped and static knobs
+		for (auto &m : module_canvases) {
+			lv_obj_del(m);
 		}
-		mappings.knobs.clear();
-		mappings.lights.clear();
-		mappings.injacks.clear();
-		mappings.outjacks.clear();
 
-		modules.clear();
+		drawn_elements.clear();
+		module_canvases.clear();
 		module_ids.clear();
 	}
 
@@ -187,25 +180,12 @@ struct PatchViewPage : PageBase {
 		const auto &patch = patch_storage.get_view_patch();
 		for (auto &drawn_el : drawn_elements) {
 			std::visit(
-				[this, patch, drawn = drawn_el.drawn](auto &el) {
-				update_element(el, this->params, patch, drawn);
-				//
+				[this, patch, drawn = drawn_el.drawn](auto &el) -> void {
+					//
+					update_element(el, this->params, patch, drawn);
 				},
 				drawn_el.element);
 		}
-
-		// for (auto &mk : mappings.knobs) {
-		// 	if (!mk.patchconf)
-		// 		continue;
-		// 	if (mk.anim_method == ParamAnimMethod::RotaryPot) {
-		// 		const float new_pot_val = mk.patchconf->get_mapped_val(params.knobs[mk.patchconf->panel_knob_id]);
-		// 		if (std::abs(new_pot_val - mk.last_pot_reading) > 0.01f) {
-		// 			mk.last_pot_reading = new_pot_val;
-		// 			const int angle = new_pot_val * 3000.f - 1500.f;
-		// 			lv_img_set_angle(mk.obj, angle);
-		// 		}
-		// 	}
-		// }
 	}
 
 	static void base_scroll_cb(lv_event_t *event) {
@@ -324,11 +304,9 @@ private:
 	lv_obj_t *playbut;
 	lv_obj_t *cable_layer;
 
-	std::vector<lv_obj_t *> modules;
+	std::vector<lv_obj_t *> module_canvases;
 	std::vector<uint32_t> module_ids;
-
-	Mappings mappings;
-	DrawnElements drawn_elements;
+	std::vector<DrawnElement> drawn_elements;
 
 	lv_draw_line_dsc_t cable_drawline_dsc;
 

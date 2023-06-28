@@ -57,21 +57,4 @@ struct Mappings {
 	std::vector<AnimatedOutJack> outjacks;
 };
 
-////////////////////////////
-////////////////////////////
-
-struct GuiElement {
-	lv_obj_t *obj;
-	uint16_t module_id;
-	uint16_t idx; //param_idx, light_idx, etc
-	std::optional<uint16_t> mapped_panel_element_id;
-};
-
-struct DrawnElement {
-	GuiElement drawn;
-	Element &element;
-};
-
-using DrawnElements = std::vector<DrawnElement>;
-
 } // namespace MetaModule
