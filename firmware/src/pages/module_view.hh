@@ -97,6 +97,9 @@ struct ModuleViewPage : PageBase {
 
 			std::visit(
 				[this, drawn = drawn_element.drawn](auto &el) {
+					if (!drawn.obj)
+						return;
+
 					opts += el.short_name;
 					if (drawn.mapped_panel_id) {
 						opts += " [";
