@@ -4,6 +4,7 @@
 #include "pages/elements/context.hh"
 #include "params.hh"
 #include "patch/patch_data.hh"
+#include "printf.h"
 #include <optional>
 
 namespace MetaModule
@@ -34,18 +35,40 @@ inline std::optional<float> get_param_value(const Params &params, const PatchDat
 inline void
 update_element(const Knob &element, const Params &params, const PatchData &patch, const ElementContext &drawn) {
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
-		int32_t angle = *val * 3000.f - 1500.f;
+		int32_t angle = val.value() * 3000.f - 1500.f;
+		if (angle < 0)
+			angle += 3600;
 		int32_t cur_angle = lv_img_get_angle(drawn.obj);
 
-		if (std::abs(angle - cur_angle) > 10)
+		if (std::abs(angle - cur_angle) > 10) {
 			lv_img_set_angle(drawn.obj, angle);
+		}
 	}
 }
 
 inline void
 update_element(const Slider &element, const Params &params, const PatchData &patch, const ElementContext &drawn) {
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
-		//TODO: set position of handle
+		auto handle = lv_obj_get_child(drawn.obj, 0);
+		if (!handle) {
+			printf_("No handle sub-object for slider %16s\n", element.short_name.data());
+			return;
+		}
+		auto height = lv_obj_get_height(drawn.obj);
+		auto width = lv_obj_get_width(drawn.obj);
+
+		if (height > width) {
+			auto handle_height = lv_obj_get_height(handle);
+			int32_t pos = (1.f - val.value()) * (height - handle_height);
+			int32_t cur_pos = lv_obj_get_y(handle);
+
+			if (std::abs(pos - cur_pos) >= 2) {
+				lv_obj_set_y(handle, pos);
+				printf_("s%d: %d=>%d\n", drawn.idx, cur_pos, pos);
+			}
+		} else {
+			//Horizontal slider
+		}
 	}
 }
 

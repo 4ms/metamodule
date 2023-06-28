@@ -1,12 +1,20 @@
 #pragma once
 #include "lvgl/lvgl.h"
 #include <array>
+#include <span>
 
 LV_FONT_DECLARE(MuseoSansRounded_500_12);
 LV_FONT_DECLARE(MuseoSansRounded_700_12);
 LV_FONT_DECLARE(MuseoSansRounded_700_14);
 LV_FONT_DECLARE(MuseoSansRounded_700_16);
 LV_FONT_DECLARE(MuseoSansRounded_700_18);
+
+// lvgl has prop1 and has_group fields out of order, thus not C++ friendly
+#define LV_STYLE_CONST_CPP(prop_array)                                                                                 \
+	lv_style_t {                                                                                                       \
+		.v_p = {.const_props = prop_array}, .prop1 = LV_STYLE_PROP_ANY, .has_group = 0xFF,                             \
+		.prop_cnt = (sizeof(prop_array) / sizeof((prop_array)[0])),                                                    \
+	}
 
 //constexpr helper
 static constexpr lv_color16_t lv_color_make_rgb565(uint8_t r8, uint8_t g8, uint8_t b8) {
@@ -64,25 +72,27 @@ struct Gui {
 		lv_palette_lighten(LV_PALETTE_PINK, 1),
 		lv_palette_lighten(LV_PALETTE_PURPLE, 1),
 	};
-	static constexpr std::array<lv_color_t, 19> palette_main = {lv_color_make_rgb565(0xF4, 0x00, 0x00),	 // RED
-																lv_color_make_rgb565(0xE9, 0x3E, 0x83),	 // PINK,
-																lv_color_make_rgb565(0x9C, 0x27, 0xB0),	 // PURPLE,
-																lv_color_make_rgb565(0x67, 0x3A, 0xB7),	 // DEEP_PURPLE,
-																lv_color_make_rgb565(0x3F, 0x51, 0xB5),	 // INDIGO,
-																lv_color_make_rgb565(0x21, 0x96, 0xF3),	 // BLUE,
-																lv_color_make_rgb565(0x03, 0xA9, 0xF4),	 // LIGHT_BLUE,
-																lv_color_make_rgb565(0x00, 0xBC, 0xD4),	 // CYAN,
-																lv_color_make_rgb565(0x00, 0x96, 0x88),	 // TEAL,
-																lv_color_make_rgb565(0x4C, 0xAF, 0x50),	 // GREEN,
-																lv_color_make_rgb565(0x8B, 0xC3, 0x4A),	 // LIGHT_GREEN,
-																lv_color_make_rgb565(0xCD, 0xDC, 0x39),	 // LIME,
-																lv_color_make_rgb565(0xFF, 0xEB, 0x3B),	 // YELLOW,
-																lv_color_make_rgb565(0xFF, 0xC1, 0x07),	 // AMBER,
-																lv_color_make_rgb565(0xFF, 0x98, 0x00),	 // ORANGE,
-																lv_color_make_rgb565(0xFF, 0x57, 0x22),	 // DEEP_ORANGE,
-																lv_color_make_rgb565(0x79, 0x55, 0x48),	 // BROWN,
-																lv_color_make_rgb565(0x60, 0x7D, 0x8B),	 // BLUE_GREY,
-																lv_color_make_rgb565(0x9E, 0x9E, 0x9E)}; // GREY,
+	static constexpr std::array<lv_color_t, 19> palette_main = {
+		lv_color_make_rgb565(0xF4, 0x00, 0x00), // RED
+		lv_color_make_rgb565(0xE9, 0x3E, 0x83), // PINK,
+		lv_color_make_rgb565(0x9C, 0x27, 0xB0), // PURPLE,
+		lv_color_make_rgb565(0x67, 0x3A, 0xB7), // DEEP_PURPLE,
+		lv_color_make_rgb565(0x3F, 0x51, 0xB5), // INDIGO,
+		lv_color_make_rgb565(0x21, 0x96, 0xF3), // BLUE,
+		lv_color_make_rgb565(0x03, 0xA9, 0xF4), // LIGHT_BLUE,
+		lv_color_make_rgb565(0x00, 0xBC, 0xD4), // CYAN,
+		lv_color_make_rgb565(0x00, 0x96, 0x88), // TEAL,
+		lv_color_make_rgb565(0x4C, 0xAF, 0x50), // GREEN,
+		lv_color_make_rgb565(0x8B, 0xC3, 0x4A), // LIGHT_GREEN,
+		lv_color_make_rgb565(0xCD, 0xDC, 0x39), // LIME,
+		lv_color_make_rgb565(0xFF, 0xEB, 0x3B), // YELLOW,
+		lv_color_make_rgb565(0xFF, 0xC1, 0x07), // AMBER,
+		lv_color_make_rgb565(0xFF, 0x98, 0x00), // ORANGE,
+		lv_color_make_rgb565(0xFF, 0x57, 0x22), // DEEP_ORANGE,
+		lv_color_make_rgb565(0x79, 0x55, 0x48), // BROWN,
+		lv_color_make_rgb565(0x60, 0x7D, 0x8B), // BLUE_GREY,
+		lv_color_make_rgb565(0x9E, 0x9E, 0x9E),
+	}; // GREY,
 
 	static inline std::array<lv_color_t, 8> knob_palette{
 		palette_main[LV_PALETTE_RED],
@@ -94,13 +104,17 @@ struct Gui {
 		palette_main[LV_PALETTE_GREY],		//?
 		palette_main[LV_PALETTE_BLUE_GREY], //?
 	};
-	// const lv_style_const_prop_t style1_props[] = {
-	// 	LV_STYLE_CONST_WIDTH(50),
-	// 	LV_STYLE_CONST_HEIGHT(50),
-	// 	LV_STYLE_PROP_INV,
-	// };
 
-	// LV_STYLE_CONST_INIT(style1, style1_props);
+	// Slider Handle Style
+	static constexpr lv_style_const_prop_t slider_handle_style_props[6] = {
+		LV_STYLE_CONST_BG_OPA(LV_OPA_100),
+		LV_STYLE_CONST_BG_COLOR(palette_main[0]),
+		LV_STYLE_CONST_OUTLINE_OPA(LV_OPA_100),
+		LV_STYLE_CONST_OUTLINE_COLOR(palette_main[10]),
+		LV_STYLE_CONST_OUTLINE_WIDTH(1),
+		LV_STYLE_CONST_RADIUS(2),
+	};
+	static inline auto slider_handle_style = LV_STYLE_CONST_CPP(slider_handle_style_props);
 
 	static void init_lvgl_styles() {
 		// invisible_style

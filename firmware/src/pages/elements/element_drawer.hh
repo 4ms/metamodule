@@ -23,8 +23,6 @@ inline void draw_element(uint32_t left, uint32_t top, const lv_img_dsc_t *img, l
 	lv_obj_set_pos(obj, left, top);
 	lv_img_set_pivot(obj, width / 2, height / 2);
 	// lv_obj_add_style(obj, &Gui::mapped_knob_style, LV_PART_MAIN);
-
-	// pr_dbg("Draw element at %d, %d (w:%d h:%d)\n", left, top, width, height);
 }
 
 inline lv_obj_t *
@@ -32,6 +30,24 @@ draw_element_topleft(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *c
 	auto [left, top] = mm_to_topleft_px(el.x_mm, el.y_mm, module_height);
 	lv_obj_t *obj = lv_img_create(canvas);
 	draw_element(left, top, img, obj);
+	pr_dbg("Draw element %.*s at %d, %d\n", el.short_name.size(), el.short_name.data(), left, top);
+	return obj;
+}
+
+inline lv_obj_t *
+draw_element_topleft(const Slider &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+	auto [left, top] = mm_to_topleft_px(el.x_mm, el.y_mm, module_height);
+	lv_obj_t *obj = lv_img_create(canvas);
+	draw_element(left, top, img, obj);
+
+	auto *handle = lv_obj_create(obj);
+	lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
+	lv_obj_set_width(handle, img->header.w);
+	lv_obj_set_height(handle, module_height / 24);
+	lv_obj_set_pos(handle, 0, 0);
+	lv_obj_add_style(handle, const_cast<lv_style_t *>(&Gui::slider_handle_style_c), 0);
+
+	pr_dbg("Draw element %.*s at %d, %d\n", el.short_name.size(), el.short_name.data(), left, top);
 	return obj;
 }
 
