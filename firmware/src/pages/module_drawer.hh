@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/elements_index.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
 #include "images/image_list.hh"
@@ -8,7 +9,7 @@
 #include "pages/elements/element_draw_helpers.hh"
 #include "pages/elements/element_drawer.hh"
 #include "pages/elements/map_ring_drawer.hh"
-#include "pages/map_register.hh"
+#include "pages/elements/mapping.hh"
 #include "pages/styles.hh"
 #include "patch/patch_data.hh"
 
@@ -62,20 +63,28 @@ struct ModuleDrawer {
 		auto center_coords = moduleinfo.uses_center_coords;
 		auto images = ElementImage{height};
 		auto el_drawer = ElementDrawer{height, canvas, center_coords};
-		auto ctx_helper = ElementContextHelper(module_idx, patch);
 		auto ring_drawer = MapRingDrawer{height, canvas, center_coords};
 
 		//Reserve enough for what we will append
 		drawn_elements.reserve(drawn_elements.size() + moduleinfo.elements.size());
 
+		ElementCount::Indices indices{};
 		for (const auto &element : moduleinfo.elements) {
 			auto element_ctx = std::visit(
-				[&ring_drawer, &images, &el_drawer, &ctx_helper, draw_rings](auto &el) -> ElementContext {
+				[&ring_drawer, &images, &el_drawer, &patch, &indices, module_idx, draw_rings](
+					auto &el) -> ElementContext {
 					auto img = images.get_img(el);
 					auto obj = el_drawer.draw_element(el, img);
-					auto element_ctx = ctx_helper.get_context(el, obj);
-					if (draw_rings && element_ctx.mapped_panel_id)
-						ring_drawer.draw_mapped_ring(el, obj, *element_ctx.mapped_panel_id);
+					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, indices);
+					auto idx = ElementIndex::get_index(el, indices);
+					auto element_ctx = ElementContext(obj, module_idx, idx, mapping_id);
+
+					// patch.get_static_knob_value(module_idx, idx);
+
+					if (draw_rings && mapping_id)
+						ring_drawer.draw_mapped_ring(el, obj, mapping_id.value());
+
+					indices = indices + ElementCount::count(el);
 					return element_ctx;
 				},
 				element);
@@ -91,10 +100,7 @@ struct ModuleDrawer {
 			if (drawn_element.drawn.mapped_panel_id) {
 				std::visit(
 					[&ring_drawer, obj = drawn_element.drawn.obj, panel_id = *drawn_element.drawn.mapped_panel_id](
-						auto &el) {
-					//
-					ring_drawer.draw_mapped_ring(el, obj, panel_id);
-					},
+						auto &el) { ring_drawer.draw_mapped_ring(el, obj, panel_id); },
 					drawn_element.element);
 			}
 		}
