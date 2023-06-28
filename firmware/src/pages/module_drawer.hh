@@ -47,26 +47,21 @@ struct ModuleDrawer {
 		return {widthpx, canvas};
 	}
 
-	struct DrawnElement {
-		lv_img_header_t img_hdr;
-		lv_obj_t *obj;
-	};
-
-	std::vector<DrawnElement> draw_elements(ModuleTypeSlug slug, lv_obj_t *canvas) {
+	std::vector<lv_obj_t *> draw_elements(ModuleTypeSlug slug, lv_obj_t *canvas) {
 		// Draw elements:
 		const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
 		auto center_coords = moduleinfo.uses_center_coords;
 		ElementImage images{height};
 		ElementDrawer el_drawer{height, canvas, center_coords};
 
-		std::vector<DrawnElement> drawn_elements;
+		std::vector<lv_obj_t *> drawn_elements;
 
 		for (const auto &element : moduleinfo.elements) {
 			auto drawn = std::visit(
-				[&images, &el_drawer](auto &el) -> DrawnElement {
+				[&images, &el_drawer](auto &el) -> auto {
 					auto img = images.get_img(el);
 					auto obj = el_drawer.draw_element(el, img);
-					return {img->header, obj};
+					return obj;
 				},
 				element);
 			drawn_elements.push_back(drawn);
@@ -80,7 +75,7 @@ struct ModuleDrawer {
 	void draw_mappings(const PatchData &patch,
 					   uint32_t module_idx,
 					   lv_obj_t *canvas,
-					   const std::vector<DrawnElement> &drawn_elements,
+					   const std::vector<lv_obj_t *> &objs,
 					   Mappings &mappings) {
 		auto slug = patch.module_slugs[module_idx];
 
@@ -93,13 +88,12 @@ struct ModuleDrawer {
 		unsigned i = 0;
 		for (const auto &element : moduleinfo.elements) {
 			std::visit(
-				[&ring_drawer, &mapper, &drawn_elements, &i](auto &el) {
-				auto img_hdr = drawn_elements[i].img_hdr;
-				auto obj = drawn_elements[i].obj;
+				[&ring_drawer, &mapper, &objs, &i](auto &el) {
+				auto obj = objs[i];
 				if (!obj)
 					return;
 				if (auto panel_param_id = mapper.register_mapping(el, obj))
-					ring_drawer.draw_mapped_ring(el, obj, img_hdr, *panel_param_id);
+					ring_drawer.draw_mapped_ring(el, obj, *panel_param_id);
 				},
 				element);
 			i++;
@@ -119,15 +113,17 @@ struct ModuleDrawer {
 		MapRegister mapper{module_idx, patch, mappings};
 		MapRingDrawer ring_drawer{height, canvas, center_coords};
 
+		unsigned element_idx = 0;
 		for (const auto &element : moduleinfo.elements) {
 			std::visit(
-				[&ring_drawer, &images, &el_drawer, &mapper](auto &el) {
+				[&ring_drawer, &images, &el_drawer, &mapper, &element_idx](auto &el) {
 				auto img = images.get_img(el);
 				auto obj = el_drawer.draw_element(el, img);
-				if (!obj)
-					return;
-				if (auto panel_param_id = mapper.register_mapping(el, obj))
-					ring_drawer.draw_mapped_ring(el, obj, img->header, *panel_param_id);
+				if (obj) {
+					if (auto panel_param_id = mapper.register_mapping(el, obj))
+						ring_drawer.draw_mapped_ring(el, obj, *panel_param_id);
+				}
+				// auto de = DrawnElement{obj, element_idx++, 0/*param_idx?*/, panel_param_id};
 				},
 				element);
 		}

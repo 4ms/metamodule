@@ -10,23 +10,23 @@
 namespace MetaModule::ElementDrawerImpl
 {
 
-// Default (BaseElement): print debug message if element drawer impl. not found
-inline lv_obj_t *draw_element(const BaseElement &el, const lv_img_dsc_t *, lv_obj_t *, uint32_t) {
-	pr_dbg("draw_element(BaseElement), not found: %.*s\n", (int)el.short_name.size(), el.short_name.data());
-	return nullptr;
-}
+// // Default (BaseElement): print debug message if element drawer impl. not found
+// inline lv_obj_t *draw_element(const BaseElement &el, const lv_img_dsc_t *, lv_obj_t *, uint32_t) {
+// 	pr_dbg("draw_element(BaseElement), not found: %.*s\n", (int)el.short_name.size(), el.short_name.data());
+// 	return nullptr;
+// }
 
-// Default for Params
-inline lv_obj_t *
-draw_element(const ParamElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
-	return draw_param_topleft(el, img, canvas, module_height);
-}
+// // Default for Params
+// inline lv_obj_t *
+// draw_element(const ParamElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+// 	return draw_param_topleft(el, img, canvas, module_height);
+// }
 
-// Default for Jacks
-inline lv_obj_t *
-draw_element(const JackElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
-	return draw_jack_topleft(el, img, canvas, module_height);
-}
+// // Default for Jacks
+// inline lv_obj_t *
+// draw_element(const JackElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+// 	return draw_jack_topleft(el, img, canvas, module_height);
+// }
 
 } // namespace MetaModule::ElementDrawerImpl
 
@@ -48,7 +48,8 @@ struct ElementDrawer {
 			element.y_mm -= ElementInfoBase::to_mm(img->header.h / 2.f, module_height / 5.059f);
 		}
 
-		return ElementDrawerImpl::draw_element(element, img, canvas, module_height);
+		return ElementDrawerImpl::draw_element_topleft(element, img, canvas, module_height);
+		// return ElementDrawerImpl::draw_element(element, img, canvas, module_height);
 	}
 };
 

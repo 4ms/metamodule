@@ -24,14 +24,14 @@ inline void
 draw_mapped_ring(const ParamElement &, uint32_t module_height, lv_obj_t *canvas, Rect &r, uint32_t panel_knob_id) {
 	// Parameters for ring size
 	// Thinner circle for uvwxyz small panel knobs
-	const float ring_thickness = (panel_knob_id >= 6) ? 4.f : 10.f;
+	const float ring_thickness = (panel_knob_id >= 6) ? 4.f : 8.f;
 
 	lv_draw_arc_dsc_t ring;
 	lv_draw_arc_dsc_init(&ring);
 	ring.opa = LV_OPA_50;
 
 	float scale = module_height / 240.f;
-	constexpr float ring_offset = 8.f;
+	float ring_offset = (panel_knob_id >= 6) ? 4.f : 8.f;
 	float radius = (r.h + r.w / 2.f) * 0.5f + ring_offset * scale;
 
 	ring.color = Gui::knob_palette[panel_knob_id % 6];
@@ -52,7 +52,7 @@ draw_mapped_ring(const Slider &, uint32_t module_height, lv_obj_t *canvas, Rect 
 
 	lv_draw_rect_dsc_t ring;
 	lv_draw_rect_dsc_init(&ring);
-	ring.border_opa = LV_OPA_50;
+	ring.border_opa = LV_OPA_70;
 	ring.border_width = ring_thickness * scale;
 	ring.border_color = Gui::knob_palette[panel_knob_id % 6];
 	ring.bg_opa = LV_OPA_0;
@@ -86,12 +86,13 @@ struct MapRingDrawer {
 	lv_obj_t *canvas;
 	bool center_coords;
 
-	void draw_mapped_ring(auto element, lv_obj_t *element_obj, lv_img_header_t element_img_hdr, uint32_t panel_el_id) {
+	void draw_mapped_ring(auto element, lv_obj_t *element_obj, uint32_t panel_el_id) {
 		if (!element_obj)
 			return;
 
-		uint16_t w = element_img_hdr.w;
-		uint16_t h = element_img_hdr.h;
+		lv_obj_refr_size(element_obj);
+		uint16_t w = lv_obj_get_width(element_obj);
+		uint16_t h = lv_obj_get_height(element_obj);
 		auto [x, y] = center_coords ?
 						  ElementDrawerImpl::mm_to_center_px(element.x_mm, element.y_mm, w, h, module_height) :
 						  ElementDrawerImpl::mm_to_topleft_px(element.x_mm, element.y_mm, module_height);
