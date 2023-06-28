@@ -32,7 +32,6 @@ struct ModuleViewPage : PageBase {
 	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
 		: PageBase{info}
 		, slug(module_slug)
-		, is_patch_playing{PageList::get_selected_patch_id() == patch_playloader.cur_patch_index()}
 		, patch{patch_storage.get_view_patch()}
 		, base(lv_obj_create(nullptr))
 		, roller(lv_roller_create(base))
@@ -60,6 +59,9 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		patch = patch_storage.get_view_patch();
+
+		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
 		mode = ViewMode::List;
 
 		this_module_id = PageList::get_selected_module_id();
@@ -107,6 +109,7 @@ struct ModuleViewPage : PageBase {
 						opts += "]";
 					}
 					opts += "\n";
+
 					add_button(drawn.obj);
 					module_controls.emplace_back(ModuleParam::get_type(el), (uint32_t)drawn.idx);
 				},
@@ -157,10 +160,12 @@ struct ModuleViewPage : PageBase {
 		}
 
 		if (is_patch_playing) {
-			const auto &patch = patch_storage.get_view_patch();
 			for (auto &drawn_el : drawn_elements) {
 				std::visit(
-					[this, patch, drawn = drawn_el.drawn](auto &el) { update_element(el, this->params, patch, drawn); },
+					[this, drawn = drawn_el.drawn](auto &el) {
+						//
+						update_element(el, params, patch, drawn);
+					},
 					drawn_el.element);
 			}
 		}
@@ -174,9 +179,9 @@ struct ModuleViewPage : PageBase {
 		// }
 	}
 
-	void blur() final {
-		drawn_elements.clear();
-	}
+	// void blur() final {
+	// drawn_elements.clear();
+	// }
 
 private:
 	void add_button(lv_obj_t *obj) {

@@ -99,10 +99,10 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		const auto &patch = patch_storage.get_view_patch();
-		patch_instance = &patch;
+		patch = patch_storage.get_view_patch();
 
-		// printf_("patch id = %d\n", patch_storage.get_view_patch_id());
+		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
+
 		if (patch.patch_name.length() == 0)
 			return;
 
@@ -172,16 +172,17 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
+		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
+
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (PageList::request_last_page()) {
 				blur();
 			}
 		}
 
-		const auto &patch = patch_storage.get_view_patch();
 		for (auto &drawn_el : drawn_elements) {
 			std::visit(
-				[this, patch, drawn = drawn_el.drawn](auto &el) -> void {
+				[this, drawn = drawn_el.drawn](auto &el) -> void {
 					//
 					update_element(el, this->params, patch, drawn);
 				},
@@ -214,8 +215,7 @@ struct PatchViewPage : PageBase {
 		if (this_module_obj == page->playbut)
 			return;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
-		const auto &patch = page->patch_storage.get_view_patch();
-		const auto this_slug = patch.module_slugs[module_id];
+		const auto this_slug = page->patch.module_slugs[module_id];
 		lv_label_set_text(page->module_name, this_slug.c_str());
 
 		// if (lv_obj_get_scroll_y(page->base) == 0 && num_rows > 1)
@@ -305,13 +305,14 @@ private:
 	lv_obj_t *playbut;
 	lv_obj_t *cable_layer;
 
+	PatchData &patch = patch_storage.get_view_patch();
+
 	std::vector<lv_obj_t *> module_canvases;
 	std::vector<uint32_t> module_ids;
 	std::vector<DrawnElement> drawn_elements;
+	bool is_patch_playing = false;
 
 	lv_draw_line_dsc_t cable_drawline_dsc;
-
-	static inline const PatchData *patch_instance;
 
 	struct focussed_context {
 		PatchViewPage *page;
