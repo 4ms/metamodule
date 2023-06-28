@@ -60,24 +60,17 @@ struct Mappings {
 ////////////////////////////
 ////////////////////////////
 
-struct Drawn {
+struct GuiElement {
 	lv_obj_t *obj;
 	uint32_t idx; //param_idx, light_idx, etc
-	std::optional<uint32_t> mapped_panel_element_id;
-
-	// float last_value = 0.5f;
-	// Get these from visting info.elements[element_idx], when matching ParamElement
-	// float min = 0.f;
-	// float max = 1.f;
-	// float get_mapped_val(float val) const {
-	// 	return (max - min) * val + min;
-	// }
+	std::optional<uint16_t> mapped_panel_element_id;
 };
+
 struct DrawnElement {
-	Drawn drawn;
+	GuiElement drawn;
 	Element &element;
 };
 
-using Mappings2 = std::vector<DrawnElement>;
+using DrawnElements = std::vector<DrawnElement>;
 
 } // namespace MetaModule

@@ -9,8 +9,8 @@
 namespace MetaModule::ElementUpdateImpl
 {
 
-void update_element(
-	Knob &element, const Params &params, const PatchData &patch, lv_obj_t *obj, uint16_t panel_element_id) {
+inline void
+update_element(Knob &element, const Params &params, const PatchData &patch, lv_obj_t *obj, uint16_t panel_element_id) {
 	float val = 0;
 	if (panel_element_id < params.knobs.size())
 		val = params.knobs[panel_element_id];
@@ -27,7 +27,7 @@ void update_element(
 		lv_img_set_angle(obj, angle);
 }
 
-void update_element(
+inline void update_element(
 	Slider &element, const Params &params, const PatchData &patch, lv_obj_t *obj, uint16_t panel_element_id) {
 	float val = 0;
 	if (panel_element_id < params.knobs.size())
@@ -41,8 +41,16 @@ void update_element(
 	//TODO: set position of handle
 }
 
-void update_element(BaseElement &, const Params &params, const PatchData &, lv_obj_t *, std::nullopt_t) {
+inline void update_element(Pot &, const Params &params, const PatchData &, lv_obj_t *, std::nullopt_t) {
 	//do nothing, not mapped
+}
+
+inline void update_element(Slider &, const Params &params, const PatchData &, lv_obj_t *, std::nullopt_t) {
+	//do nothing, not mapped
+}
+
+inline void
+update_element(BaseElement &, const Params &params, const PatchData &, lv_obj_t *, std::optional<uint16_t>) {
 }
 
 } // namespace MetaModule::ElementUpdateImpl
@@ -50,8 +58,8 @@ void update_element(BaseElement &, const Params &params, const PatchData &, lv_o
 namespace MetaModule
 {
 
-void update_element(auto &element, const Params &params, const PatchData &patch, const Drawn &drawn) {
-	ElementUpdateImpl::update_element(element, patch, drawn.obj, drawn.mapped_panel_element_id);
+void update_element(auto &element, const Params &params, const PatchData &patch, const GuiElement &drawn) {
+	ElementUpdateImpl::update_element(element, params, patch, drawn.obj, drawn.mapped_panel_element_id);
 }
 
 } // namespace MetaModule

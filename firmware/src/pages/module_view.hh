@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/module_info_base.hh"
+#include "elements/element_name.hh"
 #include "knob_edit.hh"
 #include "lvgl/src/core/lv_obj_pos.h"
 #include "pages/base.hh"
@@ -85,50 +86,66 @@ struct ModuleViewPage : PageBase {
 		auto [width_px, obj] = module_drawer.draw_faceplate(slug, buffer);
 		canvas = obj;
 
-		auto drawn_elements = module_drawer.draw_elements(slug, canvas);
+		auto objs = module_drawer.draw_elements(slug, canvas);
 		lv_obj_update_layout(canvas);
-		module_drawer.draw_mappings(patch, this_module_id, canvas, drawn_elements, mappings);
+		module_drawer.draw_mappings(patch, this_module_id, canvas, objs, mappings);
 
 		lv_obj_update_layout(canvas);
 
-		for (const auto &element : mappings.knobs) {
-			opts += element.el.short_name;
-			if (element.patchconf) {
-				opts += "[";
-				opts += PanelDef::get_map_param_name(element.patchconf->panel_knob_id);
-				opts += "] ";
-			}
-			opts += "\n";
+		for (const auto &drawn_element : drawn_elements) {
+			//TODO: sort these?
 
-			add_button(element.obj);
-			module_controls.push_back({ModuleParam::Type::Knob, element.param_idx});
+			std::visit(
+				[this, drawn = drawn_element.drawn](auto &el) -> void {
+					opts += el.short_name;
+					if (drawn.mapped_panel_element_id)
+						opts += get_panel_name<PanelDef>(el, *(drawn.mapped_panel_element_id));
+					opts += "\n";
+
+					add_button(drawn.obj);
+					//module_controls.push_back(..., drawn.idx);
+				},
+				drawn_element.element);
 		}
 
-		for (const auto &element : mappings.injacks) {
-			opts += element.el.short_name;
-			if (element.patchconf) {
-				opts += "[";
-				opts += PanelDef::get_map_injack_name(element.patchconf->panel_jack_id);
-				opts += "] ";
-			}
-			opts += "\n";
+		// for (const auto &element : mappings.knobs) {
+		// 	opts += element.el.short_name;
+		// 	if (element.patchconf) {
+		// 		opts += "[";
+		// 		opts += PanelDef::get_map_param_name(element.patchconf->panel_knob_id);
+		// 		opts += "] ";
+		// 	}
+		// 	opts += "\n";
 
-			add_button(element.obj);
-			module_controls.push_back({ModuleParam::Type::InJack, element.input_idx});
-		}
+		// 	add_button(element.obj);
+		// 	module_controls.push_back({ModuleParam::Type::Knob, element.param_idx});
+		// }
 
-		for (const auto &element : mappings.outjacks) {
-			opts += element.el.short_name;
-			if (element.patchconf) {
-				opts += "[";
-				opts += PanelDef::get_map_outjack_name(element.patchconf->panel_jack_id);
-				opts += "] ";
-			}
-			opts += "\n";
+		// for (const auto &element : mappings.injacks) {
+		// 	opts += element.el.short_name;
+		// 	if (element.patchconf) {
+		// 		opts += "[";
+		// 		opts += PanelDef::get_map_injack_name(element.patchconf->panel_jack_id);
+		// 		opts += "] ";
+		// 	}
+		// 	opts += "\n";
 
-			add_button(element.obj);
-			module_controls.push_back({ModuleParam::Type::OutJack, element.output_idx});
-		}
+		// 	add_button(element.obj);
+		// 	module_controls.push_back({ModuleParam::Type::InJack, element.input_idx});
+		// }
+
+		// for (const auto &element : mappings.outjacks) {
+		// 	opts += element.el.short_name;
+		// 	if (element.patchconf) {
+		// 		opts += "[";
+		// 		opts += PanelDef::get_map_outjack_name(element.patchconf->panel_jack_id);
+		// 		opts += "] ";
+		// 	}
+		// 	opts += "\n";
+
+		// 	add_button(element.obj);
+		// 	module_controls.push_back({ModuleParam::Type::OutJack, element.output_idx});
+		// }
 
 		// remove final \n
 		if (opts.length() > 0)
@@ -409,6 +426,7 @@ private:
 	std::vector<ModuleParam> module_controls;
 
 	Mappings mappings;
+	DrawnElements drawn_elements;
 
 	lv_obj_t *base = nullptr;
 	lv_obj_t *canvas = nullptr;

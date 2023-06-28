@@ -328,7 +328,7 @@ private:
 	std::vector<uint32_t> module_ids;
 
 	Mappings mappings;
-	Mappings2 drawn_elements;
+	DrawnElements drawn_elements;
 
 	lv_draw_line_dsc_t cable_drawline_dsc;
 
