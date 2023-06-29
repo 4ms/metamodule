@@ -5,7 +5,6 @@
 #include "lvgl/src/core/lv_obj.h"
 #include "pages/animated_knob.hh"
 #include "pages/base.hh"
-#include "pages/draw_helpers.hh"
 #include "pages/elements/element_drawer.hh"
 #include "pages/elements/map_ring_drawer.hh"
 #include "pages/elements/mapping.hh"
@@ -133,7 +132,7 @@ struct PatchViewPage : PageBase {
 			if (!canvas)
 				continue;
 
-			module_drawer.draw_mapped_elements(patch, module_idx, canvas, drawn_elements, is_patch_playing);
+			module_drawer.draw_mapped_elements(patch, module_idx, canvas, drawn_elements, true /*is_patch_playing*/);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
@@ -173,6 +172,7 @@ struct PatchViewPage : PageBase {
 
 	void update() override {
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
+		//TODO: show mapping ring layer if patch is playing
 
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (PageList::request_last_page()) {
@@ -180,13 +180,12 @@ struct PatchViewPage : PageBase {
 			}
 		}
 
-		for (auto &drawn_el : drawn_elements) {
-			std::visit(
-				[this, drawn = drawn_el.drawn](auto &el) -> void {
-					//
-					update_element(el, this->params, patch, drawn);
-				},
-				drawn_el.element);
+		if (is_patch_playing) {
+			for (auto &drawn_el : drawn_elements) {
+				std::visit([this, drawn = drawn_el.drawn](
+							   auto &el) -> void { update_element(el, this->params, patch, drawn); },
+						   drawn_el.element);
+			}
 		}
 	}
 

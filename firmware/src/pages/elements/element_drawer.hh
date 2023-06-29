@@ -46,7 +46,7 @@ draw_element_topleft(const Slider &el, const lv_img_dsc_t *img, lv_obj_t *canvas
 	lv_obj_set_pos(handle, 0, 0);
 	lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 
-	pr_dbg("Draw element %.*s at %d, %d\n", el.short_name.size(), el.short_name.data(), left, top);
+	// pr_dbg("Draw element %.*s at %d, %d\n", el.short_name.size(), el.short_name.data(), left, top);
 	return obj;
 }
 

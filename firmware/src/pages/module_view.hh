@@ -5,7 +5,6 @@
 #include "knob_edit.hh"
 #include "lvgl/src/core/lv_obj_pos.h"
 #include "pages/base.hh"
-#include "pages/draw_helpers.hh"
 #include "pages/images/image_list.hh"
 #include "pages/module_drawer.hh"
 #include "pages/module_param.hh"
