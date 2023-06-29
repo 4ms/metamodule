@@ -15,7 +15,6 @@
 #include "pages/styles.hh"
 #include "printf.h"
 #include "util/countzip.hh"
-#include <iostream>
 
 namespace MetaModule
 {
@@ -109,8 +108,6 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
-		std::cout << Height << "\n";
-		// printf("%d\n", height);
 		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
