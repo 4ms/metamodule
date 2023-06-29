@@ -3,15 +3,15 @@ project(lvgl_simulation_driver LANGUAGES C CXX)
 find_package(PkgConfig)
 pkg_check_modules(SDL2 REQUIRED sdl2)
 
-set(LV_CONF_PATH
-    ${SIM_ROOT}/lv_conf.h
-    CACHE STRING "" FORCE)
-
 add_library(lvglsdl ${PROJECT_SOURCE_DIR}/lv_sdl_disp.c
                     ${PROJECT_SOURCE_DIR}/lv_port_indev.c)
 
-target_compile_definitions(lvglsdl PRIVATE -DLV_LVGL_H_INCLUDE_SIMPLE
-                                           -DLV_CONF_PATH=${LV_CONF_PATH})
+target_compile_definitions(
+  lvglsdl PRIVATE -DLV_CONF_INCLUDE_SIMPLE -DLV_LVGL_H_INCLUDE_SIMPLE
+                  -DLV_CONF_PATH=${LV_CONF_PATH})
+
+message("lvgl_drv: LV_CONF_PATH =${LV_CONF_PATH}")
+message("lvgl_drv: LV_CONF_DIR =${LV_CONF_DIR}")
 
 target_compile_options(lvglsdl PRIVATE -Wall -O2)
 
@@ -24,4 +24,4 @@ endif()
 target_include_directories(
   lvglsdl
   PRIVATE ${SDL2_INCLUDE_DIRS}
-  PUBLIC ${PROJECT_SOURCE_DIR} ${LVGL_DIR} ${LVGL_DIR}/lvgl)
+  PUBLIC ${PROJECT_SOURCE_DIR} ${LV_CONF_DIR} ${LVGL_DIR})
