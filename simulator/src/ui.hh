@@ -12,6 +12,7 @@
 
 namespace MetaModule
 {
+
 class Ui {
 private:
 	PatchPlayLoader &patch_playloader;
@@ -28,6 +29,9 @@ public:
 		: patch_playloader{patch_playloader}
 		, msg_queue{1024}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
+		// {
+		// page_manager = std::make_unique<PageManager>(
+		// 	patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue);
 	}
 
 	void start() {

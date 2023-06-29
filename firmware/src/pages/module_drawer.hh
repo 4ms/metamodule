@@ -29,13 +29,18 @@ struct ModuleDrawer {
 		}
 		auto widthpx = img->header.w;
 		if ((widthpx * height) > canvas_buffer.size()) {
-			printf_("Buffer not big enough for %dpx, not drawing\n", widthpx);
+			printf_("Buffer not big enough for %dpx x %dpx (%zu avail), not drawing\n",
+					widthpx,
+					height,
+					canvas_buffer.size());
 			return nullptr;
 		}
 
 		lv_obj_t *canvas = lv_canvas_create(container);
-		if (!canvas)
+		if (!canvas) {
+			printf_("Failed to create module canvas object\n");
 			return nullptr;
+		}
 
 		lv_obj_set_size(canvas, widthpx, height);
 		lv_canvas_set_buffer(canvas, canvas_buffer.data(), widthpx, height, LV_IMG_CF_TRUE_COLOR);

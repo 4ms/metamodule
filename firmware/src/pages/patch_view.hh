@@ -17,12 +17,25 @@
 #include "pages/styles.hh"
 #include "printf.h"
 #include "util/countzip.hh"
+#include <iostream>
 
 namespace MetaModule
 {
 
+struct Test : PageBase {
+	Test(PatchInfo info)
+		: PageBase{info} {
+	}
+
+	static inline int x = 120;
+	void doit() {
+		printf("Test::x = %d (%x) %p + 0x%x\n", x, x, &x, sizeof x);
+		// printf("%d\n", MetaModule::PatchViewPage::Height);
+	}
+};
+
 struct PatchViewPage : PageBase {
-	static inline uint32_t height = 240;
+	static inline uint32_t Height = 240;
 	// static_assert(height == 120 || height == 240);
 
 	PatchViewPage(PatchInfo info)
@@ -73,7 +86,7 @@ struct PatchViewPage : PageBase {
 		lv_label_set_text(module_name, "Select a module:");
 
 		modules_cont = lv_obj_create(base);
-		lv_obj_set_size(modules_cont, 320, 4 * height + 8);
+		lv_obj_set_size(modules_cont, 320, 4 * Height + 8);
 		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
@@ -98,6 +111,8 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		std::cout << Height << "\n";
+		// printf("%d\n", height);
 		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
@@ -120,7 +135,7 @@ struct PatchViewPage : PageBase {
 
 		lv_group_add_obj(group, playbut);
 
-		auto module_drawer = ModuleDrawer{modules_cont, height};
+		auto module_drawer = ModuleDrawer{modules_cont, Height};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
 
@@ -136,7 +151,7 @@ struct PatchViewPage : PageBase {
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
-			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) * height);
+			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) * Height);
 
 			module_canvases.push_back(canvas);
 
