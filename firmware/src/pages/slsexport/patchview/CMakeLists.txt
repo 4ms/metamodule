@@ -1,0 +1,20 @@
+SET(SOURCES screens/ui_PatchView.c
+    ui.c
+    ui_helpers.c
+    images/ui_img_dark_icons_dark_play_png.c
+    images/ui_img_dark_icons_dark_play_press_png.c
+    images/ui_img_dark_icons_32px_circle_png.c
+    images/ui_img_dark_icons_dark_knob_png.c
+    images/ui_img_dark_icons_dark_knob_press_png.c
+    images/ui_img_dark_icons_dark_add_png.c
+    images/ui_img_dark_icons_dark_add_press_png.c
+    images/ui_img_dark_icons_dark_info_png.c
+    images/ui_img_dark_icons_dark_info_press_png.c
+    images/ui_img_dark_icons_dark_settings_png.c
+    images/ui_img_dark_icons_dark_settings_pressed_png.c
+    images/ui_img_dark_icons_dark_settings_focused3_png.c
+    images/ui_img_dark_icons_dark_settings_focused_red2_png.c
+    fonts/ui_font_Arial_16_bpp4.c
+    fonts/ui_font_Arial_bpp2.c)
+
+add_library(ui ${SOURCES})
