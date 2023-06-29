@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "pages/styles.hh"
 #include "patch/patch_data.hh"
 #include <vector>

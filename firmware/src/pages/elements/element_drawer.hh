@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "pages/elements/element_draw_helpers.hh"
 #include <cstdint>
 

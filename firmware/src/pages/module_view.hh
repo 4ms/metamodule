@@ -3,7 +3,6 @@
 #include "elements/element_name.hh"
 #include "elements/update.hh"
 #include "knob_edit.hh"
-#include "lvgl/src/core/lv_obj_pos.h"
 #include "pages/base.hh"
 #include "pages/images/image_list.hh"
 #include "pages/module_drawer.hh"
@@ -110,7 +109,8 @@ struct ModuleViewPage : PageBase {
 					opts += "\n";
 
 					add_button(drawn.obj);
-					module_controls.emplace_back(ModuleParam::get_type(el), (uint32_t)drawn.idx);
+					//emplace_back fails for clang-14
+					module_controls.push_back({ModuleParam::get_type(el), (uint32_t)drawn.idx});
 				},
 				drawn_element.element);
 		}

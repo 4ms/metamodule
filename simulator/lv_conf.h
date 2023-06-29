@@ -1,6 +1,6 @@
 /**
  * @file lv_conf.h
- * Configuration file for v8.2.0
+ * Configuration file for v8.3.0-dev
  */
 
 /*
@@ -49,7 +49,7 @@
 #define LV_MEM_CUSTOM 0
 #if LV_MEM_CUSTOM == 0
     /*Size of the memory available for `lv_mem_alloc()` in bytes (>= 2kB)*/
-    #define LV_MEM_SIZE (512U * 1024U)          /*[bytes]*/
+    #define LV_MEM_SIZE (128U * 1024U)          /*[bytes]*/
 
     /*Set an address for the memory pool instead of allocating it as a normal array. Can be in external SRAM too.*/
     #define LV_MEM_ADR 0     /*0: unused*/
@@ -78,7 +78,7 @@
  *====================*/
 
 /*Default display refresh period. LVG will redraw changed areas with this period time*/
-#define LV_DISP_DEF_REFR_PERIOD 33      /*[ms]*/
+#define LV_DISP_DEF_REFR_PERIOD 30      /*[ms]*/
 
 /*Input device read period in milliseconds*/
 #define LV_INDEV_DEF_READ_PERIOD 30     /*[ms]*/
@@ -87,8 +87,20 @@
  *It removes the need to manually update the tick with `lv_tick_inc()`)*/
 #define LV_TICK_CUSTOM 1
 #if LV_TICK_CUSTOM
-#define LV_TICK_CUSTOM_INCLUDE  "stm32xx.h"         /*Header for the system time function*/
-#define LV_TICK_CUSTOM_SYS_TIME_EXPR (HAL_GetTick())     /*Expression evaluating to current system time in ms*/
+#ifdef WIN32
+    #define LV_TICK_CUSTOM_INCLUDE "windows.h"         /*Header for the system time function*/
+    #define LV_TICK_CUSTOM_SYS_TIME_EXPR (GetTickCount())    /*Expression evaluating to current system time in ms*/
+#else
+    #include <time.h>
+    static inline uint64_t GetTickCountMs()
+    {
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        return (uint64_t)(ts.tv_nsec / 1000000) + ((uint64_t)ts.tv_sec * 1000ull);
+    }
+    #define LV_TICK_CUSTOM_INCLUDE "time.h"
+    #define LV_TICK_CUSTOM_SYS_TIME_EXPR (GetTickCountMs())
+#endif
 #endif   /*LV_TICK_CUSTOM*/
 
 /*Default Dot Per Inch. Used to initialize default sizes such as widgets sized, style paddings.
@@ -208,17 +220,17 @@
 
     /*1: Print the log with 'printf';
     *0: User need to register a callback with `lv_log_register_print_cb()`*/
-    #define LV_LOG_PRINTF 0
+    #define LV_LOG_PRINTF 1
 
     /*Enable/disable LV_LOG_TRACE in modules that produces a huge number of logs*/
     #define LV_LOG_TRACE_MEM        1
-    #define LV_LOG_TRACE_TIMER      1
+    #define LV_LOG_TRACE_TIMER      0
     #define LV_LOG_TRACE_INDEV      1
-    #define LV_LOG_TRACE_DISP_REFR  0
+    #define LV_LOG_TRACE_DISP_REFR  1
     #define LV_LOG_TRACE_EVENT      1
     #define LV_LOG_TRACE_OBJ_CREATE 1
     #define LV_LOG_TRACE_LAYOUT     0
-    #define LV_LOG_TRACE_ANIM       0
+    #define LV_LOG_TRACE_ANIM       1
 
 #endif  /*LV_USE_LOG*/
 
@@ -243,14 +255,14 @@
  *-----------*/
 
 /*1: Show CPU usage and FPS count*/
-#define LV_USE_PERF_MONITOR 0
+#define LV_USE_PERF_MONITOR 1
 #if LV_USE_PERF_MONITOR
     #define LV_USE_PERF_MONITOR_POS LV_ALIGN_BOTTOM_RIGHT
 #endif
 
 /*1: Show the used memory and the memory fragmentation
  * Requires LV_MEM_CUSTOM = 0*/
-#define LV_USE_MEM_MONITOR 0
+#define LV_USE_MEM_MONITOR 1
 #if LV_USE_MEM_MONITOR
     #define LV_USE_MEM_MONITOR_POS LV_ALIGN_BOTTOM_LEFT
 #endif
@@ -572,7 +584,6 @@
  *--------------------*/
 
 /*File system interfaces for common APIs */
-
 /*API for fopen, fread, etc*/
 #define LV_USE_FS_STDIO 0
 #if LV_USE_FS_STDIO
@@ -660,6 +671,9 @@
 
 /*1: Enable grid navigation*/
 #define LV_USE_GRIDNAV  1
+
+/*1: Enable lv_obj fragment*/
+#define LV_USE_FRAGMENT 0
 
 /*==================
 * EXAMPLES

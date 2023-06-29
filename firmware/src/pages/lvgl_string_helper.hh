@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lvgl/src/core/lv_obj.h" //For events
+#include "lvgl.h" //For events
 #include <array>
 #include <string_view>
 

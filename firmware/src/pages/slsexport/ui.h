@@ -10,7 +10,11 @@
 extern "C" {
 #endif
 
-    #include "lvgl/lvgl.h"
+#ifdef LV_LVGL_H_INCLUDE_SIMPLE
+#include "lvgl.h"
+#else
+#include "lvgl/lvgl.h"
+#endif
 
 extern lv_obj_t *ui_PatchSelector;
 extern lv_obj_t *ui_Title;
@@ -24,11 +28,7 @@ extern lv_obj_t *ui_Flashlabel;
 extern lv_obj_t *ui_patchlist;
 extern lv_obj_t *ui_waitspinner;
 
-
-
-
-LV_FONT_DECLARE( ui_font_MuseoSansRounded70014);
-
+LV_FONT_DECLARE(ui_font_MuseoSansRounded70014);
 
 void ui_init(void);
 

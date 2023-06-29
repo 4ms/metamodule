@@ -30,7 +30,7 @@ struct ParamDbgPrint {
 	void output_load(uint32_t now_ticks) {
 		if ((now_ticks - last_dbg_output_tm) > 2000) {
 			last_dbg_output_tm = now_ticks;
-			printf_("Load = %d\%\n", metaparams.audio_load);
+			printf_("Load = %d\%%n", metaparams.audio_load);
 		}
 	}
 
@@ -50,7 +50,7 @@ struct ParamDbgPrint {
 			readings = 0;
 
 			for (auto [i, pot] : enumerate(params.knobs)) {
-				printf_("Pot %d: iir=%d min=%d max=%d range=%d\r\n",
+				printf_("Pot %zu: iir=%d min=%d max=%d range=%d\r\n",
 						i,
 						(int32_t)(4096.f * pot_iir[i]),
 						(int32_t)(4096.f * pot_min[i]),
@@ -75,7 +75,7 @@ struct ParamDbgPrint {
 					b(7));
 
 			for (auto [i, ain] : enumerate(metaparams.ins)) {
-				printf_("AIN %d: [%d] iir=%d min=%d max=%d range=%d\r\n",
+				printf_("AIN %zu: [%d] iir=%d min=%d max=%d range=%d\r\n",
 						i,
 						b(i),
 						(int32_t)(ain.iir * 32768.f),

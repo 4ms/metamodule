@@ -25,7 +25,7 @@ find_mapping(const ParamElement &, const PatchData &patch, uint16_t module_idx, 
 
 inline std::optional<uint16_t>
 find_mapping(const JackInput &, const PatchData &patch, uint16_t module_idx, ElementCount::Indices indices) {
-	if (auto panel_map = patch.find_mapped_injack(Jack(module_idx, indices.input_idx)))
+	if (auto panel_map = patch.find_mapped_injack(Jack{(uint16_t)module_idx, indices.input_idx}))
 		return panel_map->panel_jack_id;
 	else
 		return {};

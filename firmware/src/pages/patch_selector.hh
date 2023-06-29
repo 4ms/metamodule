@@ -5,7 +5,6 @@
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include "printf.h"
-#include "stm32xx.h"
 
 //exported:
 #include "slsexport/ui.h"
@@ -183,7 +182,7 @@ struct PatchSelectorPage : PageBase {
 
 			case State::Idle: {
 				//periodically check if patchlist needs updating:
-				uint32_t now = HAL_GetTick();
+				uint32_t now = lv_tick_get();
 				if (now - last_refresh_check_tm > 1000) { //poll media once per second
 					last_refresh_check_tm = now;
 					state = State::TryingToRequestPatchList;

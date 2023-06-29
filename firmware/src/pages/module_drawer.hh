@@ -3,7 +3,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
 #include "images/image_list.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "pages/elements/base_image.hh"
 #include "pages/elements/context.hh"
 #include "pages/elements/element_draw_helpers.hh"
@@ -29,13 +29,18 @@ struct ModuleDrawer {
 		}
 		auto widthpx = img->header.w;
 		if ((widthpx * height) > canvas_buffer.size()) {
-			printf_("Buffer not big enough for %dpx, not drawing\n", widthpx);
+			printf_("Buffer not big enough for %dpx x %dpx (%zu avail), not drawing\n",
+					widthpx,
+					height,
+					canvas_buffer.size());
 			return nullptr;
 		}
 
 		lv_obj_t *canvas = lv_canvas_create(container);
-		if (!canvas)
+		if (!canvas) {
+			printf_("Failed to create module canvas object\n");
 			return nullptr;
+		}
 
 		lv_obj_set_size(canvas, widthpx, height);
 		lv_canvas_set_buffer(canvas, canvas_buffer.data(), widthpx, height, LV_IMG_CF_TRUE_COLOR);
@@ -77,7 +82,7 @@ struct ModuleDrawer {
 					auto obj = el_drawer.draw_element(el, img);
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, indices);
 					auto idx = ElementIndex::get_index(el, indices);
-					auto element_ctx = ElementContext(obj, module_idx, idx, mapping_id);
+					auto element_ctx = ElementContext{obj, (uint16_t)module_idx, idx, mapping_id};
 
 					// patch.get_static_knob_value(module_idx, idx);
 

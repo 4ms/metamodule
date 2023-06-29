@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "pages/elements/element_draw_helpers.hh"
 #include "pages/styles.hh"
 #include "pr_dbg.hh"
@@ -14,6 +14,14 @@ struct Rect {
 	uint16_t y;
 	uint16_t w;
 	uint16_t h;
+
+	//clang-14 needs this
+	Rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+		: x{x}
+		, y{y}
+		, w{w}
+		, h{h} {
+	}
 };
 
 // Default: do nothing

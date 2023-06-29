@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 
 LV_IMG_DECLARE(jack_x);
 LV_IMG_DECLARE(jack_x_120);

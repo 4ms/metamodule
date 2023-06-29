@@ -16,7 +16,6 @@ namespace MetaModule
 class Ui {
 private:
 	ParamCache &param_cache;
-	PatchStorageProxy &patch_storage;
 	PatchPlayLoader &patch_playloader;
 
 	MessageQueue msg_queue;
@@ -36,7 +35,6 @@ public:
 	   ParamCache &pc,
 	   PatchModQueue &patch_mod_queue)
 		: param_cache{pc}
-		, patch_storage{patch_storage}
 		, patch_playloader{patch_playloader}
 		, msg_queue{1024}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {

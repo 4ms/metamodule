@@ -1,5 +1,5 @@
 #pragma once
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include <string_view>
 
 #if defined(USE_FEWER_MODULES) //&& USE_FEWER_MODULES == 1

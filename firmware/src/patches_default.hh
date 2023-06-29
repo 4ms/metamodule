@@ -1,5 +1,6 @@
 #pragma once
-#include "module_type_slug.hh"
+#include "CoreModules/module_type_slug.hh"
+#include <cstdint>
 #include <span>
 
 ///

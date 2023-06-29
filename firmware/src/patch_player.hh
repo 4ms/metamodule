@@ -1,15 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleFactory.hh"
-#include "drivers/arch.hh"
-#include "drivers/cache.hh"
-#if !defined(TESTPROJECT) && !defined(SIMULATOR)
-// #include "CoreModules/Befaco/DualAtenuverterCore.hh"
-#include "debug.hh"
-#else
-#include "../stubs/debug.hh"
-#endif
-#include "conf/hsem_conf.hh"
 #include "conf/panel_conf.hh"
 #include "drivers/smp.hh"
 #include "patch/midi_def.hh"
@@ -140,7 +131,12 @@ public:
 			modules[1]->update();
 		else {
 			mdrivlib::SMPThread::split_with_command<SMPCommand::UpdateListOfModules>();
-			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += 2) {
+#ifdef SIMULATOR
+			constexpr size_t module_skip = 1;
+#else
+			constexpr size_t module_skip = 2;
+#endif
+			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += module_skip) {
 				modules[module_i]->update();
 			}
 			mdrivlib::SMPThread::join();

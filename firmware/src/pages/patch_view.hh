@@ -1,8 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
-#include "lvgl/lvgl.h"
-#include "lvgl/src/core/lv_event.h"
-#include "lvgl/src/core/lv_obj.h"
+#include "lvgl.h"
 #include "pages/animated_knob.hh"
 #include "pages/base.hh"
 #include "pages/elements/element_drawer.hh"
@@ -21,8 +19,20 @@
 namespace MetaModule
 {
 
+struct Test : PageBase {
+	Test(PatchInfo info)
+		: PageBase{info} {
+	}
+
+	static inline int x = 120;
+	void doit() {
+		printf("Test::x = %d (%x) %p + 0x%x\n", x, x, &x, sizeof x);
+		// printf("%d\n", MetaModule::PatchViewPage::Height);
+	}
+};
+
 struct PatchViewPage : PageBase {
-	static inline uint32_t height = 240;
+	static inline uint32_t Height = 240;
 	// static_assert(height == 120 || height == 240);
 
 	PatchViewPage(PatchInfo info)
@@ -73,7 +83,7 @@ struct PatchViewPage : PageBase {
 		lv_label_set_text(module_name, "Select a module:");
 
 		modules_cont = lv_obj_create(base);
-		lv_obj_set_size(modules_cont, 320, 4 * height + 8);
+		lv_obj_set_size(modules_cont, 320, 4 * Height + 8);
 		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_set_style_border_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
@@ -120,7 +130,7 @@ struct PatchViewPage : PageBase {
 
 		lv_group_add_obj(group, playbut);
 
-		auto module_drawer = ModuleDrawer{modules_cont, height};
+		auto module_drawer = ModuleDrawer{modules_cont, Height};
 
 		auto canvas_buf = std::span<lv_color_t>{page_pixel_buffer};
 
@@ -136,7 +146,7 @@ struct PatchViewPage : PageBase {
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
-			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) * height);
+			canvas_buf = canvas_buf.subspan(LV_CANVAS_BUF_SIZE_TRUE_COLOR(1, 1) * lv_obj_get_width(canvas) * Height);
 
 			module_canvases.push_back(canvas);
 

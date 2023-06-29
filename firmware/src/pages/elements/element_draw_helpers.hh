@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh" //just for mm_to_px
 #include "CoreModules/elements/elements.hh"
-#include "lvgl/lvgl.h"
 #include "pages/styles.hh"
 #include "pr_dbg.hh"
 #include <cmath>
