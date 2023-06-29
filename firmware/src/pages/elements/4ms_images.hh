@@ -65,11 +65,11 @@ inline const lv_img_dsc_t *get_img(const Slider25mmVert &, uint32_t scale_px) {
 }
 
 inline const lv_img_dsc_t *get_img(const Toggle3pos &, uint32_t scale_px) {
-	return scale_px == 240 ? &switch_up : &switch_up_120;
+	return scale_px == 240 ? &switch_center : &switch_center_120;
 }
 
 inline const lv_img_dsc_t *get_img(const Toggle2pos &, uint32_t scale_px) {
-	return scale_px == 240 ? &switch_up : &switch_up_120;
+	return scale_px == 240 ? &switch_center : &switch_center_120;
 }
 
 inline const lv_img_dsc_t *get_img(const LatchingButton &, uint32_t scale_px) {

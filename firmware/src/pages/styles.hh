@@ -108,9 +108,9 @@ struct Gui {
 	// Slider Handle Style
 	static constexpr lv_style_const_prop_t slider_handle_style_props[6] = {
 		LV_STYLE_CONST_BG_OPA(LV_OPA_100),
-		LV_STYLE_CONST_BG_COLOR(palette_main[0]),
+		LV_STYLE_CONST_BG_COLOR(lv_color_make_rgb565(0xFF, 0xFF, 0xFF)),
 		LV_STYLE_CONST_OUTLINE_OPA(LV_OPA_100),
-		LV_STYLE_CONST_OUTLINE_COLOR(palette_main[10]),
+		LV_STYLE_CONST_OUTLINE_COLOR(lv_color_make_rgb565(0x80, 0x80, 0x80)),
 		LV_STYLE_CONST_OUTLINE_WIDTH(1),
 		LV_STYLE_CONST_RADIUS(2),
 	};

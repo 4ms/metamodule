@@ -29,20 +29,37 @@ draw_element_topleft(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *c
 	auto [left, top] = mm_to_topleft_px(el.x_mm, el.y_mm, module_height);
 	lv_obj_t *obj = lv_img_create(canvas);
 	draw_element(left, top, img, obj);
-	pr_dbg("Draw element %.*s at %d, %d\n", el.short_name.size(), el.short_name.data(), left, top);
+	// pr_dbg("Draw element %.*s at %d, %d\n", el.short_name.size(), el.short_name.data(), left, top);
 	return obj;
 }
 
 inline lv_obj_t *
 draw_element_topleft(const Slider &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
-	auto [left, top] = mm_to_topleft_px(el.x_mm, el.y_mm, module_height);
-	lv_obj_t *obj = lv_img_create(canvas);
-	draw_element(left, top, img, obj);
+	auto obj = draw_element_topleft(BaseElement(el), img, canvas, module_height);
+	// auto [left, top] = mm_to_topleft_px(el.x_mm, el.y_mm, module_height);
+	// lv_obj_t *obj = lv_img_create(canvas);
+	// draw_element(left, top, img, obj);
 
 	auto *handle = lv_obj_create(obj);
+	// TODO: horizontal handle
 	lv_obj_set_align(handle, LV_ALIGN_TOP_MID);
 	lv_obj_set_width(handle, img->header.w);
 	lv_obj_set_height(handle, module_height / 24);
+	lv_obj_set_pos(handle, 0, 0);
+	lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
+
+	// pr_dbg("Draw element %.*s at %d, %d\n", el.short_name.size(), el.short_name.data(), left, top);
+	return obj;
+}
+
+inline lv_obj_t *
+draw_element_topleft(const Toggle3pos &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
+	auto obj = draw_element_topleft(BaseElement(el), img, canvas, module_height);
+
+	auto *handle = lv_obj_create(obj);
+	lv_obj_set_align(handle, LV_ALIGN_CENTER);
+	lv_obj_set_width(handle, img->header.w / 4);
+	lv_obj_set_height(handle, img->header.h /4);
 	lv_obj_set_pos(handle, 0, 0);
 	lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 
