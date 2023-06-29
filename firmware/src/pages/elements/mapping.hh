@@ -16,7 +16,7 @@ inline std::optional<uint16_t> find_mapping(const BaseElement &, const PatchData
 }
 
 inline std::optional<uint16_t>
-find_mapping(const Pot &, const PatchData &patch, uint16_t module_idx, ElementCount::Indices indices) {
+find_mapping(const ParamElement &, const PatchData &patch, uint16_t module_idx, ElementCount::Indices indices) {
 	if (auto panel_map = patch.find_mapped_knob(module_idx, indices.param_idx))
 		return panel_map->panel_knob_id;
 	else
