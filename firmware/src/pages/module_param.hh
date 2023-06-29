@@ -1,5 +1,5 @@
 #pragma once
-#include "elements/elements.hh"
+#include "CoreModules/elements/elements.hh"
 #include <cstdint>
 
 namespace MetaModule
