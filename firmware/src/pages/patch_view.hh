@@ -1,8 +1,6 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
-#include "lvgl/lvgl.h"
-#include "lvgl/src/core/lv_event.h"
-#include "lvgl/src/core/lv_obj.h"
+#include "lvgl.h"
 #include "pages/animated_knob.hh"
 #include "pages/base.hh"
 #include "pages/elements/element_drawer.hh"

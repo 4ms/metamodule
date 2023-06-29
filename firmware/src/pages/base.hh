@@ -1,6 +1,6 @@
 #pragma once
 #include "conf/panel_conf.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "params.hh"
 #include "patch_mod_queue.hh"
 #include "patch_playloader.hh"

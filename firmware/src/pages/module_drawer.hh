@@ -3,7 +3,7 @@
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
 #include "images/image_list.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "pages/elements/base_image.hh"
 #include "pages/elements/context.hh"
 #include "pages/elements/element_draw_helpers.hh"

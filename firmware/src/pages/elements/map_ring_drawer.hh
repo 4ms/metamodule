@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "pages/elements/element_draw_helpers.hh"
 #include "pages/styles.hh"
 #include "pr_dbg.hh"

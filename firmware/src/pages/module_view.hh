@@ -3,7 +3,6 @@
 #include "elements/element_name.hh"
 #include "elements/update.hh"
 #include "knob_edit.hh"
-#include "lvgl/src/core/lv_obj_pos.h"
 #include "pages/base.hh"
 #include "pages/images/image_list.hh"
 #include "pages/module_drawer.hh"
