@@ -14,6 +14,14 @@ struct Rect {
 	uint16_t y;
 	uint16_t w;
 	uint16_t h;
+
+	//clang-14 needs this
+	Rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+		: x{x}
+		, y{y}
+		, w{w}
+		, h{h} {
+	}
 };
 
 // Default: do nothing

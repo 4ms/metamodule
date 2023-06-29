@@ -77,7 +77,7 @@ struct ModuleDrawer {
 					auto obj = el_drawer.draw_element(el, img);
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, indices);
 					auto idx = ElementIndex::get_index(el, indices);
-					auto element_ctx = ElementContext(obj, module_idx, idx, mapping_id);
+					auto element_ctx = ElementContext{obj, (uint16_t)module_idx, idx, mapping_id};
 
 					// patch.get_static_knob_value(module_idx, idx);
 
