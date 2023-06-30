@@ -3,33 +3,14 @@
 import sys
 
 from helpers import *
-
 import vcv
 import infofile
 import coreModule
 import lvgl
+import imageList
 
 # Version check
 f"Python 3.6+ is required"
-
-   
-
-def appendImageList(artwork_array_prefix, image_list_file):
-    parts = artwork_array_prefix.split("_")
-    slug = parts[0]
-    artwork_prefix = parts[0] + "_" + parts[1]
-    artwork_Carray_240 = artwork_prefix + "_240"
-    artwork_Carray_120 = artwork_prefix + "_120"
-    newText = f'''LV_IMG_DECLARE({artwork_Carray_240});
-LV_IMG_DECLARE({artwork_Carray_120});
-'''
-    appendToFileAfterMarker(image_list_file, "// DECLARE HERE\n", newText)
-
-    newText = f'''
-\t\tif (slug == "{slug}")
-\t\t\treturn (height == 240) ? &{artwork_Carray_240} : &{artwork_Carray_120};
-'''
-    appendToFileAfterMarker(image_list_file, "// SLUG TO IMAGE HERE\n", newText)
 
 
 def processSvg(svgFilename):
@@ -42,7 +23,6 @@ def processSvg(svgFilename):
     vcv.extractForVcv(svgFilename, None, slug)
     
 
-
 def usage(script):
     print(f"""MetaModule SVG Helper Utility
 
@@ -52,8 +32,8 @@ Commands:
 
 processSvg [input svg file name]
     Runs createinfo and extractforvcv on the given file.
-    Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR if found,
-    otherwise prompts user for the values
+    Uses environmant variables METAMODULE_INFO_DIR, METAMODULE_ARTWORK_DIR if 
+    found, otherwise prompts user for the values
 
 createInfo [input svg file name] {{optional output path for ModuleInfo file}}
     Creates a ModuleInfo struct and saves it to a file in the given path. The
@@ -63,27 +43,32 @@ createInfo [input svg file name] {{optional output path for ModuleInfo file}}
 
 createVcvSvg [input SVG file name] [output artwork SVG file name]
     Saves a new VCV artwork SVG file with the components layer removed.
-    Also makes sure the Slug (found in the SVG file) exists as a model in the VCV plugin, and adds it if not.
+    Also makes sure the Slug (found in the SVG file) exists as a model in the 
+    VCV plugin, and adds it if not.
 
 createCoreModule [slug] {{optional output path for CoreModule file}}
-    Creates a stub CoreModule C++ class for the slug passed into the first parameter. 
-    If the second parameter is a valid path, the file will be saved there, otherwise
-    it will be saved to the directory pointed to by the METAMODULE_COREMODULE_DIR
-    environmant variable. File will *not* be overwritten.
+    Creates a stub CoreModule C++ class for the slug passed into the first
+    parameter. If the second parameter is a valid path, the file will be saved 
+    there, otherwise it will be saved to the directory pointed to by the 
+    METAMODULE_COREMODULE_DIR environmant variable. File will *not* be 
+    overwritten.
 
 createLvImg [input artwork SVG file name] [output C file name]
-    Converts the artwork SVG to a PNG, scales it to 240px high, and then
+    Converts the artwork SVG to a PNG, scales it to 240px high, and then 
     converts it to a .c file using the LVGL image converter.
-    Requires these commands to be present on $PATH, or else found at the associated env variable:
+    Requires these commands to be present on $PATH, or found at the env var:
         inkscape            (INKSCAPE_BIN_PATH)
         convert             (IMAGEMAGICK_BIN_PATH)
 
 appendimglist [C array name] [path/to/image_list.hh]
-    C array name is the prefix for an image array in c format, created by lv_img_conv, without the _### size suffix. Example: EnOsc_artwork
+    C array name is the prefix for an image array in c format, created by 
+    lv_img_conv, without the _### size suffix. Example: EnOsc_artwork 
     (If the array name contains a size suffix, it will be removed and ignored.)
-    The second argument is the path to the image_list.hh file that should be updated with this new array.
-    Does not update the image_list.hh file if the exact string to be inserted is already found.
-    Note that the slug is the first part of the C array name, up to the first underscore (EnOsc_artwork => EnOsc)
+    The second argument is the path to the image_list.hh file that should be 
+    updated with this new array. Does not update the image_list.hh file if the
+    exact string to be inserted is already found. Note that the slug is the 
+    first part of the C array name, up to the first underscore 
+    (EnOsc_artwork => EnOsc)
 """)
 
 
@@ -93,7 +78,7 @@ def parse_args(args):
         usage(script)
         return
 
-    cmd = args.pop(0).to_lower()
+    cmd = args.pop(0).lower()
     inputfile = args.pop(0)
 
     if cmd == 'processsvg':
@@ -124,11 +109,11 @@ def parse_args(args):
         return
 
     if cmd == 'createlvimg':
-        lvgl.createlvimg(inputfile, output)
+        lvgl.faceplateSvgToLVGL(inputfile, output)
         return
 
     if cmd == 'appendimglist':
-        appendImageList(inputfile, output)
+        imageList.appendImageList(inputfile, output)
 
 if __name__ == "__main__":
     try:
