@@ -17,9 +17,9 @@ struct EvenVCOInfo : ElementInfoBase {
 	static constexpr std::string_view svg_filename{"res/modules/Befaco/EvenVCO.svg"};
 
 	static constexpr std::array<Element, 13> Elements{{
-		BefacoBigKnob{to_mm(22), to_mm(32), "Octave", "", OCTAVE_PARAM, -5, 4}, //snap enabled
-		BefacoTinyKnob{to_mm(73), to_mm(131), "Tune", "", TUNE_PARAM, -7, 7},
-		Davies1900hRedKnob{to_mm(16), to_mm(230), "Pulse Width", "", PWM_PARAM, -1, 1},
+		BefacoBigKnob{{{{to_mm(22), to_mm(32), "Octave", "", OCTAVE_PARAM}, -5, 4}}}, //snap enabled
+		BefacoTinyKnob{{{{to_mm(73), to_mm(131), "Tune", "", TUNE_PARAM}, -7, 7}}},
+		Davies1900hRedKnob{{{{to_mm(16), to_mm(230), "Pulse Width", "", PWM_PARAM}, -1, 1}}},
 
 		BefacoInputPort{to_mm(8), to_mm(120), "Pitch 1", "", PITCH1_INPUT},
 		BefacoInputPort{to_mm(19), to_mm(157), "Pitch 2", "", PITCH2_INPUT},

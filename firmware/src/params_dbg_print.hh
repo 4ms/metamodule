@@ -30,7 +30,7 @@ struct ParamDbgPrint {
 	void output_load(uint32_t now_ticks) {
 		if ((now_ticks - last_dbg_output_tm) > 2000) {
 			last_dbg_output_tm = now_ticks;
-			printf_("Load = %d\%%n", metaparams.audio_load);
+			printf_("Load = %d%%n", metaparams.audio_load);
 		}
 	}
 
