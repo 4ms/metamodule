@@ -118,185 +118,120 @@ struct Gui {
 
 	static void init_lvgl_styles() {
 		// invisible_style
-		// lv_style_init(&invisible_style);
-		// lv_style_set_bg_opa(&invisible_style, 0);
-		// lv_style_set_border_width(&invisible_style, 0);
-		// lv_style_set_outline_width(&invisible_style, 0);
-		// lv_style_set_shadow_opa(&invisible_style, 0);
+		lv_style_init(&invisible_style);
+		lv_style_set_bg_opa(&invisible_style, 0);
+		lv_style_set_border_width(&invisible_style, 0);
+		lv_style_set_outline_width(&invisible_style, 0);
+		lv_style_set_shadow_opa(&invisible_style, 0);
 
-		// // panel_highlight_style
-		// lv_style_init(&panel_highlight_style);
-		// lv_style_set_radius(&panel_highlight_style, 120);
-		// lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
-		// lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_50);
+		// panel_highlight_style
+		lv_style_init(&panel_highlight_style);
+		lv_style_set_radius(&panel_highlight_style, 120);
+		lv_style_set_bg_color(&panel_highlight_style, orange_highlight);
+		lv_style_set_bg_opa(&panel_highlight_style, LV_OPA_50);
 
-		// // mapped_knob_style
-		// lv_style_init(&mapped_knob_style);
+		// mapped_knob_style
+		lv_style_init(&mapped_knob_style);
 
-		// // Mapped arcs:
-		// lv_draw_arc_dsc_init(&mapped_knob_arcdsc);
-		// mapped_knob_arcdsc.width = 4;
-		// mapped_knob_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
-		// mapped_knob_arcdsc.opa = LV_OPA_50;
+		// Mapped arcs:
+		lv_draw_arc_dsc_init(&mapped_knob_arcdsc);
+		mapped_knob_arcdsc.width = 4;
+		mapped_knob_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
+		mapped_knob_arcdsc.opa = LV_OPA_50;
 
-		// lv_draw_arc_dsc_init(&mapped_knob_small_arcdsc);
-		// mapped_knob_small_arcdsc.width = 2;
-		// mapped_knob_small_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
-		// mapped_knob_small_arcdsc.opa = LV_OPA_50;
+		lv_draw_arc_dsc_init(&mapped_knob_small_arcdsc);
+		mapped_knob_small_arcdsc.width = 2;
+		mapped_knob_small_arcdsc.color = lv_palette_main(LV_PALETTE_BLUE);
+		mapped_knob_small_arcdsc.opa = LV_OPA_50;
 
-		// lv_draw_arc_dsc_init(&mapped_jack_arcdsc);
-		// mapped_jack_arcdsc.width = 2;
-		// mapped_jack_arcdsc.color = palette_main[LV_PALETTE_RED];
-		// mapped_jack_arcdsc.opa = LV_OPA_50;
+		lv_draw_arc_dsc_init(&mapped_jack_arcdsc);
+		mapped_jack_arcdsc.width = 2;
+		mapped_jack_arcdsc.color = palette_main[LV_PALETTE_RED];
+		mapped_jack_arcdsc.opa = LV_OPA_50;
 
-		// lv_draw_arc_dsc_init(&mapped_jack_small_arcdsc);
-		// mapped_jack_small_arcdsc.width = 2;
-		// mapped_jack_small_arcdsc.color = lv_palette_main(LV_PALETTE_RED);
-		// mapped_jack_small_arcdsc.opa = LV_OPA_50;
+		lv_draw_arc_dsc_init(&mapped_jack_small_arcdsc);
+		mapped_jack_small_arcdsc.width = 2;
+		mapped_jack_small_arcdsc.color = lv_palette_main(LV_PALETTE_RED);
+		mapped_jack_small_arcdsc.opa = LV_OPA_50;
 
 		// selected_module_style
-		auto *p = reinterpret_cast<uint8_t *>(&selected_module_style);
-		printf("%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
-			   p[0],
-			   p[1],
-			   p[2],
-			   p[3],
-			   p[4],
-			   p[5],
-			   p[6],
-			   p[7],
-			   p[8],
-			   p[9],
-			   p[10],
-			   p[11],
-			   p[12],
-			   p[13],
-			   p[14],
-			   p[15],
-			   p[16],
-			   p[17],
-			   p[18],
-			   p[19]);
 		lv_style_init(&selected_module_style);
-		printf("%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
-			   p[0],
-			   p[1],
-			   p[2],
-			   p[3],
-			   p[4],
-			   p[5],
-			   p[6],
-			   p[7],
-			   p[8],
-			   p[9],
-			   p[10],
-			   p[11],
-			   p[12],
-			   p[13],
-			   p[14],
-			   p[15],
-			   p[16],
-			   p[17],
-			   p[18],
-			   p[19]);
-		// lv_style_set_outline_color(&selected_module_style, lv_palette_lighten(LV_PALETTE_ORANGE, 1));
+		lv_style_set_outline_color(&selected_module_style, lv_palette_lighten(LV_PALETTE_ORANGE, 1));
 		lv_style_set_outline_width(&selected_module_style, 3);
-		printf("%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
-			   p[0],
-			   p[1],
-			   p[2],
-			   p[3],
-			   p[4],
-			   p[5],
-			   p[6],
-			   p[7],
-			   p[8],
-			   p[9],
-			   p[10],
-			   p[11],
-			   p[12],
-			   p[13],
-			   p[14],
-			   p[15],
-			   p[16],
-			   p[17],
-			   p[18],
-			   p[19]);
-		// lv_style_set_outline_opa(&selected_module_style, LV_OPA_100);
-		// lv_style_set_radius(&selected_module_style, 0);
-		printf("selected_module_style %p + 0x%x\n", &selected_module_style, sizeof selected_module_style);
+		lv_style_set_outline_opa(&selected_module_style, LV_OPA_100);
+		lv_style_set_radius(&selected_module_style, 0);
 
-		// // header_style (text)
-		// lv_style_init(&header_style);
-		// lv_style_set_text_align(&header_style, LV_TEXT_ALIGN_CENTER);
-		// // lv_style_set_text_font(&header_style, &lv_font_montserrat_14);
-		// lv_style_set_text_font(&header_style, &MuseoSansRounded_700_16);
-		// lv_style_set_text_color(&header_style, lv_color_white());
-		// lv_style_set_text_opa(&header_style, LV_OPA_COVER);
-		// lv_style_set_bg_opa(&header_style, LV_OPA_COVER);
-		// lv_style_set_bg_color(&header_style, lv_color_black());
-		// lv_style_set_text_line_space(&header_style, 5);
-		// lv_style_set_pad_hor(&header_style, 6);
-		// lv_style_set_pad_ver(&header_style, 2);
+		// header_style (text)
+		lv_style_init(&header_style);
+		lv_style_set_text_align(&header_style, LV_TEXT_ALIGN_CENTER);
+		// lv_style_set_text_font(&header_style, &lv_font_montserrat_14);
+		lv_style_set_text_font(&header_style, &MuseoSansRounded_700_16);
+		lv_style_set_text_color(&header_style, lv_color_white());
+		lv_style_set_text_opa(&header_style, LV_OPA_COVER);
+		lv_style_set_bg_opa(&header_style, LV_OPA_COVER);
+		lv_style_set_bg_color(&header_style, lv_color_black());
+		lv_style_set_text_line_space(&header_style, 5);
+		lv_style_set_pad_hor(&header_style, 6);
+		lv_style_set_pad_ver(&header_style, 2);
 
-		// // text_block_style
-		// lv_style_init(&text_block_style);
-		// lv_style_set_text_align(&text_block_style, LV_TEXT_ALIGN_LEFT);
-		// lv_style_set_text_font(&text_block_style, &MuseoSansRounded_500_12);
-		// lv_style_set_text_color(&text_block_style, lv_color_white());
-		// lv_style_set_text_opa(&text_block_style, LV_OPA_COVER);
-		// lv_style_set_bg_opa(&text_block_style, LV_OPA_COVER);
-		// lv_style_set_bg_color(&text_block_style, lv_color_black());
-		// lv_style_set_text_line_space(&text_block_style, 2);
-		// lv_style_set_pad_hor(&text_block_style, 8);
-		// lv_style_set_pad_ver(&text_block_style, 4);
+		// text_block_style
+		lv_style_init(&text_block_style);
+		lv_style_set_text_align(&text_block_style, LV_TEXT_ALIGN_LEFT);
+		lv_style_set_text_font(&text_block_style, &MuseoSansRounded_500_12);
+		lv_style_set_text_color(&text_block_style, lv_color_white());
+		lv_style_set_text_opa(&text_block_style, LV_OPA_COVER);
+		lv_style_set_bg_opa(&text_block_style, LV_OPA_COVER);
+		lv_style_set_bg_color(&text_block_style, lv_color_black());
+		lv_style_set_text_line_space(&text_block_style, 2);
+		lv_style_set_pad_hor(&text_block_style, 8);
+		lv_style_set_pad_ver(&text_block_style, 4);
 
-		// // button_label_style
-		// lv_style_init(&button_label_style);
-		// lv_style_set_text_font(&button_label_style, &MuseoSansRounded_700_14);
-		// lv_style_set_text_color(&button_label_style, lv_color_white());
-		// lv_style_set_text_opa(&button_label_style, LV_OPA_COVER);
-		// lv_style_set_pad_ver(&button_label_style, 1);
+		// button_label_style
+		lv_style_init(&button_label_style);
+		lv_style_set_text_font(&button_label_style, &MuseoSansRounded_700_14);
+		lv_style_set_text_color(&button_label_style, lv_color_white());
+		lv_style_set_text_opa(&button_label_style, LV_OPA_COVER);
+		lv_style_set_pad_ver(&button_label_style, 1);
 
-		//// roller_style
-		//lv_style_init(&roller_style);
-		//lv_style_set_radius(&roller_style, 0);
-		//lv_style_set_bg_opa(&roller_style, LV_OPA_COVER);
-		//lv_style_set_bg_color(&roller_style, lv_color_black());
-		//lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_LEFT);
-		//lv_style_set_text_font(&roller_style, &MuseoSansRounded_700_14);
-		//// lv_style_set_text_font(&roller_style, &lv_font_montserrat_14);
-		//lv_style_set_text_color(&roller_style, lv_color_white());
-		//lv_style_set_text_opa(&roller_style, LV_OPA_COVER);
-		//lv_style_set_text_line_space(&roller_style, 5);
-		//lv_style_set_pad_hor(&roller_style, 2);
-		//lv_style_set_pad_ver(&roller_style, 1);
-		//lv_style_set_pad_gap(&roller_style, 2);
-		//lv_style_set_line_color(&roller_style, lv_palette_main(LV_PALETTE_GREY));
-		//lv_style_set_line_width(&roller_style, 12);
+		// roller_style
+		lv_style_init(&roller_style);
+		lv_style_set_radius(&roller_style, 0);
+		lv_style_set_bg_opa(&roller_style, LV_OPA_COVER);
+		lv_style_set_bg_color(&roller_style, lv_color_black());
+		lv_style_set_text_align(&roller_style, LV_TEXT_ALIGN_LEFT);
+		lv_style_set_text_font(&roller_style, &MuseoSansRounded_700_14);
+		// lv_style_set_text_font(&roller_style, &lv_font_montserrat_14);
+		lv_style_set_text_color(&roller_style, lv_color_white());
+		lv_style_set_text_opa(&roller_style, LV_OPA_COVER);
+		lv_style_set_text_line_space(&roller_style, 5);
+		lv_style_set_pad_hor(&roller_style, 2);
+		lv_style_set_pad_ver(&roller_style, 1);
+		lv_style_set_pad_gap(&roller_style, 2);
+		lv_style_set_line_color(&roller_style, lv_palette_main(LV_PALETTE_GREY));
+		lv_style_set_line_width(&roller_style, 12);
 
-		//// roller_sel_style
-		//lv_style_init(&roller_sel_style);
-		//lv_style_set_bg_color(&roller_sel_style, lv_palette_main(LV_PALETTE_ORANGE));
-		//lv_style_set_bg_opa(&roller_sel_style, LV_OPA_COVER);
-		//lv_style_set_text_color(&roller_sel_style, lv_color_black());
-		//lv_style_set_border_width(&roller_sel_style, 0);
+		// roller_sel_style
+		lv_style_init(&roller_sel_style);
+		lv_style_set_bg_color(&roller_sel_style, lv_palette_main(LV_PALETTE_ORANGE));
+		lv_style_set_bg_opa(&roller_sel_style, LV_OPA_COVER);
+		lv_style_set_text_color(&roller_sel_style, lv_color_black());
+		lv_style_set_border_width(&roller_sel_style, 0);
 
-		//// plain_border_style
-		//lv_style_init(&plain_border_style);
-		//lv_style_set_border_width(&plain_border_style, 0);
-		//lv_style_set_outline_width(&plain_border_style, 0);
-		//lv_style_set_shadow_opa(&plain_border_style, LV_OPA_TRANSP);
+		// plain_border_style
+		lv_style_init(&plain_border_style);
+		lv_style_set_border_width(&plain_border_style, 0);
+		lv_style_set_outline_width(&plain_border_style, 0);
+		lv_style_set_shadow_opa(&plain_border_style, LV_OPA_TRANSP);
 
-		////popup_box_style
-		//lv_style_init(&popup_box_style);
-		//lv_style_set_radius(&popup_box_style, 0);
-		//lv_style_set_bg_color(&popup_box_style, lv_palette_lighten(LV_PALETTE_GREY, 2));
-		//lv_style_set_bg_opa(&popup_box_style, 255);
-		//lv_style_set_border_width(&popup_box_style, 0);
-		//lv_style_set_border_opa(&popup_box_style, 0);
-		//lv_style_set_pad_gap(&popup_box_style, 10);
-		//lv_style_set_pad_all(&popup_box_style, 4);
+		//popup_box_style
+		lv_style_init(&popup_box_style);
+		lv_style_set_radius(&popup_box_style, 0);
+		lv_style_set_bg_color(&popup_box_style, lv_palette_lighten(LV_PALETTE_GREY, 2));
+		lv_style_set_bg_opa(&popup_box_style, 255);
+		lv_style_set_border_width(&popup_box_style, 0);
+		lv_style_set_border_opa(&popup_box_style, 0);
+		lv_style_set_pad_gap(&popup_box_style, 10);
+		lv_style_set_pad_all(&popup_box_style, 4);
 
 		// display = ...
 		// theme = lv_theme_default_init(display, // NOLINT
