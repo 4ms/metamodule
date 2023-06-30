@@ -17,6 +17,10 @@ get_filename_component(LV_CONF_DIR ${LV_CONF_PATH} DIRECTORY)
 
 add_subdirectory(lvgl_drv)
 
+# #################### LVGL ############################################
+
+include(${LVGL_DIR}/CMakeLists.txt)
+
 # #################### Gui Assets ############################################
 file(
   GLOB
@@ -36,14 +40,6 @@ file(
   ${MM_ROOT}/firmware/src/pages/slsexport/patchview/images/*.c
   ${MM_ROOT}/firmware/src/pages/slsexport/patchview/fonts/*.c)
 
-# add_library( gui_assets ${MM_ROOT}/firmware/src/pages/slsexport/patchview/ui.c
-# ${MM_ROOT}/firmware/src/pages/slsexport/patchview/screens/ui_PatchView.c
-# ${GUI_IMAGES})
-
-# target_link_libraries(gui_assets lvgl::lvgl) target_compile_options(gui_assets
-# PRIVATE -Wall -O2) target_include_directories(gui_assets PRIVATE
-# ${LV_CONF_DIR} ${LVGL_DIR})
-
 # #################### CoreModules ##################################
 file(
   GLOB
@@ -62,15 +58,6 @@ file(
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/braids/digital_oscillator.cc
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/braids/resources.cc)
-
-# add_library(core_modules ${CORE_MODULES})
-
-# target_compile_options(core_modules PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
-# -std=c++20> -Wall -O2) target_include_directories( core_modules PRIVATE
-# ${MM_ROOT}/shared/ ${MM_ROOT}/shared/CoreModules
-# ${MM_ROOT}/shared/CoreModules/info ${MM_ROOT}/firmware/src
-# ${MM_ROOT}/shared/cpputil ${MM_ROOT}/vcv/src # For sys/alloc_buffer.h
-# ${MM_ROOT}/shared/CoreModules/AudibleInstruments)
 
 # #################### RYML + Patch Convert ##################################
 
@@ -93,20 +80,13 @@ target_include_directories(
 
 target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
-# #################### LVGL ############################################
-
-include(${LVGL_DIR}/CMakeLists.txt)
-
 # #################### Application ############################################
 
 add_executable(
   simulator
-  src/main.cc
-  ${MM_ROOT}/firmware/src/pages/slsexport/ui.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/ui_helpers.c
-  ${CORE_MODULES}
-  ${GUI_IMAGES}
-  ${MM_ROOT}/firmware/src/pages/page_manager.cc)
+  src/main.cc ${MM_ROOT}/firmware/src/pages/slsexport/ui.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/ui_helpers.c ${CORE_MODULES}
+  ${GUI_IMAGES} ${MM_ROOT}/firmware/src/pages/page_manager.cc)
 
 target_include_directories(
   simulator
@@ -128,7 +108,8 @@ target_compile_options(simulator PRIVATE -Wall -Og -g2)
 target_compile_options(simulator PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
                                          ${SDL2_CFLAGS_OTHER})
 
-target_compile_definitions(simulator PRIVATE SIMULATOR)
+target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
+# Define TEST so braids dsp/dsp.h works (avoids contains raw assembly)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
                                         ryml SDL2)

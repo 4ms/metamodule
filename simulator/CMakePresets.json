@@ -13,7 +13,7 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
-        "CMAKE_CXX_FLAGS": "-Wall -Wpedantic -Werror=return-type -Wsuggest-override -Wuninitialized -Wdouble-promotion -Wmissing-requires"
+        "CMAKE_CXX_FLAGS": "-Wall -Wpedantic -Werror=return-type -Wsuggest-override -Wuninitialized -Wdouble-promotion" 
       }
     }
   ]
