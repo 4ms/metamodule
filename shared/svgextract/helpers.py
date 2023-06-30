@@ -5,12 +5,6 @@ def Log(x):
     TAG = "    svgextract: "
     print(TAG+x)
 
-ns = {
-    "svg": "http://www.w3.org/2000/svg",
-    "inkscape": "http://www.inkscape.org/namespaces/inkscape",
-}
-
-
 class UserException(Exception):
     pass
 
@@ -44,70 +38,41 @@ def appendToFileAfterMarker(filename, marker, newText, matchText=None):
         Log(f"Didn't update {filename} with {prettyNewText}, already exists in file")
 
 
-def get_components_group(root):
-    groups = root.findall(".//svg:g[@inkscape:label='components']", ns)
-    # Illustrator uses `id` for the group name.
-    if len(groups) < 1:
-        groups = root.findall(".//svg:g[@id='components']", ns)
-    if len(groups) < 1:
-        raise UserException("ERROR: Could not find \"components\" layer on panel")
-    return groups[0]
+def is_valid_slug(slug):
+    return re.match(r'^[a-zA-Z0-9_\-]+$', slug) != None
 
 
-def find_slug_and_modulename(components_group):
-    texts = components_group.findall(".//svg:text", ns)
-    slug = "Unnamed"
-    moduleName = "Unnamed"
-    for t in texts:
-        name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
-        if name is None:
-            name = t.get('id')
-        if name is None:
-            name = t.get('data-name')
-        if name is None:
-            continue
-
-        if name == "slug":
-            slug = ""
-            for m in t.itertext():
-                slug += m
-
-        if name == "modulename":
-            moduleName = ""
-            for m in t.itertext():
-                moduleName += m
-
-    subgroups = components_group.findall(".//svg:g", ns)
-    if slug == "Unnamed":
-        for t in subgroups:
-            name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
-            if name is None:
-                name = t.get('id')
-            if name is None:
-                name = t.get('data-name')
-            if name is None:
-                continue
-            if name == "slug":
-                slug = ""
-                for m in t.itertext():
-                    slug += m
-                slug = re.sub(r'\W+', '', slug).strip()
-
-    if moduleName == "Unnamed":
-        for t in subgroups:
-            name = t.get('{http://www.inkscape.org/namespaces/inkscape}label')
-            if name is None:
-                name = t.get('id')
-            if name is None:
-                name = t.get('data-name')
-            if name is None:
-                continue
-            if name == "modulename":
-                moduleName = ""
-                for m in t.itertext():
-                    moduleName += m
-                moduleName = re.sub(r'[\W]+', ' ', moduleName).strip()
-
-    return slug, moduleName
+def str_to_identifier(s):
+    if not s:
+        return "_"
+    # Identifiers can't start with a number
+    if s[0].isdigit():
+        s = "_" + s
+    # Capitalize first letter
+    s = s.title()
+    # Replace + with P
+    s = re.sub(r'\+', 'P', s)
+    # Replace - with N
+    s = re.sub(r'\-', 'N', s)
+    # Replace | with OR 
+    s = re.sub(r'\|', '_OR_', s)
+    # Replace other special characters with underscore
+    s = re.sub(r'\W', '_', s)
+    return s
 
 
+def remove_trailing_dash_number(name):
+    #Chop off -[\d\d] or -[\d]
+    if name[-3:-2] == '-' and name[-2:].isdigit() and name[-1:].isdigit():
+        name = name[:-3]
+    if name[-2:-1] == '-' and name[-1:].isdigit():
+        name = name[:-2]
+    return name
+
+
+def format_for_display(comp_name):
+    return comp_name.replace('_',' ')
+
+
+def format_as_enum_item(comp_name):
+    return str_to_identifier(comp_name)
