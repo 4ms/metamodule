@@ -85,7 +85,7 @@ update_element(const Toggle3pos &element, const Params &params, const PatchData 
 			return;
 		}
 		auto height = lv_obj_get_height(drawn.obj);
-		auto width = lv_obj_get_width(drawn.obj);
+		//auto width = lv_obj_get_width(drawn.obj);
 
 		// if (height > width) {
 		// Vertical Toggle
