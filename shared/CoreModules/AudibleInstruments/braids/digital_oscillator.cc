@@ -1155,9 +1155,9 @@ void DigitalOscillator::RenderPlucked(
         p->phase += p->phase_increment;
         size_t read_ptr = ((p->phase >> (22 + p->shift)) + 2) & p->mask;
         size_t write_ptr = p->write_ptr;
-        size_t num_loops = 0;
+        // size_t num_loops = 0;
         while (write_ptr != read_ptr) {
-          ++num_loops;
+          // ++num_loops;
           size_t next = (write_ptr + 1) & p->mask;
           int32_t a = dl[write_ptr];
           int32_t b = dl[next];
@@ -1362,7 +1362,7 @@ void DigitalOscillator::RenderBlown(
   state_.phy.lp_state = lp_state;
 }
 
-static const uint16_t kRandomPressure = 0.22 * 4096;
+// static const uint16_t kRandomPressure = 0.22 * 4096;
 static const uint16_t kDCBlockingPole = 0.99 * 4096;
 
 void DigitalOscillator::RenderFluted(
