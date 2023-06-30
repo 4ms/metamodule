@@ -61,10 +61,15 @@ struct PatchViewPage : PageBase {
 		// lv_obj_set_width(playbut, 60);
 		// lv_obj_set_style_pad_ver(playbut, 3, LV_PART_MAIN);
 		// lv_obj_set_style_pad_hor(playbut, 5, LV_PART_MAIN);
-		// lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		// lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_event_cb(playbut, playbut_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(playbut, playbut_focussed_cb, LV_EVENT_FOCUSED, this);
+
+		lv_obj_add_flag(ui_AddButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_add_flag(ui_InfoButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_add_flag(ui_KnobButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
 		// playbut_label = lv_label_create(playbut);
 		// lv_obj_add_style(playbut_label, &Gui::button_label_style, LV_PART_MAIN);
