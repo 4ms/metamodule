@@ -19,18 +19,6 @@
 namespace MetaModule
 {
 
-struct Test : PageBase {
-	Test(PatchInfo info)
-		: PageBase{info} {
-	}
-
-	static inline int x = 120;
-	void doit() {
-		printf("Test::x = %d (%x) %p + 0x%x\n", x, x, &x, sizeof x);
-		// printf("%d\n", MetaModule::PatchViewPage::Height);
-	}
-};
-
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 240;
 	// static_assert(height == 120 || height == 240);
