@@ -495,7 +495,7 @@ public:
 		ext_cv_chan = !ext_cv_chan;
 	}
 
-	void Poll(std::function<void(Event)> const &put) {
+	void Poll(std::function<void(Event)> const &put) final {
 
 		// Process gates
 		gates_.Debounce();

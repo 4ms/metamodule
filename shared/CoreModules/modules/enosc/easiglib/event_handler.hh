@@ -34,7 +34,7 @@ struct EventHandler : crtp<T, EventHandler<T, Event>> {
   struct DelayedEventSource : EventSource<Event> {
     int count_ = -1;
     Event event_;
-    void Poll(std::function<void(Event)> const& put) {
+    void Poll(std::function<void(Event)> const& put) final {
       if (count_ >= 0 && count_-- == 0) put(event_);
     }
     void trigger_after(int delay, Event e) {

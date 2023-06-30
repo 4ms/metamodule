@@ -105,7 +105,7 @@ struct ButtonsEventSource : EventSource<Event>, Buttons {
 
 template<class Switch, EventType event>
 struct SwitchEventSource : EventSource<Event>, Switch {
-	void Poll(std::function<void(Event)> const &put) {
+	void Poll(std::function<void(Event)> const &put) final {
 		Switch::Debounce();
 		if (Switch::just_switched_up())
 			put({event, Switches::UP});
@@ -123,7 +123,7 @@ struct SwitchesEventSource : EventSource<Event>, Switches {
 	SwitchEventSource<Twist, SwitchTwist> twist_;
 	SwitchEventSource<Warp, SwitchWarp> warp_;
 
-	void Poll(std::function<void(Event)> const &put) {
+	void Poll(std::function<void(Event)> const &put) final {
 		scale_.Poll(put);
 		mod_.Poll(put);
 		twist_.Poll(put);
