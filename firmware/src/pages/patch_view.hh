@@ -16,6 +16,12 @@
 #include "printf.h"
 #include "util/countzip.hh"
 
+//exported:
+extern "C" {
+#include "slsexport/patchview/ui.h"
+}
+extern "C" void ui_PatchView_screen_init();
+
 namespace MetaModule
 {
 
@@ -24,10 +30,13 @@ struct PatchViewPage : PageBase {
 	// static_assert(height == 120 || height == 240);
 
 	PatchViewPage(PatchInfo info)
-		: PageBase{info}
-		, base(lv_obj_create(nullptr)) {
+		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchView);
 
+		ui_PatchView_screen_init();
+		base = ui_PatchView; //NOLINT
+
+		// base(lv_obj_create(nullptr))
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
@@ -40,25 +49,27 @@ struct PatchViewPage : PageBase {
 
 		lv_obj_add_event_cb(base, base_scroll_cb, LV_EVENT_SCROLL, (void *)this);
 
-		patchname = lv_label_create(base);
-		lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
-		lv_obj_set_width(patchname, 248);
-		lv_obj_set_height(patchname, 28);
+		patchname = ui_PatchName; //NOLINT
+		// patchname = lv_label_create(base);
+		// lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
+		// lv_obj_set_width(patchname, 248);
+		// lv_obj_set_height(patchname, 28);
 
-		playbut = lv_btn_create(base);
-		lv_obj_set_height(playbut, 21);
-		lv_obj_set_width(playbut, 60);
-		lv_obj_set_style_pad_ver(playbut, 3, LV_PART_MAIN);
-		lv_obj_set_style_pad_hor(playbut, 5, LV_PART_MAIN);
-		lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
+		playbut = ui_PlayButton; //NOLINT
+		// playbut = lv_btn_create(base);
+		// lv_obj_set_height(playbut, 21);
+		// lv_obj_set_width(playbut, 60);
+		// lv_obj_set_style_pad_ver(playbut, 3, LV_PART_MAIN);
+		// lv_obj_set_style_pad_hor(playbut, 5, LV_PART_MAIN);
+		// lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		// lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_event_cb(playbut, playbut_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(playbut, playbut_focussed_cb, LV_EVENT_FOCUSED, this);
 
-		playbut_label = lv_label_create(playbut);
-		lv_obj_add_style(playbut_label, &Gui::button_label_style, LV_PART_MAIN);
-		lv_label_set_text(playbut_label, "Play");
-		lv_obj_set_align(playbut_label, LV_ALIGN_CENTER);
+		// playbut_label = lv_label_create(playbut);
+		// lv_obj_add_style(playbut_label, &Gui::button_label_style, LV_PART_MAIN);
+		// lv_label_set_text(playbut_label, "Play");
+		// lv_obj_set_align(playbut_label, LV_ALIGN_CENTER);
 
 		description = lv_label_create(base);
 		lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
@@ -117,6 +128,10 @@ struct PatchViewPage : PageBase {
 		lv_group_set_editing(group, false);
 
 		lv_group_add_obj(group, playbut);
+		lv_group_add_obj(group, ui_KnobButton);
+		lv_group_add_obj(group, ui_AddButton);
+		lv_group_add_obj(group, ui_InfoButton);
+		lv_group_add_obj(group, ui_SettingsButton);
 
 		auto module_drawer = ModuleDrawer{modules_cont, Height};
 
@@ -298,7 +313,7 @@ private:
 	lv_obj_t *patchname;
 	lv_obj_t *modules_cont;
 	lv_obj_t *module_name;
-	lv_obj_t *playbut_label;
+	// lv_obj_t *playbut_label;
 	lv_obj_t *playbut;
 	lv_obj_t *cable_layer;
 
