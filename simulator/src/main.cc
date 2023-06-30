@@ -16,7 +16,7 @@ int main(void) {
 	lv_init();
 	// lv_log_register_print_cb(_log_cb);
 	lv_port_disp_init(320, 240);
-	lv_port_indev_init(false);
+	lv_port_indev_init(false, false, true);
 
 	lv_log("Starting LVGL\n");
 
