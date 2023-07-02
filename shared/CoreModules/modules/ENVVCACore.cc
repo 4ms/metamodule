@@ -9,6 +9,7 @@
 #include "CoreModules/modules/helpers/EdgeDetector.h"
 #include "helpers/FlipFlop.h"
 #include "helpers/mapping.h"
+#include "debug.hh"
 
 inline auto CVToBool = [](float val) -> bool
 {
@@ -25,7 +26,7 @@ inline auto ThreeWayToInt = [](float val) -> uint32_t
 	return uint32_t(val + 0.5f);
 };
 
-constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<-0.1f, 0.5f>([](auto voltage)
+constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<-0.1f, 0.5f, 50>::generate([](auto voltage)
 {
     // two points in the V->f curve
     constexpr double V_1 = 0.4;
