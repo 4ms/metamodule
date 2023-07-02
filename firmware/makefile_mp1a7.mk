@@ -196,10 +196,11 @@ SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
 
 # Generated:
-SOURCES += src/pages/slsexport/ui.c
-SOURCES += src/pages/slsexport/ui_helpers.c
-SOURCES += $(wildcard src/pages/slsexport/ui_font_*.c)
+SOURCES += src/pages/slsexport/patchsel/ui.c
+SOURCES += src/pages/slsexport/patchsel/ui_helpers.c
+SOURCES += $(wildcard src/pages/slsexport/patchsel/ui_font_*.c)
 SOURCES += src/pages/slsexport/patchview/ui.c
+#patchview
 SOURCES += $(wildcard src/pages/slsexport/patchview/components/*.c)
 SOURCES += $(wildcard src/pages/slsexport/patchview/images/*.c)
 SOURCES += $(wildcard src/pages/slsexport/patchview/fonts/*.c)
