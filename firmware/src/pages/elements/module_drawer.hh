@@ -2,7 +2,6 @@
 #include "CoreModules/elements/elements_index.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/module_info_base.hh"
-#include "images/image_list.hh"
 #include "lvgl.h"
 #include "pages/elements/base_image.hh"
 #include "pages/elements/context.hh"
@@ -10,6 +9,7 @@
 #include "pages/elements/element_drawer.hh"
 #include "pages/elements/map_ring_drawer.hh"
 #include "pages/elements/mapping.hh"
+#include "pages/images/image_list.hh"
 #include "pages/styles.hh"
 #include "patch/patch_data.hh"
 

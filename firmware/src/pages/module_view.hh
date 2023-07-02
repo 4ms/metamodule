@@ -5,8 +5,8 @@
 #include "knob_edit.hh"
 #include "pages/base.hh"
 #include "pages/images/image_list.hh"
-#include "pages/module_drawer.hh"
-#include "pages/module_param.hh"
+#include "pages/elements/module_drawer.hh"
+#include "pages/elements/module_param.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include <string>

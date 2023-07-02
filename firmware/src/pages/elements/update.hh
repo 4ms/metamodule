@@ -94,21 +94,21 @@ update_element(const Toggle3pos &element, const Params &params, const PatchData 
 		int32_t state = *val > .75f ? 2 : *val > 0.25f ? 1 : 0;
 
 		if (state != cur_state) {
-			printf_("sw:%d h=%d %d(y=%d)=>%d (y=", element.idx, height, cur_state, y, state);
+			// printf_("sw:%d h=%d %d(y=%d)=>%d (y=", element.idx, height, cur_state, y, state);
 			if (state == 2) {
 				lv_obj_set_y(handle, height / 4);
 				lv_obj_set_height(handle, height / 2);
-				printf_("%d)\n", height / 4);
+				// printf_("%d)\n", height / 4);
 			}
 			if (state == 1) {
 				lv_obj_set_y(handle, 0);
 				lv_obj_set_height(handle, height / 4);
-				printf_("%d)\n", 0);
+				// printf_("%d)\n", 0);
 			}
 			if (state == 0) {
 				lv_obj_set_y(handle, -height / 4);
 				lv_obj_set_height(handle, height / 2);
-				printf_("%d)\n", -height / 4);
+				// printf_("%d)\n", -height / 4);
 			}
 		}
 
