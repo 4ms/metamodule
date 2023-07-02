@@ -1,8 +1,8 @@
+#pragma once
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <span>
 
 namespace Mapping
 {
@@ -22,8 +22,8 @@ struct EmptyArray {
 	constexpr EmptyArray(const F &func)
 		: data() {
 #ifdef __clang__
-	constexpr float min = min10 / 10.f;
-	constexpr float max = max10 / 10.f;
+		constexpr float min = min10 / 10.f;
+		constexpr float max = max10 / 10.f;
 #endif
 		for (std::size_t i = 0; i < LEN; i++) {
 			auto x = min + i * (max - min) / float(LEN - 1);

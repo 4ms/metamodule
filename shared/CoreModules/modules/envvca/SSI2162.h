@@ -1,32 +1,29 @@
 #pragma once
 
 #include "gcem/include/gcem.hpp"
-#include <cmath>
+#include "helpers/mapping.h"
 #include <algorithm>
+#include <cmath>
 
-class SSI2162
-{
+class SSI2162 {
 public:
-    SSI2162() : scalingFactor(1.0)
-    {        
-    }
+	SSI2162()
+		: scalingFactor(1.f) {
+	}
 
-    void setScaling(float gainInV)
-    {
-        auto gainIndB = gainInV / -33e-3f;
+	void setScaling(float gainInV) {
+		scalingFactor = GainTable.lookup(gainInV);
+	}
 
-        gainIndB = std::clamp(gainIndB, -100.0f, 20.0f);
-
-        scalingFactor = gcem::pow(10.0f, gainIndB / 20.0f);
-
-        // printf("Gain %.2fV -> %.2f dB -> scaling %.4f\n", gainInV, gainIndB, scalingFactor);
-    }
-
-    float process(float input) const
-    {
-        return input * scalingFactor;
-    }
+	float process(float input) const {
+		return input * scalingFactor;
+	}
 
 private:
-    float scalingFactor;
+	float scalingFactor;
+
+	static constexpr auto GainTable = Mapping::LookupTable_t<0.f, 5.4f, 64>::generate([](auto voltage) {
+		auto gainIndB = voltage / -33e-3f;
+		return gcem::pow(10.f, gainIndB / 20.f);
+	});
 };
