@@ -33,7 +33,9 @@ file(
   ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/*.c
   ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/components/*.c
   ${MM_ROOT}/firmware/src/pages/fonts/MuseoSansRounded_*.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/*.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/*.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui_helpers.c
   ${MM_ROOT}/firmware/src/pages/slsexport/patchview/screens/*.c
   ${MM_ROOT}/firmware/src/pages/slsexport/patchview/ui.c
   ${MM_ROOT}/firmware/src/pages/slsexport/patchview/components/*.c
@@ -82,11 +84,8 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(
-  simulator
-  src/main.cc ${MM_ROOT}/firmware/src/pages/slsexport/ui.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/ui_helpers.c ${CORE_MODULES}
-  ${GUI_IMAGES} ${MM_ROOT}/firmware/src/pages/page_manager.cc)
+add_executable(simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES}
+                         ${MM_ROOT}/firmware/src/pages/page_manager.cc)
 
 target_include_directories(
   simulator
@@ -101,6 +100,7 @@ target_include_directories(
           ${MM_ROOT}/shared/patch
           ${MM_ROOT}/shared/CoreModules
           ${MM_ROOT}/shared/CoreModules/info
+          ${MM_ROOT}/shared/CoreModules/modules
           ${MM_ROOT}/vcv/src # For sys/alloc_buffer.h
           ${MM_ROOT}/shared/CoreModules/AudibleInstruments)
 
