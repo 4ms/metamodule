@@ -8,6 +8,7 @@
 #include "gcem/include/gcem.hpp"
 #include "CoreModules/modules/helpers/EdgeDetector.h"
 #include "helpers/FlipFlop.h"
+#include "helpers/mapping.h"
 
 inline auto CVToBool = [](float val) -> bool
 {
@@ -23,6 +24,28 @@ inline auto ThreeWayToInt = [](float val) -> uint32_t
 {
 	return uint32_t(val + 0.5f);
 };
+
+constexpr auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<-0.1f, 0.5f>([](auto voltage)
+{
+    // two points in the V->f curve
+    constexpr double V_1 = 0.4;
+    constexpr double f_1 = 0.09;
+    constexpr double V_2 = 0.06;
+    constexpr double f_2 = 1000.0;
+
+    // std::pow is not required to be constexpr by the standard
+    // so this might not work in clang
+    constexpr double ArgScalingFactor = 10.0;
+    constexpr double arg = std::log2(f_1 / f_2) / (V_1 - V_2);
+    constexpr double b = std::pow(2.0f, arg / ArgScalingFactor);
+    constexpr double a = f_1 / std::pow(std::pow(2.0, arg), V_1);
+
+    // interpolate
+    auto frequency = float(std::pow(b, voltage * ArgScalingFactor) * a);
+
+    return frequency;
+});
+
 
 class ENVVCACore : public SmartCoreProcessor<MetaModule::ENVVCAInfo> {
 	using ENVVCAInfo = MetaModule::ENVVCAInfo;
@@ -41,21 +64,7 @@ public:
 		// Convert voltage to time without dealing with details of transistor core
 		auto VoltageToTime = [](float voltage) -> float
 		{
-			// two points in the V->f curve
-			constexpr float V_1 = 0.4f;
-			constexpr float f_1 = 0.09f;
-			constexpr float V_2 = 0.06f;
-			constexpr float f_2 = 1000.0f;
-
-			// std::pow is not required to be constexpr by the standard
-			// so this might not work in clang
-			constexpr double ArgScalingFactor = 10.0f;
-			constexpr double arg = gcem::log2(f_1 / f_2) / (V_1 - V_2);
-			constexpr double b = gcem::pow(2.0f, arg / ArgScalingFactor);
-			constexpr double a = f_1 / gcem::pow(gcem::pow(2.0f, arg), V_1);
-
-			// interpolate
-			auto frequency = float(gcem::pow(b, voltage * ArgScalingFactor) * a);
+			auto frequency = VoltageToFrequencyTable.lookup(voltage);
 
 			// limit to valid frequency range
 			frequency = std::clamp(frequency, 1.0f/(60 * 3), 20e3f);
