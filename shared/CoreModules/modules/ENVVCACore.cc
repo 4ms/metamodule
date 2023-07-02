@@ -36,12 +36,12 @@ constexpr auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<-0
     // std::pow is not required to be constexpr by the standard
     // so this might not work in clang
     constexpr double ArgScalingFactor = 10.0;
-    constexpr double arg = std::log2(f_1 / f_2) / (V_1 - V_2);
-    constexpr double b = std::pow(2.0f, arg / ArgScalingFactor);
-    constexpr double a = f_1 / std::pow(std::pow(2.0, arg), V_1);
+    constexpr double arg = gcem::log2(f_1 / f_2) / (V_1 - V_2);
+    constexpr double b = gcem::pow(2.0f, arg / ArgScalingFactor);
+    constexpr double a = f_1 / gcem::pow(gcem::pow(2.0, arg), V_1);
 
     // interpolate
-    auto frequency = float(std::pow(b, voltage * ArgScalingFactor) * a);
+    auto frequency = float(gcem::pow(b, double(voltage) * ArgScalingFactor) * a);
 
     return frequency;
 });
