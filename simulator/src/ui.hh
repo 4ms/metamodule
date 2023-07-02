@@ -1,4 +1,5 @@
 #pragma once
+#include "lv_port_indev.h"
 #define printf_ printf
 ///
 
@@ -23,6 +24,15 @@ private:
 	MetaParams metaparams;
 
 	ParamDbgPrint print_dbg_params{params, metaparams};
+	LvglEncoderSimulatorDriver input_driver{keys};
+
+	RotaryEncoderKeys keys{
+		.turn_cw = SDLK_RIGHT,
+		.turn_ccw = SDLK_LEFT,
+		.click = SDLK_DOWN,
+		.aux_button = SDLK_UP,
+		.quit = SDLK_ESCAPE,
+	};
 
 public:
 	Ui(PatchPlayLoader &patch_playloader, PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
@@ -42,8 +52,9 @@ public:
 		page_manager.init();
 	}
 
-	// Polling "Scheduler" for UI tasks
-	void update() {
+	// "Scheduler" for UI tasks
+	// returns true until it gets a QUIT event
+	bool update() {
 		static uint32_t last_lvgl_task_tm = 0;
 		static uint32_t last_page_task_tm = 0;
 
@@ -52,12 +63,22 @@ public:
 			lvgl_update_task();
 			last_lvgl_task_tm = tm;
 		}
+		// Transfer aux button events SDL => LVGL => metaparams
+		auto back_button = input_driver.get_aux_button();
+		metaparams.meta_buttons[0].set_state(back_button);
+		if (metaparams.meta_buttons[0].just_went_low())
+			printf("low\n");
+		else if (metaparams.meta_buttons[0].just_went_high())
+			printf("high\n");
 
 		tm = lv_tick_get();
 		if (tm - last_page_task_tm >= 16) {
 			page_update_task();
 			last_page_task_tm = tm;
 		}
+
+		bool keep_running = input_driver.get_quit() == LV_QUIT_NONE;
+		return keep_running;
 	}
 
 private:

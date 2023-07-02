@@ -29,7 +29,6 @@ struct LvglEncoderSimulatorDriver {
 
 private:
 	void set_quit(lv_quit_event_t);
-	void set_aux_button(bool);
 	static void keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *);
 
 	RotaryEncoderKeys &keys;

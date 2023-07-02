@@ -15,8 +15,10 @@ LvglEncoderSimulatorDriver::LvglEncoderSimulatorDriver(RotaryEncoderKeys &keys)
 	indev_encoder = lv_indev_drv_register(&indev_drv_keyboard_encoder);
 
 	set_quit(LV_QUIT_NONE);
-	set_aux_button(false);
+	aux_pressed = false;
 	_instance = this;
+
+	lv_log("Starting LVGL\n");
 }
 
 lv_quit_event_t LvglEncoderSimulatorDriver::get_quit() {
@@ -31,18 +33,14 @@ bool LvglEncoderSimulatorDriver::get_aux_button() {
 	return aux_pressed;
 }
 
-void LvglEncoderSimulatorDriver::set_aux_button(bool state) {
-	aux_pressed = state;
-}
-
 void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
 	auto &keys = _instance->keys;
 	auto &rotary_pressed = _instance->rotary_pressed;
+	auto &aux_pressed = _instance->aux_pressed;
 
+	// why static?
 	static SDL_Event e;
 
-	//Is there more input events?
-	//(SDL_PollEvent(NULL) != 0);
 	data->continue_reading = false;
 
 	if (!SDL_PollEvent(&e))
@@ -62,6 +60,14 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 				printf("click down\n");
 			}
 		}
+
+		if (e.key.keysym.sym == keys.aux_button) {
+			//push back event to meta_params
+			if (!aux_pressed) {
+				aux_pressed = true;
+				printf("aux down\n");
+			}
+		}
 	}
 
 	if (e.type == SDL_KEYUP) {
@@ -70,7 +76,10 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 		}
 
 		if (e.key.keysym.sym == keys.aux_button) {
-			//push back event to meta_params
+			if (aux_pressed) {
+				aux_pressed = false;
+				printf("aux up\n");
+			}
 		}
 
 		if (e.key.keysym.sym == keys.click) {
