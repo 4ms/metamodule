@@ -4,6 +4,7 @@
 #include "mapping/central_data.hh"
 
 rack::Plugin *pluginInstance;
+using namespace MetaModule;
 
 //////////////// Auto generated ///////////////////////
 // include and define models below here
@@ -186,7 +187,7 @@ rack::Model *modelBPF = GenericModule<BPFInfo>::create();
 rack::Model *modelAtvert2 = GenericModule<Atvert2Info>::create();
 
 #include "CoreModules/info/SMR_info.hh"
-rack::Model *modelSMR = GenericModule<SMRInfo>::create();
+rack::Model *modelSMR = GenericModuleNew<SMRInfo>::create();
 
 #include "CoreModules/modules/enosc/altparam_EnOsc_info.hh"
 rack::Model *modelEnOsc = GenericModule<APEnOscInfo>::create();
