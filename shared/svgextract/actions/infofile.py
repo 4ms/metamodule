@@ -64,7 +64,6 @@ def panel_to_components(tree):
     components['inputs'] = []
     components['outputs'] = []
     components['lights'] = []
-    components['widgets'] = []
     components['switches'] = []
 
     circles = components_group.findall(".//svg:circle", ns)
@@ -83,7 +82,15 @@ def panel_to_components(tree):
         if name is None:
             name = ''.join(random.choices(string.ascii_uppercase, k=6))
             Log("Unnamed component found: generating random name: " + name)
+
         c['raw_name'] = name
+
+        # If name is ElementName#ClassName, the extract ClassName
+        split = name.split("#")
+        if len(split) > 1:
+            name = split[0]
+            c['class'] = split[1]
+
         c['display_name'] = format_for_display(name)
         c['enum_name'] = format_as_enum_item(name)
 
@@ -105,10 +112,6 @@ def panel_to_components(tree):
                 tmp = c['width']
                 c['width'] = c['height']
                 c['height'] = tmp
-            if c['width'] > c['height']:
-                c['orientation'] = "Horizontal"
-            else:
-                c['orientation'] = "Vertical"
 
         elif el.tag == "{http://www.w3.org/2000/svg}circle":
             shape = "circle"
@@ -116,7 +119,7 @@ def panel_to_components(tree):
             cy = float(el.get('cy'))
             c['cx'] = round(cx, 3)
             c['cy'] = round(cy, 3)
-            c['orientation'] = "Round"
+            # c['orientation'] = "Round"
 
         else:
             shape = "unknown"
@@ -126,6 +129,7 @@ def panel_to_components(tree):
         if style is None:
             print(f"Error: {shape} shape with no style found at {c['cx']}, {c['cy']}")
             continue
+
         color_match = re.search(r'fill:\s*(.*)', style)
         color = ''
         color = color_match.group(1).lower() if color_match is not None else ''
@@ -133,101 +137,106 @@ def panel_to_components(tree):
         color = expand_color_synonyms(color)
         c['color'] = color
 
+        default_val_int = int(color[-2:], 16)
         #Red: Knob or slider
-        if color.startswith("#ff00") and color!="#ff00ff":
-            def_val_int = int(color[-2:], 16)
-            if def_val_int <= 128:
-                c['default_value'] = str(def_val_int / 128) + "f"
-                if shape == "circle":
-                    c['knob_style'] = get_knob_style_from_radius(el.get('r'))
-                else:
-                    c['knob_style'] = "Slider25mm"
-                components['params'].append(c)
+        if color.startswith("#ff00") and default_val_int <= 128:
+            c['default_value'] = str(default_val_int / 128) + "f"
 
+            if shape == "circle":
+                set_class_if_not_set(c, get_knob_class_from_radius(el.get('r')))
+                c['category'] = "Knob"
+            else:
+                set_class_if_not_set(c, get_slider_class(c))
+                c['category'] = "Slider"
+
+            components['params'].append(c)
+
+        #Magenta: LED
+        elif color.startswith("#ff00") and default_val_int > 128:
+            set_class_if_not_set(c, get_led_class_from_selector(default_val_int))
+            components['lights'].append(c)
+            c['category'] = "Light"
 
         #Green: Input jack, analog (CV or audio): 
         elif color == '#00ff00':
-            c['signal_type'] = "Analog"
+            set_class_if_not_set(c, "AnalogJackInput4ms")
             components['inputs'].append(c)
+            c['category'] = "In"
 
         #Light Green: Input jack, digital (gate or trig):
         elif color == '#80ff80':
-            c['signal_type'] = "Gate"
+            set_class_if_not_set(c, "GateJackInput4ms")
             components['inputs'].append(c)
+            c['category'] = "In"
 
         #Blue: Output jack, analog (CV or audio)
         elif color == '#0000ff':
-            c['signal_type'] = "Analog"
+            set_class_if_not_set(c, "AnalogJackOutput4ms")
             components['outputs'].append(c)
+            c['category'] = "Out"
 
         #Light Blue: Output jack, digital (gate or trig):
         elif color == '#8080ff':
-            c['signal_type'] = "Gate"
+            set_class_if_not_set(c, "GateJackOutput4ms")
             components['outputs'].append(c)
-
-        #Magenta: LED
-        elif color == '#ff00ff':
-            #TODO: led color is in the name in parenthesis
-            c['led_color'] = "Red"
-            components['lights'].append(c)
+            c['category'] = "Out"
 
         #Deep Purple: Encodeer
         elif color == '#c000c0':
-            c['switch_type'] = "Encoder"
-            c['encoder_knob_style'] = get_knob_style_from_radius(el.get('r'))
-            components['switches'].append(c)
+            set_class_if_not_set(c, get_encoder_class_from_radius(el.get('r')))
+            components['params'].append(c)
+            c['category'] = "Encoder"
 
         #Orange: Button - Latching
         elif color == '#ff8000':
-            c['encoder_knob_style'] = "None"
-            c['switch_type'] = "LatchingButton"
+            set_class_if_not_set(c, "LatchingButtonMonoLight")
             components['switches'].append(c)
+            c['category'] = "Button"
 
         #Light Orange: Button - Momentary
         elif color == '#ffc000':
-            c['encoder_knob_style'] = "None"
-            c['switch_type'] = "MomentaryButton"
+            set_class_if_not_set(c, "MomentaryButtonRGB")
             components['switches'].append(c)
+            c['category'] = "Button"
 
         #Deep Pink rectangle: Switch - 2pos
         elif color == '#ff8080':
-            c['encoder_knob_style'] = "None"
-            c['switch_type'] = "Toggle2pos"
-            if c['orientation'] == "Round":
-                c['orientation'] = "Vertical"
+            set_class_if_not_set(c, "Toggle2pos")
             components['switches'].append(c)
+            c['category'] = "Switch"
 
         #Hot Pink rectangle: Switch - 3pos
         elif color == '#ffc080':
-            c['encoder_knob_style'] = "None"
-            c['switch_type'] = "Toggle3pos"
-            if c['orientation'] == "Round":
-                c['orientation'] = "Vertical"
+            set_class_if_not_set(c, "Toggle3pos")
             components['switches'].append(c)
+            c['category'] = "Switch"
 
         elif color == '#ffff00':
-            components['widgets'].append(c)
+            Log(f"Widgets are not supported: found at {c['cx']},{c['cy']}. Skipping.")
         else:
             Log(f"Unknown color: {color} found at {c['cx']},{c['cy']}. Skipping.")
 
     # Sort components
     components['params'].reverse()
+    components['switches'].reverse()
     components['inputs'].reverse()
     components['outputs'].reverse()
     components['lights'].reverse()
-    components['widgets'].reverse()
-    components['switches'].reverse()
 
-    # top_left_sort = lambda w: (w['cy'], w['cx'])
-    # components['params'] = sorted(components['params'], key=top_left_sort)
-    # components['inputs'] = sorted(components['inputs'], key=top_left_sort)
-    # components['outputs'] = sorted(components['outputs'], key=top_left_sort)
-    # components['lights'] = sorted(components['lights'], key=top_left_sort)
-    # components['widgets'] = sorted(components['widgets'], key=top_left_sort)
-    # components['switches'] = sorted(components['switches'], key=top_left_sort)
+    components['elements'] = []
+    components['elements'] += components['params']
+    components['elements'] += components['inputs']
+    components['elements'] += components['outputs']
+    components['elements'] += components['lights']
+    components['elements'] += components['switches']
 
-    # Log(f"Found {len(components['params'])} params, {len(components['inputs'])} inputs, {len(components['outputs'])} outputs, {len(components['lights'])} lights, and {len(components['widgets'])} custom widgets.")
     return components
+
+
+def set_class_if_not_set(comp, newclass):
+    if "class" not in comp.keys():
+        comp['class'] = newclass
+
 
 def components_to_infofile(components):
     slug = components['slug']
@@ -235,121 +244,126 @@ def components_to_infofile(components):
 
     #TODO: embed knob long name vs short name in svg
     source = f"""#pragma once
-#include "CoreModules/coreProcessor.h"
-#include "CoreModules/module_info_base.hh"
+#include "CoreModules/elements/element_info.hh"
+#include <array>
 
-struct {slug}Info : ModuleInfoBase {{
+namespace MetaModule
+{{
+struct {slug}Info : ElementInfoBase {{
     static constexpr std::string_view slug{{"{slug}"}};
     static constexpr std::string_view description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
+    static constexpr bool uses_center_coords = true;
     static constexpr std::string_view svg_filename{{"res/modules/{slug}-artwork.svg"}};
 
-    static constexpr int NumKnobs = {len(components['params'])};
-    {make_enum("", "Knob", components['params'])}
+    static constexpr std::array<Element, {len(components['elements'])}> Elements{{{{
 
-    static constexpr std::array<KnobDef, NumKnobs> Knobs{{{{"""
-    for k in components['params']:
-        source += f"""
-        {{
-            .id = Knob{k['enum_name']},
-            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-            .short_name = "{k['display_name']}",
-            .long_name = "{k['display_name']}",
-            .default_val = {k['default_value']},
-            .knob_style = KnobDef::{k['knob_style']},
-            .orientation = KnobDef::{k['orientation']},
-        }},""" 
-    source += f"""
     }}}};
 
-    static constexpr int NumInJacks = {len(components['inputs'])};
-    {make_enum("", "Input", components['inputs'])}
-
-    static constexpr std::array<InJackDef, NumInJacks> InJacks{{{{"""
-    for k in components['inputs']:
-        source += f"""
-        {{
-            .id = Input{k['enum_name']},
-            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-            .short_name = "{k['display_name']}",
-            .long_name = "{k['display_name']}",
-            .unpatched_val = 0.f,
-            .signal_type = InJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
-        }},""" 
-    source += f"""
-    }}}};
-
-    static constexpr int NumOutJacks = {len(components['outputs'])};
-    {make_enum("", "Output", components['outputs'])}
-
-    static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{{{"""
-    for k in components['outputs']:
-        source += f"""
-        {{
-            .id = Output{k['enum_name']},
-            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-            .short_name = "{k['display_name']}",
-            .long_name = "{k['display_name']}",
-            .signal_type = OutJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
-        }},""" 
-    source += f"""
-    }}}};
-
-    static constexpr int NumSwitches = {len(components['switches'])};
-    {make_enum("", "Switch", components['switches'])}
-
-    static constexpr std::array<SwitchDef, NumSwitches> Switches{{{{"""
-    for k in components['switches']:
-        source += f"""
-        {{
-            .id = Switch{k['enum_name']},
-            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-            .short_name = "{k['display_name']}",
-            .long_name = "{k['display_name']}",
-            .switch_type = SwitchDef::{k['switch_type']},
-            .orientation = SwitchDef::{k['orientation']},
-            .encoder_knob_style = SwitchDef::{k['encoder_knob_style']},
-        }},""" 
-    source += f"""
-    }}}};
-
-    static constexpr int NumDiscreteLeds = {len(components['lights'])};
-    {make_enum("", "Led", components['lights'])}
-
-    static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{{{"""
-    for k in components['lights']:
-        source += f"""
-        {{
-            .id = Led{k['enum_name']},
-            .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-            .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-            .led_color = LedDef::{k['led_color']},
-        }},""" 
-    source += f"""
-    }}}};
-
+    enum class Elem {{{make_elem_enum(components['elements'])}
+    }};
 }};
+}} // namespace MetaModule
 """
+
+    # int NumKnobs = {len(components['params'])};
+    # {make_enum("", "Knob", components['params'])}
+
+    # static constexpr std::array<KnobDef, NumKnobs> Knobs{{{{"""
+    # for k in components['params']:
+    #     source += f"""
+    #     {{
+    #         .id = Knob{k['enum_name']},
+    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
+    #         .short_name = "{k['display_name']}",
+    #         .long_name = "{k['display_name']}",
+    #         .default_val = {k['default_value']},
+    #         .knob_style = KnobDef::{k['knob_style']},
+    #         .orientation = KnobDef::{k['orientation']},
+    #     }},""" 
+    # source += f"""
+    # }}}};
+
+    # static constexpr int NumInJacks = {len(components['inputs'])};
+    # {make_enum("", "Input", components['inputs'])}
+
+    # static constexpr std::array<InJackDef, NumInJacks> InJacks{{{{"""
+    # for k in components['inputs']:
+    #     source += f"""
+    #     {{
+    #         .id = Input{k['enum_name']},
+    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
+    #         .short_name = "{k['display_name']}",
+    #         .long_name = "{k['display_name']}",
+    #         .unpatched_val = 0.f,
+    #         .signal_type = InJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
+    #     }},""" 
+    # source += f"""
+    # }}}};
+
+    # static constexpr int NumOutJacks = {len(components['outputs'])};
+    # {make_enum("", "Output", components['outputs'])}
+
+    # static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{{{"""
+    # for k in components['outputs']:
+    #     source += f"""
+    #     {{
+    #         .id = Output{k['enum_name']},
+    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
+    #         .short_name = "{k['display_name']}",
+    #         .long_name = "{k['display_name']}",
+    #         .signal_type = OutJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
+    #     }},""" 
+    # source += f"""
+    # }}}};
+
+    # static constexpr int NumSwitches = {len(components['switches'])};
+    # {make_enum("", "Switch", components['switches'])}
+
+    # static constexpr std::array<SwitchDef, NumSwitches> Switches{{{{"""
+    # for k in components['switches']:
+    #     source += f"""
+    #     {{
+    #         .id = Switch{k['enum_name']},
+    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
+    #         .short_name = "{k['display_name']}",
+    #         .long_name = "{k['display_name']}",
+    #         .switch_type = SwitchDef::{k['switch_type']},
+    #         .orientation = SwitchDef::{k['orientation']},
+    #         .encoder_knob_style = SwitchDef::{k['encoder_knob_style']},
+    #     }},""" 
+    # source += f"""
+    # }}}};
+
+    # static constexpr int NumDiscreteLeds = {len(components['lights'])};
+    # {make_enum("", "Led", components['lights'])}
+
+    # static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{{{"""
+    # for k in components['lights']:
+    #     source += f"""
+    #     {{
+    #         .id = Led{k['enum_name']},
+    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
+    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
+    #         .led_color = LedDef::{k['led_color']},
+    #     }},""" 
+    # source += f"""
+    # }}}};
+
+# }};
+# """
     return source
 
-
-def make_enum(enum_name, item_prefix, list):
+def make_elem_enum(list):
     if len(list) == 0:
         return ""
-    if len(enum_name) > 0:
-        enum_name = enum_name + " "
-    source = f"""
-    enum {enum_name}{{"""
-    i = 0
+    source = ""
     for k in list:
         source += f"""
-        {item_prefix}{k['enum_name']} = {str(i)},"""
-        i = i + 1
-    source += f"""
-    }};"""
+        {k['enum_name']}{k['category']},"""
     return source
 

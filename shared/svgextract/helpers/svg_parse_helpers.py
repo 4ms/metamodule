@@ -6,16 +6,28 @@ ns = {
     "inkscape": "http://www.inkscape.org/namespaces/inkscape",
 }
 
-
-def get_knob_style_from_radius(radius):
+def get_knob_class_from_radius(radius):
     r = float(radius)
     if r < 10 and r > 3:
-        return "Small" #<10: 8.5 typical
+        return "Knob9mm" #<10: 8.5 typical
     if r < 20:
-        return "Medium" #10-20: 17.01 typical
+        return "Davies1900hBlackKnob" #10-20: 17.01 typical
     if r < 40:
-        return "Large" #15-40: 31.18 typical
-    return "Medium" #under 3 or over 40 is not a known knob
+        return "DaviesLargeKnob" #15-40: 31.18 typical
+
+    return "Davies1900hBlackKnob" #under 3 or over 40 is not a known knob
+
+
+def get_encoder_class_from_radius(radius):
+    r = float(radius)
+    if r < 10 and r > 3:
+        return "Encoder" #<10: 8.5 typical
+    if r < 20:
+        return "EncodeerRGB" #10-20: 17.01 typical
+    if r < 40:
+        return "EncoderWhiteLight" #15-40: 31.18 typical
+
+    return "Encoder" #under 3 or over 40 is not a known knob
 
 
 def get_button_style_from_radius(radius):
@@ -26,6 +38,37 @@ def get_button_style_from_radius(radius):
         return "medium" #10-40: 11.34 typical
     return "unknown" #under 3 or over 40 is not a known style
 
+
+def get_slider_class(c):
+    cls = "Slider25mmHorizLED"
+    #TODO: differentiate LED vs no LED
+    
+    if c['h'] > c['w']:
+        cls = "Slider25mmVertLED"  
+    else:
+        cls = "Slider25mmHorizLED"
+
+    return cls
+
+def get_led_class_from_selector(selector: int):
+    cls = "WhiteLight"
+
+    if selector == 0xFF:
+        cls = "RedBlueGreenLight"
+    elif selector == 0xFE:
+        cls = "RedBlueLight"
+    elif selector == 0xFD:
+        cls = "WhiteLight" 
+    elif selector == 0xFC:
+        cls = "RedLight" 
+    elif selector == 0xFB:
+        cls = "OrangeLight" 
+    elif selector == 0xFA:
+        cls = "GreenLight" 
+    elif selector == 0xF9:
+        cls = "BlueLight" 
+
+    return cls
 
 def expand_color_synonyms(color):
     if color == 'red' or color == '#f00': color = '#ff0000'
