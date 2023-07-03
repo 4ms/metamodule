@@ -43,7 +43,7 @@ def get_slider_class(c):
     cls = "Slider25mmHorizLED"
     #TODO: differentiate LED vs no LED
     
-    if c['h'] > c['w']:
+    if c['height'] > c['width']:
         cls = "Slider25mmVertLED"  
     else:
         cls = "Slider25mmHorizLED"

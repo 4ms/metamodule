@@ -140,7 +140,9 @@ def panel_to_components(tree):
         default_val_int = int(color[-2:], 16)
         #Red: Knob or slider
         if color.startswith("#ff00") and default_val_int <= 128:
-            c['default_value'] = str(default_val_int / 128) + "f"
+            c['default_val'] = str(default_val_int / 128) + "f"
+            c['min_val'] = "0"
+            c['max_val'] = "1"
 
             if shape == "circle":
                 set_class_if_not_set(c, get_knob_class_from_radius(el.get('r')))
@@ -257,112 +259,45 @@ struct {slug}Info : ElementInfoBase {{
     static constexpr std::string_view svg_filename{{"res/modules/{slug}-artwork.svg"}};
 
     static constexpr std::array<Element, {len(components['elements'])}> Elements{{{{
+{list_elem_definitions(components['elements'], DPI)}}}}};
 
-    }}}};
-
-    enum class Elem {{{make_elem_enum(components['elements'])}
+    enum class Elem {{{list_elem_names(components['elements'])}
     }};
 }};
 }} // namespace MetaModule
 """
-
-    # int NumKnobs = {len(components['params'])};
-    # {make_enum("", "Knob", components['params'])}
-
-    # static constexpr std::array<KnobDef, NumKnobs> Knobs{{{{"""
-    # for k in components['params']:
-    #     source += f"""
-    #     {{
-    #         .id = Knob{k['enum_name']},
-    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-    #         .short_name = "{k['display_name']}",
-    #         .long_name = "{k['display_name']}",
-    #         .default_val = {k['default_value']},
-    #         .knob_style = KnobDef::{k['knob_style']},
-    #         .orientation = KnobDef::{k['orientation']},
-    #     }},""" 
-    # source += f"""
-    # }}}};
-
-    # static constexpr int NumInJacks = {len(components['inputs'])};
-    # {make_enum("", "Input", components['inputs'])}
-
-    # static constexpr std::array<InJackDef, NumInJacks> InJacks{{{{"""
-    # for k in components['inputs']:
-    #     source += f"""
-    #     {{
-    #         .id = Input{k['enum_name']},
-    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-    #         .short_name = "{k['display_name']}",
-    #         .long_name = "{k['display_name']}",
-    #         .unpatched_val = 0.f,
-    #         .signal_type = InJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
-    #     }},""" 
-    # source += f"""
-    # }}}};
-
-    # static constexpr int NumOutJacks = {len(components['outputs'])};
-    # {make_enum("", "Output", components['outputs'])}
-
-    # static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{{{"""
-    # for k in components['outputs']:
-    #     source += f"""
-    #     {{
-    #         .id = Output{k['enum_name']},
-    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-    #         .short_name = "{k['display_name']}",
-    #         .long_name = "{k['display_name']}",
-    #         .signal_type = OutJackDef::{"Gate" if k['signal_type']=='gate' else 'Analog'},
-    #     }},""" 
-    # source += f"""
-    # }}}};
-
-    # static constexpr int NumSwitches = {len(components['switches'])};
-    # {make_enum("", "Switch", components['switches'])}
-
-    # static constexpr std::array<SwitchDef, NumSwitches> Switches{{{{"""
-    # for k in components['switches']:
-    #     source += f"""
-    #     {{
-    #         .id = Switch{k['enum_name']},
-    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-    #         .short_name = "{k['display_name']}",
-    #         .long_name = "{k['display_name']}",
-    #         .switch_type = SwitchDef::{k['switch_type']},
-    #         .orientation = SwitchDef::{k['orientation']},
-    #         .encoder_knob_style = SwitchDef::{k['encoder_knob_style']},
-    #     }},""" 
-    # source += f"""
-    # }}}};
-
-    # static constexpr int NumDiscreteLeds = {len(components['lights'])};
-    # {make_enum("", "Led", components['lights'])}
-
-    # static constexpr std::array<LedDef, NumDiscreteLeds> Leds{{{{"""
-    # for k in components['lights']:
-    #     source += f"""
-    #     {{
-    #         .id = Led{k['enum_name']},
-    #         .x_mm = px_to_mm<{DPI}>({k['cx']}f),
-    #         .y_mm = px_to_mm<{DPI}>({k['cy']}f),
-    #         .led_color = LedDef::{k['led_color']},
-    #     }},""" 
-    # source += f"""
-    # }}}};
-
-# }};
-# """
     return source
 
-def make_elem_enum(list):
-    if len(list) == 0:
+
+def list_elem_definitions(elems, DPI):
+    if len(elems) == 0:
         return ""
     source = ""
-    for k in list:
+    for k in elems:
+        source += "\t\t"
+        source += f"{k['class']}{{"
+        source += f"to_mm<{DPI}>({k['cx']}), "
+        source += f"to_mm<{DPI}>({k['cy']}), "
+        source += f"\"{k['display_name']}\", "
+        source += f"\"\""
+
+        if k['category'] == "Knob" or k['category'] == "Slider":
+            source += f", "
+            source += f"0, " #ID: TODO remove this
+            source += f"{k['min_val']}, "
+            source += f"{k['max_val']}, "
+            source += f"{k['default_val']}"
+
+        source += f"""}},
+"""
+    return source
+
+
+def list_elem_names(elems):
+    if len(elems) == 0:
+        return ""
+    source = ""
+    for k in elems:
         source += f"""
         {k['enum_name']}{k['category']},"""
     return source

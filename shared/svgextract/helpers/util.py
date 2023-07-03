@@ -38,6 +38,8 @@ def appendToFileAfterMarker(filename, marker, newText, matchText=None):
         Log(f"Didn't update {filename} with {prettyNewText}, already exists in file")
 
 
+### Text formatting/validation
+
 def is_valid_slug(slug):
     return re.match(r'^[a-zA-Z0-9_\-]+$', slug) != None
 
@@ -56,6 +58,8 @@ def str_to_identifier(s):
     s = re.sub(r'\-', 'N', s)
     # Replace | with OR 
     s = re.sub(r'\|', '_OR_', s)
+    # Remove spaces
+    s = re.sub(r' ', '', s)
     # Replace other special characters with underscore
     s = re.sub(r'\W', '_', s)
     return s
