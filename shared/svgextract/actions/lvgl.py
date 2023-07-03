@@ -12,6 +12,18 @@ def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName):
     svgToLVGL(artworkSvgFilename, png120Filename, "x120", False, "faceplate")
 
 
+def componentSvgToLVGL(svgFilename, outputBaseName, scale=67):
+    if scale == None:
+        scale = 67
+    scale = float(scale)
+
+    png240Filename = outputBaseName +"_240"
+    svgToLVGL(svgFilename, png240Filename, f"{scale}%", True, None)
+
+    png120Filename = outputBaseName +"_120"
+    svgToLVGL(svgFilename, png120Filename, f"{scale/2}%", True, None)
+
+
 def svgToLVGL(svgFilename, outputBaseName, resize, alpha=True, exportLayer=None):
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
     if inkscapeBin is None:
@@ -39,7 +51,7 @@ def svgToLVGL(svgFilename, outputBaseName, resize, alpha=True, exportLayer=None)
         return
 
     # PNG ==> LVGL image (C file with array)
-    lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/lv_img_conv/lv_img_conv.js"
+    lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/../lv_img_conv/lv_img_conv.js"
     colorFormat = "CF_TRUE_COLOR_ALPHA" if alpha else "CF_TRUE_COLOR"
     try:
         cFilename = os.path.realpath(os.path.splitext(pngFilename)[0]+".c")

@@ -26,7 +26,7 @@ def usage(script):
 
 Usage: {script} <command> [args] 
 
-Commands:
+Commands (case-insensitive):
 
 processSvg [input svg file name]
     Runs createinfo and extractforvcv on the given file.
@@ -51,12 +51,18 @@ createCoreModule [slug] {{optional output path for CoreModule file}}
     METAMODULE_COREMODULE_DIR environmant variable. File will *not* be 
     overwritten.
 
-createLvImg [input artwork SVG file name] [output C file name]
-    Converts the artwork SVG to a PNG, scales it to 240px high, and then 
-    converts it to a .c file using the LVGL image converter.
+createLvglFaceplate [input faceplate SVG file name] [output C file name]
+    Converts the `faceplate` layer of the SVG to two LVGL format .c files:
+    one that's 240px high, and one that's 120px high.
     Requires these commands to be present on $PATH, or found at the env var:
         inkscape            (INKSCAPE_BIN_PATH)
         convert             (IMAGEMAGICK_BIN_PATH)
+
+convertSvgToLvgl [input SVG file name] [output C file name] {{optional scale 1-100}}
+    Converts the SVG to two LVGL format .c files: one at the given scale and one
+    at half that scale. The scale parameter must be an integer or floating-point value
+    and defaults to 67% if omitted.
+    Requires the same inkscape and convert programs/paths as createLvglFaceplate
 
 appendimglist [C array name] [path/to/image_list.hh]
     C array name is the prefix for an image array in c format, created by 
@@ -106,12 +112,17 @@ def parse_args(args):
         vcv.extractForVcv(inputfile, output)
         return
 
-    if cmd == 'createlvimg':
+    if cmd == 'createLvglFaceplate':
         lvgl.faceplateSvgToLVGL(inputfile, output)
         return
 
     if cmd == 'appendimglist':
         imageList.appendImageList(inputfile, output)
+
+    if cmd == 'convertsvgtolvgl':
+        scale = args.pop(0) if len(args) > 0 else 67
+        lvgl.componentSvgToLVGL(inputfile, output, scale)
+        return
 
 if __name__ == "__main__":
     try:
