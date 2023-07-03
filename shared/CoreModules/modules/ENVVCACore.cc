@@ -15,15 +15,6 @@ inline auto CVToBool = [](float val) -> bool
 	return val >= 0.5f;
 };
 
-inline auto ButtonToBool = [](float val) -> bool
-{
-	return val >= 0.5f;
-};
-
-inline auto ThreeWayToInt = [](float val) -> uint32_t
-{
-	return uint32_t(val + 0.5f);
-};
 
 #if __clang__
 constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<-1, 5, 50>::generate([](auto voltage)
@@ -120,7 +111,7 @@ public:
 	void displayEnvelope(float val, TriangleOscillator::State_t state)
 	{
 		val = val / VoltageDivider(100e3f, 100e3f);
-		val *= getParam(LevelSlider);
+		val *= getState<LevelSlider>();
 		setOutput(EnvOut, val);
 		setLED(LevelSlider, val / 8.f);
 		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
@@ -141,7 +132,7 @@ public:
 	}
 
 	void runOscillator() {
-		bool isCycling = ButtonToBool(getParam(CycleButton)) ^ CVToBool(getInput(CycleJack).value_or(0.0f));
+		bool isCycling = (getState<CycleButton>() == MetaModule::LatchingButton::State_t::DOWN) ^ CVToBool(getInput(CycleJack).value_or(0.0f));
 
 		osc.setCycling(isCycling);
 		if (cycleLED != isCycling){
@@ -164,7 +155,7 @@ public:
 
 	std::pair<float,float> getRiseAndFallCV()
 	{
-		auto ProcessCVOffset = [](auto slider, uint32_t range) -> float
+		auto ProcessCVOffset = [](auto slider, MetaModule::Toggle3pos::State_t range) -> float
 		{	
 			// Slider plus resistor in parallel to tweak curve
 			const float SliderImpedance = 100e3f;
@@ -173,11 +164,11 @@ public:
 			// Select one of three bias voltages
 			auto BiasFromRange = [](auto range) -> float
 			{
-				if (range == 2)
+				if (range == MetaModule::Toggle3pos::State_t::UP)
 				{
 					return -12.0f * VoltageDivider(1e3f, 10e3f);
 				}
-				else if (range == 0)
+				else if (range == MetaModule::Toggle3pos::State_t::DOWN)
 				{
 					return 12.0f * VoltageDivider(1e3f, 8.2e3f);
 				}
@@ -198,15 +189,15 @@ public:
 			const auto scaledTimeCV = *timeCVValue * -100e3f / 137e3f;
 
 			// apply attenuverter knobs
-			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getParam(RiseCvAtten) * scaledTimeCV);
-			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getParam(FallCvAtten) * scaledTimeCV);
+			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<RiseCvAtten>() * scaledTimeCV);
+			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<FallCvAtten>() * scaledTimeCV);
 		}
 
 		// sum with static value from fader + range switch
-		auto riseRange = ThreeWayToInt(getParam(RiseSwitch));
-		auto fallRange = ThreeWayToInt(getParam(FallSwitch));
-		riseCV = -rScaleLEDs - ProcessCVOffset(getParam(RiseSlider), riseRange);
-		fallCV = -fScaleLEDs - ProcessCVOffset(getParam(FallSlider), fallRange);
+		auto riseRange = getState<RiseSwitch>();
+		auto fallRange = getState<FallSwitch>();
+		riseCV = -rScaleLEDs - ProcessCVOffset(getState<RiseSlider>(), riseRange);
+		fallCV = -fScaleLEDs - ProcessCVOffset(getState<FallSlider>(), fallRange);
 
 		// TODO: LEDs only need to be updated ~60Hz instead of 48kHz
 		// FIXME: Safer way to select the sub-element of a multi-color LED?
