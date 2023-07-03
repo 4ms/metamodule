@@ -113,6 +113,9 @@ struct MomentaryButtonRGB : MomentaryButton {
 	static constexpr size_t NumLights = 3;
 	enum Color { RED, BLUE, GREEN };
 };
+struct MomentaryButtonWhiteLight : MomentaryButton {
+	static constexpr size_t NumLights = 1;
+};
 
 struct LatchingButton : Switch {
 	enum class State_t { DOWN, UP };
@@ -257,6 +260,7 @@ using Element = std::variant<
 
 	// Switches/Buttons
 	MomentaryButtonRGB,
+	MomentaryButtonWhiteLight,
 	LatchingButtonMonoLight,
 	Toggle2pos,
 	Toggle3pos,
@@ -279,6 +283,7 @@ using Element = std::variant<
 
 	//	Lights
 	MediumLight<RedGreenBlueLight>,
+	RedGreenBlueLight,
 	RedLight,
 	OrangeLight,
 	GreenLight,
