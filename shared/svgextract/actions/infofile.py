@@ -2,10 +2,9 @@ import os
 import random
 import string
 import xml.etree.ElementTree
-from xml_helper import register_all_namespaces
-
-from helpers import *
-from svg_parse_helpers import *
+from helpers.xml_helper import register_all_namespaces
+from helpers.util import *
+from helpers.svg_parse_helpers import *
 
 def createInfoFile(svgFilename, infoFilePath = None):
     if infoFilePath == None:

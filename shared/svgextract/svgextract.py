@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-
 import sys
-
-from helpers import *
-import vcv
-import infofile
-import coreModule
-import lvgl
-import imageList
+from helpers.util import *
+import actions.vcv as vcv
+import actions.infofile as infofile
+import actions.coreModule as coreModule
+import actions.lvgl as lvgl
+import actions.imageList as imageList
 
 # Version check
 f"Python 3.6+ is required"

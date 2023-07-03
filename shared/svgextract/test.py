@@ -1,7 +1,7 @@
-from infofile import panel_to_components
-from helpers import format_for_display
-from helpers import format_as_enum_item
-from helpers import remove_trailing_dash_number
+from actions.infofile import panel_to_components
+from helpers.util import format_for_display
+from helpers.util import format_as_enum_item
+from helpers.util import remove_trailing_dash_number
 
 import xml.etree.ElementTree
 

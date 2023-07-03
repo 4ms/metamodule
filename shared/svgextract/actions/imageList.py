@@ -1,4 +1,4 @@
-from helpers import *
+from helpers.util import *
 
 def appendImageList(artwork_array_prefix, image_list_file):
     parts = artwork_array_prefix.split("_")

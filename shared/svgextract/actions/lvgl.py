@@ -2,7 +2,7 @@ import os
 from shutil import which
 import subprocess
 
-from helpers import *
+from helpers.util import *
 
 def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName):
     png240Filename = outputBaseName +"_artwork_240"

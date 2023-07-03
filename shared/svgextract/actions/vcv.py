@@ -1,7 +1,8 @@
 import os
 import xml.etree.ElementTree
-from xml_helper import register_all_namespaces
-from svg_parse_helpers import *
+from helpers.util import *
+from helpers.xml_helper import register_all_namespaces
+from helpers.svg_parse_helpers import *
 
 def extractForVcv(svgFilename, artworkFilename = None, slug = ""):
     if artworkFilename == None:
