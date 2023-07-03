@@ -2,6 +2,7 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/param_scales.hh"
+#include "CoreModules/elements/element_state_conversion.hh"
 #include <array>
 #include <optional>
 
@@ -43,6 +44,26 @@ protected:
 			return 0;
 		auto idx = index(el);
 		return paramValues[idx.param_idx];
+	}
+
+	template <typename INFO::Elem EL>
+	auto getState() 
+	{
+		// get back the typed element from the list of elements
+		constexpr auto elementID = static_cast<size_t>(EL);
+		constexpr auto& elementRef = INFO::Elements[elementID];
+
+		// read raw value
+		auto rawValue = getParam(EL);
+
+		// construct element of same type as the element the enum points to
+		constexpr auto variantIndex = elementRef.index();
+		std::variant_alternative_t<variantIndex,MetaModule::Element> DummyElement;
+
+		// call conversion function for that type of element
+		auto result = MetaModule::StateConversion::convertState(DummyElement, rawValue);
+
+		return result;
 	}
 
 protected:
