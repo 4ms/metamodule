@@ -1,13 +1,12 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "CoreModules/module_info_base.hh"
 #include "comm/comm_module.hh"
 #include "util/base_concepts.hh"
 #include "widgets/vcv_module_creator.hh"
 #include "widgets/vcv_widget_creator.hh"
 
-template<Derived<MetaModule::ElementInfoBase> INFO>
+template<Derived<MetaModule::ModuleInfoBase> INFO>
 struct GenericModuleNew {
 	static rack::Model *create() {
 		return rack::createModel<Module, Widget>(INFO::slug.data());

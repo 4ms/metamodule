@@ -251,7 +251,7 @@ def components_to_infofile(components):
 
 namespace MetaModule
 {{
-struct {slug}Info : ElementInfoBase {{
+struct {slug}Info : ModuleInfoBase {{
     static constexpr std::string_view slug{{"{slug}"}};
     static constexpr std::string_view description{{"{components['ModuleName']}"}};
     static constexpr uint32_t width_hp = {components['HP']};
