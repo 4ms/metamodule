@@ -49,6 +49,9 @@ MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
 MODULEIMG_C += $(MODULEIMG_PNG120S:.png=.c)
 INFO_FILES = $(addprefix $(SHARED)/CoreModules/info/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
 
+info_files: $(INFO_FILES) 
+
+
 images: $(MODULEIMG_C) $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
 
 src/pages/images/modules/%_artwork_120.c src/pages/images/modules/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
