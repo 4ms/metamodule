@@ -3,7 +3,7 @@
 
 using namespace rack;
 
-struct Braids : BraidsCore {
+struct Braids : MetaModule::BraidsCore {
 
 	Braids() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS);

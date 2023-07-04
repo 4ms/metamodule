@@ -5,7 +5,7 @@
 
 using namespace rack;
 
-struct DualAtenuverter : DualAtenuverterCore {
+struct DualAtenuverter : MetaModule::DualAtenuverterCore {
 
 	DualAtenuverter() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);

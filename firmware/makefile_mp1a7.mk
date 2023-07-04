@@ -114,7 +114,6 @@ SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc
 SOURCES += $(DRIVERLIB)/drivers/i2c.cc
 SOURCES += $(TARGETDEVICEDIR)/drivers/sai_tdm.cc
 SOURCES += $(DRIVERLIB)/drivers/codec_PCM3168.cc
-SOURCES += $(DRIVERLIB)/drivers/codec_WM8731.cc
 INCLUDES += -I$(DRIVERLIB)
 INCLUDES += -I$(DRIVERLIB)/drivers
 INCLUDES += -I$(TARGETDEVICEDIR)
@@ -139,9 +138,14 @@ modules += modules/SMR modules/ENVVCA
 # modules += modules/Djembe modules/StMix modules/PEG modules/SMR modules/MultiLFO 
 # modules += modules/PitchShift modules/HPF modules/InfOsc modules/KPLS modules/ENVVCA
 # modules += modules/Freeverb modules/Seq8 modules/EnOsc 
+SOURCES += $(wildcard src/pages/images/modules/*.c)
+SOURCES += $(wildcard src/pages/images/Befaco/*.c)
+SOURCES += $(wildcard src/pages/images/AudibleInstruments/*.c)
+
 SOURCES += $(foreach module,$(modules),$(SHARED)/CoreModules/$(module)Core.cc)
-SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_240.c)
-SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_120.c)
+# SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_240.c)
+# SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_120.c)
+
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/modules/*.cc)
 SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/*.cc)
