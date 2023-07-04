@@ -9,7 +9,10 @@
 #include "braids/signature_waveshaper.h"
 #include "braids/vco_jitter_source.h"
 
-struct BraidsCore : PlatformModule<MetaModule::BraidsInfo, BraidsCore> {
+namespace MetaModule
+{
+
+struct BraidsCore : PlatformModule<BraidsInfo, BraidsCore> {
 	static inline bool register_module = PlatformModule::s_registered;
 
 	braids::MacroOscillator osc;
@@ -129,3 +132,5 @@ struct BraidsCore : PlatformModule<MetaModule::BraidsInfo, BraidsCore> {
 		}
 	}
 };
+
+} // namespace MetaModule

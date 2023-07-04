@@ -59,7 +59,7 @@ draw_element_topleft(const Toggle3pos &el, const lv_img_dsc_t *img, lv_obj_t *ca
 	auto *handle = lv_obj_create(obj);
 	lv_obj_set_align(handle, LV_ALIGN_CENTER);
 	lv_obj_set_width(handle, img->header.w / 4);
-	lv_obj_set_height(handle, img->header.h /4);
+	lv_obj_set_height(handle, img->header.h / 4);
 	lv_obj_set_pos(handle, 0, 0);
 	lv_obj_add_style(handle, &Gui::slider_handle_style, 0);
 
@@ -80,8 +80,8 @@ struct ElementDrawer {
 			return nullptr;
 
 		if (center_coords) {
-			element.x_mm -= ElementInfoBase::to_mm(img->header.w / 2.f, module_height / 5.059f);
-			element.y_mm -= ElementInfoBase::to_mm(img->header.h / 2.f, module_height / 5.059f);
+			element.x_mm -= ModuleInfoBase::to_mm(img->header.w / 2.f, module_height / 5.059f);
+			element.y_mm -= ModuleInfoBase::to_mm(img->header.h / 2.f, module_height / 5.059f);
 		}
 
 		return ElementDrawerImpl::draw_element_topleft(element, img, canvas, module_height);

@@ -16,7 +16,7 @@ enum LightIds { ENUMS(OUT1_LIGHT, 3), ENUMS(OUT2_LIGHT, 3), NUM_LIGHTS };
 namespace MetaModule
 {
 
-struct DualAtenuverterInfo : ElementInfoBase {
+struct DualAtenuverterInfo : ModuleInfoBase {
 
 	// Slug must match VCV's slug
 	static constexpr std::string_view slug{"DualAtenuverter"};

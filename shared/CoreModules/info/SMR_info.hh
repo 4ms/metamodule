@@ -4,7 +4,7 @@
 
 namespace MetaModule
 {
-struct SMRInfo : ElementInfoBase {
+struct SMRInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"SMR"};
 	static constexpr std::string_view description{"Spectral Multiband Resonator"};
 	static constexpr uint32_t width_hp = 26;

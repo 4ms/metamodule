@@ -1,5 +1,8 @@
 #include "DualAtenuverterCore.hh"
 
+namespace MetaModule
+{
+
 void DualAtenuverterCore::process(const ProcessArgs &args) {
 	using namespace rack::math;
 	// using simd::float_4;
@@ -58,3 +61,5 @@ void DualAtenuverterCore::process(const ProcessArgs &args) {
 		lights[OUT2_LIGHT + 2].setBrightness(10.0f);
 	}
 }
+
+} // namespace MetaModule

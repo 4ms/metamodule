@@ -20,7 +20,7 @@ enum LightIds { NUM_LIGHTS };
 namespace MetaModule
 {
 
-struct BraidsInfo : ElementInfoBase {
+struct BraidsInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"Braids"};
 	static constexpr std::string_view description{"Macro Oscillator"};
 	static constexpr uint32_t width_hp = 16;

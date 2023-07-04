@@ -4,8 +4,13 @@
 
 #include "info/DualAtenuverter_info.hh"
 
-struct DualAtenuverterCore : PlatformModule<MetaModule::DualAtenuverterInfo, DualAtenuverterCore> {
+namespace MetaModule
+{
+
+struct DualAtenuverterCore : PlatformModule<DualAtenuverterInfo, DualAtenuverterCore> {
 	void process(const ProcessArgs &args) override;
 
 	static inline bool register_module = PlatformModule::s_registered;
 };
+
+} // namespace MetaModule

@@ -4,7 +4,7 @@
 
 namespace MetaModule
 {
-struct ENVVCAInfo : ElementInfoBase {
+struct ENVVCAInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"ENVVCA"};
 	static constexpr std::string_view description{"Envelope VCA"};
 	static constexpr uint32_t width_hp = 8;

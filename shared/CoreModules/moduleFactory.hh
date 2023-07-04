@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/elements/element_info_view.hh"
-#include "CoreModules/module_info_base.hh"
 #include "module_type_slug.hh"
 #include "util/seq_map.hh"
 #include "util/static_string.hh"
@@ -10,7 +9,7 @@
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
-	using ModuleInfoView2 = MetaModule::ModuleInfoView2;
+	using ModuleInfoView = MetaModule::ModuleInfoView;
 
 public:
 	ModuleFactory() = delete;
@@ -18,13 +17,6 @@ public:
 	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate, ModuleInfoView info) {
 		bool already_exists = creation_funcs.key_exists(typeslug);
 		infos.insert(typeslug, info);
-		creation_funcs.insert(typeslug, funcCreate);
-		return already_exists;
-	}
-
-	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate, ModuleInfoView2 info) {
-		bool already_exists = creation_funcs.key_exists(typeslug);
-		infos2.insert(typeslug, info);
 		creation_funcs.insert(typeslug, funcCreate);
 		return already_exists;
 	}
@@ -38,9 +30,7 @@ public:
 
 	static std::string_view getModuleTypeName(ModuleTypeSlug typeslug) {
 		if (auto m = infos.get(typeslug))
-			return m->module_name;
-		else if (auto d = infos2.get(typeslug))
-			return d->description;
+			return m->description;
 		return "Not found.";
 	}
 
@@ -51,31 +41,18 @@ public:
 			return nullinfo;
 	}
 
-	static ModuleInfoView2 &getModuleInfo2(ModuleTypeSlug typeslug) {
-		if (auto d = infos2.get(typeslug))
-			return *d;
-		else
-			return nullinfo2;
-	}
-
 	// Returns true if slug is valid and registered.
 	static bool isValidSlug(ModuleTypeSlug typeslug) {
-		if (infos.key_exists(typeslug))
-			return true;
-		if (infos2.key_exists(typeslug))
-			return true;
-		return false;
+		return infos.key_exists(typeslug);
 	}
 
 	static inline ModuleInfoView nullinfo{};
-	static inline ModuleInfoView2 nullinfo2{};
 
 private:
 	static constexpr int MAX_MODULE_TYPES = 512;
 
 	static inline SeqMap<ModuleTypeSlug, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
 	static inline SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> infos;
-	static inline SeqMap<ModuleTypeSlug, ModuleInfoView2, 64> infos2;
 
 	// static constexpr auto _sz_creation_funcs = sizeof(creation_funcs); //48k
 	// static constexpr auto _sz_infos = sizeof(infos);				   //112k

@@ -2,7 +2,10 @@
 #include "VCV-adaptor/VCVCoreProcessor.hh"
 #include "info/befaco/EvenVCO_info.hh"
 
-struct EvenVCOCore : VCVCoreProcessor<MetaModule::EvenVCOInfo, EvenVCOCore> {
+namespace MetaModule
+{
+
+struct EvenVCOCore : VCVCoreProcessor<EvenVCOInfo, EvenVCOCore> {
 	using float_4 = rack::simd::float_4;
 	static constexpr size_t PORT_MAX_CHANNELS = 4;
 
@@ -186,3 +189,5 @@ struct EvenVCOCore : VCVCoreProcessor<MetaModule::EvenVCOInfo, EvenVCOCore> {
 		outputs[SQUARE_OUTPUT].setChannels(channels);
 	}
 };
+
+} // namespace MetaModule

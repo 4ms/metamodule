@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements_index.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "CoreModules/module_info_base.hh"
 #include "lvgl.h"
 #include "pages/elements/base_image.hh"
 #include "pages/elements/context.hh"
@@ -64,7 +63,7 @@ struct ModuleDrawer {
 		auto slug = patch.module_slugs[module_idx];
 
 		// Draw module controls
-		const auto moduleinfo = ModuleFactory::getModuleInfo2(slug);
+		const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 		auto center_coords = moduleinfo.uses_center_coords;
 		auto images = ElementImage{height};
 		auto el_drawer = ElementDrawer{height, canvas, center_coords};

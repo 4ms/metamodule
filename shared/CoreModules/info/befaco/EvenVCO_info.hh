@@ -10,7 +10,7 @@ enum OutputIds { TRI_OUTPUT, SINE_OUTPUT, EVEN_OUTPUT, SAW_OUTPUT, SQUARE_OUTPUT
 namespace MetaModule
 {
 
-struct EvenVCOInfo : ElementInfoBase {
+struct EvenVCOInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"EvenVCO"};
 	static constexpr std::string_view description{"Befaco EvenVCO"};
 	static constexpr uint32_t width_hp = 8;
