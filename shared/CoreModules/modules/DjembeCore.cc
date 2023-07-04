@@ -1,10 +1,14 @@
 #include "CoreModules/coreProcessor.h"
+#include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/info/Djembe_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 #include "gcem/include/gcem.hpp"
 #include "util/math.hh"
 #include "util/math_tables.hh"
+
+namespace MetaModule
+{
 
 class DjembeCore : public CoreProcessor {
 	using Info = DjembeInfo;
@@ -262,24 +266,24 @@ public:
 		fSlow38 = (fConst62 * MathTools::cos_close((fConst5 * (slowFreq + 3800.0f))));
 	}
 
-	void set_param(int const param_id, const float val) override {
+	void set_param(int param_id, float val) override {
 		switch (param_id) {
-			case Info::KnobPitch:
+			case 0:
 				freqKnob = MathTools::map_value(val, 0.f, 1.f, 20.f, 500.f);
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::KnobHit:
+			case 1:
 				gainKnob = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::KnobSharpness:
+			case 2:
 				sharpnessKnob = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::KnobStrike_Amt:
+			case 3:
 				strikeKnob = val;
 				paramsNeedUpdating = true;
 				break;
@@ -290,29 +294,29 @@ public:
 		// Todo!
 	}
 
-	void set_input(const int input_id, const float val) override {
+	void set_input(int input_id, float val) override {
 		switch (input_id) {
-			case Info::InputPitch_Cv:
+			case 0:
 				freqCV = exp5Table.interp(MathTools::constrain(val, 0.f, 1.0f));
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::InputHit_Cv:
+			case 1:
 				gainCV = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::InputSharp_Cv:
+			case 2:
 				sharpCV = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::InputStrike_Cv:
+			case 3:
 				strikeCV = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::InputTrigger:
+			case 4:
 				trigIn = val;
 				paramsNeedUpdating = true;
 				break;
@@ -320,9 +324,7 @@ public:
 	}
 
 	float get_output(const int output_id) const override {
-		if (output_id == Info::OutputOut)
-			return signalOut;
-		return 0.f;
+		return signalOut;
 	}
 
 private:
@@ -517,6 +519,16 @@ public:
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
+
+	constexpr static auto indices = ElementCount::get_indices<Info>();
+	constexpr static auto element_index(Info::Elem el) {
+		return static_cast<std::underlying_type_t<Info::Elem>>(el);
+	}
+
+	constexpr static auto index(Info::Elem el) {
+		auto element_idx = element_index(el);
+		return indices[element_idx];
+	}
 };
 
 /*
@@ -537,3 +549,4 @@ strikesharpness = hslider("v: djembe/sharpness", 0.5, 0, 1, 0.01) + sharpcv, 1 :
 strikegain = hslider("v: djembe/gain", 1, 0, 1, 0.01) + gaincv, 1 :min;
 process = trigbutton + gate : pm.djembe(freqtotal, strikepos, strikesharpness, strikegain);
 */
+} // namespace MetaModule

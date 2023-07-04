@@ -8,7 +8,8 @@
 #include "util/math.hh"
 #include "util/math_tables.hh"
 
-using namespace MathTools;
+namespace MetaModule
+{
 
 class DjembeCoreNeon : public CoreProcessor {
 	using Info = DjembeInfo;
@@ -165,22 +166,22 @@ public:
 
 	void set_param(int const param_id, const float val) override {
 		switch (param_id) {
-			case Info::KnobPitch:
+			case 0:
 				freqKnob = MathTools::map_value(val, 0.f, 1.f, 20.f, 500.f);
 				freqNeedsUpdating = true;
 				break;
 
-			case Info::KnobHit:
+			case 1:
 				gainKnob = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::KnobSharpness:
+			case 2:
 				sharpnessKnob = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::KnobStrike_Amt:
+			case 3:
 				strikeKnob = val;
 				paramsNeedUpdating = true;
 				break;
@@ -193,27 +194,27 @@ public:
 
 	void set_input(const int input_id, const float val) override {
 		switch (input_id) {
-			case Info::InputPitch_Cv:
+			case 0:
 				freqCV = exp5Table.interp(MathTools::constrain(val, 0.f, 1.0f));
 				freqNeedsUpdating = true;
 				break;
 
-			case Info::InputHit_Cv:
+			case 1:
 				gainCV = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::InputSharp_Cv:
+			case 2:
 				sharpCV = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::InputStrike_Cv:
+			case 3:
 				strikeCV = val;
 				paramsNeedUpdating = true;
 				break;
 
-			case Info::InputTrigger:
+			case 4:
 				trigIn = val > 0.f ? 1.f : 0.f;
 				paramsNeedUpdating = true;
 				break;
@@ -221,9 +222,7 @@ public:
 	}
 
 	float get_output(const int output_id) const override {
-		if (output_id == Info::OutputOut)
-			return signalOut;
-		return 0.f;
+		return signalOut;
 	}
 
 private:
@@ -357,3 +356,5 @@ strikesharpness = hslider("v: djembe/sharpness", 0.5, 0, 1, 0.01) + sharpcv, 1 :
 strikegain = hslider("v: djembe/gain", 1, 0, 1, 0.01) + gaincv, 1 :min;
 process = trigbutton + gate : pm.djembe(freqtotal, strikepos, strikesharpness, strikegain);
 */
+
+} // namespace MetaModule
