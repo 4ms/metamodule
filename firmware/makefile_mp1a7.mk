@@ -248,10 +248,12 @@ ifeq "$(USE_FEWER_MODULES)" "1"
 	EXTRA_CFLAGS += -D'USE_FEWER_MODULES=1'
 endif
 
-EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines
+EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines \
+				-Wno-psabi
 
 EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG) \
-				-L$(BUILDDIR_MP1M4)/$(target_board)
+				-L$(BUILDDIR_MP1M4)/$(target_board) \
+				-Wno-psabi
 
 EXTDEF ?= METAMODULE_NORMAL_MODE
 
