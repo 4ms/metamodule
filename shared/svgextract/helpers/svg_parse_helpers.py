@@ -36,6 +36,7 @@ def get_button_style_from_radius(radius):
         return "small" #<10: 7.09 typical?
     if r < 40:
         return "medium" #10-40: 11.34 typical
+
     return "unknown" #under 3 or over 40 is not a known style
 
 
@@ -50,11 +51,23 @@ def get_slider_class(c):
 
     return cls
 
+def get_toggle2pos_class(c):
+    if c['height'] > c['width']:
+        return "Toggle2pos"
+    else:
+        return "Toggle2posHoriz"
+
+def get_toggle3pos_class(c):
+    if c['height'] > c['width']:
+        return "Toggle3pos"
+    else:
+        return "Toggle3posHoriz"
+
 def get_led_class_from_selector(selector: int):
     cls = "WhiteLight"
 
     if selector == 0xFF:
-        cls = "RedBlueGreenLight"
+        cls = "RedGreenBlueLight"
     elif selector == 0xFE:
         cls = "RedBlueLight"
     elif selector == 0xFD:

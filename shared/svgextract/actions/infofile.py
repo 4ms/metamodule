@@ -197,19 +197,19 @@ def panel_to_components(tree):
 
         #Light Orange: Button - Momentary
         elif color == '#ffc000':
-            set_class_if_not_set(c, "MomentaryButtonRGB")
+            set_class_if_not_set(c, "MomentaryButtonWhiteLight")
             components['switches'].append(c)
             c['category'] = "Button"
 
         #Deep Pink rectangle: Switch - 2pos
         elif color == '#ff8080':
-            set_class_if_not_set(c, "Toggle2pos")
+            set_class_if_not_set(c, get_toggle2pos_class(c))
             components['switches'].append(c)
             c['category'] = "Switch"
 
         #Hot Pink rectangle: Switch - 3pos
         elif color == '#ffc080':
-            set_class_if_not_set(c, "Toggle3pos")
+            set_class_if_not_set(c, get_toggle3pos_class(c))
             components['switches'].append(c)
             c['category'] = "Switch"
 
