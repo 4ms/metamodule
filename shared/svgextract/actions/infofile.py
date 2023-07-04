@@ -92,6 +92,7 @@ def panel_to_components(tree):
             c['class'] = split[1]
 
         c['display_name'] = format_for_display(name)
+        c['legacy_enum_name'] = format_as_legacy_enum_item(name)
         c['enum_name'] = format_as_enum_item(name)
 
         # Get position
@@ -263,6 +264,13 @@ struct {slug}Info : ModuleInfoBase {{
 
     enum class Elem {{{list_elem_names(components['elements'])}
     }};
+
+    // Legacy naming (safe to remove once CoreModule is converted
+    {make_legacy_enum("Knob", components['params'])}
+    {make_legacy_enum("Switch", components['switches'])}
+    {make_legacy_enum("Input", components['inputs'])}
+    {make_legacy_enum("Output", components['outputs'])}
+    {make_legacy_enum("Led", components['lights'])}
 }};
 }} // namespace MetaModule
 """
@@ -300,5 +308,20 @@ def list_elem_names(elems):
     for k in elems:
         source += f"""
         {k['enum_name']}{k['category']},"""
+    return source
+
+
+def make_legacy_enum(item_prefix, elements):
+    if len(elements) == 0:
+        return ""
+    source = f"""
+    enum {{"""
+    i = 0
+    for k in elements:
+        source += f"""
+        {item_prefix}{k['legacy_enum_name']} = {str(i)},"""
+        i = i + 1
+    source += f"""
+    }};"""
     return source
 
