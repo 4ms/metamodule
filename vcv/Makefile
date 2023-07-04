@@ -47,12 +47,19 @@ SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/digital_oscillato
 SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
 SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/resources.cc
 
+# INCLUDES += -I$(SHARED_DIR)/CoreModules/AudibleInstruments
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard src/hub/*.cc)
 SOURCES += $(wildcard src/comm/*.cc)
 SOURCES += $(wildcard src/mapping/*.cc)
-SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/modules/*.cc)
+# SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/modules/*.cc)
+SOURCES += $(SHARED_DIR)/CoreModules/modules/ENVVCACore.cc
+SOURCES += $(SHARED_DIR)/CoreModules/modules/SMRCore.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/Befaco/DualAtenuverterCore.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/Befaco/EvenVCOCore.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/BraidsCore.cc
+
 SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
@@ -80,6 +87,7 @@ CXXFLAGS += -mmacosx-version-min=10.15
 endif
 
 ./build/src/plugin.cc.o: CXXFLAGS+=-Wno-missing-braces
+./build/src/hub/hub_medium.cc.o: CXXFLAGS+=-Wno-missing-braces
 ./build/src/shared/CoreModules/%Core.cc.o: CXXFLAGS+=-Wno-missing-braces
 ./build/src/shared/CoreModules/enosc/dynamic_data.cc.o: CXXFLAGS+=-Wno-unknown-pragmas
 
