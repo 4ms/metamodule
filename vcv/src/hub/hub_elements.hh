@@ -26,7 +26,7 @@ inline void do_create(Knob9mm el, const ElementCount::Indices &idx, const HubWid
 
 inline void do_create(Davies1900hBlackKnob el, const ElementCount::Indices &idx, const HubWidgetContext &ctx) {
 	auto ctr_pos = rack::mm2px({el.x_mm, el.y_mm});
-	ctx.module_widget->addLabeledKnobPx<Davies1900hBlackKnob4ms>(el.short_name, idx.param_idx, ctr_pos, 14.f);
+	ctx.module_widget->addLabeledKnobPx<Davies1900hBlackKnob4ms>(el.short_name, idx.param_idx, ctr_pos, 19.f);
 }
 
 inline void do_create(JackInput el, const ElementCount::Indices &idx, const HubWidgetContext &ctx) {

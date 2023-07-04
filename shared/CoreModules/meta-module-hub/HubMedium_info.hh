@@ -1,18 +1,17 @@
 #pragma once
-#include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
 namespace MetaModule
 {
 struct HubMediumInfo : ModuleInfoBase {
-	static constexpr std::string_view slug{"MetaModule"};
+	static constexpr std::string_view slug{"HubMedium"};
 	static constexpr std::string_view description{"MetaModule"};
 	static constexpr uint32_t width_hp = 26;
 	static constexpr bool uses_center_coords = true;
-	static constexpr std::string_view svg_filename{"res/modules/MetaModule-artwork.svg"};
+	static constexpr std::string_view svg_filename{"res/modules/HubMedium-artwork.svg"};
 
-	static constexpr std::array<Element, 32> Elements{{
+	static constexpr std::array<Element, 29> Elements{{
 		Davies1900hBlackKnob{to_mm<72>(32.89), to_mm<72>(213.17), "A", "", 0, 0, 1, 0.0f},
 		Davies1900hBlackKnob{to_mm<72>(92.87), to_mm<72>(201.73), "B", "", 0, 0, 1, 0.0f},
 		Davies1900hBlackKnob{to_mm<72>(153.77), to_mm<72>(213.17), "C", "", 0, 0, 1, 0.0f},
@@ -41,10 +40,7 @@ struct HubMediumInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{to_mm<72>(264.39), to_mm<72>(282.17), "out6", ""},
 		AnalogJackOutput4ms{to_mm<72>(307.65), to_mm<72>(281.86), "out7", ""},
 		AnalogJackOutput4ms{to_mm<72>(351.09), to_mm<72>(281.86), "out8", ""},
-		Toggle3posHoriz{to_mm<72>(69.525), to_mm<72>(80.075), "CC", ""},
-		Toggle3posHoriz{to_mm<72>(69.525), to_mm<72>(60.285), "Gate", ""},
-		Toggle3posHoriz{to_mm<72>(69.525), to_mm<72>(40.585), "Note", ""},
-		LatchingButtonMonoLight{to_mm<72>(352.2), to_mm<72>(43.24), "SAVE", ""},
+		LatchingButtonMonoLight{to_mm<72>(352.2), to_mm<72>(43.24), "SavePatch", ""},
 	}};
 
 	enum class Elem {
@@ -76,10 +72,7 @@ struct HubMediumInfo : ModuleInfoBase {
 		Out6Out,
 		Out7Out,
 		Out8Out,
-		CcSwitch,
-		GateSwitch,
-		NoteSwitch,
-		SaveButton,
+		SavepatchButton,
 	};
 };
 } // namespace MetaModule

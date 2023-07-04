@@ -14,7 +14,7 @@
   "changelogUrl": "",
   "modules": [
 	{
-      "slug": "PanelMedium",
+      "slug": "HubMedium",
       "name": "MetaModule",
       "description": "MetaModule",
       "tags": []
