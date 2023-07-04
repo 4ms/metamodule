@@ -6,6 +6,9 @@
 #include <array>
 #include <optional>
 
+namespace MetaModule
+{
+
 template<typename INFO>
 class SmartCoreProcessor : public CoreProcessor {
 	using Elem = typename INFO::Elem;
@@ -123,3 +126,5 @@ private:
 	std::array<float, counts.num_outputs> outputValues;
 	std::array<float, counts.num_lights> ledValues;
 };
+
+} // namespace MetaModule
