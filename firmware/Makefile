@@ -41,16 +41,31 @@ bootloader:
 	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp10_conf.hh
 
 ## Module images
+brands := 4ms Befaco AudibleInstruments
+brands_svg_dirs := $(foreach brand,$(brands),$(SHARED)/CoreModules/$(brand)/svg)
 
-MODULEIMG_SVGS = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
+# Existing *_info.svg files:
+MODULEIMG_SVGS := $(foreach dir,$(brands_svg_dirs),$(wildcard $(dir)/*_info.svg))
+
+# Generated *_info.hh files:
+INFO_FILES := $(subst /svg/,/info/,$(MODULEIMG_SVGS:.svg=.hh))
+
+
 MODULEIMG_PNG240S = $(addprefix src/pages/images/modules/,$(addsuffix _240.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
 MODULEIMG_PNG120S = $(addprefix src/pages/images/modules/,$(addsuffix _120.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
 MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
 MODULEIMG_C += $(MODULEIMG_PNG120S:.png=.c)
-INFO_FILES = $(addprefix $(SHARED)/CoreModules/info/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
+
+.PHONY: printinfo
+printinfo:
+	$(info Found info svgs:)
+	@ls -l $(MODULEIMG_SVGS)
+	$(info Required info svgs:)
+	@ls -l $(INFO_FILES)
+	$(info LVLG faceplate image structs:)
+	@ls -l $(MODULEIMG_C)
 
 info_files: $(INFO_FILES) 
-
 
 images: $(MODULEIMG_C) $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
 
