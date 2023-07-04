@@ -1,10 +1,11 @@
 #pragma once
+#include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/element_info.hh"
 #include <array>
 
 namespace MetaModule
 {
-struct MetaModuleInfo : ModuleInfoBase {
+struct HubMediumInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"MetaModule"};
 	static constexpr std::string_view description{"MetaModule"};
 	static constexpr uint32_t width_hp = 26;
