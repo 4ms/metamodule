@@ -50,20 +50,11 @@ MODULEIMG_SVGS := $(foreach dir,$(brands_svg_dirs),$(wildcard $(dir)/*_info.svg)
 # Generated *_info.hh files:
 INFO_FILES := $(subst /svg/,/info/,$(MODULEIMG_SVGS:.svg=.hh))
 
-
-MODULEIMG_PNG240S = $(addprefix src/pages/images/modules/,$(addsuffix _240.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
-MODULEIMG_PNG120S = $(addprefix src/pages/images/modules/,$(addsuffix _120.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
+# Generated *_artwork_240/120.c files
+MODULEIMG_PNG240S := $(subst $(SHARED)/CoreModules/,src/pages/images/,$(subst /svg/,/modules/,$(MODULEIMG_SVGS:_info.svg=_artwork_240.png)))
+MODULEIMG_PNG120S := $(subst $(SHARED)/CoreModules/,src/pages/images/,$(subst /svg/,/modules/,$(MODULEIMG_SVGS:_info.svg=_artwork_120.png)))
 MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
 MODULEIMG_C += $(MODULEIMG_PNG120S:.png=.c)
-
-.PHONY: printinfo
-printinfo:
-	$(info Found info svgs:)
-	@ls -l $(MODULEIMG_SVGS)
-	$(info Required info svgs:)
-	@ls -l $(INFO_FILES)
-	$(info LVLG faceplate image structs:)
-	@ls -l $(MODULEIMG_C)
 
 info_files: $(INFO_FILES) 
 
