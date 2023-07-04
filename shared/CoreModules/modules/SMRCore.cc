@@ -3,8 +3,11 @@
 #include "CoreModules/info/SMR_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
+namespace MetaModule
+{
+
 class SMRCore : public CoreProcessor {
-	using Info = MetaModule::SMRInfo;
+	using Info = SMRInfo;
 	using ThisCore = SMRCore;
 
 public:
@@ -33,8 +36,10 @@ public:
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, MetaModule::ModuleInfoView2::makeView<Info>());
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView2::makeView<Info>());
 	// clang-format on
 
 private:
 };
+
+} // namespace MetaModule

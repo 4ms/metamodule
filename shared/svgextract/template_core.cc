@@ -1,6 +1,10 @@
 #include "CoreModules/coreProcessor.h"
+#include "CoreModules/elements/element_info_view.hh"
 #include "CoreModules/info/Slug_info.hh"
 #include "CoreModules/moduleFactory.hh"
+
+namespace MetaModule
+{
 
 class SlugCore : public CoreProcessor {
 	using Info = SlugInfo;
@@ -37,3 +41,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule
