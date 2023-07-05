@@ -1,6 +1,6 @@
+#include "CoreModules/Befaco/info/DualAtenuverter_info.hh"
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/param_scales.hh"
-#include "info/DualAtenuverter_info.hh"
 
 namespace
 {

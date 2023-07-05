@@ -2,6 +2,8 @@
 
 USE_FEWER_MODULES ?= 1
 
+#brands := 4ms Befaco AudibleInstruments
+
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 target_board = $(word 1,$(MAKECMDGOALS))
@@ -132,49 +134,54 @@ SOURCES += $(SHARED)/CoreModules/meta-module-hub/panel_medium.cc
 
 # Modules: CoreModules and faceplate artwork 
 ifeq "$(USE_FEWER_MODULES)" "1"
-modules := AudibleInstruments/Braids 
-modules += Befaco/DualAtenuverter Befaco/EvenVCO 
-modules += modules/SMR modules/ENVVCA
-# modules += modules/Djembe modules/StMix modules/PEG modules/SMR modules/MultiLFO 
-# modules += modules/PitchShift modules/HPF modules/InfOsc modules/KPLS modules/ENVVCA
-# modules += modules/Freeverb modules/Seq8 modules/EnOsc 
-SOURCES += $(wildcard src/pages/images/modules/*.c)
-SOURCES += $(wildcard src/pages/images/Befaco/*.c)
-SOURCES += $(wildcard src/pages/images/AudibleInstruments/*.c)
+modulesAudible := Braids 
+modulesBefaco := DualAtenuverter EvenVCO 
+modules4ms := SMR ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
+modules4ms += HPF InfOsc KPLS ENVVCA Freeverb Seq8 EnOsc 
 
-SOURCES += $(foreach module,$(modules),$(SHARED)/CoreModules/$(module)Core.cc)
-# SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_240.c)
-# SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_120.c)
+SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
+SOURCES += $(foreach m,$(modulesBefaco),$(SHARED)/CoreModules/Befaco/core/$(m)Core.cc)
+SOURCES += $(foreach m,$(modules4ms),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
+
+SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_120.c)
+SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_120.c)
+SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_120.c)
 
 else
-SOURCES += $(wildcard $(SHARED)/CoreModules/modules/*.cc)
-SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/*.cc)
-SOURCES += $(wildcard $(SHARED)/CoreModules/AudibleInstruments/*.cc)
-SOURCES += $(wildcard src/pages/images/modules/*.c)
-SOURCES += $(wildcard src/pages/images/Befaco/*.c)
-SOURCES += $(wildcard src/pages/images/AudibleInstruments/*.c)
+SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*.cc)
+SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/core/*.cc)
+SOURCES += $(wildcard $(SHARED)/CoreModules/AudibleInstruments/core/*.cc)
+
+SOURCES += $(wildcard src/pages/images/4ms/modules/*.c)
+SOURCES += $(wildcard src/pages/images/Befaco/modules/*.c)
+SOURCES += $(wildcard src/pages/images/AudibleInstruments/modules/*.c)
 endif
+
 INCLUDES += -I$(SHARED)/CoreModules
-INCLUDES += -I$(SHARED)/CoreModules/modules
+INCLUDES += -I$(SHARED)/CoreModules/4ms
 INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
+INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/core
 INCLUDES += -I$(SHARED)/CoreModules/Befaco
 
 # Component images
+SOURCES += $(wildcard src/pages/images/4ms/components/*.c)
 SOURCES += $(wildcard src/pages/images/Befaco/components/*.c)
 SOURCES += $(wildcard src/pages/images/AudibleInstruments/components/*.c)
-SOURCES += $(wildcard src/pages/images/components/*.c)
 
-# Module support files: Enosc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
+# Module support files
+SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/dynamic_data.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/resources.cc
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/utils/random.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/dsp/atan.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/dsp/units.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/analog_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/digital_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/resources.cc
 
 ## LVGL / Gui-Guider
 SOURCES += $(shell find -L $(LIBDIR)/lvgl/lvgl/src/extra/widgets -name \*.c)

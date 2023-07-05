@@ -1,6 +1,6 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/InfOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/InfOsc_info.hh"
 
 #include "axoloti-wrapper/axoloti_math.h"
 #include "util/math.hh"

@@ -1,6 +1,6 @@
+#include "4ms/info/SMR_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "doctest.h"
-#include "info/SMR_info.hh"
 #include <iostream>
 #include <span>
 #include <stdint.h>

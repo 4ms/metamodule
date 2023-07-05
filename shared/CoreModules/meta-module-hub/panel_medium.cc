@@ -1,5 +1,4 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/PanelMedium_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "panel_medium_defs.hh"
 
