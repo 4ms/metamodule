@@ -1,9 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Detune_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/Detune_info.hh"
 #include "processors/pitchShift.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class InterpRandomGenerator {
 public:
@@ -135,3 +137,5 @@ private:
 	InterpRandomGenerator flutterGen;
 	InterpRandomGenerator wowGen;
 };
+
+} // namespace MetaModule

@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Shift_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Shift_info.hh"
+
+namespace MetaModule
+{
 
 class ShiftCore : public CoreProcessor {
 	using Info = ShiftInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

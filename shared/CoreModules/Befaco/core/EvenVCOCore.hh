@@ -1,6 +1,6 @@
 #pragma once
 #include "VCV-adaptor/VCVCoreProcessor.hh"
-#include "info/befaco/EvenVCO_info.hh"
+#include "info/EvenVCO_info.hh"
 
 namespace MetaModule
 {

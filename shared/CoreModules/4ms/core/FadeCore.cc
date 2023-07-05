@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Fade_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Fade_info.hh"
+
+namespace MetaModule
+{
 
 class FadeCore : public CoreProcessor {
 	using Info = FadeInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

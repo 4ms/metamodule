@@ -1,8 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/StMix_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/StMix_info.hh"
 
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class StMixCore : public CoreProcessor {
 	using Info = StMixInfo;
@@ -166,3 +169,5 @@ private:
 	float rightOut = 0;
 	bool rightConnected[4]{false, false, false, false};
 };
+
+} // namespace MetaModule

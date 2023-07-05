@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/QPLFO_info.hh"
+#include "info/QPLFO_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class QPLFOCore : public CoreProcessor {

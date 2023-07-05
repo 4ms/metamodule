@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Switch41_info.hh"
+#include "info/Switch41_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "processors/tools/clockPhase.h"
 #include "util/math.hh"

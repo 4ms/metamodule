@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/ADEnv_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/ADEnv_info.hh"
+
+namespace MetaModule
+{
 
 class ADEnvCore : public CoreProcessor {
 	using Info = ADEnvInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

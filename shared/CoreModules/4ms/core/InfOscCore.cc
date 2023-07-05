@@ -5,6 +5,9 @@
 #include "axoloti-wrapper/axoloti_math.h"
 #include "util/math.hh"
 
+namespace MetaModule
+{
+
 class InfOscCore : public CoreProcessor {
 	using Info = InfOscInfo;
 	using ThisCore = InfOscCore;
@@ -433,3 +436,5 @@ private:
 	uint32_t s_rate_counter = 0;
 	static constexpr uint32_t s_rate_ratio = 48000 / 3000;
 };
+
+} // namespace MetaModule

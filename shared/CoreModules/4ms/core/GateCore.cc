@@ -1,10 +1,13 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Gate_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Gate_info.hh"
 
 #include "processors/tools/delayLine.h"
 #include "processors/tools/windowComparator.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class GateCore : public CoreProcessor {
 	using Info = GateInfo;
@@ -103,3 +106,5 @@ private:
 	DelayLine<96000> del;
 	WindowComparator wc;
 };
+
+} // namespace MetaModule

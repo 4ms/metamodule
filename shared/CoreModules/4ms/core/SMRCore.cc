@@ -1,6 +1,6 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/elements/element_info_view.hh"
-#include "CoreModules/info/SMR_info.hh"
+#include "info/SMR_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 namespace MetaModule

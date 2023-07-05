@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/PI_info.hh"
+#include "info/PI_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class PICore : public CoreProcessor {

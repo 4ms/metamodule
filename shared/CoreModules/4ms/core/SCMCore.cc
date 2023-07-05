@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/SCM_info.hh"
+#include "info/SCM_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "SCMPlus/cv_skip.h"
 #include "util/countzip.hh"

@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/RCD_info.hh"
+#include "info/RCD_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class RCDCore : public CoreProcessor {

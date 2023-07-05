@@ -136,8 +136,8 @@ SOURCES += $(SHARED)/CoreModules/meta-module-hub/panel_medium.cc
 ifeq "$(USE_FEWER_MODULES)" "1"
 modulesAudible := Braids 
 modulesBefaco := DualAtenuverter EvenVCO 
-modules4ms := SMR ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
-modules4ms += HPF InfOsc KPLS ENVVCA Freeverb Seq8 EnOsc 
+modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
+modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
 
 SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
 SOURCES += $(foreach m,$(modulesBefaco),$(SHARED)/CoreModules/Befaco/core/$(m)Core.cc)

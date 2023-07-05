@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/DEV_info.hh"
+#include "info/DEV_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class DEVCore : public CoreProcessor {

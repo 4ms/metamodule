@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Tapo_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Tapo_info.hh"
+
+namespace MetaModule
+{
 
 class TapoCore : public CoreProcessor {
 	using Info = TapoInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

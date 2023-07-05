@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Comp_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Comp_info.hh"
+
+namespace MetaModule
+{
 
 class CompCore : public CoreProcessor {
 	using Info = CompInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

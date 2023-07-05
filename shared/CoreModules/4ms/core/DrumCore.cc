@@ -1,9 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Drum_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/Drum_info.hh"
 #include "processors/envelope.h"
 #include "processors/twoOpFMOscillator.h"
+
+namespace MetaModule
+{
 
 class DrumCore : public CoreProcessor {
 	using Info = DrumInfo;
@@ -236,3 +238,5 @@ public:
 	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
 };
+
+} // namespace MetaModule

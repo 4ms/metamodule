@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/LIO_info.hh"
+#include "info/LIO_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class LIOCore : public CoreProcessor {

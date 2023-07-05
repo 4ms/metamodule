@@ -1,8 +1,10 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Source_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/Source_info.hh"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class SourceCore : public CoreProcessor {
 	using Info = SourceInfo;
@@ -57,3 +59,5 @@ private:
 	float output1;
 	float output2;
 };
+
+} // namespace MetaModule

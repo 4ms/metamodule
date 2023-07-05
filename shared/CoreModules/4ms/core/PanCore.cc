@@ -1,8 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Pan_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Pan_info.hh"
 
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class PanCore : public CoreProcessor {
 	using Info = PanInfo;
@@ -63,3 +66,5 @@ private:
 	float rightOut = 0;
 	float panCV = 0;
 };
+
+} // namespace MetaModule

@@ -1,13 +1,13 @@
 #include "CoreModules/SmartCoreProcessor.h"
-#include "CoreModules/info/ENVVCA_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/ENVVCA_info.hh"
 
-#include "CoreModules/modules/envvca/SSI2162.h"
-#include "CoreModules/modules/envvca/TriangleOscillator.h"
-#include "CoreModules/modules/helpers/EdgeDetector.h"
-#include "CoreModules/modules/helpers/circuit_elements.h"
+#include "envvca/SSI2162.h"
+#include "envvca/TriangleOscillator.h"
 #include "gcem/include/gcem.hpp"
+#include "helpers/EdgeDetector.h"
 #include "helpers/FlipFlop.h"
+#include "helpers/circuit_elements.h"
 #include "helpers/mapping.h"
 
 namespace MetaModule
@@ -109,9 +109,9 @@ public:
 
 	void displayEnvelope(float val, TriangleOscillator::State_t state) {
 		val = val / VoltageDivider(100e3f, 100e3f);
-		val *= getState<LevelSlider>();
+		val *= getState<EnvLevelSlider>();
 		setOutput(EnvOut, val);
-		setLED(LevelSlider, val / 8.f);
+		setLED(EnvLevelSlider, val / 8.f);
 		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
 		// even during State_t::FOLLOW
 		setLED(RiseSlider, state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
@@ -120,17 +120,17 @@ public:
 
 	void displayOscillatorState(TriangleOscillator::State_t state) {
 		if (state == TriangleOscillator::State_t::FALLING) {
-			setOutput(Eor, 8.f);
-			setLED(EorLed, 1);
+			setOutput(EorOut, 8.f);
+			setLED(EorLight, 1);
 		} else {
-			setOutput(Eor, 0);
-			setLED(EorLed, 0);
+			setOutput(EorOut, 0);
+			setLED(EorLight, 0);
 		}
 	}
 
 	void runOscillator() {
 		bool isCycling = (getState<CycleButton>() == MetaModule::LatchingButton::State_t::DOWN) ^
-						 CVToBool(getInput(CycleJack).value_or(0.0f));
+						 CVToBool(getInput(CycleIn).value_or(0.0f));
 
 		osc.setCycling(isCycling);
 		if (cycleLED != isCycling) {
@@ -138,11 +138,11 @@ public:
 			setLED(CycleButton, cycleLED);
 		}
 
-		if (auto inputFollowValue = getInput(Follow); inputFollowValue) {
+		if (auto inputFollowValue = getInput(FollowIn); inputFollowValue) {
 			osc.setTargetVoltage(*inputFollowValue);
 		}
 
-		if (auto triggerInputValue = getInput(Trigger); triggerInputValue) {
+		if (auto triggerInputValue = getInput(TriggerIn); triggerInputValue) {
 			if (triggerEdgeDetector(triggerDetector(*triggerInputValue))) {
 				osc.doRetrigger();
 			}
@@ -175,13 +175,13 @@ public:
 			return InvertingAmpWithBias(offset, 100e3f, 100e3f, bias);
 		};
 
-		if (auto timeCVValue = getInput(TimeCv); timeCVValue) {
+		if (auto timeCVValue = getInput(TimeCvIn); timeCVValue) {
 			// scale down cv input
 			const auto scaledTimeCV = *timeCVValue * -100e3f / 137e3f;
 
 			// apply attenuverter knobs
-			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<RiseCvAtten>() * scaledTimeCV);
-			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<FallCvAtten>() * scaledTimeCV);
+			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<RiseCvKnob>() * scaledTimeCV);
+			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<FallCvKnob>() * scaledTimeCV);
 		}
 
 		// sum with static value from fader + range switch
@@ -194,13 +194,13 @@ public:
 		// FIXME: Safer way to select the sub-element of a multi-color LED?
 		auto rise_positive = std::max(rScaleLEDs / 10.f, 0.f);
 		auto rise_negative = -std::min(rScaleLEDs / 10.f, 0.f);
-		setLED(RiseCvLed, rise_negative, 0);
-		setLED(RiseCvLed, rise_positive, 1);
+		setLED(RiseLight, rise_negative, 0);
+		setLED(RiseLight, rise_positive, 1);
 
 		auto fall_positive = std::max(fScaleLEDs / 10.f, 0.f);
 		auto fall_negative = -std::min(fScaleLEDs / 10.f, 0.f);
-		setLED(FallCvLed, fall_negative, 0);
-		setLED(FallCvLed, fall_positive, 1);
+		setLED(FallLight, fall_negative, 0);
+		setLED(FallLight, fall_positive, 1);
 
 		// TODO: low pass filter
 

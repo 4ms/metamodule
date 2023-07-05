@@ -1,9 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/MultiLFO_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/MultiLFO_info.hh"
 #include "util/math.hh"
 #include "util/math_tables.hh"
+
+namespace MetaModule
+{
 
 class MultiLFOCore : public CoreProcessor {
 	using Info = MultiLFOInfo;
@@ -115,3 +117,5 @@ private:
 	bool currentReset = 0.f;
 	bool lastReset = 0.f;
 };
+
+} // namespace MetaModule

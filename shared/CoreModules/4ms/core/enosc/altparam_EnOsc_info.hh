@@ -1,14 +1,77 @@
 #pragma once
-#include "CoreModules/coreProcessor.h"
-#include "CoreModules/module_info_base.hh"
+#include "CoreModules/elements/element_info.hh"
+#include <array>
 
-struct APEnOscInfo : ModuleInfoBase {
+namespace MetaModule
+{
+struct EnOscInfo : ModuleInfoBase {
 	static constexpr std::string_view slug{"EnOsc"};
 	static constexpr std::string_view description{"Ensemble Oscillator"};
 	static constexpr uint32_t width_hp = 16;
+	static constexpr bool uses_center_coords = true;
 	static constexpr std::string_view svg_filename{"res/modules/EnOsc-artwork.svg"};
 
-	static constexpr int NumKnobs = 9;
+	static constexpr std::array<Element, 27> Elements{{
+		Davies1900hBlackKnob{to_mm<72>(54.1), to_mm<72>(78.08), "Scale", "", 0, 0, 1, 0.0f},
+		Davies1900hBlackKnob{to_mm<72>(115.27), to_mm<72>(61.62), "Spread", "", 0, 0, 1, 0.0f},
+		Davies1900hBlackKnob{to_mm<72>(176.96), to_mm<72>(78.07), "Pitch", "", 0, 0, 1, 0.0f},
+		Davies1900hBlackKnob{to_mm<72>(32.72), to_mm<72>(144.14), "Balance", "", 0, 0, 1, 0.0f},
+		DaviesLargeKnob{to_mm<72>(115.56), to_mm<72>(140.93), "Root", "", 0, 0, 1, 0.5f},
+		Davies1900hBlackKnob{to_mm<72>(198.23), to_mm<72>(144.14), "Cross FM", "", 0, 0, 1, 0.0f},
+		Davies1900hBlackKnob{to_mm<72>(61.77), to_mm<72>(208.21), "Twist", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(115.49), to_mm<72>(207.86), "Detune", "", 0, 0, 1, 0.0f},
+		Davies1900hBlackKnob{to_mm<72>(168.87), to_mm<72>(208.21), "Warp", "", 0, 0, 1, 0.5f},
+		AnalogJackInput4ms{to_mm<72>(21.88), to_mm<72>(262.78), "Pitch Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(59.42), to_mm<72>(275.86), "Scale Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(96.88), to_mm<72>(262.78), "Spread Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(134.28), to_mm<72>(262.78), "Cross FM Jack", ""},
+		GateJackInput4ms{to_mm<72>(171.75), to_mm<72>(275.86), "Learn Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(21.88), to_mm<72>(305.91), "Root Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(59.42), to_mm<72>(319.0), "Balance Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(96.88), to_mm<72>(305.93), "Twist Jack", ""},
+		AnalogJackInput4ms{to_mm<72>(134.28), to_mm<72>(305.93), "Warp Jack", ""},
+		GateJackInput4ms{to_mm<72>(171.75), to_mm<72>(319.03), "Freeze Jack", ""},
+		AnalogJackOutput4ms{to_mm<72>(209.12), to_mm<72>(262.78), "Out A", ""},
+		AnalogJackOutput4ms{to_mm<72>(209.12), to_mm<72>(305.91), "Out B", ""},
+		Toggle3pos{to_mm<72>(16.93), to_mm<72>(103.025), "Scale Switch", ""},
+		Toggle3pos{to_mm<72>(214.23), to_mm<72>(102.945), "Cross FM Switch", ""},
+		Toggle3pos{to_mm<72>(16.93), to_mm<72>(215.065), "Twist Switch", ""},
+		Toggle3pos{to_mm<72>(214.23), to_mm<72>(201.725), "Warp Switch", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(21.63), to_mm<72>(42.53), "Learn", ""},
+		MomentaryButtonWhiteLight{to_mm<72>(209.56), to_mm<72>(42.53), "Freeze", ""},
+	}};
+
+	enum class Elem {
+		ScaleKnob,
+		SpreadKnob,
+		PitchKnob,
+		BalanceKnob,
+		RootKnob,
+		CrossFmKnob,
+		TwistKnob,
+		DetuneKnob,
+		WarpKnob,
+		PitchJackIn,
+		ScaleJackIn,
+		SpreadJackIn,
+		CrossFmJackIn,
+		LearnJackIn,
+		RootJackIn,
+		BalanceJackIn,
+		TwistJackIn,
+		WarpJackIn,
+		FreezeJackIn,
+		OutAOut,
+		OutBOut,
+		ScaleSwitchSwitch,
+		CrossFmSwitchSwitch,
+		TwistSwitchSwitch,
+		WarpSwitchSwitch,
+		LearnButton,
+		FreezeButton,
+	};
+
+	// Legacy naming (safe to remove once CoreModule is converted
 
 	enum {
 		KnobScale = 0,
@@ -22,100 +85,14 @@ struct APEnOscInfo : ModuleInfoBase {
 		KnobWarp = 8,
 	};
 
-	static constexpr std::array<KnobDef, NumKnobs> Knobs{{
-		{
-			.id = KnobScale,
-			.x_mm = px_to_mm<72>(54.1f),
-			.y_mm = px_to_mm<72>(78.08f),
-			.short_name = "Scale",
-			.long_name = "Scale",
-			.default_val = 0.0f,
-			.knob_style = KnobDef::Medium,
-			.orientation = KnobDef::Round,
-		},
-		{
-			.id = KnobSpread,
-			.x_mm = px_to_mm<72>(115.27f),
-			.y_mm = px_to_mm<72>(61.62f),
-			.short_name = "Spread",
-			.long_name = "Spread",
-			.default_val = 0.0f,
-			.knob_style = KnobDef::Medium,
-			.orientation = KnobDef::Round,
-		},
-		{
-			.id = KnobPitch,
-			.x_mm = px_to_mm<72>(176.96f),
-			.y_mm = px_to_mm<72>(78.07f),
-			.short_name = "Pitch",
-			.long_name = "Pitch",
-			.default_val = 0.0f,
-			.knob_style = KnobDef::Medium,
-			.orientation = KnobDef::Round,
-		},
-		{
-			.id = KnobBalance,
-			.x_mm = px_to_mm<72>(32.72f),
-			.y_mm = px_to_mm<72>(144.14f),
-			.short_name = "Balance",
-			.long_name = "Balance",
-			.default_val = 0.0f,
-			.knob_style = KnobDef::Medium,
-			.orientation = KnobDef::Round,
-		},
-		{
-			.id = KnobRoot,
-			.x_mm = px_to_mm<72>(115.56f),
-			.y_mm = px_to_mm<72>(140.93f),
-			.short_name = "Root",
-			.long_name = "Root",
-			.default_val = 0.5f,
-			.knob_style = KnobDef::Large,
-			.orientation = KnobDef::Round,
-		},
-		{
-			.id = KnobCross_Fm,
-			.x_mm = px_to_mm<72>(198.23f),
-			.y_mm = px_to_mm<72>(144.14f),
-			.short_name = "Cross FM",
-			.long_name = "Cross FM",
-			.default_val = 0.0f,
-			.knob_style = KnobDef::Medium,
-			.orientation = KnobDef::Round,
-		},
-		{
-			.id = KnobTwist,
-			.x_mm = px_to_mm<72>(61.77f),
-			.y_mm = px_to_mm<72>(208.21f),
-			.short_name = "Twist",
-			.long_name = "Twist",
-			.default_val = 0.0f,
-			.knob_style = KnobDef::Medium,
-			.orientation = KnobDef::Round,
-		},
-		{
-			.id = KnobDetune,
-			.x_mm = px_to_mm<72>(115.49f),
-			.y_mm = px_to_mm<72>(207.86f),
-			.short_name = "Detune",
-			.long_name = "Detune",
-			.default_val = 0.0f,
-			.knob_style = KnobDef::Small,
-			.orientation = KnobDef::Round,
-		},
-		{
-			.id = KnobWarp,
-			.x_mm = px_to_mm<72>(168.87f),
-			.y_mm = px_to_mm<72>(208.21f),
-			.short_name = "Warp",
-			.long_name = "Warp",
-			.default_val = 0.5f,
-			.knob_style = KnobDef::Medium,
-			.orientation = KnobDef::Round,
-		},
-	}};
-
-	static constexpr int NumInJacks = 10;
+	enum {
+		SwitchScale_Switch = 0,
+		SwitchCross_Fm_Switch = 1,
+		SwitchTwist_Switch = 2,
+		SwitchWarp_Switch = 3,
+		SwitchLearn = 4,
+		SwitchFreeze = 5,
+	};
 
 	enum {
 		InputPitch_Jack = 0,
@@ -130,200 +107,10 @@ struct APEnOscInfo : ModuleInfoBase {
 		InputFreeze_Jack = 9,
 	};
 
-	static constexpr std::array<InJackDef, NumInJacks> InJacks{{
-		{
-			.id = InputPitch_Jack,
-			.x_mm = px_to_mm<72>(21.88f),
-			.y_mm = px_to_mm<72>(262.78f),
-			.short_name = "Pitch Jack",
-			.long_name = "Pitch Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-		{
-			.id = InputScale_Jack,
-			.x_mm = px_to_mm<72>(59.42f),
-			.y_mm = px_to_mm<72>(275.86f),
-			.short_name = "Scale Jack",
-			.long_name = "Scale Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-		{
-			.id = InputSpread_Jack,
-			.x_mm = px_to_mm<72>(96.88f),
-			.y_mm = px_to_mm<72>(262.78f),
-			.short_name = "Spread Jack",
-			.long_name = "Spread Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-		{
-			.id = InputCross_Fm_Jack,
-			.x_mm = px_to_mm<72>(134.28f),
-			.y_mm = px_to_mm<72>(262.78f),
-			.short_name = "Cross FM Jack",
-			.long_name = "Cross FM Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-		{
-			.id = InputLearn_Jack,
-			.x_mm = px_to_mm<72>(171.75f),
-			.y_mm = px_to_mm<72>(275.86f),
-			.short_name = "Learn Jack",
-			.long_name = "Learn Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-		{
-			.id = InputRoot_Jack,
-			.x_mm = px_to_mm<72>(21.88f),
-			.y_mm = px_to_mm<72>(305.91f),
-			.short_name = "Root Jack",
-			.long_name = "Root Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-		{
-			.id = InputBalance_Jack,
-			.x_mm = px_to_mm<72>(59.42f),
-			.y_mm = px_to_mm<72>(319.0f),
-			.short_name = "Balance Jack",
-			.long_name = "Balance Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-		{
-			.id = InputTwist_Jack,
-			.x_mm = px_to_mm<72>(96.88f),
-			.y_mm = px_to_mm<72>(305.93f),
-			.short_name = "Twist Jack",
-			.long_name = "Twist Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-		{
-			.id = InputWarp_Jack,
-			.x_mm = px_to_mm<72>(134.28f),
-			.y_mm = px_to_mm<72>(305.93f),
-			.short_name = "Warp Jack",
-			.long_name = "Warp Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-		{
-			.id = InputFreeze_Jack,
-			.x_mm = px_to_mm<72>(171.75f),
-			.y_mm = px_to_mm<72>(319.03f),
-			.short_name = "Freeze Jack",
-			.long_name = "Freeze Jack",
-			.unpatched_val = 0.f,
-			.signal_type = InJackDef::Analog,
-		},
-	}};
-
-	static constexpr int NumOutJacks = 2;
-
 	enum {
 		OutputOut_A = 0,
 		OutputOut_B = 1,
 	};
-
-	static constexpr std::array<OutJackDef, NumOutJacks> OutJacks{{
-		{
-			.id = OutputOut_A,
-			.x_mm = px_to_mm<72>(209.12f),
-			.y_mm = px_to_mm<72>(262.78f),
-			.short_name = "Out A",
-			.long_name = "Out A",
-			.signal_type = OutJackDef::Analog,
-		},
-		{
-			.id = OutputOut_B,
-			.x_mm = px_to_mm<72>(209.12f),
-			.y_mm = px_to_mm<72>(305.91f),
-			.short_name = "Out B",
-			.long_name = "Out B",
-			.signal_type = OutJackDef::Analog,
-		},
-	}};
-
-	static constexpr int NumSwitches = 6;
-
-	enum {
-		SwitchScale_Switch = 0,
-		SwitchCross_Fm_Switch = 1,
-		SwitchTwist_Switch = 2,
-		SwitchWarp_Switch = 3,
-		SwitchLearn = 4,
-		SwitchFreeze = 5,
-	};
-
-	static constexpr std::array<SwitchDef, NumSwitches> Switches{{
-		{
-			.id = SwitchScale_Switch,
-			.x_mm = px_to_mm<72>(16.93f),
-			.y_mm = px_to_mm<72>(103.025f),
-			.short_name = "Scale Switch",
-			.long_name = "Scale Switch",
-			.switch_type = SwitchDef::Toggle3pos,
-			.orientation = SwitchDef::Vertical,
-			.encoder_knob_style = SwitchDef::None,
-		},
-		{
-			.id = SwitchCross_Fm_Switch,
-			.x_mm = px_to_mm<72>(214.23f),
-			.y_mm = px_to_mm<72>(102.945f),
-			.short_name = "Cross FM Switch",
-			.long_name = "Cross FM Switch",
-			.switch_type = SwitchDef::Toggle3pos,
-			.orientation = SwitchDef::Vertical,
-			.encoder_knob_style = SwitchDef::None,
-		},
-		{
-			.id = SwitchTwist_Switch,
-			.x_mm = px_to_mm<72>(16.93f),
-			.y_mm = px_to_mm<72>(215.065f),
-			.short_name = "Twist Switch",
-			.long_name = "Twist Switch",
-			.switch_type = SwitchDef::Toggle3pos,
-			.orientation = SwitchDef::Vertical,
-			.encoder_knob_style = SwitchDef::None,
-		},
-		{
-			.id = SwitchWarp_Switch,
-			.x_mm = px_to_mm<72>(214.23f),
-			.y_mm = px_to_mm<72>(201.725f),
-			.short_name = "Warp Switch",
-			.long_name = "Warp Switch",
-			.switch_type = SwitchDef::Toggle3pos,
-			.orientation = SwitchDef::Vertical,
-			.encoder_knob_style = SwitchDef::None,
-		},
-		{
-			.id = SwitchLearn,
-			.x_mm = px_to_mm<72>(21.63f),
-			.y_mm = px_to_mm<72>(42.53f),
-			.short_name = "Learn",
-			.long_name = "Learn",
-			.switch_type = SwitchDef::MomentaryButton,
-			.orientation = SwitchDef::Round,
-			.encoder_knob_style = SwitchDef::None,
-		},
-		{
-			.id = SwitchFreeze,
-			.x_mm = px_to_mm<72>(209.56f),
-			.y_mm = px_to_mm<72>(42.53f),
-			.short_name = "Freeze",
-			.long_name = "Freeze",
-			.switch_type = SwitchDef::MomentaryButton,
-			.orientation = SwitchDef::Round,
-			.encoder_knob_style = SwitchDef::None,
-		},
-	}};
-
-	static constexpr int NumDiscreteLeds = 0;
 
 	static constexpr int NumAltParams = 4;
 
@@ -334,46 +121,48 @@ struct APEnOscInfo : ModuleInfoBase {
 		AltFreeze_Split = 3,
 	};
 
-	static constexpr std::array<AltParamDef, NumAltParams> AltParams{{
-		{
-			.id = AltCrossfade_Time,
-			.short_name = "Crossfade Smoothness",
-			.min_val = 0.f,
-			.max_val = 1.f,
-			.default_val = 0.5f,
-			.attached_to_param_id = KnobBalance,
-			.attached_to = AltParamDef::AttachedTo::Knob,
-			.control_type = AltParamDef::Range::Continuous,
-		},
-		{
-			.id = AltStereo_Split,
-			.short_name = "Stereo Split",
-			.min_val = 0.f,
-			.max_val = 2.f,
-			.default_val = 1.f,
-			.attached_to_param_id = KnobTwist,
-			.attached_to = AltParamDef::AttachedTo::Knob,
-			.control_type = AltParamDef::Range::Integer,
-		},
-		{
-			.id = AltNum_Oscs,
-			.short_name = "Num Oscillators",
-			.min_val = 0.f,
-			.max_val = 16.f,
-			.default_val = 16.f,
-			.attached_to_param_id = KnobSpread,
-			.attached_to = AltParamDef::AttachedTo::Knob,
-			.control_type = AltParamDef::Range::Integer,
-		},
-		{
-			.id = AltFreeze_Split,
-			.short_name = "Freeze Split",
-			.min_val = 0.f,
-			.max_val = 2.f,
-			.default_val = 1.f,
-			.attached_to_param_id = KnobWarp,
-			.attached_to = AltParamDef::AttachedTo::Knob,
-			.control_type = AltParamDef::Range::Integer,
-		},
-	}};
+	// static constexpr std::array<AltParamDef, NumAltParams> AltParams{{
+	// 	{
+	// 		.id = AltCrossfade_Time,
+	// 		.short_name = "Crossfade Smoothness",
+	// 		.min_val = 0.f,
+	// 		.max_val = 1.f,
+	// 		.default_val = 0.5f,
+	// 		.attached_to_param_id = KnobBalance,
+	// 		.attached_to = AltParamDef::AttachedTo::Knob,
+	// 		.control_type = AltParamDef::Range::Continuous,
+	// 	},
+	// 	{
+	// 		.id = AltStereo_Split,
+	// 		.short_name = "Stereo Split",
+	// 		.min_val = 0.f,
+	// 		.max_val = 2.f,
+	// 		.default_val = 1.f,
+	// 		.attached_to_param_id = KnobTwist,
+	// 		.attached_to = AltParamDef::AttachedTo::Knob,
+	// 		.control_type = AltParamDef::Range::Integer,
+	// 	},
+	// 	{
+	// 		.id = AltNum_Oscs,
+	// 		.short_name = "Num Oscillators",
+	// 		.min_val = 0.f,
+	// 		.max_val = 16.f,
+	// 		.default_val = 16.f,
+	// 		.attached_to_param_id = KnobSpread,
+	// 		.attached_to = AltParamDef::AttachedTo::Knob,
+	// 		.control_type = AltParamDef::Range::Integer,
+	// 	},
+	// 	{
+	// 		.id = AltFreeze_Split,
+	// 		.short_name = "Freeze Split",
+	// 		.min_val = 0.f,
+	// 		.max_val = 2.f,
+	// 		.default_val = 1.f,
+	// 		.attached_to_param_id = KnobWarp,
+	// 		.attached_to = AltParamDef::AttachedTo::Knob,
+	// 		.control_type = AltParamDef::Range::Integer,
+	// 	},
+	// }};
 };
+
+} // namespace MetaModule

@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/ComplexEG_info.hh"
+#include "info/ComplexEG_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 #include "processors/envelope.h"

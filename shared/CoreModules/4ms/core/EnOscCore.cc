@@ -1,13 +1,17 @@
 #include "CoreModules/coreProcessor.h"
-// #include "CoreModules/info/EnOsc_info.hh"
 #include "CoreModules/moduleFactory.hh"
+// #include "info/EnOsc_info.hh"
 #include "enosc/altparam_EnOsc_info.hh"
-
 #include "enosc/ui.hh"
 
+namespace MetaModule
+{
+
 class EnOscCore : public CoreProcessor {
-	using Info = APEnOscInfo;
+	// using Info = APEnOscInfo;
+	using Info = EnOscInfo;
 	using ThisCore = EnOscCore;
+	enum { NumKnobs = Info::KnobWarp + 1 };
 
 	enum { kBlockSize = 64 };
 	enum { kUiUpdateRate = 60 };
@@ -72,22 +76,22 @@ public:
 			case Info::KnobWarp:
 				enosc.set_potcv(AdcInput::POT_WARP, val);
 				break;
-			case Info::SwitchLearn + Info::NumKnobs:
+			case static_cast<int>(Info::SwitchLearn) + NumKnobs:
 				enosc.set_learn_button(val > 0.5f);
 				break;
-			case Info::SwitchFreeze + Info::NumKnobs:
+			case static_cast<int>(Info::SwitchFreeze) + NumKnobs:
 				enosc.set_freeze_button(val > 0.5f);
 				break;
-			case Info::SwitchScale_Switch + Info::NumKnobs:
+			case static_cast<int>(Info::SwitchScale_Switch) + NumKnobs:
 				enosc.switches().scale_.set(switchstate(val));
 				break;
-			case Info::SwitchCross_Fm_Switch + Info::NumKnobs:
+			case static_cast<int>(Info::SwitchCross_Fm_Switch) + NumKnobs:
 				enosc.switches().mod_.set(switchstate(val));
 				break;
-			case Info::SwitchTwist_Switch + Info::NumKnobs:
+			case static_cast<int>(Info::SwitchTwist_Switch) + NumKnobs:
 				enosc.switches().twist_.set(switchstate(val));
 				break;
-			case Info::SwitchWarp_Switch + Info::NumKnobs:
+			case static_cast<int>(Info::SwitchWarp_Switch) + NumKnobs:
 				enosc.switches().warp_.set(switchstate(val));
 				break;
 		}
@@ -207,7 +211,7 @@ public:
 	}
 
 	void mark_all_inputs_unpatched() override {
-		for (unsigned i = 0; i < Info::NumInJacks; i++)
+		for (unsigned i = 0; i < 10; /*Info::NumInJacks*/ i++)
 			set_input(i, 0.f);
 	}
 	void mark_input_unpatched(const int input_id) override {
@@ -238,3 +242,5 @@ private:
 
 	unsigned block_ctr = kBlockSize;
 };
+
+} // namespace MetaModule

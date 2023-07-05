@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Mixer_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Mixer_info.hh"
+
+namespace MetaModule
+{
 
 class MixerCore : public CoreProcessor {
 	using Info = MixerInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

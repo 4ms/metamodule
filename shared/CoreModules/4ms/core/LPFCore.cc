@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/LPF_info.hh"
+#include "info/LPF_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "processors/lpf.h"
 #include "processors/moogLadder.h"

@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/SHEV_info.hh"
+#include "info/SHEV_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class SHEVCore : public CoreProcessor {

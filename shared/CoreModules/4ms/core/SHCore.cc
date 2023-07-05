@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/SH_info.hh"
+#include "info/SH_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class SHCore : public CoreProcessor {

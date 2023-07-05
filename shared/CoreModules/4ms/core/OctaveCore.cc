@@ -1,7 +1,10 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Octave_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Octave_info.hh"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class OctaveCore : public CoreProcessor {
 	using Info = OctaveInfo;
@@ -51,3 +54,5 @@ private:
 	float voltInput = 0;
 	float voltOutput = 0;
 };
+
+} // namespace MetaModule

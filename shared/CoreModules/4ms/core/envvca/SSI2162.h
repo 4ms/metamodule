@@ -1,7 +1,7 @@
 #pragma once
 
+#include "core/helpers/mapping.h"
 #include "gcem/include/gcem.hpp"
-#include "helpers/mapping.h"
 #include <algorithm>
 #include <cmath>
 

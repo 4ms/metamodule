@@ -1,7 +1,10 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/BuffMult_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/BuffMult_info.hh"
 #include <algorithm>
+
+namespace MetaModule
+{
 
 class BuffMultCore : public CoreProcessor {
 	using Info = BuffMultInfo;
@@ -74,3 +77,5 @@ private:
 	float in[2];
 	bool is_second_input_patched = false;
 };
+
+} // namespace MetaModule

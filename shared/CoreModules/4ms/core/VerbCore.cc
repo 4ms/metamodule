@@ -1,9 +1,12 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Verb_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Verb_info.hh"
 #include "processors/allpass.h"
 #include "processors/comb.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class VerbCore : public CoreProcessor {
 	using Info = VerbInfo;
@@ -255,3 +258,5 @@ private:
 	float new_comb_ratio[numComb] = {0.f};
 	bool comb_ratio_needs_update[numComb] = {false};
 };
+
+} // namespace MetaModule

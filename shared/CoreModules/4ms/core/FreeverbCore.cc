@@ -1,9 +1,12 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Freeverb_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Freeverb_info.hh"
 #include "processors/allpass.h"
 #include "processors/comb.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class FreeverbCore : public CoreProcessor {
 	using Info = FreeverbInfo;
@@ -119,3 +122,5 @@ private:
 
 	float mix = 0;
 };
+
+} // namespace MetaModule

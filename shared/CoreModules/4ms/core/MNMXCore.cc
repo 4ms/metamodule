@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/MNMX_info.hh"
+#include "info/MNMX_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "util/math.hh"
 

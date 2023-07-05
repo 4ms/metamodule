@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/GRev_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/GRev_info.hh"
+
+namespace MetaModule
+{
 
 class GRevCore : public CoreProcessor {
 	using Info = GRevInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

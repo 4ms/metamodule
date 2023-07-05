@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Gate8_info.hh"
+#include "info/Gate8_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class Gate8Core : public CoreProcessor {

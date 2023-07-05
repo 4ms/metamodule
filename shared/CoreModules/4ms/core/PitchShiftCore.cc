@@ -1,9 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/PitchShift_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/PitchShift_info.hh"
 #include "processors/pitchShift.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class PitchShiftCore : public CoreProcessor {
 	using Info = PitchShiftInfo;
@@ -88,3 +90,5 @@ private:
 	float mixOffset = 0;
 	float windowOffset = 100;
 };
+
+} // namespace MetaModule

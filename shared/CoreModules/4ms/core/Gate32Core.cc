@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Gate32_info.hh"
+#include "info/Gate32_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class Gate32Core : public CoreProcessor {

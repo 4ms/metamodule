@@ -1,10 +1,12 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/HPF_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/HPF_info.hh"
 #include "processors/hpf.h"
 #include "processors/korgHPF.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class HPFCore : public CoreProcessor {
 	using Info = HPFInfo;
@@ -36,7 +38,7 @@ public:
 					korg.q = map_value(val, 0.0f, 1.0f, 0.0f, 10.0f);
 				}
 				break;
-			case (Info::SwitchMode + Info::NumKnobs):
+			case (Info::SwitchMode + 2): //Info::NumKnobs
 				mode = val ? 1 : 0;
 				break;
 		}
@@ -82,3 +84,5 @@ private:
 	float cutoffOffset = 0;
 	float cutoffCV = 0;
 };
+
+} // namespace MetaModule

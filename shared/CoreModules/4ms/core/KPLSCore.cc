@@ -1,10 +1,13 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/KPLS_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/KPLS_info.hh"
 
 #include "processors/envelope.h"
 #include "processors/karplus.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class KPLSCore : public CoreProcessor {
 	using Info = KPLSInfo;
@@ -87,3 +90,5 @@ private:
 	Karplus k;
 	Envelope e;
 };
+
+} // namespace MetaModule

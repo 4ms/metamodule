@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/DLD_info.hh"
+#include "info/DLD_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class DLDCore : public CoreProcessor {

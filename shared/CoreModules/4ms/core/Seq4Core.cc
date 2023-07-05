@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Seq4_info.hh"
+#include "info/Seq4_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "processors/stepsequencer.h"
 #include "util/math.hh"

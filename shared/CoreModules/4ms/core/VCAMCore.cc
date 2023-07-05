@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/VCAM_info.hh"
+#include "info/VCAM_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class VCAMCore : public CoreProcessor {

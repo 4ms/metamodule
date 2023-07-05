@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/PEG_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/PEG_info.hh"
+
+namespace MetaModule
+{
 
 class PEGCore : public CoreProcessor {
 	using Info = PEGInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

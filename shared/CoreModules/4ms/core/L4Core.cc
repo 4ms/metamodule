@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/L4_info.hh"
+#include "info/L4_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class L4Core : public CoreProcessor {

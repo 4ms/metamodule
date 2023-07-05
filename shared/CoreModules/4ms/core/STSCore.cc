@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/STS_info.hh"
+#include "info/STS_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class STSCore : public CoreProcessor {

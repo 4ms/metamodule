@@ -1,8 +1,10 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Noise_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/Noise_info.hh"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class NoiseCore : public CoreProcessor {
 	using Info = NoiseInfo;
@@ -48,3 +50,5 @@ private:
 	float whiteNoise = 0;
 	float pinkNoise = 0;
 };
+
+} // namespace MetaModule

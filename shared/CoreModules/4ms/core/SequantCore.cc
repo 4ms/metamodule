@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Sequant_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Sequant_info.hh"
+
+namespace MetaModule
+{
 
 class SequantCore : public CoreProcessor {
 	using Info = SequantInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

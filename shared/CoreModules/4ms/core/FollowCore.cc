@@ -1,10 +1,12 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Follow_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/Follow_info.hh"
 #include "processors/tools/expDecay.h"
 #include "processors/tools/windowComparator.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class FollowCore : public CoreProcessor {
 	using Info = FollowInfo;
@@ -83,3 +85,5 @@ private:
 	WindowComparator wc;
 	ExpDecay slew;
 };
+
+} // namespace MetaModule

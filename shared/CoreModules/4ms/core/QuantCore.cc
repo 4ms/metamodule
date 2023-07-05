@@ -1,6 +1,6 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Quant_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Quant_info.hh"
 #include "scaling_config.hh"
 #include "util/math.hh"
 #include <cmath>
@@ -12,6 +12,9 @@
 // And Root transposes it by semitones ("modes")
 // And Transpose shifts it by a variable amount (tuning)
 // Also add a display to show the resulting pattern
+
+namespace MetaModule
+{
 
 class QuantCore : public CoreProcessor {
 	using Info = QuantInfo;
@@ -122,3 +125,5 @@ private:
 		return outputNote;
 	}
 };
+
+} // namespace MetaModule

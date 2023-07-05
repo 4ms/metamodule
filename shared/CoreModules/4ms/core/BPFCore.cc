@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/BPF_info.hh"
+#include "info/BPF_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 #include "processors/bpf.h"

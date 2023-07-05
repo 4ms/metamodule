@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Atvert2_info.hh"
+#include "info/Atvert2_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "util/math.hh"
 

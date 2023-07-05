@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/SISM_info.hh"
+#include "info/SISM_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class SISMCore : public CoreProcessor {

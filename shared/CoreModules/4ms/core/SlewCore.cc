@@ -1,9 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/Slew_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/Slew_info.hh"
 #include "processors/tools/expDecay.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class SlewCore : public CoreProcessor {
 	using Info = SlewInfo;
@@ -57,3 +59,5 @@ private:
 	float signalInput = 0;
 	float signalOutput = 0;
 };
+
+} // namespace MetaModule

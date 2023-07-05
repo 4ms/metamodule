@@ -1,5 +1,5 @@
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/info/QCD_info.hh"
+#include "info/QCD_info.hh"
 #include "CoreModules/moduleFactory.hh"
 
 class QCDCore : public CoreProcessor {
