@@ -51,7 +51,7 @@ createCoreModule [slug] {{optional output path for CoreModule file}}
     METAMODULE_COREMODULE_DIR environmant variable. File will *not* be 
     overwritten.
 
-createLvglFaceplate [input faceplate SVG file name] [output C file name]
+createLvglFaceplate [input faceplate SVG file name] [output C file name] {{optional layer}}
     Converts the `faceplate` layer of the SVG to two LVGL format .c files:
     one that's 240px high, and one that's 120px high.
     Requires these commands to be present on $PATH, or found at the env var:
@@ -112,8 +112,9 @@ def parse_args(args):
         vcv.extractForVcv(inputfile, output)
         return
 
-    if cmd == 'createLvglFaceplate':
-        lvgl.faceplateSvgToLVGL(inputfile, output)
+    if cmd == 'createlvglfaceplate':
+        layer = args.pop(0) if len(args) > 0 else "faceplate"
+        lvgl.faceplateSvgToLVGL(inputfile, output, layer)
         return
 
     if cmd == 'appendimglist':

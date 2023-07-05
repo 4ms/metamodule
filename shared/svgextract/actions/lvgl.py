@@ -4,12 +4,15 @@ import subprocess
 
 from helpers.util import *
 
-def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName):
+def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="faceplate"):
+    if exportLayer=="all":
+        exportLayer = None
+
     png240Filename = outputBaseName +"_artwork_240"
-    svgToLVGL(artworkSvgFilename, png240Filename, "x240", False, "faceplate")
+    svgToLVGL(artworkSvgFilename, png240Filename, "x240", False, exportLayer)
 
     png120Filename = outputBaseName +"_artwork_120"
-    svgToLVGL(artworkSvgFilename, png120Filename, "x120", False, "faceplate")
+    svgToLVGL(artworkSvgFilename, png120Filename, "x120", False, exportLayer)
 
 
 def componentSvgToLVGL(svgFilename, outputBaseName, scale=67):
