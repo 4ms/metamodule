@@ -13,8 +13,12 @@ def createInfoFile(svgFilename, infoFilePath = None):
             infoFilePath = input_default("Directory to save ModuleInfo file", pathFromHere("../CoreModules/info"))
 
     if os.path.isdir(infoFilePath) == False:
-        Log(f"Not a directory: {infoFilePath}. Aborting without creating an info file.")
-        return
+        # Try infoFilePath as a path relative to the dir containing svgFilename
+        svgdir = os.path.dirname(svgFilename)
+        infoFilePath = os.path.normpath(os.path.join(svgdir,infoFilePath))
+        if os.path.isdir(infoFilePath) == False:
+            Log(f"Not a directory: {infoFilePath}. Aborting without creating an info file.")
+            return
 
     if os.path.isfile(svgFilename) == False:
         Log(f"Not a file: {svgFilename}. Aborting without creating an info file.")
