@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/SH_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/SH_info.hh"
+
+namespace MetaModule
+{
 
 class SHCore : public CoreProcessor {
 	using Info = SHInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

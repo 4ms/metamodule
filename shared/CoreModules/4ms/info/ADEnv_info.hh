@@ -38,7 +38,7 @@ struct ADEnvInfo : ModuleInfoBase {
         AShapeCvIn,
         EodOut,
         EoaOut,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -48,6 +48,7 @@ struct ADEnvInfo : ModuleInfoBase {
         KnobDecay = 1,
         KnobA_Shape = 2,
         KnobD_Shape = 3,
+        NumKnobs,
     };
     
     
@@ -57,12 +58,14 @@ struct ADEnvInfo : ModuleInfoBase {
         InputAttack_Cv = 2,
         InputD_Shape_Cv = 3,
         InputA_Shape_Cv = 4,
+        NumInJacks,
     };
     
     enum {
         OutputEod = 0,
         OutputEoa = 1,
         OutputOut = 2,
+        NumOutJacks,
     };
     
 };

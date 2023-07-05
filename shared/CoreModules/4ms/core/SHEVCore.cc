@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/SHEV_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/SHEV_info.hh"
+
+namespace MetaModule
+{
 
 class SHEVCore : public CoreProcessor {
 	using Info = SHEVInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

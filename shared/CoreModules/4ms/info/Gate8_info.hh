@@ -30,7 +30,7 @@ struct Gate8Info : ModuleInfoBase {
         ClockIn,
         ResetIn,
         EndOut,
-        OutOut,
+        Out,
         Step1Button,
         Step2Button,
         Step3Button,
@@ -53,16 +53,19 @@ struct Gate8Info : ModuleInfoBase {
         SwitchStep_6 = 5,
         SwitchStep_7 = 6,
         SwitchStep_8 = 7,
+        NumSwitches,
     };
     
     enum {
         InputClock = 0,
         InputReset = 1,
+        NumInJacks,
     };
     
     enum {
         OutputEnd = 0,
         OutputOut = 1,
+        NumOutJacks,
     };
     
 };

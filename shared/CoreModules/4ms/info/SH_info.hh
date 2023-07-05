@@ -38,11 +38,13 @@ struct SHInfo : ModuleInfoBase {
         InputIn_1 = 1,
         InputSamp_2 = 2,
         InputIn_2 = 3,
+        NumInJacks,
     };
     
     enum {
         OutputOut_1 = 0,
         OutputOut_2 = 1,
+        NumOutJacks,
     };
     
 };

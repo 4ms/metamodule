@@ -72,11 +72,11 @@ struct Gate32Info : ModuleInfoBase {
         StopIn,
         GateCvJackIn,
         RepeatCvJackIn,
-        ClockOutOut,
+        ClockOut,
         Start_EndOut,
         TriggerOut,
         InvOut,
-        OutOut,
+        Out,
         Start_StopButton,
         SelectButton,
         Step1Button,
@@ -120,6 +120,7 @@ struct Gate32Info : ModuleInfoBase {
         KnobDelay = 1,
         KnobGate = 2,
         KnobRepeat = 3,
+        NumKnobs,
     };
     
     enum {
@@ -157,6 +158,7 @@ struct Gate32Info : ModuleInfoBase {
         SwitchStep_30 = 31,
         SwitchStep_31 = 32,
         SwitchStep_32 = 33,
+        NumSwitches,
     };
     
     enum {
@@ -165,6 +167,7 @@ struct Gate32Info : ModuleInfoBase {
         InputStop = 2,
         InputGate_Cv_Jack = 3,
         InputRepeat_Cv_Jack = 4,
+        NumInJacks,
     };
     
     enum {
@@ -173,6 +176,7 @@ struct Gate32Info : ModuleInfoBase {
         OutputTrigger = 2,
         OutputInv = 3,
         OutputOut = 4,
+        NumOutJacks,
     };
     
 };

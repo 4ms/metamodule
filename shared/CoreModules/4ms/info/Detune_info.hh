@@ -30,7 +30,7 @@ struct DetuneInfo : ModuleInfoBase {
         InputIn,
         DetuneIn,
         DepthIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -40,6 +40,7 @@ struct DetuneInfo : ModuleInfoBase {
         KnobF_Speed = 1,
         KnobW_Depth = 2,
         KnobF_Depth = 3,
+        NumKnobs,
     };
     
     
@@ -47,10 +48,12 @@ struct DetuneInfo : ModuleInfoBase {
         InputInput = 0,
         InputDetune = 1,
         InputDepth = 2,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

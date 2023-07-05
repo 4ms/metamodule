@@ -45,7 +45,7 @@ struct VerbInfo : ModuleInfoBase {
         CombCvIn,
         MixCvIn,
         HoldGateIn,
-        OutOut,
+        Out,
         HoldButton,
     };
 
@@ -58,10 +58,12 @@ struct VerbInfo : ModuleInfoBase {
         KnobAp_Ratio = 3,
         KnobComb = 4,
         KnobMix = 5,
+        NumKnobs,
     };
     
     enum {
         SwitchHold = 0,
+        NumSwitches,
     };
     
     enum {
@@ -73,10 +75,12 @@ struct VerbInfo : ModuleInfoBase {
         InputComb_Cv = 5,
         InputMix_Cv = 6,
         InputHold_Gate = 7,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

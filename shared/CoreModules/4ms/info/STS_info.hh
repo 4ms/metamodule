@@ -111,6 +111,7 @@ struct STSInfo : ModuleInfoBase {
         KnobLength_L = 6,
         KnobSample = 7,
         KnobLength_R = 8,
+        NumKnobs,
     };
     
     enum {
@@ -123,6 +124,7 @@ struct STSInfo : ModuleInfoBase {
         SwitchBank = 6,
         SwitchReverse_L = 7,
         SwitchReverse_R = 8,
+        NumSwitches,
     };
     
     enum {
@@ -141,6 +143,7 @@ struct STSInfo : ModuleInfoBase {
         InputSample_Cv_R = 12,
         InputStart_Pos_Cv_R = 13,
         InputLength_Cv_R = 14,
+        NumInJacks,
     };
     
     enum {
@@ -148,6 +151,7 @@ struct STSInfo : ModuleInfoBase {
         OutputOut_R = 1,
         OutputEnd_Out_L = 2,
         OutputEnd_Out_R = 3,
+        NumOutJacks,
     };
     
     enum {
@@ -155,6 +159,7 @@ struct STSInfo : ModuleInfoBase {
         LedMonitor_Led = 1,
         LedBusy_Led = 2,
         LedLed_R = 3,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

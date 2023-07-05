@@ -1,10 +1,12 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/BPF_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/BPF_info.hh"
 #include "processors/bpf.h"
 #include "processors/oberheimBPF.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class BPFCore : public CoreProcessor {
 	using Info = BPFInfo;
@@ -79,3 +81,5 @@ private:
 	float signalInput = 0;
 	float signalOutput = 0;
 };
+
+} // namespace MetaModule

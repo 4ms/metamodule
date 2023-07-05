@@ -1,9 +1,12 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/FM_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/FM_info.hh"
 
 #include "processors/twoOpFMOscillator.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class FMCore : public CoreProcessor {
 	using Info = FMInfo;
@@ -133,3 +136,5 @@ private:
 
 	const float ratioTable[8] = {0.125f, 0.25f, 0.5f, 1, 2, 4, 8, 16};
 };
+
+} // namespace MetaModule

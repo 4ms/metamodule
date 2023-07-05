@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/DEV_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/DEV_info.hh"
+
+namespace MetaModule
+{
 
 class DEVCore : public CoreProcessor {
 	using Info = DEVInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

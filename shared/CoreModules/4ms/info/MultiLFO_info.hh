@@ -45,6 +45,7 @@ struct MultiLFOInfo : ModuleInfoBase {
         KnobRate = 0,
         KnobPhase = 1,
         KnobPw = 2,
+        NumKnobs,
     };
     
     
@@ -53,6 +54,7 @@ struct MultiLFOInfo : ModuleInfoBase {
         InputPw_Cv = 1,
         InputRate_Cv = 2,
         InputPhase_Cv = 3,
+        NumInJacks,
     };
     
     enum {
@@ -60,6 +62,7 @@ struct MultiLFOInfo : ModuleInfoBase {
         OutputPulse = 1,
         OutputSaw = 2,
         OutputSine = 3,
+        NumOutJacks,
     };
     
 };

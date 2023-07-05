@@ -55,8 +55,8 @@ struct DrumInfo : ModuleInfoBase {
         TEnvCvIn,
         NEnvCvIn,
         NBlendCvIn,
-        InvOutOut,
-        OutOut,
+        InvOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -71,6 +71,7 @@ struct DrumInfo : ModuleInfoBase {
         KnobTone_Env = 6,
         KnobNoise_Env = 7,
         KnobNoise_Blend = 8,
+        NumKnobs,
     };
     
     
@@ -85,11 +86,13 @@ struct DrumInfo : ModuleInfoBase {
         InputT_Env_Cv = 7,
         InputN_Env_Cv = 8,
         InputN_Blend_Cv = 9,
+        NumInJacks,
     };
     
     enum {
         OutputInv_Out = 0,
         OutputOut = 1,
+        NumOutJacks,
     };
     
 };

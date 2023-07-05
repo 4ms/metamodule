@@ -40,9 +40,9 @@ struct FMInfo : ModuleInfoBase {
         V_OctPIn,
         V_OctSIn,
         MixCvIn,
-        IndexCvInIn,
+        IndexCvIn,
         ShapeCvIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -56,6 +56,7 @@ struct FMInfo : ModuleInfoBase {
         KnobRatio_F = 5,
         KnobShape = 6,
         KnobShape_Cv = 7,
+        NumKnobs,
     };
     
     
@@ -65,10 +66,12 @@ struct FMInfo : ModuleInfoBase {
         InputMix_Cv = 2,
         InputIndex_Cv_In = 3,
         InputShape_Cv = 4,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

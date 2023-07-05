@@ -50,12 +50,12 @@ struct ComplexEGInfo : ModuleInfoBase {
         DecayCvIn,
         SustainCvIn,
         ReleaseCvIn,
-        AttackOutOut,
-        HoldOutOut,
-        DecayOutOut,
-        SustainOutOut,
-        ReleaseOutOut,
-        OutOut,
+        AttackOut,
+        HoldOut,
+        DecayOut,
+        SustainOut,
+        ReleaseOut,
+        Out,
         LoopButton,
     };
 
@@ -70,10 +70,12 @@ struct ComplexEGInfo : ModuleInfoBase {
         KnobA_Curve = 5,
         KnobD_Curve = 6,
         KnobR_Curve = 7,
+        NumKnobs,
     };
     
     enum {
         SwitchLoop = 0,
+        NumSwitches,
     };
     
     enum {
@@ -83,6 +85,7 @@ struct ComplexEGInfo : ModuleInfoBase {
         InputDecay_Cv = 3,
         InputSustain_Cv = 4,
         InputRelease_Cv = 5,
+        NumInJacks,
     };
     
     enum {
@@ -92,6 +95,7 @@ struct ComplexEGInfo : ModuleInfoBase {
         OutputSustain_Out = 3,
         OutputRelease_Out = 4,
         OutputOut = 5,
+        NumOutJacks,
     };
     
 };

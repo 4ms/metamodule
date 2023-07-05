@@ -1,7 +1,10 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/Atvert2_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Atvert2_info.hh"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class Atvert2Core : public CoreProcessor {
 	using Info = Atvert2Info;
@@ -86,3 +89,5 @@ private:
 	bool in1Connected = false;
 	bool in2Connected = false;
 };
+
+} // namespace MetaModule

@@ -26,7 +26,7 @@ struct KPLSInfo : ModuleInfoBase {
         SpreadKnob,
         V_OctIn,
         TrigIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -35,16 +35,19 @@ struct KPLSInfo : ModuleInfoBase {
         KnobPitch = 0,
         KnobDecay = 1,
         KnobSpread = 2,
+        NumKnobs,
     };
     
     
     enum {
         InputV_Oct = 0,
         InputTrig = 1,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

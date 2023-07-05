@@ -44,6 +44,7 @@ struct BuffMultInfo : ModuleInfoBase {
     enum {
         InputInput_1 = 0,
         InputInput_2 = 1,
+        NumInJacks,
     };
     
     enum {
@@ -53,11 +54,13 @@ struct BuffMultInfo : ModuleInfoBase {
         OutputOutput_F = 3,
         OutputOutput_E = 4,
         OutputOutput_D = 5,
+        NumOutJacks,
     };
     
     enum {
         LedInput_1_Led = 0,
         LedInput_2_Led = 1,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

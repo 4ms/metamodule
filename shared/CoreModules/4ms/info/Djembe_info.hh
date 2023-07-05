@@ -34,7 +34,7 @@ struct DjembeInfo : ModuleInfoBase {
         HitCvIn,
         StrikeCvIn,
         TriggerIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -44,6 +44,7 @@ struct DjembeInfo : ModuleInfoBase {
         KnobSharpness = 1,
         KnobHit = 2,
         KnobStrike_Amt = 3,
+        NumKnobs,
     };
     
     
@@ -53,10 +54,12 @@ struct DjembeInfo : ModuleInfoBase {
         InputHit_Cv = 2,
         InputStrike_Cv = 3,
         InputTrigger = 4,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

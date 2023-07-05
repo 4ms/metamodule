@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/QPLFO_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/QPLFO_info.hh"
+
+namespace MetaModule
+{
 
 class QPLFOCore : public CoreProcessor {
 	using Info = QPLFOInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

@@ -1,4 +1,4 @@
-#include "CoreModules/AudibleInstruments/BraidsCore.hh"
+#include "CoreModules/AudibleInstruments/core/BraidsCore.hh"
 #include "plugin.hh"
 
 using namespace rack;

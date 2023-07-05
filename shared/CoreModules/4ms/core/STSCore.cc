@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/STS_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/STS_info.hh"
+
+namespace MetaModule
+{
 
 class STSCore : public CoreProcessor {
 	using Info = STSInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

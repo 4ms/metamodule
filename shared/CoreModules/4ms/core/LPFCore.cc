@@ -1,10 +1,13 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/LPF_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/LPF_info.hh"
 #include "processors/lpf.h"
 #include "processors/moogLadder.h"
 #include "util/math.hh"
 #include "util/math_tables.hh"
+
+namespace MetaModule
+{
 
 class LPFCore : public CoreProcessor {
 	using Info = LPFInfo;
@@ -66,3 +69,5 @@ private:
 	float filterQ = 0;
 	// float cvAmount = 0;
 };
+
+} // namespace MetaModule

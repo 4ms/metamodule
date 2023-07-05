@@ -39,12 +39,12 @@ struct PIInfo : ModuleInfoBase {
         SustainKnob,
         Inv_LevelKnob,
         Env_DecayKnob,
-        InIn,
+        In,
         InputIn,
-        Env_OutOut,
-        Inv_OutOut,
-        GateOutOut,
-        AudioOutOut,
+        Env_Out,
+        Inv_Out,
+        GateOut,
+        AudioOut,
         Env_OutPOut,
         Env_OutNOut,
         Sens_LedLight,
@@ -63,16 +63,19 @@ struct PIInfo : ModuleInfoBase {
         KnobSustain = 2,
         KnobInv__Level = 3,
         KnobEnv__Decay = 4,
+        NumKnobs,
     };
     
     enum {
         SwitchLow__OR__Med__OR__High = 0,
         SwitchFollow__OR__Gen = 1,
+        NumSwitches,
     };
     
     enum {
         InputIn = 0,
         InputInput = 1,
+        NumInJacks,
     };
     
     enum {
@@ -82,6 +85,7 @@ struct PIInfo : ModuleInfoBase {
         OutputAudio_Out = 3,
         OutputEnv__Out_P = 4,
         OutputEnv__Out_N = 5,
+        NumOutJacks,
     };
     
     enum {
@@ -89,6 +93,7 @@ struct PIInfo : ModuleInfoBase {
         LedGate_Led = 1,
         LedP_Led = 2,
         LedN_Led = 3,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

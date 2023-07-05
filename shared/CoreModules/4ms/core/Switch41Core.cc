@@ -1,8 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/Switch41_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Switch41_info.hh"
 #include "processors/tools/clockPhase.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class Switch41Core : public CoreProcessor {
 	using Info = Switch41Info;
@@ -108,3 +111,5 @@ private:
 	bool cvMode = false;
 	ClockPhase cp;
 };
+
+} // namespace MetaModule

@@ -97,7 +97,7 @@ struct QCDInfo : ModuleInfoBase {
         DivMultCv4JackIn,
         ClkIn4In,
         Reset4In,
-        TapOutOut,
+        TapOut,
         InvOut1Out,
         Out1Out,
         InvOut2Out,
@@ -114,7 +114,7 @@ struct QCDInfo : ModuleInfoBase {
         Led3Light,
         InvLed4Light,
         Led4Light,
-        TapButtonButton,
+        TapButton,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -136,10 +136,12 @@ struct QCDInfo : ModuleInfoBase {
         KnobGate_Pw_4 = 13,
         KnobDiv_Mult_Cv_4 = 14,
         KnobDiv_Mult_4 = 15,
+        NumKnobs,
     };
     
     enum {
         SwitchTap_Button = 0,
+        NumSwitches,
     };
     
     enum {
@@ -159,6 +161,7 @@ struct QCDInfo : ModuleInfoBase {
         InputDiv_Mult_Cv_4_Jack = 13,
         InputClk_In_4 = 14,
         InputReset_4 = 15,
+        NumInJacks,
     };
     
     enum {
@@ -171,6 +174,7 @@ struct QCDInfo : ModuleInfoBase {
         OutputOut_3 = 6,
         OutputInv_Out_4 = 7,
         OutputOut_4 = 8,
+        NumOutJacks,
     };
     
     enum {
@@ -182,6 +186,7 @@ struct QCDInfo : ModuleInfoBase {
         LedLed_3 = 5,
         LedInv_Led_4 = 6,
         LedLed_4 = 7,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

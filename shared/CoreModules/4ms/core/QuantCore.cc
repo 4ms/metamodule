@@ -45,7 +45,7 @@ public:
 	}
 
 	void set_param(int param_id, float val) override {
-		if (param_id >= (Info::NumKnobs + Info::NumSwitches) || param_id < 0)
+		if (param_id >= (Info::NumKnobs) || param_id < 0)
 			return;
 
 		bool newVal = val > 0.1f;

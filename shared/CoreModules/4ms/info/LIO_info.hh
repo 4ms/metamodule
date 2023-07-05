@@ -74,6 +74,7 @@ struct LIOInfo : ModuleInfoBase {
     enum {
         KnobGain = 0,
         KnobLevel = 1,
+        NumKnobs,
     };
     
     
@@ -82,6 +83,7 @@ struct LIOInfo : ModuleInfoBase {
         InputLine_In_R = 1,
         InputMod_In_L = 2,
         InputMod_In_R = 3,
+        NumInJacks,
     };
     
     enum {
@@ -89,6 +91,7 @@ struct LIOInfo : ModuleInfoBase {
         OutputMod_Out_R = 1,
         OutputLine_Out_L = 2,
         OutputLine_Out_R = 3,
+        NumOutJacks,
     };
     
     enum {
@@ -108,6 +111,7 @@ struct LIOInfo : ModuleInfoBase {
         LedLed_R2_3 = 13,
         LedLed_R2_2 = 14,
         LedLed_R2_1 = 15,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

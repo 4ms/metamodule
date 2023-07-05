@@ -1,10 +1,13 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/SCM_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "SCMPlus/cv_skip.h"
+#include "info/SCM_info.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include "util/zip.hh"
+
+namespace MetaModule
+{
 
 class SCMCore : public CoreProcessor {
 	using Info = SCMInfo;
@@ -351,3 +354,5 @@ private:
 	// 	{.is_shuffling = false, .base_mult = 8},
 	// }};
 };
+
+} // namespace MetaModule

@@ -1,8 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/Seq4_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Seq4_info.hh"
 #include "processors/stepsequencer.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class Seq4Core : public CoreProcessor {
 	using Info = Seq4Info;
@@ -47,3 +50,5 @@ public:
 private:
 	StepSequencer seq{4};
 };
+
+} // namespace MetaModule

@@ -22,23 +22,26 @@ struct GRevInfo : ModuleInfoBase {
         BufferKnob,
         RevIn,
         InputIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
     
     enum {
         KnobBuffer = 0,
+        NumKnobs,
     };
     
     
     enum {
         InputRev = 0,
         InputInput = 1,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

@@ -328,6 +328,22 @@ def make_legacy_enum(item_prefix, elements):
         source += f"""
         {item_prefix}{k['legacy_enum_name']} = {str(i)},"""
         i = i + 1
+    if item_prefix == "Knob":
+           source += """
+        NumKnobs,"""
+    elif item_prefix == "Switch":
+           source += """
+        NumSwitches,"""
+    elif item_prefix == "Input":
+           source += """
+        NumInJacks,"""
+    elif item_prefix == "Output":
+           source += """
+        NumOutJacks,"""
+    elif item_prefix == "Led":
+           source += """
+        NumDiscreteLeds,"""
+
     source += f"""
     }};"""
     return source

@@ -24,7 +24,7 @@ struct CompInfo : ModuleInfoBase {
         CvKnob,
         CvJackIn,
         InputIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -32,16 +32,19 @@ struct CompInfo : ModuleInfoBase {
     enum {
         KnobOffset = 0,
         KnobCv = 1,
+        NumKnobs,
     };
     
     
     enum {
         InputCv_Jack = 0,
         InputInput = 1,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

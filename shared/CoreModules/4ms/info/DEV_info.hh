@@ -59,10 +59,10 @@ struct DEVInfo : ModuleInfoBase {
 }};
 
     enum class Elem {
-        RiseASliderSlider,
-        FallASliderSlider,
-        RiseBSliderSlider,
-        FallBSliderSlider,
+        RiseASlider,
+        FallASlider,
+        RiseBSlider,
+        FallBSlider,
         LevelAKnob,
         LevelBKnob,
         OffsetAKnob,
@@ -78,17 +78,17 @@ struct DEVInfo : ModuleInfoBase {
         FollowAIn,
         FollowBIn,
         TrigBIn,
-        AudioAInIn,
+        AudioAIn,
         VcaCvAIn,
         VcaCvBIn,
-        AudioBInIn,
+        AudioBIn,
         EorAOut,
         EofBOut,
         OrOut,
-        AudioAOutOut,
-        EnvAOutOut,
-        EnvBOutOut,
-        AudioBOutOut,
+        AudioAOut,
+        EnvAOut,
+        EnvBOut,
+        AudioBOut,
         RiseLedALight,
         FallLedALight,
         RiseLedBLight,
@@ -120,6 +120,7 @@ struct DEVInfo : ModuleInfoBase {
         KnobFall_A = 9,
         KnobRise_B = 10,
         KnobFall_B = 11,
+        NumKnobs,
     };
     
     enum {
@@ -129,6 +130,7 @@ struct DEVInfo : ModuleInfoBase {
         SwitchSlow_Med_Fast_Fall_B = 3,
         SwitchCycle_A = 4,
         SwitchCycle_B = 5,
+        NumSwitches,
     };
     
     enum {
@@ -143,6 +145,7 @@ struct DEVInfo : ModuleInfoBase {
         InputVca_Cv_A = 8,
         InputVca_Cv_B = 9,
         InputAudio_B_In = 10,
+        NumInJacks,
     };
     
     enum {
@@ -153,6 +156,7 @@ struct DEVInfo : ModuleInfoBase {
         OutputEnv_A_Out = 4,
         OutputEnv_B_Out = 5,
         OutputAudio_B_Out = 6,
+        NumOutJacks,
     };
     
     enum {
@@ -164,6 +168,7 @@ struct DEVInfo : ModuleInfoBase {
         LedEof_Led = 5,
         LedEnv_A_Led = 6,
         LedEnv_B_Led = 7,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

@@ -26,7 +26,7 @@ struct Seq4Info : ModuleInfoBase {
         _3Knob,
         _4Knob,
         ClockIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -36,15 +36,18 @@ struct Seq4Info : ModuleInfoBase {
         Knob_2 = 1,
         Knob_3 = 2,
         Knob_4 = 3,
+        NumKnobs,
     };
     
     
     enum {
         InputClock = 0,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

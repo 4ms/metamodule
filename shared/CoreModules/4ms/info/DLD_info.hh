@@ -78,7 +78,7 @@ struct DLDInfo : ModuleInfoBase {
         FeedbackBJackIn,
         TimeBJackIn,
         LoopAOut,
-        ClockOutOut,
+        ClockOut,
         LoopBOut,
         OutAOut,
         SendAOut,
@@ -88,7 +88,7 @@ struct DLDInfo : ModuleInfoBase {
         TimeBLedLight,
         P16_OR_1_8ThASwitch,
         P16_OR_1_8ThBSwitch,
-        PingButtonButton,
+        PingButton,
         ReverseAButton,
         HoldAButton,
         HoldBButton,
@@ -106,6 +106,7 @@ struct DLDInfo : ModuleInfoBase {
         KnobMix_A = 5,
         KnobMix_B = 6,
         KnobDelay_Feed_B = 7,
+        NumKnobs,
     };
     
     enum {
@@ -116,6 +117,7 @@ struct DLDInfo : ModuleInfoBase {
         SwitchHold_A = 4,
         SwitchHold_B = 5,
         SwitchReverse_B = 6,
+        NumSwitches,
     };
     
     enum {
@@ -134,6 +136,7 @@ struct DLDInfo : ModuleInfoBase {
         InputDelay_Feed_B_Jack = 12,
         InputFeedback_B_Jack = 13,
         InputTime_B_Jack = 14,
+        NumInJacks,
     };
     
     enum {
@@ -144,11 +147,13 @@ struct DLDInfo : ModuleInfoBase {
         OutputSend_A = 4,
         OutputSend_B = 5,
         OutputOut_B = 6,
+        NumOutJacks,
     };
     
     enum {
         LedTime_A_Led = 0,
         LedTime_B_Led = 1,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

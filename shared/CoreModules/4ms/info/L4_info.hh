@@ -53,7 +53,7 @@ struct L4Info : ModuleInfoBase {
         In3RIn,
         In4LIn,
         In4RIn,
-        HeadphoneOutOut,
+        HeadphoneOut,
         OutLeftOut,
         OutRightOut,
         Level1LedLight,
@@ -76,10 +76,12 @@ struct L4Info : ModuleInfoBase {
         KnobLevel_4 = 5,
         KnobHeadphone_Level = 6,
         KnobMain_Level = 7,
+        NumKnobs,
     };
     
     enum {
         SwitchMod___OR__Line = 0,
+        NumSwitches,
     };
     
     enum {
@@ -89,12 +91,14 @@ struct L4Info : ModuleInfoBase {
         InputIn_3_R = 3,
         InputIn_4_L = 4,
         InputIn_4_R = 5,
+        NumInJacks,
     };
     
     enum {
         OutputHeadphone_Out = 0,
         OutputOut_Left = 1,
         OutputOut_Right = 2,
+        NumOutJacks,
     };
     
     enum {
@@ -104,6 +108,7 @@ struct L4Info : ModuleInfoBase {
         LedLevel_4_Led = 3,
         LedOut_L_Led = 4,
         LedOut_R_Led = 5,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

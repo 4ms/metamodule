@@ -34,7 +34,7 @@ struct MixerInfo : ModuleInfoBase {
         In3In,
         In4In,
         InvOut,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -44,6 +44,7 @@ struct MixerInfo : ModuleInfoBase {
         KnobLevel_2 = 1,
         KnobLevel_3 = 2,
         KnobLevel_4 = 3,
+        NumKnobs,
     };
     
     
@@ -52,11 +53,13 @@ struct MixerInfo : ModuleInfoBase {
         InputIn_2 = 1,
         InputIn_3 = 2,
         InputIn_4 = 3,
+        NumInJacks,
     };
     
     enum {
         OutputInv = 0,
         OutputOut = 1,
+        NumOutJacks,
     };
     
 };

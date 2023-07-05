@@ -118,7 +118,7 @@ struct SMRInfo : ModuleInfoBase {
         InOddsIn,
         InEvensIn,
         RotateTrigLIn,
-        RotateCvInIn,
+        RotateCvIn,
         RotateTrigRIn,
         ScaleJackIn,
         Res_Q_JackIn,
@@ -188,6 +188,7 @@ struct SMRInfo : ModuleInfoBase {
         KnobRes__Q_ = 9,
         KnobMorph = 10,
         KnobSpread = 11,
+        NumKnobs,
     };
     
     enum {
@@ -203,6 +204,7 @@ struct SMRInfo : ModuleInfoBase {
         SwitchLock_Button_4 = 9,
         SwitchLock_Button_5 = 10,
         SwitchLock_Button_6 = 11,
+        NumSwitches,
     };
     
     enum {
@@ -225,6 +227,7 @@ struct SMRInfo : ModuleInfoBase {
         InputRes__Q__Jack = 16,
         InputMorph_Jack = 17,
         InputSpread_Jack = 18,
+        NumInJacks,
     };
     
     enum {
@@ -236,6 +239,7 @@ struct SMRInfo : ModuleInfoBase {
         OutputEnv__Out_6 = 5,
         OutputOdds = 6,
         OutputEvens = 7,
+        NumOutJacks,
     };
     
     enum {
@@ -266,6 +270,7 @@ struct SMRInfo : ModuleInfoBase {
         LedLed18__Rgb_ = 24,
         LedLed19__Rgb_ = 25,
         LedLed20__Rgb_ = 26,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

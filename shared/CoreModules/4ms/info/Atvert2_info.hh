@@ -34,17 +34,20 @@ struct Atvert2Info : ModuleInfoBase {
     enum {
         Knob_1 = 0,
         Knob_2 = 1,
+        NumKnobs,
     };
     
     
     enum {
         InputIn_1 = 0,
         InputIn_2 = 1,
+        NumInJacks,
     };
     
     enum {
         OutputOut_1 = 0,
         OutputOut_2 = 1,
+        NumOutJacks,
     };
     
 };

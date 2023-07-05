@@ -1,8 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/Prob8_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Prob8_info.hh"
 #include "processors/tools/clockPhase.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class Prob8Core : public CoreProcessor {
 	using Info = Prob8Info;
@@ -75,3 +78,5 @@ private:
 	float randNum = 0;
 	ClockPhase cp;
 };
+
+} // namespace MetaModule

@@ -20,9 +20,358 @@
       "tags": []
 	},
     {
+      "slug": "SHEV",
+      "name": "SHEV",
+      "description": "SHEV",
+      "tags": []
+    },
+    {
       "slug": "ENVVCA",
       "name": "ENVVCA",
       "description": "ENVVCA",
+      "tags": []
+    },
+    {
+      "slug": "DEV",
+      "name": "DEV",
+      "description": "DEV",
+      "tags": []
+    },
+    {
+      "slug": "Freeverb",
+      "name": "Freeverb",
+      "description": "Freeverb",
+      "tags": []
+    },
+    {
+      "slug": "STS",
+      "name": "STS",
+      "description": "STS",
+      "tags": []
+    },
+    {
+      "slug": "VCAM",
+      "name": "VCAM",
+      "description": "VCAM",
+      "tags": []
+    },
+    {
+      "slug": "Tapo",
+      "name": "Tapo",
+      "description": "Tapo",
+      "tags": []
+    },
+    {
+      "slug": "Shift",
+      "name": "Shift",
+      "description": "Shift",
+      "tags": []
+    },
+    {
+      "slug": "SISM",
+      "name": "SISM",
+      "description": "SISM",
+      "tags": []
+    },
+    {
+      "slug": "SH",
+      "name": "SH",
+      "description": "SH",
+      "tags": []
+    },
+    {
+      "slug": "SCM",
+      "name": "SCM",
+      "description": "SCM",
+      "tags": []
+    },
+    {
+      "slug": "RCD",
+      "name": "RCD",
+      "description": "RCD",
+      "tags": []
+    },
+    {
+      "slug": "QPLFO",
+      "name": "QPLFO",
+      "description": "QPLFO",
+      "tags": []
+    },
+    {
+      "slug": "QCD",
+      "name": "QCD",
+      "description": "QCD",
+      "tags": []
+    },
+    {
+      "slug": "PI",
+      "name": "PI",
+      "description": "PI",
+      "tags": []
+    },
+    {
+      "slug": "PEG",
+      "name": "PEG",
+      "description": "PEG",
+      "tags": []
+    },
+    {
+      "slug": "Mixer",
+      "name": "Mixer",
+      "description": "Mixer",
+      "tags": []
+    },
+    {
+      "slug": "LPG",
+      "name": "LPG",
+      "description": "LPG",
+      "tags": []
+    },
+    {
+      "slug": "LIO",
+      "name": "LIO",
+      "description": "LIO",
+      "tags": []
+    },
+    {
+      "slug": "L4",
+      "name": "L4",
+      "description": "L4",
+      "tags": []
+    },
+    {
+      "slug": "Gate8",
+      "name": "Gate8",
+      "description": "Gate8",
+      "tags": []
+    },
+    {
+      "slug": "Gate32",
+      "name": "Gate32",
+      "description": "Gate32",
+      "tags": []
+    },
+    {
+      "slug": "GRev",
+      "name": "GRev",
+      "description": "GRev",
+      "tags": []
+    },
+    {
+      "slug": "Fade",
+      "name": "Fade",
+      "description": "Fade",
+      "tags": []
+    },
+    {
+      "slug": "DLD",
+      "name": "DLD",
+      "description": "DLD",
+      "tags": []
+    },
+    {
+      "slug": "Comp",
+      "name": "Comp",
+      "description": "Comp",
+      "tags": []
+    },
+    {
+      "slug": "CLKM",
+      "name": "CLKM",
+      "description": "CLKM",
+      "tags": []
+    },
+
+    {
+      "slug": "CLKD",
+      "name": "CLKD",
+      "description": "CLKD",
+      "tags": []
+    },
+    {
+      "slug": "ADEnv",
+      "name": "ADEnv",
+      "description": "ADEnv",
+      "tags": []
+    },
+    {
+      "slug": "Sequant",
+      "name": "Sequant",
+      "description": "Sequant",
+      "tags": []
+    },
+    {
+      "slug": "Verb",
+      "name": "Verb",
+      "description": "Verb",
+      "tags": []
+    },
+    {
+      "slug": "Switch41",
+      "name": "Switch41",
+      "description": "Switch41",
+      "tags": []
+    },
+    {
+      "slug": "Switch14",
+      "name": "Switch14",
+      "description": "Switch14",
+      "tags": []
+    },
+    {
+      "slug": "Seq8",
+      "name": "Seq8",
+      "description": "Seq8",
+      "tags": []
+    },
+    {
+      "slug": "Seq4",
+      "name": "Seq4",
+      "description": "Seq4",
+      "tags": []
+    },
+    {
+      "slug": "Quant",
+      "name": "Quant",
+      "description": "Quant",
+      "tags": []
+    },
+    {
+      "slug": "Prob8",
+      "name": "Prob8",
+      "description": "Prob8",
+      "tags": []
+    },
+    {
+      "slug": "Octave",
+      "name": "Octave",
+      "description": "Octave",
+      "tags": []
+    },
+    {
+      "slug": "MNMX",
+      "name": "MNMX",
+      "description": "MNMX",
+      "tags": []
+    },
+    {
+      "slug": "LPF",
+      "name": "LPF",
+      "description": "LPF",
+      "tags": []
+    },
+    {
+      "slug": "StMix",
+      "name": "StMix",
+      "description": "StMix",
+      "tags": []
+    },
+    {
+      "slug": "Source",
+      "name": "Source",
+      "description": "Source",
+      "tags": []
+    },
+    {
+      "slug": "Slew",
+      "name": "Slew",
+      "description": "Slew",
+      "tags": []
+    },
+    {
+      "slug": "PitchShift",
+      "name": "PitchShift",
+      "description": "PitchShift",
+      "tags": []
+    },
+    {
+      "slug": "Pan",
+      "name": "Pan",
+      "description": "Pan",
+      "tags": []
+    },
+    {
+      "slug": "Noise",
+      "name": "Noise",
+      "description": "Noise",
+      "tags": []
+    },
+    {
+      "slug": "MultiLFO",
+      "name": "MultiLFO",
+      "description": "MultiLFO",
+      "tags": []
+    },
+    {
+      "slug": "KPLS",
+      "name": "KPLS",
+      "description": "KPLS",
+      "tags": []
+    },
+    {
+      "slug": "InfOsc",
+      "name": "InfOsc",
+      "description": "InfOsc",
+      "tags": []
+    },
+    {
+      "slug": "HPF",
+      "name": "HPF",
+      "description": "HPF",
+      "tags": []
+    },
+    {
+      "slug": "Gate",
+      "name": "Gate",
+      "description": "Gate",
+      "tags": []
+    },
+    {
+      "slug": "Follow",
+      "name": "Follow",
+      "description": "Follow",
+      "tags": []
+    },
+    {
+      "slug": "FM",
+      "name": "FM",
+      "description": "FM",
+      "tags": []
+    },
+    {
+      "slug": "Drum",
+      "name": "Drum",
+      "description": "Drum",
+      "tags": []
+    },
+    {
+      "slug": "Djembe",
+      "name": "Djembe",
+      "description": "Djembe",
+      "tags": []
+    },
+    {
+      "slug": "Detune",
+      "name": "Detune",
+      "description": "Detune",
+      "tags": []
+    },
+    {
+      "slug": "ComplexEG",
+      "name": "ComplexEG",
+      "description": "ComplexEG",
+      "tags": []
+    },
+    {
+      "slug": "BPF",
+      "name": "BPF",
+      "description": "BPF",
+      "tags": []
+    },
+    {
+      "slug": "Atvert2",
+      "name": "Atvert2",
+      "description": "Atvert2",
       "tags": []
     },
     {
@@ -30,6 +379,30 @@
       "name": "SMR",
       "description": "Spectral Multiband Resonator",
       "tags": []
-    }
+    },
+	{
+      "slug": "EnOsc",
+      "name": "EnOsc",
+      "description": "Ensemble Oscillator",
+      "tags": []
+	},
+	{
+      "slug": "BuffMult",
+      "name": "BuffMult",
+      "description": "Buffered Multiple",
+      "tags": []
+	},
+	{
+      "slug": "DualAtenuverter",
+      "name": "DualAtenuverter",
+      "description": "Dual Attenuverter",
+      "tags": []
+	},
+	{
+      "slug": "Braids",
+      "name": "Braids",
+      "description": "Braids",
+      "tags": []
+	}
   ]
 }

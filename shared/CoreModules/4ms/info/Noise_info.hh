@@ -29,6 +29,7 @@ struct NoiseInfo : ModuleInfoBase {
     enum {
         OutputWhite = 0,
         OutputPink = 1,
+        NumOutJacks,
     };
     
 };

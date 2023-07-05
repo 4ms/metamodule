@@ -28,7 +28,7 @@ struct LPGInfo : ModuleInfoBase {
         InputIn,
         PingIn,
         CvJackIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -37,6 +37,7 @@ struct LPGInfo : ModuleInfoBase {
         KnobLevel = 0,
         KnobCv = 1,
         KnobDecay = 2,
+        NumKnobs,
     };
     
     
@@ -44,10 +45,12 @@ struct LPGInfo : ModuleInfoBase {
         InputInput = 0,
         InputPing = 1,
         InputCv_Jack = 2,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

@@ -26,7 +26,7 @@ struct GateInfo : ModuleInfoBase {
         LengthCvIn,
         DelayCvIn,
         InputIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -34,6 +34,7 @@ struct GateInfo : ModuleInfoBase {
     enum {
         KnobLength = 0,
         KnobDelay = 1,
+        NumKnobs,
     };
     
     
@@ -41,10 +42,12 @@ struct GateInfo : ModuleInfoBase {
         InputLength_Cv = 0,
         InputDelay_Cv = 1,
         InputInput = 2,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

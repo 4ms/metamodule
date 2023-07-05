@@ -96,6 +96,7 @@ struct SISMInfo : ModuleInfoBase {
         KnobShift_3 = 5,
         KnobScale_4 = 6,
         KnobShift_4 = 7,
+        NumKnobs,
     };
     
     
@@ -104,6 +105,7 @@ struct SISMInfo : ModuleInfoBase {
         InputIn_2 = 1,
         InputIn_3 = 2,
         InputIn_4 = 3,
+        NumInJacks,
     };
     
     enum {
@@ -115,6 +117,7 @@ struct SISMInfo : ModuleInfoBase {
         OutputN_Slice = 5,
         OutputMix__Sw_ = 6,
         OutputMix = 7,
+        NumOutJacks,
     };
     
     enum {
@@ -132,6 +135,7 @@ struct SISMInfo : ModuleInfoBase {
         LedLed_P_Mix__Sw_ = 11,
         LedLed_N_Mix = 12,
         LedLed_P_Mix = 13,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

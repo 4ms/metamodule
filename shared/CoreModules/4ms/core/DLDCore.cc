@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/DLD_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/DLD_info.hh"
+
+namespace MetaModule
+{
 
 class DLDCore : public CoreProcessor {
 	using Info = DLDInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

@@ -34,7 +34,7 @@ struct FreeverbInfo : ModuleInfoBase {
         TimeCvIn,
         DampCvIn,
         RatioCvIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -44,6 +44,7 @@ struct FreeverbInfo : ModuleInfoBase {
         KnobTime = 1,
         KnobDamp = 2,
         KnobMix = 3,
+        NumKnobs,
     };
     
     
@@ -53,10 +54,12 @@ struct FreeverbInfo : ModuleInfoBase {
         InputTime_Cv = 2,
         InputDamp_Cv = 3,
         InputRatio_Cv = 4,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

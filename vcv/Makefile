@@ -31,34 +31,38 @@ CXXFLAGS += -DVCVRACK -Wno-missing-braces
 LDFLAGS +=
 
 # Befaco
-INCLUDES += -I$(SHARED_DIR)/CoreModules/BefacO
+INCLUDES += -I$(SHARED_DIR)/CoreModules/Befaco
 SOURCES += src/modules/Befaco/DualAtenuverter.cc
-SOURCES += $(SHARED_DIR)/CoreModules/Befaco/DualAtenuverterCore.cc
+SOURCES += $(SHARED_DIR)/CoreModules/Befaco/core/DualAtenuverterCore.cc
 
 # AudibleInstruments
 INCLUDES += -I$(SHARED_DIR)/CoreModules/AudibleInstruments
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/BraidsCore.cc
+INCLUDES += -I$(SHARED_DIR)/CoreModules/AudibleInstruments/core
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/BraidsCore.cc
 SOURCES += src/modules/AudibleInstruments/Braids.cpp
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/stmlib/utils/random.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/stmlib/dsp/atan.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/stmlib/dsp/units.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/analog_oscillator.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/digital_oscillator.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/braids/resources.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/resources.cc
 
-# INCLUDES += -I$(SHARED_DIR)/CoreModules/AudibleInstruments
+# 4ms
+INCLUDES += -I$(SHARED_DIR)/CoreModules/4ms
+SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/4ms/core/*Core.cc)
+# SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/ENVVCACore.cc
+# SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/SMRCore.cc
+SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/data.cc
+SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/dynamic_data.cc
+SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/easiglib/numtypes.cc
+
+# plugin
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard src/hub/*.cc)
 SOURCES += $(wildcard src/comm/*.cc)
 SOURCES += $(wildcard src/mapping/*.cc)
-# SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/modules/*.cc)
-SOURCES += $(SHARED_DIR)/CoreModules/modules/ENVVCACore.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/SMRCore.cc
-# SOURCES += $(SHARED_DIR)/CoreModules/Befaco/DualAtenuverterCore.cc
-# SOURCES += $(SHARED_DIR)/CoreModules/Befaco/EvenVCOCore.cc
-# SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/BraidsCore.cc
 
 SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
@@ -68,9 +72,6 @@ SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
-SOURCES += $(SHARED_DIR)/CoreModules/modules/enosc/data.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/enosc/dynamic_data.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/enosc/easiglib/numtypes.cc
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.

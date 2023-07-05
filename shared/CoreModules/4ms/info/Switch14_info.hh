@@ -23,7 +23,7 @@ struct Switch14Info : ModuleInfoBase {
 }};
 
     enum class Elem {
-        InIn,
+        In,
         ResetIn,
         ClockIn,
         CvIn,
@@ -42,6 +42,7 @@ struct Switch14Info : ModuleInfoBase {
         InputReset = 1,
         InputClock = 2,
         InputCv = 3,
+        NumInJacks,
     };
     
     enum {
@@ -49,6 +50,7 @@ struct Switch14Info : ModuleInfoBase {
         OutputOut_2 = 1,
         OutputOut_3 = 2,
         OutputOut_4 = 3,
+        NumOutJacks,
     };
     
 };

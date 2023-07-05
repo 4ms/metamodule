@@ -35,16 +35,19 @@ struct FollowInfo : ModuleInfoBase {
         KnobRise = 0,
         KnobFall = 1,
         KnobThresh = 2,
+        NumKnobs,
     };
     
     
     enum {
         InputInput = 0,
+        NumInJacks,
     };
     
     enum {
         OutputGate = 0,
         OutputEnv = 1,
+        NumOutJacks,
     };
     
 };

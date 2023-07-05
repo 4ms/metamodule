@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/Gate8_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Gate8_info.hh"
+
+namespace MetaModule
+{
 
 class Gate8Core : public CoreProcessor {
 	using Info = Gate8Info;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

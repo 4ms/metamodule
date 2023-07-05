@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/SISM_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/SISM_info.hh"
+
+namespace MetaModule
+{
 
 class SISMCore : public CoreProcessor {
 	using Info = SISMInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

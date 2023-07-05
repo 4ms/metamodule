@@ -32,11 +32,13 @@ struct MNMXInfo : ModuleInfoBase {
     enum {
         InputIn_A = 0,
         InputIn_B = 1,
+        NumInJacks,
     };
     
     enum {
         OutputMin = 0,
         OutputMax = 1,
+        NumOutJacks,
     };
     
 };

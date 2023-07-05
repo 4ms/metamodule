@@ -55,12 +55,12 @@ struct TapoInfo : ModuleInfoBase {
         FeedbackJackIn,
         ModulationJackIn,
         DryWetJackIn,
-        AudioInIn,
+        AudioIn,
         RepeatJackIn,
         TapIn,
         VelocityIn,
         ExtClockIn,
-        GateOutOut,
+        GateOut,
         AudioOut1Out,
         AudioOut2Out,
         TapLedLight,
@@ -86,6 +86,7 @@ struct TapoInfo : ModuleInfoBase {
         KnobFeedback = 3,
         KnobModulation = 4,
         KnobDry_Wet = 5,
+        NumKnobs,
     };
     
     enum {
@@ -100,6 +101,7 @@ struct TapoInfo : ModuleInfoBase {
         SwitchRepeat = 8,
         SwitchTap_Sensor = 9,
         SwitchDelete = 10,
+        NumSwitches,
     };
     
     enum {
@@ -112,16 +114,19 @@ struct TapoInfo : ModuleInfoBase {
         InputTap = 6,
         InputVelocity = 7,
         InputExt_Clock = 8,
+        NumInJacks,
     };
     
     enum {
         OutputGate_Out = 0,
         OutputAudio_Out_1 = 1,
         OutputAudio_Out_2 = 2,
+        NumOutJacks,
     };
     
     enum {
         LedTap_Led = 0,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/LPG_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/LPG_info.hh"
+
+namespace MetaModule
+{
 
 class LPGCore : public CoreProcessor {
 	using Info = LPGInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

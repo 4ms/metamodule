@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/LIO_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/LIO_info.hh"
+
+namespace MetaModule
+{
 
 class LIOCore : public CoreProcessor {
 	using Info = LIOInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

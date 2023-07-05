@@ -70,12 +70,12 @@ struct SHEVInfo : ModuleInfoBase {
 }};
 
     enum class Elem {
-        RiseASliderSlider,
-        FallASliderSlider,
-        RiseBSliderSlider,
-        FallBSliderSlider,
-        ShapeASliderSlider,
-        ShapeBSliderSlider,
+        RiseASlider,
+        FallASlider,
+        RiseBSlider,
+        FallBSlider,
+        ShapeASlider,
+        ShapeBSlider,
         LevelAKnob,
         LevelBKnob,
         OffsetAKnob,
@@ -94,13 +94,13 @@ struct SHEVInfo : ModuleInfoBase {
         TimeCvAIn,
         TimeCvBIn,
         FollowBIn,
-        AudioAInIn,
-        AudioBInIn,
+        AudioAIn,
+        AudioBIn,
         VcaCvAIn,
         VcaCvBIn,
         EorAOut,
-        EnvAOutOut,
-        EnvBOutOut,
+        EnvAOut,
+        EnvBOut,
         EofBOut,
         OutAOut,
         Lin5VAOut,
@@ -146,6 +146,7 @@ struct SHEVInfo : ModuleInfoBase {
         KnobFall_A = 13,
         KnobRise_B = 14,
         KnobFall_B = 15,
+        NumKnobs,
     };
     
     enum {
@@ -157,6 +158,7 @@ struct SHEVInfo : ModuleInfoBase {
         SwitchCycle_Ar_Asr_B = 5,
         SwitchCycle_A = 6,
         SwitchCycle_B = 7,
+        NumSwitches,
     };
     
     enum {
@@ -172,6 +174,7 @@ struct SHEVInfo : ModuleInfoBase {
         InputAudio_B_In = 9,
         InputVca_Cv_A = 10,
         InputVca_Cv_B = 11,
+        NumInJacks,
     };
     
     enum {
@@ -184,6 +187,7 @@ struct SHEVInfo : ModuleInfoBase {
         OutputOr = 6,
         OutputLin_5V_B = 7,
         OutputOut_B = 8,
+        NumOutJacks,
     };
     
     enum {
@@ -197,6 +201,7 @@ struct SHEVInfo : ModuleInfoBase {
         LedEnv_B_Led = 7,
         LedEor_A_Led = 8,
         LedEof_B_Led = 9,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

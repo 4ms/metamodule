@@ -32,7 +32,7 @@ struct QuantInfo : ModuleInfoBase {
         RootCvIn,
         ThruOut,
         PreOut,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -41,6 +41,7 @@ struct QuantInfo : ModuleInfoBase {
         KnobScale = 0,
         KnobRoot = 1,
         KnobTranspose = 2,
+        NumKnobs,
     };
     
     
@@ -48,12 +49,14 @@ struct QuantInfo : ModuleInfoBase {
         InputInput = 0,
         InputScale_Cv = 1,
         InputRoot_Cv = 2,
+        NumInJacks,
     };
     
     enum {
         OutputThru = 0,
         OutputPre = 1,
         OutputOut = 2,
+        NumOutJacks,
     };
     
 };

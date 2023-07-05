@@ -1,7 +1,10 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/MNMX_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/MNMX_info.hh"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class MNMXCore : public CoreProcessor {
 	using Info = MNMXInfo;
@@ -51,3 +54,5 @@ private:
 	float inA = 0;
 	float inB = 0;
 };
+
+} // namespace MetaModule

@@ -30,6 +30,7 @@ struct SourceInfo : ModuleInfoBase {
     enum {
         Knob_1 = 0,
         Knob_2 = 1,
+        NumKnobs,
     };
     
     
@@ -37,6 +38,7 @@ struct SourceInfo : ModuleInfoBase {
     enum {
         Output_1 = 0,
         Output_2 = 1,
+        NumOutJacks,
     };
     
 };

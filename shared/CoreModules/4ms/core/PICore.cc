@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/PI_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/PI_info.hh"
+
+namespace MetaModule
+{
 
 class PICore : public CoreProcessor {
 	using Info = PIInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

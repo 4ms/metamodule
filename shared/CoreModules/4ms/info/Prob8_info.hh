@@ -38,7 +38,7 @@ struct Prob8Info : ModuleInfoBase {
         ClockIn,
         ResetIn,
         InvOut,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -52,17 +52,20 @@ struct Prob8Info : ModuleInfoBase {
         Knob_6 = 5,
         Knob_7 = 6,
         Knob_8 = 7,
+        NumKnobs,
     };
     
     
     enum {
         InputClock = 0,
         InputReset = 1,
+        NumInJacks,
     };
     
     enum {
         OutputInv = 0,
         OutputOut = 1,
+        NumOutJacks,
     };
     
 };

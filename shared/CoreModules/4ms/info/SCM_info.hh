@@ -53,7 +53,7 @@ struct SCMInfo : ModuleInfoBase {
         ShuffleKnob,
         SkipKnob,
         PwKnob,
-        ClkInIn,
+        ClkIn,
         ResyncIn,
         RotateJackIn,
         SlipJackIn,
@@ -91,11 +91,13 @@ struct SCMInfo : ModuleInfoBase {
         KnobShuffle = 2,
         KnobSkip = 3,
         KnobPw = 4,
+        NumKnobs,
     };
     
     enum {
         Switch_4X_Fast = 0,
         SwitchMute = 1,
+        NumSwitches,
     };
     
     enum {
@@ -108,6 +110,7 @@ struct SCMInfo : ModuleInfoBase {
         InputPw_Jack = 6,
         Input_4X_Fast_Jack = 7,
         InputMute_Jack = 8,
+        NumInJacks,
     };
     
     enum {
@@ -119,6 +122,7 @@ struct SCMInfo : ModuleInfoBase {
         OutputS6 = 5,
         OutputS8 = 6,
         OutputX8 = 7,
+        NumOutJacks,
     };
     
     enum {
@@ -131,6 +135,7 @@ struct SCMInfo : ModuleInfoBase {
         LedLed_S6 = 6,
         LedLed_S8 = 7,
         LedLed_X8 = 8,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

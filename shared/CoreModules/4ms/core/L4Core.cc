@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/L4_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/L4_info.hh"
+
+namespace MetaModule
+{
 
 class L4Core : public CoreProcessor {
 	using Info = L4Info;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

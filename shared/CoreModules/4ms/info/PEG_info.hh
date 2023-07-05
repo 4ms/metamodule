@@ -112,6 +112,7 @@ struct PEGInfo : ModuleInfoBase {
         KnobScale_2 = 5,
         KnobCurve_1 = 6,
         KnobCurve_2 = 7,
+        NumKnobs,
     };
     
     enum {
@@ -121,6 +122,7 @@ struct PEGInfo : ModuleInfoBase {
         SwitchPing_2 = 3,
         SwitchBiNPolar_1 = 4,
         SwitchBiNPolar_2 = 5,
+        NumSwitches,
     };
     
     enum {
@@ -137,6 +139,7 @@ struct PEGInfo : ModuleInfoBase {
         InputCurve_2_Jack = 10,
         InputSkew_2_Jack = 11,
         InputDiv_2_Jack = 12,
+        NumInJacks,
     };
     
     enum {
@@ -149,6 +152,7 @@ struct PEGInfo : ModuleInfoBase {
         OutputEof_2 = 6,
         OutputHalf_R = 7,
         OutputP5V_Env_2 = 8,
+        NumOutJacks,
     };
     
     enum {
@@ -158,6 +162,7 @@ struct PEGInfo : ModuleInfoBase {
         LedEof_Led_1 = 3,
         LedEof_Led_2 = 4,
         LedHalf_R = 5,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

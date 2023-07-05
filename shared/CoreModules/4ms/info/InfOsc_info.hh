@@ -54,7 +54,7 @@ struct InfOscInfo : ModuleInfoBase {
         PitchCvIn,
         RangeCvIn,
         FmCvIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -68,6 +68,7 @@ struct InfOscInfo : ModuleInfoBase {
         KnobPhase = 5,
         KnobModshape = 6,
         KnobWave = 7,
+        NumKnobs,
     };
     
     
@@ -83,10 +84,12 @@ struct InfOscInfo : ModuleInfoBase {
         InputPitch_Cv = 8,
         InputRange_Cv = 9,
         InputFm_Cv = 10,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/VCAM_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/VCAM_info.hh"
+
+namespace MetaModule
+{
 
 class VCAMCore : public CoreProcessor {
 	using Info = VCAMInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

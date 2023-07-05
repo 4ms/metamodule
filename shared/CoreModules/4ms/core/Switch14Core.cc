@@ -1,8 +1,11 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/Switch14_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Switch14_info.hh"
 #include "processors/tools/clockPhase.h"
 #include "util/math.hh"
+
+namespace MetaModule
+{
 
 class Switch14Core : public CoreProcessor {
 	using Info = Switch14Info;
@@ -117,3 +120,5 @@ private:
 	int stepNum = 0;
 	float inputSignal = 0;
 };
+
+} // namespace MetaModule

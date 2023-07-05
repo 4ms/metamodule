@@ -1,10 +1,12 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/ComplexEG_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
+#include "info/ComplexEG_info.hh"
 #include "processors/envelope.h"
 #include "util/math.hh"
 using namespace MathTools;
+
+namespace MetaModule
+{
 
 class ComplexEGCore : public CoreProcessor {
 	using Info = ComplexEGInfo;
@@ -124,3 +126,5 @@ private:
 	int currentStage = 0;
 	Envelope e;
 };
+
+} // namespace MetaModule

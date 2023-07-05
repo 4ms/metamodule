@@ -21,8 +21,8 @@ struct SlewInfo : ModuleInfoBase {
     enum class Elem {
         RiseKnob,
         FallKnob,
-        InIn,
-        OutOut,
+        In,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -30,15 +30,18 @@ struct SlewInfo : ModuleInfoBase {
     enum {
         KnobRise = 0,
         KnobFall = 1,
+        NumKnobs,
     };
     
     
     enum {
         InputIn = 0,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

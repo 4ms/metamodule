@@ -30,7 +30,7 @@ struct Switch41Info : ModuleInfoBase {
         ClockIn,
         CvIn,
         ResetIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -45,10 +45,12 @@ struct Switch41Info : ModuleInfoBase {
         InputClock = 4,
         InputCv = 5,
         InputReset = 6,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

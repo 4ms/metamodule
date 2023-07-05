@@ -41,7 +41,7 @@ struct RCDInfo : ModuleInfoBase {
 }};
 
     enum class Elem {
-        ClkInIn,
+        ClkIn,
         RotateIn,
         ResetIn,
         D1Out,
@@ -79,12 +79,14 @@ struct RCDInfo : ModuleInfoBase {
         SwitchMax_Div_2 = 3,
         SwitchSpread = 4,
         SwitchAutoNReset = 5,
+        NumSwitches,
     };
     
     enum {
         InputClk_In = 0,
         InputRotate = 1,
         InputReset = 2,
+        NumInJacks,
     };
     
     enum {
@@ -96,6 +98,7 @@ struct RCDInfo : ModuleInfoBase {
         OutputD6 = 5,
         OutputD7 = 6,
         OutputD8 = 7,
+        NumOutJacks,
     };
     
     enum {
@@ -108,6 +111,7 @@ struct RCDInfo : ModuleInfoBase {
         LedLed_D6 = 6,
         LedLed_D7 = 7,
         LedLed_D8 = 8,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

@@ -25,7 +25,7 @@ struct OctaveInfo : ModuleInfoBase {
         FilterKnob,
         CvIn,
         InputIn,
-        OutOut,
+        Out,
         SubButton,
     };
 
@@ -34,19 +34,23 @@ struct OctaveInfo : ModuleInfoBase {
     enum {
         KnobOctave = 0,
         KnobFilter = 1,
+        NumKnobs,
     };
     
     enum {
         SwitchSub = 0,
+        NumSwitches,
     };
     
     enum {
         InputCv = 0,
         InputInput = 1,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

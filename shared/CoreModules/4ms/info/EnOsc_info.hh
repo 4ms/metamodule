@@ -63,10 +63,10 @@ struct EnOscInfo : ModuleInfoBase {
         FreezeJackIn,
         OutAOut,
         OutBOut,
-        ScaleSwitchSwitch,
-        CrossFmSwitchSwitch,
-        TwistSwitchSwitch,
-        WarpSwitchSwitch,
+        ScaleSwitch,
+        CrossFmSwitch,
+        TwistSwitch,
+        WarpSwitch,
         LearnButton,
         FreezeButton,
     };
@@ -83,6 +83,7 @@ struct EnOscInfo : ModuleInfoBase {
         KnobTwist = 6,
         KnobDetune = 7,
         KnobWarp = 8,
+        NumKnobs,
     };
     
     enum {
@@ -92,6 +93,7 @@ struct EnOscInfo : ModuleInfoBase {
         SwitchWarp_Switch = 3,
         SwitchLearn = 4,
         SwitchFreeze = 5,
+        NumSwitches,
     };
     
     enum {
@@ -105,11 +107,13 @@ struct EnOscInfo : ModuleInfoBase {
         InputTwist_Jack = 7,
         InputWarp_Jack = 8,
         InputFreeze_Jack = 9,
+        NumInJacks,
     };
     
     enum {
         OutputOut_A = 0,
         OutputOut_B = 1,
+        NumOutJacks,
     };
     
 };

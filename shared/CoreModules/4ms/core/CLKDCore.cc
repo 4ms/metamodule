@@ -1,10 +1,13 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/CLKD_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/CLKD_info.hh"
 #include "processors/tools/clockPhase.h"
 #include "util/math.hh"
 
 using namespace MathTools;
+
+namespace MetaModule
+{
 
 class CLKDCore : public CoreProcessor {
 	using Info = CLKDInfo;
@@ -70,3 +73,5 @@ private:
 
 	ClockPhase cp;
 };
+
+} // namespace MetaModule

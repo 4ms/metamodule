@@ -63,12 +63,14 @@ struct ENVVCAInfo : ModuleInfoBase {
         KnobEnv_Level_Slider = 2,
         KnobRise_Cv = 3,
         KnobFall_Cv = 4,
+        NumKnobs,
     };
     
     enum {
         SwitchRise_Switch = 0,
         SwitchFall_Switch = 1,
         SwitchCycle = 2,
+        NumSwitches,
     };
     
     enum {
@@ -77,18 +79,21 @@ struct ENVVCAInfo : ModuleInfoBase {
         InputCycle = 2,
         InputFollow = 3,
         InputAudio_In = 4,
+        NumInJacks,
     };
     
     enum {
         OutputEnv = 0,
         OutputEor = 1,
         OutputAudio_Out = 2,
+        NumOutJacks,
     };
     
     enum {
         LedRise_Light = 0,
         LedFall_Light = 1,
         LedEor_Light = 2,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

@@ -26,7 +26,7 @@ struct ShiftInfo : ModuleInfoBase {
         MixKnob,
         CoarseCvIn,
         InputIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -35,16 +35,19 @@ struct ShiftInfo : ModuleInfoBase {
         KnobCoarse = 0,
         KnobFine = 1,
         KnobMix = 2,
+        NumKnobs,
     };
     
     
     enum {
         InputCoarse_Cv = 0,
         InputInput = 1,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/QCD_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/QCD_info.hh"
+
+namespace MetaModule
+{
 
 class QCDCore : public CoreProcessor {
 	using Info = QCDInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

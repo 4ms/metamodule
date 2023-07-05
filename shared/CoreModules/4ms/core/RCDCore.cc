@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/RCD_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/RCD_info.hh"
+
+namespace MetaModule
+{
 
 class RCDCore : public CoreProcessor {
 	using Info = RCDInfo;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

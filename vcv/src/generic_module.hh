@@ -7,7 +7,7 @@
 #include "widgets/vcv_widget_creator.hh"
 
 template<Derived<MetaModule::ModuleInfoBase> INFO>
-struct GenericModuleNew {
+struct GenericModule {
 	static rack::Model *create() {
 		return rack::createModel<Module, Widget>(INFO::slug.data());
 	}

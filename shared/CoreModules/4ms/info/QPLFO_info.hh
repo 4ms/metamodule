@@ -88,6 +88,7 @@ struct QPLFOInfo : ModuleInfoBase {
         KnobSkew_2 = 1,
         KnobSkew_3 = 2,
         KnobSkew_4 = 3,
+        NumKnobs,
     };
     
     enum {
@@ -99,6 +100,7 @@ struct QPLFOInfo : ModuleInfoBase {
         SwitchOn_3 = 5,
         SwitchPing_4 = 6,
         SwitchOn_4 = 7,
+        NumSwitches,
     };
     
     enum {
@@ -114,6 +116,7 @@ struct QPLFOInfo : ModuleInfoBase {
         InputPing_4_Jack = 9,
         InputSkew_4_Jack = 10,
         InputReset_4 = 11,
+        NumInJacks,
     };
     
     enum {
@@ -121,6 +124,7 @@ struct QPLFOInfo : ModuleInfoBase {
         OutputOut_2 = 1,
         OutputOut_3 = 2,
         OutputOut_4 = 3,
+        NumOutJacks,
     };
     
     enum {
@@ -128,6 +132,7 @@ struct QPLFOInfo : ModuleInfoBase {
         LedLed_2 = 1,
         LedLed_3 = 2,
         LedLed_4 = 3,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

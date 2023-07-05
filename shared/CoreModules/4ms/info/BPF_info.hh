@@ -25,7 +25,7 @@ struct BPFInfo : ModuleInfoBase {
         QKnob,
         CvIn,
         InputIn,
-        OutOut,
+        Out,
         ModeButton,
     };
 
@@ -34,19 +34,23 @@ struct BPFInfo : ModuleInfoBase {
     enum {
         KnobCutoff = 0,
         KnobQ = 1,
+        NumKnobs,
     };
     
     enum {
         SwitchMode = 0,
+        NumSwitches,
     };
     
     enum {
         InputCv = 0,
         InputInput = 1,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

@@ -86,11 +86,11 @@ struct SequantInfo : ModuleInfoBase {
         ClockIn,
         Start_ResetIn,
         StopIn,
-        GateInIn,
+        GateIn,
         RepeatCvIn,
-        ClockOutOut,
+        ClockOut,
         Start_EndOut,
-        GateOutOut,
+        GateOut,
         Out1Out,
         Out2Out,
         Step1LedLight,
@@ -132,11 +132,13 @@ struct SequantInfo : ModuleInfoBase {
         KnobChance = 21,
         KnobRoot = 22,
         KnobRepeat = 23,
+        NumKnobs,
     };
     
     enum {
         SwitchStart_Stop = 0,
         SwitchSelect = 1,
+        NumSwitches,
     };
     
     enum {
@@ -145,6 +147,7 @@ struct SequantInfo : ModuleInfoBase {
         InputStop = 2,
         InputGate_In = 3,
         InputRepeat_Cv = 4,
+        NumInJacks,
     };
     
     enum {
@@ -153,6 +156,7 @@ struct SequantInfo : ModuleInfoBase {
         OutputGate_Out = 2,
         OutputOut_1 = 3,
         OutputOut_2 = 4,
+        NumOutJacks,
     };
     
     enum {
@@ -164,6 +168,7 @@ struct SequantInfo : ModuleInfoBase {
         LedStep_6_Led = 5,
         LedStep_7_Led = 6,
         LedStep_8_Led = 7,
+        NumDiscreteLeds,
     };
 };
 } // namespace MetaModule

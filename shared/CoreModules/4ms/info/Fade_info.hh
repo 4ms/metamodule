@@ -24,13 +24,14 @@ struct FadeInfo : ModuleInfoBase {
         CvIn,
         In1In,
         In2In,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
     
     enum {
         KnobFade = 0,
+        NumKnobs,
     };
     
     
@@ -38,10 +39,12 @@ struct FadeInfo : ModuleInfoBase {
         InputCv = 0,
         InputIn_1 = 1,
         InputIn_2 = 2,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

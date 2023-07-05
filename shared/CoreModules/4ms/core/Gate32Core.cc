@@ -1,6 +1,9 @@
 #include "CoreModules/coreProcessor.h"
-#include "info/Gate32_info.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "info/Gate32_info.hh"
+
+namespace MetaModule
+{
 
 class Gate32Core : public CoreProcessor {
 	using Info = Gate32Info;
@@ -37,3 +40,5 @@ public:
 
 private:
 };
+
+} // namespace MetaModule

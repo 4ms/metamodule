@@ -21,24 +21,27 @@ struct CLKDInfo : ModuleInfoBase {
     enum class Elem {
         DivideKnob,
         CvIn,
-        ClkInIn,
-        ClkOutOut,
+        ClkIn,
+        ClkOut,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
     
     enum {
         KnobDivide = 0,
+        NumKnobs,
     };
     
     
     enum {
         InputCv = 0,
         InputClk_In = 1,
+        NumInJacks,
     };
     
     enum {
         OutputClk_Out = 0,
+        NumOutJacks,
     };
     
 };

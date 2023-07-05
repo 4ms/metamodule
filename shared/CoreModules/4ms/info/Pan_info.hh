@@ -22,7 +22,7 @@ struct PanInfo : ModuleInfoBase {
     enum class Elem {
         PanKnob,
         CvIn,
-        InIn,
+        In,
         Out1Out,
         Out2Out,
     };
@@ -31,17 +31,20 @@ struct PanInfo : ModuleInfoBase {
     
     enum {
         KnobPan = 0,
+        NumKnobs,
     };
     
     
     enum {
         InputCv = 0,
         InputIn = 1,
+        NumInJacks,
     };
     
     enum {
         OutputOut_1 = 0,
         OutputOut_2 = 1,
+        NumOutJacks,
     };
     
 };

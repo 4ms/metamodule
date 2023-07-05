@@ -32,7 +32,7 @@ struct PitchShiftInfo : ModuleInfoBase {
         PitchCvIn,
         WindowCvIn,
         MixCvIn,
-        OutOut,
+        Out,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -42,6 +42,7 @@ struct PitchShiftInfo : ModuleInfoBase {
         KnobFine = 1,
         KnobWindow = 2,
         KnobMix = 3,
+        NumKnobs,
     };
     
     
@@ -50,10 +51,12 @@ struct PitchShiftInfo : ModuleInfoBase {
         InputPitch_Cv = 1,
         InputWindow_Cv = 2,
         InputMix_Cv = 3,
+        NumInJacks,
     };
     
     enum {
         OutputOut = 0,
+        NumOutJacks,
     };
     
 };

@@ -111,22 +111,22 @@ struct VCAMInfo : ModuleInfoBase {
         Out2Out,
         Out3Out,
         Out4Out,
-        A1ButtonButton,
-        A2ButtonButton,
-        A3ButtonButton,
-        A4ButtonButton,
-        B1ButtonButton,
-        B2ButtonButton,
-        B3ButtonButton,
-        B4ButtonButton,
-        C1ButtonButton,
-        C2ButtonButton,
-        C3ButtonButton,
-        C4ButtonButton,
-        D1ButtonButton,
-        D2ButtonButton,
-        D3ButtonButton,
-        D4ButtonButton,
+        A1Button,
+        A2Button,
+        A3Button,
+        A4Button,
+        B1Button,
+        B2Button,
+        B3Button,
+        B4Button,
+        C1Button,
+        C2Button,
+        C3Button,
+        C4Button,
+        D1Button,
+        D2Button,
+        D3Button,
+        D4Button,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted
@@ -148,6 +148,7 @@ struct VCAMInfo : ModuleInfoBase {
         KnobD2_Level = 13,
         KnobD3_Level = 14,
         KnobD4_Level = 15,
+        NumKnobs,
     };
     
     enum {
@@ -167,6 +168,7 @@ struct VCAMInfo : ModuleInfoBase {
         SwitchD2_Button = 13,
         SwitchD3_Button = 14,
         SwitchD4_Button = 15,
+        NumSwitches,
     };
     
     enum {
@@ -190,6 +192,7 @@ struct VCAMInfo : ModuleInfoBase {
         InputD2_Jack = 17,
         InputD3_Jack = 18,
         InputD4_Jack = 19,
+        NumInJacks,
     };
     
     enum {
@@ -197,6 +200,7 @@ struct VCAMInfo : ModuleInfoBase {
         OutputOut_2 = 1,
         OutputOut_3 = 2,
         OutputOut_4 = 3,
+        NumOutJacks,
     };
     
 };
