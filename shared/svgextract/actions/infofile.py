@@ -310,8 +310,11 @@ def list_elem_names(elems):
         return ""
     source = ""
     for k in elems:
+        name = k['enum_name']
+        if not k['enum_name'].endswith(k['category']):
+            name = k['enum_name']+k['category']
         source += f"""
-        {k['enum_name']}{k['category']},"""
+        {name},"""
     return source
 
 

@@ -21,37 +21,37 @@ struct ENVVCAInfo : ModuleInfoBase {
 		GateJackInput4ms{to_mm<72>(22.3), to_mm<72>(227.06), "Trigger", ""},
 		GateJackInput4ms{to_mm<72>(57.25), to_mm<72>(254.25), "Cycle", ""},
 		AnalogJackInput4ms{to_mm<72>(22.3), to_mm<72>(278.73), "Follow", ""},
-		AnalogJackInput4ms{to_mm<72>(35.87), to_mm<72>(322.47), "In", ""},
+		AnalogJackInput4ms{to_mm<72>(35.87), to_mm<72>(322.47), "Audio In", ""},
 		AnalogJackOutput4ms{to_mm<72>(92.03), to_mm<72>(227.06), "Env", ""},
 		GateJackOutput4ms{to_mm<72>(92.03), to_mm<72>(278.73), "EOR", ""},
-		AnalogJackOutput4ms{to_mm<72>(78.57), to_mm<72>(322.5), "Out", ""},
-		RedGreenBlueLight{to_mm<72>(45.11), to_mm<72>(174.84), "Rise LED", ""},
-		RedGreenBlueLight{to_mm<72>(69.34), to_mm<72>(174.84), "Fall LED", ""},
-		RedGreenBlueLight{to_mm<72>(106.41), to_mm<72>(256.6), "EOR LED", ""},
-		Toggle3pos{to_mm<72>(23.19), to_mm<72>(43.305), "Slow Med Fast Rise", ""},
-		Toggle3pos{to_mm<72>(57.33), to_mm<72>(43.305), "Slow Med Fast Fall", ""},
+		AnalogJackOutput4ms{to_mm<72>(78.57), to_mm<72>(322.5), "Audio Out", ""},
+		RedGreenBlueLight{to_mm<72>(45.11), to_mm<72>(174.84), "Rise Light", ""},
+		RedGreenBlueLight{to_mm<72>(69.34), to_mm<72>(174.84), "Fall Light", ""},
+		RedGreenBlueLight{to_mm<72>(106.41), to_mm<72>(256.6), "EOR Light", ""},
+		Toggle3pos{to_mm<72>(23.19), to_mm<72>(43.305), "Rise Switch", ""},
+		Toggle3pos{to_mm<72>(57.33), to_mm<72>(43.305), "Fall Switch", ""},
 		LatchingButtonMonoLight{to_mm<72>(92.17), to_mm<72>(41.65), "Cycle", ""},
 }};
 
     enum class Elem {
-        RiseSliderSlider,
-        FallSliderSlider,
-        EnvLevelSliderSlider,
+        RiseSlider,
+        FallSlider,
+        EnvLevelSlider,
         RiseCvKnob,
         FallCvKnob,
         TimeCvIn,
         TriggerIn,
         CycleIn,
         FollowIn,
-        InIn,
+        AudioIn,
         EnvOut,
         EorOut,
-        OutOut,
-        RiseLedLight,
-        FallLedLight,
-        EorLedLight,
-        SlowMedFastRiseSwitch,
-        SlowMedFastFallSwitch,
+        AudioOut,
+        RiseLight,
+        FallLight,
+        EorLight,
+        RiseSwitch,
+        FallSwitch,
         CycleButton,
     };
 
@@ -66,8 +66,8 @@ struct ENVVCAInfo : ModuleInfoBase {
     };
     
     enum {
-        SwitchSlow_Med_Fast_Rise = 0,
-        SwitchSlow_Med_Fast_Fall = 1,
+        SwitchRise_Switch = 0,
+        SwitchFall_Switch = 1,
         SwitchCycle = 2,
     };
     
@@ -76,19 +76,19 @@ struct ENVVCAInfo : ModuleInfoBase {
         InputTrigger = 1,
         InputCycle = 2,
         InputFollow = 3,
-        InputIn = 4,
+        InputAudio_In = 4,
     };
     
     enum {
         OutputEnv = 0,
         OutputEor = 1,
-        OutputOut = 2,
+        OutputAudio_Out = 2,
     };
     
     enum {
-        LedRise_Led = 0,
-        LedFall_Led = 1,
-        LedEor_Led = 2,
+        LedRise_Light = 0,
+        LedFall_Light = 1,
+        LedEor_Light = 2,
     };
 };
 } // namespace MetaModule
