@@ -64,8 +64,8 @@ start_gdb:
 ## Simulator
 
 simulate:
-	$(info Simulating screens...)
-	@cd ../screen_simulator && cargo run
+	$(info Building and running simulation...)
+	@cd ../simulator && make && build/simulator 
 
 ## Tests
 
