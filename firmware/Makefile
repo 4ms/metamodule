@@ -40,74 +40,7 @@ uimg:
 bootloader:
 	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp10_conf.hh
 
-## Module images
-brands := 4ms Befaco AudibleInstruments
-brands_svg_dirs := $(foreach brand,$(brands),$(SHARED)/CoreModules/$(brand)/svg)
-
-# Existing *_info.svg files:
-MODULEIMG_SVGS := $(foreach dir,$(brands_svg_dirs),$(wildcard $(dir)/*_info.svg))
-
-# Generated *_info.hh files:
-INFO_FILES := $(subst /svg/,/info/,$(MODULEIMG_SVGS:.svg=.hh))
-
-# Generated *_artwork_240/120.c files
-MODULEIMG_PNG240S := $(subst $(SHARED)/CoreModules/,src/pages/images/,$(subst /svg/,/modules/,$(MODULEIMG_SVGS:_info.svg=_artwork_240.png)))
-MODULEIMG_PNG120S := $(subst $(SHARED)/CoreModules/,src/pages/images/,$(subst /svg/,/modules/,$(MODULEIMG_SVGS:_info.svg=_artwork_120.png)))
-MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
-MODULEIMG_C += $(MODULEIMG_PNG120S:.png=.c)
-
-# Processes all svg files to info files
-# Overwrites even if svg file has not been modified
-info_files: 
-	for f in $(MODULEIMG_SVGS); \
-	do python3 $(SHARED)/svgextract/svgextract.py createinfo $${f} ../info/; done;
-
-# Or this works, but needs each brand specified, which is OK for now because only 4ms has svgs
- $(SHARED)/CoreModules/4ms/info/%_info.hh: $(SHARED)/CoreModules/4ms/svg/%_info.svg
-	$(info $@: Creating ModuleInfo header file [and coremodule stub if needed])
-	python3 $(SHARED)/svgextract/svgextract.py createInfo $< ../info/
-
-
-# Force re-process all faceplate images to LVGL format
-images-4ms:
-	for f in $(MODULEIMG_SVGS); \
-	do f2="src/pages/images/$${f#$(SHARED)/CoreModules/}"; \
-	f3="$${f2%_info.svg}_artwork_240.c";  \
-	f4="$${f3/svg/modules}"; \
-	do python3 $(SHARED)/svgextract/svgextract.py createLvglFaceplate $${f} $${f4}; \
-	done;
-
-images: $(MODULEIMG_C)
-
-# Generate LVGL Faceplate artwork for 4ms modules:
-src/pages/images/4ms/modules/%_artwork_120.c src/pages/images/4ms/modules/%_artwork_240.c: $(SHARED)/CoreModules/4ms/svg/%_info.svg
-	$(info)
-	$(info -------)
-	$(info $*: Creating 120px and 240px-height lvgl imgs for "$*" from full-sized svg artwork $<)
-	python3 $(SHARED)/svgextract/svgextract.py createLvglFaceplate $< src/pages/images/4ms/modules/$*
-	$(info $*: Adding to LVGL image_list.hh if needed)
-	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork src/pages/images/image_list.hh
-
-
-# Generate LVGL Faceplate artwork for Befaco modules:
-src/pages/images/Befaco/modules/%_artwork_120.c src/pages/images/Befaco/modules/%_artwork_240.c: $(SHARED)/CoreModules/Befaco/vcv_svg/%.svg
-	$(info)
-	$(info -------)
-	$(info $*: Creating 120px and 240px-height lvgl imgs for "$*" from full-sized svg artwork $<)
-	python3 $(SHARED)/svgextract/svgextract.py createLvglFaceplate $< src/pages/images/Befaco/modules/$* all
-	$(info $*: Adding to LVGL image_list.hh if needed)
-	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork src/pages/images/image_list.hh
-
-# Generate LVGL Faceplate artwork for AudibleInstruments modules:
-src/pages/images/AudibleInstruments/modules/%_artwork_120.c src/pages/images/AudibleInstruments/modules/%_artwork_240.c: $(SHARED)/CoreModules/AudibleInstruments/vcv_svg/%.svg
-	$(info)
-	$(info -------)
-	$(info $*: Creating 120px and 240px-height lvgl imgs for "$*" from full-sized svg artwork $<)
-	python3 $(SHARED)/svgextract/svgextract.py createLvglFaceplate $< src/pages/images/AudibleInstruments/modules/$* all
-	$(info $*: Adding to LVGL image_list.hh if needed)
-	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork src/pages/images/image_list.hh
-
-.SECONDARY: $(MODULEIMG_PNG240S) $(MODULEIMG_PNG120S)
+include makefile_moduleinfo.mk
 
 ## Cleaning
 
