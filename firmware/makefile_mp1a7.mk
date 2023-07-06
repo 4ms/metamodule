@@ -130,7 +130,6 @@ INCLUDES += -I$(SHARED)/cpputil
 # GUI
 SOURCES += $(wildcard src/pages/elements/*.cc)
 SOURCES += src/pages/page_manager.cc
-SOURCES += $(SHARED)/CoreModules/meta-module-hub/panel_medium.cc
 
 # Modules: CoreModules and faceplate artwork 
 ifeq "$(USE_FEWER_MODULES)" "1"
