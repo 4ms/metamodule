@@ -1,6 +1,6 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
-USE_FEWER_MODULES ?= 0
+USE_FEWER_MODULES ?= 1
 
 #brands := 4ms Befaco AudibleInstruments
 
@@ -132,6 +132,7 @@ SOURCES += $(wildcard src/pages/elements/*.cc)
 SOURCES += src/pages/page_manager.cc
 
 # Modules: CoreModules and faceplate artwork 
+SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
 ifeq "$(USE_FEWER_MODULES)" "1"
 modulesAudible := Braids 
 modulesBefaco := DualAtenuverter EvenVCO 

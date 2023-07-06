@@ -5,7 +5,7 @@
 
 struct PanelDef {
 	static constexpr uint32_t PanelID = 1;
-	static constexpr char typeID[20] = "PanelMedium";
+	static constexpr char typeID[20] = "HubMedium";
 
 	static constexpr uint32_t NumAudioIn = 6;
 	static constexpr uint32_t NumAudioOut = 8;

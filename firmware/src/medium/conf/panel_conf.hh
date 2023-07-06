@@ -1,2 +1,2 @@
 #pragma once
-#include "CoreModules/meta-module-hub/panel_medium_defs.hh"
+#include "CoreModules/hub/panel_medium_defs.hh"
