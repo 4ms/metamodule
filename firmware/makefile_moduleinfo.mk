@@ -3,7 +3,10 @@
 
 brands := 4ms Befaco AudibleInstruments
 
+# Paths:
 svgscript := $(SHARED)/svgextract/svgextract.py
+vcv_faceplate_artwork_dir := ../vcv/res/modules
+#lvgl_image_dir := src/pages/images
 image_list_header := src/pages/images/image_list.hh
 
 # All dirs potentially containing module-info svg files:
@@ -28,13 +31,18 @@ png_files += $(subst $(SHARED)/CoreModules/,src/pages/images/,$(subst /svg/,/mod
 png_files += $(subst $(SHARED)/CoreModules/,src/pages/images/,$(subst /vcv_svg/,/modules/,$(artwork_only_svg_files:.svg=_artwork_240.png)))
 png_files += $(subst $(SHARED)/CoreModules/,src/pages/images/,$(subst /vcv_svg/,/modules/,$(artwork_only_svg_files:.svg=_artwork_120.png)))
 
-MODULEIMG_C := $(png_files:.png=.c)
+lvgl_faceplate_imgs := $(png_files:.png=.c)
+
+# FIXME: this only works with 4ms
+vcv_artwork_files := $(subst $(SHARED)/CoreModules/4ms/svg,$(vcv_faceplate_artwork_dir),$(svginfo_files:_info.svg=-artwork.svg))
+
+################################## Rules ##############################
 
 # Processes all modified module-info svg files to module-info files
 module-infos: $(info_file_list)
 
 # Generate all faceplate images to LVGL format (only 4ms for now)
-images: $(MODULEIMG_C)
+images: $(lvgl_faceplate_imgs)
 
 .SECONDEXPANSION:
 

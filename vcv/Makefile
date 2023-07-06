@@ -51,8 +51,6 @@ SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/resources.cc
 # 4ms
 INCLUDES += -I$(SHARED_DIR)/CoreModules/4ms
 SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/4ms/core/*Core.cc)
-# SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/ENVVCACore.cc
-# SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/SMRCore.cc
 SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/data.cc
 SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/dynamic_data.cc
 SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/easiglib/numtypes.cc
@@ -131,25 +129,25 @@ patch_convert_tests:
 win_dist:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
 
+include ../firmware/makefile_moduleinfo.mk
 
-METAMODULE_ARTWORK_DIR = res/modules
-METAMODULE_INFO_DIR = $(SHARED)/CoreModules/info
-METAMODULE_PNG_DIR = ../firmware/src/pages/images
-METAMODULE_COREMODULE_DIR = $(SHARED)/CoreModules
+# METAMODULE_ARTWORK_DIR = res/modules
+# METAMODULE_INFO_DIR = $(SHARED)/CoreModules/info
+# METAMODULE_COREMODULE_DIR = $(SHARED)/CoreModules
 
-MODULEIMG_SVGS = $(wildcard $(METAMODULE_COREMODULE_DIR)/svg/*_info.svg)
-INFO_FILES = $(addprefix $(METAMODULE_INFO_DIR)/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
-MODULE_ARTWORK_FILES = $(addprefix $(METAMODULE_ARTWORK_DIR)/, $(subst _info,-artwork,$(notdir $(MODULEIMG_SVGS))))
+# MODULEIMG_SVGS = $(wildcard $(METAMODULE_COREMODULE_DIR)/svg/*_info.svg)
+# INFO_FILES = $(addprefix $(METAMODULE_INFO_DIR)/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
+# MODULE_ARTWORK_FILES = $(addprefix $(METAMODULE_ARTWORK_DIR)/, $(subst _info,-artwork,$(notdir $(MODULEIMG_SVGS))))
 
-modules: $(INFO_FILES) $(MODULE_ARTWORK_FILES) $(SHARED)/svgextract/svgextract.py
+# modules: $(INFO_FILES) $(MODULE_ARTWORK_FILES) $(SHARED)/svgextract/svgextract.py
 
-$(METAMODULE_ARTWORK_DIR)/%-artwork.svg: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
-	$(info Creating VCV artwork image from $<)
-	@python3 $(SHARED)/svgextract/svgextract.py extractforvcv $< $@
+# $(METAMODULE_ARTWORK_DIR)/%-artwork.svg: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
+# 	$(info Creating VCV artwork image from $<)
+# 	@python3 $(SHARED)/svgextract/svgextract.py extractforvcv $< $@
 
-$(METAMODULE_INFO_DIR)/%_info.hh: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
-	$(info Creating ModuleInfo header file from $<)
-	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
+# $(METAMODULE_INFO_DIR)/%_info.hh: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
+# 	$(info Creating ModuleInfo header file from $<)
+# 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
 
 .PHONY: all plugin tests core_tests vcv_tests util_tests axo_tests patch_convert_tests compile_commands run
