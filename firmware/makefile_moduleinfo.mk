@@ -5,7 +5,7 @@ brands := 4ms Befaco AudibleInstruments
 
 # Paths:
 svgscript := $(SHARED)/svgextract/svgextract.py
-vcv_faceplate_artwork_dir := ../vcv/res/modules
+vcv_faceplate_artwork_dir := res/modules
 #lvgl_image_dir := src/pages/images
 image_list_header := src/pages/images/image_list.hh
 
@@ -42,7 +42,9 @@ vcv_artwork_files := $(subst $(SHARED)/CoreModules/4ms/svg,$(vcv_faceplate_artwo
 module-infos: $(info_file_list)
 
 # Generate all faceplate images to LVGL format (only 4ms for now)
-images: $(lvgl_faceplate_imgs)
+firmware-images: $(lvgl_faceplate_imgs)
+
+vcv-images: $(vcv_artwork_files)
 
 .SECONDEXPANSION:
 
@@ -75,5 +77,7 @@ images: $(lvgl_faceplate_imgs)
 	$(info $(notdir $*): Adding to image_list.hh if needed)
 	@python3 $(svgscript) appendimglist $(notdir $*)_artwork $(image_list_header)
 
+%-artwork.svg: $$(subst $(vcv_faceplate_artwork_dir),$(SHARED)/CoreModules/4ms/svg,$$*)_info.svg
+	python3 $(svgscript) createVcvSvg $< $@ 4ms
 
 .SECONDARY: $(png_files)

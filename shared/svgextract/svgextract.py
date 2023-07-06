@@ -41,8 +41,10 @@ createInfo [input svg file name] {{optional output path for ModuleInfo file}}
 
 createVcvSvg [input SVG file name] [output artwork SVG file name]
     Saves a new VCV artwork SVG file with the components layer removed.
-    Also makes sure the Slug (found in the SVG file) exists as a model in the 
-    VCV plugin, and adds it if not.
+
+addToVcvPlugin [slug] [brand name]
+    Makes sure the Slug exists as a model in the VCV plugin, and adds it if not.
+    Potentially modifies vcv/plugin.json, vcv/src/plugin.cc, vcv/src/plugin.hh
 
 createCoreModule [slug] {{optional output path for CoreModule file}}
     Creates a stub CoreModule C++ class for the slug passed into the first
@@ -112,6 +114,12 @@ def parse_args(args):
         vcv.extractForVcv(inputfile, output)
         return
 
+    if cmd == 'addtovcvplugin':
+        slug = inputfile
+        brand = output
+        vcv.appendPluginFiles(slug, brand)
+        return
+
     if cmd == 'createlvglfaceplate':
         layer = args.pop(0) if len(args) > 0 else "faceplate"
         lvgl.faceplateSvgToLVGL(inputfile, output, layer)
@@ -124,6 +132,7 @@ def parse_args(args):
         scale = args.pop(0) if len(args) > 0 else 67
         lvgl.componentSvgToLVGL(inputfile, output, scale)
         return
+
 
 if __name__ == "__main__":
     try:

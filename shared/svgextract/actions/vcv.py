@@ -18,8 +18,8 @@ def extractForVcv(svgFilename, artworkFilename = None, slug = ""):
     root = tree.getroot()
     components_group = get_components_group(root)
 
-    slug, _ = find_slug_and_modulename(components_group)
-    appendPluginFiles(slug)
+    # slug, _ = find_slug_and_modulename(components_group)
+    # appendPluginFiles(slug)
 
     components_group.clear()
     Log("Removed components layer")
@@ -27,7 +27,7 @@ def extractForVcv(svgFilename, artworkFilename = None, slug = ""):
     Log(f"Wrote artwork svg file for vcv: {artworkFilename}")
 
 
-def appendPluginFiles(slug, pluginDir = None, description=""):
+def appendPluginFiles(slug, brand, pluginDir = None, description=""):
     if pluginDir == None:
         pluginDir = os.getenv('METAMODULE_VCV_DIR')
         if pluginDir is None:
@@ -45,8 +45,8 @@ def appendPluginFiles(slug, pluginDir = None, description=""):
     appendToFileAfterMarker(plugincc, marker, "\n\t" + newText, newText)
     marker = "// include and define models below here\n"
     newText = f'''
-#include "CoreModules/info/{slug}_info.hh"
-Model* {modelName} = GenericModule<{slug}Info>::create();
+#include "CoreModules/{brand}/info/{slug}_info.hh"
+rack::Model* {modelName} = GenericModule<{slug}Info>::create();
 '''
     appendToFileAfterMarker(plugincc, marker, newText)
 
