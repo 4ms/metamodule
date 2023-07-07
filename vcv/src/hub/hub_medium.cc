@@ -1,5 +1,5 @@
 #include "CoreModules/elements/element_counter.hh"
-#include "CoreModules/meta-module-hub/HubMedium_info.hh"
+#include "CoreModules/hub/HubMedium_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "comm/comm_module.hh"
 #include "hub/hub_elements.hh"
