@@ -10,6 +10,7 @@ AlignOperands : "AlignAfterOperator"
 AllowAllArgumentsOnNextLine : "true"
 AllowShortBlocksOnASingleLine : "true"
 AllowShortFunctionsOnASingleLine: "false"
+AllowShortLambdasOnASingleLine: "Inline"
 AllowShortIfStatementsOnASingleLine : "Never"
 AlwaysBreakTemplateDeclarations : "true"
 BinPackArguments: false
@@ -39,7 +40,7 @@ ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth : 4
 IndentCaseLabels : "true"
 IndentPPDirectives : "None"
-LambdaBodyIndentation : "OuterScope"
+LambdaBodyIndentation : "Signature"
 ReflowComments : "false"
 RequiresClausePosition : "WithPreceding"
 SpaceAfterCStyleCast : "false"

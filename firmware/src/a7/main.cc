@@ -95,7 +95,3 @@ void main() {
 		__WFI();
 	}
 }
-
-void recover_from_task_fault() {
-	main();
-}

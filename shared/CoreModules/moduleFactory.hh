@@ -1,69 +1,59 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "CoreModules/module_info_base.hh"
-#include "etl/string.h"
-#include "etl/unordered_map.h"
+#include "CoreModules/elements/element_info_view.hh"
 #include "module_type_slug.hh"
+#include "util/seq_map.hh"
 #include "util/static_string.hh"
 #include <array>
-
-//TODO: Get rid of dependency on etl by using our own map or unordered_map
+#include <memory>
 
 class ModuleFactory {
 	using CreateModuleFunc = std::unique_ptr<CoreProcessor> (*)();
+	using ModuleInfoView = MetaModule::ModuleInfoView;
 
 public:
 	ModuleFactory() = delete;
 
 	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate, ModuleInfoView info) {
-		auto m = creation_funcs.find(typeslug.c_str());
-		bool already_exists = !(m == creation_funcs.end());
-
-		infos[typeslug.c_str()] = info;
-		creation_funcs[typeslug.c_str()] = funcCreate;
+		bool already_exists = creation_funcs.key_exists(typeslug);
+		infos.insert(typeslug, info);
+		creation_funcs.insert(typeslug, funcCreate);
 		return already_exists;
 	}
 
 	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug) {
-		auto m = creation_funcs.find(typeslug.c_str());
-		if (m != creation_funcs.end())
-			return m->second();
+		if (auto f_create = creation_funcs.get(typeslug))
+			return (*f_create)();
 		else
 			return nullptr;
 	}
 
 	static std::string_view getModuleTypeName(ModuleTypeSlug typeslug) {
-		auto m = infos.find(typeslug.c_str());
-		if (m != infos.end())
-			return m->second.module_name;
-		else
-			return "Not found.";
+		if (auto m = infos.get(typeslug))
+			return m->description;
+		return "Not found.";
 	}
 
 	static ModuleInfoView &getModuleInfo(ModuleTypeSlug typeslug) {
-		auto m = infos.find(typeslug.c_str());
-		if (m != infos.end())
-			return m->second;
+		if (auto m = infos.get(typeslug))
+			return *m;
 		else
-			return nullmodule;
+			return nullinfo;
 	}
 
 	// Returns true if slug is valid and registered.
 	static bool isValidSlug(ModuleTypeSlug typeslug) {
-		auto m = infos.find(typeslug.c_str());
-		return (m != infos.end());
+		return infos.key_exists(typeslug);
 	}
 
-	static inline ModuleInfoView nullmodule{};
+	static inline ModuleInfoView nullinfo{};
 
 private:
 	static constexpr int MAX_MODULE_TYPES = 512;
-	//Note: we can't use a string_view for the map key because the map is populated on initialization
-	//and the char[] that the string_view points to might not be initialized yet -- resulting in an element with el.first.length() == 0
-	//Ideally, we'd use StaticString<31>, but there is some functionality missing in StaticString which map requires
-	// We could try using string_view and lazy init. Within the module Core.cpp: std::string_view get_slug() { static char _slug[] = "EnOsc"; return _slug; }
-	static inline etl::unordered_map<etl::string<31>, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
-	static inline etl::unordered_map<etl::string<31>, ModuleInfoView, MAX_MODULE_TYPES> infos;
+
+	static inline SeqMap<ModuleTypeSlug, CreateModuleFunc, MAX_MODULE_TYPES> creation_funcs;
+	static inline SeqMap<ModuleTypeSlug, ModuleInfoView, MAX_MODULE_TYPES> infos;
+
 	// static constexpr auto _sz_creation_funcs = sizeof(creation_funcs); //48k
 	// static constexpr auto _sz_infos = sizeof(infos);				   //112k
 	// static constexpr auto _sz_view = sizeof(ModuleInfoView); //136B

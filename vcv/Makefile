@@ -24,16 +24,44 @@ FLAGS += $(INCLUDES)
 FLAGS += -g2
 
 CFLAGS +=
-CXXFLAGS += 
+CXXFLAGS += -DVCVRACK -Wno-missing-braces
 
 # Careful about linking to shared libraries, since you can't assume much about the user's environment and library search path.
 # Static libraries are fine, but they should be added to this plugin's build system.
 LDFLAGS +=
 
-# Add source files to the build
+# Befaco
+INCLUDES += -I$(SHARED_DIR)/CoreModules/Befaco
+SOURCES += src/modules/Befaco/DualAtenuverter.cc
+SOURCES += $(SHARED_DIR)/CoreModules/Befaco/core/DualAtenuverterCore.cc
+
+# AudibleInstruments
+INCLUDES += -I$(SHARED_DIR)/CoreModules/AudibleInstruments
+INCLUDES += -I$(SHARED_DIR)/CoreModules/AudibleInstruments/core
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/BraidsCore.cc
+SOURCES += src/modules/AudibleInstruments/Braids.cpp
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
+SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/resources.cc
+
+# 4ms
+INCLUDES += -I$(SHARED_DIR)/CoreModules/4ms
+SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/4ms/core/*Core.cc)
+SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/data.cc
+SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/dynamic_data.cc
+SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/easiglib/numtypes.cc
+
+# plugin
 SOURCES += $(wildcard src/*.cpp)
 SOURCES += $(wildcard src/*.cc)
-SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/modules/*.cc)
+SOURCES += $(wildcard src/hub/*.cc)
+SOURCES += $(wildcard src/comm/*.cc)
+SOURCES += $(wildcard src/mapping/*.cc)
+
 SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
 SOURCES += $(SHARED_DIR)/patch_convert/ryml/ryml_serial.cc
@@ -42,9 +70,6 @@ SOURCES += $(SHARED_DIR)/patch_convert/patch_to_yaml.cc
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 
-SOURCES += $(SHARED_DIR)/CoreModules/modules/enosc/data.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/enosc/dynamic_data.cc
-SOURCES += $(SHARED_DIR)/CoreModules/modules/enosc/easiglib/numtypes.cc
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.
@@ -60,7 +85,9 @@ ifeq ($(UNAME_S),Darwin)
 CXXFLAGS += -mmacosx-version-min=10.15 
 endif
 
-./build/src/shared/CoreModules/EnOscCore.cc.o: CXXFLAGS+=-Wno-missing-braces
+./build/src/plugin.cc.o: CXXFLAGS+=-Wno-missing-braces
+./build/src/hub/hub_medium.cc.o: CXXFLAGS+=-Wno-missing-braces
+./build/src/shared/CoreModules/%Core.cc.o: CXXFLAGS+=-Wno-missing-braces
 ./build/src/shared/CoreModules/enosc/dynamic_data.cc.o: CXXFLAGS+=-Wno-unknown-pragmas
 
 all: plugin res tests
@@ -102,25 +129,25 @@ patch_convert_tests:
 win_dist:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
 
+include ../firmware/makefile_moduleinfo.mk
 
-METAMODULE_ARTWORK_DIR = res/modules
-METAMODULE_INFO_DIR = $(SHARED)/CoreModules/info
-METAMODULE_PNG_DIR = ../firmware/src/pages/images
-METAMODULE_COREMODULE_DIR = $(SHARED)/CoreModules
+# METAMODULE_ARTWORK_DIR = res/modules
+# METAMODULE_INFO_DIR = $(SHARED)/CoreModules/info
+# METAMODULE_COREMODULE_DIR = $(SHARED)/CoreModules
 
-MODULEIMG_SVGS = $(wildcard $(METAMODULE_COREMODULE_DIR)/svg/*_info.svg)
-INFO_FILES = $(addprefix $(METAMODULE_INFO_DIR)/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
-MODULE_ARTWORK_FILES = $(addprefix $(METAMODULE_ARTWORK_DIR)/, $(subst _info,-artwork,$(notdir $(MODULEIMG_SVGS))))
+# MODULEIMG_SVGS = $(wildcard $(METAMODULE_COREMODULE_DIR)/svg/*_info.svg)
+# INFO_FILES = $(addprefix $(METAMODULE_INFO_DIR)/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
+# MODULE_ARTWORK_FILES = $(addprefix $(METAMODULE_ARTWORK_DIR)/, $(subst _info,-artwork,$(notdir $(MODULEIMG_SVGS))))
 
-modules: $(INFO_FILES) $(MODULE_ARTWORK_FILES) $(SHARED)/svgextract/svgextract.py
+# modules: $(INFO_FILES) $(MODULE_ARTWORK_FILES) $(SHARED)/svgextract/svgextract.py
 
-$(METAMODULE_ARTWORK_DIR)/%-artwork.svg: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
-	$(info Creating VCV artwork image from $<)
-	@python3 $(SHARED)/svgextract/svgextract.py extractforvcv $< $@
+# $(METAMODULE_ARTWORK_DIR)/%-artwork.svg: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
+# 	$(info Creating VCV artwork image from $<)
+# 	@python3 $(SHARED)/svgextract/svgextract.py extractforvcv $< $@
 
-$(METAMODULE_INFO_DIR)/%_info.hh: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
-	$(info Creating ModuleInfo header file from $<)
-	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
+# $(METAMODULE_INFO_DIR)/%_info.hh: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
+# 	$(info Creating ModuleInfo header file from $<)
+# 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
 
 
 .PHONY: all plugin tests core_tests vcv_tests util_tests axo_tests patch_convert_tests compile_commands run

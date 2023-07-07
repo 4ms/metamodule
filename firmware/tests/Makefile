@@ -20,7 +20,7 @@ TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
 TEST_SOURCES += src/time_convert.cc
 
 CXXFLAGS = 	-Wall \
-		 	-std=gnu++20 \
+		 	-std=gnu++2b \
 			-I$(DOCTEST_DIR) \
 			-I$(TEST_DIR) \
 			-I$(TEST_DIR)/stubs \
@@ -33,9 +33,9 @@ CXXFLAGS = 	-Wall \
 			-I../src \
 			-I../shared \
 			-I../shared/cpputil \
-			-I../shared/etl/include \
 			-I../shared/patch_convert \
 			-I../shared/patch_convert/ryml \
+			-I../shared/CoreModules \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
 			-DTESTPROJECT \

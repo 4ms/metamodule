@@ -1,5 +1,6 @@
 #pragma once
 #include "conf/hsem_conf.hh"
+#include "drivers/cache.hh"
 #include "drivers/hsem.hh"
 #include "params.hh"
 
@@ -49,4 +50,20 @@ struct ParamCache {
 		}
 	}
 };
+
+struct ParamCacheSync {
+	ParamCache &param_cache;
+	ParamBlock &param_block;
+
+	ParamCacheSync(ParamCache &param_cache, ParamBlock &param_block)
+		: param_cache{param_cache}
+		, param_block{param_block} {
+	}
+
+	~ParamCacheSync() {
+		param_cache.write_sync(param_block.params[0], param_block.metaparams);
+		mdrivlib::SystemCache::clean_dcache_by_range(&param_cache, sizeof(ParamCache));
+	}
+};
+
 } // namespace MetaModule

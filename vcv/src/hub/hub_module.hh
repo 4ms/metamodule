@@ -1,0 +1,188 @@
+#pragma once
+#include "comm/comm_module.hh"
+#include "hub_knob_mappings.hh"
+#include "local_path.hh"
+#include "mapping/central_data.hh"
+#include "mapping/vcv_patch_file_writer.hh"
+#include "util/edge_detector.hh"
+#include "util/math.hh"
+#include "util/string_util.hh"
+#include <span>
+
+#define pr_dbg printf
+// #define pr_dbg()
+
+struct MetaModuleHubBase : public rack::Module {
+
+	std::function<void()> updatePatchName;
+	std::string labelText = "";
+	std::string patchNameText = "";
+	std::string patchDescText = "";
+	std::function<void(void)> updateDisplay;
+
+	EdgeStateDetector patchWriteButton;
+
+	std::optional<int> inProgressMapParamId{};
+
+	std::span<MappableObj::Type> mappingSrcs;
+
+	// FIXME: NumPots should be a template parameter
+	// We then need a common base class widgets can point to
+	static constexpr uint32_t NumPots = 12;
+	static constexpr uint32_t MaxMapsPerPot = 8;
+	HubKnobMappings<NumPots, MaxMapsPerPot> mappings{id};
+
+	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
+		: mappingSrcs{mappingSrcs} {
+	}
+
+	~MetaModuleHubBase() = default;
+
+	// Mapping State/Progress
+
+	void startMappingFrom(int hubParamId) {
+		inProgressMapParamId = hubParamId;
+	}
+
+	void endMapping() {
+		inProgressMapParamId = {};
+	}
+
+	std::optional<int> getMappingSource() {
+		return inProgressMapParamId;
+	}
+
+	bool isMappingInProgress() {
+		return inProgressMapParamId.has_value();
+	}
+
+	bool registerMap(int hubParamId, rack::Module *module, int64_t moduleParamId) {
+		if (!isMappingInProgress()) {
+			pr_dbg("Error: registerMap() called but we aren't mapping!\n");
+			return false;
+		}
+
+		if (!module) {
+			pr_dbg("Error: Dest module ptr is null. Aborting mapping.\n");
+			endMapping();
+			return false;
+		}
+
+		if (ModuleDirectory::isHub(module)) {
+			pr_dbg("Dest module is a hub. Aborting mapping.\n");
+			endMapping();
+			return false;
+		}
+
+		auto *map = mappings.addMap(hubParamId, module->id, moduleParamId);
+		map->range_max = 1.f;
+		map->range_min = 0.f;
+		endMapping();
+
+		return true;
+	}
+
+	// Runtime applying maps
+
+	void processMaps() {
+		for (int hubParamId = 0; auto &knobs : mappings) {
+			for (auto &map : knobs) {
+
+				int paramId = map.paramHandle.paramId;
+				auto module = map.paramHandle.module;
+				if (!module)
+					continue;
+
+				rack::ParamQuantity *paramQuantity = module->paramQuantities[paramId];
+				if (!paramQuantity)
+					continue;
+				if (!paramQuantity->isBounded())
+					continue;
+
+				auto val = MathTools::map_value(params[hubParamId].getValue(), 0.f, 1.f, map.range_min, map.range_max);
+				paramQuantity->setScaledValue(val);
+			}
+			hubParamId++;
+		}
+	}
+
+	// Handle writing patches
+
+	void processPatchButton(float patchButtonState) {
+		patchWriteButton.update(patchButtonState > 0.5f);
+		if (patchWriteButton.went_high()) {
+			updatePatchName();
+			updateDisplay();
+			writePatchFile();
+		}
+	}
+
+	// VCV Rack calls this periodically on auto-save
+	json_t *dataToJson() override {
+		json_t *rootJ = mappings.encodeJson();
+
+		if (updatePatchName) {
+			updatePatchName();
+			json_t *patchNameJ = json_string(patchNameText.c_str());
+			json_object_set_new(rootJ, "PatchName", patchNameJ);
+
+			json_t *patchDescJ = json_string(patchDescText.c_str());
+			json_object_set_new(rootJ, "PatchDesc", patchDescJ);
+		} else
+			printf("Error: Widget has not been constructed, but dataToJson is being called\n");
+		return rootJ;
+	}
+
+	// VCV Rack calls this on startup, and on loading a new patch file
+	void dataFromJson(json_t *rootJ) override {
+		auto patchNameJ = json_object_get(rootJ, "PatchName");
+		if (json_is_string(patchNameJ)) {
+			patchNameText = json_string_value(patchNameJ);
+		}
+
+		auto patchDescJ = json_object_get(rootJ, "PatchDesc");
+		if (json_is_string(patchDescJ)) {
+			patchDescText = json_string_value(patchDescJ);
+		}
+
+		mappings.decodeJson(rootJ);
+	}
+
+private:
+	void writePatchFile() {
+		std::string patchName;
+		std::string patchDir;
+		if (patchNameText.substr(0, 5) == "test_")
+			patchDir = testPatchDir;
+		else
+			patchDir = examplePatchDir;
+		if (patchNameText != "" && patchNameText != "Enter Patch Name") {
+			patchName = patchNameText.c_str();
+		} else {
+			std::string randomname = "Unnamed" + std::to_string(MathTools::randomNumber<unsigned int>(10, 99));
+			patchName = randomname.c_str();
+		}
+		ReplaceString patchStructName{patchName};
+		patchStructName.replace_all(" ", "")
+			.replace_all("-", "_")
+			.replace_all(",", "_")
+			.replace_all("/", "")
+			.replace_all("\\", "")
+			.replace_all("\"", "")
+			.replace_all("'", "")
+			.replace_all(".", "_")
+			.replace_all("?", "")
+			.replace_all("#", "")
+			.replace_all("!", "");
+		std::string patchFileName = patchDir + patchStructName.str;
+
+		labelText = "Creating patch...";
+		updateDisplay();
+
+		VCVPatchFileWriter::writePatchFile(id, mappings.mappings, patchFileName, patchName, patchDescText);
+
+		labelText = "Wrote patch file: ";
+		labelText += patchStructName.str + ".yml";
+		updateDisplay();
+	}
+};

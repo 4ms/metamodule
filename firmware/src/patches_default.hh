@@ -1,10 +1,11 @@
 #pragma once
-#include "module_type_slug.hh"
+#include "CoreModules/module_type_slug.hh"
+#include <cstdint>
 #include <span>
 
 ///
 #include "patch/ClockRockinBeats.hh"
-#include "patch/Djembe2.hh"
+// #include "patch/Djembe2.hh"
 #include "patch/Djembe4.hh"
 #include "patch/Djembe4verb.hh"
 #include "patch/KarplusStereo.hh"
@@ -15,13 +16,15 @@
 #include "patch/Showcase.hh"
 #include "patch/SpectralPings.hh"
 #include "patch/twosimpleosc.hh"
-// #include "patch/SeaofEchoes.hh"
+#include "patch/dualatt.hh"
+#include "patch/braidslfo.hh"
+#include "patch/envevenbraids.hh"
 
 struct DefaultPatches {
 
 	static inline std::array patch_raw_data = std::to_array<std::span<char>>({
 		Showcase_patch,
-		Djembe2_patch,
+		env_even_braids,
 		Djembe4_patch,
 		Djembe4verb_patch,
 		NonlinearGateSequencer_patch,
@@ -48,7 +51,7 @@ struct DefaultPatches {
 		if (id == 0)
 			return "Showcase.yml";
 		if (id == 1)
-			return "djembe2.yml";
+			return "envevenbraids.yml";
 		if (id == 2)
 			return "djembe4.yml";
 		if (id == 3)

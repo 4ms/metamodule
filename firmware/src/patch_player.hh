@@ -1,14 +1,6 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleFactory.hh"
-#include "drivers/arch.hh"
-#include "drivers/cache.hh"
-#if !defined(TESTPROJECT) && !defined(SIMULATOR)
-#include "debug.hh"
-#else
-#include "../stubs/debug.hh"
-#endif
-#include "conf/hsem_conf.hh"
 #include "conf/panel_conf.hh"
 #include "drivers/smp.hh"
 #include "patch/midi_def.hh"
@@ -89,12 +81,11 @@ public:
 
 		copy_patch_data(patchdata);
 
-		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
-			//FIXME: Do we ever do anything with modules[0] ? Perhaps just UI displaying names, which we can get from a defs file
-			if (i == 0)
-				modules[i] = ModuleFactory::create(PanelDef::typeID);
-			else
-				modules[i] = ModuleFactory::create(pd.module_slugs[i]);
+		// First module is the hub, ignore it.
+		modules[0] = ModuleFactory::create(PanelDef::typeID);
+
+		for (size_t i = 1; i < pd.module_slugs.size(); i++) {
+			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
 				printf_("Module %s not found\n", pd.module_slugs[i].data());
@@ -105,6 +96,7 @@ public:
 
 			modules[i]->mark_all_inputs_unpatched();
 			modules[i]->mark_all_outputs_unpatched();
+			modules[i]->set_samplerate(48000.f); //Fixed SR for now
 		}
 
 		// Tell the other core about the patch
@@ -122,8 +114,9 @@ public:
 		for (auto const &k : pd.mapped_knobs)
 			cache_knob_mapping(k);
 
+		// Set static (non-mapped) knobs
 		for (auto &k : pd.static_knobs)
-			modules[k.module_id]->set_param(k.param_id, k.value);
+			modules[k.module_id]->set_and_scale_param(k.param_id, k.value);
 
 		is_loaded = true;
 
@@ -137,7 +130,12 @@ public:
 			modules[1]->update();
 		else {
 			mdrivlib::SMPThread::split_with_command<SMPCommand::UpdateListOfModules>();
-			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += 2) {
+#ifdef SIMULATOR
+			constexpr size_t module_skip = 1;
+#else
+			constexpr size_t module_skip = 2;
+#endif
+			for (size_t module_i = 1; module_i < pd.module_slugs.size(); module_i += module_skip) {
 				modules[module_i]->update();
 			}
 			mdrivlib::SMPThread::join();
@@ -172,7 +170,7 @@ public:
 
 	void set_panel_param(int param_id, float val) {
 		for (auto const &k : knob_conns[param_id]) {
-			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
+			modules[k.module_id]->set_and_scale_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
 
@@ -210,7 +208,7 @@ public:
 	}
 
 	void apply_static_param(const StaticParam &sparam) {
-		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
+		modules[sparam.module_id]->set_and_scale_param(sparam.param_id, sparam.value);
 		//Also set it in the patch?
 	}
 
@@ -393,10 +391,9 @@ public:
 
 	template<typename T>
 	void update_or_add(std::vector<T> &v, const T &d) {
-		//auto equality_op, auto copy_op
 		for (auto &el : v) {
-			if (el == d) { //if (equality_op(el, d)) {
-				el = d;	   //copy_op(el, d);
+			if (el == d) { //if (T::operator==(el, d)) {
+				el = d;
 				return;
 			}
 		}
@@ -408,9 +405,11 @@ public:
 		if (k.is_monophonic_note()) {
 			update_or_add(knob_conns[MidiMonoNoteParam], k);
 			printf_("DBG: Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+
 		} else if (k.is_monophonic_gate()) {
 			update_or_add(knob_conns[MidiMonoGateParam], k);
 			printf_("DBG: Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+
 		} else if (k.panel_knob_id < PanelDef::NumKnobs) {
 			update_or_add(knob_conns[k.panel_knob_id], k);
 		}

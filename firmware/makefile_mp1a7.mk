@@ -1,9 +1,8 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
-#TODO: Once we have multiple a7 versions, build coreModules, HAL, NE10, font library, mdrivlib in a shared A7 dir
-#so don't build it twice for mini/max/etc
+USE_FEWER_MODULES ?= 1
 
-USE_FEWER_MODULES ?= 0
+#brands := 4ms Befaco AudibleInstruments
 
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
@@ -58,11 +57,32 @@ LTOFLAG = -flto=auto
 
 INCLUDES = 
 SOURCES =
+
 SOURCES += system/libc_stub.c
 SOURCES += system/libcpp_stub.cc
 SOURCES += system/new.cc
 SOURCES += system/mmu_ca7.c
 SOURCES += src/shared_memory.cc
+SOURCES += src/uart_log.cc
+SOURCES += $(main_source)
+SOURCES += $(audio_source)
+SOURCES += $(core_src)/aux_core_main.cc
+SOURCES += src/patchlist.cc
+SOURCES += src/patchlist_ryml_tests.cc
+INCLUDES += -I.
+INCLUDES += -Isrc
+INCLUDES += -I$(core_src)
+INCLUDES += -I$(target_src)
+INCLUDES += -I$(target_chip_src)
+INCLUDES += -I$(SHARED)
+INCLUDES += -I$(SHARED)/patch
+
+
+# Printf
+SOURCES += $(LIBDIR)/printf/printf.c
+INCLUDES += -I$(LIBDIR)/printf
+
+# HAL
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/system_ca7.c
 SOURCES += $(TARGETDEVICEDIR_CA7)/boot/irq_ctrl.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal.c
@@ -71,15 +91,6 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_rcc_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_mdma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_usart.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
-SOURCES += $(DRIVERLIB)/drivers/pin.cc
-SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
-SOURCES += $(LIBDIR)/printf/printf.c
-SOURCES += src/uart_log.cc
-SOURCES += $(main_source)
-
-ifeq "$(target_board)" "norflash-loader"
-
-else
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_i2c_ex.c
@@ -90,7 +101,14 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_ll_rcc.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd_ex.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_ll_sdmmc.c
+INCLUDES += -I$(HALDIR)/include
+INCLUDES += -I$(CMSIS)/Core_A/Include
+INCLUDES += -I$(CMSIS)/Include
+INCLUDES += -I$(DEVICEDIR)/include
 
+# mdrivlib
+SOURCES += $(DRIVERLIB)/drivers/pin.cc
+SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/interrupt_handler.cc
 SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
 SOURCES += $(DRIVERLIB)/drivers/tim.cc
 SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/hal_handlers.cc
@@ -98,105 +116,120 @@ SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc
 SOURCES += $(DRIVERLIB)/drivers/i2c.cc
 SOURCES += $(TARGETDEVICEDIR)/drivers/sai_tdm.cc
 SOURCES += $(DRIVERLIB)/drivers/codec_PCM3168.cc
-SOURCES += $(DRIVERLIB)/drivers/codec_WM8731.cc
+INCLUDES += -I$(DRIVERLIB)
+INCLUDES += -I$(DRIVERLIB)/drivers
+INCLUDES += -I$(TARGETDEVICEDIR)
+INCLUDES += -I$(TARGETDEVICEDIR)/drivers
+INCLUDES += -I$(TARGETDEVICEDIR_CA7)
+INCLUDES += -I$(TARGETDEVICEDIR_CA7)/drivers
+
+# Util
 SOURCES += $(SHARED)/cpputil/util/math_tables.cc
-SOURCES += $(audio_source)
-SOURCES += $(core_src)/aux_core_main.cc
-SOURCES += src/patchlist.cc
-SOURCES += src/patchlist_ryml_tests.cc
+INCLUDES += -I$(SHARED)/cpputil
+
+# GUI
+SOURCES += $(wildcard src/pages/elements/*.cc)
 SOURCES += src/pages/page_manager.cc
 
-SOURCES += $(SHARED)/CoreModules/meta-module-hub/panel_medium.cc
+# Modules: CoreModules and faceplate artwork 
+SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
 ifeq "$(USE_FEWER_MODULES)" "1"
-SOURCES += $(SHARED)/CoreModules/modules/DjembeCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/StMixCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/PEGCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/SMRCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/MultiLFOCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/PitchShiftCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/HPFCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/InfOscCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/KPLSCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/FreeverbCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/Seq8Core.cc
-SOURCES += $(SHARED)/CoreModules/modules/EnOscCore.cc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
+modulesAudible := Braids 
+modulesBefaco := DualAtenuverter EvenVCO 
+modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
+modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
+
+SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
+SOURCES += $(foreach m,$(modulesBefaco),$(SHARED)/CoreModules/Befaco/core/$(m)Core.cc)
+SOURCES += $(foreach m,$(modules4ms),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
+
+SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_120.c)
+SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_120.c)
+SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_120.c)
+
 else
-SOURCES += $(wildcard $(SHARED)/CoreModules/modules/*.cc)
-SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
+SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*.cc)
+SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/core/*.cc)
+SOURCES += $(wildcard $(SHARED)/CoreModules/AudibleInstruments/core/*.cc)
+
+SOURCES += $(wildcard src/pages/images/4ms/modules/*.c)
+SOURCES += $(wildcard src/pages/images/Befaco/modules/*.c)
+SOURCES += $(wildcard src/pages/images/AudibleInstruments/modules/*.c)
 endif
+
+INCLUDES += -I$(SHARED)/CoreModules
+INCLUDES += -I$(SHARED)/CoreModules/4ms
+INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
+INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/core
+INCLUDES += -I$(SHARED)/CoreModules/Befaco
+
+# Component images
+SOURCES += $(wildcard src/pages/images/4ms/components/*.c)
+SOURCES += $(wildcard src/pages/images/Befaco/components/*.c)
+SOURCES += $(wildcard src/pages/images/AudibleInstruments/components/*.c)
+
+# Module support files
+SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/dynamic_data.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/resources.cc
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
-SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
-SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
 
 ## LVGL / Gui-Guider
-LVGL_DIR=$(LIBDIR)/lvgl
-LVGL_DIR_NAME=lvgl
-SOURCES += $(shell find -L $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/widgets -name \*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/flex/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/layouts/grid/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/others/gridnav/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/extra/themes/default/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/core/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/draw/sw/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/widgets/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/font/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/misc/*.c)
-SOURCES += $(wildcard $(LVGL_DIR)/$(LVGL_DIR_NAME)/src/hal/*.c)
-INCLUDES +=		-I$(LIBDIR)/lvgl
+SOURCES += $(shell find -L $(LIBDIR)/lvgl/lvgl/src/extra/widgets -name \*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/flex/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/grid/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/others/gridnav/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/themes/default/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/core/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/draw/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/draw/sw/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/widgets/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/font/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/misc/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/hal/*.c)
+INCLUDES +=	-I$(LIBDIR)/lvgl
+INCLUDES +=	-I$(LIBDIR)/lvgl/lvgl
 
+# Fonts
 SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
-# Generateod:
-SOURCES += src/pages/slsexport/ui.c
-SOURCES += src/pages/slsexport/ui_helpers.c
-SOURCES += $(wildcard src/pages/slsexport/ui_font_*.c)
+
+# Generated:
+SOURCES += src/pages/slsexport/patchsel/ui.c
+SOURCES += src/pages/slsexport/patchsel/ui_helpers.c
+SOURCES += $(wildcard src/pages/slsexport/patchsel/ui_font_*.c)
+SOURCES += src/pages/slsexport/patchview/ui.c
+#patchview
+SOURCES += $(wildcard src/pages/slsexport/patchview/components/*.c)
+SOURCES += $(wildcard src/pages/slsexport/patchview/images/*.c)
+SOURCES += $(wildcard src/pages/slsexport/patchview/fonts/*.c)
+SOURCES += $(wildcard src/pages/slsexport/patchview/screens/*.c)
 INCLUDES += -Isrc/pages/slsexport
-INCLUDES +=	-I$(LVGL_DIR)/$(LVGL_DIR_NAME)
 
-ifeq "$(USE_FEWER_MODULES)" "1"
-SOURCES += src/pages/images/modules/Djembe_artwork_240.c
-SOURCES += src/pages/images/modules/StMix_artwork_240.c
-SOURCES += src/pages/images/modules/PEG_artwork_240.c
-SOURCES += src/pages/images/modules/SMR_artwork_240.c
-SOURCES += src/pages/images/modules/MultiLFO_artwork_240.c
-SOURCES += src/pages/images/modules/PitchShift_artwork_240.c
-SOURCES += src/pages/images/modules/HPF_artwork_240.c
-SOURCES += src/pages/images/modules/InfOsc_artwork_240.c
-SOURCES += src/pages/images/modules/KPLS_artwork_240.c
-SOURCES += src/pages/images/modules/Freeverb_artwork_240.c
-SOURCES += src/pages/images/modules/Seq8_artwork_240.c
-SOURCES += src/pages/images/modules/EnOsc_artwork_240.c
-
-SOURCES += src/pages/images/modules/Djembe_artwork_120.c
-SOURCES += src/pages/images/modules/StMix_artwork_120.c
-SOURCES += src/pages/images/modules/PEG_artwork_120.c
-SOURCES += src/pages/images/modules/MultiLFO_artwork_120.c
-SOURCES += src/pages/images/modules/SMR_artwork_120.c
-SOURCES += src/pages/images/modules/PitchShift_artwork_120.c
-SOURCES += src/pages/images/modules/HPF_artwork_120.c
-SOURCES += src/pages/images/modules/InfOsc_artwork_120.c
-SOURCES += src/pages/images/modules/KPLS_artwork_120.c
-SOURCES += src/pages/images/modules/Freeverb_artwork_120.c
-SOURCES += src/pages/images/modules/Seq8_artwork_120.c
-SOURCES += src/pages/images/modules/EnOsc_artwork_120.c
-else
-SOURCES += $(wildcard src/pages/images/modules/*.c)
-endif
-SOURCES += $(wildcard src/pages/images/components/*.c)
-
+# Patch convert
+SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
+SOURCES += $(SHARED)/patch_convert/ryml/ryml_serial.cc
+INCLUDES += -I$(SHARED)/patch_convert
+INCLUDES += -I$(SHARED)/patch_convert/ryml
 ## RapidYml
-
 RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
+INCLUDES += -I$(RYMLDIR)/src
+INCLUDES += -I$(RYMLDIR)/ext/c4core/src
 
 ## FatFS, qspi flash
 
@@ -210,43 +243,15 @@ SOURCES += $(LIBDIR)/littlefs/lfs.c
 SOURCES += $(LIBDIR)/littlefs/lfs_util.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
+INCLUDES += -I$(LIBDIR)/fatfs/source
+INCLUDES += -Isrc/fatfs
 
-
-endif # ifneq "$(target_board)" "norflash-loader"
-
-INCLUDES += 	-I.
-INCLUDES +=		-Isrc
-INCLUDES +=		-I$(core_src)
-INCLUDES +=		-I$(target_src)
-INCLUDES +=		-I$(target_chip_src)
-INCLUDES +=		-I$(HALDIR)/include
-INCLUDES +=		-I$(CMSIS)/Core_A/Include
-INCLUDES +=		-I$(CMSIS)/Include
-INCLUDES +=		-I$(DEVICEDIR)/include
-INCLUDES +=		-I$(DRIVERLIB)
-INCLUDES +=		-I$(DRIVERLIB)/drivers
-INCLUDES +=		-I$(TARGETDEVICEDIR)
-INCLUDES +=		-I$(TARGETDEVICEDIR)/drivers
-INCLUDES +=		-I$(TARGETDEVICEDIR_CA7)
-INCLUDES +=		-I$(TARGETDEVICEDIR_CA7)/drivers
-INCLUDES +=		-I$(SHARED)
-INCLUDES +=		-I$(SHARED)/CoreModules
-INCLUDES +=		-I$(SHARED)/CoreModules/modules
-INCLUDES +=		-I$(SHARED)/cpputil
-INCLUDES +=		-I$(SHARED)/patch
-INCLUDES +=		-I$(LIBDIR)/printf
-INCLUDES += 	-I$(SHARED)/etl/include
-INCLUDES += 	-I$(SHARED)/patch_convert
-INCLUDES += 	-I$(SHARED)/patch_convert/ryml
-INCLUDES += 	-I$(RYMLDIR)/src
-INCLUDES += 	-I$(RYMLDIR)/ext/c4core/src
-INCLUDES += 	-I$(LIBDIR)/fatfs/source
-INCLUDES += 	-Isrc/fatfs
 
 #D-Cache L1: 32 KB, 128 Sets, 64 Bytes/Line, 4-Way
 EXTRA_CFLAGS = --param l1-cache-size=32 \
 	 		   --param l1-cache-line-size=64 \
 			   --param l2-cache-size=256 \
+
 				# -DNE10_ENABLE_DSP \
 				# $(NE10_CFLAGS) \
 
@@ -254,10 +259,12 @@ ifeq "$(USE_FEWER_MODULES)" "1"
 	EXTRA_CFLAGS += -D'USE_FEWER_MODULES=1'
 endif
 
-EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines
+EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines \
+				-Wno-psabi
 
 EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG) \
-				-L$(BUILDDIR_MP1M4)/$(target_board)
+				-L$(BUILDDIR_MP1M4)/$(target_board) \
+				-Wno-psabi
 
 EXTDEF ?= METAMODULE_NORMAL_MODE
 
@@ -267,6 +274,7 @@ ARCH_CFLAGS += -DUSE_HAL_DRIVER \
 			  -DSTM32MP1 \
 			  -DCORE_CA7 \
 			  -D$(EXTDEF)
+
               # -DENABLE_NE10_FIR_FLOAT_NEON \
               # -DENABLE_NE10_FIR_DECIMATE_FLOAT_NEON \
               # -DENABLE_NE10_FIR_INTERPOLATE_FLOAT_NEON \

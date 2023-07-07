@@ -78,30 +78,34 @@ AudioStream::AudioStream(PatchPlayer &patchplayer,
 
 	if (codec_ext_.init() == CodecT::CODEC_NO_ERR) {
 		ext_audio_connected = true;
+		codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec);
+		codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec);
 		UartLog::log("Ext Audio codec detected\n\r");
 	} else {
 		ext_audio_connected = false;
 		UartLog::log("No ext Audio codec detected\n\r");
 	}
-	codec_ext_.set_tx_buffer_start(audio_out_block.ext_codec);
-	codec_ext_.set_rx_buffer_start(audio_in_block.ext_codec);
 
-	codec_.set_callbacks(
-		[this]() {
+	auto audio_callback = [this]<unsigned block>() {
 		// Debug::Pin0::high();
-		HWSemaphore<ParamsBuf1Lock>::lock();
-		HWSemaphore<ParamsBuf2Lock>::unlock();
-		process(audio_blocks[block_0], param_blocks[0], auxsigs[0]);
-		// Debug::Pin0::low();
-		},
-		[this]() {
-		// Debug::Pin0::high();
-		HWSemaphore<ParamsBuf2Lock>::lock();
-		HWSemaphore<ParamsBuf1Lock>::unlock();
-		process(audio_blocks[block_1], param_blocks[1], auxsigs[1]);
-		// Debug::Pin0::low();
-	});
 
+		ParamCacheSync sync{param_cache, param_blocks[block]};
+
+		load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
+		param_blocks[block].metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
+		load_measure.start_measurement();
+
+		HWSemaphore<block == 0 ? ParamsBuf1Lock : ParamsBuf2Lock>::lock();
+		HWSemaphore<block == 0 ? ParamsBuf2Lock : ParamsBuf1Lock>::unlock();
+		process(audio_blocks[1 - block], param_blocks[block], auxsigs[block]);
+
+		load_measure.end_measurement();
+
+		// Debug::Pin0::low();
+	};
+
+	codec_.set_callbacks([audio_callback]() { audio_callback.operator()<0>(); },
+						 [audio_callback]() { audio_callback.operator()<1>(); });
 	load_measure.init();
 
 	// Do this, then we don't have to also scale.
@@ -120,7 +124,6 @@ AudioConf::SampleT AudioStream::get_audio_output(int output_id) {
 	auto raw_out = player.get_panel_output(output_id) * mute_ctr;
 	auto scaled_out = AudioOutFrame::scaleOutput(raw_out);
 	return scaled_out;
-	// return compressor.compress(scaled_out);
 }
 
 // Todo: the scaling and offset shouold be part of the AuxStream, so we can support different types of DACs
@@ -132,26 +135,8 @@ uint32_t AudioStream::get_dac_output(int output_id) {
 	scaled_out += 0x00800000;
 	return scaled_out;
 }
-// Todo: integrate params.buttons[]
-
-struct ParamCacheSync {
-	ParamCache &param_cache;
-	ParamBlock &param_block;
-
-	ParamCacheSync(ParamCache &param_cache, ParamBlock &param_block)
-		: param_cache{param_cache}
-		, param_block{param_block} {
-	}
-
-	~ParamCacheSync() {
-		param_cache.write_sync(param_block.params[0], param_block.metaparams);
-		mdrivlib::SystemCache::clean_dcache_by_range(&param_cache, sizeof(ParamCache));
-	}
-};
 
 void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_block, AuxStreamBlock &aux) {
-	ParamCacheSync sync{param_cache, param_block};
-
 	auto &in = audio_block.in_codec;
 	auto &out = audio_block.out_codec;
 
@@ -186,11 +171,6 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		output_silence(out);
 		return;
 	}
-
-	//TODO: RAII for load_measure wrapper class so we don't forget to end the measurement
-	load_lpf += (load_measure.get_last_measurement_load_float() - load_lpf) * 0.005f;
-	param_block.metaparams.audio_load = static_cast<uint8_t>(load_lpf * 100.f);
-	load_measure.start_measurement();
 
 	handle_patch_mods();
 
@@ -251,13 +231,12 @@ void AudioStream::process(CombinedAudioBlock &audio_block, ParamBlock &param_blo
 		for (auto [i, gate_out] : countzip(aux_.gate_out))
 			gate_out = player.get_panel_output(i + PanelDef::NumAudioOut + PanelDef::NumDACOut) > 0.5f ? 1 : 0;
 	}
-
-	load_measure.end_measurement();
 }
 
 void AudioStream::start() {
 	codec_.start();
-	codec_ext_.start();
+	if (ext_audio_connected)
+		codec_ext_.start();
 }
 
 void AudioStream::handle_patch_mods() {
@@ -280,15 +259,13 @@ void AudioStream::propagate_sense_pins(Params &params) {
 			player.set_input_jack_patched_status(i, sense);
 	}
 
-	if constexpr (PanelDef::PanelID != 0) {
-		for (int out_i = 0; out_i < PanelDef::NumUserFacingOutJacks; out_i++) {
-			auto jack_i = out_i + PanelDef::NumUserFacingInJacks;
-			auto pin_bit = jacksense_pin_order[jack_i];
-			bool sense = params.jack_senses & (1 << pin_bit);
-			plug_detects[jack_i].update(sense);
-			if (plug_detects[jack_i].changed())
-				player.set_output_jack_patched_status(out_i, sense);
-		}
+	for (int out_i = 0; out_i < PanelDef::NumUserFacingOutJacks; out_i++) {
+		auto jack_i = out_i + PanelDef::NumUserFacingInJacks;
+		auto pin_bit = jacksense_pin_order[jack_i];
+		bool sense = params.jack_senses & (1 << pin_bit);
+		plug_detects[jack_i].update(sense);
+		if (plug_detects[jack_i].changed())
+			player.set_output_jack_patched_status(out_i, sense);
 	}
 }
 

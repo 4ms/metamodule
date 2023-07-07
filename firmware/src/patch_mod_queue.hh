@@ -1,6 +1,6 @@
 #pragma once
 
-#include "patch.hh"
+#include "patch/patch.hh"
 #include "util/circular_buffer_opt.hh"
 #include <variant>
 

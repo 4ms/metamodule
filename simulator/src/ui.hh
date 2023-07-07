@@ -1,0 +1,109 @@
+#pragma once
+#include "lv_port_indev.h"
+#define printf_ printf
+///
+
+#include "pages/page_manager.hh"
+#include "params.hh"
+#include "params_dbg_print.hh"
+#include "patch_mod_queue.hh"
+#include "patch_playloader.hh"
+#include "patch_storage_proxy.hh"
+#include "patchlist.hh"
+
+namespace MetaModule
+{
+
+class Ui {
+private:
+	PatchPlayLoader &patch_playloader;
+
+	MessageQueue msg_queue;
+	PageManager page_manager;
+	Params params;
+	MetaParams metaparams;
+
+	ParamDbgPrint print_dbg_params{params, metaparams};
+	LvglEncoderSimulatorDriver input_driver{keys};
+
+	RotaryEncoderKeys keys{
+		.turn_cw = SDLK_RIGHT,
+		.turn_ccw = SDLK_LEFT,
+		.click = SDLK_DOWN,
+		.aux_button = SDLK_UP,
+		.quit = SDLK_ESCAPE,
+	};
+
+public:
+	Ui(PatchPlayLoader &patch_playloader, PatchStorageProxy &patch_storage, PatchModQueue &patch_mod_queue)
+		: patch_playloader{patch_playloader}
+		, msg_queue{1024}
+		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
+		// {
+		// page_manager = std::make_unique<PageManager>(
+		// 	patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue);
+	}
+
+	void start() {
+		params.clear();
+		metaparams.clear();
+
+		Gui::init_lvgl_styles();
+		page_manager.init();
+	}
+
+	// "Scheduler" for UI tasks
+	// returns true until it gets a QUIT event
+	bool update() {
+		static uint32_t last_lvgl_task_tm = 0;
+		static uint32_t last_page_task_tm = 0;
+
+		auto tm = lv_tick_get(); //milliseconds
+		if (tm - last_lvgl_task_tm >= 1) {
+			lvgl_update_task();
+			last_lvgl_task_tm = tm;
+		}
+		// Transfer aux button events SDL => LVGL => metaparams
+		auto back_button = input_driver.get_aux_button();
+		metaparams.meta_buttons[0].set_state(back_button);
+		if (metaparams.meta_buttons[0].just_went_low())
+			printf("low\n");
+		else if (metaparams.meta_buttons[0].just_went_high())
+			printf("high\n");
+
+		tm = lv_tick_get();
+		if (tm - last_page_task_tm >= 16) {
+			page_update_task();
+			last_page_task_tm = tm;
+		}
+
+		bool keep_running = input_driver.get_quit() == LV_QUIT_NONE;
+		return keep_running;
+	}
+
+private:
+	void lvgl_update_task() {
+		lv_timer_handler();
+
+		auto msg = msg_queue.get_message();
+		if (!msg.empty()) {
+			printf_("%s", msg.data());
+			msg_queue.clear_message();
+		}
+
+		// Uncomment to enable:
+		// print_dbg_params.output_debug_info(HAL_GetTick());
+		// print_dbg_params.output_load(HAL_GetTick());
+	}
+
+	void page_update_task() { //60Hz
+		// TODO: update params and metaparams from user input
+		// also metaparams contains the audio load
+		// [[maybe_unused]] bool read_ok = param_cache.read_sync(&params, &metaparams);
+
+		page_manager.update_current_page();
+		patch_playloader.handle_sync_patch_loading();
+	}
+};
+
+} // namespace MetaModule

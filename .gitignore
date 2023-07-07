@@ -38,3 +38,9 @@ __pycache__
 firmware/src/pages/images/modules/*_artwork_*.png
 */autosave/
 */backup/
+
+shared/gen_minblep/gen_minblep
+
+#symlinks:
+simulator/firmware
+simulator/shared

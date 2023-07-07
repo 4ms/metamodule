@@ -40,16 +40,6 @@ static void app_startup() {
 	core_m4::RCC_Enable::IPCC_::set();
 };
 
-static void signal_m4_ready_after_delay() {
-	static uint32_t ctr = 0x10000;
-	if (ctr == 1) {
-		printf_("M4 initialized\n");
-		HWSemaphore<MetaModule::M4_ready>::unlock();
-	}
-	if (ctr > 0)
-		ctr--;
-}
-
 } // namespace MetaModule
 
 void main() {
@@ -90,21 +80,22 @@ void main() {
 
 	controls.start();
 
-	while (true) {
-		signal_m4_ready_after_delay();
-
-		if (i2c.is_ready()) {
+	// Run the i2c queue a few times before letting A7 start
+	uint32_t startup_delay = 0x10000;
+	while (startup_delay--) {
+		if (i2c.is_ready())
 			i2cqueue.update();
-		}
+	}
+
+	printf_("M4 initialized\n");
+	HWSemaphore<MetaModule::M4_ready>::unlock();
+
+	while (true) {
+		if (i2c.is_ready())
+			i2cqueue.update();
 
 		usb.process();
 		patch_storage.handle_messages();
-
 		__NOP();
 	}
-}
-
-void recover_from_task_fault() {
-	while (true)
-		;
 }

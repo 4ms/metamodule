@@ -1,11 +1,12 @@
 #pragma once
-#include "CoreModules/module_info_base.hh"
+#include "CoreModules/elements/element_info.hh"
+#include "elements/element_name.hh"
+#include "elements/update.hh"
 #include "knob_edit.hh"
-#include "lvgl/src/core/lv_obj_pos.h"
 #include "pages/base.hh"
-#include "pages/draw_helpers.hh"
+#include "pages/elements/module_drawer.hh"
+#include "pages/elements/module_param.hh"
 #include "pages/images/image_list.hh"
-#include "pages/module_param.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include <string>
@@ -29,8 +30,8 @@ struct ModuleViewPage : PageBase {
 	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
 		: PageBase{info}
 		, slug(module_slug)
+		, patch{patch_storage.get_view_patch()}
 		, base(lv_obj_create(nullptr))
-		, canvas(lv_canvas_create(base))
 		, roller(lv_roller_create(base))
 		, edit_pane(lv_obj_create(base))
 		, knob_edit_pane{info, edit_pane} {
@@ -42,7 +43,9 @@ struct ModuleViewPage : PageBase {
 
 		lv_group_add_obj(group, roller);
 		lv_obj_add_style(roller, &Gui::roller_style, LV_PART_MAIN);
-		lv_obj_add_style(roller, &Gui::plain_border_style, /*LV_PART_MAIN |*/ LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
+		lv_obj_add_style(roller,
+						 &Gui::plain_border_style,
+						 /*LV_PART_MAIN |*/ LV_STATE_FOCUS_KEY | LV_STATE_EDITED);
 		lv_obj_add_style(roller, &Gui::roller_sel_style, LV_PART_SELECTED);
 
 		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
@@ -54,6 +57,9 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+		patch = patch_storage.get_view_patch();
+
+		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
 		mode = ViewMode::List;
 
 		this_module_id = PageList::get_selected_module_id();
@@ -66,54 +72,47 @@ struct ModuleViewPage : PageBase {
 
 		moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
-			msg_queue.append_message("Module View page got empty module slug.\r\n");
+			msg_queue.append_message("Module View page got empty module info.\r\n");
 			return;
 		}
 
 		reset_module_page();
 
-		//Draw module image
-		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
-		if (!img) {
-			printf_("Image not found\n");
-			return;
-		}
-		auto width_px = img->header.w;
-		lv_obj_set_size(canvas, width_px, 240);
-		lv_canvas_set_buffer(canvas, buffer, width_px, 240, LV_IMG_CF_TRUE_COLOR_ALPHA);
-		lv_canvas_draw_img(canvas, 0, 0, img, &img_dsc);
+		size_t num_elements = moduleinfo.elements.size();
+		opts.reserve(num_elements * 16); // 16 chars per roller item
+		button.reserve(num_elements);
+		drawn_elements.reserve(num_elements);
+		module_controls.reserve(num_elements);
 
-		//Create text list (roller options) and circles over components
+		auto module_drawer = ModuleDrawer{base, 240};
+		canvas = module_drawer.draw_faceplate(slug, buffer);
 
-		size_t num_controls = moduleinfo.InJacks.size() + moduleinfo.OutJacks.size() + moduleinfo.Knobs.size() +
-							  moduleinfo.Switches.size();
-		opts.reserve(num_controls * 12); //12 chars per roller item
-		button.reserve(num_controls);
-		mapped_knobs.reserve(num_controls);
-		static_knobs.reserve(num_controls);
-		module_controls.reserve(num_controls);
+		lv_obj_refr_size(canvas);
+		auto width_px = lv_obj_get_width(canvas);
 
-		// const auto &patch = patch_list.get_patch(PageList::get_selected_patch_id());
-		const auto &patch = patch_storage.get_view_patch();
+		module_drawer.draw_mapped_elements(patch, this_module_id, canvas, drawn_elements, is_patch_playing);
 
-		for (const auto el : moduleinfo.Knobs) {
-			draw_knob(el, patch);
-			module_controls.push_back({ModuleParam::Type::Knob, el.id});
-		}
+		lv_obj_update_layout(canvas);
 
-		for (const auto &el : moduleinfo.InJacks) {
-			draw_injack(el, patch);
-			module_controls.push_back({ModuleParam::Type::InJack, el.id});
-		}
+		for (const auto &drawn_element : drawn_elements) {
+			std::visit(
+				[this, drawn = drawn_element.drawn](auto &el) {
+					if (!drawn.obj)
+						return;
 
-		for (const auto el : moduleinfo.OutJacks) {
-			draw_outjack(el, patch);
-			module_controls.push_back({ModuleParam::Type::OutJack, el.id});
-		}
+					opts += el.short_name;
+					if (drawn.mapped_panel_id) {
+						opts += " [";
+						opts += get_panel_name<PanelDef>(el, *(drawn.mapped_panel_id));
+						opts += "]";
+					}
+					opts += "\n";
 
-		for (const auto el : moduleinfo.Switches) {
-			draw_switch(el, patch);
-			module_controls.push_back({ModuleParam::Type::Switch, el.id + (uint32_t)moduleinfo.Knobs.size()});
+					add_button(drawn.obj);
+					//emplace_back fails for clang-14
+					module_controls.push_back({ModuleParam::get_type(el), (uint32_t)drawn.idx});
+				},
+				drawn_element.element);
 		}
 
 		// remove final \n
@@ -130,10 +129,13 @@ struct ModuleViewPage : PageBase {
 		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
 		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
 
-		//Select first element
+		// Select first element
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
 		cur_selected = 0;
-		lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
+
+		if (button.size() > 0) {
+			lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
+		}
 
 		lv_obj_set_pos(edit_pane, width_px, 0);
 		lv_obj_set_size(edit_pane, 320 - width_px, 240);
@@ -156,93 +158,35 @@ struct ModuleViewPage : PageBase {
 			}
 		}
 
-		// Update mapped knobs rotation
-		for (auto &knob : mapped_knobs) {
-			const float new_pot_val = knob.patchconf.get_mapped_val(params.knobs[knob.patchconf.panel_knob_id]);
-			if (std::abs(new_pot_val - knob.last_pot_reading) > 0.01f) {
-				knob.last_pot_reading = new_pot_val;
-				DrawHelper::animate_control(knob, moduleinfo);
+		if (is_patch_playing) {
+			for (auto &drawn_el : drawn_elements) {
+				std::visit(
+					[this, drawn = drawn_el.drawn](auto &el) {
+						//
+						update_element(el, params, patch, drawn);
+					},
+					drawn_el.element);
 			}
 		}
 
-		// Update static knobs rotation
-		for (auto &knob : static_knobs) {
-			if (std::abs(knob.patchconf.value - knob.last_pot_reading) > 0.01f) {
-				knob.last_pot_reading = knob.patchconf.value;
-				DrawHelper::animate_control(knob, moduleinfo);
-			}
-		}
+		// // Update static knobs rotation
+		// for (auto &knob : static_knobs) {
+		// 	if (std::abs(knob.patchconf.value - knob.last_pot_reading) > 0.01f) {
+		// 		knob.last_pot_reading = knob.patchconf.value;
+		// 		DrawHelper::animate_control(knob, moduleinfo);
+		// 	}
+		// }
 	}
+
+	// void blur() final {
+	// drawn_elements.clear();
+	// }
 
 private:
-	void draw_outjack(const OutJackDef &el, const PatchData &patch) {
-		int c_x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-		int c_y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-		add_button(c_x, c_y);
-		lv_canvas_draw_img(canvas, c_x - jack_x.header.w / 2, c_y - jack_x.header.h / 2, &jack_x, &img_dsc);
-
-		Jack jack{.module_id = this_module_id, .jack_id = (uint16_t)el.id};
-		if (auto mappedjack = patch.find_mapped_outjack(jack)) {
-			Gui::mapped_jack_arcdsc.color = Gui::palette_main[el.id % 8];
-			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_jack_arcdsc);
-			opts += "[";
-			opts += PanelDef::get_map_outjack_name(mappedjack->panel_jack_id);
-			opts += "] ";
-		}
-		opts += el.short_name;
-		opts += "\n";
-	}
-
-	void draw_injack(const InJackDef &el, const PatchData &patch) {
-		int c_x = ModuleInfoBase::mm_to_px<240>(el.x_mm);
-		int c_y = ModuleInfoBase::mm_to_px<240>(el.y_mm);
-		add_button(c_x, c_y);
-		lv_canvas_draw_img(canvas, c_x - jack_x.header.w / 2, c_y - jack_x.header.h / 2, &jack_x, &img_dsc);
-
-		Jack jack{.module_id = this_module_id, .jack_id = (uint16_t)el.id};
-		if (auto mappedjack = patch.find_mapped_injack(jack)) {
-			Gui::mapped_jack_arcdsc.color = Gui::palette_main[el.id % 8];
-			lv_canvas_draw_arc(canvas, c_x, c_y, jack_x.header.w * 0.8f, 0, 3600, &Gui::mapped_jack_arcdsc);
-			opts += "[";
-			opts += PanelDef::get_map_injack_name(mappedjack->panel_jack_id);
-			opts += "] ";
-		}
-		opts += el.short_name;
-		opts += "\n";
-	}
-
-	void draw_switch(const SwitchDef &el, const PatchData &patch) {
-		draw_control(el, patch, moduleinfo.Knobs.size());
-	}
-
-	void draw_knob(const KnobDef &el, const PatchData &patch) {
-		draw_control(el, patch, 0);
-	}
-
-	void draw_control(const auto /*ControlC*/ &el, const PatchData &patch, uint32_t id_offset = 0) {
-		auto id = id_offset + el.id;
-		auto static_ctrl = patch.find_static_knob(this_module_id, id);
-		float value = static_ctrl ? static_ctrl->value : 0.f;
-		auto ctrl_opt = DrawHelper::draw_control(base, el, 240, value);
-		if (ctrl_opt) {
-			lv_obj_t *ctrl_obj = ctrl_opt.value();
-			auto anim_method = DrawHelper::get_anim_method(el);
-			if (auto mapped_knob = patch.find_mapped_knob(this_module_id, id)) {
-				mapped_knobs.push_back({ctrl_obj, *mapped_knob, anim_method});
-				opts += "[";
-				opts += PanelDef::get_map_param_name(mapped_knob->panel_knob_id);
-				opts += "] ";
-				DrawHelper::draw_control_ring(canvas, el, mapped_knob->panel_knob_id, 240);
-			} else if (static_ctrl) {
-				static_knobs.push_back({ctrl_obj, *static_ctrl, anim_method});
-			}
-		}
-		opts += el.short_name;
-		opts += "\n";
-
-		auto img = DrawHelper::get_control_img(el, 240, value);
-		auto [c_x, c_y] = DrawHelper::scale_center(el, 240);
-		add_button(c_x, c_y, img->header.w * 1.2f);
+	void add_button(lv_obj_t *obj) {
+		auto c_x = lv_obj_get_x(obj) + lv_obj_get_width(obj) / 2;
+		auto c_y = lv_obj_get_y(obj) + lv_obj_get_height(obj) / 2;
+		add_button(c_x, c_y, (float)lv_obj_get_width(obj) * 1.5f);
 	}
 
 	void add_button(int x, int y, int size = 20) {
@@ -256,23 +200,15 @@ private:
 	void reset_module_page() {
 		for (auto &b : button)
 			lv_obj_del(b);
+
 		button.clear();
-
-		for (auto &k : mapped_knobs)
-			lv_obj_del(k.obj);
-		mapped_knobs.clear();
-
-		for (auto &k : static_knobs)
-			lv_obj_del(k.obj);
-		static_knobs.clear();
-
+		drawn_elements.clear();
 		module_controls.clear();
 		opts.clear();
 	}
 
 	bool read_slug() {
 		auto module_id = PageList::get_selected_module_id();
-		const auto &patch = patch_storage.get_view_patch();
 		if (patch.patch_name.length() == 0)
 			return false;
 		if (module_id >= patch.module_slugs.size())
@@ -280,10 +216,6 @@ private:
 
 		slug = patch.module_slugs[module_id];
 		return true;
-	}
-
-	bool is_this_patch_loaded() {
-		return patch_playloader.cur_patch_index() == PageList::get_selected_patch_id();
 	}
 
 	static void roller_cb(lv_event_t *event) {
@@ -324,15 +256,17 @@ private:
 			// Show manual knob
 			// auto patch_id = PageList::get_selected_patch_id();
 			// auto &patch = page->patch_list.get_patch(patch_id);
-			// auto mappedknob = patch.find_mapped_knob(PageList::get_selected_module_id(), module_controls[cur_sel].id);
-			// if (!mappedknob) {
-			// 	auto static_knob = patch.get_static_knob_value(page->this_module_id, module_controls[cur_sel].id);
-			// 	if (static_knob) {
-			// 		lv_obj_clear_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
-			// 		lv_arc_set_value(page->manual_knob, static_knob.value() * 100);
-			// 		lv_group_focus_obj(page->manual_knob);
+			// auto mappedknob =
+			// patch.find_mapped_knob(PageList::get_selected_module_id(),
+			// module_controls[cur_sel].id); if (!mappedknob) { 	auto static_knob =
+			// patch.get_static_knob_value(page->this_module_id,
+			// module_controls[cur_sel].id); 	if (static_knob) {
+			// 		lv_obj_clear_flag(page->manual_knob,
+			// LV_OBJ_FLAG_HIDDEN); 		lv_arc_set_value(page->manual_knob,
+			// static_knob.value() * 100); 		lv_group_focus_obj(page->manual_knob);
 			// 		lv_group_set_editing(page->group, true);
-			// 		printf_("Initial knob value set to %f\n", (double)static_knob.value() * 100);
+			// 		printf_("Initial knob value set to %f\n",
+			// (double)static_knob.value() * 100);
 			// 	}
 			// } else {
 			// 	lv_obj_add_flag(page->manual_knob, LV_OBJ_FLAG_HIDDEN);
@@ -355,16 +289,13 @@ private:
 			.value = lv_arc_get_value(arc) / 100.f,
 		};
 
-		if (page->is_this_patch_loaded()) {
+		if (page->is_patch_playing) {
 			page->patch_mod_queue.put(SetStaticParam{.param = sp});
 		} else {
 
-			//FIXME: this just modifies PatchStoage::_view_patch which will get
-			// overwritten if we select a new patch in PatchSelector
-			//
-			// auto &patch = page->patch_list.get_patch(PageList::get_selected_patch_id());
-			auto &patch = page->patch_storage.get_view_patch();
-			patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
+			// FIXME: this just modifies PatchStoage::_view_patch which will get
+			//  overwritten if we select a new patch in PatchSelector
+			page->patch.set_static_knob_value(sp.module_id, sp.param_id, sp.value);
 		}
 	}
 
@@ -374,18 +305,17 @@ private:
 	uint16_t this_module_id;
 	uint32_t cur_selected = 0;
 	std::string_view slug;
-
-	std::vector<DrawHelper::MKnob> mapped_knobs;
-	std::vector<DrawHelper::SKnob> static_knobs;
+	bool is_patch_playing = false;
+	PatchData &patch;
 
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_controls;
+	std::vector<DrawnElement> drawn_elements;
 
 	lv_obj_t *base = nullptr;
 	lv_obj_t *canvas = nullptr;
 	lv_obj_t *roller = nullptr;
 	lv_obj_t *edit_pane = nullptr;
-	// lv_obj_t *manual_knob = nullptr;
 	KnobEditPage knob_edit_pane;
 
 	lv_color_t buffer[LV_CANVAS_BUF_SIZE_TRUE_COLOR_ALPHA(240, 240)];
