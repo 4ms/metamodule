@@ -1,4 +1,5 @@
 #pragma once
+#include "VCV-adaptor/common.hpp"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/simd/functions.hpp"
 

@@ -166,7 +166,8 @@ INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
 INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/core
 INCLUDES += -I$(SHARED)/CoreModules/Befaco
 
-SOURCES += ./vcv-ports/Befaco/src/DualAtenuverter.cpp
+SOURCES += vcv-ports/Befaco/src/DualAtenuverter.cpp
+INCLUDES += -Isrc/VCV-adaptor
 
 # Component images
 SOURCES += $(wildcard src/pages/images/4ms/components/*.c)
