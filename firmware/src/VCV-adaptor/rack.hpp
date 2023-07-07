@@ -13,6 +13,9 @@
 #include "VCV-adaptor/widgets.hh"
 #include <string_view>
 
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/moduleFactory.hh"
+
 using namespace rack::math;
 
 namespace rack
@@ -33,9 +36,15 @@ struct ParamQuantity {
 	}
 };
 
+template<typename ModuleT>
+std::unique_ptr<CoreProcessor> create_vcv_module() {
+	return std::make_unique<ModuleT>();
+}
+
 //model
 template<typename ModuleT, typename WidgetT>
 Model *createModel(std::string_view slug) {
+	ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
 	return nullptr;
 }
 

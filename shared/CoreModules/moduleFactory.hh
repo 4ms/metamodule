@@ -21,6 +21,18 @@ public:
 		return already_exists;
 	}
 
+	static bool registerModuleType(ModuleTypeSlug typeslug, ModuleInfoView info) {
+		bool already_exists = creation_funcs.key_exists(typeslug);
+		infos.insert(typeslug, info);
+		return already_exists;
+	}
+
+	static bool registerModuleType(ModuleTypeSlug typeslug, CreateModuleFunc funcCreate) {
+		bool already_exists = creation_funcs.key_exists(typeslug);
+		creation_funcs.insert(typeslug, funcCreate);
+		return already_exists;
+	}
+
 	static std::unique_ptr<CoreProcessor> create(const ModuleTypeSlug typeslug) {
 		if (auto f_create = creation_funcs.get(typeslug))
 			return (*f_create)();

@@ -135,7 +135,8 @@ SOURCES += src/pages/page_manager.cc
 SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
 ifeq "$(USE_FEWER_MODULES)" "1"
 modulesAudible := Braids 
-modulesBefaco := DualAtenuverter EvenVCO 
+modulesBefaco := EvenVCO 
+# modulesBefaco += DualAtenuverter
 modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
 modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
 
@@ -166,7 +167,10 @@ INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
 INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/core
 INCLUDES += -I$(SHARED)/CoreModules/Befaco
 
+SOURCES += vcv-ports/register_vcv_ports.cc
 SOURCES += vcv-ports/Befaco/src/DualAtenuverter.cpp
+SOURCES += src/pages/images/Befaco/modules/DualAtenuverter_artwork_240.c)
+SOURCES += src/pages/images/Befaco/modules/DualAtenuverter_artwork_120.c)
 INCLUDES += -Isrc/VCV-adaptor
 
 # Component images
