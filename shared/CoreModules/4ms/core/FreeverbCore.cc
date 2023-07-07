@@ -3,6 +3,7 @@
 #include "info/Freeverb_info.hh"
 #include "processors/allpass.h"
 #include "processors/comb.h"
+#include "processors/tools/dcBlock.h"
 #include "util/math.hh"
 
 namespace MetaModule
@@ -41,7 +42,7 @@ public:
 			wetSignal = apFilter[i].process(wetSignal);
 		}
 
-		signalOut = MathTools::interpolate(signalIn, wetSignal, mix);
+		signalOut = dcblock.update(MathTools::interpolate3(signalIn, wetSignal, mix));
 	}
 
 	void set_param(int param_id, float val) override {
@@ -119,6 +120,8 @@ private:
 
 	Comb<6000> combFilter[numComb];
 	AllPass<6000> apFilter[numAll];
+
+	DCBlock dcblock;
 
 	float mix = 0;
 };
