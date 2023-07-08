@@ -1,5 +1,5 @@
-static char env_even_braids[] = 
-R"(
+static char env_even_braids[] =
+	R"(
 PatchData:
   patch_name: env even braids
   description: Patch Description
@@ -9,7 +9,7 @@ PatchData:
     2: EvenVCO
     3: Braids
     4: Braids
-    5: Braids
+    5: DualAtenuverter
   int_cables:
     - out:
         module_id: 1
@@ -149,15 +149,6 @@ PatchData:
     - module_id: 5
       param_id: 3
       value: 0.5
-    - module_id: 5
-      param_id: 4
-      value: 0
-    - module_id: 5
-      param_id: 5
-      value: 0.5
-    - module_id: 5
-      param_id: 6
-      value: 0
   mapped_knobs:
     - panel_knob_id: 0
       module_id: 1

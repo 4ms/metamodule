@@ -8,6 +8,7 @@
 #include "VCV-adaptor/Module.hpp"
 #include "VCV-adaptor/ModuleWidget.hpp"
 #include "VCV-adaptor/dsp/filter.hpp"
+#include "VCV-adaptor/dsp/minblep.hpp"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/port.hh"
 #include "VCV-adaptor/widgets.hh"
@@ -25,16 +26,6 @@ namespace rack
 math::Vec mm2px(math::Vec) {
 	return {0, 0};
 }
-
-//ParamQuantity
-struct ParamQuantity {
-	float maxValue, minValue;
-	float getValue() {
-		return 0;
-	}
-	void setValue(float) {
-	}
-};
 
 template<typename ModuleT>
 std::unique_ptr<CoreProcessor> create_vcv_module() {
