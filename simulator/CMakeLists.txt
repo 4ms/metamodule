@@ -48,7 +48,11 @@ file(
   ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
-  ${MM_ROOT}/shared/CoreModules/Befaco/core/*Core.cc
+  ${MM_ROOT}/shared/CoreModules/Befaco/core/EvenVCOCore.cc
+  ${MM_ROOT}/firmware/vcv-ports/register_vcv_ports.cc
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/DualAtenuverter.cpp
+  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/DualAtenuverter_artwork_240.c
+  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/DualAtenuverter_artwork_120.c
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/*Core.cc
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
@@ -103,7 +107,7 @@ target_include_directories(
           ${MM_ROOT}/shared/CoreModules/AudibleInstruments
           ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core
           ${MM_ROOT}/vcv/src # For sys/alloc_buffer.h
-)
+          ${MM_ROOT}/firmware/src/VCV-adaptor)
 
 target_compile_options(
   simulator PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
