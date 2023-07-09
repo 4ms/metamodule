@@ -36,7 +36,7 @@ public:
 			case Info::KnobQ:
 				filterQ = val;
 				break;
-			case (Info::SwitchMode + Info::NumKnobs):
+			case (static_cast<unsigned>(Info::SwitchMode) + static_cast<unsigned>(Info::NumKnobs)):
 				mode = val;
 				break;
 		}
