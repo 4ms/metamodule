@@ -63,11 +63,16 @@ struct SvgSwitch : SvgWidget {
 struct SvgScrew : SvgWidget {};
 struct BefacoBigKnob : SvgWidget {};
 struct BefacoTinyKnob : SvgWidget {};
+struct BefacoSlidePot : SvgWidget {};
 struct Davies1900hBlackKnob : SvgWidget {};
 struct Davies1900hKnob : SvgWidget {};
 struct Davies1900hWhiteKnob : SvgWidget {};
 struct Davies1900hRedKnob : SvgWidget {};
 template<typename T> struct MediumLight : SvgWidget {};
+struct GreenRedLight : SvgWidget {};
+struct RedLight : SvgWidget {};
+struct YellowLight : SvgWidget {};
+struct GreenLight : SvgWidget {};
 struct RedGreenBlueLight : SvgWidget {};
 
 // clang-format off

@@ -1,7 +1,11 @@
 #pragma once
 #include "VCV-adaptor/common.hpp"
+#include "VCV-adaptor/log10.hh"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/simd/functions.hpp"
+
+#include "util/interp_array.hh"
+#include "util/math.hh"
 
 namespace rack
 {
@@ -25,23 +29,28 @@ See https://en.wikipedia.org/wiki/Sinc_function
 inline float sinc(float x) {
 	if (x == 0.f)
 		return 1.f;
-	x *= M_PI;
-	return std::sin(x) / x;
+
+	return MathTools::sin01(x / 2.f) / (x * M_PI);
+
+	// x *= M_PI;
+	// return std::sin(x) / x;
 }
 
-template<typename T>
-T sinc(T x) {
-	T zeromask = (x == 0.f);
-	x *= M_PI;
-	x = simd::sin(x) / x;
-	return simd::ifelse(zeromask, 1.f, x);
-}
+// template<typename T>
+// T sinc(T x) {
+// 	T zeromask = (x == 0.f);
+// 	x *= M_PI;
+// 	x = simd::sin(x) / x;
+// 	return simd::ifelse(zeromask, 1.f, x);
+// }
 
 // Conversion functions
 
 template<typename T>
 T amplitudeToDb(T amp) {
-	return simd::log10(amp) * 20;
+	// return simd::log10(amp) * 20;
+	amp = std::clamp<T>(0, 12, amp);
+	return MetaModule::log10_0V_12V.interp(amp) * 20;
 }
 
 template<typename T>

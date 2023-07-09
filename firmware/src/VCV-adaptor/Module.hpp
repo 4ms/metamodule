@@ -52,6 +52,9 @@ struct Module : VCVModuleWrapper {
 	void configBypass(unsigned, unsigned) {
 	}
 
+	virtual void processBypass(const ProcessArgs &args) {
+	}
+
 	virtual json_t *dataToJson() {
 		return nullptr;
 	}

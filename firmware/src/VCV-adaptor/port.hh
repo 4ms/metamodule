@@ -8,6 +8,10 @@ struct Port {
 		return voltage;
 	}
 
+	float getNormalVoltage(float normalVoltage, int chan = 0) const {
+		return connected ? voltage : normalVoltage;
+	}
+
 	template<typename T>
 	T getPolyVoltageSimd(int firstChannel) {
 		return T(voltage); // return vector with all elements set to voltage

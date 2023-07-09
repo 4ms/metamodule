@@ -1,10 +1,10 @@
 #pragma once
 #include <dsp/common.hpp>
 
-
-namespace rack {
-namespace dsp {
-
+namespace rack
+{
+namespace dsp
+{
 
 /** Deprecated. Use VuMeter2 instead. */
 struct VuMeter {
@@ -22,15 +22,13 @@ struct VuMeter {
 	float getBrightness(int i) {
 		if (i == 0) {
 			return (dBScaled >= 0.0) ? 1.0 : 0.0;
-		}
-		else {
+		} else {
 			return math::clamp(dBScaled + i, 0.0, 1.0);
 		}
 	}
 };
 
 DEPRECATED typedef VuMeter VUMeter;
-
 
 /** Models a VU meter with smoothing.
 Supports peak and RMS (root-mean-square) metering.
@@ -49,7 +47,7 @@ for (int i = 0; i < 6; i++) {
 struct VuMeter2 {
 	enum Mode {
 		PEAK,
-		RMS
+		// RMS  //RMS not supported
 	};
 	Mode mode = PEAK;
 	/** Either the smoothed peak or the mean-square of the brightness, depending on the mode. */
@@ -62,19 +60,17 @@ struct VuMeter2 {
 	}
 
 	void process(float deltaTime, float value) {
-		if (mode == RMS) {
-			value = std::pow(value, 2);
+		// if (mode == RMS) {
+		// 	value = std::pow(value, 2);
+		// 	v += (value - v) * lambda * deltaTime;
+		// } else {
+		value = std::fabs(value);
+		if (value >= v) {
+			v = value;
+		} else {
 			v += (value - v) * lambda * deltaTime;
 		}
-		else {
-			value = std::fabs(value);
-			if (value >= v) {
-				v = value;
-			}
-			else {
-				v += (value - v) * lambda * deltaTime;
-			}
-		}
+		// }
 	}
 
 	/** Returns the LED brightness measuring tick marks between dbMin and dbMax.
@@ -82,8 +78,10 @@ struct VuMeter2 {
 	Set dbMin == dbMax == 0.f for a clip indicator that turns fully on when db >= dbMax.
 	Expensive, so call this infrequently.
 	*/
+
 	float getBrightness(float dbMin, float dbMax) {
-		float db = amplitudeToDb((mode == RMS) ? std::sqrt(v) : v);
+		// float db = amplitudeToDb((mode == RMS) ? std::sqrt(v) : v);
+		float db = amplitudeToDb(v);
 		if (db >= dbMax)
 			return 1.f;
 		else if (db <= dbMin)
@@ -92,7 +90,6 @@ struct VuMeter2 {
 			return math::rescale(db, dbMin, dbMax, 0.f, 1.f);
 	}
 };
-
 
 } // namespace dsp
 } // namespace rack

@@ -137,11 +137,11 @@ ifeq "$(USE_FEWER_MODULES)" "1"
 modulesAudible := Braids 
 modulesBefaco := EvenVCO 
 modulesBefaco += DualAtenuverter
+modulesBefaco += SpringReverb
 modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
 modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
 
 SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
-# SOURCES += $(foreach m,$(modulesBefaco),$(SHARED)/CoreModules/Befaco/core/$(m)Core.cc)
 SOURCES += $(foreach m,$(modulesBefaco),vcv-ports/Befaco/src/$(m).cpp)
 SOURCES += $(foreach m,$(modules4ms),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
 
@@ -169,13 +169,9 @@ INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/core
 INCLUDES += -I$(SHARED)/CoreModules/Befaco
 
 SOURCES += vcv-ports/register_vcv_ports.cc
-# SOURCES += vcv-ports/Befaco/src/DualAtenuverter.cpp
-# SOURCES += vcv-ports/Befaco/src/EvenVCO.cpp
-# SOURCES += src/pages/images/Befaco/modules/DualAtenuverter_artwork_240.c
-# SOURCES += src/pages/images/Befaco/modules/DualAtenuverter_artwork_120.c
-# SOURCES += src/pages/images/Befaco/modules/EvenVCO_artwork_240.c
-# SOURCES += src/pages/images/Befaco/modules/EvenVCO_artwork_120.c
+SOURCES += src/VCV-adaptor/pffft/pffft.c
 INCLUDES += -Isrc/VCV-adaptor
+INCLUDES += -Isrc/VCV-adaptor/pffft
 
 # Component images
 SOURCES += $(wildcard src/pages/images/4ms/components/*.c)
@@ -271,7 +267,7 @@ ifeq "$(USE_FEWER_MODULES)" "1"
 endif
 
 EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines \
-				-Wno-psabi
+				-Wno-psabi -Wno-double-promotion 
 
 EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG) \
 				-L$(BUILDDIR_MP1M4)/$(target_board) \

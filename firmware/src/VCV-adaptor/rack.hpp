@@ -8,10 +8,16 @@
 #include "VCV-adaptor/Module.hpp"
 #include "VCV-adaptor/ModuleWidget.hpp"
 #include "VCV-adaptor/assert.hh"
+#include "VCV-adaptor/dsp/digital.hpp"
 #include "VCV-adaptor/dsp/filter.hpp"
+#include "VCV-adaptor/dsp/fir.hpp"
 #include "VCV-adaptor/dsp/minblep.hpp"
+#include "VCV-adaptor/dsp/resampler.hpp"
+#include "VCV-adaptor/dsp/vumeter.hpp"
+#include "VCV-adaptor/dynamic_cast.hpp"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/port.hh"
+#include "VCV-adaptor/try_catch.hh"
 #include "VCV-adaptor/widgets.hh"
 #include <string_view>
 
@@ -23,17 +29,7 @@ using namespace rack::math;
 namespace rack
 {
 
-#define dynamic_cast stub_dynamic_cast
-
-template<typename T>
-T stub_dynamic_cast(void *) {
-	return nullptr;
-}
-
-//math
-inline math::Vec mm2px(math::Vec) {
-	return {0, 0};
-}
+#define WARN(...) printf(...)
 
 template<typename ModuleT>
 std::unique_ptr<CoreProcessor> create_vcv_module() {

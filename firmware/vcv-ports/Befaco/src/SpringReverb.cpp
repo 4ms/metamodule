@@ -1,3 +1,5 @@
+#include "CoreModules/Befaco/Befaco_res_SpringReverbIR_f32.h"
+#include "debug.hh"
 #include "plugin.hpp"
 #include <pffft.h>
 
@@ -7,45 +9,25 @@ static void initIR() {
 	if (!ir.empty())
 		return;
 
-	try {
-		ir = system::readFile(asset::plugin(pluginInstance, "res/SpringReverbIR.f32"));
-	}
-	catch (std::exception& e) {
-		WARN("Cannot load IR: %s", e.what());
-	}
+	ir.assign(std::begin(Befaco_res_SpringReverbIR_f32), std::end(Befaco_res_SpringReverbIR_f32));
+
+	// 	try {
+	// 		ir = system::readFile(asset::plugin(pluginInstance, "res/SpringReverbIR.f32"));
+	// 	}
+	// 	catch (std::exception& e) {
+	// 		WARN("Cannot load IR: %s", e.what());
+	// 	}
 }
 
 static const size_t BLOCK_SIZE = 1024;
 
-
 struct SpringReverb : Module {
-	enum ParamIds {
-		WET_PARAM,
-		LEVEL1_PARAM,
-		LEVEL2_PARAM,
-		HPF_PARAM,
-		NUM_PARAMS
-	};
-	enum InputIds {
-		CV1_INPUT,
-		CV2_INPUT,
-		IN1_INPUT,
-		IN2_INPUT,
-		MIX_CV_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		MIX_OUTPUT,
-		WET_OUTPUT,
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		PEAK_LIGHT,
-		ENUMS(VU1_LIGHTS, 7),
-		NUM_LIGHTS
-	};
+	enum ParamIds { WET_PARAM, LEVEL1_PARAM, LEVEL2_PARAM, HPF_PARAM, NUM_PARAMS };
+	enum InputIds { CV1_INPUT, CV2_INPUT, IN1_INPUT, IN2_INPUT, MIX_CV_INPUT, NUM_INPUTS };
+	enum OutputIds { MIX_OUTPUT, WET_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { PEAK_LIGHT, ENUMS(VU1_LIGHTS, 7), NUM_LIGHTS };
 
-	dsp::RealTimeConvolver* convolver = NULL;
+	dsp::RealTimeConvolver *convolver = NULL;
 	dsp::SampleRateConverter<1> inputSrc;
 	dsp::SampleRateConverter<1> outputSrc;
 	dsp::DoubleRingBuffer<dsp::Frame<1>, 16 * BLOCK_SIZE> inputBuffer;
@@ -70,7 +52,7 @@ struct SpringReverb : Module {
 
 		convolver = new dsp::RealTimeConvolver(BLOCK_SIZE);
 
-		const float* kernel = (const float*) ir.data();
+		const float *kernel = (const float *)ir.data();
 		size_t kernelLen = ir.size() / sizeof(float);
 		convolver->setKernel(kernel, kernelLen);
 
@@ -84,7 +66,7 @@ struct SpringReverb : Module {
 		delete convolver;
 	}
 
-	void processBypass(const ProcessArgs& args) override {
+	void processBypass(const ProcessArgs &args) override {
 		float in1 = inputs[IN1_INPUT].getVoltageSum();
 		float in2 = inputs[IN2_INPUT].getVoltageSum();
 
@@ -94,13 +76,17 @@ struct SpringReverb : Module {
 		outputs[MIX_OUTPUT].setVoltage(dry);
 	}
 
-	void process(const ProcessArgs& args) override {
+	void process(const ProcessArgs &args) override {
 		float in1 = inputs[IN1_INPUT].getVoltageSum();
 		float in2 = inputs[IN2_INPUT].getVoltageSum();
 		const float levelScale = 0.030;
 		const float levelBase = 25.0;
-		float level1 = levelScale * dsp::exponentialBipolar(levelBase, params[LEVEL1_PARAM].getValue()) * inputs[CV1_INPUT].getNormalVoltage(10.0) / 10.0;
-		float level2 = levelScale * dsp::exponentialBipolar(levelBase, params[LEVEL2_PARAM].getValue()) * inputs[CV2_INPUT].getNormalVoltage(10.0) / 10.0;
+		Debug::Pin2::high();
+		float level1 = levelScale * dsp::exponentialBipolar(levelBase, params[LEVEL1_PARAM].getValue()) *
+					   inputs[CV1_INPUT].getNormalVoltage(10.0) / 10.0;
+		float level2 = levelScale * dsp::exponentialBipolar(levelBase, params[LEVEL2_PARAM].getValue()) *
+					   inputs[CV2_INPUT].getNormalVoltage(10.0) / 10.0;
+		Debug::Pin2::low();
 		float dry = in1 * level1 + in2 * level2;
 
 		// HPF on dry
@@ -115,7 +101,6 @@ struct SpringReverb : Module {
 			inputBuffer.push(inputFrame);
 		}
 
-
 		if (outputBuffer.empty()) {
 			float input[BLOCK_SIZE] = {};
 			float output[BLOCK_SIZE];
@@ -124,19 +109,21 @@ struct SpringReverb : Module {
 				inputSrc.setRates(args.sampleRate, 48000);
 				int inLen = inputBuffer.size();
 				int outLen = BLOCK_SIZE;
-				inputSrc.process(inputBuffer.startData(), &inLen, (dsp::Frame<1>*) input, &outLen);
+				inputSrc.process(inputBuffer.startData(), &inLen, (dsp::Frame<1> *)input, &outLen);
 				inputBuffer.startIncr(inLen);
 			}
 
 			// Convolve block
+			Debug::Pin1::high();
 			convolver->processBlock(input, output);
+			Debug::Pin1::low();
 
 			// Convert output buffer
 			{
 				outputSrc.setRates(48000, args.sampleRate);
 				int inLen = BLOCK_SIZE;
 				int outLen = outputBuffer.capacity();
-				outputSrc.process((dsp::Frame<1>*) output, &inLen, outputBuffer.endData(), &outLen);
+				outputSrc.process((dsp::Frame<1> *)output, &inLen, outputBuffer.endData(), &outLen);
 				outputBuffer.endIncr(outLen);
 			}
 		}
@@ -169,9 +156,8 @@ struct SpringReverb : Module {
 	}
 };
 
-
 struct SpringReverbWidget : ModuleWidget {
-	SpringReverbWidget(SpringReverb* module) {
+	SpringReverbWidget(SpringReverb *module) {
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/panels/SpringReverb.svg")));
 
@@ -207,5 +193,4 @@ struct SpringReverbWidget : ModuleWidget {
 	}
 };
 
-
-Model* modelSpringReverb = createModel<SpringReverb, SpringReverbWidget>("SpringReverb");
+Model *modelSpringReverb = createModel<SpringReverb, SpringReverbWidget>("SpringReverb");
