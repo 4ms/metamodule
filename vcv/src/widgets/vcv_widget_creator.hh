@@ -3,7 +3,6 @@
 #include "CoreModules/elements/elements.hh"
 #include "vcv_creation_context.hh"
 #include "widgets/4ms/4ms_widgets_implementation.hh"
-#include "widgets/befaco/befaco_widgets_implementation.hh"
 
 namespace MetaModule::VCVImplementation::Widget
 {

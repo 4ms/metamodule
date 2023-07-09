@@ -264,8 +264,4 @@ void init(rack::Plugin *p) {
 	p->addModel(modelSlew);
 	p->addModel(modelSource);
 	p->addModel(modelStMix);
-	///////////////////////////////////////////////////////
-
-	p->addModel(modelDualAtenuverter);
-	p->addModel(modelBraids);
 }

@@ -70,7 +70,3 @@ extern rack::Model *modelSMR;
 extern rack::Model *modelSlew;
 extern rack::Model *modelSource;
 extern rack::Model *modelStMix;
-//////////////////////////////////////////////////
-
-extern rack::Model *modelDualAtenuverter;
-extern rack::Model *modelBraids;

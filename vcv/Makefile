@@ -8,8 +8,6 @@ RYMLDIR = $(SHARED)/patch_convert/ryml/rapidyaml
 INCLUDES = -Isrc
 INCLUDES += -I$(SHARED_DIR)/cpputil
 INCLUDES += -I$(SHARED_DIR)/processors
-INCLUDES += -I$(SHARED_DIR)/CoreModules
-INCLUDES += -I$(SHARED_DIR)/CoreModules/modules
 INCLUDES += -I$(SHARED_DIR)/patch
 INCLUDES += -I$(SHARED_DIR)/patch_convert/ryml
 INCLUDES += -I$(SHARED_DIR)
@@ -30,25 +28,6 @@ CXXFLAGS += -DVCVRACK -Wno-missing-braces
 # Static libraries are fine, but they should be added to this plugin's build system.
 LDFLAGS +=
 
-# Befaco
-INCLUDES += -I$(SHARED_DIR)/CoreModules/Befaco
-SOURCES += src/modules/Befaco/DualAtenuverter.cc
-SOURCES += $(SHARED_DIR)/CoreModules/Befaco/core/DualAtenuverterCore.cc
-
-# AudibleInstruments
-INCLUDES += -I$(SHARED_DIR)/CoreModules/AudibleInstruments
-INCLUDES += -I$(SHARED_DIR)/CoreModules/AudibleInstruments/core
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/BraidsCore.cc
-SOURCES += src/modules/AudibleInstruments/Braids.cpp
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
-SOURCES += $(SHARED_DIR)/CoreModules/AudibleInstruments/core/braids/resources.cc
-
-# 4ms
 INCLUDES += -I$(SHARED_DIR)/CoreModules/4ms
 SOURCES += $(wildcard $(SHARED_DIR)/CoreModules/4ms/core/*Core.cc)
 SOURCES += $(SHARED_DIR)/CoreModules/4ms/core/enosc/data.cc

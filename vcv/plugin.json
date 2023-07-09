@@ -391,18 +391,6 @@
       "name": "BuffMult",
       "description": "Buffered Multiple",
       "tags": []
-	},
-	{
-      "slug": "DualAtenuverter",
-      "name": "DualAtenuverter",
-      "description": "Dual Attenuverter",
-      "tags": []
-	},
-	{
-      "slug": "Braids",
-      "name": "Braids",
-      "description": "Braids",
-      "tags": []
 	}
   ]
 }
