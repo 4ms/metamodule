@@ -98,7 +98,7 @@ public:
 
 	[[nodiscard]] bool request_patchlist() {
 		msg_state_ = MsgState::PatchListRequested;
-		printf("Patchlist requested\n");
+		// printf("Patchlist requested\n");
 		return true;
 	}
 

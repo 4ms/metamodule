@@ -1,20 +1,31 @@
 {
-  "version": 1,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 19,
-    "patch": 0
-  },
-  "configurePresets": [
-    {
-      "name": "gcc-warn",
-      "displayName": "GCC",
-      "description": "Warnings-enabled build options for GCC",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
-      "cacheVariables": {
-        "CMAKE_CXX_FLAGS": "-Wall -Wpedantic -Werror=return-type -Wsuggest-override -Wuninitialized -Wdouble-promotion" 
-      }
-    }
-  ]
+    "version": 2,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "Default",
+            "displayName": "Normal simulator",
+            "description": "Sets Ninja generator, build and install directory",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build"
+            }
+        },
+        {
+            "name": "gcc-warn",
+            "displayName": "GCC",
+            "description": "Warnings-enabled build options for GCC",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_CXX_FLAGS": "-Wall -Wpedantic -Werror=return-type -Wsuggest-override -Wuninitialized -Wdouble-promotion"
+            }
+        }
+    ]
 }
