@@ -39,9 +39,6 @@ public:
 		: patch_playloader{patch_playloader}
 		, msg_queue{1024}
 		, page_manager{patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue} {
-		// {
-		// page_manager = std::make_unique<PageManager>(
-		// 	patch_storage, patch_playloader, params, metaparams, msg_queue, patch_mod_queue);
 	}
 
 	void start() {
@@ -55,22 +52,21 @@ public:
 	// "Scheduler" for UI tasks
 	// returns true until it gets a QUIT event
 	bool update() {
-		static uint32_t last_lvgl_task_tm = 0;
-		static uint32_t last_page_task_tm = 0;
 
+		static uint32_t last_lvgl_task_tm = 0;
 		auto tm = lv_tick_get(); //milliseconds
 		if (tm - last_lvgl_task_tm >= 1) {
 			lvgl_update_task();
 			last_lvgl_task_tm = tm;
 		}
-		// Transfer aux button events SDL => LVGL => metaparams
-		auto back_button = input_driver.get_aux_button();
-		metaparams.meta_buttons[0].set_state(back_button);
-		if (metaparams.meta_buttons[0].just_went_low())
-			printf("low\n");
-		else if (metaparams.meta_buttons[0].just_went_high())
-			printf("high\n");
 
+		// Transfer aux button events SDL => LVGL => metaparams
+		if (input_driver.aux_button_just_pressed())
+			metaparams.meta_buttons[0].register_falling_edge();
+		if (input_driver.aux_button_just_released())
+			metaparams.meta_buttons[0].register_rising_edge();
+
+		static uint32_t last_page_task_tm = 0;
 		tm = lv_tick_get();
 		if (tm - last_page_task_tm >= 16) {
 			page_update_task();

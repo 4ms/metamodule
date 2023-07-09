@@ -3,7 +3,7 @@
 #include "lvgl.h"
 #include <SDL2/SDL.h>
 
-enum lv_quit_event_t {
+enum QuitEvent {
 	LV_QUIT_NONE,
 	LV_REBOOT,
 	LV_SHUTDOWN,
@@ -19,24 +19,28 @@ struct RotaryEncoderKeys {
 	SDL_Keycode quit;
 };
 
+enum class ButtonEvent { None, Pressed, Released };
+
 struct LvglEncoderSimulatorDriver {
 
 	LvglEncoderSimulatorDriver(RotaryEncoderKeys &keys);
 	~LvglEncoderSimulatorDriver();
 
-	lv_quit_event_t get_quit();
-	bool get_aux_button();
+	QuitEvent get_quit();
+	bool aux_button_just_pressed();
+	bool aux_button_just_released();
 
 private:
-	void set_quit(lv_quit_event_t);
+	void set_quit(QuitEvent);
 	static void keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *);
 
 	RotaryEncoderKeys &keys;
 	lv_indev_drv_t indev_drv_keyboard_encoder;
 	lv_indev_t *indev_encoder;
-	lv_quit_event_t quit_event = LV_QUIT_NONE;
-	bool rotary_pressed = false;
-	bool aux_pressed = false;
+	QuitEvent quit_event = LV_QUIT_NONE;
+
+	ButtonEvent rotary_pressed = ButtonEvent::None;
+	ButtonEvent aux_pressed = ButtonEvent::None;
 
 	static inline LvglEncoderSimulatorDriver *_instance;
 };

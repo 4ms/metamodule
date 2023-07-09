@@ -15,22 +15,33 @@ LvglEncoderSimulatorDriver::LvglEncoderSimulatorDriver(RotaryEncoderKeys &keys)
 	indev_encoder = lv_indev_drv_register(&indev_drv_keyboard_encoder);
 
 	set_quit(LV_QUIT_NONE);
-	aux_pressed = false;
 	_instance = this;
 
 	lv_log("Starting LVGL\n");
 }
 
-lv_quit_event_t LvglEncoderSimulatorDriver::get_quit() {
+QuitEvent LvglEncoderSimulatorDriver::get_quit() {
 	return quit_event;
 }
 
-void LvglEncoderSimulatorDriver::set_quit(lv_quit_event_t event) {
+void LvglEncoderSimulatorDriver::set_quit(QuitEvent event) {
 	quit_event = event;
 }
 
-bool LvglEncoderSimulatorDriver::get_aux_button() {
-	return aux_pressed;
+bool LvglEncoderSimulatorDriver::aux_button_just_pressed() {
+	if (aux_pressed == ButtonEvent::Pressed) {
+		aux_pressed = ButtonEvent::None;
+		return true;
+	}
+	return false;
+}
+
+bool LvglEncoderSimulatorDriver::aux_button_just_released() {
+	if (aux_pressed == ButtonEvent::Released) {
+		aux_pressed = ButtonEvent::None;
+		return true;
+	}
+	return false;
 }
 
 void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
@@ -54,8 +65,8 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 
 	if (e.type == SDL_KEYDOWN) {
 		if (e.key.keysym.sym == keys.click) {
-			if (!rotary_pressed) {
-				rotary_pressed = true;
+			if (rotary_pressed != ButtonEvent::Pressed) {
+				rotary_pressed = ButtonEvent::Pressed;
 				data->state = LV_INDEV_STATE_REL;
 				printf("click down\n");
 			}
@@ -63,8 +74,8 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 
 		if (e.key.keysym.sym == keys.aux_button) {
 			//push back event to meta_params
-			if (!aux_pressed) {
-				aux_pressed = true;
+			if (aux_pressed != ButtonEvent::Pressed) {
+				aux_pressed = ButtonEvent::Pressed;
 				printf("aux down\n");
 			}
 		}
@@ -76,15 +87,15 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 		}
 
 		if (e.key.keysym.sym == keys.aux_button) {
-			if (aux_pressed) {
-				aux_pressed = false;
+			if (aux_pressed != ButtonEvent::Released) {
+				aux_pressed = ButtonEvent::Released;
 				printf("aux up\n");
 			}
 		}
 
 		if (e.key.keysym.sym == keys.click) {
-			if (rotary_pressed) {
-				rotary_pressed = false;
+			if (rotary_pressed != ButtonEvent::Released) {
+				rotary_pressed = ButtonEvent::Released;
 				data->state = LV_INDEV_STATE_PR;
 				printf("click up\n");
 			}
