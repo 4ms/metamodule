@@ -30,9 +30,10 @@ struct DualAtenuverterInfo : ModuleInfoBase {
 	// Array of all module elements:
 	//
 	// This is the vim regex to convert addParam(...) or addInput/Output() to Element:
-	// s/add\w\+(create\w\+<\(.*\)>(Vec(\(\d\+\), \(\d\+\)), .*::\(.*\)_\(\w\+\).*/\t\t\1{to_mm(\2), to_mm(\3), "\4", "", \4_\5},/
+	// s/add\w\+(create\w\+<\(.*\)>(Vec(\(\d\+\), \(\d\+\)), .*::\(.*\)_\(\w\+\).*/\t\t\1{to_mm(\2), to_mm(\3), "\4", ""},
 	//
-	// Then I manually editted the text names
+	// Then I manually editted the text names.
+	// And manually double-check the order is the same as the Module enums (ParamIds, InputIds, etc..)
 
 	static constexpr std::array<Element, 10> Elements{
 		Davies1900hWhiteKnob{to_mm(20), to_mm(33), "Aten1", "Ch 1 gain"},
