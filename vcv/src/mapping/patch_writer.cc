@@ -1,4 +1,5 @@
 #include "patch_writer.hh"
+#include "mapping/central_data.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include "patch_convert/ryml/ryml_serial.hh"
 #include <algorithm>
@@ -27,7 +28,7 @@ void PatchFileWriter::setModuleList(std::vector<ModuleID> &modules) {
 	pd.module_slugs.push_back("");
 
 	for (auto &mod : modules) {
-		if (mod.slug.is_equal("PANEL_8") || mod.slug.is_equal("PanelMedium")) {
+		if (ModuleDirectory::isHub(mod.slug)) {
 			pd.module_slugs[0] = mod.slug;
 			vcv_mod_ids[0] = mod.id;
 		} else {
