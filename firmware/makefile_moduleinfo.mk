@@ -64,7 +64,7 @@ vcv-images: $(vcv_artwork_files)
 	$(info)
 	$(info -------)
 	$(info $(notdir $*): Creating 120px and 240px-height lvgl imgs from full-sized svg artwork $<)
-	python3 $(svgscript) createLvglFaceplate $< $*
+	python3 $(svgscript) createLvglFaceplate $< $* faceplate
 	$(info)
 	$(info -------)
 	$(info $(notdir $*): Adding to image_list.hh if needed)

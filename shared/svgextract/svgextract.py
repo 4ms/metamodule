@@ -53,9 +53,10 @@ createCoreModule [slug] {{optional output path for CoreModule file}}
     METAMODULE_COREMODULE_DIR environmant variable. File will *not* be 
     overwritten.
 
-createLvglFaceplate [input faceplate SVG file name] [output C file name] {{optional layer}}
-    Converts the `faceplate` layer of the SVG to two LVGL format .c files:
-    one that's 240px high, and one that's 120px high.
+createLvglFaceplate [input faceplate SVG file name] [output C file name] {{optional layer to extract, default=all}}
+    Converts the SVG to two LVGL format .c files: one that's 240px high, and one that's 120px high.
+    If you want just one layer of the SVG to be extracted, pass that layer name as the optional 3rd argument.
+    (e.g. for 4ms SVG info files, the layer to extract is called `faceplate`).
     Requires these commands to be present on $PATH, or found at the env var:
         inkscape            (INKSCAPE_BIN_PATH)
         convert             (IMAGEMAGICK_BIN_PATH)
@@ -77,6 +78,10 @@ appendimglist [C array name] [path/to/image_list.hh]
     (EnOsc_artwork => EnOsc)
 """)
 
+#TODO: allow to scan an entire directory for :
+# -createLvglFaceplate (scan Befaco/res/modules/*.svg) + appendimglist 
+# -convertSvgToLvgl (scan Befaco/res/components/*.svg) + edit elements/befaco_images.hh
+# -createInfo (scan all 4ms info svg files and re-generate the info files)
 
 def parse_args(args):
     script = args.pop(0)
@@ -121,7 +126,7 @@ def parse_args(args):
         return
 
     if cmd == 'createlvglfaceplate':
-        layer = args.pop(0) if len(args) > 0 else "faceplate"
+        layer = args.pop(0) if len(args) > 0 else "all"
         lvgl.faceplateSvgToLVGL(inputfile, output, layer)
         return
 
