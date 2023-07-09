@@ -1,34 +1,41 @@
 #pragma once
 #include "VCV-adaptor/events.hh"
 #include "VCV-adaptor/math.hpp"
+#include "VCV-adaptor/param_quantity.hh"
 
 namespace rack
 {
-// clang-format off
 
 struct Plugin {};
 struct Model {};
 
 namespace Svg
 {
-int load(auto) { return 0; }
+int load(auto) {
+	return 0;
 }
+} // namespace Svg
 
 namespace asset
 {
-int plugin(auto, auto) { return 0; }
-} 
-
-struct ParamQuantity;
+int plugin(auto, auto) {
+	return 0;
+}
+} // namespace asset
 
 struct SvgWidget {
 	math::Rect box;
 	SvgWidget *bg;
 	ParamQuantity *pq;
-	void setSvg(auto) {}
-	ParamQuantity *getParamQuantity() { return pq; }
-	virtual void onDoubleClick(const event::DoubleClick &e) {}
-	virtual void onAction(const event::ActionEvent &e) {}
+	void setSvg(auto) {
+	}
+	ParamQuantity *getParamQuantity() {
+		return pq;
+	}
+	virtual void onDoubleClick(const event::DoubleClick &e) {
+	}
+	virtual void onAction(const event::ActionEvent &e) {
+	}
 };
 
 namespace app
@@ -40,16 +47,21 @@ struct SvgSlider : SvgWidget {
 	bool horizontal;
 	SvgWidget *background;
 
-	void setBackgroundSvg(auto) {}
-	void setHandleSvg(auto) {}
+	void setBackgroundSvg(auto) {
+	}
+	void setHandleSvg(auto) {
+	}
 };
 
 struct SvgSwitch : SvgWidget {
-	void addFrame(auto) {}
+	void addFrame(auto) {
+	}
 };
-}
+} // namespace app
 
+// clang-format off
 struct SvgScrew : SvgWidget {};
+struct BefacoBigKnob : SvgWidget {};
 struct BefacoTinyKnob : SvgWidget {};
 struct Davies1900hBlackKnob : SvgWidget {};
 struct Davies1900hKnob : SvgWidget {};

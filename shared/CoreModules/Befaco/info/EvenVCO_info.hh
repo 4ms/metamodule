@@ -3,14 +3,14 @@
 #include <array>
 #include <string_view>
 
-enum ParamIds { OCTAVE_PARAM, TUNE_PARAM, PWM_PARAM, NUM_PARAMS };
-enum InputIds { PITCH1_INPUT, PITCH2_INPUT, FM_INPUT, SYNC_INPUT, PWM_INPUT, NUM_INPUTS };
-enum OutputIds { TRI_OUTPUT, SINE_OUTPUT, EVEN_OUTPUT, SAW_OUTPUT, SQUARE_OUTPUT, NUM_OUTPUTS };
-
 namespace MetaModule
 {
 
 struct EvenVCOInfo : ModuleInfoBase {
+	enum ParamIds { OCTAVE_PARAM, TUNE_PARAM, PWM_PARAM, NUM_PARAMS };
+	enum InputIds { PITCH1_INPUT, PITCH2_INPUT, FM_INPUT, SYNC_INPUT, PWM_INPUT, NUM_INPUTS };
+	enum OutputIds { TRI_OUTPUT, SINE_OUTPUT, EVEN_OUTPUT, SAW_OUTPUT, SQUARE_OUTPUT, NUM_OUTPUTS };
+
 	static constexpr std::string_view slug{"EvenVCO"};
 	static constexpr std::string_view description{"Befaco EvenVCO"};
 	static constexpr uint32_t width_hp = 8;

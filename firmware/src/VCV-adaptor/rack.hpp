@@ -7,6 +7,7 @@
 
 #include "VCV-adaptor/Module.hpp"
 #include "VCV-adaptor/ModuleWidget.hpp"
+#include "VCV-adaptor/assert.hh"
 #include "VCV-adaptor/dsp/filter.hpp"
 #include "VCV-adaptor/dsp/minblep.hpp"
 #include "VCV-adaptor/math.hpp"
@@ -22,8 +23,15 @@ using namespace rack::math;
 namespace rack
 {
 
+#define dynamic_cast stub_dynamic_cast
+
+template<typename T>
+T stub_dynamic_cast(void *) {
+	return nullptr;
+}
+
 //math
-math::Vec mm2px(math::Vec) {
+inline math::Vec mm2px(math::Vec) {
 	return {0, 0};
 }
 

@@ -31,6 +31,13 @@ struct Module : VCVModuleWrapper {
 		// TODO: set
 		// param_scales[id].range
 		// param_scales[id].offset
+		return nullptr;
+	}
+
+	void configInput(int portId, std::string_view name = "") {
+	}
+
+	void configOutput(int portId, std::string_view name = "") {
 	}
 
 	ParamQuantity *getParamQuantity(int index) {
@@ -43,6 +50,7 @@ struct Module : VCVModuleWrapper {
 	virtual json_t *dataToJson() {
 		return nullptr;
 	}
+
 	virtual void dataFromJson(json_t *) {
 	}
 

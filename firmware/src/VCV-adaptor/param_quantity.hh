@@ -1,5 +1,7 @@
 #pragma once
 
+namespace rack
+{
 struct ParamQuantity {
 	float maxValue;
 	float minValue;
@@ -23,3 +25,4 @@ struct ParamQuantity {
 	bool smoothEnabled = false;
 	bool snapEnabled = false;
 };
+} // namespace rack

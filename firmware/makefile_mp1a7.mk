@@ -135,19 +135,20 @@ SOURCES += src/pages/page_manager.cc
 SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
 ifeq "$(USE_FEWER_MODULES)" "1"
 modulesAudible := Braids 
-# modulesBefaco := EvenVCO 
-# modulesBefaco += DualAtenuverter
+modulesBefaco := EvenVCO 
+modulesBefaco += DualAtenuverter
 modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
 modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
 
 SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
 # SOURCES += $(foreach m,$(modulesBefaco),$(SHARED)/CoreModules/Befaco/core/$(m)Core.cc)
+SOURCES += $(foreach m,$(modulesBefaco),vcv-ports/Befaco/src/$(m).cpp)
 SOURCES += $(foreach m,$(modules4ms),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
 
 SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_240.c)
 SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_120.c)
-# SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_240.c)
-# SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_120.c)
+SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_120.c)
 SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_240.c)
 SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_120.c)
 
@@ -168,10 +169,12 @@ INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/core
 INCLUDES += -I$(SHARED)/CoreModules/Befaco
 
 SOURCES += vcv-ports/register_vcv_ports.cc
-SOURCES += vcv-ports/Befaco/src/DualAtenuverter.cpp
-SOURCES += vcv-ports/Befaco/src/EvenVCO.cpp
-SOURCES += src/pages/images/Befaco/modules/DualAtenuverter_artwork_240.c
-SOURCES += src/pages/images/Befaco/modules/DualAtenuverter_artwork_120.c
+# SOURCES += vcv-ports/Befaco/src/DualAtenuverter.cpp
+# SOURCES += vcv-ports/Befaco/src/EvenVCO.cpp
+# SOURCES += src/pages/images/Befaco/modules/DualAtenuverter_artwork_240.c
+# SOURCES += src/pages/images/Befaco/modules/DualAtenuverter_artwork_120.c
+# SOURCES += src/pages/images/Befaco/modules/EvenVCO_artwork_240.c
+# SOURCES += src/pages/images/Befaco/modules/EvenVCO_artwork_120.c
 INCLUDES += -Isrc/VCV-adaptor
 
 # Component images

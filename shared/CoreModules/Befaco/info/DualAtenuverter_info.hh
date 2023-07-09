@@ -1,22 +1,22 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include <array>
+#include <string_view>
 
 // Comments are provided to explain how this file was contstructed,
 // in hopes that it will help us create a script to convert VCV module code
 // to *_info.hh files
 
-// Enums copied from VCV Module:
-// They're not strictly necessary but they make the regex easier and improve readability
-enum ParamIds { ATEN1_PARAM, OFFSET1_PARAM, ATEN2_PARAM, OFFSET2_PARAM, NUM_PARAMS };
-enum InputIds { IN1_INPUT, IN2_INPUT, NUM_INPUTS };
-enum OutputIds { OUT1_OUTPUT, OUT2_OUTPUT, NUM_OUTPUTS };
-enum LightIds { ENUMS(OUT1_LIGHT, 3), ENUMS(OUT2_LIGHT, 3), NUM_LIGHTS };
-
 namespace MetaModule
 {
 
 struct DualAtenuverterInfo : ModuleInfoBase {
+	// Enums copied from VCV Module:
+	// They're not strictly necessary but they make the regex easier and improve readability
+	enum ParamIds { ATEN1_PARAM, OFFSET1_PARAM, ATEN2_PARAM, OFFSET2_PARAM, NUM_PARAMS };
+	enum InputIds { IN1_INPUT, IN2_INPUT, NUM_INPUTS };
+	enum OutputIds { OUT1_OUTPUT, OUT2_OUTPUT, NUM_OUTPUTS };
+	enum LightIds { ENUMS(OUT1_LIGHT, 3), ENUMS(OUT2_LIGHT, 3), NUM_LIGHTS };
 
 	// Slug must match VCV's slug
 	static constexpr std::string_view slug{"DualAtenuverter"};
