@@ -8,6 +8,84 @@
 
 extern "C" {
 // DECLARE HERE
+LV_IMG_DECLARE(Warps_artwork_240);
+LV_IMG_DECLARE(Warps_artwork_120);
+LV_IMG_DECLARE(Veils_artwork_240);
+LV_IMG_DECLARE(Veils_artwork_120);
+LV_IMG_DECLARE(Tides2_artwork_240);
+LV_IMG_DECLARE(Tides2_artwork_120);
+LV_IMG_DECLARE(Tides_artwork_240);
+LV_IMG_DECLARE(Tides_artwork_120);
+LV_IMG_DECLARE(Streams_artwork_240);
+LV_IMG_DECLARE(Streams_artwork_120);
+LV_IMG_DECLARE(Stages_artwork_240);
+LV_IMG_DECLARE(Stages_artwork_120);
+LV_IMG_DECLARE(Shelves_artwork_240);
+LV_IMG_DECLARE(Shelves_artwork_120);
+LV_IMG_DECLARE(Sheep_artwork_240);
+LV_IMG_DECLARE(Sheep_artwork_120);
+LV_IMG_DECLARE(Shades_artwork_240);
+LV_IMG_DECLARE(Shades_artwork_120);
+LV_IMG_DECLARE(Ripples_artwork_240);
+LV_IMG_DECLARE(Ripples_artwork_120);
+LV_IMG_DECLARE(Rings_artwork_240);
+LV_IMG_DECLARE(Rings_artwork_120);
+LV_IMG_DECLARE(Plaits_artwork_240);
+LV_IMG_DECLARE(Plaits_artwork_120);
+LV_IMG_DECLARE(Peaks_artwork_240);
+LV_IMG_DECLARE(Peaks_artwork_120);
+LV_IMG_DECLARE(Marbles_artwork_240);
+LV_IMG_DECLARE(Marbles_artwork_120);
+LV_IMG_DECLARE(Links_artwork_240);
+LV_IMG_DECLARE(Links_artwork_120);
+LV_IMG_DECLARE(Kinks_artwork_240);
+LV_IMG_DECLARE(Kinks_artwork_120);
+LV_IMG_DECLARE(Frames_artwork_240);
+LV_IMG_DECLARE(Frames_artwork_120);
+LV_IMG_DECLARE(Elements_artwork_240);
+LV_IMG_DECLARE(Elements_artwork_120);
+LV_IMG_DECLARE(Clouds_artwork_240);
+LV_IMG_DECLARE(Clouds_artwork_120);
+LV_IMG_DECLARE(Branches_artwork_240);
+LV_IMG_DECLARE(Branches_artwork_120);
+LV_IMG_DECLARE(Blinds_artwork_240);
+LV_IMG_DECLARE(Blinds_artwork_120);
+LV_IMG_DECLARE(StereoStrip_artwork_240);
+LV_IMG_DECLARE(StereoStrip_artwork_120);
+LV_IMG_DECLARE(SlewLimiter_artwork_240);
+LV_IMG_DECLARE(SlewLimiter_artwork_120);
+LV_IMG_DECLARE(SamplingModulator_artwork_240);
+LV_IMG_DECLARE(SamplingModulator_artwork_120);
+LV_IMG_DECLARE(STMix_artwork_240);
+LV_IMG_DECLARE(STMix_artwork_120);
+LV_IMG_DECLARE(Rampage_artwork_240);
+LV_IMG_DECLARE(Rampage_artwork_120);
+LV_IMG_DECLARE(PonyVCO_artwork_240);
+LV_IMG_DECLARE(PonyVCO_artwork_120);
+LV_IMG_DECLARE(Percall_artwork_240);
+LV_IMG_DECLARE(Percall_artwork_120);
+LV_IMG_DECLARE(NoisePlethora_artwork_240);
+LV_IMG_DECLARE(NoisePlethora_artwork_120);
+LV_IMG_DECLARE(Muxlicer_artwork_240);
+LV_IMG_DECLARE(Muxlicer_artwork_120);
+LV_IMG_DECLARE(MotionMTR_artwork_240);
+LV_IMG_DECLARE(MotionMTR_artwork_120);
+LV_IMG_DECLARE(Morphader_artwork_240);
+LV_IMG_DECLARE(Morphader_artwork_120);
+LV_IMG_DECLARE(Mex_artwork_240);
+LV_IMG_DECLARE(Mex_artwork_120);
+LV_IMG_DECLARE(Kickall_artwork_240);
+LV_IMG_DECLARE(Kickall_artwork_120);
+LV_IMG_DECLARE(HexmixVCA_artwork_240);
+LV_IMG_DECLARE(HexmixVCA_artwork_120);
+LV_IMG_DECLARE(ChoppingKinky_artwork_240);
+LV_IMG_DECLARE(ChoppingKinky_artwork_120);
+LV_IMG_DECLARE(ADSR_artwork_240);
+LV_IMG_DECLARE(ADSR_artwork_120);
+LV_IMG_DECLARE(ABC_artwork_240);
+LV_IMG_DECLARE(ABC_artwork_120);
+LV_IMG_DECLARE(SpringReverb_artwork_240);
+LV_IMG_DECLARE(SpringReverb_artwork_120);
 LV_IMG_DECLARE(DEV_artwork_240);
 LV_IMG_DECLARE(DEV_artwork_120);
 LV_IMG_DECLARE(SHEV_artwork_240);
@@ -144,6 +222,126 @@ struct ModuleImages {
 
 	static const lv_img_dsc_t *get_image_by_slug(const std::string_view slug, size_t height = 240) {
 		// SLUG TO IMAGE HERE
+
+		if (slug == "Warps")
+			return (height == 240) ? &Warps_artwork_240 : &Warps_artwork_120;
+
+		if (slug == "Veils")
+			return (height == 240) ? &Veils_artwork_240 : &Veils_artwork_120;
+
+		if (slug == "Tides2")
+			return (height == 240) ? &Tides2_artwork_240 : &Tides2_artwork_120;
+
+		if (slug == "Tides")
+			return (height == 240) ? &Tides_artwork_240 : &Tides_artwork_120;
+
+		if (slug == "Streams")
+			return (height == 240) ? &Streams_artwork_240 : &Streams_artwork_120;
+
+		if (slug == "Stages")
+			return (height == 240) ? &Stages_artwork_240 : &Stages_artwork_120;
+
+		if (slug == "Shelves")
+			return (height == 240) ? &Shelves_artwork_240 : &Shelves_artwork_120;
+
+		if (slug == "Sheep")
+			return (height == 240) ? &Sheep_artwork_240 : &Sheep_artwork_120;
+
+		if (slug == "Shades")
+			return (height == 240) ? &Shades_artwork_240 : &Shades_artwork_120;
+
+		if (slug == "Ripples")
+			return (height == 240) ? &Ripples_artwork_240 : &Ripples_artwork_120;
+
+		if (slug == "Rings")
+			return (height == 240) ? &Rings_artwork_240 : &Rings_artwork_120;
+
+		if (slug == "Plaits")
+			return (height == 240) ? &Plaits_artwork_240 : &Plaits_artwork_120;
+
+		if (slug == "Peaks")
+			return (height == 240) ? &Peaks_artwork_240 : &Peaks_artwork_120;
+
+		if (slug == "Marbles")
+			return (height == 240) ? &Marbles_artwork_240 : &Marbles_artwork_120;
+
+		if (slug == "Links")
+			return (height == 240) ? &Links_artwork_240 : &Links_artwork_120;
+
+		if (slug == "Kinks")
+			return (height == 240) ? &Kinks_artwork_240 : &Kinks_artwork_120;
+
+		if (slug == "Frames")
+			return (height == 240) ? &Frames_artwork_240 : &Frames_artwork_120;
+
+		if (slug == "Elements")
+			return (height == 240) ? &Elements_artwork_240 : &Elements_artwork_120;
+
+		if (slug == "Clouds")
+			return (height == 240) ? &Clouds_artwork_240 : &Clouds_artwork_120;
+
+		if (slug == "Branches")
+			return (height == 240) ? &Branches_artwork_240 : &Branches_artwork_120;
+
+		if (slug == "Blinds")
+			return (height == 240) ? &Blinds_artwork_240 : &Blinds_artwork_120;
+
+		if (slug == "StereoStrip")
+			return (height == 240) ? &StereoStrip_artwork_240 : &StereoStrip_artwork_120;
+
+		if (slug == "SlewLimiter")
+			return (height == 240) ? &SlewLimiter_artwork_240 : &SlewLimiter_artwork_120;
+
+		if (slug == "SamplingModulator")
+			return (height == 240) ? &SamplingModulator_artwork_240 : &SamplingModulator_artwork_120;
+
+		if (slug == "STMix")
+			return (height == 240) ? &STMix_artwork_240 : &STMix_artwork_120;
+
+		if (slug == "Rampage")
+			return (height == 240) ? &Rampage_artwork_240 : &Rampage_artwork_120;
+
+		if (slug == "PonyVCO")
+			return (height == 240) ? &PonyVCO_artwork_240 : &PonyVCO_artwork_120;
+
+		if (slug == "Percall")
+			return (height == 240) ? &Percall_artwork_240 : &Percall_artwork_120;
+
+		if (slug == "NoisePlethora")
+			return (height == 240) ? &NoisePlethora_artwork_240 : &NoisePlethora_artwork_120;
+
+		if (slug == "Muxlicer")
+			return (height == 240) ? &Muxlicer_artwork_240 : &Muxlicer_artwork_120;
+
+		if (slug == "MotionMTR")
+			return (height == 240) ? &MotionMTR_artwork_240 : &MotionMTR_artwork_120;
+
+		if (slug == "Morphader")
+			return (height == 240) ? &Morphader_artwork_240 : &Morphader_artwork_120;
+
+		if (slug == "Mex")
+			return (height == 240) ? &Mex_artwork_240 : &Mex_artwork_120;
+
+		if (slug == "Kickall")
+			return (height == 240) ? &Kickall_artwork_240 : &Kickall_artwork_120;
+
+		if (slug == "HexmixVCA")
+			return (height == 240) ? &HexmixVCA_artwork_240 : &HexmixVCA_artwork_120;
+
+		if (slug == "ChoppingKinky")
+			return (height == 240) ? &ChoppingKinky_artwork_240 : &ChoppingKinky_artwork_120;
+
+		if (slug == "Mixer")
+			return (height == 240) ? &Mixer_artwork_240 : &Mixer_artwork_120;
+
+		if (slug == "ADSR")
+			return (height == 240) ? &ADSR_artwork_240 : &ADSR_artwork_120;
+
+		if (slug == "ABC")
+			return (height == 240) ? &ABC_artwork_240 : &ABC_artwork_120;
+
+		if (slug == "SpringReverb")
+			return (height == 240) ? &SpringReverb_artwork_240 : &SpringReverb_artwork_120;
 
 		if (slug == "DEV")
 			return (height == 240) ? &DEV_artwork_240 : &DEV_artwork_120;

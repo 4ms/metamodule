@@ -43,7 +43,9 @@ vcv_artwork_files := $(subst $(coremodules)/4ms/svg,$(vcv_faceplate_artwork_dir)
 # Processes all modified module-info svg files to module-info files
 module-infos: $(info_file_list)
 
-# Generate all faceplate images to LVGL format (only 4ms for now)
+# Generate all faceplate images to LVGL format: 
+# all CoreModules/[brand]/svg/*_info.svg
+# all CoreModules/[brand]/vcv_svg/*.svg
 firmware-images: $(lvgl_faceplate_imgs)
 
 # Generate faceplate svgs for VCV, from info svgs (only for 4ms for now)
