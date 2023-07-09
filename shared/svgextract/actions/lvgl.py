@@ -4,7 +4,7 @@ import subprocess
 
 from helpers.util import *
 
-def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="faceplate"):
+def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="all"):
     if exportLayer=="all":
         exportLayer = None
 
@@ -62,11 +62,11 @@ def svgToLVGL(svgFilename, outputBaseName, resize, alpha=True, exportLayer=None)
         Log(f"Converted {pngFilename} to {cFilename}")
 
     except subprocess.CalledProcessError:
-        Log("lv_img_conv.js failed. Try "
-        " 1) `git submodule update --init` and/or "
-        " 2) `cd ../shared/svgextract/lv_img_conv && npm install` and/or"
-        " 3) `cd ../shared/svgextract/lv_img_conv && docker build -t lv_img_conv` "
-        "     and then use the docker container (or not -- docker container is broken???)"
-        " 4) `sudo n 16` to use node v16 (required) and then `cd ../shared/svgextract/lv_img_conv && npm install`."
-        "     Might have to install n with `npm i -g n`, and do `brew unlink node` first")
+        Log("lv_img_conv.js failed. Try \n"
+        " 1) `git submodule update --init` and/or \n"
+        " 2) `cd ../shared/svgextract/lv_img_conv && npm install` and/or\n"
+        " 3) `cd ../shared/svgextract/lv_img_conv && docker build -t lv_img_conv` \n"
+        "     and then use the docker container (or not -- docker container is broken???)\n"
+        " 4) `sudo n 16` to use node v16 (required) and then `cd ../shared/svgextract/lv_img_conv && npm install`.\n"
+        "     Might have to install n with `npm i -g n`, and do `brew unlink node` first\n")
         return
