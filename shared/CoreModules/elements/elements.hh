@@ -89,17 +89,10 @@ struct SliderMonoLight : Slider {
 	static constexpr size_t NumLights = 1;
 };
 
-struct BefacoSliderPot : Slider { // TODO: is using this enum better than two types (Hor/Ver)?
+struct BefacoSlidePot : Slider { // TODO: is using this enum better than two types (Hor/Ver)?
 	enum Orientation { Vertical, Horizontal };
 	static constexpr Orientation orientation = Orientation::Vertical;
 };
-
-struct CKSSNarrow : Slider {};
-struct Crossfader : Slider {};
-struct CKSSHoriz2 : Slider {};
-struct CKSSVert7 : Slider {};
-struct CKSSHoriz4 : Slider {};
-struct CKSSNarrow3 : Slider {};
 struct BefacoSlidePotSmall : Slider {};
 struct Slider25mmVert : Slider {};
 struct Slider25mmHoriz : Slider {};
@@ -202,10 +195,12 @@ struct RgbLed : LightElement {
 
 struct RedLight : MonoLight {};
 struct OrangeLight : MonoLight {};
+struct YellowLight : MonoLight {};
 struct GreenLight : MonoLight {};
 struct BlueLight : MonoLight {};
 struct WhiteLight : MonoLight {};
 struct RedBlueLight : DualLight {};
+struct GreenRedLight : DualLight {};
 struct RedGreenBlueLight : RgbLed {};
 template<typename LedT>
 struct MediumLight : LedT {};
@@ -254,14 +249,8 @@ using Element = std::variant<
 	Slider25mmHoriz,
 	Slider25mmVertLED,
 	Slider25mmHorizLED,
-	BefacoSliderPot,
 	BefacoSlidePotSmall,
-	CKSSNarrow,
-	Crossfader,
-	CKSSHoriz2,
-	CKSSVert7,
-	CKSSHoriz4,
-	CKSSNarrow3,
+	BefacoSlidePot,
 
 	// Switches/Buttons
 	MomentaryButtonRGB,
@@ -290,6 +279,10 @@ using Element = std::variant<
 
 	//	Lights
 	MediumLight<RedGreenBlueLight>,
+	MediumLight<GreenRedLight>,
+	MediumLight<RedLight>,
+	MediumLight<YellowLight>,
+	MediumLight<GreenLight>,
 	RedGreenBlueLight,
 	RedLight,
 	OrangeLight,
