@@ -4,6 +4,7 @@
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/param.hh"
 #include "VCV-adaptor/port.hh"
+#include "elements/param_scales.hh"
 #include <array>
 #include <memory>
 #include <vector>
@@ -28,8 +29,10 @@ struct VCVModuleWrapper : CoreProcessor {
 	}
 
 	void set_param(int id, float val) override {
-		// val *= param_scales[id].range;
-		// val += param_scales[id].offset;
+		if (id < (int)param_scales.size()) {
+			val *= param_scales[id].range;
+			val += param_scales[id].offset;
+		}
 		params[id].setValue(val);
 	}
 
@@ -73,10 +76,7 @@ struct VCVModuleWrapper : CoreProcessor {
 	std::vector<Port> inputs;
 	std::vector<Port> outputs;
 	std::vector<Light> lights;
-
-	// using ParamScale = typename ElementCount<Info>::ParamScale;
-
-	// constexpr static std::array<ParamScale, counts.num_params> param_scales = ElementCount<Info>::param_scales();
+	std::vector<PotElementHelper::ParamScale> param_scales;
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
 

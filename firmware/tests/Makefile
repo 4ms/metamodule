@@ -53,6 +53,8 @@ TMPFILE = $(BUILDDIR)/runtests.out
 
 all: $(DOCTESTHEADER_DIR)/doctest.h patches tests
 
+$(BUILDDIR)/tests/DualAtenCore_tests.o: CXXFLAGS += -Wno-missing-braces
+
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(info Building $<)

@@ -16,6 +16,8 @@ struct Module : VCVModuleWrapper {
 		inputs.resize(num_inputs);
 		outputs.resize(num_outputs);
 		lights.resize(num_lights);
+
+		param_scales.resize(num_params);
 	}
 
 	template<class TParamQuantity = ParamQuantity>
@@ -28,9 +30,12 @@ struct Module : VCVModuleWrapper {
 								float displayBase = 0.f,
 								float displayMultiplier = 1.f,
 								float displayOffset = 0.f) {
-		// TODO: set
-		// param_scales[id].range
-		// param_scales[id].offset
+
+		if (paramId < (int)param_scales.size()) {
+			param_scales[paramId].range = maxValue - minValue;
+			param_scales[paramId].offset = minValue;
+		}
+
 		return nullptr;
 	}
 
