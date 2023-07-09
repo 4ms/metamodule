@@ -40,7 +40,7 @@ draw_mapped_ring(const ParamElement &, uint32_t module_height, lv_obj_t *canvas,
 
 	float scale = module_height / 240.f;
 	float ring_offset = (panel_knob_id >= 6) ? 4.f : 8.f;
-	float radius = (r.h + r.w / 2.f) * 0.5f + ring_offset * scale;
+	float radius = (r.h + r.w) / 2.f * 0.5f + ring_offset * scale;
 
 	ring.color = Gui::knob_palette[panel_knob_id % 6];
 	ring.width = ring_thickness * scale;
