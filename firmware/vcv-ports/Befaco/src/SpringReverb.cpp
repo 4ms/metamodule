@@ -19,7 +19,7 @@ static void initIR() {
 	// 	}
 }
 
-static const size_t BLOCK_SIZE = 1024;
+static const size_t BLOCK_SIZE = 512;
 
 struct SpringReverb : Module {
 	enum ParamIds { WET_PARAM, LEVEL1_PARAM, LEVEL2_PARAM, HPF_PARAM, NUM_PARAMS };
