@@ -1,10 +1,10 @@
 #pragma once
-#include <dsp/common.hpp>
+#include "VCV-adaptor/dsp/common.hpp"
 
-
-namespace rack {
-namespace dsp {
-
+namespace rack
+{
+namespace dsp
+{
 
 /** Detects when a boolean changes from false to true */
 struct BooleanTrigger {
@@ -21,10 +21,9 @@ struct BooleanTrigger {
 	}
 };
 
-
 /** Turns HIGH when value reaches a threshold (default 0.f), turns LOW when value reaches a threshold (default 1.f).
 */
-template <typename T = float>
+template<typename T = float>
 struct TSchmittTrigger {
 	T state;
 	TSchmittTrigger() {
@@ -45,8 +44,7 @@ struct TSchmittTrigger {
 	}
 };
 
-
-template <>
+template<>
 struct TSchmittTrigger<float> {
 	bool state = true;
 
@@ -68,8 +66,7 @@ struct TSchmittTrigger<float> {
 			if (in <= offThreshold) {
 				state = false;
 			}
-		}
-		else {
+		} else {
 			// LOW to HIGH
 			if (in >= onThreshold) {
 				state = true;
@@ -85,7 +82,6 @@ struct TSchmittTrigger<float> {
 };
 
 typedef TSchmittTrigger<> SchmittTrigger;
-
 
 /** When triggered, holds a high value for a specified time before going low again */
 struct PulseGenerator {
@@ -114,9 +110,8 @@ struct PulseGenerator {
 	}
 };
 
-
 /** Accumulates a timer when process() is called. */
-template <typename T = float>
+template<typename T = float>
 struct TTimer {
 	T time = 0.f;
 
@@ -136,7 +131,6 @@ struct TTimer {
 };
 
 typedef TTimer<> Timer;
-
 
 /** Counts calls to process(), returning true every `division` calls.
 Example:
@@ -175,7 +169,6 @@ struct ClockDivider {
 		return false;
 	}
 };
-
 
 } // namespace dsp
 } // namespace rack

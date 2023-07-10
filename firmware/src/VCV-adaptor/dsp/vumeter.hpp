@@ -1,5 +1,5 @@
 #pragma once
-#include <dsp/common.hpp>
+#include "VCV-adaptor/dsp/common.hpp"
 
 namespace rack
 {

@@ -1,16 +1,16 @@
 #pragma once
-#include <dsp/common.hpp>
+#include "VCV-adaptor/dsp/common.hpp"
 
-
-namespace rack {
-namespace dsp {
-
+namespace rack
+{
+namespace dsp
+{
 
 /** The simplest possible analog filter using an Euler solver.
 https://en.wikipedia.org/wiki/RC_circuit
 Use two RC filters in series for a bandpass filter.
 */
-template <typename T = float>
+template<typename T = float>
 struct TRCFilter {
 	T c = 0.f;
 	T xstate[1];
@@ -51,11 +51,10 @@ struct TRCFilter {
 
 typedef TRCFilter<> RCFilter;
 
-
 /** Applies exponential smoothing to a signal with the ODE
 \f$ \frac{dy}{dt} = x \lambda \f$.
 */
-template <typename T = float>
+template<typename T = float>
 struct TExponentialFilter {
 	T out = 0.f;
 	T lambda = 0.f;
@@ -87,10 +86,9 @@ struct TExponentialFilter {
 
 typedef TExponentialFilter<> ExponentialFilter;
 
-
 /** Like ExponentialFilter but jumps immediately to higher values.
 */
-template <typename T = float>
+template<typename T = float>
 struct TPeakFilter {
 	T out = 0.f;
 	T lambda = 0.f;
@@ -127,9 +125,8 @@ struct TPeakFilter {
 
 typedef TPeakFilter<> PeakFilter;
 
-
 /** Limits the derivative of the output by a rise and fall speed, in units/s. */
-template <typename T = float>
+template<typename T = float>
 struct TSlewLimiter {
 	T out = 0.f;
 	T rise = 0.f;
@@ -154,9 +151,8 @@ struct TSlewLimiter {
 
 typedef TSlewLimiter<> SlewLimiter;
 
-
 /** Behaves like ExponentialFilter but with different lambas when the RHS of the ODE is positive or negative. */
-template <typename T = float>
+template<typename T = float>
 struct TExponentialSlewLimiter {
 	T out = 0.f;
 	T riseLambda = 0.f;
@@ -188,11 +184,10 @@ struct TExponentialSlewLimiter {
 
 typedef TExponentialSlewLimiter<> ExponentialSlewLimiter;
 
-
 /** Digital IIR filter processor.
 https://en.wikipedia.org/wiki/Infinite_impulse_response
 */
-template <int B_ORDER, int A_ORDER, typename T = float>
+template<int B_ORDER, int A_ORDER, typename T = float>
 struct IIRFilter {
 	/** transfer function numerator coefficients: b_0, b_1, etc.
 	*/
@@ -223,7 +218,7 @@ struct IIRFilter {
 		}
 	}
 
-	void setCoefficients(const T* b, const T* a) {
+	void setCoefficients(const T *b, const T *a) {
 		for (int i = 0; i < B_ORDER; i++) {
 			this->b[i] = b[i];
 		}
@@ -288,8 +283,7 @@ struct IIRFilter {
 	}
 };
 
-
-template <typename T = float>
+template<typename T = float>
 struct TBiquadFilter : IIRFilter<3, 3, T> {
 	enum Type {
 		LOWPASS_1POLE,
@@ -360,8 +354,7 @@ struct TBiquadFilter : IIRFilter<3, 3, T> {
 					this->b[2] = (1.f - M_SQRT2 * sqrtV * K + V * K * K) * norm;
 					this->a[0] = 2.f * (K * K - 1.f) * norm;
 					this->a[1] = (1.f - M_SQRT2 * K + K * K) * norm;
-				}
-				else {
+				} else {
 					float norm = 1.f / (1.f + M_SQRT2 / sqrtV * K + K * K / V);
 					this->b[0] = (1.f + M_SQRT2 * K + K * K) * norm;
 					this->b[1] = 2.f * (K * K - 1) * norm;
@@ -380,8 +373,7 @@ struct TBiquadFilter : IIRFilter<3, 3, T> {
 					this->b[2] = (V - M_SQRT2 * sqrtV * K + K * K) * norm;
 					this->a[0] = 2.f * (K * K - 1.f) * norm;
 					this->a[1] = (1.f - M_SQRT2 * K + K * K) * norm;
-				}
-				else {
+				} else {
 					float norm = 1.f / (1.f / V + M_SQRT2 / sqrtV * K + K * K);
 					this->b[0] = (1.f + M_SQRT2 * K + K * K) * norm;
 					this->b[1] = 2.f * (K * K - 1.f) * norm;
@@ -408,8 +400,7 @@ struct TBiquadFilter : IIRFilter<3, 3, T> {
 					this->b[2] = (1.f - K / Q * V + K * K) * norm;
 					this->a[0] = this->b[1];
 					this->a[1] = (1.f - K / Q + K * K) * norm;
-				}
-				else {
+				} else {
 					float norm = 1.f / (1.f + K / Q / V + K * K);
 					this->b[0] = (1.f + K / Q + K * K) * norm;
 					this->b[1] = 2.f * (K * K - 1.f) * norm;
@@ -428,13 +419,13 @@ struct TBiquadFilter : IIRFilter<3, 3, T> {
 				this->a[1] = (1.f - K / Q + K * K) * norm;
 			} break;
 
-			default: break;
+			default:
+				break;
 		}
 	}
 };
 
 typedef TBiquadFilter<> BiquadFilter;
-
 
 } // namespace dsp
 } // namespace rack
