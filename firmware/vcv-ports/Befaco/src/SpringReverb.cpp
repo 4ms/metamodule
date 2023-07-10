@@ -1,5 +1,7 @@
+#ifdef METAMODULE_NORMAL_MODE
 #include "CoreModules/Befaco/Befaco_res_SpringReverbIR_f32.h"
-#include "debug.hh"
+#endif
+
 #include "plugin.hpp"
 #include <pffft.h>
 
@@ -9,14 +11,16 @@ static void initIR() {
 	if (!ir.empty())
 		return;
 
+#ifdef METAMODULE_NORMAL_MODE
 	ir.assign(std::begin(Befaco_res_SpringReverbIR_f32), std::end(Befaco_res_SpringReverbIR_f32));
-
+#else
 	// 	try {
 	// 		ir = system::readFile(asset::plugin(pluginInstance, "res/SpringReverbIR.f32"));
 	// 	}
 	// 	catch (std::exception& e) {
 	// 		WARN("Cannot load IR: %s", e.what());
 	// 	}
+#endif
 }
 
 static const size_t BLOCK_SIZE = 512;
@@ -81,12 +85,10 @@ struct SpringReverb : Module {
 		float in2 = inputs[IN2_INPUT].getVoltageSum();
 		const float levelScale = 0.030;
 		const float levelBase = 25.0;
-		Debug::Pin2::high();
 		float level1 = levelScale * dsp::exponentialBipolar(levelBase, params[LEVEL1_PARAM].getValue()) *
 					   inputs[CV1_INPUT].getNormalVoltage(10.0) / 10.0;
 		float level2 = levelScale * dsp::exponentialBipolar(levelBase, params[LEVEL2_PARAM].getValue()) *
 					   inputs[CV2_INPUT].getNormalVoltage(10.0) / 10.0;
-		Debug::Pin2::low();
 		float dry = in1 * level1 + in2 * level2;
 
 		// HPF on dry
@@ -114,9 +116,7 @@ struct SpringReverb : Module {
 			}
 
 			// Convolve block
-			Debug::Pin1::high();
 			convolver->processBlock(input, output);
-			Debug::Pin1::low();
 
 			// Convert output buffer
 			{
