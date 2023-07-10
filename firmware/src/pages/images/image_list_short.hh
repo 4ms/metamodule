@@ -26,14 +26,16 @@ LV_IMG_DECLARE(Seq8_artwork_120);
 LV_IMG_DECLARE(Seq8_artwork_240);
 LV_IMG_DECLARE(EnOsc_artwork_120);
 LV_IMG_DECLARE(EnOsc_artwork_240);
-LV_IMG_DECLARE(DualAtenuverter_artwork_120);
-LV_IMG_DECLARE(DualAtenuverter_artwork_240);
-LV_IMG_DECLARE(Braids_artwork_120);
-LV_IMG_DECLARE(Braids_artwork_240);
-LV_IMG_DECLARE(EvenVCO_artwork_120);
-LV_IMG_DECLARE(EvenVCO_artwork_240);
 LV_IMG_DECLARE(ENVVCA_artwork_240);
 LV_IMG_DECLARE(ENVVCA_artwork_120);
+LV_IMG_DECLARE(Braids_artwork_120);
+LV_IMG_DECLARE(Braids_artwork_240);
+LV_IMG_DECLARE(DualAtenuverter_artwork_120);
+LV_IMG_DECLARE(DualAtenuverter_artwork_240);
+LV_IMG_DECLARE(EvenVCO_artwork_120);
+LV_IMG_DECLARE(EvenVCO_artwork_240);
+LV_IMG_DECLARE(SpringReverb_artwork_240);
+LV_IMG_DECLARE(SpringReverb_artwork_120);
 }
 
 struct ModuleImages {
@@ -88,6 +90,10 @@ struct ModuleImages {
 
 		if (slug == "ENVVCA")
 			return (height == 240) ? &ENVVCA_artwork_240 : &ENVVCA_artwork_120;
+
+		if (slug == "SpringReverb")
+			return (height == 240) ? &SpringReverb_artwork_240 : &SpringReverb_artwork_120;
+
 
 		return nullptr;
 	}
