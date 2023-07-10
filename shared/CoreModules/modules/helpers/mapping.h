@@ -35,17 +35,15 @@ struct EmptyArray {
 
 } // namespace Impl
 
-#ifdef __clang__
-template<int min10, int max10, std::size_t LEN>
-#else
-template<float min, float max, std::size_t LEN>
-#endif
+template <std::size_t LEN>
 class LookupTable_t {
 public:
 	using Base_t = std::array<Point_t, LEN>;
 
 public:
-	constexpr LookupTable_t(const Base_t &input) {
+	constexpr LookupTable_t(const float min_, const float max_, const Base_t &input)
+	: min(min_), max(max_)
+	{
 		static_assert(LEN >= 2);
 		std::copy_n(input.begin(), LEN, points.begin());
 	}
@@ -68,20 +66,25 @@ public:
 
 private:
 	Base_t points;
-#ifdef __clang__
-	constexpr static float min = min10 / 10.f;
-	constexpr static float max = max10 / 10.f;
-#endif
+	const float min;
+	const float max;
 
 public:
-	template<typename F>
+
+	#ifdef __clang__
+	template<int min10, int max10, typename F>
+	#else
+	template<float min, float max, typename F>
+	#endif
 	static constexpr LookupTable_t generate(const F func) {
 #ifdef __clang__
 		constexpr Impl::EmptyArray<Point_t, LEN, min10, max10, F> dataArray(func);
+		return LookupTable_t(min10 / 10.f, max10 / 10.0f, dataArray.data);
 #else
 		constexpr Impl::EmptyArray<Point_t, LEN, min, max, F> dataArray(func);
+		return LookupTable_t(min, max, dataArray.data);
 #endif
-		return LookupTable_t(dataArray.data);
+		
 	}
 };
 

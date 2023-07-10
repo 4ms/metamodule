@@ -26,9 +26,9 @@ inline auto ThreeWayToInt = [](float val) -> uint32_t
 };
 
 #if __clang__
-constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<-1, 5, 50>::generate([](auto voltage)
+constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<-1, 5>([](auto voltage)
 #else
-constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<-0.1f, 0.5f, 50>::generate([](auto voltage)
+constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<-0.1f, 0.5f>([](auto voltage)
 #endif
 {
     // two points in the V->f curve
