@@ -39,13 +39,6 @@ protected:
 		return result;
 	}
 
-	float getParam(Elem el) {
-		if (count(el).num_params == 0)
-			return 0;
-		auto idx = index(el);
-		return paramValues[idx.param_idx];
-	}
-
 	template <typename INFO::Elem EL>
 	auto getState() 
 	{
@@ -54,7 +47,7 @@ protected:
 		constexpr auto& elementRef = INFO::Elements[elementID];
 
 		// read raw value
-		auto rawValue = getParam(EL);
+		auto rawValue = getParamRaw(EL);
 
 		// construct element of same type as the element the enum points to
 		constexpr auto variantIndex = elementRef.index();
@@ -64,6 +57,14 @@ protected:
 		auto result = MetaModule::StateConversion::convertState(DummyElement, rawValue);
 
 		return result;
+	}
+
+private:
+	float getParamRaw(Elem el) {
+		if (count(el).num_params == 0)
+			return 0;
+		auto idx = index(el);
+		return paramValues[idx.param_idx];
 	}
 
 protected:
