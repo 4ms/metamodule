@@ -1,8 +1,8 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/elements/element_counter.hh"
-#include "CoreModules/elements/param_scales.hh"
 #include "CoreModules/elements/element_state_conversion.hh"
+#include "CoreModules/elements/param_scales.hh"
 #include <array>
 #include <optional>
 
@@ -34,15 +34,15 @@ protected:
 	auto getState() 
 	{
 		// get back the typed element from the list of elements
-		constexpr auto elementID = static_cast<size_t>(EL);
-		constexpr auto& elementRef = INFO::Elements[elementID];
+		constexpr auto elementID = element_index(EL);
+		constexpr auto &elementRef = INFO::Elements[elementID];
 
 		// read raw value
 		auto rawValue = getParamRaw(EL);
 
 		// construct element of same type as the element the enum points to
 		constexpr auto variantIndex = elementRef.index();
-		std::variant_alternative_t<variantIndex,MetaModule::Element> DummyElement;
+		std::variant_alternative_t<variantIndex, MetaModule::Element> DummyElement;
 
 		// call conversion function for that type of element
 		auto result = MetaModule::StateConversion::convertState(DummyElement, rawValue);
