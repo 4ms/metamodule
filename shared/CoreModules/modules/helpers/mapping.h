@@ -7,10 +7,6 @@
 namespace Mapping
 {
 
-struct Point_t {
-	float y;
-};
-
 namespace Impl
 {
 #ifdef __clang__
@@ -27,7 +23,7 @@ struct EmptyArray {
 #endif
 		for (std::size_t i = 0; i < LEN; i++) {
 			auto x = min + i * (max - min) / float(LEN - 1);
-			data[i].y = func(x);
+			data[i] = func(x);
 		}
 	}
 	std::array<T, LEN> data;
@@ -38,7 +34,7 @@ struct EmptyArray {
 template <std::size_t LEN>
 class LookupTable_t {
 public:
-	using Base_t = std::array<Point_t, LEN>;
+	using Base_t = std::array<float, LEN>;
 
 public:
 	constexpr LookupTable_t(const float min_, const float max_, const Base_t &input)
@@ -52,15 +48,15 @@ public:
 		float idx = ((val - min) / (max - min)) * (LEN - 1);
 
 		if (idx <= 0.f)
-			return points.front().y;
+			return points.front();
 		else if (idx >= (LEN - 1))
-			return points.back().y;
+			return points.back();
 		else {
 			auto lower_idx = (uint32_t)idx;
 			float phase = idx - lower_idx;
 			auto lower = points[lower_idx];
 			auto upper = points[lower_idx + 1];
-			return lower.y + phase * (upper.y - lower.y);
+			return lower + phase * (upper - lower);
 		}
 	}
 
@@ -78,10 +74,10 @@ public:
 	#endif
 	static constexpr LookupTable_t generate(const F func) {
 #ifdef __clang__
-		constexpr Impl::EmptyArray<Point_t, LEN, min10, max10, F> dataArray(func);
+		constexpr Impl::EmptyArray<float, LEN, min10, max10, F> dataArray(func);
 		return LookupTable_t(min10 / 10.f, max10 / 10.0f, dataArray.data);
 #else
-		constexpr Impl::EmptyArray<Point_t, LEN, min, max, F> dataArray(func);
+		constexpr Impl::EmptyArray<float, LEN, min, max, F> dataArray(func);
 		return LookupTable_t(min, max, dataArray.data);
 #endif
 		
