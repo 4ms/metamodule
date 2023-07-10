@@ -14,17 +14,17 @@ public:
 	SmartCoreProcessor() = default;
 
 protected:
-	void setOutput(Elem el, float val) {
-		if (count(el).num_outputs == 0)
-			return;
-		auto idx = index(el);
+	template <typename INFO::Elem EL>
+	void setOutput(float val) requires (ElementCount::count(INFO::Elements[std::size_t(EL)]).num_outputs == 1)
+	{
+		auto idx = index(EL);
 		outputValues[idx.output_idx] = val;
 	}
 
-	std::optional<float> getInput(Elem el) {
-		if (count(el).num_inputs == 0)
-			return 0;
-		auto idx = index(el);
+	template <typename INFO::Elem EL>
+	std::optional<float> getInput() requires (ElementCount::count(INFO::Elements[std::size_t(EL)]).num_inputs == 1)
+	{
+		auto idx = index(EL);
 		auto result = inputValues[idx.input_idx];
 		inputValues[idx.input_idx].reset();
 		return result;

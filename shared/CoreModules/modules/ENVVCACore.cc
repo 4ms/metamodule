@@ -98,11 +98,11 @@ public:
 
 		// Ignoring input impedance and inverting 400kHz lowpass
 
-		if (auto input = getInput(AudioIn); input) {
+		if (auto input = getInput<AudioIn>(); input) {
 			auto output = vca.process(*input);
-			setOutput(AudioOut, output);
+			setOutput<AudioOut>(output);
 		} else {
-			setOutput(AudioOut, 0.f);
+			setOutput<AudioOut>(0.f);
 		}
 
 		// Ignoring output impedance and inverting 400kHz lowpass
@@ -112,7 +112,7 @@ public:
 	{
 		val = val / VoltageDivider(100e3f, 100e3f);
 		val *= getState<LevelSlider>();
-		setOutput(EnvOut, val);
+		setOutput<EnvOut>(val);
 		setLED<LevelSlider>(val / 8.f);
 		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
 		// even during State_t::FOLLOW
@@ -123,16 +123,16 @@ public:
 	void displayOscillatorState(TriangleOscillator::State_t state)
 	{
 		if (state == TriangleOscillator::State_t::FALLING) {
-			setOutput(Eor, 8.f);
+			setOutput<Eor>(8.f);
 			setLED<EorLed>(true);
 		} else {
-			setOutput(Eor, 0);
+			setOutput<Eor>(0);
 			setLED<EorLed>(false);
 		}
 	}
 
 	void runOscillator() {
-		bool isCycling = (getState<CycleButton>() == MetaModule::LatchingButton::State_t::DOWN) ^ CVToBool(getInput(CycleJack).value_or(0.0f));
+		bool isCycling = (getState<CycleButton>() == MetaModule::LatchingButton::State_t::DOWN) ^ CVToBool(getInput<CycleJack>().value_or(0.0f));
 
 		osc.setCycling(isCycling);
 		if (cycleLED != isCycling){
@@ -140,11 +140,11 @@ public:
 			setLED<CycleButton>(cycleLED);
 		}
 
-		if (auto inputFollowValue = getInput(Follow); inputFollowValue) {
+		if (auto inputFollowValue = getInput<Follow>(); inputFollowValue) {
 			osc.setTargetVoltage(*inputFollowValue);
 		}
 
-		if (auto triggerInputValue = getInput(Trigger); triggerInputValue) {
+		if (auto triggerInputValue = getInput<Trigger>(); triggerInputValue) {
 			if (triggerEdgeDetector(triggerDetector(*triggerInputValue))) {
 				osc.doRetrigger();
 			}
@@ -184,7 +184,7 @@ public:
 			return InvertingAmpWithBias(offset, 100e3f, 100e3f, bias);
 		};
 
-		if (auto timeCVValue = getInput(TimeCv); timeCVValue) {
+		if (auto timeCVValue = getInput<TimeCv>(); timeCVValue) {
 			// scale down cv input
 			const auto scaledTimeCV = *timeCVValue * -100e3f / 137e3f;
 
