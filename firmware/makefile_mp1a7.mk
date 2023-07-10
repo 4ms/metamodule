@@ -141,7 +141,7 @@ modulesBefaco += SpringReverb
 modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
 modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
 
-SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
+#SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
 SOURCES += $(foreach m,$(modulesBefaco),vcv-ports/Befaco/src/$(m).cpp)
 SOURCES += $(foreach m,$(modules4ms),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
 
