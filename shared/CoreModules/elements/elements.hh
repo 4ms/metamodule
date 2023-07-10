@@ -16,6 +16,14 @@
 
 namespace MetaModule
 {
+// Generic
+
+class BipolarColor_t
+{
+public:
+	BipolarColor_t(float val): value(val) {}
+	float value;
+};
 
 // TODO: get rid of idx field once VCV rack modules work without it
 struct BaseElement {
@@ -30,6 +38,9 @@ struct BaseElement {
 	static constexpr size_t NumLights = 0;
 	static constexpr size_t NumInputs = 0;
 	static constexpr size_t NumOutputs = 0;
+
+	// This needs to be there to catch no State_t defined by children
+	using State_t = void;
 };
 
 //
@@ -47,6 +58,8 @@ struct Pot : ParamElement {
 	float min_val = 0.f;
 	float max_val = 1.f;
 	float default_val = 0.f;
+
+	using State_t = float;
 };
 
 struct Knob : Pot {};
@@ -102,26 +115,24 @@ struct Slider25mmVertLED : SliderMonoLight {};
 struct Switch : ParamElement {};
 
 struct MomentaryButton : Switch {
-	enum State { PRESSED, RELEASED };
+	enum class State_t { PRESSED, RELEASED };
 };
 struct MomentaryButtonRGB : MomentaryButton {
 	static constexpr size_t NumLights = 3;
-	enum Color { RED, BLUE, GREEN };
 };
 
 struct LatchingButton : Switch {
-	enum State { DOWN, UP };
+	enum class State_t { DOWN, UP };
 };
 struct LatchingButtonMonoLight : LatchingButton {
 	static constexpr size_t NumLights = 1;
-	enum Color { RED, BLUE, GREEN };
 };
 
 struct Toggle2pos : Switch {
-	enum State { DOWN, UP };
+	enum class State_t { DOWN, UP };
 };
 struct Toggle3pos : Switch {
-	enum State { DOWN, CENTER, UP };
+	enum class State_t { DOWN, CENTER, UP };
 };
 
 struct BefacoSwitchHorizontal : Toggle2pos {};
