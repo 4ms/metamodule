@@ -10,7 +10,7 @@ namespace Mapping
 namespace Impl
 {
 #ifdef __clang__
-template<typename T, std::size_t LEN, int min10, int max10, typename F>
+template<typename T, std::size_t LEN, typename rangeClass, typename F>
 #else
 template<typename T, std::size_t LEN, float min, float max, typename F>
 #endif
@@ -18,8 +18,8 @@ struct EmptyArray {
 	constexpr EmptyArray(const F &func)
 		: data() {
 #ifdef __clang__
-		constexpr float min = min10 / 10.f;
-		constexpr float max = max10 / 10.f;
+		constexpr float min = rangeClass::min;
+		constexpr float max = rangeClass::max;
 #endif
 		for (std::size_t i = 0; i < LEN; i++) {
 			auto x = min + i * (max - min) / float(LEN - 1);
@@ -67,15 +67,15 @@ private:
 
 public:
 
-	#ifdef __clang__
-	template<int min10, int max10, typename F>
-	#else
+#ifdef __clang__
+	template<typename rangeClass, typename F>
+#else
 	template<float min, float max, typename F>
-	#endif
+#endif
 	static constexpr LookupTable_t generate(const F func) {
 #ifdef __clang__
-		constexpr Impl::EmptyArray<float, LEN, min10, max10, F> dataArray(func);
-		return LookupTable_t(min10 / 10.f, max10 / 10.0f, dataArray.data);
+		constexpr Impl::EmptyArray<float, LEN, rangeClass, F> dataArray(func);
+		return LookupTable_t(rangeClass::min, rangeClass::max, dataArray.data);
 #else
 		constexpr Impl::EmptyArray<float, LEN, min, max, F> dataArray(func);
 		return LookupTable_t(min, max, dataArray.data);
@@ -85,3 +85,4 @@ public:
 };
 
 } // namespace Mapping
+
