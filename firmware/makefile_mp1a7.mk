@@ -133,15 +133,18 @@ SOURCES += src/pages/page_manager.cc
 
 # Modules: CoreModules and faceplate artwork 
 SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
+
 ifeq "$(USE_FEWER_MODULES)" "1"
 modulesAudible := Braids 
 modulesBefaco := EvenVCO 
 modulesBefaco += DualAtenuverter
-modulesBefaco += SpringReverb
+modulesBefaco += SpringReverb ABC
+#modulesBefaco += Kickall ADSR HexMixVCA
+
 modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
 modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
 
-SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
+# SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
 SOURCES += $(foreach m,$(modulesBefaco),vcv-ports/Befaco/src/$(m).cpp)
 SOURCES += $(foreach m,$(modules4ms),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "VCV-adaptor/PortInfo.hpp"
 #include "VCV-adaptor/VCV_module_wrapper.hh"
 #include "VCV-adaptor/json.hpp"
 #include "VCV-adaptor/param_quantity.hh"
@@ -39,10 +40,12 @@ struct Module : VCVModuleWrapper {
 		return nullptr;
 	}
 
-	void configInput(int portId, std::string_view name = "") {
+	PortInfo *configInput(int portId, std::string_view name = "") {
+		return &mock_portinfo;
 	}
 
-	void configOutput(int portId, std::string_view name = "") {
+	PortInfo *configOutput(int portId, std::string_view name = "") {
+		return &mock_portinfo;
 	}
 
 	ParamQuantity *getParamQuantity(int index) {
@@ -50,6 +53,10 @@ struct Module : VCVModuleWrapper {
 	}
 
 	void configBypass(unsigned, unsigned) {
+	}
+
+	PortInfo &getInputInfo(int index) {
+		return mock_portinfo;
 	}
 
 	virtual void processBypass(const ProcessArgs &args) {
@@ -64,6 +71,7 @@ struct Module : VCVModuleWrapper {
 
 private:
 	ParamQuantity mock_pq;
+	PortInfo mock_portinfo;
 };
 
 } // namespace rack
