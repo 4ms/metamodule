@@ -14,15 +14,15 @@ public:
 	SmartCoreProcessor() = default;
 
 protected:
-	template <typename INFO::Elem EL>
-	void setOutput(float val) requires (ElementCount::count(INFO::Elements[std::size_t(EL)]).num_outputs == 1)
+	template<typename INFO::Elem EL>
+	void setOutput(float val) requires(ElementCount::count(INFO::Elements[std::size_t(EL)]).num_outputs == 1)
 	{
 		auto idx = index(EL);
 		outputValues[idx.output_idx] = val;
 	}
 
-	template <typename INFO::Elem EL>
-	std::optional<float> getInput() requires (ElementCount::count(INFO::Elements[std::size_t(EL)]).num_inputs == 1)
+	template<typename INFO::Elem EL>
+	std::optional<float> getInput() requires(ElementCount::count(INFO::Elements[std::size_t(EL)]).num_inputs == 1)
 	{
 		auto idx = index(EL);
 		auto result = inputValues[idx.input_idx];
@@ -30,8 +30,8 @@ protected:
 		return result;
 	}
 
-	template <typename INFO::Elem EL>
-	auto getState() 
+	template<typename INFO::Elem EL>
+	auto getState() requires(ElementCount::count(INFO::Elements[std::size_t(EL)]).num_params > 0)
 	{
 		// get back the typed element from the list of elements
 		constexpr auto elementID = element_index(EL);
@@ -50,37 +50,32 @@ protected:
 		return result;
 	}
 
-	template <typename INFO::Elem EL, typename VAL>
-	void setLED(const VAL& value) {
-
+	template<typename INFO::Elem EL, typename VAL>
+	void setLED(const VAL &value) requires(ElementCount::count(INFO::Elements[std::size_t(EL)]).num_lights > 0)
+	{
 		// get back the typed element from the list of elements
 		constexpr auto elementID = static_cast<size_t>(EL);
-		constexpr auto& elementRef = INFO::Elements[elementID];
+		constexpr auto &elementRef = INFO::Elements[elementID];
 
 		// construct element of same type as the element the enum points to
 		constexpr auto variantIndex = elementRef.index();
-		std::variant_alternative_t<variantIndex,MetaModule::Element> DummyElement;
+		std::variant_alternative_t<variantIndex, MetaModule::Element> DummyElement;
 
 		// call conversion function for that type of element
 		auto rawValues = MetaModule::StateConversion::convertLED(DummyElement, value);
 
-		for (std::size_t i=0; i<rawValues.size(); i++)
-		{
+		for (std::size_t i = 0; i < rawValues.size(); i++) {
 			setLEDRaw(EL, rawValues[i], i);
 		}
 	}
 
 private:
 	float getParamRaw(Elem el) {
-		if (count(el).num_params == 0)
-			return 0;
 		auto idx = index(el);
 		return paramValues[idx.param_idx];
 	}
 
-	void setLEDRaw(Elem el, float val, size_t color_idx=0) {
-		if (count(el).num_lights == 0)
-			return;
+	void setLEDRaw(Elem el, float val, size_t color_idx = 0) {
 		auto idx = index(el);
 		auto led_idx = idx.light_idx + color_idx;
 		if (led_idx < ledValues.size())
