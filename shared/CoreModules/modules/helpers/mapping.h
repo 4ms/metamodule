@@ -9,18 +9,14 @@ namespace Mapping
 
 namespace Impl
 {
-#ifdef __clang__
+
 template<typename T, std::size_t LEN, typename rangeClass, typename F>
-#else
-template<typename T, std::size_t LEN, float min, float max, typename F>
-#endif
 struct EmptyArray {
 	constexpr EmptyArray(const F &func)
 		: data() {
-#ifdef __clang__
 		constexpr float min = rangeClass::min;
 		constexpr float max = rangeClass::max;
-#endif
+
 		for (std::size_t i = 0; i < LEN; i++) {
 			auto x = min + i * (max - min) / float(LEN - 1);
 			data[i] = func(x);
@@ -31,15 +27,15 @@ struct EmptyArray {
 
 } // namespace Impl
 
-template <std::size_t LEN>
+template<std::size_t LEN>
 class LookupTable_t {
 public:
 	using Base_t = std::array<float, LEN>;
 
 public:
 	constexpr LookupTable_t(const float min_, const float max_, const Base_t &input)
-	: min(min_), max(max_)
-	{
+		: min(min_)
+		, max(max_) {
 		static_assert(LEN >= 2);
 		std::copy_n(input.begin(), LEN, points.begin());
 	}
@@ -66,23 +62,11 @@ private:
 	const float max;
 
 public:
-
-#ifdef __clang__
 	template<typename rangeClass, typename F>
-#else
-	template<float min, float max, typename F>
-#endif
 	static constexpr LookupTable_t generate(const F func) {
-#ifdef __clang__
 		constexpr Impl::EmptyArray<float, LEN, rangeClass, F> dataArray(func);
 		return LookupTable_t(rangeClass::min, rangeClass::max, dataArray.data);
-#else
-		constexpr Impl::EmptyArray<float, LEN, min, max, F> dataArray(func);
-		return LookupTable_t(min, max, dataArray.data);
-#endif
-		
 	}
 };
 
 } // namespace Mapping
-

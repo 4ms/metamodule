@@ -1,5 +1,4 @@
 #pragma once
-
 #include "gcem/include/gcem.hpp"
 #include "helpers/mapping.h"
 #include <algorithm>
@@ -22,17 +21,11 @@ public:
 private:
 	float scalingFactor;
 
-#if __clang__
-	struct GainTableRange
-	{
+	struct GainTableRange {
 		static constexpr float min = 0.0f;
 		static constexpr float max = 5.4f;
 	};
 	static constexpr auto GainTable = Mapping::LookupTable_t<64>::generate<GainTableRange>([](auto voltage) {
-#else
-	static constexpr auto GainTable = Mapping::LookupTable_t<64>::generate<0.f, 5.4f>([](auto voltage) {
-#endif
-
 		auto gainIndB = voltage / -33e-3f;
 		return gcem::pow(10.f, gainIndB / 20.f);
 	});
