@@ -59,4 +59,31 @@ constexpr Pot::State_t convertState(const T &, float val) requires(std::derived_
 	return val;
 }
 
+
+//
+// LEDs
+//
+
+// Fallback for single LED elements
+template <typename T>
+constexpr std::array<float,T::NumLights> convertLED(const T&, float value) requires(T::NumLights == 1)
+{
+    return {value};
+}
+
+// Fallback for single LED elements with explicit type conversion
+template <typename T>
+constexpr std::array<float,T::NumLights> convertLED(const T&, bool value) requires(T::NumLights == 1)
+{
+    return {value ? 1.0f : 0.0f};
+}
+
+
+template <typename T>
+constexpr std::array<float,T::NumLights> convertLED(const T&, BipolarColor_t color) requires(std::derived_from<T,DualLight>)
+{
+    return {-std::min(color.value, 0.0f), std::max(color.value, 0.f)};
+}
+
 } // namespace MetaModule::StateConversion
+
