@@ -14,15 +14,6 @@ public:
 	SmartCoreProcessor() = default;
 
 protected:
-	void setLED(Elem el, float val, size_t color_idx = 0) {
-		if (count(el).num_lights == 0)
-			return;
-		auto idx = index(el);
-		auto led_idx = idx.light_idx + color_idx;
-		if (led_idx < ledValues.size())
-			ledValues[led_idx] = val;
-	}
-
 	void setOutput(Elem el, float val) {
 		if (count(el).num_outputs == 0)
 			return;
@@ -59,12 +50,41 @@ protected:
 		return result;
 	}
 
+	template <typename INFO::Elem EL, typename VAL>
+	void setLED(const VAL& value) {
+
+		// get back the typed element from the list of elements
+		constexpr auto elementID = static_cast<size_t>(EL);
+		constexpr auto& elementRef = INFO::Elements[elementID];
+
+		// construct element of same type as the element the enum points to
+		constexpr auto variantIndex = elementRef.index();
+		std::variant_alternative_t<variantIndex,MetaModule::Element> DummyElement;
+
+		// call conversion function for that type of element
+		auto rawValues = MetaModule::StateConversion::convertLED(DummyElement, value);
+
+		for (std::size_t i=0; i<rawValues.size(); i++)
+		{
+			setLEDRaw(EL, rawValues[i], i);
+		}
+	}
+
 private:
 	float getParamRaw(Elem el) {
 		if (count(el).num_params == 0)
 			return 0;
 		auto idx = index(el);
 		return paramValues[idx.param_idx];
+	}
+
+	void setLEDRaw(Elem el, float val, size_t color_idx=0) {
+		if (count(el).num_lights == 0)
+			return;
+		auto idx = index(el);
+		auto led_idx = idx.light_idx + color_idx;
+		if (led_idx < ledValues.size())
+			ledValues[led_idx] = val;
 	}
 
 protected:
