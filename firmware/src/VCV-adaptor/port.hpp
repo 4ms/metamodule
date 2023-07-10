@@ -5,8 +5,6 @@ struct Port {
 	float voltage = 0.f;
 	bool connected = false;
 
-	enum Type { INPUT, OUTPUT };
-
 	float getVoltage(int chan = 0) const {
 		return voltage;
 	}
