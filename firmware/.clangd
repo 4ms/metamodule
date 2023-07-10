@@ -13,9 +13,12 @@ CompileFlags:
 		"-flto=*",
 		"-mvectorize-with-neon-*",
 		"-mthumb-interwork",
-		"-ffold-simple-inlines"
+		"-ffold-simple-inlines",
+        "-D__ARM_ACLE",
+        "-D__ARM_FEATURE_CRC32",
 	]
 	Add: [
+       "--include /opt/homebrew/opt/llvm/lib/clang/16/include/arm_neon.h",
 		"--target=arm-none-eabi", 
 		"-DUSE_HAL_DRIVER",
 		"-DCORE_CA7", 
