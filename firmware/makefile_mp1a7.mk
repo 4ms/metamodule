@@ -138,6 +138,7 @@ modulesAudible := Braids
 modulesBefaco := EvenVCO 
 modulesBefaco += DualAtenuverter
 modulesBefaco += SpringReverb ABC ADSR ChoppingKinky
+modulesBefaco += HexmixVCA Kickall Mixer Morphader MotionMTR
 
 modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
 modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 

@@ -55,8 +55,8 @@ struct Module : VCVModuleWrapper {
 								float minValue,
 								float maxValue,
 								float defaultValue,
-								std::string name = "",
-								std::string unit = "",
+								std::string_view name = "",
+								std::string_view unit = "",
 								float displayBase = 0.f,
 								float displayMultiplier = 1.f,
 								float displayOffset = 0.f) {
@@ -73,30 +73,30 @@ struct Module : VCVModuleWrapper {
 								  float minValue,
 								  float maxValue,
 								  float defaultValue,
-								  std::string name = "",
+								  std::string_view name = "",
 								  std::vector<std::string> labels = {}) {
 		return configParam<TSwitchQuantity>(paramId, minValue, maxValue, defaultValue, name);
 		//sw->labels = labels
 	}
 
 	template<class TSwitchQuantity = SwitchQuantity>
-	TSwitchQuantity *configButton(int paramId, std::string name = "") {
+	TSwitchQuantity *configButton(int paramId, std::string_view name = "") {
 		return configParam<TSwitchQuantity>(paramId, 0.f, 1.f, 0.f, name);
 		// sq->randomizeEnabled = false;
 	}
 
 	template<class TPortInfo = PortInfo>
-	TPortInfo *configInput(int portId, std::string name = "") {
+	TPortInfo *configInput(int portId, std::string_view name = "") {
 		return &stubInputInfo;
 	}
 
 	template<class TPortInfo = PortInfo>
-	TPortInfo *configOutput(int portId, std::string name = "") {
+	TPortInfo *configOutput(int portId, std::string_view name = "") {
 		return &stubOutputInfo;
 	}
 
 	template<class TLightInfo = LightInfo>
-	TLightInfo *configLight(int lightId, std::string name = "") {
+	TLightInfo *configLight(int lightId, std::string_view name = "") {
 		return &stubLightInfo;
 	}
 
@@ -106,10 +106,10 @@ struct Module : VCVModuleWrapper {
 	}
 
 	// Not supported:
-	std::string createPatchStorageDirectory() {
+	std::string_view createPatchStorageDirectory() {
 		return "";
 	}
-	std::string getPatchStorageDirectory() {
+	std::string_view getPatchStorageDirectory() {
 		return "";
 	}
 

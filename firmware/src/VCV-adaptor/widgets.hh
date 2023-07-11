@@ -14,8 +14,8 @@ int load(auto) {
 
 namespace asset
 {
-int plugin(auto, auto) {
-	return 0;
+std::string_view plugin(auto, auto) {
+	return "";
 }
 } // namespace asset
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "VCV-adaptor/app/menu.hpp"
 #include "VCV-adaptor/widgets.hh"
+#include "helpers.hpp"
 
 namespace rack
 {
@@ -13,7 +14,7 @@ struct ModuleWidget : Widget {
 	void setModule(engine::Module *) {
 	}
 
-	void setPanel(Widget *) {
+	void setPanel(app::SvgPanel *) {
 	}
 
 	void addChild(Widget *) {
@@ -90,7 +91,7 @@ struct ModuleWidget : Widget {
 
 //TODO: move this to other files:
 struct Window {
-	Widget *loadSvg(unsigned) {
+	app::SvgPanel *loadSvg(std::string_view) {
 		return nullptr;
 	}
 };
