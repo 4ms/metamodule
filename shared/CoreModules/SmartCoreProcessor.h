@@ -13,19 +13,25 @@ template<typename INFO>
 class SmartCoreProcessor : public CoreProcessor {
 	using Elem = typename INFO::Elem;
 
-public:
-	SmartCoreProcessor() = default;
+	constexpr static auto element_index(Elem el) {
+		return static_cast<std::underlying_type_t<Elem>>(el);
+	}
+
+	constexpr static auto count(Elem el) {
+		auto element_idx = element_index(el);
+		return ElementCount::count(INFO::Elements[element_idx]);
+	}
 
 protected:
-	template<typename INFO::Elem EL>
-	void setOutput(float val) requires(ElementCount::count(INFO::Elements[std::size_t(EL)]).num_outputs == 1)
+	template<Elem EL>
+	void setOutput(float val) requires(count(EL).num_outputs == 1)
 	{
 		auto idx = index(EL);
 		outputValues[idx.output_idx] = val;
 	}
 
-	template<typename INFO::Elem EL>
-	std::optional<float> getInput() requires(ElementCount::count(INFO::Elements[std::size_t(EL)]).num_inputs == 1)
+	template<Elem EL>
+	std::optional<float> getInput() requires(count(EL).num_inputs == 1)
 	{
 		auto idx = index(EL);
 		auto result = inputValues[idx.input_idx];
@@ -33,8 +39,8 @@ protected:
 		return result;
 	}
 
-	template<typename INFO::Elem EL>
-	auto getState() requires(ElementCount::count(INFO::Elements[std::size_t(EL)]).num_params > 0)
+	template<Elem EL>
+	auto getState() requires(count(EL).num_params > 0)
 	{
 		// get back the typed element from the list of elements
 		constexpr auto elementID = element_index(EL);
@@ -45,16 +51,16 @@ protected:
 
 		// construct element of same type as the element the enum points to
 		constexpr auto variantIndex = elementRef.index();
-		std::variant_alternative_t<variantIndex, MetaModule::Element> DummyElement;
+		std::variant_alternative_t<variantIndex, Element> DummyElement;
 
 		// call conversion function for that type of element
-		auto result = MetaModule::StateConversion::convertState(DummyElement, rawValue);
+		auto result = StateConversion::convertState(DummyElement, rawValue);
 
 		return result;
 	}
 
-	template<typename INFO::Elem EL, typename VAL>
-	void setLED(const VAL &value) requires(ElementCount::count(INFO::Elements[std::size_t(EL)]).num_lights > 0)
+	template<Elem EL, typename VAL>
+	void setLED(const VAL &value) requires(count(EL).num_lights > 0)
 	{
 		// get back the typed element from the list of elements
 		constexpr auto elementID = static_cast<size_t>(EL);
@@ -62,10 +68,10 @@ protected:
 
 		// construct element of same type as the element the enum points to
 		constexpr auto variantIndex = elementRef.index();
-		std::variant_alternative_t<variantIndex, MetaModule::Element> DummyElement;
+		std::variant_alternative_t<variantIndex, Element> DummyElement;
 
 		// call conversion function for that type of element
-		auto rawValues = MetaModule::StateConversion::convertLED(DummyElement, value);
+		auto rawValues = StateConversion::convertLED(DummyElement, value);
 
 		for (std::size_t i = 0; i < rawValues.size(); i++) {
 			setLEDRaw(EL, rawValues[i], i);
@@ -120,23 +126,14 @@ protected:
 	}
 
 private:
-	constexpr static auto element_index(Elem el) {
-		return static_cast<std::underlying_type_t<Elem>>(el);
-	}
+	constexpr static auto counts = ElementCount::count<INFO>();
+	constexpr static auto indices = ElementCount::get_indices<INFO>();
+	constexpr static auto param_scales = PotElementHelper::param_scales<INFO>();
 
 	constexpr static auto index(Elem el) {
 		auto element_idx = element_index(el);
 		return indices[element_idx];
 	}
-
-	constexpr static auto count(Elem el) {
-		auto element_idx = element_index(el);
-		return ElementCount::count(INFO::Elements[element_idx]);
-	}
-
-	constexpr static auto counts = ElementCount::count<INFO>();
-	constexpr static auto indices = ElementCount::get_indices<INFO>();
-	constexpr static auto param_scales = PotElementHelper::param_scales<INFO>();
 
 	std::array<float, counts.num_params> paramValues;
 	std::array<std::optional<float>, counts.num_inputs> inputValues;
