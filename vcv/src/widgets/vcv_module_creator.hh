@@ -24,7 +24,7 @@ struct VCVModuleParamCreator {
 	}
 
 	template<typename T>
-	void config_element(const T element) {
+	void config_element(const T &element) {
 		// forward to implementation together with current context
 		if (auto indices = ElementCount::get_indices<INFO>(element)) {
 			VCVImplementation::Module::do_config_element(element, indices.value(), context);

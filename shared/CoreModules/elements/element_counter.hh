@@ -1,9 +1,9 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include <array>
+#include <cstdint>
 #include <numeric>
 #include <optional>
-#include <cstdint>
 
 namespace ElementCount
 {
@@ -47,7 +47,7 @@ constexpr Counts count(auto e) {
 	return Counts{e.NumParams, e.NumLights, e.NumInputs, e.NumOutputs};
 }
 
-constexpr Counts count(MetaModule::Element element) {
+constexpr Counts count(const MetaModule::Element &element) {
 	return std::visit([](auto e) { return count(e); }, element);
 }
 
@@ -59,13 +59,13 @@ constexpr Counts count() {
 }
 
 template<typename Info>
-constexpr std::optional<Indices> get_indices(MetaModule::BaseElement element) {
+constexpr std::optional<Indices> get_indices(const MetaModule::BaseElement &element) {
 	Indices idx{};
 
 	for (auto el : Info::Elements) {
 		Counts el_cnt = count(el);
 
-		if (element == std::visit([](auto e) { return MetaModule::BaseElement{e}; }, el)) {
+		if (element == std::visit([](auto e) { return static_cast<MetaModule::BaseElement &>(e); }, el)) {
 			return {{idx.param_idx, idx.light_idx, idx.input_idx, idx.output_idx}};
 		}
 
@@ -91,7 +91,7 @@ consteval auto get_indices() {
 
 // This isn't used (yet?) TODO: Remove when done with refactoring if still not used
 template<typename Info>
-constexpr std::optional<size_t> get_element_id(MetaModule::BaseElement element) {
+constexpr std::optional<size_t> get_element_id(const MetaModule::BaseElement &element) {
 	for (unsigned i = 0; auto el : Info::Elements) {
 		if (element == std::visit([](auto e) { return MetaModule::BaseElement{e}; }, el))
 			return i;
