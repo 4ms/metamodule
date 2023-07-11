@@ -218,6 +218,8 @@ struct Module : VCVModuleWrapper {
 		float sampleRate;
 		float sampleTime;
 	};
+	virtual void onSampleRateChange() {
+	}
 	virtual void onSampleRateChange(const SampleRateChangeEvent &e) {
 	}
 

@@ -88,14 +88,25 @@ struct ModuleWidget : Widget {
 	}
 };
 
+//TODO: move this to other files:
 struct Window {
 	Widget *loadSvg(unsigned) {
 		return nullptr;
 	}
 };
 
+struct Engine {
+	float getSampleRate() {
+		return 48000;
+	}
+};
+
 struct App {
-	Window *window;
+	Window _window;
+	Window *window = &_window;
+	Engine _engine;
+	Engine *engine = &_engine;
+	;
 };
 
 extern App *APP;

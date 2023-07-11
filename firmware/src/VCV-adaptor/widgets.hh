@@ -72,6 +72,7 @@ struct Davies1900hBlackKnob : SvgWidget {};
 struct Davies1900hKnob : SvgWidget {};
 struct Davies1900hWhiteKnob : SvgWidget {};
 struct Davies1900hRedKnob : SvgWidget {};
+struct Davies1900hLargeWhiteKnob : SvgWidget{};
 template<typename T> struct MediumLight : SvgWidget {};
 template<typename T> struct SmallLight : SvgWidget {};
 struct GreenRedLight : SvgWidget {};
