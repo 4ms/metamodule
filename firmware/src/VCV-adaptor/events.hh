@@ -1,20 +1,36 @@
 #pragma once
+#include "math.hpp"
 
 namespace rack
 {
+enum {
+	GLFW_MOUSE_BUTTON_LEFT,
+	GLFW_MOUSE_BUTTON_MIDDLE,
+	GLFW_MOUSE_BUTTON_RIGHT,
+};
 
 namespace event
 {
-struct Event {};
-struct DoubleClick {};
-struct ActionEvent {};
-struct HoverEvent {};
-struct HoverKeyEvent {};
-struct ButtonEvent {};
-struct DragStartEvent {};
-struct DragEndEvent {};
-struct DragMoveEvent {};
-struct DragHoverEvent {};
+
+struct Event {
+	unsigned button;
+	math::Vec mouseDelta;
+};
+
+struct DoubleClick : Event {};
+struct ActionEvent : Event {};
+struct HoverEvent : Event {};
+struct HoverKeyEvent : Event {};
+struct ButtonEvent : Event {};
+struct DragStartEvent : Event {};
+struct DragEndEvent : Event {};
+struct DragMoveEvent : Event {};
+struct DragHoverEvent : Event {};
+
+using DragStart = DragStartEvent;
+using DragEnd = DragEndEvent;
+using DragMove = DragMoveEvent;
+using DragHover = DragHoverEvent;
 } // namespace event
 
 using ActionEvent = event::ActionEvent;

@@ -139,6 +139,15 @@ modulesBefaco := EvenVCO
 modulesBefaco += DualAtenuverter
 modulesBefaco += SpringReverb ABC ADSR ChoppingKinky
 modulesBefaco += HexmixVCA Kickall Mixer Morphader MotionMTR
+#modulesBefaco += Muxlicer
+# modulesBefaco += NoisePlethora
+modulesBefaco += Percall
+modulesBefaco += PonyVCO
+modulesBefaco += Rampage
+modulesBefaco += STMix
+modulesBefaco += SamplingModulator
+modulesBefaco += SlewLimiter
+modulesBefaco += StereoStrip
 
 modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
 modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 

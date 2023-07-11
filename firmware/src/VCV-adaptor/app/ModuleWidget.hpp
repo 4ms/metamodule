@@ -72,21 +72,6 @@ struct ModuleWidget : Widget {
 	}
 	void drawLayer(const DrawArgs &args, int layer) {
 	}
-
-	virtual void onHover(const HoverEvent &e) {
-	}
-	virtual void onHoverKey(const HoverKeyEvent &e) {
-	}
-	virtual void onButton(const ButtonEvent &e) {
-	}
-	virtual void onDragStart(const DragStartEvent &e) {
-	}
-	virtual void onDragEnd(const DragEndEvent &e) {
-	}
-	virtual void onDragMove(const DragMoveEvent &e) {
-	}
-	virtual void onDragHover(const DragHoverEvent &e) {
-	}
 };
 
 //TODO: move this to other files:
