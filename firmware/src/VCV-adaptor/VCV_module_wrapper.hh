@@ -1,9 +1,9 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
-#include "VCV-adaptor/light.hh"
-#include "VCV-adaptor/math.hpp"
-#include "VCV-adaptor/param.hh"
-#include "VCV-adaptor/port.hh"
+#include "VCV-adaptor/engine/Light.hpp"
+// #include "VCV-adaptor/math.hpp"
+#include "VCV-adaptor/engine/Param.hpp"
+#include "VCV-adaptor/engine/Port.hpp"
 #include "elements/param_scales.hh"
 #include <array>
 #include <memory>
