@@ -72,10 +72,10 @@ struct VCVModuleWrapper : CoreProcessor {
 
 	// constexpr static typename ElementCount<Info>::Counts counts = ElementCount<Info>::count();
 
-	std::vector<Param> params;
-	std::vector<Port> inputs;
-	std::vector<Port> outputs;
-	std::vector<Light> lights;
+	std::vector<rack::engine::Param> params;
+	std::vector<rack::engine::Input> inputs;
+	std::vector<rack::engine::Output> outputs;
+	std::vector<rack::engine::Light> lights;
 	std::vector<PotElementHelper::ParamScale> param_scales;
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};

@@ -1,35 +1,24 @@
 #pragma once
 #include <vector>
 
-#include <jansson.h>
+#include "VCV-adaptor/Quantity.hpp"
+#include "VCV-adaptor/engine/Param.hpp"
+#include "VCV-adaptor/json.hpp"
 
-#include <Quantity.hpp>
-#include <engine/Param.hpp>
-
-
-namespace rack {
-namespace engine {
-
+namespace rack::engine
+{
 
 struct Module;
 
-
-/** A Quantity that wraps an engine::Param. */
 struct ParamQuantity : Quantity {
-	Module* module = NULL;
-	int paramId = -1;
+	// Module *module = nullptr;
+	// int paramId = -1;
 
-	/** The minimum allowed value. */
 	float minValue = 0.f;
-	/** The maximum allowed value. Must be greater than minValue. */
 	float maxValue = 1.f;
-	/** The initial value. */
 	float defaultValue = 0.f;
 
-	/** The name of the parameter, using sentence capitalization.
-	e.g. "Frequency", "Pulse width", "Alternative mode"
-	*/
-	std::string name;
+	std::string_view name = "";
 	/** The numerical unit of measurement appended to the value.
 	Unit words and abbreviations should have a space to separate the numerical value from the number (e.g. " semitones", " V", " ms").
 	Unit symbols should have no space (e.g. "%", "º").
@@ -63,7 +52,7 @@ struct ParamQuantity : Quantity {
 	/** Rounds values to the nearest integer. */
 	bool snapEnabled = false;
 
-	Param* getParam();
+	Param *getParam();
 	/** If smoothEnabled is true, requests to the engine to smoothly move to a target value each sample. */
 	void setSmoothValue(float value);
 	float getSmoothValue();
@@ -85,10 +74,9 @@ struct ParamQuantity : Quantity {
 
 	virtual std::string getDescription();
 
-	virtual json_t* toJson();
-	virtual void fromJson(json_t* rootJ);
+	virtual json_t *toJson();
+	virtual void fromJson(json_t *rootJ);
 };
-
 
 struct SwitchQuantity : ParamQuantity {
 	std::vector<std::string> labels;
@@ -97,6 +85,4 @@ struct SwitchQuantity : ParamQuantity {
 	void setDisplayValueString(std::string s) override;
 };
 
-
-} // namespace engine
-} // namespace rack
+} // namespace rack::engine
