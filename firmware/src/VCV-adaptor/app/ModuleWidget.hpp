@@ -5,57 +5,50 @@
 namespace rack
 {
 
-struct ParamWidget {};
-struct PortWidget {};
 struct DrawArgs {};
 
-struct ModuleWidget {
+struct ModuleWidget : Widget {
 	engine::Module *module;
 
-	void setModule(void *) {
+	void setModule(engine::Module *) {
 	}
 
-	void setPanel(unsigned) {
+	void setPanel(Widget *) {
 	}
 
-	void addChild(unsigned) {
+	void addChild(Widget *) {
 	}
 
-	void addParam(unsigned) {
+	void addParam(Widget *) {
 	}
 
-	void addInput(unsigned) {
+	void addInput(Widget *) {
 	}
 
-	void addOutput(unsigned) {
+	void addOutput(Widget *) {
 	}
 
-	template<typename T>
-	unsigned createParam(auto...) {
-		return 0;
-	}
+	// ParamWidget *createParam(auto...) {
+	// 	return nullptr;
+	// }
 
-	template<typename T>
-	unsigned createInput(math::Vec, void *, unsigned) {
-		return 0;
-	}
+	// PortWidget *createInput(auto...) {
+	// 	return nullptr;
+	// }
 
-	template<typename T>
-	unsigned createOutput(auto...) {
-		return 0;
-	}
+	// PortWidget *createOutput(auto...) {
+	// 	return nullptr;
+	// }
 
-	template<typename T>
-	unsigned createWidget(auto...) {
-		return 0;
-	}
+	// void *createWidget(auto...) {
+	// 	return nullptr;
+	// }
 
-	template<typename T>
-	unsigned createLight(auto...) {
-		return 0;
-	}
+	// void *createLight(auto...) {
+	// 	return nullptr;
+	// }
 
-	virtual void appendContextMenu(Menu *) {
+	virtual void appendContextMenu(ui::Menu *) {
 	}
 
 	void addParam(ParamWidget *param) {
@@ -96,8 +89,8 @@ struct ModuleWidget {
 };
 
 struct Window {
-	unsigned loadSvg(unsigned) {
-		return 0;
+	Widget *loadSvg(unsigned) {
+		return nullptr;
 	}
 };
 

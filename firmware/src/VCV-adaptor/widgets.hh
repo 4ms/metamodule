@@ -5,7 +5,6 @@
 
 namespace rack
 {
-
 namespace Svg
 {
 int load(auto) {
@@ -20,8 +19,13 @@ int plugin(auto, auto) {
 }
 } // namespace asset
 
-struct SvgWidget {
+struct Widget {
 	math::Rect box;
+};
+struct ParamWidget : Widget {};
+struct PortWidget : Widget {};
+
+struct SvgWidget : Widget {
 	SvgWidget *bg;
 	engine::ParamQuantity *pq;
 	void setSvg(auto) {
@@ -57,15 +61,19 @@ struct SvgSwitch : SvgWidget {
 } // namespace app
 
 // clang-format off
+// These are defined in Rack, though some appear to be brancd-specific
 struct SvgScrew : SvgWidget {};
 struct BefacoBigKnob : SvgWidget {};
 struct BefacoTinyKnob : SvgWidget {};
 struct BefacoSlidePot : SvgWidget {};
+struct BefacoSwitch : SvgWidget {};
+struct BefacoPush : SvgWidget {};
 struct Davies1900hBlackKnob : SvgWidget {};
 struct Davies1900hKnob : SvgWidget {};
 struct Davies1900hWhiteKnob : SvgWidget {};
 struct Davies1900hRedKnob : SvgWidget {};
 template<typename T> struct MediumLight : SvgWidget {};
+template<typename T> struct SmallLight : SvgWidget {};
 struct GreenRedLight : SvgWidget {};
 struct RedLight : SvgWidget {};
 struct YellowLight : SvgWidget {};

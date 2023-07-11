@@ -137,7 +137,8 @@ ifeq "$(USE_FEWER_MODULES)" "1"
 modulesAudible := Braids 
 modulesBefaco := EvenVCO 
 modulesBefaco += DualAtenuverter
-modulesBefaco += SpringReverb
+modulesBefaco += SpringReverb ABC ADSR
+
 modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
 modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
 

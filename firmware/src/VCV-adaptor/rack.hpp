@@ -31,7 +31,7 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 // #include "audio.hpp"
 // #include "midi.hpp"
 // #include "settings.hpp"
-// #include "helpers.hpp"
+#include "helpers.hpp"
 // #include "componentlibrary.hpp"
 
 // #include "widget/TransparentWidget.hpp"
@@ -90,6 +90,7 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 #include "app/ModuleWidget.hpp"
 // #include "app/SvgSlider.hpp"
 // #include "app/SvgButton.hpp"
+#include "VCV-adaptor/app/common.hpp"
 
 #include "engine/Cable.hpp"
 // #include "engine/Engine.hpp"
@@ -136,8 +137,8 @@ namespace rack
 using namespace math;
 // using namespace window;
 // using namespace widget;
-// using namespace ui;
-// using namespace app;
+using namespace ui;
+using namespace app;
 using plugin::Model;
 using plugin::Plugin;
 using namespace engine;
