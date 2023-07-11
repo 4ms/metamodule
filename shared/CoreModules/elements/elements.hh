@@ -18,10 +18,7 @@ namespace MetaModule
 {
 // Generic
 
-class BipolarColor_t
-{
-public:
-	BipolarColor_t(float val): value(val) {}
+struct BipolarColor_t {
 	float value;
 };
 
