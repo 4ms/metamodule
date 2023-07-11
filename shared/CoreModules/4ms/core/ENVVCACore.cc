@@ -1,68 +1,70 @@
 #include "CoreModules/SmartCoreProcessor.h"
+#include "CoreModules/info/ENVVCA_info.hh"
 #include "CoreModules/moduleFactory.hh"
-#include "info/ENVVCA_info.hh"
 
-#include "envvca/SSI2162.h"
-#include "envvca/TriangleOscillator.h"
+#include "CoreModules/modules/envvca/SSI2162.h"
+#include "CoreModules/modules/envvca/TriangleOscillator.h"
+#include "CoreModules/modules/helpers/circuit_elements.h"
 #include "gcem/include/gcem.hpp"
-#include "helpers/EdgeDetector.h"
+#include "CoreModules/modules/helpers/EdgeDetector.h"
 #include "helpers/FlipFlop.h"
-#include "helpers/circuit_elements.h"
 #include "helpers/mapping.h"
 
-namespace MetaModule
+inline auto CVToBool = [](float val) -> bool
 {
-
-inline auto CVToBool = [](float val) -> bool {
 	return val >= 0.5f;
 };
 
-#if __clang__
-constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<-1, 5, 50>::generate(
-	[](auto voltage)
-#else
-constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<-0.1f, 0.5f, 50>::generate(
-	[](auto voltage)
-#endif
-	{
-		// two points in the V->f curve
-		constexpr double V_1 = 0.4;
-		constexpr double f_1 = 0.09;
-		constexpr double V_2 = 0.06;
-		constexpr double f_2 = 1000.0;
 
-		// std::pow is not required to be constexpr by the standard
-		// so this might not work in clang
-		constexpr double ArgScalingFactor = 10.0;
-		constexpr double arg = gcem::log2(f_1 / f_2) / (V_1 - V_2);
-		constexpr double b = gcem::pow(2.0f, arg / ArgScalingFactor);
-		constexpr double a = f_1 / gcem::pow(gcem::pow(2.0, arg), V_1);
+struct VoltageToFreqTableRange
+{
+	static constexpr float min = -0.1f;
+	static constexpr float max = 0.5f;
+};
+constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage)
 
-		// interpolate
-		auto frequency = float(gcem::pow(b, double(voltage) * ArgScalingFactor) * a);
+{
+    // two points in the V->f curve
+    constexpr double V_1 = 0.4;
+    constexpr double f_1 = 0.09;
+    constexpr double V_2 = 0.06;
+    constexpr double f_2 = 1000.0;
 
-		return frequency;
-	});
+    // std::pow is not required to be constexpr by the standard
+    // so this might not work in clang
+    constexpr double ArgScalingFactor = 10.0;
+    constexpr double arg = gcem::log2(f_1 / f_2) / (V_1 - V_2);
+    constexpr double b = gcem::pow(2.0f, arg / ArgScalingFactor);
+    constexpr double a = f_1 / gcem::pow(gcem::pow(2.0, arg), V_1);
 
-class ENVVCACore : public SmartCoreProcessor<ENVVCAInfo> {
-	using Info = ENVVCAInfo;
+    // interpolate
+    auto frequency = float(gcem::pow(b, double(voltage) * ArgScalingFactor) * a);
+
+    return frequency;
+});
+
+
+class ENVVCACore : public SmartCoreProcessor<MetaModule::ENVVCAInfo> {
+	using ENVVCAInfo = MetaModule::ENVVCAInfo;
+	using Info = MetaModule::ENVVCAInfo;
 	using ThisCore = ENVVCACore;
 	using enum Info::Elem;
 
 public:
-	ENVVCACore()
-		: triggerDetector(1.0f, 2.0f) {
-	}
+	ENVVCACore() : triggerDetector(1.0f, 2.0f)
+	{}
 
-	void update() override {
+	void update() override
+	{
 		auto [riseCV, fallCV] = getRiseAndFallCV();
 
 		// Convert voltage to time without dealing with details of transistor core
-		auto VoltageToTime = [](float voltage) -> float {
+		auto VoltageToTime = [](float voltage) -> float
+		{
 			auto frequency = VoltageToFrequencyTable.lookup(voltage);
 
 			// limit to valid frequency range
-			frequency = std::clamp(frequency, 1.0f / (60 * 3), 20e3f);
+			frequency = std::clamp(frequency, 1.0f/(60 * 3), 20e3f);
 
 			// convert to period length
 			return 1.0f / frequency;
@@ -79,7 +81,8 @@ public:
 		runAudioPath(osc.getOutput());
 	}
 
-	void runAudioPath(float triangleWave) {
+	void runAudioPath(float triangleWave)
+	{
 		triangleWave = InvertingAmpWithBias(triangleWave, 100e3f, 100e3f, 1.94f);
 
 		constexpr float VCAInputImpendance = 5e3f;
@@ -97,74 +100,82 @@ public:
 
 		// Ignoring input impedance and inverting 400kHz lowpass
 
-		if (auto input = getInput(AudioIn); input) {
+		if (auto input = getInput<AudioIn>(); input) {
 			auto output = vca.process(*input);
-			setOutput(AudioOut, output);
+			setOutput<AudioOut>(output);
 		} else {
-			setOutput(AudioOut, 0.f);
+			setOutput<AudioOut>(0.f);
 		}
 
 		// Ignoring output impedance and inverting 400kHz lowpass
 	}
 
-	void displayEnvelope(float val, TriangleOscillator::State_t state) {
+	void displayEnvelope(float val, TriangleOscillator::State_t state)
+	{
 		val = val / VoltageDivider(100e3f, 100e3f);
-		val *= getState<EnvLevelSlider>();
-		setOutput(EnvOut, val);
-		setLED(EnvLevelSlider, val / 8.f);
+		val *= getState<LevelSlider>();
+		setOutput<EnvOut>(val);
+		setLED<LevelSlider>(val / 8.f);
 		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
 		// even during State_t::FOLLOW
-		setLED(RiseSlider, state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
-		setLED(FallSlider, state == TriangleOscillator::State_t::FALLING ? val / 8.f : 0);
+		setLED<RiseSlider>(state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
+		setLED<FallSlider>(state == TriangleOscillator::State_t::FALLING ? val / 8.f : 0);
 	}
 
-	void displayOscillatorState(TriangleOscillator::State_t state) {
+	void displayOscillatorState(TriangleOscillator::State_t state)
+	{
 		if (state == TriangleOscillator::State_t::FALLING) {
-			setOutput(EorOut, 8.f);
-			setLED(EorLight, 1);
+			setOutput<Eor>(8.f);
+			setLED<EorLed>(true);
 		} else {
-			setOutput(EorOut, 0);
-			setLED(EorLight, 0);
+			setOutput<Eor>(0);
+			setLED<EorLed>(false);
 		}
 	}
 
 	void runOscillator() {
-		bool isCycling = (getState<CycleButton>() == MetaModule::LatchingButton::State_t::DOWN) ^
-						 CVToBool(getInput(CycleIn).value_or(0.0f));
+		bool isCycling = (getState<CycleButton>() == MetaModule::LatchingButton::State_t::DOWN) ^ CVToBool(getInput<CycleJack>().value_or(0.0f));
 
 		osc.setCycling(isCycling);
-		if (cycleLED != isCycling) {
+		if (cycleLED != isCycling){
 			cycleLED = isCycling;
-			setLED(CycleButton, cycleLED);
+			setLED<CycleButton>(cycleLED);
 		}
 
-		if (auto inputFollowValue = getInput(FollowIn); inputFollowValue) {
+		if (auto inputFollowValue = getInput<Follow>(); inputFollowValue) {
 			osc.setTargetVoltage(*inputFollowValue);
 		}
 
-		if (auto triggerInputValue = getInput(TriggerIn); triggerInputValue) {
+		if (auto triggerInputValue = getInput<Trigger>(); triggerInputValue) {
 			if (triggerEdgeDetector(triggerDetector(*triggerInputValue))) {
 				osc.doRetrigger();
 			}
 		}
-
+		
 		osc.proceed(timeStepInS);
 	}
 
-	std::pair<float, float> getRiseAndFallCV() {
-		auto ProcessCVOffset = [](auto slider, MetaModule::Toggle3pos::State_t range) -> float {
+	std::pair<float,float> getRiseAndFallCV()
+	{
+		auto ProcessCVOffset = [](auto slider, MetaModule::Toggle3pos::State_t range) -> float
+		{	
 			// Slider plus resistor in parallel to tweak curve
 			const float SliderImpedance = 100e3f;
-			auto offset = 5.0f * VoltageDivider(slider * SliderImpedance + 17.4e3f,
-												0 + ParallelCircuit(100e3f, (1.0f - slider) * SliderImpedance));
+			auto offset = 5.0f * VoltageDivider(slider * SliderImpedance + 17.4e3f, 0 + ParallelCircuit(100e3f, (1.0f - slider) * SliderImpedance));
 
 			// Select one of three bias voltages
-			auto BiasFromRange = [](auto range) -> float {
-				if (range == MetaModule::Toggle3pos::State_t::UP) {
+			auto BiasFromRange = [](auto range) -> float
+			{
+				if (range == MetaModule::Toggle3pos::State_t::UP)
+				{
 					return -12.0f * VoltageDivider(1e3f, 10e3f);
-				} else if (range == MetaModule::Toggle3pos::State_t::DOWN) {
+				}
+				else if (range == MetaModule::Toggle3pos::State_t::DOWN)
+				{
 					return 12.0f * VoltageDivider(1e3f, 8.2e3f);
-				} else {
+				}
+				else
+				{
 					// middle position, and fail-safe default
 					return 0.0f;
 				}
@@ -175,13 +186,13 @@ public:
 			return InvertingAmpWithBias(offset, 100e3f, 100e3f, bias);
 		};
 
-		if (auto timeCVValue = getInput(TimeCvIn); timeCVValue) {
+		if (auto timeCVValue = getInput<TimeCv>(); timeCVValue) {
 			// scale down cv input
 			const auto scaledTimeCV = *timeCVValue * -100e3f / 137e3f;
 
 			// apply attenuverter knobs
-			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<RiseCvKnob>() * scaledTimeCV);
-			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<FallCvKnob>() * scaledTimeCV);
+			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<RiseCvAtten>() * scaledTimeCV);
+			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<FallCvAtten>() * scaledTimeCV);
 		}
 
 		// sum with static value from fader + range switch
@@ -191,16 +202,8 @@ public:
 		fallCV = -fScaleLEDs - ProcessCVOffset(getState<FallSlider>(), fallRange);
 
 		// TODO: LEDs only need to be updated ~60Hz instead of 48kHz
-		// FIXME: Safer way to select the sub-element of a multi-color LED?
-		auto rise_positive = std::max(rScaleLEDs / 10.f, 0.f);
-		auto rise_negative = -std::min(rScaleLEDs / 10.f, 0.f);
-		setLED(RiseLight, rise_negative, 0);
-		setLED(RiseLight, rise_positive, 1);
-
-		auto fall_positive = std::max(fScaleLEDs / 10.f, 0.f);
-		auto fall_negative = -std::min(fScaleLEDs / 10.f, 0.f);
-		setLED(FallLight, fall_negative, 0);
-		setLED(FallLight, fall_positive, 1);
+		setLED<RiseCvLed>(MetaModule::BipolarColor_t{rScaleLEDs / 10.f});
+		setLED<FallCvLed>(MetaModule::BipolarColor_t{fScaleLEDs / 10.f});
 
 		// TODO: low pass filter
 
@@ -217,7 +220,9 @@ public:
 		return {riseCV, fallCV};
 	}
 
-	void set_samplerate(float sr) override {
+
+	void set_samplerate(float sr) override
+	{
 		timeStepInS = 1.0f / sr;
 	}
 
@@ -227,7 +232,7 @@ public:
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, MetaModule::ModuleInfoView2::makeView<Info>());
 	// clang-format on
 
 private:
@@ -246,7 +251,6 @@ private:
 	TriangleOscillator osc;
 
 private:
-	float timeStepInS = 1.f / 48000.f;
-};
+	float timeStepInS = 1.f/48000.f;
 
-} // namespace MetaModule
+};

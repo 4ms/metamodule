@@ -16,6 +16,14 @@
 
 namespace MetaModule
 {
+// Generic
+
+class BipolarColor_t
+{
+public:
+	BipolarColor_t(float val): value(val) {}
+	float value;
+};
 
 // TODO: get rid of idx field once VCV rack modules work without it
 struct BaseElement {
@@ -111,7 +119,6 @@ struct MomentaryButton : Switch {
 };
 struct MomentaryButtonRGB : MomentaryButton {
 	static constexpr size_t NumLights = 3;
-	enum Color { RED, BLUE, GREEN };
 };
 struct MomentaryButtonWhiteLight : MomentaryButton {
 	static constexpr size_t NumLights = 1;
@@ -122,7 +129,6 @@ struct LatchingButton : Switch {
 };
 struct LatchingButtonMonoLight : LatchingButton {
 	static constexpr size_t NumLights = 1;
-	enum Color { RED, BLUE, GREEN };
 };
 
 struct Toggle2pos : Switch {
