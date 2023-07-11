@@ -110,24 +110,5 @@ win_dist:
 
 include ../firmware/makefile_moduleinfo.mk
 
-# METAMODULE_ARTWORK_DIR = res/modules
-# METAMODULE_INFO_DIR = $(SHARED)/CoreModules/info
-# METAMODULE_COREMODULE_DIR = $(SHARED)/CoreModules
-
-# MODULEIMG_SVGS = $(wildcard $(METAMODULE_COREMODULE_DIR)/svg/*_info.svg)
-# INFO_FILES = $(addprefix $(METAMODULE_INFO_DIR)/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
-# MODULE_ARTWORK_FILES = $(addprefix $(METAMODULE_ARTWORK_DIR)/, $(subst _info,-artwork,$(notdir $(MODULEIMG_SVGS))))
-
-# modules: $(INFO_FILES) $(MODULE_ARTWORK_FILES) $(SHARED)/svgextract/svgextract.py
-
-# $(METAMODULE_ARTWORK_DIR)/%-artwork.svg: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
-# 	$(info Creating VCV artwork image from $<)
-# 	@python3 $(SHARED)/svgextract/svgextract.py extractforvcv $< $@
-
-# $(METAMODULE_INFO_DIR)/%_info.hh: $(METAMODULE_COREMODULE_DIR)/svg/%_info.svg
-# 	$(info Creating ModuleInfo header file from $<)
-# 	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
-
-
 .PHONY: all plugin tests core_tests vcv_tests util_tests axo_tests patch_convert_tests compile_commands run
 

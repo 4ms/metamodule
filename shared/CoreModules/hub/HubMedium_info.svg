@@ -356,22 +356,22 @@
   <g id="components">
     <text id="modulename" transform="translate(252.73 387.79) scale(0.83 1)" style="font-size: 9px;font-family: GillSans-Bold, Gill Sans;font-weight: 700">MetaModule</text>
     <text id="slug" transform="translate(182.91 387.15) scale(0.83 1)" style="font-size: 9px;font-family: GillSans-Bold, Gill Sans;font-weight: 700">HubMedium</text>
-    <circle id="out8" cx="351.09" cy="281.86" r="8.5" style="fill: blue"/>
-    <circle id="out7" cx="307.65" cy="281.86" r="8.5" style="fill: blue"/>
-    <circle id="out6" cx="264.39" cy="282.17" r="8.5" style="fill: blue"/>
-    <circle id="out5" cx="221.02" cy="282.17" r="8.5" style="fill: blue"/>
-    <circle id="out4" cx="337.49" cy="323.62" r="8.5" style="fill: blue"/>
-    <circle id="out3" cx="294.05" cy="323.62" r="8.5" style="fill: blue"/>
-    <circle id="out2" cx="251.6" cy="323.86" r="8.5" style="fill: blue"/>
-    <circle id="out1" cx="208.16" cy="323.62" r="8.5" style="fill: blue"/>
-    <circle id="gatein2" cx="65.25" cy="274.2" r="8.5" style="fill: #80ff80"/>
-    <circle id="gatein1" cx="21.74" cy="274.18" r="8.5" style="fill: #80ff80"/>
-    <circle id="in6" cx="150.84" cy="282.34" r="8.5" style="fill: lime"/>
-    <circle id="in5" cx="108.32" cy="282.34" r="8.5" style="fill: lime"/>
-    <circle id="in4" cx="164.86" cy="323.86" r="8.5" style="fill: lime"/>
-    <circle id="in3" cx="121.2" cy="323.86" r="8.5" style="fill: lime"/>
-    <circle id="in2" cx="78.54" cy="323.62" r="8.5" style="fill: lime"/>
-    <circle id="in1" cx="35.03" cy="323.62" r="8.5" style="fill: lime"/>
+    <circle id="out8" cx="351.09" cy="281.86" r="8.5" style="fill: lime"/>
+    <circle id="out7" cx="307.65" cy="281.86" r="8.5" style="fill: lime"/>
+    <circle id="out6" cx="264.39" cy="282.17" r="8.5" style="fill: lime"/>
+    <circle id="out5" cx="221.02" cy="282.17" r="8.5" style="fill: lime"/>
+    <circle id="out4" cx="337.49" cy="323.62" r="8.5" style="fill: lime"/>
+    <circle id="out3" cx="294.05" cy="323.62" r="8.5" style="fill: lime"/>
+    <circle id="out2" cx="251.6" cy="323.86" r="8.5" style="fill: lime"/>
+    <circle id="out1" cx="208.16" cy="323.62" r="8.5" style="fill: lime"/>
+    <circle id="gatein2" cx="65.25" cy="274.2" r="8.5" style="fill: #8080ff"/>
+    <circle id="gatein1" cx="21.74" cy="274.18" r="8.5" style="fill: #8080ff"/>
+    <circle id="in6" cx="150.84" cy="282.34" r="8.5" style="fill: blue"/>
+    <circle id="in5" cx="108.32" cy="282.34" r="8.5" style="fill: blue"/>
+    <circle id="in4" cx="164.86" cy="323.86" r="8.5" style="fill: blue"/>
+    <circle id="in3" cx="121.2" cy="323.86" r="8.5" style="fill: blue"/>
+    <circle id="in2" cx="78.54" cy="323.62" r="8.5" style="fill: blue"/>
+    <circle id="in1" cx="35.03" cy="323.62" r="8.5" style="fill: blue"/>
     <circle id="SavePatch" cx="352.2" cy="43.24" r="9.46" style="fill: #ff8000"/>
     <circle id="z" cx="345.31" cy="157.07" r="8.5" style="fill: red"/>
     <circle id="y" cx="302.03" cy="123.31" r="8.5" style="fill: red"/>
