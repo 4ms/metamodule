@@ -10,7 +10,9 @@ CompileFlags:
     "-I../firmware/src",
     "-I../../firmware/src",
     "-I../../../firmware/src",
-    "-I../../../shared/CoreModules/modules",
+    "-I../../../shared",
+    "-I../../../../shared",
+    "-I../../../../../shared",
   ]
   Remove: [
     "-ffold-simple-inlines",
