@@ -1,9 +1,7 @@
 #pragma once
 #include "VCV-adaptor/dsp/common.hpp"
 
-namespace rack
-{
-namespace dsp
+namespace rack::dsp
 {
 
 /** Deprecated. Use VuMeter2 instead. */
@@ -91,5 +89,4 @@ struct VuMeter2 {
 	}
 };
 
-} // namespace dsp
-} // namespace rack
+} // namespace rack::dsp

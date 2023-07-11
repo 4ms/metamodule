@@ -3,9 +3,7 @@
 #include "VCV-adaptor/simd/Vector.hpp"
 #include "VCV-adaptor/simd/functions.hpp"
 
-namespace rack
-{
-namespace dsp
+namespace rack::dsp
 {
 
 /** Hann window function.
@@ -69,5 +67,4 @@ inline void blackmanHarrisWindow(float *x, int len) {
 	}
 }
 
-} // namespace dsp
-} // namespace rack
+} // namespace rack::dsp

@@ -7,12 +7,7 @@
 #include "util/interp_array.hh"
 #include "util/math.hh"
 
-namespace rack
-{
-
-/** Digital signal processing routines and classes
-*/
-namespace dsp
+namespace rack::dsp
 {
 
 // Constants
@@ -53,6 +48,7 @@ T amplitudeToDb(T amp) {
 	return MetaModule::log10_0V_12V.interp(amp) * 20;
 }
 
+//TODO: use LUT
 template<typename T>
 T dbToAmplitude(T db) {
 	return std::pow(10, db / 20);
@@ -81,6 +77,7 @@ T quintic(T x) {
 	return x * x * x * x * x;
 }
 
+//TODO: check if sqrt() is OK
 template<typename T>
 T sqrtBipolar(T x) {
 	return simd::sgn(x) * simd::sqrt(x);
@@ -100,5 +97,4 @@ struct Frame {
 	T samples[CHANNELS];
 };
 
-} // namespace dsp
-} // namespace rack
+} // namespace rack::dsp

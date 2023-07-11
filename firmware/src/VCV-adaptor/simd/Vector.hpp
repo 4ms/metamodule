@@ -1,15 +1,12 @@
 #pragma once
+#include "VCV-adaptor/simd/common.hpp"
 #include <cstring>
-#include "common.hpp"
-
-
-namespace rack {
-
 
 /** Abstraction of aligned types for SIMD computation
 */
-namespace simd {
 
+namespace rack::simd
+{
 
 /** Generic class for vector types.
 
@@ -23,13 +20,12 @@ Example:
 	b *= sin(2 * M_PI * a);
 	b.store(out);
 */
-template <typename TYPE, int SIZE>
+template<typename TYPE, int SIZE>
 struct Vector;
-
 
 /** Wrapper for `__m128` representing an aligned vector of 4 single-precision float values.
 */
-template <>
+template<>
 struct Vector<float, 4> {
 	using type = float;
 	constexpr static int size = 4;
@@ -45,7 +41,9 @@ struct Vector<float, 4> {
 	Vector() = default;
 
 	/** Constructs a vector from a native `__m128` type. */
-	Vector(__m128 v) : v(v) {}
+	Vector(__m128 v)
+		: v(v) {
+	}
 
 	/** Constructs a vector with all elements set to `x`. */
 	Vector(float x) {
@@ -70,7 +68,7 @@ struct Vector<float, 4> {
 	/** Reads an array of 4 values.
 	On little-endian machines (e.g. x86_64), the order is reversed, so `x[0]` corresponds to `vector.s[3]`.
 	*/
-	static Vector load(const float* x) {
+	static Vector load(const float *x) {
 		/*
 		My benchmarks show that _mm_loadu_ps() performs equally as fast as _mm_load_ps() when data is actually aligned.
 		This post seems to agree. https://stackoverflow.com/a/20265193/272642
@@ -82,17 +80,17 @@ struct Vector<float, 4> {
 	/** Writes an array of 4 values.
 	On little-endian machines (e.g. x86_64), the order is reversed, so `x[0]` corresponds to `vector.s[3]`.
 	*/
-	void store(float* x) {
+	void store(float *x) {
 		_mm_storeu_ps(x, v);
 	}
 
 	/** Accessing vector elements individually is slow and defeats the purpose of vectorizing.
 	However, this operator is convenient when writing simple serial code in a non-bottlenecked section.
 	*/
-	float& operator[](int i) {
+	float &operator[](int i) {
 		return s[i];
 	}
-	const float& operator[](int i) const {
+	const float &operator[](int i) const {
 		return s[i];
 	}
 
@@ -102,8 +100,7 @@ struct Vector<float, 4> {
 	static Vector cast(Vector<int32_t, 4> a);
 };
 
-
-template <>
+template<>
 struct Vector<int32_t, 4> {
 	using type = int32_t;
 	constexpr static int size = 4;
@@ -114,7 +111,9 @@ struct Vector<int32_t, 4> {
 	};
 
 	Vector() = default;
-	Vector(__m128i v) : v(v) {}
+	Vector(__m128i v)
+		: v(v) {
+	}
 	Vector(int32_t x) {
 		v = _mm_set1_epi32(x);
 	}
@@ -127,29 +126,27 @@ struct Vector<int32_t, 4> {
 	static Vector mask() {
 		return Vector(_mm_cmpeq_epi32(_mm_setzero_si128(), _mm_setzero_si128()));
 	}
-	static Vector load(const int32_t* x) {
+	static Vector load(const int32_t *x) {
 		// HACK
 		// Use _mm_loadu_si128() because GCC doesn't support _mm_loadu_si32()
-		return Vector(_mm_loadu_si128((const __m128i*) x));
+		return Vector(_mm_loadu_si128((const __m128i *)x));
 	}
-	void store(int32_t* x) {
+	void store(int32_t *x) {
 		// HACK
 		// Use _mm_storeu_si128() because GCC doesn't support _mm_storeu_si32()
-		_mm_storeu_si128((__m128i*) x, v);
+		_mm_storeu_si128((__m128i *)x, v);
 	}
-	int32_t& operator[](int i) {
+	int32_t &operator[](int i) {
 		return s[i];
 	}
-	const int32_t& operator[](int i) const {
+	const int32_t &operator[](int i) const {
 		return s[i];
 	}
 	Vector(Vector<float, 4> a);
 	static Vector cast(Vector<float, 4> a);
 };
 
-
 // Conversions and casts
-
 
 inline Vector<float, 4>::Vector(Vector<int32_t, 4> a) {
 	v = _mm_cvtepi32_ps(a.v);
@@ -167,20 +164,18 @@ inline Vector<int32_t, 4> Vector<int32_t, 4>::cast(Vector<float, 4> a) {
 	return Vector(_mm_castps_si128(a.v));
 }
 
-
 // Operator overloads
 
-
 /** `a @ b` */
-#define DECLARE_VECTOR_OPERATOR_INFIX(t, s, operator, func) \
-	inline Vector<t, s> operator(const Vector<t, s>& a, const Vector<t, s>& b) { \
-		return Vector<t, s>(func(a.v, b.v)); \
+#define DECLARE_VECTOR_OPERATOR_INFIX(t, s, operator, func)                                                            \
+	inline Vector<t, s> operator(const Vector<t, s> &a, const Vector<t, s> &b) {                                       \
+		return Vector<t, s>(func(a.v, b.v));                                                                           \
 	}
 
 /** `a @= b` */
-#define DECLARE_VECTOR_OPERATOR_INCREMENT(t, s, operator, opfunc) \
-	inline Vector<t, s>& operator(Vector<t, s>& a, const Vector<t, s>& b) { \
-		return a = opfunc(a, b); \
+#define DECLARE_VECTOR_OPERATOR_INCREMENT(t, s, operator, opfunc)                                                      \
+	inline Vector<t, s> &operator(Vector<t, s> &a, const Vector<t, s> &b) {                                            \
+		return a = opfunc(a, b);                                                                                       \
 	}
 
 DECLARE_VECTOR_OPERATOR_INFIX(float, 4, operator+, _mm_add_ps)
@@ -238,7 +233,7 @@ DECLARE_VECTOR_OPERATOR_INFIX(float, 4, operator==, _mm_cmpeq_ps)
 DECLARE_VECTOR_OPERATOR_INFIX(int32_t, 4, operator==, _mm_cmpeq_epi32)
 
 DECLARE_VECTOR_OPERATOR_INFIX(float, 4, operator>=, _mm_cmpge_ps)
-inline Vector<int32_t, 4> operator>=(const Vector<int32_t, 4>& a, const Vector<int32_t, 4>& b) {
+inline Vector<int32_t, 4> operator>=(const Vector<int32_t, 4> &a, const Vector<int32_t, 4> &b) {
 	return Vector<int32_t, 4>(_mm_cmpgt_epi32(a.v, b.v)) ^ Vector<int32_t, 4>::mask();
 }
 
@@ -246,7 +241,7 @@ DECLARE_VECTOR_OPERATOR_INFIX(float, 4, operator>, _mm_cmpgt_ps)
 DECLARE_VECTOR_OPERATOR_INFIX(int32_t, 4, operator>, _mm_cmpgt_epi32)
 
 DECLARE_VECTOR_OPERATOR_INFIX(float, 4, operator<=, _mm_cmple_ps)
-inline Vector<int32_t, 4> operator<=(const Vector<int32_t, 4>& a, const Vector<int32_t, 4>& b) {
+inline Vector<int32_t, 4> operator<=(const Vector<int32_t, 4> &a, const Vector<int32_t, 4> &b) {
 	return Vector<int32_t, 4>(_mm_cmplt_epi32(a.v, b.v)) ^ Vector<int32_t, 4>::mask();
 }
 
@@ -254,91 +249,87 @@ DECLARE_VECTOR_OPERATOR_INFIX(float, 4, operator<, _mm_cmplt_ps)
 DECLARE_VECTOR_OPERATOR_INFIX(int32_t, 4, operator<, _mm_cmplt_epi32)
 
 DECLARE_VECTOR_OPERATOR_INFIX(float, 4, operator!=, _mm_cmpneq_ps)
-inline Vector<int32_t, 4> operator!=(const Vector<int32_t, 4>& a, const Vector<int32_t, 4>& b) {
+inline Vector<int32_t, 4> operator!=(const Vector<int32_t, 4> &a, const Vector<int32_t, 4> &b) {
 	return Vector<int32_t, 4>(_mm_cmpeq_epi32(a.v, b.v)) ^ Vector<int32_t, 4>::mask();
 }
 
 /** `+a` */
-inline Vector<float, 4> operator+(const Vector<float, 4>& a) {
+inline Vector<float, 4> operator+(const Vector<float, 4> &a) {
 	return a;
 }
-inline Vector<int32_t, 4> operator+(const Vector<int32_t, 4>& a) {
+inline Vector<int32_t, 4> operator+(const Vector<int32_t, 4> &a) {
 	return a;
 }
 
 /** `-a` */
-inline Vector<float, 4> operator-(const Vector<float, 4>& a) {
+inline Vector<float, 4> operator-(const Vector<float, 4> &a) {
 	return 0.f - a;
 }
-inline Vector<int32_t, 4> operator-(const Vector<int32_t, 4>& a) {
+inline Vector<int32_t, 4> operator-(const Vector<int32_t, 4> &a) {
 	return 0 - a;
 }
 
 /** `++a` */
-inline Vector<float, 4>& operator++(Vector<float, 4>& a) {
+inline Vector<float, 4> &operator++(Vector<float, 4> &a) {
 	return a += 1.f;
 }
-inline Vector<int32_t, 4>& operator++(Vector<int32_t, 4>& a) {
+inline Vector<int32_t, 4> &operator++(Vector<int32_t, 4> &a) {
 	return a += 1;
 }
 
 /** `--a` */
-inline Vector<float, 4>& operator--(Vector<float, 4>& a) {
+inline Vector<float, 4> &operator--(Vector<float, 4> &a) {
 	return a -= 1.f;
 }
-inline Vector<int32_t, 4>& operator--(Vector<int32_t, 4>& a) {
+inline Vector<int32_t, 4> &operator--(Vector<int32_t, 4> &a) {
 	return a -= 1;
 }
 
 /** `a++` */
-inline Vector<float, 4> operator++(Vector<float, 4>& a, int) {
+inline Vector<float, 4> operator++(Vector<float, 4> &a, int) {
 	Vector<float, 4> b = a;
 	++a;
 	return b;
 }
-inline Vector<int32_t, 4> operator++(Vector<int32_t, 4>& a, int) {
+inline Vector<int32_t, 4> operator++(Vector<int32_t, 4> &a, int) {
 	Vector<int32_t, 4> b = a;
 	++a;
 	return b;
 }
 
 /** `a--` */
-inline Vector<float, 4> operator--(Vector<float, 4>& a, int) {
+inline Vector<float, 4> operator--(Vector<float, 4> &a, int) {
 	Vector<float, 4> b = a;
 	--a;
 	return b;
 }
-inline Vector<int32_t, 4> operator--(Vector<int32_t, 4>& a, int) {
+inline Vector<int32_t, 4> operator--(Vector<int32_t, 4> &a, int) {
 	Vector<int32_t, 4> b = a;
 	--a;
 	return b;
 }
 
 /** `~a` */
-inline Vector<float, 4> operator~(const Vector<float, 4>& a) {
+inline Vector<float, 4> operator~(const Vector<float, 4> &a) {
 	return a ^ Vector<float, 4>::mask();
 }
-inline Vector<int32_t, 4> operator~(const Vector<int32_t, 4>& a) {
+inline Vector<int32_t, 4> operator~(const Vector<int32_t, 4> &a) {
 	return a ^ Vector<int32_t, 4>::mask();
 }
 
 /** `a << b` */
-inline Vector<int32_t, 4> operator<<(const Vector<int32_t, 4>& a, const int& b) {
+inline Vector<int32_t, 4> operator<<(const Vector<int32_t, 4> &a, const int &b) {
 	return Vector<int32_t, 4>(_mm_sll_epi32(a.v, _mm_cvtsi32_si128(b)));
 }
 
 /** `a >> b` */
-inline Vector<int32_t, 4> operator>>(const Vector<int32_t, 4>& a, const int& b) {
+inline Vector<int32_t, 4> operator>>(const Vector<int32_t, 4> &a, const int &b) {
 	return Vector<int32_t, 4>(_mm_srl_epi32(a.v, _mm_cvtsi32_si128(b)));
 }
 
-
 // Typedefs
-
 
 using float_4 = Vector<float, 4>;
 using int32_4 = Vector<int32_t, 4>;
 
-
-} // namespace simd
-} // namespace rack
+} // namespace rack::simd

@@ -5,9 +5,7 @@
 #include "VCV-adaptor/math.hpp"
 #include <complex>
 
-namespace rack
-{
-namespace simd
+namespace rack::simd
 {
 
 // Functions based on instructions
@@ -273,5 +271,4 @@ inline float_4 sgn(float_4 x) {
 	return signbit | (nonzero & 1.f);
 }
 
-} // namespace simd
-} // namespace rack
+} // namespace rack::simd

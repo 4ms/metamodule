@@ -1,10 +1,8 @@
 #pragma once
-#include <dsp/common.hpp>
+#include "VCV-adaptor/dsp/common.hpp"
 
-
-namespace rack {
-namespace dsp {
-
+namespace rack::dsp
+{
 
 /** The callback function `f` in each of these stepping functions must have the signature
 
@@ -26,7 +24,7 @@ For example, the following solves the system x''(t) = -x(t) using a fixed timest
 */
 
 /** Solves an ODE system using the 1st order Euler method */
-template <typename T, typename F>
+template<typename T, typename F>
 void stepEuler(T t, T dt, T x[], int len, F f) {
 	T k[len];
 
@@ -37,7 +35,7 @@ void stepEuler(T t, T dt, T x[], int len, F f) {
 }
 
 /** Solves an ODE system using the 2nd order Runge-Kutta method */
-template <typename T, typename F>
+template<typename T, typename F>
 void stepRK2(T t, T dt, T x[], int len, F f) {
 	T k1[len];
 	T k2[len];
@@ -56,7 +54,7 @@ void stepRK2(T t, T dt, T x[], int len, F f) {
 }
 
 /** Solves an ODE system using the 4th order Runge-Kutta method */
-template <typename T, typename F>
+template<typename T, typename F>
 void stepRK4(T t, T dt, T x[], int len, F f) {
 	T k1[len];
 	T k2[len];
@@ -86,6 +84,4 @@ void stepRK4(T t, T dt, T x[], int len, F f) {
 	}
 }
 
-
-} // namespace dsp
-} // namespace rack
+} // namespace rack::dsp

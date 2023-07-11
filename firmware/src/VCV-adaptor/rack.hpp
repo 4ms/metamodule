@@ -87,23 +87,23 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 // #include "app/SvgPort.hpp"
 // #include "app/SvgSwitch.hpp"
 // #include "app/SvgScrew.hpp"
-// #include "app/ModuleWidget.hpp"
+#include "app/ModuleWidget.hpp"
 // #include "app/SvgSlider.hpp"
 // #include "app/SvgButton.hpp"
 
 #include "engine/Cable.hpp"
-#include "engine/Engine.hpp"
+// #include "engine/Engine.hpp"
 #include "engine/Light.hpp"
 #include "engine/LightInfo.hpp"
 #include "engine/Module.hpp"
 #include "engine/Param.hpp"
-#include "engine/ParamHandle.hpp"
+// #include "engine/ParamHandle.hpp"
 #include "engine/ParamQuantity.hpp"
 #include "engine/Port.hpp"
 #include "engine/PortInfo.hpp"
 
-// #include "plugin/Plugin.hpp"
-// #include "plugin/Model.hpp"
+#include "plugin/Model.hpp"
+#include "plugin/Plugin.hpp"
 // #include "plugin/callbacks.hpp"
 
 #include "dsp/approx.hpp"
@@ -113,7 +113,7 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 #include "dsp/fft.hpp"
 #include "dsp/filter.hpp"
 #include "dsp/fir.hpp"
-#include "dsp/midi.hpp"
+// #include "dsp/midi.hpp"
 #include "dsp/minblep.hpp"
 #include "dsp/ode.hpp"
 #include "dsp/resampler.hpp"
@@ -124,18 +124,22 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 #include "simd/Vector.hpp"
 #include "simd/functions.hpp"
 
+#include "VCV-adaptor/assert.hh"
+#include "VCV-adaptor/create_model.hh"
+#include "VCV-adaptor/dynamic_cast.hpp"
+
 namespace rack
 {
 
 // Import some namespaces for convenience
 // using namespace logger;
-// using namespace math;
+using namespace math;
 // using namespace window;
 // using namespace widget;
 // using namespace ui;
 // using namespace app;
-// using plugin::Plugin;
-// using plugin::Model;
+using plugin::Model;
+using plugin::Plugin;
 using namespace engine;
 // using namespace componentlibrary;
 

@@ -1,9 +1,7 @@
 #pragma once
 #include "VCV-adaptor/dsp/common.hpp"
 
-namespace rack
-{
-namespace dsp
+namespace rack::dsp
 {
 
 /** Detects when a boolean changes from false to true */
@@ -81,7 +79,7 @@ struct TSchmittTrigger<float> {
 	}
 };
 
-typedef TSchmittTrigger<> SchmittTrigger;
+using SchmittTrigger = TSchmittTrigger<>;
 
 /** When triggered, holds a high value for a specified time before going low again */
 struct PulseGenerator {
@@ -130,7 +128,7 @@ struct TTimer {
 	}
 };
 
-typedef TTimer<> Timer;
+using Timer = TTimer<>;
 
 /** Counts calls to process(), returning true every `division` calls.
 Example:
@@ -170,5 +168,4 @@ struct ClockDivider {
 	}
 };
 
-} // namespace dsp
-} // namespace rack
+} // namespace rack::dsp

@@ -1,11 +1,8 @@
 #pragma once
+#include "VCV-adaptor/dsp/common.hpp"
 #include "VCV-adaptor/pffft/pffft.h"
 
-#include "VCV-adaptor/dsp/common.hpp"
-
-namespace rack
-{
-namespace dsp
+namespace rack::dsp
 {
 
 /** Real-valued FFT context.
@@ -17,9 +14,9 @@ struct RealFFT {
 	PFFFT_Setup *setup;
 	int length;
 
-	RealFFT(size_t length) {
-		this->length = length;
-		setup = pffft_new_setup(length, PFFFT_REAL);
+	RealFFT(size_t length)
+		: setup(pffft_new_setup(length, PFFFT_REAL))
+		, length(length) {
 	}
 
 	~RealFFT() {
@@ -34,7 +31,7 @@ struct RealFFT {
 	However, this ordering is consistent, so element-wise multiplication with line up with other results, and the inverse FFT will return a correctly ordered result.
 	*/
 	void rfftUnordered(const float *input, float *output) {
-		pffft_transform(setup, input, output, NULL, PFFFT_FORWARD);
+		pffft_transform(setup, input, output, nullptr, PFFFT_FORWARD);
 	}
 
 	/** Performs the inverse real FFT.
@@ -42,7 +39,7 @@ struct RealFFT {
 	Scaling is such that IRFFT(RFFT(x)) = N*x.
 	*/
 	void irfftUnordered(const float *input, float *output) {
-		pffft_transform(setup, input, output, NULL, PFFFT_BACKWARD);
+		pffft_transform(setup, input, output, nullptr, PFFFT_BACKWARD);
 	}
 
 	/** Slower than the above methods, but returns results in the "canonical" FFT order as follows.
@@ -57,11 +54,11 @@ struct RealFFT {
 		output[length - 1] = imag(F(n/2 - 1))
 	*/
 	void rfft(const float *input, float *output) {
-		pffft_transform_ordered(setup, input, output, NULL, PFFFT_FORWARD);
+		pffft_transform_ordered(setup, input, output, nullptr, PFFFT_FORWARD);
 	}
 
 	void irfft(const float *input, float *output) {
-		pffft_transform_ordered(setup, input, output, NULL, PFFFT_BACKWARD);
+		pffft_transform_ordered(setup, input, output, nullptr, PFFFT_BACKWARD);
 	}
 
 	/** Scales the RFFT so that `scale(IFFT(FFT(x))) = x`.
@@ -81,9 +78,9 @@ struct ComplexFFT {
 	PFFFT_Setup *setup;
 	int length;
 
-	ComplexFFT(size_t length) {
-		this->length = length;
-		setup = pffft_new_setup(length, PFFFT_COMPLEX);
+	ComplexFFT(size_t length)
+		: setup(pffft_new_setup(length, PFFFT_COMPLEX))
+		, length(length) {
 	}
 
 	~ComplexFFT() {
@@ -95,7 +92,7 @@ struct ComplexFFT {
 	Input is `2*length` elements. Output is `2*length` elements.
 	*/
 	void fftUnordered(const float *input, float *output) {
-		pffft_transform(setup, input, output, NULL, PFFFT_FORWARD);
+		pffft_transform(setup, input, output, nullptr, PFFFT_FORWARD);
 	}
 
 	/** Performs the inverse complex FFT.
@@ -103,15 +100,15 @@ struct ComplexFFT {
 	Scaling is such that FFT(IFFT(x)) = N*x.
 	*/
 	void ifftUnordered(const float *input, float *output) {
-		pffft_transform(setup, input, output, NULL, PFFFT_BACKWARD);
+		pffft_transform(setup, input, output, nullptr, PFFFT_BACKWARD);
 	}
 
 	void fft(const float *input, float *output) {
-		pffft_transform_ordered(setup, input, output, NULL, PFFFT_FORWARD);
+		pffft_transform_ordered(setup, input, output, nullptr, PFFFT_FORWARD);
 	}
 
 	void ifft(const float *input, float *output) {
-		pffft_transform_ordered(setup, input, output, NULL, PFFFT_BACKWARD);
+		pffft_transform_ordered(setup, input, output, nullptr, PFFFT_BACKWARD);
 	}
 
 	void scale(float *x) {
@@ -123,5 +120,4 @@ struct ComplexFFT {
 	}
 };
 
-} // namespace dsp
-} // namespace rack
+} // namespace rack::dsp

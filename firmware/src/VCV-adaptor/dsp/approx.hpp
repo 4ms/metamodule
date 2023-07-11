@@ -1,10 +1,8 @@
 #pragma once
-#include <dsp/common.hpp>
+#include "VCV-adaptor/dsp/common.hpp"
 
-
-namespace rack {
-namespace dsp {
-
+namespace rack::dsp
+{
 
 /*
 In this header, function names are divided into two or more parts, separated by "_".
@@ -19,15 +17,14 @@ https://en.wikipedia.org/wiki/Estrin%27s_scheme
 https://en.wikipedia.org/wiki/CORDIC
 */
 
-
 /** Returns 2^floor(x), assuming that x >= 0.
 If `xf` is non-NULL, it is set to the fractional part of x.
 */
-template <typename T>
-T approxExp2Floor(T x, T* xf);
+template<typename T>
+T approxExp2Floor(T x, T *xf);
 
-template <>
-inline simd::float_4 approxExp2Floor(simd::float_4 x, simd::float_4* xf) {
+template<>
+inline simd::float_4 approxExp2Floor(simd::float_4 x, simd::float_4 *xf) {
 	simd::int32_4 xi = x;
 	if (xf)
 		*xf = x - simd::float_4(xi);
@@ -37,15 +34,14 @@ inline simd::float_4 approxExp2Floor(simd::float_4 x, simd::float_4* xf) {
 	return simd::float_4::cast(y);
 }
 
-template <>
-inline float approxExp2Floor(float x, float* xf) {
+template<>
+inline float approxExp2Floor(float x, float *xf) {
 	int32_t xi = x;
 	if (xf)
 		*xf = x - xi;
 	int32_t y = (xi + 127) << 23;
 	return bitCast<float>(y);
 }
-
 
 /** Returns 2^x, assuming that x >= 0.
 Maximum 0.00024% error.
@@ -56,16 +52,17 @@ If negative powers are needed, you may use a lower bound and rescale.
 
 	approxExp2(x + 20) / 1048576
 */
-template <typename T>
+template<typename T>
 T approxExp2_taylor5(T x) {
 	// Use bit-shifting for integer part of x.
 	T y = approxExp2Floor(x, &x);
 	// 5th order expansion of 2^x around 0.4752 in Horner form.
 	// The center is chosen so that the endpoints of [0, 1] have equal error, creating no discontinuity at integers.
-	y *= T(0.9999976457798443) + x * (T(0.6931766804601935) + x * (T(0.2400729486415728) + x * (T(0.05592817518644387) + x * (T(0.008966320633544) + x * T(0.001853512473884202)))));
+	y *= T(0.9999976457798443) +
+		 x * (T(0.6931766804601935) +
+			  x * (T(0.2400729486415728) +
+				   x * (T(0.05592817518644387) + x * (T(0.008966320633544) + x * T(0.001853512473884202)))));
 	return y;
 }
 
-
-} // namespace dsp
-} // namespace rack
+} // namespace rack::dsp

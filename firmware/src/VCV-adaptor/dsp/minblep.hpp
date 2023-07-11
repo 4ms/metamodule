@@ -21,6 +21,8 @@ struct MinBlepGenerator {
 	float impulse[2 * Z * O + 1];
 
 	MinBlepGenerator() {
+		// This call will fail:
+		// TODO: compile-time create a LUT using Z and O
 		minBlepImpulse(Z, O, impulse);
 		impulse[2 * Z * O] = 1.f;
 	}

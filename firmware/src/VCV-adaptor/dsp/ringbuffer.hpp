@@ -1,11 +1,8 @@
 #pragma once
+#include "VCV-adaptor/dsp/common.hpp"
 #include <atomic>
 
-#include "VCV-adaptor/dsp/common.hpp"
-
-namespace rack
-{
-namespace dsp
+namespace rack::dsp
 {
 
 /** Lock-free queue with fixed size and no allocations.
@@ -215,5 +212,4 @@ struct AppleRingBuffer {
 	}
 };
 
-} // namespace dsp
-} // namespace rack
+} // namespace rack::dsp

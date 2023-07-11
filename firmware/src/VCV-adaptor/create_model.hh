@@ -1,12 +1,11 @@
 #pragma once
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleFactory.hh"
+#include "VCV-adaptor/plugin/Model.hpp"
 #include <string_view>
 
 namespace rack
 {
-
-struct Model;
 
 #define WARN(...) printf(...)
 
@@ -17,7 +16,7 @@ std::unique_ptr<CoreProcessor> create_vcv_module() {
 
 //model
 template<typename ModuleT, typename WidgetT>
-Model *createModel(std::string_view slug) {
+plugin::Model *createModel(std::string_view slug) {
 	ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
 	return nullptr;
 }

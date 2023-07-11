@@ -8,25 +8,13 @@
 #include "VCV-adaptor/engine/Port.hpp"
 #include "VCV-adaptor/engine/PortInfo.hpp"
 #include "VCV-adaptor/json.hpp"
-#include "VCV-adaptor/plugin/Model.hpp"
-#include "VCV-adaptor/string.hpp"
 #include <vector>
 
-namespace rack
-{
-
-// namespace plugin
-// {
-// struct Model;
-// }
-
-namespace engine
+namespace rack::engine
 {
 
 struct Module : VCVModuleWrapper {
-	//plugin::Model *model = nullptr;
 	int64_t id = -1;
-
 	ParamQuantity stubParamQuantity;
 	PortInfo stubInputInfo;
 	PortInfo stubOutputInfo;
@@ -52,9 +40,6 @@ struct Module : VCVModuleWrapper {
 	// 	int outputId = -1;
 	// };
 	// std::vector<BypassRoute> bypassRoutes;
-
-	// Module();
-	// ~Module() override = default;
 
 	void config(unsigned num_params, unsigned num_inputs, unsigned num_outputs, unsigned num_lights = 0) {
 		params.resize(num_params);
@@ -102,20 +87,21 @@ struct Module : VCVModuleWrapper {
 
 	template<class TPortInfo = PortInfo>
 	TPortInfo *configInput(int portId, std::string name = "") {
-		return stubInputInfo;
+		return &stubInputInfo;
 	}
 
 	template<class TPortInfo = PortInfo>
 	TPortInfo *configOutput(int portId, std::string name = "") {
-		return stubOutputInfo;
+		return &stubOutputInfo;
 	}
 
 	template<class TLightInfo = LightInfo>
 	TLightInfo *configLight(int lightId, std::string name = "") {
-		return stubLightInfo;
+		return &stubLightInfo;
 	}
 
 	void configBypass(int inputId, int outputId) {
+		printf("Bypass not supported\n");
 		// Bypass not supported
 	}
 
@@ -264,9 +250,9 @@ struct Module : VCVModuleWrapper {
 	bool isBypassed() {
 		return false;
 	}
-	PRIVATE void setBypassed(bool bypassed) {
-	}
 	// TODO: What are these for?
+	// PRIVATE void setBypassed(bool bypassed) {
+	// }
 	// PRIVATE const float *meterBuffer();
 	// PRIVATE int meterLength();
 	// PRIVATE int meterIndex();
@@ -274,5 +260,4 @@ struct Module : VCVModuleWrapper {
 	// PRIVATE static void jsonStripIds(json_t *rootJ);
 };
 
-} // namespace engine
-} // namespace rack
+} // namespace rack::engine

@@ -6,10 +6,11 @@
 #include "VCV-adaptor/dsp/ringbuffer.hpp"
 #include "VCV-adaptor/dsp/window.hpp"
 
-namespace rack
+namespace rack::dsp
 {
-namespace dsp
-{
+
+// Only supports direct copy (no resampling)
+//TODO: Implement
 
 /** Resamples by a fixed rational factor. */
 template<int MAX_CHANNELS>
@@ -178,5 +179,4 @@ struct Upsampler {
 	}
 };
 
-} // namespace dsp
-} // namespace rack
+} // namespace rack::dsp
