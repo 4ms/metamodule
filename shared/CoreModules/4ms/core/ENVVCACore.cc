@@ -1,14 +1,15 @@
 #include "CoreModules/SmartCoreProcessor.h"
-#include "CoreModules/info/ENVVCA_info.hh"
 #include "CoreModules/moduleFactory.hh"
-
-#include "CoreModules/modules/envvca/SSI2162.h"
-#include "CoreModules/modules/envvca/TriangleOscillator.h"
-#include "CoreModules/modules/helpers/circuit_elements.h"
+#include "CoreModules/4ms/core/envvca/SSI2162.h"
+#include "CoreModules/4ms/core/envvca/TriangleOscillator.h"
+#include "CoreModules/4ms/core/helpers/circuit_elements.h"
+#include "CoreModules/4ms/core/helpers/EdgeDetector.h"
+#include "CoreModules/4ms/info/ENVVCA_info.hh"
 #include "gcem/include/gcem.hpp"
-#include "CoreModules/modules/helpers/EdgeDetector.h"
 #include "helpers/FlipFlop.h"
 #include "helpers/mapping.h"
+
+namespace MetaModule {
 
 inline auto CVToBool = [](float val) -> bool
 {
@@ -22,7 +23,6 @@ struct VoltageToFreqTableRange
 	static constexpr float max = 0.5f;
 };
 constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage)
-
 {
     // two points in the V->f curve
     constexpr double V_1 = 0.4;
@@ -44,9 +44,8 @@ constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<Vo
 });
 
 
-class ENVVCACore : public SmartCoreProcessor<MetaModule::ENVVCAInfo> {
-	using ENVVCAInfo = MetaModule::ENVVCAInfo;
-	using Info = MetaModule::ENVVCAInfo;
+class ENVVCACore : public SmartCoreProcessor<ENVVCAInfo> {
+	using Info = ENVVCAInfo;
 	using ThisCore = ENVVCACore;
 	using enum Info::Elem;
 
@@ -113,9 +112,9 @@ public:
 	void displayEnvelope(float val, TriangleOscillator::State_t state)
 	{
 		val = val / VoltageDivider(100e3f, 100e3f);
-		val *= getState<LevelSlider>();
+		val *= getState<EnvLevelSlider>();
 		setOutput<EnvOut>(val);
-		setLED<LevelSlider>(val / 8.f);
+		setLED<EnvLevelSlider>(val / 8.f);
 		// FIXME: slider lights should show if env is increasing or decreasing in voltage,
 		// even during State_t::FOLLOW
 		setLED<RiseSlider>(state == TriangleOscillator::State_t::RISING ? val / 8.f : 0);
@@ -125,16 +124,16 @@ public:
 	void displayOscillatorState(TriangleOscillator::State_t state)
 	{
 		if (state == TriangleOscillator::State_t::FALLING) {
-			setOutput<Eor>(8.f);
-			setLED<EorLed>(true);
+			setOutput<EorOut>(8.f);
+			// setLED<EorLight>(true);
 		} else {
-			setOutput<Eor>(0);
-			setLED<EorLed>(false);
+			setOutput<EorOut>(0);
+			// setLED<EorLight>(false);
 		}
 	}
 
 	void runOscillator() {
-		bool isCycling = (getState<CycleButton>() == MetaModule::LatchingButton::State_t::DOWN) ^ CVToBool(getInput<CycleJack>().value_or(0.0f));
+		bool isCycling = (getState<CycleButton>() == LatchingButton::State_t::DOWN) ^ CVToBool(getInput<CycleIn>().value_or(0.0f));
 
 		osc.setCycling(isCycling);
 		if (cycleLED != isCycling){
@@ -142,11 +141,11 @@ public:
 			setLED<CycleButton>(cycleLED);
 		}
 
-		if (auto inputFollowValue = getInput<Follow>(); inputFollowValue) {
+		if (auto inputFollowValue = getInput<FollowIn>(); inputFollowValue) {
 			osc.setTargetVoltage(*inputFollowValue);
 		}
 
-		if (auto triggerInputValue = getInput<Trigger>(); triggerInputValue) {
+		if (auto triggerInputValue = getInput<TriggerIn>(); triggerInputValue) {
 			if (triggerEdgeDetector(triggerDetector(*triggerInputValue))) {
 				osc.doRetrigger();
 			}
@@ -157,7 +156,7 @@ public:
 
 	std::pair<float,float> getRiseAndFallCV()
 	{
-		auto ProcessCVOffset = [](auto slider, MetaModule::Toggle3pos::State_t range) -> float
+		auto ProcessCVOffset = [](auto slider, Toggle3pos::State_t range) -> float
 		{	
 			// Slider plus resistor in parallel to tweak curve
 			const float SliderImpedance = 100e3f;
@@ -166,11 +165,11 @@ public:
 			// Select one of three bias voltages
 			auto BiasFromRange = [](auto range) -> float
 			{
-				if (range == MetaModule::Toggle3pos::State_t::UP)
+				if (range == Toggle3pos::State_t::UP)
 				{
 					return -12.0f * VoltageDivider(1e3f, 10e3f);
 				}
-				else if (range == MetaModule::Toggle3pos::State_t::DOWN)
+				else if (range == Toggle3pos::State_t::DOWN)
 				{
 					return 12.0f * VoltageDivider(1e3f, 8.2e3f);
 				}
@@ -186,13 +185,13 @@ public:
 			return InvertingAmpWithBias(offset, 100e3f, 100e3f, bias);
 		};
 
-		if (auto timeCVValue = getInput<TimeCv>(); timeCVValue) {
+		if (auto timeCVValue = getInput<TimeCvIn>(); timeCVValue) {
 			// scale down cv input
 			const auto scaledTimeCV = *timeCVValue * -100e3f / 137e3f;
 
 			// apply attenuverter knobs
-			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<RiseCvAtten>() * scaledTimeCV);
-			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<FallCvAtten>() * scaledTimeCV);
+			rScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<RiseCvKnob>() * scaledTimeCV);
+			fScaleLEDs = InvertingAmpWithBias(scaledTimeCV, 100e3f, 100e3f, getState<FallCvKnob>() * scaledTimeCV);
 		}
 
 		// sum with static value from fader + range switch
@@ -202,8 +201,8 @@ public:
 		fallCV = -fScaleLEDs - ProcessCVOffset(getState<FallSlider>(), fallRange);
 
 		// TODO: LEDs only need to be updated ~60Hz instead of 48kHz
-		setLED<RiseCvLed>(MetaModule::BipolarColor_t{rScaleLEDs / 10.f});
-		setLED<FallCvLed>(MetaModule::BipolarColor_t{fScaleLEDs / 10.f});
+		setLED<RiseLight>(BipolarColor_t{rScaleLEDs / 10.f});
+		setLED<FallLight>(BipolarColor_t{fScaleLEDs / 10.f});
 
 		// TODO: low pass filter
 
@@ -232,7 +231,7 @@ public:
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, MetaModule::ModuleInfoView2::makeView<Info>());
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
 
 private:
@@ -254,3 +253,5 @@ private:
 	float timeStepInS = 1.f/48000.f;
 
 };
+
+}
