@@ -1,5 +1,6 @@
 #pragma once
 #include "VCV-adaptor/math.hpp"
+#include <memory>
 #include <string_view>
 
 namespace rack::window
@@ -30,24 +31,27 @@ struct Svg {
 	// int getNumShapes() { return 0; }
 	// int getNumPaths() { return 0; }
 	// int getNumPoints() { return 0; }
-	static Svg *load(std::string_view filename) {
+	static std::shared_ptr<Svg> load(std::string_view filename) {
 		return nullptr;
 	}
 };
 
-struct Font {};
+struct Font {
+	int handle;
+};
+
 struct Image {};
 
 struct Window {
-	Font *loadFont(std::string_view) {
+	std::shared_ptr<Font> loadFont(std::string_view) {
 		return nullptr;
 	}
 
-	Image *loadImage(std::string_view) {
+	std::shared_ptr<Image> loadImage(std::string_view) {
 		return nullptr;
 	}
 
-	Svg *loadSvg(std::string_view) {
+	std::shared_ptr<Svg> loadSvg(std::string_view) {
 		return nullptr;
 	}
 };

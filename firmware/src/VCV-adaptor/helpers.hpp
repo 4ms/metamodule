@@ -144,7 +144,7 @@ ui::MenuItem *createSubmenuItem(std::string_view text,
 
 template<class TMenuItem = ui::MenuItem>
 ui::MenuItem *createIndexSubmenuItem(std::string_view text,
-									 std::vector<std::string_view> labels,
+									 std::vector<std::string> labels,
 									 std::function<size_t()> getter,
 									 std::function<void(size_t val)> setter,
 									 bool disabled = false,

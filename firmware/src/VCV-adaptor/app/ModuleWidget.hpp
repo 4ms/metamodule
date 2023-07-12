@@ -16,7 +16,7 @@ struct ModuleWidget : widget::Widget {
 	void setPanel(Widget *panel) {
 	}
 
-	void setPanel(window::Svg *svg) {
+	void setPanel(std::shared_ptr<window::Svg> svg) {
 	}
 
 	void addChild(Widget *) {

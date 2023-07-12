@@ -3,11 +3,16 @@
 #include "VCV-adaptor/events.hh"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/window.hpp"
+#include "nanovg.h"
 
 namespace rack
 {
 
-struct DrawArgs {};
+struct DrawArgs {
+	NVGcontext *vg;
+	math::Rect clipBox;
+	NVGLUframebuffer *fb;
+};
 
 namespace widget
 {
@@ -47,9 +52,9 @@ struct SvgWidget : Widget {
 	SvgWidget *bg;
 	bool visible;
 	engine::ParamQuantity *pq;
-	void setSvg(window::Svg *) {
+	void setSvg(std::shared_ptr<window::Svg>) {
 	}
-	void setSVG(window::Svg *) {
+	void setSVG(std::shared_ptr<window::Svg>) {
 	}
 
 	engine::ParamQuantity *getParamQuantity() {
@@ -82,7 +87,7 @@ struct SvgSlider : app::ParamWidget {
 
 struct SvgSwitch : ParamWidget {
 	bool momentary;
-	void addFrame(window::Svg *) {
+	void addFrame(std::shared_ptr<window::Svg>) {
 	}
 };
 } // namespace app
@@ -90,6 +95,7 @@ struct SvgSwitch : ParamWidget {
 // clang-format off
 // These are defined in Rack, though some appear to be brand-specific
 struct SvgScrew : widget::SvgWidget {};
+struct ScrewSilver : SvgScrew {};
 
 struct BefacoBigKnob : app::ParamWidget {};
 struct BefacoTinyKnob : app::ParamWidget {};
@@ -102,6 +108,11 @@ struct Davies1900hKnob : app::ParamWidget {};
 struct Davies1900hWhiteKnob : app::ParamWidget {};
 struct Davies1900hRedKnob : app::ParamWidget {};
 struct Davies1900hLargeWhiteKnob : app::ParamWidget{};
+
+struct Rogan2SGray : app::ParamWidget {};
+struct Rogan2PSWhite : app::ParamWidget {};
+struct Rogan2PSRed : app::ParamWidget {};
+struct Rogan2PSGreen : app::ParamWidget {};
 
 struct PJ301MPort : app::PortWidget{};
 

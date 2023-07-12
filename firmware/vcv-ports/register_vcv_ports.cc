@@ -1,3 +1,4 @@
+#include "CoreModules/AudibleInstruments/info/Braids_info.hh"
 #include "CoreModules/Befaco/info/DualAtenuverter_info.hh"
 #include "CoreModules/Befaco/info/EvenVCO_info.hh"
 #include "CoreModules/Befaco/info/SpringReverb_info.hh"
@@ -23,6 +24,6 @@ bool registered_SpringReverb =
 
 namespace AudibleInstruments
 {
-//
+bool registered_Braids = ModuleFactory::registerModuleType(BraidsInfo::slug, ModuleInfoView::makeView<BraidsInfo>());
 }
 } // namespace MetaModule

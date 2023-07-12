@@ -18,6 +18,10 @@ inline json_t *json_integer(int) {
 	return nullptr;
 }
 
+inline json_t *json_array() {
+	return nullptr;
+}
+
 inline json_t *json_object_get(json_t *, std::string_view) {
 	return nullptr;
 }
@@ -30,7 +34,14 @@ inline int json_integer_value(json_t *) {
 	return 0;
 }
 
+inline json_t *json_array_get(json_t *, int) {
+	return nullptr;
+}
+
 inline void json_object_set_new(json_t *, std::string_view, json_t *) {
+}
+
+inline void json_array_insert_new(json_t *, int, json_t *) {
 }
 
 } // namespace rack
