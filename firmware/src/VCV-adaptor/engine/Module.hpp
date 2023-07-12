@@ -45,11 +45,26 @@ struct Module : VCVModuleWrapper {
 
 	void config(unsigned num_params, unsigned num_inputs, unsigned num_outputs, unsigned num_lights = 0) {
 		params.resize(num_params);
+		for (auto &x : params)
+			x.value = 0;
+
 		inputs.resize(num_inputs);
+		for (auto &x : inputs)
+			x.voltage = 0;
+
 		outputs.resize(num_outputs);
+		for (auto &x : outputs)
+			x.voltage = 0;
+
 		lights.resize(num_lights);
+		for (auto &x : lights)
+			x.value = 0;
 
 		param_scales.resize(num_params);
+		for (auto &x : param_scales) {
+			x.range = 1;
+			x.offset = 0;
+		}
 	}
 
 	template<class TParamQuantity = ParamQuantity>
