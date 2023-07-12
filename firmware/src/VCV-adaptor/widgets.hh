@@ -2,27 +2,15 @@
 #include "VCV-adaptor/engine/ParamQuantity.hpp"
 #include "VCV-adaptor/events.hh"
 #include "VCV-adaptor/math.hpp"
+#include "VCV-adaptor/window.hpp"
 
 namespace rack
 {
-namespace Svg
+
+struct DrawArgs {};
+
+namespace widget
 {
-inline std::string_view load(auto) {
-	return "";
-}
-} // namespace Svg
-
-namespace asset
-{
-inline std::string_view plugin(auto, auto) {
-	return "";
-}
-
-inline std::string_view system(std::string_view) {
-	return "";
-}
-} // namespace asset
-
 struct Widget {
 	math::Rect box;
 	virtual void onDragStart(const event::DragStart &e) {
@@ -43,9 +31,13 @@ struct Widget {
 	}
 	virtual void onDragHover(const DragHoverEvent &e) {
 	}
+	virtual void step() {
+	}
 };
 
-struct PortWidget : Widget {};
+struct OpaqueWidget : Widget {};
+struct TransparentWidget : Widget {};
+struct FramebufferWidget : Widget {};
 
 struct SvgWidget : Widget {
 	SvgWidget *bg;
@@ -57,16 +49,19 @@ struct SvgWidget : Widget {
 	}
 };
 
-struct ParamWidget : SvgWidget {};
+} // namespace widget
 
 namespace app
 {
-struct SvgPort : SvgWidget {};
-struct SvgSlider : SvgWidget {
+struct PortWidget : widget::Widget {};
+struct ParamWidget : widget::SvgWidget {};
+struct SvgPort : widget::SvgWidget {};
+
+struct SvgSlider : widget::SvgWidget {
 	math::Vec minHandlePos;
 	math::Vec maxHandlePos;
 	bool horizontal;
-	SvgWidget *background;
+	widget::SvgWidget *background;
 
 	void setBackgroundSvg(auto) {
 	}
@@ -76,32 +71,32 @@ struct SvgSlider : SvgWidget {
 
 struct SvgSwitch : ParamWidget {
 	bool momentary;
-	void addFrame(std::string_view) {
+	void addFrame(window::Svg *) {
 	}
 };
 } // namespace app
 
 // clang-format off
-// These are defined in Rack, though some appear to be brancd-specific
-struct SvgScrew : SvgWidget {};
-struct BefacoBigKnob : SvgWidget {};
-struct BefacoTinyKnob : SvgWidget {};
-struct BefacoSlidePot : SvgWidget {};
-struct BefacoSwitch : SvgWidget {};
-struct BefacoPush : SvgWidget {};
-struct CKSS : SvgWidget {};
-struct Davies1900hBlackKnob : SvgWidget {};
-struct Davies1900hKnob : SvgWidget {};
-struct Davies1900hWhiteKnob : SvgWidget {};
-struct Davies1900hRedKnob : SvgWidget {};
-struct Davies1900hLargeWhiteKnob : SvgWidget{};
-template<typename T> struct MediumLight : SvgWidget {};
-template<typename T> struct SmallLight : SvgWidget {};
-struct GreenRedLight : SvgWidget {};
-struct RedLight : SvgWidget {};
-struct YellowLight : SvgWidget {};
-struct GreenLight : SvgWidget {};
-struct RedGreenBlueLight : SvgWidget {};
+// These are defined in Rack, though some appear to be brand-specific
+struct SvgScrew : widget::SvgWidget {};
+struct BefacoBigKnob : widget::SvgWidget {};
+struct BefacoTinyKnob : widget::SvgWidget {};
+struct BefacoSlidePot : widget::SvgWidget {};
+struct BefacoSwitch : widget::SvgWidget {};
+struct BefacoPush : widget::SvgWidget {};
+struct CKSS : widget::SvgWidget {};
+struct Davies1900hBlackKnob : widget::SvgWidget {};
+struct Davies1900hKnob : widget::SvgWidget {};
+struct Davies1900hWhiteKnob : widget::SvgWidget {};
+struct Davies1900hRedKnob : widget::SvgWidget {};
+struct Davies1900hLargeWhiteKnob : widget::SvgWidget{};
+template<typename T> struct MediumLight : widget::SvgWidget {};
+template<typename T> struct SmallLight : widget::SvgWidget {};
+struct GreenRedLight : widget::SvgWidget {};
+struct RedLight : widget::SvgWidget {};
+struct YellowLight : widget::SvgWidget {};
+struct GreenLight : widget::SvgWidget {};
+struct RedGreenBlueLight : widget::SvgWidget {};
 
 // clang-format off
 

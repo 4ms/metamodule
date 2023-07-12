@@ -1,100 +1,56 @@
 #pragma once
 #include "VCV-adaptor/app/menu.hpp"
 #include "VCV-adaptor/widgets.hh"
+#include "VCV-adaptor/window.hpp"
 #include "helpers.hpp"
 
 namespace rack
 {
 
-struct DrawArgs {};
-
-struct ModuleWidget : Widget {
+struct ModuleWidget : widget::Widget {
 	engine::Module *module;
 
 	void setModule(engine::Module *) {
 	}
 
-	void setPanel(app::SvgPanel *) {
+	void setPanel(Widget *panel) {
+	}
+
+	void setPanel(window::Svg *svg) {
 	}
 
 	void addChild(Widget *) {
 	}
 
-	void addParam(Widget *) {
+	void addParam(app::ParamWidget *param) {
 	}
 
-	void addInput(Widget *) {
+	void addInput(app::PortWidget *input) {
 	}
 
-	void addOutput(Widget *) {
+	void addOutput(app::PortWidget *output) {
 	}
-
-	// ParamWidget *createParam(auto...) {
-	// 	return nullptr;
-	// }
-
-	// PortWidget *createInput(auto...) {
-	// 	return nullptr;
-	// }
-
-	// PortWidget *createOutput(auto...) {
-	// 	return nullptr;
-	// }
-
-	// void *createWidget(auto...) {
-	// 	return nullptr;
-	// }
-
-	// void *createLight(auto...) {
-	// 	return nullptr;
-	// }
 
 	virtual void appendContextMenu(ui::Menu *) {
 	}
 
-	void addParam(ParamWidget *param) {
-	}
-	void addInput(PortWidget *input) {
-	}
-	void addOutput(PortWidget *output) {
-	}
-	ParamWidget *getParam(int paramId) {
+	app::ParamWidget *getParam(int paramId) {
 		return nullptr;
 	}
-	PortWidget *getInput(int portId) {
+
+	app::PortWidget *getInput(int portId) {
 		return nullptr;
 	}
-	PortWidget *getOutput(int portId) {
+
+	app::PortWidget *getOutput(int portId) {
 		return nullptr;
 	}
 
 	void draw(const DrawArgs &args) {
 	}
+
 	void drawLayer(const DrawArgs &args, int layer) {
 	}
 };
-
-//TODO: move this to other files:
-struct Window {
-	app::SvgPanel *loadSvg(std::string_view) {
-		return nullptr;
-	}
-};
-
-struct Engine {
-	float getSampleRate() {
-		return 48000;
-	}
-};
-
-struct App {
-	Window _window;
-	Window *window = &_window;
-	Engine _engine;
-	Engine *engine = &_engine;
-	;
-};
-
-extern App *APP;
 
 } // namespace rack

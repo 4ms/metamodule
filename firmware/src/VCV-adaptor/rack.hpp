@@ -25,8 +25,9 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 // #include "mutex.hpp"
 // #include "random.hpp"
 // #include "network.hpp"
-// #include "asset.hpp"
+#include "asset.hpp"
 // #include "window/Window.hpp"
+#include "window.hpp"
 // #include "context.hpp"
 // #include "audio.hpp"
 // #include "midi.hpp"
@@ -135,8 +136,8 @@ namespace rack
 // Import some namespaces for convenience
 // using namespace logger;
 using namespace math;
-// using namespace window;
-// using namespace widget;
+using namespace window;
+using namespace widget;
 using namespace ui;
 using namespace app;
 using plugin::Model;

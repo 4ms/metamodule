@@ -564,8 +564,4 @@ Or passing the values to a C function.
 #define VEC_ARGS(v) (v).x, (v).y
 #define RECT_ARGS(r) (r).pos.x, (r).pos.y, (r).size.x, (r).size.y
 
-inline math::Vec mm2px(math::Vec) {
-	return {0, 0};
-}
-
 } // namespace rack::math

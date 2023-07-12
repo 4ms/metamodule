@@ -1,0 +1,22 @@
+#pragma once
+#include "VCV-adaptor/widgets.hh"
+
+namespace rack::app
+{
+
+struct RackWidget {};
+
+struct RackScrollWidget {};
+
+struct Scene : widget::OpaqueWidget {
+	RackScrollWidget *rackScroll;
+	RackWidget *rack;
+	widget::Widget *menuBar;
+	widget::Widget *browser;
+
+	math::Vec mousePos;
+	math::Vec getMousePos() {
+		return mousePos;
+	}
+};
+} // namespace rack::app

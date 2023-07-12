@@ -1,5 +1,6 @@
 #pragma once
 #include "VCV-adaptor/app/Menu.hpp"
+#include "VCV-adaptor/app/SvgPanel.hpp"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/plugin/Model.hpp"
 #include <functional>
@@ -11,10 +12,6 @@ namespace rack
 namespace engine
 {
 struct Module;
-}
-namespace app
-{
-struct SvgPanel;
 }
 
 // template<class TModule, class TModuleWidget>
