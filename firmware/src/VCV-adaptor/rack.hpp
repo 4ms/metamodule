@@ -129,6 +129,7 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 #include "VCV-adaptor/assert.hh"
 #include "VCV-adaptor/create_model.hh"
 #include "VCV-adaptor/dynamic_cast.hpp"
+#include "VCV-adaptor/nanovg.h"
 
 namespace rack
 {
