@@ -38,11 +38,4 @@ struct ModuleInfoBase {
 	}
 };
 
-// Hack to allow us to copy/paste enum list from VCV Module files
-#ifndef VCVRACK
-#ifndef ENUMS
-#define ENUMS(name, count) name, name##_LAST = name + (count)-1
-#endif
-#endif
-
 } // namespace MetaModule
