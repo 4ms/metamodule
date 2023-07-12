@@ -33,6 +33,10 @@ struct Widget {
 	}
 	virtual void step() {
 	}
+	virtual void draw(const DrawArgs &) {
+	}
+	virtual void drawLayer(const DrawArgs &, int) {
+	}
 };
 
 struct OpaqueWidget : Widget {};
@@ -41,9 +45,13 @@ struct FramebufferWidget : Widget {};
 
 struct SvgWidget : Widget {
 	SvgWidget *bg;
+	bool visible;
 	engine::ParamQuantity *pq;
-	void setSvg(auto) {
+	void setSvg(window::Svg *) {
 	}
+	void setSVG(window::Svg *) {
+	}
+
 	engine::ParamQuantity *getParamQuantity() {
 		return pq;
 	}
@@ -53,11 +61,14 @@ struct SvgWidget : Widget {
 
 namespace app
 {
-struct PortWidget : widget::Widget {};
-struct ParamWidget : widget::SvgWidget {};
-struct SvgPort : widget::SvgWidget {};
+// Ports
+struct PortWidget : widget::SvgWidget {};
+struct SvgPort : app::PortWidget {};
 
-struct SvgSlider : widget::SvgWidget {
+// Params
+struct ParamWidget : widget::SvgWidget {};
+
+struct SvgSlider : app::ParamWidget {
 	math::Vec minHandlePos;
 	math::Vec maxHandlePos;
 	bool horizontal;
@@ -79,17 +90,21 @@ struct SvgSwitch : ParamWidget {
 // clang-format off
 // These are defined in Rack, though some appear to be brand-specific
 struct SvgScrew : widget::SvgWidget {};
-struct BefacoBigKnob : widget::SvgWidget {};
-struct BefacoTinyKnob : widget::SvgWidget {};
-struct BefacoSlidePot : widget::SvgWidget {};
-struct BefacoSwitch : widget::SvgWidget {};
-struct BefacoPush : widget::SvgWidget {};
-struct CKSS : widget::SvgWidget {};
-struct Davies1900hBlackKnob : widget::SvgWidget {};
-struct Davies1900hKnob : widget::SvgWidget {};
-struct Davies1900hWhiteKnob : widget::SvgWidget {};
-struct Davies1900hRedKnob : widget::SvgWidget {};
-struct Davies1900hLargeWhiteKnob : widget::SvgWidget{};
+
+struct BefacoBigKnob : app::ParamWidget {};
+struct BefacoTinyKnob : app::ParamWidget {};
+struct BefacoSlidePot : app::ParamWidget {};
+struct BefacoSwitch : app::ParamWidget {};
+struct BefacoPush : app::ParamWidget {};
+struct CKSS : app::ParamWidget {};
+struct Davies1900hBlackKnob : app::ParamWidget {};
+struct Davies1900hKnob : app::ParamWidget {};
+struct Davies1900hWhiteKnob : app::ParamWidget {};
+struct Davies1900hRedKnob : app::ParamWidget {};
+struct Davies1900hLargeWhiteKnob : app::ParamWidget{};
+
+struct PJ301MPort : app::PortWidget{};
+
 template<typename T> struct MediumLight : widget::SvgWidget {};
 template<typename T> struct SmallLight : widget::SvgWidget {};
 struct GreenRedLight : widget::SvgWidget {};

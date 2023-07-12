@@ -3,6 +3,12 @@
 
 namespace rack
 {
+
+namespace widget
+{
+struct Widget;
+}
+
 enum {
 	GLFW_MOUSE_BUTTON_LEFT,
 	GLFW_MOUSE_BUTTON_MIDDLE,
@@ -15,6 +21,30 @@ namespace event
 struct Event {
 	unsigned button;
 	math::Vec mouseDelta;
+
+	void consume(widget::Widget *) const {
+	}
+
+	void stopPropagating() const {
+	}
+
+	bool isPropagating() const {
+		return false;
+	}
+
+	void setTarget(widget::Widget *w) const {
+	}
+
+	widget::Widget *getTarget() const {
+		return nullptr;
+	}
+
+	void unconsume() const {
+	}
+
+	bool isConsumed() const {
+		return false;
+	}
 };
 
 struct DoubleClick : Event {};
@@ -27,6 +57,7 @@ struct DragEndEvent : Event {};
 struct DragMoveEvent : Event {};
 struct DragHoverEvent : Event {};
 
+using Action = ActionEvent;
 using DragStart = DragStartEvent;
 using DragEnd = DragEndEvent;
 using DragMove = DragMoveEvent;

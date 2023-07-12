@@ -9,15 +9,15 @@ struct NVGcolor {
 	};
 };
 
-NVGcolor nvgRGB(unsigned char r, unsigned char g, unsigned char b) {
+inline NVGcolor nvgRGB(unsigned char r, unsigned char g, unsigned char b) {
 	return {};
 }
-NVGcolor nvgRGBf(float r, float g, float b) {
+inline NVGcolor nvgRGBf(float r, float g, float b) {
 	return {};
 }
-NVGcolor nvgRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+inline NVGcolor nvgRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
 	return {};
 };
-NVGcolor nvgRGBAf(float r, float g, float b, float a) {
+inline NVGcolor nvgRGBAf(float r, float g, float b, float a) {
 	return {};
 };

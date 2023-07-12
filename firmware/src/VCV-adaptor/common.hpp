@@ -288,5 +288,10 @@ extern const std::string API_URL;
 
 } // namespace rack
 
+//ui/common.hpp:
+#define CHECKMARK_STRING "✔"
+#define CHECKMARK(_cond) ((_cond) ? CHECKMARK_STRING : "")
+#define RIGHT_ARROW "▸"
+
 // Logger depends on common.hpp, but it is handy to include it along with common.hpp.
 // #include <logger.hpp>

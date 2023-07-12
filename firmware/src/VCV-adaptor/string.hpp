@@ -1,9 +1,9 @@
 #pragma once
-#include <string_view>
+#include <string>
 
 namespace rack::string
 {
-std::string_view f(auto...) {
+std::string f(auto...) {
 	return "";
 }
 } // namespace rack::string

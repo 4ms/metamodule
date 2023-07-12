@@ -8,12 +8,14 @@
 #include "VCV-adaptor/engine/Port.hpp"
 #include "VCV-adaptor/engine/PortInfo.hpp"
 #include "VCV-adaptor/json.hpp"
+#include "VCV-adaptor/plugin/Model.hpp"
 #include <vector>
 
 namespace rack::engine
 {
 
 struct Module : VCVModuleWrapper {
+	plugin::Model *model = nullptr;
 	int64_t id = -1;
 	ParamQuantity stubParamQuantity;
 	PortInfo stubInputInfo;
@@ -113,10 +115,9 @@ struct Module : VCVModuleWrapper {
 		return "";
 	}
 
-	// Model* not supported
-	// plugin::Model *getModel() {
-	// 	return model;
-	// }
+	plugin::Model *getModel() {
+		return model;
+	}
 
 	int64_t getId() {
 		return id;
@@ -230,6 +231,8 @@ struct Module : VCVModuleWrapper {
 	}
 
 	struct ResetEvent {};
+	virtual void onReset() {
+	}
 	virtual void onReset(const ResetEvent &e) {
 	}
 

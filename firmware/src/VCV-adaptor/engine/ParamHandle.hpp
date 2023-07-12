@@ -1,7 +1,7 @@
 #pragma once
+#include "VCV-adaptor/nanovg.h"
 #include <cstdint>
 #include <string_view>
-// #include <color.hpp>
 
 namespace rack::engine
 {
@@ -12,7 +12,7 @@ struct ParamHandle {
 	int paramId = 0;
 	Module *module = nullptr;
 	std::string_view text;
-	// NVGcolor color;
+	NVGcolor color;
 };
 
 } // namespace rack::engine

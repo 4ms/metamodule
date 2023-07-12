@@ -46,10 +46,10 @@ struct ModuleWidget : widget::Widget {
 		return nullptr;
 	}
 
-	void draw(const DrawArgs &args) {
+	void draw(const DrawArgs &args) override {
 	}
 
-	void drawLayer(const DrawArgs &args, int layer) {
+	void drawLayer(const DrawArgs &args, int layer) override {
 	}
 };
 

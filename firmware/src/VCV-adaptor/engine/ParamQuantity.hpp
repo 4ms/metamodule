@@ -1,6 +1,7 @@
 #pragma once
 #include "VCV-adaptor/engine/Param.hpp"
 #include "VCV-adaptor/json.hpp"
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -51,10 +52,10 @@ struct ParamQuantity {
 	int getDisplayPrecision() {
 		return {};
 	}
-	std::string_view getDisplayValueString() {
+	virtual std::string getDisplayValueString() {
 		return {};
 	}
-	void setDisplayValueString(std::string_view s) {
+	virtual void setDisplayValueString(std::string s) {
 	}
 	std::string_view getLabel() {
 		return {};

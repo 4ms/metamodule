@@ -1,10 +1,8 @@
 #pragma once
+#include "VCV-adaptor/app/RackWidget.hpp"
 #include "VCV-adaptor/widgets.hh"
-
 namespace rack::app
 {
-
-struct RackWidget {};
 
 struct RackScrollWidget {};
 
