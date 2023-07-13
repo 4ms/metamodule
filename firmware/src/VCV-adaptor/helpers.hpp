@@ -37,12 +37,17 @@ inline app::SvgPanel *createPanel(std::string_view svgPath) {
 
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
-	return nullptr;
+	auto *o = new TParamWidget;
+	o->element.x_mm = pos.x;
+	o->element.y_mm = pos.y;
+	return o;
 }
 
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
-	return nullptr;
+	auto *o = createParam<TParamWidget>(pos, module, paramId);
+	//o->element.ref = MetaModule::Element::RefCoords::Center;
+	return o;
 }
 
 template<class TPortWidget>

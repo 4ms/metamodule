@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/elements.hh"
 #include "VCV-adaptor/engine/ParamQuantity.hpp"
 #include "VCV-adaptor/events.hh"
 #include "VCV-adaptor/math.hpp"
@@ -42,6 +43,8 @@ struct Widget {
 	}
 	virtual void drawLayer(const DrawArgs &, int) {
 	}
+
+	MetaModule::Element element;
 };
 
 struct OpaqueWidget : Widget {};
