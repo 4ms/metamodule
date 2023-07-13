@@ -40,7 +40,7 @@ uimg:
 SD_DISK_DEV ?= /dev/disk4
 
 bootloader:
-	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp10_conf.hh
+	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp11_conf.hh
 
 include makefile_moduleinfo.mk
 
