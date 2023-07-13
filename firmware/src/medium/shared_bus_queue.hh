@@ -1,7 +1,6 @@
 #pragma once
 #include "conf/hsem_conf.hh"
 #include "controls.hh"
-#include "debug.hh"
 #include "drivers/hsem.hh"
 #include "params.hh"
 
@@ -15,6 +14,7 @@ public:
 		: main_jacksense_reader(main_gpioexpander)
 		, ext_jacksense_reader(ext_gpioexpander)
 		, num_jacksense_readers{ext_gpioexpander.is_present() ? 2 : 1} {
+		main_jacksense_reader.start();
 	}
 
 	void update() {
@@ -101,6 +101,7 @@ private:
 
 	void handle_error() {
 		//TODO: handle this: printf...?
+		printf_("I2C Error\n");
 	}
 };
 
