@@ -212,13 +212,13 @@ uint32_t Controls::get_jacksense_reading() {
 	uint16_t aux_jacksense = extaudio_jacksense_reader.get_last_reading();
 
 	//Fix for MM p11 mono jacks: patched = high, outputs always patched
-	main_jacksense |= 0x00FF; //mark outputs always plugged
+	// main_jacksense |= 0x00FF; //mark outputs always plugged
 
 	// For stereo jacks on inputs: patched = low, outputs always patched
 	// main_jacksense = (~main_jacksense) | 0x00FF;
 
 	// For stereo jacks on all jacks: patched = low
-	// main_jacksense = ~main_jacksense;
+	main_jacksense = ~main_jacksense;
 
 	return main_jacksense | (aux_jacksense << 16);
 }
