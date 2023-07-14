@@ -14,16 +14,16 @@ namespace MetaModule
 namespace Befaco
 {
 
-bool registered_DualAtenuverter =
-	ModuleFactory::registerModuleType(DualAtenuverterInfo::slug, ModuleInfoView::makeView<DualAtenuverterInfo>());
-bool registered_EvenVCO = ModuleFactory::registerModuleType(EvenVCOInfo::slug, ModuleInfoView::makeView<EvenVCOInfo>());
-bool registered_SpringReverb =
-	ModuleFactory::registerModuleType(SpringReverbInfo::slug, ModuleInfoView::makeView<SpringReverbInfo>());
+// bool registered_DualAtenuverter =
+// 	ModuleFactory::registerModuleType(DualAtenuverterInfo::slug, ModuleInfoView::makeView<DualAtenuverterInfo>());
+// bool registered_EvenVCO = ModuleFactory::registerModuleType(EvenVCOInfo::slug, ModuleInfoView::makeView<EvenVCOInfo>());
+// bool registered_SpringReverb =
+// 	ModuleFactory::registerModuleType(SpringReverbInfo::slug, ModuleInfoView::makeView<SpringReverbInfo>());
 
 } // namespace Befaco
 
 namespace AudibleInstruments
 {
-bool registered_Braids = ModuleFactory::registerModuleType(BraidsInfo::slug, ModuleInfoView::makeView<BraidsInfo>());
+// bool registered_Braids = ModuleFactory::registerModuleType(BraidsInfo::slug, ModuleInfoView::makeView<BraidsInfo>());
 }
 } // namespace MetaModule

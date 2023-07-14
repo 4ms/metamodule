@@ -281,6 +281,9 @@ endif
 EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines \
 				-Wno-psabi -Wno-double-promotion 
 
+$(BUILDDIR)/vcv-ports/Befaco/src/%.o: EXTRA_CPPFLAGS += -Wno-deprecated-enum-float-conversion
+$(BUILDDIR)/vcv-ports/AudibleInstruments/src/%.o: EXTRA_CPPFLAGS += -Wno-deprecated-enum-float-conversion
+
 EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG) \
 				-L$(BUILDDIR_MP1M4)/$(target_board) \
 				-Wno-psabi

@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/element_setters.hh"
 #include "VCV-adaptor/app/Menu.hpp"
 #include "VCV-adaptor/app/SvgPanel.hpp"
@@ -15,11 +16,6 @@ namespace engine
 {
 struct Module;
 }
-
-// template<class TModule, class TModuleWidget>
-// plugin::Model *createModel(std::string_view slug) {
-// 	return nullptr;
-// }
 
 /** Creates a Widget subclass with its top-left at a position. */
 template<class TWidget>
@@ -42,7 +38,7 @@ TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
 	auto *o = new TParamWidget;
 	o->element = create_element<TParamWidget>();
 	o->paramId = paramId;
-	MetaModule::set_pos(o->element, pos.x, pos.y);
+	MetaModule::set_pos(o->element, MetaModule::ModuleInfoBase::to_mm(pos.x), MetaModule::ModuleInfoBase::to_mm(pos.y));
 	return o;
 }
 

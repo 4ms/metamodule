@@ -19,6 +19,7 @@ namespace widget
 {
 struct Widget {
 	math::Rect box;
+	virtual ~Widget() = default;
 	virtual void onDragStart(const event::DragStart &e) {
 	}
 	virtual void onDragMove(const event::DragMove &e) {
