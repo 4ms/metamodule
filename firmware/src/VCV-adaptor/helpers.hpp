@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/element_setters.hh"
 #include "VCV-adaptor/app/Menu.hpp"
 #include "VCV-adaptor/app/SvgPanel.hpp"
 #include "VCV-adaptor/element_creator.hh"
@@ -40,8 +41,8 @@ template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
 	auto *o = new TParamWidget;
 	o->element = create_element<TParamWidget>();
-	o->element.x_mm = pos.x;
-	o->element.y_mm = pos.y;
+	o->paramId = paramId;
+	MetaModule::set_pos(o->element, pos.x, pos.y);
 	return o;
 }
 

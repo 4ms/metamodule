@@ -6,22 +6,22 @@ namespace rack
 {
 
 template<typename WidgetT>
-MetaModule::Element create_element() {
+inline MetaModule::Element create_element() {
 	return {};
 }
 
 template<>
-MetaModule::Element create_element<BefacoBigKnob>() {
+inline MetaModule::Element create_element<BefacoBigKnob>() {
 	return MetaModule::BefacoBigKnob{};
 }
 
 template<>
-MetaModule::Element create_element<BefacoTinyKnob>() {
+inline MetaModule::Element create_element<BefacoTinyKnob>() {
 	return MetaModule::BefacoTinyKnob{};
 }
 
 template<>
-MetaModule::Element create_element<Davies1900hRedKnob>() {
+inline MetaModule::Element create_element<Davies1900hRedKnob>() {
 	return MetaModule::Davies1900hRedKnob{};
 }
 

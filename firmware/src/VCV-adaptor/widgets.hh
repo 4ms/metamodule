@@ -74,7 +74,9 @@ struct PortWidget : widget::SvgWidget {};
 struct SvgPort : app::PortWidget {};
 
 // Params
-struct ParamWidget : widget::SvgWidget {};
+struct ParamWidget : widget::SvgWidget {
+	int paramId = -1;
+};
 
 struct SvgSlider : app::ParamWidget {
 	math::Vec minHandlePos;

@@ -28,9 +28,17 @@ struct ModuleWidget : widget::Widget {
 		// delete w;
 	}
 
-	void addParam(app::ParamWidget *param) {
-		// Push back into Elements
-		delete param;
+	void addParam(app::ParamWidget *paramWidget) {
+		// Copy newly created element into our local vector
+		// Keep the params in order
+		auto paramId = paramWidget->paramId;
+		if (paramId >= 0) {
+			if (paramId >= (int)paramElements.size()) {
+				paramElements.resize(paramId + 1);
+			}
+			paramElements[paramId] = paramWidget->element;
+		}
+		delete paramWidget;
 	}
 
 	void addInput(app::PortWidget *input) {
@@ -63,13 +71,17 @@ struct ModuleWidget : widget::Widget {
 	}
 
 	const MetaModule::ModuleInfoView &get_info_view() {
-		info.width_hp = 1; //TODO: deprecate this
-		info.elements = elements;
+		info.width_hp = 1; //TODO: deprecate width_hp
+		info.elements = paramElements;
+		//append: + inputElements + outputElements + lightElements;
 		return info;
 	}
 
 private:
-	std::vector<MetaModule::Element> elements;
+	std::vector<MetaModule::Element> paramElements;
+	std::vector<MetaModule::Element> inputElements;
+	std::vector<MetaModule::Element> outputElements;
+	std::vector<MetaModule::Element> lightElements;
 	MetaModule::ModuleInfoView info;
 };
 

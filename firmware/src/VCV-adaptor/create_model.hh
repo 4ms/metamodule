@@ -8,8 +8,6 @@
 namespace rack
 {
 
-#define WARN(...) printf(...)
-
 template<typename ModuleT>
 std::unique_ptr<CoreProcessor> create_vcv_module() {
 	return std::make_unique<ModuleT>();
@@ -31,7 +29,6 @@ plugin::Model *createModel(std::string_view slug) {
 	ModuleFactory::registerModuleType(slug, info);
 	// }
 
-	// fill info
 	return nullptr;
 }
 
