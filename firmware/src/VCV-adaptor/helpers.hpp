@@ -1,6 +1,7 @@
 #pragma once
 #include "VCV-adaptor/app/Menu.hpp"
 #include "VCV-adaptor/app/SvgPanel.hpp"
+#include "VCV-adaptor/element_creator.hh"
 #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/plugin/Model.hpp"
 #include <functional>
@@ -38,6 +39,7 @@ inline app::SvgPanel *createPanel(std::string_view svgPath) {
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
 	auto *o = new TParamWidget;
+	o->element = create_element<TParamWidget>();
 	o->element.x_mm = pos.x;
 	o->element.y_mm = pos.y;
 	return o;
