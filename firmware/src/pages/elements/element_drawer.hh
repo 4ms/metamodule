@@ -72,14 +72,13 @@ draw_element_topleft(const Toggle3pos &el, const lv_img_dsc_t *img, lv_obj_t *ca
 struct ElementDrawer {
 	uint32_t module_height;
 	lv_obj_t *canvas;
-	bool center_coords;
 
 	template<typename T>
 	lv_obj_t *draw_element(T element, const lv_img_dsc_t *img) {
 		if (img == nullptr)
 			return nullptr;
 
-		if (center_coords) {
+		if (element.coords == Coords::Center) {
 			element.x_mm -= ModuleInfoBase::to_mm(img->header.w / 2.f, module_height / 5.059f);
 			element.y_mm -= ModuleInfoBase::to_mm(img->header.h / 2.f, module_height / 5.059f);
 		}

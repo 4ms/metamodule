@@ -10,9 +10,7 @@ namespace MetaModule
 struct ModuleInfoBase {
 	static constexpr std::string_view slug{""};
 	static constexpr std::string_view description{""};
-	static constexpr std::string_view svg_filename{""};
 	static constexpr uint32_t width_hp = 0;
-	static constexpr bool uses_center_coords = false;
 	static constexpr std::array<Element, 0> Elements{};
 
 	template<size_t DPI = 75>

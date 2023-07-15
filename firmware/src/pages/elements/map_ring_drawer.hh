@@ -92,7 +92,6 @@ namespace MetaModule
 struct MapRingDrawer {
 	uint32_t module_height;
 	lv_obj_t *canvas;
-	bool center_coords;
 
 	void draw_mapped_ring(auto element, lv_obj_t *element_obj, uint32_t panel_el_id) {
 		if (!element_obj)
@@ -101,7 +100,8 @@ struct MapRingDrawer {
 		lv_obj_refr_size(element_obj);
 		uint16_t w = lv_obj_get_width(element_obj);
 		uint16_t h = lv_obj_get_height(element_obj);
-		auto [x, y] = center_coords ?
+
+		auto [x, y] = element.coords == Coords::Center ?
 						  ElementDrawerImpl::mm_to_center_px(element.x_mm, element.y_mm, w, h, module_height) :
 						  ElementDrawerImpl::mm_to_topleft_px(element.x_mm, element.y_mm, module_height);
 

@@ -64,10 +64,9 @@ struct ModuleDrawer {
 
 		// Draw module controls
 		const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-		auto center_coords = moduleinfo.uses_center_coords;
 		auto images = ElementImage{height};
-		auto el_drawer = ElementDrawer{height, canvas, center_coords};
-		auto ring_drawer = MapRingDrawer{height, canvas, center_coords};
+		auto el_drawer = ElementDrawer{height, canvas};
+		auto ring_drawer = MapRingDrawer{height, canvas};
 
 		//Reserve enough for what we will append
 		drawn_elements.reserve(drawn_elements.size() + moduleinfo.elements.size());
@@ -97,8 +96,8 @@ struct ModuleDrawer {
 	}
 
 	// ??? Test this?
-	void draw_map_rings(const std::vector<DrawnElement> &drawn_elements, lv_obj_t *canvas, bool center_coords) {
-		auto ring_drawer = MapRingDrawer{height, canvas, center_coords};
+	void draw_map_rings(const std::vector<DrawnElement> &drawn_elements, lv_obj_t *canvas) {
+		auto ring_drawer = MapRingDrawer{height, canvas};
 
 		for (auto &drawn_element : drawn_elements) {
 			if (drawn_element.drawn.mapped_panel_id) {

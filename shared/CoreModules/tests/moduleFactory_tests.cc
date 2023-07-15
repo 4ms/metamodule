@@ -1,4 +1,4 @@
-#include "4ms/info/SMR_info.hh"
+#include "CoreModules/4ms/info/SMR_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "doctest.h"
 #include <iostream>
@@ -25,8 +25,8 @@ struct TestCoreMod : public CoreProcessor {
 
 static constexpr std::string_view abcabc_slug{"abcabc"};
 constexpr MetaModule::ModuleInfoView abcabcInfo{
-	.width_hp = 40,
 	.description = "abcabc module",
+	.width_hp = 40,
 };
 
 class AutoInit {
@@ -56,16 +56,17 @@ TEST_CASE("Static objects register automatically") {
 }
 
 constexpr MetaModule::ModuleInfoView ABCInfo{
-	.width_hp = 40,
 	.description = "ABC module",
+	.width_hp = 40,
 };
 
 struct TestInfo : MetaModule::ModuleInfoBase {
 	static constexpr std::string_view slug{"HIJ"};
 	static constexpr uint32_t width_hp = 2;
 	static constexpr std::array<MetaModule::Element, 2> Elements{{
-		MetaModule::Knob9mm{to_mm<72>(114.85f), to_mm<72>(61.59f), "Spread", "Spread"},
-		MetaModule::Davies1900hBlackKnob{to_mm<72>(53.68f), to_mm<72>(78.08f), "Scale", "Scale"},
+		MetaModule::Knob9mm{to_mm<72>(114.85f), to_mm<72>(61.59f), MetaModule::Coords::Center, "Spread", "Spread"},
+		MetaModule::Davies1900hBlackKnob{
+			to_mm<72>(53.68f), to_mm<72>(78.08f), MetaModule::Coords::Center, "Scale", "Scale"},
 	}};
 };
 
@@ -92,8 +93,8 @@ TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView")
 
 	SUBCASE("Test if Elements info gets stored and retreived OK") {
 		constexpr MetaModule::ModuleInfoView testinfo{
-			.width_hp = 4,
 			.description = "def info",
+			.width_hp = 4,
 			.elements = TestInfo::Elements,
 		};
 

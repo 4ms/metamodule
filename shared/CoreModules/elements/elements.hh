@@ -22,9 +22,12 @@ struct BipolarColor_t {
 	float value;
 };
 
+enum class Coords { Center, TopLeft };
+
 struct BaseElement {
 	float x_mm = 0;
 	float y_mm = 0;
+	Coords coords = Coords::Center;
 
 	std::string_view short_name;
 	std::string_view long_name;
@@ -83,9 +86,10 @@ struct SliderMonoLight : Slider {
 	static constexpr size_t NumLights = 1;
 };
 
-struct BefacoSlidePot : Slider { // TODO: is using this enum better than two types (Hor/Ver)?
-								 // enum Orientation { Vertical, Horizontal };
-								 // static constexpr Orientation orientation = Orientation::Vertical;
+struct BefacoSlidePot :
+	Slider { // TODO: is using this enum better than two types (Hor/Ver)?
+			 // enum Orientation { Vertical, Horizontal };
+			 // static constexpr Orientation orientation = Orientation::Vertical;
 };
 struct BefacoSlidePotSmall : Slider {};
 struct Slider25mmVert : Slider {};

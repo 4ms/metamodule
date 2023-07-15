@@ -28,6 +28,7 @@ CompileFlags:
 		"-Ilib/cmsis/Core_A/Include",
 		"-Ilib/cmsis-device/stm32mp157c/include",
 		"-Ilib/lvgl",
+		"-Ilib/lvgl/lvgl",
 		"-Ilib/lvgl/lvgl/src/lv_font",
         "-Isrc/fatfs",
         "-Ilib/fatfs/source",
