@@ -116,7 +116,7 @@ public:
 
 		// Set static (non-mapped) knobs
 		for (auto &k : pd.static_knobs)
-			modules[k.module_id]->set_and_scale_param(k.param_id, k.value);
+			modules[k.module_id]->set_param(k.param_id, k.value);
 
 		is_loaded = true;
 
@@ -170,7 +170,7 @@ public:
 
 	void set_panel_param(int param_id, float val) {
 		for (auto const &k : knob_conns[param_id]) {
-			modules[k.module_id]->set_and_scale_param(k.param_id, k.get_mapped_val(val));
+			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
 
@@ -208,7 +208,7 @@ public:
 	}
 
 	void apply_static_param(const StaticParam &sparam) {
-		modules[sparam.module_id]->set_and_scale_param(sparam.param_id, sparam.value);
+		modules[sparam.module_id]->set_param(sparam.param_id, sparam.value);
 		//Also set it in the patch?
 	}
 

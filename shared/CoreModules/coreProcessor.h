@@ -16,12 +16,6 @@ public:
 	virtual void set_alt_param(const int alt_param_id, const float val) {
 	}
 
-	// Given an unscaled val: 0 <= val <= 1,
-	// apply scaling (range and offset) to val
-	virtual void set_and_scale_param(int param_id, float val) {
-		set_param(param_id, val);
-	}
-
 	static constexpr unsigned NameChars = 15;
 	static constexpr unsigned LongNameChars = 39;
 
