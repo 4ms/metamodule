@@ -26,9 +26,9 @@ struct ENVVCAInfo : ModuleInfoBase {
 		AnalogJackOutput4ms{to_mm<72>(92.03), to_mm<72>(227.06), Center, "Env", ""},
 		GateJackOutput4ms{to_mm<72>(92.03), to_mm<72>(278.73), Center, "EOR", ""},
 		AnalogJackOutput4ms{to_mm<72>(78.57), to_mm<72>(322.5), Center, "Audio Out", ""},
-		RedGreenBlueLight{to_mm<72>(45.11), to_mm<72>(174.84), Center, "Rise Light", ""},
-		RedGreenBlueLight{to_mm<72>(69.34), to_mm<72>(174.84), Center, "Fall Light", ""},
-		RedGreenBlueLight{to_mm<72>(106.41), to_mm<72>(256.6), Center, "EOR Light", ""},
+		RedBlueLight{to_mm<72>(45.11), to_mm<72>(174.84), Center, "Rise Light", ""},
+		RedBlueLight{to_mm<72>(69.34), to_mm<72>(174.84), Center, "Fall Light", ""},
+		OrangeLight{to_mm<72>(106.41), to_mm<72>(256.6), Center, "EOR Light", ""},
 		Toggle3pos{to_mm<72>(23.19), to_mm<72>(43.305), Center, "Rise Switch", ""},
 		Toggle3pos{to_mm<72>(57.33), to_mm<72>(43.305), Center, "Fall Switch", ""},
 		LatchingButtonMonoLight{to_mm<72>(92.17), to_mm<72>(41.65), Center, "Cycle", ""},
@@ -40,24 +40,20 @@ struct ENVVCAInfo : ModuleInfoBase {
         EnvLevelSlider,
         RiseCvKnob,
         FallCvKnob,
-
         TimeCvIn,
         TriggerIn,
         CycleIn,
         FollowIn,
         AudioIn,
-
         EnvOut,
         EorOut,
         AudioOut,
-
-        RiseSwitch,
-        FallSwitch,
-        CycleButton,
-
         RiseLight,
         FallLight,
         EorLight,
+        RiseSwitch,
+        FallSwitch,
+        CycleButton,
     };
 
     // Legacy naming (safe to remove once all legacy 4ms CoreModules are converted)

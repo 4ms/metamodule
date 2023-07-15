@@ -289,15 +289,15 @@
     <circle id="Audio_Out" data-name="Audio Out" cx="78.57" cy="322.5" r="11.34" style="fill: blue"/>
     <circle id="Audio_In" data-name="Audio In" cx="35.87" cy="322.47" r="11.34" style="fill: lime"/>
     <circle id="EOR" cx="92.03" cy="278.73" r="11.34" style="fill: #8080ff"/>
-    <circle id="EOR_Light" data-name="EOR Light" cx="106.41" cy="256.6" r="4.96" style="fill: #f0f"/>
+    <circle id="EOR_Light_OrangeLight" data-name="EOR Light#OrangeLight" cx="106.41" cy="256.6" r="4.96" style="fill: #f0f"/>
     <circle id="Follow" cx="22.3" cy="278.73" r="11.34" style="fill: lime"/>
     <circle id="Cycle" cx="57.25" cy="254.25" r="11.34" style="fill: #80ff80"/>
     <circle id="Env" cx="92.03" cy="227.06" r="11.34" style="fill: blue"/>
     <circle id="Trigger" cx="22.3" cy="227.06" r="11.34" style="fill: #80ff80"/>
     <circle id="Time_CV" data-name="Time CV" cx="57.25" cy="203.53" r="11.34" style="fill: lime"/>
     <circle id="Fall_CV" data-name="Fall CV" cx="92.85" cy="178.25" r="8.5" style="fill: #ff0080"/>
-    <circle id="Fall_Light" data-name="Fall Light" cx="69.34" cy="174.84" r="4.96" style="fill: #f0f"/>
-    <circle id="Rise_Light" data-name="Rise Light" cx="45.11" cy="174.84" r="4.96" style="fill: #f0f"/>
+    <circle id="Fall_Light_RedBlueLight" data-name="Fall Light#RedBlueLight" cx="69.34" cy="174.84" r="4.96" style="fill: #f0f"/>
+    <circle id="Rise_Light_RedBlueLight" data-name="Rise Light#RedBlueLight" cx="45.11" cy="174.84" r="4.96" style="fill: #f0f"/>
     <circle id="Rise_CV" data-name="Rise CV" cx="21.69" cy="178.25" r="8.5" style="fill: #ff0080"/>
     <rect id="Env_Level_Slider" data-name="Env Level Slider" x="88.67" y="70.54" width="5.67" height="76.54" style="fill: #ff0080"/>
     <rect id="Fall_Slider" data-name="Fall Slider" x="54.49" y="70.75" width="5.67" height="76.54" style="fill: #ff0040"/>
