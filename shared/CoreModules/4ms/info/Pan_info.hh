@@ -12,7 +12,7 @@ struct PanInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Pan-artwork.svg"};
 
     static constexpr std::array<Element, 5> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(47.42), "Pan", "", 0, 0, 1, 0.5f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(47.42), "Pan", ""},
 		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(166.45), "CV", ""},
 		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(214.54), "In", ""},
 		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(263.64), "Out 1", ""},

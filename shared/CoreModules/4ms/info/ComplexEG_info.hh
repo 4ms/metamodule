@@ -12,14 +12,14 @@ struct ComplexEGInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/ComplexEG-artwork.svg"};
 
     static constexpr std::array<Element, 21> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(46.2), "Attack", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(163.28), "Hold", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(45.53), "Decay", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(172.52), to_mm<72>(163.23), "Sustain", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(45.53), "Release", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(104.51), "A Curve", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(104.51), "D Curve", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(104.51), "R Curve", "", 0, 0, 1, 0.0f},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(46.2), "Attack", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(163.28), "Hold", ""},
+		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(45.53), "Decay", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.52), to_mm<72>(163.23), "Sustain", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(45.53), "Release", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(104.51), "A Curve", ""},
+		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(104.51), "D Curve", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(104.51), "R Curve", ""},
 		AnalogJackInput4ms{to_mm<72>(36.45), to_mm<72>(214.13), "Input", ""},
 		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(214.13), "Attack CV", ""},
 		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(265.71), "Hold CV", ""},

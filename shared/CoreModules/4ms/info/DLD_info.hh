@@ -12,14 +12,14 @@ struct DLDInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/DLD-artwork.svg"};
 
     static constexpr std::array<Element, 39> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(34.32), to_mm<72>(53.53), "Time A", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(254.17), to_mm<72>(53.39), "Time B", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(34.17), to_mm<72>(119.05), "Feedback A", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(254.59), to_mm<72>(119.05), "Feedback B", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(43.46), to_mm<72>(184.04), "Delay Feed A", "", 0, 0, 1, 1.0f},
-		Davies1900hBlackKnob{to_mm<72>(111.56), to_mm<72>(178.84), "Mix A", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(177.02), to_mm<72>(178.91), "Mix B", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(245.19), to_mm<72>(183.78), "Delay Feed B", "", 0, 0, 1, 1.0f},
+		Davies1900hBlackKnob{to_mm<72>(34.32), to_mm<72>(53.53), "Time A", ""},
+		Davies1900hBlackKnob{to_mm<72>(254.17), to_mm<72>(53.39), "Time B", ""},
+		Davies1900hBlackKnob{to_mm<72>(34.17), to_mm<72>(119.05), "Feedback A", ""},
+		Davies1900hBlackKnob{to_mm<72>(254.59), to_mm<72>(119.05), "Feedback B", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.46), to_mm<72>(184.04), "Delay Feed A", ""},
+		Davies1900hBlackKnob{to_mm<72>(111.56), to_mm<72>(178.84), "Mix A", ""},
+		Davies1900hBlackKnob{to_mm<72>(177.02), to_mm<72>(178.91), "Mix B", ""},
+		Davies1900hBlackKnob{to_mm<72>(245.19), to_mm<72>(183.78), "Delay Feed B", ""},
 		AnalogJackInput4ms{to_mm<72>(167.59), to_mm<72>(42.51), "Ping Jack", ""},
 		AnalogJackInput4ms{to_mm<72>(28.08), to_mm<72>(242.1), "In A", ""},
 		AnalogJackInput4ms{to_mm<72>(71.16), to_mm<72>(242.1), "Return A", ""},

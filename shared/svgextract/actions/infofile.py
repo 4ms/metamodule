@@ -293,12 +293,12 @@ def list_elem_definitions(elems, DPI):
         source += f"\"{k['display_name']}\", "
         source += f"\"\""
 
-        if k['category'] == "Knob" or k['category'] == "Slider":
-            source += f", "
-            source += f"0, " #ID: TODO remove this
-            source += f"{k['min_val']}, "
-            source += f"{k['max_val']}, "
-            source += f"{k['default_val']}"
+        # if k['category'] == "Knob" or k['category'] == "Slider":
+        #     source += f", "
+        #     source += f"0, " #ID: TODO remove this
+        #     source += f"{k['min_val']}, "
+        #     source += f"{k['max_val']}, "
+        #     source += f"{k['default_val']}"
 
         source += f"""}},
 """

@@ -12,10 +12,10 @@ struct Gate32Info : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Gate32-artwork.svg"};
 
     static constexpr std::array<Element, 48> Elements{{
-		Knob9mm{to_mm<72>(64.34), to_mm<72>(46.59), "Tempo", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(102.55), to_mm<72>(46.59), "Delay", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(140.76), to_mm<72>(46.59), "Gate", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(178.96), to_mm<72>(46.59), "Repeat", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(64.34), to_mm<72>(46.59), "Tempo", ""},
+		Knob9mm{to_mm<72>(102.55), to_mm<72>(46.59), "Delay", ""},
+		Knob9mm{to_mm<72>(140.76), to_mm<72>(46.59), "Gate", ""},
+		Knob9mm{to_mm<72>(178.96), to_mm<72>(46.59), "Repeat", ""},
 		GateJackInput4ms{to_mm<72>(31.99), to_mm<72>(263.37), "Clock", ""},
 		GateJackInput4ms{to_mm<72>(77.19), to_mm<72>(263.37), "Start/Reset", ""},
 		GateJackInput4ms{to_mm<72>(122.38), to_mm<72>(263.37), "Stop", ""},

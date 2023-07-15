@@ -12,14 +12,14 @@ struct InfOscInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/InfOsc-artwork.svg"};
 
     static constexpr std::array<Element, 20> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(46.55), "Track", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(46.55), "Abs", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(46.55), "Range", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(105.5), "FM", "", 0, 0, 1, 0.0f},
-		DaviesLargeKnob{to_mm<72>(108.13), to_mm<72>(117.06), "Pitch", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(105.5), "Phase", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(43.3), to_mm<72>(164.67), "Modshape", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(172.52), to_mm<72>(164.62), "Wave", "", 0, 0, 1, 0.0f},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(46.55), "Track", ""},
+		Davies1900hBlackKnob{to_mm<72>(108.12), to_mm<72>(46.55), "Abs", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(46.55), "Range", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.62), to_mm<72>(105.5), "FM", ""},
+		DaviesLargeKnob{to_mm<72>(108.13), to_mm<72>(117.06), "Pitch", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.62), to_mm<72>(105.5), "Phase", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.3), to_mm<72>(164.67), "Modshape", ""},
+		Davies1900hBlackKnob{to_mm<72>(172.52), to_mm<72>(164.62), "Wave", ""},
 		AnalogJackInput4ms{to_mm<72>(35.96), to_mm<72>(214.54), "PM CV", ""},
 		AnalogJackInput4ms{to_mm<72>(83.96), to_mm<72>(214.54), "Scan CV", ""},
 		AnalogJackInput4ms{to_mm<72>(131.96), to_mm<72>(214.54), "Add CV", ""},

@@ -12,10 +12,10 @@ struct FreeverbInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Freeverb-artwork.svg"};
 
     static constexpr std::array<Element, 10> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(46.42), "Size", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(46.42), "Time", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(104.62), "Damp", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(104.62), "Mix", "", 0, 0, 1, 0.875f},
+		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(46.42), "Size", ""},
+		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(46.42), "Time", ""},
+		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(104.62), "Damp", ""},
+		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(104.62), "Mix", ""},
 		AnalogJackInput4ms{to_mm<72>(29.94), to_mm<72>(232.1), "Input", ""},
 		AnalogJackInput4ms{to_mm<72>(72.13), to_mm<72>(232.1), "Size CV", ""},
 		AnalogJackInput4ms{to_mm<72>(115.17), to_mm<72>(232.1), "Time CV", ""},

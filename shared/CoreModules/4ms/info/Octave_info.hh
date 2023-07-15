@@ -12,8 +12,8 @@ struct OctaveInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Octave-artwork.svg"};
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Octave", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.22), "Filter", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Octave", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.22), "Filter", ""},
 		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), "CV", ""},
 		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), "Input", ""},
 		AnalogJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), "Out", ""},

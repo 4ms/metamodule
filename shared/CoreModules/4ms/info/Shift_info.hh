@@ -12,9 +12,9 @@ struct ShiftInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Shift-artwork.svg"};
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Coarse", "", 0, 0, 1, 0.25f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.22), "Fine", "", 0, 0, 1, 0.5f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(142.91), "Mix", "", 0, 0, 1, 0.875f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Coarse", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.22), "Fine", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(142.91), "Mix", ""},
 		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), "Coarse CV", ""},
 		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), "Input", ""},
 		AnalogJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), "Out", ""},

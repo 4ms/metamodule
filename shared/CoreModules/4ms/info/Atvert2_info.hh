@@ -12,8 +12,8 @@ struct Atvert2Info : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Atvert2-artwork.svg"};
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.99), "1", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.67), "2", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.99), "1", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.67), "2", ""},
 		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(168.85), "In 1", ""},
 		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(214.97), "In 2", ""},
 		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(264.07), "Out 1", ""},

@@ -12,9 +12,9 @@ struct QuantInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Quant-artwork.svg"};
 
     static constexpr std::array<Element, 9> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(151.34), "Scale", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(151.34), "Root", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(72.13), to_mm<72>(201.33), "Transpose", "", 0, 0, 1, 0.875f},
+		Davies1900hBlackKnob{to_mm<72>(37.85), to_mm<72>(151.34), "Scale", ""},
+		Davies1900hBlackKnob{to_mm<72>(106.4), to_mm<72>(151.34), "Root", ""},
+		Davies1900hBlackKnob{to_mm<72>(72.13), to_mm<72>(201.33), "Transpose", ""},
 		AnalogJackInput4ms{to_mm<72>(29.94), to_mm<72>(272.23), "Input", ""},
 		AnalogJackInput4ms{to_mm<72>(72.13), to_mm<72>(272.23), "Scale CV", ""},
 		AnalogJackInput4ms{to_mm<72>(115.17), to_mm<72>(272.23), "Root CV", ""},

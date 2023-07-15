@@ -12,8 +12,8 @@ struct GateInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Gate-artwork.svg"};
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.52), "Length", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(28.92), to_mm<72>(94.2), "Delay", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.52), "Length", ""},
+		Knob9mm{to_mm<72>(28.92), to_mm<72>(94.2), "Delay", ""},
 		AnalogJackInput4ms{to_mm<72>(28.92), to_mm<72>(168.85), "Length CV", ""},
 		AnalogJackInput4ms{to_mm<72>(28.92), to_mm<72>(214.97), "Delay CV", ""},
 		GateJackInput4ms{to_mm<72>(28.92), to_mm<72>(264.07), "Input", ""},

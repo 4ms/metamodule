@@ -12,7 +12,7 @@ struct CLKMInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/CLKM-artwork.svg"};
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Multiply", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Multiply", ""},
 		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), "CV", ""},
 		GateJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), "Clk In", ""},
 		GateJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), "Clk Out", ""},

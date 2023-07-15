@@ -12,14 +12,14 @@ struct SISMInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/SISM-artwork.svg"};
 
     static constexpr std::array<Element, 34> Elements{{
-		Knob9mm{to_mm<72>(64.25), to_mm<72>(46.64), "Scale 1", "", 0, 0, 1, 1.0f},
-		Knob9mm{to_mm<72>(107.45), to_mm<72>(46.64), "Shift 1", "", 0, 0, 1, 0.5f},
-		Knob9mm{to_mm<72>(64.25), to_mm<72>(111.44), "Scale 2", "", 0, 0, 1, 1.0f},
-		Knob9mm{to_mm<72>(107.45), to_mm<72>(111.44), "Shift 2", "", 0, 0, 1, 0.5f},
-		Knob9mm{to_mm<72>(64.25), to_mm<72>(176.24), "Scale 3", "", 0, 0, 1, 1.0f},
-		Knob9mm{to_mm<72>(107.45), to_mm<72>(176.24), "Shift 3", "", 0, 0, 1, 0.5f},
-		Knob9mm{to_mm<72>(64.25), to_mm<72>(241.04), "Scale 4", "", 0, 0, 1, 1.0f},
-		Knob9mm{to_mm<72>(107.45), to_mm<72>(241.04), "Shift 4", "", 0, 0, 1, 0.5f},
+		Knob9mm{to_mm<72>(64.25), to_mm<72>(46.64), "Scale 1", ""},
+		Knob9mm{to_mm<72>(107.45), to_mm<72>(46.64), "Shift 1", ""},
+		Knob9mm{to_mm<72>(64.25), to_mm<72>(111.44), "Scale 2", ""},
+		Knob9mm{to_mm<72>(107.45), to_mm<72>(111.44), "Shift 2", ""},
+		Knob9mm{to_mm<72>(64.25), to_mm<72>(176.24), "Scale 3", ""},
+		Knob9mm{to_mm<72>(107.45), to_mm<72>(176.24), "Shift 3", ""},
+		Knob9mm{to_mm<72>(64.25), to_mm<72>(241.04), "Scale 4", ""},
+		Knob9mm{to_mm<72>(107.45), to_mm<72>(241.04), "Shift 4", ""},
 		AnalogJackInput4ms{to_mm<72>(21.77), to_mm<72>(52.84), "In 1", ""},
 		AnalogJackInput4ms{to_mm<72>(21.77), to_mm<72>(117.64), "In 2", ""},
 		AnalogJackInput4ms{to_mm<72>(21.77), to_mm<72>(182.44), "In 3", ""},

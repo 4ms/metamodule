@@ -12,14 +12,14 @@ struct StMixInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/StMix-artwork.svg"};
 
     static constexpr std::array<Element, 18> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(35.29), to_mm<72>(58.14), "Level 1", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(98.25), to_mm<72>(58.14), "Level 2", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(161.2), to_mm<72>(58.14), "Level 3", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(224.16), to_mm<72>(58.14), "Level 4", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(35.29), to_mm<72>(150.52), "Pan 1", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(98.25), to_mm<72>(150.3), "Pan 2", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(161.1), to_mm<72>(150.46), "Pan 3", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(224.16), to_mm<72>(150.3), "Pan 4", "", 0, 0, 1, 0.5f},
+		Davies1900hBlackKnob{to_mm<72>(35.29), to_mm<72>(58.14), "Level 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(98.25), to_mm<72>(58.14), "Level 2", ""},
+		Davies1900hBlackKnob{to_mm<72>(161.2), to_mm<72>(58.14), "Level 3", ""},
+		Davies1900hBlackKnob{to_mm<72>(224.16), to_mm<72>(58.14), "Level 4", ""},
+		Davies1900hBlackKnob{to_mm<72>(35.29), to_mm<72>(150.52), "Pan 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(98.25), to_mm<72>(150.3), "Pan 2", ""},
+		Davies1900hBlackKnob{to_mm<72>(161.1), to_mm<72>(150.46), "Pan 3", ""},
+		Davies1900hBlackKnob{to_mm<72>(224.16), to_mm<72>(150.3), "Pan 4", ""},
 		AnalogJackInput4ms{to_mm<72>(34.91), to_mm<72>(222.82), "In 1 L", ""},
 		AnalogJackInput4ms{to_mm<72>(34.91), to_mm<72>(271.92), "In 1 R", ""},
 		AnalogJackInput4ms{to_mm<72>(97.94), to_mm<72>(222.82), "In 2 L", ""},

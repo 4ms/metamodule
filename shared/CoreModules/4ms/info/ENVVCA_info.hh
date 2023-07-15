@@ -12,12 +12,11 @@ struct ENVVCAInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/ENVVCA-artwork.svg"};
 
     static constexpr std::array<Element, 19> Elements{{
-		Slider25mmVertLED{to_mm<72>(23.185), to_mm<72>(108.81), "Rise Slider", "", 0, 0, 1, 0.5f},
-		Slider25mmVertLED{to_mm<72>(57.325), to_mm<72>(109.02), "Fall Slider", "", 0, 0, 1, 0.5f},
-		Slider25mmVertLED{to_mm<72>(91.505), to_mm<72>(108.81), "Env Level Slider", "", 0, 0, 1, 1.0f},
-		Knob9mm{to_mm<72>(21.69), to_mm<72>(178.25), "Rise CV", "", 0, 0, 1, 1.0f},
-		Knob9mm{to_mm<72>(92.85), to_mm<72>(178.25), "Fall CV", "", 0, 0, 1, 1.0f},
-
+		Slider25mmVertLED{to_mm<72>(23.185), to_mm<72>(108.81), "Rise Slider", ""},
+		Slider25mmVertLED{to_mm<72>(57.325), to_mm<72>(109.02), "Fall Slider", ""},
+		Slider25mmVertLED{to_mm<72>(91.505), to_mm<72>(108.81), "Env Level Slider", ""},
+		Knob9mm{to_mm<72>(21.69), to_mm<72>(178.25), "Rise CV", ""},
+		Knob9mm{to_mm<72>(92.85), to_mm<72>(178.25), "Fall CV", ""},
 		AnalogJackInput4ms{to_mm<72>(57.25), to_mm<72>(203.53), "Time CV", ""},
 		GateJackInput4ms{to_mm<72>(22.3), to_mm<72>(227.06), "Trigger", ""},
 		GateJackInput4ms{to_mm<72>(57.25), to_mm<72>(254.25), "Cycle", ""},

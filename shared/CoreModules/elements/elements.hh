@@ -22,14 +22,12 @@ struct BipolarColor_t {
 	float value;
 };
 
-// TODO: get rid of idx field once VCV rack modules work without it
 struct BaseElement {
 	float x_mm = 0;
 	float y_mm = 0;
 
 	std::string_view short_name;
 	std::string_view long_name;
-	unsigned _unused_idx = 0;
 
 	static constexpr size_t NumParams = 0;
 	static constexpr size_t NumLights = 0;
@@ -52,10 +50,6 @@ struct ParamElement : BaseElement {
 // Pots (Knobs, Sliders)
 //
 struct Pot : ParamElement {
-	float _unused_min_val = 0.f;
-	float _unused_max_val = 1.f;
-	float _unused_default_val = 0.f;
-
 	using State_t = float;
 };
 
@@ -90,8 +84,8 @@ struct SliderMonoLight : Slider {
 };
 
 struct BefacoSlidePot : Slider { // TODO: is using this enum better than two types (Hor/Ver)?
-	enum Orientation { Vertical, Horizontal };
-	static constexpr Orientation orientation = Orientation::Vertical;
+								 // enum Orientation { Vertical, Horizontal };
+								 // static constexpr Orientation orientation = Orientation::Vertical;
 };
 struct BefacoSlidePotSmall : Slider {};
 struct Slider25mmVert : Slider {};

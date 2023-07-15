@@ -12,9 +12,9 @@ struct FollowInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Follow-artwork.svg"};
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.67), "Rise", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.35), "Fall", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(142.56), "Thresh", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.67), "Rise", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.35), "Fall", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(142.56), "Thresh", ""},
 		AnalogJackInput4ms{to_mm<72>(28.93), to_mm<72>(214.97), "Input", ""},
 		AnalogJackOutput4ms{to_mm<72>(28.93), to_mm<72>(264.07), "Gate", ""},
 		AnalogJackOutput4ms{to_mm<72>(28.93), to_mm<72>(312.29), "Env", ""},

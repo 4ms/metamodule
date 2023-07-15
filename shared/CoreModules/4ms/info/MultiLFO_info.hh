@@ -12,9 +12,9 @@ struct MultiLFOInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/MultiLFO-artwork.svg"};
 
     static constexpr std::array<Element, 11> Elements{{
-		DaviesLargeKnob{to_mm<72>(57.67), to_mm<72>(55.73), "Rate", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(31.96), to_mm<72>(119.41), "Phase", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(119.75), "PW", "", 0, 0, 1, 0.0f},
+		DaviesLargeKnob{to_mm<72>(57.67), to_mm<72>(55.73), "Rate", ""},
+		Davies1900hBlackKnob{to_mm<72>(31.96), to_mm<72>(119.41), "Phase", ""},
+		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(119.75), "PW", ""},
 		AnalogJackInput4ms{to_mm<72>(32.1), to_mm<72>(167.36), "Reset", ""},
 		AnalogJackInput4ms{to_mm<72>(83.63), to_mm<72>(167.36), "PW CV", ""},
 		AnalogJackInput4ms{to_mm<72>(32.1), to_mm<72>(214.57), "Rate CV", ""},

@@ -12,7 +12,7 @@ struct CLKDInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/CLKD-artwork.svg"};
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Divide", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Divide", ""},
 		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), "CV", ""},
 		GateJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), "Clk In", ""},
 		GateJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), "Clk Out", ""},

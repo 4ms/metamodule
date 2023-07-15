@@ -12,7 +12,7 @@ struct GRevInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/GRev-artwork.svg"};
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Buffer", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.53), "Buffer", ""},
 		GateJackInput4ms{to_mm<72>(28.63), to_mm<72>(214.97), "Rev", ""},
 		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.07), "Input", ""},
 		AnalogJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.29), "Out", ""},

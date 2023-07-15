@@ -12,11 +12,11 @@ struct PIInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/PI-artwork.svg"};
 
     static constexpr std::array<Element, 19> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(30.9), to_mm<72>(54.04), "Sensitivity", "", 0, 0, 1, 0.875f},
-		Knob9mm{to_mm<72>(86.53), to_mm<72>(46.58), "Env. Level", "", 0, 0, 1, 1.0f},
-		Knob9mm{to_mm<72>(30.8), to_mm<72>(109.3), "Sustain", "", 0, 0, 1, 0.5f},
-		Knob9mm{to_mm<72>(86.53), to_mm<72>(93.62), "Inv. Level", "", 0, 0, 1, 1.0f},
-		Knob9mm{to_mm<72>(30.8), to_mm<72>(153.17), "Env. Decay", "", 0, 0, 1, 0.5f},
+		Davies1900hBlackKnob{to_mm<72>(30.9), to_mm<72>(54.04), "Sensitivity", ""},
+		Knob9mm{to_mm<72>(86.53), to_mm<72>(46.58), "Env. Level", ""},
+		Knob9mm{to_mm<72>(30.8), to_mm<72>(109.3), "Sustain", ""},
+		Knob9mm{to_mm<72>(86.53), to_mm<72>(93.62), "Inv. Level", ""},
+		Knob9mm{to_mm<72>(30.8), to_mm<72>(153.17), "Env. Decay", ""},
 		AnalogJackInput4ms{to_mm<72>(19.83), to_mm<72>(221.47), "IN", ""},
 		AnalogJackInput4ms{to_mm<72>(86.55), to_mm<72>(310.71), "Input", ""},
 		AnalogJackOutput4ms{to_mm<72>(86.52), to_mm<72>(176.9), "Env. Out", ""},

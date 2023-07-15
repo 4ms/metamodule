@@ -12,9 +12,9 @@ struct LPGInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/LPG-artwork.svg"};
 
     static constexpr std::array<Element, 7> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(57.94), to_mm<72>(57.97), "Level", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(31.96), to_mm<72>(119.21), "CV", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(119.21), "Decay", "", 0, 0, 1, 0.875f},
+		Davies1900hBlackKnob{to_mm<72>(57.94), to_mm<72>(57.97), "Level", ""},
+		Davies1900hBlackKnob{to_mm<72>(31.96), to_mm<72>(119.21), "CV", ""},
+		Davies1900hBlackKnob{to_mm<72>(83.49), to_mm<72>(119.21), "Decay", ""},
 		AnalogJackInput4ms{to_mm<72>(32.13), to_mm<72>(272.09), "Input", ""},
 		GateJackInput4ms{to_mm<72>(83.32), to_mm<72>(272.09), "Ping", ""},
 		AnalogJackInput4ms{to_mm<72>(32.13), to_mm<72>(313.7), "CV Jack", ""},

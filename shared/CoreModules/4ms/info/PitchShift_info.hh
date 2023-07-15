@@ -12,10 +12,10 @@ struct PitchShiftInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/PitchShift-artwork.svg"};
 
     static constexpr std::array<Element, 9> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(50.53), to_mm<72>(46.91), "Coarse", "", 0, 0, 1, 0.25f},
-		Knob9mm{to_mm<72>(50.52), to_mm<72>(94.87), "Fine", "", 0, 0, 1, 0.5f},
-		Knob9mm{to_mm<72>(50.52), to_mm<72>(139.62), "Window", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(50.52), to_mm<72>(184.38), "Mix", "", 0, 0, 1, 0.875f},
+		Davies1900hBlackKnob{to_mm<72>(50.53), to_mm<72>(46.91), "Coarse", ""},
+		Knob9mm{to_mm<72>(50.52), to_mm<72>(94.87), "Fine", ""},
+		Knob9mm{to_mm<72>(50.52), to_mm<72>(139.62), "Window", ""},
+		Knob9mm{to_mm<72>(50.52), to_mm<72>(184.38), "Mix", ""},
 		AnalogJackInput4ms{to_mm<72>(30.92), to_mm<72>(232.48), "Input", ""},
 		AnalogJackInput4ms{to_mm<72>(69.92), to_mm<72>(232.48), "Pitch CV", ""},
 		AnalogJackInput4ms{to_mm<72>(30.92), to_mm<72>(281.58), "Window CV", ""},

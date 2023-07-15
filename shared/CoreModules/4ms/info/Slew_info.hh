@@ -12,8 +12,8 @@ struct SlewInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Slew-artwork.svg"};
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{to_mm<72>(28.92), to_mm<72>(46.76), "Rise", "", 0, 0, 1, 0.5f},
-		Knob9mm{to_mm<72>(28.92), to_mm<72>(94.44), "Fall", "", 0, 0, 1, 0.5f},
+		Knob9mm{to_mm<72>(28.92), to_mm<72>(46.76), "Rise", ""},
+		Knob9mm{to_mm<72>(28.92), to_mm<72>(94.44), "Fall", ""},
 		AnalogJackInput4ms{to_mm<72>(29.28), to_mm<72>(263.82), "In", ""},
 		AnalogJackOutput4ms{to_mm<72>(29.28), to_mm<72>(312.04), "Out", ""},
 }};

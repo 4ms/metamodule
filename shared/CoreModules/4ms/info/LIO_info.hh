@@ -12,8 +12,8 @@ struct LIOInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/LIO-artwork.svg"};
 
     static constexpr std::array<Element, 26> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(43.21), to_mm<72>(61.27), "Gain", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(43.21), to_mm<72>(227.57), "Level", "", 0, 0, 1, 0.875f},
+		Davies1900hBlackKnob{to_mm<72>(43.21), to_mm<72>(61.27), "Gain", ""},
+		Davies1900hBlackKnob{to_mm<72>(43.21), to_mm<72>(227.57), "Level", ""},
 		AnalogJackInput4ms{to_mm<72>(21.57), to_mm<72>(113.49), "Line In L", ""},
 		AnalogJackInput4ms{to_mm<72>(64.95), to_mm<72>(113.49), "Line In R", ""},
 		AnalogJackInput4ms{to_mm<72>(21.57), to_mm<72>(279.34), "Mod In L", ""},

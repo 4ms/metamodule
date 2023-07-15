@@ -12,14 +12,14 @@ struct FMInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/FM-artwork.svg"};
 
     static constexpr std::array<Element, 14> Elements{{
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(40.33), "Pitch", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(40.33), "Mix", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(83.47), "Index", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(83.47), "Index CV", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(126.62), "Ratio C", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(126.62), "Ratio F", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(31.96), to_mm<72>(169.76), "Shape", "", 0, 0, 1, 0.0f},
-		Knob9mm{to_mm<72>(83.49), to_mm<72>(169.76), "Shape CV", "", 0, 0, 1, 0.0f},
+		Knob9mm{to_mm<72>(31.96), to_mm<72>(40.33), "Pitch", ""},
+		Knob9mm{to_mm<72>(83.49), to_mm<72>(40.33), "Mix", ""},
+		Knob9mm{to_mm<72>(31.96), to_mm<72>(83.47), "Index", ""},
+		Knob9mm{to_mm<72>(83.49), to_mm<72>(83.47), "Index CV", ""},
+		Knob9mm{to_mm<72>(31.96), to_mm<72>(126.62), "Ratio C", ""},
+		Knob9mm{to_mm<72>(83.49), to_mm<72>(126.62), "Ratio F", ""},
+		Knob9mm{to_mm<72>(31.96), to_mm<72>(169.76), "Shape", ""},
+		Knob9mm{to_mm<72>(83.49), to_mm<72>(169.76), "Shape CV", ""},
 		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(214.56), "V/Oct P", ""},
 		AnalogJackInput4ms{to_mm<72>(83.49), to_mm<72>(214.56), "V/Oct S", ""},
 		AnalogJackInput4ms{to_mm<72>(31.96), to_mm<72>(263.28), "Mix CV", ""},

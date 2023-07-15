@@ -12,9 +12,9 @@ struct KPLSInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/KPLS-artwork.svg"};
 
     static constexpr std::array<Element, 6> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(47.15), "Pitch", "", 0, 0, 1, 0.5f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.83), "Decay", "", 0, 0, 1, 0.25f},
-		Knob9mm{to_mm<72>(29.1), to_mm<72>(143.04), "Spread", "", 0, 0, 1, 0.5f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(47.15), "Pitch", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.83), "Decay", ""},
+		Knob9mm{to_mm<72>(29.1), to_mm<72>(143.04), "Spread", ""},
 		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(215.22), "V/Oct", ""},
 		AnalogJackInput4ms{to_mm<72>(28.63), to_mm<72>(264.32), "Trig", ""},
 		AnalogJackOutput4ms{to_mm<72>(28.63), to_mm<72>(312.54), "Out", ""},

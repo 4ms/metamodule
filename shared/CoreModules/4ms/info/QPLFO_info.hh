@@ -12,10 +12,10 @@ struct QPLFOInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/QPLFO-artwork.svg"};
 
     static constexpr std::array<Element, 32> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(59.68), "Skew 1", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(135.28), "Skew 2", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(210.88), "Skew 3", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(286.48), "Skew 4", "", 0, 0, 1, 0.5f},
+		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(59.68), "Skew 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(135.28), "Skew 2", ""},
+		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(210.88), "Skew 3", ""},
+		Davies1900hBlackKnob{to_mm<72>(114.03), to_mm<72>(286.48), "Skew 4", ""},
 		GateJackInput4ms{to_mm<72>(22.57), to_mm<72>(42.18), "Ping 1 Jack", ""},
 		AnalogJackInput4ms{to_mm<72>(67.94), to_mm<72>(59.46), "Skew 1 CV", ""},
 		GateJackInput4ms{to_mm<72>(67.94), to_mm<72>(94.02), "Reset 1", ""},

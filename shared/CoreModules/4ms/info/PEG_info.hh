@@ -12,14 +12,14 @@ struct PEGInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/PEG-artwork.svg"};
 
     static constexpr std::array<Element, 42> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(34.2), to_mm<72>(106.06), "Ping Div Mult 1", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(254.32), to_mm<72>(106.02), "Ping Div Mult 2", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(34.16), to_mm<72>(170.68), "Scale 1", "", 0, 0, 1, 1.0f},
-		Davies1900hBlackKnob{to_mm<72>(95.87), to_mm<72>(151.47), "Skew 1", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(192.91), to_mm<72>(151.47), "Skew 2", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(254.75), to_mm<72>(170.82), "Scale 2", "", 0, 0, 1, 1.0f},
-		Davies1900hBlackKnob{to_mm<72>(106.67), to_mm<72>(215.41), "Curve 1", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(182.51), to_mm<72>(215.41), "Curve 2", "", 0, 0, 1, 0.5f},
+		Davies1900hBlackKnob{to_mm<72>(34.2), to_mm<72>(106.06), "Ping Div Mult 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(254.32), to_mm<72>(106.02), "Ping Div Mult 2", ""},
+		Davies1900hBlackKnob{to_mm<72>(34.16), to_mm<72>(170.68), "Scale 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(95.87), to_mm<72>(151.47), "Skew 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(192.91), to_mm<72>(151.47), "Skew 2", ""},
+		Davies1900hBlackKnob{to_mm<72>(254.75), to_mm<72>(170.82), "Scale 2", ""},
+		Davies1900hBlackKnob{to_mm<72>(106.67), to_mm<72>(215.41), "Curve 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(182.51), to_mm<72>(215.41), "Curve 2", ""},
 		GateJackInput4ms{to_mm<72>(21.57), to_mm<72>(45.55), "Ping 1 Jack", ""},
 		GateJackInput4ms{to_mm<72>(267.05), to_mm<72>(45.55), "Ping 2 Jack", ""},
 		GateJackInput4ms{to_mm<72>(97.57), to_mm<72>(74.03), "Qnt 1", ""},

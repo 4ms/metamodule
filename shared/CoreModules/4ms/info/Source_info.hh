@@ -12,8 +12,8 @@ struct SourceInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Source-artwork.svg"};
 
     static constexpr std::array<Element, 4> Elements{{
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.85), "1", "", 0, 0, 1, 0.25f},
-		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.68), "2", "", 0, 0, 1, 0.25f},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(46.85), "1", ""},
+		Knob9mm{to_mm<72>(28.93), to_mm<72>(94.68), "2", ""},
 		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(264.74), "1", ""},
 		AnalogJackOutput4ms{to_mm<72>(29.14), to_mm<72>(312.33), "2", ""},
 }};

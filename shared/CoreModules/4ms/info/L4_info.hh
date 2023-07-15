@@ -12,14 +12,14 @@ struct L4Info : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/L4-artwork.svg"};
 
     static constexpr std::array<Element, 24> Elements{{
-		Knob9mm{to_mm<72>(62.33), to_mm<72>(46.17), "Pan 1", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(111.89), to_mm<72>(59.09), "Level 1", "", 0, 0, 1, 0.875f},
-		Knob9mm{to_mm<72>(62.33), to_mm<72>(103.86), "Pan 2", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(111.89), to_mm<72>(116.69), "Level 2", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(111.89), to_mm<72>(174.29), "Level 3", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(111.89), to_mm<72>(232.15), "Level 4", "", 0, 0, 1, 0.875f},
-		Knob9mm{to_mm<72>(23.27), to_mm<72>(318.85), "Headphone Level", "", 0, 0, 1, 0.875f},
-		Davies1900hBlackKnob{to_mm<72>(71.7), to_mm<72>(302.94), "Main Level", "", 0, 0, 1, 0.875f},
+		Knob9mm{to_mm<72>(62.33), to_mm<72>(46.17), "Pan 1", ""},
+		Davies1900hBlackKnob{to_mm<72>(111.89), to_mm<72>(59.09), "Level 1", ""},
+		Knob9mm{to_mm<72>(62.33), to_mm<72>(103.86), "Pan 2", ""},
+		Davies1900hBlackKnob{to_mm<72>(111.89), to_mm<72>(116.69), "Level 2", ""},
+		Davies1900hBlackKnob{to_mm<72>(111.89), to_mm<72>(174.29), "Level 3", ""},
+		Davies1900hBlackKnob{to_mm<72>(111.89), to_mm<72>(232.15), "Level 4", ""},
+		Knob9mm{to_mm<72>(23.27), to_mm<72>(318.85), "Headphone Level", ""},
+		Davies1900hBlackKnob{to_mm<72>(71.7), to_mm<72>(302.94), "Main Level", ""},
 		AnalogJackInput4ms{to_mm<72>(23.31), to_mm<72>(46.17), "In 1", ""},
 		AnalogJackInput4ms{to_mm<72>(23.31), to_mm<72>(103.92), "In 2", ""},
 		AnalogJackInput4ms{to_mm<72>(23.31), to_mm<72>(161.52), "In 3 L", ""},

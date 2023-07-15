@@ -12,11 +12,11 @@ struct SCMInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/SCM-artwork.svg"};
 
     static constexpr std::array<Element, 33> Elements{{
-		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(54.12), "Rotate", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(104.09), "Slip", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(154.07), "Shuffle", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(204.04), "Skip", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(254.01), "PW", "", 0, 0, 1, 0.5f},
+		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(54.12), "Rotate", ""},
+		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(104.09), "Slip", ""},
+		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(154.07), "Shuffle", ""},
+		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(204.04), "Skip", ""},
+		Davies1900hBlackKnob{to_mm<72>(147.99), to_mm<72>(254.01), "PW", ""},
 		GateJackInput4ms{to_mm<72>(46.48), to_mm<72>(56.3), "Clk In", ""},
 		GateJackInput4ms{to_mm<72>(81.45), to_mm<72>(55.11), "Resync", ""},
 		AnalogJackInput4ms{to_mm<72>(81.45), to_mm<72>(90.12), "Rotate Jack", ""},

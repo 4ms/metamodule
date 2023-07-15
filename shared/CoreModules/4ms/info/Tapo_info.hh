@@ -12,12 +12,12 @@ struct TapoInfo : ModuleInfoBase {
     static constexpr std::string_view svg_filename{"res/modules/Tapo-artwork.svg"};
 
     static constexpr std::array<Element, 30> Elements{{
-		Knob9mm{to_mm<72>(34.7), to_mm<72>(97.51), "Level", "", 0, 0, 1, 0.875f},
-		Knob9mm{to_mm<72>(223.88), to_mm<72>(97.51), "Morph", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(35.19), to_mm<72>(155.83), "Time", "", 0, 0, 1, 0.5f},
-		Davies1900hBlackKnob{to_mm<72>(93.97), to_mm<72>(123.98), "Feedback", "", 0, 0, 1, 0.25f},
-		Davies1900hBlackKnob{to_mm<72>(164.73), to_mm<72>(123.98), "Modulation", "", 0, 0, 1, 0.0f},
-		Davies1900hBlackKnob{to_mm<72>(223.88), to_mm<72>(155.83), "Dry Wet", "", 0, 0, 1, 1.0f},
+		Knob9mm{to_mm<72>(34.7), to_mm<72>(97.51), "Level", ""},
+		Knob9mm{to_mm<72>(223.88), to_mm<72>(97.51), "Morph", ""},
+		Davies1900hBlackKnob{to_mm<72>(35.19), to_mm<72>(155.83), "Time", ""},
+		Davies1900hBlackKnob{to_mm<72>(93.97), to_mm<72>(123.98), "Feedback", ""},
+		Davies1900hBlackKnob{to_mm<72>(164.73), to_mm<72>(123.98), "Modulation", ""},
+		Davies1900hBlackKnob{to_mm<72>(223.88), to_mm<72>(155.83), "Dry Wet", ""},
 		AnalogJackInput4ms{to_mm<72>(21.33), to_mm<72>(222.74), "Time Jack", ""},
 		AnalogJackInput4ms{to_mm<72>(64.53), to_mm<72>(214.43), "Feedback Jack", ""},
 		AnalogJackInput4ms{to_mm<72>(107.66), to_mm<72>(197.04), "Modulation Jack", ""},
