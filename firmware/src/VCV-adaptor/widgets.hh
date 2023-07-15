@@ -1,105 +1,12 @@
 #pragma once
-#include "CoreModules/elements/elements.hh"
-#include "VCV-adaptor/engine/ParamQuantity.hpp"
-#include "VCV-adaptor/events.hh"
-#include "VCV-adaptor/math.hpp"
-#include "VCV-adaptor/window.hpp"
-#include "nanovg.h"
+#include "VCV-adaptor/app/Widget.hh"
 
 namespace rack
 {
 
-struct DrawArgs {
-	NVGcontext *vg;
-	math::Rect clipBox;
-	NVGLUframebuffer *fb;
-};
-
-namespace widget
-{
-struct Widget {
-	math::Rect box;
-	virtual ~Widget() = default;
-	virtual void onDragStart(const event::DragStart &e) {
-	}
-	virtual void onDragMove(const event::DragMove &e) {
-	}
-	virtual void onDragEnd(const event::DragEnd &e) {
-	}
-	virtual void onDoubleClick(const event::DoubleClick &e) {
-	}
-	virtual void onAction(const event::ActionEvent &e) {
-	}
-	virtual void onHover(const HoverEvent &e) {
-	}
-	virtual void onHoverKey(const HoverKeyEvent &e) {
-	}
-	virtual void onButton(const ButtonEvent &e) {
-	}
-	virtual void onDragHover(const DragHoverEvent &e) {
-	}
-	virtual void step() {
-	}
-	virtual void draw(const DrawArgs &) {
-	}
-	virtual void drawLayer(const DrawArgs &, int) {
-	}
-
-	MetaModule::Element element;
-};
-
-struct OpaqueWidget : Widget {};
-struct TransparentWidget : Widget {};
-struct FramebufferWidget : Widget {};
-
-struct SvgWidget : Widget {
-	SvgWidget *bg;
-	bool visible;
-	engine::ParamQuantity *pq;
-	void setSvg(std::shared_ptr<window::Svg>) {
-	}
-	void setSVG(std::shared_ptr<window::Svg>) {
-	}
-
-	engine::ParamQuantity *getParamQuantity() {
-		return pq;
-	}
-};
-
-} // namespace widget
-
-namespace app
-{
-// Ports
-struct PortWidget : widget::SvgWidget {};
-struct SvgPort : app::PortWidget {};
-
-// Params
-struct ParamWidget : widget::SvgWidget {
-	int paramId = -1;
-};
-
-struct SvgSlider : app::ParamWidget {
-	math::Vec minHandlePos;
-	math::Vec maxHandlePos;
-	bool horizontal;
-	widget::SvgWidget *background;
-
-	void setBackgroundSvg(auto) {
-	}
-	void setHandleSvg(auto) {
-	}
-};
-
-struct SvgSwitch : ParamWidget {
-	bool momentary;
-	void addFrame(std::shared_ptr<window::Svg>) {
-	}
-};
-} // namespace app
+// These are defined in Rack, though some appear to be brand-specific
 
 // clang-format off
-// These are defined in Rack, though some appear to be brand-specific
 struct SvgScrew : widget::SvgWidget {};
 struct ScrewSilver : SvgScrew {};
 
@@ -129,7 +36,6 @@ struct RedLight : widget::SvgWidget {};
 struct YellowLight : widget::SvgWidget {};
 struct GreenLight : widget::SvgWidget {};
 struct RedGreenBlueLight : widget::SvgWidget {};
-
 // clang-format off
 
 } // namespace rack
