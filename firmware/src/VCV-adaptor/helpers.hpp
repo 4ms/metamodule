@@ -17,6 +17,13 @@ namespace engine
 struct Module;
 }
 
+namespace
+{
+inline math::Vec mm(math::Vec v) {
+	return {MetaModule::ModuleInfoBase::to_mm(v.x), MetaModule::ModuleInfoBase::to_mm(v.y)};
+}
+} // namespace
+
 /** Creates a Widget subclass with its top-left at a position. */
 template<class TWidget>
 TWidget *createWidget(math::Vec pos) {
@@ -37,17 +44,19 @@ template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
 	using namespace MetaModule;
 	auto *o = new TParamWidget;
-	o->element = create_element<TParamWidget>();
+	pos = mm(pos);
+	o->element = typename ElementConvert<TParamWidget>::ElementType{pos.x, pos.y, Coords::TopLeft};
 	o->paramId = paramId;
-	MetaModule::set_pos(o->element, ModuleInfoBase::to_mm(pos.x), ModuleInfoBase::to_mm(pos.y), Coords::TopLeft);
 	return o;
 }
 
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
 	using namespace MetaModule;
-	auto *o = createParam<TParamWidget>(pos, module, paramId);
-	MetaModule::set_pos(o->element, ModuleInfoBase::to_mm(pos.x), ModuleInfoBase::to_mm(pos.y), Coords::Center);
+	auto *o = new TParamWidget;
+	pos = mm(pos);
+	o->element = typename ElementConvert<TParamWidget>::ElementType{pos.x, pos.y, Coords::Center};
+	o->paramId = paramId;
 	return o;
 }
 

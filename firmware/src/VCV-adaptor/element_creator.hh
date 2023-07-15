@@ -5,70 +5,84 @@
 namespace rack
 {
 
-// Default:
-template<typename WidgetT>
-inline MetaModule::Element create_element() {
-	return MetaModule::Davies1900hBlackKnob{};
-}
+template<typename TParamWidget>
+struct ElementConvert {
+	using ElementType = MetaModule::Davies1900hBlackKnob;
+};
 
 template<>
-inline MetaModule::Element create_element<BefacoBigKnob>() {
-	return MetaModule::BefacoBigKnob{};
-}
+struct ElementConvert<BefacoBigKnob> {
+	using ElementType = MetaModule::BefacoBigKnob;
+};
+
 template<>
-inline MetaModule::Element create_element<BefacoTinyKnob>() {
-	return MetaModule::BefacoTinyKnob{};
-}
+struct ElementConvert<BefacoTinyKnob> {
+	using ElementType = MetaModule::BefacoTinyKnob;
+};
+
 template<>
-inline MetaModule::Element create_element<BefacoSlidePot>() {
-	return MetaModule::BefacoSlidePot{};
-}
+struct ElementConvert<BefacoSlidePot> {
+	using ElementType = MetaModule::BefacoSlidePot;
+};
+
 template<>
-inline MetaModule::Element create_element<BefacoSwitch>() {
-	return MetaModule::BefacoSwitch{};
-}
+struct ElementConvert<BefacoSwitch> {
+	using ElementType = MetaModule::BefacoSwitch;
+};
+
 template<>
-inline MetaModule::Element create_element<BefacoPush>() {
-	return MetaModule::BefacoPush{};
-}
+struct ElementConvert<BefacoPush> {
+	using ElementType = MetaModule::BefacoPush;
+};
+
 template<>
-inline MetaModule::Element create_element<CKSS>() {
-	return MetaModule::Slider25mmHoriz{}; // TODO: What is CKSS? Is this the right element?
-}
+struct ElementConvert<CKSS> { // TODO: What is CKSS? Is this the right element?
+	using ElementType = MetaModule::Slider25mmHoriz;
+};
+
 template<>
-inline MetaModule::Element create_element<Davies1900hBlackKnob>() {
-	return MetaModule::Davies1900hBlackKnob{};
-}
+struct ElementConvert<Davies1900hBlackKnob> {
+	using ElementType = MetaModule::Davies1900hBlackKnob;
+};
+
 template<>
-inline MetaModule::Element create_element<Davies1900hKnob>() {
-	return MetaModule::Davies1900hBlackKnob{};
-}
+struct ElementConvert<Davies1900hKnob> {
+	using ElementType = MetaModule::Davies1900hBlackKnob;
+};
+
 template<>
-inline MetaModule::Element create_element<Davies1900hWhiteKnob>() {
-	return MetaModule::Davies1900hWhiteKnob{};
-}
+struct ElementConvert<Davies1900hWhiteKnob> {
+	using ElementType = MetaModule::Davies1900hWhiteKnob;
+};
+
 template<>
-inline MetaModule::Element create_element<Davies1900hRedKnob>() {
-	return MetaModule::Davies1900hRedKnob{};
-}
+struct ElementConvert<Davies1900hRedKnob> {
+	using ElementType = MetaModule::Davies1900hRedKnob;
+};
+
 template<>
-inline MetaModule::Element create_element<Davies1900hLargeWhiteKnob>() {
-	return MetaModule::Davies1900hLargeWhiteKnob{};
-}
+struct ElementConvert<Davies1900hLargeWhiteKnob> {
+	using ElementType = MetaModule::Davies1900hLargeWhiteKnob;
+};
+
 template<>
-inline MetaModule::Element create_element<Rogan2SGray>() {
-	return MetaModule::Rogan2SGray{};
-}
+struct ElementConvert<Rogan2SGray> {
+	using ElementType = MetaModule::Rogan2SGray;
+};
+
 template<>
-inline MetaModule::Element create_element<Rogan2PSWhite>() {
-	return MetaModule::Rogan2PSWhite{};
-}
+struct ElementConvert<Rogan2PSWhite> {
+	using ElementType = MetaModule::Rogan2PSWhite;
+};
+
 template<>
-inline MetaModule::Element create_element<Rogan2PSRed>() {
-	return MetaModule::Rogan2PSRed{};
-}
+struct ElementConvert<Rogan2PSRed> {
+	using ElementType = MetaModule::Rogan2PSRed;
+};
+
 template<>
-inline MetaModule::Element create_element<Rogan2PSGreen>() {
-	return MetaModule::Rogan2PSGreen{};
-}
+struct ElementConvert<Rogan2PSGreen> {
+	using ElementType = MetaModule::Rogan2PSGreen;
+};
+
 } // namespace rack
