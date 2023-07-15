@@ -4,13 +4,14 @@
 namespace MetaModule
 {
 
-inline void set_pos(BaseElement &el, float x, float y) {
+inline void set_pos(BaseElement &el, float x, float y, Coords coords) {
 	el.x_mm = x;
 	el.y_mm = y;
+	el.coords = coords;
 }
 
-inline void set_pos(Element &element, float x, float y) {
-	std::visit([&](auto &el) { set_pos(el, x, y); }, element);
+inline void set_pos(Element &element, float x, float y, Coords coords) {
+	std::visit([=](auto &el) { set_pos(el, x, y, coords); }, element);
 }
 
 inline void set_short_name(BaseElement &el, std::string_view short_name) {

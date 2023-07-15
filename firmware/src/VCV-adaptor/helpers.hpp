@@ -35,17 +35,19 @@ inline app::SvgPanel *createPanel(std::string_view svgPath) {
 
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
+	using namespace MetaModule;
 	auto *o = new TParamWidget;
 	o->element = create_element<TParamWidget>();
 	o->paramId = paramId;
-	MetaModule::set_pos(o->element, MetaModule::ModuleInfoBase::to_mm(pos.x), MetaModule::ModuleInfoBase::to_mm(pos.y));
+	MetaModule::set_pos(o->element, ModuleInfoBase::to_mm(pos.x), ModuleInfoBase::to_mm(pos.y), Coords::TopLeft);
 	return o;
 }
 
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
+	using namespace MetaModule;
 	auto *o = createParam<TParamWidget>(pos, module, paramId);
-	//o->element.ref = MetaModule::Element::RefCoords::Center;
+	MetaModule::set_pos(o->element, ModuleInfoBase::to_mm(pos.x), ModuleInfoBase::to_mm(pos.y), Coords::Center);
 	return o;
 }
 
