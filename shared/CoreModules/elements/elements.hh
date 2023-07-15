@@ -29,7 +29,7 @@ struct BaseElement {
 
 	std::string_view short_name;
 	std::string_view long_name;
-	unsigned idx = 0;
+	unsigned _unused_idx = 0;
 
 	static constexpr size_t NumParams = 0;
 	static constexpr size_t NumLights = 0;
@@ -52,9 +52,9 @@ struct ParamElement : BaseElement {
 // Pots (Knobs, Sliders)
 //
 struct Pot : ParamElement {
-	float min_val = 0.f;
-	float max_val = 1.f;
-	float default_val = 0.f;
+	float _unused_min_val = 0.f;
+	float _unused_max_val = 1.f;
+	float _unused_default_val = 0.f;
 
 	using State_t = float;
 };

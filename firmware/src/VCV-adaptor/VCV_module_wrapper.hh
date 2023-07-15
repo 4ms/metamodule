@@ -4,10 +4,15 @@
 // #include "VCV-adaptor/math.hpp"
 #include "VCV-adaptor/engine/Param.hpp"
 #include "VCV-adaptor/engine/Port.hpp"
-#include "elements/param_scales.hh"
+// #include "elements/param_scales.hh"
 #include <array>
 #include <memory>
 #include <vector>
+
+struct ParamScale {
+	float range;
+	float offset;
+};
 
 struct VCVModuleWrapper : CoreProcessor {
 	struct ProcessArgs {
@@ -76,7 +81,7 @@ struct VCVModuleWrapper : CoreProcessor {
 	std::vector<rack::engine::Input> inputs;
 	std::vector<rack::engine::Output> outputs;
 	std::vector<rack::engine::Light> lights;
-	std::vector<PotElementHelper::ParamScale> param_scales;
+	std::vector<ParamScale> param_scales;
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
 
