@@ -70,6 +70,7 @@ struct Davies1900hLargeGreyKnob : Knob {};
 struct Davies1900hLightGreyKnob : Knob {};
 struct Davies1900hDarkGreyKnob : Knob {};
 struct Davies1900hLargeLightGreyKnob : Knob {};
+struct Davies1900hLargeWhiteKnob : Knob {};
 struct Knob9mm : Knob {};
 struct BefacoTinyKnobWhite : Knob {};
 struct BefacoTinyKnobRed : Knob {};
@@ -86,10 +87,9 @@ struct SliderMonoLight : Slider {
 	static constexpr size_t NumLights = 1;
 };
 
-struct BefacoSlidePot :
-	Slider { // TODO: is using this enum better than two types (Hor/Ver)?
-			 // enum Orientation { Vertical, Horizontal };
-			 // static constexpr Orientation orientation = Orientation::Vertical;
+struct BefacoSlidePot : Slider { // TODO: is using this enum better than two types (Hor/Ver)?
+								 // enum Orientation { Vertical, Horizontal };
+								 // static constexpr Orientation orientation = Orientation::Vertical;
 };
 struct BefacoSlidePotSmall : Slider {};
 struct Slider25mmVert : Slider {};
@@ -128,6 +128,8 @@ struct Toggle3pos : Switch {
 struct Toggle2posHoriz : Toggle2pos {};
 struct Toggle3posHoriz : Toggle3pos {};
 
+struct BefacoPush : MomentaryButton {};
+struct BefacoSwitch : Toggle2pos {};
 struct BefacoSwitchHorizontal : Toggle2pos {};
 
 //
@@ -233,6 +235,7 @@ using Element = std::variant<
 	BefacoTinyKnobDarkGrey,
 	BefacoTinyKnobLightGrey,
 	BefacoTinyKnobBlack,
+	Davies1900hLargeWhiteKnob,
 	Davies1900hLargeLightGreyKnob,
 	Davies1900hLargeGreyKnob,
 	Davies1900hLightGreyKnob,
@@ -254,10 +257,12 @@ using Element = std::variant<
 	MomentaryButtonRGB,
 	MomentaryButtonWhiteLight,
 	LatchingButtonMonoLight,
+	BefacoPush,
 	Toggle2pos,
 	Toggle3pos,
 	Toggle2posHoriz,
 	Toggle3posHoriz,
+	BefacoSwitch,
 	BefacoSwitchHorizontal,
 
 	//Encoders
