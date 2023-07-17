@@ -130,7 +130,6 @@ INCLUDES += -I$(SHARED)/cpputil
 # GUI
 SOURCES += $(wildcard src/pages/elements/*.cc)
 SOURCES += src/pages/page_manager.cc
-SOURCES += src/pages/images/4ms/modules/ENVVCA_artwork_240.png.c
 
 # Modules: CoreModules and faceplate artwork 
 SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
