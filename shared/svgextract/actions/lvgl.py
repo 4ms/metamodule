@@ -55,7 +55,8 @@ def svgToLVGL(svgFilename, outputBaseName, resize, alpha=True, exportLayer=None)
 
     # PNG ==> LVGL image (C file with array)
     lv_img_conv = os.path.dirname(os.path.realpath(__file__)) + "/../lv_img_conv/lv_img_conv.js"
-    colorFormat = "CF_TRUE_COLOR_ALPHA" if alpha else "CF_TRUE_COLOR"
+    colorFormat = "CF_RAW_ALPHA"
+    # colorFormat = "CF_TRUE_COLOR_ALPHA" if alpha else "CF_TRUE_COLOR"
     try:
         cFilename = os.path.realpath(os.path.splitext(pngFilename)[0]+".c")
         subprocess.run([lv_img_conv, '-c', colorFormat, '-t', 'c', '--force', pngFilename, '-o', cFilename], check=True)
