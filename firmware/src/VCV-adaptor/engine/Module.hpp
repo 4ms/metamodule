@@ -17,10 +17,11 @@ namespace rack::engine
 struct Module : VCVModuleWrapper {
 	plugin::Model *model = nullptr;
 	int64_t id = -1;
-	ParamQuantity stubParamQuantity;
-	PortInfo stubInputInfo;
-	PortInfo stubOutputInfo;
-	LightInfo stubLightInfo;
+
+	std::vector<std::unique_ptr<ParamQuantity>> paramQuantities;
+	std::vector<std::unique_ptr<PortInfo>> inputInfos;
+	std::vector<std::unique_ptr<PortInfo>> outputInfos;
+	std::vector<std::unique_ptr<LightInfo>> lightInfos;
 
 	// Expander not supported
 	struct Expander {
@@ -65,6 +66,20 @@ struct Module : VCVModuleWrapper {
 			x.range = 1;
 			x.offset = 0;
 		}
+
+		paramQuantities.resize(num_params);
+		// for (unsigned i = 0; i < num_params; i++)
+		// 	configParam(i, 0.f, 1.f, 0.f);
+
+		inputInfos.resize(num_inputs);
+		// for (unsigned i = 0; i < num_inputs; i++)
+		// 	configInput(i);
+
+		outputInfos.resize(num_outputs);
+		// for (unsigned i = 0; i < num_outputs; i++)
+		// 	configOutput(i);
+
+		lightInfos.resize(num_lights);
 	}
 
 	template<class TParamQuantity = ParamQuantity>
@@ -77,12 +92,34 @@ struct Module : VCVModuleWrapper {
 								float displayBase = 0.f,
 								float displayMultiplier = 1.f,
 								float displayOffset = 0.f) {
-		if (paramId < (int)param_scales.size()) {
-			param_scales[paramId].range = maxValue - minValue;
-			param_scales[paramId].offset = minValue;
-		}
 
-		return nullptr;
+		if (paramId >= (int)param_scales.size() || (paramId >= (int)paramQuantities.size()))
+			return nullptr;
+
+		param_scales[paramId].range = maxValue - minValue;
+		param_scales[paramId].offset = minValue;
+
+		if (paramQuantities[paramId])
+			paramQuantities[paramId].reset();
+
+		paramQuantities[paramId] = std::make_unique<TParamQuantity>();
+
+		// TODO: is any of this necessary? In case a VCV module reads its own PQs?
+		paramQuantities[paramId]->ParamQuantity::module = this;
+		paramQuantities[paramId]->ParamQuantity::paramId = paramId;
+		paramQuantities[paramId]->ParamQuantity::minValue = minValue;
+		paramQuantities[paramId]->ParamQuantity::maxValue = maxValue;
+		paramQuantities[paramId]->ParamQuantity::defaultValue = defaultValue;
+		paramQuantities[paramId]->ParamQuantity::name = name;
+		paramQuantities[paramId]->ParamQuantity::unit = unit;
+		paramQuantities[paramId]->ParamQuantity::displayBase = displayBase;
+		paramQuantities[paramId]->ParamQuantity::displayMultiplier = displayMultiplier;
+		paramQuantities[paramId]->ParamQuantity::displayOffset = displayOffset;
+
+		Param *p = &params[paramId];
+		p->value = defaultValue;
+
+		return static_cast<TParamQuantity *>(paramQuantities[paramId].get());
 	}
 
 	template<class TSwitchQuantity = SwitchQuantity>
@@ -92,29 +129,70 @@ struct Module : VCVModuleWrapper {
 								  float defaultValue,
 								  std::string_view name = "",
 								  std::vector<std::string> labels = {}) {
-		return configParam<TSwitchQuantity>(paramId, minValue, maxValue, defaultValue, name);
-		//sw->labels = labels
+		TSwitchQuantity *sq = configParam<TSwitchQuantity>(paramId, minValue, maxValue, defaultValue, name);
+		// sq->labels = labels;
+		return sq;
 	}
 
 	template<class TSwitchQuantity = SwitchQuantity>
 	TSwitchQuantity *configButton(int paramId, std::string_view name = "") {
-		return configParam<TSwitchQuantity>(paramId, 0.f, 1.f, 0.f, name);
-		// sq->randomizeEnabled = false;
+		TSwitchQuantity *sq = configParam<TSwitchQuantity>(paramId, 0.f, 1.f, 0.f, name);
+		sq->randomizeEnabled = false;
+		return sq;
 	}
 
 	template<class TPortInfo = PortInfo>
 	TPortInfo *configInput(int portId, std::string_view name = "") {
-		return &stubInputInfo;
+		if (portId >= (int)inputs.size() || portId >= (int)inputInfos.size())
+			return nullptr;
+
+		if (inputInfos[portId])
+			inputInfos[portId].reset();
+
+		inputInfos[portId] = std::make_unique<TPortInfo>();
+
+		// TODO: is any of this necessary? In case a VCV module reads its own inputInfos?
+		inputInfos[portId]->PortInfo::module = this;
+		inputInfos[portId]->PortInfo::type = Port::INPUT;
+		inputInfos[portId]->PortInfo::portId = portId;
+		inputInfos[portId]->PortInfo::name = name;
+		return static_cast<TPortInfo *>(inputInfos[portId].get());
 	}
 
 	template<class TPortInfo = PortInfo>
 	TPortInfo *configOutput(int portId, std::string_view name = "") {
-		return &stubOutputInfo;
+		if (portId >= (int)outputs.size() || portId >= (int)outputInfos.size())
+			return nullptr;
+
+		if (outputInfos[portId])
+			outputInfos[portId].reset();
+
+		outputInfos[portId] = std::make_unique<TPortInfo>();
+
+		// TODO: is any of this necessary? In case a VCV module reads its own outputInfos?
+		outputInfos[portId]->PortInfo::module = this;
+		outputInfos[portId]->PortInfo::type = Port::INPUT;
+		outputInfos[portId]->PortInfo::portId = portId;
+		outputInfos[portId]->PortInfo::name = name;
+		return static_cast<TPortInfo *>(outputInfos[portId].get());
 	}
 
 	template<class TLightInfo = LightInfo>
 	TLightInfo *configLight(int lightId, std::string_view name = "") {
-		return &stubLightInfo;
+		if (lightId >= (int)lights.size() || lightId >= (int)lightInfos.size())
+			return nullptr;
+
+		if (lightInfos[lightId])
+			lightInfos[lightId].reset();
+
+		lightInfos[lightId] = std::make_unique<TLightInfo>();
+
+		// TODO: is any of this necessary? In case a VCV module reads its own lightInfos?
+		lightInfos[lightId]->LightInfo::module = this;
+		lightInfos[lightId]->LightInfo::lightId = lightId;
+		lightInfos[lightId]->LightInfo::name = name;
+
+		return static_cast<TLightInfo *>(lightInfos[lightId].get());
 	}
 
 	void configBypass(int inputId, int outputId) {
@@ -162,16 +240,24 @@ struct Module : VCVModuleWrapper {
 		return lights[index];
 	}
 	ParamQuantity *getParamQuantity(int index) {
-		return &stubParamQuantity;
+		if (index >= (int)paramQuantities.size())
+			return nullptr;
+		return paramQuantities[index].get();
 	}
 	PortInfo *getInputInfo(int index) {
-		return &stubInputInfo;
+		if (index >= (int)inputInfos.size())
+			return nullptr;
+		return inputInfos[index].get();
 	}
 	PortInfo *getOutputInfo(int index) {
-		return &stubOutputInfo;
+		if (index >= (int)outputInfos.size())
+			return nullptr;
+		return outputInfos[index].get();
 	}
 	LightInfo *getLightInfo(int index) {
-		return &stubLightInfo;
+		if (index >= (int)lightInfos.size())
+			return nullptr;
+		return lightInfos[index].get();
 	}
 	Expander &getLeftExpander() {
 		return leftExpander;

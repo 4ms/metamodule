@@ -146,4 +146,5 @@ using plugin::Plugin;
 using namespace engine;
 // using namespace componentlibrary;
 
+#define DEBUG printf
 } // namespace rack

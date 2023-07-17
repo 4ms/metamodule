@@ -46,6 +46,8 @@ struct Widget {
 	}
 	virtual void drawLayer(const DrawArgs &, int) {
 	}
+	virtual void onDoubleClick(const DoubleClickEvent &e) {
+	}
 
 	MetaModule::Element element;
 };
@@ -55,9 +57,9 @@ struct TransparentWidget : Widget {};
 struct FramebufferWidget : Widget {};
 
 struct SvgWidget : Widget {
-	SvgWidget *bg;
+	SvgWidget *bg /*= this*/;
 	bool visible;
-	engine::ParamQuantity *pq;
+	engine::ParamQuantity *pq = &_pq;
 
 	void setSvg(std::shared_ptr<window::Svg>) {
 	}
@@ -68,6 +70,9 @@ struct SvgWidget : Widget {
 	engine::ParamQuantity *getParamQuantity() {
 		return pq;
 	}
+
+private:
+	engine::ParamQuantity _pq;
 };
 
 } // namespace widget

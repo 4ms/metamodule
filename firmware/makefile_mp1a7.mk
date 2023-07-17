@@ -134,14 +134,20 @@ SOURCES += src/pages/page_manager.cc
 # Modules: CoreModules and faceplate artwork 
 SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
 ifeq "$(USE_FEWER_MODULES)" "1"
-modulesAudible := Braids 
+modulesAudible := Braids
 
-modulesBefaco := EvenVCO 
+modulesBefaco := EvenVCO
 modulesBefaco += DualAtenuverter
-modulesBefaco += SpringReverb ABC ADSR ChoppingKinky
-modulesBefaco += HexmixVCA Kickall Mixer Morphader MotionMTR
-modulesBefaco += Muxlicer
-# modulesBefaco += NoisePlethora
+modulesBefaco += SpringReverb
+modulesBefaco += ABC
+modulesBefaco += ADSR
+modulesBefaco += ChoppingKinky
+modulesBefaco += HexmixVCA
+modulesBefaco += Kickall
+modulesBefaco += Mixer
+modulesBefaco += Morphader
+modulesBefaco += MotionMTR
+# modulesBefaco += Muxlicer #can't change visibility dynamically
 modulesBefaco += Percall
 modulesBefaco += PonyVCO
 modulesBefaco += Rampage
@@ -149,9 +155,11 @@ modulesBefaco += STMix
 modulesBefaco += SamplingModulator
 modulesBefaco += SlewLimiter
 modulesBefaco += StereoStrip
+# modulesBefaco += NoisePlethora
 
-modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
-modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
+modules4ms := EnOsc ENVVCA 
+modules4ms += Djembe StMix PEG SMR MultiLFO PitchShift
+modules4ms += HPF InfOsc KPLS Freeverb Seq8
 
 SOURCES += $(foreach m,$(modulesAudible),vcv-ports/AudibleInstruments/src/$(m).cpp)
 SOURCES += $(foreach m,$(modulesBefaco),vcv-ports/Befaco/src/$(m).cpp)
@@ -166,8 +174,8 @@ SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_1
 
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*.cc)
-SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/core/*.cc)
-SOURCES += $(wildcard $(SHARED)/CoreModules/AudibleInstruments/core/*.cc)
+SOURCES += $(wildcard vcv-ports/AudibleInstruments/src/*.cpp)
+SOURCES += $(wildcard vcv-ports/Befaco/src/*.cpp)
 
 SOURCES += $(wildcard src/pages/images/4ms/modules/*.c)
 SOURCES += $(wildcard src/pages/images/Befaco/modules/*.c)
@@ -176,9 +184,12 @@ endif
 
 INCLUDES += -I$(SHARED)/CoreModules
 INCLUDES += -I$(SHARED)/CoreModules/4ms
-INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
-INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/core
-INCLUDES += -I$(SHARED)/CoreModules/Befaco
+INCLUDES += -Ivcv-ports/AudibleInstruments/src/
+INCLUDES += -Ivcv-ports/AudibleInstruments/eurorack
+INCLUDES += -Ivcv-ports/Befaco/src
+# INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
+# INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/eurorack
+# INCLUDES += -I$(SHARED)/CoreModules/Befaco
 
 SOURCES += vcv-ports/register_vcv_ports.cc
 SOURCES += src/VCV-adaptor/pffft/pffft.c

@@ -3,7 +3,6 @@
 #include "CoreModules/moduleFactory.hh"
 #include "VCV-adaptor/app/ModuleWidget.hpp"
 #include "VCV-adaptor/plugin/Model.hpp"
-#include "printf.h"
 #include <string_view>
 
 namespace rack
@@ -15,7 +14,7 @@ std::unique_ptr<CoreProcessor> create_vcv_module() {
 }
 
 template<typename ModuleT, typename WidgetT>
-requires(std::derived_from<WidgetT, rack::ModuleWidget>)
+requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
 plugin::Model *createModel(std::string_view slug) {
 
 	// Register creation function
@@ -25,10 +24,8 @@ plugin::Model *createModel(std::string_view slug) {
 		ModuleT module;
 		WidgetT mw{&module};
 
+		// static storage: each calls to createModel has unique ModuleT/WidgetT
 		static std::vector<MetaModule::Element> elements;
-
-		//TODO: alternatively:
-		// auto model = new plugin::Model;
 
 		mw.populate_elements(elements);
 		MetaModule::ModuleInfoView info;
@@ -40,7 +37,6 @@ plugin::Model *createModel(std::string_view slug) {
 		return nullptr;
 	}
 
-	printf_("Model %.*s already registered!\n", (int)slug.size(), slug.data());
 	return nullptr;
 }
 

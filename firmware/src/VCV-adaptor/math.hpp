@@ -14,6 +14,9 @@ namespace rack::math
 #ifndef M_E
 #define M_E 2.7182818284590452354f
 #endif
+#ifndef M_SQRT1_2
+#define M_SQRT1_2	0.70710678118654752440f
+#endif
 
 // #define M_LOG2E 1.4426950408889634074f
 // #define M_LOG10E 0.43429448190325182765f
@@ -26,7 +29,6 @@ namespace rack::math
 // #define M_2_PI 0.63661977236758134308f
 // #define M_2_SQRTPI 1.12837916709551257390f
 // #define M_SQRT2 1.41421356237309504880f
-// #define M_SQRT1_2 0.70710678118654752440f
 
 ////////////////////
 // basic integer functions
