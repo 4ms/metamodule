@@ -1,4 +1,8 @@
+#include "lvgl.h"
 #include <string_view>
+
+//
+#include "pages/images/4ms/modules/ENVVCA_artwork_240.png.cc"
 
 extern "C" {
 // DECLARE HERE
@@ -28,14 +32,26 @@ LV_IMG_DECLARE(EnOsc_artwork_120);
 LV_IMG_DECLARE(EnOsc_artwork_240);
 LV_IMG_DECLARE(ENVVCA_artwork_240);
 LV_IMG_DECLARE(ENVVCA_artwork_120);
-LV_IMG_DECLARE(Braids_artwork_120);
-LV_IMG_DECLARE(Braids_artwork_240);
+// LV_IMG_DECLARE(Braids_artwork_120);
+// LV_IMG_DECLARE(Braids_artwork_240);
 LV_IMG_DECLARE(DualAtenuverter_artwork_120);
 LV_IMG_DECLARE(DualAtenuverter_artwork_240);
 LV_IMG_DECLARE(EvenVCO_artwork_120);
 LV_IMG_DECLARE(EvenVCO_artwork_240);
-LV_IMG_DECLARE(SpringReverb_artwork_240);
-LV_IMG_DECLARE(SpringReverb_artwork_120);
+// LV_IMG_DECLARE(SpringReverb_artwork_240);
+// LV_IMG_DECLARE(SpringReverb_artwork_120);
+
+static const lv_img_dsc_t ENVVCA_png{
+	.header =
+		{
+			.cf = LV_IMG_CF_TRUE_COLOR_ALPHA,
+			.always_zero = 0,
+			.w = 75,
+			.h = 240, //detect from file
+		},
+	.data_size = src_pages_images_4ms_modules_ENVVCA_artwork_240_png_len,
+	.data = src_pages_images_4ms_modules_ENVVCA_artwork_240_png,
+};
 }
 
 struct ModuleImages {
@@ -82,18 +98,18 @@ struct ModuleImages {
 		if (slug == "DualAtenuverter")
 			return (height == 240) ? &DualAtenuverter_artwork_240 : &DualAtenuverter_artwork_120;
 
-		if (slug == "Braids")
-			return (height == 240) ? &Braids_artwork_240 : &Braids_artwork_120;
+		// if (slug == "Braids")
+		// 	return (height == 240) ? &Braids_artwork_240 : &Braids_artwork_120;
 
 		if (slug == "EvenVCO")
 			return (height == 240) ? &EvenVCO_artwork_240 : &EvenVCO_artwork_120;
 
 		if (slug == "ENVVCA")
+			// return &ENVVCA_png;
 			return (height == 240) ? &ENVVCA_artwork_240 : &ENVVCA_artwork_120;
 
-		if (slug == "SpringReverb")
-			return (height == 240) ? &SpringReverb_artwork_240 : &SpringReverb_artwork_120;
-
+		// if (slug == "SpringReverb")
+		// 	return (height == 240) ? &SpringReverb_artwork_240 : &SpringReverb_artwork_120;
 
 		return nullptr;
 	}
