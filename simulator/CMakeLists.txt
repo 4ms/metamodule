@@ -88,8 +88,11 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES}
-                         ${MM_ROOT}/firmware/src/pages/page_manager.cc)
+add_executable(
+  simulator
+  src/main.cc ${CORE_MODULES} ${GUI_IMAGES}
+  ${MM_ROOT}/firmware/src/pages/page_manager.cc
+  ${MM_ROOT}/firmware/src/pages/images/4ms/modules/ENVVCA_artwork_240.png.c)
 
 target_include_directories(
   simulator

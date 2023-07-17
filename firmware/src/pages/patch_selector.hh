@@ -12,6 +12,9 @@ extern "C" void ui_PatchSelector_screen_init();
 LV_FONT_DECLARE(lv_font_montserrat_10);
 LV_FONT_DECLARE(lv_font_montserrat_16);
 
+extern unsigned char *src_pages_images_4ms_modules_ENVVCA_artwork_240_png;
+extern unsigned src_pages_images_4ms_modules_ENVVCA_artwork_240_png_len;
+
 namespace MetaModule
 {
 
@@ -33,6 +36,15 @@ struct PatchSelectorPage : PageBase {
 
 		init_bg(base);
 
+		// png_image = lv_img_create(base);
+		img_dsc->data = src_pages_images_4ms_modules_ENVVCA_artwork_240_png;
+		img_dsc->data_size = 75*240*2;//src_pages_images_4ms_modules_ENVVCA_artwork_240_png_len;
+		img_dsc->header.always_zero = 0;
+		img_dsc->header.w = 75;
+		img_dsc->header.h = 240;
+		img_dsc->header.cf = LV_IMG_CF_RAW;
+		// lv_img_set_src(png_image, &img_dsc);
+
 		lv_group_add_obj(group, roller);
 		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(roller, patchlist_scroll_cb, LV_EVENT_KEY, this);
@@ -43,6 +55,7 @@ struct PatchSelectorPage : PageBase {
 	}
 
 	void prepare_focus() override {
+
 		state = State::TryingToRequestPatchList;
 		lv_obj_add_flag(spinner, LV_OBJ_FLAG_HIDDEN);
 	}
@@ -291,7 +304,8 @@ private:
 	Volume highlighted_vol = Volume::NorFlash;
 
 	lv_obj_t *roller;
-	// lv_obj_t *header_text;
+	lv_obj_t *png_image;
+	lv_img_dsc_t *img_dsc;
 	lv_obj_t *base;
 	lv_obj_t *usb_but;
 	lv_obj_t *sd_but;

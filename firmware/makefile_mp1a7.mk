@@ -130,6 +130,7 @@ INCLUDES += -I$(SHARED)/cpputil
 # GUI
 SOURCES += $(wildcard src/pages/elements/*.cc)
 SOURCES += src/pages/page_manager.cc
+SOURCES += src/pages/images/4ms/modules/ENVVCA_artwork_240.png.c
 
 # Modules: CoreModules and faceplate artwork 
 SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
@@ -205,6 +206,7 @@ SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 ## LVGL / Gui-Guider
 SOURCES += $(shell find -L $(LIBDIR)/lvgl/lvgl/src/extra/widgets -name \*.c)
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/*.c)
+SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/libs/png/*.c)
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/flex/*.c)
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/layouts/grid/*.c)
 SOURCES += $(wildcard $(LIBDIR)/lvgl/lvgl/src/extra/others/gridnav/*.c)
