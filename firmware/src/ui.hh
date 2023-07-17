@@ -74,7 +74,9 @@ public:
 private:
 	void lvgl_update_task() {
 		page_update_tm.stop();
+		Debug::Pin2::high();
 		lv_timer_handler();
+		Debug::Pin2::low();
 		page_update_tm.start();
 
 		auto msg = msg_queue.get_message();

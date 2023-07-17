@@ -13,6 +13,8 @@
 #include "patch/patch_data.hh"
 #include "pr_dbg.hh"
 
+#include "debug.hh"
+
 namespace MetaModule
 {
 
@@ -50,7 +52,10 @@ struct ModuleDrawer {
 		// Draw module artwork
 		lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
+		pr_dbg("Drawing faceplate %s\n", slug.data());
+		Debug::Pin1::high();
 		lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
+		Debug::Pin1::low();
 
 		return canvas;
 	}
