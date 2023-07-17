@@ -9,6 +9,7 @@
 #include "inter_core_comm_msg.hh"
 #include "littlefs/norflash_lfs.hh"
 #include "patch_fileio.hh"
+#include "pr_dbg.hh"
 #include "qspi_flash_driver.hh"
 #include "util/edge_detector.hh"
 #include "volumes.hh"
@@ -158,16 +159,16 @@ private:
 	}
 
 	void rescan_sdcard() {
-		printf_("Updating patchlist from SD Card.\n");
+		pr_dbg("Updating patchlist from SD Card.\n");
 		PatchFileIO::add_all_to_patchlist(sdcard_, patch_list_);
-		printf_(
+		pr_dbg(
 			"SD Patchlist updated. filelist data: %p, size: %d.\n", filelist_.sdcard.data(), filelist_.sdcard.size());
 	}
 
 	void rescan_usbdrive() {
-		printf_("Updating patchlist from USB Drive.\n");
+		pr_dbg("Updating patchlist from USB Drive.\n");
 		PatchFileIO::add_all_to_patchlist(usbdrive_, patch_list_);
-		printf_("USB Patchlist updated. filelist data: %p, size: %d.\n", filelist_.usb.data(), filelist_.usb.size());
+		pr_dbg("USB Patchlist updated. filelist data: %p, size: %d.\n", filelist_.usb.data(), filelist_.usb.size());
 	}
 
 	// std::optional<uint32_t> find_by_name(std::string_view &patchname) const {
@@ -176,7 +177,7 @@ private:
 
 	uint32_t load_patch_file(Volume vol, uint32_t patch_id) {
 		auto filename = patch_list_.get_patch_filename(vol, patch_id);
-		printf("load_patch_file() patch_id=%d vol=%d name=%.31s\n", patch_id, (uint32_t)vol, filename.data());
+		pr_dbg("load_patch_file() patch_id=%d vol=%d name=%.31s\n", patch_id, (uint32_t)vol, filename.data());
 
 		bool ok = false;
 		std::span<char> raw_patch = raw_patch_buffer_;
@@ -195,11 +196,11 @@ private:
 		}
 
 		if (!ok) {
-			printf_("Could not load patch id %d\n", patch_id);
+			pr_warn("Could not load patch id %d\n", patch_id);
 			return 0;
 		}
 
-		printf_("Read patch id %d, %d bytes\n", patch_id, raw_patch.size_bytes());
+		pr_dbg("Read patch id %d, %d bytes\n", patch_id, raw_patch.size_bytes());
 		return raw_patch.size_bytes();
 	}
 };

@@ -11,6 +11,7 @@
 #include "pages/images/image_list.hh"
 #include "pages/styles.hh"
 #include "patch/patch_data.hh"
+#include "pr_dbg.hh"
 
 namespace MetaModule
 {
@@ -23,12 +24,14 @@ struct ModuleDrawer {
 	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
 		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
 		if (!img) {
-			printf_("Image not found for %s\n", slug.c_str());
+			if (!slug.is_equal("PanelMedium"))
+				pr_warn("Image not found for %s\n", slug.c_str());
 			return nullptr;
 		}
+
 		auto widthpx = img->header.w;
 		if ((widthpx * height) > canvas_buffer.size()) {
-			printf_("Buffer not big enough for %dpx x %dpx (%zu avail), not drawing\n",
+			pr_warn("Buffer not big enough for %dpx x %dpx (%zu avail), not drawing\n",
 					widthpx,
 					height,
 					canvas_buffer.size());
@@ -37,7 +40,7 @@ struct ModuleDrawer {
 
 		lv_obj_t *canvas = lv_canvas_create(container);
 		if (!canvas) {
-			printf_("Failed to create module canvas object\n");
+			pr_warn("Failed to create module canvas object\n");
 			return nullptr;
 		}
 

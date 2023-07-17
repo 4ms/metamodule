@@ -35,7 +35,6 @@ struct PatchViewPage : PageBase {
 		ui_PatchView_screen_init();
 		base = ui_PatchView; //NOLINT
 
-		// base(lv_obj_create(nullptr))
 		init_bg(base);
 		lv_group_set_editing(group, false);
 
@@ -49,17 +48,8 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(base, base_scroll_cb, LV_EVENT_SCROLL, (void *)this);
 
 		patchname = ui_PatchName; //NOLINT
-		// patchname = lv_label_create(base);
-		// lv_obj_add_style(patchname, &Gui::header_style, LV_PART_MAIN);
-		// lv_obj_set_width(patchname, 248);
-		// lv_obj_set_height(patchname, 28);
 
 		playbut = ui_PlayButton; //NOLINT
-		// playbut = lv_btn_create(base);
-		// lv_obj_set_height(playbut, 21);
-		// lv_obj_set_width(playbut, 60);
-		// lv_obj_set_style_pad_ver(playbut, 3, LV_PART_MAIN);
-		// lv_obj_set_style_pad_hor(playbut, 5, LV_PART_MAIN);
 		lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_event_cb(playbut, playbut_cb, LV_EVENT_PRESSED, this);
@@ -69,11 +59,6 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(ui_InfoButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_KnobButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-
-		// playbut_label = lv_label_create(playbut);
-		// lv_obj_add_style(playbut_label, &Gui::button_label_style, LV_PART_MAIN);
-		// lv_label_set_text(playbut_label, "Play");
-		// lv_obj_set_align(playbut_label, LV_ALIGN_CENTER);
 
 		description = lv_label_create(base);
 		lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);

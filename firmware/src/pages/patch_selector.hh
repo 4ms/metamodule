@@ -4,17 +4,13 @@
 #include "pages/lvgl_string_helper.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
-#include "printf.h"
+#include "pr_dbg.hh"
 
 //exported:
 #include "slsexport/patchsel/ui.h"
 extern "C" void ui_PatchSelector_screen_init();
 LV_FONT_DECLARE(lv_font_montserrat_10);
 LV_FONT_DECLARE(lv_font_montserrat_16);
-
-#include "pages/images/4ms/modules/ENVVCA_artwork_240.png.cc"
-// extern const uint8_t src_pages_images_4ms_modules_ENVVCA_artwork_240_png[];
-// extern unsigned src_pages_images_4ms_modules_ENVVCA_artwork_240_png_len;
 
 namespace MetaModule
 {
@@ -36,16 +32,6 @@ struct PatchSelectorPage : PageBase {
 		spinner = ui_waitspinner; //NOLINT
 
 		init_bg(base);
-
-		png_image = lv_img_create(base);
-		// lv_img_dsc_init(img_dsc);
-		img_dsc.data_size = src_pages_images_4ms_modules_ENVVCA_artwork_240_png_len;
-		img_dsc.data = src_pages_images_4ms_modules_ENVVCA_artwork_240_png;
-		img_dsc.header.always_zero = 0;
-		img_dsc.header.w = 75;
-		img_dsc.header.h = 240;
-		img_dsc.header.cf = LV_IMG_CF_RAW;
-		lv_img_set_src(png_image, &img_dsc);
 
 		lv_group_add_obj(group, roller);
 		lv_obj_add_event_cb(roller, patchlist_select_cb, LV_EVENT_VALUE_CHANGED, this);
@@ -218,18 +204,18 @@ struct PatchSelectorPage : PageBase {
 					// Try to parse the patch and open the PatchView page
 					if (patch_storage.parse_view_patch(message.bytes_read)) {
 						auto view_patch = patch_storage.get_view_patch();
-						printf_("Parsed patch: %.31s\n", view_patch.patch_name.data());
+						pr_dbg("Parsed patch: %.31s\n", view_patch.patch_name.data());
 						PageList::set_selected_patch_id(selected_patch);
 						PageList::request_new_page(PageId::PatchView);
 						state = State::Closing;
 						hide_spinner();
 					} else {
-						printf_("Error parsing patch id %d, bytes_read = %d\n", selected_patch, message.bytes_read);
+						pr_warn("Error parsing patch id %d, bytes_read = %d\n", selected_patch, message.bytes_read);
 						state = State::Idle;
 						hide_spinner();
 					}
 				} else if (message.message_type == PatchStorageProxy::PatchDataLoadFail) {
-					printf_("Error loading patch id %d\n", selected_patch);
+					pr_warn("Error loading patch id %d\n", selected_patch);
 					state = State::Idle;
 					lv_group_set_editing(group, true);
 					hide_spinner();
@@ -283,7 +269,7 @@ struct PatchSelectorPage : PageBase {
 		_instance->selected_patch = patch_id;
 		_instance->state = State::TryingToRequestPatchData;
 
-		printf_("Selected vol %d, patch %d\n", (uint32_t)_instance->selected_patch_vol, _instance->selected_patch);
+		pr_dbg("Selected vol %d, patch %d\n", (uint32_t)_instance->selected_patch_vol, _instance->selected_patch);
 	}
 
 	std::pair<uint32_t, Volume> calc_patch_id_vol(uint32_t roller_idx) {
@@ -306,8 +292,8 @@ private:
 	Volume highlighted_vol = Volume::NorFlash;
 
 	lv_obj_t *roller;
-	lv_obj_t *png_image;
-	lv_img_dsc_t img_dsc;
+	// lv_obj_t *png_image;
+	// lv_img_dsc_t img_dsc;
 	lv_obj_t *base;
 	lv_obj_t *usb_but;
 	lv_obj_t *sd_but;
