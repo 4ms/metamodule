@@ -134,7 +134,7 @@ struct PatchViewPage : PageBase {
 			if (!canvas)
 				continue;
 
-			module_drawer.draw_mapped_elements(patch, module_idx, canvas, drawn_elements, true /*is_patch_playing*/);
+			module_drawer.draw_mapped_elements(patch, module_idx, canvas, drawn_elements, is_patch_playing);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
