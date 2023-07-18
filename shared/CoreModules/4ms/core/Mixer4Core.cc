@@ -1,16 +1,16 @@
 #include "CoreModules/coreProcessor.h"
 #include "CoreModules/moduleFactory.hh"
-#include "info/Mixer_info.hh"
+#include "info/Mixer4_info.hh"
 
 namespace MetaModule
 {
 
-class MixerCore : public CoreProcessor {
-	using Info = MixerInfo;
-	using ThisCore = MixerCore;
+class Mixer4Core : public CoreProcessor {
+	using Info = Mixer4Info;
+	using ThisCore = Mixer4Core;
 
 public:
-	MixerCore() = default;
+	Mixer4Core() = default;
 
 	void update() override {
 	}

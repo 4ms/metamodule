@@ -4,11 +4,11 @@
 
 namespace MetaModule
 {
-struct MixerInfo : ModuleInfoBase {
-    static constexpr std::string_view slug{"Mixer"};
+struct Mixer4Info : ModuleInfoBase {
+    static constexpr std::string_view slug{"Mixer4"};
     static constexpr std::string_view description{"4 Ch. Mixer"};
     static constexpr uint32_t width_hp = 10;
-    static constexpr std::string_view svg_filename{"res/modules/Mixer-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Mixer4-artwork.svg"};
 
     using enum Coords;
 

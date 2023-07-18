@@ -21,7 +21,7 @@
 #define LV_ATTRIBUTE_IMG_MIXER_ARTWORK_240
 #endif
 
-const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_MIXER_ARTWORK_240 uint8_t Mixer_artwork_240_map[] = {
+const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_MIXER_ARTWORK_240 uint8_t Mixer4_artwork_240_map[] = {
     0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 
     0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x5f, 0x00, 0x00, 0x00, 0xf0, 0x08, 0x04, 
     0x00, 0x00, 0x00, 0xcc, 0x0f, 0x70, 0x45, 0x00, 0x00, 0x00, 0x20, 0x63, 0x48, 
@@ -428,12 +428,12 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_MIXER_ART
     0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
 };
 
-const lv_img_dsc_t Mixer_artwork_240 = {
+const lv_img_dsc_t Mixer4_artwork_240 = {
   .header.cf = LV_IMG_CF_RAW_ALPHA,
   .header.always_zero = 0,
   .header.reserved = 0,
   .header.w = 95,
   .header.h = 240,
   .data_size = 5246,
-  .data = Mixer_artwork_240_map,
+  .data = Mixer4_artwork_240_map,
 };

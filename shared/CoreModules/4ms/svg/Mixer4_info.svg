@@ -134,7 +134,7 @@
     <circle id="Level_3" data-name="Level 3" cx="37.85" cy="104.62" r="17.01" style="fill: #ff0040"/>
     <circle id="Level_2" data-name="Level 2" cx="106.4" cy="46.42" r="17.01" style="fill: #ff0070"/>
     <circle id="Level_1" data-name="Level 1" cx="37.85" cy="46.42" r="17.01" style="fill: #ff0040"/>
-    <text id="slug" transform="translate(115.04 369.08)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro"><tspan style="letter-spacing: 0.012044270833333334em">M</tspan><tspan x="2.45" y="0">i</tspan><tspan x="3.15" y="0" style="letter-spacing: -0.014973958333333334em">x</tspan><tspan x="4.49" y="0">er</tspan></text>
-    <text id="modulename" transform="translate(128.91 369.08)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro">4 Ch. <tspan x="6.84" y="0" style="letter-spacing: 0.012044270833333334em">M</tspan><tspan x="9.29" y="0" style="letter-spacing: -0.0003255208333333333em">i</tspan><tspan x="9.99" y="0" style="letter-spacing: -0.0146484375em">x</tspan><tspan x="11.33" y="0">er</tspan></text>
+    <text id="slug" transform="translate(115.04 369.08)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro"><tspan style="letter-spacing: 0.012044270833333334em">M</tspan><tspan x="2.45" y="0">i</tspan><tspan x="3.15" y="0" style="letter-spacing: -0.014973958333333334em">x</tspan><tspan x="4.49" y="0">er4</tspan></text>
+    <text id="modulename" transform="translate(128.91 369.08)" style="font-size: 3px;font-family: MyriadPro-Regular, Myriad Pro">4 Ch. <tspan x="6.84" y="0" style="letter-spacing: 0.012044270833333334em">M</tspan><tspan x="9.29" y="0" style="letter-spacing: -0.0003255208333333333em">i</tspan><tspan x="9.99" y="0" style="letter-spacing: -0.0146484375em">x</tspan><tspan x="11.33" y="0">er4</tspan></text>
   </g>
 </svg>

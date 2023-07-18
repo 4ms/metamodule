@@ -128,8 +128,8 @@ LV_IMG_DECLARE(ADEnv_artwork_240);
 LV_IMG_DECLARE(ADEnv_artwork_120);
 LV_IMG_DECLARE(Shift_artwork_240);
 LV_IMG_DECLARE(Shift_artwork_120);
-LV_IMG_DECLARE(Mixer_artwork_240);
-LV_IMG_DECLARE(Mixer_artwork_120);
+LV_IMG_DECLARE(Mixer4_artwork_240);
+LV_IMG_DECLARE(Mixer4_artwork_120);
 LV_IMG_DECLARE(LPG_artwork_240);
 LV_IMG_DECLARE(LPG_artwork_120);
 LV_IMG_DECLARE(Gate8_artwork_240);
@@ -331,8 +331,8 @@ struct ModuleImages {
 		if (slug == "ChoppingKinky")
 			return (height == 240) ? &ChoppingKinky_artwork_240 : &ChoppingKinky_artwork_120;
 
-		if (slug == "Mixer")
-			return (height == 240) ? &Mixer_artwork_240 : &Mixer_artwork_120;
+		if (slug == "Mixer4")
+			return (height == 240) ? &Mixer4_artwork_240 : &Mixer4_artwork_120;
 
 		if (slug == "ADSR")
 			return (height == 240) ? &ADSR_artwork_240 : &ADSR_artwork_120;
