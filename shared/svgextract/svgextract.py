@@ -48,7 +48,7 @@ createLvglFaceplate [input faceplate SVG file name] [output C file name] {{optio
 convertSvgToLvgl [input SVG file name] [output C file name] {{optional scale 1-100}}
     Converts the SVG to two LVGL format .c files: one at the given scale and one
     at half that scale. The scale parameter must be an integer or floating-point value
-    and defaults to 67% if omitted.
+    and defaults to 63% if omitted.
     Requires the same inkscape and convert programs/paths as createLvglFaceplate
 
 appendImgList [C struct name] [path/to/image_list.hh]
@@ -138,7 +138,7 @@ def parse_args(args):
         imageList.appendImageList(inputfile, output)
 
     if cmd == 'convertsvgtolvgl':
-        scale = args.pop(0) if len(args) > 0 else 67
+        scale = args.pop(0) if len(args) > 0 else 63.25
         lvgl.componentSvgToLVGL(inputfile, output, scale)
         return
 

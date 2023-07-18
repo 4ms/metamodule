@@ -11,6 +11,7 @@ namespace rack::engine
 struct Module;
 
 struct ParamQuantity {
+	virtual ~ParamQuantity() = default;
 	Module *module = nullptr;
 	int paramId = -1;
 

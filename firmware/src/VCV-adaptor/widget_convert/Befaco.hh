@@ -36,27 +36,27 @@ struct ElementConvert<Knurlie> {
 
 template<>
 struct ElementConvert<BefacoTinyKnobWhite> {
-	using ElementType = MetaModule::BefacoTinyKnob;
+	using ElementType = MetaModule::BefacoTinyKnobWhite;
 };
 
 template<>
 struct ElementConvert<BefacoTinyKnobRed> {
-	using ElementType = MetaModule::BefacoTinyKnob;
+	using ElementType = MetaModule::BefacoTinyKnobRed;
 };
 
 template<>
 struct ElementConvert<BefacoTinyKnobDarkGrey> {
-	using ElementType = MetaModule::BefacoTinyKnob;
+	using ElementType = MetaModule::BefacoTinyKnobDarkGrey;
 };
 
 template<>
 struct ElementConvert<BefacoTinyKnobLightGrey> {
-	using ElementType = MetaModule::BefacoTinyKnob;
+	using ElementType = MetaModule::BefacoTinyKnobLightGrey;
 };
 
 template<>
 struct ElementConvert<BefacoTinyKnobBlack> {
-	using ElementType = MetaModule::BefacoTinyKnob;
+	using ElementType = MetaModule::BefacoTinyKnobBlack;
 };
 
 template<>
@@ -86,12 +86,12 @@ struct ElementConvert<BananutBlack> {
 
 template<>
 struct ElementConvert<CKSSNarrow> {
-	using ElementType = MetaModule::BefacoSlidePotSmall;
+	using ElementType = MetaModule::CKSSNarrow;
 };
 
 template<>
 struct ElementConvert<Crossfader> {
-	using ElementType = MetaModule::Slider25mmHoriz;
+	using ElementType = MetaModule::Crossfader;
 };
 
 template<>
@@ -101,22 +101,22 @@ struct ElementConvert<BefacoSwitchHorizontal> {
 
 template<>
 struct ElementConvert<CKSSHoriz2> {
-	using ElementType = MetaModule::NullElement;
+	using ElementType = MetaModule::CKSSHoriz2;
 };
 
 template<>
 struct ElementConvert<CKSSVert7> {
-	using ElementType = MetaModule::NullElement;
+	using ElementType = MetaModule::CKSSVert7;
 };
 
 template<>
 struct ElementConvert<CKSSHoriz4> {
-	using ElementType = MetaModule::NullElement;
+	using ElementType = MetaModule::CKSSHoriz4;
 };
 
 template<>
 struct ElementConvert<CKSSNarrow3> {
-	using ElementType = MetaModule::NullElement;
+	using ElementType = MetaModule::CKSSNarrow3;
 };
 
 template<>

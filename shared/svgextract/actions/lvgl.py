@@ -15,9 +15,7 @@ def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="all"):
     svgToLVGL(artworkSvgFilename, png120Filename, "x120", False, exportLayer)
 
 
-def componentSvgToLVGL(svgFilename, outputBaseName, scale=67):
-    if scale == None:
-        scale = 67
+def componentSvgToLVGL(svgFilename, outputBaseName, scale):
     scale = float(scale)
 
     png240Filename = outputBaseName +"_240"

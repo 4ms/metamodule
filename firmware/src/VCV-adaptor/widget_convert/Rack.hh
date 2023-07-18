@@ -6,6 +6,8 @@
 namespace rack
 {
 
+//TODO put rest of widgets from Rack_fwd.hh here
+
 template<>
 struct ElementConvert<componentlibrary::BefacoBigKnob> {
 	using ElementType = MetaModule::BefacoBigKnob;
@@ -13,7 +15,7 @@ struct ElementConvert<componentlibrary::BefacoBigKnob> {
 
 template<>
 struct ElementConvert<componentlibrary::BefacoTinyKnob> {
-	using ElementType = MetaModule::BefacoTinyKnob;
+	using ElementType = MetaModule::BefacoTinyKnobBlack;
 };
 
 template<>

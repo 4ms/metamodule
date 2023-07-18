@@ -23,6 +23,9 @@ struct PatchPlayLoader {
 	}
 
 	void load_initial_patch() {
+		// TODO:this loads a default patch, not a patch from NOR Flash
+		// Instead, we should load the last patch that was loaded before power-down
+
 		auto initial_patch = 11;
 		// TODO: Test the below.. do we need an escape hatch
 		// to avoid infinite loop?

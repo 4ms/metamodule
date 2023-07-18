@@ -48,11 +48,11 @@ inline const lv_img_dsc_t *get_img(const Knob9mm &, uint32_t scale_px) {
 	return scale_px == 240 ? &knob9mm_x : &knob9mm_x_120;
 }
 
-inline const lv_img_dsc_t *get_img(const JackInput &, uint32_t scale_px) {
+inline const lv_img_dsc_t *get_img(const JackInput4ms &, uint32_t scale_px) {
 	return scale_px == 240 ? &jack_x : &jack_x_120;
 }
 
-inline const lv_img_dsc_t *get_img(const JackOutput &, uint32_t scale_px) {
+inline const lv_img_dsc_t *get_img(const JackOutput4ms &, uint32_t scale_px) {
 	return scale_px == 240 ? &jack_x : &jack_x_120;
 }
 
@@ -76,8 +76,14 @@ inline const lv_img_dsc_t *get_img(const LatchingButton &, uint32_t scale_px) {
 	return scale_px == 240 ? &button_x : &button_x_120;
 }
 
+inline const lv_img_dsc_t *get_img(const MomentaryButton &, uint32_t scale_px) {
+	return scale_px == 240 ? &button_x : &button_x_120;
+}
+
 inline const lv_img_dsc_t *get_img(const LightElement &, uint32_t scale_px) {
 	return scale_px == 240 ? &led_x : &led_x_120;
 }
+
+//TODO: Encoders
 
 } // namespace MetaModule::ElementImageImpl
