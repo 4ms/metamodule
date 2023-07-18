@@ -145,7 +145,7 @@ using namespace app;
 using plugin::Model;
 using plugin::Plugin;
 using namespace engine;
-// using namespace componentlibrary;
+using namespace componentlibrary;
 
 using namespace color;
 

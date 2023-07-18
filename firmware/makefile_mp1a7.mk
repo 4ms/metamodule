@@ -187,9 +187,6 @@ INCLUDES += -I$(SHARED)/CoreModules/4ms
 INCLUDES += -Ivcv-ports/AudibleInstruments/src/
 INCLUDES += -Ivcv-ports/AudibleInstruments/eurorack
 INCLUDES += -Ivcv-ports/Befaco/src
-# INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
-# INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/eurorack
-# INCLUDES += -I$(SHARED)/CoreModules/Befaco
 
 SOURCES += vcv-ports/register_vcv_ports.cc
 SOURCES += src/VCV-adaptor/pffft/pffft.c

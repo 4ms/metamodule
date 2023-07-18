@@ -1,7 +1,7 @@
 #pragma once
 #include "VCV-adaptor/app/Widget.hh"
 
-namespace rack
+namespace rack::componentlibrary
 {
 
 // These are defined in Rack, though some appear to be brand-specific

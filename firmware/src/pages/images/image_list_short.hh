@@ -32,8 +32,8 @@ LV_IMG_DECLARE(ENVVCA_artwork_120);
 // Audible
 LV_IMG_DECLARE(Braids_artwork_120);
 LV_IMG_DECLARE(Braids_artwork_240);
-LV_IMG_DECLARE(Clouds_artwork_120);
-LV_IMG_DECLARE(Clouds_artwork_240);
+// LV_IMG_DECLARE(Clouds_artwork_120);
+// LV_IMG_DECLARE(Clouds_artwork_240);
 // Befaco
 LV_IMG_DECLARE(DualAtenuverter_artwork_120);
 LV_IMG_DECLARE(DualAtenuverter_artwork_240);
@@ -136,8 +136,8 @@ struct ModuleImages {
 		// Audible Instruments
 		if (slug == "Braids")
 			return (height == 240) ? &Braids_artwork_240 : &Braids_artwork_120;
-		if (slug == "Clouds")
-			return (height == 240) ? &Clouds_artwork_240 : &Clouds_artwork_120;
+		// if (slug == "Clouds")
+		// 	return (height == 240) ? &Clouds_artwork_240 : &Clouds_artwork_120;
 
 		// Befaco
 		if (slug == "DualAtenuverter")
