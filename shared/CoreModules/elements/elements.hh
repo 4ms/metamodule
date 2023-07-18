@@ -41,6 +41,9 @@ struct BaseElement {
 	using State_t = void;
 };
 
+// Placeholder
+struct NullElement : BaseElement {};
+
 //
 // ParamElement: base class for pot, encoder, switch/button
 //
@@ -222,6 +225,9 @@ struct AltParamToggle3 : AltParam {};
 // All Concrete Elements
 //
 using Element = std::variant<
+	// Placeholder for unknown element
+	NullElement,
+
 	// Knobs
 	Davies1900hBlackKnob,
 	Knob9mm,
