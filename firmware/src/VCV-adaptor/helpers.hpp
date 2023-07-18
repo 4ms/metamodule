@@ -8,6 +8,7 @@
 #include "VCV-adaptor/widget_convert/widget_element_convert.hh"
 #include <functional>
 #include <string_view>
+// #include "pr_dbg.hh"
 
 namespace rack
 {
@@ -37,66 +38,88 @@ TWidget *createWidgetCentered(math::Vec pos) {
 }
 
 inline app::SvgPanel *createPanel(std::string_view svgPath) {
+	// pr_dbg("createPanel(%s)\n", svgPath.data());
+	// pr_dbg(" OK\n");
 	return nullptr;
 }
 
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
+	// pr_dbg("createParam(%f, %f, ..., %d)...", pos.x, pos.y, paramId);
 	using namespace MetaModule;
 	auto *o = new TParamWidget;
 	pos = mm(pos);
 	o->element = typename ElementConvert<TParamWidget>::ElementType{pos.x, pos.y, Coords::TopLeft};
 	o->paramId = paramId;
+	// pr_dbg(" OK\n");
 	return o;
 }
 
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
+	// pr_dbg("createParamCentered(%f, %f, ..., %d)...", pos.x, pos.y, paramId);
 	using namespace MetaModule;
 	auto *o = new TParamWidget;
 	pos = mm(pos);
 	o->element = typename ElementConvert<TParamWidget>::ElementType{pos.x, pos.y, Coords::Center};
 	o->paramId = paramId;
+	// pr_dbg(" OK\n");
 	return o;
 }
 
 template<class TPortWidget>
 TPortWidget *createInput(math::Vec pos, engine::Module *module, int inputId) {
+	// pr_dbg("createInput(%f, %f, ..., %d)...", pos.x, pos.y, inputId);
+	// pr_dbg(" OK\n");
 	return nullptr;
 }
 
 template<class TPortWidget>
 TPortWidget *createInputCentered(math::Vec pos, engine::Module *module, int inputId) {
+	// pr_dbg("createInputCentered(%f, %f, ..., %d)...", pos.x, pos.y, inputId);
+	// pr_dbg(" OK\n");
 	return nullptr;
 }
 
 template<class TPortWidget>
 TPortWidget *createOutput(math::Vec pos, engine::Module *module, int outputId) {
+	// pr_dbg("createOutut(%f, %f, ..., %d)...", pos.x, pos.y, outputId);
+	// pr_dbg(" OK\n");
 	return nullptr;
 }
 
 template<class TPortWidget>
 TPortWidget *createOutputCentered(math::Vec pos, engine::Module *module, int outputId) {
+	// pr_dbg("createOutputCentered(%f, %f, ..., %d)...", pos.x, pos.y, outputId);
+	// pr_dbg(" OK\n");
 	return nullptr;
 }
 
 template<class TModuleLightWidget>
 TModuleLightWidget *createLight(math::Vec pos, engine::Module *module, int firstLightId) {
+	// pr_dbg("createLight(%f, %f, ..., %d)...", pos.x, pos.y, firstLightId);
+	// pr_dbg(" OK\n");
 	return nullptr;
 }
 
 template<class TModuleLightWidget>
 TModuleLightWidget *createLightCentered(math::Vec pos, engine::Module *module, int firstLightId) {
+	// pr_dbg("createLightCentered(%f, %f, ..., %d)...", pos.x, pos.y, firstLightId);
+	// pr_dbg(" OK\n");
 	return nullptr;
 }
 
 template<class TParamWidget>
 TParamWidget *createLightParam(math::Vec pos, engine::Module *module, int paramId, int firstLightId) {
+	// pr_dbg("createLightParam(%f, %f, ..., %d, %d)...", pos.x, pos.y, paramId, firstLightId);
+	// pr_dbg(" OK\n");
 	return nullptr;
 }
 
 template<class TParamWidget>
 TParamWidget *createLightParamCentered(math::Vec pos, engine::Module *module, int paramId, int firstLightId) {
+	// pr_dbg("createLightParamCentered(%f, %f, ..., %d, %d)\n", pos.x, pos.y, paramId, firstLightId);
+	// pr_dbg(" OK\n");
 	return nullptr;
 }
 

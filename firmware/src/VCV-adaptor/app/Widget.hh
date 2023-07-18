@@ -17,12 +17,15 @@ struct SvgSlider : app::ParamWidget {
 	math::Vec minHandlePos;
 	math::Vec maxHandlePos;
 	bool horizontal;
-	widget::SvgWidget *background;
+	widget::SvgWidget *background = &_background;
 
 	void setBackgroundSvg(auto) {
 	}
 	void setHandleSvg(auto) {
 	}
+
+private:
+	widget::SvgWidget _background;
 };
 
 struct SvgSwitch : ParamWidget {

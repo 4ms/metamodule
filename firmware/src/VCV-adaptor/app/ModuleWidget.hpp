@@ -13,7 +13,7 @@ struct ModuleWidget : widget::Widget {
 	engine::Module *module;
 
 	void setModule(engine::Module *m) {
-		// module = m;
+		module = m;
 	}
 
 	void setPanel(Widget *panel) {

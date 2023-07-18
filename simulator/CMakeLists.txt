@@ -45,19 +45,47 @@ file(
 file(
   GLOB
   CORE_MODULES
+  # 4ms
   ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
-  # ${MM_ROOT}/shared/CoreModules/Befaco/core/EvenVCOCore.cc
+  # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/NoisePlethora.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/StereoStrip.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/SlewLimiter.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/SamplingModulator.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/STMix.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Rampage.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/PonyVCO.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Percall.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Muxslicer.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/MotionMTR.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Morphader.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Mixer.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/KickAll.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/HexMixVCA.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/ChoppingKinky.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/ABC.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/ADSR.cpp
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/SpringReverb.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/DualAtenuverter.cpp
-  # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/EvenVCO.cpp
-  # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
-  # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
-  # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
-  # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
-  # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
-  # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
-  # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/resources.cc
+  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/EvenVCO.cpp
+  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/DualAtenuverter_artwork_240.c
+  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/DualAtenuverter_artwork_120.c
+  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/EvenVCO_artwork_240.c
+  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/EvenVCO_artwork_120.c
+  # AudibleInstruments
+  ${MM_ROOT}/vcv-ports/AudibleInstruments/src/*.cpp
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/resources.cc
+  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/modules/Braids_artwork_240.c
+  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/modules/Braids_artwork_120.c
+  # Other
+  ${MM_ROOT}/firmware/src/VCV-adaptor/pffft/pffft.c
   ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
   ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
 
@@ -96,6 +124,7 @@ target_include_directories(
           stubs
           lvgl_drv
           ${SDL2_INCLUDE_DIRS}
+          ${MM_ROOT}/firmware
           ${MM_ROOT}/firmware/src
           ${MM_ROOT}/firmware/src/medium
           ${MM_ROOT}/shared
@@ -107,7 +136,8 @@ target_include_directories(
           ${MM_ROOT}/shared/CoreModules/AudibleInstruments
           ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core
           ${MM_ROOT}/vcv/src # For sys/alloc_buffer.h
-          ${MM_ROOT}/firmware/src/VCV-adaptor)
+          ${MM_ROOT}/firmware/src/VCV-adaptor
+          ${MM_ROOT}/firmware/src/VCV-adaptor/pffft)
 
 target_compile_options(
   simulator PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>

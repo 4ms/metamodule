@@ -56,6 +56,7 @@ struct DragStartEvent : Event {};
 struct DragEndEvent : Event {};
 struct DragMoveEvent : Event {};
 struct DragHoverEvent : Event {};
+struct DoubleClickEvent : Event {};
 
 using Action = ActionEvent;
 using DragStart = DragStartEvent;
@@ -73,5 +74,6 @@ using DragStartEvent = event::DragStartEvent;
 using DragEndEvent = event::DragEndEvent;
 using DragMoveEvent = event::DragMoveEvent;
 using DragHoverEvent = event::DragHoverEvent;
+using DoubleClickEvent = event::DoubleClickEvent;
 
 } // namespace rack
