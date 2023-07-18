@@ -48,13 +48,9 @@ file(
   ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
-  # ${MM_ROOT}/firmware/vcv-ports/register_vcv_ports.cc
   # ${MM_ROOT}/shared/CoreModules/Befaco/core/EvenVCOCore.cc
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/DualAtenuverter.cpp
   # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/EvenVCO.cpp
-  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/DualAtenuverter_artwork_240.c
-  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/DualAtenuverter_artwork_120.c
-  # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/*Core.cc
   # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
   # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
   # ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
