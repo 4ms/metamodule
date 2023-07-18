@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
 #include "VCV-adaptor/widget_convert/base.hh"
-#include "VCV-adaptor/widgets.hh"
 
 // Forward declare widgets from Befaco/src/plugin.hpp
 struct Knurlie;
@@ -73,19 +72,15 @@ struct ElementConvert<Davies1900hDarkGreyKnob> {
 	using ElementType = MetaModule::Davies1900hDarkGreyKnob;
 };
 
-// using Davies1900hDarkBlackAlt = Davies1900hBlackKnob;
-
 template<>
 struct ElementConvert<BananutRed> {
 	using ElementType = MetaModule::BefacoOutputPort;
 };
-// using BefacoOutputPort = BananutRed;
 
 template<>
 struct ElementConvert<BananutBlack> {
 	using ElementType = MetaModule::BefacoInputPort;
 };
-// using BefacoInputPort = BananutBlack;
 
 template<>
 struct ElementConvert<CKSSNarrow> {
