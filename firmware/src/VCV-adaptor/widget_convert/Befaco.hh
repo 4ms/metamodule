@@ -24,6 +24,8 @@ struct CKSSNarrow3;
 struct Davies1900hLargeLightGreyKnob;
 struct BefacoSlidePotSmall;
 
+// Conversions from Befaco widgets to MetaModule Elements:
+
 namespace rack
 {
 

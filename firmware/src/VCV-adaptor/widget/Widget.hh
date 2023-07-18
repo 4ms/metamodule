@@ -59,6 +59,7 @@ struct OpaqueWidget : Widget {};
 struct TransparentWidget : Widget {};
 struct FramebufferWidget : Widget {};
 
+// Should be called SvgParamWidget
 struct SvgWidget : Widget {
 	SvgWidget *bg /*= this*/;
 	NVGcolor bgColor;

@@ -67,6 +67,8 @@ public:
 	}
 
 	InterCoreCommMessage get_message() {
+		// Simulator uses the DefaultPatches as if it were the NOR Flash:
+
 		if (msg_state_ == MsgState::ViewPatchRequested) {
 			msg_state_ = MsgState::Idle;
 			//load patch data into raw_patch_data_ and replace 1024 wtih actual size
