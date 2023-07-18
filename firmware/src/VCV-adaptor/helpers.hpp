@@ -18,109 +18,106 @@ namespace engine
 struct Module;
 }
 
-namespace
-{
-inline math::Vec mm(math::Vec v) {
-	return {MetaModule::ModuleInfoBase::to_mm(v.x), MetaModule::ModuleInfoBase::to_mm(v.y)};
-}
-} // namespace
 
-/** Creates a Widget subclass with its top-left at a position. */
+template<typename T>
+T *createElement(math::Vec pos, MetaModule::Coords coord_ref) {
+	auto *o = new T;
+	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
+	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
+	o->element = typename ElementConvert<T>::ElementType{pos.x, pos.y, coord_ref};
+	return o;
+}
+
 template<class TWidget>
 TWidget *createWidget(math::Vec pos) {
-	return nullptr;
+	return createElement<TWidget>(pos, MetaModule::Coords::TopLeft);
 }
 
-/** Creates a Widget subclass with its center at a position. */
 template<class TWidget>
 TWidget *createWidgetCentered(math::Vec pos) {
-	return nullptr;
+	return createElement<TWidget>(pos, MetaModule::Coords::Center);
 }
 
 inline app::SvgPanel *createPanel(std::string_view svgPath) {
-	// pr_dbg("createPanel(%s)\n", svgPath.data());
-	// pr_dbg(" OK\n");
 	return nullptr;
 }
 
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
-	// pr_dbg("createParam(%f, %f, ..., %d)...", pos.x, pos.y, paramId);
-	using namespace MetaModule;
-	auto *o = new TParamWidget;
-	pos = mm(pos);
-	o->element = typename ElementConvert<TParamWidget>::ElementType{pos.x, pos.y, Coords::TopLeft};
+	auto o = createElement<TParamWidget>(pos, MetaModule::Coords::TopLeft);
 	o->paramId = paramId;
-	// pr_dbg(" OK\n");
 	return o;
 }
 
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
-	// pr_dbg("createParamCentered(%f, %f, ..., %d)...", pos.x, pos.y, paramId);
-	using namespace MetaModule;
-	auto *o = new TParamWidget;
-	pos = mm(pos);
-	o->element = typename ElementConvert<TParamWidget>::ElementType{pos.x, pos.y, Coords::Center};
+	auto o = createElement<TParamWidget>(pos, MetaModule::Coords::Center);
 	o->paramId = paramId;
-	// pr_dbg(" OK\n");
 	return o;
 }
 
 template<class TPortWidget>
 TPortWidget *createInput(math::Vec pos, engine::Module *module, int inputId) {
-	// pr_dbg("createInput(%f, %f, ..., %d)...", pos.x, pos.y, inputId);
-	// pr_dbg(" OK\n");
-	return nullptr;
+	auto o = createElement<TPortWidget>(pos, MetaModule::Coords::TopLeft);
+	o->portId = inputId;
+	return o;
 }
 
 template<class TPortWidget>
 TPortWidget *createInputCentered(math::Vec pos, engine::Module *module, int inputId) {
-	// pr_dbg("createInputCentered(%f, %f, ..., %d)...", pos.x, pos.y, inputId);
-	// pr_dbg(" OK\n");
-	return nullptr;
+	auto o = createElement<TPortWidget>(pos, MetaModule::Coords::Center);
+	o->portId = inputId;
+	return o;
 }
 
 template<class TPortWidget>
 TPortWidget *createOutput(math::Vec pos, engine::Module *module, int outputId) {
-	// pr_dbg("createOutut(%f, %f, ..., %d)...", pos.x, pos.y, outputId);
-	// pr_dbg(" OK\n");
-	return nullptr;
+	auto o = createElement<TPortWidget>(pos, MetaModule::Coords::TopLeft);
+	o->portId = outputId;
+	return o;
 }
 
 template<class TPortWidget>
 TPortWidget *createOutputCentered(math::Vec pos, engine::Module *module, int outputId) {
-	// pr_dbg("createOutputCentered(%f, %f, ..., %d)...", pos.x, pos.y, outputId);
-	// pr_dbg(" OK\n");
-	return nullptr;
+	auto o = createElement<TPortWidget>(pos, MetaModule::Coords::Center);
+	o->portId = outputId;
+	return o;
 }
 
 template<class TModuleLightWidget>
 TModuleLightWidget *createLight(math::Vec pos, engine::Module *module, int firstLightId) {
-	// pr_dbg("createLight(%f, %f, ..., %d)...", pos.x, pos.y, firstLightId);
-	// pr_dbg(" OK\n");
-	return nullptr;
+	auto o = createElement<TModuleLightWidget>(pos, MetaModule::Coords::TopLeft);
+	o->firstLightId = firstLightId;
+	return o;
 }
 
 template<class TModuleLightWidget>
 TModuleLightWidget *createLightCentered(math::Vec pos, engine::Module *module, int firstLightId) {
-	// pr_dbg("createLightCentered(%f, %f, ..., %d)...", pos.x, pos.y, firstLightId);
-	// pr_dbg(" OK\n");
-	return nullptr;
+	auto o = createElement<TModuleLightWidget>(pos, MetaModule::Coords::Center);
+	o->firstLightId = firstLightId;
+	return o;
 }
 
 template<class TParamWidget>
 TParamWidget *createLightParam(math::Vec pos, engine::Module *module, int paramId, int firstLightId) {
-	// pr_dbg("createLightParam(%f, %f, ..., %d, %d)...", pos.x, pos.y, paramId, firstLightId);
-	// pr_dbg(" OK\n");
-	return nullptr;
+	auto param = createElement<TParamWidget>(pos, MetaModule::Coords::TopLeft);
+	param->paramId = paramId;
+
+	// TODO: how to do this?
+	// param->getLight()->firstLightId = firstLightId;
+
+	return param;
 }
 
 template<class TParamWidget>
 TParamWidget *createLightParamCentered(math::Vec pos, engine::Module *module, int paramId, int firstLightId) {
-	// pr_dbg("createLightParamCentered(%f, %f, ..., %d, %d)\n", pos.x, pos.y, paramId, firstLightId);
-	// pr_dbg(" OK\n");
-	return nullptr;
+	auto param = createElement<TParamWidget>(pos, MetaModule::Coords::Center);
+	param->paramId = paramId;
+
+	// TODO: how to do this?
+	// param->getLight()->firstLightId = firstLightId;
+
+	return param;
 }
 
 template<class TMenu = ui::Menu>

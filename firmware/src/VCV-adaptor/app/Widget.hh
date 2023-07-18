@@ -5,15 +5,43 @@ namespace rack::app
 {
 
 // Ports
-struct PortWidget : widget::SvgWidget {};
-struct SvgPort : app::PortWidget {};
+struct PortWidget : widget::Widget {
+	int portId = -1;
+};
+
+struct SvgPort : PortWidget {
+	widget::FramebufferWidget* fb;
+	// CircularShadow* shadow;
+	widget::SvgWidget* sw;
+
+	void setSvg(std::shared_ptr<window::Svg> svg){
+	}
+	void setSVG(std::shared_ptr<window::Svg> svg) {
+		setSvg(svg);
+	}
+
+};
+
+// Lights
+
+struct ModuleLightWidget : widget::Widget {
+	int firstLightId = -1;
+	// NVGcolor bgColor = nvgRGBA(0, 0, 0, 0);
+	// NVGcolor color = nvgRGBA(0, 0, 0, 0);
+	// NVGcolor borderColor = nvgRGBA(0, 0, 0, 0);
+
+	// std::vector<NVGcolor> baseColors;
+	// int getNumColors(){ return 0;}
+	// void addBaseColor(NVGcolor baseColor){}
+	// void setBrightnesses(const std::vector<float>& brightnesses){}
+};
 
 // Params
 struct ParamWidget : widget::SvgWidget {
 	int paramId = -1;
 };
 
-struct SvgSlider : app::ParamWidget {
+struct SvgSlider : ParamWidget {
 	math::Vec minHandlePos;
 	math::Vec maxHandlePos;
 	bool horizontal;

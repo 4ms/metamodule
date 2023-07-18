@@ -22,33 +22,47 @@ struct ModuleWidget : widget::Widget {
 	void setPanel(std::shared_ptr<window::Svg> svg) {
 	}
 
-	void addChild(Widget *w) {
-		// Check if it's a light
-		//Ignore all others(?)
+	void place_at(std::vector<MetaModule::Element> &elements, int id, const MetaModule::Element &el) {
+		if (id < 0)
+			return;
 
-		// delete w;
+		// Make sure vector is big enough
+		if (id >= (int)elements.size())
+			elements.resize(id + 1);
+
+		elements[id] = el;
+	}
+
+	void addChild(Widget *w) {
+		if (!w)
+			return;
+		lightElements.push_back(w->element);
+		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
+		delete w;
 	}
 
 	void addParam(app::ParamWidget *paramWidget) {
+		if (!paramWidget)
+			return;
+		place_at(paramElements, paramWidget->paramId, paramWidget->element);
 		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
-		auto paramId = paramWidget->paramId;
-		if (paramId >= 0) {
-			// Make sure vector is big enough
-			if (paramId >= (int)paramElements.size()) {
-				paramElements.resize(paramId + 1);
-			}
-			// Copy newly created element into our local vector
-			paramElements[paramId] = paramWidget->element;
-		}
 		delete paramWidget;
 	}
 
 	void addInput(app::PortWidget *input) {
-		// delete input;
+		if (!input)
+			return;
+		place_at(inputElements, input->portId, input->element);
+		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
+		delete input;
 	}
 
 	void addOutput(app::PortWidget *output) {
-		// delete output;
+		if (!output)
+			return;
+		place_at(outputElements, output->portId, output->element);
+		// Makes same assumption as VCV Rack: That we are given ownership of the widget pointer
+		delete output;
 	}
 
 	virtual void appendContextMenu(ui::Menu *) {

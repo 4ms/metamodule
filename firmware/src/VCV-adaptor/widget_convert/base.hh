@@ -4,10 +4,10 @@
 namespace rack
 {
 
+// Default
 template<typename TParamWidget>
 struct ElementConvert {
-	//FIXME: more sensible default
-	using ElementType = MetaModule::Davies1900hBlackKnob;
+	using ElementType = MetaModule::NullElement;
 };
 
 } // namespace rack
