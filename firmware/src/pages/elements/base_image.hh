@@ -11,10 +11,10 @@ namespace MetaModule::ElementImageImpl
 {
 
 inline const lv_img_dsc_t *get_img(const BaseElement &element, uint32_t scale_px) {
-	if (element.short_name.data() && element.short_name.size() > 0 && element.short_name.size() < 32)
-		pr_dbg("Element image not found: %.s\n", (int)element.short_name.size(), element.short_name.data());
-	else
-		pr_dbg("Element image not found (invalid name)\n");
+	// if (element.short_name.data() && element.short_name.size() > 0 && element.short_name.size() < 32)
+	// 	pr_dbg("Element image not found: %.32s\n", element.short_name.data());
+	// else
+	pr_dbg("Element image not found (invalid name)\n");
 	return nullptr;
 }
 
