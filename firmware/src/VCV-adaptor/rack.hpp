@@ -127,6 +127,7 @@ Directly including Rack headers other than rack.hpp in your plugin is unsupporte
 #include "simd/functions.hpp"
 
 #include "VCV-adaptor/assert.hh"
+#include "VCV-adaptor/color.hpp"
 #include "VCV-adaptor/create_model.hh"
 #include "VCV-adaptor/dynamic_cast.hpp"
 #include "VCV-adaptor/nanovg.h"
@@ -145,6 +146,8 @@ using plugin::Model;
 using plugin::Plugin;
 using namespace engine;
 // using namespace componentlibrary;
+
+using namespace color;
 
 #define DEBUG printf
 } // namespace rack

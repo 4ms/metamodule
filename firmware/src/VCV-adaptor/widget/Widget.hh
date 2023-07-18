@@ -50,6 +50,9 @@ struct Widget {
 	}
 
 	MetaModule::Element element;
+
+	void hide() {
+	}
 };
 
 struct OpaqueWidget : Widget {};
@@ -58,6 +61,7 @@ struct FramebufferWidget : Widget {};
 
 struct SvgWidget : Widget {
 	SvgWidget *bg /*= this*/;
+	NVGcolor bgColor;
 	bool visible;
 	engine::ParamQuantity *pq = &_pq;
 
