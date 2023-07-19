@@ -31,7 +31,7 @@ protected:
 	}
 
 	template <typename INFO::Elem EL>
-	auto getState() 
+	auto getState() requires (ElementCount::count(INFO::Elements[std::size_t(EL)]).num_params != 0)
 	{
 		// get back the typed element from the list of elements
 		constexpr auto elementID = static_cast<size_t>(EL);
@@ -51,7 +51,8 @@ protected:
 	}
 
 	template <typename INFO::Elem EL, typename VAL>
-	void setLED(const VAL& value) {
+	void setLED(const VAL& value)  requires (ElementCount::count(INFO::Elements[std::size_t(EL)]).num_lights != 0)
+	{
 
 		// get back the typed element from the list of elements
 		constexpr auto elementID = static_cast<size_t>(EL);
@@ -71,20 +72,16 @@ protected:
 	}
 
 private:
-	float getParamRaw(Elem el) {
-		if (count(el).num_params == 0)
-			return 0;
+	float getParamRaw(Elem el, std::size_t local_index=0) {
 		auto idx = index(el);
-		return paramValues[idx.param_idx];
+		auto param_id = idx.param_idx + local_index;
+		return paramValues.at(param_id);
 	}
 
 	void setLEDRaw(Elem el, float val, size_t color_idx=0) {
-		if (count(el).num_lights == 0)
-			return;
 		auto idx = index(el);
 		auto led_idx = idx.light_idx + color_idx;
-		if (led_idx < ledValues.size())
-			ledValues[led_idx] = val;
+		ledValues.at(led_idx) = val;
 	}
 
 protected:
