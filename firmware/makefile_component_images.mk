@@ -4,7 +4,7 @@
 
 comp_svg_dir := ../graphics/4ms/components
 befaco_svg_dir := ../graphics/Befaco/components
-rack_svg_dir := ../graphics/VCVComponentLibrary
+rack_svg_dir := ../graphics/Rack/components
 
 comp_lvgl_img_dir := src/pages/images/4ms/components
 befaco_lvgl_img_dir := src/pages/images/Befaco/components
@@ -12,10 +12,7 @@ rack_lvgl_img_dir := src/pages/images/Rack/components
 
 comp_svgs := $(wildcard $(comp_svg_dir)/*.svg) 
 befaco_svgs := $(wildcard $(befaco_svg_dir)/*.svg)
-#Choose a subset of Rack components:
-rack_svg_basenames := Rogan2SGray Rogan2PSWhite Rogan2PSGreen Rogan2PSRed 
-rack_svg_basenames += Davies1900hRed Davies1900hWhite MediumLight BefacoPush_0 BefacoSlidePot BefacoSlidePotHandle
-rack_svgs := $(addsuffix .svg,$(addprefix $(rack_svg_dir)/,$(rack_svg_basenames)))
+rack_svgs := $(wildcard $(rack_svg_dir)/*.svg) 
 
 comp_lvgl_imgs := $(subst $(comp_svg_dir),$(comp_lvgl_img_dir),$(comp_svgs:.svg=.c))
 befaco_lvgl_imgs := $(subst $(befaco_svg_dir),$(befaco_lvgl_img_dir),$(befaco_svgs:.svg=.c))

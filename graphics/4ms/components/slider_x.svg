@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="2.3529999mm"
-   height="26.918243mm"
-   viewBox="0 0 2.3529999 26.918244"
+   width="2.24087mm"
+   height="21.845301mm"
+   viewBox="0 0 2.24087 21.845301"
    version="1.1"
    id="svg163547"
    sodipodi:docname="slider_x.svg"
@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.9625884"
-     inkscape:cx="-8.7064304"
-     inkscape:cy="39.242027"
+     inkscape:zoom="5.6408534"
+     inkscape:cx="-12.40947"
+     inkscape:cy="22.957519"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -58,18 +58,18 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-107.68064,-95.308737)">
+     transform="translate(-107.73671,-98.053155)">
     <path
-       style="fill:#b5b5b5;stroke:#555555;stroke-width:2.353;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
-       d="M 108.85714,96.485237 V 121.05048"
+       style="fill:#b5b5b5;stroke:#555555;stroke-width:2.24087;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       d="m 108.85714,99.17359 v 19.60443"
        id="path946"
        sodipodi:nodetypes="cc" />
     <rect
-       style="fill:#cbcbcb;fill-opacity:1;stroke:none;stroke-width:1.953;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       style="fill:#cbcbcb;fill-opacity:1;stroke:none;stroke-width:1.85993;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
        id="rect3528"
-       width="0.96838379"
-       height="24.706102"
-       x="108.37295"
-       y="96.414803" />
+       width="1.1005343"
+       height="19.716846"
+       x="108.30688"
+       y="99.117378" />
   </g>
 </svg>
