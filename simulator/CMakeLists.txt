@@ -31,6 +31,7 @@ file(
   ${MM_ROOT}/firmware/src/pages/images/Befaco/components/*.c
   ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/modules/*.c
   ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/components/*.c
+  ${MM_ROOT}/firmware/src/pages/images/Rack/components/*.c
   ${MM_ROOT}/firmware/src/pages/fonts/MuseoSansRounded_*.c
   ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui.c
   ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui_helpers.c
@@ -45,11 +46,13 @@ file(
 file(
   GLOB
   CORE_MODULES
+  #
   # 4ms
   ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
   ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
-  # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/NoisePlethora.cpp
+  #
+  # Befaco
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/StereoStrip.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/SlewLimiter.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/SamplingModulator.cpp
@@ -57,7 +60,6 @@ file(
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Rampage.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/PonyVCO.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Percall.cpp
-  ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Muxslicer.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/MotionMTR.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Morphader.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Mixer.cpp
@@ -69,12 +71,11 @@ file(
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/SpringReverb.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/DualAtenuverter.cpp
   ${MM_ROOT}/firmware/vcv-ports/Befaco/src/EvenVCO.cpp
-  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/DualAtenuverter_artwork_240.c
-  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/DualAtenuverter_artwork_120.c
-  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/EvenVCO_artwork_240.c
-  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/EvenVCO_artwork_120.c
+  # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/NoisePlethora.cpp
+  # ${MM_ROOT}/firmware/vcv-ports/Befaco/src/Muxslicer.cpp
+  #
   # AudibleInstruments
-  ${MM_ROOT}/vcv-ports/AudibleInstruments/src/*.cpp
+  ${MM_ROOT}/firmware/vcv-ports/AudibleInstruments/src/Braids.cpp
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
@@ -82,9 +83,8 @@ file(
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
   ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/resources.cc
-  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/modules/Braids_artwork_240.c
-  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/modules/Braids_artwork_120.c
-  # Other
+  #
+  # support files
   ${MM_ROOT}/firmware/src/VCV-adaptor/pffft/pffft.c
   ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
   ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
@@ -112,11 +112,8 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(
-  simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES}
-            ${MM_ROOT}/firmware/src/pages/page_manager.cc
-  # ${MM_ROOT}/firmware/src/pages/images/4ms/modules/ENVVCA_artwork_240.png.c
-)
+add_executable(simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES}
+                         ${MM_ROOT}/firmware/src/pages/page_manager.cc)
 
 target_include_directories(
   simulator

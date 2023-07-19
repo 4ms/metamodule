@@ -147,7 +147,6 @@ modulesBefaco += Kickall
 modulesBefaco += Mixer
 modulesBefaco += Morphader
 modulesBefaco += MotionMTR
-# modulesBefaco += Muxlicer #can't change visibility dynamically
 modulesBefaco += Percall
 modulesBefaco += PonyVCO
 modulesBefaco += Rampage
@@ -155,6 +154,7 @@ modulesBefaco += STMix
 modulesBefaco += SamplingModulator
 modulesBefaco += SlewLimiter
 modulesBefaco += StereoStrip
+# modulesBefaco += Muxlicer #can't change visibility dynamically
 # modulesBefaco += NoisePlethora
 
 modules4ms := EnOsc ENVVCA 
@@ -195,6 +195,7 @@ INCLUDES += -Isrc/VCV-adaptor/pffft
 
 # Component images
 SOURCES += $(wildcard src/pages/images/4ms/components/*.c)
+SOURCES += $(wildcard src/pages/images/Rack/components/*.c)
 SOURCES += $(wildcard src/pages/images/Befaco/components/*.c)
 SOURCES += $(wildcard src/pages/images/AudibleInstruments/components/*.c)
 
