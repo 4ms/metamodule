@@ -38,16 +38,14 @@ createVcvSvg [input SVG file name] [output artwork SVG file name]
     Saves a new VCV artwork SVG file with the components layer removed.
 
 createLvglFaceplate [input faceplate SVG file name] [output C file name] {{optional layer to extract, default=all}}
-    Converts the SVG to two LVGL format .c files: one that's 240px high, and one that's 120px high.
+    Converts the SVG to a 47 dpi LVGL format .c file (240px/5.059in = 47.44dpi):
     If you want just one layer of the SVG to be extracted, pass that layer name as the optional 3rd argument.
     (e.g. for 4ms SVG info files, the layer to extract is called `faceplate`).
-    Requires these commands to be present on $PATH, or found at the env var:
-        inkscape            (INKSCAPE_BIN_PATH)
-        convert             (IMAGEMAGICK_BIN_PATH)
+    Requires the inkscape command to be present on PATH, or found at the env var INKSCAPE_BIN_PATH
 
 convertSvgToLvgl [input SVG file name] [output C file name] {{optional scale 1-100}}
-    Converts the SVG to two LVGL format .c files: one at the given scale and one
-    at half that scale. The scale parameter must be an integer or floating-point value
+    Converts the SVG to a 47dpi LVGL format .c files.
+    The scale parameter must be an integer or floating-point value
     and defaults to 63% if omitted.
     Requires the same inkscape and convert programs/paths as createLvglFaceplate
 

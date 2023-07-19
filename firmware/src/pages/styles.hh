@@ -32,6 +32,10 @@ struct Gui {
 
 	// removes border, outline, shadow
 	static inline lv_style_t plain_border_style;
+
+	// orange border
+	static inline lv_style_t module_border_style;
+
 	// transparent with no border, etc
 	static inline lv_style_t invisible_style;
 
@@ -222,6 +226,15 @@ struct Gui {
 		lv_style_set_border_width(&plain_border_style, 0);
 		lv_style_set_outline_width(&plain_border_style, 0);
 		lv_style_set_shadow_opa(&plain_border_style, LV_OPA_TRANSP);
+
+		//module border
+		lv_style_init(&module_border_style);
+		lv_style_set_outline_width(&module_border_style, 1);
+		lv_style_set_outline_color(&module_border_style, lv_palette_main(LV_PALETTE_ORANGE));
+		lv_style_set_border_width(&module_border_style, 0);
+		lv_style_set_shadow_opa(&module_border_style, LV_OPA_TRANSP);
+		lv_style_set_pad_all(&module_border_style, 0);
+		lv_style_set_pad_gap(&module_border_style, 0);
 
 		//popup_box_style
 		lv_style_init(&popup_box_style);

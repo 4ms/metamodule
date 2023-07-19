@@ -8,39 +8,41 @@ def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="all"):
     if exportLayer=="all":
         exportLayer = None
     png240Filename = outputBaseName +"_artwork_240"
-    svgToLVGL(artworkSvgFilename, png240Filename, "x240", False, exportLayer)
+    svgToLVGL(artworkSvgFilename, png240Filename, 240, False, exportLayer)
 
 
 def componentSvgToLVGL(svgFilename, outputBaseName, scale):
     scale = float(scale)
     png240Filename = outputBaseName.rstrip(".c")
-    svgToLVGL(svgFilename, png240Filename, f"{scale}%", True, None)
+    svgToLVGL(svgFilename, png240Filename)
 
 
-def svgToLVGL(svgFilename, outputBaseName, resize, alpha=True, exportLayer=None):
+def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=None):
     inkscapeBin = which('inkscape') or os.getenv('INKSCAPE_BIN_PATH')
     if inkscapeBin is None:
         Log("inkscape is not found. Please put it in your shell PATH, or set INKSCAPE_BIN_PATH to the path to the binary")
         Log("Aborting")
         return
 
-    convertBin = which('convert') or which('magick') or os.getenv('IMAGEMAGICK_BIN_PATH')
-    if convertBin is None:
-        Log("convert or magick is not found. Please put it in your shell PATH, or set IMAGEMAGICK_BIN_PATH to the path to the binary")
-        Log("Aborting")
-        return
-
     # SVG ==> PNG
     pngFilename = outputBaseName + ".png"
     exportLayer = f"--export-id=\"{exportLayer}\" --export-id-only" if exportLayer else ""
-    inkscape_cmd = f'{inkscapeBin} --export-type="png" {exportLayer} --export-filename=- {svgFilename}'
-    convert_cmd = f'{convertBin} -resize {resize} - {pngFilename}'
+
+
+    if resize == 0:
+        dpi = determine_dpi(svgFilename)
+        export_size = f"--export-dpi={dpi}"
+    else:
+        dpi = f"x{resize}"
+        export_size = f"--export-height={resize}"
+
+    inkscape_cmd = f'{inkscapeBin} --export-type="png" {exportLayer} --export-png-use-dithering=false {export_size} --export-filename={pngFilename} {svgFilename}'
 
     try:
-        subprocess.run(f'{inkscape_cmd} | {convert_cmd}', shell=True, check=True)
-        Log(f"Converted {svgFilename} to {pngFilename}, resizing to {resize}.")
+        subprocess.run(f'{inkscape_cmd}', shell=True, check=True)
+        Log(f"Converted {svgFilename} to {pngFilename} at {dpi}.")
     except:
-        Log(f"Failed running {inkscape_cmd} | {convert_cmd}. Aborting")
+        Log(f"Failed running {inkscape_cmd}. Aborting")
         return
 
     # PNG ==> LVGL image (C file with array)
@@ -61,3 +63,14 @@ def svgToLVGL(svgFilename, outputBaseName, resize, alpha=True, exportLayer=None)
         " 4) `sudo n 16` to use node v16 (required) and then `cd ../shared/svgextract/lv_img_conv && npm install`.\n"
         "     Might have to install n with `npm i -g n`, and do `brew unlink node` first\n")
         return
+
+def determine_dpi(filename):
+    with open(filename, 'r') as fp:
+        line = fp.readline()
+        line = fp.readline()
+        if "Adobe Illustrator" in line:
+            return 60.72
+        else:
+            return 47.44
+
+

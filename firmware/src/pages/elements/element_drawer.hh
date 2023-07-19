@@ -12,15 +12,15 @@ namespace ElementDrawerImpl
 {
 
 inline void
-draw_element(uint32_t x, uint32_t y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t *obj, uint32_t module_height) {
+draw_element(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t *obj, uint32_t module_height) {
 	if (!img) {
 		pr_dbg("draw_knob: image not found\n");
 		return;
 	}
 	lv_img_set_src(obj, img);
 
-	uint32_t width = img->header.w;
-	uint32_t height = img->header.h;
+	float width = img->header.w;
+	float height = img->header.h;
 
 	float zoom = module_height / 240.f;
 	float pixel_width = width * zoom;
@@ -30,14 +30,14 @@ draw_element(uint32_t x, uint32_t y, Coords coord_ref, const lv_img_dsc_t *img, 
 
 	if (coord_ref == Coords::TopLeft && module_height != 240) {
 		// // TODO: Make this more general
-		x -= pixel_width / 2.f;
-		y -= pixel_height / 2.f;
+		// x -= pixel_width / 2.f;
+		// y -= pixel_height / 2.f;
 		////adjust by difference of width and pixel_width
-		//pixel_x -= (width - pixel_width);
-		//pixel_y -= (height - pixel_height);
-		//// Convert back to non-zoom coords (LVGL uses this)
-		//x = pixel_x / zoom;
-		//y = pixel_y / zoom;
+		// pixel_x -= (float)width - pixel_width;
+		// pixel_y -= (float)height - pixel_height;
+		// // Convert back to non-zoom coords (LVGL uses this)
+		// x = std::round(pixel_x / zoom);
+		// y = std::round(pixel_y / zoom);
 	} else if (coord_ref == Coords::Center) {
 		//Calculate Top-left from Center
 		pixel_x -= pixel_width / 2.f;
@@ -45,15 +45,21 @@ draw_element(uint32_t x, uint32_t y, Coords coord_ref, const lv_img_dsc_t *img, 
 		// Convert back to non-zoom coords (LVGL uses this)
 		x = pixel_x / zoom;
 		y = pixel_y / zoom;
+		// x+=1;
+		// y+=1;
 	}
-	printf("@x:%d, y:%d [%d x %d]\n", x, y, width, height);
 
 	uint16_t lv_zoom = 256.f * zoom;
 	lv_img_set_zoom(obj, lv_zoom);
-	// lv_img_set_size_mode(obj, LV_IMG_SIZE_MODE_REAL);
+	lv_img_set_size_mode(obj, LV_IMG_SIZE_MODE_REAL);
 	lv_img_set_antialias(obj, true);
 	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
-	lv_obj_set_pos(obj, x, y);
+	uint16_t pos_x = std::round(x);
+	uint16_t pos_y = std::round(y);
+	lv_obj_add_style(obj, &Gui::module_border_style, LV_STATE_DEFAULT);
+	lv_obj_set_pos(obj, pos_x, pos_y);
+
+	printf("@x:%d(%f), y:%d(%f) [%f x %f] x%d\n", pos_x, x, pos_y, y, width, height, lv_zoom);
 	// Default:
 	//lv_img_set_pivot(obj, width / 2, height / 2);
 }
@@ -61,7 +67,8 @@ draw_element(uint32_t x, uint32_t y, Coords coord_ref, const lv_img_dsc_t *img, 
 inline lv_obj_t *
 draw_element(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	lv_obj_t *obj = lv_img_create(canvas);
-	auto [x, y] = mm_to_px(el.x_mm, el.y_mm, module_height);
+	float x = ModuleInfoBase::mm_to_px(el.x_mm, module_height);
+	float y = ModuleInfoBase::mm_to_px(el.y_mm, module_height);
 	draw_element(x, y, el.coords, img, obj, module_height);
 	return obj;
 }
