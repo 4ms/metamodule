@@ -60,11 +60,11 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(ui_KnobButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
-		description = lv_label_create(base);
-		lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
-		lv_label_set_long_mode(description, LV_LABEL_LONG_WRAP);
-		lv_obj_set_width(description, 320);
-		lv_obj_set_height(description, 51);
+		// description = lv_label_create(base);
+		// lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
+		// lv_label_set_long_mode(description, LV_LABEL_LONG_WRAP);
+		// lv_obj_set_width(description, 320);
+		// lv_obj_set_height(description, 51);
 
 		module_name = lv_label_create(base);
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
@@ -104,7 +104,7 @@ struct PatchViewPage : PageBase {
 			return;
 
 		lv_label_set_text(patchname, patch.patch_name.c_str());
-		lv_label_set_text(description, patch.description.c_str());
+		// lv_label_set_text(description, patch.description.c_str());
 
 		blur();
 
@@ -310,7 +310,7 @@ struct PatchViewPage : PageBase {
 	}
 
 private:
-	lv_obj_t *description;
+	// lv_obj_t *description;
 	lv_obj_t *patchname;
 	lv_obj_t *modules_cont;
 	lv_obj_t *module_name;
