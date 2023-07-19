@@ -11,8 +11,8 @@ namespace MetaModule
 namespace ElementDrawerImpl
 {
 
-inline void draw_element(
-	uint32_t left, uint32_t top, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t *obj, uint32_t module_height) {
+inline void
+draw_element(uint32_t x, uint32_t y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t *obj, uint32_t module_height) {
 	if (!img) {
 		pr_dbg("draw_knob: image not found\n");
 		return;
@@ -25,22 +25,37 @@ inline void draw_element(
 	float zoom = module_height / 240.f;
 	float pixel_width = width * zoom;
 	float pixel_height = height * zoom;
+	float pixel_x = x * zoom;
+	float pixel_y = y * zoom;
 
 	if (coord_ref == Coords::TopLeft && module_height != 240) {
-		left -= pixel_width / 2.f;
-		top -= pixel_height / 2.f;
-	} else if (coord_ref == Coords::Center && module_height != 240) {
-		left -= pixel_width;
-		top -= pixel_height;
+		// // TODO: Make this more general
+		x -= pixel_width / 2.f;
+		y -= pixel_height / 2.f;
+		////adjust by difference of width and pixel_width
+		//pixel_x -= (width - pixel_width);
+		//pixel_y -= (height - pixel_height);
+		//// Convert back to non-zoom coords (LVGL uses this)
+		//x = pixel_x / zoom;
+		//y = pixel_y / zoom;
+	} else if (coord_ref == Coords::Center) {
+		//Calculate Top-left from Center
+		pixel_x -= pixel_width / 2.f;
+		pixel_y -= pixel_height / 2.f;
+		// Convert back to non-zoom coords (LVGL uses this)
+		x = pixel_x / zoom;
+		y = pixel_y / zoom;
 	}
-	printf("@left:%d, top:%d [%d x %d]\n", left, top, width, height);
+	printf("@x:%d, y:%d [%d x %d]\n", x, y, width, height);
 
 	uint16_t lv_zoom = 256.f * zoom;
 	lv_img_set_zoom(obj, lv_zoom);
+	// lv_img_set_size_mode(obj, LV_IMG_SIZE_MODE_REAL);
 	lv_img_set_antialias(obj, true);
 	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
-	lv_obj_set_pos(obj, left, top);
-	lv_img_set_pivot(obj, width / 2, height / 2);
+	lv_obj_set_pos(obj, x, y);
+	// Default:
+	//lv_img_set_pivot(obj, width / 2, height / 2);
 }
 
 inline lv_obj_t *
