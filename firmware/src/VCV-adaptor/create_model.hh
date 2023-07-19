@@ -47,14 +47,6 @@ plugin::Model *createModel(std::string_view slug) {
 	return nullptr;
 }
 
-// struct Braids;
-// struct BraidsWidget;
-
-// template<>
-// plugin::Model *createModel<Braids, BraidsWidget>(std::string_view slug){
-// 	return nullptr;
-// }
-
 } // namespace rack
 
 using namespace rack;
