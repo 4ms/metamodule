@@ -23,45 +23,29 @@ draw_element(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj
 	float height = img->header.h;
 
 	float zoom = module_height / 240.f;
-	float pixel_width = width * zoom;
-	float pixel_height = height * zoom;
-	float pixel_x = x * zoom;
-	float pixel_y = y * zoom;
 
-	if (coord_ref == Coords::TopLeft && module_height != 240) {
-		// // TODO: Make this more general
-		// x -= pixel_width / 2.f;
-		// y -= pixel_height / 2.f;
-		////adjust by difference of width and pixel_width
-		// pixel_x -= (float)width - pixel_width;
-		// pixel_y -= (float)height - pixel_height;
-		// // Convert back to non-zoom coords (LVGL uses this)
-		// x = std::round(pixel_x / zoom);
-		// y = std::round(pixel_y / zoom);
+	if (coord_ref == Coords::TopLeft && zoom < 1.f) {
+		// FIXME: why does LVGL add padding around a zoomed obj, and how to get rid of it?
+		// This just happens to work, but why?
+		x -= width * (1.f - zoom) / 2.f;
+		y -= height * (1.f - zoom) / 2.f;
 	} else if (coord_ref == Coords::Center) {
 		//Calculate Top-left from Center
-		pixel_x -= pixel_width / 2.f;
-		pixel_y -= pixel_height / 2.f;
-		// Convert back to non-zoom coords (LVGL uses this)
-		x = pixel_x / zoom;
-		y = pixel_y / zoom;
-		// x+=1;
-		// y+=1;
+		x -= width / 2.f;
+		y -= height / 2.f;
 	}
 
 	uint16_t lv_zoom = 256.f * zoom;
 	lv_img_set_zoom(obj, lv_zoom);
-	lv_img_set_size_mode(obj, LV_IMG_SIZE_MODE_REAL);
-	lv_img_set_antialias(obj, true);
+	lv_img_set_size_mode(obj, LV_IMG_SIZE_MODE_VIRTUAL);
+	lv_img_set_antialias(obj, false);
 	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
+	// lv_obj_add_style(obj, &Gui::module_border_style, LV_STATE_DEFAULT);
+
 	uint16_t pos_x = std::round(x);
 	uint16_t pos_y = std::round(y);
-	lv_obj_add_style(obj, &Gui::module_border_style, LV_STATE_DEFAULT);
 	lv_obj_set_pos(obj, pos_x, pos_y);
-
-	printf("@x:%d(%f), y:%d(%f) [%f x %f] x%d\n", pos_x, x, pos_y, y, width, height, lv_zoom);
-	// Default:
-	//lv_img_set_pivot(obj, width / 2, height / 2);
+	lv_img_set_pivot(obj, width / 2.f, height / 2.f);
 }
 
 inline lv_obj_t *

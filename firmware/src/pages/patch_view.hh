@@ -25,8 +25,7 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
-	static inline uint32_t Height = 120;
-	// static_assert(height == 120 || height == 240);
+	static inline uint32_t Height = 180;
 
 	PatchViewPage(PatchInfo info)
 		: PageBase{info} {
@@ -59,6 +58,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(ui_InfoButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_KnobButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+		lv_obj_add_event_cb(ui_SettingsButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 
 		// description = lv_label_create(base);
 		// lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
@@ -96,6 +96,7 @@ struct PatchViewPage : PageBase {
 	}
 
 	void prepare_focus() override {
+
 		patch = patch_storage.get_view_patch();
 
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
@@ -160,6 +161,7 @@ struct PatchViewPage : PageBase {
 		//cable_drawer.draw_all();
 
 		// lv_obj_refresh_self_size(modules_cont);
+		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 	}
 
 	void blur() override {
@@ -306,6 +308,11 @@ struct PatchViewPage : PageBase {
 		// page->blur();
 		// page->focus();
 		// }
+		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
+	}
+
+	static void button_focussed_cb(lv_event_t *event) {
+		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 	}
 
