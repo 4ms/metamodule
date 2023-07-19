@@ -5,6 +5,8 @@
 #include "VCV-adaptor/plugin/Model.hpp"
 #include <string_view>
 
+#include "CoreModules/AudibleInstruments/info/Braids_info.hh"
+
 namespace rack
 {
 
@@ -16,6 +18,11 @@ std::unique_ptr<CoreProcessor> create_vcv_module() {
 template<typename ModuleT, typename WidgetT>
 requires(std::derived_from<WidgetT, rack::ModuleWidget>) && (std::derived_from<ModuleT, rack::engine::Module>)
 plugin::Model *createModel(std::string_view slug) {
+
+	if (slug == "Braids") {
+		ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>, MetaModule::ModuleInfoView::makeView<MetaModule::BraidsInfo>());
+		return nullptr;
+	}
 
 	// Register creation function
 	ModuleFactory::registerModuleType(slug, create_vcv_module<ModuleT>);
@@ -39,6 +46,14 @@ plugin::Model *createModel(std::string_view slug) {
 
 	return nullptr;
 }
+
+// struct Braids;
+// struct BraidsWidget;
+
+// template<>
+// plugin::Model *createModel<Braids, BraidsWidget>(std::string_view slug){
+// 	return nullptr;
+// }
 
 } // namespace rack
 
