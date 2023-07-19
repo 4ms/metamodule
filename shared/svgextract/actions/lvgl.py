@@ -7,22 +7,14 @@ from helpers.util import *
 def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="all"):
     if exportLayer=="all":
         exportLayer = None
-
     png240Filename = outputBaseName +"_artwork_240"
     svgToLVGL(artworkSvgFilename, png240Filename, "x240", False, exportLayer)
-
-    png120Filename = outputBaseName +"_artwork_120"
-    svgToLVGL(artworkSvgFilename, png120Filename, "x120", False, exportLayer)
 
 
 def componentSvgToLVGL(svgFilename, outputBaseName, scale):
     scale = float(scale)
-
-    png240Filename = outputBaseName +"_240"
+    png240Filename = outputBaseName
     svgToLVGL(svgFilename, png240Filename, f"{scale}%", True, None)
-
-    png120Filename = outputBaseName +"_120"
-    svgToLVGL(svgFilename, png120Filename, f"{scale/2}%", True, None)
 
 
 def svgToLVGL(svgFilename, outputBaseName, resize, alpha=True, exportLayer=None):
