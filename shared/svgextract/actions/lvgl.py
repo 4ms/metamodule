@@ -53,7 +53,7 @@ def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=Non
     try:
         cFilename = os.path.realpath(os.path.splitext(pngFilename)[0]+".c")
         subprocess.run([lv_img_conv, '-c', colorFormat, '-t', 'c', '--force', pngFilename, '-o', cFilename], check=True)
-        Log(f"Converted {pngFilename} to {cFilename}")
+        #Log(f"Converted {pngFilename} to {cFilename}")
 
     except subprocess.CalledProcessError:
         Log("lv_img_conv.js failed. Try \n"
@@ -70,6 +70,9 @@ def determine_dpi(filename):
     # Some need to be exported at 47.44 DPI (which makes sense since 240px screen = 5.059" module)
     # But it seems some are scaled by a factor of 96/75, so they need to be exported at 60.72 DPI
     # I don't know the reason, but the common factor seems to be width="*mm" in the file
+    if "4ms" in filename:
+        return 60.72
+
     with open(filename, 'r') as fp:
         contents = fp.read()
         m = re.search('width=".+mm"',contents)
