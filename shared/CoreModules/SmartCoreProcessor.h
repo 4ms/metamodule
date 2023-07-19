@@ -37,17 +37,28 @@ protected:
 		constexpr auto elementID = static_cast<size_t>(EL);
 		constexpr auto& elementRef = INFO::Elements[elementID];
 
-		// read raw value
-		auto rawValue = getParamRaw(EL);
-
 		// construct element of same type as the element the enum points to
 		constexpr auto variantIndex = elementRef.index();
 		std::variant_alternative_t<variantIndex,MetaModule::Element> DummyElement;
 
-		// call conversion function for that type of element
-		auto result = MetaModule::StateConversion::convertState(DummyElement, rawValue);
+		// read raw value
+		std::array<float,DummyElement.NumParams> rawValues;
+		for (std::size_t i=0; i<rawValues.size(); i++)
+		{
+			rawValues[i] = getParamRaw(EL, i);
+		}
 
-		return result;
+		// call conversion function for that type of element
+		// use shortcut for special but common case of single parameter elements
+		// in order to keep the conversion functions simple
+		if constexpr (rawValues.size() == 1)
+		{
+			return MetaModule::StateConversion::convertState(DummyElement, rawValues[0]);
+		}
+		else
+		{
+			return MetaModule::StateConversion::convertState(DummyElement, rawValues);
+		}
 	}
 
 	template <typename INFO::Elem EL, typename VAL>
