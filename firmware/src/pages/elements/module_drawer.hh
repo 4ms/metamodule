@@ -22,7 +22,7 @@ struct ModuleDrawer {
 
 	// Draws the module from patch, into container, using the provided buffer.
 	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
-		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, 240 /*height*/);
+		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug);
 		if (!img) {
 			if (!slug.is_equal("PanelMedium"))
 				pr_warn("Image not found for %s\n", slug.c_str());

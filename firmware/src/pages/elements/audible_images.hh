@@ -10,8 +10,8 @@ LV_IMG_DECLARE(braids_display_240);
 namespace MetaModule::ElementImageImpl
 {
 
-inline const lv_img_dsc_t *get_img(const BraidsDisplay148x56 &, uint32_t scale_px) {
-	return scale_px == 240 ? &braids_display_240 : &braids_display_240;
+inline const lv_img_dsc_t *get_img(const BraidsDisplay148x56 &) {
+	return &braids_display_240;
 }
 } // namespace MetaModule::ElementImageImpl
 
