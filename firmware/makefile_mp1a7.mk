@@ -166,11 +166,8 @@ SOURCES += $(foreach m,$(modulesBefaco),vcv-ports/Befaco/src/$(m).cpp)
 SOURCES += $(foreach m,$(modules4ms),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
 
 SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_240.c)
-SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_120.c)
 SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_240.c)
-SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_120.c)
 SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_240.c)
-SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_120.c)
 
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*.cc)

@@ -2,53 +2,62 @@
 #include "CoreModules/elements/elements.hh"
 #include "lvgl.h"
 
-LV_IMG_DECLARE(BananaBlack_240);
-LV_IMG_DECLARE(BananaRed_240);
-LV_IMG_DECLARE(Davies1900hRed_240);
-LV_IMG_DECLARE(Davies1900hWhite_240);
-LV_IMG_DECLARE(MediumLight_240);
-LV_IMG_DECLARE(BefacoBigKnob_240);
-LV_IMG_DECLARE(BefacoTinyKnobWhite_240);
-LV_IMG_DECLARE(BefacoSlidePotSmall_240);
-LV_IMG_DECLARE(BefacoSlidePotHandleSmall_240);
+LV_IMG_DECLARE(BananutBlack);
+LV_IMG_DECLARE(BananutRed);
+LV_IMG_DECLARE(BefacoBigKnob);
+LV_IMG_DECLARE(BefacoTinyKnobWhite);
+LV_IMG_DECLARE(BefacoSlidePotSmall);
+LV_IMG_DECLARE(BefacoSlidePotHandleSmall);
+LV_IMG_DECLARE(Davies1900hLightGrey);
+LV_IMG_DECLARE(Davies1900hLargeLightGrey);
+LV_IMG_DECLARE(Davies1900hDarkGrey);
+LV_IMG_DECLARE(Davies1900hLargeGrey);
 
 namespace MetaModule::ElementImageImpl
 {
 
-inline const lv_img_dsc_t *get_img(const Davies1900hWhiteKnob &) {
-	return &Davies1900hWhite_240;
-}
-
-inline const lv_img_dsc_t *get_img(const Davies1900hRedKnob &) {
-	return &Davies1900hRed_240;
-}
-
 inline const lv_img_dsc_t *get_img(const BefacoBigKnob &) {
-	return &BefacoBigKnob_240;
+	return &::BefacoBigKnob;
 }
 
 inline const lv_img_dsc_t *get_img(const BefacoTinyKnob &) {
-	return &BefacoTinyKnobWhite_240;
+	return &::BefacoTinyKnobWhite;
+}
+
+inline const lv_img_dsc_t *get_img(const BefacoTinyKnobDarkGrey &) {
+	return &::BefacoTinyKnobWhite;
+}
+
+inline const lv_img_dsc_t *get_img(const Davies1900hDarkGreyKnob&) {
+	return &::Davies1900hDarkGrey;
+}
+
+inline const lv_img_dsc_t *get_img(const Davies1900hLightGreyKnob&) {
+	return &::Davies1900hLightGrey;
+}
+
+inline const lv_img_dsc_t *get_img(const Davies1900hLargeGreyKnob &) {
+	return &::Davies1900hLargeGrey;
+}
+
+inline const lv_img_dsc_t *get_img(const Davies1900hLargeLightGreyKnob &) {
+	return &::Davies1900hLargeLightGrey;
 }
 
 inline const lv_img_dsc_t *get_img(const BefacoInputPort &) {
-	return &BananaBlack_240;
+	return &::BananutBlack;
 }
 
 inline const lv_img_dsc_t *get_img(const BefacoOutputPort &) {
-	return &BananaRed_240;
+	return &::BananutRed;
 }
 
-inline const lv_img_dsc_t *get_img(const MediumLight<RedGreenBlueLight> &) {
-	return &MediumLight_240;
+inline const lv_img_dsc_t *get_img(const BefacoSlidePotSmall &) {
+	return &::BefacoSlidePotSmall;
 }
 
-inline const lv_img_dsc_t *get_img(const BefacoSlidePot &) {
-	return &BefacoSlidePotSmall_240;
-}
-
-inline const lv_img_dsc_t *get_img_handle(const BefacoSlidePot &) {
-	return &BefacoSlidePotHandleSmall_240;
+inline const lv_img_dsc_t *get_img_handle(const BefacoSlidePotSmall &) {
+	return &::BefacoSlidePotHandleSmall;
 }
 
 } // namespace MetaModule::ElementImageImpl

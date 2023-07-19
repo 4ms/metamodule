@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Layer_1"
+   data-name="Layer 1"
+   width="12.91mm"
+   height="12.91mm"
+   viewBox="0 0 36.6 36.6"
+   version="1.1"
+   sodipodi:docname="Davies1900hBlack.svg"
+   inkscape:export-filename="Davies1900hBlack.png"
+   inkscape:export-xdpi="60.720001"
+   inkscape:export-ydpi="60.720001"
+   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs7" />
+  <sodipodi:namedview
+     id="namedview5"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="21.047799"
+     inkscape:cx="14.514582"
+     inkscape:cy="24.634405"
+     inkscape:window-width="1592"
+     inkscape:window-height="1205"
+     inkscape:window-x="622"
+     inkscape:window-y="393"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Layer_1" />
+  <path
+     id="path6449"
+     d="M36.2,16.4c-.8-1.3-2.2-2.5-2.9-4.4a28.46,28.46,0,0,1-1-5.1,17.24,17.24,0,0,0-2.7-2.7,26.88,26.88,0,0,1-5.1-1c-1.8-.7-3.1-2.1-4.3-2.9A12.1,12.1,0,0,0,18.3.2a12.1,12.1,0,0,0-1.9.1c-1.3.8-2.5,2.1-4.3,2.9A17.59,17.59,0,0,1,7,4.2,37,37,0,0,0,4.2,7a26.88,26.88,0,0,1-1,5.1c-.7,1.8-2.1,3-2.9,4.3a12.1,12.1,0,0,0-.1,1.9,12.1,12.1,0,0,0,.1,1.9c.8,1.3,2.1,2.5,2.9,4.3s.7,3.6,1,5.1A14.38,14.38,0,0,0,7,32.3a26.88,26.88,0,0,1,5.1,1c1.8.7,3.1,2.1,4.3,2.9a12.1,12.1,0,0,0,1.9.1,12.1,12.1,0,0,0,1.9-.1c1.3-.8,2.5-2.1,4.3-2.9s3.6-.7,5.1-1a17.24,17.24,0,0,0,2.7-2.7,26.88,26.88,0,0,1,1-5.1c.7-1.8,2.1-3,2.9-4.3a12.1,12.1,0,0,0,.1-1.9c0-.7-.1-1.3-.1-1.9"
+     transform="translate(0.05 0.05)"
+     style="stroke: #ededed;stroke-miterlimit: 10;stroke-width: 0.5px;fill-rule: evenodd" />
+  <path
+     id="path6453"
+     d="M18.9.3a2.44,2.44,0,0,0-1.2,0V18.5h1.2Z"
+     transform="translate(0.05 0.05)"
+     style="fill: #fff;fill-rule: evenodd" />
+</svg>

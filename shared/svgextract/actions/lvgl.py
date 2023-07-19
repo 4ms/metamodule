@@ -13,7 +13,7 @@ def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="all"):
 
 def componentSvgToLVGL(svgFilename, outputBaseName, scale):
     scale = float(scale)
-    png240Filename = outputBaseName
+    png240Filename = outputBaseName.rstrip(".c")
     svgToLVGL(svgFilename, png240Filename, f"{scale}%", True, None)
 
 
