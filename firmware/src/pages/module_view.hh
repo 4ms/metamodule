@@ -119,6 +119,7 @@ struct ModuleViewPage : PageBase {
 		if (opts.length() > 0)
 			opts.pop_back();
 
+		//Show Roller and select it
 		lv_obj_set_pos(roller, width_px, 0);
 		lv_obj_set_size(roller, 320 - width_px, 240);
 		lv_obj_clear_flag(roller, LV_OBJ_FLAG_HIDDEN);
@@ -127,7 +128,7 @@ struct ModuleViewPage : PageBase {
 		lv_roller_set_options(roller, opts.c_str(), LV_ROLLER_MODE_NORMAL);
 		lv_roller_set_visible_row_count(roller, 11);
 		lv_obj_add_event_cb(roller, roller_cb, LV_EVENT_KEY, this);
-		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(roller, roller_click_cb, LV_EVENT_PRESSED, this);
 
 		// Select first element
 		lv_roller_set_selected(roller, 0, LV_ANIM_OFF);
@@ -137,9 +138,13 @@ struct ModuleViewPage : PageBase {
 			lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
 
+		// Hide Edit pane
 		lv_obj_set_pos(edit_pane, width_px, 0);
 		lv_obj_set_size(edit_pane, 320 - width_px, 240);
 		lv_obj_add_flag(edit_pane, LV_OBJ_FLAG_HIDDEN);
+
+		lv_group_focus_obj(roller);
+		lv_group_set_editing(group, false);
 	}
 
 	void update() override {
@@ -201,6 +206,9 @@ private:
 		for (auto &b : button)
 			lv_obj_del(b);
 
+		if (canvas)
+			lv_obj_del(canvas);
+
 		button.clear();
 		drawn_elements.clear();
 		module_controls.clear();
@@ -244,6 +252,7 @@ private:
 		auto &module_controls = page->module_controls;
 
 		if (cur_sel < module_controls.size()) {
+			printf_("Click %d\n", cur_sel);
 			PageList::set_selected_control(module_controls[cur_sel]);
 
 			// Hide roller, show edit pane
