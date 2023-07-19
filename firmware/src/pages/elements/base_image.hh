@@ -3,6 +3,7 @@
 #include "lvgl.h"
 
 #include "4ms_images.hh"
+#include "Rack_images.hh"
 #include "audible_images.hh"
 #include "befaco_images.hh"
 #include "pr_dbg.hh"
