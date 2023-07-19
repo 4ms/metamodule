@@ -3,13 +3,13 @@
 #include "VCV-adaptor/widget_convert/base.hh"
 
 // Forward declare widgets from Befaco/src/plugin.hpp
-template<typename Base>
-struct Rogan6PSLight;
-
 namespace rack
 {
 struct RedGreenBlueLight;
 }
+
+template<typename Base>
+struct Rogan6PSLight;
 
 template<>
 struct Rogan6PSLight<rack::RedGreenBlueLight>;

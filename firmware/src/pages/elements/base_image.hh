@@ -33,7 +33,7 @@ struct ElementImage {
 
 	template<typename T>
 	const lv_img_dsc_t *get_img(T element) {
-		return ElementImageImpl::get_img(element, scale_px);
+		return ElementImageImpl::get_img(element, 240 /*scale_px*/);
 	}
 };
 

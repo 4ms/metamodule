@@ -8,10 +8,10 @@
 namespace MetaModule::ElementDrawerImpl
 {
 
-constexpr std::pair<uint32_t, uint32_t> mm_to_topleft_px(uint32_t x_mm, uint32_t y_mm, uint32_t module_height) {
-	uint32_t left = std::round(ModuleInfoBase::mm_to_px(x_mm, module_height));
-	uint32_t top = std::round(ModuleInfoBase::mm_to_px(y_mm, module_height));
-	return {left, top};
+constexpr std::pair<uint32_t, uint32_t> mm_to_px(uint32_t x_mm, uint32_t y_mm, uint32_t module_height) {
+	uint32_t x = std::round(ModuleInfoBase::mm_to_px(x_mm, module_height));
+	uint32_t y = std::round(ModuleInfoBase::mm_to_px(y_mm, module_height));
+	return {x, y};
 }
 
 inline std::pair<uint32_t, uint32_t>

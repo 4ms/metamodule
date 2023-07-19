@@ -103,7 +103,7 @@ struct MapRingDrawer {
 
 		auto [x, y] = element.coords == Coords::Center ?
 						  ElementDrawerImpl::mm_to_center_px(element.x_mm, element.y_mm, w, h, module_height) :
-						  ElementDrawerImpl::mm_to_topleft_px(element.x_mm, element.y_mm, module_height);
+						  ElementDrawerImpl::mm_to_px(element.x_mm, element.y_mm, module_height);
 
 		ElementDrawerImpl::Rect r(x, y, w, h);
 		ElementDrawerImpl::draw_mapped_ring(element, module_height, canvas, r, panel_el_id);

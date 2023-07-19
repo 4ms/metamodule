@@ -24,17 +24,13 @@ draw_element(const BraidsDisplay148x56 &el, const lv_img_dsc_t *img, lv_obj_t *c
 		pr_dbg("draw_element(BraidsDisplay148x56), image not found\n");
 		return nullptr;
 	}
-	uint32_t width = img->header.w;
-	uint32_t height = img->header.h;
 	uint32_t left = std::round(ModuleInfoBase::mm_to_px(el.x_mm, module_height));
 	uint32_t top = std::round(ModuleInfoBase::mm_to_px(el.y_mm, module_height));
 
 	lv_draw_img_dsc_t draw_img_dsc;
 	lv_draw_img_dsc_init(&draw_img_dsc);
+	draw_img_dsc.zoom = 256.f * module_height / 240.f;
 	lv_canvas_draw_img(canvas, left, top, img, &draw_img_dsc);
-
-	pr_dbg(
-		"Draw BraidsDisplay148x56 at %d, %d (w:%d h:%d) module_height=%d\n", left, top, width, height, module_height);
 
 	return nullptr;
 }

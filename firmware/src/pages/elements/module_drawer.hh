@@ -22,14 +22,16 @@ struct ModuleDrawer {
 
 	// Draws the module from patch, into container, using the provided buffer.
 	lv_obj_t *draw_faceplate(ModuleTypeSlug slug, std::span<lv_color_t> canvas_buffer) {
-		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, height);
+		const lv_img_dsc_t *img = ModuleImages::get_image_by_slug(slug, 240 /*height*/);
 		if (!img) {
 			if (!slug.is_equal("PanelMedium"))
 				pr_warn("Image not found for %s\n", slug.c_str());
 			return nullptr;
 		}
 
-		auto widthpx = img->header.w;
+		float zoom = height / 240.f;
+
+		uint32_t widthpx = img->header.w * zoom;
 		if ((widthpx * height) > canvas_buffer.size()) {
 			pr_warn("Buffer not big enough for %dpx x %dpx (%zu avail), not drawing\n",
 					widthpx,
@@ -50,6 +52,7 @@ struct ModuleDrawer {
 		// Draw module artwork
 		lv_draw_img_dsc_t draw_img_dsc;
 		lv_draw_img_dsc_init(&draw_img_dsc);
+		draw_img_dsc.zoom = zoom * 256;
 		pr_dbg("Drawing faceplate %s\n", slug.data());
 		lv_canvas_draw_img(canvas, 0, 0, img, &draw_img_dsc);
 
