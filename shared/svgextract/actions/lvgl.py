@@ -1,6 +1,7 @@
 import os
 from shutil import which
 import subprocess
+import re
 
 from helpers.util import *
 
@@ -40,7 +41,7 @@ def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=Non
 
     try:
         subprocess.run(f'{inkscape_cmd}', shell=True, check=True)
-        Log(f"Converted {svgFilename} to {pngFilename} at {dpi}.")
+        Log(f"Converted {svgFilename} to {os.path.basename(pngFilename)} at {dpi} dpi.")
     except:
         Log(f"Failed running {inkscape_cmd}. Aborting")
         return
@@ -65,12 +66,17 @@ def svgToLVGL(svgFilename, outputBaseName, resize=0, alpha=True, exportLayer=Non
         return
 
 def determine_dpi(filename):
+    # Workaround for different SVGs;
+    # Some need to be exported at 47.44 DPI (which makes sense since 240px screen = 5.059" module)
+    # But it seems some are scaled by a factor of 96/75, so they need to be exported at 60.72 DPI
+    # I don't know the reason, but the common factor seems to be width="*mm" in the file
     with open(filename, 'r') as fp:
-        line = fp.readline()
-        line = fp.readline()
-        if "Adobe Illustrator" in line:
+        contents = fp.read()
+        m = re.search('width=".+mm"',contents)
+        if m is None:
+            return 60.72
+        if m.group(0) is None:
             return 60.72
         else:
             return 47.44
-
 

@@ -21,11 +21,11 @@ rack_lvgl_imgs := $(subst $(rack_svg_dir),$(rack_lvgl_img_dir),$(rack_svgs:.svg=
 comp-images: $(comp_lvgl_imgs) $(befaco_lvgl_imgs) $(rack_lvgl_imgs)
 
 $(comp_lvgl_imgs): $(comp_lvgl_img_dir)/%.c : $(comp_svg_dir)/%.svg
-	python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
+	@python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
 
 $(befaco_lvgl_imgs): $(befaco_lvgl_img_dir)/%.c : $(befaco_svg_dir)/%.svg
-	python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
+	@python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
 
 $(rack_lvgl_imgs): $(rack_lvgl_img_dir)/%.c : $(rack_svg_dir)/%.svg
-	python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
+	@python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
 
