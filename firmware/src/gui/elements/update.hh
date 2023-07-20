@@ -4,7 +4,7 @@
 #include "lvgl.h"
 #include "params.hh"
 #include "patch/patch_data.hh"
-#include "printf.h"
+#include "pr_dbg.hh"
 #include <optional>
 
 namespace MetaModule
@@ -14,18 +14,19 @@ namespace ElementUpdateImpl
 {
 
 inline std::optional<float> get_param_value(const Params &params, const PatchData &patch, const ElementContext &drawn) {
+	if (!drawn.obj)
+		return {};
+
 	float val = 0;
 	if (drawn.mapped_panel_id) {
+		// mapped knob
 		if (drawn.mapped_panel_id < params.knobs.size())
 			val = params.knobs[*drawn.mapped_panel_id];
 		else
-			return {}; // mapped, but not found in patch
+			return {}; // mapped to an invalid param id (error?)
 	} else {
 		//static knob
-		if (auto maybe_val = patch.get_static_knob_value(drawn.module_idx, drawn.idx))
-			val = maybe_val.value();
-		else
-			return {}; // not found in module
+		return patch.get_static_knob_value(drawn.module_idx, drawn.idx);
 	}
 	return val;
 }
@@ -50,7 +51,7 @@ update_element(const Slider &element, const Params &params, const PatchData &pat
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
 		auto handle = lv_obj_get_child(drawn.obj, 0);
 		if (!handle) {
-			printf_("No handle sub-object for slider %16s\n", element.short_name.data());
+			pr_err("No handle sub-object for slider %16s\n", element.short_name.data());
 			return;
 		}
 		auto height = lv_obj_get_height(drawn.obj);
@@ -78,7 +79,6 @@ update_element(const Slider &element, const Params &params, const PatchData &pat
 inline void
 update_element(const Toggle3pos &element, const Params &params, const PatchData &patch, const ElementContext &drawn) {
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
-
 		auto handle = lv_obj_get_child(drawn.obj, 0);
 		if (!handle) {
 			printf_("No handle sub-object for toggle3pos %16s\n", element.short_name.data());
