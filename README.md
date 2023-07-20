@@ -49,6 +49,7 @@ This will create the plugin file and install it in your local VCV Rack plugin di
 
 The simulator uses SDL2, which must be installed on your host machine.
 It only simulates graphics right now (audio can be added -- TODO).
+The window can be re-sized in order to examine precise pixel alignment.
 
 Navigate using the left and right arrows to simulate the encoder turning CCW and CW.
 
