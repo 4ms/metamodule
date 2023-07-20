@@ -33,6 +33,10 @@ color is ‘#8080FF’
 
 Magenta: LED
 color is #FF00FF
+Append name with class name:
+    - #RedGreenBlueLight (default)
+    - #RedBlueLight
+    - #OrangeLight
 
 Orange: Button - Latching
 color is ‘#FF8000’
