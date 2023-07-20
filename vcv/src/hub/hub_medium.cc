@@ -4,7 +4,6 @@
 #include "comm/comm_module.hh"
 #include "hub/hub_elements.hh"
 #include "hub_module_widget.hh"
-#include "local_path.hh"
 #include "mapping/Mapping.h"
 #include "mapping/patch_writer.hh"
 #include "widgets/4ms/4ms_widgets.hh"
@@ -154,6 +153,12 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		// 				  HubMedium::MIDI_CC,
 		// 				  rack::mm2px({midigate.x_mm, midigate.y_mm}),
 		// 				  LabelButtonID::Types::MidiCC);
+	}
+
+	void onHover(const HoverEvent &e) override {
+		if (hubModule->should_write_patch()) {
+			hubModule->writePatchFile();
+		}
 	}
 };
 
