@@ -5,6 +5,7 @@
 
 ;MetaModule bootloader:
 ;DO ~/4ms/stm32/meta-module/firmware/flashing/t32-qspi-flash.cmm FSBL=~/4ms/stm32/meta-module/firmware/bootloader/mp1-boot/build/fsbl.stm32
+;DO ~/4ms/stm32/meta-module/firmware/flashing/t32-qspi-flash.cmm SSBL=~/4ms/stm32/mp1-usb-dfu/build/usbdfu.uimg
 
 ;Load minimal startup:
 ;DO t32-qspi-flash FSBL="/Users/dann/4ms/stm32/meta-module/firmware/bootloader/mp1-boot/build/fsbl.stm32" SSBL="/Users/dann/4ms/stm32/meta-module/firmware/debug-img/minimal-boot.uimg"

@@ -13,9 +13,9 @@ using GreenLED2 = Led<GPIO::E, PinNum::_2, LedActive::High>; //" EXTGPIO2
 using OrangeLED = RedLED2;
 using BlueLED = Led<GPIO::A, PinNum::_14, LedActive::Low>;
 
-//EXPANDER: right-most pins shorted
+//EXPANDER: top-left pin shorted to next pin to the right
 constexpr bool UseBootSelect = true;
-constexpr PinConf BootSelectPin{GPIO::G, PinNum::_11}; //EXTGPIO3
+constexpr PinConf BootSelectPin{GPIO::B, PinNum::_11}; //AUX_I2C_SDA
 
 constexpr uint32_t ConsoleUART = UART7_BASE;
 constexpr PinConf UartRX{GPIO::B, PinNum::_3, PinAF::AF_13};
