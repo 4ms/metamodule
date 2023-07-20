@@ -6,7 +6,7 @@ namespace MetaModule
 {
 struct Mixer4Info : ModuleInfoBase {
     static constexpr std::string_view slug{"Mixer4"};
-    static constexpr std::string_view description{"4 Ch. Mixer"};
+    static constexpr std::string_view description{"4 Ch. Mixer4"};
     static constexpr uint32_t width_hp = 10;
     static constexpr std::string_view svg_filename{"res/modules/Mixer4-artwork.svg"};
 

@@ -55,8 +55,8 @@ rack::Model *modelPI = GenericModule<PIInfo>::create();
 #include "CoreModules/4ms/info/PEG_info.hh"
 rack::Model *modelPEG = GenericModule<PEGInfo>::create();
 
-#include "CoreModules/4ms/info/Mixer_info.hh"
-rack::Model *modelMixer = GenericModule<MixerInfo>::create();
+#include "CoreModules/4ms/info/Mixer4_info.hh"
+rack::Model *modelMixer = GenericModule<Mixer4Info>::create();
 
 #include "CoreModules/4ms/info/LPG_info.hh"
 rack::Model *modelLPG = GenericModule<LPGInfo>::create();
