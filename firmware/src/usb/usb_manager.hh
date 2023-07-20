@@ -1,7 +1,7 @@
 #pragma once
 #include "conf/fusb30x_conf.hh"
 #include "drivers/pin_change.hh"
-#include "fatfs/ramdisk_ops.hh"
+#include "fs/fatfs/ramdisk_ops.hh"
 #include "fusb302.hh"
 #include "usb/usb_drive_device.hh"
 #include "usb/usb_host_manager.hh"

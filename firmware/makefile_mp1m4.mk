@@ -6,21 +6,16 @@ $(info --------------------)
 
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 	target_board = $(word 1,$(MAKECMDGOALS))
-    $(info Building for MP1 M4 core, $(target_board) module)
+    $(info Building for MP1 M4 core, "$(target_board)" module)
 else
     $(error Board not supported)
 endif
 
 target_src := src/$(target_board)
+target_chip_src := src/$(target_board)
 
-ifeq "$(target_board)" "mini"
-	target_chip_src := src/$(target_board)/mp1
-else
-	target_chip_src := src/$(target_board)
-endif
-
-core_src = src/mp1m4
-hal_conf_inc = src/mp1m4 
+core_src = src/core_m4
+hal_conf_inc = src/core_m4 
 
 TAG := [MP1M4-$(target_board)]
 BUILDDIR = $(BUILDDIR_MP1M4)/$(target_board)
@@ -60,9 +55,9 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_dma.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_uart.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_usart.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_cortex.c
-SOURCES += src/shared_memory.cc
-SOURCES += $(target_src)/controls.cc
-SOURCES += $(target_chip_src)/main-m4.cc
+SOURCES += src/core_intercom/shared_memory.cc
+SOURCES += $(core_src)/controls.cc
+SOURCES += $(core_src)/main_m4.cc
 SOURCES += system/libc_stub.c
 SOURCES += system/libcpp_stub.cc
 SOURCES += system/new.cc
@@ -73,7 +68,7 @@ SOURCES += $(DRIVERLIB)/drivers/pin.cc
 SOURCES += $(DRIVERLIB)/drivers/rotary.cc
 SOURCES += $(DRIVERLIB)/drivers/tim.cc
 SOURCES += $(DRIVERLIB)/drivers/timekeeper.cc
-SOURCES += src/uart_log.cc
+SOURCES += src/console/uart_log.cc
 SOURCES += lib/printf/printf.c
 
 # SD Card (FATFS):
@@ -82,11 +77,9 @@ SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_sd_ex.c
 SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
-SOURCES += src/fatfs/diskio.cc
-SOURCES += src/fatfs/fattime.cc
-SOURCES += src/time_convert.cc
-
-SOURCES += src/patch_fileio.cc
+SOURCES += src/fs/fatfs/diskio.cc
+SOURCES += src/fs/fatfs/fattime.cc
+SOURCES += src/fs/time_convert.cc
 
 # Nor flash/LFS
 SOURCES += $(LIBDIR)/littlefs/lfs.c
@@ -139,6 +132,8 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(LIBDIR)/easiglib \
 			-I. \
 			-Isrc \
+			-Isrc/console \
+			-Isrc/params \
 			-I$(target_src) \
 			-I$(target_chip_src) \
 			-I$(core_src) \
@@ -150,15 +145,13 @@ INCLUDES = -I$(DEVICEDIR)/include \
 			-I$(SHARED)/cpputil \
 			-I$(SHARED)/patch \
 			-I$(LIBDIR)/fatfs/source \
-			-Isrc/fatfs \
+			-Isrc/fs/fatfs \
 			-I$(usb_src) \
 			-I$(usbhost_libdir)/Core/Inc \
 			-I$(usbhost_libdir)/Class/MSC/Inc \
 			-I$(usbdev_libdir)/Core/Inc \
 			-I$(usbdev_libdir)/Class/MSC/Inc \
 			
-# 			-I$(SHARED)/etl/include
-
 MCU = -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mlittle-endian -mfloat-abi=hard
 
 ARCH_CFLAGS = -DUSE_HAL_DRIVER \

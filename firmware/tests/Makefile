@@ -17,7 +17,7 @@ TEST_SOURCES += ../shared/patch_convert/yaml_to_patch.cc
 TEST_SOURCES += ../shared/patch_convert/ryml/ryml_serial.cc
 TEST_SOURCES += $(wildcard $(RYMLDIR)/src/c4/yml/*.cpp)
 TEST_SOURCES += $(wildcard $(RYMLDIR)/ext/c4core/src/c4/*.cpp)
-TEST_SOURCES += src/time_convert.cc
+TEST_SOURCES += src/fs/time_convert.cc
 
 CXXFLAGS = 	-Wall \
 		 	-std=gnu++2b \
