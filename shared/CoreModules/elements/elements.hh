@@ -18,10 +18,7 @@ namespace MetaModule
 {
 // Generic
 
-class BipolarColor_t
-{
-public:
-	BipolarColor_t(float val): value(val) {}
+struct BipolarColor_t {
 	float value;
 };
 
@@ -120,6 +117,9 @@ struct MomentaryButton : Switch {
 struct MomentaryButtonRGB : MomentaryButton {
 	static constexpr size_t NumLights = 3;
 };
+struct MomentaryButtonWhiteLight : MomentaryButton {
+	static constexpr size_t NumLights = 1;
+};
 
 struct LatchingButton : Switch {
 	enum class State_t { DOWN, UP };
@@ -134,6 +134,8 @@ struct Toggle2pos : Switch {
 struct Toggle3pos : Switch {
 	enum class State_t { DOWN, CENTER, UP };
 };
+struct Toggle2posHoriz : Toggle2pos {};
+struct Toggle3posHoriz : Toggle3pos {};
 
 struct BefacoSwitchHorizontal : Toggle2pos {};
 
@@ -263,9 +265,12 @@ using Element = std::variant<
 
 	// Switches/Buttons
 	MomentaryButtonRGB,
+	MomentaryButtonWhiteLight,
 	LatchingButtonMonoLight,
 	Toggle2pos,
 	Toggle3pos,
+	Toggle2posHoriz,
+	Toggle3posHoriz,
 	BefacoSwitchHorizontal,
 
 	//Encoders
@@ -285,6 +290,7 @@ using Element = std::variant<
 
 	//	Lights
 	MediumLight<RedGreenBlueLight>,
+	RedGreenBlueLight,
 	RedLight,
 	OrangeLight,
 	GreenLight,

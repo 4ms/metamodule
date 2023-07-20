@@ -35,6 +35,7 @@ CXXFLAGS = 	-Wall \
 			-I$(RYMLDIR)/src \
 			-I$(RYMLDIR)/ext/c4core/src \
 			-DTESTPROJECT \
+			-Wno-missing-braces \
 
 ### Boilerplate below here:
 

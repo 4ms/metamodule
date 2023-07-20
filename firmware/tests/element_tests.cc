@@ -4,7 +4,7 @@
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
 
-struct TestInfo : MetaModule::ElementInfoBase {
+struct TestInfo : MetaModule::ModuleInfoBase {
 
 	static constexpr std::array<MetaModule::Element, 9> Elements{
 		MetaModule::Slider25mmHoriz{{{{1, 2, "Slider1", ""}}}},			//Param 0

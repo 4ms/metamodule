@@ -1,14 +1,16 @@
-#include "../shared/CoreModules/modules/helpers/mapping.h"
+#include "../shared/CoreModules/4ms/core/helpers/mapping.h"
 #include "../shared/gcem/include/gcem.hpp"
 #include "doctest.h"
 #include <iostream>
 
 //Copy-pasted from ENVVCACore.cc
-#ifdef __clang__
-constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<-1, 5, 50>::generate([](auto voltage) {
-#else
-constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<-0.1f, 0.5f>([](auto voltage) {
-#endif
+struct VoltageToFreqTableRange
+{
+	static constexpr float min = -0.1f;
+	static constexpr float max = 0.5f;
+};
+constinit auto VoltageToFrequencyTable = Mapping::LookupTable_t<50>::generate<VoltageToFreqTableRange>([](auto voltage)
+{
 	// two points in the V->f curve
 	constexpr double V_1 = 0.4;
 	constexpr double f_1 = 0.09;

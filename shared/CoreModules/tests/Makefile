@@ -23,6 +23,7 @@ CXXFLAGS = 	-Wall \
 			-I../../shared/etl/include \
 			-I$(TEST_DIR) \
 			-Wno-unused-const-variable \
+			-Wno-missing-braces \
 			-DTESTPROJECT \
 
 ### Boilerplate below here:

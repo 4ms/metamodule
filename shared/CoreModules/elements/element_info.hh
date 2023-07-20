@@ -7,7 +7,7 @@
 namespace MetaModule
 {
 
-struct ElementInfoBase {
+struct ModuleInfoBase {
 	static constexpr std::string_view slug{""};
 	static constexpr std::string_view description{""};
 	static constexpr std::string_view svg_filename{""};

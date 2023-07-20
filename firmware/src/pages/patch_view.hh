@@ -1,16 +1,15 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
 #include "lvgl.h"
-#include "pages/animated_knob.hh"
 #include "pages/base.hh"
 #include "pages/elements/element_drawer.hh"
 #include "pages/elements/map_ring_drawer.hh"
 #include "pages/elements/mapping.hh"
+#include "pages/elements/module_drawer.hh"
 #include "pages/elements/update.hh"
 #include "pages/images/image_list.hh"
 #include "pages/lvgl_mem_helper.hh"
 #include "pages/lvgl_string_helper.hh"
-#include "pages/module_drawer.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include "printf.h"
@@ -200,9 +199,12 @@ struct PatchViewPage : PageBase {
 
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
-				std::visit([this, drawn = drawn_el.drawn](
-							   auto &el) -> void { update_element(el, this->params, patch, drawn); },
-						   drawn_el.element);
+				std::visit(
+					[this, drawn = drawn_el.drawn](auto &el) -> void {
+						if (drawn.obj)
+							update_element(el, this->params, patch, drawn);
+					},
+					drawn_el.element);
 			}
 		}
 	}
@@ -228,10 +230,19 @@ struct PatchViewPage : PageBase {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		if (!page)
 			return;
+
 		auto this_module_obj = lv_group_get_focused(page->group);
-		if (this_module_obj == page->playbut)
+		if (!this_module_obj) //|| this_module_obj == page->playbut // or any of the other buttons?
 			return;
-		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(this_module_obj)));
+
+		auto user_data = lv_obj_get_user_data(this_module_obj);
+		if (!user_data)
+			return;
+
+		uint32_t module_id = *(static_cast<uint32_t *>(user_data));
+		if (module_id >= page->patch.module_slugs.size())
+			return;
+
 		const auto this_slug = page->patch.module_slugs[module_id];
 		lv_label_set_text(page->module_name, this_slug.c_str());
 

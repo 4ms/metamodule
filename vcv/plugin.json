@@ -14,7 +14,7 @@
   "changelogUrl": "",
   "modules": [
 	{
-      "slug": "PanelMedium",
+      "slug": "HubMedium",
       "name": "MetaModule",
       "description": "MetaModule",
       "tags": []
@@ -116,7 +116,7 @@
       "tags": []
     },
     {
-      "slug": "Mixer",
+      "slug": "Mixer4",
       "name": "Mixer",
       "description": "Mixer",
       "tags": []
@@ -390,18 +390,6 @@
       "slug": "BuffMult",
       "name": "BuffMult",
       "description": "Buffered Multiple",
-      "tags": []
-	},
-	{
-      "slug": "DualAtenuverter",
-      "name": "DualAtenuverter",
-      "description": "Dual Attenuverter",
-      "tags": []
-	},
-	{
-      "slug": "Braids",
-      "name": "Braids",
-      "description": "Braids",
       "tags": []
 	}
   ]

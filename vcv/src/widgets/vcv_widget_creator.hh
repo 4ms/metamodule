@@ -3,7 +3,6 @@
 #include "CoreModules/elements/elements.hh"
 #include "vcv_creation_context.hh"
 #include "widgets/4ms/4ms_widgets_implementation.hh"
-#include "widgets/befaco/befaco_widgets_implementation.hh"
 
 namespace MetaModule::VCVImplementation::Widget
 {
@@ -27,7 +26,7 @@ struct VCVWidgetCreator {
 	}
 
 	template<typename T>
-	void create(const T element) {
+	void create(const T &element) {
 		// forward to implementation together with current context
 		if (auto indices = ElementCount::get_indices<INFO>(element)) {
 			VCVImplementation::Widget::do_create(element, indices.value(), context);

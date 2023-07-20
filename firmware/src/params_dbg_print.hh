@@ -3,6 +3,7 @@
 #include "params.hh"
 #include "printf.h"
 #include "util/countzip.hh"
+#include "util/term_codes.hh"
 
 namespace MetaModule
 {
@@ -45,7 +46,8 @@ struct ParamDbgPrint {
 
 		readings++;
 
-		if ((now_ticks - last_dbg_output_tm) > 1000) {
+		if ((now_ticks - last_dbg_output_tm) > 2000) {
+			printf_("%s", Term::ClearScreen);
 			printf_("\r\nnumber of readings: %d\r\n", readings);
 			readings = 0;
 

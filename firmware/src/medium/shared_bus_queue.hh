@@ -1,19 +1,20 @@
 #pragma once
 #include "conf/hsem_conf.hh"
 #include "controls.hh"
-#include "debug.hh"
 #include "drivers/hsem.hh"
 #include "params.hh"
 
 namespace MetaModule
 {
 
+// I2C Bus shared between Codec, main GPIO Expander, and optional external GPIO Expander
 class SharedBusQueue {
 public:
 	SharedBusQueue(GPIOExpander &main_gpioexpander, GPIOExpander &ext_gpioexpander)
 		: main_jacksense_reader(main_gpioexpander)
 		, ext_jacksense_reader(ext_gpioexpander)
 		, num_jacksense_readers{ext_gpioexpander.is_present() ? 2 : 1} {
+		main_jacksense_reader.start();
 	}
 
 	void update() {
@@ -22,7 +23,7 @@ public:
 			case PrepareReadGPIOExpander: {
 				auto err = main_jacksense_reader.prepare_read();
 				if (err != GPIOExpander::Error::None)
-					__BKPT();
+					handle_error();
 				cur_client = RequestReadGPIOExpander;
 				break;
 			}
@@ -30,7 +31,7 @@ public:
 			case RequestReadGPIOExpander: {
 				auto err = main_jacksense_reader.read_pins();
 				if (err != GPIOExpander::Error::None)
-					__BKPT();
+					handle_error();
 				cur_client = CollectReadGPIOExpander;
 				break;
 			}
@@ -49,7 +50,7 @@ public:
 			case PrepareReadExtGPIOExpander: {
 				auto err = ext_jacksense_reader.prepare_read();
 				if (err != GPIOExpander::Error::None)
-					__BKPT();
+					handle_error();
 				cur_client = RequestReadExtGPIOExpander;
 				break;
 			}
@@ -57,7 +58,7 @@ public:
 			case RequestReadExtGPIOExpander: {
 				auto err = ext_jacksense_reader.read_pins();
 				if (err != GPIOExpander::Error::None)
-					__BKPT();
+					handle_error();
 				cur_client = CollectReadExtGPIOExpander;
 				break;
 			}
@@ -97,6 +98,11 @@ private:
 		RequestReadExtGPIOExpander,
 		CollectReadExtGPIOExpander,
 	} cur_client = PrepareReadGPIOExpander;
+
+	void handle_error() {
+		//TODO: handle this: printf...?
+		printf_("I2C Error\n");
+	}
 };
 
 } // namespace MetaModule

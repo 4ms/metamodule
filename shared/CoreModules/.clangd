@@ -1,14 +1,21 @@
 ---
 CompileFlags:
-	Add: [
-		"-std=c++20",
-		"-I..",
-		"-I../cpputil",
-		"-I../../cpputil",
-		"-I../..",
-		"-Itests",
-        "-I../firmware/src",
-        "-I../../firmware/src",
-        "-I../../../firmware/src",
-        "-I../../../shared/CoreModules/modules",
-	]
+  Add: [
+    "-std=c++20",
+    "-I..",
+    "-I../cpputil",
+    "-I../../cpputil",
+    "-I../..",
+    "-Itests",
+    "-I../firmware/src",
+    "-I../../firmware/src",
+    "-I../../../firmware/src",
+    "-I../../../shared",
+    "-I../../../../shared",
+    "-I../../../../../shared",
+  ]
+  Remove: [
+    "-ffold-simple-inlines",
+    "-mvectorize-with-neon-quad",
+    "-mthumb-interwork",
+  ]

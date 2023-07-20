@@ -25,39 +25,40 @@ include(${LVGL_DIR}/CMakeLists.txt)
 file(
   GLOB
   GUI_IMAGES
-  ${MM_ROOT}/firmware/src/pages/images/modules/*.c
-  ${MM_ROOT}/firmware/src/pages/images/components/*.c
-  ${MM_ROOT}/firmware/src/pages/images/ui/*.c
-  ${MM_ROOT}/firmware/src/pages/images/Befaco/*.c
+  ${MM_ROOT}/firmware/src/pages/images/4ms/modules/*.c
+  ${MM_ROOT}/firmware/src/pages/images/4ms/components/*.c
+  ${MM_ROOT}/firmware/src/pages/images/Befaco/modules/*.c
   ${MM_ROOT}/firmware/src/pages/images/Befaco/components/*.c
-  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/*.c
+  ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/modules/*.c
   ${MM_ROOT}/firmware/src/pages/images/AudibleInstruments/components/*.c
   ${MM_ROOT}/firmware/src/pages/fonts/MuseoSansRounded_*.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/*.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchview/screens/*.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui_helpers.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/patchsel/ui_font_*.c
   ${MM_ROOT}/firmware/src/pages/slsexport/patchview/ui.c
   ${MM_ROOT}/firmware/src/pages/slsexport/patchview/components/*.c
+  ${MM_ROOT}/firmware/src/pages/slsexport/patchview/fonts/*.c
   ${MM_ROOT}/firmware/src/pages/slsexport/patchview/images/*.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/patchview/fonts/*.c)
+  ${MM_ROOT}/firmware/src/pages/slsexport/patchview/screens/*.c)
 
 # #################### CoreModules ##################################
 file(
   GLOB
   CORE_MODULES
-  ${MM_ROOT}/shared/CoreModules/modules/*Core.cc
-  ${MM_ROOT}/shared/CoreModules/Befaco/*Core.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/*Core.cc
-  ${MM_ROOT}/shared/CoreModules/modules/enosc/dynamic_data.cc
-  ${MM_ROOT}/shared/CoreModules/modules/enosc/data.cc
-  ${MM_ROOT}/shared/cpputil/util/math_tables.cc
+  ${MM_ROOT}/shared/CoreModules/4ms/core/*Core.cc
+  ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/dynamic_data.cc
+  ${MM_ROOT}/shared/CoreModules/4ms/core/enosc/data.cc
+  ${MM_ROOT}/shared/CoreModules/Befaco/core/*Core.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/*Core.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
+  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core/braids/resources.cc
   ${MM_ROOT}/shared/axoloti-wrapper/axoloti_math.cpp
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/stmlib/utils/random.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/stmlib/dsp/atan.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/stmlib/dsp/units.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/braids/analog_oscillator.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/braids/digital_oscillator.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
-  ${MM_ROOT}/shared/CoreModules/AudibleInstruments/braids/resources.cc)
+  ${MM_ROOT}/shared/cpputil/util/math_tables.cc)
 
 # #################### RYML + Patch Convert ##################################
 
@@ -82,11 +83,8 @@ target_compile_options(ryml PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>)
 
 # #################### Application ############################################
 
-add_executable(
-  simulator
-  src/main.cc ${MM_ROOT}/firmware/src/pages/slsexport/ui.c
-  ${MM_ROOT}/firmware/src/pages/slsexport/ui_helpers.c ${CORE_MODULES}
-  ${GUI_IMAGES} ${MM_ROOT}/firmware/src/pages/page_manager.cc)
+add_executable(simulator src/main.cc ${CORE_MODULES} ${GUI_IMAGES}
+                         ${MM_ROOT}/firmware/src/pages/page_manager.cc)
 
 target_include_directories(
   simulator
@@ -100,16 +98,21 @@ target_include_directories(
           ${MM_ROOT}/shared/cpputil
           ${MM_ROOT}/shared/patch
           ${MM_ROOT}/shared/CoreModules
-          ${MM_ROOT}/shared/CoreModules/info
+          ${MM_ROOT}/shared/CoreModules/4ms
+          ${MM_ROOT}/shared/CoreModules/Befaco
+          ${MM_ROOT}/shared/CoreModules/AudibleInstruments
+          ${MM_ROOT}/shared/CoreModules/AudibleInstruments/core
           ${MM_ROOT}/vcv/src # For sys/alloc_buffer.h
-          ${MM_ROOT}/shared/CoreModules/AudibleInstruments)
+)
 
-target_compile_options(simulator PRIVATE -Wall -Og -g2)
-target_compile_options(simulator PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
-                                         ${SDL2_CFLAGS_OTHER})
+target_compile_options(
+  simulator PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>: -std=c++20>
+                    ${SDL2_CFLAGS_OTHER})
+target_compile_options(simulator PRIVATE -Wno-missing-braces)
 
 target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
-# Define TEST so braids dsp/dsp.h works (avoids contains raw assembly)
+# Define TEST so braids dsp/dsp.h works (since it contains raw Cortex-M4
+# assembly)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
                                         ryml SDL2)

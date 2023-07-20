@@ -2,6 +2,8 @@
 
 USE_FEWER_MODULES ?= 1
 
+#brands := 4ms Befaco AudibleInstruments
+
 # First target of the make command is the board we should build for. Check if it's valid.
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
 target_board = $(word 1,$(MAKECMDGOALS))
@@ -114,7 +116,6 @@ SOURCES += $(TARGETDEVICEDIR_CA7)/drivers/cycle_counter.cc
 SOURCES += $(DRIVERLIB)/drivers/i2c.cc
 SOURCES += $(TARGETDEVICEDIR)/drivers/sai_tdm.cc
 SOURCES += $(DRIVERLIB)/drivers/codec_PCM3168.cc
-SOURCES += $(DRIVERLIB)/drivers/codec_WM8731.cc
 INCLUDES += -I$(DRIVERLIB)
 INCLUDES += -I$(DRIVERLIB)/drivers
 INCLUDES += -I$(TARGETDEVICEDIR)
@@ -129,47 +130,58 @@ INCLUDES += -I$(SHARED)/cpputil
 # GUI
 SOURCES += $(wildcard src/pages/elements/*.cc)
 SOURCES += src/pages/page_manager.cc
-SOURCES += $(SHARED)/CoreModules/meta-module-hub/panel_medium.cc
 
 # Modules: CoreModules and faceplate artwork 
+SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
 ifeq "$(USE_FEWER_MODULES)" "1"
-modules := AudibleInstruments/Braids 
-modules += Befaco/DualAtenuverter Befaco/EvenVCO 
-modules += modules/Djembe modules/StMix modules/PEG modules/SMR modules/MultiLFO 
-modules += modules/PitchShift modules/HPF modules/InfOsc modules/KPLS modules/ENVVCA
-modules += modules/Freeverb modules/Seq8 modules/EnOsc 
-SOURCES += $(foreach module,$(modules),$(SHARED)/CoreModules/$(module)Core.cc)
-SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_240.c)
-SOURCES += $(foreach module,$(modules),src/pages/images/$(module)_artwork_120.c)
+modulesAudible := Braids 
+modulesBefaco := DualAtenuverter EvenVCO 
+modules4ms := ENVVCA Djembe StMix PEG SMR MultiLFO PitchShift
+modules4ms += HPF InfOsc KPLS Freeverb Seq8 EnOsc 
+
+SOURCES += $(foreach m,$(modulesAudible),$(SHARED)/CoreModules/AudibleInstruments/core/$(m)Core.cc)
+SOURCES += $(foreach m,$(modulesBefaco),$(SHARED)/CoreModules/Befaco/core/$(m)Core.cc)
+SOURCES += $(foreach m,$(modules4ms),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
+
+SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_120.c)
+SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_120.c)
+SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_120.c)
+
 else
-SOURCES += $(wildcard $(SHARED)/CoreModules/modules/*.cc)
-SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/*.cc)
-SOURCES += $(wildcard $(SHARED)/CoreModules/AudibleInstruments/*.cc)
-SOURCES += $(wildcard src/pages/images/modules/*.c)
-SOURCES += $(wildcard src/pages/images/Befaco/*.c)
-SOURCES += $(wildcard src/pages/images/AudibleInstruments/*.c)
+SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*.cc)
+SOURCES += $(wildcard $(SHARED)/CoreModules/Befaco/core/*.cc)
+SOURCES += $(wildcard $(SHARED)/CoreModules/AudibleInstruments/core/*.cc)
+
+SOURCES += $(wildcard src/pages/images/4ms/modules/*.c)
+SOURCES += $(wildcard src/pages/images/Befaco/modules/*.c)
+SOURCES += $(wildcard src/pages/images/AudibleInstruments/modules/*.c)
 endif
+
 INCLUDES += -I$(SHARED)/CoreModules
-INCLUDES += -I$(SHARED)/CoreModules/modules
+INCLUDES += -I$(SHARED)/CoreModules/4ms
 INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments
+INCLUDES += -I$(SHARED)/CoreModules/AudibleInstruments/core
 INCLUDES += -I$(SHARED)/CoreModules/Befaco
 
 # Component images
+SOURCES += $(wildcard src/pages/images/4ms/components/*.c)
 SOURCES += $(wildcard src/pages/images/Befaco/components/*.c)
 SOURCES += $(wildcard src/pages/images/AudibleInstruments/components/*.c)
-SOURCES += $(wildcard src/pages/images/components/*.c)
 
-# Module support files: Enosc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/data.cc
-SOURCES += $(SHARED)/CoreModules/modules/enosc/dynamic_data.cc
+# Module support files
+SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc
+SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/dynamic_data.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
+SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/resources.cc
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/utils/random.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/dsp/atan.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/stmlib/dsp/units.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/analog_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/digital_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/macro_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/braids/resources.cc
 
 ## LVGL / Gui-Guider
 SOURCES += $(shell find -L $(LIBDIR)/lvgl/lvgl/src/extra/widgets -name \*.c)
@@ -196,10 +208,11 @@ SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
 SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
 
 # Generated:
-SOURCES += src/pages/slsexport/ui.c
-SOURCES += src/pages/slsexport/ui_helpers.c
-SOURCES += $(wildcard src/pages/slsexport/ui_font_*.c)
+SOURCES += src/pages/slsexport/patchsel/ui.c
+SOURCES += src/pages/slsexport/patchsel/ui_helpers.c
+SOURCES += $(wildcard src/pages/slsexport/patchsel/ui_font_*.c)
 SOURCES += src/pages/slsexport/patchview/ui.c
+#patchview
 SOURCES += $(wildcard src/pages/slsexport/patchview/components/*.c)
 SOURCES += $(wildcard src/pages/slsexport/patchview/images/*.c)
 SOURCES += $(wildcard src/pages/slsexport/patchview/fonts/*.c)
@@ -246,10 +259,12 @@ ifeq "$(USE_FEWER_MODULES)" "1"
 	EXTRA_CFLAGS += -D'USE_FEWER_MODULES=1'
 endif
 
-EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines
+EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines \
+				-Wno-psabi
 
 EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG) \
-				-L$(BUILDDIR_MP1M4)/$(target_board)
+				-L$(BUILDDIR_MP1M4)/$(target_board) \
+				-Wno-psabi
 
 EXTDEF ?= METAMODULE_NORMAL_MODE
 

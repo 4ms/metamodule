@@ -16,6 +16,9 @@
 #include <array>
 #include <memory>
 
+namespace MetaModule
+{
+
 // This wrapper lets ported VCV modules run on hardware.
 template<typename Info, typename Core>
 struct VCVCoreProcessor : CoreProcessor {
@@ -96,6 +99,8 @@ struct VCVCoreProcessor : CoreProcessor {
 	// Boilerplate to auto-register in ModuleFactory
 	// clang-format off
 	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<Core>(); }
-	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, MetaModule::ModuleInfoView2::makeView<Info>());
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
 	// clang-format on
 };
+
+} // namespace MetaModule

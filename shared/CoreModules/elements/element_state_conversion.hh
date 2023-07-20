@@ -1,6 +1,7 @@
 #pragma once
-
-#include <cstdio>
+#include "CoreModules/elements/elements.hh"
+#include <concepts>
+#include <type_traits>
 
 namespace MetaModule::StateConversion
 {
@@ -10,87 +11,77 @@ namespace MetaModule::StateConversion
 // Since overload resolution does not work for template parameters, just inheriting from a specialized type (and expecting the method to fall back to the parent's) will not work
 
 //TODO: This generates a compiler error for gcc < 12.3
-template <typename T>
-constexpr typename T::State_t convertState(const T&, float val) requires(std::is_same_v<typename T::State_t,void>)
+template<typename T>
+constexpr typename T::State_t convertState(const T &, float val) requires(std::is_same_v<typename T::State_t, void>)
 {
-    // This should never by reached
-    // All types that inherit from BaseElement but do not define their own State_t will be caught
-    printf("No State conversion defined for this type\n");
+	// This should never by reached
+	// All types that inherit from BaseElement but do not define their own State_t will be caught
 }
 
 // to be defined for all kinds of elements
-template <typename T>
-constexpr MomentaryButton::State_t convertState(const T&, float val) requires(std::derived_from<T,MomentaryButton>)
+template<typename T>
+constexpr MomentaryButton::State_t convertState(const T &, float val) requires(std::derived_from<T, MomentaryButton>)
 {
-    return val > 0 ? MomentaryButton::State_t::PRESSED : MomentaryButton::State_t::RELEASED;
+	return val > 0 ? MomentaryButton::State_t::PRESSED : MomentaryButton::State_t::RELEASED;
 }
 
-template <typename T>
-constexpr LatchingButton::State_t convertState(const T&, float val) requires(std::derived_from<T,LatchingButton>)
+template<typename T>
+constexpr LatchingButton::State_t convertState(const T &, float val) requires(std::derived_from<T, LatchingButton>)
 {
-    return val > 0 ? LatchingButton::State_t::DOWN : LatchingButton::State_t::UP;
+	return val > 0 ? LatchingButton::State_t::DOWN : LatchingButton::State_t::UP;
 }
 
-template <typename T>
-constexpr Toggle2pos::State_t convertState(const T&, float val) requires(std::derived_from<T,Toggle2pos>)
+template<typename T>
+constexpr Toggle2pos::State_t convertState(const T &, float val) requires(std::derived_from<T, Toggle2pos>)
 {
-    if (val < 1)
-    {
-        return Toggle2pos::State_t::DOWN;
-    }
-    else
-    {
-        return Toggle2pos::State_t::UP;
-    }
+	if (val < 0.5f) {
+		return Toggle2pos::State_t::DOWN;
+	} else {
+		return Toggle2pos::State_t::UP;
+	}
 }
 
-template <typename T>
-constexpr Toggle3pos::State_t convertState(const T&, float val) requires(std::derived_from<T,Toggle3pos>)
+template<typename T>
+constexpr Toggle3pos::State_t convertState(const T &, float val) requires(std::derived_from<T, Toggle3pos>)
 {
-    if (val < 1)
-    {
-        return Toggle3pos::State_t::DOWN;
-    }
-    else if (val < 2)
-    {
-        return Toggle3pos::State_t::CENTER;
-    }
-    else
-    {
-        return Toggle3pos::State_t::UP;
-    }
+	if (val < 0.5f) {
+		return Toggle3pos::State_t::DOWN;
+	} else if (val < 1.5f) {
+		return Toggle3pos::State_t::CENTER;
+	} else {
+		return Toggle3pos::State_t::UP;
+	}
 }
 
-template <typename T>
-constexpr Pot::State_t convertState(const T&, float val) requires(std::derived_from<T,Pot>)
+template<typename T>
+constexpr Pot::State_t convertState(const T &, float val) requires(std::derived_from<T, Pot>)
 {
-    return val;
+	return val;
 }
-
 
 //
 // LEDs
 //
 
 // Fallback for single LED elements
-template <typename T>
-constexpr std::array<float,T::NumLights> convertLED(const T&, float value) requires(T::NumLights == 1)
+template<typename T>
+constexpr std::array<float, T::NumLights> convertLED(const T &, float value) requires(T::NumLights == 1)
 {
-    return {value};
+	return {value};
 }
 
 // Fallback for single LED elements with explicit type conversion
-template <typename T>
-constexpr std::array<float,T::NumLights> convertLED(const T&, bool value) requires(T::NumLights == 1)
+template<typename T>
+constexpr std::array<float, T::NumLights> convertLED(const T &, bool value) requires(T::NumLights == 1)
 {
-    return {value ? 1.0f : 0.0f};
+	return {value ? 1.0f : 0.0f};
 }
 
-
-template <typename T>
-constexpr std::array<float,T::NumLights> convertLED(const T&, BipolarColor_t color) requires(std::derived_from<T,DualLight>)
+template<typename T>
+constexpr std::array<float, T::NumLights> convertLED(const T &, BipolarColor_t color)
+	requires(std::derived_from<T, DualLight>)
 {
-    return {-std::min(color.value, 0.0f), std::max(color.value, 0.f)};
+	return {-std::min(color.value, 0.0f), std::max(color.value, 0.f)};
 }
 
-}
+} // namespace MetaModule::StateConversion

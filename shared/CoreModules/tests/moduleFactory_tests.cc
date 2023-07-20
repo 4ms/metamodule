@@ -1,6 +1,6 @@
+#include "4ms/info/SMR_info.hh"
+#include "CoreModules/moduleFactory.hh"
 #include "doctest.h"
-#include "info/EnOsc_info.hh"
-#include "moduleFactory.hh"
 #include <iostream>
 #include <span>
 #include <stdint.h>
@@ -24,10 +24,9 @@ struct TestCoreMod : public CoreProcessor {
 };
 
 static constexpr std::string_view abcabc_slug{"abcabc"};
-constexpr ModuleInfoView abcabcInfo{
+constexpr MetaModule::ModuleInfoView abcabcInfo{
 	.width_hp = 40,
-	.svg_filename = "abcabc.svg",
-	.module_name = "abcabc module",
+	.description = "abcabc module",
 };
 
 class AutoInit {
@@ -51,39 +50,22 @@ TEST_CASE("Static objects register automatically") {
 
 	auto info = ModuleFactory::getModuleInfo(typeID);
 	CHECK(info.width_hp == 40);
-	CHECK(info.module_name == "abcabc module");
+	CHECK(info.description == "abcabc module");
 
 	CHECK_FALSE(AutoInit::g_abcabc_already_exists);
 }
 
-constexpr ModuleInfoView ABCInfo{
+constexpr MetaModule::ModuleInfoView ABCInfo{
 	.width_hp = 40,
-	.svg_filename = "abc.svg",
-	.module_name = "ABC module",
+	.description = "ABC module",
 };
 
-struct TestInfo : ModuleInfoBase {
+struct TestInfo : MetaModule::ModuleInfoBase {
 	static constexpr std::string_view slug{"HIJ"};
 	static constexpr uint32_t width_hp = 2;
-	static constexpr std::array<KnobDef, 2> Knobs = {{
-		{
-			.id = 1,
-			.x_mm = ModuleInfoBase::px_to_mm<72>(114.85f),
-			.y_mm = ModuleInfoBase::px_to_mm<72>(61.59f),
-			.short_name = "Spread",
-			.long_name = "Spread",
-			.default_val = 0.5f,
-			.knob_style = KnobDef::Medium,
-		},
-		{
-			.id = 2,
-			.x_mm = ModuleInfoBase::px_to_mm<72>(53.68f),
-			.y_mm = ModuleInfoBase::px_to_mm<72>(78.08f),
-			.short_name = "Scale",
-			.long_name = "Scale",
-			.default_val = 0.0f,
-			.knob_style = KnobDef::Medium,
-		},
+	static constexpr std::array<MetaModule::Element, 2> Elements{{
+		MetaModule::Knob9mm{to_mm<72>(114.85f), to_mm<72>(61.59f), "Spread", "Spread", 0, 0, 1, 0.5f},
+		MetaModule::Davies1900hBlackKnob{to_mm<72>(53.68f), to_mm<72>(78.08f), "Scale", "Scale", 0, 0, 1, 0.0f},
 	}};
 };
 
@@ -103,82 +85,79 @@ TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView")
 
 	auto info = ModuleFactory::getModuleInfo(typeID);
 	CHECK(info.width_hp == 40);
-	CHECK(info.module_name == "ABC module");
+	CHECK(info.description == "ABC module");
 
 	auto cf = ModuleFactory::create(typeID);
 	CHECK(cf != nullptr);
 
-	SUBCASE("Test if Knob info get stored and retreived OK") {
-		constexpr ModuleInfoView testinfo{
+	SUBCASE("Test if Elements info gets stored and retreived OK") {
+		constexpr MetaModule::ModuleInfoView testinfo{
 			.width_hp = 4,
-			.svg_filename = "",
-			.module_name = "def info",
-			.Knobs = TestInfo::Knobs,
+			.description = "def info",
+			.elements = TestInfo::Elements,
 		};
 
 		already_exists = ModuleFactory::registerModuleType("DEF", TestCoreMod::create, testinfo);
 		CHECK_FALSE(already_exists);
 
 		CHECK(ModuleFactory::getModuleInfo("DEF").width_hp == 4);
-		auto knobs = ModuleFactory::getModuleInfo("DEF").Knobs;
-		CHECK(knobs[0].short_name == "Spread");
-		CHECK(knobs[1].short_name == "Scale");
-		CHECK(knobs.size() == 2);
+		auto elements = ModuleFactory::getModuleInfo("DEF").elements;
 
-		SUBCASE("Test actual EnOscInfo data") {
-			already_exists =
-				ModuleFactory::registerModuleType("EnOsc2", TestCoreMod::create, ModuleInfoView::makeView<EnOscInfo>());
-			CHECK_FALSE(already_exists);
+		auto name0 = std::visit([](auto el) { return el.short_name; }, elements[0]);
+		CHECK(name0 == "Spread");
 
-			auto info = ModuleFactory::getModuleInfo("EnOsc2");
-			CHECK(info.width_hp == 16);
-			CHECK(info.svg_filename == "res/modules/EnOsc-artwork.svg");
-			CHECK(info.Knobs[0].short_name == "Scale");
-			CHECK(info.Knobs[1].short_name == "Spread");
-			CHECK(info.Knobs[2].short_name == "Pitch");
-			CHECK(info.Knobs[2].knob_style == KnobDef::Medium);
-			CHECK(info.Knobs[4].default_val == 0.5f);
-			CHECK(info.Knobs[7].id == 7);
-			CHECK(info.Knobs.size() == 9);
+		auto name1 = std::visit([](auto el) { return el.short_name; }, elements[1]);
+		CHECK(name1 == "Scale");
 
-			CHECK(info.InJacks.size() == 10);
-			CHECK(info.InJacks[2].short_name == "Spread Jack");
-			CHECK(info.InJacks[2].x_mm == EnOscInfo::px_to_mm<72>(96.88f));
+		CHECK(elements.size() == 2);
 
-			CHECK(info.OutJacks.size() == 2);
-			CHECK(info.OutJacks[0].short_name == "Out A");
-			CHECK(info.OutJacks[0].signal_type == OutJackDef::Analog);
-			CHECK(info.OutJacks[0].id == EnOscInfo::OutputOut_A);
-			CHECK(info.OutJacks[0].y_mm == EnOscInfo::px_to_mm<72>(262.78f));
+		// FIXME: update once we convert EnOsc to new format
+		// SUBCASE("Test actual EnOscInfo data") {
+		// 	already_exists =
+		// 		ModuleFactory::registerModuleType("EnOsc2", TestCoreMod::create, ModuleInfoView::makeView<EnOscInfo>());
+		// 	CHECK_FALSE(already_exists);
 
-			// Switches
-			// Leds
+		// 	auto info = ModuleFactory::getModuleInfo("EnOsc2");
+		// 	CHECK(info.width_hp == 16);
+		// 	CHECK(info.Knobs[0].short_name == "Scale");
+		// 	CHECK(info.Knobs[1].short_name == "Spread");
+		// 	CHECK(info.Knobs[2].short_name == "Pitch");
+		// 	CHECK(info.Knobs[2].knob_style == KnobDef::Medium);
+		// 	CHECK(info.Knobs[4].default_val == 0.5f);
+		// 	CHECK(info.Knobs[7].id == 7);
+		// 	CHECK(info.Knobs.size() == 9);
 
-			SUBCASE("Test unregistered slug") {
-				CHECK_FALSE(ModuleFactory::isValidSlug("NotFound"));
+		// 	CHECK(info.InJacks.size() == 10);
+		// 	CHECK(info.InJacks[2].short_name == "Spread Jack");
+		// 	CHECK(info.InJacks[2].x_mm == EnOscInfo::px_to_mm<72>(96.88f));
 
-				auto info = ModuleFactory::getModuleInfo("NotFound");
-				CHECK(info.width_hp == 0);
-				CHECK(info.svg_filename.empty() == true);
-				CHECK(info.Knobs.size() == 0);
-				CHECK(info.InJacks.size() == 0);
-				CHECK(info.OutJacks.size() == 0);
-				CHECK(info.Switches.size() == 0);
-				CHECK(info.Leds.size() == 0);
-			}
-		}
+		// 	CHECK(info.OutJacks.size() == 2);
+		// 	CHECK(info.OutJacks[0].short_name == "Out A");
+		// 	CHECK(info.OutJacks[0].signal_type == OutJackDef::Analog);
+		// 	CHECK(info.OutJacks[0].id == EnOscInfo::OutputOut_A);
+		// 	CHECK(info.OutJacks[0].y_mm == EnOscInfo::px_to_mm<72>(262.78f));
+
+		// 	// Switches
+		// 	// Leds
+
+		// 	SUBCASE("Test unregistered slug") {
+		// 		CHECK_FALSE(ModuleFactory::isValidSlug("NotFound"));
+
+		// 		auto info = ModuleFactory::getModuleInfo("NotFound");
+		// 		CHECK(info.width_hp == 0);
+		// 		CHECK(info.Knobs.size() == 0);
+		// 		CHECK(info.InJacks.size() == 0);
+		// 		CHECK(info.OutJacks.size() == 0);
+		// 		CHECK(info.Switches.size() == 0);
+		// 		CHECK(info.Leds.size() == 0);
+		// 	}
+		// }
 	}
 }
 
 TEST_CASE("ModuleInfoView::makeView<T>() matches T:: fields") {
 
-	auto v = ModuleInfoView::makeView<EnOscInfo>();
-	CHECK(v.width_hp == EnOscInfo::width_hp);
-	CHECK(v.svg_filename == EnOscInfo::svg_filename);
-	CHECK(v.Knobs.size() == EnOscInfo::Knobs.size());
-	// 													   .Knobs = EnOscInfo::Knobs,
-	// 													   .InJacks = EnOscInfo::InJacks,
-	// 													   .OutJacks = EnOscInfo::OutJacks,
-	// 													   .Switches = EnOscInfo::Switches,
-	// 													   .Leds = EnOscInfo::Leds,
+	auto v = MetaModule::ModuleInfoView::makeView<MetaModule::SMRInfo>();
+	CHECK(v.width_hp == MetaModule::SMRInfo::width_hp);
+	CHECK(v.elements.size() == MetaModule::SMRInfo::Elements.size());
 }

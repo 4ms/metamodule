@@ -1,12 +1,12 @@
 #pragma once
-#include "CoreModules/module_info_base.hh"
+#include "CoreModules/elements/element_info.hh"
 #include "elements/element_name.hh"
 #include "elements/update.hh"
 #include "knob_edit.hh"
 #include "pages/base.hh"
+#include "pages/elements/module_drawer.hh"
+#include "pages/elements/module_param.hh"
 #include "pages/images/image_list.hh"
-#include "pages/module_drawer.hh"
-#include "pages/module_param.hh"
 #include "pages/page_list.hh"
 #include "pages/styles.hh"
 #include <string>
@@ -70,7 +70,7 @@ struct ModuleViewPage : PageBase {
 		}
 		printf_("ModuleViewPage module %s\n", slug.data());
 
-		moduleinfo = ModuleFactory::getModuleInfo2(slug);
+		moduleinfo = ModuleFactory::getModuleInfo(slug);
 		if (moduleinfo.width_hp == 0) {
 			msg_queue.append_message("Module View page got empty module info.\r\n");
 			return;
@@ -299,7 +299,7 @@ private:
 		}
 	}
 
-	ModuleInfoView2 moduleinfo;
+	ModuleInfoView moduleinfo;
 
 	std::string opts;
 	uint16_t this_module_id;

@@ -1,12 +1,15 @@
-#include "CoreModules/meta-module-hub/MetaModule_info.hh"
-#include "CoreModules/meta-module-hub/panel_medium_defs.hh"
+#include "CoreModules/elements/element_counter.hh"
+#include "CoreModules/hub/HubMedium_info.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "comm/comm_module.hh"
+#include "hub/hub_elements.hh"
 #include "hub_module_widget.hh"
 #include "local_path.hh"
 #include "mapping/Mapping.h"
 #include "mapping/patch_writer.hh"
 #include "widgets/4ms/4ms_widgets.hh"
+#include "widgets/vcv_module_creator.hh"
+#include "widgets/vcv_widget_creator.hh"
 
 using namespace rack;
 
@@ -33,47 +36,44 @@ struct HubMediumMappings {
 };
 
 struct HubMedium : MetaModuleHubBase {
-
-	enum ParamIds { ENUMS(KNOBS, PanelDef::NumPot), MIDI_MONO_NOTE, MIDI_MONO_GATE, WRITE_PATCH, NUM_PARAMS };
-	enum InputIds { NUM_INPUTS = PanelDef::NumUserFacingOutJacks };
-	enum OutputIds { NUM_OUTPUTS = PanelDef::NumUserFacingInJacks };
-	enum LightIds { NUM_LIGHTS = 0 };
+	using INFO = MetaModule::HubMediumInfo;
 
 	HubMedium()
 		: MetaModuleHubBase{HubMediumMappings::mapping_srcs} {
-		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(0, 0.f, 1.f, 0.f, "Knob A");
-		configParam(1, 0.f, 1.f, 0.f, "Knob B");
-		configParam(2, 0.f, 1.f, 0.f, "Knob C");
-		configParam(3, 0.f, 1.f, 0.f, "Knob D");
-		configParam(4, 0.f, 1.f, 0.f, "Knob E");
-		configParam(5, 0.f, 1.f, 0.f, "Knob F");
-		configParam(6, 0.f, 1.f, 0.f, "Knob U");
-		configParam(7, 0.f, 1.f, 0.f, "Knob V");
-		configParam(8, 0.f, 1.f, 0.f, "Knob W");
-		configParam(9, 0.f, 1.f, 0.f, "Knob X");
-		configParam(10, 0.f, 1.f, 0.f, "Knob Y");
-		configParam(11, 0.f, 1.f, 0.f, "Knob Z");
 
-		configParam(MIDI_MONO_NOTE, 0.f, 1.f, 0.f, "MidiNote");
-		configParam(MIDI_MONO_GATE, 0.f, 1.f, 0.f, "MidiGate");
+		// Register with VCV the number of elements of each type
+		auto cnt = ElementCount::count<INFO>();
+		config(cnt.num_params, cnt.num_inputs, cnt.num_outputs, cnt.num_lights);
 
-		configParam(WRITE_PATCH, 0.f, 1.f, 0.f, "Export patch file");
-
-		for (auto jack : MetaModuleInfo::InJacks)
-			configInput((int)jack.id, std::string{jack.short_name});
-
-		for (auto jack : MetaModuleInfo::OutJacks)
-			configOutput((int)jack.id, std::string{jack.short_name});
+		// Configure elements with VCV
+		MetaModule::VCVModuleParamCreator<INFO> creator{this};
+		for (auto &element : INFO::Elements) {
+			std::visit([&creator](auto &el) { creator.config_element(el); }, element);
+		}
 	}
 
 	void process(const ProcessArgs &args) override {
-		processPatchButton(params[WRITE_PATCH].getValue());
+		processPatchButton(params[save_patch_button_idx].getValue());
 		processMaps();
 	}
+
+	constexpr static auto indices = ElementCount::get_indices<INFO>();
+
+	constexpr static auto element_index(INFO::Elem el) {
+		return static_cast<std::underlying_type_t<INFO::Elem>>(el);
+	}
+
+	constexpr static ElementCount::Indices index(INFO::Elem el) {
+		auto element_idx = element_index(el);
+		return indices[element_idx];
+	}
+
+	unsigned save_patch_button_idx = index(INFO::Elem::SavepatchButton).param_idx;
 };
 
 struct HubMediumWidget : MetaModuleHubWidget {
+	using INFO = MetaModule::HubMediumInfo;
+
 	LedDisplayTextField *patchName;
 	LedDisplayTextField *patchDesc;
 
@@ -89,7 +89,9 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		hubModule = module;
 
 		if (hubModule != nullptr) {
-			hubModule->updateDisplay = [this] { this->statusText->text = this->hubModule->labelText; };
+			hubModule->updateDisplay = [this] {
+				this->statusText->text = this->hubModule->labelText;
+			};
 			hubModule->updatePatchName = [this] {
 				this->hubModule->patchNameText = this->patchName->text;
 				this->hubModule->patchDescText = this->patchDesc->text;
@@ -129,35 +131,23 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		patchDesc->cursor = 0;
 		addChild(patchDesc);
 
-		for (auto knob : MetaModuleInfo::Knobs) {
-			auto ctr_pos = rack::mm2px({knob.x_mm, knob.y_mm});
-			if (knob.knob_style == KnobDef::Small)
-				addLabeledKnobPx<Small9mmKnob>(knob.short_name, knob.id, ctr_pos, 14.f);
-			if (knob.knob_style == KnobDef::Medium)
-				addLabeledKnobPx<Davies1900hBlackKnob4ms>(knob.short_name, knob.id, ctr_pos, 21.f);
+		// create widgets from all elements
+		MetaModule::HubWidgetCreator<INFO> creator(this, module);
+		for (auto &element : INFO::Elements) {
+			std::visit([&creator](auto &el) { creator.create(el); }, element);
 		}
 
-		for (auto jack : MetaModuleInfo::InJacks)
-			addInput(createInputCentered<PJ301MPort>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
+		// auto &midinote = MetaModuleInfo::Switches[MetaModuleInfo::SwitchNote];
+		// addMidiValueMapSrc("MidiNote",
+		// 				   HubMedium::MIDI_MONO_NOTE,
+		// 				   rack::mm2px({midinote.x_mm, midinote.y_mm}),
+		// 				   MappableObj::Type::MidiNote);
 
-		for (auto jack : MetaModuleInfo::OutJacks)
-			addOutput(createOutputCentered<PJ301MPort>(rack::mm2px({jack.x_mm, jack.y_mm}), module, jack.id));
-
-		auto &savebut = MetaModuleInfo::Switches[MetaModuleInfo::SwitchSave];
-		addParam(rack::createParamCentered<BefacoPush>(
-			rack::mm2px({savebut.x_mm, savebut.y_mm}), module, HubMedium::WRITE_PATCH));
-
-		auto &midinote = MetaModuleInfo::Switches[MetaModuleInfo::SwitchNote];
-		addMidiValueMapSrc("MidiNote",
-						   HubMedium::MIDI_MONO_NOTE,
-						   rack::mm2px({midinote.x_mm, midinote.y_mm}),
-						   MappableObj::Type::MidiNote);
-
-		auto &midigate = MetaModuleInfo::Switches[MetaModuleInfo::SwitchGate];
-		addMidiValueMapSrc("MidiGate",
-						   HubMedium::MIDI_MONO_GATE,
-						   rack::mm2px({midigate.x_mm, midigate.y_mm}),
-						   MappableObj::Type::MidiGate);
+		// auto &midigate = MetaModuleInfo::Switches[MetaModuleInfo::SwitchGate];
+		// addMidiValueMapSrc("MidiGate",
+		// 				   HubMedium::MIDI_MONO_GATE,
+		// 				   rack::mm2px({midigate.x_mm, midigate.y_mm}),
+		// 				   MappableObj::Type::MidiGate);
 
 		// auto &midicc = MetaModuleInfo::Switches[MetaModuleInfo::SwitchCc];
 		// addMidiValueMapPt("MidiCC",
@@ -167,4 +157,4 @@ struct HubMediumWidget : MetaModuleHubWidget {
 	}
 };
 
-rack::Model *modelHubMedium = rack::createModel<HubMedium, HubMediumWidget>("PanelMedium");
+rack::Model *modelHubMedium = rack::createModel<HubMedium, HubMediumWidget>("HubMedium");

@@ -60,8 +60,8 @@ struct MMScreenConf : mdrivlib::DefaultSpiScreenConf {
 	};
 
 	using DCPin = FPin<GPIO::B, PinNum::_7, PinMode::Output>;
-	static constexpr PinDef ResetPin{GPIO::B, PinNum::_12}; //p10 jumper
-	// static constexpr PinDef ResetPin{GPIO::C, PinNum::_4}; //p11
+	// static constexpr PinDef ResetPin{GPIO::B, PinNum::_12}; //p10 jumper
+	static constexpr PinDef ResetPin{GPIO::C, PinNum::_4}; //p11
 	//p9c:PE8 using wire to short EX_CODEC_RST to reset pin on screen connector
 
 	static constexpr bool IsInverted = false;

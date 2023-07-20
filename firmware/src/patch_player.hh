@@ -81,12 +81,11 @@ public:
 
 		copy_patch_data(patchdata);
 
-		for (size_t i = 0; i < pd.module_slugs.size(); i++) {
-			//FIXME: Do we ever do anything with modules[0] ? Perhaps just UI displaying names, which we can get from a defs file
-			if (i == 0)
-				modules[i] = ModuleFactory::create(PanelDef::typeID);
-			else
-				modules[i] = ModuleFactory::create(pd.module_slugs[i]);
+		// First module is the hub, ignore it.
+		modules[0] = ModuleFactory::create(PanelDef::typeID);
+
+		for (size_t i = 1; i < pd.module_slugs.size(); i++) {
+			modules[i] = ModuleFactory::create(pd.module_slugs[i]);
 
 			if (modules[i] == nullptr) {
 				printf_("Module %s not found\n", pd.module_slugs[i].data());

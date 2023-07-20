@@ -36,34 +36,31 @@ norflash-loader: mp1-med
 uimg:
 	@$(MAKE) --no-print-directory -f makefile_mp1a7.mk uimg
 
-.PHONY: bootloader
+.PHONY: bootloader format-sd flash-bootloader-sd 
+SD_DISK_DEV ?= /dev/disk4
+
 bootloader:
-	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp10_conf.hh
+	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp11_conf.hh
 
-## Module images
+include makefile_moduleinfo.mk
 
-MODULEIMG_SVGS = $(wildcard $(SHARED)/CoreModules/svg/*_info.svg)
-MODULEIMG_PNG240S = $(addprefix src/pages/images/modules/,$(addsuffix _240.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
-MODULEIMG_PNG120S = $(addprefix src/pages/images/modules/,$(addsuffix _120.png, $(subst info,artwork,$(basename $(notdir $(MODULEIMG_SVGS))))))
-MODULEIMG_C = $(MODULEIMG_PNG240S:.png=.c)
-MODULEIMG_C += $(MODULEIMG_PNG120S:.png=.c)
-INFO_FILES = $(addprefix $(SHARED)/CoreModules/info/, $(addsuffix .hh, $(basename $(notdir $(MODULEIMG_SVGS)))))
+format-sd:
+	@read -p "What is the disk device to format (Enter for $(SD_DISK_DEV)): " DISK && \
+	DISK=$${DISK:-$(SD_DISK_DEV)} && \
+	echo "Formatting $${DISK}" && \
+	echo "./flashing/format-partition-sdcard.sh $${DISK}" && \
+	./flashing/format-partition-sdcard.sh $${DISK}
 
-images: $(MODULEIMG_C) $(INFO_FILES) $(SHARED)/svgextract/svgextract.py
+flash-bootloader-sd: 
+	cd bootloader/mp1-boot && make load
 
-src/pages/images/modules/%_artwork_120.c src/pages/images/modules/%_artwork_240.c: $(SHARED)/CoreModules/svg/%_info.svg
-	$(info)
-	$(info -------)
-	$(info $*: Creating 120px and 240px-height lvgl imgs for "$*" from full-sized svg artwork $<)
-	@python3 $(SHARED)/svgextract/svgextract.py createlvimg $< src/pages/images/modules/$*
-	$(info $*: Adding to LVGL image_list.hh if needed)
-	@python3 $(SHARED)/svgextract/svgextract.py appendimglist $*_artwork src/pages/images/image_list.hh
+flash-app-sd: uimg
+	@read -p "What is the disk device and partition to flash to (Enter for $(SD_DISK_DEV)s4): " DISK && \
+	DISK=$${DISK:-$(SD_DISK_DEV)s4} && \
+	echo "Copying app to $${DISK}" && \
+	echo "sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}" && \
+	sudo dd if=./build/mp1corea7/medium/main.uimg of=$${DISK}
 
-$(SHARED)/CoreModules/info/%_info.hh: $(SHARED)/CoreModules/svg/%_info.svg
-	$(info $*: Creating ModuleInfo header file [and coremodule stub if needed])
-	@python3 $(SHARED)/svgextract/svgextract.py createinfo $<
-
-.SECONDARY: $(MODULEIMG_PNG240S) $(MODULEIMG_PNG120S)
 
 ## Cleaning
 
@@ -87,8 +84,8 @@ start_gdb:
 ## Simulator
 
 simulate:
-	$(info Simulating screens...)
-	@cd ../screen_simulator && cargo run
+	$(info Building and running simulation...)
+	@cd ../simulator && make && build/simulator 
 
 ## Tests
 

@@ -191,10 +191,7 @@ Controls::Controls(DoubleBufParamBlock &param_blocks_ref,
 
 	if constexpr (AuxStream::BoardHasDac || AuxStream::BoardHasGateOuts) {
 		auxstream.init();
-		auxstream_updater.init([&]() {
-			// 0.35us wide, every 20.83us = 1.68% load
-			auxstream.output_next();
-		});
+		auxstream_updater.init([&]() { auxstream.output_next(); });
 	}
 
 	// Debug::Pin2::low();
@@ -211,7 +208,19 @@ uint32_t Controls::get_patchcv_reading() {
 }
 
 uint32_t Controls::get_jacksense_reading() {
-	return ~(jacksense_reader.get_last_reading() | (extaudio_jacksense_reader.get_last_reading() << 16));
+	uint16_t main_jacksense = jacksense_reader.get_last_reading();
+	uint16_t aux_jacksense = extaudio_jacksense_reader.get_last_reading();
+
+	//Fix for MM p11 mono jacks: patched = high, outputs always patched
+	// main_jacksense |= 0x00FF; //mark outputs always plugged
+
+	// For stereo jacks on inputs: patched = low, outputs always patched
+	// main_jacksense = (~main_jacksense) | 0x00FF;
+
+	// For stereo jacks on all jacks: patched = low
+	main_jacksense = ~main_jacksense;
+
+	return main_jacksense | (aux_jacksense << 16);
 }
 
 } // namespace MetaModule

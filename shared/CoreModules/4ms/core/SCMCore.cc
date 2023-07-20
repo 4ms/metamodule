@@ -1,0 +1,358 @@
+#include "CoreModules/coreProcessor.h"
+#include "CoreModules/moduleFactory.hh"
+#include "SCMPlus/cv_skip.h"
+#include "info/SCM_info.hh"
+#include "util/countzip.hh"
+#include "util/math.hh"
+#include "util/zip.hh"
+
+namespace MetaModule
+{
+
+class SCMCore : public CoreProcessor {
+	using Info = SCMInfo;
+	using ThisCore = SCMCore;
+
+public:
+	SCMCore() = default;
+
+	uint32_t convert_param(float rawval, uint32_t max) {
+		return MathTools::constrain<float>(rawval * max, 0.f, 255.f);
+	}
+
+	void update() override {
+		uint32_t rotate_adc = convert_param(pots[Info::KnobRotate] + ins[Info::InputRotate_Jack], 8);
+		uint32_t slippage_adc = convert_param(pots[Info::KnobSlip] + ins[Info::InputSlip_Jack], 255);
+		uint32_t shuffle_adc = convert_param(pots[Info::KnobShuffle] + ins[Info::InputShuffle_Jack], 255);
+		uint32_t skip_adc = convert_param(pots[Info::KnobSkip] + ins[Info::InputSkip_Jack], 255);
+		uint32_t pw_adc = convert_param(pots[Info::KnobPw] + ins[Info::InputPw_Jack], 255);
+
+		bool faster_switch_state = switches[Info::Switch_4X_Fast] > 0;
+		mute = switches[Info::Switch_4X_Fast] > 0;
+
+		if (ins[Info::InputClk_In] > 0.5f) {
+			if (!clkin) {
+				clkin = true;
+				handle_clock_in();
+			}
+		} else
+			clkin = false;
+
+		// We "tick" every update
+		// To make it more like the hardware SCM, we would tick less often
+		// But that'd introduce more jitter and less accurate clock
+		handle_tick();
+
+		if ((rotate_adc != old_rotation) || (faster_switch_state != old_faster_switch_state)) {
+			old_rotation = rotate_adc;
+			old_faster_switch_state = faster_switch_state;
+
+			for (auto [i, _d, _dd] : enumerate(d, dd)) {
+				_dd = ((i + rotate_adc) & 7) + 1;
+				_d = faster_switch_state ? _dd << 2 : _dd;
+			}
+			d[6] = d[7];
+			dd[6] = dd[7];
+
+			update_pulse_params = true;
+		}
+
+		if ((slippage_adc != old_slippage_adc) || (pw_adc != old_pw_adc)) {
+			old_pw_adc = pw_adc;
+			old_slippage_adc = slippage_adc;
+			update_pulse_params = true;
+		}
+
+		if (MathTools::diff(skip_adc, old_skip_adc) > 4) {
+			old_skip_adc = skip_adc;
+			skip_pattern = (skip_adc > 128) ? ~skip[0xFF - skip_adc] : skip[skip_adc];
+		}
+
+		if (shuffle_adc != old_shuffle_adc) {
+			old_shuffle_adc = shuffle_adc;
+			uint16_t t = shuffle_adc & 0x7F; // chop to 0-127|0-127
+			t = (t * 5) >> 7;				 // scale 0..127 to 0-4
+			slip_every = t + 2;				 // shift to 2-6
+
+			if (shuffle_adc <= 127)
+				slip_howmany = 0;
+			else
+				slip_howmany = ((shuffle_adc & 0b00011000) >> 3) + 1; // 1..4
+
+			if (slip_howmany >= slip_every)
+				slip_howmany = slip_every - 1; // 1..(slip_every-1)
+		}
+
+		if (ins[Info::InputResync] > 0.5f && !resync) {
+			resync = true;
+			for (auto [_p, _s, _slip, _slipamt] : zip(p, s, slip, slipamt)) {
+				_p = 0;
+				_s = 0;
+				_slip = _slipamt;
+			}
+		} else if (!ins[Info::InputResync])
+			resync = false;
+
+		if (DoFreeRun) {
+			if (tmr_int > period) {
+				tmr_int -= period;
+
+				reset_all_phases();
+
+				update_pulse_params = true;
+				update_slip_params = true;
+			}
+		} else {
+			if (tmr_clkin >= (period << 1))
+				is_running = false;
+		}
+
+		if (update_pulse_params) {
+			auto base_pw = calc_pw(pw_adc, period);
+			for (auto [_pw, _d] : zip(pw, d))
+				_pw = base_pw / _d;
+
+			// uint32_t min_pw = MIN_PW + 1;
+			for (auto [_pw, _d, _per] : zip(pw, d, per)) {
+				if (_per >= MIN_PW && _pw < MIN_PW)
+					_pw = MIN_PW;
+				_per = period / _d;
+			}
+
+			if (slippage_adc < 2) {
+				for (auto &_slipamt : slipamt)
+					_slipamt = 0;
+			} else {
+				for (auto [_pw, _per, _slipamt] : zip(pw, per, slipamt)) {
+					_slipamt = static_cast<int32_t>((slippage_adc * (_per - (_pw + MIN_PW))) >> 8);
+				}
+			}
+
+			if (update_slip_params) { // clock in received
+				for (auto [_slipamt, _slip] : zip(slipamt, slip))
+					_slip = _slipamt;
+			}
+
+			update_pulse_params = false;
+			update_slip_params = false;
+		}
+	}
+
+	void reset_all_phases() {
+		if (!mute) {
+			for (auto &_o : outs)
+				_o = true;
+		}
+
+		for (auto &_t : tmr)
+			_t = 0;
+
+		for (auto &_p : p)
+			_p = 0;
+
+		for (auto &_s : s)
+			_s = 0;
+	}
+
+	void handle_clock_in() {
+		period = tmr_clkin;
+		is_running = true;
+
+		tmr_clkin = 0;
+		tmr_int = 0;
+
+		reset_all_phases();
+
+		update_pulse_params = true;
+		update_slip_params = true;
+	}
+
+	void handle_tick() {
+		tmr_clkin++;
+		tmr_int++;
+		for (auto [_tmr, _pw, _out] : zip(tmr, pw, outs)) {
+			_tmr++;
+			if (_tmr >= _pw)
+				_out = false;
+		}
+
+		if (is_running) {
+			constexpr std::array<uint32_t, 3> plain_jacks{0, 1, 7};
+			for (const auto i : plain_jacks) {
+				if (tmr[i] > per[i]) {
+					tmr[i] = tmr[i] - per[i];
+					if (!mute)
+						outs[i] = true;
+				}
+			}
+
+			constexpr std::array complex_jacks{2, 3, 4, 5, 6};
+			for (const auto i : complex_jacks) {
+				if (tmr[i] > (per[i] + slip[i])) {
+					tmr[i] = 0;
+
+					if ((skip_pattern >> (8 - dd[i])) & (1 << p[i]))
+						if (!mute)
+							outs[i] = true;
+
+					if (++p[i] >= dd[i]) {
+						p[i] = 0;
+						s[i] = 0;
+						slip[i] = slipamt[i];
+					}
+
+					if (s[i] == slip_howmany)
+						slip[i] = -1 * slipamt[i];
+					else
+						slip[i] = 0;
+
+					if (++s[i] >= slip_every) {
+						s[i] = 0;
+						slip[i] = slipamt[i];
+					}
+				}
+			}
+		}
+	}
+
+	uint32_t calc_pw(uint8_t pw_adc, uint32_t period) {
+		if (pw_adc < MIN_PW)
+			return MIN_PW;
+		if (pw_adc > 254)
+			return period - MIN_PW;
+
+		float pw = (float)pw_adc / 255.f * (float)period;
+		return static_cast<uint32_t>(pw);
+	}
+
+	void set_param(int param_id, float val) override {
+		if (param_id < Info::NumKnobs)
+			pots[param_id] = val;
+	}
+
+	void set_input(int input_id, float val) override {
+		if (input_id < Info::NumInJacks)
+			ins[input_id] = val;
+	}
+
+	float get_output(int output_id) const override {
+		if (output_id < Info::NumOutJacks)
+			return outs[output_id] ? 1.f : 0.f;
+		else
+			return 0.f;
+	}
+
+	void set_samplerate(float sr) override {
+	}
+
+	float get_led_brightness(int led_id) const override {
+		if (led_id == Info::Switch_4X_Fast)
+			return switches[Info::Switch_4X_Fast] > 0;
+
+		if (led_id == Info::SwitchMute)
+			return switches[Info::Switch_4X_Fast] > 0;
+
+		//first two LEDs are Switches
+		led_id -= 2;
+		if (led_id == Info::LedLed_In)
+			return ins[Info::InputClk_In];
+
+		static_assert(Info::LedLed_In == 0,
+					  "SCM Led_In must be 0 and the other LEDs must be 1-8 in order."
+					  "Fix this or modify the code below this assert.");
+		if (led_id < Info::NumDiscreteLeds)
+			return outs[led_id - 1];
+
+		return 0.f;
+	}
+
+	// Boilerplate to auto-register in ModuleFactory
+	// clang-format off
+	static std::unique_ptr<CoreProcessor> create() { return std::make_unique<ThisCore>(); }
+	static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, ModuleInfoView::makeView<Info>());
+	// clang-format on
+
+private:
+	// Controls/Outs
+	float pots[Info::NumKnobs];
+	float switches[Info::NumSwitches];
+	float ins[Info::NumInJacks];
+	std::array<bool, Info::NumOutJacks> outs;
+
+	static constexpr bool DoFreeRun = true; //TODO: make this a switch?
+
+	// Params (analog)
+	uint32_t old_shuffle_adc = 127;
+	uint32_t old_slippage_adc = 127;
+	uint32_t old_pw_adc = 127;
+	uint32_t old_skip_adc = 127;
+	uint32_t old_rotation = 255;
+	uint32_t old_faster_switch_state = 127;
+
+	// Params (rhythmic)
+	uint8_t skip_pattern = 0xFF;
+	uint8_t slip_every = 2;
+	uint8_t slip_howmany = 0;
+
+	// Params (states)
+	bool clkin;
+	bool mute;
+	bool is_running;
+	bool resync;
+
+	// Flags
+	bool update_pulse_params;
+	bool update_slip_params;
+
+	// Multiply-by for each jack
+	std::array<uint32_t, 8> d;
+
+	// Phase counters
+	uint32_t tmr_int = 0;
+	uint32_t tmr_clkin = 0;
+
+	std::array<uint32_t, 8> tmr{};
+	uint32_t period = 84000;
+	std::array<uint32_t, 8> per;
+
+	// Pulse-width
+	std::array<uint32_t, 8> pw{8400, 4200, 2800, 2200, 1680, 1400, 1050, 1050};
+	static constexpr uint32_t MIN_PW = 50;
+
+	// Beat counters for Skip feature
+	std::array<uint32_t, 8> p;
+
+	// Counters for slip
+	std::array<uint32_t, 8> s;
+	std::array<uint32_t, 8> dd;
+	std::array<int32_t, 8> slipamt;
+	std::array<int32_t, 8> slip;
+
+	// Alt structure: TODO
+	// struct ClockOut {
+	// 	bool is_shuffling;
+	// 	uint32_t base_mult;
+	// 	uint32_t d;		  //mult
+	// 	uint32_t tmr;	  //phase
+	// 	uint32_t per;	  //maxphase
+	// 	uint32_t pw;	  //pw
+	// 	uint32_t p;		  //pulse_ctr
+	// 	uint32_t s;		  //?
+	// 	uint32_t dd;	  //mult_prefast
+	// 	uint32_t slip;	  //?
+	// 	uint32_t slipamt; //?
+	// };
+
+	// std::array<ClockOut, 8> jacks{{
+	// 	{.is_shuffling = false, .base_mult = 1},
+	// 	{.is_shuffling = false, .base_mult = 2},
+	// 	{.is_shuffling = true, .base_mult = 3},
+	// 	{.is_shuffling = true, .base_mult = 4},
+	// 	{.is_shuffling = true, .base_mult = 5},
+	// 	{.is_shuffling = true, .base_mult = 6},
+	// 	{.is_shuffling = true, .base_mult = 8},
+	// 	{.is_shuffling = false, .base_mult = 8},
+	// }};
+};
+
+} // namespace MetaModule

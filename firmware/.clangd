@@ -55,6 +55,14 @@ CompileFlags:
 	]
 ---
 If:
+	PathMatch: [".*/VCV-adaptor/dsp/.*"]
+CompileFlags:
+	Add: [
+        "--include /opt/homebrew/opt/llvm/lib/clang/16/include/arm_neon.h"
+	]
+
+---
+If:
 	PathMatch: [".*mp1.*m4.*", ".*medium.*m4.*"]
 CompileFlags:
 	Add: [

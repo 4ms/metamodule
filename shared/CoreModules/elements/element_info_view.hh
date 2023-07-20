@@ -7,14 +7,14 @@
 namespace MetaModule
 {
 
-struct ModuleInfoView2 {
+struct ModuleInfoView {
 	std::string_view description{""};
 	uint32_t width_hp = 0;
 	bool uses_center_coords = false;
 	std::span<const Element> elements;
 
-	template<Derived<ElementInfoBase> T>
-	static constexpr ModuleInfoView2 makeView() {
+	template<Derived<ModuleInfoBase> T>
+	static constexpr ModuleInfoView makeView() {
 		return {
 			.description = T::description,
 			.width_hp = T::width_hp,

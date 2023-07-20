@@ -23,13 +23,22 @@ struct ModuleDirectory {
 		return false;
 	}
 
+	static bool isHub(std::string_view slug) {
+		if (slug == "PanelMedium")
+			return true;
+		if (slug == "HubMedium")
+			return true;
+
+		return false;
+	}
+
 	static bool isHub(rack::Module *module) {
 		if (!module)
 			return false;
 		if (!module->model)
 			return false;
 
-		return module->model->slug == "PanelMedium";
+		return isHub(module->model->slug);
 	}
 
 	static bool isModuleInPlugin(rack::Module *module) {

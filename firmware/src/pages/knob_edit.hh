@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/module_info_base.hh"
+#include "CoreModules/elements/element_info.hh"
 #include "pages/base.hh"
 #include "pages/images/image_list.hh"
 #include "pages/page_list.hh"
@@ -110,7 +110,7 @@ struct KnobEditPage : PageBase {
 		nm.reserve(40);
 		nm.append(slug.c_str());
 		nm.append(" knob: ");
-		nm.append(moduleinfo.Knobs[this_param_id].long_name);
+		// nm.append(moduleinfo.Knobs[this_param_id].long_name);
 		lv_label_set_text(knob_name, nm.c_str());
 
 		nm.clear();

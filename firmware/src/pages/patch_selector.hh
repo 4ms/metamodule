@@ -7,7 +7,7 @@
 #include "printf.h"
 
 //exported:
-#include "slsexport/ui.h"
+#include "slsexport/patchsel/ui.h"
 extern "C" void ui_PatchSelector_screen_init();
 LV_FONT_DECLARE(lv_font_montserrat_10);
 LV_FONT_DECLARE(lv_font_montserrat_16);

@@ -110,18 +110,16 @@ public:
 		// lv_disp_flush_ready(disp_drv);
 	}
 
-	static inline bool should_send_button_release = false;
-
 	static void read_input(lv_indev_drv_t *indev, lv_indev_data_t *data) {
 		data->continue_reading = false;
 
+#ifdef LONG_PRESS_MANUALLY_PARSED
+		static inline bool should_send_button_release = false;
 		if (should_send_button_release) {
 			data->state = LV_INDEV_STATE_REL;
 			should_send_button_release = false;
 			return;
 		}
-
-		data->enc_diff = m->rotary.use_motion();
 
 		// Handle rotary button press/release while still allowing for rotary push+turn.
 		// LVGL does not support rotary push+turn, instead it interprets the release at the end
@@ -136,6 +134,10 @@ public:
 			should_send_button_release = true;
 			data->continue_reading = true;
 		}
+#else
+		data->state = m->rotary_button.is_pressed() ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+#endif
+		data->enc_diff = m->rotary.use_motion();
 	}
 };
 } // namespace MetaModule

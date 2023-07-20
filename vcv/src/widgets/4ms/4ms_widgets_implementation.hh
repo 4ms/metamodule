@@ -66,6 +66,14 @@ inline void do_create(Toggle3pos el, const Indices &indices, const WidgetContext
 	create_4ms_param<SubMiniToggle3pos>(el.x_mm, el.y_mm, indices, context);
 }
 
+inline void do_create(Toggle2posHoriz el, const Indices &indices, const WidgetContext_t &context) {
+	create_4ms_param<SubMiniToggleHoriz2pos>(el.x_mm, el.y_mm, indices, context);
+}
+
+inline void do_create(Toggle3posHoriz el, const Indices &indices, const WidgetContext_t &context) {
+	create_4ms_param<SubMiniToggleHoriz3pos>(el.x_mm, el.y_mm, indices, context);
+}
+
 inline void do_create(LatchingButtonMonoLight el, const Indices &indices, const WidgetContext_t &context) {
 	using WidgetT = LatchingSwitch<rack::LEDBezel>;
 	using LightT = rack::LEDBezelLight<rack::YellowLight>;

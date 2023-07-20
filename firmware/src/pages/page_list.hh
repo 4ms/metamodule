@@ -1,5 +1,5 @@
 #pragma once
-#include "module_param.hh"
+#include "elements/module_param.hh"
 #include "util/circular_stack.hh"
 #include <array>
 #include <cstdint>
