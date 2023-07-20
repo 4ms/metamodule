@@ -1,8 +1,6 @@
 #include "doctest.h"
 
-//
-
-#include "pages/page_list.hh"
+#include "gui/pages/page_list.hh"
 
 using namespace MetaModule;
 

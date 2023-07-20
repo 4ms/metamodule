@@ -20,20 +20,8 @@ endif
 
 # target/chip/core specific source dirs
 target_src := src/$(target_board)
-target_chip_src := src/$(target_board)/mp1
-core_src := src/a7
+core_src := src/core_a7
 usb_src := src/usb
-
-ifeq "$(target_board)" "pcmdev"
-main_source = src/pcmdev/main.cc
-audio_source = src/pcmdev/audio-dualcodec.cc
-EXTDEF = DUAL_PCM3168_DEV
-else ifeq "$(target_board)" "norflash-loader"
-main_source = $(target_src)/main.cc
-else
-main_source = $(core_src)/main.cc
-audio_source = src/audio.cc
-endif
 
 TAG := [MP1A7-$(target_board)]
 
@@ -62,18 +50,18 @@ SOURCES += system/libc_stub.c
 SOURCES += system/libcpp_stub.cc
 SOURCES += system/new.cc
 SOURCES += system/mmu_ca7.c
-SOURCES += src/shared_memory.cc
-SOURCES += src/uart_log.cc
-SOURCES += $(main_source)
-SOURCES += $(audio_source)
+SOURCES += src/core_intercom/shared_memory.cc
+SOURCES += src/console/uart_log.cc
+SOURCES += $(core_src)/main.cc
+SOURCES += src/audio/audio.cc
 SOURCES += $(core_src)/aux_core_main.cc
-SOURCES += src/patchlist.cc
-SOURCES += src/patchlist_ryml_tests.cc
+SOURCES += src/ryml_tests/patchlist_ryml_tests.cc
 INCLUDES += -I.
 INCLUDES += -Isrc
+INCLUDES += -Isrc/console
+INCLUDES += -Isrc/params
 INCLUDES += -I$(core_src)
 INCLUDES += -I$(target_src)
-INCLUDES += -I$(target_chip_src)
 INCLUDES += -I$(SHARED)
 INCLUDES += -I$(SHARED)/patch
 
@@ -128,8 +116,7 @@ SOURCES += $(SHARED)/cpputil/util/math_tables.cc
 INCLUDES += -I$(SHARED)/cpputil
 
 # GUI
-SOURCES += $(wildcard src/pages/elements/*.cc)
-SOURCES += src/pages/page_manager.cc
+SOURCES += src/gui/pages/page_manager.cc
 
 # Modules: CoreModules and faceplate artwork 
 SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
@@ -161,50 +148,50 @@ modules4ms := EnOsc ENVVCA
 modules4ms += Djembe StMix PEG SMR MultiLFO PitchShift
 modules4ms += HPF InfOsc KPLS Freeverb Seq8
 
-SOURCES += $(foreach m,$(modulesAudible),vcv-ports/AudibleInstruments/src/$(m).cpp)
-SOURCES += $(foreach m,$(modulesBefaco),vcv-ports/Befaco/src/$(m).cpp)
+SOURCES += $(foreach m,$(modulesAudible),vcv_ports/AudibleInstruments/src/$(m).cpp)
+SOURCES += $(foreach m,$(modulesBefaco),vcv_ports/Befaco/src/$(m).cpp)
 SOURCES += $(foreach m,$(modules4ms),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
 
-SOURCES += $(foreach m,$(modulesAudible),src/pages/images/AudibleInstruments/modules/$(m)_artwork_240.c)
-SOURCES += $(foreach m,$(modulesBefaco),src/pages/images/Befaco/modules/$(m)_artwork_240.c)
-SOURCES += $(foreach m,$(modules4ms),src/pages/images/4ms/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modulesAudible),src/gui/images/AudibleInstruments/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modulesBefaco),src/gui/images/Befaco/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(modules4ms),src/gui/images/4ms/modules/$(m)_artwork_240.c)
 
 else
 SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*.cc)
-SOURCES += $(wildcard vcv-ports/AudibleInstruments/src/*.cpp)
-SOURCES += $(wildcard vcv-ports/Befaco/src/*.cpp)
+SOURCES += $(wildcard vcv_ports/AudibleInstruments/src/*.cpp)
+SOURCES += $(wildcard vcv_ports/Befaco/src/*.cpp)
 
-SOURCES += $(wildcard src/pages/images/4ms/modules/*.c)
-SOURCES += $(wildcard src/pages/images/Befaco/modules/*.c)
-SOURCES += $(wildcard src/pages/images/AudibleInstruments/modules/*.c)
+SOURCES += $(wildcard src/gui/images/4ms/modules/*.c)
+SOURCES += $(wildcard src/gui/images/Befaco/modules/*.c)
+SOURCES += $(wildcard src/gui/images/AudibleInstruments/modules/*.c)
 endif
 
 INCLUDES += -I$(SHARED)/CoreModules
 INCLUDES += -I$(SHARED)/CoreModules/4ms
-INCLUDES += -Ivcv-ports/AudibleInstruments/src/
-INCLUDES += -Ivcv-ports/AudibleInstruments/eurorack
-INCLUDES += -Ivcv-ports/Befaco/src
+INCLUDES += -Ivcv_ports/AudibleInstruments/src
+INCLUDES += -Ivcv_ports/AudibleInstruments/eurorack
+INCLUDES += -Ivcv_ports/Befaco/src
 
-SOURCES += src/VCV-adaptor/pffft/pffft.c
-INCLUDES += -Isrc/VCV-adaptor
-INCLUDES += -Isrc/VCV-adaptor/pffft
+SOURCES += src/VCV_adaptor/pffft/pffft.c
+INCLUDES += -Isrc/VCV_adaptor
+INCLUDES += -Isrc/VCV_adaptor/pffft
 
 # Component images
-SOURCES += $(wildcard src/pages/images/4ms/components/*.c)
-SOURCES += $(wildcard src/pages/images/Rack/components/*.c)
-SOURCES += $(wildcard src/pages/images/Befaco/components/*.c)
-SOURCES += $(wildcard src/pages/images/AudibleInstruments/components/*.c)
+SOURCES += $(wildcard src/gui/images/4ms/components/*.c)
+SOURCES += $(wildcard src/gui/images/Rack/components/*.c)
+SOURCES += $(wildcard src/gui/images/Befaco/components/*.c)
+SOURCES += $(wildcard src/gui/images/AudibleInstruments/components/*.c)
 
 # Module support files
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/dynamic_data.cc
-SOURCES += vcv-ports/AudibleInstruments/eurorack/stmlib/utils/random.cc
-SOURCES += vcv-ports/AudibleInstruments/eurorack/stmlib/dsp/atan.cc
-SOURCES += vcv-ports/AudibleInstruments/eurorack/stmlib/dsp/units.cc
-SOURCES += vcv-ports/AudibleInstruments/eurorack/braids/analog_oscillator.cc
-SOURCES += vcv-ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
-SOURCES += vcv-ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
-SOURCES += vcv-ports/AudibleInstruments/eurorack/braids/resources.cc
+SOURCES += vcv_ports/AudibleInstruments/eurorack/stmlib/utils/random.cc
+SOURCES += vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/atan.cc
+SOURCES += vcv_ports/AudibleInstruments/eurorack/stmlib/dsp/units.cc
+SOURCES += vcv_ports/AudibleInstruments/eurorack/braids/analog_oscillator.cc
+SOURCES += vcv_ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
+SOURCES += vcv_ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
+SOURCES += vcv_ports/AudibleInstruments/eurorack/braids/resources.cc
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 
 ## LVGL / Gui-Guider
@@ -226,23 +213,23 @@ INCLUDES +=	-I$(LIBDIR)/lvgl
 INCLUDES +=	-I$(LIBDIR)/lvgl/lvgl
 
 # Fonts
-SOURCES += src/pages/fonts/MuseoSansRounded_500_12.c
-SOURCES += src/pages/fonts/MuseoSansRounded_700_12.c
-SOURCES += src/pages/fonts/MuseoSansRounded_700_14.c
-SOURCES += src/pages/fonts/MuseoSansRounded_700_16.c
-SOURCES += src/pages/fonts/MuseoSansRounded_700_18.c
+SOURCES += src/gui/fonts/MuseoSansRounded_500_12.c
+SOURCES += src/gui/fonts/MuseoSansRounded_700_12.c
+SOURCES += src/gui/fonts/MuseoSansRounded_700_14.c
+SOURCES += src/gui/fonts/MuseoSansRounded_700_16.c
+SOURCES += src/gui/fonts/MuseoSansRounded_700_18.c
 
 # Generated:
-SOURCES += src/pages/slsexport/patchsel/ui.c
-SOURCES += src/pages/slsexport/patchsel/ui_helpers.c
-SOURCES += $(wildcard src/pages/slsexport/patchsel/ui_font_*.c)
-SOURCES += src/pages/slsexport/patchview/ui.c
+SOURCES += src/gui/slsexport/patchsel/ui.c
+SOURCES += src/gui/slsexport/patchsel/ui_helpers.c
+SOURCES += $(wildcard src/gui/slsexport/patchsel/ui_font_*.c)
+SOURCES += src/gui/slsexport/patchview/ui.c
 #patchview
-SOURCES += $(wildcard src/pages/slsexport/patchview/components/*.c)
-SOURCES += $(wildcard src/pages/slsexport/patchview/images/*.c)
-SOURCES += $(wildcard src/pages/slsexport/patchview/fonts/*.c)
-SOURCES += $(wildcard src/pages/slsexport/patchview/screens/*.c)
-INCLUDES += -Isrc/pages/slsexport
+SOURCES += $(wildcard src/gui/slsexport/patchview/components/*.c)
+SOURCES += $(wildcard src/gui/slsexport/patchview/images/*.c)
+SOURCES += $(wildcard src/gui/slsexport/patchview/fonts/*.c)
+SOURCES += $(wildcard src/gui/slsexport/patchview/screens/*.c)
+INCLUDES += -Isrc/gui/slsexport
 
 # Patch convert
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
@@ -260,16 +247,15 @@ INCLUDES += -I$(RYMLDIR)/ext/c4core/src
 
 SOURCES += $(LIBDIR)/fatfs/source/ff.c
 SOURCES += $(LIBDIR)/fatfs/source/ffunicode.c
-SOURCES += src/fatfs/diskio.cc
-SOURCES += src/fatfs/fattime.cc
-SOURCES += src/patch_fileio.cc
-SOURCES += src/time_convert.cc
+SOURCES += src/fs/fatfs/diskio.cc
+SOURCES += src/fs/fatfs/fattime.cc
+SOURCES += src/fs/time_convert.cc
 SOURCES += $(LIBDIR)/littlefs/lfs.c
 SOURCES += $(LIBDIR)/littlefs/lfs_util.c
 SOURCES += $(HALDIR)/src/stm32mp1xx_hal_qspi.c
 SOURCES += $(DRIVERLIB)/drivers/qspi_flash_driver.cc
 INCLUDES += -I$(LIBDIR)/fatfs/source
-INCLUDES += -Isrc/fatfs
+INCLUDES += -Isrc/fs/fatfs
 
 
 #D-Cache L1: 32 KB, 128 Sets, 64 Bytes/Line, 4-Way
@@ -287,8 +273,8 @@ endif
 EXTRA_CPPFLAGS = $(LTOFLAG) -ffold-simple-inlines \
 				-Wno-psabi -Wno-double-promotion 
 
-$(BUILDDIR)/vcv-ports/Befaco/src/%.o: EXTRA_CPPFLAGS += -Wno-deprecated-enum-float-conversion
-$(BUILDDIR)/vcv-ports/AudibleInstruments/src/%.o: EXTRA_CPPFLAGS += -Wno-deprecated-enum-float-conversion
+$(BUILDDIR)/vcv_ports/Befaco/src/%.o: EXTRA_CPPFLAGS += -Wno-deprecated-enum-float-conversion
+$(BUILDDIR)/vcv_ports/AudibleInstruments/src/%.o: EXTRA_CPPFLAGS += -Wno-deprecated-enum-float-conversion
 
 EXTRA_LFLAGS = $(LTOFLAG) $(OPTFLAG) \
 				-L$(BUILDDIR_MP1M4)/$(target_board) \

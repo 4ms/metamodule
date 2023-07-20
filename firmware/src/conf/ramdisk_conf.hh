@@ -1,5 +1,5 @@
 #pragma once
-#include "ramdisk.hh"
+#include "fs/ramdisk.hh"
 #include <cstdint>
 
 static constexpr uint32_t RamDiskSizeBytes = 4 * 1024 * 1024;

@@ -20,7 +20,6 @@ compile_flags.txt
 shared/tableGen/make_tables
 cubemx
 compile_commands.json*
-doctest.h
 *.dat
 *.uimg
 .gdb_history

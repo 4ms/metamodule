@@ -3,13 +3,13 @@
 #define printf_ printf
 ///
 
-#include "pages/page_manager.hh"
-#include "params.hh"
-#include "params_dbg_print.hh"
-#include "patch_mod_queue.hh"
-#include "patch_playloader.hh"
-#include "patch_storage_proxy.hh"
-#include "patchlist.hh"
+#include "gui/pages/page_manager.hh"
+#include "params/params.hh"
+#include "params/params_dbg_print.hh"
+#include "patch_file/patch_storage_proxy.hh"
+#include "patch_file/patchlist.hh"
+#include "patch_play/patch_mod_queue.hh"
+#include "patch_play/patch_playloader.hh"
 
 namespace MetaModule
 {
