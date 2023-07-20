@@ -2,7 +2,7 @@
 #include "mapping/JackMap.hh"
 #include "mapping/ModuleID.h"
 #include "mapping/ParamMap.hh"
-#include "mapping/central_data.hh"
+#include "mapping/module_directory.hh"
 #include "mapping/patch_writer.hh"
 #include <fstream>
 #include <rack.hpp>

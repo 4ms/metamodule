@@ -1,5 +1,5 @@
 #include "patch_writer.hh"
-#include "mapping/central_data.hh"
+#include "mapping/module_directory.hh"
 #include "patch_convert/patch_to_yaml.hh"
 #include "patch_convert/ryml/ryml_serial.hh"
 #include <algorithm>

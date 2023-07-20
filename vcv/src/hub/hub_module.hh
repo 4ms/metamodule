@@ -1,7 +1,7 @@
 #pragma once
 #include "comm/comm_module.hh"
 #include "hub_knob_mappings.hh"
-#include "mapping/central_data.hh"
+#include "mapping/module_directory.hh"
 #include "mapping/vcv_patch_file_writer.hh"
 #include "util/edge_detector.hh"
 #include "util/math.hh"
