@@ -195,8 +195,9 @@ struct MetaModuleHubBase : public rack::Module {
 		std::string patchFileName = filename;
 		DEFER({ free(filename); });
 
-		if (rack::system::getExtension(rack::system::getFilename(patchFileName)) != ".yml")
+		if (rack::system::getExtension(rack::system::getFilename(patchFileName)) != ".yml") {
 			patchFileName += ".yml";
+		}
 
 		lastPatchFilePath = rack::system::getDirectory(patchFileName);
 
