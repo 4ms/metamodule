@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/param_scales.hh"
 #include "CoreModules/moduleFactory.hh"

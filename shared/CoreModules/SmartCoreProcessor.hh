@@ -1,5 +1,5 @@
 #pragma once
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/elements/element_counter.hh"
 #include "CoreModules/elements/element_state_conversion.hh"
 #include "CoreModules/elements/param_scales.hh"
@@ -51,21 +51,17 @@ protected:
 		std::variant_alternative_t<variantIndex, Element> DummyElement;
 
 		// read raw value
-		std::array<float,DummyElement.NumParams> rawValues;
-		for (std::size_t i=0; i<rawValues.size(); i++)
-		{
+		std::array<float, DummyElement.NumParams> rawValues;
+		for (std::size_t i = 0; i < rawValues.size(); i++) {
 			rawValues[i] = getParamRaw(EL, i);
 		}
 
 		// call conversion function for that type of element
 		// use shortcut for special but common case of single parameter elements
 		// in order to keep the conversion functions simple
-		if constexpr (rawValues.size() == 1)
-		{
+		if constexpr (rawValues.size() == 1) {
 			return MetaModule::StateConversion::convertState(DummyElement, rawValues[0]);
-		}
-		else
-		{
+		} else {
 			return MetaModule::StateConversion::convertState(DummyElement, rawValues);
 		}
 	}
@@ -90,13 +86,13 @@ protected:
 	}
 
 private:
-	float getParamRaw(Elem el, std::size_t local_index=0) {
+	float getParamRaw(Elem el, std::size_t local_index = 0) {
 		auto idx = index(el);
 		auto param_id = idx.param_idx + local_index;
 		return paramValues.at(param_id);
 	}
 
-	void setLEDRaw(Elem el, float val, size_t color_idx=0) {
+	void setLEDRaw(Elem el, float val, size_t color_idx = 0) {
 		auto idx = index(el);
 		auto led_idx = idx.light_idx + color_idx;
 		ledValues.at(led_idx) = val;

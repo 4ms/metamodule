@@ -17,24 +17,20 @@ struct ENVVCAInfo : ModuleInfoBase {
 		Slider25mmVertLED{to_mm<72>(91.505), to_mm<72>(108.81), "Env Level Slider", "", 0, 0, 1, 1.0f},
 		Knob9mm{to_mm<72>(21.69), to_mm<72>(178.25), "Rise CV", "", 0, 0, 1, 1.0f},
 		Knob9mm{to_mm<72>(92.85), to_mm<72>(178.25), "Fall CV", "", 0, 0, 1, 1.0f},
-
 		AnalogJackInput4ms{to_mm<72>(57.25), to_mm<72>(203.53), "Time CV", ""},
 		GateJackInput4ms{to_mm<72>(22.3), to_mm<72>(227.06), "Trigger", ""},
 		GateJackInput4ms{to_mm<72>(57.25), to_mm<72>(254.25), "Cycle", ""},
 		AnalogJackInput4ms{to_mm<72>(22.3), to_mm<72>(278.73), "Follow", ""},
 		AnalogJackInput4ms{to_mm<72>(35.87), to_mm<72>(322.47), "Audio In", ""},
-
 		AnalogJackOutput4ms{to_mm<72>(92.03), to_mm<72>(227.06), "Env", ""},
 		GateJackOutput4ms{to_mm<72>(92.03), to_mm<72>(278.73), "EOR", ""},
 		AnalogJackOutput4ms{to_mm<72>(78.57), to_mm<72>(322.5), "Audio Out", ""},
-
+		RedGreenBlueLight{to_mm<72>(45.11), to_mm<72>(174.84), "Rise Light", ""},
+		RedGreenBlueLight{to_mm<72>(69.34), to_mm<72>(174.84), "Fall Light", ""},
+		RedGreenBlueLight{to_mm<72>(106.41), to_mm<72>(256.6), "EOR Light", ""},
 		Toggle3pos{to_mm<72>(23.19), to_mm<72>(43.305), "Rise Switch", ""},
 		Toggle3pos{to_mm<72>(57.33), to_mm<72>(43.305), "Fall Switch", ""},
 		LatchingButtonMonoLight{to_mm<72>(92.17), to_mm<72>(41.65), "Cycle", ""},
-
-		RedBlueLight{to_mm<72>(45.11f), to_mm<72>(174.84f), "Rise CV", "Rise CV", 0},
-		RedBlueLight{to_mm<72>(69.34f), to_mm<72>(174.84f), "Fall CV", "Fall CV", 0},
-		OrangeLight{to_mm<72>(106.41f), to_mm<72>(256.6f), "EOR", "EOR", 0},
 }};
 
     enum class Elem {
@@ -43,24 +39,20 @@ struct ENVVCAInfo : ModuleInfoBase {
         EnvLevelSlider,
         RiseCvKnob,
         FallCvKnob,
-
         TimeCvIn,
         TriggerIn,
         CycleIn,
         FollowIn,
         AudioIn,
-
         EnvOut,
         EorOut,
         AudioOut,
-
-        RiseSwitch,
-        FallSwitch,
-        CycleButton,
-
         RiseLight,
         FallLight,
         EorLight,
+        RiseSwitch,
+        FallSwitch,
+        CycleButton,
     };
 
     // Legacy naming (safe to remove once CoreModule is converted

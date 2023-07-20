@@ -1,4 +1,4 @@
-#include "CoreModules/SmartCoreProcessor.h"
+#include "CoreModules/SmartCoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 #include "CoreModules/4ms/core/envvca/SSI2162.h"
 #include "CoreModules/4ms/core/envvca/TriangleOscillator.h"

@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreModules/4ms/info/Djembe_info.hh"
-#include "CoreModules/coreProcessor.h"
+#include "CoreModules/CoreProcessor.hh"
 #include "CoreModules/moduleFactory.hh"
 
 #include "gcem/include/gcem.hpp"
