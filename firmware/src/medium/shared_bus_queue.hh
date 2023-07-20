@@ -3,6 +3,7 @@
 #include "controls.hh"
 #include "drivers/hsem.hh"
 #include "params.hh"
+#include "pr_dbg.hh"
 
 namespace MetaModule
 {
@@ -14,7 +15,12 @@ public:
 		: main_jacksense_reader(main_gpioexpander)
 		, ext_jacksense_reader(ext_gpioexpander)
 		, num_jacksense_readers{ext_gpioexpander.is_present() ? 2 : 1} {
-		main_jacksense_reader.start();
+		if (!main_jacksense_reader.is_present())
+			pr_dbg("Jack sense GPIO Expander failed to start\n");	
+		else {
+			pr_dbg("Main Jack sense GPIO Expander present\n");
+			main_jacksense_reader.start();
+		}
 	}
 
 	void update() {
