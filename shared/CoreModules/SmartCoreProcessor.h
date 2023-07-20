@@ -46,17 +46,28 @@ protected:
 		constexpr auto elementID = element_index(EL);
 		constexpr auto &elementRef = INFO::Elements[elementID];
 
-		// read raw value
-		auto rawValue = getParamRaw(EL);
-
 		// construct element of same type as the element the enum points to
 		constexpr auto variantIndex = elementRef.index();
 		std::variant_alternative_t<variantIndex, Element> DummyElement;
 
-		// call conversion function for that type of element
-		auto result = StateConversion::convertState(DummyElement, rawValue);
+		// read raw value
+		std::array<float,DummyElement.NumParams> rawValues;
+		for (std::size_t i=0; i<rawValues.size(); i++)
+		{
+			rawValues[i] = getParamRaw(EL, i);
+		}
 
-		return result;
+		// call conversion function for that type of element
+		// use shortcut for special but common case of single parameter elements
+		// in order to keep the conversion functions simple
+		if constexpr (rawValues.size() == 1)
+		{
+			return MetaModule::StateConversion::convertState(DummyElement, rawValues[0]);
+		}
+		else
+		{
+			return MetaModule::StateConversion::convertState(DummyElement, rawValues);
+		}
 	}
 
 	template<Elem EL, typename VAL>
@@ -79,16 +90,16 @@ protected:
 	}
 
 private:
-	float getParamRaw(Elem el) {
+	float getParamRaw(Elem el, std::size_t local_index=0) {
 		auto idx = index(el);
-		return paramValues[idx.param_idx];
+		auto param_id = idx.param_idx + local_index;
+		return paramValues.at(param_id);
 	}
 
-	void setLEDRaw(Elem el, float val, size_t color_idx = 0) {
+	void setLEDRaw(Elem el, float val, size_t color_idx=0) {
 		auto idx = index(el);
 		auto led_idx = idx.light_idx + color_idx;
-		if (led_idx < ledValues.size())
-			ledValues[led_idx] = val;
+		ledValues.at(led_idx) = val;
 	}
 
 protected:
