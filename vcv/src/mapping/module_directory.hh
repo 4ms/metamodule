@@ -15,8 +15,13 @@ struct ModuleDirectory {
 
 		if (module->model->plugin->slug == "4msCompany")
 			return true;
-		if (module->model->plugin->slug == "Befaco")
+		if (module->model->plugin->slug == "Befaco") {
+			if (module->model->slug == "NoisePlethora")
+				return false;
+			if (module->model->slug == "Muxlicer")
+				return false;
 			return true;
+		}
 		if (module->model->plugin->slug == "Audible Instruments")
 			return true;
 
