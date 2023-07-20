@@ -1,5 +1,5 @@
 #ifdef METAMODULE_NORMAL_MODE
-#include "CoreModules/Befaco/Befaco_res_SpringReverbIR_f32.h"
+#include "vcv-ports/glue/Befaco/Befaco_res_SpringReverbIR_f32.h"
 #endif
 
 #include "plugin.hpp"

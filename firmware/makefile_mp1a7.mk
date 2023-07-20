@@ -198,13 +198,13 @@ SOURCES += $(wildcard src/pages/images/AudibleInstruments/components/*.c)
 # Module support files
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/data.cc
 SOURCES += $(SHARED)/CoreModules/4ms/core/enosc/dynamic_data.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/utils/random.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/dsp/atan.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/stmlib/dsp/units.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/analog_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/digital_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/macro_oscillator.cc
-SOURCES += $(SHARED)/CoreModules/AudibleInstruments/core/braids/resources.cc
+SOURCES += vcv-ports/AudibleInstruments/eurorack/stmlib/utils/random.cc
+SOURCES += vcv-ports/AudibleInstruments/eurorack/stmlib/dsp/atan.cc
+SOURCES += vcv-ports/AudibleInstruments/eurorack/stmlib/dsp/units.cc
+SOURCES += vcv-ports/AudibleInstruments/eurorack/braids/analog_oscillator.cc
+SOURCES += vcv-ports/AudibleInstruments/eurorack/braids/digital_oscillator.cc
+SOURCES += vcv-ports/AudibleInstruments/eurorack/braids/macro_oscillator.cc
+SOURCES += vcv-ports/AudibleInstruments/eurorack/braids/resources.cc
 SOURCES += $(SHARED)/axoloti-wrapper/axoloti_math.cpp
 
 ## LVGL / Gui-Guider
