@@ -108,7 +108,5 @@ patch_convert_tests:
 win_dist:
 	CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STRIP=x86_64-w64-mingw32-strip RACK_DIR=../../Rack-SDK make -j16 dist
 
-include ../firmware/makefile_moduleinfo.mk
-
 .PHONY: all plugin tests core_tests vcv_tests util_tests axo_tests patch_convert_tests compile_commands run
 
