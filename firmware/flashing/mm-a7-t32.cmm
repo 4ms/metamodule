@@ -11,13 +11,6 @@ Trace.DISable
 SYStem.MemAccess DAP
 SYStem.Up
 
-;Data.LOAD.Elf /Users/dann/4ms/stm32/sampler-kit/build/mp153/RelWithDebInfo/mp153.elf /CPP
-;Data.LOAD.Elf /Users/dann/4ms/stm32/sampler-kit/build/mp153/Debug/mp153.elf /CPP
-;Data.LOAD.Elf /Users/dann/4ms/stm32/looping-delay-kit/build/mp153/RelWithDebInfo/mp153.elf /CPP
-;Data.LOAD.Elf /Users/dann/4ms/stm32/looping-delay-kit/build/mp153/Debug/mp153.elf /CPP
-;Data.LOAD.Elf /Users/dann/4ms/stm32/stm32mp1-baremetal/bootloaders/dfu_ssbl/build/main.elf /CPP
-;Data.LOAD.Elf /Users/dann/4ms/stm32/stm32mp1-baremetal/examples/usb_msc_device/build/main.elf /CPP
-
 Data.LOAD.Elf /Users/dann/4ms/stm32/meta-module/firmware/build/mp1corea7/medium/main.elf /CPP
 ;Break main
 Go
