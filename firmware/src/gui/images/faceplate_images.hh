@@ -65,7 +65,6 @@ LV_IMG_DECLARE(LIO_artwork_240);
 LV_IMG_DECLARE(L4_artwork_240);
 LV_IMG_DECLARE(KPLS_artwork_240);
 LV_IMG_DECLARE(InfOsc_artwork_240);
-LV_IMG_DECLARE(HubMedium_artwork_240);
 LV_IMG_DECLARE(HPF_artwork_240);
 LV_IMG_DECLARE(Gate_artwork_240);
 LV_IMG_DECLARE(Gate8_artwork_240);
@@ -269,9 +268,6 @@ struct ModuleImages {
 
 		if (slug == "InfOsc")
 			return &InfOsc_artwork_240;
-
-		if (slug == "HubMedium")
-			return &HubMedium_artwork_240;
 
 		if (slug == "HPF")
 			return &HPF_artwork_240;
