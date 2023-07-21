@@ -1,7 +1,5 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
-USE_FEWER_MODULES ?= 0
-
 $(info --------------------)
 
 ifeq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS),$(VALID_BOARDS)))
