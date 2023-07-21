@@ -1,6 +1,6 @@
 # Makefile by Dan Green <danngreen1@gmail.com>, public domain
 
-USE_FEWER_MODULES ?= 1
+USE_FEWER_MODULES ?= 0
 
 #brands := 4ms Befaco AudibleInstruments
 
@@ -119,15 +119,17 @@ INCLUDES += -I$(SHARED)/cpputil
 SOURCES += src/gui/pages/page_manager.cc
 
 # Modules: CoreModules and faceplate artwork 
-include vcv_ports/glue/AudibleInstruments/modules.mk
-include vcv_ports/glue/Befaco/modules.mk
 
 ifeq "$(USE_FEWER_MODULES)" "1"
 4ms_modules := EnOsc ENVVCA 
 4ms_modules += Djembe StMix PEG SMR MultiLFO PitchShift
 4ms_modules += HPF InfOsc KPLS Freeverb Seq8
+Befaco_modules := EvenVCO DualAtenuverter SpringReverb
+AudibleInstruments_modules := Braids
 else
-4ms_modules := $(basename $(notdir $(wildcard $(SHARED)/CoreModules/4ms/core/*.cc)))
+4ms_modules := $(subst Core,,$(basename $(notdir $(wildcard $(SHARED)/CoreModules/4ms/core/*Core.cc))))
+include vcv_ports/glue/Befaco/modules.mk
+include vcv_ports/glue/AudibleInstruments/modules.mk
 endif
 
 SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
@@ -137,13 +139,6 @@ SOURCES += $(foreach m,$(AudibleInstruments_modules),vcv_ports/AudibleInstrument
 SOURCES += $(foreach m,$(AudibleInstruments_modules),src/gui/images/AudibleInstruments/modules/$(m)_240.c)
 SOURCES += $(foreach m,$(Befaco_modules),vcv_ports/Befaco/src/$(m).cpp)
 SOURCES += $(foreach m,$(Befaco_modules),src/gui/images/Befaco/modules/$(m)_240.c)
-
-# SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*.cc)
-# SOURCES += $(wildcard vcv_ports/AudibleInstruments/src/*.cpp)
-# SOURCES += $(wildcard vcv_ports/Befaco/src/*.cpp)
-# SOURCES += $(wildcard src/gui/images/4ms/modules/*.c)
-# SOURCES += $(wildcard src/gui/images/Befaco/modules/*.c)
-# SOURCES += $(wildcard src/gui/images/AudibleInstruments/modules/*.c)
 
 INCLUDES += -I$(SHARED)/CoreModules
 INCLUDES += -I$(SHARED)/CoreModules/4ms
