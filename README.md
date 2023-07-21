@@ -129,22 +129,58 @@ which is loaded by powering on with a particular jumper installed.
 
 To load onto hardware, there are several options:
 
-#### Load over SWD
+#### Load in RAM over SWD/JTAG
 
-Power cycle the module with the jumper installed on the top-left and the pin to the right of that,
-on the Control Expander header. This forces alt firmware mode (which is DFU-USB mode). After power cycling, you can use gdb,
-Ozone, jflash, TRACE32, etc to load the elf file.
+Attach a JTAG debugger to the 10-pin connector at the top of the module labeled "SWD".
+
+If you are already running the application and just need to debug, you can just attach without loading.
+
+Install a jumper at ????
+(TODO: add new jumper position to make mp1-boot hang instead of jumping to app.)
+
+Power cycle the module. The console will show MP1-Boot started up, intialized RAM, and is waiting.
+
+Use jflash, TRACE32, Ozone, arm-none-eabi-gdb, etc to load the main.elf file.
+
+Execution can begin immediately from 0xC0200040.
+
+TODO: detailed instructions using J-flash, and also gdb.
  
-#### Load over DFU-USB
+#### Load into NOR Flash over DFU-USB
 
-Power cycle the module with the jumper installed on the top-left and the pin to the right of that,
-on the Control Expander header. This forces alt firmware mode (which is DFU-USB mode).
-Connect a USB cable from a computer to the module, and open a DFU loader. (TODO)
+Power cycle the module with a jumper installed on the Control Expander header. The jumper
+must bridge the top-left pin and the pin to the right of that.
+This forces an alt firmware to be loaded from NOR Flash (which is a USB-DFU bootloader).
+
+The button will be flashing green when in USB-DFU bootloader mode.
+
+Connect a USB cable from a computer to the module. 
+
+You can use a web-based loader [such as this one](https://devanlai.github.io/webdfu/dfu-util/).
+(detailed instructions TODO)
+
+Or use the command line (you must have [dfu-util](https://dfu-util.sourceforge.net/) installed):
+
+```
+dfu-util -a 0 -s 0x70080000 -D build/mp1corea7/medium/main.uimg
+```
+
+Load the main.uimg file to the default address (0x70080000). It will take a minute or two.
+
+At the end, if you are using the web version, there may be an error `DFU
+GETSTATUS failed: ControlTransferIn failed: NetworkError: Failed to execute
+'controlTransferIn' on 'USBDevice': A transfer error has occurred.` This is
+normal, and is not an error. It's safe to ignore this.
+
+Remove the jumper and power-cycle, and the new code will start up.
+
+
 
 #### Boot from SD Card
 
 Use `dd` to copy main.uimg to the third partition of an SD Card that contains mp1-boot on the first two sectors. 
-Then, change the BOOT DIP switches to be both to the right (see diagram on PCB).
+Then, change the BOOT DIP switches to be both to the left (see diagram on PCB). Power cycle.
+
 (more instructions TODO)
 
 ### Converting assets
