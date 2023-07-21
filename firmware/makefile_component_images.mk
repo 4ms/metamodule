@@ -1,34 +1,40 @@
-#TODO: foreach brand...
+####
+#### Generate LVGL image files from SVGs for components
+####
+#### make comp-images
+####
+#### The component Svg files must be in ../graphics/BRANDNAME/components/
+#### The converted LVGL-format image files will be in src/gui/images/BRANDNAME/components/ 
+
+#### Add a brand name here:
 brands = 4ms Rack Befaco AudibleInstruments 
 
-4ms_svg_dir    := ../graphics/4ms/components
-Befaco_svg_dir := ../graphics/Befaco/components
-Rack_svg_dir   := ../graphics/Rack/components
+svgscript := ../shared/svgextract/svgextract.py
+graphics_dir := ../graphics
+lvgl_image_dir := src/gui/images
+image_list_header := $(lvgl_image_dir)/faceplate_images.hh
 
-4ms_lvgl_img_dir    := src/gui/images/4ms/components
-Befaco_lvgl_img_dir := src/gui/images/Befaco/components
-Rack_lvgl_img_dir   := src/gui/images/Rack/components
+define comp_TEMPLATE =
+$(1)_comp_svgs := $(wildcard $(graphics_dir)/$(1)/components/*.svg)
+$(1)_comp_lvgls := $$(addprefix $(lvgl_image_dir)/$(1)/components/,$$(notdir $$($(1)_comp_svgs:.svg=.c)))
+comp_lvgls += $$($(1)_comp_lvgls)
+endef
 
-4ms_svgs    := $(wildcard $(4ms_svg_dir)/*.svg) 
-Befaco_svgs := $(wildcard $(Befaco_svg_dir)/*.svg)
-Rack_svgs   := $(wildcard $(Rack_svg_dir)/*.svg) 
+comp_lvgls = 
+$(foreach brand,$(brands),$(eval $(call comp_TEMPLATE,$(brand))))
 
-4ms_lvgl_imgs    := $(subst $(4ms_svg_dir),   $(4ms_lvgl_img_dir),   $(4ms_svgs:.svg=.c))
-Befaco_lvgl_imgs := $(subst $(Befaco_svg_dir),$(Befaco_lvgl_img_dir),$(Befaco_svgs:.svg=.c))
-Rack_lvgl_imgs   := $(subst $(Rack_svg_dir),  $(Rack_lvgl_img_dir),  $(Rack_svgs:.svg=.c))
+comp-images: $(comp_lvgls)
 
-## Recipe to make all images
-comp-images: $(4ms_lvgl_imgs) $(Befaco_lvgl_imgs) $(Rack_lvgl_imgs)
 
-## Details:
-$(4ms_lvgl_imgs): $(4ms_lvgl_img_dir)/%.c : $(4ms_svg_dir)/%.svg
-	@python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
+.SECONDEXPANSION:
+src/gui/images/%.c : ../graphics/$$*.svg
+	@echo "Converting: $*"
+	@python3 $(svgscript) convertSvgToLvgl $< $@
+	@echo "______________"
 
-$(Befaco_lvgl_imgs): $(Befaco_lvgl_img_dir)/%.c : $(Befaco_svg_dir)/%.svg
-	@python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
 
-$(Rack_lvgl_imgs): $(Rack_lvgl_img_dir)/%.c : $(Rack_svg_dir)/%.svg
-	@python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
+
+#####
 
 
 4ms_faceplate_svg_dir    := ../vcv/res/modules
@@ -43,9 +49,9 @@ Rack_faceplate_lvgl_dir   := src/gui/images/Rack/modules
 Befaco_faceplate_svgs := $(wildcard $(Befaco_faceplate_svg_dir)/*.svg)
 Rack_faceplate_svgs   := $(wildcard $(Rack_faceplate_svg_dir)/*.svg) 
 
-4ms_faceplate_lvgls    := $(subst $(4ms_faceplate_svg_dir),   $(4ms_lvgl_faceplate_dir),   $(4ms_svgs:.svg=.c))
-Befaco_faceplate_lvgls := $(subst $(Befaco_faceplate_svg_dir),$(Befaco_lvgl_faceplate_dir),$(Befaco_svgs:.svg=.c))
-Rack_faceplate_lvgls   := $(subst $(Rack_faceplate_svg_dir),  $(Rack_lvgl_faceplate_dir),  $(Rack_svgs:.svg=.c))
+4ms_faceplate_lvgls    := $(subst $(4ms_faceplate_svg_dir),$(4ms_faceplate_lvgl_dir),$(4ms_faceplate_svgs:.svg=.c))
+Befaco_faceplate_lvgls := $(subst $(Befaco_faceplate_svg_dir),$(Befaco_faceplate_lvgl_dir),$(Befaco_faceplate_svgs:.svg=.c))
+Rack_faceplate_lvgls   := $(subst $(Rack_faceplate_svg_dir),$(Rack_faceplate_lvgl_dir),$(Rack_faceplate_svgs:.svg=.c))
 
 module-images: $(4ms_faceplate_lvgls) $(Befaco_faceplate_lvgls) $(Rack_faceplate_lvgls)
 
@@ -54,7 +60,7 @@ $(4ms_faceplate_lvgls): $(4ms_faceplate_lvgl_dir)/%.c : $(4ms_faceplate_svg_dir)
 	$(info)
 	$(info -------)
 	$(info $(notdir $*): Creating 240px-height lvgl img from full-sized svg artwork $<)
-	python3 $(svgscript) createLvglFaceplate $< $* faceplate
+	python3 $(svgscript) createLvglFaceplate $< $@ all
 	$(info)
 	$(info -------)
 	$(info $(notdir $*): Adding to image_list.hh if needed)

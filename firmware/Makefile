@@ -42,7 +42,7 @@ SD_DISK_DEV ?= /dev/disk4
 bootloader:
 	cd bootloader/mp1-boot && make clean && make BOARD_CONF=../board_conf/mmp11_conf.hh
 
-include makefile_moduleinfo.mk
+#include makefile_moduleinfo.mk
 include makefile_component_images.mk
 
 format-sd:
