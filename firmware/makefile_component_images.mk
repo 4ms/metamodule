@@ -17,7 +17,7 @@
 brands = 4ms Rack Befaco AudibleInstruments 
 
 # We can use wildcards like this:
-4ms_faceplate_svgs := $(wildcard ../vcv/res/modules/*.svg) 
+4ms_faceplate_svgs := $(filter-out ../vcv/res/modules/HubMedium_artwork.svg,$(wildcard ../vcv/res/modules/*.svg))
 
 # ... Or could use the modules.mk list like this:
 include vcv_ports/glue/Befaco/modules.mk
