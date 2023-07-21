@@ -8,7 +8,7 @@ struct FollowInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Follow"};
     static constexpr std::string_view description{"Follower"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/Follow-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Follow_artwork.svg"};
 
     using enum Coords;
 

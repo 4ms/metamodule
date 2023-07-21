@@ -8,7 +8,7 @@ struct SCMInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"SCM"};
     static constexpr std::string_view description{"Shuffling Clock Multiplier"};
     static constexpr uint32_t width_hp = 12;
-    static constexpr std::string_view svg_filename{"res/modules/SCM-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/SCM_artwork.svg"};
 
     using enum Coords;
 

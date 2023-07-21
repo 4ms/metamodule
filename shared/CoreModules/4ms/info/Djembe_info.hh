@@ -8,7 +8,7 @@ struct DjembeInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Djembe"};
     static constexpr std::string_view description{"Djembe Drum Voice"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr std::string_view svg_filename{"res/modules/Djembe-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Djembe_artwork.svg"};
 
     using enum Coords;
 

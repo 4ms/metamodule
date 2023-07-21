@@ -8,7 +8,7 @@ struct RCDInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"RCD"};
     static constexpr std::string_view description{"Rotating Clock Divider"};
     static constexpr uint32_t width_hp = 10;
-    static constexpr std::string_view svg_filename{"res/modules/RCD-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/RCD_artwork.svg"};
 
     using enum Coords;
 

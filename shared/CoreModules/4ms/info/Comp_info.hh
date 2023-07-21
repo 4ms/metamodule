@@ -8,7 +8,7 @@ struct CompInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Comp"};
     static constexpr std::string_view description{"Comparator"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/Comp-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Comp_artwork.svg"};
 
     using enum Coords;
 

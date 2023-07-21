@@ -8,7 +8,7 @@ struct STSInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"STS"};
     static constexpr std::string_view description{"Stereo Triggered Sampler"};
     static constexpr uint32_t width_hp = 20;
-    static constexpr std::string_view svg_filename{"res/modules/STS-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/STS_artwork.svg"};
 
     using enum Coords;
 

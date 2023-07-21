@@ -8,7 +8,7 @@ struct DLDInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"DLD"};
     static constexpr std::string_view description{"Dual Looping Delay"};
     static constexpr uint32_t width_hp = 20;
-    static constexpr std::string_view svg_filename{"res/modules/DLD-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/DLD_artwork.svg"};
 
     using enum Coords;
 

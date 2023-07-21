@@ -8,7 +8,7 @@ struct DetuneInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Detune"};
     static constexpr std::string_view description{"Detuner"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr std::string_view svg_filename{"res/modules/Detune-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Detune_artwork.svg"};
 
     using enum Coords;
 

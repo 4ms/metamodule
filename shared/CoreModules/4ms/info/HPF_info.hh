@@ -8,7 +8,7 @@ struct HPFInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"HPF"};
     static constexpr std::string_view description{"High-Pass Filter"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/HPF-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/HPF_artwork.svg"};
 
     using enum Coords;
 

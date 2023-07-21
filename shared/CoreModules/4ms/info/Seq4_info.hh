@@ -8,7 +8,7 @@ struct Seq4Info : ModuleInfoBase {
     static constexpr std::string_view slug{"Seq4"};
     static constexpr std::string_view description{"4 Step Sequencer"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/Seq4-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Seq4_artwork.svg"};
 
     using enum Coords;
 

@@ -8,7 +8,7 @@ struct FMInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"FM"};
     static constexpr std::string_view description{"FM Oscillator"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr std::string_view svg_filename{"res/modules/FM-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/FM_artwork.svg"};
 
     using enum Coords;
 

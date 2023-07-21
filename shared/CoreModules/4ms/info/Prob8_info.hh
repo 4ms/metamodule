@@ -8,7 +8,7 @@ struct Prob8Info : ModuleInfoBase {
     static constexpr std::string_view slug{"Prob8"};
     static constexpr std::string_view description{"Probability Module"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr std::string_view svg_filename{"res/modules/Prob8-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Prob8_artwork.svg"};
 
     using enum Coords;
 
