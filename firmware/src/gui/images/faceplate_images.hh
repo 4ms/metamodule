@@ -8,25 +8,25 @@
 
 extern "C" {
 // DECLARE HERE
-LV_IMG_DECLARE(Braids_artwork_240);
-LV_IMG_DECLARE(StereoStrip_artwork_240);
-LV_IMG_DECLARE(SlewLimiter_artwork_240);
-LV_IMG_DECLARE(SamplingModulator_artwork_240);
-LV_IMG_DECLARE(STMix_artwork_240);
-LV_IMG_DECLARE(Rampage_artwork_240);
-LV_IMG_DECLARE(PonyVCO_artwork_240);
-LV_IMG_DECLARE(Percall_artwork_240);
-LV_IMG_DECLARE(MotionMTR_artwork_240);
-LV_IMG_DECLARE(Morphader_artwork_240);
-LV_IMG_DECLARE(Mixer_artwork_240);
-LV_IMG_DECLARE(Kickall_artwork_240);
-LV_IMG_DECLARE(HexmixVCA_artwork_240);
-LV_IMG_DECLARE(ChoppingKinky_artwork_240);
-LV_IMG_DECLARE(ADSR_artwork_240);
-LV_IMG_DECLARE(ABC_artwork_240);
-LV_IMG_DECLARE(SpringReverb_artwork_240);
-LV_IMG_DECLARE(DualAtenuverter_artwork_240);
-LV_IMG_DECLARE(EvenVCO_artwork_240);
+LV_IMG_DECLARE(Braids_240);
+LV_IMG_DECLARE(StereoStrip_240);
+LV_IMG_DECLARE(SlewLimiter_240);
+LV_IMG_DECLARE(SamplingModulator_240);
+LV_IMG_DECLARE(STMix_240);
+LV_IMG_DECLARE(Rampage_240);
+LV_IMG_DECLARE(PonyVCO_240);
+LV_IMG_DECLARE(Percall_240);
+LV_IMG_DECLARE(MotionMTR_240);
+LV_IMG_DECLARE(Morphader_240);
+LV_IMG_DECLARE(Mixer_240);
+LV_IMG_DECLARE(Kickall_240);
+LV_IMG_DECLARE(HexmixVCA_240);
+LV_IMG_DECLARE(ChoppingKinky_240);
+LV_IMG_DECLARE(ADSR_240);
+LV_IMG_DECLARE(ABC_240);
+LV_IMG_DECLARE(SpringReverb_240);
+LV_IMG_DECLARE(DualAtenuverter_240);
+LV_IMG_DECLARE(EvenVCO_240);
 LV_IMG_DECLARE(Verb_artwork_240);
 LV_IMG_DECLARE(VCAM_artwork_240);
 LV_IMG_DECLARE(Tapo_artwork_240);
@@ -100,61 +100,61 @@ struct ModuleImages {
 		// SLUG TO IMAGE HERE
 
 		if (slug == "Braids")
-			return &Braids_artwork_240;
+			return &Braids_240;
 
 		if (slug == "StereoStrip")
-			return &StereoStrip_artwork_240;
+			return &StereoStrip_240;
 
 		if (slug == "SlewLimiter")
-			return &SlewLimiter_artwork_240;
+			return &SlewLimiter_240;
 
 		if (slug == "SamplingModulator")
-			return &SamplingModulator_artwork_240;
+			return &SamplingModulator_240;
 
 		if (slug == "STMix")
-			return &STMix_artwork_240;
+			return &STMix_240;
 
 		if (slug == "Rampage")
-			return &Rampage_artwork_240;
+			return &Rampage_240;
 
 		if (slug == "PonyVCO")
-			return &PonyVCO_artwork_240;
+			return &PonyVCO_240;
 
 		if (slug == "Percall")
-			return &Percall_artwork_240;
+			return &Percall_240;
 
 		if (slug == "MotionMTR")
-			return &MotionMTR_artwork_240;
+			return &MotionMTR_240;
 
 		if (slug == "Morphader")
-			return &Morphader_artwork_240;
+			return &Morphader_240;
 
 		if (slug == "Mixer")
-			return &Mixer_artwork_240;
+			return &Mixer_240;
 
 		if (slug == "Kickall")
-			return &Kickall_artwork_240;
+			return &Kickall_240;
 
 		if (slug == "HexmixVCA")
-			return &HexmixVCA_artwork_240;
+			return &HexmixVCA_240;
 
 		if (slug == "ChoppingKinky")
-			return &ChoppingKinky_artwork_240;
+			return &ChoppingKinky_240;
 
 		if (slug == "ADSR")
-			return &ADSR_artwork_240;
+			return &ADSR_240;
 
 		if (slug == "ABC")
-			return &ABC_artwork_240;
+			return &ABC_240;
 
 		if (slug == "SpringReverb")
-			return &SpringReverb_artwork_240;
+			return &SpringReverb_240;
 
 		if (slug == "DualAtenuverter")
-			return &DualAtenuverter_artwork_240;
+			return &DualAtenuverter_240;
 
 		if (slug == "EvenVCO")
-			return &EvenVCO_artwork_240;
+			return &EvenVCO_240;
 
 		if (slug == "Verb")
 			return &Verb_artwork_240;

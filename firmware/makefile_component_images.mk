@@ -58,14 +58,16 @@ src/gui/images/%.c: ../graphics/$$*.svg
 Rack_faceplate_svg_dir :=  
 
 define make_faceplate =
-$(info)
 $(info -------)
 $(info $(notdir $*): Creating 240px-height lvgl img from full-sized svg artwork $<)
 python3 $(svgscript) createLvglFaceplate $< $@ all
-$(info)
-$(info -------)
-$(info $(notdir $*): Adding to image_list.hh if needed)
-@python3 $(svgscript) appendimglist $(notdir $*)_artwork $(image_list_header)
+@echo "-------"
+endef
+
+define update_img_list =
+@echo "" && \
+echo "$(1): Adding to image list if needed" && \
+python3 $(svgscript) appendimglist $(1) $(image_list_header)
 endef
 
 define faceplate_TEMPLATE =
@@ -87,3 +89,5 @@ $(foreach brand,$(brands),$(eval $(call faceplate_TEMPLATE,$(brand))))
 
 faceplate-images: $(faceplate_lvgls) 
 
+image-list:
+	$(foreach m,$(basename $(notdir $(faceplate_lvgls))), $(call update_img_list,$m))
