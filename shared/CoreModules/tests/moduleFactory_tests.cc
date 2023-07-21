@@ -25,8 +25,8 @@ struct TestCoreMod : public CoreProcessor {
 
 static constexpr std::string_view abcabc_slug{"abcabc"};
 constexpr MetaModule::ModuleInfoView abcabcInfo{
-	.width_hp = 40,
 	.description = "abcabc module",
+	.width_hp = 40,
 };
 
 class AutoInit {
@@ -56,8 +56,8 @@ TEST_CASE("Static objects register automatically") {
 }
 
 constexpr MetaModule::ModuleInfoView ABCInfo{
-	.width_hp = 40,
 	.description = "ABC module",
+	.width_hp = 40,
 };
 
 struct TestInfo : MetaModule::ModuleInfoBase {
@@ -92,8 +92,8 @@ TEST_CASE("Register ModuleTypes with an object constructed from ModuleInfoView")
 
 	SUBCASE("Test if Elements info gets stored and retreived OK") {
 		constexpr MetaModule::ModuleInfoView testinfo{
-			.width_hp = 4,
 			.description = "def info",
+			.width_hp = 4,
 			.elements = TestInfo::Elements,
 		};
 
