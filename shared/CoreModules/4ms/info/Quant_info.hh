@@ -8,7 +8,7 @@ struct QuantInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Quant"};
     static constexpr std::string_view description{"Quantizer"};
     static constexpr uint32_t width_hp = 10;
-    static constexpr std::string_view svg_filename{"res/modules/Quant-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Quant_artwork.svg"};
 
     using enum Coords;
 

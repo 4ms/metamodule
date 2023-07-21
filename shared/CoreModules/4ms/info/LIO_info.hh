@@ -8,7 +8,7 @@ struct LIOInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"LIO"};
     static constexpr std::string_view description{"Listen IO"};
     static constexpr uint32_t width_hp = 6;
-    static constexpr std::string_view svg_filename{"res/modules/LIO-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/LIO_artwork.svg"};
 
     using enum Coords;
 

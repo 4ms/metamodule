@@ -8,7 +8,7 @@ struct GRevInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"GRev"};
     static constexpr std::string_view description{"Gated Reverse"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/GRev-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/GRev_artwork.svg"};
 
     using enum Coords;
 

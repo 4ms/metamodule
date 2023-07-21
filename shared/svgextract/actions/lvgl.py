@@ -8,7 +8,7 @@ from helpers.util import *
 def faceplateSvgToLVGL(artworkSvgFilename, outputBaseName, exportLayer="all"):
     if exportLayer=="all":
         exportLayer = None
-    png240Filename = outputBaseName +"_artwork_240"
+    png240Filename = outputBaseName.rstrip(".c")
     svgToLVGL(artworkSvgFilename, png240Filename, 240, False, exportLayer)
 
 

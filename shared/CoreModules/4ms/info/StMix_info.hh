@@ -8,7 +8,7 @@ struct StMixInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"StMix"};
     static constexpr std::string_view description{"Stereo Mixer"};
     static constexpr uint32_t width_hp = 18;
-    static constexpr std::string_view svg_filename{"res/modules/StMix-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/StMix_artwork.svg"};
 
     using enum Coords;
 

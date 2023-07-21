@@ -8,7 +8,7 @@ struct VCAMInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"VCAM"};
     static constexpr std::string_view description{"VCA Matrix"};
     static constexpr uint32_t width_hp = 26;
-    static constexpr std::string_view svg_filename{"res/modules/VCAM-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/VCAM_artwork.svg"};
 
     using enum Coords;
 

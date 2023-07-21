@@ -8,7 +8,7 @@ struct DEVInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"DEV"};
     static constexpr std::string_view description{"Dual EnvVCA"};
     static constexpr uint32_t width_hp = 16;
-    static constexpr std::string_view svg_filename{"res/modules/DEV-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/DEV_artwork.svg"};
 
     using enum Coords;
 

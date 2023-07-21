@@ -8,7 +8,7 @@ struct Atvert2Info : ModuleInfoBase {
     static constexpr std::string_view slug{"Atvert2"};
     static constexpr std::string_view description{"Dual Attenuverter"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/Atvert2-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Atvert2_artwork.svg"};
 
     using enum Coords;
 

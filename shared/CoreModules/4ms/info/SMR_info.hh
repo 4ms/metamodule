@@ -8,7 +8,7 @@ struct SMRInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"SMR"};
     static constexpr std::string_view description{"Spectral Multiband Resonator"};
     static constexpr uint32_t width_hp = 26;
-    static constexpr std::string_view svg_filename{"res/modules/SMR-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/SMR_artwork.svg"};
 
     using enum Coords;
 

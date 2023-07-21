@@ -8,7 +8,7 @@ struct QPLFOInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"QPLFO"};
     static constexpr std::string_view description{"Quad Pingable LFO"};
     static constexpr uint32_t width_hp = 12;
-    static constexpr std::string_view svg_filename{"res/modules/QPLFO-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/QPLFO_artwork.svg"};
 
     using enum Coords;
 

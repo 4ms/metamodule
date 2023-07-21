@@ -8,7 +8,7 @@ struct LPFInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"LPF"};
     static constexpr std::string_view description{"Low-Pass Filter"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/LPF-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/LPF_artwork.svg"};
 
     using enum Coords;
 

@@ -1,31 +1,102 @@
-#TODO:
-#foreach brand...
-# brands = 4ms Rack Befaco AudibleInstruments 
+#### make comp-images
+#### Generates LVGL image files from SVGs for components:
+#### The component files to be converted is ../graphics/BRANDNAME/components/*.svg
+#### The converted LVGL-format image files will be in src/gui/images/BRANDNAME/components/*.[png,c]
+####
+#### make faceplate-images
+#### Generates LVGL image files from SVGs for faceplates:
+#### Specify the path to faceplates in a variable called BRANDNAME_faceplate_svgs
+#### (full path or relative path from this makefile)
+####
+#### make image-list
+#### Adds any missing images to the faceplate_images.hh file
+#### Uses the list of all brands faceplate SVGs
 
-comp_svg_dir := ../graphics/4ms/components
-befaco_svg_dir := ../graphics/Befaco/components
-rack_svg_dir := ../graphics/Rack/components
 
-comp_lvgl_img_dir := src/pages/images/4ms/components
-befaco_lvgl_img_dir := src/pages/images/Befaco/components
-rack_lvgl_img_dir := src/pages/images/Rack/components
+#### List of brands:
+brands = 4ms Rack Befaco AudibleInstruments 
 
-comp_svgs := $(wildcard $(comp_svg_dir)/*.svg) 
-befaco_svgs := $(wildcard $(befaco_svg_dir)/*.svg)
-rack_svgs := $(wildcard $(rack_svg_dir)/*.svg) 
+# We can use wildcards like this:
+4ms_faceplate_svgs := $(filter-out ../vcv/res/modules/HubMedium_artwork.svg,$(wildcard ../vcv/res/modules/*.svg))
 
-comp_lvgl_imgs := $(subst $(comp_svg_dir),$(comp_lvgl_img_dir),$(comp_svgs:.svg=.c))
-befaco_lvgl_imgs := $(subst $(befaco_svg_dir),$(befaco_lvgl_img_dir),$(befaco_svgs:.svg=.c))
-rack_lvgl_imgs := $(subst $(rack_svg_dir),$(rack_lvgl_img_dir),$(rack_svgs:.svg=.c))
+# ... Or could use the modules.mk list like this:
+include vcv_ports/glue/Befaco/modules.mk
+Befaco_faceplate_svgs := $(addprefix vcv_ports/Befaco/res/panels/,$(addsuffix .svg,$(Befaco_modules)))
 
-comp-images: $(comp_lvgl_imgs) $(befaco_lvgl_imgs) $(rack_lvgl_imgs)
+# ... Or specify them manully like this:
+AudibleInstruments_faceplate_svgs := ./vcv_ports/AudibleInstruments/res/Braids.svg
 
-$(comp_lvgl_imgs): $(comp_lvgl_img_dir)/%.c : $(comp_svg_dir)/%.svg
-	@python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
 
-$(befaco_lvgl_imgs): $(befaco_lvgl_img_dir)/%.c : $(befaco_svg_dir)/%.svg
-	@python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
 
-$(rack_lvgl_imgs): $(rack_lvgl_img_dir)/%.c : $(rack_svg_dir)/%.svg
-	@python3 ../shared/svgextract/svgextract.py convertSvgToLvgl $< $@
 
+
+
+
+###########################################################################################################
+###########################################################################################################
+###########################################################################################################
+###########################################################################################################
+###########################################################################################################
+
+.SECONDEXPANSION:
+
+svgscript := ../shared/svgextract/svgextract.py
+graphics_dir := ../graphics
+lvgl_image_dir := src/gui/images
+image_list_header := $(lvgl_image_dir)/faceplate_images.hh
+
+# Components:
+
+define comp_TEMPLATE =
+$(1)_comp_svgs := $(wildcard $(graphics_dir)/$(1)/components/*.svg)
+$(1)_comp_lvgls := $$(addprefix $(lvgl_image_dir)/$(1)/components/,$$(notdir $$($(1)_comp_svgs:.svg=.c)))
+comp_lvgls += $$($(1)_comp_lvgls)
+endef
+
+comp_lvgls = 
+$(foreach brand,$(brands),$(eval $(call comp_TEMPLATE,$(brand))))
+
+comp-images: $(comp_lvgls)
+
+src/gui/images/%.c: ../graphics/$$*.svg
+	@echo "Converting: $*"
+	@python3 $(svgscript) convertSvgToLvgl $< $@
+
+# Faceplates:
+
+Rack_faceplate_svg_dir :=  
+
+define make_faceplate =
+@echo "-------"
+$(info $(notdir $*): Creating 240px-height lvgl img from full-sized svg artwork $<)
+python3 $(svgscript) createLvglFaceplate $< $@ $(if $(findstring 4ms,$@),faceplate,all)
+endef
+
+define update_img_list =
+@echo "" && \
+echo "$(1): Adding to image list if needed" && \
+python3 $(svgscript) appendimglist $(1) $(image_list_header)
+endef
+
+define faceplate_TEMPLATE =
+$(1)_faceplate_lvgls := $$(addprefix $(lvgl_image_dir)/$(1)/modules/,$$(notdir $$($(1)_faceplate_svgs:.svg=_240.c)))
+faceplate_lvgls += $$($(1)_faceplate_lvgls)
+$(1)_faceplate_lvgl_dir := $(lvgl_image_dir)/$(1)/modules
+$(1)_faceplate_svg_dir := $$(dir $$(firstword $$($(1)_faceplate_svgs)))
+
+$$($(1)_faceplate_lvgl_dir)/%_240.c: $$($(1)_faceplate_svg_dir)/%.svg
+	$$(make_faceplate)
+
+$(1)_debug:
+	ls -l $$($(1)_faceplate_lvgl_dir)
+	ls -l $$($(1)_faceplate_svg_dir)
+endef
+
+faceplate_lvgls =
+non4msbrands := $(filter-out 4ms,$(brands))
+$(foreach brand,$(brands),$(eval $(call faceplate_TEMPLATE,$(brand))))
+
+faceplate-images: $(faceplate_lvgls) 
+
+image-list:
+	$(foreach m,$(basename $(notdir $(faceplate_lvgls))), $(call update_img_list,$m))

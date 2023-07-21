@@ -8,7 +8,7 @@ struct QCDInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"QCD"};
     static constexpr std::string_view description{"Quad Clock Distributor"};
     static constexpr uint32_t width_hp = 22;
-    static constexpr std::string_view svg_filename{"res/modules/QCD-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/QCD_artwork.svg"};
 
     using enum Coords;
 

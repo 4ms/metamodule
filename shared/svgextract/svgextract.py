@@ -41,7 +41,7 @@ createLvglFaceplate [input faceplate SVG file name] [output C file name] {{optio
     Converts the SVG to a 47 dpi LVGL format .c file (240px/5.059in = 47.44dpi):
     If you want just one layer of the SVG to be extracted, pass that layer name as the optional 3rd argument.
     (e.g. for 4ms SVG info files, the layer to extract is called `faceplate`).
-    Requires the inkscape command to be present on PATH, or found at the env var INKSCAPE_BIN_PATH
+    Requires inkscape v1.2.2 and for the command to be present on PATH, or found at the env var INKSCAPE_BIN_PATH
 
 convertSvgToLvgl [input SVG file name] [output C file name] {{optional scale 1-100}}
     Converts the SVG to a 47dpi LVGL format .c files.
@@ -58,8 +58,9 @@ appendImgList [C struct name] [path/to/image_list.hh]
     exact string to be inserted is already found. Note that the slug is the 
     first part of the C array name, up to the first underscore 
     (EnOsc_artwork => EnOsc)
+""")
 
-
+    extended_help = f"""
 ##### Not actively used: #####
 
 processSvg [input svg file name]
@@ -77,8 +78,7 @@ createCoreModule [slug] {{optional output path for CoreModule file}}
     there, otherwise it will be saved to the directory pointed to by the 
     METAMODULE_COREMODULE_DIR environmant variable. File will *not* be 
     overwritten.
-
-""")
+    """
 
 #TODO: allow to scan an entire directory for :
 # -createLvglFaceplate (scan Befaco/res/modules/*.svg) + appendimglist 

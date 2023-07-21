@@ -8,7 +8,7 @@ struct ComplexEGInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"ComplexEG"};
     static constexpr std::string_view description{"Complex Envelope Generator"};
     static constexpr uint32_t width_hp = 15;
-    static constexpr std::string_view svg_filename{"res/modules/ComplexEG-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/ComplexEG_artwork.svg"};
 
     using enum Coords;
 

@@ -8,7 +8,7 @@ struct LPGInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"LPG"};
     static constexpr std::string_view description{"Low Pass Gate"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr std::string_view svg_filename{"res/modules/LPG-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/LPG_artwork.svg"};
 
     using enum Coords;
 

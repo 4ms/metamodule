@@ -8,7 +8,7 @@ struct MNMXInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"MNMX"};
     static constexpr std::string_view description{"Min Max Logic"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/MNMX-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/MNMX_artwork.svg"};
 
     using enum Coords;
 

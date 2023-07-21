@@ -8,7 +8,7 @@ struct Switch41Info : ModuleInfoBase {
     static constexpr std::string_view slug{"Switch41"};
     static constexpr std::string_view description{"4 to 1 Switch"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr std::string_view svg_filename{"res/modules/Switch41-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Switch41_artwork.svg"};
 
     using enum Coords;
 

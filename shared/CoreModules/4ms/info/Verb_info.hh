@@ -8,7 +8,7 @@ struct VerbInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Verb"};
     static constexpr std::string_view description{"Reverb Effect"};
     static constexpr uint32_t width_hp = 10;
-    static constexpr std::string_view svg_filename{"res/modules/Verb-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Verb_artwork.svg"};
 
     using enum Coords;
 

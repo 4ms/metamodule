@@ -8,7 +8,7 @@ struct ShiftInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"Shift"};
     static constexpr std::string_view description{"Frequency Shifter"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/Shift-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/Shift_artwork.svg"};
 
     using enum Coords;
 

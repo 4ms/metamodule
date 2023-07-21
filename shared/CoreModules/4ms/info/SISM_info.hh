@@ -8,7 +8,7 @@ struct SISMInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"SISM"};
     static constexpr std::string_view description{"Shifting Inverting Signal Mingler"};
     static constexpr uint32_t width_hp = 12;
-    static constexpr std::string_view svg_filename{"res/modules/SISM-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/SISM_artwork.svg"};
 
     using enum Coords;
 

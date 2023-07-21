@@ -8,7 +8,7 @@ struct SHInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"SH"};
     static constexpr std::string_view description{"2 Ch. Sample and Hold"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/SH-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/SH_artwork.svg"};
 
     using enum Coords;
 

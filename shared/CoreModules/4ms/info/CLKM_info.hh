@@ -8,7 +8,7 @@ struct CLKMInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"CLKM"};
     static constexpr std::string_view description{"Clock Multiplier"};
     static constexpr uint32_t width_hp = 4;
-    static constexpr std::string_view svg_filename{"res/modules/CLKM-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/CLKM_artwork.svg"};
 
     using enum Coords;
 

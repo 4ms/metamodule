@@ -8,7 +8,7 @@ struct PIInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"PI"};
     static constexpr std::string_view description{"Percussion Interface"};
     static constexpr uint32_t width_hp = 8;
-    static constexpr std::string_view svg_filename{"res/modules/PI-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/PI_artwork.svg"};
 
     using enum Coords;
 

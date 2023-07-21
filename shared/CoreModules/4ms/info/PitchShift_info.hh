@@ -8,7 +8,7 @@ struct PitchShiftInfo : ModuleInfoBase {
     static constexpr std::string_view slug{"PitchShift"};
     static constexpr std::string_view description{"Pitch Shifter"};
     static constexpr uint32_t width_hp = 7;
-    static constexpr std::string_view svg_filename{"res/modules/PitchShift-artwork.svg"};
+    static constexpr std::string_view svg_filename{"res/modules/PitchShift_artwork.svg"};
 
     using enum Coords;
 
