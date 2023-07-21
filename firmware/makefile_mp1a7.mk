@@ -134,10 +134,10 @@ SOURCES += $(SHARED)/CoreModules/hub/hub_medium.cc
 SOURCES += $(foreach m,$(4ms_modules),$(SHARED)/CoreModules/4ms/core/$(m)Core.cc)
 SOURCES += $(foreach m,$(4ms_modules),src/gui/images/4ms/modules/$(m)_artwork_240.c)
 SOURCES += $(foreach m,$(AudibleInstruments_modules),vcv_ports/AudibleInstruments/src/$(m).cpp)
-SOURCES += $(foreach m,$(AudibleInstruments_modules),src/gui/images/AudibleInstruments/modules/$(m)_artwork_240.c)
+SOURCES += $(foreach m,$(AudibleInstruments_modules),src/gui/images/AudibleInstruments/modules/$(m)_240.c)
 SOURCES += $(foreach m,$(Befaco_modules),vcv_ports/Befaco/src/$(m).cpp)
-SOURCES += $(foreach m,$(Befaco_modules),src/gui/images/Befaco/modules/$(m)_artwork_240.c)
-#
+SOURCES += $(foreach m,$(Befaco_modules),src/gui/images/Befaco/modules/$(m)_240.c)
+
 # SOURCES += $(wildcard $(SHARED)/CoreModules/4ms/core/*.cc)
 # SOURCES += $(wildcard vcv_ports/AudibleInstruments/src/*.cpp)
 # SOURCES += $(wildcard vcv_ports/Befaco/src/*.cpp)

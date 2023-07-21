@@ -1,16 +1,19 @@
-#### Generate LVGL image files from SVGs for components:
 #### make comp-images
-####
+#### Generates LVGL image files from SVGs for components:
 #### The component files to be converted is ../graphics/BRANDNAME/components/*.svg
 #### The converted LVGL-format image files will be in src/gui/images/BRANDNAME/components/*.[png,c]
 ####
-#### Generate LVGL image files from SVGs for faceplates:
 #### make faceplate-images
+#### Generates LVGL image files from SVGs for faceplates:
+#### Specify the path to faceplates in a variable called BRANDNAME_faceplate_svgs
+#### (full path or relative path from this makefile)
 ####
-####  the fullpaths to a list of faceplates to convert
-#### and 
+#### make image-list
+#### Adds any missing images to the faceplate_images.hh file
+#### Uses the list of all brands faceplate SVGs
 
-#### Add a brand name here:
+
+#### List of brands:
 brands = 4ms Rack Befaco AudibleInstruments 
 
 # We can use wildcards like this:
@@ -23,11 +26,18 @@ Befaco_faceplate_svgs := $(addprefix vcv_ports/Befaco/res/panels/,$(addsuffix .s
 # ... Or specify them manully like this:
 AudibleInstruments_faceplate_svgs := ./vcv_ports/AudibleInstruments/res/Braids.svg
 
+
+
+
+
+
+
 ###########################################################################################################
 ###########################################################################################################
 ###########################################################################################################
 ###########################################################################################################
 ###########################################################################################################
+
 .SECONDEXPANSION:
 
 svgscript := ../shared/svgextract/svgextract.py
@@ -51,17 +61,15 @@ comp-images: $(comp_lvgls)
 src/gui/images/%.c: ../graphics/$$*.svg
 	@echo "Converting: $*"
 	@python3 $(svgscript) convertSvgToLvgl $< $@
-	@echo "______________"
 
 # Faceplates:
 
 Rack_faceplate_svg_dir :=  
 
 define make_faceplate =
-$(info -------)
-$(info $(notdir $*): Creating 240px-height lvgl img from full-sized svg artwork $<)
-python3 $(svgscript) createLvglFaceplate $< $@ all
 @echo "-------"
+$(info $(notdir $*): Creating 240px-height lvgl img from full-sized svg artwork $<)
+python3 $(svgscript) createLvglFaceplate $< $@ $(if $(findstring 4ms,$@),faceplate,all)
 endef
 
 define update_img_list =
@@ -85,6 +93,7 @@ $(1)_debug:
 endef
 
 faceplate_lvgls =
+non4msbrands := $(filter-out 4ms,$(brands))
 $(foreach brand,$(brands),$(eval $(call faceplate_TEMPLATE,$(brand))))
 
 faceplate-images: $(faceplate_lvgls) 
