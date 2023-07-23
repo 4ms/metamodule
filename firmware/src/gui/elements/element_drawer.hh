@@ -1,6 +1,8 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
+#include "gui/images/component_images.hh"
+#include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
 #include <cmath>
@@ -49,6 +51,8 @@ draw_element(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj
 	lv_img_set_pivot(obj, width / 2.f, height / 2.f);
 }
 
+// Create an object as a sub-object of the canvas, and draw img in it
+// Returns the object
 inline lv_obj_t *
 draw_element(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	lv_obj_t *obj = lv_img_create(canvas);
@@ -58,6 +62,7 @@ draw_element(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, u
 	return obj;
 }
 
+// Draw slider with its handle as a sub-object
 inline lv_obj_t *draw_element(const Slider &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
 
@@ -73,6 +78,7 @@ inline lv_obj_t *draw_element(const Slider &el, const lv_img_dsc_t *img, lv_obj_
 	return obj;
 }
 
+// Draw toggle switch with its handle as a sub-object
 inline lv_obj_t *draw_element(const Toggle3pos &el, const lv_img_dsc_t *img, lv_obj_t *canvas, uint32_t module_height) {
 	auto obj = draw_element(BaseElement(el), img, canvas, module_height);
 
@@ -94,14 +100,10 @@ struct ElementDrawer {
 	lv_obj_t *canvas;
 
 	template<typename T>
-	lv_obj_t *draw_element(T element, const lv_img_dsc_t *img) {
+	lv_obj_t *draw_element(T element) {
+		auto img = ElementImage::get_img(element);
 		if (img == nullptr)
 			return nullptr;
-
-		// if (element.coords == Coords::Center) {
-		// 	element.x_mm -= ModuleInfoBase::to_mm(img->header.w / 2.f, 240 / 5.059f);
-		// 	element.y_mm -= ModuleInfoBase::to_mm(img->header.h / 2.f, 240 / 5.059f);
-		// }
 
 		return ElementDrawerImpl::draw_element(element, img, canvas, module_height);
 	}

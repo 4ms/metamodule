@@ -70,7 +70,6 @@ struct ModuleDrawer {
 
 		// Draw module controls
 		const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
-		auto images = ElementImage{height};
 		auto el_drawer = ElementDrawer{height, canvas};
 		auto ring_drawer = MapRingDrawer{height, canvas};
 
@@ -80,17 +79,15 @@ struct ModuleDrawer {
 		ElementCount::Indices indices{};
 		for (const auto &element : moduleinfo.elements) {
 			auto element_ctx = std::visit(
-				[&ring_drawer, &images, &el_drawer, &patch, &indices, module_idx, draw_rings](
-					auto &el) -> ElementContext {
-					auto img = images.get_img(el);
-					auto obj = el_drawer.draw_element(el, img);
+				[&ring_drawer, &el_drawer, &patch, &indices, module_idx](auto &el) -> ElementContext {
+					auto obj = el_drawer.draw_element(el); //, img);
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, indices);
 					auto idx = ElementIndex::get_index(el, indices);
 					auto element_ctx = ElementContext{obj, (uint16_t)module_idx, idx, mapping_id};
 
 					// patch.get_static_knob_value(module_idx, idx);
 
-					if (draw_rings && mapping_id)
+					if (mapping_id)
 						ring_drawer.draw_mapped_ring(el, obj, mapping_id.value());
 
 					indices = indices + ElementCount::count(el);

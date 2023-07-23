@@ -24,17 +24,13 @@ inline const lv_img_dsc_t *get_img(const BaseElement &element) {
 namespace MetaModule
 {
 
-struct ElementImage {
-	uint32_t scale_px;
+namespace ElementImage
+{
 
-	ElementImage(uint32_t module_height)
-		: scale_px{module_height} {
-	}
-
-	template<typename T>
-	const lv_img_dsc_t *get_img(T element) {
-		return ElementImageImpl::get_img(element);
-	}
-};
+template<typename T>
+const lv_img_dsc_t *get_img(T element) {
+	return ElementImageImpl::get_img(element);
+}
+}; // namespace ElementImage
 
 } // namespace MetaModule
