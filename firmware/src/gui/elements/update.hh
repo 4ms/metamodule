@@ -13,7 +13,7 @@ namespace MetaModule
 namespace ElementUpdateImpl
 {
 
-inline std::optional<float> get_param_value(const Params &params, const PatchData &patch, const ElementContext &drawn) {
+inline std::optional<float> get_param_value(const Params &params, const PatchData &patch, const GuiElement &drawn) {
 	if (!drawn.obj)
 		return {};
 
@@ -34,7 +34,7 @@ inline std::optional<float> get_param_value(const Params &params, const PatchDat
 } // namespace ElementUpdateImpl
 
 inline void
-update_element(const Knob &element, const Params &params, const PatchData &patch, const ElementContext &drawn) {
+update_element(const Knob &element, const Params &params, const PatchData &patch, const GuiElement &drawn) {
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
 		int32_t angle = val.value() * 3000.f - 1500.f;
 		if (angle < 0)
@@ -47,7 +47,7 @@ update_element(const Knob &element, const Params &params, const PatchData &patch
 }
 
 inline void
-update_element(const Slider &element, const Params &params, const PatchData &patch, const ElementContext &drawn) {
+update_element(const Slider &element, const Params &params, const PatchData &patch, const GuiElement &drawn) {
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
 		auto handle = lv_obj_get_child(drawn.obj, 0);
 		if (!handle) {
@@ -77,7 +77,7 @@ update_element(const Slider &element, const Params &params, const PatchData &pat
 }
 
 inline void
-update_element(const Toggle3pos &element, const Params &params, const PatchData &patch, const ElementContext &drawn) {
+update_element(const Toggle3pos &element, const Params &params, const PatchData &patch, const GuiElement &drawn) {
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
 		auto handle = lv_obj_get_child(drawn.obj, 0);
 		if (!handle) {
@@ -124,14 +124,14 @@ update_element(const Toggle3pos &element, const Params &params, const PatchData 
 }
 
 inline void
-update_element(const Toggle2pos &element, const Params &params, const PatchData &patch, const ElementContext &drawn) {
+update_element(const Toggle2pos &element, const Params &params, const PatchData &patch, const GuiElement &drawn) {
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
 		//angle 0 => up
 		//angle 1800 => down
 	}
 }
 
-inline void update_element(const BaseElement &, const Params &, const PatchData &, const ElementContext &) {
+inline void update_element(const BaseElement &, const Params &, const PatchData &, const GuiElement &) {
 }
 
 } // namespace MetaModule
