@@ -20,6 +20,10 @@ def input_default(prompt, default=""):
     #     return default
     # return str
 
+def overwriteOrCreateFile(filename, text):
+     with open(filename, "w") as file:
+        file.write(text)
+        Log(f"Create {filename} with {text}")
 
 def appendToFileAfterMarker(filename, marker, newText, matchText=None):
     if matchText == None:
