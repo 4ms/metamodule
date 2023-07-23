@@ -8,26 +8,39 @@
 namespace MetaModule::ElementDrawerImpl
 {
 
-constexpr std::pair<uint32_t, uint32_t> mm_to_px(uint32_t x_mm, uint32_t y_mm, uint32_t module_height) {
-	uint32_t x = std::round(ModuleInfoBase::mm_to_px(x_mm, module_height));
-	uint32_t y = std::round(ModuleInfoBase::mm_to_px(y_mm, module_height));
-	return {x, y};
+constexpr float fix_zoomed_coord(Coords coord_ref, float x, float width, float zoom) {
+	if (coord_ref == Coords::TopLeft && zoom < 1.f) {
+		// FIXME: why does LVGL add padding around a zoomed obj?
+		return x - (width * (1.f - zoom) / 2.f);
+
+	} else if (coord_ref == Coords::Center) {
+		//Calculate Top-left from Center
+		return x - (width / 2.f);
+	}
+
+	return x;
 }
 
-inline std::pair<uint32_t, uint32_t>
-mm_to_center_px(uint32_t x_mm, uint32_t y_mm, const lv_img_dsc_t *img, uint32_t module_height) {
-	uint32_t width = img ? img->header.w : 0;
-	uint32_t height = img ? img->header.h : 0;
-	uint32_t left = std::round(ModuleInfoBase::mm_to_px(x_mm, module_height) - width / 2.f);
-	uint32_t top = std::round(ModuleInfoBase::mm_to_px(y_mm, module_height) - height / 2.f);
-	return {left, top};
-}
+// constexpr std::pair<uint32_t, uint32_t> mm_to_px(uint32_t x_mm, uint32_t y_mm, uint32_t module_height) {
+// 	uint32_t x = std::round(ModuleInfoBase::mm_to_px(x_mm, module_height));
+// 	uint32_t y = std::round(ModuleInfoBase::mm_to_px(y_mm, module_height));
+// 	return {x, y};
+// }
 
-constexpr std::pair<uint32_t, uint32_t>
-mm_to_center_px(uint32_t x_mm, uint32_t y_mm, uint32_t width, uint32_t height, uint32_t module_height) {
-	uint32_t left = std::round(ModuleInfoBase::mm_to_px(x_mm, module_height) - width / 2.f);
-	uint32_t top = std::round(ModuleInfoBase::mm_to_px(y_mm, module_height) - height / 2.f);
-	return {left, top};
-}
+// inline std::pair<uint32_t, uint32_t>
+// mm_to_center_px(uint32_t x_mm, uint32_t y_mm, const lv_img_dsc_t *img, uint32_t module_height) {
+// 	uint32_t width = img ? img->header.w : 0;
+// 	uint32_t height = img ? img->header.h : 0;
+// 	uint32_t left = std::round(ModuleInfoBase::mm_to_px(x_mm, module_height) - width / 2.f);
+// 	uint32_t top = std::round(ModuleInfoBase::mm_to_px(y_mm, module_height) - height / 2.f);
+// 	return {left, top};
+// }
+
+// constexpr std::pair<uint32_t, uint32_t>
+// mm_to_center_px(uint32_t x_mm, uint32_t y_mm, uint32_t width, uint32_t height, uint32_t module_height) {
+// 	uint32_t left = std::round(ModuleInfoBase::mm_to_px(x_mm, module_height) - width / 2.f);
+// 	uint32_t top = std::round(ModuleInfoBase::mm_to_px(y_mm, module_height) - height / 2.f);
+// 	return {left, top};
+// }
 
 } // namespace MetaModule::ElementDrawerImpl

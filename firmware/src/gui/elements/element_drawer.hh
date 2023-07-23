@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "CoreModules/elements/elements.hh"
+#include "gui/helpers/units_conversion.hh"
 #include "gui/images/component_images.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
@@ -15,7 +16,7 @@ namespace ElementDrawerImpl
 {
 
 inline void
-draw_element(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t *obj, uint32_t module_height) {
+draw_image(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t *obj, uint32_t module_height) {
 	if (!img) {
 		pr_dbg("draw_knob: image not found\n");
 		return;
@@ -27,28 +28,24 @@ draw_element(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj
 
 	float zoom = module_height / 240.f;
 
-	if (coord_ref == Coords::TopLeft && zoom < 1.f) {
-		// FIXME: why does LVGL add padding around a zoomed obj, and how to get rid of it?
-		// This just happens to work, but why?
-		x -= width * (1.f - zoom) / 2.f;
-		y -= height * (1.f - zoom) / 2.f;
-	} else if (coord_ref == Coords::Center) {
-		//Calculate Top-left from Center
-		x -= width / 2.f;
-		y -= height / 2.f;
-	}
+	x = fix_zoomed_coord(coord_ref, x, width, zoom);
+	y = fix_zoomed_coord(coord_ref, y, height, zoom);
 
 	uint16_t lv_zoom = 256.f * zoom;
 	lv_img_set_zoom(obj, lv_zoom);
 	lv_img_set_size_mode(obj, LV_IMG_SIZE_MODE_VIRTUAL);
 	lv_img_set_antialias(obj, false);
 	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
-	// lv_obj_add_style(obj, &Gui::module_border_style, LV_STATE_DEFAULT);
 
 	uint16_t pos_x = std::round(x);
 	uint16_t pos_y = std::round(y);
 	lv_obj_set_pos(obj, pos_x, pos_y);
 	lv_img_set_pivot(obj, width / 2.f, height / 2.f);
+
+	//DEBUG positions:
+	// lv_obj_set_style_outline_color(obj, lv_palette_main(LV_PALETTE_BLUE), LV_STATE_DEFAULT);
+	// lv_obj_set_style_outline_width(obj, 1, LV_STATE_DEFAULT);
+	// printf_("Draw el img pos:%d, %d img:[%d x %d]\n", pos_x, pos_y, (int)width, (int)height);
 }
 
 // Create an object as a sub-object of the canvas, and draw img in it
@@ -58,7 +55,7 @@ draw_element(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, u
 	lv_obj_t *obj = lv_img_create(canvas);
 	float x = ModuleInfoBase::mm_to_px(el.x_mm, module_height);
 	float y = ModuleInfoBase::mm_to_px(el.y_mm, module_height);
-	draw_element(x, y, el.coords, img, obj, module_height);
+	draw_image(x, y, el.coords, img, obj, module_height);
 	return obj;
 }
 

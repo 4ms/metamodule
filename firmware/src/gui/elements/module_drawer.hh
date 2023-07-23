@@ -71,7 +71,6 @@ struct ModuleDrawer {
 		// Draw module controls
 		const auto moduleinfo = ModuleFactory::getModuleInfo(slug);
 		auto el_drawer = ElementDrawer{height, canvas};
-		auto ring_drawer = MapRingDrawer{height, canvas};
 
 		//Reserve enough for what we will append
 		drawn_elements.reserve(drawn_elements.size() + moduleinfo.elements.size());
@@ -79,36 +78,20 @@ struct ModuleDrawer {
 		ElementCount::Indices indices{};
 		for (const auto &element : moduleinfo.elements) {
 			auto element_ctx = std::visit(
-				[&ring_drawer, &el_drawer, &patch, &indices, module_idx](auto &el) -> ElementContext {
-					auto obj = el_drawer.draw_element(el); //, img);
+				[height = height, &el_drawer, &patch, &indices, module_idx](auto &el) -> ElementContext {
+					auto obj = el_drawer.draw_element(el);
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, indices);
+					MapRingDrawer::draw_mapped_ring(el, obj, mapping_id, height);
 					auto idx = ElementIndex::get_index(el, indices);
 					auto element_ctx = ElementContext{obj, (uint16_t)module_idx, idx, mapping_id};
 
 					// patch.get_static_knob_value(module_idx, idx);
-
-					if (mapping_id)
-						ring_drawer.draw_mapped_ring(el, obj, mapping_id.value());
 
 					indices = indices + ElementCount::count(el);
 					return element_ctx;
 				},
 				element);
 			drawn_elements.push_back({element_ctx, element});
-		}
-	}
-
-	// ??? Test this?
-	void draw_map_rings(const std::vector<DrawnElement> &drawn_elements, lv_obj_t *canvas) {
-		auto ring_drawer = MapRingDrawer{height, canvas};
-
-		for (auto &drawn_element : drawn_elements) {
-			if (drawn_element.drawn.mapped_panel_id) {
-				std::visit(
-					[&ring_drawer, obj = drawn_element.drawn.obj, panel_id = *drawn_element.drawn.mapped_panel_id](
-						auto &el) { ring_drawer.draw_mapped_ring(el, obj, panel_id); },
-					drawn_element.element);
-			}
 		}
 	}
 };
