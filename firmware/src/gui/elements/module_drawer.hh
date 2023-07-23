@@ -78,12 +78,13 @@ struct ModuleDrawer {
 		ElementCount::Indices indices{};
 		for (const auto &element : moduleinfo.elements) {
 			auto element_ctx = std::visit(
-				[height = height, &el_drawer, &patch, &indices, module_idx](auto &el) -> ElementContext {
+				[height = height, &el_drawer, &patch, &indices, module_idx, canvas](auto &el) -> GuiElement {
 					auto obj = el_drawer.draw_element(el);
 					auto mapping_id = ElementMapping::find_mapping(el, patch, module_idx, indices);
-					MapRingDrawer::draw_mapped_ring(el, obj, mapping_id, height);
+					auto mapped_ring = MapRingDrawer::draw_mapped_ring(el, obj, canvas, mapping_id, height);
+
 					auto idx = ElementIndex::get_index(el, indices);
-					auto element_ctx = ElementContext{obj, (uint16_t)module_idx, idx, mapping_id};
+					auto element_ctx = GuiElement{obj, mapped_ring, (uint16_t)module_idx, idx, mapping_id};
 
 					// patch.get_static_knob_value(module_idx, idx);
 
