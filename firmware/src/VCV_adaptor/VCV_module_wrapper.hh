@@ -4,7 +4,6 @@
 // #include "VCV_adaptor/math.hpp"
 #include "VCV_adaptor/engine/Param.hpp"
 #include "VCV_adaptor/engine/Port.hpp"
-// #include "elements/param_scales.hh"
 #include <array>
 #include <memory>
 #include <vector>
@@ -75,8 +74,6 @@ struct VCVModuleWrapper : CoreProcessor {
 		outputs[output_id].connected = true;
 	}
 
-	// constexpr static typename ElementCount<Info>::Counts counts = ElementCount<Info>::count();
-
 	std::vector<rack::engine::Param> params;
 	std::vector<rack::engine::Input> inputs;
 	std::vector<rack::engine::Output> outputs;
@@ -84,10 +81,4 @@ struct VCVModuleWrapper : CoreProcessor {
 	std::vector<ParamScale> param_scales;
 
 	ProcessArgs args{48000.f, 1.f / 48000.f, 0};
-
-	// Boilerplate to auto-register in ModuleFactory
-	// clang-format off
-	// static std::unique_ptr<CoreProcessor> create() { return std::make_unique<Core>(); }
-	// static inline bool s_registered = ModuleFactory::registerModuleType(Info::slug, create, MetaModule::ElementInfoView::makeView<Info>());
-	// clang-format on
 };

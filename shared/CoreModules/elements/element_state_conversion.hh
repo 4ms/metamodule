@@ -44,9 +44,9 @@ constexpr Toggle2pos::State_t convertState(const T &, float val) requires(std::d
 template<typename T>
 constexpr Toggle3pos::State_t convertState(const T &, float val) requires(std::derived_from<T, Toggle3pos>)
 {
-	if (val < 0.5f) {
+	if (val < 0.25f) {
 		return Toggle3pos::State_t::DOWN;
-	} else if (val < 1.5f) {
+	} else if (val < 0.75f) {
 		return Toggle3pos::State_t::CENTER;
 	} else {
 		return Toggle3pos::State_t::UP;
