@@ -87,6 +87,12 @@ inline void do_create(MomentaryButtonRGB el, const Indices &indices, const Widge
 	create_4ms_param<WidgetT, LightT>(el.x_mm, el.y_mm, indices, context);
 }
 
+inline void do_create(MomentaryButtonWhiteLight el, const Indices &indices, const WidgetContext_t &context) {
+	using WidgetT = rack::MomentarySwitch<rack::LEDBezel>;
+	using LightT = rack::LEDBezelLight<rack::WhiteLight>;
+	create_4ms_param<WidgetT, LightT>(el.x_mm, el.y_mm, indices, context);
+}
+
 inline void do_create(Encoder el, const Indices &indices, const WidgetContext_t &context) {
 	create_4ms_param<Davies1900hBlackKnobUnlined4ms>(el.x_mm, el.y_mm, indices, context);
 }

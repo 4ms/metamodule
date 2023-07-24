@@ -9,7 +9,7 @@ def extractForVcv(svgFilename, artworkFilename = None, slug = ""):
         outputpath = os.getenv('METAMODULE_ARTWORK_DIR')
         if outputpath is None:
             outputpath = input_default("Directory to save SVG artwork file", pathFromHere("../../vcv/res/modules"))
-        artworkFilename = os.path.join(outputpath, slug + "-artwork.svg")
+        artworkFilename = os.path.join(outputpath, slug + "_artwork.svg")
 
     Log(f"reading from {svgFilename}, writing to {artworkFilename}")
     register_all_namespaces(svgFilename)
