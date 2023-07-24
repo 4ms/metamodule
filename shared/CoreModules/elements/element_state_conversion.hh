@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreModules/elements/elements.hh"
+#include <array>
 #include <concepts>
 #include <type_traits>
 

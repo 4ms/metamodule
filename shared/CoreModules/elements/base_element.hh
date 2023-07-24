@@ -65,10 +65,12 @@ struct LatchingButton : Switch {
 	enum class State_t { DOWN, UP };
 };
 
-struct Toggle2pos : Switch {
+struct ToggleSwitch : Switch {};
+
+struct Toggle2pos : ToggleSwitch {
 	enum class State_t { DOWN, UP };
 };
-struct Toggle3pos : Switch {
+struct Toggle3pos : ToggleSwitch {
 	enum class State_t { DOWN, CENTER, UP };
 };
 struct Toggle2posHoriz : Toggle2pos {};

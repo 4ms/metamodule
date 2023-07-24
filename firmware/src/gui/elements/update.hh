@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreModules/elements/element_state_conversion.hh"
 #include "CoreModules/elements/elements.hh"
 #include "gui/elements/context.hh"
 #include "lvgl.h"
@@ -95,12 +96,13 @@ update_element(const Slider &element, const Params &params, const PatchData &pat
 // Toggle update
 inline bool
 update_element(const Toggle3pos &element, const Params &params, const PatchData &patch, const GuiElement &gui_el) {
+	using enum Toggle3pos::State_t;
 	bool updated_position = false;
 
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, gui_el)) {
 		auto handle = lv_obj_get_child(gui_el.obj, 0);
 		if (!handle) {
-			printf_("No handle sub-object for toggle3pos %16s\n", element.short_name.data());
+			printf_("No handle sub-object for toggle3pos\n");
 			return false;
 		}
 		auto height = lv_obj_get_height(gui_el.obj);
@@ -108,39 +110,29 @@ update_element(const Toggle3pos &element, const Params &params, const PatchData 
 
 		// if (height > width) {
 		// Vertical Toggle
+		lv_obj_refr_size(handle);
+		lv_obj_refr_pos(handle);
 		int32_t y = lv_obj_get_y(handle);
-		int32_t cur_state = y > 0 ? 2 : y == 0 ? 1 : 0;
-		int32_t state = *val > .75f ? 2 : *val > 0.25f ? 1 : 0;
+		Toggle3pos::State_t cur_state = (y >= height / 2) ? DOWN : (y == 0) ? UP : CENTER;
+		auto state = StateConversion::convertState(element, *val);
 
 		if (state != cur_state) {
 			updated_position = true;
-
-			// printf_("sw:%d h=%d %d(y=%d)=>%d (y=", element.idx, height, cur_state, y, state);
-			if (state == 2) {
-				lv_obj_set_y(handle, height / 4);
-				lv_obj_set_height(handle, height / 2);
-				// printf_("%d)\n", height / 4);
-			}
-			if (state == 1) {
+			if (state == UP) {
 				lv_obj_set_y(handle, 0);
-				lv_obj_set_height(handle, height / 4);
-				// printf_("%d)\n", 0);
-			}
-			if (state == 0) {
-				lv_obj_set_y(handle, -height / 4);
 				lv_obj_set_height(handle, height / 2);
-				// printf_("%d)\n", -height / 4);
+			}
+			if (state == CENTER) {
+				lv_obj_set_y(handle, height / 2 - height / 8);
+				lv_obj_set_height(handle, height / 4);
+			}
+			if (state == DOWN) {
+				lv_obj_set_y(handle, height / 2);
+				lv_obj_set_height(handle, height / 2);
 			}
 		}
 
-		// } else {
-		// Horizontal Toggle
-		// auto handle_width = lv_obj_get_width(handle);
-		// int32_t pos = (1.f - val.value()) * (width - handle_width);
-		// int32_t cur_pos = lv_obj_get_x(handle);
-		// if (pos != cur_pos)
-		// 	lv_obj_set_x(handle, pos);
-		// }
+		// TODO: Horizontal Toggle
 	}
 
 	return updated_position;
@@ -149,11 +141,37 @@ update_element(const Toggle3pos &element, const Params &params, const PatchData 
 // Toggle 2pos update
 inline bool
 update_element(const Toggle2pos &element, const Params &params, const PatchData &patch, const GuiElement &gui_el) {
+	using enum Toggle2pos::State_t;
 	bool updated_position = false;
 
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, gui_el)) {
-		//angle 0 => up
-		//angle 1800 => down
+		auto handle = lv_obj_get_child(gui_el.obj, 0);
+		if (!handle) {
+			printf_("No handle sub-object for toggle2pos\n");
+			return false;
+		}
+		auto height = lv_obj_get_height(gui_el.obj);
+		//auto width = lv_obj_get_width(drawn.obj);
+
+		// if (height > width) {
+		// Vertical Toggle
+		lv_obj_refr_size(handle);
+		lv_obj_refr_pos(handle);
+		int32_t y = lv_obj_get_y(handle);
+		auto cur_state = (y >= height / 2) ? DOWN : UP;
+		auto state = StateConversion::convertState(element, *val);
+
+		if (state != cur_state) {
+			updated_position = true;
+			if (state == UP) {
+				lv_obj_set_y(handle, 0);
+				lv_obj_set_height(handle, height / 2);
+			}
+			if (state == DOWN) {
+				lv_obj_set_y(handle, height / 2);
+				lv_obj_set_height(handle, height / 2);
+			}
+		}
 	}
 
 	return updated_position;
