@@ -33,18 +33,19 @@ def appendPluginFiles(slug, brand, pluginDir = None, description=""):
         if pluginDir is None:
             pluginDir = input_default("Metamodule/VCV dir", pathFromHere("../../vcv/"))
     plugincc = os.path.join(pluginDir, 'src/plugin.cc')
-    private_plugin_cc = os.path.join(pluginDir, f'src/plugin_{slug}.cc')
+    private_plugin_cc = os.path.join(pluginDir, f'src/models/{slug}.cc')
     pluginhh = os.path.join(pluginDir, 'src/plugin.hh')
     pluginjson = os.path.join(pluginDir, 'plugin.json')
     if description=="":
         description = slug
     modelName = 'model' + slug
 
-    module_file_content = f"""
-#include "generic_module.hh"
+    module_file_content = f"""#include "generic_module.hh"
 #include "CoreModules/{brand}/info/{slug}_info.hh"
 using namespace MetaModule;
-rack::Model* {modelName} = GenericModule<{slug}Info>::create();"""
+
+rack::Model* {modelName} = GenericModule<{slug}Info>::create();
+"""
 
     overwriteOrCreateFile(private_plugin_cc, module_file_content)
 

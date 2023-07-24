@@ -21,7 +21,8 @@ def input_default(prompt, default=""):
     # return str
 
 def overwriteOrCreateFile(filename, text):
-     with open(filename, "w") as file:
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w") as file:
         file.write(text)
         Log(f"Create {filename} with {text}")
 

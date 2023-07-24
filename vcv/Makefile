@@ -40,6 +40,7 @@ SOURCES += $(wildcard src/*.cc)
 SOURCES += $(wildcard src/hub/*.cc)
 SOURCES += $(wildcard src/comm/*.cc)
 SOURCES += $(wildcard src/mapping/*.cc)
+SOURCES += $(wildcard src/models/*.cc)
 
 SOURCES += $(wildcard $(SHARED_DIR)/cpputil/util/*.cc)
 SOURCES += $(SHARED_DIR)/axoloti-wrapper/axoloti_math.cpp
@@ -70,6 +71,8 @@ endif
 ./build/src/shared/CoreModules/enosc/dynamic_data.cc.o: CXXFLAGS+=-Wno-unknown-pragmas
 
 all: plugin res tests
+
+include make-models.mk
 
 plugin: $(TARGET)
 
