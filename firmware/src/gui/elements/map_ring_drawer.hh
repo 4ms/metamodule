@@ -53,6 +53,9 @@ inline lv_obj_t *draw_mapped_ring(const BaseElement &,
 	lv_obj_set_style_outline_opa(ring_obj, LV_OPA_TRANSP, LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ring_obj, 40, LV_STATE_DEFAULT);
 
+	lv_obj_clear_flag(ring_obj, LV_OBJ_FLAG_SCROLLABLE);
+	lv_obj_set_scrollbar_mode(ring_obj, LV_SCROLLBAR_MODE_OFF);
+
 	return ring_obj;
 }
 

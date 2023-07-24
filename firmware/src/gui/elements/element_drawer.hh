@@ -56,6 +56,8 @@ draw_element(const BaseElement &el, const lv_img_dsc_t *img, lv_obj_t *canvas, u
 	float x = ModuleInfoBase::mm_to_px(el.x_mm, module_height);
 	float y = ModuleInfoBase::mm_to_px(el.y_mm, module_height);
 	draw_image(x, y, el.coords, img, obj, module_height);
+	lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+	lv_obj_set_scrollbar_mode(obj, LV_SCROLLBAR_MODE_OFF);
 	return obj;
 }
 
