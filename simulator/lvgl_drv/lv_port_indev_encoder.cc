@@ -117,7 +117,7 @@ void LvglEncoderSimulatorDriver::handle_key_press(SDL_Keycode key, lv_indev_data
 	if (key >= 'a' && key <= 'f')
 		last_selected_param = key - 'a';
 	if (key >= 'u' && key <= 'z')
-		last_selected_param = key - 'u';
+		last_selected_param = key - 'u' + 6;
 }
 
 LvglEncoderSimulatorDriver::~LvglEncoderSimulatorDriver() {
