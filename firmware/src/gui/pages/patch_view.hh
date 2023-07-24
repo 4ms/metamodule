@@ -28,6 +28,7 @@ struct PatchViewPage : PageBase {
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true; //flash map ring if knob is turned while patch is playing
+		bool scroll_to_active_param = false;
 		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::CurModuleIfPlaying;
 	};
 	ViewSettings settings;
@@ -49,7 +50,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_scroll_dir(base, LV_DIR_VER);
 		lv_obj_set_scrollbar_mode(base, LV_SCROLLBAR_MODE_ACTIVE);
 
-		lv_obj_add_event_cb(base, base_scroll_cb, LV_EVENT_SCROLL, (void *)this);
+		// lv_obj_add_event_cb(base, base_scroll_cb, LV_EVENT_SCROLL, (void *)this);
 
 		patchname = ui_PatchName; //NOLINT
 
@@ -204,7 +205,8 @@ struct PatchViewPage : PageBase {
 
 						if (did_update && settings.map_ring_flash_active) {
 							MapRingDisplay::flash_once(gui_el.map_ring);
-							lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+							if (settings.scroll_to_active_param)
+								lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 						}
 					},
 					drawn_el.element);
