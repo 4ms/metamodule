@@ -8,7 +8,6 @@ struct MapRingDisplay {
 
 	enum class Style {
 		HideAlways,
-		FlashActive,
 		CurModule,
 		CurModuleIfPlaying,
 		ShowAllIfPlaying,

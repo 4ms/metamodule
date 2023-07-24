@@ -29,6 +29,7 @@ namespace MetaModule
 struct ModuleViewPage : PageBase {
 
 	struct ViewSettings {
+		bool map_ring_flash_active = true;
 		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::ShowAll;
 	};
 	ViewSettings settings;
@@ -175,7 +176,7 @@ struct ModuleViewPage : PageBase {
 				std::visit(
 					[this, gui_el = drawn_el.gui_element](auto &el) {
 						bool did_update = update_element(el, params, patch, gui_el);
-						if (did_update && settings.map_ring_style == MapRingDisplay::Style::FlashActive) {
+						if (did_update && settings.map_ring_flash_active) {
 							MapRingDisplay::flash_once(gui_el.map_ring);
 						}
 					},
@@ -192,9 +193,6 @@ struct ModuleViewPage : PageBase {
 			auto map_ring = drawn_el.gui_element.map_ring;
 
 			switch (settings.map_ring_style) {
-				case FlashActive:
-					break;
-
 				case ShowAllIfPlaying:
 				case CurModuleIfPlaying:
 					if (is_patch_playing)

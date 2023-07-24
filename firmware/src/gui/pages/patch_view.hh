@@ -27,7 +27,8 @@ struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
 	struct ViewSettings {
-		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::FlashActive;
+		bool map_ring_flash_active = true; //flash map ring if knob is turned while patch is playing
+		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::ShowAllIfPlaying;
 	};
 	ViewSettings settings;
 
@@ -201,7 +202,7 @@ struct PatchViewPage : PageBase {
 						//if (drawn.obj) //TODO: This can be removed now, right?
 						bool did_update = update_element(el, this->params, patch, gui_el);
 
-						if (did_update && settings.map_ring_style == MapRingDisplay::Style::FlashActive) {
+						if (did_update && settings.map_ring_flash_active) {
 							MapRingDisplay::flash_once(gui_el.map_ring);
 							lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
 						}
@@ -219,9 +220,6 @@ struct PatchViewPage : PageBase {
 			auto map_ring = drawn_el.gui_element.map_ring;
 
 			switch (settings.map_ring_style) {
-				case FlashActive:
-					break;
-
 				case ShowAllIfPlaying:
 					if (is_patch_playing)
 						MapRingDisplay::show(map_ring);
