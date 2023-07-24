@@ -28,7 +28,7 @@ struct PatchViewPage : PageBase {
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true; //flash map ring if knob is turned while patch is playing
-		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::ShowAllIfPlaying;
+		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::CurModuleIfPlaying;
 	};
 	ViewSettings settings;
 
