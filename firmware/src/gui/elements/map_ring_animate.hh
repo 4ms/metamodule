@@ -13,6 +13,8 @@ struct MapRingDisplay {
 		ShowAllIfPlaying,
 		ShowAll,
 	};
+	// enum class IsOnHighlightedModule { Yes, No };
+	enum class Flash { On, Brighter };
 
 	static void show(lv_obj_t *map_ring) {
 		if (!map_ring)
@@ -26,7 +28,25 @@ struct MapRingDisplay {
 		lv_obj_set_style_outline_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
 	}
 
-	static void flash_once(lv_obj_t *map_ring) {
+	static void flash_once(lv_obj_t *map_ring, Style style, bool on_highlighted_module) {
+		using enum Style;
+		if (style == CurModuleIfPlaying && on_highlighted_module)
+			flash_once(map_ring, Flash::Brighter);
+
+		else if (style == CurModule && on_highlighted_module)
+			flash_once(map_ring, Flash::Brighter);
+
+		else if (style == ShowAllIfPlaying)
+			flash_once(map_ring, Flash::Brighter);
+
+		else if (style == ShowAll)
+			flash_once(map_ring, Flash::Brighter);
+
+		else
+			flash_once(map_ring, Flash::On);
+	}
+
+	static void flash_once(lv_obj_t *map_ring, Flash flash) {
 		if (!map_ring)
 			return;
 
@@ -36,8 +56,8 @@ struct MapRingDisplay {
 		auto end = LV_OPA_0;
 		auto delay = 200;
 		auto time = 500;
-		if (cur_opa == LV_OPA_50) {
-			start = LV_OPA_0;
+		if (flash == Flash::Brighter) {
+			start = LV_OPA_100;
 			end = LV_OPA_50;
 			delay = 100;
 			time = 100;
