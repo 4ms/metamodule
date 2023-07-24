@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_info.hh"
 #include "gui/elements/element_name.hh"
+#include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/module_drawer.hh"
 #include "gui/elements/module_param.hh"
 #include "gui/elements/update.hh"
@@ -26,6 +27,11 @@ LV_IMG_DECLARE(switch_down);
 namespace MetaModule
 {
 struct ModuleViewPage : PageBase {
+
+	struct ViewSettings {
+		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::ShowAll;
+	};
+	ViewSettings settings;
 
 	ModuleViewPage(PatchInfo info, std::string_view module_slug = "EnOsc")
 		: PageBase{info}
@@ -138,6 +144,8 @@ struct ModuleViewPage : PageBase {
 			lv_obj_add_style(button[cur_selected], &Gui::panel_highlight_style, LV_PART_MAIN);
 		}
 
+		update_map_ring_style();
+
 		// Hide Edit pane
 		lv_obj_set_pos(edit_pane, width_px, 0);
 		lv_obj_set_size(edit_pane, 320 - width_px, 240);
@@ -148,7 +156,6 @@ struct ModuleViewPage : PageBase {
 	}
 
 	void update() override {
-		// Back button: Knob -> List -> last_page
 		if (metaparams.meta_buttons[0].is_just_released()) {
 			if (mode == ViewMode::List) {
 				if (PageList::request_last_page()) {
@@ -166,22 +173,47 @@ struct ModuleViewPage : PageBase {
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
 				std::visit(
-					[this, gui_element = drawn_el.gui_element](auto &el) {
-						// re-draw element with new rotation/slider position, etc
-						// if mapped parameter changed
-						update_element(el, params, patch, gui_element);
+					[this, gui_el = drawn_el.gui_element](auto &el) {
+						bool did_update = update_element(el, params, patch, gui_el);
+						if (did_update && settings.map_ring_style == MapRingDisplay::Style::FlashActive) {
+							MapRingDisplay::flash_once(gui_el.map_ring);
+						}
 					},
 					drawn_el.element);
 			}
 		}
+	}
 
-		// // Update static knobs rotation
-		// for (auto &knob : static_knobs) {
-		// 	if (std::abs(knob.patchconf.value - knob.last_pot_reading) > 0.01f) {
-		// 		knob.last_pot_reading = knob.patchconf.value;
-		// 		DrawHelper::animate_control(knob, moduleinfo);
-		// 	}
-		// }
+	// This gets called after map_ring_style changes
+	void update_map_ring_style() {
+		using enum MapRingDisplay::Style;
+
+		for (auto &drawn_el : drawn_elements) {
+			auto map_ring = drawn_el.gui_element.map_ring;
+
+			switch (settings.map_ring_style) {
+				case FlashActive:
+					break;
+
+				case ShowAllIfPlaying:
+				case CurModuleIfPlaying:
+					if (is_patch_playing)
+						MapRingDisplay::show(map_ring);
+					else
+						MapRingDisplay::hide(map_ring);
+
+					break;
+
+				case CurModule:
+				case ShowAll:
+					MapRingDisplay::show(map_ring);
+					break;
+
+				case HideAlways:
+					MapRingDisplay::hide(map_ring);
+					break;
+			}
+		}
 	}
 
 	// void blur() final {

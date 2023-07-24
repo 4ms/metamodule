@@ -13,28 +13,31 @@ namespace MetaModule
 namespace ElementUpdateImpl
 {
 
-inline std::optional<float> get_param_value(const Params &params, const PatchData &patch, const GuiElement &drawn) {
-	if (!drawn.obj)
+inline std::optional<float> get_param_value(const Params &params, const PatchData &patch, const GuiElement &gui_el) {
+	if (!gui_el.obj)
 		return {};
 
 	float val = 0;
-	if (drawn.mapped_panel_id) {
+	if (gui_el.mapped_panel_id) {
 		// mapped knob
-		if (drawn.mapped_panel_id < params.knobs.size())
-			val = params.knobs[*drawn.mapped_panel_id];
+		if (gui_el.mapped_panel_id < params.knobs.size())
+			val = params.knobs[*gui_el.mapped_panel_id];
 		else
 			return {}; // mapped to an invalid param id (error?)
 	} else {
 		//static knob
-		return patch.get_static_knob_value(drawn.module_idx, drawn.idx);
+		return patch.get_static_knob_value(gui_el.module_idx, gui_el.idx);
 	}
 	return val;
 }
 
 } // namespace ElementUpdateImpl
 
-inline void
+// Knob update
+inline bool
 update_element(const Knob &element, const Params &params, const PatchData &patch, const GuiElement &gui_el) {
+	bool updated_position = false;
+
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, gui_el)) {
 		int32_t angle = val.value() * 3000.f - 1500.f;
 		if (angle < 0)
@@ -43,64 +46,63 @@ update_element(const Knob &element, const Params &params, const PatchData &patch
 
 		if (std::abs(angle - cur_angle) > 10) {
 			lv_img_set_angle(gui_el.obj, angle);
-			if (gui_el.map_ring) {
-				lv_anim_t a;
-				lv_anim_init(&a);
-				lv_anim_set_exec_cb(
-					&a, (lv_anim_exec_xcb_t)[](void *var, int32_t val) {
-						lv_obj_set_style_outline_opa((lv_obj_t *)var, val, LV_STATE_DEFAULT);
-					});
-				lv_anim_set_var(&a, gui_el.map_ring);
-				lv_anim_set_time(&a, 500);
-				lv_anim_set_values(&a, LV_OPA_50, LV_OPA_0);
-				lv_anim_set_delay(&a, 200);
-				lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
-				lv_anim_set_early_apply(&a, true);
-				lv_anim_start(&a);
-			}
+			updated_position = true;
 		}
 	}
+
+	return updated_position;
 }
 
-inline void
-update_element(const Slider &element, const Params &params, const PatchData &patch, const GuiElement &drawn) {
-	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
-		auto handle = lv_obj_get_child(drawn.obj, 0);
+// Slider update
+inline bool
+update_element(const Slider &element, const Params &params, const PatchData &patch, const GuiElement &gui_el) {
+	bool updated_position = false;
+
+	if (auto val = ElementUpdateImpl::get_param_value(params, patch, gui_el)) {
+		auto handle = lv_obj_get_child(gui_el.obj, 0);
 		if (!handle) {
 			pr_err("No handle sub-object for slider %16s\n", element.short_name.data());
-			return;
+			return false;
 		}
-		auto height = lv_obj_get_height(drawn.obj);
-		auto width = lv_obj_get_width(drawn.obj);
+		auto height = lv_obj_get_height(gui_el.obj);
+		auto width = lv_obj_get_width(gui_el.obj);
 
 		if (height > width) {
 			// Vertical Slider
 			auto handle_height = lv_obj_get_height(handle);
 			int32_t pos = (1.f - val.value()) * (height - handle_height);
 			int32_t cur_pos = lv_obj_get_y(handle);
-			if (pos != cur_pos)
+			if (pos != cur_pos) {
 				lv_obj_set_y(handle, pos);
+				updated_position = true;
+			}
 
 		} else {
 			// Horizontal Slider
 			auto handle_width = lv_obj_get_width(handle);
 			int32_t pos = (1.f - val.value()) * (width - handle_width);
 			int32_t cur_pos = lv_obj_get_x(handle);
-			if (pos != cur_pos)
+			if (pos != cur_pos) {
 				lv_obj_set_x(handle, pos);
+				updated_position = true;
+			}
 		}
 	}
+	return updated_position;
 }
 
-inline void
-update_element(const Toggle3pos &element, const Params &params, const PatchData &patch, const GuiElement &drawn) {
-	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
-		auto handle = lv_obj_get_child(drawn.obj, 0);
+// Toggle update
+inline bool
+update_element(const Toggle3pos &element, const Params &params, const PatchData &patch, const GuiElement &gui_el) {
+	bool updated_position = false;
+
+	if (auto val = ElementUpdateImpl::get_param_value(params, patch, gui_el)) {
+		auto handle = lv_obj_get_child(gui_el.obj, 0);
 		if (!handle) {
 			printf_("No handle sub-object for toggle3pos %16s\n", element.short_name.data());
-			return;
+			return false;
 		}
-		auto height = lv_obj_get_height(drawn.obj);
+		auto height = lv_obj_get_height(gui_el.obj);
 		//auto width = lv_obj_get_width(drawn.obj);
 
 		// if (height > width) {
@@ -110,6 +112,8 @@ update_element(const Toggle3pos &element, const Params &params, const PatchData 
 		int32_t state = *val > .75f ? 2 : *val > 0.25f ? 1 : 0;
 
 		if (state != cur_state) {
+			updated_position = true;
+
 			// printf_("sw:%d h=%d %d(y=%d)=>%d (y=", element.idx, height, cur_state, y, state);
 			if (state == 2) {
 				lv_obj_set_y(handle, height / 4);
@@ -137,17 +141,26 @@ update_element(const Toggle3pos &element, const Params &params, const PatchData 
 		// 	lv_obj_set_x(handle, pos);
 		// }
 	}
+
+	return updated_position;
 }
 
-inline void
-update_element(const Toggle2pos &element, const Params &params, const PatchData &patch, const GuiElement &drawn) {
-	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
+// Toggle 2pos update
+inline bool
+update_element(const Toggle2pos &element, const Params &params, const PatchData &patch, const GuiElement &gui_el) {
+	bool updated_position = false;
+
+	if (auto val = ElementUpdateImpl::get_param_value(params, patch, gui_el)) {
 		//angle 0 => up
 		//angle 1800 => down
 	}
+
+	return updated_position;
 }
 
-inline void update_element(const BaseElement &, const Params &, const PatchData &, const GuiElement &) {
+// default/catch-all
+inline bool update_element(const BaseElement &, const Params &, const PatchData &, const GuiElement &) {
+	return false;
 }
 
 } // namespace MetaModule

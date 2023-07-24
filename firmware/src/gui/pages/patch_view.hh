@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
 #include "gui/elements/element_drawer.hh"
+#include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
@@ -24,6 +25,11 @@ namespace MetaModule
 
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
+
+	struct ViewSettings {
+		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::FlashActive;
+	};
+	ViewSettings settings;
 
 	PatchViewPage(PatchInfo info)
 		: PageBase{info} {
@@ -56,6 +62,11 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(ui_InfoButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_KnobButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+
+		// Scroll to top when focussing on a button
+		lv_obj_add_event_cb(ui_AddButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_InfoButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SettingsButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 
 		// description = lv_label_create(base);
@@ -128,7 +139,6 @@ struct PatchViewPage : PageBase {
 		for (auto [module_idx, slug] : enumerate(patch.module_slugs)) {
 			module_ids.push_back(module_idx);
 
-			//FIXME: get the width from the canvas object, but we have to call lv_obj_refresh_size
 			auto canvas = module_drawer.draw_faceplate(slug, canvas_buf);
 			if (!canvas)
 				continue;
@@ -142,6 +152,7 @@ struct PatchViewPage : PageBase {
 			module_canvases.push_back(canvas);
 
 			lv_group_add_obj(group, canvas);
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SNAPPABLE);
 
 			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
 			lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
@@ -155,6 +166,7 @@ struct PatchViewPage : PageBase {
 			lv_obj_add_event_cb(canvas, module_defocus_cb, LV_EVENT_DEFOCUSED, (void *)this);
 		}
 
+		update_map_ring_style(0);
 		//auto cable_drawer = CableDrawer{cable_cont, modules, patch, height};
 		//cable_drawer.draw_all();
 
@@ -185,11 +197,59 @@ struct PatchViewPage : PageBase {
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
 				std::visit(
-					[this, drawn = drawn_el.gui_element](auto &el) -> void {
-						if (drawn.obj)
-							update_element(el, this->params, patch, drawn);
+					[this, gui_el = drawn_el.gui_element](auto &el) -> void {
+						//if (drawn.obj) //TODO: This can be removed now, right?
+						bool did_update = update_element(el, this->params, patch, gui_el);
+
+						if (did_update && settings.map_ring_style == MapRingDisplay::Style::FlashActive) {
+							MapRingDisplay::flash_once(gui_el.map_ring);
+							lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+						}
 					},
 					drawn_el.element);
+			}
+		}
+	}
+
+	// This gets called after map_ring_style changes
+	void update_map_ring_style(unsigned module_id) {
+		using enum MapRingDisplay::Style;
+
+		for (auto &drawn_el : drawn_elements) {
+			auto map_ring = drawn_el.gui_element.map_ring;
+
+			switch (settings.map_ring_style) {
+				case FlashActive:
+					break;
+
+				case ShowAllIfPlaying:
+					if (is_patch_playing)
+						MapRingDisplay::show(map_ring);
+					else
+						MapRingDisplay::hide(map_ring);
+					break;
+
+				case CurModule:
+					if (module_id == drawn_el.gui_element.module_idx)
+						MapRingDisplay::show(map_ring);
+					else
+						MapRingDisplay::hide(map_ring);
+					break;
+
+				case CurModuleIfPlaying:
+					if (module_id == drawn_el.gui_element.module_idx && is_patch_playing)
+						MapRingDisplay::show(map_ring);
+					else
+						MapRingDisplay::hide(map_ring);
+					break;
+
+				case ShowAll:
+					MapRingDisplay::show(map_ring);
+					break;
+
+				case HideAlways:
+					MapRingDisplay::hide(map_ring);
+					break;
 			}
 		}
 	}
@@ -233,6 +293,8 @@ struct PatchViewPage : PageBase {
 
 		// if (lv_obj_get_scroll_y(page->base) == 0 && num_rows > 1)
 		// 	lv_obj_scroll_to_y(page->base, 119, LV_ANIM_ON);
+
+		page->update_map_ring_style(module_id);
 
 		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 

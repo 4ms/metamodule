@@ -3,18 +3,12 @@
 #include "gui/helpers/units_conversion.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
-#include "pr_dbg.hh"
-#include "src/core/lv_obj_pos.h"
 #include <cstdint>
 #include <optional>
 
-namespace MetaModule::ElementDrawerImpl
-{} // namespace MetaModule::ElementDrawerImpl
+namespace MetaModule::MapRingDrawer
+{
 
-namespace MetaModule
-{
-namespace MapRingDrawer
-{
 inline lv_obj_t *draw_mapped_ring(const BaseElement &,
 								  lv_obj_t *element_obj,
 								  lv_obj_t *canvas,
@@ -22,8 +16,6 @@ inline lv_obj_t *draw_mapped_ring(const BaseElement &,
 								  uint32_t module_height) {
 	if (!panel_el_id.has_value() || !element_obj)
 		return nullptr;
-
-	float zoom = module_height / 240.f;
 
 	//TODO: color and thickness set by variant type
 	auto color = Gui::knob_palette[panel_el_id.value() % 6];
@@ -46,6 +38,8 @@ inline lv_obj_t *draw_mapped_ring(const BaseElement &,
 	auto h = lv_obj_get_height(element_obj);
 
 	//TODO: shrink box around center by width * (1-zoom)
+	// So that it's consistant at all zoom levels
+	// float zoom = module_height / 240.f;
 
 	auto ring_obj = lv_obj_create(canvas);
 	lv_obj_set_pos(ring_obj, x, y);
@@ -61,5 +55,5 @@ inline lv_obj_t *draw_mapped_ring(const BaseElement &,
 
 	return ring_obj;
 }
-}; // namespace MapRingDrawer
-} // namespace MetaModule
+
+} // namespace MetaModule::MapRingDrawer
