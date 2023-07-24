@@ -8,8 +8,9 @@
 namespace MetaModule
 {
 
-struct ElementContext {
+struct GuiElement {
 	lv_obj_t *obj = nullptr;				 //gui object
+	lv_obj_t *map_ring = nullptr;			 //gui map ring object
 	uint16_t module_idx = 0;				 //index in patch
 	uint16_t idx = 0;						 //index of cateogry in module: param_idx, light_idx, etc
 	std::optional<uint16_t> mapped_panel_id; //patch mapping
@@ -17,7 +18,7 @@ struct ElementContext {
 
 // Element and it context in a patch, drawn on the screen
 struct DrawnElement {
-	ElementContext drawn;
+	GuiElement gui_element;
 	const Element &element;
 };
 

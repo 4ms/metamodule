@@ -6,7 +6,12 @@ void CommModule::onSampleRateChange() {
 
 void CommModule::process(const ProcessArgs &args) {
 	for (unsigned i = 0; auto &p : params) {
-		core->set_param(i, p.getValue());
+
+		// Transform VCV scaled values to MetaModule 0...1:
+		// This is needed for 3-pos switches only
+		auto val = getParamQuantity(i)->toScaled(p.getValue());
+
+		core->set_param(i, val);
 		i++;
 	}
 
@@ -61,4 +66,6 @@ void CommModule::configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned N
 	for (unsigned i = 0; i < NUM_OUTPUTS; i++) {
 		outJacks.push_back({outputs[i], i});
 	}
+	core->mark_all_inputs_unpatched();
+	core->mark_all_outputs_unpatched();
 }

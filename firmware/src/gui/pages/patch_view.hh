@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreModules/elements/element_counter.hh"
 #include "gui/elements/element_drawer.hh"
+#include "gui/elements/map_ring_animate.hh"
 #include "gui/elements/map_ring_drawer.hh"
 #include "gui/elements/mapping.hh"
 #include "gui/elements/module_drawer.hh"
@@ -25,6 +26,13 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
+	struct ViewSettings {
+		bool map_ring_flash_active = true; //flash map ring if knob is turned while patch is playing
+		bool scroll_to_active_param = false;
+		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::CurModuleIfPlaying;
+	};
+	ViewSettings settings;
+
 	PatchViewPage(PatchInfo info)
 		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchView);
@@ -42,7 +50,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_scroll_dir(base, LV_DIR_VER);
 		lv_obj_set_scrollbar_mode(base, LV_SCROLLBAR_MODE_ACTIVE);
 
-		lv_obj_add_event_cb(base, base_scroll_cb, LV_EVENT_SCROLL, (void *)this);
+		// lv_obj_add_event_cb(base, base_scroll_cb, LV_EVENT_SCROLL, (void *)this);
 
 		patchname = ui_PatchName; //NOLINT
 
@@ -50,25 +58,24 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_flag(playbut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_clear_flag(playbut, LV_OBJ_FLAG_SCROLLABLE);
 		lv_obj_add_event_cb(playbut, playbut_cb, LV_EVENT_PRESSED, this);
-		lv_obj_add_event_cb(playbut, playbut_focussed_cb, LV_EVENT_FOCUSED, this);
 
 		lv_obj_add_flag(ui_AddButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_InfoButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_KnobButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 		lv_obj_add_flag(ui_SettingsButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+
+		// Scroll to top when focussing on a button
+		lv_obj_add_event_cb(playbut, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_AddButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_InfoButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SettingsButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 
-		// description = lv_label_create(base);
-		// lv_obj_add_style(description, &Gui::text_block_style, LV_PART_MAIN);
-		// lv_label_set_long_mode(description, LV_LABEL_LONG_WRAP);
-		// lv_obj_set_width(description, 320);
-		// lv_obj_set_height(description, 51);
-
-		module_name = lv_label_create(base);
+		module_name = lv_label_create(base); //NOLINT
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
 		lv_label_set_text(module_name, "Select a module:");
 
-		modules_cont = lv_obj_create(base);
+		modules_cont = lv_obj_create(base); //NOLINT
 		lv_obj_set_size(modules_cont, 320, 4 * Height + 8);
 		lv_obj_set_style_bg_color(modules_cont, lv_color_black(), LV_STATE_DEFAULT);
 		lv_obj_set_style_border_width(modules_cont, 0, LV_STATE_DEFAULT);
@@ -78,9 +85,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_set_style_pad_all(modules_cont, 2, LV_STATE_DEFAULT);
 		lv_obj_set_style_radius(modules_cont, 0, LV_STATE_DEFAULT);
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLLABLE);
-		// lv_obj_set_scroll_dir(modules_cont, LV_DIR_ALL); //FIXME: why no horiz scrolling?
 		lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-		// lv_obj_add_flag(modules_cont, LV_OBJ_FLAG_SCROLL_CHAIN); //FIXME: has no effect?
 
 		cable_layer = lv_canvas_create(lv_layer_top()); // NOLINT
 		lv_obj_set_size(cable_layer, 320, 240);
@@ -103,14 +108,11 @@ struct PatchViewPage : PageBase {
 			return;
 
 		lv_label_set_text(patchname, patch.patch_name.c_str());
-		// lv_label_set_text(description, patch.description.c_str());
 
 		blur();
 
 		module_canvases.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
-
-		//lv_obj_set_height(modules_cont, 2 * height + 8);
 
 		lv_group_remove_all_objs(group);
 		lv_group_set_editing(group, false);
@@ -128,7 +130,6 @@ struct PatchViewPage : PageBase {
 		for (auto [module_idx, slug] : enumerate(patch.module_slugs)) {
 			module_ids.push_back(module_idx);
 
-			//FIXME: get the width from the canvas object, but we have to call lv_obj_refresh_size
 			auto canvas = module_drawer.draw_faceplate(slug, canvas_buf);
 			if (!canvas)
 				continue;
@@ -142,6 +143,7 @@ struct PatchViewPage : PageBase {
 			module_canvases.push_back(canvas);
 
 			lv_group_add_obj(group, canvas);
+			lv_obj_add_flag(canvas, LV_OBJ_FLAG_SNAPPABLE);
 
 			lv_obj_add_style(canvas, &Gui::plain_border_style, LV_STATE_DEFAULT);
 			lv_obj_add_style(canvas, &Gui::selected_module_style, LV_STATE_FOCUS_KEY);
@@ -155,10 +157,11 @@ struct PatchViewPage : PageBase {
 			lv_obj_add_event_cb(canvas, module_defocus_cb, LV_EVENT_DEFOCUSED, (void *)this);
 		}
 
+		highlighted_module_id = std::nullopt;
+		update_map_ring_style();
 		//auto cable_drawer = CableDrawer{cable_cont, modules, patch, height};
 		//cable_drawer.draw_all();
 
-		// lv_obj_refresh_self_size(modules_cont);
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
 	}
 
@@ -185,11 +188,63 @@ struct PatchViewPage : PageBase {
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
 				std::visit(
-					[this, drawn = drawn_el.drawn](auto &el) -> void {
-						if (drawn.obj)
-							update_element(el, this->params, patch, drawn);
+					[this, gui_el = drawn_el.gui_element](auto &el) -> void {
+						//if (drawn.obj) //TODO: This can be removed now, right?
+						bool did_update = update_element(el, this->params, patch, gui_el);
+
+						if (did_update) {
+							using enum MapRingDisplay::Style;
+							if (settings.map_ring_flash_active) {
+								MapRingDisplay::flash_once(gui_el.map_ring,
+														   settings.map_ring_style,
+														   highlighted_module_id == gui_el.module_idx);
+							}
+							if (settings.scroll_to_active_param) {
+								lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
+							}
+						}
 					},
 					drawn_el.element);
+			}
+		}
+	}
+
+	// This gets called after map_ring_style changes
+	void update_map_ring_style() {
+		using enum MapRingDisplay::Style;
+
+		for (auto &drawn_el : drawn_elements) {
+			auto map_ring = drawn_el.gui_element.map_ring;
+
+			switch (settings.map_ring_style) {
+				case ShowAllIfPlaying:
+					if (is_patch_playing)
+						MapRingDisplay::show(map_ring);
+					else
+						MapRingDisplay::hide(map_ring);
+					break;
+
+				case CurModule:
+					if (highlighted_module_id == drawn_el.gui_element.module_idx)
+						MapRingDisplay::show(map_ring);
+					else
+						MapRingDisplay::hide(map_ring);
+					break;
+
+				case CurModuleIfPlaying:
+					if (highlighted_module_id == drawn_el.gui_element.module_idx && is_patch_playing)
+						MapRingDisplay::show(map_ring);
+					else
+						MapRingDisplay::hide(map_ring);
+					break;
+
+				case ShowAll:
+					MapRingDisplay::show(map_ring);
+					break;
+
+				case HideAlways:
+					MapRingDisplay::hide(map_ring);
+					break;
 			}
 		}
 	}
@@ -228,11 +283,15 @@ struct PatchViewPage : PageBase {
 		if (module_id >= page->patch.module_slugs.size())
 			return;
 
+		page->highlighted_module_id = module_id;
+
 		const auto this_slug = page->patch.module_slugs[module_id];
 		lv_label_set_text(page->module_name, this_slug.c_str());
 
 		// if (lv_obj_get_scroll_y(page->base) == 0 && num_rows > 1)
 		// 	lv_obj_scroll_to_y(page->base, 119, LV_ANIM_ON);
+
+		page->update_map_ring_style();
 
 		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
@@ -297,31 +356,23 @@ struct PatchViewPage : PageBase {
 		page->start_changing_patch();
 	}
 
-	static void playbut_focussed_cb(lv_event_t *event) {
-		auto page = static_cast<PatchViewPage *>(event->user_data);
-		lv_label_set_text(page->module_name, "Select a module:");
-
-		// if (page->height == 240) {
-		// 	page->height = 120;
-		// page->blur();
-		// page->focus();
-		// }
-		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
-	}
-
 	static void button_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+		lv_label_set_text(page->module_name, "Select a module:");
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
+		page->highlighted_module_id = std::nullopt;
 	}
 
 private:
 	// lv_obj_t *description;
+	lv_obj_t *base;
 	lv_obj_t *patchname;
 	lv_obj_t *modules_cont;
 	lv_obj_t *module_name;
-	// lv_obj_t *playbut_label;
 	lv_obj_t *playbut;
 	lv_obj_t *cable_layer;
+
+	std::optional<uint32_t> highlighted_module_id{};
 
 	PatchData &patch = patch_storage.get_view_patch();
 
@@ -336,8 +387,6 @@ private:
 		PatchViewPage *page;
 		uint32_t selected_module_id;
 	};
-
-	lv_obj_t *base;
 
 	void start_changing_patch() {
 		patch_playloader.request_load_view_patch();

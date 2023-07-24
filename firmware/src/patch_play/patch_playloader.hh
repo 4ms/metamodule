@@ -52,6 +52,7 @@ struct PatchPlayLoader {
 	void request_load_view_patch() {
 		loading_new_patch_ = true;
 	}
+
 	bool is_loading_new_patch() {
 		return loading_new_patch_;
 	}

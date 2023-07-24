@@ -38,8 +38,8 @@ struct EnOscInfo : ModuleInfoBase {
 		Toggle3pos{to_mm<72>(214.23), to_mm<72>(102.945), Center, "Cross FM Switch", ""},
 		Toggle3pos{to_mm<72>(16.93), to_mm<72>(215.065), Center, "Twist Switch", ""},
 		Toggle3pos{to_mm<72>(214.23), to_mm<72>(201.725), Center, "Warp Switch", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(21.63), to_mm<72>(42.53), Center, "Learn", ""},
-		MomentaryButtonWhiteLight{to_mm<72>(209.56), to_mm<72>(42.53), Center, "Freeze", ""},
+		MomentaryButtonRGB{to_mm<72>(21.63), to_mm<72>(42.53), Center, "Learn", ""},
+		MomentaryButtonRGB{to_mm<72>(209.56), to_mm<72>(42.53), Center, "Freeze", ""},
 	}};
 
 	enum class Elem {
