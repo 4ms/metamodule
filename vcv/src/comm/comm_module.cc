@@ -61,4 +61,6 @@ void CommModule::configComm(unsigned NUM_PARAMS, unsigned NUM_INPUTS, unsigned N
 	for (unsigned i = 0; i < NUM_OUTPUTS; i++) {
 		outJacks.push_back({outputs[i], i});
 	}
+	core->mark_all_inputs_unpatched();
+	core->mark_all_outputs_unpatched();
 }
