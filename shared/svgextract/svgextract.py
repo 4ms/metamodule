@@ -121,24 +121,27 @@ def parse_args(args):
         vcv.extractForVcv(inputfile, output)
         return
 
-    if cmd == 'addtovcvplugin':
+    elif cmd == 'addtovcvplugin':
         slug = inputfile
         brand = output
         vcv.appendPluginFiles(slug, brand)
         return
 
-    if cmd == 'createlvglfaceplate':
+    elif cmd == 'createlvglfaceplate':
         layer = args.pop(0) if len(args) > 0 else "all"
         lvgl.faceplateSvgToLVGL(inputfile, output, layer)
         return
 
-    if cmd == 'appendimglist':
+    elif cmd == 'appendimglist':
         imageList.appendImageList(inputfile, output)
 
-    if cmd == 'convertsvgtolvgl':
+    elif cmd == 'convertsvgtolvgl':
         scale = args.pop(0) if len(args) > 0 else 63.25
         lvgl.componentSvgToLVGL(inputfile, output, scale)
         return
+
+    else:
+        print(f"Invalid command '{cmd}'")
 
 
 if __name__ == "__main__":
