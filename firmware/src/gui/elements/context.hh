@@ -18,7 +18,7 @@ struct GuiElement {
 
 // Element and it context in a patch, drawn on the screen
 struct DrawnElement {
-	GuiElement drawn;
+	GuiElement gui_element;
 	const Element &element;
 };
 

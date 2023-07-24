@@ -56,7 +56,7 @@ inline lv_obj_t *draw_mapped_ring(const BaseElement &,
 	lv_obj_set_style_outline_pad(ring_obj, gap, LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_color(ring_obj, color, LV_STATE_DEFAULT);
 	lv_obj_set_style_outline_width(ring_obj, ring_thickness, LV_STATE_DEFAULT);
-	lv_obj_set_style_outline_opa(ring_obj, LV_OPA_50, LV_STATE_DEFAULT);
+	lv_obj_set_style_outline_opa(ring_obj, LV_OPA_TRANSP, LV_STATE_DEFAULT);
 	lv_obj_set_style_radius(ring_obj, 40, LV_STATE_DEFAULT);
 
 	return ring_obj;

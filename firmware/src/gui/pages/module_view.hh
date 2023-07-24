@@ -96,7 +96,7 @@ struct ModuleViewPage : PageBase {
 
 		for (const auto &drawn_element : drawn_elements) {
 			std::visit(
-				[this, drawn = drawn_element.drawn](auto &el) {
+				[this, drawn = drawn_element.gui_element](auto &el) {
 					if (!drawn.obj)
 						return;
 
@@ -166,9 +166,10 @@ struct ModuleViewPage : PageBase {
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
 				std::visit(
-					[this, drawn = drawn_el.drawn](auto &el) {
-						//
-						update_element(el, params, patch, drawn);
+					[this, gui_element = drawn_el.gui_element](auto &el) {
+						// re-draw element with new rotation/slider position, etc
+						// if mapped parameter changed
+						update_element(el, params, patch, gui_element);
 					},
 					drawn_el.element);
 			}

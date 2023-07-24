@@ -185,7 +185,7 @@ struct PatchViewPage : PageBase {
 		if (is_patch_playing) {
 			for (auto &drawn_el : drawn_elements) {
 				std::visit(
-					[this, drawn = drawn_el.drawn](auto &el) -> void {
+					[this, drawn = drawn_el.gui_element](auto &el) -> void {
 						if (drawn.obj)
 							update_element(el, this->params, patch, drawn);
 					},
@@ -300,12 +300,6 @@ struct PatchViewPage : PageBase {
 	static void playbut_focussed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_label_set_text(page->module_name, "Select a module:");
-
-		// if (page->height == 240) {
-		// 	page->height = 120;
-		// page->blur();
-		// page->focus();
-		// }
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 	}
 

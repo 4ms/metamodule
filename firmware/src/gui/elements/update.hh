@@ -34,15 +34,18 @@ inline std::optional<float> get_param_value(const Params &params, const PatchDat
 } // namespace ElementUpdateImpl
 
 inline void
-update_element(const Knob &element, const Params &params, const PatchData &patch, const GuiElement &drawn) {
-	if (auto val = ElementUpdateImpl::get_param_value(params, patch, drawn)) {
+update_element(const Knob &element, const Params &params, const PatchData &patch, const GuiElement &gui_el) {
+	if (auto val = ElementUpdateImpl::get_param_value(params, patch, gui_el)) {
 		int32_t angle = val.value() * 3000.f - 1500.f;
 		if (angle < 0)
 			angle += 3600;
-		int32_t cur_angle = lv_img_get_angle(drawn.obj);
+		int32_t cur_angle = lv_img_get_angle(gui_el.obj);
 
-		if (std::abs(angle - cur_angle) > 10)
-			lv_img_set_angle(drawn.obj, angle);
+		if (std::abs(angle - cur_angle) > 10) {
+			lv_img_set_angle(gui_el.obj, angle);
+			if (gui_el.map_ring)
+				lv_obj_set_style_outline_opa(gui_el.map_ring, LV_OPA_50, LV_STATE_DEFAULT);
+		}
 	}
 }
 
