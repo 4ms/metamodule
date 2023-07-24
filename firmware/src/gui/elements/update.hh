@@ -37,6 +37,7 @@ inline std::optional<float> get_param_value(const Params &params, const PatchDat
 inline bool
 update_element(const Knob &element, const Params &params, const PatchData &patch, const GuiElement &gui_el) {
 	bool updated_position = false;
+	constexpr int32_t threshold_degrees = 30;
 
 	if (auto val = ElementUpdateImpl::get_param_value(params, patch, gui_el)) {
 		int32_t angle = val.value() * 3000.f - 1500.f;
@@ -44,7 +45,7 @@ update_element(const Knob &element, const Params &params, const PatchData &patch
 			angle += 3600;
 		int32_t cur_angle = lv_img_get_angle(gui_el.obj);
 
-		if (std::abs(angle - cur_angle) > 10) {
+		if (std::abs(angle - cur_angle) > threshold_degrees) {
 			lv_img_set_angle(gui_el.obj, angle);
 			updated_position = true;
 		}
