@@ -30,6 +30,19 @@ struct MapRingDisplay {
 		if (!map_ring)
 			return;
 
+		auto cur_opa = lv_obj_get_style_outline_opa(map_ring, LV_STATE_DEFAULT);
+
+		auto start = LV_OPA_50;
+		auto end = LV_OPA_0;
+		auto delay = 200;
+		auto time = 500;
+		if (cur_opa == LV_OPA_50) {
+			start = LV_OPA_0;
+			end = LV_OPA_50;
+			delay = 100;
+			time = 100;
+		}
+
 		lv_anim_t a;
 		lv_anim_init(&a);
 		lv_anim_set_exec_cb(
@@ -37,9 +50,9 @@ struct MapRingDisplay {
 				lv_obj_set_style_outline_opa((lv_obj_t *)var, val, LV_STATE_DEFAULT);
 			});
 		lv_anim_set_var(&a, map_ring);
-		lv_anim_set_time(&a, 500);
-		lv_anim_set_values(&a, LV_OPA_50, LV_OPA_0);
-		lv_anim_set_delay(&a, 200);
+		lv_anim_set_time(&a, time);
+		lv_anim_set_values(&a, start, end);
+		lv_anim_set_delay(&a, delay);
 		lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
 		lv_anim_set_early_apply(&a, true);
 		lv_anim_start(&a);
