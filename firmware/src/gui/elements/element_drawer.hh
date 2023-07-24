@@ -34,7 +34,7 @@ draw_image(float x, float y, Coords coord_ref, const lv_img_dsc_t *img, lv_obj_t
 	uint16_t lv_zoom = 256.f * zoom;
 	lv_img_set_zoom(obj, lv_zoom);
 	lv_img_set_size_mode(obj, LV_IMG_SIZE_MODE_VIRTUAL);
-	lv_img_set_antialias(obj, false);
+	lv_img_set_antialias(obj, true);
 	lv_obj_set_align(obj, LV_ALIGN_TOP_LEFT);
 
 	uint16_t pos_x = std::round(x);
