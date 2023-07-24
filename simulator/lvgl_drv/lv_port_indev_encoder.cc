@@ -20,30 +20,6 @@ LvglEncoderSimulatorDriver::LvglEncoderSimulatorDriver(RotaryEncoderKeys &keys)
 	lv_log("Starting LVGL\n");
 }
 
-QuitEvent LvglEncoderSimulatorDriver::get_quit() {
-	return quit_event;
-}
-
-void LvglEncoderSimulatorDriver::set_quit(QuitEvent event) {
-	quit_event = event;
-}
-
-bool LvglEncoderSimulatorDriver::aux_button_just_pressed() {
-	if (aux_pressed == ButtonEvent::Pressed) {
-		aux_pressed = ButtonEvent::None;
-		return true;
-	}
-	return false;
-}
-
-bool LvglEncoderSimulatorDriver::aux_button_just_released() {
-	if (aux_pressed == ButtonEvent::Released) {
-		aux_pressed = ButtonEvent::None;
-		return true;
-	}
-	return false;
-}
-
 void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_indev_data_t *data) {
 	auto &keys = _instance->keys;
 	auto &rotary_pressed = _instance->rotary_pressed;
@@ -82,38 +58,110 @@ void LvglEncoderSimulatorDriver::keyboard_rotary_read_cb(lv_indev_drv_t *, lv_in
 	}
 
 	if (e.type == SDL_KEYUP) {
-		if (e.key.keysym.sym == keys.quit) {
-			_instance->set_quit(LV_QUIT);
-		}
-
-		if (e.key.keysym.sym == keys.aux_button) {
-			if (aux_pressed != ButtonEvent::Released) {
-				aux_pressed = ButtonEvent::Released;
-				printf("aux up\n");
-			}
-		}
-
-		if (e.key.keysym.sym == keys.click) {
-			if (rotary_pressed != ButtonEvent::Released) {
-				rotary_pressed = ButtonEvent::Released;
-				data->state = LV_INDEV_STATE_PR;
-				printf("click up\n");
-			}
-		}
-
-		if (e.key.keysym.sym == keys.turn_cw) {
-			data->enc_diff = 1;
-		}
-
-		if (e.key.keysym.sym == keys.turn_ccw) {
-			data->enc_diff = -1;
-		}
+		_instance->handle_key_press(e.key.keysym.sym, data);
 	}
 
 	//Is there more input events?
 	data->continue_reading = (SDL_PollEvent(NULL) != 0);
 }
 
+void LvglEncoderSimulatorDriver::handle_key_press(SDL_Keycode key, lv_indev_data_t *data) {
+	if (key == keys.quit) {
+		_instance->set_quit(LV_QUIT);
+	}
+
+	if (key == keys.aux_button) {
+		if (aux_pressed != ButtonEvent::Released) {
+			aux_pressed = ButtonEvent::Released;
+			printf("aux up\n");
+		}
+	}
+
+	if (key == keys.click) {
+		if (rotary_pressed != ButtonEvent::Released) {
+			rotary_pressed = ButtonEvent::Released;
+			data->state = LV_INDEV_STATE_PR;
+			printf("click up\n");
+		}
+	}
+
+	if (key == keys.turn_cw) {
+		data->enc_diff = 1;
+	}
+
+	if (key == keys.turn_ccw) {
+		data->enc_diff = -1;
+	}
+
+	if (key == keys.param_inc) {
+		_instance->param_inc_pressed = true;
+	}
+
+	if (key == keys.param_dec) {
+		_instance->param_dec_pressed = true;
+	}
+
+	// Keys 0-9 select params 0 - 9, minus => 10, equal => 11
+	if (key >= '0' && key <= '9') {
+		last_selected_param = key - '0';
+	}
+	if (key == '-') {
+		last_selected_param = 10;
+	}
+	if (key == '=') {
+		last_selected_param = 11;
+	}
+
+	// Keys A - F select params 0 - 5 (knobs A,B,C,D,E,F)
+	// Keys u - z select params 6 - 11 (knobs u,v,w,x,y,z)
+	if (key >= 'a' && key <= 'f')
+		last_selected_param = key - 'a';
+	if (key >= 'u' && key <= 'z')
+		last_selected_param = key - 'u';
+}
+
 LvglEncoderSimulatorDriver::~LvglEncoderSimulatorDriver() {
 	SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
+}
+
+// Getter and Setters
+
+QuitEvent LvglEncoderSimulatorDriver::get_quit() {
+	return quit_event;
+}
+
+void LvglEncoderSimulatorDriver::set_quit(QuitEvent event) {
+	quit_event = event;
+}
+
+bool LvglEncoderSimulatorDriver::aux_button_just_pressed() {
+	if (aux_pressed == ButtonEvent::Pressed) {
+		aux_pressed = ButtonEvent::None;
+		return true;
+	}
+	return false;
+}
+
+bool LvglEncoderSimulatorDriver::aux_button_just_released() {
+	if (aux_pressed == ButtonEvent::Released) {
+		aux_pressed = ButtonEvent::None;
+		return true;
+	}
+	return false;
+}
+
+bool LvglEncoderSimulatorDriver::param_inc() {
+	bool pressed = param_inc_pressed;
+	param_inc_pressed = false;
+	return pressed;
+}
+
+bool LvglEncoderSimulatorDriver::param_dec() {
+	bool pressed = param_dec_pressed;
+	param_dec_pressed = false;
+	return pressed;
+}
+
+unsigned LvglEncoderSimulatorDriver::selected_param() {
+	return last_selected_param;
 }

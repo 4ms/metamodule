@@ -32,6 +32,8 @@ private:
 		.click = SDLK_DOWN,
 		.aux_button = SDLK_UP,
 		.quit = SDLK_ESCAPE,
+		.param_inc = ']',
+		.param_dec = '[',
 	};
 
 public:
@@ -47,6 +49,8 @@ public:
 
 		Gui::init_lvgl_styles();
 		page_manager.init();
+
+		patch_playloader.audio_is_muted();
 	}
 
 	// "Scheduler" for UI tasks
@@ -63,8 +67,21 @@ public:
 		// Transfer aux button events SDL => LVGL => metaparams
 		if (input_driver.aux_button_just_pressed())
 			metaparams.meta_buttons[0].register_falling_edge();
+
 		if (input_driver.aux_button_just_released())
 			metaparams.meta_buttons[0].register_rising_edge();
+
+		if (unsigned cur_param = input_driver.selected_param(); cur_param < params.knobs.size()) {
+			if (input_driver.param_inc()) {
+				params.knobs[cur_param] = std::clamp(params.knobs[cur_param] + 0.05f, 0.f, 1.f);
+				printf_("Knob #%d = %f\n", cur_param, params.knobs[cur_param]);
+			}
+
+			if (input_driver.param_dec()) {
+				params.knobs[cur_param] = std::clamp(params.knobs[cur_param] - 0.05f, 0.f, 1.f);
+				printf_("Knob #%d = %f\n", cur_param, params.knobs[cur_param]);
+			}
+		}
 
 		static uint32_t last_page_task_tm = 0;
 		tm = lv_tick_get();
