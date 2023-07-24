@@ -43,7 +43,7 @@ public:
 
 	// DOWN=0 / MID=0.5 / UP=1.0
 	Switches::State switchstate(float val) {
-		return val < 0.25f ? Switches::State::DOWN : val < 0.75f ? Switches::State::MID : Switches::State::UP;
+		return val < 0.5f ? Switches::State::DOWN : val < 1.5f ? Switches::State::MID : Switches::State::UP;
 	}
 
 	// TODO: re-arrange AdcInput enums to match
