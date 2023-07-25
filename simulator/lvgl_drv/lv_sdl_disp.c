@@ -14,7 +14,7 @@ static lv_disp_draw_buf_t draw_buf;
 static int DISPLAY_WIDTH;
 static int DISPLAY_HEIGHT;
 #ifndef WINDOW_NAME
-#define WINDOW_NAME "LVGL"
+#define WINDOW_NAME "MetaModule"
 #endif
 
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
@@ -29,7 +29,7 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
 	lv_disp_flush_ready(disp_drv);
 }
 
-void lv_port_disp_init(int width, int height) {
+void lv_port_disp_init(int width, int height, int zoom) {
 	assert(LV_COLOR_DEPTH == 16 || LV_COLOR_DEPTH == 32);
 	DISPLAY_WIDTH = width;
 	DISPLAY_HEIGHT = height;
@@ -38,8 +38,8 @@ void lv_port_disp_init(int width, int height) {
 	window = SDL_CreateWindow(WINDOW_NAME,
 							  SDL_WINDOWPOS_UNDEFINED,
 							  SDL_WINDOWPOS_UNDEFINED,
-							  DISPLAY_WIDTH,
-							  DISPLAY_HEIGHT,
+							  DISPLAY_WIDTH * zoom,
+							  DISPLAY_HEIGHT * zoom,
 							  SDL_WINDOW_RESIZABLE);
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
