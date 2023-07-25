@@ -103,17 +103,9 @@ private:
 			printf_("%s", msg.data());
 			msg_queue.clear_message();
 		}
-
-		// Uncomment to enable:
-		// print_dbg_params.output_debug_info(HAL_GetTick());
-		// print_dbg_params.output_load(HAL_GetTick());
 	}
 
 	void page_update_task() { //60Hz
-		// TODO: update params and metaparams from user input
-		// also metaparams contains the audio load
-		// [[maybe_unused]] bool read_ok = param_cache.read_sync(&params, &metaparams);
-
 		page_manager.update_current_page();
 		patch_playloader.handle_sync_patch_loading();
 	}

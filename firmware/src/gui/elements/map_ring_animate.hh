@@ -50,7 +50,7 @@ struct MapRingDisplay {
 		if (!map_ring)
 			return;
 
-		auto cur_opa = lv_obj_get_style_outline_opa(map_ring, LV_STATE_DEFAULT);
+		// auto cur_opa = lv_obj_get_style_outline_opa(map_ring, LV_STATE_DEFAULT);
 
 		auto start = LV_OPA_50;
 		auto end = LV_OPA_0;

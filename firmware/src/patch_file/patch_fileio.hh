@@ -41,7 +41,7 @@ public:
 
 		bool ok = fileio.foreach_file_with_ext(
 			".yml", [&fileio, &patch_list](const std::string_view filename, uint32_t timestamp, uint32_t filesize) {
-				if (filesize < 12 || filename.starts_with("."))
+				if (filesize < 12) // || filename.starts_with("."))
 					return;
 
 				pr_log("Found patch file on %s: %s (%zu B) Timestamp: 0x%x, Reading... \n",

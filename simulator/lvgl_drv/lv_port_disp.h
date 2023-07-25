@@ -3,7 +3,7 @@
  *
  */
 
- /*Copy this file as "lv_port_disp.h" and set this value to "1" to enable content*/
+/*Copy this file as "lv_port_disp.h" and set this value to "1" to enable content*/
 #if 1
 
 #ifndef LV_PORT_DISP_H
@@ -29,7 +29,7 @@ extern "C" {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
-void lv_port_disp_init(int width, int height);
+void lv_port_disp_init(int width, int height, int zoom);
 void lv_port_disp_deinit(void);
 /**********************
  *      MACROS
