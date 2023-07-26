@@ -9,6 +9,7 @@
 #include "gui/images/faceplate_images.hh"
 #include "gui/pages/base.hh"
 #include "gui/pages/page_list.hh"
+#include "gui/pages/patch_view_settings_menu.hh"
 #include "gui/styles.hh"
 #include "lvgl.h"
 #include "pr_dbg.hh"
@@ -18,7 +19,7 @@
 extern "C" {
 #include "gui/slsexport/patchview/ui.h"
 }
-extern "C" void ui_PatchView_screen_init();
+extern "C" void ui_PatchViewPage_screen_init();
 
 namespace MetaModule
 {
@@ -26,19 +27,12 @@ namespace MetaModule
 struct PatchViewPage : PageBase {
 	static inline uint32_t Height = 180;
 
-	struct ViewSettings {
-		bool map_ring_flash_active = true; //flash map ring if knob is turned while patch is playing
-		bool scroll_to_active_param = false;
-		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::CurModuleIfPlaying;
-	};
-	ViewSettings settings;
-
 	PatchViewPage(PatchInfo info)
 		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchView);
 
-		ui_PatchView_screen_init();
-		base = ui_PatchView; //NOLINT
+		ui_PatchViewPage_screen_init();
+		base = ui_PatchViewPage; //NOLINT
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -70,6 +64,9 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(ui_InfoButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SettingsButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+
+		// Settings menu
+		settings_menu.init();
 
 		module_name = lv_label_create(base); //NOLINT
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
@@ -108,8 +105,6 @@ struct PatchViewPage : PageBase {
 			return;
 
 		lv_label_set_text(patchname, patch.patch_name.c_str());
-
-		blur();
 
 		module_canvases.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
@@ -163,9 +158,15 @@ struct PatchViewPage : PageBase {
 		//cable_drawer.draw_all();
 
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
+
+		settings_menu.focus(group);
 	}
 
 	void blur() override {
+		settings_menu.hide();
+		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
+		lv_obj_clear_state(ui_SettingsButton, LV_STATE_FOCUSED);
+
 		for (auto &m : module_canvases) {
 			lv_obj_del(m);
 		}
@@ -173,14 +174,23 @@ struct PatchViewPage : PageBase {
 		drawn_elements.clear();
 		module_canvases.clear();
 		module_ids.clear();
+
+		settings_menu.blur();
 	}
 
 	void update() override {
+		bool last_is_patch_playing = is_patch_playing;
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
-		//TODO: show mapping ring layer if patch is playing
+
+		if (is_patch_playing != last_is_patch_playing || map_settings.changed) {
+			map_settings.changed = false;
+			update_map_ring_style();
+		}
 
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (PageList::request_last_page()) {
+			if (settings_menu.visible) {
+				settings_menu.hide();
+			} else if (PageList::request_last_page()) {
 				blur();
 			}
 		}
@@ -189,19 +199,15 @@ struct PatchViewPage : PageBase {
 			for (auto &drawn_el : drawn_elements) {
 				std::visit(
 					[this, gui_el = drawn_el.gui_element](auto &el) -> void {
-						//if (drawn.obj) //TODO: This can be removed now, right?
 						bool did_update = update_element(el, this->params, patch, gui_el);
-
 						if (did_update) {
-							using enum MapRingDisplay::Style;
-							if (settings.map_ring_flash_active) {
+							if (map_settings.map_ring_flash_active)
 								MapRingDisplay::flash_once(gui_el.map_ring,
-														   settings.map_ring_style,
+														   map_settings.map_ring_style,
 														   highlighted_module_id == gui_el.module_idx);
-							}
-							if (settings.scroll_to_active_param) {
+
+							if (map_settings.scroll_to_active_param)
 								lv_obj_scroll_to_view_recursive(gui_el.obj, LV_ANIM_ON);
-							}
 						}
 					},
 					drawn_el.element);
@@ -209,60 +215,23 @@ struct PatchViewPage : PageBase {
 		}
 	}
 
-	// This gets called after map_ring_style changes
 	void update_map_ring_style() {
-		using enum MapRingDisplay::Style;
-
 		for (auto &drawn_el : drawn_elements) {
 			auto map_ring = drawn_el.gui_element.map_ring;
-
-			switch (settings.map_ring_style) {
-				case ShowAllIfPlaying:
-					if (is_patch_playing)
-						MapRingDisplay::show(map_ring);
-					else
-						MapRingDisplay::hide(map_ring);
-					break;
-
-				case CurModule:
-					if (highlighted_module_id == drawn_el.gui_element.module_idx)
-						MapRingDisplay::show(map_ring);
-					else
-						MapRingDisplay::hide(map_ring);
-					break;
-
-				case CurModuleIfPlaying:
-					if (highlighted_module_id == drawn_el.gui_element.module_idx && is_patch_playing)
-						MapRingDisplay::show(map_ring);
-					else
-						MapRingDisplay::hide(map_ring);
-					break;
-
-				case ShowAll:
-					MapRingDisplay::show(map_ring);
-					break;
-
-				case HideAlways:
-					MapRingDisplay::hide(map_ring);
-					break;
-			}
+			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
+			MapRingDisplay::update(map_ring, map_settings.map_ring_style, is_on_highlighted_module, is_patch_playing);
 		}
-	}
-
-	static void base_scroll_cb(lv_event_t *event) {
-		lv_event_t e2;
-		e2.user_data = event->user_data;
-		module_focus_cb(&e2);
 	}
 
 	static void module_pressed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+		if (!page)
+			return;
 		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
 		auto obj = event->current_target;
 		uint32_t module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(obj)));
 		PageList::set_selected_module_id(module_id);
-		printf_("Clicked Module %d\n", module_id);
 		PageList::request_new_page(PageId::ModuleView);
 	}
 
@@ -272,7 +241,7 @@ struct PatchViewPage : PageBase {
 			return;
 
 		auto this_module_obj = lv_group_get_focused(page->group);
-		if (!this_module_obj) //|| this_module_obj == page->playbut // or any of the other buttons?
+		if (!this_module_obj)
 			return;
 
 		auto user_data = lv_obj_get_user_data(this_module_obj);
@@ -288,61 +257,7 @@ struct PatchViewPage : PageBase {
 		const auto this_slug = page->patch.module_slugs[module_id];
 		lv_label_set_text(page->module_name, this_slug.c_str());
 
-		// if (lv_obj_get_scroll_y(page->base) == 0 && num_rows > 1)
-		// 	lv_obj_scroll_to_y(page->base, 119, LV_ANIM_ON);
-
 		page->update_map_ring_style();
-
-		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
-
-		// Draw all cables connected to this module
-		// TODO: gotta be a cleaner way to do this...
-		// 		push Jack{c.out}, this_module_obj, Jack{in}, outmodule_obj
-		// 		draw_cable(Jack out, Jack in, lv_obj_t *out_module, lv_obj_t *in_module);
-		const auto thismoduleinfo = ModuleFactory::getModuleInfo(this_slug);
-		if (thismoduleinfo.width_hp > 0) {
-			//for (const auto &c : patch.int_cables) {
-			//	// Draw cable(s) if out jack is on this module
-			//	if (c.out.module_id == module_id) {
-			//		auto end = DrawHelper::get_jack_xy(thismoduleinfo.OutJacks, this_module_obj, c.out, height);
-
-			//		// Draw a cable from this out jack to all in jacks it's connected to
-			//		for (const auto &in : c.ins) {
-			//			// Iterate through all modules to find the one with a matching id (TODO: better way to do this?)
-			//			for (auto inmodule_obj : page->modules) {
-			//				uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(inmodule_obj)));
-			//				if (t_module_id == in.module_id) {
-			//					const auto inmodule_info =
-			//						ModuleFactory::getModuleInfo(patch.module_slugs[t_module_id]);
-			//					auto start = DrawHelper::get_jack_xy(inmodule_info.InJacks, inmodule_obj, in, height);
-			//					page->cable_drawline_dsc.color = DrawHelper::get_cable_color(in);
-			//					DrawHelper::draw_cable(start, end, page->cable_layer, &page->cable_drawline_dsc);
-			//					break;
-			//				}
-			//			}
-			//		}
-			//		continue; //We drew the output to all inputs, no need to check if any inputs are on this module
-			//	}
-			//	// Draw cable if in jack is on this module
-			//	for (const auto &in : c.ins) {
-			//		if (in.module_id == module_id) {
-			//			auto start = DrawHelper::get_jack_xy(thismoduleinfo.InJacks, this_module_obj, in, height);
-			//			//Find output jack on another module
-			//			for (auto outmodule_obj : page->modules) {
-			//				uint32_t t_module_id = *(static_cast<uint32_t *>(lv_obj_get_user_data(outmodule_obj)));
-			//				if (t_module_id == c.out.module_id) {
-			//					auto outmodule_info = ModuleFactory::getModuleInfo(patch.module_slugs[t_module_id]);
-			//					auto end =
-			//						DrawHelper::get_jack_xy(outmodule_info.OutJacks, outmodule_obj, c.out, height);
-			//					page->cable_drawline_dsc.color = DrawHelper::get_cable_color(in);
-			//					DrawHelper::draw_cable(start, end, page->cable_layer, &page->cable_drawline_dsc);
-			//					break;
-			//				}
-			//			}
-			//		}
-			//	}
-			// }
-		}
 	}
 
 	static void module_defocus_cb(lv_event_t *event) {
@@ -352,7 +267,6 @@ struct PatchViewPage : PageBase {
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		// printf_("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
 		page->start_changing_patch();
 	}
 
@@ -361,6 +275,7 @@ struct PatchViewPage : PageBase {
 		lv_label_set_text(page->module_name, "Select a module:");
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 		page->highlighted_module_id = std::nullopt;
+		page->settings_menu.hide();
 	}
 
 private:
@@ -371,6 +286,9 @@ private:
 	lv_obj_t *module_name;
 	lv_obj_t *playbut;
 	lv_obj_t *cable_layer;
+
+	PatchViewSettingsMenu::ViewSettings map_settings;
+	PatchViewSettingsMenu settings_menu{map_settings};
 
 	std::optional<uint32_t> highlighted_module_id{};
 
@@ -392,4 +310,5 @@ private:
 		patch_playloader.request_load_view_patch();
 	}
 };
+
 } // namespace MetaModule

@@ -1,7 +1,7 @@
 components/ui_comp_buttons_2.c
 components/ui_comp_buttons_3.c
 components/ui_comp.c
-screens/ui_PatchView.c
+screens/ui_PatchViewPage.c
 ui.c
 components/ui_comp_hook.c
 ui_helpers.c
