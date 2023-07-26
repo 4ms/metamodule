@@ -464,6 +464,4 @@ private:
 	}
 };
 
-extern "C" inline void update_settings_group(lv_event_t *e) {
-}
 } // namespace MetaModule
