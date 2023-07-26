@@ -50,7 +50,10 @@ struct PatchViewSettingsMenu {
 	}
 
 	void blur() {
-		lv_group_del(settings_menu_group);
+		if (settings_menu_group) {
+			lv_group_del(settings_menu_group);
+			settings_menu_group = nullptr;
+		}
 	}
 
 	void show() {
@@ -135,7 +138,7 @@ struct PatchViewSettingsMenu {
 	}
 
 	lv_group_t *base_group;
-	lv_group_t *settings_menu_group;
+	lv_group_t *settings_menu_group = nullptr;
 	bool visible = false;
 	ViewSettings &settings;
 };

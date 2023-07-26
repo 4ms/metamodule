@@ -11,6 +11,7 @@ void PageManager::init() {
 
 void PageManager::update_current_page() {
 	if (auto newpage = PageList::get_requested_page()) {
+		cur_page->blur();
 		cur_page = newpage.value();
 		cur_page->focus();
 	}

@@ -167,14 +167,12 @@ struct PatchViewPage : PageBase {
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
 		lv_obj_clear_state(ui_SettingsButton, LV_STATE_FOCUSED);
 
-		for (auto &m : module_canvases) {
+		for (auto &m : module_canvases)
 			lv_obj_del(m);
-		}
 
-		drawn_elements.clear();
 		module_canvases.clear();
+		drawn_elements.clear();
 		module_ids.clear();
-
 		settings_menu.blur();
 	}
 
