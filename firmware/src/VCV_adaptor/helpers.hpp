@@ -3,6 +3,7 @@
 #include "CoreModules/elements/element_setters.hh"
 #include "VCV_adaptor/app/Menu.hpp"
 #include "VCV_adaptor/app/SvgPanel.hpp"
+#include "VCV_adaptor/engine/Module.hpp"
 #include "VCV_adaptor/math.hpp"
 #include "VCV_adaptor/plugin/Model.hpp"
 #include "VCV_adaptor/widget_convert/widget_element_convert.hh"
@@ -13,29 +14,61 @@
 namespace rack
 {
 
-namespace engine
-{
-struct Module;
-}
+// namespace engine
+// {
+// struct Module;
+// }
 
-
+// Creates a Widget that has an Element
 template<typename T>
-T *createElement(math::Vec pos, MetaModule::Coords coord_ref) {
+T *createElementWidget(math::Vec pos, MetaModule::Coords coord_ref, std::string_view name) {
 	auto *o = new T;
 	pos.x = MetaModule::ModuleInfoBase::to_mm(pos.x);
 	pos.y = MetaModule::ModuleInfoBase::to_mm(pos.y);
-	o->element = typename ElementConvert<T>::ElementType{pos.x, pos.y, coord_ref};
+	o->element = typename ElementConvert<T>::ElementType{pos.x, pos.y, coord_ref, name, name};
 	return o;
+}
+
+inline std::string_view getParamName(engine::Module *module, int id) {
+	if (auto pq = module->getParamQuantity(id)) {
+		printf("Param %d name:%.16s\n", id, pq->name.data());
+		return pq->name;
+	}
+	return "";
+}
+
+inline std::string_view getInputName(engine::Module *module, int id) {
+	if (auto info = module->getInputInfo(id)) {
+		printf("Input %d name:%.16s\n", id, info->name.data());
+		return info->name;
+	}
+	return "";
+}
+
+inline std::string_view getOutputName(engine::Module *module, int id) {
+	if (auto info = module->getOutputInfo(id)) {
+		printf("Output %d name:%.16s\n", id, info->name.data());
+		return info->name;
+	}
+	return "";
+}
+
+inline std::string_view getLightName(engine::Module *module, int id) {
+	if (auto info = module->getLightInfo(id)) {
+		printf("Light %d name:%.16s\n", id, info->name.data());
+		return info->name;
+	}
+	return "";
 }
 
 template<class TWidget>
 TWidget *createWidget(math::Vec pos) {
-	return createElement<TWidget>(pos, MetaModule::Coords::TopLeft);
+	return createElementWidget<TWidget>(pos, MetaModule::Coords::TopLeft, "Unknown");
 }
 
 template<class TWidget>
 TWidget *createWidgetCentered(math::Vec pos) {
-	return createElement<TWidget>(pos, MetaModule::Coords::Center);
+	return createElementWidget<TWidget>(pos, MetaModule::Coords::Center, "Unknown");
 }
 
 inline app::SvgPanel *createPanel(std::string_view svgPath) {
@@ -44,63 +77,72 @@ inline app::SvgPanel *createPanel(std::string_view svgPath) {
 
 template<class TParamWidget>
 TParamWidget *createParam(math::Vec pos, engine::Module *module, int paramId) {
-	auto o = createElement<TParamWidget>(pos, MetaModule::Coords::TopLeft);
+	auto name = getParamName(module, paramId);
+	auto o = createElementWidget<TParamWidget>(pos, MetaModule::Coords::TopLeft, name);
 	o->paramId = paramId;
 	return o;
 }
 
 template<class TParamWidget>
 TParamWidget *createParamCentered(math::Vec pos, engine::Module *module, int paramId) {
-	auto o = createElement<TParamWidget>(pos, MetaModule::Coords::Center);
+	auto name = getParamName(module, paramId);
+	auto o = createElementWidget<TParamWidget>(pos, MetaModule::Coords::Center, name);
 	o->paramId = paramId;
 	return o;
 }
 
 template<class TPortWidget>
 TPortWidget *createInput(math::Vec pos, engine::Module *module, int inputId) {
-	auto o = createElement<TPortWidget>(pos, MetaModule::Coords::TopLeft);
+	auto name = getInputName(module, inputId);
+	auto o = createElementWidget<TPortWidget>(pos, MetaModule::Coords::TopLeft, name);
 	o->portId = inputId;
 	return o;
 }
 
 template<class TPortWidget>
 TPortWidget *createInputCentered(math::Vec pos, engine::Module *module, int inputId) {
-	auto o = createElement<TPortWidget>(pos, MetaModule::Coords::Center);
+	auto name = getInputName(module, inputId);
+	auto o = createElementWidget<TPortWidget>(pos, MetaModule::Coords::Center, name);
 	o->portId = inputId;
 	return o;
 }
 
 template<class TPortWidget>
 TPortWidget *createOutput(math::Vec pos, engine::Module *module, int outputId) {
-	auto o = createElement<TPortWidget>(pos, MetaModule::Coords::TopLeft);
+	auto name = getOutputName(module, outputId);
+	auto o = createElementWidget<TPortWidget>(pos, MetaModule::Coords::TopLeft, name);
 	o->portId = outputId;
 	return o;
 }
 
 template<class TPortWidget>
 TPortWidget *createOutputCentered(math::Vec pos, engine::Module *module, int outputId) {
-	auto o = createElement<TPortWidget>(pos, MetaModule::Coords::Center);
+	auto name = getOutputName(module, outputId);
+	auto o = createElementWidget<TPortWidget>(pos, MetaModule::Coords::Center, name);
 	o->portId = outputId;
 	return o;
 }
 
 template<class TModuleLightWidget>
 TModuleLightWidget *createLight(math::Vec pos, engine::Module *module, int firstLightId) {
-	auto o = createElement<TModuleLightWidget>(pos, MetaModule::Coords::TopLeft);
+	auto name = getLightName(module, firstLightId);
+	auto o = createElementWidget<TModuleLightWidget>(pos, MetaModule::Coords::TopLeft, name);
 	o->firstLightId = firstLightId;
 	return o;
 }
 
 template<class TModuleLightWidget>
 TModuleLightWidget *createLightCentered(math::Vec pos, engine::Module *module, int firstLightId) {
-	auto o = createElement<TModuleLightWidget>(pos, MetaModule::Coords::Center);
+	auto name = getLightName(module, firstLightId);
+	auto o = createElementWidget<TModuleLightWidget>(pos, MetaModule::Coords::Center, name);
 	o->firstLightId = firstLightId;
 	return o;
 }
 
 template<class TParamWidget>
 TParamWidget *createLightParam(math::Vec pos, engine::Module *module, int paramId, int firstLightId) {
-	auto param = createElement<TParamWidget>(pos, MetaModule::Coords::TopLeft);
+	auto name = getParamName(module, paramId);
+	auto param = createElementWidget<TParamWidget>(pos, MetaModule::Coords::TopLeft, name);
 	param->paramId = paramId;
 
 	// TODO: how to do this?
@@ -111,7 +153,8 @@ TParamWidget *createLightParam(math::Vec pos, engine::Module *module, int paramI
 
 template<class TParamWidget>
 TParamWidget *createLightParamCentered(math::Vec pos, engine::Module *module, int paramId, int firstLightId) {
-	auto param = createElement<TParamWidget>(pos, MetaModule::Coords::Center);
+	auto name = getParamName(module, paramId);
+	auto param = createElementWidget<TParamWidget>(pos, MetaModule::Coords::Center, name);
 	param->paramId = paramId;
 
 	// TODO: how to do this?
