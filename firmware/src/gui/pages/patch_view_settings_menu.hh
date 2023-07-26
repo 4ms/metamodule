@@ -1,6 +1,7 @@
 #pragma once
 #include "gui/elements/map_ring_animate.hh"
 #include "lvgl.h"
+#include <algorithm>
 
 extern "C" {
 #include "gui/slsexport/patchview/ui.h"
@@ -47,6 +48,48 @@ struct PatchViewSettingsMenu {
 		lv_group_add_obj(settings_menu_group, ui_FlashMapCheck);
 		lv_group_add_obj(settings_menu_group, ui_MapTranspSlider);
 		lv_group_add_obj(settings_menu_group, ui_ShowAllCablesCheck);
+
+		using enum MapRingDisplay::StyleMode;
+		switch (settings.map_ring_style.mode) {
+			case ShowAllIfPlaying:
+				lv_obj_add_state(ui_ShowAllMapsCheck, LV_STATE_CHECKED);
+				lv_obj_clear_state(ui_ShowSelectedMapsCheck, LV_STATE_CHECKED);
+				lv_obj_add_state(ui_ShowPlayingMapsCheck, LV_STATE_CHECKED);
+				break;
+
+			case ShowAll:
+				lv_obj_add_state(ui_ShowAllMapsCheck, LV_STATE_CHECKED);
+				lv_obj_clear_state(ui_ShowSelectedMapsCheck, LV_STATE_CHECKED);
+				lv_obj_clear_state(ui_ShowPlayingMapsCheck, LV_STATE_CHECKED);
+				break;
+
+			case CurModuleIfPlaying:
+				lv_obj_clear_state(ui_ShowAllMapsCheck, LV_STATE_CHECKED);
+				lv_obj_add_state(ui_ShowSelectedMapsCheck, LV_STATE_CHECKED);
+				lv_obj_add_state(ui_ShowPlayingMapsCheck, LV_STATE_CHECKED);
+				break;
+
+			case CurModule:
+				lv_obj_clear_state(ui_ShowAllMapsCheck, LV_STATE_CHECKED);
+				lv_obj_add_state(ui_ShowSelectedMapsCheck, LV_STATE_CHECKED);
+				lv_obj_clear_state(ui_ShowPlayingMapsCheck, LV_STATE_CHECKED);
+				break;
+
+			case HideAlways:
+				lv_obj_clear_state(ui_ShowAllMapsCheck, LV_STATE_CHECKED);
+				lv_obj_add_state(ui_ShowSelectedMapsCheck, LV_STATE_CHECKED);
+				lv_obj_clear_state(ui_ShowPlayingMapsCheck, LV_STATE_CHECKED);
+				break;
+		}
+
+		if (settings.map_ring_flash_active)
+			lv_obj_add_state(ui_FlashMapCheck, LV_STATE_CHECKED);
+		else
+			lv_obj_clear_state(ui_FlashMapCheck, LV_STATE_CHECKED);
+
+		// 0..100 => 0..255
+		uint32_t opacity = (float)settings.map_ring_style.opa / 2.5f;
+		opacity = std::clamp<unsigned>(opacity, LV_OPA_0, LV_OPA_COVER);
 	}
 
 	void blur() {
