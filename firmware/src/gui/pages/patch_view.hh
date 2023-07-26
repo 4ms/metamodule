@@ -202,11 +202,16 @@ struct PatchViewPage : PageBase {
 	}
 
 	void update() override {
+		bool last_is_patch_playing = is_patch_playing;
 		is_patch_playing = PageList::get_selected_patch_id() == patch_playloader.cur_patch_index();
-		//TODO: show mapping ring layer if patch is playing
+
+		if (is_patch_playing != last_is_patch_playing)
+			update_map_ring_style();
 
 		if (metaparams.meta_buttons[0].is_just_released()) {
-			if (PageList::request_last_page()) {
+			if (!lv_obj_has_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN)) {
+				hide_settings_menu();
+			} else if (PageList::request_last_page()) {
 				blur();
 			}
 		}
@@ -309,6 +314,7 @@ struct PatchViewPage : PageBase {
 		if (!indev)
 			return;
 		lv_indev_set_group(indev, group);
+		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
 		lv_obj_add_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN);
 	}
 
