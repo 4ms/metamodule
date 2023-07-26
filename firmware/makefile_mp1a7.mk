@@ -195,10 +195,11 @@ SOURCES += src/gui/fonts/MuseoSansRounded_700_18.c
 
 # Generated:
 SOURCES += src/gui/slsexport/patchsel/ui.c
-SOURCES += src/gui/slsexport/patchsel/ui_helpers.c
+# SOURCES += src/gui/slsexport/patchsel/ui_helpers.c
 SOURCES += $(wildcard src/gui/slsexport/patchsel/ui_font_*.c)
 SOURCES += src/gui/slsexport/patchview/ui.c
 #patchview
+SOURCES += src/gui/slsexport/patchview/ui_helpers.c
 SOURCES += $(wildcard src/gui/slsexport/patchview/components/*.c)
 SOURCES += $(wildcard src/gui/slsexport/patchview/images/*.c)
 SOURCES += $(wildcard src/gui/slsexport/patchview/fonts/*.c)

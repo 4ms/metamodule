@@ -16,10 +16,12 @@ extern "C" {
 #include "components/ui_comp.h"
 #include "components/ui_comp_hook.h"
 #include "ui_events.h"
+void Dropdown_Animation( lv_obj_t *TargetObject, int delay);
+void Dropup_Animation( lv_obj_t *TargetObject, int delay);
 // SCREEN: ui_PatchViewPage
 void ui_PatchViewPage_screen_init(void);
 extern lv_obj_t *ui_PatchViewPage;
-extern lv_obj_t *ui_MenuContainer;
+extern lv_obj_t *ui_ButtonBarContainer;
 extern lv_obj_t *ui_PlayButton;
 extern lv_obj_t *ui_KnobButton;
 extern lv_obj_t *ui_AddButton;
@@ -29,15 +31,18 @@ extern lv_obj_t *ui_PatchName;
 extern lv_obj_t *ui_ModulesPanel;
 extern lv_obj_t *ui_SettingsMenu;
 extern lv_obj_t *ui_SettingsClosePanel;
+extern lv_obj_t *ui_SettingsHeaderLabel;
 extern lv_obj_t *ui_SettingsCloseButton;
-extern lv_obj_t *ui_Label2;
 extern lv_obj_t *ui_SettingsMapsTitle;
 extern lv_obj_t *ui_ShowAllMapsPanel;
 extern lv_obj_t *ui_ShowAllMapsLabel;
-extern lv_obj_t *ui_ShowAllCheck;
+extern lv_obj_t *ui_ShowAllMapsCheck;
 extern lv_obj_t *ui_ShowCurrentPanel;
 extern lv_obj_t *ui_ShowCurrentLabel;
-extern lv_obj_t *ui_ShowSelectedCheck;
+extern lv_obj_t *ui_ShowSelectedMapsCheck;
+extern lv_obj_t *ui_ShowPlayingMapsPanel;
+extern lv_obj_t *ui_ShowPlayingMapsLabel;
+extern lv_obj_t *ui_ShowPlayingMapsCheck;
 extern lv_obj_t *ui_FlashMapPanel;
 extern lv_obj_t *ui_FlashMapLabel;
 extern lv_obj_t *ui_FlashMapCheck;

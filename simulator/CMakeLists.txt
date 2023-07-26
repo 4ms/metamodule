@@ -34,9 +34,10 @@ file(
   ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
   ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c
   ${MM_ROOT}/firmware/src/gui/slsexport/patchsel/ui.c
-  ${MM_ROOT}/firmware/src/gui/slsexport/patchsel/ui_helpers.c
+  # ${MM_ROOT}/firmware/src/gui/slsexport/patchsel/ui_helpers.c
   ${MM_ROOT}/firmware/src/gui/slsexport/patchsel/ui_font_*.c
   ${MM_ROOT}/firmware/src/gui/slsexport/patchview/ui.c
+  ${MM_ROOT}/firmware/src/gui/slsexport/patchview/ui_helpers.c
   ${MM_ROOT}/firmware/src/gui/slsexport/patchview/components/*.c
   ${MM_ROOT}/firmware/src/gui/slsexport/patchview/fonts/*.c
   ${MM_ROOT}/firmware/src/gui/slsexport/patchview/images/*.c

@@ -7,11 +7,13 @@
 #include "ui_helpers.h"
 
 ///////////////////// VARIABLES ////////////////////
+void Dropdown_Animation( lv_obj_t *TargetObject, int delay);
+void Dropup_Animation( lv_obj_t *TargetObject, int delay);
 
 // SCREEN: ui_PatchViewPage
 void ui_PatchViewPage_screen_init(void);
 lv_obj_t *ui_PatchViewPage;
-lv_obj_t *ui_MenuContainer;
+lv_obj_t *ui_ButtonBarContainer;
 lv_obj_t *ui_PlayButton;
 lv_obj_t *ui_KnobButton;
 lv_obj_t *ui_AddButton;
@@ -21,15 +23,18 @@ lv_obj_t *ui_PatchName;
 lv_obj_t *ui_ModulesPanel;
 lv_obj_t *ui_SettingsMenu;
 lv_obj_t *ui_SettingsClosePanel;
+lv_obj_t *ui_SettingsHeaderLabel;
 lv_obj_t *ui_SettingsCloseButton;
-lv_obj_t *ui_Label2;
 lv_obj_t *ui_SettingsMapsTitle;
 lv_obj_t *ui_ShowAllMapsPanel;
 lv_obj_t *ui_ShowAllMapsLabel;
-lv_obj_t *ui_ShowAllCheck;
+lv_obj_t *ui_ShowAllMapsCheck;
 lv_obj_t *ui_ShowCurrentPanel;
 lv_obj_t *ui_ShowCurrentLabel;
-lv_obj_t *ui_ShowSelectedCheck;
+lv_obj_t *ui_ShowSelectedMapsCheck;
+lv_obj_t *ui_ShowPlayingMapsPanel;
+lv_obj_t *ui_ShowPlayingMapsLabel;
+lv_obj_t *ui_ShowPlayingMapsCheck;
 lv_obj_t *ui_FlashMapPanel;
 lv_obj_t *ui_FlashMapLabel;
 lv_obj_t *ui_FlashMapCheck;
@@ -60,6 +65,50 @@ const lv_img_dsc_t *ui_imgset_settings_dark[2] = {&ui_img_symbols_raw_settings_d
 #endif
 
 ///////////////////// ANIMATIONS ////////////////////
+void Dropdown_Animation( lv_obj_t *TargetObject, int delay)
+{
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+PropertyAnimation_0_user_data->target = TargetObject;
+PropertyAnimation_0_user_data->val = -1;
+lv_anim_t PropertyAnimation_0;
+lv_anim_init(&PropertyAnimation_0);
+lv_anim_set_time(&PropertyAnimation_0, 250);
+lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_height );
+lv_anim_set_values(&PropertyAnimation_0, 0, 240 );
+lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_linear);
+lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
+lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
+lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+ lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+lv_anim_set_early_apply( &PropertyAnimation_0, false );
+lv_anim_start(&PropertyAnimation_0);
+
+}
+void Dropup_Animation( lv_obj_t *TargetObject, int delay)
+{
+ui_anim_user_data_t *PropertyAnimation_0_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+PropertyAnimation_0_user_data->target = TargetObject;
+PropertyAnimation_0_user_data->val = -1;
+lv_anim_t PropertyAnimation_0;
+lv_anim_init(&PropertyAnimation_0);
+lv_anim_set_time(&PropertyAnimation_0, 200);
+lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_height );
+lv_anim_set_values(&PropertyAnimation_0, 240, 0 );
+lv_anim_set_path_cb( &PropertyAnimation_0, lv_anim_path_ease_in);
+lv_anim_set_delay( &PropertyAnimation_0, delay + 0 );
+lv_anim_set_deleted_cb( &PropertyAnimation_0, _ui_anim_callback_free_user_data );
+lv_anim_set_playback_time(&PropertyAnimation_0, 0);
+lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
+ lv_anim_set_repeat_count(&PropertyAnimation_0, 0);
+lv_anim_set_repeat_delay(&PropertyAnimation_0, 0);
+lv_anim_set_early_apply( &PropertyAnimation_0, false );
+lv_anim_start(&PropertyAnimation_0);
+
+}
 
 ///////////////////// FUNCTIONS ////////////////////
 

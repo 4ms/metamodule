@@ -5,6 +5,8 @@
 namespace MetaModule
 {
 
+// TODO: consider refactoring this as a class with non-static methods and *map_ring as a data member
+// Downside: this would make MapRingDrawer dependent on MapRingDisplay
 struct MapRingDisplay {
 
 	enum class StyleMode {
@@ -19,7 +21,6 @@ struct MapRingDisplay {
 		uint8_t opa = LV_OPA_50;
 	};
 
-	// enum class IsOnHighlightedModule { Yes, No };
 	enum class Flash { On, Brighter };
 
 	static void show(lv_obj_t *map_ring, unsigned opa) {
@@ -34,7 +35,10 @@ struct MapRingDisplay {
 		lv_obj_set_style_outline_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
 	}
 
-	static void show_hide(lv_obj_t *map_ring, Style style, bool on_highlighted_module, bool is_patch_playing) {
+	//TODO:
+	// enum class IsOnHighlightedModule { Yes, No };
+	// enum class IsPatchPlaying { Yes, No };
+	static void update(lv_obj_t *map_ring, Style style, bool on_highlighted_module, bool is_patch_playing) {
 		using enum StyleMode;
 
 		switch (style.mode) {
