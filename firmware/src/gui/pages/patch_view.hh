@@ -18,7 +18,7 @@
 extern "C" {
 #include "gui/slsexport/patchview/ui.h"
 }
-extern "C" void ui_PatchView_screen_init();
+extern "C" void ui_PatchViewPage_screen_init();
 
 namespace MetaModule
 {
@@ -37,8 +37,8 @@ struct PatchViewPage : PageBase {
 		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchView);
 
-		ui_PatchView_screen_init();
-		base = ui_PatchView; //NOLINT
+		ui_PatchViewPage_screen_init();
+		base = ui_PatchViewPage; //NOLINT
 
 		init_bg(base);
 		lv_group_set_editing(group, false);
@@ -70,6 +70,11 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(ui_InfoButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_KnobButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
 		lv_obj_add_event_cb(ui_SettingsButton, button_focussed_cb, LV_EVENT_FOCUSED, this);
+
+		// Settings menu
+		lv_obj_set_parent(ui_SettingsMenu, lv_layer_top());
+		lv_obj_add_event_cb(ui_SettingsButton, settings_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_SettingsCloseButton, settings_cb, LV_EVENT_PRESSED, this);
 
 		module_name = lv_label_create(base); //NOLINT
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
@@ -109,7 +114,7 @@ struct PatchViewPage : PageBase {
 
 		lv_label_set_text(patchname, patch.patch_name.c_str());
 
-		blur();
+		// blur();
 
 		module_canvases.reserve(patch.module_slugs.size());
 		module_ids.reserve(patch.module_slugs.size());
@@ -163,9 +168,23 @@ struct PatchViewPage : PageBase {
 		//cable_drawer.draw_all();
 
 		lv_obj_scroll_to_y(base, 0, LV_ANIM_OFF);
+
+		settings_menu_group = lv_group_create();
+		lv_group_remove_all_objs(settings_menu_group);
+		lv_group_set_editing(settings_menu_group, false);
+		lv_group_add_obj(settings_menu_group, ui_SettingsCloseButton);
+		lv_group_add_obj(settings_menu_group, ui_ShowAllCheck);
+		lv_group_add_obj(settings_menu_group, ui_ShowSelectedCheck);
+		lv_group_add_obj(settings_menu_group, ui_FlashMapCheck);
+		lv_group_add_obj(settings_menu_group, ui_MapTranspSlider);
+		lv_group_add_obj(settings_menu_group, ui_ShowAllCablesCheck);
 	}
 
 	void blur() override {
+		hide_settings_menu();
+		lv_obj_clear_state(ui_SettingsButton, LV_STATE_PRESSED);
+		lv_obj_clear_state(ui_SettingsButton, LV_STATE_FOCUSED);
+
 		for (auto &m : module_canvases) {
 			lv_obj_del(m);
 		}
@@ -173,6 +192,7 @@ struct PatchViewPage : PageBase {
 		drawn_elements.clear();
 		module_canvases.clear();
 		module_ids.clear();
+		lv_group_del(settings_menu_group);
 	}
 
 	void update() override {
@@ -215,6 +235,9 @@ struct PatchViewPage : PageBase {
 
 		for (auto &drawn_el : drawn_elements) {
 			auto map_ring = drawn_el.gui_element.map_ring;
+			auto map_ring_module = drawn_el.gui_element.module_idx;
+			// TODO: Move this to MapRingDisplay
+			// MapRingDisplay::show_hide(map_ring, map_ring_module == highlighted_module_id, is_patch_playing);
 
 			switch (settings.map_ring_style) {
 				case ShowAllIfPlaying:
@@ -249,14 +272,45 @@ struct PatchViewPage : PageBase {
 		}
 	}
 
-	static void base_scroll_cb(lv_event_t *event) {
-		lv_event_t e2;
-		e2.user_data = event->user_data;
-		module_focus_cb(&e2);
+	static void settings_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		auto page = static_cast<PatchViewPage *>(event->user_data);
+		if (lv_obj_has_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN)) {
+			page->show_settings_menu();
+		} else {
+			page->hide_settings_menu();
+		}
+	}
+
+	void show_settings_menu() {
+		auto indev = lv_indev_get_next(nullptr);
+		if (!indev) {
+			printf_("No indev?\n");
+			return;
+		}
+		lv_indev_set_group(indev, settings_menu_group);
+		// lv_obj_clear_flag(ui_SettingsCloseButton, LV_OBJ_STATE
+		lv_group_focus_obj(ui_SettingsCloseButton);
+		lv_obj_clear_state(ui_SettingsCloseButton, LV_STATE_PRESSED);
+		// lv_obj_clear_state(ui_SettingsCloseButton, LV_STATE_FOCUSED);
+		lv_obj_clear_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN);
+	}
+
+	void hide_settings_menu() {
+		auto indev = lv_indev_get_next(nullptr);
+		if (!indev) {
+			printf_("No indev?\n");
+			return;
+		}
+		lv_indev_set_group(indev, group);
+		lv_obj_add_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	static void module_pressed_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+		if (!page)
+			return;
 		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 
 		auto obj = event->current_target;
@@ -346,21 +400,25 @@ struct PatchViewPage : PageBase {
 	}
 
 	static void module_defocus_cb(lv_event_t *event) {
+		printf_("Module defocus cb\n");
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_canvas_fill_bg(page->cable_layer, lv_color_white(), LV_OPA_0);
 	}
 
 	static void playbut_cb(lv_event_t *event) {
 		auto page = static_cast<PatchViewPage *>(event->user_data);
-		// printf_("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
+		printf_("Clicked Play: playing patch# %d\n\r", PageList::get_selected_patch_id());
 		page->start_changing_patch();
 	}
 
 	static void button_focussed_cb(lv_event_t *event) {
+		printf_("But focus cb\n");
 		auto page = static_cast<PatchViewPage *>(event->user_data);
 		lv_label_set_text(page->module_name, "Select a module:");
 		lv_obj_scroll_to_y(page->base, 0, LV_ANIM_ON);
 		page->highlighted_module_id = std::nullopt;
+		// Hide the Settings Menu
+		lv_obj_add_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN);
 	}
 
 private:
@@ -371,6 +429,8 @@ private:
 	lv_obj_t *module_name;
 	lv_obj_t *playbut;
 	lv_obj_t *cable_layer;
+
+	lv_group_t *settings_menu_group;
 
 	std::optional<uint32_t> highlighted_module_id{};
 
@@ -392,4 +452,7 @@ private:
 		patch_playloader.request_load_view_patch();
 	}
 };
+
+extern "C" inline void update_settings_group(lv_event_t *e) {
+}
 } // namespace MetaModule

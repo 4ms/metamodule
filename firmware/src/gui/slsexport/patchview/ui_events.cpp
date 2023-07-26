@@ -3,12 +3,9 @@
 // LVGL version: 8.3.6
 // Project name: PatchView_Screen12
 
-#include "../ui.h"
+#include "ui.h"
 
-void ui_comp_Buttons_2_create_hook( lv_obj_t * comp)
+void update_settings_group(lv_event_t * e)
 {
-}
-
-void ui_comp_Buttons_3_create_hook( lv_obj_t * comp)
-{
+	// Your code here
 }
