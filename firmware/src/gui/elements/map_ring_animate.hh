@@ -1,18 +1,24 @@
 #pragma once
 #include "lvgl.h"
+#include "src/misc/lv_color.h"
 
 namespace MetaModule
 {
 
 struct MapRingDisplay {
 
-	enum class Style {
+	enum class StyleMode {
 		HideAlways,
 		CurModule,
 		CurModuleIfPlaying,
 		ShowAllIfPlaying,
 		ShowAll,
 	};
+	struct Style {
+		StyleMode mode;
+		uint8_t opa = LV_OPA_50;
+	};
+
 	// enum class IsOnHighlightedModule { Yes, No };
 	enum class Flash { On, Brighter };
 
@@ -28,18 +34,53 @@ struct MapRingDisplay {
 		lv_obj_set_style_outline_opa(map_ring, LV_OPA_0, LV_STATE_DEFAULT);
 	}
 
+	static void show_hide(lv_obj_t *map_ring, Style style, bool on_highlighted_module, bool is_patch_playing) {
+		using enum StyleMode;
+
+		switch (style.mode) {
+			case ShowAllIfPlaying:
+				if (is_patch_playing)
+					MapRingDisplay::show(map_ring);
+				else
+					MapRingDisplay::hide(map_ring);
+				break;
+
+			case CurModule:
+				if (on_highlighted_module)
+					MapRingDisplay::show(map_ring);
+				else
+					MapRingDisplay::hide(map_ring);
+				break;
+
+			case CurModuleIfPlaying:
+				if (on_highlighted_module && is_patch_playing)
+					MapRingDisplay::show(map_ring);
+				else
+					MapRingDisplay::hide(map_ring);
+				break;
+
+			case ShowAll:
+				MapRingDisplay::show(map_ring);
+				break;
+
+			case HideAlways:
+				MapRingDisplay::hide(map_ring);
+				break;
+		}
+	}
+
 	static void flash_once(lv_obj_t *map_ring, Style style, bool on_highlighted_module) {
-		using enum Style;
-		if (style == CurModuleIfPlaying && on_highlighted_module)
+		using enum StyleMode;
+		if (style.mode == CurModuleIfPlaying && on_highlighted_module)
 			flash_once(map_ring, Flash::Brighter);
 
-		else if (style == CurModule && on_highlighted_module)
+		else if (style.mode == CurModule && on_highlighted_module)
 			flash_once(map_ring, Flash::Brighter);
 
-		else if (style == ShowAllIfPlaying)
+		else if (style.mode == ShowAllIfPlaying)
 			flash_once(map_ring, Flash::Brighter);
 
-		else if (style == ShowAll)
+		else if (style.mode == ShowAll)
 			flash_once(map_ring, Flash::Brighter);
 
 		else

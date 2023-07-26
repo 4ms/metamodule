@@ -30,7 +30,7 @@ struct ModuleViewPage : PageBase {
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true;
-		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::ShowAll;
+		MapRingDisplay::Style map_ring_style = {.mode = MapRingDisplay::StyleMode::ShowAll, .opa = LV_OPA_50};
 	};
 	ViewSettings settings;
 
@@ -188,12 +188,12 @@ struct ModuleViewPage : PageBase {
 
 	// This gets called after map_ring_style changes
 	void update_map_ring_style() {
-		using enum MapRingDisplay::Style;
+		using enum MapRingDisplay::StyleMode;
 
 		for (auto &drawn_el : drawn_elements) {
 			auto map_ring = drawn_el.gui_element.map_ring;
 
-			switch (settings.map_ring_style) {
+			switch (settings.map_ring_style.mode) {
 				case ShowAllIfPlaying:
 				case CurModuleIfPlaying:
 					if (is_patch_playing)

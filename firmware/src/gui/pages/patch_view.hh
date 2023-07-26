@@ -24,12 +24,13 @@ namespace MetaModule
 {
 
 struct PatchViewPage : PageBase {
+	using enum MapRingDisplay::StyleMode;
 	static inline uint32_t Height = 180;
 
 	struct ViewSettings {
 		bool map_ring_flash_active = true; //flash map ring if knob is turned while patch is playing
 		bool scroll_to_active_param = false;
-		MapRingDisplay::Style map_ring_style = MapRingDisplay::Style::CurModuleIfPlaying;
+		MapRingDisplay::Style map_ring_style = {.mode = CurModuleIfPlaying, .opa = LV_OPA_50};
 	};
 	ViewSettings settings;
 
@@ -73,8 +74,12 @@ struct PatchViewPage : PageBase {
 
 		// Settings menu
 		lv_obj_set_parent(ui_SettingsMenu, lv_layer_top());
+		lv_obj_add_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN); /// Flags
 		lv_obj_add_event_cb(ui_SettingsButton, settings_cb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(ui_SettingsCloseButton, settings_cb, LV_EVENT_PRESSED, this);
+		lv_obj_add_event_cb(ui_ShowAllCheck, settings_map_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_ShowSelectedCheck, settings_map_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_FlashMapCheck, settings_map_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		module_name = lv_label_create(base); //NOLINT
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
@@ -213,7 +218,6 @@ struct PatchViewPage : PageBase {
 						bool did_update = update_element(el, this->params, patch, gui_el);
 
 						if (did_update) {
-							using enum MapRingDisplay::Style;
 							if (settings.map_ring_flash_active) {
 								MapRingDisplay::flash_once(gui_el.map_ring,
 														   settings.map_ring_style,
@@ -231,44 +235,10 @@ struct PatchViewPage : PageBase {
 
 	// This gets called after map_ring_style changes
 	void update_map_ring_style() {
-		using enum MapRingDisplay::Style;
-
 		for (auto &drawn_el : drawn_elements) {
 			auto map_ring = drawn_el.gui_element.map_ring;
-			auto map_ring_module = drawn_el.gui_element.module_idx;
-			// TODO: Move this to MapRingDisplay
-			// MapRingDisplay::show_hide(map_ring, map_ring_module == highlighted_module_id, is_patch_playing);
-
-			switch (settings.map_ring_style) {
-				case ShowAllIfPlaying:
-					if (is_patch_playing)
-						MapRingDisplay::show(map_ring);
-					else
-						MapRingDisplay::hide(map_ring);
-					break;
-
-				case CurModule:
-					if (highlighted_module_id == drawn_el.gui_element.module_idx)
-						MapRingDisplay::show(map_ring);
-					else
-						MapRingDisplay::hide(map_ring);
-					break;
-
-				case CurModuleIfPlaying:
-					if (highlighted_module_id == drawn_el.gui_element.module_idx && is_patch_playing)
-						MapRingDisplay::show(map_ring);
-					else
-						MapRingDisplay::hide(map_ring);
-					break;
-
-				case ShowAll:
-					MapRingDisplay::show(map_ring);
-					break;
-
-				case HideAlways:
-					MapRingDisplay::hide(map_ring);
-					break;
-			}
+			bool is_on_highlighted_module = (drawn_el.gui_element.module_idx == highlighted_module_id);
+			MapRingDisplay::show_hide(map_ring, settings.map_ring_style, is_on_highlighted_module, is_patch_playing);
 		}
 	}
 
@@ -276,6 +246,7 @@ struct PatchViewPage : PageBase {
 		if (!event || !event->user_data)
 			return;
 		auto page = static_cast<PatchViewPage *>(event->user_data);
+
 		if (lv_obj_has_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN)) {
 			page->show_settings_menu();
 		} else {
@@ -283,26 +254,56 @@ struct PatchViewPage : PageBase {
 		}
 	}
 
+	static void settings_map_cb(lv_event_t *event) {
+		if (!event || !event->user_data)
+			return;
+		lv_event_code_t event_code = lv_event_get_code(event);
+		auto obj = lv_event_get_target(event);
+
+		if (event_code == LV_EVENT_VALUE_CHANGED) {
+			auto show_all = lv_obj_has_state(ui_ShowAllCheck, LV_STATE_CHECKED);
+			auto show_selected = lv_obj_has_state(ui_ShowSelectedCheck, LV_STATE_CHECKED);
+			auto flash_active = lv_obj_has_state(ui_FlashMapCheck, LV_STATE_CHECKED);
+
+			// Do not allow both ShowAll and ShowSelected to be checked
+			if (obj == ui_ShowAllCheck && show_all) {
+				lv_obj_clear_state(ui_ShowSelectedCheck, LV_STATE_CHECKED);
+				show_selected = !show_selected;
+			} else if (obj == ui_ShowSelectedCheck && show_selected) {
+				lv_obj_clear_state(ui_ShowAllCheck, LV_STATE_CHECKED);
+				show_all = !show_all;
+			}
+
+			auto page = static_cast<PatchViewPage *>(event->user_data);
+			auto &style = page->settings.map_ring_style;
+
+			//TODO: one more switch: Always/While Playing
+			if (show_all)
+				style.mode = MapRingDisplay::StyleMode::ShowAllIfPlaying;
+			else if (show_selected)
+				style.mode = MapRingDisplay::StyleMode::CurModuleIfPlaying;
+			else
+				style.mode = MapRingDisplay::StyleMode::HideAlways;
+
+			page->settings.map_ring_flash_active = flash_active;
+			page->update_map_ring_style();
+		}
+	}
+
 	void show_settings_menu() {
 		auto indev = lv_indev_get_next(nullptr);
-		if (!indev) {
-			printf_("No indev?\n");
+		if (!indev)
 			return;
-		}
 		lv_indev_set_group(indev, settings_menu_group);
-		// lv_obj_clear_flag(ui_SettingsCloseButton, LV_OBJ_STATE
 		lv_group_focus_obj(ui_SettingsCloseButton);
 		lv_obj_clear_state(ui_SettingsCloseButton, LV_STATE_PRESSED);
-		// lv_obj_clear_state(ui_SettingsCloseButton, LV_STATE_FOCUSED);
 		lv_obj_clear_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN);
 	}
 
 	void hide_settings_menu() {
 		auto indev = lv_indev_get_next(nullptr);
-		if (!indev) {
-			printf_("No indev?\n");
+		if (!indev)
 			return;
-		}
 		lv_indev_set_group(indev, group);
 		lv_obj_add_flag(ui_SettingsMenu, LV_OBJ_FLAG_HIDDEN);
 	}
