@@ -197,7 +197,7 @@ struct ModuleViewPage : PageBase {
 				case ShowAllIfPlaying:
 				case CurModuleIfPlaying:
 					if (is_patch_playing)
-						MapRingDisplay::show(map_ring);
+						MapRingDisplay::show(map_ring, settings.map_ring_style.opa);
 					else
 						MapRingDisplay::hide(map_ring);
 
@@ -205,7 +205,7 @@ struct ModuleViewPage : PageBase {
 
 				case CurModule:
 				case ShowAll:
-					MapRingDisplay::show(map_ring);
+					MapRingDisplay::show(map_ring, settings.map_ring_style.opa);
 					break;
 
 				case HideAlways:

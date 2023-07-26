@@ -22,10 +22,10 @@ struct MapRingDisplay {
 	// enum class IsOnHighlightedModule { Yes, No };
 	enum class Flash { On, Brighter };
 
-	static void show(lv_obj_t *map_ring) {
+	static void show(lv_obj_t *map_ring, unsigned opa) {
 		if (!map_ring)
 			return;
-		lv_obj_set_style_outline_opa(map_ring, LV_OPA_50, LV_STATE_DEFAULT);
+		lv_obj_set_style_outline_opa(map_ring, opa, LV_STATE_DEFAULT);
 	}
 
 	static void hide(lv_obj_t *map_ring) {
@@ -40,27 +40,27 @@ struct MapRingDisplay {
 		switch (style.mode) {
 			case ShowAllIfPlaying:
 				if (is_patch_playing)
-					MapRingDisplay::show(map_ring);
+					MapRingDisplay::show(map_ring, style.opa);
 				else
 					MapRingDisplay::hide(map_ring);
 				break;
 
 			case CurModule:
 				if (on_highlighted_module)
-					MapRingDisplay::show(map_ring);
+					MapRingDisplay::show(map_ring, style.opa);
 				else
 					MapRingDisplay::hide(map_ring);
 				break;
 
 			case CurModuleIfPlaying:
 				if (on_highlighted_module && is_patch_playing)
-					MapRingDisplay::show(map_ring);
+					MapRingDisplay::show(map_ring, style.opa);
 				else
 					MapRingDisplay::hide(map_ring);
 				break;
 
 			case ShowAll:
-				MapRingDisplay::show(map_ring);
+				MapRingDisplay::show(map_ring, style.opa);
 				break;
 
 			case HideAlways:

@@ -80,6 +80,7 @@ struct PatchViewPage : PageBase {
 		lv_obj_add_event_cb(ui_ShowAllCheck, settings_map_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_ShowSelectedCheck, settings_map_cb, LV_EVENT_VALUE_CHANGED, this);
 		lv_obj_add_event_cb(ui_FlashMapCheck, settings_map_cb, LV_EVENT_VALUE_CHANGED, this);
+		lv_obj_add_event_cb(ui_MapTranspSlider, settings_map_cb, LV_EVENT_VALUE_CHANGED, this);
 
 		module_name = lv_label_create(base); //NOLINT
 		lv_obj_add_style(module_name, &Gui::header_style, LV_PART_MAIN);
@@ -285,6 +286,9 @@ struct PatchViewPage : PageBase {
 			else
 				style.mode = MapRingDisplay::StyleMode::HideAlways;
 
+			auto opacity = lv_slider_get_value(ui_MapTranspSlider); //0..100
+			opacity = (float)opacity * 2.5f;
+			page->settings.map_ring_style.opa = opacity;
 			page->settings.map_ring_flash_active = flash_active;
 			page->update_map_ring_style();
 		}
