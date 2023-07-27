@@ -11,7 +11,7 @@
 struct VCVPatchFileWriter {
 
 	static void writePatchFile(
-		int64_t hubModuleId, auto &mappings, std::string fileName, std::string patchName, std::string patchDesc) {
+		int64_t hubModuleId, auto &knob_sets, std::string fileName, std::string patchName, std::string patchDesc) {
 
 		auto context = rack::contextGet();
 		auto engine = context->engine;
@@ -72,19 +72,25 @@ struct VCVPatchFileWriter {
 		pw.setCableList(cableData);
 		pw.setParamList(paramData);
 
-		for (unsigned hubParamId = 0; auto &knob_maps : mappings) {
-			std::vector<Mapping> active_maps;
-			active_maps.reserve(8);
+		for (unsigned set_i = 0; auto &mappings : knob_sets) {
+			//TODO:
+			//pw.addKnobMapSet(set_it, mappings.name);
+			for (unsigned hubParamId = 0; auto &knob_maps : mappings.set) {
+				std::vector<Mapping> active_maps;
+				active_maps.reserve(8);
 
-			for (auto &m : knob_maps) {
-				if (m.paramHandle.module && m.paramHandle.moduleId > 0)
-					active_maps.push_back(m);
+				for (auto &m : knob_maps) {
+					if (m.paramHandle.module && m.paramHandle.moduleId > 0)
+						active_maps.push_back(m);
+				}
+
+				if (active_maps.size())
+					pw.addKnobMaps(hubParamId, mappings.name, set_i, active_maps);
+				//TODO: don't add name everytime
+
+				hubParamId++;
 			}
-
-			if (active_maps.size())
-				pw.addKnobMaps(hubParamId, active_maps);
-
-			hubParamId++;
+			set_i++;
 		}
 
 		std::string yml = pw.printPatchYAML();

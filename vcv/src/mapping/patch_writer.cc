@@ -7,7 +7,7 @@
 PatchFileWriter::PatchFileWriter(std::vector<ModuleID> modules, int64_t hubModuleId)
 	: hubModuleId{hubModuleId} {
 	setModuleList(modules);
-	pd.mapped_knobs.clear();
+	pd.knob_sets.clear();
 	pd.mapped_ins.clear();
 	pd.mapped_outs.clear();
 }
@@ -121,11 +121,18 @@ void PatchFileWriter::setParamList(std::vector<ParamMap> &params) {
 //	}
 //}
 
-void PatchFileWriter::addKnobMaps(unsigned panelKnobId, const std::span<const Mapping> maps) {
+void PatchFileWriter::addKnobMaps(unsigned panelKnobId,
+								  std::string_view knobSetName,
+								  unsigned knobSetId,
+								  const std::span<const Mapping> maps) {
 	for (const auto &m : maps) {
 		if (!idMap.contains(m.paramHandle.moduleId))
 			continue;
-		pd.mapped_knobs.push_back({
+		if (knobSetId >= pd.knob_sets.size())
+			pd.knob_sets.resize(knobSetId + 1);
+
+		pd.knob_sets[knobSetId].name = knobSetName;
+		pd.knob_sets[knobSetId].set.push_back({
 			.panel_knob_id = static_cast<uint16_t>(panelKnobId),
 			.module_id = idMap[m.paramHandle.moduleId],
 			.param_id = static_cast<uint16_t>(m.paramHandle.paramId),
