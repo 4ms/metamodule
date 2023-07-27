@@ -50,32 +50,39 @@ struct DefaultPatches {
 
 	static ModuleTypeSlug get_filename(uint32_t id) {
 		if (id == 0)
-			return "Showcase";
+			return "Showcase.yml";
 		if (id == 1)
-			return "envevenbraids";
+			return "envevenbraids.yml";
 		if (id == 2)
-			return "AllBefaco";
+			return "AllBefaco.yml";
 		if (id == 3)
-			return "djembe4";
+			return "djembe4.yml";
 		if (id == 4)
-			return "djembe4verb";
+			return "djembe4verb.yml";
 		if (id == 5)
-			return "nonlinear";
+			return "nonlinear.yml";
 		if (id == 6)
-			return "SpectralPings";
+			return "SpectralPings.yml";
 		if (id == 7)
-			return "OctoSampler";
+			return "OctoSampler.yml";
 		if (id == 8)
-			return "ClockRockinBeats";
+			return "ClockRockinBeats.yml";
 		if (id == 9)
-			return "KarplusStereo";
+			return "KarplusStereo.yml";
 		if (id == 10)
-			return "QuartetEnOsc";
+			return "QuartetEnOsc.yml";
 		if (id == 11)
-			return "Seq8";
+			return "Seq8.yml";
 		if (id == 12)
-			return "TwoSimpleOsc";
+			return "TwoSimpleOsc.yml";
 
-		return "??";
+		ModuleTypeSlug s;
+		s._data[0] = ((id / 10) % 10) + '0';
+		s._data[1] = (id % 10) + '0';
+		s._data[2] = '.';
+		s._data[3] = 'y';
+		s._data[4] = 'm';
+		s._data[5] = 'l';
+		return s;
 	}
 };

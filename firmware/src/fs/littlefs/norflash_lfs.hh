@@ -6,7 +6,7 @@
 #include "fs/volumes.hh"
 #include "lib/littlefs/lfs.h"
 #include "patch_file/patches_default.hh"
-#include "printf.h"
+#include "pr_dbg.hh"
 #include <string_view>
 
 namespace MetaModule
@@ -31,7 +31,7 @@ public:
 
 	Status initialize() {
 		if (!_flash.check_chip_id(0x180001, 0x00180001)) { //182001 or 186001 or 1840EF
-			printf_("ERROR: NOR Flash returned wrong id\n");
+			pr_err("ERROR: NOR Flash returned wrong id\n");
 			return Status::FlashError;
 		}
 
@@ -52,8 +52,12 @@ public:
 		};
 
 		auto err = lfs_mount(&lfs, &cfg);
-		if (err >= 0)
+		if (err >= 0) {
+			pr_dbg("LittleFS mounted OK\n");
 			return Status::AlreadyFormatted;
+		}
+
+		pr_dbg("LittleFS not formatted\n");
 
 		// No FS on disk, format and re-mount
 		if (lfs_format(&lfs, &cfg) < 0)
@@ -108,7 +112,7 @@ public:
 
 		auto err = time_file_open(&file, filename.data(), LFS_O_CREAT | LFS_O_WRONLY);
 		if (err < 0) {
-			printf_("Open failed with err %d\n", err);
+			pr_err("Open failed with err %d\n", err);
 			return false;
 		}
 
@@ -116,7 +120,7 @@ public:
 
 		printf_("Littlefs: updating or creating file %s, timestamp 0x%x\n", filename.data(), file.timestamp);
 		if (int err = lfs_file_write(&lfs, &file.file, data.data(), data.size_bytes()); err < 0) {
-			printf_("Write failed with err %d\n", err);
+			pr_err("Write failed with err %d\n", err);
 			return false;
 		}
 
