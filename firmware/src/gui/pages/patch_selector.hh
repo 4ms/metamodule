@@ -7,10 +7,9 @@
 #include "pr_dbg.hh"
 
 //exported:
-#include "gui/slsexport/patchsel/ui.h"
-extern "C" void ui_PatchSelector_screen_init();
-LV_FONT_DECLARE(lv_font_montserrat_10);
-LV_FONT_DECLARE(lv_font_montserrat_16);
+#include "gui/slsexport/meta5/ui.h"
+// LV_FONT_DECLARE(lv_font_montserrat_10);
+// LV_FONT_DECLARE(lv_font_montserrat_16);
 
 namespace MetaModule
 {
@@ -23,13 +22,13 @@ struct PatchSelectorPage : PageBase {
 		: PageBase{info} {
 		PageList::register_page(this, PageId::PatchSel);
 
-		ui_PatchSelector_screen_init();
-		base = ui_PatchSelector;  //NOLINT
-		roller = ui_patchlist;	  //NOLINT
-		nor_but = ui_Flashbut;	  //NOLINT
-		usb_but = ui_USBbut;	  //NOLINT
-		sd_but = ui_SDbut;		  //NOLINT
-		spinner = ui_waitspinner; //NOLINT
+		ui_PatchSelectorPage_screen_init();
+		base = ui_PatchSelectorPage; //NOLINT
+		roller = ui_PatchListRoller; //NOLINT
+		nor_but = ui_Flashbut;		 //NOLINT
+		usb_but = ui_USBbut;		 //NOLINT
+		sd_but = ui_SDbut;			 //NOLINT
+		spinner = ui_waitspinner;	 //NOLINT
 
 		init_bg(base);
 
@@ -113,7 +112,7 @@ struct PatchSelectorPage : PageBase {
 		highlighted_vol = num_usb ? Volume::USB : num_sdcard ? Volume::SDCard : Volume::NorFlash;
 		lv_roller_set_selected(roller, highlighted_idx, LV_ANIM_ON);
 
-		printf_("Patch Selector refreshed:\nUSB: %ld patches\nSD: %ld patches\nNOR: %ld patches\n",
+		printf_("Patch Selector refreshed:\nUSB: %zu patches\nSD: %zu patches\nNOR: %zu patches\n",
 				patchfiles.usb.size(),
 				patchfiles.sdcard.size(),
 				patchfiles.norflash.size());

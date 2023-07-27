@@ -4,7 +4,7 @@
 #include <algorithm>
 
 extern "C" {
-#include "gui/slsexport/patchview/ui.h"
+#include "gui/slsexport/meta5/ui.h"
 }
 
 namespace MetaModule

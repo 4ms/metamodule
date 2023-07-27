@@ -17,9 +17,8 @@
 
 //exported:
 extern "C" {
-#include "gui/slsexport/patchview/ui.h"
+#include "gui/slsexport/meta5/ui.h"
 }
-extern "C" void ui_PatchViewPage_screen_init();
 
 namespace MetaModule
 {
