@@ -32,16 +32,14 @@ file(
   ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/modules/*.c
   ${MM_ROOT}/firmware/src/gui/images/AudibleInstruments/components/*.c
   ${MM_ROOT}/firmware/src/gui/images/Rack/components/*.c
-  ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c
-  ${MM_ROOT}/firmware/src/gui/slsexport/patchsel/ui.c
-  # ${MM_ROOT}/firmware/src/gui/slsexport/patchsel/ui_helpers.c
-  ${MM_ROOT}/firmware/src/gui/slsexport/patchsel/ui_font_*.c
-  ${MM_ROOT}/firmware/src/gui/slsexport/patchview/ui.c
-  ${MM_ROOT}/firmware/src/gui/slsexport/patchview/ui_helpers.c
-  ${MM_ROOT}/firmware/src/gui/slsexport/patchview/components/*.c
-  ${MM_ROOT}/firmware/src/gui/slsexport/patchview/fonts/*.c
-  ${MM_ROOT}/firmware/src/gui/slsexport/patchview/images/*.c
-  ${MM_ROOT}/firmware/src/gui/slsexport/patchview/screens/*.c)
+  ${MM_ROOT}/firmware/src/gui/fonts/MuseoSansRounded_*.c)
+
+add_subdirectory(${MM_ROOT}/firmware/src/gui/slsexport/meta5
+                 ${CMAKE_CURRENT_BINARY_DIR}/meta5)
+
+target_include_directories(ui PRIVATE ./ ${LVGL_DIR})
+target_compile_options(ui PRIVATE -Wall -Og -g2 $<$<COMPILE_LANGUAGE:CXX>:
+                                  -std=c++20>)
 
 # #################### CoreModules ##################################
 file(
@@ -134,7 +132,6 @@ target_include_directories(
           ${MM_ROOT}/shared/CoreModules/4ms
           ${MM_ROOT}/shared/CoreModules/Befaco
           ${MM_ROOT}/firmware/vcv_ports/AudibleInstruments/eurorack
-          # ${MM_ROOT}/vcv/src # For sys/alloc_buffer.h
           ${MM_ROOT}/firmware/src/VCV_adaptor
           ${MM_ROOT}/firmware/src/VCV_adaptor/pffft)
 
@@ -148,6 +145,6 @@ target_compile_definitions(simulator PRIVATE SIMULATOR TEST)
 # assembly)
 
 target_link_libraries(simulator PRIVATE ${SDL2_LIBRARIES} lvglsdl lvgl::lvgl
-                                        ryml SDL2)
+                                        ryml SDL2 ui)
 
 target_link_options(simulator PUBLIC LINKER:-map,simulator.map)

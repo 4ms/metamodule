@@ -194,17 +194,9 @@ SOURCES += src/gui/fonts/MuseoSansRounded_700_16.c
 SOURCES += src/gui/fonts/MuseoSansRounded_700_18.c
 
 # Generated:
-SOURCES += src/gui/slsexport/patchsel/ui.c
-# SOURCES += src/gui/slsexport/patchsel/ui_helpers.c
-SOURCES += $(wildcard src/gui/slsexport/patchsel/ui_font_*.c)
-SOURCES += src/gui/slsexport/patchview/ui.c
-#patchview
-SOURCES += src/gui/slsexport/patchview/ui_helpers.c
-SOURCES += $(wildcard src/gui/slsexport/patchview/components/*.c)
-SOURCES += $(wildcard src/gui/slsexport/patchview/images/*.c)
-SOURCES += $(wildcard src/gui/slsexport/patchview/fonts/*.c)
-SOURCES += $(wildcard src/gui/slsexport/patchview/screens/*.c)
-INCLUDES += -Isrc/gui/slsexport
+slsexport_dir := src/gui/slsexport/meta5
+SOURCES += $(addprefix $(slsexport_dir)/,$(file <src/gui/slsexport/meta5/filelist.txt))
+INCLUDES += -I$(slsexport_dir)
 
 # Patch convert
 SOURCES += $(SHARED)/patch_convert/yaml_to_patch.cc
