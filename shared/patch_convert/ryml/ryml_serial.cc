@@ -11,6 +11,24 @@ void write(ryml::NodeRef *n, Jack const &jack) {
 	n->append_child() << ryml::key("jack_id") << jack.jack_id;
 }
 
+void write(ryml::NodeRef *n, MappedKnob const &mapped_knob) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("panel_knob_id") << mapped_knob.panel_knob_id;
+	n->append_child() << ryml::key("module_id") << mapped_knob.module_id;
+	n->append_child() << ryml::key("param_id") << mapped_knob.param_id;
+	n->append_child() << ryml::key("curve_type") << mapped_knob.curve_type;
+	n->append_child() << ryml::key("min") << mapped_knob.min;
+	n->append_child() << ryml::key("max") << mapped_knob.max;
+	if (mapped_knob.alias_name.length())
+		n->append_child() << ryml::key("alias_name") << mapped_knob.alias_name;
+}
+
+void write(ryml::NodeRef *n, MappedKnobSet const &knob_set) {
+	*n |= ryml::MAP;
+	n->append_child() << ryml::key("name") << knob_set.name;
+	n->append_child() << ryml::key("set") << knob_set.set;
+}
+
 bool read(ryml::NodeRef const &n, Jack *jack) {
 	if (n.num_children() < 2)
 		return false;
@@ -117,6 +135,22 @@ bool read(ryml::NodeRef const &n, MappedKnob *k) {
 
 	if (n.has_child("alias_name"))
 		n["alias_name"] >> k->alias_name;
+
+	return true;
+}
+
+bool read(ryml::NodeRef const &n, MappedKnobSet *ks) {
+	if (n.num_children() < 1)
+		return false;
+	if (!n.is_map())
+		return false;
+	if (!n.has_child("set"))
+		return false;
+
+	if (n.has_child("name"))
+		n["name"] >> ks->name;
+
+	n["set"] >> ks->set;
 
 	return true;
 }

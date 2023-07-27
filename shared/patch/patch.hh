@@ -56,8 +56,12 @@ struct MappedKnob {
 		return (module_id == other.module_id) && (param_id == other.param_id);
 	}
 };
-
 static_assert(sizeof(MappedKnob) == 32, "MappedKnob should be 32B");
+
+struct MappedKnobSet {
+	std::vector<MappedKnob> set;
+	AliasNameString name;
+};
 
 struct InternalCable {
 	Jack out;
@@ -68,6 +72,7 @@ struct MappedInputJack {
 	uint32_t panel_jack_id;
 	std::vector<Jack> ins;
 	AliasNameString alias_name;
+
 	bool is_monophonic_note() const {
 		return (panel_jack_id == static_cast<uint16_t>(MidiMonoNoteJack));
 	}

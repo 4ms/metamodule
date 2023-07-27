@@ -2,6 +2,7 @@
 #include "CoreModules/module_type_slug.hh"
 #include "patch.hh"
 #include "util/static_string.hh"
+#include <_types/_uint32_t.h>
 #include <optional>
 #include <vector>
 
@@ -14,12 +15,21 @@ struct PatchData {
 	std::vector<MappedInputJack> mapped_ins;
 	std::vector<MappedOutputJack> mapped_outs;
 	std::vector<StaticParam> static_knobs;
-	std::vector<MappedKnob> mapped_knobs;
+	std::vector<MappedKnobSet> knob_sets;
+	// TODO: update:
+	// shared/patch_convert/yaml_to_patch, patch_to_yaml, and tests
+	// vcv/.../patch_writer
+	// ryml_tests/patchlist_ryml_tests
+	// firmware/../patch_player and tests
+	// firmware/..pages/module_view.hh
+	// firmware/..pages/knob_edit.hh ??
 
-	const MappedKnob *find_mapped_knob(uint32_t module_id, uint32_t param_id) const {
-		for (auto &m : mapped_knobs) {
-			if (m.module_id == module_id && m.param_id == param_id)
-				return &m;
+	const MappedKnob *find_mapped_knob(uint32_t set_id, uint32_t module_id, uint32_t param_id) const {
+		if (set_id < knob_sets.size()) {
+			for (auto &m : knob_sets[set_id].set) {
+				if (m.module_id == module_id && m.param_id == param_id)
+					return &m;
+			}
 		}
 		return nullptr;
 	}
