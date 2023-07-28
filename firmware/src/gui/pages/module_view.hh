@@ -97,7 +97,8 @@ struct ModuleViewPage : PageBase {
 		lv_obj_refr_size(canvas);
 		auto width_px = lv_obj_get_width(canvas);
 
-		module_drawer.draw_mapped_elements(patch, this_module_id, canvas, drawn_elements, is_patch_playing);
+		module_drawer.draw_mapped_elements(
+			patch, this_module_id, active_knob_set, canvas, drawn_elements, is_patch_playing);
 
 		lv_obj_update_layout(canvas);
 
@@ -348,6 +349,9 @@ private:
 	std::string_view slug;
 	bool is_patch_playing = false;
 	PatchData &patch;
+
+	// TODO:put this in PageList
+	unsigned active_knob_set = 0;
 
 	std::vector<lv_obj_t *> button;
 	std::vector<ModuleParam> module_controls;

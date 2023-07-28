@@ -128,7 +128,8 @@ struct PatchViewPage : PageBase {
 			if (!canvas)
 				continue;
 
-			module_drawer.draw_mapped_elements(patch, module_idx, canvas, drawn_elements, is_patch_playing);
+			module_drawer.draw_mapped_elements(
+				patch, module_idx, active_knob_set, canvas, drawn_elements, is_patch_playing);
 
 			// Increment the buffer
 			lv_obj_refr_size(canvas);
@@ -297,6 +298,9 @@ private:
 	bool is_patch_playing = false;
 
 	lv_draw_line_dsc_t cable_drawline_dsc;
+
+	// TODO:put this in PageList
+	unsigned active_knob_set = 0;
 
 	struct focussed_context {
 		PatchViewPage *page;

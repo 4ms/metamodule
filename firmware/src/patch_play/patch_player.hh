@@ -7,7 +7,7 @@
 #include "patch/midi_def.hh"
 #include "patch/patch.hh"
 #include "patch/patch_data.hh"
-#include "printf.h"
+#include "pr_dbg.hh"
 #include "util/countzip.hh"
 #include "util/math.hh"
 #include <array>
@@ -34,7 +34,11 @@ public:
 	std::array<std::vector<Jack>, NumInConns + PanelDef::NumMidiJackMaps> in_conns;
 
 	// knob_conns[]: ABCDEFuvwxyz, MidiMonoNoteParam, MidiMonoGateParam
-	std::array<std::vector<MappedKnob>, PanelDef::NumKnobs + PanelDef::NumMidiParams> knob_conns;
+	static constexpr size_t NumParams = PanelDef::NumKnobs + PanelDef::NumMidiParams;
+	using KnobSet = std::array<std::vector<MappedKnob>, NumParams>;
+	static constexpr size_t MaxKnobSets = 8;
+
+	std::array<KnobSet, MaxKnobSets> knob_conns;
 
 	bool is_loaded = false;
 
@@ -45,6 +49,7 @@ private:
 	uint8_t dup_module_index[MAX_MODULES_IN_PATCH] = {0};
 
 	PatchData pd;
+	unsigned active_knob_set = 0;
 	static inline ModuleTypeSlug no_patch_loaded{"(Not Loaded)"};
 
 public:
@@ -111,8 +116,10 @@ public:
 		mark_patched_jacks();
 		calc_panel_jack_connections();
 
-		for (auto const &k : pd.mapped_knobs)
-			cache_knob_mapping(k);
+		for (auto const &knob_set : pd.knob_sets) {
+			for (auto const &k : knob_set.set)
+				cache_knob_mapping(active_knob_set, k);
+		}
 
 		// Set static (non-mapped) knobs
 		for (auto &k : pd.static_knobs)
@@ -157,7 +164,7 @@ public:
 		}
 		pd.int_cables.clear();
 		pd.mapped_ins.clear();
-		pd.mapped_knobs.clear();
+		pd.knob_sets.clear();
 		pd.mapped_outs.clear();
 		pd.static_knobs.clear();
 		pd.module_slugs.clear();
@@ -169,7 +176,7 @@ public:
 	// K-rate setters/getters:
 
 	void set_panel_param(int param_id, float val) {
-		for (auto const &k : knob_conns[param_id]) {
+		for (auto const &k : knob_conns[active_knob_set][param_id]) {
 			modules[k.module_id]->set_param(k.param_id, k.get_mapped_val(val));
 		}
 	}
@@ -224,7 +231,7 @@ public:
 	}
 
 	StaticString<15> const &get_panel_knob_name(int param_id) {
-		return pd.mapped_knobs[param_id].alias_name;
+		return pd.knob_sets[active_knob_set].set[param_id].alias_name;
 	}
 
 	InternalCable &get_int_cable(unsigned idx) {
@@ -317,8 +324,9 @@ public:
 		for (auto &in_conn : in_conns)
 			in_conn.clear();
 
-		for (auto &knob_conn : knob_conns)
-			knob_conn.clear();
+		for (auto &knob_set : knob_conns)
+			for (auto &mappings : knob_set)
+				mappings.clear();
 	}
 
 	// Returns the index in int_cables[] for a cable that has the given Jack as an input
@@ -401,17 +409,20 @@ public:
 	}
 
 	// Cache a panel knob mapping into knob_conns[]
-	void cache_knob_mapping(const MappedKnob &k) {
+	void cache_knob_mapping(unsigned knob_set, const MappedKnob &k) {
+		if (knob_set >= knob_conns.size())
+			return;
+
 		if (k.is_monophonic_note()) {
-			update_or_add(knob_conns[MidiMonoNoteParam], k);
-			printf_("DBG: Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+			update_or_add(knob_conns[knob_set][MidiMonoNoteParam], k);
+			pr_dbg("Mapping midi monophonic note to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 
 		} else if (k.is_monophonic_gate()) {
-			update_or_add(knob_conns[MidiMonoGateParam], k);
-			printf_("DBG: Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
+			update_or_add(knob_conns[knob_set][MidiMonoGateParam], k);
+			pr_dbg("Mapping midi monophonic gate to knob: m=%d, p=%d\n", k.module_id, k.param_id);
 
 		} else if (k.panel_knob_id < PanelDef::NumKnobs) {
-			update_or_add(knob_conns[k.panel_knob_id], k);
+			update_or_add(knob_conns[knob_set][k.panel_knob_id], k);
 		}
 	}
 
