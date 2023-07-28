@@ -126,7 +126,7 @@ void PatchFileWriter::addKnobMaps(unsigned panelKnobId,
 								  unsigned knobSetId,
 								  const std::span<const Mapping> maps) {
 	for (const auto &m : maps) {
-		if (!idMap.contains(m.paramHandle.moduleId))
+		if (!idMap.contains(m.moduleId))
 			continue;
 		if (knobSetId >= pd.knob_sets.size())
 			pd.knob_sets.resize(knobSetId + 1);
@@ -134,8 +134,8 @@ void PatchFileWriter::addKnobMaps(unsigned panelKnobId,
 		pd.knob_sets[knobSetId].name = knobSetName;
 		pd.knob_sets[knobSetId].set.push_back({
 			.panel_knob_id = static_cast<uint16_t>(panelKnobId),
-			.module_id = idMap[m.paramHandle.moduleId],
-			.param_id = static_cast<uint16_t>(m.paramHandle.paramId),
+			.module_id = idMap[m.moduleId],
+			.param_id = static_cast<uint16_t>(m.paramId),
 			.curve_type = 0,
 			.min = m.range_min,
 			.max = m.range_max,

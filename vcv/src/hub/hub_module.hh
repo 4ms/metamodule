@@ -79,7 +79,7 @@ struct MetaModuleHubBase : public rack::Module {
 
 		auto *map = mappings.addMap(hubParamId, module->id, moduleParamId);
 		map->range_max = 1.f;
-		map->range_min = 0.f;
+		map->range_min = 0.0f;
 		endMapping();
 
 		return true;
@@ -88,11 +88,11 @@ struct MetaModuleHubBase : public rack::Module {
 	// Runtime applying maps
 
 	void processMaps() {
-		for (int hubParamId = 0; auto &knobs : mappings) {
-			for (auto &map : knobs) {
+		for (int hubParamId = 0; auto &knob : mappings) {
+			for (auto &mapset : knob) {
 
-				int paramId = map.paramHandle.paramId;
-				auto module = map.paramHandle.module;
+				int paramId = mapset.paramHandle.paramId;
+				auto module = mapset.paramHandle.module;
 				if (!module)
 					continue;
 
@@ -102,6 +102,7 @@ struct MetaModuleHubBase : public rack::Module {
 				if (!paramQuantity->isBounded())
 					continue;
 
+				auto &map = mappings.activeMap(mapset);
 				auto val = MathTools::map_value(params[hubParamId].getValue(), 0.f, 1.f, map.range_min, map.range_max);
 				paramQuantity->setScaledValue(val);
 			}
@@ -205,7 +206,9 @@ struct MetaModuleHubBase : public rack::Module {
 		labelText = "Creating patch...";
 		updateDisplay();
 
-		VCVPatchFileWriter::writePatchFile(id, mappings.knobSets, patchFileName, patchName, patchDescText);
+		auto knobSets = mappings.collate_mappings();
+		VCVPatchFileWriter::writePatchFile(
+			id, knobSets, mappings.knobSetNames, patchFileName, patchName, patchDescText);
 
 		labelText = "Wrote patch file: ";
 		labelText += rack::system::getFilename(patchFileName);

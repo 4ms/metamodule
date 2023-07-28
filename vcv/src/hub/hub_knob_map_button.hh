@@ -59,15 +59,16 @@ public:
 		if (!hub)
 			return;
 
-		if (hub->mappings.getNumMappings(hubParamObj.objID) > 0) {
+		if (hub->mappings.getNumActiveMappings(hubParamObj.objID) > 0) {
 			auto *sep = new rack::MenuSeparator;
 			menu->addChild(sep);
 
 			auto aliasItem = new KnobAliasMenuItem{hub, hubParamObj};
 			menu->addChild(aliasItem);
 
-			auto &phs = hub->mappings.getActiveParamHandles(hubParamObj.objID);
-			for (auto const &ph : phs) {
+			auto &knob_sets = hub->mappings.getAllMappings(hubParamObj.objID);
+			for (auto const &knob : knob_sets) {
+				auto &ph = knob.paramHandle;
 				if (!ph.module)
 					continue;
 				if (ph.module->id < 0)

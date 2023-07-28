@@ -1,4 +1,5 @@
 #pragma once
+#include "hub/hub_knob_mappings.hh"
 #include "mapping/JackMap.hh"
 #include "mapping/ModuleID.h"
 #include "mapping/ParamMap.hh"
@@ -10,8 +11,12 @@
 // Adpats VCVRack-format of patch data to a format PatchFileWriter can use
 struct VCVPatchFileWriter {
 
-	static void writePatchFile(
-		int64_t hubModuleId, auto &knob_sets, std::string fileName, std::string patchName, std::string patchDesc) {
+	static void writePatchFile(int64_t hubModuleId,
+							   auto &knobSets,
+							   std::span<std::string> knobSetNames,
+							   std::string fileName,
+							   std::string patchName,
+							   std::string patchDesc) {
 
 		auto context = rack::contextGet();
 		auto engine = context->engine;
@@ -72,20 +77,21 @@ struct VCVPatchFileWriter {
 		pw.setCableList(cableData);
 		pw.setParamList(paramData);
 
-		for (unsigned set_i = 0; auto &mappings : knob_sets) {
-			//TODO:
-			//pw.addKnobMapSet(set_it, mappings.name);
-			for (unsigned hubParamId = 0; auto &knob_maps : mappings.set) {
+		//TODO:
+		//pw.addKnobMapSet(set_it, mappings.name);
+
+		for (unsigned set_i = 0; auto &mappings : knobSets) {
+			for (unsigned hubParamId = 0; auto &knob_maps : mappings) {
 				std::vector<Mapping> active_maps;
 				active_maps.reserve(8);
 
 				for (auto &m : knob_maps) {
-					if (m.paramHandle.module && m.paramHandle.moduleId > 0)
+					if (m.module && m.moduleId > 0)
 						active_maps.push_back(m);
 				}
 
 				if (active_maps.size())
-					pw.addKnobMaps(hubParamId, mappings.name, set_i, active_maps);
+					pw.addKnobMaps(hubParamId, knobSetNames[set_i], set_i, active_maps);
 				//TODO: don't add name everytime
 
 				hubParamId++;
