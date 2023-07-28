@@ -7,14 +7,39 @@
 template<size_t NumKnobs, size_t MaxMapsPerPot, size_t MaxKnobSets = 8>
 struct HubKnobMappings {
 
-	using KnobParamHandles = std::array<Mapping, MaxMapsPerPot>;
+	struct KnobMapping {
+		rack::ParamHandle paramHandle;
+		std::array<Mapping, MaxKnobSets> sets;
+	};
+
+	using KnobMultiMap = std::array<KnobMapping, MaxMapsPerPot>;
+
+	std::array<KnobMultiMap, NumKnobs> mappings;
+
+	// Structure:
+	// A Knob Set is a group of multi-mappings for all the knobs
+	// There are up to 8 (MaxKnobSets) Knob Sets
+	// Only one Knob Set is active at a time
+	//
+	// Each KnobSet contains 12 (NumKnobs) KnobMultiMap's
+	//
+	// Each KnobMultiMap contains up to 8 (MaxMapsPerPot) possible Mapping's
+	// from that hub knob to 0 or more other knobs
+	//
+	// activeParamHandles are VCV-native objects that are registered with VCV
+
 	struct KnobSet {
 		std::string name;
-		std::array<KnobParamHandles, NumKnobs> set;
+		std::array<KnobMultiMap, NumKnobs> set;
 	};
 
 	std::array<KnobSet, MaxKnobSets> knobSets;
+
+	// FIXME: Aliases should be inside KnobSet?
 	std::array<StaticString<31>, NumKnobs> aliases;
+
+	using ParamHandleMultiMap = std::array<rack::ParamHandle, MaxMapsPerPot>;
+	std::array<ParamHandleMultiMap, NumKnobs> activeParamHandles;
 
 private:
 	int64_t hubModuleId = -1;
@@ -23,23 +48,19 @@ private:
 public:
 	HubKnobMappings(int64_t hubModuleId)
 		: hubModuleId{hubModuleId} {
-		for (auto &mappings : knobSets) {
-			for (unsigned i = 0; auto &knob : mappings.set) {
-				auto color = PaletteHub::color(i++);
-				for (auto &map : knob) {
-					map.paramHandle.color = color;
-					APP->engine->addParamHandle(&map.paramHandle);
-				}
+		for (unsigned i = 0; auto &knob_phs : activeParamHandles) {
+			auto color = PaletteHub::color(i++);
+			for (auto &ph : knob_phs) {
+				ph.color = color;
+				APP->engine->addParamHandle(&ph);
 			}
 		}
 	}
 
 	~HubKnobMappings() {
-		for (auto &mappings : knobSets) {
-			for (auto &pot : mappings.set) {
-				for (auto &map : pot)
-					APP->engine->removeParamHandle(&map.paramHandle);
-			}
+		for (auto &knob_phs : activeParamHandles) {
+			for (auto &ph : knob_phs)
+				APP->engine->removeParamHandle(&ph);
 		}
 	}
 
@@ -61,8 +82,26 @@ public:
 	}
 
 	void setActiveKnobSetIdx(unsigned setId) {
-		if (setId < knobSets.size())
-			activeSetId = setId;
+		if (setId == activeSetId || setId < knobSets.size())
+			return;
+
+		//Clear paramHandle links from old active set
+		// for (auto &knob : knobSets[activeSetId].set) {
+		// 	for (auto &map : knob) {
+		// 		map.paramHandle = nullptr; //?
+		// 	}
+		// }
+
+		// Connect new active set to paramHandles
+		activeSetId = setId;
+		for (auto [knob, phs] : zip(knobSets[activeSetId].set, activeParamHandles)) {
+			for (auto [map, ph] : zip(knob, phs)) {
+				map.paramHandle.moduleId = ph.moduleId;
+				map.paramHandle.module = ph.module;
+				map.paramHandle.paramId = ph.paramId;
+				map.paramHandle.text = ph.text;
+			}
+		}
 	}
 
 	// Mapping Range:
@@ -122,8 +161,14 @@ public:
 	// Add mappings to a knob:
 
 	Mapping *addMap(unsigned hubParamId, int64_t destModuleId, int destParamId) {
-		auto *map = nextFreeMap(hubParamId);
-		APP->engine->updateParamHandle(&map->paramHandle, destModuleId, destParamId, true);
+		auto map_i = nextFreeMap(hubParamId);
+
+		APP->engine->updateParamHandle(&activeParamHandles[hubParamId][map_i], destModuleId, destParamId, true);
+
+		Mapping *map = &knobSets[activeSetId].set[hubParamId][map_i];
+		map->paramHandle.moduleId = destModuleId;
+		map->paramHandle.paramId = destParamId;
+		// map->paramHandle.text = ; //?
 		return map;
 	}
 
@@ -142,27 +187,24 @@ public:
 		return num;
 	}
 
-	Mapping *nextFreeMap(unsigned hubParamId) {
+	unsigned nextFreeMap(unsigned hubParamId) {
 		// Find first unused paramHandle
-		auto &mappings = knobSets[activeSetId].set;
-
-		for (auto &p : mappings[hubParamId]) {
-			if (p.paramHandle.moduleId < 0) {
-				return &p;
+		for (unsigned map_i = 0; auto &ph : activeParamHandles[hubParamId]) {
+			if (ph.moduleId < 0) {
+				return map_i;
 			}
+			map_i++;
 		}
 		// If all are used, then overwrite the last one
-		return &mappings[hubParamId][MaxMapsPerPot - 1];
+		return MaxMapsPerPot - 1;
 	}
 
-	// Get all mappings to a knob in the active set
-
-	auto &getMappings(int hubParamId) {
+	// Return a ptr to an array of the ParamHandles of a knob
+	auto &getActiveParamHandles(int hubParamId) {
 		if (hubParamId >= (int)NumKnobs)
 			return nullmap;
 
-		auto &mappings = knobSets[activeSetId].set;
-		return mappings[hubParamId];
+		return activeParamHandles[hubParamId];
 	}
 
 	// Save/restore VCV rack patch
@@ -231,15 +273,13 @@ public:
 							if (hubParamId >= (int)NumKnobs)
 								continue;
 
-							auto *map = nextFreeMap(hubParamId);
-
 							val = json_object_get(mappingJ, "DstModID");
 							auto destModuleId = json_is_integer(val) ? json_integer_value(val) : -1;
 
 							val = json_object_get(mappingJ, "DstObjID");
 							auto destModuleParamId = json_is_integer(val) ? json_integer_value(val) : -1;
 
-							APP->engine->updateParamHandle(&map->paramHandle, destModuleId, destModuleParamId, true);
+							auto *map = addMap(hubParamId, destModuleId, destModuleParamId);
 
 							val = json_object_get(mappingJ, "RangeMin");
 							map->range_min = json_is_real(val) ? json_real_value(val) : 0.f;
@@ -257,7 +297,8 @@ public:
 	}
 
 	bool is_valid(Mapping map) {
-		return map.paramHandle.module && map.paramHandle.moduleId >= 0;
+		//TODO: check if moduleIf exists in patch still?
+		return map.paramHandle.moduleId >= 0;
 	}
 
 	void clear_all() {
@@ -292,5 +333,5 @@ public:
 		return mappings[std::min(n, NumKnobs - 1)];
 	}
 
-	KnobParamHandles nullmap{};
+	ParamHandleMultiMap nullmap{};
 };

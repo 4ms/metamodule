@@ -66,25 +66,25 @@ public:
 			auto aliasItem = new KnobAliasMenuItem{hub, hubParamObj};
 			menu->addChild(aliasItem);
 
-			auto maps = hub->mappings.getMappings(hubParamObj.objID);
-			for (auto const &m : maps) {
-				if (!m.paramHandle.module)
+			auto &phs = hub->mappings.getActiveParamHandles(hubParamObj.objID);
+			for (auto const &ph : phs) {
+				if (!ph.module)
 					continue;
-				if (m.paramHandle.module->id < 0)
+				if (ph.module->id < 0)
 					continue;
-				if (!m.paramHandle.module->model)
+				if (!ph.module->model)
 					continue;
-				auto paramId = m.paramHandle.paramId;
-				auto moduleId = m.paramHandle.moduleId;
-				if (!m.paramHandle.module->paramQuantities[paramId])
+				auto paramId = ph.paramId;
+				auto moduleId = ph.moduleId;
+				if (!ph.module->paramQuantities[paramId])
 					continue;
 
 				auto *sep = new rack::MenuSeparator;
 				menu->addChild(sep);
 
 				MappedKnobMenuLabel *paramLabel2 = new MappedKnobMenuLabel;
-				paramLabel2->moduleName = m.paramHandle.module->model->name;
-				paramLabel2->paramName = m.paramHandle.module->paramQuantities[paramId]->getLabel();
+				paramLabel2->moduleName = ph.module->model->name;
+				paramLabel2->paramName = ph.module->paramQuantities[paramId]->getLabel();
 				paramLabel2->moduleId = moduleId;
 				paramLabel2->paramId = paramId;
 				menu->addChild(paramLabel2);

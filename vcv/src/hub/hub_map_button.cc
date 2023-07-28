@@ -54,9 +54,9 @@ void HubMapButton::onHover(const rack::event::Hover &e) {
 	static unsigned flash = 0;
 	constexpr unsigned flash_rate = 6;
 	if (hub) {
-		auto &maps = hub->mappings.getMappings(hubParamObj.objID);
-		for (auto &map : maps) {
-			map.paramHandle.color = (flash < flash_rate / 2) ? PaletteHub::color(hubParamObj.objID) : PaletteHub::WHITE;
+		auto &phs = hub->mappings.getActiveParamHandles(hubParamObj.objID);
+		for (auto &ph : phs) {
+			ph.color = (flash < flash_rate / 2) ? PaletteHub::color(hubParamObj.objID) : PaletteHub::WHITE;
 		}
 		flash = flash ? flash - 1 : flash_rate;
 	}
@@ -66,9 +66,9 @@ void HubMapButton::onHover(const rack::event::Hover &e) {
 void HubMapButton::onLeave(const rack::event::Leave &e) {
 	hovered = false;
 	if (hub) {
-		auto &maps = hub->mappings.getMappings(hubParamObj.objID);
-		for (auto &map : maps) {
-			map.paramHandle.color = PaletteHub::color(hubParamObj.objID);
+		auto &phs = hub->mappings.getActiveParamHandles(hubParamObj.objID);
+		for (auto &ph : phs) {
+			ph.color = PaletteHub::color(hubParamObj.objID);
 		}
 	}
 	e.consume(this);
@@ -77,9 +77,9 @@ void HubMapButton::onLeave(const rack::event::Leave &e) {
 void HubMapButton::onEnter(const rack::event::Enter &e) {
 	hovered = true;
 	if (hub) {
-		auto &maps = hub->mappings.getMappings(hubParamObj.objID);
-		for (auto &map : maps) {
-			map.paramHandle.color = PaletteHub::WHITE;
+		auto &phs = hub->mappings.getActiveParamHandles(hubParamObj.objID);
+		for (auto &ph : phs) {
+			ph.color = PaletteHub::WHITE;
 		}
 	}
 	e.consume(this);
