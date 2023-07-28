@@ -260,6 +260,15 @@ public:
 			knobSetId++;
 		}
 		json_object_set_new(rootJ, "Mappings", knobSetsJ);
+
+		json_t *namesJ = json_array();
+		for (auto &name : knobSetNames) {
+			json_t *nameJ = json_string(name.c_str());
+			json_array_append(namesJ, nameJ);
+			json_decref(nameJ);
+		}
+		json_object_set_new(rootJ, "KnobSetNames", namesJ);
+
 		return rootJ;
 	}
 
@@ -324,10 +333,20 @@ public:
 			}
 		}
 		setActiveKnobSetIdx(0); //TODO: save the default in json
+
+		auto namesJ = json_object_get(rootJ, "KnobSetNames");
+		for (unsigned set_i = 0; auto &name : knobSetNames) {
+			if (set_i < json_array_size(namesJ)) {
+				auto nameJ = json_array_get(namesJ, set_i);
+				name = json_is_string(nameJ) ? json_string_value(nameJ) : "";
+			} else
+				name = "";
+			set_i++;
+		}
 	}
 
+private:
 	bool is_valid(Mapping map) {
-		//TODO: check if module exists in patch still?
 		return map.moduleId >= 0;
 	}
 
@@ -343,6 +362,7 @@ public:
 		}
 	}
 
+public:
 	// Helpers
 
 	auto begin() {
@@ -351,14 +371,6 @@ public:
 	auto end() {
 		return mappings.end();
 	}
-	// auto &operator[](size_t n) {
-	// 	auto &mappings = mappings[knobSets[activeSetId].set;
-	// 	return mappings[std::min(n, NumKnobs - 1)];
-	// }
-	// auto &operator[](size_t n) const {
-	// 	auto &mappings = knobSets[activeSetId].set;
-	// 	return mappings[std::min(n, NumKnobs - 1)];
-	// }
 
 	KnobMultiMap nullmap{};
 };
