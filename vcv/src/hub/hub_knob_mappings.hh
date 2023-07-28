@@ -315,14 +315,6 @@ public:
 							val = json_object_get(mappingJ, "RangeMax");
 							map->range_max = json_is_real(val) ? json_real_value(val) : 1.f;
 
-							printf("add map k:%d m:%d p:%d s:%d %f %f\n",
-								   hubParamId,
-								   destModuleId,
-								   destModuleParamId,
-								   set_i,
-								   map->range_min,
-								   map->range_max);
-
 							val = json_object_get(mappingJ, "AliasName");
 							aliases[hubParamId][set_i] = json_is_string(val) ? json_string_value(val) : "";
 						}
