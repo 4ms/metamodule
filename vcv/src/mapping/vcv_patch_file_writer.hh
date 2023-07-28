@@ -86,7 +86,7 @@ struct VCVPatchFileWriter {
 				active_maps.reserve(8);
 
 				for (auto &m : knob_maps) {
-					if (m.module && m.moduleId > 0)
+					if (m.moduleId > 0)
 						active_maps.push_back(m);
 				}
 

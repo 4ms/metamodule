@@ -3,7 +3,6 @@
 
 struct Mapping {
 	int64_t moduleId = -1;
-	rack::Module *module = nullptr;
 	int paramId = -1;
 	// std::string text = "";
 
@@ -12,7 +11,6 @@ struct Mapping {
 
 	void clear() {
 		moduleId = -1;
-		module = nullptr;
 		paramId = -1;
 		// text = "";
 		range_min = 0.f;
