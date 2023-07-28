@@ -1,6 +1,7 @@
 #pragma once
 #include "../comm/comm_module.hh"
 #include "CoreModules/moduleFactory.hh"
+#include "hub/knob_set_menu.hh"
 #include "hub_knob.hh"
 #include "hub_midi.hh"
 #include "hub_module.hh"
@@ -81,5 +82,28 @@ struct MetaModuleHubWidget : rack::app::ModuleWidget {
 			button->setParamQuantity(pq);
 		}
 		addParam(p);
+	}
+
+	void onHover(const HoverEvent &e) override {
+		if (hubModule->should_write_patch()) {
+			hubModule->writePatchFile();
+		}
+	}
+
+	void appendContextMenu(rack::Menu *menu) override {
+		using namespace rack;
+		menu->addChild(new MenuSeparator());
+		menu->addChild(createMenuLabel<MenuLabel>("Mapped Knob Sets"));
+
+		for (unsigned i = 0; i < hubModule->MaxKnobSets; i++) {
+			menu->addChild(new MenuSeparator());
+			menu->addChild(createCheckMenuItem(
+				string::f("Knob Set %d", i + 1),
+				"",
+				[=]() { return hubModule->mappings.getActiveKnobSetIdx() == i; },
+				[=]() { hubModule->mappings.setActiveKnobSetIdx(i); }));
+
+			menu->addChild(new KnobSetNameMenuItem{hubModule, i});
+		}
 	}
 };

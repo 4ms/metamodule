@@ -44,9 +44,16 @@ public:
 	}
 
 	// Sets of Knob Mappings:
+	std::string_view getKnobSetName(unsigned idx) {
+		if (idx < knobSets.size())
+			return knobSets[idx].name;
+		else
+			return "";
+	}
 
-	void setKnobSetName(std::string &name) {
-		knobSets[activeSetId].name = name;
+	void setKnobSetName(unsigned idx, std::string &name) {
+		if (idx < knobSets.size())
+			knobSets[idx].name = name;
 	}
 
 	unsigned getActiveKnobSetIdx() {

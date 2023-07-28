@@ -12,7 +12,6 @@
 
 using namespace rack;
 
-// Note: in v2, first the module is constructed, then dataFromJson is called, then the Widget is constructed
 struct HubMediumMappings {
 	constexpr static unsigned NumMidiSrcs = 2;
 	constexpr static unsigned NumMappings = PanelDef::NumKnobs + NumMidiSrcs;
@@ -56,6 +55,7 @@ struct HubMedium : MetaModuleHubBase {
 		processMaps();
 	}
 
+private:
 	constexpr static auto indices = ElementCount::get_indices<INFO>();
 
 	constexpr static auto element_index(INFO::Elem el) {
@@ -75,13 +75,6 @@ struct HubMediumWidget : MetaModuleHubWidget {
 
 	LedDisplayTextField *patchName;
 	LedDisplayTextField *patchDesc;
-
-	Vec fixDPI(Vec v) {
-		return v.mult(75.f / 72.f);
-	}
-	Vec fixDPIKnob(Vec v) {
-		return v.mult(75.f / 72.f).plus({0.6f, 0.2f});
-	}
 
 	HubMediumWidget(HubMedium *module) {
 		setModule(module);
@@ -153,12 +146,6 @@ struct HubMediumWidget : MetaModuleHubWidget {
 		// 				  HubMedium::MIDI_CC,
 		// 				  rack::mm2px({midigate.x_mm, midigate.y_mm}),
 		// 				  LabelButtonID::Types::MidiCC);
-	}
-
-	void onHover(const HoverEvent &e) override {
-		if (hubModule->should_write_patch()) {
-			hubModule->writePatchFile();
-		}
 	}
 };
 

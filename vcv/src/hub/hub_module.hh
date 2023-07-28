@@ -32,7 +32,8 @@ struct MetaModuleHubBase : public rack::Module {
 	// We then need a common base class widgets can point to
 	static constexpr uint32_t NumPots = 12;
 	static constexpr uint32_t MaxMapsPerPot = 8;
-	HubKnobMappings<NumPots, MaxMapsPerPot> mappings{id};
+	static constexpr uint32_t MaxKnobSets = 4;
+	HubKnobMappings<NumPots, MaxMapsPerPot, MaxKnobSets> mappings{id};
 
 	MetaModuleHubBase(const std::span<MappableObj::Type> mappingSrcs)
 		: mappingSrcs{mappingSrcs} {
